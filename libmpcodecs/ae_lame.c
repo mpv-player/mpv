@@ -39,6 +39,55 @@ static char* lame_param_preset=NULL; // unset
 static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_name );
 #endif
 
+#define MEncoderMP3LameHelp _("\n\n"\
+" vbr=<0-4>     variable bitrate method\n"\
+"                0: cbr (constant bitrate)\n"\
+"                1: mt (Mark Taylor VBR algorithm)\n"\
+"                2: rh (Robert Hegemann VBR algorithm - default)\n"\
+"                3: abr (average bitrate)\n"\
+"                4: mtrh (Mark Taylor Robert Hegemann VBR algorithm)\n"\
+"\n"\
+" abr           average bitrate\n"\
+"\n"\
+" cbr           constant bitrate\n"\
+"               Also forces CBR mode encoding on subsequent ABR presets modes.\n"\
+"\n"\
+" br=<0-1024>   specify bitrate in kBit (CBR and ABR only)\n"\
+"\n"\
+" q=<0-9>       quality (0-highest, 9-lowest) (only for VBR)\n"\
+"\n"\
+" aq=<0-9>      algorithmic quality (0-best/slowest, 9-worst/fastest)\n"\
+"\n"\
+" ratio=<1-100> compression ratio\n"\
+"\n"\
+" vol=<0-10>    set audio input gain\n"\
+"\n"\
+" mode=<0-3>    (default: auto)\n"\
+"                0: stereo\n"\
+"                1: joint-stereo\n"\
+"                2: dualchannel\n"\
+"                3: mono\n"\
+"\n"\
+" padding=<0-2>\n"\
+"                0: no\n"\
+"                1: all\n"\
+"                2: adjust\n"\
+"\n"\
+" fast          Switch on faster encoding on subsequent VBR presets modes,\n"\
+"               slightly lower quality and higher bitrates.\n"\
+"\n"\
+" preset=<value> Provide the highest possible quality settings.\n"\
+"                 medium: VBR  encoding,  good  quality\n"\
+"                 (150-180 kbps bitrate range)\n"\
+"                 standard:  VBR encoding, high quality\n"\
+"                 (170-210 kbps bitrate range)\n"\
+"                 extreme: VBR encoding, very high quality\n"\
+"                 (200-240 kbps bitrate range)\n"\
+"                 insane:  CBR  encoding, highest preset quality\n"\
+"                 (320 kbps bitrate)\n"\
+"                 <8-320>: ABR encoding at average given kbps bitrate.\n\n")
+
+
 
 m_option_t lameopts_conf[]={
 	{"q", &lame_param_quality, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
@@ -64,18 +113,18 @@ m_option_t lameopts_conf[]={
 	{"fast", "MPlayer was built without -lameopts fast support (requires libmp3lame >=3.92).\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"preset", "MPlayer was built without -lameopts preset support (requires libmp3lame >=3.92).\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
-	{"help", _(MSGTR_MEncoderMP3LameHelp), CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"help", MEncoderMP3LameHelp, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
 
 static int bind_lame(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 {
-    mp_tmsg(MSGT_MENCODER, MSGL_INFO, MSGTR_MP3AudioSelected);
+    mp_tmsg(MSGT_MENCODER, MSGL_INFO, "MP3 audio selected.\n");
     mux_a->h.dwSampleSize=0; // VBR
     mux_a->h.dwRate=encoder->params.sample_rate;
     mux_a->h.dwScale=encoder->params.samples_per_frame; // samples/frame
-    if(sizeof(MPEGLAYER3WAVEFORMAT)!=30) mp_tmsg(MSGT_MENCODER,MSGL_WARN,MSGTR_MP3WaveFormatSizeNot30,sizeof(MPEGLAYER3WAVEFORMAT));
+    if(sizeof(MPEGLAYER3WAVEFORMAT)!=30) mp_tmsg(MSGT_MENCODER,MSGL_WARN,"sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, maybe broken C compiler?\n",sizeof(MPEGLAYER3WAVEFORMAT));
     mux_a->wf=malloc(sizeof(MPEGLAYER3WAVEFORMAT)); // should be 30
     mux_a->wf->wFormatTag=0x55; // MP3
     mux_a->wf->nChannels= (lame_param_mode<0) ? encoder->params.channels : ((lame_param_mode==3) ? 1 : 2);
@@ -143,7 +192,7 @@ static void fixup(audio_encoder_t *encoder)
         encoder->stream->h.dwRate=encoder->stream->wf->nAvgBytesPerSec;
         encoder->stream->h.dwScale=1;
         encoder->stream->wf->nBlockAlign=1;
-        mp_tmsg(MSGT_MENCODER, MSGL_V, MSGTR_CBRAudioByterate,
+        mp_tmsg(MSGT_MENCODER, MSGL_V, "\n\nCBR audio: %d bytes/sec, %d bytes/block\n",
             encoder->stream->h.dwRate,((MPEGLAYER3WAVEFORMAT*)(encoder->stream->wf))->nBlockSize);
     }
 }
@@ -174,20 +223,23 @@ int mpae_init_lame(audio_encoder_t *encoder)
     if(lame_param_mode>=0) lame_set_mode(lame,lame_param_mode); // j-st
     if(lame_param_ratio>0) lame_set_compression_ratio(lame,lame_param_ratio);
     if(lame_param_scale>0) {
-        mp_tmsg(MSGT_MENCODER, MSGL_V, MSGTR_SettingAudioInputGain, lame_param_scale);
+        mp_tmsg(MSGT_MENCODER, MSGL_V, "Setting audio input gain to %f.\n", lame_param_scale);
         lame_set_scale(lame,lame_param_scale);
     }
     if(lame_param_lowpassfreq>=-1) lame_set_lowpassfreq(lame,lame_param_lowpassfreq);
     if(lame_param_highpassfreq>=-1) lame_set_highpassfreq(lame,lame_param_highpassfreq);
 #ifdef CONFIG_MP3LAME_PRESET
     if(lame_param_preset != NULL) {
-        mp_tmsg(MSGT_MENCODER, MSGL_V, MSGTR_LamePresetEquals,lame_param_preset);
+        mp_tmsg(MSGT_MENCODER, MSGL_V, "\npreset=%s\n\n",lame_param_preset);
         if(lame_presets_set(lame,lame_param_fast, (lame_param_vbr==0), lame_param_preset) < 0)
             return 0;
     }
 #endif
     if(lame_init_params(lame) == -1) {
-        mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameCantInit); 
+        mp_tmsg(MSGT_MENCODER, MSGL_FATAL,
+            "Cannot set LAME options, check bitrate/samplerate, some very low bitrates\n"\
+            "(<32) need lower samplerates (i.e. -srate 8000).\n"\
+            "If everything else fails, try a preset.");
         return 0;
     }
     if( mp_msg_test(MSGT_MENCODER,MSGL_V) ) {
@@ -211,8 +263,87 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
     int mono = 0;
 
     if (strcmp(preset_name, "help") == 0) {
-        mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameVersion, get_lame_version(), get_lame_url());
-        mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LamePresetsLongInfo);
+        mp_tmsg(MSGT_MENCODER, MSGL_FATAL, "LAME version %s (%s)\n\n", get_lame_version(), get_lame_url());
+
+#define LamePresetsLongInfo _("\n"\
+"The preset switches are designed to provide the highest possible quality.\n"\
+"\n"\
+"They have for the most part been subjected to and tuned via rigorous double\n"\
+"blind listening tests to verify and achieve this objective.\n"\
+"\n"\
+"These are continually updated to coincide with the latest developments that\n"\
+"occur and as a result should provide you with nearly the best quality\n"\
+"currently possible from LAME.\n"\
+"\n"\
+"To activate these presets:\n"\
+"\n"\
+"   For VBR modes (generally highest quality):\n"\
+"\n"\
+"     \"preset=standard\" This preset should generally be transparent\n"\
+"                             to most people on most music and is already\n"\
+"                             quite high in quality.\n"\
+"\n"\
+"     \"preset=extreme\" If you have extremely good hearing and similar\n"\
+"                             equipment, this preset will generally provide\n"\
+"                             slightly higher quality than the \"standard\"\n"\
+"                             mode.\n"\
+"\n"\
+"   For CBR 320kbps (highest quality possible from the preset switches):\n"\
+"\n"\
+"     \"preset=insane\"  This preset will usually be overkill for most\n"\
+"                             people and most situations, but if you must\n"\
+"                             have the absolute highest quality with no\n"\
+"                             regard to filesize, this is the way to go.\n"\
+"\n"\
+"   For ABR modes (high quality per given bitrate but not as high as VBR):\n"\
+"\n"\
+"     \"preset=<kbps>\"  Using this preset will usually give you good\n"\
+"                             quality at a specified bitrate. Depending on the\n"\
+"                             bitrate entered, this preset will determine the\n"\
+"                             optimal settings for that particular situation.\n"\
+"                             While this approach works, it is not nearly as\n"\
+"                             flexible as VBR, and usually will not attain the\n"\
+"                             same level of quality as VBR at higher bitrates.\n"\
+"\n"\
+"The following options are also available for the corresponding profiles:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (ABR Mode) - The ABR Mode is implied. To use it,\n"\
+"                      simply specify a bitrate. For example:\n"\
+"                      \"preset=185\" activates this\n"\
+"                      preset and uses 185 as an average kbps.\n"\
+"\n"\
+"   \"fast\" - Enables the new fast VBR for a particular profile. The\n"\
+"            disadvantage to the speed switch is that often times the\n"\
+"            bitrate will be slightly higher than with the normal mode\n"\
+"            and quality may be slightly lower also.\n"\
+"   Warning: with the current version fast presets might result in too\n"\
+"            high bitrate compared to regular presets.\n"\
+"\n"\
+"   \"cbr\"  - If you use the ABR mode (read above) with a significant\n"\
+"            bitrate such as 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
+"            you can use the \"cbr\" option to force CBR mode encoding\n"\
+"            instead of the standard abr mode. ABR does provide higher\n"\
+"            quality but CBR may be useful in situations such as when\n"\
+"            streaming an MP3 over the internet may be important.\n"\
+"\n"\
+"    For example:\n"\
+"\n"\
+"    \"-lameopts fast:preset=standard  \"\n"\
+" or \"-lameopts  cbr:preset=192       \"\n"\
+" or \"-lameopts      preset=172       \"\n"\
+" or \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"\n"\
+"A few aliases are available for ABR mode:\n"\
+"phone => 16kbps/mono        phon+/lw/mw-eu/sw => 24kbps/mono\n"\
+"mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
+"fm/radio/tape => 112kbps    hifi => 160kbps\n"\
+"cd => 192kbps               studio => 256kbps")
+
+        mp_tmsg(MSGT_MENCODER, MSGL_FATAL, LamePresetsLongInfo);
         return -1;
     }
 
@@ -307,14 +438,39 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
 
         }
         else {
-            mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameVersion, get_lame_version(), get_lame_url());
-            mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_InvalidBitrateForLamePreset);
+            mp_tmsg(MSGT_MENCODER, MSGL_FATAL, "LAME version %s (%s)\n\n", get_lame_version(), get_lame_url());
+            mp_tmsg(MSGT_MENCODER, MSGL_FATAL,
+                "Error: The bitrate specified is out of the valid range for this preset.\n"\
+                "\n"\
+                "When using this mode you must enter a value between \"8\" and \"320\".\n"\
+                "\n"\
+                "For further information try: \"-lameopts preset=help\"\n");
             return -1;
         }
     }
 
-    mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameVersion, get_lame_version(), get_lame_url());
-    mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_InvalidLamePresetOptions);
+    mp_tmsg(MSGT_MENCODER, MSGL_FATAL, "LAME version %s (%s)\n\n", get_lame_version(), get_lame_url());
+#define InvalidLamePresetOptions _("Error: You did not enter a valid profile and/or options with preset.\n"\
+"\n"\
+"Available profiles are:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (ABR Mode) - The ABR Mode is implied. To use it,\n"\
+"                      simply specify a bitrate. For example:\n"\
+"                      \"preset=185\" activates this\n"\
+"                      preset and uses 185 as an average kbps.\n"\
+"\n"\
+"    Some examples:\n"\
+"\n"\
+"    \"-lameopts fast:preset=standard  \"\n"\
+" or \"-lameopts  cbr:preset=192       \"\n"\
+" or \"-lameopts      preset=172       \"\n"\
+" or \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"For further information try: \"-lameopts preset=help\"\n")
+    mp_tmsg(MSGT_MENCODER, MSGL_FATAL, InvalidLamePresetOptions);
     return -1;
 }
 #endif

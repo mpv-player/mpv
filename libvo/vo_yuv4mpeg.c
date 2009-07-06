@@ -123,7 +123,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		if (height % 4)
 		{
 			mp_tmsg(MSGT_VO,MSGL_FATAL,
-				MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4);
+				"Interlaced mode requires image height to be divisible by 4.");
 			return -1;
 		}
 		
@@ -131,19 +131,19 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		if (!rgb_line_buffer)
 		{
 			mp_tmsg(MSGT_VO,MSGL_FATAL,
-				MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail);
+				"Unable to allocate line buffer for interlaced mode.");
 			return -1;
 		}
 		
 		if (using_format == IMGFMT_YV12)
 			mp_tmsg(MSGT_VO,MSGL_WARN,
-				MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB);
+				"Input not RGB, can't separate chrominance by fields!");
 	}
 				
 	if (width % 2)
 	{
 		mp_tmsg(MSGT_VO,MSGL_FATAL,
-			MSGTR_VO_YUV4MPEG_WidthDivisibleBy2);
+			"Image width must be divisible by 2.");
 		return -1;
 	}	
 	
@@ -154,7 +154,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		if (!rgb_buffer)
 		{
 			mp_tmsg(MSGT_VO,MSGL_FATAL,
-				MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf);
+				"Not enough memory to allocate RGB framebuffer.");
 			return -1;
 		}
 	}
@@ -166,7 +166,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	if (!yuv_out || image == 0) 
 	{
 		mp_tmsg(MSGT_VO,MSGL_FATAL,
-			MSGTR_VO_YUV4MPEG_OutFileOpenError,
+			"Can't get memory or file handle to write \"%s\"!",
 			yuv_filename);
 		return -1;
 	}
@@ -263,7 +263,7 @@ static void vo_y4m_write(const void *ptr, const size_t num_bytes)
 {
 	if (fwrite(ptr, 1, num_bytes, yuv_out) != num_bytes)
 		mp_tmsg(MSGT_VO,MSGL_ERR,
-			MSGTR_VO_YUV4MPEG_OutFileWriteError);
+			"Error writing image to output!");
 }
 
 static int write_last_frame(void)
@@ -524,7 +524,7 @@ static int preinit(const char *arg)
   il_bf = 0;
   yuv_filename = strdup("stream.yuv");
   if (subopt_parse(arg, subopts) != 0) {
-    mp_tmsg(MSGT_VO, MSGL_FATAL, MSGTR_VO_YUV4MPEG_UnknownSubDev, arg); 
+    mp_tmsg(MSGT_VO, MSGL_FATAL, "Unknown subdevice: %s", arg); 
     return -1;
   }
 
@@ -539,15 +539,15 @@ static int preinit(const char *arg)
     {
         case Y4M_ILACE_TOP_FIRST:
 	    mp_tmsg(MSGT_VO,MSGL_STATUS,
-	    	    MSGTR_VO_YUV4MPEG_InterlacedTFFMode);
+	    	    "Using interlaced output mode, top-field first.");
             break;
         case Y4M_ILACE_BOTTOM_FIRST:
 	    mp_tmsg(MSGT_VO,MSGL_STATUS,
-	    	    MSGTR_VO_YUV4MPEG_InterlacedBFFMode);
+	    	    "Using interlaced output mode, bottom-field first.");
             break;
         default:
 	    mp_tmsg(MSGT_VO,MSGL_STATUS,
-	    	    MSGTR_VO_YUV4MPEG_ProgressiveMode);
+	    	    "Using (default) progressive frame mode.");
             break;
     }
     return 0;

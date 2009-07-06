@@ -154,13 +154,13 @@ static int realtime_samplecounter_available(char *dev)
     info.play.samples = 0;
     if (ioctl(fd, AUDIO_SETINFO, &info)) {
 	if ( mp_msg_test(MSGT_AO,MSGL_V) )
-	    mp_tmsg(MSGT_AO, MSGL_ERR, MSGTR_AO_SUN_RtscSetinfoFailed);
+	    mp_tmsg(MSGT_AO, MSGL_ERR, "[AO SUN] rtsc: SETINFO failed.\n");
 	goto error;
     }
     
     if (write(fd, silence, len) != len) {
 	if ( mp_msg_test(MSGT_AO,MSGL_V) )
-	    mp_tmsg(MSGT_AO, MSGL_ERR, MSGTR_AO_SUN_RtscWriteFailed);
+	    mp_tmsg(MSGT_AO, MSGL_ERR, "[AO SUN] rtsc: write failed.\n");
 	goto error;
     }
 
@@ -494,7 +494,7 @@ static int init(int rate,int channels,int format,int flags){
 
     audio_fd=open(audio_dev, O_WRONLY);
     if(audio_fd<0){
-	mp_tmsg(MSGT_AO, MSGL_ERR, MSGTR_AO_SUN_CantOpenAudioDev, audio_dev, strerror(errno));
+	mp_tmsg(MSGT_AO, MSGL_ERR, "[AO SUN] Can't open audio device %s, %s -> nosound.\n", audio_dev, strerror(errno));
 	return 0;
     }
 
@@ -572,7 +572,7 @@ static int init(int rate,int channels,int format,int flags){
 
     if (!ok) {
 	char buf[128];
-	mp_tmsg(MSGT_AO, MSGL_ERR, MSGTR_AO_SUN_UnsupSampleRate,
+	mp_tmsg(MSGT_AO, MSGL_ERR, "[AO SUN] audio_setup: your card doesn't support %d channel, %s, %d Hz samplerate.\n",
 	       channels, af_fmt2str(format, buf, 128), rate);
 	return 0;
     }

@@ -64,14 +64,14 @@ extern struct vo_old_functions video_out_vesa;
 
 int vlvo_preinit(const char *drvname)
 {
-  mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported);
+  mp_tmsg(MSGT_VO,MSGL_WARN, "[VESA_LVO] This branch is no longer supported.\n[VESA_LVO] Please use -vo vesa:vidix instead.\n");
   return -1;
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
     mp_msg(MSGT_VO,MSGL_DBG2, "vesa_lvo: vlvo_preinit(%s) was called\n",drvname);}
 	lvo_handler = open(drvname,O_RDWR);
 	if(lvo_handler == -1)
 	{
- 		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_CouldntOpen,drvname);
+ 		mp_tmsg(MSGT_VO,MSGL_WARN, "[VESA_LVO] Couldn't open: '%s'\n",drvname);
 		return -1;
 	}
 	/* we are able to tune up this stuff depend on fourcc format */
@@ -88,7 +88,7 @@ int      vlvo_init(unsigned src_width,unsigned src_height,
 		   unsigned dst_height,unsigned format,unsigned dest_bpp)
 {
   size_t i,awidth;
-  mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported);
+  mp_tmsg(MSGT_VO,MSGL_WARN, "[VESA_LVO] This branch is no longer supported.\n[VESA_LVO] Please use -vo vesa:vidix instead.\n");
   return -1;
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
     mp_msg(MSGT_VO,MSGL_DBG2, "vesa_lvo: vlvo_init() was called\n");}
@@ -127,7 +127,7 @@ int      vlvo_init(unsigned src_width,unsigned src_height,
 	    mga_vid_config.frame_size = awidth*src_height*4;
 	    break;
         default:
-            mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_InvalidOutputFormat,vo_format_name(format),format);
+            mp_tmsg(MSGT_VO,MSGL_WARN, "[VESA_LVI] Invalid output format: %s(%0X)\n",vo_format_name(format),format);
             return -1;
         }
         mga_vid_config.colkey_on=0;
@@ -141,7 +141,7 @@ int      vlvo_init(unsigned src_width,unsigned src_height,
 	if (ioctl(lvo_handler,MGA_VID_CONFIG,&mga_vid_config))
 	{
 		perror("vesa_lvo: Error in mga_vid_config ioctl()");
-                mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_IncompatibleDriverVersion);
+                mp_tmsg(MSGT_VO,MSGL_WARN, "[VESA_LVO] Your fb_vid driver version is incompatible with this MPlayer version!\n");
 		return -1;
 	}
 	ioctl(lvo_handler,MGA_VID_ON,0);

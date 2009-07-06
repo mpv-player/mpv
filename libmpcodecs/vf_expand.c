@@ -260,7 +260,7 @@ static void get_image(struct vf_instance* vf, mp_image_t *mpi){
 #if 1
 	if((vf->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
 	  !(vf->dmpi->flags & MP_IMGFLAG_DIRECT)){
-	    mp_tmsg(MSGT_VFILTER, MSGL_INFO, MSGTR_MPCODECS_FullDRNotPossible);
+	    mp_tmsg(MSGT_VFILTER, MSGL_INFO, "Full DR not possible, trying SLICES instead!\n");
 	    return;
 	}
 #endif
@@ -301,7 +301,7 @@ static void start_slice(struct vf_instance* vf, mp_image_t *mpi){
             MAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x), 
             MAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
     if(!(vf->dmpi->flags&MP_IMGFLAG_DRAW_CALLBACK))
-	mp_tmsg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices); // shouldn't happen.
+	mp_tmsg(MSGT_VFILTER, MSGL_WARN, "WARNING! Next filter doesn't support SLICES, get ready for sig11...\n"); // shouldn't happen.
     vf->priv->first_slice = 1;
 }
 
@@ -367,7 +367,7 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
 
     if(mpi->flags&MP_IMGFLAG_DIRECT || mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
 	vf->dmpi=mpi->priv;
-	if(!vf->dmpi) { mp_tmsg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_FunWhydowegetNULL); return 0; }
+	if(!vf->dmpi) { mp_tmsg(MSGT_VFILTER, MSGL_WARN, "Why do we get NULL??\n"); return 0; }
 	mpi->priv=NULL;
 #ifdef OSD_SUPPORT
 	if(vf->priv->osd_enabled) draw_osd(vf,mpi->w,mpi->h);

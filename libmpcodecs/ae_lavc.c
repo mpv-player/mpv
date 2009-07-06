@@ -166,7 +166,7 @@ int mpae_init_lavc(audio_encoder_t *encoder)
 	
 	if(!lavc_param_acodec)
 	{
-		mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_NoLavcAudioCodecName);
+		mp_tmsg(MSGT_MENCODER, MSGL_FATAL, "Audio LAVC, Missing codec name!\n");
 		return 0;
 	}
 
@@ -179,7 +179,7 @@ int mpae_init_lavc(audio_encoder_t *encoder)
 	lavc_acodec = avcodec_find_encoder_by_name(lavc_param_acodec);
 	if (!lavc_acodec)
 	{
-		mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LavcAudioCodecNotFound, lavc_param_acodec);
+		mp_tmsg(MSGT_MENCODER, MSGL_FATAL, "Audio LAVC, couldn't find encoder for codec %s.\n", lavc_param_acodec);
 		return 0;
 	}
 	if(lavc_param_atag == 0)
@@ -199,7 +199,7 @@ int mpae_init_lavc(audio_encoder_t *encoder)
 	lavc_actx = avcodec_alloc_context();
 	if(lavc_actx == NULL)
 	{
-		mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_CouldntAllocateLavcContext);
+		mp_tmsg(MSGT_MENCODER, MSGL_FATAL, "Audio LAVC, couldn't allocate context!\n");
 		return 0;
 	}
 	
@@ -238,7 +238,7 @@ int mpae_init_lavc(audio_encoder_t *encoder)
 
 	if(avcodec_open(lavc_actx, lavc_acodec) < 0)
 	{
-		mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_CouldntOpenCodec, lavc_param_acodec, lavc_param_abitrate);
+		mp_tmsg(MSGT_MENCODER, MSGL_FATAL, "Couldn't open codec %s, br=%d.\n", lavc_param_acodec, lavc_param_abitrate);
 		return 0;
 	}
 

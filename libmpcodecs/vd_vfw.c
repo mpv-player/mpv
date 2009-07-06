@@ -304,7 +304,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	MP_IMGTYPE_STATIC : MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_WIDTH, 
 	sh->disp_w, sh->disp_h);
     if(!mpi){	// temporary!
-	mp_tmsg(MSGT_DECVIDEO,MSGL_WARN,MSGTR_MPCODECS_CouldntAllocateImageForCinepakCodec);
+	mp_tmsg(MSGT_DECVIDEO,MSGL_WARN,"[VD_DMO] Couldn't allocate image for cinepak codec.\n");
 	return NULL;
     }
 

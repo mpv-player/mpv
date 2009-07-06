@@ -66,19 +66,19 @@ struct osd_text_p {
 //^
 
 char * const sub_osd_names[]={
-    _(MSGTR_VO_SUB_Seekbar),
-    _(MSGTR_VO_SUB_Play),
-    _(MSGTR_VO_SUB_Pause),
-    _(MSGTR_VO_SUB_Stop),
-    _(MSGTR_VO_SUB_Rewind),
-    _(MSGTR_VO_SUB_Forward),
-    _(MSGTR_VO_SUB_Clock),
-    _(MSGTR_VO_SUB_Contrast),
-    _(MSGTR_VO_SUB_Saturation),
-    _(MSGTR_VO_SUB_Volume),
-    _(MSGTR_VO_SUB_Brightness),
-    _(MSGTR_VO_SUB_Hue),
-    _(MSGTR_VO_SUB_Balance)
+    _("Seekbar"),
+    _("Play"),
+    _("Pause"),
+    _("Stop"),
+    _("Rewind"),
+    _("Forward"),
+    _("Clock"),
+    _("Contrast"),
+    _("Saturation"),
+    _("Volume"),
+    _("Brightness"),
+    _("Hue"),
+    _("Balance")
 };
 char * const sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "", "", "", "", "", "" };
 

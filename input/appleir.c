@@ -79,12 +79,12 @@ int mp_input_appleir_init (char *dev)
 
   if (dev)
   {
-    mp_tmsg (MSGT_INPUT, MSGL_V, MSGTR_INPUT_APPLE_IR_Init, dev);
+    mp_tmsg (MSGT_INPUT, MSGL_V, "Initializing Apple IR on %s\n", dev);
     fd = open (dev, O_RDONLY | O_NONBLOCK);
     if (fd < 0)
     {
       mp_tmsg (MSGT_INPUT, MSGL_ERR,
-              MSGTR_INPUT_APPLE_IR_CantOpen, strerror (errno));
+              "Can't open Apple IR device: %s\n", strerror (errno));
       return -1;
     }
 
@@ -108,14 +108,14 @@ int mp_input_appleir_init (char *dev)
           id.vendor  == USB_VENDOR_APPLE &&
           (id.product == USB_DEV_APPLE_IR ||id.product == USB_DEV_APPLE_IR_2))
       {
-        mp_tmsg (MSGT_INPUT, MSGL_V, MSGTR_INPUT_APPLE_IR_Detect, file);
+        mp_tmsg (MSGT_INPUT, MSGL_V, "Detected Apple IR on %s\n", file);
         return fd;
       }
       close (fd);
     }
 
     mp_tmsg (MSGT_INPUT, MSGL_ERR,
-            MSGTR_INPUT_APPLE_IR_CantOpen, strerror (errno));
+            "Can't open Apple IR device: %s\n", strerror (errno));
   }
 
   return -1;

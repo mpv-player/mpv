@@ -173,6 +173,52 @@ static int max_framesize=0;
 #include "options.h"
 #include "defaultopts.h"
 
+#define Exit_SIGILL_RTCpuSel _(\
+"- MPlayer crashed by an 'Illegal Instruction'.\n"\
+"  It may be a bug in our new runtime CPU-detection code...\n"\
+"  Please read DOCS/HTML/en/bugreports.html.\n")
+
+#define Exit_SIGILL _(\
+"- MPlayer crashed by an 'Illegal Instruction'.\n"\
+"  It usually happens when you run it on a CPU different than the one it was\n"\
+"  compiled/optimized for.\n"\
+"  Verify this!\n")
+
+#define Exit_SIGSEGV_SIGFPE _(\
+"- MPlayer crashed by bad usage of CPU/FPU/RAM.\n"\
+"  Recompile MPlayer with --enable-debug and make a 'gdb' backtrace and\n"\
+"  disassembly. Details in DOCS/HTML/en/bugreports_what.html#bugreports_crash.\n")
+
+#define Exit_SIGCRASH _(\
+"- MPlayer crashed. This shouldn't happen.\n"\
+"  It can be a bug in the MPlayer code _or_ in your drivers _or_ in your\n"\
+"  gcc version. If you think it's MPlayer's fault, please read\n"\
+"  DOCS/HTML/en/bugreports.html and follow the instructions there. We can't and\n"\
+"  won't help unless you provide this information when reporting a possible bug.\n")
+
+#define SystemTooSlow _("\n\n"\
+"           ************************************************\n"\
+"           **** Your system is too SLOW to play this!  ****\n"\
+"           ************************************************\n\n"\
+"Possible reasons, problems, workarounds:\n"\
+"- Most common: broken/buggy _audio_ driver\n"\
+"  - Try -ao sdl or use the OSS emulation of ALSA.\n"\
+"  - Experiment with different values for -autosync, 30 is a good start.\n"\
+"- Slow video output\n"\
+"  - Try a different -vo driver (-vo help for a list) or try -framedrop!\n"\
+"- Slow CPU\n"\
+"  - Don't try to play a big DVD/DivX on a slow CPU! Try some of the lavdopts,\n"\
+"    e.g. -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all.\n"\
+"- Broken file\n"\
+"  - Try various combinations of -nobps -ni -forceidx -mc 0.\n"\
+"- Slow media (NFS/SMB mounts, DVD, VCD etc)\n"\
+"  - Try -cache 8192.\n"\
+"- Are you using -cache to play a non-interleaved AVI file?\n"\
+"  - Try -nocache.\n"\
+"Read DOCS/HTML/en/video.html for tuning/speedup tips.\n"\
+"If none of this helps you, read DOCS/HTML/en/bugreports.html.\n\n")
+
+
 //**************************************************************************//
 //**************************************************************************//
 
@@ -699,15 +745,15 @@ void exit_player_with_rc(struct MPContext *mpctx, exit_reason_t how, int rc)
   if(edl_records != NULL) free(edl_records); // free mem allocated for EDL
   switch(how) {
   case EXIT_QUIT:
-    mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ExitingHow,MSGTR_Exit_quit);
+    mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"\nExiting... (%s)\n","Quit");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_EXIT=QUIT\n");
     break;
   case EXIT_EOF:
-    mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ExitingHow,MSGTR_Exit_eof);
+    mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"\nExiting... (%s)\n","End of file");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_EXIT=EOF\n");
     break;
   case EXIT_ERROR:
-    mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ExitingHow,MSGTR_Exit_error);
+    mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"\nExiting... (%s)\n","Fatal error");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_EXIT=ERROR\n");
     break;
   default:
@@ -757,7 +803,7 @@ static void exit_sighandler(int x){
     kill(getpid(),SIGKILL);
 #endif
   }
-  mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"\n" MSGTR_IntBySignal,x,
+  mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"\n" "\nMPlayer interrupted by signal %d in module: %s\n",x,
       current_module?current_module:"unknown"
   );
   mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SIGNAL=%d\n", x);
@@ -771,15 +817,15 @@ static void exit_sighandler(int x){
       return;  // killed from keyboard (^C) or killed [-9]
   case SIGILL:
 #if CONFIG_RUNTIME_CPUDETECT
-      mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_Exit_SIGILL_RTCpuSel);
+      mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,Exit_SIGILL_RTCpuSel);
 #else
-      mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_Exit_SIGILL);
+      mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,Exit_SIGILL);
 #endif
   case SIGFPE:
   case SIGSEGV:
-      mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_Exit_SIGSEGV_SIGFPE);
+      mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,Exit_SIGSEGV_SIGFPE);
   default:
-      mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_Exit_SIGCRASH);
+      mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,Exit_SIGCRASH);
 #ifdef CONFIG_CRASH_DEBUG
       if (crash_debug) {
         int gdb_pid;
@@ -820,7 +866,7 @@ if (!disable_system_conf &&
     m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mplayer.conf") < 0)
   exit_player(mpctx, EXIT_NONE);
 if ((conffile = get_path("")) == NULL) {
-  mp_tmsg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoHomeDir);
+  mp_tmsg(MSGT_CPLAYER,MSGL_WARN,"Cannot find HOME directory.\n");
 } else {
 #ifdef __MINGW32__
   mkdir(conffile);
@@ -829,10 +875,10 @@ if ((conffile = get_path("")) == NULL) {
 #endif
   free(conffile);
   if ((conffile = get_path("config")) == NULL) {
-    mp_tmsg(MSGT_CPLAYER,MSGL_ERR,MSGTR_GetpathProblem);
+    mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"get_path(\"config\") problem\n");
   } else {
     if ((conffile_fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY, 0666)) != -1) {
-      mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CreatingCfgFile, conffile);
+      mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Creating config file: %s\n", conffile);
       write(conffile_fd, default_config, strlen(default_config));
       close(conffile_fd);
     }
@@ -862,7 +908,7 @@ static void load_per_protocol_config (m_config_t* conf, const char *const file)
     p = m_config_get_profile (conf, protocol);
     if (p)
     {
-        mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingProtocolProfile, protocol);
+        mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Loading protocol-related profile '%s'\n", protocol);
         m_config_set_profile(conf,p);
     }
 }
@@ -885,7 +931,7 @@ static void load_per_extension_config (m_config_t* conf, const char *const file)
     p = m_config_get_profile (conf, extension);
     if (p)
     {
-      mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingExtensionProfile, extension);
+      mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Loading extension-related profile '%s'\n", extension);
       m_config_set_profile(conf,p);
     }
 }
@@ -902,7 +948,7 @@ static void load_per_output_config (m_config_t* conf, char *cfg, char *out)
     p = m_config_get_profile (conf, profile);
     if (p)
     {
-      mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingExtensionProfile, profile);
+      mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Loading extension-related profile '%s'\n", profile);
       m_config_set_profile(conf,p);
     }
 }
@@ -918,7 +964,7 @@ static void load_per_file_config (m_config_t* conf, const char *const file)
     
     if (use_filedir_conf && !stat (cfg, &st))
     {
-	mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingConfig, cfg);
+	mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Loading config '%s'\n", cfg);
 	m_config_parse_config_file (conf, cfg);
 	return;
     }
@@ -932,7 +978,7 @@ static void load_per_file_config (m_config_t* conf, const char *const file)
     {
 	if (!stat (confpath, &st))
 	{
-	    mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingConfig, confpath);
+	    mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Loading config '%s'\n", confpath);
 	    m_config_parse_config_file (conf, confpath);
 	}
 
@@ -1032,7 +1078,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
 #else
     if(!subd) 
 #endif
-        mp_tmsg(MSGT_CPLAYER, noerr ? MSGL_WARN : MSGL_ERR, MSGTR_CantLoadSub,
+        mp_tmsg(MSGT_CPLAYER, noerr ? MSGL_WARN : MSGL_ERR, "Cannot load subtitles: %s\n",
 		filename_recode(filename));
     
 #ifdef CONFIG_ASS
@@ -1046,7 +1092,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_FILENAME=%s\n",
 	   filename_recode(filename));
     ++mpctx->set_of_sub_size;
-    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AddedSubtitleFile, mpctx->set_of_sub_size,
+    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "SUB: Added subtitle file (%d): %s\n", mpctx->set_of_sub_size,
 	    filename_recode(filename));
 }
 
@@ -1178,7 +1224,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
       mpctx->last_av_difference = a_pos - sh_video->pts - audio_delay;
       if (mpctx->last_av_difference > 0.5 && drop_frame_cnt > 50
           && !mpctx->drop_message_shown) {
-          mp_tmsg(MSGT_AVSYNC,MSGL_WARN,MSGTR_SystemTooSlow);
+          mp_tmsg(MSGT_AVSYNC,MSGL_WARN,SystemTooSlow);
           mpctx->drop_message_shown = true;
       }
   }
@@ -1616,7 +1662,7 @@ if(mpctx->sh_audio){
         mpctx->sh_audio->samplerate,
 	// output:
 	&ao_data.samplerate, &ao_data.channels, &ao_data.format)){
-      mp_tmsg(MSGT_CPLAYER,MSGL_ERR,MSGTR_AudioFilterChainPreinitError);
+      mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Error at audio filter chain pre-init!\n");
       exit_player(mpctx, EXIT_ERROR);
   }
 #endif  
@@ -1627,7 +1673,7 @@ if(mpctx->sh_audio){
       ao_data.channels,
       ao_data.format,0))){
     // FAILED:
-    mp_tmsg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
+    mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Could not open/initialize audio device -> no sound.\n");
     uninit_player(mpctx, INITIALIZED_ACODEC); // close codec
     mpctx->sh_audio=mpctx->d_audio->sh=NULL; // -> nosound
     mpctx->d_audio->id = -2;
@@ -1648,7 +1694,7 @@ if(mpctx->sh_audio){
 #if 1
     current_module="af_init";
     if(!build_afilter_chain(mpctx, mpctx->sh_audio, &ao_data)) {
-      mp_tmsg(MSGT_CPLAYER,MSGL_ERR,MSGTR_NoMatchingFilter);
+      mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter/ao format!\n");
 //      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format! -> NOSOUND\n");
 //      uninit_player(mpctx, INITIALIZED_ACODEC|INITIALIZED_AO); // close codec & ao
 //      sh_audio=mpctx->d_audio->sh=NULL; // -> nosound
@@ -1761,7 +1807,7 @@ static float timing_sleep(struct MPContext *mpctx, float time_frame)
         while (time_frame > 0.000) {
 	    unsigned long rtc_ts;
 	    if (read(rtc_fd, &rtc_ts, sizeof(rtc_ts)) <= 0)
-		mp_tmsg(MSGT_CPLAYER, MSGL_ERR, MSGTR_LinuxRTCReadError, strerror(errno));
+		mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Linux RTC read error: %s\n", strerror(errno));
             time_frame -= get_relative_time(mpctx);
 	}
     } else
@@ -1778,7 +1824,7 @@ static float timing_sleep(struct MPContext *mpctx, float time_frame)
 	if (softsleep){
 	    current_module = "sleep_soft";
 	    if (time_frame < 0)
-		mp_tmsg(MSGT_AVSYNC, MSGL_WARN, MSGTR_SoftsleepUnderflow);
+		mp_tmsg(MSGT_AVSYNC, MSGL_WARN, "Warning! Softsleep underflow!\n");
 	    while (time_frame > 0)
                 time_frame -= get_relative_time(mpctx); // burn the CPU
 	}
@@ -2103,7 +2149,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     //shouldn't we set dvideo->id=-2 when we fail?
     //if((mpctx->video_out->preinit(vo_subdevice))!=0){
     if(!(mpctx->video_out=init_best_video_out(opts, mpctx->x11_state, mpctx->key_fifo, mpctx->input))){
-      mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
+      mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"Error opening/initializing the selected video_out (-vo) device.\n");
       goto err_out;
     }
     mpctx->initialized_flags|=INITIALIZED_VO;
@@ -2121,7 +2167,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     char* vf_arg[] = { "_oldargs_", menu_root, NULL };
     vf_menu = vf_open_plugin(opts,libmenu_vfs,sh_video->vfilter,"menu",vf_arg);
     if(!vf_menu) {
-      mp_tmsg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantOpenLibmenuFilterWithThisRootMenu,menu_root);
+      mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Can't open libmenu video filter with root menu %s.\n",menu_root);
       use_menu = 0;
     }
   }
@@ -2389,13 +2435,13 @@ static void pause_loop(struct MPContext *mpctx)
         // The pause string is: "\n == PAUSE == \r" so we need to
         // take the first and the last char out
 	if (term_osd && !mpctx->sh_video) {
-	    char msg[128] = _(MSGTR_Paused);
+	    char msg[128] = _("\n ===== PAUSE =====\r");
 	    int mlen = strlen(msg);
 	    msg[mlen-1] = '\0';
 	    set_osd_msg(OSD_MSG_PAUSE, 1, 0, "%s", msg+1);
 	    update_osd_msg(mpctx);
 	} else
-	    mp_tmsg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
+	    mp_tmsg(MSGT_CPLAYER,MSGL_STATUS,"\n ===== PAUSE =====\r");
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
     }
 #ifdef CONFIG_GUI
@@ -2469,7 +2515,7 @@ static void edl_update(MPContext *mpctx)
 	return;
 
     if (!mpctx->sh_video) {
-	mp_tmsg(MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlNOsh_video);
+	mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Cannot use EDL without video, disabling.\n");
 	free_edl(edl_records);
 	next_edl_record = NULL; 
 	edl_records = NULL;
@@ -2984,13 +3030,13 @@ int gui_no_filename=0;
 
 #ifndef CONFIG_GUI
     if(use_gui){
-      mp_tmsg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoGui);
+      mp_tmsg(MSGT_CPLAYER,MSGL_WARN,"MPlayer was compiled WITHOUT GUI support.\n");
       use_gui=0;
     }
 #else
 #if !defined(__MINGW32__) && !defined(__CYGWIN__)
     if(use_gui && !vo_init()){
-      mp_tmsg(MSGT_CPLAYER,MSGL_WARN,MSGTR_GuiNeedsX);
+      mp_tmsg(MSGT_CPLAYER,MSGL_WARN,"MPlayer GUI requires X11.\n");
       use_gui=0;
     }
 #endif
@@ -3028,7 +3074,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
       if(!parse_codec_cfg(NULL)){
         exit_player_with_rc(mpctx, EXIT_NONE, 0);
       }
-      mp_tmsg(MSGT_CPLAYER,MSGL_V,MSGTR_BuiltinCodecsConf);
+      mp_tmsg(MSGT_CPLAYER,MSGL_V,"Using built-in default codecs.conf.\n");
     }
   }
   free( mem_ptr ); // release the buffer created by get_path()
@@ -3043,14 +3089,14 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
     }
 #endif
     if(audio_codec_list && strcmp(audio_codec_list[0],"help")==0){
-      mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableAudioCodecs);
+      mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Available audio codecs:\n");
       mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_CODECS\n");
       list_codecs(1);
       mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
       opt_exit = 1;
     }
     if(video_codec_list && strcmp(video_codec_list[0],"help")==0){
-      mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoCodecs);
+      mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Available video codecs:\n");
       mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_CODECS\n");
       list_codecs(0);
       mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
@@ -3094,7 +3140,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
       exit_player(mpctx, EXIT_NONE);
 
     if (player_idle_mode && use_gui) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_NoIdleAndGui);
+        mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, "The -idle option cannot be used with GMPlayer.\n");
         exit_player_with_rc(mpctx, EXIT_NONE, 1);
     }
 
@@ -3111,7 +3157,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 
     // Many users forget to include command line in bugreports...
     if( mp_msg_test(MSGT_CPLAYER,MSGL_V) ){
-      mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_CommandLine);
+      mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "CommandLine:");
       for(i=1;i<argc;i++)mp_msg(MSGT_CPLAYER, MSGL_INFO," '%s'",argv[i]);
       mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
     }
@@ -3131,7 +3177,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 #ifdef CONFIG_BITMAP_FONT
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor,verbose>1);
-       if(!vo_font) mp_tmsg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,
+       if(!vo_font) mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Cannot load bitmap font: %s\n",
 		filename_recode(font_name));
   } else {
       // try default:
@@ -3158,23 +3204,23 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   {
     // seteuid(0); /* Can't hurt to try to get root here */
     if ((rtc_fd = open(rtc_device ? rtc_device : "/dev/rtc", O_RDONLY)) < 0)
-	mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_RTCDeviceNotOpenable,
+	mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Failed to open %s: %s (it should be readable by the user.)\n",
 	    rtc_device ? rtc_device : "/dev/rtc", strerror(errno));
      else {
 	unsigned long irqp = 1024; /* 512 seemed OK. 128 is jerky. */
 
 	if (ioctl(rtc_fd, RTC_IRQP_SET, irqp) < 0) {
-    	    mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_LinuxRTCInitErrorIrqpSet, irqp, strerror(errno));
-    	    mp_tmsg(MSGT_CPLAYER, MSGL_HINT, MSGTR_IncreaseRTCMaxUserFreq, irqp);
+    	    mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Linux RTC init error in ioctl (rtc_irqp_set %lu): %s\n", irqp, strerror(errno));
+    	    mp_tmsg(MSGT_CPLAYER, MSGL_HINT, "Try adding \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" to your system startup scripts.\n", irqp);
    	    close (rtc_fd);
     	    rtc_fd = -1;
 	} else if (ioctl(rtc_fd, RTC_PIE_ON, 0) < 0) {
 	    /* variable only by the root */
-    	    mp_tmsg(MSGT_CPLAYER, MSGL_ERR, MSGTR_LinuxRTCInitErrorPieOn, strerror(errno));
+    	    mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Linux RTC init error in ioctl (rtc_pie_on): %s\n", strerror(errno));
     	    close (rtc_fd);
 	    rtc_fd = -1;
 	} else
-	    mp_tmsg(MSGT_CPLAYER, MSGL_V, MSGTR_UsingRTCTiming, irqp);
+	    mp_tmsg(MSGT_CPLAYER, MSGL_V, "Using Linux hardware RTC timing (%ldHz).\n", irqp);
     }
   }
 #ifdef CONFIG_GUI
@@ -3207,17 +3253,17 @@ stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
 #ifdef CONFIG_MENU
  if(use_menu) {
      if(menu_cfg && menu_init(mpctx, mpctx->mconfig, mpctx->input, menu_cfg))
-     mp_tmsg(MSGT_CPLAYER, MSGL_V, MSGTR_MenuInitialized, menu_cfg);
+     mp_tmsg(MSGT_CPLAYER, MSGL_V, "Menu initialized: %s\n", menu_cfg);
    else {
      menu_cfg = get_path("menu.conf");
      if(menu_init(mpctx, mpctx->mconfig, mpctx->input, menu_cfg))
-       mp_tmsg(MSGT_CPLAYER, MSGL_V, MSGTR_MenuInitialized, menu_cfg);
+       mp_tmsg(MSGT_CPLAYER, MSGL_V, "Menu initialized: %s\n", menu_cfg);
      else {
          if(menu_init(mpctx, mpctx->mconfig, mpctx->input,
                       MPLAYER_CONFDIR "/menu.conf"))
-         mp_tmsg(MSGT_CPLAYER, MSGL_V, MSGTR_MenuInitialized, MPLAYER_CONFDIR"/menu.conf");
+         mp_tmsg(MSGT_CPLAYER, MSGL_V, "Menu initialized: %s\n", MPLAYER_CONFDIR"/menu.conf");
        else {
-         mp_tmsg(MSGT_CPLAYER, MSGL_ERR, MSGTR_MenuInitFailed);
+         mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Menu init failed.\n");
          use_menu = 0;
        }
      }
@@ -3289,7 +3335,7 @@ play_next_file:
 // or cache filling
 if(!noconsolecontrols && !slave_mode){
   if(mpctx->initialized_flags&INITIALIZED_GETCH2)
-    mp_tmsg(MSGT_CPLAYER,MSGL_WARN,MSGTR_Getch2InitializedTwice);
+    mp_tmsg(MSGT_CPLAYER,MSGL_WARN,"WARNING: getch2_init called twice!\n");
   else
     getch2_enable();  // prepare stdin for hotkeys...
   mpctx->initialized_flags|=INITIALIZED_GETCH2;
@@ -3393,7 +3439,7 @@ while (player_idle_mode && !mpctx->filename) {
 //---------------------------------------------------------------------------
 
     if(mpctx->filename)
-	mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing,
+	mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"\nPlaying %s.\n",
 		filename_recode(mpctx->filename));
 
 if (edl_filename) {
@@ -3404,7 +3450,7 @@ if (edl_output_filename) {
     if (edl_fd) fclose(edl_fd);
     if ((edl_fd = fopen(edl_output_filename, "w")) == NULL)
     {
-        mp_tmsg(MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlCantOpenForWrite,
+        mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Can't open EDL file [%s] for writing.\n",
 		filename_recode(edl_output_filename));
     }
 }
@@ -3415,7 +3461,7 @@ if (edl_output_filename) {
     if (vobsub_name){
       vo_vobsub=vobsub_open(vobsub_name,spudec_ifo,1,&vo_spudec);
       if(vo_vobsub==NULL)
-        mp_tmsg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,
+        mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Cannot load subtitles: %s\n",
 		filename_recode(vobsub_name));
     } else if (sub_auto && mpctx->filename){
       /* try to autodetect vobsub from movie filename ::atmos */
@@ -3507,14 +3553,14 @@ if(stream_dump_type==5){
   FILE *f;
   current_module="dumpstream";
   if(mpctx->stream->type==STREAMTYPE_STREAM && mpctx->stream->fd<0){
-    mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_DumpstreamFdUnavailable);
+    mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"Cannot dump this stream - no file descriptor available.\n");
     exit_player(mpctx, EXIT_ERROR);
   }
   stream_reset(mpctx->stream);
   stream_seek(mpctx->stream,mpctx->stream->start_pos);
   f=fopen(stream_dump_name,"wb");
   if(!f){
-    mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CantOpenDumpfile);
+    mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"Cannot open dump file.\n");
     exit_player(mpctx, EXIT_ERROR);
   }
   if (dvd_chapter > 1) {
@@ -3525,7 +3571,7 @@ if(stream_dump_type==5){
       len=stream_read(mpctx->stream,buf,4096);
       if(len>0) {
         if(fwrite(buf,len,1,f) != 1) {
-          mp_tmsg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile,stream_dump_name);
+          mp_tmsg(MSGT_MENCODER,MSGL_FATAL,"%s: Error writing file.\n",stream_dump_name);
           exit_player(mpctx, EXIT_ERROR);
         }
       }
@@ -3537,10 +3583,10 @@ if(stream_dump_type==5){
       }
   }
   if(fclose(f)) {
-    mp_tmsg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile,stream_dump_name);
+    mp_tmsg(MSGT_MENCODER,MSGL_FATAL,"%s: Error writing file.\n",stream_dump_name);
     exit_player(mpctx, EXIT_ERROR);
   }
-  mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CoreDumped);
+  mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Core dumped ;)\n");
   exit_player_with_rc(mpctx, EXIT_EOF, 0);
 }
 
@@ -3716,7 +3762,7 @@ if((stream_dump_type)&&(stream_dump_type<4)){
   case 3: ds=mpctx->d_sub;break;
   }
   if(!ds){        
-      mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_DumpSelectedStreamMissing);
+      mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"dump: FATAL: Selected stream missing!\n");
       exit_player(mpctx, EXIT_ERROR);
   }
   // disable other streams:
@@ -3726,7 +3772,7 @@ if((stream_dump_type)&&(stream_dump_type<4)){
   // let's dump it!
   f=fopen(stream_dump_name,"wb");
   if(!f){
-    mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CantOpenDumpfile);
+    mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"Cannot open dump file.\n");
     exit_player(mpctx, EXIT_ERROR);
   }
   while(!ds->eof){
@@ -3742,7 +3788,7 @@ if((stream_dump_type)&&(stream_dump_type<4)){
     }
   }
   fclose(f);
-  mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CoreDumped);
+  mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Core dumped ;)\n");
   exit_player_with_rc(mpctx, EXIT_EOF, 0);
 }
 
@@ -3753,10 +3799,10 @@ if(mpctx->sh_video){
 
   current_module="video_read_properties";
   if(!video_read_properties(mpctx->sh_video)) {
-    mp_tmsg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotReadVideoProperties);
+    mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Video: Cannot read properties.\n");
     mpctx->sh_video=mpctx->d_video->sh=NULL;
   } else {
-    mp_tmsg(MSGT_CPLAYER,MSGL_V,MSGTR_FilefmtFourccSizeFpsFtime,
+    mp_tmsg(MSGT_CPLAYER,MSGL_V,"[V] filefmt:%d fourcc:0x%X size:%dx%d fps:%5.3f ftime:=%6.4f\n",
 	   mpctx->demuxer->file_format,mpctx->sh_video->format, mpctx->sh_video->disp_w,mpctx->sh_video->disp_h,
 	   mpctx->sh_video->fps,mpctx->sh_video->frametime
 	   );
@@ -3769,7 +3815,7 @@ if(mpctx->sh_video){
     vo_fps = mpctx->sh_video->fps;
 
     if(!mpctx->sh_video->fps && !force_fps){
-      mp_tmsg(MSGT_CPLAYER,MSGL_ERR,MSGTR_FPSnotspecified);
+      mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"FPS not specified in the header or invalid, use the -fps option.\n");
       mpctx->sh_video=mpctx->d_video->sh=NULL;
     }
   }
@@ -3777,7 +3823,7 @@ if(mpctx->sh_video){
 }
 
 if(!mpctx->sh_video && !mpctx->sh_audio){
-    mp_tmsg(MSGT_CPLAYER,MSGL_FATAL, MSGTR_NoStreamFound);
+    mp_tmsg(MSGT_CPLAYER,MSGL_FATAL, "No stream found.\n");
 #ifdef CONFIG_DVBIN
 	if(mpctx->stream->type == STREAMTYPE_DVB)
 	{
@@ -3794,7 +3840,7 @@ if(!mpctx->sh_video && !mpctx->sh_audio){
                 }
 	}
 #endif	
-    goto goto_next_file; // exit_player(_(MSGTR_Exit_error));
+    goto goto_next_file; // exit_player(_("Fatal error"));
 }
 
 /* display clip info */
@@ -3907,7 +3953,7 @@ if(!mpctx->sh_video) goto main; // audio-only
 if(!reinit_video_chain(mpctx)) {
   if(!mpctx->sh_video){
     if(!mpctx->sh_audio) goto goto_next_file;
-    goto main; // exit_player(_(MSGTR_Exit_error));
+    goto main; // exit_player(_("Fatal error"));
   }
 }
 
@@ -3970,14 +4016,14 @@ if(mpctx->sh_audio){
 }
 
 if(!mpctx->sh_audio){
-  mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_NoSound);
+  mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Audio: no sound\n");
   mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused audio chunks.\n",mpctx->d_audio->packs);
   ds_free_packs(mpctx->d_audio); // free buffered chunks
   //mpctx->d_audio->id=-2;         // do not read audio chunks
   //uninit_player(mpctx, INITIALIZED_AO); // close device
 }
 if(!mpctx->sh_video){
-   mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Video_NoVideo);
+   mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Video: no video\n");
    mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused video chunks.\n",mpctx->d_video->packs);
    ds_free_packs(mpctx->d_video);
    mpctx->d_video->id=-2;
@@ -3991,7 +4037,7 @@ if (!mpctx->sh_video && !mpctx->sh_audio)
 if(force_fps && mpctx->sh_video){
   vo_fps = mpctx->sh_video->fps=force_fps;
   mpctx->sh_video->frametime=1.0f/mpctx->sh_video->fps;
-  mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_FPSforced,mpctx->sh_video->fps,mpctx->sh_video->frametime);
+  mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"FPS forced to be %5.3f (ftime: %5.3f).\n",mpctx->sh_video->fps,mpctx->sh_video->frametime);
 }
 
 #ifdef CONFIG_GUI
@@ -4014,7 +4060,7 @@ if ( use_gui ) {
 if(opts->loop_times>1) opts->loop_times--; else
 if(opts->loop_times==1) opts->loop_times = -1;
 
-mp_tmsg(MSGT_CPLAYER,MSGL_INFO,MSGTR_StartPlaying);
+mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Starting playback...\n");
 
 total_time_usage_start=GetTimer();
 audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
@@ -4031,7 +4077,7 @@ if (seek_to_sec) {
 }
 
 if (end_at.type == END_AT_SIZE) {
-    mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_MPEndposNoSizeBased);
+    mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Option -endpos in MPlayer does not yet support size units.\n");
     end_at.type = END_AT_NONE;
 }
 
@@ -4102,7 +4148,7 @@ if(!mpctx->sh_video) {
       double frame_time = update_video(mpctx, &blit_frame);
       mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
       if (mpctx->sh_video->vf_initialized < 0) {
-	  mp_tmsg(MSGT_CPLAYER,MSGL_FATAL, MSGTR_NotInitializeVOPorVO);
+	  mp_tmsg(MSGT_CPLAYER,MSGL_FATAL, "\nFATAL: Could not initialize video filters (-vf) or video output (-vo).\n");
 	  mpctx->stop_play = PT_NEXT_ENTRY;
           goto goto_next_file;
       }

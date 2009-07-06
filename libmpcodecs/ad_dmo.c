@@ -34,7 +34,7 @@ static int preinit(sh_audio_t *sh_audio)
       audio_output_channels : (sh_audio->wf->nChannels>=2 ? 2 : 1);
   if(!(ds_adec=DMO_AudioDecoder_Open(sh_audio->codec->dll,&sh_audio->codec->guid,sh_audio->wf,chans)))
   {
-    mp_tmsg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_MissingDLLcodec,sh_audio->codec->dll);
+    mp_tmsg(MSGT_DECAUDIO,MSGL_ERR,"ERROR: Could not open required DirectShow codec %s.\n",sh_audio->codec->dll);
     return 0;
   }
     sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;

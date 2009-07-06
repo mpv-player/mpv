@@ -117,13 +117,13 @@ static int parse_args(menu_t* menu,char* args) {
   while(1) {
     r = asx_get_element(parser,&args,&element,&body,&attribs);
     if(r < 0) {
-      mp_tmsg(MSGT_OSD_MENU,MSGL_ERR,MSGTR_LIBMENU_SyntaxErrorAtLine,parser->line);
+      mp_tmsg(MSGT_OSD_MENU,MSGL_ERR,"[MENU] syntax error at line: %d\n",parser->line);
       asx_parser_free(parser);
       return -1;
     } else if(r == 0) {      
       asx_parser_free(parser);
       if(!m)
-        mp_tmsg(MSGT_OSD_MENU,MSGL_WARN,MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition);
+        mp_tmsg(MSGT_OSD_MENU,MSGL_WARN,"[MENU] No entry found in the menu definition.\n");
       m = calloc(1,sizeof(struct list_entry_s));
       m->p.txt = strdup("Back");
       menu_list_add_entry(menu,m);
@@ -132,7 +132,7 @@ static int parse_args(menu_t* menu,char* args) {
     if(!strcmp(element,"menu")) {
       name = asx_get_attrib("menu",attribs);
       if(!name) {
-        mp_tmsg(MSGT_OSD_MENU,MSGL_WARN,MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut);
+        mp_tmsg(MSGT_OSD_MENU,MSGL_WARN,"[MENU] Submenu definition needs a 'menu' attribute.\n");
         goto next_element;
       }
       m = calloc(1,sizeof(struct list_entry_s));
@@ -147,13 +147,13 @@ static int parse_args(menu_t* menu,char* args) {
     name = asx_get_attrib("property",attribs);
     opt = NULL;
     if(name && mp_property_do(name,M_PROPERTY_GET_TYPE,&opt,menu->ctx) <= 0) {
-      mp_tmsg(MSGT_OSD_MENU,MSGL_WARN,MSGTR_LIBMENU_InvalidProperty,
+      mp_tmsg(MSGT_OSD_MENU,MSGL_WARN,"[MENU] Invalid property '%s' in pref menu entry. (line %d).\n",
              name,parser->line);
       goto next_element;
     }
     txt = asx_get_attrib("txt",attribs);
     if(!(name || txt)) {
-      mp_tmsg(MSGT_OSD_MENU,MSGL_WARN,MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed,parser->line);
+      mp_tmsg(MSGT_OSD_MENU,MSGL_WARN,"[MENU] Pref menu entry definitions need a valid 'property' or 'txt' attribute (line %d).\n",parser->line);
       if(txt) free(txt), txt = NULL;
       goto next_element;
     }
@@ -278,7 +278,7 @@ static int openMenu(menu_t* menu, char* args) {
 
 
   if(!args) {
-    mp_tmsg(MSGT_OSD_MENU,MSGL_ERR,MSGTR_LIBMENU_PrefMenuNeedsAnArgument);
+    mp_tmsg(MSGT_OSD_MENU,MSGL_ERR,"[MENU] Pref menu needs an argument.\n");
     return 0;
   }
  

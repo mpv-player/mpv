@@ -64,11 +64,11 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
         af_to_dB (AF_NCH, db_vals, db_vals, 20.0);
         if (!af_control_any_rev(mixer->afilter,
                AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, db_vals)) {
-          mp_tmsg(MSGT_GLOBAL, MSGL_INFO, MSGTR_InsertingAfVolume);
+          mp_tmsg(MSGT_GLOBAL, MSGL_INFO, "[Mixer] No hardware mixing, inserting volume filter.\n");
           if (af_add(mixer->afilter, "volume")) {
             if (!af_control_any_rev(mixer->afilter,
                    AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, db_vals)) {
-              mp_tmsg(MSGT_GLOBAL, MSGL_ERR, MSGTR_NoVolume);
+              mp_tmsg(MSGT_GLOBAL, MSGL_ERR, "[Mixer] No volume control available.\n");
               return;
             }
           }
@@ -142,7 +142,7 @@ void mixer_setbalance(mixer_t *mixer, float val)
     return;
 
   if (!(af_pan_balance = af_add(mixer->afilter, "pan"))) {
-    mp_tmsg(MSGT_GLOBAL, MSGL_ERR, MSGTR_NoBalance);
+    mp_tmsg(MSGT_GLOBAL, MSGL_ERR, "[Mixer] No balance control available.\n");
     return;
   }
 

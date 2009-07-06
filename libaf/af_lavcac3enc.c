@@ -98,7 +98,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
             s->lavc_actx->bit_rate = bit_rate;
 
             if(avcodec_open(s->lavc_actx, s->lavc_acodec) < 0) {
-                mp_tmsg(MSGT_AFILTER, MSGL_ERR, MSGTR_CouldntOpenCodec, "ac3", bit_rate);
+                mp_tmsg(MSGT_AFILTER, MSGL_ERR, "Couldn't open codec %s, br=%d.\n", "ac3", bit_rate);
                 return AF_ERROR;
             }
         }
@@ -295,13 +295,13 @@ static int af_open(af_instance_t* af){
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");
     if (!s->lavc_acodec) {
-        mp_tmsg(MSGT_AFILTER, MSGL_ERR, MSGTR_LavcAudioCodecNotFound, "ac3");
+        mp_tmsg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, couldn't find encoder for codec %s.\n", "ac3");
         return AF_ERROR;
     }
 
     s->lavc_actx = avcodec_alloc_context();
     if (!s->lavc_actx) {
-        mp_tmsg(MSGT_AFILTER, MSGL_ERR, MSGTR_CouldntAllocateLavcContext);
+        mp_tmsg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, couldn't allocate context!\n");
         return AF_ERROR;
     }
 

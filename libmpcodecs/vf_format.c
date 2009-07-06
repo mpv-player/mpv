@@ -66,7 +66,7 @@ static int open(vf_instance_t *vf, char* args){
 	if(!strcasecmp(args,"argb")) vf->priv->fmt=IMGFMT_ARGB; else
 	if(!strcasecmp(args,"bgra")) vf->priv->fmt=IMGFMT_BGRA; else
 	if(!strcasecmp(args,"abgr")) vf->priv->fmt=IMGFMT_ABGR; else
-	{ mp_tmsg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_UnknownFormatName, args);return 0;}
+	{ mp_tmsg(MSGT_VFILTER, MSGL_WARN, "[VF_FORMAT] Unknown format name: '%s'.\n", args);return 0;}
     }
         
 

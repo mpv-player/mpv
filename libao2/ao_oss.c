@@ -160,7 +160,7 @@ static int oss2format(int format)
     case AFMT_AC3: return AF_FORMAT_AC3;
 #endif
     }
-    mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_AO_OSS_UnknownUnsupportedFormat, format);
+    mp_tmsg(MSGT_GLOBAL,MSGL_ERR,"[AO OSS] Unknown/Unsupported OSS format: %x.\n", format);
     return -1;
 }
 
@@ -294,7 +294,7 @@ static int init(int rate,int channels,int format,int flags){
     int fd, devs, i;
     
     if ((fd = open(oss_mixer_device, O_RDONLY)) == -1){
-      mp_tmsg(MSGT_AO,MSGL_ERR,MSGTR_AO_OSS_CantOpenMixer,
+      mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS] audio_setup: Can't open mixer device %s: %s\n",
         oss_mixer_device, strerror(errno));
     }else{
       ioctl(fd, SOUND_MIXER_READ_DEVMASK, &devs);
@@ -303,7 +303,7 @@ static int init(int rate,int channels,int format,int flags){
       for (i=0; i<SOUND_MIXER_NRDEVICES; i++){
         if(!strcasecmp(mixer_channels[i], mchan)){
           if(!(devs & (1 << i))){
-            mp_tmsg(MSGT_AO,MSGL_ERR,MSGTR_AO_OSS_ChanNotFound,mchan);
+            mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS] audio_setup: Audio card mixer does not have channel '%s', using default.\n",mchan);
             i = SOUND_MIXER_NRDEVICES+1;
             break;
           }
@@ -312,7 +312,7 @@ static int init(int rate,int channels,int format,int flags){
         }
       }
       if(i==SOUND_MIXER_NRDEVICES){
-        mp_tmsg(MSGT_AO,MSGL_ERR,MSGTR_AO_OSS_ChanNotFound,mchan);
+        mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS] audio_setup: Audio card mixer does not have channel '%s', using default.\n",mchan);
       }
     }
   } else
@@ -328,14 +328,14 @@ static int init(int rate,int channels,int format,int flags){
   audio_fd=open(dsp, O_WRONLY);
 #endif
   if(audio_fd<0){
-    mp_tmsg(MSGT_AO,MSGL_ERR,MSGTR_AO_OSS_CantOpenDev, dsp, strerror(errno));
+    mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS] audio_setup: Can't open audio device %s: %s\n", dsp, strerror(errno));
     return 0;
   }
 
 #ifdef __linux__
   /* Remove the non-blocking flag */
   if(fcntl(audio_fd, F_SETFL, 0) < 0) {
-   mp_tmsg(MSGT_AO,MSGL_ERR,MSGTR_AO_OSS_CantMakeFd, strerror(errno));
+   mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS] audio_setup: Can't make file descriptor blocking: %s\n", strerror(errno));
    return 0;
   }  
 #endif
@@ -362,7 +362,7 @@ ac3_retry:
   }
   if( ioctl(audio_fd, SNDCTL_DSP_SETFMT, &oss_format)<0 ||
       oss_format != format2oss(format)) {
-    mp_tmsg(MSGT_AO,MSGL_WARN, MSGTR_AO_OSS_CantSet, dsp,
+    mp_tmsg(MSGT_AO,MSGL_WARN, "[AO OSS] Can't set audio device %s to %s output, trying %s...\n", dsp,
             af_fmt2str_short(format), af_fmt2str_short(AF_FORMAT_S16_NE) );
     format=AF_FORMAT_S16_NE;
     goto ac3_retry;
@@ -384,14 +384,14 @@ ac3_retry:
     if (ao_data.channels > 2) {
       if ( ioctl(audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels) == -1 ||
 	   ao_data.channels != channels ) {
-	mp_tmsg(MSGT_AO,MSGL_ERR,MSGTR_AO_OSS_CantSetChans, channels);
+	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS] audio_setup: Failed to set audio device to %d channels.\n", channels);
 	return 0;
       }
     }
     else {
       int c = ao_data.channels-1;
       if (ioctl (audio_fd, SNDCTL_DSP_STEREO, &c) == -1) {
-	mp_tmsg(MSGT_AO,MSGL_ERR,MSGTR_AO_OSS_CantSetChans, ao_data.channels);
+	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS] audio_setup: Failed to set audio device to %d channels.\n", ao_data.channels);
 	return 0;
       }
       ao_data.channels=c+1;
@@ -405,7 +405,7 @@ ac3_retry:
 
   if(ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz)==-1){
       int r=0;
-      mp_tmsg(MSGT_AO,MSGL_WARN,MSGTR_AO_OSS_CantUseGetospace);
+      mp_tmsg(MSGT_AO,MSGL_WARN,"[AO OSS] audio_setup: driver doesn't support SNDCTL_DSP_GETOSPACE :-(\n");
       if(ioctl(audio_fd, SNDCTL_DSP_GETBLKSIZE, &r)==-1){
           mp_msg(MSGT_AO,MSGL_V,"audio_setup: %d bytes/frag (config.h)\n",ao_data.outburst);
       } else {
@@ -436,7 +436,7 @@ ac3_retry:
     }
     free(data);
     if(ao_data.buffersize==0){
-        mp_tmsg(MSGT_AO,MSGL_ERR,MSGTR_AO_OSS_CantUseSelect);
+        mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS]\n *** Your audio driver DOES NOT support select() ***\n Recompile MPlayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n");
         return 0;
     }
 #endif
@@ -474,7 +474,7 @@ static void reset(void){
     uninit(1);
     audio_fd=open(dsp, O_WRONLY);
     if(audio_fd < 0){
-	mp_tmsg(MSGT_AO,MSGL_ERR,MSGTR_AO_OSS_CantReopen, strerror(errno));
+	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS]\nFatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE *** %s\n", strerror(errno));
 	return;
     }
 

@@ -617,9 +617,16 @@ static int parse_suboptions(const char *arg) {
         helpmsg = strdup(aa_help);
         for (i=0; i<(signed)strlen(helpmsg); i++)
             if (helpmsg[i] == '-') helpmsg[i] = ' ';
-        mp_tmsg(MSGT_VO, MSGL_INFO, MSGTR_VO_AA_HelpHeader);
+        mp_tmsg(MSGT_VO, MSGL_INFO, "\n\nHere are the aalib vo_aa suboptions:\n");
         mp_msg(MSGT_VO, MSGL_INFO, "%s\n\n", helpmsg);
-        mp_tmsg(MSGT_VO, MSGL_INFO, MSGTR_VO_AA_AdditionalOptions);
+#define VO_AA_AdditionalOptions _("Additional options vo_aa provides:\n" \
+"  help        print this help message\n" \
+"  osdcolor    set OSD color\n  subcolor    set subtitle color\n" \
+"        the color parameters are:\n           0 : normal\n" \
+"           1 : dim\n           2 : bold\n           3 : boldfont\n" \
+"           4 : reverse\n           5 : special\n\n\n")
+
+        mp_tmsg(MSGT_VO, MSGL_INFO, VO_AA_AdditionalOptions);
         retval = -1;
     }
     if (retval == 0) {

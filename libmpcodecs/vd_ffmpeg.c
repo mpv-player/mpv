@@ -201,7 +201,7 @@ static void set_format_params(struct AVCodecContext *avctx, enum PixelFormat fmt
         avctx->release_buffer  = release_buffer;
         avctx->reget_buffer    = get_buffer;
         avctx->draw_horiz_band = draw_slice;
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_XVMCAcceleratedMPEG2);
+        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] XVMC-accelerated MPEG-2.\n");
         avctx->slice_flags = SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
     }
 }
@@ -229,7 +229,7 @@ static int init(sh_video_t *sh){
 
     lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh->codec->dll);
     if(!lavc_codec){
-        mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MissingLAVCcodec, sh->codec->dll);
+        mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Cannot find codec '%s' in libavcodec...\n", sh->codec->dll);
         uninit(sh);
         return 0;
     }
@@ -254,7 +254,7 @@ static int init(sh_video_t *sh){
 #endif /* CONFIG_VDPAU */
 #if CONFIG_XVMC
     if(lavc_codec->capabilities & CODEC_CAP_HWACCEL){
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_XVMCAcceleratedCodec);
+        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] XVMC accelerated codec.\n");
         avctx->get_format= get_format;//for now only this decoder will use it
         // HACK around badly placed checks in mpeg_mc_decode_init
         set_format_params(avctx, PIX_FMT_XVMC_MPEG2_IDCT);
@@ -394,7 +394,7 @@ static int init(sh_video_t *sh){
         avcodec_thread_init(avctx, lavc_param->threads);
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
-        mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_CantOpenCodec);
+        mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not open codec.\n");
         uninit(sh);
         return 0;
     }
@@ -415,7 +415,7 @@ static void uninit(sh_video_t *sh){
         for(i=1; i<32; i++){
             mp_msg(MSGT_DECVIDEO, MSGL_INFO, "QP: %d, count: %d\n", i, ctx->qp_stat[i]);
         }
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_ArithmeticMeanOfQP,
+        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] Arithmetic mean of QP: %2.4f, Harmonic mean of QP: %2.4f\n",
             ctx->qp_sum / avctx->coded_frame->coded_picture_number,
             1.0/(ctx->inv_qp_sum / avctx->coded_frame->coded_picture_number)
             );
@@ -423,7 +423,7 @@ static void uninit(sh_video_t *sh){
 
     if (avctx) {
         if (avctx->codec && avcodec_close(avctx) < 0)
-            mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_CantCloseCodec);
+            mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not close codec.\n");
 
         av_freep(&avctx->extradata);
         av_freep(&avctx->palctrl);
@@ -567,7 +567,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     } else
     if (!pic->buffer_hints) {
         if(ctx->b_count>1 || ctx->ip_count>2){
-            mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, MSGTR_MPCODECS_DRIFailure);
+            mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "[VD_FFMPEG] DRI failure.\n");
 
             ctx->do_dr1=0; //FIXME
             avctx->get_buffer= avcodec_default_get_buffer;
@@ -601,13 +601,13 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         struct xvmc_pix_fmt *render = mpi->priv; //same as data[2]
         avctx->draw_horiz_band= draw_slice;
         if(!avctx->xvmc_acceleration) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC);
+            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] The mc_get_buffer should work only with XVMC acceleration!!");
             assert(0);
             exit(1);
 //            return -1;//!!fixme check error conditions in ffmpeg
         }
         if(!(mpi->flags & MP_IMGFLAG_DIRECT)) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MPCODECS_OnlyBuffersAllocatedByVoXvmcAllowed);
+            mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "[VD_FFMPEG] Only buffers allocated by vo_xvmc allowed.\n");
             assert(0);
             exit(1);
 //            return -1;//!!fixme check error conditions in ffmpeg
@@ -860,7 +860,7 @@ static mp_image_t *decode(sh_video_t *sh, void *data, int len, int flags){
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE,
         avctx->width, avctx->height);
     if(!mpi){        // temporary!
-        mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, MSGTR_MPCODECS_CouldntAllocateImageForCodec);
+        mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "[VD_FFMPEG] Couldn't allocate image for codec.\n");
         return NULL;
     }
 
@@ -911,7 +911,7 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
     for(i=0;fmt[i]!=PIX_FMT_NONE;i++){
         imgfmt = pixfmt2imgfmt(fmt[i]);
         if(!IMGFMT_IS_XVMC(imgfmt) && !IMGFMT_IS_VDPAU(imgfmt)) continue;
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_TryingPixfmt, i);
+        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] Trying pixfmt=%d.\n", i);
         if(init_vo(sh, fmt[i]) >= 0) {
             break;
         }

@@ -249,7 +249,7 @@ static int open_dir(menu_t* menu,char* args) {
   mpriv->p.title = replace_path(mpriv->title,mpriv->dir,0);
 
   if ((dirp = opendir (mpriv->dir)) == NULL){
-    mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_OpendirError, strerror(errno));
+    mp_tmsg(MSGT_GLOBAL,MSGL_ERR,"[MENU] opendir error: %s\n", strerror(errno));
     return 0;
   }
 
@@ -291,7 +291,7 @@ static int open_dir(menu_t* menu,char* args) {
     if(n%20 == 0){ // Get some more mem
       if((tp = (char **) realloc(namelist, (n+20) * sizeof (char *)))
          == NULL) {
-        mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ReallocError, strerror(errno));
+        mp_tmsg(MSGT_GLOBAL,MSGL_ERR,"[MENU] realloc error: %s\n", strerror(errno));
 	n--;
         goto bailout;
       } 
@@ -300,7 +300,7 @@ static int open_dir(menu_t* menu,char* args) {
 
     namelist[n] = (char *) malloc(strlen(dp->d_name) + 2);
     if(namelist[n] == NULL){
-      mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_MallocError, strerror(errno));
+      mp_tmsg(MSGT_GLOBAL,MSGL_ERR,"[MENU] memory allocation error: %s\n", strerror(errno));
       n--;
       goto bailout;
     }
@@ -318,7 +318,7 @@ bailout:
   qsort(namelist, n, sizeof(char *), (kill_warn)compare);
 
   if (n < 0) {
-    mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ReaddirError,strerror(errno));
+    mp_tmsg(MSGT_GLOBAL,MSGL_ERR,"[MENU] readdir error: %s\n",strerror(errno));
     return 0;
   }
   while(n--) {
@@ -329,7 +329,7 @@ bailout:
       e->d = 1;
     menu_list_add_entry(menu,e);
     }else{
-      mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_MallocError, strerror(errno));
+      mp_tmsg(MSGT_GLOBAL,MSGL_ERR,"[MENU] memory allocation error: %s\n", strerror(errno));
     }
     free(namelist[n]);
   }
@@ -368,7 +368,7 @@ static void read_cmd(menu_t* menu,int cmd) {
 	}
 	menu_list_uninit(menu,free_entry);
 	if(!open_dir(menu,p)) {
-	  mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_CantOpenDirectory,p);
+	  mp_tmsg(MSGT_GLOBAL,MSGL_ERR,"[MENU] Can't open directory %s.\n",p);
 	  menu->cl = 1;
 	}
 	free(p);

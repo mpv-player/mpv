@@ -213,7 +213,7 @@ stream_t *open_stream_full(char *filename,int mode, struct MPOpts *options,
 	  return s;
 	}
 	else if(r != STREAM_UNSUPPORTED) {
-	  mp_tmsg(MSGT_OPEN,MSGL_ERR, MSGTR_FailedToOpen,filename);
+	  mp_tmsg(MSGT_OPEN,MSGL_ERR, "Failed to open %s.\n",filename);
 	  return NULL;
 	}
 	break;

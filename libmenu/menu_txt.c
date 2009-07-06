@@ -141,13 +141,13 @@ static int open_txt(menu_t* menu, char* args) {
   menu->read_cmd = read_cmd;
 
   if(!mpriv->file) {
-    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_MenuTxtNeedATxtFileName);
+    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Text menu needs a textfile name (parameter file).\n");
     return 0;
   }
 
   fd = fopen(mpriv->file,"r");
   if(!fd) {
-    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_MenuTxtCantOpen,mpriv->file);
+    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Can't open %s.\n",mpriv->file);
     return 0;
   }
 
@@ -178,7 +178,7 @@ static int open_txt(menu_t* menu, char* args) {
       mpriv->num_lines++;
     }
     if(pos >= BUF_SIZE-1) {
-      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_WarningTooLongLineSplitting);
+      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Warning, line too long. Splitting it.\n");
       mpriv->lines = realloc(mpriv->lines,(mpriv->num_lines + 1)*sizeof(char*));
       mpriv->lines[mpriv->num_lines] = strdup(buf);
       mpriv->num_lines++;
@@ -186,7 +186,7 @@ static int open_txt(menu_t* menu, char* args) {
     }
   }
 
-  mp_tmsg(MSGT_GLOBAL,MSGL_INFO,MSGTR_LIBMENU_ParsedLines,mpriv->num_lines);
+  mp_tmsg(MSGT_GLOBAL,MSGL_INFO,"[MENU] Parsed %d lines.\n",mpriv->num_lines);
 
   return 1;
 }

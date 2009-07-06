@@ -407,24 +407,24 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     }else{//force_vm
         vid_mode=force_vm;
         if(vga_hasmode(vid_mode) == 0){
-            mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SVGA_ForcedVidmodeNotAvailable,
+            mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SVGA] Forced vid_mode %d (%s) not available.\n",
                    vid_mode,vga_getmodename(vid_mode));
             return 1; //error;
         }
         modeinfo=vga_getmodeinfo(vid_mode);
         if( (modeinfo->width < req_w) || (modeinfo->height < req_h) ){
-            mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SVGA_ForcedVidmodeTooSmall,
+            mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SVGA] Forced vid_mode %d (%s) too small.\n",
                    vid_mode,vga_getmodename(vid_mode));
             return 1;
         }
     }
     mode_bpp=bpp_from_vminfo(modeinfo);
 
-    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_Vidmode,
+    mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_SVGA] Vid_mode: %d, %dx%d %dbpp.\n",
            vid_mode,modeinfo->width,modeinfo->height,mode_bpp);
 
     if (vga_setmode(vid_mode) == -1) {
-        mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SVGA_VgasetmodeFailed,vid_mode);
+        mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SVGA] Vga_setmode(%d) failed.\n",vid_mode);
         uninit();
         return 1; // error
     }
@@ -474,11 +474,11 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         }
     }//fi force native
     if(mode_capabilities&CAP_LINEAR){
-        mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_VideoModeIsLinearAndMemcpyCouldBeUsed);
+        mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_SVGA] Video mode is linear and memcpy could be used for image transfer.\n");
     }
     if(mode_capabilities&CAP_ACCEL_PUTIMAGE){
-        mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_VideoModeHasHardwareAcceleration);
-        mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLikeToKnow);
+        mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_SVGA] Video mode has hardware acceleration and put_image could be used.\n");
+        mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_SVGA] If it works for you I would like to know.\n[VO_SVGA] (send log with `mplayer test.avi -v -v -v -v &> svga.log`). Thx!\n");
     }
 
 //here is the place to handle strides for accel_ modes;
@@ -512,7 +512,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         }
     }
     assert(max_pages>0);
-    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_VideoModeHas,max_pages);
+    mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_SVGA] Video mode has %d page(s).\n",max_pages);
     //15bpp
     if(modeinfo->bytesperpixel!=0)
         vga_claimvideomemory(max_pages * modeinfo->height * modeinfo->width * modeinfo->bytesperpixel);
@@ -527,14 +527,14 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     x_pos = (modeinfo->width  - req_w) / 2;
     y_pos = (modeinfo->height - req_h) / 2;
     x_pos &= ~(15); //align x offset position to 16 pixels
-    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_CenteringImageStartAt,x_pos,y_pos);
+    mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_SVGA] Centering image. Starting at (%d,%d)\n",x_pos,y_pos);
 
 #ifdef CONFIG_VIDIX
 
     if(vidix_name[0]){
         vidix_init(width, height, x_pos, y_pos, modeinfo->width, modeinfo->height,
                    format, mode_bpp, modeinfo->width,modeinfo->height);
-        mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_UsingVidix,width,height,
+        mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_SVGA] Using VIDIX. w=%i h=%i mw=%i mh=%i\n",width,height,
                modeinfo->width,modeinfo->height);
         vidix_start();
         /*set colorkey*/

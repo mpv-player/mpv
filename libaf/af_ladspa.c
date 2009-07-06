@@ -213,7 +213,7 @@ static int af_ladspa_parse_plugin(af_ladspa_t *setup) {
 
     if (setup->ninputs == 0) {
         mp_msg(MSGT_AFILTER, MSGL_WARN, "%s: %s\n", setup->myname, 
-                                                _(MSGTR_AF_LADSPA_WarnNoInputs));
+                                                _("WARNING! This LADSPA plugin has no audio inputs.\n The incoming audio signal will be lost."));
     } else if (setup->ninputs == 1) {
         mp_msg(MSGT_AFILTER, MSGL_V, "%s: this is a mono effect\n", setup->myname);
     } else if (setup->ninputs == 2) {
@@ -225,13 +225,13 @@ static int af_ladspa_parse_plugin(af_ladspa_t *setup) {
 
     if (setup->noutputs == 0) {
         mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
-                                                _(MSGTR_AF_LADSPA_ErrNoOutputs));
+                                                _("This LADSPA plugin has no audio outputs."));
         return AF_ERROR;
     }
 
     if (setup->noutputs != setup->ninputs ) {
         mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
-                                                _(MSGTR_AF_LADSPA_ErrInOutDiff));
+                                                _("The number of audio inputs and audio outputs of the LADSPA plugin differ."));
         return AF_ERROR;
     }
 
@@ -391,7 +391,7 @@ static int af_ladspa_load_plugin(af_ladspa_t *setup) {
 
     if (!setup->libhandle) {
         mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s %s\n\t%s\n", setup->myname,
-                    _(MSGTR_AF_LADSPA_ErrFailedToLoad), setup->file, dlerror() );
+                    _("failed to load"), setup->file, dlerror() );
         return AF_ERROR;
     }
 
@@ -404,7 +404,7 @@ static int af_ladspa_load_plugin(af_ladspa_t *setup) {
 
     if (!descriptor_function) {
         mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n\t%s\n", setup->myname,
-                                _(MSGTR_AF_LADSPA_ErrNoDescriptor), dlerror());
+                                _("Couldn't find ladspa_descriptor() function in the specified library file."), dlerror());
         return AF_ERROR;
     }
 
@@ -412,7 +412,7 @@ static int af_ladspa_load_plugin(af_ladspa_t *setup) {
 
     if (strcmp(setup->label, "help") == 0) {
         mp_msg(MSGT_AFILTER, MSGL_INFO, "%s: %s %s:\n", setup->myname, 
-                _(MSGTR_AF_LADSPA_AvailableLabels), setup->file);
+                _("available labels in"), setup->file);
         for (i=0; ; i++) {
             ladspa_descriptor = descriptor_function(i);
             if (ladspa_descriptor == NULL) {
@@ -432,7 +432,7 @@ static int af_ladspa_load_plugin(af_ladspa_t *setup) {
         ladspa_descriptor = descriptor_function(i);
         if (ladspa_descriptor == NULL) {
             mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
-                                            _(MSGTR_AF_LADSPA_ErrLabelNotFound));
+                                            _("Couldn't find label in plugin library."));
             return AF_ERROR;
         }
         if (strcmp(ladspa_descriptor->Label, setup->label) == 0) {
@@ -458,7 +458,7 @@ static int af_ladspa_load_plugin(af_ladspa_t *setup) {
  */
 
 static int af_ladspa_malloc_failed(char *myname) {
-    mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s", myname, MSGTR_MemAllocFailed);
+    mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s", myname, "Memory allocation failed.\n");
     return AF_ERROR;
 }
 
@@ -520,7 +520,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
 
         if (!arg) {
             mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
-                                            _(MSGTR_AF_LADSPA_ErrNoSuboptions));
+                                            _("No suboptions specified."));
             return AF_ERROR;
         }
 
@@ -532,7 +532,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
         sscanf(arg, "%[^:]", buf);
         if (buf[0] == '\0') {
             mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
-                                                _(MSGTR_AF_LADSPA_ErrNoLibFile));
+                                                _("No library file specified."));
             free(buf);
             return AF_ERROR;
         }
@@ -548,7 +548,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
         sscanf(arg, "%[^:]", buf);
         if (buf[0] == '\0') {
             mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
-                                                _(MSGTR_AF_LADSPA_ErrNoLabel));
+                                                _("No filter label specified."));
             free(buf);
             return AF_ERROR;
         }
@@ -584,14 +584,14 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
         for(i=0; i<setup->ninputcontrols; i++) {
             if (!arg || (*(char*)arg != ':') ) {
                 mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
-                                        _(MSGTR_AF_LADSPA_ErrNotEnoughControls));
+                                        _("Not enough controls specified on the command line."));
                 return AF_ERROR;
             }
             arg++;
             r = sscanf(arg, "%f", &val);
             if (r!=1) {
                 mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
-                                        _(MSGTR_AF_LADSPA_ErrNotEnoughControls));
+                                        _("Not enough controls specified on the command line."));
                 return AF_ERROR;
             }
             setup->inputcontrols[setup->inputcontrolsmap[i]] = val;
@@ -617,13 +617,13 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
 
             if (LADSPA_IS_HINT_BOUNDED_BELOW(hint.HintDescriptor) &&
                     val < hint.LowerBound) {
-                mp_tmsg(MSGT_AFILTER, MSGL_ERR, MSGTR_AF_LADSPA_ErrControlBelow,
+                mp_tmsg(MSGT_AFILTER, MSGL_ERR, "%s: Input control #%d is below lower boundary of %0.4f.\n",
                                             setup->myname, i, hint.LowerBound);
                 return AF_ERROR;
             }
             if (LADSPA_IS_HINT_BOUNDED_ABOVE(hint.HintDescriptor) &&
                     val > hint.UpperBound) {
-                mp_tmsg(MSGT_AFILTER, MSGL_ERR, MSGTR_AF_LADSPA_ErrControlAbove,
+                mp_tmsg(MSGT_AFILTER, MSGL_ERR, "%s: Input control #%d is above upper boundary of %0.4f.\n",
                                             setup->myname, i, hint.UpperBound);
                 return AF_ERROR;
             }

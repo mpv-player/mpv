@@ -59,7 +59,7 @@ static int preinit(sh_audio_t *sh_audio)
     priv->o_wf = malloc(sizeof(WAVEFORMATEX));
     if (!priv->o_wf)
     {
-	mp_tmsg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_ACMiniterror);
+	mp_tmsg(MSGT_DECAUDIO,MSGL_ERR,"Could not load/initialize Win32/ACM audio codec (missing DLL file?).\n");
 	return 0;
     }
 
@@ -90,7 +90,7 @@ static int preinit(sh_audio_t *sh_audio)
 	else
 	    mp_msg(MSGT_WIN32, MSGL_ERR, "ACM_Decoder: acmStreamOpen error: %d\n",
 		(int)ret);
-	mp_tmsg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_ACMiniterror);
+	mp_tmsg(MSGT_DECAUDIO,MSGL_ERR,"Could not load/initialize Win32/ACM audio codec (missing DLL file?).\n");
 	return 0;
     }
     mp_msg(MSGT_WIN32, MSGL_V, "Audio codec opened OK! ;-)\n");

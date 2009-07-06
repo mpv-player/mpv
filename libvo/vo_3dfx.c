@@ -169,12 +169,12 @@ create_window(Display *display, char *title)
 	bpp = attribs.depth;
 	if (bpp != 16) 
 	{
-		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_3DFX_Only16BppSupported);
+		mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_3DFX] Only 16bpp supported!");
 		exit(-1);
 	}
 
 	XMatchVisualInfo(display,screen,bpp,TrueColor,&vinfo);
-	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_3DFX_VisualIdIs,vinfo.visualid);
+	mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_3DFX] Visual ID is %lx.\n",vinfo.visualid);
 
 	theCmap = XCreateColormap(display, RootWindow(display,screen),
 			vinfo.visual, AllocNone);
@@ -335,7 +335,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	// Open driver device
 	if ( fd == -1 ) 
 	{
-		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_3DFX_UnableToOpenDevice);
+		mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_3DFX] Unable to open /dev/3dfx.\n");
 		return -1;
 	}
 
@@ -354,7 +354,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	data.device = 0;
 	if ((retval = ioctl(fd,_IOC(_IOC_READ,'3',3,0),&data)) < 0) 
 	{
-		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_3DFX_Error,retval);
+		mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_3DFX] Error: %d.\n",retval);
 		return -1;
 	}
 
@@ -365,7 +365,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	data.device = 0;
 	if ((retval = ioctl(fd,_IOC(_IOC_READ,'3',3,0),&data)) < 0) 
 	{
-		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_3DFX_Error,retval);
+		mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_3DFX] Error: %d.\n",retval);
 		return -1;
 	}
 
@@ -374,7 +374,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	memBase1 = mmap(0,3*page_space,PROT_READ | PROT_WRITE,MAP_SHARED,fd,baseAddr1);
 	if (memBase0 == (uint32_t *) 0xFFFFFFFF || memBase1 == (uint32_t *) 0xFFFFFFFF) 
 	{
-		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_3DFX_CouldntMapMemoryArea, 
+		mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_3DFX] Couldn't map 3dfx memory areas: %p,%p,%d.\n", 
 		 memBase0,memBase1,errno);
 	}  
 
@@ -413,7 +413,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	atexit(restore);
 
-	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_3DFX_DisplayInitialized,memBase1);
+	mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_3DFX] Initialized: %p.\n",memBase1);
 	return 0;
 }
 
@@ -485,13 +485,13 @@ static int preinit(const char *arg)
 {
     if ( (fd = open("/dev/3dfx",O_RDWR) ) == -1) 
     {
-        mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_3DFX_UnableToOpenDevice);
+        mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_3DFX] Unable to open /dev/3dfx.\n");
         return -1;
     }
                                                         
     if(arg) 
     {
-	mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_3DFX_UnknownSubdevice,arg);
+	mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_3DFX] Unknown subdevice: %s.\n",arg);
 	return ENOSYS;
     }
     return 0;

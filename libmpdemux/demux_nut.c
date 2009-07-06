@@ -97,7 +97,7 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 				              s[i].codec_specific_len, 1);
 			sh_audio_t* sh_audio = new_sh_audio(demuxer, i);
 			int j;
-			mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "nut", i);
+			mp_tmsg(MSGT_DEMUX, MSGL_INFO, "[%s] Audio stream found, -aid %d\n", "nut", i);
 
 			sh_audio->wf= wf; sh_audio->ds = demuxer->audio;
 			sh_audio->audio.dwSampleSize = 0; // FIXME
@@ -133,7 +133,7 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 				              s[i].codec_specific_len, 1);
 			sh_video_t * sh_video = new_sh_video(demuxer, i);
 			int j;
-			mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "nut", i);
+			mp_tmsg(MSGT_DEMUX, MSGL_INFO, "[%s] Video stream found, -vid %d\n", "nut", i);
 
 			sh_video->bih = bih;
 			sh_video->ds = demuxer->video;

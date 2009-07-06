@@ -47,7 +47,7 @@ int get_video_quality_max(sh_video_t *sh_video)
     if (vf) {
         int ret = vf->control(vf, VFCTRL_QUERY_MAX_PP_LEVEL, NULL);
         if (ret > 0) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_UsingExternalPP, ret);
+            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[PP] Using external postprocessing filter, max q = %d.\n", ret);
             return ret;
         }
     }
@@ -55,7 +55,7 @@ int get_video_quality_max(sh_video_t *sh_video)
     if (vd) {
         int ret = vd->control(sh_video, VDCTRL_QUERY_MAX_PP_LEVEL, NULL);
         if (ret > 0) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_UsingCodecPP, ret);
+            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[PP] Using codec's postprocessing, max q = %d.\n", ret);
             return ret;
         }
     }
@@ -95,7 +95,7 @@ int set_video_colors(sh_video_t *sh_video, const char *item, int value)
         vd->control(sh_video, VDCTRL_SET_EQUALIZER, item, (int *) value)
             == CONTROL_OK)
         return 1;
-    mp_tmsg(MSGT_DECVIDEO, MSGL_V, MSGTR_VideoAttributeNotSupportedByVO_VD,
+    mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Video attribute '%s' is not supported by selected vo & vd.\n",
            item);
     return 0;
 }
@@ -166,7 +166,7 @@ void uninit_video(sh_video_t *sh_video)
 {
     if (!sh_video->initialized)
         return;
-    mp_tmsg(MSGT_DECVIDEO, MSGL_V, MSGTR_UninitVideoStr, sh_video->codec->drv);
+    mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Uninit video: %s\n", sh_video->codec->drv);
     sh_video->vd_driver->uninit(sh_video);
 #ifdef CONFIG_DYNAMIC_PLUGINS
     if (sh_video->dec_handle)
@@ -179,7 +179,7 @@ void uninit_video(sh_video_t *sh_video)
 void vfm_help(void)
 {
     int i;
-    mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_AvailableVideoFm);
+    mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Available (compiled-in) video codec families/drivers:\n");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_DRIVERS\n");
     mp_msg(MSGT_DECVIDEO, MSGL_INFO, "   vfm:    info:  (comment)\n");
     for (i = 0; mpcodecs_vd_drivers[i] != NULL; i++)
@@ -269,7 +269,7 @@ static int init_video(sh_video_t *sh_video, char *codecname, char *vfm,
 #endif
         if (!sh_video->vd_driver) {    // driver not available (==compiled in)
             mp_tmsg(MSGT_DECVIDEO, MSGL_WARN,
-                   _(MSGTR_VideoCodecFamilyNotAvailableStr),
+                   _("Requested video codec family [%s] (vfm=%s) not available.\nEnable it at compilation.\n"),
                    sh_video->codec->name, sh_video->codec->drv);
             continue;
         }
@@ -290,13 +290,13 @@ static int init_video(sh_video_t *sh_video, char *codecname, char *vfm,
 
         // init()
         const struct vd_functions *vd = sh_video->vd_driver;
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_OpeningVideoDecoder,
+        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Opening video decoder: [%s] %s\n",
                vd->info->short_name, vd->info->name);
         // clear vf init error, it is no longer relevant
         if (sh_video->vf_initialized < 0)
             sh_video->vf_initialized = 0;
         if (!vd->init(sh_video)) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_VDecoderInitFailed);
+            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "VDecoder init failed :(\n");
             sh_video->disp_w = orig_w;
             sh_video->disp_h = orig_h;
             if (sh_video->bih) {
@@ -331,7 +331,7 @@ int init_best_video_codec(sh_video_t *sh_video, char **video_codec_list,
                 stringset_add(&selected, video_codec + 1);
             } else {
                 // forced codec by name:
-                mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_ForcedVideoCodec,
+                mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Forced video codec: %s\n",
                        video_codec);
                 init_video(sh_video, video_codec, NULL, -1, &selected);
             }
@@ -343,7 +343,7 @@ int init_best_video_codec(sh_video_t *sh_video, char **video_codec_list,
                 // try first the preferred codec families:
                 while (!sh_video->initialized && *fmlist) {
                     char *video_fm = *(fmlist++);
-                    mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_TryForceVideoFmtStr,
+                    mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Trying to force video codec driver family %s...\n",
                            video_fm);
                     for (status = CODECS_STATUS__MAX;
                          status >= CODECS_STATUS__MIN; --status)
@@ -362,12 +362,12 @@ int init_best_video_codec(sh_video_t *sh_video, char **video_codec_list,
     stringset_free(&selected);
 
     if (!sh_video->initialized) {
-        mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_CantFindVideoCodec,
+        mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Cannot find codec matching selected -vo and video format 0x%X.\n",
                sh_video->format);
         return 0;               // failed
     }
 
-    mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_SelectedVideoCodec,
+    mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Selected video codec: [%s] vfm: %s (%s)\n",
            sh_video->codec->name, sh_video->codec->drv, sh_video->codec->info);
     return 1;                   // success
 }

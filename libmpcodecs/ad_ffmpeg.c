@@ -49,7 +49,7 @@ static int init(sh_audio_t *sh_audio)
     
     lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh_audio->codec->dll);
     if(!lavc_codec){
-	mp_tmsg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_MissingLAVCcodec,sh_audio->codec->dll);
+	mp_tmsg(MSGT_DECAUDIO,MSGL_ERR,"Cannot find codec '%s' in libavcodec...\n",sh_audio->codec->dll);
 	return 0;
     }
     
@@ -88,7 +88,7 @@ static int init(sh_audio_t *sh_audio)
 
     /* open it */
     if (avcodec_open(lavc_context, lavc_codec) < 0) {
-        mp_tmsg(MSGT_DECAUDIO,MSGL_ERR, MSGTR_CantOpenCodec);
+        mp_tmsg(MSGT_DECAUDIO,MSGL_ERR, "Could not open codec.\n");
         return 0;
     }
    mp_msg(MSGT_DECAUDIO,MSGL_V,"INFO: libavcodec init OK!\n");
@@ -138,7 +138,7 @@ static void uninit(sh_audio_t *sh)
     AVCodecContext *lavc_context = sh->context;
 
     if (avcodec_close(lavc_context) < 0)
-	mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_CantCloseCodec);
+	mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not close codec.\n");
     av_freep(&lavc_context->extradata);
     av_freep(&lavc_context);
 }

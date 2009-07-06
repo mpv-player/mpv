@@ -23,24 +23,24 @@ int ai_alsa_setup(audio_in_t *ai)
 
     err = snd_pcm_hw_params_any(ai->alsa.handle, params);
     if (err < 0) {
-	mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_PcmBrokenConfig);
+	mp_tmsg(MSGT_TV, MSGL_ERR, "Broken configuration for this PCM: no configurations available.\n");
 	return -1;
     }
     err = snd_pcm_hw_params_set_access(ai->alsa.handle, params,
 				       SND_PCM_ACCESS_RW_INTERLEAVED);
     if (err < 0) {
-	mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_UnavailableAccessType);
+	mp_tmsg(MSGT_TV, MSGL_ERR, "Access type not available.\n");
 	return -1;
     }
     err = snd_pcm_hw_params_set_format(ai->alsa.handle, params, SND_PCM_FORMAT_S16_LE);
     if (err < 0) {
-	mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt);
+	mp_tmsg(MSGT_TV, MSGL_ERR, "Sample format not available.\n");
 	return -1;
     }
     err = snd_pcm_hw_params_set_channels(ai->alsa.handle, params, ai->req_channels);
     if (err < 0) {
 	ai->channels = snd_pcm_hw_params_get_channels(params);
-	mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_UnavailableChanCount,
+	mp_tmsg(MSGT_TV, MSGL_ERR, "Channel count not available - reverting to default: %d\n",
 	       ai->channels);
     } else {
 	ai->channels = ai->req_channels;
@@ -61,14 +61,14 @@ int ai_alsa_setup(audio_in_t *ai)
     assert(ai->alsa.period_time >= 0);
     err = snd_pcm_hw_params(ai->alsa.handle, params);
     if (err < 0) {
-	mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams);
+	mp_tmsg(MSGT_TV, MSGL_ERR, "Unable to install hardware paramameters: %s");
 	snd_pcm_hw_params_dump(params, ai->alsa.log);
 	return -1;
     }
     ai->alsa.chunk_size = snd_pcm_hw_params_get_period_size(params, 0);
     buffer_size = snd_pcm_hw_params_get_buffer_size(params);
     if (ai->alsa.chunk_size == buffer_size) {
-	mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize, ai->alsa.chunk_size, (long)buffer_size);
+	mp_tmsg(MSGT_TV, MSGL_ERR, "Can't use period equal to buffer size (%u == %lu)\n", ai->alsa.chunk_size, (long)buffer_size);
 	return -1;
     }
     snd_pcm_sw_params_current(ai->alsa.handle, swparams);
@@ -84,7 +84,7 @@ int ai_alsa_setup(audio_in_t *ai)
 
     assert(err >= 0);
     if (snd_pcm_sw_params(ai->alsa.handle, swparams) < 0) {
-	mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams);
+	mp_tmsg(MSGT_TV, MSGL_ERR, "Unable to install software parameters:\n");
 	snd_pcm_sw_params_dump(swparams, ai->alsa.log);
 	return -1;
     }
@@ -108,7 +108,7 @@ int ai_alsa_init(audio_in_t *ai)
     
     err = snd_pcm_open(&ai->alsa.handle, ai->alsa.device, SND_PCM_STREAM_CAPTURE, 0);
     if (err < 0) {
-	mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio, snd_strerror(err));
+	mp_tmsg(MSGT_TV, MSGL_ERR, "Error opening audio: %s\n", snd_strerror(err));
 	return -1;
     }
     
@@ -142,7 +142,7 @@ int ai_alsa_xrun(audio_in_t *ai)
 	
     snd_pcm_status_alloca(&status);
     if ((res = snd_pcm_status(ai->alsa.handle, status))<0) {
-	mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_AlsaStatusError, snd_strerror(res));
+	mp_tmsg(MSGT_TV, MSGL_ERR, "ALSA status error: %s", snd_strerror(res));
 	return -1;
     }
     if (snd_pcm_status_get_state(status) == SND_PCM_STATE_XRUN) {
@@ -150,18 +150,18 @@ int ai_alsa_xrun(audio_in_t *ai)
 	gettimeofday(&now, 0);
 	snd_pcm_status_get_trigger_tstamp(status, &tstamp);
 	timersub(&now, &tstamp, &diff);
-	mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_AlsaXRUN,
+	mp_tmsg(MSGT_TV, MSGL_ERR, "ALSA xrun!!! (at least %.3f ms long)\n",
 	       diff.tv_sec * 1000 + diff.tv_usec / 1000.0);
 	if (mp_msg_test(MSGT_TV, MSGL_V)) {
-	    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_AlsaStatus);
+	    mp_tmsg(MSGT_TV, MSGL_ERR, "ALSA Status:\n");
 	    snd_pcm_status_dump(status, ai->alsa.log);
 	}
 	if ((res = snd_pcm_prepare(ai->alsa.handle))<0) {
-	    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_AlsaXRUNPrepareError, snd_strerror(res));
+	    mp_tmsg(MSGT_TV, MSGL_ERR, "ALSA xrun: prepare error: %s", snd_strerror(res));
 	    return -1;
 	}
 	return 0;		/* ok, data should be accepted again */
     }
-    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_AlsaReadWriteError);
+    mp_tmsg(MSGT_TV, MSGL_ERR, "ALSA read/write error");
     return -1;
 }

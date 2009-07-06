@@ -84,16 +84,16 @@ static BITMAPINFOHEADER* vfw_open_encoder(char *dll_name, char *compdatafile, BI
 
   ret = ICGetInfo(encoder_hic, &icinfo, sizeof(ICINFO));
   mp_msg(MSGT_WIN32,MSGL_INFO,"%ld - %ld - %d\n", ret, icinfo.dwSize, sizeof(ICINFO));
-  mp_tmsg(MSGT_WIN32,MSGL_INFO,MSGTR_MPCODECS_CompressorType, icinfo.fccType);
-  mp_tmsg(MSGT_WIN32,MSGL_INFO,MSGTR_MPCODECS_CompressorSubtype, icinfo.fccHandler);
-  mp_tmsg(MSGT_WIN32,MSGL_INFO,MSGTR_MPCODECS_CompressorFlags,
+  mp_tmsg(MSGT_WIN32,MSGL_INFO,"Compressor type: %.4lx\n", icinfo.fccType);
+  mp_tmsg(MSGT_WIN32,MSGL_INFO,"Compressor subtype: %.4lx\n", icinfo.fccHandler);
+  mp_tmsg(MSGT_WIN32,MSGL_INFO,"Compressor flags: %lu, version %lu, ICM version: %lu\n",
     icinfo.dwFlags, icinfo.dwVersion, icinfo.dwVersionICM);
 //printf("Compressor name: %s\n", icinfo.szName);
 //printf("Compressor description: %s\n", icinfo.szDescription);
 
-mp_tmsg(MSGT_WIN32,MSGL_INFO,MSGTR_MPCODECS_Flags);
+mp_tmsg(MSGT_WIN32,MSGL_INFO,"Flags:");
 if (icinfo.dwFlags & VIDCF_QUALITY)
-    mp_tmsg(MSGT_WIN32,MSGL_INFO,MSGTR_MPCODECS_Quality);
+    mp_tmsg(MSGT_WIN32,MSGL_INFO," quality");
 if (icinfo.dwFlags & VIDCF_FASTTEMPORALD)
     mp_msg(MSGT_WIN32,MSGL_INFO," fast-decompr");
 if (icinfo.dwFlags & VIDCF_QUALITYTIME)
@@ -340,7 +340,7 @@ static int vf_open(vf_instance_t *vf, char* args){
 
     if (!vfw_param_codec)
     {
-	mp_tmsg(MSGT_WIN32,MSGL_WARN, MSGTR_MPCODECS_NoVfwCodecSpecified);
+	mp_tmsg(MSGT_WIN32,MSGL_WARN, "[VE_RAW] Required VfW codec not specified!!\n");
 	return 0;
     }
 //    mux_v->bih=vfw_open_encoder("divxc32.dll",vfw_bih,mmioFOURCC('D', 'I', 'V', '3'));

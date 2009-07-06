@@ -85,8 +85,8 @@ int framenum = 0;
  */
 
 static void md5sum_write_error(void) {
-    mp_tmsg(MSGT_VO, MSGL_ERR, MSGTR_ErrorWritingFile, info.short_name);
-    exit_player_bad(_(MSGTR_Exit_error));
+    mp_tmsg(MSGT_VO, MSGL_ERR, "%s: Error writing file.\n", info.short_name);
+    exit_player_bad(_("Fatal error"));
 }
 
 /* ------------------------------------------------------------------------- */
@@ -113,7 +113,7 @@ static int preinit(const char *arg)
     };
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-           _(MSGTR_VO_ParsingSuboptions));
+           _("Parsing suboptions."));
 
     md5sum_outfile = strdup("md5sums");
     if (subopt_parse(arg, subopts) != 0) {
@@ -124,7 +124,7 @@ static int preinit(const char *arg)
                                                             md5sum_outfile);
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-           _(MSGTR_VO_SuboptionsParsedOK));
+           _("Suboptions parsed OK."));
     return 0;
 }
 
@@ -149,10 +149,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     if ( (md5sum_fd = fopen(md5sum_outfile, "w") ) == NULL ) {
         mp_msg(MSGT_VO, MSGL_ERR, "\n%s: %s\n", info.short_name,
-               _(MSGTR_VO_CantCreateFile));
+               _("Unable to create output file."));
         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n",
-               info.short_name, _(MSGTR_VO_GenericError), strerror(errno) );
-        exit_player_bad(_(MSGTR_Exit_error));
+               info.short_name, _("This error has occurred"), strerror(errno) );
+        exit_player_bad(_("Fatal error"));
     }
 
     return 0;

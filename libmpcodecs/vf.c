@@ -450,7 +450,7 @@ vf_instance_t* vf_open_plugin(struct MPOpts *opts, const vf_info_t* const* filte
     int i;
     for(i=0;;i++){
 	if(!filter_list[i]){
-	    mp_tmsg(MSGT_VFILTER,MSGL_ERR,MSGTR_CouldNotFindVideoFilter,name);
+	    mp_tmsg(MSGT_VFILTER,MSGL_ERR,"Couldn't find video filter '%s'.\n",name);
 	    return NULL; // no such filter!
 	}
 	if(!strcmp(filter_list[i]->name,name)) break;
@@ -480,7 +480,7 @@ vf_instance_t* vf_open_plugin(struct MPOpts *opts, const vf_info_t* const* filte
 	args = NULL;
     if(vf->info->open(vf,(char*)args)>0) return vf; // Success!
     free(vf);
-    mp_tmsg(MSGT_VFILTER,MSGL_ERR,MSGTR_CouldNotOpenVideoFilter,name);
+    mp_tmsg(MSGT_VFILTER,MSGL_ERR,"Couldn't open video filter '%s'.\n",name);
     return NULL;
 }
 
@@ -496,14 +496,14 @@ vf_instance_t* vf_open_filter(struct MPOpts *opts, vf_instance_t* next, const ch
       p += sprintf(str,"%s",name);
       for(i = 0 ; args && args[2*i] ; i++)
 	p += sprintf(p," %s=%s",args[2*i],args[2*i+1]);
-      mp_tmsg(MSGT_VFILTER,MSGL_INFO,MSGTR_OpeningVideoFilter "[%s]\n",str);
+      mp_tmsg(MSGT_VFILTER,MSGL_INFO,"Opening video filter: " "[%s]\n",str);
     }
   } else if(strcmp(name,"vo")) {
     if(args && strcmp(args[0],"_oldargs_") == 0)
-      mp_tmsg(MSGT_VFILTER,MSGL_INFO,MSGTR_OpeningVideoFilter
+      mp_tmsg(MSGT_VFILTER,MSGL_INFO,"Opening video filter: "
 	     "[%s=%s]\n", name,args[1]);
     else
-      mp_tmsg(MSGT_VFILTER,MSGL_INFO,MSGTR_OpeningVideoFilter
+      mp_tmsg(MSGT_VFILTER,MSGL_INFO,"Opening video filter: "
 	     "[%s]\n", name);
   }
   return vf_open_plugin(opts, filter_list,next,name,args);
@@ -626,7 +626,7 @@ int vf_config_wrapper(struct vf_instance* vf,
         if ((vf->fmt.orig_width != width)
 	    || (vf->fmt.orig_height != height)
 	    || (vf->fmt.orig_fmt != outfmt)) {
-            mp_tmsg(MSGT_VFILTER,MSGL_ERR,MSGTR_ResolutionDoesntMatch);
+            mp_tmsg(MSGT_VFILTER,MSGL_ERR,"\nNew video file has different resolution or colorspace than the previous one.\n");
             return 0;
         }
         return 1;
@@ -656,7 +656,7 @@ int vf_next_config(struct vf_instance* vf,
 	vf->next=vf2;
 	flags=vf->next->query_format(vf->next,outfmt);
 	if(!flags){
-	    mp_tmsg(MSGT_VFILTER,MSGL_ERR,MSGTR_CannotFindColorspace);
+	    mp_tmsg(MSGT_VFILTER,MSGL_ERR,"Cannot find matching colorspace, even by inserting 'scale' :(\n");
 	    return 0; // FAIL
 	}
     }

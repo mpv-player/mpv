@@ -195,7 +195,7 @@ static void init_plugins_from_dir(const char *plugin_dir){
             gpi=dlsym(handle, "get_iplugin_info");
             if(gpi){
                 InputPlugin *p=gpi();
-                mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_XMMS_FoundPlugin,
+                mp_tmsg(MSGT_DEMUX, MSGL_INFO, "Found plugin: %s (%s).\n",
                                                 ent->d_name,p->description);
                 p->handle = handle;
                 p->filename = strdup(filename);
@@ -230,7 +230,7 @@ static void init_plugins(void) {
 static void cleanup_plugins(void) {
     while(no_plugins>0){
         --no_plugins;
-        mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_XMMS_ClosingPlugin,
+        mp_tmsg(MSGT_DEMUX, MSGL_INFO, "Closing plugin: %s.\n",
                                         input_plugins[no_plugins]->filename);
         if(input_plugins[no_plugins]->cleanup)
             input_plugins[no_plugins]->cleanup();
@@ -284,7 +284,7 @@ static int demux_xmms_open(demuxer_t* demuxer) {
         ip->get_song_info(demuxer->stream->url,&xmms_title,&xmms_length);
     if (xmms_length<=0) demuxer->seekable=0;
 
-    mp_tmsg(MSGT_DEMUX,MSGL_INFO,MSGTR_MPDEMUX_XMMS_WaitForStart,
+    mp_tmsg(MSGT_DEMUX,MSGL_INFO,"Waiting for the XMMS plugin to start playback of '%s'...\n",
                                                         demuxer->stream->url);
     while (xmms_channels==0) {
         usleep(10000);

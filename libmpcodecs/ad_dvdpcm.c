@@ -38,7 +38,7 @@ static int init(sh_audio_t *sh)
 	    sh->samplesize = 2;
 	    break;
 	  case 1:
-	    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, MSGTR_SamplesWanted);
+	    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Samples of this format are needed to improve support. Please contact the developers.\n");
 	    sh->i_bps = sh->channels * sh->samplerate * 5 / 2;
 	  case 2: 
 	    sh->sample_format = AF_FORMAT_S24_BE;

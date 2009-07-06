@@ -118,36 +118,36 @@ static void jpeg_mkdir(char *buf, int verbose) {
             case EEXIST:
                 if ( stat(buf, &stat_p ) < 0 ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name,
-                           _(MSGTR_VO_GenericError), strerror(errno) );
+                           _("This error has occurred"), strerror(errno) );
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
-                           _(MSGTR_VO_UnableToAccess), buf);
-                    exit_player_bad(_(MSGTR_Exit_error));
+                           _("Unable to access"), buf);
+                    exit_player_bad(_("Fatal error"));
                 }
                 if ( !S_ISDIR(stat_p.st_mode) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
-                           buf, _(MSGTR_VO_ExistsButNoDirectory));
-                    exit_player_bad(_(MSGTR_Exit_error));
+                           buf, _("already exists, but is not a directory."));
+                    exit_player_bad(_("Fatal error"));
                 }
                 if ( !(stat_p.st_mode & S_IWUSR) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
-                           buf, _(MSGTR_VO_DirExistsButNotWritable));
-                    exit_player_bad(_(MSGTR_Exit_error));
+                           buf, _("Output directory already exists, but is not writable."));
+                    exit_player_bad(_("Fatal error"));
                 }
                 
                 mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
-                       buf, _(MSGTR_VO_DirExistsAndIsWritable));
+                       buf, _("Output directory already exists and is writable."));
                 break;
 
             default:
                 mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name,
-                       _(MSGTR_VO_GenericError), strerror(errno) );
+                       _("This error has occurred"), strerror(errno) );
                 mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
-                       buf, _(MSGTR_VO_CantCreateDirectory));
-                exit_player_bad(_(MSGTR_Exit_error));
+                       buf, _("Unable to create output directory."));
+                exit_player_bad(_("Fatal error"));
         } /* end switch */
     } else if ( verbose ) {  
         mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
-               buf, _(MSGTR_VO_DirectoryCreateSuccess));
+               buf, _("Output directory successfully created."));
     } /* end if */
 }
 
@@ -188,11 +188,11 @@ static uint32_t jpeg_write(uint8_t * name, uint8_t * buffer)
     if ( !buffer ) return 1; 
     if ( (outfile = fopen(name, "wb") ) == NULL ) {
         mp_msg(MSGT_VO, MSGL_ERR, "\n%s: %s\n", info.short_name,
-               _(MSGTR_VO_CantCreateFile));
+               _("Unable to create output file."));
         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n",
-               info.short_name, _(MSGTR_VO_GenericError),
-                strerror(errno) );
-        exit_player_bad(_(MSGTR_Exit_error));
+               info.short_name, _("This error has occurred"),
+               strerror(errno) );
+        exit_player_bad(_("Fatal error"));
     }
  
     cinfo.err = jpeg_std_error(&jerr);
@@ -357,7 +357,7 @@ static int preinit(const char *arg)
     const char *info_message = NULL;
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-           _(MSGTR_VO_ParsingSuboptions));
+           _("Parsing suboptions."));
 
     jpeg_progressive_mode = 0;
     jpeg_baseline = 1;
@@ -372,12 +372,12 @@ static int preinit(const char *arg)
         return -1;
     }
 
-    if (jpeg_progressive_mode) info_message = _(MSGTR_VO_JPEG_ProgressiveJPEG);
-    else info_message = _(MSGTR_VO_JPEG_NoProgressiveJPEG);
+    if (jpeg_progressive_mode) info_message = _("Progressive JPEG enabled.");
+    else info_message = _("Progressive JPEG disabled.");
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name, info_message);
 
-    if (jpeg_baseline) info_message = _(MSGTR_VO_JPEG_BaselineJPEG);
-    else info_message = _(MSGTR_VO_JPEG_NoBaselineJPEG);
+    if (jpeg_baseline) info_message = _("Baseline JPEG enabled.");
+    else info_message = _("Baseline JPEG disabled.");
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name, info_message);
 
     mp_msg(MSGT_VO, MSGL_V, "%s: optimize --> %d\n", info.short_name,
@@ -398,7 +398,7 @@ static int preinit(const char *arg)
     }
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-           _(MSGTR_VO_SuboptionsParsedOK));
+           _("Suboptions parsed OK."));
     return 0;
 }
 

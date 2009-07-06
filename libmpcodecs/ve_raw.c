@@ -74,7 +74,7 @@ static int set_format(struct vf_instance *vf, unsigned int fmt) {
         mux_v->bih->biBitCount = 8;
         break;
     default:
-	mp_tmsg(MSGT_MENCODER, MSGL_INFO, MSGTR_MPCODECS_OutputWithFourccNotSupported, fmt);
+	mp_tmsg(MSGT_MENCODER, MSGL_INFO, "[VE_RAW] Raw output with FourCC [%x] not supported!\n", fmt);
 	mux_v->bih->biCompression = 0;
 	return 0;
     }

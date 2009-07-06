@@ -186,7 +186,7 @@ static int control(uint32_t request, void *data)
 		return VO_TRUE;
 	case VOCTRL_SET_SPU_PALETTE:
 		if (ioctl(fd_spu, EM8300_IOCTL_SPU_SETPALETTE, data) < 0) {
-			mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette);
+			mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_DXR3] Unable to load new SPU palette!\n");
 			return VO_ERROR;
 		}
 		return VO_TRUE;
@@ -216,7 +216,7 @@ static int control(uint32_t request, void *data)
 		if (dxr3_prebuf) {
 			ioval = EM8300_PLAYMODE_PLAY;
 			if (ioctl(fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval) < 0) {
-				mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_UnableToSetPlaymode);
+				mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Unable to set playmode!\n");
 			}
 		}
 		return VO_TRUE;
@@ -224,7 +224,7 @@ static int control(uint32_t request, void *data)
 		if (dxr3_prebuf) {
 			ioval = EM8300_PLAYMODE_PAUSED;
 			if (ioctl(fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval) < 0) {
-				mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_UnableToSetPlaymode);
+				mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Unable to set playmode!\n");
 			}
 		}
 		return VO_TRUE;
@@ -319,7 +319,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	/* up in a lockup */
 	ioval = EM8300_SPUMODE_ON;
 	if (ioctl(fd_control, EM8300_IOCTL_SET_SPUMODE, &ioval) < 0) {
-		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_UnableToSetSubpictureMode);
+		mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Unable to set subpicture mode!\n");
 		uninit();
 		return -1;
 	}
@@ -327,7 +327,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	/* Set the playmode to play (just in case another app has set it to something else) */
 	ioval = EM8300_PLAYMODE_PLAY;
 	if (ioctl(fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval) < 0) {
-		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_UnableToSetPlaymode);
+		mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Unable to set playmode!\n");
 	}
 	
 	/* Start em8300 prebuffering and sync engine */
@@ -359,7 +359,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	monitor_aspect = (float) width / (float) height;
 
 	if (ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &old_vmode) < 0) {
-		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_UnableToGetTVNorm);
+		mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Unable to get TV norm!\n");
 		old_vmode = -1;
 	}
 	
@@ -378,7 +378,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 			    ioval = EM8300_VIDEOMODE_PAL;
 			}
 			
-			mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_AutoSelectedTVNormByFrameRate);
+			mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Auto-selected TV norm by framerate: ");
 			ioval == EM8300_VIDEOMODE_PAL60 ? mp_msg(MSGT_VO,MSGL_INFO, "PAL-60") : mp_msg(MSGT_VO,MSGL_INFO, "PAL");
 			printf(".\n"); 
 		} else {
@@ -388,14 +388,14 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 			    ioval = EM8300_VIDEOMODE_PAL;
 			}
 
-			mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_AutoSelectedTVNormByFrameRate);
+			mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Auto-selected TV norm by framerate: ");
 			ioval == EM8300_VIDEOMODE_NTSC ? mp_msg(MSGT_VO,MSGL_INFO, "NTSC") : mp_msg(MSGT_VO,MSGL_INFO, "PAL");
 			printf(".\n"); 
 	    }
 	
 		if (old_vmode != ioval) {
 	    	if (ioctl(fd_control, EM8300_IOCTL_SET_VIDEOMODE, &ioval) < 0) {
-				mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_UnableToSetTVNorm);
+				mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Unable to set TV norm!\n");
 	    	}
 		}
 	}
@@ -406,10 +406,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	aspect_save_prescale(d_width, d_height);
 	ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
 	if (ioval == EM8300_VIDEOMODE_NTSC) {
-		mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_SettingUpForNTSC);
+		mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Setting up for NTSC.\n");
 		aspect_save_screenres(352, 240);
 	} else {
-		mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_SettingUpForPALSECAM);
+		mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Setting up for PAL/SECAM.\n");
 		aspect_save_screenres(352, 288);
 	}
 	aspect(&s_width, &s_height, A_ZOOM);
@@ -422,10 +422,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	tmp2 = abs(d_height - (int) (d_width / 2.35));
 	if (tmp1 < tmp2) {
 		ioval = EM8300_ASPECTRATIO_4_3;
-		mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_SettingAspectRatioTo43);
+		mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Setting aspect ratio to 4:3.\n");
 	} else {
 		ioval = EM8300_ASPECTRATIO_16_9;
-		mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_SettingAspectRatioTo169);
+		mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Setting aspect ratio to 16:9.\n");
 	}
 	ioctl(fd_control, EM8300_IOCTL_SET_ASPECTRATIO, &ioval);
 
@@ -444,20 +444,20 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 
 	osdpicbuf = calloc( 1,s_width * s_height);
 	if (osdpicbuf == NULL) {
-		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_OutOfMemory);
+		mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_DXR3] out of memory\n");
 		return -1;
 	}
 	spued = (encodedata *) malloc(sizeof(encodedata));
 	if (spued == NULL) {
 	        free( osdpicbuf );
-		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_OutOfMemory);
+		mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_DXR3] out of memory\n");
 		return -1;
 	}
 	spubuf = (encodedata *) malloc(sizeof(encodedata));
 	if (spubuf == NULL) {
 	        free( osdpicbuf );
 		free( spued );
-		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_OutOfMemory);
+		mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_DXR3] out of memory\n");
 		return -1;
 	}
 	osd_w = s_width;
@@ -536,13 +536,13 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 				   ((key_color.blue >> (16 - blue_prec)) << blue_shift));
 		key_color.flags = DoRed | DoGreen | DoBlue;
 		if (!XAllocColor(mDisplay, cmap, &key_color)) {
-			mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_UnableToAllocateKeycolor);
+			mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_DXR3] Unable to allocate keycolor!\n");
 			return -1;
 		}
 		
 		acq_color = ((key_color.red / 256) << 16) | ((key_color.green / 256) << 8) | key_color.blue;
 		if (key_color.pixel != KEY_COLOR) {
-			mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_UnableToAllocateExactKeycolor, key_color.pixel);	
+			mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Unable to allocate exact keycolor, using closest match (0x%lx).\n", key_color.pixel);	
 		}
 		
 		/* Set keycolor and activate overlay */
@@ -696,7 +696,7 @@ static int draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0, int
 
 static void uninit(void)
 {
-	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_Uninitializing);
+	mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Uninitializing.\n");
 #ifdef CONFIG_X11
 	if (dxr3_overlay) {
 		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_OFF);
@@ -714,7 +714,7 @@ static void uninit(void)
 #endif
 	if (old_vmode != -1) {
 		if (ioctl(fd_control, EM8300_IOCTL_SET_VIDEOMODE, &old_vmode) < 0) {
-			mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_FailedRestoringTVNorm);
+			mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Failed restoring TV norm!\n");
 		}
 	}
 	
@@ -749,24 +749,24 @@ static int preinit(const char *arg)
 	/* Parse commandline */
 	while (arg) {
 		if (!strncmp("prebuf", arg, 6) && !dxr3_prebuf) {
-			mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_EnablingPrebuffering);
+			mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Enabling prebuffering.\n");
 			dxr3_prebuf = 1;
 		} else if (!strncmp("sync", arg, 4) && !dxr3_newsync) {
-			mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_UsingNewSyncEngine);
+			mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Using new sync engine.\n");
 			dxr3_newsync = 1;
 		} else if (!strncmp("overlay", arg, 7) && !dxr3_overlay) {
 #ifdef CONFIG_X11
-			mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_UsingOverlay);
+			mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Using overlay.\n");
 			dxr3_overlay = 1;
 #else
-			mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_ErrorYouNeedToCompileMplayerWithX11);
+			mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Error: Overlay requires compiling with X11 libs/headers installed.\n");
 #endif
 		} else if (!strncmp("norm=", arg, 5)) {
 			arg += 5;
 			// dxr3_norm is 0 (-> don't change norm) by default
 			// but maybe someone changes this in the future
 
-			mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_WillSetTVNormTo);
+			mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Will set TV norm to: ");
 			
 			if (*arg == '5') {
 			    dxr3_norm = 5;
@@ -779,16 +779,16 @@ static int preinit(const char *arg)
 			    mp_msg(MSGT_VO,MSGL_INFO, "PAL");
 			} else if (*arg == '2') {
 			    dxr3_norm = 2;
-			    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALPAL60);
+			    mp_tmsg(MSGT_VO,MSGL_INFO, "auto-adjust to movie framerate (PAL/PAL-60)");
 			} else if (*arg == '1') {
 			    dxr3_norm = 1;
-			    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALNTSC);
+			    mp_tmsg(MSGT_VO,MSGL_INFO, "auto-adjust to movie framerate (PAL/NTSC)");
 			} else if (*arg == '0') {
 			    dxr3_norm = 0;
-			    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_UseCurrentNorm);
+			    mp_tmsg(MSGT_VO,MSGL_INFO, "Use current norm.");
 			} else {
 			    dxr3_norm = 0;
-			    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_UseUnknownNormSuppliedCurrentNorm);
+			    mp_tmsg(MSGT_VO,MSGL_INFO, "Unknown norm supplied. Use current norm.");
 			}
 			
 			mp_msg(MSGT_VO,MSGL_INFO, ".\n");
@@ -808,15 +808,15 @@ static int preinit(const char *arg)
 	fd_control = open(devname, fdflags);
 	if (fd_control < 1) {
 		/* Fall back to old naming scheme */
-		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTrying, devname);
+		mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Error opening %s for writing, trying /dev/em8300 instead.\n", devname);
 		sprintf(devname, "/dev/em8300");
 		fd_control = open(devname, fdflags);
 		if (fd_control < 1) {
-			mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWell);
+			mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_DXR3] Error opening /dev/em8300 for writing as well!\nBailing out.\n");
 			return -1;
 		}
 	} else {
-		mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_Opened, devname);
+		mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Opened: %s.\n", devname);
 	}
 
 	/* Open the video interface */
@@ -824,16 +824,16 @@ static int preinit(const char *arg)
 	fd_video = open(devname, fdflags);
 	if (fd_video < 0) {
 		/* Fall back to old naming scheme */
-		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingMV, devname);
+		mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Error opening %s for writing, trying /dev/em8300_mv instead.\n", devname);
 		sprintf(devname, "/dev/em8300_mv");
 		fd_video = open(devname, fdflags);
 		if (fd_video < 0) {
-			mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellMV);
+			mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_DXR3] Error opening /dev/em8300_mv for writing as well!\nBailing out.\n");
 			uninit();
 			return -1;
 		}
 	} else {
-		mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_Opened, devname);
+		mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Opened: %s.\n", devname);
 	}
 	strcpy(fdv_name, devname);
 	
@@ -842,16 +842,16 @@ static int preinit(const char *arg)
 	fd_spu = open(devname, fdflags);
 	if (fd_spu < 0) {
 		/* Fall back to old naming scheme */
-		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingSP, devname);
+		mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Error opening %s for writing, trying /dev/em8300_sp instead.\n", devname);
 		sprintf(devname, "/dev/em8300_sp");
 		fd_spu = open(devname, fdflags);
 		if (fd_spu < 0) {
-			mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellSP);
+			mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_DXR3] Error opening /dev/em8300_sp for writing as well!\nBailing out.\n");
 			uninit();
 			return -1;
 		}
 	} else {
-		mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_Opened, devname);
+		mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Opened: %s.\n", devname);
 	}
 	strcpy(fds_name, devname);
 	
@@ -868,7 +868,7 @@ static int preinit(const char *arg)
 		
 		dpy = XOpenDisplay(NULL);
 	    	if (!dpy) {
-			mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_UnableToOpenDisplayDuringHackSetup);
+			mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_DXR3] Unable to open display during overlay hack setup!\n");
 			return -1;
 		}
 		XGetWindowAttributes(dpy, RootWindow(dpy, DefaultScreen(dpy)), &attribs);
@@ -888,7 +888,7 @@ static int preinit(const char *arg)
 		if (!use_gui) {
 #endif
 			if (!vo_init()) {
-				mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_UnableToInitX11);
+				mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_DXR3] Unable to init X11!\n");
 				return -1;
 			}
 #ifdef CONFIG_GUI
@@ -927,7 +927,7 @@ static int overlay_set_attribute(overlay_t *o, int attribute, int value)
     attr.value = value;
     if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_SET_ATTRIBUTE, &attr)==-1)
         {
-	     mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_FailedSettingOverlayAttribute);
+	     mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Failed setting overlay attribute.\n");
 	     return -1;
         }
 
@@ -1133,7 +1133,7 @@ static int overlay_set_screen(overlay_t *o, int xres, int yres, int depth)
    
    if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_SETSCREEN, &scr)==-1)
         {
-            mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_FailedSettingOverlayScreen);
+            mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Failed setting overlay screen!\nExiting.\n");
             return -1;
 	}
    return 0;
@@ -1142,7 +1142,7 @@ static int overlay_set_screen(overlay_t *o, int xres, int yres, int depth)
 static int overlay_set_mode(overlay_t *o, int mode)
 {
     if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_SETMODE, &mode)==-1) {
-	mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_FailedEnablingOverlay);
+	mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Failed enabling overlay!\nExiting.\n");
 	return -1;
     }
     return 0;
@@ -1158,7 +1158,7 @@ static int overlay_set_window(overlay_t *o, int xpos,int ypos,int width,int heig
 
     if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_SETWINDOW, &win)==-1)
         {
-            mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow);
+            mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Failed resizing overlay window!\n");
             return -1;
         }
     return 0;
@@ -1173,7 +1173,7 @@ static int overlay_set_bcs(overlay_t *o, int brightness, int contrast, int satur
 
     if (ioctl(o->dev, EM8300_IOCTL_GETBCS, &bcs)==-1)
         {
-            mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_FailedSettingOverlayBcs);
+            mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Failed setting overlay bcs!\n");
             return -1;
         }
     return 0;
@@ -1261,11 +1261,11 @@ static int overlay_autocalibrate(overlay_t *o, pattern_drawer_cb pd, void *arg)
     cal.cal_mode = EM8300_OVERLAY_CALMODE_YOFFSET;
     if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_CALIBRATE, &cal))
         {
-	    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_FailedGettingOverlayYOffsetValues);
+	    mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Failed getting overlay Y-offset values!\nExiting.\n");
 	    return -1;
         }
     o->yoffset = cal.result;
-    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_YOffset,cal.result);
+    mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Yoffset: %d.\n",cal.result);
 
     /* Calibrate X-offset */
 
@@ -1274,11 +1274,11 @@ static int overlay_autocalibrate(overlay_t *o, pattern_drawer_cb pd, void *arg)
     cal.cal_mode = EM8300_OVERLAY_CALMODE_XOFFSET;
     if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_CALIBRATE, &cal))
 	{
- 	    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_FailedGettingOverlayXOffsetValues);
+ 	    mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Failed getting overlay X-offset values!\nExiting.\n");
  	    return -1;
 	}
     o->xoffset = cal.result;
-    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_XOffset,cal.result);
+    mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Xoffset: %d.\n",cal.result);
 
     /* Calibrate X scale correction */
 
@@ -1287,10 +1287,10 @@ static int overlay_autocalibrate(overlay_t *o, pattern_drawer_cb pd, void *arg)
     cal.cal_mode = EM8300_OVERLAY_CALMODE_XCORRECTION;
     if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_CALIBRATE, &cal))
 	{
- 	    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_FailedGettingOverlayXScaleCorrection);
+ 	    mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Failed getting overlay X scale correction!\nExiting.\n");
  	    return -1;
 	}
-    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_XCorrection,cal.result);
+    mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_DXR3] Xcorrection: %d.\n",cal.result);
     o->xcorr = cal.result;
 
     win.xpos = 10;
@@ -1298,7 +1298,7 @@ static int overlay_autocalibrate(overlay_t *o, pattern_drawer_cb pd, void *arg)
     win.width = o->xres-20;
     win.height = o->yres-20;
     if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_SETWINDOW, &win)==-1) {
-	mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow);
+	mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_DXR3] Failed resizing overlay window!\n");
 	exit(1);
     }
 
@@ -1361,7 +1361,7 @@ static int overlay_autocalibrate(overlay_t *o, pattern_drawer_cb pd, void *arg)
 
 static int overlay_signalmode(overlay_t *o, int mode) {
 	if(ioctl(o->dev, EM8300_IOCTL_OVERLAY_SIGNALMODE, &mode) ==-1) {
-	    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_FailedSetSignalMix);
+	    mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_DXR3] Failed to set signal mix!\n");
 	    return -1;
 	}
 	return 0;

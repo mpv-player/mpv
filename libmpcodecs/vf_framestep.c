@@ -170,7 +170,7 @@ static int open(vf_instance_t *vf, char* args)
                 if (*args != '\0') {
                     p->frame_step = atoi(args);
                     if (p->frame_step <= 0) {
-                        mp_tmsg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_ErrorParsingArgument);
+                        mp_tmsg(MSGT_VFILTER, MSGL_WARN, "[VF_FRAMESTEP] Error parsing argument.\n");
                         return 0;
                     }
                 }

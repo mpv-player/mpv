@@ -59,10 +59,10 @@ static int init(int rate_hz, int channels, int format, int flags)
 	int frag_spec;
 
 	if( (err=arts_init()) ) {
-		mp_tmsg(MSGT_AO, MSGL_ERR, MSGTR_AO_ARTS_CantInit, arts_error_text(err));
+		mp_tmsg(MSGT_AO, MSGL_ERR, "[AO ARTS] %s\n", arts_error_text(err));
 		return 0;
 	}
-	mp_tmsg(MSGT_AO, MSGL_INFO, MSGTR_AO_ARTS_ServerConnect);
+	mp_tmsg(MSGT_AO, MSGL_INFO, "[AO ARTS] Connected to sound server.\n");
 
 	/*
 	 * arts supports 8bit unsigned and 16bit signed sample formats
@@ -93,7 +93,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	stream=arts_play_stream(rate_hz, OBTAIN_BITRATE(format), channels, "MPlayer");
 
 	if(stream == NULL) {
-		mp_tmsg(MSGT_AO, MSGL_ERR, MSGTR_AO_ARTS_CantOpenStream);
+		mp_tmsg(MSGT_AO, MSGL_ERR, "[AO ARTS] Unable to open a stream.\n");
 		arts_free();
 		return 0;
 	}
@@ -104,11 +104,11 @@ static int init(int rate_hz, int channels, int format, int flags)
 	frag_spec = ARTS_PACKET_SIZE_LOG2 | ARTS_PACKETS << 16;
 	arts_stream_set(stream, ARTS_P_PACKET_SETTINGS, frag_spec);
 	ao_data.buffersize = arts_stream_get(stream, ARTS_P_BUFFER_SIZE);
-	mp_tmsg(MSGT_AO, MSGL_INFO, MSGTR_AO_ARTS_StreamOpen);
+	mp_tmsg(MSGT_AO, MSGL_INFO, "[AO ARTS] Stream opened.\n");
 
-	mp_tmsg(MSGT_AO, MSGL_INFO, MSGTR_AO_ARTS_BufferSize,
+	mp_tmsg(MSGT_AO, MSGL_INFO, "[AO ARTS] buffer size: %d\n",
 	    ao_data.buffersize);
-	mp_tmsg(MSGT_AO, MSGL_INFO, MSGTR_AO_ARTS_BufferSize,
+	mp_tmsg(MSGT_AO, MSGL_INFO, "[AO ARTS] buffer size: %d\n",
 	    arts_stream_get(stream, ARTS_P_PACKET_SIZE));
 
 	return 1;

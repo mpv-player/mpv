@@ -34,7 +34,7 @@ af_cfg_t af_cfg = { 1, NULL };	// Configuration for audio filters
 void afm_help(void)
 {
     int i;
-    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, MSGTR_AvailableAudioFm);
+    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Available (compiled-in) audio codec families/drivers:\n");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_DRIVERS\n");
     mp_msg(MSGT_DECAUDIO, MSGL_INFO, "    afm:    info:  (comment)\n");
     for (i = 0; mpcodecs_ad_drivers[i] != NULL; i++)
@@ -61,14 +61,14 @@ static int init_audio_codec(sh_audio_t *sh_audio)
 	}
     }
     if (!sh_audio->ad_driver->preinit(sh_audio)) {
-	mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, MSGTR_ADecoderPreinitFailed);
+	mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "ADecoder preinit failed :(\n");
 	return 0;
     }
 
     /* allocate audio in buffer: */
     if (sh_audio->audio_in_minsize > 0) {
 	sh_audio->a_in_buffer_size = sh_audio->audio_in_minsize;
-	mp_tmsg(MSGT_DECAUDIO, MSGL_V, MSGTR_AllocatingBytesForInputBuffer,
+	mp_tmsg(MSGT_DECAUDIO, MSGL_V, "dec_audio: Allocating %d bytes for input buffer.\n",
 	       sh_audio->a_in_buffer_size);
 	sh_audio->a_in_buffer = av_mallocz(sh_audio->a_in_buffer_size);
 	sh_audio->a_in_buffer_len = 0;
@@ -76,18 +76,18 @@ static int init_audio_codec(sh_audio_t *sh_audio)
 
     sh_audio->a_buffer_size = sh_audio->audio_out_minsize + MAX_OUTBURST;
 
-    mp_tmsg(MSGT_DECAUDIO, MSGL_V, MSGTR_AllocatingBytesForOutputBuffer,
+    mp_tmsg(MSGT_DECAUDIO, MSGL_V, "dec_audio: Allocating %d + %d = %d bytes for output buffer.\n",
 	   sh_audio->audio_out_minsize, MAX_OUTBURST, sh_audio->a_buffer_size);
 
     sh_audio->a_buffer = av_mallocz(sh_audio->a_buffer_size);
     if (!sh_audio->a_buffer) {
-	mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, MSGTR_CantAllocAudioBuf);
+	mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Cannot allocate audio out buffer.\n");
 	return 0;
     }
     sh_audio->a_buffer_len = 0;
 
     if (!sh_audio->ad_driver->init(sh_audio)) {
-	mp_tmsg(MSGT_DECAUDIO, MSGL_WARN, MSGTR_ADecoderInitFailed);
+	mp_tmsg(MSGT_DECAUDIO, MSGL_WARN, "ADecoder init failed :(\n");
 	uninit_audio(sh_audio);	// free buffers
 	return 0;
     }
@@ -95,7 +95,7 @@ static int init_audio_codec(sh_audio_t *sh_audio)
     sh_audio->initialized = 1;
 
     if (!sh_audio->channels || !sh_audio->samplerate) {
-	mp_tmsg(MSGT_DECAUDIO, MSGL_WARN, MSGTR_UnknownAudio);
+	mp_tmsg(MSGT_DECAUDIO, MSGL_WARN, "Unknown/missing audio format -> no sound\n");
 	uninit_audio(sh_audio);	// free buffers
 	return 0;
     }
@@ -199,17 +199,17 @@ static int init_audio(sh_audio_t *sh_audio, char *codecname, char *afm,
 #endif
 	if (!mpadec) {		// driver not available (==compiled in)
 	    mp_tmsg(MSGT_DECAUDIO, MSGL_ERR,
-		   MSGTR_AudioCodecFamilyNotAvailableStr,
+		   "Requested audio codec family [%s] (afm=%s) not available.\nEnable it at compilation.\n",
 		   sh_audio->codec->name, sh_audio->codec->drv);
 	    continue;
 	}
 	// it's available, let's try to init!
 	// init()
-	mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, MSGTR_OpeningAudioDecoder,
+	mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Opening audio decoder: [%s] %s\n",
 	       mpadec->info->short_name, mpadec->info->name);
 	sh_audio->ad_driver = mpadec;
 	if (!init_audio_codec(sh_audio)) {
-	    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, MSGTR_ADecoderInitFailed);
+	    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "ADecoder init failed :(\n");
 	    continue;		// try next...
 	}
 	// Yeah! We got it!
@@ -237,7 +237,7 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char **audio_codec_list,
 		stringset_add(&selected, audio_codec + 1);
 	    } else {
 		// forced codec by name:
-		mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, MSGTR_ForcedAudioCodec,
+		mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Forced audio codec: %s\n",
 		       audio_codec);
 		init_audio(sh_audio, audio_codec, NULL, -1, &selected);
 	    }
@@ -250,7 +250,7 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char **audio_codec_list,
 		// try first the preferred codec families:
 		while (!sh_audio->initialized && *fmlist) {
 		    char *audio_fm = *(fmlist++);
-		    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, MSGTR_TryForceAudioFmtStr,
+		    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Trying to force audio codec driver family %s...\n",
 			   audio_fm);
 		    for (status = CODECS_STATUS__MAX;
 			 status >= CODECS_STATUS__MIN; --status)
@@ -268,12 +268,12 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char **audio_codec_list,
     stringset_free(&selected);
 
     if (!sh_audio->initialized) {
-	mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, MSGTR_CantFindAudioCodec,
+	mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Cannot find codec for audio format 0x%X.\n",
 	       sh_audio->format);
 	return 0;   // failed
     }
 
-    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, MSGTR_SelectedAudioCodec,
+    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Selected audio codec: [%s] afm: %s (%s)\n",
 	   sh_audio->codec->name, sh_audio->codec->drv, sh_audio->codec->info);
     return 1;   // success
 }
@@ -287,7 +287,7 @@ void uninit_audio(sh_audio_t *sh_audio)
 	sh_audio->afilter = NULL;
     }
     if (sh_audio->initialized) {
-	mp_tmsg(MSGT_DECAUDIO, MSGL_V, MSGTR_UninitAudioStr,
+	mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Uninit audio: %s\n",
 	       sh_audio->codec->drv);
 	sh_audio->ad_driver->uninit(sh_audio);
 #ifdef CONFIG_DYNAMIC_PLUGINS
@@ -327,7 +327,7 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
     // filter config:
     memcpy(&afs->cfg, &af_cfg, sizeof(af_cfg_t));
 
-    mp_tmsg(MSGT_DECAUDIO, MSGL_V, MSGTR_BuildingAudioFilterChain,
+    mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Building audio filter chain for %dHz/%dch/%s -> %dHz/%dch/%s...\n",
 	   afs->input.rate, afs->input.nch,
 	   af_fmt2str_short(afs->input.format), afs->output.rate,
 	   afs->output.nch, af_fmt2str_short(afs->output.format));

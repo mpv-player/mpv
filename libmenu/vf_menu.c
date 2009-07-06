@@ -99,7 +99,7 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
     else if(strcmp(arg,"hide") == 0 || strcmp(arg,"toggle") == 0)
       priv->current->show = 0;
     else
-      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_UnknownMenuCommand,arg);
+      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Unknown command: '%s'.\n",arg);
     return 1;
   }
   case MP_CMD_SET_MENU : {
@@ -107,7 +107,7 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
     menu_t* l = priv->current;
     priv->current = menu_open(menu);
     if(!priv->current) {
-      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_FailedToOpenMenu,menu);
+      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Failed to open menu: '%s'.\n",menu);
       priv->current = l;
       priv->current->show = 0;
     } else {

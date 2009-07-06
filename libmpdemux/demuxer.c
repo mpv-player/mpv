@@ -288,9 +288,9 @@ sh_audio_t *new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
         return NULL;
     }
     if (demuxer->a_streams[id]) {
-        mp_tmsg(MSGT_DEMUXER, MSGL_WARN, MSGTR_AudioStreamRedefined, id);
+        mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "WARNING: Audio stream header %d redefined.\n", id);
     } else {
-        mp_tmsg(MSGT_DEMUXER, MSGL_V, MSGTR_FoundAudioStream, id);
+        mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found audio stream: %d\n", id);
         sh_audio_t *sh = calloc(1, sizeof(sh_audio_t));
         demuxer->a_streams[id] = sh;
         sh->aid = aid;
@@ -326,9 +326,9 @@ sh_video_t *new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
         return NULL;
     }
     if (demuxer->v_streams[id])
-        mp_tmsg(MSGT_DEMUXER, MSGL_WARN, MSGTR_VideoStreamRedefined, id);
+        mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "WARNING: Video stream header %d redefined.\n", id);
     else {
-        mp_tmsg(MSGT_DEMUXER, MSGL_V, MSGTR_FoundVideoStream, id);
+        mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found video stream: %d\n", id);
         sh_video_t *sh = calloc(1, sizeof *sh);
         demuxer->v_streams[id] = sh;
         sh->vid = vid;
@@ -505,18 +505,22 @@ int ds_fill_buffer(demux_stream_t *ds)
             ds->eof = 0;
             return 1;
         }
+
+#define MaybeNI _("Maybe you are playing a non-interleaved stream/file or the codec failed?\n" \
+                "For AVI files, try to force non-interleaved mode with the -ni option.\n")
+
         if (demux->audio->packs >= MAX_PACKS
             || demux->audio->bytes >= MAX_PACK_BYTES) {
-            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, MSGTR_TooManyAudioInBuffer,
+            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "\nToo many audio packets in the buffer: (%d in %d bytes).\n",
                    demux->audio->packs, demux->audio->bytes);
-            mp_tmsg(MSGT_DEMUXER, MSGL_HINT, MSGTR_MaybeNI);
+            mp_tmsg(MSGT_DEMUXER, MSGL_HINT, MaybeNI);
             break;
         }
         if (demux->video->packs >= MAX_PACKS
             || demux->video->bytes >= MAX_PACK_BYTES) {
-            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, MSGTR_TooManyVideoInBuffer,
+            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "\nToo many video packets in the buffer: (%d in %d bytes).\n",
                    demux->video->packs, demux->video->bytes);
-            mp_tmsg(MSGT_DEMUXER, MSGL_HINT, MSGTR_MaybeNI);
+            mp_tmsg(MSGT_DEMUXER, MSGL_HINT, MaybeNI);
             break;
         }
         if (!demux_fill_buffer(demux, ds)) {
@@ -677,16 +681,16 @@ double ds_get_next_pts(demux_stream_t *ds)
     while (!ds->first) {
         if (demux->audio->packs >= MAX_PACKS
             || demux->audio->bytes >= MAX_PACK_BYTES) {
-            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, MSGTR_TooManyAudioInBuffer,
+            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "\nToo many audio packets in the buffer: (%d in %d bytes).\n",
                    demux->audio->packs, demux->audio->bytes);
-            mp_tmsg(MSGT_DEMUXER, MSGL_HINT, MSGTR_MaybeNI);
+            mp_tmsg(MSGT_DEMUXER, MSGL_HINT, MaybeNI);
             return MP_NOPTS_VALUE;
         }
         if (demux->video->packs >= MAX_PACKS
             || demux->video->bytes >= MAX_PACK_BYTES) {
-            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, MSGTR_TooManyVideoInBuffer,
+            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "\nToo many video packets in the buffer: (%d in %d bytes).\n",
                    demux->video->packs, demux->video->bytes);
-            mp_tmsg(MSGT_DEMUXER, MSGL_HINT, MSGTR_MaybeNI);
+            mp_tmsg(MSGT_DEMUXER, MSGL_HINT, MaybeNI);
             return MP_NOPTS_VALUE;
         }
         if (!demux_fill_buffer(demux, ds))
@@ -798,7 +802,7 @@ static demuxer_t *demux_open_stream(struct MPOpts *opts, stream_t *stream,
                     demuxer_t *demux2 = demuxer;
                     // Move messages to demuxer detection code?
                     mp_tmsg(MSGT_DEMUXER, MSGL_INFO,
-                           MSGTR_Detected_XXX_FileFormat,
+                           "%s file format detected.\n",
                            demuxer_desc->shortdesc);
                     file_format = fformat;
                     if (!demuxer->desc->open
@@ -828,7 +832,7 @@ static demuxer_t *demux_open_stream(struct MPOpts *opts, stream_t *stream,
                 if (fformat == demuxer_desc->type) {
                     demuxer_t *demux2 = demuxer;
                     mp_tmsg(MSGT_DEMUXER, MSGL_INFO,
-                           MSGTR_Detected_XXX_FileFormat,
+                           "%s file format detected.\n",
                            demuxer_desc->shortdesc);
                     file_format = fformat;
                     if (!demuxer->desc->open
@@ -882,7 +886,7 @@ static demuxer_t *demux_open_stream(struct MPOpts *opts, stream_t *stream,
                 if (fformat == demuxer_desc->type) {
                     demuxer_t *demux2 = demuxer;
                     mp_tmsg(MSGT_DEMUXER, MSGL_INFO,
-                           MSGTR_Detected_XXX_FileFormat,
+                           "%s file format detected.\n",
                            demuxer_desc->shortdesc);
                     file_format = fformat;
                     if (!demuxer->desc->open
@@ -986,7 +990,7 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
     if (audio_stream) {
         as = open_stream(audio_stream, 0, &afmt);
         if (!as) {
-            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, MSGTR_CannotOpenAudioStream,
+            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "Cannot open audio stream: %s\n",
                    audio_stream);
             return NULL;
         }
@@ -1007,7 +1011,7 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
     if (sub_stream) {
         ss = open_stream(sub_stream, 0, &sfmt);
         if (!ss) {
-            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, MSGTR_CannotOpenSubtitlesStream,
+            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "Cannot open subtitle stream: %s\n",
                    sub_stream);
             return NULL;
         }
@@ -1029,7 +1033,7 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
                                audio_demuxer_force, audio_id, -2, -2,
                                audio_stream);
         if (!ad) {
-            mp_tmsg(MSGT_DEMUXER, MSGL_WARN, MSGTR_OpeningAudioDemuxerFailed,
+            mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "Failed to open audio demuxer: %s\n",
                    audio_stream);
             free_stream(as);
         } else if (ad->audio->sh
@@ -1043,7 +1047,7 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
                                sub_stream);
         if (!sd) {
             mp_tmsg(MSGT_DEMUXER, MSGL_WARN,
-                   MSGTR_OpeningSubtitlesDemuxerFailed, sub_stream);
+                   "Failed to open subtitle demuxer: %s\n", sub_stream);
             free_stream(ss);
         }
     }
@@ -1085,13 +1089,13 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
 
     if (!demuxer->seekable) {
         if (demuxer->file_format == DEMUXER_TYPE_AVI)
-            mp_tmsg(MSGT_SEEK, MSGL_WARN, MSGTR_CantSeekRawAVI);
+            mp_tmsg(MSGT_SEEK, MSGL_WARN, "Cannot seek in raw AVI streams. (Index required, try with the -idx switch.)\n");
 #ifdef CONFIG_TV
         else if (demuxer->file_format == DEMUXER_TYPE_TV)
-            mp_tmsg(MSGT_SEEK, MSGL_WARN, MSGTR_TVInputNotSeekable);
+            mp_tmsg(MSGT_SEEK, MSGL_WARN, "TV input is not seekable! (Seeking will probably be for changing channels ;)\n");
 #endif
         else
-            mp_tmsg(MSGT_SEEK, MSGL_WARN, MSGTR_CantSeekFile);
+            mp_tmsg(MSGT_SEEK, MSGL_WARN, "Cannot seek in this file.\n");
         return 0;
     }
     // clear demux buffers:
@@ -1146,7 +1150,7 @@ int demux_info_add(demuxer_t *demuxer, const char *opt, const char *param)
 
     for (n = 0; info && info[2 * n] != NULL; n++) {
         if (!strcasecmp(opt, info[2 * n])) {
-            mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_DemuxerInfoChanged, opt,
+            mp_tmsg(MSGT_DEMUX, MSGL_INFO, "Demuxer info %s changed to %s\n", opt,
                    param);
             free(info[2 * n + 1]);
             info[2 * n + 1] = strdup(param);
@@ -1171,7 +1175,7 @@ int demux_info_print(demuxer_t *demuxer)
     if (!info)
         return 0;
 
-    mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_ClipInfo);
+    mp_tmsg(MSGT_DEMUX, MSGL_INFO, "Clip info:\n");
     for (n = 0; info[2 * n] != NULL; n++) {
         mp_msg(MSGT_DEMUX, MSGL_INFO, " %s: %s\n", info[2 * n],
                info[2 * n + 1]);
@@ -1321,7 +1325,7 @@ int demuxer_add_chapter(demuxer_t *demuxer, const char *name, uint64_t start,
 
     demuxer->chapters[demuxer->num_chapters].start = start;
     demuxer->chapters[demuxer->num_chapters].end = end;
-    demuxer->chapters[demuxer->num_chapters].name = strdup(name ? name : mp_gtext(MSGTR_Unknown));
+    demuxer->chapters[demuxer->num_chapters].name = strdup(name ? name : mp_gtext("unknown"));
 
     return demuxer->num_chapters++;
 }

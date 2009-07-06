@@ -112,7 +112,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   f=open(p->device,O_RDONLY);
 #endif
   if(f<0){ 
-    mp_tmsg(MSGT_OPEN,MSGL_ERR,MSGTR_CdDevNotfound,p->device);
+    mp_tmsg(MSGT_OPEN,MSGL_ERR,"CD-ROM Device '%s' not found.\n",p->device);
     m_struct_free(&stream_opts,opts);
     return STREAM_ERROR;
   }
@@ -126,7 +126,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
   ret2=vcd_get_track_end(vcd,p->track);
   if(ret2<0){
-    mp_tmsg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (get)\n");
+    mp_tmsg(MSGT_OPEN,MSGL_ERR,"Error selecting VCD track." " (get)\n");
     close(f);
     free(vcd);
     m_struct_free(&stream_opts,opts);
@@ -134,7 +134,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
   ret=vcd_seek_to_track(vcd,p->track);
   if(ret<0){
-    mp_tmsg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (seek)\n");
+    mp_tmsg(MSGT_OPEN,MSGL_ERR,"Error selecting VCD track." " (seek)\n");
     close(f);
     free(vcd);
     m_struct_free(&stream_opts,opts);

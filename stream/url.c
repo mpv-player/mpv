@@ -54,19 +54,19 @@ url_new(const char* url) {
 	if( url==NULL ) return NULL;
 	
         if (strlen(url) > (SIZE_MAX / 3 - 1)) {
-                mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+                mp_tmsg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed.\n");
                 goto err_out;
         }
         escfilename=malloc(strlen(url)*3+1);
         if (!escfilename ) {
-                mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+                mp_tmsg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed.\n");
                 goto err_out;
         }
 
 	// Create the URL container
 	Curl = malloc(sizeof(URL_t));
 	if( Curl==NULL ) {
-		mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+		mp_tmsg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed.\n");
 		goto err_out;
 	}
 
@@ -78,7 +78,7 @@ url_new(const char* url) {
 	// Copy the url in the URL container
 	Curl->url = strdup(escfilename);
 	if( Curl->url==NULL ) {
-		mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+		mp_tmsg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed.\n");
 		goto err_out;
 	}
         mp_msg(MSGT_OPEN,MSGL_V,"Filename for url is now %s\n",escfilename);
@@ -98,7 +98,7 @@ url_new(const char* url) {
 	pos1 = ptr1-escfilename;
 	Curl->protocol = malloc(pos1+1);
 	if( Curl->protocol==NULL ) {
-		mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+		mp_tmsg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed.\n");
 		goto err_out;
 	}
 	strncpy(Curl->protocol, escfilename, pos1);
@@ -120,7 +120,7 @@ url_new(const char* url) {
 		int len = ptr2-ptr1;
 		Curl->username = malloc(len+1);
 		if( Curl->username==NULL ) {
-			mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+			mp_tmsg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed.\n");
 			goto err_out;
 		}
 		strncpy(Curl->username, ptr1, len);
@@ -133,7 +133,7 @@ url_new(const char* url) {
 			Curl->username[ptr3-ptr1]='\0';
 			Curl->password = malloc(len2+1);
 			if( Curl->password==NULL ) {
-				mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+				mp_tmsg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed.\n");
 				goto err_out;
 			}
 			strncpy( Curl->password, ptr3+1, len2);
@@ -185,7 +185,7 @@ url_new(const char* url) {
 	// copy the hostname in the URL container
 	Curl->hostname = malloc(pos2-pos1+1);
 	if( Curl->hostname==NULL ) {
-		mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+		mp_tmsg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed.\n");
 		goto err_out;
 	}
 	strncpy(Curl->hostname, ptr1, pos2-pos1);
@@ -200,7 +200,7 @@ url_new(const char* url) {
 			// copy the path/filename in the URL container
 			Curl->file = strdup(ptr2);
 			if( Curl->file==NULL ) {
-				mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+				mp_tmsg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed.\n");
 				goto err_out;
 			}
 		}
@@ -209,7 +209,7 @@ url_new(const char* url) {
 	if( Curl->file==NULL ) {
 		Curl->file = malloc(2);
 		if( Curl->file==NULL ) {
-			mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+			mp_tmsg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed.\n");
 			goto err_out;
 		}
 		strcpy(Curl->file, "/");
@@ -287,7 +287,7 @@ url_escape_string_part(char *outbuf, const char *inbuf) {
                             *outbuf++=c;                      // already
 			      
                                                               // dont escape again
-                            mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_URL_StringAlreadyEscaped,c,c1,c2);
+                            mp_tmsg(MSGT_NETWORK,MSGL_ERR,"String appears to be already escaped in url_escape %c%c1%c2\n",c,c1,c2);
                                                               // error as this should not happen against RFC 2396
                                                               // to escape a string twice
 		} else {

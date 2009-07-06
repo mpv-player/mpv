@@ -706,9 +706,9 @@ static int demux_mpg_probe(demuxer_t *demuxer) {
         } else
         {
           if(demuxer->synced==2)
-            mp_tmsg(MSGT_DEMUXER,MSGL_ERR,"MPEG: " MSGTR_MissingVideoStreamBug);
+            mp_tmsg(MSGT_DEMUXER,MSGL_ERR,"MPEG: " "Missing video stream!? Contact the author, it may be a bug :(\n");
           else
-            mp_tmsg(MSGT_DEMUXER,MSGL_V,MSGTR_NotSystemStream);
+            mp_tmsg(MSGT_DEMUXER,MSGL_V,"Not MPEG System Stream format... (maybe Transport Stream?)\n");
         }
   }
   //FIXME this shouldn't be necessary
@@ -847,7 +847,7 @@ do{
       if(!ret)
         if(--max_packs==0){
           demux->stream->eof=1;
-          mp_tmsg(MSGT_DEMUX,MSGL_ERR,MSGTR_DoesntContainSelectedStream);
+          mp_tmsg(MSGT_DEMUX,MSGL_ERR,"demux: File doesn't contain the selected audio or video stream.\n");
           return 0;
         }
       if(demux->synced==3) demux->synced=(ret==1)?2:0; // PES detect
@@ -1082,7 +1082,7 @@ static demuxer_t* demux_mpg_ps_open(demuxer_t* demuxer)
 
     if(demuxer->audio->id!=-2) {
         if(!ds_fill_buffer(demuxer->audio)){
-            mp_tmsg(MSGT_DEMUXER,MSGL_INFO,"MPEG: " MSGTR_MissingAudioStream);
+            mp_tmsg(MSGT_DEMUXER,MSGL_INFO,"MPEG: " "No audio stream found -> no sound.\n");
             demuxer->audio->sh=NULL;
         } else {
             sh_audio=demuxer->audio->sh;sh_audio->ds=demuxer->audio;

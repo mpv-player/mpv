@@ -254,7 +254,7 @@ static void check_events(void)
 static int preinit(const char *arg)
 {
     if(arg) {
-	mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TGA_UnknownSubdevice,arg);
+	mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_TGA] Unknown subdevice: %s.\n",arg);
 	return ENOSYS;
     }
     return 0;

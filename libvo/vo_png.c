@@ -63,9 +63,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 {
     
 	    if(z_compression == 0) {
- 		    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_PNG_Warning1);
- 		    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_PNG_Warning2);
- 		    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_PNG_Warning3);
+ 		    mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_PNG] Warning: compression level set to 0, compression disabled!\n");
+ 		    mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_PNG] Info: Use -vo png:z=<n> to set compression level from 0 to 9.\n");
+ 		    mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_PNG] Info: (0 = no compression, 1 = fastest, lowest - 9 best, slowest compression)\n");
 	    }	    
     
     mp_msg(MSGT_VO,MSGL_DBG2, "PNG Compression level %i\n", z_compression);
@@ -111,7 +111,7 @@ static struct pngdata create_png (char * fname, int image_width, int image_heigh
     
     png.fp = fopen (fname, "wb");
     if (png.fp == NULL) {
- 	mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_PNG_ErrorOpeningForWriting, strerror(errno));
+ 	mp_tmsg(MSGT_VO,MSGL_WARN, "\n[VO_PNG] Error opening '%s' for writing!\n", strerror(errno));
        	png.status = ERROR;
        	return png;
     }	    
@@ -169,7 +169,7 @@ static uint32_t draw_image(mp_image_t* mpi){
     png = create_png(buf, mpi->w, mpi->h, IMGFMT_IS_BGR(mpi->imgfmt));
 
     if(png.status){
- 	    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_PNG_ErrorInCreatePng);
+ 	    mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_PNG] Error in create_png.\n");
 	    return 1;
     }	     
 

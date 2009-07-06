@@ -126,7 +126,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
   if(!strcmp(filename,"-")){
     if(mode == STREAM_READ) {
       // read from stdin
-      mp_tmsg(MSGT_OPEN,MSGL_INFO,MSGTR_ReadSTDIN);
+      mp_tmsg(MSGT_OPEN,MSGL_INFO,"Reading from stdin...\n");
       f=0; // 0=stdin
 #ifdef __MINGW32__
 	  setmode(fileno(stdin),O_BINARY);
@@ -145,7 +145,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
 #endif
       f=open(filename,m, openmode);
     if(f<0) {
-      mp_tmsg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,filename);
+      mp_tmsg(MSGT_OPEN,MSGL_ERR,"File not found: '%s'\n",filename);
       m_struct_free(&stream_opts,opts);
       return STREAM_ERROR;
     }

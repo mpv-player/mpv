@@ -183,7 +183,7 @@ static int parse_channels(radio_priv_t* priv,float freq_channel,float* pfreq){
         /*parsing channels string*/
         channels=priv->radio_param->channels;
 
-        mp_tmsg(MSGT_RADIO, MSGL_INFO, MSGTR_RADIO_ChannelNamesDetected);
+        mp_tmsg(MSGT_RADIO, MSGL_INFO, "[radio] Radio channel names detected.\n");
         priv->radio_channel_list = malloc(sizeof(radio_channels_t));
         priv->radio_channel_list->index=1;
         priv->radio_channel_list->next=NULL;
@@ -201,7 +201,7 @@ static int parse_channels(radio_priv_t* priv,float freq_channel,float* pfreq){
             priv->radio_channel_current->freq=atof(tmp);
 
             if ((priv->radio_channel_current->freq>priv->rangehigh)||(priv->radio_channel_current->freq<priv->rangelow))
-                mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_WrongFreqForChannel,
+                mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] Wrong frequency for channel %s\n",
                     priv->radio_channel_current->name);
 
             while ((sep=strchr(priv->radio_channel_current->name, '_'))) sep[0] = ' ';
@@ -227,17 +227,17 @@ static int parse_channels(radio_priv_t* priv,float freq_channel,float* pfreq){
                 priv->radio_channel_current = priv->radio_channel_current->next;
         if (priv->radio_channel_current->index!=channel){
             if (((float)((int)freq_channel))!=freq_channel)
-                mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_WrongChannelNumberFloat,freq_channel);
+                mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] Wrong channel number: %.2f\n",freq_channel);
             else
-                mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_WrongChannelNumberInt,(int)freq_channel);
+                mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] Wrong channel number: %d\n",(int)freq_channel);
             return STREAM_ERROR;
         }
-        mp_tmsg(MSGT_RADIO, MSGL_INFO, MSGTR_RADIO_SelectedChannel, priv->radio_channel_current->index,
+        mp_tmsg(MSGT_RADIO, MSGL_INFO, "[radio] Selected channel: %d - %s (freq: %.2f)\n", priv->radio_channel_current->index,
             priv->radio_channel_current->name, priv->radio_channel_current->freq);
         *pfreq=priv->radio_channel_current->freq;
     }else{
         if (freq_channel){
-            mp_tmsg(MSGT_RADIO, MSGL_INFO, MSGTR_RADIO_FreqParameterDetected);
+            mp_tmsg(MSGT_RADIO, MSGL_INFO, "[radio] Radio frequency parameter detected.\n");
             priv->radio_channel_list=malloc(sizeof(radio_channels_t));
             priv->radio_channel_list->next=NULL;
             priv->radio_channel_list->prev=NULL;
@@ -248,7 +248,7 @@ static int parse_channels(radio_priv_t* priv,float freq_channel,float* pfreq){
             *pfreq=freq_channel;
         }
     }
-    mp_tmsg(MSGT_RADIO, MSGL_DBG2, MSGTR_RADIO_DoneParsingChannels);
+    mp_tmsg(MSGT_RADIO, MSGL_DBG2, "[radio] Done parsing channels.\n");
     return STREAM_OK;
 }
 
@@ -271,25 +271,25 @@ static int init_frac_v4l2(radio_priv_t* priv){
     memset(&tuner,0,sizeof(tuner));
     tuner.index=0;
     if (ioctl(priv->radio_fd, VIDIOC_G_TUNER, &tuner)<0){
-        mp_tmsg(MSGT_RADIO,MSGL_WARN,MSGTR_RADIO_GetTunerFailed,strerror(errno),priv->frac);
+        mp_tmsg(MSGT_RADIO,MSGL_WARN,"[radio] Warning: ioctl get tuner failed: %s. Setting frac to %d.\n",strerror(errno),priv->frac);
         return  STREAM_ERROR;
     }
     if(tuner.type!=V4L2_TUNER_RADIO){
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_NotRadioDevice,priv->radio_param->device);
+        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] %s is no radio device!\n",priv->radio_param->device);
         return STREAM_ERROR;
     }
     if(tuner.capability & V4L2_TUNER_CAP_LOW){
         priv->frac=16000;
-        mp_tmsg(MSGT_RADIO,MSGL_DBG2,MSGTR_RADIO_TunerCapLowYes,priv->frac);
+        mp_tmsg(MSGT_RADIO,MSGL_DBG2,"[radio] tuner is low:yes frac=%d\n",priv->frac);
     }
     else{
         priv->frac=16;
-        mp_tmsg(MSGT_RADIO,MSGL_DBG2,MSGTR_RADIO_TunerCapLowNo,priv->frac);
+        mp_tmsg(MSGT_RADIO,MSGL_DBG2,"[radio] tuner is low:no frac=%d\n",priv->frac);
     }
 
     priv->rangelow=((float)tuner.rangelow)/priv->frac;
     priv->rangehigh=((float)tuner.rangehigh)/priv->frac;
-    mp_tmsg(MSGT_RADIO,MSGL_V,MSGTR_RADIO_FreqRange,priv->rangelow,priv->rangehigh);
+    mp_tmsg(MSGT_RADIO,MSGL_V,"[radio] Allowed frequency range is %.2f-%.2f MHz.\n",priv->rangelow,priv->rangehigh);
     return STREAM_OK;
 }
 
@@ -306,7 +306,7 @@ static int set_frequency_v4l2(radio_priv_t* priv,float frequency){
     freq.type=V4L2_TUNER_RADIO;
     freq.frequency=frequency*priv->frac;
     if(ioctl(priv->radio_fd,VIDIOC_S_FREQUENCY,&freq)<0){
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_SetFreqFailed,freq.frequency,
+        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] ioctl set frequency 0x%x (%.2f) failed: %s\n",freq.frequency,
         frequency,strerror(errno));
         return  STREAM_ERROR;
     }
@@ -322,7 +322,7 @@ static int get_frequency_v4l2(radio_priv_t* priv,float* frequency){
     struct v4l2_frequency freq;
     memset(&freq,0,sizeof(freq));
     if (ioctl(priv->radio_fd, VIDIOC_G_FREQUENCY, &freq) < 0) {
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_GetFreqFailed,strerror(errno));
+        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] ioctl get frequency failed: %s\n",strerror(errno));
         return  STREAM_ERROR;
     }
     *frequency=((float)freq.frequency)/priv->frac;
@@ -346,13 +346,13 @@ static void set_volume_v4l2(radio_priv_t* priv,int volume){
     control.id=V4L2_CID_AUDIO_MUTE;
     control.value = (volume==0?1:0);
     if (ioctl(priv->radio_fd, VIDIOC_S_CTRL, &control)<0){
-        mp_tmsg(MSGT_RADIO,MSGL_WARN,MSGTR_RADIO_SetMuteFailed,strerror(errno));
+        mp_tmsg(MSGT_RADIO,MSGL_WARN,"[radio] ioctl set mute failed: %s\n",strerror(errno));
     }
 
     memset(&qctrl,0,sizeof(qctrl));
     qctrl.id = V4L2_CID_AUDIO_VOLUME;
     if (ioctl(priv->radio_fd, VIDIOC_QUERYCTRL, &qctrl) < 0) {
-        mp_tmsg(MSGT_RADIO, MSGL_WARN, MSGTR_RADIO_QueryControlFailed,strerror(errno));
+        mp_tmsg(MSGT_RADIO, MSGL_WARN, "[radio] ioctl query control failed: %s\n",strerror(errno));
         return;
     }
 
@@ -360,7 +360,7 @@ static void set_volume_v4l2(radio_priv_t* priv,int volume){
     control.id=V4L2_CID_AUDIO_VOLUME;
     control.value=qctrl.minimum+volume*(qctrl.maximum-qctrl.minimum)/100;
     if (ioctl(priv->radio_fd, VIDIOC_S_CTRL, &control) < 0) {
-        mp_tmsg(MSGT_RADIO, MSGL_WARN,MSGTR_RADIO_SetVolumeFailed,strerror(errno));
+        mp_tmsg(MSGT_RADIO, MSGL_WARN,"[radio] ioctl set volume failed: %s\n",strerror(errno));
     }
 }
 
@@ -376,14 +376,14 @@ static int get_volume_v4l2(radio_priv_t* priv,int* volume){
     memset(&qctrl,0,sizeof(qctrl));
     qctrl.id = V4L2_CID_AUDIO_VOLUME;
     if (ioctl(priv->radio_fd, VIDIOC_QUERYCTRL, &qctrl) < 0) {
-        mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_QueryControlFailed,strerror(errno));
+        mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] ioctl query control failed: %s\n",strerror(errno));
         return STREAM_ERROR;
     }
 
     memset(&control,0,sizeof(control));
     control.id=V4L2_CID_AUDIO_VOLUME;
     if (ioctl(priv->radio_fd, VIDIOC_G_CTRL, &control) < 0) {
-        mp_tmsg(MSGT_RADIO, MSGL_ERR,MSGTR_RADIO_GetVolumeFailed,strerror(errno));
+        mp_tmsg(MSGT_RADIO, MSGL_ERR,"[radio] ioctl get volume failed: %s\n",strerror(errno));
         return STREAM_ERROR;
     }
 
@@ -402,7 +402,7 @@ static int get_volume_v4l2(radio_priv_t* priv,int* volume){
 /* v4l2 driver info structure */
 static const radio_driver_t radio_driver_v4l2={
     "v4l2",
-    _(MSGTR_RADIO_DriverV4L)2,
+    _("[radio] Using V4Lv1 radio interface.\n")2,
     init_frac_v4l2,
     set_volume_v4l2,
     get_volume_v4l2,
@@ -428,20 +428,20 @@ static int init_frac_v4l(radio_priv_t* priv){
     struct video_tuner tuner;
     memset(&tuner,0,sizeof(tuner));
     if (ioctl(priv->radio_fd, VIDIOCGTUNER, &tuner) <0){
-        mp_tmsg(MSGT_RADIO,MSGL_WARN,MSGTR_RADIO_GetTunerFailed,strerror(errno),priv->frac);
+        mp_tmsg(MSGT_RADIO,MSGL_WARN,"[radio] Warning: ioctl get tuner failed: %s. Setting frac to %d.\n",strerror(errno),priv->frac);
         return  STREAM_ERROR;
     }
     if(tuner.flags & VIDEO_TUNER_LOW){
         priv->frac=16000;
-        mp_tmsg(MSGT_RADIO,MSGL_DBG2,MSGTR_RADIO_TunerCapLowYes,priv->frac);
+        mp_tmsg(MSGT_RADIO,MSGL_DBG2,"[radio] tuner is low:yes frac=%d\n",priv->frac);
     }else{
         priv->frac=16;
-        mp_tmsg(MSGT_RADIO,MSGL_DBG2,MSGTR_RADIO_TunerCapLowNo,priv->frac);
+        mp_tmsg(MSGT_RADIO,MSGL_DBG2,"[radio] tuner is low:no frac=%d\n",priv->frac);
     }
 
     priv->rangelow=((float)tuner.rangelow)/priv->frac;
     priv->rangehigh=((float)tuner.rangehigh)/priv->frac;
-    mp_tmsg(MSGT_RADIO,MSGL_V,MSGTR_RADIO_FreqRange,priv->rangelow,priv->rangehigh);
+    mp_tmsg(MSGT_RADIO,MSGL_V,"[radio] Allowed frequency range is %.2f-%.2f MHz.\n",priv->rangelow,priv->rangehigh);
 
     return STREAM_OK;
 }
@@ -455,7 +455,7 @@ static int set_frequency_v4l(radio_priv_t* priv,float frequency){
     __u32 freq;
     freq=frequency*priv->frac;
     if (ioctl(priv->radio_fd, VIDIOCSFREQ, &freq) < 0) {
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_SetFreqFailed,freq,frequency,strerror(errno));
+        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] ioctl set frequency 0x%x (%.2f) failed: %s\n",freq,frequency,strerror(errno));
         return  STREAM_ERROR;
     }
     return STREAM_OK;
@@ -468,7 +468,7 @@ static int set_frequency_v4l(radio_priv_t* priv,float frequency){
 static int get_frequency_v4l(radio_priv_t* priv,float* frequency){
     __u32 freq;
     if (ioctl(priv->radio_fd, VIDIOCGFREQ, &freq) < 0) {
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_GetFreqFailed,strerror(errno));
+        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] ioctl get frequency failed: %s\n",strerror(errno));
         return  STREAM_ERROR;
     }
     *frequency=((float)freq)/priv->frac;
@@ -490,7 +490,7 @@ static void set_volume_v4l(radio_priv_t* priv,int volume){
     memset(&audio,0,sizeof(audio));
     audio.flags = (volume==0?VIDEO_AUDIO_MUTE:0);
     if (ioctl(priv->radio_fd, VIDIOCSAUDIO, &audio)<0){
-        mp_tmsg(MSGT_RADIO,MSGL_WARN,MSGTR_RADIO_SetMuteFailed,strerror(errno));
+        mp_tmsg(MSGT_RADIO,MSGL_WARN,"[radio] ioctl set mute failed: %s\n",strerror(errno));
     }
 
     memset(&audio,0,sizeof(audio));
@@ -500,7 +500,7 @@ static void set_volume_v4l(radio_priv_t* priv,int volume){
     audio.volume =  volume* (65535 / 100);
 
     if (ioctl(priv->radio_fd, VIDIOCSAUDIO, &audio) < 0){
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_SetVolumeFailed,strerror(errno));
+        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] ioctl set volume failed: %s\n",strerror(errno));
     }
 }
 
@@ -515,7 +515,7 @@ static int get_volume_v4l(radio_priv_t* priv,int* volume){
     memset(&audio,0,sizeof(audio));
     audio.audio=0;
     if (ioctl(priv->radio_fd, VIDIOCGAUDIO, &audio) < 0){
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_GetVolumeFailed,strerror(errno));
+        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] ioctl get volume failed: %s\n",strerror(errno));
         return STREAM_ERROR;
     }
 
@@ -533,7 +533,7 @@ static int get_volume_v4l(radio_priv_t* priv,int* volume){
 /* v4l driver info structure */
 static const radio_driver_t radio_driver_v4l={
     "v4l",
-    _(MSGTR_RADIO_DriverV4L),
+    _("[radio] Using V4Lv1 radio interface.\n"),
     init_frac_v4l,
     set_volume_v4l,
     get_volume_v4l,
@@ -576,7 +576,7 @@ static int set_frequency_bsdbt848(radio_priv_t* priv,float frequency){
     unsigned int freq;
     freq=frequency*priv->frac;
     if(ioctl(priv->radio_fd,RADIO_SETFREQ,&freq)<0){
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_SetFreqFailed,freq, frequency, strerror(errno));
+        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] ioctl set frequency 0x%x (%.2f) failed: %s\n",freq, frequency, strerror(errno));
         return  STREAM_ERROR;
     }
     return STREAM_OK;
@@ -590,7 +590,7 @@ static int set_frequency_bsdbt848(radio_priv_t* priv,float frequency){
 static int get_frequency_bsdbt848(radio_priv_t* priv,float* frequency){
     unsigned int freq;
     if (ioctl(priv->radio_fd, RADIO_GETFREQ, &freq) < 0) {
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_GetFreqFailed,strerror(errno));
+        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] ioctl get frequency failed: %s\n",strerror(errno));
         return  STREAM_ERROR;
     }
     *frequency=((float)freq)/priv->frac;
@@ -614,7 +614,7 @@ static void set_volume_bsdbt848(radio_priv_t* priv,int volume){
 
     audio_flags = (volume==0?AUDIO_MUTE:AUDIO_UNMUTE);
     if (ioctl(priv->radio_fd, BT848_SAUDIO, &audio_flags)<0){
-            mp_tmsg(MSGT_RADIO,MSGL_WARN,MSGTR_RADIO_SetMuteFailed,strerror(errno));
+            mp_tmsg(MSGT_RADIO,MSGL_WARN,"[radio] ioctl set mute failed: %s\n",strerror(errno));
     }
 }
 
@@ -630,7 +630,7 @@ static int get_volume_bsdbt848(radio_priv_t* priv,int* volume){
     int audio_flags;
 
     if (ioctl(priv->radio_fd, BT848_GAUDIO, &audio_flags)<0){
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_GetVolumeFailed,strerror(errno));
+        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] ioctl get volume failed: %s\n",strerror(errno));
         return STREAM_ERROR;
     }
 
@@ -645,7 +645,7 @@ static int get_volume_bsdbt848(radio_priv_t* priv,int* volume){
 /* bsdbt848 driver info structure */
 static const radio_driver_t radio_driver_bsdbt848={
     "bsdbt848",
-    _(MSGTR_RADIO_DriverBSDBT848),
+    _("[radio] Using *BSD BT848 radio interface.\n"),
     init_frac_bsdbt848,
     set_volume_bsdbt848,
     get_volume_bsdbt848,
@@ -659,7 +659,7 @@ static inline int init_frac(radio_priv_t* priv){
 }
 static inline int set_frequency(radio_priv_t* priv,float frequency){ 
     if ((frequency<priv->rangelow)||(frequency>priv->rangehigh)){
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_WrongFreq,frequency);
+        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] Wrong frequency: %.2f\n",frequency);
         return STREAM_ERROR;
     }
     if(priv->driver->set_frequency(priv,frequency)!=STREAM_OK)
@@ -667,7 +667,7 @@ static inline int set_frequency(radio_priv_t* priv,float frequency){
 	
 #ifdef CONFIG_RADIO_CAPTURE
     if(clear_buffer(priv)!=STREAM_OK){
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_ClearBufferFailed,strerror(errno));
+        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] Clearing buffer failed: %s\n",strerror(errno));
         return  STREAM_ERROR;
     }
 #endif
@@ -722,16 +722,16 @@ static int read_chunk(audio_in_t *ai, unsigned char *buffer)
         if (ret != ai->alsa.chunk_size) {
             if (ret < 0) {
                 if (ret==-EAGAIN) return -1;
-                mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio, snd_strerror(ret));
+                mp_tmsg(MSGT_RADIO, MSGL_ERR, "\nError reading audio: %s\n", snd_strerror(ret));
                 if (ret == -EPIPE) {
                     if (ai_alsa_xrun(ai) == 0) {
-                        mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut);
+                        mp_tmsg(MSGT_RADIO, MSGL_ERR, "Recovered from cross-run, some frames may be left out!\n");
                     } else {
-                        mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover);
+                        mp_tmsg(MSGT_RADIO, MSGL_ERR, "Fatal error, cannot recover!\n");
                     }
                 }
             } else {
-                mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples);
+                mp_tmsg(MSGT_RADIO, MSGL_ERR, "\nNot enough audio samples!\n");
             }
             return -1;
         }
@@ -753,7 +753,7 @@ static int read_chunk(audio_in_t *ai, unsigned char *buffer)
             if (ret<0){
                 if (errno==EAGAIN && bt==0) return -1; //no data avail yet
                 if (errno==EAGAIN) { usleep(1000); continue;} //nilling buffer to blocksize size
-                mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio, strerror(errno));
+                mp_tmsg(MSGT_RADIO, MSGL_ERR, "\nError reading audio: %s\n", strerror(errno));
                 return -1;
             }
             bt+=ret;
@@ -785,7 +785,7 @@ static int read_chunk(audio_in_t *ai, unsigned char *buffer)
 static int grab_audio_frame(radio_priv_t *priv, char *buffer, int len)
 {
     int i;
-    mp_tmsg(MSGT_RADIO, MSGL_DBG3, MSGTR_RADIO_BufferString,"grab_audio_frame",priv->audio_cnt,priv->audio_drop);
+    mp_tmsg(MSGT_RADIO, MSGL_DBG3, "[radio] %s: in buffer=%d dropped=%d\n","grab_audio_frame",priv->audio_cnt,priv->audio_drop);
     /* Cache buffer must be filled by some audio packets when playing starts. 
        Otherwise MPlayer will quit with EOF error.
        Probably, there is need more carefull checking rather than simple 'for' loop
@@ -835,7 +835,7 @@ static int init_audio(radio_priv_t *priv)
     }
 
     priv->do_capture=1;
-    mp_tmsg(MSGT_RADIO,MSGL_V,MSGTR_RADIO_CaptureStarting);
+    mp_tmsg(MSGT_RADIO,MSGL_V,"[radio] Starting capture stuff.\n");
 #ifdef CONFIG_ALSA
     while ((tmp = strrchr(priv->radio_param->adevice, '='))){
         tmp[0] = ':';
@@ -847,7 +847,7 @@ static int init_audio(radio_priv_t *priv)
 #endif
 
     if(audio_in_init(&priv->audio_in, is_oss?AUDIO_IN_OSS:AUDIO_IN_ALSA)<0){
-        mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_AudioInInitFailed);
+        mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] audio_in_init failed.\n");
     }
 
     audio_in_set_device(&priv->audio_in, priv->radio_param->adevice);
@@ -855,7 +855,7 @@ static int init_audio(radio_priv_t *priv)
     audio_in_set_samplerate(&priv->audio_in, priv->radio_param->arate);
 
     if (audio_in_setup(&priv->audio_in) < 0) {
-        mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_AudioInSetupFailed, strerror(errno));
+        mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] audio_in_setup call failed: %s\n", strerror(errno));
         return STREAM_ERROR;
     }
 #ifdef CONFIG_OSS_AUDIO
@@ -871,12 +871,12 @@ static int init_audio(radio_priv_t *priv)
             priv->audio_in.bytes_per_sample+priv->audio_in.blocksize;
     if (priv->audio_buffer_size < 256*priv->audio_in.blocksize)
         priv->audio_buffer_size = 256*priv->audio_in.blocksize;
-    mp_tmsg(MSGT_RADIO, MSGL_V, MSGTR_RADIO_AudioBuffer,
+    mp_tmsg(MSGT_RADIO, MSGL_V, "[radio] Audio capture - buffer=%d bytes (block=%d bytes).\n",
         priv->audio_buffer_size,priv->audio_in.blocksize);
     /* start capture */
     priv->audio_ringbuffer = calloc(1, priv->audio_buffer_size);
     if (!priv->audio_ringbuffer) {
-        mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_AllocateBufferFailed,priv->audio_in.blocksize, priv->audio_buffer_size, strerror(errno));
+        mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] cannot allocate audio buffer (block=%d,buf=%d): %s\n",priv->audio_in.blocksize, priv->audio_buffer_size, strerror(errno));
         return STREAM_ERROR;
     }
     priv->audio_head = 0;
@@ -924,7 +924,7 @@ int radio_set_freq(struct stream *stream, float frequency){
     if (get_frequency(priv,&frequency)!=STREAM_OK){
         return 0;
     }
-    mp_tmsg(MSGT_RADIO, MSGL_INFO, MSGTR_RADIO_CurrentFreq,frequency);
+    mp_tmsg(MSGT_RADIO, MSGL_INFO, "[radio] Current frequency: %.2f\n",frequency);
     return 1;
 }
 
@@ -969,7 +969,7 @@ int radio_step_channel(struct stream *stream, int direction) {
                     priv->radio_channel_current = priv->radio_channel_list;
                 if(!radio_set_freq(stream,priv->radio_channel_current->freq))
                     return 0;
-                mp_tmsg(MSGT_RADIO, MSGL_V, MSGTR_RADIO_SelectedChannel,
+                mp_tmsg(MSGT_RADIO, MSGL_V, "[radio] Selected channel: %d - %s (freq: %.2f)\n",
                     priv->radio_channel_current->index, priv->radio_channel_current->name,
                     priv->radio_channel_current->freq);
             break;
@@ -981,13 +981,13 @@ int radio_step_channel(struct stream *stream, int direction) {
                         priv->radio_channel_current = priv->radio_channel_current->next;
                 if(!radio_set_freq(stream,priv->radio_channel_current->freq))
                     return 0;
-                mp_tmsg(MSGT_RADIO, MSGL_V, MSGTR_RADIO_SelectedChannel,
+                mp_tmsg(MSGT_RADIO, MSGL_V, "[radio] Selected channel: %d - %s (freq: %.2f)\n",
                 priv->radio_channel_current->index, priv->radio_channel_current->name,
                 priv->radio_channel_current->freq);
             break;
         }
     }else
-        mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_ChangeChannelNoChannelList);
+        mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] Can not change channel: no channel list given.\n");
     return 1;
 }
 
@@ -1006,7 +1006,7 @@ int radio_set_channel(struct stream *stream, char *channel) {
     char* endptr;
 
     if (*channel=='\0')
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_WrongChannelName,channel);
+        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] Wrong channel name: %s\n",channel);
     
     if (priv->radio_channel_list) {
         channel_int = strtol(channel,&endptr,10);
@@ -1017,7 +1017,7 @@ int radio_set_channel(struct stream *stream, char *channel) {
                 if (!strncmp(channel,tmp->name,sizeof(tmp->name)-1))
                     break;
                 if (!tmp){
-                mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_WrongChannelName,channel);
+                mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] Wrong channel name: %s\n",channel);
                 return 0;
             }
         }else{
@@ -1027,17 +1027,17 @@ int radio_set_channel(struct stream *stream, char *channel) {
             else
                 break;
         if (tmp->index!=channel_int){
-            mp_tmsg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_WrongChannelNumberInt,channel_int);
+            mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] Wrong channel number: %d\n",channel_int);
             return 0;
         }
         }
         priv->radio_channel_current=tmp;
-        mp_tmsg(MSGT_RADIO, MSGL_V, MSGTR_RADIO_SelectedChannel, priv->radio_channel_current->index,
+        mp_tmsg(MSGT_RADIO, MSGL_V, "[radio] Selected channel: %d - %s (freq: %.2f)\n", priv->radio_channel_current->index,
             priv->radio_channel_current->name, priv->radio_channel_current->freq);
         if(!radio_set_freq(stream, priv->radio_channel_current->freq))
             return 0;
     } else
-        mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_ChangeChannelNoChannelList);
+        mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] Can not change channel: no channel list given.\n");
     return 1;
 }
 
@@ -1129,7 +1129,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     else
         priv->driver=NULL;
 
-    mp_tmsg(MSGT_RADIO,MSGL_V,MSGTR_RADIO_AvailableDrivers);
+    mp_tmsg(MSGT_RADIO,MSGL_V,"[radio] Available drivers: ");
     for(i=0;radio_drivers[i];i++){
         mp_msg(MSGT_RADIO,MSGL_V,"%s, ",radio_drivers[i]->name);
         if(strcmp(priv->radio_param->driver,radio_drivers[i]->name)==0)
@@ -1140,7 +1140,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     if(priv->driver)
         mp_msg(MSGT_RADIO, MSGL_INFO, priv->driver->info);
     else{
-        mp_tmsg(MSGT_RADIO, MSGL_INFO, MSGTR_RADIO_DriverUnknownStr,priv->radio_param->driver);
+        mp_tmsg(MSGT_RADIO, MSGL_INFO, "[radio] Unknown driver name: %s\n",priv->radio_param->driver);
         close_s(stream);
         return STREAM_ERROR;
     }
@@ -1160,12 +1160,12 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
     priv->radio_fd = open(priv->radio_param->device, O_RDONLY);
     if (priv->radio_fd < 0) {
-        mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_UnableOpenDevice,
+        mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] Unable to open '%s': %s\n",
             priv->radio_param->device, strerror(errno));
         close_s(stream);
         return STREAM_ERROR;
     }
-    mp_tmsg(MSGT_RADIO, MSGL_V, MSGTR_RADIO_RadioDevice, priv->radio_fd,priv->radio_param->device);
+    mp_tmsg(MSGT_RADIO, MSGL_V, "[radio] Radio fd: %d, %s\n", priv->radio_fd,priv->radio_param->device);
     fcntl(priv->radio_fd, F_SETFD, FD_CLOEXEC);
 
     get_volume(priv, &priv->old_snd_volume);
@@ -1182,11 +1182,11 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     }
 
     if ((frequency<priv->rangelow)||(frequency>priv->rangehigh)){
-        mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_WrongFreq,frequency);
+        mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] Wrong frequency: %.2f\n",frequency);
         close_s(stream);
         return STREAM_ERROR;
     }else
-        mp_tmsg(MSGT_RADIO, MSGL_INFO, MSGTR_RADIO_UsingFreq,frequency);
+        mp_tmsg(MSGT_RADIO, MSGL_INFO, "[radio] Using frequency: %.2f.\n",frequency);
 
     if(set_frequency(priv,frequency)!=STREAM_OK){
         close_s(stream);
@@ -1205,7 +1205,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         if(!stream_enable_cache(stream,5*priv->audio_in.samplerate*priv->audio_in.channels*
                 priv->audio_in.bytes_per_sample,2*priv->audio_in.samplerate*priv->audio_in.channels*
                 priv->audio_in.bytes_per_sample,priv->audio_in.blocksize)) {
-            mp_tmsg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_StreamEnableCacheFailed,strerror(errno));
+            mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] Call to stream_enable_cache failed: %s\n",strerror(errno));
             close_s(stream);
             return STREAM_ERROR;
         }

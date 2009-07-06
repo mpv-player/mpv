@@ -121,7 +121,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
     if (!sh->disp_w || !sh->disp_h)
         return 0;
 
-    mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_VoConfigRequest, w, h,
+    mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "VDec: vo config request - %d x %d (preferred colorspace: %s)\n", w, h,
            vo_format_name(preferred_outfmt));
 
     if (get_video_quality_max(sh) <= 0 && divx_quality) {
@@ -177,7 +177,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
     if (j < 0) {
         // TODO: no match - we should use conversion...
         if (strcmp(vf->info->name, "scale") && palette != -1) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_CouldNotFindColorspace);
+            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Could not find matching colorspace - retrying with -vf scale...\n");
             sc = vf = vf_open_filter(opts, vf, "scale", NULL);
             goto csp_again;
         } else if (palette == 1) {
@@ -208,12 +208,15 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
                 goto csp_again;
             }
         }
-        mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_VOincompCodec);
+        mp_tmsg(MSGT_CPLAYER, MSGL_WARN,
+            "The selected video_out device is incompatible with this codec.\n"\
+            "Try appending the scale filter to your filter list,\n"\
+            "e.g. -vf spp,scale instead of -vf spp.\n");
         sh->vf_initialized = -1;
         return 0;               // failed
     }
     out_fmt = sh->codec->outfmt[j];
-    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_UsingXAsOutputCspNoY,
+    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "VDec: using %s as output csp (no %d)\n",
            vo_format_name(out_fmt), j);
     sh->outfmtidx = j;
     sh->vfilter = vf;
@@ -269,7 +272,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
         }
         if (sh->aspect > 0.01) {
             int w;
-            mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_MovieAspectIsSet,
+            mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n",
                    sh->aspect);
             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ASPECT=%1.4f\n",
                    sh->aspect);
@@ -283,7 +286,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
             } else
                 screen_size_x = w;      // keep new width
         } else {
-            mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_MovieAspectUndefined);
+            mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Movie-Aspect is undefined - no prescaling applied.\n");
         }
     }
 
@@ -303,7 +306,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
     if (vf_config_wrapper
         (vf, sh->disp_w, sh->disp_h, screen_size_x, screen_size_y, vocfg_flags,
          out_fmt) == 0) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_CannotInitVO);
+        mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "FATAL: Cannot initialize video driver.\n");
         sh->vf_initialized = -1;
         return 0;
     }

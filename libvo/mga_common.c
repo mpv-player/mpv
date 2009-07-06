@@ -243,7 +243,7 @@ static void mga_fullscreen(void)
 	mga_vid_config.x_org=(vo_screenwidth-w)/2;
 	mga_vid_config.y_org=(vo_screenheight-h)/2;
 	if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) )
-		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_ErrorInConfigIoctl );
+		mp_tmsg(MSGT_VO,MSGL_WARN, "[MGA] error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
 }
 #endif
 
@@ -267,7 +267,7 @@ static int control(uint32_t request, void *data)
 
      if (ioctl(f,MGA_VID_GET_LUMA,&prev)) {
 	perror("Error in mga_vid_config ioctl()");
-    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule);    
+    mp_tmsg(MSGT_VO,MSGL_WARN, "[MGA] Could not get luma values from the kernel module!\n");    
 	return VO_FALSE;
      }
 
@@ -286,7 +286,7 @@ static int control(uint32_t request, void *data)
      
      if (ioctl(f,MGA_VID_SET_LUMA,luma)) {
 	perror("Error in mga_vid_config ioctl()");
-        mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule);
+        mp_tmsg(MSGT_VO,MSGL_WARN, "[MGA] Could not set luma values from the kernel module!\n");
 	return VO_FALSE;
      }
 
@@ -304,7 +304,7 @@ static int control(uint32_t request, void *data)
 
      if (ioctl(f,MGA_VID_GET_LUMA,&luma)) {
 	perror("Error in mga_vid_config ioctl()");
-        mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule);
+        mp_tmsg(MSGT_VO,MSGL_WARN, "[MGA] Could not get luma values from the kernel module!\n");
 	return VO_FALSE;
      }
      
@@ -323,7 +323,7 @@ static int control(uint32_t request, void *data)
     if (vo_screenwidth && vo_screenheight)
 	mga_fullscreen();
     else
-	mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown);
+	mp_tmsg(MSGT_VO,MSGL_WARN, "[MGA] Screen width/height unknown!\n");
     return VO_TRUE;
   case VOCTRL_GET_PANSCAN:
       if ( !vo_fs ) return VO_FALSE;
@@ -380,7 +380,7 @@ static int mga_init(int width,int height,unsigned int format){
 	    mga_vid_config.frame_size = ((width + 31) & ~31) * height * 2;
             mga_vid_config.format=MGA_VID_FORMAT_UYVY; break;
         default: 
-            mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_InvalidOutputFormat,format);
+            mp_tmsg(MSGT_VO,MSGL_WARN, "[MGA] invalid output format %0X\n",format);
             return -1;
         }
 
@@ -398,7 +398,7 @@ static int mga_init(int width,int height,unsigned int format){
 
 	if(width > 1024 && height > 1024)
 	{
-		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_MGA_ResolutionTooHigh);
+		mp_tmsg(MSGT_VO,MSGL_ERR, "[MGA] Source resolution exceeds 1023x1023 in at least one dimension.\n[MGA] Rescale in software or use -lavdopts lowres=1.\n");
 		return -1;
 	} else if(height <= 1024)
 	{
@@ -409,13 +409,13 @@ static int mga_init(int width,int height,unsigned int format){
 			if(mga_vid_config.card_type != MGA_G550)
 			{
 				// we don't have a G550, so our resolution is too high
-				mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_MGA_ResolutionTooHigh);
+				mp_tmsg(MSGT_VO,MSGL_ERR, "[MGA] Source resolution exceeds 1023x1023 in at least one dimension.\n[MGA] Rescale in software or use -lavdopts lowres=1.\n");
 				return -1;
 			} else {
 				// there is a deeper problem
 				// we have a G550, but still couldn't configure mga_vid
 				perror("Error in mga_vid_config ioctl()");
-				mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_IncompatibleDriverVersion);
+				mp_tmsg(MSGT_VO,MSGL_WARN, "[MGA] Your mga_vid driver version is incompatible with this MPlayer version!\n");
 				return -1;
 			}
 			// if we arrived here, then we could successfully configure mga_vid
@@ -426,7 +426,7 @@ static int mga_init(int width,int height,unsigned int format){
 		if (ioctl(f,MGA_VID_CONFIG,&mga_vid_config))
 		{
 			perror("Error in mga_vid_config ioctl()");
-			mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_IncompatibleDriverVersion);
+			mp_tmsg(MSGT_VO,MSGL_WARN, "[MGA] Your mga_vid driver version is incompatible with this MPlayer version!\n");
 			return -1;
 		}
 	}
@@ -470,7 +470,7 @@ static int preinit(const char *vo_subdevice)
 	if(f == -1)
 	{
 		perror("open");
-		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_CouldntOpen,devname);
+		mp_tmsg(MSGT_VO,MSGL_WARN, "[MGA] Couldn't open: %s\n",devname);
 		return -1;
 	}
 	
@@ -480,7 +480,7 @@ static int preinit(const char *vo_subdevice)
 	ioctl(f,MGA_VID_GET_VERSION,&ver);
 	if(MGA_VID_VERSION != ver)
 	{
-		mp_tmsg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_MGA_mgavidVersionMismatch, ver, MGA_VID_VERSION);
+		mp_tmsg(MSGT_VO, MSGL_ERR, "[MGA] mismatch between kernel (%u) and MPlayer (%u) mga_vid driver versions\n", ver, MGA_VID_VERSION);
 		return -1;
 	}
 

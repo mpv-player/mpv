@@ -69,7 +69,7 @@ int vidix_start(void)
     int err;
     if((err=vdlPlaybackOn(vidix_handler))!=0)
     {
-	mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_CantStartPlayback,strerror(err));
+	mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SUB_VIDIX] Can't start playback: %s\n",strerror(err));
 	return -1;
     }
     video_on=1;
@@ -81,7 +81,7 @@ int vidix_stop(void)
     int err;
     if((err=vdlPlaybackOff(vidix_handler))!=0)
     {
-	mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_CantStopPlayback,strerror(err));
+	mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SUB_VIDIX] Can't stop playback: %s\n",strerror(err));
 	return -1;
     }
     video_on=0;
@@ -179,7 +179,7 @@ static int vidix_draw_slice_410(uint8_t *image[], int stride[], int w,int h,int 
     
     if (vidix_play.flags & VID_PLAY_INTERLEAVED_UV)
     {
-	mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SUB_VIDIX_InterleavedUvForYuv410pNotSupported);
+	mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_SUB_VIDIX] Interleaved UV for YUV410P not supported.\n");
     }
     else 
     {
@@ -254,7 +254,7 @@ static int vidix_draw_slice_nv12(uint8_t *image[], int stride[], int w,int h,int
 
 static int vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
-    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled);
+    mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_SUB_VIDIX] Dummy vidix_draw_slice() was called.\n");
     return -1;
 }
 
@@ -272,7 +272,7 @@ static uint32_t  vidix_draw_image(mp_image_t *mpi){
 
 static int vidix_draw_frame(uint8_t *image[])
 {
-  mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawframeWasCalled);
+  mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_SUB_VIDIX] Dummy vidix_draw_frame() was called.\n");
   return -1;
 }
 
@@ -392,7 +392,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 
 	if(vidix_query_fourcc(format) == 0)
 	{
-	  mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_UnsupportedFourccForThisVidixDriver,
+	  mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SUB_VIDIX] Unsupported FourCC for this VIDIX driver: %x (%s).\n",
 	    format,vo_format_name(format));
 	  return -1;
 	} 
@@ -402,7 +402,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	    ((vidix_cap.maxheight != -1) && (vid_h > vidix_cap.maxheight)) ||
 	    ((vidix_cap.minwidth != -1 ) && (vid_h < vidix_cap.minheight)))
 	{
-	  mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedResolution,
+	  mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SUB_VIDIX] Video server has unsupported resolution (%dx%d), supported: %dx%d-%dx%d.\n",
 	    vid_w, vid_h, vidix_cap.minwidth, vidix_cap.minheight,
 	    vidix_cap.maxwidth, vidix_cap.maxheight);
 	  return -1;
@@ -424,19 +424,19 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	}
 	if(err)
 	{
-	  mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedColorDepth
+	  mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SUB_VIDIX] Video server has unsupported color depth by vidix (%d).\n"
 	  ,vidix_fourcc.depth);
 	  return -1;
 	}
 	if((dst_width > src_width || dst_height > src_height) && (vidix_cap.flags & FLAG_UPSCALER) != FLAG_UPSCALER)
 	{
-	  mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_DriverCantUpscaleImage,
+	  mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SUB_VIDIX] VIDIX driver can't upscale image (%d%d -> %d%d).\n",
 	  src_width, src_height, dst_width, dst_height);
 	  return -1;
 	}
 	if((dst_width > src_width || dst_height > src_height) && (vidix_cap.flags & FLAG_DOWNSCALER) != FLAG_DOWNSCALER)
 	{
-	  mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_DriverCantDownscaleImage,
+	  mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SUB_VIDIX] VIDIX driver can't downscale image (%d%d -> %d%d).\n",
 	  src_width, src_height, dst_width, dst_height);
 	  return -1;
 	}
@@ -464,7 +464,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 
 	if((err=vdlConfigPlayback(vidix_handler,&vidix_play))!=0)
 	{
- 		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_CantConfigurePlayback,strerror(err));
+ 		mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SUB_VIDIX] Can't configure playback: %s.\n",strerror(err));
 		return -1;
 	}
 	if ( mp_msg_test(MSGT_VO,MSGL_V) ) {
@@ -681,12 +681,12 @@ int vidix_preinit(const char *drvname, struct vo_old_functions *server)
               
 	if(vidix_handler == NULL)
 	{
-		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_CouldntFindWorkingVidixDriver);
+		mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SUB_VIDIX] Couldn't find working VIDIX driver.\n");
 		return -1;
 	}
 	if((err=vdlGetCapability(vidix_handler,&vidix_cap)) != 0)
 	{
-		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability,strerror(err));
+		mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SUB_VIDIX] Couldn't get capability: %s.\n",strerror(err));
 		return -1;
 	}
 	mp_msg(MSGT_VO,MSGL_V, "[VO_SUB_VIDIX] Description: %s.\n", vidix_cap.name);

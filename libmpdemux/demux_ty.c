@@ -870,7 +870,7 @@ static demuxer_t* demux_open_ty(demuxer_t* demuxer)
 
     if(demuxer->audio->id!=-2) {
         if(!ds_fill_buffer(demuxer->audio)){
-            mp_tmsg(MSGT_DEMUXER,MSGL_INFO,"MPEG: " MSGTR_MissingAudioStream);
+            mp_tmsg(MSGT_DEMUXER,MSGL_INFO,"MPEG: " "No audio stream found -> no sound.\n");
             demuxer->audio->sh=NULL;
         } else {
             sh_audio=demuxer->audio->sh;sh_audio->ds=demuxer->audio;

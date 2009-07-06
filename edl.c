@@ -19,7 +19,7 @@ static edl_record_ptr edl_alloc_new(edl_record_ptr next_edl_record)
 {
     edl_record_ptr new_record = calloc(1, sizeof(struct edl_record));
     if (!new_record) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_EdlOutOfMem);
+        mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, "Can't allocate enough memory to hold EDL data.\n");
         exit(1);
     }
     
@@ -78,24 +78,26 @@ edl_record_ptr edl_parse_file(void)
             if ((sscanf(line, "%f %f %d", &start, &stop, &action))
                 != 3)
             {
-                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadlyFormattedLine,
+                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Badly formatted EDL line [%d], discarding.\n",
                        lineCount);
                 continue;
             } 
  
             if (next_edl_record && start <= next_edl_record->stop_sec)
             {
-                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine, line);
-                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadLineOverlap,
+                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Invalid EDL line: %s\n", line);
+                mp_tmsg(MSGT_CPLAYER, MSGL_WARN,
+					"Last stop position was [%f]; next start is [%f].\n"\
+					"Entries must be in chronological order, cannot overlap. Discarding.\n",
                        next_edl_record->stop_sec, start);
                 continue;    
             }
 
             if (stop <= start)
             {
-                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine,
+                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Invalid EDL line: %s\n",
                        line);
-                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadLineBadStop);
+                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Stop time has to be after start time.\n");
                 continue;
             }
 
@@ -131,9 +133,9 @@ edl_record_ptr edl_parse_file(void)
     }        
 
     if (edl_records) 
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlRecordsNo, record_count);
+        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Read %d EDL actions.\n", record_count);
     else 
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlQueueEmpty);
+        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "There are no EDL actions to take care of.\n");
 
     return edl_records;
 }

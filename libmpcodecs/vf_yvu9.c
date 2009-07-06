@@ -20,7 +20,7 @@ static int config(struct vf_instance* vf,
 	unsigned int flags, unsigned int outfmt){
     
     if(vf_next_query_format(vf,IMGFMT_YV12)<=0){
-	mp_tmsg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_WarnNextFilterDoesntSupport, "YVU9");
+	mp_tmsg(MSGT_VFILTER, MSGL_WARN, "%s not supported by next filter/vo :(\n", "YVU9");
 	return 0;
     }
     

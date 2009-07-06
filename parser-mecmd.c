@@ -78,7 +78,7 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 	no_more_opts = 1;
 	if (i+1 >= argc)
 	  {
-	    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, MSGTR_NoFileGivenOnCommandLine);
+	    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "'--' indicates no more options, but no filename was given on the command line.\n");
 	    goto err_out;
 	  }
 	continue;
@@ -93,7 +93,7 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 	mp_opt = m_config_get_option(config,opt);
 	if(!mp_opt) {
 	  tmp = M_OPT_UNKNOWN;
-	  mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, MSGTR_NotAnMEncoderOption, opt);
+	  mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "-%s is not an MEncoder option\n", opt);
 	  goto err_out;
 	}
 	if(!entry || (mp_opt->flags & M_OPT_GLOBAL)){
@@ -105,7 +105,7 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 	  else
 	  if(tmp < 0){
 //	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "m_config_set_option() failed (%d)\n",tmp);
-	    mp_tmsg(MSGT_CFGPARSER, MSGL_FATAL, MSGTR_ErrorParsingOptionOnCommandLine, opt);
+	    mp_tmsg(MSGT_CFGPARSER, MSGL_FATAL, "Error parsing option on the command line: -%s\n", opt);
 	    goto err_out;
 	  }
 	} else {
@@ -142,7 +142,7 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
     exit(0);
   if(nf == 0) {
     m_entry_list_free(lst);
-    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, MSGTR_NoFileGiven);
+    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "No file given\n");
     return NULL;
   }
   return lst;

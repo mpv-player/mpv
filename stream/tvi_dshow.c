@@ -1042,10 +1042,10 @@ static HRESULT set_nearest_freq(priv_t * priv, long lFreq)
         if (load_freq_table(chanlist2country(priv->tv_param->chanlist), tunerInput, &(priv->freq_table), &(priv->freq_table_len), &(priv->first_channel)) != S_OK) {//FIXME
             priv->freq_table_len=0;
             priv->freq_table=NULL;
-            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableExtractFreqTable);
+            mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Unable to load frequency table from kstvtune.ax\n");
             return E_FAIL;
         };
-        mp_tmsg(MSGT_TV, MSGL_V, MSGTR_TVI_DS_FreqTableLoaded, tunerInput == TunerInputAntenna ? "broadcast" : "cable",
+        mp_tmsg(MSGT_TV, MSGL_V, "tvi_dshow: loaded system (%s) frequency table for country id=%d (channels:%d).\n", tunerInput == TunerInputAntenna ? "broadcast" : "cable",
             chanlist2country(priv->tv_param->chanlist), priv->freq_table_len);
     }
 
@@ -1062,14 +1062,14 @@ static HRESULT set_nearest_freq(priv_t * priv, long lFreq)
 	mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: set_nearest_freq #%d (%ld) => %d (%ld)\n",i+priv->first_channel,priv->freq_table[i], nChannel,lFreqDiff);
     }
     if (nChannel == -1) {
-	mp_tmsg(MSGT_TV,MSGL_ERR, MSGTR_TVI_DS_UnableFindNearestChannel);
+	mp_tmsg(MSGT_TV,MSGL_ERR, "tvi_dshow: Unable to find nearest channel in system frequency table\n");
 	return E_FAIL;
     }
     mp_msg(MSGT_TV, MSGL_V, "tvi_dshow: set_nearest_freq #%d (%ld)\n",nChannel,priv->freq_table[nChannel - priv->first_channel]);
     hr = OLE_CALL_ARGS(priv->pTVTuner, put_Channel, nChannel,
 		   AMTUNER_SUBCHAN_DEFAULT, AMTUNER_SUBCHAN_DEFAULT);
     if (FAILED(hr)) {
-	mp_tmsg(MSGT_TV,MSGL_ERR,MSGTR_TVI_DS_UnableToSetChannel, (unsigned int)hr);
+	mp_tmsg(MSGT_TV,MSGL_ERR,"tvi_dshow: Unable to switch to nearest channel from system frequency table. Error:0x%x\n", (unsigned int)hr);
 	return E_FAIL;
     }
     return S_OK;
@@ -1096,7 +1096,7 @@ static int set_frequency(priv_t * priv, long lFreq)
     if (priv->direct_setfreq_call) {	//using direct call to set frequency
 	hr = set_frequency_direct(priv->pTVTuner, lFreq);
 	if (FAILED(hr)) {
-	    mp_tmsg(MSGT_TV, MSGL_V, MSGTR_TVI_DS_DirectSetFreqFailed);
+	    mp_tmsg(MSGT_TV, MSGL_V, "tvi_dshow: Unable to set frequency directly. OS built-in channels table will be used.\n");
 	    priv->direct_setfreq_call = 0;
 	}
     }
@@ -1171,7 +1171,7 @@ static int get_frequency(priv_t * priv, long *plFreq)
     if (priv->direct_getfreq_call) {	//using direct call to get frequency
 	hr = get_frequency_direct(priv->pTVTuner, plFreq);
 	if (FAILED(hr)) {
-	    mp_tmsg(MSGT_TV, MSGL_INFO, MSGTR_TVI_DS_DirectGetFreqFailed);
+	    mp_tmsg(MSGT_TV, MSGL_INFO, "tvi_dshow: Unable to get frequency directly. OS built-in channels table will be used.\n");
 	    priv->direct_getfreq_call = 0;
 	}
     }
@@ -1205,7 +1205,7 @@ static void get_capabilities(priv_t * priv)
     mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: get_capabilities called\n");
     if (priv->pTVTuner) {
 
-	mp_tmsg(MSGT_TV, MSGL_V, MSGTR_TVI_DS_SupportedNorms);
+	mp_tmsg(MSGT_TV, MSGL_V, "tvi_dshow: supported norms:");
 	hr = OLE_CALL_ARGS(priv->pTVTuner, get_AvailableTVFormats,
 		       &lAvailableFormats);
 	if (FAILED(hr))
@@ -1229,7 +1229,7 @@ static void get_capabilities(priv_t * priv)
 	tv_available_inputs = (long *) malloc(sizeof(long) * lInputPins);
 	tv_available_inputs_count = 0;
 
-	mp_tmsg(MSGT_TV, MSGL_V, MSGTR_TVI_DS_AvailableVideoInputs);
+	mp_tmsg(MSGT_TV, MSGL_V, "tvi_dshow: available video inputs:");
 	for (i = 0; i < lInputPins; i++) {
 	    OLE_CALL_ARGS(priv->pCrossbar, get_CrossbarPinInfo, 1, i,
 		      &lRelated, &lPhysicalType);
@@ -1250,7 +1250,7 @@ static void get_capabilities(priv_t * priv)
 	hr = OLE_CALL_ARGS(priv->chains[1]->pCaptureFilter, EnumPins, &pEnum);
 	if (FAILED(hr))
 	    return;
-	mp_tmsg(MSGT_TV, MSGL_V, MSGTR_TVI_DS_AvailableAudioInputs);
+	mp_tmsg(MSGT_TV, MSGL_V, "tvi_dshow: available audio inputs:");
 	i = 0;
 	while (OLE_CALL_ARGS(pEnum, Next, 1, &pPin, NULL) == S_OK) {
 	    memset(&pi, 0, sizeof(pi));
@@ -1272,7 +1272,7 @@ static void get_capabilities(priv_t * priv)
                         else
 			    OLE_CALL_ARGS(pIAMixer, put_MixLevel, 1.0);
 #endif
-			mp_tmsg(MSGT_TV, MSGL_V, MSGTR_TVI_DS_InputSelected);
+			mp_tmsg(MSGT_TV, MSGL_V, "(selected)");
 		    } else {
 			OLE_CALL_ARGS(pIAMixer, put_Enable, FALSE);
 #if 0
@@ -1417,7 +1417,7 @@ static HRESULT build_sub_graph(priv_t * priv, chain_t * chain, const GUID* ppin_
         hr = OLE_CALL_ARGS(chain->pCapturePin, ConnectionMediaType, chain->pmt);
         if(FAILED(hr))
         {
-            mp_tmsg(MSGT_TV, MSGL_WARN, MSGTR_TVI_DS_GetActualMediatypeFailed, (unsigned int)hr);
+            mp_tmsg(MSGT_TV, MSGL_WARN, "tvi_dshow: Unable to get actual mediatype (Error:0x%x). Assuming equal to requested.\n", (unsigned int)hr);
         }
 
         if(priv->tv_param->hidden_video_renderer){
@@ -1531,7 +1531,7 @@ static int set_crossbar_input(priv_t * priv, int input)
 	//connecting given input with video decoder
 	hr = OLE_CALL_ARGS(priv->pCrossbar, Route, nVideoDecoder, lInput);
 	if (hr != S_OK) {
-	    mp_tmsg(MSGT_TV,MSGL_ERR,MSGTR_TVI_DS_UnableConnectInputVideoDecoder, (unsigned int)hr);
+	    mp_tmsg(MSGT_TV,MSGL_ERR,"Unable to connect given input to video decoder. Error:0x%x\n", (unsigned int)hr);
 	    return TVI_CONTROL_FALSE;
 	}
     }
@@ -1539,7 +1539,7 @@ static int set_crossbar_input(priv_t * priv, int input)
 	hr = OLE_CALL_ARGS(priv->pCrossbar, Route, nAudioDecoder,
 		       lInputRelated);
 	if (hr != S_OK) {
-	    mp_tmsg(MSGT_TV,MSGL_ERR,MSGTR_TVI_DS_UnableConnectInputAudioDecoder, (unsigned int)hr);
+	    mp_tmsg(MSGT_TV,MSGL_ERR,"Unable to connect given input to audio decoder. Error:0x%x\n", (unsigned int)hr);
 	    return TVI_CONTROL_FALSE;
 	}
     }
@@ -1943,11 +1943,11 @@ static IBaseFilter *find_capture_device(int index, REFCLSID category)
     OLE_CALL(pClassEnum,Reset);
     for (i = 0; OLE_CALL_ARGS(pClassEnum, Next, 1, &pM, &cFetched) == S_OK; i++) {
 	if(get_device_name(pM, tmp, DEVICE_NAME_MAX_LEN)!=TVI_CONTROL_TRUE)
-	    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableGetDeviceName, i);
+	    mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Unable to get name for device #%d\n", i);
         else
-	    mp_tmsg(MSGT_TV, MSGL_V, MSGTR_TVI_DS_DeviceName, i, tmp);
+	    mp_tmsg(MSGT_TV, MSGL_V, "tvi_dshow: Device #%d: %s\n", i, tmp);
 	if (index != -1 && i == index) {
-	    mp_tmsg(MSGT_TV, MSGL_INFO, MSGTR_TVI_DS_UsingDevice, index, tmp);
+	    mp_tmsg(MSGT_TV, MSGL_INFO, "tvi_dshow: Using device #%d: %s\n", index, tmp);
 	    hr = OLE_CALL_ARGS(pM, BindToObject, 0, 0, &IID_IBaseFilter,(void *) &pFilter);
 	    if (FAILED(hr))
 		pFilter = NULL;
@@ -1955,7 +1955,7 @@ static IBaseFilter *find_capture_device(int index, REFCLSID category)
 	OLE_RELEASE_SAFE(pM);
     }
     if (index != -1 && !pFilter) {
-	mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_DeviceNotFound,
+	mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Device #%d not found\n",
 	       index);
     }
     OLE_RELEASE_SAFE(pClassEnum);
@@ -2011,7 +2011,7 @@ static HRESULT get_available_formats_stream(chain_t *chain)
 	    return E_FAIL;
 	}
     } else {
-		mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnsupportedMediaType,"get_available_formats_stream");
+		mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Unsupported media type passed to %s\n","get_available_formats_stream");
 		return E_FAIL;
     }
     done = 0;
@@ -2106,7 +2106,7 @@ static HRESULT get_available_formats_pin(ICaptureGraphBuilder2 * pBuilder,
     } else if (chain->type == audio) {
 	size = sizeof(AUDIO_STREAM_CONFIG_CAPS);
     } else {
-	mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnsupportedMediaType,"get_available_formats_pin");
+	mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Unsupported media type passed to %s\n","get_available_formats_pin");
 	return E_FAIL;
     }
 
@@ -2470,7 +2470,7 @@ static HRESULT build_video_chain(priv_t *priv)
     if (priv->chains[0]->pStreamConfig) {
 	hr = OLE_CALL_ARGS(priv->chains[0]->pStreamConfig, SetFormat, priv->chains[0]->pmt);
 	if (FAILED(hr)) {
-	    mp_tmsg(MSGT_TV,MSGL_ERR,MSGTR_TVI_DS_UnableSelectVideoFormat, (unsigned int)hr);
+	    mp_tmsg(MSGT_TV,MSGL_ERR,"tvi_dshow: Unable to select video format. Error:0x%x\n", (unsigned int)hr);
 	}
     }
 
@@ -2487,7 +2487,7 @@ static HRESULT build_video_chain(priv_t *priv)
     priv->chains[0]->rbuf->buffersize *= 1024 * 1024;
     hr=build_sub_graph(priv, priv->chains[0], &PIN_CATEGORY_CAPTURE);
     if(FAILED(hr)){
-        mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildVideoSubGraph,(unsigned int)hr);
+        mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Unable to build video chain of capture graph. Error:0x%x\n",(unsigned int)hr);
         return hr;
     }
     return S_OK;
@@ -2513,7 +2513,7 @@ static HRESULT build_audio_chain(priv_t *priv)
 	hr = OLE_CALL_ARGS(priv->chains[1]->pStreamConfig, SetFormat,
 		       priv->chains[1]->pmt);
 	if (FAILED(hr)) {
-	    mp_tmsg(MSGT_TV,MSGL_ERR,MSGTR_TVI_DS_UnableSelectAudioFormat, (unsigned int)hr);
+	    mp_tmsg(MSGT_TV,MSGL_ERR,"tvi_dshow: Unable to select audio format. Error:0x%x\n", (unsigned int)hr);
 	}
     }
 
@@ -2530,7 +2530,7 @@ static HRESULT build_audio_chain(priv_t *priv)
 
         hr=build_sub_graph(priv, priv->chains[1],&PIN_CATEGORY_CAPTURE);
         if(FAILED(hr)){
-            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildAudioSubGraph,(unsigned int)hr);
+            mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Unable to build audio chain of capture graph. Error:0x%x\n",(unsigned int)hr);
             return 0;
         }
     }
@@ -2561,7 +2561,7 @@ static HRESULT build_vbi_chain(priv_t *priv)
 
         hr=build_sub_graph(priv, priv->chains[2],&PIN_CATEGORY_VBI);
         if(FAILED(hr)){
-            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildVBISubGraph,(unsigned int)hr);
+            mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Unable to build VBI chain of capture graph. Error:0x%x\n",(unsigned int)hr);
             return 0;
         }
     }
@@ -2603,12 +2603,12 @@ static int start(priv_t * priv)
 	mp_msg(MSGT_TV, MSGL_DBG2, "Debug pause end\n");
     }
     if (!priv->pMediaControl) {
-        mp_tmsg(MSGT_TV,MSGL_ERR,MSGTR_TVI_DS_UnableGetMediaControlInterface,(unsigned int)E_POINTER);
+        mp_tmsg(MSGT_TV,MSGL_ERR,"tvi_dshow: Unable to get IMediaControl interface. Error:0x%x\n",(unsigned int)E_POINTER);
         return 0;
     }
     hr = OLE_CALL(priv->pMediaControl, Run);
     if (FAILED(hr)) {
-	mp_tmsg(MSGT_TV,MSGL_ERR,MSGTR_TVI_DS_UnableStartGraph, (unsigned int)hr);
+	mp_tmsg(MSGT_TV,MSGL_ERR,"tvi_dshow: Unable to start graph! Error:0x%x\n", (unsigned int)hr);
 	return 0;
     }
     mp_msg(MSGT_TV, MSGL_DBG2, "tvi_dshow: Graph is started.\n");
@@ -2681,7 +2681,7 @@ static int init(priv_t * priv)
         mp_msg(MSGT_TV, MSGL_DBG2, "tvi_dshow: Searching for available video capture devices\n");
         priv->chains[0]->pCaptureFilter = find_capture_device(priv->dev_index, &CLSID_VideoInputDeviceCategory);
         if(!priv->chains[0]->pCaptureFilter){
-            mp_tmsg(MSGT_TV,MSGL_ERR, MSGTR_TVI_DS_NoVideoCaptureDevice);
+            mp_tmsg(MSGT_TV,MSGL_ERR, "tvi_dshow: Unable to find video capture device\n");
             break;
         }
         hr = OLE_CALL_ARGS(priv->pGraph, AddFilter, priv->chains[0]->pCaptureFilter, NULL);
@@ -2693,7 +2693,7 @@ static int init(priv_t * priv)
         if (priv->adev_index != -1) {
         	priv->chains[1]->pCaptureFilter = find_capture_device(priv->adev_index, &CLSID_AudioInputDeviceCategory);	//output available audio edevices
                 if(!priv->chains[1]->pCaptureFilter){
-                    mp_tmsg(MSGT_TV,MSGL_ERR, MSGTR_TVI_DS_NoAudioCaptureDevice);
+                    mp_tmsg(MSGT_TV,MSGL_ERR, "tvi_dshow: Unable to find audio capture device\n");
                     break;
                 }
 
@@ -2713,7 +2713,7 @@ static int init(priv_t * priv)
             mp_msg(MSGT_TV, MSGL_DBG2, "tvi_dshow: Get IID_IAMVideoProcAmp failed (0x%x).\n", (unsigned int)hr);
 
         if (hr != S_OK) {
-            mp_tmsg(MSGT_TV, MSGL_INFO, MSGTR_TVI_DS_VideoAdjustigNotSupported);
+            mp_tmsg(MSGT_TV, MSGL_INFO, "tvi_dshow: Adjusting of brightness/hue/saturation/contrast is not supported by device\n");
             priv->pVideoProcAmp = NULL;
         }
 
@@ -2723,7 +2723,7 @@ static int init(priv_t * priv)
         		   priv->chains[0]->pCaptureFilter,
         		   &IID_IAMCrossbar, (void **) &(priv->pCrossbar));
         if (FAILED(hr)) {
-            mp_tmsg(MSGT_TV, MSGL_INFO, MSGTR_TVI_DS_SelectingInputNotSupported);
+            mp_tmsg(MSGT_TV, MSGL_INFO, "tvi_dshow: Selection of capture source is not supported by device\n");
             priv->pCrossbar = NULL;
         }
 
@@ -2749,7 +2749,7 @@ static int init(priv_t * priv)
                 }
                 OLE_RELEASE_SAFE(pTVAudio);
                 if (FAILED(hr))
-                    mp_tmsg(MSGT_TV, MSGL_WARN, MSGTR_TVI_DS_UnableSetAudioMode, priv->tv_param->amode,(unsigned int)hr);
+                    mp_tmsg(MSGT_TV, MSGL_WARN, "tvi_dshow: Unable to set audio mode %d. Error:0x%x\n", priv->tv_param->amode,(unsigned int)hr);
             }
         }
 
@@ -2787,19 +2787,19 @@ static int init(priv_t * priv)
         }
 
         if (!priv->chains[0]->pStreamConfig)
-            mp_tmsg(MSGT_TV, MSGL_INFO, MSGTR_TVI_DS_ChangingWidthHeightNotSupported);
+            mp_tmsg(MSGT_TV, MSGL_INFO, "tvi_dshow: Changing video width/height is not supported by device.\n");
 
         if (!priv->chains[0]->arpmt[priv->chains[0]->nFormatUsed]
             || !extract_video_format(priv->chains[0]->arpmt[priv->chains[0]->nFormatUsed],
 				 &(priv->fcc), &(priv->width),
 				 &(priv->height))) {
-            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_ErrorParsingVideoFormatStruct);
+            mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Unable to parse video format structure.\n");
             break;
         }
 
         if (priv->chains[1]->arpmt[priv->chains[1]->nFormatUsed]) {
             if (!extract_audio_format(priv->chains[1]->pmt, &(priv->samplerate), NULL, NULL)) {
-                mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_ErrorParsingAudioFormatStruct);
+                mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Unable to parse audio format structure.\n");
                 DisplayMediaType("audio format failed",priv->chains[1]->arpmt[priv->chains[1]->nFormatUsed]);
                 break;
             }
@@ -2807,7 +2807,7 @@ static int init(priv_t * priv)
 
         hr = OLE_QUERYINTERFACE(priv->pGraph, IID_IMediaControl,priv->pMediaControl);
         if(FAILED(hr)){
-            mp_tmsg(MSGT_TV,MSGL_ERR, MSGTR_TVI_DS_UnableGetMediaControlInterface,(unsigned int)hr);
+            mp_tmsg(MSGT_TV,MSGL_ERR, "tvi_dshow: Unable to get IMediaControl interface. Error:0x%x\n",(unsigned int)hr);
             break;
         }
         hr = OLE_CALL_ARGS(priv->pBuilder, FindInterface,
@@ -2867,7 +2867,7 @@ static int init(priv_t * priv)
             OLE_RELEASE_SAFE(pVPOutPin);
 
             if (FAILED(hr)) {
-                mp_tmsg(MSGT_TV,MSGL_ERR, MSGTR_TVI_DS_UnableTerminateVPPin, (unsigned int)hr);
+                mp_tmsg(MSGT_TV,MSGL_ERR, "tvi_dshow: Unable to terminate VideoPort pin with any filter in graph. Error:0x%x\n", (unsigned int)hr);
                 break;
             }
         }
@@ -2909,7 +2909,7 @@ static int init(priv_t * priv)
     } while(0);
 
     if (!result){
-        mp_tmsg(MSGT_TV,MSGL_ERR, MSGTR_TVI_DS_GraphInitFailure);
+        mp_tmsg(MSGT_TV,MSGL_ERR, "tvi_dshow: Directshow graph initialization failure.\n");
 	uninit(priv);
     }
     return result;
@@ -3041,12 +3041,12 @@ static tvi_handle_t *tvi_init_dshow(tv_param_t* tv_param)
 	if (sscanf(tv_param->device, "%d", &a) == 1) {
 	    priv->dev_index = a;
 	} else {
-	    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_WrongDeviceParam, tv_param->device);
+	    mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Wrong device parameter: %s\n", tv_param->device);
 	    free_handle(h);
 	    return NULL;
 	}
 	if (priv->dev_index < 0) {
-	    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_WrongDeviceIndex, a);
+	    mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Wrong device index: %d\n", a);
 	    free_handle(h);
 	    return NULL;
 	}
@@ -3055,12 +3055,12 @@ static tvi_handle_t *tvi_init_dshow(tv_param_t* tv_param)
 	if (sscanf(tv_param->adevice, "%d", &a) == 1) {
 	    priv->adev_index = a;
 	} else {
-	    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_WrongADeviceParam, tv_param->adevice);
+	    mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Wrong adevice parameter: %s\n", tv_param->adevice);
 	    free_handle(h);
 	    return NULL;
 	}
 	if (priv->dev_index < 0) {
-	    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_WrongADeviceIndex, a);
+	    mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Wrong adevice index: %d\n", a);
 	    free_handle(h);
 	    return NULL;
 	}
@@ -3320,7 +3320,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 		    break;
 	    if (!priv->chains[1]->arpmt[i]) {	
                 //request not found. failing back to first available
-		mp_tmsg(MSGT_TV, MSGL_WARN, MSGTR_TVI_DS_SamplerateNotsupported, samplerate);
+		mp_tmsg(MSGT_TV, MSGL_WARN, "tvi_dshow: Samplerate %d is not supported by device. Failing back to first available.\n", samplerate);
 		i = 0;
 	    }
 	    if (priv->chains[1]->pmt)

@@ -209,7 +209,7 @@ ldt_fs_t* Setup_LDT_Keeper(void)
 
 #ifdef __APPLE__
     if (getenv("DYLD_BIND_AT_LAUNCH") == NULL)
-        mp_tmsg(MSGT_LOADER, MSGL_WARN, MSGTR_LOADER_DYLD_Warning);
+        mp_tmsg(MSGT_LOADER, MSGL_WARN, "WARNING: Attempting to use DLL codecs but environment variable\n DYLD_BIND_AT_LAUNCH not set. This will likely crash.\n");
 #endif /* __APPLE__ */
     
     fs_seg=

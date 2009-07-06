@@ -163,7 +163,7 @@ m_config_pop(m_config_t* config) {
     if(co->flags & M_CFG_OPT_ALIAS)
       continue;
     if(co->slots->lvl > config->lvl)
-      mp_tmsg(MSGT_CFGPARSER, MSGL_WARN,MSGTR_SaveSlotTooOld,config->lvl,co->slots->lvl);
+      mp_tmsg(MSGT_CFGPARSER, MSGL_WARN,"Save slot found from lvl %d is too old: %d !!!\n",config->lvl,co->slots->lvl);
     
     while(co->slots->lvl >= config->lvl) {
       m_option_free(co->opt,co->slots->data);
@@ -306,11 +306,11 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
 
   // Check if this option isn't forbidden in the current mode
   if((config->mode == M_CONFIG_FILE) && (co->opt->flags & M_OPT_NOCFG)) {
-    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,MSGTR_InvalidCfgfileOption,arg);
+    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,"The %s option can't be used in a config file.\n",arg);
     return M_OPT_INVALID;
   }
   if((config->mode == M_COMMAND_LINE) && (co->opt->flags & M_OPT_NOCMD)) {
-    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,MSGTR_InvalidCmdlineOption,arg);
+    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,"The %s option can't be used on the command line.\n",arg);
     return M_OPT_INVALID;
   }
   // During command line preparse set only pre-parse options
@@ -338,11 +338,11 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
 	sr = m_config_parse_option(config,n,lst[2*i+1],set);
 	if(sr < 0){
 	  if(sr == M_OPT_UNKNOWN){
-	    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,MSGTR_InvalidSuboption,co->name,lst[2*i]);
+	    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,"Error: option '%s' has no suboption '%s'.\n",co->name,lst[2*i]);
 	    r = M_OPT_INVALID;
 	  } else
 	  if(sr == M_OPT_MISSING_PARAM){
-	    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,MSGTR_MissingSuboptionParameter,lst[2*i],co->name);
+	    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,"Error: suboption '%s' of '%s' must have a parameter!\n",lst[2*i],co->name);
 	    r = M_OPT_INVALID;
 	  } else
 	    r = sr;
@@ -379,7 +379,7 @@ m_config_check_option(m_config_t *config, char* arg, char* param) {
   mp_msg(MSGT_CFGPARSER, MSGL_DBG2,"Checking %s=%s\n",arg,param);
   r=m_config_parse_option(config,arg,param,0);
   if(r==M_OPT_MISSING_PARAM){
-    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,MSGTR_MissingOptionParameter,arg);
+    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,"Error: option '%s' must have a parameter!\n",arg);
     return M_OPT_INVALID;
   }
   return r;
@@ -411,7 +411,7 @@ m_config_print_option_list(m_config_t *config) {
 
   if(!config->opts) return;
 
-  mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_OptionListHeader);
+  mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "\n Name Type Min Max Global CL Cfg\n\n");
   for(co = config->opts ; co ; co = co->next) {
     const m_option_t* opt = co->opt;
     if(opt->type->flags & M_OPT_TYPE_HAS_CHILD) continue;
@@ -433,7 +433,7 @@ m_config_print_option_list(m_config_t *config) {
 	   opt->flags & CONF_NOCFG ? "No" : "Yes");
     count++;
   }
-  mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_TotalOptions,count);
+  mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "\nTotal: %d options\n",count);
 }
 
 m_profile_t*
@@ -478,7 +478,7 @@ void
 m_config_set_profile(m_config_t* config, m_profile_t* p) {
   int i;
   if(config->profile_depth > MAX_PROFILE_DEPTH) {
-    mp_tmsg(MSGT_CFGPARSER, MSGL_WARN, MSGTR_ProfileInclusionTooDeep);
+    mp_tmsg(MSGT_CFGPARSER, MSGL_WARN, "WARNING: Profile inclusion too deep.\n");
     return;
   }
   config->profile_depth++;
@@ -496,10 +496,10 @@ parse_profile(const m_option_t *opt, const char *name, char *param, void *dst, i
   if(param && !strcmp(param,"help")) {
     m_profile_t* p;
     if(!config->profiles) {
-      mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_NoProfileDefined);
+      mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "No profiles have been defined.\n");
       return M_OPT_EXIT-1;
     }
-    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_AvailableProfiles);
+    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "Available profiles:\n");
     for(p = config->profiles ; p ; p = p->next)
       mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\t%s\t%s\n",p->name,
 	     p->desc ? p->desc : "");
@@ -512,7 +512,7 @@ parse_profile(const m_option_t *opt, const char *name, char *param, void *dst, i
   if(!list || !list[0]) return M_OPT_INVALID;
   for(i = 0 ; list[i] ; i++)
     if(!m_config_get_profile(config,list[i])) {
-      mp_tmsg(MSGT_CFGPARSER, MSGL_WARN, MSGTR_UnknownProfile,
+      mp_tmsg(MSGT_CFGPARSER, MSGL_WARN, "Unknown profile '%s'.\n",
              list[i]);
       r = M_OPT_INVALID;
     }
@@ -546,11 +546,11 @@ show_profile(m_option_t *opt, char* name, char *param) {
   int i,j;
   if(!param) return M_OPT_MISSING_PARAM;
   if(!(p = m_config_get_profile(config,param))) {
-    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, MSGTR_UnknownProfile, param);
+    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "Unknown profile '%s'.\n", param);
     return M_OPT_EXIT-1;
   }
   if(!config->profile_depth)
-    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_Profile, param,
+    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "Profile %s: %s\n", param,
 	   p->desc ? p->desc : "");
   config->profile_depth++;
   for(i = 0 ; i < p->num_opts ; i++) {

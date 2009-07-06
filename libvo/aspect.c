@@ -96,9 +96,9 @@ void aspect_fit(struct vo *vo, int *srcw, int *srch, int fitw, int fith)
       *srcw = tmpw;
     }else{
 #ifndef ASPECT_TEST
-      mp_tmsg(MSGT_VO,MSGL_WARN,MSGTR_LIBVO_ASPECT_NoSuitableNewResFound);
+      mp_tmsg(MSGT_VO,MSGL_WARN,"[ASPECT] Warning: No suitable new res found!\n");
 #else
-      mp_tmsg(MSGT_VO,MSGL_WARN,MSGTR_LIBVO_ASPECT_NoNewSizeFoundThatFitsIntoRes);
+      mp_tmsg(MSGT_VO,MSGL_WARN,"[ASPECT] Error: No new size found that fits into res!\n");
 #endif
     }
   }

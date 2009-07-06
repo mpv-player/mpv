@@ -572,7 +572,7 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
     break;
   }
   default:
-    mp_tmsg(MSGT_DEMUXER,MSGL_WARN,MSGTR_MPDEMUX_AUDIO_UnknownFormat,priv->frmt);
+    mp_tmsg(MSGT_DEMUXER,MSGL_WARN,"Audio demuxer: unknown format %d.\n",priv->frmt);
     return 0;
   }
 

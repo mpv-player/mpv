@@ -471,25 +471,25 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     }
     if (s->scale_nominal <= 0) {
       mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-             _(MSGTR_ErrorParsingCommandLine) ": " _(MSGTR_AF_ValueOutOfRange)
+             _("error parsing command line") ": " _("value out of range")
              ": scale > 0\n");
       return AF_ERROR;
     }
     if (s->ms_stride <= 0) {
       mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-             _(MSGTR_ErrorParsingCommandLine) ": " _(MSGTR_AF_ValueOutOfRange)
+             _("error parsing command line") ": " _("value out of range")
              ": stride > 0\n");
       return AF_ERROR;
     }
     if (s->percent_overlap < 0 || s->percent_overlap > 1) {
       mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-             _(MSGTR_ErrorParsingCommandLine) ": " _(MSGTR_AF_ValueOutOfRange)
+             _("error parsing command line") ": " _("value out of range")
              ": 0 <= overlap <= 1\n");
       return AF_ERROR;
     }
     if (s->ms_search < 0) {
       mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-             _(MSGTR_ErrorParsingCommandLine) ": " _(MSGTR_AF_ValueOutOfRange)
+             _("error parsing command line") ": " _("value out of range")
              ": search >= 0\n");
       return AF_ERROR;
     }
@@ -508,7 +508,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
         s->speed_pitch = 1;
       } else {
         mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-               _(MSGTR_ErrorParsingCommandLine) ": " _(MSGTR_AF_ValueOutOfRange)
+               _("error parsing command line") ": " _("value out of range")
                ": speed=[pitch|tempo|none|both]\n");
         return AF_ERROR;
       }

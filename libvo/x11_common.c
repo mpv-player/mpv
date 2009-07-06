@@ -144,7 +144,7 @@ void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action)
                         SubstructureRedirectMask | SubstructureNotifyMask,
                         &xev))
         {
-            mp_tmsg(MSGT_VO, MSGL_ERR, MSGTR_EwmhFullscreenStateFailed);
+            mp_tmsg(MSGT_VO, MSGL_ERR, "\nX11: Couldn't send EWMH fullscreen event!\n");
         }
     }
 }
@@ -205,7 +205,7 @@ static int x11_errorhandler(Display * display, XErrorEvent * event)
 
 void fstype_help(void)
 {
-    mp_tmsg(MSGT_VO, MSGL_INFO, MSGTR_AvailableFsType);
+    mp_tmsg(MSGT_VO, MSGL_INFO, "Available fullscreen layer change modes:\n");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FULL_SCREEN_TYPES\n");
 
     mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "none",
@@ -1625,7 +1625,7 @@ void vo_vm_switch(struct vo *vo)
                     j = i;
                 }
 
-        mp_tmsg(MSGT_VO, MSGL_INFO, MSGTR_SelectedVideoMode,
+        mp_tmsg(MSGT_VO, MSGL_INFO, "XF86VM: Selected video mode %dx%d for image size %dx%d.\n",
                modeline_width, modeline_height, X, Y);
         XF86VidModeLockModeSwitch(mDisplay, x11->screen, 0);
         XF86VidModeSwitchToMode(mDisplay, x11->screen, vidmodes[j]);

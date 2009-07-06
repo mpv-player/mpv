@@ -168,7 +168,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     if (esd_fd < 0) {
 	esd_fd = esd_open_sound(server);
 	if (esd_fd < 0) {
-	    mp_tmsg(MSGT_AO, MSGL_ERR, MSGTR_AO_ESD_CantOpenSound,
+	    mp_tmsg(MSGT_AO, MSGL_ERR, "[AO ESD] esd_open_sound failed: %s\n",
 		   strerror(errno));
 	    return 0;
 	}
@@ -245,14 +245,14 @@ static int init(int rate_hz, int channels, int format, int flags)
 	lag_serv = (esd_latency * 4.0f) / (bytes_per_sample * rate_hz);
 	lag_seconds = lag_net + lag_serv;
 	audio_delay += lag_seconds;
-	mp_tmsg(MSGT_AO, MSGL_INFO,MSGTR_AO_ESD_LatencyInfo, 
+	mp_tmsg(MSGT_AO, MSGL_INFO,"[AO ESD] latency: [server: %0.2fs, net: %0.2fs] (adjust %0.2fs)\n", 
 	       lag_serv, lag_net, lag_seconds);
     }
     
     esd_play_fd = esd_play_stream_fallback(esd_fmt, rate_hz,
 					   server, ESD_CLIENT_NAME);
     if (esd_play_fd < 0) {
-	mp_tmsg(MSGT_AO, MSGL_ERR, MSGTR_AO_ESD_CantOpenPBStream, strerror(errno));
+	mp_tmsg(MSGT_AO, MSGL_ERR, "[AO ESD] failed to open ESD playback stream: %s\n", strerror(errno));
 	return 0;
     }
 

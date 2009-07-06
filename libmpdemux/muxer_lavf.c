@@ -272,7 +272,7 @@ static void write_header(muxer_t *muxer)
 {
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 	
-	mp_tmsg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingHeader);
+	mp_tmsg(MSGT_MUXER, MSGL_INFO, "Writing header...\n");
 	av_write_header(priv->oc);
 	muxer->cont_write_header = NULL;
 }
@@ -283,7 +283,7 @@ static void write_trailer(muxer_t *muxer)
 	int i;
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 	
-	mp_tmsg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingTrailer);
+	mp_tmsg(MSGT_MUXER, MSGL_INFO, "Writing index...\n");
 	av_write_trailer(priv->oc);
 	for(i = 0; i < priv->oc->nb_streams; i++) 
 	{

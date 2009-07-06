@@ -228,7 +228,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             if(priv->audio_streams >= MAX_A_STREAMS)
                 break;
             sh_audio=new_sh_audio(demuxer, i);
-            mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "lavf", i);
+            mp_tmsg(MSGT_DEMUX, MSGL_INFO, "[%s] Audio stream found, -aid %d\n", "lavf", i);
             if(!sh_audio)
                 break;
             priv->astreams[priv->audio_streams] = i;
@@ -308,7 +308,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             if(priv->video_streams >= MAX_V_STREAMS)
                 break;
             sh_video=new_sh_video(demuxer, i);
-            mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "lavf", i);
+            mp_tmsg(MSGT_DEMUX, MSGL_INFO, "[%s] Video stream found, -vid %d\n", "lavf", i);
             if(!sh_video) break;
             priv->vstreams[priv->video_streams] = i;
             priv->video_streams++;
@@ -388,7 +388,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             else
                 break;
             sh_sub = new_sh_sub_sid(demuxer, i, priv->sub_streams);
-            mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_SubtitleID, "lavf", priv->sub_streams);
+            mp_tmsg(MSGT_DEMUX, MSGL_INFO, "[%s] Subtitle stream found, -sid %d\n", "lavf", priv->sub_streams);
             if(!sh_sub) break;
             priv->sstreams[priv->sub_streams] = i;
             sh_sub->type = type;

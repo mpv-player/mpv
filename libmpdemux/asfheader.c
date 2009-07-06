@@ -37,7 +37,7 @@ static char* get_ucs2str(const uint16_t* inbuf, uint16_t inlen)
   int i;
 
   if (!outbuf) {
-    mp_tmsg(MSGT_HEADER, MSGL_ERR, MSGTR_MemAllocFailed);
+    mp_tmsg(MSGT_HEADER, MSGL_ERR, "Memory allocation failed.\n");
     return NULL;
   }
   q = outbuf;
@@ -269,7 +269,7 @@ static int get_meta(char *buf, int buf_len, int this_stream_num,
     if (record_entry.stream_num && record_entry.stream_num != this_stream_num)
       continue;
     if (!(name = get_ucs2str(record_entry.name, record_entry.name_length))) {
-      mp_tmsg(MSGT_HEADER, MSGL_ERR, MSGTR_MemAllocFailed);
+      mp_tmsg(MSGT_HEADER, MSGL_ERR, "Memory allocation failed.\n");
       continue;
     }
     if (strcmp(name, "AspectRatioX") == 0)
@@ -322,7 +322,7 @@ static int is_drm(char* buf, int buf_len)
   buf += 4;
 
   buf[url_len - 1] = '\0';
-  mp_tmsg(MSGT_HEADER, MSGL_INFO, MSGTR_MPDEMUX_ASFHDR_DRMLicenseURL, buf);
+  mp_tmsg(MSGT_HEADER, MSGL_INFO, "DRM License URL: %s\n", buf);
   return 1;
 } 
 
@@ -385,14 +385,14 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
   }
     
   if (hdr_len > 1024 * 1024) {
-    mp_tmsg(MSGT_HEADER, MSGL_ERR, MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB,
+    mp_tmsg(MSGT_HEADER, MSGL_ERR, "FATAL: header size bigger than 1 MB (%d)!\nPlease contact MPlayer authors, and upload/send this file.\n",
 			hdr_len);
     hdr_skip = hdr_len - 1024 * 1024;
     hdr_len = 1024 * 1024;
   }
   hdr = malloc(hdr_len);
   if (!hdr) {
-    mp_tmsg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed,
+    mp_tmsg(MSGT_HEADER, MSGL_FATAL, "Could not allocate %d bytes for header.\n",
             hdr_len);
     return 0;
   }
@@ -400,12 +400,12 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
   if (hdr_skip)
     stream_skip(demuxer->stream, hdr_skip);
   if (stream_eof(demuxer->stream)) {
-    mp_tmsg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader);
+    mp_tmsg(MSGT_HEADER, MSGL_FATAL, "EOF while reading ASF header, broken/incomplete file?\n");
     goto err_out;
   }
 
   if (is_drm(hdr, hdr_len))
-    mp_tmsg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_DRMProtected);
+    mp_tmsg(MSGT_HEADER, MSGL_FATAL, "This file has been encumbered with DRM encryption, it will not play in MPlayer!\n");
 
   if ((pos = find_asf_guid(hdr, asf_ext_stream_audio, 0, hdr_len)) >= 0)
   {
@@ -427,7 +427,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
       audio_pos += 64; //16+16+4+4+4+16+4;
       buffer = &hdr[audio_pos];
       sh_audio=new_sh_audio(demuxer,streamh->stream_no & 0x7F);
-      mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "asfheader", streamh->stream_no & 0x7F);
+      mp_tmsg(MSGT_DEMUX, MSGL_INFO, "[%s] Audio stream found, -aid %d\n", "asfheader", streamh->stream_no & 0x7F);
       ++audio_streams;
       if (!asf_init_audio_stream(demuxer, asf, sh_audio, streamh, &audio_pos, &buffer, hdr, hdr_len))
         goto len_err_out;
@@ -464,7 +464,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
     switch(ASF_LOAD_GUID_PREFIX(streamh->type)){
       case ASF_GUID_PREFIX_audio_stream: {
         sh_audio_t* sh_audio=new_sh_audio(demuxer,streamh->stream_no & 0x7F);
-        mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "asfheader", streamh->stream_no & 0x7F);
+        mp_tmsg(MSGT_DEMUX, MSGL_INFO, "[%s] Audio stream found, -aid %d\n", "asfheader", streamh->stream_no & 0x7F);
         ++audio_streams;
         if (!asf_init_audio_stream(demuxer, asf, sh_audio, streamh, &pos, &buffer, hdr, hdr_len))
           goto len_err_out;
@@ -475,7 +475,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
         unsigned int len;
         float asp_ratio;
         sh_video_t* sh_video=new_sh_video(demuxer,streamh->stream_no & 0x7F);
-        mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "asfheader", streamh->stream_no & 0x7F);
+        mp_tmsg(MSGT_DEMUX, MSGL_INFO, "[%s] Video stream found, -vid %d\n", "asfheader", streamh->stream_no & 0x7F);
         len=streamh->type_size-(4+4+1+2);
 	++video_streams;
 //        sh_video->bih=malloc(chunksize); memset(sh_video->bih,0,chunksize);
@@ -485,7 +485,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
 	if (sh_video->bih->biSize > len && sh_video->bih->biSize > sizeof(BITMAPINFOHEADER))
 		sh_video->bih->biSize = len;
         if (sh_video->bih->biCompression == mmioFOURCC('D', 'V', 'R', ' ')) {
-          //mp_tmsg(MSGT_DEMUXER, MSGL_WARN, MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat);
+          //mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "DVR will probably only work with libavformat, try -demuxer 35 if you have problems\n");
           //sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
           //sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
           asf->asf_frame_state=-1;
@@ -631,7 +631,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
   start = stream_tell(demuxer->stream); // start of first data chunk
   stream_read(demuxer->stream, guid_buffer, 16);
   if (memcmp(guid_buffer, asf_data_chunk_guid, 16) != 0) {
-    mp_tmsg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader);
+    mp_tmsg(MSGT_HEADER, MSGL_FATAL, "No data chunk following header!\n");
     free(streams);
     streams = NULL;
     return 0;
@@ -678,7 +678,7 @@ if(!audio_streams) demuxer->audio->id=-2;  // nosound
 else if(best_audio > 0 && demuxer->audio->id == -1) demuxer->audio->id=best_audio;
 if(!video_streams){
     if(!audio_streams){
-	mp_tmsg(MSGT_HEADER,MSGL_ERR,MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound);
+	mp_tmsg(MSGT_HEADER,MSGL_ERR,"ASF: no audio or video headers found - broken file?\n");
 	return 0; 
     }
     demuxer->video->id=-2; // audio-only
@@ -695,7 +695,7 @@ if( mp_msg_test(MSGT_HEADER,MSGL_V) ){
 return 1;
 
 len_err_out:
-  mp_tmsg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader);
+  mp_tmsg(MSGT_HEADER, MSGL_FATAL, "Invalid length in ASF header!\n");
 err_out:
   if (hdr) free(hdr);
   if (streams) free(streams);

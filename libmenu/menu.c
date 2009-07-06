@@ -114,7 +114,7 @@ static int menu_parse_config(char* buffer, struct m_config *mconfig)
   while(1) {
     r = asx_get_element(parser,&buffer,&element,&body,&attribs);
     if(r < 0) {
-      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_SyntaxErrorAtLine,parser->line);
+      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] syntax error at line: %d\n",parser->line);
       asx_parser_free(parser);
       return 0;
     } else if(r == 0) {
@@ -124,7 +124,7 @@ static int menu_parse_config(char* buffer, struct m_config *mconfig)
     // Has it a name ?
     name = asx_get_attrib("name",attribs);
     if(!name) {
-      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib,parser->line);
+      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Menu definitions need a name attribute (line %d).\n",parser->line);
       free(element);
       if(body) free(body);
       asx_free_attribs(attribs);
@@ -156,7 +156,7 @@ static int menu_parse_config(char* buffer, struct m_config *mconfig)
         for(;;) {
           r = asx_get_element(parser,&bd,&element,&b,&attribs);
           if(r < 0) {
-            mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_SyntaxErrorAtLine,
+            mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] syntax error at line: %d\n",
                    parser->line);
             free(body);
             asx_parser_free(parser);
@@ -209,13 +209,13 @@ static int menu_parse_config(char* buffer, struct m_config *mconfig)
       for(i = 0 ; attribs[2*i] ; i++) {
 	if(strcasecmp(attribs[2*i],"name") == 0) continue;
 	if(!m_struct_set(&minfo->priv_st,menu_list[menu_count].cfg,attribs[2*i], attribs[2*i+1]))
-	  mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_BadAttrib,attribs[2*i],attribs[2*i+1],
+	  mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] bad attribute %s=%s in menu '%s' at line %d\n",attribs[2*i],attribs[2*i+1],
 		 name,parser->line);
       }
       menu_count++;
       memset(&menu_list[menu_count],0,sizeof(menu_def_t));
     } else {
-      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_UnknownMenuType,element,parser->line);
+      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] unknown menu type '%s' at line %d\n",element,parser->line);
       free(name);
       if(body) free(body);
     }
@@ -243,7 +243,7 @@ int menu_init(struct MPContext *mpctx, struct m_config *mconfig,
 #endif
   fd = open(cfg_file, O_RDONLY);
   if(fd < 0) {
-    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_CantOpenConfigFile,cfg_file);
+    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Can't open menu config file: %s\n",cfg_file);
     return 0;
   }
   buffer = malloc(bl);
@@ -251,7 +251,7 @@ int menu_init(struct MPContext *mpctx, struct m_config *mconfig,
     int r;
     if(bl - br < BUF_MIN) {
       if(bl >= BUF_MAX) {
-	mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_ConfigFileIsTooBig,BUF_MAX/1024);
+	mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Config file is too big (> %d KB)\n",BUF_MAX/1024);
 	close(fd);
 	free(buffer);
 	return 0;
@@ -264,7 +264,7 @@ int menu_init(struct MPContext *mpctx, struct m_config *mconfig,
     br += r;
   }
   if(!br) {
-    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_ConfigFileIsEmpty);
+    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Config file is empty.\n");
     return 0;
   }
   buffer[br-1] = '\0';
@@ -329,7 +329,7 @@ menu_t* menu_open(char *name) {
       break;
   }
   if(menu_list[i].name == NULL) {
-    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_MenuNotFound,name);
+    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Menu %s not found.\n",name);
     return NULL;
   }
   m = calloc(1,sizeof(menu_t));
@@ -344,7 +344,7 @@ menu_t* menu_open(char *name) {
   if(m->priv)
     m_struct_free(m->priv_st,m->priv);
   free(m);
-  mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_MenuInitFailed,name);
+  mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Menu '%s': Init failed.\n",name);
   return NULL;
 }
 
@@ -482,7 +482,7 @@ void menu_draw_text(mp_image_t* mpi,char* txt, int x, int y) {
   int font;
 
   if(!draw_alpha) {
-    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_UnsupportedOutformat);
+    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Unsupported output format!!!!\n");
     return;
   }
 
@@ -516,7 +516,7 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
   draw_alpha_f draw_alpha = get_draw_alpha(mpi->imgfmt);
 
   if(!draw_alpha) {
-    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_UnsupportedOutformat);
+    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Unsupported output format!!!!\n");
     return;
   }
 
@@ -758,7 +758,7 @@ void menu_draw_box(mp_image_t* mpi,unsigned char grey,unsigned char alpha, int x
   int g;
   
   if(!draw_alpha) {
-    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_UnsupportedOutformat);
+    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] Unsupported output format!!!!\n");
     return;
   }
   
