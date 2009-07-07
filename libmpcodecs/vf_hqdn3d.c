@@ -64,7 +64,7 @@ static int config(struct vf_instance_s* vf,
 static inline unsigned int LowPassMul(unsigned int PrevMul, unsigned int CurrMul, int* Coef){
 //    int dMul= (PrevMul&0xFFFFFF)-(CurrMul&0xFFFFFF);
     int dMul= PrevMul-CurrMul;
-    int d=((dMul+0x10007FF)>>12);
+    unsigned int d=((dMul+0x10007FF)>>12);
     return CurrMul + Coef[d];
 }
 
@@ -75,7 +75,7 @@ static void deNoiseTemporal(
                     int W, int H, int sStride, int dStride,
                     int *Temporal)
 {
-    int X, Y;
+    long X, Y;
     unsigned int PixelDst;
 
     for (Y = 0; Y < H; Y++){
@@ -97,8 +97,8 @@ static void deNoiseSpacial(
                     int W, int H, int sStride, int dStride,
                     int *Horizontal, int *Vertical)
 {
-    int X, Y;
-    int sLineOffs = 0, dLineOffs = 0;
+    long X, Y;
+    long sLineOffs = 0, dLineOffs = 0;
     unsigned int PixelAnt;
     unsigned int PixelDst;
 
@@ -137,8 +137,8 @@ static void deNoise(unsigned char *Frame,        // mpi->planes[x]
                     int W, int H, int sStride, int dStride,
                     int *Horizontal, int *Vertical, int *Temporal)
 {
-    int X, Y;
-    int sLineOffs = 0, dLineOffs = 0;
+    long X, Y;
+    long sLineOffs = 0, dLineOffs = 0;
     unsigned int PixelAnt;
     unsigned int PixelDst;
     unsigned short* FrameAnt=(*FrameAntPtr);
