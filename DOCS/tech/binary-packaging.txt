@@ -66,9 +66,6 @@ the following features MUST be included in any official binary package:
 
 (*) if available for your OS/hardware
 
-There is great demand for the GUI, so it SHOULD be included, but it MUST
-come as a separate package (see Tips and Tricks for details).
-
 Including other features, like LIVE.COM streaming or JACK support, is
 acceptable. They SHOULD, however, be build-time configurable, with the
 default build configuration containing the above set.
@@ -111,7 +108,6 @@ for Red Hat and Fedora RPMs I am using FHS-compliant paths:
 /usr/share/doc/mplayer-version/ docs
 /usr/share/man/man1/            man page
 /usr/share/man/XX/man1/         translated man page
-/usr/share/mplayer/skins/       GUI skins
 
 You MUST NOT include the codecs.conf file in your package. It is useful
 only for development purposes and often causes obscure problems for users.
@@ -129,13 +125,9 @@ install only what you need. This is the layout I am using for Red Hat and
 Fedora RPMs:
 
 mencoder         contains MEncoder binary (mencoder)
-mplayer          contains MPlayer binary without GUI (mplayer),
-                 config files, man pages and documentation;
-                 required by mplayer-gui
+mplayer          contains MPlayer binary config files, man pages and
+                 documentation;
 mplayer-codecs-* contain binary codecs available from MPlayer's site
-mplayer-gui      contains MPlayer binary with GUI (gmplayer);
-                 contains default skin (Blue)
-mplayer-skin-*   contain various MPlayer GUI skins
 
 There is no strict policy for now, just use your common sense.
 
@@ -200,14 +192,8 @@ ao=alsa,
 
 Tips and tricks
 ~~~~~~~~~~~~~~~
-In my package layout, mplayer and mplayer-gui can be installed at the same
-time, because they contain differently named binaries and there is no
-conflict. The trick is to build MPlayer once with --enable-gui, rename the
-resulting binary to "gmplayer" and then build it again, without GUI, but
-keeping the rest of ./configure options the same.
-
-To provide man pages for all MPlayer suite binaries (mplayer, gmplayer,
-mencoder), you can use man-links instead of regular symbolic links.
+To provide man pages for all MPlayer suite binaries (mplayer, mencoder), you
+can use man-links instead of regular symbolic links.
 Creating a mencoder man page linked to mplayer is as simple as:
 
   echo ".so mplayer.1" >> mencoder.1

@@ -78,10 +78,6 @@
 #include "osdep/timer.h"
 #include "osdep/findfiles.h"
 
-#ifdef CONFIG_GUI
-#include "gui/interface.h"
-#endif
-
 #include "input/input.h"
 
 const int under_mencoder = 0;
@@ -124,9 +120,6 @@ char *heartbeat_cmd;
 //**************************************************************************//
 #include "playtree.h"
 #include "playtreeparser.h"
-
-int import_playtree_playlist_into_gui(play_tree_t* my_playtree, m_config_t* config);
-int import_initial_playtree_into_gui(play_tree_t* my_playtree, m_config_t* config, int enqueue);
 
 //**************************************************************************//
 //             Config
@@ -239,12 +232,6 @@ int benchmark=0;
 // options:
        int auto_quality=0;
 static int output_quality=0;
-
-int use_gui=0;
-
-#ifdef CONFIG_GUI
-int enqueue=0;
-#endif
 
 static int list_properties = 0;
 
@@ -592,9 +579,6 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
     mpctx->initialized_flags&=~INITIALIZED_ACODEC;
     current_module="uninit_acodec";
     if(mpctx->sh_audio) uninit_audio(mpctx->sh_audio);
-#ifdef CONFIG_GUI
-    if (use_gui) guiGetEvent(guiSetAfilter, (char *)NULL);
-#endif
     mpctx->sh_audio=NULL;
     mpctx->mixer.afilter = NULL;
   }
@@ -685,14 +669,6 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
     mpctx->audio_out=NULL;
   }
 
-#ifdef CONFIG_GUI
-  if(mask&INITIALIZED_GUI){
-    mpctx->initialized_flags&=~INITIALIZED_GUI;
-    current_module="uninit_gui";
-    guiDone();
-  }
-#endif
-
   current_module=NULL;
 }
 
@@ -704,9 +680,6 @@ void exit_player_with_rc(struct MPContext *mpctx, exit_reason_t how, int rc)
   timeEndPeriod(1);
 #endif
 #ifdef CONFIG_X11
-#ifdef CONFIG_GUI
-  if ( !use_gui )
-#endif
   vo_uninit(mpctx->x11_state);	// Close the X11 connection (if any is open).
 #endif
 
@@ -1019,14 +992,6 @@ static int playtree_add_playlist(struct MPContext *mpctx, play_tree_t* entry)
 {
   play_tree_add_bpf(entry,mpctx->filename);
 
-#ifdef CONFIG_GUI
-  if (use_gui) {
-    if (entry) {
-      import_playtree_playlist_into_gui(entry, mpctx->mconfig);
-      play_tree_free_list(entry,1);
-    }
-  } else
-#endif
   {
   if(!entry) {
     entry = mpctx->playtree_iter->tree;
@@ -1094,28 +1059,6 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
     ++mpctx->set_of_sub_size;
     mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "SUB: Added subtitle file (%d): %s\n", mpctx->set_of_sub_size,
 	    filename_recode(filename));
-}
-
-// FIXME: if/when the GUI calls this, global sub numbering gets (potentially) broken.
-void update_set_of_subtitles(struct MPContext *mpctx)
-    // subdata was changed, set_of_sub... have to be updated.
-{
-    sub_data ** const set_of_subtitles = mpctx->set_of_subtitles;
-    int i;
-    if (mpctx->set_of_sub_size > 0 && subdata == NULL) { // *subdata was deleted
-        for (i = mpctx->set_of_sub_pos + 1; i < mpctx->set_of_sub_size; ++i)
-            set_of_subtitles[i-1] = set_of_subtitles[i];
-        set_of_subtitles[mpctx->set_of_sub_size-1] = NULL;
-        --mpctx->set_of_sub_size;
-        if (mpctx->set_of_sub_size > 0) subdata = set_of_subtitles[mpctx->set_of_sub_pos=0];
-    }
-    else if (mpctx->set_of_sub_size > 0 && subdata != NULL) { // *subdata was changed
-        set_of_subtitles[mpctx->set_of_sub_pos] = subdata;
-    }
-    else if (mpctx->set_of_sub_size <= 0 && subdata != NULL) { // *subdata was added
-        set_of_subtitles[mpctx->set_of_sub_pos=mpctx->set_of_sub_size] = subdata;
-        ++mpctx->set_of_sub_size;
-    }
 }
 
 void init_vo_spudec(struct MPContext *mpctx)
@@ -1331,9 +1274,6 @@ int build_afilter_chain(struct MPContext *mpctx, sh_audio_t *sh_audio, ao_data_t
   int result;
   if (!sh_audio)
   {
-#ifdef CONFIG_GUI
-    if (use_gui) guiGetEvent(guiSetAfilter, (char *)NULL);
-#endif
     mpctx->mixer.afilter = NULL;
     return 0;
   }
@@ -1355,9 +1295,6 @@ int build_afilter_chain(struct MPContext *mpctx, sh_audio_t *sh_audio, ao_data_t
   result =  init_audio_filters(sh_audio, new_srate,
            &ao_data->samplerate, &ao_data->channels, &ao_data->format);
   mpctx->mixer.afilter = sh_audio->afilter;
-#ifdef CONFIG_GUI
-  if (use_gui) guiGetEvent(guiSetAfilter, (char *)sh_audio->afilter);
-#endif
   return result;
 }
 
@@ -2444,10 +2381,6 @@ static void pause_loop(struct MPContext *mpctx)
 	    mp_tmsg(MSGT_CPLAYER,MSGL_STATUS,"\n ===== PAUSE =====\r");
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
     }
-#ifdef CONFIG_GUI
-    if (use_gui)
-	guiGetEvent(guiCEvent, (char *)guiSetPause);
-#endif
 
     while ( (cmd = mp_input_get_cmd(mpctx->input, 20, 1, 1)) == NULL
             || cmd->id == MP_CMD_SET_MOUSE_POS || cmd->pausing == 4) {
@@ -2459,14 +2392,6 @@ static void pause_loop(struct MPContext *mpctx)
 	}
 	if (mpctx->sh_video && mpctx->video_out)
 	    vo_check_events(mpctx->video_out);
-#ifdef CONFIG_GUI
-	if (use_gui) {
-	    guiEventHandling();
-	    guiGetEvent(guiReDraw, NULL);
-	    if (guiIntfStruct.Playing!=2 || (mpctx->rel_seek_secs || mpctx->abs_seek_pos))
-		break;
-	}
-#endif
 #ifdef CONFIG_MENU
 	if (vf_menu)
 	    vf_menu_pause_update(vf_menu);
@@ -2478,14 +2403,6 @@ static void pause_loop(struct MPContext *mpctx)
       if (hack)
           break;
     }
-#ifdef CONFIG_GUI
-    if (use_gui) {
-	if (guiIntfStruct.Playing == guiSetStop)
-	    mpctx->eof = 1;
-	else
-	    guiGetEvent(guiCEvent, (char *)guiSetPlay);
-    }
-#endif
 }
 
 
@@ -2923,8 +2840,6 @@ int opt_exit = 0;
 
 int i;
 
-int gui_no_filename=0;
-
     struct MPContext *mpctx = &(struct MPContext){
         .osd_function = OSD_PLAY,
         .begin_skip = MP_NOPTS_VALUE,
@@ -2961,26 +2876,7 @@ int gui_no_filename=0;
   stream_tv_defaults.immediate = 1;
 #endif
 
-  if (argc > 1 && argv[1] &&
-      (!strcmp(argv[1], "-gui") || !strcmp(argv[1], "-nogui"))) {
-    use_gui = !strcmp(argv[1], "-gui");
-  } else
-  if ( argv[0] )
-  {
-    char *base = strrchr(argv[0], '/');
-    if (!base)
-      base = strrchr(argv[0], '\\');
-    if (!base)
-      base = argv[0];
-    if(strstr(base, "gmplayer"))
-          use_gui=1;
-  }
-
     parse_cfgfiles(mpctx, mpctx->mconfig);
-
-#ifdef CONFIG_GUI
-    if ( use_gui ) cfg_read();
-#endif
 
     mpctx->playtree = m_config_parse_mp_command_line(mpctx->mconfig, argc, argv);
     if(mpctx->playtree == NULL)
@@ -3002,21 +2898,6 @@ int gui_no_filename=0;
 
   print_version("MPlayer");
 
-#if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_GUI)
-    void *runningmplayer = FindWindow("MPlayer GUI for Windows", "MPlayer for Windows");
-    if(runningmplayer && mpctx->filename && use_gui){
-        COPYDATASTRUCT csData;
-        char file[MAX_PATH];
-        char *filepart = mpctx->filename;
-        if(GetFullPathName(mpctx->filename, MAX_PATH, file, &filepart)){
-            csData.dwData = 0;
-            csData.cbData = strlen(file)*2;
-            csData.lpData = file;
-            SendMessage(runningmplayer, WM_COPYDATA, (WPARAM)runningmplayer, (LPARAM)&csData);
-        }
-    }
-#endif
-
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 	// stop Windows from showing all kinds of annoying error dialogs
 	SetErrorMode(0x8003);
@@ -3027,35 +2908,6 @@ int gui_no_filename=0;
 #ifdef CONFIG_PRIORITY
     set_priority();
 #endif
-
-#ifndef CONFIG_GUI
-    if(use_gui){
-      mp_tmsg(MSGT_CPLAYER,MSGL_WARN,"MPlayer was compiled WITHOUT GUI support.\n");
-      use_gui=0;
-    }
-#else
-#if !defined(__MINGW32__) && !defined(__CYGWIN__)
-    if(use_gui && !vo_init()){
-      mp_tmsg(MSGT_CPLAYER,MSGL_WARN,"MPlayer GUI requires X11.\n");
-      use_gui=0;
-    }
-#endif
-    if (use_gui && mpctx->playtree_iter){
-      char cwd[PATH_MAX+2];
-      // Free Playtree and Playtree-Iter as it's not used by the GUI.
-      play_tree_iter_free(mpctx->playtree_iter);
-      mpctx->playtree_iter=NULL;
-
-      if (getcwd(cwd, PATH_MAX) != (char *)NULL)
-      {
-	  strcat(cwd, "/");
-          // Prefix relative paths with current working directory
-          play_tree_add_bpf(mpctx->playtree, cwd);
-      }
-      // Import initital playtree into GUI.
-      import_initial_playtree_into_gui(mpctx->playtree, mpctx->mconfig, enqueue);
-    }
-#endif /* CONFIG_GUI */
 
     if(opts->video_driver_list && strcmp(opts->video_driver_list[0],"help")==0){
       list_video_out();
@@ -3139,17 +2991,10 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
     if(opt_exit)
       exit_player(mpctx, EXIT_NONE);
 
-    if (player_idle_mode && use_gui) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, "The -idle option cannot be used with GMPlayer.\n");
-        exit_player_with_rc(mpctx, EXIT_NONE, 1);
-    }
-
     if(!mpctx->filename && !player_idle_mode){
-      if(!use_gui){
 	// no file/vcd/dvd -> show HELP:
 	mp_msg(MSGT_CPLAYER, MSGL_INFO, help_text);
         exit_player_with_rc(mpctx, EXIT_NONE, 0);
-      } else gui_no_filename=1;
     }
 
     /* Display what configure line was used */
@@ -3223,25 +3068,20 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 	    mp_tmsg(MSGT_CPLAYER, MSGL_V, "Using Linux hardware RTC timing (%ldHz).\n", irqp);
     }
   }
-#ifdef CONFIG_GUI
-// breaks DGA and SVGAlib and VESA drivers:  --A'rpi
-// and now ? -- Pontscho
-    if(use_gui) setuid( getuid() ); // strongly test, please check this.
-#endif
     if(rtc_fd<0)
 #endif /* HAVE_RTC */
       mp_msg(MSGT_CPLAYER, MSGL_V, "Using %s timing\n",
 	     softsleep?"software":timer_name);
 
 #ifdef HAVE_TERMCAP
-  if ( !use_gui ) load_termcap(NULL); // load key-codes
+  load_termcap(NULL); // load key-codes
 #endif
 
 // ========== Init keyboard FIFO (connection to libvo) ============
 
 // Init input system
 current_module = "init_input";
- mpctx->input = mp_input_init(&opts->input, use_gui);
+ mpctx->input = mp_input_init(&opts->input);
  mp_input_add_key_fd(mpctx->input, -1,0,mplayer_get_key,NULL, mpctx->key_fifo);
 if(slave_mode)
     mp_input_add_cmd_fd(mpctx->input, 0,USE_SELECT,MP_INPUT_SLAVE_CMD_FUNC,NULL);
@@ -3303,15 +3143,6 @@ current_module = NULL;
 #endif
 #endif
 
-#ifdef CONFIG_GUI
-  if(use_gui){
-       guiInit();
-       guiGetEvent(guiSetContext, mpctx);
-       mpctx->initialized_flags|=INITIALIZED_GUI;
-       guiGetEvent( guiCEvent,(char *)((gui_no_filename) ? 0 : 1) );
-  }
-#endif
-
 // ******************* Now, let's see the per-file stuff ********************
 
 play_next_file:
@@ -3343,46 +3174,6 @@ if(!noconsolecontrols && !slave_mode){
 }
 
 // =================== GUI idle loop (STOP state) ===========================
-#ifdef CONFIG_GUI
-    if ( use_gui ) {
-      mpctx->file_format=DEMUXER_TYPE_UNKNOWN;
-      guiGetEvent( guiSetDefaults,0 );
-      while ( guiIntfStruct.Playing != 1 )
-       {
-        mp_cmd_t* cmd;
-	usec_sleep(20000);
-	guiEventHandling();
-	guiGetEvent( guiReDraw,NULL );
-	if ( (cmd = mp_input_get_cmd(mpctx->input, 0,0,0)) != NULL) {
-	  guiGetEvent(guiIEvent, (char *)cmd->id);
-	  mp_cmd_free(cmd);
-	}
-       }
-      guiGetEvent( guiSetParameters,NULL );
-      if ( guiIntfStruct.StreamType == STREAMTYPE_STREAM )
-       {
-        play_tree_t * entry = play_tree_new();
-        play_tree_add_file( entry,guiIntfStruct.Filename );
-        if ( mpctx->playtree ) play_tree_free_list( mpctx->playtree->child,1 );
-         else mpctx->playtree=play_tree_new();
-        play_tree_set_child( mpctx->playtree,entry );
-        if(mpctx->playtree)
-	 {
-	  mpctx->playtree_iter = play_tree_iter_new(mpctx->playtree,mpctx->mconfig);
-	  if(mpctx->playtree_iter)
-	   {
-	    if(play_tree_iter_step(mpctx->playtree_iter,0,0) != PLAY_TREE_ITER_ENTRY)
-	     {
-	      play_tree_iter_free(mpctx->playtree_iter);
-	      mpctx->playtree_iter = NULL;
-	     }
-	    mpctx->filename = play_tree_iter_get_file(mpctx->playtree_iter,1);
-	   }
-         }
-       }
-    }
-#endif /* CONFIG_GUI */
-
 while (player_idle_mode && !mpctx->filename) {
     play_tree_t * entry = NULL;
     mp_cmd_t * cmd;
@@ -3524,10 +3315,6 @@ if (edl_output_filename) {
     goto goto_next_file;
   }
   mpctx->initialized_flags|=INITIALIZED_STREAM;
-
-#ifdef CONFIG_GUI
-  if ( use_gui ) guiGetEvent( guiSetStream,(char *)mpctx->stream );
-#endif
 
   if(mpctx->file_format == DEMUXER_TYPE_PLAYLIST) {
       mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nThis looks like a playlist, but "
@@ -4041,16 +3828,6 @@ if(force_fps && mpctx->sh_video){
   mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"FPS forced to be %5.3f (ftime: %5.3f).\n",mpctx->sh_video->fps,mpctx->sh_video->frametime);
 }
 
-#ifdef CONFIG_GUI
-if ( use_gui ) {
-    if ( mpctx->sh_audio ) guiIntfStruct.AudioType=mpctx->sh_audio->channels; else guiIntfStruct.AudioType=0;
-    if ( !mpctx->sh_video && mpctx->sh_audio ) guiGetEvent( guiSetAudioOnly,(char *)1 ); else guiGetEvent( guiSetAudioOnly,(char *)0 );
-    guiGetEvent( guiSetFileFormat,(char *)mpctx->demuxer->file_format );
-    if ( guiGetEvent( guiSetValues,(char *)mpctx->sh_video ) ) goto goto_next_file;
-    guiGetEvent( guiSetDemuxer,(char *)mpctx->demuxer );
-}
-#endif
-
  mp_input_set_section(mpctx->input, NULL);
 //TODO: add desired (stream-based) sections here
  if (mpctx->stream->type==STREAMTYPE_TV) mp_input_set_section(mpctx->input, "tv");
@@ -4187,10 +3964,6 @@ if(!mpctx->sh_video) {
 
 //    current_module="draw_osd";
 //    if(vo_config_count) mpctx->video_out->draw_osd();
-
-#ifdef CONFIG_GUI
-    if(use_gui) guiEventHandling();
-#endif
 
     current_module="vo_check_events";
     vo_check_events(mpctx->video_out);
@@ -4344,33 +4117,6 @@ if(mpctx->rel_seek_secs || mpctx->abs_seek_pos){
   mpctx->abs_seek_pos=0;
 }
 
-#ifdef CONFIG_GUI
-      if(use_gui){
-        guiEventHandling();
-	if(mpctx->demuxer->file_format==DEMUXER_TYPE_AVI && mpctx->sh_video && mpctx->sh_video->video.dwLength>2){
-	  // get pos from frame number / total frames
-	  guiIntfStruct.Position=(float)mpctx->d_video->pack_no*100.0f/mpctx->sh_video->video.dwLength;
-	} else {
-          guiIntfStruct.Position=demuxer_get_percent_pos(mpctx->demuxer);
-	}
-	if ( mpctx->sh_video ) guiIntfStruct.TimeSec=mpctx->sh_video->pts;
-	  else if ( mpctx->sh_audio ) guiIntfStruct.TimeSec=playing_audio_pts(mpctx);
-	guiIntfStruct.LengthInSec=demuxer_get_time_length(mpctx->demuxer);
-	guiGetEvent( guiReDraw,NULL );
-	guiGetEvent( guiSetVolume,NULL );
-	if(guiIntfStruct.Playing==0) break; // STOP
-	if(guiIntfStruct.Playing==2) mpctx->osd_function=OSD_PAUSE;
-        if ( guiIntfStruct.DiskChanged || guiIntfStruct.NewPlay ) goto goto_next_file;
-#ifdef CONFIG_DVDREAD
-        if ( mpctx->stream->type == STREAMTYPE_DVD )
-	 {
-	  dvd_priv_t * dvdp = mpctx->stream->priv;
-	  guiIntfStruct.DVD.current_chapter=dvd_chapter_from_cell(dvdp,guiIntfStruct.DVD.current_title-1, dvdp->cur_cell)+1;
-	 }
-#endif
-      }
-#endif /* CONFIG_GUI */
-
 } // while(!mpctx->stop_play)
 
 mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",mpctx->stop_play);
@@ -4379,7 +4125,7 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",mpctx->stop_play);
 if(mpctx->dvbin_reopen)
 {
   mpctx->stop_play = 0;
-  uninit_player(mpctx, INITIALIZED_ALL-(INITIALIZED_GUI|INITIALIZED_STREAM|INITIALIZED_GETCH2|(opts->fixed_vo?INITIALIZED_VO:0)));
+  uninit_player(mpctx, INITIALIZED_ALL-(INITIALIZED_STREAM|INITIALIZED_GETCH2|(opts->fixed_vo?INITIALIZED_VO:0)));
   cache_uninit(mpctx->stream);
   mpctx->dvbin_reopen = 0;
   goto goto_enable_cache;
@@ -4417,7 +4163,7 @@ if(benchmark){
 }
 
 // time to uninit all, except global stuff:
-uninit_player(mpctx, INITIALIZED_ALL-(INITIALIZED_GUI+(opts->fixed_vo?INITIALIZED_VO:0)));
+uninit_player(mpctx, INITIALIZED_ALL-(opts->fixed_vo?INITIALIZED_VO:0));
 
 if(mpctx->set_of_sub_size > 0) {
     current_module="sub_free";
@@ -4475,16 +4221,7 @@ while(mpctx->playtree_iter != NULL) {
         break;
 }
 
-#ifdef CONFIG_GUI
-if(use_gui && !mpctx->playtree_iter) {
-#ifdef CONFIG_DVDREAD
-    if(!guiIntfStruct.DiskChanged)
-#endif
-        mplEnd();
-}
-#endif
-
-if(use_gui || mpctx->playtree_iter != NULL || player_idle_mode){
+if(mpctx->playtree_iter != NULL || player_idle_mode){
     if(!mpctx->playtree_iter) mpctx->filename = NULL;
     mpctx->stop_play = 0;
     goto play_next_file;

@@ -31,7 +31,6 @@ extern int verbose;
 
 #define MSGT_GLOBAL 0        // common player stuff errors
 #define MSGT_CPLAYER 1       // console player (mplayer.c)
-#define MSGT_GPLAYER 2       // gui player
 
 #define MSGT_VO 3	       // libvo
 #define MSGT_AO 4	       // libao

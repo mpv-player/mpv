@@ -49,7 +49,6 @@
 #include "aspect.h"
 
 #include "subopt-helper.h"
-#include "gui/interface.h"
 
 #include "libavutil/common.h"
 
@@ -623,11 +622,6 @@ found_subpic:
 
 skip_surface_allocation:
 
-#ifdef CONFIG_GUI
-    if(use_gui)
-        guiGetEvent( guiSetShVideo,0 ); // let the GUI to setup/resize our window
-    else
-#endif
     {
 #ifdef CONFIG_XF86VM
         if ( vm )
@@ -1285,8 +1279,6 @@ static int control(uint32_t request, void *data)
         case VOCTRL_GET_IMAGE:
             return get_image((mp_image_t *)data);
         //vo_xv
-        case VOCTRL_GUISUPPORT:
-            return VO_TRUE;
         case VOCTRL_ONTOP:
             vo_x11_ontop();
             return VO_TRUE;

@@ -47,6 +47,4 @@ static inline void exit_player_bad(const char *how)
 
 struct MPContext;
 
-void update_set_of_subtitles(struct MPContext *mpctx);
-
 #endif /* MPLAYER_MPLAYER_H */

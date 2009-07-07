@@ -124,11 +124,6 @@ tivo://host/[list|llist|fsid]
 [options]
 .
 .br
-.B gmplayer
-[options]
-[\-skin\ skin]
-.
-.br
 .B mencoder
 [options] file
 [file|URL|\-] [\-o file | file://file | smb://[user:pass@]host/filepath]
@@ -358,30 +353,6 @@ Pause.
 Stop playing and quit.
 .IPs "PREVIOUS and NEXT"
 Seek backward/\:forward 1 minute.
-.RE
-.PD 1
-.PP
-.RS
-(The following keys are only valid if GUI support is compiled in
-and will take precedence over the keys defined above.)
-.RE
-.PP
-.PD 0
-.RS
-.IPs ENTER
-Start playing.
-.IPs "ESC\ \ "
-Stop playing.
-.IPs "l\ \ \ \ "
-Load file.
-.IPs "t\ \ \ \ "
-Load subtitle.
-.IPs "c\ \ \ \ "
-Open skin browser.
-.IPs "p\ \ \ \ "
-Open playlist.
-.IPs "r\ \ \ \ "
-Open preferences.
 .RE
 .PD 1
 .PP
@@ -715,8 +686,6 @@ Available options are:
 .RSs
 .IPs "all\ \ "
 all configuration files
-.IPs "gui (GUI only)"
-GUI configuration file
 .IPs system
 system configuration file
 .IPs "user\ "
@@ -752,7 +721,6 @@ Use the given profile(s), \-profile help displays a list of the defined profiles
 .TP
 .B \-really\-quiet (also see \-quiet)
 Display even less output and status messages than with \-quiet.
-Also suppresses the GUI error message boxes.
 .
 .TP
 .B \-show\-profile <profile>
@@ -860,11 +828,6 @@ later.
 See http://www.mplayerhq.hu/\:DOCS/\:HTML/\:en/\:edl.html for details.
 .
 .TP
-.B \-enqueue (GUI only)
-Enqueue files given on the command line in the playlist instead of playing them
-immediately.
-.
-.TP
 .B \-nofixed\-vo
 \-fixed\-vo enforces a fixed video system for multiple files (one
 (un)initialization for all files).
@@ -879,12 +842,6 @@ xmga, xv, xvidix and dfbmga.
 Skip displaying some frames to maintain A/V sync on slow systems.
 Video filters are not applied to such frames.
 For B-frames even decoding is skipped completely.
-.
-.TP
-.B \-(no)gui
-Enable or disable the GUI interface (default depends on binary name).
-Only works as the first argument on the command line.
-Does not work as a config-file option.
 .
 .TP
 .B \-h, \-help, \-\-help
@@ -1116,20 +1073,6 @@ Use the specified device for RTC timing.
 .TP
 .B \-shuffle
 Play files in random order.
-.
-.TP
-.B \-skin <name> (GUI only)
-Loads a skin from the directory given as parameter below the default skin
-directories, /usr/\:local/\:share/\:mplayer/\:skins/\: and ~/.mplayer/\:skins/.
-.sp 1
-.I EXAMPLE:
-.PD 0
-.RSs
-.IPs "\-skin fittyfene"
-Tries /usr/\:local/\:share/\:mplayer/\:skins/\:fittyfene
-and afterwards ~/.mplayer/\:skins/\:fittyfene.
-.RE
-.PD 1
 .
 .TP
 .B \-slave (also see \-input)
@@ -3156,12 +3099,6 @@ Places the window at the bottom right corner of the screen.
 .PD 1
 .
 .TP
-.B \-guiwid <window ID> (also see \-wid) (GUI only)
-This tells the GUI to also use an X11 window and stick itself to the bottom
-of the video, which is useful to embed a mini-GUI in a browser (with the
-MPlayer plugin for instance).
-.
-.TP
 .B \-hue <\-100\-100>
 Adjust the hue of the video signal (default: 0).
 You can get a colored negative of the image with this option.
@@ -3292,7 +3229,7 @@ the new display mode.
 Enables VBI for the vesa, dfbmga and svga video output drivers.
 .
 .TP
-.B \-wid <window ID> (also see \-guiwid) (X11, OpenGL and DirectX only)
+.B \-wid <window ID> (X11, OpenGL and DirectX only)
 This tells MPlayer to attach to an existing window.
 Useful to embed MPlayer in a browser (e.g.\& the plugger extension).
 .
@@ -11066,14 +11003,6 @@ MEncoder user settings
 .TP
 ~/.mplayer/\:input.conf
 input bindings (see '\-input keylist' for the full list)
-.
-.TP
-~/.mplayer/\:gui.conf
-GUI configuration file
-.
-.TP
-~/.mplayer/\:gui.pl
-GUI playlist
 .
 .TP
 ~/.mplayer/\:font/

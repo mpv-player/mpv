@@ -31,9 +31,6 @@
 
 #include "gl_common.h"
 #include "aspect.h"
-#ifdef CONFIG_GUI
-#include "gui/interface.h"
-#endif
 #include "fastmemcpy.h"
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
@@ -540,15 +537,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
   vo_flipped = !!(flags & VOFLAG_FLIPPING);
 
-#ifdef CONFIG_GUI
-  if (use_gui) {
-    // GUI creates and manages window for us
-    guiGetEvent(guiSetShVideo, 0);
-#ifndef GL_WIN32
-    goto glconfig;
-#endif
-  }
-#endif
 #ifdef GL_WIN32
   if (!vo_w32_config(d_width, d_height, flags))
     return -1;
@@ -1154,8 +1142,6 @@ static int control(uint32_t request, void *data)
         r->w = vo_dwidth; r->h = vo_dheight;
       }
     }
-    return VO_TRUE;
-  case VOCTRL_GUISUPPORT:
     return VO_TRUE;
   case VOCTRL_ONTOP:
     vo_gl_ontop();

@@ -763,8 +763,6 @@ static int control(uint32_t request, void *data)
     case VOCTRL_RESUME:
         priv->is_paused = 0;
         return VO_TRUE;
-    case VOCTRL_GUISUPPORT:
-        return VO_NOTIMPL;
     case VOCTRL_SET_EQUALIZER:
         return VO_NOTIMPL;
     case VOCTRL_GET_EQUALIZER:

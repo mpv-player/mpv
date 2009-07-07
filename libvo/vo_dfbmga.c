@@ -1468,10 +1468,6 @@ static int
 control( uint32_t request, void *data)
 {
      switch (request) {
-     case VOCTRL_GUISUPPORT:
-     case VOCTRL_GUI_NOWINDOW:
-          return VO_TRUE;
-
      case VOCTRL_QUERY_FORMAT:
           return query_format( *((uint32_t *) data) );
 

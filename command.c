@@ -57,9 +57,6 @@
 #include "m_struct.h"
 #include "libmenu/menu.h"
 #endif
-#ifdef CONFIG_GUI
-#include "gui/interface.h"
-#endif
 
 #include "mp_core.h"
 #include "mp_fifo.h"
@@ -1022,11 +1019,6 @@ static int mp_property_fullscreen(m_option_t *prop, int action, void *arg,
 	    return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-#ifdef CONFIG_GUI
-	if (use_gui)
-	    guiGetEvent(guiIEvent, (char *) MP_CMD_GUI_FULLSCREEN);
-	else
-#endif
 	if (mpctx->video_out->config_ok)
 	    vo_control(mpctx->video_out, VOCTRL_FULLSCREEN, 0);
         mpctx->opts.fullscreen = vo_fs;
@@ -2547,17 +2539,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		int n = cmd->args[0].v.i == 0 ? 1 : cmd->args[0].v.i;
 		int force = cmd->args[1].v.i;
 
-#ifdef CONFIG_GUI
-		if (use_gui) {
-		    int i = 0;
-		    if (n > 0)
-			for (i = 0; i < n; i++)
-			    mplNext();
-		    else
-			for (i = 0; i < -1 * n; i++)
-			    mplPrev();
-		} else
-#endif
 		{
 		    if (!force && mpctx->playtree_iter) {
 			play_tree_iter_t *i =
@@ -3227,11 +3208,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 #endif
 
 	default:
-#ifdef CONFIG_GUI
-	    if ((use_gui) && (cmd->id > MP_CMD_GUI_EVENTS))
-		guiGetEvent(guiIEvent, (char *) cmd->id);
-	    else
-#endif
 		mp_msg(MSGT_CPLAYER, MSGL_V,
 		       "Received unknown cmd %s\n", cmd->name);
 	}

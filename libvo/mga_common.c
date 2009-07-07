@@ -330,11 +330,6 @@ static int control(uint32_t request, void *data)
       return VO_TRUE;
 #endif
 
-#if defined(VO_XMGA) && defined(CONFIG_GUI)
-  case VOCTRL_GUISUPPORT:
-    return VO_TRUE;
-#endif
-
 #ifdef VO_XMGA
   case VOCTRL_ONTOP:
       vo_x11_ontop();

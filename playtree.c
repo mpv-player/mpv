@@ -946,20 +946,6 @@ void pt_add_file(play_tree_t** ppt, char* filename)
   play_tree_set_params_from(entry,pt);
 }
 
-void pt_add_gui_file(play_tree_t** ppt, char* path, char* file)
-{
-  char* wholename = malloc(strlen(path)+strlen(file)+2);
-
-  if (wholename)
-  {
-    strcpy(wholename, path);
-    strcat(wholename, "/");
-    strcat(wholename, file);
-    pt_add_file(ppt, wholename);
-    free(wholename); // As pt_add_file strdups it anyway!
-  }
-}
-
 void pt_iter_goto_head(play_tree_iter_t* iter)
 {
   iter->tree=iter->root;

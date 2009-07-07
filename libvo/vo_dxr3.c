@@ -44,9 +44,6 @@
 #include "aspect.h"
 #include "spuenc.h"
 #include "sub.h"
-#ifdef CONFIG_GUI
-#include "gui/interface.h"
-#endif
 #ifdef CONFIG_X11
 #include "x11_common.h"
 #endif
@@ -177,13 +174,6 @@ static overlay_t *overlay_data;
 static int control(uint32_t request, void *data)
 {
 	switch (request) {
-	case VOCTRL_GUISUPPORT:
-		return VO_TRUE;
-	case VOCTRL_GUI_NOWINDOW:
-		if (dxr3_overlay) {
-			return VO_FALSE;
-		}
-		return VO_TRUE;
 	case VOCTRL_SET_SPU_PALETTE:
 		if (ioctl(fd_spu, EM8300_IOCTL_SPU_SETPALETTE, data) < 0) {
 			mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_DXR3] Unable to load new SPU palette!\n");
@@ -488,19 +478,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		vo_dy = (vo_screenheight - d_height) / 2;
 		vo_dwidth = d_width;
 		vo_dheight = d_height;
-#ifdef CONFIG_GUI
-		if (use_gui) {
-			guiGetEvent(guiSetShVideo, 0);
-			XSetWindowBackground(mDisplay, vo_window, KEY_COLOR);
-			XClearWindow(mDisplay, vo_window);
-			XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &xwin_attribs);
-			depth = xwin_attribs.depth;
-			if (depth != 15 && depth != 16 && depth != 24 && depth != 32) {
-				depth = 24;
-			}
-			XMatchVisualInfo(mDisplay, mScreen, depth, TrueColor, &vinfo);
-		} else
-#endif
 		{
 			XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &xwin_attribs);
 			depth = xwin_attribs.depth;
@@ -702,14 +679,8 @@ static void uninit(void)
 		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_OFF);
 		overlay_release(overlay_data);
 
-#ifdef CONFIG_GUI
-		if (!use_gui) {
-#endif
 			vo_x11_uninit();
 
-#ifdef CONFIG_GUI
-		}
-#endif
 	}
 #endif
 	if (old_vmode != -1) {
@@ -884,16 +855,10 @@ static int preinit(const char *arg)
 
 		/* Initialize overlay and X11 */
 		overlay_data = overlay_init(fd_control);
-#ifdef CONFIG_GUI
-		if (!use_gui) {
-#endif
 			if (!vo_init()) {
 				mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_DXR3] Unable to init X11!\n");
 				return -1;
 			}
-#ifdef CONFIG_GUI
-		}
-#endif
 	}
 #endif
 

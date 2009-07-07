@@ -65,10 +65,6 @@ Buffer allocation:
 #include "input/input.h"
 #include "mp_fifo.h"
 
-#ifdef CONFIG_GUI
-#include "gui/interface.h"
-#endif
-
 #include "libavutil/common.h"
 
 static const vo_info_t info = {
@@ -239,11 +235,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if (!ctx->xv_format)
         return -1;
 
-#ifdef CONFIG_GUI
-    if (use_gui)
-        guiGetEvent(guiSetShVideo, 0);  // the GUI will set up / resize the window
-    else
-#endif
     {
 #ifdef CONFIG_XF86VM
         int vm = flags & VOFLAG_MODESWITCHING;
@@ -813,8 +804,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return get_image(ctx, data);
     case VOCTRL_DRAW_IMAGE:
         return draw_image(vo, data);
-    case VOCTRL_GUISUPPORT:
-        return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         if (!vo->config_ok || !vo_fs)
             return VO_FALSE;

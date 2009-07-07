@@ -644,11 +644,7 @@ your configuration file. Add
 <programlisting>
 vo = <replaceable>selected_vo</replaceable>
 </programlisting>
-to <filename>~/.mplayer/config</filename> and/or
-<programlisting>
-vo_driver = <replaceable>selected_vo</replaceable>
-</programlisting>
-to <filename>~/.mplayer/gui.conf</filename>.
+to <filename>~/.mplayer/config</filename>
 </para></answer>
 </qandaentry>
 

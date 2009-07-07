@@ -49,11 +49,6 @@
 #include "vosub_vidix.h"
 #include "vidix/vidix.h"
 
-#ifdef CONFIG_GUI
-#include "gui/interface.h"
-#endif
-
-
 static const vo_info_t info = {
     "X11 (VIDIX)",
     "xvidix",
@@ -252,13 +247,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     }
     mp_msg(MSGT_VO, MSGL_V, "Using colorkey: %x\n", colorkey);
 
-#ifdef CONFIG_GUI
-    if (use_gui)
-        guiGetEvent(guiSetShVideo, 0);  // the GUI will set up / resize the window
-    else
-    {
-#endif
-
 #ifdef X11_FULLSCREEN
         if ((flags & VOFLAG_FULLSCREEN) || (flags & VOFLAG_SWSCALE))
             aspect(&d_width, &d_height, A_ZOOM);
@@ -288,10 +276,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                     window_width, window_height, flags,
                     CopyFromParent, "xvidix", title);
             XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
-
-#ifdef CONFIG_GUI
-    }
-#endif
 
     if ((!WinID) && (flags & VOFLAG_FULLSCREEN))
     {
@@ -421,8 +405,6 @@ static int control(uint32_t request, void *data)
     {
         case VOCTRL_QUERY_FORMAT:
             return query_format(*((uint32_t *) data));
-        case VOCTRL_GUISUPPORT:
-            return VO_TRUE;
         case VOCTRL_GET_PANSCAN:
             if (!vo_config_count || !vo_fs)
                 return VO_FALSE;

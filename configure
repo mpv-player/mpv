@@ -225,8 +225,6 @@ Installation directories:
 Optional features:
   --disable-mencoder     disable MEncoder (A/V encoder) compilation [enable]
   --disable-mplayer      disable MPlayer compilation [enable]
-  --enable-gui           enable GMPlayer compilation (GTK+ GUI) [disable]
-  --enable-gtk1          force using GTK 1.2 for the GUI  [disable]
   --disable-largefiles   disable support for files > 2GB [enable]
   --enable-linux-devfs   set default devices to devfs [disable]
   --enable-termcap       use termcap database for key codes [autodetect]
@@ -429,7 +427,7 @@ Language options:
   --charset=charset      convert the console messages to this character set
   --language-doc=lang    language to use for the documentation [en]
   --language-man=lang    language to use for the man pages [en]
-  --language-msg=lang    language to use for the messages and the GUI [en]
+  --language-msg=lang    language to use for the messages [en]
   --language=lang        default language to use [en]
 Specific options override --language. You can pass a list of languages separated
 by whitespace or commas instead of a single language. Nonexisting translations
@@ -1335,8 +1333,8 @@ for ac_option do
 done
 
 if test "$_gui" = yes ; then
-  echo "Error: --enable-gui is no longer supported. Use an external frontend if you want a GUI." >&2
-  exit 1
+    die "Internal GUI was removed from MPlayer. Please use one of many available\n frontends\
+ (http://www.mplayerhq.hu/design7/projects.html#mplayer_frontends)."
 fi
 
 # Atmos: moved this here, to be correct, if --prefix is specified
@@ -7796,135 +7794,6 @@ else
 fi
 echores "$_xmms"
 
-
-# --------------- GUI specific tests begin -------------------
-echocheck "GUI"
-echo "$_gui"
-if test "$_gui" = yes ; then
-
-  # Required libraries
-  if test "$_libavcodec" != yes ||
-      ! echo $_libavdecoders | grep -q PNG_DECODER ; then
-    die "The GUI requires libavcodec with PNG support (needs zlib)."
-  fi
-  test "$_freetype" = no && test "$_bitmap_font" = no && \
-    die "The GUI requires either FreeType or bitmap font support."
-if ! win32 ; then
-  _gui_gtk=yes
-  test "$_x11" != yes && die "X11 support required for GUI compilation."
-
-  echocheck "XShape extension"
-  if test "$_xshape" = auto ; then
-    _xshape=no
-    cat > $TMPC << EOF
-#include <X11/Xlib.h>
-#include <X11/Xproto.h>
-#include <X11/Xutil.h>
-#include <X11/extensions/shape.h>
-#include <stdlib.h>
-int main(void) {
-  char *name = ":0.0";
-  Display *wsDisplay;
-  int exitvar = 0;
-  int eventbase, errorbase;
-  if (getenv("DISPLAY"))
-    name=getenv("DISPLAY");
-  wsDisplay=XOpenDisplay(name);
-  if (!XShapeQueryExtension(wsDisplay,&eventbase,&errorbase))
-    exitvar=1;
-  XCloseDisplay(wsDisplay);
-  return exitvar;
-}
-EOF
-    cc_check -lXext && _xshape=yes
-  fi
-  if test "$_xshape" = yes ; then
-    def_xshape='#define CONFIG_XSHAPE 1'
-  else
-    die "The GUI requires the X11 extension XShape (which was not found)."
-  fi
-  echores "$_xshape"
-
-#Check for GTK
-if test "$_gtk1" = no ; then
-  #Check for GTK2 :
-  echocheck "GTK+ version"
-
-  if $_pkg_config gtk+-2.0 --exists ; then
-    _gtk=$($_pkg_config gtk+-2.0 --modversion 2>/dev/null)
-    extra_cflags="$extra_cflags $($_pkg_config gtk+-2.0 --cflags 2>/dev/null)"
-    libs_mplayer="$libs_mplayer $($_pkg_config gtk+-2.0 --libs 2>/dev/null)"
-    echores "$_gtk"
-
-    # Check for GLIB2
-    if $_pkg_config glib-2.0 --exists ; then
-      echocheck "glib version"
-      _glib=$($_pkg_config glib-2.0 --modversion 2>/dev/null)
-      libs_mplayer="$libs_mplayer $($_pkg_config glib-2.0 --libs 2>/dev/null)"
-      echores "$_glib"
-
-      def_gui='#define CONFIG_GUI 1'
-      def_gtk2='#define CONFIG_GTK2 1'
-    else
-      _gtk1=yes
-      echo "GLIB-2 devel packages were not found, trying GTK 1.2"
-    fi
-  else
-    echo "GTK-2 devel packages were not found, trying GTK 1.2"
-    _gtk1=yes
-  fi
-fi
-
-if test "$_gtk1" = yes ; then
-  # Check for old GTK (1.2.x)
-  echocheck "GTK version"
-  if test -z "$_gtkconfig" ; then
-    if ( gtk-config --version ) >/dev/null 2>&1 ; then
-      _gtkconfig="gtk-config"
-    elif ( gtk12-config --version ) >/dev/null 2>&1 ; then
-      _gtkconfig="gtk12-config"
-    else
-      die "The GUI requires GTK devel packages (which were not found)."
-    fi
-  fi
-  _gtk=$($_gtkconfig --version 2>&1)
-  extra_cflags="$extra_cflags $($_gtkconfig --cflags 2>&1)"
-  libs_mplayer="$libs_mplayer $($_gtkconfig --libs 2>&1)"
-  echores "$_gtk (using $_gtkconfig)"
-
-  # Check for GLIB
-  echocheck "glib version"
-  if test -z "$_glibconfig" ; then
-    if ( glib-config --version ) >/dev/null 2>&1 ; then
-      _glibconfig="glib-config"
-    elif ( glib12-config --version ) >/dev/null 2>&1 ; then
-      _glibconfig="glib12-config"
-    else
-      die "The GUI requires GLIB devel packages (which were not found)"
-    fi
-  fi
-  _glib=$($_glibconfig --version 2>&1)
-  libs_mplayer="$libs_mplayer $($_glibconfig --libs 2>&1)"
-  echores "$_glib (using $_glibconfig)"
-
-  def_gui='#define CONFIG_GUI 1'
-  def_gtk2='#undef CONFIG_GTK2'
-fi
-
-else #if ! win32
-  _gui_win32=yes
-  libs_mplayer="$libs_mplayer -lcomdlg32 -lcomctl32 -lshell32 -lkernel32"
-  def_gui='#define CONFIG_GUI 1'
-  def_gtk2='#undef CONFIG_GTK2'
-fi #if ! win32
-
-else #if test "$_gui"
-  def_gui='#undef CONFIG_GUI'
-  def_gtk2='#undef CONFIG_GTK2'
-fi #if test "$_gui"
-# --------------- GUI specific tests end -------------------
-
-
 if test "$_charset" != "noconv" ; then
   def_charset="#define MSG_CHARSET \"$_charset\""
 else
@@ -7940,7 +7809,6 @@ if test "$?" -ne 0 ; then
     echo "No working iconv program found, use "
     echo "--charset=UTF-8 to continue anyway."
     echo "If you also have problems with iconv library functions use --charset=noconv."
-    echo "Messages in the GTK-2 interface will be broken then."
     exit 1
 else
   echores "yes"
@@ -8266,9 +8134,6 @@ GIF = $_gif
 GGI = $_ggi
 GL = $_gl
 GL_WIN32 = $_gl_win32
-GUI = $_gui
-GUI_GTK = $_gui_gtk
-GUI_WIN32 = $_gui_win32
 HAVE_POSIX_SELECT = $_posix_select
 HAVE_SYS_MMAN_H = $_mman
 IVTV = $_ivtv
@@ -8675,12 +8540,6 @@ $def_xmms
 #define XMMS_INPUT_PLUGIN_DIR "$_xmmsplugindir"
 
 
-/* GUI */
-$def_gtk2
-$def_gui
-$def_xshape
-
-
 /* Audio output drivers */
 $def_alsa
 $def_alsa1x
@@ -8952,7 +8811,7 @@ Config files successfully generated by ./configure $_configuration !
   Optimizing for: $_optimizing
 
   Languages:
-    Messages/GUI: $language_msg
+    Messages: $language_msg
     Manual pages: $language_man
     Documentation: $language_doc
 
@@ -9002,7 +8861,7 @@ skipping autodetection. This behavior is unlike what you may be used to from
 autoconf-based configure scripts that can decide to override you. This greater
 level of control comes at a price. You may have to provide the correct compiler
 and linker flags yourself.
-If you used one of these options (except --enable-gui and similar ones that
+If you used one of these options (except --enable-menu and similar ones that
 turn on internal features) and experience a compilation or linking failure,
 make sure you have passed the necessary compiler/linker flags to configure.
 

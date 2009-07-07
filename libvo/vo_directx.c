@@ -39,10 +39,6 @@
 #include "mp_fifo.h"
 #include "sub.h"
 
-#ifdef CONFIG_GUI
-#include "gui/interface.h"
-#endif
-
 #ifndef WM_XBUTTONDOWN
 # define WM_XBUTTONDOWN    0x020B
 # define WM_XBUTTONUP      0x020C
@@ -1292,11 +1288,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     if(format != primary_image_format)nooverlay = 0;
     window_aspect= (float)d_image_width / (float)d_image_height;
 
-#ifdef CONFIG_GUI
-    if(use_gui){
-        guiGetEvent(guiSetShVideo, 0);
-    }
-#endif
     /*release all directx objects*/
     if (g_cc != NULL)g_cc->lpVtbl->Release(g_cc);
     g_cc=NULL;

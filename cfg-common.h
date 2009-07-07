@@ -250,7 +250,6 @@ const m_option_t msgl_config[]={
 
 	{ "global", &mp_msg_levels[MSGT_GLOBAL], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "cplayer", &mp_msg_levels[MSGT_CPLAYER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
-	{ "gplayer", &mp_msg_levels[MSGT_GPLAYER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "vo", &mp_msg_levels[MSGT_VO], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "ao", &mp_msg_levels[MSGT_AO], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "demuxer", &mp_msg_levels[MSGT_DEMUXER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
@@ -296,7 +295,6 @@ const m_option_t msgl_config[]={
         {"help", "Available msg modules:\n"
         "   global     - common player errors/information\n"
         "   cplayer    - console player (mplayer.c)\n"
-        "   gplayer    - gui player\n"
         "   vo         - libvo\n"
         "   ao         - libao\n"
         "   demuxer    - demuxer.c (general stuff)\n"

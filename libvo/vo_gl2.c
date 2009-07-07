@@ -33,9 +33,6 @@
 
 #include "gl_common.h"
 #include "aspect.h"
-#ifdef CONFIG_GUI
-#include "gui/interface.h"
-#endif
 
 #undef TEXTUREFORMAT_ALWAYS
 #ifdef __APPLE__
@@ -550,13 +547,6 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
 }
 #endif
 
-#ifdef CONFIG_GUI
-static int config_glx_gui(uint32_t d_width, uint32_t d_height) {
-  guiGetEvent( guiSetShVideo,0 ); // the GUI will set up / resize the window
-  return 0;
-}
-#endif
-
 static int initGl(uint32_t d_width, uint32_t d_height)
 {
   fragprog = lookupTex = 0;
@@ -622,15 +612,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   image_width = width;
   image_format = format;
 
-#ifdef CONFIG_GUI
-  if (use_gui) {
-    if (config_glx_gui(d_width, d_height) == -1)
-      return -1;
-  }
-#ifndef GL_WIN32
-  else
-#endif
-#endif
 #ifdef GL_WIN32
   if (config_w32(width, height, d_width, d_height, flags, title, format) == -1)
 #else
@@ -883,8 +864,6 @@ static int control(uint32_t request, void *data)
       return VO_TRUE;
     case VOCTRL_QUERY_FORMAT:
       return query_format(*((uint32_t*)data));
-    case VOCTRL_GUISUPPORT:
-      return VO_TRUE;
     case VOCTRL_ONTOP:
       vo_gl_ontop();
       return VO_TRUE;

@@ -2,8 +2,7 @@ Welcome to MPlayer, The Movie Player. MPlayer can play most standard video
 formats out of the box and almost all others with the help of external codecs.
 MPlayer currently works best from the command line, but visual feedback for
 many functions is available from its onscreen status display (OSD), which is
-also used for displaying subtitles. MPlayer also has a GUI with skin support and
-several unofficial alternative graphical frontends are available.
+also used for displaying subtitles.
 
 MEncoder is a command line video encoder for advanced users that can be built
 from the MPlayer source tree. Unofficial graphical frontends exist but are
@@ -23,7 +22,6 @@ Requirements:
   package(s) installed.
 - To compile MPlayer with X11 support, you need to have the X Window System
   development packages (like for XFree86 or X.Org) installed.
-- For the GUI you need the GTK development packages.
 
 
 Before you start...
@@ -39,8 +37,7 @@ STEP0: Getting MPlayer
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Official releases and Subversion snapshots, as well as binary codec packages
-and a number of different skins for the GUI are available from the download
-section of our homepage at
+available from the download section of our homepage at
 
   http://www.mplayerhq.hu/dload.html
 
@@ -54,9 +51,9 @@ Please note that binary codecs only work on the processor architecture they
 were compiled for. Choose the correct package for your processor. No other
 package is necessary.
 
-The GUI needs at least one skin and codec packages add support for some more
-video and audio formats. MPlayer does not come with any of these by default,
-you have to download and install them separately.
+Codec packages add support for some more video and audio formats. MPlayer does
+not come with any of these by default, you have to download and install them
+separately.
 
 You can also get MPlayer via Subversion. Issue the following commands to get
 the latest sources:
@@ -90,14 +87,8 @@ MPlayer can be adapted to all kinds of needs and hardware environments. Run
 
   ./configure
 
-to configure MPlayer with the default options. GUI support has to be enabled
-separately, run
-
-  ./configure --enable-gui
-
-if you want to use the GUI.
-
-If something does not work as expected, try
+to configure MPlayer with the default options. If something does not work as
+expected, try
 
   ./configure --help
 
@@ -136,15 +127,15 @@ NOTE: If you run Debian you can configure, compile and build a proper Debian
   fakeroot debian/rules binary
 
 If you want to pass custom options to configure, you can set up the
-DEB_BUILD_OPTIONS environment variable. For instance, if you want GUI
-and OSD menu support you would use:
+DEB_BUILD_OPTIONS environment variable. For instance, if you want OSD menu
+support you would use:
 
-  DEB_BUILD_OPTIONS="--enable-gui --enable-menu" fakeroot debian/rules binary
+  DEB_BUILD_OPTIONS="--enable-menu" fakeroot debian/rules binary
 
 You can also pass some variables to the Makefile. For example, if you want
 to compile with gcc 3.4 even if it's not the default compiler:
 
-  CC=gcc-3.4 DEB_BUILD_OPTIONS="--enable-gui" fakeroot debian/rules binary
+  CC=gcc-3.4 DEB_BUILD_OPTIONS="--enable-menu" fakeroot debian/rules binary
 
 To clean up the source tree run the following command:
 
@@ -161,31 +152,13 @@ you can create a symbolic link from either ~/.mplayer/subfont.ttf or
 /usr/local/share/mplayer/subfont.ttf to your TrueType font.
 
 
-____________________________
-STEP5: Installing a GUI skin
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Unpack the archive and put the contents in /usr/local/share/mplayer/skins/ or
-~/.mplayer/skins/. MPlayer will use the skin in the subdirectory named default
-of /usr/local/share/mplayer/skins/ or ~/.mplayer/skins/ unless told otherwise
-via the '-skin' switch. You should therefore rename your skin subdirectory or
-make a suitable symbolic link.
-
-
 __________________
-STEP6: Let's play!
+STEP5: Let's play!
 ~~~~~~~~~~~~~~~~~~
 
 That's it for the moment. To start playing movies, open a command line and try
 
   mplayer <moviefile>
-
-or for the GUI
-
-  gmplayer <moviefile>
-
-gmplayer is a symbolic link to mplayer created by 'make install'.
-Without <moviefile>, gmplayer will start with the GUI filepicker.
 
 To play a VCD track or a DVD title, try:
 

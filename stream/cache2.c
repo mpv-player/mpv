@@ -37,7 +37,6 @@ static void *ThreadProc(void *s);
 
 #include "stream.h"
 #include "cache2.h"
-extern int use_gui;
 
 typedef struct {
   // constats:
@@ -374,9 +373,6 @@ static void ThreadProc( void *s ){
 #endif
 #endif
 
-#ifdef CONFIG_GUI
-  use_gui = 0; // mp_msg may not use gui stuff in forked code
-#endif
 // cache thread mainloop:
   signal(SIGTERM,exit_sighandler); // kill
   do {

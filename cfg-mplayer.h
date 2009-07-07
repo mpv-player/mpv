@@ -39,10 +39,6 @@ void vo_zr_revertoption(const m_option_t* opt,char* pram);
 
 extern m_option_t dxr2_opts[];
 
-extern char * skinName;
-extern int guiWinID;
-
-
 extern int sws_flags;
 int readPPOpt(void *conf, char *arg);
 void revertPPOpt(void *conf, char* opt);
@@ -297,15 +293,9 @@ const m_option_t mplayer_opts[]={
 	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
 
-	{"gui", "The -gui option will only work as the first command line argument.\n", CONF_TYPE_PRINT, 0, 0, 0, (void *)1},
-	{"nogui", "The -nogui option will only work as the first command line argument.\n", CONF_TYPE_PRINT, 0, 0, 0, (void *)1},
-
-#ifdef CONFIG_GUI
-	{"skin", &skinName, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
-	{"enqueue", &enqueue, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"noenqueue", &enqueue, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-	{"guiwid", &guiWinID, CONF_TYPE_INT, 0, 0, 0, NULL},
-#endif
+    // these should be removed when gmplayer is forgotten
+    {"gui", "Internal GUI was removed. Use some other frontend instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+    {"nogui", "Internal GUI was removed, -nogui is no longer valid.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 
 	OPT_FLAG_CONSTANTS("noloop", loop_times, 0, 0, -1),
 	OPT_INTRANGE("loop", loop_times, 0, -1, 10000),

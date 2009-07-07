@@ -550,41 +550,6 @@ SRCS_MPLAYER-$(GGI)          += libvo/vo_ggi.c
 SRCS_MPLAYER-$(GIF)          += libvo/vo_gif89a.c
 SRCS_MPLAYER-$(GL)           += libvo/gl_common.c libvo/vo_gl.c libvo/vo_gl2.c
 SRCS_MPLAYER-$(GL_WIN32)     += libvo/w32_common.c
-SRCS_MPLAYER-$(GUI)          += gui/bitmap.c
-SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
-                                gui/cfg.c \
-                                gui/interface.c \
-                                gui/mplayer/gui_common.c \
-                                gui/mplayer/menu.c \
-                                gui/mplayer/mw.c \
-                                gui/mplayer/pb.c \
-                                gui/mplayer/play.c \
-                                gui/mplayer/sw.c \
-                                gui/mplayer/widgets.c \
-                                gui/mplayer/gtk/about.c \
-                                gui/mplayer/gtk/eq.c \
-                                gui/mplayer/gtk/fs.c \
-                                gui/mplayer/gtk/gtk_common.c \
-                                gui/mplayer/gtk/gtk_url.c \
-                                gui/mplayer/gtk/mb.c \
-                                gui/mplayer/gtk/menu.c \
-                                gui/mplayer/gtk/opts.c \
-                                gui/mplayer/gtk/pl.c \
-                                gui/mplayer/gtk/sb.c \
-                                gui/skin/cut.c \
-                                gui/skin/font.c \
-                                gui/skin/skin.c \
-                                gui/wm/ws.c \
-                                gui/wm/wsxdnd.c \
-
-SRCS_MPLAYER-$(GUI_WIN32)    += gui/win32/dialogs.c \
-                                gui/win32/gui.c \
-                                gui/win32/interface.c \
-                                gui/win32/playlist.c \
-                                gui/win32/preferences.c \
-                                gui/win32/skinload.c \
-                                gui/win32/widgetrender.c \
-                                gui/win32/wincfg.c \
 
 SRCS_MPLAYER-$(IVTV)         += libao2/ao_ivtv.c libvo/vo_ivtv.c
 SRCS_MPLAYER-$(JACK)         += libao2/ao_jack.c
@@ -732,17 +697,10 @@ DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
 
-INSTALL_TARGETS-$(GUI)      += install-gui
 INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mencoder-man
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
 
 DIRS =  . \
-        gui \
-        gui/mplayer \
-        gui/mplayer/gtk \
-        gui/skin \
-        gui/wm \
-        gui/win32 \
         input \
         liba52 \
         libaf \
@@ -882,7 +840,7 @@ version.h: version.sh
 # Make sure all generated header files are created.
 codec-cfg.d codec-cfg.o: codecs.conf.h
 $(DEPS) $(MENCODER_DEPS) $(MPLAYER_DEPS): help_mp.h
-$(call ADDSUFFIXES,.d .o,mpcommon vobsub stream/stream_cddb stream/network libmpdemux/muxer_avi gui/win32/gui): version.h
+$(call ADDSUFFIXES,.d .o,mpcommon vobsub stream/stream_cddb stream/network libmpdemux/muxer_avi): version.h
 
 libdvdcss/%:   CFLAGS := -Ilibdvdcss -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.10\" $(CFLAGS_LIBDVDCSS) $(CFLAGS)
 libdvdnav/%:   CFLAGS := -Ilibdvdnav -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H -DVERSION=\"MPlayer-custom\" $(CFLAGS)
@@ -926,18 +884,8 @@ install-dirs:
 install-%: %$(EXESUF) install-dirs
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
 
-install-gui: install-mplayer
-	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
-	$(INSTALL) -d $(DATADIR)/skins $(prefix)/share/pixmaps $(prefix)/share/applications
-	$(INSTALL) -m 644 etc/mplayer.xpm $(prefix)/share/pixmaps/
-	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/
-
-install-gui-man:      $(foreach lang,$(MAN_LANGS),install-gui-man-$(lang))
 install-mencoder-man: $(foreach lang,$(MAN_LANGS),install-mencoder-man-$(lang))
 install-mplayer-man:  $(foreach lang,$(MAN_LANGS),install-mplayer-man-$(lang))
-
-install-gui-man-en: install-mplayer-man-en
-	cd $(MANDIR)/man1/ && ln -sf mplayer.1 gmplayer.1
 
 install-mencoder-man-en: install-mplayer-man-en
 	cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1
@@ -945,11 +893,6 @@ install-mencoder-man-en: install-mplayer-man-en
 install-mplayer-man-en:
 	if test ! -d $(MANDIR)/man1 ; then $(INSTALL) -d $(MANDIR)/man1 ; fi
 	$(INSTALL) -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
-
-define GUI_MAN_RULE
-install-gui-man-$(lang): install-mplayer-man-$(lang)
-	cd $(MANDIR)/$(lang)/man1/ && ln -sf mplayer.1 gmplayer.1
-endef
 
 define MENCODER_MAN_RULE
 install-mencoder-man-$(lang): install-mplayer-man-$(lang)
@@ -962,7 +905,6 @@ install-mplayer-man-$(lang):
 	$(INSTALL) -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
 endef
 
-$(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(GUI_MAN_RULE)))
 $(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MENCODER_MAN_RULE)))
 $(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MPLAYER_MAN_RULE)))
 

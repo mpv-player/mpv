@@ -257,26 +257,17 @@ int select_audio(demuxer_t* demuxer, int audio_id, char* audio_lang)
 /* Parse -noconfig common to both programs */
 int disable_system_conf=0;
 int disable_user_conf=0;
-#ifdef CONFIG_GUI
-int disable_gui_conf=0;
-#endif /* CONFIG_GUI */
 
 /* Disable all configuration files */
 static void noconfig_all(void)
 {
     disable_system_conf = 1;
     disable_user_conf = 1;
-#ifdef CONFIG_GUI
-    disable_gui_conf = 1;
-#endif /* CONFIG_GUI */
 }
 
 const m_option_t noconfig_opts[] = {
     {"all", noconfig_all, CONF_TYPE_FUNC, CONF_GLOBAL|CONF_NOCFG|CONF_PRE_PARSE, 0, 0, NULL},
     {"system", &disable_system_conf, CONF_TYPE_FLAG, CONF_GLOBAL|CONF_NOCFG|CONF_PRE_PARSE, 0, 1, NULL},
     {"user", &disable_user_conf, CONF_TYPE_FLAG, CONF_GLOBAL|CONF_NOCFG|CONF_PRE_PARSE, 0, 1, NULL},
-#ifdef CONFIG_GUI
-    {"gui", &disable_gui_conf, CONF_TYPE_FLAG, CONF_GLOBAL|CONF_NOCFG|CONF_PRE_PARSE, 0, 1, NULL},
-#endif /* CONFIG_GUI */
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };

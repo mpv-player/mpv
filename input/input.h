@@ -140,18 +140,6 @@ typedef enum {
   MP_CMD_DVDNAV_PREVMENU,
   MP_CMD_DVDNAV_MOUSECLICK,
 
-  /// GUI commands
-  MP_CMD_GUI_EVENTS = 5000,
-  MP_CMD_GUI_LOADFILE,
-  MP_CMD_GUI_LOADSUBTITLE,
-  MP_CMD_GUI_ABOUT,
-  MP_CMD_GUI_PLAY,
-  MP_CMD_GUI_STOP,
-  MP_CMD_GUI_PLAYLIST,
-  MP_CMD_GUI_PREFERENCES,
-  MP_CMD_GUI_FULLSCREEN,
-  MP_CMD_GUI_SKINBROWSER,
-
   /// DVB commands
   MP_CMD_DVB_SET_CHANNEL = 5101,
 
@@ -297,7 +285,7 @@ char *mp_input_get_section(struct input_ctx *ictx);
 
 // When you create a new driver you should add it in these 2 functions.
 struct input_conf;
-struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui);
+struct input_ctx *mp_input_init(struct input_conf *input_conf);
 
 void mp_input_uninit(struct input_ctx *ictx);
 

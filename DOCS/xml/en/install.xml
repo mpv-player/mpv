@@ -106,10 +106,6 @@ answers.
 
 <itemizedlist>
 <listitem><para>
-  Decide if you need GUI. If you do, see the <link linkend="gui">GUI</link>
-  section before compiling.
-</para></listitem>
-<listitem><para>
   If you want to install <application>MEncoder</application> (our great
   all-purpose encoder), see the
   <link linkend="mencoder"><application>MEncoder</application></link> section.
@@ -184,27 +180,10 @@ See the <link linkend="subosd">Subtitles and OSD</link> section for details.
 <title>What about the GUI?</title>
 
 <para>
-The GUI needs GTK 1.2.x or GTK 2.0 (it isn't fully GTK, but the panels are),
-so <systemitem class="library">GTK</systemitem> (and the devel stuff, usually
-called <systemitem class="library">gtk-dev</systemitem>) has to be installed.
-You can build it by specifying <option>--enable-gui</option> during
-<filename>./configure</filename>. Then, to turn on GUI mode, you have to
-execute the <command>gmplayer</command> binary.
-</para>
-
-<para>
-As <application>MPlayer</application> doesn't have a skin included, you
-have to download one if you want to use the GUI. See the <ulink
-url="http://www.mplayerhq.hu/dload.html">download page</ulink>.
-It should be extracted to the usual system-wide directory (<filename
-class="directory">$PREFIX/share/mplayer/skins</filename>), or to <filename
-class="directory">$HOME/.mplayer/skins</filename>.
-<application>MPlayer</application> by default looks in these directories
-for a directory named <filename class="directory">default</filename>, but
-you can use the <option>-skin <replaceable>newskin</replaceable></option>
-option, or the <literal>skin=newskin</literal> config file directive to use
-the skin in the <filename class="directory">*/skins/newskin</filename>
-directory.
+MPlayer used to have an internal GUI, but it was removed because it was
+buggy, unmaintained and there are much better alternatives. See <ulink
+url="http://www.mplayerhq.hu/design7/projects.html#mplayer_frontends">the
+frontends page</ulink> for a list of existing GUIs.
 </para>
 </sect1>
 

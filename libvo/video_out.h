@@ -39,9 +39,6 @@
 #define VOCTRL_QUERY_FORMAT 2
 /* signal a device reset seek */
 #define VOCTRL_RESET 3
-/* true if vo driver can use GUI created windows */
-#define VOCTRL_GUISUPPORT 4
-#define VOCTRL_GUI_NOWINDOW 19
 /* used to switch to fullscreen */
 #define VOCTRL_FULLSCREEN 5
 /* signal a device pause */
@@ -69,7 +66,6 @@ struct voctrl_get_equalizer_args {
     const char *name;
     int *valueptr;
 };
-//#define VOCTRL_GUI_NOWINDOW 19
 /* Frame duplication */
 #define VOCTRL_DUPLICATE_FRAME 20
 // ... 21
