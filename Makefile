@@ -425,6 +425,7 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_flip.c \
               libmpcodecs/vf_format.c \
               libmpcodecs/vf_framestep.c \
+              libmpcodecs/vf_gradfun.c \
               libmpcodecs/vf_halfpack.c \
               libmpcodecs/vf_harddup.c \
               libmpcodecs/vf_hqdn3d.c \
