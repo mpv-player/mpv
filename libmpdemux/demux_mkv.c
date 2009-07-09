@@ -2958,7 +2958,7 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
     }
     // Adjust the target a little bit to catch cases where the target position
     // specifies a keyframe with high, but not perfect, precision.
-    rel_seek_secs += flags & SEEK_FORWARD ? -0.001 : 0.001;
+    rel_seek_secs += flags & SEEK_FORWARD ? -0.005 : 0.005;
 
   free_cached_dps (demuxer);
   if (!(flags & SEEK_FACTOR))  /* time in secs */
