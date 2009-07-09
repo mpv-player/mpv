@@ -2963,6 +2963,7 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
   free_cached_dps (demuxer);
   if (!(flags & SEEK_FACTOR))  /* time in secs */
     {
+      mkv_index_t *index = NULL;
       mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
       stream_t *s = demuxer->stream;
       int64_t target_timecode = 0, diff, min_diff=0xFFFFFFFFFFFFFFFLL;
@@ -3032,7 +3033,6 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
         }
       else
         {
-          mkv_index_t *index = NULL;
           int seek_id = (demuxer->video->id < 0) ? demuxer->audio->id : demuxer->video->id;
 
           /* let's find the entry in the indexes with the smallest */
@@ -3077,7 +3077,7 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
       if (flags & SEEK_FORWARD)
         mkv_d->skip_to_timecode = target_timecode;
       else
-          mkv_d->skip_to_timecode = 0;
+          mkv_d->skip_to_timecode = index ? index->timecode : 0;
       mkv_d->a_skip_to_keyframe = 1;
 
       demux_mkv_fill_buffer(demuxer, NULL);
