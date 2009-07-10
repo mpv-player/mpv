@@ -100,13 +100,13 @@ typedef struct mkv_track
   int type;
 
   uint32_t v_width, v_height, v_dwidth, v_dheight;
-  float v_frate;
+  double v_frate;
 
   uint32_t a_formattag;
   uint32_t a_channels, a_bps;
   float a_sfreq;
 
-  float default_duration;
+  double default_duration;
 
   int default_track;
 
@@ -117,8 +117,8 @@ typedef struct mkv_track
   int realmedia;
   int64_t rv_kf_base;
   int rv_kf_pts;
-  float rv_pts;  /* previous video timestamp */
-  float ra_pts;  /* previous audio timestamp */
+  double rv_pts;  /* previous video timestamp */
+  double ra_pts;  /* previous audio timestamp */
 
   /** realaudio descrambling */
   int sub_packet_size; ///< sub packet size, per stream
@@ -126,13 +126,13 @@ typedef struct mkv_track
   int coded_framesize; ///< coded frame size, per stream
   int audiopk_size; ///< audio packet size
   unsigned char *audio_buf; ///< place to store reordered audio data
-  float *audio_timestamp; ///< timestamp for each audio packet
+  double *audio_timestamp; ///< timestamp for each audio packet
   int sub_packet_cnt; ///< number of subpacket already received
   int audio_filepos; ///< file position of first audio packet in block
 
   /* stuff for quicktime */
   int fix_i_bps;
-  float qt_last_a_pts;
+  double qt_last_a_pts;
 
   int subtitle_type;
 
@@ -142,7 +142,7 @@ typedef struct mkv_track
   int reorder_timecodes;
   demux_packet_t **cached_dps;
   int num_cached_dps, num_allocated_dps;
-  float max_pts;
+  double max_pts;
 
   /* generic content encoding support */
   mkv_content_encoding_t *encodings;
@@ -162,7 +162,7 @@ typedef struct mkv_demuxer
 {
   off_t segment_start;
 
-  float duration, last_pts;
+  double duration, last_pts;
   uint64_t last_filepos;
 
   mkv_track_t **tracks;
@@ -1710,7 +1710,7 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
       sh_v->disp_w = track->v_width;
       sh_v->disp_h = track->v_height;
       if (track->v_dheight)
-      sh_v->aspect = (float)track->v_dwidth / (float)track->v_dheight;
+      sh_v->aspect = (double)track->v_dwidth / track->v_dheight;
     }
   else
     {
@@ -1928,7 +1928,7 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
       else
         {
           sh_a->codecdata_len = 2;
-          track->default_duration = 1024.0 / (float)sh_a->samplerate;
+          track->default_duration = 1024.0 / sh_a->samplerate;
         }
     }
   else if (track->a_formattag == mmioFOURCC('v', 'r', 'b', 's'))  /* VORBIS */
@@ -1979,25 +1979,25 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
           sh_a->wf->nAvgBytesPerSec = atrc_fl2bps[flavor];
           sh_a->wf->nBlockAlign = track->sub_packet_size;
           track->audio_buf = malloc(track->sub_packet_h * track->audiopk_size);
-          track->audio_timestamp = malloc(track->sub_packet_h * sizeof(float));
+          track->audio_timestamp = malloc(track->sub_packet_h * sizeof(double));
           break;
         case mmioFOURCC('c', 'o', 'o', 'k'):
           sh_a->wf->nAvgBytesPerSec = cook_fl2bps[flavor];
           sh_a->wf->nBlockAlign = track->sub_packet_size;
           track->audio_buf = malloc(track->sub_packet_h * track->audiopk_size);
-          track->audio_timestamp = malloc(track->sub_packet_h * sizeof(float));
+          track->audio_timestamp = malloc(track->sub_packet_h * sizeof(double));
           break;
         case mmioFOURCC('s', 'i', 'p', 'r'):
           sh_a->wf->nAvgBytesPerSec = sipr_fl2bps[flavor];
           sh_a->wf->nBlockAlign = track->coded_framesize;
           track->audio_buf = malloc(track->sub_packet_h * track->audiopk_size);
-          track->audio_timestamp = malloc(track->sub_packet_h * sizeof(float));
+          track->audio_timestamp = malloc(track->sub_packet_h * sizeof(double));
           break;
         case mmioFOURCC('2', '8', '_', '8'):
           sh_a->wf->nAvgBytesPerSec = 3600;
           sh_a->wf->nBlockAlign = track->coded_framesize;
           track->audio_buf = malloc(track->sub_packet_h * track->audiopk_size);
-          track->audio_timestamp = malloc(track->sub_packet_h * sizeof(float));
+          track->audio_timestamp = malloc(track->sub_packet_h * sizeof(double));
           break;
       }
 
@@ -2420,8 +2420,8 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
   sub_utf8 = 1;
   dp = new_demux_packet(size);
   memcpy(dp->buffer, block, size);
-  dp->pts = timecode / 1000.0f;
-  dp->endpts = (timecode + block_duration) / 1000.0f;
+  dp->pts = timecode / 1000.0;
+  dp->endpts = (timecode + block_duration) / 1000.0;
   ds_add_packet(demuxer->sub, dp);
 }
 
@@ -2580,7 +2580,7 @@ flush_cached_dps (demuxer_t *demuxer, mkv_track_t *track)
     ok = 1;
     for (i = 1; i < track->num_cached_dps; i++)
       if (track->cached_dps[i - 1]->pts > track->cached_dps[i]->pts) {
-        float tmp_pts = track->cached_dps[i - 1]->pts;
+        double tmp_pts = track->cached_dps[i - 1]->pts;
         track->cached_dps[i - 1]->pts = track->cached_dps[i]->pts;
         track->cached_dps[i]->pts = tmp_pts;
         ok = 0;
@@ -2654,7 +2654,7 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
   uint32_t *lace_size;
   uint8_t laces, flags;
   int i, num, tmp, use_this_block = 1;
-  float current_pts;
+  double current_pts;
   int16_t time;
 
   /* first byte(s): track num */
@@ -2670,7 +2670,7 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
     return 0;
   block += old_length - length;
 
-  tc = ((time*mkv_d->tc_scale+mkv_d->cluster_tc) /1000000.0);
+  tc = (time*mkv_d->tc_scale+mkv_d->cluster_tc) / 1000000.0 + 0.5;
   if (tc < 0)
     tc = 0;
   current_pts = tc / 1000.0;
@@ -3041,7 +3041,8 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
             if (mkv_d->indexes[i].tnum == seek_id)
               {
                 diff = target_timecode -
-                       (int64_t) mkv_d->indexes[i].timecode * mkv_d->tc_scale / 1000000.0;
+                       (int64_t)(mkv_d->indexes[i].timecode * mkv_d->tc_scale
+                                 / 1000000.0 + 0.5);
 
                 if (flags & SEEK_BACKWARD) {
                     // Seek backward: find the last index position
