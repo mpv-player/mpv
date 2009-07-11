@@ -2930,7 +2930,7 @@ if test "$_posix4" = yes ; then
 fi
 echores "$_posix4"
 
-for func in llrint lrint lrintf round roundf truncf; do
+for func in llrint log2 lrint lrintf round roundf truncf; do
 echocheck $func
 cat > $TMPC << EOF
 #include <math.h>
@@ -8526,6 +8526,7 @@ $def_gettimeofday
 $def_glob
 $def_langinfo
 $def_llrint
+$def_log2
 $def_lrint
 $def_lrintf
 $def_map_memalign
