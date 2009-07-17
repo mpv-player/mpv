@@ -8864,6 +8864,7 @@ $def_yasm
 #define HAVE_POLL_H 1
 #define HAVE_PPC4XX 0
 #define HAVE_VIRTUALALLOC 0
+#define HAVE_ATTRIBUTE_PACKED 1
 
 /* Some FFmpeg codecs depend on these. Enable them unconditionally for now. */
 #define CONFIG_AANDCT 1
