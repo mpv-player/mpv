@@ -341,8 +341,8 @@ Codecs:
   --disable-liba52-internal disable builtin liba52 [autodetect]
   --disable-libmpeg2        disable builtin libmpeg2 [autodetect]
   --disable-musepack        disable musepack support [autodetect]
-  --disable-libamr_nb       disable libamr narrowband [autodetect]
-  --disable-libamr_wb       disable libamr wideband [autodetect]
+  --disable-libopencore_amrnb disable libopencore_amr narrowband [autodetect]
+  --disable-libopencore_amrwb disable libopencore_amr wideband [autodetect]
   --disable-decoder=DECODER disable specified FFmpeg decoder
   --enable-decoder=DECODER  enable specified FFmpeg decoder
   --disable-encoder=ENCODER disable specified FFmpeg encoder
@@ -535,8 +535,8 @@ _prefix="/usr/local"
 _libavutil_a=auto
 _libavutil_so=auto
 _libavcodec_a=auto
-_libamr_nb=auto
-_libamr_wb=auto
+_libopencore_amrnb=auto
+_libopencore_amrwb=auto
 _libavdecoders_all=$(sed -n 's/^[^#]*DEC.*(.*, *\(.*\)).*/\1_decoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]')
 _libavdecoders=$(echo $_libavdecoders_all | sed -e 's/ LIB[A-Z0-9_]*_DECODER//g' -e s/MPEG4AAC_DECODER//)
 _libavencoders_all=$(sed -n 's/^[^#]*ENC.*(.*, *\(.*\)).*/\1_encoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]')
@@ -1145,10 +1145,10 @@ for ac_option do
   --disable-libavcodec_a)	_libavcodec_a=no	;;
   --enable-libavcodec_so)	_libavcodec_so=yes	;;
   --disable-libavcodec_so)	_libavcodec_so=no	;;
-  --enable-libamr_nb)	_libamr_nb=yes	;;
-  --disable-libamr_nb)	_libamr_nb=no	;;
-  --enable-libamr_wb)	_libamr_wb=yes	;;
-  --disable-libamr_wb)	_libamr_wb=no	;;
+  --enable-libopencore_amrnb)	_libopencore_amrnb=yes	;;
+  --disable-libopencore_amrnb)	_libopencore_amrnb=no	;;
+  --enable-libopencore_amrwb)	_libopencore_amrwb=yes	;;
+  --disable-libopencore_amrwb)	_libopencore_amrwb=no	;;
   --enable-decoder=*)	_libavdecoders="$_libavdecoders $(echo $ac_option | cut -d '=' -f 2)" ;;
   --disable-decoder=*)	_libavdecoders=$(echo $_libavdecoders | sed "s/$(echo $ac_option | cut -d '=' -f 2)//g") ;;
   --enable-encoder=*)	_libavencoders="$_libavencoders $(echo $ac_option | cut -d '=' -f 2)" ;;
@@ -7061,60 +7061,58 @@ test "$_libswscale_so" = yes \
   && def_libswscale_so='#define CONFIG_LIBSWSCALE_SO 1'
 echores "$_libswscale"
 
-echocheck "libamr narrowband"
-if test "$_libamr_nb" = auto ; then
-  _libamr_nb=no
+echocheck "libopencore_amr narrowband"
+if test "$_libopencore_amrnb" = auto ; then
+  _libopencore_amrnb=no
   cat > $TMPC << EOF
-#include <amrnb/sp_dec.h>
-int main(void) { Speech_Decode_Frame_init(); return 0; }
+#include <opencore-amrnb/interf_dec.h>
+int main(void) { Decoder_Interface_init(); return 0; }
 EOF
-  cc_check -lamrnb && _libamr_nb=yes
+  cc_check -lopencore-amrnb && _libopencore_amrnb=yes
   if test "$_libavcodec_a" != yes ; then
-    _libamr_nb=no
-    _res_comment="libavcodec (static) is required by libamr_nb, sorry"
+    _libopencore_amrnb=no
+    _res_comment="libavcodec (static) is required by libopencore_amrnb, sorry"
   fi
 fi
-if test "$_libamr_nb" = yes ; then
-  _libamr=yes
-  extra_ldflags="$extra_ldflags -lamrnb"
-  def_libamr='#define CONFIG_LIBAMR 1'
-  def_libamr_nb='#define CONFIG_LIBAMR_NB 1'
-  _libavdecoders="$_libavdecoders LIBAMR_NB_DECODER"
-  _libavencoders="$_libavencoders LIBAMR_NB_ENCODER"
-  _codecmodules="libamr_nb $_codecmodules"
+if test "$_libopencore_amrnb" = yes ; then
+  _libopencore_amr=yes
+  extra_ldflags="$extra_ldflags -lopencore-amrnb"
+  def_libopencore_amrnb='#define CONFIG_LIBOPENCORE_AMRNB 1'
+  _libavdecoders="$_libavdecoders LIBOPENCORE_AMRNB_DECODER"
+  _libavencoders="$_libavencoders LIBOPENCORE_AMRNB_DECODER"
+  _codecmodules="libopencore_amrnb $_codecmodules"
 else
-  def_libamr_nb='#define CONFIG_LIBAMR_NB 0'
-  _nocodecmodules="libamr_nb $_nocodecmodules"
+  def_libopencore_amrnb='#define CONFIG_LIBOPENCORE_AMRNB 0'
+  _nocodecmodules="libopencore_amrnb $_nocodecmodules"
 fi
-echores "$_libamr_nb"
+echores "$_libopencore_amrnb"
 
 
-echocheck "libamr wideband"
-if test "$_libamr_wb" = auto ; then
-  _libamr_wb=no
+echocheck "libopencore_amr wideband"
+if test "$_libopencore_amrwb" = auto ; then
+  _libopencore_amrwb=no
   cat > $TMPC << EOF
-#include <amrwb/dec_if.h>
+#include <opencore-amrwb/dec_if.h>
 int main(void) { D_IF_init(); return 0; }
 EOF
-  cc_check -lamrwb && _libamr_wb=yes
+  cc_check -lopencore-amrwb && _libopencore_amrwb=yes
   if test "$_libavcodec_a" != yes ; then
-    _libamr_wb=no
-    _res_comment="libavcodec (static) is required by libamr_wb, sorry"
+    _libopencore_amrwb=no
+    _res_comment="libavcodec (static) is required by libopencore_amrwb, sorry"
   fi
 fi
-if test "$_libamr_wb" = yes ; then
-  _libamr=yes
-  extra_ldflags="$extra_ldflags -lamrwb"
-  def_libamr='#define CONFIG_LIBAMR 1'
-  def_libamr_wb='#define CONFIG_LIBAMR_WB 1'
-  _libavdecoders="$_libavdecoders LIBAMR_WB_DECODER"
-  _libavencoders="$_libavencoders LIBAMR_WB_ENCODER"
-  _codecmodules="libamr_wb $_codecmodules"
+if test "$_libopencore_amrwb" = yes ; then
+  _libopencore_amr=yes
+  extra_ldflags="$extra_ldflags -lopencore-amrwb"
+  def_libopencore_amrwb='#define CONFIG_LIBOPENCORE_AMRWB 1'
+  _libavdecoders="$_libavdecoders LIBOPENCORE_AMRWB_DECODER"
+  _libavencoders="$_libavencoders LIBOPENCORE_AMRWB_DECODER"
+  _codecmodules="libopencore_amrwb $_codecmodules"
 else
-  def_libamr_wb='#define CONFIG_LIBAMR_WB 0'
-  _nocodecmodules="libamr_wb $_nocodecmodules"
+  def_libopencore_amrwb='#define LIBOPENCORE_AMRWB 0'
+  _nocodecmodules="libopencore_amrwb $_nocodecmodules"
 fi
-echores "$_libamr_wb"
+echores "$_libopencore_amrwb"
 
 echocheck "libdv-0.9.5+"
 if test "$_libdv" = auto ; then
@@ -8393,12 +8391,11 @@ CONFIG_RDFT=yes
 CONFIG_BZLIB=$bzlib
 CONFIG_ENCODERS=yes
 CONFIG_GPL=yes
-CONFIG_LIBAMR=$_libamr
-CONFIG_LIBAMR_NB=$_libamr_nb
-CONFIG_LIBAMR_WB=$_libamr_wb
 CONFIG_LIBDIRAC=$_libdirac_lavc
 CONFIG_LIBFAAC=$_faac_lavc
 CONFIG_LIBMP3LAME=$_mp3lame_lavc
+CONFIG_LIBOPENCORE_AMRNB=$_libopencore_amrnb
+CONFIG_LIBOPENCORE_AMRWB=$_libopencore_amrwb
 CONFIG_LIBSCHROEDINGER=$_libschroedinger_lavc
 CONFIG_LIBVORBIS=$_libvorbis
 CONFIG_LIBX264=$_x264_lavc
@@ -8882,10 +8879,9 @@ $def_yasm
 
 /* External libraries used through libavcodec. */
 $def_faac_lavc
-$def_libamr
-$def_libamr_nb
-$def_libamr_wb
 $def_libdirac_lavc
+$def_libopencore_amrnb
+$def_libopencore_amrwb
 $def_libschroedinger_lavc
 $def_mp3lame_lavc
 $def_x264_lavc
