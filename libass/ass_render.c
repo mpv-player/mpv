@@ -317,6 +317,11 @@ static ass_image_t* my_draw_bitmap(unsigned char* bitmap, int bitmap_w, int bitm
 {
 	ass_image_t* img = calloc(1, sizeof(ass_image_t));
 
+	assert(dst_x >= 0);
+	assert(dst_y >= 0);
+	assert(dst_x + bitmap_w < frame_context.width);
+	assert(dst_y + bitmap_h < frame_context.height);
+
 	img->w = bitmap_w;
 	img->h = bitmap_h;
 	img->stride = stride;
@@ -598,6 +603,7 @@ static double x2scr_pos(double x) {
 	return x*frame_context.orig_width / frame_context.track->PlayResX +
 		global_settings->left_margin;
 }
+
 /**
  * \brief Mapping between script and screen coordinates
  */
@@ -2147,6 +2153,11 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		render_context.clip_y0 = y2scr_pos(render_context.clip_y0);
 		render_context.clip_y1 = y2scr_pos(render_context.clip_y1);
 	}
+
+	render_context.clip_x0 = FFMIN(FFMAX(render_context.clip_x0, 0), frame_context.width);
+	render_context.clip_x1 = FFMIN(FFMAX(render_context.clip_x1, 0), frame_context.width);
+	render_context.clip_y0 = FFMIN(FFMAX(render_context.clip_y0, 0), frame_context.height);
+	render_context.clip_y1 = FFMIN(FFMAX(render_context.clip_y1, 0), frame_context.height);
 
 	// calculate rotation parameters
 	{
