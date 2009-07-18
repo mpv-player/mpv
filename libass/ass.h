@@ -34,6 +34,8 @@ typedef struct ass_image_s {
 	int w, h; // bitmap width/height
 	int stride; // bitmap stride
 	unsigned char* bitmap; // 1bpp stride*h alpha buffer
+	                       // Actual bitmap size may be as low as
+	                       // stride * (h-1) + w
 	uint32_t color; // RGBA
 	int dst_x, dst_y; // bitmap placement inside the video frame
 
