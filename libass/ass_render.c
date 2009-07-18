@@ -346,19 +346,18 @@ static ass_image_t** render_glyph(bitmap_t* bm, int dst_x, int dst_y, uint32_t c
 	// color = color left of brk
 	// color2 = color right of brk
 	int b_x0, b_y0, b_x1, b_y1; // visible part of the bitmap
-	int clip_x0, clip_y0, clip_x1, clip_y1;
 	int tmp;
 	ass_image_t* img;
+
+	const int clip_x0 = render_context.clip_x0;
+	const int clip_y0 = render_context.clip_y0;
+	const int clip_x1 = render_context.clip_x1;
+	const int clip_y1 = render_context.clip_y1;
 
 	dst_x += bm->left;
 	dst_y += bm->top;
 	brk -= bm->left;
 
-	// clipping
-	clip_x0 = render_context.clip_x0;
-	clip_y0 = render_context.clip_y0;
-	clip_x1 = render_context.clip_x1;
-	clip_y1 = render_context.clip_y1;
 	b_x0 = 0;
 	b_y0 = 0;
 	b_x1 = bm->w;
