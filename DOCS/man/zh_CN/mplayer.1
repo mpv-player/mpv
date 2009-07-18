@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r29252
+.\" sync with en/mplayer.1 r29413
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -6851,6 +6851,23 @@ h参数值。
 .IPs <threshold>
 决定像素值低于多少就被认作是黑色的阈值（默认值：32）。
 .RE
+.
+.TP
+.B gradfun[=strength[:radius]]
+消除有时候因为将色深降至 8 比特后，在颜色近似不变的区域造成的带状损伤。
+通过插值在带状区域产生变化坡度，从而使其颜色产生抖动效果。
+.sp 1
+设计该滤镜仅为播放目的。
+不要在有损压缩步骤前使用该滤镜，因为压缩过程容易丢失抖动效果，从而恢复带状损伤。
+.RSs
+.IPs <strength>
+滤镜改变单个像素的最大程度。
+同时也是侦测颜色近似不变区域的阈值（默认值：1.2）。
+.IPs <radius>
+应用变化坡度的周边区域大小。
+较大的 radius 值带来较平缓的变化坡度，但同时使滤镜不能修改靠近颜色变化丰富区域
+的像素（默认值：16）。
+.RE.
 .
 .
 .
