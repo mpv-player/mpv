@@ -27,10 +27,6 @@
 #include "libvo/fastmemcpy.h"
 
 #include "libavutil/common.h"
-#include "libavutil/internal.h"
-
-#undef fprintf
-#undef printf
 
 #if ARCH_X86_64
 // 3DNow! and 3DNow!Ext routines don't compile under AMD64

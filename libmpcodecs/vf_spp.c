@@ -37,14 +37,9 @@
 #include "mp_msg.h"
 #include "cpudetect.h"
 
-#include "libavutil/internal.h"
 #include "libavutil/intreadwrite.h"
 #include "libavcodec/avcodec.h"
 #include "libavcodec/dsputil.h"
-
-#undef fprintf
-#undef free
-#undef malloc
 
 #include "img_format.h"
 #include "mp_image.h"

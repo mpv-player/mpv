@@ -5,7 +5,7 @@
  * and mp3lib/dct64_mmx.c
  */
 
-#include "libavutil/internal.h"
+#include "libavutil/mem.h"
 
 typedef float real;
 
