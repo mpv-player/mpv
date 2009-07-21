@@ -393,16 +393,16 @@ static int init(int rate_hz, int channels, int format, int flags)
 	alsa_format = SND_PCM_FORMAT_S32_BE;
 	break;
       case AF_FORMAT_U24_LE:
-	alsa_format = SND_PCM_FORMAT_U24_LE;
+	alsa_format = SND_PCM_FORMAT_U24_3LE;
 	break;
       case AF_FORMAT_U24_BE:
-	alsa_format = SND_PCM_FORMAT_U24_BE;
+	alsa_format = SND_PCM_FORMAT_U24_3BE;
 	break;
       case AF_FORMAT_S24_LE:
-	alsa_format = SND_PCM_FORMAT_S24_LE;
+	alsa_format = SND_PCM_FORMAT_S24_3LE;
 	break;
       case AF_FORMAT_S24_BE:
-	alsa_format = SND_PCM_FORMAT_S24_BE;
+	alsa_format = SND_PCM_FORMAT_S24_3BE;
 	break;
       case AF_FORMAT_FLOAT_LE:
 	alsa_format = SND_PCM_FORMAT_FLOAT_LE;
