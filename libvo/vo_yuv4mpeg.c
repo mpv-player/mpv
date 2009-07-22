@@ -56,7 +56,9 @@
 
 #include "fastmemcpy.h"
 #include "libswscale/swscale.h"
+#ifdef CONFIG_LIBSWSCALE_INTERNALS
 #include "libswscale/rgb2rgb.h"
+#endif
 #include "libmpcodecs/vf_scale.h"
 #include "libavutil/rational.h"
 
@@ -147,6 +149,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		return -1;
 	}
 
+#ifdef CONFIG_LIBSWSCALE_INTERNALS
 	if(using_format != IMGFMT_YV12)
 	{
 		sws_rgb2rgb_init(get_sws_cpuflags());
@@ -158,6 +161,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 			return -1;
 		}
 	}
+#endif
 
 	write_bytes = image_width * image_height * 3 / 2;
 	image = malloc(write_bytes);
@@ -228,6 +232,7 @@ static void draw_osd(void)
     vo_draw_text(image_width, image_height, draw_alpha);
 }
 
+#ifdef CONFIG_LIBSWSCALE_INTERNALS
 static void deinterleave_fields(uint8_t *ptr, const int stride,
 							  const int img_height)
 {
@@ -258,6 +263,7 @@ static void deinterleave_fields(uint8_t *ptr, const int stride,
 	}
 	free(line_state);
 }
+#endif
 
 static void vo_y4m_write(const void *ptr, const size_t num_bytes)
 {
@@ -318,14 +324,15 @@ static int write_last_frame(void)
 
 static void flip_page (void)
 {
-	uint8_t *upper_y, *upper_u, *upper_v, *rgb_buffer_lower;
-	int rgb_stride, uv_stride, field_height;
-	unsigned int i, low_ofs;
-
 	fprintf(yuv_out, "FRAME\n");
 
+#ifdef CONFIG_LIBSWSCALE_INTERNALS
 	if (using_format != IMGFMT_YV12)
 	{
+                uint8_t *upper_y, *upper_u, *upper_v, *rgb_buffer_lower;
+                int rgb_stride, uv_stride, field_height;
+                unsigned int i, low_ofs;
+
 		rgb_stride = image_width * 3;
 		uv_stride = image_width / 2;
 
@@ -374,6 +381,7 @@ static void flip_page (void)
 					image_width, image_height,
 					image_width, uv_stride, rgb_stride);
 	}
+#endif
 
 	/* Write progressive frame */
 	vo_y4m_write(image, write_bytes);
@@ -458,9 +466,11 @@ static int query_format(uint32_t format)
 		{
 			case IMGFMT_YV12:
 				return VFCAP_CSP_SUPPORTED|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
+#ifdef CONFIG_LIBSWSCALE_INTERNALS
 			case IMGFMT_BGR|24:
 			case IMGFMT_RGB|24:
 				return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
+#endif
 		}
 	}
 	else
@@ -470,9 +480,11 @@ static int query_format(uint32_t format)
 		{
 			case IMGFMT_YV12:
 				return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
+#ifdef CONFIG_LIBSWSCALE_INTERNALS
     		case IMGFMT_BGR|24:
     		case IMGFMT_RGB|24:
         		return VFCAP_CSP_SUPPORTED|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
+#endif
     	}
 	}
 	return 0;

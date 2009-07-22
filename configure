@@ -379,8 +379,8 @@ Video output:
   --enable-v4l2            enable V4L2 Decoder audio/video output [autodetect]
   --enable-dvb             enable DVB video output [autodetect]
   --enable-dvbhead         enable DVB video output (HEAD version) [autodetect]
-  --enable-mga             enable mga_vid video output [autodetect]
-  --enable-xmga            enable mga_vid X11 video output [autodetect]
+  --enable-mga             enable mga_vid video output [broken, disabled]
+  --enable-xmga            enable mga_vid X11 video output [broken, disabled]
   --enable-xv              enable Xv video output [autodetect]
   --enable-xvmc            enable XvMC acceleration [disable]
   --enable-vdpau           enable VDPAU acceleration [autodetect]
@@ -642,8 +642,8 @@ _live=auto
 _nemesi=auto
 _native_rtsp=yes
 _xinerama=auto
-_mga=auto
-_xmga=auto
+_mga=no
+_xmga=no
 _vm=auto
 _xf86keysym=auto
 _mlib=no #broken, thus disabled
@@ -1061,9 +1061,9 @@ for ac_option do
   --disable-nemesi)	_nemesi=no	;;
   --enable-xinerama)	_xinerama=yes	;;
   --disable-xinerama)	_xinerama=no	;;
-  --enable-mga)		_mga=yes	;;
+  --enable-mga)		_mga=no 	;;
   --disable-mga)	_mga=no		;;
-  --enable-xmga)	_xmga=yes	;;
+  --enable-xmga)	_xmga=no	;;
   --disable-xmga)	_xmga=no	;;
   --enable-vm)		_vm=yes		;;
   --disable-vm)		_vm=no		;;
@@ -8268,6 +8268,7 @@ LIBPOSTPROC_SO = $_libpostproc_so
 LIBSWSCALE = $_libswscale
 LIBSWSCALE_A = $_libswscale_a
 LIBSWSCALE_SO = $_libswscale_so
+LIBSWSCALE_INTERNALS = no
 
 BUILD_STATIC=yes
 SRC_PATH=..
@@ -8710,6 +8711,7 @@ $def_libpostproc_so
 $def_libswscale
 $def_libswscale_a
 $def_libswscale_so
+#undef CONFIG_LIBSWSCALE_INTERNALS
 
 #define CONFIG_DECODERS 1
 #define CONFIG_ENCODERS 1

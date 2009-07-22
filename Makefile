@@ -192,6 +192,10 @@ SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
 SRCS_COMMON-$(LIBNUT)                += libmpdemux/demux_nut.c
 SRCS_COMMON-$(LIBPOSTPROC)           += libmpcodecs/vf_pp.c
 SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
+SRCS_COMMON-$(LIBSWSCALE_INTERNALS)  += libmpcodecs/vf_halfpack.c \
+                                        libmpcodecs/vf_palette.c \
+                                        libmpcodecs/vf_rgb2bgr.c \
+                                        libmpcodecs/vf_yuy2.c
 SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
 SRCS_COMMON-$(LIVE555)               += libmpdemux/demux_rtp.cpp \
                                         libmpdemux/demux_rtp_codec.cpp \
@@ -428,7 +432,6 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_format.c \
               libmpcodecs/vf_framestep.c \
               libmpcodecs/vf_gradfun.c \
-              libmpcodecs/vf_halfpack.c \
               libmpcodecs/vf_harddup.c \
               libmpcodecs/vf_hqdn3d.c \
               libmpcodecs/vf_hue.c \
@@ -440,14 +443,12 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_noformat.c \
               libmpcodecs/vf_noise.c \
               libmpcodecs/vf_ow.c \
-              libmpcodecs/vf_palette.c \
               libmpcodecs/vf_perspective.c \
               libmpcodecs/vf_phase.c \
               libmpcodecs/vf_pp7.c \
               libmpcodecs/vf_pullup.c \
               libmpcodecs/vf_rectangle.c \
               libmpcodecs/vf_remove_logo.c \
-              libmpcodecs/vf_rgb2bgr.c \
               libmpcodecs/vf_rgbtest.c \
               libmpcodecs/vf_rotate.c \
               libmpcodecs/vf_sab.c \
@@ -465,7 +466,6 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_vo.c \
               libmpcodecs/vf_yadif.c \
               libmpcodecs/vf_yuvcsp.c \
-              libmpcodecs/vf_yuy2.c \
               libmpcodecs/vf_yvu9.c \
               libmpdemux/aac_hdr.c \
               libmpdemux/asfheader.c \
