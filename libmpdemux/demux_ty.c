@@ -45,7 +45,7 @@
 #include "stheader.h"
 #include "sub_cc.h"
 #include "libavutil/avstring.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 
 void skip_audio_frame( sh_audio_t *sh_audio );
 extern int sub_justify;

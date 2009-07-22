@@ -16,7 +16,7 @@
 #ifdef CONFIG_TV_TELETEXT
 #include "stream/tv.h"
 #endif
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 #include "m_option.h"
 
 double sub_last_pts = -303;

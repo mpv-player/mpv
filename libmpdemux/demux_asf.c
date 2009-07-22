@@ -33,7 +33,7 @@
 #include "demuxer.h"
 
 #include "libvo/fastmemcpy.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 
 // defined at asfheader.c:
 

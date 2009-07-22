@@ -31,7 +31,7 @@
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 
 #define FOURCC_VORBIS mmioFOURCC('v', 'r', 'b', 's')
 #define FOURCC_SPEEX  mmioFOURCC('s', 'p', 'x', ' ')

@@ -39,7 +39,7 @@
 #include "stream_dvd.h"
 #include "stream_dvd_common.h"
 #include "libmpdemux/demuxer.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 
 extern char* dvd_device;
 static char* dvd_device_current;

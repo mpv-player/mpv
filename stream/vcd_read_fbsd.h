@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 #include <inttypes.h>
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 #include <sys/cdio.h>
 #if defined(__NetBSD__) || defined(__OpenBSD__)
 #define VCD_NETBSD 1

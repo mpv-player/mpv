@@ -43,7 +43,7 @@
 #include <winsock2.h>
 #endif
 
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 
 #include "stream.h"
 #include "libmpdemux/demuxer.h"

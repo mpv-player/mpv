@@ -24,7 +24,7 @@
 #include "network.h"
 #include "tcp.h"
 
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 
 #include "libmpdemux/asfguid.h"
 

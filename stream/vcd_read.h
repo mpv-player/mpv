@@ -7,7 +7,7 @@
 #include <sys/ioctl.h>
 #include "mp_msg.h"
 #include "stream.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 //=================== VideoCD ==========================
 #if	defined(__linux__) || defined(sun) || defined(__bsdi__)
 

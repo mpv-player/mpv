@@ -19,7 +19,7 @@
 #include "mp_image.h"
 #include "vf.h"
 
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 #include <lzo/lzo1x.h>
 #include "native/rtjpegn.h"
 

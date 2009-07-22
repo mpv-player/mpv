@@ -51,7 +51,7 @@
 
 #include "cfg-mplayer-def.h"
 
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 
 #include "subreader.h"
 

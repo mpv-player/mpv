@@ -37,7 +37,7 @@
 #include "sdpplin.h"
 #include "xbuffer.h"
 #include "libavutil/md5.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 #include "stream/http.h"
 #include "mp_msg.h"
 

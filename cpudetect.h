@@ -8,7 +8,7 @@
 #define CPUTYPE_I586	5
 #define CPUTYPE_I686    6
 
-#include "libavutil/x86_cpu.h"
+#include "ffmpeg_files/x86_cpu.h"
 
 typedef struct cpucaps_s {
 	int cpuType;

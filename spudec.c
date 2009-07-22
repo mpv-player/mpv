@@ -25,7 +25,7 @@
 #include "spudec.h"
 #include "vobsub.h"
 #include "libavutil/avutil.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 #include "libswscale/swscale.h"
 
 /* Valid values for spu_aamode:

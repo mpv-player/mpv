@@ -24,7 +24,7 @@
 
 #include "config.h"
 #include "libavutil/common.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 

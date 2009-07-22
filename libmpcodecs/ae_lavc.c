@@ -16,7 +16,7 @@
 #include "libaf/af_format.h"
 #include "libaf/reorder_ch.h"
 #include "libavcodec/avcodec.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 
 static AVCodec        *lavc_acodec;
 static AVCodecContext *lavc_actx;

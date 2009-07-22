@@ -27,7 +27,7 @@
 #include "stheader.h"
 #include "genres.h"
 #include "mp3_hdr.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 
 #include <string.h>
 

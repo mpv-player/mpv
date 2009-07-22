@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 #include "config.h"
-#include "libavutil/bswap.h"
+#include "ffmpeg_files/bswap.h"
 
 #ifndef HAVE_SWAB
 void swab(const void *from, void *to, ssize_t n);

@@ -58,7 +58,7 @@
 #endif
 
 #include "libavutil/lzo.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 #include "libavutil/avstring.h"
 
 static const unsigned char sipr_swaps[38][2]={

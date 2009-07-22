@@ -39,7 +39,7 @@
 #include "vf.h"
 #include "libvo/fastmemcpy.h"
 #include "libavutil/avutil.h"
-#include "libavutil/x86_cpu.h"
+#include "ffmpeg_files/x86_cpu.h"
 
 struct vf_priv_s {
     int thresh;

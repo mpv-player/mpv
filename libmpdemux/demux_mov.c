@@ -63,7 +63,7 @@
 
 #include "libmpcodecs/img_format.h"
 #include "libavutil/common.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 
 #include "libvo/sub.h"
 
