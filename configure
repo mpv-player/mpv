@@ -2414,8 +2414,8 @@ cat > $TMPC << EOF
 __attribute__((noinline)) static int foo3(int i1, int i2, int i3) { return i3; }
 int main(void) { return foo3(1,2,3) == 3 ? 0 : 1; }
 EOF
-  cc_check -O4 -mstackrealign && tmp_run && cflags_stackrealign=-mstackrealign
-  test -z "$cflags_stackrealign" && cc_check -O4 -mstackrealign -fno-unit-at-a-time \
+  cc_check -O2 -mstackrealign && tmp_run && cflags_stackrealign=-mstackrealign
+  test -z "$cflags_stackrealign" && cc_check -O2 -mstackrealign -fno-unit-at-a-time \
     && tmp_run && cflags_stackrealign="-mstackrealign -fno-unit-at-a-time"
   test -n "$cflags_stackrealign" && echores "yes" || echores "no"
 fi # if darwin && test "$cc_vendor" = "gnu" ; then
@@ -2432,7 +2432,7 @@ elif test -z "$CFLAGS" ; then
   elif test "$cc_vendor" != "gnu" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe"
   else
-    CFLAGS="-Wall -Wno-switch -Wpointer-arith -Wredundant-decls -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
+    CFLAGS="-Wall -Wno-switch -Wpointer-arith -Wredundant-decls -O2 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
     extra_ldflags="$extra_ldflags -ffast-math"
   fi
 else
@@ -6572,7 +6572,7 @@ int main(void) { unsigned long x, y; faacEncOpen(48000, 2, &x, &y); return 0; }
 EOF
   _faac=no
   for _ld_faac in "-lfaac" "-lfaac -lmp4v2 -lstdc++" ; do
-    cc_check -O4 $_ld_faac $_ld_lm && libs_mencoder="$libs_mencoder $_ld_faac" && _faac=yes && break
+    cc_check -O2 $_ld_faac $_ld_lm && libs_mencoder="$libs_mencoder $_ld_faac" && _faac=yes && break
   done
 fi
 if test "$_faac" = yes ; then
