@@ -235,7 +235,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             priv->audio_streams++;
             wf= calloc(sizeof(WAVEFORMATEX) + codec->extradata_size, 1);
             // For some formats (like PCM) always trust CODEC_ID_* more than codec_tag
-            override_tag= av_codec_get_tag(mp_wav_override_taglists, codec->codec_id);
+            override_tag= mp_av_codec_get_tag(mp_wav_override_taglists, codec->codec_id);
             if (override_tag)
                 codec->codec_tag= override_tag;
             // mp4a tag is used for all mp4 files no matter what they actually contain
@@ -244,7 +244,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             if(codec->codec_id == CODEC_ID_ADPCM_IMA_AMV)
                 codec->codec_tag= MKTAG('A','M','V','A');
             if(!codec->codec_tag)
-                codec->codec_tag= av_codec_get_tag(mp_wav_taglists, codec->codec_id);
+                codec->codec_tag= mp_av_codec_get_tag(mp_wav_taglists, codec->codec_id);
             wf->wFormatTag= codec->codec_tag;
             wf->nChannels= codec->channels;
             wf->nSamplesPerSec= codec->sample_rate;
@@ -322,7 +322,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 }
             }
             if(!codec->codec_tag)
-                codec->codec_tag= av_codec_get_tag(mp_bmp_taglists, codec->codec_id);
+                codec->codec_tag= mp_av_codec_get_tag(mp_bmp_taglists, codec->codec_id);
             bih->biSize= sizeof(BITMAPINFOHEADER) + codec->extradata_size;
             bih->biWidth= codec->width;
             bih->biHeight= codec->height;

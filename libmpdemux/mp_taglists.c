@@ -19,9 +19,13 @@
 #include "config.h"
 
 #include "libavformat/avformat.h"
-#include "libavformat/riff.h"
+#include <libavcodec/avcodec.h>
 
-static const AVCodecTag mp_wav_tags[] = {
+#include "mp_taglists.h"
+
+#include "ffmpeg_files/taglists.c"
+
+static const struct mp_AVCodecTag mp_wav_tags[] = {
     { CODEC_ID_RA_144,            MKTAG('1', '4', '_', '4')},
     { CODEC_ID_RA_288,            MKTAG('2', '8', '_', '8')},
     { CODEC_ID_ADPCM_4XM,         MKTAG('4', 'X', 'M', 'A')},
@@ -51,9 +55,9 @@ static const AVCodecTag mp_wav_tags[] = {
     { 0, 0 },
 };
 
-const struct AVCodecTag *mp_wav_taglists[] = {ff_codec_wav_tags, mp_wav_tags, 0};
+const struct mp_AVCodecTag *mp_wav_taglists[] = {mp_ff_codec_wav_tags, mp_wav_tags, 0};
 
-static const AVCodecTag mp_wav_override_tags[] = {
+static const struct mp_AVCodecTag mp_wav_override_tags[] = {
     { CODEC_ID_PCM_S8,            MKTAG('t', 'w', 'o', 's')},
     { CODEC_ID_PCM_U8,            1},
     { CODEC_ID_PCM_S16BE,         MKTAG('t', 'w', 'o', 's')},
@@ -65,9 +69,9 @@ static const AVCodecTag mp_wav_override_tags[] = {
     { 0, 0 },
 };
 
-const struct AVCodecTag *mp_wav_override_taglists[] = {mp_wav_override_tags, 0};
+const struct mp_AVCodecTag *mp_wav_override_taglists[] = {mp_wav_override_tags, 0};
 
-static const AVCodecTag mp_bmp_tags[] = {
+static const struct mp_AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_AMV,               MKTAG('A', 'M', 'V', 'V')},
     { CODEC_ID_BETHSOFTVID,       MKTAG('B', 'E', 'T', 'H')},
     { CODEC_ID_BFI,               MKTAG('B', 'F', 'I', 'V')},
@@ -96,4 +100,4 @@ static const AVCodecTag mp_bmp_tags[] = {
     { 0, 0 },
 };
 
-const struct AVCodecTag *mp_bmp_taglists[] = {ff_codec_bmp_tags, mp_bmp_tags, 0};
+const struct mp_AVCodecTag *mp_bmp_taglists[] = {mp_ff_codec_bmp_tags, mp_bmp_tags, 0};

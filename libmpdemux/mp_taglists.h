@@ -19,10 +19,14 @@
 #ifndef MPLAYER_MP_TAGLISTS_H
 #define MPLAYER_MP_TAGLISTS_H
 
-extern const struct AVCodecTag *mp_wav_taglists[];
+#include <libavcodec/avcodec.h>
 
-extern const struct AVCodecTag *mp_wav_override_taglists[];
+#include "ffmpeg_files/taglists.h"
 
-extern const struct AVCodecTag *mp_bmp_taglists[];
+extern const struct mp_AVCodecTag *mp_wav_taglists[];
+
+extern const struct mp_AVCodecTag *mp_wav_override_taglists[];
+
+extern const struct mp_AVCodecTag *mp_bmp_taglists[];
 
 #endif /* MPLAYER_MP_TAGLISTS_H */
