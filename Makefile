@@ -669,12 +669,6 @@ SRCS_MENCODER = mencoder.c \
                 libmpdemux/muxer_rawvideo.c \
                 $(SRCS_MENCODER-yes)
 
-
-COMMON_LIBS-$(LIBAVFORMAT_A)      += ffmpeg/libavformat/libavformat.a
-COMMON_LIBS-$(LIBAVCODEC_A)       += ffmpeg/libavcodec/libavcodec.a
-COMMON_LIBS-$(LIBAVUTIL_A)        += ffmpeg/libavutil/libavutil.a
-COMMON_LIBS-$(LIBPOSTPROC_A)      += ffmpeg/libpostproc/libpostproc.a
-COMMON_LIBS-$(LIBSWSCALE_A)       += libswscale/libswscale.a
 COMMON_LIBS += $(COMMON_LIBS-yes)
 
 OBJS_COMMON    += $(addsuffix .o, $(basename $(SRCS_COMMON)))
@@ -699,23 +693,6 @@ DIRS =  . \
         libaf \
         libao2 \
         libass \
-        ffmpeg/libavcodec \
-        ffmpeg/libavcodec/alpha \
-        ffmpeg/libavcodec/arm \
-        ffmpeg/libavcodec/bfin \
-        ffmpeg/libavcodec/x86 \
-        ffmpeg/libavcodec/mlib \
-        ffmpeg/libavcodec/ppc \
-        ffmpeg/libavcodec/sh4 \
-        ffmpeg/libavcodec/sparc \
-        ffmpeg/libavformat \
-        ffmpeg/libavutil \
-        ffmpeg/libavutil/arm \
-        ffmpeg/libavutil/bfin \
-        ffmpeg/libavutil/bfin \
-        ffmpeg/libavutil/ppc \
-        ffmpeg/libavutil/sh4 \
-        ffmpeg/libavutil/x86 \
         libdvdcss \
         libdvdnav \
         libdvdnav/vm \
@@ -726,7 +703,6 @@ DIRS =  . \
         libmpcodecs/native \
         libmpdemux \
         libmpeg2 \
-        ffmpeg/libpostproc \
         libswscale \
         libswscale/bfin \
         libswscale/mlib \
@@ -753,17 +729,6 @@ ADDSUFFIXES     = $(foreach suf,$(1),$(addsuffix $(suf),$(2)))
 ADD_ALL_DIRS    = $(call ADDSUFFIXES,$(1),$(DIRS))
 ADD_ALL_EXESUFS = $(1) $(call ADDSUFFIXES,$(EXESUFS_ALL),$(1))
 
-FFMPEGPARTS = ffmpeg/libavcodec \
-              ffmpeg/libavformat \
-              ffmpeg/libavutil \
-              ffmpeg/libpostproc \
-              libswscale \
-
-FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(part)/$(notdir $(part)).a)
-FFMPEGFILES = $(foreach part, $(FFMPEGPARTS), $(wildcard $(part)/*.[choS] $(part)/*/*.[choS] $(part)/*/*.asm))
-
-
-
 ###### generic rules #######
 
 all: $(ALL_PRG-yes)
@@ -786,15 +751,6 @@ all: $(ALL_PRG-yes)
 checkheaders: $(ALLHEADERS:.h=.ho)
 
 dep depend: $(DEPS)
-	for part in $(FFMPEGPARTS); do $(MAKE) -C $$part depend; done
-
-# dummy to prevent default build rules from being used for FFMPEGFILES
-$(FFMPEGFILES):
-	echo "this shouldn't run"
-
-$(FFMPEGLIBS): $(FFMPEGFILES) config.h
-	$(MAKE) -C $(@D)
-	touch $@
 
 mencoder$(EXESUF): $(MENCODER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MENCODER)
@@ -803,7 +759,7 @@ mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
 
 codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
-	$(HOST_CC) -O -DCODECS2HTML -I. -Iffmpeg -o $@ $<
+	$(HOST_CC) -O -DCODECS2HTML -I. -o $@ $<
 
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 	./$^ > $@
