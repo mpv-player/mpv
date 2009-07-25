@@ -42,10 +42,7 @@
 
 #include "libaf/af_format.h"
 
-#ifdef CONFIG_ASS
-#include "libass/ass.h"
-#include "libass/ass_mp.h"
-#endif
+#include "ass_mp.h"
 
 #ifdef CONFIG_LIBAVCODEC
 #include "libavcodec/avcodec.h"

@@ -32,8 +32,7 @@
 #include "gl_common.h"
 #include "aspect.h"
 #include "fastmemcpy.h"
-#include "libass/ass.h"
-#include "libass/ass_mp.h"
+#include "ass_mp.h"
 
 static const vo_info_t info =
 {

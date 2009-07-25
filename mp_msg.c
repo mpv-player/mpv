@@ -165,16 +165,14 @@ static void print_msg_module(FILE* stream, int mod)
     fprintf(stream, ": ");
 }
 
-void mp_msg(int mod, int lev, const char *format, ... ){
-    va_list va;
+void mp_msg_va(int mod, int lev, const char *format, va_list va)
+{
     char tmp[MSGSIZE_MAX];
     FILE *stream = lev <= MSGL_WARN ? stderr : stdout;
     static int header = 1;
 
     if (!mp_msg_test(mod, lev)) return; // do not display
-    va_start(va, format);
     vsnprintf(tmp, MSGSIZE_MAX, format, va);
-    va_end(va);
     tmp[MSGSIZE_MAX-2] = '\n';
     tmp[MSGSIZE_MAX-1] = 0;
 
@@ -217,6 +215,15 @@ void mp_msg(int mod, int lev, const char *format, ... ){
     fprintf(stream, "%s", tmp);
     fflush(stream);
 }
+
+void mp_msg(int mod, int lev, const char *format, ...)
+{
+    va_list va;
+    va_start(va, format);
+    mp_msg_va(mod, lev, format, va);
+    va_end(va);
+}
+
 
 char *mp_gtext(const char *string)
 {

@@ -1,0 +1,82 @@
+/*
+ * Copyright (C) 2006 Evgeniy Stepanov <eugeni.stepanov@gmail.com>
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with libass; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#ifndef MPLAYER_ASS_MP_H
+#define MPLAYER_ASS_MP_H
+
+#include <stdint.h>
+
+#include "ass_mp.h"
+
+#include "subreader.h"
+
+#ifdef CONFIG_ASS
+#include <ass/ass.h>
+#include <ass/ass_types.h>
+
+extern ass_library_t *ass_library;
+extern int ass_enabled;
+extern float ass_font_scale;
+extern float ass_line_spacing;
+extern int ass_top_margin;
+extern int ass_bottom_margin;
+extern int extract_embedded_fonts;
+extern char **ass_force_style_list;
+extern int ass_use_margins;
+extern char *ass_color;
+extern char *ass_border_color;
+extern char *ass_styles_file;
+extern int ass_hinting;
+
+ass_track_t *ass_default_track(ass_library_t *library);
+int ass_process_subtitle(ass_track_t *track, subtitle *sub);
+ass_track_t *ass_read_subdata(ass_library_t *library, sub_data *subdata,
+                              double fps);
+
+void ass_configure(ass_renderer_t *priv, int w, int h, int hinting);
+void ass_configure_fonts(ass_renderer_t *priv);
+ass_library_t *ass_init(void);
+
+extern int ass_force_reload;
+ass_image_t *ass_mp_render_frame(ass_renderer_t *priv, ass_track_t *track,
+                                 long long now, int *detect_change);
+
+#else /* CONFIG_ASS */
+
+/* Needed for EOSD code using this type to compile */
+
+typedef struct ass_image {
+    int w, h;
+    int stride;
+    unsigned char *bitmap;
+    uint32_t color;
+    int dst_x, dst_y;
+    struct ass_image *next;
+} ass_image_t;
+
+#endif
+
+typedef struct {
+    ass_image_t *imgs;
+    int changed;
+} mp_eosd_images_t;
+
+
+#endif                          /* MPLAYER_ASS_MP_H */

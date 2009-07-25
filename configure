@@ -6092,29 +6092,16 @@ echores "$_fontconfig"
 
 
 echocheck "SSA/ASS support"
-# libass depends on FreeType
-if test "$_freetype" = no ; then
-    _ass=no
-    _res_comment="FreeType support needed"
-fi
-
-if test "$_ass" = auto ; then
-    cat > $TMPC << EOF
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#if ((FREETYPE_MAJOR < 2) || (FREETYPE_MINOR < 1) || ((FREETYPE_MINOR == 1) && (FREETYPE_PATCH < 8)))
-#error "Need FreeType 2.1.8 or newer"
-#endif
-int main(void) { return 0; }
-EOF
-    _ass=no
-    cc_check $($_freetypeconfig --cflags) $($_freetypeconfig --libs) && tmp_run && _ass=yes
-    if test "$_ass" = no ; then
-        _res_comment="FreeType >= 2.1.8 needed"
-    fi
-fi
-if test "$_ass" = yes ; then
-    def_ass='#define CONFIG_ASS'
+if test "$_ass" = auto -o "$_ass" = yes ; then
+	if $_pkg_config libass; then
+		_ass=yes
+		def_ass='#define CONFIG_ASS'
+		extra_ldflags="$extra_ldflags $($_pkg_config --libs libass)"
+		extra_cflags="$extra_cflags $($_pkg_config --cflags libass)"
+	else
+		_ass=no
+		def_ass='#undef CONFIG_ASS'
+	fi
 else
     def_ass='#undef CONFIG_ASS'
 fi

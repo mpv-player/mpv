@@ -50,8 +50,7 @@
 #include "libavutil/common.h"
 #include "libavutil/mathematics.h"
 
-#include "libass/ass.h"
-#include "libass/ass_mp.h"
+#include "ass_mp.h"
 
 static vo_info_t info = {
     "VDPAU with X11",

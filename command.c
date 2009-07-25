@@ -31,6 +31,7 @@
 #include "vobsub.h"
 #include "spudec.h"
 #include "get_path.h"
+#include "ass_mp.h"
 #ifdef CONFIG_TV
 #include "stream/tv.h"
 #endif
@@ -48,10 +49,6 @@
 #endif
 #ifdef CONFIG_DVDNAV
 #include "stream/stream_dvdnav.h"
-#endif
-#ifdef CONFIG_ASS
-#include "libass/ass.h"
-#include "libass/ass_mp.h"
 #endif
 #ifdef CONFIG_MENU
 #include "m_struct.h"

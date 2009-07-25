@@ -12,8 +12,7 @@
 #include "libvo/video_out.h"
 
 #ifdef CONFIG_ASS
-#include "libass/ass.h"
-#include "libass/ass_mp.h"
+#include "ass_mp.h"
 extern ass_track_t* ass_track;
 #endif
 
@@ -28,6 +27,7 @@ struct vf_priv_s {
 #ifdef CONFIG_ASS
     ass_renderer_t* ass_priv;
     int prev_visibility;
+    double scale_ratio;
 #endif
 };
 #define video_out (vf->priv->vo)
@@ -67,6 +67,8 @@ static int config(struct vf_instance* vf,
 	return 0;
 
 #ifdef CONFIG_ASS
+    vf->priv->scale_ratio = (double) d_width / d_height * height / width;
+
     if (vf->priv->ass_priv)
 	ass_configure(vf->priv->ass_priv, width, height, !!(vf->default_caps & VFCAP_EOSD_UNSCALED));
 #endif
@@ -133,7 +135,7 @@ static int control(struct vf_instance* vf, int request, void* data)
             if (vo_control(video_out, VOCTRL_GET_EOSD_RES, &res) == VO_TRUE) {
                 ass_set_frame_size(vf->priv->ass_priv, res.w, res.h);
                 ass_set_margins(vf->priv->ass_priv, res.mt, res.mb, res.ml, res.mr);
-                ass_set_aspect_ratio(vf->priv->ass_priv, (double)res.w / res.h);
+                ass_set_aspect_ratio(vf->priv->ass_priv, vf->priv->scale_ratio, 1);
             }
 
             images.imgs = ass_mp_render_frame(vf->priv->ass_priv, ass_track, (pts+sub_delay) * 1000 + .5, &images.changed);

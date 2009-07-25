@@ -125,15 +125,7 @@ SRCS_COMMON-$(LIBA52_INTERNAL)       += liba52/crc.c \
                                         liba52/imdct.c \
                                         liba52/parse.c \
 
-SRCS_COMMON-$(LIBASS)                += libass/ass.c \
-                                        libass/ass_bitmap.c \
-                                        libass/ass_cache.c \
-                                        libass/ass_font.c \
-                                        libass/ass_fontconfig.c \
-                                        libass/ass_library.c \
-                                        libass/ass_mp.c \
-                                        libass/ass_render.c \
-                                        libass/ass_utils.c \
+SRCS_COMMON-$(LIBASS)                += ass_mp.c \
                                         libmpcodecs/vf_ass.c \
 
 SRCS_COMMON-$(LIBAVCODEC)            += av_opts.c \
