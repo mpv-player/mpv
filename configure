@@ -2361,10 +2361,10 @@ EOF
 fi
 if test "$_big_endian" = yes ; then
   _byte_order='big-endian'
-  def_words_endian='#define WORDS_BIGENDIAN 1'
+  def_words_endian='#define HAVE_BIGENDIAN 1'
 else
   _byte_order='little-endian'
-  def_words_endian='#undef WORDS_BIGENDIAN'
+  def_words_endian='#define HAVE_BIGENDIAN 0'
 fi
 echores "$_byte_order"
 
