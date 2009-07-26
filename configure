@@ -353,8 +353,8 @@ Video output:
   --enable-v4l2            enable V4L2 Decoder audio/video output [autodetect]
   --enable-dvb             enable DVB video output [autodetect]
   --enable-dvbhead         enable DVB video output (HEAD version) [autodetect]
-  --enable-mga             enable mga_vid video output [broken, disabled]
-  --enable-xmga            enable mga_vid X11 video output [broken, disabled]
+  --enable-mga             enable mga_vid video output [autodetect]
+  --enable-xmga            enable mga_vid X11 video output [autodetect]
   --enable-xv              enable Xv video output [autodetect]
   --enable-xvmc            enable XvMC acceleration [disable]
   --enable-vdpau           enable VDPAU acceleration [autodetect]
@@ -448,6 +448,7 @@ Advanced options:
   --disable-sighandler      disable sighandler for crashes [enable]
   --enable-crash-debug      enable automatic gdb attach on crash [disable]
   --enable-dynamic-plugins  enable dynamic A/V plugins [disable]
+  --ffmpeg-source-dir=PATH  enable features requiring internal FFmpeg headers
 
 Use these options if autodetection fails:
   --extra-cflags=FLAGS        extra CFLAGS
@@ -509,6 +510,8 @@ _libavcodec_so=auto
 _libavformat_so=auto
 _libpostproc_so=auto
 _libswscale_so=auto
+_libavcodec_internals=no
+_libswscale_internals=no
 _mencoder=yes
 _mplayer=yes
 _x11=auto
@@ -593,8 +596,8 @@ _live=auto
 _nemesi=auto
 _native_rtsp=yes
 _xinerama=auto
-_mga=no
-_xmga=no
+_mga=auto
+_xmga=auto
 _vm=auto
 _xf86keysym=auto
 _mlib=no #broken, thus disabled
@@ -1004,9 +1007,9 @@ for ac_option do
   --disable-nemesi)	_nemesi=no	;;
   --enable-xinerama)	_xinerama=yes	;;
   --disable-xinerama)	_xinerama=no	;;
-  --enable-mga)		_mga=no 	;;
+  --enable-mga)		_mga=yes 	;;
   --disable-mga)	_mga=no		;;
-  --enable-xmga)	_xmga=no	;;
+  --enable-xmga)	_xmga=yes	;;
   --disable-xmga)	_xmga=no	;;
   --enable-vm)		_vm=yes		;;
   --disable-vm)		_vm=no		;;
@@ -1080,6 +1083,8 @@ for ac_option do
   --disable-libpostproc_so)	_libpostproc_so=no	;;
   --enable-libswscale_so)	_libswscale_so=yes	;;
   --disable-libswscale_so)	_libswscale_so=no	;;
+  --ffmpeg-source-dir=*)
+    _ffmpeg_source=$(echo $ac_option | cut -d '=' -f 2 ) ;;
 
   --enable-lirc)	_lirc=yes	;;
   --disable-lirc)	_lirc=no	;;
@@ -4481,36 +4486,6 @@ else
   _novomodules="xvidix $_novomodules"
 fi
 
-echocheck "/dev/mga_vid"
-if test "$_mga" = auto ; then
-  _mga=no
-  test -c /dev/mga_vid && _mga=yes
-fi
-if test "$_mga" = yes ; then
-  def_mga='#define CONFIG_MGA 1'
-  _vomodules="mga $_vomodules"
-else
-  def_mga='#undef CONFIG_MGA'
-  _novomodules="mga $_novomodules"
-fi
-echores "$_mga"
-
-
-echocheck "xmga"
-if test "$_xmga" = auto ; then
-  _xmga=no
-  test "$_x11" = yes && test "$_mga" = yes && _xmga=yes
-fi
-if test "$_xmga" = yes ; then
-  def_xmga='#define CONFIG_XMGA 1'
-  _vomodules="xmga $_vomodules"
-else
-  def_xmga='#undef CONFIG_XMGA'
-  _novomodules="xmga $_novomodules"
-fi
-echores "$_xmga"
-
-
 echocheck "GGI"
 if test "$_ggi" = auto ; then
   cat > $TMPC << EOF
@@ -6919,6 +6894,16 @@ test "$_libswscale_so" = yes \
   && def_libswscale_so='#define CONFIG_LIBSWSCALE_SO 1'
 echores "$_libswscale"
 
+def_libswscale_internals="#undef CONFIG_LIBSWSCALE_INTERNALS"
+if ! test -z "$_ffmpeg_source" ; then
+  test "$_libswscale" = yes && def_libswscale_internals="#define CONFIG_LIBSWSCALE_INTERNALS 1" && _libswscale_internals=yes
+fi
+
+def_libavcodec_internals="#undef CONFIG_LIBAVCODEC_INTERNALS"
+if ! test -z "$_ffmpeg_source" ; then
+  test "$_libavcodec" = yes && def_libavcodec_internals="#define CONFIG_LIBAVCODEC_INTERNALS 1" && _libavcodec_internals=yes
+fi
+
 echocheck "libdv-0.9.5+"
 if test "$_libdv" = auto ; then
   _libdv=no
@@ -7007,7 +6992,48 @@ else
 fi
 echores "$_libnut"
 
-#check must be done after libavcodec one
+# These VO checks must be done after libavcodec/libswscale one
+echocheck "/dev/mga_vid"
+if test "$_mga" = auto ; then
+  _mga=no
+  test -c /dev/mga_vid && _mga=yes
+fi
+if test "$_mga" = yes ; then
+  if test "$_libswscale_internals" = yes ; then
+    def_mga='#define CONFIG_MGA 1'
+    _vomodules="mga $_vomodules"
+  else
+    _res_comment="libswscale internal headers are required by mga, sorry"
+    def_mga='#undef CONFIG_MGA'
+    _novomodules="mga $_novomodules"
+  fi
+else
+  def_mga='#undef CONFIG_MGA'
+  _novomodules="mga $_novomodules"
+fi
+echores "$_mga"
+
+
+echocheck "xmga"
+if test "$_xmga" = auto ; then
+  _xmga=no
+  test "$_x11" = yes && test "$_mga" = yes && _xmga=yes
+fi
+if test "$_xmga" = yes ; then
+  if test "$_libswscale_internals" = yes ; then
+    def_xmga='#define CONFIG_XMGA 1'
+    _vomodules="xmga $_vomodules"
+  else
+    _res_comment="libswscale internal headers are required by mga, sorry"
+    def_xmga='#undef CONFIG_XMGA'
+    _novomodules="xmga $_novomodules"
+  fi
+else
+  def_xmga='#undef CONFIG_XMGA'
+  _novomodules="xmga $_novomodules"
+fi
+echores "$_xmga"
+
 echocheck "zr"
 if test "$_zr" = auto ; then
   #36067's seem to identify themselves as 36057PQC's, so the line
@@ -7019,11 +7045,11 @@ if test "$_zr" = auto ; then
   fi
 fi
 if test "$_zr" = yes ; then
-  if test "$_libavcodec_a" = yes ; then
+  if test "$_libavcodec_internals" = yes ; then
     def_zr='#define CONFIG_ZR 1'
     _vomodules="zr zr2 $_vomodules"
   else
-    _res_comment="libavcodec (static) is required by zr, sorry"
+    _res_comment="libavcodec internal headers are required by zr, sorry"
     _novomodules="zr $_novomodules"
     def_zr='#undef CONFIG_ZR'
   fi
@@ -7925,7 +7951,9 @@ LIBPOSTPROC = $_libpostproc
 LIBPOSTPROC_SO = $_libpostproc_so
 LIBSWSCALE = $_libswscale
 LIBSWSCALE_SO = $_libswscale_so
-LIBSWSCALE_INTERNALS = no
+LIBAVCODEC_INTERNALS = $_libavcodec_internals
+LIBSWSCALE_INTERNALS = $_libswscale_internals
+FFMPEG_SOURCE_PATH = $_ffmpeg_source
 
 # Some FFmpeg codecs depend on these. Enable them unconditionally for now.
 CONFIG_AANDCT=yes
@@ -8338,7 +8366,8 @@ $def_libpostproc
 $def_libpostproc_so
 $def_libswscale
 $def_libswscale_so
-#undef CONFIG_LIBSWSCALE_INTERNALS
+$def_libavcodec_internals
+$def_libswscale_internals
 
 #define CONFIG_DECODERS 1
 #define CONFIG_ENCODERS 1

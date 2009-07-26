@@ -69,7 +69,7 @@ static af_info_t* filter_list[]={
 #endif
    &af_info_volnorm,
    &af_info_extrastereo,
-#ifdef CONFIG_LIBAVCODEC_A
+#ifdef CONFIG_LIBAVCODEC_INTERNALS
    &af_info_lavcac3enc,
 #endif
 #ifdef CONFIG_LIBAVCODEC

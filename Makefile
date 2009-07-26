@@ -137,7 +137,7 @@ SRCS_COMMON-$(LIBAVCODEC)            += av_opts.c \
                                         libmpcodecs/vf_screenshot.c \
 
 # These filters use private headers and do not work with shared libavcodec.
-SRCS_COMMON-$(LIBAVCODEC_A)          += libaf/af_lavcac3enc.c \
+SRCS_COMMON-$(LIBAVCODEC_INTERNALS)  += libaf/af_lavcac3enc.c \
                                         libmpcodecs/vf_fspp.c \
                                         libmpcodecs/vf_geq.c \
                                         libmpcodecs/vf_mcdeint.c \
@@ -790,6 +790,17 @@ version.h: version.sh
 codec-cfg.d codec-cfg.o: codecs.conf.h
 $(DEPS) $(MENCODER_DEPS) $(MPLAYER_DEPS): help_mp.h
 $(call ADDSUFFIXES,.d .o,mpcommon vobsub stream/stream_cddb stream/network libmpdemux/muxer_avi): version.h
+
+# Files that depend on libswscale internals
+libvo/vo_mga.o libvo/vo_xmga.o libmpcodecs/vf_halfpack.o libmpcodecs/vf_palette.o libmpcodecs/vf_rgb2bgr.o libmpcodecs/vf_yuy2.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
+
+# Files that depend on libavcodec internals
+libaf/af_lavcac3enc.o libmpcodecs/vf_fspp.o libmpcodecs/vf_geq.o libmpcodecs/vf_mcdeint.o libmpcodecs/vf_qp.o libmpcodecs/vf_spp.o libvo/jpeg_enc.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
+
+# yuv4mpeg has rgb conversion code under #ifdef CONFIG_LIBSWSCALE_INTERNALS
+ifeq ($(LIBSWSCALE_INTERNALS),yes)
+libvo/vo_yuv4mpeg.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
+endif
 
 libdvdcss/%:   CFLAGS := -Ilibdvdcss -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.10\" $(CFLAGS_LIBDVDCSS) $(CFLAGS)
 libdvdnav/%:   CFLAGS := -Ilibdvdnav -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H -DVERSION=\"MPlayer-custom\" $(CFLAGS)
