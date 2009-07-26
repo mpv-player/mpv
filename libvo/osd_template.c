@@ -320,7 +320,7 @@ static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, 
 
 static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
     dstbase++;
 #endif
 #if HAVE_MMX

@@ -245,7 +245,7 @@ char *strchr(), *strrchr();
 
 #endif
 
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
 #define ARCH_IS_BIG_ENDIAN
 #endif
 

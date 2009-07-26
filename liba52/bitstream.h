@@ -62,7 +62,7 @@ static inline uint32_t unaligned32(const void *v) {
 #endif
 
 /* (stolen from the kernel) */
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
 
 #	define swab32(x) (x)
 

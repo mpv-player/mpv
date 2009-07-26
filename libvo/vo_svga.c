@@ -660,7 +660,7 @@ static int query_format(uint32_t format) {
     if( (!IMGFMT_IS_RGB(format)) && (!IMGFMT_IS_BGR(format)) ) return 0;
 
 // Reject different endian
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
     if (IMGFMT_IS_BGR(format)) return 0;
 #else
     if (IMGFMT_IS_RGB(format)) return 0;

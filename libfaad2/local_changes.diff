@@ -62,6 +62,15 @@
 +
  typedef float float32_t;
 
+@@ -245,7 +245,7 @@
+ 
+ #endif
+ 
+-#ifdef WORDS_BIGENDIAN
++#if HAVE_BIGENDIAN
+ #define ARCH_IS_BIG_ENDIAN
+ #endif
+ 
 @@ -289,7 +305,7 @@
    }
 

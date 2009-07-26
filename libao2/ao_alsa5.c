@@ -101,13 +101,13 @@ static int init(int rate_hz, int channels, int format, int flags)
 	case AF_FORMAT_U16_BE:
 	    alsa_format.format = SND_PCM_SFMT_U16_BE;
 	    break;
-#ifndef WORDS_BIGENDIAN
+#if !HAVE_BIGENDIAN
 	case AF_FORMAT_AC3:
 #endif
 	case AF_FORMAT_S16_LE:
 	    alsa_format.format = SND_PCM_SFMT_S16_LE;
 	    break;
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
 	case AF_FORMAT_AC3:
 #endif
 	case AF_FORMAT_S16_BE:

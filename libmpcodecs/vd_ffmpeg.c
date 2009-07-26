@@ -896,7 +896,7 @@ static mp_image_t *decode(sh_video_t *sh, void *data, int len, int flags){
         mpi->stride[2]*=2;
     }
 
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
     // FIXME: this might cause problems for buffers with FF_BUFFER_HINTS_PRESERVE
     if (mpi->bpp == 8)
         swap_palette(mpi->planes[1]);

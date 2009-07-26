@@ -267,7 +267,7 @@ static void freeMyXImage(void)
     ImageData = NULL;
 }
 
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
 #define BO_NATIVE    MSBFirst
 #define BO_NONNATIVE LSBFirst
 #else
@@ -457,7 +457,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     // we can easily "emulate" them.
     if (out_format & 64 && (IMGFMT_IS_RGB(out_format) || IMGFMT_IS_BGR(out_format))) {
       out_format &= ~64;
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
       out_offset = 1;
 #else
       out_offset = -1;

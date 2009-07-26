@@ -346,7 +346,7 @@ static int fill_buffer(stream_t* s, char* buffer, int max_len) {
   if (!buf)
     return 0;
 
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
   for(i=0;i<CD_FRAMESIZE_RAW/2;i++)
           buf[i]=le2me_16(buf[i]);
 #endif

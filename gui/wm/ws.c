@@ -1082,7 +1082,7 @@ int wsGetDepthOnScreen( void )
    wsRedMask=mXImage->red_mask;
    wsGreenMask=mXImage->green_mask;
    wsBlueMask=mXImage->blue_mask;
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
    wsNonNativeOrder = mXImage->byte_order == LSBFirst;
 #else
    wsNonNativeOrder = mXImage->byte_order == MSBFirst;

@@ -108,7 +108,7 @@ static int conv24to32( txSample * bf )
 static void Normalize( txSample * bf )
 {
  int           i;
-#ifndef WORDS_BIGENDIAN
+#if !HAVE_BIGENDIAN
  for ( i=0;i < (int)bf->ImageSize;i+=4 ) bf->Image[i+3]=0;
 #else
  for ( i=0;i < (int)bf->ImageSize;i+=4 ) bf->Image[i]=0;

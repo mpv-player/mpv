@@ -306,7 +306,7 @@ ac3_retry:
   ao_data.format=format;
   oss_format=format2oss(format);
   if (oss_format == -1) {
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
     oss_format=AFMT_S16_BE;
 #else
     oss_format=AFMT_S16_LE;
