@@ -135,6 +135,7 @@ SRCS_COMMON-$(LIBAVCODEC)            += av_opts.c \
                                         libmpcodecs/vf_lavc.c \
                                         libmpcodecs/vf_lavcdeint.c \
                                         libmpcodecs/vf_screenshot.c \
+                                        libmpcodecs/vf_uspp.c \
 
 # These filters use private headers and do not work with shared libavcodec.
 SRCS_COMMON-$(LIBAVCODEC_INTERNALS)  += libaf/af_lavcac3enc.c \
@@ -143,7 +144,6 @@ SRCS_COMMON-$(LIBAVCODEC_INTERNALS)  += libaf/af_lavcac3enc.c \
                                         libmpcodecs/vf_mcdeint.c \
                                         libmpcodecs/vf_qp.c \
                                         libmpcodecs/vf_spp.c \
-                                        libmpcodecs/vf_uspp.c \
 
 SRCS_COMMON-$(LIBAVFORMAT)           += libmpdemux/demux_lavf.c
 SRCS_COMMON-$(LIBBS2B)               += libaf/af_bs2b.c
