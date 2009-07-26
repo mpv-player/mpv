@@ -1,16 +1,5 @@
 --- libfaad2.orig/bits.h	2006-03-16 20:15:04.000000000 +0100
 +++ libfaad2/bits.h	2006-03-16 20:37:21.000000000 +0100
-@@ -22,7 +22,10 @@
- ** Commercial non-GPL licensing of this software is possible.
- ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
- **
-+** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
- ** $Id: bits.h,v 1.40 2004/09/04 14:56:27 menno Exp $
-+** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
-+** local_changes.diff contains the exact changes to this file.
- **/
-
- #ifndef __BITS_H__
 @@ -58,7 +61,7 @@
 
  #if defined (_WIN32) && !defined(_WIN32_WCE) && !defined(__MINGW32__)
@@ -22,18 +11,7 @@
  #define BSWAP(a) \
 --- libfaad2.orig/common.h	2006-03-16 20:15:04.000000000 +0100
 +++ libfaad2/common.h	2006-03-16 20:56:56.000000000 +0100
-@@ -22,7 +22,10 @@
- ** Commercial non-GPL licensing of this software is possible.
- ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
- **
-+** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
- ** $Id: common.h,v 1.65 2004/09/08 09:43:11 gcp Exp $
-+** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
-+** local_changes.diff contains the exact changes to this file.
- **/
-
- #ifndef __COMMON_H__
-@@ -32,8 +35,13 @@
+@@ -32,8 +37,13 @@
 
  #ifdef HAVE_CONFIG_H
  #  include "../config.h"
@@ -47,7 +25,7 @@
  #define INLINE __inline
  #if 0 //defined(_WIN32) && !defined(_WIN32_WCE)
  #define ALIGN __declspec(align(16))
-@@ -61,7 +67,7 @@
+@@ -61,7 +69,7 @@
  /* Use if target platform has address generators with autoincrement */
  //#define PREFER_POINTERS
 
@@ -56,7 +34,7 @@
  #define FIXED_POINT
  #endif
 
-@@ -117,6 +123,9 @@
+@@ -117,6 +125,9 @@
  # ifdef MAIN_DEC
  #  undef MAIN_DEC
  # endif
@@ -66,7 +44,7 @@
  #endif // FIXED_POINT
 
  #ifdef DRM
-@@ -151,6 +160,7 @@
+@@ -151,6 +162,7 @@
 
  #include <stdlib.h>
 
@@ -74,7 +52,7 @@
  typedef unsigned __int64 uint64_t;
  typedef unsigned __int32 uint32_t;
  typedef unsigned __int16 uint16_t;
-@@ -159,5 +169,9 @@
+@@ -159,5 +171,9 @@
  typedef __int32 int32_t;
  typedef __int16 int16_t;
  typedef __int8  int8_t;
@@ -84,7 +62,7 @@
 +
  typedef float float32_t;
 
-@@ -289,7 +319,7 @@
+@@ -289,7 +305,7 @@
    }
 
 
@@ -93,7 +71,7 @@
      #define HAS_LRINTF
      static INLINE int lrintf(float f)
      {
-@@ -301,7 +331,7 @@
+@@ -301,7 +317,7 @@
          }
          return i;
      }
@@ -102,17 +80,17 @@
      #define HAS_LRINTF
      // from http://www.stereopsis.com/FPU.html
      static INLINE int lrintf(float f)
-@@ -330,7 +360,7 @@
+@@ -330,6 +346,8 @@
 
    #else
 
 +#include <math.h>
 +
 -#ifdef HAVE_LRINTF
--#if HAVE_LRINTF
++#if HAVE_LRINTF
  #  define HAS_LRINTF
  #  define _ISOC9X_SOURCE 1
-@@ -338,8 +370,6 @@
+@@ -338,8 +356,6 @@
  #  define __USE_ISOC99   1
  #endif
 
@@ -123,20 +101,6 @@
  #error
 --- libfaad2.orig/output.c	2006-03-16 20:15:04.000000000 +0100
 +++ libfaad2/output.c	2006-04-18 19:50:26.000000000 +0200
-@@ -19,10 +19,9 @@
- ** Any non-GPL usage of this software or parts of this software is strictly
- ** forbidden.
- **
--** Commercial non-GPL licensing of this software is possible.
--** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
--**
--** $Id: output.c,v 1.42 2004/09/04 14:56:28 menno Exp $
-+** Initially modified for use with MPlayer by Rich Felker on 2005/03/29
-+** $Id: output.c,v 1.11 2005/04/05 05:43:41 rfelker Exp $
-+** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
- **/
-
- #include "common.h"
 @@ -463,7 +462,7 @@
      }
  }
@@ -200,17 +164,6 @@
  #endif
 --- libfaad2.orig/ps_dec.c	2006-03-16 20:15:04.000000000 +0100
 +++ libfaad2/ps_dec.c	2006-04-18 20:29:38.000000000 +0200
-@@ -22,7 +22,10 @@
- ** Commercial non-GPL licensing of this software is possible.
- ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
- **
-+** Initially modified for use with MPlayer on 2005/12/05
- ** $Id: ps_dec.c,v 1.10 2004/09/04 14:56:28 menno Exp $
-+** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
-+** local_changes.diff contains the exact changes to this file.
- **/
-
- #include "common.h"
 @@ -159,7 +162,7 @@
 
  /* static function declarations */
@@ -242,17 +195,6 @@
      ps_data_decode(ps);
 --- libfaad2.orig/sbr_dec.c	2006-03-16 20:15:04.000000000 +0100
 +++ libfaad2/sbr_dec.c	2006-04-18 20:33:57.000000000 +0200
-@@ -22,7 +22,10 @@
- ** Commercial non-GPL licensing of this software is possible.
- ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
- **
-+** Initially modified for use with MPlayer on 2005/12/05
- ** $Id: sbr_dec.c,v 1.39 2004/09/04 14:56:28 menno Exp $
-+** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
-+** local_changes.diff contains the exact changes to this file.
- **/
-
-
 @@ -526,8 +529,8 @@
      uint8_t l, k;
      uint8_t dont_process = 0;
@@ -266,20 +208,6 @@
          return 20;
 --- libfaad2.orig/specrec.c	2006-03-16 20:15:04.000000000 +0100
 +++ libfaad2/specrec.c	2006-04-18 20:38:09.000000000 +0200
-@@ -19,10 +19,10 @@
- ** Any non-GPL usage of this software or parts of this software is strictly
- ** forbidden.
- **
--** Commercial non-GPL licensing of this software is possible.
--** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
--**
-+** Initially modified for use with MPlayer on 2006/04/18
- ** $Id: specrec.c,v 1.56 2004/09/08 09:43:11 gcp Exp $
-+** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
-+** local_changes.diff contains the exact changes to this file.
- **/
-
- /*
 @@ -673,29 +673,19 @@
      /* MAIN object type prediction */
      if (hDecoder->object_type == MAIN)
@@ -386,7 +314,7 @@
          retval = allocate_single_channel(hDecoder, sce->channel, output_channels);
          if (retval > 0)
              return retval;
-@@ -1026,11 +994,10 @@
+@@ -1026,11 +995,10 @@
      {
          return 23;
      }
@@ -399,7 +327,7 @@
      {
          uint8_t ele = hDecoder->fr_ch_ele;
          uint8_t ch = sce->channel;
-@@ -1040,6 +1007,7 @@
+@@ -1040,6 +1008,7 @@
          memcpy(hDecoder->time_out[ch+1], hDecoder->time_out[ch], frame_size);
      }
  #endif
