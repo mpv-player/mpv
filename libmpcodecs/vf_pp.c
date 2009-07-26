@@ -17,13 +17,6 @@
 #include "vf.h"
 #include "libpostproc/postprocess.h"
 
-#ifdef CONFIG_LIBPOSTPROC_A
-#define EMU_OLD
-#include "libpostproc/postprocess_internal.h"
-#endif
-
-#undef malloc
-
 struct vf_priv_s {
     int pp;
     pp_mode_t *ppMode[PP_QUALITY_MAX+1];
@@ -179,35 +172,10 @@ static int open(vf_instance_t *vf, char* args){
         name="de";
     }
 
-#ifdef EMU_OLD
-    if(name){
-#endif
 	for(i=0; i<=PP_QUALITY_MAX; i++){
             vf->priv->ppMode[i]= pp_get_mode_by_name_and_quality(name, i);
             if(vf->priv->ppMode[i]==NULL) return -1;
         }
-#ifdef EMU_OLD
-    }else{
-        /* hex mode for compatibility */
-        for(i=0; i<=PP_QUALITY_MAX; i++){
-	    PPMode *ppMode;
-
-	    ppMode= (PPMode*)memalign(8, sizeof(PPMode));
-
-	    ppMode->lumMode= hex_mode;
-	    ppMode->chromMode= ((hex_mode&0xFF)>>4) | (hex_mode&0xFFFFFF00);
-	    ppMode->maxTmpNoise[0]= 700;
-	    ppMode->maxTmpNoise[1]= 1500;
-	    ppMode->maxTmpNoise[2]= 3000;
-	    ppMode->maxAllowedY= 234;
-	    ppMode->minAllowedY= 16;
-	    ppMode->baseDcDiff= 256/4;
-	    ppMode->flatnessThreshold=40;
-
-            vf->priv->ppMode[i]= ppMode;
-        }
-    }
-#endif
 
     vf->priv->pp=PP_QUALITY_MAX;
     return 1;
