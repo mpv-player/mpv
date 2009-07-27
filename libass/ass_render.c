@@ -319,8 +319,8 @@ static ass_image_t* my_draw_bitmap(unsigned char* bitmap, int bitmap_w, int bitm
 
 	assert(dst_x >= 0);
 	assert(dst_y >= 0);
-	assert(dst_x + bitmap_w < frame_context.width);
-	assert(dst_y + bitmap_h < frame_context.height);
+	assert(dst_x + bitmap_w <= frame_context.width);
+	assert(dst_y + bitmap_h <= frame_context.height);
 
 	img->w = bitmap_w;
 	img->h = bitmap_h;

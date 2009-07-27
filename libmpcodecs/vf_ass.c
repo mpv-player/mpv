@@ -221,7 +221,7 @@ static void copy_from_image(struct vf_instance_s* vf, int first_row, int last_ro
 
 	assert(first_row >= 0);
 	assert(first_row <= last_row);
-	assert(last_row < vf->priv->outh);
+	assert(last_row <= vf->priv->outh);
 
 	for (pl = 1; pl < 3; ++pl) {
 		int dst_stride = vf->priv->outw;
