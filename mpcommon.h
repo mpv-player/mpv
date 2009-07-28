@@ -6,7 +6,7 @@
 #include "libmpdemux/stheader.h"
 
 extern double sub_last_pts;
-extern struct ass_track_s *ass_track;
+extern struct ass_track *ass_track;
 extern subtitle *vo_sub_last;
 
 void print_version(const char* name);
