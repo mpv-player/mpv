@@ -1,4 +1,4 @@
-.\" Synced with r29305
+.\" Synced with r29413
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 05. 24." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 07. 13." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -7359,6 +7359,26 @@ A kimeneti sorok a megtalált képkocka számából, a sötétség százalékos
 A pixelek százalékos aránya, melyeknek a küszöb alatt kell lenniük (alapértelmezett: 98).
 .IPs <küszöb>
 Határérték, mely alatt egy pixel feketének minõsül (alapértelmezett: 32).
+.RE
+.
+.TP
+.B gradfun[=erõsség[:sugár]]
+Megszünteti a banding mellékhatásait, amik néha a színmélység 8 bitre történõ
+csökkentésekor jelentkeznek a sima területeken.
+Interpolálja a szögeket, amik a sávok helyére kell, hogy kerüljenek és
+árnyalja õket.
+.sp 1
+Ez a szûrõ a lejátszáshoz lett tervezve.
+Ne használd veszteséges tömörítés elõtt, mert a tömörítés elveszti az
+árnyalást és visszahozza a sávokat.
+.RSs
+.IPs <erõsség>
+A maximum érték, amennyivel a szûrõ megváltoztat egy pixelt.
+Valamint ez a küszöbérték a majdnem sima területek azonosításához is (alapértelmezett: 1.2).
+.IPs <sugár>
+A szomszédság, melyhez a szögnek illeszkednie kell.
+A nagyobb sugár simább szögeket ad, de megakadályozza a szûrõt a részletesebb
+területek közelében lévõ pixelek módosításában (alapértelmezett: 16).
 .RE
 .
 .

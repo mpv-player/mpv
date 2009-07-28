@@ -30,7 +30,7 @@
 #define AF_FORMAT_LE		(1<<0) // Little Endian
 #define AF_FORMAT_END_MASK	(1<<0)
 
-#ifdef WORDS_BIGENDIAN	       	// Native endian of cpu
+#if HAVE_BIGENDIAN	       	// Native endian of cpu
 #define	AF_FORMAT_NE		AF_FORMAT_BE
 #else
 #define	AF_FORMAT_NE		AF_FORMAT_LE
@@ -83,7 +83,7 @@
 #define AF_FORMAT_FLOAT_LE	(AF_FORMAT_F|AF_FORMAT_32BIT|AF_FORMAT_LE)
 #define AF_FORMAT_FLOAT_BE	(AF_FORMAT_F|AF_FORMAT_32BIT|AF_FORMAT_BE)
 
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
 #define AF_FORMAT_U16_NE AF_FORMAT_U16_BE
 #define AF_FORMAT_S16_NE AF_FORMAT_S16_BE
 #define AF_FORMAT_U24_NE AF_FORMAT_U24_BE

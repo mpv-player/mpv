@@ -345,7 +345,7 @@ int b_alive;
     }
     if ((format & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_AC3) {
         // Currently ac3 input (comes from hwac3) is always in native byte-order.
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
         inDesc.mFormatFlags |= kAudioFormatFlagIsBigEndian;
 #endif
     }
@@ -669,7 +669,7 @@ static int OpenSPDIF(void)
 
     /* FIXME: If output stream is not native byte-order, we need change endian somewhere. */
     /*        Although there's no such case reported.                                     */
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
     if (!(ao->stream_format.mFormatFlags & kAudioFormatFlagIsBigEndian))
 #else
     if (ao->stream_format.mFormatFlags & kAudioFormatFlagIsBigEndian)

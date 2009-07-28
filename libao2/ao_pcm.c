@@ -234,7 +234,7 @@ static int play(void* data,int len,int flags){
 
 // let libaf to do the conversion...
 #if 0
-//#ifdef WORDS_BIGENDIAN
+//#if HAVE_BIGENDIAN
     if (ao_data.format == AFMT_S16_LE) {
       unsigned short *buffer = (unsigned short *) data;
       register int i;

@@ -238,7 +238,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
             int16_t *out = (int16_t *)buf;
             int bsmod = dest[5] & 0x7;
 
-#ifndef WORDS_BIGENDIAN
+#if !HAVE_BIGENDIAN
             int i;
             char tmp;
             for (i = 0; i < len; i += 2) {

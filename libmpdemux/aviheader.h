@@ -21,7 +21,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include "config.h"	/* get correct definition of WORDS_BIGENDIAN */
+#include "config.h"	/* get correct definition of HAVE_BIGENDIAN */
 #include "libavutil/common.h"
 #include "mpbswap.h"
 
@@ -227,7 +227,7 @@ typedef enum {
  * Some macros to swap little endian structures read from an AVI file
  * into machine endian format
  */
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
 #define	le2me_MainAVIHeader(h) {					\
     (h)->dwMicroSecPerFrame = le2me_32((h)->dwMicroSecPerFrame);	\
     (h)->dwMaxBytesPerSec = le2me_32((h)->dwMaxBytesPerSec);		\

@@ -231,6 +231,8 @@ int ivtv_probe(int verbose, int force)
 	pciinfo_t lst[MAX_PCI_DEVICES];
 	int err = 0;
 	unsigned int i, num_pci = 0;
+	unsigned char yuv_device_number = 48, yuv_device = 48 + fb_number;
+	char yuv_device_name[] = "/dev/videoXXX\0";
 
 	if(verbose)
 		printf(IVTV_MSG"probe\n");
@@ -302,9 +304,6 @@ card_found:
 	}
 
 	/* Try to find YUV device */
-	unsigned char yuv_device_number = 48, yuv_device = 48 + fb_number;
-	char yuv_device_name[] = "/dev/videoXXX\0";
-
 	do {
 		sprintf(yuv_device_name, "/dev/video%u", yuv_device);
 		yuvdev = open(yuv_device_name, O_RDWR);
@@ -399,10 +398,11 @@ int ivtv_get_caps(vidix_capability_t *to)
 
 int ivtv_query_fourcc(vidix_fourcc_t *to)
 {
+	int supports = 0;
+
 	if(ivtv_verbose)
 		printf(IVTV_MSG"query fourcc (%x)\n", to->fourcc);
 
-	int supports = 0;
 	switch(to->fourcc)
 	{
 	case IMGFMT_YV12:

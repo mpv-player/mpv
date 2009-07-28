@@ -116,7 +116,7 @@
 +#endif
 +
  /* (stolen from the kernel) */
- #ifdef WORDS_BIGENDIAN
+ #if HAVE_BIGENDIAN
 
 @@ -28,7 +68,7 @@
 

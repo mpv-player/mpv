@@ -207,7 +207,7 @@ static int play(void* data,int len,int flags){
 	int i;
 	//unsigned short *s=data;
 	uint16_t *s=data;
-#ifndef WORDS_BIGENDIAN
+#if !HAVE_BIGENDIAN
 	for(i=0;i<len/2;i++) s[i] = bswap_16(s[i]);
 #endif
 	dxr2_send_lpcm_packet(data,len,0xA0,ao_data.pts-10000,freq_id);

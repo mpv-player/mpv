@@ -378,13 +378,13 @@ static int init(int rate_hz, int channels, int format, int flags)
       case AF_FORMAT_U16_BE:
 	alsa_format = SND_PCM_FORMAT_U16_BE;
 	break;
-#ifndef WORDS_BIGENDIAN
+#if !HAVE_BIGENDIAN
       case AF_FORMAT_AC3:
 #endif
       case AF_FORMAT_S16_LE:
 	alsa_format = SND_PCM_FORMAT_S16_LE;
 	break;
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
       case AF_FORMAT_AC3:
 #endif
       case AF_FORMAT_S16_BE:
@@ -401,6 +401,18 @@ static int init(int rate_hz, int channels, int format, int flags)
 	break;
       case AF_FORMAT_S32_BE:
 	alsa_format = SND_PCM_FORMAT_S32_BE;
+	break;
+      case AF_FORMAT_U24_LE:
+	alsa_format = SND_PCM_FORMAT_U24_3LE;
+	break;
+      case AF_FORMAT_U24_BE:
+	alsa_format = SND_PCM_FORMAT_U24_3BE;
+	break;
+      case AF_FORMAT_S24_LE:
+	alsa_format = SND_PCM_FORMAT_S24_3LE;
+	break;
+      case AF_FORMAT_S24_BE:
+	alsa_format = SND_PCM_FORMAT_S24_3BE;
 	break;
       case AF_FORMAT_FLOAT_LE:
 	alsa_format = SND_PCM_FORMAT_FLOAT_LE;

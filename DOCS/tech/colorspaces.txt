@@ -154,5 +154,5 @@ order followed by the number 32, the portable way to access it is to load
 the pixel into an integer and use bitmasks.
 
 When the above portable access methods are not used, you will need to write
-2 versions of your code, and use #ifdef WORDS_BIGENDIAN to choose the correct
+2 versions of your code, and use #if HAVE_BIGENDIAN to choose the correct
 one.

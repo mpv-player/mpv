@@ -31,7 +31,7 @@
 #include <sys/types.h>
 #include "config.h"
 
-#ifndef WORDS_BIGENDIAN
+#if !HAVE_BIGENDIAN
 union magic {
   struct {
     ogg_int32_t lo;

@@ -19,7 +19,7 @@
 #ifndef MPLAYER_ASF_H
 #define MPLAYER_ASF_H
 
-//#include "config.h"	/* for WORDS_BIGENDIAN */
+//#include "config.h"	/* for HAVE_BIGENDIAN */
 #include <inttypes.h>
 #include "libavutil/common.h"
 #include "mpbswap.h"
@@ -105,7 +105,7 @@ typedef struct __attribute__((packed)) {
 } ASF_stream_chunck_t;
 
 // Definition of the stream type
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
 	#define ASF_STREAMING_CLEAR	0x2443		// $C
 	#define ASF_STREAMING_DATA	0x2444		// $D
 	#define ASF_STREAMING_END_TRANS	0x2445		// $E
@@ -140,7 +140,7 @@ typedef struct {
  * Some macros to swap little endian structures read from an ASF file
  * into machine endian format
  */
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
 #define	le2me_ASF_obj_header_t(h) {					\
     (h)->size = le2me_64((h)->size);					\
 }

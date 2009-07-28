@@ -7,7 +7,7 @@
 +#include "config.h"
 
 -#if BYTE_ORDER==LITTLE_ENDIAN
-+#ifndef WORDS_BIGENDIAN
++#if !HAVE_BIGENDIAN
  union magic {
    struct {
      ogg_int32_t lo;

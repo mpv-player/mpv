@@ -68,7 +68,7 @@ typedef struct {
 #endif
 
 #ifndef le2me_BITMAPINFOHEADER
-#ifdef WORDS_BIGENDIAN
+#if HAVE_BIGENDIAN
 #define le2me_BITMAPINFOHEADER(h) {					\
     (h)->biSize = le2me_32((h)->biSize);				\
     (h)->biWidth = le2me_32((h)->biWidth);				\

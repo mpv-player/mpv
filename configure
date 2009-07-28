@@ -2280,9 +2280,11 @@ fi
 if test "$_big_endian" = yes ; then
   _byte_order='big-endian'
   def_words_endian='#define WORDS_BIGENDIAN 1'
+  def_bigendian='#define HAVE_BIGENDIAN 1'
 else
   _byte_order='little-endian'
   def_words_endian='#undef WORDS_BIGENDIAN'
+  def_bigendian='#define HAVE_BIGENDIAN 0'
 fi
 echores "$_byte_order"
 
@@ -4402,8 +4404,6 @@ def_vidix_drv_cyberblade='#undef CONFIG_VIDIX_DRV_CYBERBLADE'
 _vidix_drv_cyberblade=no
 def_vidix_drv_ivtv='#undef CONFIG_VIDIX_DRV_IVTV'
 _vidix_drv_ivtv=no
-def_vidix_drv_ivtv='#undef CONFIG_VIDIX_DRV_IVTV'
-_vidix_drv_ivtv=no
 def_vidix_drv_mach64='#undef CONFIG_VIDIX_DRV_MACH64'
 _vidix_drv_mach64=no
 def_vidix_drv_mga='#undef CONFIG_VIDIX_DRV_MGA'
@@ -4439,8 +4439,9 @@ echores "$_vidix"
 if test "$_vidix" = yes ; then
   def_vidix='#define CONFIG_VIDIX 1'
   _vomodules="cvidix $_vomodules"
-  test "$_vidix_drivers" || _vidix_drivers="cyberblade ivtv mach64 mga mga_crtc2 nvidia pm2 pm3 radeon rage128 s3 sh_veu sis unichrome"
-  test $_ivtv = "yes" || _vidix_drivers=$(echo $_vidix_drivers | sed s/ivtv//)
+  # FIXME: ivtv driver temporarily disabled until we have a proper test
+  #test "$_vidix_drivers" || _vidix_drivers="cyberblade ivtv mach64 mga mga_crtc2 nvidia pm2 pm3 radeon rage128 s3 sh_veu sis unichrome"
+  test "$_vidix_drivers" || _vidix_drivers="cyberblade mach64 mga mga_crtc2 nvidia pm2 pm3 radeon rage128 s3 sh_veu sis unichrome"
 
   # some vidix drivers are architecture and os specific, discard them elsewhere
   x86 || _vidix_drivers=$(echo $_vidix_drivers | sed -e s/cyberblade// -e s/sis// -e s/unichrome// -e s/s3//)
@@ -7932,7 +7933,6 @@ CONFIG_RDFT=yes
 CONFIG_BZLIB=$bzlib
 CONFIG_ENCODERS=yes
 CONFIG_GPL=yes
-CONFIG_LIBVORBIS=$_libvorbis
 CONFIG_MLIB = $_mlib
 CONFIG_MUXERS=$_mencoder
 CONFIG_VDPAU=$_vdpau
@@ -8104,6 +8104,7 @@ $def_pthread_cache
 /* CPU stuff */
 #define __CPU__ $iproc
 $def_words_endian
+$def_bigendian
 $(ff_config_enable "$_arch_all" "$_arch" "ARCH")
 $(ff_config_enable "$_cpuexts_all" "$_cpuexts" "HAVE")
 
@@ -8363,6 +8364,7 @@ $def_yasm
 #define CONFIG_SWSCALE 1
 #define CONFIG_SWSCALE_ALPHA 1
 
+#define HAVE_ATTRIBUTE_PACKED 1
 #define HAVE_GETHRTIME 0
 #define HAVE_INLINE_ASM 0
 #define HAVE_LDBRX 0
