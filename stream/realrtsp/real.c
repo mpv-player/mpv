@@ -382,6 +382,8 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer, int rdt_rawdata) {
     ph.flags=0;
   *buffer = xbuffer_ensure_size(*buffer, 12+size);
   if(rdt_rawdata) {
+      if (size < 12)
+          return 0;
     n=rtsp_read_data(rtsp_session, *buffer, size-12);
     return (n <= 0) ? 0 : n;
   }
