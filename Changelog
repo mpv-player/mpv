@@ -8,7 +8,9 @@ MPlayer (1.0)
     * add new FourCCs (m1v1,HDMV), TwoCCs (0xA106,0x6c75), and formats (0x11005354)
      to existing codecs.
     * AMR now handled via opencore decoder
-    * support for TrueHD in BluRay streams
+
+    Demuxers:
+    * support for TrueHD in BluRay streams in libmpdemux
 
   rc3: "BikeshedCounter" March 27, 2009
     Decoders:
