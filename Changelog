@@ -1,5 +1,15 @@
 MPlayer (1.0)
 
+  rc4: "Yes We Can"
+    Decoders:
+    * YUY2 Lossless Codec (YLC0) via binary DLL
+    * Truemotion RT codec (TR20) via binary DLL
+    * Nogantech Codec (NTN1 and NTN2) via binary DLL
+    * add new FourCCs (m1v1,HDMV), TwoCCs (0xA106,0x6c75), and formats (0x11005354)
+     to existing codecs.
+    * AMR now handled via opencore decoder
+    * support for TrueHD in BluRay streams
+
   rc3: "BikeshedCounter" March 27, 2009
     Decoders:
     * support for X8 frames (fixes "J-type picture is not supported" for WMV2)
