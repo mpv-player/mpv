@@ -2622,14 +2622,6 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
   <entry>G.726 ADPCM</entry>
 </row>
 <row>
-  <entry>libamr_nb</entry>
-  <entry>3GPP Adaptive Multi-Rate (AMR) narrow-band</entry>
-</row>
-<row>
-  <entry>libamr_wb</entry>
-  <entry>3GPP Adaptive Multi-Rate (AMR) wide-band</entry>
-</row>
-<row>
   <entry>libfaac</entry>
   <entry>Advanced Audio Coding (AAC) - using FAAC</entry>
 </row>

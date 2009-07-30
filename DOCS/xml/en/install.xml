@@ -469,14 +469,10 @@ make install
 <title>AMR</title>
 
 <para>
-Adaptive Multi-Rate speech codec is used in third generation (3G) mobile
-phones.
-Reference implementation is available from
-<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
-(free for private use).
-To enable support, download and install support libraries for
-<ulink url="http://www.penguin.cz/~utx/amr">AMR-NB and AMR-WB</ulink>
-following the instructions on that page. Recompile MPlayer afterwards.
+MPlayer can use the OpenCORE AMR libraries through FFmpeg.
+Download the libraries for AMR-NB and AMR-WB from the
+<ulink url="http://sourceforge.net/projects/opencore-amr/">opencore-amr</ulink>
+project and install them according to the instructions on that page.
 </para>
 </sect2>
 
