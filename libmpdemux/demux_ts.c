@@ -77,6 +77,7 @@ typedef enum
 	AUDIO_DTS	= 0x2001,
 	AUDIO_LPCM_BE  	= 0x10001,
 	AUDIO_AAC	= mmioFOURCC('M', 'P', '4', 'A'),
+	AUDIO_TRUEHD	= mmioFOURCC('T', 'R', 'H', 'D'),
 	SPU_DVD		= 0x3000000,
 	SPU_DVB		= 0x3000001,
 	PES_PRIVATE1	= 0xBD00000,
@@ -244,7 +245,7 @@ typedef struct {
 } TS_pids_t;
 
 
-#define IS_AUDIO(x) (((x) == AUDIO_MP2) || ((x) == AUDIO_A52) || ((x) == AUDIO_LPCM_BE) || ((x) == AUDIO_AAC) || ((x) == AUDIO_DTS))
+#define IS_AUDIO(x) (((x) == AUDIO_MP2) || ((x) == AUDIO_A52) || ((x) == AUDIO_LPCM_BE) || ((x) == AUDIO_AAC) || ((x) == AUDIO_DTS) || ((x) == AUDIO_TRUEHD))
 #define IS_VIDEO(x) (((x) == VIDEO_MPEG1) || ((x) == VIDEO_MPEG2) || ((x) == VIDEO_MPEG4) || ((x) == VIDEO_H264) || ((x) == VIDEO_AVC)  || ((x) == VIDEO_VC1))
 
 static int ts_parse(demuxer_t *demuxer, ES_stream_t *es, unsigned char *packet, int probe);
@@ -871,6 +872,8 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 		mp_msg(MSGT_DEMUXER, MSGL_INFO, "AUDIO LPCM(pid=%d)", param->apid);
 	else if(param->atype == AUDIO_AAC)
 		mp_msg(MSGT_DEMUXER, MSGL_INFO, "AUDIO AAC(pid=%d)", param->apid);
+	else if(param->atype == AUDIO_TRUEHD)
+		mp_msg(MSGT_DEMUXER, MSGL_INFO, "AUDIO TRUEHD(pid=%d)", param->apid);
 	else
 	{
 		audio_found = 0;
@@ -1412,6 +1415,8 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 		int ssid = parse_pes_extension_fields(p, pkt_len);
 		if((audio_substream_id!=-1) && (ssid != audio_substream_id))
 			return 0;
+		if(ssid == 0x72)
+			es->type  = type_from_pmt = AUDIO_TRUEHD;
 	}
 
 	p += header_len + 9;
