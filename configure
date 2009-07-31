@@ -8414,6 +8414,7 @@ CONFIG_XVMC=$_xvmc
 CONFIG_ZLIB=$_zlib
 
 HAVE_PTHREADS = $_pthreads
+HAVE_SHM = $_shm
 HAVE_W32THREADS = $_w32threads
 HAVE_YASM = $_have_yasm
 
