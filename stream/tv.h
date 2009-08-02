@@ -198,7 +198,7 @@ typedef struct {
 #define TVI_CONTROL_VBI_INIT           0x501   ///< vbi init
 
 /*
-  TELETEXT controls (through tv_teletext_control() )
+  TELETEXT controls (through teletext_control() )
    NOTE:
     _SET_ should be _GET_ +1
    _STEP_ should be _GET_ +2
@@ -213,7 +213,7 @@ typedef struct {
 #define TV_VBI_CONTROL_GET_SUBPAGE     0x516   ///< get grabbed teletext page
 #define TV_VBI_CONTROL_SET_SUBPAGE     0x517   ///< set grab teletext page number
 
-#define TV_VBI_CONTROL_GET_FORMAT      0x519   ///< get eletext format
+#define TV_VBI_CONTROL_GET_FORMAT      0x519   ///< get teletext format
 #define TV_VBI_CONTROL_SET_FORMAT      0x51a   ///< set teletext format
 
 #define TV_VBI_CONTROL_GET_HALF_PAGE   0x51c   ///< get current half page
@@ -269,7 +269,7 @@ void tv_start_scan(tvi_handle_t *tvh, int start);
 #define TV_NORM_NTSCJP		7
 
 #define VBI_TFORMAT_TEXT    0               ///< text mode
-#define VBI_TFORMAT_BW      1               ///< back&white mode
+#define VBI_TFORMAT_BW      1               ///< black&white mode
 #define VBI_TFORMAT_GRAY    2               ///< grayscale mode
 #define VBI_TFORMAT_COLOR   3               ///< color mode (require color_spu patch!)
 
