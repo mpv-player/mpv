@@ -287,9 +287,9 @@ void tv_start_scan(tvi_handle_t *tvh, int start);
 typedef
 enum{
     TT_FORMAT_OPAQUE=0,       ///< opaque
-    TT_FORMAT_TRANSPARENT,    ///< translarent
+    TT_FORMAT_TRANSPARENT,    ///< transparent
     TT_FORMAT_OPAQUE_INV,     ///< opaque with inverted colors
-    TT_FORMAT_TRANSPARENT_INV ///< translarent with inverted colors
+    TT_FORMAT_TRANSPARENT_INV ///< transparent with inverted colors
 } teletext_format;
 
 typedef
