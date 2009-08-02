@@ -10,6 +10,9 @@ prefix := $(shell pwd)/debian/$(package)
 
 arch   := $(shell dpkg --print-architecture)
 
+# See http://wiki.debian.org/Teams/Dpkg/DebianRules; #465282  and
+# https://wiki.ubuntu.com/DistCompilerFlags
+CLEAN_ENV=env -u CFLAGS -u CPPFLAGS -u LDFLAGS -u FFLAGS -u CXXFLAGS
 
 configure: configure-stamp
 configure-stamp:
@@ -19,6 +22,7 @@ configure-stamp:
 	# If you plan to install the target .deb on a wide variety of machines,
 	# you may want to add the "--enable-runtime-cpudetection" option to
 	# the line below, but beware: the resulting binary will run slower
+	$(CLEAN_ENV) \
 	./configure --prefix=/usr --confdir=/etc/mplayer $(DEB_BUILD_OPTIONS)
 
 	touch configure-stamp
@@ -28,6 +32,7 @@ build-stamp:
 	dh_testdir
 
 	# commands to compile the package.
+	$(CLEAN_ENV) \
 	${MAKE}
 
 	touch build-stamp
