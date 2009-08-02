@@ -20,9 +20,7 @@
 #include "vobsub.h"
 #include "spudec.h"
 #include "mp_msg.h"
-#ifdef CONFIG_UNRAR_EXEC
 #include "unrar_exec.h"
-#endif
 #include "libavutil/common.h"
 
 extern int vobsub_id;

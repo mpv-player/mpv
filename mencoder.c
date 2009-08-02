@@ -77,13 +77,8 @@
 #include "stream/stream_dvd.h"
 #endif
 
-#ifdef CONFIG_DVDNAV
 #include "stream/stream_dvdnav.h"
-#endif
-
-#ifdef CONFIG_LIBAVCODEC
 #include "libavcodec/avcodec.h"
-#endif
 
 #include "libmpcodecs/ae.h"
 int vo_doublebuffering=0;
@@ -218,10 +213,8 @@ void mplayer_put_key(int code)
 {
 }
 
-#ifdef CONFIG_ASS
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
-#endif
 char *current_module;
 #include "mpcommon.h"
 

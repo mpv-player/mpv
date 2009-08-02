@@ -11,9 +11,7 @@
 #include "spudec.h"
 #include "version.h"
 #include "vobsub.h"
-#ifdef CONFIG_TV_TELETEXT
 #include "stream/tv.h"
-#endif
 #include "libavutil/intreadwrite.h"
 #include "m_option.h"
 

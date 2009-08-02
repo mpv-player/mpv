@@ -72,9 +72,7 @@
 #include "osdep/getch2.h"
 #include "osdep/timer.h"
 
-#ifdef CONFIG_GUI
 #include "gui/interface.h"
-#endif
 
 #include "input/input.h"
 
@@ -100,17 +98,10 @@ char *heartbeat_cmd;
 #endif /* __linux__ */
 #endif /* HAVE_RTC */
 
-#ifdef CONFIG_TV
 #include "stream/tv.h"
-#endif
-#ifdef CONFIG_RADIO
 #include "stream/stream_radio.h"
-#endif
-
-#ifdef CONFIG_DVBIN
 #include "stream/dvbin.h"
 #include "stream/cache2.h"
-#endif
 
 //**************************************************************************//
 //             Playtree
@@ -161,10 +152,7 @@ static int max_framesize=0;
 #ifdef CONFIG_DVDREAD
 #include "stream/stream_dvd.h"
 #endif
-
-#ifdef CONFIG_DVDNAV
 #include "stream/stream_dvdnav.h"
-#endif
 
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
@@ -320,10 +308,8 @@ char *vobsub_name=NULL;
 int   subcc_enabled=0;
 int suboverlap_enabled = 1;
 
-#ifdef CONFIG_ASS
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
-#endif
 
 char* current_module=NULL; // for debugging
 

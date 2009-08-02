@@ -21,11 +21,10 @@ char* get_term_charset(void);
 #if defined(FOR_MENCODER)
 #undef CONFIG_GUI
 int use_gui;
-#endif
-
-#ifdef CONFIG_GUI
+#else
 #include "gui/interface.h"
 #endif
+
 #include "mp_msg.h"
 
 /* maximum message length of mp_msg */
