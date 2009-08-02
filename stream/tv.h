@@ -1,10 +1,6 @@
 #ifndef MPLAYER_TV_H
 #define MPLAYER_TV_H
 
-//#include "libao2/afmt.h"
-//#include "libmpcodecs/img_format.h"
-//#include "mp_msg.h"
-
 typedef struct tv_param_s {
     char *freq;
     char *channel;
