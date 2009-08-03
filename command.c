@@ -34,7 +34,9 @@
 #ifdef CONFIG_DVBIN
 #include "stream/dvbin.h"
 #endif
+#ifdef CONFIG_DVDREAD
 #include "stream/stream_dvd.h"
+#endif
 #include "stream/stream_dvdnav.h"
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
