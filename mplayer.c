@@ -100,7 +100,9 @@ char *heartbeat_cmd;
 
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
+#ifdef CONFIG_DVBIN
 #include "stream/dvbin.h"
+#endif
 #include "stream/cache2.h"
 
 //**************************************************************************//
