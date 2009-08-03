@@ -2838,8 +2838,9 @@ language_man=$tmp_language_man
 test -z "$language_man" && language_man=en
 
 for lang in $language_msg ; do
-  test -f "help/help_mp-${lang}.h" && language_msg=$lang && break
+  test -f "help/help_mp-${lang}.h" && tmp_language_msg=$lang && break
 done
+language_msg=$tmp_language_msg
 test -z "$language_msg" && language_msg=en
 _mp_help="help/help_mp-${language_msg}.h"
 echores "messages: $language_msg - man pages: $language_man - documentation: $language_doc"
