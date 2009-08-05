@@ -181,6 +181,8 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
     bih->biCompression = sh_video->format = fourcc;
     bih->biWidth = qtRTPSource->qtState.width;
     bih->biHeight = qtRTPSource->qtState.height;
+      if (qtRTPSource->qtState.sdAtomSize > 83)
+        bih->biBitCount = qtRTPSource->qtState.sdAtom[83];
       uint8_t *pos = (uint8_t*)qtRTPSource->qtState.sdAtom + 86;
       uint8_t *endpos = (uint8_t*)qtRTPSource->qtState.sdAtom
                         + qtRTPSource->qtState.sdAtomSize;
