@@ -52,7 +52,7 @@ int ass_use_margins = 0;
 char *ass_color = NULL;
 char *ass_border_color = NULL;
 char *ass_styles_file = NULL;
-int ass_hinting = ASS_HINTING_NATIVE + 4;       // native hinting for unscaled osd
+int ass_hinting = ASS_HINTING_LIGHT + 4;       // light hinting for unscaled osd
 
 #ifdef CONFIG_FONTCONFIG
 extern int font_fontconfig;
