@@ -13,7 +13,7 @@
 
 #ifdef CONFIG_ASS
 #include "ass_mp.h"
-extern ass_track_t* ass_track;
+extern ASS_Track *ass_track;
 #endif
 
 //===========================================================================//
@@ -25,7 +25,7 @@ struct vf_priv_s {
     double pts;
     struct vo *vo;
 #ifdef CONFIG_ASS
-    ass_renderer_t* ass_priv;
+    ASS_Renderer *ass_priv;
     int prev_visibility;
     double scale_ratio;
 #endif
@@ -118,7 +118,7 @@ static int control(struct vf_instance* vf, int request, void* data)
 #ifdef CONFIG_ASS
     case VFCTRL_INIT_EOSD:
     {
-        vf->priv->ass_priv = ass_renderer_init((ass_library_t*)data);
+        vf->priv->ass_priv = ass_renderer_init((ASS_Library*)data);
         if (!vf->priv->ass_priv) return CONTROL_FALSE;
         ass_configure_fonts(vf->priv->ass_priv);
         vf->priv->prev_visibility = 0;

@@ -289,11 +289,11 @@ static void clearEOSD(void) {
 
 static void do_render_osd(int);
 
-static inline int is_tinytex(ass_image_t *i, int tinytexcur) {
+static inline int is_tinytex(ASS_Image *i, int tinytexcur) {
   return i->w < TINYTEX_SIZE && i->h < TINYTEX_SIZE && tinytexcur < TINYTEX_MAX;
 }
 
-static inline int is_smalltex(ass_image_t *i, int smalltexcur) {
+static inline int is_smalltex(ASS_Image *i, int smalltexcur) {
   return i->w < SMALLTEX_SIZE && i->h < SMALLTEX_SIZE && smalltexcur < SMALLTEX_MAX;
 }
 
@@ -318,8 +318,8 @@ static void genEOSD(mp_eosd_images_t *imgs) {
   int smalltexcur = 0;
   GLuint *curtex;
   GLint scale_type = scaled_osd ? GL_LINEAR : GL_NEAREST;
-  ass_image_t *img = imgs->imgs;
-  ass_image_t *i;
+  ASS_Image *img = imgs->imgs;
+  ASS_Image *i;
 
   if (imgs->changed == 0) // there are elements, but they are unchanged
       return;

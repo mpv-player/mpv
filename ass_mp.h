@@ -31,7 +31,7 @@
 #include <ass/ass.h>
 #include <ass/ass_types.h>
 
-extern ass_library_t *ass_library;
+extern ASS_Library *ass_library;
 extern int ass_enabled;
 extern float ass_font_scale;
 extern float ass_line_spacing;
@@ -45,18 +45,18 @@ extern char *ass_border_color;
 extern char *ass_styles_file;
 extern int ass_hinting;
 
-ass_track_t *ass_default_track(ass_library_t *library);
-int ass_process_subtitle(ass_track_t *track, subtitle *sub);
-ass_track_t *ass_read_subdata(ass_library_t *library, sub_data *subdata,
-                              double fps);
+ASS_Track *ass_default_track(ASS_Library *library);
+int ass_process_subtitle(ASS_Track *track, subtitle *sub);
+ASS_Track *ass_read_subdata(ASS_Library *library, sub_data *subdata,
+                            double fps);
 
-void ass_configure(ass_renderer_t *priv, int w, int h, int hinting);
-void ass_configure_fonts(ass_renderer_t *priv);
-ass_library_t *ass_init(void);
+void ass_configure(ASS_Renderer *priv, int w, int h, int hinting);
+void ass_configure_fonts(ASS_Renderer *priv);
+ASS_Library *ass_init(void);
 
 extern int ass_force_reload;
-ass_image_t *ass_mp_render_frame(ass_renderer_t *priv, ass_track_t *track,
-                                 long long now, int *detect_change);
+ASS_Image *ass_mp_render_frame(ASS_Renderer *priv, ASS_Track *track,
+                               long long now, int *detect_change);
 
 #else /* CONFIG_ASS */
 
@@ -69,12 +69,12 @@ typedef struct ass_image {
     uint32_t color;
     int dst_x, dst_y;
     struct ass_image *next;
-} ass_image_t;
+} ASS_Image;
 
 #endif
 
 typedef struct {
-    ass_image_t *imgs;
+    ASS_Image *imgs;
     int changed;
 } mp_eosd_images_t;
 
