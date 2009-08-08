@@ -23,7 +23,7 @@ configure-stamp:
 	# you may want to add the "--enable-runtime-cpudetection" option to
 	# the line below, but beware: the resulting binary will run slower
 	$(CLEAN_ENV) \
-	./configure --prefix=/usr --confdir=/etc/mplayer $(DEB_BUILD_OPTIONS)
+	./configure --prefix=/usr --confdir=/etc/mplayer $(DEB_BUILD_CONFIGURE)
 
 	touch configure-stamp
 
