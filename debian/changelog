@@ -1,3 +1,10 @@
+mplayer (1.0git) unstable; urgency=low
+
+  * change version name to git.
+  * update standards version to 3.8.2
+
+ -- Anton Khirnov <wyskas@gmail.com>  Sat, 08 Aug 2009 13:15:57 +0200
+
 mplayer (1.0svn) unstable; urgency=low
 
   * change version naming from cvs to svn.
