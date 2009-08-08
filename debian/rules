@@ -5,6 +5,10 @@
 # This is the debhelper compatability version to use.
 export DH_COMPAT=4
 
+# do not run the actual rules of this makefile in parallel. sub-makes
+# can go in parallel
+.NOTPARALLEL:
+
 package        := mplayer
 prefix := $(shell pwd)/debian/$(package)
 
@@ -13,6 +17,11 @@ arch   := $(shell dpkg --print-architecture)
 # See http://wiki.debian.org/Teams/Dpkg/DebianRules; #465282  and
 # https://wiki.ubuntu.com/DistCompilerFlags
 CLEAN_ENV=env -u CFLAGS -u CPPFLAGS -u LDFLAGS -u FFLAGS -u CXXFLAGS
+
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+         NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+         MAKEFLAGS += -j$(NUMJOBS)
+endif
 
 configure: configure-stamp
 configure-stamp:
