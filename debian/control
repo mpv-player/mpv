@@ -2,8 +2,8 @@ Source: mplayer
 Section: misc
 Priority: optional
 Maintainer: Diego Biurrun <diego@biurrun.de>
-Standards-Version: 3.2.1
-Build-Depends: libpng12-dev, zlib1g-dev, x11proto-core-dev, libx11-dev, libxext-dev, libxinerama-dev, libxv-dev, debhelper (>= 2)
+Standards-Version: 3.8.2
+Build-Depends: libpng12-dev, zlib1g-dev, x11proto-core-dev, libx11-dev, libxext-dev, libxinerama-dev, libxv-dev, debhelper (>= 7)
 
 Package: mplayer
 Architecture: any
