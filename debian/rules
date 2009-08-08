@@ -51,7 +51,6 @@ clean:
 
 	# commands to clean up after the build process.
 	-$(MAKE) distclean
-	rm -f help_mp.h config.h config.mak
 	dh_clean
 
 # Build architecture-independent files here.
