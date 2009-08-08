@@ -1,3 +1,0 @@
-# Site          Directory               Pattern                 Version Script
-version=2
-http://www.mplayerhq.hu /MPlayer/releases/ MPlayer-(.*)\.tar\.bz2 debian uupdate
