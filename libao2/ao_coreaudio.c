@@ -115,7 +115,8 @@ static int write_buffer(unsigned char* data, int len){
 static int read_buffer(unsigned char* data,int len){
   int buffered = av_fifo_size(ao->buffer);
   if (len > buffered) len = buffered;
-  return av_fifo_generic_read(ao->buffer, data, len, NULL);
+  av_fifo_generic_read(ao->buffer, data, len, NULL);
+  return len;
 }
 
 OSStatus theRenderProc(void *inRefCon, AudioUnitRenderActionFlags *inActionFlags, const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber, UInt32 inNumFrames, AudioBufferList *ioData)
