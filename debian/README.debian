@@ -8,9 +8,9 @@ mplayer for Debian
   directory
 
   In case you would like to pass some parameters to ./configure, set variable
-  DEB_BUILD_OPTIONS like that:
+  DEB_BUILD_CONFIGURE like that:
 
-  eyck@ghost$ DEB_BUILD_OPTIONS="--enable-streaming" fakeroot debian/rules binary
+  eyck@ghost$ DEB_BUILD_CONFIGURE"--enable-streaming" fakeroot debian/rules binary
 
 
 Dariush Pietrzak <eyck@ghost.anime.pl>  Sat Jan  5 20:28:23 CET 2002
