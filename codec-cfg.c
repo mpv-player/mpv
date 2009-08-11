@@ -142,6 +142,9 @@ static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int
 	        const char *name;
 	        const unsigned int num;
 	} fmt_table[] = {
+		// note: due to parser deficiencies/simplicity, if one format
+		// name matches the beginning of another, the longer one _must_
+		// come first in this list.
 		{"YV12",  IMGFMT_YV12},
 		{"I420",  IMGFMT_I420},
 		{"IYUV",  IMGFMT_IYUV},
