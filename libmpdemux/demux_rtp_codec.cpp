@@ -30,6 +30,7 @@ extern "C" {
 #ifdef CONFIG_LIBAVCODEC
 AVCodecParserContext * h264parserctx;
 #endif
+void *avcctx;
 
 // Copied from vlc
 static unsigned char* parseH264ConfigStr( char const* configStr,
@@ -137,6 +138,7 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
 #ifdef CONFIG_LIBAVCODEC
     avcodec_register_all();
     h264parserctx = av_parser_init(CODEC_ID_H264);
+    avcctx = avcodec_alloc_context();
 #endif
     needVideoFrameRate(demuxer, subsession);
   } else if (strcmp(subsession->codecName(), "H261") == 0) {
