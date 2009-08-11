@@ -317,6 +317,10 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
     wf->wFormatTag = sh_audio->format = fourcc;
     wf->nChannels = numChannels;
 
+      if (qtRTPSource->qtState.sdAtomSize > 33) {
+        wf->wBitsPerSample = qtRTPSource->qtState.sdAtom[27];
+        wf->nSamplesPerSec = qtRTPSource->qtState.sdAtom[32]<<8|qtRTPSource->qtState.sdAtom[33];
+      }
     uint8_t *pos = (uint8_t*)qtRTPSource->qtState.sdAtom + 52;
     uint8_t *endpos = (uint8_t*)qtRTPSource->qtState.sdAtom
                       + qtRTPSource->qtState.sdAtomSize;
