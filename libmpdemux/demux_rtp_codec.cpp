@@ -29,8 +29,8 @@ extern "C" {
 
 #ifdef CONFIG_LIBAVCODEC
 AVCodecParserContext * h264parserctx;
+AVCodecContext *avcctx;
 #endif
-void *avcctx;
 
 // Copied from vlc
 static unsigned char* parseH264ConfigStr( char const* configStr,

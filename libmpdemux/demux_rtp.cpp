@@ -117,7 +117,9 @@ int rtsp_transport_tcp = 0;
 #endif
 
 extern int rtsp_port;
-extern void *avcctx;
+#ifdef CONFIG_LIBAVCODEC
+extern AVCodecContext *avcctx;
+#endif
 
 extern "C" int audio_id, video_id, dvdsub_id;
 extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
@@ -565,7 +567,7 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
     }
     if (headersize == 3 && h264parserctx) { // h264
       consumed = h264parserctx->parser->parser_parse(h264parserctx,
-                               (AVCodecContext *)avcctx,
+                               avcctx,
                                &poutbuf, &poutbuf_size,
                                dp->buffer, dp->len);
 
