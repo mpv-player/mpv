@@ -138,7 +138,7 @@ static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int
 	return 1;
 }
 
-        static struct {
+        static const struct {
 	        const char *name;
 	        const unsigned int num;
 	} fmt_table[] = {
