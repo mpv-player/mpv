@@ -392,7 +392,7 @@ extern "C" void demux_close_rtp(demuxer_t* demuxer) {
   delete rtpState->sdpDescription;
   delete rtpState;
 #ifdef CONFIG_LIBAVCODEC
-  av_free(avcctx);
+  av_freep(&avcctx);
 #endif
 
   env->reclaim(); delete scheduler;
