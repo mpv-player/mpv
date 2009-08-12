@@ -162,8 +162,8 @@ static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int
 		{"UYVY",  IMGFMT_UYVY},
 		{"YVYU",  IMGFMT_YVYU},
 
-		{"RGB48LE",  IMGFMT_RGB|48},
-		{"RGB48BE",  IMGFMT_RGB|49},
+		{"RGB48LE",  IMGFMT_RGB48LE},
+		{"RGB48BE",  IMGFMT_RGB48BE},
 	        {"RGB4",  IMGFMT_RGB|4},
 	        {"RGB8",  IMGFMT_RGB|8},
 		{"RGB15", IMGFMT_RGB|15},
