@@ -270,8 +270,15 @@ static int process_event_tail(ass_track_t* track, ass_event_t* event, char* str,
 	int i;
 	ass_event_t* target = event;
 
-	char* format = strdup(track->event_format);
-	char* q = format; // format scanning pointer
+	char* format;
+	char* q; // format scanning pointer
+
+	if (!track->event_format) {
+		track->event_format = strdup("Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text");
+		mp_msg(MSGT_ASS, MSGL_V, "Event format is broken, reseting to defaults.\n");
+	}
+
+	q = format = strdup(track->event_format);
 
 	if (track->n_styles == 0) {
 		// add "Default" style to the end
