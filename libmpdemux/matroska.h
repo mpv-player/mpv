@@ -50,6 +50,7 @@
 #define MKV_A_QDMC2      "A_QUICKTIME/QDM2"
 #define MKV_A_FLAC       "A_FLAC"
 #define MKV_A_WAVPACK    "A_WAVPACK4"
+#define MKV_A_TRUEHD     "A_TRUEHD"
 
 #define MKV_V_MSCOMP     "V_MS/VFW/FOURCC"
 #define MKV_V_REALV10    "V_REAL/RV10"

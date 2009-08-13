@@ -1751,6 +1751,8 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
         track->a_formattag = mmioFOURCC('Q', 'D', 'M', '2');
       else if (!strcmp(track->codec_id, MKV_A_WAVPACK))
         track->a_formattag = mmioFOURCC('W', 'V', 'P', 'K');
+      else if (!strcmp(track->codec_id, MKV_A_TRUEHD))
+        track->a_formattag = mmioFOURCC('T', 'R', 'H', 'D');
       else if (!strcmp(track->codec_id, MKV_A_FLAC))
         {
           if (track->private_data == NULL || track->private_size == 0)
@@ -1990,7 +1992,8 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
       dp->flags = 0;
       ds_add_packet (demuxer->audio, dp);
     }
-  else if (track->a_formattag == mmioFOURCC('W', 'V', 'P', 'K'))
+  else if (track->a_formattag == mmioFOURCC('W', 'V', 'P', 'K') ||
+           track->a_formattag == mmioFOURCC('T', 'R', 'H', 'D'))
     {  /* do nothing, still works */  }
   else if (!track->ms_compat || (track->private_size < sizeof(WAVEFORMATEX)))
     {
