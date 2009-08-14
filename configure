@@ -7692,7 +7692,7 @@ if test "$_pvr" = auto ; then
 #include <inttypes.h>
 #include <linux/types.h>
 #include <linux/videodev2.h>
-int main(void) { struct v4l2_ext_controls ext; return 0; }
+int main(void) { struct v4l2_ext_controls ext; return ext.controls->value; }
 EOF
   cc_check && _pvr=yes
  fi
