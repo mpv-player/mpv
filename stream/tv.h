@@ -1,5 +1,5 @@
 /*
- * Teletext support
+ * TV interface
  *
  * Copyright (C) 2001 Alex Beregszászi
  * Copyright (C) 2007 Attila Ötvös
