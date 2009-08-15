@@ -1,6 +1,8 @@
 /*
  * Teletext support
  *
+ * Copyright (C) 2001 Alex Beregszászi
+ * Copyright (C) 2007 Attila Ötvös
  * Copyright (C) 2007 Vladimir Voroshilov <voroshil@gmail.com>
  *
  * This file is part of MPlayer.
