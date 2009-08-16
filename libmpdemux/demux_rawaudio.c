@@ -112,6 +112,23 @@ static void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
 //  printf("demux_rawaudio: streamtell=%d\n",(int)stream_tell(demuxer->stream));
 }
 
+static int demux_rawaudio_control(demuxer_t *demuxer,int cmd, void *arg)
+{
+  sh_audio_t *sh_audio = demuxer->audio->sh;
+  switch(cmd) {
+  case DEMUXER_CTRL_GET_TIME_LENGTH:
+    if (!sh_audio->i_bps) return DEMUXER_CTRL_DONTKNOW;
+    *(double *)arg = (double)(demuxer->movi_end - demuxer->movi_start) / sh_audio->i_bps;
+    return DEMUXER_CTRL_GUESS;
+
+  case DEMUXER_CTRL_GET_PERCENT_POS:
+    *(int *)arg = (stream_tell(demuxer->stream) - demuxer->movi_start) * 100 / (demuxer->movi_end - demuxer->movi_start);
+    return DEMUXER_CTRL_GUESS;
+  }
+  return DEMUXER_CTRL_NOTIMPL;
+}
+
+
 
 const demuxer_desc_t demuxer_desc_rawaudio = {
   "Raw audio demuxer",
@@ -126,5 +143,5 @@ const demuxer_desc_t demuxer_desc_rawaudio = {
   demux_rawaudio_open,
   NULL,
   demux_rawaudio_seek,
-  NULL
+  demux_rawaudio_control
 };
