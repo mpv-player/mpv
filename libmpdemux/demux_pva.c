@@ -439,7 +439,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 				buffer[255]=stream_read_char(d->stream);
 				pes_head_len=stream_read_char(d->stream);
 				stream_read(d->stream,buffer,pes_head_len);
-				if(!buffer[255]&0x80) //PES header does not contain PTS.
+				if(!(buffer[255]&0x80)) //PES header does not contain PTS.
 				{
 					mp_msg(MSGT_DEMUX,MSGL_V,"Audio PES packet does not contain PTS. (pes_head_len=%d)\n",pes_head_len);
 					payload->pts=priv->last_audio_pts;
