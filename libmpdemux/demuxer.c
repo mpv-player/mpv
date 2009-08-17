@@ -242,7 +242,7 @@ demuxer_t *new_demuxer(stream_t *stream, int type, int a_id, int v_id,
     d->movi_end = stream->end_pos;
     d->seekable = 1;
     d->synced = 0;
-    d->filepos = 0;
+    d->filepos = -1;
     d->audio = new_demuxer_stream(d, a_id);
     d->video = new_demuxer_stream(d, v_id);
     d->sub = new_demuxer_stream(d, s_id);
@@ -1262,8 +1262,9 @@ int demuxer_get_percent_pos(demuxer_t *demuxer)
     int res = demux_control(demuxer, DEMUXER_CTRL_GET_PERCENT_POS, &ans);
     int len = (demuxer->movi_end - demuxer->movi_start) / 100;
     if (res <= 0) {
+        off_t pos = demuxer->filepos > 0 ? demuxer->filepos : stream_tell(demuxer->stream);
         if (len > 0)
-            ans = (demuxer->filepos - demuxer->movi_start) / len;
+            ans = (pos - demuxer->movi_start) / len;
         else
             ans = 0;
     }

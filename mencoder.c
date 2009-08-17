@@ -1399,7 +1399,8 @@ if(sh_audio && !demuxer2){
 
     {	float t=(GetTimerMS()-timer_start)*0.001f;
 	float len=(demuxer->movi_end-demuxer->movi_start);
-	float p=len>1000 ? (float)(demuxer->filepos-demuxer->movi_start) / len :
+	off_t pos = demuxer->filepos >= 0 ? demuxer->filepos : stream_tell(demuxer->stream);
+	float p=len>1000 ? (float)(pos-demuxer->movi_start) / len :
                 (demuxer_get_percent_pos(demuxer) / 100.0);
 #if 0
 	if(!len && sh_audio && sh_audio->audio.dwLength>100){
