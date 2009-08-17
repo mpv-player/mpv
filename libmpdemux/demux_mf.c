@@ -41,7 +41,7 @@ static void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,float audio_del
    else newpos+=rel_seek_secs * sh_video->fps;
   if ( newpos < 0 ) newpos=0;
   if( newpos >= mf->nr_of_files) newpos=mf->nr_of_files - 1;
-  mf->curr_frame=newpos;
+  demuxer->filepos=mf->curr_frame=newpos;
 }
 
 // return value:
@@ -71,7 +71,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
   }
   fclose( f );
 
-  mf->curr_frame++;
+  demuxer->filepos=mf->curr_frame++;
   return 1;
 }
 
@@ -126,7 +126,7 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] file type was not set! trying 'type=%s'...\n", mf_type);
   }
 
-  mf->curr_frame=0;
+  demuxer->filepos=mf->curr_frame=0;
 
   demuxer->movi_start = 0;
   demuxer->movi_end = mf->nr_of_files - 1;
