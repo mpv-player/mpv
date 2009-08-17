@@ -82,10 +82,11 @@ static int read_buffer(unsigned char* data,int len){
   int buffered = av_fifo_size(buffer);
   if (len > buffered) len = buffered;
 #ifdef USE_SDL_INTERNAL_MIXER
-  return av_fifo_generic_read(buffer, data, len, mix_audio);
+  av_fifo_generic_read(buffer, data, len, mix_audio);
 #else
-  return av_fifo_generic_read(buffer, data, len, NULL);
+  av_fifo_generic_read(buffer, data, len, NULL);
 #endif
+  return len;
 }
 
 // end ring buffer stuff

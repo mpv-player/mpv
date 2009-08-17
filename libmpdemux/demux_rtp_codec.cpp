@@ -29,6 +29,7 @@ extern "C" {
 
 #ifdef CONFIG_LIBAVCODEC
 AVCodecParserContext * h264parserctx;
+AVCodecContext *avcctx;
 #endif
 
 // Copied from vlc
@@ -137,6 +138,7 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
 #ifdef CONFIG_LIBAVCODEC
     avcodec_register_all();
     h264parserctx = av_parser_init(CODEC_ID_H264);
+    avcctx = avcodec_alloc_context();
 #endif
     needVideoFrameRate(demuxer, subsession);
   } else if (strcmp(subsession->codecName(), "H261") == 0) {
@@ -181,6 +183,8 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
     bih->biCompression = sh_video->format = fourcc;
     bih->biWidth = qtRTPSource->qtState.width;
     bih->biHeight = qtRTPSource->qtState.height;
+      if (qtRTPSource->qtState.sdAtomSize > 83)
+        bih->biBitCount = qtRTPSource->qtState.sdAtom[83];
       uint8_t *pos = (uint8_t*)qtRTPSource->qtState.sdAtom + 86;
       uint8_t *endpos = (uint8_t*)qtRTPSource->qtState.sdAtom
                         + qtRTPSource->qtState.sdAtomSize;
@@ -315,6 +319,10 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
     wf->wFormatTag = sh_audio->format = fourcc;
     wf->nChannels = numChannels;
 
+      if (qtRTPSource->qtState.sdAtomSize > 33) {
+        wf->wBitsPerSample = qtRTPSource->qtState.sdAtom[27];
+        wf->nSamplesPerSec = qtRTPSource->qtState.sdAtom[32]<<8|qtRTPSource->qtState.sdAtom[33];
+      }
     uint8_t *pos = (uint8_t*)qtRTPSource->qtState.sdAtom + 52;
     uint8_t *endpos = (uint8_t*)qtRTPSource->qtState.sdAtom
                       + qtRTPSource->qtState.sdAtomSize;

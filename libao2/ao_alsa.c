@@ -210,6 +210,7 @@ static int control(int cmd, void *arg)
 	if ((err = snd_mixer_selem_set_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, set_vol)) < 0) {
 	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Error setting left channel, %s\n",
 		 snd_strerror(err));
+	  snd_mixer_close(handle);
 	  return CONTROL_ERROR;
 	}
 	mp_msg(MSGT_AO,MSGL_DBG2,"left=%li, ", set_vol);
@@ -219,6 +220,7 @@ static int control(int cmd, void *arg)
 	if ((err = snd_mixer_selem_set_playback_volume(elem, SND_MIXER_SCHN_FRONT_RIGHT, set_vol)) < 0) {
 	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Error setting right channel, %s\n",
 		 snd_strerror(err));
+	  snd_mixer_close(handle);
 	  return CONTROL_ERROR;
 	}
 	mp_msg(MSGT_AO,MSGL_DBG2,"right=%li, pmin=%li, pmax=%li, mult=%f\n",

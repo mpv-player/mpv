@@ -103,17 +103,12 @@ char *heartbeat_cmd;
 #endif /* __linux__ */
 #endif /* HAVE_RTC */
 
-#ifdef CONFIG_TV
 #include "stream/tv.h"
-#endif
-#ifdef CONFIG_RADIO
 #include "stream/stream_radio.h"
-#endif
-
 #ifdef CONFIG_DVBIN
 #include "stream/dvbin.h"
-#include "stream/cache2.h"
 #endif
+#include "stream/cache2.h"
 
 //**************************************************************************//
 //             Playtree
@@ -149,10 +144,7 @@ static int max_framesize=0;
 #ifdef CONFIG_DVDREAD
 #include "stream/stream_dvd.h"
 #endif
-
-#ifdef CONFIG_DVDNAV
 #include "stream/stream_dvdnav.h"
-#endif
 
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"

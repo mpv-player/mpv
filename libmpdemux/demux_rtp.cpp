@@ -118,6 +118,9 @@ int rtsp_transport_tcp = 0;
 #endif
 
 extern int rtsp_port;
+#ifdef CONFIG_LIBAVCODEC
+extern AVCodecContext *avcctx;
+#endif
 
 extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
   struct MPOpts *opts = demuxer->opts;
@@ -390,6 +393,9 @@ extern "C" void demux_close_rtp(demuxer_t* demuxer) {
   delete rtpState->videoBufferQueue;
   delete rtpState->sdpDescription;
   delete rtpState;
+#ifdef CONFIG_LIBAVCODEC
+  av_freep(&avcctx);
+#endif
 
   env->reclaim(); delete scheduler;
 }
@@ -563,7 +569,7 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
     }
     if (headersize == 3 && h264parserctx) { // h264
       consumed = h264parserctx->parser->parser_parse(h264parserctx,
-                               NULL,
+                               avcctx,
                                &poutbuf, &poutbuf_size,
                                dp->buffer, dp->len);
 

@@ -880,7 +880,7 @@ static void prepare_visible_page(priv_vbi_t* priv){
  * \param pt page to render
  * \param f opened file descriptor
  * \param pagenum which page to render
- * \param colored use colors not implementede yet)
+ * \param colored use colors not implemented yet)
  *
  * Text will be UTF8 encoded
  */

@@ -473,6 +473,8 @@ static int query_format(struct vf_instance* vf, unsigned int fmt){
     case IMGFMT_RGB8:
     case IMGFMT_BG4B:
     case IMGFMT_RG4B:
+    case IMGFMT_RGB48LE:
+    case IMGFMT_RGB48BE:
     {
 	unsigned int best=find_best_out(vf);
 	int flags;

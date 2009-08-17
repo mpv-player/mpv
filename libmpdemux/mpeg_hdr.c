@@ -303,6 +303,11 @@ static unsigned int read_golomb(unsigned char *buffer, unsigned int *init)
   return v2;
 }
 
+inline static int read_golomb_s(unsigned char *buffer, unsigned int *init)
+{
+  unsigned int v = read_golomb(buffer, init);
+  return (v & 1) ? ((v + 1) >> 1) : -(v >> 1);
+}
 
 static int h264_parse_vui(mp_mpeg_header_t * picture, unsigned char * buf, unsigned int n)
 {
@@ -361,7 +366,7 @@ static int mp_unescape03(unsigned char *buf, int len);
 
 int h264_parse_sps(mp_mpeg_header_t * picture, unsigned char * buf, int len)
 {
-  unsigned int n = 0, v, i, mbh;
+  unsigned int n = 0, v, i, k, mbh;
   int frame_mbs_only;
 
   len = mp_unescape03(buf, len);
@@ -376,7 +381,15 @@ int h264_parse_sps(mp_mpeg_header_t * picture, unsigned char * buf, int len)
     read_golomb(buf, &n);
     n++;
     if(getbits(buf, n++, 1)){
-      //FIXME scaling matrix
+      for(i = 0; i < 8; i++)
+      {  // scaling list is skipped for now
+        if(getbits(buf, n++, 1))
+        {
+          v = 8;
+          for(k = (i < 6 ? 16 : 64); k && v; k--)
+            v = (v + read_golomb_s(buf, &n)) & 255;
+        }
+      }
     }
   }
   read_golomb(buf, &n);

@@ -15,6 +15,7 @@
 #include "vf.h"
 
 #include "libvo/fastmemcpy.h"
+#include "libavutil/avutil.h"
 
 #ifdef OSD_SUPPORT
 #include "libvo/sub.h"
@@ -23,8 +24,6 @@
 
 #include "m_option.h"
 #include "m_struct.h"
-
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
 
 static struct vf_priv_s {
     int exp_w,exp_h;
@@ -255,8 +254,8 @@ static void get_image(struct vf_instance* vf, mp_image_t *mpi){
 	// try full DR !
 	mpi->priv=vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	    mpi->type, mpi->flags,
-            MAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x),
-            MAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
+            FFMAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x),
+            FFMAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
 #if 1
 	if((vf->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
 	  !(vf->dmpi->flags & MP_IMGFLAG_DIRECT)){
@@ -298,8 +297,8 @@ static void start_slice(struct vf_instance* vf, mp_image_t *mpi){
 	mpi->priv=vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 //	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
 	    MP_IMGTYPE_TEMP, mpi->flags,
-            MAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x),
-            MAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
+            FFMAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x),
+            FFMAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
     if(!(vf->dmpi->flags&MP_IMGFLAG_DRAW_CALLBACK))
 	mp_tmsg(MSGT_VFILTER, MSGL_WARN, "WARNING! Next filter doesn't support SLICES, get ready for sig11...\n"); // shouldn't happen.
     vf->priv->first_slice = 1;

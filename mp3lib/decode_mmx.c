@@ -219,7 +219,7 @@ int synth_1to1_MMX(real *bandPtr, int channel, short *samples)
     //printf("DEBUG: channel %d, bo %d, off %d\n", channel, bo, 16 - bo1);
 __asm__ volatile(
 ASMALIGN(4)
-".L03:\n\t"
+"0:\n\t"
         "movq  (%1),%%mm0\n\t"
         "movq  64(%1),%%mm4\n\t"
         "pmaddwd (%2),%%mm0\n\t"
@@ -265,7 +265,7 @@ ASMALIGN(4)
         "add $8,%3\n\t"
 
 	"decl %0\n\t"
-        "jnz  .L03\n\t"
+        "jnz  0b\n\t"
 
         "movq  (%1),%%mm0\n\t"
         "pmaddwd (%2),%%mm0\n\t"
@@ -291,7 +291,7 @@ ASMALIGN(4)
 
         "movl $7,%0\n\t"
 ASMALIGN(4)
-".L04:\n\t"
+"1:\n\t"
         "movq  (%1),%%mm0\n\t"
         "movq  64(%1),%%mm4\n\t"
         "pmaddwd (%2),%%mm0\n\t"
@@ -340,7 +340,7 @@ ASMALIGN(4)
         "add $128,%1\n\t"
         "add $8,%3\n\t"
         "decl %0\n\t"
-	"jnz  .L04\n\t"
+	"jnz  1b\n\t"
 
         "movq  (%1),%%mm0\n\t"
         "pmaddwd (%2),%%mm0\n\t"

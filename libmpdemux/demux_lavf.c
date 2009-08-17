@@ -422,6 +422,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     AVFormatContext *avfc;
     AVFormatParameters ap;
     const AVOption *opt;
+    AVMetadataTag *t = NULL;
     lavf_priv_t *priv= demuxer->priv;
     int i;
     char mp_filename[256]="mp:";
@@ -477,20 +478,17 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         return NULL;
     }
 
-    if(avfc->title    [0]) demux_info_add(demuxer, "title"    , avfc->title    );
-    if(avfc->author   [0]) demux_info_add(demuxer, "author"   , avfc->author   );
-    if(avfc->copyright[0]) demux_info_add(demuxer, "copyright", avfc->copyright);
-    if(avfc->comment  [0]) demux_info_add(demuxer, "comments" , avfc->comment  );
-    if(avfc->album    [0]) demux_info_add(demuxer, "album"    , avfc->album    );
-//    if(avfc->year        ) demux_info_add(demuxer, "year"     , avfc->year     );
-//    if(avfc->track       ) demux_info_add(demuxer, "track"    , avfc->track    );
-    if(avfc->genre    [0]) demux_info_add(demuxer, "genre"    , avfc->genre    );
+    /* Add metadata. */
+    av_metadata_conv(avfc, NULL, avfc->iformat->metadata_conv);
+    while((t = av_metadata_get(avfc->metadata, "", t, AV_METADATA_IGNORE_SUFFIX)))
+        demux_info_add(demuxer, t->key, t->value);
 
     for(i=0; i < avfc->nb_chapters; i++) {
         AVChapter *c = avfc->chapters[i];
         uint64_t start = av_rescale_q(c->start, c->time_base, (AVRational){1,1000});
         uint64_t end   = av_rescale_q(c->end, c->time_base, (AVRational){1,1000});
-        demuxer_add_chapter(demuxer, c->title, start, end);
+        t = av_metadata_get(c->metadata, "title", NULL, 0);
+        demuxer_add_chapter(demuxer, t ? t->value : NULL, start, end);
     }
 
     if(avfc->nb_programs) {
@@ -512,7 +510,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         p = start;
         do {
             AVProgram *program = avfc->programs[p];
-            mp_msg(MSGT_HEADER,MSGL_INFO,"LAVF: Program %d %s\n", program->id, (program->name ? program->name : ""));
+            t = av_metadata_get(program->metadata, "title", NULL, 0);
+            mp_msg(MSGT_HEADER,MSGL_INFO,"LAVF: Program %d %s\n", program->id, t ? t->value : "");
             for(i=0; i<program->nb_stream_indexes; i++)
                 handle_stream(demuxer, avfc, program->stream_index[i]);
             if(!priv->cur_program && (demuxer->video->sh || demuxer->audio->sh))

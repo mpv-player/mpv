@@ -141,10 +141,13 @@ static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int
 	return 1;
 }
 
-        static struct {
+        static const struct {
 	        const char *name;
 	        const unsigned int num;
 	} fmt_table[] = {
+		// note: due to parser deficiencies/simplicity, if one format
+		// name matches the beginning of another, the longer one _must_
+		// come first in this list.
 		{"YV12",  IMGFMT_YV12},
 		{"I420",  IMGFMT_I420},
 		{"IYUV",  IMGFMT_IYUV},
@@ -162,20 +165,22 @@ static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int
 		{"UYVY",  IMGFMT_UYVY},
 		{"YVYU",  IMGFMT_YVYU},
 
-	        {"RGB4",  IMGFMT_RGB|4},
-	        {"RGB8",  IMGFMT_RGB|8},
-		{"RGB15", IMGFMT_RGB|15},
-		{"RGB16", IMGFMT_RGB|16},
-		{"RGB24", IMGFMT_RGB|24},
-		{"RGB32", IMGFMT_RGB|32},
-		{"BGR4",  IMGFMT_BGR|4},
-		{"BGR8",  IMGFMT_BGR|8},
-		{"BGR15", IMGFMT_BGR|15},
-		{"BGR16", IMGFMT_BGR|16},
-		{"BGR24", IMGFMT_BGR|24},
-		{"BGR32", IMGFMT_BGR|32},
-	        {"RGB1",  IMGFMT_RGB|1},
-		{"BGR1",  IMGFMT_BGR|1},
+		{"RGB48LE",  IMGFMT_RGB48LE},
+		{"RGB48BE",  IMGFMT_RGB48BE},
+	        {"RGB4",  IMGFMT_RGB4},
+	        {"RGB8",  IMGFMT_RGB8},
+		{"RGB15", IMGFMT_RGB15},
+		{"RGB16", IMGFMT_RGB16},
+		{"RGB24", IMGFMT_RGB24},
+		{"RGB32", IMGFMT_RGB32},
+		{"BGR4",  IMGFMT_BGR4},
+		{"BGR8",  IMGFMT_BGR8},
+		{"BGR15", IMGFMT_BGR15},
+		{"BGR16", IMGFMT_BGR16},
+		{"BGR24", IMGFMT_BGR24},
+		{"BGR32", IMGFMT_BGR32},
+	        {"RGB1",  IMGFMT_RGB1},
+		{"BGR1",  IMGFMT_BGR1},
 
 		{"MPES",  IMGFMT_MPEGPES},
 		{"ZRMJPEGNI", IMGFMT_ZRMJPEGNI},

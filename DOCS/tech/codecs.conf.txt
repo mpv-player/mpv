@@ -133,6 +133,8 @@ static, query. The flags are defined as follows:
     Used for some very old DLLs like Indeo 3 and for some XAnim codecs like
     cinepak. See dr-methods.txt for details on buffer types.
 
+The "in" keyword -- UNDOCUMENTED
+
 Audio Codecs
 ------------
 Here is an example of a rather full-featured audio codec block:

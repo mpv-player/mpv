@@ -32,28 +32,18 @@
 #include "spudec.h"
 #include "get_path.h"
 #include "ass_mp.h"
-#ifdef CONFIG_TV
 #include "stream/tv.h"
-#endif
-#ifdef CONFIG_RADIO
 #include "stream/stream_radio.h"
-#endif
-#ifdef CONFIG_PVR
 #include "stream/pvr.h"
-#endif
 #ifdef CONFIG_DVBIN
 #include "stream/dvbin.h"
 #endif
 #ifdef CONFIG_DVDREAD
 #include "stream/stream_dvd.h"
 #endif
-#ifdef CONFIG_DVDNAV
 #include "stream/stream_dvdnav.h"
-#endif
-#ifdef CONFIG_MENU
 #include "m_struct.h"
 #include "libmenu/menu.h"
-#endif
 
 #include "mp_core.h"
 #include "mp_fifo.h"

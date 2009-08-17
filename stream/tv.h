@@ -1,9 +1,29 @@
+/*
+ * TV interface
+ *
+ * Copyright (C) 2001 Alex Beregszászi
+ * Copyright (C) 2007 Attila Ötvös
+ * Copyright (C) 2007 Vladimir Voroshilov <voroshil@gmail.com>
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 #ifndef MPLAYER_TV_H
 #define MPLAYER_TV_H
-
-//#include "libao2/afmt.h"
-//#include "libmpcodecs/img_format.h"
-//#include "mp_msg.h"
 
 typedef struct tv_param_s {
     char *freq;
@@ -202,7 +222,7 @@ typedef struct {
 #define TVI_CONTROL_VBI_INIT           0x501   ///< vbi init
 
 /*
-  TELETEXT controls (through tv_teletext_control() )
+  TELETEXT controls (through teletext_control() )
    NOTE:
     _SET_ should be _GET_ +1
    _STEP_ should be _GET_ +2
@@ -217,7 +237,7 @@ typedef struct {
 #define TV_VBI_CONTROL_GET_SUBPAGE     0x516   ///< get grabbed teletext page
 #define TV_VBI_CONTROL_SET_SUBPAGE     0x517   ///< set grab teletext page number
 
-#define TV_VBI_CONTROL_GET_FORMAT      0x519   ///< get eletext format
+#define TV_VBI_CONTROL_GET_FORMAT      0x519   ///< get teletext format
 #define TV_VBI_CONTROL_SET_FORMAT      0x51a   ///< set teletext format
 
 #define TV_VBI_CONTROL_GET_HALF_PAGE   0x51c   ///< get current half page
@@ -273,7 +293,7 @@ void tv_start_scan(tvi_handle_t *tvh, int start);
 #define TV_NORM_NTSCJP		7
 
 #define VBI_TFORMAT_TEXT    0               ///< text mode
-#define VBI_TFORMAT_BW      1               ///< back&white mode
+#define VBI_TFORMAT_BW      1               ///< black&white mode
 #define VBI_TFORMAT_GRAY    2               ///< grayscale mode
 #define VBI_TFORMAT_COLOR   3               ///< color mode (require color_spu patch!)
 
@@ -287,9 +307,9 @@ void tv_start_scan(tvi_handle_t *tvh, int start);
 typedef
 enum{
     TT_FORMAT_OPAQUE=0,       ///< opaque
-    TT_FORMAT_TRANSPARENT,    ///< translarent
+    TT_FORMAT_TRANSPARENT,    ///< transparent
     TT_FORMAT_OPAQUE_INV,     ///< opaque with inverted colors
-    TT_FORMAT_TRANSPARENT_INV ///< translarent with inverted colors
+    TT_FORMAT_TRANSPARENT_INV ///< transparent with inverted colors
 } teletext_format;
 
 typedef
