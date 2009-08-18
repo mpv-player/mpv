@@ -293,6 +293,9 @@ void reorder_channel_copy(void *src,
     case AF_CHANNEL_LAYOUT_5_1_E << 16 | AF_CHANNEL_LAYOUT_5_1_B:
         reorder_copy_6ch(dest, src, samples, samplesize, 1, 3, 4, 5, 2, 0);
         break;
+    case AF_CHANNEL_LAYOUT_5_1_F << 16 | AF_CHANNEL_LAYOUT_5_1_B:
+        reorder_copy_6ch(dest, src, samples, samplesize, 1, 2, 4, 5, 0, 3);
+        break;
     default:
         mp_msg(MSGT_GLOBAL, MSGL_WARN, "[reorder_channel_copy] unsupport "
                "from %x to %x, %d * %d\n", src_layout, dest_layout,
@@ -1099,6 +1102,9 @@ void reorder_channel(void *src,
     case AF_CHANNEL_LAYOUT_5_1_E << 16 | AF_CHANNEL_LAYOUT_5_1_B:
         reorder_self_2_4(src, samples, samplesize, 2, 4, 0, 1, 3, 5);
         break;
+    case AF_CHANNEL_LAYOUT_5_1_F << 16 | AF_CHANNEL_LAYOUT_5_1_B:
+        reorder_self_2_4(src, samples, samplesize, 3, 5, 0, 1, 2, 4);
+        break;
     default:
         mp_msg(MSGT_GLOBAL, MSGL_WARN,
                "[reorder_channel] unsupported from %x to %x, %d * %d\n",
@@ -1111,22 +1117,18 @@ static int channel_layout_mapping_5ch[AF_CHANNEL_LAYOUT_SOURCE_NUM] = {
     AF_CHANNEL_LAYOUT_ALSA_5CH_DEFAULT,
     AF_CHANNEL_LAYOUT_AAC_5CH_DEFAULT,
     AF_CHANNEL_LAYOUT_WAVEEX_5CH_DEFAULT,
-    AF_CHANNEL_LAYOUT_LAVC_AC3_5CH_DEFAULT,
-    AF_CHANNEL_LAYOUT_LAVC_LIBA52_5CH_DEFAULT,
-    AF_CHANNEL_LAYOUT_LAVC_DCA_5CH_DEFAULT,
+    AF_CHANNEL_LAYOUT_LAVC_5CH_DEFAULT,
     AF_CHANNEL_LAYOUT_VORBIS_5CH_DEFAULT,
-    AF_CHANNEL_LAYOUT_FLAC_5CH_DEFAULT,
+    AF_CHANNEL_LAYOUT_LAVC_AAC_DEC_5CH_DEFAULT,
 };
 
 static int channel_layout_mapping_6ch[AF_CHANNEL_LAYOUT_SOURCE_NUM] = {
     AF_CHANNEL_LAYOUT_ALSA_6CH_DEFAULT,
     AF_CHANNEL_LAYOUT_AAC_6CH_DEFAULT,
     AF_CHANNEL_LAYOUT_WAVEEX_6CH_DEFAULT,
-    AF_CHANNEL_LAYOUT_LAVC_AC3_6CH_DEFAULT,
-    AF_CHANNEL_LAYOUT_LAVC_LIBA52_6CH_DEFAULT,
-    AF_CHANNEL_LAYOUT_LAVC_DCA_6CH_DEFAULT,
+    AF_CHANNEL_LAYOUT_LAVC_6CH_DEFAULT,
     AF_CHANNEL_LAYOUT_VORBIS_6CH_DEFAULT,
-    AF_CHANNEL_LAYOUT_FLAC_6CH_DEFAULT,
+    AF_CHANNEL_LAYOUT_LAVC_AAC_DEC_6CH_DEFAULT,
 };
 
 void reorder_channel_copy_nch(void *src,
