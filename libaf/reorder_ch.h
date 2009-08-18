@@ -97,9 +97,9 @@ void reorder_channel(void *buf,
 
 // Channel layout definitions for different audio sources or targets
 // When specified channel number, they will be map to the specific layouts.
-#define AF_CHANNEL_LAYOUT_ALSA_DEFAULT        0
-#define AF_CHANNEL_LAYOUT_AAC_DEFAULT         1
-#define AF_CHANNEL_LAYOUT_WAVEEX_DEFAULT      2
+#define AF_CHANNEL_LAYOUT_ALSA_DEFAULT         0
+#define AF_CHANNEL_LAYOUT_AAC_DEFAULT          1
+#define AF_CHANNEL_LAYOUT_WAVEEX_DEFAULT       2
 #define AF_CHANNEL_LAYOUT_LAVC_DEFAULT         3
 #define AF_CHANNEL_LAYOUT_VORBIS_DEFAULT       4
 #define AF_CHANNEL_LAYOUT_LAVC_AAC_DEC_DEFAULT 5
