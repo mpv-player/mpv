@@ -1408,7 +1408,7 @@ if test -z "$_target" ; then
       sh3|sh4|sh4a) host_arch=sh ;;
       s390) host_arch=s390 ;;
       s390x) host_arch=s390x ;;
-      mips*) host_arch=mips ;;
+      *mips*) host_arch=mips ;;
       vax) host_arch=vax ;;
       xtensa*) host_arch=xtensa ;;
       *) host_arch=UNKNOWN ;;
