@@ -85,6 +85,7 @@ static int reorder_copy_5ch(void *dest, const void *src,
             dest_8[i+13] = src_8[i+s4*3+1];
             dest_8[i+14] = src_8[i+s4*3+2];
         }
+        break;
     }
     case 4:
     {
@@ -163,6 +164,7 @@ static int reorder_copy_6ch(void *dest, const void *src,
             dest_8[i+16] = src_8[i+s5*3+1];
             dest_8[i+17] = src_8[i+s5*3+2];
         }
+        break;
     }
     case 4:
     {
@@ -360,6 +362,7 @@ static int reorder_self_2(void *src, unsigned int samples,
             src_8[i+s1*3+1] = tmp1;
             src_8[i+s1*3+2] = tmp2;
         }
+        break;
     }
     case 4:
     {
@@ -626,6 +629,7 @@ static int reorder_self_4_step_2(void *src, unsigned int samples,
             src_8[i+s3*3+1] = tmp1;
             src_8[i+s3*3+2] = tmp2;
         }
+        break;
     }
     default:
         mp_msg(MSGT_GLOBAL, MSGL_WARN,
