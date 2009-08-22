@@ -38,6 +38,7 @@
 #include "mp_msg.h"
 #include "libvo/fastmemcpy.h"
 #include "subopt-helper.h"
+#include "libavutil/fifo.h"
 
 static const ao_info_t info = {
     "DART audio output",
@@ -53,85 +54,30 @@ LIBAO_EXTERN(dart)
 
 #define CHUNK_SIZE  ao_data.outburst
 
-static uint8_t *m_audioBuf = NULL;
+static AVFifoBuffer *m_audioBuf;
 
 static int m_nBufSize = 0;
 
 static volatile int m_fQuit = FALSE;
-// may only be modified by DART's playback thread or while it is stopped
-static volatile int m_iBufReadPos = 0;
-// may only be modified by MPlayer's thread
-static volatile int m_iBufWritePos = 0;
-
-// may only be called by MPlayer's thread
-// return value may change between immediately following two calls,
-// and the real number of free bytes might be larger!
-static int buf_free(void)
-{
-    int nFree = m_iBufReadPos - m_iBufWritePos - CHUNK_SIZE;
-
-    if (nFree < 0)
-        nFree += m_nBufSize;
-
-    return nFree;
-}
-
-// may only be called by DART's playback thread
-// return value may change between immediately following two calls,
-// and the real number of buffered bytes might be larger!
-static int buf_used(void)
-{
-    int nUsed = m_iBufWritePos - m_iBufReadPos;
-
-    if (nUsed < 0)
-        nUsed += m_nBufSize;
-
-    return nUsed;
-}
 
 static int write_buffer(unsigned char *data, int len)
 {
-    int nFirstLen = m_nBufSize - m_iBufWritePos;
-    int nFree = buf_free();
+    int nFree = av_fifo_space(m_audioBuf);
 
     if (len > nFree)
         len = nFree;
 
-    if (nFirstLen > len)
-        nFirstLen = len;
-
-    // till end of buffer
-    fast_memcpy(m_audioBuf + m_iBufWritePos, data, nFirstLen);
-    if (len > nFirstLen) { // we have to wrap around
-        // remaining part from beginning of buffer
-        fast_memcpy(m_audioBuf, data + nFirstLen, len - nFirstLen);
-    }
-
-    m_iBufWritePos = (m_iBufWritePos + len) % m_nBufSize;
-
-    return len;
+    return av_fifo_generic_write(m_audioBuf, data, len, NULL);
 }
 
 static int read_buffer(unsigned char *data, int len)
 {
-    int nFirstLen = m_nBufSize - m_iBufReadPos;
-    int nBuffered = buf_used();
+    int nBuffered = av_fifo_size(m_audioBuf);
 
     if (len > nBuffered)
         len = nBuffered;
 
-    if (nFirstLen > len)
-        nFirstLen = len;
-
-    // till end of buffer
-    fast_memcpy(data, m_audioBuf + m_iBufReadPos, nFirstLen);
-    if (len > nFirstLen) { // we have to wrap around
-        // remaining part from beginning of buffer
-        fast_memcpy(data + nFirstLen, m_audioBuf, len - nFirstLen);
-    }
-
-    m_iBufReadPos = (m_iBufReadPos + len) % m_nBufSize;
-
+    av_fifo_generic_read(m_audioBuf, data, len, NULL);
     return len;
 }
 
@@ -253,10 +199,7 @@ static int init(int rate, int channels, int format, int flags)
     // and one more chunk plus round up
     m_nBufSize += 2 * CHUNK_SIZE;
 
-    m_audioBuf = malloc(m_nBufSize);
-
-    m_iBufReadPos  = 0;
-    m_iBufWritePos = 0;
+    m_audioBuf = av_fifo_alloc(m_nBufSize);
 
     dartPlay();
 
@@ -280,7 +223,7 @@ static void uninit(int immed)
 
     dartClose();
 
-    free(m_audioBuf);
+    av_fifo_free(m_audioBuf);
 }
 
 // stop playing and empty buffers (for seeking/pause)
@@ -289,8 +232,7 @@ static void reset(void)
     dartPause();
 
     // Reset ring-buffer state
-    m_iBufReadPos  = 0;
-    m_iBufWritePos = 0;
+    av_fifo_reset(m_audioBuf);
 
     dartResume();
 }
@@ -310,7 +252,7 @@ static void audio_resume(void)
 // return: how many bytes can be played without blocking
 static int get_space(void)
 {
-    return buf_free();
+    return av_fifo_space(m_audioBuf);
 }
 
 // plays 'len' bytes of 'data'
@@ -328,7 +270,7 @@ static int play(void *data, int len, int flags)
 // return: delay in seconds between first and last sample in buffer
 static float get_delay(void)
 {
-    int nBuffered = m_nBufSize - CHUNK_SIZE - buf_free(); // could be less
+    int nBuffered = av_fifo_size(m_audioBuf); // could be less
 
     return (float)nBuffered / (float)ao_data.bps;
 }

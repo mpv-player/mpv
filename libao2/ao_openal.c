@@ -52,7 +52,7 @@ static const ao_info_t info =
 
 LIBAO_EXTERN(openal)
 
-#define MAX_CHANS 6
+#define MAX_CHANS 8
 #define NUM_BUF 128
 #define CHUNK_SIZE 512
 static ALuint buffers[MAX_CHANS][NUM_BUF];
@@ -95,10 +95,11 @@ static void print_help(void) {
 static int init(int rate, int channels, int format, int flags) {
   float position[3] = {0, 0, 0};
   float direction[6] = {0, 0, 1, 0, -1, 0};
-  float sppos[6][3] = {
+  float sppos[MAX_CHANS][3] = {
     {-1, 0, 0.5}, {1, 0, 0.5},
     {-1, 0,  -1}, {1, 0,  -1},
     {0,  0,   1}, {0, 0, 0.1},
+    {-1, 0,   0}, {1, 0,   0},
   };
   ALCdevice *dev = NULL;
   ALCcontext *ctx = NULL;
