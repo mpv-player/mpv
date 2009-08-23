@@ -646,19 +646,12 @@ int ds_get_packet_pts(demux_stream_t *ds, unsigned char **start, double *pts)
 {
     int len;
     *pts = MP_NOPTS_VALUE;
-    if (ds->buffer_pos >= ds->buffer_size) {
-        if (!ds_fill_buffer(ds)) {
-            // EOF
-            *start = NULL;
-            return -1;
-        }
-    }
+    len = ds_get_packet(ds, start);
+    if (len < 0)
+        return len;
     // Return pts unless this read starts from the middle of a packet
-    if (!ds->buffer_pos)
+    if (len == ds->buffer_pos)
         *pts = ds->current->pts;
-    len = ds->buffer_size - ds->buffer_pos;
-    *start = &ds->buffer[ds->buffer_pos];
-    ds->buffer_pos += len;
     return len;
 }
 
