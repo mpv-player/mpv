@@ -108,7 +108,7 @@ static int init(sh_audio_t *sh_audio)
 
    // Decode at least 1 byte:  (to get header filled)
    do {
-   x=decode_audio(sh_audio,sh_audio->a_buffer,1,sh_audio->a_buffer_size);
+       x=decode_audio(sh_audio,sh_audio->a_buffer,1,sh_audio->a_buffer_size);
    } while (x <= 0 && tries++ < 5);
    if(x>0) sh_audio->a_buffer_len=x;
 
