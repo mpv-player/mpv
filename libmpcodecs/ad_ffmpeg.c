@@ -36,6 +36,7 @@ static int preinit(sh_audio_t *sh)
 
 static int init(sh_audio_t *sh_audio)
 {
+    int tries = 0;
     int x;
     AVCodecContext *lavc_context;
     AVCodec *lavc_codec;
@@ -106,7 +107,9 @@ static int init(sh_audio_t *sh_audio)
    }
 
    // Decode at least 1 byte:  (to get header filled)
+   do {
    x=decode_audio(sh_audio,sh_audio->a_buffer,1,sh_audio->a_buffer_size);
+   } while (x <= 0 && tries++ < 5);
    if(x>0) sh_audio->a_buffer_len=x;
 
   sh_audio->channels=lavc_context->channels;
