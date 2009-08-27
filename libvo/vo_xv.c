@@ -748,26 +748,12 @@ static int control(uint32_t request, void *data, ...)
         case VOCTRL_GUISUPPORT:
             return VO_TRUE;
         case VOCTRL_GET_PANSCAN:
-            if (!vo_config_count || !vo_fs)
-                return VO_FALSE;
             return VO_TRUE;
         case VOCTRL_FULLSCREEN:
             vo_x11_fullscreen();
             /* indended, fallthrough to update panscan on fullscreen/windowed switch */
         case VOCTRL_SET_PANSCAN:
-            if ((vo_fs && (vo_panscan != vo_panscan_amount))
-                || (!vo_fs && vo_panscan_amount))
-            {
-                int old_y = vo_panscan_y;
-
-                panscan_calc();
-
-                if (old_y != vo_panscan_y)
-                {
                     resize();
-                    flip_page();
-                }
-            }
             return VO_TRUE;
         case VOCTRL_SET_EQUALIZER:
             {
