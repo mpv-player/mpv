@@ -106,7 +106,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             vo_dheight = r.bottom;
             break;
         case WM_WINDOWPOSCHANGING:
-            if (vo_keepaspect && !vo_fs) {
+            if (vo_keepaspect && !vo_fs && WinID < 0) {
               WINDOWPOS *wpos = lParam;
               int xborder, yborder;
               r.left = r.top = 0;
