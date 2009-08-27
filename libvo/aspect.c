@@ -99,11 +99,11 @@ void aspect_fit(int *srcw, int *srch, int fitw, int fith){
 #ifdef ASPECT_DEBUG
   printf("aspect(2) wh: %dx%d (org: %dx%d)\n",*srcw,*srch,aspdat.prew,aspdat.preh);
 #endif
-  if(*srch>aspdat.scrh || *srch<aspdat.orgh){
+  if(*srch>fith || *srch<aspdat.orgh){
       tmpw = (int)(((float)fith / (float)aspdat.preh * (float)aspdat.prew)
                 * ((float)aspdat.scrw / ((float)aspdat.scrh / (1.0/monitor_aspect))));
     tmpw+= tmpw%2; // round
-    if(tmpw<=aspdat.scrw /*&& tmpw>=aspdat.orgw*/){
+    if(tmpw<=fitw /*&& tmpw>=aspdat.orgw*/){
       *srch = fith;
       *srcw = tmpw;
     }else{
