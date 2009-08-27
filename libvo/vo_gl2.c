@@ -419,23 +419,23 @@ static void drawTextureDisplay (void)
 }
 
 
-static void resize(int *x,int *y){
-  mp_msg(MSGT_VO,MSGL_V,"[gl2] Resize: %dx%d\n",*x,*y);
+static void resize(int x,int y){
+  mp_msg(MSGT_VO,MSGL_V,"[gl2] Resize: %dx%d\n",x,y);
   if( vo_fs ) {
     glClear(GL_COLOR_BUFFER_BIT);
-    aspect(x, y, A_ZOOM);
+    aspect(&x, &y, A_ZOOM);
     panscan_calc();
-    *x += vo_panscan_x;
-    *y += vo_panscan_y;
-    glViewport( (vo_screenwidth-*x)/2, (vo_screenheight-*y)/2, *x, *y);
+    x += vo_panscan_x;
+    y += vo_panscan_y;
+    glViewport( (vo_screenwidth-x)/2, (vo_screenheight-y)/2, x, y);
   } else {
     //aspect(x, y, A_NOZOOM);
     if (WinID >= 0) {
-      int top = 0, left = 0, w = *x, h = *y;
+      int top = 0, left = 0, w = x, h = y;
       geometry(&top, &left, &w, &h, vo_screenwidth, vo_screenheight);
       glViewport(top, left, w, h);
     } else
-      glViewport( 0, 0, *x, *y );
+      glViewport( 0, 0, x, y );
   }
 
   glMatrixMode(GL_PROJECTION);
@@ -597,7 +597,7 @@ static int initGl(uint32_t d_width, uint32_t d_height)
         glValName(gl_bitmap_format), glValName(gl_bitmap_type),
         rgb_sz, r_sz, g_sz, b_sz, a_sz, glValName(gl_internal_format));
 
-  resize(&d_width, &d_height);
+  resize(d_width, d_height);
 
   glClearColor( 0.0f,0.0f,0.0f,0.0f );
   glClear( GL_COLOR_BUFFER_BIT );
@@ -718,7 +718,7 @@ static void check_events(void)
   }
 #endif
   e=vo_check_events();
-  if(e&VO_EVENT_RESIZE) resize(&vo_dwidth, &vo_dheight);
+  if(e&VO_EVENT_RESIZE) resize(vo_dwidth, vo_dheight);
   if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
 }
 
@@ -891,7 +891,7 @@ static int control(uint32_t request, void *data, ...)
       vo_fullscreen();
       if (setGlWindow(&gl_vinfo, &gl_context, vo_window) == SET_WINDOW_REINIT)
         initGl(vo_dwidth, vo_dheight);
-      resize(&vo_dwidth, &vo_dheight);
+      resize(vo_dwidth, vo_dheight);
       return VO_TRUE;
     case VOCTRL_BORDER:
       vo_border();
@@ -899,7 +899,7 @@ static int control(uint32_t request, void *data, ...)
     case VOCTRL_GET_PANSCAN:
       return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
-      resize (&vo_dwidth, &vo_dheight);
+      resize(vo_dwidth, vo_dheight);
       return VO_TRUE;
 #ifndef GL_WIN32
     case VOCTRL_SET_EQUALIZER:
