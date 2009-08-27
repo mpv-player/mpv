@@ -3281,6 +3281,9 @@ Enables VBI for the vesa, dfbmga and svga video output drivers.
 .B \-wid <window ID> (also see \-guiwid) (X11, OpenGL and DirectX only)
 This tells MPlayer to attach to an existing window.
 Useful to embed MPlayer in a browser (e.g.\& the plugger extension).
+This option fills the given window completely, thus aspect scaling,
+panscan etc. are no longer handled by MPlayer but must be managed by the
+application that created the window.
 .
 .TP
 .B \-xineramascreen <\-2\-...>
