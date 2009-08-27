@@ -427,7 +427,7 @@ static void resize(int x,int y){
     panscan_calc();
     x += vo_panscan_x;
     y += vo_panscan_y;
-    glViewport( (vo_screenwidth-x)/2, (vo_screenheight-y)/2, x, y);
+    glViewport( (vo_dwidth-x)/2, (vo_dheight-y)/2, x, y);
   } else {
     //aspect(x, y, A_NOZOOM);
     if (WinID >= 0) {
