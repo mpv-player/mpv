@@ -120,14 +120,21 @@ void aspect_fit(int *srcw, int *srch, int fitw, int fith){
 #endif
 }
 
-void aspect(int *srcw, int *srch, int zoom){
-  int fitw = zoom ? aspdat.scrw : aspdat.prew;
-  int fith = zoom ? aspdat.scrh : aspdat.preh;
+static void get_max_dims(int *w, int *h, int zoom)
+{
+  *w = zoom ? aspdat.scrw : aspdat.prew;
+  *h = zoom ? aspdat.scrh : aspdat.preh;
   if (zoom && WinID >= 0) zoom = A_WINZOOM;
   if (zoom == A_WINZOOM) {
-    fitw = vo_dwidth;
-    fith = vo_dheight;
+    *w = vo_dwidth;
+    *h = vo_dheight;
   }
+}
+
+void aspect(int *srcw, int *srch, int zoom){
+  int fitw;
+  int fith;
+  get_max_dims(&fitw, &fith, zoom);
   if( !zoom && geometry_wh_changed ) {
 #ifdef ASPECT_DEBUG
     printf("aspect(0) no aspect forced!\n");
@@ -148,15 +155,17 @@ void panscan_calc( void )
 {
  int fwidth,fheight;
  int vo_panscan_area;
+ int max_w, max_h;
+ get_max_dims(&max_w, &max_h, A_ZOOM);
 
  if (vo_panscanrange > 0) {
    aspect(&fwidth,&fheight,A_ZOOM);
-   vo_panscan_area = (aspdat.scrh-fheight);
+   vo_panscan_area = max_h - fheight;
    if (!vo_panscan_area)
-     vo_panscan_area = aspdat.scrw - fwidth;
+     vo_panscan_area = max_w - fwidth;
    vo_panscan_area *= vo_panscanrange;
  } else
-   vo_panscan_area = -vo_panscanrange * aspdat.scrh;
+   vo_panscan_area = -vo_panscanrange * max_h;
 
  vo_panscan_amount = vo_fs ? vo_panscan : 0;
  vo_panscan_x = vo_panscan_area * vo_panscan_amount * aspdat.asp;
