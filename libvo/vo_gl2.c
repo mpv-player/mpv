@@ -471,9 +471,6 @@ static int config_w32(uint32_t width, uint32_t height, uint32_t d_width, uint32_
   if (!vo_w32_config(d_width, d_height, flags))
     return -1;
 
-  if (vo_fs)
-    aspect(&d_width, &d_height, A_ZOOM);
-
   return 0;
 }
 
