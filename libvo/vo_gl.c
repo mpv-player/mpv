@@ -173,8 +173,8 @@ static void resize(int x,int y){
     scale_x = (GLdouble)new_w / (GLdouble)x;
     scale_y = (GLdouble)new_h / (GLdouble)y;
     glScaled(scale_x, scale_y, 1);
-    ass_border_x = (vo_screenwidth - new_w) / 2;
-    ass_border_y = (vo_screenheight - new_h) / 2;
+    ass_border_x = (vo_dwidth - new_w) / 2;
+    ass_border_y = (vo_dheight - new_h) / 2;
   }
   glOrtho(0, image_width, image_height, 0, -1,1);
 
@@ -1148,10 +1148,7 @@ static int control(uint32_t request, void *data, ...)
       r->mt = r->mb = r->ml = r->mr = 0;
       if (scaled_osd) {r->w = image_width; r->h = image_height;}
       else if (vo_fs) {
-        r->w = vo_screenwidth; r->h = vo_screenheight;
-        if (WinID >= 0) {
-            r->w = vo_dwidth; r->h = vo_dheight;
-        }
+        r->w = vo_dwidth; r->h = vo_dheight;
         r->ml = r->mr = ass_border_x;
         r->mt = r->mb = ass_border_y;
       } else {
