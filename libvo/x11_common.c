@@ -1086,6 +1086,7 @@ void vo_x11_create_vo_window(XVisualInfo *vis, int x, int y,
 {
   XGCValues xgcv;
   if (WinID >= 0) {
+    vo_fs = flags & VOFLAG_FULLSCREEN;
     vo_window = WinID ? (Window)WinID : mRootWin;
     if (col_map != CopyFromParent) {
       unsigned long xswamask = CWColormap;
@@ -1343,7 +1344,11 @@ void vo_x11_fullscreen(void)
 {
     int x, y, w, h;
 
-    if (WinID >= 0 || vo_fs_flip)
+    if (WinID >= 0) {
+        vo_fs = !vo_fs;
+        return;
+    }
+    if (vo_fs_flip)
         return;
 
     if (vo_fs)
