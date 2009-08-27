@@ -421,10 +421,10 @@ static void drawTextureDisplay (void)
 
 static void resize(int x,int y){
   mp_msg(MSGT_VO,MSGL_V,"[gl2] Resize: %dx%d\n",x,y);
-  if( vo_fs ) {
+  if(aspect_scaling()) {
     glClear(GL_COLOR_BUFFER_BIT);
-    aspect(&x, &y, A_ZOOM);
-    panscan_calc();
+    aspect(&x, &y, A_WINZOOM);
+    panscan_calc_windowed();
     x += vo_panscan_x;
     y += vo_panscan_y;
     glViewport( (vo_dwidth-x)/2, (vo_dheight-y)/2, x, y);
@@ -738,7 +738,7 @@ flip_page(void)
   glFinish();
   swapGlBuffers();
 
-  if (vo_fs) // Avoid flickering borders in fullscreen mode
+  if (aspect_scaling()) // Avoid flickering borders in fullscreen mode
     glClear (GL_COLOR_BUFFER_BIT);
 }
 
