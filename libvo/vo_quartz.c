@@ -156,58 +156,41 @@ void window_ontop(void);
 void window_fullscreen(void);
 void window_panscan(void);
 
+static const struct keymap keymap[] = {
+    // special keys
+    {QZ_IBOOK_ENTER, KEY_ENTER}, {QZ_RETURN, KEY_ENTER},
+    {QZ_ESCAPE, KEY_ESC},
+    {QZ_BACKSPACE, KEY_BACKSPACE}, {QZ_LALT, KEY_BACKSPACE}, {QZ_LCTRL, KEY_BACKSPACE}, {QZ_LSHIFT, KEY_BACKSPACE},
+    {QZ_TAB, KEY_TAB},
+
+    // cursor keys
+    {QZ_UP, KEY_UP}, {QZ_DOWN, KEY_DOWN}, {QZ_LEFT, KEY_LEFT}, {QZ_RIGHT, KEY_RIGHT},
+
+    // navigation block
+    {QZ_INSERT, KEY_INSERT}, {QZ_DELETE, KEY_DELETE}, {QZ_HOME, KEY_HOME},
+    {QZ_END, KEY_END}, {QZ_PAGEUP, KEY_PAGE_UP}, {QZ_PAGEDOWN, KEY_PAGE_DOWN},
+
+    // F-keys
+    {QZ_F1, KEY_F + 1}, {QZ_F2, KEY_F + 2}, {QZ_F3, KEY_F + 3}, {QZ_F4, KEY_F + 4},
+    {QZ_F5, KEY_F + 5}, {QZ_F6, KEY_F + 6}, {QZ_F7, KEY_F + 7}, {QZ_F8, KEY_F + 8},
+    {QZ_F9, KEY_F + 9}, {QZ_F10, KEY_F + 10}, {QZ_F11, KEY_F + 11}, {QZ_F12, KEY_F + 12},
+
+    // numpad
+    {QZ_KP_PLUS, '+'}, {QZ_KP_MINUS, '-'}, {QZ_KP_MULTIPLY, '*'},
+    {QZ_KP_DIVIDE, '/'}, {QZ_KP_ENTER, KEY_KPENTER}, {QZ_KP_PERIOD, KEY_KPDEC},
+    {QZ_KP0, KEY_KP0}, {QZ_KP1, KEY_KP1}, {QZ_KP2, KEY_KP2}, {QZ_KP3, KEY_KP3},
+    {QZ_KP4, KEY_KP4}, {QZ_KP5, KEY_KP5}, {QZ_KP6, KEY_KP6}, {QZ_KP7, KEY_KP7},
+    {QZ_KP8, KEY_KP8}, {QZ_KP9, KEY_KP9},
+
+    {0, 0}
+};
+
 static inline int convert_key(UInt32 key, UInt32 charcode)
 {
-    switch (key)
-    {
-    case QZ_IBOOK_ENTER:
-    case QZ_RETURN:      return KEY_ENTER;
-    case QZ_ESCAPE:      return KEY_ESC;
-    case QZ_BACKSPACE:   return KEY_BACKSPACE;
-    case QZ_LALT:        return KEY_BACKSPACE;
-    case QZ_LCTRL:       return KEY_BACKSPACE;
-    case QZ_LSHIFT:      return KEY_BACKSPACE;
-    case QZ_F1:          return KEY_F + 1;
-    case QZ_F2:          return KEY_F + 2;
-    case QZ_F3:          return KEY_F + 3;
-    case QZ_F4:          return KEY_F + 4;
-    case QZ_F5:          return KEY_F + 5;
-    case QZ_F6:          return KEY_F + 6;
-    case QZ_F7:          return KEY_F + 7;
-    case QZ_F8:          return KEY_F + 8;
-    case QZ_F9:          return KEY_F + 9;
-    case QZ_F10:         return KEY_F + 10;
-    case QZ_F11:         return KEY_F + 11;
-    case QZ_F12:         return KEY_F + 12;
-    case QZ_INSERT:      return KEY_INSERT;
-    case QZ_DELETE:      return KEY_DELETE;
-    case QZ_HOME:        return KEY_HOME;
-    case QZ_END:         return KEY_END;
-    case QZ_KP_PLUS:     return '+';
-    case QZ_KP_MINUS:    return '-';
-    case QZ_TAB:         return KEY_TAB;
-    case QZ_PAGEUP:      return KEY_PAGE_UP;
-    case QZ_PAGEDOWN:    return KEY_PAGE_DOWN;
-    case QZ_UP:          return KEY_UP;
-    case QZ_DOWN:        return KEY_DOWN;
-    case QZ_LEFT:        return KEY_LEFT;
-    case QZ_RIGHT:       return KEY_RIGHT;
-    case QZ_KP_MULTIPLY: return '*';
-    case QZ_KP_DIVIDE:   return '/';
-    case QZ_KP_ENTER:    return KEY_KPENTER;
-    case QZ_KP_PERIOD:   return KEY_KPDEC;
-    case QZ_KP0:         return KEY_KP0;
-    case QZ_KP1:         return KEY_KP1;
-    case QZ_KP2:         return KEY_KP2;
-    case QZ_KP3:         return KEY_KP3;
-    case QZ_KP4:         return KEY_KP4;
-    case QZ_KP5:         return KEY_KP5;
-    case QZ_KP6:         return KEY_KP6;
-    case QZ_KP7:         return KEY_KP7;
-    case QZ_KP8:         return KEY_KP8;
-    case QZ_KP9:         return KEY_KP9;
-    default:             return charcode;
-    }
+    int mpkey = lookup_keymap_table(keymap, key);
+    if (mpkey)
+        return mpkey;
+    return charcode;
 }
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride)
