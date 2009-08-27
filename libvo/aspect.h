@@ -33,6 +33,7 @@ void aspect_save_prescale(int prew, int preh);
 
 void aspect_save_screenres(int scrw, int scrh);
 
+#define A_WINZOOM 2 ///< zoom to fill window size
 #define A_ZOOM 1
 #define A_NOZOOM 0
 

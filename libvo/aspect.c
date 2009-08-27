@@ -123,6 +123,11 @@ void aspect_fit(int *srcw, int *srch, int fitw, int fith){
 void aspect(int *srcw, int *srch, int zoom){
   int fitw = zoom ? aspdat.scrw : aspdat.prew;
   int fith = zoom ? aspdat.scrh : aspdat.preh;
+  if (zoom && WinID >= 0) zoom = A_WINZOOM;
+  if (zoom == A_WINZOOM) {
+    fitw = vo_dwidth;
+    fith = vo_dheight;
+  }
   if( !zoom && geometry_wh_changed ) {
 #ifdef ASPECT_DEBUG
     printf("aspect(0) no aspect forced!\n");
