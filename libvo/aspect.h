@@ -26,6 +26,7 @@ extern float vo_panscan_amount;
 
 void panscan_init(void);
 void panscan_calc(void);
+void panscan_calc_windowed(void);
 
 void aspect_save_orig(int orgw, int orgh);
 

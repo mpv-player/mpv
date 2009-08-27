@@ -151,15 +151,15 @@ void panscan_init( void )
  vo_panscan_amount=0.0f;
 }
 
-void panscan_calc( void )
+static void panscan_calc_internal(int zoom)
 {
  int fwidth,fheight;
  int vo_panscan_area;
  int max_w, max_h;
- get_max_dims(&max_w, &max_h, A_ZOOM);
+ get_max_dims(&max_w, &max_h, zoom);
 
  if (vo_panscanrange > 0) {
-   aspect(&fwidth,&fheight,A_ZOOM);
+   aspect(&fwidth,&fheight,zoom);
    vo_panscan_area = max_h - fheight;
    if (!vo_panscan_area)
      vo_panscan_area = max_w - fwidth;
@@ -167,8 +167,21 @@ void panscan_calc( void )
  } else
    vo_panscan_area = -vo_panscanrange * max_h;
 
- vo_panscan_amount = vo_fs ? vo_panscan : 0;
+ vo_panscan_amount = vo_fs || zoom == A_WINZOOM ? vo_panscan : 0;
  vo_panscan_x = vo_panscan_area * vo_panscan_amount * aspdat.asp;
  vo_panscan_y = vo_panscan_area * vo_panscan_amount;
 }
 
+void panscan_calc(void)
+{
+  panscan_calc_internal(A_ZOOM);
+}
+
+/**
+ * vos that set vo_dwidth and v_dheight correctly should call this to update
+ * vo_panscan_x and vo_panscan_y
+ */
+void panscan_calc_windowed(void)
+{
+  panscan_calc_internal(A_WINZOOM);
+}

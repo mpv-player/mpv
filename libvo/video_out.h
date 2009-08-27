@@ -275,4 +275,9 @@ struct vo_rect {
 void calc_src_dst_rects(int src_width, int src_height, struct vo_rect *src, struct vo_rect *dst,
                         struct vo_rect *borders, const struct vo_rect *crop);
 
+static inline int aspect_scaling(void)
+{
+  return vo_fs;
+}
+
 #endif /* MPLAYER_VIDEO_OUT_H */

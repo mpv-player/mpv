@@ -163,11 +163,11 @@ static void resize(int x,int y){
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   ass_border_x = ass_border_y = 0;
-  if (vo_fs && use_aspect) {
+  if (aspect_scaling() && use_aspect) {
     int new_w, new_h;
     GLdouble scale_x, scale_y;
-    aspect(&new_w, &new_h, A_ZOOM);
-    panscan_calc();
+    aspect(&new_w, &new_h, A_WINZOOM);
+    panscan_calc_windowed();
     new_w += vo_panscan_x;
     new_h += vo_panscan_y;
     scale_x = (GLdouble)new_w / (GLdouble)x;
@@ -722,7 +722,7 @@ static void flip_page(void) {
   if (vo_doublebuffering) {
     if (use_glFinish) glFinish();
     swapGlBuffers();
-    if (vo_fs && use_aspect)
+    if (aspect_scaling() && use_aspect)
       glClear(GL_COLOR_BUFFER_BIT);
   } else {
     do_render();
@@ -1148,7 +1148,7 @@ static int control(uint32_t request, void *data, ...)
       r->w = vo_dwidth; r->h = vo_dheight;
       r->mt = r->mb = r->ml = r->mr = 0;
       if (scaled_osd) {r->w = image_width; r->h = image_height;}
-      else if (vo_fs) {
+      else if (aspect_scaling()) {
         r->ml = r->mr = ass_border_x;
         r->mt = r->mb = ass_border_y;
       }
