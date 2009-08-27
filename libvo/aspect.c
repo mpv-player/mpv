@@ -40,7 +40,6 @@ float vo_panscanrange = 1.0;
 float force_monitor_aspect=0;
 float monitor_aspect=0;
 float monitor_pixel_aspect=1;
-extern float movie_aspect;
 
 static struct {
   int orgw; // real width
