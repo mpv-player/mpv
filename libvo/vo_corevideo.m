@@ -47,6 +47,7 @@
 #include "input/mouse.h"
 
 #include "osdep/keycodes.h"
+#include "osx_common.h"
 
 //Cocoa
 NSDistantObject *mplayerosxProxy;
@@ -993,58 +994,8 @@ static int control(uint32_t request, void *data, ...)
 */
 - (void) keyDown: (NSEvent *) theEvent
 {
-	unsigned int key;
-
-	switch([theEvent keyCode])
-    {
-		case 0x34:
-		case 0x24: key = KEY_ENTER; break;
-		case 0x35: key = KEY_ESC; break;
-		case 0x33: key = KEY_BACKSPACE; break;
-		case 0x3A: key = KEY_BACKSPACE; break;
-		case 0x3B: key = KEY_BACKSPACE; break;
-		case 0x38: key = KEY_BACKSPACE; break;
-		case 0x7A: key = KEY_F+1; break;
-		case 0x78: key = KEY_F+2; break;
-		case 0x63: key = KEY_F+3; break;
-		case 0x76: key = KEY_F+4; break;
-		case 0x60: key = KEY_F+5; break;
-		case 0x61: key = KEY_F+6; break;
-		case 0x62: key = KEY_F+7; break;
-		case 0x64: key = KEY_F+8; break;
-		case 0x65: key = KEY_F+9; break;
-		case 0x6D: key = KEY_F+10; break;
-		case 0x67: key = KEY_F+11; break;
-		case 0x6F: key = KEY_F+12; break;
-		case 0x72: key = KEY_INSERT; break;
-		case 0x75: key = KEY_DELETE; break;
-		case 0x73: key = KEY_HOME; break;
-		case 0x77: key = KEY_END; break;
-		case 0x45: key = '+'; break;
-		case 0x4E: key = '-'; break;
-		case 0x30: key = KEY_TAB; break;
-		case 0x74: key = KEY_PAGE_UP; break;
-		case 0x79: key = KEY_PAGE_DOWN; break;
-		case 0x7B: key = KEY_LEFT; break;
-		case 0x7C: key = KEY_RIGHT; break;
-		case 0x7D: key = KEY_DOWN; break;
-		case 0x7E: key = KEY_UP; break;
-		case 0x43: key = '*'; break;
-		case 0x4B: key = '/'; break;
-		case 0x4C: key = KEY_KPENTER; break;
-		case 0x41: key = KEY_KPDEC; break;
-		case 0x52: key = KEY_KP0; break;
-		case 0x53: key = KEY_KP1; break;
-		case 0x54: key = KEY_KP2; break;
-		case 0x55: key = KEY_KP3; break;
-		case 0x56: key = KEY_KP4; break;
-		case 0x57: key = KEY_KP5; break;
-		case 0x58: key = KEY_KP6; break;
-		case 0x59: key = KEY_KP7; break;
-		case 0x5B: key = KEY_KP8; break;
-		case 0x5C: key = KEY_KP9; break;
-		default: key = *[[theEvent characters] UTF8String]; break;
-    }
+	int key = convert_key([theEvent keyCode], *[[theEvent characters] UTF8String]);
+	if (key != -1)
 	mplayer_put_key(key);
 }
 
