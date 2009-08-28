@@ -5,6 +5,7 @@
 #include "osx_common.h"
 #include "video_out.h"
 #include "osdep/keycodes.h"
+#include "input/input.h"
 
 static const struct keymap keymap[] = {
     // special keys
