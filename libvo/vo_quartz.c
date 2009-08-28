@@ -87,8 +87,6 @@ static int EnterMoviesDone = 0;
 static int get_image_done = 0;
 
 static int vo_quartz_fs; // we are in fullscreen
-static int our_aspect_change;
-static float old_movie_aspect;
 
 static int winLevel = 1;
 int levelList[] =
@@ -420,19 +418,15 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
             break;
 
         case kAspectOrgCmd:
-            our_aspect_change = 1;
-            sprintf(cmd_str, "switch_ratio %f", old_movie_aspect);
-            mp_input_queue_cmd(mp_input_parse_cmd(cmd_str));
+            change_movie_aspect(-1);
             break;
 
         case kAspectFullCmd:
-            our_aspect_change = 1;
-            mp_input_queue_cmd(mp_input_parse_cmd("switch_ratio 1.6667"));
+            change_movie_aspect(4.0 / 3.0);
             break;
 
         case kAspectWideCmd:
-            our_aspect_change = 1;
-            mp_input_queue_cmd(mp_input_parse_cmd("switch_ratio 1.7778"));
+            change_movie_aspect(16.0 / 9.0);
             break;
 
         case kPanScanCmd:
@@ -615,9 +609,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
     OSErr qterr;
     CGRect tmpBounds;
 
-    if (!our_aspect_change)
-        old_movie_aspect = (float)d_width / d_height;
-    our_aspect_change = 0;
+    config_movie_aspect((float)d_width / d_height);
 
     // misc mplayer setup/////////////////////////////////////////////////////
     SetRect(&imgRect, 0, 0, width, height);

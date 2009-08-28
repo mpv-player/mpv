@@ -43,3 +43,31 @@ int convert_key(unsigned key, unsigned charcode)
         return mpkey;
     return charcode;
 }
+
+static int our_aspect_change;
+static float old_movie_aspect;
+
+/**
+ * Sends MPlayer a command to change aspect to the requested value.
+ * @param new_aspect desired new aspect, < 0 means restore original.
+ */
+void change_movie_aspect(float new_aspect)
+{
+    char cmd_str[64];
+    if (new_aspect < 0)
+        new_aspect = old_movie_aspect;
+    our_aspect_change = 1;
+    snprintf(cmd_str, 64, "switch_ratio %f", old_movie_aspect);
+    mp_input_queue_cmd(mp_input_parse_cmd(cmd_str));
+}
+
+/**
+ * Call in config to save the original movie aspect.
+ * This will ignore config calls caused by change_movie_aspect.
+ */
+void config_movie_aspect(float config_aspect)
+{
+    if (!our_aspect_change)
+        old_movie_aspect = config_aspect;
+    our_aspect_change = 0;
+}
