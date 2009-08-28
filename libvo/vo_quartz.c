@@ -87,8 +87,7 @@ static int EnterMoviesDone = 0;
 static int get_image_done = 0;
 
 static int vo_quartz_fs; // we are in fullscreen
-extern float monitor_aspect;
-extern float movie_aspect;
+static int our_aspect_change;
 static float old_movie_aspect;
 
 static int winLevel = 1;
@@ -121,7 +120,6 @@ static Rect imgRect;            // size of the original image (unscaled)
 static Rect dstRect;            // size of the displayed image (after scaling)
 static Rect winRect;            // size of the window containg the displayed image (include padding)
 static Rect oldWinRect;         // size of the window containg the displayed image (include padding) when NOT in FS mode
-static CGRect displayRect;      // size of the display device
 static Rect oldWinBounds;
 
 static MenuRef windMenu;
@@ -391,6 +389,7 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 //default window event handler
 static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
+    char cmd_str[64];
     OSStatus result = noErr;
     uint32_t d_width;
     uint32_t d_height;
@@ -420,7 +419,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
                 window_fullscreen();
             }
 
-            SizeWindow(theWindow, (d_width / 2), ((d_width / movie_aspect) / 2), 1);
+            SizeWindow(theWindow, d_width / 2, d_height / 2, 1);
             window_resized();
             break;
 
@@ -431,7 +430,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
                 window_fullscreen();
             }
 
-            SizeWindow(theWindow, d_width, (d_width / movie_aspect), 1);
+            SizeWindow(theWindow, d_width, d_height, 1);
             window_resized();
             break;
 
@@ -442,7 +441,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
                 window_fullscreen();
             }
 
-            SizeWindow(theWindow, (d_width * 2), ((d_width / movie_aspect) * 2), 1);
+            SizeWindow(theWindow, d_width * 2, d_height * 2, 1);
             window_resized();
             break;
 
@@ -458,30 +457,19 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
             break;
 
         case kAspectOrgCmd:
-            movie_aspect = old_movie_aspect;
-            if (!vo_quartz_fs)
-            {
-                SizeWindow(theWindow, dstRect.right, (dstRect.right / movie_aspect), 1);
-            }
-            window_resized();
+            our_aspect_change = 1;
+            sprintf(cmd_str, "switch_ratio %f", old_movie_aspect);
+            mp_input_queue_cmd(mp_input_parse_cmd(cmd_str));
             break;
 
         case kAspectFullCmd:
-            movie_aspect = 4.0f / 3.0f;
-            if (!vo_quartz_fs)
-            {
-                SizeWindow(theWindow, dstRect.right, (dstRect.right / movie_aspect), 1);
-            }
-            window_resized();
+            our_aspect_change = 1;
+            mp_input_queue_cmd(mp_input_parse_cmd("switch_ratio 1.6667"));
             break;
 
         case kAspectWideCmd:
-            movie_aspect = 16.0f / 9.0f;
-            if (!vo_quartz_fs)
-            {
-                SizeWindow(theWindow, dstRect.right, (dstRect.right / movie_aspect), 1);
-            }
-            window_resized();
+            our_aspect_change = 1;
+            mp_input_queue_cmd(mp_input_parse_cmd("switch_ratio 1.7778"));
             break;
 
         case kPanScanCmd:
@@ -631,16 +619,11 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
     InstallWindowEventHandler(theWindow, NewEventHandlerUPP(WindowEventHandler), GetEventTypeCount(win_events), win_events, theWindow, NULL);
 }
 
-static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+static void update_screen_info(void)
 {
-    WindowAttributes windowAttrs;
-    OSErr qterr;
-    CGRect tmpBounds;
+    CGRect displayRect;
     CGDisplayCount displayCount;
     CGDirectDisplayID *displays;
-
-    // Get Main device info///////////////////////////////////////////////////
-
     // Display IDs might not be consecutive, get the list of all devices up to # device_id
     displayCount = device_id + 1;
     displays = malloc(sizeof(CGDirectDisplayID) * displayCount);
@@ -656,8 +639,22 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
     free(displays);
 
     displayRect = CGDisplayBounds(displayId);
+    xinerama_x = displayRect.origin.x;
+    xinerama_y = displayRect.origin.y;
+    vo_screenwidth = displayRect.size.width;
+    vo_screenheight = displayRect.size.height;
+    aspect_save_screenres(vo_screenwidth, vo_screenheight);
+}
 
-    monitor_aspect = (float)displayRect.size.width / (float)displayRect.size.height;
+static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+{
+    WindowAttributes windowAttrs;
+    OSErr qterr;
+    CGRect tmpBounds;
+
+    if (!our_aspect_change)
+        old_movie_aspect = (float)d_width / d_height;
+    our_aspect_change = 0;
 
     // misc mplayer setup/////////////////////////////////////////////////////
     SetRect(&imgRect, 0, 0, width, height);
@@ -675,19 +672,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
         break;
     }
     image_size = ((imgRect.right * imgRect.bottom * image_depth) + 7) / 8;
-
-    vo_fs = flags & VOFLAG_FULLSCREEN;
-
-    // get movie aspect
-    panscan_init();
-    aspect_save_orig(width, height);
-    aspect_save_prescale(d_width, d_height);
-    aspect_save_screenres(displayRect.size.width, displayRect.size.height);
-
-    aspect(&d_width, &d_height, A_NOZOOM);
-
-    movie_aspect = (float)d_width / (float)d_height;
-    old_movie_aspect = movie_aspect;
 
     if (image_data)
         free(image_data);
@@ -1294,17 +1278,15 @@ static int control(uint32_t request, void *data, ...)
         default:
             break;
         }
+    case VOCTRL_UPDATE_SCREENINFO:
+        update_screen_info();
+        return VO_TRUE;
     }
     return VO_NOTIMPL;
 }
 
 void window_resized(void)
 {
-    float aspectX;
-    float aspectY;
-
-    int padding = 0;
-
     uint32_t d_width;
     uint32_t d_height;
 
@@ -1313,30 +1295,12 @@ void window_resized(void)
     CGContextRef context;
 
     GetWindowPortBounds(theWindow, &winRect);
+    d_width  = vo_dwidth  = winRect.right;
+    d_height = vo_dheight = winRect.bottom;
 
     if (vo_keepaspect)
-    {
-        aspect(&d_width, &d_height, A_NOZOOM);
-        d_height = ((float)d_width / movie_aspect);
-
-        aspectX = (float)((float)winRect.right / (float)d_width);
-        aspectY = (float)((float)(winRect.bottom) / (float)d_height);
-
-        if ((d_height * aspectX) > (winRect.bottom))
-        {
-            padding = (winRect.right - d_width * aspectY) / 2;
-            SetRect(&dstRect, padding, 0, d_width * aspectY + padding, d_height * aspectY);
-        }
-        else
-        {
-            padding = ((winRect.bottom) - d_height * aspectX) / 2;
-            SetRect(&dstRect, 0, padding, (d_width * aspectX), d_height * aspectX + padding);
-        }
-    }
-    else
-    {
-        SetRect(&dstRect, 0, 0, winRect.right, winRect.bottom);
-    }
+        aspect(&d_width, &d_height, A_WINZOOM);
+    SetRect(&dstRect, (vo_dwidth - d_width) / 2, (vo_dheight - d_height) / 2, d_width, d_height);
 
     switch (image_format)
     {
@@ -1359,7 +1323,7 @@ void window_resized(void)
         {
             ScaleMatrix(&matrix, scale_X, scale_Y, 0, 0);
 
-            if (padding > 0)
+            if (vo_dwidth > d_width || vo_dheight > d_height)
             {
                 TranslateMatrix(&matrix, Long2Fix(dstRect.left), Long2Fix(dstRect.top));
             }
@@ -1432,7 +1396,7 @@ void window_fullscreen(void)
                 }
 
                 // Get Main device info///////////////////////////////////////////////////
-                displayRect = CGDisplayBounds(displayId);
+                update_screen_info();
             }
         }
         // save old window size
@@ -1442,12 +1406,10 @@ void window_fullscreen(void)
             GetWindowBounds(theWindow, kWindowContentRgn, &oldWinBounds);
         }
         // go fullscreen
-        panscan_calc();
         ChangeWindowAttributes(theWindow, kWindowNoShadowAttribute, 0);
-        MoveWindow(theWindow, displayRect.origin.x - (vo_panscan_x >> 1), displayRect.origin.y - (vo_panscan_y >> 1), 1);
-        SizeWindow(theWindow, displayRect.size.width + vo_panscan_x, displayRect.size.height + vo_panscan_y, 1);
 
         vo_quartz_fs = 1;
+        window_panscan();
     }
     else //go back to windowed mode
     {
@@ -1458,7 +1420,7 @@ void window_fullscreen(void)
             CGDisplayRelease(displayId);
 
             // Get Main device info///////////////////////////////////////////////////
-            displayRect = CGDisplayBounds(displayId);
+            update_screen_info();
 
             originalMode = NULL;
         }
@@ -1487,7 +1449,7 @@ void window_panscan(void)
 
     if (vo_quartz_fs)
     {
-        MoveWindow(theWindow, displayRect.origin.x - (vo_panscan_x >> 1), displayRect.origin.y - (vo_panscan_y >> 1), 1);
-        SizeWindow(theWindow, displayRect.size.width + vo_panscan_x, displayRect.size.height + vo_panscan_y, 1);
+        MoveWindow(theWindow, xinerama_x - (vo_panscan_x >> 1), xinerama_y - (vo_panscan_y >> 1), 1);
+        SizeWindow(theWindow, vo_screenwidth + vo_panscan_x, vo_screenheight + vo_panscan_y, 1);
     }
 }
