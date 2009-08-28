@@ -99,6 +99,7 @@ int levelList[] =
 static int int_pause = 0;
 static float winAlpha = 1;
 static int mouseHide = FALSE;
+static float winSizeMult = 1;
 
 static int device_id = 0;
 
@@ -380,6 +381,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
                 window_fullscreen();
             }
 
+            winSizeMult = 0.5;
             SizeWindow(theWindow, d_width / 2, d_height / 2, 1);
             window_resized();
             break;
@@ -391,6 +393,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
                 window_fullscreen();
             }
 
+            winSizeMult = 1;
             SizeWindow(theWindow, d_width, d_height, 1);
             window_resized();
             break;
@@ -402,6 +405,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
                 window_fullscreen();
             }
 
+            winSizeMult = 2;
             SizeWindow(theWindow, d_width * 2, d_height * 2, 1);
             window_resized();
             break;
@@ -609,6 +613,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
     OSErr qterr;
     CGRect tmpBounds;
 
+    vo_dwidth  = d_width  *= winSizeMult;
+    vo_dheight = d_height *= winSizeMult;
     config_movie_aspect((float)d_width / d_height);
 
     // misc mplayer setup/////////////////////////////////////////////////////
