@@ -53,7 +53,7 @@
 #include "input/input.h"
 #include "input/mouse.h"
 
-#include "vo_quartz.h"
+#include "osx_common.h"
 
 static const vo_info_t info =
 {
@@ -153,43 +153,6 @@ void window_resized(void);
 void window_ontop(void);
 void window_fullscreen(void);
 void window_panscan(void);
-
-static const struct keymap keymap[] = {
-    // special keys
-    {QZ_IBOOK_ENTER, KEY_ENTER}, {QZ_RETURN, KEY_ENTER},
-    {QZ_ESCAPE, KEY_ESC},
-    {QZ_BACKSPACE, KEY_BACKSPACE}, {QZ_LALT, KEY_BACKSPACE}, {QZ_LCTRL, KEY_BACKSPACE}, {QZ_LSHIFT, KEY_BACKSPACE},
-    {QZ_TAB, KEY_TAB},
-
-    // cursor keys
-    {QZ_UP, KEY_UP}, {QZ_DOWN, KEY_DOWN}, {QZ_LEFT, KEY_LEFT}, {QZ_RIGHT, KEY_RIGHT},
-
-    // navigation block
-    {QZ_INSERT, KEY_INSERT}, {QZ_DELETE, KEY_DELETE}, {QZ_HOME, KEY_HOME},
-    {QZ_END, KEY_END}, {QZ_PAGEUP, KEY_PAGE_UP}, {QZ_PAGEDOWN, KEY_PAGE_DOWN},
-
-    // F-keys
-    {QZ_F1, KEY_F + 1}, {QZ_F2, KEY_F + 2}, {QZ_F3, KEY_F + 3}, {QZ_F4, KEY_F + 4},
-    {QZ_F5, KEY_F + 5}, {QZ_F6, KEY_F + 6}, {QZ_F7, KEY_F + 7}, {QZ_F8, KEY_F + 8},
-    {QZ_F9, KEY_F + 9}, {QZ_F10, KEY_F + 10}, {QZ_F11, KEY_F + 11}, {QZ_F12, KEY_F + 12},
-
-    // numpad
-    {QZ_KP_PLUS, '+'}, {QZ_KP_MINUS, '-'}, {QZ_KP_MULTIPLY, '*'},
-    {QZ_KP_DIVIDE, '/'}, {QZ_KP_ENTER, KEY_KPENTER}, {QZ_KP_PERIOD, KEY_KPDEC},
-    {QZ_KP0, KEY_KP0}, {QZ_KP1, KEY_KP1}, {QZ_KP2, KEY_KP2}, {QZ_KP3, KEY_KP3},
-    {QZ_KP4, KEY_KP4}, {QZ_KP5, KEY_KP5}, {QZ_KP6, KEY_KP6}, {QZ_KP7, KEY_KP7},
-    {QZ_KP8, KEY_KP8}, {QZ_KP9, KEY_KP9},
-
-    {0, 0}
-};
-
-static inline int convert_key(UInt32 key, UInt32 charcode)
-{
-    int mpkey = lookup_keymap_table(keymap, key);
-    if (mpkey)
-        return mpkey;
-    return charcode;
-}
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride)
 {
