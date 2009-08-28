@@ -58,7 +58,7 @@ void change_movie_aspect(float new_aspect)
     if (new_aspect < 0)
         new_aspect = old_movie_aspect;
     our_aspect_change = 1;
-    snprintf(cmd_str, sizeof(cmd_str), "switch_ratio %f", old_movie_aspect);
+    snprintf(cmd_str, sizeof(cmd_str), "switch_ratio %f", new_aspect);
     mp_input_queue_cmd(mp_input_parse_cmd(cmd_str));
 }
 
