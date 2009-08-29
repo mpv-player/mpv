@@ -1,4 +1,4 @@
-// Synced with help_mp-en.h r29209 (MSGTR_LIBVO_VESA_YouShouldSee5OemRelatedLines)
+// Synced with help_mp-en.h r29549 (MSGTR_LIBVO_SUB_VIDIX_CantStartPlayback)
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);
 //   NAV; section/subsection;  XScreenSaver; keycolor;
@@ -6,13 +6,6 @@
 //   profile? demuxer? drain? flush?
 //
 // Translated by JRaSH <jrash06@163.com>
-// (Translator before 2007-05-01)
-// Lu Ran <hephooey@fastmail.fm>, Sheldon Jin <jinsh2 AT yahoo.com>
-// (Translator before 2006-04-24)
-// Emfox Zhou <EmfoxZhou@gmail.com>
-// (Translator before 2005-10-12)
-// Lu Ran <hephooey@fastmail.fm>
-
 
 // ========================= MPlayer help ===========================
 
@@ -1044,69 +1037,69 @@ static const char help_text[]=
 #define MSGTR_LIBVO_VESA_Capabilites "[VO_VESA] VESA 性能：%s %s %s %s %s。\n"
 #define MSGTR_LIBVO_VESA_BelowWillBePrintedOemInfo "[VO_VESA] ！！！下面将显示 OEM 信息！！！\n"
 #define MSGTR_LIBVO_VESA_YouShouldSee5OemRelatedLines "[VO_VESA] 应该看到 5 行 OEM 的相关内容；否则说明 vm86 有问题。\n"
-#define MSGTR_LIBVO_VESA_OemInfo "[VO_VESA] OEM 信息: %s。\n"
-#define MSGTR_LIBVO_VESA_OemRevision "[VO_VESA] OEM 版本: %x。\n"
-#define MSGTR_LIBVO_VESA_OemVendor "[VO_VESA] OEM 发行商: %s。\n"
-#define MSGTR_LIBVO_VESA_OemProductName "[VO_VESA] OEM 产品名: %s。\n"
-#define MSGTR_LIBVO_VESA_OemProductRev "[VO_VESA] OEM 产品版本: %s。\n"
-#define MSGTR_LIBVO_VESA_Hint "[VO_VESA] 提示: 为使用电视输出你需要在启动之前插入 TV 接口。\n"\
-"[VO_VESA] 因为 VESA BIOS 只在自举的时候初始化自己。\n"
+#define MSGTR_LIBVO_VESA_OemInfo "[VO_VESA] OEM 信息：%s。\n"
+#define MSGTR_LIBVO_VESA_OemRevision "[VO_VESA] OEM 版本：%x。\n"
+#define MSGTR_LIBVO_VESA_OemVendor "[VO_VESA] OEM 销售商：%s。\n"
+#define MSGTR_LIBVO_VESA_OemProductName "[VO_VESA] OEM 产品名：%s。\n"
+#define MSGTR_LIBVO_VESA_OemProductRev "[VO_VESA] OEM 产品版本：%s。\n"
+#define MSGTR_LIBVO_VESA_Hint "[VO_VESA] 提示：为使用电视输出你应当在启动前插入 TV 接口。\n"\
+"[VO_VESA] 因为 VESA BIOS 只在自检的时候执行初始化。\n"
 #define MSGTR_LIBVO_VESA_UsingVesaMode "[VO_VESA] 使用 VESA 模式 (%u) = %x [%ux%u@%u]\n"
-#define MSGTR_LIBVO_VESA_CantInitializeSwscaler "[VO_VESA] 不能初始化软件缩放。\n"
-#define MSGTR_LIBVO_VESA_CantUseDga "[VO_VESA] 不能使用 DGA。锁定区域切换模式。 :(\n"
-#define MSGTR_LIBVO_VESA_UsingDga "[VO_VESA] 使用 DGA (物理资源: %08lXh, %08lXh)"
-#define MSGTR_LIBVO_VESA_CantUseDoubleBuffering "[VO_VESA] 不能使用双缓冲: 显存不足。\n"
-#define MSGTR_LIBVO_VESA_CantFindNeitherDga "[VO_VESA] 未找到 DGA 也不能重新分配窗口的大小。\n"
-#define MSGTR_LIBVO_VESA_YouveForcedDga "[VO_VESA] 你锁定了 DGA。退出中\n"
-#define MSGTR_LIBVO_VESA_CantFindValidWindowAddress "[VO_VESA] 未找到可用的窗口地址。\n"
-#define MSGTR_LIBVO_VESA_UsingBankSwitchingMode "[VO_VESA] 使用区域切换模式 (物理资源: %08lXh, %08lXh)。\n"
-#define MSGTR_LIBVO_VESA_CantAllocateTemporaryBuffer "[VO_VESA] 不能分配临时缓冲。\n"
-#define MSGTR_LIBVO_VESA_SorryUnsupportedMode "[VO_VESA] 抱歉, 模式不支持 -- 试试 -x 640 -zoom。\n"
-#define MSGTR_LIBVO_VESA_OhYouReallyHavePictureOnTv "[VO_VESA] 啊你的电视机上有图像了!\n"
-#define MSGTR_LIBVO_VESA_CantInitialozeLinuxVideoOverlay "[VO_VESA] 不能初始化 Linux Video Overlay。\n"
-#define MSGTR_LIBVO_VESA_UsingVideoOverlay "[VO_VESA] 使用视频覆盖: %s。\n"
-#define MSGTR_LIBVO_VESA_CantInitializeVidixDriver "[VO_VESA] 不能初始化 VIDIX 驱动。\n"
-#define MSGTR_LIBVO_VESA_UsingVidix "[VO_VESA] 使用 VIDIX 中。\n"
-#define MSGTR_LIBVO_VESA_CantFindModeFor "[VO_VESA] 未找到适合 %ux%u@%u 的模式。\n"
+#define MSGTR_LIBVO_VESA_CantInitializeSwscaler "[VO_VESA] 无法初始化软件缩放功能。\n"
+#define MSGTR_LIBVO_VESA_CantUseDga "[VO_VESA] 无法使用 DGA。强制使用组交换模式。 :(\n"
+#define MSGTR_LIBVO_VESA_UsingDga "[VO_VESA] 使用 DGA（物理资源: %08lXh, %08lXh）"
+#define MSGTR_LIBVO_VESA_CantUseDoubleBuffering "[VO_VESA] 无法使用双重缓冲：显存不足。\n"
+#define MSGTR_LIBVO_VESA_CantFindNeitherDga "[VO_VESA] 无法找到 DGA 或是可再分配的视频窗口框架。\n"
+#define MSGTR_LIBVO_VESA_YouveForcedDga "[VO_VESA] 已强制使用 DGA。正在退出\n"
+#define MSGTR_LIBVO_VESA_CantFindValidWindowAddress "[VO_VESA] 无法找到有效的视频窗口地址。\n"
+#define MSGTR_LIBVO_VESA_UsingBankSwitchingMode "[VO_VESA] 使用组交换模式（物理资源：%08lXh, %08lXh）。\n"
+#define MSGTR_LIBVO_VESA_CantAllocateTemporaryBuffer "[VO_VESA] 无法分配临时缓冲。\n"
+#define MSGTR_LIBVO_VESA_SorryUnsupportedMode "[VO_VESA] 抱歉，不支持该模式——试试 -x 640 -zoom。\n"
+#define MSGTR_LIBVO_VESA_OhYouReallyHavePictureOnTv "[VO_VESA] 噢，你的电视上有图像了！\n"
+#define MSGTR_LIBVO_VESA_CantInitialozeLinuxVideoOverlay "[VO_VESA] 无法初始化 Linux 视频覆盖模式。\n"
+#define MSGTR_LIBVO_VESA_UsingVideoOverlay "[VO_VESA] 使用视频覆盖模式：%s。\n"
+#define MSGTR_LIBVO_VESA_CantInitializeVidixDriver "[VO_VESA] 无法初始化 VIDIX 驱动。\n"
+#define MSGTR_LIBVO_VESA_UsingVidix "[VO_VESA] 正在使用 VIDIX。\n"
+#define MSGTR_LIBVO_VESA_CantFindModeFor "[VO_VESA] 无法找到适合的模式用于：%ux%u@%u。\n"
 #define MSGTR_LIBVO_VESA_InitializationComplete "[VO_VESA] VESA 初始化完成。\n"
 
 // vesa_lvo.c
-#define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] 这个分支已经不再维护。\n[VESA_LVO] 请使用 -vo vesa:vidix。\n"
-#define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] 打不开: '%s'\n"
-#define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] 无效的输出格式: %s(%0X)\n"
-#define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] 你的 fb_vid 驱动版本与 MPlayer 的版本不兼容!\n"
+#define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] 这个分支版本已经不再维护。\n[VESA_LVO] 请使用 -vo vesa:vidix。\n"
+#define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] 无法打开：‘%s’\n"
+#define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] 无效的输出格式：%s(%0X)\n"
+#define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] 你的 fb_vid 驱动版本与该版本 MPlayer 不兼容！\n"
 
 // vo_x11.c
-#define MSGTR_LIBVO_X11_DrawFrameCalled "[VO_X11] 调用 draw_frame()!!!!!!\n"
+#define MSGTR_LIBVO_X11_DrawFrameCalled "[VO_X11] 已调用 draw_frame()！！！\n"
 
 // vo_xv.c
-#define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] 调用 draw_frame()!!!!!!\n"
-#define MSGTR_LIBVO_XV_SharedMemoryNotSupported "[VO_XV] 不支持共享内存\n回复到正常 Xv。\n"
-#define MSGTR_LIBVO_XV_XvNotSupportedByX11 "[VO_XV] 对不起, 此 X11 版本/驱动不支持 Xv\n[VO_XV] ******** 试试使用  -vo x11  或  -vo sdl  *********\n"
-#define MSGTR_LIBVO_XV_XvQueryAdaptorsFailed  "[VO_XV] XvQueryAdaptors 失败.\n"
-#define MSGTR_LIBVO_XV_InvalidPortParameter "[VO_XV] 无效端口参数, 端口 0 重载。\n"
-#define MSGTR_LIBVO_XV_CouldNotGrabPort "[VO_XV] 不能抓取端口 %i.\n"
-#define MSGTR_LIBVO_XV_CouldNotFindFreePort "[VO_XV] 未找到空闲 Xvideo 端口 - 或许另一过程已\n"\
-"[VO_XV] 在使用。请关闭所有的应用程序再试。如果那样做\n"\
-"[VO_XV] 没用, 请参见 'mplayer -vo help' 找其它 (非-xv) 视频输出驱动。\n"
-#define MSGTR_LIBVO_XV_NoXvideoSupport "[VO_XV] 好像不存在 Xvideo 支持你可用的显卡。\n"\
-"[VO_XV] 运行 'xvinfo' 证实有 Xv 的支持并阅读\n"\
-"[VO_XV] DOCS/HTML/en/video.html#xv!\n"\
-"[VO_XV] 请参见 'mplayer -vo help' 找其它 (非-xv) 视频输出驱动。\n"\
-"[VO_XV] 试试 -vo x11.\n"
+#define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] 已调用 draw_frame()！！！\n"
+#define MSGTR_LIBVO_XV_SharedMemoryNotSupported "[VO_XV] 共享内存模式不支持\n回复到正常 Xv 模式。\n"
+#define MSGTR_LIBVO_XV_XvNotSupportedByX11 "[VO_XV] 对不起，该 X11 版本/驱动不支持 Xv\n[VO_XV] ******** 试试使用 -vo x11 或  -vo sdl  *********\n"
+#define MSGTR_LIBVO_XV_XvQueryAdaptorsFailed  "[VO_XV] XvQueryAdaptors 失败。\n"
+#define MSGTR_LIBVO_XV_InvalidPortParameter "[VO_XV] 无效的端口参数，改用端口 0。\n"
+#define MSGTR_LIBVO_XV_CouldNotGrabPort "[VO_XV] 无法绑定端口 %i。\n"
+#define MSGTR_LIBVO_XV_CouldNotFindFreePort "[VO_XV] 无法找到空闲的 Xvideo 端口 - 或许另一进程已经正在使用\n"\
+"[VO_XV] 该端口。关闭所有视频应用程序并再次尝试。如果那样做仍然无效，则\n"\
+"[VO_XV] 参见‘mplayer -vo help’获取其它（非 xv）视频输出驱动的信息。\n"
+#define MSGTR_LIBVO_XV_NoXvideoSupport "[VO_XV] 好像没有可用的 Xvideo 能够支持你的显卡。\n"\
+"[VO_XV] 运行‘xvinfo’检查其是否支持 Xv 并阅读\n"\
+"[VO_XV] DOCS/HTML/en/video.html#xv！\n"\
+"[VO_XV] 参见‘mplayer -vo help’获取其它（非 xv）视频输出驱动的信息。\n"\
+"[VO_XV] 试试 -vo x11。\n"
 
 // vo_yuv4mpeg.c
-#define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "交错模式要求图像高度能被 4 整除。"
-#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "无法为交错模式分配线缓冲。"
-#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "输入不是 RGB, 不能按域分开色差!"
+#define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "隔行扫描模式要求图像高度能被 4 整除。"
+#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "无法为隔行扫描模式分配扫描行缓冲。"
+#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "输入信号不是 RGB 格式，不能按色彩域拆分色度信息！"
 #define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "图像宽度必须能被 2 整除。"
-#define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "内存不够, 不能分配 RGB 缓冲。"
-#define MSGTR_VO_YUV4MPEG_OutFileOpenError "不能取得内存或文件句柄以写入 \"%s\"!"
-#define MSGTR_VO_YUV4MPEG_OutFileWriteError "图像写到输出错误!"
-#define MSGTR_VO_YUV4MPEG_UnknownSubDev "未知的子设备: %s"
-#define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "使用交错输出模式, 前场(奇数图场)优先。"
-#define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "使用交错输出模式, 后场(偶数图场)优先。"
-#define MSGTR_VO_YUV4MPEG_ProgressiveMode "使用(默认的) 渐显帧模式。"
+#define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "内存不够, 无法分配 RGB 帧缓冲。"
+#define MSGTR_VO_YUV4MPEG_OutFileOpenError "无法获取内存或文件句柄以写入“%s”！"
+#define MSGTR_VO_YUV4MPEG_OutFileWriteError "图像写入输出错误！"
+#define MSGTR_VO_YUV4MPEG_UnknownSubDev "未知子设备：%s"
+#define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "使用隔行扫描输出模式，上半扫描场优先方式。"
+#define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "使用隔行扫描输出模式，下半扫描场优先方式。"
+#define MSGTR_VO_YUV4MPEG_ProgressiveMode "使用（默认的）逐行扫描帧模式。"
 
 // vobsub_vidix.c
 #define MSGTR_LIBVO_SUB_VIDIX_CantStartPlayback "[VO_SUB_VIDIX] 不能开始播放: %s\n"
@@ -1268,10 +1261,7 @@ static const char help_text[]=
 #define MSGTR_AO_ALSA_UnableToDisableResampling "[AO_ALSA] 无法停用再抽样: %s\n"
 #define MSGTR_AO_ALSA_UnableToSetSamplerate2 "[AO_ALSA] 无法设置 采样率-2: %s\n"
 #define MSGTR_AO_ALSA_UnableToSetBufferTimeNear "[AO_ALSA] 无法设置缓冲时间约: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetPeriodTime "[AO_ALSA] 无法设置区段时间: %s\n"
-#define MSGTR_AO_ALSA_BufferTimePeriodTime "[AO_ALSA] buffer_time: %d, period_time :%d\n"
 #define MSGTR_AO_ALSA_UnableToGetPeriodSize "[AO ALSA] 无法取得区段大小: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetPeriodSize "[AO ALSA] 无法设置区段大小(%ld): %s\n"
 #define MSGTR_AO_ALSA_UnableToSetPeriods "[AO_ALSA] 无法设置区段: %s\n"
 #define MSGTR_AO_ALSA_UnableToSetHwParameters "[AO_ALSA] 无法设置 hw-parameters: %s\n"
 #define MSGTR_AO_ALSA_UnableToGetBufferSize "[AO_ALSA] 无法取得缓冲大小: %s\n"
