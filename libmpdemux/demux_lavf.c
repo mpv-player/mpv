@@ -221,7 +221,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
     AVStream *st= avfc->streams[i];
     AVCodecContext *codec= st->codec;
     AVMetadataTag *lang = av_metadata_get(st->metadata, "language", NULL, 0);
-    int g, override_tag = av_codec_get_tag(mp_wav_override_taglists, codec->codec_id);
+    int g, override_tag = av_codec_get_tag(mp_codecid_override_taglists,
+                                           codec->codec_id);
     // For some formats (like PCM) always trust CODEC_ID_* more than codec_tag
     if (override_tag)
         codec->codec_tag = override_tag;

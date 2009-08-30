@@ -54,7 +54,7 @@ static const AVCodecTag mp_wav_tags[] = {
 
 const struct AVCodecTag *mp_wav_taglists[] = {ff_codec_wav_tags, mp_wav_tags, 0};
 
-static const AVCodecTag mp_wav_override_tags[] = {
+static const AVCodecTag mp_codecid_override_tags[] = {
     { CODEC_ID_PCM_S8,            MKTAG('t', 'w', 'o', 's')},
     { CODEC_ID_PCM_U8,            1},
     { CODEC_ID_PCM_S16BE,         MKTAG('t', 'w', 'o', 's')},
@@ -71,7 +71,8 @@ static const AVCodecTag mp_wav_override_tags[] = {
     { 0, 0 },
 };
 
-const struct AVCodecTag *mp_wav_override_taglists[] = {mp_wav_override_tags, 0};
+const struct AVCodecTag *mp_codecid_override_taglists[] =
+                        {mp_codecid_override_tags, 0};
 
 static const AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_AMV,               MKTAG('A', 'M', 'V', 'V')},
