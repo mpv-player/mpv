@@ -63,6 +63,7 @@ static const AVCodecTag mp_wav_override_tags[] = {
     { CODEC_ID_PCM_S24LE,         1},
     { CODEC_ID_PCM_S32BE,         MKTAG('i', 'n', '3', '2')},
     { CODEC_ID_PCM_S32LE,         1},
+    { CODEC_ID_PCM_BLURAY,        MKTAG('B', 'P', 'C', 'M')},
     { 0, 0 },
 };
 
