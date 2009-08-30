@@ -221,11 +221,13 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
     AVStream *st= avfc->streams[i];
     AVCodecContext *codec= st->codec;
     AVMetadataTag *lang = av_metadata_get(st->metadata, "language", NULL, 0);
-    int g;
+    int g, override_tag = av_codec_get_tag(mp_wav_override_taglists, codec->codec_id);
+    // For some formats (like PCM) always trust CODEC_ID_* more than codec_tag
+    if (override_tag)
+        codec->codec_tag = override_tag;
 
     switch(codec->codec_type){
         case CODEC_TYPE_AUDIO:{
-            int override_tag;
             WAVEFORMATEX *wf;
             sh_audio_t* sh_audio;
             sh_audio=new_sh_audio(demuxer, i);
@@ -235,10 +237,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             priv->astreams[priv->audio_streams] = i;
             priv->audio_streams++;
             wf= calloc(sizeof(WAVEFORMATEX) + codec->extradata_size, 1);
-            // For some formats (like PCM) always trust CODEC_ID_* more than codec_tag
-            override_tag= av_codec_get_tag(mp_wav_override_taglists, codec->codec_id);
-            if (override_tag)
-                codec->codec_tag= override_tag;
             // mp4a tag is used for all mp4 files no matter what they actually contain
             if(codec->codec_tag == MKTAG('m', 'p', '4', 'a'))
                 codec->codec_tag= 0;
