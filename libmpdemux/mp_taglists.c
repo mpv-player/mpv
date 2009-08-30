@@ -66,6 +66,8 @@ static const AVCodecTag mp_wav_override_tags[] = {
     { CODEC_ID_PCM_BLURAY,        MKTAG('B', 'P', 'C', 'M')},
     { CODEC_ID_MP2,               0x50},
     { CODEC_ID_AC3,               0x2000},
+    { CODEC_ID_MPEG2VIDEO,        MKTAG('M', 'P', 'G', '2')},
+    { CODEC_ID_H264,              MKTAG('H', '2', '6', '4')},
     { 0, 0 },
 };
 
