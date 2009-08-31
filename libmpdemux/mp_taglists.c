@@ -57,6 +57,7 @@ const struct AVCodecTag *mp_wav_taglists[] = {ff_codec_wav_tags, mp_wav_tags, 0}
 static const AVCodecTag mp_codecid_override_tags[] = {
     { CODEC_ID_AAC,               MKTAG('M', 'P', '4', 'A')},
     { CODEC_ID_AC3,               0x2000},
+    { CODEC_ID_DTS,               0x2001},
     { CODEC_ID_H264,              MKTAG('H', '2', '6', '4')},
     { CODEC_ID_PCM_BLURAY,        MKTAG('B', 'P', 'C', 'M')},
     { CODEC_ID_PCM_S8,            MKTAG('t', 'w', 'o', 's')},
