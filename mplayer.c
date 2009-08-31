@@ -938,7 +938,16 @@ static void load_per_file_config (m_config_t* conf, const char *const file)
     if (use_filedir_conf && try_load_config(conf, cfg))
 	return;
 
-    if ((name = strrchr (cfg, '/')) == NULL)
+    name = strrchr(cfg, '/');
+    if (HAVE_DOS_PATHS) {
+        char *tmp = strrchr(cfg, '\\');
+        if (!name || tmp > name)
+            name = tmp;
+        tmp = strrchr(cfg, ':');
+        if (!name || tmp > name)
+            name = tmp;
+    }
+    if (!name)
 	name = cfg;
     else
 	name++;
