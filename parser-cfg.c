@@ -35,7 +35,7 @@ static int recursion_depth = 0;
  *  \param conffile Path to the config file.
  *  \return 1 on sucess, -1 on error.
  */
-int m_config_parse_config_file(m_config_t* config, char *conffile)
+int m_config_parse_config_file(m_config_t* config, const char *conffile)
 {
 #define PRINT_LINENUM	mp_msg(MSGT_CFGPARSER,MSGL_V,"%s(%d): ", conffile, line_num)
 #define MAX_LINE_LEN	10000
