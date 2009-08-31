@@ -913,21 +913,30 @@ static void load_per_output_config (m_config_t* conf, char *cfg, char *out)
     }
 }
 
+/**
+ * Tries to load a config file
+ * @return 0 if file was not found, 1 otherwise
+ */
+static int try_load_config(m_config_t *conf, const char *file)
+{
+    struct stat st;
+    if (stat(file, &st))
+        return 0;
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingConfig, file);
+    m_config_parse_config_file (conf, file);
+    return 1;
+}
+
 static void load_per_file_config (m_config_t* conf, const char *const file)
 {
     char *confpath;
     char cfg[strlen(file)+10];
-    struct stat st;
     char *name;
 
     sprintf (cfg, "%s.conf", file);
 
-    if (use_filedir_conf && !stat (cfg, &st))
-    {
-	mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingConfig, cfg);
-	m_config_parse_config_file (conf, cfg);
+    if (use_filedir_conf && try_load_config(conf, cfg))
 	return;
-    }
 
     if ((name = strrchr (cfg, '/')) == NULL)
 	name = cfg;
@@ -936,11 +945,7 @@ static void load_per_file_config (m_config_t* conf, const char *const file)
 
     if ((confpath = get_path (name)) != NULL)
     {
-	if (!stat (confpath, &st))
-	{
-	    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingConfig, confpath);
-	    m_config_parse_config_file (conf, confpath);
-	}
+	try_load_config(conf, confpath);
 
 	free (confpath);
     }
