@@ -6853,7 +6853,8 @@ EOF
       _live=yes && break
   done
   if test "$_live" != yes ; then
-      if cxx_check -I/usr/include/liveMedia -I/usr/include/UsageEnvironment -I/usr/include/groupsock; then
+      ld_tmp="-lliveMedia -lgroupsock -lUsageEnvironment -lBasicUsageEnvironment -lstdc++"
+      if cxx_check -I/usr/include/liveMedia -I/usr/include/UsageEnvironment -I/usr/include/groupsock $ld_tmp; then
 	  _live_dist=yes
       fi
   fi
@@ -6866,7 +6867,7 @@ elif test "$_live_dist" = yes && test "$_network" = yes; then
   _res_comment="using distribution version"
   _live="yes"
   def_live='#define CONFIG_LIVE555 1'
-  extra_ldflags="$extra_ldflags -lliveMedia -lgroupsock -lUsageEnvironment -lBasicUsageEnvironment -lstdc++"
+  extra_ldflags="$extra_ldflags $ld_tmp"
   extra_cxxflags="-I/usr/include/liveMedia -I/usr/include/UsageEnvironment \
              -I/usr/include/BasicUsageEnvironment -I/usr/include/groupsock"
  _inputmodules="live555 $_inputmodules"
