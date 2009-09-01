@@ -54,6 +54,9 @@ demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd) {
   ret->video = vd->video;
   ret->audio = ad->audio;
   ret->sub = sd->sub;
+  if (vd) vd->video->demuxer = ret;
+  if (ad) ad->audio->demuxer = ret;
+  if (sd) sd->sub->demuxer = ret;
 
   // HACK?, necessary for subtitle (and audio and video when implemented) switching
   memcpy(ret->v_streams, vd->v_streams, sizeof(ret->v_streams));
@@ -70,11 +73,11 @@ static int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds) {
 
   priv=demux->priv;
 
-  if(ds->demuxer == priv->vd)
+  if(priv->vd && priv->vd->video == ds)
     return demux_fill_buffer(priv->vd,ds);
-  else if(ds->demuxer == priv->ad)
+  else if(priv->ad && priv->ad->audio == ds)
     return demux_fill_buffer(priv->ad,ds);
-  else if(ds->demuxer == priv->sd)
+  else if(priv->sd && priv->sd->sub == ds)
     return demux_fill_buffer(priv->sd,ds);
 
   mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MPDEMUX_DEMUXERS_FillBufferError);
