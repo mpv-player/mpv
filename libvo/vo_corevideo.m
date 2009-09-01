@@ -431,6 +431,9 @@ static int control(uint32_t request, void *data, ...)
 @implementation MPlayerOpenGLView
 - (void) preinit
 {
+	GLint swapInterval = 1;
+	CVReturn error;
+
 	//init menu
 	[self initMenu];
 
@@ -448,22 +451,6 @@ static int control(uint32_t request, void *data, ...)
 
 	isFullscreen = 0;
 	winSizeMult = 1;
-}
-
-- (void) config
-{
-	uint32_t d_width;
-	uint32_t d_height;
-
-	GLint swapInterval = 1;
-
-	NSRect frame;
-	CVReturn error = kCVReturnSuccess;
-
-	//config window
-	d_width = vo_dwidth; d_height = vo_dheight;
-	frame = NSMakeRect(0, 0, d_width, d_height);
-	[window setContentSize: frame.size];
 
 	//create OpenGL Context
 	glContext = [[NSOpenGLContext alloc] initWithFormat:[NSOpenGLView defaultPixelFormat] shareContext:nil];
@@ -473,6 +460,35 @@ static int control(uint32_t request, void *data, ...)
 	[glContext setView:self];
 	[glContext makeCurrentContext];
 
+	error = CVOpenGLTextureCacheCreate(NULL, 0, [glContext CGLContextObj], [[self pixelFormat] CGLPixelFormatObj], 0, &textureCache);
+	if(error != kCVReturnSuccess)
+		mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL texture Cache(%d)\n", error);
+}
+
+- (void) releaseVideoSpecific
+{
+	CVPixelBufferRelease(frameBuffers[0]);
+	frameBuffers[0] = NULL;
+	CVPixelBufferRelease(frameBuffers[1]);
+	frameBuffers[1] = NULL;
+	CVOpenGLTextureRelease(texture);
+	texture = NULL;
+}
+
+- (void) config
+{
+	uint32_t d_width;
+	uint32_t d_height;
+
+	NSRect frame;
+	CVReturn error = kCVReturnSuccess;
+
+	//config window
+	d_width = vo_dwidth; d_height = vo_dheight;
+	frame = NSMakeRect(0, 0, d_width, d_height);
+	[window setContentSize: frame.size];
+
+	[self releaseVideoSpecific];
 	error = CVPixelBufferCreateWithBytes(NULL, image_width, image_height, pixelFormat, image_datas[0], image_width*image_bytes, NULL, NULL, NULL, &frameBuffers[0]);
 	if(error != kCVReturnSuccess)
 		mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create Pixel Buffer(%d)\n", error);
@@ -481,10 +497,6 @@ static int control(uint32_t request, void *data, ...)
 		if(error != kCVReturnSuccess)
 			mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create Pixel Double Buffer(%d)\n", error);
 	}
-
-	error = CVOpenGLTextureCacheCreate(NULL, 0, [glContext CGLContextObj], [[self pixelFormat] CGLPixelFormatObj], 0, &textureCache);
-	if(error != kCVReturnSuccess)
-		mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL texture Cache(%d)\n", error);
 
 	error = CVOpenGLTextureCacheCreateTextureFromImage(NULL, textureCache, frameBuffers[image_page], 0, &texture);
 	if(error != kCVReturnSuccess)
