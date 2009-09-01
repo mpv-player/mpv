@@ -57,7 +57,6 @@ NSAutoreleasePool *autoreleasepool;
 OSType pixelFormat;
 
 //shared memory
-int shm_fd;
 BOOL shared_buffer = false;
 #define DEFAULT_BUFFER_NAME "mplayerosx"
 static char *buffer_name;
@@ -173,6 +172,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	}
 	else
 	{
+		int shm_fd;
 		mp_msg(MSGT_VO, MSGL_INFO, "[vo_corevideo] writing output to a shared buffer "
 				"named \"%s\"\n",buffer_name);
 
@@ -190,12 +190,14 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		{
 			mp_msg(MSGT_VO, MSGL_FATAL,
 				   "[vo_corevideo] failed to size shared memory, possibly already in use. Error: %s\n", strerror(errno));
+			close(shm_fd);
 			shm_unlink(buffer_name);
 			return 1;
 		}
 
 		image_data = mmap(NULL, image_width*image_height*image_bytes,
 					PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+		close(shm_fd);
 
 		if (image_data == MAP_FAILED)
 		{
