@@ -134,8 +134,33 @@ static void update_screen_info(void)
 	aspect_save_screenres(vo_screenwidth, vo_screenheight);
 }
 
+static void free_file_specific(void)
+{
+	if(shared_buffer)
+	{
+		[mplayerosxProto stop];
+		mplayerosxProto = nil;
+		[mplayerosxProxy release];
+		mplayerosxProxy = nil;
+
+		if (munmap(image_data, image_width*image_height*image_bytes) == -1)
+			mp_msg(MSGT_VO, MSGL_FATAL, "[vo_corevideo] uninit: munmap failed. Error: %s\n", strerror(errno));
+
+		if (shm_unlink(buffer_name) == -1)
+			mp_msg(MSGT_VO, MSGL_FATAL, "[vo_corevideo] uninit: shm_unlink failed. Error: %s\n", strerror(errno));
+    } else {
+        free(image_datas[0]);
+        if (vo_doublebuffering)
+            free(image_datas[1]);
+        image_datas[0] = NULL;
+        image_datas[1] = NULL;
+        image_data = NULL;
+    }
+}
+
 static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
+	free_file_specific();
 	config_movie_aspect((float)d_width/d_height);
 
 	vo_dwidth  = d_width  *= mpGLView->winSizeMult;
@@ -293,23 +318,10 @@ static int query_format(uint32_t format)
 
 static void uninit(void)
 {
-	if(shared_buffer)
-	{
-		[mplayerosxProto stop];
-		mplayerosxProto = nil;
-		[mplayerosxProxy release];
-		mplayerosxProxy = nil;
-
-		if (munmap(image_data, image_width*image_height*image_bytes) == -1)
-			mp_msg(MSGT_VO, MSGL_FATAL, "[vo_corevideo] uninit: munmap failed. Error: %s\n", strerror(errno));
-
-		if (shm_unlink(buffer_name) == -1)
-			mp_msg(MSGT_VO, MSGL_FATAL, "[vo_corevideo] uninit: shm_unlink failed. Error: %s\n", strerror(errno));
-
-	}
-
     SetSystemUIMode( kUIModeNormal, 0);
     CGDisplayShowCursor(kCGDirectMainDisplay);
+
+    free_file_specific();
 
     if(mpGLView)
     {
@@ -319,15 +331,6 @@ static void uninit(void)
         finalPool = [[NSAutoreleasePool alloc] init];
         [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES];
         [finalPool release];
-    }
-    if (!shared_buffer)
-    {
-        free(image_datas[0]);
-        if (vo_doublebuffering)
-            free(image_datas[1]);
-        image_datas[0] = NULL;
-        image_datas[1] = NULL;
-        image_data = NULL;
     }
 
     if (buffer_name) free(buffer_name);
