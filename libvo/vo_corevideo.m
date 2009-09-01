@@ -480,6 +480,17 @@ static int control(uint32_t request, void *data, ...)
 	texture = NULL;
 }
 
+- (void) dealloc
+{
+	[self releaseVideoSpecific];
+	CVOpenGLTextureCacheRelease(textureCache);
+	textureCache = NULL;
+	[self setOpenGLContext:nil];
+	[glContext release];
+	glContext = NULL;
+	[super dealloc];
+}
+
 - (void) config
 {
 	uint32_t d_width;
