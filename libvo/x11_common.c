@@ -1092,9 +1092,8 @@ void vo_x11_create_vo_window(XVisualInfo *vis, int x, int y,
       unsigned long xswamask = CWColormap;
       XSetWindowAttributes xswa;
       xswa.colormap = col_map;
-      XUnmapWindow(mDisplay, vo_window);
       XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
-      XMapWindow(mDisplay, vo_window);
+      XInstallColormap(mDisplay, col_map);
     }
     if (WinID) vo_x11_update_geometry();
     vo_x11_selectinput_witherr(mDisplay, vo_window,
