@@ -3219,7 +3219,7 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
     if ((strlen(bname)>10) && !strncmp(bname,"qt",2) && !strncmp(bname+3,"gateQT",6))
         continue;
 
-    if (!strncmp(bname,mp_basename(filename),strlen(bname))) // ignoring self-reference
+    if (!strcmp(playlist_entry,filename)) // ignoring self-reference
         continue;
 
     entry = play_tree_new();
@@ -3231,6 +3231,10 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
       {
 	strncpy(temp, filename, strlen(filename)-strlen(mp_basename(filename)));
 	temp[strlen(filename)-strlen(mp_basename(filename))]='\0';
+	if (!strcmp(temp, filename)) {
+	  free(temp);
+	  continue;
+	}
 	strcat(temp, playlist_entry);
 	play_tree_add_file(entry,temp);
 	mp_msg(MSGT_CPLAYER,MSGL_V,"Resolving reference to %s.\n",temp);
