@@ -571,7 +571,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 glconfig:
   if (vo_config_count)
     uninitGl();
-  setGlWindow(&gl_vinfo, &gl_context, vo_window);
+  if (setGlWindow(&gl_vinfo, &gl_context, vo_window) == SET_WINDOW_FAILED)
+    return -1;
   initGl(vo_dwidth, vo_dheight);
 
   return 0;
