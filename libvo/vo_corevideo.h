@@ -55,7 +55,6 @@
     GLfloat upperLeft[2];
 
 	BOOL mouseHide;
-	float winSizeMult;
 
 	//menu command id
 	NSMenuItem *kQuitCmd;
@@ -72,6 +71,8 @@
 	//timestamps for disabling screensaver and mouse hiding
 	int lastMouseHide;
 	int lastScreensaverUpdate;
+@public
+	float winSizeMult;
 }
 
 - (BOOL) acceptsFirstResponder;

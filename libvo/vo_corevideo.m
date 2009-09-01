@@ -84,9 +84,6 @@ static uint32_t image_format;
 static int isFullscreen;
 static int isOntop;
 static int isRootwin;
-extern float monitor_aspect;
-extern float movie_aspect;
-static float old_movie_aspect;
 extern int enable_mouse_movements;
 
 static float winAlpha = 1;
@@ -117,10 +114,8 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 	}
 }
 
-static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+static void update_screen_info(void)
 {
-
-	//init screen
 	screen_array = [NSScreen screens];
 	if(screen_id < (int)[screen_array count])
 	{
@@ -132,9 +127,20 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		screen_handle = [screen_array objectAtIndex:0];
 		screen_id = -1;
 	}
-	screen_frame = [screen_handle frame];
+
+	screen_frame = ![mpGLView window] || screen_id >= 0 ? [screen_handle frame] : [[[mpGLView window] screen] frame];
 	vo_screenwidth = screen_frame.size.width;
 	vo_screenheight = screen_frame.size.height;
+	xinerama_x = xinerama_y = 0;
+	aspect_save_screenres(vo_screenwidth, vo_screenheight);
+}
+
+static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+{
+	config_movie_aspect((float)d_width/d_height);
+
+	vo_dwidth  = d_width  *= mpGLView->winSizeMult;
+	vo_dheight = d_height *= mpGLView->winSizeMult;
 
 	//misc mplayer setup
 	image_width = width;
@@ -159,18 +165,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 			image_datas[1] = malloc(image_width*image_height*image_bytes);
 		image_page = 0;
 
-		monitor_aspect = (float)screen_frame.size.width/(float)screen_frame.size.height;
-
-		//set aspect
-		panscan_init();
-		aspect_save_orig(width,height);
-		aspect_save_prescale(d_width,d_height);
-		aspect_save_screenres(screen_frame.size.width, screen_frame.size.height);
-		aspect((int *)&d_width,(int *)&d_height,A_NOZOOM);
-
-		movie_aspect = (float)d_width/(float)d_height;
-		old_movie_aspect = movie_aspect;
-
 		vo_fs = flags & VOFLAG_FULLSCREEN;
 
 		//config OpenGL View
@@ -181,8 +175,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	{
 		mp_msg(MSGT_VO, MSGL_INFO, "[vo_corevideo] writing output to a shared buffer "
 				"named \"%s\"\n",buffer_name);
-
-		movie_aspect = (float)d_width/(float)d_height;
 
 		// create shared memory
 		shm_fd = shm_open(buffer_name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
@@ -218,7 +210,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		if ([mplayerosxProxy conformsToProtocol:@protocol(MPlayerOSXVOProto)]) {
 			[mplayerosxProxy setProtocolForProxy:@protocol(MPlayerOSXVOProto)];
 			mplayerosxProto = (id <MPlayerOSXVOProto>)mplayerosxProxy;
-			[mplayerosxProto startWithWidth: image_width withHeight: image_height withBytes: image_bytes withAspect:(int)(movie_aspect*100)];
+			[mplayerosxProto startWithWidth: image_width withHeight: image_height withBytes: image_bytes withAspect:d_width*100/d_height];
 		}
 		else {
 			[mplayerosxProxy release];
@@ -428,6 +420,7 @@ static int control(uint32_t request, void *data, ...)
 		case VOCTRL_FULLSCREEN: vo_fs = (!(vo_fs)); if(!shared_buffer){ [mpGLView fullscreen: NO]; } else { [mplayerosxProto toggleFullscreen]; } return VO_TRUE;
 		case VOCTRL_GET_PANSCAN: return VO_TRUE;
 		case VOCTRL_SET_PANSCAN: [mpGLView panscan]; return VO_TRUE;
+		case VOCTRL_UPDATE_SCREENINFO: update_screen_info(); return VO_TRUE;
 	}
 	return VO_NOTIMPL;
 }
@@ -468,7 +461,7 @@ static int control(uint32_t request, void *data, ...)
 	CVReturn error = kCVReturnSuccess;
 
 	//config window
-	aspect((int *)&d_width, (int *)&d_height,A_NOZOOM);
+	d_width = vo_dwidth; d_height = vo_dheight;
 	frame = NSMakeRect(0, 0, d_width, d_height);
 	[window setContentSize: frame.size];
 
@@ -596,8 +589,8 @@ static int control(uint32_t request, void *data, ...)
 		}
 
 		winSizeMult = 0.5;
-		frame.size.width = (d_width*winSizeMult);
-		frame.size.height = ((d_width/movie_aspect)*winSizeMult);
+		frame.size.width = d_width*winSizeMult;
+		frame.size.height = d_height*winSizeMult;
 		[window setContentSize: frame.size];
 		[self reshape];
 	}
@@ -609,7 +602,7 @@ static int control(uint32_t request, void *data, ...)
 
 		winSizeMult = 1;
 		frame.size.width = d_width;
-		frame.size.height = d_width/movie_aspect;
+		frame.size.height = d_height;
 		[window setContentSize: frame.size];
 		[self reshape];
 	}
@@ -621,7 +614,7 @@ static int control(uint32_t request, void *data, ...)
 
 		winSizeMult = 2;
 		frame.size.width = d_width*winSizeMult;
-		frame.size.height = (d_width/movie_aspect)*winSizeMult;
+		frame.size.height = d_height*winSizeMult;
 		[window setContentSize: frame.size];
 		[self reshape];
 	}
@@ -654,55 +647,13 @@ static int control(uint32_t request, void *data, ...)
 	}
 
 	if(sender == kAspectOrgCmd)
-	{
-		movie_aspect = old_movie_aspect;
-
-		if(isFullscreen)
-		{
-			[self reshape];
-		}
-		else
-		{
-			frame.size.width = d_width*winSizeMult;
-			frame.size.height = (d_width/movie_aspect)*winSizeMult;
-			[window setContentSize: frame.size];
-			[self reshape];
-		}
-	}
+		change_movie_aspect(-1);
 
 	if(sender == kAspectFullCmd)
-	{
-		movie_aspect = 4.0f/3.0f;
-
-		if(isFullscreen)
-		{
-			[self reshape];
-		}
-		else
-		{
-			frame.size.width = d_width*winSizeMult;
-			frame.size.height = (d_width/movie_aspect)*winSizeMult;
-			[window setContentSize: frame.size];
-			[self reshape];
-		}
-	}
+		change_movie_aspect(4.0f/3.0f);
 
 	if(sender == kAspectWideCmd)
-	{
-		movie_aspect = 16.0f/9.0f;
-
-		if(isFullscreen)
-		{
-			[self reshape];
-		}
-		else
-		{
-			frame.size.width = d_width*winSizeMult;
-			frame.size.height = (d_width/movie_aspect)*winSizeMult;
-			[window setContentSize: frame.size];
-			[self reshape];
-		}
-	}
+		change_movie_aspect(16.0f/9.0f);
 }
 
 /*
@@ -724,11 +675,10 @@ static int control(uint32_t request, void *data, ...)
 {
 	uint32_t d_width;
 	uint32_t d_height;
-	float aspectX;
-	float aspectY;
-	int padding = 0;
 
 	NSRect frame = [self frame];
+	vo_dwidth  = frame.size.width;
+	vo_dheight = frame.size.height;
 
 	glViewport(0, 0, frame.size.width, frame.size.height);
 	glMatrixMode(GL_PROJECTION);
@@ -740,29 +690,14 @@ static int control(uint32_t request, void *data, ...)
 	//set texture frame
 	if(vo_keepaspect)
 	{
-		aspect( (int *)&d_width, (int *)&d_height, A_NOZOOM);
-		d_height = ((float)d_width/movie_aspect);
+		aspect( (int *)&d_width, (int *)&d_height, A_WINZOOM);
 
-		aspectX = (float)((float)frame.size.width/(float)d_width);
-		aspectY = (float)((float)(frame.size.height)/(float)d_height);
-
-		if((d_height*aspectX)>(frame.size.height))
-		{
-			padding = (frame.size.width - d_width*aspectY)/2;
-			textureFrame = NSMakeRect(padding, 0, d_width*aspectY, d_height*aspectY);
-		}
-		else
-		{
-			padding = ((frame.size.height) - d_height*aspectX)/2;
-			textureFrame = NSMakeRect(0, padding, d_width*aspectX, d_height*aspectX);
-		}
+		textureFrame = NSMakeRect((vo_dwidth - d_width) / 2, (vo_dheight - d_height) / 2, d_width, d_height);
 	}
 	else
 	{
 		textureFrame = frame;
 	}
-	vo_dwidth = textureFrame.size.width;
-	vo_dheight = textureFrame.size.height;
 }
 
 /*
@@ -877,13 +812,7 @@ static int control(uint32_t request, void *data, ...)
 		}
 
 		old_frame = [window frame];	//save main window size & position
-		if(screen_id >= 0)
-			screen_frame = [screen_handle frame];
-		else {
-			screen_frame = [[window screen] frame];
-			vo_screenwidth = screen_frame.size.width;
-			vo_screenheight = screen_frame.size.height;
-		}
+		update_screen_info();
 
 		[window setFrame:screen_frame display:YES animate:animate]; //zoom-in window with nice useless sfx
 		old_view_frame = [self bounds];
