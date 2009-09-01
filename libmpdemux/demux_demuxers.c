@@ -73,6 +73,10 @@ static int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds) {
 
   priv=demux->priv;
 
+  // HACK: make sure the subtitles get properly interleaved if with -subfile
+  if (priv->sd && priv->sd->sub != ds &&
+      priv->sd != priv->vd && priv->sd != priv->ad)
+    ds_get_next_pts(priv->sd->sub);
   if(priv->vd && priv->vd->video == ds)
     return demux_fill_buffer(priv->vd,ds);
   else if(priv->ad && priv->ad->audio == ds)
