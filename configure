@@ -7082,7 +7082,7 @@ if test "$_libopencore_amrnb" = yes ; then
   extra_ldflags="$extra_ldflags -lopencore-amrnb"
   def_libopencore_amrnb='#define CONFIG_LIBOPENCORE_AMRNB 1'
   _libavdecoders="$_libavdecoders LIBOPENCORE_AMRNB_DECODER"
-  _libavencoders="$_libavencoders LIBOPENCORE_AMRNB_DECODER"
+  _libavencoders="$_libavencoders LIBOPENCORE_AMRNB_ENCODER"
   _codecmodules="libopencore_amrnb $_codecmodules"
 else
   def_libopencore_amrnb='#define CONFIG_LIBOPENCORE_AMRNB 0'
