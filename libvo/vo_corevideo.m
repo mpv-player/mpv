@@ -436,6 +436,7 @@ static int control(uint32_t request, void *data, ...)
 @implementation MPlayerOpenGLView
 - (void) preinit
 {
+	NSOpenGLContext *glContext;
 	GLint swapInterval = 1;
 	CVReturn error;
 
@@ -464,6 +465,7 @@ static int control(uint32_t request, void *data, ...)
 	[glContext setValues:&swapInterval forParameter:NSOpenGLCPSwapInterval];
 	[glContext setView:self];
 	[glContext makeCurrentContext];
+	[glContext release];
 
 	error = CVOpenGLTextureCacheCreate(NULL, 0, [glContext CGLContextObj], [[self pixelFormat] CGLPixelFormatObj], 0, &textureCache);
 	if(error != kCVReturnSuccess)
@@ -486,8 +488,6 @@ static int control(uint32_t request, void *data, ...)
 	CVOpenGLTextureCacheRelease(textureCache);
 	textureCache = NULL;
 	[self setOpenGLContext:nil];
-	[glContext release];
-	glContext = NULL;
 	[super dealloc];
 }
 

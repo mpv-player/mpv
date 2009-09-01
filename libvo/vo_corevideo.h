@@ -40,7 +40,6 @@
 {
 	//Cocoa
 	NSWindow *window;
-	NSOpenGLContext *glContext;
 	NSEvent *event;
 
 	//CoreVideo
