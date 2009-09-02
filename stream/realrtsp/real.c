@@ -441,7 +441,10 @@ rmff_header_t *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwidt
   int i;
 
   /* get challenge */
-  challenge1=strdup(rtsp_search_answers(rtsp_session,"RealChallenge1"));
+  challenge1=rtsp_search_answers(rtsp_session,"RealChallenge1");
+  if (!challenge1)
+      goto out;
+  challenge1=strdup(challenge1);
 #ifdef LOG
   printf("real: Challenge1: %s\n", challenge1);
 #endif
