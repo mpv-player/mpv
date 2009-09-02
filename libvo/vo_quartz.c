@@ -351,7 +351,6 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 //default window event handler
 static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
-    char cmd_str[64];
     OSStatus result = noErr;
     uint32_t d_width;
     uint32_t d_height;
