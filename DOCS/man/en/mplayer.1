@@ -527,6 +527,11 @@ named 'movie.avi.conf' with the file-specific options in it and put it in
 You can also put the configuration file in the same directory as the file to
 be played, as long as you give the \-use\-filedir\-conf option (either on the
 command line or in your global config file).
+If file-specific configuration file is found in the same directory, no file-specific
+one is loaded from ~/.mplayer.
+In addition the \-use\-filedir\-conf also enables directory-specific configuration files,
+MPlayer tries to first load a mplayer.conf from the same directory as the file played
+and then tries to load any file-specific configuration.
 .PP
 .I EXAMPLE MPLAYER CONFIGURATION FILE:
 .sp 1
