@@ -223,7 +223,7 @@ static int InitDirectSound(void)
     HRESULT (WINAPI *OurDirectSoundCreate)(LPGUID, LPDIRECTSOUND *, LPUNKNOWN);
 	HRESULT (WINAPI *OurDirectSoundEnumerate)(LPDSENUMCALLBACKA, LPVOID);
 	int device_index=0;
-	opt_t subopts[] = {
+	const opt_t subopts[] = {
 	  {"device", OPT_ARG_INT, &device_num,NULL},
 	  {NULL}
 	};

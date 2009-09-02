@@ -94,7 +94,7 @@ static int control(int cmd,void *arg){
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
     int bits;
-    opt_t subopts[] = {
+    const opt_t subopts[] = {
         {"waveheader", OPT_ARG_BOOL, &ao_pcm_waveheader, NULL},
         {"file",       OPT_ARG_MSTRZ, &ao_outputfilename, NULL},
         {"fast",       OPT_ARG_BOOL, &fast, NULL},

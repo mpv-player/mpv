@@ -106,7 +106,7 @@ static int init(int rate, int channels, int format, int flags) {
   ALCint freq = 0;
   ALCint attribs[] = {ALC_FREQUENCY, rate, 0, 0};
   int i;
-  opt_t subopts[] = {
+  const opt_t subopts[] = {
     {NULL}
   };
   if (subopt_parse(ao_subdevice, subopts) != 0) {

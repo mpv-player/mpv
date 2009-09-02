@@ -326,7 +326,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     snd_pcm_uframes_t chunk_size;
     snd_pcm_uframes_t bufsize;
     snd_pcm_uframes_t boundary;
-    opt_t subopts[] = {
+    const opt_t subopts[] = {
       {"block", OPT_ARG_BOOL, &block, NULL},
       {"device", OPT_ARG_STR, &device, (opt_test_f)str_maxlen},
       {NULL}

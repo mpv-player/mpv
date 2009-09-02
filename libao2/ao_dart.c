@@ -146,7 +146,7 @@ static int init(int rate, int channels, int format, int flags)
     int nDartSamples = DEFAULT_DART_SAMPLES;
     int nBytesPerSample;
 
-    opt_t subopts[] = {
+    const opt_t subopts[] = {
         {"share", OPT_ARG_BOOL, &fShare, NULL},
         {"bufsize", OPT_ARG_INT, &nDartSamples, (opt_test_f)int_non_neg},
         {NULL}
