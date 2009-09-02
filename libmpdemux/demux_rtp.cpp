@@ -389,7 +389,7 @@ extern "C" void demux_close_rtp(demuxer_t* demuxer) {
   Medium::close(rtpState->sipClient);
   delete rtpState->audioBufferQueue;
   delete rtpState->videoBufferQueue;
-  delete rtpState->sdpDescription;
+  delete[] rtpState->sdpDescription;
   delete rtpState;
 #ifdef CONFIG_LIBAVCODEC
   av_freep(&avcctx);
@@ -631,7 +631,7 @@ ReadBufferQueue::ReadBufferQueue(MediaSubsession* subsession,
 }
 
 ReadBufferQueue::~ReadBufferQueue() {
-  delete fTag;
+  free((void *)fTag);
 
   // Free any pending buffers (that never got delivered):
   demux_packet_t* dp = pendingDPHead;
