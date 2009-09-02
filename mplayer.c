@@ -3243,11 +3243,11 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
       {
 	strncpy(temp, filename, strlen(filename)-strlen(mp_basename(filename)));
 	temp[strlen(filename)-strlen(mp_basename(filename))]='\0';
+	strcat(temp, playlist_entry);
 	if (!strcmp(temp, filename)) {
 	  free(temp);
 	  continue;
 	}
-	strcat(temp, playlist_entry);
 	play_tree_add_file(entry,temp);
 	mp_msg(MSGT_CPLAYER,MSGL_V,"Resolving reference to %s.\n",temp);
 	free(temp);
