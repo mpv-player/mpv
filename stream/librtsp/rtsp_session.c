@@ -139,7 +139,8 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
     /* we are talking to a real server ... */
 
     rmff_header_t *h=real_setup_and_get_header(rtsp_session->s, bandwidth, user, pass);
-    if (!h) {
+    if (!h || !h->streams[0]) {
+      rmff_free_header(h);
       /* got an redirect? */
       if (rtsp_search_answers(rtsp_session->s, RTSP_OPTIONS_LOCATION))
       {
