@@ -48,6 +48,7 @@
 #include "cfg-mplayer-def.h"
 
 #include "libavutil/intreadwrite.h"
+#include "libavutil/avstring.h"
 
 #include "subreader.h"
 
@@ -935,9 +936,6 @@ static void load_per_file_config (m_config_t* conf, const char *const file)
 
     sprintf (cfg, "%s.conf", file);
 
-    if (use_filedir_conf && try_load_config(conf, cfg))
-	return;
-
     name = strrchr(cfg, '/');
     if (HAVE_DOS_PATHS) {
         char *tmp = strrchr(cfg, '\\');
@@ -951,6 +949,16 @@ static void load_per_file_config (m_config_t* conf, const char *const file)
 	name = cfg;
     else
 	name++;
+
+    if (use_filedir_conf) {
+        char dircfg[strlen(file)+14];
+        strcpy(dircfg, cfg);
+        strcpy(dircfg + (name - cfg), "mplayer.conf");
+        try_load_config(conf, dircfg);
+
+        if (try_load_config(conf, cfg))
+            return;
+    }
 
     if ((confpath = get_path (name)) != NULL)
     {
