@@ -570,7 +570,7 @@ rmff_mdpr_t *rmff_new_mdpr(
       uint32_t   type_specific_len,
       const char *type_specific_data ) {
 
-  rmff_mdpr_t *mdpr=malloc(sizeof(rmff_mdpr_t));
+  rmff_mdpr_t *mdpr=calloc(sizeof(rmff_mdpr_t),1);
 
   mdpr->object_id=MDPR_TAG;
   mdpr->object_version=0;
