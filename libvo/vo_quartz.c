@@ -348,18 +348,30 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
     return result;
 }
 
+static void set_winSizeMult(float mult)
+{
+    int d_width, d_height;
+    aspect(&d_width, &d_height, A_NOZOOM);
+
+    if (vo_quartz_fs)
+    {
+        vo_fs = (!(vo_fs));
+        window_fullscreen();
+    }
+
+    winSizeMult = mult;
+    SizeWindow(theWindow, d_width * mult, d_height * mult, 1);
+    window_resized();
+}
+
 //default window event handler
 static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus result = noErr;
-    uint32_t d_width;
-    uint32_t d_height;
     UInt32 class = GetEventClass(event);
     UInt32 kind = GetEventKind(event);
 
     result = CallNextEventHandler(nextHandler, event);
-
-    aspect(&d_width, &d_height, A_NOZOOM);
 
     if (class == kEventClassCommand)
     {
@@ -374,39 +386,15 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
             break;
 
         case kHalfScreenCmd:
-            if (vo_quartz_fs)
-            {
-                vo_fs = (!(vo_fs));
-                window_fullscreen();
-            }
-
-            winSizeMult = 0.5;
-            SizeWindow(theWindow, d_width / 2, d_height / 2, 1);
-            window_resized();
+            set_winSizeMult(0.5);
             break;
 
         case kNormalScreenCmd:
-            if (vo_quartz_fs)
-            {
-                vo_fs = (!(vo_fs));
-                window_fullscreen();
-            }
-
-            winSizeMult = 1;
-            SizeWindow(theWindow, d_width, d_height, 1);
-            window_resized();
+            set_winSizeMult(1);
             break;
 
         case kDoubleScreenCmd:
-            if (vo_quartz_fs)
-            {
-                vo_fs = (!(vo_fs));
-                window_fullscreen();
-            }
-
-            winSizeMult = 2;
-            SizeWindow(theWindow, d_width * 2, d_height * 2, 1);
-            window_resized();
+            set_winSizeMult(2);
             break;
 
         case kFullScreenCmd:
