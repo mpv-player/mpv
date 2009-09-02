@@ -607,11 +607,27 @@ static void update_screen_info(void)
     aspect_save_screenres(vo_screenwidth, vo_screenheight);
 }
 
+static void free_video_specific(void)
+{
+    if (seqId) CDSequenceEnd(seqId);
+    seqId = 0;
+    free(image_data);
+    image_data = NULL;
+    free(P);
+    P = NULL;
+    CGDataProviderRelease(dataProviderRef);
+    dataProviderRef = NULL;
+    CGImageRelease(image);
+    image = NULL;
+}
+
 static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
     WindowAttributes windowAttrs;
     OSErr qterr;
     CGRect tmpBounds;
+
+    free_video_specific();
 
     vo_dwidth  = d_width  *= winSizeMult;
     vo_dheight = d_height *= winSizeMult;
@@ -633,9 +649,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
         break;
     }
     image_size = ((imgRect.right * imgRect.bottom * image_depth) + 7) / 8;
-
-    if (image_data)
-        free(image_data);
 
     image_data = malloc(image_size);
 
@@ -788,9 +801,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
         if (qterr)
         {
             mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: AddImageDescriptionExtension [pasp] (%d)\n", qterr);
-        }
-        if (P != NULL) {        // second or subsequent movie
-            free(P);
         }
         P = calloc(sizeof(PlanarPixmapInfoYUV420) + image_size, 1);
         switch (image_format)
@@ -1054,29 +1064,10 @@ static int query_format(uint32_t format)
 
 static void uninit(void)
 {
-    OSErr qterr;
-
-    switch (image_format)
-    {
-    case IMGFMT_YV12:
-    case IMGFMT_IYUV:
-    case IMGFMT_I420:
-    case IMGFMT_UYVY:
-    case IMGFMT_YUY2:
-    {
-        if (EnterMoviesDone)
-        {
-            qterr = CDSequenceEnd(seqId);
-            if (qterr)
-            {
-                mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: CDSequenceEnd (%d)\n", qterr);
-            }
-        }
-        break;
-    }
-    default:
-        break;
-    }
+    free_video_specific();
+    if (EnterMoviesDone)
+        ExitMovies();
+    EnterMoviesDone = 0;
 
     ShowMenuBar();
 }
