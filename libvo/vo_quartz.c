@@ -300,7 +300,7 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
                 }
                 break;
             }
-            if ((winMousePos.h > (bounds.right - 15)) && (winMousePos.v > (bounds.bottom)))
+            if (winMousePos.h > bounds.right - 15 && winMousePos.v > bounds.bottom)
             {
                 if (!vo_quartz_fs)
                 {
@@ -355,7 +355,7 @@ static void set_winSizeMult(float mult)
 
     if (vo_quartz_fs)
     {
-        vo_fs = (!(vo_fs));
+        vo_fs = !vo_fs;
         window_fullscreen();
     }
 
@@ -398,12 +398,12 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
             break;
 
         case kFullScreenCmd:
-            vo_fs = (!(vo_fs));
+            vo_fs = !vo_fs;
             window_fullscreen();
             break;
 
         case kKeepAspectCmd:
-            vo_keepaspect = (!(vo_keepaspect));
+            vo_keepaspect = !vo_keepaspect;
             CheckMenuItem(aspectMenu, 1, vo_keepaspect);
             window_resized();
             break;
@@ -421,7 +421,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
             break;
 
         case kPanScanCmd:
-            vo_panscan = (!(vo_panscan));
+            vo_panscan = !vo_panscan;
             CheckMenuItem(aspectMenu, 2, vo_panscan);
             window_panscan();
             window_resized();
@@ -635,7 +635,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
         image_depth = 16;
         break;
     }
-    image_size = ((imgRect.right * imgRect.bottom * image_depth) + 7) / 8;
+    image_size = (imgRect.right * imgRect.bottom * image_depth + 7) / 8;
 
     image_data = malloc(image_size);
 
@@ -644,7 +644,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
                 | kWindowStandardHandlerAttribute
                 | kWindowLiveResizeAttribute;
 
-    windowAttrs &= (~kWindowResizableAttribute);
+    windowAttrs &= ~kWindowResizableAttribute;
 
     if (theWindow == NULL)
     {
@@ -685,7 +685,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
                               imgRect.bottom,
                               8,
                               image_depth,
-                              ((imgRect.right * 32) + 7) / 8,
+                              (imgRect.right * 32 + 7) / 8,
                               CGColorSpaceCreateDeviceRGB(),
                               kCGImageAlphaNoneSkipFirst,
                               dataProviderRef, 0, 1, kCGRenderingIntentDefault);
@@ -719,7 +719,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 
         SetIdentityMatrix(&matrix);
 
-        if ((d_width != width) || (d_height != height))
+        if (d_width != width || d_height != height)
         {
             ScaleMatrix(&matrix, FixDiv(Long2Fix(d_width), Long2Fix(width)), FixDiv(Long2Fix(d_height), Long2Fix(height)), 0, 0);
         }
@@ -816,7 +816,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
                                          GetWindowPort(theWindow),
                                          NULL,
                                          NULL,
-                                         ((d_width != width) || (d_height != height)) ?
+                                         d_width != width || d_height != height ?
                                          &matrix : NULL,
                                          srcCopy,
                                          NULL,
@@ -962,7 +962,7 @@ static void flip_page(void)
     // auto hide mouse cursor (and future on-screen control?)
     if (vo_quartz_fs && !mouseHide)
     {
-        if (((curTime - lastMouseHide) >= 5) || (lastMouseHide == 0))
+        if (curTime - lastMouseHide >= 5 || lastMouseHide == 0)
         {
             CGDisplayHideCursor(displayId);
             mouseHide = TRUE;
@@ -971,7 +971,7 @@ static void flip_page(void)
     }
     // update activity every 30 seconds to prevent
     // screensaver from starting up.
-    if (((curTime - lastScreensaverUpdate) >= 30) || (lastScreensaverUpdate == 0))
+    if (curTime - lastScreensaverUpdate >= 30 || lastScreensaverUpdate == 0)
     {
         UpdateSystemActivity(UsrActivity);
         lastScreensaverUpdate = curTime;
@@ -1028,7 +1028,7 @@ static int query_format(uint32_t format)
         return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
     }
 
-    if ((format == IMGFMT_YV12) || (format == IMGFMT_IYUV) || (format == IMGFMT_I420))
+    if (format == IMGFMT_YV12 || format == IMGFMT_IYUV || format == IMGFMT_I420)
     {
         image_qtcodec = kMpegYUV420CodecType;   //kYUV420CodecType ?;
         return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
@@ -1185,9 +1185,9 @@ static int control(uint32_t request, void *data, ...)
     {
     case VOCTRL_PAUSE:        return int_pause = 1;
     case VOCTRL_RESUME:       return int_pause = 0;
-    case VOCTRL_FULLSCREEN:   vo_fs = (!(vo_fs));        window_fullscreen(); return VO_TRUE;
-    case VOCTRL_ONTOP:        vo_ontop = (!(vo_ontop));  window_ontop();      return VO_TRUE;
-    case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t *) data));
+    case VOCTRL_FULLSCREEN:   vo_fs = !vo_fs;        window_fullscreen(); return VO_TRUE;
+    case VOCTRL_ONTOP:        vo_ontop = !vo_ontop;  window_ontop();      return VO_TRUE;
+    case VOCTRL_QUERY_FORMAT: return query_format(*(uint32_t *) data);
     case VOCTRL_GET_PANSCAN:  return VO_TRUE;
     case VOCTRL_SET_PANSCAN:  window_panscan();          return VO_TRUE;
 
@@ -1258,7 +1258,7 @@ void window_resized(void)
         long scale_Y = FixDiv(Long2Fix(dstRect.bottom - dstRect.top), Long2Fix(imgRect.bottom));
 
         SetIdentityMatrix(&matrix);
-        if (((dstRect.right - dstRect.left) != imgRect.right) || ((dstRect.bottom - dstRect.right) != imgRect.bottom))
+        if (dstRect.right - dstRect.left != imgRect.right || dstRect.bottom - dstRect.right != imgRect.bottom)
         {
             ScaleMatrix(&matrix, scale_X, scale_Y, 0, 0);
 
