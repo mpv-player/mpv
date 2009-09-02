@@ -931,9 +931,13 @@ static int try_load_config(m_config_t *conf, const char *file)
 static void load_per_file_config (m_config_t* conf, const char *const file)
 {
     char *confpath;
-    char cfg[strlen(file)+10];
+    char cfg[PATH_MAX];
     char *name;
 
+    if (strlen(file) > PATH_MAX - 14) {
+        mp_msg(MSGT_CPLAYER, MSGL_WARN, "Filename is too long, can not load file or directory specific config files\n");
+        return;
+    }
     sprintf (cfg, "%s.conf", file);
 
     name = strrchr(cfg, '/');
@@ -951,7 +955,7 @@ static void load_per_file_config (m_config_t* conf, const char *const file)
 	name++;
 
     if (use_filedir_conf) {
-        char dircfg[strlen(file)+14];
+        char dircfg[PATH_MAX];
         strcpy(dircfg, cfg);
         strcpy(dircfg + (name - cfg), "mplayer.conf");
         try_load_config(conf, dircfg);
