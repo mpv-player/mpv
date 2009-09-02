@@ -427,11 +427,11 @@ rmff_header_t *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwidt
 
   char *description=NULL;
   char *session_id=NULL;
-  rmff_header_t *h;
+  rmff_header_t *h = NULL;
   char *challenge1;
   char challenge2[41];
   char checksum[9];
-  char *subscribe;
+  char *subscribe = NULL;
   char *buf = xbuffer_init(256);
   char *mrl=rtsp_get_mrl(rtsp_session);
   unsigned int size;
@@ -513,8 +513,7 @@ autherr:
         alert);
     }
     rtsp_send_ok(rtsp_session);
-    buf = xbuffer_free(buf);
-    return NULL;
+    goto out;
   }
 
   /* receive description */
@@ -528,8 +527,7 @@ autherr:
   if (size > MAX_DESC_BUF) {
     mp_msg(MSGT_STREAM, MSGL_ERR, "realrtsp: Content-length for description too big (> %uMB)!\n",
             MAX_DESC_BUF/(1024*1024) );
-    xbuffer_free(buf);
-    return NULL;
+    goto out;
   }
 
   if (!rtsp_search_answers(rtsp_session,"ETag"))
@@ -544,8 +542,7 @@ autherr:
   description=malloc(size+1);
 
   if( rtsp_read_data(rtsp_session, description, size) <= 0) {
-    buf = xbuffer_free(buf);
-    return NULL;
+    goto out;
   }
   description[size]=0;
 
@@ -554,9 +551,7 @@ autherr:
   strcpy(subscribe, "Subscribe: ");
   h=real_parse_sdp(description, &subscribe, bandwidth);
   if (!h) {
-    subscribe = xbuffer_free(subscribe);
-    buf = xbuffer_free(buf);
-    return NULL;
+    goto out;
   }
   rmff_fix_header(h);
 
@@ -619,6 +614,7 @@ autherr:
   /* and finally send a play request */
   rtsp_request_play(rtsp_session,NULL);
 
+out:
   subscribe = xbuffer_free(subscribe);
   buf = xbuffer_free(buf);
   return h;
