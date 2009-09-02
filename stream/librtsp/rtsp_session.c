@@ -106,7 +106,6 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
   rtsp_session_t *rtsp_session = NULL;
   char *server;
   char *mrl_line = NULL;
-  rmff_header_t *h;
 
   rtsp_session = malloc (sizeof (rtsp_session_t));
   rtsp_session->s = NULL;
@@ -138,7 +137,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
   {
     /* we are talking to a real server ... */
 
-    h=real_setup_and_get_header(rtsp_session->s, bandwidth, user, pass);
+    rmff_header_t *h=real_setup_and_get_header(rtsp_session->s, bandwidth, user, pass);
     if (!h) {
       /* got an redirect? */
       if (rtsp_search_answers(rtsp_session->s, RTSP_OPTIONS_LOCATION))
