@@ -233,8 +233,8 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
         Point mousePos;
         Point winMousePos;
 
-        GetEventParameter(event, kEventParamMouseLocation, typeQDPoint, 0, sizeof(Point), 0, &mousePos);
-        GetEventParameter(event, kEventParamWindowMouseLocation, typeQDPoint, 0, sizeof(Point), 0, &winMousePos);
+        GetEventParameter(event, kEventParamMouseLocation, typeQDPoint, 0, sizeof(mousePos), 0, &mousePos);
+        GetEventParameter(event, kEventParamWindowMouseLocation, typeQDPoint, 0, sizeof(winMousePos), 0, &winMousePos);
 
         switch (kind)
         {
@@ -253,7 +253,7 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
             int wheel;
             short part;
 
-            GetEventParameter(event, kEventParamMouseWheelDelta, typeSInt32, 0, sizeof(int), 0, &wheel);
+            GetEventParameter(event, kEventParamMouseWheelDelta, typeSInt32, 0, sizeof(wheel), 0, &wheel);
 
             part = FindWindow(mousePos, &tmpWin);
 
@@ -275,7 +275,7 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
             Rect bounds;
 
             GetWindowPortBounds(theWindow, &bounds);
-            GetEventParameter(event, kEventParamMouseButton, typeMouseButton, 0, sizeof(EventMouseButton), 0, &button);
+            GetEventParameter(event, kEventParamMouseButton, typeMouseButton, 0, sizeof(button), 0, &button);
 
             part = FindWindow(mousePos, &tmpWin);
             if (kind == kEventMouseUp)
@@ -377,7 +377,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
     {
         HICommand theHICommand;
 
-        GetEventParameter(event, kEventParamDirectObject, typeHICommand, NULL, sizeof(HICommand), NULL, &theHICommand);
+        GetEventParameter(event, kEventParamDirectObject, typeHICommand, NULL, sizeof(theHICommand), NULL, &theHICommand);
 
         switch (theHICommand.commandID)
         {
@@ -437,7 +437,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
         WindowRef window;
         Rect rectWindow = { 0, 0, 0, 0 };
 
-        GetEventParameter(event, kEventParamDirectObject, typeWindowRef, NULL, sizeof(WindowRef), NULL, &window);
+        GetEventParameter(event, kEventParamDirectObject, typeWindowRef, NULL, sizeof(window), NULL, &window);
 
         if (window)
         {
@@ -574,7 +574,7 @@ static void update_screen_info(void)
     CGDirectDisplayID *displays;
     // Display IDs might not be consecutive, get the list of all devices up to # device_id
     displayCount = device_id + 1;
-    displays = malloc(sizeof(CGDirectDisplayID) * displayCount);
+    displays = malloc(sizeof(*displays) * displayCount);
     if (kCGErrorSuccess != CGGetActiveDisplayList(displayCount, displays, &displayCount) || displayCount < device_id + 1) {
         mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: Device ID %d do not exist, falling back to main device.\n", device_id);
         displayId = kCGDirectMainDisplay;
