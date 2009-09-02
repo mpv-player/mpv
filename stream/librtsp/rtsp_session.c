@@ -94,6 +94,7 @@ static void rtsp_close(rtsp_t *s) {
   if (s->mrl) free(s->mrl);
   if (s->session) free(s->session);
   if (s->user_agent) free(s->user_agent);
+  free(s->server);
   rtsp_free_answers(s);
   rtsp_unschedule_all(s);
   free(s);
@@ -194,6 +195,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
       rtsp_session->real_session->header_len;
     }
     rtsp_session->real_session->recv_read = 0;
+    rmff_free_header(h);
   } else /* not a Real server : try RTP instead */
   {
     char *public = NULL;
