@@ -428,7 +428,7 @@ rmff_header_t *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwidt
   char *description=NULL;
   char *session_id=NULL;
   rmff_header_t *h = NULL;
-  char *challenge1;
+  char *challenge1 = NULL;
   char challenge2[41];
   char checksum[9];
   char *subscribe = NULL;
@@ -617,6 +617,9 @@ autherr:
 out:
   subscribe = xbuffer_free(subscribe);
   buf = xbuffer_free(buf);
+  free(description);
+  free(session_id);
+  free(challenge1);
   return h;
 }
 
