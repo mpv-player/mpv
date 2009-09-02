@@ -8,6 +8,7 @@ get_error_string
 bitmap_surface_create
 bitmap_surface_destroy
 bitmap_surface_put_bits_native
+bitmap_surface_query_capabilities
 decoder_create
 decoder_destroy
 decoder_render
