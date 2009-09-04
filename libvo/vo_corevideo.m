@@ -337,7 +337,7 @@ static void uninit(void)
     buffer_name = NULL;
 }
 
-static opt_t subopts[] = {
+static const opt_t subopts[] = {
 {"device_id",     OPT_ARG_INT,  &screen_id,     NULL},
 {"shared_buffer", OPT_ARG_BOOL, &shared_buffer, NULL},
 {"buffer_name",   OPT_ARG_MSTRZ,&buffer_name,   NULL},
