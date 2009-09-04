@@ -594,58 +594,40 @@ static int control(uint32_t request, void *data, ...)
 	[menuItem release];
 }
 
+- (void)set_winSizeMult:(float)mult
+{
+    NSRect frame;
+    int d_width, d_height;
+    aspect(&d_width, &d_height, A_NOZOOM);
+
+    if (isFullscreen) {
+        vo_fs = !vo_fs;
+        [self fullscreen:NO];
+    }
+
+    winSizeMult = mult;
+    frame.size.width  = d_width  * mult;
+    frame.size.height = d_height * mult;
+    [window setContentSize: frame.size];
+    [self reshape];
+}
+
 /*
 	Menu Action
  */
 - (void)menuAction:(id)sender
 {
-	uint32_t d_width;
-	uint32_t d_height;
-	NSRect frame;
-
-	aspect((int *)&d_width, (int *)&d_height,A_NOZOOM);
-
 	if(sender == kQuitCmd)
 	{
 		mplayer_put_key(KEY_ESC);
 	}
 
 	if(sender == kHalfScreenCmd)
-	{
-		if(isFullscreen) {
-			vo_fs = (!(vo_fs)); [self fullscreen:NO];
-		}
-
-		winSizeMult = 0.5;
-		frame.size.width = d_width*winSizeMult;
-		frame.size.height = d_height*winSizeMult;
-		[window setContentSize: frame.size];
-		[self reshape];
-	}
+		[self set_winSizeMult: 0.5];
 	if(sender == kNormalScreenCmd)
-	{
-		if(isFullscreen) {
-			vo_fs = (!(vo_fs)); [self fullscreen:NO];
-		}
-
-		winSizeMult = 1;
-		frame.size.width = d_width;
-		frame.size.height = d_height;
-		[window setContentSize: frame.size];
-		[self reshape];
-	}
+		[self set_winSizeMult: 1];
 	if(sender == kDoubleScreenCmd)
-	{
-		if(isFullscreen) {
-			vo_fs = (!(vo_fs)); [self fullscreen:NO];
-		}
-
-		winSizeMult = 2;
-		frame.size.width = d_width*winSizeMult;
-		frame.size.height = d_height*winSizeMult;
-		[window setContentSize: frame.size];
-		[self reshape];
-	}
+		[self set_winSizeMult: 2];
 	if(sender == kFullScreenCmd)
 	{
 		vo_fs = (!(vo_fs));
