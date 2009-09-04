@@ -4780,7 +4780,7 @@ EOF
   cc_check -framework QuickTime && quicktime=yes
 fi
 if test "$quicktime" = yes ; then
-  libs_mplayer="$libs_mplayer -framework QuickTime"
+  extra_ldflags="$extra_ldflags -framework QuickTime"
   def_quicktime='#define CONFIG_QUICKTIME 1'
 else
   def_quicktime='#undef CONFIG_QUICKTIME'
