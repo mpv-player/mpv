@@ -1445,7 +1445,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    z_stream zstrm;
 	    stream_t* backup;
 
-	    if (moov_sz > SIZE_MAX - 16) {
+	    if (moov_sz > UINT_MAX - 16) {
               mp_msg(MSGT_DEMUX, MSGL_ERR, "Invalid cmvd atom size %d\n", moov_sz);
               break;
             }
