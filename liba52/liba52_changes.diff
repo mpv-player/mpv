@@ -1504,7 +1504,7 @@
  {
      int i, k;
      sample_t t_r, t_i, a_r, a_i, b_r, b_i, w_1, w_2;
-@@ -285,6 +366,702 @@
+@@ -285,6 +366,704 @@
      }
  }
 
@@ -1869,6 +1869,7 @@
 +#define HAVE_AMD3DNOWEXT 1
 +#include "imdct_3dnow.h"
 +
++#if !ARCH_X86_64 || !defined(PIC)
 +void
 +imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 +{
@@ -2202,12 +2203,13 @@
 +		: "%"REG_S, "%"REG_D
 +	);
 +}
++#endif
 +#endif // ARCH_X86 || ARCH_X86_64
 +
  void a52_imdct_256(sample_t * data, sample_t * delay, sample_t bias)
  {
      int i, k;
-@@ -364,7 +1141,7 @@
+@@ -364,7 +1143,7 @@
 
  void a52_imdct_init (uint32_t mm_accel)
  {
@@ -2216,7 +2218,7 @@
      double sum;
 
      /* compute imdct window - kaiser-bessel derived window, alpha = 5.0 */
-@@ -416,6 +1193,99 @@
+@@ -416,6 +1195,101 @@
  	post2[i].real = cos ((M_PI / 128) * (i + 0.5));
  	post2[i].imag = sin ((M_PI / 128) * (i + 0.5));
      }
@@ -2286,12 +2288,14 @@
 +	ifft64 = ifft64_c;
 +
 +#if ARCH_X86 || ARCH_X86_64
++#if !ARCH_X86_64 || !defined(PIC)
 +	if(mm_accel & MM_ACCEL_X86_SSE)
 +	{
 +	  fprintf (stderr, "Using SSE optimized IMDCT transform\n");
 +	  a52_imdct_512 = imdct_do_512_sse;
 +	}
 +	else
++#endif
 +	if(mm_accel & MM_ACCEL_X86_3DNOWEXT)
 +	{
 +	  fprintf (stderr, "Using 3DNowEx optimized IMDCT transform\n");
@@ -2316,7 +2320,7 @@
 
  #ifdef LIBA52_DJBFFT
      if (mm_accel & MM_ACCEL_DJBFFT) {
-@@ -426,7 +1296,5 @@
+@@ -426,7 +1300,5 @@
  #endif
      {
  	fprintf (stderr, "No accelerated IMDCT transform found\n");

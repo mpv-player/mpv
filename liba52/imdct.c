@@ -727,6 +727,7 @@ const complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 0
 #define HAVE_AMD3DNOWEXT 1
 #include "imdct_3dnow.h"
 
+#if !ARCH_X86_64 || !defined(PIC)
 void
 imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 {
@@ -1060,6 +1061,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		: "%"REG_S, "%"REG_D
 	);
 }
+#endif
 #endif // ARCH_X86 || ARCH_X86_64
 
 void a52_imdct_256(sample_t * data, sample_t * delay, sample_t bias)
@@ -1259,12 +1261,14 @@ void a52_imdct_init (uint32_t mm_accel)
 	ifft64 = ifft64_c;
 
 #if ARCH_X86 || ARCH_X86_64
+#if !ARCH_X86_64 || !defined(PIC)
 	if(mm_accel & MM_ACCEL_X86_SSE)
 	{
 	  fprintf (stderr, "Using SSE optimized IMDCT transform\n");
 	  a52_imdct_512 = imdct_do_512_sse;
 	}
 	else
+#endif
 	if(mm_accel & MM_ACCEL_X86_3DNOWEXT)
 	{
 	  fprintf (stderr, "Using 3DNowEx optimized IMDCT transform\n");
