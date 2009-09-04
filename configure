@@ -4431,59 +4431,6 @@ fi
 echores "$_3dfx"
 
 
-echocheck "OpenGL"
-#Note: this test is run even with --enable-gl since we autodetect linker flags
-if (test "$_x11" = yes || win32) && test "$_gl" != no ; then
-  cat > $TMPC << EOF
-#ifdef GL_WIN32
-#include <windows.h>
-#include <GL/gl.h>
-#else
-#include <GL/gl.h>
-#include <X11/Xlib.h>
-#include <GL/glx.h>
-#endif
-int main(void) {
-#ifdef GL_WIN32
-  HDC dc;
-  wglCreateContext(dc);
-#else
-  glXCreateContext(NULL, NULL, NULL, True);
-#endif
-  glFinish();
-  return 0;
-}
-EOF
-  _gl=no
-  if cc_check -lGL $_ld_lm ; then
-    _gl=yes
-    libs_mplayer="$libs_mplayer -lGL $_ld_dl"
-  elif cc_check -lGL $_ld_lm $_ld_pthread ; then
-    _gl=yes
-    libs_mplayer="$libs_mplayer -lGL $_ld_pthread $_ld_dl"
-  elif cc_check -DGL_WIN32 -lopengl32 ; then
-    _gl=yes
-    _gl_win32=yes
-    libs_mplayer="$libs_mplayer -lopengl32 -lgdi32"
-  fi
-else
-  _gl=no
-fi
-if test "$_gl" = yes ; then
-  def_gl='#define CONFIG_GL 1'
-  if test "$_gl_win32" = yes ; then
-    def_gl_win32='#define GL_WIN32 1'
-    _res_comment="win32 version"
-  fi
-  _vomodules="opengl $_vomodules"
-else
-  def_gl='#undef CONFIG_GL'
-  def_gl_win32='#undef GL_WIN32'
-  _novomodules="opengl $_novomodules"
-fi
-echores "$_gl"
-
-
 echocheck "VIDIX"
 def_vidix='#undef CONFIG_VIDIX'
 def_vidix_drv_cyberblade='#undef CONFIG_VIDIX_DRV_CYBERBLADE'
@@ -4865,6 +4812,61 @@ fi
 echores "$_corevideo"
 
 fi #if darwin
+
+
+# make sure this stays below CoreVideo to avoid issues due to namespace
+# conflicts between -lGL and -framework OpenGL
+echocheck "OpenGL"
+#Note: this test is run even with --enable-gl since we autodetect linker flags
+if (test "$_x11" = yes || win32) && test "$_gl" != no ; then
+  cat > $TMPC << EOF
+#ifdef GL_WIN32
+#include <windows.h>
+#include <GL/gl.h>
+#else
+#include <GL/gl.h>
+#include <X11/Xlib.h>
+#include <GL/glx.h>
+#endif
+int main(void) {
+#ifdef GL_WIN32
+  HDC dc;
+  wglCreateContext(dc);
+#else
+  glXCreateContext(NULL, NULL, NULL, True);
+#endif
+  glFinish();
+  return 0;
+}
+EOF
+  _gl=no
+  if cc_check -lGL $_ld_lm ; then
+    _gl=yes
+    libs_mplayer="$libs_mplayer -lGL $_ld_dl"
+  elif cc_check -lGL $_ld_lm $_ld_pthread ; then
+    _gl=yes
+    libs_mplayer="$libs_mplayer -lGL $_ld_pthread $_ld_dl"
+  elif cc_check -DGL_WIN32 -lopengl32 ; then
+    _gl=yes
+    _gl_win32=yes
+    libs_mplayer="$libs_mplayer -lopengl32 -lgdi32"
+  fi
+else
+  _gl=no
+fi
+if test "$_gl" = yes ; then
+  def_gl='#define CONFIG_GL 1'
+  if test "$_gl_win32" = yes ; then
+    def_gl_win32='#define GL_WIN32 1'
+    _res_comment="win32 version"
+  fi
+  _vomodules="opengl $_vomodules"
+else
+  def_gl='#undef CONFIG_GL'
+  def_gl_win32='#undef GL_WIN32'
+  _novomodules="opengl $_novomodules"
+fi
+echores "$_gl"
 
 
 echocheck "PNG support"
