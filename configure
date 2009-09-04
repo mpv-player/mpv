@@ -722,6 +722,7 @@ _maemo=auto
 _coreaudio=auto
 _corevideo=auto
 _quartz=auto
+quicktime=auto
 _macosx_finder=no
 _macosx_bundle=auto
 _sortsub=yes
@@ -4764,23 +4765,43 @@ fi
 
 if darwin; then
 
+echocheck "QuickTime"
+if test "$quicktime" = auto ; then
+  cat > $TMPC <<EOF
+#include <QuickTime/QuickTime.h>
+int main(void) {
+    ImageDescription *desc;
+    EnterMovies();
+    ExitMovies();
+    return 0;
+}
+EOF
+  quicktime=no
+  cc_check -framework QuickTime && quicktime=yes
+fi
+if test "$quicktime" = yes ; then
+  libs_mplayer="$libs_mplayer -framework QuickTime"
+  def_quicktime='#define CONFIG_QUICKTIME 1'
+else
+  def_quicktime='#undef CONFIG_QUICKTIME'
+  _quartz=no
+fi
+echores $quicktime
+
 echocheck "Quartz"
 if test "$_quartz" = auto ; then
   cat > $TMPC <<EOF
 #include <Carbon/Carbon.h>
-#include <QuickTime/QuickTime.h>
 int main(void) {
-    EnterMovies();
-    ExitMovies();
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, false);
     return 0;
 }
 EOF
   _quartz=no
-  cc_check -framework Carbon -framework QuickTime && _quartz=yes
+  cc_check -framework Carbon && _quartz=yes
 fi
 if test "$_quartz" = yes ; then
-  libs_mplayer="$libs_mplayer -framework Carbon -framework QuickTime"
+  libs_mplayer="$libs_mplayer -framework Carbon"
   def_quartz='#define CONFIG_QUARTZ 1'
   _vomodules="quartz $_vomodules"
 else
@@ -6792,12 +6813,10 @@ echores "$_real"
 echocheck "QuickTime codecs"
 _qtx_emulation=no
 def_qtx_win32='#undef CONFIG_QTX_CODECS_WIN32'
-def_quicktime='#undef CONFIG_QUICKTIME'
 if test "$_qtx" = auto ; then
-  test "$_win32dll" = yes || darwin && _qtx=yes
+  test "$_win32dll" = yes || quicktime && _qtx=yes
 fi
 if test "$_qtx" = yes ; then
-    darwin && extra_ldflags="$extra_ldflags -framework QuickTime" && def_quicktime='#define CONFIG_QUICKTIME 1'
     def_qtx='#define CONFIG_QTX_CODECS 1'
     win32 && _qtx_codecs_win32=yes && def_qtx_win32='#define CONFIG_QTX_CODECS_WIN32 1'
     _codecmodules="qtx $_codecmodules"
