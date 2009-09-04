@@ -25,7 +25,7 @@
 
 extern const struct mp_AVCodecTag *mp_wav_taglists[];
 
-extern const struct mp_AVCodecTag *mp_wav_override_taglists[];
+extern const struct mp_AVCodecTag *mp_codecid_override_taglists[];
 
 extern const struct mp_AVCodecTag *mp_bmp_taglists[];
 

@@ -376,6 +376,7 @@ void sdpplin_free(sdpplin_t *description) {
         free(description->stream[i]->mlti_data);
       if (description->stream[i]->asm_rule_book)
         free(description->stream[i]->asm_rule_book);
+      free(description->stream[i]->id);
       free(description->stream[i]);
     }
   }

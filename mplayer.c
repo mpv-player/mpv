@@ -52,6 +52,7 @@
 #include "cfg-mplayer-def.h"
 
 #include "ffmpeg_files/intreadwrite.h"
+#include "libavutil/avstring.h"
 
 #include "subreader.h"
 
@@ -915,34 +916,59 @@ static void load_per_output_config (m_config_t* conf, char *cfg, char *out)
     }
 }
 
+/**
+ * Tries to load a config file
+ * @return 0 if file was not found, 1 otherwise
+ */
+static int try_load_config(m_config_t *conf, const char *file)
+{
+    struct stat st;
+    if (stat(file, &st))
+        return 0;
+    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Loading config '%s'\n", file);
+    m_config_parse_config_file (conf, file);
+    return 1;
+}
+
 static void load_per_file_config (m_config_t* conf, const char *const file)
 {
     char *confpath;
-    char cfg[strlen(file)+10];
-    struct stat st;
+    char cfg[PATH_MAX];
     char *name;
 
+    if (strlen(file) > PATH_MAX - 14) {
+        mp_msg(MSGT_CPLAYER, MSGL_WARN, "Filename is too long, can not load file or directory specific config files\n");
+        return;
+    }
     sprintf (cfg, "%s.conf", file);
 
-    if (use_filedir_conf && !stat (cfg, &st))
-    {
-	mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Loading config '%s'\n", cfg);
-	m_config_parse_config_file (conf, cfg);
-	return;
+    name = strrchr(cfg, '/');
+    if (HAVE_DOS_PATHS) {
+        char *tmp = strrchr(cfg, '\\');
+        if (!name || tmp > name)
+            name = tmp;
+        tmp = strrchr(cfg, ':');
+        if (!name || tmp > name)
+            name = tmp;
     }
-
-    if ((name = strrchr (cfg, '/')) == NULL)
+    if (!name)
 	name = cfg;
     else
 	name++;
 
+    if (use_filedir_conf) {
+        char dircfg[PATH_MAX];
+        strcpy(dircfg, cfg);
+        strcpy(dircfg + (name - cfg), "mplayer.conf");
+        try_load_config(conf, dircfg);
+
+        if (try_load_config(conf, cfg))
+            return;
+    }
+
     if ((confpath = get_path (name)) != NULL)
     {
-	if (!stat (confpath, &st))
-	{
-	    mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Loading config '%s'\n", confpath);
-	    m_config_parse_config_file (conf, confpath);
-	}
+	try_load_config(conf, confpath);
 
 	free (confpath);
     }
@@ -3426,7 +3452,7 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
     if ((strlen(bname)>10) && !strncmp(bname,"qt",2) && !strncmp(bname+3,"gateQT",6))
         continue;
 
-    if (!strncmp(bname,mp_basename(mpctx->filename),strlen(bname))) // ignoring self-reference
+    if (!strcmp(playlist_entry, mpctx->filename)) // ignoring self-reference
         continue;
 
     entry = play_tree_new();
@@ -3439,6 +3465,10 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
 	strncpy(temp, mpctx->filename, strlen(mpctx->filename)-strlen(mp_basename(mpctx->filename)));
 	temp[strlen(mpctx->filename)-strlen(mp_basename(mpctx->filename))]='\0';
 	strcat(temp, playlist_entry);
+	if (!strcmp(temp, mpctx->filename)) {
+	  free(temp);
+	  continue;
+	}
 	play_tree_add_file(entry,temp);
 	mp_msg(MSGT_CPLAYER,MSGL_V,"Resolving reference to %s.\n",temp);
 	free(temp);

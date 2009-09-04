@@ -35,7 +35,7 @@ static int recursion_depth = 0;
  *  \param conffile Path to the config file.
  *  \return 1 on sucess, -1 on error.
  */
-int m_config_parse_config_file(m_config_t* config, char *conffile)
+int m_config_parse_config_file(m_config_t* config, const char *conffile)
 {
 #define PRINT_LINENUM	mp_msg(MSGT_CFGPARSER,MSGL_V,"%s(%d): ", conffile, line_num)
 #define MAX_LINE_LEN	10000
@@ -252,7 +252,6 @@ int m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
 {
 	int msg_lvl, i, r, ret = 0;
 	char* arg;
-	m_option_t* opt;
 
 	// Hack to shutup the parser error messages.
 	msg_lvl = mp_msg_levels[MSGT_CFGPARSER];
@@ -261,6 +260,7 @@ int m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
 	config->mode = M_COMMAND_LINE_PRE_PARSE;
 
 	for(i = 1 ; i < argc ; i++) {
+		const m_option_t* opt;
 		arg = argv[i];
 		// Ignore non option
 		if(arg[0] != '-' || arg[1] == 0) continue;

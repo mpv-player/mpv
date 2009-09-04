@@ -53,7 +53,7 @@
 #include "input/input.h"
 #include "input/mouse.h"
 
-#include "vo_quartz.h"
+#include "osx_common.h"
 
 static const vo_info_t info =
 {
@@ -87,7 +87,6 @@ static int EnterMoviesDone = 0;
 static int get_image_done = 0;
 
 static int vo_quartz_fs; // we are in fullscreen
-static float old_movie_aspect;
 
 static int winLevel = 1;
 int levelList[] =
@@ -100,6 +99,7 @@ int levelList[] =
 static int int_pause = 0;
 static float winAlpha = 1;
 static int mouseHide = FALSE;
+static float winSizeMult = 1;
 
 static int device_id = 0;
 
@@ -119,7 +119,6 @@ static Rect imgRect;            // size of the original image (unscaled)
 static Rect dstRect;            // size of the displayed image (after scaling)
 static Rect winRect;            // size of the window containg the displayed image (include padding)
 static Rect oldWinRect;         // size of the window containg the displayed image (include padding) when NOT in FS mode
-static CGRect displayRect;      // size of the display device
 static Rect oldWinBounds;
 
 static MenuRef windMenu;
@@ -153,60 +152,6 @@ void window_resized(void);
 void window_ontop(void);
 void window_fullscreen(void);
 void window_panscan(void);
-
-static inline int convert_key(UInt32 key, UInt32 charcode)
-{
-    switch (key)
-    {
-    case QZ_IBOOK_ENTER:
-    case QZ_RETURN:      return KEY_ENTER;
-    case QZ_ESCAPE:      return KEY_ESC;
-    case QZ_BACKSPACE:   return KEY_BACKSPACE;
-    case QZ_LALT:        return KEY_BACKSPACE;
-    case QZ_LCTRL:       return KEY_BACKSPACE;
-    case QZ_LSHIFT:      return KEY_BACKSPACE;
-    case QZ_F1:          return KEY_F + 1;
-    case QZ_F2:          return KEY_F + 2;
-    case QZ_F3:          return KEY_F + 3;
-    case QZ_F4:          return KEY_F + 4;
-    case QZ_F5:          return KEY_F + 5;
-    case QZ_F6:          return KEY_F + 6;
-    case QZ_F7:          return KEY_F + 7;
-    case QZ_F8:          return KEY_F + 8;
-    case QZ_F9:          return KEY_F + 9;
-    case QZ_F10:         return KEY_F + 10;
-    case QZ_F11:         return KEY_F + 11;
-    case QZ_F12:         return KEY_F + 12;
-    case QZ_INSERT:      return KEY_INSERT;
-    case QZ_DELETE:      return KEY_DELETE;
-    case QZ_HOME:        return KEY_HOME;
-    case QZ_END:         return KEY_END;
-    case QZ_KP_PLUS:     return '+';
-    case QZ_KP_MINUS:    return '-';
-    case QZ_TAB:         return KEY_TAB;
-    case QZ_PAGEUP:      return KEY_PAGE_UP;
-    case QZ_PAGEDOWN:    return KEY_PAGE_DOWN;
-    case QZ_UP:          return KEY_UP;
-    case QZ_DOWN:        return KEY_DOWN;
-    case QZ_LEFT:        return KEY_LEFT;
-    case QZ_RIGHT:       return KEY_RIGHT;
-    case QZ_KP_MULTIPLY: return '*';
-    case QZ_KP_DIVIDE:   return '/';
-    case QZ_KP_ENTER:    return KEY_KPENTER;
-    case QZ_KP_PERIOD:   return KEY_KPDEC;
-    case QZ_KP0:         return KEY_KP0;
-    case QZ_KP1:         return KEY_KP1;
-    case QZ_KP2:         return KEY_KP2;
-    case QZ_KP3:         return KEY_KP3;
-    case QZ_KP4:         return KEY_KP4;
-    case QZ_KP5:         return KEY_KP5;
-    case QZ_KP6:         return KEY_KP6;
-    case QZ_KP7:         return KEY_KP7;
-    case QZ_KP8:         return KEY_KP8;
-    case QZ_KP9:         return KEY_KP9;
-    default:             return charcode;
-    }
-}
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride)
 {
@@ -288,8 +233,8 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
         Point mousePos;
         Point winMousePos;
 
-        GetEventParameter(event, kEventParamMouseLocation, typeQDPoint, 0, sizeof(Point), 0, &mousePos);
-        GetEventParameter(event, kEventParamWindowMouseLocation, typeQDPoint, 0, sizeof(Point), 0, &winMousePos);
+        GetEventParameter(event, kEventParamMouseLocation, typeQDPoint, 0, sizeof(mousePos), 0, &mousePos);
+        GetEventParameter(event, kEventParamWindowMouseLocation, typeQDPoint, 0, sizeof(winMousePos), 0, &winMousePos);
 
         switch (kind)
         {
@@ -308,7 +253,7 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
             int wheel;
             short part;
 
-            GetEventParameter(event, kEventParamMouseWheelDelta, typeSInt32, 0, sizeof(int), 0, &wheel);
+            GetEventParameter(event, kEventParamMouseWheelDelta, typeSInt32, 0, sizeof(wheel), 0, &wheel);
 
             part = FindWindow(mousePos, &tmpWin);
 
@@ -330,7 +275,7 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
             Rect bounds;
 
             GetWindowPortBounds(theWindow, &bounds);
-            GetEventParameter(event, kEventParamMouseButton, typeMouseButton, 0, sizeof(EventMouseButton), 0, &button);
+            GetEventParameter(event, kEventParamMouseButton, typeMouseButton, 0, sizeof(button), 0, &button);
 
             part = FindWindow(mousePos, &tmpWin);
             if (kind == kEventMouseUp)
@@ -355,7 +300,7 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
                 }
                 break;
             }
-            if ((winMousePos.h > (bounds.right - 15)) && (winMousePos.v > (bounds.bottom)))
+            if (winMousePos.h > bounds.right - 15 && winMousePos.v > bounds.bottom)
             {
                 if (!vo_quartz_fs)
                 {
@@ -403,24 +348,36 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
     return result;
 }
 
+static void set_winSizeMult(float mult)
+{
+    int d_width, d_height;
+    aspect(&d_width, &d_height, A_NOZOOM);
+
+    if (vo_quartz_fs)
+    {
+        vo_fs = !vo_fs;
+        window_fullscreen();
+    }
+
+    winSizeMult = mult;
+    SizeWindow(theWindow, d_width * mult, d_height * mult, 1);
+    window_resized();
+}
+
 //default window event handler
 static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus result = noErr;
-    uint32_t d_width;
-    uint32_t d_height;
     UInt32 class = GetEventClass(event);
     UInt32 kind = GetEventKind(event);
 
     result = CallNextEventHandler(nextHandler, event);
 
-    aspect(&d_width, &d_height, A_NOZOOM);
-
     if (class == kEventClassCommand)
     {
         HICommand theHICommand;
 
-        GetEventParameter(event, kEventParamDirectObject, typeHICommand, NULL, sizeof(HICommand), NULL, &theHICommand);
+        GetEventParameter(event, kEventParamDirectObject, typeHICommand, NULL, sizeof(theHICommand), NULL, &theHICommand);
 
         switch (theHICommand.commandID)
         {
@@ -429,78 +386,42 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
             break;
 
         case kHalfScreenCmd:
-            if (vo_quartz_fs)
-            {
-                vo_fs = (!(vo_fs));
-                window_fullscreen();
-            }
-
-            SizeWindow(theWindow, (d_width / 2), ((d_width / movie_aspect) / 2), 1);
-            window_resized();
+            set_winSizeMult(0.5);
             break;
 
         case kNormalScreenCmd:
-            if (vo_quartz_fs)
-            {
-                vo_fs = (!(vo_fs));
-                window_fullscreen();
-            }
-
-            SizeWindow(theWindow, d_width, (d_width / movie_aspect), 1);
-            window_resized();
+            set_winSizeMult(1);
             break;
 
         case kDoubleScreenCmd:
-            if (vo_quartz_fs)
-            {
-                vo_fs = (!(vo_fs));
-                window_fullscreen();
-            }
-
-            SizeWindow(theWindow, (d_width * 2), ((d_width / movie_aspect) * 2), 1);
-            window_resized();
+            set_winSizeMult(2);
             break;
 
         case kFullScreenCmd:
-            vo_fs = (!(vo_fs));
+            vo_fs = !vo_fs;
             window_fullscreen();
             break;
 
         case kKeepAspectCmd:
-            vo_keepaspect = (!(vo_keepaspect));
+            vo_keepaspect = !vo_keepaspect;
             CheckMenuItem(aspectMenu, 1, vo_keepaspect);
             window_resized();
             break;
 
         case kAspectOrgCmd:
-            movie_aspect = old_movie_aspect;
-            if (!vo_quartz_fs)
-            {
-                SizeWindow(theWindow, dstRect.right, (dstRect.right / movie_aspect), 1);
-            }
-            window_resized();
+            change_movie_aspect(-1);
             break;
 
         case kAspectFullCmd:
-            movie_aspect = 4.0f / 3.0f;
-            if (!vo_quartz_fs)
-            {
-                SizeWindow(theWindow, dstRect.right, (dstRect.right / movie_aspect), 1);
-            }
-            window_resized();
+            change_movie_aspect(4.0 / 3.0);
             break;
 
         case kAspectWideCmd:
-            movie_aspect = 16.0f / 9.0f;
-            if (!vo_quartz_fs)
-            {
-                SizeWindow(theWindow, dstRect.right, (dstRect.right / movie_aspect), 1);
-            }
-            window_resized();
+            change_movie_aspect(16.0 / 9.0);
             break;
 
         case kPanScanCmd:
-            vo_panscan = (!(vo_panscan));
+            vo_panscan = !vo_panscan;
             CheckMenuItem(aspectMenu, 2, vo_panscan);
             window_panscan();
             window_resized();
@@ -516,7 +437,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
         WindowRef window;
         Rect rectWindow = { 0, 0, 0, 0 };
 
-        GetEventParameter(event, kEventParamDirectObject, typeWindowRef, NULL, sizeof(WindowRef), NULL, &window);
+        GetEventParameter(event, kEventParamDirectObject, typeWindowRef, NULL, sizeof(window), NULL, &window);
 
         if (window)
         {
@@ -646,19 +567,14 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
     InstallWindowEventHandler(theWindow, NewEventHandlerUPP(WindowEventHandler), GetEventTypeCount(win_events), win_events, theWindow, NULL);
 }
 
-static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+static void update_screen_info(void)
 {
-    WindowAttributes windowAttrs;
-    OSErr qterr;
-    CGRect tmpBounds;
+    CGRect displayRect;
     CGDisplayCount displayCount;
     CGDirectDisplayID *displays;
-
-    // Get Main device info///////////////////////////////////////////////////
-
     // Display IDs might not be consecutive, get the list of all devices up to # device_id
     displayCount = device_id + 1;
-    displays = malloc(sizeof(CGDirectDisplayID) * displayCount);
+    displays = malloc(sizeof(*displays) * displayCount);
     if (kCGErrorSuccess != CGGetActiveDisplayList(displayCount, displays, &displayCount) || displayCount < device_id + 1) {
         mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: Device ID %d do not exist, falling back to main device.\n", device_id);
         displayId = kCGDirectMainDisplay;
@@ -671,8 +587,38 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
     free(displays);
 
     displayRect = CGDisplayBounds(displayId);
+    xinerama_x = displayRect.origin.x;
+    xinerama_y = displayRect.origin.y;
+    vo_screenwidth = displayRect.size.width;
+    vo_screenheight = displayRect.size.height;
+    aspect_save_screenres(vo_screenwidth, vo_screenheight);
+}
 
-    monitor_aspect = (float)displayRect.size.width / (float)displayRect.size.height;
+static void free_video_specific(void)
+{
+    if (seqId) CDSequenceEnd(seqId);
+    seqId = 0;
+    free(image_data);
+    image_data = NULL;
+    free(P);
+    P = NULL;
+    CGDataProviderRelease(dataProviderRef);
+    dataProviderRef = NULL;
+    CGImageRelease(image);
+    image = NULL;
+}
+
+static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+{
+    WindowAttributes windowAttrs;
+    OSErr qterr;
+    CGRect tmpBounds;
+
+    free_video_specific();
+
+    vo_dwidth  = d_width  *= winSizeMult;
+    vo_dheight = d_height *= winSizeMult;
+    config_movie_aspect((float)d_width / d_height);
 
     // misc mplayer setup/////////////////////////////////////////////////////
     SetRect(&imgRect, 0, 0, width, height);
@@ -689,23 +635,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
         image_depth = 16;
         break;
     }
-    image_size = ((imgRect.right * imgRect.bottom * image_depth) + 7) / 8;
-
-    vo_fs = flags & VOFLAG_FULLSCREEN;
-
-    // get movie aspect
-    panscan_init();
-    aspect_save_orig(width, height);
-    aspect_save_prescale(d_width, d_height);
-    aspect_save_screenres(displayRect.size.width, displayRect.size.height);
-
-    aspect(&d_width, &d_height, A_NOZOOM);
-
-    movie_aspect = (float)d_width / (float)d_height;
-    old_movie_aspect = movie_aspect;
-
-    if (image_data)
-        free(image_data);
+    image_size = (imgRect.right * imgRect.bottom * image_depth + 7) / 8;
 
     image_data = malloc(image_size);
 
@@ -714,7 +644,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
                 | kWindowStandardHandlerAttribute
                 | kWindowLiveResizeAttribute;
 
-    windowAttrs &= (~kWindowResizableAttribute);
+    windowAttrs &= ~kWindowResizableAttribute;
 
     if (theWindow == NULL)
     {
@@ -755,7 +685,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
                               imgRect.bottom,
                               8,
                               image_depth,
-                              ((imgRect.right * 32) + 7) / 8,
+                              (imgRect.right * 32 + 7) / 8,
                               CGColorSpaceCreateDeviceRGB(),
                               kCGImageAlphaNoneSkipFirst,
                               dataProviderRef, 0, 1, kCGRenderingIntentDefault);
@@ -789,7 +719,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 
         SetIdentityMatrix(&matrix);
 
-        if ((d_width != width) || (d_height != height))
+        if (d_width != width || d_height != height)
         {
             ScaleMatrix(&matrix, FixDiv(Long2Fix(d_width), Long2Fix(width)), FixDiv(Long2Fix(d_height), Long2Fix(height)), 0, 0);
         }
@@ -859,9 +789,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
         {
             mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: AddImageDescriptionExtension [pasp] (%d)\n", qterr);
         }
-        if (P != NULL) {        // second or subsequent movie
-            free(P);
-        }
         P = calloc(sizeof(PlanarPixmapInfoYUV420) + image_size, 1);
         switch (image_format)
         {
@@ -889,7 +816,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
                                          GetWindowPort(theWindow),
                                          NULL,
                                          NULL,
-                                         ((d_width != width) || (d_height != height)) ?
+                                         d_width != width || d_height != height ?
                                          &matrix : NULL,
                                          srcCopy,
                                          NULL,
@@ -1035,7 +962,7 @@ static void flip_page(void)
     // auto hide mouse cursor (and future on-screen control?)
     if (vo_quartz_fs && !mouseHide)
     {
-        if (((curTime - lastMouseHide) >= 5) || (lastMouseHide == 0))
+        if (curTime - lastMouseHide >= 5 || lastMouseHide == 0)
         {
             CGDisplayHideCursor(displayId);
             mouseHide = TRUE;
@@ -1044,7 +971,7 @@ static void flip_page(void)
     }
     // update activity every 30 seconds to prevent
     // screensaver from starting up.
-    if (((curTime - lastScreensaverUpdate) >= 30) || (lastScreensaverUpdate == 0))
+    if (curTime - lastScreensaverUpdate >= 30 || lastScreensaverUpdate == 0)
     {
         UpdateSystemActivity(UsrActivity);
         lastScreensaverUpdate = curTime;
@@ -1101,7 +1028,7 @@ static int query_format(uint32_t format)
         return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
     }
 
-    if ((format == IMGFMT_YV12) || (format == IMGFMT_IYUV) || (format == IMGFMT_I420))
+    if (format == IMGFMT_YV12 || format == IMGFMT_IYUV || format == IMGFMT_I420)
     {
         image_qtcodec = kMpegYUV420CodecType;   //kYUV420CodecType ?;
         return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
@@ -1124,29 +1051,10 @@ static int query_format(uint32_t format)
 
 static void uninit(void)
 {
-    OSErr qterr;
-
-    switch (image_format)
-    {
-    case IMGFMT_YV12:
-    case IMGFMT_IYUV:
-    case IMGFMT_I420:
-    case IMGFMT_UYVY:
-    case IMGFMT_YUY2:
-    {
-        if (EnterMoviesDone)
-        {
-            qterr = CDSequenceEnd(seqId);
-            if (qterr)
-            {
-                mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: CDSequenceEnd (%d)\n", qterr);
-            }
-        }
-        break;
-    }
-    default:
-        break;
-    }
+    free_video_specific();
+    if (EnterMoviesDone)
+        ExitMovies();
+    EnterMoviesDone = 0;
 
     ShowMenuBar();
 }
@@ -1277,9 +1185,9 @@ static int control(uint32_t request, void *data)
     {
     case VOCTRL_PAUSE:        return int_pause = 1;
     case VOCTRL_RESUME:       return int_pause = 0;
-    case VOCTRL_FULLSCREEN:   vo_fs = (!(vo_fs));        window_fullscreen(); return VO_TRUE;
-    case VOCTRL_ONTOP:        vo_ontop = (!(vo_ontop));  window_ontop();      return VO_TRUE;
-    case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t *) data));
+    case VOCTRL_FULLSCREEN:   vo_fs = !vo_fs;        window_fullscreen(); return VO_TRUE;
+    case VOCTRL_ONTOP:        vo_ontop = !vo_ontop;  window_ontop();      return VO_TRUE;
+    case VOCTRL_QUERY_FORMAT: return query_format(*(uint32_t *) data);
     case VOCTRL_GET_PANSCAN:  return VO_TRUE;
     case VOCTRL_SET_PANSCAN:  window_panscan();          return VO_TRUE;
 
@@ -1309,17 +1217,15 @@ static int control(uint32_t request, void *data)
         default:
             break;
         }
+    case VOCTRL_UPDATE_SCREENINFO:
+        update_screen_info();
+        return VO_TRUE;
     }
     return VO_NOTIMPL;
 }
 
 void window_resized(void)
 {
-    float aspectX;
-    float aspectY;
-
-    int padding = 0;
-
     uint32_t d_width;
     uint32_t d_height;
 
@@ -1328,30 +1234,12 @@ void window_resized(void)
     CGContextRef context;
 
     GetWindowPortBounds(theWindow, &winRect);
+    d_width  = vo_dwidth  = winRect.right;
+    d_height = vo_dheight = winRect.bottom;
 
     if (vo_keepaspect)
-    {
-        aspect(&d_width, &d_height, A_NOZOOM);
-        d_height = ((float)d_width / movie_aspect);
-
-        aspectX = (float)((float)winRect.right / (float)d_width);
-        aspectY = (float)((float)(winRect.bottom) / (float)d_height);
-
-        if ((d_height * aspectX) > (winRect.bottom))
-        {
-            padding = (winRect.right - d_width * aspectY) / 2;
-            SetRect(&dstRect, padding, 0, d_width * aspectY + padding, d_height * aspectY);
-        }
-        else
-        {
-            padding = ((winRect.bottom) - d_height * aspectX) / 2;
-            SetRect(&dstRect, 0, padding, (d_width * aspectX), d_height * aspectX + padding);
-        }
-    }
-    else
-    {
-        SetRect(&dstRect, 0, 0, winRect.right, winRect.bottom);
-    }
+        aspect(&d_width, &d_height, A_WINZOOM);
+    SetRect(&dstRect, (vo_dwidth - d_width) / 2, (vo_dheight - d_height) / 2, d_width, d_height);
 
     switch (image_format)
     {
@@ -1370,11 +1258,11 @@ void window_resized(void)
         long scale_Y = FixDiv(Long2Fix(dstRect.bottom - dstRect.top), Long2Fix(imgRect.bottom));
 
         SetIdentityMatrix(&matrix);
-        if (((dstRect.right - dstRect.left) != imgRect.right) || ((dstRect.bottom - dstRect.right) != imgRect.bottom))
+        if (dstRect.right - dstRect.left != imgRect.right || dstRect.bottom - dstRect.right != imgRect.bottom)
         {
             ScaleMatrix(&matrix, scale_X, scale_Y, 0, 0);
 
-            if (padding > 0)
+            if (vo_dwidth > d_width || vo_dheight > d_height)
             {
                 TranslateMatrix(&matrix, Long2Fix(dstRect.left), Long2Fix(dstRect.top));
             }
@@ -1447,7 +1335,7 @@ void window_fullscreen(void)
                 }
 
                 // Get Main device info///////////////////////////////////////////////////
-                displayRect = CGDisplayBounds(displayId);
+                update_screen_info();
             }
         }
         // save old window size
@@ -1457,12 +1345,10 @@ void window_fullscreen(void)
             GetWindowBounds(theWindow, kWindowContentRgn, &oldWinBounds);
         }
         // go fullscreen
-        panscan_calc();
         ChangeWindowAttributes(theWindow, kWindowNoShadowAttribute, 0);
-        MoveWindow(theWindow, displayRect.origin.x - (vo_panscan_x >> 1), displayRect.origin.y - (vo_panscan_y >> 1), 1);
-        SizeWindow(theWindow, displayRect.size.width + vo_panscan_x, displayRect.size.height + vo_panscan_y, 1);
 
         vo_quartz_fs = 1;
+        window_panscan();
     }
     else //go back to windowed mode
     {
@@ -1473,7 +1359,7 @@ void window_fullscreen(void)
             CGDisplayRelease(displayId);
 
             // Get Main device info///////////////////////////////////////////////////
-            displayRect = CGDisplayBounds(displayId);
+            update_screen_info();
 
             originalMode = NULL;
         }
@@ -1502,7 +1388,7 @@ void window_panscan(void)
 
     if (vo_quartz_fs)
     {
-        MoveWindow(theWindow, displayRect.origin.x - (vo_panscan_x >> 1), displayRect.origin.y - (vo_panscan_y >> 1), 1);
-        SizeWindow(theWindow, displayRect.size.width + vo_panscan_x, displayRect.size.height + vo_panscan_y, 1);
+        MoveWindow(theWindow, xinerama_x - (vo_panscan_x >> 1), xinerama_y - (vo_panscan_y >> 1), 1);
+        SizeWindow(theWindow, vo_screenwidth + vo_panscan_x, vo_screenheight + vo_panscan_y, 1);
     }
 }

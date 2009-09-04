@@ -805,24 +805,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_DRAW_IMAGE:
         return draw_image(vo, data);
     case VOCTRL_GET_PANSCAN:
-        if (!vo->config_ok || !vo_fs)
-            return VO_FALSE;
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
         vo_x11_fullscreen(vo);
         /* indended, fallthrough to update panscan on fullscreen/windowed switch */
     case VOCTRL_SET_PANSCAN:
-        if ((vo_fs && (vo_panscan != vo->panscan_amount))
-            || (!vo_fs && vo->panscan_amount)) {
-            int old_y = vo->panscan_y;
-
-            panscan_calc(vo);
-
-            if (old_y != vo->panscan_y) {
-                resize(vo);
-                flip_page(vo);
-            }
-        }
+        resize(vo);
         return VO_TRUE;
     case VOCTRL_SET_EQUALIZER:
         {

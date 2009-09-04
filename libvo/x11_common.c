@@ -1032,14 +1032,14 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
   Display *mDisplay = vo->x11->display;
   XGCValues xgcv;
   if (WinID >= 0) {
+    vo_fs = flags & VOFLAG_FULLSCREEN;
     x11->window = WinID ? (Window)WinID : x11->rootwin;
     if (col_map != CopyFromParent) {
       unsigned long xswamask = CWColormap;
       XSetWindowAttributes xswa;
       xswa.colormap = col_map;
-      XUnmapWindow(mDisplay, x11->window);
       XChangeWindowAttributes(mDisplay, x11->window, xswamask, &xswa);
-      XMapWindow(mDisplay, x11->window);
+      XInstallColormap(mDisplay, col_map);
     }
     if (WinID) vo_x11_update_geometry(vo);
     vo_x11_selectinput_witherr(mDisplay, x11->window,
@@ -1302,7 +1302,11 @@ void vo_x11_fullscreen(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     int x, y, w, h;
 
-    if (WinID >= 0 || x11->fs_flip)
+    if (WinID >= 0) {
+        vo_fs = !vo_fs;
+        return;
+    }
+    if (x11->fs_flip)
         return;
 
     if (vo_fs)

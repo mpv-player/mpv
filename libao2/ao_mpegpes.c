@@ -158,7 +158,7 @@ static int preinit(const char *arg)
 	int card = -1;
 	char *ao_file = NULL;
 
-	opt_t subopts[] = {
+	const opt_t subopts[] = {
 		{"card", OPT_ARG_INT, &card, NULL},
 		{"file", OPT_ARG_MSTRZ, &ao_file, NULL},
 		{NULL}

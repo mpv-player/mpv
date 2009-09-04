@@ -94,6 +94,7 @@ static void rtsp_close(rtsp_t *s) {
   if (s->mrl) free(s->mrl);
   if (s->session) free(s->session);
   if (s->user_agent) free(s->user_agent);
+  free(s->server);
   rtsp_free_answers(s);
   rtsp_unschedule_all(s);
   free(s);
@@ -106,7 +107,6 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
   rtsp_session_t *rtsp_session = NULL;
   char *server;
   char *mrl_line = NULL;
-  rmff_header_t *h;
 
   rtsp_session = malloc (sizeof (rtsp_session_t));
   rtsp_session->s = NULL;
@@ -138,8 +138,9 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
   {
     /* we are talking to a real server ... */
 
-    h=real_setup_and_get_header(rtsp_session->s, bandwidth, user, pass);
-    if (!h) {
+    rmff_header_t *h=real_setup_and_get_header(rtsp_session->s, bandwidth, user, pass);
+    if (!h || !h->streams[0]) {
+      rmff_free_header(h);
       /* got an redirect? */
       if (rtsp_search_answers(rtsp_session->s, RTSP_OPTIONS_LOCATION))
       {
@@ -195,6 +196,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
       rtsp_session->real_session->header_len;
     }
     rtsp_session->real_session->recv_read = 0;
+    rmff_free_header(h);
   } else /* not a Real server : try RTP instead */
   {
     char *public = NULL;

@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r29461
+.\" sync with en/mplayer.1 r29555
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -3072,9 +3072,11 @@ ggi 和 gl2 的都支持此功能。
 启用 VBI 用于 vesa, dfbmga 和 svga 视频输出驱动。
 .
 .TP
-.B \-wid <窗口标识> (也请参见 \-guiwid) (仅用于 X11, OpenGL 和 DirectX)
-告诉 MPlayer 附着于一个已有的窗口。
-把 MPlayer 嵌入浏览器(比如 plugger 扩展)时有用。
+.B \-wid <窗口标识>（另见 \-guiwid）（仅用于 X11、OpenGL 和 DirectX）
+该选项让 MPlayer 绑定至一个已有的窗口上。
+适用于将 MPlayer 嵌入至浏览器中（比如扩展插件）。
+该选项将完全充填所给的窗口，从而会缩放宽高比。MPlayer 不再负责诸如全景模式之类
+的功能，而是由创建该窗口的应用程序管理。
 .
 .TP
 .B \-xineramascreen <\-2\-...>

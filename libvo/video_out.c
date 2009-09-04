@@ -476,9 +476,9 @@ void calc_src_dst_rects(struct vo *vo, int src_width, int src_height,
   if (borders) {
     borders->left = 0; borders->top = 0;
   }
-  if (vo_fs) {
-    aspect(vo, &scaled_width, &scaled_height, A_ZOOM);
-    panscan_calc(vo);
+  if (aspect_scaling()) {
+    aspect(vo, &scaled_width, &scaled_height, A_WINZOOM);
+    panscan_calc_windowed(vo);
     scaled_width  += vo->panscan_x;
     scaled_height += vo->panscan_y;
     if (borders) {

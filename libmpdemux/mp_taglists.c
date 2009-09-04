@@ -26,8 +26,6 @@
 #include "ffmpeg_files/taglists.c"
 
 static const struct mp_AVCodecTag mp_wav_tags[] = {
-    { CODEC_ID_RA_144,            MKTAG('1', '4', '_', '4')},
-    { CODEC_ID_RA_288,            MKTAG('2', '8', '_', '8')},
     { CODEC_ID_ADPCM_4XM,         MKTAG('4', 'X', 'M', 'A')},
     { CODEC_ID_ADPCM_EA,          MKTAG('A', 'D', 'E', 'A')},
     { CODEC_ID_ADPCM_EA_MAXIS_XA, MKTAG('A', 'D', 'X', 'A')},
@@ -45,6 +43,8 @@ static const struct mp_AVCodecTag mp_wav_tags[] = {
     { CODEC_ID_NELLYMOSER,        MKTAG('N', 'E', 'L', 'L')},
     { CODEC_ID_QCELP,             MKTAG('Q', 'c', 'l', 'p')},
     { CODEC_ID_QDM2,              MKTAG('Q', 'D', 'M', '2')},
+    { CODEC_ID_RA_144,            MKTAG('1', '4', '_', '4')},
+    { CODEC_ID_RA_288,            MKTAG('2', '8', '_', '8')},
     { CODEC_ID_ROQ_DPCM,          MKTAG('R', 'o', 'Q', 'A')},
     { CODEC_ID_SHORTEN,           MKTAG('s', 'h', 'r', 'n')},
     { CODEC_ID_SPEEX,             MKTAG('s', 'p', 'x', ' ')},
@@ -58,7 +58,14 @@ static const struct mp_AVCodecTag mp_wav_tags[] = {
 
 const struct mp_AVCodecTag *mp_wav_taglists[] = {mp_ff_codec_wav_tags, mp_wav_tags, 0};
 
-static const struct mp_AVCodecTag mp_wav_override_tags[] = {
+static const struct mp_AVCodecTag mp_codecid_override_tags[] = {
+    { CODEC_ID_AAC,               MKTAG('M', 'P', '4', 'A')},
+    { CODEC_ID_AC3,               0x2000},
+    { CODEC_ID_DTS,               0x2001},
+    { CODEC_ID_EAC3,              MKTAG('E', 'A', 'C', '3')},
+    { CODEC_ID_H264,              MKTAG('H', '2', '6', '4')},
+    { CODEC_ID_MPEG4,             MKTAG('M', 'P', '4', 'V')},
+    { CODEC_ID_PCM_BLURAY,        MKTAG('B', 'P', 'C', 'M')},
     { CODEC_ID_PCM_S8,            MKTAG('t', 'w', 'o', 's')},
     { CODEC_ID_PCM_U8,            1},
     { CODEC_ID_PCM_S16BE,         MKTAG('t', 'w', 'o', 's')},
@@ -67,10 +74,12 @@ static const struct mp_AVCodecTag mp_wav_override_tags[] = {
     { CODEC_ID_PCM_S24LE,         1},
     { CODEC_ID_PCM_S32BE,         MKTAG('i', 'n', '3', '2')},
     { CODEC_ID_PCM_S32LE,         1},
+    { CODEC_ID_MP2,               0x50},
+    { CODEC_ID_MPEG2VIDEO,        MKTAG('M', 'P', 'G', '2')},
     { 0, 0 },
 };
 
-const struct mp_AVCodecTag *mp_wav_override_taglists[] = {mp_wav_override_tags, 0};
+const struct mp_AVCodecTag *mp_codecid_override_taglists[] = {mp_codecid_override_tags, 0};
 
 static const struct mp_AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_AMV,               MKTAG('A', 'M', 'V', 'V')},
@@ -84,6 +93,7 @@ static const struct mp_AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_INTERPLAY_VIDEO,   MKTAG('I', 'N', 'P', 'V')},
     { CODEC_ID_MDEC,              MKTAG('M', 'D', 'E', 'C')},
     { CODEC_ID_MOTIONPIXELS,      MKTAG('M', 'V', 'I', '1')},
+    { CODEC_ID_NUV,               MKTAG('N', 'U', 'V', '1')},
     { CODEC_ID_RL2,               MKTAG('R', 'L', '2', 'V')},
     { CODEC_ID_ROQ,               MKTAG('R', 'o', 'Q', 'V')},
     { CODEC_ID_RV10,              MKTAG('R', 'V', '1', '0')},
@@ -97,7 +107,6 @@ static const struct mp_AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_VMDVIDEO,          MKTAG('V', 'M', 'D', 'V')},
     { CODEC_ID_WS_VQA,            MKTAG('V', 'Q', 'A', 'V')},
     { CODEC_ID_XAN_WC3,           MKTAG('W', 'C', '3', 'V')},
-    { CODEC_ID_NUV,               MKTAG('N', 'U', 'V', '1')},
     { 0, 0 },
 };
 
