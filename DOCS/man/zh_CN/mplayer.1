@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r29555
+.\" sync with en/mplayer.1 r29638
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -511,11 +511,16 @@ MEncoder 的配置文件是 "mencoder.conf" 位于你的配置目录
 而如果要停用就把它们设置为 "no" 或者 "0" 或者 "false"。
 甚至子选项也可以如此设定选项。
 .PP
-你也可以为特定文件写配置文件。
-如果你希望一个特定文件 "movie.avi" 有个配置文件, 就新建文件,
-名为 "movie.avi.conf", 写上该特定文件的选项并放在目录 ~/.mplayer/ 下。
-你也可以把配置文件放在与播放该特定文件时该特定文件相同的目录之下,
-只要你（要么在命令行或者在全局配置文件中）给出 \-use\-filedir\-conf 选项。
+你也可以编写每个媒体文件专用的配置文件。
+如果要给名叫‘movie.avi’的一个文件设置一个配置文件，则创建一个名为‘movie.avi.conf’的文件，
+其中存放了该媒体文件专用的选项，并将其放到 ~/.mplayer/。
+只要给出了 \-use\-filedir\-conf 选项（或是通行命令行，或是在全局配置文件中），你也可以把配置文
+件放到与所播放的媒体文件相同的目录下。
+如果在媒体文件所在目录下找到其专用的配置文件，则不会从 ~/.maplyer 目录下加载任何媒体文件专用的
+配置。
+另外，\-use\-filedir\-conf 选项启用了目录专用的配置文件。
+对于该选项，MPlayer 首先尝试所播放文件的目录下加载 mplayer.conf，然后尝试加载任何存在的媒体文件
+专用的配置。
 .PP
 .I MPLAYER 配置文件示例:
 .sp 1
