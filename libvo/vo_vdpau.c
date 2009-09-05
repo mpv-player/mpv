@@ -1293,85 +1293,84 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct vdp_functions *vdp = vc->vdp;
 
     switch (request) {
-        case VOCTRL_GET_DEINTERLACE:
-            *(int*)data = vc->deint;
-            return VO_TRUE;
-        case VOCTRL_SET_DEINTERLACE:
-            vc->deint = *(int*)data;
-            if (vc->deint)
-                vc->deint = vc->deint_type;
-            if (vc->deint_type > 2) {
-                VdpStatus vdp_st;
-                VdpVideoMixerFeature features[1] =
-                    {vc->deint_type == 3 ?
-                     VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL :
-                     VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL};
-                VdpBool feature_enables[1] = {vc->deint ? VDP_TRUE : VDP_FALSE};
-                vdp_st = vdp->video_mixer_set_feature_enables(vc->video_mixer,
-                                                              1, features,
-                                                              feature_enables);
-                CHECK_ST_WARNING("Error changing deinterlacing settings");
-                vc->deint_buffer_past_frames = 1;
-            }
-            return VO_TRUE;
-        case VOCTRL_PAUSE:
-            return (vc->paused = true);
-        case VOCTRL_RESUME:
-            return (vc->paused = false);
-        case VOCTRL_QUERY_FORMAT:
-            return query_format(*(uint32_t *)data);
-        case VOCTRL_GET_IMAGE:
-            return get_image(vo, data);
-        case VOCTRL_DRAW_IMAGE:
-            return draw_image(vo, data);
-        case VOCTRL_BORDER:
-            vo_x11_border(vo);
-            resize(vo);
-            return VO_TRUE;
-        case VOCTRL_FULLSCREEN:
-            vo_x11_fullscreen(vo);
-            resize(vo);
-            return VO_TRUE;
-        case VOCTRL_GET_PANSCAN:
-            return VO_TRUE;
-        case VOCTRL_SET_PANSCAN:
-            resize(vo);
-            return VO_TRUE;
-        case VOCTRL_SET_EQUALIZER: {
-            struct voctrl_set_equalizer_args *args = data;
-            return set_equalizer(vo, args->name, args->value);
+    case VOCTRL_GET_DEINTERLACE:
+        *(int*)data = vc->deint;
+        return VO_TRUE;
+    case VOCTRL_SET_DEINTERLACE:
+        vc->deint = *(int*)data;
+        if (vc->deint)
+            vc->deint = vc->deint_type;
+        if (vc->deint_type > 2) {
+            VdpStatus vdp_st;
+            VdpVideoMixerFeature features[1] =
+                {vc->deint_type == 3 ?
+                 VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL :
+                 VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL};
+            VdpBool feature_enables[1] = {vc->deint ? VDP_TRUE : VDP_FALSE};
+            vdp_st = vdp->video_mixer_set_feature_enables(vc->video_mixer,
+                                                          1, features,
+                                                          feature_enables);
+            CHECK_ST_WARNING("Error changing deinterlacing settings");
+            vc->deint_buffer_past_frames = 1;
         }
-        case VOCTRL_GET_EQUALIZER:
-        {
-            struct voctrl_get_equalizer_args *args = data;
-            return get_equalizer(vo, args->name, args->valueptr);
+        return VO_TRUE;
+    case VOCTRL_PAUSE:
+        return (vc->paused = true);
+    case VOCTRL_RESUME:
+        return (vc->paused = false);
+    case VOCTRL_QUERY_FORMAT:
+        return query_format(*(uint32_t *)data);
+    case VOCTRL_GET_IMAGE:
+        return get_image(vo, data);
+    case VOCTRL_DRAW_IMAGE:
+        return draw_image(vo, data);
+    case VOCTRL_BORDER:
+        vo_x11_border(vo);
+        resize(vo);
+        return VO_TRUE;
+    case VOCTRL_FULLSCREEN:
+        vo_x11_fullscreen(vo);
+        resize(vo);
+        return VO_TRUE;
+    case VOCTRL_GET_PANSCAN:
+        return VO_TRUE;
+    case VOCTRL_SET_PANSCAN:
+        resize(vo);
+        return VO_TRUE;
+    case VOCTRL_SET_EQUALIZER: {
+        struct voctrl_set_equalizer_args *args = data;
+        return set_equalizer(vo, args->name, args->value);
+    }
+    case VOCTRL_GET_EQUALIZER: {
+        struct voctrl_get_equalizer_args *args = data;
+        return get_equalizer(vo, args->name, args->valueptr);
+    }
+    case VOCTRL_ONTOP:
+        vo_x11_ontop(vo);
+        return VO_TRUE;
+    case VOCTRL_UPDATE_SCREENINFO:
+        update_xinerama_info(vo);
+        return VO_TRUE;
+    case VOCTRL_DRAW_EOSD:
+        if (!data)
+            return VO_FALSE;
+        generate_eosd(vo, data);
+        draw_eosd(vo);
+        return VO_TRUE;
+    case VOCTRL_GET_EOSD_RES: {
+        mp_eosd_res_t *r = data;
+        r->mt = r->mb = r->ml = r->mr = 0;
+        if (vo_fs) {
+            r->w = vo->opts->vo_screenwidth;
+            r->h = vo->opts->vo_screenheight;
+            r->ml = r->mr = vc->border_x;
+            r->mt = r->mb = vc->border_y;
+        } else {
+            r->w = vo->dwidth;
+            r->h = vo->dheight;
         }
-        case VOCTRL_ONTOP:
-            vo_x11_ontop(vo);
-            return VO_TRUE;
-        case VOCTRL_UPDATE_SCREENINFO:
-            update_xinerama_info(vo);
-            return VO_TRUE;
-        case VOCTRL_DRAW_EOSD:
-            if (!data)
-                return VO_FALSE;
-            generate_eosd(vo, data);
-            draw_eosd(vo);
-            return VO_TRUE;
-        case VOCTRL_GET_EOSD_RES: {
-            mp_eosd_res_t *r = data;
-            r->mt = r->mb = r->ml = r->mr = 0;
-            if (vo_fs) {
-                r->w = vo->opts->vo_screenwidth;
-                r->h = vo->opts->vo_screenheight;
-                r->ml = r->mr = vc->border_x;
-                r->mt = r->mb = vc->border_y;
-            } else {
-                r->w = vo->dwidth;
-                r->h = vo->dheight;
-            }
-            return VO_TRUE;
-        }
+        return VO_TRUE;
+    }
     }
     return VO_NOTIMPL;
 }
