@@ -1371,6 +1371,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         }
         return VO_TRUE;
     }
+    case VOCTRL_REDRAW_OSD:
+        video_to_output_surface(vo);
+        draw_eosd(vo);
+        draw_osd(vo, data);
+        flip_page(vo);
+        return true;
     }
     return VO_NOTIMPL;
 }
