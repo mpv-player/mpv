@@ -43,6 +43,7 @@
 #include "subopt-helper.h"
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"
+#include "osdep/timer.h"
 
 #include "libavcodec/vdpau.h"
 
@@ -93,6 +94,10 @@ struct vdpctx {
     struct vdp_functions *vdp;
 
     VdpDevice                          vdp_device;
+    bool                               is_preempted;
+    bool                               preemption_acked;
+    bool                               preemption_user_notified;
+    unsigned int                       last_preemption_retry_fail;
     VdpDeviceCreateX11                *vdp_device_create;
     VdpGetProcAddress                 *vdp_get_proc_address;
 
@@ -282,11 +287,19 @@ static void resize(struct vo *vo)
         flip_page(vo);
 }
 
+static void preemption_callback(VdpDevice device, void *context)
+{
+    struct vdpctx *vc = context;
+    vc->is_preempted = true;
+    vc->preemption_acked = false;
+}
+
 /* Initialize vdp_get_proc_address, called from preinit() */
 static int win_x11_init_vdpau_procs(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
     struct vdpctx *vc = vo->priv;
+    talloc_free(vc->vdp); // In case this is reinitialization after preemption
     struct vdp_functions *vdp = talloc_zero(vc, struct vdp_functions);
     vc->vdp = vdp;
     VdpStatus vdp_st;
@@ -324,6 +337,8 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
             return -1;
         }
     }
+    vdp_st = vdp->preemption_callback_register(vc->vdp_device,
+                                               preemption_callback, vc);
     return 0;
 }
 
@@ -334,15 +349,31 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     VdpStatus vdp_st;
 
-    vdp_st = vdp->presentation_queue_target_create_x11(vc->vdp_device,
-                                                       x11->window,
-                                                       &vc->flip_target);
-    CHECK_ST_ERROR("Error when calling "
-                   "vdp_presentation_queue_target_create_x11");
+    if (vc->flip_target == VDP_INVALID_HANDLE) {
+        vdp_st = vdp->presentation_queue_target_create_x11(vc->vdp_device,
+                                                           x11->window,
+                                                           &vc->flip_target);
+        CHECK_ST_ERROR("Error when calling "
+                       "vdp_presentation_queue_target_create_x11");
+    }
 
-    vdp_st = vdp->presentation_queue_create(vc->vdp_device, vc->flip_target,
-                                            &vc->flip_queue);
-    CHECK_ST_ERROR("Error when calling vdp_presentation_queue_create");
+    /* Emperically this seems to be the first call which fails when we
+     * try to reinit after preemption while the user is still switched
+     * from X to a virtual terminal (creating the vdp_device initially
+     * succeeds, as does creating the flip_target above). This is
+     * probably not guaranteed behavior, but we'll assume it as a simple
+     * way to reduce warnings while trying to recover from preemption.
+     */
+    if (vc->flip_queue == VDP_INVALID_HANDLE) {
+        vdp_st = vdp->presentation_queue_create(vc->vdp_device, vc->flip_target,
+                                                &vc->flip_queue);
+        if (vc->is_preempted && vdp_st != VDP_STATUS_OK) {
+            mp_msg(MSGT_VO, MSGL_DBG2, "[vdpau] Failed to create flip queue "
+                   "while preempted: %s\n", vdp->get_error_string(vdp_st));
+            return -1;
+        } else
+            CHECK_ST_ERROR("Error when calling vdp_presentation_queue_create");
+    }
 
     return 0;
 }
@@ -355,6 +386,10 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
 #define MAX_NUM_FEATURES 5
     int i;
     VdpStatus vdp_st;
+
+    if (vc->video_mixer != VDP_INVALID_HANDLE)
+        return 0;
+
     int feature_count = 0;
     VdpVideoMixerFeature features[MAX_NUM_FEATURES];
     VdpBool feature_enables[MAX_NUM_FEATURES];
@@ -429,9 +464,6 @@ static void free_video_specific(struct vo *vo)
     vc->decoder = VDP_INVALID_HANDLE;
     vc->decoder_max_refs = -1;
 
-    for (i = 0; i < 3; i++)
-        vc->deint_surfaces[i] = VDP_INVALID_HANDLE;
-
     for (i = 0; i < 2; i++)
         if (vc->deint_mpi[i]) {
             vc->deint_mpi[i]->usage_count--;
@@ -493,6 +525,102 @@ static int create_vdp_decoder(struct vo *vo, int max_refs)
     return 1;
 }
 
+int initialize_vdpau_objects(struct vo *vo)
+{
+    struct vdpctx *vc = vo->priv;
+    struct vdp_functions *vdp = vc->vdp;
+    VdpStatus vdp_st;
+
+    vc->vdp_chroma_type = VDP_CHROMA_TYPE_420;
+    switch (vc->image_format) {
+        case IMGFMT_YV12:
+        case IMGFMT_I420:
+        case IMGFMT_IYUV:
+            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YV12;
+            break;
+        case IMGFMT_NV12:
+            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_NV12;
+            break;
+        case IMGFMT_YUY2:
+            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YUYV;
+            vc->vdp_chroma_type  = VDP_CHROMA_TYPE_422;
+            break;
+        case IMGFMT_UYVY:
+            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_UYVY;
+            vc->vdp_chroma_type  = VDP_CHROMA_TYPE_422;
+    }
+    if (win_x11_init_vdpau_flip_queue(vo) < 0)
+        return -1;
+
+    if (create_vdp_mixer(vo, vc->vdp_chroma_type) < 0)
+        return -1;
+
+    vdp_st = vdp->
+        bitmap_surface_query_capabilities(vc->vdp_device,
+                                          VDP_RGBA_FORMAT_A8,
+                                          &(VdpBool){0},
+                                          &vc->eosd_surface.max_width,
+                                          &vc->eosd_surface.max_height);
+    CHECK_ST_WARNING("Query to get max EOSD surface size failed");
+    vc->surface_num = 0;
+    vc->vid_surface_num = -1;
+    resize(vo);
+    return 0;
+}
+
+static void mark_vdpau_objects_uninitialized(struct vo *vo)
+{
+    struct vdpctx *vc = vo->priv;
+
+    vc->decoder = VDP_INVALID_HANDLE;
+    for (int i = 0; i < MAX_VIDEO_SURFACES; i++)
+        vc->surface_render[i].surface = VDP_INVALID_HANDLE;
+    for (int i = 0; i < 3; i++)
+        vc->deint_surfaces[i] = VDP_INVALID_HANDLE;
+    vc->video_mixer = VDP_INVALID_HANDLE;
+    vc->flip_queue = VDP_INVALID_HANDLE;
+    vc->flip_target = VDP_INVALID_HANDLE;
+    for (int i = 0; i <= NUM_OUTPUT_SURFACES; i++)
+        vc->output_surfaces[i] = VDP_INVALID_HANDLE;
+    vc->vdp_device = VDP_INVALID_HANDLE;
+    vc->eosd_surface = (struct eosd_bitmap_surface){
+        .surface = VDP_INVALID_HANDLE,
+    };
+    vc->output_surface_width = vc->output_surface_height = -1;
+    vc->eosd_render_count = 0;
+    vc->visible_buf = false;
+}
+
+static int handle_preemption(struct vo *vo)
+{
+    struct vdpctx *vc = vo->priv;
+
+    if (!vc->is_preempted)
+        return 0;
+    if (!vc->preemption_acked)
+        mark_vdpau_objects_uninitialized(vo);
+    vc->preemption_acked = true;
+    if (!vc->preemption_user_notified) {
+        mp_tmsg(MSGT_VO, MSGL_ERR, "[vdpau] Got display preemption notice! "
+                "Will attempt to recover.\n");
+        vc->preemption_user_notified = true;
+    }
+    /* Trying to initialize seems to be quite slow, so only try once a
+     * second to avoid using 100% CPU. */
+    if (vc->last_preemption_retry_fail
+        && GetTimerMS() - vc->last_preemption_retry_fail < 1000)
+        return -1;
+    if (win_x11_init_vdpau_procs(vo) < 0 || initialize_vdpau_objects(vo) < 0) {
+        vc->last_preemption_retry_fail = GetTimerMS() | 1;
+        return -1;
+    }
+    vc->last_preemption_retry_fail = 0;
+    vc->is_preempted = false;
+    vc->preemption_user_notified = false;
+    mp_tmsg(MSGT_VO, MSGL_INFO, "[vdpau] Recovered from display preemption.\n");
+    return 1;
+}
+
 /*
  * connect to X server, create and map window, initialize all
  * VDPAU objects, create different surfaces etc.
@@ -513,14 +641,14 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     int vm = flags & VOFLAG_MODESWITCHING;
 #endif
 
+    if (handle_preemption(vo) < 0)
+        return -1;
     vc->image_format = format;
     vc->vid_width    = width;
     vc->vid_height   = height;
     free_video_specific(vo);
     if (IMGFMT_IS_VDPAU(vc->image_format) && !create_vdp_decoder(vo, 2))
         return -1;
-
-    vc->visible_buf = false;
 
 #ifdef CONFIG_XF86VM
     if (vm) {
@@ -559,40 +687,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0)
         vo_fs = 1;
 
-    /* -----VDPAU related code here -------- */
-    if (vc->flip_queue == VDP_INVALID_HANDLE
-        && win_x11_init_vdpau_flip_queue(vo))
+    if (initialize_vdpau_objects(vo) < 0)
         return -1;
-
-    vc->vdp_chroma_type = VDP_CHROMA_TYPE_420;
-    switch (vc->image_format) {
-        case IMGFMT_YV12:
-        case IMGFMT_I420:
-        case IMGFMT_IYUV:
-            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YV12;
-            break;
-        case IMGFMT_NV12:
-            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_NV12;
-            break;
-        case IMGFMT_YUY2:
-            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YUYV;
-            vc->vdp_chroma_type  = VDP_CHROMA_TYPE_422;
-            break;
-        case IMGFMT_UYVY:
-            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_UYVY;
-            vc->vdp_chroma_type  = VDP_CHROMA_TYPE_422;
-    }
-    if (create_vdp_mixer(vo, vc->vdp_chroma_type))
-        return -1;
-
-    vc->vdp->bitmap_surface_query_capabilities(vc->vdp_device,
-                                               VDP_RGBA_FORMAT_A8,
-                                               &(VdpBool){0},
-                                               &vc->eosd_surface.max_width,
-                                               &vc->eosd_surface.max_height);
-    vc->surface_num = 0;
-    vc->vid_surface_num = -1;
-    resize(vo);
 
     return 0;
 }
@@ -601,6 +697,9 @@ static void check_events(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
+
+    if (handle_preemption(vo) < 0)
+        return;
 
     int e = vo_x11_check_events(vo);
 
@@ -699,6 +798,9 @@ static void draw_eosd(struct vo *vo)
     VdpStatus vdp_st;
     VdpOutputSurface output_surface = vc->output_surfaces[vc->surface_num];
     int i;
+
+    if (handle_preemption(vo) < 0)
+        return;
 
     VdpOutputSurfaceRenderBlendState blend_state = {
         .struct_version = VDP_OUTPUT_SURFACE_RENDER_BLEND_STATE_VERSION,
@@ -914,6 +1016,9 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     struct vdpctx *vc = vo->priv;
     mp_msg(MSGT_VO, MSGL_DBG2, "DRAW_OSD\n");
 
+    if (handle_preemption(vo) < 0)
+        return;
+
     osd_draw_text_ext(osd, vo->dwidth, vo->dheight, vc->border_x, vc->border_y,
                       vc->border_x, vc->border_y, vc->vid_width,
                       vc->vid_height, draw_osd_I8A8, vo);
@@ -924,6 +1029,9 @@ static void flip_page(struct vo *vo)
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
+
+    if (handle_preemption(vo) < 0)
+        return;
 
     mp_msg(MSGT_VO, MSGL_DBG2, "\nFLIP_PAGE VID:%u -> OUT:%u\n",
            vc->surface_render[vc->vid_surface_num].surface,
@@ -945,6 +1053,10 @@ static int draw_slice(struct vo *vo, uint8_t *image[], int stride[], int w,
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
+
+    if (handle_preemption(vo) < 0)
+        return VO_TRUE;
+
     struct vdpau_render_state *rndr = (struct vdpau_render_state *)image[0];
     int max_refs = vc->image_format == IMGFMT_VDPAU_H264 ?
         rndr->info.h264.num_ref_frames : 2;
@@ -975,14 +1087,13 @@ static struct vdpau_render_state *get_surface(struct vo *vo, int number)
 
     if (number > MAX_VIDEO_SURFACES)
         return NULL;
-    if (vc->surface_render[number].surface == VDP_INVALID_HANDLE) {
+    if (vc->surface_render[number].surface == VDP_INVALID_HANDLE
+        && !vc->is_preempted) {
         VdpStatus vdp_st;
         vdp_st = vdp->video_surface_create(vc->vdp_device, vc->vdp_chroma_type,
                                            vc->vid_width, vc->vid_height,
                                            &vc->surface_render[number].surface);
         CHECK_ST_WARNING("Error when calling vdp_video_surface_create");
-        if (vdp_st != VDP_STATUS_OK)
-            return NULL;
     }
     mp_msg(MSGT_VO, MSGL_DBG2, "VID CREATE: %u\n",
            vc->surface_render[number].surface);
@@ -1163,16 +1274,7 @@ static int preinit(struct vo *vo, const char *arg)
 
     // Mark everything as invalid first so uninit() can tell what has been
     // allocated
-    vc->decoder = VDP_INVALID_HANDLE;
-    for (i = 0; i < MAX_VIDEO_SURFACES; i++)
-        vc->surface_render[i].surface = VDP_INVALID_HANDLE;
-    vc->video_mixer = VDP_INVALID_HANDLE;
-    vc->flip_queue = VDP_INVALID_HANDLE;
-    vc->flip_target = VDP_INVALID_HANDLE;
-    for (i = 0; i <= NUM_OUTPUT_SURFACES; i++)
-        vc->output_surfaces[i] = VDP_INVALID_HANDLE;
-    vc->vdp_device = VDP_INVALID_HANDLE;
-    vc->eosd_surface.surface = VDP_INVALID_HANDLE;
+    mark_vdpau_objects_uninitialized(vo);
 
     vc->deint_type = 3;
     vc->chroma_deint = 1;
@@ -1222,8 +1324,6 @@ static int preinit(struct vo *vo, const char *arg)
         dlclose(vc->vdpau_lib_handle);
         return -1;
     }
-
-    vc->output_surface_width = vc->output_surface_height = -1;
 
     // full grayscale palette.
     for (i = 0; i < PALETTE_SIZE; ++i)
@@ -1292,6 +1392,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
 
+    handle_preemption(vo);
+
     switch (request) {
     case VOCTRL_GET_DEINTERLACE:
         *(int*)data = vc->deint;
@@ -1323,6 +1425,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_GET_IMAGE:
         return get_image(vo, data);
     case VOCTRL_DRAW_IMAGE:
+        if (vc->is_preempted)
+            return true;
         return draw_image(vo, data);
     case VOCTRL_BORDER:
         vo_x11_border(vo);
