@@ -65,7 +65,7 @@ static struct {
         { "it", DEMUXER_TYPE_XMMS },
         { "mid", DEMUXER_TYPE_XMMS },
         { "midi", DEMUXER_TYPE_XMMS },
-        { "vqf", DEMUXER_TYPE_XMMS },
+        { "vqf", DEMUXER_TYPE_LAVF },
         { "nsv", DEMUXER_TYPE_NSV },
         { "nsa", DEMUXER_TYPE_NSV },
         { "mpc", DEMUXER_TYPE_MPC },
