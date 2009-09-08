@@ -948,7 +948,7 @@ static int mp_property_program(m_option_t * prop, int action, void *arg,
 	if (prog.aid < 0 && prog.vid < 0) {
 	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "Selected program contains no audio or video streams!\n");
 	    return M_PROPERTY_ERROR;
-        }
+	}
 	mp_property_do("switch_audio", M_PROPERTY_SET, &prog.aid, mpctx);
 	mp_property_do("switch_video", M_PROPERTY_SET, &prog.vid, mpctx);
 	return M_PROPERTY_OK;
