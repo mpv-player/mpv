@@ -491,6 +491,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         demuxer_add_chapter(demuxer, t ? t->value : NULL, start, end);
     }
 
+    for(i=0; i<avfc->nb_streams; i++)
+        handle_stream(demuxer, avfc, i);
     if(avfc->nb_programs) {
         int p, start=0, found=0;
 
@@ -512,15 +514,11 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
             AVProgram *program = avfc->programs[p];
             t = av_metadata_get(program->metadata, "title", NULL, 0);
             mp_msg(MSGT_HEADER,MSGL_INFO,"LAVF: Program %d %s\n", program->id, t ? t->value : "");
-            for(i=0; i<program->nb_stream_indexes; i++)
-                handle_stream(demuxer, avfc, program->stream_index[i]);
             if(!priv->cur_program && (demuxer->video->sh || demuxer->audio->sh))
                 priv->cur_program = program->id;
             p = (p + 1) % avfc->nb_programs;
         } while(p!=start);
-    } else
-        for(i=0; i<avfc->nb_streams; i++)
-            handle_stream(demuxer, avfc, i);
+    }
 
     mp_msg(MSGT_HEADER,MSGL_V,"LAVF: %d audio and %d video streams found\n",priv->audio_streams,priv->video_streams);
     mp_msg(MSGT_HEADER,MSGL_V,"LAVF: build %d\n", LIBAVFORMAT_BUILD);
