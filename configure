@@ -6814,7 +6814,7 @@ echocheck "QuickTime codecs"
 _qtx_emulation=no
 def_qtx_win32='#undef CONFIG_QTX_CODECS_WIN32'
 if test "$_qtx" = auto ; then
-  test "$_win32dll" = yes || quicktime && _qtx=yes
+  test "$_win32dll" = yes || test "$quicktime" = yes && _qtx=yes
 fi
 if test "$_qtx" = yes ; then
     def_qtx='#define CONFIG_QTX_CODECS 1'
