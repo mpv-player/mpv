@@ -183,6 +183,7 @@ static const char * const preferred_list[] = {
     "mxf",
     "swf",
     "vqf",
+    "w64",
     "wv",
     NULL
 };
