@@ -345,8 +345,8 @@ fi
 [ $mp3 -eq 1 -a $abrset -eq 0 ] && abr=128
 
 # audio sample rate in kHz
-((a=$asr / 1000))
-((b=$asr % 1000))
+a=$(($a=$asr / 1000))
+b=$(($b=$asr % 1000))
 [ $b -le 9 ] && b="00$b00"
 [ $b -le 99 ] && b="0$b00"
 kasr="$a.$b"
