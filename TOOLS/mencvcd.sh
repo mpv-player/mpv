@@ -4,7 +4,7 @@
 #
 # Licence:          GPL
 #
-# 2002/09/21        Jürgen Hammelmann <juergen.hammelmann@gmx.de>
+# 2002/09/21        JÃ¼rgen Hammelmann <juergen.hammelmann@gmx.de>
 #
 # Script:           MPlayer Sources (DVD) to (S)VCD ripping and burning
 #
