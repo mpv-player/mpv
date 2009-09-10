@@ -173,17 +173,17 @@ static int lavf_check_file(demuxer_t *demuxer){
 
 static const char * const preferred_list[] = {
     "dxa",
-    "wv",
-    "nuv",
-    "nut",
-    "gxf",
-    "mxf",
     "flv",
-    "swf",
+    "gxf",
+    "nut",
+    "nuv",
     "mov,mp4,m4a,3gp,3g2,mj2",
     "mpc",
     "mpc8",
+    "mxf",
+    "swf",
     "vqf",
+    "wv",
     NULL
 };
 
