@@ -1,4 +1,4 @@
-.\" Synced with r29413
+.\" Synced with r29661
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 07. 13." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 09. 11." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -525,6 +525,12 @@ a ~/.mplayer/ könyvtárba.
 A konfigurációs fájlt teheted ugyanabba a könyvtárba is, mint ahol a
 lejátszandó fájl van, feltéve hogy megadod a \-use\-filedir\-conf kapcsolót (vagy
 a parancssorban vagy a globális konfigurációs fájlban).
+Ha egy fájl specifikus konfigurációs fájl található ugyan abban a könyvtárban, nem
+tölt be egy fájl specifikus konfigurációt sem a ~/.mplayer könyvtárból.
+Ráadásul a \-use\-filedir\-conf opció engedélyezi a könyvtár specifikus konfigurációs
+fájlokat. Ezért az MPlayer elõször megpróbálja betölteni az mplayer.conf-ot az
+lejátszandó fájlt tartalmazó könyvtárból, majd megpróbál betölteni bármilyen fájl
+specifikus konfigurációt.
 .PP
 .I PÉLDA AZ MPLAYER KONFIGURÁCIÓS FÁJLJÁRA:
 .sp 1
@@ -3295,6 +3301,8 @@ VBI bekapcsolása a vesa, dfbmga és az svga videó kimeneti meghajtóhoz.
 Ez megadja az MPlayernek hogy egy már létezõ X11 ablakban játsszon le,
 hasznos ha böngészõbe akarod integrálni az MPlayert (pl.\& a plugger
 kiterjesztéssel).
+Ez az opció a megadott ablakot teljesen kitölti, ezért a méretezést, panscan-t,
+stb. már nem az MPlayer kezeli, hanem az alkalmazás, amelyik az ablakot létrehozta.
 .
 .TP
 .B \-xineramascreen <\-2\-...>
@@ -3629,7 +3637,7 @@ Kényszeríti a WarpOverlay! módot.
 .IPs dive
 Kényszeríti a DIVE módot.
 .IPs (no)t23
-Engedélyezi/letiltja a T23 laptopokra vonatkozó kódot (alapértelmezett: \-not23).
+Engedélyezi/letiltja a T23 laptopokra vonatkozó kódot (alapértelmezett: letiltott).
 Próbáld meg engedélyezni ezt az opciót, ha a videó kártyád csak a felméretezést támogatja.
 .RE
 .PD 1
@@ -7884,10 +7892,6 @@ Adaptív PCM formátumok \- lásd a HTML dokumentációt a részletekért.
 Free Lossless Audio Codec (FLAC)
 .IPs "g726\ "
 G.726 ADPCM
-.IPs libamr_nb
-3GPP Adaptive Multi-Rate (AMR) narrow-band
-.IPs libamr_wb
-3GPP Adaptive Multi-Rate (AMR) wide-band
 .IPs libfaac
 Advanced Audio Coding (AAC) \- FAAC használatával
 .IPs libmp3lame
