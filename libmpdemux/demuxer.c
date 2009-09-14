@@ -1144,6 +1144,10 @@ int demux_info_add(demuxer_t *demuxer, const char *opt, const char *param)
 
     for (n = 0; info && info[2 * n] != NULL; n++) {
         if (!strcasecmp(opt, info[2 * n])) {
+            if (!strcmp(param, info[2 * n + 1])) {
+                mp_msg(MSGT_DEMUX, MSGL_V, "Demuxer info %s set to unchanged value %s\n", opt, param);
+                return 0;
+            }
             mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_DemuxerInfoChanged, opt,
                    param);
             free(info[2 * n + 1]);
