@@ -442,7 +442,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->draw_slice=draw_slice;
     vf->get_image=get_image;
     vf->put_image=put_image;
-    mp_msg(MSGT_VFILTER, MSGL_INFO, "Expand: %d x %d, %d ; %d, osd: %d, aspect: %lf, round: %d\n",
+    mp_msg(MSGT_VFILTER, MSGL_INFO, "Expand: %d x %d, %d ; %d, osd: %d, aspect: %f, round: %d\n",
     vf->priv->cfg_exp_w,
     vf->priv->cfg_exp_h,
     vf->priv->cfg_exp_x,
