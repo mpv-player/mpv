@@ -168,6 +168,7 @@ static void qpel_li_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds
 	__asm__ volatile("emms \n\t" : : : "memory");
 }
 
+#if HAVE_EBX_AVAILABLE
 static void qpel_4tap_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
 {
 	int i, j, ssd=ss;
@@ -247,6 +248,7 @@ static void qpel_4tap_MMX(unsigned char *d, unsigned char *s, int w, int h, int 
 	if (!up) fast_memcpy(d, s, w);
 	__asm__ volatile("emms \n\t" : : : "memory");
 }
+#endif /* HAVE_EBX_AVAILABLE */
 #endif
 
 static inline int clamp(int a)
@@ -480,7 +482,9 @@ static int open(vf_instance_t *vf, char* args)
 	qpel_4tap = qpel_4tap_C;
 #if HAVE_MMX
 	if(gCpuCaps.hasMMX) qpel_li = qpel_li_MMX;
+#if HAVE_EBX_AVAILABLE
 	if(gCpuCaps.hasMMX) qpel_4tap = qpel_4tap_MMX;
+#endif
 #endif
 #if HAVE_MMX2
 	if(gCpuCaps.hasMMX2) qpel_li = qpel_li_MMX2;

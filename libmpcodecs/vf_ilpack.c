@@ -88,6 +88,7 @@ static void pack_nn_MMX(unsigned char *dst, unsigned char *y,
 	pack_nn_C(dst, y, u, v, (w&7));
 }
 
+#if HAVE_EBX_AVAILABLE
 static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 	unsigned char *u, unsigned char *v, int w, int us, int vs)
 {
@@ -307,6 +308,7 @@ static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
 		);
 	pack_li_1_C(dst, y, u, v, (w&15), us, vs);
 }
+#endif /* HAVE_EBX_AVAILABLE */
 #endif
 
 static pack_func_t *pack_nn;
@@ -399,8 +401,10 @@ static int open(vf_instance_t *vf, char* args)
 #if HAVE_MMX
 	if(gCpuCaps.hasMMX) {
 		pack_nn = (pack_func_t *)pack_nn_MMX;
+#if HAVE_EBX_AVAILABLE
 		pack_li_0 = pack_li_0_MMX;
 		pack_li_1 = pack_li_1_MMX;
+#endif
 	}
 #endif
 
