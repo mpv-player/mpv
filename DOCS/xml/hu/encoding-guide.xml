@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r28984 -->
+<!-- synced with r29461 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -2592,14 +2592,6 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
 <row>
   <entry>g726</entry>
   <entry>G.726 ADPCM</entry>
-</row>
-<row>
-  <entry>libamr_nb</entry>
-  <entry>3GPP Adaptive Multi-Rate (AMR) narrow-band</entry>
-</row>
-<row>
-  <entry>libamr_wb</entry>
-  <entry>3GPP Adaptive Multi-Rate (AMR) wide-band</entry>
 </row>
 <row>
   <entry>libfaac</entry>

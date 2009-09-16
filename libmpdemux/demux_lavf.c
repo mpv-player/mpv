@@ -172,16 +172,18 @@ static int lavf_check_file(demuxer_t *demuxer){
 
 static const char * const preferred_list[] = {
     "dxa",
-    "wv",
-    "nuv",
-    "nut",
-    "gxf",
-    "mxf",
     "flv",
-    "swf",
+    "gxf",
+    "nut",
+    "nuv",
     "mov,mp4,m4a,3gp,3g2,mj2",
     "mpc",
     "mpc8",
+    "mxf",
+    "swf",
+    "vqf",
+    "w64",
+    "wv",
     NULL
 };
 
@@ -240,8 +242,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             // mp4a tag is used for all mp4 files no matter what they actually contain
             if(codec->codec_tag == MKTAG('m', 'p', '4', 'a'))
                 codec->codec_tag= 0;
-            if(codec->codec_id == CODEC_ID_ADPCM_IMA_AMV)
-                codec->codec_tag= MKTAG('A','M','V','A');
             if(!codec->codec_tag)
                 codec->codec_tag= mp_av_codec_get_tag(mp_wav_taglists, codec->codec_id);
             wf->wFormatTag= codec->codec_tag;
@@ -490,6 +490,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         demuxer_add_chapter(demuxer, t ? t->value : NULL, start, end);
     }
 
+    for(i=0; i<avfc->nb_streams; i++)
+        handle_stream(demuxer, avfc, i);
     if(avfc->nb_programs) {
         int p, start=0, found=0;
 
@@ -511,15 +513,11 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
             AVProgram *program = avfc->programs[p];
             t = av_metadata_get(program->metadata, "title", NULL, 0);
             mp_msg(MSGT_HEADER,MSGL_INFO,"LAVF: Program %d %s\n", program->id, t ? t->value : "");
-            for(i=0; i<program->nb_stream_indexes; i++)
-                handle_stream(demuxer, avfc, program->stream_index[i]);
             if(!priv->cur_program && (demuxer->video->sh || demuxer->audio->sh))
                 priv->cur_program = program->id;
             p = (p + 1) % avfc->nb_programs;
         } while(p!=start);
-    } else
-        for(i=0; i<avfc->nb_streams; i++)
-            handle_stream(demuxer, avfc, i);
+    }
 
     mp_msg(MSGT_HEADER,MSGL_V,"LAVF: %d audio and %d video streams found\n",priv->audio_streams,priv->video_streams);
     mp_msg(MSGT_HEADER,MSGL_V,"LAVF: build %d\n", LIBAVFORMAT_BUILD);
@@ -714,6 +712,7 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
             demux_program_t *prog = arg;
             AVProgram *program;
             int p, i;
+            int start;
 
             if(priv->avfc->nb_programs < 2)
                 return DEMUXER_CTRL_NOTIMPL;
@@ -735,6 +734,7 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
                 p = i;
             }
             prog->vid = prog->aid = prog->sid = -2;	//no audio and no video by default
+            start = p;
 redo:
             program = priv->avfc->programs[p];
             for(i=0; i<program->nb_stream_indexes; i++)
@@ -758,6 +758,8 @@ redo:
             if(prog->progid == -1 && prog->vid == -2 && prog->aid == -2)
             {
                 p = (p + 1) % priv->avfc->nb_programs;
+                if (p == start)
+                    return DEMUXER_CTRL_DONTKNOW;
                 goto redo;
             }
             priv->cur_program = prog->progid = program->id;

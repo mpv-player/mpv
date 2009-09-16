@@ -23,10 +23,10 @@
 
 #include "ffmpeg_files/taglists.h"
 
-extern const struct mp_AVCodecTag *mp_wav_taglists[];
+extern const struct mp_AVCodecTag * const mp_wav_taglists[];
 
-extern const struct mp_AVCodecTag *mp_codecid_override_taglists[];
+extern const struct mp_AVCodecTag * const mp_codecid_override_taglists[];
 
-extern const struct mp_AVCodecTag *mp_bmp_taglists[];
+extern const struct mp_AVCodecTag * const mp_bmp_taglists[];
 
 #endif /* MPLAYER_MP_TAGLISTS_H */

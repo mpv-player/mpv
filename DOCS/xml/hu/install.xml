@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r28510 -->
+<!-- synced with r29461 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -470,14 +470,10 @@ make install
 <title>AMR</title>
 
 <para>
-Az Adaptive Multi-Rate beszéd codec-et harmadik generációs (3G) mobiltelefonokban
-használják.
-A referencia implementáció elérhető
-<ulink url="http://www.3gpp.org">A 3. Generációs Együttműködés Projekt</ulink>
-oldalán (személyes felhasználásra ingyenes).
-A támogatás bekapcsolásához töltsd le és telepítsd a függvénykönyvtárakat az
-<ulink url="http://www.penguin.cz/~utx/amr">AMR-NB és AMR-WB</ulink>-hez
-az oldal utasításait követve. Utána forgasd újra az MPlayert!
+Az MPlayer használni tudja az OpenCORE AMR függvénykönyvtárakat a FFmpeg-en keresztül.
+Töltsd le a könyvtárakat az AMR-NB-hez és az AMR-WB-hez az
+<ulink url="http://sourceforge.net/projects/opencore-amr/">opencore-amr</ulink>
+projectből és telepítsd őket az oldalon lévő utasítások szerint.
 </para>
 </sect2>
 

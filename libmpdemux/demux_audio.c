@@ -528,11 +528,10 @@ static int demux_audio_open(demuxer_t* demuxer) {
 }
 
 
-static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
+static int demux_audio_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
   int l;
   demux_packet_t* dp;
   sh_audio_t* sh_audio = ds->sh;
-  demuxer_t* demux = ds->demuxer;
   da_priv_t* priv = demux->priv;
   double this_pts = priv->next_pts;
   stream_t* s = demux->stream;

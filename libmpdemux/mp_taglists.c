@@ -50,17 +50,19 @@ static const struct mp_AVCodecTag mp_wav_tags[] = {
     { CODEC_ID_SPEEX,             MKTAG('s', 'p', 'x', ' ')},
     { CODEC_ID_TRUEHD,            MKTAG('T', 'R', 'H', 'D')},
     { CODEC_ID_TTA,               MKTAG('T', 'T', 'A', '1')},
+    { CODEC_ID_TWINVQ,            MKTAG('T', 'W', 'I', '2')},
     { CODEC_ID_WAVPACK,           MKTAG('W', 'V', 'P', 'K')},
     { CODEC_ID_WESTWOOD_SND1,     MKTAG('S', 'N', 'D', '1')},
     { CODEC_ID_XAN_DPCM,          MKTAG('A', 'x', 'a', 'n')},
     { 0, 0 },
 };
 
-const struct mp_AVCodecTag *mp_wav_taglists[] = {mp_ff_codec_wav_tags, mp_wav_tags, 0};
+const struct mp_AVCodecTag * const mp_wav_taglists[] = {mp_ff_codec_wav_tags, mp_wav_tags, 0};
 
 static const struct mp_AVCodecTag mp_codecid_override_tags[] = {
     { CODEC_ID_AAC,               MKTAG('M', 'P', '4', 'A')},
     { CODEC_ID_AC3,               0x2000},
+    { CODEC_ID_ADPCM_IMA_AMV,     MKTAG('A', 'M', 'V', 'A')},
     { CODEC_ID_DTS,               0x2001},
     { CODEC_ID_EAC3,              MKTAG('E', 'A', 'C', '3')},
     { CODEC_ID_H264,              MKTAG('H', '2', '6', '4')},
@@ -79,7 +81,7 @@ static const struct mp_AVCodecTag mp_codecid_override_tags[] = {
     { 0, 0 },
 };
 
-const struct mp_AVCodecTag *mp_codecid_override_taglists[] = {mp_codecid_override_tags, 0};
+const struct mp_AVCodecTag * const mp_codecid_override_taglists[] = {mp_codecid_override_tags, 0};
 
 static const struct mp_AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_AMV,               MKTAG('A', 'M', 'V', 'V')},
@@ -110,4 +112,4 @@ static const struct mp_AVCodecTag mp_bmp_tags[] = {
     { 0, 0 },
 };
 
-const struct mp_AVCodecTag *mp_bmp_taglists[] = {mp_ff_codec_bmp_tags, mp_bmp_tags, 0};
+const struct mp_AVCodecTag * const mp_bmp_taglists[] = {mp_ff_codec_bmp_tags, mp_bmp_tags, 0};
