@@ -5273,6 +5273,9 @@ struct exports exp_msvcr80[]={
     FF(_initterm_e, -1)
     FF(_initterm, -1)
     FF(_decode_pointer, -1)
+/* needed by KGV1-VFW.dll */
+    {"??2@YAPAXI@Z", -1, expnew},
+    {"??3@YAXPAX@Z", -1, expdelete}
 };
 
 struct exports exp_msvcp60[]={
