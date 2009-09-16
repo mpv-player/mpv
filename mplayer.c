@@ -2590,7 +2590,8 @@ int gui_no_filename=0;
 
   print_version("MPlayer");
 
-#if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_GUI)
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+#ifdef CONFIG_GUI
     void *runningmplayer = FindWindow("MPlayer GUI for Windows", "MPlayer for Windows");
     if(runningmplayer && filename && use_gui){
         COPYDATASTRUCT csData;
@@ -2605,7 +2606,6 @@ int gui_no_filename=0;
     }
 #endif
 
-#if defined(__MINGW32__) || defined(__CYGWIN__)
 	{
 		HMODULE kernel32 = GetModuleHandle("Kernel32.dll");
 		BOOL WINAPI (*setDEP)(DWORD) = NULL;
