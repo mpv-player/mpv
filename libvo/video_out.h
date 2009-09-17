@@ -24,7 +24,7 @@
 #define MPLAYER_VIDEO_OUT_H
 
 #include <inttypes.h>
-#include <stdarg.h>
+#include <stdbool.h>
 
 //#include "font_load.h"
 #include "libmpcodecs/img_format.h"
@@ -117,84 +117,84 @@ typedef struct {
 
 typedef struct vo_info_s
 {
-        /* driver name ("Matrox Millennium G200/G400" */
-        const char *name;
-        /* short name (for config strings) ("mga") */
-        const char *short_name;
-        /* author ("Aaron Holtzman <aholtzma@ess.engr.uvic.ca>") */
-        const char *author;
-        /* any additional comments */
-        const char *comment;
+    /* driver name ("Matrox Millennium G200/G400" */
+    const char *name;
+    /* short name (for config strings) ("mga") */
+    const char *short_name;
+    /* author ("Aaron Holtzman <aholtzma@ess.engr.uvic.ca>") */
+    const char *author;
+    /* any additional comments */
+    const char *comment;
 } vo_info_t;
 
 struct vo;
 struct osd_state;
 
 struct vo_driver {
-	// Driver uses new API
-	int is_new;
+    // Driver uses new API
+    bool is_new;
 
-	// This is set if the driver is not new and contains pointers to
-	// old-API functions to be used instead of the ones below.
-	struct vo_old_functions *old_functions;
+    // This is set if the driver is not new and contains pointers to
+    // old-API functions to be used instead of the ones below.
+    struct vo_old_functions *old_functions;
 
-	const vo_info_t *info;
-	/*
-	 * Preinitializes driver (real INITIALIZATION)
-	 *   arg - currently it's vo_subdevice
-	 *   returns: zero on successful initialization, non-zero on error.
-	 */
-	int (*preinit)(struct vo *vo, const char *arg);
-        /*
-         * Initialize (means CONFIGURE) the display driver.
-	 * params:
-         *   width,height: image source size
-	 *   d_width,d_height: size of the requested window size, just a hint
-	 *   fullscreen: flag, 0=windowd 1=fullscreen, just a hint
-	 *   title: window title, if available
-	 *   format: fourcc of pixel format
-         * returns : zero on successful initialization, non-zero on error.
-         */
-        int (*config)(struct vo *vo, uint32_t width, uint32_t height,
-	              uint32_t d_width, uint32_t d_height, uint32_t fullscreen,
-		      char *title, uint32_t format);
+    const vo_info_t *info;
+    /*
+     * Preinitializes driver (real INITIALIZATION)
+     *   arg - currently it's vo_subdevice
+     *   returns: zero on successful initialization, non-zero on error.
+     */
+    int (*preinit)(struct vo *vo, const char *arg);
+    /*
+     * Initialize (means CONFIGURE) the display driver.
+     * params:
+     *   width,height: image source size
+     *   d_width,d_height: size of the requested window size, just a hint
+     *   fullscreen: flag, 0=windowd 1=fullscreen, just a hint
+     *   title: window title, if available
+     *   format: fourcc of pixel format
+     * returns : zero on successful initialization, non-zero on error.
+     */
+    int (*config)(struct vo *vo, uint32_t width, uint32_t height,
+                  uint32_t d_width, uint32_t d_height, uint32_t fullscreen,
+                  char *title, uint32_t format);
 
-	/*
-	 * Control interface
-	 */
-	int (*control)(struct vo *vo, uint32_t request, void *data);
+    /*
+     * Control interface
+     */
+    int (*control)(struct vo *vo, uint32_t request, void *data);
 
-        /*
-         * Draw a planar YUV slice to the buffer:
-	 * params:
-	 *   src[3] = source image planes (Y,U,V)
-         *   stride[3] = source image planes line widths (in bytes)
-	 *   w,h = width*height of area to be copied (in Y pixels)
-         *   x,y = position at the destination image (in Y pixels)
-         */
-        int (*draw_slice)(struct vo *vo, uint8_t *src[], int stride[], int w,
-			  int h, int x, int y);
+    /*
+     * Draw a planar YUV slice to the buffer:
+     * params:
+     *   src[3] = source image planes (Y,U,V)
+     *   stride[3] = source image planes line widths (in bytes)
+     *   w,h = width*height of area to be copied (in Y pixels)
+     *   x,y = position at the destination image (in Y pixels)
+     */
+    int (*draw_slice)(struct vo *vo, uint8_t *src[], int stride[], int w,
+                      int h, int x, int y);
 
-   	/*
-         * Draws OSD to the screen buffer
-         */
-        void (*draw_osd)(struct vo *vo, struct osd_state *osd);
+    /*
+     * Draws OSD to the screen buffer
+     */
+    void (*draw_osd)(struct vo *vo, struct osd_state *osd);
 
-        /*
-         * Blit/Flip buffer to the screen. Must be called after each frame!
-         */
-        void (*flip_page)(struct vo *vo);
+    /*
+     * Blit/Flip buffer to the screen. Must be called after each frame!
+     */
+    void (*flip_page)(struct vo *vo);
 
-        /*
-         * This func is called after every frames to handle keyboard and
-	 * other events. It's called in PAUSE mode too!
-         */
-        void (*check_events)(struct vo *vo);
+    /*
+     * This func is called after every frames to handle keyboard and
+     * other events. It's called in PAUSE mode too!
+     */
+    void (*check_events)(struct vo *vo);
 
-        /*
-         * Closes driver. Should restore the original state of the system.
-         */
-        void (*uninit)(struct vo *vo);
+    /*
+     * Closes driver. Should restore the original state of the system.
+     */
+    void (*uninit)(struct vo *vo);
 };
 
 struct vo_old_functions {
