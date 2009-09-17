@@ -165,13 +165,6 @@ struct vo_driver {
 	int (*control)(struct vo *vo, uint32_t request, void *data);
 
         /*
-         * Display a new RGB/BGR frame of the video to the screen.
-         * params:
-	 *   src[0] - pointer to the image
-         */
-        int (*draw_frame)(struct vo *vo, uint8_t *src[]);
-
-        /*
          * Draw a planar YUV slice to the buffer:
 	 * params:
 	 *   src[3] = source image planes (Y,U,V)

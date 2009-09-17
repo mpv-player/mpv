@@ -50,7 +50,6 @@ static int preinit(const char *);
     .preinit = old_vo_preinit,\
     .config = old_vo_config,\
     .control = old_vo_control,\
-    .draw_frame = old_vo_draw_frame,\
     .draw_slice = old_vo_draw_slice,\
     .draw_osd = old_vo_draw_osd,\
     .flip_page = old_vo_flip_page,\

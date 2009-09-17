@@ -1075,11 +1075,6 @@ static int draw_slice(struct vo *vo, uint8_t *image[], int stride[], int w,
 }
 
 
-static int draw_frame(struct vo *vo, uint8_t *src[])
-{
-    return VO_ERROR;
-}
-
 static struct vdpau_render_state *get_surface(struct vo *vo, int number)
 {
     struct vdpctx *vc = vo->priv;
@@ -1496,7 +1491,6 @@ const struct vo_driver video_out_vdpau = {
     .preinit = preinit,
     .config = config,
     .control = control,
-    .draw_frame = draw_frame,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
