@@ -277,10 +277,10 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 			"xor %%"REG_a", %%"REG_a"	\n\t"
 			ASMALIGN(4)
 			"1:			\n\t"
-				"movl (%0, %%"REG_a"), %%ebx 	\n\t"
-				"movl 32(%0, %%"REG_a"), %%ebx 	\n\t"
-				"movl 64(%0, %%"REG_a"), %%ebx 	\n\t"
-				"movl 96(%0, %%"REG_a"), %%ebx 	\n\t"
+				"movl (%0, %%"REG_a"), %%ecx 	\n\t"
+				"movl 32(%0, %%"REG_a"), %%ecx 	\n\t"
+				"movl 64(%0, %%"REG_a"), %%ecx 	\n\t"
+				"movl 96(%0, %%"REG_a"), %%ecx 	\n\t"
 				"add $128, %%"REG_a"		\n\t"
 				"cmp %3, %%"REG_a"		\n\t"
 				" jb 1b				\n\t"
@@ -313,10 +313,10 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 	// a few percent speedup on out of order executing CPUs
 			"mov %5, %%"REG_a"		\n\t"
 				"2:			\n\t"
-				"movl (%0), %%ebx	\n\t"
-				"movl (%0), %%ebx	\n\t"
-				"movl (%0), %%ebx	\n\t"
-				"movl (%0), %%ebx	\n\t"
+				"movl (%0), %%ecx	\n\t"
+				"movl (%0), %%ecx	\n\t"
+				"movl (%0), %%ecx	\n\t"
+				"movl (%0), %%ecx	\n\t"
 				"dec %%"REG_a"		\n\t"
 				" jnz 2b		\n\t"
 #endif
@@ -329,7 +329,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 			" jae 1b		\n\t"
 				: "+r" (from), "+r" (to), "+r" (i)
 				: "r" ((long)BLOCK_SIZE), "i" (BLOCK_SIZE/64), "i" ((long)CONFUSION_FACTOR)
-				: "%"REG_a, "%ebx"
+				: "%"REG_a, "%ecx"
 		);
 
 	for(; i>0; i--)
