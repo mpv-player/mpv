@@ -178,14 +178,14 @@ struct vdpctx {
 
 
 static void flip_page(struct vo *vo);
-static void video_to_output_surface(struct vo *vo)
+static int video_to_output_surface(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpTime dummy;
     VdpStatus vdp_st;
     if (vc->deint_queue_pos < 0)
-        return;
+        return -1;
 
     int field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
     unsigned int dp = vc->deint_queue_pos;
@@ -214,6 +214,7 @@ static void video_to_output_surface(struct vo *vo)
                                      &vc->src_rect_vid, output_surface,
                                      NULL, &vc->out_rect_vid, 0, NULL);
     CHECK_ST_WARNING("Error when calling vdp_video_mixer_render");
+    return 0;
 }
 
 static void add_new_video_surface(struct vo *vo, VdpVideoSurface surface,
@@ -315,9 +316,9 @@ static void resize(struct vo *vo)
                    vc->output_surfaces[i]);
         }
     }
-    video_to_output_surface(vo);
-    if (vc->visible_buf)
-        flip_page(vo);
+    if (vc->paused && vc->visible_buf)
+        if (video_to_output_surface(vo) >= 0)
+            flip_page(vo);
 }
 
 static void preemption_callback(VdpDevice device, void *context)
@@ -737,14 +738,15 @@ static void check_events(struct vo *vo)
 
     if (e & VO_EVENT_RESIZE)
         resize(vo);
-
-    if ((e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) && vc->paused) {
+    else if (e & VO_EVENT_EXPOSE && vc->paused) {
         /* did we already draw a buffer */
         if (vc->visible_buf) {
             /* redraw the last visible buffer */
             VdpStatus vdp_st;
+            int last_surface = (vc->surface_num + NUM_OUTPUT_SURFACES - 1)
+                % NUM_OUTPUT_SURFACES;
             vdp_st = vdp->presentation_queue_display(vc->flip_queue,
-                                         vc->output_surfaces[vc->surface_num],
+                                         vc->output_surfaces[last_surface],
                                          vo->dwidth, vo->dheight, 0);
             CHECK_ST_WARNING("Error when calling "
                              "vdp_presentation_queue_display");
