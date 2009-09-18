@@ -749,6 +749,8 @@ void vf_uninit_filter(vf_instance_t* vf){
     free_mp_image(vf->imgctx.static_images[1]);
     free_mp_image(vf->imgctx.temp_images[0]);
     free_mp_image(vf->imgctx.export_images[0]);
+    for (int i = 0; i < NUM_NUMBERED_MPI; i++)
+        free_mp_image(vf->imgctx.numbered_images[i]);
     free(vf);
 }
 
