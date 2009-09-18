@@ -117,7 +117,7 @@ static GLint getInternalFormat(void)
 {
 #ifdef GL_WIN32
   PIXELFORMATDESCRIPTOR pfd;
-  HDC vo_hdc = GetDC(vo_window);
+  HDC vo_hdc = GetDC(vo_w32_window);
   int pf = GetPixelFormat(vo_hdc);
   if (!DescribePixelFormat(vo_hdc, pf, sizeof pfd, &pfd)) {
     r_sz = g_sz = b_sz = a_sz = 0;
@@ -127,7 +127,7 @@ static GLint getInternalFormat(void)
     b_sz = pfd.cBlueBits;
     a_sz = pfd.cAlphaBits;
   }
-  ReleaseDC(vo_window, vo_hdc);
+  ReleaseDC(vo_w32_window, vo_hdc);
 #else
   if (glXGetConfig(mDisplay, gl_vinfo, GLX_RED_SIZE, &r_sz) != 0) r_sz = 0;
   if (glXGetConfig(mDisplay, gl_vinfo, GLX_GREEN_SIZE, &g_sz) != 0) g_sz = 0;
