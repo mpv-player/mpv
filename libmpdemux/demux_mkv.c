@@ -1319,17 +1319,19 @@ demux_mkv_read_attachments (demuxer_t *demuxer)
                   switch (ebml_read_id (s, &il))
                     {
                     case MATROSKA_ID_FILENAME:
+                        free(name);
                       name = ebml_read_utf8 (s, &l);
                       if (name == NULL)
-                        return 0;
+                          goto error;
                       mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + FileName: %s\n",
                         name);
                       break;
 
                     case MATROSKA_ID_FILEMIMETYPE:
+                        free(mime);
                       mime = ebml_read_ascii (s, &l);
                       if (mime == NULL)
-                        return 0;
+                          goto error;
                       mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + FileMimeType: %s\n",
                         mime);
                       break;
@@ -1343,7 +1345,10 @@ demux_mkv_read_attachments (demuxer_t *demuxer)
                         data = malloc (num);
                         if (stream_read(s, data, num) != (int) num)
                         {
+                        error:
                           free(data);
+                          free(mime);
+                          free(name);
                           return 0;
                         }
                         data_size = num;
@@ -1360,6 +1365,9 @@ demux_mkv_read_attachments (demuxer_t *demuxer)
                 }
 
               demuxer_add_attachment(demuxer, name, mime, data, data_size);
+              free(data);
+              free(mime);
+              free(name);
               mp_msg(MSGT_DEMUX, MSGL_V,
                      "[mkv] Attachment: %s, %s, %u bytes\n",
                      name, mime, data_size);
