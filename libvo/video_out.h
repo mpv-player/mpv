@@ -24,7 +24,7 @@
 #define MPLAYER_VIDEO_OUT_H
 
 #include <inttypes.h>
-#include <stdarg.h>
+#include <stdbool.h>
 
 //#include "font_load.h"
 #include "libmpcodecs/img_format.h"
@@ -117,91 +117,98 @@ typedef struct {
 
 typedef struct vo_info_s
 {
-        /* driver name ("Matrox Millennium G200/G400" */
-        const char *name;
-        /* short name (for config strings) ("mga") */
-        const char *short_name;
-        /* author ("Aaron Holtzman <aholtzma@ess.engr.uvic.ca>") */
-        const char *author;
-        /* any additional comments */
-        const char *comment;
+    /* driver name ("Matrox Millennium G200/G400" */
+    const char *name;
+    /* short name (for config strings) ("mga") */
+    const char *short_name;
+    /* author ("Aaron Holtzman <aholtzma@ess.engr.uvic.ca>") */
+    const char *author;
+    /* any additional comments */
+    const char *comment;
 } vo_info_t;
 
 struct vo;
 struct osd_state;
+struct mp_image;
 
 struct vo_driver {
-	// Driver uses new API
-	int is_new;
+    // Driver uses new API
+    bool is_new;
+    // Driver buffers or adds (deinterlace) frames and will keep track
+    // of pts values itself
+    bool buffer_frames;
 
-	// This is set if the driver is not new and contains pointers to
-	// old-API functions to be used instead of the ones below.
-	struct vo_old_functions *old_functions;
+    // This is set if the driver is not new and contains pointers to
+    // old-API functions to be used instead of the ones below.
+    struct vo_old_functions *old_functions;
 
-	const vo_info_t *info;
-	/*
-	 * Preinitializes driver (real INITIALIZATION)
-	 *   arg - currently it's vo_subdevice
-	 *   returns: zero on successful initialization, non-zero on error.
-	 */
-	int (*preinit)(struct vo *vo, const char *arg);
-        /*
-         * Initialize (means CONFIGURE) the display driver.
-	 * params:
-         *   width,height: image source size
-	 *   d_width,d_height: size of the requested window size, just a hint
-	 *   fullscreen: flag, 0=windowd 1=fullscreen, just a hint
-	 *   title: window title, if available
-	 *   format: fourcc of pixel format
-         * returns : zero on successful initialization, non-zero on error.
-         */
-        int (*config)(struct vo *vo, uint32_t width, uint32_t height,
-	              uint32_t d_width, uint32_t d_height, uint32_t fullscreen,
-		      char *title, uint32_t format);
+    const vo_info_t *info;
+    /*
+     * Preinitializes driver (real INITIALIZATION)
+     *   arg - currently it's vo_subdevice
+     *   returns: zero on successful initialization, non-zero on error.
+     */
+    int (*preinit)(struct vo *vo, const char *arg);
+    /*
+     * Initialize (means CONFIGURE) the display driver.
+     * params:
+     *   width,height: image source size
+     *   d_width,d_height: size of the requested window size, just a hint
+     *   fullscreen: flag, 0=windowd 1=fullscreen, just a hint
+     *   title: window title, if available
+     *   format: fourcc of pixel format
+     * returns : zero on successful initialization, non-zero on error.
+     */
+    int (*config)(struct vo *vo, uint32_t width, uint32_t height,
+                  uint32_t d_width, uint32_t d_height, uint32_t fullscreen,
+                  char *title, uint32_t format);
 
-	/*
-	 * Control interface
-	 */
-	int (*control)(struct vo *vo, uint32_t request, void *data);
+    /*
+     * Control interface
+     */
+    int (*control)(struct vo *vo, uint32_t request, void *data);
 
-        /*
-         * Display a new RGB/BGR frame of the video to the screen.
-         * params:
-	 *   src[0] - pointer to the image
-         */
-        int (*draw_frame)(struct vo *vo, uint8_t *src[]);
+    void (*draw_image)(struct vo *vo, struct mp_image *mpi, double pts);
 
-        /*
-         * Draw a planar YUV slice to the buffer:
-	 * params:
-	 *   src[3] = source image planes (Y,U,V)
-         *   stride[3] = source image planes line widths (in bytes)
-	 *   w,h = width*height of area to be copied (in Y pixels)
-         *   x,y = position at the destination image (in Y pixels)
-         */
-        int (*draw_slice)(struct vo *vo, uint8_t *src[], int stride[], int w,
-			  int h, int x, int y);
+    /*
+     * Get extra frames from the VO, such as those added by VDPAU
+     * deinterlace. Preparing the next such frame if any could be done
+     * automatically by the VO after a previous flip_page(), but having
+     * it as a separate step seems to allow making code more robust.
+     */
+    void (*get_buffered_frame)(struct vo *vo, bool eof);
 
-   	/*
-         * Draws OSD to the screen buffer
-         */
-        void (*draw_osd)(struct vo *vo, struct osd_state *osd);
+    /*
+     * Draw a planar YUV slice to the buffer:
+     * params:
+     *   src[3] = source image planes (Y,U,V)
+     *   stride[3] = source image planes line widths (in bytes)
+     *   w,h = width*height of area to be copied (in Y pixels)
+     *   x,y = position at the destination image (in Y pixels)
+     */
+    int (*draw_slice)(struct vo *vo, uint8_t *src[], int stride[], int w,
+                      int h, int x, int y);
 
-        /*
-         * Blit/Flip buffer to the screen. Must be called after each frame!
-         */
-        void (*flip_page)(struct vo *vo);
+    /*
+     * Draws OSD to the screen buffer
+     */
+    void (*draw_osd)(struct vo *vo, struct osd_state *osd);
 
-        /*
-         * This func is called after every frames to handle keyboard and
-	 * other events. It's called in PAUSE mode too!
-         */
-        void (*check_events)(struct vo *vo);
+    /*
+     * Blit/Flip buffer to the screen. Must be called after each frame!
+     */
+    void (*flip_page)(struct vo *vo);
 
-        /*
-         * Closes driver. Should restore the original state of the system.
-         */
-        void (*uninit)(struct vo *vo);
+    /*
+     * This func is called after every frames to handle keyboard and
+     * other events. It's called in PAUSE mode too!
+     */
+    void (*check_events)(struct vo *vo);
+
+    /*
+     * Closes driver. Should restore the original state of the system.
+     */
+    void (*uninit)(struct vo *vo);
 };
 
 struct vo_old_functions {
@@ -221,6 +228,10 @@ struct vo_old_functions {
 struct vo {
     int config_ok;  // Last config call was successful?
     int config_count;  // Total number of successful config calls
+
+    bool frame_loaded;  // Is there a next frame the VO could flip to?
+    double next_pts;    // pts value of the next frame if any
+
     const struct vo_driver *driver;
     void *priv;
     struct MPOpts *opts;
@@ -258,11 +269,14 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
 void list_video_out(void);
 
 int vo_control(struct vo *vo, uint32_t request, void *data);
+int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts);
+int vo_get_buffered_frame(struct vo *vo, bool eof);
 int vo_draw_frame(struct vo *vo, uint8_t *src[]);
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y);
 void vo_draw_osd(struct vo *vo, struct osd_state *osd);
 void vo_flip_page(struct vo *vo);
 void vo_check_events(struct vo *vo);
+void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);
 
 

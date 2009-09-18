@@ -22,7 +22,6 @@ extern int sub_visibility;
 extern float sub_delay;
 
 struct vf_priv_s {
-    double pts;
     struct vo *vo;
 #ifdef CONFIG_ASS
     ASS_Renderer *ass_priv;
@@ -127,7 +126,7 @@ static int control(struct vf_instance* vf, int request, void* data)
     case VFCTRL_DRAW_EOSD:
     {
         mp_eosd_images_t images = {NULL, 2};
-        double pts = vf->priv->pts;
+        double pts = video_out->next_pts;
         if (!video_out->config_ok || !vf->priv->ass_priv) return CONTROL_FALSE;
         if (sub_visibility && vf->priv->ass_priv && ass_track && (pts != MP_NOPTS_VALUE)) {
             mp_eosd_res_t res;
@@ -148,11 +147,6 @@ static int control(struct vf_instance* vf, int request, void* data)
         return vo_control(video_out, VOCTRL_DRAW_EOSD, &images) == VO_TRUE;
     }
 #endif
-    case VFCTRL_GET_PTS:
-    {
-	*(double *)data = vf->priv->pts;
-	return CONTROL_TRUE;
-    }
     }
     return CONTROL_UNKNOWN;
 }
@@ -179,10 +173,9 @@ static void get_image(struct vf_instance* vf,
 static int put_image(struct vf_instance* vf,
         mp_image_t *mpi, double pts){
   if(!video_out->config_ok) return 0; // vo not configured?
-  // record pts (potentially modified by filters) for main loop
-  vf->priv->pts = pts;
   // first check, maybe the vo/vf plugin implements draw_image using mpi:
-  if (vo_control(video_out, VOCTRL_DRAW_IMAGE,mpi)==VO_TRUE) return 1; // done.
+  if (vo_draw_image(video_out, mpi, pts) >= 0)
+      return 1;
   // nope, fallback to old draw_frame/draw_slice:
   if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))){
     // blit frame:
@@ -210,6 +203,9 @@ static void draw_slice(struct vf_instance* vf,
 static void uninit(struct vf_instance* vf)
 {
     if (vf->priv) {
+        /* Allow VO (which may live on to work with another instance of vf_vo)
+         * to get rid of numbered-mpi references that will now be invalid. */
+        vo_control(video_out, VOCTRL_RESET, NULL);
 #ifdef CONFIG_ASS
         if (vf->priv->ass_priv)
             ass_renderer_done(vf->priv->ass_priv);

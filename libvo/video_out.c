@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+#include <stdbool.h>
 
 #include <unistd.h>
 //#include <sys/mman.h>
@@ -31,6 +33,7 @@
 #include "video_out.h"
 #include "aspect.h"
 #include "geometry.h"
+#include "old_vo_wrapper.h"
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -162,11 +165,11 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_3DFX
         &video_out_3dfx,
 #endif
-#ifdef CONFIG_XV
-        &video_out_xv,
-#endif
 #if CONFIG_VDPAU
         &video_out_vdpau,
+#endif
+#ifdef CONFIG_XV
+        &video_out_xv,
 #endif
 #ifdef CONFIG_X11
         &video_out_x11,
@@ -276,11 +279,41 @@ int vo_control(struct vo *vo, uint32_t request, void *data)
     return vo->driver->control(vo, request, data);
 }
 
-int vo_draw_frame(struct vo *vo, uint8_t *src[])
+// Return -1 if driver appears not to support a draw_image interface,
+// 0 otherwise (whether the driver actually drew something or not).
+int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts)
 {
     if (!vo->config_ok)
         return 0;
-    return vo->driver->draw_frame(vo, src);
+    if (vo->driver->buffer_frames) {
+        vo->driver->draw_image(vo, mpi, pts);
+        return 0;
+    }
+    vo->frame_loaded = true;
+    vo->next_pts = pts;
+    if (vo_control(vo, VOCTRL_DRAW_IMAGE, mpi) == VO_NOTIMPL)
+        return -1;
+    return 0;
+}
+
+int vo_get_buffered_frame(struct vo *vo, bool eof)
+{
+    if (!vo->config_ok)
+        return -1;
+    if (vo->frame_loaded)
+        return 0;
+    if (!vo->driver->buffer_frames)
+        return -1;
+    vo->driver->get_buffered_frame(vo, eof);
+    return vo->frame_loaded ? 0 : -1;
+}
+
+int vo_draw_frame(struct vo *vo, uint8_t *src[])
+{
+    assert(!vo->driver->is_new);
+    if (!vo->config_ok)
+        return 0;
+    return old_vo_draw_frame(vo, src);
 }
 
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y)
@@ -299,6 +332,8 @@ void vo_flip_page(struct vo *vo)
 {
     if (!vo->config_ok)
         return;
+    vo->frame_loaded = false;
+    vo->next_pts = (-1LL<<63); // MP_NOPTS_VALUE
     vo->driver->flip_page(vo);
 }
 
@@ -307,6 +342,14 @@ void vo_check_events(struct vo *vo)
     if (!vo->config_ok)
         return;
     vo->driver->check_events(vo);
+}
+
+void vo_seek_reset(struct vo *vo)
+{
+    if (!vo->config_ok)
+        return;
+    vo_control(vo, VOCTRL_RESET, NULL);
+    vo->frame_loaded = false;
 }
 
 void vo_destroy(struct vo *vo)

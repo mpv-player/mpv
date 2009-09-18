@@ -2266,6 +2266,7 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx,
 static double update_video(struct MPContext *mpctx, int *blit_frame)
 {
     struct sh_video *sh_video = mpctx->sh_video;
+    struct vo *video_out = mpctx->video_out;
     *blit_frame = 0;
     sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SET_OSD_OBJ,
                                mpctx->osd); // hack for vf_expand
@@ -2274,14 +2275,18 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
 
     double pts;
 
-    while (1) {
+    bool hit_eof = false;
+    while (!video_out->frame_loaded) {
         current_module = "filter_video";
+        if (vo_get_buffered_frame(video_out, hit_eof) >= 0)
+            break;
+        if (hit_eof)
+            return -1;
         // XXX Time used in this call is not counted in any performance
         // timer now, OSD time is not updated correctly for filter-added frames
         if (vf_output_queued_frame(sh_video->vfilter))
             break;
         unsigned char *packet = NULL;
-        bool hit_eof = false;
         int in_size = ds_get_packet_pts(mpctx->d_video, &packet, &pts);
         if (pts != MP_NOPTS_VALUE)
             pts += mpctx->video_offset;
@@ -2304,12 +2309,12 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
             update_osd_msg(mpctx);
             current_module = "filter video";
             if (filter_video(sh_video, decoded_frame, sh_video->pts))
-                break;
-        } else if (hit_eof)
-            return -1;
+                if (!video_out->config_ok)
+                    break; // We'd likely hang in this loop otherwise
+        }
     }
 
-    sh_video->vfilter->control(sh_video->vfilter, VFCTRL_GET_PTS, &pts);
+    pts = video_out->next_pts;
     if (pts == MP_NOPTS_VALUE) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "Video pts after filters MISSING\n");
         // Try to use decoder pts from before filters
@@ -2565,11 +2570,9 @@ static int seek(MPContext *mpctx, double amount, int style)
     if (mpctx->sh_video) {
 	current_module = "seek_video_reset";
 	resync_video_stream(mpctx->sh_video);
-	if (mpctx->video_out->config_ok)
-	    vo_control(mpctx->video_out, VOCTRL_RESET, NULL);
+        vo_seek_reset(mpctx->video_out);
 	mpctx->sh_video->num_buffered_pts = 0;
 	mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
-	mpctx->num_buffered_frames = 0;
 	mpctx->delay = 0;
         mpctx->time_frame = 0;
         mpctx->update_video_immediately = true;
@@ -3799,7 +3802,6 @@ if(verbose) term_osd = 0;
 
 int frame_time_remaining=0; // flag
 int blit_frame=0;
-mpctx->num_buffered_frames=0;
 
 // Make sure old OSD does not stay around,
 // e.g. with -fixed-vo and same-resolution files
@@ -3948,7 +3950,7 @@ if(!mpctx->sh_video) {
   vo_pts=mpctx->sh_video->timer*90000.0;
   vo_fps=mpctx->sh_video->fps;
 
-  if (!mpctx->num_buffered_frames) {
+  if (!mpctx->video_out->frame_loaded) {
       double frame_time = update_video(mpctx, &blit_frame);
       mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
       if (mpctx->sh_video->vf_initialized < 0) {
@@ -3965,8 +3967,6 @@ if(!mpctx->sh_video) {
       if (frame_time < 0)
 	  mpctx->stop_play = AT_END_OF_FILE;
       else {
-	  // might return with !eof && !blit_frame if !correct_pts
-	  mpctx->num_buffered_frames += blit_frame;
           if (mpctx->update_video_immediately) {
               // Show this frame immediately, rest normally
               mpctx->update_video_immediately = false;
@@ -4018,7 +4018,6 @@ if(!mpctx->sh_video) {
 	   unsigned int t2=GetTimer();
 
            vo_flip_page(mpctx->video_out);
-	   mpctx->num_buffered_frames--;
 
            mpctx->last_vo_flip_duration = (GetTimer() - t2) * 0.000001;
            vout_time_usage += mpctx->last_vo_flip_duration;

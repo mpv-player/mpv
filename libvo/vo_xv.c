@@ -518,11 +518,6 @@ static int draw_slice(struct vo *vo, uint8_t *image[], int stride[], int w,
     return 0;
 }
 
-static int draw_frame(struct vo *vo, uint8_t *src[])
-{
-    return VO_ERROR;
-}
-
 static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct xvctx *ctx = vo->priv;
@@ -840,7 +835,6 @@ const struct vo_driver video_out_xv = {
     .preinit = preinit,
     .config = config,
     .control = control,
-    .draw_frame = draw_frame,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
