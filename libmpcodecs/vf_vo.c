@@ -203,6 +203,9 @@ static void draw_slice(struct vf_instance* vf,
 static void uninit(struct vf_instance* vf)
 {
     if (vf->priv) {
+        /* Allow VO (which may live on to work with another instance of vf_vo)
+         * to get rid of numbered-mpi references that will now be invalid. */
+        vo_control(video_out, VOCTRL_RESET, NULL);
 #ifdef CONFIG_ASS
         if (vf->priv->ass_priv)
             ass_renderer_done(vf->priv->ass_priv);
