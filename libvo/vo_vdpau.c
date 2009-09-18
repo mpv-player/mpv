@@ -28,6 +28,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <dlfcn.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -110,14 +111,15 @@ struct vdpctx {
 #define osd_surface vc->output_surfaces[NUM_OUTPUT_SURFACES]
     VdpOutputSurface                   output_surfaces[NUM_OUTPUT_SURFACES + 1];
     VdpVideoSurface                    deint_surfaces[3];
-    mp_image_t                        *deint_mpi[2];
+    double                             deint_pts[3];
+    int                                deint_queue_pos;
+    mp_image_t                        *deint_mpi[3];
     int                                output_surface_width, output_surface_height;
 
     VdpVideoMixer                      video_mixer;
     int                                deint;
     int                                deint_type;
     int                                deint_counter;
-    int                                deint_buffer_past_frames;
     int                                pullup;
     float                              denoise;
     float                              sharpen;
@@ -133,7 +135,6 @@ struct vdpctx {
 
     struct vdpau_render_state          surface_render[MAX_VIDEO_SURFACES];
     int                                surface_num;
-    int                                vid_surface_num;
     uint32_t                           vid_width, vid_height;
     uint32_t                           image_format;
     VdpChromaType                      vdp_chroma_type;
@@ -176,14 +177,6 @@ struct vdpctx {
 };
 
 
-static void push_deint_surface(struct vo *vo, VdpVideoSurface surface)
-{
-    struct vdpctx *vc = vo->priv;
-    vc->deint_surfaces[2] = vc->deint_surfaces[1];
-    vc->deint_surfaces[1] = vc->deint_surfaces[0];
-    vc->deint_surfaces[0] = surface;
-}
-
 static void flip_page(struct vo *vo);
 static void video_to_output_surface(struct vo *vo)
 {
@@ -191,41 +184,81 @@ static void video_to_output_surface(struct vo *vo)
     struct vdp_functions *vdp = vc->vdp;
     VdpTime dummy;
     VdpStatus vdp_st;
-    int i;
-    if (vc->vid_surface_num < 0)
+    if (vc->deint_queue_pos < 0)
         return;
 
-    if (vc->deint < 2 || vc->deint_surfaces[0] == VDP_INVALID_HANDLE)
-        push_deint_surface(vo, vc->surface_render[vc->vid_surface_num].surface);
+    int field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
+    unsigned int dp = vc->deint_queue_pos;
+    // dp==0 means last field of latest frame, 1 earlier field of latest frame,
+    // 2 last field of previous frame and so on
+    if (vc->deint) {
+        field = vc->top_field_first ^ (dp & 1) ?
+            VDP_VIDEO_MIXER_PICTURE_STRUCTURE_BOTTOM_FIELD:
+            VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD;
+    }
+    VdpVideoSurface *q = vc->deint_surfaces;
+    const VdpVideoSurface *past_fields = (const VdpVideoSurface []){
+        q[(dp+1)/2], q[(dp+2)/2]};
+    const VdpVideoSurface *future_fields = (const VdpVideoSurface []){
+        q[(dp-1)/2]};
+    VdpOutputSurface output_surface = vc->output_surfaces[vc->surface_num];
+    vdp_st = vdp->presentation_queue_block_until_surface_idle(vc->flip_queue,
+                                                              output_surface,
+                                                              &dummy);
+    CHECK_ST_WARNING("Error when calling "
+                     "vdp_presentation_queue_block_until_surface_idle");
 
-    for (i = 0; i <= (vc->deint > 1); i++) {
-        int field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
-        VdpOutputSurface output_surface;
-        if (i) {
-            // draw_eosd()
-            // draw_osd()
-            flip_page(vo);
-        }
-        if (vc->deint)
-            field = (vc->top_field_first == i) ^ (vc->deint > 1) ?
-                VDP_VIDEO_MIXER_PICTURE_STRUCTURE_BOTTOM_FIELD:
-                VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD;
-        output_surface = vc->output_surfaces[vc->surface_num];
-        vdp_st = vdp->
-            presentation_queue_block_until_surface_idle(vc->flip_queue,
-                                                        output_surface,
-                                                        &dummy);
-        CHECK_ST_WARNING("Error when calling "
-                         "vdp_presentation_queue_block_until_surface_idle");
+    vdp_st = vdp->video_mixer_render(vc->video_mixer, VDP_INVALID_HANDLE,
+                                     0, field, 2, past_fields,
+                                     vc->deint_surfaces[dp/2], 1, future_fields,
+                                     &vc->src_rect_vid, output_surface,
+                                     NULL, &vc->out_rect_vid, 0, NULL);
+    CHECK_ST_WARNING("Error when calling vdp_video_mixer_render");
+}
 
-        vdp_st = vdp->video_mixer_render(vc->video_mixer, VDP_INVALID_HANDLE,
-                                         0, field, 2, vc->deint_surfaces + 1,
-                                         vc->deint_surfaces[0], 1,
-                                         &vc->surface_render[vc->vid_surface_num].surface,
-                                         &vc->src_rect_vid, output_surface,
-                                         NULL, &vc->out_rect_vid, 0, NULL);
-        CHECK_ST_WARNING("Error when calling vdp_video_mixer_render");
-        push_deint_surface(vo, vc->surface_render[vc->vid_surface_num].surface);
+static void add_new_video_surface(struct vo *vo, VdpVideoSurface surface,
+                                  struct mp_image *reserved_mpi, double pts)
+{
+    struct vdpctx *vc = vo->priv;
+
+    if (reserved_mpi)
+        reserved_mpi->usage_count++;
+    if (vc->deint_mpi[2])
+        vc->deint_mpi[2]->usage_count--;
+
+    for (int i = 2; i > 0; i--) {
+        vc->deint_mpi[i] = vc->deint_mpi[i - 1];
+        vc->deint_surfaces[i] = vc->deint_surfaces[i - 1];
+        vc->deint_pts[i] = vc->deint_pts[i - 1];
+    }
+    vc->deint_mpi[0] = reserved_mpi;
+    vc->deint_surfaces[0] = surface;
+    vc->deint_pts[0] = pts;
+
+    vo->frame_loaded = true;
+    vo->next_pts = pts;
+    if (vc->deint >= 2 && vc->deint_queue_pos >= 0) {
+        vc->deint_queue_pos = 2;
+        double diff = vc->deint_pts[0] - vc->deint_pts[1];
+        if (diff > 0 && diff < 0.5)
+            vo->next_pts = (vc->deint_pts[0] + vc->deint_pts[1]) / 2;
+        else
+            vo->next_pts = vc->deint_pts[1];
+    } else
+        vc->deint_queue_pos = 1;
+    video_to_output_surface(vo);
+}
+
+static void forget_frames(struct vo *vo)
+{
+    struct vdpctx *vc = vo->priv;
+
+    vc->deint_queue_pos = -1;
+    for (int i = 0; i < 3; i++) {
+        vc->deint_surfaces[i] = VDP_INVALID_HANDLE;
+        if (vc->deint_mpi[i])
+            vc->deint_mpi[i]->usage_count--;
+        vc->deint_mpi[i] = NULL;
     }
 }
 
@@ -563,7 +596,7 @@ int initialize_vdpau_objects(struct vo *vo)
                                           &vc->eosd_surface.max_height);
     CHECK_ST_WARNING("Query to get max EOSD surface size failed");
     vc->surface_num = 0;
-    vc->vid_surface_num = -1;
+    forget_frames(vo);
     resize(vo);
     return 0;
 }
@@ -575,8 +608,7 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
     vc->decoder = VDP_INVALID_HANDLE;
     for (int i = 0; i < MAX_VIDEO_SURFACES; i++)
         vc->surface_render[i].surface = VDP_INVALID_HANDLE;
-    for (int i = 0; i < 3; i++)
-        vc->deint_surfaces[i] = VDP_INVALID_HANDLE;
+    forget_frames(vo);
     vc->video_mixer = VDP_INVALID_HANDLE;
     vc->flip_queue = VDP_INVALID_HANDLE;
     vc->flip_target = VDP_INVALID_HANDLE;
@@ -1033,10 +1065,6 @@ static void flip_page(struct vo *vo)
     if (handle_preemption(vo) < 0)
         return;
 
-    mp_msg(MSGT_VO, MSGL_DBG2, "\nFLIP_PAGE VID:%u -> OUT:%u\n",
-           vc->surface_render[vc->vid_surface_num].surface,
-           vc->output_surfaces[vc->surface_num]);
-
     vdp_st =
         vdp->presentation_queue_display(vc->flip_queue,
                                         vc->output_surfaces[vc->surface_num],
@@ -1095,27 +1123,26 @@ static struct vdpau_render_state *get_surface(struct vo *vo, int number)
     return &vc->surface_render[number];
 }
 
-static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
+    struct mp_image *reserved_mpi = NULL;
+    struct vdpau_render_state *rndr;
+
+    if (vc->is_preempted) {
+        vo->frame_loaded = true;
+        return;
+    }
 
     if (IMGFMT_IS_VDPAU(vc->image_format)) {
-        struct vdpau_render_state *rndr = mpi->priv;
-        vc->vid_surface_num = rndr - vc->surface_render;
-        if (vc->deint_buffer_past_frames) {
-            mpi->usage_count++;
-            if (vc->deint_mpi[1])
-                vc->deint_mpi[1]->usage_count--;
-            vc->deint_mpi[1] = vc->deint_mpi[0];
-            vc->deint_mpi[0] = mpi;
-        }
+        rndr = mpi->priv;
+        reserved_mpi = mpi;
     } else if (!(mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)) {
         VdpStatus vdp_st;
         void *destdata[3] = {mpi->planes[0], mpi->planes[2], mpi->planes[1]};
-        struct vdpau_render_state *rndr = get_surface(vo, vc->deint_counter);
+        rndr = get_surface(vo, vc->deint_counter);
         vc->deint_counter = (vc->deint_counter + 1) % 3;
-        vc->vid_surface_num = rndr - vc->surface_render;
         if (vc->image_format == IMGFMT_NV12)
             destdata[1] = destdata[2];
         vdp_st =
@@ -1123,16 +1150,33 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
                                                 vc->vdp_pixel_format,
                                                 (const void *const*)destdata,
                                                 mpi->stride); // pitch
-        CHECK_ST_ERROR("Error when calling "
+        CHECK_ST_WARNING("Error when calling "
                        "vdp_video_surface_put_bits_y_cb_cr");
-    }
+    } else
+        // We don't support slice callbacks so this shouldn't occur -
+        // I think the flags test above in pointless, but I'm adding
+        // this instead of removing it just in case.
+        abort();
     if (mpi->fields & MP_IMGFIELD_ORDERED)
         vc->top_field_first = !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
     else
         vc->top_field_first = 1;
 
+    add_new_video_surface(vo, rndr->surface, mpi, pts);
+
+    return;
+}
+
+static void get_buffered_frame(struct vo *vo, bool eof)
+{
+    struct vdpctx *vc = vo->priv;
+
+    if (vc->deint_queue_pos < 2)
+        return;
+    vc->deint_queue_pos = 1;
     video_to_output_surface(vo);
-    return VO_TRUE;
+    vo->next_pts = vc->deint_pts[0];
+    vo->frame_loaded = true;
 }
 
 static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
@@ -1287,8 +1331,6 @@ static int preinit(struct vo *vo, const char *arg)
     }
     if (vc->deint)
         vc->deint_type = vc->deint;
-    if (vc->deint > 1)
-        vc->deint_buffer_past_frames = 1;
 
     char *vdpaulibrary = "libvdpau.so.1";
     char *vdpau_device_create = "vdp_device_create_x11";
@@ -1408,7 +1450,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
                                                           1, features,
                                                           feature_enables);
             CHECK_ST_WARNING("Error changing deinterlacing settings");
-            vc->deint_buffer_past_frames = 1;
         }
         return VO_TRUE;
     case VOCTRL_PAUSE:
@@ -1420,9 +1461,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_GET_IMAGE:
         return get_image(vo, data);
     case VOCTRL_DRAW_IMAGE:
-        if (vc->is_preempted)
-            return true;
-        return draw_image(vo, data);
+        abort(); // draw_image() should get called directly
     case VOCTRL_BORDER:
         vo_x11_border(vo);
         resize(vo);
@@ -1476,12 +1515,16 @@ static int control(struct vo *vo, uint32_t request, void *data)
         draw_osd(vo, data);
         flip_page(vo);
         return true;
+    case VOCTRL_RESET:
+        forget_frames(vo);
+        return true;
     }
     return VO_NOTIMPL;
 }
 
 const struct vo_driver video_out_vdpau = {
-    .is_new = 1,
+    .is_new = true,
+    .buffer_frames = true,
     .info = &(const struct vo_info_s){
         "VDPAU with X11",
         "vdpau",
@@ -1491,6 +1534,8 @@ const struct vo_driver video_out_vdpau = {
     .preinit = preinit,
     .config = config,
     .control = control,
+    .draw_image = draw_image,
+    .get_buffered_frame = get_buffered_frame,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,

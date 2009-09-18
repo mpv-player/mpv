@@ -103,10 +103,6 @@ typedef struct MPContext {
     struct demux_stream *d_sub;
     mixer_t mixer;
     struct vo *video_out;
-    // Frames buffered in the vo ready to flip. Currently always 0 or 1.
-    // This is really a vo variable but currently there's no suitable vo
-    // struct.
-    int num_buffered_frames;
 
     // Show a video frame as quickly as possible without trying to adjust
     // for AV sync. Used when starting a file or after seeking.

@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include <unistd.h>
 //#include <sys/mman.h>
@@ -278,6 +279,35 @@ int vo_control(struct vo *vo, uint32_t request, void *data)
     return vo->driver->control(vo, request, data);
 }
 
+// Return -1 if driver appears not to support a draw_image interface,
+// 0 otherwise (whether the driver actually drew something or not).
+int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts)
+{
+    if (!vo->config_ok)
+        return 0;
+    if (vo->driver->buffer_frames) {
+        vo->driver->draw_image(vo, mpi, pts);
+        return 0;
+    }
+    vo->frame_loaded = true;
+    vo->next_pts = pts;
+    if (vo_control(vo, VOCTRL_DRAW_IMAGE, mpi) == VO_NOTIMPL)
+        return -1;
+    return 0;
+}
+
+int vo_get_buffered_frame(struct vo *vo, bool eof)
+{
+    if (!vo->config_ok)
+        return -1;
+    if (vo->frame_loaded)
+        return 0;
+    if (!vo->driver->buffer_frames)
+        return -1;
+    vo->driver->get_buffered_frame(vo, eof);
+    return vo->frame_loaded ? 0 : -1;
+}
+
 int vo_draw_frame(struct vo *vo, uint8_t *src[])
 {
     assert(!vo->driver->is_new);
@@ -302,6 +332,8 @@ void vo_flip_page(struct vo *vo)
 {
     if (!vo->config_ok)
         return;
+    vo->frame_loaded = false;
+    vo->next_pts = (-1LL<<63); // MP_NOPTS_VALUE
     vo->driver->flip_page(vo);
 }
 
@@ -310,6 +342,14 @@ void vo_check_events(struct vo *vo)
     if (!vo->config_ok)
         return;
     vo->driver->check_events(vo);
+}
+
+void vo_seek_reset(struct vo *vo)
+{
+    if (!vo->config_ok)
+        return;
+    vo_control(vo, VOCTRL_RESET, NULL);
+    vo->frame_loaded = false;
 }
 
 void vo_destroy(struct vo *vo)

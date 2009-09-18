@@ -129,10 +129,14 @@ typedef struct vo_info_s
 
 struct vo;
 struct osd_state;
+struct mp_image;
 
 struct vo_driver {
     // Driver uses new API
     bool is_new;
+    // Driver buffers or adds (deinterlace) frames and will keep track
+    // of pts values itself
+    bool buffer_frames;
 
     // This is set if the driver is not new and contains pointers to
     // old-API functions to be used instead of the ones below.
@@ -163,6 +167,16 @@ struct vo_driver {
      * Control interface
      */
     int (*control)(struct vo *vo, uint32_t request, void *data);
+
+    void (*draw_image)(struct vo *vo, struct mp_image *mpi, double pts);
+
+    /*
+     * Get extra frames from the VO, such as those added by VDPAU
+     * deinterlace. Preparing the next such frame if any could be done
+     * automatically by the VO after a previous flip_page(), but having
+     * it as a separate step seems to allow making code more robust.
+     */
+    void (*get_buffered_frame)(struct vo *vo, bool eof);
 
     /*
      * Draw a planar YUV slice to the buffer:
@@ -214,6 +228,10 @@ struct vo_old_functions {
 struct vo {
     int config_ok;  // Last config call was successful?
     int config_count;  // Total number of successful config calls
+
+    bool frame_loaded;  // Is there a next frame the VO could flip to?
+    double next_pts;    // pts value of the next frame if any
+
     const struct vo_driver *driver;
     void *priv;
     struct MPOpts *opts;
@@ -251,11 +269,14 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
 void list_video_out(void);
 
 int vo_control(struct vo *vo, uint32_t request, void *data);
+int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts);
+int vo_get_buffered_frame(struct vo *vo, bool eof);
 int vo_draw_frame(struct vo *vo, uint8_t *src[]);
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y);
 void vo_draw_osd(struct vo *vo, struct osd_state *osd);
 void vo_flip_page(struct vo *vo);
 void vo_check_events(struct vo *vo);
+void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);
 
 

@@ -204,6 +204,7 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
 	      uint32_t d_width, uint32_t d_height, uint32_t flags,
 	      char *title, uint32_t format) { abort(); }
 int vo_control(struct vo *vo, uint32_t request, void *data) { abort(); }
+int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts) { abort(); }
 int vo_draw_frame(struct vo *vo, uint8_t *src[]) { abort(); }
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y) { abort(); }
 void vo_draw_osd(struct vo *vo, struct osd_state *osd) { abort(); }
