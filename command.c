@@ -2178,8 +2178,118 @@ void property_print_help(void)
 }
 
 
-///@}
-// Properties group
+/* List of default ways to show a property on OSD.
+ *
+ * Setting osd_progbar to -1 displays seek bar, other nonzero displays
+ * a bar showing the current position between min/max values of the
+ * property. In this case osd_msg is only used for terminal output
+ * if there is no video; it'll be a label shown together with percentage.
+ *
+ * Otherwise setting osd_msg will show the string on OSD, formatted with
+ * the text value of the property as argument.
+ */
+static struct property_osd_display {
+    /// property name
+    const char *name;
+    /// progressbar type
+    int osd_progbar; // -1 is special value for seek indicators
+    /// osd msg id if it must be shared
+    int osd_id;
+    /// osd msg template
+    const char *osd_msg;
+} property_osd_display[] = {
+    // general
+    { "loop", 0, -1, _("Loop: %s") },
+    { "chapter", -1, -1, NULL },
+    // audio
+    { "volume", OSD_VOLUME, -1, _("Volume") },
+    { "mute", 0, -1, _("Mute: %s") },
+    { "audio_delay", 0, -1, _("A-V delay: %s") },
+    { "switch_audio", 0, -1, _("Audio: %s") },
+    { "balance", OSD_BALANCE, -1, _("Balance") },
+    // video
+    { "panscan", OSD_PANSCAN, -1, _("Panscan") },
+    { "ontop", 0, -1, _("Stay on top: %s") },
+    { "rootwin", 0, -1, _("Rootwin: %s") },
+    { "border", 0, -1, _("Border: %s") },
+    { "framedropping", 0, -1, _("Framedropping: %s") },
+    { "gamma", OSD_BRIGHTNESS, -1, _("Gamma") },
+    { "brightness", OSD_BRIGHTNESS, -1, _("Brightness") },
+    { "contrast", OSD_CONTRAST, -1, _("Contrast") },
+    { "saturation", OSD_SATURATION, -1, _("Saturation") },
+    { "hue", OSD_HUE, -1, _("Hue") },
+    { "vsync", 0, -1, _("VSync: %s") },
+    // subs
+    { "sub", 0, -1, _("Subtitles: %s") },
+    { "sub_source", 0, -1, _("Sub source: %s") },
+    { "sub_vob", 0, -1, _("Subtitles: %s") },
+    { "sub_demux", 0, -1, _("Subtitles: %s") },
+    { "sub_file", 0, -1, _("Subtitles: %s") },
+    { "sub_pos", 0, -1, _("Sub position: %s/100") },
+    { "sub_alignment", 0, -1, _("Sub alignment: %s") },
+    { "sub_delay", 0, OSD_MSG_SUB_DELAY, _("Sub delay: %s") },
+    { "sub_visibility", 0, -1, _("Subtitles: %s") },
+    { "sub_forced_only", 0, -1, _("Forced sub only: %s") },
+#ifdef CONFIG_FREETYPE
+    { "sub_scale", 0, -1, _("Sub Scale: %s")},
+#endif
+#ifdef CONFIG_TV
+    { "tv_brightness", OSD_BRIGHTNESS, -1, _("Brightness") },
+    { "tv_hue", OSD_HUE, -1, _("Hue") },
+    { "tv_saturation", OSD_SATURATION, -1, _("Saturation") },
+    { "tv_contrast", OSD_CONTRAST, -1, _("Contrast") },
+#endif
+    {}
+};
+
+static int show_property_osd(MPContext *mpctx, const char *pname)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    int r;
+    m_option_t* prop;
+    struct property_osd_display *p;
+
+    // look for the command
+    for (p = property_osd_display; p->name; p++)
+        if (!strcmp(p->name, pname))
+            break;
+    if (!p->name)
+        return -1;
+
+    if (mp_property_do(pname, M_PROPERTY_GET_TYPE, &prop, mpctx) <= 0 || !prop)
+        return -1;
+
+    if (p->osd_progbar == -1)
+        mpctx->add_osd_seek_info = true;
+    else if (p->osd_progbar) {
+        if (prop->type == CONF_TYPE_INT) {
+            if (mp_property_do(pname, M_PROPERTY_GET, &r, mpctx) > 0)
+                set_osd_bar(mpctx, p->osd_progbar, p->osd_msg,
+                            prop->min, prop->max, r);
+        } else if (prop->type == CONF_TYPE_FLOAT) {
+            float f;
+            if (mp_property_do(pname, M_PROPERTY_GET, &f, mpctx) > 0)
+                set_osd_bar(mpctx, p->osd_progbar, p->osd_msg,
+                            prop->min, prop->max, f);
+        } else {
+            mp_msg(MSGT_CPLAYER, MSGL_ERR,
+                   "Property use an unsupported type.\n");
+            return -1;
+        }
+        return 0;
+    }
+
+    if (p->osd_msg) {
+        char *val = mp_property_print(pname, mpctx);
+        if (val) {
+            int index = p - property_osd_display;
+            set_osd_msg(p->osd_id >= 0 ? p->osd_id : OSD_MSG_PROPERTY + index,
+                        1, opts->osd_duration, p->osd_msg, val);
+            free(val);
+        }
+    }
+    return 0;
+}
 
 
 /**
@@ -2209,68 +2319,60 @@ static struct {
     int cmd;
     /// set/adjust or toggle command
     int toggle;
-    /// progressbar type
-    int osd_progbar; // -1 is special value for seek indicators
-    /// osd msg id if it must be shared
-    int osd_id;
-    /// osd msg template
-    const char *osd_msg;
 } set_prop_cmd[] = {
     // general
-    { "loop", MP_CMD_LOOP, 0, 0, -1, _("Loop: %s") },
-    { "chapter", MP_CMD_SEEK_CHAPTER, 0, -1, -1, NULL },
-    { "angle", MP_CMD_SWITCH_ANGLE, 0, 0, -1, NULL },
-    { "pause", MP_CMD_PAUSE, 0, 0, -1, NULL },
+    { "loop", MP_CMD_LOOP, 0},
+    { "chapter", MP_CMD_SEEK_CHAPTER, 0},
+    { "angle", MP_CMD_SWITCH_ANGLE, 0},
+    { "pause", MP_CMD_PAUSE, 0},
     // audio
-    { "volume", MP_CMD_VOLUME, 0, OSD_VOLUME, -1, _("Volume") },
-    { "mute", MP_CMD_MUTE, 1, 0, -1, _("Mute: %s") },
-    { "audio_delay", MP_CMD_AUDIO_DELAY, 0, 0, -1, _("A-V delay: %s") },
-    { "switch_audio", MP_CMD_SWITCH_AUDIO, 1, 0, -1, _("Audio: %s") },
-    { "balance", MP_CMD_BALANCE, 0, OSD_BALANCE, -1, _("Balance") },
+    { "volume", MP_CMD_VOLUME, 0},
+    { "mute", MP_CMD_MUTE, 1},
+    { "audio_delay", MP_CMD_AUDIO_DELAY, 0},
+    { "switch_audio", MP_CMD_SWITCH_AUDIO, 1},
+    { "balance", MP_CMD_BALANCE, 0},
     // video
-    { "fullscreen", MP_CMD_VO_FULLSCREEN, 1, 0, -1, NULL },
-    { "panscan", MP_CMD_PANSCAN, 0, OSD_PANSCAN, -1, _("Panscan") },
-    { "ontop", MP_CMD_VO_ONTOP, 1, 0, -1, _("Stay on top: %s") },
-    { "rootwin", MP_CMD_VO_ROOTWIN, 1, 0, -1, _("Rootwin: %s") },
-    { "border", MP_CMD_VO_BORDER, 1, 0, -1, _("Border: %s") },
-    { "framedropping", MP_CMD_FRAMEDROPPING, 1, 0, -1, _("Framedropping: %s") },
-    { "gamma", MP_CMD_GAMMA, 0, OSD_BRIGHTNESS, -1, _("Gamma") },
-    { "brightness", MP_CMD_BRIGHTNESS, 0, OSD_BRIGHTNESS, -1, _("Brightness") },
-    { "contrast", MP_CMD_CONTRAST, 0, OSD_CONTRAST, -1, _("Contrast") },
-    { "saturation", MP_CMD_SATURATION, 0, OSD_SATURATION, -1, _("Saturation") },
-    { "hue", MP_CMD_HUE, 0, OSD_HUE, -1, _("Hue") },
-    { "vsync", MP_CMD_SWITCH_VSYNC, 1, 0, -1, _("VSync: %s") },
-	// subs
-    { "sub", MP_CMD_SUB_SELECT, 1, 0, -1, _("Subtitles: %s") },
-    { "sub_source", MP_CMD_SUB_SOURCE, 1, 0, -1, _("Sub source: %s") },
-    { "sub_vob", MP_CMD_SUB_VOB, 1, 0, -1, _("Subtitles: %s") },
-    { "sub_demux", MP_CMD_SUB_DEMUX, 1, 0, -1, _("Subtitles: %s") },
-    { "sub_file", MP_CMD_SUB_FILE, 1, 0, -1, _("Subtitles: %s") },
-    { "sub_pos", MP_CMD_SUB_POS, 0, 0, -1, _("Sub position: %s/100") },
-    { "sub_alignment", MP_CMD_SUB_ALIGNMENT, 1, 0, -1, _("Sub alignment: %s") },
-    { "sub_delay", MP_CMD_SUB_DELAY, 0, 0, OSD_MSG_SUB_DELAY, _("Sub delay: %s") },
-    { "sub_visibility", MP_CMD_SUB_VISIBILITY, 1, 0, -1, _("Subtitles: %s") },
-    { "sub_forced_only", MP_CMD_SUB_FORCED_ONLY, 1, 0, -1, _("Forced sub only: %s") },
+    { "fullscreen", MP_CMD_VO_FULLSCREEN, 1},
+    { "panscan", MP_CMD_PANSCAN, 0},
+    { "ontop", MP_CMD_VO_ONTOP, 1},
+    { "rootwin", MP_CMD_VO_ROOTWIN, 1},
+    { "border", MP_CMD_VO_BORDER, 1},
+    { "framedropping", MP_CMD_FRAMEDROPPING, 1},
+    { "gamma", MP_CMD_GAMMA, 0},
+    { "brightness", MP_CMD_BRIGHTNESS, 0},
+    { "contrast", MP_CMD_CONTRAST, 0},
+    { "saturation", MP_CMD_SATURATION, 0},
+    { "hue", MP_CMD_HUE, 0},
+    { "vsync", MP_CMD_SWITCH_VSYNC, 1},
+    // subs
+    { "sub", MP_CMD_SUB_SELECT, 1},
+    { "sub_source", MP_CMD_SUB_SOURCE, 1},
+    { "sub_vob", MP_CMD_SUB_VOB, 1},
+    { "sub_demux", MP_CMD_SUB_DEMUX, 1},
+    { "sub_file", MP_CMD_SUB_FILE, 1},
+    { "sub_pos", MP_CMD_SUB_POS, 0},
+    { "sub_alignment", MP_CMD_SUB_ALIGNMENT, 1},
+    { "sub_delay", MP_CMD_SUB_DELAY, 0},
+    { "sub_visibility", MP_CMD_SUB_VISIBILITY, 1},
+    { "sub_forced_only", MP_CMD_SUB_FORCED_ONLY, 1},
 #ifdef CONFIG_FREETYPE
-    { "sub_scale", MP_CMD_SUB_SCALE, 0, 0, -1, _("Sub Scale: %s")},
+    { "sub_scale", MP_CMD_SUB_SCALE, 0},
 #endif
 #ifdef CONFIG_ASS
-    { "ass_use_margins", MP_CMD_ASS_USE_MARGINS, 1, 0, -1, NULL },
+    { "ass_use_margins", MP_CMD_ASS_USE_MARGINS, 1},
 #endif
 #ifdef CONFIG_TV
-    { "tv_brightness", MP_CMD_TV_SET_BRIGHTNESS, 0, OSD_BRIGHTNESS, -1, _("Brightness") },
-    { "tv_hue", MP_CMD_TV_SET_HUE, 0, OSD_HUE, -1, _("Hue") },
-    { "tv_saturation", MP_CMD_TV_SET_SATURATION, 0, OSD_SATURATION, -1, _("Saturation") },
-    { "tv_contrast", MP_CMD_TV_SET_CONTRAST, 0, OSD_CONTRAST, -1, _("Contrast") },
+    { "tv_brightness", MP_CMD_TV_SET_BRIGHTNESS, 0},
+    { "tv_hue", MP_CMD_TV_SET_HUE, 0},
+    { "tv_saturation", MP_CMD_TV_SET_SATURATION, 0},
+    { "tv_contrast", MP_CMD_TV_SET_CONTRAST, 0},
 #endif
-    { NULL, 0, 0, 0, -1, NULL }
+    {}
 };
-
 
 /// Handle commands that set a property.
 static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
-    struct MPOpts *opts = &mpctx->opts;
     int i, r;
     m_option_t* prop;
     const char *pname;
@@ -2300,33 +2402,8 @@ static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
     if (r <= 0)
 	return 1;
 
-    if (set_prop_cmd[i].osd_progbar == -1)
-        mpctx->add_osd_seek_info = true;
-    else if (set_prop_cmd[i].osd_progbar) {
-	if (prop->type == CONF_TYPE_INT) {
-	    if (mp_property_do(pname, M_PROPERTY_GET, &r, mpctx) > 0)
-		set_osd_bar(mpctx, set_prop_cmd[i].osd_progbar,
-			    set_prop_cmd[i].osd_msg, prop->min, prop->max, r);
-	} else if (prop->type == CONF_TYPE_FLOAT) {
-	    float f;
-	    if (mp_property_do(pname, M_PROPERTY_GET, &f, mpctx) > 0)
-		set_osd_bar(mpctx, set_prop_cmd[i].osd_progbar,
-			    set_prop_cmd[i].osd_msg, prop->min, prop->max, f);
-	} else
-	    mp_msg(MSGT_CPLAYER, MSGL_ERR,
-		   "Property use an unsupported type.\n");
-	return 1;
-    }
+    show_property_osd(mpctx, pname);
 
-    if (set_prop_cmd[i].osd_msg) {
-	char *val = mp_property_print(pname, mpctx);
-	if (val) {
-	    set_osd_msg(set_prop_cmd[i].osd_id >=
-			0 ? set_prop_cmd[i].osd_id : OSD_MSG_PROPERTY + i,
-			1, opts->osd_duration, set_prop_cmd[i].osd_msg, val);
-	    free(val);
-	}
-    }
     return 1;
 }
 
