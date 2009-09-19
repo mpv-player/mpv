@@ -2443,6 +2443,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     sh_audio_t * const sh_audio = mpctx->sh_audio;
     sh_video_t * const sh_video = mpctx->sh_video;
     int osd_duration = opts->osd_duration;
+    int case_fallthrough_hack = 0;
     if (!set_property_command(mpctx, cmd))
 	switch (cmd->id) {
 	case MP_CMD_SEEK:{
@@ -2469,6 +2470,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 	    }
 	    break;
 
+        case MP_CMD_SET_PROPERTY_OSD:
+            case_fallthrough_hack = 1;
+
 	case MP_CMD_SET_PROPERTY:{
 		int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_PARSE,
 				       cmd->args[1].v.s, mpctx);
@@ -2479,8 +2483,13 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Failed to set property '%s' to '%s'.\n",
 			   cmd->args[0].v.s, cmd->args[1].v.s);
+                else if (case_fallthrough_hack)
+                    show_property_osd(mpctx, cmd->args[0].v.s);
 	    }
 	    break;
+
+        case MP_CMD_STEP_PROPERTY_OSD:
+            case_fallthrough_hack = 1;
 
 	case MP_CMD_STEP_PROPERTY:{
 		void* arg = NULL;
@@ -2520,6 +2529,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Failed to increment property '%s' by %f.\n",
 			   cmd->args[0].v.s, cmd->args[1].v.f);
+                else if (case_fallthrough_hack)
+                    show_property_osd(mpctx, cmd->args[0].v.s);
 	    }
 	    break;
 

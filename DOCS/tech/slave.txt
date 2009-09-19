@@ -261,6 +261,10 @@ set_mouse_pos <x> <y>
 set_property <property> <value>
     Set a property.
 
+set_property_osd <property> <value>
+    Same as above, but show the new value on the OSD in the standard
+    manner defined for that property (if any).
+
 speed_incr <value>
     Add <value> to the current playback speed.
 
@@ -274,6 +278,10 @@ step_property <property> [value] [direction]
     Change a property by value, or increase by a default if value is
     not given or zero. The direction is reversed if direction is less
     than zero.
+
+step_property_osd <property> [value] [direction]
+    Same as above, but show the new value on the OSD in the standard
+    manner defined for that property (if any).
 
 stop
     Stop playback.
