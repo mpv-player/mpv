@@ -1349,6 +1349,9 @@ if test -z "$_target" ; then
   case "$system_name" in
   Linux|FreeBSD|NetBSD|OpenBSD|DragonFly|BSD/OS|Darwin|SunOS|QNX|GNU|BeOS|MorphOS|AIX|AmigaOS)
     ;;
+  Haiku)
+    system_name=BeOS
+    ;;
   IRIX*)
     system_name=IRIX
     ;;
