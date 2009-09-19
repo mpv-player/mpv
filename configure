@@ -2553,6 +2553,24 @@ EOF
 cc_check && ten_operands=yes && def_ten_operands='#define HAVE_TEN_OPERANDS 1'
 echores $ten_operands
 
+echocheck "ebx availability"
+ebx_available=no
+def_ebx_available='#define HAVE_EBX_AVAILABLE 0'
+cat > $TMPC << EOF
+int main(void) {
+    int x;
+    __asm__ volatile(
+        "xor %0, %0"
+        :"=b"(x)
+        // just adding ebx to clobber list seems unreliable with some
+        // compilers, e.g. Haiku's gcc 2.95
+    );
+    return 0;
+}
+EOF
+cc_check && ebx_available=yes && def_ebx_available='#define HAVE_EBX_AVAILABLE 1'
+echores $ebx_available
+
 echocheck "yasm"
 if test -z "$YASMFLAGS" ; then
   if darwin ; then
@@ -8902,7 +8920,7 @@ $def_yasm
 #define CONFIG_RDFT 1
 
 /* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
-#define HAVE_EBX_AVAILABLE 1
+$def_ebx_available
 #ifndef MP_DEBUG
 #define HAVE_EBP_AVAILABLE 1
 #else
