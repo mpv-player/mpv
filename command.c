@@ -1046,7 +1046,9 @@ static int mp_property_deinterlace(m_option_t *prop, int action,
 	vf->control(vf, VFCTRL_SET_DEINTERLACE, &deinterlace);
 	return M_PROPERTY_OK;
     }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    int value = 0;
+    vf->control(vf, VFCTRL_GET_DEINTERLACE, &value);
+    return m_property_flag_ro(prop, action, arg, value);
 }
 
 /// Panscan (RW)
@@ -2213,6 +2215,7 @@ static struct property_osd_display {
     { "rootwin", 0, -1, _("Rootwin: %s") },
     { "border", 0, -1, _("Border: %s") },
     { "framedropping", 0, -1, _("Framedropping: %s") },
+    { "deinterlace", 0, -1, _("Deinterlace: %s") },
     { "gamma", OSD_BRIGHTNESS, -1, _("Gamma") },
     { "brightness", OSD_BRIGHTNESS, -1, _("Brightness") },
     { "contrast", OSD_CONTRAST, -1, _("Contrast") },
