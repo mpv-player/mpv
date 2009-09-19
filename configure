@@ -468,6 +468,7 @@ Advanced options:
   --enable-armv6            enable ARMv6 (ARM) [autodetect]
   --enable-armv6t2          enable ARMv6t2 (ARM) [autodetect]
   --enable-armvfp           enable ARM VFP (ARM) [autodetect]
+  --enable-neon             enable NEON (ARM) [autodetect]
   --enable-iwmmxt           enable iWMMXt (ARM) [autodetect]
   --disable-fastmemcpy      disable 3DNow!/SSE/MMX optimized memcpy [enable]
   --enable-big-endian       force byte order to big-endian [autodetect]
@@ -517,6 +518,7 @@ _armv5te=auto
 _armv6=auto
 _armv6t2=auto
 _armvfp=auto
+neon=auto
 _iwmmxt=auto
 _mtrr=auto
 _altivec=auto
@@ -1321,6 +1323,8 @@ for ac_option do
   --disable-armv6t2) _armv6t2=no ;;
   --enable-armvfp) _armvfp=yes ;;
   --disable-armvfp) _armvfp=no ;;
+  --enable-neon) neon=yes ;;
+  --disable-neon) neon=no ;;
   --enable-iwmmxt) _iwmmxt=yes ;;
   --disable-iwmmxt) _iwmmxt=no ;;
   --enable-mmx)	_mmx=yes ;;
@@ -2729,6 +2733,16 @@ EOF
   fi
   echores "$_armvfp"
 
+  echocheck "ARM NEON"
+  if test $neon = "auto" ; then
+    cat > $TMPC << EOF
+int main(void) { __asm__ volatile ("vadd.i16 q0, q0, q0"); return 0; }
+EOF
+    neon=no
+    cc_check && neon=yes
+  fi
+  echores "$neon"
+
   echocheck "iWMMXt (Intel XScale SIMD instructions)"
   if test $_iwmmxt = "auto" ; then
     cat > $TMPC << EOF
@@ -2740,7 +2754,7 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC MMX MMX2 AMD3DNOW AMD3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP IWMMXT MMI VIS MVI'
+_cpuexts_all='ALTIVEC MMX MMX2 AMD3DNOW AMD3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP NEON IWMMXT MMI VIS MVI'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
@@ -2756,6 +2770,7 @@ test "$_armv5te"   = yes && _cpuexts="ARMV5TE $_cpuexts"
 test "$_armv6"     = yes && _cpuexts="ARMV6 $_cpuexts"
 test "$_armv6t2"   = yes && _cpuexts="ARMV6T2 $_cpuexts"
 test "$_armvfp"    = yes && _cpuexts="ARMVFP $_cpuexts"
+test "$neon"       = yes && _cpuexts="NEON $_cpuexts"
 test "$_iwmmxt"    = yes && _cpuexts="IWMMXT $_cpuexts"
 test "$_vis"       = yes && _cpuexts="VIS $_cpuexts"
 test "$_mvi"       = yes && _cpuexts="MVI $_cpuexts"
