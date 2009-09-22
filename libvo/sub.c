@@ -356,9 +356,9 @@ inline static void vo_update_text_teletext(mp_osd_obj_t *obj, int dxs, int dys)
 
     //very simple teletext font auto scaling
     if(!vo_osd_teletext_scale && hm*(max_rows+1)>dys){
-        text_font_scale_factor*=1.0*(dys)/((max_rows+1)*hm);
+        osd_font_scale_factor*=1.0*(dys)/((max_rows+1)*hm);
         force_load_font=1;
-        vo_osd_teletext_scale=text_font_scale_factor;
+        vo_osd_teletext_scale=osd_font_scale_factor;
         obj->flags&=~OSDFLAG_VISIBLE;
         return;
     }
