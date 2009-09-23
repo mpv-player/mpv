@@ -75,8 +75,7 @@ void update_subtitles(sh_video_t *sh_video, double refpts, demux_stream_t *d_dvd
     if (reset) {
         sub_clear_text(&subs, MP_NOPTS_VALUE);
         if (vo_sub) {
-            vo_sub = NULL;
-            vo_osd_changed(OSDTYPE_SUBTITLE);
+            set_osd_subtitle(NULL);
         }
         if (vo_spudec) {
             spudec_reset(vo_spudec);
@@ -145,7 +144,6 @@ void update_subtitles(sh_video_t *sh_video, double refpts, demux_stream_t *d_dvd
     } else if (dvdsub_id >= 0 && (type == 't' || type == 'm' || type == 'a')) {
         double curpts = refpts + sub_delay;
         double endpts;
-        vo_sub = &subs;
         while (d_dvdsub->first) {
             double subpts = ds_get_next_pts(d_dvdsub);
             if (subpts > curpts)
@@ -167,7 +165,6 @@ void update_subtitles(sh_video_t *sh_video, double refpts, demux_stream_t *d_dvd
                                       (long long)(subpts*1000 + 0.5),
                                       (long long)((endpts-subpts)*1000 + 0.5));
                 } else { // plaintext subs with libass
-                    vo_sub = NULL;
                     if (subpts != MP_NOPTS_VALUE) {
                         if (endpts == MP_NOPTS_VALUE) endpts = subpts + 3;
                         sub_clear_text(&subs, MP_NOPTS_VALUE);
@@ -195,11 +192,11 @@ void update_subtitles(sh_video_t *sh_video, double refpts, demux_stream_t *d_dvd
                     packet = p;
                 }
                 sub_add_text(&subs, packet, len, endpts);
-                vo_osd_changed(OSDTYPE_SUBTITLE);
+                set_osd_subtitle(&subs);
             }
         }
         if (sub_clear_text(&subs, curpts))
-            vo_osd_changed(OSDTYPE_SUBTITLE);
+            set_osd_subtitle(&subs);
     }
     current_module=NULL;
 }

@@ -218,6 +218,12 @@ void mplayer_put_key(int code)
 char *current_module;
 #include "mpcommon.h"
 
+// Needed by mpcommon.c
+void set_osd_subtitle(subtitle *subs) {
+    vo_sub = subs;
+    vo_osd_changed(OSDTYPE_SUBTITLE);
+}
+
 //char *out_audio_codec=NULL; // override audio codec
 //char *out_video_codec=NULL; // override video codec
 

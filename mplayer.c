@@ -1507,6 +1507,26 @@ void set_osd_bar(int type,const char* name,double min,double max,double val) {
                 name,ROUND(100*(val-min)/(max-min)));
 }
 
+/**
+ * \brief Display text subtitles on the OSD
+ */
+void set_osd_subtitle(subtitle *subs) {
+    int i;
+    vo_sub = subs;
+    vo_osd_changed(OSDTYPE_SUBTITLE);
+    if (!mpctx->sh_video) {
+        // reverse order, since newest set_osd_msg is displayed first
+        for (i = SUB_MAX_TEXT - 1; i >= 0; i--) {
+            if (!subs || i >= subs->lines || !subs->text[i])
+                rm_osd_msg(OSD_MSG_SUB_BASE + i);
+            else {
+                // HACK: currently display time for each sub line except the last is set to 2 seconds.
+                int display_time = i == subs->lines - 1 ? 180000 : 2000;
+                set_osd_msg(OSD_MSG_SUB_BASE + i, 1, display_time, "%s", subs->text[i]);
+            }
+        }
+    }
+}
 
 /**
  * \brief Update the OSD message line.
@@ -2492,6 +2512,8 @@ static int seek(MPContext *mpctx, double amount, int style)
 	mpctx->audio_out->reset(); // stop audio, throwing away buffered data
 	mpctx->sh_audio->a_buffer_len = 0;
 	mpctx->sh_audio->a_out_buffer_len = 0;
+	if (!mpctx->sh_video)
+	    update_subtitles(NULL, mpctx->sh_audio->pts, mpctx->d_sub, 1);
     }
 
     if (vo_vobsub && mpctx->sh_video) {
@@ -3704,6 +3726,7 @@ if(!mpctx->sh_video) {
 
   if(end_at.type == END_AT_TIME && end_at.pos < a_pos)
     mpctx->eof = PT_NEXT_ENTRY;
+  update_subtitles(NULL, mpctx->sh_audio->pts, mpctx->d_sub, 0);
   update_osd_msg();
 
 } else {
