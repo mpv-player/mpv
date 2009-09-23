@@ -257,6 +257,8 @@ static int init(sh_video_t *sh){
     ctx->avctx = avcodec_alloc_context();
     avctx = ctx->avctx;
     avctx->opaque = sh;
+    avctx->codec_type = CODEC_TYPE_VIDEO;
+    avctx->codec_id = lavc_codec->id;
 
 #if CONFIG_VDPAU
     if(lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU){
