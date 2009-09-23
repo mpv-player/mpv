@@ -71,6 +71,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
     int len;
     char type = d_dvdsub->sh ? ((sh_sub_t *)d_dvdsub->sh)->type : 'v';
     static subtitle subs;
+    double refpts = sh_video->pts;
     if (reset) {
         sub_clear_text(&subs, MP_NOPTS_VALUE);
         if (vo_sub) {
@@ -84,15 +85,14 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
     }
     // find sub
     if (subdata) {
-        double pts = sh_video->pts;
         if (sub_fps==0) sub_fps = sh_video->fps;
         current_module = "find_sub";
-        if (pts > sub_last_pts || pts < sub_last_pts-1.0) {
-            find_sub(subdata, (pts+sub_delay) *
+        if (refpts > sub_last_pts || refpts < sub_last_pts-1.0) {
+            find_sub(subdata, (refpts+sub_delay) *
                      (subdata->sub_uses_time ? 100. : sub_fps));
             if (vo_sub) vo_sub_last = vo_sub;
             // FIXME! frame counter...
-            sub_last_pts = pts;
+            sub_last_pts = refpts;
         }
     }
 
@@ -108,12 +108,12 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
             // Vobsub
             len = 0;
             if (vo_vobsub) {
-                if (sh_video->pts+sub_delay >= 0) {
-                    len = vobsub_get_packet(vo_vobsub, sh_video->pts+sub_delay,
+                if (refpts+sub_delay >= 0) {
+                    len = vobsub_get_packet(vo_vobsub, refpts+sub_delay,
                                             (void**)&packet, &timestamp);
                     if (len > 0) {
-                        timestamp -= (sh_video->pts + sub_delay - sh_video->timer)*90000;
-                        mp_dbg(MSGT_CPLAYER,MSGL_V,"\rVOB sub: len=%d v_pts=%5.3f v_timer=%5.3f sub=%5.3f ts=%d \n",len,sh_video->pts,sh_video->timer,timestamp / 90000.0,timestamp);
+                        timestamp -= (refpts + sub_delay - sh_video->timer)*90000;
+                        mp_dbg(MSGT_CPLAYER,MSGL_V,"\rVOB sub: len=%d v_pts=%5.3f v_timer=%5.3f sub=%5.3f ts=%d \n",len,refpts,sh_video->timer,timestamp / 90000.0,timestamp);
                     }
                 }
             } else {
@@ -125,14 +125,14 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
                     // d_video->pts which would have been the simplest
                     // improvement doesn't work because mpeg specific hacks
                     // in video.c set d_video->pts to 0.
-                    float x = d_dvdsub->pts - sh_video->pts;
+                    float x = d_dvdsub->pts - refpts;
                     if (x > -20 && x < 20) // prevent missing subs on pts reset
                         timestamp = 90000*(sh_video->timer + d_dvdsub->pts
-                                           + sub_delay - sh_video->pts);
+                                           + sub_delay - refpts);
                     else timestamp = 90000*(sh_video->timer + sub_delay);
                     mp_dbg(MSGT_CPLAYER, MSGL_V, "\rDVD sub: len=%d  "
                            "v_pts=%5.3f  s_pts=%5.3f  ts=%d \n", len,
-                           sh_video->pts, d_dvdsub->pts, timestamp);
+                           refpts, d_dvdsub->pts, timestamp);
                 }
             }
             if (len<=0 || !packet) break;
@@ -143,7 +143,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
         if (spudec_changed(vo_spudec))
             vo_osd_changed(OSDTYPE_SPU);
     } else if (dvdsub_id >= 0 && (type == 't' || type == 'm' || type == 'a')) {
-        double curpts = sh_video->pts + sub_delay;
+        double curpts = refpts + sub_delay;
         double endpts;
         vo_sub = &subs;
         while (d_dvdsub->first) {
