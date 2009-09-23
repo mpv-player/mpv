@@ -14,6 +14,7 @@
 #include "stream/tv.h"
 #include "libavutil/intreadwrite.h"
 #include "m_option.h"
+#include "mpcommon.h"
 
 double sub_last_pts = -303;
 
