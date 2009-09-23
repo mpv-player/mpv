@@ -147,8 +147,8 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
         double endpts;
         vo_sub = &subs;
         while (d_dvdsub->first) {
-            double pts = ds_get_next_pts(d_dvdsub);
-            if (pts > curpts)
+            double subpts = ds_get_next_pts(d_dvdsub);
+            if (subpts > curpts)
                 break;
             endpts = d_dvdsub->first->endpts;
             len = ds_get_packet_sub(d_dvdsub, &packet);
@@ -164,15 +164,15 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
                 if (!ass_track) continue;
                 if (type == 'a') { // ssa/ass subs with libass
                     ass_process_chunk(ass_track, packet, len,
-                                      (long long)(pts*1000 + 0.5),
-                                      (long long)((endpts-pts)*1000 + 0.5));
+                                      (long long)(subpts*1000 + 0.5),
+                                      (long long)((endpts-subpts)*1000 + 0.5));
                 } else { // plaintext subs with libass
                     vo_sub = NULL;
-                    if (pts != MP_NOPTS_VALUE) {
-                        if (endpts == MP_NOPTS_VALUE) endpts = pts + 3;
+                    if (subpts != MP_NOPTS_VALUE) {
+                        if (endpts == MP_NOPTS_VALUE) endpts = subpts + 3;
                         sub_clear_text(&subs, MP_NOPTS_VALUE);
                         sub_add_text(&subs, packet, len, endpts);
-                        subs.start = pts * 100;
+                        subs.start = subpts * 100;
                         subs.end = endpts * 100;
                         ass_process_subtitle(ass_track, &subs);
                     }
@@ -180,7 +180,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
                 continue;
             }
 #endif
-            if (pts != MP_NOPTS_VALUE) {
+            if (subpts != MP_NOPTS_VALUE) {
                 if (endpts == MP_NOPTS_VALUE)
                     sub_clear_text(&subs, MP_NOPTS_VALUE);
                 if (type == 'a') { // ssa/ass subs without libass => convert to plaintext
