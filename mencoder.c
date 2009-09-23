@@ -1454,7 +1454,7 @@ if(sh_audio && !demuxer2){
  }
  else
 #endif
-    update_subtitles(sh_video, d_dvdsub, 0);
+    update_subtitles(sh_video, sh_video->pts, d_dvdsub, 0);
 
  frame_data = (s_frame_data){ .start = NULL, .in_size = 0, .frame_time = 0., .already_read = 0 };
 

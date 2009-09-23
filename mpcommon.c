@@ -66,13 +66,12 @@ if (HAVE_CMOV)
 }
 
 
-void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
+void update_subtitles(sh_video_t *sh_video, double refpts, demux_stream_t *d_dvdsub, int reset)
 {
     unsigned char *packet=NULL;
     int len;
     char type = d_dvdsub->sh ? ((sh_sub_t *)d_dvdsub->sh)->type : 'v';
     static subtitle subs;
-    double refpts = sh_video->pts;
     if (reset) {
         sub_clear_text(&subs, MP_NOPTS_VALUE);
         if (vo_sub) {
@@ -86,7 +85,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
     }
     // find sub
     if (subdata) {
-        if (sub_fps==0) sub_fps = sh_video->fps;
+        if (sub_fps==0) sub_fps = sh_video ? sh_video->fps : 25;
         current_module = "find_sub";
         if (refpts > sub_last_pts || refpts < sub_last_pts-1.0) {
             find_sub(subdata, (refpts+sub_delay) *

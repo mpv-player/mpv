@@ -1767,7 +1767,7 @@ static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
 	current_module = "decode video";
 	decoded_frame = decode_video(sh_video, start, in_size, drop_frame, pts);
 	if (decoded_frame) {
-	    update_subtitles(sh_video, mpctx->d_sub, 0);
+	    update_subtitles(sh_video, sh_video->pts, mpctx->d_sub, 0);
 	    update_teletext(sh_video, mpctx->demuxer, 0);
 	    update_osd_msg();
 	    current_module = "filter video";
@@ -2290,7 +2290,7 @@ static double update_video(int *blit_frame)
 	// video_read_frame can change fps (e.g. for ASF video)
 	vo_fps = sh_video->fps;
 	drop_frame = check_framedrop(frame_time);
-	update_subtitles(sh_video, mpctx->d_sub, 0);
+	update_subtitles(sh_video, sh_video->pts, mpctx->d_sub, 0);
 	update_teletext(sh_video, mpctx->demuxer, 0);
 	update_osd_msg();
 	current_module = "decode_video";
@@ -2483,7 +2483,7 @@ static int seek(MPContext *mpctx, double amount, int style)
 	// (which is used by at least vobsub and edl code below) may
 	// be completely wrong (probably 0).
 	mpctx->sh_video->pts = mpctx->d_video->pts;
-	update_subtitles(mpctx->sh_video, mpctx->d_sub, 1);
+	update_subtitles(mpctx->sh_video, mpctx->sh_video->pts, mpctx->d_sub, 1);
 	update_teletext(mpctx->sh_video, mpctx->demuxer, 1);
     }
 
