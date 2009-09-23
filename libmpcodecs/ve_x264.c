@@ -59,20 +59,6 @@ static int turbo = 0;
 static x264_param_t param;
 static int parse_error = 0;
 
-static int encode_nals(uint8_t *buf, int size, x264_nal_t *nals, int nnal){
-    uint8_t *p = buf;
-    int i;
-
-    for(i = 0; i < nnal; i++){
-        int s = x264_nal_encode(p, &size, 1, nals + i);
-        if(s < 0)
-            return -1;
-        p += s;
-    }
-
-    return p - buf;
-}
-
 static int put_image(struct vf_instance_s *vf, mp_image_t *mpi, double pts);
 static int encode_frame(struct vf_instance_s *vf, x264_picture_t *pic_in);
 
@@ -189,21 +175,13 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     }
 
     if(!param.b_repeat_headers){
-        uint8_t *extradata;
         x264_nal_t *nal;
-        int extradata_size, nnal, i, s = 0;
+        int extradata_size, nnal;
 
-        x264_encoder_headers(mod->x264, &nal, &nnal);
-
-        /* 5 bytes NAL header + worst case escaping */
-        for(i = 0; i < nnal; i++)
-            s += 5 + nal[i].i_payload * 4 / 3;
-
-        extradata = malloc(s);
-        extradata_size = encode_nals(extradata, s, nal, nnal);
+        extradata_size = x264_encoder_headers(mod->x264, &nal, &nnal);
 
         mod->mux->bih= realloc(mod->mux->bih, sizeof(BITMAPINFOHEADER) + extradata_size);
-        memcpy(mod->mux->bih + 1, extradata, extradata_size);
+        memcpy(mod->mux->bih + 1, nal->p_payload, extradata_size);
         mod->mux->bih->biSize= sizeof(BITMAPINFOHEADER) + extradata_size;
     }
 
@@ -273,23 +251,20 @@ static int encode_frame(struct vf_instance_s *vf, x264_picture_t *pic_in)
     x264_picture_t pic_out;
     x264_nal_t *nal;
     int i_nal;
-    int i_size = 0;
-    int i;
+    int i_size;
 
-    if(x264_encoder_encode(mod->x264, &nal, &i_nal, pic_in, &pic_out) < 0) {
+    i_size = x264_encoder_encode(mod->x264, &nal, &i_nal, pic_in, &pic_out);
+
+    if(i_size<0) {
         mp_msg(MSGT_MENCODER, MSGL_ERR, "x264_encoder_encode failed\n");
         return -1;
-    }
-
-    for(i=0; i < i_nal; i++) {
-        int i_data = mod->mux->buffer_size - i_size;
-        i_size += x264_nal_encode(mod->mux->buffer + i_size, &i_data, 1, &nal[i]);
     }
     if(i_size>0) {
         int keyframe = (pic_out.i_type == X264_TYPE_IDR) ||
                        (pic_out.i_type == X264_TYPE_I
                         && param.i_frame_reference == 1
                         && !param.i_bframe);
+        memcpy(mod->mux->buffer, nal->p_payload, i_size);
         muxer_write_chunk(mod->mux, i_size, keyframe?0x10:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     }
     else
