@@ -196,12 +196,10 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
 static int control(struct vf_instance_s* vf, int request, void *data)
 {
     h264_module_t *mod=(h264_module_t*)vf->priv;
-    int count = 256; // giant HACK, x264_encoder_encode may incorrectly return 0
-                     // when threads > 1 and delayed frames pending
     switch(request){
         case VFCTRL_FLUSH_FRAMES:
-            while(encode_frame(vf, NULL) == 0 && --count);
-                while(encode_frame(vf, NULL) > 0);
+            while (x264_encoder_delayed_frames(mod->x264) > 0)
+                encode_frame(vf, NULL);
             return CONTROL_TRUE;
         default:
             return CONTROL_UNKNOWN;
