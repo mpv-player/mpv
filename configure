@@ -8435,6 +8435,8 @@ LIBSWSCALE = $_libswscale
 LIBSWSCALE_A = $_libswscale_a
 LIBSWSCALE_SO = $_libswscale_so
 
+CC_O=-o \$@
+LD=gcc
 CONFIG_STATIC=yes
 SRC_PATH=..
 BUILD_ROOT=..
