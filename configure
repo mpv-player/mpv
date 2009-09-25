@@ -1520,7 +1520,7 @@ echo configuration: $_configuration > "$TMPLOG"
 echo >> "$TMPLOG"
 
 
-if x86 ; then
+if test -z "$_target" && x86 ; then
   cat > $TMPC << EOF
 int main(void) {
     int test[sizeof(char *)-7];
