@@ -20,6 +20,7 @@
 // only to get keycode definitions from HIToolbox/Events.h
 #include <Carbon/Carbon.h>
 #include "osx_common.h"
+#include "old_vo_defines.h"
 #include "video_out.h"
 #include "osdep/keycodes.h"
 #include "input/input.h"
@@ -76,7 +77,7 @@ void change_movie_aspect(float new_aspect)
         new_aspect = old_movie_aspect;
     our_aspect_change = 1;
     snprintf(cmd_str, sizeof(cmd_str), "switch_ratio %f", new_aspect);
-    mp_input_queue_cmd(mp_input_parse_cmd(cmd_str));
+    mp_input_queue_cmd(global_vo->input_ctx, mp_input_parse_cmd(cmd_str));
 }
 
 /**
