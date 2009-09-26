@@ -6237,8 +6237,8 @@ if test "$_zlib" = yes ; then
   extra_ldflags="$extra_ldflags -lz"
 else
   def_zlib='#define CONFIG_ZLIB 0'
-  _libavdecoders=$(echo $_libavdecoders | sed -e s/FLASHSV_DECODER// -e s/PNG_DECODER// -e s/ZMBV_DECODER// -e s/DXA_DECODER// -e s/TSCC_DECODER// -e s/ZLIB_DECODER//)
-  _libavencoders=$(echo $_libavencoders | sed -e s/FLASHSV_ENCODER// -e s/PNG_ENCODER// -e s/ZMBV_ENCODER//)
+  _libavdecoders=$(echo $_libavdecoders | sed -e s/FLASHSV_DECODER// -e s/PNG_DECODER// -e s/ZMBV_DECODER// -e s/ZLIB_DECODER// -e s/DXA_DECODER// -e s/TSCC_DECODER//)
+  _libavencoders=$(echo $_libavencoders | sed -e s/FLASHSV_ENCODER// -e s/PNG_ENCODER// -e s/ZMBV_ENCODER// -e s/ZLIB_ENCODER//)
 fi
 echores "$_zlib"
 
