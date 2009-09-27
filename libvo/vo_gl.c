@@ -785,7 +785,7 @@ static uint32_t get_image(mp_image_t *mpi) {
       mesa_bufferptr = NULL;
     }
     if (!mesa_bufferptr)
-      mesa_bufferptr = AllocateMemoryMESA(mDisplay, mScreen, needed_size, 0, 0, 0);
+      mesa_bufferptr = AllocateMemoryMESA(mDisplay, mScreen, needed_size, 0, 1.0, 1.0);
     mesa_buffersize = needed_size;
 #endif
     mpi->planes[0] = mesa_bufferptr;
