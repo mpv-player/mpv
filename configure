@@ -6503,7 +6503,7 @@ echores "$_theora"
 
 echocheck "internal mp3lib support"
 if test "$_mp3lib" = auto ; then
-  test "$cc_vendor" = intel && _mp3lib=no || _mp3lib=yes
+  test "$cc_vendor" = intel && test "$_cc_major" -le 10 -o "$_cc_major" -eq 11 -a "$_cc_minor" -eq 0 && _mp3lib=no || _mp3lib=yes
 fi
 if test "$_mp3lib" = yes ; then
   def_mp3lib='#define CONFIG_MP3LIB 1'
@@ -6516,7 +6516,7 @@ echores "$_mp3lib"
 
 echocheck "liba52 support"
 if test "$_liba52_internal" = auto ; then
-  test "$cc_vendor" = intel && _liba52_internal=no || _liba52_internal=yes
+  test "$cc_vendor" = intel && test "$_cc_major" -le 10 -o "$_cc_major" -eq 11 -a "$_cc_minor" -eq 0 && _liba52_internal=no || _liba52_internal=yes
 fi
 def_liba52='#undef CONFIG_LIBA52'
 def_liba52_internal="#undef CONFIG_LIBA52_INTERNAL"
