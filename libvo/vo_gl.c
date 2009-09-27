@@ -571,6 +571,10 @@ glconfig:
     uninitGl();
   if (setGlWindow(&gl_vinfo, &gl_context, vo_window) == SET_WINDOW_FAILED)
     return -1;
+  if (mesa_buffer && !AllocateMemoryMESA) {
+    mp_msg(MSGT_VO, MSGL_ERR, "Can not enable mesa-buffer because AllocateMemoryMESA was not found\n");
+    mesa_buffer = 0;
+  }
   initGl(vo_dwidth, vo_dheight);
 
   return 0;
