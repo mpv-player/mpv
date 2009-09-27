@@ -492,7 +492,7 @@ Use these options if autodetection fails:
   --with-gtk-config=PATH      path to gtk*-config
   --with-sdl-config=PATH      path to sdl*-config
   --with-dvdnav-config=PATH   path to dvdnav-config
-  --with-dvdread-config=PATH   path to dvdread-config
+  --with-dvdread-config=PATH  path to dvdread-config
 
 This configure script is NOT autoconf-based, even though its output is similar.
 It will try to autodetect all configuration options. If you --enable an option
