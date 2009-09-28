@@ -3450,14 +3450,15 @@ if(vo_spudec==NULL && mpctx->sh_video &&
   init_vo_spudec();
 }
 
-if(mpctx->sh_video) {
+if(1 || mpctx->sh_video) {
 // after reading video params we should load subtitles because
 // we know fps so now we can adjust subtitle time to ~6 seconds AST
 // check .sub
+  double fps = mpctx->sh_video ? mpctx->sh_video->fps : 25;
   current_module="read_subtitles_file";
   if(sub_name){
     for (i = 0; sub_name[i] != NULL; ++i)
-        add_subtitles (sub_name[i], mpctx->sh_video->fps, 0);
+        add_subtitles (sub_name[i], fps, 0);
   }
   if(sub_auto) { // auto load sub file ...
     char *psub = get_path( "sub/" );
@@ -3465,7 +3466,7 @@ if(mpctx->sh_video) {
     int i = 0;
     free(psub); // release the buffer created by get_path() above
     while (tmp[i]) {
-        add_subtitles (tmp[i], mpctx->sh_video->fps, 1);
+        add_subtitles (tmp[i], fps, 1);
         free(tmp[i++]);
     }
     free(tmp);
