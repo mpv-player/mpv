@@ -128,10 +128,10 @@
 	{"loadidx", &index_file_load, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 	// select audio/video/subtitle stream
-	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 8190, NULL},
+	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, -2, 8190, NULL},
 	{"ausid", &audio_substream_id, CONF_TYPE_INT, 0, 0, 0, NULL},
-	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 8190, NULL},
-	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 8190, NULL},
+	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, -2, 8190, NULL},
+	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, -2, 8190, NULL},
 	{"novideo", &video_id, CONF_TYPE_FLAG, 0, -1, -2, NULL},
 
 	{ "hr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 0, 1, NULL },
