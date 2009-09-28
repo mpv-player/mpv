@@ -3726,7 +3726,7 @@ if(!mpctx->sh_video) {
 
   if(end_at.type == END_AT_TIME && end_at.pos < a_pos)
     mpctx->eof = PT_NEXT_ENTRY;
-  update_subtitles(NULL, mpctx->sh_audio->pts, mpctx->d_sub, 0);
+  update_subtitles(NULL, a_pos, mpctx->d_sub, 0);
   update_osd_msg();
 
 } else {
