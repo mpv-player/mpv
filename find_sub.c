@@ -12,6 +12,7 @@
 
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "mpcommon.h"
 
 static int current_sub=0;
 
@@ -54,6 +55,7 @@ void step_sub(sub_data *subd, float pts, int movement) {
 
 void find_sub(sub_data* subd,int key){
     subtitle *subs;
+    subtitle *new_sub = NULL;
     int i,j;
 
     if ( !subd || subd->sub_num == 0) return;
@@ -77,8 +79,8 @@ void find_sub(sub_data* subd,int key){
     vo_osd_changed(OSDTYPE_SUBTITLE);
 
     if(key<=0){
-      vo_sub=NULL; // no sub here
-      return;
+      // no sub here
+      goto update;
     }
 
 //    printf("\r---- sub changed ----\n");
@@ -89,13 +91,12 @@ void find_sub(sub_data* subd,int key){
           // no sub
           nosub_range_start=subs[current_sub].end;
           nosub_range_end=subs[current_sub+1].start;
-          vo_sub=NULL;
-          return;
+          goto update;
       }
       // next sub?
       ++current_sub;
-      vo_sub=&subs[current_sub];
-      if(key>=vo_sub->start && key<=vo_sub->end) return; // OK!
+      new_sub=&subs[current_sub];
+      if(key>=new_sub->start && key<=new_sub->end) goto update; // OK!
     }
 
 //    printf("\r---- sub log search... ----\n");
@@ -106,22 +107,22 @@ void find_sub(sub_data* subd,int key){
 //    printf("Searching %d in %d..%d\n",key,subs[i].start,subs[j].end);
     while(j>=i){
         current_sub=(i+j+1)/2;
-        vo_sub=&subs[current_sub];
-        if(key<vo_sub->start) j=current_sub-1;
-        else if(key>vo_sub->end) i=current_sub+1;
-        else return; // found!
+        new_sub=&subs[current_sub];
+        if(key<new_sub->start) j=current_sub-1;
+        else if(key>new_sub->end) i=current_sub+1;
+        else goto update; // found!
     }
-//    if(key>=vo_sub->start && key<=vo_sub->end) return; // OK!
+//    if(key>=new_sub->start && key<=new_sub->end) return; // OK!
 
     // check where are we...
-    if(key<vo_sub->start){
+    if(key<new_sub->start){
       if(current_sub<=0){
           // before the first sub
           nosub_range_start=key-1; // tricky
-          nosub_range_end=vo_sub->start;
-//          printf("FIRST...  key=%d  end=%d  \n",key,vo_sub->start);
-          vo_sub=NULL;
-          return;
+          nosub_range_end=new_sub->start;
+//          printf("FIRST...  key=%d  end=%d  \n",key,new_sub->start);
+          new_sub=NULL;
+          goto update;
       }
       --current_sub;
       if(key>subs[current_sub].end && key<subs[current_sub+1].start){
@@ -129,31 +130,33 @@ void find_sub(sub_data* subd,int key){
           nosub_range_start=subs[current_sub].end;
           nosub_range_end=subs[current_sub+1].start;
 //          printf("No sub... 1 \n");
-          vo_sub=NULL;
-          return;
+          new_sub=NULL;
+          goto update;
       }
       printf("HEH????  ");
     } else {
-      if(key<=vo_sub->end) printf("JAJJ!  "); else
+      if(key<=new_sub->end) printf("JAJJ!  "); else
       if(current_sub+1 >= subd->sub_num){
           // at the end?
-          nosub_range_start=vo_sub->end;
+          nosub_range_start=new_sub->end;
           nosub_range_end=0x7FFFFFFF; // MAXINT
 //          printf("END!?\n");
-          vo_sub=NULL;
-          return;
+          new_sub=NULL;
+          goto update;
       } else
       if(key>subs[current_sub].end && key<subs[current_sub+1].start){
           // no sub
           nosub_range_start=subs[current_sub].end;
           nosub_range_end=subs[current_sub+1].start;
 //          printf("No sub... 2 \n");
-          vo_sub=NULL;
-          return;
+          new_sub=NULL;
+          goto update;
       }
     }
 
-    mp_msg(MSGT_FIXME,MSGL_FIXME,"SUB ERROR:  %d  ?  %d --- %d  [%d]  \n",key,(int)vo_sub->start,(int)vo_sub->end,current_sub);
+    mp_msg(MSGT_FIXME,MSGL_FIXME,"SUB ERROR:  %d  ?  %d --- %d  [%d]  \n",key,(int)new_sub->start,(int)new_sub->end,current_sub);
 
-    vo_sub=NULL; // no sub here
+    new_sub=NULL; // no sub here
+update:
+    set_osd_subtitle(new_sub);
 }
