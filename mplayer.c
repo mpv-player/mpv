@@ -253,7 +253,7 @@ extern char *sub_demuxer_name; // override sub demuxer
 // streaming:
 int audio_id=-1;
 int video_id=-1;
-int dvdsub_id=-2;
+int dvdsub_id=-1;
 int vobsub_id=-1;
 char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
@@ -3491,11 +3491,11 @@ if (mpctx->global_sub_size) {
   } else if (mpctx->global_sub_indices[SUB_SOURCE_SUBS] >= 0) {
     // if there are text subs to use, use those.  (autosubs come last here)
     mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_SUBS];
-  } else if (dvdsub_id < 0 && mpctx->global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
+  } else if (dvdsub_id == -1 && mpctx->global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
     // finally select subs by language and container hints
-    if (dvdsub_id < 0 && dvdsub_lang)
+    if (dvdsub_id == -1 && dvdsub_lang)
       dvdsub_id = demuxer_sub_track_by_lang(mpctx->demuxer, dvdsub_lang);
-    if (dvdsub_id < 0)
+    if (dvdsub_id == -1)
       dvdsub_id = demuxer_default_sub_track(mpctx->demuxer);
     if (dvdsub_id >= 0)
       mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + dvdsub_id;
