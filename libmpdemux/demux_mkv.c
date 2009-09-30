@@ -2961,7 +2961,7 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
           target_filepos = (uint64_t) (target_timecode * mkv_d->last_filepos
                                        / (mkv_d->last_pts * 1000.0));
 
-          max_pos = mkv_d->cluster_positions[mkv_d->num_cluster_pos-1];
+          max_pos = mkv_d->num_cluster_pos ? mkv_d->cluster_positions[mkv_d->num_cluster_pos-1] : 0;
           if (target_filepos > max_pos)
             {
               if ((off_t) max_pos > stream_tell (s))
