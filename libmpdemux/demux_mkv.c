@@ -1578,7 +1578,7 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
           uint32_t type2;
           unsigned int cnt;
 
-          src = track->private_data + RVPROPERTIES_SIZE;
+          src = (uint8_t *)track->private_data + RVPROPERTIES_SIZE;
 
           cnt = track->private_size - RVPROPERTIES_SIZE;
           bih = realloc(bih, sizeof (BITMAPINFOHEADER)+8+cnt);
