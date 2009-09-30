@@ -670,8 +670,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: 編解碼器無法設置 sh->disp_w 和 sh->disp_h, 嘗試繞過。\n"
-#define MSGTR_VoConfigRequest "VDec: vo 配置請求 - %d x %d (色彩空間首選項: %s)\n"
-#define MSGTR_UsingXAsOutputCspNoY "VDec: 使用 %s 作為輸出 csp (没有 %d)\n"
 #define MSGTR_CouldNotFindColorspace "找不到匹配的色彩空間 - 重新嘗試 -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "電影寬高比為 %.2f:1 - 預放大到正確的電影寬高比。\n"
 #define MSGTR_MovieAspectUndefined "電影寬高比未定義 - 没使用預放大。\n"

@@ -148,7 +148,9 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     if(!sh->disp_w || !sh->disp_h)
 	return 0;
 
-    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_VoConfigRequest,w,h,vo_format_name(preferred_outfmt));
+    mp_msg(MSGT_DECVIDEO, MSGL_V,
+           "VDec: vo config request - %d x %d (preferred colorspace: %s)\n",
+           w, h, vo_format_name(preferred_outfmt));
 
 //    if(!vf) return 1; // temp hack
 
@@ -226,7 +228,8 @@ csp_again:
 	return 0;	// failed
     }
     out_fmt=sh->codec->outfmt[j];
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_UsingXAsOutputCspNoY,vo_format_name(out_fmt),j);
+    mp_msg(MSGT_CPLAYER, MSGL_V, "VDec: using %s as output csp (no %d)\n",
+           vo_format_name(out_fmt), j);
     sh->outfmtidx=j;
     sh->vfilter=vf;
 

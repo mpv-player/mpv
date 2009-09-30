@@ -268,7 +268,6 @@ static const char help_text[]=
 #define MSGTR_CannotFindColorspace "common colorspaceが見付かりません, even by inserting 'scale' :(\n"
 
 // vd.c
-#define MSGTR_VoConfigRequest "VDec: 映像出力設定 - %d x %d (preferred csp: %s)\n"
 
 // ====================== GUI messages/buttons ========================
 

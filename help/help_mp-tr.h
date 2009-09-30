@@ -696,8 +696,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Kodek ayarlanamadı: sh->disp_w ve sh->disp_h, çözülmeye çalışılıyor!\n"
-#define MSGTR_VoConfigRequest "VDec: vo ayar isteği - %d x %d (tercih csp: %s)\n"
-#define MSGTR_UsingXAsOutputCspNoY "VDec: çıkış csp'si olarak %s kullanılıyor (%d yok)\n"
 #define MSGTR_CouldNotFindColorspace "Renk biçimi bulunamadı.  -vf scale ile tekrar deneniyor...\n"
 #define MSGTR_MovieAspectIsSet "Video-Görünümü: %.2f:1 - doğru video görünümü için önölçekleniyor.\n"
 #define MSGTR_MovieAspectUndefined "Video-Görünümü tanımsız - önölçekleme onaylanamadı.\n"

@@ -635,7 +635,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: kodek nenastavil sh->disp_w a sh->disp_h, skúšam to obísť!\n"
-#define MSGTR_VoConfigRequest "VDec: vo konfiguračná požiadavka - %d x %d (preferovaný csp: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Nemôžem nájsť zhodný priestor farieb - skúšam znova s -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect je %.2f:1 - mením rozmery na správne.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect je nedefinovný - nemenia sa rozmery.\n"

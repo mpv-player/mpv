@@ -325,7 +325,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: το codec δεν όρισε sh->disp_w και sh->disp_h, προσπάθεια επίλυσης!\n"
-#define MSGTR_VoConfigRequest "VDec: αίτηση για επιλογή vo - %d x %d (προτεινόμενο csp: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Δεν βρέθηκε αντίστοιχο colorspace - προσπάθεια με -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Η αναλογία της ταινίας είναι %.2f:1 - προκλιμάκωση για την διόρθωση της εμφάνισης της ταινίας.\n"
 #define MSGTR_MovieAspectUndefined "Η αναλογία της ταινίας δεν είναι ορισμένη - δεν εφαρμόζεται προκλιμάκωση.\n"

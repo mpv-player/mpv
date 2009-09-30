@@ -688,7 +688,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec : le codec n'a pas défini sh->disp_w et sh->disp_h, essai de contournement !\n"
-#define MSGTR_VoConfigRequest "VDec : requête de config de vo - %d x %d (espace colorimétrique préferé : %s)\n"
 #define MSGTR_CouldNotFindColorspace "N'a pas pu trouver espace colorimétrique correspondant - nouvel essai avec -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "L'aspect du film est %.2f:1 - pré-redimensionnement à l'aspect correct.\n"
 #define MSGTR_MovieAspectUndefined "L'aspect du film est indéfini - pas de pré-dimensionnement appliqué.\n"

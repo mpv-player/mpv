@@ -324,7 +324,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: 코덱이 sh->disp_w와 sh->disp_h로 설정되지 않아서, 다시 시도합니다.\n"
-#define MSGTR_VoConfigRequest "VDec: vo 설정 요청 - %d x %d (선호하는 csp: %s)\n"
 #define MSGTR_CouldNotFindColorspace "어울리는 컬러공간을 찾을 수 없습니다. -vf 크기조절로 다시 시도합니다...\n"
 #define MSGTR_MovieAspectIsSet "화면비율이 %.2f:1 입니다. - 화면비율을 조정하기위해 사전 크기조절을 합니다.\n"
 #define MSGTR_MovieAspectUndefined "화면비율이 정의되지 않았습니다. - 사전 크기조절이 적용되지 않았습니다.\n"

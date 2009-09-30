@@ -1670,8 +1670,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Кодек не установил sh->disp_w и sh->disp_h, пытаюсь обойти.\n"
-#define MSGTR_VoConfigRequest "VDec: запрос vo config - %d x %d (предпочитаемое цветовое пространство: %s)\n"
-#define MSGTR_UsingXAsOutputCspNoY "VDec: использую %s в качестве выходного csp (не %d)\n"
 #define MSGTR_CouldNotFindColorspace "Не могу найти подходящее цветовое пространство - попытаюсь с -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect - %.2f:1 - выполняю предварительное масштабирование\nдля коррекции соотношения сторон фильма.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect не определён - предварительное масштабирование не применяется.\n"
