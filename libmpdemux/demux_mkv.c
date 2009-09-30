@@ -257,30 +257,10 @@ add_cluster_position (mkv_demuxer_t *mkv_d, uint64_t position)
 static int
 aac_get_sample_rate_index (uint32_t sample_rate)
 {
-  if (92017 <= sample_rate)
-    return 0;
-  else if (75132 <= sample_rate)
-    return 1;
-  else if (55426 <= sample_rate)
-    return 2;
-  else if (46009 <= sample_rate)
-    return 3;
-  else if (37566 <= sample_rate)
-    return 4;
-  else if (27713 <= sample_rate)
-    return 5;
-  else if (23004 <= sample_rate)
-    return 6;
-  else if (18783 <= sample_rate)
-    return 7;
-  else if (13856 <= sample_rate)
-    return 8;
-  else if (11502 <= sample_rate)
-    return 9;
-  else if (9391 <= sample_rate)
-    return 10;
-  else
-    return 11;
+  static const int srates[] = {92017, 75132, 55426, 46009, 37566, 27713, 23004, 18783, 13856, 11502, 9391, 0};
+  int i = 0;
+  while (sample_rate < srates[i]) i++;
+  return i;
 }
 
 /** \brief Free cached demux packets
