@@ -617,7 +617,10 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, float audio
     } else {
       priv->last_pts += rel_seek_secs * AV_TIME_BASE;
     }
-    av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags);
+    if (av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags) < 0) {
+        avsflags ^= AVSEEK_FLAG_BACKWARD;
+        av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags);
+    }
 }
 
 static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
