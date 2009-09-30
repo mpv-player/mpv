@@ -210,8 +210,11 @@ extern int dvdsub_id;
  */
 static void grow_array(void *arrayp, int nelem, size_t elsize) {
   void **array = arrayp;
+  void *oldp = *array;
   if (!(nelem & 31))
     *array = realloc(*array, (nelem + 32) * elsize);
+  if (!*array)
+    free(oldp);
 }
 
 static mkv_track_t *
