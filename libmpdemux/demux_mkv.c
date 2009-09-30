@@ -245,6 +245,10 @@ add_cluster_position (mkv_demuxer_t *mkv_d, uint64_t position)
 
   grow_array(&mkv_d->cluster_positions, mkv_d->num_cluster_pos,
              sizeof(uint64_t));
+  if (!mkv_d->cluster_positions) {
+    mkv_d->num_cluster_pos = 0;
+    return;
+  }
   mkv_d->cluster_positions[mkv_d->num_cluster_pos++] = position;
 }
 
@@ -1088,6 +1092,10 @@ demux_mkv_read_cues (demuxer_t *demuxer)
           && pos != EBML_UINT_INVALID)
         {
           grow_array(&mkv_d->indexes, mkv_d->num_indexes, sizeof(mkv_index_t));
+          if (!mkv_d->indexes) {
+            mkv_d->num_indexes = 0;
+            break;
+          }
           mkv_d->indexes[mkv_d->num_indexes].tnum = track;
           mkv_d->indexes[mkv_d->num_indexes].timecode = time;
           mkv_d->indexes[mkv_d->num_indexes].filepos =mkv_d->segment_start+pos;
