@@ -213,7 +213,10 @@ static void grow_array(void *arrayp, int nelem, size_t elsize) {
   void *oldp = *array;
   if (nelem & 31)
     return;
-  *array = realloc(*array, (nelem + 32) * elsize);
+  if (nelem > UINT_MAX / elsize - 32)
+    *array = NULL;
+  else
+    *array = realloc(*array, (nelem + 32) * elsize);
   if (!*array)
     free(oldp);
 }
