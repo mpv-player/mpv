@@ -2388,6 +2388,7 @@ EOF
 cc_check -c || die "Symbol mangling check failed."
 sym=$($_nm -P -g $TMPEXE)
 extern_prefix=${sym%%ff_extern*}
+def_extern_asm="#define EXTERN_ASM $extern_prefix"
 def_extern_prefix="#define EXTERN_PREFIX \"$extern_prefix\""
 echores $extern_prefix
 
@@ -8619,6 +8620,7 @@ $def_vsscanf
 $def_asmalign_pot
 $def_builtin_expect
 $def_dl
+$def_extern_asm
 $def_extern_prefix
 $def_iconv
 $def_kstat
