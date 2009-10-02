@@ -763,8 +763,11 @@ static void reset(void)
 
 static int play(void* data, int len, int flags)
 {
-  int num_frames = len / bytes_per_sample;
+  int num_frames;
   snd_pcm_sframes_t res = 0;
+  if (!(flags & AOPLAY_FINAL_CHUNK))
+      len = len / ao_data.outburst * ao_data.outburst;
+  num_frames = len / bytes_per_sample;
 
   //mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: frames=%i, len=%i\n",num_frames,len);
 
