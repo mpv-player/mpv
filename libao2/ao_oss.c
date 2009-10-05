@@ -396,8 +396,19 @@ ac3_retry:
   }
 
   ao_data.bps=ao_data.channels;
-  if(ao_data.format != AF_FORMAT_U8 && ao_data.format != AF_FORMAT_S8)
+  switch (ao_data.format & AF_FORMAT_BITS_MASK) {
+  case AF_FORMAT_8BIT:
+    break;
+  case AF_FORMAT_16BIT:
     ao_data.bps*=2;
+    break;
+  case AF_FORMAT_24BIT:
+    ao_data.bps*=3;
+    break;
+  case AF_FORMAT_32BIT:
+    ao_data.bps*=4;
+    break;
+  }
 
   ao_data.outburst-=ao_data.outburst % ao_data.bps; // round down
   ao_data.bps*=ao_data.samplerate;
