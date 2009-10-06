@@ -388,7 +388,7 @@ Audio output:
   --disable-esd          disable esd audio output [autodetect]
   --disable-pulse        disable Pulseaudio audio output [autodetect]
   --disable-jack         disable JACK audio output [autodetect]
-  --disable-openal       disable OpenAL audio output [autodetect]
+  --enable-openal        enable OpenAL audio output [disable]
   --disable-nas          disable NAS audio output [autodetect]
   --disable-sgiaudio     disable SGI audio output [autodetect]
   --disable-sunaudio     disable Sun audio output [autodetect]
@@ -560,7 +560,7 @@ _esd=auto
 _pulse=auto
 _jack=auto
 _dart=auto
-_openal=auto
+_openal=no
 _libcdio=auto
 _liblzo=auto
 _mad=auto
