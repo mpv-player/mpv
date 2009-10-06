@@ -325,7 +325,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDek: codec satte ikke sh->disp_w og sh->disp_h, prøver en anden løsning!\n"
-#define MSGTR_VoConfigRequest "VDek: vo konfig. anmodning - %d x %d (foretrukket csp: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Kunne ikke finde colorspace som matcher - prøver med -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Størrelsesforhold er %.2f:1 - præskalerer for at rette størrelsesforholdet.\n"
 #define MSGTR_MovieAspectUndefined "Størrelsesforholdet er ikke defineret - ingen præskalering benyttet.\n"

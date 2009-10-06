@@ -1618,8 +1618,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: el codec no declaró sh->disp_w y sh->disp_h, intentando solucionarlo!\n"
-#define MSGTR_VoConfigRequest "VDec: vo solicitud de config - %d x %d (csp preferida: %s).\n"
-#define MSGTR_UsingXAsOutputCspNoY "VDec: usando %s como salida csp (no %d)\n"
 #define MSGTR_CouldNotFindColorspace "No se pudo encontrar colorspace concordante - reintentando escalado -vf...\n"
 #define MSGTR_MovieAspectIsSet "Aspecto es %.2f:1 - prescalando a aspecto correcto.\n"
 #define MSGTR_MovieAspectUndefined "Aspecto de película no es definido - no se ha aplicado prescalado.\n"

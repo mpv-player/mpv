@@ -66,10 +66,10 @@ if (HAVE_CMOV)
 }
 
 
-void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub,
-                      double video_offset, int reset)
+void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
+                      sh_video_t *sh_video, double refpts, double sub_offset,
+                      demux_stream_t *d_dvdsub, int reset)
 {
-    struct MPOpts *opts = sh_video->opts;
     unsigned char *packet=NULL;
     int len;
     char type = d_dvdsub->sh ? ((sh_sub_t *)d_dvdsub->sh)->type : 'v';
@@ -77,25 +77,24 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub,
     if (reset) {
         sub_clear_text(&subs, MP_NOPTS_VALUE);
         if (vo_sub) {
-            vo_sub = NULL;
-            vo_osd_changed(OSDTYPE_SUBTITLE);
+            set_osd_subtitle(mpctx, NULL);
         }
         if (vo_spudec) {
             spudec_reset(vo_spudec);
             vo_osd_changed(OSDTYPE_SPU);
         }
+        return;
     }
     // find sub
     if (subdata) {
-        double pts = sh_video->pts;
-        if (sub_fps==0) sub_fps = sh_video->fps;
+        if (sub_fps==0) sub_fps = sh_video ? sh_video->fps : 25;
         current_module = "find_sub";
-        if (pts > sub_last_pts || pts < sub_last_pts-1.0) {
-            find_sub(subdata, (pts+sub_delay) *
+        if (refpts > sub_last_pts || refpts < sub_last_pts-1.0) {
+            find_sub(mpctx, subdata, (refpts+sub_delay) *
                      (subdata->sub_uses_time ? 100. : sub_fps));
             if (vo_sub) vo_sub_last = vo_sub;
             // FIXME! frame counter...
-            sub_last_pts = pts;
+            sub_last_pts = refpts;
         }
     }
 
@@ -110,12 +109,12 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub,
             // Vobsub
             len = 0;
             if (vo_vobsub) {
-                if (sh_video->pts+sub_delay >= 0) {
-                    len = vobsub_get_packet(vo_vobsub, sh_video->pts+sub_delay,
+                if (refpts+sub_delay >= 0) {
+                    len = vobsub_get_packet(vo_vobsub, refpts+sub_delay,
                                             (void**)&packet, &timestamp);
                     if (len > 0) {
-                        timestamp -= (sh_video->pts + sub_delay - sh_video->timer)*90000;
-                        mp_dbg(MSGT_CPLAYER,MSGL_V,"\rVOB sub: len=%d v_pts=%5.3f v_timer=%5.3f sub=%5.3f ts=%d \n",len,sh_video->pts,sh_video->timer,timestamp / 90000.0,timestamp);
+                        timestamp -= (refpts + sub_delay - sh_video->timer)*90000;
+                        mp_dbg(MSGT_CPLAYER,MSGL_V,"\rVOB sub: len=%d v_pts=%5.3f v_timer=%5.3f sub=%5.3f ts=%d \n",len,refpts,sh_video->timer,timestamp / 90000.0,timestamp);
                     }
                 }
             } else {
@@ -127,14 +126,14 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub,
                     // d_video->pts which would have been the simplest
                     // improvement doesn't work because mpeg specific hacks
                     // in video.c set d_video->pts to 0.
-                    float x = d_dvdsub->pts - sh_video->pts;
+                    float x = d_dvdsub->pts - refpts;
                     if (x > -20 && x < 20) // prevent missing subs on pts reset
                         timestamp = 90000*(sh_video->timer + d_dvdsub->pts
-                                           + sub_delay - sh_video->pts);
+                                           + sub_delay - refpts);
                     else timestamp = 90000*(sh_video->timer + sub_delay);
                     mp_dbg(MSGT_CPLAYER, MSGL_V, "\rDVD sub: len=%d  "
                            "v_pts=%5.3f  s_pts=%5.3f  ts=%d \n", len,
-                           sh_video->pts, d_dvdsub->pts, timestamp);
+                           refpts, d_dvdsub->pts, timestamp);
                 }
             }
             if (len<=0 || !packet) break;
@@ -146,14 +145,13 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub,
             vo_osd_changed(OSDTYPE_SPU);
     } else if (opts->sub_id >= 0
                && (type == 't' || type == 'm' || type == 'a')) {
-        double curpts = sh_video->pts + sub_delay;
+        double curpts = refpts + sub_delay;
         double endpts;
-        vo_sub = &subs;
         while (d_dvdsub->first) {
-            double pts = ds_get_next_pts(d_dvdsub) + video_offset;
-            if (pts > curpts)
+            double subpts = ds_get_next_pts(d_dvdsub) + sub_offset;
+            if (subpts > curpts)
                 break;
-            endpts = d_dvdsub->first->endpts + video_offset;
+            endpts = d_dvdsub->first->endpts + sub_offset;
             len = ds_get_packet_sub(d_dvdsub, &packet);
             if (type == 'm') {
                 if (len < 2) continue;
@@ -167,15 +165,14 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub,
                 if (!ass_track) continue;
                 if (type == 'a') { // ssa/ass subs with libass
                     ass_process_chunk(ass_track, packet, len,
-                                      (long long)(pts*1000 + 0.5),
-                                      (long long)((endpts-pts)*1000 + 0.5));
+                                      (long long)(subpts*1000 + 0.5),
+                                      (long long)((endpts-subpts)*1000 + 0.5));
                 } else { // plaintext subs with libass
-                    vo_sub = NULL;
-                    if (pts != MP_NOPTS_VALUE) {
-                        if (endpts == MP_NOPTS_VALUE) endpts = pts + 3;
+                    if (subpts != MP_NOPTS_VALUE) {
+                        if (endpts == MP_NOPTS_VALUE) endpts = subpts + 3;
                         sub_clear_text(&subs, MP_NOPTS_VALUE);
                         sub_add_text(&subs, packet, len, endpts);
-                        subs.start = pts * 100;
+                        subs.start = subpts * 100;
                         subs.end = endpts * 100;
                         ass_process_subtitle(ass_track, &subs);
                     }
@@ -183,7 +180,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub,
                 continue;
             }
 #endif
-            if (pts != MP_NOPTS_VALUE) {
+            if (subpts != MP_NOPTS_VALUE) {
                 if (endpts == MP_NOPTS_VALUE)
                     sub_clear_text(&subs, MP_NOPTS_VALUE);
                 if (type == 'a') { // ssa/ass subs without libass => convert to plaintext
@@ -198,11 +195,11 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub,
                     packet = p;
                 }
                 sub_add_text(&subs, packet, len, endpts);
-                vo_osd_changed(OSDTYPE_SUBTITLE);
+                set_osd_subtitle(mpctx, &subs);
             }
         }
         if (sub_clear_text(&subs, curpts))
-            vo_osd_changed(OSDTYPE_SUBTITLE);
+            set_osd_subtitle(mpctx, &subs);
     }
     current_module=NULL;
 }

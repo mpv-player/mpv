@@ -1345,7 +1345,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
     int source = -1, reset_spu = 0;
     char *sub_name;
 
-    if (!mpctx->sh_video || global_sub_size <= 0)
+    if (global_sub_size <= 0)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
@@ -1529,7 +1529,8 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
         d_sub->id = opts->sub_id;
     }
 #endif
-    update_subtitles(mpctx->sh_video, d_sub, 0, 1);
+
+    update_subtitles(mpctx, &mpctx->opts, mpctx->sh_video, 0, 0, d_sub, 1);
 
     return M_PROPERTY_OK;
 }

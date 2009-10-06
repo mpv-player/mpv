@@ -431,7 +431,7 @@ static void uninitGl(void) {
     DeleteBuffers(2, gl_buffer_uv);
   gl_buffer_uv[0] = gl_buffer_uv[1] = 0; gl_buffersize_uv = 0;
   gl_bufferptr_uv[0] = gl_bufferptr_uv[1] = 0;
-#ifndef GL_WIN32
+#ifdef CONFIG_X11
   if (mesa_bufferptr)
     FreeMemoryMESA(mDisplay, mScreen, mesa_bufferptr);
 #endif
@@ -559,6 +559,10 @@ glconfig:
     uninitGl();
   if (setGlWindow(&gl_vinfo, &gl_context, vo_window) == SET_WINDOW_FAILED)
     return -1;
+  if (mesa_buffer && !AllocateMemoryMESA) {
+    mp_msg(MSGT_VO, MSGL_ERR, "Can not enable mesa-buffer because AllocateMemoryMESA was not found\n");
+    mesa_buffer = 0;
+  }
   initGl(vo_dwidth, vo_dheight);
 
   return 0;
@@ -763,13 +767,13 @@ static uint32_t get_image(mp_image_t *mpi) {
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
   needed_size = mpi->stride[0] * mpi->height;
   if (mesa_buffer) {
-#ifndef GL_WIN32
+#ifdef CONFIG_X11
     if (mesa_bufferptr && needed_size > mesa_buffersize) {
       FreeMemoryMESA(mDisplay, mScreen, mesa_bufferptr);
       mesa_bufferptr = NULL;
     }
     if (!mesa_bufferptr)
-      mesa_bufferptr = AllocateMemoryMESA(mDisplay, mScreen, needed_size, 0, 0, 0);
+      mesa_bufferptr = AllocateMemoryMESA(mDisplay, mScreen, needed_size, 0, 1.0, 1.0);
     mesa_buffersize = needed_size;
 #endif
     mpi->planes[0] = mesa_bufferptr;

@@ -1179,7 +1179,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Кодек не встановив sh->disp_w та sh->disp_h, спробую обійти це.\n"
-#define MSGTR_VoConfigRequest "VDec: vo config запит - %d x %d (preferred csp: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Не можу підібрати підходящу схему кольорів - повтор з -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Відношення сторін %.2f:1 - масштабую аби скоректувати.\n"
 #define MSGTR_MovieAspectUndefined "Відношення сторін не вказано - масштабування не використовується.\n"

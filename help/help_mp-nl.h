@@ -531,7 +531,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: codec stelde sh->disp_w en sh->disp_h niet in, ik probeer het probleem te omzeilen!\n"
-#define MSGTR_VoConfigRequest "VDec: vo config aanvraag - %d x %d (csp voorkeur: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Kon geen bijpassende kleurenruimte vinden - ik probeer opnieuw met -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Film-Aspect is %.2f:1 - voorscalering naar het correcte film-aspect.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect is niet gedefinieerd - geen voorscalering toegepast.\n"

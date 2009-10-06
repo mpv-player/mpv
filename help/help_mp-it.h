@@ -1632,8 +1632,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Il codec non ha impostato sh->disp_w and sh->disp_h, tento di risolvere.\n"
-#define MSGTR_VoConfigRequest "VDec: configurazione chiesta dal vo - %d x %d (sp.col. preferito: %s)\n"
-#define MSGTR_UsingXAsOutputCspNoY "VDec: uso %s come sp.colore di uscita (non %d)\n"
 #define MSGTR_CouldNotFindColorspace "Impossibile trovare uno spazio colore adatto - riprovo con -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect è %.2f:1 - riscalo per ottenere un rapporto corretto.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect non definito - nessuna scalatura.\n"

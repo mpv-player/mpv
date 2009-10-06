@@ -184,7 +184,7 @@ void uninit(sh_audio_t *sh)
   FreeLibrary(vqf_dll);
 }
 
-int control(sh_audio_t *sh_audio,int cmd,void* arg, ...)
+static int control(sh_audio_t *sh_audio,int cmd,void* arg, ...)
 {
   switch(cmd) {
       case ADCTRL_QUERY_FORMAT:

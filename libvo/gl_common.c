@@ -1564,6 +1564,21 @@ static XVisualInfo *getWindowVisualInfo(Window win) {
   return XGetVisualInfo(mDisplay, VisualIDMask, &vinfo_template, &tmp);
 }
 
+static void appendstr(char **dst, const char *str)
+{
+    int newsize;
+    char *newstr;
+    if (!str)
+        return;
+    newsize = strlen(*dst) + 1 + strlen(str) + 1;
+    newstr = realloc(*dst, newsize);
+    if (!newstr)
+        return;
+    *dst = newstr;
+    strcat(*dst, " ");
+    strcat(*dst, str);
+}
+
 /**
  * \brief Changes the window in which video is displayed.
  * If possible only transfers the context to the new window, otherwise
@@ -1620,6 +1635,7 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
   if (!keep_context) {
     void *(*getProcAddress)(const GLubyte *);
     const char *(*glXExtStr)(Display *, int);
+    char *glxstr = strdup("");
     if (*context)
       glXDestroyContext(mDisplay, *context);
     *context = new_context;
@@ -1632,8 +1648,17 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
     if (!getProcAddress)
       getProcAddress = (void *)getdladdr;
     glXExtStr = getdladdr("glXQueryExtensionsString");
-    getFunctions(getProcAddress, !glXExtStr ? NULL :
-                 glXExtStr(mDisplay, DefaultScreen(mDisplay)));
+    if (glXExtStr)
+        appendstr(&glxstr, glXExtStr(mDisplay, DefaultScreen(mDisplay)));
+    glXExtStr = getdladdr("glXGetClientString");
+    if (glXExtStr)
+        appendstr(&glxstr, glXExtStr(mDisplay, GLX_EXTENSIONS));
+    glXExtStr = getdladdr("glXGetServerString");
+    if (glXExtStr)
+        appendstr(&glxstr, glXExtStr(mDisplay, GLX_EXTENSIONS));
+
+    getFunctions(getProcAddress, glxstr);
+    free(glxstr);
 
     // and inform that reinit is neccessary
     return SET_WINDOW_REINIT;

@@ -121,8 +121,9 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
     if (!sh->disp_w || !sh->disp_h)
         return 0;
 
-    mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "VDec: vo config request - %d x %d (preferred colorspace: %s)\n", w, h,
-           vo_format_name(preferred_outfmt));
+    mp_msg(MSGT_DECVIDEO, MSGL_V,
+           "VDec: vo config request - %d x %d (preferred colorspace: %s)\n",
+           w, h, vo_format_name(preferred_outfmt));
 
     if (get_video_quality_max(sh) <= 0 && divx_quality) {
         // user wants postprocess but no pp filter yet:
@@ -216,7 +217,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
         return 0;               // failed
     }
     out_fmt = sh->codec->outfmt[j];
-    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "VDec: using %s as output csp (no %d)\n",
+    mp_msg(MSGT_CPLAYER, MSGL_V, "VDec: using %s as output csp (no %d)\n",
            vo_format_name(out_fmt), j);
     sh->outfmtidx = j;
     sh->vfilter = vf;

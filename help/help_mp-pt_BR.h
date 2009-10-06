@@ -330,7 +330,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: codec não configurou sh->disp_w e sh->disp_h, tentando solução alternativa!\n"
-#define MSGTR_VoConfigRequest "VDec: configuração vo pedida - %d x %d (preferido csp: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Impossível encotrar \"colorspace\" similar - retentando com -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Aspecto do filme é  %.2f:1 - pré-redimensionando para corrigir o aspecto do filme.\n"
 #define MSGTR_MovieAspectUndefined "Aspecto do filme é indefinido - nenhum pré-redimensionamento aplicado.\n"

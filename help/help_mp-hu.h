@@ -1633,8 +1633,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: a codec nem állította be az sh->disp_w és az sh_disp_h izéket, megpróbálom workaroundolni!\n"
-#define MSGTR_VoConfigRequest "VDec: vo config kérés - %d x %d (preferált színtér: %s)\n"
-#define MSGTR_UsingXAsOutputCspNoY "VDec: %s használata kimeneti színtérként (nincs %d)\n"
 #define MSGTR_CouldNotFindColorspace "Nem találok egyező colorspace-t - újra próbálom a -vf scale filterrel...\n"
 #define MSGTR_MovieAspectIsSet "A film aspect értéke %.2f:1 - aspect arány javítása.\n"
 #define MSGTR_MovieAspectUndefined "A film aspect értéke nem definiált - nincs arányjavítás.\n"

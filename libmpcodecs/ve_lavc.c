@@ -331,7 +331,7 @@ static int config(struct vf_instance* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
     int size, i;
-    void *p;
+    char *p;
 
     mux_v->bih->biWidth=width;
     mux_v->bih->biHeight=height;
@@ -1047,6 +1047,8 @@ static int vf_open(vf_instance_t *vf, char* args){
 
     vf->priv->pic = avcodec_alloc_frame();
     vf->priv->context = avcodec_alloc_context();
+    vf->priv->context->codec_type = CODEC_TYPE_VIDEO;
+    vf->priv->context->codec_id = vf->priv->codec->id;
 
     return 1;
 }

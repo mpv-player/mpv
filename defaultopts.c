@@ -26,7 +26,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .doubleclick_time = 300,
         .audio_id = -1,
         .video_id = -1,
-        .sub_id = -2,
+        .sub_id = -1,
         .playback_speed = 1.,
         .movie_aspect = -1.,
         .flip = -1,

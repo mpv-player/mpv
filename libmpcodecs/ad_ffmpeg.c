@@ -68,6 +68,7 @@ static int init(sh_audio_t *sh_audio)
     }
     lavc_context->request_channels = audio_output_channels;
     lavc_context->codec_tag = sh_audio->format; //FOURCC
+    lavc_context->codec_type = CODEC_TYPE_AUDIO;
     lavc_context->codec_id = lavc_codec->id; // not sure if required, imho not --A'rpi
 
     /* alloc extra data */

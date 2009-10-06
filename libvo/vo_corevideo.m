@@ -161,10 +161,6 @@ static void free_file_specific(void)
 static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 	free_file_specific();
-	config_movie_aspect((float)d_width/d_height);
-
-	vo_dwidth  = d_width  *= mpGLView->winSizeMult;
-	vo_dheight = d_height *= mpGLView->winSizeMult;
 
 	//misc mplayer setup
 	image_width = width;
@@ -183,6 +179,11 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 
 	if(!shared_buffer)
 	{
+		config_movie_aspect((float)d_width/d_height);
+
+		vo_dwidth  = d_width  *= mpGLView->winSizeMult;
+		vo_dheight = d_height *= mpGLView->winSizeMult;
+
 		image_data = malloc(image_width*image_height*image_bytes);
 		image_datas[0] = image_data;
 		if (vo_doublebuffering)

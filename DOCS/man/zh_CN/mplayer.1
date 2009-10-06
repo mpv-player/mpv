@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r29661
+.\" sync with en/mplayer.1 r29731
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -2180,6 +2180,10 @@ SSA/ASS 提供器能在那里放置字幕 (与 \-ass\-use\-margins 组合用)。
 显示由 <标识> (0\-31) 指定的字幕流。
 MPlayer 运行在 verbose (\-v) 模式时, 打印可用的字幕标识。
 如果你不能选择 DVD 中其中之一的字幕, 也请试试 \-vobsubid。
+.
+.TP
+.B \-nosub
+禁止所有默认情况下自动选择的字幕（就像比如 Matroska/mkv 流分离器所支持的那样）。
 .
 .TP
 .B \-slang <语言代号[,语言代号,...]> (也请参见 \-sid)

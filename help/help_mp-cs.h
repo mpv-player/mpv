@@ -1631,8 +1631,6 @@ static const char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDek: Kodek nenastavil sh->disp_w a sh->disp_h, pokouším se to obejít.\n"
-#define MSGTR_VoConfigRequest "VDek: Požadovaná konfigurace vo - %d x %d (preferovaný barevný prostor: %s)\n"
-#define MSGTR_UsingXAsOutputCspNoY "VDek: používám %s jako výstupní csp (ne %d)\n"
 #define MSGTR_CouldNotFindColorspace "Nemohu nalézt společný barevný prostor - zkouším to znovu s -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Poměr stran obrazu filmu je %.2f:1 - škáluji na správný poměr.\n"
 #define MSGTR_MovieAspectUndefined "Poměr stran obrazu filmu není definován - neměním velikost.\n"

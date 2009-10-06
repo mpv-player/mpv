@@ -120,10 +120,11 @@
 	{"loadidx", &index_file_load, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 	// select audio/video/subtitle stream
-        OPT_INTRANGE("aid", audio_id, 0, 0, 8190),
+        OPT_INTRANGE("aid", audio_id, 0, -2, 8190),
 	{"ausid", &audio_substream_id, CONF_TYPE_INT, 0, 0, 0, NULL},
-        OPT_INTRANGE("vid", video_id, 0, 0, 8190),
-        OPT_INTRANGE("sid", sub_id, 0, 0, 8190),
+        OPT_INTRANGE("vid", video_id, 0, -2, 8190),
+        OPT_INTRANGE("sid", sub_id, 0, -2, 8190),
+        OPT_FLAG_CONSTANTS("nosub", sub_id, 0, -1, -2),
         OPT_FLAG_CONSTANTS("novideo", video_id, 0, -1, -2),
 
 	{ "hr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 0, 1, NULL },

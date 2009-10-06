@@ -11,6 +11,7 @@
 #define OSD_MSG_RADIO_CHANNEL           7
 /// Base id for messages generated from the commmand to property bridge.
 #define OSD_MSG_PROPERTY                0x100
+#define OSD_MSG_SUB_BASE                0x1000
 
 #define MAX_OSD_LEVEL 3
 #define MAX_TERM_OSD_LEVEL 1
