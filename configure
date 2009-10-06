@@ -3942,7 +3942,7 @@ int main(void) {
   return 0;
 }
 EOF
-  cc_check && tmp_run && _apple_ir=yes
+  cc_check && _apple_ir=yes
 fi
 if test "$_apple_ir" = yes ; then
   def_apple_ir='#define CONFIG_APPLE_IR 1'
@@ -4948,13 +4948,7 @@ int main(void) {
   return strcmp(PNG_LIBPNG_VER_STRING, png_libpng_ver);
 }
 EOF
-    if cc_check -lpng -lz $_ld_lm ; then
-      if tmp_run ; then
-        _png=yes
-      else
-        _res_comment="mismatch of library and header versions"
-      fi
-    fi
+    cc_check -lpng -lz $_ld_lm && _png=yes
   fi
 fi
 echores "$_png"
@@ -5000,11 +4994,7 @@ cat > $TMPC << EOF
 #include <jpeglib.h>
 int main(void) { return 0; }
 EOF
-    if cc_check -ljpeg $_ld_lm ; then
-      if tmp_run ; then
-        _jpeg=yes
-      fi
-    fi
+  cc_check -ljpeg $_ld_lm && _jpeg=yes
 fi
 echores "$_jpeg"
 
@@ -5047,7 +5037,7 @@ cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
   for _ld_gif in "-lungif" "-lgif" ; do
-    cc_check $_ld_gif && tmp_run && _gif=yes && break
+    cc_check $_ld_gif && _gif=yes && break
   done
 fi
 
@@ -5084,7 +5074,7 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check "$_ld_gif" && tmp_run ; then
+  if cc_check "$_ld_gif" ; then
     def_gif_4='#define CONFIG_GIF_4 1'
     _res_comment=""
   fi
@@ -5109,7 +5099,7 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check "$_ld_gif" && tmp_run ; then
+  if cc_check "$_ld_gif" ; then
     def_gif_tvt_hack='#undef CONFIG_GIF_TVT_HACK'
     echores "disabled"
   else
@@ -5458,7 +5448,7 @@ cat > $TMPC << EOF
 #include <artsc.h>
 int main(void) { return 0; }
 EOF
-cc_check $(artsc-config --libs) $(artsc-config --cflags) && tmp_run && _arts=yes
+cc_check $(artsc-config --libs) $(artsc-config --cflags) && _arts=yes
 
   fi
 fi
@@ -5538,7 +5528,7 @@ cat > $TMPC << EOF
 #include <pulse/pulseaudio.h>
 int main(void) { return 0; }
 EOF
-cc_check $($_pkg_config --libs --cflags libpulse) && tmp_run && _pulse=yes
+cc_check $($_pkg_config --libs --cflags libpulse) && _pulse=yes
 
   fi
 fi
@@ -6073,23 +6063,11 @@ int main(void) {
     FT_Library library;
     FT_Int major=-1,minor=-1,patch=-1;
     int err=FT_Init_FreeType(&library);
-    if (err) {
-	printf("Couldn't initialize freetype2 lib, err code: %d\n",err);
-	exit(err);
-    }
-    FT_Library_Version(library,&major,&minor,&patch); // in v2.1.0+ only :(((
-    printf("freetype2  header version: %d.%d.%d  library version: %d.%d.%d\n",
-	FREETYPE_MAJOR,FREETYPE_MINOR,FREETYPE_PATCH,
-	(int)major,(int)minor,(int)patch );
-    if (major!=FREETYPE_MAJOR || minor!=FREETYPE_MINOR) {
-	printf("Library and header version mismatch! Fix it in your distribution!\n");
-	exit(1);
-    }
     return 0;
 }
 EOF
 	_freetype=no
-	cc_check $($_freetypeconfig --cflags) $($_freetypeconfig --libs) && tmp_run && _freetype=yes
+	cc_check $($_freetypeconfig --cflags) $($_freetypeconfig --libs) && _freetype=yes
     else
 	_freetype=no
     fi
@@ -6159,7 +6137,7 @@ if test "$_ass" = auto ; then
 int main(void) { return 0; }
 EOF
     _ass=no
-    cc_check $($_freetypeconfig --cflags) $($_freetypeconfig --libs) && tmp_run && _ass=yes
+    cc_check $($_freetypeconfig --cflags) $($_freetypeconfig --libs) && _ass=yes
     if test "$_ass" = no ; then
         _res_comment="FreeType >= 2.1.8 needed"
     fi
@@ -6189,7 +6167,7 @@ int main(void) {
 }
 EOF
 	_fribidi=no
-	cc_check $($_fribidiconfig --cflags) $($_fribidiconfig --libs) && tmp_run && _fribidi=yes
+	cc_check $($_fribidiconfig --cflags) $($_fribidiconfig --libs) && _fribidi=yes
     else
 	_fribidi=no
     fi
@@ -7408,7 +7386,7 @@ int main(void) { lame_version_t lv; (void) lame_init();
     get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor);
     return 0; }
 EOF
-  cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
+  cc_check -lmp3lame $_ld_lm && _mp3lame=yes
 fi
 if test "$_mp3lame" = yes ; then
   def_mp3lame="#define CONFIG_MP3LAME"
