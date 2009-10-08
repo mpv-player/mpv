@@ -1767,14 +1767,14 @@ frequenza massima permessa (default: 108.00)
 Imposta la lista dei canali.
 Usa _ per gli spazi nei nomi (o divertiti con il quoting ;-).
 I nomi dei canali verranno scritti usando l'OSD e i comandi slave
-radio_step_channel e radio_set_channel saranno utilizzabili da un controllo
+radio_step_channel e radio_set_channel saranno utilizzabili per un controllo
 remoto (dai un'occhiata a LIRC).
 Quando fornito, un numero nell'URL del filmato sarà trattato come la posizione
 del canale nella lista dei canali.
 .br
 .I ESEMPIO:
 radio://1, radio://104.4, radio_set_channel 1
-.IPs adevice=<valore> (solo acquisizione (capture) radio)
+.IPs "adevice=<valore> (solo acquisizione (capture) radio)"
 Nome del dispositivo da cui catturare l'audio.
 Senza tale nome la cattura sarà disabilitata anche se la parola
 chiave 'capture' appare nell'URL.
@@ -1788,7 +1788,7 @@ Quando usi la cattura audio, imposta anche l'opzione \-rawaudio rate=<valore>
 con lo stesso valore di arate.
 Se hai problemi colla velocità audio (va troppo veloce), prova la riproduzione
 con valori di frequenza differenti (per es.\& 48000,44100,32000,...).
-.IPs achannels=<valore> (solo acquisizione radio)
+.IPs "achannels=<valore> (solo acquisizione radio)"
 Numero di canali audio da catturare.
 .RE
 .
@@ -2004,9 +2004,9 @@ Se <can> è un intero maggiore di 1000, verrà trattato come fosse una frequenza
 (in kHz) invece che un nome di canale della tabella frequenze.
 .br
 Usa _ per gli spazi nei nomi (o divertiti con il quoting ;-).
-I nomi dei canali verranno scritti usando l'OSD e i comandi slave tv_step_channel,
-tv_set_channel e tv_last_channel saranno utilizzabili da un controllo
-remoto (dai un'occhiata a LIRC).
+I nomi dei canali verranno scritti usando l'OSD e i comandi slave
+tv_step_channel, tv_set_channel e tv_last_channel saranno utilizzabili per un
+controllo remoto (dai un'occhiata a LIRC).
 Non è compatibile con il parametro frequency.
 .br
 .I NOTA:
