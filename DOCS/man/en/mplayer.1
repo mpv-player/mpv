@@ -1817,7 +1817,7 @@ Not guaranteed to work correctly with \-oac copy.
 .
 .TP
 .B \-srate <Hz>
-Selects the output sample rate to be used
+Select the output sample rate to be used
 (of course sound cards have limits on this).
 If the sample frequency selected is different from that
 of the current media, the resample or lavcresample audio filter will be inserted
@@ -3470,21 +3470,21 @@ for negative values a blurring algorithm (default: 0).
 .IPs denoise=<0\-1>
 Apply a noise reduction algorithm to the video (default: 0, no noise reduction).
 .IPs deint=<0\-4>
-Chooses the deinterlacer (default: 0).
+Select the deinterlacer (default: 0).
 All modes > 0 respect \-field\-dominance.
 .RSss
 .IPs 0
-No deinterlacing.
+no deinterlacing
 .IPs 1
 Show only first field, similar to \-vf field.
 .IPs 2
 Bob deinterlacing, similar to \-vf tfields=1.
 .IPs 3
-Motion adaptive temporal deinterlacing.
+motion adaptive temporal deinterlacing
 May lead to A/V desync with slow video hardware and/or high resolution.
 This is the default if "D" is used to enable deinterlacing.
 .IPs 4
-Motion adaptive temporal deinterlacing with edge-guided spatial interpolation.
+motion adaptive temporal deinterlacing with edge-guided spatial interpolation
 Needs fast video hardware.
 .RE
 .IPs chroma\-deint
@@ -4967,7 +4967,7 @@ Allow (1) or disallow (0) the output frequency to differ slightly
 from the frequency given by <srate> (default: 1).
 Can be used if the startup of the playback is extremely slow.
 .IPs <type>
-Selects which resampling method to use.
+Select which resampling method to use.
 .RSss
 0: linear interpolation (fast, poor quality especially when upsampling)
 .br
