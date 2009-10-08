@@ -936,8 +936,10 @@ static uint32_t get_image(mp_image_t *mpi)
     struct vdpau_render_state *rndr;
 
     // no dr for non-decoding for now
-    if (!IMGFMT_IS_VDPAU(image_format)) return VO_FALSE;
-    if (mpi->type != MP_IMGTYPE_NUMBERED) return VO_FALSE;
+    if (!IMGFMT_IS_VDPAU(image_format))
+        return VO_FALSE;
+    if (mpi->type != MP_IMGTYPE_NUMBERED)
+        return VO_FALSE;
 
     rndr = get_surface(mpi->number);
     if (!rndr) {
