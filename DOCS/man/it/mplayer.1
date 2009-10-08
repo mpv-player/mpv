@@ -1,4 +1,4 @@
-.\" synced with r28576
+.\" synced with r29762
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -301,7 +301,7 @@ Inizia/\:smette di salvare istantanee.
 Mostra il nome del file sull'OSD.
 .IPs "! e @"
 Va all'inizio del capitolo precedente/\:successivo.
-.IPs "D (solo \-vo xvmc, \-vf yadif, \-vf kerndeint)"
+.IPs "D (solo \-vo xvmc, \-vo vdpau, \-vf yadif, \-vf kerndeint)"
 Attiva/\:disattiva deinterlacciatore.
 .IPs "A"
 Passa attraverso tutte le angolazioni del DVD.
@@ -540,12 +540,18 @@ a 'yes', '1' oppure 'true' e disabilitate impostandole a 'no', '0' oppure 'false
 Anche le sotto-opzioni possono essere specificate in questo modo.
 .PP
 Puoi anche scrivere configurazioni specifiche per i singoli file.
-Se desideri avere un file di configurazione per un file che si chiama 'movie.avi',
-crea un file di nome 'movie.avi.conf' con le opzioni specifiche dentro di esso
-e salvalo in ~/.mplayer/.
+Se desideri avere un file di configurazione per un file che si
+chiama 'movie.avi', crea un file di nome 'movie.avi.conf' con le opzioni
+specifiche dentro di esso e salvalo in ~/.mplayer/.
 Puoi anche mettere tale file di configurazione nella stessa directory in cui si
 trova il file relativo, sempre che tu imposti poi l'opzione \-use\-filedir\-conf
 (dalla riga comando oppure nel tuo file di configurazione globale).
+Se viene trovato un file di configurazione specifico nella stessa directory del
+file, nessun file di configurazione specifico vine letto da ~/.mplayer.
+Inoltre l'opzione \-use\-filedir\-conf abilita i file di configurazione
+specifici nella directory.
+Per questo, MPlayer dapprima cerca di caricare un mplayer.conf dalla stessa
+directory del file riprodotto e poi cerca un file di configurazione specifico.
 .PP
 .I ESEMPIO DI UN FILE DI CONFIGURAZIONE PER MPLAYER:
 .sp 1
@@ -932,13 +938,15 @@ quindi considera l'utilizzo di "\-vc ffmpeg12,".
 .
 .TP
 .B \-heartbeat\-cmd
-Comando da eseguire via system () ogni 30 secondi durante la riproduzione -
-per es.\& usando la shell.
+Comando da eseguire attraverso system() ogni 30 secondi durante la riproduzione
+- per es.\& usando la shell.
 .sp 1
 .I NOTA:
 MPlayer usa questo comando senza fare alcun controllo, è tua responsabilità
 assicurarti che non causi problemi di sicurezza (per es.\& assicurati di usare
-percorsi assoluti se "." e nella tua PATH come in Windows).
+percorsi assoluti se "." e nella tua PATH, come in Windows).
+Funziona solamente riproducendo video (per es.\& non funziona con \-novideo,
+mentre con \-vo null sì).
 .sp 1
 Questo può essere usato (male) per disabilitare salvaschermi che non usano le
 corrette API di X (vedi anche \-stop\-xscreensaver).
@@ -998,6 +1006,8 @@ automaticamente di default).
 Ritardo in msec prima di cominciare ad autoripetere un tasto (0 per disabilitare)
 .IPs ar-rate
 Numero di pressioni di un tasto da generare quando è attivo l'autorepeat.
+.IPs (no)default-bindings
+Usa i collegamenti ai tasti come sono impostati di default in MPlayer.
 .IPs keylist
 Stampa tutti i tasti che possono essere collegati ad un comando.
 .IPs cmdlist
@@ -1176,6 +1186,9 @@ separati dal carattere di nuova linea (newline, \\n) da stdin.
 .I NOTA:
 Vedi \-input cmdlist per la lista dei comandi in modalità slave e
 DOCS/tech/slave.txt per la loro descrizione.
+Tra l'altro questa opzione non è indicata per disabilitare altri input,
+per es.\& attraverso la finestra del video, per far ciò usa altri metodi come
+\-input nodefault\-binds:conf=/dev/null.
 .
 .TP
 .B \-softsleep
@@ -1767,7 +1780,7 @@ Senza tale nome la cattura sarà disabilitata anche se la parola
 chiave 'capture' appare nell'URL.
 Per i dispositivi ALSA deve essere usato nella forma hw=<scheda>.<dispositivo>.
 Se il nome contiene un '=', il modulo userà ALSA per la cattura, se no OSS.
-.IPs arate=<valore> (solo acquisizione radio)
+.IPs "arate=<valore> (solo acquisizione radio)"
 Frequenza in campioni per secondo (default: 44100).
 .br
 .I NOTA:
@@ -1984,8 +1997,12 @@ Vedi l'output su console per una lista delle norme TV disponibili.
 Regola il sintonizzatore sul canale <valore>.
 .IPs chanlist=<valore>
 disponibili: europe-east, europe-west, us-bcast, us-cable, etc
-.IPs channels=<canale>\-<nome>[=<norma>],<canale>\-<nome>[=<norma>],...
+.IPs channels=<can>\-<nome>[=<norma>],<can>\-<nome>[=<norma>],...
 Imposta la lista dei canali.
+.I NOTA:
+Se <can> è un intero maggiore di 1000, verrà trattato come fosse una frequenza
+(in kHz) invece che un nome di canale della tabella frequenze.
+.br
 Usa _ per gli spazi nei nomi (o divertiti con il quoting ;-).
 I nomi dei canali verranno scritti usando l'OSD e i comandi slave tv_step_channel,
 tv_set_channel e tv_last_channel saranno utilizzabili da un controllo
@@ -2338,7 +2355,7 @@ Utilizzalo se le virgole nei sottotitoli sono visualizzate all'inizio di una
 frase invece che alla fine.
 .
 .TP
-.B \-font <percorso del file font.desc>
+.B \-font <percorso del file font.desc, percorso del font (FreeType), descrizione del font (Fontconfig)>
 Cerca i font per OSD/\:SUB in una directory alternativa (default per i
 font normali: ~/\:.mplayer/\:font/\:font.desc, default per i font FreeType:
 ~/.mplayer/\:subfont.ttf).
@@ -2346,7 +2363,7 @@ font normali: ~/\:.mplayer/\:font/\:font.desc, default per i font FreeType:
 .I NOTA:
 Con FreeType, questa opzione determina il percorso del file del font di testo.
 .br
-Con fontconfig, questa opzione determina il nome del font fontconfig.
+Con Fontconfig, questa opzione determina la definizione del font Fontconfig.
 .sp 1
 .I ESEMPIO:
 .PD 0
@@ -2356,6 +2373,8 @@ Con fontconfig, questa opzione determina il nome del font fontconfig.
 \-font ~/\:.mplayer/\:arialuni.ttf
 .br
 \-font 'Bitstream Vera Sans'
+.br
+\-font 'Bitstream Vera Sans:style=Bold'
 .RE
 .PD 1
 .
@@ -2364,7 +2383,7 @@ Con fontconfig, questa opzione determina il nome del font fontconfig.
 Abilita l'utilizzo dei font gestiti da fontconfig.
 .br
 .I NOTA:
-fontconfig viene usato automaticamente per i sottotitoli di libass e non per
+Fontconfig viene usato automaticamente per i sottotitoli di libass e non per
 OSD. Usando \-fontconfig viene utilizzato sia per libass che per OSD, usando
 \-nofontconfig non viene proprio usato.
 .
@@ -2419,6 +2438,11 @@ Visualizza il flusso dei sottotitoli nel linguaggio specificato da <ID> (0\-31).
 MPlayer stampa gli ID disponibili se eseguito in
 modalità verbosa (\-v).
 Se non riesci a selezionare un sottotitolo di un DVD, prova anche \-vobsubid.
+.
+.TP
+.B \-nosub
+Disabilita qualsiasi sottotitolo auto-selezionato (cosa che per es.\& il demuxer
+Matroska/mkv implementa).
 .
 .TP
 .B \-slang <codice linguaggio[,codice linguaggio]> (vedi anche \-sid)
@@ -2606,7 +2630,8 @@ E' lo stesso che \-audiofile, ma per il flusso dei sottotitoli (OggDS?).
 .
 .TP
 .B \-subfont <nomefile> (solo FreeType)
-Seleziona il font per i sottotitoli.
+.B \-subfont <percorso del font (FreeType), descrizione del font (Fontconfig)> (solo FreeType)
+Seleziona il font per i sottotitoli (vedi \-font).
 Se \-subfont non è specificato, viene usato \-font.
 .
 .TP
@@ -2953,6 +2978,18 @@ dispositivi disponibili.
 .PD 1
 .
 .TP
+.B dart (solo OS/2)
+driver di uscita video OS/2 DART
+.PD 0
+.RSs
+.IPs (no)share
+Apre Dart in modalità condivisa o esclusiva.
+.IPs bufsize=<dimensione>
+Imposta la dimenzione del buffer a <dimensione> in campioni (default: 2048).
+.RE
+.PD 1
+.
+.TP
 .B dxr2 (vedi anche \-dxr2) (solo DXR2)
 Driver di uscita audio specifico per la scheda Creative DXR2
 .
@@ -3227,6 +3264,9 @@ Supporta anche il formato dell'opzione standard di X \-geometry.
 Se viene specificata una finestra esterna utilizzando l'opzione \-wid
 allora le coordinate x ed y sono relative all'angolo in alto a sinistra
 della finestra stessa piuttosto che dello schermo.
+Le coordinate sono relative allo schermo indicato con \-xineramascreen per i
+driver di uscita video che gestiscono completamente \-xineramascreen (direct3d,
+gl, gl2, vdpau, x11, xv, xvmc).
 .br
 .I NOTA:
 Questa opzione è supportata dai driver di uscita video x11, xmga, xv, xvmc,
@@ -3395,6 +3435,9 @@ Abilita il VBI per i driver di uscita video vesa, dfbmga e svga.
 Dice ad MPlayer di collegarsi ad una finestra già esistente.
 Utile per 'incastrare' MPlayer in un browser (p.es.\& con l'estensione
 plugger).
+Quest'opzione riempie completamente la finestra indicata, quindi rapporto di
+aspetto, panscan, etc non vengono più gestite da MPlayer, ma devono esser
+gestire dall'applicazione che ha creato la finestra.
 .
 .TP
 .B \-xineramascreen <\-2\-...>
@@ -3609,6 +3652,50 @@ E' lo stesso che \-vo xv:ck-method (vedi \-vo xv).
 .PD 1
 .
 .TP
+.B vdpau (con \-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau o ffh264vdpau)
+Driver di uscita video che usa VDPAU per la docodifica video via hardware.
+Gestisce anche la visualizzazione di video decodificato via software.
+.PD 0
+.RSs
+.IPs sharpen=<\-1\-1>
+Per valori positivi applica un algoritmo di messa a fuoco,
+per valori negativi un algoritmo di sfocatura (default: 0).
+.IPs denoise=<0\-1>
+Applica al video un algoritmo di riduzione del disturbo (default: 0, nessuna
+riduzione).
+.IPs deint=<0\-4>
+Sceglie il deinterlacciatore (default: 0).
+Tutte le modalità > 0 rispettano \-field\-dominance.
+.RSss
+.IPs 0
+nessun deinterlacciamento
+.IPs 1
+Mostra solo il primo campo, simile a \-vf field.
+.IPs 2
+deinterlacciatore molto semplice, simile a \-vf tfields=1
+.IPs 3
+Deinterlacciamento temporale adattivo al movimento.
+Può portare desincronizzazione A/V con hardware video lento e/o alte
+risoluzioni.
+E' il default se si usa "D" per deinterlacciare.
+.IPs 4
+Deinterlacciamento temporale adattivo al movimento, con interpolazione spaziale
+legata ai bordi.
+Richiede harware video veloce.
+.RE
+.IPs chroma\-deint
+Fa sì che i deinterlacciatori temporali operino sia sulla luminosità che sulla
+crominanza (default).
+Usa nochroma\-deint per usare solo la luminanza ed accellerare il
+deinterlacciamento avanzato.
+Utile con memoria video lenta.
+.IPs pullup
+Cerca di applicare il telecine inverso, richiede un deinterlacciamento
+temporale adattivo al movimento.
+.RE
+.PD 1
+.
+.TP
 .B dga (solo X11)
 Riproduce il video utilizzando l'estensione Direct Graphics
 Access di XFree86.
@@ -3693,6 +3780,24 @@ Driver di uscita video che utilizza l'interfaccia DirectX.
 .IPs noaccel
 Disabilita l'accelerazione hardware.
 Prova questa opzione se hai problemi di visualizzazione.
+.RE
+.PD 1
+.
+.TP
+.B kva (solo OS/2)
+Driver di uscita video che usa l'interfaccia libkva.
+.PD 0
+.RSs
+.IPs snap
+Forza la modalità SNAP.
+.IPs wo
+Forza la modalità WarpOverlay!.
+.IPs dive
+Forza la modalità DIVE.
+.IPs (no)t23
+Abilita o disabilita i workaround per il laptop T23 (default: diabilita).
+Prova ad abilitare questa opzione se la tua scheda video supporta solo
+l'ingrandimento.
 .RE
 .PD 1
 .
@@ -4575,7 +4680,7 @@ Disabilita la compensazione automatica del rapporto di aspetto del film.
 .B "\-field\-dominance <\-1\-1>"
 Imposta il primo campo per contenuti interlacciati.
 Utile per deinterlacciatori che raddoppiano la frequenza: \-vf tfields=1,
-\-vf yadif=1 e \-vo xvmc:bobdeint.
+\-vf yadif=1, \-vo vdpau:deint and \-vo xvmc:bobdeint.
 .PD 0
 .RSs
 .IPs \-1
@@ -5208,6 +5313,38 @@ Valori ragionevoli sono intorno a 0.001.
 .PD 1
 .
 .TP
+.B bs2b[=opzione1:opzione2:...]
+Trasformazione di Bauer da stereofonica a binaurale usando libbs2b.
+Migliora l'ascolto attraverso le cuffie rendendo simile l'audio a quello degli
+altroparlanti, permettendo a ciascun orecchio di sentire entrambi i canali e
+percepire la differenza di distanza e l'effetto di allontanamento dalla testa.
+E' applicabile solo all'audio a 2 canali.
+.PD 0
+.RSs
+.IPs fcut=<300\-1000>
+Imposta la frequenza di taglio in Hz.
+.IPs feed=<10\-150>
+Imposta il livello di feed per basse frequenze, in 0.1*dB.
+.IPs profile=<valore>
+Alcuni profili sono disponibili per comodità:
+.PD 0
+.RSs
+.IPs default
+usato se non specificato altro (fcut=700, feed=45)
+.IPs cmoy
+implementazione del circuito di Chu Moy (fcut=700, feed=60)
+.IPs jmeier
+implementazione del circuito di Jan Meier (fcut=650, feed=95)
+.RE
+.RE
+.sp 1
+.RS
+Se le opzioni fcut o feed vengono specificate insieme con un profilo, queste
+verranno applicate sul profilo selezionato.
+.RE
+.PD 1
+.
+.TP
 .B hrtf[=flag]
 Funzione di trasferimento riferita alla testa: Converte l'audio multicanale
 in una uscita a due canali per le cuffie, preservando la spazialità del
@@ -5729,6 +5866,13 @@ audio a 1.2x.
 .RE
 .PD 1
 .
+.TP
+.B "stats\ \ "
+Raccoglie ed emette a video statistiche sul flusso audio, in particolare sul
+volume.
+Queste statistiche sono particolarmente utili per aiutare l'impostazione del
+volume ed evitare il clipping.
+I volumi vengono scritti in dB e compatibili col filtro audio volume.
 .
 .
 .\" --------------------------------------------------------------------------
@@ -7514,6 +7658,10 @@ usando il primo numero disponibile \- nessun file sarà sovrascritto.
 Il filtro se non viene usato non appesantisce il programma e accetta uno spazio
 colore arbitrario, quindi può esser impostato senza problemi nel file di
 configurazione.
+Assicurati di aggiungere il filtro screenshot dopo tutti gli altri filtri che
+influenzano l'immagine che vuoi salvare.
+Per es.\& dovrebbe essere l'ultimo filtro se vuoi un'istantanea corrispondente
+a ciò che vedi sul monitor.
 .RE
 .
 .TP
@@ -7544,6 +7692,26 @@ Percentuale di pixel che devono essere sotto la soglia (default: 98).
 .IPs <soglia>
 La soglia sotto la quale un valore di un pixel viene considerato nero
 (default: 32).
+.RE
+.
+.TP
+.B gradfun[=valore[:raggio]]
+Corregge gli artefatti a bande che appaiono alcune volte in regioni quasi
+piane abbassando la profondità colore a 8bit.
+Interpola i gradienti che dovrebbero essere al posto delle bande, e li sgrana
+col resto.
+.sp 1
+Questo filtro è pensato solo per la riproduzione.
+Non usarlo per compressioni con perdita, perché la compressione tende a
+togliere la sgranatura e rendere di nuovo visibili le bande.
+.RSs
+.IPs <valore>
+Massima variazione che il filtro applicherà su ogni pixel.
+E' anche la soglia per determinare le regioni quasi piane (default: 1.2).
+.IPs <raggio>
+Raggio della zona circostante a cui adattare il gradiente.
+Raggi più ampi generano gradienti più sfumati, ma impediranno al filtro di
+modificare pixel in regioni più dettagliate (default: 16).
 .RE
 .
 .
@@ -8073,10 +8241,6 @@ Formati PCM adattivi \- vedi la documentazione HTML per i dettagli.
 Free Lossless Audio Codec (FLAC)
 .IPs "g726\ "
 G.726 ADPCM
-.IPs libamr_nb
-3GPP Adaptive Multi-Rate (AMR) narrow-band
-.IPs libamr_wb
-3GPP Adaptive Multi-Rate (AMR) wide-band
 .IPs libfaac
 Advanced Audio Coding (AAC) \- usando FAAC
 .IPs libmp3lame
