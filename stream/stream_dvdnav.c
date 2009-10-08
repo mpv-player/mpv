@@ -698,11 +698,11 @@ static int mp_dvdnav_get_aid_from_format (stream_t *stream, int index, uint8_t l
   format = dvdnav_audio_stream_format(priv->dvdnav, lg);
   switch(format) {
   case DVDNAV_FORMAT_AC3:
-    return (index + 128);
+    return index + 128;
   case DVDNAV_FORMAT_DTS:
-    return (index + 136);
+    return index + 136;
   case DVDNAV_FORMAT_LPCM:
-    return (index + 160);
+    return index + 160;
   case DVDNAV_FORMAT_MPEGAUDIO:
     return index;
   default:

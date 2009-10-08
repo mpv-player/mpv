@@ -348,7 +348,7 @@ int tv_set_norm_i(tvi_handle_t *tvh, int norm)
    }
 
    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
-   return(1);
+   return 1;
 }
 
 static int open_tv(tvi_handle_t *tvh)

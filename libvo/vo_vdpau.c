@@ -1198,9 +1198,9 @@ static int control(uint32_t request, void *data, ...)
         }
         return VO_TRUE;
     case VOCTRL_PAUSE:
-        return (int_pause = 1);
+        return int_pause = 1;
     case VOCTRL_RESUME:
-        return (int_pause = 0);
+        return int_pause = 0;
     case VOCTRL_QUERY_FORMAT:
         return query_format(*(uint32_t *)data);
     case VOCTRL_GET_IMAGE:
