@@ -168,7 +168,7 @@ LOCAL unsigned int get1bit(void)
   bitindex++;
   wordpointer += (bitindex>>3);
   bitindex &= 7;
-  return (val >> 7) & 1;
+  return (rval >> 7) & 1;
 }
 
 LOCAL void set_pointer(int backstep)
