@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <see AUTHORS for email address>
 
-// Updated to help_mp-en.h r29209
+// Updated to help_mp-en.h r29742
 
 
 // ========================= MPlayer help ===========================
@@ -1274,9 +1274,7 @@ static const char help_text[]=
 #define MSGTR_AO_ALSA_UnableToSetSamplerate2 "[AO_ALSA] Impossibile impostare samplerate-2: %s\n"
 // TODO::
 //#define MSGTR_AO_ALSA_UnableToSetBufferTimeNear "[AO_ALSA] Unable to set buffer time near: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetPeriodTime "[AO_ALSA] Impossibile impostare il tempo del periodo: %s\n"
 #define MSGTR_AO_ALSA_UnableToGetPeriodSize "[AO ALSA] Impossibile ricavare la dimensione periodo: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetPeriodSize "[AO ALSA] Impossibile impostare la dimensione periodo(%ld): %s\n"
 #define MSGTR_AO_ALSA_UnableToSetPeriods "[AO_ALSA] Impossibile impostare i periodi: %s\n"
 #define MSGTR_AO_ALSA_UnableToSetHwParameters "[AO_ALSA] Impossibile impostare hw-parameters: %s\n"
 #define MSGTR_AO_ALSA_UnableToGetBufferSize "[AO_ALSA] Impossibile ricavare buffersize: %s\n"
