@@ -527,11 +527,12 @@ named 'movie.avi.conf' with the file-specific options in it and put it in
 You can also put the configuration file in the same directory as the file to
 be played, as long as you give the \-use\-filedir\-conf option (either on the
 command line or in your global config file).
-If a file-specific configuration file is found in the same directory, no file-specific
-configuration is loaded from ~/.mplayer.
-In addition, the \-use\-filedir\-conf option enables directory-specific configuration files.
-For this, MPlayer first tries to load a mplayer.conf from the same directory as the file played
-and then tries to load any file-specific configuration.
+If a file-specific configuration file is found in the same directory, no
+file-specific configuration is loaded from ~/.mplayer.
+In addition, the \-use\-filedir\-conf option enables directory-specific
+configuration files.
+For this, MPlayer first tries to load a mplayer.conf from the same directory as
+the file played and then tries to load any file-specific configuration.
 .PP
 .I EXAMPLE MPLAYER CONFIGURATION FILE:
 .sp 1
@@ -1045,7 +1046,7 @@ Display the main menu at MPlayer startup.
 Permit MPlayer to receive pointer events reported by the video
 output driver.
 Necessary to select the buttons in DVD menus.
-Supported for X11 based VOs (x11, xv, xvmc, etc.) and the gl, gl2, direct3d and
+Supported for X11 based VOs (x11, xv, xvmc, etc) and the gl, gl2, direct3d and
 corevideo VOs.
 .
 .TP
@@ -2342,7 +2343,8 @@ If you cannot select one of the subtitles on a DVD, also try \-vobsubid.
 .
 .TP
 .B \-nosub
-Disables any otherwise auto-selected subtitles (as e.g. the Matroska/mkv demuxer supports).
+Disables any otherwise auto-selected subtitles (as e.g.\& the Matroska/mkv
+demuxer supports).
 .
 .TP
 .B \-slang <language code[,language code,...]> (also see \-sid)
@@ -2784,8 +2786,8 @@ Useful if you want to have certain connections established automatically.
 .IPs (no)estimate
 Estimate the audio delay, supposed to make the video playback smoother
 (default: enabled).
-.IPs (no)autostart (default: disabled)
-Automatically start jackd if necessary.
+.IPs (no)autostart
+Automatically start jackd if necessary (default: disabled).
 Note that this seems unreliable and will spam stdout with server messages.
 .RE
 .PD 1
@@ -3291,7 +3293,7 @@ Enables VBI for the vesa, dfbmga and svga video output drivers.
 This tells MPlayer to attach to an existing window.
 Useful to embed MPlayer in a browser (e.g.\& the plugger extension).
 This option fills the given window completely, thus aspect scaling,
-panscan etc. are no longer handled by MPlayer but must be managed by the
+panscan, etc are no longer handled by MPlayer but must be managed by the
 application that created the window.
 .
 .TP
@@ -3539,7 +3541,7 @@ Since SDL uses its own X11 layer, MPlayer X11 options do not have
 any effect on SDL.
 Note that it has several minor bugs (\-vm/\-novm is mostly ignored,
 \-fs behaves like \-novm should, window is in top-left corner when
-returning from fullscreen, panscan is not supported, ...)
+returning from fullscreen, panscan is not supported, ...).
 .PD 0
 .RSs
 .IPs driver=<driver>
@@ -3624,7 +3626,7 @@ Force WarpOverlay! mode.
 .IPs dive
 Force DIVE mode.
 .IPs (no)t23
-Enable/disable workaround for T23 laptop (default: disabled).
+Enable or disable workaround for T23 laptop (default: disabled).
 Try to enable this option if your video card supports upscaling only.
 .RE
 .PD 1
@@ -5070,7 +5072,7 @@ Reasonable values are around 0.001.
 .PD 1
 .
 .TP
-.B bs2b[=option1:option2]
+.B bs2b[=option1:option2:...]
 Bauer stereophonic to binaural transformation using libbs2b.
 Improves the headphone listening experience by making the sound
 similar to that from loudspeakers, allowing each ear to hear both
@@ -10331,7 +10333,6 @@ psy optimization strength (requires subq>=6) (default: 1.0)
 trellis (requires trellis, experimental) (default: 0.0)
 .RE
 .PD 1
-.
 .
 .TP
 .B deadzone_inter=<0\-32>
