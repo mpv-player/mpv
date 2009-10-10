@@ -3493,6 +3493,22 @@ Use nochroma\-deint to solely use luma and speed up advanced deinterlacing.
 Useful with slow video memory.
 .IPs pullup
 Try to apply inverse telecine, needs motion adaptive temporal deinterlacing.
+.IPs colorspace
+Select the color space for YUV to RGB conversion (default: 1, BT.601).
+In general BT.601 should be used for standard definition (SD) content and
+BT.709 for high definition (HD) content.
+Using incorrect color space results in slightly under or over saturated and
+shifted colors.
+.RSss
+.IPs 0
+Guess the color space based on video resolution.
+Video with width >= 1280 or height > 576 is assumed to be HD and BT.709 color
+space will be used.
+.IPs 1
+Use ITU-R BT.601 color space (default).
+.IPs 2
+Use ITU-R BT.709 color space.
+.RE
 .RE
 .PD 1
 .

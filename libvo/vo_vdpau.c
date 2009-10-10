@@ -159,6 +159,7 @@ static int                                deint_buffer_past_frames;
 static int                                pullup;
 static float                              denoise;
 static float                              sharpen;
+static int                                colorspace;
 static int                                chroma_deint;
 static int                                top_field_first;
 
@@ -403,6 +404,31 @@ static int win_x11_init_vdpau_flip_queue(void)
     return 0;
 }
 
+static int update_csc_matrix(void)
+{
+    VdpStatus vdp_st;
+    VdpCSCMatrix matrix;
+    static const VdpVideoMixerAttribute attributes[] = {VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX};
+    const void *attribute_values[] = {&matrix};
+    static const VdpColorStandard vdp_colors[] = {0, VDP_COLOR_STANDARD_ITUR_BT_601, VDP_COLOR_STANDARD_ITUR_BT_709};
+    static const char * const vdp_names[] = {NULL, "BT.601", "BT.709"};
+    int csp = colorspace;
+
+    if (!csp)
+        csp = vid_width >= 1280 || vid_height > 576 ? 2 : 1;
+
+    mp_msg(MSGT_VO, MSGL_V, "[vdpau] Updating CSC matrix for %s\n",
+           vdp_names[csp]);
+
+    vdp_st = vdp_generate_csc_matrix(&procamp, vdp_colors[csp], &matrix);
+    CHECK_ST_WARNING("Error when generating CSC matrix")
+
+    vdp_st = vdp_video_mixer_set_attribute_values(video_mixer, 1, attributes,
+                                                  attribute_values);
+    CHECK_ST_WARNING("Error when setting CSC matrix")
+    return VO_TRUE;
+}
+
 static int create_vdp_mixer(VdpChromaType vdp_chroma_type)
 {
 #define VDP_NUM_MIXER_PARAMETER 3
@@ -458,6 +484,7 @@ static int create_vdp_mixer(VdpChromaType vdp_chroma_type)
     if (!chroma_deint)
         vdp_video_mixer_set_attribute_values(video_mixer, 1, skip_chroma_attrib, skip_chroma_value_ptr);
 
+    update_csc_matrix();
     return 0;
 }
 
@@ -1040,6 +1067,7 @@ static const opt_t subopts[] = {
     {"pullup",  OPT_ARG_BOOL,  &pullup,  NULL},
     {"denoise", OPT_ARG_FLOAT, &denoise, NULL},
     {"sharpen", OPT_ARG_FLOAT, &sharpen, NULL},
+    {"colorspace", OPT_ARG_INT, &colorspace, NULL},
     {NULL}
 };
 
@@ -1062,6 +1090,10 @@ static const char help_msg[] =
     "    Apply denoising, argument is strength from 0.0 to 1.0\n"
     "  sharpen\n"
     "    Apply sharpening or softening, argument is strength from -1.0 to 1.0\n"
+    "  colorspace\n"
+    "    0: guess based on video resolution\n"
+    "    1: ITU-R BT.601 (default)\n"
+    "    2: ITU-R BT.709\n"
     ;
 
 static int preinit(const char *arg)
@@ -1079,6 +1111,7 @@ static int preinit(const char *arg)
     pullup  = 0;
     denoise = 0;
     sharpen = 0;
+    colorspace = 1;
     if (subopt_parse(arg, subopts) != 0) {
         mp_msg(MSGT_VO, MSGL_FATAL, help_msg);
         return -1;
@@ -1087,6 +1120,11 @@ static int preinit(const char *arg)
         deint_type = deint;
     if (deint > 1)
         deint_buffer_past_frames = 1;
+    if (colorspace < 0 || colorspace > 2) {
+        mp_msg(MSGT_VO, MSGL_WARN, "[vdpau] Invalid color space specified, "
+               "using BT.601\n");
+        colorspace = 1;
+    }
 
     vdpau_lib_handle = dlopen(vdpaulibrary, RTLD_LAZY);
     if (!vdpau_lib_handle) {
@@ -1148,11 +1186,6 @@ static int get_equalizer(char *name, int *value)
 
 static int set_equalizer(char *name, int value)
 {
-    VdpStatus vdp_st;
-    VdpCSCMatrix matrix;
-    static const VdpVideoMixerAttribute attributes[] = {VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX};
-    const void *attribute_values[] = {&matrix};
-
     if (!strcasecmp(name, "brightness"))
         procamp.brightness = value / 100.0;
     else if (!strcasecmp(name, "contrast"))
@@ -1164,13 +1197,7 @@ static int set_equalizer(char *name, int value)
     else
         return VO_NOTIMPL;
 
-    vdp_st = vdp_generate_csc_matrix(&procamp, VDP_COLOR_STANDARD_ITUR_BT_601,
-                                     &matrix);
-    CHECK_ST_WARNING("Error when generating CSC matrix")
-    vdp_st = vdp_video_mixer_set_attribute_values(video_mixer, 1, attributes,
-                                                  attribute_values);
-    CHECK_ST_WARNING("Error when setting CSC matrix")
-    return VO_TRUE;
+    return update_csc_matrix();
 }
 
 static int control(uint32_t request, void *data, ...)
