@@ -410,8 +410,8 @@ static int update_csc_matrix(void)
     VdpCSCMatrix matrix;
     static const VdpVideoMixerAttribute attributes[] = {VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX};
     const void *attribute_values[] = {&matrix};
-    static const VdpColorStandard vdp_colors[] = {0, VDP_COLOR_STANDARD_ITUR_BT_601, VDP_COLOR_STANDARD_ITUR_BT_709};
-    static const char * const vdp_names[] = {NULL, "BT.601", "BT.709"};
+    static const VdpColorStandard vdp_colors[] = {0, VDP_COLOR_STANDARD_ITUR_BT_601, VDP_COLOR_STANDARD_ITUR_BT_709, VDP_COLOR_STANDARD_SMPTE_240M};
+    static const char * const vdp_names[] = {NULL, "BT.601", "BT.709", "SMPTE-240M"};
     int csp = colorspace;
 
     if (!csp)
@@ -1094,6 +1094,7 @@ static const char help_msg[] =
     "    0: guess based on video resolution\n"
     "    1: ITU-R BT.601 (default)\n"
     "    2: ITU-R BT.709\n"
+    "    3: SMPTE-240M\n"
     ;
 
 static int preinit(const char *arg)
@@ -1120,7 +1121,7 @@ static int preinit(const char *arg)
         deint_type = deint;
     if (deint > 1)
         deint_buffer_past_frames = 1;
-    if (colorspace < 0 || colorspace > 2) {
+    if (colorspace < 0 || colorspace > 3) {
         mp_msg(MSGT_VO, MSGL_WARN, "[vdpau] Invalid color space specified, "
                "using BT.601\n");
         colorspace = 1;
