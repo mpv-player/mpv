@@ -30,6 +30,8 @@
 #include "libmpcodecs/img_format.h"
 //#include "vidix/vidix.h"
 
+#define MP_NOPTS_VALUE (-1LL<<63)
+
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2
 #define VO_EVENT_KEYPRESS 4
@@ -231,6 +233,7 @@ struct vo {
 
     bool frame_loaded;  // Is there a next frame the VO could flip to?
     double next_pts;    // pts value of the next frame if any
+    double next_pts2;   // optional pts of frame after that
 
     const struct vo_driver *driver;
     void *priv;

@@ -333,7 +333,7 @@ void vo_flip_page(struct vo *vo)
     if (!vo->config_ok)
         return;
     vo->frame_loaded = false;
-    vo->next_pts = (-1LL<<63); // MP_NOPTS_VALUE
+    vo->next_pts = MP_NOPTS_VALUE;
     vo->driver->flip_page(vo);
 }
 

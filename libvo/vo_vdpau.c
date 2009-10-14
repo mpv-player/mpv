@@ -74,6 +74,7 @@
 /* number of video and output surfaces */
 #define NUM_OUTPUT_SURFACES                2
 #define MAX_VIDEO_SURFACES                 50
+#define NUM_BUFFERED_VIDEO                 4
 
 /* number of palette entries */
 #define PALETTE_SIZE 256
@@ -110,10 +111,12 @@ struct vdpctx {
     /* output_surfaces[NUM_OUTPUT_SURFACES] is misused for OSD. */
 #define osd_surface vc->output_surfaces[NUM_OUTPUT_SURFACES]
     VdpOutputSurface                   output_surfaces[NUM_OUTPUT_SURFACES + 1];
-    VdpVideoSurface                    deint_surfaces[3];
-    double                             deint_pts[3];
+    struct buffered_video_surface {
+        VdpVideoSurface surface;
+        double pts;
+        mp_image_t *mpi;
+    } buffered_video[NUM_BUFFERED_VIDEO];
     int                                deint_queue_pos;
-    mp_image_t                        *deint_mpi[3];
     int                                output_surface_width, output_surface_height;
 
     VdpVideoMixer                      video_mixer;
@@ -187,6 +190,7 @@ static int video_to_output_surface(struct vo *vo)
     if (vc->deint_queue_pos < 0)
         return -1;
 
+    struct buffered_video_surface *bv = vc->buffered_video;
     int field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
     unsigned int dp = vc->deint_queue_pos;
     // dp==0 means last field of latest frame, 1 earlier field of latest frame,
@@ -196,11 +200,10 @@ static int video_to_output_surface(struct vo *vo)
             VDP_VIDEO_MIXER_PICTURE_STRUCTURE_BOTTOM_FIELD:
             VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD;
     }
-    VdpVideoSurface *q = vc->deint_surfaces;
     const VdpVideoSurface *past_fields = (const VdpVideoSurface []){
-        q[(dp+1)/2], q[(dp+2)/2]};
+        bv[(dp+1)/2].surface, bv[(dp+2)/2].surface};
     const VdpVideoSurface *future_fields = (const VdpVideoSurface []){
-        q[(dp-1)/2]};
+        dp >= 1 ? bv[(dp-1)/2].surface : VDP_INVALID_HANDLE};
     VdpOutputSurface output_surface = vc->output_surfaces[vc->surface_num];
     vdp_st = vdp->presentation_queue_block_until_surface_idle(vc->flip_queue,
                                                               output_surface,
@@ -210,56 +213,92 @@ static int video_to_output_surface(struct vo *vo)
 
     vdp_st = vdp->video_mixer_render(vc->video_mixer, VDP_INVALID_HANDLE,
                                      0, field, 2, past_fields,
-                                     vc->deint_surfaces[dp/2], 1, future_fields,
+                                     bv[dp/2].surface, 1, future_fields,
                                      &vc->src_rect_vid, output_surface,
                                      NULL, &vc->out_rect_vid, 0, NULL);
     CHECK_ST_WARNING("Error when calling vdp_video_mixer_render");
     return 0;
 }
 
+static void get_buffered_frame(struct vo *vo, bool eof)
+{
+    struct vdpctx *vc = vo->priv;
+
+    int dqp = vc->deint_queue_pos;
+    if (dqp < 0)
+        dqp += 1000;
+    else
+        dqp = vc->deint >= 2 ? dqp - 1 : dqp - 2 | 1;
+    if (dqp < (eof ? 0 : 3))
+        return;
+
+    dqp = FFMIN(dqp, 4);
+    vc->deint_queue_pos = dqp;
+    vo->frame_loaded = true;
+
+    // Set pts values
+    struct buffered_video_surface *bv = vc->buffered_video;
+    int idx = vc->deint_queue_pos >> 1;
+    if (idx == 0) {  // no future frame/pts available
+        vo->next_pts = bv[0].pts;
+        vo->next_pts2 = MP_NOPTS_VALUE;
+    } else if (!(vc->deint >= 2)) {    // no field-splitting deinterlace
+        vo->next_pts = bv[idx].pts;
+        vo->next_pts2 = bv[idx - 1].pts;
+    } else {  // deinterlace with separate fields
+        double intermediate_pts;
+        double diff = bv[idx - 1].pts - bv[idx].pts;
+        if (diff > 0 && diff < 0.5)
+            intermediate_pts = (bv[idx].pts + bv[idx - 1].pts) / 2;
+        else
+            intermediate_pts =  bv[idx].pts;
+        if (vc->deint_queue_pos & 1) { // first field
+            vo->next_pts = bv[idx].pts;
+            vo->next_pts2 = intermediate_pts;
+        } else {
+            vo->next_pts = intermediate_pts;
+            vo->next_pts2 = bv[idx - 1].pts;
+        }
+    }
+
+    video_to_output_surface(vo);
+}
+
 static void add_new_video_surface(struct vo *vo, VdpVideoSurface surface,
                                   struct mp_image *reserved_mpi, double pts)
 {
     struct vdpctx *vc = vo->priv;
+    struct buffered_video_surface *bv = vc->buffered_video;
 
     if (reserved_mpi)
         reserved_mpi->usage_count++;
-    if (vc->deint_mpi[2])
-        vc->deint_mpi[2]->usage_count--;
+    if (bv[NUM_BUFFERED_VIDEO - 1].mpi)
+        bv[NUM_BUFFERED_VIDEO - 1].mpi->usage_count--;
 
-    for (int i = 2; i > 0; i--) {
-        vc->deint_mpi[i] = vc->deint_mpi[i - 1];
-        vc->deint_surfaces[i] = vc->deint_surfaces[i - 1];
-        vc->deint_pts[i] = vc->deint_pts[i - 1];
-    }
-    vc->deint_mpi[0] = reserved_mpi;
-    vc->deint_surfaces[0] = surface;
-    vc->deint_pts[0] = pts;
+    for (int i = NUM_BUFFERED_VIDEO - 1; i > 0; i--)
+        bv[i] = bv[i - 1];
+    bv[0] = (struct buffered_video_surface){
+        .mpi = reserved_mpi,
+        .surface = surface,
+        .pts = pts,
+    };
 
-    vo->frame_loaded = true;
-    vo->next_pts = pts;
-    if (vc->deint >= 2 && vc->deint_queue_pos >= 0) {
-        vc->deint_queue_pos = 2;
-        double diff = vc->deint_pts[0] - vc->deint_pts[1];
-        if (diff > 0 && diff < 0.5)
-            vo->next_pts = (vc->deint_pts[0] + vc->deint_pts[1]) / 2;
-        else
-            vo->next_pts = vc->deint_pts[1];
-    } else
-        vc->deint_queue_pos = 1;
-    video_to_output_surface(vo);
+    vc->deint_queue_pos += 2;
+    get_buffered_frame(vo, false);
 }
 
 static void forget_frames(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
 
-    vc->deint_queue_pos = -1;
-    for (int i = 0; i < 3; i++) {
-        vc->deint_surfaces[i] = VDP_INVALID_HANDLE;
-        if (vc->deint_mpi[i])
-            vc->deint_mpi[i]->usage_count--;
-        vc->deint_mpi[i] = NULL;
+    vc->deint_queue_pos = -1001;
+    for (int i = 0; i < NUM_BUFFERED_VIDEO; i++) {
+        struct buffered_video_surface *p = vc->buffered_video + i;
+        if (p->mpi)
+            p->mpi->usage_count--;
+        *p = (struct buffered_video_surface){
+            .surface = VDP_INVALID_HANDLE,
+        };
     }
 }
 
@@ -498,11 +537,7 @@ static void free_video_specific(struct vo *vo)
     vc->decoder = VDP_INVALID_HANDLE;
     vc->decoder_max_refs = -1;
 
-    for (i = 0; i < 2; i++)
-        if (vc->deint_mpi[i]) {
-            vc->deint_mpi[i]->usage_count--;
-            vc->deint_mpi[i] = NULL;
-        }
+    forget_frames(vo);
 
     for (i = 0; i < MAX_VIDEO_SURFACES; i++) {
         if (vc->surface_render[i].surface != VDP_INVALID_HANDLE) {
@@ -1144,7 +1179,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
         VdpStatus vdp_st;
         void *destdata[3] = {mpi->planes[0], mpi->planes[2], mpi->planes[1]};
         rndr = get_surface(vo, vc->deint_counter);
-        vc->deint_counter = (vc->deint_counter + 1) % 3;
+        vc->deint_counter = (vc->deint_counter + 1) % NUM_BUFFERED_VIDEO;
         if (vc->image_format == IMGFMT_NV12)
             destdata[1] = destdata[2];
         vdp_st =
@@ -1167,18 +1202,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
     add_new_video_surface(vo, rndr->surface, mpi, pts);
 
     return;
-}
-
-static void get_buffered_frame(struct vo *vo, bool eof)
-{
-    struct vdpctx *vc = vo->priv;
-
-    if (vc->deint_queue_pos < 2)
-        return;
-    vc->deint_queue_pos = 1;
-    video_to_output_surface(vo);
-    vo->next_pts = vc->deint_pts[0];
-    vo->frame_loaded = true;
 }
 
 static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
