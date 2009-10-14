@@ -1,4 +1,4 @@
-.\" synced with r29762
+.\" synced with r29771
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -3692,6 +3692,24 @@ Utile con memoria video lenta.
 .IPs pullup
 Cerca di applicare il telecine inverso, richiede un deinterlacciamento
 temporale adattivo al movimento.
+.IPs colorspace
+Seleziona lo spazio colore per la conversione da YUV a RGB (default: 1, BT.601).
+In linea di massima si dovrebbero usare BT.601 per contenuto con una
+definizione standard (SD) e BT.709 per contenuto ad alta definizione (HD).
+L'utilizzo di uno spazio colore errato può portare colori leggermente saturati
+o spostati verso l'alto o il basso.
+.RSss
+.IPs 0
+Prova ad indovinare lo spazio colore in base alla risoluzione video.
+Un video con larghezza >= 1280 o altezza > 576 viene considerato come HD e
+verrà usato lo spazio colore BT.709.
+.IPs 1
+Usa lo spazio colore ITU-R BT.601 (default).
+.IPs 2
+Usa lo spazio colore ITU-R BT.709.
+.IPs 3
+Usa lo spazio colore SMPTE-240M.
+.RE
 .RE
 .PD 1
 .
