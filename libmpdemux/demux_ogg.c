@@ -145,7 +145,9 @@ typedef struct ogg_demuxer {
   ogg_syncpoint_t* syncpoints;
   int num_syncpoint;
   off_t pos, last_size;
+  int64_t initial_granulepos;
   int64_t final_granulepos;
+  int64_t duration;
 
   /* Used for subtitle switching. */
   int n_text;
@@ -263,20 +265,23 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,fl
   if(os->vorbis) {
     if(*pack->packet & PACKET_TYPE_HEADER)
       os->hdr_packets++;
-    else if (os->vi_initialized)
+    else
     {
        vorbis_info *vi;
-       int32_t blocksize;
+       int32_t blocksize = 0;
 
        // When we dump the audio, there is no vi, but we don't care of timestamp in this case
-       vi = &(os->vi);
+       vi = os->vi_initialized ? &os->vi : NULL;
+       if (vi)
        blocksize = vorbis_packet_blocksize(vi,pack) / samplesize;
        // Calculate the timestamp if the packet don't have any
        if(pack->granulepos == -1) {
 	  pack->granulepos = os->lastpos;
 	  if(os->lastsize > 0)
 	     pack->granulepos += os->lastsize;
-       }
+       } else
+         *flags = 1;
+       if (vi)
        *pts = pack->granulepos / (float)vi->rate;
        os->lastsize = blocksize;
        os->lastpos = pack->granulepos;
@@ -521,12 +526,7 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
   pos = last_pos = demuxer->movi_start;
 
   // Reset the stream
-  if(index_mode == 2) {
   stream_seek(s,demuxer->movi_start);
-  } else {
-    //the 270000 are just a wild guess
-    stream_seek(s,FFMAX(ogg_d->pos,demuxer->movi_end-270000));
-  }
   ogg_sync_reset(sync);
 
   // Get the serial number of the stream we use
@@ -574,7 +574,18 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
       float pts;
       int flags;
       demux_ogg_read_packet(os,&op,&pts,&flags,samplesize);
-      if(op.granulepos >= 0) ogg_d->final_granulepos = op.granulepos;
+      if(op.granulepos >= 0) {
+	ogg_d->final_granulepos = op.granulepos;
+	if(ogg_d->initial_granulepos == MP_NOPTS_VALUE && (flags & 1)) {
+	  ogg_d->initial_granulepos = op.granulepos;
+	  if (index_mode != 2 && ogg_d->pos < demuxer->movi_end-2*270000) {
+	    //the 270000 are just a wild guess
+	    stream_seek(s,FFMAX(ogg_d->pos,demuxer->movi_end-270000));
+	    ogg_sync_reset(sync);
+	    continue;
+	  }
+	}
+      }
       if(index_mode == 2 && (flags || (os->vorbis && op.granulepos >= 0))) {
 	if (ogg_d->num_syncpoint > SIZE_MAX / sizeof(ogg_syncpoint_t) - 1) break;
 	ogg_d->syncpoints = realloc_struct(ogg_d->syncpoints,(ogg_d->num_syncpoint+1), sizeof(ogg_syncpoint_t));
@@ -1122,6 +1133,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
   }
 
   ogg_d->final_granulepos=0;
+  ogg_d->initial_granulepos = MP_NOPTS_VALUE;
   if(!s->end_pos)
     demuxer->seekable = 0;
   else {
@@ -1130,6 +1142,9 @@ int demux_ogg_open(demuxer_t* demuxer) {
     demuxer->seekable = 1;
     demux_ogg_scan_stream(demuxer);
   }
+  if (ogg_d->initial_granulepos == MP_NOPTS_VALUE)
+    ogg_d->initial_granulepos = 0;
+  ogg_d->duration = ogg_d->final_granulepos - ogg_d->initial_granulepos;
 
   mp_msg(MSGT_DEMUX,MSGL_V,"Ogg demuxer : found %d audio stream%s, %d video stream%s and %d text stream%s\n",n_audio,n_audio>1?"s":"",n_video,n_video>1?"s":"",ogg_d->n_text,ogg_d->n_text>1?"s":"");
 
@@ -1361,10 +1376,10 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
   old_pos = ogg_d->pos;
 
   //calculate the granulepos to seek to
-    gp = flags & SEEK_ABSOLUTE ? 0 : os->lastpos;
+    gp = flags & SEEK_ABSOLUTE ? ogg_d->initial_granulepos : os->lastpos;
   if(flags & SEEK_FACTOR) {
-    if (ogg_d->final_granulepos > 0)
-      gp += ogg_d->final_granulepos * rel_seek_secs;
+    if (ogg_d->duration > 0)
+      gp += ogg_d->duration * rel_seek_secs;
       else
       gp += rel_seek_secs * (demuxer->movi_end - demuxer->movi_start) * os->lastpos / ogg_d->pos;
   } else
@@ -1391,8 +1406,8 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
     if(flags & SEEK_FACTOR)
       pos += (demuxer->movi_end - demuxer->movi_start) * rel_seek_secs;
     else {
-      if (ogg_d->final_granulepos > 0) {
-        pos += rel_seek_secs * (demuxer->movi_end - demuxer->movi_start) / (ogg_d->final_granulepos / rate);
+      if (ogg_d->duration > 0) {
+        pos += rel_seek_secs * (demuxer->movi_end - demuxer->movi_start) / (ogg_d->duration / rate);
       } else if (os->lastpos > 0) {
       pos += rel_seek_secs * ogg_d->pos / (os->lastpos / rate);
     }
@@ -1547,13 +1562,13 @@ static int demux_ogg_control(demuxer_t *demuxer,int cmd, void *arg){
 
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
-	    if (ogg_d->final_granulepos<=0) return DEMUXER_CTRL_DONTKNOW;
-	    *(double *)arg=(double)ogg_d->final_granulepos / rate;
+	    if (ogg_d->duration<=0) return DEMUXER_CTRL_DONTKNOW;
+	    *(double *)arg=(double)(ogg_d->duration) / rate;
 	    return DEMUXER_CTRL_GUESS;
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:
-	    if (ogg_d->final_granulepos<=0) return DEMUXER_CTRL_DONTKNOW;
-	    *(int *)arg=(os->lastpos*100) / ogg_d->final_granulepos;
+	    if (ogg_d->duration<=0) return DEMUXER_CTRL_DONTKNOW;
+	    *(int *)arg=((os->lastpos - ogg_d->initial_granulepos)*100) / ogg_d->duration;
 	    return DEMUXER_CTRL_OK;
 
 	default:
