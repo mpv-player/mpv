@@ -1721,7 +1721,6 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   sh_audio_t *sh_a = new_sh_audio_aid(demuxer, track->tnum, aid);
-  demux_packet_t *dp;
   if(!sh_a) return 1;
   mkv_d->audio_tracks[mkv_d->last_aid] = track->tnum;
 
@@ -2015,17 +2014,16 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
       if (size < 4 || ptr[0] != 'f' || ptr[1] != 'L' ||
           ptr[2] != 'a' || ptr[3] != 'C')
         {
-          dp = new_demux_packet (4);
-          memcpy (dp->buffer, "fLaC", 4);
+            sh_a->codecdata = malloc(4);
+            sh_a->codecdata_len = 4;
+            memcpy(sh_a->codecdata, "fLaC", 4);
         }
       else
         {
-          dp = new_demux_packet (size);
-          memcpy (dp->buffer, ptr, size);
+            sh_a->codecdata = malloc(size);
+            sh_a->codecdata_len = size;
+            memcpy(sh_a->codecdata, ptr, size);
         }
-      dp->pts = 0;
-      dp->flags = 0;
-      ds_add_packet (demuxer->audio, dp);
     }
   else if (track->a_formattag == mmioFOURCC('W', 'V', 'P', 'K') ||
            track->a_formattag == mmioFOURCC('T', 'R', 'H', 'D'))
