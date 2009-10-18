@@ -27,12 +27,6 @@ include config.mak
 COMMON_LDFLAGS += $(EXTRA_LIB)\
                   $(EXTRALIBS) \
 
-LDFLAGS_MPLAYER = $(EXTRALIBS_MPLAYER) \
-                  $(COMMON_LDFLAGS) \
-
-LDFLAGS_MENCODER = $(EXTRALIBS_MENCODER) \
-                   $(COMMON_LDFLAGS) \
-
 SRCS_AUDIO_INPUT-$(ALSA1X)           += stream/ai_alsa1x.c
 SRCS_AUDIO_INPUT-$(ALSA9)            += stream/ai_alsa.c
 SRCS_AUDIO_INPUT-$(OSS)              += stream/ai_oss.c
@@ -841,10 +835,10 @@ $(FFMPEGLIBS): $(FFMPEGFILES) config.h
 	touch $@
 
 mencoder$(EXESUF): $(MENCODER_DEPS)
-	$(CC) -o $@ $^ $(LDFLAGS_MENCODER)
+	$(CC) -o $@ $^ $(COMMON_LDFLAGS) $(EXTRALIBS_MENCODER)
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
-	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
+	$(CC) -o $@ $^ $(COMMON_LDFLAGS) $(EXTRALIBS_MPLAYER)
 
 codec-cfg$(EXESUF): codec-cfg.c help_mp.h
 	$(HOST_CC) -O -DCODECS2HTML -I. -o $@ $<
