@@ -835,10 +835,11 @@ $(FFMPEGLIBS): $(FFMPEGFILES) config.h
 	touch $@
 
 mencoder$(EXESUF): $(MENCODER_DEPS)
-	$(CC) -o $@ $^ $(COMMON_LDFLAGS) $(EXTRALIBS_MENCODER)
-
+mencoder$(EXESUF): COMMON_LDFLAGS += $(EXTRALIBS_MENCODER)
 mplayer$(EXESUF): $(MPLAYER_DEPS)
-	$(CC) -o $@ $^ $(COMMON_LDFLAGS) $(EXTRALIBS_MPLAYER)
+mplayer$(EXESUF): COMMON_LDFLAGS += $(EXTRALIBS_MPLAYER)
+mencoder$(EXESUF) mplayer$(EXESUF):
+	$(CC) -o $@ $^ $(COMMON_LDFLAGS)
 
 codec-cfg$(EXESUF): codec-cfg.c help_mp.h
 	$(HOST_CC) -O -DCODECS2HTML -I. -o $@ $<
