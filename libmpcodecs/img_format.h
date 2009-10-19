@@ -1,6 +1,8 @@
 #ifndef MPLAYER_IMG_FORMAT_H
 #define MPLAYER_IMG_FORMAT_H
 
+#include "config.h"
+
 /* RGB/BGR Formats */
 
 #define IMGFMT_RGB_MASK 0xFFFFFF00
