@@ -8917,6 +8917,7 @@ $def_yasm
 #define CONFIG_AANDCT 1
 #define CONFIG_FFT 1
 #define CONFIG_GOLOMB 1
+#define CONFIG_LPC 1
 #define CONFIG_MDCT 1
 #define CONFIG_RDFT 1
 
