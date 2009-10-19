@@ -185,7 +185,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
         mod->mux->bih->biSize= sizeof(BITMAPINFOHEADER) + extradata_size;
     }
 
-    if (param.i_bframe > 1 && param.b_bframe_pyramid)
+    if (param.i_bframe > 1 && param.i_bframe_pyramid)
         mod->mux->decoder_delay = 2;
     else
         mod->mux->decoder_delay = param.i_bframe ? 1 : 0;
