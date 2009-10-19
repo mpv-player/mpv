@@ -8208,8 +8208,7 @@ CFLAGS_SVGALIB_HELPER = $cflags_svgalib_helper
 CFLAGS_TREMOR_LOW = $cflags_tremor_low
 YASMFLAGS = $YASMFLAGS
 
-EXTRALIBS = $extra_libs
-EXTRA_LIB = $extra_ldflags $_ld_static $_ld_lm
+EXTRALIBS = $extra_ldflags $_ld_static $_ld_lm $extra_libs
 EXTRALIBS_MPLAYER = $libs_mplayer
 EXTRALIBS_MENCODER = $libs_mencoder
 

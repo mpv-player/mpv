@@ -24,9 +24,6 @@ include config.mak
 
 ###### variable declarations #######
 
-COMMON_LDFLAGS += $(EXTRA_LIB)\
-                  $(EXTRALIBS) \
-
 SRCS_AUDIO_INPUT-$(ALSA1X)           += stream/ai_alsa1x.c
 SRCS_AUDIO_INPUT-$(ALSA9)            += stream/ai_alsa.c
 SRCS_AUDIO_INPUT-$(OSS)              += stream/ai_oss.c
@@ -835,11 +832,11 @@ $(FFMPEGLIBS): $(FFMPEGFILES) config.h
 	touch $@
 
 mencoder$(EXESUF): $(MENCODER_DEPS)
-mencoder$(EXESUF): COMMON_LDFLAGS += $(EXTRALIBS_MENCODER)
+mencoder$(EXESUF): EXTRALIBS += $(EXTRALIBS_MENCODER)
 mplayer$(EXESUF): $(MPLAYER_DEPS)
-mplayer$(EXESUF): COMMON_LDFLAGS += $(EXTRALIBS_MPLAYER)
+mplayer$(EXESUF): EXTRALIBS += $(EXTRALIBS_MPLAYER)
 mencoder$(EXESUF) mplayer$(EXESUF):
-	$(CC) -o $@ $^ $(COMMON_LDFLAGS)
+	$(CC) -o $@ $^ $(EXTRALIBS)
 
 codec-cfg$(EXESUF): codec-cfg.c help_mp.h
 	$(HOST_CC) -O -DCODECS2HTML -I. -o $@ $<
@@ -1046,7 +1043,7 @@ mplayer-nomain.o: mplayer.c
 TOOLS/netstream$(EXESUF): TOOLS/netstream.c
 TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c
 TOOLS/netstream$(EXESUF) TOOLS/vivodump$(EXESUF): $(subst mplayer.o,mplayer-nomain.o,$(OBJS_MPLAYER)) $(filter-out %mencoder.o,$(OBJS_MENCODER)) $(OBJS_COMMON) $(COMMON_LIBS)
-	$(CC) $(CFLAGS) -o $@ $^ $(EXTRALIBS_MPLAYER) $(EXTRALIBS_MENCODER) $(COMMON_LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $^ $(EXTRALIBS_MPLAYER) $(EXTRALIBS_MENCODER) $(EXTRALIBS)
 
 REAL_SRCS    = $(wildcard TOOLS/realcodecs/*.c)
 REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)
