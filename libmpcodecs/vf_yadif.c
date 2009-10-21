@@ -436,8 +436,6 @@ static int continue_buffered_image(struct vf_instance *vf)
         ret |= vf_next_put_image(vf, dmpi, pts /*FIXME*/);
         if (!under_mencoder)
             break;
-        if(i<(vf->priv->mode&1))
-            vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
     }
     vf->priv->buffered_i = 1;
     return ret;
