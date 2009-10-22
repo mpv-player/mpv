@@ -1111,9 +1111,17 @@ static void DestroyVdpauObjects(void)
 
 static void uninit(void)
 {
+    int i;
+
     if (!vo_config_count)
         return;
     visible_buf = 0;
+
+    for (i = 0; i < MAX_VIDEO_SURFACES; i++) {
+        // Allocated in ff_vdpau_add_data_chunk()
+        av_freep(&surface_render[i].bitstream_buffers);
+        surface_render[i].bitstream_buffers_allocated = 0;
+    }
 
     /* Destroy all vdpau objects */
     DestroyVdpauObjects();
