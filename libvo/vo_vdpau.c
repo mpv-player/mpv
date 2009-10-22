@@ -559,7 +559,7 @@ static int create_vdp_decoder(struct vo *vo, int max_refs)
     return 1;
 }
 
-int initialize_vdpau_objects(struct vo *vo)
+static int initialize_vdpau_objects(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;

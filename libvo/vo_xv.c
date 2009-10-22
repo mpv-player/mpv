@@ -400,7 +400,7 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
 }
 
 // Only copies luma for planar formats as draw_alpha doesn't change others */
-void copy_backup_image(struct vo *vo, int dest, int src)
+static void copy_backup_image(struct vo *vo, int dest, int src)
 {
     struct xvctx *ctx = vo->priv;
 
