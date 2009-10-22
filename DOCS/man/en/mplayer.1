@@ -3494,7 +3494,7 @@ Useful with slow video memory.
 .IPs pullup
 Try to apply inverse telecine, needs motion adaptive temporal deinterlacing.
 .IPs colorspace
-Select the color space for YUV to RGB conversion (default: 1, BT.601).
+Select the color space for YUV to RGB conversion.
 In general BT.601 should be used for standard definition (SD) content and
 BT.709 for high definition (HD) content.
 Using incorrect color space results in slightly under or over saturated and
@@ -5105,15 +5105,15 @@ Set cut frequency in Hz.
 Set feed level for low frequencies in 0.1*dB.
 .IPs profile=<value>
 Several profiles are available for convenience:
+.PD 0
 .RSs
-default: will be used if nothing else was specified (fcut=700,
-feed=45);
-.br
-cmoy: Chu Moy circuit implementation (fcut=700, feed=60);
-.br
-jmeier: Jan Meier circuit implementation (fcut=650, feed=95).
-.REss
-.PD 1
+.IPs default
+will be used if nothing else was specified (fcut=700, feed=45)
+.IPs cmoy
+Chu Moy circuit implementation (fcut=700, feed=60)
+.IPs jmeier
+Jan Meier circuit implementation (fcut=650, feed=95)
+.RE
 .RE
 .sp 1
 .RS
