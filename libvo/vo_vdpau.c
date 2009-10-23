@@ -163,6 +163,7 @@ static float                              sharpen;
 static int                                colorspace;
 static int                                chroma_deint;
 static int                                top_field_first;
+static int                                flip;
 
 static VdpDecoder                         decoder;
 static int                                decoder_max_refs;
@@ -279,8 +280,8 @@ static void resize(void)
     out_rect_vid.y1 = dst_rect.bottom;
     src_rect_vid.x0 = src_rect.left;
     src_rect_vid.x1 = src_rect.right;
-    src_rect_vid.y0 = src_rect.top;
-    src_rect_vid.y1 = src_rect.bottom;
+    src_rect_vid.y0 = flip ? src_rect.bottom : src_rect.top;
+    src_rect_vid.y1 = flip ? src_rect.top    : src_rect.bottom;
     border_x        = borders.left;
     border_y        = borders.top;
 #ifdef CONFIG_FREETYPE
@@ -636,6 +637,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 #ifdef CONFIG_XF86VM
     int vm = flags & VOFLAG_MODESWITCHING;
 #endif
+    flip = flags & VOFLAG_FLIPPING;
 
     image_format = format;
     vid_width    = width;
@@ -1059,7 +1061,7 @@ static uint32_t get_image(mp_image_t *mpi)
 
 static int query_format(uint32_t format)
 {
-    int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_EOSD | VFCAP_EOSD_UNSCALED;
+    int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_EOSD | VFCAP_EOSD_UNSCALED | VFCAP_FLIP;
     switch (format) {
     case IMGFMT_YV12:
     case IMGFMT_I420:
