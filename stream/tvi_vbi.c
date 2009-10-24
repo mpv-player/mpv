@@ -1107,7 +1107,7 @@ static int decode_pkt0(priv_vbi_t* priv,unsigned char* data,int magAddr)
     if(priv->primary_language)
         priv->mag[magAddr].pt->primary_lang=priv->primary_language;
     else
-        priv->mag[magAddr].pt->primary_lang= (d[7]&7)>>1;
+        priv->mag[magAddr].pt->primary_lang= (d[7]>>1)&7;
     priv->mag[magAddr].pt->secondary_lang=priv->secondary_language;
     priv->mag[magAddr].pt->subpagenum=(d[2]|(d[3]<<4)|(d[4]<<8)|(d[5]<<12))&0x3f7f;
     priv->mag[magAddr].pt->pagenum=(magAddr<<8) | d[0] | (d[1]<<4);
