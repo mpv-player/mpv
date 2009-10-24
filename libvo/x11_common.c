@@ -1342,6 +1342,10 @@ int vo_x11_update_geometry(void) {
 void vo_x11_fullscreen(void)
 {
     int x, y, w, h;
+    x = vo_old_x;
+    y = vo_old_y;
+    w = vo_old_width;
+    h = vo_old_height;
 
     if (WinID >= 0) {
         vo_fs = !vo_fs;
@@ -1352,15 +1356,6 @@ void vo_x11_fullscreen(void)
 
     if (vo_fs)
     {
-        // fs->win
-        if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
-        {
-            x = vo_old_x;
-            y = vo_old_y;
-            w = vo_old_width;
-            h = vo_old_height;
-	}
-
         vo_x11_ewmh_fullscreen(_NET_WM_STATE_REMOVE);   // removes fullscreen state if wm supports EWMH
         vo_fs = VO_FALSE;
     } else
