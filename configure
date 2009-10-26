@@ -1520,19 +1520,6 @@ echo configuration: $_configuration > "$TMPLOG"
 echo >> "$TMPLOG"
 
 
-if test -z "$_target" && x86 ; then
-  cat > $TMPC << EOF
-int main(void) {
-    int test[sizeof(char *)-7];
-    return 0;
-}
-EOF
-  cc_check && host_arch=x86_64 || host_arch=i386
-fi
-
-echo "Detected operating system: $system_name"
-echo "Detected host architecture: $host_arch"
-
 if test "$_runtime_cpudetection" = yes && ! x86 && ! ppc; then
   die "Runtime CPU detection only works for x86, x86-64 and PPC!"
 fi
@@ -1586,6 +1573,19 @@ else
   done
 fi # icc
 test "$cc_fail" = yes && die "unsupported compiler version"
+
+if test -z "$_target" && x86 ; then
+  cat > $TMPC << EOF
+int main(void) {
+    int test[sizeof(char *)-7];
+    return 0;
+}
+EOF
+  cc_check && host_arch=x86_64 || host_arch=i386
+fi
+
+echo "Detected operating system: $system_name"
+echo "Detected host architecture: $host_arch"
 
 echocheck "host cc"
 test "$_host_cc" || _host_cc=$_cc
