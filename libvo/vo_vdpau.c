@@ -323,7 +323,7 @@ static void resize(void)
                                                           VDP_OUTPUT_SURFACE_RENDER_ROTATE_0);
         CHECK_ST_WARNING("Error when calling vdp_output_surface_render_output_surface")
     } else
-    video_to_output_surface();
+        video_to_output_surface();
     if (visible_buf)
         flip_page();
 }
