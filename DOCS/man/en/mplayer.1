@@ -3511,6 +3511,10 @@ Use ITU-R BT.709 color space.
 .IPs 3
 Use SMPTE-240M color space.
 .RE
+.IPs force\-mixer
+Forces the use of the VDPAU mixer, which implements all above options (default).
+Use noforce\-mixer to allow displaying BGRA colorspace.
+(Disables all above options if image format BGRA is actually used.)
 .RE
 .PD 1
 .

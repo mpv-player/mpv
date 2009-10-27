@@ -162,6 +162,7 @@ static float                              denoise;
 static float                              sharpen;
 static int                                colorspace;
 static int                                chroma_deint;
+static int                                force_mixer;
 static int                                top_field_first;
 static int                                flip;
 
@@ -310,6 +311,18 @@ static void resize(void)
             mp_msg(MSGT_VO, MSGL_DBG2, "OUT CREATE: %u\n", output_surfaces[i]);
         }
     }
+    if (image_format == IMGFMT_BGRA) {
+        vdp_st = vdp_output_surface_render_output_surface(output_surfaces[surface_num],
+                                                          NULL, VDP_INVALID_HANDLE,
+                                                          NULL, NULL, NULL,
+                                                          VDP_OUTPUT_SURFACE_RENDER_ROTATE_0);
+        CHECK_ST_WARNING("Error when calling vdp_output_surface_render_output_surface")
+        vdp_st = vdp_output_surface_render_output_surface(output_surfaces[1 - surface_num],
+                                                          NULL, VDP_INVALID_HANDLE,
+                                                          NULL, NULL, NULL,
+                                                          VDP_OUTPUT_SURFACE_RENDER_ROTATE_0);
+        CHECK_ST_WARNING("Error when calling vdp_output_surface_render_output_surface")
+    } else
     video_to_output_surface();
     if (visible_buf)
         flip_page();
@@ -1010,6 +1023,19 @@ static uint32_t draw_image(mp_image_t *mpi)
             deint_mpi[1] = deint_mpi[0];
             deint_mpi[0] = mpi;
         }
+    } else if (image_format == IMGFMT_BGRA) {
+        VdpStatus vdp_st;
+        VdpRect r = {0, 0, vid_width, vid_height};
+        vdp_st = vdp_output_surface_put_bits_native(output_surfaces[2],
+                                                    (void const*const*)mpi->planes,
+                                                    mpi->stride, &r);
+        CHECK_ST_ERROR("Error when calling vdp_output_surface_put_bits_native")
+        vdp_st = vdp_output_surface_render_output_surface(output_surfaces[surface_num],
+                                                          &out_rect_vid,
+                                                          output_surfaces[2],
+                                                          &src_rect_vid, NULL, NULL,
+                                                          VDP_OUTPUT_SURFACE_RENDER_ROTATE_0);
+        CHECK_ST_ERROR("Error when calling vdp_output_surface_render_output_surface")
     } else if (!(mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)) {
         VdpStatus vdp_st;
         void *destdata[3] = {mpi->planes[0], mpi->planes[2], mpi->planes[1]};
@@ -1063,6 +1089,9 @@ static int query_format(uint32_t format)
 {
     int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_EOSD | VFCAP_EOSD_UNSCALED | VFCAP_FLIP;
     switch (format) {
+    case IMGFMT_BGRA:
+        if (force_mixer)
+            return 0;
     case IMGFMT_YV12:
     case IMGFMT_I420:
     case IMGFMT_IYUV:
@@ -1151,6 +1180,7 @@ static const opt_t subopts[] = {
     {"denoise", OPT_ARG_FLOAT, &denoise, NULL},
     {"sharpen", OPT_ARG_FLOAT, &sharpen, NULL},
     {"colorspace", OPT_ARG_INT, &colorspace, NULL},
+    {"force-mixer", OPT_ARG_BOOL, &force_mixer, NULL},
     {NULL}
 };
 
@@ -1178,6 +1208,9 @@ static const char help_msg[] =
     "    1: ITU-R BT.601 (default)\n"
     "    2: ITU-R BT.709\n"
     "    3: SMPTE-240M\n"
+    "  force-mixer\n"
+    "    Use the VDPAU mixer (default)\n"
+    "    Use noforce-mixer to allow BGRA output (disables all above options)\n"
     ;
 
 static int preinit(const char *arg)
@@ -1196,6 +1229,7 @@ static int preinit(const char *arg)
     denoise = 0;
     sharpen = 0;
     colorspace = 1;
+    force_mixer = 1;
     if (subopt_parse(arg, subopts) != 0) {
         mp_msg(MSGT_VO, MSGL_FATAL, help_msg);
         return -1;
@@ -1294,6 +1328,8 @@ static int control(uint32_t request, void *data, ...)
         *(int*)data = deint;
         return VO_TRUE;
     case VOCTRL_SET_DEINTERLACE:
+        if (image_format == IMGFMT_BGRA)
+            return VO_NOTIMPL;
         deint = *(int*)data;
         if (deint)
             deint = deint_type;
@@ -1339,6 +1375,8 @@ static int control(uint32_t request, void *data, ...)
     case VOCTRL_SET_EQUALIZER: {
         va_list ap;
         int value;
+        if (image_format == IMGFMT_BGRA)
+            return VO_NOTIMPL;
 
         va_start(ap, data);
         value = va_arg(ap, int);
