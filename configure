@@ -3982,7 +3982,7 @@ EOF
 fi
 
 if test "$_smb" = yes; then
-    def_smb="#define CONFIG_LIBSMBCLIENT"
+    def_smb="#define CONFIG_LIBSMBCLIENT 1"
     _inputmodules="smb $_inputmodules"
 else
     def_smb="#undef CONFIG_LIBSMBCLIENT"
@@ -4075,7 +4075,7 @@ echores "$_tga"
 
 echocheck "md5sum support"
 if test "$_md5sum" = yes; then
-  def_md5sum="#define CONFIG_MD5SUM"
+  def_md5sum="#define CONFIG_MD5SUM 1"
   _vomodules="md5sum $_vomodules"
 else
   def_md5sum="#undef CONFIG_MD5SUM"
@@ -4086,7 +4086,7 @@ echores "$_md5sum"
 
 echocheck "yuv4mpeg support"
 if test "$_yuv4mpeg" = yes; then
-  def_yuv4mpeg="#define CONFIG_YUV4MPEG"
+  def_yuv4mpeg="#define CONFIG_YUV4MPEG 1"
   _vomodules="yuv4mpeg $_vomodules"
 else
   def_yuv4mpeg="#undef CONFIG_YUV4MPEG"
@@ -5490,7 +5490,7 @@ if test "$_esd" = yes ; then
 #include <esd.h>
 int main(void) { return esd_get_latency(0); }
 EOF
-  cc_check $(esd-config --libs) $(esd-config --cflags) && _esd_latency=yes && def_esd_latency='#define CONFIG_ESD_LATENCY'
+  cc_check $(esd-config --libs) $(esd-config --cflags) && _esd_latency=yes && def_esd_latency='#define CONFIG_ESD_LATENCY 1'
   echores "$_esd_latency"
 else
   def_esd='#undef CONFIG_ESD'
@@ -6004,7 +6004,7 @@ EOF
 fi
 if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
     _cdda='yes'
-    def_libcdio='#define CONFIG_LIBCDIO'
+    def_libcdio='#define CONFIG_LIBCDIO 1'
     def_havelibcdio='yes'
 else
     if test "$_cdparanoia" = yes ; then
@@ -6017,7 +6017,7 @@ echores "$_libcdio"
 
 if test "$_cdda" = yes ; then
     test $_cddb = auto && test $_network = yes && _cddb=yes
-    def_cdparanoia='#define CONFIG_CDDA'
+    def_cdparanoia='#define CONFIG_CDDA 1'
     _inputmodules="cdda $_inputmodules"
 else
     def_cdparanoia='#undef CONFIG_CDDA'
@@ -6025,7 +6025,7 @@ else
 fi
 
 if test "$_cddb" = yes ; then
-    def_cddb='#define CONFIG_CDDB'
+    def_cddb='#define CONFIG_CDDB 1'
     _inputmodules="cddb $_inputmodules"
 else
     _cddb=no
@@ -6073,7 +6073,7 @@ EOF
     fi
 fi
 if test "$_freetype" = yes ; then
-    def_freetype='#define CONFIG_FREETYPE'
+    def_freetype='#define CONFIG_FREETYPE 1'
     extra_cflags="$extra_cflags $($_freetypeconfig --cflags)"
     extra_ldflags="$extra_ldflags $($_freetypeconfig --libs)"
 else
@@ -6113,7 +6113,7 @@ EOF
   fi
 fi
 if test "$_fontconfig" = yes ; then
-    def_fontconfig='#define CONFIG_FONTCONFIG'
+    def_fontconfig='#define CONFIG_FONTCONFIG 1'
 else
     def_fontconfig='#undef CONFIG_FONTCONFIG'
 fi
@@ -6143,7 +6143,7 @@ EOF
     fi
 fi
 if test "$_ass" = yes ; then
-    def_ass='#define CONFIG_ASS'
+    def_ass='#define CONFIG_ASS 1'
 else
     def_ass='#undef CONFIG_ASS'
 fi
@@ -6173,7 +6173,7 @@ EOF
     fi
 fi
 if test "$_fribidi" = yes ; then
-    def_fribidi='#define CONFIG_FRIBIDI'
+    def_fribidi='#define CONFIG_FRIBIDI 1'
     extra_cflags="$extra_cflags $($_fribidiconfig --cflags)"
     extra_ldflags="$extra_ldflags $($_fribidiconfig --libs)"
 else
@@ -6696,7 +6696,7 @@ EOF
   cc_check && _ladspa=yes
 fi
 if test "$_ladspa" = yes; then
-  def_ladspa="#define CONFIG_LADSPA"
+  def_ladspa="#define CONFIG_LADSPA 1"
 else
   def_ladspa="#undef CONFIG_LADSPA"
 fi
@@ -6736,7 +6736,7 @@ EOF
   fi
 fi
 def_libbs2b="#undef CONFIG_LIBBS2B"
-test "$_libbs2b" = yes && def_libbs2b="#define CONFIG_LIBBS2B"
+test "$_libbs2b" = yes && def_libbs2b="#define CONFIG_LIBBS2B 1"
 echores "$_libbs2b"
 
 
@@ -7389,19 +7389,19 @@ EOF
   cc_check -lmp3lame $_ld_lm && _mp3lame=yes
 fi
 if test "$_mp3lame" = yes ; then
-  def_mp3lame="#define CONFIG_MP3LAME"
+  def_mp3lame="#define CONFIG_MP3LAME 1"
   _ld_mp3lame=-lmp3lame
   libs_mencoder="$libs_mencoder $_ld_mp3lame"
   cat > $TMPC << EOF
 #include <lame/lame.h>
 int main(void) { lame_set_preset(NULL, STANDARD_FAST); return 0; }
 EOF
-  cc_check $_ld_mp3lame $_ld_lm && def_mp3lame_preset="#define CONFIG_MP3LAME_PRESET"
+  cc_check $_ld_mp3lame $_ld_lm && def_mp3lame_preset="#define CONFIG_MP3LAME_PRESET 1"
   cat > $TMPC << EOF
 #include <lame/lame.h>
 int main(void) { lame_set_preset(NULL, MEDIUM_FAST); return 0; }
 EOF
-  cc_check $_ld_mp3lame $_ld_lm && def_mp3lame_preset_medium="#define CONFIG_MP3LAME_PRESET_MEDIUM"
+  cc_check $_ld_mp3lame $_ld_lm && def_mp3lame_preset_medium="#define CONFIG_MP3LAME_PRESET_MEDIUM 1"
   test "$_mp3lame_lavc" = auto && _mp3lame_lavc=yes
   if test "$_mp3lame_lavc" = yes ; then
     def_mp3lame_lavc="#define CONFIG_LIBMP3LAME 1"
