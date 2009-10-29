@@ -29,6 +29,7 @@
 
 #include "libaf/af_format.h"
 #include "libmpcodecs/img_format.h"
+#include "libmpcodecs/dec_teletext.h"
 #include "libavutil/avstring.h"
 #include "osdep/timer.h"
 

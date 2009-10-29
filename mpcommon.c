@@ -12,6 +12,7 @@
 #include "version.h"
 #include "vobsub.h"
 #include "stream/tv.h"
+#include "libmpcodecs/dec_teletext.h"
 #include "libavutil/intreadwrite.h"
 #include "m_option.h"
 #include "mpcommon.h"

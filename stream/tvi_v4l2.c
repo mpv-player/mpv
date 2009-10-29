@@ -53,6 +53,7 @@ known issues:
 #include <linux/videodev2.h>
 #include "mp_msg.h"
 #include "libmpcodecs/img_format.h"
+#include "libmpcodecs/dec_teletext.h"
 #include "libaf/af_format.h"
 #include "tv.h"
 #include "audio_in.h"

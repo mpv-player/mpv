@@ -25,6 +25,7 @@
 #include "mpcommon.h"
 #include "mixer.h"
 #include "libmpcodecs/dec_video.h"
+#include "libmpcodecs/dec_teletext.h"
 #include "vobsub.h"
 #include "spudec.h"
 #include "get_path.h"

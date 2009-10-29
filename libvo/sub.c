@@ -29,7 +29,7 @@
 #include "stream/stream_dvdnav.h"
 #define OSD_NAV_BOX_ALPHA 0x7f
 
-#include "stream/tv.h"
+#include "libmpcodecs/dec_teletext.h"
 #include "osdep/timer.h"
 
 #include "mplayer.h"
