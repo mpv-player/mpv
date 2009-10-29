@@ -3487,7 +3487,7 @@ static int control(priv_t * priv, int cmd, void *arg)
     {
         void* ptr;
         ptr=&(priv->tsp);
-        if(teletext_control(NULL,TV_VBI_CONTROL_START,&ptr)==TVI_CONTROL_TRUE)
+        if(teletext_control(NULL,TV_VBI_CONTROL_START,&ptr)==VBI_CONTROL_TRUE)
             priv->priv_vbi=ptr;
         else
             priv->priv_vbi=NULL;

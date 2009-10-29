@@ -211,19 +211,19 @@ void update_teletext(sh_video_t *sh_video, demuxer_t *demuxer, int reset)
     if (demuxer->type != DEMUXER_TYPE_TV || !tvh) return;
 
     //Also forcing page update when such ioctl is not supported or call error occured
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_IS_CHANGED,&page_changed)!=TVI_CONTROL_TRUE)
+    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_IS_CHANGED,&page_changed)!=VBI_CONTROL_TRUE)
         page_changed=1;
 
     if(!page_changed)
         return;
 
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_VBIPAGE,&vo_osd_teletext_page)!=TVI_CONTROL_TRUE)
+    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_VBIPAGE,&vo_osd_teletext_page)!=VBI_CONTROL_TRUE)
         vo_osd_teletext_page=NULL;
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_HALF_PAGE,&vo_osd_teletext_half)!=TVI_CONTROL_TRUE)
+    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_HALF_PAGE,&vo_osd_teletext_half)!=VBI_CONTROL_TRUE)
         vo_osd_teletext_half=0;
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_MODE,&vo_osd_teletext_mode)!=TVI_CONTROL_TRUE)
+    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_MODE,&vo_osd_teletext_mode)!=VBI_CONTROL_TRUE)
         vo_osd_teletext_mode=0;
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_FORMAT,&vo_osd_teletext_format)!=TVI_CONTROL_TRUE)
+    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_FORMAT,&vo_osd_teletext_format)!=VBI_CONTROL_TRUE)
         vo_osd_teletext_format=0;
     vo_osd_changed(OSDTYPE_TELETEXT);
 

@@ -49,17 +49,17 @@
  * 0. stream/tvi_*.c: vbi_grabber(...)
  *      getting vbi data from video device
  * ---decoding stage---
- * 1. stream/tvi_vbi.c: decode_raw_line_runin(...) or decode_raw_line_sine(...)
+ * 1. libmpcodecs/dec_teletext.c: decode_raw_line_runin(...) or decode_raw_line_sine(...)
  *      decode raw vbi data into sliced 45(?) bytes long packets
- * 2. stream/tvi_vbi.c: decode_pkt0(...), decode_pkt_page(...)
+ * 2. libmpcodecs/dec_teletext.c: decode_pkt0(...), decode_pkt_page(...)
  *      packets processing (header analyzing, storing complete page in cache,
  *      only raw member of tt_char is filled at this stage)
- * 3. stream/tvi_vbi.c: decode_page(...)
+ * 3. libmpcodecs/dec_teletext.c: decode_page(...)
  *      page decoding. filling unicode,gfx,ctl,etc members of tt_char structure
  *      with appropriate values according to teletext control chars, converting
  *      text to utf8.
  * ---rendering stage---
- * 4. stream/tvi_vbi.c: prepare_visible_page(...)
+ * 4. libmpcodecs/dec_teletext.c: prepare_visible_page(...)
  *      processing page. adding number of just received by background process
  *      teletext page, adding current time,etc.
  * 5. libvo/sub.c: vo_update_text_teletext(...)
@@ -578,7 +578,7 @@ static void put_to_cache(priv_vbi_t* priv,tt_page* pg,int line){
         if(!(pg->raw[i]&0x80))
             pgc->raw[i]=pg->raw[i];
         else
-            mp_msg(MSGT_TV,MSGL_DBG3,"char error. pg:%x, c[%d]=0x%x\n",
+            mp_msg(MSGT_TELETEXT,MSGL_DBG3,"char error. pg:%x, c[%d]=0x%x\n",
                 pg->pagenum,i,pg->raw[i]);
     }
     pgc->active=1;
@@ -799,13 +799,13 @@ static void prepare_visible_page(priv_vbi_t* priv){
     int i;
 
     pthread_mutex_lock(&(priv->buffer_mutex));
-    mp_msg(MSGT_TV,MSGL_DBG3,"tvi_vbi: prepare_visible_page pg:0x%x, sub:0x%x\n",
+    mp_msg(MSGT_TELETEXT,MSGL_DBG3,"tvi_vbi: prepare_visible_page pg:0x%x, sub:0x%x\n",
         priv->pagenum,priv->subpagenum);
     if(priv->subpagenum==0x3f7f) //no page yet
         priv->subpagenum=get_subpagenum_from_cache(priv,priv->pagenum);
 
     pg=get_from_cache(priv,priv->pagenum,priv->subpagenum);
-    mp_dbg(MSGT_TV,MSGL_DBG3,"tvi_vbi: prepare_vibible_page2 pg:0x%x, sub:0x%x\n",
+    mp_dbg(MSGT_TELETEXT,MSGL_DBG3,"tvi_vbi: prepare_vibible_page2 pg:0x%x, sub:0x%x\n",
         priv->pagenum,priv->subpagenum);
 
     curr_pg=get_from_cache(priv,priv->curr_pagenum,
@@ -827,7 +827,7 @@ static void prepare_visible_page(priv_vbi_t* priv){
         }
     }else{
         decode_page(priv->display_page,pg->raw,pg->primary_lang,pg->secondary_lang,pg->flags);
-        mp_msg(MSGT_TV,MSGL_DBG3,"page #%x was decoded!\n",pg->pagenum);
+        mp_msg(MSGT_TELETEXT,MSGL_DBG3,"page #%x was decoded!\n",pg->pagenum);
     }
 
     PRINT_HEX(priv->display_page,0,(priv->curr_pagenum&0x700)?priv->curr_pagenum>>8:8);
@@ -987,7 +987,7 @@ static void dump_page(tt_page* pt)
  * Routine also calls decode_page to perform 1st stage of rendering
  */
 static void store_in_cache(priv_vbi_t* priv, int magAddr, int line){
-    mp_msg(MSGT_TV,MSGL_DBG2,"store_in_cache(%d): pagenum:%x\n",
+    mp_msg(MSGT_TELETEXT,MSGL_DBG2,"store_in_cache(%d): pagenum:%x\n",
         priv->mag[magAddr].order,
         priv->mag[magAddr].pt->pagenum);
 
@@ -1039,7 +1039,7 @@ static void pll_add(priv_vbi_t* priv,int n,int err){
             priv->pll_dir=-1;
             priv->pll_lerr=0;
         }
-        mp_msg(MSGT_TV,MSGL_DBG3,"vbi: pll_adj=%2d\n",priv->pll_adj);
+        mp_msg(MSGT_TELETEXT,MSGL_DBG3,"vbi: pll_adj=%2d\n",priv->pll_adj);
     }
     priv->pll_cnt=0;
     priv->pll_err=0;
@@ -1063,9 +1063,9 @@ static void pll_reset(priv_vbi_t* priv,int fine_tune){
     if(priv->pll_fixed)
         priv->pll_adj=fine_tune;
     if(priv->pll_fixed)
-        mp_msg(MSGT_TV,MSGL_DBG3,"pll_reset (fixed@%2d)\n",priv->pll_adj);
+        mp_msg(MSGT_TELETEXT,MSGL_DBG3,"pll_reset (fixed@%2d)\n",priv->pll_adj);
     else
-        mp_msg(MSGT_TV,MSGL_DBG3,"pll_reset (auto)\n");
+        mp_msg(MSGT_TELETEXT,MSGL_DBG3,"pll_reset (auto)\n");
 
 }
 /**
@@ -1303,7 +1303,7 @@ static void decode_pkt28(priv_vbi_t* priv,unsigned char*data){
                                 (priv->secondary_language&4)>>2 |
                                 (priv->secondary_language&1)<<2;
 
-    mp_msg(MSGT_TV,MSGL_DBG2,"pkt28: language: primary=%02x secondary=0x%02x\n",
+    mp_msg(MSGT_TELETEXT,MSGL_DBG2,"pkt28: language: primary=%02x secondary=0x%02x\n",
         priv->primary_language,priv->secondary_language);
 }
 
@@ -1352,7 +1352,7 @@ static int decode_raw_line_runin(priv_vbi_t* priv,unsigned char* buf,unsigned ch
     i=hi[5]-hi[1]; // length of 4 periods (8 bits)
     if (i<priv->bp8bl || i>priv->bp8bh)
     {
-        mp_msg(MSGT_TV,MSGL_DBG3,"vbi: wrong freq %d (%d,%d)\n",
+        mp_msg(MSGT_TELETEXT,MSGL_DBG3,"vbi: wrong freq %d (%d,%d)\n",
             i,priv->bp8bl,priv->bp8bh);
         return 0;      // bad frequency
     }
@@ -1388,7 +1388,7 @@ static int decode_raw_line_runin(priv_vbi_t* priv,unsigned char* buf,unsigned ch
     for(i=0;i<43;i++){
         data[i]=data[i+1];
     }
-    mp_msg(MSGT_TV,MSGL_DBG3,"thr:%d sync:%d ",thr,sync);
+    mp_msg(MSGT_TELETEXT,MSGL_DBG3,"thr:%d sync:%d ",thr,sync);
 
     return 1;
 }
@@ -1471,7 +1471,7 @@ static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
     unsigned char* linep;
     int d0,d1;
     int i=0;
-    mp_msg(MSGT_TV,MSGL_DBG3,"vbi: vbi_decode\n");
+    mp_msg(MSGT_TELETEXT,MSGL_DBG3,"vbi: vbi_decode\n");
     for(linep=buf; !priv->cache_reset && linep<buf+priv->ptsp->bufsize; linep+=priv->ptsp->samples_per_line,i++){
 #if 0
         /*
@@ -1489,13 +1489,13 @@ static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
 
         if(d0&0x80 || d1&0x80){
            pll_add(priv,2,4);
-           mp_msg(MSGT_TV,MSGL_V,"vbi_decode(%d):HammErr after decode_raw_line\n",i);
+           mp_msg(MSGT_TELETEXT,MSGL_V,"vbi_decode(%d):HammErr after decode_raw_line\n",i);
 
            continue; //hamError
         }
         magAddr=d0 & 0x7;
         pkt=(d0>>3)|(d1<<1);
-        mp_msg(MSGT_TV,MSGL_DBG3,"vbi_decode(%d):%x %x (mag:%x, pkt:%d)\n",
+        mp_msg(MSGT_TELETEXT,MSGL_DBG3,"vbi_decode(%d):%x %x (mag:%x, pkt:%d)\n",
             i,d0,d1,magAddr,pkt);
         if(!pkt){
             decode_pkt0(priv,data+2,magAddr); //skip MRGA
@@ -1509,7 +1509,7 @@ static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
         }else if(pkt==30){
             decode_pkt30(priv,data+2,magAddr);
         } else {
-            mp_msg(MSGT_TV,MSGL_DBG3,"unsupported packet:%d\n",pkt);
+            mp_msg(MSGT_TELETEXT,MSGL_DBG3,"unsupported packet:%d\n",pkt);
         }
     }
     if (priv->cache_reset){
@@ -1531,8 +1531,8 @@ static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
  * \param priv_vbi private data structure
  * \param flag new format
  * \return
- *   TVI_CONTROL_TRUE is success,
- *   TVI_CONTROL_FALSE otherwise
+ *   VBI_CONTROL_TRUE is success,
+ *   VBI_CONTROL_FALSE otherwise
  *
  * flag:
  * 0 - opaque
@@ -1544,7 +1544,7 @@ static int teletext_set_format(priv_vbi_t * priv, teletext_format flag)
 {
     flag&=3;
 
-    mp_msg(MSGT_TV,MSGL_DBG3,"teletext_set_format_is called. mode:%d\n",flag);
+    mp_msg(MSGT_TELETEXT,MSGL_DBG3,"teletext_set_format_is called. mode:%d\n",flag);
     pthread_mutex_lock(&(priv->buffer_mutex));
 
     priv->tformat=flag;
@@ -1552,7 +1552,7 @@ static int teletext_set_format(priv_vbi_t * priv, teletext_format flag)
     priv->pagenumdec=0;
 
     pthread_mutex_unlock(&(priv->buffer_mutex));
-    return TVI_CONTROL_TRUE;
+    return VBI_CONTROL_TRUE;
 }
 
 /**
@@ -1648,9 +1648,9 @@ int teletext_control(void* p, int cmd, void *arg)
     tt_page* pgc;
 
     if (!priv && cmd!=TV_VBI_CONTROL_START)
-        return TVI_CONTROL_FALSE;
+        return VBI_CONTROL_FALSE;
     if (!arg && cmd!=TV_VBI_CONTROL_STOP && cmd!=TV_VBI_CONTROL_MARK_UNCHANGED)
-        return TVI_CONTROL_FALSE;
+        return VBI_CONTROL_FALSE;
 
     switch (cmd) {
     case TV_VBI_CONTROL_RESET:
@@ -1665,12 +1665,12 @@ int teletext_control(void* p, int cmd, void *arg)
         priv->subpagenum=0x3f7f;
         pll_reset(priv,fine_tune);
         if(tv_param->tlang==-1){
-            mp_msg(MSGT_TV,MSGL_INFO,MSGTR_TV_TTSupportedLanguages);
+            mp_msg(MSGT_TELETEXT,MSGL_INFO,MSGTR_TV_TTSupportedLanguages);
             for(i=0; tt_languages[i].lang_code; i++){
-                mp_msg(MSGT_TV,MSGL_INFO,"  %3d  %s\n",
+                mp_msg(MSGT_TELETEXT,MSGL_INFO,"  %3d  %s\n",
                     tt_languages[i].lang_code, tt_languages[i].lang_name);
             }
-            mp_msg(MSGT_TV,MSGL_INFO,"  %3d  %s\n",
+            mp_msg(MSGT_TELETEXT,MSGL_INFO,"  %3d  %s\n",
                 tt_languages[i].lang_code, tt_languages[i].lang_name);
         }else{
             for(i=0; tt_languages[i].lang_code; i++){
@@ -1678,14 +1678,14 @@ int teletext_control(void* p, int cmd, void *arg)
                     break;
             }
             if (priv->primary_language!=tt_languages[i].lang_code){
-                mp_msg(MSGT_TV,MSGL_INFO,MSGTR_TV_TTSelectedLanguage,
+                mp_msg(MSGT_TELETEXT,MSGL_INFO,MSGTR_TV_TTSelectedLanguage,
                     tt_languages[i].lang_name);
                 priv->primary_language=tt_languages[i].lang_code;
             }
         }
         priv->page_changed=1;
         pthread_mutex_unlock(&(priv->buffer_mutex));
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     }
     case TV_VBI_CONTROL_START:
     {
@@ -1693,7 +1693,7 @@ int teletext_control(void* p, int cmd, void *arg)
         tt_stream_props* ptsp=*(tt_stream_props**)arg;
 
         if(!ptsp)
-            return TVI_CONTROL_FALSE;
+            return VBI_CONTROL_FALSE;
 
         priv=calloc(1,sizeof(priv_vbi_t));
 
@@ -1712,7 +1712,7 @@ int teletext_control(void* p, int cmd, void *arg)
         init_vbi_consts(priv);
         pll_reset(priv,fine_tune);
         priv->page_changed=1;
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     }
     case TV_VBI_CONTROL_STOP:
     {
@@ -1723,15 +1723,15 @@ int teletext_control(void* p, int cmd, void *arg)
         destroy_cache(priv);
         priv->page_changed=1;
         free(priv);
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     }
     case TV_VBI_CONTROL_SET_MODE:
         priv->on=(*(int*)arg%2);
         priv->page_changed=1;
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_GET_MODE:
         *(int*)arg=priv->on;
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_SET_FORMAT:
         priv->page_changed=1;
         return teletext_set_format(priv, *(int *) arg);
@@ -1739,12 +1739,12 @@ int teletext_control(void* p, int cmd, void *arg)
         pthread_mutex_lock(&(priv->buffer_mutex));
         *(int*)arg=priv->tformat;
         pthread_mutex_unlock(&(priv->buffer_mutex));
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_GET_HALF_PAGE:
         if(!priv->on)
-            return TVI_CONTROL_FALSE;
+            return VBI_CONTROL_FALSE;
         *(int *)arg=priv->zoom;
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_SET_HALF_PAGE:
     {
         int val=*(int*)arg;
@@ -1755,21 +1755,21 @@ int teletext_control(void* p, int cmd, void *arg)
         priv->zoom=val;
         priv->page_changed=1;
         pthread_mutex_unlock(&(priv->buffer_mutex));
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     }
     case TV_VBI_CONTROL_GO_LINK:
     {
         int val=*(int *) arg;
         if(val<1 || val>6)
-            return TVI_CONTROL_FALSE;
+            return VBI_CONTROL_FALSE;
         pthread_mutex_lock(&(priv->buffer_mutex));
         if (!(pgc = priv->ptt_cache[priv->pagenum])) {
             pthread_mutex_unlock(&(priv->buffer_mutex));
-            return TVI_CONTROL_FALSE;
+            return VBI_CONTROL_FALSE;
         }
         if (!pgc->links[val-1].pagenum || pgc->links[val-1].pagenum>0x7ff) {
             pthread_mutex_unlock(&(priv->buffer_mutex));
-            return TVI_CONTROL_FALSE;
+            return VBI_CONTROL_FALSE;
         }
         priv->pagenum=pgc->links[val-1].pagenum;
         if(pgc->links[val-1].subpagenum!=0x3f7f)
@@ -1778,20 +1778,20 @@ int teletext_control(void* p, int cmd, void *arg)
             priv->subpagenum=get_subpagenum_from_cache(priv,priv->pagenum);
         priv->page_changed=1;
         pthread_mutex_unlock(&(priv->buffer_mutex));
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     }
     case TV_VBI_CONTROL_SET_PAGE:
     {
         int val=*(int *) arg;
         if(val<100 || val>0x899)
-            return TVI_CONTROL_FALSE;
+            return VBI_CONTROL_FALSE;
         pthread_mutex_lock(&(priv->buffer_mutex));
         priv->pagenum=val&0x7ff;
         priv->subpagenum=get_subpagenum_from_cache(priv,priv->pagenum);
         priv->pagenumdec=0;
         priv->page_changed=1;
         pthread_mutex_unlock(&(priv->buffer_mutex));
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     }
     case TV_VBI_CONTROL_STEP_PAGE:
     {
@@ -1802,11 +1802,11 @@ int teletext_control(void* p, int cmd, void *arg)
         priv->pagenumdec=0;
         priv->page_changed=1;
         pthread_mutex_unlock(&(priv->buffer_mutex));
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     }
     case TV_VBI_CONTROL_GET_PAGE:
         *(int*)arg=((priv->pagenum+0x700)&0x7ff)+0x100;
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_SET_SUBPAGE:
         pthread_mutex_lock(&(priv->buffer_mutex));
         priv->pagenumdec=0;
@@ -1817,35 +1817,35 @@ int teletext_control(void* p, int cmd, void *arg)
             priv->subpagenum=VBI_MAX_SUBPAGES-1;
         priv->page_changed=1;
         pthread_mutex_unlock(&(priv->buffer_mutex));
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_GET_SUBPAGE:
         *(int*)arg=priv->subpagenum;
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_ADD_DEC:
         vbi_add_dec(priv, *(char **) arg);
         priv->page_changed=1;
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_DECODE_PAGE:
         vbi_decode(priv,*(unsigned char**)arg);
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_GET_VBIPAGE:
         if(!priv->on)
-            return TVI_CONTROL_FALSE;
+            return VBI_CONTROL_FALSE;
         prepare_visible_page(priv);
         *(void **)arg=priv->display_page;
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_GET_NETWORKNAME:
         *(void **)arg=priv->networkname;
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_MARK_UNCHANGED:
         priv->page_changed=0;
         priv->last_rendered=GetTimerMS();
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_IS_CHANGED:
         if(GetTimerMS()-priv->last_rendered> 250)  //forcing page update every 1/4 sec
             priv->page_changed=3; //mark that header update is enough
         *(int*)arg=priv->page_changed;
-        return TVI_CONTROL_TRUE;
+        return VBI_CONTROL_TRUE;
     }
-    return TVI_CONTROL_UNKNOWN;
+    return VBI_CONTROL_UNKNOWN;
 }

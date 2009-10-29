@@ -23,6 +23,10 @@
 #ifndef MPLAYER_DEC_TELETEXT_H
 #define MPLAYER_DEC_TELETEXT_H
 
+#define VBI_CONTROL_FALSE              0
+#define VBI_CONTROL_TRUE               1
+#define VBI_CONTROL_UNKNOWN           -1
+
 int teletext_control(void* p, int cmd, void *arg);
 
 /*

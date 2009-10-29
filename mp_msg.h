@@ -104,6 +104,8 @@ extern int verbose;
 
 #define MSGT_STATUSLINE 45 // playback/encoding status line
 
+#define MSGT_TELETEXT 46       // Teletext decoder
+
 #define MSGT_MAX 64
 
 void mp_msg_init(void);
