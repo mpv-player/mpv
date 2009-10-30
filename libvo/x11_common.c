@@ -1316,7 +1316,7 @@ static int vo_x11_get_fs_type(int supported)
                 else
                     type |= vo_wm_NETWM;
             } else if (!strcmp(arg, "none"))
-                return 0;
+                type = 0; // clear; keep parsing
         }
     }
 
