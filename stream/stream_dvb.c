@@ -323,8 +323,9 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 				ptr->mod = VSB_8;
 			else if(! strcmp(mod, "VSB_16") || !strcmp(mod, "16VSB"))
 				ptr->mod = VSB_16;
+			else if(! strcmp(mod, "QAM_AUTO"))
+				ptr->mod = QAM_AUTO;
 
-			ptr->inv = INVERSION_AUTO;
 #endif
 		}
 
@@ -342,7 +343,8 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 				ptr->trans = TRANSMISSION_MODE_2K;
 			else if(! strcmp(transm, "TRANSMISSION_MODE_8K"))
 				ptr->trans = TRANSMISSION_MODE_8K;
-
+			else if(! strcmp(transm, "TRANSMISSION_MODE_AUTO"))
+				ptr->trans = TRANSMISSION_MODE_AUTO;
 
 			if(! strcmp(gi, "GUARD_INTERVAL_1_32"))
 				ptr->gi = GUARD_INTERVAL_1_32;
@@ -350,7 +352,9 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 				ptr->gi = GUARD_INTERVAL_1_16;
 			else if(! strcmp(gi, "GUARD_INTERVAL_1_8"))
 				ptr->gi = GUARD_INTERVAL_1_8;
-			else ptr->gi = GUARD_INTERVAL_1_4;
+			else if(! strcmp(gi, "GUARD_INTERVAL_1_4"))
+				ptr->gi = GUARD_INTERVAL_1_4;
+			else ptr->gi = GUARD_INTERVAL_AUTO;
 
 			if(! strcmp(tmp_lcr, "FEC_1_2"))
 				ptr->cr_lp =FEC_1_2;
