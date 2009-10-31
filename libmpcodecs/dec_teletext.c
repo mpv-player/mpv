@@ -799,13 +799,13 @@ static void prepare_visible_page(priv_vbi_t* priv){
     int i;
 
     pthread_mutex_lock(&(priv->buffer_mutex));
-    mp_msg(MSGT_TELETEXT,MSGL_DBG3,"tvi_vbi: prepare_visible_page pg:0x%x, sub:0x%x\n",
+    mp_msg(MSGT_TELETEXT,MSGL_DBG3,"dec_teletext: prepare_visible_page pg:0x%x, sub:0x%x\n",
         priv->pagenum,priv->subpagenum);
     if(priv->subpagenum==0x3f7f) //no page yet
         priv->subpagenum=get_subpagenum_from_cache(priv,priv->pagenum);
 
     pg=get_from_cache(priv,priv->pagenum,priv->subpagenum);
-    mp_dbg(MSGT_TELETEXT,MSGL_DBG3,"tvi_vbi: prepare_vibible_page2 pg:0x%x, sub:0x%x\n",
+    mp_dbg(MSGT_TELETEXT,MSGL_DBG3,"dec_teletext: prepare_vibible_page2 pg:0x%x, sub:0x%x\n",
         priv->pagenum,priv->subpagenum);
 
     curr_pg=get_from_cache(priv,priv->curr_pagenum,

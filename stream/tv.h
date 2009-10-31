@@ -218,7 +218,7 @@ typedef struct {
 #define TVI_CONTROL_SPC_SET_INPUT	0x402	/* set input channel (tv,s-video,composite..) */
 #define TVI_CONTROL_SPC_GET_NORMID	0x403	/* get normid from norm name */
 
-//tvi_* ioctl (not tvi_vbi.c !!!)
+//tvi_* ioctl (not dec_teletext.c !!!)
 #define TVI_CONTROL_VBI_INIT           0x501   ///< vbi init
 
 int tv_set_color_options(tvi_handle_t *tvh, int opt, int val);
