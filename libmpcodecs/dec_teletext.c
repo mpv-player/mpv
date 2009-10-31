@@ -983,8 +983,6 @@ static void dump_page(tt_page* pt)
  * \brief checks whether page is ready and copies it into cache array if so
  * \param priv private data structure
  * \param magAddr page's magazine address (0-7)
- *
- * Routine also calls decode_page to perform 1st stage of rendering
  */
 static void store_in_cache(priv_vbi_t* priv, int magAddr, int line){
     mp_msg(MSGT_TELETEXT,MSGL_DBG2,"store_in_cache(%d): pagenum:%x\n",
