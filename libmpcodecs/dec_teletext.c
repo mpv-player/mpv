@@ -70,7 +70,6 @@
  *  spu rendering
  *  is better quality on poor signal possible ?
  *  link support
- *  font autoscale
  *  greyscale osd
  *  slave command for dumping pages
  *  fix bcd<->dec as suggested my Michael
