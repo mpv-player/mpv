@@ -39,6 +39,7 @@
 #include <errno.h>
 
 #include "mp_msg.h"
+#include "av_log.h"
 
 #define HELP_MP_DEFINE_STATIC
 #include "help_mp.h"
@@ -2900,6 +2901,7 @@ int i;
   srand(GetTimerMS());
 
   mp_msg_init();
+  set_av_log_callback();
 
 #ifdef CONFIG_X11
   mpctx->x11_state = vo_x11_init_state();

@@ -37,6 +37,7 @@
 #include <sys/time.h>
 
 #include "mp_msg.h"
+#include "av_log.h"
 #include "help_mp.h"
 
 #include "codec-cfg.h"
@@ -405,6 +406,7 @@ audio_encoding_params_t aparams;
 audio_encoder_t *aencoder = NULL;
 
   mp_msg_init();
+  set_av_log_callback();
 
   // Create the config context and register the options
   set_default_mencoder_options(&opts);

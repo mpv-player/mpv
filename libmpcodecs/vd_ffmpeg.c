@@ -138,56 +138,6 @@ static int control(sh_video_t *sh, int cmd, void *arg, ...){
     return CONTROL_UNKNOWN;
 }
 
-static void mp_msp_av_log_callback(void *ptr, int level, const char *fmt, va_list vl)
-{
-    static int print_prefix=1;
-    AVClass *avc= ptr ? *(AVClass **)ptr : NULL;
-    int type= MSGT_FIXME;
-    int mp_level;
-    char buf[256];
-
-    switch(level){
-    case AV_LOG_DEBUG:  mp_level= MSGL_V   ; break;
-    case AV_LOG_INFO :  mp_level= MSGL_INFO; break;
-    case AV_LOG_ERROR:  mp_level= MSGL_ERR ; break;
-    default          :  mp_level= MSGL_ERR ; break;
-    }
-
-    if (!mp_msg_test(type, mp_level)) return;
-
-    if(ptr){
-        if(!strcmp(avc->class_name, "AVCodecContext")){
-            AVCodecContext *s= ptr;
-            if(s->codec){
-                if(s->codec->type == CODEC_TYPE_AUDIO){
-                    if(s->codec->decode)
-                        type= MSGT_DECAUDIO;
-                }else if(s->codec->type == CODEC_TYPE_VIDEO){
-                    if(s->codec->decode)
-                        type= MSGT_DECVIDEO;
-                }
-                //FIXME subtitles, encoders (what msgt for them? there is no appropriate ...)
-            }
-        }else if(!strcmp(avc->class_name, "AVFormatContext")){
-#if 0 //needs libavformat include FIXME iam too lazy to do this cleanly, probably the whole should be moved out of this file ...
-            AVFormatContext *s= ptr;
-            if(s->iformat)
-                type= MSGT_DEMUXER;
-            else if(s->oformat)
-                type= MSGT_MUXER;
-#endif
-        }
-    }
-
-    if(print_prefix && avc) {
-        mp_msg(type, mp_level, "[%s @ %p]", avc->item_name(ptr), avc);
-    }
-
-    print_prefix= strchr(fmt, '\n') != NULL;
-    vsnprintf(buf, sizeof(buf), fmt, vl);
-    mp_msg(type, mp_level, buf);
-}
-
 static void set_format_params(struct AVCodecContext *avctx, enum PixelFormat fmt){
     int imgfmt;
     imgfmt = pixfmt2imgfmt(fmt);
@@ -219,7 +169,6 @@ static int init(sh_video_t *sh){
         avcodec_init();
         avcodec_register_all();
         avcodec_initialized=1;
-        av_log_set_callback(mp_msp_av_log_callback);
     }
 
     ctx = sh->context = malloc(sizeof(vd_ffmpeg_ctx));
