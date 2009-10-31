@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r29731
+.\" sync with en/mplayer.1 r29805
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -2904,7 +2904,7 @@ VESA 帧缓冲不支持改变模式。
 .IPs netwm
 锁定 NETWM 风格。
 .IPs "none\ "
-不设置全屏窗口层。
+清空模式列表；你可以之后添加要启用的模式。
 .IPs stays_on_top
 如果可用的话, 使用 _NETWM_STATE_STAYS_ON_TOP 提示。
 .REss
@@ -3266,6 +3266,25 @@ ggi 和 gl2 的都支持此功能。
 对于低速显存很有用。
 .IPs pullup
 尝试应用反电视电影模式，需要使用运动自适应的瞬间反隔行扫描算法。
+.IPs colorspace
+选择 YUV 至 RGB 转换时使用的色彩空间
+通常标清（SD）内容应使用 BT.601，而高清（HD）内容用 BT.709。
+使用不正确的色彩空间将导致稍许的饱和度过度或不足，以及色彩偏移。
+.RSss
+.IPs 0
+根据视频分辨率判断色彩空间。
+宽度大于 1280 或高度大于 576 的视频将被假定为 HD，从而使用 BT.709 色彩空间。
+.IPs 1
+使用 ITU-R BT.601 色彩空间（默认值）。
+.IPs 2
+使用 ITU-R BT.709 色彩空间。
+.IPs 3
+使用 SMPTE-240M 色彩空间。
+.RE
+.IPs force\-mixer
+强制使用 VDPAU 混合器，其实现了所有以上选项（默认值）。
+要允许显示 BGRA 色彩空间，则使用 noforce\-mixer。
+（如果实际使用了BGRA，则禁用所有以上选项。）
 .RE
 .PD 1
 .
@@ -3389,7 +3408,7 @@ VIDIX 的 Windows 前台
 .IPs dive
 强制使用 DIVE 模式。
 .IPs (no)t23
-启用/禁用解决 T23 笔记本问题的变通模式（默认值：禁用）。
+启用或禁用解决 T23 笔记本问题的变通模式（默认值：禁用）。
 如果你的显卡仅支持画面放大输出，尝试开启这个选项。
 .RE
 .PD 1
@@ -4758,7 +4777,7 @@ delta 的正弦, 使用非常低的值听此扫听(sweep)。
 .PD 1
 .
 .TP
-.B bs2b[=option1:option2]
+.B bs2b[=option1:option2:...]
 使用 libbs2b 的 Bauer 立体声至双耳声道转换模式。
 通过使声音更类似于如同从扬声器传来以提升耳机的听觉效果。该模式让每个耳朵同时
 听见两个声道，并考虑了声音传播距离的差别及头部回响效果。
@@ -4771,14 +4790,15 @@ delta 的正弦, 使用非常低的值听此扫听(sweep)。
 设置以 0.1*dB 为单位的用于低频率的反馈级别。
 .IPs profile=<value>
 有许多配置可供方便选用：
+.PD 0
 .RSs
-默认配置：如果未指定其它参数将被使用（fcut=700，feed=45）；
-.br
-cmoy：Chu Moy 回路实现方案（fcut=700，feed=60）；
-.br
-jmeier：Jan Meier 回路实现方案（fcut=650，feed=95）。
-.REss
-.PD 1
+.IPs default
+如果未指定其它选项则使用这个选项（fcut=700, feed=45）
+.IPs "cmoy\ "
+Chu Moy 回路实现算法（fcut=700, feed=60）
+.IPs jmeier
+Jan Meier 回路实现算法（fcut=650, feed=95）
+.RE
 .RE
 .sp 1
 .RS
@@ -6834,6 +6854,8 @@ h参数值。
 可以用的编号——不会覆盖任何文件。
 该滤镜在不用时不占用资源，并且支持任意色彩空间，所以将其添加进
 配置文件中很安全。
+要确保 screenshot 滤镜是加在所有其效果你希望录在所保存图像中的滤镜之后。
+例如，如果你希望截屏与你在显示屏上看到的完全一致，则它应当是最后一个滤镜。
 .RE
 .
 .TP
@@ -9646,7 +9668,6 @@ subq=5能比subq=1多压缩掉10%。
 trellis（要求 trellis，实验性）（默认值：0.0）
 .RE
 .PD 1
-.
 .
 .TP
 .B deadzone_inter=<0\-32>
