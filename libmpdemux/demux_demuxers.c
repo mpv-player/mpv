@@ -54,9 +54,15 @@ demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd) {
   ret->video = vd->video;
   ret->audio = ad->audio;
   ret->sub = sd->sub;
+  if (sd && sd != vd && sd != ad) sd->sub->non_interleaved = 1;
+
+  // without these, demux_demuxers_fill_buffer will never be called,
+  // but they break the demuxer-specific code in video.c
+#if 0
   if (vd) vd->video->demuxer = ret;
   if (ad) ad->audio->demuxer = ret;
   if (sd) sd->sub->demuxer = ret;
+#endif
 
   // HACK?, necessary for subtitle (and audio and video when implemented) switching
   memcpy(ret->v_streams, vd->v_streams, sizeof(ret->v_streams));

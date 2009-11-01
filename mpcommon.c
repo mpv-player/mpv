@@ -145,6 +145,8 @@ void update_subtitles(sh_video_t *sh_video, double refpts, demux_stream_t *d_dvd
     } else if (dvdsub_id >= 0 && (type == 't' || type == 'm' || type == 'a')) {
         double curpts = refpts + sub_delay;
         double endpts;
+        if (d_dvdsub->non_interleaved)
+            ds_get_next_pts(d_dvdsub);
         while (d_dvdsub->first) {
             double subpts = ds_get_next_pts(d_dvdsub);
             if (subpts > curpts)
@@ -195,6 +197,8 @@ void update_subtitles(sh_video_t *sh_video, double refpts, demux_stream_t *d_dvd
                 sub_add_text(&subs, packet, len, endpts);
                 set_osd_subtitle(&subs);
             }
+            if (d_dvdsub->non_interleaved)
+                ds_get_next_pts(d_dvdsub);
         }
         if (sub_clear_text(&subs, curpts))
             set_osd_subtitle(&subs);
