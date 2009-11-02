@@ -5415,7 +5415,7 @@ w和h的负数值将被视作为相对于原始大小的增量。
 .RE
 .
 .TP
-.B scale[=w:h[:ilaced[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
+.B scale[=w:h[:interlaced[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
 使用软件缩放器（速度慢）缩放图像并执行YUV<\->RGB色彩空间转换（另参见\-sws）。
 .RSs
 .IPs <w>,<h>
@@ -5435,7 +5435,7 @@ d_宽/\:d_高！
 .br
 \-(n+8)：与以上的\-n相似，但舍入尺寸值至最接近的16的倍数。
 .REss
-.IPs <ilaced>
+.IPs <interlaced>
 触发隔行扫描视频的缩放方式。
 .RSss
 0：关闭（默认）

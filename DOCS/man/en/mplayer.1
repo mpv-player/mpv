@@ -5803,7 +5803,7 @@ Rotate by 90 degrees counterclockwise and flip.
 .RE
 .
 .TP
-.B scale[=w:h[:ilaced[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
+.B scale[=w:h[:interlaced[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
 Scales the image with the software scaler (slow) and performs a YUV<\->RGB
 colorspace conversion (also see \-sws).
 .RSs
@@ -5824,7 +5824,7 @@ incapable of scaling, it defaults to d_width/\:d_height!
 .br
 \-(n+8): Like \-n above, but rounding the dimension to the closest multiple of 16.
 .REss
-.IPs <ilaced>
+.IPs <interlaced>
 Toggle interlaced scaling.
 .RSss
 0: off (default)
