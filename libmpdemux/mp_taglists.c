@@ -88,6 +88,7 @@ static const AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_DNXHD,             MKTAG('A', 'V', 'd', 'n')},
     { CODEC_ID_DSICINVIDEO,       MKTAG('D', 'C', 'I', 'V')},
     { CODEC_ID_DXA,               MKTAG('D', 'X', 'A', '1')},
+    { CODEC_ID_EATGV,             MKTAG('f', 'V', 'G', 'T')},
     { CODEC_ID_FLIC,              MKTAG('F', 'L', 'I', 'C')},
     { CODEC_ID_IDCIN,             MKTAG('I', 'D', 'C', 'I')},
     { CODEC_ID_INTERPLAY_VIDEO,   MKTAG('I', 'N', 'P', 'V')},
