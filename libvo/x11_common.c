@@ -1258,7 +1258,6 @@ static int vo_x11_get_fs_type(int supported)
 
     if (vo_fstype_list)
     {
-        i = 0;
         for (i = 0; vo_fstype_list[i]; i++)
         {
             int neg = 0;
