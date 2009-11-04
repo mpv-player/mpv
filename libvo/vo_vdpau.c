@@ -165,6 +165,7 @@ static int                                chroma_deint;
 static int                                force_mixer;
 static int                                top_field_first;
 static int                                flip;
+static int                                hqscaling;
 
 static VdpDecoder                         decoder;
 static int                                decoder_max_refs;
@@ -461,7 +462,7 @@ static int update_csc_matrix(void)
 static int create_vdp_mixer(VdpChromaType vdp_chroma_type)
 {
 #define VDP_NUM_MIXER_PARAMETER 3
-#define MAX_NUM_FEATURES 5
+#define MAX_NUM_FEATURES 6
     int i;
     VdpStatus vdp_st;
     int feature_count = 0;
@@ -493,6 +494,8 @@ static int create_vdp_mixer(VdpChromaType vdp_chroma_type)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_NOISE_REDUCTION;
     if (sharpen)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_SHARPNESS;
+    if (hqscaling)
+        features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 + (hqscaling - 1);
 
     vdp_st = vdp_video_mixer_create(vdp_device, feature_count, features,
                                     VDP_NUM_MIXER_PARAMETER,
@@ -1181,6 +1184,7 @@ static const opt_t subopts[] = {
     {"sharpen", OPT_ARG_FLOAT, &sharpen, NULL},
     {"colorspace", OPT_ARG_INT, &colorspace, NULL},
     {"force-mixer", OPT_ARG_BOOL, &force_mixer, NULL},
+    {"hqscaling", OPT_ARG_INT, &hqscaling, (opt_test_f)int_non_neg},
     {NULL}
 };
 
@@ -1208,6 +1212,9 @@ static const char help_msg[] =
     "    1: ITU-R BT.601 (default)\n"
     "    2: ITU-R BT.709\n"
     "    3: SMPTE-240M\n"
+    "  hqscaling\n"
+    "    0: default VDPAU scaler\n"
+    "    1-9: high quality VDPAU scaler (needs capable hardware)\n"
     "  force-mixer\n"
     "    Use the VDPAU mixer (default)\n"
     "    Use noforce-mixer to allow BGRA output (disables all above options)\n"
@@ -1230,6 +1237,7 @@ static int preinit(const char *arg)
     sharpen = 0;
     colorspace = 1;
     force_mixer = 1;
+    hqscaling = 0;
     if (subopt_parse(arg, subopts) != 0) {
         mp_msg(MSGT_VO, MSGL_FATAL, help_msg);
         return -1;

@@ -4339,7 +4339,7 @@ if test "$_vdpau" = auto ; then
   if test "$_dl" = yes ; then
     cat > $TMPC <<EOF
 #include <vdpau/vdpau_x11.h>
-int main(void) {return VDP_VIDEO_MIXER_ATTRIBUTE_SKIP_CHROMA_DEINTERLACE;}
+int main(void) {return VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1;}
 EOF
     cc_check && _vdpau=yes
   fi

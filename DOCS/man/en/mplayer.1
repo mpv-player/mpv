@@ -3511,6 +3511,13 @@ Use ITU-R BT.709 color space.
 .IPs 3
 Use SMPTE-240M color space.
 .RE
+.IPs hqscaling
+.RSss
+.IPs 0
+Use default VDPAU scaling (default).
+.IPs 1\-9
+Apply high quality VDPAU scaling (needs capable hardware).
+.RE
 .IPs force\-mixer
 Forces the use of the VDPAU mixer, which implements all above options (default).
 Use noforce\-mixer to allow displaying BGRA colorspace.
