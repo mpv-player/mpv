@@ -177,17 +177,10 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 	if(y<x) sh_audio->ds->buffer_pos+=y-x;  // put back data (HACK!)
 	if(len2>0){
 	  if (((AVCodecContext *)sh_audio->context)->channels >= 5) {
-            int src_ch_layout = AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT;
             int samplesize = av_get_bits_per_sample_format(((AVCodecContext *)
                                     sh_audio->context)->sample_fmt) / 8;
             const char *codec=((AVCodecContext*)sh_audio->context)->codec->name;
-            if (!strcasecmp(codec, "aac"))
-              src_ch_layout = AF_CHANNEL_LAYOUT_LAVC_AAC_DEC_DEFAULT;
-            else if (!strcasecmp(codec, "vorbis"))
-              src_ch_layout = AF_CHANNEL_LAYOUT_VORBIS_DEFAULT;
-            else
-              src_ch_layout = AF_CHANNEL_LAYOUT_LAVC_DEFAULT;
-            reorder_channel_nch(buf, src_ch_layout,
+            reorder_channel_nch(buf, AF_CHANNEL_LAYOUT_LAVC_DEFAULT,
                                 AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
                                 ((AVCodecContext *)sh_audio->context)->channels,
                                 len2 / samplesize, samplesize);
