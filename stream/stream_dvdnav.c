@@ -538,9 +538,9 @@ static void show_audio_subs_languages(dvdnav_t *nav)
     if(format == 0xFFFF || format > 6)
       format = 1; //unknown
     id = i + base[format];
-    if (lang != 0xFFFF) {
       mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDaudioStreamInfo, i,
              dvd_audio_stream_types[format], dvd_audio_stream_channels[channels], tmp, id);
+    if (lang != 0xFFFF) {
       if(lang && tmp[0])
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", id, tmp);
     }
