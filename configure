@@ -1577,7 +1577,7 @@ test "$cc_fail" = yes && die "unsupported compiler version"
 if test -z "$_target" && x86 ; then
   cat > $TMPC << EOF
 int main(void) {
-    int test[sizeof(char *)-7];
+    int test[(int)sizeof(char *)-7];
     return 0;
 }
 EOF
