@@ -557,6 +557,8 @@ static void show_audio_subs_languages(dvdnav_t *nav)
       tmp[2] = 0;
     }
     mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, i, tmp);
+    if (lang != 0xFFFF && lang && tmp[0])
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", i, tmp);
   }
 }
 
