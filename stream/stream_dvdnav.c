@@ -517,9 +517,9 @@ static void show_audio_subs_languages(dvdnav_t *nav)
   uint8_t lg;
   uint16_t i, lang, format, id, channels;
   int base[7] = {128, 0, 0, 0, 160, 136, 0};
-  char tmp[3];
   for(i=0; i<8; i++)
   {
+    char tmp[] = "unknown";
     lg = dvdnav_get_audio_logical_stream(nav, i);
     if(lg == 0xff) continue;
     channels = dvdnav_audio_stream_channels(nav, lg);
@@ -528,14 +528,12 @@ static void show_audio_subs_languages(dvdnav_t *nav)
     else
       channels--;
     lang = dvdnav_audio_stream_to_lang(nav, lg);
-    if(lang == 0xFFFF)
-      tmp[0] = tmp[1] = '?';
-    else
+    if(lang != 0xFFFF)
     {
       tmp[0] = lang >> 8;
       tmp[1] = lang & 0xFF;
+      tmp[2] = 0;
     }
-    tmp[2] = 0;
     format = dvdnav_audio_stream_format(nav, lg);
     if(format == 0xFFFF || format > 6)
       format = 1; //unknown
@@ -550,18 +548,16 @@ static void show_audio_subs_languages(dvdnav_t *nav)
 
   for(i=0; i<32; i++)
   {
+    char tmp[] = "unknown";
     lg = dvdnav_get_spu_logical_stream(nav, i);
     if(lg == 0xff) continue;
     lang = dvdnav_spu_stream_to_lang(nav, lg);
-    if(lang == 0xFFFF)
-      tmp[0] = tmp[1] = '?';
-    else
+    if(lang != 0xFFFF)
     {
       tmp[0] = lang >> 8;
       tmp[1] = lang & 0xFF;
+      tmp[2] = 0;
     }
-    tmp[2] = 0;
-    if (lang != 0xFFFF)
       mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, i, tmp);
   }
 }
