@@ -562,7 +562,7 @@ static void show_audio_subs_languages(dvdnav_t *nav)
     }
     tmp[2] = 0;
     if (lang != 0xFFFF)
-      mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, i+0x20, tmp);
+      mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, i, tmp);
   }
 }
 
