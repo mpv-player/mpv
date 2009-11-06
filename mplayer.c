@@ -1634,11 +1634,12 @@ void reinit_audio_chain(void) {
   }
 #endif
   current_module="ao2_init";
-  if(!(mpctx->audio_out=init_best_audio_out(audio_driver_list,
+  mpctx->audio_out = init_best_audio_out(audio_driver_list,
       0, // plugin flag
       ao_data.samplerate,
       ao_data.channels,
-      ao_data.format,0))){
+      ao_data.format,0);
+  if(!mpctx->audio_out){
     // FAILED:
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
     goto init_error;
