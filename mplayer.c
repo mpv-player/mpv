@@ -1611,9 +1611,7 @@ void reinit_audio_chain(void) {
   current_module="init_audio_codec";
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
   if(!init_best_audio_codec(mpctx->sh_audio,audio_codec_list,audio_fm_list)){
-    mpctx->sh_audio=mpctx->d_audio->sh=NULL; // failed to init :(
-    mpctx->d_audio->id = -2;
-    return;
+    goto init_error;
   }
     initialized_flags|=INITIALIZED_ACODEC;
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
