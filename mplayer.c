@@ -1606,7 +1606,8 @@ static void update_osd_msg(void) {
 
 
 void reinit_audio_chain(void) {
-if(mpctx->sh_audio){
+  if (!mpctx->sh_audio)
+      return;
   current_module="init_audio_codec";
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
   if(!init_best_audio_codec(mpctx->sh_audio,audio_codec_list,audio_fm_list)){
@@ -1666,7 +1667,6 @@ if(mpctx->sh_audio){
   }
   mpctx->mixer.audio_out = mpctx->audio_out;
   mpctx->mixer.volstep = volstep;
-}
 return;
 
 init_error:
