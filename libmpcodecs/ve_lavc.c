@@ -911,7 +911,8 @@ static void uninit(struct vf_instance_s* vf){
     av_freep(&lavc_venc_context->intra_matrix);
     av_freep(&lavc_venc_context->inter_matrix);
 
-    avcodec_close(lavc_venc_context);
+    if (lavc_venc_context->codec)
+        avcodec_close(lavc_venc_context);
 
     if(stats_file) fclose(stats_file);
 
