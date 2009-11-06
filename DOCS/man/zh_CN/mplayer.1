@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r29805
+.\" sync with en/mplayer.1 r29823
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -3281,10 +3281,17 @@ ggi 和 gl2 的都支持此功能。
 .IPs 3
 使用 SMPTE-240M 色彩空间。
 .RE
+.IPs hqscaling
+.RSss
+.IPs 0
+使用默认的 VDPAU 缩放模式（默认值）。
+.IPs 1\-9
+应用高质量的 VDPAU 缩放模式（需要足够性能的硬件）。
+.RE
 .IPs force\-mixer
 强制使用 VDPAU 混合器，其实现了所有以上选项（默认值）。
 要允许显示 BGRA 色彩空间，则使用 noforce\-mixer。
-（如果实际使用了BGRA，则禁用所有以上选项。）
+（如果实际使用了BGRA，则禁用所有以上选项和硬件均衡器。）
 .RE
 .PD 1
 .
