@@ -1614,7 +1614,7 @@ void reinit_audio_chain(void) {
     mpctx->sh_audio=mpctx->d_audio->sh=NULL; // failed to init :(
     mpctx->d_audio->id = -2;
     return;
-  } else
+  }
     initialized_flags|=INITIALIZED_ACODEC;
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
@@ -1644,7 +1644,7 @@ void reinit_audio_chain(void) {
     // FAILED:
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
     goto init_error;
-  } else {
+  }
     // SUCCESS:
     initialized_flags|=INITIALIZED_AO;
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
@@ -1664,7 +1664,6 @@ void reinit_audio_chain(void) {
       goto init_error;
     }
 #endif
-  }
   mpctx->mixer.audio_out = mpctx->audio_out;
   mpctx->mixer.volstep = volstep;
 return;
