@@ -1642,10 +1642,7 @@ if(mpctx->sh_audio){
       ao_data.format,0))){
     // FAILED:
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
-    uninit_player(INITIALIZED_ACODEC); // close codec
-    mpctx->sh_audio=mpctx->d_audio->sh=NULL; // -> nosound
-    mpctx->d_audio->id = -2;
-    return;
+    goto init_error;
   } else {
     // SUCCESS:
     initialized_flags|=INITIALIZED_AO;
@@ -1663,15 +1660,19 @@ if(mpctx->sh_audio){
     current_module="af_init";
     if(!build_afilter_chain(mpctx->sh_audio, &ao_data)) {
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_NoMatchingFilter);
-//      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format! -> NOSOUND\n");
-//      uninit_player(INITIALIZED_ACODEC|INITIALIZED_AO); // close codec & ao
-//      sh_audio=mpctx->d_audio->sh=NULL; // -> nosound
+      goto init_error;
     }
 #endif
   }
   mpctx->mixer.audio_out = mpctx->audio_out;
   mpctx->mixer.volstep = volstep;
 }
+return;
+
+init_error:
+    uninit_player(INITIALIZED_ACODEC|INITIALIZED_AO); // close codec and possibly AO
+    mpctx->sh_audio=mpctx->d_audio->sh=NULL; // -> nosound
+    mpctx->d_audio->id = -2;
 }
 
 
