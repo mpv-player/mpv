@@ -1617,7 +1617,6 @@ void reinit_audio_chain(void) {
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
 
-  //const ao_info_t *info=audio_out->info;
   current_module="af_preinit";
   ao_data.samplerate=force_srate;
   ao_data.channels=0;
@@ -1640,11 +1639,9 @@ void reinit_audio_chain(void) {
       ao_data.channels,
       ao_data.format,0);
   if(!mpctx->audio_out){
-    // FAILED:
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
     goto init_error;
   }
-    // SUCCESS:
     initialized_flags|=INITIALIZED_AO;
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
       mpctx->audio_out->info->short_name,
