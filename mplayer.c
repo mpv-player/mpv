@@ -564,7 +564,7 @@ static void mp_dvdnav_context_free(MPContext *ctx){
 #endif
 
 void uninit_player(unsigned int mask){
-  mask=initialized_flags&mask;
+  mask &= initialized_flags;
 
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n*** uninit(0x%X)\n",mask);
 
