@@ -207,7 +207,6 @@ void update_subtitles(sh_video_t *sh_video, double refpts, demux_stream_t *d_dvd
 
 void update_teletext(sh_video_t *sh_video, demuxer_t *demuxer, int reset)
 {
-#ifdef CONFIG_TV_TELETEXT
     int page_changed;
 
     if (!demuxer->teletext)
@@ -231,7 +230,6 @@ void update_teletext(sh_video_t *sh_video, demuxer_t *demuxer, int reset)
     vo_osd_changed(OSDTYPE_TELETEXT);
 
     teletext_control(demuxer->teletext,TV_VBI_CONTROL_MARK_UNCHANGED,NULL);
-#endif
 }
 
 int select_audio(demuxer_t* demuxer, int audio_id, char* audio_lang)

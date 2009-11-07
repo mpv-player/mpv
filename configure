@@ -248,7 +248,6 @@ Optional features:
   --disable-tv-v4l1      disable Video4Linux TV interface [autodetect]
   --disable-tv-v4l2      disable Video4Linux2 TV interface [autodetect]
   --disable-tv-bsdbt848  disable BSD BT848 interface [autodetect]
-  --disable-tv-teletext  disable TV teletext interface [autodetect]
   --disable-pvr          disable Video4Linux2 MPEG PVR [autodetect]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
   --disable-network      disable networking [enable]
@@ -668,7 +667,6 @@ _tv_v4l1=auto
 _tv_v4l2=auto
 _tv_bsdbt848=auto
 _tv_dshow=auto
-_tv_teletext=auto
 _pvr=auto
 _network=yes
 _winsock2_h=auto
@@ -1092,8 +1090,6 @@ for ac_option do
   --disable-tv-v4l2)	_tv_v4l2=no	;;
   --enable-tv-dshow)	_tv_dshow=yes	;;
   --disable-tv-dshow)	_tv_dshow=no	;;
-  --enable-tv-teletext)    _tv_teletext=yes        ;;
-  --disable-tv-teletext)    _tv_teletext=no        ;;
   --enable-radio)       _radio=yes	;;
   --enable-radio-capture)       _radio_capture=yes	;;
   --disable-radio-capture)       _radio_capture=no	;;
@@ -7616,25 +7612,6 @@ fi
 echores "$_tv_v4l2"
 
 
-echocheck "TV teletext interface"
-if test "$_tv_teletext" = auto ; then
-  _tv_teletext=no
-  if test "$_freetype" = yes && test "$_pthreads" = yes; then
-    if test "$_tv_v4l2" = yes || test "$_v4l" = yes || test "$_tv_dshow" = yes || test "$_dvbin" = yes; then
-      _tv_teletext=yes
-    fi
-  fi
-fi
-if test "$_tv_teletext" = yes ; then
-  def_tv_teletext='#define CONFIG_TV_TELETEXT 1'
-  _inputmodules="tv-teletext $_inputmodules"
-else
-  _noinputmodules="tv-teletext $_noinputmodules"
-  def_tv_teletext='#undef CONFIG_TV_TELETEXT'
-fi
-echores "$_tv_teletext"
-
-
 echocheck "Radio interface"
 if test "$_radio" = yes ; then
   def_radio='#define CONFIG_RADIO 1'
@@ -8352,7 +8329,6 @@ TREMOR_INTERNAL = $_tremor_internal
 TV = $_tv
 TV_BSDBT848 = $_tv_bsdbt848
 TV_DSHOW = $_tv_dshow
-TV_TELETEXT = $_tv_teletext
 TV_V4L  = $_tv_v4l
 TV_V4L1 = $_tv_v4l1
 TV_V4L2 = $_tv_v4l2
@@ -8749,7 +8725,6 @@ $def_radio_v4l2
 $def_tv
 $def_tv_bsdbt848
 $def_tv_dshow
-$def_tv_teletext
 $def_tv_v4l
 $def_tv_v4l1
 $def_tv_v4l2

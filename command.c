@@ -1878,7 +1878,6 @@ static int mp_property_tv_color(m_option_t * prop, int action, void *arg,
 
 #endif
 
-#ifdef CONFIG_TV_TELETEXT
 static int mp_property_teletext_common(m_option_t * prop, int action, void *arg,
                   MPContext * mpctx)
 {
@@ -1958,9 +1957,6 @@ static int mp_property_teletext_page(m_option_t * prop, int action, void *arg,
     }
     return result;
 }
-
-
-#endif /* CONFIG_TV_TELETEXT */
 
 ///@}
 
@@ -2114,8 +2110,6 @@ static const m_option_t mp_properties[] = {
     { "tv_hue", mp_property_tv_color, CONF_TYPE_INT,
      M_OPT_RANGE, -100, 100, (void *) TV_COLOR_HUE },
 #endif
-
-#ifdef CONFIG_TV_TELETEXT
     { "teletext_page", mp_property_teletext_page, CONF_TYPE_INT,
      M_OPT_RANGE, 100, 899,  (void*)TV_VBI_CONTROL_GET_PAGE },
     { "teletext_subpage", mp_property_teletext_common, CONF_TYPE_INT,
@@ -2126,8 +2120,6 @@ static const m_option_t mp_properties[] = {
      M_OPT_RANGE, 0, 3, (void*)TV_VBI_CONTROL_GET_FORMAT },
     { "teletext_half_page", mp_property_teletext_common, CONF_TYPE_INT,
      M_OPT_RANGE, 0, 2, (void*)TV_VBI_CONTROL_GET_HALF_PAGE },
-#endif
-
     { NULL, NULL, NULL, 0, 0, 0, NULL }
 };
 
@@ -2870,7 +2862,6 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		tv_step_chanlist((tvi_handle_t *) (mpctx->demuxer->priv));
 	    break;
 #endif /* CONFIG_TV */
-#ifdef CONFIG_TV_TELETEXT
 	case MP_CMD_TV_TELETEXT_ADD_DEC:
 	{
 	    if (mpctx->demuxer->teletext)
@@ -2885,7 +2876,6 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	                         &(cmd->args[0].v.i));
 	    break;
 	}
-#endif /* CONFIG_TV_TELETEXT */
 
 	case MP_CMD_SUB_LOAD:
 	    if (sh_video) {

@@ -142,14 +142,12 @@ typedef struct {
     long                        audio_recv_blocks_total;
     long                        audio_sent_blocks_total;
     long                        mjpeg_bufsize;
-#ifdef CONFIG_TV_TELETEXT
     char                        *vbi_dev;
     int                         vbi_fd;
     int                         vbi_bufsize;
     int                         vbi_shutdown;
     pthread_t                   vbi_grabber_thread;
     void                        *priv_vbi;
-#endif
 
     tv_param_t                  *tv_param;
 } priv_t;
@@ -676,7 +674,6 @@ static int uninit(priv_t *priv)
 {
     unsigned long num;
 
-#ifdef CONFIG_TV_TELETEXT
     priv->vbi_shutdown=1;
     if(priv->vbi_grabber_thread)
         pthread_join(priv->vbi_grabber_thread, NULL);
@@ -693,8 +690,6 @@ static int uninit(priv_t *priv)
         free(priv->vbi_dev);
         priv->vbi_dev=0;
     }
-
-#endif
 
     priv->shutdown = 1;
 
@@ -782,7 +777,6 @@ static int get_capture_buffer_size(priv_t *priv)
     return cnt;
 }
 
-#ifdef CONFIG_TV_TELETEXT
 static int vbi_init(priv_t* priv,char* device)
 {
     int vbi_fd=0;
@@ -898,7 +892,6 @@ static void *vbi_grabber(void *data)
     free(buf);
     return NULL;
 }
-#endif /* CONFIG_TV_TELETEXT */
 
 static int start(priv_t *priv)
 {
@@ -1112,13 +1105,11 @@ static int start(priv_t *priv)
         ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
     }
 
-#ifdef CONFIG_TV_TELETEXT
     /* start vbi thread */
     if(priv->priv_vbi){
         priv->vbi_shutdown = 0;
         pthread_create(&priv->vbi_grabber_thread, NULL, vbi_grabber, priv);
     }
-#endif
 
     /* launch capture threads */
     priv->shutdown = 0;
@@ -1512,7 +1503,6 @@ static int control(priv_t *priv, int cmd, void *arg)
             priv->immediate_mode = 1;
             return TVI_CONTROL_TRUE;
         }
-#ifdef CONFIG_TV_TELETEXT
         case TVI_CONTROL_VBI_INIT:
         {
             void* ptr;
@@ -1533,7 +1523,6 @@ static int control(priv_t *priv, int cmd, void *arg)
         case TVI_CONTROL_GET_VBI_PTR:
             *(void **)arg=priv->priv_vbi;
             return TVI_CONTROL_TRUE;
-#endif
     }
 
     return TVI_CONTROL_UNKNOWN;

@@ -34,11 +34,7 @@ struct tt_param {
 #define VBI_CONTROL_TRUE               1
 #define VBI_CONTROL_UNKNOWN           -1
 
-#ifdef CONFIG_TV_TELETEXT
 int teletext_control(void* p, int cmd, void *arg);
-#else
-#define teletext_control(p, cmd, arg) VBI_CONTROL_FALSE
-#endif
 
 /*
   TELETEXT controls (through teletext_control() )

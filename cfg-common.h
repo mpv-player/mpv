@@ -125,12 +125,10 @@ const m_option_t tvopts_conf[]={
 #endif /* CONFIG_ALSA */
 #endif /* defined(CONFIG_TV_V4L) || defined(CONFIG_TV_V4L2) */
 	{"adevice", &stream_tv_defaults.adevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#ifdef CONFIG_TV_TELETEXT
 	{"tdevice", &stream_tv_defaults.teletext.device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"tpage", &stream_tv_defaults.teletext.page, CONF_TYPE_INT, CONF_RANGE, 100, 899, NULL},
 	{"tformat", &stream_tv_defaults.teletext.format, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
 	{"tlang", &stream_tv_defaults.teletext.lang, CONF_TYPE_INT, CONF_RANGE, -1, 0x7f, NULL},
-#endif /* CONFIG_TV_TELETEXT */
 	{"audioid", &stream_tv_defaults.audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
 #ifdef CONFIG_TV_DSHOW
 	{"hidden_video_renderer", &stream_tv_defaults.hidden_video_renderer, CONF_TYPE_FLAG, 0, 0, 1, NULL},

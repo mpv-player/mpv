@@ -272,7 +272,6 @@ SRCS_COMMON-$(TV)                    += stream/stream_tv.c stream/tv.c \
                                         stream/frequencies.c stream/tvi_dummy.c
 SRCS_COMMON-$(TV_BSDBT848)           += stream/tvi_bsdbt848.c
 SRCS_COMMON-$(TV_DSHOW)              += stream/tvi_dshow.c
-SRCS_COMMON-$(TV_TELETEXT)           += libmpcodecs/dec_teletext.c
 SRCS_COMMON-$(TV_V4L1)               += stream/tvi_v4l.c  stream/audio_in.c
 SRCS_COMMON-$(TV_V4L2)               += stream/tvi_v4l2.c stream/audio_in.c
 SRCS_COMMON-$(UNRAR_EXEC)            += unrar_exec.c
@@ -378,6 +377,7 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/ad_msgsm.c \
               libmpcodecs/ad_pcm.c \
               libmpcodecs/dec_audio.c \
+              libmpcodecs/dec_teletext.c \
               libmpcodecs/dec_video.c \
               libmpcodecs/img_format.c \
               libmpcodecs/mp_image.c \
