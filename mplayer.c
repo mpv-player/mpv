@@ -3339,6 +3339,10 @@ mpctx->d_audio=mpctx->demuxer->audio;
 mpctx->d_video=mpctx->demuxer->video;
 mpctx->d_sub=mpctx->demuxer->sub;
 
+if (ts_prog) {
+  int tmp = ts_prog;
+  mp_property_do("switch_program", M_PROPERTY_SET, &tmp, mpctx);
+}
 // select audio stream
 select_audio(mpctx->demuxer, audio_id, audio_lang);
 
