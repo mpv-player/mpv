@@ -1454,6 +1454,44 @@ static int decode_raw_line_sine(priv_vbi_t* priv,unsigned char* buf,unsigned cha
 #endif
 
 /**
+ * \brief decodes one vbi line from one video frame
+ * \param priv private data structure
+ * \param data buffer with raw vbi data in it
+ */
+static void vbi_decode_line(priv_vbi_t *priv, unsigned char *data) {
+    int d0,d1,magAddr,pkt;
+
+    d0= corrHamm48[ data[0] ];
+    d1= corrHamm48[ data[1] ];
+
+    if(d0&0x80 || d1&0x80){
+        pll_add(priv,2,4);
+        mp_msg(MSGT_TELETEXT,MSGL_V,"vbi_decode_line: HammErr\n");
+
+        return; //hamError
+    }
+    magAddr=d0 & 0x7;
+    pkt=(d0>>3)|(d1<<1);
+    mp_msg(MSGT_TELETEXT,MSGL_DBG3,"vbi_decode_line:%x %x (mag:%x, pkt:%d)\n",
+            d0,d1,magAddr,pkt);
+    if(!pkt){
+        decode_pkt0(priv,data+2,magAddr); //skip MRGA
+    }else if(pkt>0 && pkt<VBI_ROWS){
+        if(!priv->mag[magAddr].pt)
+            return;
+        decode_pkt_page(priv,data+2,magAddr,pkt);//skip MRGA
+    }else if(pkt==27) {
+        decode_pkt27(priv,data+2,magAddr);
+    }else if(pkt==28){
+        decode_pkt28(priv,data+2);
+    }else if(pkt==30){
+        decode_pkt30(priv,data+2,magAddr);
+    } else {
+        mp_msg(MSGT_TELETEXT,MSGL_DBG3,"unsupported packet:%d\n",pkt);
+    }
+}
+
+/**
  * \brief decodes all vbi lines from one video frame
  * \param priv private data structure
  * \param buf buffer with raw vbi data in it
@@ -1461,11 +1499,8 @@ static int decode_raw_line_sine(priv_vbi_t* priv,unsigned char* buf,unsigned cha
  * \note buffer size have to be at least priv->ptsp->bufsize bytes
  */
 static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
-    int magAddr;
-    int pkt;
     unsigned char data[64];
     unsigned char* linep;
-    int d0,d1;
     int i=0;
     mp_msg(MSGT_TELETEXT,MSGL_DBG3,"vbi: vbi_decode\n");
     for(linep=buf; !priv->cache_reset && linep<buf+priv->ptsp->bufsize; linep+=priv->ptsp->samples_per_line,i++){
@@ -1480,33 +1515,7 @@ static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
         if(decode_raw_line_runin(priv,linep,data)<=0){
              continue; //this is not valid teletext line
         }
-        d0= corrHamm48[ data[0] ];
-        d1= corrHamm48[ data[1] ];
-
-        if(d0&0x80 || d1&0x80){
-           pll_add(priv,2,4);
-           mp_msg(MSGT_TELETEXT,MSGL_V,"vbi_decode(%d):HammErr after decode_raw_line\n",i);
-
-           continue; //hamError
-        }
-        magAddr=d0 & 0x7;
-        pkt=(d0>>3)|(d1<<1);
-        mp_msg(MSGT_TELETEXT,MSGL_DBG3,"vbi_decode(%d):%x %x (mag:%x, pkt:%d)\n",
-            i,d0,d1,magAddr,pkt);
-        if(!pkt){
-            decode_pkt0(priv,data+2,magAddr); //skip MRGA
-        }else if(pkt>0 && pkt<VBI_ROWS){
-            if(!priv->mag[magAddr].pt) continue;
-            decode_pkt_page(priv,data+2,magAddr,pkt);//skip MRGA
-        }else if(pkt==27) {
-            decode_pkt27(priv,data+2,magAddr);
-        }else if(pkt==28){
-            decode_pkt28(priv,data+2);
-        }else if(pkt==30){
-            decode_pkt30(priv,data+2,magAddr);
-        } else {
-            mp_msg(MSGT_TELETEXT,MSGL_DBG3,"unsupported packet:%d\n",pkt);
-        }
+        vbi_decode_line(priv, data);
     }
     if (priv->cache_reset){
         pthread_mutex_lock(&(priv->buffer_mutex));
