@@ -50,7 +50,6 @@ static unsigned int opt_probesize = 0;
 static unsigned int opt_analyzeduration = 0;
 static char *opt_format;
 static char *opt_cryptokey;
-extern int ts_prog;
 static char *opt_avopt = NULL;
 
 const m_option_t lavfdopts_conf[] = {
@@ -493,30 +492,12 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     for(i=0; i<avfc->nb_streams; i++)
         handle_stream(demuxer, avfc, i);
     if(avfc->nb_programs) {
-        int p, start=0, found=0;
-
-        if(ts_prog) {
-            for(p=0; p<avfc->nb_programs; p++) {
-                if(avfc->programs[p]->id == ts_prog) {
-                    start = p;
-                    found = 1;
-                    break;
-                }
-            }
-            if(!found) {
-                mp_msg(MSGT_HEADER,MSGL_ERR,"DEMUX_LAVF: program %d doesn't seem to be present\n", ts_prog);
-                return NULL;
-            }
-        }
-        p = start;
-        do {
+        int p;
+        for (p = 0; p < avfc->nb_programs; p++) {
             AVProgram *program = avfc->programs[p];
             t = av_metadata_get(program->metadata, "title", NULL, 0);
             mp_msg(MSGT_HEADER,MSGL_INFO,"LAVF: Program %d %s\n", program->id, t ? t->value : "");
-            if(!priv->cur_program && (demuxer->video->sh || demuxer->audio->sh))
-                priv->cur_program = program->id;
-            p = (p + 1) % avfc->nb_programs;
-        } while(p!=start);
+        }
     }
 
     mp_msg(MSGT_HEADER,MSGL_V,"LAVF: %d audio and %d video streams found\n",priv->audio_streams,priv->video_streams);
