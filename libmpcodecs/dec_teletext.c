@@ -90,7 +90,6 @@
 
 #include <pthread.h>
 
-#include "stream/tv.h"
 #include "dec_teletext.h"
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -1653,15 +1652,15 @@ int teletext_control(void* p, int cmd, void *arg)
     case TV_VBI_CONTROL_RESET:
     {
         int i;
-        tv_param_t* tv_param=arg;
+        struct tt_param* tt_param=arg;
         pthread_mutex_lock(&(priv->buffer_mutex));
         priv->pagenumdec=0;
         clear_cache(priv);
-        priv->pagenum=steppage(0,tv_param->tpage&0x7ff,1);
-        priv->tformat=tv_param->tformat;
+        priv->pagenum=steppage(0,tt_param->page&0x7ff,1);
+        priv->tformat=tt_param->format;
         priv->subpagenum=0x3f7f;
         pll_reset(priv,fine_tune);
-        if(tv_param->tlang==-1){
+        if(tt_param->lang==-1){
             mp_msg(MSGT_TELETEXT,MSGL_INFO,MSGTR_TV_TTSupportedLanguages);
             for(i=0; tt_languages[i].lang_code; i++){
                 mp_msg(MSGT_TELETEXT,MSGL_INFO,"  %3d  %s\n",
@@ -1671,7 +1670,7 @@ int teletext_control(void* p, int cmd, void *arg)
                 tt_languages[i].lang_code, tt_languages[i].lang_name);
         }else{
             for(i=0; tt_languages[i].lang_code; i++){
-                if(tt_languages[i].lang_code==tv_param->tlang)
+                if(tt_languages[i].lang_code==tt_param->lang)
                     break;
             }
             if (priv->primary_language!=tt_languages[i].lang_code){

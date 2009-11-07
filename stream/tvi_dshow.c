@@ -2552,7 +2552,7 @@ static HRESULT build_vbi_chain(priv_t *priv)
     if(priv->chains[2]->rbuf)
         return S_OK;
 
-    if(priv->tv_param->tdevice)
+    if(priv->tv_param->teletext.device)
     {
         priv->chains[2]->rbuf=calloc(1,sizeof(grabber_ringbuffer_t));
         if(!priv->chains[2]->rbuf)
@@ -3493,8 +3493,9 @@ static int control(priv_t * priv, int cmd, void *arg)
             priv->priv_vbi=NULL;
         return TVI_CONTROL_TRUE;
     }
-    default:
-        return teletext_control(priv->priv_vbi,cmd,arg);
+    case TVI_CONTROL_GET_VBI_PTR:
+        *(void **)arg=priv->priv_vbi;
+        return TVI_CONTROL_TRUE;
 #endif
     }
     return TVI_CONTROL_UNKNOWN;

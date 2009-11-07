@@ -334,7 +334,8 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm)
 	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
 	return 0;
     }
-    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
+    teletext_control(tvh->demuxer->teletext,TV_VBI_CONTROL_RESET,
+                     &tvh->tv_param->teletext);
     return 1;
 }
 
@@ -348,7 +349,8 @@ int tv_set_norm_i(tvi_handle_t *tvh, int norm)
       return 0;
    }
 
-   tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
+   teletext_control(tvh->demuxer->teletext,TV_VBI_CONTROL_RESET,
+                    &tvh->tv_param->teletext);
    return 1;
 }
 
@@ -669,7 +671,11 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
     if(!(tvh=tv_begin(demuxer->stream->priv))) return NULL;
     if (!tvh->functions->init(tvh->priv)) return NULL;
 
-    tvh->functions->control(tvh->priv,TVI_CONTROL_VBI_INIT,&(tvh->tv_param->tdevice));
+    tvh->demuxer = demuxer;
+    tvh->functions->control(tvh->priv,TVI_CONTROL_VBI_INIT,
+                            &(tvh->tv_param->teletext.device));
+    tvh->functions->control(tvh->priv,TVI_CONTROL_GET_VBI_PTR,
+                            &demuxer->teletext);
 
     if (!open_tv(tvh)){
 	tv_uninit(tvh);
@@ -812,7 +818,8 @@ no_audio:
         if(funcs->control(tvh->priv,TVI_CONTROL_VID_SET_GAIN,&tvh->tv_param->gain)!=TVI_CONTROL_TRUE)
             mp_msg(MSGT_TV,MSGL_WARN,"Unable to set gain control!\n");
 
-    funcs->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
+    teletext_control(demuxer->teletext,TV_VBI_CONTROL_RESET,
+                     &tvh->tv_param->teletext);
 
     return demuxer;
 }
@@ -893,7 +900,8 @@ int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
 	mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_CurrentFrequency,
 	    freq, (float)freq/16);
     }
-    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
+    teletext_control(tvh->demuxer->teletext,TV_VBI_CONTROL_RESET,
+                     &tvh->tv_param->teletext);
     return 1;
 }
 
@@ -1074,7 +1082,8 @@ int tv_step_norm(tvi_handle_t *tvh)
       return 0;
     }
   }
-    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
+    teletext_control(tvh->demuxer->teletext,TV_VBI_CONTROL_RESET,
+                     &tvh->tv_param->teletext);
     return 1;
 }
 

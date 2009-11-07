@@ -7620,7 +7620,7 @@ echocheck "TV teletext interface"
 if test "$_tv_teletext" = auto ; then
   _tv_teletext=no
   if test "$_freetype" = yes && test "$_pthreads" = yes; then
-    if test "$_tv_v4l2" = yes || test "$_v4l" = yes || test "$_tv_dshow" = yes; then
+    if test "$_tv_v4l2" = yes || test "$_v4l" = yes || test "$_tv_dshow" = yes || test "$_dvbin" = yes; then
       _tv_teletext=yes
     fi
   fi

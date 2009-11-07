@@ -11,7 +11,6 @@
 #include "spudec.h"
 #include "version.h"
 #include "vobsub.h"
-#include "stream/tv.h"
 #include "libmpcodecs/dec_teletext.h"
 #include "libavutil/intreadwrite.h"
 #include "m_option.h"
@@ -209,29 +208,29 @@ void update_subtitles(sh_video_t *sh_video, double refpts, demux_stream_t *d_dvd
 void update_teletext(sh_video_t *sh_video, demuxer_t *demuxer, int reset)
 {
 #ifdef CONFIG_TV_TELETEXT
-    tvi_handle_t* tvh=demuxer->priv;
     int page_changed;
 
-    if (demuxer->type != DEMUXER_TYPE_TV || !tvh) return;
+    if (!demuxer->teletext)
+        return;
 
     //Also forcing page update when such ioctl is not supported or call error occured
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_IS_CHANGED,&page_changed)!=VBI_CONTROL_TRUE)
+    if(teletext_control(demuxer->teletext,TV_VBI_CONTROL_IS_CHANGED,&page_changed)!=VBI_CONTROL_TRUE)
         page_changed=1;
 
     if(!page_changed)
         return;
 
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_VBIPAGE,&vo_osd_teletext_page)!=VBI_CONTROL_TRUE)
+    if(teletext_control(demuxer->teletext,TV_VBI_CONTROL_GET_VBIPAGE,&vo_osd_teletext_page)!=VBI_CONTROL_TRUE)
         vo_osd_teletext_page=NULL;
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_HALF_PAGE,&vo_osd_teletext_half)!=VBI_CONTROL_TRUE)
+    if(teletext_control(demuxer->teletext,TV_VBI_CONTROL_GET_HALF_PAGE,&vo_osd_teletext_half)!=VBI_CONTROL_TRUE)
         vo_osd_teletext_half=0;
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_MODE,&vo_osd_teletext_mode)!=VBI_CONTROL_TRUE)
+    if(teletext_control(demuxer->teletext,TV_VBI_CONTROL_GET_MODE,&vo_osd_teletext_mode)!=VBI_CONTROL_TRUE)
         vo_osd_teletext_mode=0;
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_FORMAT,&vo_osd_teletext_format)!=VBI_CONTROL_TRUE)
+    if(teletext_control(demuxer->teletext,TV_VBI_CONTROL_GET_FORMAT,&vo_osd_teletext_format)!=VBI_CONTROL_TRUE)
         vo_osd_teletext_format=0;
     vo_osd_changed(OSDTYPE_TELETEXT);
 
-    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_MARK_UNCHANGED,NULL);
+    teletext_control(demuxer->teletext,TV_VBI_CONTROL_MARK_UNCHANGED,NULL);
 #endif
 }
 

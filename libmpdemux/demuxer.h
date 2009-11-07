@@ -242,6 +242,9 @@ typedef struct demuxer_st {
   void* v_streams[MAX_V_STREAMS]; // video sterams (sh_video_t)
   void *s_streams[MAX_S_STREAMS];   // dvd subtitles (flag)
 
+  // pointer to teletext decoder private data, if demuxer stream contains teletext
+  void *teletext;
+
   demux_chapter_t* chapters;
   int num_chapters;
 

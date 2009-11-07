@@ -25,6 +25,9 @@
 #ifndef MPLAYER_TV_H
 #define MPLAYER_TV_H
 
+#include "libmpcodecs/dec_teletext.h"
+#include "libmpdemux/demuxer.h"
+
 typedef struct tv_param_s {
     char *freq;
     char *channel;
@@ -62,10 +65,7 @@ typedef struct tv_param_s {
     int hue;
     int saturation;
     int gain;
-    char *tdevice;  ///< teletext device
-    int tformat;    ///< teletext display format
-    int tpage;      ///< start teletext page
-    int tlang;      ///< primary language code
+    struct tt_param teletext;
 
     int scan;
     int scan_threshold;
@@ -125,6 +125,7 @@ typedef struct tvi_handle_s {
     const tvi_functions_t	*functions;
     void		*priv;
     int 		seq;
+    demuxer_t		*demuxer;
 
     /* specific */
     int			norm;
@@ -220,6 +221,7 @@ typedef struct {
 
 //tvi_* ioctl (not dec_teletext.c !!!)
 #define TVI_CONTROL_VBI_INIT           0x501   ///< vbi init
+#define TVI_CONTROL_GET_VBI_PTR        0x502   ///< get teletext private pointer
 
 int tv_set_color_options(tvi_handle_t *tvh, int opt, int val);
 int tv_get_color_options(tvi_handle_t *tvh, int opt, int* val);

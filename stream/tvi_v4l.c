@@ -1530,8 +1530,9 @@ static int control(priv_t *priv, int cmd, void *arg)
             }
             return TVI_CONTROL_TRUE;
         }
-        default:
-            return teletext_control(priv->priv_vbi,cmd,arg);
+        case TVI_CONTROL_GET_VBI_PTR:
+            *(void **)arg=priv->priv_vbi;
+            return TVI_CONTROL_TRUE;
 #endif
     }
 

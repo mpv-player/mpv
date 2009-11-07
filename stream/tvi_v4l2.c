@@ -1057,8 +1057,9 @@ static int control(priv_t *priv, int cmd, void *arg)
         }
 	return TVI_CONTROL_TRUE;
     }
-    default:
-        return teletext_control(priv->priv_vbi,cmd,arg);
+    case TVI_CONTROL_GET_VBI_PTR:
+        *(void **)arg=priv->priv_vbi;
+        return TVI_CONTROL_TRUE;
 #endif
     }
     mp_msg(MSGT_TV, MSGL_V, "%s: unknown control: %d\n", info.short_name, cmd);
