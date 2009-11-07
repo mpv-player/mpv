@@ -711,8 +711,9 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
             int p, i;
             int start;
 
-            if(priv->avfc->nb_programs < 2)
-                return DEMUXER_CTRL_NOTIMPL;
+            prog->vid = prog->aid = prog->sid = -2;	//no audio and no video by default
+            if(priv->avfc->nb_programs < 1)
+                return DEMUXER_CTRL_DONTKNOW;
 
             if(prog->progid == -1)
             {
@@ -727,10 +728,9 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
                     if(priv->avfc->programs[i]->id == prog->progid)
                         break;
                 if(i==priv->avfc->nb_programs)
-                    return DEMUXER_CTRL_NOTIMPL;
+                    return DEMUXER_CTRL_DONTKNOW;
                 p = i;
             }
-            prog->vid = prog->aid = prog->sid = -2;	//no audio and no video by default
             start = p;
 redo:
             program = priv->avfc->programs[p];
