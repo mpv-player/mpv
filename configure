@@ -2576,6 +2576,20 @@ EOF
 cc_check && ebx_available=yes && def_ebx_available='#define HAVE_EBX_AVAILABLE 1'
 echores $ebx_available
 
+echocheck "PIC"
+pic=no
+cat > $TMPC << EOF
+int main(void) {
+// keep in sync with mangle.h and libavutil/internal.h
+#if !(defined(__PIC__) || defined(__pic__) || defined(PIC))
+#error PIC not enabled
+#endif
+    return 0;
+}
+EOF
+cc_check && pic=yes
+echores $pic
+
 echocheck "yasm"
 if test -z "$YASMFLAGS" ; then
   if darwin ; then
@@ -2588,6 +2602,7 @@ if test -z "$YASMFLAGS" ; then
   # currently tested for Linux x86, x86_64
   YASMFLAGS="-f $objformat"
   x86_64 && YASMFLAGS="$YASMFLAGS -DARCH_X86_64 -m amd64"
+  test "$pic" = "yes" && YASMFLAGS="$YASMFLAGS -DPIC"
   case "$objformat" in
     elf) test $_debug && YASMFLAGS="$YASMFLAGS -g dwarf2" ;;
     macho64)             YASMFLAGS="$YASMFLAGS -DPIC -DPREFIX" ;;
