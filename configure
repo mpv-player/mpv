@@ -2605,7 +2605,6 @@ if test -z "$YASMFLAGS" ; then
   test "$pic" = "yes" && YASMFLAGS="$YASMFLAGS -DPIC"
   case "$objformat" in
     elf) test $_debug && YASMFLAGS="$YASMFLAGS -g dwarf2" ;;
-    macho64)             YASMFLAGS="$YASMFLAGS -DPIC -DPREFIX" ;;
     *)                   YASMFLAGS="$YASMFLAGS -DPREFIX"  ;;
   esac
 else
