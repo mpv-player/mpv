@@ -88,7 +88,16 @@
 #include <math.h>
 #include <stdio.h>
 
+#ifdef HAVE_PTHREADS
+// pthreads are needed for async updates from v4l(2)
+// FIXME: try to avoid using pthread calls when running only a single
+// thread as e.g. with DVB teletext
 #include <pthread.h>
+#else
+#define pthread_mutex_init(m, p)
+#define pthread_mutex_lock(m)
+#define pthread_mutex_unlock(m)
+#endif
 
 #include "dec_teletext.h"
 #include "mp_msg.h"
@@ -138,7 +147,9 @@ typedef struct {
     int pll_fixed;
     /// vbi stream properties (buffer size,bytes per line, etc)
     tt_stream_props* ptsp;
+#ifdef HAVE_PTHREADS
     pthread_mutex_t buffer_mutex;
+#endif
 
     tt_page** ptt_cache;
     unsigned char* ptt_cache_first_subpage;
