@@ -95,6 +95,7 @@
 #include <pthread.h>
 #else
 #define pthread_mutex_init(m, p)
+#define pthread_mutex_destroy(m)
 #define pthread_mutex_lock(m)
 #define pthread_mutex_unlock(m)
 #endif
@@ -1738,6 +1739,7 @@ int teletext_control(void* p, int cmd, void *arg)
             free(priv->ptsp);
         destroy_cache(priv);
         priv->page_changed=1;
+        pthread_mutex_destroy(&priv->buffer_mutex);
         free(priv);
         return VBI_CONTROL_TRUE;
     }
