@@ -312,7 +312,7 @@ inline static void vo_update_text_teletext(mp_osd_obj_t *obj, int dxs, int dys)
     int b,ax[6],ay[6],aw[6],ah[6];
     tt_char tc;
     tt_char* tdp=vo_osd_teletext_page;
-    unsigned char colors[8]={1,85,150,226,70,105,179,254};
+    static const uint8_t colors[8]={1,85,150,226,70,105,179,254};
     unsigned char* buf[9];
 
     obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
