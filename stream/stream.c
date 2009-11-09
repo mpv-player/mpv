@@ -248,12 +248,9 @@ int stream_fill_buffer(stream_t *s){
 #ifdef CONFIG_NETWORK
     if( s->streaming_ctrl!=NULL && s->streaming_ctrl->streaming_read ) {
 	    len=s->streaming_ctrl->streaming_read(s->fd,s->buffer,STREAM_BUFFER_SIZE, s->streaming_ctrl);
-    } else {
-      len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);
-    }
-#else
-    len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);
+    } else
 #endif
+      len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);
     break;
   case STREAMTYPE_DS:
     len = demux_read_data((demux_stream_t*)s->priv,s->buffer,STREAM_BUFFER_SIZE);
