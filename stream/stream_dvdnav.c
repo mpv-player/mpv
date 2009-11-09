@@ -549,16 +549,16 @@ static void show_audio_subs_languages(dvdnav_t *nav)
     char tmp[] = "unknown";
     lg = dvdnav_get_spu_logical_stream(nav, i);
     if(lg == 0xff) continue;
-    lang = dvdnav_spu_stream_to_lang(nav, lg);
+    lang = dvdnav_spu_stream_to_lang(nav, i);
     if(lang != 0xFFFF)
     {
       tmp[0] = lang >> 8;
       tmp[1] = lang & 0xFF;
       tmp[2] = 0;
     }
-    mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, i, tmp);
+    mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, lg, tmp);
     if (lang != 0xFFFF && lang && tmp[0])
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", i, tmp);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", lg, tmp);
   }
 }
 
@@ -797,9 +797,9 @@ int mp_dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
     for(k=0; k<32; k++) {
       lg = dvdnav_get_spu_logical_stream(priv->dvdnav, k);
       if(lg == 0xff) continue;
-      lang = dvdnav_spu_stream_to_lang(priv->dvdnav, lg);
+      lang = dvdnav_spu_stream_to_lang(priv->dvdnav, k);
       if(lang != 0xFFFF && lang == lcode) {
-        return k;
+        return lg;
       }
     }
     language += 2;
@@ -816,12 +816,16 @@ int mp_dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
  * \return 0 on error, 1 if successful
  */
 int mp_dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
-    uint8_t lg;
+    uint8_t lg, k;
     uint16_t lang;
     dvdnav_priv_t *priv = stream->priv;
     if(sid < 0) return 0;
-    lg = dvdnav_get_spu_logical_stream(priv->dvdnav, sid);
-    lang = dvdnav_spu_stream_to_lang(priv->dvdnav, lg);
+    for (k=0; k<32; k++)
+        if (dvdnav_get_spu_logical_stream(priv->dvdnav, k) == sid)
+            break;
+    if (k == 32)
+        return 0;
+    lang = dvdnav_spu_stream_to_lang(priv->dvdnav, k);
     if(lang == 0xffff) return 0;
     buf[0] = lang >> 8;
     buf[1] = lang & 0xFF;
@@ -842,7 +846,7 @@ int mp_dvdnav_number_of_subs(stream_t *stream) {
   for(k=0; k<32; k++) {
     lg = dvdnav_get_spu_logical_stream(priv->dvdnav, k);
     if(lg == 0xff) continue;
-    n++;
+    if(lg >= n) n = lg + 1;
   }
   return n;
 }
