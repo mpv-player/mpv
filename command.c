@@ -1888,7 +1888,7 @@ static int mp_property_teletext_common(m_option_t * prop, int action, void *arg,
       SET is GET+1
       STEP is GET+2
     */
-    if (!mpctx->demuxer->teletext)
+    if (!mpctx->demuxer || !mpctx->demuxer->teletext)
         return M_PROPERTY_UNAVAILABLE;
     if(!base_ioctl)
         return M_PROPERTY_ERROR;
