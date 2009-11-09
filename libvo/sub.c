@@ -351,6 +351,7 @@ inline static void vo_update_text_teletext(mp_osd_obj_t *obj, int dxs, int dys)
     hm=vo_font->height+1;
     wm=dxs*hm*max_rows/(dys*VBI_COLUMNS);
 
+#ifdef CONFIG_FREETYPE
     //very simple teletext font auto scaling
     if(!vo_osd_teletext_scale && hm*(max_rows+1)>dys){
         osd_font_scale_factor*=1.0*(dys)/((max_rows+1)*hm);
@@ -359,6 +360,7 @@ inline static void vo_update_text_teletext(mp_osd_obj_t *obj, int dxs, int dys)
         obj->flags&=~OSDFLAG_VISIBLE;
         return;
     }
+#endif
 
     cols=dxs/wm;
     rows=dys/hm;
