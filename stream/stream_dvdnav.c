@@ -709,27 +709,6 @@ static int mp_dvdnav_get_aid_from_format (stream_t *stream, int index, uint8_t l
 }
 
 /**
- * \brief mp_dvdnav_aid_from_audio_num() returns the audio id corresponding to the logical number
- * \param stream: - stream pointer
- * \param audio_num: - logical number
- * \return -1 on error, current subtitle id if successful
- */
-int mp_dvdnav_aid_from_audio_num(stream_t *stream, int audio_num) {
-  dvdnav_priv_t * priv = stream->priv;
-  int k;
-  uint8_t lg;
-
-  for(k=0; k<32; k++) {
-    lg = dvdnav_get_audio_logical_stream(priv->dvdnav, k);
-    if (lg == 0xff) continue;
-    if (lg != audio_num) continue;
-
-    return mp_dvdnav_get_aid_from_format (stream, k, lg);
-  }
-  return -1;
-}
-
-/**
  * \brief mp_dvdnav_aid_from_lang() returns the audio id corresponding to the language code 'lang'
  * \param stream: - stream pointer
  * \param lang: 2-characters language code[s], eventually separated by spaces of commas
