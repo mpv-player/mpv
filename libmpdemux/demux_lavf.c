@@ -133,6 +133,7 @@ static int lavf_check_file(demuxer_t *demuxer){
     AVProbeData avpd;
     uint8_t buf[PROBE_BUF_SIZE];
     lavf_priv_t *priv;
+    int probe_data_size;
 
     if(!demuxer->priv)
         demuxer->priv=calloc(sizeof(lavf_priv_t),1);
@@ -154,11 +155,12 @@ static int lavf_check_file(demuxer_t *demuxer){
         return DEMUXER_TYPE_LAVF;
     }
 
-    if(stream_read(demuxer->stream, buf, PROBE_BUF_SIZE)!=PROBE_BUF_SIZE)
+    probe_data_size = stream_read(demuxer->stream, buf, PROBE_BUF_SIZE);
+    if(probe_data_size <= 0)
         return 0;
     avpd.filename= demuxer->stream->url;
     avpd.buf= buf;
-    avpd.buf_size= PROBE_BUF_SIZE;
+    avpd.buf_size= probe_data_size;
 
     priv->avif= av_probe_input_format(&avpd, 1);
     if(!priv->avif){
