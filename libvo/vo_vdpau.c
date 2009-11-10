@@ -579,6 +579,9 @@ static int create_vdp_decoder(uint32_t format, uint32_t width, uint32_t height,
     case IMGFMT_VDPAU_VC1:
         vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_ADVANCED;
         break;
+    case IMGFMT_VDPAU_MPEG4:
+        vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG4_PART2_ASP;
+        break;
     default:
         goto err_out;
     }
@@ -1112,6 +1115,7 @@ static int query_format(uint32_t format)
     case IMGFMT_VDPAU_H264:
     case IMGFMT_VDPAU_WMV3:
     case IMGFMT_VDPAU_VC1:
+    case IMGFMT_VDPAU_MPEG4:
         if (create_vdp_decoder(format, 48, 48, 2))
             return default_flags;
     }

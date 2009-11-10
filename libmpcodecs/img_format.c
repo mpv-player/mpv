@@ -72,6 +72,7 @@ const char *vo_format_name(int format)
 	case IMGFMT_VDPAU_MPEG1: return "MPEG1 VDPAU acceleration";
 	case IMGFMT_VDPAU_MPEG2: return "MPEG2 VDPAU acceleration";
 	case IMGFMT_VDPAU_H264: return "H.264 VDPAU acceleration";
+	case IMGFMT_VDPAU_MPEG4: return "MPEG-4 Part 2 VDPAU acceleration";
 	case IMGFMT_VDPAU_WMV3: return "WMV3 VDPAU acceleration";
 	case IMGFMT_VDPAU_VC1: return "VC1 VDPAU acceleration";
     }

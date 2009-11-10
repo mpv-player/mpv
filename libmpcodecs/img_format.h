@@ -120,6 +120,7 @@
 #define IMGFMT_VDPAU_H264          (IMGFMT_VDPAU|0x03)
 #define IMGFMT_VDPAU_WMV3          (IMGFMT_VDPAU|0x04)
 #define IMGFMT_VDPAU_VC1           (IMGFMT_VDPAU|0x05)
+#define IMGFMT_VDPAU_MPEG4         (IMGFMT_VDPAU|0x06)
 
 typedef struct {
     void* data;

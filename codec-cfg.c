@@ -192,6 +192,7 @@ static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int
 		{"VDPAU_H264",IMGFMT_VDPAU_H264},
 		{"VDPAU_WMV3",IMGFMT_VDPAU_WMV3},
 		{"VDPAU_VC1",IMGFMT_VDPAU_VC1},
+		{"VDPAU_MPEG4",IMGFMT_VDPAU_MPEG4},
 
 		{NULL,    0}
 	};
