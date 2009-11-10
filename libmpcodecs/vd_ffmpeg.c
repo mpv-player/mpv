@@ -159,6 +159,7 @@ void mp_msp_av_log_callback(void *ptr, int level, const char *fmt, va_list vl)
     char buf[256];
 
     switch(level){
+    case AV_LOG_VERBOSE: mp_level = MSGL_V ; break;
     case AV_LOG_DEBUG:  mp_level= MSGL_V   ; break;
     case AV_LOG_INFO :  mp_level= MSGL_INFO; break;
     case AV_LOG_ERROR:  mp_level= MSGL_ERR ; break;
