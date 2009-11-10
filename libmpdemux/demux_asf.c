@@ -613,7 +613,7 @@ static int demux_asf_control(demuxer_t *demuxer,int cmd, void *arg){
 */
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
-	    *((double *)arg)=(double)(asf->movielength);
+	    *((double *)arg)=asf->movielength;
 	    return DEMUXER_CTRL_OK;
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:
