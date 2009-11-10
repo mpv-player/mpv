@@ -555,13 +555,14 @@ static void free_video_specific(void)
     video_mixer = VDP_INVALID_HANDLE;
 }
 
-static int create_vdp_decoder(int max_refs)
+static int create_vdp_decoder(uint32_t format, uint32_t width, uint32_t height,
+                              int max_refs)
 {
     VdpStatus vdp_st;
     VdpDecoderProfile vdp_decoder_profile;
     if (decoder != VDP_INVALID_HANDLE)
         vdp_decoder_destroy(decoder);
-    switch (image_format) {
+    switch (format) {
     case IMGFMT_VDPAU_MPEG1:
         vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG1;
         break;
@@ -582,7 +583,7 @@ static int create_vdp_decoder(int max_refs)
         goto err_out;
     }
     vdp_st = vdp_decoder_create(vdp_device, vdp_decoder_profile,
-                                vid_width, vid_height, max_refs, &decoder);
+                                width, height, max_refs, &decoder);
     CHECK_ST_WARNING("Failed creating VDPAU decoder");
     if (vdp_st != VDP_STATUS_OK) {
 err_out:
@@ -662,7 +663,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     vid_width    = width;
     vid_height   = height;
     free_video_specific();
-    if (IMGFMT_IS_VDPAU(image_format) && !create_vdp_decoder(2))
+    if (IMGFMT_IS_VDPAU(image_format)
+        && !create_vdp_decoder(image_format, vid_width, vid_height, 2))
         return -1;
 
     int_pause   = 0;
@@ -986,7 +988,7 @@ static int draw_slice(uint8_t *image[], int stride[], int w, int h,
     if (!IMGFMT_IS_VDPAU(image_format))
         return VO_FALSE;
     if ((decoder == VDP_INVALID_HANDLE || decoder_max_refs < max_refs)
-        && !create_vdp_decoder(max_refs))
+        && !create_vdp_decoder(image_format, vid_width, vid_height, max_refs))
         return VO_FALSE;
 
     vdp_st = vdp_decoder_render(decoder, rndr->surface, (void *)&rndr->info, rndr->bitstream_buffers_used, rndr->bitstream_buffers);
@@ -1110,6 +1112,7 @@ static int query_format(uint32_t format)
     case IMGFMT_VDPAU_H264:
     case IMGFMT_VDPAU_WMV3:
     case IMGFMT_VDPAU_VC1:
+        if (create_vdp_decoder(image_format, vid_width, vid_height, 2))
         return default_flags;
     }
     return 0;
