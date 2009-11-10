@@ -1537,6 +1537,29 @@ static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
 
 }
 
+/**
+ * \brief decodes a vbi line from a DVB teletext stream
+ * \param priv private data structure
+ * \param buf buffer with DVB teletext data
+ *
+ * No locking is done since this is only called from a single-threaded context
+ */
+static void vbi_decode_dvb(priv_vbi_t *priv, const uint8_t buf[44]){
+    int i;
+    uint8_t data[42];
+
+    mp_msg(MSGT_TELETEXT,MSGL_DBG3, "vbi: vbi_decode_dvb\n");
+
+    /* Reverse bit order, skipping the first two bytes (field parity, line
+       offset and framing code). */
+    for (i = 0; i < sizeof(data); i++)
+        data[i] = av_reverse[buf[2 + i]];
+
+    vbi_decode_line(priv, data);
+    if (priv->cache_reset)
+        priv->cache_reset--;
+}
+
 /*
 ---------------------------------------------------------------------------------
     Public routines
@@ -1845,6 +1868,9 @@ int teletext_control(void* p, int cmd, void *arg)
         return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_DECODE_PAGE:
         vbi_decode(priv,*(unsigned char**)arg);
+        return VBI_CONTROL_TRUE;
+    case TV_VBI_CONTROL_DECODE_DVB:
+        vbi_decode_dvb(priv, arg);
         return VBI_CONTROL_TRUE;
     case TV_VBI_CONTROL_GET_VBIPAGE:
         if(!priv->on)

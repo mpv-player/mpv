@@ -141,9 +141,15 @@ void update_subtitles(sh_video_t *sh_video, double refpts, demux_stream_t *d_dvd
 
         if (spudec_changed(vo_spudec))
             vo_osd_changed(OSDTYPE_SPU);
-    } else if (dvdsub_id >= 0 && (type == 't' || type == 'm' || type == 'a')) {
+    } else if (dvdsub_id >= 0 && (type == 't' || type == 'm' || type == 'a' || type == 'd')) {
         double curpts = refpts + sub_delay;
         double endpts;
+        if (type == 'd' && !d_dvdsub->demuxer->teletext) {
+            tt_stream_props tsp = {0};
+            void *ptr = &tsp;
+            if (teletext_control(NULL, TV_VBI_CONTROL_START, &ptr) == VBI_CONTROL_TRUE)
+                d_dvdsub->demuxer->teletext = ptr;
+        }
         if (d_dvdsub->non_interleaved)
             ds_get_next_pts(d_dvdsub);
         while (d_dvdsub->first) {
@@ -156,6 +162,22 @@ void update_subtitles(sh_video_t *sh_video, double refpts, demux_stream_t *d_dvd
                 if (len < 2) continue;
                 len = FFMIN(len - 2, AV_RB16(packet));
                 packet += 2;
+            }
+            if (type == 'd') {
+                if (d_dvdsub->demuxer->teletext) {
+                    uint8_t *p = packet;
+                    p++;
+                    len--;
+                    while (len >= 46) {
+                        int sublen = p[1];
+                        if (p[0] == 2 || p[0] == 3)
+                            teletext_control(d_dvdsub->demuxer->teletext,
+                                TV_VBI_CONTROL_DECODE_DVB, p + 2);
+                        p   += sublen + 2;
+                        len -= sublen + 2;
+                    }
+                }
+                continue;
             }
 #ifdef CONFIG_ASS
             if (ass_enabled) {
