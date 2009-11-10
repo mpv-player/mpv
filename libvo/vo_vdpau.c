@@ -1112,7 +1112,7 @@ static int query_format(uint32_t format)
     case IMGFMT_VDPAU_H264:
     case IMGFMT_VDPAU_WMV3:
     case IMGFMT_VDPAU_VC1:
-        if (create_vdp_decoder(image_format, vid_width, vid_height, 2))
+        if (create_vdp_decoder(format, 48, 48, 2))
             return default_flags;
     }
     return 0;
