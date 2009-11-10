@@ -47,8 +47,6 @@ typedef struct {
   unsigned int     state;
 } dvdnav_priv_t;
 
-extern char *dvd_audio_stream_channels[6], *dvd_audio_stream_types[8];
-
 static struct stream_priv_s {
   int track;
   char* device;

@@ -3,6 +3,9 @@
 #include <dvdread/ifo_types.h>
 #include "stream_dvd_common.h"
 
+const char * const dvd_audio_stream_types[8] = { "ac3","unknown","mpeg1","mpeg2ext","lpcm","unknown","dts" };
+const char * const dvd_audio_stream_channels[6] = { "mono", "stereo", "unknown", "unknown", "5.1/6.1", "5.1" };
+
 /**
 \brief Converts DVD time structure to milliseconds.
 \param *dev the DVD time structure to convert
