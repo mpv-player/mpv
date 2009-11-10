@@ -2580,14 +2580,13 @@ echocheck "PIC"
 pic=no
 cat > $TMPC << EOF
 int main(void) {
-// keep in sync with mangle.h and libavutil/internal.h
 #if !(defined(__PIC__) || defined(__pic__) || defined(PIC))
 #error PIC not enabled
 #endif
     return 0;
 }
 EOF
-cc_check && pic=yes
+cc_check && pic=yes && extra_cflags="$extra_cflags -DPIC"
 echores $pic
 
 echocheck "yasm"

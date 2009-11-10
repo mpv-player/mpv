@@ -31,10 +31,6 @@
 #define attribute_used
 #endif
 
-// keep in sync with configure PIC check and libavutil/internal.h
-#if ( defined(__PIC__) || defined(__pic__) ) && ! defined(PIC)
-#    define PIC
-#endif
 #if ARCH_X86_64 && defined(PIC)
 #define MANGLE(a) EXTERN_PREFIX #a "(%%rip)"
 #else
