@@ -544,7 +544,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
       asf->packetsize=fileh->max_packet_size;
       asf->packet=malloc(asf->packetsize); // !!!
       asf->packetrate=fileh->max_bitrate/8.0/(double)asf->packetsize;
-      asf->movielength=(fileh->play_duration-fileh->preroll)/10000000LL;
+      asf->movielength=(fileh->play_duration-10000*fileh->preroll)/10000000LL;
   }
 
   // find content header
