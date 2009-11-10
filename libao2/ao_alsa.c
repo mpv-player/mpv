@@ -457,6 +457,13 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    device.str = "surround51";
 	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: device set to surround51\n");
 	  break;
+	case 8:
+	  if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
+	    device.str = "plug:surround71";
+	  else
+	    device.str = "surround71";
+	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: device set to surround71\n");
+	  break;
 	default:
 	  device.str = "default";
 	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_ChannelsNotSupported,channels);

@@ -189,6 +189,94 @@ static int reorder_copy_6ch(void *dest, const void *src,
     return 1;
 }
 
+#define REORDER_COPY_8(DEST,SRC,SAMPLES,S0,S1,S2,S3,S4,S5,S6,S7) \
+for (i = 0; i < SAMPLES; i += 8) {\
+    DEST[i]   = SRC[i+S0];\
+    DEST[i+1] = SRC[i+S1];\
+    DEST[i+2] = SRC[i+S2];\
+    DEST[i+3] = SRC[i+S3];\
+    DEST[i+4] = SRC[i+S4];\
+    DEST[i+5] = SRC[i+S5];\
+    DEST[i+6] = SRC[i+S6];\
+    DEST[i+7] = SRC[i+S7];\
+}
+
+static int reorder_copy_8ch(void *dest, const void *src,
+                            unsigned int samples, uint8_t samplesize,
+                            int s0, int s1, int s2, int s3,
+                            int s4, int s5, int s6, int s7)
+{
+    int i;
+    switch (samplesize) {
+    case 1:
+    {
+        int8_t *dest_8 = dest;
+        const int8_t *src_8 = src;
+        REORDER_COPY_8(dest_8,src_8,samples,s0,s1,s2,s3,s4,s5,s6,s7);
+        break;
+    }
+    case 2:
+    {
+        int16_t *dest_16 = dest;
+        const int16_t *src_16 = src;
+        REORDER_COPY_8(dest_16,src_16,samples,s0,s1,s2,s3,s4,s5,s6,s7);
+        break;
+    }
+    case 3:
+    {
+        int8_t *dest_8 = dest;
+        const int8_t *src_8 = src;
+        for (i = 0; i < samples; i += 24) {
+            dest_8[i]    = src_8[i+s0*3];
+            dest_8[i+1]  = src_8[i+s0*3+1];
+            dest_8[i+2]  = src_8[i+s0*3+2];
+            dest_8[i+3]  = src_8[i+s1*3];
+            dest_8[i+4]  = src_8[i+s1*3+1];
+            dest_8[i+5]  = src_8[i+s1*3+2];
+            dest_8[i+6]  = src_8[i+s2*3];
+            dest_8[i+7]  = src_8[i+s2*3+1];
+            dest_8[i+8]  = src_8[i+s2*3+2];
+            dest_8[i+9]  = src_8[i+s3*3];
+            dest_8[i+10] = src_8[i+s3*3+1];
+            dest_8[i+11] = src_8[i+s3*3+2];
+            dest_8[i+12] = src_8[i+s4*3];
+            dest_8[i+13] = src_8[i+s4*3+1];
+            dest_8[i+14] = src_8[i+s4*3+2];
+            dest_8[i+15] = src_8[i+s5*3];
+            dest_8[i+16] = src_8[i+s5*3+1];
+            dest_8[i+17] = src_8[i+s5*3+2];
+            dest_8[i+18] = src_8[i+s6*3];
+            dest_8[i+19] = src_8[i+s6*3+1];
+            dest_8[i+20] = src_8[i+s6*3+2];
+            dest_8[i+21] = src_8[i+s7*3];
+            dest_8[i+22] = src_8[i+s7*3+1];
+            dest_8[i+23] = src_8[i+s7*3+2];
+        }
+        break;
+    }
+    case 4:
+    {
+        int32_t *dest_32 = dest;
+        const int32_t *src_32 = src;
+        REORDER_COPY_8(dest_32,src_32,samples,s0,s1,s2,s3,s4,s5,s6,s7);
+        break;
+    }
+    case 8:
+    {
+        int64_t *dest_64 = dest;
+        const int64_t *src_64 = src;
+        REORDER_COPY_8(dest_64,src_64,samples,s0,s1,s2,s3,s4,s5,s6,s7);
+        break;
+    }
+    default:
+        mp_msg(MSGT_GLOBAL, MSGL_WARN,
+               "[reorder_ch] Unsupported sample size: %d, please "
+               "report this error on the MPlayer mailing list.\n",samplesize);
+        return 0;
+    }
+    return 1;
+}
+
 void reorder_channel_copy(void *src,
                           int src_layout,
                           void *dest,
@@ -298,6 +386,16 @@ void reorder_channel_copy(void *src,
     case AF_CHANNEL_LAYOUT_5_1_F << 16 | AF_CHANNEL_LAYOUT_5_1_B:
         reorder_copy_6ch(dest, src, samples, samplesize, 1, 2, 4, 5, 0, 3);
         break;
+    // AF_CHANNEL_LAYOUT_7_1_A   L R C LFE Ls Rs Rls Rrs
+    // AF_CHANNEL_LAYOUT_7_1_B   L R Ls Rs C LFE Rls Rrs
+    // AF_CHANNEL_LAYOUT_7_1_D   C L R Ls Rs Rls Rrs LFE
+    case AF_CHANNEL_LAYOUT_7_1_A << 16 | AF_CHANNEL_LAYOUT_7_1_B:
+    case AF_CHANNEL_LAYOUT_7_1_B << 16 | AF_CHANNEL_LAYOUT_7_1_A:
+        reorder_copy_8ch(dest, src, samples, samplesize, 0, 1, 4, 5, 2, 3, 6, 7);
+        break;
+    case AF_CHANNEL_LAYOUT_7_1_D << 16 | AF_CHANNEL_LAYOUT_7_1_B:
+        reorder_copy_8ch(dest, src, samples, samplesize, 1, 2, 3, 4, 0, 7, 5, 6);
+        break;
     default:
         mp_msg(MSGT_GLOBAL, MSGL_WARN, "[reorder_channel_copy] unsupport "
                "from %x to %x, %d * %d\n", src_layout, dest_layout,
@@ -327,6 +425,9 @@ static int reorder_self_2(void *src, unsigned int samples,
         if (chnum==6) {
             REORDER_SELF_SWAP_2(src_8,tmp,samples,6,s0,s1);
         }
+        else if (chnum==8) {
+            REORDER_SELF_SWAP_2(src_8,tmp,samples,8,s0,s1);
+        }
         else {
             REORDER_SELF_SWAP_2(src_8,tmp,samples,5,s0,s1);
         }
@@ -340,6 +441,9 @@ static int reorder_self_2(void *src, unsigned int samples,
             REORDER_SELF_SWAP_2(src_16,tmp,samples,6,s0,s1);
         }
         else if (chnum==3) {
+            REORDER_SELF_SWAP_2(src_16,tmp,samples,3,s0,s1);
+        }
+        else if (chnum==4) {
             REORDER_SELF_SWAP_2(src_16,tmp,samples,3,s0,s1);
         }
         else {
@@ -374,6 +478,9 @@ static int reorder_self_2(void *src, unsigned int samples,
         else if (chnum==3) {
             REORDER_SELF_SWAP_2(src_32,tmp,samples,3,s0,s1);
         }
+        else if (chnum==4) {
+            REORDER_SELF_SWAP_2(src_32,tmp,samples,4,s0,s1);
+        }
         else {
             REORDER_SELF_SWAP_2(src_32,tmp,samples,5,s0,s1);
         }
@@ -388,6 +495,9 @@ static int reorder_self_2(void *src, unsigned int samples,
         }
         else if (chnum==3) {
             REORDER_SELF_SWAP_2(src_64,tmp,samples,3,s0,s1);
+        }
+        else if (chnum==4) {
+            REORDER_SELF_SWAP_2(src_64,tmp,samples,4,s0,s1);
         }
         else {
             REORDER_SELF_SWAP_2(src_64,tmp,samples,5,s0,s1);
@@ -516,6 +626,9 @@ static int reorder_self_4_step_1(void *src, unsigned int samples,
         if (chnum==6) {
             REORDER_SELF_SWAP_4_STEP_1(src_8,tmp,samples,6,s0,s1,s2,s3);
         }
+        else if (chnum==8) {
+            REORDER_SELF_SWAP_4_STEP_1(src_8,tmp,samples,8,s0,s1,s2,s3);
+        }
         else {
             REORDER_SELF_SWAP_4_STEP_1(src_8,tmp,samples,5,s0,s1,s2,s3);
         }
@@ -527,6 +640,9 @@ static int reorder_self_4_step_1(void *src, unsigned int samples,
         int16_t tmp;
         if (chnum==6) {
             REORDER_SELF_SWAP_4_STEP_1(src_16,tmp,samples,6,s0,s1,s2,s3);
+        }
+        else if (chnum==8) {
+            REORDER_SELF_SWAP_4_STEP_1(src_16,tmp,samples,8,s0,s1,s2,s3);
         }
         else {
             REORDER_SELF_SWAP_4_STEP_1(src_16,tmp,samples,5,s0,s1,s2,s3);
@@ -563,6 +679,9 @@ static int reorder_self_4_step_1(void *src, unsigned int samples,
         if (chnum==6) {
             REORDER_SELF_SWAP_4_STEP_1(src_32,tmp,samples,6,s0,s1,s2,s3);
         }
+        else if (chnum==8) {
+            REORDER_SELF_SWAP_4_STEP_1(src_32,tmp,samples,8,s0,s1,s2,s3);
+        }
         else {
             REORDER_SELF_SWAP_4_STEP_1(src_32,tmp,samples,5,s0,s1,s2,s3);
         }
@@ -574,6 +693,9 @@ static int reorder_self_4_step_1(void *src, unsigned int samples,
         int64_t tmp;
         if (chnum==6) {
             REORDER_SELF_SWAP_4_STEP_1(src_64,tmp,samples,6,s0,s1,s2,s3);
+        }
+        else if (chnum==8) {
+            REORDER_SELF_SWAP_4_STEP_1(src_64,tmp,samples,8,s0,s1,s2,s3);
         }
         else {
             REORDER_SELF_SWAP_4_STEP_1(src_64,tmp,samples,5,s0,s1,s2,s3);
@@ -922,7 +1044,7 @@ for (i = 0; i < SAMPLES; i += CHNUM) {\
 }
 
 static int reorder_self_2_4(void *src, unsigned int samples,
-                            unsigned int samplesize,
+                            unsigned int samplesize, int chnum,
                             int s0, int s1, int s2, int s3, int s4, int s5)
 {
     int i;
@@ -931,21 +1053,29 @@ static int reorder_self_2_4(void *src, unsigned int samples,
     {
         int8_t *src_8 = src;
         int8_t tmp;
-        REORDER_SELF_SWAP_2_4(src_8,tmp,samples,6,s0,s1,s2,s3,s4,s5);
+        if (chnum==6) {
+            REORDER_SELF_SWAP_2_4(src_8,tmp,samples,6,s0,s1,s2,s3,s4,s5);
+        } else {
+            REORDER_SELF_SWAP_2_4(src_8,tmp,samples,8,s0,s1,s2,s3,s4,s5);
+        }
         break;
     }
     case 2:
     {
         int16_t *src_16 = src;
         int16_t tmp;
-        REORDER_SELF_SWAP_2_4(src_16,tmp,samples,6,s0,s1,s2,s3,s4,s5);
+        if (chnum==6) {
+            REORDER_SELF_SWAP_2_4(src_16,tmp,samples,6,s0,s1,s2,s3,s4,s5);
+        } else {
+            REORDER_SELF_SWAP_2_4(src_16,tmp,samples,8,s0,s1,s2,s3,s4,s5);
+        }
         break;
     }
     case 3:
     {
         int8_t *src_8 = src;
         int8_t tmp0, tmp1, tmp2;
-        for (i = 0; i < samples; i += 18) {
+        for (i = 0; i < samples; i += 3*chnum) {
             tmp0 = src_8[i+s0*3];
             tmp1 = src_8[i+s0*3+1];
             tmp2 = src_8[i+s0*3+2];
@@ -977,14 +1107,22 @@ static int reorder_self_2_4(void *src, unsigned int samples,
     {
         int32_t *src_32 = src;
         int32_t tmp;
-        REORDER_SELF_SWAP_2_4(src_32,tmp,samples,6,s0,s1,s2,s3,s4,s5);
+        if (chnum==6) {
+            REORDER_SELF_SWAP_2_4(src_32,tmp,samples,6,s0,s1,s2,s3,s4,s5);
+        } else {
+            REORDER_SELF_SWAP_2_4(src_32,tmp,samples,8,s0,s1,s2,s3,s4,s5);
+        }
         break;
     }
     case 8:
     {
         int64_t *src_64 = src;
         int64_t tmp;
-        REORDER_SELF_SWAP_2_4(src_64,tmp,samples,6,s0,s1,s2,s3,s4,s5);
+        if (chnum==6) {
+            REORDER_SELF_SWAP_2_4(src_64,tmp,samples,6,s0,s1,s2,s3,s4,s5);
+        } else {
+            REORDER_SELF_SWAP_2_4(src_64,tmp,samples,8,s0,s1,s2,s3,s4,s5);
+        }
         break;
     }
     default:
@@ -1083,7 +1221,7 @@ void reorder_channel(void *src,
         reorder_self_5_step_1(src, samples, samplesize, 6, 4, 3, 2, 1, 0);
         break;
     case AF_CHANNEL_LAYOUT_5_1_B << 16 | AF_CHANNEL_LAYOUT_5_1_E:
-        reorder_self_2_4(src, samples, samplesize, 2, 4, 5, 3, 1, 0);
+        reorder_self_2_4(src, samples, samplesize, 6, 2, 4, 5, 3, 1, 0);
         break;
     case AF_CHANNEL_LAYOUT_5_1_C << 16 | AF_CHANNEL_LAYOUT_5_1_A:
         reorder_self_2_3(src, samples, samplesize, 1, 2, 5, 4, 3);
@@ -1104,10 +1242,27 @@ void reorder_channel(void *src,
         reorder_self_2(src, samples, samplesize, 6, 0, 1);
         break;
     case AF_CHANNEL_LAYOUT_5_1_E << 16 | AF_CHANNEL_LAYOUT_5_1_B:
-        reorder_self_2_4(src, samples, samplesize, 2, 4, 0, 1, 3, 5);
+        reorder_self_2_4(src, samples, samplesize, 6, 2, 4, 0, 1, 3, 5);
         break;
     case AF_CHANNEL_LAYOUT_5_1_F << 16 | AF_CHANNEL_LAYOUT_5_1_B:
-        reorder_self_2_4(src, samples, samplesize, 3, 5, 0, 1, 2, 4);
+        reorder_self_2_4(src, samples, samplesize, 6, 3, 5, 0, 1, 2, 4);
+        break;
+    // AF_CHANNEL_LAYOUT_7_1_A   L R C LFE Ls Rs Rls Rrs
+    // AF_CHANNEL_LAYOUT_7_1_B   L R Ls Rs C LFE Rls Rrs
+    // AF_CHANNEL_LAYOUT_7_1_C   L C R Ls Rs LFE Rls Rrs
+    // AF_CHANNEL_LAYOUT_7_1_F   C L R LFE Ls Rs Rls Rrs
+    case AF_CHANNEL_LAYOUT_7_1_A << 16 | AF_CHANNEL_LAYOUT_7_1_B:
+    case AF_CHANNEL_LAYOUT_7_1_B << 16 | AF_CHANNEL_LAYOUT_7_1_A:
+        if (samplesize != 3)
+            reorder_self_2(src, samples/2, samplesize*2, 4, 1, 2);
+        else
+            reorder_self_4_step_2(src, samples, samplesize, 8, 2, 3, 4, 5);
+        break;
+    case AF_CHANNEL_LAYOUT_7_1_C << 16 | AF_CHANNEL_LAYOUT_7_1_B:
+        reorder_self_4_step_1(src, samples, samplesize, 8, 1, 2, 3, 4);
+        break;
+    case AF_CHANNEL_LAYOUT_7_1_F << 16 | AF_CHANNEL_LAYOUT_7_1_B:
+        reorder_self_2_4(src, samples, samplesize, 8, 3, 5, 0, 1, 2, 4);
         break;
     default:
         mp_msg(MSGT_GLOBAL, MSGL_WARN,
@@ -1133,6 +1288,14 @@ static int channel_layout_mapping_6ch[AF_CHANNEL_LAYOUT_SOURCE_NUM] = {
     AF_CHANNEL_LAYOUT_VORBIS_6CH_DEFAULT,
 };
 
+static int channel_layout_mapping_8ch[AF_CHANNEL_LAYOUT_SOURCE_NUM] = {
+    AF_CHANNEL_LAYOUT_ALSA_8CH_DEFAULT,
+    AF_CHANNEL_LAYOUT_AAC_8CH_DEFAULT,
+    AF_CHANNEL_LAYOUT_WAVEEX_8CH_DEFAULT,
+    AF_CHANNEL_LAYOUT_LAVC_8CH_DEFAULT,
+    AF_CHANNEL_LAYOUT_VORBIS_8CH_DEFAULT,
+};
+
 void reorder_channel_copy_nch(void *src,
                               int src_layout,
                               void *dest,
@@ -1141,13 +1304,18 @@ void reorder_channel_copy_nch(void *src,
                               int samples,
                               int samplesize)
 {
-    if (chnum < 5 || chnum > 6 || src_layout < 0 || dest_layout < 0 ||
+    if (chnum < 5 || chnum == 7 || chnum > 8 ||
+            src_layout < 0 || dest_layout < 0 ||
             src_layout >= AF_CHANNEL_LAYOUT_SOURCE_NUM ||
             dest_layout >= AF_CHANNEL_LAYOUT_SOURCE_NUM)
         fast_memcpy(dest, src, samples*samplesize);
     else if (chnum == 6)
         reorder_channel_copy(src, channel_layout_mapping_6ch[src_layout],
                              dest, channel_layout_mapping_6ch[dest_layout],
+                             samples, samplesize);
+    else if (chnum == 8)
+        reorder_channel_copy(src, channel_layout_mapping_8ch[src_layout],
+                             dest, channel_layout_mapping_8ch[dest_layout],
                              samples, samplesize);
     else
         reorder_channel_copy(src, channel_layout_mapping_5ch[src_layout],
@@ -1162,7 +1330,7 @@ void reorder_channel_nch(void *buf,
                          int samples,
                          int samplesize)
 {
-    if (src_layout == dest_layout || chnum < 5 || chnum > 6 ||
+    if (src_layout == dest_layout || chnum < 5 || chnum == 7 || chnum > 8 ||
             src_layout < 0 || dest_layout < 0 ||
             src_layout >= AF_CHANNEL_LAYOUT_SOURCE_NUM ||
             dest_layout >= AF_CHANNEL_LAYOUT_SOURCE_NUM ||
@@ -1171,6 +1339,10 @@ void reorder_channel_nch(void *buf,
     if (chnum == 6)
         reorder_channel(buf, channel_layout_mapping_6ch[src_layout],
                         channel_layout_mapping_6ch[dest_layout],
+                        samples, samplesize);
+    else if (chnum == 8)
+        reorder_channel(buf, channel_layout_mapping_8ch[src_layout],
+                        channel_layout_mapping_8ch[dest_layout],
                         samples, samplesize);
     else
         reorder_channel(buf, channel_layout_mapping_5ch[src_layout],

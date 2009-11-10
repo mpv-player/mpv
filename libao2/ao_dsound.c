@@ -426,7 +426,12 @@ static int init(int rate, int channels, int format, int flags)
 	DSBUFFERDESC dsbpridesc;
 	DSBUFFERDESC dsbdesc;
 
-	//check if the format is supported in general
+	//check if the channel count and format is supported in general
+	if (channels > 6) {
+		UninitDirectSound();
+		mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: 8 channel audio not yet supported\n");
+		return 0;
+	}
 	switch(format){
 		case AF_FORMAT_AC3:
 		case AF_FORMAT_S24_LE:

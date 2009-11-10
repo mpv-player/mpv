@@ -244,7 +244,7 @@ static int play(void* data,int len,int flags){
     }
 #endif
 
-    if (ao_data.channels == 6 || ao_data.channels == 5) {
+    if (ao_data.channels == 5 || ao_data.channels == 6 || ao_data.channels == 8) {
         int frame_size = le2me_16(wavhdr.bits) / 8;
         len -= len % (frame_size * ao_data.channels);
         reorder_channel_nch(data, AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
