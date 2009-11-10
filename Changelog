@@ -21,6 +21,7 @@ MPlayer (1.0)
     * -nosub option for disabling auto-selected subtitles
     * support for displaying subs in the term (FIXME)
     * support for subtitles with audio only files
+    * support for 8 channel audio
 
   rc3: "BikeshedCounter" March 27, 2009
     Decoders:
