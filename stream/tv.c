@@ -831,6 +831,7 @@ static void demux_close_tv(demuxer_t *demuxer)
     tv_uninit(tvh);
     free(tvh);
     demuxer->priv=NULL;
+    demuxer->teletext=NULL;
 }
 
 /* utilities for mplayer (not mencoder!!) */
