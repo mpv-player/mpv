@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <dvdread/ifo_types.h>
 
+extern char *dvd_device;
 int mp_dvdtimetomsec(dvd_time_t *dt);
 
 #endif /* MPLAYER_STREAM_DVD_COMMON_H */

@@ -41,7 +41,6 @@
 #include "libmpdemux/demuxer.h"
 #include "libavutil/intreadwrite.h"
 
-extern char* dvd_device;
 static char* dvd_device_current;
 int dvd_angle=1;
 int dvd_speed=0; /* 0 => don't touch speed */
