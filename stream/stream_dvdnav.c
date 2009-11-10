@@ -87,6 +87,8 @@ static dvdnav_priv_t * new_dvdnav_stream(char * filename) {
     return NULL;
   }
 
+  dvd_set_speed(priv->filename, dvd_speed);
+
   if(dvdnav_open(&(priv->dvdnav),priv->filename)!=DVDNAV_STATUS_OK)
   {
     free(priv->filename);
@@ -291,6 +293,7 @@ static void stream_dvdnav_close(stream_t *s) {
   dvdnav_priv_t *priv = s->priv;
   dvdnav_close(priv->dvdnav);
   priv->dvdnav = NULL;
+  dvd_set_speed(priv->filename, -1);
   free(priv);
 }
 
