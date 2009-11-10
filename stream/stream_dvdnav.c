@@ -795,7 +795,7 @@ int mp_dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
  * \return 0 on error, 1 if successful
  */
 int mp_dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
-    uint8_t lg, k;
+    uint8_t k;
     uint16_t lang;
     dvdnav_priv_t *priv = stream->priv;
     if(sid < 0) return 0;
