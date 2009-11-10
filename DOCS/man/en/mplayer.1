@@ -1326,6 +1326,8 @@ stereo
 surround
 .IPs 6
 full 5.1
+.IPs 8
+full 7.1
 .RE
 .PD 1
 .
@@ -5213,11 +5215,11 @@ of input channels the exceeding channels are truncated.
 .PD 0
 .RSs
 .IPs <nch>
-number of output channels (1\-6)
+number of output channels (1\-8)
 .IPs "<nr>\ "
-number of routes (1\-6)
+number of routes (1\-8)
 .IPs <from1:to1:from2:to2:from3:to3:...>
-Pairs of numbers between 0 and 5 that define where to route each channel.
+Pairs of numbers between 0 and 7 that define where to route each channel.
 .RE
 .sp 1
 .RS
@@ -5320,7 +5322,7 @@ this filter can be found in the examples section near the end.
 .PD 0
 .RSs
 .IPs "<n>\ \ "
-number of output channels (1\-6)
+number of output channels (1\-8)
 .IPs <Lij>
 How much of input channel i is mixed into output channel j (0\-1).
 So in principle you first have n numbers saying what to do with the
@@ -5363,7 +5365,7 @@ For the best result try setting the cutoff frequency as low as possible.
 This will improve the stereo or surround sound experience.
 .IPs "<ch>\ "
 Determines the channel number in which to insert the sub-channel audio.
-Channel number can be between 0 and 5 (default: 5).
+Channel number can be between 0 and 7 (default: 5).
 Observe that the number of channels will automatically
 be increased to <ch> if necessary.
 .RE
@@ -5388,7 +5390,7 @@ halves the channels instead.
 .RSs
 .IPs "<ch>\ "
 Determines the channel number in which to insert the center channel.
-Channel number can be between 0 and 5 (default: 5).
+Channel number can be between 0 and 7 (default: 5).
 Observe that the number of channels will automatically
 be increased to <ch> if necessary.
 .RE
