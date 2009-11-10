@@ -578,11 +578,14 @@ static int create_vdp_decoder(int max_refs)
     case IMGFMT_VDPAU_VC1:
         vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_ADVANCED;
         break;
+    default:
+        goto err_out;
     }
     vdp_st = vdp_decoder_create(vdp_device, vdp_decoder_profile,
                                 vid_width, vid_height, max_refs, &decoder);
     CHECK_ST_WARNING("Failed creating VDPAU decoder");
     if (vdp_st != VDP_STATUS_OK) {
+err_out:
         decoder = VDP_INVALID_HANDLE;
         decoder_max_refs = 0;
         return 0;
