@@ -254,6 +254,10 @@ extern char *sub_demuxer_name; // override sub demuxer
 int audio_id=-1;
 int video_id=-1;
 int dvdsub_id=-1;
+// this dvdsub_id was selected via slang
+// use this to allow dvdnav to follow -slang across stream resets,
+// in particular the subtitle ID for a language changes
+int dvdsub_lang_id;
 int vobsub_id=-1;
 char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
@@ -1918,6 +1922,13 @@ static void mp_dvdnav_reset_stream (MPContext *ctx) {
     }
 
     audio_delay = 0.0f;
+    if (dvdsub_lang && dvdsub_id == dvdsub_lang_id) {
+        dvdsub_lang_id = mp_dvdnav_sid_from_lang(ctx->stream, dvdsub_lang);
+        if (dvdsub_lang_id != dvdsub_id) {
+            dvdsub_id = dvdsub_lang_id;
+            select_subtitle(ctx);
+        }
+    }
 
     /// clear all EOF related flags
     ctx->d_video->eof = ctx->d_audio->eof = ctx->stream->eof = 0;
@@ -3237,7 +3248,9 @@ if(mpctx->stream->type==STREAMTYPE_DVD){
 if(mpctx->stream->type==STREAMTYPE_DVDNAV){
   current_module="dvdnav lang->id";
   if(audio_id==-1) audio_id=mp_dvdnav_aid_from_lang(mpctx->stream,audio_lang);
-  if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=mp_dvdnav_sid_from_lang(mpctx->stream,dvdsub_lang);
+  dvdsub_lang_id = -3;
+  if(dvdsub_lang && dvdsub_id==-1)
+    dvdsub_lang_id=dvdsub_id=mp_dvdnav_sid_from_lang(mpctx->stream,dvdsub_lang);
   // setup global sub numbering
   mpctx->global_sub_indices[SUB_SOURCE_DEMUX] = mpctx->global_sub_size; // the global # of the first demux-specific sub.
   mpctx->global_sub_size += mp_dvdnav_number_of_subs(mpctx->stream);
