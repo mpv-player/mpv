@@ -2394,68 +2394,68 @@ static void pause_loop(void)
         // Small hack to display the pause message on the OSD line.
         // The pause string is: "\n == PAUSE == \r" so we need to
         // take the first and the last char out
-	if (term_osd && !mpctx->sh_video) {
-	    char msg[128] = MSGTR_Paused;
-	    int mlen = strlen(msg);
-	    msg[mlen-1] = '\0';
-	    set_osd_msg(OSD_MSG_PAUSE, 1, 0, "%s", msg+1);
-	    update_osd_msg();
-	} else
-	    mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
+        if (term_osd && !mpctx->sh_video) {
+            char msg[128] = MSGTR_Paused;
+            int mlen = strlen(msg);
+            msg[mlen-1] = '\0';
+            set_osd_msg(OSD_MSG_PAUSE, 1, 0, "%s", msg+1);
+            update_osd_msg();
+        } else
+            mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
     }
 #ifdef CONFIG_GUI
     if (use_gui)
-	guiGetEvent(guiCEvent, (char *)guiSetPause);
+        guiGetEvent(guiCEvent, (char *)guiSetPause);
 #endif
     if (mpctx->video_out && mpctx->sh_video && vo_config_count)
-	mpctx->video_out->control(VOCTRL_PAUSE, NULL);
+        mpctx->video_out->control(VOCTRL_PAUSE, NULL);
 
     if (mpctx->audio_out && mpctx->sh_audio)
-	mpctx->audio_out->pause();	// pause audio, keep data if possible
+        mpctx->audio_out->pause(); // pause audio, keep data if possible
 
     while ( (cmd = mp_input_get_cmd(20, 1, 1)) == NULL || cmd->pausing == 4) {
-	if (cmd) {
-	  cmd = mp_input_get_cmd(0,1,0);
-	  run_command(mpctx, cmd);
-	  mp_cmd_free(cmd);
-	  continue;
-	}
-	if (mpctx->sh_video && mpctx->video_out && vo_config_count)
-	    mpctx->video_out->check_events();
+        if (cmd) {
+          cmd = mp_input_get_cmd(0,1,0);
+          run_command(mpctx, cmd);
+          mp_cmd_free(cmd);
+          continue;
+        }
+        if (mpctx->sh_video && mpctx->video_out && vo_config_count)
+            mpctx->video_out->check_events();
 #ifdef CONFIG_GUI
-	if (use_gui) {
-	    guiEventHandling();
-	    guiGetEvent(guiReDraw, NULL);
-	    if (guiIntfStruct.Playing!=2 || (rel_seek_secs || abs_seek_pos))
-		break;
-	}
+        if (use_gui) {
+            guiEventHandling();
+            guiGetEvent(guiReDraw, NULL);
+            if (guiIntfStruct.Playing!=2 || (rel_seek_secs || abs_seek_pos))
+                break;
+        }
 #endif
 #ifdef CONFIG_MENU
-	if (vf_menu)
-	    vf_menu_pause_update(vf_menu);
+        if (vf_menu)
+            vf_menu_pause_update(vf_menu);
 #endif
-	usec_sleep(20000);
+        usec_sleep(20000);
     }
     if (cmd && cmd->id == MP_CMD_PAUSE) {
-	cmd = mp_input_get_cmd(0,1,0);
-	mp_cmd_free(cmd);
+        cmd = mp_input_get_cmd(0,1,0);
+        mp_cmd_free(cmd);
     }
     mpctx->osd_function=OSD_PLAY;
     if (mpctx->audio_out && mpctx->sh_audio)
         if (mpctx->eof) // do not play remaining audio if we e.g.  switch to the next file
           mpctx->audio_out->reset();
         else
-        mpctx->audio_out->resume();	// resume audio
+          mpctx->audio_out->resume(); // resume audio
     if (mpctx->video_out && mpctx->sh_video && vo_config_count)
-        mpctx->video_out->control(VOCTRL_RESUME, NULL);	// resume video
-    (void)GetRelativeTime();	// ignore time that passed during pause
+        mpctx->video_out->control(VOCTRL_RESUME, NULL); // resume video
+    (void)GetRelativeTime(); // ignore time that passed during pause
 #ifdef CONFIG_GUI
     if (use_gui) {
-	if (guiIntfStruct.Playing == guiSetStop)
-	    mpctx->eof = 1;
-	else
-	    guiGetEvent(guiCEvent, (char *)guiSetPlay);
+        if (guiIntfStruct.Playing == guiSetStop)
+            mpctx->eof = 1;
+        else
+            guiGetEvent(guiCEvent, (char *)guiSetPlay);
     }
 #endif
 }
