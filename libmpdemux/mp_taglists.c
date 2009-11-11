@@ -18,6 +18,7 @@
 
 #include "config.h"
 
+#include "mp_taglists.h"
 #include "libavformat/avformat.h"
 #include "libavformat/riff.h"
 
