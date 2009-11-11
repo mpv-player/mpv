@@ -1,7 +1,26 @@
 #include "config.h"
+#include <fcntl.h>
 #include <inttypes.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
 #include <dvdread/ifo_types.h>
+#ifdef __FreeBSD__
+#include <sys/cdrio.h>
+#endif
+
+#ifdef __linux__
+#include <linux/cdrom.h>
+#include <scsi/sg.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#endif
+
+#include "mp_msg.h"
+#include "help_mp.h"
 #include "stream_dvd_common.h"
+#include "libavutil/intreadwrite.h"
 
 const char * const dvd_audio_stream_types[8] = { "ac3","unknown","mpeg1","mpeg2ext","lpcm","unknown","dts" };
 const char * const dvd_audio_stream_channels[6] = { "mono", "stereo", "unknown", "unknown", "5.1/6.1", "5.1" };

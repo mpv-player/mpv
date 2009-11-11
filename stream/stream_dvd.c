@@ -5,24 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <string.h>
 
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
-
-#ifdef __FreeBSD__
-#include <sys/cdrio.h>
-#endif
-
-#ifdef __linux__
-#include <linux/cdrom.h>
-#include <scsi/sg.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#endif
 
 #include <libgen.h>
 #include <errno.h>
@@ -39,7 +26,6 @@
 #include "stream_dvd.h"
 #include "stream_dvd_common.h"
 #include "libmpdemux/demuxer.h"
-#include "libavutil/intreadwrite.h"
 
 static char* dvd_device_current;
 int dvd_angle=1;
