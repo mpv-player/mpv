@@ -70,7 +70,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 {
   int i,j,start_title=-1,end_title=-1;
   char *opt,*splitpos=NULL;
-  char entbuf[10];
+  char entbuf[15];
   int no_more_opts = 0;
   int opt_exit = 0; // flag indicating whether mplayer should exit without playing anything
   play_tree_t *last_parent, *last_entry = NULL, *root;
@@ -215,15 +215,17 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
       }
     else /* filename */
       {
+        int is_dvdnav = strstr(argv[i],"dvdnav://") != NULL;
 	play_tree_t* entry = play_tree_new();
 	mp_msg(MSGT_CFGPARSER, MSGL_DBG2,"Adding file %s\n",argv[i]);
         // if required expand DVD filename entries like dvd://1-3 into component titles
-        if ( strstr(argv[i],"dvd://") != NULL )
+        if ( strstr(argv[i],"dvd://") != NULL || is_dvdnav)
 	{
-             splitpos=strstr(argv[i]+6,"-");
+             int offset = is_dvdnav ? 9 : 6;
+             splitpos=strstr(argv[i]+offset,"-");
              if(splitpos != NULL)
              {
-               start_title=strtol(argv[i]+6,NULL,10);
+               start_title=strtol(argv[i]+offset,NULL,10);
 	       if (start_title<0) { //entries like dvd://-2 start title implied 1
 		   end_title=abs(start_title);
                    start_title=1;
@@ -237,7 +239,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
                  {
                   if (j!=start_title)
                       entry=play_tree_new();
-                  snprintf(entbuf,9,"dvd://%d",j);
+                  snprintf(entbuf,sizeof(entbuf),is_dvdnav ? "dvdnav://%d" : "dvd://%d",j);
                   play_tree_add_file(entry,entbuf);
                   add_entry(&last_parent,&last_entry,entry);
 		  last_entry = entry;
