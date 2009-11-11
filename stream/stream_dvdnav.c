@@ -349,8 +349,10 @@ static int fill_buffer(stream_t *s, char *but, int len)
           if(dvdnav_current_title_info(priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK) {
             mp_msg(MSGT_CPLAYER,MSGL_V, "\r\nDVDNAV, NEW TITLE %d\r\n", tit);
             dvdnav_get_highlight (priv, 0);
-            if(priv->title > 0 && tit != priv->title)
+            if(priv->title > 0 && tit != priv->title) {
+              priv->state |= NAV_FLAG_EOF;
               return 0;
+            }
           }
           break;
         }
@@ -364,8 +366,10 @@ static int fill_buffer(stream_t *s, char *but, int len)
             priv->state |= NAV_FLAG_WAIT_READ;
           if(priv->title > 0 && dvd_last_chapter > 0) {
             int tit=0, part=0;
-            if(dvdnav_current_title_info(priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK && part > dvd_last_chapter)
+            if(dvdnav_current_title_info(priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK && part > dvd_last_chapter) {
+              priv->state |= NAV_FLAG_EOF;
               return 0;
+            }
           }
           dvdnav_get_highlight (priv, 1);
         }
