@@ -1498,8 +1498,8 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	&& (mpctx->stream->type == STREAMTYPE_DVD
 	    || mpctx->stream->type == STREAMTYPE_DVDNAV)
 	&& dvdsub_id < 0 && reset_spu) {
-	dvdsub_id = -2;
-	d_sub->id = dvdsub_id;
+	d_sub->id = -2;
+	d_sub->sh = NULL;
     }
 #endif
     if (mpctx->sh_audio)
