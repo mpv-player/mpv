@@ -33,7 +33,6 @@
  */
 
 #include <stdio.h>
-#include <dlfcn.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -93,7 +92,6 @@ LIBVO_EXTERN(vdpau)
  * win_x11_init_vdpau_flip_queue() functions
  */
 static VdpDevice                          vdp_device;
-static VdpDeviceCreateX11                *vdp_device_create;
 static VdpGetProcAddress                 *vdp_get_proc_address;
 
 static VdpPresentationQueueTarget         vdp_flip_target;
@@ -144,7 +142,6 @@ static VdpDecoderRender                          *vdp_decoder_render;
 static VdpGenerateCSCMatrix                      *vdp_generate_csc_matrix;
 static VdpPreemptionCallbackRegister             *vdp_preemption_callback_register;
 
-static void                              *vdpau_lib_handle;
 /* output_surfaces[NUM_OUTPUT_SURFACES] is misused for OSD. */
 #define osd_surface output_surfaces[NUM_OUTPUT_SURFACES]
 static VdpOutputSurface                   output_surfaces[NUM_OUTPUT_SURFACES + 1];
@@ -395,7 +392,7 @@ static int win_x11_init_vdpau_procs(void)
         {0, NULL}
     };
 
-    vdp_st = vdp_device_create(mDisplay, mScreen,
+    vdp_st = vdp_device_create_x11(mDisplay, mScreen,
                                &vdp_device, &vdp_get_proc_address);
     if (vdp_st != VDP_STATUS_OK) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error when calling vdp_device_create_x11: %i\n", vdp_st);
@@ -1182,8 +1179,6 @@ static void uninit(void)
     vo_vm_close();
 #endif
     vo_x11_uninit();
-
-    dlclose(vdpau_lib_handle);
 }
 
 static const opt_t subopts[] = {
@@ -1233,8 +1228,6 @@ static const char help_msg[] =
 static int preinit(const char *arg)
 {
     int i;
-    static const char *vdpaulibrary = "libvdpau.so.1";
-    static const char *vdpau_device_create = "vdp_device_create_x11";
 
     deint = 0;
     deint_type = 3;
@@ -1262,18 +1255,6 @@ static int preinit(const char *arg)
         colorspace = 1;
     }
 
-    vdpau_lib_handle = dlopen(vdpaulibrary, RTLD_LAZY);
-    if (!vdpau_lib_handle) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Could not open dynamic library %s\n",
-               vdpaulibrary);
-        return -1;
-    }
-    vdp_device_create = dlsym(vdpau_lib_handle, vdpau_device_create);
-    if (!vdp_device_create) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Could not find function %s in %s\n",
-               vdpau_device_create, vdpaulibrary);
-        return -1;
-    }
     if (!vo_init() || win_x11_init_vdpau_procs())
         return -1;
 

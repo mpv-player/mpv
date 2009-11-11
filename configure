@@ -4348,13 +4348,16 @@ if test "$_vdpau" = auto ; then
   if test "$_dl" = yes ; then
     cat > $TMPC <<EOF
 #include <vdpau/vdpau_x11.h>
-int main(void) {return VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1;}
+int main(void) {
+    (void) vdp_device_create_x11(0, 0, 0, 0);
+    return VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1; }
 EOF
-    cc_check && _vdpau=yes
+    cc_check -lvdpau && _vdpau=yes
   fi
 fi
 if test "$_vdpau" = yes ; then
   def_vdpau='#define CONFIG_VDPAU 1'
+  libs_mplayer="$libs_mplayer -lvdpau"
   _vomodules="vdpau $_vomodules"
 else
   def_vdpau='#define CONFIG_VDPAU 0'
