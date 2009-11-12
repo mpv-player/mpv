@@ -79,6 +79,11 @@ int vo_directrendering=0;
 int vo_colorkey = 0x0000ff00; // default colorkey is green
                               // (0xff000000 means that colorkey has been disabled)
 
+// name to be used instead of the vo's default
+char *vo_winname;
+// title to be applied to movie window
+char *vo_wintitle;
+
 //
 // Externally visible list of all vo drivers
 //

@@ -3204,6 +3204,10 @@ A value of 1 means square pixels
 (correct for (almost?) all LCDs).
 .
 .TP
+.B \-name (X11 only)
+Set the window class name.
+.
+.TP
 .B \-nodouble
 Disables double buffering, mostly for debugging purposes.
 Double buffering fixes flicker by storing two frames in memory, and
@@ -3281,6 +3285,16 @@ do not know the screen resolution like fbdev, x11 and TV-out.
 Turns off xscreensaver at startup and turns it on again on exit.
 If your screensaver supports neither the XSS nor XResetScreenSaver
 API please use \-heartbeat\-cmd instead.
+.
+.TP
+.B \-title (also see \-use\-filename\-title)
+Set the window title.
+Supported by X11 based video output drivers.
+.
+.TP
+.B \-use\-filename\-title (also see \-title)
+Set the window title using the media file name, when not set with \-title.
+Supported by X11 based video output drivers.
 .
 .TP
 .B "\-vm \ \ \ "

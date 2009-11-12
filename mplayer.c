@@ -349,6 +349,7 @@ edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_records
 short edl_decision = 0; ///< 1 when an EDL operation has been made.
 FILE* edl_fd = NULL; ///< fd to write to when in -edlout mode.
 int use_filedir_conf;
+int use_filename_title;
 
 static unsigned int initialized_flags=0;
 #include "mpcommon.h"
@@ -3089,9 +3090,12 @@ while (player_idle_mode && !filename) {
 }
 //---------------------------------------------------------------------------
 
-    if(filename)
+    if(filename) {
 	mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing,
 		filename_recode(filename));
+        if(use_filename_title && vo_wintitle == NULL)
+            vo_wintitle = strdup ( mp_basename2 (filename));
+    }
 
 if (edl_filename) {
     if (edl_records) free_edl(edl_records);

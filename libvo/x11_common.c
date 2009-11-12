@@ -738,7 +738,7 @@ void vo_x11_classhint(Display * display, Window window, char *name)
     XClassHint wmClass;
     pid_t pid = getpid();
 
-    wmClass.res_name = name;
+    wmClass.res_name = vo_winname ? vo_winname : name;
     wmClass.res_class = "MPlayer";
     XSetClassHint(display, window, &wmClass);
     XChangeProperty(display, window, XA_NET_WM_PID, XA_CARDINAL, 32,
@@ -1335,6 +1335,9 @@ int vo_x11_update_geometry(void) {
     if (w <= INT_MAX && h <= INT_MAX) { vo_dwidth = w; vo_dheight = h; }
     XTranslateCoordinates(mDisplay, vo_window, mRootWin, 0, 0, &vo_dx, &vo_dy,
                           &dummy_win);
+    if (vo_wintitle)
+        XStoreName(mDisplay, vo_window, vo_wintitle);
+
     return depth <= INT_MAX ? depth : 0;
 }
 
