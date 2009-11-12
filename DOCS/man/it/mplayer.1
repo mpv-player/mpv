@@ -1,4 +1,4 @@
-.\" synced with r29791
+.\" synced with r29885
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -190,7 +190,11 @@ controllo rumore/\:disturbo, conversioni RGB/\:YUV) ed oltre.
 .PP
 .B gmplayer
 è MPlayer con una interfaccia utente grafica.
-Ha le stesse opzioni di MPlayer.
+Ha le stesse opzioni di MPlayer, tuttavia alcune potrebbero non funzionare
+correttamente a causa di conflitti con la configurazione fatta via GUI (salvata
+in gui.conf).
+In particolare alcune opzioni potrebbero venire sovrascritte da opzioni nel file
+gui.conf mentre altre potrebbero venire salvate definitivamente in gui.conf.
 .PP
 Esempi di utilizzo per farti partire rapidamente possono essere trovati alla
 fine di questa pagina di manuale.
@@ -445,7 +449,9 @@ Conferma la scelta.
 .RS
 .
 (I seguenti tasti sono validi solo se MPlayer è stato compilato col supporto
-per televideo (teletext): vengono usati per controllare il televideo della TV)
+per televideo (teletext): vengono usati per controllare il televideo della TV,
+i cui dati possono arrivare sia da una sorgente TV analogica che da un flusso
+MPEG.)
 .RE
 .PP
 .PD 0
@@ -1385,6 +1391,8 @@ stereo
 surround
 .IPs 6
 5.1 completo
+.IPs 8
+7.1 completo
 .RE
 .PD 1
 .
@@ -3234,7 +3242,7 @@ Utilizza l'hint _WIN_LAYER hint con il numero di layer specificato.
 .IPs netwm
 Forza lo stile NETWM.
 .IPs "none\ "
-Non attivare il layer della finestra a schermo intero.
+Pulisce la lista delle modalità; ne puoi aggiungere per abilitarle dopo.
 .IPs stays_on_top
 Utilizza l'hint _NETWM_STATE_STAYS_ON_TOP se disponibile.
 .REss
@@ -3652,7 +3660,8 @@ E' lo stesso che \-vo xv:ck-method (vedi \-vo xv).
 .PD 1
 .
 .TP
-.B vdpau (con \-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau o ffh264vdpau)
+.B vdpau (con \-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau, ffh264vdpau
+o ffodivxvdpau)
 Driver di uscita video che usa VDPAU per la docodifica video via hardware.
 Gestisce anche la visualizzazione di video decodificato via software.
 .PD 0
@@ -3710,6 +3719,19 @@ Usa lo spazio colore ITU-R BT.709.
 .IPs 3
 Usa lo spazio colore SMPTE-240M.
 .RE
+.IPs hqscaling
+.RSss
+.IPs 0
+Utilizza la scalatura di default di VDPAU (default).
+.IPs 1\-9
+Applica la scalatura VDPAU ad alta qualità (serve hardware abbastanza potente).
+.RE
+.IPs force\-mixer
+Forza l'utilizzo del mixer VDPAU, che implementa tutte le opzioni di cui sopra
+(default).
+Usa noforce\-mixer per permettere la visualizzazione dello spazio colore BGRA.
+(Se viene usato il formato immagine BGRA, disabilita tutte le opzioni sopra e
+l'equalizzatore hardware.)
 .RE
 .PD 1
 .
@@ -5442,11 +5464,11 @@ canali in eccesso sono troncati.
 .PD 0
 .RSs
 .IPs <numero_canali>
-numero di canali di uscita (1\-6)
+numero di canali di uscita (1\-8)
 .IPs "<numero>\ "
-numero di indirizzamenti (1\-6)
+numero di indirizzamenti (1\-8)
 .IPs <da1:a1:da2:a2:da3:a3:...>
-Coppie di numeri tra 0 e 5 che definiscono dove reindirizzare ogni canale.
+Coppie di numeri tra 0 e 7 che definiscono dove reindirizzare ogni canale.
 .RE
 .sp 1
 .RS
@@ -5552,7 +5574,7 @@ con questo filtro si trova nella sezione degli esempi verso la fine.
 .PD 0
 .RSs
 .IPs "<n>\ \ "
-numero di canali di uscita (1\-6)
+numero di canali di uscita (1\-8)
 .IPs <Lij>
 Quanta parte del canale di ingresso i è miscelata nel canale di uscita j (0\-1).
 Così all'inizio hai n numeri che dicono cosa fare col primo canale di ingresso,
@@ -5597,7 +5619,7 @@ basso possibile.
 Questo migliorerà l'esperienza del suono stereo o surround.
 .IPs "<ch>\ "
 Determina il numero di canale in cui inserire il sotto-canale audio.
-Il numero del canale può essere tra 0 e 5 (default: 5).
+Il numero del canale può essere tra 0 e 7 (default: 5).
 Nota che il numero di canali verrà automaticamente incrementato a <ch>
 se necessario.
 .RE
@@ -5622,7 +5644,7 @@ semplicemente somma e media i canali interessati.
 .RSs
 .IPs "<ch>\ "
 Determina il numero del canale su cui inserire il canale centrale.
-Il numero del canale può essere tra 0 e 5 (default: 5).
+Il numero del canale può essere tra 0 e 7 (default: 5).
 Nota che il numero di canali verrà automaticamente incrementato a <ch>
 se necessario.
 .RE
