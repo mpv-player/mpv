@@ -553,10 +553,10 @@ Puoi anche mettere tale file di configurazione nella stessa directory in cui si
 trova il file relativo, sempre che tu imposti poi l'opzione \-use\-filedir\-conf
 (dalla riga comando oppure nel tuo file di configurazione globale).
 Se viene trovato un file di configurazione specifico nella stessa directory del
-file, nessun file di configurazione specifico vine letto da ~/.mplayer.
-Inoltre l'opzione \-use\-filedir\-conf abilita i file di configurazione
+file, nessun file di configurazione specifico viene letto da ~/.mplayer.
+Inoltre, l'opzione \-use\-filedir\-conf abilita i file di configurazione
 specifici nella directory.
-Per questo, MPlayer dapprima cerca di caricare un mplayer.conf dalla stessa
+Per questo MPlayer dapprima cerca di caricare un mplayer.conf dalla stessa
 directory del file riprodotto e poi cerca un file di configurazione specifico.
 .PP
 .I ESEMPIO DI UN FILE DI CONFIGURAZIONE PER MPLAYER:
@@ -1240,11 +1240,12 @@ programma (se presente) con il flusso audio scelto.
 .TP
 .B \-ausid <ID> (vedi anche \-alang)
 Selezione il canale del sottoflussio audio.
-Attualmente la gamma valida è 0x55..0x75 e viene applicata solo a MPEG-TS
-quando viene decodificato dal demuxer nativo (non da libavformat).
-Il tipo di formato potrebbe non venir correttamente identificato a causa di
-come questa informazione (o la sua assenza) viene impacchettata nel flusso, ma
-decodificherà correttamente i flussi audio quando sono presenti più sottoflussi.
+Attualmente la gamma valida è 0x55..0x75 e viene applicata solo ad un flusso
+MPEG-TS quando viene decodificato dal demuxer nativo (non da libavformat).
+Il tipo di formato potrebbe non venir identificato correttamente a causa del
+modo in cui questa informazione (o la sua assenza) viene impacchettata nel
+flusso, ma decodificherà correttamente i flussi audio quando sono presenti più
+sottoflussi.
 MPlayer emette gli ID dei sottoflussi disponibili se eseguito con \-identify.
 .
 .TP
@@ -2449,8 +2450,8 @@ Se non riesci a selezionare un sottotitolo di un DVD, prova anche \-vobsubid.
 .
 .TP
 .B \-nosub
-Disabilita qualsiasi sottotitolo auto-selezionato (cosa che per es.\& il demuxer
-Matroska/mkv implementa).
+Disabilita qualsiasi sottotitolo selezionato automaticamente (cosa che per
+es.\& il demuxer Matroska/mkv implementa).
 .
 .TP
 .B \-slang <codice linguaggio[,codice linguaggio]> (vedi anche \-sid)
@@ -3474,9 +3475,9 @@ la finestra.
 La posizione iniziale selezionata con l'opzione \-geometry è relativa allo
 schermo specificato.
 Funzionerà solitamente solo con "\-fstype \-fullscreen" o "\-fstype none".
-Quest'opzione non è indicata per impostare solo la schermata di avvio
-(dato che si aprirà sempre a tutto schermo sullo schermo indicato), per farlo
-la miglior opzione attualmente disponibilie è \-geometry.
+Quest'opzione non è utilizzabile per impostare solo la schermata di avvio
+(dato che si aprirà sempre a tutto schermo sullo schermo indicato), per far
+ciò la miglior opzione attualmente disponibilie è \-geometry.
 Supportata almeno dai driver di uscita video direct3d, gl, gl2, x11 e xv.
 .
 .TP
@@ -3850,7 +3851,7 @@ Forza la modalità WarpOverlay!.
 .IPs dive
 Forza la modalità DIVE.
 .IPs (no)t23
-Abilita o disabilita i workaround per il laptop T23 (default: diabilita).
+Abilita o disabilita i workaround per il laptop T23 (default: disabilita).
 Prova ad abilitare questa opzione se la tua scheda video supporta solo
 l'ingrandimento.
 .RE
@@ -5381,7 +5382,7 @@ Imposta la frequenza di taglio in Hz.
 .IPs feed=<10\-150>
 Imposta il livello di feed per basse frequenze, in 0.1*dB.
 .IPs profile=<valore>
-Alcuni profili sono disponibili per comodità:
+Sono disponibili alcuni profili di comodo:
 .PD 0
 .RSs
 .IPs default
@@ -9722,7 +9723,7 @@ Attualmente funziona solo se la rilevazione del cambio scena è disattivata
 .
 .TP
 .B "gmc\ \ \ \ "
-Abilita la compensazione del moto globale (Global Motion Compensation),
+Abilita la compensazione del moto globale (Global Motion Compensation).
 .
 .TP
 .B (no)lowdelay
@@ -10798,7 +10799,7 @@ Esegue la miglior stima del movimento a quarto di pixel in tutti i
 tipi di macroblocchi candidati prima di selezionare il tipo migliore.
 Inoltre rifinisce con una metrica SATD i due vettori di movimento usati nei
 macroblocchi bidirezionali, invece di riutilizzare i vettori delle ricerche
-in avanti e indietro.
+in avanti e all'indietro.
 .IPs 6
 Abilita l'ottimizzazione rate-distorsion (?) dei tipi di macroblocco nei
 fotogrammi I e P (default).
