@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r29823
+.\" sync with en/mplayer.1 r29905
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -188,7 +188,10 @@ MPlayer 可播放的电影(见上所述)编码成其他的 MPlayer 可播放格�
 扩展, 反转, 后处理, 旋转, 缩放, 降噪声, RGB/\:YUV 转换)等。
 .PP
 .B gmplayer
-是具有图形用户界面的 MPlayer。其选项与 MPlayer 相同。
+其与 MPlayer 具有相同的选项，然而这些选项可能无法全部正常工作，因为与经由 GUI 所作
+的配置（保存在 gui.conf 中）有冲突。
+特别是有些选项的设置可能被 gui.conf 中的设置覆盖，而另一些可能最终永久保存在
+gui.conf 中。
 .PP
 本手册页最后有用法示例, 能让你迅速上手。
 .PP
@@ -424,7 +427,7 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 .RS
 .
 （以下按键只有当编译时启用对于电视字幕的支持（teletext）时才有效：这些按键用于控制电
-视字幕。）
+视字幕，数据可能来自模拟电视输入或是 MPEG 传输流。）
 .RE
 .PP
 .PD 0
@@ -1247,7 +1250,9 @@ MPlayer 要求解码器把音频解码到指定数量的声道。
 .IPs 4
 环绕立体声
 .IPs 6
-5.1 立体声
+5.1 全声道输出
+.IPs 8
+7.1 全声道输出
 .RE
 .PD 1
 .
@@ -2997,6 +3002,10 @@ gl、gl2、directx、fbdev 和 tdfxfb 视频输出驱动支持。
 值 1 表示正方形像素((几乎?)对所有的 LCD 是正确的)。
 .
 .TP
+.B \-name（仅用于 X11）
+设置窗口类的名字。
+.
+.TP
 .B \-nodouble
 停用双缓冲, 多数用于调试目的。
 双缓冲通过在内存里储存两帧来解决闪烁问题, 在显示一帧的同时解码另一帧。
@@ -3068,6 +3077,16 @@ ggi 和 gl2 的都支持此功能。
 .B \-stop\-xscreensaver (仅用于 X11)
 启动时关闭 xscreensaver, 退出时再打开它。
 如果你的屏保程序不支持 XSS 或 XResetScreenSaver 的 API，则请使用 \-heartbeat\-cmd 选项。
+.
+.TP
+.B \-title（另见 \-use\-filename\-title）
+设置窗口的标题。
+基于 X11 的视频输出驱动支持。
+.
+.TP
+.B \-use\-filename\-title（另见 \-title）
+当未使用 \-title 设置窗口的标题时，使用媒体的文件名设置。
+基于 X11 的视频输出驱动支持。
 .
 .TP
 .B "\-vm \ \ \ "
@@ -3232,7 +3251,8 @@ ggi 和 gl2 的都支持此功能。
 .PD 1
 .
 .TP
-.B vdpau（与 \-vc ffmpeg12vdpau，ffwmv3vdpau，ffvc1vdpau 或 ffh264vdpau 一同使用）
+.B vdpau（与 \-vc ffmpeg12vdpau，ffwmv3vdpau，ffvc1vdpau，ffh264vdpau 或
+ffodivxvdpau 一同使用）
 使用 VDPAU 硬件解码视频的视频输出方式。
 同时支持显示软件解码的视频。
 .PD 0
@@ -4880,11 +4900,11 @@ Jan Meier 回路实现算法（fcut=650, feed=95）
 .PD 0
 .RSs
 .IPs <nch>
-输出声道数 (1\-6)
+输出声道数（1\-8）
 .IPs "<nr>\ "
-路由数 (1\-6)
+转换路径数（1\-8）
 .IPs <from1:to1:from2:to2:from3:to3:...>
-0 到 5 对定义各声道的路由。
+0 到 7 的数字对定义各声道的转换路径。
 .RE
 .sp 1
 .RS
@@ -4966,7 +4986,7 @@ s8, floatle, floatbe, floatne, mulaw, alaw, mpeg2, ac3 和 imaadpcm。
 .PD 0
 .RSs
 .IPs "<n>\ \ "
-输出声道数 (1\-6)
+输出声道数（1\-8）
 .IPs <Lij>
 输入声道 i 混音成输出声道 j 的份量 (0\-1)。
 所以基本上你先要有 n 个数表示要作用到第一个输入声道,
@@ -5003,7 +5023,7 @@ s8, floatle, floatbe, floatne, mulaw, alaw, mpeg2, ac3 和 imaadpcm。
 为了最佳结果, 尝试设置截频尽可能低。这能改善立体声或环绕音效的体验。
 .IPs "<ch>\ "
 决定插入超音声道音频的声道号。
-声道号在 0 和 5 之间 (默认是: 5)。
+声道号在 0 和 7 之间（默认值：5）。
 观察到声道数会自动增加到 <ch>, 如果必要的话。
 .RE
 .sp 1
@@ -5024,8 +5044,8 @@ s8, floatle, floatbe, floatne, mulaw, alaw, mpeg2, ac3 和 imaadpcm。
 .PD 0
 .RSs
 .IPs "<ch>\ "
-决定插入中心声道的声道号。
-声道号在 0 和 5 之间 (默认是: 5)。
+决定插入中心声道的声道编号。
+声道编号取值于 0 和 7 之间（默认值：5）。
 观察到声道数会自动增加到 <ch>, 如果必要的话。
 .RE
 .PD 1
