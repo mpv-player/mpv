@@ -649,7 +649,8 @@ void uninit_player(unsigned int mask){
     initialized_flags&=~INITIALIZED_AO;
     current_module="uninit_ao";
     if (mpctx->edl_muted) mixer_mute(&mpctx->mixer);
-    mpctx->audio_out->uninit(mpctx->eof?0:1); mpctx->audio_out=NULL;
+    if (mpctx->audio_out) mpctx->audio_out->uninit(mpctx->eof?0:1);
+    mpctx->audio_out=NULL;
   }
 
 #ifdef CONFIG_GUI
