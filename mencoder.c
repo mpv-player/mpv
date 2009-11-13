@@ -552,6 +552,14 @@ if(stream->type==STREAMTYPE_DVDNAV){
 	mencoder_exit(1,NULL);
   }
 
+  if (ts_prog) {
+    demux_program_t prog = { .progid = ts_prog };
+    if (demux_control(demuxer, DEMUXER_CTRL_IDENTIFY_PROGRAM, &prog) != DEMUXER_CTRL_NOTIMPL) {
+      audio_id = prog.aid; // switching is handled by select_audio below
+      video_id = prog.vid;
+      demuxer_switch_video(demuxer, video_id);
+    }
+  }
   select_audio(demuxer, audio_id, audio_lang);
 
   if (dvdsub_id == -1 && dvdsub_lang)
