@@ -1,4 +1,4 @@
-.\" synced with r29885
+.\" synced with r29905
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -3343,6 +3343,10 @@ Un valore 1 significa pixel quadrati
 (valore corretto per (quasi?) tutti gli schermi LCD).
 .
 .TP
+.B \-name (solo X11)
+Imposta il nome classe della finestra.
+.
+.TP
 .B \-nodouble
 Disabilita il doppio buffering, fondamentalmente usato a scopi di
 debug.
@@ -3425,6 +3429,17 @@ non conoscono la risoluzione dello schermo come fbdev, x11 e TV-out.
 Disattiva il salvaschermo di X alla partenza e lo riattiva all'uscita.
 Se il tuo salvaschermo non gestisce né la API XSS né XResetScreenSaver,
 perfavore usa al suo posto \-heartbeat\-cmd.
+.
+.TP
+.B \-title (vedi anche \-use\-filename\-title)
+Imposta il titolo della finestra.
+Gestito dai driver di uscita video basati su X11.
+.
+.TP
+.B \-use\-filename\-title (vedi anche \-title)
+Imposta il titolo della finestra usando il nome del file multimediale, se non
+è stato impostato con \-title.
+Gestito dai driver di uscita video basati su X11.
 .
 .TP
 .B "\-vm \ \ \ "
