@@ -1020,6 +1020,8 @@ static int mp_property_deinterlace(m_option_t * prop, int action,
 	vf->control(vf, VFCTRL_GET_DEINTERLACE, &deinterlace);
 	deinterlace = !deinterlace;
 	vf->control(vf, VFCTRL_SET_DEINTERLACE, &deinterlace);
+	set_osd_msg(OSD_MSG_SPEED, 1, osd_duration, MSGTR_OSDDeinterlace,
+	    deinterlace ? MSGTR_Enabled : MSGTR_Disabled);
 	return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
