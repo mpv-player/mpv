@@ -31,6 +31,7 @@ presentation_queue_target_create_x11
 presentation_queue_target_destroy
 video_mixer_create
 video_mixer_destroy
+video_mixer_query_feature_support
 video_mixer_render
 video_mixer_set_attribute_values
 video_mixer_set_feature_enables

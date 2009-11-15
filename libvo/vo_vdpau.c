@@ -132,6 +132,7 @@ struct vdpctx {
     int                                pullup;
     float                              denoise;
     float                              sharpen;
+    int                                hqscaling;
     int                                chroma_deint;
     int                                top_field_first;
     bool                               flip;
@@ -576,7 +577,7 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
 #define VDP_NUM_MIXER_PARAMETER 3
-#define MAX_NUM_FEATURES 5
+#define MAX_NUM_FEATURES 6
     int i;
     VdpStatus vdp_st;
 
@@ -616,6 +617,25 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_NOISE_REDUCTION;
     if (vc->sharpen)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_SHARPNESS;
+    if (vc->hqscaling) {
+#ifndef VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1
+        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] MPlayer was compiled with (old?)"
+               "libvdpau headers with no support for requested hqscaling.\n");
+#else
+        VdpVideoMixerFeature hqscaling_feature =
+            VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 + vc->hqscaling-1;
+        VdpBool hqscaling_available;
+        vdp_st = vdp->video_mixer_query_feature_support(vc->vdp_device,
+                                                        hqscaling_feature,
+                                                        &hqscaling_available);
+        CHECK_ST_ERROR("Error when calling video_mixer_query_feature_support");
+        if (hqscaling_available)
+            features[feature_count++] = hqscaling_feature;
+        else
+            mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Your hardware or VDPAU "
+                   "library does not support requested hqscaling.\n");
+    }
+#endif
 
     vdp_st = vdp->video_mixer_create(vc->vdp_device, feature_count, features,
                                      VDP_NUM_MIXER_PARAMETER,
@@ -1592,10 +1612,12 @@ static int preinit(struct vo *vo, const char *arg)
         {"denoise", OPT_ARG_FLOAT, &vc->denoise, NULL},
         {"sharpen", OPT_ARG_FLOAT, &vc->sharpen, NULL},
         {"colorspace", OPT_ARG_INT, &vc->user_colorspace, NULL},
+        {"hqscaling", OPT_ARG_INT, &vc->hqscaling, NULL},
         {"fps",     OPT_ARG_FLOAT, &vc->user_fps, NULL},
         {NULL}
     };
-    if (subopt_parse(arg, subopts) != 0) {
+    if (subopt_parse(arg, subopts) != 0 || vc->hqscaling < 0
+        || vc->hqscaling > 9) {
         mp_msg(MSGT_VO, MSGL_FATAL, help_msg);
         return -1;
     }

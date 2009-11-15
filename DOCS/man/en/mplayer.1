@@ -3462,6 +3462,13 @@ Use ITU-R BT.709 color space.
 .IPs 3
 Use SMPTE-240M color space.
 .RE
+IPs hqscaling
+.RSss
+.IPs 0
+Use default VDPAU scaling (default).
+.IPs 1\-9
+Apply high quality VDPAU scaling (needs capable hardware).
+.RE
 .IPs fps=<number>
 Override autodetected display refresh rate value (the value is needed for framedrop to allow video playback rates higher than display refresh rate, and for vsync-aware frame timing adjustments).
 Default 0 means use autodetected value.
