@@ -93,6 +93,8 @@ typedef struct vf_seteq_s
  * the OSD state outside of normal OSD draw time. */
 #define VFCTRL_SET_OSD_OBJ 20
 #define VFCTRL_REDRAW_OSD  21 /* Change user-visible OSD immediately */
+#define VFCTRL_SET_YUV_COLORSPACE 22
+#define VFCTRL_GET_YUV_COLORSPACE 23
 
 #include "vfcap.h"
 

@@ -1051,6 +1051,48 @@ static int mp_property_deinterlace(m_option_t *prop, int action,
     return m_property_flag_ro(prop, action, arg, value);
 }
 
+static int mp_property_yuv_colorspace(m_option_t *prop, int action,
+                                     void *arg, MPContext *mpctx)
+{
+    if (!mpctx->sh_video || !mpctx->sh_video->vfilter)
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct vf_instance *vf = mpctx->sh_video->vfilter;
+    int colorspace;
+    switch (action) {
+    case M_PROPERTY_GET:
+	if (!arg)
+	    return M_PROPERTY_ERROR;
+	if (vf->control(vf, VFCTRL_GET_YUV_COLORSPACE, arg) != true)
+            return M_PROPERTY_UNAVAILABLE;
+	return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT:
+        if (!arg)
+            return M_PROPERTY_ERROR;
+	if (vf->control(vf, VFCTRL_GET_YUV_COLORSPACE, &colorspace) != true)
+            return M_PROPERTY_UNAVAILABLE;
+        char * const names[] = {"BT.601 (SD)", "BT.709 (HD)", "SMPTE-240M"};
+        if (colorspace < 0 || colorspace >= sizeof(names) / sizeof(names[0]))
+            *(char **)arg = strdup("Unknown");
+        else
+            *(char**)arg = strdup(names[colorspace]);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET:
+	if (!arg)
+	    return M_PROPERTY_ERROR;
+	M_PROPERTY_CLAMP(prop, *(int *) arg);
+	vf->control(vf, VFCTRL_SET_YUV_COLORSPACE, arg);
+	return M_PROPERTY_OK;
+    case M_PROPERTY_STEP_UP:;
+	if (vf->control(vf, VFCTRL_GET_YUV_COLORSPACE, &colorspace) != true)
+            return M_PROPERTY_UNAVAILABLE;
+	colorspace += 1;
+	vf->control(vf, VFCTRL_SET_YUV_COLORSPACE, &colorspace);
+	return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 /// Panscan (RW)
 static int mp_property_panscan(m_option_t *prop, int action, void *arg,
 			       MPContext *mpctx)
@@ -2058,6 +2100,8 @@ static const m_option_t mp_properties[] = {
      M_OPT_RANGE, 0, 1, NULL },
     { "deinterlace", mp_property_deinterlace, CONF_TYPE_FLAG,
      M_OPT_RANGE, 0, 1, NULL },
+    { "yuv_colorspace", mp_property_yuv_colorspace, CONF_TYPE_INT,
+     M_OPT_RANGE, 0, 2, NULL },
     { "ontop", mp_property_ontop, CONF_TYPE_FLAG,
      M_OPT_RANGE, 0, 1, NULL },
     { "rootwin", mp_property_rootwin, CONF_TYPE_FLAG,
@@ -2217,6 +2261,7 @@ static struct property_osd_display {
     { "border", 0, -1, _("Border: %s") },
     { "framedropping", 0, -1, _("Framedropping: %s") },
     { "deinterlace", 0, -1, _("Deinterlace: %s") },
+    { "yuv_colorspace", 0, -1, _("YUV colorspace: %s") },
     { "gamma", OSD_BRIGHTNESS, -1, _("Gamma") },
     { "brightness", OSD_BRIGHTNESS, -1, _("Brightness") },
     { "contrast", OSD_CONTRAST, -1, _("Contrast") },

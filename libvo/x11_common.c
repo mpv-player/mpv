@@ -1651,7 +1651,7 @@ double vo_vm_get_fps(struct vo *vo)
     if (!XF86VidModeGetModeLine(x11->display, x11->screen, &clock, &modeline))
         return 0;
     if (modeline.privsize)
-        Xfree(modeline.private);
+        XFree(modeline.private);
     return 1e3 * clock / modeline.htotal / modeline.vtotal;
 }
 #endif
@@ -1906,6 +1906,9 @@ int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, char *name, int value)
                 else if (!strcmp(attributes[i].name, "XV_BLUE_INTENSITY")
                          && (!strcasecmp(name, "blue_intensity")))
                     port_value = value;
+                else if (!strcmp(attributes[i].name, "XV_ITURBT_709")
+                         && (!strcasecmp(name, "bt_709")))
+                    port_value = value;
                 else
                     continue;
 
@@ -1986,6 +1989,9 @@ int vo_xv_get_eq(struct vo *vo, uint32_t xv_port, char *name, int *value)
                     *value = val;
                 else if (!strcmp(attributes[i].name, "XV_BLUE_INTENSITY")
                          && (!strcasecmp(name, "blue_intensity")))
+                    *value = val;
+                else if (!strcmp(attributes[i].name, "XV_ITURBT_709")
+                         && (!strcasecmp(name, "bt_709")))
                     *value = val;
                 else
                     continue;

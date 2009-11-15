@@ -817,6 +817,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
             struct voctrl_get_equalizer_args *args = data;
             return vo_xv_get_eq(vo, x11->xv_port, args->name, args->valueptr);
         }
+    case VOCTRL_SET_YUV_COLORSPACE:;
+        int given_cspc = *(int *)data % 2;
+        return vo_xv_set_eq(vo, x11->xv_port, "bt_709", given_cspc * 200 - 100);
+    case VOCTRL_GET_YUV_COLORSPACE:;
+        int bt709_enabled;
+        if (!vo_xv_get_eq(vo, x11->xv_port, "bt_709", &bt709_enabled))
+            return false;
+        *(int *)data = bt709_enabled == 100;
+        return true;
     case VOCTRL_ONTOP:
         vo_x11_ontop(vo);
         return VO_TRUE;

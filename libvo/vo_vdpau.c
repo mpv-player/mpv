@@ -124,6 +124,8 @@ struct vdpctx {
     int                                output_surface_width, output_surface_height;
 
     VdpVideoMixer                      video_mixer;
+    int                                user_colorspace;
+    int                                colorspace;
     int                                deint;
     int                                deint_type;
     int                                deint_counter;
@@ -541,6 +543,33 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
     return 0;
 }
 
+static void update_csc_matrix(struct vo *vo)
+{
+    struct vdpctx *vc = vo->priv;
+    struct vdp_functions *vdp = vc->vdp;
+    VdpStatus vdp_st;
+
+    const VdpColorStandard vdp_colors[] = {VDP_COLOR_STANDARD_ITUR_BT_601,
+                                           VDP_COLOR_STANDARD_ITUR_BT_709,
+                                           VDP_COLOR_STANDARD_SMPTE_240M};
+    char * const vdp_names[] = {"BT.601", "BT.709", "SMPTE-240M"};
+    int csp = vc->colorspace;
+    mp_msg(MSGT_VO, MSGL_V, "[vdpau] Updating CSC matrix for %s\n",
+           vdp_names[csp]);
+
+    VdpCSCMatrix matrix;
+    vdp_st = vdp->generate_csc_matrix(&vc->procamp, vdp_colors[csp], &matrix);
+    CHECK_ST_WARNING("Error when generating CSC matrix");
+
+    const VdpVideoMixerAttribute attributes[] =
+        {VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX};
+    const void *attribute_values[] = {&matrix};
+    vdp_st = vdp->video_mixer_set_attribute_values(vc->video_mixer, 1,
+                                                   attributes,
+                                                   attribute_values);
+    CHECK_ST_WARNING("Error when setting CSC matrix");
+}
+
 static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
 {
     struct vdpctx *vc = vo->priv;
@@ -611,6 +640,7 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
                                               skip_chroma_attrib,
                                               skip_chroma_value_ptr);
 
+    update_csc_matrix(vo);
     return 0;
 }
 
@@ -803,6 +833,10 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     vc->image_format = format;
     vc->vid_width    = width;
     vc->vid_height   = height;
+    if (vc->user_colorspace == 0)
+        vc->colorspace = width >= 1280 || height > 576 ? 1 : 0;
+    else
+        vc->colorspace = vc->user_colorspace - 1;
     free_video_specific(vo);
     if (IMGFMT_IS_VDPAU(vc->image_format) && !create_vdp_decoder(vo, 2))
         return -1;
@@ -1543,12 +1577,14 @@ static int preinit(struct vo *vo, const char *arg)
 
     vc->deint_type = 3;
     vc->chroma_deint = 1;
+    vc->user_colorspace = 1;
     const opt_t subopts[] = {
         {"deint",   OPT_ARG_INT,   &vc->deint,   (opt_test_f)int_non_neg},
         {"chroma-deint", OPT_ARG_BOOL,  &vc->chroma_deint,  NULL},
         {"pullup",  OPT_ARG_BOOL,  &vc->pullup,  NULL},
         {"denoise", OPT_ARG_FLOAT, &vc->denoise, NULL},
         {"sharpen", OPT_ARG_FLOAT, &vc->sharpen, NULL},
+        {"colorspace", OPT_ARG_INT, &vc->user_colorspace, NULL},
         {"fps",     OPT_ARG_FLOAT, &vc->user_fps, NULL},
         {NULL}
     };
@@ -1623,11 +1659,6 @@ static int set_equalizer(struct vo *vo, const char *name, int value)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
-    VdpStatus vdp_st;
-    VdpCSCMatrix matrix;
-    static const VdpVideoMixerAttribute attributes[] =
-        {VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX};
-    const void *attribute_values[] = {&matrix};
 
     if (!strcasecmp(name, "brightness"))
         vc->procamp.brightness = value / 100.0;
@@ -1640,15 +1671,8 @@ static int set_equalizer(struct vo *vo, const char *name, int value)
     else
         return VO_NOTIMPL;
 
-    vdp_st = vdp->generate_csc_matrix(&vc->procamp,
-                                      VDP_COLOR_STANDARD_ITUR_BT_601,
-                                      &matrix);
-    CHECK_ST_WARNING("Error when generating CSC matrix");
-    vdp_st = vdp->video_mixer_set_attribute_values(vc->video_mixer, 1,
-                                                   attributes,
-                                                   attribute_values);
-    CHECK_ST_WARNING("Error when setting CSC matrix");
-    return VO_TRUE;
+    update_csc_matrix(vo);
+    return true;
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
@@ -1712,6 +1736,13 @@ static int control(struct vo *vo, uint32_t request, void *data)
         struct voctrl_get_equalizer_args *args = data;
         return get_equalizer(vo, args->name, args->valueptr);
     }
+    case VOCTRL_SET_YUV_COLORSPACE:
+        vc->colorspace = *(int *)data % 3;
+        update_csc_matrix(vo);
+        return true;
+    case VOCTRL_GET_YUV_COLORSPACE:
+        *(int *)data = vc->colorspace;
+        return true;
     case VOCTRL_ONTOP:
         vo_x11_ontop(vo);
         return VO_TRUE;

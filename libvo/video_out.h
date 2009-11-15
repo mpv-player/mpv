@@ -88,6 +88,9 @@ typedef struct {
 
 #define VOCTRL_UPDATE_SCREENINFO 32
 
+#define VOCTRL_SET_YUV_COLORSPACE 33
+#define VOCTRL_GET_YUV_COLORSPACE 34
+
 // Vo can be used by xover
 #define VOCTRL_XOVERLAY_SUPPORT 22
 
