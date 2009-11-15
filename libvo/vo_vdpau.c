@@ -2,6 +2,7 @@
  * VDPAU video output driver
  *
  * Copyright (C) 2008 NVIDIA
+ * Copyright (C) 2009 Uoti Urpala
  *
  * This file is part of MPlayer.
  *
@@ -32,6 +33,7 @@
 #include <dlfcn.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <limits.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -72,7 +74,7 @@
     } while (0)
 
 /* number of video and output surfaces */
-#define NUM_OUTPUT_SURFACES                2
+#define NUM_OUTPUT_SURFACES                3
 #define MAX_VIDEO_SURFACES                 50
 #define NUM_BUFFERED_VIDEO                 4
 
@@ -105,6 +107,8 @@ struct vdpctx {
 
     VdpPresentationQueueTarget         flip_target;
     VdpPresentationQueue               flip_queue;
+    uint64_t                           last_vdp_time;
+    unsigned int                       last_sync_update;
 
     void                              *vdpau_lib_handle;
 
@@ -138,6 +142,13 @@ struct vdpctx {
 
     struct vdpau_render_state          surface_render[MAX_VIDEO_SURFACES];
     int                                surface_num;
+    VdpTime                            recent_vsync_time;
+    float                              user_fps;
+    unsigned int                       vsync_interval;
+    uint64_t                           last_queue_time;
+    uint64_t                           last_ideal_time;
+    bool                               dropped_frame;
+    uint64_t                           dropped_time;
     uint32_t                           vid_width, vid_height;
     uint32_t                           image_format;
     VdpChromaType                      vdp_chroma_type;
@@ -172,15 +183,57 @@ struct vdpctx {
     // Video equalizer
     VdpProcamp procamp;
 
-    bool visible_buf;
+    int num_shown_frames;
     bool paused;
 
     // These tell what's been initialized and uninit() should free/uninitialize
     bool mode_switched;
 };
 
+static int change_vdptime_sync(struct vdpctx *vc, unsigned int *t)
+{
+    struct vdp_functions *vdp = vc->vdp;
+    VdpStatus vdp_st;
+    VdpTime vdp_time;
+    vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &vdp_time);
+    CHECK_ST_ERROR("Error when calling vdp_presentation_queue_get_time");
+    unsigned int t1 = *t;
+    unsigned int t2 = GetTimer();
+    uint64_t old = vc->last_vdp_time + (t1 - vc->last_sync_update) * 1000ULL;
+    if (vdp_time > old)
+        if (vdp_time > old + (t2 - t1) * 1000ULL)
+            vdp_time -= (t2 - t1) * 1000ULL;
+        else
+            vdp_time = old;
+    mp_msg(MSGT_VO, MSGL_V, "[vdpau] adjusting VdpTime offset by %f µs\n",
+           (int64_t)(vdp_time - old) / 1000.);
+    vc->last_vdp_time = vdp_time;
+    vc->last_sync_update = t1;
+    *t = t2;
+    return 0;
+}
 
-static void flip_page(struct vo *vo);
+static uint64_t sync_vdptime(struct vo *vo)
+{
+    struct vdpctx *vc = vo->priv;
+
+    unsigned int t = GetTimer();
+    if (t - vc->last_sync_update > 5000000)
+        change_vdptime_sync(vc, &t);
+    uint64_t now = (t - vc->last_sync_update) * 1000ULL + vc->last_vdp_time;
+    // Make sure nanosecond inaccuracies don't make things inconsistent
+    now = FFMAX(now, vc->recent_vsync_time);
+    return now;
+}
+
+static uint64_t convert_to_vdptime(struct vo *vo, unsigned int t)
+{
+    struct vdpctx *vc = vo->priv;
+    return (int)(t - vc->last_sync_update) * 1000LL + vc->last_vdp_time;
+}
+
+static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration);
+
 static int video_to_output_surface(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
@@ -292,6 +345,7 @@ static void forget_frames(struct vo *vo)
     struct vdpctx *vc = vo->priv;
 
     vc->deint_queue_pos = -1001;
+    vc->dropped_frame = false;
     for (int i = 0; i < NUM_BUFFERED_VIDEO; i++) {
         struct buffered_video_surface *p = vc->buffered_video + i;
         if (p->mpi)
@@ -329,6 +383,7 @@ static void resize(struct vo *vo)
 #endif
     vo_osd_changed(OSDTYPE_OSD);
 
+    bool had_frames = vc->num_shown_frames;
     if (vc->output_surface_width < vo->dwidth
         || vc->output_surface_height < vo->dheight) {
         if (vc->output_surface_width < vo->dwidth) {
@@ -354,10 +409,11 @@ static void resize(struct vo *vo)
             mp_msg(MSGT_VO, MSGL_DBG2, "OUT CREATE: %u\n",
                    vc->output_surfaces[i]);
         }
+        vc->num_shown_frames = 0;
     }
-    if (vc->paused && vc->visible_buf)
+    if (vc->paused && had_frames)
         if (video_to_output_surface(vo) >= 0)
-            flip_page(vo);
+            flip_page_timed(vo, 0, -1);
 }
 
 static void preemption_callback(VdpDevice device, void *context)
@@ -447,6 +503,40 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
         } else
             CHECK_ST_ERROR("Error when calling vdp_presentation_queue_create");
     }
+
+    VdpTime vdp_time;
+    vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &vdp_time);
+    CHECK_ST_ERROR("Error when calling vdp_presentation_queue_get_time");
+    vc->last_vdp_time = vdp_time;
+    vc->last_sync_update = GetTimer();
+
+    vc->vsync_interval = 1;
+    if (vc->user_fps > 0) {
+        vc->vsync_interval = 1e9 / vc->user_fps;
+        mp_msg(MSGT_VO, MSGL_INFO, "[vdpau] Assuming user-specified display "
+               "refresh rate of %.3f Hz.\n", vc->user_fps);
+    } else if (vc->user_fps == 0) {
+#ifdef CONFIG_XF86VM
+        double fps = vo_vm_get_fps(vo);
+        if (!fps)
+            mp_msg(MSGT_VO, MSGL_WARN, "[vdpau] Failed to get display FPS\n");
+        else {
+            vc->vsync_interval = 1e9 / fps;
+            // This is verbose, but I'm not yet sure how common wrong values are
+            mp_msg(MSGT_VO, MSGL_INFO,
+                   "[vdpau] Got display refresh rate %.3f Hz.\n"
+                   "[vdpau] If that value looks wrong give the "
+                   "-vo vdpau:fps=X suboption manually.\n", fps);
+        }
+#else
+        mp_msg(MSGT_VO, MSGL_INFO, "[vdpau] This binary has been compiled "
+               "without XF86VidMode support.\n");
+        mp_msg(MSGT_VO, MSGL_INFO, "[vdpau] Can't use vsync-aware timing "
+               "without manually provided -vo vdpau:fps=X suboption.\n");
+#endif
+    } else
+        mp_msg(MSGT_VO, MSGL_V, "[vdpau] framedrop/timing logic disabled by "
+               "user.\n");
 
     return 0;
 }
@@ -631,7 +721,6 @@ static int initialize_vdpau_objects(struct vo *vo)
                                           &vc->eosd_surface.max_width,
                                           &vc->eosd_surface.max_height);
     CHECK_ST_WARNING("Query to get max EOSD surface size failed");
-    vc->surface_num = 0;
     forget_frames(vo);
     resize(vo);
     return 0;
@@ -656,7 +745,7 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
     };
     vc->output_surface_width = vc->output_surface_height = -1;
     vc->eosd_render_count = 0;
-    vc->visible_buf = false;
+    vc->num_shown_frames = 0;
 }
 
 static int handle_preemption(struct vo *vo)
@@ -775,7 +864,7 @@ static void check_events(struct vo *vo)
         resize(vo);
     else if (e & VO_EVENT_EXPOSE && vc->paused) {
         /* did we already draw a buffer */
-        if (vc->visible_buf) {
+        if (vc->num_shown_frames) {
             /* redraw the last visible buffer */
             VdpStatus vdp_st;
             int last_surface = (vc->surface_num + NUM_OUTPUT_SURFACES - 1)
@@ -1093,23 +1182,135 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
                       vc->vid_height, draw_osd_I8A8, vo);
 }
 
-static void flip_page(struct vo *vo)
+static void wait_for_previous_frame(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
 
+    if (vc->num_shown_frames < 2)
+        return;
+
+    VdpTime vtime;
+    VdpOutputSurface visible_s, prev_s;
+    int base = vc->surface_num + NUM_OUTPUT_SURFACES;
+    visible_s = vc->output_surfaces[(base - 1) % NUM_OUTPUT_SURFACES];
+    prev_s = vc->output_surfaces[(base - 2) % NUM_OUTPUT_SURFACES];
+    vdp_st = vdp->presentation_queue_block_until_surface_idle(vc->flip_queue,
+                                                              prev_s, &vtime);
+    CHECK_ST_WARNING("Error calling "
+                     "presentation_queue_block_until_surface_idle");
+    VdpPresentationQueueStatus status;
+    vdp_st = vdp->presentation_queue_query_surface_status(vc->flip_queue,
+                                                          visible_s,
+                                                          &status, &vtime);
+    CHECK_ST_WARNING("Error calling presentation_queue_query_surface_status");
+    vc->recent_vsync_time = vtime;
+}
+
+static inline uint64_t prev_vs2(struct vdpctx *vc, uint64_t ts, int shift)
+{
+    uint64_t offset = ts - vc->recent_vsync_time;
+    // Fix negative values for 1<<shift vsyncs before vc->recent_vsync_time
+    offset += (uint64_t)vc->vsync_interval << shift;
+    offset %= vc->vsync_interval;
+    return ts - offset;
+}
+
+static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration)
+{
+    struct vdpctx *vc = vo->priv;
+    struct vdp_functions *vdp = vc->vdp;
+    VdpStatus vdp_st;
+    uint32_t vsync_interval = vc->vsync_interval;
+
     if (handle_preemption(vo) < 0)
         return;
 
+    if (duration > INT_MAX / 1000)
+        duration = -1;
+    else
+        duration *= 1000;
+
+    if (vc->user_fps < 0)
+        duration = -1;  // Make sure drop logic is disabled
+
+    uint64_t now = sync_vdptime(vo);
+    uint64_t pts = pts_us ? convert_to_vdptime(vo, pts_us) : now;
+    uint64_t ideal_pts = pts;
+    uint64_t npts = duration >= 0 ? pts + duration : UINT64_MAX;
+
+#define PREV_VS2(ts, shift) prev_vs2(vc, ts, shift)
+    // Only gives accurate results for ts >= vc->recent_vsync_time
+#define PREV_VSYNC(ts) PREV_VS2(ts, 0)
+
+    /* We hope to be here at least one vsync before the frame should be shown.
+     * If we are running late then don't drop the frame unless there is
+     * already one queued for the next vsync; even if we _hope_ to show the
+     * next frame soon enough to mean this one should be dropped we might
+     * not make the target time in reality. Without this check we could drop
+     * every frame, freezing the display completely if video lags behind.
+     */
+    if (now > PREV_VSYNC(FFMAX(pts,
+                               vc->last_queue_time + vsync_interval)))
+        npts = UINT64_MAX;
+
+    /* Allow flipping a frame at a vsync if its presentation time is a
+     * bit after that vsync and the change makes the flip time delta
+     * from previous frame better match the target timestamp delta.
+     * This avoids instability with frame timestamps falling near vsyncs.
+     * For example if the frame timestamps were (with vsyncs at
+     * integer values) 0.01, 1.99, 4.01, 5.99, 8.01, ... then
+     * straightforward timing at next vsync would flip the frames at
+     * 1, 2, 5, 6, 9; this changes it to 1, 2, 4, 6, 8 and so on with
+     * regular 2-vsync intervals.
+     *
+     * Also allow moving the frame forward if it looks like we dropped
+     * the previous frame incorrectly (now that we know better after
+     * having final exact timestamp information for this frame) and
+     * there would unnecessarily be a vsync without a frame change.
+     */
+    uint64_t vsync = PREV_VSYNC(pts);
+    if (pts < vsync + vsync_interval / 4
+        && (vsync - PREV_VS2(vc->last_queue_time, 16)
+            > pts - vc->last_ideal_time + vsync_interval / 2
+            || vc->dropped_frame && vsync > vc->dropped_time))
+        pts -= vsync_interval / 2;
+
+    vc->dropped_frame = true; // changed at end if false
+    vc->dropped_time = ideal_pts;
+
+    pts = FFMAX(pts, vc->last_queue_time + vsync_interval);
+    pts = FFMAX(pts, now);
+    if (npts < PREV_VSYNC(pts) + vsync_interval)
+        return;
+
+    /* At least on my NVIDIA 9500GT with driver versions 185.18.36 and 190.42
+     * trying to queue two unshown frames simultaneously caused bad behavior
+     * (high CPU use in _other_ VDPAU functions called later). Avoiding
+     * longer queues also makes things simpler. So currently we always
+     * try to keep exactly one frame queued for the future, queuing the
+     * current frame immediately after the previous one is shown.
+     */
+    wait_for_previous_frame(vo);
+
+    now = sync_vdptime(vo);
+    pts = FFMAX(pts, now);
+    vsync = PREV_VSYNC(pts);
+    if (npts < vsync + vsync_interval)
+        return;
+    pts = vsync + (vsync_interval >> 2);
     vdp_st =
         vdp->presentation_queue_display(vc->flip_queue,
                                         vc->output_surfaces[vc->surface_num],
-                                        vo->dwidth, vo->dheight, 0);
+                                        vo->dwidth, vo->dheight, pts);
     CHECK_ST_WARNING("Error when calling vdp_presentation_queue_display");
 
+    vc->last_queue_time = pts;
+    vc->last_ideal_time = ideal_pts;
+    vc->dropped_frame = false;
     vc->surface_num = (vc->surface_num + 1) % NUM_OUTPUT_SURFACES;
-    vc->visible_buf = true;
+    vc->num_shown_frames = FFMIN(vc->num_shown_frames + 1, 1000);
 }
 
 static int draw_slice(struct vo *vo, uint8_t *image[], int stride[], int w,
@@ -1348,6 +1549,7 @@ static int preinit(struct vo *vo, const char *arg)
         {"pullup",  OPT_ARG_BOOL,  &vc->pullup,  NULL},
         {"denoise", OPT_ARG_FLOAT, &vc->denoise, NULL},
         {"sharpen", OPT_ARG_FLOAT, &vc->sharpen, NULL},
+        {"fps",     OPT_ARG_FLOAT, &vc->user_fps, NULL},
         {NULL}
     };
     if (subopt_parse(arg, subopts) != 0) {
@@ -1478,6 +1680,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         }
         return VO_TRUE;
     case VOCTRL_PAUSE:
+        if (vc->dropped_frame)
+            flip_page_timed(vo, 0, -1);
         return (vc->paused = true);
     case VOCTRL_RESUME:
         return (vc->paused = false);
@@ -1538,7 +1742,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         video_to_output_surface(vo);
         draw_eosd(vo);
         draw_osd(vo, data);
-        flip_page(vo);
+        flip_page_timed(vo, 0, -1);
         return true;
     case VOCTRL_RESET:
         forget_frames(vo);
@@ -1563,7 +1767,7 @@ const struct vo_driver video_out_vdpau = {
     .get_buffered_frame = get_buffered_frame,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
-    .flip_page = flip_page,
+    .flip_page_timed = flip_page_timed,
     .check_events = check_events,
     .uninit = uninit,
 };

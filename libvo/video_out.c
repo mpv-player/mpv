@@ -328,13 +328,16 @@ void vo_draw_osd(struct vo *vo, struct osd_state *osd)
     vo->driver->draw_osd(vo, osd);
 }
 
-void vo_flip_page(struct vo *vo)
+void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration)
 {
     if (!vo->config_ok)
         return;
     vo->frame_loaded = false;
     vo->next_pts = MP_NOPTS_VALUE;
-    vo->driver->flip_page(vo);
+    if (vo->driver->flip_page_timed)
+        vo->driver->flip_page_timed(vo, pts_us, duration);
+    else
+        vo->driver->flip_page(vo);
 }
 
 void vo_check_events(struct vo *vo)

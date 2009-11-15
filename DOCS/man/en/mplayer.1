@@ -3442,6 +3442,11 @@ Use nochroma\-deint to solely use luma and speed up advanced deinterlacing.
 Useful with slow video memory.
 .IPs pullup
 Try to apply inverse telecine, needs motion adaptive temporal deinterlacing.
+.IPs fps=<number>
+Override autodetected display refresh rate value (the value is needed for framedrop to allow video playback rates higher than display refresh rate, and for vsync-aware frame timing adjustments).
+Default 0 means use autodetected value.
+A positive value is interpreted as a refresh rate in Hz and overrides the autodetected value.
+A negative value disables all timing adjustment and framedrop logic.
 .RE
 .PD 1
 .

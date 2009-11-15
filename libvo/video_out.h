@@ -200,6 +200,7 @@ struct vo_driver {
      * Blit/Flip buffer to the screen. Must be called after each frame!
      */
     void (*flip_page)(struct vo *vo);
+    void (*flip_page_timed)(struct vo *vo, unsigned int pts_us, int duration);
 
     /*
      * This func is called after every frames to handle keyboard and
@@ -277,7 +278,7 @@ int vo_get_buffered_frame(struct vo *vo, bool eof);
 int vo_draw_frame(struct vo *vo, uint8_t *src[]);
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y);
 void vo_draw_osd(struct vo *vo, struct osd_state *osd);
-void vo_flip_page(struct vo *vo);
+void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration);
 void vo_check_events(struct vo *vo);
 void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);

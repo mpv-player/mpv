@@ -1642,6 +1642,18 @@ void vo_vm_close(struct vo *vo)
         vidmodes = NULL;
     }
 }
+
+double vo_vm_get_fps(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    int clock;
+    XF86VidModeModeLine modeline;
+    if (!XF86VidModeGetModeLine(x11->display, x11->screen, &clock, &modeline))
+        return 0;
+    if (modeline.privsize)
+        Xfree(modeline.private);
+    return 1e3 * clock / modeline.htotal / modeline.vtotal;
+}
 #endif
 
 #endif                          /* X11_FULLSCREEN */

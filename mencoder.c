@@ -208,7 +208,7 @@ int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts) { abort(); }
 int vo_draw_frame(struct vo *vo, uint8_t *src[]) { abort(); }
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y) { abort(); }
 void vo_draw_osd(struct vo *vo, struct osd_state *osd) { abort(); }
-void vo_flip_page(struct vo *vo) { abort(); }
+void vo_flip_page(struct vo *vo, uint32_t pts_us, int duration) { abort(); }
 void vo_check_events(struct vo *vo) { abort(); }
 
 // Needed by getch2
