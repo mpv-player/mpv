@@ -134,6 +134,7 @@ struct vdpctx {
     float                              sharpen;
     int                                chroma_deint;
     int                                top_field_first;
+    bool                               flip;
 
     VdpDecoder                         decoder;
     int                                decoder_max_refs;
@@ -375,8 +376,8 @@ static void resize(struct vo *vo)
     vc->out_rect_vid.y1 = dst_rect.bottom;
     vc->src_rect_vid.x0 = src_rect.left;
     vc->src_rect_vid.x1 = src_rect.right;
-    vc->src_rect_vid.y0 = src_rect.top;
-    vc->src_rect_vid.y1 = src_rect.bottom;
+    vc->src_rect_vid.y0 = vc->flip ? src_rect.bottom : src_rect.top;
+    vc->src_rect_vid.y1 = vc->flip ? src_rect.top    : src_rect.bottom;
     vc->border_x        = borders.left;
     vc->border_y        = borders.top;
 #ifdef CONFIG_FREETYPE
@@ -830,6 +831,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     if (handle_preemption(vo) < 0)
         return -1;
+
+    vc->flip = flags & VOFLAG_FLIPPING;
     vc->image_format = format;
     vc->vid_width    = width;
     vc->vid_height   = height;
@@ -1471,7 +1474,7 @@ static int query_format(uint32_t format)
 {
     int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
         | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_EOSD
-        | VFCAP_EOSD_UNSCALED;
+        | VFCAP_EOSD_UNSCALED | VFCAP_FLIP;
     switch (format) {
         case IMGFMT_YV12:
         case IMGFMT_I420:
