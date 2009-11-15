@@ -1540,6 +1540,10 @@ static void uninit(struct vo *vo)
 #endif
     vo_x11_uninit(vo);
 
+    // Free bitstream buffers allocated by FFmpeg
+    for (int i = 0; i < MAX_VIDEO_SURFACES; i++)
+        av_freep(&vc->surface_render[i].bitstream_buffers);
+
     dlclose(vc->vdpau_lib_handle);
 }
 
