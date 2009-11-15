@@ -1570,27 +1570,6 @@ static void uninit(struct vo *vo)
     dlclose(vc->vdpau_lib_handle);
 }
 
-static const char help_msg[] =
-    "\n-vo vdpau command line help:\n"
-    "Example: mplayer -vo vdpau:deint=2\n"
-    "\nOptions:\n"
-    "  deint (all modes > 0 respect -field-dominance)\n"
-    "    0: no deinterlacing\n"
-    "    1: only show first field\n"
-    "    2: bob deinterlacing\n"
-    "    3: temporal deinterlacing (resource-hungry)\n"
-    "    4: temporal-spatial deinterlacing (very resource-hungry)\n"
-    "  chroma-deint\n"
-    "    Operate on luma and chroma when using temporal deinterlacing (default)\n"
-    "    Use nochroma-deint to speed up temporal deinterlacing\n"
-    "  pullup\n"
-    "    Try to apply inverse-telecine (needs temporal deinterlacing)\n"
-    "  denoise\n"
-    "    Apply denoising, argument is strength from 0.0 to 1.0\n"
-    "  sharpen\n"
-    "    Apply sharpening or softening, argument is strength from -1.0 to 1.0\n"
-    ;
-
 static int preinit(struct vo *vo, const char *arg)
 {
     int i;
@@ -1616,9 +1595,13 @@ static int preinit(struct vo *vo, const char *arg)
         {"fps",     OPT_ARG_FLOAT, &vc->user_fps, NULL},
         {NULL}
     };
-    if (subopt_parse(arg, subopts) != 0 || vc->hqscaling < 0
-        || vc->hqscaling > 9) {
-        mp_msg(MSGT_VO, MSGL_FATAL, help_msg);
+    if (subopt_parse(arg, subopts) != 0) {
+        mp_msg(MSGT_VO, MSGL_FATAL, "[vdpau] Could not parse suboptions.\n");
+        return -1;
+    }
+    if (vc->hqscaling < 0 || vc->hqscaling > 9) {
+        mp_msg(MSGT_VO, MSGL_FATAL, "[vdpau] Invalid value for suboption "
+               "hqscaling\n");
         return -1;
     }
     if (vc->deint)
