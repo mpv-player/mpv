@@ -367,6 +367,7 @@ typedef struct {
   avisuperindex_chunk *suidx;
   int suidx_size;
   int isodml;
+  int warned_unaligned;
 } avi_priv_t;
 
 #define AVI_PRIV ((avi_priv_t*)(demuxer->priv))

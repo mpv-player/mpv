@@ -106,6 +106,12 @@ static int valid_fourcc(unsigned int id){
            strchr(valid, fcc[2]) && strchr(valid, fcc[3]);
 }
 
+static int valid_stream_id(unsigned int id) {
+    unsigned char* fcc=(unsigned char*)(&id);
+    return fcc[0] >= '0' && fcc[0] <= '9' && fcc[1] >= '0' && fcc[1] <= '9' &&
+           ((fcc[2] == 'w' && fcc[3] == 'b') || (fcc[2] == 'd' && fcc[3] == 'c'));
+}
+
 static int choose_chunk_len(unsigned int len1,unsigned int len2){
     // len1 has a bit more priority than len2. len1!=len2
     // Note: this is a first-idea-logic, may be wrong. comments welcomed.
@@ -218,8 +224,12 @@ do{
     idx=&((AVIINDEXENTRY *)priv->idx)[priv->idx_pos++];
 
     if(idx->dwFlags&AVIIF_LIST){
+      if (!valid_stream_id(idx->ckid))
       // LIST
       continue;
+      if (!priv->warned_unaligned)
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "Looks like unaligned chunk in index, broken AVI file!\n");
+      priv->warned_unaligned = 1;
     }
     if(!demux_avi_select_stream(demux,idx->ckid)){
       mp_dbg(MSGT_DEMUX,MSGL_DBG3,"Skip chunk %.4s (0x%X)  \n",(char *)&idx->ckid,(unsigned int)idx->ckid);
@@ -317,8 +327,12 @@ do{
     idx=&((AVIINDEXENTRY *)priv->idx)[idx_pos];
 
     if(idx->dwFlags&AVIIF_LIST){
+      if (!valid_stream_id(idx->ckid))
       // LIST
       continue;
+      if (!priv->warned_unaligned)
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "Looks like unaligned chunk in index, broken AVI file!\n");
+      priv->warned_unaligned = 1;
     }
     if(ds && demux_avi_select_stream(demux,idx->ckid)!=ds){
       mp_dbg(MSGT_DEMUX,MSGL_DBG3,"Skip chunk %.4s (0x%X)  \n",(char *)&idx->ckid,(unsigned int)idx->ckid);
@@ -437,6 +451,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
   priv->isodml = 0;
   priv->suidx_size = 0;
   priv->suidx = NULL;
+  priv->warned_unaligned = 0;
 
   demuxer->priv=(void*)priv;
 
