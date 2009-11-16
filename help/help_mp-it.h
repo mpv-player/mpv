@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <see AUTHORS for email address>
 
-// Updated to help_mp-en.h r29742
+// Updated to help_mp-en.h r29912
 
 
 // ========================= MPlayer help ===========================
@@ -209,6 +209,7 @@ static const char help_text[]=
 #define MSGTR_OSDosd "OSD: %so"
 #define MSGTR_OSDChapter "Capitolo: (%d) %s"
 #define MSGTR_OSDAngle "Angolazione: %d/%d"
+#define MSGTR_OSDDeinterlace "Deinterlacciamento: %s"
 
 // property values
 #define MSGTR_Enabled "abilitat"
