@@ -27,8 +27,8 @@ MPlayer (1.0)
     * support for subtitles with audio only files
     * support for 8 channel audio
     * sync dvd:// and dvdnav:// features
-    * support for mpeg4 asp in VDPAU video output
-    * support for non-live DVB teletext
+    * support for mpeg4 asp in VDPAU video output (non B-frame only)
+    * support for live and non-live DVB teletext with demuxer lavf
     * -name, -title and -use-filename-title options for MPlayer
 
     MEncoder:
