@@ -437,21 +437,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=NULL;
     sh_video_t *sh_video=NULL;
-    avi_priv_t* priv=malloc(sizeof(avi_priv_t));
-
-  // priv struct:
-  priv->avi_audio_pts=priv->avi_video_pts=0.0f;
-  priv->pts_correction=0.0f;
-  priv->skip_video_frames=0;
-  priv->pts_corr_bytes=0;
-  priv->pts_has_video=priv->pts_corrected=0;
-  priv->video_pack_no=0;
-  priv->audio_block_no=0;
-  priv->audio_block_size=0;
-  priv->isodml = 0;
-  priv->suidx_size = 0;
-  priv->suidx = NULL;
-  priv->warned_unaligned = 0;
+    avi_priv_t* priv=calloc(1, sizeof(avi_priv_t));
 
   demuxer->priv=(void*)priv;
 
@@ -469,22 +455,15 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
 
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,demuxer->movi_start);
-  priv->idx_pos=0;
-  priv->idx_pos_a=0;
-  priv->idx_pos_v=0;
   if(priv->idx_size>1){
     // decide index format:
 #if 1
     if((AVI_IDX_OFFSET(&((AVIINDEXENTRY *)priv->idx)[0])<demuxer->movi_start ||
         AVI_IDX_OFFSET(&((AVIINDEXENTRY *)priv->idx)[1])<demuxer->movi_start )&& !priv->isodml)
       priv->idx_offset=demuxer->movi_start-4;
-    else
-      priv->idx_offset=0;
 #else
     if(AVI_IDX_OFFSET(&((AVIINDEXENTRY *)priv->idx)[0])<demuxer->movi_start)
       priv->idx_offset=demuxer->movi_start-4;
-    else
-      priv->idx_offset=0;
 #endif
     mp_msg(MSGT_DEMUX,MSGL_V,"AVI index offset: 0x%X (movi=0x%X idx0=0x%X idx1=0x%X)\n",
 	    (int)priv->idx_offset,(int)demuxer->movi_start,
