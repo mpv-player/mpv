@@ -1903,7 +1903,8 @@ int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, char *name, int value)
                 else if (!strcmp(attributes[i].name, "XV_BLUE_INTENSITY")
                          && (!strcasecmp(name, "blue_intensity")))
                     port_value = value;
-                else if (!strcmp(attributes[i].name, "XV_ITURBT_709")
+                else if ((!strcmp(attributes[i].name, "XV_ITURBT_709") //NVIDIA
+                          || !strcmp(attributes[i].name, "XV_COLORSPACE"))//ATI
                          && (!strcasecmp(name, "bt_709")))
                     port_value = value;
                 else
@@ -1987,7 +1988,8 @@ int vo_xv_get_eq(struct vo *vo, uint32_t xv_port, char *name, int *value)
                 else if (!strcmp(attributes[i].name, "XV_BLUE_INTENSITY")
                          && (!strcasecmp(name, "blue_intensity")))
                     *value = val;
-                else if (!strcmp(attributes[i].name, "XV_ITURBT_709")
+                else if ((!strcmp(attributes[i].name, "XV_ITURBT_709") //NVIDIA
+                          || !strcmp(attributes[i].name, "XV_COLORSPACE"))//ATI
                          && (!strcasecmp(name, "bt_709")))
                     *value = val;
                 else
