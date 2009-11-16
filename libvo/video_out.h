@@ -30,6 +30,8 @@
 #include "libmpcodecs/img_format.h"
 //#include "vidix/vidix.h"
 
+#define MP_NOPTS_VALUE (-1LL<<63)
+
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2
 #define VO_EVENT_KEYPRESS 4
@@ -85,6 +87,9 @@ typedef struct {
 #define VOCTRL_GET_DEINTERLACE 31
 
 #define VOCTRL_UPDATE_SCREENINFO 32
+
+#define VOCTRL_SET_YUV_COLORSPACE 33
+#define VOCTRL_GET_YUV_COLORSPACE 34
 
 // Vo can be used by xover
 #define VOCTRL_XOVERLAY_SUPPORT 22
@@ -198,6 +203,7 @@ struct vo_driver {
      * Blit/Flip buffer to the screen. Must be called after each frame!
      */
     void (*flip_page)(struct vo *vo);
+    void (*flip_page_timed)(struct vo *vo, unsigned int pts_us, int duration);
 
     /*
      * This func is called after every frames to handle keyboard and
@@ -231,6 +237,7 @@ struct vo {
 
     bool frame_loaded;  // Is there a next frame the VO could flip to?
     double next_pts;    // pts value of the next frame if any
+    double next_pts2;   // optional pts of frame after that
 
     const struct vo_driver *driver;
     void *priv;
@@ -274,7 +281,7 @@ int vo_get_buffered_frame(struct vo *vo, bool eof);
 int vo_draw_frame(struct vo *vo, uint8_t *src[]);
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y);
 void vo_draw_osd(struct vo *vo, struct osd_state *osd);
-void vo_flip_page(struct vo *vo);
+void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration);
 void vo_check_events(struct vo *vo);
 void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);

@@ -164,6 +164,7 @@ void vo_x11_putkey(struct vo *vo, int key);
 #ifdef CONFIG_XF86VM
 void vo_vm_switch(struct vo *vo);
 void vo_vm_close(struct vo *vo);
+double vo_vm_get_fps(struct vo *vo);
 #endif
 
 void update_xinerama_info(struct vo *vo);

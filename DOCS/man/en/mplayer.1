@@ -282,8 +282,10 @@ Show filename on the OSD.
 Seek to the beginning of the previous/next chapter.
 .IPs "D (\-vo xvmc, \-vo vdpau, \-vf yadif, \-vf kerndeint only)"
 Activate/deactivate deinterlacer.
-.IPs "A"
+.IPs "A\ \ \ \ "
 Cycle through the available DVD angles.
+.IPs "c (currently -vo vdpau and -vo xv only)"
+Change YUV colorspace.
 .RE
 .PD 1
 .PP
@@ -3408,7 +3410,8 @@ Select the driver to use as source to overlay on top of X11.
 .PD 1
 .
 .TP
-.B vdpau (with \-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau or ffh264vdpau)
+.B vdpau (with \-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau or ffh264vdpau or
+ffodivxvdpau)
 Video output that uses VDPAU to decode video via hardware.
 Also supports displaying of software-decoded video.
 .PD 0
@@ -3442,6 +3445,36 @@ Use nochroma\-deint to solely use luma and speed up advanced deinterlacing.
 Useful with slow video memory.
 .IPs pullup
 Try to apply inverse telecine, needs motion adaptive temporal deinterlacing.
+.IPs colorspace
+Select the color space for YUV to RGB conversion (default: 1, BT.601).
+In general BT.601 should be used for standard definition (SD) content and
+BT.709 for high definition (HD) content.
+Using incorrect color space results in slightly under or over saturated and
+shifted colors.
+.RSss
+.IPs 0
+Guess the color space based on video resolution.
+Video with width >= 1280 or height > 576 is assumed to be HD and BT.709 color
+space will be used.
+.IPs 1
+Use ITU-R BT.601 color space (default).
+.IPs 2
+Use ITU-R BT.709 color space.
+.IPs 3
+Use SMPTE-240M color space.
+.RE
+IPs hqscaling
+.RSss
+.IPs 0
+Use default VDPAU scaling (default).
+.IPs 1\-9
+Apply high quality VDPAU scaling (needs capable hardware).
+.RE
+.IPs fps=<number>
+Override autodetected display refresh rate value (the value is needed for framedrop to allow video playback rates higher than display refresh rate, and for vsync-aware frame timing adjustments).
+Default 0 means use autodetected value.
+A positive value is interpreted as a refresh rate in Hz and overrides the autodetected value.
+A negative value disables all timing adjustment and framedrop logic.
 .RE
 .PD 1
 .

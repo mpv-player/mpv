@@ -1181,6 +1181,8 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
       a_pos = playing_audio_pts(mpctx);
   if (mpctx->sh_audio && sh_video && at_frame) {
       mpctx->last_av_difference = a_pos - sh_video->pts - audio_delay;
+      if (mpctx->time_frame > 0)
+          mpctx->last_av_difference += mpctx->time_frame * opts->playback_speed;
       if (mpctx->last_av_difference > 0.5 && drop_frame_cnt > 50
           && !mpctx->drop_message_shown) {
           mp_tmsg(MSGT_AVSYNC,MSGL_WARN,SystemTooSlow);
@@ -2105,9 +2107,13 @@ static int sleep_until_update(struct MPContext *mpctx, float *time_frame,
 
     //============================== SLEEP: ===================================
 
+    if (mpctx->video_out->driver->flip_page_timed)
+        *time_frame -= 0.05;
     // flag 256 means: libvo driver does its timing (dvb card)
     if (*time_frame > 0.001 && !(mpctx->sh_video->output_flags&256))
 	*time_frame = timing_sleep(mpctx, *time_frame);
+    if (mpctx->video_out->driver->flip_page_timed)
+        *time_frame += 0.05;
     return frame_time_remaining;
 }
 
@@ -4046,11 +4052,31 @@ if(!mpctx->sh_video) {
         current_module="flip_page";
         if (!frame_time_remaining && blit_frame) {
 	   unsigned int t2=GetTimer();
-
-           vo_flip_page(mpctx->video_out);
+           unsigned int pts_us = mpctx->last_time + mpctx->time_frame * 1e6;
+           int duration = -1;
+           double pts2 = mpctx->video_out->next_pts2;
+           if (pts2 != MP_NOPTS_VALUE && opts->correct_pts) {
+               // expected A/V sync correction is ignored
+               double diff = (pts2 - mpctx->sh_video->pts);
+               diff /= opts->playback_speed;
+               if (mpctx->time_frame < 0)
+                   diff += mpctx->time_frame;
+               if (diff < 0)
+                   diff = 0;
+               if (diff > 10)
+                   diff = 10;
+               duration = diff * 1e6;
+           }
+           vo_flip_page(mpctx->video_out, pts_us|1, duration);
 
            mpctx->last_vo_flip_duration = (GetTimer() - t2) * 0.000001;
            vout_time_usage += mpctx->last_vo_flip_duration;
+           if (mpctx->video_out->driver->flip_page_timed) {
+               // No need to adjust sync based on flip speed
+               mpctx->last_vo_flip_duration = 0;
+               // For print_status - VO call finishing early is OK for sync
+               mpctx->time_frame -= get_relative_time(mpctx);
+           }
            print_status(mpctx, MP_NOPTS_VALUE, true);
         }
         else

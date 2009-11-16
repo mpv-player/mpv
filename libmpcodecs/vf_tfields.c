@@ -368,8 +368,6 @@ static int continue_buffered_image(struct vf_instance *vf)
 			ret |= vf_next_put_image(vf, dmpi, pts);
 			if (!under_mencoder)
 				break;
-			else
-				if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 		}
 		break;
 	case 1:
@@ -398,8 +396,6 @@ static int continue_buffered_image(struct vf_instance *vf)
 			ret |= vf_next_put_image(vf, dmpi, pts);
 			if (!under_mencoder)
 				break;
-			else
-				if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 		}
 		break;
 	case 2:
@@ -424,8 +420,6 @@ static int continue_buffered_image(struct vf_instance *vf)
 			ret |= vf_next_put_image(vf, dmpi, pts);
 			if (!under_mencoder)
 				break;
-			else
-				if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 		}
 		break;
 	}

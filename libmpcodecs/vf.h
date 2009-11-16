@@ -81,7 +81,6 @@ typedef struct vf_seteq_s
 #define VFCTRL_GET_EQUALIZER 8 /* gset color options (brightness,contrast etc) */
 #define VFCTRL_DRAW_OSD 7
 #define VFCTRL_CHANGE_RECTANGLE 9 /* Change the rectangle boundaries */
-#define VFCTRL_FLIP_PAGE 10 /* Tell the vo to flip pages */
 #define VFCTRL_DUPLICATE_FRAME 11 /* For encoding - encode zero-change frame */
 #define VFCTRL_SKIP_NEXT_FRAME 12 /* For encoding - drop the next frame that passes thru */
 #define VFCTRL_FLUSH_FRAMES    13 /* For encoding - flush delayed frames */
@@ -94,6 +93,8 @@ typedef struct vf_seteq_s
  * the OSD state outside of normal OSD draw time. */
 #define VFCTRL_SET_OSD_OBJ 20
 #define VFCTRL_REDRAW_OSD  21 /* Change user-visible OSD immediately */
+#define VFCTRL_SET_YUV_COLORSPACE 22
+#define VFCTRL_GET_YUV_COLORSPACE 23
 
 #include "vfcap.h"
 

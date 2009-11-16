@@ -62,7 +62,7 @@ void vf_menu_pause_update(struct vf_instance* vf) {
     put_image(vf,pause_mpi, MP_NOPTS_VALUE);
     // Don't draw the osd atm
     //vf->control(vf,VFCTRL_DRAW_OSD,NULL);
-    vo_flip_page(video_out);
+    vo_flip_page(video_out, 0, -1);
   }
 }
 
