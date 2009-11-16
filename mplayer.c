@@ -253,6 +253,10 @@ extern char *demuxer_name; // override demuxer
 extern char *audio_demuxer_name; // override audio demuxer
 extern char *sub_demuxer_name; // override sub demuxer
 
+// this dvdsub_id was selected via slang
+// use this to allow dvdnav to follow -slang across stream resets,
+// in particular the subtitle ID for a language changes
+int dvdsub_lang_id;
 int vobsub_id=-1;
 char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
@@ -335,6 +339,7 @@ edl_record_ptr edl_records = NULL; ///< EDL entries memory area
 edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_records
 FILE* edl_fd = NULL; ///< fd to write to when in -edlout mode.
 int use_filedir_conf;
+int use_filename_title;
 
 #include "mpcommon.h"
 #include "command.h"
@@ -562,7 +567,7 @@ static void mp_dvdnav_context_free(MPContext *ctx){
 #endif
 
 void uninit_player(struct MPContext *mpctx, unsigned int mask){
-  mask=mpctx->initialized_flags&mask;
+  mask &= mpctx->initialized_flags;
 
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n*** uninit(0x%X)\n",mask);
 
@@ -656,7 +661,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
     mpctx->initialized_flags&=~INITIALIZED_AO;
     current_module="uninit_ao";
     if (mpctx->edl_muted) mixer_mute(&mpctx->mixer);
-    mpctx->audio_out->uninit(mpctx->stop_play != AT_END_OF_FILE);
+    if (mpctx->audio_out)
+        mpctx->audio_out->uninit(mpctx->stop_play != AT_END_OF_FILE);
     mpctx->audio_out=NULL;
   }
 
@@ -1614,72 +1620,69 @@ static void update_osd_msg(struct MPContext *mpctx)
 void reinit_audio_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
-if(mpctx->sh_audio){
-  current_module="init_audio_codec";
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-  if(!init_best_audio_codec(mpctx->sh_audio,audio_codec_list,audio_fm_list)){
-    mpctx->sh_audio=mpctx->d_audio->sh=NULL; // failed to init :(
-    mpctx->d_audio->id = -2;
-    return;
-  } else
+    if (!mpctx->sh_audio)
+        return;
+    current_module="init_audio_codec";
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+    if(!init_best_audio_codec(mpctx->sh_audio,audio_codec_list,audio_fm_list)){
+        goto init_error;
+    }
     mpctx->initialized_flags|=INITIALIZED_ACODEC;
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
 
-  //const ao_info_t *info=audio_out->info;
-  current_module="af_preinit";
-  ao_data.samplerate=force_srate;
-  ao_data.channels=0;
-  ao_data.format=audio_output_format;
+    current_module="af_preinit";
+    ao_data.samplerate=force_srate;
+    ao_data.channels=0;
+    ao_data.format=audio_output_format;
 #if 1
-  // first init to detect best values
-  if(!init_audio_filters(mpctx->sh_audio,   // preliminary init
-        // input:
-        mpctx->sh_audio->samplerate,
-	// output:
-	&ao_data.samplerate, &ao_data.channels, &ao_data.format)){
-      mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Error at audio filter chain pre-init!\n");
-      exit_player(mpctx, EXIT_ERROR);
-  }
+    // first init to detect best values
+    if(!init_audio_filters(mpctx->sh_audio,   // preliminary init
+                           // input:
+                           mpctx->sh_audio->samplerate,
+                           // output:
+                           &ao_data.samplerate, &ao_data.channels, &ao_data.format)){
+        mp_tmsg(MSGT_CPLAYER,MSGL_ERR, "Error at audio filter chain "
+                "pre-init!\n");
+        exit_player(mpctx, EXIT_ERROR);
+    }
 #endif
-  current_module="ao2_init";
-  if(!(mpctx->audio_out=init_best_audio_out(opts->audio_driver_list,
-      0, // plugin flag
-      ao_data.samplerate,
-      ao_data.channels,
-      ao_data.format,0))){
-    // FAILED:
-    mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Could not open/initialize audio device -> no sound.\n");
-    uninit_player(mpctx, INITIALIZED_ACODEC); // close codec
-    mpctx->sh_audio=mpctx->d_audio->sh=NULL; // -> nosound
-    mpctx->d_audio->id = -2;
-    return;
-  } else {
-    // SUCCESS:
+    current_module="ao2_init";
+    mpctx->audio_out = init_best_audio_out(opts->audio_driver_list,
+                                           0, // plugin flag
+                                           ao_data.samplerate,
+                                           ao_data.channels,
+                                           ao_data.format, 0);
+    if(!mpctx->audio_out){
+        mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Could not open/initialize audio device -> no sound.\n");
+        goto init_error;
+    }
     mpctx->initialized_flags|=INITIALIZED_AO;
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
-      mpctx->audio_out->info->short_name,
-      ao_data.samplerate, ao_data.channels,
-      af_fmt2str_short(ao_data.format),
-      af_fmt2bits(ao_data.format)/8 );
+           mpctx->audio_out->info->short_name,
+           ao_data.samplerate, ao_data.channels,
+           af_fmt2str_short(ao_data.format),
+           af_fmt2bits(ao_data.format)/8 );
     mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Description: %s\nAO: Author: %s\n",
-      mpctx->audio_out->info->name, mpctx->audio_out->info->author);
+           mpctx->audio_out->info->name, mpctx->audio_out->info->author);
     if(strlen(mpctx->audio_out->info->comment) > 0)
-      mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Comment: %s\n", mpctx->audio_out->info->comment);
+        mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Comment: %s\n", mpctx->audio_out->info->comment);
     // init audio filters:
 #if 1
     current_module="af_init";
     if(!build_afilter_chain(mpctx, mpctx->sh_audio, &ao_data)) {
-      mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter/ao format!\n");
-//      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format! -> NOSOUND\n");
-//      uninit_player(mpctx, INITIALIZED_ACODEC|INITIALIZED_AO); // close codec & ao
-//      sh_audio=mpctx->d_audio->sh=NULL; // -> nosound
+        mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter/ao format!\n");
+        goto init_error;
     }
 #endif
-  }
-  mpctx->mixer.audio_out = mpctx->audio_out;
-  mpctx->mixer.volstep = volstep;
-}
+    mpctx->mixer.audio_out = mpctx->audio_out;
+    mpctx->mixer.volstep = volstep;
+    return;
+
+init_error:
+    uninit_player(mpctx, INITIALIZED_ACODEC|INITIALIZED_AO); // close codec and possibly AO
+    mpctx->sh_audio=mpctx->d_audio->sh=NULL; // -> nosound
+    mpctx->d_audio->id = -2;
 }
 
 
@@ -1808,6 +1811,35 @@ static float timing_sleep(struct MPContext *mpctx, float time_frame)
     return time_frame;
 }
 
+static void select_subtitle(MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+  // find the best sub to use
+  int vobsub_index_id = vobsub_get_index_by_id(vo_vobsub, vobsub_id);
+  mpctx->global_sub_pos = -1; // no subs by default
+  if (vobsub_index_id >= 0) {
+    // if user asks for a vobsub id, use that first.
+    mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_VOBSUB] + vobsub_index_id;
+  } else if (opts->sub_id >= 0 && mpctx->global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
+    // if user asks for a dvd sub id, use that next.
+    mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + opts->sub_id;
+  } else if (mpctx->global_sub_indices[SUB_SOURCE_SUBS] >= 0) {
+    // if there are text subs to use, use those.  (autosubs come last here)
+    mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_SUBS];
+  } else if (opts->sub_id == -1 && mpctx->global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
+    // finally select subs by language and container hints
+    if (opts->sub_id == -1 && dvdsub_lang)
+      opts->sub_id = demuxer_sub_track_by_lang(mpctx->demuxer, dvdsub_lang);
+    if (opts->sub_id == -1)
+      opts->sub_id = demuxer_default_sub_track(mpctx->demuxer);
+    if (opts->sub_id >= 0)
+      mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + opts->sub_id;
+  }
+  // rather than duplicate code, use the SUB_SELECT handler to init the right one.
+  mpctx->global_sub_pos--;
+  mp_property_do("sub",M_PROPERTY_STEP_UP,NULL, mpctx);
+}
+
 #ifdef CONFIG_DVDNAV
 #ifndef FF_B_TYPE
 #define FF_B_TYPE 3
@@ -1864,9 +1896,14 @@ static void mp_dvdnav_reset_stream (MPContext *ctx) {
         resync_audio_stream(ctx->sh_audio);
     }
 
-    if (ctx->d_sub) opts->sub_id = -2;
-
     audio_delay = 0.0f;
+    if (dvdsub_lang && dvdsub_id == dvdsub_lang_id) {
+        dvdsub_lang_id = mp_dvdnav_sid_from_lang(ctx->stream, dvdsub_lang);
+        if (dvdsub_lang_id != dvdsub_id) {
+            dvdsub_id = dvdsub_lang_id;
+            select_subtitle(ctx);
+        }
+    }
 
     /// clear all EOF related flags
     ctx->d_video->eof = ctx->d_audio->eof = ctx->stream->eof = 0;
@@ -2443,8 +2480,8 @@ static void pause_loop(struct MPContext *mpctx)
 	if (mpctx->sh_video && mpctx->video_out)
 	    vo_check_events(mpctx->video_out);
 #ifdef CONFIG_MENU
-	if (vf_menu)
-	    vf_menu_pause_update(vf_menu);
+        if (vf_menu)
+            vf_menu_pause_update(vf_menu);
 #endif
 	usec_sleep(20000);
       update_osd_msg(mpctx);
@@ -3290,9 +3327,12 @@ while (player_idle_mode && !mpctx->filename) {
 }
 //---------------------------------------------------------------------------
 
-    if(mpctx->filename)
+    if (mpctx->filename) {
 	mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"\nPlaying %s.\n",
 		filename_recode(mpctx->filename));
+        if(use_filename_title && vo_wintitle == NULL)
+            vo_wintitle = strdup(mp_basename2(mpctx->filename));
+    }
 
 if (edl_filename) {
     if (edl_records) free_edl(edl_records);
@@ -3454,7 +3494,9 @@ if(mpctx->stream->type==STREAMTYPE_DVD){
 if(mpctx->stream->type==STREAMTYPE_DVDNAV){
   current_module="dvdnav lang->id";
   if(opts->audio_id==-1) opts->audio_id=mp_dvdnav_aid_from_lang(mpctx->stream,audio_lang);
-  if(dvdsub_lang && opts->sub_id==-1) opts->sub_id=mp_dvdnav_sid_from_lang(mpctx->stream,dvdsub_lang);
+  dvdsub_lang_id = -3;
+  if(dvdsub_lang && opts->sub_id==-1)
+    dvdsub_lang_id = opts->sub_id = mp_dvdnav_sid_from_lang(mpctx->stream,dvdsub_lang);
   // setup global sub numbering
   mpctx->global_sub_indices[SUB_SOURCE_DEMUX] = mpctx->global_sub_size; // the global # of the first demux-specific sub.
   mpctx->global_sub_size += mp_dvdnav_number_of_subs(mpctx->stream);
@@ -3597,6 +3639,10 @@ mpctx->d_audio=mpctx->demuxer->audio;
 mpctx->d_video=mpctx->demuxer->video;
 mpctx->d_sub=mpctx->demuxer->sub;
 
+if (ts_prog) {
+  int tmp = ts_prog;
+  mp_property_do("switch_program", M_PROPERTY_SET, &tmp, mpctx);
+}
 // select audio stream
 select_audio(mpctx->demuxer, opts->audio_id, audio_lang);
 
@@ -3730,30 +3776,7 @@ if(vo_spudec==NULL && mpctx->sh_video &&
 
 
 if (mpctx->global_sub_size) {
-  // find the best sub to use
-  int vobsub_index_id = vobsub_get_index_by_id(vo_vobsub, vobsub_id);
-  mpctx->global_sub_pos = -1; // no subs by default
-  if (vobsub_index_id >= 0) {
-    // if user asks for a vobsub id, use that first.
-    mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_VOBSUB] + vobsub_index_id;
-  } else if (opts->sub_id >= 0 && mpctx->global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
-    // if user asks for a dvd sub id, use that next.
-    mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + opts->sub_id;
-  } else if (mpctx->global_sub_indices[SUB_SOURCE_SUBS] >= 0) {
-    // if there are text subs to use, use those.  (autosubs come last here)
-    mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_SUBS];
-  } else if (opts->sub_id == -1 && mpctx->global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
-    // finally select subs by language and container hints
-    if (opts->sub_id == -1 && dvdsub_lang)
-      opts->sub_id = demuxer_sub_track_by_lang(mpctx->demuxer, dvdsub_lang);
-    if (opts->sub_id == -1)
-      opts->sub_id = demuxer_default_sub_track(mpctx->demuxer);
-    if (opts->sub_id >= 0)
-      mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + opts->sub_id;
-  }
-  // rather than duplicate code, use the SUB_SELECT handler to init the right one.
-  mpctx->global_sub_pos--;
-  mp_property_do("sub",M_PROPERTY_STEP_UP,NULL, mpctx);
+  select_subtitle(mpctx);
   if(subdata)
     switch (stream_dump_type) {
         case 3: list_sub_file(subdata); break;

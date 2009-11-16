@@ -29,6 +29,7 @@
 
 #include "libaf/af_format.h"
 #include "libmpcodecs/img_format.h"
+#include "libmpcodecs/dec_teletext.h"
 #include "libavutil/avstring.h"
 #include "osdep/timer.h"
 
@@ -333,7 +334,8 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm)
 	mp_tmsg(MSGT_TV, MSGL_ERR, "Error: Cannot set norm!\n");
 	return 0;
     }
-    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
+    teletext_control(tvh->demuxer->teletext,TV_VBI_CONTROL_RESET,
+                     &tvh->tv_param->teletext);
     return 1;
 }
 
@@ -347,8 +349,9 @@ static int tv_set_norm_i(tvi_handle_t *tvh, int norm)
       return 0;
    }
 
-   tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
-   return(1);
+   teletext_control(tvh->demuxer->teletext,TV_VBI_CONTROL_RESET,
+                    &tvh->tv_param->teletext);
+   return 1;
 }
 
 static int open_tv(tvi_handle_t *tvh)
@@ -675,7 +678,11 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
     if(!(tvh=tv_begin(demuxer->stream->priv))) return NULL;
     if (!tvh->functions->init(tvh->priv)) return NULL;
 
-    tvh->functions->control(tvh->priv,TVI_CONTROL_VBI_INIT,&(tvh->tv_param->tdevice));
+    tvh->demuxer = demuxer;
+    tvh->functions->control(tvh->priv,TVI_CONTROL_VBI_INIT,
+                            &(tvh->tv_param->teletext.device));
+    tvh->functions->control(tvh->priv,TVI_CONTROL_GET_VBI_PTR,
+                            &demuxer->teletext);
 
     if (!open_tv(tvh)){
 	tv_uninit(tvh);
@@ -818,7 +825,8 @@ no_audio:
         if(funcs->control(tvh->priv,TVI_CONTROL_VID_SET_GAIN,&tvh->tv_param->gain)!=TVI_CONTROL_TRUE)
             mp_msg(MSGT_TV,MSGL_WARN,"Unable to set gain control!\n");
 
-    funcs->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
+    teletext_control(demuxer->teletext,TV_VBI_CONTROL_RESET,
+                     &tvh->tv_param->teletext);
 
     return demuxer;
 }
@@ -830,6 +838,7 @@ static void demux_close_tv(demuxer_t *demuxer)
     tv_uninit(tvh);
     free(tvh);
     demuxer->priv=NULL;
+    demuxer->teletext=NULL;
 }
 
 /* utilities for mplayer (not mencoder!!) */
@@ -899,7 +908,8 @@ int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
 	mp_tmsg(MSGT_TV, MSGL_V, "Current frequency: %lu (%.3f)\n",
 	    freq, (float)freq/16);
     }
-    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
+    teletext_control(tvh->demuxer->teletext,TV_VBI_CONTROL_RESET,
+                     &tvh->tv_param->teletext);
     return 1;
 }
 
@@ -1080,7 +1090,8 @@ int tv_step_norm(tvi_handle_t *tvh)
       return 0;
     }
   }
-    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
+    teletext_control(tvh->demuxer->teletext,TV_VBI_CONTROL_RESET,
+                     &tvh->tv_param->teletext);
     return 1;
 }
 

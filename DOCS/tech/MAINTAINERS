@@ -40,9 +40,9 @@ Man page translations:
     * French: Guillaume Poirier
     * German: Sebastian Krämer
     * Hungarian: Gabor Mizda
-    * Italian: Daniele Forghieri
+    * Italian: Paolo Tresoldi
     * Polish: Waclaw Schiller
-    * Spanish: Reynaldo H. Verdejo Pinochet (outdated)
+    * Spanish: None
     * Russian: Vladimir Voroshilov
 
 Documentation translations:
@@ -52,7 +52,7 @@ Documentation translations:
     * Hungarian: Gabor Mizda
     * Italian: Paolo Tresoldi
     * Polish: Waclaw Schiller
-    * Spanish: Reynaldo H. Verdejo Pinochet (outdated)
+    * Spanish: None
     * Chinese (simplified): unmaintained, outdated
     * Italian: unmaintained, outdated
     * Russian: Vladimir Voroshilov
@@ -84,7 +84,7 @@ MPlayer code:
     * playtree, input layer: Alban Bedel
     * libswscale: Michael Niedermayer, Luca Abeni
     * DVB support: Nico Sabbi
-    * EDL code: Reynaldo H. Verdejo Pinochet, Oded Shimon
+    * EDL code: Oded Shimon
 
 Imported libs/projects:
     * FFmpeg: Michael Niedermayer
@@ -143,8 +143,8 @@ video filters:
 audio filters:
     * general: Alex Beregszaszi
     * af_ladspa.c - Ivo van Poorten
-    * af_equalizer.c - Reynaldo H. Verdejo Pinochet
-    * af_karaoke.c - Reynaldo H. Verdejo Pinochet
+    * af_equalizer.c - None
+    * af_karaoke.c - None
 
 audio encoders:
     * ae_toolame.c, ae_twolame.c and ae_faac.c - Nico Sabbi

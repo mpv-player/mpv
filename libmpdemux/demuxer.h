@@ -144,6 +144,8 @@ typedef struct demux_stream {
   off_t dpos;                // position in the demuxed stream
   int pack_no;		   // serial number of packet
   int flags;               // flags of current packet (keyframe etc)
+  int non_interleaved;     // 1 if this stream is not properly interleaved,
+                           // so e.g. subtitle handling must do explicit reads.
 //---------------
   int packs;              // number of packets in buffer
   int bytes;              // total bytes of packets in buffer
@@ -254,6 +256,9 @@ typedef struct demuxer {
   struct sh_audio *a_streams[MAX_A_STREAMS];
   struct sh_video *v_streams[MAX_V_STREAMS];
   struct sh_sub   *s_streams[MAX_S_STREAMS];
+
+  // pointer to teletext decoder private data, if demuxer stream contains teletext
+  void *teletext;
 
   demux_chapter_t* chapters;
   int num_chapters;

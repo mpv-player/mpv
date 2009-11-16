@@ -17,7 +17,7 @@ static inline unsigned int GetTimer(void){
 //  float s;
   gettimeofday(&tv,&tz);
 //  s=tv.tv_usec;s*=0.000001;s+=tv.tv_sec;
-  return (tv.tv_sec*1000000+tv.tv_usec);
+  return tv.tv_sec * 1000000 + tv.tv_usec;
 }
 
 static FILE* mp3file=NULL;

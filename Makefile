@@ -24,15 +24,6 @@ include config.mak
 
 ###### variable declarations #######
 
-COMMON_LDFLAGS += $(EXTRA_LIB)\
-                  $(EXTRALIBS) \
-
-LDFLAGS_MPLAYER = $(EXTRALIBS_MPLAYER) \
-                  $(COMMON_LDFLAGS) \
-
-LDFLAGS_MENCODER = $(EXTRALIBS_MENCODER) \
-                   $(COMMON_LDFLAGS) \
-
 SRCS_AUDIO_INPUT-$(ALSA1X)           += stream/ai_alsa1x.c
 SRCS_AUDIO_INPUT-$(ALSA9)            += stream/ai_alsa.c
 SRCS_AUDIO_INPUT-$(OSS)              += stream/ai_oss.c
@@ -277,7 +268,6 @@ SRCS_COMMON-$(TV)                    += stream/stream_tv.c stream/tv.c \
                                         stream/frequencies.c stream/tvi_dummy.c
 SRCS_COMMON-$(TV_BSDBT848)           += stream/tvi_bsdbt848.c
 SRCS_COMMON-$(TV_DSHOW)              += stream/tvi_dshow.c
-SRCS_COMMON-$(TV_TELETEXT)           += stream/tvi_vbi.c
 SRCS_COMMON-$(TV_V4L1)               += stream/tvi_v4l.c  stream/audio_in.c
 SRCS_COMMON-$(TV_V4L2)               += stream/tvi_v4l2.c stream/audio_in.c
 SRCS_COMMON-$(UNRAR_EXEC)            += unrar_exec.c
@@ -386,6 +376,7 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/ad_msgsm.c \
               libmpcodecs/ad_pcm.c \
               libmpcodecs/dec_audio.c \
+              libmpcodecs/dec_teletext.c \
               libmpcodecs/dec_video.c \
               libmpcodecs/img_format.c \
               libmpcodecs/mp_image.c \
@@ -754,10 +745,11 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 dep depend: $(DEPS)
 
 mencoder$(EXESUF): $(MENCODER_DEPS)
-	$(CC) -o $@ $^ $(LDFLAGS_MENCODER)
-
+mencoder$(EXESUF): EXTRALIBS += $(EXTRALIBS_MENCODER)
 mplayer$(EXESUF): $(MPLAYER_DEPS)
-	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
+mplayer$(EXESUF): EXTRALIBS += $(EXTRALIBS_MPLAYER)
+mencoder$(EXESUF) mplayer$(EXESUF):
+	$(CC) -o $@ $^ $(EXTRALIBS)
 
 codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
 	$(HOST_CC) -O -DCODECS2HTML -I. -o $@ $<
@@ -961,7 +953,7 @@ mplayer-nomain.o: mplayer.c
 TOOLS/netstream$(EXESUF): TOOLS/netstream.c
 TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c
 TOOLS/netstream$(EXESUF) TOOLS/vivodump$(EXESUF): $(subst mplayer.o,mplayer-nomain.o,$(OBJS_MPLAYER)) $(filter-out %mencoder.o,$(OBJS_MENCODER)) $(OBJS_COMMON) $(COMMON_LIBS)
-	$(CC) $(CFLAGS) -o $@ $^ $(EXTRALIBS_MPLAYER) $(EXTRALIBS_MENCODER) $(COMMON_LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $^ $(EXTRALIBS_MPLAYER) $(EXTRALIBS_MENCODER) $(EXTRALIBS)
 
 REAL_SRCS    = $(wildcard TOOLS/realcodecs/*.c)
 REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)

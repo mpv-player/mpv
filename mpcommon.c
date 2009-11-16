@@ -13,7 +13,7 @@
 #include "spudec.h"
 #include "version.h"
 #include "vobsub.h"
-#include "stream/tv.h"
+#include "libmpcodecs/dec_teletext.h"
 #include "ffmpeg_files/intreadwrite.h"
 #include "m_option.h"
 
@@ -144,9 +144,17 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
         if (spudec_changed(vo_spudec))
             vo_osd_changed(OSDTYPE_SPU);
     } else if (opts->sub_id >= 0
-               && (type == 't' || type == 'm' || type == 'a')) {
+               && (type == 't' || type == 'm' || type == 'a' || type == 'd')) {
         double curpts = refpts + sub_delay;
         double endpts;
+        if (type == 'd' && !d_dvdsub->demuxer->teletext) {
+            tt_stream_props tsp = {0};
+            void *ptr = &tsp;
+            if (teletext_control(NULL, TV_VBI_CONTROL_START, &ptr) == VBI_CONTROL_TRUE)
+                d_dvdsub->demuxer->teletext = ptr;
+        }
+        if (d_dvdsub->non_interleaved)
+            ds_get_next_pts(d_dvdsub);
         while (d_dvdsub->first) {
             double subpts = ds_get_next_pts(d_dvdsub) + sub_offset;
             if (subpts > curpts)
@@ -157,6 +165,22 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
                 if (len < 2) continue;
                 len = FFMIN(len - 2, AV_RB16(packet));
                 packet += 2;
+            }
+            if (type == 'd') {
+                if (d_dvdsub->demuxer->teletext) {
+                    uint8_t *p = packet;
+                    p++;
+                    len--;
+                    while (len >= 46) {
+                        int sublen = p[1];
+                        if (p[0] == 2 || p[0] == 3)
+                            teletext_control(d_dvdsub->demuxer->teletext,
+                                TV_VBI_CONTROL_DECODE_DVB, p + 2);
+                        p   += sublen + 2;
+                        len -= sublen + 2;
+                    }
+                }
+                continue;
             }
 #ifdef CONFIG_ASS
             if (ass_enabled) {
@@ -197,6 +221,8 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
                 sub_add_text(&subs, packet, len, endpts);
                 set_osd_subtitle(mpctx, &subs);
             }
+            if (d_dvdsub->non_interleaved)
+                ds_get_next_pts(d_dvdsub);
         }
         if (sub_clear_text(&subs, curpts))
             set_osd_subtitle(mpctx, &subs);
@@ -206,31 +232,29 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
 
 void update_teletext(sh_video_t *sh_video, demuxer_t *demuxer, int reset)
 {
-#ifdef CONFIG_TV_TELETEXT
-    tvi_handle_t* tvh=demuxer->priv;
     int page_changed;
 
-    if (demuxer->type != DEMUXER_TYPE_TV || !tvh) return;
+    if (!demuxer->teletext)
+        return;
 
     //Also forcing page update when such ioctl is not supported or call error occured
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_IS_CHANGED,&page_changed)!=TVI_CONTROL_TRUE)
+    if(teletext_control(demuxer->teletext,TV_VBI_CONTROL_IS_CHANGED,&page_changed)!=VBI_CONTROL_TRUE)
         page_changed=1;
 
     if(!page_changed)
         return;
 
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_VBIPAGE,&vo_osd_teletext_page)!=TVI_CONTROL_TRUE)
+    if(teletext_control(demuxer->teletext,TV_VBI_CONTROL_GET_VBIPAGE,&vo_osd_teletext_page)!=VBI_CONTROL_TRUE)
         vo_osd_teletext_page=NULL;
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_HALF_PAGE,&vo_osd_teletext_half)!=TVI_CONTROL_TRUE)
+    if(teletext_control(demuxer->teletext,TV_VBI_CONTROL_GET_HALF_PAGE,&vo_osd_teletext_half)!=VBI_CONTROL_TRUE)
         vo_osd_teletext_half=0;
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_MODE,&vo_osd_teletext_mode)!=TVI_CONTROL_TRUE)
+    if(teletext_control(demuxer->teletext,TV_VBI_CONTROL_GET_MODE,&vo_osd_teletext_mode)!=VBI_CONTROL_TRUE)
         vo_osd_teletext_mode=0;
-    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_FORMAT,&vo_osd_teletext_format)!=TVI_CONTROL_TRUE)
+    if(teletext_control(demuxer->teletext,TV_VBI_CONTROL_GET_FORMAT,&vo_osd_teletext_format)!=VBI_CONTROL_TRUE)
         vo_osd_teletext_format=0;
     vo_osd_changed(OSDTYPE_TELETEXT);
 
-    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_MARK_UNCHANGED,NULL);
-#endif
+    teletext_control(demuxer->teletext,TV_VBI_CONTROL_MARK_UNCHANGED,NULL);
 }
 
 int select_audio(demuxer_t* demuxer, int audio_id, char* audio_lang)

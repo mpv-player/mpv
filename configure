@@ -246,7 +246,6 @@ Optional features:
   --disable-tv-v4l1      disable Video4Linux TV interface [autodetect]
   --disable-tv-v4l2      disable Video4Linux2 TV interface [autodetect]
   --disable-tv-bsdbt848  disable BSD BT848 interface [autodetect]
-  --disable-tv-teletext  disable TV teletext interface [autodetect]
   --disable-pvr          disable Video4Linux2 MPEG PVR [autodetect]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
   --disable-network      disable networking [enable]
@@ -620,7 +619,6 @@ _tv_v4l1=auto
 _tv_v4l2=auto
 _tv_bsdbt848=auto
 _tv_dshow=auto
-_tv_teletext=auto
 _pvr=auto
 _network=yes
 _winsock2_h=auto
@@ -1036,8 +1034,6 @@ for ac_option do
   --disable-tv-v4l2)	_tv_v4l2=no	;;
   --enable-tv-dshow)	_tv_dshow=yes	;;
   --disable-tv-dshow)	_tv_dshow=no	;;
-  --enable-tv-teletext)    _tv_teletext=yes        ;;
-  --disable-tv-teletext)    _tv_teletext=no        ;;
   --enable-radio)       _radio=yes	;;
   --enable-radio-capture)       _radio_capture=yes	;;
   --disable-radio-capture)       _radio_capture=no	;;
@@ -1437,19 +1433,6 @@ echo configuration: $_configuration > "$TMPLOG"
 echo >> "$TMPLOG"
 
 
-if test -z "$_target" && x86 ; then
-  cat > $TMPC << EOF
-int main(void) {
-    int test[sizeof(char *)-7];
-    return 0;
-}
-EOF
-  cc_check && host_arch=x86_64 || host_arch=i386
-fi
-
-echo "Detected operating system: $system_name"
-echo "Detected host architecture: $host_arch"
-
 if test "$_runtime_cpudetection" = yes && ! x86 && ! ppc; then
   die "Runtime CPU detection only works for x86, x86-64 and PPC!"
 fi
@@ -1503,6 +1486,19 @@ else
   done
 fi # icc
 test "$cc_fail" = yes && die "unsupported compiler version"
+
+if test -z "$_target" && x86 ; then
+  cat > $TMPC << EOF
+int main(void) {
+    int test[(int)sizeof(char *)-7];
+    return 0;
+}
+EOF
+  cc_check && host_arch=x86_64 || host_arch=i386
+fi
+
+echo "Detected operating system: $system_name"
+echo "Detected host architecture: $host_arch"
 
 echocheck "host cc"
 test "$_host_cc" || _host_cc=$_cc
@@ -2497,6 +2493,19 @@ EOF
 cc_check && ebx_available=yes && def_ebx_available='#define HAVE_EBX_AVAILABLE 1'
 echores $ebx_available
 
+echocheck "PIC"
+pic=no
+cat > $TMPC << EOF
+int main(void) {
+#if !(defined(__PIC__) || defined(__pic__) || defined(PIC))
+#error PIC not enabled
+#endif
+    return 0;
+}
+EOF
+cc_check && pic=yes && extra_cflags="$extra_cflags -DPIC"
+echores $pic
+
 echocheck "yasm"
 if test -z "$YASMFLAGS" ; then
   if darwin ; then
@@ -2509,9 +2518,9 @@ if test -z "$YASMFLAGS" ; then
   # currently tested for Linux x86, x86_64
   YASMFLAGS="-f $objformat"
   x86_64 && YASMFLAGS="$YASMFLAGS -DARCH_X86_64 -m amd64"
+  test "$pic" = "yes" && YASMFLAGS="$YASMFLAGS -DPIC"
   case "$objformat" in
     elf) test $_debug && YASMFLAGS="$YASMFLAGS -g dwarf2" ;;
-    macho64)             YASMFLAGS="$YASMFLAGS -DPIC -DPREFIX" ;;
     *)                   YASMFLAGS="$YASMFLAGS -DPREFIX"  ;;
   esac
 else
@@ -2598,7 +2607,7 @@ def_xform_asm='#define HAVE_XFORM_ASM 0'
 xform_asm=no
 echocheck "XFORM ASM support"
   cat > $TMPC << EOF
-int main(void) { __asm__ volatile ("lwzx 0, %y0" :: "Z"(*(int*)0)); return 0; }
+int main(void) { __asm__ volatile ("lwzx %1, %y0" :: "Z"(*(int*)0), "r"(0)); return 0; }
 EOF
 cc_check && xform_asm=yes && def_xform_asm='#define HAVE_XFORM_ASM 1'
 echores "$xform_asm"
@@ -3859,7 +3868,7 @@ int main(void) {
   return 0;
 }
 EOF
-  cc_check && tmp_run && _apple_ir=yes
+  cc_check && _apple_ir=yes
 fi
 if test "$_apple_ir" = yes ; then
   def_apple_ir='#define CONFIG_APPLE_IR 1'
@@ -3899,7 +3908,7 @@ EOF
 fi
 
 if test "$_smb" = yes; then
-    def_smb="#define CONFIG_LIBSMBCLIENT"
+    def_smb="#define CONFIG_LIBSMBCLIENT 1"
     _inputmodules="smb $_inputmodules"
 else
     def_smb="#undef CONFIG_LIBSMBCLIENT"
@@ -3992,7 +4001,7 @@ echores "$_tga"
 
 echocheck "md5sum support"
 if test "$_md5sum" = yes; then
-  def_md5sum="#define CONFIG_MD5SUM"
+  def_md5sum="#define CONFIG_MD5SUM 1"
   _vomodules="md5sum $_vomodules"
 else
   def_md5sum="#undef CONFIG_MD5SUM"
@@ -4003,7 +4012,7 @@ echores "$_md5sum"
 
 echocheck "yuv4mpeg support"
 if test "$_yuv4mpeg" = yes; then
-  def_yuv4mpeg="#define CONFIG_YUV4MPEG"
+  def_yuv4mpeg="#define CONFIG_YUV4MPEG 1"
   _vomodules="yuv4mpeg $_vomodules"
 else
   def_yuv4mpeg="#undef CONFIG_YUV4MPEG"
@@ -4833,13 +4842,7 @@ int main(void) {
   return strcmp(PNG_LIBPNG_VER_STRING, png_libpng_ver);
 }
 EOF
-    if cc_check -lpng -lz $_ld_lm ; then
-      if tmp_run ; then
-        _png=yes
-      else
-        _res_comment="mismatch of library and header versions"
-      fi
-    fi
+    cc_check -lpng -lz $_ld_lm && _png=yes
   fi
 fi
 echores "$_png"
@@ -4885,11 +4888,7 @@ cat > $TMPC << EOF
 #include <jpeglib.h>
 int main(void) { return 0; }
 EOF
-    if cc_check -ljpeg $_ld_lm ; then
-      if tmp_run ; then
-        _jpeg=yes
-      fi
-    fi
+  cc_check -ljpeg $_ld_lm && _jpeg=yes
 fi
 echores "$_jpeg"
 
@@ -4932,7 +4931,7 @@ cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
   for _ld_gif in "-lungif" "-lgif" ; do
-    cc_check $_ld_gif && tmp_run && _gif=yes && break
+    cc_check $_ld_gif && _gif=yes && break
   done
 fi
 
@@ -4969,7 +4968,7 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check "$_ld_gif" && tmp_run ; then
+  if cc_check "$_ld_gif" ; then
     def_gif_4='#define CONFIG_GIF_4 1'
     _res_comment=""
   fi
@@ -4994,7 +4993,7 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check "$_ld_gif" && tmp_run ; then
+  if cc_check "$_ld_gif" ; then
     def_gif_tvt_hack='#undef CONFIG_GIF_TVT_HACK'
     echores "disabled"
   else
@@ -5259,7 +5258,6 @@ if test "$_v4l2" = auto ; then
 int main(void) {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
 #error kernel headers too old, need 2.6.22
-  bad_kernel_version();
 #endif
   struct v4l2_ext_controls ctrls;
   ctrls.ctrl_class = V4L2_CTRL_CLASS_MPEG;
@@ -5352,7 +5350,7 @@ cat > $TMPC << EOF
 #include <artsc.h>
 int main(void) { return 0; }
 EOF
-cc_check $(artsc-config --libs) $(artsc-config --cflags) && tmp_run && _arts=yes
+cc_check $(artsc-config --libs) $(artsc-config --cflags) && _arts=yes
 
   fi
 fi
@@ -5394,7 +5392,7 @@ if test "$_esd" = yes ; then
 #include <esd.h>
 int main(void) { return esd_get_latency(0); }
 EOF
-  cc_check $(esd-config --libs) $(esd-config --cflags) && _esd_latency=yes && def_esd_latency='#define CONFIG_ESD_LATENCY'
+  cc_check $(esd-config --libs) $(esd-config --cflags) && _esd_latency=yes && def_esd_latency='#define CONFIG_ESD_LATENCY 1'
   echores "$_esd_latency"
 else
   def_esd='#undef CONFIG_ESD'
@@ -5432,7 +5430,7 @@ cat > $TMPC << EOF
 #include <pulse/pulseaudio.h>
 int main(void) { return 0; }
 EOF
-cc_check $($_pkg_config --libs --cflags libpulse) && tmp_run && _pulse=yes
+cc_check $($_pkg_config --libs --cflags libpulse) && _pulse=yes
 
   fi
 fi
@@ -5911,7 +5909,7 @@ EOF
 fi
 if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
     _cdda='yes'
-    def_libcdio='#define CONFIG_LIBCDIO'
+    def_libcdio='#define CONFIG_LIBCDIO 1'
     def_havelibcdio='yes'
 else
     if test "$_cdparanoia" = yes ; then
@@ -5924,7 +5922,7 @@ echores "$_libcdio"
 
 if test "$_cdda" = yes ; then
     test $_cddb = auto && test $_network = yes && _cddb=yes
-    def_cdparanoia='#define CONFIG_CDDA'
+    def_cdparanoia='#define CONFIG_CDDA 1'
     _inputmodules="cdda $_inputmodules"
 else
     def_cdparanoia='#undef CONFIG_CDDA'
@@ -5932,7 +5930,7 @@ else
 fi
 
 if test "$_cddb" = yes ; then
-    def_cddb='#define CONFIG_CDDB'
+    def_cddb='#define CONFIG_CDDB 1'
     _inputmodules="cddb $_inputmodules"
 else
     _cddb=no
@@ -5970,29 +5968,17 @@ int main(void) {
     FT_Library library;
     FT_Int major=-1,minor=-1,patch=-1;
     int err=FT_Init_FreeType(&library);
-    if (err) {
-	printf("Couldn't initialize freetype2 lib, err code: %d\n",err);
-	exit(err);
-    }
-    FT_Library_Version(library,&major,&minor,&patch); // in v2.1.0+ only :(((
-    printf("freetype2  header version: %d.%d.%d  library version: %d.%d.%d\n",
-	FREETYPE_MAJOR,FREETYPE_MINOR,FREETYPE_PATCH,
-	(int)major,(int)minor,(int)patch );
-    if (major!=FREETYPE_MAJOR || minor!=FREETYPE_MINOR) {
-	printf("Library and header version mismatch! Fix it in your distribution!\n");
-	exit(1);
-    }
     return 0;
 }
 EOF
 	_freetype=no
-	cc_check $($_freetypeconfig --cflags) $($_freetypeconfig --libs) && tmp_run && _freetype=yes
+	cc_check $($_freetypeconfig --cflags) $($_freetypeconfig --libs) && _freetype=yes
     else
 	_freetype=no
     fi
 fi
 if test "$_freetype" = yes ; then
-    def_freetype='#define CONFIG_FREETYPE'
+    def_freetype='#define CONFIG_FREETYPE 1'
     extra_cflags="$extra_cflags $($_freetypeconfig --cflags)"
     extra_ldflags="$extra_ldflags $($_freetypeconfig --libs)"
 else
@@ -6032,7 +6018,7 @@ EOF
   fi
 fi
 if test "$_fontconfig" = yes ; then
-    def_fontconfig='#define CONFIG_FONTCONFIG'
+    def_fontconfig='#define CONFIG_FONTCONFIG 1'
 else
     def_fontconfig='#undef CONFIG_FONTCONFIG'
 fi
@@ -6043,7 +6029,7 @@ echocheck "SSA/ASS support"
 if test "$_ass" = auto -o "$_ass" = yes ; then
 	if $_pkg_config libass; then
 		_ass=yes
-		def_ass='#define CONFIG_ASS'
+		def_ass='#define CONFIG_ASS 1'
 		extra_ldflags="$extra_ldflags $($_pkg_config --libs libass)"
 		extra_cflags="$extra_cflags $($_pkg_config --cflags libass)"
 	else
@@ -6073,13 +6059,13 @@ int main(void) {
 }
 EOF
 	_fribidi=no
-	cc_check $($_fribidiconfig --cflags) $($_fribidiconfig --libs) && tmp_run && _fribidi=yes
+	cc_check $($_fribidiconfig --cflags) $($_fribidiconfig --libs) && _fribidi=yes
     else
 	_fribidi=no
     fi
 fi
 if test "$_fribidi" = yes ; then
-    def_fribidi='#define CONFIG_FRIBIDI'
+    def_fribidi='#define CONFIG_FRIBIDI 1'
     extra_cflags="$extra_cflags $($_fribidiconfig --cflags)"
     extra_ldflags="$extra_ldflags $($_fribidiconfig --libs)"
 else
@@ -6591,7 +6577,7 @@ EOF
   cc_check && _ladspa=yes
 fi
 if test "$_ladspa" = yes; then
-  def_ladspa="#define CONFIG_LADSPA"
+  def_ladspa="#define CONFIG_LADSPA 1"
 else
   def_ladspa="#undef CONFIG_LADSPA"
 fi
@@ -6631,7 +6617,7 @@ EOF
   fi
 fi
 def_libbs2b="#undef CONFIG_LIBBS2B"
-test "$_libbs2b" = yes && def_libbs2b="#define CONFIG_LIBBS2B"
+test "$_libbs2b" = yes && def_libbs2b="#define CONFIG_LIBBS2B 1"
 echores "$_libbs2b"
 
 
@@ -7109,22 +7095,22 @@ int main(void) { lame_version_t lv; (void) lame_init();
     get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor);
     return 0; }
 EOF
-  cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
+  cc_check -lmp3lame $_ld_lm && _mp3lame=yes
 fi
 if test "$_mp3lame" = yes ; then
-  def_mp3lame="#define CONFIG_MP3LAME"
+  def_mp3lame="#define CONFIG_MP3LAME 1"
   _ld_mp3lame=-lmp3lame
   libs_mencoder="$libs_mencoder $_ld_mp3lame"
   cat > $TMPC << EOF
 #include <lame/lame.h>
 int main(void) { lame_set_preset(NULL, STANDARD_FAST); return 0; }
 EOF
-  cc_check $_ld_mp3lame $_ld_lm && def_mp3lame_preset="#define CONFIG_MP3LAME_PRESET"
+  cc_check $_ld_mp3lame $_ld_lm && def_mp3lame_preset="#define CONFIG_MP3LAME_PRESET 1"
   cat > $TMPC << EOF
 #include <lame/lame.h>
 int main(void) { lame_set_preset(NULL, MEDIUM_FAST); return 0; }
 EOF
-  cc_check $_ld_mp3lame $_ld_lm && def_mp3lame_preset_medium="#define CONFIG_MP3LAME_PRESET_MEDIUM"
+  cc_check $_ld_mp3lame $_ld_lm && def_mp3lame_preset_medium="#define CONFIG_MP3LAME_PRESET_MEDIUM 1"
 else
   def_mp3lame='#undef CONFIG_MP3LAME'
 fi
@@ -7324,25 +7310,6 @@ else
   def_tv_v4l2='#undef CONFIG_TV_V4L2'
 fi
 echores "$_tv_v4l2"
-
-
-echocheck "TV teletext interface"
-if test "$_tv_teletext" = auto ; then
-  _tv_teletext=no
-  if test "$_freetype" = yes && test "$_pthreads" = yes; then
-    if test "$_tv_v4l2" = yes || test "$_v4l" = yes || test "$_tv_dshow" = yes; then
-      _tv_teletext=yes
-    fi
-  fi
-fi
-if test "$_tv_teletext" = yes ; then
-  def_tv_teletext='#define CONFIG_TV_TELETEXT 1'
-  _inputmodules="tv-teletext $_inputmodules"
-else
-  _noinputmodules="tv-teletext $_noinputmodules"
-  def_tv_teletext='#undef CONFIG_TV_TELETEXT'
-fi
-echores "$_tv_teletext"
 
 
 echocheck "Radio interface"
@@ -7790,8 +7757,7 @@ CFLAGS_SVGALIB_HELPER = $cflags_svgalib_helper
 CFLAGS_TREMOR_LOW = $cflags_tremor_low
 YASMFLAGS = $YASMFLAGS
 
-EXTRALIBS = $extra_libs
-EXTRA_LIB = $extra_ldflags $_ld_static $_ld_lm
+EXTRALIBS = $extra_ldflags $_ld_static $_ld_lm $extra_libs
 EXTRALIBS_MPLAYER = $libs_mplayer
 EXTRALIBS_MENCODER = $libs_mencoder
 
@@ -7930,7 +7896,6 @@ TREMOR_INTERNAL = $_tremor_internal
 TV = $_tv
 TV_BSDBT848 = $_tv_bsdbt848
 TV_DSHOW = $_tv_dshow
-TV_TELETEXT = $_tv_teletext
 TV_V4L  = $_tv_v4l
 TV_V4L1 = $_tv_v4l1
 TV_V4L2 = $_tv_v4l2
@@ -7991,6 +7956,7 @@ CONFIG_AANDCT=yes
 CONFIG_FFT=yes
 CONFIG_FFT_MMX=$fft_mmx
 CONFIG_GOLOMB=yes
+CONFIG_LPC=yes
 CONFIG_MDCT=yes
 CONFIG_RDFT=yes
 
@@ -8283,7 +8249,6 @@ $def_radio_v4l2
 $def_tv
 $def_tv_bsdbt848
 $def_tv_dshow
-$def_tv_teletext
 $def_tv_v4l
 $def_tv_v4l1
 $def_tv_v4l2
@@ -8442,6 +8407,7 @@ $def_yasm
 #define CONFIG_AANDCT 1
 #define CONFIG_FFT 1
 #define CONFIG_GOLOMB 1
+#define CONFIG_LPC 1
 #define CONFIG_MDCT 1
 #define CONFIG_RDFT 1
 

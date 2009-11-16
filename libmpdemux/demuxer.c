@@ -41,6 +41,7 @@
 #include "mf.h"
 
 #include "libaf/af_format.h"
+#include "libmpcodecs/dec_teletext.h"
 
 #include "ass_mp.h"
 
@@ -186,27 +187,11 @@ void free_demuxer_stream(demux_stream_t *ds)
 demux_stream_t *new_demuxer_stream(struct demuxer *demuxer, int id)
 {
     demux_stream_t *ds = malloc(sizeof(demux_stream_t));
-    ds->buffer_pos = ds->buffer_size = 0;
-    ds->buffer = NULL;
-    ds->pts = 0;
-    ds->pts_bytes = 0;
-    ds->eof = 0;
-    ds->pos = 0;
-    ds->dpos = 0;
-    ds->pack_no = 0;
-
-    ds->packs = 0;
-    ds->bytes = 0;
-    ds->first = ds->last = ds->current = NULL;
-    ds->id = id;
-    ds->demuxer = demuxer;
-
-    ds->asf_seq = -1;
-    ds->asf_packet = NULL;
-
-    ds->ss_mul = ds->ss_div = 0;
-
-    ds->sh = NULL;
+    *ds = (demux_stream_t){
+        .id = id,
+        .demuxer = demuxer,
+        .asf_seq = -1,
+    };
     return ds;
 }
 
@@ -405,6 +390,8 @@ void free_demuxer(demuxer_t *demuxer)
         }
         free(demuxer->attachments);
     }
+    if (demuxer->teletext)
+        teletext_control(demuxer->teletext, TV_VBI_CONTROL_STOP, NULL);
     talloc_free(demuxer);
 }
 

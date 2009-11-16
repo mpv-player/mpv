@@ -34,6 +34,15 @@ For "set_mouse_pos" and "key_down_event", "pausing_keep_force" is the default
 since other values do not make much sense for them.
 
 
+Various tips and tricks (please help expand it!):
+
+- Try using something like
+    pausing_keep_force pt_step 1
+    get_property pause
+  to switch to the next file. It avoids audio playback starting to play
+  the old file for a short time before switching to the new one.
+
+
 Available commands ('mplayer -input cmdlist' will print a list):
 
 

@@ -47,7 +47,7 @@ LIBAD_EXTERN(faad)
 
 /* configure maximum supported channels, *
  * this is theoretically max. 64 chans   */
-#define FAAD_MAX_CHANNELS 6
+#define FAAD_MAX_CHANNELS 8
 #define FAAD_BUFFLEN (FAAD_MIN_STREAMSIZE*FAAD_MAX_CHANNELS)
 
 //#define AAC_DUMP_COMPRESSED
@@ -167,7 +167,8 @@ static int init(sh_audio_t *sh)
   } else {
     mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: Decoder init done (%dBytes)!\n", sh->a_in_buffer_len); // XXX: remove or move to debug!
     mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: Negotiated samplerate: %ldHz  channels: %d\n", faac_samplerate, faac_channels);
-    sh->channels = faac_channels;
+    // 8 channels is aac channel order #7.
+    sh->channels = faac_channels == 7 ? 8 : faac_channels;
     if (audio_output_channels <= 2) sh->channels = faac_channels > 1 ? 2 : 1;
     sh->samplerate = faac_samplerate;
     sh->samplesize=2;

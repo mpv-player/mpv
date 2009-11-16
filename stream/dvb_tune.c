@@ -230,7 +230,7 @@ int dvb_demux_stop(int fd)
 
 	mp_msg(MSGT_DEMUX, MSGL_DBG2, "STOPPING FD: %d, RESULT: %d\n", fd, i);
 
-	return (i==0);
+	return i == 0;
 }
 
 
@@ -241,7 +241,7 @@ int dvb_demux_start(int fd)
 
 	mp_msg(MSGT_DEMUX, MSGL_DBG2, "STARTING FD: %d, RESULT: %d\n", fd, i);
 
-	return (i==0);
+	return i == 0;
 }
 
 
@@ -265,7 +265,7 @@ int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int to
 	if(ris != 0)
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "dvb_tune, TUNING FAILED\n");
 
-	return (ris == 0);
+	return ris == 0;
 }
 
 
@@ -740,5 +740,5 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
     return -1;
   }
 
-  return(check_status(fd_frontend, timeout));
+  return check_status(fd_frontend, timeout);
 }

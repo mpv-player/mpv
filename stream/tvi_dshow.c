@@ -76,6 +76,7 @@
 
 #include <stdio.h>
 #include "libmpcodecs/img_format.h"
+#include "libmpcodecs/dec_teletext.h"
 #include "libaf/af_format.h"
 #include "help_mp.h"
 #include "osdep/timer.h"
@@ -2263,7 +2264,6 @@ static int get_audio_framesize(priv_t * priv)
     return priv->chains[1]->rbuf->blocksize;
 }
 
-#ifdef CONFIG_TV_TELETEXT
 static int vbi_get_props(priv_t* priv,tt_stream_props* ptsp)
 {
     if(!priv || !ptsp)
@@ -2309,7 +2309,6 @@ static void vbi_grabber(priv_t* priv)
     }
     free(buf);
 }
-#endif /* CONFIG_TV_TELETEXT */
 
 /**
  * \brief fills given buffer with video data (usually one frame)
@@ -2354,9 +2353,7 @@ static double grab_video_frame(priv_t * priv, char *buffer, int len)
       rb->count--;
     LeaveCriticalSection(rb->pMutex);
 
-#ifdef CONFIG_TV_TELETEXT
     vbi_grabber(priv);
-#endif
     return pts;
 }
 
@@ -2545,13 +2542,12 @@ static HRESULT build_audio_chain(priv_t *priv)
  */
 static HRESULT build_vbi_chain(priv_t *priv)
 {
-#ifdef CONFIG_TV_TELETEXT
     HRESULT hr;
 
     if(priv->chains[2]->rbuf)
         return S_OK;
 
-    if(priv->tv_param->tdevice)
+    if(priv->tv_param->teletext.device)
     {
         priv->chains[2]->rbuf=calloc(1,sizeof(grabber_ringbuffer_t));
         if(!priv->chains[2]->rbuf)
@@ -2565,7 +2561,6 @@ static HRESULT build_vbi_chain(priv_t *priv)
             return 0;
         }
     }
-#endif
     return S_OK;
 }
 
@@ -2901,10 +2896,8 @@ static int init(priv_t * priv)
             OLE_QUERYINTERFACE(priv->pBuilder,IID_IBaseFilter,pBF);
             OLE_CALL_ARGS(pBF,SetSyncSource,rc);
         }
-#ifdef CONFIG_TV_TELETEXT
        if(vbi_get_props(priv,&(priv->tsp))!=TVI_CONTROL_TRUE)
            break;
-#endif
         result = 1;
     } while(0);
 
@@ -2974,9 +2967,7 @@ static int uninit(priv_t * priv)
     if (priv->dwRegister) {
         RemoveFromRot(priv->dwRegister);
     }
-#ifdef CONFIG_TV_TELETEXT
     teletext_control(priv->priv_vbi,TV_VBI_CONTROL_STOP,(void*)1);
-#endif
     //stop audio grabber thread
 
     if (priv->state && priv->pMediaControl) {
@@ -3481,20 +3472,19 @@ static int control(priv_t * priv, int cmd, void *arg)
     case TVI_CONTROL_IMMEDIATE:
 	priv->immediate_mode = 1;
 	return TVI_CONTROL_TRUE;
-#ifdef CONFIG_TV_TELETEXT
     case TVI_CONTROL_VBI_INIT:
     {
         void* ptr;
         ptr=&(priv->tsp);
-        if(teletext_control(NULL,TV_VBI_CONTROL_START,&ptr)==TVI_CONTROL_TRUE)
+        if(teletext_control(NULL,TV_VBI_CONTROL_START,&ptr)==VBI_CONTROL_TRUE)
             priv->priv_vbi=ptr;
         else
             priv->priv_vbi=NULL;
         return TVI_CONTROL_TRUE;
     }
-    default:
-        return teletext_control(priv->priv_vbi,cmd,arg);
-#endif
+    case TVI_CONTROL_GET_VBI_PTR:
+        *(void **)arg=priv->priv_vbi;
+        return TVI_CONTROL_TRUE;
     }
     return TVI_CONTROL_UNKNOWN;
 }

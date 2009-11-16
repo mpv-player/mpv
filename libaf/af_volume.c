@@ -20,7 +20,7 @@
 
 /* This audio filter changes the volume of the sound, and can be used
    when the mixer doesn't support the PCM channel. It can handle
-   between 1 and 6 channels. The volume can be adjusted between -60dB
+   between 1 and AF_NCH channels. The volume can be adjusted between -60dB
    to +20dB and is set on a per channels basis. The is accessed through
    AF_CONTROL_VOLUME_LEVEL.
 

@@ -39,7 +39,8 @@ static int bind_pcm(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 static int encode_pcm(audio_encoder_t *encoder, uint8_t *dest, void *src, int nsamples, int max_size)
 {
 	max_size = FFMIN(nsamples, max_size);
-	if (encoder->params.channels == 6 || encoder->params.channels == 5) {
+	if (encoder->params.channels == 5 || encoder->params.channels == 6 ||
+		    encoder->params.channels == 8) {
 		max_size -= max_size % (encoder->params.channels * 2);
 		reorder_channel_copy_nch(src, AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
 		                         dest, AF_CHANNEL_LAYOUT_WAVEEX_DEFAULT,

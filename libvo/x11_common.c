@@ -713,7 +713,7 @@ void vo_x11_classhint(struct vo *vo, Window window, char *name)
     XClassHint wmClass;
     pid_t pid = getpid();
 
-    wmClass.res_name = name;
+    wmClass.res_name = vo_winname ? vo_winname : name;
     wmClass.res_class = "MPlayer";
     XSetClassHint(x11->display, window, &wmClass);
     XChangeProperty(x11->display, window, x11->XA_NET_WM_PID, XA_CARDINAL,
@@ -1210,7 +1210,6 @@ static int vo_x11_get_fs_type(int supported)
 
     if (vo_fstype_list)
     {
-        i = 0;
         for (i = 0; vo_fstype_list[i]; i++)
         {
             int neg = 0;
@@ -1268,7 +1267,7 @@ static int vo_x11_get_fs_type(int supported)
                 else
                     type |= vo_wm_NETWM;
             } else if (!strcmp(arg, "none"))
-                return 0;
+                type = 0; // clear; keep parsing
         }
     }
 
@@ -1293,6 +1292,9 @@ int vo_x11_update_geometry(struct vo *vo)
     }
     XTranslateCoordinates(x11->display, x11->window, x11->rootwin, 0, 0,
                           &vo->dx, &vo->dy, &dummy_win);
+    if (vo_wintitle)
+        XStoreName(x11->display, x11->window, vo_wintitle);
+
     return depth <= INT_MAX ? depth : 0;
 }
 
@@ -1301,6 +1303,10 @@ void vo_x11_fullscreen(struct vo *vo)
     struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
     int x, y, w, h;
+    x = x11->vo_old_x;
+    y = x11->vo_old_y;
+    w = x11->vo_old_width;
+    h = x11->vo_old_height;
 
     if (WinID >= 0) {
         vo_fs = !vo_fs;
@@ -1311,15 +1317,6 @@ void vo_x11_fullscreen(struct vo *vo)
 
     if (vo_fs)
     {
-        // fs->win
-        if ( ! (x11->fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
-        {
-            x = x11->vo_old_x;
-            y = x11->vo_old_y;
-            w = x11->vo_old_width;
-            h = x11->vo_old_height;
-	}
-
         vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_REMOVE);   // removes fullscreen state if wm supports EWMH
         vo_fs = VO_FALSE;
     } else

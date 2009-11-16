@@ -320,25 +320,15 @@ play_tree_remove_file(play_tree_t* pt,char* file) {
 
 void
 play_tree_set_param(play_tree_t* pt, char* name, char* val) {
-  int n = 0,ni = -1;
+  int n = 0;
 
 #ifdef MP_DEBUG
   assert(pt != NULL);
   assert(name != NULL);
 #endif
 
-  if(pt->params) {
-    for( ; pt->params[n].name != NULL ; n++) {
-      if(strcasecmp(pt->params[n].name,name) == 0)
-	ni = n;
-    }
-  }
-
-  if(ni > 0) {
-    if(pt->params[n].value != NULL) free(pt->params[n].value);
-    pt->params[n].value = val != NULL ? strdup(val) : NULL;
-    return;
-  }
+  if(pt->params)
+    for ( ; pt->params[n].name != NULL ; n++ ) { }
 
   pt->params = (play_tree_param_t*)realloc(pt->params,(n+2)*sizeof(play_tree_param_t));
   if(pt->params == NULL) {

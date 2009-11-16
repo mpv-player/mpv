@@ -15,8 +15,6 @@ static int get_video_framesize(priv_t *priv);
 static double grab_audio_frame(priv_t *priv, char *buffer, int len);
 static int get_audio_framesize(priv_t *priv);
 
-int teletext_control(void* p, int cmd, void *arg);
-
 static const tvi_functions_t functions =
 {
     init,

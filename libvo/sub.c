@@ -29,7 +29,7 @@
 #include "stream/stream_dvdnav.h"
 #define OSD_NAV_BOX_ALPHA 0x7f
 
-#include "stream/tv.h"
+#include "libmpcodecs/dec_teletext.h"
 #include "osdep/timer.h"
 
 #include "talloc.h"
@@ -85,13 +85,11 @@ char * const sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "",
 //static int vo_font_loaded=-1;
 font_desc_t* vo_font=NULL;
 
-#ifdef CONFIG_TV_TELETEXT
 void* vo_osd_teletext_page=NULL;
 int vo_osd_teletext_half = 0;
 int vo_osd_teletext_mode=0;
 int vo_osd_teletext_format=0;
 int vo_osd_teletext_scale=0;
-#endif
 int sub_unicode=0;
 int sub_utf8=0;
 int sub_pos=100;
@@ -277,7 +275,6 @@ inline static void vo_update_nav (mp_osd_obj_t *obj, int dxs, int dys, int left_
 }
 #endif
 
-#ifdef CONFIG_TV_TELETEXT
 // renders char to a big per-object buffer where alpha and bitmap are separated
 static void tt_draw_alpha_buf(mp_osd_obj_t* obj, int x0,int y0, int w,int h, unsigned char* src, int stride,int fg,int bg,int alpha)
 {
@@ -318,7 +315,7 @@ inline static void vo_update_text_teletext(mp_osd_obj_t *obj, int dxs, int dys)
     int b,ax[6],ay[6],aw[6],ah[6];
     tt_char tc;
     tt_char* tdp=vo_osd_teletext_page;
-    unsigned char colors[8]={1,85,150,226,70,105,179,254};
+    static const uint8_t colors[8]={1,85,150,226,70,105,179,254};
     unsigned char* buf[9];
 
     obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
@@ -357,6 +354,7 @@ inline static void vo_update_text_teletext(mp_osd_obj_t *obj, int dxs, int dys)
     hm=vo_font->height+1;
     wm=dxs*hm*max_rows/(dys*VBI_COLUMNS);
 
+#ifdef CONFIG_FREETYPE
     //very simple teletext font auto scaling
     if(!vo_osd_teletext_scale && hm*(max_rows+1)>dys){
         osd_font_scale_factor*=1.0*(dys)/((max_rows+1)*hm);
@@ -365,6 +363,7 @@ inline static void vo_update_text_teletext(mp_osd_obj_t *obj, int dxs, int dys)
         obj->flags&=~OSDFLAG_VISIBLE;
         return;
     }
+#endif
 
     cols=dxs/wm;
     rows=dys/hm;
@@ -519,7 +518,6 @@ TODO: support for separated graphics symbols (where six rectangles does not touc
     for(i=0;i<9;i++)
         free(buf[i]);
 }
-#endif
 
 int vo_osd_progbar_type=-1;
 int vo_osd_progbar_value=100;   // 0..256
@@ -1162,11 +1160,9 @@ int osd_update_ext(struct osd_state *osd, int dxs, int dys, int left_border,
 	case OSDTYPE_SUBTITLE:
 	    vo_update_text_sub(osd, obj,dxs,dys);
 	    break;
-#ifdef CONFIG_TV_TELETEXT
 	case OSDTYPE_TELETEXT:
 	    vo_update_text_teletext(obj,dxs,dys);
 	    break;
-#endif
 	case OSDTYPE_PROGBAR:
 	    vo_update_text_progbar(obj,dxs,dys);
 	    break;
@@ -1242,9 +1238,7 @@ struct osd_state *osd_create(void)
 #ifdef CONFIG_DVDNAV
     new_osd_obj(OSDTYPE_DVDNAV);
 #endif
-#ifdef CONFIG_TV_TELETEXT
     new_osd_obj(OSDTYPE_TELETEXT);
-#endif
 #ifdef CONFIG_FREETYPE
     force_load_font = 1;
 #endif
@@ -1295,9 +1289,7 @@ void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
 #ifdef CONFIG_DVDNAV
         case OSDTYPE_DVDNAV:
 #endif
-#ifdef CONFIG_TV_TELETEXT
 	case OSDTYPE_TELETEXT:
-#endif
 	case OSDTYPE_OSD:
 	case OSDTYPE_SUBTITLE:
 	case OSDTYPE_PROGBAR:

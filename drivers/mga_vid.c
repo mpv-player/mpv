@@ -1197,7 +1197,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			tmp = MGA_VID_VERSION;
 			if (copy_to_user((uint32_t *) arg, &tmp, sizeof(uint32_t))) {
 				printk(KERN_ERR "mga_vid: failed copy %p to userspace %p\n", &tmp, (uint32_t *) arg);
-				return (-EFAULT);
+				return -EFAULT;
 			}
 			break;
 

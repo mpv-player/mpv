@@ -158,6 +158,9 @@ const m_option_t mplayer_opts[]={
 	{"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
         OPT_FLAG_ON("force-window-position", force_window_position, 0),
         OPT_FLAG_OFF("noforce-window-position", force_window_position, 0),
+	// vo name (X classname) and window title strings
+	{"name", &vo_winname, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"title", &vo_wintitle, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	// set aspect ratio of monitor - useful for 16:9 TV-out
         OPT_FLOATRANGE("monitoraspect", force_monitor_aspect, 0, 0.0, 9.0),
         OPT_FLOATRANGE("monitorpixelaspect", monitor_pixel_aspect, 0, 0.2, 9.0),
@@ -234,6 +237,8 @@ const m_option_t mplayer_opts[]={
 
 	{"use-filedir-conf", &use_filedir_conf, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nouse-filedir-conf", &use_filedir_conf, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
+	{"use-filename-title", &use_filename_title, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+	{"nouse-filename-title", &use_filename_title, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 #ifdef CONFIG_CRASH_DEBUG
 	{"crash-debug", &crash_debug, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nocrash-debug", &crash_debug, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
