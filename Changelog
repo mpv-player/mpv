@@ -29,6 +29,7 @@ MPlayer (1.0)
     * sync dvd:// and dvdnav:// features
     * support for mpeg4 asp in VDPAU video output
     * support for non-live DVB teletext
+    * -name, -title and -use-filename-title options for MPlayer
 
     MEncoder:
     * add -tsprog for demuxer lavf
