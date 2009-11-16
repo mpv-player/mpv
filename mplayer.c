@@ -1897,10 +1897,10 @@ static void mp_dvdnav_reset_stream (MPContext *ctx) {
     }
 
     audio_delay = 0.0f;
-    if (dvdsub_lang && dvdsub_id == dvdsub_lang_id) {
+    if (dvdsub_lang && opts->sub_id == dvdsub_lang_id) {
         dvdsub_lang_id = mp_dvdnav_sid_from_lang(ctx->stream, dvdsub_lang);
-        if (dvdsub_lang_id != dvdsub_id) {
-            dvdsub_id = dvdsub_lang_id;
+        if (dvdsub_lang_id != opts->sub_id) {
+            opts->sub_id = dvdsub_lang_id;
             select_subtitle(ctx);
         }
     }
