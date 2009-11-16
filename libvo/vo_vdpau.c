@@ -721,6 +721,11 @@ static int create_vdp_decoder(struct vo *vo, int max_refs)
         case IMGFMT_VDPAU_VC1:
             vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_ADVANCED;
             break;
+#ifdef VDP_DECODER_PROFILE_MPEG4_PART2_ASP
+        case IMGFMT_VDPAU_MPEG4:
+            vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG4_PART2_ASP;
+            break;
+#endif
     }
     vdp_st = vdp->decoder_create(vc->vdp_device, vdp_decoder_profile,
                                  vc->vid_width, vc->vid_height, max_refs,
@@ -1508,6 +1513,7 @@ static int query_format(uint32_t format)
         case IMGFMT_VDPAU_H264:
         case IMGFMT_VDPAU_WMV3:
         case IMGFMT_VDPAU_VC1:
+        case IMGFMT_VDPAU_MPEG4:
             return default_flags;
     }
     return 0;
