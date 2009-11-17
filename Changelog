@@ -30,6 +30,10 @@ MPlayer (1.0)
     * support for mpeg4 asp in VDPAU video output (non B-frame only)
     * support for live and non-live DVB teletext with demuxer lavf
     * -name, -title and -use-filename-title options for MPlayer
+    * support for stream handling via FFmpeg
+      Configure with --enable-protocol="file_protocol pipe_protocol
+      http_protocol rtmp_protocol tcp_protocol udp_protocol"
+      and use e.g. ffmpeg://http://example.com/test
 
     MEncoder:
     * add -tsprog for demuxer lavf
