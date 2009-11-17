@@ -396,8 +396,7 @@ stream_t* new_memory_stream(unsigned char* data,int len){
 
   if(len < 0)
     return NULL;
-  s=malloc(sizeof(stream_t)+len);
-  memset(s,0,sizeof(stream_t));
+  s=calloc(1, sizeof(stream_t)+len);
   s->fd=-1;
   s->type=STREAMTYPE_MEMORY;
   s->buf_pos=0; s->buf_len=len;
@@ -409,9 +408,8 @@ stream_t* new_memory_stream(unsigned char* data,int len){
 }
 
 stream_t* new_stream(int fd,int type){
-  stream_t *s=malloc(sizeof(stream_t));
+  stream_t *s=calloc(1, sizeof(stream_t));
   if(s==NULL) return NULL;
-  memset(s,0,sizeof(stream_t));
 
 #if HAVE_WINSOCK2_H
   {
