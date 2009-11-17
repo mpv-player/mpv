@@ -651,9 +651,12 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
         feature_enables[i] = VDP_TRUE;
     if (vc->deint < 3)
         feature_enables[0] = VDP_FALSE;
-    if (feature_count)
-        vdp->video_mixer_set_feature_enables(vc->video_mixer, feature_count,
-                                             features, feature_enables);
+    if (feature_count) {
+        vdp_st = vdp->video_mixer_set_feature_enables(vc->video_mixer,
+                                                      feature_count, features,
+                                                      feature_enables);
+        CHECK_ST_WARNING("Error calling vdp_video_mixer_set_feature_enables");
+    }
     if (vc->denoise)
         SET_VIDEO_ATTR(NOISE_REDUCTION_LEVEL, float, vc->denoise);
     if (vc->sharpen)
