@@ -331,8 +331,9 @@ if(newpos==0 || newpos!=s->pos){
         mp_msg(MSGT_STREAM,MSGL_INFO,"Stream not seekable!\n");
         return 1;
       }
+      break;
     }
-#else
+#endif
     if(newpos<s->pos){
       mp_msg(MSGT_STREAM,MSGL_INFO,"Cannot seek backward in linear streams!\n");
       return 1;
@@ -340,7 +341,6 @@ if(newpos==0 || newpos!=s->pos){
     while(s->pos<newpos){
       if(stream_fill_buffer(s)<=0) break; // EOF
     }
-#endif
     break;
   default:
     // This should at the beginning as soon as all streams are converted
