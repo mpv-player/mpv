@@ -112,11 +112,11 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     if (size >= 0)
         stream->end_pos = size;
     stream->type = STREAMTYPE_FILE;
+    stream->seek = seek;
     if (ctx->is_streamed) {
         stream->type = STREAMTYPE_STREAM;
-        stream->flags |= STREAM_SEEK_FW;
+        stream->seek = NULL;
     }
-    stream->seek = seek;
     stream->fill_buffer = fill_buffer;
     stream->write_buffer = write_buffer;
     stream->control = control;
