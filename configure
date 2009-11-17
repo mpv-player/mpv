@@ -348,6 +348,8 @@ Codecs:
   --enable-encoder=ENCODER  enable specified FFmpeg encoder
   --disable-parser=PARSER   disable specified FFmpeg parser
   --enable-parser=PARSER    enable specified FFmpeg parser
+  --disable-protocol=PROTO  disable specified FFmpeg protocol
+  --enable-protocol=PROTO   enable specified FFmpeg protocol
   --disable-demuxer=DEMUXER disable specified FFmpeg demuxer
   --enable-demuxer=DEMUXER  enable specified FFmpeg demuxer
   --disable-muxer=MUXER     disable specified FFmpeg muxer
@@ -551,6 +553,7 @@ _libavdemuxers=$(echo $_libavdemuxers_all | sed -e 's/ LIB[A-Z0-9_]*_DEMUXER//g'
 _libavmuxers_all=$(sed -n 's/^[^#]*_MUX.*(.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]')
 _libavmuxers=$(echo $_libavmuxers_all | sed -e 's/ LIB[A-Z0-9_]*_MUXER//g' -e s/RTP_MUXER//)
 _libavprotocols_all=$(sed -n 's/^[^#]*PROTOCOL.*(.*, *\(.*\)).*/\1_protocol/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]')
+_libavprotocols=""
 _libavcodec_so=auto
 _libavformat_a=auto
 _libavformat_so=auto
@@ -1154,6 +1157,8 @@ for ac_option do
   --disable-encoder=*) _libavencoders=$(echo $_libavencoders | sed "s/$(echo $ac_option | cut -d '=' -f 2 | tr '[a-z]' '[A-Z]')//g") ;;
   --enable-parser=*)   _libavparsers="$_libavparsers $(echo $ac_option | cut -d '=' -f 2 | tr '[a-z]' '[A-Z]')" ;;
   --disable-parser=*)  _libavparsers=$(echo $_libavparsers | sed "s/$(echo $ac_option | cut -d '=' -f 2 | tr '[a-z]' '[A-Z]')//g") ;;
+  --enable-protocol=*)   _libavprotocols="$_libavprotocols $(echo $ac_option | cut -d '=' -f 2 | tr '[a-z]' '[A-Z]')" ;;
+  --disable-protocol=*)  _libavprotocols=$(echo $_libavprotocols | sed "s/$(echo $ac_option | cut -d '=' -f 2 | tr '[a-z]' '[A-Z]')//g") ;;
   --enable-demuxer=*)  _libavdemuxers="$_libavdemuxers $(echo $ac_option | cut -d '=' -f 2 | tr '[a-z]' '[A-Z]')" ;;
   --disable-demuxer=*) _libavdemuxers=$(echo $_libavdemuxers | sed "s/$(echo $ac_option | cut -d '=' -f 2 | tr '[a-z]' '[A-Z]')//g") ;;
   --enable-muxer=*)    _libavmuxers="$_libavmuxers $(echo $ac_option | cut -d '=' -f 2 | tr '[a-z]' '[A-Z]')" ;;
@@ -8458,6 +8463,7 @@ $(echo $_libavencoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/')
 $(echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/')
 $(echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/')
 $(echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/')
+$(echo $_libavprotocols | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/')
 $(echo $_libavbsfs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/')
 EOF
 
