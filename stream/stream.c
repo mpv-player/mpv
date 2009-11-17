@@ -254,6 +254,9 @@ int stream_fill_buffer(stream_t *s){
 	    len=s->streaming_ctrl->streaming_read(s->fd,s->buffer,STREAM_BUFFER_SIZE, s->streaming_ctrl);
     } else
 #endif
+    if (s->fill_buffer)
+      len = s->fill_buffer(s, s->buffer, STREAM_BUFFER_SIZE);
+    else
       len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);
     break;
   case STREAMTYPE_DS:
