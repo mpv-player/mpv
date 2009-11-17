@@ -311,8 +311,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
   int ss = stream->sector_size ? stream->sector_size : STREAM_BUFFER_SIZE;
   cache_vars_t* s;
 
-  if (stream->type==STREAMTYPE_STREAM && stream->fd < 0) {
-    // The stream has no 'fd' behind it, so is non-cacheable
+  if (stream->flags & STREAM_NON_CACHEABLE) {
     mp_msg(MSGT_CACHE,MSGL_STATUS,"\rThis stream is non-cacheable\n");
     return 1;
   }

@@ -44,6 +44,7 @@ static int open_live_rtsp_sip(stream_t *stream,int mode, void* opts, int* file_f
 
   *file_format = DEMUXER_TYPE_RTP;
   stream->type = STREAMTYPE_STREAM;
+  stream->flags = STREAM_NONCACHEABLE;
   return STREAM_OK;
 
 fail:
