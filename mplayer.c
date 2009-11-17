@@ -1987,7 +1987,6 @@ static void mp_dvdnav_save_smpi(struct MPContext *mpctx, int in_size,
  */
 static void adjust_sync(struct MPContext *mpctx, double frame_time)
 {
-    struct MPOpts *opts = &mpctx->opts;
     current_module = "av_sync";
 
     if (!mpctx->sh_audio)

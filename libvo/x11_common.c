@@ -765,7 +765,6 @@ void vo_x11_uninit(struct vo *vo)
 int vo_x11_check_events(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
-    struct MPOpts *opts = vo->opts;
     Display *display = vo->x11->display;
     int ret = 0;
     XEvent Event;
@@ -790,8 +789,6 @@ int vo_x11_check_events(struct vo *vo)
                 ret |= VO_EVENT_EXPOSE;
                 break;
             case ConfigureNotify:
-//         if (!vo_fs && (Event.xconfigure.width == opts->vo_screenwidth || Event.xconfigure.height == opts->vo_screenheight)) break;
-//         if (vo_fs && Event.xconfigure.width != opts->vo_screenwidth && Event.xconfigure.height != opts->vo_screenheight) break;
                 if (x11->window == None)
                     break;
                 {

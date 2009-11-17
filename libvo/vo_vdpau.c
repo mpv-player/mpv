@@ -1676,7 +1676,6 @@ static int get_equalizer(struct vo *vo, const char *name, int *value)
 static int set_equalizer(struct vo *vo, const char *name, int value)
 {
     struct vdpctx *vc = vo->priv;
-    struct vdp_functions *vdp = vc->vdp;
 
     if (!strcasecmp(name, "brightness"))
         vc->procamp.brightness = value / 100.0;
