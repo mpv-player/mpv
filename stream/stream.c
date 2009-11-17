@@ -58,6 +58,7 @@ extern const stream_info_t stream_info_rtsp_sip;
 extern const stream_info_t stream_info_cue;
 extern const stream_info_t stream_info_null;
 extern const stream_info_t stream_info_mf;
+extern const stream_info_t stream_info_ffmpeg;
 extern const stream_info_t stream_info_file;
 extern const stream_info_t stream_info_ifo;
 extern const stream_info_t stream_info_dvd;
@@ -111,6 +112,9 @@ static const stream_info_t* const auto_open_streams[] = {
 #endif
 #ifdef CONFIG_DVDNAV
   &stream_info_dvdnav,
+#endif
+#ifdef CONFIG_LIBAVFORMAT
+  &stream_info_ffmpeg,
 #endif
 
   &stream_info_null,
