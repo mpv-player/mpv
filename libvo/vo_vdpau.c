@@ -545,6 +545,22 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
     return 0;
 }
 
+static int set_video_attribute(struct vdpctx *vc, VdpVideoMixerAttribute attr,
+                               const void *value, char *attr_name)
+{
+    struct vdp_functions *vdp = vc->vdp;
+    VdpStatus vdp_st;
+
+    vdp_st = vdp->video_mixer_set_attribute_values(vc->video_mixer, 1, &attr,
+                                                   &value);
+    if (vdp_st != VDP_STATUS_OK) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error setting video mixer "
+               "attribute %s: %s\n", attr_name, vdp->get_error_string(vdp_st));
+        return -1;
+    }
+    return 0;
+}
+
 static void update_csc_matrix(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
@@ -563,15 +579,13 @@ static void update_csc_matrix(struct vo *vo)
     vdp_st = vdp->generate_csc_matrix(&vc->procamp, vdp_colors[csp], &matrix);
     CHECK_ST_WARNING("Error when generating CSC matrix");
 
-    const VdpVideoMixerAttribute attributes[] =
-        {VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX};
-    const void *attribute_values[] = {&matrix};
-    vdp_st = vdp->video_mixer_set_attribute_values(vc->video_mixer, 1,
-                                                   attributes,
-                                                   attribute_values);
-    CHECK_ST_WARNING("Error when setting CSC matrix");
+    set_video_attribute(vc, VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX,
+                        &matrix, "CSC matrix");
 }
 
+#define SET_VIDEO_ATTR(attr_name, attr_type, value) set_video_attribute(vc, \
+                 VDP_VIDEO_MIXER_ATTRIBUTE_ ## attr_name, &(attr_type){value},\
+                 # attr_name)
 static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
 {
     struct vdpctx *vc = vo->priv;
@@ -587,16 +601,6 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
     int feature_count = 0;
     VdpVideoMixerFeature features[MAX_NUM_FEATURES];
     VdpBool feature_enables[MAX_NUM_FEATURES];
-    static const VdpVideoMixerAttribute denoise_attrib[] =
-        {VDP_VIDEO_MIXER_ATTRIBUTE_NOISE_REDUCTION_LEVEL};
-    const void * const denoise_value[] = {&vc->denoise};
-    static const VdpVideoMixerAttribute sharpen_attrib[] =
-        {VDP_VIDEO_MIXER_ATTRIBUTE_SHARPNESS_LEVEL};
-    const void * const sharpen_value[] = {&vc->sharpen};
-    static const VdpVideoMixerAttribute skip_chroma_attrib[] =
-        {VDP_VIDEO_MIXER_ATTRIBUTE_SKIP_CHROMA_DEINTERLACE};
-    const uint8_t skip_chroma_value = 1;
-    const void * const skip_chroma_value_ptr[] = {&skip_chroma_value};
     static const VdpVideoMixerParameter parameters[VDP_NUM_MIXER_PARAMETER] = {
         VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_WIDTH,
         VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_HEIGHT,
@@ -651,15 +655,11 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
         vdp->video_mixer_set_feature_enables(vc->video_mixer, feature_count,
                                              features, feature_enables);
     if (vc->denoise)
-        vdp->video_mixer_set_attribute_values(vc->video_mixer, 1,
-                                              denoise_attrib, denoise_value);
+        SET_VIDEO_ATTR(NOISE_REDUCTION_LEVEL, float, vc->denoise);
     if (vc->sharpen)
-        vdp->video_mixer_set_attribute_values(vc->video_mixer, 1,
-                                              sharpen_attrib, sharpen_value);
+        SET_VIDEO_ATTR(SHARPNESS_LEVEL, float, vc->sharpen);
     if (!vc->chroma_deint)
-        vdp->video_mixer_set_attribute_values(vc->video_mixer, 1,
-                                              skip_chroma_attrib,
-                                              skip_chroma_value_ptr);
+        SET_VIDEO_ATTR(SKIP_CHROMA_DEINTERLACE, uint8_t, 1);
 
     update_csc_matrix(vo);
     return 0;
