@@ -8925,6 +8925,9 @@ $def_ebx_available
 #define HAVE_EBP_AVAILABLE 0
 #endif
 
+#define FFMPEG_CONFIGURATION "--enable-gpl --enable-postproc"
+#define FFMPEG_LICENSE "GPL version 2 or later"
+
 /* External libraries used through libavcodec. */
 $def_faac_lavc
 $def_libdirac_lavc
