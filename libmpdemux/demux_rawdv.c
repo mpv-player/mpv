@@ -190,8 +190,7 @@ static demuxer_t* demux_open_rawdv(demuxer_t* demuxer)
    sh_video->frametime = 1.0/sh_video->fps;
 
   // emulate BITMAPINFOHEADER for win32 decoders:
-  sh_video->bih=malloc(sizeof(BITMAPINFOHEADER));
-  memset(sh_video->bih,0,sizeof(BITMAPINFOHEADER));
+  sh_video->bih=calloc(1, sizeof(BITMAPINFOHEADER));
   sh_video->bih->biSize=40;
   sh_video->bih->biWidth = dv_decoder->width;
   sh_video->bih->biHeight = dv_decoder->height;
