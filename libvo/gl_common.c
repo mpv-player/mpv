@@ -695,7 +695,7 @@ static void store_weights(float x, GLfloat *dst) {
  * \param unit texture unit to attach texture to
  */
 static void gen_spline_lookup_tex(GLenum unit) {
-  GLfloat tex[4 * LOOKUP_BSPLINE_RES];
+  GLfloat *tex = calloc(4 * LOOKUP_BSPLINE_RES, sizeof(*tex));
   GLfloat *tp = tex;
   int i;
   for (i = 0; i < LOOKUP_BSPLINE_RES; i++) {
@@ -712,6 +712,7 @@ static void gen_spline_lookup_tex(GLenum unit) {
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   ActiveTexture(GL_TEXTURE0);
+  free(tex);
 }
 
 static const char *bilin_filt_template =
