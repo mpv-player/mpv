@@ -1148,7 +1148,7 @@ subtitle* subcp_recode (subtitle *sub)
 #endif
 
 #ifdef CONFIG_FRIBIDI
-subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
+static subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
 {
   FriBidiChar logical[LINE_LEN+1], visual[LINE_LEN+1]; // Hopefully these two won't smash the stack
   char        *ip      = NULL, *op     = NULL;
