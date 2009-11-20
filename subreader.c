@@ -19,6 +19,7 @@
 #include "mp_msg.h"
 #include "subreader.h"
 #include "stream/stream.h"
+#include "libavutil/common.h"
 
 #ifdef CONFIG_ENCA
 #include <enca.h>
@@ -1147,9 +1148,6 @@ subtitle* subcp_recode (subtitle *sub)
 #endif
 
 #ifdef CONFIG_FRIBIDI
-#ifndef max
-#define max(a,b)  (((a)>(b))?(a):(b))
-#endif
 subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
 {
   FriBidiChar logical[LINE_LEN+1], visual[LINE_LEN+1]; // Hopefully these two won't smash the stack
@@ -1184,7 +1182,7 @@ subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
     if(log2vis) {
       len = fribidi_remove_bidi_marks (visual, len, NULL, NULL,
 				       NULL);
-      if((op = malloc((max(2*orig_len,2*len) + 1))) == NULL) {
+      if((op = malloc((FFMAX(2*orig_len,2*len) + 1))) == NULL) {
 	mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error allocating mem.\n");
 	l++;
 	break;
