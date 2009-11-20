@@ -1157,7 +1157,8 @@ subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
   int l=sub->lines;
   int char_set_num;
   fribidi_boolean log2vis;
-  if(flip_hebrew) { // Please fix the indentation someday
+  if (!flip_hebrew)
+    return sub;
   fribidi_set_mirroring(1);
   fribidi_set_reorder_nsm(0);
 
@@ -1196,7 +1197,6 @@ subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
     for (l = sub->lines; l;)
       free (sub->text[--l]);
     return ERR;
-  }
   }
   return sub;
 }
