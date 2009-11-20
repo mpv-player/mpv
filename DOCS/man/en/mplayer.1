@@ -3172,8 +3172,12 @@ Useful for multihead setups.
 .TP
 .B \-nokeepaspect
 Do not keep window aspect ratio when resizing windows.
-Only works with the x11, xv, xmga, xvidix, directx video output drivers.
-Furthermore under X11 your window manager has to honor window aspect hints.
+By default MPlayer tries to keep the correct video aspect ratio by
+instructing the window manager to maintain window aspect when resizing,
+and by adding black bars if the window manager nevertheless allows
+window shape to change.
+This option disables window manager aspect hints and scales the video
+to completely fill the window without regard for aspect ratio.
 .
 .TP
 .B "\-ontop\ "

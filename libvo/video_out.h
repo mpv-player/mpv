@@ -347,7 +347,7 @@ void calc_src_dst_rects(struct vo *vo, int src_width, int src_height,
 
 static inline int aspect_scaling(void)
 {
-  return vo_fs;
+  return vo_keepaspect || vo_fs;
 }
 
 #endif /* MPLAYER_VIDEO_OUT_H */
