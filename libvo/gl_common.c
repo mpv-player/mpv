@@ -339,7 +339,7 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *),
   strcpy(allexts, extensions);
   strcat(allexts, " ");
   strcat(allexts, ext2);
-  mp_msg(MSGT_VO, MSGL_V, "OpenGL extensions string:\n%s\n", allexts);
+  mp_msg(MSGT_VO, MSGL_DBG2, "OpenGL extensions string:\n%s\n", allexts);
   if (!getProcAddress)
     getProcAddress = setNull;
   for (dsc = extfuncs; dsc->funcptr; dsc++) {
@@ -1166,7 +1166,7 @@ int loadGPUProgram(GLenum target, char *prog) {
       glGetString(GL_PROGRAM_ERROR_STRING), &prog[err]);
     return 0;
   }
-  if (!GetProgramiv || !mp_msg_test(MSGT_VO, MSGL_V))
+  if (!GetProgramiv || !mp_msg_test(MSGT_VO, MSGL_DBG2))
     return 1;
   mp_msg(MSGT_VO, MSGL_V, "[gl] Program statistics:\n");
   for (i = 0; progstats[i].name; i++) {
@@ -1262,7 +1262,7 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown conversion type %i\n", YUV_CONVERSION(type));
       break;
   }
-  mp_msg(MSGT_VO, MSGL_V, "[gl] generated fragment program:\n%s\n", yuv_prog);
+  mp_msg(MSGT_VO, MSGL_DBG2, "[gl] generated fragment program:\n%s\n", yuv_prog);
   loadGPUProgram(GL_FRAGMENT_PROGRAM, yuv_prog);
   free(yuv_prog);
 }
