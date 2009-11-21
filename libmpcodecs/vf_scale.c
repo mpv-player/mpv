@@ -508,25 +508,6 @@ static int open(vf_instance_t *vf, char* args){
     vf->query_format=query_format;
     vf->control= control;
     vf->uninit=uninit;
-    if(!vf->priv) {
-    vf->priv=malloc(sizeof(struct vf_priv_s));
-    // TODO: parse args ->
-    vf->priv->ctx=NULL;
-    vf->priv->ctx2=NULL;
-    vf->priv->w=
-    vf->priv->h=-1;
-    vf->priv->v_chr_drop=0;
-    vf->priv->accurate_rnd=0;
-    vf->priv->param[0]=
-    vf->priv->param[1]=SWS_PARAM_DEFAULT;
-    vf->priv->palette=NULL;
-    } // if(!vf->priv)
-    if(args) sscanf(args, "%d:%d:%d:%lf:%lf",
-    &vf->priv->w,
-    &vf->priv->h,
-    &vf->priv->v_chr_drop,
-    &vf->priv->param[0],
-    &vf->priv->param[1]);
     mp_msg(MSGT_VFILTER,MSGL_V,"SwScale params: %d x %d (-1=no scaling)\n",
     vf->priv->w,
     vf->priv->h);

@@ -144,19 +144,6 @@ static int open(vf_instance_t *vf, char* args){
     vf->start_slice=start_slice;
     vf->draw_slice=draw_slice;
     vf->default_reqs=VFCAP_ACCEPT_STRIDE;
-    if(!vf->priv) {
-    vf->priv=malloc(sizeof(struct vf_priv_s));
-    // TODO: parse args ->
-    vf->priv->crop_x=
-    vf->priv->crop_y=
-    vf->priv->crop_w=
-    vf->priv->crop_h=-1;
-    } //if(!vf->priv)
-    if(args) sscanf(args, "%d:%d:%d:%d",
-    &vf->priv->crop_w,
-    &vf->priv->crop_h,
-    &vf->priv->crop_x,
-    &vf->priv->crop_y);
     mp_msg(MSGT_VFILTER, MSGL_INFO, "Crop: %d x %d, %d ; %d\n",
     vf->priv->crop_w,
     vf->priv->crop_h,

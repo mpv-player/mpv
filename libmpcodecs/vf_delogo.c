@@ -204,20 +204,6 @@ static int open(vf_instance_t *vf, char* args){
     vf->get_image=get_image;
     vf->query_format=query_format;
     vf->uninit=uninit;
-    if (!vf->priv)
-    {
-        vf->priv=malloc(sizeof(struct vf_priv_s));
-	memset(vf->priv, 0, sizeof(struct vf_priv_s));
-    }
-
-    if (args) res = sscanf(args, "%d:%d:%d:%d:%d",
-			   &vf->priv->xoff, &vf->priv->yoff,
-			   &vf->priv->lw, &vf->priv->lh,
-			   &vf->priv->band);
-    if (args && (res != 5)) {
-	uninit(vf);
-	return 0; // bad syntax
-    }
 
     mp_msg(MSGT_VFILTER, MSGL_V, "delogo: %d x %d, %d x %d, band = %d\n",
 	   vf->priv->xoff, vf->priv->yoff,
