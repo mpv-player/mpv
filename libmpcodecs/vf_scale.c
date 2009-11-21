@@ -68,6 +68,8 @@ static unsigned int outfmt_list[]={
     IMGFMT_RGB32,
     IMGFMT_BGR24,
     IMGFMT_RGB24,
+    IMGFMT_RGB48LE,
+    IMGFMT_RGB48BE,
     IMGFMT_BGR16,
     IMGFMT_RGB16,
     IMGFMT_BGR15,
