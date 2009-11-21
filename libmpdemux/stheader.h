@@ -93,6 +93,13 @@ typedef struct sh_video {
   double last_pts;
   double buffered_pts[20];
   int num_buffered_pts;
+  double codec_reordered_pts;
+  double prev_codec_reordered_pts;
+  int num_reordered_pts_problems;
+  double sorted_pts;
+  double prev_sorted_pts;
+  int num_sorted_pts_problems;
+  int pts_assoc_mode;
   // output format: (set by demuxer)
   float fps;              // frames per second (set only if constant fps)
   float frametime;        // 1/fps

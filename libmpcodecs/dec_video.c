@@ -149,6 +149,8 @@ void resync_video_stream(sh_video_t *sh_video)
     const struct vd_functions *vd = sh_video->vd_driver;
     if (vd)
         vd->control(sh_video, VDCTRL_RESYNC_STREAM, NULL);
+    sh_video->prev_codec_reordered_pts = MP_NOPTS_VALUE;
+    sh_video->prev_sorted_pts = MP_NOPTS_VALUE;
 }
 
 int get_current_video_decoder_lag(sh_video_t *sh_video)
@@ -307,6 +309,8 @@ static int init_video(sh_video_t *sh_video, char *codecname, char *vfm,
         }
         // Yeah! We got it!
         sh_video->initialized = 1;
+        sh_video->prev_codec_reordered_pts = MP_NOPTS_VALUE;
+        sh_video->prev_sorted_pts = MP_NOPTS_VALUE;
         return 1;
     }
     return 0;
@@ -411,7 +415,14 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
         }
     }
 
-    mpi = sh_video->vd_driver->decode(sh_video, start, in_size, drop_frame);
+    if (sh_video->vd_driver->decode2) {
+        mpi = sh_video->vd_driver->decode2(sh_video, start, in_size,
+                                           drop_frame, &pts);
+    } else {
+        mpi = sh_video->vd_driver->decode(sh_video, start, in_size,
+                                          drop_frame);
+        pts = MP_NOPTS_VALUE;
+    }
 
     //------------------------ frame decoded. --------------------
 
@@ -438,16 +449,28 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
     else if (field_dominance == 1)
         mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
 
+    double prevpts = sh_video->codec_reordered_pts;
+    sh_video->prev_codec_reordered_pts = prevpts;
+    sh_video->codec_reordered_pts = pts;
+    if (prevpts != MP_NOPTS_VALUE && pts <= prevpts
+        || pts == MP_NOPTS_VALUE)
+        sh_video->num_reordered_pts_problems++;
+    prevpts = sh_video->sorted_pts;
     if (opts->correct_pts) {
         if (sh_video->num_buffered_pts) {
             sh_video->num_buffered_pts--;
-            sh_video->pts = sh_video->buffered_pts[sh_video->num_buffered_pts];
+            sh_video->sorted_pts =
+                sh_video->buffered_pts[sh_video->num_buffered_pts];
         } else {
             mp_msg(MSGT_CPLAYER, MSGL_ERR,
                    "No pts value from demuxer to " "use for frame!\n");
-            sh_video->pts = MP_NOPTS_VALUE;
+            sh_video->sorted_pts = MP_NOPTS_VALUE;
         }
     }
+    pts = sh_video->sorted_pts;
+    if (prevpts != MP_NOPTS_VALUE && pts <= prevpts
+        || pts == MP_NOPTS_VALUE)
+        sh_video->num_sorted_pts_problems++;
     return mpi;
 }
 

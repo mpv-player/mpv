@@ -31,6 +31,7 @@ typedef struct MPOpts {
     int ordered_chapters;
     int correct_pts;
     int user_correct_pts;
+    int user_pts_assoc_mode;
     int key_fifo_size;
     int doubleclick_time;
     int audio_id;

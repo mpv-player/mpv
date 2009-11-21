@@ -2328,6 +2328,36 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx,
     return frame_time;
 }
 
+static void determine_frame_pts(struct MPContext *mpctx)
+{
+    struct sh_video *sh_video = mpctx->sh_video;
+    struct MPOpts *opts = &mpctx->opts;
+
+    if (opts->user_pts_assoc_mode) {
+        sh_video->pts_assoc_mode = opts->user_pts_assoc_mode;
+    } else if (sh_video->pts_assoc_mode == 0) {
+        if (sh_video->codec_reordered_pts != MP_NOPTS_VALUE)
+            sh_video->pts_assoc_mode = 1;
+        else
+            sh_video->pts_assoc_mode = 2;
+    } else {
+        int probcount1 = sh_video->num_reordered_pts_problems;
+        int probcount2 = sh_video->num_sorted_pts_problems;
+        if (sh_video->pts_assoc_mode == 2) {
+            int tmp = probcount1;
+            probcount1 = probcount2;
+            probcount2 = tmp;
+        }
+        if (probcount1 >= probcount2 * 1.5 + 2) {
+            sh_video->pts_assoc_mode = 3 - sh_video->pts_assoc_mode;
+            mp_msg(MSGT_CPLAYER, MSGL_V, "Switching to pts association mode "
+                   "%d.\n", sh_video->pts_assoc_mode);
+        }
+    }
+    sh_video->pts = sh_video->pts_assoc_mode == 1 ?
+        sh_video->codec_reordered_pts : sh_video->sorted_pts;
+}
+
 static double update_video(struct MPContext *mpctx, int *blit_frame)
 {
     struct sh_video *sh_video = mpctx->sh_video;
@@ -2368,6 +2398,7 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
         void *decoded_frame = decode_video(sh_video, packet, in_size,
                                            framedrop_type, pts);
         if (decoded_frame) {
+            determine_frame_pts(mpctx);
             // These updates are done here for vf_expand OSD/subtitles
             update_subtitles(mpctx, &mpctx->opts, sh_video, sh_video->pts,
                              mpctx->video_offset, mpctx->d_sub, 0);

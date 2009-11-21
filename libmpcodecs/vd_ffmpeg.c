@@ -14,7 +14,10 @@
 #include "mpbswap.h"
 #include "fmt-conversion.h"
 
-#include "vd_internal.h"
+#include "vd.h"
+#include "img_format.h"
+#include "libmpdemux/stheader.h"
+#include "codec-cfg.h"
 
 static const vd_info_t info = {
     "FFmpeg's libavcodec codec family",
@@ -23,8 +26,6 @@ static const vd_info_t info = {
     "A'rpi, Michael, Alex",
     "native codecs"
 };
-
-LIBVD_EXTERN(ffmpeg)
 
 #include "libavcodec/avcodec.h"
 
@@ -62,6 +63,7 @@ static void draw_slice(struct AVCodecContext *s, const AVFrame *src,
 
 static enum PixelFormat get_format(struct AVCodecContext *avctx,
                                    const enum PixelFormat *pix_fmt);
+static void uninit(struct sh_video *sh);
 
 const m_option_t lavc_decode_opts_conf[]={
     OPT_INTRANGE("bug", lavc_param.workaround_bugs, 0, -1, 999999),
@@ -627,6 +629,13 @@ else
         ctx->b_age=1;
     }
     pic->type= FF_BUFFER_TYPE_USER;
+
+    /* The libavcodec reordered_opaque functionality is implemented by
+     * a similar copy in avcodec_default_get_buffer() and without a
+     * workaround like this it'd stop working when a custom buffer
+     * callback is used.
+     */
+    pic->reordered_opaque = avctx->reordered_opaque;
     return 0;
 }
 
@@ -691,7 +700,9 @@ static void swap_palette(void *pal) {
 }
 
 // decode a frame
-static mp_image_t *decode(sh_video_t *sh, void *data, int len, int flags){
+static struct mp_image *decode(struct sh_video *sh, void *data, int len,
+                               int flags, double *reordered_pts)
+{
     int got_picture=0;
     int ret;
     vd_ffmpeg_ctx *ctx = sh->context;
@@ -726,7 +737,10 @@ static mp_image_t *decode(sh_video_t *sh, void *data, int len, int flags){
     pkt.size = len;
     // HACK: make PNGs decode normally instead of as CorePNG delta frames
     pkt.flags = PKT_FLAG_KEY;
+    // The avcodec opaque field stupidly supports only int64_t type
+    *(double *)&avctx->reordered_opaque = *reordered_pts;
     ret = avcodec_decode_video2(avctx, pic, &got_picture, &pkt);
+    *reordered_pts = *(double *)&pic->reordered_opaque;
 
     dr1= ctx->do_dr1;
     if(ret<0) mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Error while decoding frame!\n");
@@ -877,3 +891,11 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
     return selected_format;
 }
 #endif /* CONFIG_XVMC || CONFIG_VDPAU */
+
+const struct vd_functions mpcodecs_vd_ffmpeg = {
+    .info = &info,
+    .init = init,
+    .uninit = uninit,
+    .control = control,
+    .decode2 = decode
+};

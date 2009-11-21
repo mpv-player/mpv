@@ -803,8 +803,8 @@ xover, xv (see \-vo xv:ck), xvmc (see \-vo xv:ck) and directx video output
 drivers.
 .
 .TP
-.B \-correct\-pts (EXPERIMENTAL)
-Switches MPlayer to an experimental mode where timestamps for video frames
+.B \-correct\-pts
+Switches MPlayer to a mode where timestamps for video frames
 are calculated differently and video filters which add new frames or
 modify timestamps of existing ones are supported.
 The more accurate timestamps can be visible for example when playing
@@ -1042,6 +1042,21 @@ on this option).
 Disable support for Matroska ordered chapters.
 MPlayer will not load or search for video segments from other files,
 and will also ignore any chapter order specified for the main file.
+.
+.TP
+.B \-pts\-association\-mode <mode number>
+Select the method used to determine which container packet timestamp
+corresponds to a particular output frame from the video decoder.
+.PD 0
+.RSs
+.IPs 0
+Try to pick a working mode from the ones below automatically (default)
+.IPs 1
+Use decoder reordering functionality.
+.IPs 2
+Maintain a buffer of unused pts values and use the lowest value for the frame.
+.RE
+.PD 1
 .
 .TP
 .B \-rtc (RTC only)
