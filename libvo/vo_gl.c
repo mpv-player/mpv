@@ -559,6 +559,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
       return -1;
     }
+    mp_msg(MSGT_VO, MSGL_V, "[gl] GLX chose visual with ID 0x%x\n", (int)vinfo->visualid);
 
     vo_x11_create_vo_window(vinfo, vo_dx, vo_dy, d_width, d_height, flags,
             XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone),
