@@ -1461,7 +1461,7 @@ static void *w32gpa(const GLubyte *procName) {
 int setGlWindow(int *vinfo, HGLRC *context, HWND win)
 {
   int new_vinfo;
-  HDC windc = GetDC(win);
+  HDC windc = vo_w32_get_dc(win);
   HGLRC new_context = 0;
   int keep_context = 0;
   int res = SET_WINDOW_FAILED;
@@ -1514,7 +1514,7 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
     res = SET_WINDOW_OK;
 
 out:
-  ReleaseDC(win, windc);
+  vo_w32_release_dc(win, windc);
   return res;
 }
 
@@ -1528,9 +1528,9 @@ void releaseGlContext(int *vinfo, HGLRC *context) {
 }
 
 void swapGlBuffers(void) {
-  HDC vo_hdc = GetDC(vo_w32_window);
+  HDC vo_hdc = vo_w32_get_dc(vo_w32_window);
   SwapBuffers(vo_hdc);
-  ReleaseDC(vo_w32_window, vo_hdc);
+  vo_w32_release_dc(vo_w32_window, vo_hdc);
 }
 #else
 #ifdef HAVE_LIBDL

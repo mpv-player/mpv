@@ -51,6 +51,8 @@ static uint32_t o_dheight;
 static HINSTANCE hInstance;
 #define vo_window vo_w32_window
 HWND vo_window = 0;
+/** HDC used when rendering to a device instead of window */
+static HDC dev_hdc;
 static int event_flags;
 static int mon_cnt;
 
@@ -328,7 +330,7 @@ static void resetMode(void) {
 static int createRenderingContext(void) {
     HWND layer = HWND_NOTOPMOST;
     PIXELFORMATDESCRIPTOR pfd;
-    HDC vo_hdc = GetDC(vo_window);
+    HDC vo_hdc = vo_w32_get_dc(vo_window);
     RECT r;
     int pf;
   if (WinID < 0) {
@@ -395,7 +397,7 @@ static int createRenderingContext(void) {
 
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d with depth %d\n", vo_screenwidth, vo_screenheight, vo_depthonscreen);
 
-    ReleaseDC(vo_window, vo_hdc);
+    vo_w32_release_dc(vo_window, vo_hdc);
     return 1;
 }
 
@@ -430,6 +432,18 @@ int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
 }
 
 /**
+ * \brief return the name of the selected device if it is indepedant
+ */
+static char *get_display_name(void) {
+    DISPLAY_DEVICE disp;
+    disp.cb = sizeof(disp);
+    EnumDisplayDevices(NULL, vo_adapter_num, &disp, 0);
+    if (disp.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)
+        return NULL;
+    return disp.DeviceName;
+}
+
+/**
  * \brief Initialize w32_common framework.
  *
  * The first function that should be called from the w32_common framework.
@@ -450,6 +464,7 @@ int vo_w32_init(void) {
     HICON mplayerIcon = 0;
     char exedir[MAX_PATH];
     HINSTANCE user32;
+    char *dev;
 
     if (vo_window)
         return 1;
@@ -497,6 +512,9 @@ int vo_w32_init(void) {
         myGetMonitorInfo = GetProcAddress(user32, "GetMonitorInfoA");
         myEnumDisplayMonitors = GetProcAddress(user32, "EnumDisplayMonitors");
     }
+    dev_hdc = 0;
+    dev = get_display_name();
+    if (dev) dev_hdc = CreateDC(dev, NULL, NULL, NULL);
     updateScreenProperties();
 
     return 1;
@@ -564,7 +582,29 @@ void vo_w32_uninit(void) {
     resetMode();
     ShowCursor(1);
     vo_depthonscreen = 0;
+    if (dev_hdc) DeleteDC(dev_hdc);
+    dev_hdc = 0;
     DestroyWindow(vo_window);
     vo_window = 0;
     UnregisterClass(classname, 0);
+}
+
+/**
+ * \brief get a device context to draw in
+ *
+ * \param wnd window the DC should belong to if it makes sense
+ */
+HDC vo_w32_get_dc(HWND wnd) {
+    if (dev_hdc) return dev_hdc;
+    return GetDC(wnd);
+}
+
+/**
+ * \brief release a device context
+ *
+ * \param wnd window the DC probably belongs to
+ */
+void vo_w32_release_dc(HWND wnd, HDC dc) {
+    if (dev_hdc) return;
+    ReleaseDC(wnd, dc);
 }
