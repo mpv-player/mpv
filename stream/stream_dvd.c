@@ -978,7 +978,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     //    return NULL;
     stream->type = STREAMTYPE_DVD;
     stream->sector_size = 2048;
-    stream->flags = STREAM_READ | STREAM_SEEK;
+    stream->flags = STREAM_READ | MP_STREAM_SEEK;
     stream->fill_buffer = fill_buffer;
     stream->seek = seek;
     stream->control = control;

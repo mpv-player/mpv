@@ -37,10 +37,10 @@
 #define STREAM_READ  0
 #define STREAM_WRITE 1
 /// Seek flags, if not mannualy set and s->seek isn't NULL
-/// STREAM_SEEK is automaticly set
-#define STREAM_SEEK_BW  2
-#define STREAM_SEEK_FW  4
-#define STREAM_SEEK  (STREAM_SEEK_BW|STREAM_SEEK_FW)
+/// MP_STREAM_SEEK is automaticly set
+#define MP_STREAM_SEEK_BW  2
+#define MP_STREAM_SEEK_FW  4
+#define MP_STREAM_SEEK  (MP_STREAM_SEEK_BW|MP_STREAM_SEEK_FW)
 /** This is a HACK for live555 that does not respect the
     separation between stream an demuxer and thus is not
     actually a stream cache can not be used */
@@ -276,7 +276,7 @@ inline static int stream_seek(stream_t *s,off_t pos){
 }
 
 inline static int stream_skip(stream_t *s,off_t len){
-  if( (len<0 && (s->flags & STREAM_SEEK_BW)) || (len>2*STREAM_BUFFER_SIZE && (s->flags & STREAM_SEEK_FW)) ) {
+  if( (len<0 && (s->flags & MP_STREAM_SEEK_BW)) || (len>2*STREAM_BUFFER_SIZE && (s->flags & MP_STREAM_SEEK_FW)) ) {
     // negative or big skip!
     return stream_seek(s,stream_tell(s)+len);
   }

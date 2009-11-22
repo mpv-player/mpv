@@ -237,7 +237,7 @@ do{
     }
 
     pos = (off_t)priv->idx_offset+AVI_IDX_OFFSET(idx);
-    if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start) && (demux->stream->flags & STREAM_SEEK)){
+    if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start) && (demux->stream->flags & MP_STREAM_SEEK)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!   idx=0x%"PRIX64"  \n",(int64_t)pos);
       continue;
     }
@@ -262,7 +262,7 @@ do{
     if(!(idx->dwFlags&AVIIF_KEYFRAME)) flags=0;
   } else {
     demux->filepos=stream_tell(demux->stream);
-    if(demux->filepos>=demux->movi_end && demux->movi_end>demux->movi_start && (demux->stream->flags & STREAM_SEEK)){
+    if(demux->filepos>=demux->movi_end && demux->movi_end>demux->movi_start && (demux->stream->flags & MP_STREAM_SEEK)){
           demux->stream->eof=1;
           return 0;
     }
@@ -442,7 +442,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
   demuxer->priv=(void*)priv;
 
   //---- AVI header:
-  read_avi_header(demuxer,(demuxer->stream->flags & STREAM_SEEK_BW)?index_mode:-2);
+  read_avi_header(demuxer,(demuxer->stream->flags & MP_STREAM_SEEK_BW)?index_mode:-2);
 
   if(demuxer->audio->id>=0 && !demuxer->a_streams[demuxer->audio->id]){
       mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_InvalidAudioStreamNosound,demuxer->audio->id);

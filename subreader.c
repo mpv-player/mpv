@@ -1085,7 +1085,7 @@ void	subcp_open (stream_t *st)
 		char enca_lang[3], enca_fallback[100];
 		if (sscanf(sub_cp, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
 		     || sscanf(sub_cp, "ENCA:%2s:%99s", enca_lang, enca_fallback) == 2) {
-		  if (st && st->flags & STREAM_SEEK ) {
+		  if (st && st->flags & MP_STREAM_SEEK ) {
 		    cp_tmp = guess_cp(st, enca_lang, enca_fallback);
 		  } else {
 		    cp_tmp = enca_fallback;

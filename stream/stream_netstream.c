@@ -279,7 +279,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
   stream->fill_buffer = fill_buffer;
   stream->control = control;
-  if(stream->flags & STREAM_SEEK)
+  if(stream->flags & MP_STREAM_SEEK)
     stream->seek = seek;
   stream->close = close_s;
 

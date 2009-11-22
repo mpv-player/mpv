@@ -159,7 +159,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
 #endif
     if(mode == STREAM_READ) stream->seek = seek_forward;
     stream->type = STREAMTYPE_STREAM; // Must be move to STREAMTYPE_FILE
-    stream->flags |= STREAM_SEEK_FW;
+    stream->flags |= MP_STREAM_SEEK_FW;
   } else if(len >= 0) {
     stream->seek = seek;
     stream->end_pos = len;

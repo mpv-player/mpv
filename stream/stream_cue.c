@@ -578,7 +578,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   stream->fd = f;
   stream->type = STREAMTYPE_VCDBINCUE;
   stream->sector_size = VCD_SECTOR_DATA;
-  stream->flags = STREAM_READ | STREAM_SEEK_FW;
+  stream->flags = STREAM_READ | MP_STREAM_SEEK_FW;
   stream->start_pos = ret;
   stream->end_pos = ret2;
   stream->fill_buffer = cue_vcd_read;
