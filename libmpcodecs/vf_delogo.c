@@ -197,8 +197,6 @@ static unsigned int fmt_list[]={
 };
 
 static int open(vf_instance_t *vf, char* args){
-    int res;
-
     vf->config=config;
     vf->put_image=put_image;
     vf->get_image=get_image;
