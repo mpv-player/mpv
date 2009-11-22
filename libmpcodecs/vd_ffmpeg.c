@@ -55,7 +55,7 @@ typedef struct {
 
 static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void release_buffer(AVCodecContext *avctx, AVFrame *pic);
-static void draw_slice(struct AVCodecContext *s, AVFrame *src, int offset[4],
+static void draw_slice(struct AVCodecContext *s, const AVFrame *src, int offset[4],
                        int y, int type, int height);
 
 static enum PixelFormat get_format(struct AVCodecContext *avctx,
@@ -451,7 +451,7 @@ static void uninit(sh_video_t *sh){
 }
 
 static void draw_slice(struct AVCodecContext *s,
-                        AVFrame *src, int offset[4],
+                        const AVFrame *src, int offset[4],
                         int y, int type, int height){
     sh_video_t *sh = s->opaque;
     uint8_t *source[MP_MAX_PLANES]= {src->data[0] + offset[0], src->data[1] + offset[1], src->data[2] + offset[2]};
