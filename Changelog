@@ -25,6 +25,7 @@ MPlayer (1.0)
     * -nosub option for disabling auto-selected subtitles
     * support for displaying subs in the term (FIXME)
     * support for subtitles with audio only files
+    * support for right-to-left languages with embedded subtitles
     * support for 8 channel audio
     * sync dvd:// and dvdnav:// features
     * support for mpeg4 asp in VDPAU video output (non B-frame only)
