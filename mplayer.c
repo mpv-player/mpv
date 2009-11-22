@@ -2314,11 +2314,6 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx,
         mp_dvdnav_save_smpi(mpctx, in_size, packet, decoded_frame);
 #endif
         if (decoded_frame) {
-            // These updates are done here for vf_expand OSD/subtitles
-            update_subtitles(mpctx, &mpctx->opts, sh_video, sh_video->pts,
-                             mpctx->video_offset, mpctx->d_sub, 0);
-            update_teletext(sh_video, mpctx->demuxer, 0);
-            update_osd_msg(mpctx);
             current_module = "filter video";
             if (filter_video(sh_video, decoded_frame, sh_video->pts))
                 break;
@@ -2399,11 +2394,6 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
                                            framedrop_type, pts);
         if (decoded_frame) {
             determine_frame_pts(mpctx);
-            // These updates are done here for vf_expand OSD/subtitles
-            update_subtitles(mpctx, &mpctx->opts, sh_video, sh_video->pts,
-                             mpctx->video_offset, mpctx->d_sub, 0);
-            update_teletext(sh_video, mpctx->demuxer, 0);
-            update_osd_msg(mpctx);
             current_module = "filter video";
             if (filter_video(sh_video, decoded_frame, sh_video->pts))
                 if (!video_out->config_ok)
@@ -4048,6 +4038,11 @@ if(!mpctx->sh_video) {
           goto goto_next_file;
       }
       if (blit_frame) {
+          struct sh_video *sh_video = mpctx->sh_video;
+          update_subtitles(mpctx, &mpctx->opts, sh_video, sh_video->pts,
+                           mpctx->video_offset, mpctx->d_sub, 0);
+          update_teletext(sh_video, mpctx->demuxer, 0);
+          update_osd_msg(mpctx);
           struct vf_instance *vf = mpctx->sh_video->vfilter;
           vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
           vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
