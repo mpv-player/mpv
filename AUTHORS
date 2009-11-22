@@ -794,6 +794,7 @@ Togni, Roberto (rxt) <r_togni@tiscali.it>
 
 Tresoldi, Paolo "PaulTT" (ptt) <mplayer@paultt.org>
     * mplayer -endpos option
+    * -name, -title and -use-filename-title options
     * Italian man page and console messages translations
     * Italian documentation translation
 

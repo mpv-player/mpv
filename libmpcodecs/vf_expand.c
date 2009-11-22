@@ -45,6 +45,8 @@ static struct vf_priv_s {
 } const vf_priv_dflt = {
   -1,-1,
   -1,-1,
+  -1,-1,
+  -1,-1,
   0,
   0.,
   1,

@@ -235,6 +235,8 @@ switch(video_codec){
      return 0;
    }
    h264_parse_sps(&picture, &(videobuffer[pos]), videobuf_len - pos);
+   sh_video->disp_w=picture.display_picture_width;
+   sh_video->disp_h=picture.display_picture_height;
    mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for picture parameter set... ");
    while(1){
       int i=sync_video_packet(d_video);

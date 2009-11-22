@@ -34,5 +34,7 @@ int vo_w32_check_events(void);
 int vo_w32_config(uint32_t, uint32_t, uint32_t);
 void destroyRenderingContext(void);
 void w32_update_xinerama_info(void);
+HDC vo_w32_get_dc(HWND wnd);
+void vo_w32_release_dc(HWND wnd, HDC dc);
 
 #endif /* MPLAYER_W32_COMMON_H */

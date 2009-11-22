@@ -60,6 +60,7 @@ extern const stream_info_t stream_info_rtsp_sip;
 extern const stream_info_t stream_info_cue;
 extern const stream_info_t stream_info_null;
 extern const stream_info_t stream_info_mf;
+extern const stream_info_t stream_info_ffmpeg;
 extern const stream_info_t stream_info_file;
 extern const stream_info_t stream_info_ifo;
 extern const stream_info_t stream_info_dvd;
@@ -114,6 +115,9 @@ static const stream_info_t* const auto_open_streams[] = {
 #ifdef CONFIG_DVDNAV
   &stream_info_dvdnav,
 #endif
+#ifdef CONFIG_LIBAVFORMAT
+  &stream_info_ffmpeg,
+#endif
 
   &stream_info_null,
   &stream_info_mf,
@@ -165,10 +169,10 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo, char *filename,
   }
   if(s->type <= -2)
     mp_msg(MSGT_OPEN,MSGL_WARN, "Warning streams need a type !!!!\n");
-  if(s->flags & STREAM_SEEK && !s->seek)
-    s->flags &= ~STREAM_SEEK;
-  if(s->seek && !(s->flags & STREAM_SEEK))
-    s->flags |= STREAM_SEEK;
+  if(s->flags & MP_STREAM_SEEK && !s->seek)
+    s->flags &= ~MP_STREAM_SEEK;
+  if(s->seek && !(s->flags & MP_STREAM_SEEK))
+    s->flags |= MP_STREAM_SEEK;
 
   s->mode = mode;
 
@@ -248,6 +252,9 @@ int stream_fill_buffer(stream_t *s){
 	    len=s->streaming_ctrl->streaming_read(s->fd,s->buffer,STREAM_BUFFER_SIZE, s->streaming_ctrl);
     } else
 #endif
+    if (s->fill_buffer)
+      len = s->fill_buffer(s, s->buffer, STREAM_BUFFER_SIZE);
+    else
       len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);
     break;
   case STREAMTYPE_DS:
@@ -322,8 +329,9 @@ if(newpos==0 || newpos!=s->pos){
         mp_msg(MSGT_STREAM,MSGL_INFO,"Stream not seekable!\n");
         return 1;
       }
+      break;
     }
-#else
+#endif
     if(newpos<s->pos){
       mp_msg(MSGT_STREAM,MSGL_INFO,"Cannot seek backward in linear streams!\n");
       return 1;
@@ -331,7 +339,6 @@ if(newpos==0 || newpos!=s->pos){
     while(s->pos<newpos){
       if(stream_fill_buffer(s)<=0) break; // EOF
     }
-#endif
     break;
   default:
     // This should at the beginning as soon as all streams are converted
@@ -387,8 +394,7 @@ stream_t* new_memory_stream(unsigned char* data,int len){
 
   if(len < 0)
     return NULL;
-  s=malloc(sizeof(stream_t)+len);
-  memset(s,0,sizeof(stream_t));
+  s=calloc(1, sizeof(stream_t)+len);
   s->fd=-1;
   s->type=STREAMTYPE_MEMORY;
   s->buf_pos=0; s->buf_len=len;
@@ -400,9 +406,8 @@ stream_t* new_memory_stream(unsigned char* data,int len){
 }
 
 stream_t* new_stream(int fd,int type){
-  stream_t *s=malloc(sizeof(stream_t));
+  stream_t *s=calloc(1, sizeof(stream_t));
   if(s==NULL) return NULL;
-  memset(s,0,sizeof(stream_t));
 
 #if HAVE_WINSOCK2_H
   {

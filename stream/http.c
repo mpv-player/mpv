@@ -891,7 +891,7 @@ static int fixup_open(stream_t *stream,int seekable) {
 	stream->type = STREAMTYPE_STREAM;
 	if(!is_icy && !is_ultravox && seekable)
 	{
-		stream->flags |= STREAM_SEEK;
+		stream->flags |= MP_STREAM_SEEK;
 		stream->seek = http_seek;
 	}
 	stream->streaming_ctrl->bandwidth = network_bandwidth;

@@ -208,12 +208,6 @@ static int open(vf_instance_t *vf, char* args)
 	vf->put_image=put_image;
 	vf->uninit=uninit;
 
-	if(!vf->priv) {
-	vf->priv = malloc(sizeof(struct vf_priv_s));
-	memset(vf->priv, 0, sizeof(struct vf_priv_s));
-	}
-	if (args) sscanf(args, "%d:%d", &vf->priv->brightness, &vf->priv->contrast);
-
 	process = process_C;
 #if HAVE_MMX
 	if(gCpuCaps.hasMMX) process = process_MMX;

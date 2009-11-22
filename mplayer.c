@@ -3460,10 +3460,6 @@ if(stream_dump_type==5){
   int len;
   FILE *f;
   current_module="dumpstream";
-  if(mpctx->stream->type==STREAMTYPE_STREAM && mpctx->stream->fd<0){
-    mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"Cannot dump this stream - no file descriptor available.\n");
-    exit_player(mpctx, EXIT_ERROR);
-  }
   stream_reset(mpctx->stream);
   stream_seek(mpctx->stream,mpctx->stream->start_pos);
   f=fopen(stream_dump_name,"wb");

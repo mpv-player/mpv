@@ -1,4 +1,4 @@
-.\" Synced with r29661
+.\" Synced with r29905
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 09. 11." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 11. 16." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -184,7 +184,11 @@ nagyítás, tükrözés, utófeldolgozás, forgatás, méretezés, zajszûrés,
 RGB/\:YUV átalakítás) és így tovább.
 .PP
 .B gmplayer
-egy MPlayer grafikus felhasználó felülettel. Ugyan azt tudja, mint az MPlayer.
+egy MPlayer grafikus felhasználó felülettel.
+Ugyan azok az opciói, mint az MPlayer-nek, de nem biztos, hogy minden tökéletesen
+fog mûködni a GUI konfigurációja miatt (ami a gui.conf fájlban van).
+Gyakorlatilag néhány opció felülírásra kerül a gui.conf fájl beállításaival,
+míg mások véglegesen ott kerülnek tárolásra.
 .PP
 A gyors kezdéshez példákat ezen man oldal végén találhatsz.
 .PP
@@ -427,7 +431,8 @@ Választás jóváhagyása.
 .RS
 .
 (A következõ gombok csak akkor mûködnek, ha teletext támogatással fordítottál:
-a TV teletext irányítására szolgálnak.)
+a TV teletext irányítására szolgálnak, melynek adatai jöhetnek
+analóg TV forrásból vagy egy MPEG Transport Stream-bõl.)
 .RE
 .PP
 .PD 0
@@ -527,8 +532,9 @@ lejátszandó fájl van, feltéve hogy megadod a \-use\-filedir\-conf kapcsolót (vag
 a parancssorban vagy a globális konfigurációs fájlban).
 Ha egy fájl specifikus konfigurációs fájl található ugyan abban a könyvtárban, nem
 tölt be egy fájl specifikus konfigurációt sem a ~/.mplayer könyvtárból.
-Ráadásul a \-use\-filedir\-conf opció engedélyezi a könyvtár specifikus konfigurációs
-fájlokat. Ezért az MPlayer elõször megpróbálja betölteni az mplayer.conf-ot az
+Ráadásul a \-use\-filedir\-conf opció engedélyezi a könyvtár specifikus
+konfigurációs fájlokat.
+Ezért az MPlayer elõször megpróbálja betölteni az mplayer.conf-ot az
 lejátszandó fájlt tartalmazó könyvtárból, majd megpróbál betölteni bármilyen fájl
 specifikus konfigurációt.
 .PP
@@ -1330,6 +1336,8 @@ sztereó
 térhatás
 .IPs 6
 teljes 5.1
+.IPs 8
+teljes 7.1
 .RE
 .PD 1
 .
@@ -1829,7 +1837,7 @@ faktorral. Nem biztos, hogy jól mûködik az \-oac copy kapcsolóval.
 .
 .TP
 .B \-srate <Hz>
-A megadott audio lejátszási ráta kiválasztása (természetesen a hangkártya
+A használni kívánt mintavételi ráta megadása (természetesen a hangkártya
 által megszabott határon belül).
 Ha a kiválasztott minta frekvencia különbözik az aktuális médiáétól, a
 resample vagy a lavcresample audió szûrõ beillesztõdik az audió rétegbe
@@ -2352,6 +2360,11 @@ Ha a feliratok valamelyikét nem tudod kiválasztani a DVD_n, próbáld ki a
 \-vobsubid kapcsolót.
 .
 .TP
+.B \-nosub
+Letilt minden automatikusan kiválasztott feliratot (mint pl.\& amit a
+Matroska/mkv demuxer támogat).
+.
+.TP
 .B \-slang <nyelv kód[,nyelv kód,...]> (lásd még \-sid)
 Felirat nyelvek priorítási listájának megadására használható.
 A különbözõ konténer formátumok különbözõ nyelvi kódokat használnak.
@@ -2794,8 +2807,8 @@ Hasznos, ha bizonyos kapcsolatokat automatikusan akarsz felépíteni.
 .IPs (no)estimate
 Megbecsüli az audió késleltetést, a szándékok szerint folyamatosabbá
 teszi a videó lejátszást (alapértelmezett: engedélyezve).
-.IPs (no)autostart (alapértelmezett: letiltva)
-Automatikusan elindítja a jackd-t, ha szükséges.
+.IPs (no)autostart
+Automatikusan elindítja a jackd-t, ha szükséges (alapértelmezett: letiltva).
 Emlékezz rá, hogy ez nem megbízható és a szerver üzenetek bepiszkítják az stdout-ot.
 .RE
 .PD 1
@@ -3110,7 +3123,7 @@ A _WIN_LAYER hint-et használja a megadott rétegszámmal.
 .IPs netwm
 NETWM stílus kényszerítése.
 .IPs "none\ "
-Ne állítsa be a teljes képernyõs ablak rétegét.
+Törli a módok listáját; ezután hozzáadhatsz módokat az engedélyezéséhez.
 .IPs stays_on_top
 A _NETWM_STATE_STAYS_ON_TOP hint-et használja, ha elérhetõ.
 .REss
@@ -3205,6 +3218,10 @@ Az 1 négyzetes pixeleket jelent
 (megfelelõ a (legtöbb?) LCD képernyõn).
 .
 .TP
+.B \-name (csak X11)
+Beállítja az ablak osztály nevét.
+.
+.TP
 .B \-nodouble
 Letiltja a dupla bufferelést, leginkább hibakeresési célzattal.
 A dupla bufferelés kiküszöböli a vibrálást úgy, hogy két képet tart a memóriában
@@ -3283,6 +3300,16 @@ ami nem tudja a képernyõ felbontását, mint az fbdev, x11 és TV-out.
 Kikapcsolja az xscreensaver-t a lejátszás indításakor, kilépéskor újraindítja.
 Ha a képernyõ védõd sem az XSS, sem az XResetScreenSaver API-t nem támogatja,
 használd inkább a \-heartbeat\-cmd kapcsolót.
+.
+.TP
+.B \-title (lásd még \-use\-filename\-title)
+Beállítja az ablak címét.
+Az X11 alapú videó kimeneti vezérlõk támogatják.
+.
+.TP
+.B \-use\-filename\-title (lásd még \-title)
+Beállítja az ablak címét a média fájlnevére, ha nincs megadva a \-title opcióval.
+Az X11 alapú videó kimeneti vezérlõk támogatják.
 .
 .TP
 .B "\-vm \ \ \ "
@@ -3419,7 +3446,8 @@ lejátszáshoz.
 Ha nem tudsz harver specifikus vezérlõt használni, valószínûleg ez a
 legjobb opció.
 A használt színkulcsról és annak megjelenítésérõl a \-v opcióval ad
-információkat az MPlayer, keresd az [xv common] tag-gel kezdõdõ sorokat.
+információkat az MPlayer, keresd az [xv common] tag-gel kezdõdõ
+sorokat.
 .PD 0
 .RSs
 .IPs adaptor=<szám>
@@ -3467,7 +3495,8 @@ Vezérlõ kiválasztása az overlay forrásaként az X11 felett.
 .PD 1
 .
 .TP
-.B vdpau (\-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau vagy ffh264vdpau kapcsolókkal)
+.B vdpau (\-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau, ffh264vdpau vagy
+ffodivxvdpau kapcsolókkal)
 Videó kimenet, ami a VDPAU-t használja a videó hardveres dekódolásához.
 Támogatja a szoftveresen dekódolt videó megjelenítését is.
 .PD 0
@@ -3482,17 +3511,17 @@ Kiválasztja a deinterlacer-t (alapértelmezett: 0).
 Minden mód > 0 figyelembe veszi a \-field\-dominance kapcsolót.
 .RSss
 .IPs 0
-Nincs deinterlace.
+nincs deinterlace
 .IPs 1
 Csak az elsõ mezõt mutatja, hasonló a \-vf field kapcsolóhoz.
 .IPs 2
 Bob deinterlace, hasonló a \-vf tfields=1 kapcsolóhoz.
 .IPs 3
-Mozgás adaptív idõbeli deinterlace.
+mozgás adaptív idõbeli deinterlace
 A/V deszinkronizációt okozhat lassú videó hardveren és/vagy nagy felbontásnál.
 Ez az alapértelmezett, ha a "D" gombbal engedélyezhetõ a deinterlacing.
 .IPs 4
-Mozgás adaptív idõbeli deinterlace él-vezérelt térbeli interpolációval.
+mozgás adaptív idõbeli deinterlace él-vezérelt térbeli interpolációval
 Gyors videó hardver kell hozzá.
 .RE
 .IPs chroma\-deint
@@ -3502,6 +3531,36 @@ szeretnél a fejlett deinterlacing-en.
 Hasznos lassú videó memóriánál.
 .IPs pullup
 Inverz telecine-t próbál alkalmazni, mozgás adaptív idõbeli deinterlace kell hozzá.
+.IPs colorspace
+Kiválasztja a színteret a YUV-RGB konverzióhoz.
+Általában a BT.601 használatos a szabvány felbontású (SD) tartalomhoz és
+a BT.709 a nagy felbontású (HD) tartalomhoz.
+A hibás színtér használata kicsit alul vagy túl telített képet és
+elcsúszott színeket okoz.
+.RSss
+.IPs 0
+Megpróbálja kitalálni a színteret a videó felbontása alapján.
+A szélesség >= 1280 vagy magasság > 576 méretû videók HD-ként lesznek kezelve,
+és a BT.709 színtér lesz használva.
+.IPs 1
+Az ITU-R BT.601 színteret használja (alapértelmezett).
+.IPs 2
+Az ITU-R BT.709 színteret használja.
+.IPs 3
+Az SMPTE-240M színteret használja.
+.RE
+.IPs hqscaling
+.RSss
+.IPs 0
+Az alapértelmezett VDPAU méretezést használja (alapértelmezett).
+.IPs 1\-9
+Nagyon jó minõségû VDPAU méretezést használ (megfelelõ hardver kell hozzá).
+.RE
+.IPs force\-mixer
+Kényszeríti a VDPAU mixer használatát, ami implementálja a fenti opciókat (alapértelmezett).
+A noforce\-mixer használatával jeleníthetõ meg a BGRA színtér.
+(Letiltja az összes fenti opciót és a hardveres equalizert, ha
+a BGRA képformátum van használva.)
 .RE
 .PD 1
 .
@@ -3552,7 +3611,7 @@ opcióinak nincs hatásuk az SDL-re.
 Emlékezz rá, hogy számos kisebb hibája van (\-vm/\-novm opciót a
 legtöbbször figyelmen kívül hagyja, a \-fs úgy mûködik, ahogy a
 \-novm opciónak kellene, az ablak a bal felsõ sarokba kerül, ha
-kikapcsolod a teljes képernyõs megjelenítést, a panscan nem támogatott, ...)
+kikapcsolod a teljes képernyõs megjelenítést, a panscan nem támogatott, ...).
 .PD 0
 .RSs
 .IPs driver=<vezérlõ>
@@ -3637,7 +3696,7 @@ Kényszeríti a WarpOverlay! módot.
 .IPs dive
 Kényszeríti a DIVE módot.
 .IPs (no)t23
-Engedélyezi/letiltja a T23 laptopokra vonatkozó kódot (alapértelmezett: letiltott).
+Engedélyezi vagy letiltja a T23 laptopokra vonatkozó kódot (alapértelmezett: letiltott).
 Próbáld meg engedélyezni ezt az opciót, ha a videó kártyád csak a felméretezést támogatja.
 .RE
 .PD 1
@@ -5101,7 +5160,7 @@ Az ésszerû értékek 0.001 körül vannak.
 .PD 1
 .
 .TP
-.B bs2b[=opció1:opció2]
+.B bs2b[=opció1:opció2:...]
 Bauer térhatásúból két fülesbe történõ transzformálás libbs2b-vel.
 Javítja a fülhallgatón történõ hallgatást úgy, hogy a hangot hasonlóvá
 teszi, mintha hangszóróból jönne, lehetõvé téve hogy mindkét fül
@@ -5116,14 +5175,15 @@ Megadja a vágási frekvenciát Hz-ben.
 Megadja az erõsítés mértékét az alacsony frekvenciákhoz 0.1*dB-ben.
 .IPs profile=<érték>
 Több profil is elérhetõ a kényelmesebb használatért:
+.PD 0
 .RSs
-default: ez lesz használva, ha nincs más megadva (fcut=700, feed=45);
-.br
-cmoy: Chu Moy körkörös implementáció (fcut=700, feed=60);
-.br
-jmeier: Jan Meier körkörös implementáció (fcut=650, feed=95).
-.REss
-.PD 1
+.IPs default
+ez lesz használva, ha nincs más megadva (fcut=700, feed=45);
+.IPs "cmoy\ "
+Chu Moy körkörös implementáció (fcut=700, feed=60);
+.IPs jmeier
+Jan Meier körkörös implementáció (fcut=650, feed=95).
+.RE
 .RE
 .sp 1
 .RS
@@ -5207,11 +5267,11 @@ csatornák el lesznek hagyva.
 .PD 0
 .RSs
 .IPs <nch>
-kimeneti csatornák száma (1\-6)
+kimeneti csatornák száma (1\-8)
 .IPs "<nr>\ "
-útvonalak száma (1\-6)
+útvonalak száma (1\-8)
 .IPs <honnan1:hova1:honnan2:hova2:honnan3:hova3:...>
-Számpárok 0 és 5 között, amik megadják az egyes csatornák irányítását.
+Számpárok 0 és 7 között, amik megadják az egyes csatornák irányítását.
 .RE
 .sp 1
 .RS
@@ -5313,7 +5373,7 @@ csatornára, a példa részben található a fájl vége felé.
 .PD 0
 .RSs
 .IPs "<n>\ \ "
-a kimeneti csatornák száma (1\-6)
+a kimeneti csatornák száma (1\-8)
 .IPs <Lij>
 A i. bemeneti csatorna mekkora része lesz átmixelve az j. kimeneti csatornára (0\-1).
 Az alapötlet, hogy van n számod, ami megadja, hogy mit kell csinálni az elsõ bemeneti
@@ -5355,7 +5415,7 @@ A legjobb eredményhez próbáld meg a vágási frekvenciát a lehetõ legalacsonyabbra
 állítani. Ez növeli a sztereó és térhatású hangélményt.
 .IPs "<ch>\ "
 Meghatározza a csatorna számot, amibe az al-csatorna audiót be kell tenni.
-A csatorna szám 0 és 5 között lehet (alapértelmezett: 5).
+A csatorna szám 0 és 7 között lehet (alapértelmezett: 5).
 Figyeld meg, hogy a csatornák száma automatikusan megnõ <ch>-ra,
 ha szükséges.
 .RE
@@ -5380,7 +5440,7 @@ felezi a csatornákat.
 .RSs
 .IPs "<ch>\ "
 Meghatározza a csatorna számát, ahova a középsõ csatornát be kell illeszteni.
-A csatorna száma 0 és 5 közötti lehet (alapértelmezett: 5).
+A csatorna száma 0 és 7 közötti lehet (alapértelmezett: 5).
 Figyeld meg, hogy a csatornák száma automatikusan megnõ <ch>-ra,
 ha szükséges.
 .RE
@@ -7340,6 +7400,10 @@ fejezetet a részletekért.
 az elsõ szabad szám felhasználásával \- egy fájl sem lesz felülírva.
 A szûrõ nem jelent hátrányt, ha nem használod és elfogad minden
 színteret, így nyugodtan beleírható a konfigurációs fájlba.
+Gyõzõdj meg róla, hogy a screenshot szûrõ az összes többi olyan
+szûrõ után van megadva, melyek hatását rögzíteni szeretnéd a képen.
+Pl.\& utolsóként kell megadni, ha pontosan olyan képernyõ mentést
+szeretnél, mint amit a monitoron látsz.
 .RE
 .
 .TP
@@ -10349,7 +10413,6 @@ psy optimalizáció erõssége (subq>=6 kell hozzá) (alapértelmezett: 1.0)
 trellis (trellis kell hozzá, kísérleti) (alapértelmezett: 0.0)
 .RE
 .PD 1
-.
 .
 .TP
 .B deadzone_inter=<0\-32>

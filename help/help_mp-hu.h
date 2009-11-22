@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r29549 (2009. 09. 11.)
+// Sync'ed with help_mp-en.h r29912 (2009. 11. 16.)
 
 
 // ========================= MPlayer help ===========================
@@ -210,6 +210,7 @@ static const char help_text[]=
 #define MSGTR_OSDosd "OSD: %s"
 #define MSGTR_OSDChapter "Fejezet: (%d) %s"
 #define MSGTR_OSDAngle "Szög: %d/%d"
+#define MSGTR_OSDDeinterlace "Deinterlace: %s"
 
 // property values
 #define MSGTR_Enabled "bekapcsolva"

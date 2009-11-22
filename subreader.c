@@ -19,6 +19,7 @@
 #include "mp_msg.h"
 #include "subreader.h"
 #include "stream/stream.h"
+#include "libavutil/common.h"
 
 #ifdef CONFIG_ENCA
 #include <enca.h>
@@ -1084,7 +1085,7 @@ void	subcp_open (stream_t *st)
 		char enca_lang[3], enca_fallback[100];
 		if (sscanf(sub_cp, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
 		     || sscanf(sub_cp, "ENCA:%2s:%99s", enca_lang, enca_fallback) == 2) {
-		  if (st && st->flags & STREAM_SEEK ) {
+		  if (st && st->flags & MP_STREAM_SEEK ) {
 		    cp_tmp = guess_cp(st, enca_lang, enca_fallback);
 		  } else {
 		    cp_tmp = enca_fallback;
@@ -1147,10 +1148,13 @@ subtitle* subcp_recode (subtitle *sub)
 #endif
 
 #ifdef CONFIG_FRIBIDI
-#ifndef max
-#define max(a,b)  (((a)>(b))?(a):(b))
-#endif
-static subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
+/**
+ * Do conversion necessary for right-to-left language support via fribidi.
+ * @param sub subtitle to convert
+ * @param sub_utf8 whether the subtitle is encoded in UTF-8
+ * @param from first new subtitle, all lines before this are assumed to be already converted
+ */
+static subtitle* sub_fribidi (subtitle *sub, int sub_utf8, int from)
 {
   FriBidiChar logical[LINE_LEN+1], visual[LINE_LEN+1]; // Hopefully these two won't smash the stack
   char        *ip      = NULL, *op     = NULL;
@@ -1159,7 +1163,8 @@ static subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
   int l=sub->lines;
   int char_set_num;
   fribidi_boolean log2vis;
-  if(flip_hebrew) { // Please fix the indentation someday
+  if (!flip_hebrew)
+    return sub;
   fribidi_set_mirroring(1);
   fribidi_set_reorder_nsm(0);
 
@@ -1168,7 +1173,7 @@ static subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
   }else {
     char_set_num = fribidi_parse_charset ("UTF-8");
   }
-  while (l) {
+  while (l > from) {
     ip = sub->text[--l];
     orig_len = len = strlen( ip ); // We assume that we don't use full unicode, only UTF-8 or ISO8859-x
     if(len > LINE_LEN) {
@@ -1184,7 +1189,7 @@ static subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
     if(log2vis) {
       len = fribidi_remove_bidi_marks (visual, len, NULL, NULL,
 				       NULL);
-      if((op = malloc((max(2*orig_len,2*len) + 1))) == NULL) {
+      if((op = malloc((FFMAX(2*orig_len,2*len) + 1))) == NULL) {
 	mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error allocating mem.\n");
 	l++;
 	break;
@@ -1194,11 +1199,10 @@ static subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
       sub->text[l] = op;
     }
   }
-  if (l){
+  if (!from && l){
     for (l = sub->lines; l;)
       free (sub->text[--l]);
     return ERR;
-  }
   }
   return sub;
 }
@@ -1417,7 +1421,7 @@ sub_data* sub_read_file (char *filename, float fps) {
 	if ((sub!=ERR) && (sub_utf8 & 2)) sub=subcp_recode(sub);
 #endif
 #ifdef CONFIG_FRIBIDI
-	if (sub!=ERR) sub=sub_fribidi(sub,sub_utf8);
+	if (sub!=ERR) sub=sub_fribidi(sub,sub_utf8,0);
 #endif
 	if ( sub == ERR )
 	 {
@@ -2271,6 +2275,7 @@ void sub_add_text(subtitle *sub, const char *txt, int len, double endpts) {
   int double_newline = 1; // ignore newlines at the beginning
   int i, pos;
   char *buf;
+  int orig_lines = sub->lines;
   if (sub->lines >= SUB_MAX_TEXT) return;
   pos = 0;
   buf = malloc(MAX_SUBLINE + 1);
@@ -2315,6 +2320,9 @@ void sub_add_text(subtitle *sub, const char *txt, int len, double endpts) {
   if (sub->lines < SUB_MAX_TEXT &&
       strlen(sub->text[sub->lines]))
     sub->lines++;
+#ifdef CONFIG_FRIBIDI
+  sub = sub_fribidi(sub, sub_utf8, orig_lines);
+#endif
 }
 
 #define MP_NOPTS_VALUE (-1LL<<63)

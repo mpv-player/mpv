@@ -197,6 +197,10 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
   *bpp = IMGFMT_IS_BGR(fmt)?IMGFMT_BGR_DEPTH(fmt):IMGFMT_RGB_DEPTH(fmt);
   *gl_texfmt = 3;
   switch (fmt) {
+    case IMGFMT_RGB48NE:
+      *gl_format = GL_RGB;
+      *gl_type = GL_UNSIGNED_SHORT;
+      break;
     case IMGFMT_RGB24:
       *gl_format = GL_RGB;
       *gl_type = GL_UNSIGNED_BYTE;
@@ -336,7 +340,7 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *),
   strcpy(allexts, extensions);
   strcat(allexts, " ");
   strcat(allexts, ext2);
-  mp_msg(MSGT_VO, MSGL_V, "OpenGL extensions string:\n%s\n", allexts);
+  mp_msg(MSGT_VO, MSGL_DBG2, "OpenGL extensions string:\n%s\n", allexts);
   if (!getProcAddress)
     getProcAddress = setNull;
   for (dsc = extfuncs; dsc->funcptr; dsc++) {
@@ -696,7 +700,7 @@ static void store_weights(float x, GLfloat *dst) {
  * \param unit texture unit to attach texture to
  */
 static void gen_spline_lookup_tex(GLenum unit) {
-  GLfloat tex[4 * LOOKUP_BSPLINE_RES];
+  GLfloat *tex = calloc(4 * LOOKUP_BSPLINE_RES, sizeof(*tex));
   GLfloat *tp = tex;
   int i;
   for (i = 0; i < LOOKUP_BSPLINE_RES; i++) {
@@ -713,6 +717,7 @@ static void gen_spline_lookup_tex(GLenum unit) {
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   ActiveTexture(GL_TEXTURE0);
+  free(tex);
 }
 
 static const char *bilin_filt_template =
@@ -1162,7 +1167,7 @@ int loadGPUProgram(GLenum target, char *prog) {
       glGetString(GL_PROGRAM_ERROR_STRING), &prog[err]);
     return 0;
   }
-  if (!GetProgramiv || !mp_msg_test(MSGT_VO, MSGL_V))
+  if (!GetProgramiv || !mp_msg_test(MSGT_VO, MSGL_DBG2))
     return 1;
   mp_msg(MSGT_VO, MSGL_V, "[gl] Program statistics:\n");
   for (i = 0; progstats[i].name; i++) {
@@ -1258,7 +1263,7 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown conversion type %i\n", YUV_CONVERSION(type));
       break;
   }
-  mp_msg(MSGT_VO, MSGL_V, "[gl] generated fragment program:\n%s\n", yuv_prog);
+  mp_msg(MSGT_VO, MSGL_DBG2, "[gl] generated fragment program:\n%s\n", yuv_prog);
   loadGPUProgram(GL_FRAGMENT_PROGRAM, yuv_prog);
   free(yuv_prog);
 }
@@ -1457,7 +1462,7 @@ static void *w32gpa(const GLubyte *procName) {
 int setGlWindow(int *vinfo, HGLRC *context, HWND win)
 {
   int new_vinfo;
-  HDC windc = GetDC(win);
+  HDC windc = vo_w32_get_dc(win);
   HGLRC new_context = 0;
   int keep_context = 0;
   int res = SET_WINDOW_FAILED;
@@ -1510,7 +1515,7 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
     res = SET_WINDOW_OK;
 
 out:
-  ReleaseDC(win, windc);
+  vo_w32_release_dc(win, windc);
   return res;
 }
 
@@ -1524,9 +1529,9 @@ void releaseGlContext(int *vinfo, HGLRC *context) {
 }
 
 void swapGlBuffers(void) {
-  HDC vo_hdc = GetDC(vo_w32_window);
+  HDC vo_hdc = vo_w32_get_dc(vo_w32_window);
   SwapBuffers(vo_hdc);
-  ReleaseDC(vo_w32_window, vo_hdc);
+  vo_w32_release_dc(vo_w32_window, vo_hdc);
 }
 #else
 #ifdef HAVE_LIBDL

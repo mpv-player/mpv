@@ -136,7 +136,9 @@ SRCS_COMMON-$(LIBAVCODEC_INTERNALS)  += libaf/af_lavcac3enc.c \
                                         libmpcodecs/vf_qp.c \
                                         libmpcodecs/vf_spp.c \
 
-SRCS_COMMON-$(LIBAVFORMAT)           += libmpdemux/demux_lavf.c
+SRCS_COMMON-$(LIBAVFORMAT)           += libmpdemux/demux_lavf.c \
+                                        stream/stream_ffmpeg.c \
+
 SRCS_COMMON-$(LIBBS2B)               += libaf/af_bs2b.c
 SRCS_COMMON-$(LIBDCA)                += libmpcodecs/ad_libdca.c
 SRCS_COMMON-$(LIBDV)                 += libmpcodecs/ad_libdv.c \

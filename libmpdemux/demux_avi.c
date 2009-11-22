@@ -108,6 +108,12 @@ static int valid_fourcc(unsigned int id){
            strchr(valid, fcc[2]) && strchr(valid, fcc[3]);
 }
 
+static int valid_stream_id(unsigned int id) {
+    unsigned char* fcc=(unsigned char*)(&id);
+    return fcc[0] >= '0' && fcc[0] <= '9' && fcc[1] >= '0' && fcc[1] <= '9' &&
+           ((fcc[2] == 'w' && fcc[3] == 'b') || (fcc[2] == 'd' && fcc[3] == 'c'));
+}
+
 static int choose_chunk_len(unsigned int len1,unsigned int len2){
     // len1 has a bit more priority than len2. len1!=len2
     // Note: this is a first-idea-logic, may be wrong. comments welcomed.
@@ -220,8 +226,12 @@ do{
     idx=&((AVIINDEXENTRY *)priv->idx)[priv->idx_pos++];
 
     if(idx->dwFlags&AVIIF_LIST){
+      if (!valid_stream_id(idx->ckid))
       // LIST
       continue;
+      if (!priv->warned_unaligned)
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "Looks like unaligned chunk in index, broken AVI file!\n");
+      priv->warned_unaligned = 1;
     }
     if(!demux_avi_select_stream(demux,idx->ckid)){
       mp_dbg(MSGT_DEMUX,MSGL_DBG3,"Skip chunk %.4s (0x%X)  \n",(char *)&idx->ckid,(unsigned int)idx->ckid);
@@ -229,7 +239,7 @@ do{
     }
 
     pos = (off_t)priv->idx_offset+AVI_IDX_OFFSET(idx);
-    if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start) && (demux->stream->flags & STREAM_SEEK)){
+    if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start) && (demux->stream->flags & MP_STREAM_SEEK)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!   idx=0x%"PRIX64"  \n",(int64_t)pos);
       continue;
     }
@@ -254,7 +264,7 @@ do{
     if(!(idx->dwFlags&AVIIF_KEYFRAME)) flags=0;
   } else {
     demux->filepos=stream_tell(demux->stream);
-    if(demux->filepos>=demux->movi_end && demux->movi_end>demux->movi_start && (demux->stream->flags & STREAM_SEEK)){
+    if(demux->filepos>=demux->movi_end && demux->movi_end>demux->movi_start && (demux->stream->flags & MP_STREAM_SEEK)){
           demux->stream->eof=1;
           return 0;
     }
@@ -319,8 +329,12 @@ do{
     idx=&((AVIINDEXENTRY *)priv->idx)[idx_pos];
 
     if(idx->dwFlags&AVIIF_LIST){
+      if (!valid_stream_id(idx->ckid))
       // LIST
       continue;
+      if (!priv->warned_unaligned)
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "Looks like unaligned chunk in index, broken AVI file!\n");
+      priv->warned_unaligned = 1;
     }
     if(ds && demux_avi_select_stream(demux,idx->ckid)!=ds){
       mp_dbg(MSGT_DEMUX,MSGL_DBG3,"Skip chunk %.4s (0x%X)  \n",(char *)&idx->ckid,(unsigned int)idx->ckid);
@@ -425,25 +439,12 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=NULL;
     sh_video_t *sh_video=NULL;
-    avi_priv_t* priv=malloc(sizeof(avi_priv_t));
-
-  // priv struct:
-  priv->avi_audio_pts=priv->avi_video_pts=0.0f;
-  priv->pts_correction=0.0f;
-  priv->skip_video_frames=0;
-  priv->pts_corr_bytes=0;
-  priv->pts_has_video=priv->pts_corrected=0;
-  priv->video_pack_no=0;
-  priv->audio_block_no=0;
-  priv->audio_block_size=0;
-  priv->isodml = 0;
-  priv->suidx_size = 0;
-  priv->suidx = NULL;
+    avi_priv_t* priv=calloc(1, sizeof(avi_priv_t));
 
   demuxer->priv=(void*)priv;
 
   //---- AVI header:
-  read_avi_header(demuxer,(demuxer->stream->flags & STREAM_SEEK_BW)?index_mode:-2);
+  read_avi_header(demuxer,(demuxer->stream->flags & MP_STREAM_SEEK_BW)?index_mode:-2);
 
   if(demuxer->audio->id>=0 && !demuxer->a_streams[demuxer->audio->id]){
       mp_tmsg(MSGT_DEMUX,MSGL_WARN,"AVI: invalid audio stream ID: %d - ignoring (nosound)\n",demuxer->audio->id);
@@ -456,22 +457,15 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
 
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,demuxer->movi_start);
-  priv->idx_pos=0;
-  priv->idx_pos_a=0;
-  priv->idx_pos_v=0;
   if(priv->idx_size>1){
     // decide index format:
 #if 1
     if((AVI_IDX_OFFSET(&((AVIINDEXENTRY *)priv->idx)[0])<demuxer->movi_start ||
         AVI_IDX_OFFSET(&((AVIINDEXENTRY *)priv->idx)[1])<demuxer->movi_start )&& !priv->isodml)
       priv->idx_offset=demuxer->movi_start-4;
-    else
-      priv->idx_offset=0;
 #else
     if(AVI_IDX_OFFSET(&((AVIINDEXENTRY *)priv->idx)[0])<demuxer->movi_start)
       priv->idx_offset=demuxer->movi_start-4;
-    else
-      priv->idx_offset=0;
 #endif
     mp_msg(MSGT_DEMUX,MSGL_V,"AVI index offset: 0x%X (movi=0x%X idx0=0x%X idx1=0x%X)\n",
 	    (int)priv->idx_offset,(int)demuxer->movi_start,

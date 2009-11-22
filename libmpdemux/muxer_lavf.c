@@ -391,7 +391,7 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
         }
 
 	priv->oc->pb = av_alloc_put_byte(priv->buffer, BIO_BUFFER_SIZE, 1, muxer, NULL, mp_write, mp_seek);
-	if ((muxer->stream->flags & STREAM_SEEK) != STREAM_SEEK)
+	if ((muxer->stream->flags & MP_STREAM_SEEK) != MP_STREAM_SEEK)
             priv->oc->pb->is_streamed = 1;
 
 	muxer->priv = (void *) priv;

@@ -152,11 +152,6 @@ static int open(vf_instance_t *vf, char* args)
 	vf->put_image=put_image;
 	vf->uninit=uninit;
 
-	if(!vf->priv) {
-	vf->priv = malloc(sizeof(struct vf_priv_s));
-	memset(vf->priv, 0, sizeof(struct vf_priv_s));
-	}
-	if (args) sscanf(args, "%f:%f", &vf->priv->hue, &vf->priv->saturation);
         vf->priv->hue *= M_PI / 180.0;
 
 	process = process_C;

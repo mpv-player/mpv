@@ -66,7 +66,7 @@ typedef struct lavf_priv_t{
     AVInputFormat *avif;
     AVFormatContext *avfc;
     ByteIOContext *pb;
-    uint8_t buffer[BIO_BUFFER_SIZE];
+    uint8_t buffer[FFMAX(BIO_BUFFER_SIZE, PROBE_BUF_SIZE)];
     int audio_streams;
     int video_streams;
     int sub_streams;
@@ -130,7 +130,6 @@ static void list_formats(void) {
 
 static int lavf_check_file(demuxer_t *demuxer){
     AVProbeData avpd;
-    uint8_t buf[PROBE_BUF_SIZE];
     lavf_priv_t *priv;
     int probe_data_size;
 
@@ -154,11 +153,11 @@ static int lavf_check_file(demuxer_t *demuxer){
         return DEMUXER_TYPE_LAVF;
     }
 
-    probe_data_size = stream_read(demuxer->stream, buf, PROBE_BUF_SIZE);
+    probe_data_size = stream_read(demuxer->stream, priv->buffer, PROBE_BUF_SIZE);
     if(probe_data_size <= 0)
         return 0;
     avpd.filename= demuxer->stream->url;
-    avpd.buf= buf;
+    avpd.buf= priv->buffer;
     avpd.buf_size= probe_data_size;
 
     priv->avif= av_probe_input_format(&avpd, 1);
@@ -433,7 +432,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     stream_seek(demuxer->stream, 0);
 
-    avfc = av_alloc_format_context();
+    avfc = avformat_alloc_context();
 
     if (opt_cryptokey)
         parse_cryptokey(avfc, opt_cryptokey);
@@ -466,7 +465,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     priv->pb = av_alloc_put_byte(priv->buffer, BIO_BUFFER_SIZE, 0,
                                  demuxer->stream, mp_read, NULL, mp_seek);
-    priv->pb->is_streamed = !demuxer->stream->end_pos || (demuxer->stream->flags & STREAM_SEEK) != STREAM_SEEK;
+    priv->pb->is_streamed = !demuxer->stream->end_pos || (demuxer->stream->flags & MP_STREAM_SEEK) != MP_STREAM_SEEK;
 
     if(av_open_input_stream(&avfc, priv->pb, mp_filename, priv->avif, &ap)<0){
         mp_msg(MSGT_HEADER,MSGL_ERR,"LAVF_header: av_open_input_stream() failed\n");
