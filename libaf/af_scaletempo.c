@@ -226,6 +226,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   int8_t* pout;
 
   if (s->scale == 1.0) {
+    af->delay = 0;
     return data;
   }
 
