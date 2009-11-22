@@ -432,7 +432,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     stream_seek(demuxer->stream, 0);
 
-    avfc = av_alloc_format_context();
+    avfc = avformat_alloc_context();
 
     if (opt_cryptokey)
         parse_cryptokey(avfc, opt_cryptokey);
