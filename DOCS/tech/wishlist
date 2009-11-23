@@ -139,11 +139,9 @@ Enhancements:
 
  * make -noborder work with all video outputs
 
- * add option to use ffmpeg network code (rtsp, http, mms etc)
-
 Difficult stuff:
 
- * RE all closed source codecs (QDMC, WMA9, Indeo 4/5, ...)
+ * RE all closed source codecs (Voxware, VIVO, MVI2, MSS1/MSS2, Indeo 4/5, ...)
 
  * support for Bink codec
 
