@@ -2267,11 +2267,14 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx,
     struct sh_video *sh_video = mpctx->sh_video;
     *blit_frame = 0;
     double frame_time = 0;
-    while (1) {
+    struct vo *video_out = mpctx->video_out;
+    while (!video_out->frame_loaded) {
         current_module = "filter_video";
         // In nocorrect-pts mode there is no way to properly time these frames
-        if (vf_output_queued_frame(sh_video->vfilter))
+        if (vo_get_buffered_frame(video_out, 0) >= 0)
             break;
+        if (vf_output_queued_frame(sh_video->vfilter))
+            continue;
         unsigned char *packet = NULL;
         frame_time = sh_video->next_frame_time;
         if (mpctx->update_video_immediately)
@@ -2316,7 +2319,8 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx,
         if (decoded_frame) {
             current_module = "filter video";
             if (filter_video(sh_video, decoded_frame, sh_video->pts))
-                break;
+                if (!video_out->config_ok)
+                    break;
         }
     }
     *blit_frame = 1;
