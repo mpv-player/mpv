@@ -2374,12 +2374,12 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
         current_module = "filter_video";
         if (vo_get_buffered_frame(video_out, hit_eof) >= 0)
             break;
-        if (hit_eof)
-            return -1;
         // XXX Time used in this call is not counted in any performance
         // timer now, OSD time is not updated correctly for filter-added frames
         if (vf_output_queued_frame(sh_video->vfilter))
-            break;
+            continue;
+        if (hit_eof)
+            return -1;
         unsigned char *packet = NULL;
         int in_size = ds_get_packet_pts(mpctx->d_video, &packet, &pts);
         if (pts != MP_NOPTS_VALUE)
