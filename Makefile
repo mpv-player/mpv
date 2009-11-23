@@ -768,10 +768,6 @@ config.mak: configure
 help_mp.h: help/help_mp-en.h $(HELP_FILE)
 	help/help_create.sh $(HELP_FILE) $(CHARSET)
 
-# rebuild version.h each time the working copy is updated
-ifeq ($(wildcard .svn/entries),.svn/entries)
-version.h: .svn/entries
-endif
 version.h: version.sh
 	./$< `$(CC) -dumpversion`
 
