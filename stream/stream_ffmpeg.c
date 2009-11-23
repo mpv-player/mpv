@@ -31,7 +31,7 @@ static const struct m_struct_st stream_opts = {
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
-    int r = url_read_complete(s->priv, buffer, max_len);
+    int r = url_read(s->priv, buffer, max_len);
     return (r <= 0) ? -1 : r;
 }
 
