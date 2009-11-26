@@ -475,6 +475,7 @@ static int asf_http_streaming_type(char *content_type, char *features, HTTP_head
 	if( 	!strcasecmp(content_type, "application/octet-stream") ||
 		!strcasecmp(content_type, "application/vnd.ms.wms-hdr.asfv1") ||        // New in Corona, first request
 		!strcasecmp(content_type, "application/x-mms-framed") ||                // New in Corana, second request
+		!strcasecmp(content_type, "video/x-ms-wmv") ||
 		!strcasecmp(content_type, "video/x-ms-asf")) {
 
 		if( strstr(features, "broadcast") ) {
