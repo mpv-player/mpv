@@ -93,7 +93,7 @@ static int init(sh_audio_t *sh_audio)
         mp_msg(MSGT_DECAUDIO,MSGL_ERR, MSGTR_CantOpenCodec);
         return 0;
     }
-   mp_msg(MSGT_DECAUDIO,MSGL_V,"INFO: libavcodec init OK!\n");
+   mp_msg(MSGT_DECAUDIO,MSGL_V,"INFO: libavcodec \"%s\" init OK!\n", lavc_codec->name);
 
 //   printf("\nFOURCC: 0x%X\n",sh_audio->format);
    if(sh_audio->format==0x3343414D){
