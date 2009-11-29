@@ -68,7 +68,7 @@ static int reorder_copy_5ch(void *dest, const void *src,
     {
         int8_t *dest_8 = dest;
         const int8_t *src_8 = src;
-        for (i = 0; i < samples; i += 15) {
+        for (i = 0; i < samples * 3; i += 15) {
             dest_8[i]    = src_8[i+s0*3];
             dest_8[i+1]  = src_8[i+s0*3+1];
             dest_8[i+2]  = src_8[i+s0*3+2];
@@ -144,7 +144,7 @@ static int reorder_copy_6ch(void *dest, const void *src,
     {
         int8_t *dest_8 = dest;
         const int8_t *src_8 = src;
-        for (i = 0; i < samples; i += 18) {
+        for (i = 0; i < samples * 3; i += 18) {
             dest_8[i]    = src_8[i+s0*3];
             dest_8[i+1]  = src_8[i+s0*3+1];
             dest_8[i+2]  = src_8[i+s0*3+2];
@@ -226,7 +226,7 @@ static int reorder_copy_8ch(void *dest, const void *src,
     {
         int8_t *dest_8 = dest;
         const int8_t *src_8 = src;
-        for (i = 0; i < samples; i += 24) {
+        for (i = 0; i < samples * 3; i += 24) {
             dest_8[i]    = src_8[i+s0*3];
             dest_8[i+1]  = src_8[i+s0*3+1];
             dest_8[i+2]  = src_8[i+s0*3+2];
@@ -455,7 +455,7 @@ static int reorder_self_2(void *src, unsigned int samples,
     {
         int8_t *src_8 = src;
         int8_t tmp0, tmp1, tmp2;
-        for (i = 0; i < samples; i += chnum*3) {
+        for (i = 0; i < samples * 3; i += chnum * 3) {
             tmp0 = src_8[i+s0*3];
             tmp1 = src_8[i+s0*3+1];
             tmp2 = src_8[i+s0*3+2];
@@ -555,7 +555,7 @@ static int reorder_self_3(void *src, unsigned int samples,
     {
         int8_t *src_8 = src;
         int8_t tmp0, tmp1, tmp2;
-        for (i = 0; i < samples; i += chnum*3) {
+        for (i = 0; i < samples * 3; i += chnum * 3) {
             tmp0 = src_8[i+s0*3];
             tmp1 = src_8[i+s0*3+1];
             tmp2 = src_8[i+s0*3+2];
@@ -653,7 +653,7 @@ static int reorder_self_4_step_1(void *src, unsigned int samples,
     {
         int8_t *src_8 = src;
         int8_t tmp0, tmp1, tmp2;
-        for (i = 0; i < samples; i += chnum*3) {
+        for (i = 0; i < samples * 3; i += chnum * 3) {
             tmp0 = src_8[i+s0*3];
             tmp1 = src_8[i+s0*3+1];
             tmp2 = src_8[i+s0*3+2];
@@ -731,7 +731,7 @@ static int reorder_self_4_step_2(void *src, unsigned int samples,
     {
         int8_t *src_8 = src;
         int8_t tmp0, tmp1, tmp2;
-        for (i = 0; i < samples; i += chnum*3) {
+        for (i = 0; i < samples * 3; i += chnum * 3) {
             tmp0 = src_8[i+s0*3];
             tmp1 = src_8[i+s0*3+1];
             tmp2 = src_8[i+s0*3+2];
@@ -806,7 +806,7 @@ static int reorder_self_5_step_1(void *src, unsigned int samples,
     {
         int8_t *src_8 = src;
         int8_t tmp0, tmp1, tmp2;
-        for (i = 0; i < samples; i += chnum*3) {
+        for (i = 0; i < samples * 3; i += chnum * 3) {
             tmp0 = src_8[i+s0*3];
             tmp1 = src_8[i+s0*3+1];
             tmp2 = src_8[i+s0*3+2];
@@ -896,7 +896,7 @@ static int reorder_self_2_3(void *src, unsigned int samples,
     {
         int8_t *src_8 = src;
         int8_t tmp0, tmp1, tmp2;
-        for (i = 0; i < samples; i += 18) {
+        for (i = 0; i < samples * 3; i += 18) {
             tmp0 = src_8[i+s0*3];
             tmp1 = src_8[i+s0*3+1];
             tmp2 = src_8[i+s0*3+2];
@@ -980,7 +980,7 @@ static int reorder_self_3_3(void *src, unsigned int samples,
     {
         int8_t *src_8 = src;
         int8_t tmp0, tmp1, tmp2;
-        for (i = 0; i < samples; i += 18) {
+        for (i = 0; i < samples * 3; i += 18) {
             tmp0 = src_8[i+s0*3];
             tmp1 = src_8[i+s0*3+1];
             tmp2 = src_8[i+s0*3+2];
@@ -1075,7 +1075,7 @@ static int reorder_self_2_4(void *src, unsigned int samples,
     {
         int8_t *src_8 = src;
         int8_t tmp0, tmp1, tmp2;
-        for (i = 0; i < samples; i += 3*chnum) {
+        for (i = 0; i < samples * 3; i += chnum * 3) {
             tmp0 = src_8[i+s0*3];
             tmp1 = src_8[i+s0*3+1];
             tmp2 = src_8[i+s0*3+2];

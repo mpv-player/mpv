@@ -1897,6 +1897,7 @@ static void mp_dvdnav_reset_stream (MPContext *ctx) {
     }
 
     audio_delay = 0.0f;
+    ctx->global_sub_size = ctx->global_sub_indices[SUB_SOURCE_DEMUX] + mp_dvdnav_number_of_subs(ctx->stream);
     if (dvdsub_lang && opts->sub_id == dvdsub_lang_id) {
         dvdsub_lang_id = mp_dvdnav_sid_from_lang(ctx->stream, dvdsub_lang);
         if (dvdsub_lang_id != opts->sub_id) {
