@@ -1093,6 +1093,7 @@ static uint64_t read_one_chapter(struct demuxer *demuxer, stream_t *s)
     char *name = 0;
     int i;
     uint32_t id;
+    bool badchapter = false;
 
     len = ebml_read_length(s, &i);
     uint64_t bytes_read = len + i;
@@ -1147,6 +1148,15 @@ static uint64_t read_one_chapter(struct demuxer *demuxer, stream_t *s)
             }
             break;
 
+        case MATROSKA_ID_CHAPTERSEGMENTEDITIONUID:
+            mp_tmsg(MSGT_DEMUX, MSGL_WARN,
+                    "[mkv] Warning: unsupported edition recursion in chapter; "
+                    "will skip on playback!\n");
+            ebml_read_skip(s, &l);
+            len -= l;
+            badchapter = true;
+            break;
+
         default:
             ebml_read_skip(s, &l);
             len -= l;
@@ -1169,6 +1179,11 @@ static uint64_t read_one_chapter(struct demuxer *demuxer, stream_t *s)
     m->ordered_chapters[m->num_ordered_chapters] = chapter;
     m->num_ordered_chapters++;
 
+    if (badchapter) {
+        memset(&chapter.segment_uid, 0, sizeof(chapter.segment_uid));
+        goto cleanup;
+    }
+
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Chapter %u from %02d:%02d:%02d."
            "%03d to %02d:%02d:%02d.%03d, %s\n",
            cid,
@@ -1181,6 +1196,7 @@ static uint64_t read_one_chapter(struct demuxer *demuxer, stream_t *s)
            (int) ((end / 1000) % 60),
            (int) (end % 1000), name);
 
+cleanup:
     free(name);
     return bytes_read;
 }

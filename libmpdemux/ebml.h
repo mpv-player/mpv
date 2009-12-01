@@ -152,6 +152,8 @@
 #define MATROSKA_ID_CHAPTERDISPLAY       0x80
 #define MATROSKA_ID_CHAPSTRING           0x85
 #define MATROSKA_ID_CHAPTERSEGMENTUID    0x6E67
+#define MATROSKA_ID_CHAPTERSEGMENTEDITIONUID\
+                                         0x6EBC
 
 /* IDs in the cluster master */
 #define MATROSKA_ID_CLUSTERTIMECODE      0xE7
