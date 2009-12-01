@@ -1301,6 +1301,12 @@ Specify which chapter to start playing at.
 Optionally specify which chapter to end playing at (default: 1).
 .
 .TP
+.B \-edition <edition ID> (Matroska, MPlayer only)
+Specify the edition (set of chapters) to use, where 0 is the first. If set to
+-1 (the default), MPlayer will choose the first edition declared as a default,
+or if there is no default, the first edition defined.
+.
+.TP
 .B \-cookies (network only)
 Send cookies when making HTTP requests.
 .

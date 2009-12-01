@@ -40,6 +40,7 @@
 	{"dvd-speed", "MPlayer was compiled without libdvdread support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"dvd", "MPlayer was compiled without libdvdread support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif /* CONFIG_DVDREAD */
+	OPT_INTRANGE("edition", edition_id, 0, -1, 8190),
 	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
