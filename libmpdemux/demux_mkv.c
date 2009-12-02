@@ -2819,7 +2819,7 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
                       free(block);
                       return 0;
                     }
-                    block_duration *= mkv_d->tc_scale / 1000000.0;
+                    block_duration = block_duration * mkv_d->tc_scale / 1000000.0 + 0.5;
                     break;
                   }
 
