@@ -2825,11 +2825,13 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
     struct demuxer *demuxer = mpctx->demuxer;
     struct matroska_data *m = &demuxer->matroska_data;
 
+    // +1 because sources/uid_map[0] is original file even if all chapters
+    // actually use other sources and need separate entries
     struct content_source *sources = talloc_array_ptrtype(NULL, sources,
-                                                   m->num_ordered_chapters);
+                                                   m->num_ordered_chapters+1);
     sources[0].stream = mpctx->stream;
     sources[0].demuxer = mpctx->demuxer;
-    unsigned char uid_map[m->num_ordered_chapters][16];
+    unsigned char uid_map[m->num_ordered_chapters+1][16];
     int num_sources = 1;
     memcpy(uid_map[0], m->segment_uid, 16);
 
@@ -2852,6 +2854,7 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
                                                uid_map);
 
 
+    // +1 for terminating chapter with start time marking end of last real one
     struct timeline_part *timeline = talloc_array_ptrtype(NULL, timeline,
                                                   m->num_ordered_chapters + 1);
     struct chapter *chapters = talloc_array_ptrtype(NULL, chapters,
