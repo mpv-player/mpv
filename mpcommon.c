@@ -157,8 +157,14 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
             ds_get_next_pts(d_dvdsub);
         while (d_dvdsub->first) {
             double subpts = ds_get_next_pts(d_dvdsub) + sub_offset;
-            if (subpts > curpts)
-                break;
+            if (subpts > curpts) {
+                // Libass handled subs can be fed to it in advance
+                if (!opts->ass_enabled || type == 'd')
+                    break;
+                // Try to avoid demuxing whole file at once
+                if (d_dvdsub->non_interleaved && subpts > curpts + 1)
+                    break;
+            }
             endpts = d_dvdsub->first->endpts + sub_offset;
             len = ds_get_packet_sub(d_dvdsub, &packet);
             if (type == 'm') {
