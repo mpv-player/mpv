@@ -354,8 +354,6 @@ void vo_check_events(struct vo *vo)
 
 void vo_seek_reset(struct vo *vo)
 {
-    if (!vo->config_ok)
-        return;
     vo_control(vo, VOCTRL_RESET, NULL);
     vo->frame_loaded = false;
 }
