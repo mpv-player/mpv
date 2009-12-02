@@ -2262,11 +2262,9 @@ err_out:
   return 0;
 }
 
-static double update_video_nocorrect_pts(struct MPContext *mpctx,
-                                         int *blit_frame)
+static double update_video_nocorrect_pts(struct MPContext *mpctx)
 {
     struct sh_video *sh_video = mpctx->sh_video;
-    *blit_frame = 0;
     double frame_time = 0;
     struct vo *video_out = mpctx->video_out;
     while (!video_out->frame_loaded) {
@@ -2324,7 +2322,6 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx,
                     break;
         }
     }
-    *blit_frame = 1;
     return frame_time;
 }
 
@@ -2358,15 +2355,14 @@ static void determine_frame_pts(struct MPContext *mpctx)
         sh_video->codec_reordered_pts : sh_video->sorted_pts;
 }
 
-static double update_video(struct MPContext *mpctx, int *blit_frame)
+static double update_video(struct MPContext *mpctx)
 {
     struct sh_video *sh_video = mpctx->sh_video;
     struct vo *video_out = mpctx->video_out;
-    *blit_frame = 0;
     sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SET_OSD_OBJ,
                                mpctx->osd); // hack for vf_expand
     if (!mpctx->opts.correct_pts)
-        return update_video_nocorrect_pts(mpctx, blit_frame);
+        return update_video_nocorrect_pts(mpctx);
 
     double pts;
 
@@ -2435,7 +2431,6 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
     sh_video->timer += frame_time;
     if (mpctx->sh_audio)
         mpctx->delay -= frame_time;
-    *blit_frame = 1;
     return frame_time;
 }
 
@@ -4033,8 +4028,10 @@ if(!mpctx->sh_video) {
   vo_pts=mpctx->sh_video->timer*90000.0;
   vo_fps=mpctx->sh_video->fps;
 
-  if (!mpctx->video_out->frame_loaded) {
-      double frame_time = update_video(mpctx, &blit_frame);
+  blit_frame = mpctx->video_out->frame_loaded;
+  if (!blit_frame) {
+      double frame_time = update_video(mpctx);
+      blit_frame = mpctx->video_out->frame_loaded;
       mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
       if (mpctx->sh_video->vf_initialized < 0) {
 	  mp_tmsg(MSGT_CPLAYER,MSGL_FATAL, "\nFATAL: Could not initialize video filters (-vf) or video output (-vo).\n");
