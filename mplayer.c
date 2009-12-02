@@ -2924,7 +2924,6 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
     mpctx->chapters = chapters;
 
     mpctx->timeline_part = 0;
-    mpctx->video_offset = timeline[0].source_start;
     mpctx->demuxer = timeline[0].source->demuxer;
 }
 
@@ -3953,7 +3952,8 @@ if(play_n_frames==0){
   mpctx->stop_play=PT_NEXT_ENTRY; goto goto_next_file;
 }
 
-if (seek_to_sec) {
+// If there's a timeline force an absolute seek to initialize state
+if (seek_to_sec || mpctx->timeline) {
     seek(mpctx, seek_to_sec, SEEK_ABSOLUTE);
     end_at.pos += seek_to_sec;
 }
