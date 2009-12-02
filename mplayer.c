@@ -1041,6 +1041,7 @@ static int playtree_add_playlist(struct MPContext *mpctx, play_tree_t* entry)
 
 void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr)
 {
+    struct MPOpts *opts = &mpctx->opts;
     sub_data *subd;
 #ifdef CONFIG_ASS
     ASS_Track *asst = 0;
@@ -1052,13 +1053,13 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
 
     subd = sub_read_file(filename, fps);
 #ifdef CONFIG_ASS
-    if (ass_enabled)
+    if (opts->ass_enabled)
 #ifdef CONFIG_ICONV
         asst = ass_read_file(ass_library, filename, sub_cp);
 #else
         asst = ass_read_file(ass_library, filename, 0);
 #endif
-    if (ass_enabled && subd && !asst)
+    if (opts->ass_enabled && subd && !asst)
         asst = ass_read_subdata(ass_library, subd, fps);
 
     if (!asst && !subd)
@@ -2193,7 +2194,7 @@ int reinit_video_chain(struct MPContext *mpctx)
 #endif
 
 #ifdef CONFIG_ASS
-  if(ass_enabled) {
+  if(opts->ass_enabled) {
     int i;
     int insert = 1;
     if (opts->vf_settings)
@@ -2218,7 +2219,7 @@ int reinit_video_chain(struct MPContext *mpctx)
   sh_video->vfilter = append_filters(sh_video->vfilter, opts->vf_settings);
 
 #ifdef CONFIG_ASS
-  if (ass_enabled)
+  if (opts->ass_enabled)
     sh_video->vfilter->control(sh_video->vfilter, VFCTRL_INIT_EOSD, ass_library);
 #endif
 
@@ -3634,7 +3635,7 @@ if (mpctx->global_sub_size <= mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + opts
   mpctx->global_sub_size = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + opts->sub_id + 1;
 
 #ifdef CONFIG_ASS
-if (ass_enabled && ass_library) {
+if (opts->ass_enabled && ass_library) {
     for (int j = 0; j < mpctx->num_sources; j++) {
         struct demuxer *d = mpctx->sources[j].demuxer;
         for (int i = 0; i < d->num_attachments; i++) {

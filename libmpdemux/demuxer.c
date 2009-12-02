@@ -923,7 +923,7 @@ static demuxer_t *demux_open_stream(struct MPOpts *opts, stream_t *stream,
                sh_video->i_bps / 1024.0f);
     }
 #ifdef CONFIG_ASS
-    if (ass_enabled && ass_library) {
+    if (opts->ass_enabled && ass_library) {
         for (i = 0; i < MAX_S_STREAMS; ++i) {
             sh_sub_t *sh = demuxer->s_streams[i];
             if (sh && sh->type == 'a') {

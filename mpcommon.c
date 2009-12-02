@@ -183,7 +183,7 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
                 continue;
             }
 #ifdef CONFIG_ASS
-            if (ass_enabled) {
+            if (opts->ass_enabled) {
                 sh_sub_t* sh = d_dvdsub->sh;
                 ass_track = sh ? sh->ass_track : NULL;
                 if (!ass_track) continue;

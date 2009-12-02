@@ -1524,7 +1524,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
 	mpctx->set_of_sub_pos =
 	    mpctx->global_sub_pos - mpctx->global_sub_indices[SUB_SOURCE_SUBS];
 #ifdef CONFIG_ASS
-	if (ass_enabled && mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos])
+	if (opts->ass_enabled && mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos])
 	    ass_track = mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos];
 	else
 #endif
@@ -1554,7 +1554,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
 		if (sh->type == 'v')
 		    init_vo_spudec(mpctx);
 #ifdef CONFIG_ASS
-		else if (ass_enabled)
+		else if (opts->ass_enabled)
 		    ass_track = sh->ass_track;
 #endif
             } else {
@@ -1862,6 +1862,7 @@ static int mp_property_sub_forced_only(m_option_t *prop, int action,
 static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
 			      MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
 
     switch (action) {
         case M_PROPERTY_SET:
@@ -1869,7 +1870,7 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
                 return M_PROPERTY_ERROR;
             M_PROPERTY_CLAMP(prop, *(float *) arg);
 #ifdef CONFIG_ASS
-            if (ass_enabled) {
+            if (opts->ass_enabled) {
                 ass_font_scale = *(float *) arg;
                 ass_force_reload = 1;
             }
@@ -1880,7 +1881,7 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
         case M_PROPERTY_STEP_UP:
         case M_PROPERTY_STEP_DOWN:
 #ifdef CONFIG_ASS
-            if (ass_enabled) {
+            if (opts->ass_enabled) {
                 ass_font_scale += (arg ? *(float *) arg : 0.1)*
                   (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
                 M_PROPERTY_CLAMP(prop, ass_font_scale);
@@ -1894,7 +1895,7 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_OK;
         default:
 #ifdef CONFIG_ASS
-            if (ass_enabled)
+            if (opts->ass_enabled)
                 return m_property_float_ro(prop, action, arg, ass_font_scale);
             else
 #endif

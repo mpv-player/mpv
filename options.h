@@ -44,6 +44,7 @@ typedef struct MPOpts {
     float screen_size_xy;
     int flip;
     int vd_use_slices;
+    int ass_enabled;
     struct lavc_param {
         int workaround_bugs;
         int error_resilience;

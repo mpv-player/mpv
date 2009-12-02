@@ -32,7 +32,6 @@
 #include <ass/ass_types.h>
 
 extern ASS_Library *ass_library;
-extern int ass_enabled;
 extern float ass_font_scale;
 extern float ass_line_spacing;
 extern int ass_top_margin;
