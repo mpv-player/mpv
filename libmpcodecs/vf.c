@@ -134,6 +134,7 @@ static const vf_info_t* const filter_list[]={
     &vf_info_lavc,
     &vf_info_lavcdeint,
     &vf_info_screenshot,
+    &vf_info_uspp,
 #endif
 #ifdef CONFIG_ZR
     &vf_info_zrmjpeg,
@@ -180,9 +181,8 @@ static const vf_info_t* const filter_list[]={
     &vf_info_delogo,
     &vf_info_remove_logo,
     &vf_info_hue,
-#ifdef CONFIG_LIBAVCODEC_A
+#ifdef CONFIG_LIBAVCODEC_INTERNALS
     &vf_info_spp,
-    &vf_info_uspp,
     &vf_info_fspp,
     &vf_info_qp,
     &vf_info_mcdeint,
