@@ -2445,11 +2445,12 @@ static void pause_loop(void)
         mp_cmd_free(cmd);
     }
     mpctx->osd_function=OSD_PLAY;
-    if (mpctx->audio_out && mpctx->sh_audio)
+    if (mpctx->audio_out && mpctx->sh_audio) {
         if (mpctx->eof) // do not play remaining audio if we e.g.  switch to the next file
           mpctx->audio_out->reset();
         else
           mpctx->audio_out->resume(); // resume audio
+    }
     if (mpctx->video_out && mpctx->sh_video && vo_config_count)
         mpctx->video_out->control(VOCTRL_RESUME, NULL); // resume video
     (void)GetRelativeTime(); // ignore time that passed during pause
