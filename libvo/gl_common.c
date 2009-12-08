@@ -1458,8 +1458,11 @@ static void *w32gpa(const GLubyte *procName) {
   return GetProcAddress(oglmod, procName);
 }
 
-int setGlWindow(int *vinfo, HGLRC *context, HWND win)
+static int setGlWindow_w32(MPGLContext *ctx)
 {
+  HWND win = vo_w32_window;
+  int *vinfo = &ctx->vinfo.w32;
+  HGLRC *context = &ctx->context.w32;
   int new_vinfo;
   HDC windc = vo_w32_get_dc(win);
   HGLRC new_context = 0;
@@ -1518,7 +1521,9 @@ out:
   return res;
 }
 
-void releaseGlContext(int *vinfo, HGLRC *context) {
+static void releaseGlContext_w32(MPGLContext *ctx) {
+  int *vinfo = &ctx->vinfo.w32;
+  HGLRC *context = &ctx->context.w32;
   *vinfo = 0;
   if (*context) {
     wglMakeCurrent(0, 0);
@@ -1527,12 +1532,13 @@ void releaseGlContext(int *vinfo, HGLRC *context) {
   *context = 0;
 }
 
-void swapGlBuffers(void) {
+static void swapGlBuffers_w32(MPGLContext *ctx) {
   HDC vo_hdc = vo_w32_get_dc(vo_w32_window);
   SwapBuffers(vo_hdc);
   vo_w32_release_dc(vo_w32_window, vo_hdc);
 }
-#else
+#endif
+#ifdef CONFIG_X11
 #ifdef HAVE_LIBDL
 #include <dlfcn.h>
 #endif
@@ -1595,8 +1601,11 @@ static void appendstr(char **dst, const char *str)
  * and the caller must initialize it correctly.
  * \ingroup glcontext
  */
-int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
+static int setGlWindow_x11(MPGLContext *ctx)
 {
+  XVisualInfo **vinfo = &ctx->vinfo.x11;
+  GLXContext *context = &ctx->context.x11;
+  Window win = vo_window;
   XVisualInfo *new_vinfo;
   GLXContext new_context = NULL;
   int keep_context = 0;
@@ -1674,7 +1683,9 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
  * \brief free the VisualInfo and GLXContext of an OpenGL context.
  * \ingroup glcontext
  */
-void releaseGlContext(XVisualInfo **vinfo, GLXContext *context) {
+static void releaseGlContext_x11(MPGLContext *ctx) {
+  XVisualInfo **vinfo = &ctx->vinfo.x11;
+  GLXContext *context = &ctx->context.x11;
   if (*vinfo)
     XFree(*vinfo);
   *vinfo = NULL;
@@ -1687,8 +1698,61 @@ void releaseGlContext(XVisualInfo **vinfo, GLXContext *context) {
   *context = 0;
 }
 
-void swapGlBuffers(void) {
+static void swapGlBuffers_x11(MPGLContext *ctx) {
   glXSwapBuffers(mDisplay, vo_window);
+}
+
+static int x11_check_events(void) {
+  return vo_x11_check_events(mDisplay);
 }
 #endif
 
+int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
+  memset(ctx, 0, sizeof(*ctx));
+  ctx->type = type;
+  switch (ctx->type) {
+#ifdef GL_WIN32
+  case GLTYPE_W32:
+    ctx->setGlWindow = setGlWindow_w32;
+    ctx->releaseGlContext = releaseGlContext_w32;
+    ctx->swapGlBuffers = swapGlBuffers_w32;
+    ctx->update_xinerama_info = w32_update_xinerama_info;
+    ctx->border = vo_w32_border;
+    ctx->check_events = vo_w32_check_events;
+    ctx->fullscreen = vo_w32_fullscreen;
+    ctx->ontop = vo_w32_ontop;
+    return vo_w32_init();
+#endif
+#ifdef CONFIG_X11
+  case GLTYPE_X11:
+    ctx->setGlWindow = setGlWindow_x11;
+    ctx->releaseGlContext = releaseGlContext_x11;
+    ctx->swapGlBuffers = swapGlBuffers_x11;
+    ctx->update_xinerama_info = update_xinerama_info;
+    ctx->border = vo_x11_border;
+    ctx->check_events = x11_check_events;
+    ctx->fullscreen = vo_x11_fullscreen;
+    ctx->ontop = vo_x11_ontop;
+    return vo_init();
+#endif
+  default:
+    return 0;
+  }
+}
+
+void uninit_mpglcontext(MPGLContext *ctx) {
+  ctx->releaseGlContext(ctx);
+  switch (ctx->type) {
+#ifdef GL_WIN32
+  case GLTYPE_W32:
+    vo_w32_uninit();
+    break;
+#endif
+#ifdef CONFIG_X11
+  case GLTYPE_X11:
+    vo_x11_uninit();
+    break;
+#endif
+  }
+  memset(ctx, 0, sizeof(*ctx));
+}

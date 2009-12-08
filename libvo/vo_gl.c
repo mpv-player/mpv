@@ -48,15 +48,7 @@ static const vo_info_t info =
 
 const LIBVO_EXTERN(gl)
 
-#ifdef GL_WIN32
-static int gl_vinfo = 0;
-static HGLRC gl_context = 0;
-#define update_xinerama_info w32_update_xinerama_info
-#define vo_init vo_w32_init
-#define vo_window vo_w32_window
-#else
-static XVisualInfo *gl_vinfo = NULL;
-static GLXContext gl_context = 0;
+#ifdef CONFIG_X11
 static int                  wsGLXAttrib[] = { GLX_RGBA,
                                        GLX_RED_SIZE,1,
                                        GLX_GREEN_SIZE,1,
@@ -64,6 +56,7 @@ static int                  wsGLXAttrib[] = { GLX_RGBA,
                                        GLX_DOUBLEBUFFER,
                                        None };
 #endif
+static MPGLContext glctx;
 
 static int use_osd;
 static int scaled_osd;
@@ -549,10 +542,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   }
 #endif
 #ifdef GL_WIN32
-  if (!vo_w32_config(d_width, d_height, flags))
+  if (glctx.type == GLTYPE_W32 && !vo_w32_config(d_width, d_height, flags))
     return -1;
-#else
-  {
+#endif
+#ifdef CONFIG_X11
+  if (glctx.type == GLTYPE_X11) {
     XVisualInfo *vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
     if (vinfo == NULL)
     {
@@ -570,7 +564,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 glconfig:
   if (vo_config_count)
     uninitGl();
-  if (setGlWindow(&gl_vinfo, &gl_context, vo_window) == SET_WINDOW_FAILED)
+  if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
     return -1;
   if (mesa_buffer && !AllocateMemoryMESA) {
     mp_msg(MSGT_VO, MSGL_ERR, "Can not enable mesa-buffer because AllocateMemoryMESA was not found\n");
@@ -583,7 +577,7 @@ glconfig:
 
 static void check_events(void)
 {
-    int e=vo_check_events();
+    int e=glctx.check_events();
     if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
     if(e&VO_EVENT_EXPOSE && int_pause) redraw();
 }
@@ -725,7 +719,7 @@ static void do_render_osd(int type) {
 static void flip_page(void) {
   if (vo_doublebuffering) {
     if (use_glFinish) glFinish();
-    swapGlBuffers();
+    glctx.swapGlBuffers(&glctx);
     if (aspect_scaling() && use_aspect)
       glClear(GL_COLOR_BUFFER_BIT);
   } else {
@@ -972,12 +966,11 @@ uninit(void)
 {
   if (!vo_config_count) return;
   uninitGl();
-  releaseGlContext(&gl_vinfo, &gl_context);
   if (custom_prog) free(custom_prog);
   custom_prog = NULL;
   if (custom_tex) free(custom_tex);
   custom_tex = NULL;
-  vo_uninit();
+  uninit_mpglcontext(&glctx);
 }
 
 static const opt_t subopts[] = {
@@ -1007,7 +1000,11 @@ static const opt_t subopts[] = {
 
 static int preinit(const char *arg)
 {
+    enum MPGLType gltype = GLTYPE_X11;
     // set defaults
+#ifdef GL_WIN32
+    gltype = GLTYPE_W32;
+#endif
     many_fmts = 1;
     use_osd = 1;
     scaled_osd = 0;
@@ -1102,7 +1099,7 @@ static int preinit(const char *arg)
                "Use -vo gl:nomanyfmts if playback fails.\n");
     mp_msg(MSGT_VO, MSGL_V, "[gl] Using %d as slice height "
              "(0 means image height).\n", slice_height);
-    if (!vo_init()) return -1; // Can't open X11
+    if (!init_mpglcontext(&glctx, gltype)) return -1;
 
     return 0;
 }
@@ -1161,14 +1158,14 @@ static int control(uint32_t request, void *data, ...)
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
   case VOCTRL_ONTOP:
-    vo_ontop();
+    glctx.ontop();
     return VO_TRUE;
   case VOCTRL_FULLSCREEN:
-    vo_fullscreen();
+    glctx.fullscreen();
     resize(vo_dwidth, vo_dheight);
     return VO_TRUE;
   case VOCTRL_BORDER:
-    vo_border();
+    glctx.border();
     resize(vo_dwidth, vo_dheight);
     return VO_TRUE;
   case VOCTRL_GET_PANSCAN:
@@ -1212,7 +1209,7 @@ static int control(uint32_t request, void *data, ...)
     }
     break;
   case VOCTRL_UPDATE_SCREENINFO:
-    update_xinerama_info();
+    glctx.update_xinerama_info();
     return VO_TRUE;
   }
   return VO_NOTIMPL;

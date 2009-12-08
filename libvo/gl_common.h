@@ -31,7 +31,8 @@
 #include <windows.h>
 #include <GL/gl.h>
 #include "w32_common.h"
-#else
+#endif
+#ifdef CONFIG_X11
 #include <GL/gl.h>
 #include <X11/Xlib.h>
 #include <GL/glx.h>
@@ -352,24 +353,39 @@ void glDisableYUVConversion(GLenum target, int type);
 #define SET_WINDOW_REINIT 1
 /** \} */
 
-#ifdef GL_WIN32
-#define vo_border() vo_w32_border()
-#define vo_check_events() vo_w32_check_events()
-#define vo_fullscreen() vo_w32_fullscreen()
-#define vo_ontop() vo_w32_ontop()
-#define vo_uninit() vo_w32_uninit()
-int setGlWindow(int *vinfo, HGLRC *context, HWND win);
-void releaseGlContext(int *vinfo, HGLRC *context);
-#else
-#define vo_border() vo_x11_border()
-#define vo_check_events() vo_x11_check_events(mDisplay)
-#define vo_fullscreen() vo_x11_fullscreen()
-#define vo_ontop() vo_x11_ontop()
-#define vo_uninit() vo_x11_uninit()
-int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win);
-void releaseGlContext(XVisualInfo **vinfo, GLXContext *context);
+enum MPGLType {
+  GLTYPE_W32,
+  GLTYPE_X11,
+};
+
+typedef struct MPGLContext {
+  enum MPGLType type;
+  union {
+    int w32;
+#ifdef CONFIG_X11
+    XVisualInfo *x11;
 #endif
-void swapGlBuffers(void);
+  } vinfo;
+  union {
+#ifdef GL_WIN32
+    HGLRC w32;
+#endif
+#ifdef CONFIG_X11
+    GLXContext x11;
+#endif
+  } context;
+  int (*setGlWindow)(struct MPGLContext *);
+  void (*releaseGlContext)(struct MPGLContext *);
+  void (*swapGlBuffers)(struct MPGLContext *);
+  void (*update_xinerama_info)(void);
+  void (*border)(void);
+  int (*check_events)(void);
+  void (*fullscreen)(void);
+  void (*ontop)(void);
+} MPGLContext;
+
+int init_mpglcontext(MPGLContext *ctx, enum MPGLType type);
+void uninit_mpglcontext(MPGLContext *ctx);
 
 extern void (APIENTRY *GenBuffers)(GLsizei, GLuint *);
 extern void (APIENTRY *DeleteBuffers)(GLsizei, const GLuint *);

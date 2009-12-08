@@ -62,16 +62,7 @@ const LIBVO_EXTERN(gl2)
 /* local data */
 static unsigned char *ImageData=NULL;
 
-#ifdef GL_WIN32
-    static int gl_vinfo = 0;
-    static HGLRC gl_context = 0;
-#define update_xinerama_info w32_update_xinerama_info
-#define vo_init vo_w32_init
-#define vo_window vo_w32_window
-#else
-    static XVisualInfo *gl_vinfo = NULL;
-    static GLXContext gl_context = 0;
-#endif
+static MPGLContext glctx;
 
 static uint32_t image_width;
 static uint32_t image_height;
@@ -115,7 +106,10 @@ struct TexSquare
 
 static GLint getInternalFormat(void)
 {
+  switch (glctx.type) {
 #ifdef GL_WIN32
+  case GLTYPE_W32:
+  {
   PIXELFORMATDESCRIPTOR pfd;
   HDC vo_hdc = vo_w32_get_dc(vo_w32_window);
   int pf = GetPixelFormat(vo_hdc);
@@ -128,12 +122,18 @@ static GLint getInternalFormat(void)
     a_sz = pfd.cAlphaBits;
   }
   vo_w32_release_dc(vo_w32_window, vo_hdc);
-#else
-  if (glXGetConfig(mDisplay, gl_vinfo, GLX_RED_SIZE, &r_sz) != 0) r_sz = 0;
-  if (glXGetConfig(mDisplay, gl_vinfo, GLX_GREEN_SIZE, &g_sz) != 0) g_sz = 0;
-  if (glXGetConfig(mDisplay, gl_vinfo, GLX_BLUE_SIZE, &b_sz) != 0) b_sz = 0;
-  if (glXGetConfig(mDisplay, gl_vinfo, GLX_ALPHA_SIZE, &a_sz) != 0) a_sz = 0;
+  }
+  break;
 #endif
+#ifdef CONFIG_X11
+  case GLTYPE_X11:
+  if (glXGetConfig(mDisplay, glctx.vinfo.x11, GLX_RED_SIZE, &r_sz) != 0) r_sz = 0;
+  if (glXGetConfig(mDisplay, glctx.vinfo.x11, GLX_GREEN_SIZE, &g_sz) != 0) g_sz = 0;
+  if (glXGetConfig(mDisplay, glctx.vinfo.x11, GLX_BLUE_SIZE, &b_sz) != 0) b_sz = 0;
+  if (glXGetConfig(mDisplay, glctx.vinfo.x11, GLX_ALPHA_SIZE, &a_sz) != 0) a_sz = 0;
+  break;
+#endif
+  }
 
   rgb_sz=r_sz+g_sz+b_sz;
   if(rgb_sz<=0) rgb_sz=24;
@@ -637,7 +637,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 #endif
     return -1;
 
-  if (setGlWindow(&gl_vinfo, &gl_context, vo_window) == SET_WINDOW_FAILED)
+  if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
     return -1;
 
   glVersion = glGetString(GL_VERSION);
@@ -718,7 +718,7 @@ static void check_events(void)
     }
   }
 #endif
-  e=vo_check_events();
+  e=glctx.check_events();
   if(e&VO_EVENT_RESIZE) resize(vo_dwidth, vo_dheight);
   if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
 }
@@ -737,7 +737,7 @@ flip_page(void)
 //  glFlush();
   if (use_glFinish)
   glFinish();
-  swapGlBuffers();
+  glctx.swapGlBuffers(&glctx);
 
   if (aspect_scaling()) // Avoid flickering borders in fullscreen mode
     glClear (GL_COLOR_BUFFER_BIT);
@@ -834,12 +834,11 @@ static void
 uninit(void)
 {
   if ( !vo_config_count ) return;
-  releaseGlContext(&gl_vinfo, &gl_context);
   if (texgrid) {
     free(texgrid);
     texgrid = NULL;
   }
-  vo_uninit();
+  uninit_mpglcontext(&glctx);
 }
 
 static const opt_t subopts[] = {
@@ -850,7 +849,11 @@ static const opt_t subopts[] = {
 
 static int preinit(const char *arg)
 {
+  enum MPGLType gltype = GLTYPE_X11;
   // set defaults
+#ifdef GL_WIN32
+  gltype = GLTYPE_W32;
+#endif
   use_yuv = 0;
   use_glFinish = 1;
   if (subopt_parse(arg, subopts) != 0) {
@@ -870,7 +873,7 @@ static int preinit(const char *arg)
             "\n" );
     return -1;
   }
-    if( !vo_init() ) return -1; // Can't open X11
+    if(!init_mpglcontext(&glctx, gltype)) return -1;
     return 0;
 }
 
@@ -886,16 +889,16 @@ static int control(uint32_t request, void *data, ...)
     case VOCTRL_GUISUPPORT:
       return VO_TRUE;
     case VOCTRL_ONTOP:
-      vo_ontop();
+      glctx.ontop();
       return VO_TRUE;
     case VOCTRL_FULLSCREEN:
-      vo_fullscreen();
-      if (setGlWindow(&gl_vinfo, &gl_context, vo_window) == SET_WINDOW_REINIT)
+      glctx.fullscreen();
+      if (glctx.setGlWindow(&glctx) == SET_WINDOW_REINIT)
         initGl(vo_dwidth, vo_dheight);
       resize(vo_dwidth, vo_dheight);
       return VO_TRUE;
     case VOCTRL_BORDER:
-      vo_border();
+      glctx.border();
       return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
       return VO_TRUE;
@@ -925,7 +928,7 @@ static int control(uint32_t request, void *data, ...)
     }
 #endif
     case VOCTRL_UPDATE_SCREENINFO:
-      update_xinerama_info();
+      glctx.update_xinerama_info();
       return VO_TRUE;
   }
   return VO_NOTIMPL;
