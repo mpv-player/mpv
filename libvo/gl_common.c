@@ -35,6 +35,47 @@
 #include "gl_common.h"
 #include "libavutil/common.h"
 
+void (APIENTRY *Begin)(GLenum) = glBegin;
+void (APIENTRY *End)(void) = glEnd;
+void (APIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei) = glViewport;
+void (APIENTRY *MatrixMode)(GLenum) = glMatrixMode;
+void (APIENTRY *LoadIdentity)(void) = glLoadIdentity;
+void (APIENTRY *Scaled)(double, double, double) = glScaled;
+void (APIENTRY *Ortho)(double, double, double, double, double, double) = glOrtho;
+void (APIENTRY *PushMatrix)(void) = glPushMatrix;
+void (APIENTRY *PopMatrix)(void) = glPopMatrix;
+void (APIENTRY *Clear)(GLbitfield) = glClear;
+GLuint (APIENTRY *GenLists)(GLsizei) = glGenLists;
+void (APIENTRY *DeleteLists)(GLuint, GLsizei) = glDeleteLists;
+void (APIENTRY *NewList)(GLuint, GLenum) = glNewList;
+void (APIENTRY *EndList)(void) = glEndList;
+void (APIENTRY *CallList)(GLuint) = glCallList;
+void (APIENTRY *CallLists)(GLsizei, GLenum, const GLvoid *) = glCallLists;
+void (APIENTRY *GenTextures)(GLsizei, GLuint *) = glGenTextures;
+void (APIENTRY *DeleteTextures)(GLsizei, const GLuint *) = glDeleteTextures;
+void (APIENTRY *TexEnvi)(GLenum, GLenum, GLint) = glTexEnvi;
+void (APIENTRY *Color4ub)(GLubyte, GLubyte, GLubyte, GLubyte) = glColor4ub;
+void (APIENTRY *Color3f)(GLfloat, GLfloat, GLfloat) = glColor3f;
+void (APIENTRY *ClearColor)(GLclampf, GLclampf, GLclampf, GLclampf) = glClearColor;
+void (APIENTRY *Enable)(GLenum) = glEnable;
+void (APIENTRY *Disable)(GLenum) = glDisable;
+const GLubyte *(APIENTRY *GetString)(GLenum) = glGetString;
+void (APIENTRY *DrawBuffer)(GLenum) = glDrawBuffer;
+void (APIENTRY *DepthMask)(GLboolean) = glDepthMask;
+void (APIENTRY *BlendFunc)(GLenum, GLenum) = glBlendFunc;
+void (APIENTRY *Flush)(void) = glFlush;
+void (APIENTRY *Finish)(void) = glFinish;
+void (APIENTRY *PixelStorei)(GLenum, GLint) = glPixelStorei;
+void (APIENTRY *TexImage1D)(GLenum, GLint, GLint, GLsizei, GLint, GLenum, GLenum, const GLvoid *) = glTexImage1D;
+void (APIENTRY *TexImage2D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *) = glTexImage2D;
+void (APIENTRY *TexSubImage2D)(GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const GLvoid *) = glTexSubImage2D;
+void (APIENTRY *TexParameteri)(GLenum, GLenum, GLint) = glTexParameteri;
+void (APIENTRY *TexParameterf)(GLenum, GLenum, GLfloat) = glTexParameterf;
+void (APIENTRY *TexParameterfv)(GLenum, GLenum, const GLfloat *) = glTexParameterfv;
+void (APIENTRY *TexCoord2f)(GLfloat, GLfloat) = glTexCoord2f;
+void (APIENTRY *Vertex2f)(GLfloat, GLfloat) = glVertex2f;
+void (APIENTRY *GetIntegerv)(GLenum, GLint *) = glGetIntegerv;
+
 /**
  * \defgroup glextfunctions OpenGL extension functions
  *
@@ -106,7 +147,7 @@ void glAdjustAlignment(int stride) {
     gl_alignment=2;
   else
     gl_alignment=1;
-  glPixelStorei (GL_UNPACK_ALIGNMENT, gl_alignment);
+  PixelStorei(GL_UNPACK_ALIGNMENT, gl_alignment);
 }
 
 struct gl_name_map_struct {
@@ -290,7 +331,52 @@ typedef struct {
   const char *funcnames[7];
 } extfunc_desc_t;
 
+#define DEF_FUNC_DESC(name) {&name, NULL, {"gl"#name, NULL}}
 static const extfunc_desc_t extfuncs[] = {
+  // these aren't extension functions but we query them anyway to allow
+  // different "backends" with one binary
+  DEF_FUNC_DESC(Begin),
+  DEF_FUNC_DESC(End),
+  DEF_FUNC_DESC(Viewport),
+  DEF_FUNC_DESC(MatrixMode),
+  DEF_FUNC_DESC(LoadIdentity),
+  DEF_FUNC_DESC(Scaled),
+  DEF_FUNC_DESC(Ortho),
+  DEF_FUNC_DESC(PushMatrix),
+  DEF_FUNC_DESC(PopMatrix),
+  DEF_FUNC_DESC(Clear),
+  DEF_FUNC_DESC(GenLists),
+  DEF_FUNC_DESC(DeleteLists),
+  DEF_FUNC_DESC(NewList),
+  DEF_FUNC_DESC(EndList),
+  DEF_FUNC_DESC(CallList),
+  DEF_FUNC_DESC(CallLists),
+  DEF_FUNC_DESC(GenTextures),
+  DEF_FUNC_DESC(DeleteTextures),
+  DEF_FUNC_DESC(TexEnvi),
+  DEF_FUNC_DESC(Color4ub),
+  DEF_FUNC_DESC(Color3f),
+  DEF_FUNC_DESC(ClearColor),
+  DEF_FUNC_DESC(Enable),
+  DEF_FUNC_DESC(Disable),
+  DEF_FUNC_DESC(GetString),
+  DEF_FUNC_DESC(DrawBuffer),
+  DEF_FUNC_DESC(DepthMask),
+  DEF_FUNC_DESC(BlendFunc),
+  DEF_FUNC_DESC(Flush),
+  DEF_FUNC_DESC(Finish),
+  DEF_FUNC_DESC(PixelStorei),
+  DEF_FUNC_DESC(TexImage1D),
+  DEF_FUNC_DESC(TexImage2D),
+  DEF_FUNC_DESC(TexSubImage2D),
+  DEF_FUNC_DESC(TexParameteri),
+  DEF_FUNC_DESC(TexParameterf),
+  DEF_FUNC_DESC(TexParameterfv),
+  DEF_FUNC_DESC(TexCoord2f),
+  DEF_FUNC_DESC(Vertex2f),
+  DEF_FUNC_DESC(GetIntegerv),
+
+  // here start the real extensions
   {&GenBuffers, NULL, {"glGenBuffers", "glGenBuffersARB", NULL}},
   {&DeleteBuffers, NULL, {"glDeleteBuffers", "glDeleteBuffersARB", NULL}},
   {&BindBuffer, NULL, {"glBindBuffer", "glBindBufferARB", NULL}},
@@ -331,7 +417,7 @@ static const extfunc_desc_t extfuncs[] = {
 static void getFunctions(void *(*getProcAddress)(const GLubyte *),
                          const char *ext2) {
   const extfunc_desc_t *dsc;
-  const char *extensions = (const char *)glGetString(GL_EXTENSIONS);
+  const char *extensions = (const char *)GetString(GL_EXTENSIONS);
   char *allexts;
   if (!extensions) extensions = "";
   if (!ext2) ext2 = "";
@@ -382,16 +468,16 @@ void glCreateClearTex(GLenum target, GLenum fmt, GLenum format, GLenum type, GLi
   init = malloc(stride * h);
   memset(init, val, stride * h);
   glAdjustAlignment(stride);
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, w);
-  glTexImage2D(target, 0, fmt, w, h, 0, format, type, init);
-  glTexParameterf(target, GL_TEXTURE_PRIORITY, 1.0);
-  glTexParameteri(target, GL_TEXTURE_MIN_FILTER, filter);
-  glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
-  glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  PixelStorei(GL_UNPACK_ROW_LENGTH, w);
+  TexImage2D(target, 0, fmt, w, h, 0, format, type, init);
+  TexParameterf(target, GL_TEXTURE_PRIORITY, 1.0);
+  TexParameteri(target, GL_TEXTURE_MIN_FILTER, filter);
+  TexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
+  TexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  TexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   // Border texels should not be used with CLAMP_TO_EDGE
   // We set a sane default anyway.
-  glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, border);
+  TexParameterfv(target, GL_TEXTURE_BORDER_COLOR, border);
   free(init);
 }
 
@@ -539,13 +625,13 @@ void glUploadTex(GLenum target, GLenum format, GLenum type,
   }
   // this is not always correct, but should work for MPlayer
   glAdjustAlignment(stride);
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, stride / glFmt2bpp(format, type));
+  PixelStorei(GL_UNPACK_ROW_LENGTH, stride / glFmt2bpp(format, type));
   for (; y + slice <= y_max; y += slice) {
-    glTexSubImage2D(target, 0, x, y, w, slice, format, type, data);
+    TexSubImage2D(target, 0, x, y, w, slice, format, type, data);
     data += stride * slice;
   }
   if (y < y_max)
-    glTexSubImage2D(target, 0, x, y, w, y_max - y, format, type, data);
+    TexSubImage2D(target, 0, x, y, w, y_max - y, format, type, data);
 }
 
 static void fillUVcoeff(GLfloat *ucoef, GLfloat *vcoef,
@@ -584,11 +670,11 @@ static void glSetupYUVCombiners(float uvcos, float uvsin) {
     mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Combiner functions missing!\n");
     return;
   }
-  glGetIntegerv(GL_MAX_GENERAL_COMBINERS_NV, &i);
+  GetIntegerv(GL_MAX_GENERAL_COMBINERS_NV, &i);
   if (i < 2)
     mp_msg(MSGT_VO, MSGL_ERR,
            "[gl] 2 general combiners needed for YUV combiner support (found %i)\n", i);
-  glGetIntegerv(GL_MAX_TEXTURE_UNITS, &i);
+  GetIntegerv(GL_MAX_TEXTURE_UNITS, &i);
   if (i < 3)
     mp_msg(MSGT_VO, MSGL_ERR,
            "[gl] 3 texture units needed for YUV combiner support (found %i)\n", i);
@@ -644,11 +730,11 @@ static void glSetupYUVCombinersATI(float uvcos, float uvsin) {
     mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Combiner (ATI) functions missing!\n");
     return;
   }
-  glGetIntegerv(GL_NUM_FRAGMENT_REGISTERS_ATI, &i);
+  GetIntegerv(GL_NUM_FRAGMENT_REGISTERS_ATI, &i);
   if (i < 3)
     mp_msg(MSGT_VO, MSGL_ERR,
            "[gl] 3 registers needed for YUV combiner (ATI) support (found %i)\n", i);
-  glGetIntegerv (GL_MAX_TEXTURE_UNITS, &i);
+  GetIntegerv (GL_MAX_TEXTURE_UNITS, &i);
   if (i < 3)
     mp_msg(MSGT_VO, MSGL_ERR,
            "[gl] 3 texture units needed for YUV combiner (ATI) support (found %i)\n", i);
@@ -710,11 +796,11 @@ static void gen_spline_lookup_tex(GLenum unit) {
   store_weights(0, tex);
   store_weights(1, &tex[4 * (LOOKUP_BSPLINE_RES - 1)]);
   ActiveTexture(unit);
-  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, LOOKUP_BSPLINE_RES, 0, GL_RGBA, GL_FLOAT, tex);
-  glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_PRIORITY, 1.0);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  TexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, LOOKUP_BSPLINE_RES, 0, GL_RGBA, GL_FLOAT, tex);
+  TexParameterf(GL_TEXTURE_1D, GL_TEXTURE_PRIORITY, 1.0);
+  TexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  TexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  TexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   ActiveTexture(GL_TEXTURE0);
   free(tex);
 }
@@ -1023,15 +1109,15 @@ static void create_conv_textures(gl_conversion_params_t *params, int *texu, char
         lookup_data = malloc(3 * sz * sz * sz);
         gen_yuv2rgb_map(params, lookup_data, LOOKUP_3DRES);
         glAdjustAlignment(sz);
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
         TexImage3D(GL_TEXTURE_3D, 0, 3, sz, sz, sz, 1,
                    GL_RGB, GL_UNSIGNED_BYTE, lookup_data);
-        glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_PRIORITY, 1.0);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+        TexParameterf(GL_TEXTURE_3D, GL_TEXTURE_PRIORITY, 1.0);
+        TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
         ActiveTexture(GL_TEXTURE0);
         texs[0] += '0';
       }
@@ -1157,13 +1243,13 @@ int loadGPUProgram(GLenum target, char *prog) {
     return 0;
   }
   ProgramString(target, GL_PROGRAM_FORMAT_ASCII, strlen(prog), prog);
-  glGetIntegerv(GL_PROGRAM_ERROR_POSITION, &err);
+  GetIntegerv(GL_PROGRAM_ERROR_POSITION, &err);
   if (err != -1) {
     mp_msg(MSGT_VO, MSGL_ERR,
       "[gl] Error compiling fragment program, make sure your card supports\n"
       "[gl]   GL_ARB_fragment_program (use glxinfo to check).\n"
       "[gl]   Error message:\n  %s at %.10s\n",
-      glGetString(GL_PROGRAM_ERROR_STRING), &prog[err]);
+      GetString(GL_PROGRAM_ERROR_STRING), &prog[err]);
     return 0;
   }
   if (!GetProgramiv || !mp_msg_test(MSGT_VO, MSGL_DBG2))
@@ -1211,7 +1297,7 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
     memcpy(chrom_scale_texs, lum_scale_texs, sizeof(chrom_scale_texs));
   else
     create_scaler_textures(YUV_CHROM_SCALER(type), &cur_texu, chrom_scale_texs);
-  glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &i);
+  GetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &i);
   if (i < cur_texu)
     mp_msg(MSGT_VO, MSGL_ERR,
            "[gl] %i texture units needed for this type of YUV fragment support (found %i)\n",
@@ -1328,25 +1414,25 @@ void glEnableYUVConversion(GLenum target, int type) {
   switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_COMBINERS:
       ActiveTexture(GL_TEXTURE1);
-      glEnable(target);
+      Enable(target);
       ActiveTexture(GL_TEXTURE2);
-      glEnable(target);
+      Enable(target);
       ActiveTexture(GL_TEXTURE0);
-      glEnable(GL_REGISTER_COMBINERS_NV);
+      Enable(GL_REGISTER_COMBINERS_NV);
       break;
     case YUV_CONVERSION_COMBINERS_ATI:
       ActiveTexture(GL_TEXTURE1);
-      glEnable(target);
+      Enable(target);
       ActiveTexture(GL_TEXTURE2);
-      glEnable(target);
+      Enable(target);
       ActiveTexture(GL_TEXTURE0);
-      glEnable(GL_FRAGMENT_SHADER_ATI);
+      Enable(GL_FRAGMENT_SHADER_ATI);
       break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_POW:
     case YUV_CONVERSION_FRAGMENT:
-      glEnable(GL_FRAGMENT_PROGRAM);
+      Enable(GL_FRAGMENT_PROGRAM);
       break;
   }
 }
@@ -1362,25 +1448,25 @@ void glDisableYUVConversion(GLenum target, int type) {
   switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_COMBINERS:
       ActiveTexture(GL_TEXTURE1);
-      glDisable(target);
+      Disable(target);
       ActiveTexture(GL_TEXTURE2);
-      glDisable(target);
+      Disable(target);
       ActiveTexture(GL_TEXTURE0);
-      glDisable(GL_REGISTER_COMBINERS_NV);
+      Disable(GL_REGISTER_COMBINERS_NV);
       break;
     case YUV_CONVERSION_COMBINERS_ATI:
       ActiveTexture(GL_TEXTURE1);
-      glDisable(target);
+      Disable(target);
       ActiveTexture(GL_TEXTURE2);
-      glDisable(target);
+      Disable(target);
       ActiveTexture(GL_TEXTURE0);
-      glDisable(GL_FRAGMENT_SHADER_ATI);
+      Disable(GL_FRAGMENT_SHADER_ATI);
       break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_POW:
     case YUV_CONVERSION_FRAGMENT:
-      glDisable(GL_FRAGMENT_PROGRAM);
+      Disable(GL_FRAGMENT_PROGRAM);
       break;
   }
 }
@@ -1414,32 +1500,32 @@ void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
     y += h;
     h = -h;
   }
-  glBegin(GL_QUADS);
-  glTexCoord2f(tx, ty);
+  Begin(GL_QUADS);
+  TexCoord2f(tx, ty);
   if (is_yv12) {
     MultiTexCoord2f(GL_TEXTURE1, tx2, ty2);
     MultiTexCoord2f(GL_TEXTURE2, tx2, ty2);
   }
-  glVertex2f(x, y);
-  glTexCoord2f(tx, ty + th);
+  Vertex2f(x, y);
+  TexCoord2f(tx, ty + th);
   if (is_yv12) {
     MultiTexCoord2f(GL_TEXTURE1, tx2, ty2 + th2);
     MultiTexCoord2f(GL_TEXTURE2, tx2, ty2 + th2);
   }
-  glVertex2f(x, y + h);
-  glTexCoord2f(tx + tw, ty + th);
+  Vertex2f(x, y + h);
+  TexCoord2f(tx + tw, ty + th);
   if (is_yv12) {
     MultiTexCoord2f(GL_TEXTURE1, tx2 + tw2, ty2 + th2);
     MultiTexCoord2f(GL_TEXTURE2, tx2 + tw2, ty2 + th2);
   }
-  glVertex2f(x + w, y + h);
-  glTexCoord2f(tx + tw, ty);
+  Vertex2f(x + w, y + h);
+  TexCoord2f(tx + tw, ty);
   if (is_yv12) {
     MultiTexCoord2f(GL_TEXTURE1, tx2 + tw2, ty2);
     MultiTexCoord2f(GL_TEXTURE2, tx2 + tw2, ty2);
   }
-  glVertex2f(x + w, y);
-  glEnd();
+  Vertex2f(x + w, y);
+  End();
 }
 
 #ifdef GL_WIN32
@@ -1472,7 +1558,7 @@ static int setGlWindow_w32(MPGLContext *ctx)
   // should only be needed when keeping context, but not doing glFinish
   // can cause flickering even when we do not keep it.
   if (*context)
-  glFinish();
+  Finish();
   new_vinfo = GetPixelFormat(windc);
   if (*context && *vinfo && new_vinfo && *vinfo == new_vinfo) {
       // we can keep the wglContext
@@ -1613,7 +1699,7 @@ static int setGlWindow_x11(MPGLContext *ctx)
   // should only be needed when keeping context, but not doing glFinish
   // can cause flickering even when we do not keep it.
   if (*context)
-  glFinish();
+  Finish();
   new_vinfo = getWindowVisualInfo(win);
   if (*context && *vinfo && new_vinfo &&
       (*vinfo)->visualid == new_vinfo->visualid) {
@@ -1691,7 +1777,7 @@ static void releaseGlContext_x11(MPGLContext *ctx) {
   *vinfo = NULL;
   if (*context)
   {
-    glFinish();
+    Finish();
     glXMakeCurrent(mDisplay, None, NULL);
     glXDestroyContext(mDisplay, *context);
   }
