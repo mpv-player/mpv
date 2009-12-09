@@ -35,46 +35,46 @@
 #include "gl_common.h"
 #include "libavutil/common.h"
 
-void (GLAPIENTRY *Begin)(GLenum) = glBegin;
-void (GLAPIENTRY *End)(void) = glEnd;
-void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei) = glViewport;
-void (GLAPIENTRY *MatrixMode)(GLenum) = glMatrixMode;
-void (GLAPIENTRY *LoadIdentity)(void) = glLoadIdentity;
-void (GLAPIENTRY *Scaled)(double, double, double) = glScaled;
-void (GLAPIENTRY *Ortho)(double, double, double, double, double, double) = glOrtho;
-void (GLAPIENTRY *PushMatrix)(void) = glPushMatrix;
-void (GLAPIENTRY *PopMatrix)(void) = glPopMatrix;
-void (GLAPIENTRY *Clear)(GLbitfield) = glClear;
-GLuint (GLAPIENTRY *GenLists)(GLsizei) = glGenLists;
-void (GLAPIENTRY *DeleteLists)(GLuint, GLsizei) = glDeleteLists;
-void (GLAPIENTRY *NewList)(GLuint, GLenum) = glNewList;
-void (GLAPIENTRY *EndList)(void) = glEndList;
-void (GLAPIENTRY *CallList)(GLuint) = glCallList;
-void (GLAPIENTRY *CallLists)(GLsizei, GLenum, const GLvoid *) = glCallLists;
-void (GLAPIENTRY *GenTextures)(GLsizei, GLuint *) = glGenTextures;
-void (GLAPIENTRY *DeleteTextures)(GLsizei, const GLuint *) = glDeleteTextures;
-void (GLAPIENTRY *TexEnvi)(GLenum, GLenum, GLint) = glTexEnvi;
-void (GLAPIENTRY *Color4ub)(GLubyte, GLubyte, GLubyte, GLubyte) = glColor4ub;
-void (GLAPIENTRY *Color3f)(GLfloat, GLfloat, GLfloat) = glColor3f;
-void (GLAPIENTRY *ClearColor)(GLclampf, GLclampf, GLclampf, GLclampf) = glClearColor;
-void (GLAPIENTRY *Enable)(GLenum) = glEnable;
-void (GLAPIENTRY *Disable)(GLenum) = glDisable;
-const GLubyte *(GLAPIENTRY *GetString)(GLenum) = glGetString;
-void (GLAPIENTRY *DrawBuffer)(GLenum) = glDrawBuffer;
-void (GLAPIENTRY *DepthMask)(GLboolean) = glDepthMask;
-void (GLAPIENTRY *BlendFunc)(GLenum, GLenum) = glBlendFunc;
-void (GLAPIENTRY *Flush)(void) = glFlush;
-void (GLAPIENTRY *Finish)(void) = glFinish;
-void (GLAPIENTRY *PixelStorei)(GLenum, GLint) = glPixelStorei;
-void (GLAPIENTRY *TexImage1D)(GLenum, GLint, GLint, GLsizei, GLint, GLenum, GLenum, const GLvoid *) = glTexImage1D;
-void (GLAPIENTRY *TexImage2D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *) = glTexImage2D;
-void (GLAPIENTRY *TexSubImage2D)(GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const GLvoid *) = glTexSubImage2D;
-void (GLAPIENTRY *TexParameteri)(GLenum, GLenum, GLint) = glTexParameteri;
-void (GLAPIENTRY *TexParameterf)(GLenum, GLenum, GLfloat) = glTexParameterf;
-void (GLAPIENTRY *TexParameterfv)(GLenum, GLenum, const GLfloat *) = glTexParameterfv;
-void (GLAPIENTRY *TexCoord2f)(GLfloat, GLfloat) = glTexCoord2f;
-void (GLAPIENTRY *Vertex2f)(GLfloat, GLfloat) = glVertex2f;
-void (GLAPIENTRY *GetIntegerv)(GLenum, GLint *) = glGetIntegerv;
+void (GLAPIENTRY *Begin)(GLenum);
+void (GLAPIENTRY *End)(void);
+void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei);
+void (GLAPIENTRY *MatrixMode)(GLenum);
+void (GLAPIENTRY *LoadIdentity)(void);
+void (GLAPIENTRY *Scaled)(double, double, double);
+void (GLAPIENTRY *Ortho)(double, double, double, double, double, double);
+void (GLAPIENTRY *PushMatrix)(void);
+void (GLAPIENTRY *PopMatrix)(void);
+void (GLAPIENTRY *Clear)(GLbitfield);
+GLuint (GLAPIENTRY *GenLists)(GLsizei);
+void (GLAPIENTRY *DeleteLists)(GLuint, GLsizei);
+void (GLAPIENTRY *NewList)(GLuint, GLenum);
+void (GLAPIENTRY *EndList)(void);
+void (GLAPIENTRY *CallList)(GLuint);
+void (GLAPIENTRY *CallLists)(GLsizei, GLenum, const GLvoid *);
+void (GLAPIENTRY *GenTextures)(GLsizei, GLuint *);
+void (GLAPIENTRY *DeleteTextures)(GLsizei, const GLuint *);
+void (GLAPIENTRY *TexEnvi)(GLenum, GLenum, GLint);
+void (GLAPIENTRY *Color4ub)(GLubyte, GLubyte, GLubyte, GLubyte);
+void (GLAPIENTRY *Color3f)(GLfloat, GLfloat, GLfloat);
+void (GLAPIENTRY *ClearColor)(GLclampf, GLclampf, GLclampf, GLclampf);
+void (GLAPIENTRY *Enable)(GLenum);
+void (GLAPIENTRY *Disable)(GLenum);
+const GLubyte *(GLAPIENTRY *GetString)(GLenum);
+void (GLAPIENTRY *DrawBuffer)(GLenum);
+void (GLAPIENTRY *DepthMask)(GLboolean);
+void (GLAPIENTRY *BlendFunc)(GLenum, GLenum);
+void (GLAPIENTRY *Flush)(void);
+void (GLAPIENTRY *Finish)(void);
+void (GLAPIENTRY *PixelStorei)(GLenum, GLint);
+void (GLAPIENTRY *TexImage1D)(GLenum, GLint, GLint, GLsizei, GLint, GLenum, GLenum, const GLvoid *);
+void (GLAPIENTRY *TexImage2D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *);
+void (GLAPIENTRY *TexSubImage2D)(GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const GLvoid *);
+void (GLAPIENTRY *TexParameteri)(GLenum, GLenum, GLint);
+void (GLAPIENTRY *TexParameterf)(GLenum, GLenum, GLfloat);
+void (GLAPIENTRY *TexParameterfv)(GLenum, GLenum, const GLfloat *);
+void (GLAPIENTRY *TexCoord2f)(GLfloat, GLfloat);
+void (GLAPIENTRY *Vertex2f)(GLfloat, GLfloat);
+void (GLAPIENTRY *GetIntegerv)(GLenum, GLint *);
 
 /**
  * \defgroup glextfunctions OpenGL extension functions
@@ -329,9 +329,10 @@ typedef struct {
   void *funcptr;
   const char *extstr;
   const char *funcnames[7];
+  void *fallback;
 } extfunc_desc_t;
 
-#define DEF_FUNC_DESC(name) {&name, NULL, {"gl"#name, NULL}}
+#define DEF_FUNC_DESC(name) {&name, NULL, {"gl"#name, NULL}, gl ##name}
 static const extfunc_desc_t extfuncs[] = {
   // these aren't extension functions but we query them anyway to allow
   // different "backends" with one binary
@@ -359,7 +360,6 @@ static const extfunc_desc_t extfuncs[] = {
   DEF_FUNC_DESC(ClearColor),
   DEF_FUNC_DESC(Enable),
   DEF_FUNC_DESC(Disable),
-  DEF_FUNC_DESC(GetString),
   DEF_FUNC_DESC(DrawBuffer),
   DEF_FUNC_DESC(DepthMask),
   DEF_FUNC_DESC(BlendFunc),
@@ -417,8 +417,18 @@ static const extfunc_desc_t extfuncs[] = {
 static void getFunctions(void *(*getProcAddress)(const GLubyte *),
                          const char *ext2) {
   const extfunc_desc_t *dsc;
-  const char *extensions = (const char *)GetString(GL_EXTENSIONS);
+  const char *extensions;
   char *allexts;
+
+  if (!getProcAddress)
+    getProcAddress = setNull;
+
+  // special case, we need glGetString before starting to find the other functions
+  GetString = getProcAddress("glGetString");
+  if (!GetString)
+      GetString = glGetString;
+
+  extensions = (const char *)GetString(GL_EXTENSIONS);
   if (!extensions) extensions = "";
   if (!ext2) ext2 = "";
   allexts = malloc(strlen(extensions) + strlen(ext2) + 2);
@@ -426,8 +436,6 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *),
   strcat(allexts, " ");
   strcat(allexts, ext2);
   mp_msg(MSGT_VO, MSGL_DBG2, "OpenGL extensions string:\n%s\n", allexts);
-  if (!getProcAddress)
-    getProcAddress = setNull;
   for (dsc = extfuncs; dsc->funcptr; dsc++) {
     void *ptr = NULL;
     int i;
@@ -435,6 +443,8 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *),
       for (i = 0; !ptr && dsc->funcnames[i]; i++)
         ptr = getProcAddress((const GLubyte *)dsc->funcnames[i]);
     }
+    if (!ptr)
+        ptr = dsc->fallback;
     *(void **)dsc->funcptr = ptr;
   }
   if (strstr(allexts, "_texture_float"))
