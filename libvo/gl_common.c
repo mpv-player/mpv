@@ -35,46 +35,46 @@
 #include "gl_common.h"
 #include "libavutil/common.h"
 
-void (APIENTRY *Begin)(GLenum) = glBegin;
-void (APIENTRY *End)(void) = glEnd;
-void (APIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei) = glViewport;
-void (APIENTRY *MatrixMode)(GLenum) = glMatrixMode;
-void (APIENTRY *LoadIdentity)(void) = glLoadIdentity;
-void (APIENTRY *Scaled)(double, double, double) = glScaled;
-void (APIENTRY *Ortho)(double, double, double, double, double, double) = glOrtho;
-void (APIENTRY *PushMatrix)(void) = glPushMatrix;
-void (APIENTRY *PopMatrix)(void) = glPopMatrix;
-void (APIENTRY *Clear)(GLbitfield) = glClear;
-GLuint (APIENTRY *GenLists)(GLsizei) = glGenLists;
-void (APIENTRY *DeleteLists)(GLuint, GLsizei) = glDeleteLists;
-void (APIENTRY *NewList)(GLuint, GLenum) = glNewList;
-void (APIENTRY *EndList)(void) = glEndList;
-void (APIENTRY *CallList)(GLuint) = glCallList;
-void (APIENTRY *CallLists)(GLsizei, GLenum, const GLvoid *) = glCallLists;
-void (APIENTRY *GenTextures)(GLsizei, GLuint *) = glGenTextures;
-void (APIENTRY *DeleteTextures)(GLsizei, const GLuint *) = glDeleteTextures;
-void (APIENTRY *TexEnvi)(GLenum, GLenum, GLint) = glTexEnvi;
-void (APIENTRY *Color4ub)(GLubyte, GLubyte, GLubyte, GLubyte) = glColor4ub;
-void (APIENTRY *Color3f)(GLfloat, GLfloat, GLfloat) = glColor3f;
-void (APIENTRY *ClearColor)(GLclampf, GLclampf, GLclampf, GLclampf) = glClearColor;
-void (APIENTRY *Enable)(GLenum) = glEnable;
-void (APIENTRY *Disable)(GLenum) = glDisable;
-const GLubyte *(APIENTRY *GetString)(GLenum) = glGetString;
-void (APIENTRY *DrawBuffer)(GLenum) = glDrawBuffer;
-void (APIENTRY *DepthMask)(GLboolean) = glDepthMask;
-void (APIENTRY *BlendFunc)(GLenum, GLenum) = glBlendFunc;
-void (APIENTRY *Flush)(void) = glFlush;
-void (APIENTRY *Finish)(void) = glFinish;
-void (APIENTRY *PixelStorei)(GLenum, GLint) = glPixelStorei;
-void (APIENTRY *TexImage1D)(GLenum, GLint, GLint, GLsizei, GLint, GLenum, GLenum, const GLvoid *) = glTexImage1D;
-void (APIENTRY *TexImage2D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *) = glTexImage2D;
-void (APIENTRY *TexSubImage2D)(GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const GLvoid *) = glTexSubImage2D;
-void (APIENTRY *TexParameteri)(GLenum, GLenum, GLint) = glTexParameteri;
-void (APIENTRY *TexParameterf)(GLenum, GLenum, GLfloat) = glTexParameterf;
-void (APIENTRY *TexParameterfv)(GLenum, GLenum, const GLfloat *) = glTexParameterfv;
-void (APIENTRY *TexCoord2f)(GLfloat, GLfloat) = glTexCoord2f;
-void (APIENTRY *Vertex2f)(GLfloat, GLfloat) = glVertex2f;
-void (APIENTRY *GetIntegerv)(GLenum, GLint *) = glGetIntegerv;
+void (GLAPIENTRY *Begin)(GLenum) = glBegin;
+void (GLAPIENTRY *End)(void) = glEnd;
+void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei) = glViewport;
+void (GLAPIENTRY *MatrixMode)(GLenum) = glMatrixMode;
+void (GLAPIENTRY *LoadIdentity)(void) = glLoadIdentity;
+void (GLAPIENTRY *Scaled)(double, double, double) = glScaled;
+void (GLAPIENTRY *Ortho)(double, double, double, double, double, double) = glOrtho;
+void (GLAPIENTRY *PushMatrix)(void) = glPushMatrix;
+void (GLAPIENTRY *PopMatrix)(void) = glPopMatrix;
+void (GLAPIENTRY *Clear)(GLbitfield) = glClear;
+GLuint (GLAPIENTRY *GenLists)(GLsizei) = glGenLists;
+void (GLAPIENTRY *DeleteLists)(GLuint, GLsizei) = glDeleteLists;
+void (GLAPIENTRY *NewList)(GLuint, GLenum) = glNewList;
+void (GLAPIENTRY *EndList)(void) = glEndList;
+void (GLAPIENTRY *CallList)(GLuint) = glCallList;
+void (GLAPIENTRY *CallLists)(GLsizei, GLenum, const GLvoid *) = glCallLists;
+void (GLAPIENTRY *GenTextures)(GLsizei, GLuint *) = glGenTextures;
+void (GLAPIENTRY *DeleteTextures)(GLsizei, const GLuint *) = glDeleteTextures;
+void (GLAPIENTRY *TexEnvi)(GLenum, GLenum, GLint) = glTexEnvi;
+void (GLAPIENTRY *Color4ub)(GLubyte, GLubyte, GLubyte, GLubyte) = glColor4ub;
+void (GLAPIENTRY *Color3f)(GLfloat, GLfloat, GLfloat) = glColor3f;
+void (GLAPIENTRY *ClearColor)(GLclampf, GLclampf, GLclampf, GLclampf) = glClearColor;
+void (GLAPIENTRY *Enable)(GLenum) = glEnable;
+void (GLAPIENTRY *Disable)(GLenum) = glDisable;
+const GLubyte *(GLAPIENTRY *GetString)(GLenum) = glGetString;
+void (GLAPIENTRY *DrawBuffer)(GLenum) = glDrawBuffer;
+void (GLAPIENTRY *DepthMask)(GLboolean) = glDepthMask;
+void (GLAPIENTRY *BlendFunc)(GLenum, GLenum) = glBlendFunc;
+void (GLAPIENTRY *Flush)(void) = glFlush;
+void (GLAPIENTRY *Finish)(void) = glFinish;
+void (GLAPIENTRY *PixelStorei)(GLenum, GLint) = glPixelStorei;
+void (GLAPIENTRY *TexImage1D)(GLenum, GLint, GLint, GLsizei, GLint, GLenum, GLenum, const GLvoid *) = glTexImage1D;
+void (GLAPIENTRY *TexImage2D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *) = glTexImage2D;
+void (GLAPIENTRY *TexSubImage2D)(GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const GLvoid *) = glTexSubImage2D;
+void (GLAPIENTRY *TexParameteri)(GLenum, GLenum, GLint) = glTexParameteri;
+void (GLAPIENTRY *TexParameterf)(GLenum, GLenum, GLfloat) = glTexParameterf;
+void (GLAPIENTRY *TexParameterfv)(GLenum, GLenum, const GLfloat *) = glTexParameterfv;
+void (GLAPIENTRY *TexCoord2f)(GLfloat, GLfloat) = glTexCoord2f;
+void (GLAPIENTRY *Vertex2f)(GLfloat, GLfloat) = glVertex2f;
+void (GLAPIENTRY *GetIntegerv)(GLenum, GLint *) = glGetIntegerv;
 
 /**
  * \defgroup glextfunctions OpenGL extension functions
@@ -83,43 +83,43 @@ void (APIENTRY *GetIntegerv)(GLenum, GLint *) = glGetIntegerv;
  * context is created
  * \{
  */
-void (APIENTRY *GenBuffers)(GLsizei, GLuint *);
-void (APIENTRY *DeleteBuffers)(GLsizei, const GLuint *);
-void (APIENTRY *BindBuffer)(GLenum, GLuint);
-GLvoid* (APIENTRY *MapBuffer)(GLenum, GLenum);
-GLboolean (APIENTRY *UnmapBuffer)(GLenum);
-void (APIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
-void (APIENTRY *CombinerParameterfv)(GLenum, const GLfloat *);
-void (APIENTRY *CombinerParameteri)(GLenum, GLint);
-void (APIENTRY *CombinerInput)(GLenum, GLenum, GLenum, GLenum, GLenum,
+void (GLAPIENTRY *GenBuffers)(GLsizei, GLuint *);
+void (GLAPIENTRY *DeleteBuffers)(GLsizei, const GLuint *);
+void (GLAPIENTRY *BindBuffer)(GLenum, GLuint);
+GLvoid* (GLAPIENTRY *MapBuffer)(GLenum, GLenum);
+GLboolean (GLAPIENTRY *UnmapBuffer)(GLenum);
+void (GLAPIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
+void (GLAPIENTRY *CombinerParameterfv)(GLenum, const GLfloat *);
+void (GLAPIENTRY *CombinerParameteri)(GLenum, GLint);
+void (GLAPIENTRY *CombinerInput)(GLenum, GLenum, GLenum, GLenum, GLenum,
                                GLenum);
-void (APIENTRY *CombinerOutput)(GLenum, GLenum, GLenum, GLenum, GLenum,
+void (GLAPIENTRY *CombinerOutput)(GLenum, GLenum, GLenum, GLenum, GLenum,
                                 GLenum, GLenum, GLboolean, GLboolean,
                                 GLboolean);
-void (APIENTRY *BeginFragmentShader)(void);
-void (APIENTRY *EndFragmentShader)(void);
-void (APIENTRY *SampleMap)(GLuint, GLuint, GLenum);
-void (APIENTRY *ColorFragmentOp2)(GLenum, GLuint, GLuint, GLuint, GLuint,
+void (GLAPIENTRY *BeginFragmentShader)(void);
+void (GLAPIENTRY *EndFragmentShader)(void);
+void (GLAPIENTRY *SampleMap)(GLuint, GLuint, GLenum);
+void (GLAPIENTRY *ColorFragmentOp2)(GLenum, GLuint, GLuint, GLuint, GLuint,
                                   GLuint, GLuint, GLuint, GLuint, GLuint);
-void (APIENTRY *ColorFragmentOp3)(GLenum, GLuint, GLuint, GLuint, GLuint,
+void (GLAPIENTRY *ColorFragmentOp3)(GLenum, GLuint, GLuint, GLuint, GLuint,
                                   GLuint, GLuint, GLuint, GLuint, GLuint,
                                   GLuint, GLuint, GLuint);
-void (APIENTRY *SetFragmentShaderConstant)(GLuint, const GLfloat *);
-void (APIENTRY *ActiveTexture)(GLenum);
-void (APIENTRY *BindTexture)(GLenum, GLuint);
-void (APIENTRY *MultiTexCoord2f)(GLenum, GLfloat, GLfloat);
-void (APIENTRY *GenPrograms)(GLsizei, GLuint *);
-void (APIENTRY *DeletePrograms)(GLsizei, const GLuint *);
-void (APIENTRY *BindProgram)(GLenum, GLuint);
-void (APIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
-void (APIENTRY *GetProgramiv)(GLenum, GLenum, GLint *);
-void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
+void (GLAPIENTRY *SetFragmentShaderConstant)(GLuint, const GLfloat *);
+void (GLAPIENTRY *ActiveTexture)(GLenum);
+void (GLAPIENTRY *BindTexture)(GLenum, GLuint);
+void (GLAPIENTRY *MultiTexCoord2f)(GLenum, GLfloat, GLfloat);
+void (GLAPIENTRY *GenPrograms)(GLsizei, GLuint *);
+void (GLAPIENTRY *DeletePrograms)(GLsizei, const GLuint *);
+void (GLAPIENTRY *BindProgram)(GLenum, GLuint);
+void (GLAPIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
+void (GLAPIENTRY *GetProgramiv)(GLenum, GLenum, GLint *);
+void (GLAPIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
                                        GLfloat, GLfloat);
-int (APIENTRY *SwapInterval)(int);
-void (APIENTRY *TexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLsizei,
+int (GLAPIENTRY *SwapInterval)(int);
+void (GLAPIENTRY *TexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLsizei,
                             GLint, GLenum, GLenum, const GLvoid *);
-void* (APIENTRY *AllocateMemoryMESA)(void *, int, size_t, float, float, float);
-void (APIENTRY *FreeMemoryMESA)(void *, int, void *);
+void* (GLAPIENTRY *AllocateMemoryMESA)(void *, int, size_t, float, float, float);
+void (GLAPIENTRY *FreeMemoryMESA)(void *, int, void *);
 /** \} */ // end of glextfunctions group
 
 //! \defgroup glgeneral OpenGL general helper functions
