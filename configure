@@ -3050,7 +3050,8 @@ _socklib=no
 for _ld_tmp in "" "-lsocket -lbind" "-lsocket -ldnet" "-lsocket -lnsl" "-lnsl" "-lsocket" ; do
   cc_check $_ld_tmp && _ld_sock="$_ld_tmp" && _socklib=yes && break
 done
-if test $_winsock2_h = auto && ! cygwin ; then
+test $_socklib = yes && test $_winsock2_h = auto && _winsock2_h=no
+if test $_winsock2_h = auto ; then
   _winsock2_h=no
   cat > $TMPC << EOF
 #include <winsock2.h>
