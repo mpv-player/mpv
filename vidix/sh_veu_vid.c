@@ -1,6 +1,6 @@
 /*
  * VIDIX driver for SuperH Mobile VEU hardware block.
- * Copyright (C) 2008 Magnus Damm
+ * Copyright (C) 2008, 2009 Magnus Damm
  *
  * Requires a kernel that exposes the VEU hardware block to user space
  * using UIO. Available in upstream linux-2.6.27 or later.
@@ -179,8 +179,7 @@ static int get_fb_info(char *device, struct fb_info *fip)
     memset(iomem, 0, fip->line_length * fip->height);
     munmap(iomem, fip->size);
 
-    close(fd);
-    return 0;
+    return fd;
 }
 
 #define VESTR 0x00 /* start register */
@@ -268,6 +267,7 @@ struct sh_veu_plane {
 
 static struct sh_veu_plane _src, _dst;
 static vidix_playback_t my_info;
+static int fb_fd;
 
 static int sh_veu_probe(int verbose, int force)
 {
@@ -276,6 +276,7 @@ static int sh_veu_probe(int verbose, int force)
     ret = get_fb_info("/dev/fb0", &fbi);
     if (ret < 0)
         return ret;
+    fb_fd = ret;
 
     if (fbi.bpp != 16) {
         printf("sh_veu: only 16bpp supported\n");
@@ -315,6 +316,9 @@ static void sh_veu_wait_irq(vidix_playback_t *info)
     read(uio_dev.fd, &n_pending, sizeof(unsigned long));
 
     write_reg(&uio_mmio, 0x100, VEVTR); /* ack int, write 0 to bit 0 */
+
+    /* flush framebuffer to handle deferred io case */
+    fsync(fb_fd);
 }
 
 static int sh_veu_is_veu2h(void)
@@ -486,6 +490,7 @@ static int sh_veu_init(void)
 
 static void sh_veu_destroy(void)
 {
+    close(fb_fd);
 }
 
 static int sh_veu_get_caps(vidix_capability_t *to)
