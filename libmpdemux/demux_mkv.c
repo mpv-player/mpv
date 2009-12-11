@@ -208,7 +208,7 @@ extern int dvdsub_id;
  * \param nelem current number of elements in array
  * \param elsize size of one array element
  */
-static void grow_array(void *arrayp, int nelem, size_t elsize) {
+static void av_noinline grow_array(void *arrayp, int nelem, size_t elsize) {
   void **array = arrayp;
   void *oldp = *array;
   if (nelem & 31)
