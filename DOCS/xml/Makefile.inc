@@ -55,8 +55,8 @@ ifndef HTMLFILE
 	$(warning Typically this means, that you've run make from a subdir of DOCS/xml.)
 	$(error Don't do this!)
 endif
-	cp -f $(HTML_STYLESHEET) `dirname $(HTMLFILE)`
-	../xsltproc.sh $(HTMLFILE) $(HTML_SINGLE_XSL) $<
+	cp -f $(HTML_STYLESHEET) `dirname $@`
+	../xsltproc.sh $@ $(HTML_SINGLE_XSL) $<
 
 ../html-chunk.xsl ../html-single.xsl main.xml:
 	cd .. && sh configure
