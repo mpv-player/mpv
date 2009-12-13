@@ -45,7 +45,7 @@ html-single-$(1): $(HTML_SINGLE)/$(1) xsltproc.sh xmllint.sh
 	$(MAKE) HTMLFILE=../$$</MPlayer.html -C $(1) html-single
 
 xmllint-$(1): xmllint.sh
-	$(MAKE) HTMLFILE=../$(HTML_SINGLE)/$(1)/MPlayer.html -C $(1) xmllint
+	$(MAKE) -C $(1) xmllint
 endef
 
 $(foreach lang, $(DOC_LANG_ALL),$(eval $(call lang-def,$(lang))))
