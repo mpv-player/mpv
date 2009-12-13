@@ -31,19 +31,17 @@ html-single:  $(HTML_SINGLE)  $(addprefix html-single-,$(DOC_LANGS))
 
 xmllint: xmllint.sh $(addprefix xmllint-,$(DOC_LANG_ALL))
 
-$(HTML_CHUNKED) $(HTML_SINGLE):
+$(foreach lang,$(DOC_LANG_ALL),$(HTML_CHUNKED)/$(lang) $(HTML_SINGLE)/$(lang)):
 	-mkdir -p $@
 
 xsltproc.sh xmllint.sh:
 	sh configure
 
 define lang-def
-html-chunked-$(1): xsltproc.sh xmllint.sh $(HTML_CHUNKED)
-	-mkdir -p $(HTML_CHUNKED)/$(1)
+html-chunked-$(1): $(HTML_CHUNKED)/$(1) xsltproc.sh xmllint.sh
 	$(MAKE) HTMLDIR=../$(HTML_CHUNKED)/$(1) -C $(1) html-chunked
 
-html-single-$(1): xsltproc.sh xmllint.sh $(HTML_SINGLE)
-	-mkdir -p $(HTML_SINGLE)/$(1)
+html-single-$(1): $(HTML_SINGLE)/$(1) xsltproc.sh xmllint.sh
 	$(MAKE) HTMLFILE=../$(HTML_SINGLE)/$(1)/MPlayer.html -C $(1) html-single
 
 xmllint-$(1): xmllint.sh
