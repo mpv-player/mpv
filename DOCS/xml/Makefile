@@ -26,8 +26,8 @@ help:
 	@echo "Substitute LANG for one of $(DOC_LANG_ALL)"
 
 html-chunked html-single: xsltproc.sh xmllint.sh
-html-chunked: $(HTML_CHUNKED) $(addprefix html-chunked-,$(DOC_LANGS))
-html-single:  $(HTML_SINGLE)  $(addprefix html-single-,$(DOC_LANGS))
+html-chunked: $(addprefix html-chunked-,$(DOC_LANGS))
+html-single:  $(addprefix html-single-,$(DOC_LANGS))
 
 xmllint: xmllint.sh $(addprefix xmllint-,$(DOC_LANG_ALL))
 
