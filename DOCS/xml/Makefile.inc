@@ -40,21 +40,10 @@ xmllint: main.xml $(SYMLINKS_DEPS)
 	../xmllint.sh $<
 
 $(HTMLDIR)/index.html: main.xml $(CHUNK_XSL_DEPS) $(SYMLINKS_DEPS) xmllint
-ifndef HTMLDIR
-	$(warning $(HTMLDIR))
-	$(warning Error: HTMLDIR not set!!!)
-	$(warning Typically this means, that you've run make from a subdir of DOCS/xml.)
-	$(error Don't do this!)
-endif
 	cp -f $(HTML_STYLESHEET) $(HTMLDIR)/
 	../xsltproc.sh $(HTMLDIR)/ $(HTML_CHUNK_XSL) $<
 
 $(HTMLFILE): main.xml $(XSL_DEPS) $(SYMLINKS_DEPS) xmllint
-ifndef HTMLFILE
-	$(warning Error: HTMLFILE not set!!!)
-	$(warning Typically this means, that you've run make from a subdir of DOCS/xml.)
-	$(error Don't do this!)
-endif
 	cp -f $(HTML_STYLESHEET) $(@D)
 	../xsltproc.sh $@ $(HTML_SINGLE_XSL) $<
 
