@@ -4,11 +4,7 @@
 
 # Use customized html-chunk.xsl and/or html-single.xsl file if they exist...
 # Also add html-common.xsl to depends if it exists.
-ifeq (html-common.xsl,$(wildcard html-common.xsl))
-COMMON_XSL_DEPS := html-common.xsl ../html-common.xsl
-else
-COMMON_XSL_DEPS := ../html-common.xsl
-endif
+COMMON_XSL_DEPS := ../html-common.xsl $(wildcard html-common.xsl)
 
 ifeq (html-chunk.xsl,$(wildcard html-chunk.xsl))
 HTML_CHUNK_XSL := html-chunk.xsl
