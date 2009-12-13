@@ -39,7 +39,7 @@ SYMLINKS_DEPS:=$(if $(findstring yes,$(USE_SYMLINKS)), $(patsubst ../en/%,%,$(wi
 xmllint: main.xml $(SYMLINKS_DEPS)
 	../xmllint.sh $<
 
-$(HTMLDIR)/index.html: main.xml $(CHUNK_XSL_DEPS) $(SYMLINKS_DEPS)
+$(HTMLDIR)/index.html: main.xml $(CHUNK_XSL_DEPS) $(SYMLINKS_DEPS) xmllint
 ifndef HTMLDIR
 	$(warning $(HTMLDIR))
 	$(warning Error: HTMLDIR not set!!!)
@@ -47,18 +47,16 @@ ifndef HTMLDIR
 	$(error Don't do this!)
 endif
 	-rm -f $(HTMLDIR)/*
-	../xmllint.sh $<
 	cp -f $(HTML_STYLESHEET) $(HTMLDIR)/
 	../xsltproc.sh $(HTMLDIR)/ $(HTML_CHUNK_XSL) $<
 
-$(HTMLFILE): main.xml $(XSL_DEPS) $(SYMLINKS_DEPS)
+$(HTMLFILE): main.xml $(XSL_DEPS) $(SYMLINKS_DEPS) xmllint
 ifndef HTMLFILE
 	$(warning Error: HTMLFILE not set!!!)
 	$(warning Typically this means, that you've run make from a subdir of DOCS/xml.)
 	$(error Don't do this!)
 endif
 	-rm -f $(HTMLFILE)
-	../xmllint.sh $<
 	cp -f $(HTML_STYLESHEET) `dirname $(HTMLFILE)`
 	../xsltproc.sh $(HTMLFILE) $(HTML_SINGLE_XSL) $<
 
