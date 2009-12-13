@@ -40,7 +40,7 @@ xmllint: main.xml $(SYMLINKS_DEPS)
 	../xmllint.sh $<
 
 $(HTMLDIR)/index.html: main.xml $(CHUNK_XSL_DEPS) $(SYMLINKS_DEPS) xmllint
-	cp -f $(HTML_STYLESHEET) $(HTMLDIR)/
+	cp -f $(HTML_STYLESHEET) $(HTMLDIR)
 	../xsltproc.sh $(HTMLDIR)/ $(HTML_CHUNK_XSL) $<
 
 $(HTMLFILE): main.xml $(XSL_DEPS) $(SYMLINKS_DEPS) xmllint
