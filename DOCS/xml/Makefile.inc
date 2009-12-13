@@ -46,7 +46,6 @@ ifndef HTMLDIR
 	$(warning Typically this means, that you've run make from a subdir of DOCS/xml.)
 	$(error Don't do this!)
 endif
-	-rm -f $(HTMLDIR)/*
 	cp -f $(HTML_STYLESHEET) $(HTMLDIR)/
 	../xsltproc.sh $(HTMLDIR)/ $(HTML_CHUNK_XSL) $<
 
@@ -56,7 +55,6 @@ ifndef HTMLFILE
 	$(warning Typically this means, that you've run make from a subdir of DOCS/xml.)
 	$(error Don't do this!)
 endif
-	-rm -f $(HTMLFILE)
 	cp -f $(HTML_STYLESHEET) `dirname $(HTMLFILE)`
 	../xsltproc.sh $(HTMLFILE) $(HTML_SINGLE_XSL) $<
 
