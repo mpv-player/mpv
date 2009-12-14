@@ -6,6 +6,7 @@ include ../../config.mak
 HTML = ../HTML
 
 MAIN_XML_ALL = $(foreach lang,$(DOC_LANG_ALL),$(lang)/main.xml)
+CONFIGURE_GENERATED = html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
 
 all: html-chunked html-single
 
@@ -53,9 +54,9 @@ clean:
 	rm -rf $(HTML)
 
 releaseclean:
+	rm -f $(CONFIGURE_GENERATED)
 	rm -f $(MAIN_XML_ALL)
 	rm -f $$(find . -name *.xml -type l)
-	rm -f html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
 
 distclean: clean releaseclean
 
