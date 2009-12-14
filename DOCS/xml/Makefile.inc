@@ -32,9 +32,7 @@ $(HTMLDIR)/MPlayer.html: main.xml $(SINGLE_XSL_DEPS) $(SYMLINKS_DEPS) xmllint $(
 
 $(filter-out main.xml, $(patsubst ../en/%,%, $(wildcard ../en/*.xml))):
 	for file in ../en/*.xml ; do \
-	if ! test -r `basename $$file` ; then \
-		ln -s $$file `basename $$file` ; \
-	fi; \
+	test -r `basename $$file` || ln -s $$file `basename $$file` ; \
 	done
 
 .PHONY: all html-chunked html-single xmllint
