@@ -36,7 +36,7 @@ xmllint: main.xml $(SYMLINKS_DEPS)
 	../xmllint.sh $<
 
 $(HTMLDIR)/default.css:
-	cp -f ../default.css $(@D)
+	cp -f $(HTML_STYLESHEET) $(@D)
 
 $(HTMLDIR)/index.html: main.xml $(CHUNK_XSL_DEPS) $(SYMLINKS_DEPS) xmllint $(HTMLDIR)/default.css
 	../xsltproc.sh $(HTMLDIR)/ $(HTML_CHUNK_XSL) $<
