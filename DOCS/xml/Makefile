@@ -61,4 +61,5 @@ releaseclean:
 
 distclean: clean releaseclean
 
-.PHONY: all help html-chunked* html-single* xmllint xmllint-* *clean*
+.PHONY: all help html-chunked html-single xmllint
+.PHONY: html-chunked-* html-single-* xmllint-* *clean*
