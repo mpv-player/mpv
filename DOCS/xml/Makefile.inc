@@ -22,9 +22,6 @@ HTML_SINGLE_XSL := ../html-single.xsl
 XSL_DEPS := $(HTML_SINGLE_XSL) ../html-common.xsl
 endif
 
-# Fall back to the default HTML stylesheet if none is specified.
-HTML_STYLESHEET ?= ../default.css
-
 # This is the main target...
 all: html-chunked html-single
 html-chunked: $(HTMLDIR)/index.html
@@ -36,7 +33,7 @@ xmllint: main.xml $(SYMLINKS_DEPS)
 	../xmllint.sh $<
 
 $(HTMLDIR)/default.css:
-	cp -f $(HTML_STYLESHEET) $(@D)
+	cp -f ../default.css $(@D)
 
 $(HTMLDIR)/index.html: main.xml $(CHUNK_XSL_DEPS) $(SYMLINKS_DEPS) xmllint $(HTMLDIR)/default.css
 	../xsltproc.sh $(HTMLDIR)/ $(HTML_CHUNK_XSL) $<
