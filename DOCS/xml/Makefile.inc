@@ -13,7 +13,7 @@ all: html-chunked html-single
 html-chunked: $(HTMLDIR)/index.html
 html-single:  $(HTMLDIR)/MPlayer.html
 
-SYMLINKS_DEPS := $(filter-out main.xml,$(patsubst ../en/%,%,$(wildcard ../en/*.xml)))
+SYMLINKS_DEPS := $(filter-out main.xml,$(notdir $(wildcard ../en/*.xml)))
 
 xmllint: main.xml $(SYMLINKS_DEPS)
 	../xmllint.sh $<
