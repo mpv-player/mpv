@@ -18,6 +18,7 @@
 #ifndef _V_RANDOM_H_
 #define _V_RANDOM_H_
 #include "ivorbiscodec.h"
+#include "codec_internal.h"
 #include "os_types.h"
 
 #include "asm_arm.h"
@@ -29,6 +30,7 @@
 /* 64 bit multiply */
 
 #include <sys/types.h>
+#include <stdlib.h>
 #include "config.h"
 
 #if !HAVE_BIGENDIAN

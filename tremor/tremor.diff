@@ -1,9 +1,18 @@
 --- misc.h	2005-01-04 16:29:01.000000000 +0100
 +++ misc.h	2004-12-30 13:09:20.000000000 +0100
-@@ -29,8 +29,9 @@
+@@ -18,6 +18,7 @@
+ #ifndef _V_RANDOM_H_
+ #define _V_RANDOM_H_
+ #include "ivorbiscodec.h"
++#include "codec_internal.h"
+ #include "os_types.h"
+ 
+ #include "asm_arm.h"
+@@ -29,8 +30,10 @@
  /* 64 bit multiply */
 
  #include <sys/types.h>
++#include <stdlib.h>
 +#include "config.h"
 
 -#if BYTE_ORDER==LITTLE_ENDIAN
@@ -11,7 +20,7 @@
  union magic {
    struct {
      ogg_int32_t lo;
-@@ -38,9 +39,7 @@
+@@ -38,9 +41,7 @@
    } halves;
    ogg_int64_t whole;
  };
