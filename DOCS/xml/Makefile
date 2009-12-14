@@ -41,7 +41,7 @@ html-chunked-$(1): $(HTML)/$(1) xsltproc.sh xmllint.sh
 	$(MAKE) HTMLDIR=../$$< -C $(1) html-chunked
 
 html-single-$(1): $(HTML)/$(1) xsltproc.sh xmllint.sh
-	$(MAKE) HTMLFILE=../$$</MPlayer.html -C $(1) html-single
+	$(MAKE) HTMLDIR=../$$< -C $(1) html-single
 
 xmllint-$(1): xmllint.sh
 	$(MAKE) -C $(1) xmllint

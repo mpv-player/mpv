@@ -28,7 +28,7 @@ HTML_STYLESHEET ?= ../default.css
 # This is the main target...
 all: html-chunked html-single
 html-chunked: $(HTMLDIR)/index.html
-html-single: $(HTMLFILE)
+html-single:  $(HTMLDIR)/MPlayer.html
 
 SYMLINKS_DEPS:=$(if $(findstring yes,$(USE_SYMLINKS)), $(patsubst ../en/%,%,$(wildcard ../en/*.xml)))
 
@@ -39,7 +39,7 @@ $(HTMLDIR)/index.html: main.xml $(CHUNK_XSL_DEPS) $(SYMLINKS_DEPS) xmllint
 	cp -f $(HTML_STYLESHEET) $(@D)
 	../xsltproc.sh $(HTMLDIR)/ $(HTML_CHUNK_XSL) $<
 
-$(HTMLFILE): main.xml $(XSL_DEPS) $(SYMLINKS_DEPS) xmllint
+$(HTMLDIR)/MPlayer.html: main.xml $(XSL_DEPS) $(SYMLINKS_DEPS) xmllint
 	cp -f $(HTML_STYLESHEET) $(@D)
 	../xsltproc.sh $@ $(HTML_SINGLE_XSL) $<
 
