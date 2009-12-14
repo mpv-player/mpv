@@ -25,7 +25,6 @@ help:
 	@echo "distclean         : Remove ALL generated files."
 	@echo "Substitute LANG for one of $(DOC_LANG_ALL)"
 
-html-chunked html-single: $(CONFIGURE_GENERATED)
 html-chunked: $(addprefix html-chunked-,$(DOC_LANGS))
 html-single:  $(addprefix html-single-,$(DOC_LANGS))
 
