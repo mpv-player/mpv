@@ -30,7 +30,7 @@ all: html-chunked html-single
 html-chunked: $(HTMLDIR)/index.html
 html-single:  $(HTMLDIR)/MPlayer.html
 
-SYMLINKS_DEPS:=$(if $(findstring yes,$(USE_SYMLINKS)), $(patsubst ../en/%,%,$(wildcard ../en/*.xml)))
+SYMLINKS_DEPS:=$(patsubst ../en/%,%,$(wildcard ../en/*.xml))
 
 xmllint: main.xml $(SYMLINKS_DEPS)
 	../xmllint.sh $<
@@ -48,7 +48,6 @@ $(HTMLDIR)/MPlayer.html: main.xml $(XSL_DEPS) $(SYMLINKS_DEPS) xmllint $(HTMLDIR
 	cd .. && sh configure
 
 $(filter-out main.xml, $(patsubst ../en/%,%, $(wildcard ../en/*.xml))):
-	$(if $(findstring yes,$(USE_SYMLINKS)), ,exit 0;)\
 	for file in ../en/*.xml ; do \
 	if ! test -r `basename $$file` ; then \
 		ln -s $$file `basename $$file` ; \

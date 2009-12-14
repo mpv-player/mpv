@@ -75,9 +75,4 @@ Adding new translations
    like <!-- synced with r2 -->, where 2 is the revision of corresponding
    English file (see comment at the top of file).
 
-7) While your translation isn't finished, you can change USE_SYMLINKS
-   to "yes" in your Makefile. This will help you testing your translation:
-   English files will be used instead of untranslated ones, when generating
-   HTML docs.
-
 That's all, in theory.
