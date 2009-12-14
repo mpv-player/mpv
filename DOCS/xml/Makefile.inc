@@ -6,7 +6,7 @@ HTML_CHUNK_XSL := ../html-chunk.xsl
 CHUNK_XSL_DEPS := $(HTML_CHUNK_XSL) ../html-common.xsl
 
 HTML_SINGLE_XSL := ../html-single.xsl
-XSL_DEPS := $(HTML_SINGLE_XSL) ../html-common.xsl
+SINGLE_XSL_DEPS := $(HTML_SINGLE_XSL) ../html-common.xsl
 
 # This is the main target...
 all: html-chunked html-single
@@ -24,7 +24,7 @@ $(HTMLDIR)/default.css:
 $(HTMLDIR)/index.html: main.xml $(CHUNK_XSL_DEPS) $(SYMLINKS_DEPS) xmllint $(HTMLDIR)/default.css
 	../xsltproc.sh $(HTMLDIR)/ $(HTML_CHUNK_XSL) $<
 
-$(HTMLDIR)/MPlayer.html: main.xml $(XSL_DEPS) $(SYMLINKS_DEPS) xmllint $(HTMLDIR)/default.css
+$(HTMLDIR)/MPlayer.html: main.xml $(SINGLE_XSL_DEPS) $(SYMLINKS_DEPS) xmllint $(HTMLDIR)/default.css
 	../xsltproc.sh $@ $(HTML_SINGLE_XSL) $<
 
 ../html-chunk.xsl ../html-single.xsl main.xml:
