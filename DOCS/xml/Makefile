@@ -18,7 +18,7 @@ help:
 	@echo "html-single-LANG  : As above, but only one language."
 	@echo "html-chunked      : HTML documentation for configured languages (multiple files)"
 	@echo "html-chunked-LANG : As above, but only one language."
-	@echo "xmllint           : Check syntax of all XML files."
+	@echo "xmllint           : Check syntax of XML files for configured languages."
 	@echo "xmllint-LANG      : Check syntax of LANG XML files."
 	@echo "clean             : Purge the 'HTML' directory."
 	@echo "releaseclean      : Remove generated files but keep the HTML."
@@ -28,7 +28,7 @@ help:
 html-chunked: $(addprefix html-chunked-,$(DOC_LANGS))
 html-single:  $(addprefix html-single-,$(DOC_LANGS))
 
-xmllint: $(addprefix xmllint-,$(DOC_LANG_ALL))
+xmllint: $(addprefix xmllint-,$(DOC_LANGS))
 
 $(foreach lang,$(DOC_LANG_ALL),$(HTML)/$(lang)):
 	-mkdir -p $@
