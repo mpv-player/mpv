@@ -37,10 +37,12 @@ $(CONFIGURE_GENERATED) $(MAIN_XML_ALL):
 	sh configure
 
 define lang-def
-html-chunked-$(1): $(HTML)/$(1) $(CONFIGURE_GENERATED)
+html-chunked-$(1) html-single-$(1): $(HTML)/$(1) $(CONFIGURE_GENERATED)
+
+html-chunked-$(1):
 	$(MAKE) HTMLDIR=../$$< -C $(1) html-chunked
 
-html-single-$(1): $(HTML)/$(1) $(CONFIGURE_GENERATED)
+html-single-$(1):
 	$(MAKE) HTMLDIR=../$$< -C $(1) html-single
 
 xmllint-$(1): xmllint.sh
