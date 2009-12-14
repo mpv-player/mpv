@@ -8,8 +8,6 @@ IMPORTANT: Do NOT place sensitive files under 'HTML'!
 	   It is for generated documentation only.
 	   The whole directory tree is wiped out by the Makefile
 	   when running 'make distclean' or 'make clean'.
-	   Also, subdirectories are wiped out one by one before
-	   creating the HTML files.
 
 Each subdirectory must have a Makefile.  Its purpose is to include
 the toplevel Makefile.inc file (with the rules to build the docs)
