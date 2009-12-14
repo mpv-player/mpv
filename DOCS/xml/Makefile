@@ -25,7 +25,7 @@ help:
 	@echo "distclean         : Remove ALL generated files."
 	@echo "Substitute LANG for one of $(DOC_LANG_ALL)"
 
-html-chunked html-single: xsltproc.sh xmllint.sh
+html-chunked html-single: $(CONFIGURE_GENERATED)
 html-chunked: $(addprefix html-chunked-,$(DOC_LANGS))
 html-single:  $(addprefix html-single-,$(DOC_LANGS))
 
@@ -38,10 +38,10 @@ $(CONFIGURE_GENERATED) $(MAIN_XML_ALL):
 	sh configure
 
 define lang-def
-html-chunked-$(1): $(HTML)/$(1) xsltproc.sh xmllint.sh
+html-chunked-$(1): $(HTML)/$(1) $(CONFIGURE_GENERATED)
 	$(MAKE) HTMLDIR=../$$< -C $(1) html-chunked
 
-html-single-$(1): $(HTML)/$(1) xsltproc.sh xmllint.sh
+html-single-$(1): $(HTML)/$(1) $(CONFIGURE_GENERATED)
 	$(MAKE) HTMLDIR=../$$< -C $(1) html-single
 
 xmllint-$(1): xmllint.sh
