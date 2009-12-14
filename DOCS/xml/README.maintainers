@@ -14,9 +14,7 @@ IMPORTANT: Do NOT place sensitive files under 'HTML'!
 Each subdirectory must have a Makefile.  Its purpose is to include
 the toplevel Makefile.inc file (with the rules to build the docs)
 and add dependency information to the main target, $(HTMLDIR)/index.html.
-The main target usually depends on all the XML and XSL files in the
-subdirectory.  (Note that the toplevel *.xsl files are added automatically
-by Makefile.inc, so you do not have to list them.)
+The main target usually depends on all the XML files in the subdirectory.
 
 
 Adding new translations
@@ -28,46 +26,7 @@ Adding new translations
 2) Make sure to create a 'Makefile' for the translation -- you can
    use 'en/Makefile' as an example.
 
-3) If you want to use a customized XSL stylesheet, create one and name it
-   'html-common.xsl'. Also create two additional XSL stylesheets
-   ('html-single.xsl' and 'html-chunk.xsl'), with content such as this:
-
-   html-single.xsl:
-
-   <?xml version="1.0" encoding="ISO-8859-1"?>
-   <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                version="1.0">
-
-  <xsl:import href="../html-single.xsl"/>
-  <xsl:include href="html-common.xsl"/>
-
-  </xsl:stylesheet>
-
-  html-chunk.xsl:
-
-  <?xml version="1.0" encoding="ISO-8859-1"?>
-  <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                version="1.0">
-
-  <xsl:import href="../html-chunk.xsl"/>
-  <xsl:include href="html-common.xsl"/>
-
-  </xsl:stylesheet>
-
-
-   Note: You mustn't xsl:include or xsl:import chunk.xsl directly!
-   Including it can (and will) break building of documentation if chunk.xsl
-   is installed at a nonstandard location.
-
-4) If you wish to change the output encoding of generated files, create
-   html-common.xsl as suggested in step 4) and add strings such as these
-   somewhere between the <xsl:stylesheet ...> and </xsl:stylesheet> tags
-   (please, pay attention to quotes):
-
-      <xsl:param name="chunker.output.encoding" select="'your_encoding'"/>
-      <xsl:output encoding="your_encoding"/>
-
-5) In each translated file after the <?xml ... ?> tag you must put a note
+3) In each translated file after the <?xml ... ?> tag you must put a note
    like <!-- synced with r2 -->, where 2 is the revision of corresponding
    English file (see comment at the top of file).
 

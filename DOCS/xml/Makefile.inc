@@ -2,25 +2,11 @@
 # Makefile.inc for Makefiles in subdirectories.
 #
 
-# Use customized html-chunk.xsl and/or html-single.xsl file if they exist...
-# Also add html-common.xsl to depends if it exists.
-COMMON_XSL_DEPS := ../html-common.xsl $(wildcard html-common.xsl)
-
-ifeq (html-chunk.xsl,$(wildcard html-chunk.xsl))
-HTML_CHUNK_XSL := html-chunk.xsl
-CHUNK_XSL_DEPS := $(HTML_CHUNK_XSL) ../html-chunk.xsl $(COMMON_XSL_DEPS)
-else
 HTML_CHUNK_XSL := ../html-chunk.xsl
 CHUNK_XSL_DEPS := $(HTML_CHUNK_XSL) ../html-common.xsl
-endif
 
-ifeq (html-single.xsl,$(wildcard html-single.xsl))
-HTML_SINGLE_XSL := html-single.xsl
-XSL_DEPS := $(HTML_SINGLE_XSL) ../html-single.xsl $(COMMON_XSL_DEPS)
-else
 HTML_SINGLE_XSL := ../html-single.xsl
 XSL_DEPS := $(HTML_SINGLE_XSL) ../html-common.xsl
-endif
 
 # This is the main target...
 all: html-chunked html-single
