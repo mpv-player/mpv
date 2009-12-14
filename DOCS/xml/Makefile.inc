@@ -30,7 +30,7 @@ $(HTMLDIR)/MPlayer.html: main.xml $(SINGLE_XSL_DEPS) $(SYMLINKS_DEPS) xmllint $(
 ../html-chunk.xsl ../html-single.xsl main.xml:
 	cd .. && sh configure
 
-$(filter-out main.xml, $(patsubst ../en/%,%, $(wildcard ../en/*.xml))):
+$(filter-out main.xml, $(SYMLINKS_DEPS)):
 	for file in ../en/*.xml ; do \
 	test -r `basename $$file` || ln -s $$file `basename $$file` ; \
 	done
