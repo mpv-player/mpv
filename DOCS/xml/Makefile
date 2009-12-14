@@ -52,12 +52,12 @@ endef
 $(foreach lang, $(DOC_LANG_ALL),$(eval $(call lang-def,$(lang))))
 
 clean:
-	rm -rf $(HTML)
+	-rm -rf $(HTML)
 
 releaseclean:
-	rm -f $(CONFIGURE_GENERATED)
-	rm -f $(MAIN_XML_ALL)
-	rm -f $$(find . -name *.xml -type l)
+	-rm -f $(CONFIGURE_GENERATED)
+	-rm -f $(MAIN_XML_ALL)
+	-rm -f $$(find . -name *.xml -type l)
 
 distclean: clean releaseclean
 
