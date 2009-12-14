@@ -31,8 +31,6 @@ $(HTMLDIR)/MPlayer.html: main.xml $(SINGLE_XSL_DEPS) $(SYMLINKS_DEPS) xmllint $(
 	cd .. && sh configure
 
 $(SYMLINKS_DEPS):
-	for file in ../en/*.xml ; do \
-	test -r `basename $$file` || ln -s $$file `basename $$file` ; \
-	done
+	test -r $(@F) || ln -s ../en/$@ $@
 
 .PHONY: all html-chunked html-single xmllint
