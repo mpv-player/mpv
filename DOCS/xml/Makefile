@@ -34,7 +34,7 @@ xmllint: xmllint.sh $(addprefix xmllint-,$(DOC_LANG_ALL))
 $(foreach lang,$(DOC_LANG_ALL),$(HTML)/$(lang)):
 	-mkdir -p $@
 
-html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh $(MAIN_XML_ALL):
+$(CONFIGURE_GENERATED) $(MAIN_XML_ALL):
 	sh configure
 
 define lang-def
