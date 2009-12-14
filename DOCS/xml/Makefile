@@ -31,7 +31,7 @@ html-single:  $(addprefix html-single-,$(DOC_LANGS))
 xmllint: $(addprefix xmllint-,$(DOC_LANGS))
 
 $(foreach lang,$(DOC_LANG_ALL),$(HTML)/$(lang)):
-	-mkdir -p $@
+	mkdir -p $@
 
 $(CONFIGURE_GENERATED) $(MAIN_XML_ALL):
 	sh configure
