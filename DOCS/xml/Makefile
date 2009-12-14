@@ -28,7 +28,7 @@ help:
 html-chunked: $(addprefix html-chunked-,$(DOC_LANGS))
 html-single:  $(addprefix html-single-,$(DOC_LANGS))
 
-xmllint: xmllint.sh $(addprefix xmllint-,$(DOC_LANG_ALL))
+xmllint: $(addprefix xmllint-,$(DOC_LANG_ALL))
 
 $(foreach lang,$(DOC_LANG_ALL),$(HTML)/$(lang)):
 	-mkdir -p $@
