@@ -497,16 +497,21 @@ static int control(uint32_t request, void *data, ...)
 
 - (void) config
 {
-	uint32_t d_width;
-	uint32_t d_height;
-
-	NSRect frame;
+	NSRect visibleFrame;
 	CVReturn error = kCVReturnSuccess;
 
 	//config window
-	d_width = vo_dwidth; d_height = vo_dheight;
-	frame = NSMakeRect(0, 0, d_width, d_height);
-	[window setContentSize: frame.size];
+	[window setContentSize:NSMakeSize(vo_dwidth, vo_dheight)];
+
+	// Use visibleFrame to position the window taking the menu bar and dock into account.
+	// Also flip vo_dy since the screen origin is in the bottom left on OSX.
+	if (screen_id < 0)
+		visibleFrame = [[[mpGLView window] screen] visibleFrame];
+	else
+		visibleFrame = [[[NSScreen screens] objectAtIndex:screen_id] visibleFrame];
+	[window setFrameTopLeftPoint:NSMakePoint(
+		visibleFrame.origin.x + vo_dx,
+		visibleFrame.origin.y + visibleFrame.size.height - vo_dy)];
 
 	[self releaseVideoSpecific];
 	error = CVPixelBufferCreateWithBytes(NULL, image_width, image_height, pixelFormat, image_datas[0], image_width*image_bytes, NULL, NULL, NULL, &frameBuffers[0]);
@@ -523,7 +528,6 @@ static int control(uint32_t request, void *data, ...)
 		mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL texture(%d)\n", error);
 
 	//show window
-	[window center];
 	[window makeKeyAndOrderFront:mpGLView];
 
 	if(vo_rootwin)
