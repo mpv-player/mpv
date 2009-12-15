@@ -80,7 +80,7 @@ static void rescale_input_coordinates(struct MPContext *mpctx, int ix, int iy,
     *dy = (double) iy / (double) vo->dheight;
 
     mp_msg(MSGT_CPLAYER, MSGL_V,
-	   "\r\nrescaled coordinates: %.3lf, %.3lf, screen (%d x %d), vodisplay: (%d, %d), fullscreen: %d\r\n",
+	   "\r\nrescaled coordinates: %.3f, %.3f, screen (%d x %d), vodisplay: (%d, %d), fullscreen: %d\r\n",
 	   *dx, *dy, opts->vo_screenwidth, opts->vo_screenheight, vo->dwidth,
 	   vo->dheight, vo_fs);
 }
@@ -3110,7 +3110,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 	    break;
 
 	case MP_CMD_GET_TIME_LENGTH:{
-		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_LENGTH=%.2lf\n",
+		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_LENGTH=%.2f\n",
 		       demuxer_get_time_length(mpctx->demuxer));
 	    }
 	    break;

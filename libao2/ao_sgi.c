@@ -174,7 +174,7 @@ static int init(int rate, int channels, int format, int flags) {
 
     realrate = alFixedToDouble(x[0].value.ll);
     if (frate != realrate) {
-      mp_tmsg(MSGT_AO, MSGL_INFO, "[AO SGI] init: samplerate is now %lf (desired rate is %lf)\n", realrate, frate);
+      mp_tmsg(MSGT_AO, MSGL_INFO, "[AO SGI] init: samplerate is now %f (desired rate is %f)\n", realrate, frate);
     }
     sample_rate = (int)realrate;
   }

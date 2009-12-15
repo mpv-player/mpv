@@ -1012,7 +1012,7 @@ static int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
             if(stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, arg) != STREAM_UNSUPPORTED) {
-              mp_msg(MSGT_DEMUXER,MSGL_DBG2,"\r\nDEMUX_MPG_CTRL, (%.3lf)\r\n", *((double*)arg));
+              mp_msg(MSGT_DEMUXER,MSGL_DBG2,"\r\nDEMUX_MPG_CTRL, (%.3f)\r\n", *((double*)arg));
               return DEMUXER_CTRL_GUESS;
             }
             if (mpg_d && mpg_d->has_valid_timestamps) {
