@@ -115,6 +115,9 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 
 static void update_screen_info(void)
 {
+	if (screen_id == -1 && xinerama_screen > -1)
+		screen_id = xinerama_screen;
+
 	screen_array = [NSScreen screens];
 	if(screen_id < (int)[screen_array count])
 	{
