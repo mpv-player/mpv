@@ -1144,6 +1144,7 @@ void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_n
     FcChar8 *s;
     int face_index;
     FcBool scalable;
+    FcResult result;
 #endif
     font_desc_t *vo_font = *fontp;
     vo_image_width = width;
@@ -1162,7 +1163,8 @@ void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_n
 	FcConfigSubstitute(0, fc_pattern, FcMatchPattern);
 	FcDefaultSubstitute(fc_pattern);
 	fc_pattern2 = fc_pattern;
-	fc_pattern = FcFontMatch(0, fc_pattern, 0);
+	fc_pattern = FcFontMatch(0, fc_pattern, &result);
+	if (result == FcResultMatch) {
 	FcPatternDestroy(fc_pattern2);
 	FcPatternGetBool(fc_pattern, FC_SCALABLE, 0, &scalable);
 	if (scalable != FcTrue) {
@@ -1179,8 +1181,11 @@ void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_n
 	FcPatternGetInteger(fc_pattern, FC_INDEX, 0, &face_index);
 	*fontp=read_font_desc_ft(s, face_index, width, height, font_scale_factor);
 	FcPatternDestroy(fc_pattern);
+	return;
+	}
+	// Failed to match any font, try without fontconfig
+	mp_msg(MSGT_OSD, MSGL_ERR, MSGTR_LIBVO_FONT_LOAD_FT_FontconfigNoMatch);
     }
-    else
 #endif
     *fontp=read_font_desc_ft(font_name, 0, width, height, font_scale_factor);
 }

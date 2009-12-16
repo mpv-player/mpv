@@ -856,6 +856,7 @@ static const char help_text[]=
 #define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont "Cannot prepare OSD font.\n"
 #define MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables "Cannot generate tables.\n"
 #define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "FT_Done_FreeType failed.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_FontconfigNoMatch "Fontconfig failed to select a font. Trying without fontconfig...\n"
 
 // sub.c
 #define MSGTR_VO_SUB_Seekbar "Seekbar"
