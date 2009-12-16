@@ -37,19 +37,19 @@ $(CONFIGURE_GENERATED) $(MAIN_XML_ALL):
 	sh configure
 
 define lang-def
-html-chunked-$(1) html-single-$(1): $(HTML)/$(1) $(CONFIGURE_GENERATED)
+html-chunked-$(lang) html-single-$(lang): $(HTML)/$(lang) $(CONFIGURE_GENERATED)
 
-html-chunked-$(1):
-	$(MAKE) HTMLDIR=../$$< -C $(1) html-chunked
+html-chunked-$(lang):
+	$(MAKE) HTMLDIR=../$$< -C $(lang) html-chunked
 
-html-single-$(1):
-	$(MAKE) HTMLDIR=../$$< -C $(1) html-single
+html-single-$(lang):
+	$(MAKE) HTMLDIR=../$$< -C $(lang) html-single
 
-xmllint-$(1): xmllint.sh
-	$(MAKE) -C $(1) xmllint
+xmllint-$(lang): xmllint.sh
+	$(MAKE) -C $(lang) xmllint
 endef
 
-$(foreach lang, $(DOC_LANG_ALL),$(eval $(call lang-def,$(lang))))
+$(foreach lang, $(DOC_LANG_ALL),$(eval $(lang-def)))
 
 clean:
 	-rm -rf $(HTML)
