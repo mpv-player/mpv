@@ -1164,7 +1164,7 @@ void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_n
 	FcDefaultSubstitute(fc_pattern);
 	fc_pattern2 = fc_pattern;
 	fc_pattern = FcFontMatch(0, fc_pattern, &result);
-	if (result == FcResultMatch) {
+	if (fc_pattern) {
 	FcPatternDestroy(fc_pattern2);
 	FcPatternGetBool(fc_pattern, FC_SCALABLE, 0, &scalable);
 	if (scalable != FcTrue) {
