@@ -1023,11 +1023,11 @@ static uint32_t draw_image(mp_image_t *mpi)
     if (IMGFMT_IS_VDPAU(image_format)) {
         struct vdpau_render_state *rndr = mpi->priv;
         vid_surface_num = rndr - surface_render;
-            mpi->usage_count++;
-            if (deint_mpi[1])
-                deint_mpi[1]->usage_count--;
-            deint_mpi[1] = deint_mpi[0];
-            deint_mpi[0] = mpi;
+        mpi->usage_count++;
+        if (deint_mpi[1])
+            deint_mpi[1]->usage_count--;
+        deint_mpi[1] = deint_mpi[0];
+        deint_mpi[0] = mpi;
     } else if (image_format == IMGFMT_BGRA) {
         VdpStatus vdp_st;
         VdpRect r = {0, 0, vid_width, vid_height};
