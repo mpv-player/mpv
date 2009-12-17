@@ -632,11 +632,11 @@ if (index_file_load) {
 }
 gen_index:
 if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
+  int idx_pos = 0;
   // build index for file:
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,demuxer->movi_start);
 
-  priv->idx_pos=0;
   priv->idx_size=0;
   priv->idx=NULL;
 
@@ -657,13 +657,13 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
     if(stream_eof(demuxer->stream)) break;
     if(!id || avi_stream_id(id)==100) goto skip_chunk; // bad ID (or padding?)
 
-    if(priv->idx_pos>=priv->idx_size){
+    if(idx_pos>=priv->idx_size){
 //      priv->idx_size+=32;
       priv->idx_size+=1024; // +16kB
       priv->idx=realloc(priv->idx,priv->idx_size*sizeof(AVIINDEXENTRY));
-      if(!priv->idx){priv->idx_pos=0; break;} // error!
+      if(!priv->idx){idx_pos=0; break;} // error!
     }
-    idx=&((AVIINDEXENTRY *)priv->idx)[priv->idx_pos++];
+    idx=&((AVIINDEXENTRY *)priv->idx)[idx_pos++];
     idx->ckid=id;
     idx->dwFlags=AVIIF_KEYFRAME; // FIXME
     idx->dwFlags|=(demuxer->filepos>>16)&0xffff0000U;
@@ -713,7 +713,7 @@ skip_chunk:
     skip=(len+1)&(~1UL); // total bytes in this chunk
     stream_seek(demuxer->stream,8+demuxer->filepos+skip);
   }
-  priv->idx_size=priv->idx_pos;
+  priv->idx_size=idx_pos;
   mp_msg(MSGT_HEADER,MSGL_INFO,MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks,priv->idx_size);
   if( mp_msg_test(MSGT_HEADER,MSGL_DBG2) ) print_index(priv->idx,priv->idx_size,MSGL_DBG2);
 
