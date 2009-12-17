@@ -75,7 +75,7 @@ LIBVO_EXTERN(vdpau)
                message, vdp_get_error_string(vdp_st));
 
 /* number of video and output surfaces */
-#define NUM_OUTPUT_SURFACES                2
+#define NUM_OUTPUT_SURFACES                3
 #define MAX_VIDEO_SURFACES                 50
 
 /* number of palette entries */
