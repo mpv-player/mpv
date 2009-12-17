@@ -153,7 +153,6 @@ static VdpVideoMixer                      video_mixer;
 static int                                deint;
 static int                                deint_type;
 static int                                deint_counter;
-static int                                deint_buffer_past_frames;
 static int                                pullup;
 static float                              denoise;
 static float                              sharpen;
@@ -1024,13 +1023,11 @@ static uint32_t draw_image(mp_image_t *mpi)
     if (IMGFMT_IS_VDPAU(image_format)) {
         struct vdpau_render_state *rndr = mpi->priv;
         vid_surface_num = rndr - surface_render;
-        if (deint_buffer_past_frames) {
             mpi->usage_count++;
             if (deint_mpi[1])
                 deint_mpi[1]->usage_count--;
             deint_mpi[1] = deint_mpi[0];
             deint_mpi[0] = mpi;
-        }
     } else if (image_format == IMGFMT_BGRA) {
         VdpStatus vdp_st;
         VdpRect r = {0, 0, vid_width, vid_height};
@@ -1232,7 +1229,6 @@ static int preinit(const char *arg)
     deint = 0;
     deint_type = 3;
     deint_counter = 0;
-    deint_buffer_past_frames = 0;
     deint_mpi[0] = deint_mpi[1] = NULL;
     chroma_deint = 1;
     pullup  = 0;
@@ -1247,8 +1243,6 @@ static int preinit(const char *arg)
     }
     if (deint)
         deint_type = deint;
-    if (deint > 1)
-        deint_buffer_past_frames = 1;
     if (colorspace < 0 || colorspace > 3) {
         mp_msg(MSGT_VO, MSGL_WARN, "[vdpau] Invalid color space specified, "
                "using BT.601\n");
@@ -1343,7 +1337,6 @@ static int control(uint32_t request, void *data, ...)
                                                          features,
                                                          feature_enables);
             CHECK_ST_WARNING("Error changing deinterlacing settings")
-            deint_buffer_past_frames = 1;
         }
         return VO_TRUE;
     case VOCTRL_PAUSE:
