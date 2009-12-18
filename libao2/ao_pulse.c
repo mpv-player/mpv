@@ -140,7 +140,7 @@ static int init(int rate_hz, int channels, int format, int flags) {
     char *devarg = NULL;
     char *host = NULL;
     char *sink = NULL;
-    char *version = pa_get_library_version();
+    const char *version = pa_get_library_version();
 
     if (ao_subdevice) {
         devarg = strdup(ao_subdevice);
