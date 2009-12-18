@@ -230,8 +230,9 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
             if (d_dvdsub->non_interleaved)
                 ds_get_next_pts(d_dvdsub);
         }
-        if (sub_clear_text(&subs, curpts))
-            set_osd_subtitle(mpctx, &subs);
+        if (!opts->ass_enabled)
+            if (sub_clear_text(&subs, curpts))
+                set_osd_subtitle(mpctx, &subs);
     }
     current_module=NULL;
 }
