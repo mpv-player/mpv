@@ -1,4 +1,4 @@
-.\" synced with r29905
+.\" synced with r30043
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -3275,11 +3275,11 @@ allora le coordinate x ed y sono relative all'angolo in alto a sinistra
 della finestra stessa piuttosto che dello schermo.
 Le coordinate sono relative allo schermo indicato con \-xineramascreen per i
 driver di uscita video che gestiscono completamente \-xineramascreen (direct3d,
-gl, gl2, vdpau, x11, xv, xvmc).
+gl, gl2, vdpau, x11, xv, xvmc, corevideo).
 .br
 .I NOTA:
 Questa opzione è supportata dai driver di uscita video x11, xmga, xv, xvmc,
-xvidix, gl, gl2, directx, fbdev e tdfxfb.
+xvidix, gl, gl2, directx, fbdev, tdfxfb e corevideo.
 .sp 1
 .I ESEMPIO:
 .PD 0
@@ -3478,7 +3478,8 @@ Funzionerà solitamente solo con "\-fstype \-fullscreen" o "\-fstype none".
 Quest'opzione non è utilizzabile per impostare solo la schermata di avvio
 (dato che si aprirà sempre a tutto schermo sullo schermo indicato), per far
 ciò la miglior opzione attualmente disponibilie è \-geometry.
-Supportata almeno dai driver di uscita video direct3d, gl, gl2, x11 e xv.
+Supportata almeno dai driver di uscita video direct3d, gl, gl2, x11, xv e
+corevideo.
 .
 .TP
 .B \-zrbw (solo \-vo zr)
