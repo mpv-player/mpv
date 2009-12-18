@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r29905
+.\" sync with en/mplayer.1 r30053
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -2935,14 +2935,14 @@ x 和 y 代表从屏幕左上角到显示图像左上角的距离(以像素为�
 如果使用 \-wid 选项指定了外部窗口,
 那么 x 和 y 坐标是相对于窗口而不是屏幕的左上角。
 坐标是相对于 \-xineramascreen 选项给出的屏幕，该屏幕用于完全支持 \-xineramascreen 的
-视频输出的驱动（direct3d、gl、gl2、vdpau、x11、xv、xvmc）。
+视频输出的驱动（direct3d、gl、gl2、vdpau、x11、xv、xvmc、corevideo）。
 The coordinates are relative to the screen given with \-xineramascreen for
 the video output drivers that fully support \-xineramascreen (direct3d, gl, gl2,
 vdpau, x11, xv, xvmc).
 .br
 .I 注意：
-此选项仅被 x11、xmga、xv、xvmc、xvidix、
-gl、gl2、directx、fbdev 和 tdfxfb 视频输出驱动支持。
+此选项仅被 x11、xmga、xv、xvmc、xvidix、gl、gl2、directx、fbdev、tdfxfb 和 
+corevideo 视频输出驱动支持。
 .sp 1
 .I 示例:
 .PD 0
@@ -3116,7 +3116,7 @@ ggi 和 gl2 的都支持此功能。
 通常只能与 "\-fstype \-fullscreen" 或 "\-fstype none" 一起工作。
 该选项不适用于仅仅设置启动屏幕（并且也不适合设置全屏屏幕），\-geometry 是目前可用
 于此目的的最好选项。
-至少 direct3d、gl、gl2、x11 和 xv 视频输出驱动支持该选项。
+至少 direct3d、gl、gl2、x11、xv 和 corevideo 视频输出驱动支持该选项。
 .TP
 .B \-zrbw (仅用于 \-vo zr)
 黑白显示。
