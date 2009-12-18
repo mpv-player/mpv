@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <see AUTHORS for email address>
 
-// Updated to help_mp-en.h r29912
+// Updated to help_mp-en.h r30044
 
 
 // ========================= MPlayer help ===========================
@@ -851,8 +851,7 @@ static const char help_text[]=
 #define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont "Impossibile preparare il font per l'OSD.\n"
 #define MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables "Impossibile generare le tabelle.\n"
 #define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "FT_Done_FreeType in errore.\n"
-
-
+#define MSGTR_LIBVO_FONT_LOAD_FT_FontconfigNoMatch "Fontconfig non ha potuto selezionare un font. Provo senza fontconfig...\n"
 
 // sub.c
 #define MSGTR_VO_SUB_Seekbar "Barra ricerca"
