@@ -49,9 +49,6 @@ static struct pa_context *context;
 /** Main event loop object */
 static struct pa_threaded_mainloop *mainloop;
 
-/** A temporary variable to store the current volume */
-static pa_cvolume volume;
-
 static int broken_pause;
 
 LIBAO_EXTERN(pulse)
@@ -144,6 +141,7 @@ static int init(int rate_hz, int channels, int format, int flags) {
     char *host = NULL;
     char *sink = NULL;
     char *version = pa_get_library_version();
+    struct pa_cvolume volume;
 
     if (ao_subdevice) {
         devarg = strdup(ao_subdevice);
@@ -350,13 +348,14 @@ static float get_delay(void) {
  * pa_context_get_sink_input_info() operation completes. Saves the
  * volume field of the specified structure to the global variable volume. */
 static void info_func(struct pa_context *c, const struct pa_sink_input_info *i, int is_last, void *userdata) {
+    struct pa_cvolume *volume = userdata;
     if (is_last < 0) {
         GENERIC_ERR_MSG(context, "Failed to get sink input info");
         return;
     }
     if (!i)
         return;
-    volume = i->volume;
+    *volume = i->volume;
     pa_threaded_mainloop_signal(mainloop, 0);
 }
 
@@ -365,8 +364,9 @@ static int control(int cmd, void *arg) {
         case AOCONTROL_GET_VOLUME: {
             ao_control_vol_t *vol = arg;
             uint32_t devidx = pa_stream_get_index(stream);
+            struct pa_cvolume volume;
             pa_threaded_mainloop_lock(mainloop);
-            if (!waitop(pa_context_get_sink_input_info(context, devidx, info_func, NULL))) {
+            if (!waitop(pa_context_get_sink_input_info(context, devidx, info_func, &volume))) {
                 GENERIC_ERR_MSG(context, "pa_stream_get_sink_input_info() failed");
                 return CONTROL_ERROR;
             }
@@ -384,7 +384,9 @@ static int control(int cmd, void *arg) {
         case AOCONTROL_SET_VOLUME: {
             const ao_control_vol_t *vol = arg;
             pa_operation *o;
+            struct pa_cvolume volume;
 
+            pa_cvolume_reset(&volume, ao_data.channels);
             if (volume.channels != 2)
                 pa_cvolume_set(&volume, volume.channels, (pa_volume_t)vol->left*PA_VOLUME_NORM/100);
             else {
