@@ -141,7 +141,6 @@ static int init(int rate_hz, int channels, int format, int flags) {
     char *host = NULL;
     char *sink = NULL;
     char *version = pa_get_library_version();
-    struct pa_cvolume volume;
 
     if (ao_subdevice) {
         devarg = strdup(ao_subdevice);
@@ -187,8 +186,6 @@ static int init(int rate_hz, int channels, int format, int flags) {
     pa_channel_map_init_auto(&map, ss.channels, PA_CHANNEL_MAP_ALSA);
     ao_data.bps = pa_bytes_per_second(&ss);
 
-    pa_cvolume_reset(&volume, ss.channels);
-
     if (!(mainloop = pa_threaded_mainloop_new())) {
         mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Failed to allocate main loop\n");
         goto fail;
@@ -222,7 +219,7 @@ static int init(int rate_hz, int channels, int format, int flags) {
     pa_stream_set_write_callback(stream, stream_request_cb, NULL);
     pa_stream_set_latency_update_callback(stream, stream_latency_update_cb, NULL);
 
-    if (pa_stream_connect_playback(stream, sink, NULL, PA_STREAM_INTERPOLATE_TIMING|PA_STREAM_AUTO_TIMING_UPDATE, &volume, NULL) < 0)
+    if (pa_stream_connect_playback(stream, sink, NULL, PA_STREAM_INTERPOLATE_TIMING|PA_STREAM_AUTO_TIMING_UPDATE, NULL, NULL) < 0)
         goto unlock_and_fail;
 
     /* Wait until the stream is ready */
