@@ -613,7 +613,7 @@ static int vbi_init(priv_t* priv,char* device)
         close(vbi_fd);
         return  TVI_CONTROL_FALSE;
     }
-    if(!cap.capabilities & V4L2_CAP_VBI_CAPTURE){
+    if(!(cap.capabilities & V4L2_CAP_VBI_CAPTURE)){
         mp_msg(MSGT_TV,MSGL_ERR,"vbi: %s does not support VBI capture\n",priv->vbi_dev);
         close(vbi_fd);
         return  TVI_CONTROL_FALSE;

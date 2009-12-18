@@ -1,4 +1,4 @@
-// Synced with help_mp-en.h r29912 (MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB)
+// Synced with help_mp-en.h r30044 (MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4)
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);
 //   NAV; section/subsection;  XScreenSaver; keycolor;
@@ -842,7 +842,7 @@ static const char help_text[]=
 #define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "调用 FT_Done_FreeType 失败。\n"
 
 // sub.c
-#define MSGTR_VO_SUB_Seekbar "搜索条"
+#define MSGTR_VO_SUB_Seekbar "定位条"
 #define MSGTR_VO_SUB_Play "播放"
 #define MSGTR_VO_SUB_Pause "暂停"
 #define MSGTR_VO_SUB_Stop "停止"
@@ -989,14 +989,14 @@ static const char help_text[]=
 
 // vo_tdfx_vid.c
 #define MSGTR_LIBVO_TDFXVID_Move "[VO_TDXVID] 移动 %d(%d) x %d => %d。\n"
-#define MSGTR_LIBVO_TDFXVID_AGPMoveFailedToClearTheScreen "[VO_TDFXVID] AGP 移动操作清除屏幕失败。\n"
+#define MSGTR_LIBVO_TDFXVID_AGPMoveFailedToClearTheScreen "[VO_TDFXVID] AGP 移动操作未能清空屏幕。\n"
 #define MSGTR_LIBVO_TDFXVID_BlitFailed "[VO_TDFXVID] 位块传输失败。\n"
 #define MSGTR_LIBVO_TDFXVID_NonNativeOverlayFormatNeedConversion "[VO_TDFXVID] 非原生支持的覆盖格式需要转换。\n"
 #define MSGTR_LIBVO_TDFXVID_UnsupportedInputFormat "[VO_TDFXVID] 不支持的输入格式 0x%x。\n"
 #define MSGTR_LIBVO_TDFXVID_OverlaySetupFailed "[VO_TDFXVID] 覆盖模式设置失败。\n"
 #define MSGTR_LIBVO_TDFXVID_OverlayOnFailed "[VO_TDFXVID] 覆盖模式打开失败。\n"
-#define MSGTR_LIBVO_TDFXVID_OverlayReady "[VO_TDFXVID] 覆盖模式准备完成：%d(%d) x %d @ %d => %d(%d) x %d @ %d。\n"
-#define MSGTR_LIBVO_TDFXVID_TextureBlitReady "[VO_TDFXVID] 纹理位块传输准备完毕：%d(%d) x %d @ %d => %d(%d) x %d @ %d。\n"
+#define MSGTR_LIBVO_TDFXVID_OverlayReady "[VO_TDFXVID] 覆盖模式就绪：%d(%d) x %d @ %d => %d(%d) x %d @ %d。\n"
+#define MSGTR_LIBVO_TDFXVID_TextureBlitReady "[VO_TDFXVID] 纹理位块传输就绪：%d(%d) x %d @ %d => %d(%d) x %d @ %d。\n"
 #define MSGTR_LIBVO_TDFXVID_OverlayOffFailed "[VO_TDFXVID] 覆盖模式关闭失败\n"
 #define MSGTR_LIBVO_TDFXVID_CantOpen "[VO_TDFXVID] 无法打开 %s：%s。\n"
 #define MSGTR_LIBVO_TDFXVID_CantGetCurrentCfg "[VO_TDFXVID] 无法获得当前配置：%s。\n"
@@ -1004,9 +1004,9 @@ static const char help_text[]=
 #define MSGTR_LIBVO_TDFXVID_GetImageTodo "获得图像 todo。\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailed "[VO_TDFXVID] AGP 移动操作失败。\n"
 #define MSGTR_LIBVO_TDFXVID_SetYuvFailed "[VO_TDFXVID] 设置 YUV 失败。\n"
-#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] Y 平面的 AGP 移动操作失败。\n"
-#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] U 平面的 AGP 移动操作失败。\n"
-#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] V 平面的 AGP 移动操作失败。\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] Y 平面 AGP 移动操作失败。\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] U 平面 AGP 移动操作失败。\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] V 平面 AGP 移动操作失败。\n"
 #define MSGTR_LIBVO_TDFXVID_UnknownFormat "[VO_TDFXVID] 未知格式：0x%x。\n"
 
 // vo_tdfxfb.c
@@ -1016,10 +1016,10 @@ static const char help_text[]=
 #define MSGTR_LIBVO_TDFXFB_ThisDriverOnlySupports "[VO_TDFXFB] 该驱动仅支持 3Dfx Banshee、Voodoo3 和 Voodoo 5。\n"
 #define MSGTR_LIBVO_TDFXFB_OutputIsNotSupported "[VO_TDFXFB] 不支持 %d bpp 输出。\n"
 #define MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas "[VO_TDFXFB] 无法映射内存区域：%s。\n"
-#define MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported "[VO_TDFXFB] 不支持 %d bpp 输出（这不应该出现）。\n"
+#define MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported "[VO_TDFXFB] 不支持 %d bpp 输出（这种情况不应出现）。\n"
 #define MSGTR_LIBVO_TDFXFB_SomethingIsWrongWithControl "[VO_TDFXFB] 呃！control() 有点问题。\n"
-#define MSGTR_LIBVO_TDFXFB_NotEnoughVideoMemoryToPlay "[VO_TDFXFB] 没有足够的显存播放此片，尝试较低的分辨率。\n"
-#define MSGTR_LIBVO_TDFXFB_ScreenIs "[VO_TDFXFB] 屏幕 %dx%d 色深 %d bpp，输入 %dx%d 色深 %d bpp，输出 %dx%d。\n"
+#define MSGTR_LIBVO_TDFXFB_NotEnoughVideoMemoryToPlay "[VO_TDFXFB] 没有足够的显存播放此影片，请尝试使用较低的分辨率。\n"
+#define MSGTR_LIBVO_TDFXFB_ScreenIs "[VO_TDFXFB] 屏幕尺寸为 %dx%d 色深 %d bpp，输入尺寸 %dx%d 色深 %d bpp，标准化尺寸 %dx%d。\n"
 
 // vo_tga.c
 #define MSGTR_LIBVO_TGA_UnknownSubdevice "[VO_TGA] 未知子设备：%s。\n"
@@ -1027,11 +1027,11 @@ static const char help_text[]=
 // vo_vesa.c
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] 发生致命错误！无法继续。\n"
 #define MSGTR_LIBVO_VESA_UnknownSubdevice "[VO_VESA] 未知子设备：‘%s’。\n"
-#define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] 显存太小无法支持该模式：\n[VO_VESA] 需要：%08lX 可用：%08lX。\n"
-#define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] 需要指定显示器的性能。未改变刷新率。\n"
-#define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] 模式超出显示器的限制。未改变刷新率。\n"
+#define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] 显存太小无法支持该模式：\n[VO_VESA] 需要：%08lX 现有：%08lX。\n"
+#define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] 需要指定显示器的性能。未改变刷新频率。\n"
+#define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] 模式超出显示器的限制。未改变刷新频率。\n"
 #define MSGTR_LIBVO_VESA_DetectedInternalFatalError "[VO_VESA] 检测到内部致命错误：init 在 preinit 前被调用。\n"
-#define MSGTR_LIBVO_VESA_SwitchFlipIsNotSupported "[VO_VESA] -flip 命令不支持。\n"
+#define MSGTR_LIBVO_VESA_SwitchFlipIsNotSupported "[VO_VESA] 不支持 -flip 命令。\n"
 #define MSGTR_LIBVO_VESA_PossibleReasonNoVbe2BiosFound "[VO_VESA] 可能的原因：未找到 VBE2 BIOS。\n"
 #define MSGTR_LIBVO_VESA_FoundVesaVbeBiosVersion "[VO_VESA] 找到 VESA VBE BIOS 版本 %x.%x 修订版本：%x。\n"
 #define MSGTR_LIBVO_VESA_VideoMemory "[VO_VESA] 显存：%u Kb。\n"
@@ -1043,7 +1043,7 @@ static const char help_text[]=
 #define MSGTR_LIBVO_VESA_OemVendor "[VO_VESA] OEM 销售商：%s。\n"
 #define MSGTR_LIBVO_VESA_OemProductName "[VO_VESA] OEM 产品名：%s。\n"
 #define MSGTR_LIBVO_VESA_OemProductRev "[VO_VESA] OEM 产品版本：%s。\n"
-#define MSGTR_LIBVO_VESA_Hint "[VO_VESA] 提示：为使用电视输出你应当在启动前插入 TV 接口。\n"\
+#define MSGTR_LIBVO_VESA_Hint "[VO_VESA] 提示：为使用电视输出你应当在启动前插入电视接头。\n"\
 "[VO_VESA] 因为 VESA BIOS 只在自检的时候执行初始化。\n"
 #define MSGTR_LIBVO_VESA_UsingVesaMode "[VO_VESA] 使用 VESA 模式 (%u) = %x [%ux%u@%u]\n"
 #define MSGTR_LIBVO_VESA_CantInitializeSwscaler "[VO_VESA] 无法初始化软件缩放功能。\n"
@@ -1055,7 +1055,7 @@ static const char help_text[]=
 #define MSGTR_LIBVO_VESA_CantFindValidWindowAddress "[VO_VESA] 无法找到有效的视频窗口地址。\n"
 #define MSGTR_LIBVO_VESA_UsingBankSwitchingMode "[VO_VESA] 使用组交换模式（物理资源：%08lXh, %08lXh）。\n"
 #define MSGTR_LIBVO_VESA_CantAllocateTemporaryBuffer "[VO_VESA] 无法分配临时缓冲。\n"
-#define MSGTR_LIBVO_VESA_SorryUnsupportedMode "[VO_VESA] 抱歉，不支持该模式——试试 -x 640 -zoom。\n"
+#define MSGTR_LIBVO_VESA_SorryUnsupportedMode "[VO_VESA] 抱歉，不支持该模式——请尝试 -x 640 -zoom。\n"
 #define MSGTR_LIBVO_VESA_OhYouReallyHavePictureOnTv "[VO_VESA] 噢，你的电视上有图像了！\n"
 #define MSGTR_LIBVO_VESA_CantInitialozeLinuxVideoOverlay "[VO_VESA] 无法初始化 Linux 视频覆盖模式。\n"
 #define MSGTR_LIBVO_VESA_UsingVideoOverlay "[VO_VESA] 使用视频覆盖模式：%s。\n"
@@ -1068,15 +1068,15 @@ static const char help_text[]=
 #define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] 这个分支版本已经不再维护。\n[VESA_LVO] 请使用 -vo vesa:vidix。\n"
 #define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] 无法打开：‘%s’\n"
 #define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] 无效的输出格式：%s(%0X)\n"
-#define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] 你的 fb_vid 驱动版本与该版本 MPlayer 不兼容！\n"
+#define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] fb_vid 驱动版本与该版本 MPlayer 不兼容！\n"
 
 // vo_x11.c
 #define MSGTR_LIBVO_X11_DrawFrameCalled "[VO_X11] 已调用 draw_frame()！！！\n"
 
 // vo_xv.c
 #define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] 已调用 draw_frame()！！！\n"
-#define MSGTR_LIBVO_XV_SharedMemoryNotSupported "[VO_XV] 共享内存模式不支持\n回复到正常 Xv 模式。\n"
-#define MSGTR_LIBVO_XV_XvNotSupportedByX11 "[VO_XV] 对不起，该 X11 版本/驱动不支持 Xv\n[VO_XV] ******** 试试使用 -vo x11 或  -vo sdl  *********\n"
+#define MSGTR_LIBVO_XV_SharedMemoryNotSupported "[VO_XV] 不支持共享内存模式\n回复到正常 Xv 模式。\n"
+#define MSGTR_LIBVO_XV_XvNotSupportedByX11 "[VO_XV] 对不起，该 X11 版本/驱动不支持 Xv\n[VO_XV] ******** 请尝试使用 -vo x11 或  -vo sdl  *********\n"
 #define MSGTR_LIBVO_XV_XvQueryAdaptorsFailed  "[VO_XV] XvQueryAdaptors 失败。\n"
 #define MSGTR_LIBVO_XV_InvalidPortParameter "[VO_XV] 无效的端口参数，改用端口 0。\n"
 #define MSGTR_LIBVO_XV_CouldNotGrabPort "[VO_XV] 无法绑定端口 %i。\n"
@@ -1440,40 +1440,40 @@ static const char help_text[]=
 
 // asfheader.c
 
-#define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "致命: 头部的大小超过 1 MB (%d)!\n请联系 MPlayer 的作者, 并且发送或上传此文件。\n"
-#define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "不能为头部分配 %d 字节的空间。\n"
-#define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "读 ASF 头部时遇到 EOF, 文件损坏或不完整?\n"
-#define MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat "DVR 可能只能和 libavformat 一起工作, 如果有问题请试试 -demuxer 35\n"
-#define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "没有数据块紧随头部之后!\n"
-#define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: 找不到音频或视频头部 - 文件损坏?\n"
-#define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "无效的 ASF 头部长度!\n"
-#define MSGTR_MPDEMUX_ASFHDR_DRMLicenseURL "DRM许可证URL地址：%s\n"
-#define MSGTR_MPDEMUX_ASFHDR_DRMProtected "该文件经过了DRM加密，不能在Mplayer中播放！\n"
+#define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "致命错误：文件头部大小超过 1 MB（%d）！\n请联系 MPlayer 的作者, 并且发送或上传此文件。\n"
+#define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "无法为文件头部分配 %d 字节的存放空间。\n"
+#define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "读 ASF 头部时遇到文件结尾，文件损坏或不完整？\n"
+#define MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat "DVR 可能只能与 libavformat 一同使用，如果有问题请尝试 -demuxer 35。\n"
+#define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "文件头部之后没有数据块！\n"
+#define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF：未找到音频或视频头部 - 文件损坏？\n"
+#define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "ASF 头部长度无效！\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMLicenseURL "DRM 许可证 URL 地址：%s\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMProtected "该文件经过了 DRM 加密保护，无法在 Mplayer 中播放！\n"
 
 // aviheader.c
-#define MSGTR_MPDEMUX_AVIHDR_EmptyList "**空列表?!\n"
-#define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "在 0x%X - 0x%X 找到电影\n"
-#define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "找到 'bih', %u 字节的 %d\n"
+#define MSGTR_MPDEMUX_AVIHDR_EmptyList "**空列表？！\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "于 0x%X - 0x%X 位置找到影片数据\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "找到‘bih’，%u 字节，%d\n"
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "为 M$ mpg4v1 视频重新生成关键帧表。\n"
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "为 DIVX3 视频重新生成关键帧表。\n"
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "为 MPEG4 视频重新生成关键帧表。\n"
-#define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "找到 'wf', %d 字节的 %d\n"
-#define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: 发现 dmlh (size=%d) (total_frames=%d)\n"
-#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "正在读 INDEX 块, %d 区块的 %d 帧 (fpos=%"PRId64")。\n"
-#define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "附加的 RIFF 头...\n"
-#define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** 警告: 这不是扩展的 AVI 头部..\n"
-#define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "区块损坏?  chunksize=%d  (id=%.4s)\n"
-#define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: 建造 ODML 索引 (%d superindexchunks)。\n"
-#define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI: ODML: 检测到损坏的(不完整的?)文件。将使用传统的索引。\n"
-#define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "不能读索引文件 %s: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "找到‘wf’，%d 字节，%d\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI：发现 dmlh (size=%d) (total_frames=%d)\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "正在读取索引数据块，%d 块数据用于 %d 帧 (fpos=%"PRId64")。\n"
+#define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "额外的 RIFF 头部数据...\n"
+#define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** 警告：这不是扩展格式的 AVI 头部..\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "数据块损坏？ chunksize=%d  (id=%.4s)\n"
+#define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI：ODML：构造 ODML 索引 (%d superindexchunks)。\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI：ODML：检测到损坏的（不完整的？）文件。将使用传统的索引模式。\n"
+#define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "无法读索引文件 %s：%s\n"
 #define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "%s 不是有效的 MPlayer 索引文件。\n"
 #define MSGTR_MPDEMUX_AVIHDR_FailedMallocForIdxFile "无法为来自 %s 的索引数据分配内存。\n"
 #define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "过早结束的索引文件 %s\n"
-#define MSGTR_MPDEMUX_AVIHDR_IdxFileLoaded "装载索引文件: %s\n"
-#define MSGTR_MPDEMUX_AVIHDR_GeneratingIdx "正在生成索引: %3lu %s     \r"
-#define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: 为 %d 区块生成索引表!\n"
-#define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "无法写索引文件 %s: %s\n"
-#define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "已保存索引文件: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileLoaded "已加载索引文件：%s\n"
+#define MSGTR_MPDEMUX_AVIHDR_GeneratingIdx "正在生成索引：%3lu %s     \r"
+#define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI：为 %d 块数据生成索引表！\n"
+#define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "无法写入索引文件 %s：%s\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "已保存索引文件：%s\n"
 
 // demux_audio.c
 #define MSGTR_MPDEMUX_AUDIO_UnknownFormat "音频分路器: 未知格式 %d。\n"

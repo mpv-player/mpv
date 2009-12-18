@@ -77,8 +77,6 @@
 #include "sysdep/AsmMacros_arm32.h"
 #elif defined(__powerpc__)
 #include "sysdep/AsmMacros_powerpc.h"
-#elif defined(__sh__)
-#include <sys/io.h>
 #else
 #include "sysdep/AsmMacros_x86.h"
 #endif

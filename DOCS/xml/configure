@@ -181,7 +181,7 @@ echo "Looking for a valid XSLT processor..."
 # Also checks for Jade/OpenJade.
 #FIXME: Add support for the xalan/xalan2 XSLT processors.
 
-if xsltproc --version &> /dev/null
+if xsltproc --version > /dev/null 2>&1
 then
   if test -z "$_fake_chunk_xsl"
   then

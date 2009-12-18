@@ -1,8 +1,7 @@
+#!/usr/bin/awk -f
 # This file converts given pci.db to "C" source and header files
 # For latest version of pci ids see: http://pciids.sf.net
 # Copyright 2002 Nick Kurshev
-#
-# Usage: awk -f pci_db2c.awk pci.db
 #
 # Tested with Gawk v 3.0.x and Mawk 1.3.3
 # But it should work with standard Awk implementations (hopefully).
@@ -28,7 +27,7 @@ BEGIN {
 
     if(ARGC != 3) {
 # check for arguments:
-	print "Usage awk -f pci_db2c.awk pci.db (and make sure pci.db file exists first)";
+	print "Usage ./pci_db2c.awk pci.db (and make sure pci.db file exists first)";
 	exit(1);
     }
     in_file = ARGV[1];
