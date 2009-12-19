@@ -32,7 +32,7 @@
 #include <GL/gl.h>
 #include "w32_common.h"
 #endif
-#ifdef CONFIG_X11
+#ifdef GL_X11
 #include <GL/gl.h>
 #include <X11/Xlib.h>
 #include <GL/glx.h>
@@ -362,7 +362,7 @@ typedef struct MPGLContext {
   enum MPGLType type;
   union {
     int w32;
-#ifdef CONFIG_X11
+#ifdef GL_X11
     XVisualInfo *x11;
 #endif
   } vinfo;
@@ -370,7 +370,7 @@ typedef struct MPGLContext {
 #ifdef GL_WIN32
     HGLRC w32;
 #endif
-#ifdef CONFIG_X11
+#ifdef GL_X11
     GLXContext x11;
 #endif
   } context;

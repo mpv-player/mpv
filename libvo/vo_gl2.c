@@ -125,7 +125,7 @@ static GLint getInternalFormat(void)
   }
   break;
 #endif
-#ifdef CONFIG_X11
+#ifdef GL_X11
   case GLTYPE_X11:
   if (glXGetConfig(mDisplay, glctx.vinfo.x11, GLX_RED_SIZE, &r_sz) != 0) r_sz = 0;
   if (glXGetConfig(mDisplay, glctx.vinfo.x11, GLX_GREEN_SIZE, &g_sz) != 0) g_sz = 0;

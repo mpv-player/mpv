@@ -4922,11 +4922,14 @@ EOF
   _gl=no
   if cc_check -lGL $_ld_lm ; then
     _gl=yes
+    _gl_x11=yes
     libs_mplayer="$libs_mplayer -lGL $_ld_dl"
   elif cc_check -lGL $_ld_lm $_ld_pthread ; then
     _gl=yes
+    _gl_x11=yes
     libs_mplayer="$libs_mplayer -lGL $_ld_pthread $_ld_dl"
-  elif cc_check -DGL_WIN32 -lopengl32 ; then
+  fi
+  if cc_check -DGL_WIN32 -lopengl32 ; then
     _gl=yes
     _gl_win32=yes
     libs_mplayer="$libs_mplayer -lopengl32 -lgdi32"
@@ -4936,14 +4939,20 @@ else
 fi
 if test "$_gl" = yes ; then
   def_gl='#define CONFIG_GL 1'
+  _res_comment="backends:"
   if test "$_gl_win32" = yes ; then
     def_gl_win32='#define GL_WIN32 1'
-    _res_comment="win32 version"
+    _res_comment="$_res_comment win32"
+  fi
+  if test "$_gl_x11" = yes ; then
+    def_gl_x11='#define GL_X11 1'
+    _res_comment="$_res_comment x11"
   fi
   _vomodules="opengl $_vomodules"
 else
   def_gl='#undef CONFIG_GL'
   def_gl_win32='#undef GL_WIN32'
+  def_gl_x11='#undef GL_X11'
   _novomodules="opengl $_novomodules"
 fi
 echores "$_gl"
@@ -8280,6 +8289,7 @@ GIF = $_gif
 GGI = $_ggi
 GL = $_gl
 GL_WIN32 = $_gl_win32
+GL_X11 = $_gl_x11
 GUI = $_gui
 GUI_GTK = $_gui_gtk
 GUI_WIN32 = $_gui_win32
@@ -8802,6 +8812,7 @@ $def_gif_4
 $def_gif_tvt_hack
 $def_gl
 $def_gl_win32
+$def_gl_x11
 $def_ivtv
 $def_jpeg
 $def_kva

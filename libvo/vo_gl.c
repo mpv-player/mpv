@@ -48,7 +48,7 @@ static const vo_info_t info =
 
 const LIBVO_EXTERN(gl)
 
-#ifdef CONFIG_X11
+#ifdef GL_X11
 static int                  wsGLXAttrib[] = { GLX_RGBA,
                                        GLX_RED_SIZE,1,
                                        GLX_GREEN_SIZE,1,
@@ -428,7 +428,7 @@ static void uninitGl(void) {
     DeleteBuffers(2, gl_buffer_uv);
   gl_buffer_uv[0] = gl_buffer_uv[1] = 0; gl_buffersize_uv = 0;
   gl_bufferptr_uv[0] = gl_bufferptr_uv[1] = 0;
-#ifdef CONFIG_X11
+#ifdef GL_X11
   if (mesa_bufferptr)
     FreeMemoryMESA(mDisplay, mScreen, mesa_bufferptr);
 #endif
@@ -545,7 +545,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   if (glctx.type == GLTYPE_W32 && !vo_w32_config(d_width, d_height, flags))
     return -1;
 #endif
-#ifdef CONFIG_X11
+#ifdef GL_X11
   if (glctx.type == GLTYPE_X11) {
     XVisualInfo *vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
     if (vinfo == NULL)
@@ -774,7 +774,7 @@ static uint32_t get_image(mp_image_t *mpi) {
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
   needed_size = mpi->stride[0] * mpi->height;
   if (mesa_buffer) {
-#ifdef CONFIG_X11
+#ifdef GL_X11
     if (mesa_bufferptr && needed_size > mesa_buffersize) {
       FreeMemoryMESA(mDisplay, mScreen, mesa_bufferptr);
       mesa_bufferptr = NULL;

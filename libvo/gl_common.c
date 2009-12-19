@@ -1634,7 +1634,7 @@ static void swapGlBuffers_w32(MPGLContext *ctx) {
   vo_w32_release_dc(vo_w32_window, vo_hdc);
 }
 #endif
-#ifdef CONFIG_X11
+#ifdef GL_X11
 #ifdef HAVE_LIBDL
 #include <dlfcn.h>
 #endif
@@ -1819,7 +1819,7 @@ int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
     ctx->ontop = vo_w32_ontop;
     return vo_w32_init();
 #endif
-#ifdef CONFIG_X11
+#ifdef GL_X11
   case GLTYPE_X11:
     ctx->setGlWindow = setGlWindow_x11;
     ctx->releaseGlContext = releaseGlContext_x11;
@@ -1844,7 +1844,7 @@ void uninit_mpglcontext(MPGLContext *ctx) {
     vo_w32_uninit();
     break;
 #endif
-#ifdef CONFIG_X11
+#ifdef GL_X11
   case GLTYPE_X11:
     vo_x11_uninit();
     break;
