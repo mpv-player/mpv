@@ -6180,6 +6180,11 @@ if test "$_ass" = yes ; then
 else
     def_ass='#undef CONFIG_ASS'
 fi
+if test "$ass_internal" = yes ; then
+    def_ass_internal='#define CONFIG_ASS_INTERNAL 1'
+else
+    def_ass_internal='#undef CONFIG_ASS_INTERNAL'
+fi
 echores "$_ass"
 
 
@@ -8772,6 +8777,7 @@ $def_tv_v4l2
 
 /* font stuff */
 $def_ass
+$def_ass_internal
 $def_bitmap_font
 $def_enca
 $def_fontconfig
