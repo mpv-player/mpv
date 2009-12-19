@@ -1408,6 +1408,8 @@ void glSetupYUVConversion(gl_conversion_params_t *params) {
     case YUV_CONVERSION_FRAGMENT_POW:
       glSetupYUVFragprog(params);
       break;
+    case YUV_CONVERSION_NONE:
+      break;
     default:
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown conversion type %i\n", YUV_CONVERSION(params->type));
   }
@@ -1420,7 +1422,6 @@ void glSetupYUVConversion(gl_conversion_params_t *params) {
  * \ingroup glconversion
  */
 void glEnableYUVConversion(GLenum target, int type) {
-  if (type <= 0) return;
   switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_COMBINERS:
       ActiveTexture(GL_TEXTURE1);
@@ -1442,6 +1443,7 @@ void glEnableYUVConversion(GLenum target, int type) {
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_POW:
     case YUV_CONVERSION_FRAGMENT:
+    case YUV_CONVERSION_NONE:
       Enable(GL_FRAGMENT_PROGRAM);
       break;
   }
@@ -1454,7 +1456,6 @@ void glEnableYUVConversion(GLenum target, int type) {
  * \ingroup glconversion
  */
 void glDisableYUVConversion(GLenum target, int type) {
-  if (type <= 0) return;
   switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_COMBINERS:
       ActiveTexture(GL_TEXTURE1);
@@ -1476,6 +1477,7 @@ void glDisableYUVConversion(GLenum target, int type) {
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_POW:
     case YUV_CONVERSION_FRAGMENT:
+    case YUV_CONVERSION_NONE:
       Disable(GL_FRAGMENT_PROGRAM);
       break;
   }
