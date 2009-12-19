@@ -26,7 +26,7 @@
 
 #include "stream/stream.h"
 #ifdef CONFIG_ASS
-#include "libass/ass_types.h"
+#include "libass/ass_mp.h"
 #endif
 
 #ifdef HAVE_BUILTIN_EXPECT
