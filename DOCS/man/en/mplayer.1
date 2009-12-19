@@ -3839,6 +3839,9 @@ Values below 0 will leave it at the system default.
 This limits the framerate to (horizontal refresh rate / n).
 Requires GLX_SGI_swap_control support to work.
 With some (most/all?) implementations this only works in fullscreen mode.
+.IPs ycbcr
+Use the GL_MESA_ycbcr_texture extension to convert YUV to RGB.
+In most cases this is probably slower than doing software conversion to RGB.
 .IPs yuv=<n>
 Select the type of YUV to RGB conversion.
 .RSss
@@ -3882,9 +3885,6 @@ Provides brightness, contrast, saturation, hue and gamma control.
 Gamma can also be set independently for red, green and blue.
 Speed depends more on GPU memory bandwidth than other methods.
 .RE
-.IPs ycbcr
-Use the GL_MESA_ycbcr_texture extension to convert YUV to RGB.
-In most cases this is probably slower than doing software conversion to RGB.
 .IPs lscale=<n>
 Select the scaling function to use for luminance scaling.
 Only valid for yuv modes 2, 3, 4 and 6.
@@ -3921,6 +3921,13 @@ If enabled (default) use GL_LINEAR interpolation, otherwise use GL_NEAREST
 for customtex texture.
 .IPs (no)customtrect
 If enabled, use texture_rectangle for customtex texture.
+Default is disabled.
+.IPs (no)mipmapgen
+If enabled, mipmaps for the video are automatically generated.
+This should be useful together with the customprog and the TXB
+instruction to implement blur filters with a large radius.
+For most OpenGL implementations this is very slow for any non-RGB
+formats.
 Default is disabled.
 .RE
 .sp 1

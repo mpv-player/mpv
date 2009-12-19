@@ -1067,6 +1067,8 @@ static int preinit(const char *arg)
               "    Interval in displayed frames between to buffer swaps.\n"
               "    1 is equivalent to enable VSYNC, 0 to disable VSYNC.\n"
               "    Requires GLX_SGI_swap_control support to work.\n"
+              "  ycbcr\n"
+              "    also try to use the GL_MESA_ycbcr_texture extension\n"
               "  yuv=<n>\n"
               "    0: use software YUV to RGB conversion.\n"
               "    1: use register combiners (nVidia only, for older cards).\n"
@@ -1098,8 +1100,6 @@ static int preinit(const char *arg)
               "    generate mipmaps for the video image (use with TXB in customprog)\n"
               "  osdcolor=<0xAARRGGBB>\n"
               "    use the given color for the OSD\n"
-              "  ycbcr\n"
-              "    also try to use the GL_MESA_ycbcr_texture extension\n"
               "\n" );
       return -1;
     }
