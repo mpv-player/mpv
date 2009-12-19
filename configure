@@ -280,7 +280,8 @@ Optional features:
   --disable-vstream      disable TiVo vstream client support [autodetect]
   --disable-pthreads     disable Posix threads support [autodetect]
   --disable-w32threads   disable Win32 threads support [autodetect]
-  --disable-ass          disable internal SSA/ASS subtitle support [autodetect]
+  --disable-ass-internal disable internal SSA/ASS subtitle support [autodetect]
+  --disable-ass          disable SSA/ASS subtitle support [autodetect]
   --enable-rpath         enable runtime linker path for extra libs [disabled]
 
 Codecs:
@@ -741,6 +742,7 @@ _vstream=auto
 _pthreads=auto
 _w32threads=auto
 _ass=auto
+ass_internal=yes
 _rpath=no
 _asmalign_pot=auto
 _stream_cache=yes
@@ -1248,6 +1250,8 @@ for ac_option do
   --disable-w32threads) _w32threads=no  ;;
   --enable-ass)         _ass=yes        ;;
   --disable-ass)        _ass=no         ;;
+  --enable-ass-internal)  ass_internal=yes ;;
+  --disable-ass-internal) ass_internal=no  ;;
   --enable-rpath)       _rpath=yes      ;;
   --disable-rpath)      _rpath=no       ;;
 
@@ -6166,6 +6170,9 @@ EOF
     cc_check $($_freetypeconfig --cflags) $($_freetypeconfig --libs) && _ass=yes
     if test "$_ass" = no ; then
         _res_comment="FreeType >= 2.1.8 needed"
+    elif test "$ass_internal" = no ; then
+        _res_comment="external"
+        extra_ldflags="$extra_ldflags -lass"
     fi
 fi
 if test "$_ass" = yes ; then
@@ -8304,6 +8311,7 @@ LADSPA = $_ladspa
 LIBA52 = $_liba52
 LIBA52_INTERNAL = $_liba52_internal
 LIBASS = $_ass
+LIBASS_INTERNAL = $ass_internal
 LIBBS2B = $_libbs2b
 LIBDCA = $_libdca
 LIBDV = $_libdv

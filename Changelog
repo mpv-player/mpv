@@ -35,6 +35,8 @@ MPlayer (1.0)
       Configure with --enable-protocol="file_protocol pipe_protocol
       http_protocol rtmp_protocol tcp_protocol udp_protocol"
       and use e.g. ffmpeg://http://example.com/test
+    * experimental support for external libass, configure with
+      --disable-ass-internal
 
     MEncoder:
     * add -tsprog for demuxer lavf
