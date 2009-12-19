@@ -90,6 +90,9 @@ static int osd_color;
 
 static int use_aspect;
 static int use_ycbcr;
+#define MASK_ALL_YUV (~(1 << YUV_CONVERSION_NONE))
+#define MASK_NOT_COMBINERS (~((1 << YUV_CONVERSION_NONE) | (1 << YUV_CONVERSION_COMBINERS) | (1 << YUV_CONVERSION_COMBINERS_ATI)))
+#define MASK_GAMMA_SUPPORT (MASK_NOT_COMBINERS & ~(1 << YUV_CONVERSION_FRAGMENT))
 static int use_yuv;
 static int lscale;
 static int cscale;
@@ -492,20 +495,19 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
     ActiveTexture(GL_TEXTURE2);
     glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, GL_LINEAR,
                      texture_width / 2, texture_height / 2, 128);
-    switch (use_yuv) {
-      case YUV_CONVERSION_FRAGMENT_LOOKUP:
-      case YUV_CONVERSION_FRAGMENT_POW:
-      case YUV_CONVERSION_FRAGMENT:
-        if (!GenPrograms || !BindProgram) {
-          mp_msg(MSGT_VO, MSGL_ERR, "[gl] fragment program functions missing!\n");
-          break;
-        }
-        GenPrograms(1, &fragprog);
-        BindProgram(GL_FRAGMENT_PROGRAM, fragprog);
-        break;
-    }
     ActiveTexture(GL_TEXTURE0);
     BindTexture(gl_target, 0);
+  }
+  if (image_format == IMGFMT_YV12 || custom_prog)
+  {
+    if ((MASK_NOT_COMBINERS & (1 << use_yuv)) || custom_prog) {
+      if (!GenPrograms || !BindProgram) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[gl] fragment program functions missing!\n");
+      } else {
+        GenPrograms(1, &fragprog);
+        BindProgram(GL_FRAGMENT_PROGRAM, fragprog);
+      }
+    }
     update_yuvconv();
   }
   glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, GL_LINEAR,
@@ -670,14 +672,14 @@ static void do_render(void) {
 //  BindTexture(GL_TEXTURE_2D, texture_id);
 
   Color3f(1,1,1);
-  if (image_format == IMGFMT_YV12)
+  if (image_format == IMGFMT_YV12 || custom_prog)
     glEnableYUVConversion(gl_target, yuvconvtype);
   glDrawTex(0, 0, image_width, image_height,
             0, 0, image_width, image_height,
             texture_width, texture_height,
             use_rectangle == 1, image_format == IMGFMT_YV12,
             mpi_flipped ^ vo_flipped);
-  if (image_format == IMGFMT_YV12)
+  if (image_format == IMGFMT_YV12 || custom_prog)
     glDisableYUVConversion(gl_target, yuvconvtype);
 }
 
@@ -1103,10 +1105,6 @@ static int preinit(const char *arg)
 
     return 0;
 }
-
-#define MASK_ALL_YUV (~(1 << YUV_CONVERSION_NONE))
-#define MASK_NOT_COMBINERS (~((1 << YUV_CONVERSION_NONE) | (1 << YUV_CONVERSION_COMBINERS) | (1 << YUV_CONVERSION_COMBINERS_ATI)))
-#define MASK_GAMMA_SUPPORT (MASK_NOT_COMBINERS & ~(1 << YUV_CONVERSION_FRAGMENT))
 
 static const struct {
   const char *name;
