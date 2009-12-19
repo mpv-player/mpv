@@ -1092,7 +1092,7 @@ static void create_conv_textures(gl_conversion_params_t *params, int *texu, char
   switch (conv) {
     case YUV_CONVERSION_FRAGMENT:
     case YUV_CONVERSION_FRAGMENT_POW:
-     break;
+      break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
       texs[0] = (*texu)++;
       ActiveTexture(GL_TEXTURE0 + texs[0]);
