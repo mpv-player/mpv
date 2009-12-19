@@ -4941,18 +4941,18 @@ if test "$_gl" = yes ; then
   def_gl='#define CONFIG_GL 1'
   _res_comment="backends:"
   if test "$_gl_win32" = yes ; then
-    def_gl_win32='#define GL_WIN32 1'
+    def_gl_win32='#define CONFIG_GL_WIN32 1'
     _res_comment="$_res_comment win32"
   fi
   if test "$_gl_x11" = yes ; then
-    def_gl_x11='#define GL_X11 1'
+    def_gl_x11='#define CONFIG_GL_X11 1'
     _res_comment="$_res_comment x11"
   fi
   _vomodules="opengl $_vomodules"
 else
   def_gl='#undef CONFIG_GL'
-  def_gl_win32='#undef GL_WIN32'
-  def_gl_x11='#undef GL_X11'
+  def_gl_win32='#undef CONFIG_GL_WIN32'
+  def_gl_x11='#undef CONFIG_GL_X11'
   _novomodules="opengl $_novomodules"
 fi
 echores "$_gl"

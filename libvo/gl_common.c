@@ -1538,7 +1538,7 @@ void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
   End();
 }
 
-#ifdef GL_WIN32
+#ifdef CONFIG_GL_WIN32
 #include "w32_common.h"
 /**
  * \brief little helper since wglGetProcAddress definition does not fit our
@@ -1634,7 +1634,7 @@ static void swapGlBuffers_w32(MPGLContext *ctx) {
   vo_w32_release_dc(vo_w32_window, vo_hdc);
 }
 #endif
-#ifdef GL_X11
+#ifdef CONFIG_GL_X11
 #ifdef HAVE_LIBDL
 #include <dlfcn.h>
 #endif
@@ -1807,7 +1807,7 @@ int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
   memset(ctx, 0, sizeof(*ctx));
   ctx->type = type;
   switch (ctx->type) {
-#ifdef GL_WIN32
+#ifdef CONFIG_GL_WIN32
   case GLTYPE_W32:
     ctx->setGlWindow = setGlWindow_w32;
     ctx->releaseGlContext = releaseGlContext_w32;
@@ -1819,7 +1819,7 @@ int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
     ctx->ontop = vo_w32_ontop;
     return vo_w32_init();
 #endif
-#ifdef GL_X11
+#ifdef CONFIG_GL_X11
   case GLTYPE_X11:
     ctx->setGlWindow = setGlWindow_x11;
     ctx->releaseGlContext = releaseGlContext_x11;
@@ -1839,12 +1839,12 @@ int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
 void uninit_mpglcontext(MPGLContext *ctx) {
   ctx->releaseGlContext(ctx);
   switch (ctx->type) {
-#ifdef GL_WIN32
+#ifdef CONFIG_GL_WIN32
   case GLTYPE_W32:
     vo_w32_uninit();
     break;
 #endif
-#ifdef GL_X11
+#ifdef CONFIG_GL_X11
   case GLTYPE_X11:
     vo_x11_uninit();
     break;

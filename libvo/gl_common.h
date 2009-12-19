@@ -27,12 +27,12 @@
 
 #include "video_out.h"
 
-#ifdef GL_WIN32
+#ifdef CONFIG_GL_WIN32
 #include <windows.h>
 #include <GL/gl.h>
 #include "w32_common.h"
 #endif
-#ifdef GL_X11
+#ifdef CONFIG_GL_X11
 #include <GL/gl.h>
 #include <X11/Xlib.h>
 #include <GL/glx.h>
@@ -43,7 +43,7 @@
 #ifndef GLAPIENTRY
 #ifdef APIENTRY
 #define GLAPIENTRY APIENTRY
-#elif defined(GL_WIN32)
+#elif defined(CONFIG_GL_WIN32)
 #define GLAPIENTRY __stdcall
 #else
 #define GLAPIENTRY
@@ -362,15 +362,15 @@ typedef struct MPGLContext {
   enum MPGLType type;
   union {
     int w32;
-#ifdef GL_X11
+#ifdef CONFIG_GL_X11
     XVisualInfo *x11;
 #endif
   } vinfo;
   union {
-#ifdef GL_WIN32
+#ifdef CONFIG_GL_WIN32
     HGLRC w32;
 #endif
-#ifdef GL_X11
+#ifdef CONFIG_GL_X11
     GLXContext x11;
 #endif
   } context;
