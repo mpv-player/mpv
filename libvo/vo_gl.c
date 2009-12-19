@@ -127,6 +127,7 @@ static char *custom_prog;
 static char *custom_tex;
 static int custom_tlin;
 static int custom_trect;
+static int mipmap_gen;
 
 static int int_pause;
 static int eq_bri = 0;
@@ -465,6 +466,7 @@ static void autodetectGlExtensions(void) {
  * set global gl-related variables to their default values
  */
 static int initGl(uint32_t d_width, uint32_t d_height) {
+  int scale_type = mipmap_gen ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR;
   autodetectGlExtensions();
   texSize(image_width, image_height, &texture_width, &texture_height);
 
@@ -490,11 +492,15 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
       BindTexture(GL_TEXTURE_3D, default_texs[i + 14]);
     }
     ActiveTexture(GL_TEXTURE1);
-    glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, GL_LINEAR,
+    glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, scale_type,
                      texture_width / 2, texture_height / 2, 128);
+    if (mipmap_gen)
+      TexParameteri(gl_target, GL_GENERATE_MIPMAP, GL_TRUE);
     ActiveTexture(GL_TEXTURE2);
-    glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, GL_LINEAR,
+    glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, scale_type,
                      texture_width / 2, texture_height / 2, 128);
+    if (mipmap_gen)
+      TexParameteri(gl_target, GL_GENERATE_MIPMAP, GL_TRUE);
     ActiveTexture(GL_TEXTURE0);
     BindTexture(gl_target, 0);
   }
@@ -510,8 +516,10 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
     }
     update_yuvconv();
   }
-  glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, GL_LINEAR,
+  glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, scale_type,
                    texture_width, texture_height, 0);
+  if (mipmap_gen)
+    TexParameteri(gl_target, GL_GENERATE_MIPMAP, GL_TRUE);
 
   resize(d_width, d_height);
 
@@ -996,6 +1004,7 @@ static const opt_t subopts[] = {
   {"customtex",    OPT_ARG_MSTRZ,&custom_tex,   NULL},
   {"customtlin",   OPT_ARG_BOOL, &custom_tlin,  NULL},
   {"customtrect",  OPT_ARG_BOOL, &custom_trect, NULL},
+  {"mipmapgen",    OPT_ARG_BOOL, &mipmap_gen,   NULL},
   {"osdcolor",     OPT_ARG_INT,  &osd_color,    NULL},
   {NULL}
 };
@@ -1027,6 +1036,7 @@ static int preinit(const char *arg)
     custom_tex = NULL;
     custom_tlin = 1;
     custom_trect = 0;
+    mipmap_gen = 0;
     osd_color = 0xffffff;
     if (subopt_parse(arg, subopts) != 0) {
       mp_msg(MSGT_VO, MSGL_FATAL,
@@ -1084,6 +1094,8 @@ static int preinit(const char *arg)
               "    use GL_NEAREST scaling for customtex texture\n"
               "  customtrect\n"
               "    use texture_rectangle for customtex texture\n"
+              "  mipmapgen\n"
+              "    generate mipmaps for the video image (use with TXB in customprog)\n"
               "  osdcolor=<0xAARRGGBB>\n"
               "    use the given color for the OSD\n"
               "  ycbcr\n"
