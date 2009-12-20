@@ -42,7 +42,9 @@ BEGIN {
     print_head(ids_file);
     print_head(name_file);
     print_head(dev_ids_file);
-    print_includes(dev_ids_file);
+    print "#include <stdlib.h>" > dev_ids_file;
+    print "#include \"pci_names.h\"" > dev_ids_file;
+
     print_guards_start(vendor_file);
     print_guards_start(ids_file);
     print "#include \"pci_vendors.h\"" > ids_file
@@ -128,12 +130,6 @@ function print_guards_end(out_file)
     guard_name = construct_guard_name(out_file);
     print "" > out_file
     printf("#endif /* %s */\n", guard_name) > out_file
-}
-
-function print_includes(out_file)
-{
-    print "#include <stdlib.h>" > out_file;
-    print "#include \"pci_names.h\"" > out_file;
 }
 
 function print_head(out_file)
