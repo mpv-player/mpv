@@ -45,18 +45,12 @@ BEGIN {
     print_head(name_h_file);
     print_head(dev_ids_file);
     print_includes(dev_ids_file);
-    print "#ifndef MPLAYER_PCI_VENDORS_H" > vendor_file
-    print "#define MPLAYER_PCI_VENDORS_H" > vendor_file
-    print "" > vendor_file
-    print "#ifndef MPLAYER_PCI_IDS_H" > ids_file
-    print "#define MPLAYER_PCI_IDS_H" > ids_file
-    print "" > ids_file
+    print_guards_start(vendor_file);
+    print_guards_start(name_h_file);
+    print_guards_start(ids_file);
     print "#include \"pci_vendors.h\"" > ids_file
     print "" > ids_file
 
-    print "#ifndef MPLAYER_PCI_NAMES_H" > name_h_file
-    print "#define MPLAYER_PCI_NAMES_H" > name_h_file
-    print "" > name_h_file
     print_name_struct(name_h_file);
     print "#include <stddef.h>" > name_file
     print "#include \"pci_names.h\"" > name_file
@@ -110,16 +104,35 @@ BEGIN {
         }
     }
     #print "Total lines parsed:", line;
-    print "" > vendor_file
-    print "#endif /* MPLAYER_PCI_VENDORS_H */" > vendor_file
-    print "" > ids_file
-    print "#endif /* MPLAYER_PCI_IDS_H */" > ids_file
-    print "" > name_h_file
-    print "#endif /* MPLAYER_PCI_NAMES_H */" > name_h_file
+    print_guards_end(vendor_file);
+    print_guards_end(name_h_file);
+    print_guards_end(ids_file);
     if (with_pci_db) print "};" > name_file
     print "{ 0xFFFF, NULL }" > dev_ids_file;
     print "};" > dev_ids_file
     print_func_bodies(name_file);
+}
+
+function construct_guard_name(out_file)
+{
+    split(out_file, path_components, "/");
+    sub(".h","_h", path_components[2]);
+    return "MPLAYER_" toupper(path_components[2]);
+}
+
+function print_guards_start(out_file)
+{
+    guard_name = construct_guard_name(out_file);
+    printf("#ifndef %s\n", guard_name) > out_file
+    printf("#define %s\n", guard_name) > out_file
+    print "" > out_file
+}
+
+function print_guards_end(out_file)
+{
+    guard_name = construct_guard_name(out_file);
+    print "" > out_file
+    printf("#endif /* %s */\n", guard_name) > out_file
 }
 
 function print_includes(out_file)
