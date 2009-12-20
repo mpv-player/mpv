@@ -32,30 +32,30 @@ BEGIN {
     }
     in_file = ARGV[1];
     with_pci_db = ARGV[2];
-    vendor_file  = "vidix/pci_vendors.h";
-    ids_file     = "vidix/pci_ids.h"
-    name_file    = "vidix/pci_names.c"
-    dev_ids_file = "vidix/pci_dev_ids.c"
+    dev_ids_c_file = "vidix/pci_dev_ids.c"
+    ids_h_file     = "vidix/pci_ids.h"
+    names_c_file   = "vidix/pci_names.c"
+    vendors_h_file = "vidix/pci_vendors.h";
     line = 0;
     # print out head lines
-    print_head(vendor_file);
-    print_head(ids_file);
-    print_head(name_file);
-    print_head(dev_ids_file);
-    print "#include <stdlib.h>" > dev_ids_file;
-    print "#include \"pci_names.h\"" > dev_ids_file;
+    print_head(vendors_h_file);
+    print_head(ids_h_file);
+    print_head(names_c_file);
+    print_head(dev_ids_c_file);
+    print "#include <stdlib.h>" > dev_ids_c_file;
+    print "#include \"pci_names.h\"" > dev_ids_c_file;
 
-    print_guards_start(vendor_file);
-    print_guards_start(ids_file);
-    print "#include \"pci_vendors.h\"" > ids_file
-    print "" > ids_file
+    print_guards_start(vendors_h_file);
+    print_guards_start(ids_h_file);
+    print "#include \"pci_vendors.h\"" > ids_h_file
+    print "" > ids_h_file
 
-    print "#include <stddef.h>" > name_file
-    print "#include \"pci_names.h\"" > name_file
+    print "#include <stddef.h>" > names_c_file
+    print "#include \"pci_names.h\"" > names_c_file
     if (with_pci_db) {
-        print "#include \"pci_dev_ids.c\"" > name_file
-        print "" > name_file
-        print "static struct vendor_id_s vendor_ids[] = {" > name_file
+        print "#include \"pci_dev_ids.c\"" > names_c_file
+        print "" > names_c_file
+        print "static struct vendor_id_s vendor_ids[] = {" > names_c_file
     }
     first_pass = 1;
     init_name_db();
@@ -67,47 +67,47 @@ BEGIN {
         if (field[1] == "v" && length(field[3]) > 0 && field[4] == "0") {
             init_device_db()
             svend_name = get_short_vendor_name(field[3])
-            printf("#define VENDOR_%s\t", svend_name) > vendor_file;
-            if (length(svend_name) < 9) printf("\t") > vendor_file;
-            printf("0x%s /*%s*/\n", field[2], name_field) > vendor_file;
-            if (with_pci_db) printf("{ 0x%s, \"%s\", dev_lst_%s },\n", field[2], name_field, field[2]) > name_file;
-            printf("/* Vendor: %s: %s */\n", field[2], name_field) > ids_file
+            printf("#define VENDOR_%s\t", svend_name) > vendors_h_file;
+            if (length(svend_name) < 9) printf("\t") > vendors_h_file;
+            printf("0x%s /*%s*/\n", field[2], name_field) > vendors_h_file;
+            if (with_pci_db) printf("{ 0x%s, \"%s\", dev_lst_%s },\n", field[2], name_field, field[2]) > names_c_file;
+            printf("/* Vendor: %s: %s */\n", field[2], name_field) > ids_h_file
             if (first_pass == 1) first_pass = 0;
-            else print "{ 0xFFFF, NULL }\n};" > dev_ids_file;
-            printf("static const struct device_id_s dev_lst_%s[] = {\n", field[2])> dev_ids_file
+            else print "{ 0xFFFF, NULL }\n};" > dev_ids_c_file;
+            printf("static const struct device_id_s dev_lst_%s[] = {\n", field[2])> dev_ids_c_file
         }
         if (field[1] == "d" && length(field[3]) > 0 && field[4] == "0") {
             sdev_name = get_short_device_name(field[3])
             full_name = sprintf("#define DEVICE_%s_%s", svend_name, sdev_name);
-            printf("%s\t", full_name) > ids_file
-            if (length(full_name) <  9) printf("\t") > ids_file;
-            if (length(full_name) < 17) printf("\t") > ids_file;
-            if (length(full_name) < 25) printf("\t") > ids_file;
-            if (length(full_name) < 32) printf("\t") > ids_file;
-            if (length(full_name) < 40) printf("\t") > ids_file;
-            if (length(full_name) < 48) printf("\t") > ids_file;
-            printf("0x%s /*%s*/\n", substr(field[2], 5), name_field) > ids_file
-            printf("{ 0x%s, \"%s\" },\n", substr(field[2], 5), name_field) > dev_ids_file
+            printf("%s\t", full_name) > ids_h_file
+            if (length(full_name) <  9) printf("\t") > ids_h_file;
+            if (length(full_name) < 17) printf("\t") > ids_h_file;
+            if (length(full_name) < 25) printf("\t") > ids_h_file;
+            if (length(full_name) < 32) printf("\t") > ids_h_file;
+            if (length(full_name) < 40) printf("\t") > ids_h_file;
+            if (length(full_name) < 48) printf("\t") > ids_h_file;
+            printf("0x%s /*%s*/\n", substr(field[2], 5), name_field) > ids_h_file
+            printf("{ 0x%s, \"%s\" },\n", substr(field[2], 5), name_field) > dev_ids_c_file
         }
         if (field[1] == "s" && length(field[3]) > 0 && field[4] == "0") {
             subdev_name = get_short_subdevice_name(field[3])
             full_name = sprintf("#define SUBDEVICE_%s_%s", svend_name, subdev_name)
-            printf("\t%s\t", full_name) > ids_file
-            if (length(full_name) <  9) printf("\t") > ids_file;
-            if (length(full_name) < 17) printf("\t") > ids_file;
-            if (length(full_name) < 25) printf("\t") > ids_file;
-            if (length(full_name) < 32) printf("\t") > ids_file;
-            if (length(full_name) < 40) printf("\t") > ids_file;
-            printf("0x%s /*%s*/\n", substr(field[2], 9), name_field) > ids_file
+            printf("\t%s\t", full_name) > ids_h_file
+            if (length(full_name) <  9) printf("\t") > ids_h_file;
+            if (length(full_name) < 17) printf("\t") > ids_h_file;
+            if (length(full_name) < 25) printf("\t") > ids_h_file;
+            if (length(full_name) < 32) printf("\t") > ids_h_file;
+            if (length(full_name) < 40) printf("\t") > ids_h_file;
+            printf("0x%s /*%s*/\n", substr(field[2], 9), name_field) > ids_h_file
         }
     }
     #print "Total lines parsed:", line;
-    print_guards_end(vendor_file);
-    print_guards_end(ids_file);
-    if (with_pci_db) print "};" > name_file
-    print "{ 0xFFFF, NULL }" > dev_ids_file;
-    print "};" > dev_ids_file
-    print_func_bodies(name_file);
+    print_guards_end(vendors_h_file);
+    print_guards_end(ids_h_file);
+    if (with_pci_db) print "};" > names_c_file
+    print "{ 0xFFFF, NULL }" > dev_ids_c_file;
+    print "};" > dev_ids_c_file
+    print_func_bodies(names_c_file);
 }
 
 function construct_guard_name(out_file)
