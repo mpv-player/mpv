@@ -131,31 +131,26 @@ function print_includes(out_file)
 
 function print_head(out_file)
 {
-    print "/*" > out_file;
-    printf(" * File: %s\n", out_file) > out_file;
-    printf(" * This file was generated automatically. Don't modify it.\n") > out_file;
-    print "*/" > out_file;
+    printf("/* File: %s\n", out_file) > out_file;
+    printf(" * This file was generated automatically. Don't modify it. */\n") > out_file;
+    print "" > out_file
     return;
 }
 
 function print_name_struct(out_file)
 {
-    print "" > out_file
-    print "struct device_id_s" > out_file
-    print "{" > out_file
-    print "\tunsigned short\tid;" > out_file
-    print "\tconst char *\tname;" > out_file
+    print "struct device_id_s {" > out_file
+    print "    unsigned short id;" > out_file
+    print "    const char *name;" > out_file
     print "};" > out_file
     print "" > out_file
-    print "struct vendor_id_s" > out_file
-    print "{" > out_file
-    print "\tunsigned short\tid;" > out_file
-    print "\tconst char *\tname;" > out_file
-    print "\tconst struct device_id_s *\tdev_list;" > out_file
+    print "struct vendor_id_s {" > out_file
+    print "    unsigned short id;" > out_file
+    print "    const char *name;" > out_file
+    print "    const struct device_id_s *dev_list;" > out_file
     print "};" > out_file
     print "const char *pci_vendor_name(unsigned short id);" > out_file
     print "const char *pci_device_name(unsigned short vendor_id, unsigned short device_id);" > out_file
-    print "" > out_file
     return
 }
 
@@ -165,34 +160,32 @@ function print_func_bodies(out_file)
     print "const char *pci_vendor_name(unsigned short id)" > out_file
     print "{" > out_file
     if (with_pci_db) {
-        print "  unsigned i;" > out_file
-        print "  for (i = 0; i < sizeof(vendor_ids) / sizeof(struct vendor_id_s); i++)" > out_file
-        print "  {" > out_file
-        print "\tif (vendor_ids[i].id == id) return vendor_ids[i].name;" > out_file
-        print "  }" > out_file
+        print "    unsigned i;" > out_file
+        print "    for (i = 0; i < sizeof(vendor_ids) / sizeof(struct vendor_id_s); i++) {" > out_file
+        print "        if (vendor_ids[i].id == id)" > out_file
+        print "            return vendor_ids[i].name;" > out_file
+        print "    }" > out_file
     }
-    print "  return NULL;" > out_file
+    print "    return NULL;" > out_file
     print "}" > out_file
     print "" > out_file
     print "const char *pci_device_name(unsigned short vendor_id, unsigned short device_id)" > out_file
     print "{" > out_file
     if (with_pci_db) {
-        print "  unsigned i, j;" > out_file
-        print "  for (i = 0; i < sizeof(vendor_ids) / sizeof(struct vendor_id_s); i++)" > out_file
-        print "  {" > out_file
-        print "\tif (vendor_ids[i].id == vendor_id)" > out_file
-        print "\t{" > out_file
-        print "\t  j = 0;" > out_file
-        print "\t  while (vendor_ids[i].dev_list[j].id != 0xFFFF)" > out_file
-        print "\t  {" > out_file
-        print "\t\tif (vendor_ids[i].dev_list[j].id == device_id) return vendor_ids[i].dev_list[j].name;" > out_file
-        print "\t\tj++;" > out_file
-        print "\t  };" > out_file
-        print "\t  break;" > out_file
-        print "\t}" > out_file
-        print "  }" > out_file
+        print "    unsigned i, j;" > out_file
+        print "    for (i = 0; i < sizeof(vendor_ids) / sizeof(struct vendor_id_s); i++) {" > out_file
+        print "        if (vendor_ids[i].id == vendor_id) {" > out_file
+        print "            j = 0;" > out_file
+        print "            while (vendor_ids[i].dev_list[j].id != 0xFFFF) {" > out_file
+        print "                if (vendor_ids[i].dev_list[j].id == device_id)" > out_file
+        print "                    return vendor_ids[i].dev_list[j].name;" > out_file
+        print "                j++;" > out_file
+        print "            };" > out_file
+        print "            break;" > out_file
+        print "        }" > out_file
+        print "    }" > out_file
     }
-    print "  return NULL;" > out_file
+    print "    return NULL;" > out_file
     print "}" > out_file
     return
 }
