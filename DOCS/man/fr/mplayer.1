@@ -1,4 +1,4 @@
-.\" synced with r29244
+.\" synced with r29731
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -551,10 +551,17 @@ Vous pouvez également écrire des fichiers de config spécifiques à un fichier.
 Si vous souhaitez avoir un fichier de config pour un fichier nommé 'film.avi',
 créez un fichier nommé 'film.avi.conf' contenant les options spécifiques à ce
 fichier et placez-le dans ~/.mplayer/.
-Vous pouvez aussi mettre le fichier de configuration dans le même répertoire
-que le fichier à jouer, pour autant que vous spécifiez l'option
-\-use\-filedir\-conf (soit depuis la ligne de commande, soit dans le fichier
-de configuration global).
+
+Si un tel fichier de configuration se trouve dans le même répertoire,
+aucun fichier de configuration spécifique ne sera lu depuis
+~/.mplayer/.
+
+De plus, l'option \-use\-filedir\-conf permet de définir des fichiers
+de configuration spécifiques à un répertoire.
+
+Pour ce faire, MPlayer essaye de charger un fichier mplayer.conf
+depuis le même répertoire que celui du fichier joué, et essaye ensuite
+de charger un fichier de configuration spécifique.
 
 .PP
 .I EXEMPLE DE FICHIER DE CONFIGURATION MPLAYER\ :
@@ -2444,6 +2451,11 @@ Si vous n'arrivez pas à sélectionner une des pistes de sous-titres d'un
 DVD, essayez avec \-vobsubid.
 .
 .TP
+.B \-nosub
+Désactive la sélection automatique de sous-titres (c'est ce qui se
+passe par défaut avec le démultiplexeur Matroska/mkv par exemple).
+.
+.TP
 .B \-slang <code de pays[,code de langue,...]> (voir aussi l'option \-sid)
 Définit une liste de langues de sous-titres à afficher en priorité.
 Chaque format de conteneur utilise des codes de pays différents.
@@ -3466,6 +3478,9 @@ uniquement)
 Dit à MPlayer de s'attacher à une fenêtre existante.
 Utile pour intégrer MPlayer dans un navigateur (avec l'extension plugger
 par exemple).
+Cette option rempli complètement la fenêtre donnée, si bien que le
+ratio d'aspect, panscan, etc. ne sont plus assurés par MPlayer et
+doivent ainsi être assurés par l'application qui a créé la fenêtre.
 .
 .TP
 .B \-xineramascreen <\-2\-...>
@@ -3800,7 +3815,8 @@ Force le mode WarpOverlay!.
 .IPs dive
 Force le mode DIVE.
 .IPs (no)t23
-Active le contournement pour les bugs de l'ordinateur portable T23.
+Active le contournement pour les bugs de l'ordinateur portable T23
+(par défaut\ : désactivé).
 Essayez d'activer cette option si votre carte vidéo ne gère que
 l'agrandissement d'image (upscaling).
 .RE
@@ -7721,6 +7737,28 @@ Pourcentage de pixels qui doivent être sous le seuil (par défaut: 98).
 Seuil en dessous duquel un pixel est considéré comme noir (par défaut: 32)
 .RE
 .
+.TP
+.B gradfun[=force[:rayon]]
+Corrige les "effets de bande" (banding) qui se produisent parfois dans les
+régions presque uniformes, dûes à la troncature de la profondeur des
+couleur à 8bits.
+Interpole le dégradé qui devraient se situer où les bandes sont, et
+effectue un tramage.
+.sp 1
+Ce filtre est destiné à être uniquement utilisé pour la lecture.
+Ne l'utilisez pas avant une compression à perte, car la compression tend
+à supprimer le tramage et de rétablir les bandes.
+.RSs
+.IPs <force>
+Le delta maximum permis pour la modification d'un pixel.
+Est aussi le seuil pour détecter les régions presque uniformes (par
+defaut\ : 1.2).
+.IPs <rayon>
+Le voisinage avec lequel le dégradé doit être injecté.
+Un rayon plus grand produit des dégradés plus doux, mais empêche le filtre
+de modifier les pixels près des régions détaillées (par defaut\ : 16).
+.RE
+.
 .
 .SH "OPTIONS D'ENCODAGE GÉNÉRALES (MENCODER UNIQUEMENT)"
 .
@@ -8275,10 +8313,6 @@ formats adaptatifs PCM \- voir la documentation HTML pour plus de details.
 Free Lossless Audio Codec (FLAC)
 .IPs "g726\ "
 G.726 ADPCM
-.IPs libamr_nb
-3GPP Adaptive Multi-Rate (AMR) narrow-band (bande étroite)
-.IPs libamr_wb
-3GPP Adaptive Multi-Rate (AMR) wide-band (large bande)
 .IPs libfaac
 Advanced Audio Coding (AAC) \- utilisant FAAC
 .IPs libmp3lame
