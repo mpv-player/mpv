@@ -36,7 +36,6 @@ BEGIN {
     ids_h_file     = "vidix/pci_ids.h"
     names_c_file   = "vidix/pci_names.c"
     vendors_h_file = "vidix/pci_vendors.h";
-    line = 0;
     # print out head lines
     print_head(vendors_h_file);
     print_head(ids_h_file);
@@ -60,8 +59,6 @@ BEGIN {
     first_pass = 1;
     init_name_db();
     while (getline < in_file) {
-        # count up lines
-        line++;
         n = split($0, field, "[\t]");
         name_field = kill_double_quoting(field[3])
         if (field[1] == "v" && length(field[3]) > 0 && field[4] == "0") {
@@ -101,7 +98,6 @@ BEGIN {
             printf("0x%s /*%s*/\n", substr(field[2], 9), name_field) > ids_h_file
         }
     }
-    #print "Total lines parsed:", line;
     print_guards_end(vendors_h_file);
     print_guards_end(ids_h_file);
     if (with_pci_db) print "};" > names_c_file
