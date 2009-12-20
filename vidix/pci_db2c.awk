@@ -35,23 +35,19 @@ BEGIN {
     vendor_file  = "vidix/pci_vendors.h";
     ids_file     = "vidix/pci_ids.h"
     name_file    = "vidix/pci_names.c"
-    name_h_file  = "vidix/pci_names.h"
     dev_ids_file = "vidix/pci_dev_ids.c"
     line = 0;
     # print out head lines
     print_head(vendor_file);
     print_head(ids_file);
     print_head(name_file);
-    print_head(name_h_file);
     print_head(dev_ids_file);
     print_includes(dev_ids_file);
     print_guards_start(vendor_file);
-    print_guards_start(name_h_file);
     print_guards_start(ids_file);
     print "#include \"pci_vendors.h\"" > ids_file
     print "" > ids_file
 
-    print_name_struct(name_h_file);
     print "#include <stddef.h>" > name_file
     print "#include \"pci_names.h\"" > name_file
     if (with_pci_db) {
@@ -105,7 +101,6 @@ BEGIN {
     }
     #print "Total lines parsed:", line;
     print_guards_end(vendor_file);
-    print_guards_end(name_h_file);
     print_guards_end(ids_file);
     if (with_pci_db) print "};" > name_file
     print "{ 0xFFFF, NULL }" > dev_ids_file;
@@ -146,22 +141,6 @@ function print_head(out_file)
     printf("/* File: %s\n", out_file) > out_file;
     printf(" * This file was generated automatically. Don't modify it. */\n") > out_file;
     print "" > out_file
-}
-
-function print_name_struct(out_file)
-{
-    print "struct device_id_s {" > out_file
-    print "    unsigned short id;" > out_file
-    print "    const char *name;" > out_file
-    print "};" > out_file
-    print "" > out_file
-    print "struct vendor_id_s {" > out_file
-    print "    unsigned short id;" > out_file
-    print "    const char *name;" > out_file
-    print "    const struct device_id_s *dev_list;" > out_file
-    print "};" > out_file
-    print "const char *pci_vendor_name(unsigned short id);" > out_file
-    print "const char *pci_device_name(unsigned short vendor_id, unsigned short device_id);" > out_file
 }
 
 function print_func_bodies(out_file)
