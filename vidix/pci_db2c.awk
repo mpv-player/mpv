@@ -139,7 +139,6 @@ function print_includes(out_file)
 {
     print "#include <stdlib.h>" > out_file;
     print "#include \"pci_names.h\"" > out_file;
-    return;
 }
 
 function print_head(out_file)
@@ -147,7 +146,6 @@ function print_head(out_file)
     printf("/* File: %s\n", out_file) > out_file;
     printf(" * This file was generated automatically. Don't modify it. */\n") > out_file;
     print "" > out_file
-    return;
 }
 
 function print_name_struct(out_file)
@@ -164,7 +162,6 @@ function print_name_struct(out_file)
     print "};" > out_file
     print "const char *pci_vendor_name(unsigned short id);" > out_file
     print "const char *pci_device_name(unsigned short vendor_id, unsigned short device_id);" > out_file
-    return
 }
 
 function print_func_bodies(out_file)
@@ -200,7 +197,6 @@ function print_func_bodies(out_file)
     }
     print "    return NULL;" > out_file
     print "}" > out_file
-    return
 }
 
 function kill_double_quoting(fld)
