@@ -1434,7 +1434,7 @@ else # if test -z "$_target"
     qnx) system_name=QNX ;;
     morphos) system_name=MorphOS ;;
     amigaos) system_name=AmigaOS ;;
-    mingw32) system_name=MINGW32 ;;
+    mingw32*) system_name=MINGW32 ;;
   esac
   # We need to convert underscores so that values like k6-2 and pentium-mmx can be passed
   host_arch=$(echo $_target | cut -d '-' -f 1)
