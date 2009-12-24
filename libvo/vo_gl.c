@@ -1156,6 +1156,7 @@ static int control(uint32_t request, void *data, ...)
     {
       mp_eosd_res_t *r = data;
       r->w = vo_dwidth; r->h = vo_dheight;
+      r->srcw = image_width; r->srch = image_height;
       r->mt = r->mb = r->ml = r->mr = 0;
       if (scaled_osd) {r->w = image_width; r->h = image_height;}
       else if (aspect_scaling()) {

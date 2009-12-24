@@ -29,6 +29,15 @@
 #else
 #include <ass/ass.h>
 #endif
+#if defined(LIBASS_VERSION) && LIBASS_VERSION >= 0x00908000
+#define ass_library_t ASS_Library
+#define ass_track_t ASS_Track
+#define ass_track_s ASS_Track
+#define ass_renderer_t ASS_Renderer
+#define ass_image_t ASS_Image
+#define ass_style_t ASS_Style
+#define ass_event_t ASS_Event
+#endif
 
 extern ass_library_t* ass_library;
 extern int ass_enabled;

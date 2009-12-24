@@ -1400,6 +1400,7 @@ static int control(uint32_t request, void *data, ...)
     case VOCTRL_GET_EOSD_RES: {
         mp_eosd_res_t *r = data;
         r->mt = r->mb = r->ml = r->mr = 0;
+        r->srcw = vid_width; r->srch = vid_height;
         if (vo_fs) {
             r->w = vo_screenwidth;
             r->h = vo_screenheight;
