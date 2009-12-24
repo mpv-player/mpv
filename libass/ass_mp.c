@@ -71,8 +71,6 @@ extern char* sub_cp;
 static char* sub_cp = 0;
 #endif
 
-void process_force_style(ass_track_t* track);
-
 ass_track_t* ass_default_track(ass_library_t* library) {
 	ass_track_t* track = ass_new_track(library);
 
@@ -123,7 +121,7 @@ ass_track_t* ass_default_track(ass_library_t* library) {
 		style->ScaleY = 1.;
 	}
 
-	process_force_style(track);
+	ass_process_force_style(track);
 	return track;
 }
 

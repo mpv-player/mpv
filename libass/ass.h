@@ -147,6 +147,8 @@ int ass_alloc_event(ass_track_t* track);
  */
 void ass_free_style(ass_track_t* track, int sid);
 
+void ass_process_force_style(ass_track_t* track);
+
 /**
  * \brief delete an event
  * \param track track
