@@ -37,6 +37,9 @@
 #define ass_image_t ASS_Image
 #define ass_style_t ASS_Style
 #define ass_event_t ASS_Event
+#define process_force_style(t) ass_process_force_style(t)
+#else
+void process_force_style(ass_track_t* track);
 #endif
 
 extern ass_library_t* ass_library;

@@ -118,7 +118,7 @@ ass_track_t* ass_default_track(ass_library_t* library) {
 		style->ScaleY = 1.;
 	}
 
-	ass_process_force_style(track);
+	process_force_style(track);
 	return track;
 }
 
