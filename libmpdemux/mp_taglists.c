@@ -86,6 +86,7 @@ static const AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_BETHSOFTVID,       MKTAG('B', 'E', 'T', 'H')},
     { CODEC_ID_BFI,               MKTAG('B', 'F', 'I', 'V')},
     { CODEC_ID_C93,               MKTAG('C', '9', '3', 'V')},
+    { CODEC_ID_CDGRAPHICS,        MKTAG('C', 'D', 'G', 'R')},
     { CODEC_ID_DNXHD,             MKTAG('A', 'V', 'd', 'n')},
     { CODEC_ID_DSICINVIDEO,       MKTAG('D', 'C', 'I', 'V')},
     { CODEC_ID_DXA,               MKTAG('D', 'X', 'A', '1')},
