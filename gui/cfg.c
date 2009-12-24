@@ -32,7 +32,6 @@
 #include "libvo/video_out.h"
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
-#include "libass/ass.h"
 #include "libass/ass_mp.h"
 
 #include "cfg.h"

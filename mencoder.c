@@ -213,7 +213,6 @@ void mplayer_put_key(int code)
 {
 }
 
-#include "libass/ass.h"
 #include "libass/ass_mp.h"
 char *current_module;
 #include "mpcommon.h"

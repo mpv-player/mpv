@@ -11,7 +11,6 @@
 #include "libvo/video_out.h"
 
 #ifdef CONFIG_ASS
-#include "libass/ass.h"
 #include "libass/ass_mp.h"
 extern ass_track_t* ass_track;
 #endif

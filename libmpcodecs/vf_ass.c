@@ -41,7 +41,6 @@
 #include "m_option.h"
 #include "m_struct.h"
 
-#include "libass/ass.h"
 #include "libass/ass_mp.h"
 
 #define _r(c)  ((c)>>24)

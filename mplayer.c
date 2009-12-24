@@ -315,7 +315,6 @@ char *vobsub_name=NULL;
 int   subcc_enabled=0;
 int suboverlap_enabled = 1;
 
-#include "libass/ass.h"
 #include "libass/ass_mp.h"
 
 char* current_module=NULL; // for debugging

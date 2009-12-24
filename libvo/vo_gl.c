@@ -35,7 +35,6 @@
 #include "gui/interface.h"
 #endif
 #include "fastmemcpy.h"
-#include "libass/ass.h"
 #include "libass/ass_mp.h"
 
 static const vo_info_t info =
