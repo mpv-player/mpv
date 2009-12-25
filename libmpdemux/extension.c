@@ -27,6 +27,12 @@
 
 /*
  * An autodetection based on the extension is not a good idea, but we don't care ;-)
+ *
+ * You should not anything here where autodetection can be easily fixed except in
+ * order to speed up auto-detection, in particular for formats that are often streamed.
+ * In particular you should not normally add any DEMUXER_TYPE_LAVF, adding the
+ * format to preferred_list in libmpdemux/demuxer_lavf.c will usually achieve
+ * the same effect in a much more reliable way.
  */
 static struct {
         const char *extension;
