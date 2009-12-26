@@ -76,6 +76,7 @@ static int config(struct vf_instance_s* vf,
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
+    uint8_t *old_palette = mpi->planes[1];
 
     // hope we'll get DR buffer:
     dmpi=vf_get_image(vf->next,vf->priv->fmt,
@@ -152,6 +153,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	    }
 	}
     }
+    mpi->planes[1] = old_palette;
 
     return vf_next_put_image(vf,dmpi, pts);
 }
