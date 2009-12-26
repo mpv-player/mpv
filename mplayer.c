@@ -707,6 +707,8 @@ void exit_player_with_rc(exit_reason_t how, int rc){
   if(mconfig)
     m_config_free(mconfig);
 
+  if(mpctx->playtree_iter)
+    play_tree_iter_free(mpctx->playtree_iter);
   if(mpctx->playtree)
     play_tree_free(mpctx->playtree, 1);
 
