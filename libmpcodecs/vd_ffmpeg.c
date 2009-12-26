@@ -27,6 +27,10 @@ LIBVD_EXTERN(ffmpeg)
 
 #include "libavcodec/avcodec.h"
 
+#if AVPALETTE_SIZE > 1024
+#error palette too large, adapt libmpcodecs/vf.c:vf_get_image
+#endif
+
 #if CONFIG_XVMC
 #include "libavcodec/xvmc.h"
 #endif
@@ -593,6 +597,8 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         mp_msg(MSGT_DECVIDEO, MSGL_DBG2, type== MP_IMGTYPE_IPB ? "using IPB\n" : "using IP\n");
     }
 
+    if (ctx->best_csp == IMGFMT_RGB8 || ctx->best_csp == IMGFMT_BGR8)
+        flags |= MP_IMGFLAG_RGB_PALETTE;
     mpi= mpcodecs_get_image(sh, type, flags, width, height);
     if (!mpi) return -1;
 
@@ -629,10 +635,6 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         render->state |= AV_XVMC_STATE_PREDICTION;
     }
 #endif
-
-    // Palette support: libavcodec copies palette to *data[1]
-    if (mpi->bpp == 8)
-        mpi->planes[1] = av_malloc(AVPALETTE_SIZE);
 
     pic->data[0]= mpi->planes[0];
     pic->data[1]= mpi->planes[1];

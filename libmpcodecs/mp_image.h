@@ -38,7 +38,7 @@
 #define MP_IMGFLAG_YUV 0x200
 // set if it's swapped (BGR or YVU) plane/byteorder
 #define MP_IMGFLAG_SWAPPED 0x400
-// using palette for RGB data
+// set if you want memory for palette allocated and managed by vf_get_image etc.
 #define MP_IMGFLAG_RGB_PALETTE 0x800
 
 #define MP_IMGFLAGMASK_COLORS 0xF00
@@ -223,6 +223,8 @@ static inline void free_mp_image(mp_image_t* mpi){
     if(mpi->flags&MP_IMGFLAG_ALLOCATED){
 	/* becouse we allocate the whole image in once */
 	if(mpi->planes[0]) free(mpi->planes[0]);
+	if (mpi->flags & MP_IMGFLAG_RGB_PALETTE)
+	    free(mpi->planes[1]);
     }
     free(mpi);
 }
