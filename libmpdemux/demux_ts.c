@@ -305,6 +305,7 @@ static void ts_add_stream(demuxer_t * demuxer, ES_stream_t *es)
 		if(sh)
 		{
 			const char *lang = pid_lang_from_pmt(priv, es->pid);
+			sh->needs_parsing = 1;
 			sh->format = IS_AUDIO(es->type) ? es->type : es->subtype;
 			sh->ds = demuxer->audio;
 

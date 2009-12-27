@@ -219,6 +219,7 @@ while(1){
         mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "aviheader", stream_id);
         memcpy(&sh_audio->audio,&h,sizeof(h));
         sh_audio->stream_delay = (float)sh_audio->audio.dwStart * sh_audio->audio.dwScale/sh_audio->audio.dwRate;
+        sh_audio->needs_parsing = 1;
       }
       last_fccType=h.fccType;
       last_fccHandler=h.fccHandler;

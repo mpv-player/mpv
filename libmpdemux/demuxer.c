@@ -53,6 +53,13 @@
 #endif
 #endif
 
+// This is quite experimental, in particular it will mess up the pts values
+// in the queue - on the other hand it might fix some issues like generating
+// broken files with mencoder and stream copy.
+// Better leave it disabled for now, if we find no use for it this code should
+// just be removed again.
+#define PARSE_ON_ADD 0
+
 void resync_video_stream(sh_video_t *sh_video);
 void resync_audio_stream(sh_audio_t *sh_audio);
 
@@ -278,6 +285,10 @@ void free_sh_sub(sh_sub_t *sh)
         ass_free_track(sh->ass_track);
 #endif
     free(sh->lang);
+#ifdef CONFIG_LIBAVCODEC
+    av_parser_close(sh->parser);
+    av_freep(&sh->avctx);
+#endif
     free(sh);
 }
 
@@ -315,6 +326,10 @@ void free_sh_audio(demuxer_t *demuxer, int id)
     free(sh->wf);
     free(sh->codecdata);
     free(sh->lang);
+#ifdef CONFIG_LIBAVCODEC
+    av_parser_close(sh->parser);
+    av_freep(&sh->avctx);
+#endif
     free(sh);
 }
 
@@ -343,6 +358,10 @@ void free_sh_video(sh_video_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_video at %p\n", sh);
     free(sh->bih);
+#ifdef CONFIG_LIBAVCODEC
+    av_parser_close(sh->parser);
+    av_freep(&sh->avctx);
+#endif
     free(sh);
 }
 
@@ -396,7 +415,7 @@ void free_demuxer(demuxer_t *demuxer)
 }
 
 
-void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
+static void ds_add_packet_internal(demux_stream_t *ds, demux_packet_t *dp)
 {
     // append packet to DS stream:
     ++ds->packs;
@@ -414,6 +433,109 @@ void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
            (ds == ds->demuxer->audio) ? "d_audio" : "d_video", dp->len,
            dp->pts, (unsigned int) dp->pos, ds->demuxer->audio->packs,
            ds->demuxer->video->packs);
+}
+
+#ifdef CONFIG_LIBAVCODEC
+static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parser, unsigned format)
+{
+    enum CodecID codec_id = CODEC_ID_NONE;
+    extern int avcodec_initialized;
+    if (!avcodec_initialized) {
+        avcodec_init();
+        avcodec_register_all();
+        avcodec_initialized = 1;
+    }
+    switch (format) {
+    case 0x2000:
+    case 0x332D6361:
+    case 0x332D4341:
+    case MKTAG('d', 'n', 'e', 't'):
+    case MKTAG('s', 'a', 'c', '3'):
+        codec_id = CODEC_ID_AC3;
+        break;
+    case MKTAG('E', 'A', 'C', '3'):
+        codec_id = CODEC_ID_EAC3;
+        break;
+    case 0x2001:
+    case 0x86:
+        codec_id = CODEC_ID_DTS;
+        break;
+    case 0x55:
+    case 0x5500736d:
+    case MKTAG('.', 'm', 'p', '3'):
+    case MKTAG('M', 'P', 'E', ' '):
+    case MKTAG('L', 'A', 'M', 'E'):
+        codec_id = CODEC_ID_MP3;
+        break;
+    case 0x50:
+    case MKTAG('.', 'm', 'p', '2'):
+    case MKTAG('.', 'm', 'p', '1'):
+        codec_id = CODEC_ID_MP2;
+        break;
+    }
+    if (codec_id != CODEC_ID_NONE) {
+        *avctx = avcodec_alloc_context();
+        if (!*avctx)
+            return;
+        *parser = av_parser_init(codec_id);
+        if (!*parser)
+            av_freep(avctx);
+    }
+}
+
+static void get_parser(sh_common_t *sh, AVCodecContext **avctx, AVCodecParserContext **parser)
+{
+    *avctx  = NULL;
+    *parser = NULL;
+
+    if (!sh || !sh->needs_parsing)
+        return;
+
+    *avctx  = sh->avctx;
+    *parser = sh->parser;
+    if (*parser)
+        return;
+
+    allocate_parser(avctx, parser, sh->format);
+    sh->avctx  = *avctx;
+    sh->parser = *parser;
+}
+
+int ds_parse(demux_stream_t *ds, uint8_t **buffer, int *len, double pts, off_t pos)
+{
+    AVCodecContext *avctx;
+    AVCodecParserContext *parser;
+    get_parser(ds->sh, &avctx, &parser);
+    if (!parser)
+        return *len;
+    return av_parser_parse2(parser, avctx, buffer, len, *buffer, *len, pts, pts, pos);
+}
+#endif
+
+void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
+{
+#if PARSE_ON_ADD && defined(CONFIG_LIBAVCODEC)
+    int len = dp->len;
+    int pos = 0;
+    while (len > 0) {
+        uint8_t *parsed_start = dp->buffer + pos;
+        int parsed_len = len;
+        int consumed = ds_parse(ds->sh, &parsed_start, &parsed_len, dp->pts, dp->pos);
+        pos += consumed;
+        len -= consumed;
+        if (parsed_start == dp->buffer && parsed_len == dp->len) {
+            ds_add_packet_internal(ds, dp);
+        } else if (parsed_len) {
+            demux_packet_t *dp2 = new_demux_packet(parsed_len);
+            dp2->pos = dp->pos;
+            dp2->pts = dp->pts; // should be parser->pts but that works badly
+            memcpy(dp2->buffer, parsed_start, parsed_len);
+            ds_add_packet_internal(ds, dp2);
+        }
+    }
+#else
+    ds_add_packet_internal(ds, dp);
+#endif
 }
 
 void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len,
@@ -514,6 +636,18 @@ int ds_fill_buffer(demux_stream_t *ds)
             break;
         }
         if (!demux_fill_buffer(demux, ds)) {
+#if PARSE_ON_ADD && defined(CONFIG_LIBAVCODEC)
+            uint8_t *parsed_start = NULL;
+            int parsed_len = 0;
+            ds_parse(ds->sh, &parsed_start, &parsed_len, MP_NOPTS_VALUE, 0);
+            if (parsed_len) {
+                demux_packet_t *dp2 = new_demux_packet(parsed_len);
+                dp2->pts = MP_NOPTS_VALUE;
+                memcpy(dp2->buffer, parsed_start, parsed_len);
+                ds_add_packet_internal(ds, dp2);
+                continue;
+            }
+#endif
             mp_dbg(MSGT_DEMUXER, MSGL_DBG2,
                    "ds_fill_buffer()->demux_fill_buffer() failed\n");
             break; // EOF
