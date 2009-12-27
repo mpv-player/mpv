@@ -287,8 +287,6 @@ static void clearEOSD(void) {
   eosdtex = NULL;
 }
 
-static void do_render_osd(int);
-
 static inline int is_tinytex(ass_image_t *i, int tinytexcur) {
   return i->w < TINYTEX_SIZE && i->h < TINYTEX_SIZE && tinytexcur < TINYTEX_MAX;
 }
@@ -660,36 +658,6 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   osdtexCnt++;
 }
 
-static void draw_osd(void)
-{
-  if (!use_osd) return;
-  if (vo_osd_changed(0)) {
-    int osd_h, osd_w;
-    clearOSD();
-    osd_w = scaled_osd ? image_width : vo_dwidth;
-    osd_h = scaled_osd ? image_height : vo_dheight;
-    vo_draw_text_ext(osd_w, osd_h, ass_border_x, ass_border_y, ass_border_x, ass_border_y,
-                     image_width, image_height, create_osd_texture);
-  }
-  if (vo_doublebuffering) do_render_osd(1);
-}
-
-static void do_render(void) {
-//  Enable(GL_TEXTURE_2D);
-//  BindTexture(GL_TEXTURE_2D, texture_id);
-
-  Color3f(1,1,1);
-  if (image_format == IMGFMT_YV12 || custom_prog)
-    glEnableYUVConversion(gl_target, yuvconvtype);
-  glDrawTex(0, 0, image_width, image_height,
-            0, 0, image_width, image_height,
-            texture_width, texture_height,
-            use_rectangle == 1, image_format == IMGFMT_YV12,
-            mpi_flipped ^ vo_flipped);
-  if (image_format == IMGFMT_YV12 || custom_prog)
-    glDisableYUVConversion(gl_target, yuvconvtype);
-}
-
 /**
  * \param type bit 0: render OSD, bit 1: render EOSD
  */
@@ -723,6 +691,36 @@ static void do_render_osd(int type) {
       PopMatrix();
     BindTexture(gl_target, 0);
   }
+}
+
+static void draw_osd(void)
+{
+  if (!use_osd) return;
+  if (vo_osd_changed(0)) {
+    int osd_h, osd_w;
+    clearOSD();
+    osd_w = scaled_osd ? image_width : vo_dwidth;
+    osd_h = scaled_osd ? image_height : vo_dheight;
+    vo_draw_text_ext(osd_w, osd_h, ass_border_x, ass_border_y, ass_border_x, ass_border_y,
+                     image_width, image_height, create_osd_texture);
+  }
+  if (vo_doublebuffering) do_render_osd(1);
+}
+
+static void do_render(void) {
+//  Enable(GL_TEXTURE_2D);
+//  BindTexture(GL_TEXTURE_2D, texture_id);
+
+  Color3f(1,1,1);
+  if (image_format == IMGFMT_YV12 || custom_prog)
+    glEnableYUVConversion(gl_target, yuvconvtype);
+  glDrawTex(0, 0, image_width, image_height,
+            0, 0, image_width, image_height,
+            texture_width, texture_height,
+            use_rectangle == 1, image_format == IMGFMT_YV12,
+            mpi_flipped ^ vo_flipped);
+  if (image_format == IMGFMT_YV12 || custom_prog)
+    glDisableYUVConversion(gl_target, yuvconvtype);
 }
 
 static void flip_page(void) {
