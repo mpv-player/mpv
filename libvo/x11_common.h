@@ -63,7 +63,7 @@ void vo_uninit( void );
 void vo_hidecursor ( Display* , Window );
 void vo_showcursor( Display *disp, Window win );
 void vo_x11_decoration( Display * vo_Display,Window w,int d );
-void vo_x11_classhint( Display * display,Window window,char *name );
+void vo_x11_classhint( Display * display,Window window,const char *name );
 void vo_x11_nofs_sizepos(int x, int y, int width, int height);
 void vo_x11_sizehint( int x, int y, int width, int height, int max );
 int vo_x11_check_events(Display *mydisplay);

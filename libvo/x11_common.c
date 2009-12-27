@@ -733,7 +733,7 @@ void vo_x11_decoration(Display * vo_Display, Window w, int d)
     }
 }
 
-void vo_x11_classhint(Display * display, Window window, char *name)
+void vo_x11_classhint(Display * display, Window window, const char *name)
 {
     XClassHint wmClass;
     pid_t pid = getpid();
