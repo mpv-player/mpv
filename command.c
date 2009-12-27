@@ -1288,9 +1288,6 @@ static int mp_property_aspect(m_option_t * prop, int action, void *arg,
 static int mp_property_sub_pos(m_option_t * prop, int action, void *arg,
 			       MPContext * mpctx)
 {
-    if (!mpctx->sh_video)
-	return M_PROPERTY_UNAVAILABLE;
-
     switch (action) {
     case M_PROPERTY_SET:
 	if (!arg)
