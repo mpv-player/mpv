@@ -31,10 +31,6 @@
   unsigned int format; \
   int initialized; \
   float stream_delay; /* number of seconds stream should be delayed (according to dwStart or similar) */ \
-  /* things needed for parsing */ \
-  int needs_parsing; \
-  struct AVCodecContext *avctx; \
-  struct AVCodecParserContext *parser; \
   /* audio: last known pts value in output from decoder \
    * video: predicted/interpolated PTS of the current frame */ \
   double pts; \
