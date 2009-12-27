@@ -796,18 +796,16 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 			     MPContext * mpctx)
 {
     int current_id = -1, tmp;
+    if (!mpctx->demuxer || !mpctx->demuxer->audio)
+        return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
     case M_PROPERTY_GET:
-	if (!mpctx->sh_audio)
-	    return M_PROPERTY_UNAVAILABLE;
 	if (!arg)
 	    return M_PROPERTY_ERROR;
 	*(int *) arg = audio_id;
 	return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
-	if (!mpctx->sh_audio)
-	    return M_PROPERTY_UNAVAILABLE;
 	if (!arg)
 	    return M_PROPERTY_ERROR;
 
@@ -840,8 +838,6 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_SET:
-	if (!mpctx->demuxer || !mpctx->demuxer->audio)
-	    return M_PROPERTY_UNAVAILABLE;
 	if (action == M_PROPERTY_SET && arg)
 	    tmp = *((int *) arg);
 	else
@@ -874,18 +870,16 @@ static int mp_property_video(m_option_t * prop, int action, void *arg,
 			     MPContext * mpctx)
 {
     int current_id = -1, tmp;
+    if (!mpctx->demuxer || !mpctx->demuxer->video)
+        return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
     case M_PROPERTY_GET:
-	if (!mpctx->sh_video)
-	    return M_PROPERTY_UNAVAILABLE;
 	if (!arg)
 	    return M_PROPERTY_ERROR;
 	*(int *) arg = video_id;
 	return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
-	if (!mpctx->sh_video)
-	    return M_PROPERTY_UNAVAILABLE;
 	if (!arg)
 	    return M_PROPERTY_ERROR;
 
@@ -900,8 +894,6 @@ static int mp_property_video(m_option_t * prop, int action, void *arg,
 
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_SET:
-	if (!mpctx->demuxer || !mpctx->demuxer->video)
-	    return M_PROPERTY_UNAVAILABLE;
 	if (action == M_PROPERTY_SET && arg)
 	    tmp = *((int *) arg);
 	else
