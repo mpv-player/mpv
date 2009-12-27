@@ -840,7 +840,7 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_SET:
-	if (!mpctx->demuxer)
+	if (!mpctx->demuxer || !mpctx->demuxer->audio)
 	    return M_PROPERTY_UNAVAILABLE;
 	if (action == M_PROPERTY_SET && arg)
 	    tmp = *((int *) arg);
@@ -900,11 +900,13 @@ static int mp_property_video(m_option_t * prop, int action, void *arg,
 
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_SET:
-	current_id = mpctx->demuxer->video->id;
+	if (!mpctx->demuxer || !mpctx->demuxer->video)
+	    return M_PROPERTY_UNAVAILABLE;
 	if (action == M_PROPERTY_SET && arg)
 	    tmp = *((int *) arg);
 	else
 	    tmp = -1;
+	current_id = mpctx->demuxer->video->id;
 	video_id = demuxer_switch_video(mpctx->demuxer, tmp);
 	if (video_id == -2
 	    || (video_id > -1 && mpctx->demuxer->video->id != current_id
