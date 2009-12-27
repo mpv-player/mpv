@@ -2327,6 +2327,23 @@ static const struct {
 };
 #endif
 
+static const char *property_error_string(int error_value)
+{
+    switch (error_value) {
+    case M_PROPERTY_ERROR:
+        return "ERROR";
+    case M_PROPERTY_UNAVAILABLE:
+        return "PROPERTY_UNAVAILABLE";
+    case M_PROPERTY_NOT_IMPLEMENTED:
+        return "NOT_IMPLEMENTED";
+    case M_PROPERTY_UNKNOWN:
+        return "PROPERTY_UNKNOWN";
+    case M_PROPERTY_DISABLED:
+        return "DISABLED";
+    }
+    return "UNKNOWN";
+}
+
 int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 {
     sh_audio_t * const sh_audio = mpctx->sh_audio;
@@ -2370,6 +2387,8 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Failed to set property '%s' to '%s'.\n",
 			   cmd->args[0].v.s, cmd->args[1].v.s);
+		if (r <= 0)
+		    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_ERROR=%s\n", property_error_string(r));
 	    }
 	    break;
 
@@ -2411,16 +2430,20 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Failed to increment property '%s' by %f.\n",
 			   cmd->args[0].v.s, cmd->args[1].v.f);
+		if (r <= 0)
+		    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_ERROR=%s\n", property_error_string(r));
 	    }
 	    break;
 
 	case MP_CMD_GET_PROPERTY:{
 		char *tmp;
-		if (mp_property_do(cmd->args[0].v.s, M_PROPERTY_TO_STRING,
-				   &tmp, mpctx) <= 0) {
+		int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_TO_STRING,
+				       &tmp, mpctx);
+		if (r <= 0) {
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Failed to get value of property '%s'.\n",
 			   cmd->args[0].v.s);
+		    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_ERROR=%s\n", property_error_string(r));
 		    break;
 		}
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_%s=%s\n",
