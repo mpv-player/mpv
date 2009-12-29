@@ -834,11 +834,11 @@ static const char *bilin_filt_template =
   "LRP yuv.%c, parmx.b, a.bbbb, a.aaaa;"
 
 static const char *bicub_filt_template_2D =
-  "MAD coord.xy, fragment.texcoord[%c], {%f, %f}, {0.5, 0.5};"
+  "MAD coord.xy, fragment.texcoord[%c], {%e, %e}, {0.5, 0.5};"
   "TEX parmx, coord.x, texture[%c], 1D;"
-  "MUL cdelta.xz, parmx.rrgg, {-%f, 0, %f, 0};"
+  "MUL cdelta.xz, parmx.rrgg, {-%e, 0, %e, 0};"
   "TEX parmy, coord.y, texture[%c], 1D;"
-  "MUL cdelta.yw, parmy.rrgg, {0, -%f, 0, %f};"
+  "MUL cdelta.yw, parmy.rrgg, {0, -%e, 0, %e};"
   BICUB_FILT_MAIN("2D");
 
 static const char *bicub_filt_template_RECT =
@@ -860,12 +860,12 @@ static const char *bicub_filt_template_RECT =
   "SUB "t".y, "t".yyyy, "s";"
 
 static const char *bicub_notex_filt_template_2D =
-  "MAD coord.xy, fragment.texcoord[%c], {%f, %f}, {0.5, 0.5};"
+  "MAD coord.xy, fragment.texcoord[%c], {%e, %e}, {0.5, 0.5};"
   "FRC coord.xy, coord.xyxy;"
   CALCWEIGHTS("parmx", "coord.xxxx")
-  "MUL cdelta.xz, parmx.rrgg, {-%f, 0, %f, 0};"
+  "MUL cdelta.xz, parmx.rrgg, {-%e, 0, %e, 0};"
   CALCWEIGHTS("parmy", "coord.yyyy")
-  "MUL cdelta.yw, parmy.rrgg, {0, -%f, 0, %f};"
+  "MUL cdelta.yw, parmy.rrgg, {0, -%e, 0, %e};"
   BICUB_FILT_MAIN("2D");
 
 static const char *bicub_notex_filt_template_RECT =
@@ -886,9 +886,9 @@ static const char *bicub_notex_filt_template_RECT =
   "LRP yuv.%c, parmx.b, a.rrrr, b.rrrr;"
 
 static const char *bicub_x_filt_template_2D =
-  "MAD coord.x, fragment.texcoord[%c], {%f}, {0.5};"
+  "MAD coord.x, fragment.texcoord[%c], {%e}, {0.5};"
   "TEX parmx, coord, texture[%c], 1D;"
-  "MUL cdelta.xyz, parmx.rrgg, {-%f, 0, %f};"
+  "MUL cdelta.xyz, parmx.rrgg, {-%e, 0, %e};"
   BICUB_X_FILT_MAIN("2D");
 
 static const char *bicub_x_filt_template_RECT =
@@ -898,7 +898,7 @@ static const char *bicub_x_filt_template_RECT =
   BICUB_X_FILT_MAIN("RECT");
 
 static const char *unsharp_filt_template =
-  "PARAM dcoord%c = {%f, %f, %f, %f};"
+  "PARAM dcoord%c = {%e, %e, %e, %e};"
   "ADD coord, fragment.texcoord[%c].xyxy, dcoord%c;"
   "SUB coord2, fragment.texcoord[%c].xyxy, dcoord%c;"
   "TEX a.r, fragment.texcoord[%c], texture[%c], %s;"
@@ -909,11 +909,11 @@ static const char *unsharp_filt_template =
   "TEX b.g, coord2.zwzw, texture[%c], %s;"
   "DP3 b, b, {0.25, 0.25, 0.25};"
   "SUB b.r, a.r, b.r;"
-  "MAD yuv.%c, b.r, {%f}, a.r;";
+  "MAD yuv.%c, b.r, {%e}, a.r;";
 
 static const char *unsharp_filt_template2 =
-  "PARAM dcoord%c = {%f, %f, %f, %f};"
-  "PARAM dcoord2%c = {%f, 0, 0, %f};"
+  "PARAM dcoord%c = {%e, %e, %e, %e};"
+  "PARAM dcoord2%c = {%e, 0, 0, %e};"
   "ADD coord, fragment.texcoord[%c].xyxy, dcoord%c;"
   "SUB coord2, fragment.texcoord[%c].xyxy, dcoord%c;"
   "TEX a.r, fragment.texcoord[%c], texture[%c], %s;"
@@ -933,13 +933,13 @@ static const char *unsharp_filt_template2 =
   "TEX b.g, coord2.zwzw, texture[%c], %s;"
   "DP4 b.r, b, {-0.1171875, -0.1171875, -0.1171875, -0.09765625};"
   "MAD b.r, a.r, {0.859375}, b.r;"
-  "MAD yuv.%c, b.r, {%f}, a.r;";
+  "MAD yuv.%c, b.r, {%e}, a.r;";
 
 static const char *yuv_prog_template =
-  "PARAM ycoef = {%.4f, %.4f, %.4f};"
-  "PARAM ucoef = {%.4f, %.4f, %.4f};"
-  "PARAM vcoef = {%.4f, %.4f, %.4f};"
-  "PARAM offsets = {%.4f, %.4f, %.4f};"
+  "PARAM ycoef = {%e, %e, %e};"
+  "PARAM ucoef = {%e, %e, %e};"
+  "PARAM vcoef = {%e, %e, %e};"
+  "PARAM offsets = {%e, %e, %e};"
   "TEMP res;"
   "MAD res.rgb, yuv.rrrr, ycoef, offsets;"
   "MAD res.rgb, yuv.gggg, ucoef, res;"
@@ -947,11 +947,11 @@ static const char *yuv_prog_template =
   "END";
 
 static const char *yuv_pow_prog_template =
-  "PARAM ycoef = {%.4f, %.4f, %.4f};"
-  "PARAM ucoef = {%.4f, %.4f, %.4f};"
-  "PARAM vcoef = {%.4f, %.4f, %.4f};"
-  "PARAM offsets = {%.4f, %.4f, %.4f};"
-  "PARAM gamma = {%.4f, %.4f, %.4f};"
+  "PARAM ycoef = {%e, %e, %e};"
+  "PARAM ucoef = {%e, %e, %e};"
+  "PARAM vcoef = {%e, %e, %e};"
+  "PARAM offsets = {%e, %e, %e};"
+  "PARAM gamma = {%e, %e, %e};"
   "TEMP res;"
   "MAD res.rgb, yuv.rrrr, ycoef, offsets;"
   "MAD res.rgb, yuv.gggg, ucoef, res;"
@@ -962,10 +962,10 @@ static const char *yuv_pow_prog_template =
   "END";
 
 static const char *yuv_lookup_prog_template =
-  "PARAM ycoef = {%.4f, %.4f, %.4f, 0};"
-  "PARAM ucoef = {%.4f, %.4f, %.4f, 0};"
-  "PARAM vcoef = {%.4f, %.4f, %.4f, 0};"
-  "PARAM offsets = {%.4f, %.4f, %.4f, 0.125};"
+  "PARAM ycoef = {%e, %e, %e, 0};"
+  "PARAM ucoef = {%e, %e, %e, 0};"
+  "PARAM vcoef = {%e, %e, %e, 0};"
+  "PARAM offsets = {%e, %e, %e, 0.125};"
   "TEMP res;"
   "MAD res, yuv.rrrr, ycoef, offsets;"
   "MAD res.rgb, yuv.gggg, ucoef, res;"
@@ -1093,7 +1093,7 @@ static void create_conv_textures(gl_conversion_params_t *params, int *texu, char
   switch (conv) {
     case YUV_CONVERSION_FRAGMENT:
     case YUV_CONVERSION_FRAGMENT_POW:
-     break;
+      break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
       texs[0] = (*texu)++;
       ActiveTexture(GL_TEXTURE0 + texs[0]);
@@ -1409,6 +1409,8 @@ void glSetupYUVConversion(gl_conversion_params_t *params) {
     case YUV_CONVERSION_FRAGMENT_POW:
       glSetupYUVFragprog(params);
       break;
+    case YUV_CONVERSION_NONE:
+      break;
     default:
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown conversion type %i\n", YUV_CONVERSION(params->type));
   }
@@ -1421,7 +1423,6 @@ void glSetupYUVConversion(gl_conversion_params_t *params) {
  * \ingroup glconversion
  */
 void glEnableYUVConversion(GLenum target, int type) {
-  if (type <= 0) return;
   switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_COMBINERS:
       ActiveTexture(GL_TEXTURE1);
@@ -1443,6 +1444,7 @@ void glEnableYUVConversion(GLenum target, int type) {
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_POW:
     case YUV_CONVERSION_FRAGMENT:
+    case YUV_CONVERSION_NONE:
       Enable(GL_FRAGMENT_PROGRAM);
       break;
   }
@@ -1455,7 +1457,6 @@ void glEnableYUVConversion(GLenum target, int type) {
  * \ingroup glconversion
  */
 void glDisableYUVConversion(GLenum target, int type) {
-  if (type <= 0) return;
   switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_COMBINERS:
       ActiveTexture(GL_TEXTURE1);
@@ -1477,6 +1478,7 @@ void glDisableYUVConversion(GLenum target, int type) {
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_POW:
     case YUV_CONVERSION_FRAGMENT:
+    case YUV_CONVERSION_NONE:
       Disable(GL_FRAGMENT_PROGRAM);
       break;
   }

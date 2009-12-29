@@ -86,6 +86,9 @@ static int osd_color;
 
 static int use_aspect;
 static int use_ycbcr;
+#define MASK_ALL_YUV (~(1 << YUV_CONVERSION_NONE))
+#define MASK_NOT_COMBINERS (~((1 << YUV_CONVERSION_NONE) | (1 << YUV_CONVERSION_COMBINERS) | (1 << YUV_CONVERSION_COMBINERS_ATI)))
+#define MASK_GAMMA_SUPPORT (MASK_NOT_COMBINERS & ~(1 << YUV_CONVERSION_FRAGMENT))
 static int use_yuv;
 static int lscale;
 static int cscale;
@@ -120,6 +123,7 @@ static char *custom_prog;
 static char *custom_tex;
 static int custom_tlin;
 static int custom_trect;
+static int mipmap_gen;
 
 static int int_pause;
 static int eq_bri = 0;
@@ -458,6 +462,7 @@ static void autodetectGlExtensions(void) {
  * set global gl-related variables to their default values
  */
 static int initGl(uint32_t d_width, uint32_t d_height) {
+  int scale_type = mipmap_gen ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR;
   autodetectGlExtensions();
   texSize(image_width, image_height, &texture_width, &texture_height);
 
@@ -483,29 +488,34 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
       BindTexture(GL_TEXTURE_3D, default_texs[i + 14]);
     }
     ActiveTexture(GL_TEXTURE1);
-    glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, GL_LINEAR,
+    glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, scale_type,
                      texture_width / 2, texture_height / 2, 128);
+    if (mipmap_gen)
+      TexParameteri(gl_target, GL_GENERATE_MIPMAP, GL_TRUE);
     ActiveTexture(GL_TEXTURE2);
-    glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, GL_LINEAR,
+    glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, scale_type,
                      texture_width / 2, texture_height / 2, 128);
-    switch (use_yuv) {
-      case YUV_CONVERSION_FRAGMENT_LOOKUP:
-      case YUV_CONVERSION_FRAGMENT_POW:
-      case YUV_CONVERSION_FRAGMENT:
-        if (!GenPrograms || !BindProgram) {
-          mp_msg(MSGT_VO, MSGL_ERR, "[gl] fragment program functions missing!\n");
-          break;
-        }
-        GenPrograms(1, &fragprog);
-        BindProgram(GL_FRAGMENT_PROGRAM, fragprog);
-        break;
-    }
+    if (mipmap_gen)
+      TexParameteri(gl_target, GL_GENERATE_MIPMAP, GL_TRUE);
     ActiveTexture(GL_TEXTURE0);
     BindTexture(gl_target, 0);
+  }
+  if (image_format == IMGFMT_YV12 || custom_prog)
+  {
+    if ((MASK_NOT_COMBINERS & (1 << use_yuv)) || custom_prog) {
+      if (!GenPrograms || !BindProgram) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[gl] fragment program functions missing!\n");
+      } else {
+        GenPrograms(1, &fragprog);
+        BindProgram(GL_FRAGMENT_PROGRAM, fragprog);
+      }
+    }
     update_yuvconv();
   }
-  glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, GL_LINEAR,
+  glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, scale_type,
                    texture_width, texture_height, 0);
+  if (mipmap_gen)
+    TexParameteri(gl_target, GL_GENERATE_MIPMAP, GL_TRUE);
 
   resize(d_width, d_height);
 
@@ -658,14 +668,14 @@ static void do_render(void) {
 //  BindTexture(GL_TEXTURE_2D, texture_id);
 
   Color3f(1,1,1);
-  if (image_format == IMGFMT_YV12)
+  if (image_format == IMGFMT_YV12 || custom_prog)
     glEnableYUVConversion(gl_target, yuvconvtype);
   glDrawTex(0, 0, image_width, image_height,
             0, 0, image_width, image_height,
             texture_width, texture_height,
             use_rectangle == 1, image_format == IMGFMT_YV12,
             mpi_flipped ^ vo_flipped);
-  if (image_format == IMGFMT_YV12)
+  if (image_format == IMGFMT_YV12 || custom_prog)
     glDisableYUVConversion(gl_target, yuvconvtype);
 }
 
@@ -982,6 +992,7 @@ static const opt_t subopts[] = {
   {"customtex",    OPT_ARG_MSTRZ,&custom_tex,   NULL},
   {"customtlin",   OPT_ARG_BOOL, &custom_tlin,  NULL},
   {"customtrect",  OPT_ARG_BOOL, &custom_trect, NULL},
+  {"mipmapgen",    OPT_ARG_BOOL, &mipmap_gen,   NULL},
   {"osdcolor",     OPT_ARG_INT,  &osd_color,    NULL},
   {NULL}
 };
@@ -1013,6 +1024,7 @@ static int preinit(const char *arg)
     custom_tex = NULL;
     custom_tlin = 1;
     custom_trect = 0;
+    mipmap_gen = 0;
     osd_color = 0xffffff;
     if (subopt_parse(arg, subopts) != 0) {
       mp_msg(MSGT_VO, MSGL_FATAL,
@@ -1043,6 +1055,8 @@ static int preinit(const char *arg)
               "    Interval in displayed frames between to buffer swaps.\n"
               "    1 is equivalent to enable VSYNC, 0 to disable VSYNC.\n"
               "    Requires GLX_SGI_swap_control support to work.\n"
+              "  ycbcr\n"
+              "    also try to use the GL_MESA_ycbcr_texture extension\n"
               "  yuv=<n>\n"
               "    0: use software YUV to RGB conversion.\n"
               "    1: use register combiners (nVidia only, for older cards).\n"
@@ -1070,10 +1084,10 @@ static int preinit(const char *arg)
               "    use GL_NEAREST scaling for customtex texture\n"
               "  customtrect\n"
               "    use texture_rectangle for customtex texture\n"
+              "  mipmapgen\n"
+              "    generate mipmaps for the video image (use with TXB in customprog)\n"
               "  osdcolor=<0xAARRGGBB>\n"
               "    use the given color for the OSD\n"
-              "  ycbcr\n"
-              "    also try to use the GL_MESA_ycbcr_texture extension\n"
               "\n" );
       return -1;
     }
@@ -1091,10 +1105,6 @@ static int preinit(const char *arg)
 
     return 0;
 }
-
-#define MASK_ALL_YUV (~(1 << YUV_CONVERSION_NONE))
-#define MASK_NOT_COMBINERS (~((1 << YUV_CONVERSION_NONE) | (1 << YUV_CONVERSION_COMBINERS) | (1 << YUV_CONVERSION_COMBINERS_ATI)))
-#define MASK_GAMMA_SUPPORT (MASK_NOT_COMBINERS & ~(1 << YUV_CONVERSION_FRAGMENT))
 
 static const struct {
   const char *name;
