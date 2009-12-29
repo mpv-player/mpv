@@ -1,4 +1,4 @@
-.\" synced with r29731
+.\" synced with r30135
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -188,7 +188,12 @@ rotation, redimensionnement, bruit, conversion RGB/\:YUV) et bien plus.
 .PP
 .B gmplayer
 est l'interface graphique de MPlayer.
-Il possède les mêmes options que MPlayer.
+Elle possède les mêmes options que MPlayer, cela dit toutes peuvent ne
+pas fonctionner correctement à cause des des conflits avec la
+configuration de l'IHM graphique (stocké dans gui.conf).
+Certaines options peuvent êtres redéfinies par la configuration de
+gui.conf, et certaines autres peuvent être définies de façon
+permanente par gui.conf
 .PP
 Des exemples d'usage pour vous familiariser rapidement sont disponibles
 à la fin de cette page de manuel.
@@ -447,9 +452,10 @@ Confirme le choix.
 .RS
 .
 .
-(Les touches suivantes ne sont valides que si MPlayer a été
-compilé avec le support télétexte\ : elles peuvent être utilisées pour contrôler
-le télétexte de la TV.)
+(Les touches suivantes ne sont valides que si MPlayer a été compilé
+avec le support télétexte\ : elles servent à contrôler le télétexte de
+la TV, dont les données peuvent provenir d'une source TV analogique ou
+par MPEG Transport Stream.)
 .RE
 .PP
 .PD 0
@@ -551,18 +557,14 @@ Vous pouvez également écrire des fichiers de config spécifiques à un fichier.
 Si vous souhaitez avoir un fichier de config pour un fichier nommé 'film.avi',
 créez un fichier nommé 'film.avi.conf' contenant les options spécifiques à ce
 fichier et placez-le dans ~/.mplayer/.
-
 Si un tel fichier de configuration se trouve dans le même répertoire,
 aucun fichier de configuration spécifique ne sera lu depuis
 ~/.mplayer/.
-
 De plus, l'option \-use\-filedir\-conf permet de définir des fichiers
 de configuration spécifiques à un répertoire.
-
 Pour ce faire, MPlayer essaye de charger un fichier mplayer.conf
 depuis le même répertoire que celui du fichier joué, et essaye ensuite
 de charger un fichier de configuration spécifique.
-
 .PP
 .I EXEMPLE DE FICHIER DE CONFIGURATION MPLAYER\ :
 .sp 1
@@ -1299,7 +1301,7 @@ Permet au socket d'être ré-utilisé par un autre processus aussitôt qu'il
 est fermé.
 .
 .TP
-.B \-bandwidth <valeur> (réseau uniquement)
+.B \-bandwidth <octets> (réseau uniquement)
 Spécifie la bande passante maximum pour le streaming par le réseau (pour les
 serveurs capables d'envoyer du contenu à différents débits).
 Utile si vous voulez voir en direct avec une connexion lente des médias
@@ -1400,6 +1402,8 @@ Stereo
 Surround
 .IPs 6
 5.1 complet
+.IPs 8
+7.1 complet
 .RE
 .PD 1
 .
@@ -3266,8 +3270,9 @@ Utilise l'astuce _WIN_LAYER avec la couche par défaut.
 Utilise l'astuce _WIN_LAYER avec le numéro de couche.
 .IPs netwm
 Force le style NETWM.
-.IPs none
-N'initialise pas la couche plein-écran de la fenêtre.
+.IPs "none\ "
+Efface la liste des modes\ ; vous pouvez ajouter des modes à activer
+plus tard.
 .IPs stays_on_top
 Utilise l'astuce _NETWM_STATE_STAYS_ON_TOP si disponible.
 .REss
@@ -3298,11 +3303,11 @@ alors les coordonnées x et y sont relatives aux coin supérieur gauche de la
 fenêtre au lieu celui de l'écran.
 Les coordonnées sont relatives à l'écran donné par l'option \-xineramascreen
 pour les pilotes de sortie vidéo gérant complètement l'option \-xineramascreen
-(direct3d, gl, gl2, vdpau, x11, xv, xvmc).
+(direct3d, gl, gl2, vdpau, x11, xv, xvmc, corevideo).
 .br
 .I NOTE:
 Cette option n'est permise que par les pilotes de sortie vidéo x11, xmga, xv,
-xvmc, xvidix, gl, gl2, directx, fbdev et tdfxfb.
+xvmc, xvidix, gl, gl2, directx, fbdev, tdfxfb et corevideo.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -3369,6 +3374,10 @@ Défini l'aspect d'un seul pixel de votre moniteur ou écran TB
 Écrase le paramétrage de \-monitoraspect.
 La valeur 1 signifie des pixels carrés (correct
 pour presque tous les écrans LCD).
+.
+.TP
+.B \-name (X11 uniquement)
+Défini le nom de la classe de fenêtre.
 .
 .TP
 .B \-nodouble
@@ -3461,6 +3470,17 @@ Si votre reposeur d'écran ne supporte ni l'API XSS, ni XResetScreenSaver,
 alors veuillez utiliser \-heartbeat\-cmd à la place.
 .
 .TP
+.B \-title (voir aussi \-use\-filename\-title)
+Défini le titre de la fenêtre.
+Géré par tous les pilotes de sortie vidéos basés sur X11.
+.
+.TP
+.B \-use\-filename\-title (voir aussi \-title)
+Défini la barre de titre en fonction du nom de fichier du média, quand
+celui-ci n'est pas défini par \-title.
+Géré par tous les pilotes de sortie vidéos basés sur X11.
+.
+.TP
 .B "\-vm \ \ \ "
 Essaie de changer vers un autre mode vidéo.
 Les pilotes de sortie vidéo dga, x11, xv, sdl et directx le permettent.
@@ -3496,7 +3516,8 @@ Fontionnera généralement uniquement avec  "\-fstype \-fullscreen" ou
 Cette option ne convient pas pour définir l'écran de démarrage (car l'affichage
 se fera toujours en plein écran sur le moniteur donné), \-geometry est plus
 approprié.
-Géré au moins par les pilotes de sortie vidéo direct3d, gl, gl2, x11, et xv.
+Géré au moins par les pilotes de sortie vidéo direct3d, gl, gl2, x11, xv et
+corevideo.
 .
 .TP
 .B \-zrbw (\-vo zr uniquement)
@@ -3651,7 +3672,8 @@ Sélectionnne le pilote à utiliser comme source pour l'incrustation dans X11.
 .PD 1
 .
 .TP
-.B vdpau (avec \-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau ou ffh264vdpau)
+.B vdpau (avec \-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau, ffh264vdpau,
+ou ffodivxvdpau)
 Sortie vidéo utilisant VDPAU pour décoder les vidéos matériellement.
 Gère aussi l'affichage de vidéos décodées en logiciel.
 .PD 0
@@ -3693,6 +3715,37 @@ Utile quand la mémoire vidéo est lente.
 .IPs pullup
 Essaye d'appliquer un filtre téléciné inverse.
 Nécessite un filtre de désentrelacement à adaptation de mouvement temporel.
+.IPs colorspace
+Sélectionne l'espace de couleur pour la conversion YUV vers RVB.
+En général, BT.601 est recommandé pour les contenus à définition standard
+(SD), et BT.709 pour la haute définition (HD)
+L'utilisation d'un espace de couleur inapproprié peut donner des
+couleurs trop ou pas assez saturées.
+.RSss
+.IPs 0
+Déduit l'espace de couleur en fonction de la résolution vidéo.
+Une vidéo dont la largeur est >= 1280 ou on la hauteur est > 576 est
+détectée comme HD et donc l'espace de couleur BT.709 sera utilisé.
+.IPs 1
+Utilise l'espace de couleur ITU-R BT.601 (par défaut).
+.IPs 2
+Utilise l'espace de couleur ITU-R BT.709.
+.IPs 3
+Utilise l'espace de couleur SMPTE-240M.
+.RE
+.IPs hqscaling
+.RSss
+.IPs 0
+Utilise la mise à l'échelle VDPAU (par défaut).
+.IPs 1\-9
+Utilise une mise à l'échelle de haute qualité (nécessite un matériel
+compatible).
+.RE
+.IPs force\-mixer
+Force l'utilisation du mixeur VDPAU, qui implémente toutes les options
+ci-dessus (par défaut).
+Utilisez noforce\-mixer pour permettre l'affichage de vidéos utilisant
+l'espace de couleur BGRA.
 .RE
 .PD 1
 .
@@ -3985,6 +4038,9 @@ horizontal / n).
 Requiert le support de GLX_SGI_swap_control pour fonctionner.
 Avec certaines implémentation (la plupart/toutes?) ceci ne fonctionne
 qu'en mode plein écran
+.IPs ycbcr
+Utilise l'extension GL_MESA_ycbcr_texture pour la conversion YUV vers RVB.
+Généralement plus lent que de réaliser cette conversion par logiciel.
 .IPs yuv=<n>
 Choisit le type de conversion YUV vers RGB.
 .RSss
@@ -4038,10 +4094,6 @@ Le gamma du rouge, vert et bleu peut aussi être ajusté indépendement.
 La vitesse de ce type de conversion dépend plus de la bande passante
 de la carte vidéo que les autres méthodes.
 .RE
-.IPs ycbcr
-Utilise l'extension GL_MESA_ycbcr_texture pour la conversion YUV vers RGB.
-Dans la plupart des cas, cela est probablement plus lent que de réaliser
-la conversion RGB par logiciel.
 .IPs lscale=<n>
 Sélection de la fonction de mise à l'échelle à utiliser pour la luminance.
 Valide uniquement pour les modes yuv 2, 3, 4 et 6.
@@ -4083,6 +4135,12 @@ Utilise l'interpolation GL_LINEAR (par défaut), sinon utilise
 GL_NEAREST comme texture customtex.
 .IPs (no)customtrect
 Utilise texture_rectangle comme texture customtex.
+.IPs (no)mipmapgen
+Permet la génération automatique de mipmaps pour la vidéo.
+Peut être utile combiné avec les instruction customprog et TXB
+pour implémenter des filtre de floutage à large diamètre.
+Très lent avec la plupart des implémentation OpenGL pour les formats
+non-RVB.
 .RE
 .sp 1
 .RS
@@ -5374,14 +5432,15 @@ Défini la fréquence de coupure (en Hz).
 Défini le niveau d'entrée des basses fréquences (en dixième de dB).
 .IPs profile=<valeur>
 Plusieurs profils sont disponibles\ :
+.PD 0
 .RSs
-default\ : réglage par défaut (fcut=700, feed=45);
-.br
-cmoy: implémentation du circuit Chu Moy (fcut=700, feed=60);
-.br
-jmeier: implémentation du circuit Jan Meier (fcut=650, feed=95).
-.REss
-.PD 1
+.IPs default
+réglage par défaut (fcut=700, feed=45);
+.IPs "cmoy\ "
+implémentation du circuit Chu Moy (fcut=700, feed=60);
+.IPs jmeier
+implémentation du circuit Jan Meier (fcut=650, feed=95).
+.RE
 .RE
 .sp 1
 .RS
@@ -5466,11 +5525,11 @@ d'entrée les canaux en trop seront tronqués.
 .PD 0
 .RSs
 .IPs <nch>
-nombre de canaux de sortie (1\-6)
+nombre de canaux de sortie (1\-8)
 .IPs "<nr>\ "
-nombre de routes (1\-6)
+nombre de routes (1\-8)
 .IPs <from1:to1:from2:to2:from3:to3:...>
-Paires de nombres entre 0 and 5 définissant où router chaque canal.
+Paires de nombres entre 0 and 7 définissant où router chaque canal.
 .RE
 .sp 1
 .RS
@@ -5577,7 +5636,7 @@ Un exemple de mixage de six canaux vers deux à l'aide de ce filtre peut
 .PD 0
 .RSs
 .IPs "<n>\ \ "
-nombre de canaux de sortie (1\-6)
+nombre de canaux de sortie (1\-8)
 .IPs <Lij>
 Combien du canal i est mixé dans le canal de sortie j (0\-1).
 En principe, vous avez un nombre spécifiant ce que faire avec le premier
@@ -5623,8 +5682,8 @@ aussi bas que possible.
 Cela améliorera l'effet surround ou stéréo.
 .IPs "<ca>\ "
 Définit le numéro de canal vers lequel router le flux du caisson de basse.
-Le numéro de canal doit être compris entre 0 et 5 (par défaut\ : 5).
-Notez que le nombre de canaux sera automatiquement incrémenté jusqu'à <ch>
+Le numéro de canal doit être compris entre 0 et 7 (par défaut\ : 5).
+Notez que le nombre de canaux sera automatiquement incrémenté jusqu'à <ca>
 si nécessaire.
 .RE
 .sp 1
@@ -5648,7 +5707,7 @@ fait une moyenne des canaux et l'atténue de moitié à la place.
 .RSs
 .IPs <ca>
 Détermine le canal dans lequel insérer le canal central.
-Le numéro de canal peut être un nombre compris entre 0 et 5
+Le numéro de canal peut être un nombre compris entre 0 et 7
 (par défaut\ : 5).
 Notez que le nombre de canaux sera automatiquement augmenté à <ca>
 si nécessaire.
@@ -5725,8 +5784,8 @@ Les aires de mémoire mappées contiennent une entête:
 int nch                      /*nombre de canaux*/
 int size                     /*taille du tampon*/
 unsigned long long counter   /*Utilisé pour garder la synchro, mis à jour
-                               chaque fois que de nouvelles données son
-                               exportées.*/
+			       chaque fois que de nouvelles données son
+			       exportées.*/
 .fi
 .sp 1
 Le reste est charge utile, constitué de données 16bit (non-entrelacées).
@@ -7706,6 +7765,8 @@ disponible \- aucun fichier ne sera écrasé.
 Ce filtre ne provoque pas de surcoût lorsqu'il n'est pas utilisé, et accepte
 tous les espaces de couleur, donc ça ne pose pas de problème de l'ajouter par
 défaut dans votre fichier de configuration.
+Assurez-vous que ce filtre est appliqué après tous les autres filtres vidéos,
+sinon l'image capturée ne correspondra pas à ce que vous voyez à l'écran.
 .RE
 .
 .TP
