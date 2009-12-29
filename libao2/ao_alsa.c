@@ -72,8 +72,8 @@ static snd_pcm_format_t alsa_format;
 static snd_pcm_hw_params_t *alsa_hwparams;
 static snd_pcm_sw_params_t *alsa_swparams;
 
-static unsigned int alsa_buffer_time = 500000; /* 0.5 s */
-static unsigned int alsa_fragcount = 16;
+#define BUFFER_TIME 500000  // 0.5 s
+#define FRAGCOUNT 16
 
 static size_t bytes_per_sample;
 
@@ -589,7 +589,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       ao_data.bps = ao_data.samplerate * bytes_per_sample;
 
 	if ((err = snd_pcm_hw_params_set_buffer_time_near(alsa_handler, alsa_hwparams,
-							  &alsa_buffer_time, NULL)) < 0)
+							  &(unsigned int){BUFFER_TIME}, NULL)) < 0)
 	  {
 	    mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Unable to set buffer time near: %s\n",
 		   snd_strerror(err));
@@ -597,7 +597,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  }
 
 	if ((err = snd_pcm_hw_params_set_periods_near(alsa_handler, alsa_hwparams,
-						      &alsa_fragcount, NULL)) < 0) {
+						      &(unsigned int){FRAGCOUNT}, NULL)) < 0) {
 	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Unable to set periods: %s\n",
 		 snd_strerror(err));
 	  return 0;
