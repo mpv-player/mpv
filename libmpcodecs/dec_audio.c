@@ -74,10 +74,12 @@ static int init_audio_codec(sh_audio_t *sh_audio)
 	sh_audio->a_in_buffer_len = 0;
     }
 
-    sh_audio->a_buffer_size = sh_audio->audio_out_minsize + MAX_OUTBURST;
+    const int base_size = 65536;
+    // At least 64 KiB plus rounding up to next decodable unit size
+    sh_audio->a_buffer_size = base_size + sh_audio->audio_out_minsize;
 
     mp_tmsg(MSGT_DECAUDIO, MSGL_V, "dec_audio: Allocating %d + %d = %d bytes for output buffer.\n",
-	   sh_audio->audio_out_minsize, MAX_OUTBURST, sh_audio->a_buffer_size);
+	   sh_audio->audio_out_minsize, base_size, sh_audio->a_buffer_size);
 
     sh_audio->a_buffer = av_mallocz(sh_audio->a_buffer_size);
     if (!sh_audio->a_buffer) {

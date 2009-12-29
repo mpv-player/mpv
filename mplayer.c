@@ -2020,7 +2020,6 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     int playsize;
     int playflags=0;
     int audio_eof=0;
-    int bytes_to_write;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
 
     current_module="play_audio";
@@ -2031,65 +2030,59 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
 	// sync completely wrong; there should be no need to use ao_data.pts
 	// in get_space()
 	ao_data.pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
-	bytes_to_write = mpctx->audio_out->get_space();
-	if (mpctx->sh_video || bytes_to_write >= ao_data.outburst)
+	playsize = mpctx->audio_out->get_space();
+	if (mpctx->sh_video || playsize >= ao_data.outburst)
 	    break;
 
 	// handle audio-only case:
 	// this is where mplayer sleeps during audio-only playback
 	// to avoid 100% CPU use
-	sleep_time = (ao_data.outburst - bytes_to_write) * 1000 / ao_data.bps;
+	sleep_time = (ao_data.outburst - playsize) * 1000 / ao_data.bps;
 	if (sleep_time < 10) sleep_time = 10; // limit to 100 wakeups per second
 	usec_sleep(sleep_time * 1000);
     }
 
-    while (bytes_to_write) {
-	playsize = bytes_to_write;
-	if (playsize > MAX_OUTBURST)
-	    playsize = MAX_OUTBURST;
-	bytes_to_write -= playsize;
-
-	// Fill buffer if needed:
-	current_module="decode_audio";
-	t = GetTimer();
-	if (decode_audio(sh_audio, playsize) < 0) // EOF or error
-	    if (mpctx->d_audio->eof) {
-		audio_eof = 1;
-		if (sh_audio->a_out_buffer_len == 0)
-		    return 0;
-	    }
-	t = GetTimer() - t;
-	tt = t*0.000001f; audio_time_usage+=tt;
-	if (playsize > sh_audio->a_out_buffer_len) {
-	    playsize = sh_audio->a_out_buffer_len;
-	    if (audio_eof)
-		playflags |= AOPLAY_FINAL_CHUNK;
-	}
-	if (!playsize)
-	    break;
-
-	// play audio:
-	current_module="play_audio";
-
-	// Is this pts value actually useful for the aos that access it?
-	// They're obviously badly broken in the way they handle av sync;
-	// would not having access to this make them more broken?
-	ao_data.pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
-	playsize = mpctx->audio_out->play(sh_audio->a_out_buffer, playsize, playflags);
-
-	if (playsize > 0) {
-	    sh_audio->a_out_buffer_len -= playsize;
-	    memmove(sh_audio->a_out_buffer, &sh_audio->a_out_buffer[playsize],
-		    sh_audio->a_out_buffer_len);
-	    mpctx->delay += opts->playback_speed*playsize/(double)ao_data.bps;
-	}
-	else if (audio_eof && mpctx->audio_out->get_delay() < .04) {
-	    // Sanity check to avoid hanging in case current ao doesn't output
-	    // partial chunks and doesn't check for AOPLAY_FINAL_CHUNK
-	    mp_msg(MSGT_CPLAYER, MSGL_WARN, "Audio output truncated at end.\n");
-	    sh_audio->a_out_buffer_len = 0;
-	}
+    // Fill buffer if needed:
+    current_module="decode_audio";
+    t = GetTimer();
+    if (decode_audio(sh_audio, playsize) < 0) // EOF or error
+        if (mpctx->d_audio->eof) {
+            audio_eof = 1;
+            if (sh_audio->a_out_buffer_len == 0)
+                return 0;
+        }
+    t = GetTimer() - t;
+    tt = t*0.000001f; audio_time_usage+=tt;
+    if (playsize > sh_audio->a_out_buffer_len) {
+        playsize = sh_audio->a_out_buffer_len;
+        if (audio_eof)
+            playflags |= AOPLAY_FINAL_CHUNK;
     }
+    if (!playsize)
+        return 1;
+
+    // play audio:
+    current_module="play_audio";
+
+    // Is this pts value actually useful for the aos that access it?
+    // They're obviously badly broken in the way they handle av sync;
+    // would not having access to this make them more broken?
+    ao_data.pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
+    playsize = mpctx->audio_out->play(sh_audio->a_out_buffer, playsize, playflags);
+
+    if (playsize > 0) {
+        sh_audio->a_out_buffer_len -= playsize;
+        memmove(sh_audio->a_out_buffer, &sh_audio->a_out_buffer[playsize],
+                sh_audio->a_out_buffer_len);
+        mpctx->delay += opts->playback_speed*playsize/(double)ao_data.bps;
+    }
+    else if (audio_eof && mpctx->audio_out->get_delay() < .04) {
+        // Sanity check to avoid hanging in case current ao doesn't output
+        // partial chunks and doesn't check for AOPLAY_FINAL_CHUNK
+        mp_msg(MSGT_CPLAYER, MSGL_WARN, "Audio output truncated at end.\n");
+        sh_audio->a_out_buffer_len = 0;
+    }
+
     return 1;
 }
 
