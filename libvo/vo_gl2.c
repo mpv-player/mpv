@@ -104,7 +104,7 @@ struct TexSquare
 static GLint getInternalFormat(void)
 {
   switch (glctx.type) {
-#ifdef GL_WIN32
+#ifdef CONFIG_GL_WIN32
   case GLTYPE_W32:
   {
   PIXELFORMATDESCRIPTOR pfd;
@@ -122,7 +122,7 @@ static GLint getInternalFormat(void)
   }
   break;
 #endif
-#ifdef CONFIG_X11
+#ifdef CONFIG_GL_X11
   case GLTYPE_X11:
   if (glXGetConfig(mDisplay, glctx.vinfo.x11, GLX_RED_SIZE, &r_sz) != 0) r_sz = 0;
   if (glXGetConfig(mDisplay, glctx.vinfo.x11, GLX_GREEN_SIZE, &g_sz) != 0) g_sz = 0;
@@ -462,7 +462,7 @@ static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsign
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 }
 
-#ifdef GL_WIN32
+#ifdef CONFIG_GL_WIN32
 
 static int config_w32(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format) {
   if (!vo_w32_config(d_width, d_height, flags))
@@ -609,7 +609,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   image_width = width;
   image_format = format;
 
-#ifdef GL_WIN32
+#ifdef CONFIG_GL_WIN32
   if (config_w32(width, height, d_width, d_height, flags, title, format) == -1)
 #else
   if (config_glx(width, height, d_width, d_height, flags, title, format) == -1)
@@ -659,7 +659,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   return 0;
 }
 
-#ifndef GL_WIN32
+#ifndef CONFIG_GL_WIN32
 static int gl_handlekey(int key)
 {
   if(key=='a'||key=='A') {
@@ -676,7 +676,7 @@ static int gl_handlekey(int key)
 static void check_events(void)
 {
   int e;
-#ifndef GL_WIN32
+#ifndef CONFIG_GL_WIN32
   XEvent         Event;
   char           buf[100];
   KeySym         keySym;
@@ -830,7 +830,7 @@ static int preinit(const char *arg)
 {
   enum MPGLType gltype = GLTYPE_X11;
   // set defaults
-#ifdef GL_WIN32
+#ifdef CONFIG_GL_WIN32
   gltype = GLTYPE_W32;
 #endif
   use_yuv = 0;
@@ -882,7 +882,7 @@ static int control(uint32_t request, void *data)
     case VOCTRL_SET_PANSCAN:
       resize(vo_dwidth, vo_dheight);
       return VO_TRUE;
-#ifndef GL_WIN32
+#ifndef CONFIG_GL_WIN32
     case VOCTRL_SET_EQUALIZER:
     {
       struct voctrl_set_equalizer_args *args = data;
