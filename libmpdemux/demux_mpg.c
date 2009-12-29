@@ -270,6 +270,7 @@ static void new_audio_stream(demuxer_t *demux, int aid){
     sh_audio_t* sh_a;
     new_sh_audio(demux,aid);
     sh_a = (sh_audio_t*)demux->a_streams[aid];
+    sh_a->needs_parsing = 1;
     switch(aid & 0xE0){  // 1110 0000 b  (high 3 bit: type  low 5: id)
       case 0x00: sh_a->format=0x50;break; // mpeg
       case 0xA0: sh_a->format=0x10001;break;  // dvd pcm

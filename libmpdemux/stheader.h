@@ -26,14 +26,32 @@ struct demuxer;
 
 // Stream headers:
 
+#define SH_COMMON \
+  struct MPOpts *opts; \
+  struct demux_stream *ds;   \
+  struct codecs *codec; \
+  unsigned int format; \
+  int initialized; \
+  float stream_delay; /* number of seconds stream should be delayed (according to dwStart or similar) */ \
+  /* things needed for parsing */ \
+  int needs_parsing; \
+  struct AVCodecContext *avctx; \
+  struct AVCodecParserContext *parser; \
+  /* audio: last known pts value in output from decoder \
+   * video: predicted/interpolated PTS of the current frame */ \
+  double pts; \
+  /* codec-specific: */ \
+  void* context;   /* codec-specific stuff (usually HANDLE or struct pointer) */ \
+  char* lang; /* track language */ \
+  int default_track; \
+
+typedef struct sh_common {
+  SH_COMMON
+} sh_common_t;
+
 typedef struct sh_audio {
-  struct MPOpts *opts;
+  SH_COMMON
   int aid;
-  struct demux_stream *ds;
-  struct codecs *codec;
-  unsigned int format;
-  int initialized;
-  float stream_delay; // number of seconds stream should be delayed (according to dwStart or similar)
   // output format:
   int sample_format;
   int samplerate;
@@ -65,29 +83,19 @@ typedef struct sh_audio {
   AVIStreamHeader audio;
   WAVEFORMATEX* wf;
   // codec-specific:
-  void* context; // codec-specific stuff (usually HANDLE or struct pointer)
   unsigned char* codecdata; // extra header data passed from demuxer to codec
   int codecdata_len;
-  double pts;  // last known pts value in output from decoder
   int pts_bytes; // bytes output by decoder after last known pts
-  char* lang; // track language
-  int default_track;
 } sh_audio_t;
 
 typedef struct sh_video {
-  struct MPOpts *opts;
+  SH_COMMON
   int vid;
-  struct demux_stream *ds;
-  struct codecs *codec;
-  unsigned int format;
-  int initialized;
   float timer;		  // absolute time in video stream, since last start/seek
-  float stream_delay; // number of seconds stream should be delayed (according to dwStart or similar)
   // frame counters:
   float num_frames;       // number of frames played
   int num_frames_decoded; // number of frames decoded
   // timing (mostly for mpeg):
-  double pts;     // predicted/interpolated PTS of the current frame
   double i_pts;   // PTS for the _next_ I/P frame
   float next_frame_time;
   double last_pts;
@@ -120,19 +128,15 @@ typedef struct sh_video {
   AVIStreamHeader video;
   BITMAPINFOHEADER* bih;
   void* ImageDesc; // for quicktime codecs
-  // codec-specific:
-  void* context;   // codec-specific stuff (usually HANDLE or struct pointer)
 } sh_video_t;
 
 typedef struct sh_sub {
-  struct MPOpts *opts;
+  SH_COMMON
   int sid;
   char type;                    // t = text, v = VobSub, a = SSA/ASS
   unsigned char* extradata; // extra header data passed from demuxer
   int extradata_len;
   struct ass_track *ass_track;  // for SSA/ASS streams (type == 'a')
-  char* lang; // track language
-  int default_track;
 } sh_sub_t;
 
 // demuxer.c:

@@ -707,7 +707,7 @@ void vo_x11_decoration(struct vo *vo, int d)
     }
 }
 
-void vo_x11_classhint(struct vo *vo, Window window, char *name)
+void vo_x11_classhint(struct vo *vo, Window window, const char *name)
 {
     struct vo_x11_state *x11 = vo->x11;
     XClassHint wmClass;

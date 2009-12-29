@@ -824,23 +824,22 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
 			     MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
-    int current_id = -1, tmp;
+    int current_id, tmp;
+    if (!mpctx->demuxer || !mpctx->demuxer->audio)
+        return M_PROPERTY_UNAVAILABLE;
+    current_id = mpctx->demuxer->audio->id;
 
     switch (action) {
     case M_PROPERTY_GET:
-	if (!mpctx->sh_audio)
-	    return M_PROPERTY_UNAVAILABLE;
 	if (!arg)
 	    return M_PROPERTY_ERROR;
-        *(int *) arg = opts->audio_id;
+	*(int *) arg = current_id;
 	return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
-	if (!mpctx->sh_audio)
-	    return M_PROPERTY_UNAVAILABLE;
 	if (!arg)
 	    return M_PROPERTY_ERROR;
 
-        if (opts->audio_id < 0)
+	if (current_id < 0)
 	    *(char **) arg = strdup(_("disabled"));
 	else {
 	    char lang[40] = _("unknown");
@@ -849,7 +848,7 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
                 av_strlcpy(lang, sh->lang, 40);
 #ifdef CONFIG_DVDREAD
 	    else if (mpctx->stream->type == STREAMTYPE_DVD) {
-                int code = dvd_lang_from_aid(mpctx->stream, opts->audio_id);
+		int code = dvd_lang_from_aid(mpctx->stream, current_id);
 		if (code) {
 		    lang[0] = code >> 8;
 		    lang[1] = code;
@@ -860,22 +859,19 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
 
 #ifdef CONFIG_DVDNAV
 	    else if (mpctx->stream->type == STREAMTYPE_DVDNAV)
-		mp_dvdnav_lang_from_aid(mpctx->stream, opts->audio_id, lang);
+		mp_dvdnav_lang_from_aid(mpctx->stream, current_id, lang);
 #endif
 	    *(char **) arg = malloc(64);
-            snprintf(*(char **) arg, 64, "(%d) %s", opts->audio_id, lang);
+	    snprintf(*(char **) arg, 64, "(%d) %s", current_id, lang);
 	}
 	return M_PROPERTY_OK;
 
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_SET:
-	if (!mpctx->demuxer)
-	    return M_PROPERTY_UNAVAILABLE;
 	if (action == M_PROPERTY_SET && arg)
 	    tmp = *((int *) arg);
 	else
 	    tmp = -1;
-	current_id = mpctx->demuxer->audio->id;
         opts->audio_id = demuxer_switch_audio(mpctx->demuxer, tmp);
         if (opts->audio_id == -2
             || (opts->audio_id > -1
@@ -903,34 +899,32 @@ static int mp_property_video(m_option_t *prop, int action, void *arg,
 			     MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
-    int current_id = -1, tmp;
+    int current_id, tmp;
+    if (!mpctx->demuxer || !mpctx->demuxer->video)
+        return M_PROPERTY_UNAVAILABLE;
+    current_id = mpctx->demuxer->video->id;
 
     switch (action) {
     case M_PROPERTY_GET:
-	if (!mpctx->sh_video)
-	    return M_PROPERTY_UNAVAILABLE;
 	if (!arg)
 	    return M_PROPERTY_ERROR;
-        *(int *) arg = opts->video_id;
+	*(int *) arg = current_id;
 	return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
-	if (!mpctx->sh_video)
-	    return M_PROPERTY_UNAVAILABLE;
 	if (!arg)
 	    return M_PROPERTY_ERROR;
 
-        if (opts->video_id < 0)
+	if (current_id < 0)
 	    *(char **) arg = strdup(_("disabled"));
 	else {
 	    char lang[40] = _("unknown");
 	    *(char **) arg = malloc(64);
-            snprintf(*(char **) arg, 64, "(%d) %s", opts->video_id, lang);
+	    snprintf(*(char **) arg, 64, "(%d) %s", current_id, lang);
 	}
 	return M_PROPERTY_OK;
 
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_SET:
-	current_id = mpctx->demuxer->video->id;
 	if (action == M_PROPERTY_SET && arg)
 	    tmp = *((int *) arg);
 	else
@@ -1363,9 +1357,6 @@ static int mp_property_aspect(m_option_t *prop, int action, void *arg,
 static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
 			       MPContext *mpctx)
 {
-    if (!mpctx->sh_video)
-	return M_PROPERTY_UNAVAILABLE;
-
     switch (action) {
     case M_PROPERTY_SET:
 	if (!arg)
@@ -2479,6 +2470,23 @@ static const struct {
 };
 #endif
 
+static const char *property_error_string(int error_value)
+{
+    switch (error_value) {
+    case M_PROPERTY_ERROR:
+        return "ERROR";
+    case M_PROPERTY_UNAVAILABLE:
+        return "PROPERTY_UNAVAILABLE";
+    case M_PROPERTY_NOT_IMPLEMENTED:
+        return "NOT_IMPLEMENTED";
+    case M_PROPERTY_UNKNOWN:
+        return "PROPERTY_UNKNOWN";
+    case M_PROPERTY_DISABLED:
+        return "DISABLED";
+    }
+    return "UNKNOWN";
+}
+
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -2527,6 +2535,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 			   cmd->args[0].v.s, cmd->args[1].v.s);
                 else if (case_fallthrough_hack)
                     show_property_osd(mpctx, cmd->args[0].v.s);
+		if (r <= 0)
+		    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_ERROR=%s\n", property_error_string(r));
 	    }
 	    break;
 
@@ -2573,16 +2583,20 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 			   cmd->args[0].v.s, cmd->args[1].v.f);
                 else if (case_fallthrough_hack)
                     show_property_osd(mpctx, cmd->args[0].v.s);
+		if (r <= 0)
+		    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_ERROR=%s\n", property_error_string(r));
 	    }
 	    break;
 
 	case MP_CMD_GET_PROPERTY:{
 		char *tmp;
-		if (mp_property_do(cmd->args[0].v.s, M_PROPERTY_TO_STRING,
-				   &tmp, mpctx) <= 0) {
+		int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_TO_STRING,
+				       &tmp, mpctx);
+		if (r <= 0) {
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Failed to get value of property '%s'.\n",
 			   cmd->args[0].v.s);
+		    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_ERROR=%s\n", property_error_string(r));
 		    break;
 		}
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_%s=%s\n",

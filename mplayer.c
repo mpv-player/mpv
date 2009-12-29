@@ -699,6 +699,7 @@ void exit_player_with_rc(struct MPContext *mpctx, exit_reason_t how, int rc)
 
 #ifdef CONFIG_ASS
   ass_library_done(ass_library);
+  ass_library = NULL;
 #endif
 
   current_module="exit_player";
@@ -706,13 +707,19 @@ void exit_player_with_rc(struct MPContext *mpctx, exit_reason_t how, int rc)
 // free mplayer config
   if(mpctx->mconfig)
     m_config_free(mpctx->mconfig);
+  mpctx->mconfig = NULL;
 
+  if(mpctx->playtree_iter)
+    play_tree_iter_free(mpctx->playtree_iter);
+  mpctx->playtree_iter = NULL;
   if(mpctx->playtree)
     play_tree_free(mpctx->playtree, 1);
+  mpctx->playtree = NULL;
 
   talloc_free(mpctx->key_fifo);
 
   if(edl_records != NULL) free(edl_records); // free mem allocated for EDL
+  edl_records = NULL;
   switch(how) {
   case EXIT_QUIT:
     mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"\nExiting... (%s)\n","Quit");

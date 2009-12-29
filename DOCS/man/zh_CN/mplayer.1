@@ -3581,6 +3581,9 @@ OSD 颜色（默认值是：0x00ffffff，对应不透明的白色）。
 此限制帧率到 (水平刷新率 / n)。
 需要 GLX_SGI_swap_control 的支持。
 某些(大多数/所有?)实现仅工作于全屏模式。
+.IPs ycbcr
+使用 GL_MESA_ycbcr_texture 扩展组件将 YUV 转换为 RGB 格式。
+在大多数情况下，该方法很可能比使用软件转换成 RGB 慢。
 .IPs yuv=<n>
 选择 YUV 到 RGB 转换的类型。
 .RSss
@@ -3620,9 +3623,6 @@ GL_ARB_fragment_shader！）。至少需要三个纹理单位。提供饱和度�
 对红, 绿和蓝色, Gamma 也能被独立设置。
 速度比其他方法更多地依赖于 GPU 内存带宽。
 .RE
-.IPs ycbcr
-使用 GL_MESA_ycbcr_texture 扩展组件完成 YUV 至 RGB 的转换。
-在大多数情况下，这可能比使用软件方式转换至 RGB 要慢。
 .IPs lscale=<n>
 选择缩放功能供调节发光性。
 仅对 yuv 模式 2, 3, 4 和 6 有效。
@@ -3657,6 +3657,11 @@ GL_ARB_fragment_shader！）。至少需要三个纹理单位。提供饱和度�
 如果启用(默认), 使用 GL_LINEAR 插值, 否则使用 GL_NEAREST 用于 customtex 纹理。
 .IPs (no)customtrect
 如果启用, 使用 texture_rectangle 用于 customtex 纹理。默认是停用。
+.IPs (no)mipmapgen
+一旦启用，将自动生成视频的贴图。该选项与 customprog 和 TXB 一起使用
+有助于实现一个具有大影响半径的模糊滤镜。
+对于大多数 OpenGL 的实现产品来说，该选项作用于任何非 RGB 的格式都很慢。
+默认值为禁用。
 .RE
 .sp 1
 .RS

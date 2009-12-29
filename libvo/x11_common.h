@@ -110,7 +110,7 @@ struct vo_x11_state *vo_x11_init_state(void);
 int vo_init(struct vo *vo);
 void vo_uninit(struct vo_x11_state *x11);
 void vo_x11_decoration(struct vo *vo, int d );
-void vo_x11_classhint(struct vo *vo, Window window, char *name);
+void vo_x11_classhint(struct vo *vo, Window window, const char *name);
 void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max);
 int vo_x11_check_events(struct vo *vo);
 void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask);
