@@ -133,4 +133,11 @@ typedef struct {
 
 const char *vo_format_name(int format);
 
+/**
+ * Calculates the scale shifts for the chroma planes for planar YUV
+ *
+ * \return bits-per-pixel for format if successful (i.e. format is 3 or 4-planes planar YUV), 0 otherwise
+ */
+int mp_get_chroma_shift(int format, int *x_shift, int *y_shift);
+
 #endif /* MPLAYER_IMG_FORMAT_H */

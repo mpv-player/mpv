@@ -133,51 +133,24 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     }
     mpi->flags|=MP_IMGFLAG_YUV;
     mpi->num_planes=3;
+    if (mp_get_chroma_shift(out_fmt, NULL, NULL)) {
+        mpi->flags|=MP_IMGFLAG_PLANAR;
+        mpi->bpp = mp_get_chroma_shift(out_fmt, &mpi->chroma_x_shift, &mpi->chroma_y_shift);
+        mpi->chroma_width  = mpi->width  >> mpi->chroma_x_shift;
+        mpi->chroma_height = mpi->height >> mpi->chroma_y_shift;
+    }
     switch(out_fmt){
     case IMGFMT_I420:
     case IMGFMT_IYUV:
 	mpi->flags|=MP_IMGFLAG_SWAPPED;
     case IMGFMT_YV12:
-	mpi->flags|=MP_IMGFLAG_PLANAR;
-	mpi->bpp=12;
-	mpi->chroma_width=(mpi->width>>1);
-	mpi->chroma_height=(mpi->height>>1);
-	mpi->chroma_x_shift=1;
-	mpi->chroma_y_shift=1;
 	return;
     case IMGFMT_IF09:
 	mpi->num_planes=4;
     case IMGFMT_YVU9:
-	mpi->flags|=MP_IMGFLAG_PLANAR;
-	mpi->bpp=9;
-	mpi->chroma_width=(mpi->width>>2);
-	mpi->chroma_height=(mpi->height>>2);
-	mpi->chroma_x_shift=2;
-	mpi->chroma_y_shift=2;
-	return;
     case IMGFMT_444P:
-	mpi->flags|=MP_IMGFLAG_PLANAR;
-	mpi->bpp=24;
-	mpi->chroma_width=(mpi->width);
-	mpi->chroma_height=(mpi->height);
-	mpi->chroma_x_shift=0;
-	mpi->chroma_y_shift=0;
-	return;
     case IMGFMT_422P:
-	mpi->flags|=MP_IMGFLAG_PLANAR;
-	mpi->bpp=16;
-	mpi->chroma_width=(mpi->width>>1);
-	mpi->chroma_height=(mpi->height);
-	mpi->chroma_x_shift=1;
-	mpi->chroma_y_shift=0;
-	return;
     case IMGFMT_411P:
-	mpi->flags|=MP_IMGFLAG_PLANAR;
-	mpi->bpp=12;
-	mpi->chroma_width=(mpi->width>>2);
-	mpi->chroma_height=(mpi->height);
-	mpi->chroma_x_shift=2;
-	mpi->chroma_y_shift=0;
 	return;
     case IMGFMT_Y800:
     case IMGFMT_Y8:

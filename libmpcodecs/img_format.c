@@ -79,3 +79,40 @@ const char *vo_format_name(int format)
     snprintf(unknown_format,20,"Unknown 0x%04x",format);
     return unknown_format;
 }
+
+int mp_get_chroma_shift(int format, int *x_shift, int *y_shift)
+{
+    int xs = 0, ys = 0;
+    int err = 0;
+    switch (format) {
+    case IMGFMT_I420:
+    case IMGFMT_IYUV:
+    case IMGFMT_YV12:
+        xs = 1;
+        ys = 1;
+        break;
+    case IMGFMT_IF09:
+    case IMGFMT_YVU9:
+        xs = 2;
+        ys = 2;
+        break;
+    case IMGFMT_444P:
+        xs = 0;
+        ys = 0;
+        break;
+    case IMGFMT_422P:
+        xs = 1;
+        ys = 0;
+        break;
+    case IMGFMT_411P:
+        xs = 2;
+        ys = 0;
+        break;
+    default:
+        err = 1;
+        break;
+    }
+    if (x_shift) *x_shift = xs;
+    if (y_shift) *y_shift = ys;
+    return err ? 0 : 8 + (16 >> (xs + ys));
+}
