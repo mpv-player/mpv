@@ -339,6 +339,8 @@ typedef struct {
   float bgamma;
   int texw;
   int texh;
+  int chrom_texw;
+  int chrom_texh;
   float filter_strength;
 } gl_conversion_params_t;
 

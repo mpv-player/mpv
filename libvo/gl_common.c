@@ -234,6 +234,10 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
   if (!gl_format) gl_format = &dummy2;
   if (!gl_type) gl_type = &dummy2;
 
+  // these are all the same for our purpose
+  if (mp_get_chroma_shift(fmt, NULL, NULL))
+    fmt = IMGFMT_YV12;
+
   *bpp = IMGFMT_IS_BGR(fmt)?IMGFMT_BGR_DEPTH(fmt):IMGFMT_RGB_DEPTH(fmt);
   *gl_texfmt = 3;
   switch (fmt) {
@@ -1323,9 +1327,9 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
   add_scaler(YUV_LUM_SCALER(type), &prog_pos, &prog_remain, lum_scale_texs,
              '0', 'r', rect, texw, texh, params->filter_strength);
   add_scaler(YUV_CHROM_SCALER(type), &prog_pos, &prog_remain, chrom_scale_texs,
-             '1', 'g', rect, texw / 2, texh / 2, params->filter_strength);
+             '1', 'g', rect, params->chrom_texw, params->chrom_texh, params->filter_strength);
   add_scaler(YUV_CHROM_SCALER(type), &prog_pos, &prog_remain, chrom_scale_texs,
-             '2', 'b', rect, texw / 2, texh / 2, params->filter_strength);
+             '2', 'b', rect, params->chrom_texw, params->chrom_texh, params->filter_strength);
   get_yuv2rgb_coeffs(params, yuv2rgb);
   switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_FRAGMENT:
@@ -1496,14 +1500,19 @@ void glDisableYUVConversion(GLenum target, int type) {
  * \param sx width of texture in pixels
  * \param sy height of texture in pixels
  * \param rect_tex whether this texture uses texture_rectangle extension
- * \param is_yv12 if set, also draw the textures from units 1 and 2
+ * \param is_yv12 if != 0, also draw the textures from units 1 and 2,
+ *                bits 8 - 15 and 16 - 23 specify the x and y scaling of those textures
  * \param flip flip the texture upside down
  * \ingroup gltexture
  */
 void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
                int sx, int sy, int rect_tex, int is_yv12, int flip) {
-  GLfloat tx2 = tx / 2, ty2 = ty / 2, tw2 = tw / 2, th2 = th / 2;
+  int chroma_x_shift = (is_yv12 >>  8) & 31;
+  int chroma_y_shift = (is_yv12 >> 16) & 31;
+  GLfloat xscale = 1 << chroma_x_shift;
+  GLfloat yscale = 1 << chroma_y_shift;
+  GLfloat tx2 = tx / xscale, ty2 = ty / yscale, tw2 = tw / xscale, th2 = th / yscale;
   if (!rect_tex) {
     tx /= sx; ty /= sy; tw /= sx; th /= sy;
     tx2 = tx, ty2 = ty, tw2 = tw, th2 = th;
