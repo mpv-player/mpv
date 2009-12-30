@@ -63,6 +63,7 @@ static unsigned int outfmt_list[]={
     IMGFMT_NV21,
     IMGFMT_YUY2,
     IMGFMT_UYVY,
+    IMGFMT_440P,
 // RGB and grayscale (Y8 and Y800):
     IMGFMT_BGR32,
     IMGFMT_RGB32,
@@ -472,6 +473,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_444P:
     case IMGFMT_422P:
     case IMGFMT_411P:
+    case IMGFMT_440P:
     case IMGFMT_BGR8:
     case IMGFMT_RGB8:
     case IMGFMT_BG4B:
