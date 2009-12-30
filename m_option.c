@@ -1035,6 +1035,7 @@ static struct {
   {"444p", IMGFMT_444P},
   {"422p", IMGFMT_422P},
   {"411p", IMGFMT_411P},
+  {"440p", IMGFMT_440P},
   {"yuy2", IMGFMT_YUY2},
   {"uyvy", IMGFMT_UYVY},
   {"yvu9", IMGFMT_YVU9},

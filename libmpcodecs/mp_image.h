@@ -151,6 +151,7 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     case IMGFMT_444P:
     case IMGFMT_422P:
     case IMGFMT_411P:
+    case IMGFMT_440P:
 	return;
     case IMGFMT_Y800:
     case IMGFMT_Y8:

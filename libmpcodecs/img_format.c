@@ -108,6 +108,10 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift)
         xs = 2;
         ys = 0;
         break;
+    case IMGFMT_440P:
+        xs = 0;
+        ys = 1;
+        break;
     default:
         err = 1;
         break;
