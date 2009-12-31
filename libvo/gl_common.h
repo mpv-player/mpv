@@ -26,6 +26,7 @@
 #include "mp_msg.h"
 
 #include "video_out.h"
+#include "csputils.h"
 
 #ifdef CONFIG_GL_WIN32
 #include <windows.h>
@@ -327,16 +328,6 @@ int loadGPUProgram(GLenum target, char *prog);
 //! extract chrominance scaler out of type
 #define YUV_CHROM_SCALER(t) ((t >> YUV_CHROM_SCALER_SHIFT) & YUV_SCALER_MASK)
 /** \} */
-
-struct mp_csp_params {
-  float brightness;
-  float contrast;
-  float hue;
-  float saturation;
-  float rgamma;
-  float ggamma;
-  float bgamma;
-};
 
 typedef struct {
   GLenum target;
