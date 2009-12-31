@@ -216,7 +216,7 @@ static void update_yuvconv(void) {
   float ggamma = exp(log(8.0) * eq_ggamma / 100.0);
   float bgamma = exp(log(8.0) * eq_bgamma / 100.0);
   gl_conversion_params_t params = {gl_target, yuvconvtype,
-      bri, cont, hue, sat, rgamma, ggamma, bgamma,
+      {bri, cont, hue, sat, rgamma, ggamma, bgamma},
       texture_width, texture_height, 0, 0, filter_strength};
   mp_get_chroma_shift(image_format, &xs, &ys);
   params.chrom_texw = params.texw >> xs;

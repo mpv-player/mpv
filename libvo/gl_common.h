@@ -327,9 +327,8 @@ int loadGPUProgram(GLenum target, char *prog);
 //! extract chrominance scaler out of type
 #define YUV_CHROM_SCALER(t) ((t >> YUV_CHROM_SCALER_SHIFT) & YUV_SCALER_MASK)
 /** \} */
-typedef struct {
-  GLenum target;
-  int type;
+
+struct mp_csp_params {
   float brightness;
   float contrast;
   float hue;
@@ -337,6 +336,12 @@ typedef struct {
   float rgamma;
   float ggamma;
   float bgamma;
+};
+
+typedef struct {
+  GLenum target;
+  int type;
+  struct mp_csp_params csp_params;
   int texw;
   int texh;
   int chrom_texw;

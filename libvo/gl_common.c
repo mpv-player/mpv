@@ -1018,7 +1018,7 @@ static void gen_gamma_map(unsigned char *map, int size, float gamma);
 #define COL_V 2
 #define COL_C 3
 
-static void get_yuv2rgb_coeffs(gl_conversion_params_t *params, float yuv2rgb[3][4]) {
+static void get_yuv2rgb_coeffs(struct mp_csp_params *params, float yuv2rgb[3][4]) {
   float uvcos = params->saturation * cos(params->hue);
   float uvsin = params->saturation * sin(params->hue);
   int i;
@@ -1049,7 +1049,7 @@ static void get_yuv2rgb_coeffs(gl_conversion_params_t *params, float yuv2rgb[3][
  * \param map where to store map. Must provide space for (size + 2)^3 elements
  * \param size size of the map, excluding border
  */
-static void gen_yuv2rgb_map(gl_conversion_params_t *params, unsigned char *map, int size) {
+static void gen_yuv2rgb_map(struct mp_csp_params *params, unsigned char *map, int size) {
   int i, j, k, l;
   float step = 1.0 / size;
   float y, u, v;
@@ -1101,9 +1101,9 @@ static void create_conv_textures(gl_conversion_params_t *params, int *texu, char
       texs[0] = (*texu)++;
       ActiveTexture(GL_TEXTURE0 + texs[0]);
       lookup_data = malloc(4 * LOOKUP_RES);
-      gen_gamma_map(lookup_data, LOOKUP_RES, params->rgamma);
-      gen_gamma_map(&lookup_data[LOOKUP_RES], LOOKUP_RES, params->ggamma);
-      gen_gamma_map(&lookup_data[2 * LOOKUP_RES], LOOKUP_RES, params->bgamma);
+      gen_gamma_map(lookup_data, LOOKUP_RES, params->csp_params.rgamma);
+      gen_gamma_map(&lookup_data[LOOKUP_RES], LOOKUP_RES, params->csp_params.ggamma);
+      gen_gamma_map(&lookup_data[2 * LOOKUP_RES], LOOKUP_RES, params->csp_params.bgamma);
       glCreateClearTex(GL_TEXTURE_2D, GL_LUMINANCE8, GL_LUMINANCE, GL_UNSIGNED_BYTE, GL_LINEAR,
                        LOOKUP_RES, 4, 0);
       glUploadTex(GL_TEXTURE_2D, GL_LUMINANCE, GL_UNSIGNED_BYTE, lookup_data,
@@ -1121,7 +1121,7 @@ static void create_conv_textures(gl_conversion_params_t *params, int *texu, char
         texs[0] = (*texu)++;
         ActiveTexture(GL_TEXTURE0 + texs[0]);
         lookup_data = malloc(3 * sz * sz * sz);
-        gen_yuv2rgb_map(params, lookup_data, LOOKUP_3DRES);
+        gen_yuv2rgb_map(&params->csp_params, lookup_data, LOOKUP_3DRES);
         glAdjustAlignment(sz);
         PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
         TexImage3D(GL_TEXTURE_3D, 0, 3, sz, sz, sz, 1,
@@ -1330,7 +1330,7 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
              '1', 'g', rect, params->chrom_texw, params->chrom_texh, params->filter_strength);
   add_scaler(YUV_CHROM_SCALER(type), &prog_pos, &prog_remain, chrom_scale_texs,
              '2', 'b', rect, params->chrom_texw, params->chrom_texh, params->filter_strength);
-  get_yuv2rgb_coeffs(params, yuv2rgb);
+  get_yuv2rgb_coeffs(&params->csp_params, yuv2rgb);
   switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_FRAGMENT:
       snprintf(prog_pos, prog_remain, yuv_prog_template,
@@ -1345,7 +1345,7 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
                yuv2rgb[ROW_R][COL_U], yuv2rgb[ROW_G][COL_U], yuv2rgb[ROW_B][COL_U],
                yuv2rgb[ROW_R][COL_V], yuv2rgb[ROW_G][COL_V], yuv2rgb[ROW_B][COL_V],
                yuv2rgb[ROW_R][COL_C], yuv2rgb[ROW_G][COL_C], yuv2rgb[ROW_B][COL_C],
-               (float)1.0 / params->rgamma, (float)1.0 / params->bgamma, (float)1.0 / params->bgamma);
+               (float)1.0 / params->csp_params.rgamma, (float)1.0 / params->csp_params.bgamma, (float)1.0 / params->csp_params.bgamma);
       break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
       snprintf(prog_pos, prog_remain, yuv_lookup_prog_template,
@@ -1397,8 +1397,8 @@ static void gen_gamma_map(unsigned char *map, int size, float gamma) {
  * \ingroup glconversion
  */
 void glSetupYUVConversion(gl_conversion_params_t *params) {
-  float uvcos = params->saturation * cos(params->hue);
-  float uvsin = params->saturation * sin(params->hue);
+  float uvcos = params->csp_params.saturation * cos(params->csp_params.hue);
+  float uvsin = params->csp_params.saturation * sin(params->csp_params.hue);
   switch (YUV_CONVERSION(params->type)) {
     case YUV_CONVERSION_COMBINERS:
       glSetupYUVCombiners(uvcos, uvsin);
