@@ -924,7 +924,7 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     off_t off;
     int i, il;
 
-    if (index_mode == 0) {
+    if (index_mode == 0 || index_mode == 2) {
         ebml_read_skip(s, NULL);
         return 0;
     }
