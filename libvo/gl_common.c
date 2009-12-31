@@ -234,9 +234,15 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
   if (!gl_format) gl_format = &dummy2;
   if (!gl_type) gl_type = &dummy2;
 
-  // these are all the same for our purpose
-  if (mp_get_chroma_shift(fmt, NULL, NULL))
-    fmt = IMGFMT_YV12;
+  if (mp_get_chroma_shift(fmt, NULL, NULL)) {
+    // reduce the possible cases a bit
+    if (IMGFMT_IS_YUVP16_LE(fmt))
+      fmt = IMGFMT_420P16_LE;
+    else if (IMGFMT_IS_YUVP16_BE(fmt))
+      fmt = IMGFMT_420P16_BE;
+    else
+      fmt = IMGFMT_YV12;
+  }
 
   *bpp = IMGFMT_IS_BGR(fmt)?IMGFMT_BGR_DEPTH(fmt):IMGFMT_RGB_DEPTH(fmt);
   *gl_texfmt = 3;
@@ -253,6 +259,13 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
       *gl_texfmt = 4;
       *gl_format = GL_RGBA;
       *gl_type = GL_UNSIGNED_BYTE;
+      break;
+    case IMGFMT_420P16:
+      supported = 0; // no native YUV support
+      *gl_texfmt = 1;
+      *bpp = 16;
+      *gl_format = GL_LUMINANCE;
+      *gl_type = GL_UNSIGNED_SHORT;
       break;
     case IMGFMT_YV12:
       supported = 0; // no native YV12 support

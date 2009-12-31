@@ -822,7 +822,8 @@ draw_frame(uint8_t *src[])
 static int
 query_format(uint32_t format)
 {
-  if (use_yuv && mp_get_chroma_shift(format, NULL, NULL))
+  if (use_yuv && mp_get_chroma_shift(format, NULL, NULL) &&
+      (IMGFMT_IS_YUVP16_NE(format) || !IMGFMT_IS_YUVP16(format)))
     return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD |
            VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
   switch(format) {
