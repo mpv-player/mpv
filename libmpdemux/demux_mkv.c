@@ -2069,25 +2069,11 @@ static int demux_mkv_open(demuxer_t *demuxer)
             cont = demux_mkv_read_attachments(demuxer);
             break;
 
-        case MATROSKA_ID_CLUSTER:;
-            int p, l;
+        case MATROSKA_ID_CLUSTER:
             mp_msg(MSGT_DEMUX, MSGL_V,
                    "[mkv] |+ found cluster, headers are "
                    "parsed completely :)\n");
-            /* get the first cluster timecode */
-            p = stream_tell(s);
-            l = ebml_read_length(s, NULL);
-            while (ebml_read_id(s, NULL) != MATROSKA_ID_CLUSTERTIMECODE) {
-                ebml_read_skip(s, NULL);
-                if (stream_tell(s) >= p + l)
-                    break;
-            }
-            if (stream_tell(s) < p + l) {
-                uint64_t num = ebml_read_uint(s, NULL);
-                if (num == EBML_UINT_INVALID)
-                    return 0;
-            }
-            stream_seek(s, p - 4);
+            stream_seek(s, stream_tell(s) - 4);
             cont = 1;
             break;
 
