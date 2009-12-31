@@ -1041,6 +1041,7 @@ static struct {
   {"444p16", IMGFMT_444P16},
   {"422p16", IMGFMT_422P16},
   {"420p16", IMGFMT_420P16},
+  {"420a", IMGFMT_420A},
   {"444p", IMGFMT_444P},
   {"422p", IMGFMT_422P},
   {"411p", IMGFMT_411P},

@@ -145,6 +145,7 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->flags|=MP_IMGFLAG_SWAPPED;
     case IMGFMT_YV12:
 	return;
+    case IMGFMT_420A:
     case IMGFMT_IF09:
 	mpi->num_planes=4;
     case IMGFMT_YVU9:
@@ -210,6 +211,7 @@ static inline void free_mp_image(mp_image_t* mpi){
 }
 
 mp_image_t* alloc_mpi(int w, int h, unsigned long int fmt);
+void mp_image_alloc_planes(mp_image_t *mpi);
 void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi);
 
 #endif /* MPLAYER_MP_IMAGE_H */

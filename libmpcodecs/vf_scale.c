@@ -61,6 +61,7 @@ static unsigned int outfmt_list[]={
     IMGFMT_I420,
     IMGFMT_420P16_LE,
     IMGFMT_420P16_BE,
+    IMGFMT_420A,
     IMGFMT_IYUV,
     IMGFMT_YVU9,
     IMGFMT_IF09,
@@ -480,6 +481,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_422P:
     case IMGFMT_411P:
     case IMGFMT_440P:
+    case IMGFMT_420A:
     case IMGFMT_444P16_LE:
     case IMGFMT_444P16_BE:
     case IMGFMT_422P16_LE:

@@ -161,6 +161,7 @@ static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int
 		{"444P16", IMGFMT_444P16},
 		{"422P16", IMGFMT_422P16},
 		{"420P16", IMGFMT_420P16},
+		{"420A",  IMGFMT_420A},
 		{"444P",  IMGFMT_444P},
 		{"422P",  IMGFMT_422P},
 		{"411P",  IMGFMT_411P},

@@ -43,6 +43,7 @@ const char *vo_format_name(int format)
 	case IMGFMT_422P16_BE: return "Planar 422P 16-bit big-endian";
 	case IMGFMT_444P16_LE: return "Planar 444P 16-bit little-endian";
 	case IMGFMT_444P16_BE: return "Planar 444P 16-bit big-endian";
+	case IMGFMT_420A: return "Planar 420P with alpha";
 	case IMGFMT_444P: return "Planar 444P";
 	case IMGFMT_422P: return "Planar 422P";
 	case IMGFMT_411P: return "Planar 411P";
@@ -96,6 +97,7 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift)
     case IMGFMT_420P16_LE:
     case IMGFMT_420P16_BE:
         bpp_factor = 2;
+    case IMGFMT_420A:
     case IMGFMT_I420:
     case IMGFMT_IYUV:
     case IMGFMT_YV12:
@@ -136,6 +138,8 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift)
     if (x_shift) *x_shift = xs;
     if (y_shift) *y_shift = ys;
     bpp = 8 + (16 >> (xs + ys));
+    if (format == IMGFMT_420A)
+        bpp += 8;
     bpp *= bpp_factor;
     return err ? 0 : bpp;
 }
