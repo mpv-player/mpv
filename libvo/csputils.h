@@ -21,7 +21,17 @@
 
 #include <stdint.h>
 
+enum mp_csp_standard {
+  MP_CSP_DEFAULT,
+  MP_CSP_BT_601,
+  MP_CSP_BT_709,
+  MP_CSP_SMPTE_240M,
+  MP_CSP_EBU,
+  MP_CSP_COUNT
+};
+
 struct mp_csp_params {
+  enum mp_csp_standard format;
   float brightness;
   float contrast;
   float hue;

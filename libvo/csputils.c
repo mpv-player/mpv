@@ -56,20 +56,50 @@ void mp_gen_gamma_map(uint8_t *map, int size, float gamma) {
 void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float yuv2rgb[3][4]) {
   float uvcos = params->saturation * cos(params->hue);
   float uvsin = params->saturation * sin(params->hue);
+  int format = params->format;
   int i;
-  float uv_coeffs[3][2] = {
-    { 0.000,  1.596},
-    {-0.391, -0.813},
-    { 2.018,  0.000}
+  const float (*uv_coeffs)[2];
+  static const float level_adjust[4] = {-16 / 255.0, -128 / 255.0, -128 / 255.0, 1.164};
+  static const float uv_coeffs_table[MP_CSP_COUNT][3][2] = {
+    [MP_CSP_DEFAULT] = {
+      { 0.000,  1.596},
+      {-0.391, -0.813},
+      { 2.018,  0.000}
+    },
+    [MP_CSP_BT_601] = {
+      { 0.000,  1.403},
+      {-0.344, -0.714},
+      { 1.773,  0.000}
+    },
+    [MP_CSP_BT_709] = {
+      { 0.0000,  1.5701},
+      {-0.1870, -0.4664},
+      { 1.8556,  0.0000}
+    },
+    [MP_CSP_SMPTE_240M] = {
+      { 0.0000,  1.5756},
+      {-0.2253, -0.5000},
+      { 1.8270,  0.0000}
+    },
+    [MP_CSP_EBU] = {
+      { 0.000,  1.140},
+      {-0.396, -0.581},
+      { 2.029,  0.000}
+    },
   };
+
+  if (format < 0 || format >= MP_CSP_COUNT)
+    format = MP_CSP_DEFAULT;
+  uv_coeffs = uv_coeffs_table[format];
+
   for (i = 0; i < 3; i++) {
     yuv2rgb[i][COL_C]  = params->brightness;
-    yuv2rgb[i][COL_Y]  = 1.164 * params->contrast;
-    yuv2rgb[i][COL_C] += (-16 / 255.0) * yuv2rgb[i][COL_Y];
+    yuv2rgb[i][COL_Y]  = level_adjust[COL_C] * params->contrast;
+    yuv2rgb[i][COL_C] += level_adjust[COL_Y] * yuv2rgb[i][COL_Y];
     yuv2rgb[i][COL_U]  = uv_coeffs[i][0] * uvcos + uv_coeffs[i][1] * uvsin;
-    yuv2rgb[i][COL_C] += (-128 / 255.0) * yuv2rgb[i][COL_U];
+    yuv2rgb[i][COL_C] += level_adjust[COL_U] * yuv2rgb[i][COL_U];
     yuv2rgb[i][COL_V]  = uv_coeffs[i][0] * uvsin + uv_coeffs[i][1] * uvcos;
-    yuv2rgb[i][COL_C] += (-128 / 255.0) * yuv2rgb[i][COL_V];
+    yuv2rgb[i][COL_C] += level_adjust[COL_V] * yuv2rgb[i][COL_V];
     // this "centers" contrast control so that e.g. a contrast of 0
     // leads to a grey image, not a black one
     yuv2rgb[i][COL_C] += 0.5 - params->contrast / 2.0;
