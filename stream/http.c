@@ -768,9 +768,10 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 		// Check if we can make partial content requests and thus seek in http-streams
 		if( http_hdr!=NULL && http_hdr->status_code==200 ) {
 		    char *accept_ranges;
+		    const char *server = http_get_field(http_hdr, "Server");
 		    if( (accept_ranges = http_get_field(http_hdr,"Accept-Ranges")) != NULL )
 			seekable = strncmp(accept_ranges,"bytes",5)==0;
-		    else if (strcmp(http_get_field(http_hdr, "Server"), "gvs 1.0") == 0)
+		    else if (server && strcmp(server, "gvs 1.0") == 0)
 			seekable = 1; // HACK for youtube incorrectly claiming not to support seeking
 		}
 
