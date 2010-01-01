@@ -286,9 +286,7 @@ static void check_events(void){}
 static int int_zero_to_nine(void *value)
 {
     int *sh = value;
-    if ( (*sh < 0) || (*sh > 9) )
-        return 0;
-    return 1;
+    return *sh >= 0 && *sh <= 9;
 }
 
 static const opt_t subopts[] = {

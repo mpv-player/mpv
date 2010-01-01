@@ -265,9 +265,7 @@ static void print_help (void)
 
 static int str_maxlen(void *strp) {
   strarg_t *str = strp;
-  if (str->len > ALSA_DEVICE_SIZE)
-    return 0;
-  return 1;
+  return str->len <= ALSA_DEVICE_SIZE;
 }
 
 static int try_open_device(const char *device, int open_mode, int try_ac3)

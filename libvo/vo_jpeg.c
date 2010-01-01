@@ -333,9 +333,7 @@ static void check_events(void)
 static int int_zero_hundred(void *valp)
 {
     int *val = valp;
-    if ( (*val >=0) && (*val<=100) )
-        return 1;
-    return 0;
+    return *val >= 0 && *val <= 100;
 }
 
 static int preinit(const char *arg)
