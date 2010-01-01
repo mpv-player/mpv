@@ -93,6 +93,7 @@ static int use_ycbcr;
 #define MASK_NOT_COMBINERS (~((1 << YUV_CONVERSION_NONE) | (1 << YUV_CONVERSION_COMBINERS) | (1 << YUV_CONVERSION_COMBINERS_ATI)))
 #define MASK_GAMMA_SUPPORT (MASK_NOT_COMBINERS & ~(1 << YUV_CONVERSION_FRAGMENT))
 static int use_yuv;
+static int colorspace;
 static int is_yuv;
 static int lscale;
 static int cscale;
@@ -216,7 +217,7 @@ static void update_yuvconv(void) {
   float ggamma = exp(log(8.0) * eq_ggamma / 100.0);
   float bgamma = exp(log(8.0) * eq_bgamma / 100.0);
   gl_conversion_params_t params = {gl_target, yuvconvtype,
-      {MP_CSP_DEFAULT, bri, cont, hue, sat, rgamma, ggamma, bgamma},
+      {colorspace, bri, cont, hue, sat, rgamma, ggamma, bgamma},
       texture_width, texture_height, 0, 0, filter_strength};
   mp_get_chroma_shift(image_format, &xs, &ys);
   params.chrom_texw = params.texw >> xs;
@@ -999,6 +1000,12 @@ uninit(void)
   uninit_mpglcontext(&glctx);
 }
 
+static int valid_csp(void *p)
+{
+  int *csp = p;
+  return *csp >= -1 && *csp < MP_CSP_COUNT;
+}
+
 static const opt_t subopts[] = {
   {"manyfmts",     OPT_ARG_BOOL, &many_fmts,    NULL},
   {"osd",          OPT_ARG_BOOL, &use_osd,      NULL},
@@ -1008,6 +1015,7 @@ static const opt_t subopts[] = {
   {"slice-height", OPT_ARG_INT,  &slice_height, (opt_test_f)int_non_neg},
   {"rectangle",    OPT_ARG_INT,  &use_rectangle,(opt_test_f)int_non_neg},
   {"yuv",          OPT_ARG_INT,  &use_yuv,      (opt_test_f)int_non_neg},
+  {"colorspace",   OPT_ARG_INT,  &colorspace,   valid_csp},
   {"lscale",       OPT_ARG_INT,  &lscale,       (opt_test_f)int_non_neg},
   {"cscale",       OPT_ARG_INT,  &cscale,       (opt_test_f)int_non_neg},
   {"filter-strength", OPT_ARG_FLOAT, &filter_strength, NULL},
@@ -1038,6 +1046,7 @@ static int preinit(const char *arg)
     use_aspect = 1;
     use_ycbcr = 0;
     use_yuv = 0;
+    colorspace = -1;
     lscale = 0;
     cscale = 0;
     filter_strength = 0.5;
@@ -1093,6 +1102,12 @@ static int preinit(const char *arg)
               "    4: use fragment program with gamma correction via lookup.\n"
               "    5: use ATI-specific method (for older cards).\n"
               "    6: use lookup via 3D texture.\n"
+	      "  colorspace=<n>\n"
+              "    0: MPlayer's default YUV to RGB conversion\n"
+              "    1: YUV to RGB according to BT.601\n"
+              "    2: YUV to RGB according to BT.709\n"
+              "    3: YUV to RGB according to SMPT-240M\n"
+              "    4: YUV to RGB according to EBU\n"
               "  lscale=<n>\n"
               "    0: use standard bilinear scaling for luma.\n"
               "    1: use improved bicubic scaling for luma.\n"
