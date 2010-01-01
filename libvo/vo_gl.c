@@ -1108,6 +1108,7 @@ static int preinit(const char *arg)
               "    2: YUV to RGB according to BT.709\n"
               "    3: YUV to RGB according to SMPT-240M\n"
               "    4: YUV to RGB according to EBU\n"
+              "    5: XYZ to RGB\n"
               "  lscale=<n>\n"
               "    0: use standard bilinear scaling for luma.\n"
               "    1: use improved bicubic scaling for luma.\n"

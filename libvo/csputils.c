@@ -52,53 +52,67 @@ void mp_gen_gamma_map(uint8_t *map, int size, float gamma) {
  * \brief get the coefficients of the yuv -> rgb conversion matrix
  * \param params struct specifying the properties of the conversion like brightness, ...
  * \param yuv2rgb array to store coefficients into
+ *
+ * Note: contrast, hue and saturation will only work as expected with YUV formats,
+ * not with e.g. MP_CSP_XYZ
  */
 void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float yuv2rgb[3][4]) {
   float uvcos = params->saturation * cos(params->hue);
   float uvsin = params->saturation * sin(params->hue);
   int format = params->format;
   int i;
-  const float (*uv_coeffs)[2];
-  static const float level_adjust[4] = {-16 / 255.0, -128 / 255.0, -128 / 255.0, 1.164};
-  static const float uv_coeffs_table[MP_CSP_COUNT][3][2] = {
+  const float (*uv_coeffs)[3];
+  const float *level_adjust;
+  static const float yuv_pc_level_adjust[4] = {-16 / 255.0, -128 / 255.0, -128 / 255.0, 1.164};
+  static const float yuv_tv_level_adjust[4] = {0, -128 / 255.0, -128 / 255.0, 0};
+  static const float xyz_level_adjust[4] = {0, 0, 0, 0};
+  static const float uv_coeffs_table[MP_CSP_COUNT][3][3] = {
     [MP_CSP_DEFAULT] = {
-      { 0.000,  1.596},
-      {-0.391, -0.813},
-      { 2.018,  0.000}
+      {1,  0.000,  1.596},
+      {1, -0.391, -0.813},
+      {1,  2.018,  0.000}
     },
     [MP_CSP_BT_601] = {
-      { 0.000,  1.403},
-      {-0.344, -0.714},
-      { 1.773,  0.000}
+      {1,  0.000,  1.403},
+      {1, -0.344, -0.714},
+      {1,  1.773,  0.000}
     },
     [MP_CSP_BT_709] = {
-      { 0.0000,  1.5701},
-      {-0.1870, -0.4664},
-      { 1.8556,  0.0000}
+      {1,  0.0000,  1.5701},
+      {1, -0.1870, -0.4664},
+      {1,  1.8556,  0.0000}
     },
     [MP_CSP_SMPTE_240M] = {
-      { 0.0000,  1.5756},
-      {-0.2253, -0.5000},
-      { 1.8270,  0.0000}
+      {1,  0.0000,  1.5756},
+      {1, -0.2253, -0.5000},
+      {1,  1.8270,  0.0000}
     },
     [MP_CSP_EBU] = {
-      { 0.000,  1.140},
-      {-0.396, -0.581},
-      { 2.029,  0.000}
+      {1,  0.000,  1.140},
+      {1, -0.396, -0.581},
+      {1,  2.029,  0.000}
+    },
+    [MP_CSP_XYZ] = {
+      { 3.2404542, -1.5371385, -0.4985314},
+      {-0.9692660,  1.8760108,  0.0415560},
+      { 0.0556434, -0.2040259,  1.0572252}
     },
   };
 
   if (format < 0 || format >= MP_CSP_COUNT)
     format = MP_CSP_DEFAULT;
   uv_coeffs = uv_coeffs_table[format];
+  level_adjust = yuv_pc_level_adjust;
+  if (format == MP_CSP_XYZ)
+    level_adjust = xyz_level_adjust;
 
   for (i = 0; i < 3; i++) {
     yuv2rgb[i][COL_C]  = params->brightness;
-    yuv2rgb[i][COL_Y]  = level_adjust[COL_C] * params->contrast;
+    yuv2rgb[i][COL_Y]  = uv_coeffs[i][COL_Y] * level_adjust[COL_C] * params->contrast;
     yuv2rgb[i][COL_C] += level_adjust[COL_Y] * yuv2rgb[i][COL_Y];
-    yuv2rgb[i][COL_U]  = uv_coeffs[i][0] * uvcos + uv_coeffs[i][1] * uvsin;
+    yuv2rgb[i][COL_U]  = uv_coeffs[i][COL_U] * uvcos + uv_coeffs[i][COL_V] * uvsin;
     yuv2rgb[i][COL_C] += level_adjust[COL_U] * yuv2rgb[i][COL_U];
-    yuv2rgb[i][COL_V]  = uv_coeffs[i][0] * uvsin + uv_coeffs[i][1] * uvcos;
+    yuv2rgb[i][COL_V]  = uv_coeffs[i][COL_U] * uvsin + uv_coeffs[i][COL_V] * uvcos;
     yuv2rgb[i][COL_C] += level_adjust[COL_V] * yuv2rgb[i][COL_V];
     // this "centers" contrast control so that e.g. a contrast of 0
     // leads to a grey image, not a black one

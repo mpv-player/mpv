@@ -27,6 +27,7 @@ enum mp_csp_standard {
   MP_CSP_BT_709,
   MP_CSP_SMPTE_240M,
   MP_CSP_EBU,
+  MP_CSP_XYZ,
   MP_CSP_COUNT
 };
 
