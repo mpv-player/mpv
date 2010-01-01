@@ -24,7 +24,7 @@
 #define LIBASS_MP_H
 
 #include "subreader.h"
-#ifdef CONFIG_ASS_INTERNAL
+#if defined(CONFIG_ASS_INTERNAL) || !defined(CONFIG_ASS)
 #include "ass.h"
 #else
 #include <ass/ass.h>

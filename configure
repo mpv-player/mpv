@@ -6154,6 +6154,7 @@ echocheck "SSA/ASS support"
 # libass depends on FreeType
 if test "$_freetype" = no ; then
     _ass=no
+    ass_internal=no
     _res_comment="FreeType support needed"
 fi
 
@@ -6169,6 +6170,7 @@ EOF
     _ass=no
     cc_check $($_freetypeconfig --cflags) $($_freetypeconfig --libs) && _ass=yes
     if test "$_ass" = no ; then
+        ass_internal=no
         _res_comment="FreeType >= 2.1.8 needed"
     elif test "$ass_internal" = no ; then
         _res_comment="external"
