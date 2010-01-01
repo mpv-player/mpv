@@ -330,8 +330,9 @@ static void check_events(void)
 /** \brief Validation function for values [0-100]
  */
 
-static int int_zero_hundred(int *val)
+static int int_zero_hundred(void *valp)
 {
+    int *val = valp;
     if ( (*val >=0) && (*val<=100) )
         return 1;
     return 0;
@@ -343,15 +344,15 @@ static int preinit(const char *arg)
         {"progressive", OPT_ARG_BOOL,   &jpeg_progressive_mode, NULL},
         {"baseline",    OPT_ARG_BOOL,   &jpeg_baseline,         NULL},
         {"optimize",    OPT_ARG_INT,    &jpeg_optimize,
-                                            (opt_test_f)int_zero_hundred},
+                                            int_zero_hundred},
         {"smooth",      OPT_ARG_INT,    &jpeg_smooth,
-                                            (opt_test_f)int_zero_hundred},
+                                            int_zero_hundred},
         {"quality",     OPT_ARG_INT,    &jpeg_quality,
-                                            (opt_test_f)int_zero_hundred},
+                                            int_zero_hundred},
         {"dpi",         OPT_ARG_INT,    &jpeg_dpi,              NULL},
         {"outdir",      OPT_ARG_MSTRZ,  &jpeg_outdir,           NULL},
         {"subdirs",     OPT_ARG_MSTRZ,  &jpeg_subdirs,          NULL},
-        {"maxfiles",    OPT_ARG_INT,    &jpeg_maxfiles, (opt_test_f)int_pos},
+        {"maxfiles",    OPT_ARG_INT,    &jpeg_maxfiles, int_pos},
         {NULL, 0, NULL, NULL}
     };
     const char *info_message = NULL;

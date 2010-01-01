@@ -283,8 +283,9 @@ static void uninit(void){
 
 static void check_events(void){}
 
-static int int_zero_to_nine(int *sh)
+static int int_zero_to_nine(void *value)
 {
+    int *sh = value;
     if ( (*sh < 0) || (*sh > 9) )
         return 0;
     return 1;
@@ -292,7 +293,7 @@ static int int_zero_to_nine(int *sh)
 
 static const opt_t subopts[] = {
     {"alpha", OPT_ARG_BOOL, &use_alpha, NULL},
-    {"z",   OPT_ARG_INT, &z_compression, (opt_test_f)int_zero_to_nine},
+    {"z",   OPT_ARG_INT, &z_compression, int_zero_to_nine},
     {"outdir",      OPT_ARG_MSTRZ,  &png_outdir,           NULL},
     {NULL}
 };
