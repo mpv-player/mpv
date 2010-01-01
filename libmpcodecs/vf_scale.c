@@ -349,7 +349,7 @@ static void scale(struct SwsContext *sws1, struct SwsContext *sws2, uint8_t *src
         int dst_stride2[MP_MAX_PLANES]={2*dst_stride[0], 2*dst_stride[1], 2*dst_stride[2], 2*dst_stride[3]};
 
         sws_scale_ordered(sws1, src2, src_stride2, y>>1, h>>1, dst2, dst_stride2);
-        for(i=0; i<3; i++){
+        for(i=0; i<MP_MAX_PLANES; i++){
             src2[i] += src_stride[i];
             dst2[i] += dst_stride[i];
         }
