@@ -168,6 +168,7 @@ typedef struct mkv_demuxer {
 
     uint64_t tc_scale, cluster_tc;
 
+    uint64_t cluster_start;
     uint64_t cluster_size;
     uint64_t blockgroup_size;
 
@@ -179,7 +180,10 @@ typedef struct mkv_demuxer {
     off_t *parsed_seekhead;
     int parsed_seekhead_num;
 
-    uint64_t *cluster_positions;
+    struct cluster_pos {
+        uint64_t filepos;
+        uint64_t timecode;
+    } *cluster_positions;
     int num_cluster_pos;
 
     int64_t skip_to_timecode;
@@ -220,18 +224,23 @@ static mkv_track_t *demux_mkv_find_track_by_num(mkv_demuxer_t *d, int n,
     return NULL;
 }
 
-static void add_cluster_position(mkv_demuxer_t *mkv_d, uint64_t position)
+static void add_cluster_position(mkv_demuxer_t *mkv_d, uint64_t filepos,
+                                 uint64_t timecode)
 {
-    int i = mkv_d->num_cluster_pos;
+    if (mkv_d->indexes)
+        return;
 
-    while (i--)
-        if (mkv_d->cluster_positions[i] == position)
-            return;
+    int n = mkv_d->num_cluster_pos;
+    if (n > 0 && mkv_d->cluster_positions[n-1].filepos >= filepos)
+        return;
 
     mkv_d->cluster_positions =
         grow_array(mkv_d->cluster_positions, mkv_d->num_cluster_pos,
-                   sizeof(uint64_t));
-    mkv_d->cluster_positions[mkv_d->num_cluster_pos++] = position;
+                   sizeof(*mkv_d->cluster_positions));
+    mkv_d->cluster_positions[mkv_d->num_cluster_pos++] = (struct cluster_pos){
+        .filepos = filepos,
+        .timecode = timecode,
+    };
 }
 
 
@@ -2743,6 +2752,8 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
                     if (num == EBML_UINT_INVALID)
                         return 0;
                     mkv_d->cluster_tc = num * mkv_d->tc_scale;
+                    add_cluster_position(mkv_d, mkv_d->cluster_start,
+                                         mkv_d->cluster_tc);
                     break;
 
                 case MATROSKA_ID_BLOCKGROUP:
@@ -2787,7 +2798,7 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
         if (ebml_read_id(s, &il) != MATROSKA_ID_CLUSTER)
             return 0;
-        add_cluster_position(mkv_d, stream_tell(s) - il);
+        mkv_d->cluster_start = stream_tell(s) - il;
         mkv_d->cluster_size = ebml_read_length(s, NULL);
     }
 
@@ -2822,54 +2833,66 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
             target_timecode = 0;
 
         if (mkv_d->indexes == NULL) {   /* no index was found */
-            uint64_t target_filepos, cluster_pos, max_pos;
+            int64_t target_tc_ns = (int64_t) (rel_seek_secs * 1e9);
+            if (target_tc_ns < 0)
+                target_tc_ns = 0;
+            uint64_t max_filepos = 0;
+            int64_t max_tc = -1;
+            int n = mkv_d->num_cluster_pos;
+            if (n > 0) {
+                max_filepos = mkv_d->cluster_positions[n - 1].filepos;
+                max_tc = mkv_d->cluster_positions[n - 1].timecode;
+            }
 
-            target_filepos =
-                (uint64_t) (target_timecode * mkv_d->last_filepos /
-                            (mkv_d->last_pts * 1000.0));
-
-            max_pos = mkv_d->num_cluster_pos ?
-                mkv_d->cluster_positions[mkv_d->num_cluster_pos - 1] : 0;
-            if (target_filepos > max_pos) {
-                if ((off_t) max_pos > stream_tell(s))
-                    stream_seek(s, max_pos);
+            if (target_tc_ns > max_tc) {
+                if ((off_t) max_filepos > stream_tell(s))
+                    stream_seek(s, max_filepos);
                 else
                     stream_seek(s, stream_tell(s) + mkv_d->cluster_size);
                 /* parse all the clusters upto target_filepos */
-                while (!s->eof && stream_tell(s) < (off_t) target_filepos) {
-                    switch (ebml_read_id(s, &i)) {
-                    case MATROSKA_ID_CLUSTER:
-                        add_cluster_position(mkv_d,
-                                             (uint64_t) stream_tell(s) - i);
-                        break;
-
-                    case MATROSKA_ID_CUES:
-                        demux_mkv_read_cues(demuxer);
-                        break;
+                while (!s->eof) {
+                    uint64_t start = stream_tell(s);
+                    uint32_t type = ebml_read_id(s, NULL);
+                    uint64_t len = ebml_read_length(s, NULL);
+                    uint64_t end = stream_tell(s) + len;
+                    if (type == MATROSKA_ID_CLUSTER) {
+                        while (!s->eof && stream_tell(s) < end) {
+                            if (ebml_read_id(s, NULL)
+                                == MATROSKA_ID_CLUSTERTIMECODE) {
+                                uint64_t tc = ebml_read_uint(s, NULL);
+                                tc *= mkv_d->tc_scale;
+                                add_cluster_position(mkv_d, start, tc);
+                                if (tc >= target_tc_ns)
+                                    goto enough_index;
+                                break;
+                            }
+                        }
                     }
-                    ebml_read_skip(s, NULL);
+                    stream_seek(s, end);
                 }
+            enough_index:
                 if (s->eof)
                     stream_reset(s);
             }
-
-            if (mkv_d->indexes == NULL) {
-                cluster_pos = mkv_d->cluster_positions[0];
-                /* Let's find the nearest cluster */
-                for (i = 0; i < mkv_d->num_cluster_pos; i++) {
-                    diff = mkv_d->cluster_positions[i] - target_filepos;
-                    if (flags & SEEK_BACKWARD && diff < 0 && -diff < min_diff) {
-                        cluster_pos = mkv_d->cluster_positions[i];
-                        min_diff = -diff;
-                    } else if (flags & SEEK_FORWARD
-                               && (diff < 0 ? -1 * diff : diff) < min_diff) {
-                        cluster_pos = mkv_d->cluster_positions[i];
-                        min_diff = diff < 0 ? -1 * diff : diff;
-                    }
-                }
-                mkv_d->cluster_size = mkv_d->blockgroup_size = 0;
-                stream_seek(s, cluster_pos);
+            if (!mkv_d->num_cluster_pos) {
+                mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] no target for seek found\n");
+                return;
             }
+            uint64_t cluster_pos = mkv_d->cluster_positions[0].filepos;
+            /* Let's find the nearest cluster */
+            for (i = 0; i < mkv_d->num_cluster_pos; i++) {
+                diff = mkv_d->cluster_positions[i].timecode - target_tc_ns;
+                if (flags & SEEK_BACKWARD && diff < 0 && -diff < min_diff) {
+                    cluster_pos = mkv_d->cluster_positions[i].filepos;
+                    min_diff = -diff;
+                } else if (flags & SEEK_FORWARD
+                           && (diff < 0 ? -1 * diff : diff) < min_diff) {
+                    cluster_pos = mkv_d->cluster_positions[i].filepos;
+                    min_diff = diff < 0 ? -1 * diff : diff;
+                }
+            }
+            mkv_d->cluster_size = mkv_d->blockgroup_size = 0;
+            stream_seek(s, cluster_pos);
         } else {
             int seek_id = (demuxer->video->id < 0) ?
                 demuxer->audio->id : demuxer->video->id;
