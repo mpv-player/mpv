@@ -89,6 +89,11 @@
 
 #include "tvi_dshow.h"
 
+#ifndef STDCALL
+// mingw64 needs this
+#define STDCALL __stdcall
+#endif
+
 static tvi_handle_t *tvi_init_dshow(tv_param_t* tv_param);
 
 /*

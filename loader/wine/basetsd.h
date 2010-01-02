@@ -72,8 +72,8 @@ typedef unsigned __int64 __uint64;
 
 #if defined(_WIN64)
 
-typedef __uint32 __ptr32;
-typedef void    *__ptr64;
+//typedef __uint32 __ptr32;
+//typedef void    *__ptr64;
 
 #else /* FIXME: defined(_WIN32) */
 
