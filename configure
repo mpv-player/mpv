@@ -4529,7 +4529,7 @@ if test "$_vidix" = auto ; then
   _vidix=no
   x86 && (linux || freebsd || netbsd || openbsd || dragonfly || sunos || win32) \
     && _vidix=yes
-  x86_64 && win32 && vidix=no
+  x86_64 && win32 && _vidix=no
   (ppc || alpha) && linux && _vidix=yes
 fi
 echores "$_vidix"
