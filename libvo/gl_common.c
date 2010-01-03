@@ -40,8 +40,10 @@ void (GLAPIENTRY *End)(void);
 void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei);
 void (GLAPIENTRY *MatrixMode)(GLenum);
 void (GLAPIENTRY *LoadIdentity)(void);
+void (GLAPIENTRY *Translated)(double, double, double);
 void (GLAPIENTRY *Scaled)(double, double, double);
 void (GLAPIENTRY *Ortho)(double, double, double, double, double, double);
+void (GLAPIENTRY *Frustum)(double, double, double, double, double, double);
 void (GLAPIENTRY *PushMatrix)(void);
 void (GLAPIENTRY *PopMatrix)(void);
 void (GLAPIENTRY *Clear)(GLbitfield);
@@ -53,10 +55,14 @@ void (GLAPIENTRY *CallList)(GLuint);
 void (GLAPIENTRY *CallLists)(GLsizei, GLenum, const GLvoid *);
 void (GLAPIENTRY *GenTextures)(GLsizei, GLuint *);
 void (GLAPIENTRY *DeleteTextures)(GLsizei, const GLuint *);
+void (GLAPIENTRY *TexEnvf)(GLenum, GLenum, GLfloat);
 void (GLAPIENTRY *TexEnvi)(GLenum, GLenum, GLint);
 void (GLAPIENTRY *Color4ub)(GLubyte, GLubyte, GLubyte, GLubyte);
 void (GLAPIENTRY *Color3f)(GLfloat, GLfloat, GLfloat);
+void (GLAPIENTRY *Color4f)(GLfloat, GLfloat, GLfloat, GLfloat);
 void (GLAPIENTRY *ClearColor)(GLclampf, GLclampf, GLclampf, GLclampf);
+void (GLAPIENTRY *ClearDepth)(GLclampd);
+void (GLAPIENTRY *DepthFunc)(GLenum);
 void (GLAPIENTRY *Enable)(GLenum);
 void (GLAPIENTRY *Disable)(GLenum);
 const GLubyte *(GLAPIENTRY *GetString)(GLenum);
@@ -74,6 +80,11 @@ void (GLAPIENTRY *TexParameterf)(GLenum, GLenum, GLfloat);
 void (GLAPIENTRY *TexParameterfv)(GLenum, GLenum, const GLfloat *);
 void (GLAPIENTRY *TexCoord2f)(GLfloat, GLfloat);
 void (GLAPIENTRY *Vertex2f)(GLfloat, GLfloat);
+void (GLAPIENTRY *Vertex3f)(GLfloat, GLfloat, GLfloat);
+void (GLAPIENTRY *Normal3f)(GLfloat, GLfloat, GLfloat);
+void (GLAPIENTRY *Lightfv)(GLenum, GLenum, const GLfloat *);
+void (GLAPIENTRY *ColorMaterial)(GLenum, GLenum);
+void (GLAPIENTRY *ShadeModel)(GLenum);
 void (GLAPIENTRY *GetIntegerv)(GLenum, GLint *);
 
 /**
@@ -358,8 +369,10 @@ static const extfunc_desc_t extfuncs[] = {
   DEF_FUNC_DESC(Viewport),
   DEF_FUNC_DESC(MatrixMode),
   DEF_FUNC_DESC(LoadIdentity),
+  DEF_FUNC_DESC(Translated),
   DEF_FUNC_DESC(Scaled),
   DEF_FUNC_DESC(Ortho),
+  DEF_FUNC_DESC(Frustum),
   DEF_FUNC_DESC(PushMatrix),
   DEF_FUNC_DESC(PopMatrix),
   DEF_FUNC_DESC(Clear),
@@ -371,10 +384,14 @@ static const extfunc_desc_t extfuncs[] = {
   DEF_FUNC_DESC(CallLists),
   DEF_FUNC_DESC(GenTextures),
   DEF_FUNC_DESC(DeleteTextures),
+  DEF_FUNC_DESC(TexEnvf),
   DEF_FUNC_DESC(TexEnvi),
   DEF_FUNC_DESC(Color4ub),
   DEF_FUNC_DESC(Color3f),
+  DEF_FUNC_DESC(Color4f),
   DEF_FUNC_DESC(ClearColor),
+  DEF_FUNC_DESC(ClearDepth),
+  DEF_FUNC_DESC(DepthFunc),
   DEF_FUNC_DESC(Enable),
   DEF_FUNC_DESC(Disable),
   DEF_FUNC_DESC(DrawBuffer),
@@ -391,6 +408,11 @@ static const extfunc_desc_t extfuncs[] = {
   DEF_FUNC_DESC(TexParameterfv),
   DEF_FUNC_DESC(TexCoord2f),
   DEF_FUNC_DESC(Vertex2f),
+  DEF_FUNC_DESC(Vertex3f),
+  DEF_FUNC_DESC(Normal3f),
+  DEF_FUNC_DESC(Lightfv),
+  DEF_FUNC_DESC(ColorMaterial),
+  DEF_FUNC_DESC(ShadeModel),
   DEF_FUNC_DESC(GetIntegerv),
 
   // here start the real extensions
