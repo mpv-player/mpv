@@ -6158,7 +6158,7 @@ int main(void) {
 }
 EOF
   _fontconfig=no
-  for _ld_tmp in "" "-lexpat -lfreetype" "-lexpat -lfreetype -lz" ; do
+  for _ld_tmp in "" "-lexpat -lfreetype" "-lexpat -lfreetype -lz" "-lexpat -lfreetype -lz -liconv" ; do
     _ld_tmp="-lfontconfig $_ld_tmp"
     cc_check $_ld_tmp && _fontconfig=yes && extra_ldflags="$extra_ldflags $_ld_tmp" && break
   done
