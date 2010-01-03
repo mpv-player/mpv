@@ -353,7 +353,7 @@ draw_frame(uint8_t *src[]) {
     break;
   }
 
-  sws_scale_ordered(sws,src,stride,0,src_height,image,image_stride);
+  sws_scale(sws,src,stride,0,src_height,image,image_stride);
 
    /* Now 'ASCIInate' the image */
   if (fast)
@@ -373,7 +373,7 @@ draw_slice(uint8_t *src[], int stride[],
   int dx2 = screen_x + ((x+w) * screen_w / src_width);
   int dy2 = screen_y + ((y+h) * screen_h / src_height);
 
-  sws_scale_ordered(sws,src,stride,y,h,image,image_stride);
+  sws_scale(sws,src,stride,y,h,image,image_stride);
 
   /* Now 'ASCIInate' the image */
   if (fast)
