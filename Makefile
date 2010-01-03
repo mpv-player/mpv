@@ -135,7 +135,6 @@ SRCS_COMMON-$(LIBAVCODEC)            += av_opts.c \
                                         libmpcodecs/vf_lavc.c \
                                         libmpcodecs/vf_lavcdeint.c \
                                         libmpcodecs/vf_screenshot.c \
-                                        libvo/vo_png.c \
 
 # These filters use private headers and do not work with shared libavcodec.
 SRCS_COMMON-$(LIBAVCODEC_A)          += libaf/af_lavcac3enc.c \
@@ -589,6 +588,7 @@ SRCS_MPLAYER-$(JACK)         += libao2/ao_jack.c
 SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
 SRCS_MPLAYER-$(JPEG)         += libvo/vo_jpeg.c
 SRCS_MPLAYER-$(KVA)          += libvo/vo_kva.c
+SRCS_MPLAYER-$(LIBAVCODEC)   += libvo/vo_png.c
 SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
                                 libmenu/menu_chapsel.c \
                                 libmenu/menu_cmdlist.c  \
