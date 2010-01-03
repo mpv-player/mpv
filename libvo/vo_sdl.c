@@ -90,7 +90,11 @@ static const vo_info_t info =
 
 const LIBVO_EXTERN(sdl)
 
+#ifdef CONFIG_SDL_SDL_H
+#include <SDL/SDL.h>
+#else
 #include <SDL.h>
+#endif
 //#include <SDL/SDL_syswm.h>
 
 

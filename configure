@@ -5192,6 +5192,9 @@ echores "$_vesa"
 
 
 echocheck "SDL"
+_inc_tmp=""
+_ld_tmp=""
+def_sdl_sdl_h="#undef CONFIG_SDL_SDL_H"
 if test -z "$_sdlconfig" ; then
   if ( sdl-config --version ) >>"$TMPLOG" 2>&1 ; then
     _sdlconfig="sdl-config"
@@ -5203,15 +5206,40 @@ if test -z "$_sdlconfig" ; then
 fi
 if test "$_sdl" = auto || test "$_sdl" = yes ; then
   cat > $TMPC << EOF
+#ifdef CONFIG_SDL_SDL_H
+#include <SDL/SDL.h>
+#else
 #include <SDL.h>
+#endif
+#ifndef __APPLE__
+// we allow SDL hacking our main() only on OSX
+#undef main
+#endif
 int main(int argc, char *argv[]) {
   SDL_Init(SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE);
   return 0;
 }
 EOF
   _sdl=no
-  if "$_sdlconfig" --version >>"$TMPLOG" 2>&1 ; then
-    if cc_check $($_sdlconfig --cflags) $($_sdlconfig --libs) >>"$TMPLOG" 2>&1 ; then
+  for _ld_tmp in "-lSDL" "-lSDL -lpthread" "-lSDL -lwinmm -lgdi32" ; do
+    if cc_check -DCONFIG_SDL_SDL_H $_inc_tmp $_ld_tmp ; then
+      _sdl=yes
+      def_sdl_sdl_h="#define CONFIG_SDL_SDL_H 1"
+      break
+    fi
+  done
+  if test "$_sdl" = no && "$_sdlconfig" --version >>"$TMPLOG" 2>&1 ; then
+    if cygwin ; then
+      _inc_tmp="$($_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/)"
+      _ld_tmp="$($_sdlconfig --libs | cut -d " " -f 1,4,6 | sed s/no-cygwin/cygwin/)"
+    elif mingw32 ; then
+      _inc_tmp=$($_sdlconfig --cflags | sed s/-Dmain=SDL_main//)
+      _ld_tmp=$($_sdlconfig --libs | sed -e s/-mwindows// -e s/-lmingw32//)
+    else
+      _inc_tmp="$($_sdlconfig --cflags)"
+      _ld_tmp="$($_sdlconfig --libs)"
+    fi
+    if cc_check $_inc_tmp $_ld_tmp >>"$TMPLOG" 2>&1 ; then
       _sdlversion=$($_sdlconfig --version | sed 's/[^0-9]//g')
         if test "$_sdlversion" -gt 116 ; then
           if test "$_sdlversion" -lt 121 ; then
@@ -5226,16 +5254,8 @@ EOF
 fi
 if test "$_sdl" = yes ; then
   def_sdl='#define CONFIG_SDL 1'
-  if cygwin ; then
-    libs_mplayer="$libs_mplayer $($_sdlconfig --libs | cut -d " " -f 1,4,6 | sed s/no-cygwin/cygwin/)"
-    extra_cflags="$extra_cflags $($_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/)"
-  elif mingw32 ; then
-    libs_mplayer="$libs_mplayer $($_sdlconfig --libs | sed -e s/-mwindows// -e s/-lmingw32//)"
-    extra_cflags="$extra_cflags $($_sdlconfig --cflags | sed s/-Dmain=SDL_main//)"
-  else
-    libs_mplayer="$libs_mplayer $($_sdlconfig --libs)"
-    extra_cflags="$extra_cflags $($_sdlconfig --cflags | sed s/-D_GNU_SOURCE=1//)"
-  fi
+  extra_cflags="$extra_cflags $_inc_tmp"
+  libs_mplayer="$libs_mplayer $_ld_tmp"
   _vomodules="sdl $_vomodules"
   _aomodules="sdl $_aomodules"
   _res_comment="using $_sdlconfig"
@@ -8874,6 +8894,7 @@ $def_pnm
 $def_quartz
 $def_s3fb
 $def_sdl
+$def_sdl_sdl_h
 $def_sdlbuggy
 $def_svga
 $def_tdfxfb
