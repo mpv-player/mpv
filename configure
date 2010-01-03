@@ -5334,11 +5334,10 @@ if test "$_direct3d" = auto ; then
 int main(void) { return 0; }
 EOF
   _direct3d=no
-  cc_check -ld3d9 && _direct3d=yes
+  cc_check && _direct3d=yes
 fi
 if test "$_direct3d" = yes ; then
   def_direct3d='#define CONFIG_DIRECT3D 1'
-  libs_mplayer="$libs_mplayer -ld3d9"
   _vomodules="direct3d $_vomodules"
 else
   def_direct3d='#undef CONFIG_DIRECT3D'
