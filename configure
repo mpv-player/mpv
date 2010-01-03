@@ -343,6 +343,7 @@ Codecs:
   --disable-musepack        disable musepack support [autodetect]
   --disable-libopencore_amrnb disable libopencore_amr narrowband [autodetect]
   --disable-libopencore_amrwb disable libopencore_amr wideband [autodetect]
+  --disable-libopenjpeg	    disable OpenJPEG (JPEG2000) input/output support [autodetect]
   --disable-decoder=DECODER disable specified FFmpeg decoder
   --enable-decoder=DECODER  enable specified FFmpeg decoder
   --disable-encoder=ENCODER disable specified FFmpeg encoder
@@ -541,6 +542,7 @@ _libavutil_so=auto
 _libavcodec_a=auto
 _libopencore_amrnb=auto
 _libopencore_amrwb=auto
+libopenjpeg=auto
 _libavdecoders_all=$(sed -n 's/^[^#]*DEC.*(.*, *\(.*\)).*/\1_decoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]')
 _libavdecoders=$(echo $_libavdecoders_all | sed -e 's/ LIB[A-Z0-9_]*_DECODER//g' -e s/MPEG4AAC_DECODER//)
 _libavencoders_all=$(sed -n 's/^[^#]*ENC.*(.*, *\(.*\)).*/\1_encoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]')
@@ -937,6 +939,8 @@ for ac_option do
   --disable-mng)	_mng=no		;;
   --enable-jpeg)	_jpeg=yes	;;
   --disable-jpeg)	_jpeg=no		;;
+  --enable-libopenjpeg)	libopenjpeg=yes	;;
+  --disable-libopenjpeg)libopenjpeg=no	;;
   --enable-pnm)		_pnm=yes	;;
   --disable-pnm)	_pnm=no		;;
   --enable-md5sum)	_md5sum=yes	;;
@@ -5040,6 +5044,28 @@ else
 fi
 
 
+echocheck "OpenJPEG (JPEG2000) support"
+if test "$libopenjpeg" = auto ; then
+  libopenjpeg=no
+cat > $TMPC << EOF
+#define  OPJ_STATIC
+#include <openjpeg.h>
+int main(void) { opj_dparameters_t dec_params; opj_set_default_decoder_parameters(&dec_params); return 0; }
+EOF
+  cc_check -lopenjpeg $_ld_lm && libopenjpeg=yes
+fi
+echores "$libopenjpeg"
+if test "$libopenjpeg" = yes ; then
+  def_libopenjpeg='#define CONFIG_LIBOPENJPEG 1'
+  extra_ldflags="$extra_ldflags -lopenjpeg"
+  _libavdecoders="$_libavdecoders LIBOPENJPEG_DECODER"
+  _libavencoders="$_libavencoders LIBOPENJPEG_ENCODER"
+  _codecmodules="OpenJPEG $_codecmodules"
+else
+  def_libopenjpeg='#define CONFIG_LIBOPENJPEG 0'
+  _nocodecmodules="OpenJPEG $_nocodecmodules"
+fi
+
 
 echocheck "PNM support"
 if test "$_pnm" = yes; then
@@ -8466,6 +8492,8 @@ CONFIG_LIBMP3LAME_ENCODER=$_mp3lame_lavc
 CONFIG_LIBOPENCORE_AMRNB_DECODER=$_libopencore_amrnb
 CONFIG_LIBOPENCORE_AMRNB_ENCODER=$_libopencore_amrnb
 CONFIG_LIBOPENCORE_AMRWB_DECODER=$_libopencore_amrwb
+OCNFIG_LIBOPENJPEG_DECODER = $libopenjpeg
+OCNFIG_LIBOPENJPEG_ENCODER = $libopenjpeg
 CONFIG_LIBSCHROEDINGER_DECODER=$_libschroedinger_lavc
 CONFIG_LIBSCHROEDINGER_ENCODER=$_libschroedinger_lavc
 CONFIG_LIBVORBIS_ENCODER=$_libvorbis
@@ -8962,6 +8990,7 @@ $def_faac_lavc
 $def_libdirac_lavc
 $def_libopencore_amrnb
 $def_libopencore_amrwb
+$def_libopenjpeg
 $def_libschroedinger_lavc
 $def_mp3lame_lavc
 $def_x264_lavc

@@ -14,6 +14,7 @@ MPlayer (1.0)
     * h264 decoder (CoreAVC) on Windows only via binary DLL
     * Kega Game video codec (KGV1) via binary DLL
     * SoftLab-NSK Forward MPEG2 I-frames (SLIF) via binary DLL
+    * JPEG2000 support via OpenJPEG
 
     Demuxers:
     * support for TrueHD in BluRay streams in libmpdemux

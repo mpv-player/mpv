@@ -83,6 +83,8 @@ static const struct {
 } type2format[] = {
   { "bmp",  mmioFOURCC('b', 'm', 'p', ' ') },
   { "dpx",  mmioFOURCC('d', 'p', 'x', ' ') },
+  { "j2k",  mmioFOURCC('M', 'J', '2', 'C') },
+  { "jp2",  mmioFOURCC('M', 'J', '2', 'C') },
   { "jpeg", mmioFOURCC('I', 'J', 'P', 'G') },
   { "jpg",  mmioFOURCC('I', 'J', 'P', 'G') },
   { "jls",  mmioFOURCC('I', 'J', 'P', 'G') },
