@@ -6218,8 +6218,9 @@ echores "$_ass"
 
 
 echocheck "fribidi with charsets"
+_inc_tmp=""
+_ld_tmp=""
 if test "$_fribidi" = auto ; then
-    if ( $_fribidiconfig --version ) >/dev/null 2>&1 ; then
 	cat > $TMPC << EOF
 #include <stdio.h>
 /* workaround for fribidi 0.10.4 and below */
@@ -6234,15 +6235,19 @@ int main(void) {
 }
 EOF
 	_fribidi=no
-	cc_check $($_fribidiconfig --cflags) $($_fribidiconfig --libs) && _fribidi=yes
-    else
-	_fribidi=no
-    fi
+	_inc_tmp=""
+	_ld_tmp="-lfribidi"
+	cc_check $_inc_tmp $_ld_tmp && _fribidi=yes
+	if test "$_fribidi" = no ; then
+	  _inc_tmp="$($_fribidiconfig --cflags)"
+	  _ld_tmp="$($_fribidiconfig --libs)"
+	  cc_check $_inc_tmp $_ld_tmp && _fribidi=yes
+	fi
 fi
 if test "$_fribidi" = yes ; then
     def_fribidi='#define CONFIG_FRIBIDI 1'
-    extra_cflags="$extra_cflags $($_fribidiconfig --cflags)"
-    extra_ldflags="$extra_ldflags $($_fribidiconfig --libs)"
+    extra_cflags="$extra_cflags $_inc_tmp"
+    extra_ldflags="$extra_ldflags $_ld_tmp"
 else
     def_fribidi='#undef CONFIG_FRIBIDI'
 fi
