@@ -449,6 +449,7 @@ static void autodetectGlExtensions(void) {
   const char *version    = GetString(GL_VERSION);
   int is_ati = strstr(vendor, "ATI") != NULL;
   int ati_broken_pbo = 0;
+  mp_msg(MSGT_VO, MSGL_V, "[gl] Running on OpenGL by '%s', versions '%s'\n", vendor, version);
   if (is_ati && strncmp(version, "2.1.", 4) == 0) {
     int ver = atoi(version + 4);
     mp_msg(MSGT_VO, MSGL_V, "[gl] Detected ATI driver version: %i\n", ver);
