@@ -366,6 +366,7 @@ Video output:
   --enable-dhahelper       enable VIDIX dhahelper support
   --enable-svgalib_helper  enable VIDIX svgalib_helper support
   --enable-gl              enable OpenGL video output [autodetect]
+  --disable-matrixview     disable OpenGL MatrixView video output [autodetect]
   --enable-dga2            enable DGA 2 support [autodetect]
   --enable-dga1            enable DGA 1 support [autodetect]
   --enable-vesa            enable VESA video output [autodetect]
@@ -589,6 +590,7 @@ _md5sum=yes
 _yuv4mpeg=yes
 _gif=auto
 _gl=auto
+matrixview=yes
 _ggi=auto
 _ggiwmh=auto
 _aa=auto
@@ -951,6 +953,8 @@ for ac_option do
   --disable-gif)	_gif=no		;;
   --enable-gl)		_gl=yes		;;
   --disable-gl)		_gl=no		;;
+  --enable-matrixview)  matrixview=yes ;;
+  --disable-matrixview) matrixview=no  ;;
   --enable-ggi)		_ggi=yes	;;
   --disable-ggi)	_ggi=no		;;
   --enable-ggiwmh)	_ggiwmh=yes	;;
@@ -4603,6 +4607,18 @@ else
 fi
 echores "$_mga"
 
+echocheck "MatrixView"
+if test "$_gl" = no ; then
+  matrixview=no
+fi
+if test "$matrixview" = yes ; then
+  _vomodules="matrixview $_vomodules"
+  def_matrixview='#define CONFIG_MATRIXVIEW 1'
+else
+  _novomodules="matrixview $_novomodules"
+  def_matrixview='#undef CONFIG_MATRIXVIEW'
+fi
+echores "$matrixview"
 
 echocheck "xmga"
 if test "$_xmga" = auto ; then
@@ -8356,6 +8372,7 @@ GGI = $_ggi
 GL = $_gl
 GL_WIN32 = $_gl_win32
 GL_X11 = $_gl_x11
+MATRIXVIEW = $matrixview
 GUI = $_gui
 GUI_GTK = $_gui_gtk
 GUI_WIN32 = $_gui_win32
@@ -8883,6 +8900,7 @@ $def_gif_tvt_hack
 $def_gl
 $def_gl_win32
 $def_gl_x11
+$def_matrixview
 $def_ivtv
 $def_jpeg
 $def_kva
