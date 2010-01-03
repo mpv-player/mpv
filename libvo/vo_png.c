@@ -30,8 +30,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <png.h>
-
 #include "config.h"
 #include "mp_msg.h"
 #include "mp_msg.h"
@@ -40,6 +38,7 @@
 #include "video_out_internal.h"
 #include "subopt-helper.h"
 #include "mplayer.h"
+#include "libavcodec/avcodec.h"
 
 #define BUFLENGTH 512
 
@@ -53,17 +52,13 @@ static const vo_info_t info =
 
 const LIBVO_EXTERN (png)
 
-static int z_compression = Z_NO_COMPRESSION;
-static char *png_outdir = NULL;
-static int framenum = 0;
+static int z_compression;
+static char *png_outdir;
+static int framenum;
 static int use_alpha;
-
-struct pngdata {
-	FILE * fp;
-	png_structp png_ptr;
-	png_infop info_ptr;
-	enum {OK,ERROR} status;
-};
+static AVCodecContext *avctx;
+static uint8_t *outbuffer;
+int outbuffer_size;
 
 static void png_mkdir(char *buf, int verbose) {
     struct stat stat_p;
@@ -130,117 +125,44 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 }
 
 
-static struct pngdata create_png (char * fname, int image_width, int image_height, int swapped)
-{
-    struct pngdata png;
-
-    /*png_structp png_ptr = png_create_write_struct
-       (PNG_LIBPNG_VER_STRING, (png_voidp)user_error_ptr,
-        user_error_fn, user_warning_fn);*/
-    //png_byte *row_pointers[image_height];
-    png.png_ptr = png_create_write_struct
-       (PNG_LIBPNG_VER_STRING, NULL,
-        NULL, NULL);
-    png.info_ptr = png_create_info_struct(png.png_ptr);
-
-    if (!png.png_ptr) {
-       mp_msg(MSGT_VO,MSGL_DBG2, "PNG Failed to init png pointer\n");
-       png.status = ERROR;
-       return png;
-    }
-
-    if (!png.info_ptr) {
-       mp_msg(MSGT_VO,MSGL_DBG2, "PNG Failed to init png infopointer\n");
-       png_destroy_write_struct(&png.png_ptr,
-         (png_infopp)NULL);
-       png.status = ERROR;
-       return png;
-    }
-
-    if (setjmp(png.png_ptr->jmpbuf)) {
-        mp_msg(MSGT_VO,MSGL_DBG2, "PNG Internal error!\n");
-        png_destroy_write_struct(&png.png_ptr, &png.info_ptr);
-        fclose(png.fp);
-        png.status = ERROR;
-        return png;
-    }
-
-    png.fp = fopen (fname, "wb");
-    if (png.fp == NULL) {
- 	mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_PNG_ErrorOpeningForWriting, strerror(errno));
-       	png.status = ERROR;
-       	return png;
-    }
-
-    mp_msg(MSGT_VO,MSGL_DBG2, "PNG Init IO\n");
-    png_init_io(png.png_ptr, png.fp);
-
-    /* set the zlib compression level */
-    png_set_compression_level(png.png_ptr, z_compression);
-
-
-    /*png_set_IHDR(png_ptr, info_ptr, width, height,
-       bit_depth, color_type, interlace_type,
-       compression_type, filter_type)*/
-    png_set_IHDR(png.png_ptr, png.info_ptr, image_width, image_height,
-       8, use_alpha ? PNG_COLOR_TYPE_RGBA : PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
-       PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-
-    mp_msg(MSGT_VO,MSGL_DBG2, "PNG Write Info\n");
-    png_write_info(png.png_ptr, png.info_ptr);
-
-    if(swapped) {
-        mp_msg(MSGT_VO,MSGL_DBG2, "PNG Set BGR Conversion\n");
-    	png_set_bgr(png.png_ptr);
-    }
-
-    png.status = OK;
-    return png;
-}
-
-static uint8_t destroy_png(struct pngdata png) {
-
-    mp_msg(MSGT_VO,MSGL_DBG2, "PNG Write End\n");
-    png_write_end(png.png_ptr, png.info_ptr);
-
-    mp_msg(MSGT_VO,MSGL_DBG2, "PNG Destroy Write Struct\n");
-    png_destroy_write_struct(&png.png_ptr, &png.info_ptr);
-
-    fclose (png.fp);
-
-    return 0;
-}
-
 static uint32_t draw_image(mp_image_t* mpi){
+    AVFrame pic;
+    int buffersize;
+    int res;
     char buf[100];
-    int k;
-    struct pngdata png;
-    png_byte *row_pointers[mpi->h];
+    FILE *outfile;
 
     // if -dr or -slices then do nothing:
     if(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK)) return VO_TRUE;
 
     snprintf (buf, 100, "%s/%08d.png", png_outdir, ++framenum);
+    outfile = fopen(buf, "wb");
+    if (!outfile) {
+        mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_PNG_ErrorOpeningForWriting, strerror(errno));
+        return 1;
+    }
 
-    png = create_png(buf, mpi->w, mpi->h, IMGFMT_IS_BGR(mpi->imgfmt));
+    avctx->width = mpi->w;
+    avctx->height = mpi->h;
+    avctx->pix_fmt = imgfmt2pixfmt(mpi->imgfmt);
+    pic.data[0] = mpi->planes[0];
+    pic.linesize[0] = mpi->stride[0];
+    buffersize = mpi->w * mpi->h * 8;
+    if (outbuffer_size < buffersize) {
+        av_freep(&outbuffer);
+        outbuffer = av_malloc(buffersize);
+        outbuffer_size = buffersize;
+    }
+    res = avcodec_encode_video(avctx, outbuffer, outbuffer_size, &pic);
 
-    if(png.status){
+    if(res < 0){
  	    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_PNG_ErrorInCreatePng);
+            fclose(outfile);
 	    return 1;
     }
 
-    mp_msg(MSGT_VO,MSGL_DBG2, "PNG Creating Row Pointers\n");
-    for ( k = 0; k < mpi->h; k++ )
-	row_pointers[k] = mpi->planes[0]+mpi->stride[0]*k;
-
-    //png_write_flush(png.png_ptr);
-    //png_set_flush(png.png_ptr, nrows);
-
-    if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
-        mp_msg(MSGT_VO,MSGL_DBG2, "PNG Writing Image Data\n"); }
-    png_write_image(png.png_ptr, row_pointers);
-
-    destroy_png(png);
+    fwrite(outbuffer, res, 1, outfile);
+    fclose(outfile);
 
     return VO_TRUE;
 }
@@ -265,16 +187,18 @@ query_format(uint32_t format)
     const int supported_flags = VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_ACCEPT_STRIDE;
     switch(format){
     case IMGFMT_RGB24:
-    case IMGFMT_BGR24:
         return use_alpha ? 0 : supported_flags;
-    case IMGFMT_RGBA:
-    case IMGFMT_BGRA:
+    case IMGFMT_BGR32:
         return use_alpha ? supported_flags : 0;
     }
     return 0;
 }
 
 static void uninit(void){
+    avcodec_close(avctx);
+    av_freep(&avctx);
+    av_freep(&outbuffer);
+    outbuffer_size = 0;
     if (png_outdir) {
         free(png_outdir);
         png_outdir = NULL;
@@ -304,6 +228,13 @@ static int preinit(const char *arg)
     if (subopt_parse(arg, subopts) != 0) {
         return -1;
     }
+    avcodec_register_all();
+    avctx = avcodec_alloc_context();
+    if (avcodec_open(avctx, avcodec_find_encoder(CODEC_ID_PNG)) < 0) {
+        uninit();
+        return -1;
+    }
+    avctx->compression_level = z_compression;
     return 0;
 }
 

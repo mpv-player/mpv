@@ -5007,10 +5007,8 @@ echores "$_png"
 if test "$_png" = yes ; then
   def_png='#define CONFIG_PNG 1'
   extra_ldflags="$extra_ldflags -lpng -lz"
-  _vomodules="png $_vomodules"
 else
   def_png='#undef CONFIG_PNG'
-  _novomodules="png $_novomodules"
 fi
 
 echocheck "MNG support"
