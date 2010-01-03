@@ -3885,6 +3885,18 @@ Provides brightness, contrast, saturation, hue and gamma control.
 Gamma can also be set independently for red, green and blue.
 Speed depends more on GPU memory bandwidth than other methods.
 .RE
+.IPs colorspace
+Select the color space for YUV to RGB conversion.
+.RSss
+.IPs 0
+Use the formula used normally by MPlayer (default)
+.IPs 1
+Use ITU-R BT.601 color space.
+.IPs 2
+Use ITU-R BT.709 color space.
+.IPs 3
+Use SMPTE-240M color space.
+.RE
 .IPs lscale=<n>
 Select the scaling function to use for luminance scaling.
 Only valid for yuv modes 2, 3, 4 and 6.
