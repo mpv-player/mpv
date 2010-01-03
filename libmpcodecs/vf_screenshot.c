@@ -256,6 +256,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 
 static void uninit(vf_instance_t *vf)
 {
+    avcodec_close(vf->priv->avctx);
     av_freep(&vf->priv->avctx);
     if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
     if (vf->priv->buffer) free(vf->priv->buffer);
