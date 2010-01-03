@@ -22,6 +22,13 @@ MPlayer (1.0)
     * fix length in asf/wmv files
     * support ISDB-Tb dvb streams
 
+    Drivers:
+    * Support for more formats in OpenGL vos (different YUV
+      subsampling, 16 bit per component)
+    * Selectable YUV to RGB conversion standard for -vo gl
+      (-vo gl:colorspace=...)
+    * -vo matrixview finally added
+
     Other:
     * -nosub option for disabling auto-selected subtitles
     * support for displaying subs in the term (FIXME)
@@ -33,11 +40,11 @@ MPlayer (1.0)
     * support for live and non-live DVB teletext with demuxer lavf
     * -name, -title and -use-filename-title options for MPlayer
     * support for stream handling via FFmpeg
-      Configure with --enable-protocol="file_protocol pipe_protocol
-      http_protocol rtmp_protocol tcp_protocol udp_protocol"
-      and use e.g. ffmpeg://http://example.com/test
+      Use e.g. ffmpeg://http://example.com/test
     * experimental support for external libass, configure with
       --disable-ass-internal
+    * better support for 16-bit-per-component formats and formats
+      with alpha channel.
 
     MEncoder:
     * add -tsprog for demuxer lavf
