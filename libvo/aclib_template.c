@@ -100,7 +100,7 @@ If you have questions please contact with me: Nick Kurshev: nickols_k@mail.ru.
 /* for small memory blocks (<256 bytes) this version is faster */
 #define small_memcpy(to,from,n)\
 {\
-register unsigned long int dummy;\
+register x86_reg dummy;\
 __asm__ volatile(\
 	"rep; movsb"\
 	:"=&D"(to), "=&S"(from), "=&c"(dummy)\
@@ -180,9 +180,9 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 #endif
         if(len >= MIN_LEN)
 	{
-	  register unsigned long int delta;
+	  register x86_reg delta;
           /* Align destinition to MMREG_SIZE -boundary */
-          delta = ((unsigned long int)to)&(MMREG_SIZE-1);
+          delta = ((intptr_t)to)&(MMREG_SIZE-1);
           if(delta)
 	  {
 	    delta=MMREG_SIZE-delta;
@@ -201,7 +201,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
            processor's decoders, but it's not always possible.
         */
 #if HAVE_SSE /* Only P3 (may be Cyrix3) */
-	if(((unsigned long)from) & 15)
+	if(((intptr_t)from) & 15)
 	/* if SRC is misaligned */
 	for(; i>0; i--)
 	{
@@ -243,7 +243,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 	}
 #else
 	// Align destination at BLOCK_SIZE boundary
-	for(; ((int)to & (BLOCK_SIZE-1)) && i>0; i--)
+	for(; ((intptr_t)to & (BLOCK_SIZE-1)) && i>0; i--)
 	{
 		__asm__ volatile (
 #ifndef HAVE_ONLY_MMX1
@@ -328,7 +328,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 			"cmp %4, %2		\n\t"
 			" jae 1b		\n\t"
 				: "+r" (from), "+r" (to), "+r" (i)
-				: "r" ((long)BLOCK_SIZE), "i" (BLOCK_SIZE/64), "i" ((long)CONFUSION_FACTOR)
+				: "r" ((x86_reg)BLOCK_SIZE), "i" (BLOCK_SIZE/64), "i" ((x86_reg)CONFUSION_FACTOR)
 				: "%"REG_a, "%ecx"
 		);
 
@@ -400,9 +400,9 @@ static void * RENAME(mem2agpcpy)(void * to, const void * from, size_t len)
 #endif
         if(len >= MIN_LEN)
 	{
-	  register unsigned long int delta;
+	  register x86_reg delta;
           /* Align destinition to MMREG_SIZE -boundary */
-          delta = ((unsigned long int)to)&7;
+          delta = ((intptr_t)to)&7;
           if(delta)
 	  {
 	    delta=8-delta;
