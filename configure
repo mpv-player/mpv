@@ -3377,7 +3377,7 @@ echocheck "dynamic loader"
 cat > $TMPC << EOF
 #include <stddef.h>
 #include <dlfcn.h>
-int main(void) { dlopen(NULL, 0); dlclose(NULL); dlsym(NULL, NULL); return 0; }
+int main(void) { dlopen("", 0); dlclose(NULL); dlsym(NULL, ""); return 0; }
 EOF
 _dl=no
 for _ld_tmp in "" "-ldl" ; do
@@ -3745,7 +3745,7 @@ cat > $TMPC << EOF
 #define _ISOC99_SOURCE
 #include <stdarg.h>
 #include <stdio.h>
-int main(void) { va_list ap; vsscanf(0, 0, ap); return 0; }
+int main(void) { va_list ap; vsscanf("foo", "bar", ap); return 0; }
 EOF
 _vsscanf=no
 cc_check && _vsscanf=yes
