@@ -8999,12 +8999,20 @@ $def_yasm
 #define CONFIG_SWSCALE 1
 #define CONFIG_SWSCALE_ALPHA 1
 
+#ifdef HAVE_AF_INET6
+#define CONFIG_IPV6 1
+#else
+#define CONFIG_IPV6 0
+#endif
+
 #define HAVE_ATTRIBUTE_PACKED 1
 #define HAVE_GETHRTIME 0
 #define HAVE_INLINE_ASM 0
 #define HAVE_LDBRX 0
 #define HAVE_POLL_H 1
 #define HAVE_PPC4XX 0
+#define HAVE_SETMODE 0
+#define HAVE_SYS_SELECT_H 0
 #define HAVE_VIRTUALALLOC 0
 
 /* Some FFmpeg codecs depend on these. Enable them unconditionally for now. */
