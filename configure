@@ -7489,7 +7489,7 @@ if test "$_mp3lame" = auto ; then
   cat > $TMPC <<EOF
 #include <lame/lame.h>
 int main(void) { lame_version_t lv; (void) lame_init();
-    get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor);
+    get_lame_version_numerical(&lv);
     return 0; }
 EOF
   cc_check -lmp3lame $_ld_lm && _mp3lame=yes
