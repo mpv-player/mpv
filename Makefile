@@ -781,6 +781,7 @@ DIRS =  . \
         loader \
         loader/dshow \
         loader/dmo \
+        loader/wine \
         mp3lib \
         osdep \
         stream \
