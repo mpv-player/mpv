@@ -1,6 +1,9 @@
 #ifndef MPLAYER_DS_VIDEODECODER_H
 #define MPLAYER_DS_VIDEODECODER_H
 
+#include "loader/com.h"
+#include "loader/wine/vfw.h"
+
 typedef struct DS_VideoDecoder DS_VideoDecoder;
 
 int DS_VideoDecoder_GetCapabilities(DS_VideoDecoder *this);

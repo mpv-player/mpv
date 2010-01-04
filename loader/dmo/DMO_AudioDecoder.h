@@ -1,6 +1,9 @@
 #ifndef MPLAYER_DMO_AUDIODECODER_H
 #define MPLAYER_DMO_AUDIODECODER_H
 
+#include "loader/com.h"
+#include "loader/wine/mmreg.h"
+
 typedef struct DMO_AudioDecoder DMO_AudioDecoder;
 
 //DMO_AudioDecoder * DMO_AudioDecoder_Create(const CodecInfo * info, const WAVEFORMATEX* wf);

@@ -9,6 +9,7 @@
 extern "C" {
 #endif
 
+#include "windef.h"
 #include "pshpack1.h"
 
 /* flags for HIGHCONTRAST dwFlags field */
