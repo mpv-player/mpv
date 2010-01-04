@@ -175,7 +175,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
       mp_msg(MSGT_OPEN, MSGL_V, "smil-over-realrtsp playlist, switching to raw rdt mode\n");
     } else {
     rtsp_session->real_session->header_len =
-      rmff_dump_header (h, (char *) rtsp_session->real_session->header, HEADER_SIZE);
+      rmff_dump_header (h, (char *) rtsp_session->real_session->header, RTSP_HEADER_SIZE);
 
       if (rtsp_session->real_session->header_len < 0) {
         mp_msg (MSGT_OPEN, MSGL_ERR,"rtsp_session: error while dumping RMFF headers, session can not be established.\n");
