@@ -4138,7 +4138,7 @@ if test "$_directfb" = auto ; then
   _directfb=no
   cat > $TMPC <<EOF
 #include <directfb.h>
-int main(void) { IDirectFB *foo; DirectFBInit(0,0); return 0; }
+int main(void) { DirectFBInit(0, 0); return 0; }
 EOF
   for _inc_tmp in "" -I/usr/local/include/directfb \
       -I/usr/include/directfb -I/usr/local/include; do
