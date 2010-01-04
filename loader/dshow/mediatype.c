@@ -22,8 +22,8 @@
  */
 #include "mp_msg.h"
 #include "libmpcodecs/img_format.h"
-#include "wine/winerror.h"
-#include "com.h"
+#include "loader/wine/winerror.h"
+#include "loader/com.h"
 #include "mediatype.h"
 #include "libwin32.h"
 

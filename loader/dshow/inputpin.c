@@ -5,7 +5,7 @@
 
 #include "inputpin.h"
 #include "mediatype.h"
-#include "wine/winerror.h"
+#include "loader/wine/winerror.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

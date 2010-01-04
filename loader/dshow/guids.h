@@ -7,13 +7,13 @@ under MinGW
 */
 
 #ifndef GUID_DEFINED
-#include "com.h"
+#include "loader/com.h"
 #endif
 
 #ifndef VFWAPI
-#include "wine/module.h"
-#include "wine/windef.h"
-#include "wine/vfw.h"
+#include "loader/wine/module.h"
+#include "loader/wine/windef.h"
+#include "loader/wine/vfw.h"
 #endif
 
 #include "mediatype.h"

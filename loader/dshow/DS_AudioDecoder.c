@@ -21,7 +21,7 @@ struct DS_AudioDecoder
 
 #include "DS_AudioDecoder.h"
 #ifdef WIN32_LOADER
-#include "ldt_keeper.h"
+#include "loader/ldt_keeper.h"
 #endif
 
 #include <string.h>

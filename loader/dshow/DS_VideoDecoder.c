@@ -7,7 +7,7 @@
 #include "config.h"
 #include "guids.h"
 #include "interfaces.h"
-#include "registry.h"
+#include "loader/registry.h"
 #include "libwin32.h"
 #include "DS_Filter.h"
 
@@ -30,9 +30,9 @@ static SampleProcUserData sampleProcData;
 
 #include "DS_VideoDecoder.h"
 
-#include "wine/winerror.h"
+#include "loader/wine/winerror.h"
 #ifdef WIN32_LOADER
-#include "ldt_keeper.h"
+#include "loader/ldt_keeper.h"
 #endif
 
 #include <unistd.h>

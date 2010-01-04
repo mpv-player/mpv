@@ -1,7 +1,7 @@
 #ifndef MPLAYER_DMO_GUIDS_H
 #define MPLAYER_DMO_GUIDS_H
 
-#include "dshow/guids.h"
+#include "loader/dshow/guids.h"
 
 extern const GUID IID_IMediaBuffer;
 extern const GUID IID_IMediaObject;

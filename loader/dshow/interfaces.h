@@ -8,7 +8,7 @@
  */
 
 #include "iunk.h"
-#include "com.h"
+#include "loader/com.h"
 
 /*    Sh*t. MSVC++ and g++ use different methods of storing vtables.    */
 

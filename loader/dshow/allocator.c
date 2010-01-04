@@ -5,8 +5,8 @@
 
 #include "config.h"
 #include "allocator.h"
-#include "com.h"
-#include "wine/winerror.h"
+#include "loader/com.h"
+#include "loader/wine/winerror.h"
 #include <stdio.h>
 #include <stdlib.h>
 
