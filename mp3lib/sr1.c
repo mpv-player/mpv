@@ -13,9 +13,6 @@
 #include        <string.h>
 #include        <math.h>
 
-#define real float
-// #define int long
-
 #include "mpg123.h"
 #include "huffman.h"
 #include "mp3.h"

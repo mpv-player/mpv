@@ -25,6 +25,8 @@
 
 #undef MPG123_REMOTE           /* Get rid of this stuff for Win32 */
 
+typedef float real;
+
 /*
 #  define real float
 #  define real long double

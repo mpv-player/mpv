@@ -7,6 +7,8 @@
 #ifndef MPLAYER_MP3LIB_L2TABLES_H
 #define MPLAYER_MP3LIB_L2TABLES_H
 
+#include "mpg123.h"
+
 /*
  * Layer 2 Alloc tables ..
  * most other tables are calculated on program start (which is (of course)

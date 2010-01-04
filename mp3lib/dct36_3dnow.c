@@ -27,10 +27,9 @@
  * 2003/06/21: Moved to GCC inline assembly - Alex Beregszaszi
  */
 
-#define real float /* ugly - but only way */
-
 #include "config.h"
 #include "mangle.h"
+#include "mpg123.h"
 
 #ifdef DCT36_OPTIMIZE_FOR_K7
 void dct36_3dnowex(real *inbuf, real *o1,
