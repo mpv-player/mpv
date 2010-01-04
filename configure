@@ -3745,7 +3745,7 @@ cat > $TMPC << EOF
 #define _ISOC99_SOURCE
 #include <stdarg.h>
 #include <stdio.h>
-int main(void) { vsscanf(0, 0, 0); return 0; }
+int main(void) { va_list ap; vsscanf(0, 0, ap); return 0; }
 EOF
 _vsscanf=no
 cc_check && _vsscanf=yes
