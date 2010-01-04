@@ -6271,7 +6271,8 @@ EOF
 	_inc_tmp=""
 	_ld_tmp="-lfribidi"
 	cc_check $_inc_tmp $_ld_tmp && _fribidi=yes
-	if test "$_fribidi" = no ; then
+	if $_fribidiconfig --version > /dev/null 2>&1 &&
+	   test "$_fribidi" = no ; then
 	  _inc_tmp="$($_fribidiconfig --cflags)"
 	  _ld_tmp="$($_fribidiconfig --libs)"
 	  cc_check $_inc_tmp $_ld_tmp && _fribidi=yes
