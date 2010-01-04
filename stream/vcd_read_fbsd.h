@@ -1,10 +1,14 @@
 #ifndef MPLAYER_VCD_READ_FBSD_H
 #define MPLAYER_VCD_READ_FBSD_H
 
+#define _XOPEN_SOURCE 500
+
 #include <sys/types.h>
 #include <inttypes.h>
+#include <unistd.h>
 #include "libavutil/intreadwrite.h"
 #include <sys/cdio.h>
+#include <sys/ioctl.h>
 #if defined(__NetBSD__) || defined(__OpenBSD__)
 #define VCD_NETBSD 1
 #endif

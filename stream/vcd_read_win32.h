@@ -1,6 +1,9 @@
 #ifndef MPLAYER_VCD_READ_WIN32_H
 #define MPLAYER_VCD_READ_WIN32_H
 
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ddk/ntddcdrm.h>
 #include "mp_msg.h"
 

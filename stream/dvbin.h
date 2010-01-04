@@ -8,6 +8,7 @@
 #ifndef MPLAYER_DVBIN_H
 #define MPLAYER_DVBIN_H
 
+#include "config.h"
 #include "stream.h"
 
 #define SLOF (11700*1000UL)

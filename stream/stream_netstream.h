@@ -10,6 +10,7 @@
 #ifndef MPLAYER_NETSTREAM_H
 #define MPLAYER_NETSTREAM_H
 
+#include "config.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>

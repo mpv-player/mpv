@@ -1,6 +1,7 @@
 #ifndef MPLAYER_STREAM_RADIO_H
 #define MPLAYER_STREAM_RADIO_H
 
+#include "config.h"
 #include "stream.h"
 
 #define RADIO_CHANNEL_LOWER 1
