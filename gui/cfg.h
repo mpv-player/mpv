@@ -19,6 +19,8 @@
 #ifndef MPLAYER_GUI_CFG_H
 #define MPLAYER_GUI_CFG_H
 
+#include "config.h"
+
 extern int gtkEnableAudioEqualizer;
 
 extern int    gtkVfPP;
