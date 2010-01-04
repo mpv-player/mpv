@@ -2544,10 +2544,12 @@ static int seek(MPContext *mpctx, double amount, int style)
 	resync_video_stream(mpctx->sh_video);
 	if (vo_config_count)
 	    mpctx->video_out->control(VOCTRL_RESET, NULL);
+	mpctx->sh_video->next_frame_time = 0;
 	mpctx->sh_video->num_buffered_pts = 0;
 	mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
 	mpctx->num_buffered_frames = 0;
 	mpctx->delay = 0;
+	mpctx->time_frame = 0;
 	// Not all demuxers set d_video->pts during seek, so this value
 	// (which is used by at least vobsub and edl code below) may
 	// be completely wrong (probably 0).
@@ -3610,7 +3612,6 @@ if(verbose) term_osd = 0;
 {
 //int frame_corr_num=0;   //
 //float v_frame=0;    // Video
-float time_frame=0; // Timer
 //float num_frames=0;      // number of frames played
 
 int frame_time_remaining=0; // flag
@@ -3778,7 +3779,7 @@ if(!mpctx->sh_video) {
       else {
 	  // might return with !eof && !blit_frame if !correct_pts
 	  mpctx->num_buffered_frames += blit_frame;
-	  time_frame += frame_time / playback_speed;  // for nosound
+	  mpctx->time_frame += frame_time / playback_speed;  // for nosound
       }
   }
 
@@ -3809,7 +3810,7 @@ if(!mpctx->sh_video) {
         }
     }
 
-    frame_time_remaining = sleep_until_update(&time_frame, &aq_sleep_time);
+    frame_time_remaining = sleep_until_update(&mpctx->time_frame, &aq_sleep_time);
 
 //====================== FLIP PAGE (VIDEO BLT): =========================
 
@@ -3824,7 +3825,7 @@ if(!mpctx->sh_video) {
         }
 //====================== A-V TIMESTAMP CORRECTION: =========================
 
-  adjust_sync_and_print_status(frame_time_remaining, time_frame);
+  adjust_sync_and_print_status(frame_time_remaining, mpctx->time_frame);
 
 //============================ Auto QUALITY ============================
 

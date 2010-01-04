@@ -72,6 +72,9 @@ typedef struct MPContext {
     // struct.
     int num_buffered_frames;
 
+    // how long until we need to display the "current" frame
+    float time_frame;
+
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
     // written to the ao, decreased when moving to the next frame.
