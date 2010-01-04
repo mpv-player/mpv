@@ -37,8 +37,7 @@
 
 #include "matrixview.h"
 
-static const vo_info_t info =
-{
+static const vo_info_t info = {
     "MatrixView (OpenGL)",
     "matrixview",
     "Pigeon <pigeon@pigeond.net>",
@@ -88,7 +87,8 @@ static void contrast_set(int value)
 {
     float contrast = value * CONTRAST_MULTIPLIER + DEFAULT_CONTRAST;
     eq_contrast = value;
-    if (contrast < 0) contrast = 0;
+    if (contrast < 0)
+         contrast = 0;
     matrixview_contrast_set(contrast);
 }
 
@@ -97,54 +97,56 @@ static void brightness_set(int value)
 {
     float brightness = value * BRIGHTNESS_MULTIPLIER + DEFAULT_BRIGHTNESS;
     eq_brightness = value;
-    if (brightness < 0) brightness = 0;
+    if (brightness < 0)
+        brightness = 0;
     matrixview_brightness_set(brightness);
 }
 
 
-static int
-config(uint32_t width, uint32_t height,
-        uint32_t d_width, uint32_t d_height,
-        uint32_t flags, char *title, uint32_t format)
+static int config(uint32_t width, uint32_t height,
+                  uint32_t d_width, uint32_t d_height,
+                  uint32_t flags, char *title, uint32_t format)
 {
     image_height = height;
-    image_width = width;
+    image_width  = width;
     image_format = format;
 
     int_pause = 0;
 
 #ifdef CONFIG_GL_WIN32
-  if (glctx.type == GLTYPE_W32 && !vo_w32_config(d_width, d_height, flags))
-    return -1;
+    if (glctx.type == GLTYPE_W32 && !vo_w32_config(d_width, d_height, flags))
+        return -1;
 #endif
 #ifdef CONFIG_GL_X11
-  if (glctx.type == GLTYPE_X11) {
-    XVisualInfo *vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
-    if (vinfo == NULL)
-    {
-      mp_msg(MSGT_VO, MSGL_ERR, "[matrixview] no GLX support present\n");
-      return -1;
-    }
-    mp_msg(MSGT_VO, MSGL_V, "[matrixview] GLX chose visual with ID 0x%x\n", (int)vinfo->visualid);
+    if (glctx.type == GLTYPE_X11) {
+        XVisualInfo *vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
+        if (vinfo == NULL) {
+            mp_msg(MSGT_VO, MSGL_ERR, "[matrixview] no GLX support present\n");
+            return -1;
+        }
+        mp_msg(MSGT_VO, MSGL_V, "[matrixview] GLX chose visual with ID 0x%x\n",
+               (int)vinfo->visualid);
 
-    vo_x11_create_vo_window(vinfo, vo_dx, vo_dy, d_width, d_height, flags,
-            XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone),
-            "matrixview", title);
-  }
+        vo_x11_create_vo_window(vinfo, vo_dx, vo_dy, d_width, d_height, flags,
+                                XCreateColormap(mDisplay, mRootWin,
+                                                vinfo->visual, AllocNone),
+                                "matrixview", title);
+    }
 #endif /* CONFIG_GL_WIN32 */
     if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
         return -1;
 
-    if(sws)
+    if (sws)
         sws_freeContext(sws);
 
-    sws = sws_getContextFromCmdLine(image_width, image_height, image_format, matrix_cols, matrix_rows, IMGFMT_Y8);
+    sws = sws_getContextFromCmdLine(image_width, image_height, image_format,
+                                    matrix_cols, matrix_rows, IMGFMT_Y8);
     if (!sws) {
         mp_msg(MSGT_VO, MSGL_ERR, "[matrixview] Cannot create SwsContext context\n");
         return -1;
     }
 
-    if(!map_image[0])
+    if (!map_image[0])
         map_image[0] = calloc(matrix_cols, matrix_rows);
 
     map_stride[0] = matrix_cols;
@@ -161,11 +163,12 @@ config(uint32_t width, uint32_t height,
 
 static void check_events(void)
 {
-    int e=glctx.check_events();
-    if(e & VO_EVENT_RESIZE) {
+    int e = glctx.check_events();
+    if (e & VO_EVENT_RESIZE) {
         matrixview_reshape(vo_dwidth, vo_dheight);
     }
-    if(e & VO_EVENT_EXPOSE && int_pause) flip_page();
+    if (e & VO_EVENT_EXPOSE && int_pause)
+        flip_page();
 }
 
 
@@ -200,18 +203,18 @@ static int query_format(uint32_t format)
 {
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
 
-    switch(format) {
-        case IMGFMT_YV12:
-        case IMGFMT_BGR32:
-        case IMGFMT_BGR24:
-        case IMGFMT_BGR16:
-        case IMGFMT_BGR15:
-        case IMGFMT_RGB32:
-        case IMGFMT_RGB24:
-        case IMGFMT_ARGB:
-            return caps;
-        default:
-            break;
+    switch (format) {
+    case IMGFMT_YV12:
+    case IMGFMT_BGR32:
+    case IMGFMT_BGR24:
+    case IMGFMT_BGR16:
+    case IMGFMT_BGR15:
+    case IMGFMT_RGB32:
+    case IMGFMT_RGB24:
+    case IMGFMT_ARGB:
+        return caps;
+    default:
+        break;
     }
 
     return 0;
@@ -220,7 +223,8 @@ static int query_format(uint32_t format)
 
 static void uninit(void)
 {
-    if (!vo_config_count) return;
+    if (!vo_config_count)
+        return;
     uninit_mpglcontext(&glctx);
     free(map_image[0]);
     map_image[0] = NULL;
@@ -231,8 +235,8 @@ static void uninit(void)
 
 static const opt_t subopts[] =
 {
-    { "rows",       OPT_ARG_INT, &matrix_rows, int_pos },
-    { "cols",       OPT_ARG_INT, &matrix_cols, int_pos },
+    { "rows", OPT_ARG_INT, &matrix_rows, int_pos },
+    { "cols", OPT_ARG_INT, &matrix_cols, int_pos },
     { NULL }
 };
 
@@ -243,12 +247,13 @@ static int preinit(const char *arg)
 #ifdef CONFIG_GL_WIN32
     gltype = GLTYPE_W32;
 #endif
-    if(!init_mpglcontext(&glctx, gltype)) return -1;
+    if (!init_mpglcontext(&glctx, gltype))
+        return -1;
 
     matrix_rows = DEFAULT_MATRIX_ROWS;
     matrix_cols = DEFAULT_MATRIX_COLS;
 
-    if(subopt_parse(arg, subopts) != 0) {
+    if (subopt_parse(arg, subopts) != 0) {
         mp_msg(MSGT_VO, MSGL_FATAL,
                 "\n-vo matrixview command line help:\n"
                 "Example: mplayer -vo matrixview:cols=320:rows=240\n"
@@ -297,12 +302,9 @@ static int control(uint32_t request, void *data, ...)
             va_start(va, data);
             value = va_arg(va, int *);
             va_end(va);
-            if (strcasecmp(data, "contrast") == 0)
-            {
+            if (strcasecmp(data, "contrast") == 0) {
                 *value = eq_contrast;
-            }
-            else if (strcasecmp(data, "brightness") == 0)
-            {
+            } else if (strcasecmp(data, "brightness") == 0) {
                 *value = eq_brightness;
             }
         }
@@ -314,12 +316,9 @@ static int control(uint32_t request, void *data, ...)
             va_start(va, data);
             value = va_arg(va, int);
             va_end(va);
-            if (strcasecmp(data, "contrast") == 0)
-            {
+            if (strcasecmp(data, "contrast") == 0) {
                 contrast_set(value);
-            }
-            else if (strcasecmp(data, "brightness") == 0)
-            {
+            } else if (strcasecmp(data, "brightness") == 0) {
                 brightness_set(value);
             }
         }
