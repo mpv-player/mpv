@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+#include "config.h"
+
 extern int suboverlap_enabled;
 extern int sub_no_text_pp;  // disable text post-processing
 extern int sub_match_fuzziness;
