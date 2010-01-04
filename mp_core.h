@@ -72,6 +72,8 @@ typedef struct MPContext {
     // struct.
     int num_buffered_frames;
 
+    // used to retry decoding after startup/seeking to compensate for codec delay
+    int startup_decode_retry;
     // how long until we need to display the "current" frame
     float time_frame;
 
