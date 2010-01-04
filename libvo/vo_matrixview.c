@@ -211,7 +211,6 @@ static int query_format(uint32_t format)
     case IMGFMT_BGR15:
     case IMGFMT_RGB32:
     case IMGFMT_RGB24:
-    case IMGFMT_ARGB:
         return caps;
     default:
         break;
