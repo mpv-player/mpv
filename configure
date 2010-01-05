@@ -4607,19 +4607,6 @@ else
 fi
 echores "$_mga"
 
-echocheck "MatrixView"
-if test "$_gl" = no ; then
-  matrixview=no
-fi
-if test "$matrixview" = yes ; then
-  _vomodules="matrixview $_vomodules"
-  def_matrixview='#define CONFIG_MATRIXVIEW 1'
-else
-  _novomodules="matrixview $_novomodules"
-  def_matrixview='#undef CONFIG_MATRIXVIEW'
-fi
-echores "$matrixview"
-
 echocheck "xmga"
 if test "$_xmga" = auto ; then
   _xmga=no
@@ -4981,6 +4968,20 @@ else
   _novomodules="opengl $_novomodules"
 fi
 echores "$_gl"
+
+
+echocheck "MatrixView"
+if test "$_gl" = no ; then
+  matrixview=no
+fi
+if test "$matrixview" = yes ; then
+  _vomodules="matrixview $_vomodules"
+  def_matrixview='#define CONFIG_MATRIXVIEW 1'
+else
+  _novomodules="matrixview $_novomodules"
+  def_matrixview='#undef CONFIG_MATRIXVIEW'
+fi
+echores "$matrixview"
 
 
 echocheck "PNG support"
