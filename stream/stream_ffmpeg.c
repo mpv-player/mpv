@@ -7,28 +7,6 @@
 #include "m_option.h"
 #include "m_struct.h"
 
-static struct stream_priv_s {
-    char *filename;
-    char *filename2;
-} stream_priv_dflts = {
-    NULL, NULL
-};
-
-#define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
-/// URL definition
-static const m_option_t stream_opts_fields[] = {
-    {"string",   ST_OFF(filename),  CONF_TYPE_STRING, 0, 0 ,0, NULL},
-    {"filename", ST_OFF(filename2), CONF_TYPE_STRING, 0, 0 ,0, NULL},
-    {NULL}
-};
-
-static const struct m_struct_st stream_opts = {
-    "ffmpeg",
-    sizeof(struct stream_priv_s),
-    &stream_priv_dflts,
-    stream_opts_fields
-};
-
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
     int r = url_read_complete(s->priv, buffer, max_len);
@@ -76,7 +54,6 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
 {
     int flags = 0;
     const char *filename;
-    struct stream_priv_s *p = opts;
     URLContext *ctx = NULL;
     int res = STREAM_ERROR;
     int64_t size;
@@ -92,10 +69,8 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
         goto out;
     }
 
-    if (p->filename)
-        filename = p->filename;
-    else if (p->filename2)
-        filename = p->filename2;
+    if (stream->url)
+        filename = stream->url;
     else {
         mp_msg(MSGT_OPEN, MSGL_ERR, "[ffmpeg] No URL\n");
         goto out;
@@ -124,7 +99,6 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     res = STREAM_OK;
 
 out:
-    m_struct_free(&stream_opts,opts);
     return res;
 }
 
@@ -135,6 +109,6 @@ const stream_info_t stream_info_ffmpeg = {
   "",
   open_f,
   { "ffmpeg", NULL },
-  &stream_opts,
+  NULL,
   1 // Urls are an option string
 };
