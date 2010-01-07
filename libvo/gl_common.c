@@ -34,7 +34,7 @@
 #include <math.h>
 #include "old_vo_defines.h"
 #include "gl_common.h"
-#include "libavutil/common.h"
+#include "csputils.h"
 
 void (GLAPIENTRY *Begin)(GLenum);
 void (GLAPIENTRY *End)(void);
@@ -235,6 +235,16 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
   if (!gl_format) gl_format = &dummy2;
   if (!gl_type) gl_type = &dummy2;
 
+  if (mp_get_chroma_shift(fmt, NULL, NULL)) {
+    // reduce the possible cases a bit
+    if (IMGFMT_IS_YUVP16_LE(fmt))
+      fmt = IMGFMT_420P16_LE;
+    else if (IMGFMT_IS_YUVP16_BE(fmt))
+      fmt = IMGFMT_420P16_BE;
+    else
+      fmt = IMGFMT_YV12;
+  }
+
   *bpp = IMGFMT_IS_BGR(fmt)?IMGFMT_BGR_DEPTH(fmt):IMGFMT_RGB_DEPTH(fmt);
   *gl_texfmt = 3;
   switch (fmt) {
@@ -250,6 +260,13 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
       *gl_texfmt = 4;
       *gl_format = GL_RGBA;
       *gl_type = GL_UNSIGNED_BYTE;
+      break;
+    case IMGFMT_420P16:
+      supported = 0; // no native YUV support
+      *gl_texfmt = 1;
+      *bpp = 16;
+      *gl_format = GL_LUMINANCE;
+      *gl_type = GL_UNSIGNED_SHORT;
       break;
     case IMGFMT_YV12:
       supported = 0; // no native YV12 support
@@ -1005,78 +1022,6 @@ static void create_scaler_textures(int scaler, int *texu, char *texs) {
   }
 }
 
-static void gen_gamma_map(unsigned char *map, int size, float gamma);
-
-#define ROW_R 0
-#define ROW_G 1
-#define ROW_B 2
-#define COL_Y 0
-#define COL_U 1
-#define COL_V 2
-#define COL_C 3
-
-static void get_yuv2rgb_coeffs(gl_conversion_params_t *params, float yuv2rgb[3][4]) {
-  float uvcos = params->saturation * cos(params->hue);
-  float uvsin = params->saturation * sin(params->hue);
-  int i;
-  float uv_coeffs[3][2] = {
-    { 0.000,  1.596},
-    {-0.391, -0.813},
-    { 2.018,  0.000}
-  };
-  for (i = 0; i < 3; i++) {
-    yuv2rgb[i][COL_C]  = params->brightness;
-    yuv2rgb[i][COL_Y]  = 1.164 * params->contrast;
-    yuv2rgb[i][COL_C] += (-16 / 255.0) * yuv2rgb[i][COL_Y];
-    yuv2rgb[i][COL_U]  = uv_coeffs[i][0] * uvcos + uv_coeffs[i][1] * uvsin;
-    yuv2rgb[i][COL_C] += (-128 / 255.0) * yuv2rgb[i][COL_U];
-    yuv2rgb[i][COL_V]  = uv_coeffs[i][0] * uvsin + uv_coeffs[i][1] * uvcos;
-    yuv2rgb[i][COL_C] += (-128 / 255.0) * yuv2rgb[i][COL_V];
-    // this "centers" contrast control so that e.g. a contrast of 0
-    // leads to a grey image, not a black one
-    yuv2rgb[i][COL_C] += 0.5 - params->contrast / 2.0;
-  }
-}
-
-//! size of gamma map use to avoid slow exp function in gen_yuv2rgb_map
-#define GMAP_SIZE (1024)
-/**
- * \brief generate a 3D YUV -> RGB map
- * \param params struct containing parameters like brightness, gamma, ...
- * \param map where to store map. Must provide space for (size + 2)^3 elements
- * \param size size of the map, excluding border
- */
-static void gen_yuv2rgb_map(gl_conversion_params_t *params, unsigned char *map, int size) {
-  int i, j, k, l;
-  float step = 1.0 / size;
-  float y, u, v;
-  float yuv2rgb[3][4];
-  unsigned char gmaps[3][GMAP_SIZE];
-  gen_gamma_map(gmaps[0], GMAP_SIZE, params->rgamma);
-  gen_gamma_map(gmaps[1], GMAP_SIZE, params->ggamma);
-  gen_gamma_map(gmaps[2], GMAP_SIZE, params->bgamma);
-  get_yuv2rgb_coeffs(params, yuv2rgb);
-  for (i = 0; i < 3; i++)
-    for (j = 0; j < 4; j++)
-      yuv2rgb[i][j] *= GMAP_SIZE - 1;
-  v = 0;
-  for (i = -1; i <= size; i++) {
-    u = 0;
-    for (j = -1; j <= size; j++) {
-      y = 0;
-      for (k = -1; k <= size; k++) {
-        for (l = 0; l < 3; l++) {
-          float rgb = yuv2rgb[l][COL_Y] * y + yuv2rgb[l][COL_U] * u + yuv2rgb[l][COL_V] * v + yuv2rgb[l][COL_C];
-          *map++ = gmaps[l][av_clip(rgb, 0, GMAP_SIZE - 1)];
-        }
-        y += (k == -1 || k == size - 1) ? step / 2 : step;
-      }
-      u += (j == -1 || j == size - 1) ? step / 2 : step;
-    }
-    v += (i == -1 || i == size - 1) ? step / 2 : step;
-  }
-}
-
 //! resolution of texture for gamma lookup table
 #define LOOKUP_RES 512
 //! resolution for 3D yuv->rgb conversion lookup table
@@ -1098,9 +1043,9 @@ static void create_conv_textures(gl_conversion_params_t *params, int *texu, char
       texs[0] = (*texu)++;
       ActiveTexture(GL_TEXTURE0 + texs[0]);
       lookup_data = malloc(4 * LOOKUP_RES);
-      gen_gamma_map(lookup_data, LOOKUP_RES, params->rgamma);
-      gen_gamma_map(&lookup_data[LOOKUP_RES], LOOKUP_RES, params->ggamma);
-      gen_gamma_map(&lookup_data[2 * LOOKUP_RES], LOOKUP_RES, params->bgamma);
+      mp_gen_gamma_map(lookup_data, LOOKUP_RES, params->csp_params.rgamma);
+      mp_gen_gamma_map(&lookup_data[LOOKUP_RES], LOOKUP_RES, params->csp_params.ggamma);
+      mp_gen_gamma_map(&lookup_data[2 * LOOKUP_RES], LOOKUP_RES, params->csp_params.bgamma);
       glCreateClearTex(GL_TEXTURE_2D, GL_LUMINANCE8, GL_LUMINANCE, GL_UNSIGNED_BYTE, GL_LINEAR,
                        LOOKUP_RES, 4, 0);
       glUploadTex(GL_TEXTURE_2D, GL_LUMINANCE, GL_UNSIGNED_BYTE, lookup_data,
@@ -1118,7 +1063,7 @@ static void create_conv_textures(gl_conversion_params_t *params, int *texu, char
         texs[0] = (*texu)++;
         ActiveTexture(GL_TEXTURE0 + texs[0]);
         lookup_data = malloc(3 * sz * sz * sz);
-        gen_yuv2rgb_map(params, lookup_data, LOOKUP_3DRES);
+        mp_gen_yuv2rgb_map(&params->csp_params, lookup_data, LOOKUP_3DRES);
         glAdjustAlignment(sz);
         PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
         TexImage3D(GL_TEXTURE_3D, 0, 3, sz, sz, sz, 1,
@@ -1324,10 +1269,10 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
   add_scaler(YUV_LUM_SCALER(type), &prog_pos, &prog_remain, lum_scale_texs,
              '0', 'r', rect, texw, texh, params->filter_strength);
   add_scaler(YUV_CHROM_SCALER(type), &prog_pos, &prog_remain, chrom_scale_texs,
-             '1', 'g', rect, texw / 2, texh / 2, params->filter_strength);
+             '1', 'g', rect, params->chrom_texw, params->chrom_texh, params->filter_strength);
   add_scaler(YUV_CHROM_SCALER(type), &prog_pos, &prog_remain, chrom_scale_texs,
-             '2', 'b', rect, texw / 2, texh / 2, params->filter_strength);
-  get_yuv2rgb_coeffs(params, yuv2rgb);
+             '2', 'b', rect, params->chrom_texw, params->chrom_texh, params->filter_strength);
+  mp_get_yuv2rgb_coeffs(&params->csp_params, yuv2rgb);
   switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_FRAGMENT:
       snprintf(prog_pos, prog_remain, yuv_prog_template,
@@ -1342,7 +1287,7 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
                yuv2rgb[ROW_R][COL_U], yuv2rgb[ROW_G][COL_U], yuv2rgb[ROW_B][COL_U],
                yuv2rgb[ROW_R][COL_V], yuv2rgb[ROW_G][COL_V], yuv2rgb[ROW_B][COL_V],
                yuv2rgb[ROW_R][COL_C], yuv2rgb[ROW_G][COL_C], yuv2rgb[ROW_B][COL_C],
-               (float)1.0 / params->rgamma, (float)1.0 / params->bgamma, (float)1.0 / params->bgamma);
+               (float)1.0 / params->csp_params.rgamma, (float)1.0 / params->csp_params.bgamma, (float)1.0 / params->csp_params.bgamma);
       break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
       snprintf(prog_pos, prog_remain, yuv_lookup_prog_template,
@@ -1365,37 +1310,14 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
 }
 
 /**
- * \brief little helper function to create a lookup table for gamma
- * \param map buffer to create map into
- * \param size size of buffer
- * \param gamma gamma value
- */
-static void gen_gamma_map(unsigned char *map, int size, float gamma) {
-  int i;
-  if (gamma == 1.0) {
-    for (i = 0; i < size; i++)
-      map[i] = 255 * i / (size - 1);
-    return;
-  }
-  gamma = 1.0 / gamma;
-  for (i = 0; i < size; i++) {
-    float tmp = (float)i / (size - 1.0);
-    tmp = pow(tmp, gamma);
-    if (tmp > 1.0) tmp = 1.0;
-    if (tmp < 0.0) tmp = 0.0;
-    map[i] = 255 * tmp;
-  }
-}
-
-/**
  * \brief setup YUV->RGB conversion
  * \param parms struct containing parameters like conversion and scaler type,
  *              brightness, ...
  * \ingroup glconversion
  */
 void glSetupYUVConversion(gl_conversion_params_t *params) {
-  float uvcos = params->saturation * cos(params->hue);
-  float uvsin = params->saturation * sin(params->hue);
+  float uvcos = params->csp_params.saturation * cos(params->csp_params.hue);
+  float uvsin = params->csp_params.saturation * sin(params->csp_params.hue);
   switch (YUV_CONVERSION(params->type)) {
     case YUV_CONVERSION_COMBINERS:
       glSetupYUVCombiners(uvcos, uvsin);
@@ -1497,14 +1419,19 @@ void glDisableYUVConversion(GLenum target, int type) {
  * \param sx width of texture in pixels
  * \param sy height of texture in pixels
  * \param rect_tex whether this texture uses texture_rectangle extension
- * \param is_yv12 if set, also draw the textures from units 1 and 2
+ * \param is_yv12 if != 0, also draw the textures from units 1 and 2,
+ *                bits 8 - 15 and 16 - 23 specify the x and y scaling of those textures
  * \param flip flip the texture upside down
  * \ingroup gltexture
  */
 void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
                int sx, int sy, int rect_tex, int is_yv12, int flip) {
-  GLfloat tx2 = tx / 2, ty2 = ty / 2, tw2 = tw / 2, th2 = th / 2;
+  int chroma_x_shift = (is_yv12 >>  8) & 31;
+  int chroma_y_shift = (is_yv12 >> 16) & 31;
+  GLfloat xscale = 1 << chroma_x_shift;
+  GLfloat yscale = 1 << chroma_y_shift;
+  GLfloat tx2 = tx / xscale, ty2 = ty / yscale, tw2 = tw / xscale, th2 = th / yscale;
   if (!rect_tex) {
     tx /= sx; ty /= sy; tw /= sx; th /= sy;
     tx2 = tx, ty2 = ty, tw2 = tw, th2 = th;

@@ -579,6 +579,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     pic->data[0]= mpi->planes[0];
     pic->data[1]= mpi->planes[1];
     pic->data[2]= mpi->planes[2];
+    pic->data[3]= mpi->planes[3];
 
 #if 0
     assert(mpi->width >= ((width +align)&(~align)));
@@ -603,6 +604,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     pic->linesize[0]= mpi->stride[0];
     pic->linesize[1]= mpi->stride[1];
     pic->linesize[2]= mpi->stride[2];
+    pic->linesize[3]= mpi->stride[3];
 
     pic->opaque = mpi;
 //printf("%X\n", (int)mpi->planes[0]);
@@ -837,9 +839,11 @@ static struct mp_image *decode(struct sh_video *sh, void *data, int len,
         mpi->planes[0]=pic->data[0];
         mpi->planes[1]=pic->data[1];
         mpi->planes[2]=pic->data[2];
+        mpi->planes[3]=pic->data[3];
         mpi->stride[0]=pic->linesize[0];
         mpi->stride[1]=pic->linesize[1];
         mpi->stride[2]=pic->linesize[2];
+        mpi->stride[3]=pic->linesize[3];
     }
 
     if (!mpi->planes[0])

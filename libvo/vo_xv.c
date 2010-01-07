@@ -663,13 +663,14 @@ static int preinit(struct vo *vo, const char *arg)
     struct vo_x11_state *x11 = vo->x11;
     int xv_adaptor = -1;
 
-    const opt_t subopts[] = {
-        /* name         arg type     arg var         test */
-        {"port", OPT_ARG_INT, &x11->xv_port, (opt_test_f) int_pos},
-        {"adaptor", OPT_ARG_INT, &xv_adaptor, (opt_test_f) int_non_neg},
-        {"ck", OPT_ARG_STR, &ck_src_arg, xv_test_ck},
-        {"ck-method", OPT_ARG_STR, &ck_method_arg, xv_test_ckm},
-        {NULL}
+    const opt_t subopts[] =
+    {
+      /* name         arg type     arg var         test */
+      {  "port",      OPT_ARG_INT, &x11->xv_port,  int_pos },
+      {  "adaptor",   OPT_ARG_INT, &xv_adaptor,    int_non_neg },
+      {  "ck",        OPT_ARG_STR, &ck_src_arg,    xv_test_ck },
+      {  "ck-method", OPT_ARG_STR, &ck_method_arg, xv_test_ckm },
+      {  NULL }
     };
 
     x11->xv_port = 0;

@@ -49,9 +49,16 @@ void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, Sw
 static const unsigned int outfmt_list[]={
 // YUV:
     IMGFMT_444P,
+    IMGFMT_444P16_LE,
+    IMGFMT_444P16_BE,
     IMGFMT_422P,
+    IMGFMT_422P16_LE,
+    IMGFMT_422P16_BE,
     IMGFMT_YV12,
     IMGFMT_I420,
+    IMGFMT_420P16_LE,
+    IMGFMT_420P16_BE,
+    IMGFMT_420A,
     IMGFMT_IYUV,
     IMGFMT_YVU9,
     IMGFMT_IF09,
@@ -60,6 +67,7 @@ static const unsigned int outfmt_list[]={
     IMGFMT_NV21,
     IMGFMT_YUY2,
     IMGFMT_UYVY,
+    IMGFMT_440P,
 // RGB and grayscale (Y8 and Y800):
     IMGFMT_BGR32,
     IMGFMT_RGB32,
@@ -322,7 +330,7 @@ static void start_slice(struct vf_instance* vf, mp_image_t *mpi){
 
 static void scale(struct SwsContext *sws1, struct SwsContext *sws2, uint8_t *src[MP_MAX_PLANES], int src_stride[MP_MAX_PLANES],
                   int y, int h,  uint8_t *dst[MP_MAX_PLANES], int dst_stride[MP_MAX_PLANES], int interlaced){
-    uint8_t *src2[MP_MAX_PLANES]={src[0], src[1], src[2]};
+    uint8_t *src2[MP_MAX_PLANES]={src[0], src[1], src[2], src[3]};
 #if HAVE_BIGENDIAN
     uint32_t pal2[256];
     if (src[1] && !src[2]){
@@ -335,12 +343,12 @@ static void scale(struct SwsContext *sws1, struct SwsContext *sws2, uint8_t *src
 
     if(interlaced){
         int i;
-        uint8_t *dst2[MP_MAX_PLANES]={dst[0], dst[1], dst[2]};
-        int src_stride2[MP_MAX_PLANES]={2*src_stride[0], 2*src_stride[1], 2*src_stride[2]};
-        int dst_stride2[MP_MAX_PLANES]={2*dst_stride[0], 2*dst_stride[1], 2*dst_stride[2]};
+        uint8_t *dst2[MP_MAX_PLANES]={dst[0], dst[1], dst[2], dst[3]};
+        int src_stride2[MP_MAX_PLANES]={2*src_stride[0], 2*src_stride[1], 2*src_stride[2], 2*src_stride[3]};
+        int dst_stride2[MP_MAX_PLANES]={2*dst_stride[0], 2*dst_stride[1], 2*dst_stride[2], 2*dst_stride[3]};
 
         sws_scale_ordered(sws1, src2, src_stride2, y>>1, h>>1, dst2, dst_stride2);
-        for(i=0; i<3; i++){
+        for(i=0; i<MP_MAX_PLANES; i++){
             src2[i] += src_stride[i];
             dst2[i] += dst_stride[i];
         }
@@ -471,6 +479,14 @@ static int query_format(struct vf_instance* vf, unsigned int fmt){
     case IMGFMT_444P:
     case IMGFMT_422P:
     case IMGFMT_411P:
+    case IMGFMT_440P:
+    case IMGFMT_420A:
+    case IMGFMT_444P16_LE:
+    case IMGFMT_444P16_BE:
+    case IMGFMT_422P16_LE:
+    case IMGFMT_422P16_BE:
+    case IMGFMT_420P16_LE:
+    case IMGFMT_420P16_BE:
     case IMGFMT_BGR8:
     case IMGFMT_RGB8:
     case IMGFMT_BG4B:

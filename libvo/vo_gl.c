@@ -90,6 +90,8 @@ static int use_ycbcr;
 #define MASK_NOT_COMBINERS (~((1 << YUV_CONVERSION_NONE) | (1 << YUV_CONVERSION_COMBINERS) | (1 << YUV_CONVERSION_COMBINERS_ATI)))
 #define MASK_GAMMA_SUPPORT (MASK_NOT_COMBINERS & ~(1 << YUV_CONVERSION_FRAGMENT))
 static int use_yuv;
+static int colorspace;
+static int is_yuv;
 static int lscale;
 static int cscale;
 static float filter_strength;
@@ -203,6 +205,7 @@ static void texSize(int w, int h, int *texw, int *texh) {
 //! maximum size of custom fragment program
 #define MAX_CUSTOM_PROG_SIZE (1024 * 1024)
 static void update_yuvconv(void) {
+  int xs, ys;
   float bri = eq_bri / 100.0;
   float cont = (eq_cont + 100) / 100.0;
   float hue = eq_hue / 100.0 * 3.1415927;
@@ -211,8 +214,11 @@ static void update_yuvconv(void) {
   float ggamma = exp(log(8.0) * eq_ggamma / 100.0);
   float bgamma = exp(log(8.0) * eq_bgamma / 100.0);
   gl_conversion_params_t params = {gl_target, yuvconvtype,
-      bri, cont, hue, sat, rgamma, ggamma, bgamma,
-      texture_width, texture_height, filter_strength};
+      {colorspace, bri, cont, hue, sat, rgamma, ggamma, bgamma},
+      texture_width, texture_height, 0, 0, filter_strength};
+  mp_get_chroma_shift(image_format, &xs, &ys);
+  params.chrom_texw = params.texw >> xs;
+  params.chrom_texh = params.texh >> ys;
   glSetupYUVConversion(&params);
   if (custom_prog) {
     FILE *f = fopen(custom_prog, "r");
@@ -475,8 +481,10 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
   mp_msg(MSGT_VO, MSGL_V, "[gl] Creating %dx%d texture...\n",
           texture_width, texture_height);
 
-  if (image_format == IMGFMT_YV12) {
+  if (is_yuv) {
     int i;
+    int xs, ys;
+    mp_get_chroma_shift(image_format, &xs, &ys);
     GenTextures(21, default_texs);
     default_texs[21] = 0;
     for (i = 0; i < 7; i++) {
@@ -487,18 +495,18 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
     }
     ActiveTexture(GL_TEXTURE1);
     glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, scale_type,
-                     texture_width / 2, texture_height / 2, 128);
+                     texture_width >> xs, texture_height >> ys, 128);
     if (mipmap_gen)
       TexParameteri(gl_target, GL_GENERATE_MIPMAP, GL_TRUE);
     ActiveTexture(GL_TEXTURE2);
     glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, scale_type,
-                     texture_width / 2, texture_height / 2, 128);
+                     texture_width >> xs, texture_height >> ys, 128);
     if (mipmap_gen)
       TexParameteri(gl_target, GL_GENERATE_MIPMAP, GL_TRUE);
     ActiveTexture(GL_TEXTURE0);
     BindTexture(gl_target, 0);
   }
-  if (image_format == IMGFMT_YV12 || custom_prog)
+  if (is_yuv || custom_prog)
   {
     if ((MASK_NOT_COMBINERS & (1 << use_yuv)) || custom_prog) {
       if (!GenPrograms || !BindProgram) {
@@ -530,9 +538,12 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
 static int
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
+  int xs, ys;
   image_height = height;
   image_width = width;
   image_format = format;
+  is_yuv = mp_get_chroma_shift(image_format, &xs, &ys) > 0;
+  is_yuv |= (xs << 8) | (ys << 16);
   glFindFormat(format, NULL, &gl_texfmt, &gl_format, &gl_type);
 
   vo_flipped = !!(flags & VOFLAG_FLIPPING);
@@ -701,14 +712,14 @@ static void do_render(void) {
 //  BindTexture(GL_TEXTURE_2D, texture_id);
 
   Color3f(1,1,1);
-  if (image_format == IMGFMT_YV12 || custom_prog)
+  if (is_yuv || custom_prog)
     glEnableYUVConversion(gl_target, yuvconvtype);
   glDrawTex(0, 0, image_width, image_height,
             0, 0, image_width, image_height,
             texture_width, texture_height,
-            use_rectangle == 1, image_format == IMGFMT_YV12,
+            use_rectangle == 1, is_yuv,
             mpi_flipped ^ vo_flipped);
-  if (image_format == IMGFMT_YV12 || custom_prog)
+  if (is_yuv || custom_prog)
     glDisableYUVConversion(gl_target, yuvconvtype);
 }
 
@@ -737,13 +748,15 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
   mpi_flipped = stride[0] < 0;
   glUploadTex(gl_target, gl_format, gl_type, src[0], stride[0],
               x, y, w, h, slice_height);
-  if (image_format == IMGFMT_YV12) {
+  if (is_yuv) {
+    int xs, ys;
+    mp_get_chroma_shift(image_format, &xs, &ys);
     ActiveTexture(GL_TEXTURE1);
     glUploadTex(gl_target, gl_format, gl_type, src[1], stride[1],
-                x / 2, y / 2, w / 2, h / 2, slice_height);
+                x >> xs, y >> ys, w >> xs, h >> ys, slice_height);
     ActiveTexture(GL_TEXTURE2);
     glUploadTex(gl_target, gl_format, gl_type, src[2], stride[2],
-                x / 2, y / 2, w / 2, h / 2, slice_height);
+                x >> xs, y >> ys, w >> xs, h >> ys, slice_height);
     ActiveTexture(GL_TEXTURE0);
   }
   return 0;
@@ -801,14 +814,16 @@ static uint32_t get_image(mp_image_t *mpi) {
     err_shown = 1;
     return VO_FALSE;
   }
-  if (mpi->imgfmt == IMGFMT_YV12) {
-    // YV12
+  if (is_yuv) {
+    // planar YUV
+    int xs, ys;
+    mp_get_chroma_shift(image_format, &xs, &ys);
     mpi->flags |= MP_IMGFLAG_COMMON_STRIDE | MP_IMGFLAG_COMMON_PLANE;
     mpi->stride[0] = mpi->width;
     mpi->planes[1] = mpi->planes[0] + mpi->stride[0] * mpi->height;
-    mpi->stride[1] = mpi->width >> 1;
-    mpi->planes[2] = mpi->planes[1] + mpi->stride[1] * (mpi->height >> 1);
-    mpi->stride[2] = mpi->width >> 1;
+    mpi->stride[1] = mpi->width >> xs;
+    mpi->planes[2] = mpi->planes[1] + mpi->stride[1] * (mpi->height >> ys);
+    mpi->stride[2] = mpi->width >> xs;
     if (ati_hack && !mesa_buffer) {
       mpi->flags &= ~MP_IMGFLAG_COMMON_PLANE;
       if (!gl_buffer_uv[0]) GenBuffers(2, gl_buffer_uv);
@@ -858,17 +873,19 @@ static uint32_t draw_image(mp_image_t *mpi) {
   mpi2.flags = 0; mpi2.type = MP_IMGTYPE_TEMP;
   mpi2.width = mpi2.w; mpi2.height = mpi2.h;
   if (force_pbo && !(mpi->flags & MP_IMGFLAG_DIRECT) && !gl_bufferptr && get_image(&mpi2) == VO_TRUE) {
-    int bpp = mpi->imgfmt == IMGFMT_YV12 ? 8 : mpi->bpp;
+    int bpp = is_yuv ? 8 : mpi->bpp;
+    int xs, ys;
+    mp_get_chroma_shift(image_format, &xs, &ys);
     memcpy_pic(mpi2.planes[0], mpi->planes[0], mpi->w * bpp / 8, mpi->h, mpi2.stride[0], mpi->stride[0]);
-    if (mpi->imgfmt == IMGFMT_YV12) {
-      memcpy_pic(mpi2.planes[1], mpi->planes[1], mpi->w >> 1, mpi->h >> 1, mpi2.stride[1], mpi->stride[1]);
-      memcpy_pic(mpi2.planes[2], mpi->planes[2], mpi->w >> 1, mpi->h >> 1, mpi2.stride[2], mpi->stride[2]);
+    if (is_yuv) {
+      memcpy_pic(mpi2.planes[1], mpi->planes[1], mpi->w >> xs, mpi->h >> ys, mpi2.stride[1], mpi->stride[1]);
+      memcpy_pic(mpi2.planes[2], mpi->planes[2], mpi->w >> xs, mpi->h >> ys, mpi2.stride[2], mpi->stride[2]);
     }
     if (ati_hack) { // since we have to do a full upload we need to clear the borders
       clear_border(mpi2.planes[0], mpi->w * bpp / 8, mpi2.stride[0], mpi->h, mpi2.height, 0);
-      if (mpi->imgfmt == IMGFMT_YV12) {
-        clear_border(mpi2.planes[1], mpi->w >> 1, mpi2.stride[1], mpi->h >> 1, mpi2.height >> 1, 128);
-        clear_border(mpi2.planes[2], mpi->w >> 1, mpi2.stride[2], mpi->h >> 1, mpi2.height >> 1, 128);
+      if (is_yuv) {
+        clear_border(mpi2.planes[1], mpi->w >> xs, mpi2.stride[1], mpi->h >> ys, mpi2.height >> ys, 128);
+        clear_border(mpi2.planes[2], mpi->w >> xs, mpi2.stride[2], mpi->h >> ys, mpi2.height >> ys, 128);
       }
     }
     mpi = &mpi2;
@@ -898,7 +915,9 @@ static uint32_t draw_image(mp_image_t *mpi) {
   }
   glUploadTex(gl_target, gl_format, gl_type, planes[0], stride[0],
               mpi->x, mpi->y, w, h, slice);
-  if (mpi->imgfmt == IMGFMT_YV12) {
+  if (is_yuv) {
+    int xs, ys;
+    mp_get_chroma_shift(image_format, &xs, &ys);
     if ((mpi->flags & MP_IMGFLAG_DIRECT) && !(mpi->flags & MP_IMGFLAG_COMMON_PLANE)) {
       BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer_uv[0]);
       UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
@@ -906,7 +925,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
     }
     ActiveTexture(GL_TEXTURE1);
     glUploadTex(gl_target, gl_format, gl_type, planes[1], stride[1],
-                mpi->x / 2, mpi->y / 2, w / 2, h / 2, slice);
+                mpi->x >> xs, mpi->y >> ys, w >> xs, h >> ys, slice);
     if ((mpi->flags & MP_IMGFLAG_DIRECT) && !(mpi->flags & MP_IMGFLAG_COMMON_PLANE)) {
       BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer_uv[1]);
       UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
@@ -914,7 +933,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
     }
     ActiveTexture(GL_TEXTURE2);
     glUploadTex(gl_target, gl_format, gl_type, planes[2], stride[2],
-                mpi->x / 2, mpi->y / 2, w / 2, h / 2, slice);
+                mpi->x >> xs, mpi->y >> ys, w >> xs, h >> ys, slice);
     ActiveTexture(GL_TEXTURE0);
   }
   if (mpi->flags & MP_IMGFLAG_DIRECT) {
@@ -942,7 +961,8 @@ query_format(uint32_t format)
       caps |= VFCAP_OSD | VFCAP_EOSD | (scaled_osd ? 0 : VFCAP_EOSD_UNSCALED);
     if (format == IMGFMT_RGB24 || format == IMGFMT_RGBA)
         return caps;
-    if (use_yuv && format == IMGFMT_YV12)
+    if (use_yuv && mp_get_chroma_shift(format, NULL, NULL) &&
+        (IMGFMT_IS_YUVP16_NE(format) || !IMGFMT_IS_YUVP16(format)))
         return caps;
     // HACK, otherwise we get only b&w with some filters (e.g. -vf eq)
     // ideally MPlayer should be fixed instead not to use Y800 when it has the choice
@@ -969,17 +989,24 @@ uninit(void)
   uninit_mpglcontext(&glctx);
 }
 
+static int valid_csp(void *p)
+{
+  int *csp = p;
+  return *csp >= -1 && *csp < MP_CSP_COUNT;
+}
+
 static const opt_t subopts[] = {
   {"manyfmts",     OPT_ARG_BOOL, &many_fmts,    NULL},
   {"osd",          OPT_ARG_BOOL, &use_osd,      NULL},
   {"scaled-osd",   OPT_ARG_BOOL, &scaled_osd,   NULL},
   {"aspect",       OPT_ARG_BOOL, &use_aspect,   NULL},
   {"ycbcr",        OPT_ARG_BOOL, &use_ycbcr,    NULL},
-  {"slice-height", OPT_ARG_INT,  &slice_height, (opt_test_f)int_non_neg},
-  {"rectangle",    OPT_ARG_INT,  &use_rectangle,(opt_test_f)int_non_neg},
-  {"yuv",          OPT_ARG_INT,  &use_yuv,      (opt_test_f)int_non_neg},
-  {"lscale",       OPT_ARG_INT,  &lscale,       (opt_test_f)int_non_neg},
-  {"cscale",       OPT_ARG_INT,  &cscale,       (opt_test_f)int_non_neg},
+  {"slice-height", OPT_ARG_INT,  &slice_height, int_non_neg},
+  {"rectangle",    OPT_ARG_INT,  &use_rectangle,int_non_neg},
+  {"yuv",          OPT_ARG_INT,  &use_yuv,      int_non_neg},
+  {"colorspace",   OPT_ARG_INT,  &colorspace,   valid_csp},
+  {"lscale",       OPT_ARG_INT,  &lscale,       int_non_neg},
+  {"cscale",       OPT_ARG_INT,  &cscale,       int_non_neg},
   {"filter-strength", OPT_ARG_FLOAT, &filter_strength, NULL},
   {"ati-hack",     OPT_ARG_BOOL, &ati_hack,     NULL},
   {"force-pbo",    OPT_ARG_BOOL, &force_pbo,    NULL},
@@ -1008,6 +1035,7 @@ static int preinit(const char *arg)
     use_aspect = 1;
     use_ycbcr = 0;
     use_yuv = 0;
+    colorspace = -1;
     lscale = 0;
     cscale = 0;
     filter_strength = 0.5;
@@ -1063,6 +1091,13 @@ static int preinit(const char *arg)
               "    4: use fragment program with gamma correction via lookup.\n"
               "    5: use ATI-specific method (for older cards).\n"
               "    6: use lookup via 3D texture.\n"
+	      "  colorspace=<n>\n"
+              "    0: MPlayer's default YUV to RGB conversion\n"
+              "    1: YUV to RGB according to BT.601\n"
+              "    2: YUV to RGB according to BT.709\n"
+              "    3: YUV to RGB according to SMPT-240M\n"
+              "    4: YUV to RGB according to EBU\n"
+              "    5: XYZ to RGB\n"
               "  lscale=<n>\n"
               "    0: use standard bilinear scaling for luma.\n"
               "    1: use improved bicubic scaling for luma.\n"
@@ -1170,7 +1205,7 @@ static int control(uint32_t request, void *data)
     resize(vo_dwidth, vo_dheight);
     return VO_TRUE;
   case VOCTRL_GET_EQUALIZER:
-    if (image_format == IMGFMT_YV12) {
+    if (is_yuv) {
       struct voctrl_get_equalizer_args *args = data;
       int i;
       for (i = 0; eq_map[i].name; i++)
@@ -1182,7 +1217,7 @@ static int control(uint32_t request, void *data)
     }
     break;
   case VOCTRL_SET_EQUALIZER:
-    if (image_format == IMGFMT_YV12) {
+    if (is_yuv) {
       struct voctrl_set_equalizer_args *args = data;
       int i;
       for (i = 0; eq_map[i].name; i++)

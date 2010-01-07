@@ -148,7 +148,7 @@ static int init(int rate, int channels, int format, int flags)
 
     const opt_t subopts[] = {
         {"share", OPT_ARG_BOOL, &fShare, NULL},
-        {"bufsize", OPT_ARG_INT, &nDartSamples, (opt_test_f)int_non_neg},
+        {"bufsize", OPT_ARG_INT, &nDartSamples, int_non_neg},
         {NULL}
     };
 

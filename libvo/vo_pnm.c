@@ -128,7 +128,7 @@ static int preinit(const char *arg)
         {"ascii",       OPT_ARG_BOOL,   &ascii_mode,    NULL},
         {"outdir",      OPT_ARG_MSTRZ,  &pnm_outdir,    NULL},
         {"subdirs",     OPT_ARG_MSTRZ,  &pnm_subdirs,   NULL},
-        {"maxfiles",    OPT_ARG_INT,    &pnm_maxfiles,  (opt_test_f)int_pos},
+        {"maxfiles",    OPT_ARG_INT,    &pnm_maxfiles,  int_pos},
         {NULL, 0, NULL, NULL}
     };
     const char *info_message = NULL;

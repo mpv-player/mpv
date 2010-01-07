@@ -38,8 +38,8 @@ typedef struct strarg_s
 } strarg_t;
 
 
-int int_non_neg( int * i );
-int int_pos( int * i );
+int int_non_neg(void *iptr);
+int int_pos(void *iptr);
 
 int strargcmp(strarg_t *arg, const char *str);
 int strargcasecmp(strarg_t *arg, char *str);

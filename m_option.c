@@ -1024,9 +1024,20 @@ static struct {
   const char* name;
   unsigned int fmt;
 } mp_imgfmt_list[] = {
+  {"444p16le", IMGFMT_444P16_LE},
+  {"444p16be", IMGFMT_444P16_BE},
+  {"422p16le", IMGFMT_422P16_LE},
+  {"422p16be", IMGFMT_422P16_BE},
+  {"420p16le", IMGFMT_420P16_LE},
+  {"420p16be", IMGFMT_420P16_BE},
+  {"444p16", IMGFMT_444P16},
+  {"422p16", IMGFMT_422P16},
+  {"420p16", IMGFMT_420P16},
+  {"420a", IMGFMT_420A},
   {"444p", IMGFMT_444P},
   {"422p", IMGFMT_422P},
   {"411p", IMGFMT_411P},
+  {"440p", IMGFMT_440P},
   {"yuy2", IMGFMT_YUY2},
   {"uyvy", IMGFMT_UYVY},
   {"yvu9", IMGFMT_YVU9},
