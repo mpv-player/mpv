@@ -434,6 +434,8 @@ DECLARE_INTERFACE(IAMCrossbar)
     STDMETHOD(get_CrossbarPinInfo) (THIS_ BOOL, long, long *, long *);
 };
 
+#ifndef __IPropertyBag_INTERFACE_DEFINED__
+#define __IPropertyBag_INTERFACE_DEFINED__
 #undef INTERFACE
 #define INTERFACE IPropertyBag
 DECLARE_INTERFACE(IPropertyBag)
@@ -444,6 +446,7 @@ DECLARE_INTERFACE(IPropertyBag)
     STDMETHOD(Read) (THIS_ LPCOLESTR, LPVARIANT, LPERRORLOG);
     STDMETHOD(Write) (THIS_ LPCOLESTR, LPVARIANT);
 };
+#endif
 
 #undef INTERFACE
 #define INTERFACE IAMStreamConfig
@@ -678,6 +681,19 @@ DECLARE_INTERFACE(IVideoWindow)
     STDMETHOD(IsCursorHidden) (THIS_ long *);
 };
 
+#ifndef DECLARE_ENUMERATOR_
+#define DECLARE_ENUMERATOR_(I,T) \
+    DECLARE_INTERFACE_(I,IUnknown) \
+    { \
+        STDMETHOD(QueryInterface)(I*, REFIID,PVOID*); \
+        STDMETHOD_(ULONG,AddRef)(I*); \
+        STDMETHOD_(ULONG,Release)(I*); \
+        STDMETHOD(Next)(I*, ULONG,T*,ULONG*); \
+        STDMETHOD(Skip)(I*, ULONG); \
+        STDMETHOD(Reset)(I*); \
+        STDMETHOD(Clone)(I*, I**); \
+    }
+#endif
 DECLARE_ENUMERATOR_(IEnumFilters, LPBASEFILTER);
 DECLARE_ENUMERATOR_(IEnumPins, LPPIN);
 DECLARE_ENUMERATOR_(IEnumMediaTypes, AM_MEDIA_TYPE *);
