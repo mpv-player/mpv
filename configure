@@ -334,6 +334,7 @@ Video output:
   --enable-dhahelper       enable VIDIX dhahelper support
   --enable-svgalib_helper  enable VIDIX svgalib_helper support
   --enable-gl              enable OpenGL video output [autodetect]
+  --disable-matrixview     disable OpenGL MatrixView video output [autodetect]
   --enable-dga2            enable DGA 2 support [autodetect]
   --enable-dga1            enable DGA 1 support [autodetect]
   --enable-vesa            enable VESA video output [autodetect]
@@ -537,6 +538,7 @@ _md5sum=yes
 _yuv4mpeg=yes
 _gif=auto
 _gl=auto
+matrixview=yes
 _ggi=auto
 _ggiwmh=auto
 _aa=auto
@@ -890,6 +892,8 @@ for ac_option do
   --disable-gif)	_gif=no		;;
   --enable-gl)		_gl=yes		;;
   --disable-gl)		_gl=no		;;
+  --enable-matrixview)  matrixview=yes ;;
+  --disable-matrixview) matrixview=no  ;;
   --enable-ggi)		_ggi=yes	;;
   --disable-ggi)	_ggi=no		;;
   --enable-ggiwmh)	_ggiwmh=yes	;;
@@ -4488,6 +4492,19 @@ else
   _novomodules="xvidix $_novomodules"
 fi
 
+echocheck "MatrixView"
+if test "$_gl" = no ; then
+  matrixview=no
+fi
+if test "$matrixview" = yes ; then
+  _vomodules="matrixview $_vomodules"
+  def_matrixview='#define CONFIG_MATRIXVIEW 1'
+else
+  _novomodules="matrixview $_novomodules"
+  def_matrixview='#undef CONFIG_MATRIXVIEW'
+fi
+echores "$matrixview"
+
 echocheck "GGI"
 if test "$_ggi" = auto ; then
   cat > $TMPC << EOF
@@ -5039,6 +5056,9 @@ echores "$_vesa"
 
 
 echocheck "SDL"
+_inc_tmp=""
+_ld_tmp=""
+def_sdl_sdl_h="#undef CONFIG_SDL_SDL_H"
 if test -z "$_sdlconfig" ; then
   if ( sdl-config --version ) >>"$TMPLOG" 2>&1 ; then
     _sdlconfig="sdl-config"
@@ -5050,15 +5070,40 @@ if test -z "$_sdlconfig" ; then
 fi
 if test "$_sdl" = auto || test "$_sdl" = yes ; then
   cat > $TMPC << EOF
+#ifdef CONFIG_SDL_SDL_H
+#include <SDL/SDL.h>
+#else
 #include <SDL.h>
+#endif
+#ifndef __APPLE__
+// we allow SDL hacking our main() only on OSX
+#undef main
+#endif
 int main(int argc, char *argv[]) {
   SDL_Init(SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE);
   return 0;
 }
 EOF
   _sdl=no
-  if "$_sdlconfig" --version >>"$TMPLOG" 2>&1 ; then
-    if cc_check $($_sdlconfig --cflags) $($_sdlconfig --libs) >>"$TMPLOG" 2>&1 ; then
+  for _ld_tmp in "-lSDL" "-lSDL -lpthread" "-lSDL -lwinmm -lgdi32" ; do
+    if cc_check -DCONFIG_SDL_SDL_H $_inc_tmp $_ld_tmp ; then
+      _sdl=yes
+      def_sdl_sdl_h="#define CONFIG_SDL_SDL_H 1"
+      break
+    fi
+  done
+  if test "$_sdl" = no && "$_sdlconfig" --version >>"$TMPLOG" 2>&1 ; then
+    if cygwin ; then
+      _inc_tmp="$($_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/)"
+      _ld_tmp="$($_sdlconfig --libs | cut -d " " -f 1,4,6 | sed s/no-cygwin/cygwin/)"
+    elif mingw32 ; then
+      _inc_tmp=$($_sdlconfig --cflags | sed s/-Dmain=SDL_main//)
+      _ld_tmp=$($_sdlconfig --libs | sed -e s/-mwindows// -e s/-lmingw32//)
+    else
+      _inc_tmp="$($_sdlconfig --cflags)"
+      _ld_tmp="$($_sdlconfig --libs)"
+    fi
+    if cc_check $_inc_tmp $_ld_tmp >>"$TMPLOG" 2>&1 ; then
       _sdlversion=$($_sdlconfig --version | sed 's/[^0-9]//g')
         if test "$_sdlversion" -gt 116 ; then
           if test "$_sdlversion" -lt 121 ; then
@@ -5073,16 +5118,8 @@ EOF
 fi
 if test "$_sdl" = yes ; then
   def_sdl='#define CONFIG_SDL 1'
-  if cygwin ; then
-    libs_mplayer="$libs_mplayer $($_sdlconfig --libs | cut -d " " -f 1,4,6 | sed s/no-cygwin/cygwin/)"
-    extra_cflags="$extra_cflags $($_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/)"
-  elif mingw32 ; then
-    libs_mplayer="$libs_mplayer $($_sdlconfig --libs | sed -e s/-mwindows// -e s/-lmingw32//)"
-    extra_cflags="$extra_cflags $($_sdlconfig --cflags | sed s/-Dmain=SDL_main//)"
-  else
-    libs_mplayer="$libs_mplayer $($_sdlconfig --libs)"
-    extra_cflags="$extra_cflags $($_sdlconfig --cflags | sed s/-D_GNU_SOURCE=1//)"
-  fi
+  extra_cflags="$extra_cflags $_inc_tmp"
+  libs_mplayer="$libs_mplayer $_ld_tmp"
   _vomodules="sdl $_vomodules"
   _aomodules="sdl $_aomodules"
   _res_comment="using $_sdlconfig"
@@ -6017,7 +6054,7 @@ int main(void) {
 }
 EOF
   _fontconfig=no
-  for _ld_tmp in "" "-lexpat -lfreetype" "-lexpat -lfreetype -lz" ; do
+  for _ld_tmp in "" "-lexpat -lfreetype" "-lexpat -lfreetype -lz" "-lexpat -lfreetype -lz -liconv" ; do
     _ld_tmp="-lfontconfig $_ld_tmp"
     cc_check $_ld_tmp && _fontconfig=yes && extra_ldflags="$extra_ldflags $_ld_tmp" && break
   done
@@ -6054,8 +6091,9 @@ echores "$_ass"
 
 
 echocheck "fribidi with charsets"
+_inc_tmp=""
+_ld_tmp=""
 if test "$_fribidi" = auto ; then
-    if ( $_fribidiconfig --version ) >/dev/null 2>&1 ; then
 	cat > $TMPC << EOF
 #include <stdio.h>
 /* workaround for fribidi 0.10.4 and below */
@@ -6070,15 +6108,19 @@ int main(void) {
 }
 EOF
 	_fribidi=no
-	cc_check $($_fribidiconfig --cflags) $($_fribidiconfig --libs) && _fribidi=yes
-    else
-	_fribidi=no
-    fi
+	_inc_tmp=""
+	_ld_tmp="-lfribidi"
+	cc_check $_inc_tmp $_ld_tmp && _fribidi=yes
+	if test "$_fribidi" = no ; then
+	  _inc_tmp="$($_fribidiconfig --cflags)"
+	  _ld_tmp="$($_fribidiconfig --libs)"
+	  cc_check $_inc_tmp $_ld_tmp && _fribidi=yes
+	fi
 fi
 if test "$_fribidi" = yes ; then
     def_fribidi='#define CONFIG_FRIBIDI 1'
-    extra_cflags="$extra_cflags $($_fribidiconfig --cflags)"
-    extra_ldflags="$extra_ldflags $($_fribidiconfig --libs)"
+    extra_cflags="$extra_cflags $_inc_tmp"
+    extra_ldflags="$extra_ldflags $_ld_tmp"
 else
     def_fribidi='#undef CONFIG_FRIBIDI'
 fi
@@ -7841,6 +7883,7 @@ GGI = $_ggi
 GL = $_gl
 GL_WIN32 = $_gl_win32
 GL_X11 = $_gl_x11
+MATRIXVIEW = $matrixview
 HAVE_POSIX_SELECT = $_posix_select
 HAVE_SYS_MMAN_H = $_mman
 IVTV = $_ivtv
@@ -8314,6 +8357,7 @@ $def_gif_tvt_hack
 $def_gl
 $def_gl_win32
 $def_gl_x11
+$def_matrixview
 $def_ivtv
 $def_jpeg
 $def_kva
@@ -8325,6 +8369,7 @@ $def_pnm
 $def_quartz
 $def_s3fb
 $def_sdl
+$def_sdl_sdl_h
 $def_sdlbuggy
 $def_svga
 $def_tdfxfb

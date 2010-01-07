@@ -1140,7 +1140,11 @@ void init_vo_spudec(struct MPContext *mpctx)
  * will be done automatically by replacing our main() if we include SDL.h.
  */
 #if defined(__APPLE__) && defined(CONFIG_SDL)
+#ifdef CONFIG_SDL_SDL_H
+#include <SDL/SDL.h>
+#else
 #include <SDL.h>
+#endif
 #endif
 
 /**
