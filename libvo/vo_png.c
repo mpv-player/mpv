@@ -35,6 +35,7 @@
 #include "video_out_internal.h"
 #include "subopt-helper.h"
 #include "libavcodec/avcodec.h"
+#include "fmt-conversion.h"
 
 static const vo_info_t info =
 {
