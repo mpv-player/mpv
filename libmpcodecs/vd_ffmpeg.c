@@ -207,6 +207,8 @@ void mp_msp_av_log_callback(void *ptr, int level, const char *fmt, va_list vl)
 
 static void set_format_params(struct AVCodecContext *avctx, enum PixelFormat fmt){
     int imgfmt;
+    if (fmt == PIX_FMT_NONE)
+        return;
     imgfmt = pixfmt2imgfmt(fmt);
     if (IMGFMT_IS_XVMC(imgfmt) || IMGFMT_IS_VDPAU(imgfmt)) {
         sh_video_t *sh     = avctx->opaque;
