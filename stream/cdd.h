@@ -9,6 +9,7 @@
 #include <cdio/cdda.h>
 #include <cdio/paranoia.h>
 #endif
+#include <sys/types.h>
 
 typedef struct {
 	char cddb_hello[1024];

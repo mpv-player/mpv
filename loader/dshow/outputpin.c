@@ -3,8 +3,8 @@
  * http://svn.mplayerhq.hu/mplayer/trunk/
  */
 
-#include "wine/winerror.h"
-#include "wine/windef.h"
+#include "loader/wine/winerror.h"
+#include "loader/wine/windef.h"
 #include "outputpin.h"
 #include "mediatype.h"
 #include <stdio.h>

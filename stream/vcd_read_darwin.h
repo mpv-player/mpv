@@ -1,6 +1,8 @@
 #ifndef MPLAYER_VCD_READ_DARWIN_H
 #define MPLAYER_VCD_READ_DARWIN_H
 
+#define _XOPEN_SOURCE 500
+
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>

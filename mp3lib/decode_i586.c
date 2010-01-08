@@ -31,7 +31,7 @@
 */
 #include "config.h"
 #include "mangle.h"
-#define real float /* ugly - but only way */
+#include "mpg123.h"
 
 static int attribute_used buffs[1088]={0};
 static int attribute_used bo=1;

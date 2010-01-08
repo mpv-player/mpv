@@ -4,6 +4,11 @@
  * $Id$
  */
 
+#ifndef MPLAYER_MP3LIB_L2TABLES_H
+#define MPLAYER_MP3LIB_L2TABLES_H
+
+#include "mpg123.h"
+
 /*
  * Layer 2 Alloc tables ..
  * most other tables are calculated on program start (which is (of course)
@@ -157,3 +162,5 @@ static struct al_table alloc_4[] = {
     {2,0},{5,3},{7,5},{10,9},
     {2,0},{5,3},{7,5},{10,9},
     {2,0},{5,3},{7,5},{10,9}  };
+
+#endif /* MPLAYER_MP3LIB_L2TABLES_H */

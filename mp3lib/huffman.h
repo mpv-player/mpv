@@ -6,6 +6,9 @@
  * smaller tables are often the part of a bigger table
  */
 
+#ifndef MPLAYER_MP3LIB_HUFFMAN_H
+#define MPLAYER_MP3LIB_HUFFMAN_H
+
 struct newhuff
 {
   unsigned int linbits;
@@ -328,3 +331,5 @@ static struct newhuff htc[] =
  { /* 1 , 1 , */ 0 , tab_c0 } ,
  { /* 1 , 1 , */ 0 , tab_c1 }
 };
+
+#endif /* MPLAYER_MP3LIB_HUFFMAN_H */

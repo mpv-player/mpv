@@ -4,6 +4,8 @@
  * $Id$
  */
 
+#include "mpg123.h"
+
 real mp3lib_decwin[(512+32)];
 static real cos64[32], cos32[16], cos16[8], cos8[4], cos4[2];
 real *mp3lib_pnts[]={ cos64,cos32,cos16,cos8,cos4 };

@@ -11,7 +11,7 @@
  *
  */
 
-//#include "mpg123.h"
+#include "mpg123.h"
 #include "l2tables.h"
 
 static int grp_3tab[32 * 3] = { 0, };   /* used: 27 */

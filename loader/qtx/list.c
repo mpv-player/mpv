@@ -8,7 +8,7 @@
 
 #include "qtxsdk/components.h"
 #include "qtxsdk/select.h"
-#include "ldt_keeper.h"
+#include "loader/ldt_keeper.h"
 
 char* get_path(const char* x){  return strdup(x);}
 void* LoadLibraryA(char* name);

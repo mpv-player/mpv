@@ -1,5 +1,8 @@
 /* MP3 Player Library 2.0      (C) 1999 A'rpi/Astral&ESP-team  */
 
+#ifndef MPLAYER_MP3LIB_MP3_H
+#define MPLAYER_MP3LIB_MP3_H
+
 /* decoder level: */
 #ifdef CONFIG_FAKE_MONO
 void MP3_Init(int fakemono);
@@ -33,3 +36,4 @@ void MP3_Play(void);
 void MP3_Stop(void);
 void MP3_CloseDevice(void);
 
+#endif /* MPLAYER_MP3LIB_MP3_H */

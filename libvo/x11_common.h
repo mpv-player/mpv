@@ -19,6 +19,7 @@
 #ifndef MPLAYER_X11_COMMON_H
 #define MPLAYER_X11_COMMON_H
 
+#include <stdint.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 

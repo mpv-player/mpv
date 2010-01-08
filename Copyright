@@ -1,11 +1,16 @@
 MPlayer was originally written by Árpád Gereöffy and has been extended and
 worked on by many more since then, see the AUTHORS file for an (incomplete)
-list. You are free to use it under the terms of the GNU General Public License,
-as described in the LICENSE file.
+list. MPlayer as a whole is copyrighted by the MPlayer team. Individual
+copyright notices can be found in file headers.
 
-MPlayer as a whole is copyrighted by the MPlayer team. Individual copyright
-notices can be found in the file headers. Furthermore, MPlayer includes code
-from several external sources:
+Most files in MPlayer are licensed under the GNU General Public License,
+version 2 with an explicit "or later" clause or a compatible license. An
+exception is the file libmpdemux/demux_ty_osd.c, which is version 2 only.
+Thus MPlayer as a whole can be redistributed under the terms of the GNU
+General Public License, version 2, see the LICENSE file for details.
+
+MPlayer includes code from several external sources. General information and
+license details are listed below:
 
 Name:       FFmpeg
 Version:    Subversion HEAD

@@ -17,6 +17,8 @@
 extern "C" {
 #endif
 
+#include "wine/winbase.h"
+
 void free_registry(void);
 
 long __stdcall RegOpenKeyExA(long key, const char* subkey, long reserved,

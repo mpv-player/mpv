@@ -18,7 +18,7 @@
  *   COPYING: you may use this source under LGPL terms!
  */
 
-//#include "mpg123.h"
+#include "mpg123.h"
 
 static void I_step_one(unsigned int balloc[], unsigned int scale_index[2][SBLIMIT],struct frame *fr)
 {

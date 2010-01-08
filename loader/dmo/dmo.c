@@ -5,12 +5,12 @@
 
 #include "config.h"
 #include "DMO_Filter.h"
-#include "drv.h"
-#include "com.h"
+#include "loader/drv.h"
+#include "loader/com.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "win32.h" // printf macro
+#include "loader/win32.h" // printf macro
 
 void trapbug(void);
 typedef long STDCALL (*GETCLASS) (const GUID*, const GUID*, void**);

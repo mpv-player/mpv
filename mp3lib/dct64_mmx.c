@@ -5,7 +5,7 @@
 */
 #include "config.h"
 #include "mangle.h"
-#define real float /* ugly - but only way */
+#include "mpg123.h"
 
 void dct64_MMX(short *a,short *b,real *c)
 {

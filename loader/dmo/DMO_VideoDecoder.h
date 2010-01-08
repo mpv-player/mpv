@@ -1,6 +1,9 @@
 #ifndef MPLAYER_DMO_VIDEODECODER_H
 #define MPLAYER_DMO_VIDEODECODER_H
 
+#include "loader/com.h"
+#include "loader/wine/vfw.h"
+
 typedef struct DMO_VideoDecoder DMO_VideoDecoder;
 
 int DMO_VideoDecoder_GetCapabilities(DMO_VideoDecoder *this);

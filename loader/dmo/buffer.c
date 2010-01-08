@@ -1,7 +1,7 @@
 #include "DMO_Filter.h"
 
-#include "wine/winerror.h"
-#include "wine/windef.h"
+#include "loader/wine/winerror.h"
+#include "loader/wine/windef.h"
 
 #include <stdio.h>
 #include <string.h>
