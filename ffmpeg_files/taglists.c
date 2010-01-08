@@ -101,6 +101,7 @@ const struct mp_AVCodecTag mp_ff_codec_bmp_tags[] = {
     { CODEC_ID_DVVIDEO,      MKTAG('c', 'd', 'v', 'c') }, /* Canopus DV */
     { CODEC_ID_DVVIDEO,      MKTAG('C', 'D', 'V', 'H') }, /* Canopus DV */
     { CODEC_ID_DVVIDEO,      MKTAG('d', 'v', 'c', ' ') },
+    { CODEC_ID_DVVIDEO,      MKTAG('d', 'v', 'c', 's') },
     { CODEC_ID_DVVIDEO,      MKTAG('d', 'v', 'h', '1') },
     { CODEC_ID_MPEG1VIDEO,   MKTAG('m', 'p', 'g', '1') },
     { CODEC_ID_MPEG1VIDEO,   MKTAG('m', 'p', 'g', '2') },
@@ -115,9 +116,12 @@ const struct mp_AVCodecTag mp_ff_codec_bmp_tags[] = {
     { CODEC_ID_MPEG2VIDEO,   MKTAG('D', 'V', 'R', ' ') },
     { CODEC_ID_MPEG2VIDEO,   MKTAG('M', 'M', 'E', 'S') },
     { CODEC_ID_MPEG2VIDEO,   MKTAG('L', 'M', 'P', '2') }, /* Lead MPEG2 in avi */
+    { CODEC_ID_MPEG2VIDEO,   MKTAG('s', 'l', 'i', 'f') },
+    { CODEC_ID_MPEG2VIDEO,   MKTAG('E', 'M', '2', 'V') },
     { CODEC_ID_MJPEG,        MKTAG('M', 'J', 'P', 'G') },
     { CODEC_ID_MJPEG,        MKTAG('L', 'J', 'P', 'G') },
     { CODEC_ID_MJPEG,        MKTAG('d', 'm', 'b', '1') },
+    { CODEC_ID_MJPEG,        MKTAG('m', 'j', 'p', 'a') },
     { CODEC_ID_LJPEG,        MKTAG('L', 'J', 'P', 'G') },
     { CODEC_ID_MJPEG,        MKTAG('J', 'P', 'G', 'L') }, /* Pegasus lossless JPEG */
     { CODEC_ID_JPEGLS,       MKTAG('M', 'J', 'L', 'S') }, /* JPEG-LS custom FOURCC for avi - encoder */
@@ -129,6 +133,12 @@ const struct mp_AVCodecTag mp_ff_codec_bmp_tags[] = {
     { CODEC_ID_MJPEG,        MKTAG('Q', 'I', 'V', 'G') },
     { CODEC_ID_MJPEG,        MKTAG('S', 'L', 'M', 'J') }, /* SL M-JPEG */
     { CODEC_ID_MJPEG,        MKTAG('C', 'J', 'P', 'G') }, /* Creative Webcam JPEG */
+    { CODEC_ID_MJPEG,        MKTAG('I', 'J', 'L', 'V') }, /* Intel JPEG Library Video Codec */
+    { CODEC_ID_MJPEG,        MKTAG('M', 'V', 'J', 'P') }, /* Midvid JPEG Video Codec */
+    { CODEC_ID_MJPEG,        MKTAG('A', 'V', 'I', '1') },
+    { CODEC_ID_MJPEG,        MKTAG('A', 'V', 'I', '2') },
+    { CODEC_ID_MJPEG,        MKTAG('M', 'T', 'S', 'J') },
+    { CODEC_ID_MJPEG,        MKTAG('Z', 'J', 'P', 'G') }, /* Paradigm Matrix M-JPEG Codec */
     { CODEC_ID_HUFFYUV,      MKTAG('H', 'F', 'Y', 'U') },
     { CODEC_ID_FFVHUFF,      MKTAG('F', 'F', 'V', 'H') },
     { CODEC_ID_CYUV,         MKTAG('C', 'Y', 'U', 'V') },
@@ -137,12 +147,23 @@ const struct mp_AVCodecTag mp_ff_codec_bmp_tags[] = {
     { CODEC_ID_RAWVIDEO,     MKTAG('I', '4', '2', '0') },
     { CODEC_ID_RAWVIDEO,     MKTAG('Y', 'U', 'Y', '2') },
     { CODEC_ID_RAWVIDEO,     MKTAG('Y', '4', '2', '2') },
+    { CODEC_ID_RAWVIDEO,     MKTAG('V', '4', '2', '2') },
+    { CODEC_ID_RAWVIDEO,     MKTAG('Y', 'U', 'N', 'V') },
+    { CODEC_ID_RAWVIDEO,     MKTAG('U', 'Y', 'N', 'V') },
+    { CODEC_ID_RAWVIDEO,     MKTAG('U', 'Y', 'N', 'Y') },
+    { CODEC_ID_RAWVIDEO,     MKTAG('u', 'y', 'v', '1') },
+    { CODEC_ID_RAWVIDEO,     MKTAG('2', 'V', 'u', '1') },
+    { CODEC_ID_RAWVIDEO,     MKTAG('2', 'v', 'u', 'y') },
+    { CODEC_ID_RAWVIDEO,     MKTAG('P', '4', '2', '2') },
     { CODEC_ID_RAWVIDEO,     MKTAG('Y', 'V', '1', '2') },
     { CODEC_ID_RAWVIDEO,     MKTAG('U', 'Y', 'V', 'Y') },
+    { CODEC_ID_RAWVIDEO,     MKTAG('V', 'Y', 'U', 'Y') },
     { CODEC_ID_RAWVIDEO,     MKTAG('I', 'Y', 'U', 'V') },
     { CODEC_ID_RAWVIDEO,     MKTAG('Y', '8', '0', '0') },
     { CODEC_ID_RAWVIDEO,     MKTAG('H', 'D', 'Y', 'C') },
     { CODEC_ID_RAWVIDEO,     MKTAG('Y', 'V', 'U', '9') },
+    { CODEC_ID_FRWU,         MKTAG('F', 'R', 'W', 'U') },
+    { CODEC_ID_R210,         MKTAG('r', '2', '1', '0') },
     { CODEC_ID_V210,         MKTAG('v', '2', '1', '0') },
     { CODEC_ID_INDEO3,       MKTAG('I', 'V', '3', '1') },
     { CODEC_ID_INDEO3,       MKTAG('I', 'V', '3', '2') },
@@ -267,7 +288,7 @@ const struct mp_AVCodecTag mp_ff_codec_wav_tags[] = {
     { CODEC_ID_PCM_S16LE, MKTAG('R', 'A', 'W', 'A') },
     { CODEC_ID_MP3,       MKTAG('L', 'A', 'M', 'E') },
     { CODEC_ID_MP3,       MKTAG('M', 'P', '3', ' ') },
-    { 0, 0 },
+    { CODEC_ID_NONE,      0 },
 };
 
 static unsigned int ff_codec_get_tag(const struct mp_AVCodecTag *tags, int id)
