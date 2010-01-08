@@ -30,12 +30,12 @@
 #include "matrixview.h"
 #include "matrixview_font.h"
 
-static float matrix_contrast = 1.5;
+static float matrix_contrast   = 1.5;
 static float matrix_brightness = 1.0;
 
 // Settings for our light.  Try playing with these (or add more lights).
-static float Light_Ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-static float Light_Diffuse[] = { 1.2f, 1.2f, 1.2f, 1.0f };
+static float Light_Ambient[]  = { 0.1f, 0.1f, 0.1f, 1.0f };
+static float Light_Diffuse[]  = { 1.2f, 1.2f, 1.2f, 1.0f };
 static float Light_Position[] = { 2.0f, 2.0f, 0.0f, 1.0f };
 
 static const uint8_t flare[4][4] = {
@@ -134,7 +134,7 @@ static void draw_text(uint8_t *pic)
 
     for (y = _text_y; y > -_text_y; y--) {
         for (x = -_text_x; x < _text_x; x++) {
-            c = text_light[p] - (text[p] >> 1);
+            c  = text_light[p] - (text[p] >> 1);
             c += pic_fade;
             if (c > 255)
                 c = 255;
@@ -167,7 +167,8 @@ static void draw_text(uint8_t *pic)
                 text_depth[p] /= 1.1;
 
             if (text_light[p] > 128 && text_light[p + text_x] < 10)
-                draw_illuminatedchar(text[p] + 1, x, y, text_depth[p] + bump_pic[p]);
+                draw_illuminatedchar(text[p] + 1, x, y,
+                                     text_depth[p] + bump_pic[p]);
 
             p++;
         }
@@ -182,7 +183,7 @@ static void draw_flares(void)
     for (y = _text_y; y > -_text_y; y--) {
         for (x = -_text_x; x < _text_x; x++) {
             if (text_light[p] > 128 && text_light[p + text_x] < 10)
-                 draw_flare(x, y, text_depth[p] + bump_pic[p]);
+                draw_flare(x, y, text_depth[p] + bump_pic[p]);
             p++;
         }
     }
@@ -249,12 +250,14 @@ static void make_text(void)
 
 static void ourBuildTextures(void)
 {
-    TexImage2D(GL_TEXTURE_2D, 0, 1, 128, 64, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, font_texture);
+    TexImage2D(GL_TEXTURE_2D, 0, 1, 128, 64, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
+               font_texture);
     TexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     TexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     BindTexture(GL_TEXTURE_2D, 1);
-    TexImage2D(GL_TEXTURE_2D, 0, 1, 4, 4, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, flare);
+    TexImage2D(GL_TEXTURE_2D, 0, 1, 4, 4, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
+               flare);
     TexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     TexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -309,7 +312,8 @@ void matrixview_reshape(int w, int h)
 }
 
 
-void matrixview_draw(int w, int h, double currentTime, float frameTime, uint8_t *data)
+void matrixview_draw(int w, int h, double currentTime, float frameTime,
+                     uint8_t *data)
 {
     Enable(GL_BLEND);
     Enable(GL_TEXTURE_2D);

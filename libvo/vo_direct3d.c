@@ -70,6 +70,10 @@ static struct global_priv {
                                     the movie's codec) */
     D3DFORMAT desktop_fmt;          /**< Desktop (screen) colorspace format.
                                     Usually XRGB */
+
+    HANDLE d3d9_dll;                /**< d3d9 Library HANDLE */
+    IDirect3D9 * (WINAPI *pDirect3DCreate9)(UINT); /**< pointer to Direct3DCreate9 function */
+
     LPDIRECT3D9        d3d_handle;  /**< Direct3D Handle */
     LPDIRECT3DDEVICE9  d3d_device;  /**< The Direct3D Adapter */
     IDirect3DSurface9 *d3d_surface; /**< Offscreen Direct3D Surface. MPlayer
@@ -441,7 +445,7 @@ static int reconfigure_d3d(void)
     IDirect3D9_Release(priv->d3d_handle);
 
     /* Initialize Direct3D from the beginning */
-    priv->d3d_handle = Direct3DCreate9(D3D_SDK_VERSION);
+    priv->d3d_handle = priv->pDirect3DCreate9(D3D_SDK_VERSION);
     if (!priv->d3d_handle) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Initializing Direct3D failed.\n");
         return 0;
@@ -670,7 +674,7 @@ static int preinit(const char *arg)
     priv = calloc(1, sizeof(struct global_priv));
     if (!priv) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Allocating private memory failed.\n");
-        return -1;
+        goto err_out;
     }
 
     /* FIXME
@@ -678,17 +682,29 @@ static int preinit(const char *arg)
        > an example of how to use it.
     */
 
-    priv->d3d_handle = Direct3DCreate9(D3D_SDK_VERSION);
+    priv->d3d9_dll = LoadLibraryA("d3d9.dll");
+    if (!priv->d3d9_dll) {
+        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Unable to dynamically load d3d9.dll\n");
+        goto err_out;
+    }
+
+    priv->pDirect3DCreate9 = (void *)GetProcAddress(priv->d3d9_dll, "Direct3DCreate9");
+    if (!priv->pDirect3DCreate9) {
+        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Unable to find entry point of Direct3DCreate9\n");
+        goto err_out;
+    }
+
+    priv->d3d_handle = priv->pDirect3DCreate9(D3D_SDK_VERSION);
     if (!priv->d3d_handle) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Initializing Direct3D failed.\n");
-        return -1;
+        goto err_out;
     }
 
     if (FAILED(IDirect3D9_GetAdapterDisplayMode(priv->d3d_handle,
                                                 D3DADAPTER_DEFAULT,
                                                 &disp_mode))) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Reading display mode failed.\n");
-        return -1;
+        goto err_out;
     }
 
     /* Store in priv->desktop_fmt the user desktop's colorspace. Usually XRGB. */
@@ -704,7 +720,7 @@ static int preinit(const char *arg)
                                         D3DDEVTYPE_HAL,
                                         &disp_caps))) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Reading display capabilities failed.\n");
-        return -1;
+        goto err_out;
     }
 
     /* Store relevant information reguarding caps of device */
@@ -729,10 +745,14 @@ static int preinit(const char *arg)
      */
     if (!vo_w32_init()) {
         mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Configuring onscreen window failed.\n");
-        return -1;
+        goto err_out;
     }
 
     return 0;
+
+err_out:
+    uninit();
+    return -1;
 }
 
 
@@ -859,6 +879,9 @@ static void uninit(void)
 
     uninit_d3d();
     vo_w32_uninit(); /* w32_common framework call */
+    if (priv->d3d9_dll)
+        FreeLibrary(priv->d3d9_dll);
+    priv->d3d9_dll = NULL;
     free(priv);
     priv = NULL;
 }

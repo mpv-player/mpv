@@ -291,7 +291,7 @@ static int draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
     dstStride[1]=
     dstStride[2]=dstStride[0]>>1;
     if(HAS_DGA()) dst[0] += y_offset*SCREEN_LINE_SIZE(PIXEL_SIZE())+x_offset*PIXEL_SIZE();
-    sws_scale_ordered(sws,image,stride,y,h,dst,dstStride);
+    sws_scale(sws,image,stride,y,h,dst,dstStride);
     flip_trigger = 1;
     return 0;
 }
@@ -436,7 +436,7 @@ static int draw_frame(uint8_t *src[])
 	else
 	    srcStride[0] = srcW*2;
 	if(HAS_DGA()) dst[0] += y_offset*SCREEN_LINE_SIZE(PIXEL_SIZE())+x_offset*PIXEL_SIZE();
-	sws_scale_ordered(sws,src,srcStride,0,srcH,dst,dstStride);
+	sws_scale(sws,src,srcStride,0,srcH,dst,dstStride);
 	flip_trigger=1;
     }
     return 0;
