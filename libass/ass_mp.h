@@ -29,7 +29,7 @@
 #else
 #include <ass/ass.h>
 #endif
-#if defined(LIBASS_VERSION) && LIBASS_VERSION >= 0x00908000
+#if defined(LIBASS_VERSION) && LIBASS_VERSION >= 0x00907010
 #define ass_library_t ASS_Library
 #define ass_track_t ASS_Track
 #define ass_track_s ASS_Track

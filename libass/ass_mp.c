@@ -240,7 +240,7 @@ void ass_configure_fonts(ass_renderer_t* priv) {
 	else if (font_fontconfig >= 0 && font_name) family = strdup(font_name);
 	else family = 0;
 
-#if defined(LIBASS_VERSION) && LIBASS_VERSION >= 0x00908000
+#if defined(LIBASS_VERSION) && LIBASS_VERSION >= 0x00907010
         ass_set_fonts(priv, path, family, font_fontconfig, NULL, 1);
 #else
 	if (font_fontconfig >= 0)
