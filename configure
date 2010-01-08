@@ -6223,8 +6223,8 @@ if test "$_ass" = auto ; then
     cat > $TMPC << EOF
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#if ((FREETYPE_MAJOR < 2) || (FREETYPE_MINOR < 1) || ((FREETYPE_MINOR == 1) && (FREETYPE_PATCH < 8)))
-#error "Need FreeType 2.1.8 or newer"
+#if ((FREETYPE_MAJOR < 2) || (FREETYPE_MINOR < 2) || ((FREETYPE_MINOR == 2) && (FREETYPE_PATCH < 1)))
+#error "Need FreeType 2.2.1 or newer"
 #endif
 int main(void) { return 0; }
 EOF
@@ -6232,7 +6232,7 @@ EOF
     cc_check $($_freetypeconfig --cflags) $($_freetypeconfig --libs) && _ass=yes
     if test "$_ass" = no ; then
         ass_internal=no
-        _res_comment="FreeType >= 2.1.8 needed"
+        _res_comment="FreeType >= 2.2.1 needed"
     elif test "$ass_internal" = no ; then
         _res_comment="external"
         extra_ldflags="$extra_ldflags -lass"
