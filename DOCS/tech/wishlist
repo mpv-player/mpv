@@ -113,7 +113,7 @@ Enhancements:
 
  * DXVA / DXVA2 -vo for Windows
 
-* GDI -vo for older windows versions
+ * GDI -vo for older windows versions
 
  * hardware MPEG encoding support (Ati cards)
 
