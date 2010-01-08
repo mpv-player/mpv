@@ -3281,7 +3281,7 @@ echocheck "dynamic loader"
 cat > $TMPC << EOF
 #include <stddef.h>
 #include <dlfcn.h>
-int main(void) { dlopen(NULL, 0); dlclose(NULL); dlsym(NULL, NULL); return 0; }
+int main(void) { dlopen("", 0); dlclose(NULL); dlsym(NULL, ""); return 0; }
 EOF
 _dl=no
 for _ld_tmp in "" "-ldl" ; do
@@ -3649,7 +3649,7 @@ cat > $TMPC << EOF
 #define _ISOC99_SOURCE
 #include <stdarg.h>
 #include <stdio.h>
-int main(void) { vsscanf(0, 0, 0); return 0; }
+int main(void) { va_list ap; vsscanf("foo", "bar", ap); return 0; }
 EOF
 _vsscanf=no
 cc_check && _vsscanf=yes
@@ -4042,7 +4042,7 @@ if test "$_directfb" = auto ; then
   _directfb=no
   cat > $TMPC <<EOF
 #include <directfb.h>
-int main(void) { IDirectFB *foo; DirectFBInit(0,0); return 0; }
+int main(void) { DirectFBInit(0, 0); return 0; }
 EOF
   for _inc_tmp in "" -I/usr/local/include/directfb \
       -I/usr/include/directfb -I/usr/local/include; do
@@ -4492,19 +4492,6 @@ else
   _novomodules="xvidix $_novomodules"
 fi
 
-echocheck "MatrixView"
-if test "$_gl" = no ; then
-  matrixview=no
-fi
-if test "$matrixview" = yes ; then
-  _vomodules="matrixview $_vomodules"
-  def_matrixview='#define CONFIG_MATRIXVIEW 1'
-else
-  _novomodules="matrixview $_novomodules"
-  def_matrixview='#undef CONFIG_MATRIXVIEW'
-fi
-echores "$matrixview"
-
 echocheck "GGI"
 if test "$_ggi" = auto ; then
   cat > $TMPC << EOF
@@ -4851,6 +4838,20 @@ else
   _novomodules="opengl $_novomodules"
 fi
 echores "$_gl"
+
+
+echocheck "MatrixView"
+if test "$_gl" = no ; then
+  matrixview=no
+fi
+if test "$matrixview" = yes ; then
+  _vomodules="matrixview $_vomodules"
+  def_matrixview='#define CONFIG_MATRIXVIEW 1'
+else
+  _novomodules="matrixview $_novomodules"
+  def_matrixview='#undef CONFIG_MATRIXVIEW'
+fi
+echores "$matrixview"
 
 
 echocheck "PNG support"
@@ -6093,6 +6094,7 @@ _ld_tmp=""
 if test "$_fribidi" = auto ; then
     cat > $TMPC << EOF
 #include <stdio.h>
+#include <stdlib.h>
 /* workaround for fribidi 0.10.4 and below */
 #define FRIBIDI_CHARSET_UTF8 FRIBIDI_CHAR_SET_UTF8
 #include <fribidi/fribidi.h>
@@ -7143,7 +7145,7 @@ if test "$_mp3lame" = auto ; then
   cat > $TMPC <<EOF
 #include <lame/lame.h>
 int main(void) { lame_version_t lv; (void) lame_init();
-    get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor);
+    get_lame_version_numerical(&lv);
     return 0; }
 EOF
   cc_check -lmp3lame $_ld_lm && _mp3lame=yes

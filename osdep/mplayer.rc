@@ -36,7 +36,7 @@ FILETYPE VFT_APP
             VALUE "FileDescription", "MPlayer - Movie Player\000"
             VALUE "FileVersion",VERSION
             VALUE "InternalName", "Counter Counter\000"
-            VALUE "LegalCopyright", " (C) 2000-2009 MPlayer Team\000"
+            VALUE "LegalCopyright", " (C) 2000-2010 MPlayer Team\000"
             //VALUE "LegalTrademarks"," \000";
             VALUE "OriginalFilename", "mplayer.exe\000"
             VALUE "ProductName", "MPlayer - The Movie Player\000"
