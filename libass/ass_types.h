@@ -1,5 +1,3 @@
-// -*- c-basic-offset: 8; indent-tabs-mode: t -*-
-// vim:ts=8:sw=8:noet:ai:
 /*
  * Copyright (C) 2006 Evgeniy Stepanov <eugeni.stepanov@gmail.com>
  *
@@ -32,88 +30,96 @@
 #define HALIGN_CENTER 2
 #define HALIGN_RIGHT 3
 
-/// ass Style: line
-typedef struct ass_style_s {
-	char* Name;
-	char* FontName;
-	double FontSize;
-	uint32_t PrimaryColour;
-	uint32_t SecondaryColour;
-	uint32_t OutlineColour;
-	uint32_t BackColour;
-	int Bold;
-	int Italic;
-	int Underline;
-	int StrikeOut;
-	double ScaleX;
-	double ScaleY;
-	double Spacing;
-	int Angle;
-	int BorderStyle;
-	double Outline;
-	double Shadow;
-	int Alignment;
-	int MarginL;
-	int MarginR;
-	int MarginV;
-//        int AlphaLevel;
-	int Encoding;
-	int treat_fontname_as_pattern;
-} ass_style_t;
+/* Opaque objects internally used by libass.  Contents are private. */
+typedef struct ass_renderer ASS_Renderer;
+typedef struct render_priv ASS_RenderPriv;
+typedef struct parser_priv ASS_ParserPriv;
+typedef struct ass_library ASS_Library;
 
-typedef struct render_priv_s render_priv_t;
+/* ASS Style: line */
+typedef struct ass_style {
+    char *Name;
+    char *FontName;
+    double FontSize;
+    uint32_t PrimaryColour;
+    uint32_t SecondaryColour;
+    uint32_t OutlineColour;
+    uint32_t BackColour;
+    int Bold;
+    int Italic;
+    int Underline;
+    int StrikeOut;
+    double ScaleX;
+    double ScaleY;
+    double Spacing;
+    int Angle;
+    int BorderStyle;
+    double Outline;
+    double Shadow;
+    int Alignment;
+    int MarginL;
+    int MarginR;
+    int MarginV;
+    int Encoding;
+    int treat_fontname_as_pattern;
+} ASS_Style;
 
-/// ass_event_t corresponds to a single Dialogue line
-/// Text is stored as-is, style overrides will be parsed later
-typedef struct ass_event_s {
-	long long Start; // ms
-	long long Duration; // ms
+/*
+ * ASS_Event corresponds to a single Dialogue line;
+ * text is stored as-is, style overrides will be parsed later.
+ */
+typedef struct ass_event {
+    long long Start;            // ms
+    long long Duration;         // ms
 
-	int ReadOrder;
-	int Layer;
-	int Style;
-	char* Name;
-	int MarginL;
-	int MarginR;
-	int MarginV;
-	char* Effect;
-	char* Text;
+    int ReadOrder;
+    int Layer;
+    int Style;
+    char *Name;
+    int MarginL;
+    int MarginR;
+    int MarginV;
+    char *Effect;
+    char *Text;
 
-	render_priv_t* render_priv;
-} ass_event_t;
+    ASS_RenderPriv *render_priv;
+} ASS_Event;
 
-typedef struct parser_priv_s parser_priv_t;
+/*
+ * ass track represent either an external script or a matroska subtitle stream
+ * (no real difference between them); it can be used in rendering after the
+ * headers are parsed (i.e. events format line read).
+ */
+typedef struct ass_track {
+    int n_styles;           // amount used
+    int max_styles;         // amount allocated
+    int n_events;
+    int max_events;
+    ASS_Style *styles;    // array of styles, max_styles length, n_styles used
+    ASS_Event *events;    // the same as styles
 
-typedef struct ass_library_s ass_library_t;
+    char *style_format;     // style format line (everything after "Format: ")
+    char *event_format;     // event format line
 
-/// ass track represent either an external script or a matroska subtitle stream (no real difference between them)
-/// it can be used in rendering after the headers are parsed (i.e. events format line read)
-typedef struct ass_track_s {
-	int n_styles; // amount used
-	int max_styles; // amount allocated
-	int n_events;
-	int max_events;
-	ass_style_t* styles; // array of styles, max_styles length, n_styles used
-	ass_event_t* events; // the same as styles
+    enum {
+        TRACK_TYPE_UNKNOWN = 0,
+        TRACK_TYPE_ASS,
+        TRACK_TYPE_SSA
+    } track_type;
 
-	char* style_format; // style format line (everything after "Format: ")
-	char* event_format; // event format line
+    // Script header fields
+    int PlayResX;
+    int PlayResY;
+    double Timer;
+    int WrapStyle;
+    int ScaledBorderAndShadow;
+    int Kerning;
 
-	enum {TRACK_TYPE_UNKNOWN = 0, TRACK_TYPE_ASS, TRACK_TYPE_SSA} track_type;
+    int default_style;      // index of default style
+    char *name;             // file name in case of external subs, 0 for streams
 
-	// script header fields
-	int PlayResX;
-	int PlayResY;
-	double Timer;
-	int WrapStyle;
-	char ScaledBorderAndShadow;
-
-
-	int default_style; // index of default style
-	char* name; // file name in case of external subs, 0 for streams
-
-	ass_library_t* library;
-	parser_priv_t* parser_priv;
-} ass_track_t;
+    ASS_Library *library;
+    ASS_ParserPriv *parser_priv;
+} ASS_Track;
 
 #endif /* LIBASS_TYPES_H */

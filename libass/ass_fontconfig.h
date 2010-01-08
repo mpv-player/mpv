@@ -1,5 +1,3 @@
-// -*- c-basic-offset: 8; indent-tabs-mode: t -*-
-// vim:ts=8:sw=8:noet:ai:
 /*
  * Copyright (C) 2006 Evgeniy Stepanov <eugeni.stepanov@gmail.com>
  *
@@ -25,6 +23,7 @@
 
 #include <stdint.h>
 #include "ass_types.h"
+#include "ass.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -32,10 +31,17 @@
 #include <fontconfig/fontconfig.h>
 #endif
 
-typedef struct fc_instance_s fc_instance_t;
+typedef struct fc_instance FCInstance;
 
-fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path, int fc);
-char* fontconfig_select(fc_instance_t* priv, const char* family, int treat_family_as_pattern, unsigned bold, unsigned italic, int* index, uint32_t code);
-void fontconfig_done(fc_instance_t* priv);
+FCInstance *fontconfig_init(ASS_Library *library,
+                            FT_Library ftlibrary, const char *family,
+                            const char *path, int fc, const char *config,
+                            int update);
+char *fontconfig_select(ASS_Library *library, FCInstance *priv,
+                        const char *family, int treat_family_as_pattern,
+                        unsigned bold, unsigned italic, int *index,
+                        uint32_t code);
+void fontconfig_done(FCInstance *priv);
+int fontconfig_update(FCInstance *priv);
 
-#endif /* LIBASS_FONTCONFIG_H */
+#endif                          /* LIBASS_FONTCONFIG_H */
