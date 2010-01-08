@@ -132,7 +132,7 @@ static void draw_slice(struct vf_instance_s* vf,
     if (x+w > vf->priv->crop_w) w = vf->priv->crop_w-x;
     if (y+h > vf->priv->crop_h) h = vf->priv->crop_h-y;
     //mp_msg(MSGT_VFILTER, MSGL_V, "%d %d %d %d\n", w,h,x,y);
-    if ((w < 0) || (h < 0)) return;
+    if (w <= 0 || h <= 0) return;
     vf_next_draw_slice(vf,src2,stride,w,h,x,y);
 }
 
