@@ -475,6 +475,7 @@ Advanced options:
   --enable-neon             enable NEON (ARM) [autodetect]
   --enable-iwmmxt           enable iWMMXt (ARM) [autodetect]
   --disable-fastmemcpy      disable 3DNow!/SSE/MMX optimized memcpy [enable]
+  --enable-hardcoded-tables put tables in binary instead of calculating them at startup [disable]
   --enable-big-endian       force byte order to big-endian [autodetect]
   --enable-debug[=1-3]      compile-in debugging information [disable]
   --enable-profile          compile-in profiling information [disable]
@@ -662,6 +663,7 @@ _sgiaudio=auto
 _sunaudio=auto
 _alsa=auto
 _fastmemcpy=yes
+hardcoded_tables=no
 _unrar_exec=auto
 _win32dll=auto
 _select=yes
@@ -1117,6 +1119,8 @@ for ac_option do
   --disable-pvr)        _pvr=no         ;;
   --enable-fastmemcpy)  _fastmemcpy=yes ;;
   --disable-fastmemcpy) _fastmemcpy=no  ;;
+  --enable-hardcoded-tables)  hardcoded_tables=yes ;;
+  --disable-hardcoded-tables) hardcoded_tables=no  ;;
   --enable-network)     _network=yes    ;;
   --disable-network)    _network=no     ;;
   --enable-winsock2_h)  _winsock2_h=yes ;;
@@ -3342,6 +3346,15 @@ else
   def_fastmemcpy='#undef CONFIG_FASTMEMCPY'
 fi
 echores "$_fastmemcpy"
+
+
+echocheck "hard-coded tables"
+if test "$hardcoded_tables" = yes ; then
+  def_hardcoded_tables='#define CONFIG_HARDCODED_TABLES 1'
+else
+  def_hardcoded_tables='#define CONFIG_HARDCODED_TABLES 0'
+fi
+echores "$hardcoded_tables"
 
 
 echocheck "mman.h"
@@ -8364,6 +8377,7 @@ FAAC=$_faac
 FAAD = $_faad
 FAAD_INTERNAL = $_faad_internal
 FASTMEMCPY = $_fastmemcpy
+CONFIG_HARDCODED_TABLES = $hardcoded_tables
 FBDEV = $_fbdev
 FREETYPE = $_freetype
 FTP = $_ftp
@@ -8713,6 +8727,7 @@ $def_crash_debug
 $def_debug
 $def_dynamic_plugins
 $def_fastmemcpy
+$def_hardcoded_tables
 $def_menu
 $def_runtime_cpudetection
 $def_sighandler
@@ -8995,7 +9010,6 @@ $def_yasm
 #define CONFIG_FFSERVER 0
 #define CONFIG_GPL 1
 #define CONFIG_GRAY 0
-#define CONFIG_HARDCODED_TABLES 0
 #define CONFIG_LIBVORBIS 0
 #define CONFIG_POWERPC_PERF 0
 #define CONFIG_SMALL 0
