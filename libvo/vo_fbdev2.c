@@ -319,13 +319,17 @@ static int query_format(uint32_t format)
 		set_bpp(&fb_vinfo, fb_target_bpp);
 		fb_vinfo.xres_virtual = fb_vinfo.xres;
 		fb_vinfo.yres_virtual = fb_vinfo.yres;
+		if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_vinfo))
+			// Needed for Intel framebuffer with 32 bpp
+			fb_vinfo.transp.length = fb_vinfo.transp.offset = 0;
 		if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
 			mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] Can't put VSCREENINFO: %s\n", strerror(errno));
 			return 0;
 		}
 		fb_pixel_size = fb_vinfo.bits_per_pixel / 8;
-		fb_bpp = fb_vinfo.red.length + fb_vinfo.green.length +
-			fb_vinfo.blue.length + fb_vinfo.transp.length;
+		fb_bpp = fb_vinfo.bits_per_pixel;
+		if (fb_bpp == 16)
+			fb_bpp = fb_vinfo.red.length + fb_vinfo.green.length + fb_vinfo.blue.length;
 		if (fb_bpp == fb_target_bpp)
 			return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_ACCEPT_STRIDE;
 	}
