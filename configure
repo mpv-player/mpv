@@ -8520,6 +8520,9 @@ LIBSWSCALE = $_libswscale
 LIBSWSCALE_A = $_libswscale_a
 LIBSWSCALE_SO = $_libswscale_so
 
+HOSTCC=\$(HOST_CC)
+HOSTCFLAGS=-D_ISOC99_SOURCE -D_POSIX_C_SOURCE=200112 -O3
+HOSTLIBS=-lm
 CC_O=-o \$@
 LD=gcc
 CONFIG_STATIC=yes
@@ -8528,6 +8531,7 @@ BUILD_ROOT=..
 LIBPREF=lib
 LIBSUF=.a
 LIBNAME=\$(LIBPREF)\$(NAME)\$(LIBSUF)
+FULLNAME=\$(NAME)\$(BUILDSUF)
 
 # Some FFmpeg codecs depend on these. Enable them unconditionally for now.
 CONFIG_AANDCT=yes
