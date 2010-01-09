@@ -9020,7 +9020,7 @@ $def_yasm
 #define CONFIG_SWSCALE 1
 #define CONFIG_SWSCALE_ALPHA 1
 
-#ifdef HAVE_AF_INET6
+#if defined(HAVE_AF_INET6) && (!defined(_WIN32) || defined(__CYGWIN__))
 #define CONFIG_IPV6 1
 #else
 #define CONFIG_IPV6 0
