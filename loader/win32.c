@@ -3839,7 +3839,7 @@ HRESULT WINAPI CoInitialize(LPVOID lpReserved)
 }
 void WINAPI CoUninitialize(void)
 {
-    return expCoUninitialize();
+    expCoUninitialize();
 }
 
 static DWORD WINAPI expSetThreadAffinityMask
