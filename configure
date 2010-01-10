@@ -4223,7 +4223,7 @@ echocheck "X11 headers presence"
     fi
   done
   if test $_cross_compile = no; then
-    for I in /usr/X11/include /usr/X11R7/include /usr/X11R6/include \
+    for I in /usr/X11/include /usr/X11R7/include /usr/local/include /usr/X11R6/include \
              /usr/include/X11R6 /usr/openwin/include ; do
       if test -f "$I/X11/Xlib.h" ; then
         extra_cflags="$extra_cflags -I$I"
@@ -4243,8 +4243,8 @@ if test "$_x11" = auto && test "$_x11_headers" = yes ; then
 #include <X11/Xutil.h>
 int main(void) { (void) XCreateWindow(0,0,0,0,0,0,0,0,0,0,0,0); return 0; }
 EOF
-  for I in "" -L/usr/X11R7/lib -L/usr/X11R6/lib -L/usr/lib/X11R6 \
-           -L/usr/X11/lib -L/usr/lib32 -L/usr/openwin/lib -L/usr/X11R6/lib64 \
+  for I in "" -L/usr/X11R7/lib -L/usr/local/lib -L/usr/X11R6/lib -L/usr/lib/X11R6 \
+           -L/usr/X11/lib -L/usr/lib32 -L/usr/openwin/lib -L/usr/local/lib64 -L/usr/X11R6/lib64 \
            -L/usr/lib ; do
     if netbsd; then
       _ld_tmp="$I -lXext -lX11 $_ld_pthread -Wl,-R$(echo $I | sed s/^-L//)"
