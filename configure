@@ -5257,6 +5257,7 @@ EOF
     fi
   done
   if test "$_sdl" = no && "$_sdlconfig" --version >>"$TMPLOG" 2>&1 ; then
+    _res_comment="using $_sdlconfig"
     if cygwin ; then
       _inc_tmp="$($_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/)"
       _ld_tmp="$($_sdlconfig --libs | cut -d " " -f 1,4,6 | sed s/no-cygwin/cygwin/)"
@@ -5286,7 +5287,6 @@ if test "$_sdl" = yes ; then
   libs_mplayer="$libs_mplayer $_ld_tmp"
   _vomodules="sdl $_vomodules"
   _aomodules="sdl $_aomodules"
-  _res_comment="using $_sdlconfig"
 else
   def_sdl='#undef CONFIG_SDL'
   _novomodules="sdl $_novomodules"
