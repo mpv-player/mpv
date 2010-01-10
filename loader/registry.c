@@ -385,7 +385,7 @@ long __stdcall RegCloseKey(long key)
     if(handle==head)
 	head=head->prev;
     free(handle);
-    return 1;
+    return 0;
 }
 
 long __stdcall RegQueryValueExA(long key, const char* value, int* reserved, int* type, int* data, int* count)
