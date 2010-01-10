@@ -1729,18 +1729,18 @@ char * strreplace( char * in,char * what,char * whereof )
 static void strcpy_trim(char *d, char *s)
 {
     // skip leading whitespace
-    while (*s && !isalnum(*s)) {
+    while (*s && isspace(*s)) {
 	s++;
     }
     for (;;) {
 	// copy word
-	while (*s && isalnum(*s)) {
+	while (*s && !isspace(*s)) {
 	    *d = tolower(*s);
 	    s++; d++;
 	}
 	if (*s == 0) break;
 	// trim excess whitespace
-	while (*s && !isalnum(*s)) {
+	while (*s && isspace(*s)) {
 	    s++;
 	}
 	if (*s == 0) break;
@@ -1779,7 +1779,7 @@ static void strcpy_get_ext(char *d, char *s)
 static int whiteonly(char *s)
 {
     while (*s) {
-	if (isalnum(*s)) return 0;
+	if (!isspace(*s)) return 0;
 	s++;
   }
     return 1;
