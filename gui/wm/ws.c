@@ -1172,6 +1172,7 @@ void wsCreateImage( wsTWindow * win,int Width,int Height )
    win->xImage->data=win->Shminfo.shmaddr;
    win->Shminfo.readOnly=0;
    XShmAttach( wsDisplay,&win->Shminfo );
+   XSync(wsDisplay, False);
    shmctl( win->Shminfo.shmid,IPC_RMID,0 );
   }
   else
