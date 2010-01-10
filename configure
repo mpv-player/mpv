@@ -6672,7 +6672,7 @@ if test "$_libdca" = auto ; then
 #include <dts.h>
 int main(void) { dts_init(0); return 0; }
 EOF
-  for _ld_dca in -ldts -ldca ; do
+  for _ld_dca in -ldca -ldts ; do
     cc_check $_ld_dca $_ld_lm && extra_ldflags="$extra_ldflags $_ld_dca" \
       && _libdca=yes && break
   done
