@@ -5328,7 +5328,7 @@ static WIN_BOOL WINAPI ext_stubs(void)
 {
     volatile int idx = 0x0deadabc;
     // make sure gcc does not do eip-relative call or something like that
-    volatile void (*my_printf)(char *, char *) = (void *)0xdeadfbcd;
+    void (* volatile my_printf)(char *, char *) = (void *)0xdeadfbcd;
     my_printf("Called unk_%s\n", export_names[idx]);
     return 0;
 }
