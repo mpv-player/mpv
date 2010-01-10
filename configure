@@ -3111,7 +3111,7 @@ for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
   cc_check $_ld_tmp && inet_pton=yes && break
 done
 if test $inet_pton = yes ; then
-  test $_ld_tmp && _res_comment="using $_ld_tmp"
+  test "$_ld_tmp" && _res_comment="using $_ld_tmp"
   def_inet_pton='#define HAVE_INET_PTON 1'
 fi
 echores "$inet_pton"
@@ -3130,7 +3130,7 @@ for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
   cc_check $_ld_tmp && inet_aton=yes && break
 done
 if test $inet_aton = yes ; then
-  test $_ld_tmp && _res_comment="using $_ld_tmp"
+  test "$_ld_tmp" && _res_comment="using $_ld_tmp"
   def_inet_aton='#define HAVE_INET_ATON 1'
 fi
 echores "$inet_aton"
