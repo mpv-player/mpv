@@ -179,7 +179,7 @@ static int control(int cmd,void *arg){
 	    ao_control_vol_t *vol = (ao_control_vol_t *)arg;
 	    int fd, v, devs;
 
-	    if(ao_data.format == AF_FORMAT_AC3)
+	    if(AF_FORMAT_IS_AC3(ao_data.format))
 		return CONTROL_TRUE;
 
 	    if ((fd = open(oss_mixer_device, O_RDONLY)) > 0)
@@ -297,7 +297,7 @@ static int init(int rate,int channels,int format,int flags){
   fcntl(audio_fd, F_SETFD, FD_CLOEXEC);
 #endif
 
-  if(format == AF_FORMAT_AC3) {
+  if(AF_FORMAT_IS_AC3(format)) {
     ao_data.samplerate=rate;
     ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
   }
@@ -332,7 +332,7 @@ ac3_retry:
     af_fmt2str_short(ao_data.format), af_fmt2str_short(format));
 
   ao_data.channels = channels;
-  if(format != AF_FORMAT_AC3) {
+  if(!AF_FORMAT_IS_AC3(format)) {
     // We only use SNDCTL_DSP_CHANNELS for >2 channels, in case some drivers don't have it
     if (ao_data.channels > 2) {
       if ( ioctl(audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels) == -1 ||
@@ -447,10 +447,10 @@ static void reset(void){
 #endif
 
   oss_format = format2oss(ao_data.format);
-  if(ao_data.format == AF_FORMAT_AC3)
+  if(AF_FORMAT_IS_AC3(ao_data.format))
     ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
   ioctl (audio_fd, SNDCTL_DSP_SETFMT, &oss_format);
-  if(ao_data.format != AF_FORMAT_AC3) {
+  if(!AF_FORMAT_IS_AC3(ao_data.format)) {
     if (ao_data.channels > 2)
       ioctl (audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels);
     else {
