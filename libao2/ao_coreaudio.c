@@ -328,13 +328,7 @@ int b_alive;
 	// unsigned int
 		inDesc.mFormatFlags = kAudioFormatFlagIsPacked;
     }
-    if (AF_FORMAT_IS_AC3(format)) {
-        // Currently ac3 input (comes from hwac3) is always in native byte-order.
-#if HAVE_BIGENDIAN
-        inDesc.mFormatFlags |= kAudioFormatFlagIsBigEndian;
-#endif
-    }
-    else if ((format & AF_FORMAT_END_MASK) == AF_FORMAT_BE)
+    if ((format & AF_FORMAT_END_MASK) == AF_FORMAT_BE)
         inDesc.mFormatFlags |= kAudioFormatFlagIsBigEndian;
 
     inDesc.mFramesPerPacket = 1;
