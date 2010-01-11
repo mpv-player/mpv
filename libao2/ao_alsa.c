@@ -574,7 +574,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  return 0;
         }
 
-      bytes_per_sample = snd_pcm_format_physical_width(alsa_format) / 8;
+      bytes_per_sample = af_fmt2bits(ao_data.format) / 8;
       bytes_per_sample *= ao_data.channels;
       ao_data.bps = ao_data.samplerate * bytes_per_sample;
 
