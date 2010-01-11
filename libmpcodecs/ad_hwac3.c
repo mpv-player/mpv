@@ -15,14 +15,9 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "mpbswap.h"
+#include "libavutil/common.h"
 
 #include "ad_internal.h"
-
-#ifdef CONFIG_LIBA52_INTERNAL
-#include "liba52/a52.h"
-#else
-#include <a52dec/a52.h>
-#endif
 
 
 static int isdts = -1;
@@ -42,6 +37,44 @@ LIBAD_EXTERN(hwac3)
 static int dts_syncinfo(uint8_t *indata_ptr, int *flags, int *sample_rate, int *bit_rate);
 static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *buf);
 
+
+static int a52_syncinfo (uint8_t *buf, int *sample_rate, int *bit_rate)
+{
+    static const uint16_t rate[] = { 32,  40,  48,  56,  64,  80,  96, 112,
+                                    128, 160, 192, 224, 256, 320, 384, 448,
+                                    512, 576, 640};
+    int frmsizecod;
+    int bitrate;
+    int half;
+
+    if (buf[0] != 0x0b || buf[1] != 0x77)    /* syncword */
+        return 0;
+
+    if (buf[5] >= 0x60)                      /* bsid >= 12 */
+        return 0;
+    half = buf[5] >> 3;
+    half = FFMAX(half - 8, 0);
+
+    frmsizecod = buf[4] & 63;
+    if (frmsizecod >= 38)
+        return 0;
+    bitrate = rate[frmsizecod >> 1];
+    *bit_rate = (bitrate * 1000) >> half;
+
+    switch (buf[4] & 0xc0) {
+    case 0:
+        *sample_rate = 48000 >> half;
+        return 4 * bitrate;
+    case 0x40:
+        *sample_rate = 44100 >> half;
+        return 2 * (320 * bitrate / 147 + (frmsizecod & 1));
+    case 0x80:
+        *sample_rate = 32000 >> half;
+        return 6 * bitrate;
+    default:
+        return 0;
+    }
+}
 
 static int ac3dts_fillbuff(sh_audio_t *sh_audio)
 {
@@ -79,7 +112,7 @@ static int ac3dts_fillbuff(sh_audio_t *sh_audio)
     }
     else
     {
-      length = a52_syncinfo(sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
+      length = a52_syncinfo(sh_audio->a_in_buffer, &sample_rate, &bit_rate);
       if(length >= 7 && length <= 3840)
       {
         if(isdts != 0)
@@ -125,25 +158,16 @@ static int preinit(sh_audio_t *sh)
 static int init(sh_audio_t *sh_audio)
 {
   /* Dolby AC3 passthrough:*/
-  a52_state_t *a52_state = a52_init(0);
-  if(a52_state == NULL)
-  {
-    mp_msg(MSGT_DECAUDIO, MSGL_ERR, "A52 init failed\n");
-    return 0;
-  }
   if(ac3dts_fillbuff(sh_audio) < 0)
   {
-    a52_free(a52_state);
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "AC3/DTS sync failed\n");
     return 0;
   }
-  sh_audio->context = a52_state;
   return 1;
 }
 
 static void uninit(sh_audio_t *sh)
 {
-  a52_free(sh->context);
 }
 
 static int control(sh_audio_t *sh,int cmd,void* arg, ...)
