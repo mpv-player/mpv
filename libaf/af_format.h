@@ -103,6 +103,8 @@
 
 #define AF_FORMAT_UNKNOWN (-1)
 
+#define AF_FORMAT_IS_AC3(fmt) (((fmt) & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_AC3)
+
 int af_str2fmt(const char *str);
 int af_str2fmt_short(const char *str);
 int af_fmt2bits(int format);

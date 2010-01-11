@@ -263,7 +263,7 @@ int b_alive;
     ao->b_changed_mixing = 0;
 
     /* Probe whether device support S/PDIF stream output if input is AC3 stream. */
-    if ((format & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_AC3)
+    if (AF_FORMAT_IS_AC3(format))
     {
         /* Find the ID of the default Device. */
         i_param_size = sizeof(AudioDeviceID);
@@ -344,7 +344,7 @@ int b_alive;
 	// unsigned int
 		inDesc.mFormatFlags = kAudioFormatFlagIsPacked;
     }
-    if ((format & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_AC3) {
+    if (AF_FORMAT_IS_AC3(format)) {
         // Currently ac3 input (comes from hwac3) is always in native byte-order.
 #if HAVE_BIGENDIAN
         inDesc.mFormatFlags |= kAudioFormatFlagIsBigEndian;
