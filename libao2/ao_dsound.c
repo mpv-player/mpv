@@ -327,7 +327,7 @@ static int write_buffer(unsigned char *data, int len)
 
   if (SUCCEEDED(res))
   {
-  	if( (ao_data.channels == 6) && (ao_data.format!=AF_FORMAT_AC3) ) {
+  	if( (ao_data.channels == 6) && !AF_FORMAT_IS_AC3(ao_data.format) ) {
   	    // reorder channels while writing to pointers.
   	    // it's this easy because buffer size and len are always
   	    // aligned to multiples of channels*bytespersample
@@ -456,7 +456,7 @@ static int init(int rate, int channels, int format, int flags)
 	wformat.Format.cbSize          = (channels > 2) ? sizeof(WAVEFORMATEXTENSIBLE)-sizeof(WAVEFORMATEX) : 0;
 	wformat.Format.nChannels       = channels;
 	wformat.Format.nSamplesPerSec  = rate;
-	if (format == AF_FORMAT_AC3) {
+	if (AF_FORMAT_IS_AC3(format)) {
 		wformat.Format.wFormatTag      = WAVE_FORMAT_DOLBY_AC3_SPDIF;
 		wformat.Format.wBitsPerSample  = 16;
 		wformat.Format.nBlockAlign     = 4;
