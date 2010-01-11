@@ -364,15 +364,11 @@ static int init(int rate_hz, int channels, int format, int flags)
       case AF_FORMAT_U16_BE:
 	alsa_format = SND_PCM_FORMAT_U16_BE;
 	break;
-#if !HAVE_BIGENDIAN
-      case AF_FORMAT_AC3:
-#endif
+      case AF_FORMAT_AC3_LE:
       case AF_FORMAT_S16_LE:
 	alsa_format = SND_PCM_FORMAT_S16_LE;
 	break;
-#if HAVE_BIGENDIAN
-      case AF_FORMAT_AC3:
-#endif
+      case AF_FORMAT_AC3_BE:
       case AF_FORMAT_S16_BE:
 	alsa_format = SND_PCM_FORMAT_S16_BE;
 	break;
@@ -535,6 +531,9 @@ static int init(int rate_hz, int channels, int format, int flags)
          mp_msg(MSGT_AO,MSGL_INFO,
 		MSGTR_AO_ALSA_FormatNotSupportedByHardware, af_fmt2str_short(format));
          alsa_format = SND_PCM_FORMAT_S16_LE;
+         if (AF_FORMAT_IS_AC3(ao_data.format))
+           ao_data.format = AF_FORMAT_AC3_LE;
+         else
          ao_data.format = AF_FORMAT_S16_LE;
       }
 

@@ -58,7 +58,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
 
     switch (cmd){
     case AF_CONTROL_REINIT:
-        if (data->format == AF_FORMAT_AC3 || data->nch < s->min_channel_num)
+        if (AF_FORMAT_IS_AC3(data->format) || data->nch < s->min_channel_num)
             return AF_DETACH;
 
         s->pending_len = 0;
@@ -102,7 +102,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
                 return AF_ERROR;
             }
         }
-        af->data->format = AF_FORMAT_AC3;
+        af->data->format = AF_FORMAT_AC3_NE;
         af->data->nch = 2;
         return test_output_res;
     case AF_CONTROL_COMMAND_LINE:

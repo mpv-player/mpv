@@ -760,7 +760,6 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
 	    case AF_FORMAT_MU_LAW:
 	    case AF_FORMAT_A_LAW:
 	    case AF_FORMAT_MPEG2:
-	    case AF_FORMAT_AC3:
 	    default:
 		mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_UnsupportedAudioType,
 		    af_fmt2str(audio_format, buf, 128), audio_format);

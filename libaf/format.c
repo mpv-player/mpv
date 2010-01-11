@@ -47,7 +47,7 @@ int af_str2fmt(const char* str)
     format |= AF_FORMAT_A_LAW; return format;
   }
   if(strstr(str,"ac3") || strstr(str,"AC3")){
-    format |= AF_FORMAT_AC3; return format;
+    format |= AF_FORMAT_AC3 | AF_FORMAT_16BIT; return format;
   }
   if(strstr(str,"mpeg2") || strstr(str,"MPEG2")){
     format |= AF_FORMAT_MPEG2; return format;
@@ -158,7 +158,9 @@ static struct {
     { "mulaw", AF_FORMAT_MU_LAW },
     { "alaw", AF_FORMAT_A_LAW },
     { "mpeg2", AF_FORMAT_MPEG2 },
-    { "ac3", AF_FORMAT_AC3 },
+    { "ac3le", AF_FORMAT_AC3_LE },
+    { "ac3be", AF_FORMAT_AC3_BE },
+    { "ac3ne", AF_FORMAT_AC3_NE },
     { "imaadpcm", AF_FORMAT_IMA_ADPCM },
 
     { "u8", AF_FORMAT_U8 },

@@ -127,7 +127,8 @@ static int init(int rate,int channels,int format,int flags){
         format=AF_FORMAT_U8;
     case AF_FORMAT_U8:
         break;
-    case AF_FORMAT_AC3:
+    case AF_FORMAT_AC3_BE:
+    case AF_FORMAT_AC3_LE:
         bits=16;
         break;
     default:

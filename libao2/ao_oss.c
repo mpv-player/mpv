@@ -96,7 +96,7 @@ static int format2oss(int format)
     case AF_FORMAT_MPEG2: return AFMT_MPEG;
 #endif
 #ifdef AFMT_AC3
-    case AF_FORMAT_AC3: return AFMT_AC3;
+    case AF_FORMAT_AC3_NE: return AFMT_AC3;
 #endif
     }
     mp_msg(MSGT_AO, MSGL_V, "OSS: Unknown/not supported internal format: %s\n", af_fmt2str_short(format));
@@ -139,7 +139,7 @@ static int oss2format(int format)
     case AFMT_MPEG: return AF_FORMAT_MPEG2;
 #endif
 #ifdef AFMT_AC3
-    case AFMT_AC3: return AF_FORMAT_AC3;
+    case AFMT_AC3: return AF_FORMAT_AC3_NE;
 #endif
     }
     mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_AO_OSS_UnknownUnsupportedFormat, format);
@@ -303,6 +303,8 @@ static int init(int rate,int channels,int format,int flags){
   }
 
 ac3_retry:
+  if (AF_FORMAT_IS_AC3(format))
+    format = AF_FORMAT_AC3_NE;
   ao_data.format=format;
   oss_format=format2oss(format);
   if (oss_format == -1) {

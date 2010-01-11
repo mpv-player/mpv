@@ -143,8 +143,10 @@ static int init(int rate,int channels,int format,int flags)
 	unsigned char* buffer;
 	int i;
 
+	if (AF_FORMAT_IS_AC3(format))
+		format = AF_FORMAT_AC3_NE;
 	switch(format){
-		case AF_FORMAT_AC3:
+		case AF_FORMAT_AC3_NE:
 		case AF_FORMAT_S24_LE:
 		case AF_FORMAT_S16_LE:
 		case AF_FORMAT_U8:

@@ -250,8 +250,11 @@ static int init(int rate,int channels,int format,int flags){
     switch(format){
 	case AF_FORMAT_S16_BE:
 	case AF_FORMAT_MPEG2:
-	case AF_FORMAT_AC3:
+	case AF_FORMAT_AC3_BE:
 	    ao_data.format=format;
+	    break;
+	case AF_FORMAT_AC3_LE:
+	    ao_data.format=AF_FORMAT_AC3_BE;
 	    break;
 	default:
 	    ao_data.format=AF_FORMAT_S16_BE;
@@ -333,8 +336,6 @@ static int play(void* data,int len,int flags){
 	unsigned short *s=data;
 //	if(len>2000) len=2000;
 //	printf("ao_mpegpes: len=%d  \n",len);
-	if(ao_data.format==AF_FORMAT_AC3)
-	    for(i=0;i<len/2;i++) s[i]=(s[i]>>8)|(s[i]<<8); // le<->be
 	send_mpeg_lpcm_packet(data, len, 0xA0, ao_data.pts, freq_id, my_ao_write);
     }
     return len;
