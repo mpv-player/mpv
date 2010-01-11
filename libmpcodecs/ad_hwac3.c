@@ -135,12 +135,6 @@ static int ac3dts_fillbuff(sh_audio_t *sh_audio)
   demux_read_data(sh_audio->ds, sh_audio->a_in_buffer + 12, length - 12);
   sh_audio->a_in_buffer_len = length;
 
-  // TODO: is DTS also checksummed?
-#ifdef CONFIG_LIBA52_INTERNAL
-  if(isdts == 0 && crc16_block(sh_audio->a_in_buffer + 2, length - 2) != 0)
-    mp_msg(MSGT_DECAUDIO, MSGL_STATUS, "a52: CRC check failed!  \n");
-#endif
-
   return length;
 }
 
