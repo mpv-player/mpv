@@ -32,6 +32,7 @@
 
 #include "libavcodec/avcodec.h"
 #include "libavcodec/ac3.h"
+#include "libavutil/intreadwrite.h"
 
 // Data for specific instances of this filter
 typedef struct af_ac3enc_s {
@@ -102,7 +103,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
                 return AF_ERROR;
             }
         }
-        af->data->format = AF_FORMAT_AC3_NE;
+        af->data->format = AF_FORMAT_AC3_BE;
         af->data->nch = 2;
         return test_output_res;
     case AF_CONTROL_COMMAND_LINE:
@@ -235,28 +236,13 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
                len, s->pending_len);
 
         if (s->add_iec61937_header) {
-            int16_t *out = (int16_t *)buf;
             int bsmod = dest[5] & 0x7;
 
-#if !HAVE_BIGENDIAN
-            int i;
-            char tmp;
-            for (i = 0; i < len; i += 2) {
-                tmp = dest[i];
-                dest[i] = dest[i+1];
-                dest[i+1] = tmp;
-            }
-            if (len & 1) {
-                dest[len] = dest[len-1];
-                dest[len-1] = 0;
-                len++;
-            }
-#endif
-            out[0] = 0xF872;   // iec 61937 syncword 1
-            out[1] = 0x4E1F;   // iec 61937 syncword 2
-            out[2] = 0x0001;   // data-type ac3
-            out[2] |= bsmod << 8; // bsmod
-            out[3] = len << 3; // number of bits in payload
+            AV_WB16(buf,     0xF872);   // iec 61937 syncword 1
+            AV_WB16(buf + 2, 0x4E1F);   // iec 61937 syncword 2
+            buf[4] = bsmod;             // bsmod
+            buf[5] = 0x01;              // data-type ac3
+            AV_WB16(buf + 6, len << 3); // number of bits in payload
 
             memset(buf + 8 + len, 0, AC3_FRAME_SIZE * 2 * 2 - 8 - len);
             len = AC3_FRAME_SIZE * 2 * 2;

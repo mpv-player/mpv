@@ -16,6 +16,7 @@
 #include "help_mp.h"
 #include "mpbswap.h"
 #include "libavutil/common.h"
+#include "libavutil/intreadwrite.h"
 
 #include "ad_internal.h"
 
@@ -151,7 +152,7 @@ static int preinit(sh_audio_t *sh)
   sh->audio_in_minsize = 8192;
   sh->channels = 2;
   sh->samplesize = 2;
-  sh->sample_format = AF_FORMAT_AC3_NE;
+  sh->sample_format = AF_FORMAT_AC3_BE;
   return 1;
 }
 
@@ -198,22 +199,12 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
   }
   else if(isdts == 0)
   {
-    uint16_t *buf16 = (uint16_t *)buf;
-    buf16[0] = 0xF872;   // iec 61937 syncword 1
-    buf16[1] = 0x4E1F;   // iec 61937 syncword 2
-    buf16[2] = 0x0001;   // data-type ac3
-    buf16[2] |= (sh_audio->a_in_buffer[5] & 0x7) << 8; // bsmod
-    buf16[3] = len << 3; // number of bits in payload
-#if HAVE_BIGENDIAN
+    AV_WB16(buf,     0xF872);   // iec 61937 syncword 1
+    AV_WB16(buf + 2, 0x4E1F);   // iec 61937 syncword 2
+    buf[4] = sh_audio->a_in_buffer[5] & 0x7; // bsmod
+    buf[5] = 0x01;              // data-type ac3
+    AV_WB16(buf + 6, len << 3); // number of bits in payload
     memcpy(buf + 8, sh_audio->a_in_buffer, len);
-#else
-    swab(sh_audio->a_in_buffer, buf + 8, len);
-    if (len & 1) {
-      buf[8+len-1] = 0;
-      buf[8+len] = sh_audio->a_in_buffer[len-1];
-      len++;
-    }
-#endif
     memset(buf + 8 + len, 0, 6144 - 8 - len);
 
     return 6144;
