@@ -1145,8 +1145,7 @@ static uint32_t get_image(mp_image_t *mpi)
 
 //    printf("width=%d vs. pitch=%d, flags=0x%X  \n",mpi->width,pitch,mpi->flags);
 
-    if((mpi->width==pitch) ||
-       (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH))){
+    if(mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)){
        // we're lucky or codec accepts stride => ok, let's go!
 
 	    if (frame) {
