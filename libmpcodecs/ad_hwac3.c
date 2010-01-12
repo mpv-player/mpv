@@ -148,7 +148,7 @@ static int preinit(sh_audio_t *sh)
   sh->samplesize = 2;
   sh->sample_format = AF_FORMAT_AC3_BE;
   // HACK for DTS where useless swapping can't easily be removed
-  if (sh_audio->format == 0x2001)
+  if (sh->format == 0x2001)
     sh->sample_format = AF_FORMAT_AC3_NE;
   return 1;
 }
