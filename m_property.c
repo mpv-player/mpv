@@ -250,7 +250,8 @@ int m_property_flag_ro(const m_option_t* prop,int action,
     switch(action) {
     case M_PROPERTY_PRINT:
         if(!arg) return 0;
-        *(char**)arg = strdup((var > prop->min) ? _("enabled") : _("disabled"));
+        *(char**)arg = strdup((var > prop->min) ?
+                              mp_gtext("enabled") : mp_gtext("disabled"));
         return 1;
     }
     return m_property_int_ro(prop,action,arg,var);
