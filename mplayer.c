@@ -1356,10 +1356,10 @@ static mp_osd_msg_t* osd_msg_stack = NULL;
  *  it is pulled on top of the stack, otherwise a new message is created.
  *
  */
-
-void set_osd_msg(int id, int level, int time, const char* fmt, ...) {
+static void set_osd_msg_va(int id, int level, int time, const char *fmt,
+                           va_list ap)
+{
     mp_osd_msg_t *msg,*last=NULL;
-    va_list va;
     int r;
 
     // look if the id is already in the stack
@@ -1376,9 +1376,7 @@ void set_osd_msg(int id, int level, int time, const char* fmt, ...) {
         osd_msg_stack = msg;
     }
     // write the msg
-    va_start(va,fmt);
-    r = vsnprintf(msg->msg, 128, fmt, va);
-    va_end(va);
+    r = vsnprintf(msg->msg, 128, fmt, ap);
     if(r >= 128) msg->msg[127] = 0;
     // set id and time
     msg->id = id;
@@ -1386,6 +1384,23 @@ void set_osd_msg(int id, int level, int time, const char* fmt, ...) {
     msg->time = time;
 
 }
+
+void set_osd_msg(int id, int level, int time, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    set_osd_msg_va(id, level, time, fmt, ap);
+    va_end(ap);
+}
+
+void set_osd_tmsg(int id, int level, int time, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    set_osd_msg_va(id, level, time, mp_gtext(fmt), ap);
+    va_end(ap);
+}
+
 
 /**
  *  \brief Remove a message from the OSD stack

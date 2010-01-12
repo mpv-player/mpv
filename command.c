@@ -2297,12 +2297,12 @@ static int show_property_osd(MPContext *mpctx, const char *pname)
     else if (p->osd_progbar) {
         if (prop->type == CONF_TYPE_INT) {
             if (mp_property_do(pname, M_PROPERTY_GET, &r, mpctx) > 0)
-                set_osd_bar(mpctx, p->osd_progbar, p->osd_msg,
+                set_osd_bar(mpctx, p->osd_progbar, mp_gtext(p->osd_msg),
                             prop->min, prop->max, r);
         } else if (prop->type == CONF_TYPE_FLOAT) {
             float f;
             if (mp_property_do(pname, M_PROPERTY_GET, &f, mpctx) > 0)
-                set_osd_bar(mpctx, p->osd_progbar, p->osd_msg,
+                set_osd_bar(mpctx, p->osd_progbar, mp_gtext(p->osd_msg),
                             prop->min, prop->max, f);
         } else {
             mp_msg(MSGT_CPLAYER, MSGL_ERR,
@@ -2316,8 +2316,8 @@ static int show_property_osd(MPContext *mpctx, const char *pname)
         char *val = mp_property_print(pname, mpctx);
         if (val) {
             int index = p - property_osd_display;
-            set_osd_msg(p->osd_id >= 0 ? p->osd_id : OSD_MSG_PROPERTY + index,
-                        1, opts->osd_duration, p->osd_msg, val);
+            set_osd_tmsg(p->osd_id >= 0 ? p->osd_id : OSD_MSG_PROPERTY + index,
+                         1, opts->osd_duration, p->osd_msg, val);
             free(val);
         }
     }

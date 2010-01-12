@@ -23,6 +23,7 @@ struct MPContext;
 
 void set_osd_bar(struct MPContext *mpctx, int type,const char* name,double min,double max,double val);
 void set_osd_msg(int id, int level, int time, const char* fmt, ...);
+void set_osd_tmsg(int id, int level, int time, const char* fmt, ...);
 void rm_osd_msg(int id);
 
 #endif /* MPLAYER_MP_OSD_H */
