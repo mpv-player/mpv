@@ -97,7 +97,7 @@ typedef struct {
 	unsigned char *start;
 	uint16_t payload_size;
 	es_stream_type_t type, subtype;
-	float pts, last_pts;
+	double pts, last_pts;
 	int pid;
 	char lang[4];
 	int last_cc;				// last cc code (-1 if first packet)
@@ -219,8 +219,8 @@ typedef struct {
 typedef struct {
 	uint64_t size;
 	float duration;
-	float first_pts;
-	float last_pts;
+	double first_pts;
+	double last_pts;
 } TS_stream_info;
 
 typedef struct {
@@ -1255,7 +1255,7 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 					return -1;
 			}
 
-			pes_es->pts = (float) v / (float) sl->ts_resolution;
+			pes_es->pts = (double) v / (double) sl->ts_resolution;
 			mp_msg(MSGT_DEMUXER,MSGL_DBG2, "CTS: %d bits, value: %"PRIu64"/%d = %.3f\n", sl->ts_len, v, sl->ts_resolution, pes_es->pts);
 		}
 
@@ -1398,7 +1398,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 		pts |=  p[12]         <<  7 ;
 		pts |= (p[13] & 0xFE) >>  1 ;
 
-		es->pts = pts / 90000.0f;
+		es->pts = pts / (double)90000.0f;
 	}
 	else
 		es->pts = 0.0f;
@@ -3277,8 +3277,8 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, float audio_d
 	{
 		if(sh_audio && !d_audio->eof && d_video->pts && d_audio->pts)
 		{
-			float a_pts=d_audio->pts;
-			a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+			double a_pts=d_audio->pts;
+			a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(double)sh_audio->i_bps;
 			if(d_video->pts > a_pts)
 			{
 				skip_audio_frame(sh_audio);  // sync audio
