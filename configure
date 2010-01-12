@@ -2415,7 +2415,8 @@ echocheck "assembler support of -pipe option"
 cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
-cc_check -pipe && _pipe="-pipe" && echores "yes" || echores "no"
+# -I. helps to detect compilers that just misunderstand -pipe like Sun C
+cc_check -pipe -I. && _pipe="-pipe" && echores "yes" || echores "no"
 
 
 echocheck "compiler support of named assembler arguments"
