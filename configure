@@ -1567,7 +1567,7 @@ if test "$(basename $_cc)" = "icc" || test "$(basename $_cc)" = "ecc"; then
   esac
   echores "$cc_version"
 else
-  for _cc in "$_cc" cc gcc ; do
+  for _cc in "$_cc" gcc cc ; do
     cc_name_tmp=$($_cc -v 2>&1 | tail -n 1 | cut -d ' ' -f 1)
     if test "$cc_name_tmp" = "gcc"; then
     cc_name=$cc_name_tmp
@@ -1586,6 +1586,15 @@ else
     esac
     echores "$cc_version"
     break
+    fi
+    cc_name_tmp=$($_cc -V 2>&1 | head -n 1 | cut -d ' ' -f 2,3)
+    if test "$cc_name_tmp" = "Sun C"; then
+      echocheck "$_cc version"
+      cc_vendor=sun
+      cc_version=$($_cc -V 2>&1 | head -n 1 | cut -d ' ' -f 4)
+      _res_comment="experimental support only"
+      echores "Sun C $cc_version"
+      break
     fi
   done
 fi # icc
@@ -2457,6 +2466,8 @@ if test "$_profile" != "" || test "$_debug" != "" ; then
 elif test -z "$CFLAGS" ; then
   if test "$cc_vendor" = "intel" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe -fomit-frame-pointer -wd167 -wd556 -wd144"
+  elif test "$cc_vendor" = "sun" ; then
+    CFLAGS="-O2 $_march $_mcpu $_pipe -xc99 -xregs=frameptr"
   elif test "$cc_vendor" != "gnu" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe"
   else
