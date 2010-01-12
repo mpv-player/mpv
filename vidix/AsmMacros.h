@@ -66,7 +66,6 @@
 #ifndef MPLAYER_ASMMACROS_H
 #define MPLAYER_ASMMACROS_H
 
-#if defined(__GNUC__)
 #if defined(__alpha__)
 #include "sysdep/AsmMacros_alpha.h"
 #elif defined(__ia64__)
@@ -80,38 +79,5 @@
 #else
 #include "sysdep/AsmMacros_x86.h"
 #endif
-
-#else /* __GNUC__ */
-
-#if defined(_MINIX) && defined(_ACK)
-
-/* inb, outb, inw and outw are defined in the library */
-/* ... but I've no idea if the same is true for inl & outl */
-
-u8_t inb(U16_t);
-void outb(U16_t, U8_t);
-u16_t inw(U16_t);
-void outw(U16_t, U16_t);
-u32_t inl(U16_t);
-void outl(U16_t, U32_t);
-
-#else /* not _MINIX and _ACK */
-
-# ifdef SVR4
-#  include <sys/types.h>
-#  ifndef __USLC__
-#   define __USLC__
-#  endif
-# endif
-#ifndef SCO325
-# include <sys/inline.h>
-#else
-# include "../common/scoasm.h"
-#endif
-#define intr_disable() __asm__("cli")
-#define intr_enable()  __asm__("sti")
-
-#endif /* _MINIX and _ACK */
-#endif /* __GNUC__ */
 
 #endif /* MPLAYER_ASMMACROS_H */
