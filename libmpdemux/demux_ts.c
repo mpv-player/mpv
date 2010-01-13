@@ -1398,10 +1398,10 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 		pts |=  p[12]         <<  7 ;
 		pts |= (p[13] & 0xFE) >>  1 ;
 
-		es->pts = pts / (double)90000.0f;
+		es->pts = pts / 90000.0;
 	}
 	else
-		es->pts = 0.0f;
+		es->pts = 0.0;
 
 
 	header_len = p[8];
@@ -3094,7 +3094,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			}
 			else
 			{
-				if(es->pts == 0.0f)
+				if(es->pts == 0.0)
 					es->pts = tss->pts = tss->last_pts;
 				else
 					tss->pts = tss->last_pts = es->pts;
