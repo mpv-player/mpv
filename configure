@@ -680,6 +680,9 @@ _tv_dshow=auto
 _pvr=auto
 _network=yes
 _winsock2_h=auto
+_struct_addrinfo=auto
+_getaddrinfo=auto
+_struct_sockaddr_storage=auto
 _smb=auto
 _vidix=auto
 _vidix_pcidb=yes
@@ -3097,6 +3100,64 @@ if test $_winsock2_h = yes ; then
   def_winsock2_h='#define HAVE_WINSOCK2_H 1'
 else
   def_winsock2_h='#define HAVE_WINSOCK2_H 0'
+fi
+
+
+echocheck "netdb.h, struct addrinfo"
+if test "$_struct_addrinfo" = auto; then
+  _struct_addrinfo=no
+  cat > $TMPC << EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+int main(void) { struct addrinfo ai; return 0; }
+EOF
+  cc_check && _struct_addrinfo=yes
+fi
+echores "$_struct_addrinfo"
+
+if test "$_struct_addrinfo" = yes; then
+  def_addrinfo="#define HAVE_STRUCT_ADDRINFO 1"
+else
+  def_addrinfo="#define HAVE_STRUCT_ADDRINFO 0"
+fi
+
+
+echocheck "netdb.h, getaddrinfo()"
+if test "$_getaddrinfo" = auto; then
+  _getaddrinfo=no
+  cat > $TMPC << EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+int main(void) { (void) getaddrinfo(0, 0, 0, 0); return 0; }
+EOF
+  cc_check && _getaddrinfo=yes
+fi
+echores "$_getaddrinfo"
+
+if test "$_getaddrinfo" = yes; then
+  def_getaddrinfo="#define HAVE_GETADDRINFO 1"
+else
+  def_getaddrinfo="define HAVE_GETADDRINFO 0"
+fi
+
+
+echocheck "sockaddr_storage"
+if test "$_struct_sockaddr_storage" = auto; then
+  _struct_sockaddr_storage=no
+  cat > $TMPC << EOF
+#include <sys/socket.h>
+int main(void) { struct sockaddr_storage sas; return 0; }
+EOF
+  cc_check && _struct_sockaddr_storage=yes
+fi
+echores "$_struct_sockaddr_storage"
+
+if test "$_struct_sockaddr_storage" = yes; then
+  def_sockaddr_storage="#define HAVE_STRUCT_SOCKADDR_STORAGE 1"
+else
+  def_sockaddr_storage="#define HAVE_STRUCT_SOCKADDR_STORAGE 0"
 fi
 
 
@@ -8907,6 +8968,9 @@ $def_network
 $def_smb
 $def_socklen_t
 $def_vstream
+$def_addrinfo
+$def_getaddrinfo
+$def_sockaddr_storage
 
 
 /* libvo options */
