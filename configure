@@ -3139,7 +3139,7 @@ echores "$_getaddrinfo"
 if test "$_getaddrinfo" = yes; then
   def_getaddrinfo="#define HAVE_GETADDRINFO 1"
 else
-  def_getaddrinfo="define HAVE_GETADDRINFO 0"
+  def_getaddrinfo="#define HAVE_GETADDRINFO 0"
 fi
 
 
