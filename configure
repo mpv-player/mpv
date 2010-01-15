@@ -2092,7 +2092,7 @@ EOF
       cc_check $_march $_mcpu || _march=""
     fi
 
-    _optimizing=""
+    _optimizing="$proc"
     test $_fast_cmov = "auto" && _fast_cmov=yes
 
     echores "$proc"
