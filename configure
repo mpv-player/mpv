@@ -2024,7 +2024,6 @@ EOF
     else
         cpuopt=-mcpu
     fi
-    test $_fast_cmov = "auto" && _fast_cmov=yes
     if test "$_runtime_cpudetection" = no ; then
       case "$pvendor" in
       AuthenticAMD)
@@ -2036,6 +2035,7 @@ EOF
           # 64-bit prescotts exist, but as far as GCC is concerned they
           # have the same capabilities as a nocona.
           proc=nocona
+          test $_fast_cmov = "auto" && _fast_cmov=no
           ;;
         esac
         ;;
@@ -2089,6 +2089,7 @@ EOF
     fi
 
     _optimizing=""
+    test $_fast_cmov = "auto" && _fast_cmov=yes
 
     echores "$proc"
     ;;
