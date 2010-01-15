@@ -2064,6 +2064,9 @@ EOF
       fi
       # --- Intel processors ---
       if test "$proc" = "core2"; then
+        cc_check -march=$proc $cpuopt=$proc || proc=x86-64
+      fi
+      if test "$proc" = "x86-64"; then
         cc_check -march=$proc $cpuopt=$proc || proc=nocona
       fi
       if test "$proc" = "nocona"; then
