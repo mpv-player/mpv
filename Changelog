@@ -26,7 +26,7 @@ MPlayer (1.0)
     * Support for more formats in OpenGL vos (different YUV
       subsampling, 16 bit per component)
     * Selectable YUV to RGB conversion standard for -vo gl
-      (-vo gl:colorspace=...)
+      (-vo gl:colorspace=...:levelconv=...)
     * -vo matrixview finally added
 
     Other:
