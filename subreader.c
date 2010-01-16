@@ -1526,6 +1526,11 @@ if ((suboverlap_enabled == 2) ||
 	    }
 	}
 
+        /* Avoid n^2 memory use for the "placeholder" data structure
+         * below with subtitles that have a huge number of
+         * consecutive overlapping lines. */
+        lines_to_add = FFMIN(lines_to_add, SUB_MAX_TEXT);
+
 	// we need a structure to keep trace of the screen lines
 	// used by the subs, a 'placeholder'
 	counter = 2 * sub_to_add + 1;  // the maximum number of subs derived
