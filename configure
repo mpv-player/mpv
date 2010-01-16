@@ -3121,7 +3121,7 @@ if test "$_struct_addrinfo" = auto; then
 #include <sys/socket.h>
 #include <netdb.h>
 #endif
-int main(void) { struct addrinfo ai; return 0; }
+int main(void) { struct addrinfo *ai; return 0; }
 EOF
   cc_check $cc_check_winsock2_h && _struct_addrinfo=yes
 fi
