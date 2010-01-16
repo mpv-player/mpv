@@ -167,7 +167,7 @@ alpha() {
 
 arm() {
   case "$host_arch" in
-    arm) return 0;;
+    arm*) return 0;;
     *) return 1;;
   esac
 }
@@ -2126,7 +2126,7 @@ EOF
     _optimizing="$proc"
     ;;
 
-  arm|armv4l|armv5tel)
+  arm*)
     _arch='ARM'
     _target_arch='ARCH_ARM = yes'
     iproc='arm'
