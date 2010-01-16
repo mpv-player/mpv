@@ -3103,8 +3103,10 @@ echores "$_socklib"
 if test $_winsock2_h = yes ; then
   _ld_sock="-lws2_32"
   def_winsock2_h='#define HAVE_WINSOCK2_H 1'
+  cc_check_winsock2_h='-DHAVE_WINSOCK2_H=1'
 else
   def_winsock2_h='#define HAVE_WINSOCK2_H 0'
+  cc_check_winsock2_h='-DHAVE_WINSOCK2_H=0'
 fi
 
 
@@ -3112,12 +3114,16 @@ echocheck "netdb.h, struct addrinfo"
 if test "$_struct_addrinfo" = auto; then
   _struct_addrinfo=no
   cat > $TMPC << EOF
+#if HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#endif
 int main(void) { struct addrinfo ai; return 0; }
 EOF
-  cc_check && _struct_addrinfo=yes
+  cc_check $cc_check_winsock2_h && _struct_addrinfo=yes
 fi
 echores "$_struct_addrinfo"
 
@@ -3132,12 +3138,16 @@ echocheck "netdb.h, getaddrinfo()"
 if test "$_getaddrinfo" = auto; then
   _getaddrinfo=no
   cat > $TMPC << EOF
+#if HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#endif
 int main(void) { (void) getaddrinfo(0, 0, 0, 0); return 0; }
 EOF
-  cc_check && _getaddrinfo=yes
+  cc_check $cc_check_winsock2_h && _getaddrinfo=yes
 fi
 echores "$_getaddrinfo"
 
@@ -3152,10 +3162,14 @@ echocheck "sockaddr_storage"
 if test "$_struct_sockaddr_storage" = auto; then
   _struct_sockaddr_storage=no
   cat > $TMPC << EOF
+#if HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
 #include <sys/socket.h>
+#endif
 int main(void) { struct sockaddr_storage sas; return 0; }
 EOF
-  cc_check && _struct_sockaddr_storage=yes
+  cc_check $cc_check_winsock2_h && _struct_sockaddr_storage=yes
 fi
 echores "$_struct_sockaddr_storage"
 
