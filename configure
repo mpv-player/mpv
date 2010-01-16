@@ -9115,7 +9115,7 @@ $def_yasm
 
 #define HAVE_ATTRIBUTE_PACKED 1
 #define HAVE_GETHRTIME 0
-#define HAVE_INLINE_ASM 0
+#define HAVE_INLINE_ASM 1
 #define HAVE_LDBRX 0
 #define HAVE_POLL_H 1
 #define HAVE_PPC4XX 0
