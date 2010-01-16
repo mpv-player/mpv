@@ -3897,6 +3897,16 @@ Use ITU-R BT.709 color space.
 .IPs 3
 Use SMPTE-240M color space.
 .RE
+.IPs levelconv=<n>
+Select the brightness level conversion to use for the YUV to RGB conversion
+.RSss
+.IPs 0
+Convert TV to PC levels (default).
+.IPs 1
+Convert PC to TV levels.
+.IPs 2
+Do not do any conversion.
+.RE
 .IPs lscale=<n>
 Select the scaling function to use for luminance scaling.
 Only valid for yuv modes 2, 3, 4 and 6.
