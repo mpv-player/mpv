@@ -60,10 +60,15 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float yuv2rgb[3][4]) {
   float uvcos = params->saturation * cos(params->hue);
   float uvsin = params->saturation * sin(params->hue);
   int format = params->format;
+  int levelconv = params->levelconv;
   int i;
   const float (*uv_coeffs)[3];
   const float *level_adjust;
-  static const float yuv_pc_level_adjust[4] = {-16 / 255.0, -128 / 255.0, -128 / 255.0, 1.164};
+  static const float yuv_level_adjust[MP_CSP_LEVELCONV_COUNT][4] = {
+    {-16 / 255.0, -128 / 255.0, -128 / 255.0, 1.164},
+    { 16 / 255.0 * 1.164, -128 / 255.0, -128 / 255.0, 1.0/1.164},
+    { 0, -128 / 255.0, -128 / 255.0, 1},
+  };
   static const float xyz_level_adjust[4] = {0, 0, 0, 0};
   static const float uv_coeffs_table[MP_CSP_COUNT][3][3] = {
     [MP_CSP_DEFAULT] = {
@@ -101,7 +106,9 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float yuv2rgb[3][4]) {
   if (format < 0 || format >= MP_CSP_COUNT)
     format = MP_CSP_DEFAULT;
   uv_coeffs = uv_coeffs_table[format];
-  level_adjust = yuv_pc_level_adjust;
+  if (levelconv < 0 || levelconv >= MP_CSP_LEVELCONV_COUNT)
+    levelconv = MP_CSP_LEVELCONV_TV_TO_PC;
+  level_adjust = yuv_level_adjust[levelconv];
   if (format == MP_CSP_XYZ)
     level_adjust = xyz_level_adjust;
 

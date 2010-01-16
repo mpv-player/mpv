@@ -94,6 +94,7 @@ static int use_ycbcr;
 #define MASK_GAMMA_SUPPORT (MASK_NOT_COMBINERS & ~(1 << YUV_CONVERSION_FRAGMENT))
 static int use_yuv;
 static int colorspace;
+static int levelconv;
 static int is_yuv;
 static int lscale;
 static int cscale;
@@ -217,7 +218,7 @@ static void update_yuvconv(void) {
   float ggamma = exp(log(8.0) * eq_ggamma / 100.0);
   float bgamma = exp(log(8.0) * eq_bgamma / 100.0);
   gl_conversion_params_t params = {gl_target, yuvconvtype,
-      {colorspace, bri, cont, hue, sat, rgamma, ggamma, bgamma},
+      {colorspace, levelconv, bri, cont, hue, sat, rgamma, ggamma, bgamma},
       texture_width, texture_height, 0, 0, filter_strength};
   mp_get_chroma_shift(image_format, &xs, &ys);
   params.chrom_texw = params.texw >> xs;
@@ -1007,6 +1008,12 @@ static int valid_csp(void *p)
   return *csp >= -1 && *csp < MP_CSP_COUNT;
 }
 
+static int valid_csp_lvl(void *p)
+{
+  int *lvl = p;
+  return *lvl >= -1 && *lvl < MP_CSP_LEVELCONV_COUNT;
+}
+
 static const opt_t subopts[] = {
   {"manyfmts",     OPT_ARG_BOOL, &many_fmts,    NULL},
   {"osd",          OPT_ARG_BOOL, &use_osd,      NULL},
@@ -1017,6 +1024,7 @@ static const opt_t subopts[] = {
   {"rectangle",    OPT_ARG_INT,  &use_rectangle,int_non_neg},
   {"yuv",          OPT_ARG_INT,  &use_yuv,      int_non_neg},
   {"colorspace",   OPT_ARG_INT,  &colorspace,   valid_csp},
+  {"levelconv",    OPT_ARG_INT,  &levelconv,    valid_csp_lvl},
   {"lscale",       OPT_ARG_INT,  &lscale,       int_non_neg},
   {"cscale",       OPT_ARG_INT,  &cscale,       int_non_neg},
   {"filter-strength", OPT_ARG_FLOAT, &filter_strength, NULL},
@@ -1048,6 +1056,7 @@ static int preinit(const char *arg)
     use_ycbcr = 0;
     use_yuv = 0;
     colorspace = -1;
+    levelconv = -1;
     lscale = 0;
     cscale = 0;
     filter_strength = 0.5;
@@ -1110,6 +1119,10 @@ static int preinit(const char *arg)
               "    3: YUV to RGB according to SMPT-240M\n"
               "    4: YUV to RGB according to EBU\n"
               "    5: XYZ to RGB\n"
+              "  levelconv=<n>\n"
+              "    0: YUV to RGB converting TV to PC levels\n"
+              "    1: YUV to RGB converting PC to TV levels\n"
+              "    2: YUV to RGB without converting levels\n"
               "  lscale=<n>\n"
               "    0: use standard bilinear scaling for luma.\n"
               "    1: use improved bicubic scaling for luma.\n"
