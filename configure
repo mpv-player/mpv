@@ -9114,6 +9114,7 @@ $def_yasm
 #endif
 
 #define HAVE_ATTRIBUTE_PACKED 1
+#define HAVE_FAST_CLZ 0
 #define HAVE_GETHRTIME 0
 #define HAVE_INLINE_ASM 1
 #define HAVE_LDBRX 0
