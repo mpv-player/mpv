@@ -5326,6 +5326,8 @@ struct libs libraries[]={
 
 static WIN_BOOL WINAPI ext_stubs(void)
 {
+    // NOTE! these magic values will be replaced at runtime, make sure
+    // add_stub can still find them if you change them.
     volatile int idx = 0x0deadabc;
     // make sure gcc does not do eip-relative call or something like that
     void (* volatile my_printf)(char *, char *) = (void *)0xdeadfbcd;
