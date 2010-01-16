@@ -8189,6 +8189,14 @@ else
   echores "no"
 fi
 
+echocheck "linker support for --nxcompat --no-seh --dynamicbase"
+if cc_check "-Wl,--nxcompat -Wl,--no-seh -Wl,--dynamicbase" ; then
+  extra_ldflags="-Wl,--nxcompat -Wl,--no-seh -Wl,--dynamicbase $extra_ldflags"
+  echores "yes"
+else
+  echores "no"
+fi
+
 
 # Dynamic linking flags
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
