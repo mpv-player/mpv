@@ -420,7 +420,11 @@ static int vf_default_query_format(struct vf_instance* vf, unsigned int fmt){
   return vf_next_query_format(vf,fmt);
 }
 
-vf_instance_t* vf_open_plugin(struct MPOpts *opts, const vf_info_t* const* filter_list, vf_instance_t* next, const char *name, char **args){
+struct vf_instance *vf_open_plugin_noerr(struct MPOpts *opts,
+                                         const vf_info_t * const *filter_list,
+                                         vf_instance_t *next, const char *name,
+                                         char **args, int *retcode)
+{
     vf_instance_t* vf;
     int i;
     for(i=0;;i++){
@@ -453,10 +457,24 @@ vf_instance_t* vf_open_plugin(struct MPOpts *opts, const vf_info_t* const* filte
 	args = (char**)args[1];
       else
 	args = NULL;
-    if(vf->info->open(vf,(char*)args)>0) return vf; // Success!
+    *retcode = vf->info->open(vf,(char*)args);
+    if (*retcode > 0)
+        return vf;
     free(vf);
-    mp_tmsg(MSGT_VFILTER,MSGL_ERR,"Couldn't open video filter '%s'.\n",name);
     return NULL;
+}
+
+struct vf_instance *vf_open_plugin(struct MPOpts *opts,
+                                   const vf_info_t * const *filter_list,
+                                   vf_instance_t *next, const char *name,
+                                   char **args)
+{
+    struct vf_instance *vf = vf_open_plugin_noerr(opts, filter_list, next,
+                                                  name, args, &(int){0});
+    if (!vf)
+        mp_tmsg(MSGT_VFILTER, MSGL_ERR, "Couldn't open video filter '%s'.\n",
+                name);
+    return vf;
 }
 
 vf_instance_t* vf_open_filter(struct MPOpts *opts, vf_instance_t* next, const char *name, char **args){

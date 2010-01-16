@@ -107,6 +107,10 @@ void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h);
 mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype, int mp_imgflag, int w, int h);
 
 vf_instance_t* vf_open_plugin(struct MPOpts *opts, const vf_info_t* const* filter_list, vf_instance_t* next, const char *name, char **args);
+struct vf_instance *vf_open_plugin_noerr(struct MPOpts *opts,
+                                         const vf_info_t * const *filter_list,
+                                         vf_instance_t *next, const char *name,
+                                         char **args, int *retcode);
 vf_instance_t* vf_open_filter(struct MPOpts *opts, vf_instance_t* next, const char *name, char **args);
 vf_instance_t* vf_add_before_vo(vf_instance_t **vf, char *name, char **args);
 vf_instance_t* vf_open_encoder(struct MPOpts *opts, vf_instance_t* next, const char *name, char *args);

@@ -2229,9 +2229,15 @@ int reinit_video_chain(struct MPContext *mpctx)
       extern vf_info_t vf_info_ass;
       const vf_info_t* libass_vfs[] = {&vf_info_ass, NULL};
       char* vf_arg[] = {"auto", "1", NULL};
-      vf_instance_t* vf_ass = vf_open_plugin(opts, libass_vfs,sh_video->vfilter,"ass",vf_arg);
+      int retcode = 0;
+      struct vf_instance *vf_ass = vf_open_plugin_noerr(opts, libass_vfs,
+                                                        sh_video->vfilter,
+                                                        "ass", vf_arg,
+                                                        &retcode);
       if (vf_ass)
         sh_video->vfilter = vf_ass;
+      else if (retcode == -1) // vf_ass open() returns -1 if there's VO EOSD
+          mp_msg(MSGT_CPLAYER, MSGL_V, "[ass] vf_ass not needed\n");
       else
         mp_msg(MSGT_CPLAYER,MSGL_ERR, "ASS: cannot add video filter\n");
     }

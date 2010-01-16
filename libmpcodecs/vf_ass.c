@@ -388,10 +388,12 @@ static int open(vf_instance_t *vf, char* args)
 	vf->priv->outfmt = vf_match_csp(&vf->next,fmt_list,IMGFMT_YV12);
 	if (vf->priv->outfmt)
 		flags = vf_next_query_format(vf, vf->priv->outfmt);
-	if (!vf->priv->outfmt || (vf->priv->auto_insert && flags&VFCAP_EOSD))
-	{
+	if (!vf->priv->outfmt) {
 		uninit(vf);
 		return 0;
+	} else if (vf->priv->auto_insert && flags&VFCAP_EOSD) {
+		uninit(vf);
+		return -1;
 	}
 
 	if (vf->priv->auto_insert)
