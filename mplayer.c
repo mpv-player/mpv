@@ -1049,39 +1049,42 @@ static int playtree_add_playlist(struct MPContext *mpctx, play_tree_t* entry)
 void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr)
 {
     struct MPOpts *opts = &mpctx->opts;
-    sub_data *subd;
-#ifdef CONFIG_ASS
-    ASS_Track *asst = 0;
-#endif
+    sub_data *subd = NULL;
+    struct ass_track *asst = NULL;
 
     if (filename == NULL || mpctx->set_of_sub_size >= MAX_SUBTITLE_FILES) {
 	return;
     }
 
-    subd = sub_read_file(filename, fps);
 #ifdef CONFIG_ASS
-    if (opts->ass_enabled)
+    if (opts->ass_enabled) {
 #ifdef CONFIG_ICONV
         asst = ass_read_file(ass_library, filename, sub_cp);
 #else
         asst = ass_read_file(ass_library, filename, 0);
 #endif
-    if (opts->ass_enabled && subd && !asst)
-        asst = ass_read_subdata(ass_library, subd, fps);
-
-    if (!asst && !subd)
-#else
-    if(!subd)
+        if (!asst) {
+            subd = sub_read_file(filename, fps);
+            if (subd) {
+                asst = ass_read_subdata(ass_library, subd, fps);
+                if (asst) {
+                    sub_free(subd);
+                    subd = NULL;
+                }
+            }
+        }
+    } else
 #endif
-        mp_tmsg(MSGT_CPLAYER, noerr ? MSGL_WARN : MSGL_ERR, "Cannot load subtitles: %s\n",
-		filename_recode(filename));
+        subd = sub_read_file(filename, fps);
 
-#ifdef CONFIG_ASS
-    if (!asst && !subd) return;
+
+    if (!asst && !subd) {
+        mp_tmsg(MSGT_CPLAYER, noerr ? MSGL_WARN : MSGL_ERR,
+                "Cannot load subtitles: %s\n", filename_recode(filename));
+        return;
+    }
+
     mpctx->set_of_ass_tracks[mpctx->set_of_sub_size] = asst;
-#else
-    if (!subd) return;
-#endif
     mpctx->set_of_subtitles[mpctx->set_of_sub_size] = subd;
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_ID=%d\n", mpctx->set_of_sub_size);
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_FILENAME=%s\n",
