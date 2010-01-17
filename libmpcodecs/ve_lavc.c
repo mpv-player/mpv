@@ -15,6 +15,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "av_opts.h"
+#include "osdep/strsep.h"
 
 #include "codec-cfg.h"
 #include "stream/stream.h"
