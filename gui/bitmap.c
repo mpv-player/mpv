@@ -59,7 +59,8 @@ static int pngRead( unsigned char * fname,txSample * bf )
    case PIX_FMT_GRAY8:    bf->BPP =  8; break;
    case PIX_FMT_GRAY16BE: bf->BPP = 16; break;
    case PIX_FMT_RGB24:    bf->BPP = 24; break;
-   case PIX_FMT_RGB32:    bf->BPP = 32; break;
+   case PIX_FMT_BGRA:
+   case PIX_FMT_ARGB:     bf->BPP = 32; break;
    default:               bf->BPP =  0; break;
  }
  if (decode_ok && bf->BPP) {
