@@ -45,6 +45,9 @@ MPlayer (1.0)
       --disable-ass-internal
     * better support for 16-bit-per-component formats and formats
       with alpha channel.
+    * better out-of-the-box support for compiling for ARM, IA64,
+      MinGW32 and MinGW-w64, MinGW has ASLR enabled with recent
+      enough binutils.
 
     MEncoder:
     * add -tsprog for demuxer lavf
