@@ -374,6 +374,9 @@ static int tv_available_inputs_count = 0;
 *
 *---------------------------------------------------------------------------------------
 */
+// selectany can not be used with "static", fixes compilation with mingw-w64
+#undef DECLSPEC_SELECTANY
+#define DECLSPEC_SELECTANY
 /// CLSID definitions (used for CoCreateInstance call)
 #define CLSID_SampleGrabber MP_CLSID_SampleGrabber
 static DEFINE_GUID(CLSID_SampleGrabber, 0xC1F400A0, 0x3F08, 0x11d3, 0x9F, 0x0B,
