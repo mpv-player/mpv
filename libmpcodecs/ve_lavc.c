@@ -24,6 +24,7 @@
 #include "libmpdemux/muxer.h"
 
 #include "img_format.h"
+#include "fmt-conversion.h"
 #include "mp_image.h"
 #include "vf.h"
 
@@ -593,30 +594,9 @@ static int config(struct vf_instance_s* vf,
     }
 
     mux_v->imgfmt = lavc_param_format;
-    switch(lavc_param_format)
-    {
-	case IMGFMT_YV12:
-	    lavc_venc_context->pix_fmt = PIX_FMT_YUV420P;
-	    break;
-	case IMGFMT_422P:
-	    lavc_venc_context->pix_fmt = PIX_FMT_YUV422P;
-	    break;
-	case IMGFMT_444P:
-	    lavc_venc_context->pix_fmt = PIX_FMT_YUV444P;
-	    break;
-	case IMGFMT_411P:
-	    lavc_venc_context->pix_fmt = PIX_FMT_YUV411P;
-	    break;
-	case IMGFMT_YVU9:
-	    lavc_venc_context->pix_fmt = PIX_FMT_YUV410P;
-	    break;
-	case IMGFMT_BGR32:
-	    lavc_venc_context->pix_fmt = PIX_FMT_RGB32;
-	    break;
-	default:
-    	    mp_msg(MSGT_MENCODER,MSGL_ERR,"%s is not a supported format\n", vo_format_name(lavc_param_format));
-    	    return 0;
-    }
+    lavc_venc_context->pix_fmt = imgfmt2pixfmt(lavc_param_format);
+    if (lavc_venc_context->pix_fmt == PIX_FMT_NONE)
+        return 0;
 
     if(!stats_file) {
     /* lavc internal 2pass bitrate control */
