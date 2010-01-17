@@ -97,12 +97,14 @@ extern int vidmode;
  * Defining them here allows us to get rid of the dxguid library during
  * the linking stage.
  *****************************************************************************/
-const GUID IID_IDirectDraw7 =
+#define IID_IDirectDraw7 MP_IID_IDirectDraw7
+static const GUID MP_IID_IDirectDraw7 =
 {
 	0x15e65ec0,0x3b9c,0x11d2,{0xb9,0x2f,0x00,0x60,0x97,0x97,0xea,0x5b}
 };
 
-const GUID IID_IDirectDrawColorControl =
+#define IID_IDirectDrawColorControl MP_IID_IDirectDrawColorControl
+static const GUID MP_IID_IDirectDrawColorControl =
 {
 	0x4b9f0ee0,0x0d7e,0x11d0,{0x9b,0x06,0x00,0xa0,0xc9,0x03,0xa3,0xb8}
 };
