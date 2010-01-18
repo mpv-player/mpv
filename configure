@@ -1818,7 +1818,7 @@ case "$host_arch" in
         proc=k8
         ;;
 
-    *) proc=k8 iproc=686 ;;
+    *) proc=amdfam10 iproc=686 ;;
     esac
     ;;
   GenuineIntel)
@@ -2028,7 +2028,11 @@ EOF
     if test "$_runtime_cpudetection" = no ; then
       case "$pvendor" in
       AuthenticAMD)
-        proc=k8;;
+        case "$pfamily" in
+        15) proc=k8;;
+        *) proc=amdfam10;;
+        esac
+        ;;
       GenuineIntel)
         case "$pfamily" in
         6) proc=core2;;
