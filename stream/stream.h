@@ -269,6 +269,7 @@ inline static int stream_seek(stream_t *s,off_t pos){
     off_t x=pos-(s->pos-s->buf_len);
     if(x>=0){
       s->buf_pos=x;
+      s->eof = 0;
 //      putchar('*');fflush(stdout);
       return 1;
     }

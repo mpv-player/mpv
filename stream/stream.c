@@ -355,18 +355,22 @@ if(newpos==0 || newpos!=s->pos){
 //   putchar('%');fflush(stdout);
 }
 
-while(stream_fill_buffer(s) > 0 && pos >= 0) {
+s->eof = 0; // EOF reset when seek succeeds.
+while (stream_fill_buffer(s) > 0) {
   if(pos<=s->buf_len){
     s->buf_pos=pos; // byte position in sector
     return 1;
   }
   pos -= s->buf_len;
 }
+// Fill failed, but seek still is a success.
+s->pos += pos;
+s->buf_pos = 0;
+s->buf_len = 0;
 
-//  if(pos==s->buf_len) printf("XXX Seek to last byte of file -> EOF\n");
-
-  mp_msg(MSGT_STREAM,MSGL_V,"stream_seek: WARNING! Can't seek to 0x%"PRIX64" !\n",(int64_t)(pos+newpos));
-  return 0;
+mp_msg(MSGT_STREAM,MSGL_V,
+       "stream_seek: Seek to/past EOF: no buffer preloaded.\n");
+return 1;
 }
 
 
