@@ -1,4 +1,4 @@
-.\" synced with r30043
+.\" synced with r30197
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -1292,14 +1292,14 @@ Permette ad un socket di essere riutilizzato da altri processi appena viene
 chiuso.
 .
 .TP
-.B \-bandwidth <valore> (solo rete)
+.B \-bandwidth <Bytes> (solo rete)
 Specifica la massima larghezza di banda (bandwidth) per lo streaming attraverso
 una rete (per quei server che sono capaci di inviare contenuti, normalmente
 filmati, a diversi bitrate).
-Utile se vuoi guardare contenuti multimediali dal vivo con una connessione lenta.
+Utile se vuoi guardare contenuti multimediali dal vivo su una connessione lenta.
 Con lo streaming RTSP Real, viene anche usata per impostare la massima larghezza
 di banda in uscita dal server, permettendo un riempimento della cache e un dump
-di flusso più veloce.
+del flusso più rapido.
 .
 .TP
 .B \-cache <KBytes>
@@ -1347,15 +1347,15 @@ Usa il dispositivo SCSI generico specificato
 .IPs sector-size=<valore>
 Dimensione di una lettura atomica
 .IPs overlap=<valore>
-Forza la ricerca di sovrapposizione minima (minimum overlap search) durante la verifica a <valore> settori
+Forza la ricerca di sovrapposizione minima (minimum overlap search) durante la
+verifica a <valore> settori.
 .IPs toc-bias
 Assume che lo scostamento iniziale della traccia 1 come riportato nella TOC
 sarà indirizzato come LBA 0.
 Alcuni lettori Toshiba hanno bisogno di questa opzione per ottenere la corretta
 delimitazione delle tracce.
 .IPs toc-offset=<valore>
-Aggiunge <valore> settori ai valori riportati quando si indirizzano
-le tracce.
+Aggiunge <valore> settori ai valori riportati quando si indirizzano le tracce.
 Può essere negativo.
 .IPs (no)skip
 (Non) accetta una ricostruzione imperfetta dei dati.
@@ -2672,7 +2672,7 @@ Attiva il raggio della sfocatura del font (default: 2).
 .TP
 .B \-subfont\-encoding <valore> (solo FreeType)
 Attiva la codifica del font.
-Quando settato a 'unicode' tutti i glifi dal file del font verranno disegnati
+Quando impostato a 'unicode' verranno disegnati tutti i glifi dal file del font
 e verrà usato l'unicode (default: unicode).
 .
 .TP
@@ -3606,7 +3606,7 @@ Seleziona la sorgente da cui viene preso il colorkey (default: cur).
 .IPs cur
 Il default prende il colorkey correntemente configurato in Xv.
 .IPs use
-Utilizza ma non setta il colorkey da MPlayer (utilizza l'opzione \-colorkey
+Utilizza ma non imposta il colorkey da MPlayer (utilizza l'opzione \-colorkey
 per cambiarlo).
 .IPs set
 Uguale a use ma imposta anche il colorkey fornito.
@@ -3668,7 +3668,7 @@ Può aggiungere una piccola (non distinguibile) desincronizzazione costante
 del flusso A/V (default: noqueue).
 .IPs (no)sleep
 Utilizza la funzione sleep mentre aspetta che finisca la visualizzazione
-(non raccomandato con Linux) (default: nosleep).
+(non consigliato in Linux) (default: nosleep).
 .IPs ck=cur|use|set
 E' lo stesso che \-vo xv:ck (vedi \-vo xv).
 .IPs ck-method=man|bg|auto
@@ -4024,6 +4024,10 @@ orizzontale / n).
 Richiede il supporto GLX_SGI_swap_control per funzionare.
 Con alcune (la maggior parte/tutte?) implementazioni funziona sono in modalità
 a schermo intero.
+.IPs ycbcr
+Usa l'estenzione GL_MESA_ycbcr_texture per convertire da YUV a RGB.
+Nella maggior parte dei casi è probabilmente più lento di una conversione
+software verso RGB.
 .IPs yuv=<n>
 Seleziona il tipo di conversione da YUV a RGB.
 .RSss
@@ -4069,10 +4073,18 @@ La gamma può essere impostata indipendentemente per rosso, verde e blu.
 La velocità dipende più dall'ampiezza di memoria della GPU rispetto agli altri
 metodi.
 .RE
-.IPs ycbcr
-Usa l'estenzione GL_MESA_ycbcr_texture per convertire da YUV a RGB.
-Nella maggior parte dei casi è probabilmente più lento di una conversione
-software verso RGB.
+.IPs colorspace
+Seleziona lo spazio colore per la conversione da YUV a RGB.
+.RSss
+.IPs 0
+Utilizza la formula usata solitamente da MPlayer (default).
+.IPs 1
+Usa uno spazio colore ITU-R BT.601.
+.IPs 2
+Usa uno spazio colore ITU-R BT.709.
+.IPs 3
+Usa uno spazio colore SMPTE-240M.
+.RE
 .IPs lscale=<n>
 Seleziona la funzione di ridimensionamento da usare per il ridimensionamento
 della luminanza.
@@ -4112,6 +4124,13 @@ Se abilitata (default) usa l'interpolazione GL_LINEAR, se no usa quella
 GL_NEAREST per la texture 'customtex'.
 .IPs (no)customtrect
 Se abilitata, usa texture_rectangle per la texture 'customtex'.
+Disabilitata di default.
+.IPs (no)mipmapgen
+Se abilitata, vengono generate automaticamente delle mipmap per il video.
+Questo dovrebbe essere utile insieme con customprog e con l'istruzione TXB per
+implementare filtri di sfocatura con un raggio ampio.
+Per la maggior parte delle implementazioni OpenGL è molto lento per un
+qualsiasi formato non RGB.
 Disabilitata di default.
 .RE
 .sp 1
@@ -4171,6 +4190,23 @@ A parte ciò, i valori hanno gli stessi significati validi per \-vo gl.
 .REss
 .
 .TP
+.B matrixview
+Renderizzatore basato su OpenGL che crea un effetto di testo stile Matrix.
+.PD 0
+.RSs
+.IPs cols=<n>
+Numero delle colonne di testo da mostrare.
+Valori molto bassi (< 16) probabilmente non funzioneranno a causa delle
+limitazioni dello scalatore.
+Allo stesso modo, valori non divisibili per 16 potrebbero causare problemi.
+.IPs rows=<n>
+Numero delle righe di testo da mostrare.
+Valori molto bassi (< 16) probabilmente non funzioneranno a causa delle
+limitazioni dello scalatore.
+Allo stesso modo, valori non divisibili per 16 potrebbero causare problemi.
+.REss
+.
+.TP
 .B "null\ \ \ "
 Non produce nessuna uscita video.
 Utile per benchmarking (prove di velocità).
@@ -4226,17 +4262,20 @@ Visualizza il video utilizzando la libreria DirectFB.
 .IPs (no)input
 Utilizza il codice della tastiera di DirectFB invece di quello standard di MPlayer. (default: abilitato)
 .IPs buffermode=single|double|triple
-Il doppio ed il triplo buffering danno i migliori risultati se vuoi evitare problemi di tearing.
-Il triplo buffering è più efficiente del doppio buffering perché non blocca MPlayer
-mentre aspetta il tracciamento verticale.
+Il doppio ed il triplo buffering danno i migliori risultati se vuoi evitare
+problemi di tearing.
+Il triplo buffering è più efficiente del doppio buffering perché non blocca
+MPlayer mentre aspetta il tracciamento verticale.
 La bufferizzazione singola dovrebbe essere evitata (default: single).
 .IPs fieldparity=top|bottom
-Controlla l'ordine di uscita dei fotogrammi interlacciati (default: disabilitato).
-Valori validi sono top (prima il campo superiore) e bottom (prima il campo inferiore).
-Questa opzione non ha alcun effetto su materiale progressivo, generalmente la maggior
-parte dei film MPEG.
-Devi abilitare questa opzione se hai effetti di tearing oppure movimenti non uniformi
-guardando materiale interlacciato.
+Controlla l'ordine di uscita dei fotogrammi interlacciati
+(default: disabilitato).
+Valori validi sono top (prima il campo superiore) e bottom (prima il campo
+inferiore).
+Questa opzione non ha alcun effetto su materiale progressivo, generalmente la
+maggior parte dei film MPEG.
+Devi abilitare questa opzione se hai effetti di tearing oppure movimenti non
+uniformi guardando materiale interlacciato.
 .IPs layer=N
 Forza l'utilizzo del layer con ID N per la riproduzione (default: \-1 \- auto).
 .IPs dfbopts=<list>
@@ -8134,7 +8173,7 @@ lascia che sia LAME a scegliere il valore automaticamente.
 .
 .TP
 .B preset=<valore>
-valore dei settaggi predefiniti (Preset)
+valore delle impostazioni predefinite (Preset)
 .RSs
 .IPs "help\ "
 Stampa le opzioni aggiuntive ed informazioni sui preset.
@@ -8145,7 +8184,7 @@ codifica VBR, alta qualità, bitrate compreso tra 170\-210 kbps
 .IPs extreme
 codifica VBR, qualità molto alta, bitrate compreso tra 200\-240 kbps
 .IPs insane
-codifica CBR, il settaggio di miglior qualità, bitrate di 320 kbps
+codifica CBR, l'impostazione di miglior qualità, bitrate di 320 kbps
 .IPs <8\-320>
 codifica ABR al bitrate medio specificato
 .RE
@@ -9944,12 +9983,12 @@ dai blocchi circostanti (default: attiva).
 .
 .TP
 .B vhq=<0\-4>
-L'algoritmo di ricerca del movimento è basato su una ricerca nel dominio del colore
-e cerca di trovare un vettore di movimento che minimizzi la differenza tra il fotogramma
-di riferimento e quello codificato.
-Con questo settaggio attivato Xvid userà anche il dominio delle frequenze (DCT)
-per ricercare un vettore di movimento che minimizzi non solo la differenza spaziale, ma
-anche la lunghezza codificata del blocco.
+L'algoritmo di ricerca del movimento è basato su una ricerca nel dominio del
+colore e cerca di trovare un vettore di movimento che minimizzi la differenza
+tra il fotogramma di riferimento e quello codificato.
+Con questa impostazione attivata, Xvid userà anche il dominio delle frequenze
+(DCT) per ricercare un vettore di movimento che minimizzi non solo la
+differenza spaziale, ma anche la lunghezza codificata del blocco.
 Dalla più rapida alla più lenta:
 .PD 0
 .RSs
