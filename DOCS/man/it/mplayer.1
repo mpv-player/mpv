@@ -1,4 +1,4 @@
-.\" synced with r30197
+.\" synced with r30336
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -4084,6 +4084,16 @@ Usa uno spazio colore ITU-R BT.601.
 Usa uno spazio colore ITU-R BT.709.
 .IPs 3
 Usa uno spazio colore SMPTE-240M.
+.RE
+.IPs levelconv=<n>
+Seleziona il livello di luminosità da usare per la conversione da YUV a RGB.
+.RSss
+.IPs 0
+Converte da livelli TV a PC (default).
+.IPs 1
+Converte da livelli PC a TV.
+.IPs 2
+Non effettua alcuna conversione.
 .RE
 .IPs lscale=<n>
 Seleziona la funzione di ridimensionamento da usare per il ridimensionamento
