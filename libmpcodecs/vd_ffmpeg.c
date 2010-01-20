@@ -864,7 +864,6 @@ static struct mp_image *decode(struct sh_video *sh, void *data, int len,
     return mpi;
 }
 
-#if CONFIG_XVMC || CONFIG_VDPAU
 static enum PixelFormat get_format(struct AVCodecContext *avctx,
                                     const enum PixelFormat *fmt){
     enum PixelFormat selected_format;
@@ -883,7 +882,6 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
     selected_format = fmt[i];
     return selected_format;
 }
-#endif /* CONFIG_XVMC || CONFIG_VDPAU */
 
 const struct vd_functions mpcodecs_vd_ffmpeg = {
     .info = &info,
