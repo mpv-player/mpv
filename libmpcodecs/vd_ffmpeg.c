@@ -135,8 +135,9 @@ static int control(sh_video_t *sh, int cmd, void *arg, ...){
         return CONTROL_TRUE;
     case VDCTRL_QUERY_UNSEEN_FRAMES:;
         int delay = avctx->has_b_frames;
-#ifdef FF_THREAD_FRAME
+#if defined(FF_THREAD_FRAME) && LIBAVCODEC_VERSION_MAJOR <= 52 && LIBAVCODEC_VERSION_MINOR < 49
         // FFmpeg-mt has extra delay when using frame threading
+        // In newer versions that is included in has_b_frames
         if (avctx->thread_type & FF_THREAD_FRAME)
             delay += avctx->thread_count - 1;
 #endif
