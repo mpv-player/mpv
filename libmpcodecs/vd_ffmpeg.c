@@ -197,7 +197,12 @@ static int init(sh_video_t *sh){
         avctx->release_buffer  = release_buffer;
         avctx->reget_buffer    = get_buffer;
         avctx->draw_horiz_band = draw_slice;
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] XVMC-accelerated MPEG-2.\n");
+        if (lavc_codec->capabilities & CODEC_CAP_HWACCEL)
+            mp_msg(MSGT_DECVIDEO, MSGL_V, "[VD_FFMPEG] XVMC-accelerated "
+                   "MPEG-2.\n");
+        if (lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU)
+            mp_msg(MSGT_DECVIDEO, MSGL_V, "[VD_FFMPEG] VDPAU hardware "
+                   "decoding.\n");
         avctx->slice_flags = SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
     }
 
@@ -869,7 +874,7 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
     for(i=0;fmt[i]!=PIX_FMT_NONE;i++){
         imgfmt = pixfmt2imgfmt(fmt[i]);
         if(!IMGFMT_IS_XVMC(imgfmt) && !IMGFMT_IS_VDPAU(imgfmt)) continue;
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] Trying pixfmt=%d.\n", i);
+        mp_msg(MSGT_DECVIDEO, MSGL_V, "[VD_FFMPEG] Trying pixfmt=%d.\n", i);
         if(init_vo(sh, fmt[i]) >= 0) {
             break;
         }
