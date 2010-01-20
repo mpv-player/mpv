@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
+#include <stdbool.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -144,26 +145,6 @@ static int control(sh_video_t *sh, int cmd, void *arg, ...){
     return CONTROL_UNKNOWN;
 }
 
-static void set_format_params(struct AVCodecContext *avctx, enum PixelFormat fmt){
-    int imgfmt;
-    if (fmt == PIX_FMT_NONE)
-        return;
-    imgfmt = pixfmt2imgfmt(fmt);
-    if (IMGFMT_IS_XVMC(imgfmt) || IMGFMT_IS_VDPAU(imgfmt)) {
-        sh_video_t *sh     = avctx->opaque;
-        vd_ffmpeg_ctx *ctx = sh->context;
-        ctx->do_dr1    = 1;
-        ctx->do_slices = 1;
-        avctx->thread_count    = 1;
-        avctx->get_buffer      = get_buffer;
-        avctx->release_buffer  = release_buffer;
-        avctx->reget_buffer    = get_buffer;
-        avctx->draw_horiz_band = draw_slice;
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] XVMC-accelerated MPEG-2.\n");
-        avctx->slice_flags = SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
-    }
-}
-
 // init driver
 static int init(sh_video_t *sh){
     struct lavc_param *lavc_param = &sh->opts->lavc_param;
@@ -206,19 +187,27 @@ static int init(sh_video_t *sh){
     avctx->codec_type = CODEC_TYPE_VIDEO;
     avctx->codec_id = lavc_codec->id;
 
-#if CONFIG_VDPAU
-    if(lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU){
-        avctx->get_format = get_format;
+    if (lavc_codec->capabilities & CODEC_CAP_HWACCEL   // XvMC
+        || lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU) {
+        ctx->do_dr1    = true;
+        ctx->do_slices = true;
+        lavc_param->threads    = 1;
+        avctx->get_format      = get_format;
+        avctx->get_buffer      = get_buffer;
+        avctx->release_buffer  = release_buffer;
+        avctx->reget_buffer    = get_buffer;
+        avctx->draw_horiz_band = draw_slice;
+        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] XVMC-accelerated MPEG-2.\n");
+        avctx->slice_flags = SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
     }
-#endif /* CONFIG_VDPAU */
-#if CONFIG_XVMC
-    if(lavc_codec->capabilities & CODEC_CAP_HWACCEL){
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] XVMC accelerated codec.\n");
-        avctx->get_format= get_format;//for now only this decoder will use it
-        // HACK around badly placed checks in mpeg_mc_decode_init
-        set_format_params(avctx, PIX_FMT_XVMC_MPEG2_IDCT);
+
+    /* Our get_buffer and draw_horiz_band callbacks are not safe to call
+     * from other threads. */
+    if (lavc_param->threads > 1) {
+        ctx->do_dr1 = false;
+        ctx->do_slices = false;
     }
-#endif /* CONFIG_XVMC */
+
     if(ctx->do_dr1){
         avctx->flags|= CODEC_FLAG_EMU_EDGE;
         avctx->get_buffer= get_buffer;
@@ -357,9 +346,6 @@ static int init(sh_video_t *sh){
         uninit(sh);
         return 0;
     }
-    // this is necessary in case get_format was never called and init_vo is
-    // too late e.g. for H.264 VDPAU
-    set_format_params(avctx, avctx->pix_fmt);
     mp_msg(MSGT_DECVIDEO, MSGL_V, "INFO: libavcodec init OK!\n");
     return 1; //mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, IMGFMT_YV12);
 }
@@ -454,9 +440,6 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
         pix_fmt != ctx->pix_fmt ||
         !ctx->vo_initialized)
     {
-        // this is a special-case HACK for MPEG-1/2 VDPAU that uses neither get_format nor
-        // sets the value correctly in avcodec_open.
-        set_format_params(avctx, avctx->pix_fmt);
         mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
         if (sh->aspect == 0 ||
             av_cmp_q(avctx->sample_aspect_ratio,
@@ -892,7 +875,6 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
         }
     }
     selected_format = fmt[i];
-    set_format_params(avctx, selected_format);
     return selected_format;
 }
 #endif /* CONFIG_XVMC || CONFIG_VDPAU */
