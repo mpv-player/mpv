@@ -554,6 +554,9 @@ _libavparsers_all=$(sed -n 's/^[^#]*PARSER.*(.*, *\(.*\)).*/\1_parser/p' libavco
 _libavparsers=$_libavparsers_all
 _libavbsfs_all=$(sed -n 's/^[^#]*BSF.*(.*, *\(.*\)).*/\1_bsf/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]')
 _libavbsfs=$_libavbsfs_all
+_libavhwaccels_all=$(sed -n 's/^[^#]*HWACCEL.*(.*, *\(.*\)).*/\1_hwaccel/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]')
+# Disable all hardware accelerators for now.
+_libavhwaccels=
 _libavdemuxers_all=$(sed -n 's/^[^#]*DEMUX.*(.*, *\(.*\)).*/\1_demuxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]')
 _libavdemuxers=$(echo $_libavdemuxers_all | sed -e 's/ LIB[A-Z0-9_]*_DEMUXER//g' -e s/REDIR_DEMUXER// -e s/RTSP_DEMUXER// -e s/SDP_DEMUXER// -e s/AVISYNTH_DEMUXER//)
 _libavmuxers_all=$(sed -n 's/^[^#]*_MUX.*(.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]')
@@ -8713,6 +8716,7 @@ $(echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/')
 $(echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/')
 $(echo $_libavprotocols | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/')
 $(echo $_libavbsfs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/')
+$(echo $_libavhwaccels | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/')
 EOF
 
 #############################################################################
@@ -9213,14 +9217,7 @@ $(ff_config_enable "$_libavdemuxers_all" "$_libavdemuxers")
 $(ff_config_enable "$_libavmuxers_all"   "$_libavmuxers")
 $(ff_config_enable "$_libavprotocols_all" "$_libavprotocols")
 $(ff_config_enable "$_libavbsfs_all" "$_libavbsfs")
-
-#define CONFIG_H263_VAAPI_HWACCEL 0
-#define CONFIG_MPEG2_VAAPI_HWACCEL 0
-#define CONFIG_MPEG4_VAAPI_HWACCEL 0
-#define CONFIG_H264_VAAPI_HWACCEL 0
-#define CONFIG_VC1_VAAPI_HWACCEL 0
-#define CONFIG_WMV3_VAAPI_HWACCEL 0
-#define CONFIG_H264_DXVA2_HWACCEL 0
+$(ff_config_enable "$_libavhwaccels_all"  "$_libavhwaccels")
 
 #endif /* MPLAYER_CONFIG_H */
 EOF
