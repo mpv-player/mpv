@@ -9220,6 +9220,7 @@ $(ff_config_enable "$_libavbsfs_all" "$_libavbsfs")
 #define CONFIG_H264_VAAPI_HWACCEL 0
 #define CONFIG_VC1_VAAPI_HWACCEL 0
 #define CONFIG_WMV3_VAAPI_HWACCEL 0
+#define CONFIG_H264_DXVA2_HWACCEL 0
 
 #endif /* MPLAYER_CONFIG_H */
 EOF
