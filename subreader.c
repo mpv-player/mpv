@@ -2249,15 +2249,15 @@ void dump_sami(sub_data* subd, float fps) {
 
 void sub_free( sub_data * subd )
 {
- int i;
+    int i, j;
 
     if ( !subd ) return;
 
-    if (subd->subtitles) {
-	for (i=0; i < subd->subtitles->lines; i++) free( subd->subtitles->text[i] );
-	free( subd->subtitles );
-    }
-    if (subd->filename) free( subd->filename );
+    for (i = 0; i < subd->sub_num; i++)
+        for (j = 0; j < subd->subtitles[i].lines; j++)
+            free( subd->subtitles[i].text[j] );
+    free( subd->subtitles );
+    free( subd->filename );
     free( subd );
 }
 
