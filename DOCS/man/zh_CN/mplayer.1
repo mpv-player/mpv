@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r30197
+.\" sync with en/mplayer.1 r30336
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -3627,13 +3627,23 @@ GL_ARB_fragment_shader！）。至少需要三个纹理单位。提供饱和度�
 选择 YUV 至 RGB 转换所用的色彩空间
 .RSss
 .IPs 0
-使用 MPlayer 通常使用的程式（默认值）
+使用 MPlayer 通常使用的公式（默认值）。
 .IPs 1
 使用 ITU-R BT.601 色彩空间。
 .IPs 2
 使用 ITU-R BT.709 色彩空间。
 .IPs 3
 使用 SMPTE-240M 色彩空间。
+.RE
+.IPs levelconv=<n>
+选择用于 YUV 至 RGB 转换的亮度等级转换方式。
+.RSss
+.IPs 0
+将 TV 等级转换为 PC 等级（默认值）。
+.IPs 1
+将 PC 等级转换为 TV 等级。
+.IPs 2
+不作任何转换。
 .RE
 .IPs lscale=<n>
 选择用于亮度调整的调节函数。
