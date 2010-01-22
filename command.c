@@ -2335,6 +2335,45 @@ static const char *property_error_string(int error_value)
     return "UNKNOWN";
 }
 
+static void remove_subtitle_range(MPContext *mpctx, int start, int count)
+{
+    int idx;
+    int end = start + count;
+    int after = mpctx->set_of_sub_size - end;
+    sub_data **subs = mpctx->set_of_subtitles;
+    if (count < 0 || count > mpctx->set_of_sub_size ||
+        start < 0 || start > mpctx->set_of_sub_size - count) {
+        mp_msg(MSGT_CPLAYER, MSGL_ERR,
+               "Cannot remove invalid subtitle range %i +%i\n", start, count);
+        return;
+    }
+    for (idx = start; idx < end; idx++) {
+        sub_data *subd = subs[idx];
+        mp_msg(MSGT_CPLAYER, MSGL_STATUS,
+               MSGTR_RemovedSubtitleFile, idx + 1,
+               filename_recode(subd->filename));
+        sub_free(subd);
+        subs[idx] = NULL;
+    }
+
+    mpctx->global_sub_size -= count;
+    mpctx->set_of_sub_size -= count;
+    if (mpctx->set_of_sub_size <= 0)
+        mpctx->global_sub_indices[SUB_SOURCE_SUBS] = -1;
+
+    memmove(subs + start, subs + end, after * sizeof(*subs));
+    memset(subs + start + after, 0, count * sizeof(*subs));
+
+    if (mpctx->set_of_sub_pos >= start && mpctx->set_of_sub_pos < end) {
+        mpctx->global_sub_pos = -2;
+        subdata = NULL;
+        mp_input_queue_cmd(mp_input_parse_cmd("sub_select"));
+    } else if (mpctx->set_of_sub_pos >= end) {
+        mpctx->set_of_sub_pos -= count;
+        mpctx->global_sub_pos -= count;
+    }
+}
+
 int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 {
     sh_audio_t * const sh_audio = mpctx->sh_audio;
@@ -2908,46 +2947,10 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	case MP_CMD_SUB_REMOVE:
 	    if (sh_video) {
 		int v = cmd->args[0].v.i;
-		sub_data *subd;
 		if (v < 0) {
-		    for (v = 0; v < mpctx->set_of_sub_size; ++v) {
-			subd = mpctx->set_of_subtitles[v];
-			mp_msg(MSGT_CPLAYER, MSGL_STATUS,
-			       MSGTR_RemovedSubtitleFile, v + 1,
-			       filename_recode(subd->filename));
-			sub_free(subd);
-			mpctx->set_of_subtitles[v] = NULL;
-		    }
-		    mpctx->global_sub_indices[SUB_SOURCE_SUBS] = -1;
-		    mpctx->global_sub_size -= mpctx->set_of_sub_size;
-		    mpctx->set_of_sub_size = 0;
-		    if (mpctx->set_of_sub_pos >= 0) {
-			mpctx->global_sub_pos = -2;
-			subdata = NULL;
-			mp_input_queue_cmd(mp_input_parse_cmd("sub_select"));
-		    }
+		    remove_subtitle_range(mpctx, 0, mpctx->set_of_sub_size);
 		} else if (v < mpctx->set_of_sub_size) {
-		    subd = mpctx->set_of_subtitles[v];
-		    mp_msg(MSGT_CPLAYER, MSGL_STATUS,
-			   MSGTR_RemovedSubtitleFile, v + 1,
-			   filename_recode(subd->filename));
-		    sub_free(subd);
-		    if (mpctx->set_of_sub_pos == v) {
-			mpctx->global_sub_pos = -2;
-			subdata = NULL;
-			mp_input_queue_cmd(mp_input_parse_cmd("sub_select"));
-		    } else if (mpctx->set_of_sub_pos > v) {
-			--mpctx->set_of_sub_pos;
-			--mpctx->global_sub_pos;
-		    }
-		    while (++v < mpctx->set_of_sub_size)
-			mpctx->set_of_subtitles[v - 1] =
-			    mpctx->set_of_subtitles[v];
-		    --mpctx->set_of_sub_size;
-		    --mpctx->global_sub_size;
-		    if (mpctx->set_of_sub_size <= 0)
-			mpctx->global_sub_indices[SUB_SOURCE_SUBS] = -1;
-		    mpctx->set_of_subtitles[mpctx->set_of_sub_size] = NULL;
+		    remove_subtitle_range(mpctx, v, 1);
 		}
 	    }
 	    break;
