@@ -206,7 +206,7 @@ csp_again:
 	    goto csp_again;
 	} else
 	{ // sws failed, if the last filter (vf_vo) support MPEGPES try to append vf_lavc
-	     vf_instance_t* vo, *vp = NULL, *ve;
+	     vf_instance_t* vo, *vp = NULL, *ve, *vpp = NULL;
 	     // Remove the scale filter if we added it ourself
 	     if(vf == sc) {
 	       ve = vf;
@@ -214,13 +214,20 @@ csp_again:
 	       vf_uninit_filter(ve);
 	     }
 	     // Find the last filter (vf_vo)
-	     for(vo = vf ; vo->next ; vo = vo->next)
+	     for(vo = vf ; vo->next ; vo = vo->next) {
+               vpp = vp;
 	       vp = vo;
+             }
 	     if(vo->query_format(vo,IMGFMT_MPEGPES) && (!vp || (vp && strcmp(vp->info->name,"lavc")))) {
 	       ve = vf_open_filter(vo,"lavc",NULL);
 	       if(vp) vp->next = ve;
 		 else vf = ve;
 	       goto csp_again;
+	     }
+	     if (vp && !strcmp(vp->info->name,"lavc")) {
+		if (vpp) vpp->next = vo;
+		else vf = vo;
+		vf_uninit_filter(vp);
 	     }
 	}
 	mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_VOincompCodec);
