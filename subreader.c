@@ -20,6 +20,7 @@
 #include "subreader.h"
 #include "stream/stream.h"
 #include "libavutil/common.h"
+#include "libavutil/avstring.h"
 
 #ifdef CONFIG_ENCA
 #include <enca.h>
@@ -990,8 +991,7 @@ static subtitle *sub_read_line_jacosub(stream_t* st, subtitle * current)
 		    if (!stream_read_line(st, directive, LINE_LEN))
 			return NULL;
 		    trail_space(directive);
-		    strncat(line2, directive,
-			    (LINE_LEN > 511) ? LINE_LEN : 511);
+		    av_strlcat(line2, directive, LINE_LEN);
 		    break;
 		}
 	    default:
