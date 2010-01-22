@@ -2341,6 +2341,9 @@ static void remove_subtitle_range(MPContext *mpctx, int start, int count)
     int end = start + count;
     int after = mpctx->set_of_sub_size - end;
     sub_data **subs = mpctx->set_of_subtitles;
+#ifdef CONFIG_ASS
+    ass_track_t **ass_tracks = mpctx->set_of_ass_tracks;
+#endif
     if (count < 0 || count > mpctx->set_of_sub_size ||
         start < 0 || start > mpctx->set_of_sub_size - count) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR,
@@ -2354,6 +2357,11 @@ static void remove_subtitle_range(MPContext *mpctx, int start, int count)
                filename_recode(subd->filename));
         sub_free(subd);
         subs[idx] = NULL;
+#ifdef CONFIG_ASS
+        if (ass_tracks[idx])
+            ass_free_track(ass_tracks[idx]);
+        ass_tracks[idx] = NULL;
+#endif
     }
 
     mpctx->global_sub_size -= count;
@@ -2363,10 +2371,17 @@ static void remove_subtitle_range(MPContext *mpctx, int start, int count)
 
     memmove(subs + start, subs + end, after * sizeof(*subs));
     memset(subs + start + after, 0, count * sizeof(*subs));
+#ifdef CONFIG_ASS
+    memmove(ass_tracks + start, ass_tracks + end, after * sizeof(*ass_tracks));
+    memset(ass_tracks + start + after, 0, count * sizeof(*ass_tracks));
+#endif
 
     if (mpctx->set_of_sub_pos >= start && mpctx->set_of_sub_pos < end) {
         mpctx->global_sub_pos = -2;
         subdata = NULL;
+#ifdef CONFIG_ASS
+        ass_track = NULL;
+#endif
         mp_input_queue_cmd(mp_input_parse_cmd("sub_select"));
     } else if (mpctx->set_of_sub_pos >= end) {
         mpctx->set_of_sub_pos -= count;
