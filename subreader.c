@@ -1338,7 +1338,7 @@ const char* guess_cp(stream_t *st, const char *preferred_language, const char *f
 sub_data* sub_read_file (char *filename, float fps) {
     stream_t* fd;
     int n_max, n_first, i, j, sub_first, sub_orig;
-    subtitle *first, *second, *sub, *return_sub;
+    subtitle *first, *second, *sub, *return_sub, *alloced_sub = NULL;
     sub_data *subt_data;
     int uses_time = 0, sub_num = 0, sub_errs = 0;
     struct subreader sr[]=
@@ -1401,6 +1401,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     }
 
 #ifdef CONFIG_SORTSUB
+    alloced_sub =
     sub = malloc(sizeof(subtitle));
     //This is to deal with those formats (AQT & Subrip) which define the end of a subtitle
     //as the beginning of the following
@@ -1429,6 +1430,7 @@ sub_data* sub_read_file (char *filename, float fps) {
           subcp_close();
 #endif
     	  if ( first ) free(first);
+	  free(alloced_sub);
 	  return NULL;
 	 }
         // Apply any post processing that needs recoding first
@@ -1481,6 +1483,7 @@ sub_data* sub_read_file (char *filename, float fps) {
 #ifdef CONFIG_ICONV
     subcp_close();
 #endif
+    free(alloced_sub);
 
 //    printf ("SUB: Subtitle format %s time.\n", uses_time?"uses":"doesn't use");
     mp_msg(MSGT_SUBREADER, MSGL_V,"SUB: Read %i subtitles, %i bad line(s).\n",
