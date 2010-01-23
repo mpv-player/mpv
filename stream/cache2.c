@@ -292,6 +292,7 @@ void cache_uninit(stream_t *s) {
   kill(s->cache_pid,SIGKILL);
   waitpid(s->cache_pid,NULL,0);
 #endif
+    s->cache_pid = 0;
   }
   if(!c) return;
 #if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
@@ -302,6 +303,8 @@ void cache_uninit(stream_t *s) {
   shmem_free(c->buffer,c->buffer_size);
   shmem_free(s->cache_data,sizeof(cache_vars_t));
 #endif
+  c->buffer = NULL;
+  s->cache_data = NULL;
 }
 
 static void exit_sighandler(int x){
