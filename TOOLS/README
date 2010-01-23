@@ -534,8 +534,6 @@ Notes:        Known to work at least on Linux x86 with RealPlayer8.
 netstream - access remote streams
 ---------------------------------
 
-NOTE: netstream does not link at the moment - help welcome.
-
 netstream allows you to access most MPlayer stream types from a remote host.
 The main purpose of this feature is to make it possible to directly use the
 CD or DVD drive of another computer on the network (provided you have the
@@ -544,10 +542,10 @@ are not usable remotely because they are implemented at the demuxer level.
 
 Be aware that currently the server is not secure at all.
 
-Compile the server by running 'make netstream' and then copy the netstream
-binary to the right place on your system (usually /usr/local/bin on Unix).
-Start the netstream server on the computer you intend to access remotely.
-There are no command line arguments.
+Compile the server by running 'make TOOLS/netstream' from the root of mplayer
+source and then copy the netstream binary to the right place on your system
+(usually /usr/local/bin on Unix). Start the netstream server on the computer you
+intend to access remotely. There are no command line arguments.
 
 Play the second track of a VCD on the server with:
 
@@ -560,3 +558,7 @@ Access files on this server with:
 Note that paths which do not start with a / will be interpreted as relative to
 the directory where the server is running. The '-cache' option is not needed
 but highly recommended.
+
+netstream will not take -dvd-device, so you must either symlink
+your drive to /dev/dvd/ or use the dvd:///path/to/dvd.
+for example: mpst://audioserver/dvd:////dev/optical/lg_black_dvd
