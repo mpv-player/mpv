@@ -823,7 +823,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 					mp_msg(MSGT_NETWORK,MSGL_V,"Content-Type: [%s]\n", content_type );
 					if( (content_length = http_get_field(http_hdr, "Content-Length")) != NULL) {
 						mp_msg(MSGT_NETWORK,MSGL_V,"Content-Length: [%s]\n", http_get_field(http_hdr, "Content-Length"));
-						stream->end_pos = atoi(content_length);
+						stream->end_pos = atoll(content_length);
 					}
 					// Check in the mime type table for a demuxer type
 					i = 0;
