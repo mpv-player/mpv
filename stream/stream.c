@@ -433,9 +433,7 @@ stream_t* new_stream(int fd,int type){
 void free_stream(stream_t *s){
 //  printf("\n*** free_stream() called ***\n");
 #ifdef CONFIG_STREAM_CACHE
-  if(s->cache_pid) {
     cache_uninit(s);
-  }
 #endif
   if(s->close) s->close(s);
   if(s->fd>0){
