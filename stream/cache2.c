@@ -287,10 +287,10 @@ void cache_uninit(stream_t *s) {
   cache_vars_t* c = s->cache_data;
   if(s->cache_pid) {
 #if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
-  cache_do_control(s, -2, NULL);
+    cache_do_control(s, -2, NULL);
 #else
-  kill(s->cache_pid,SIGKILL);
-  waitpid(s->cache_pid,NULL,0);
+    kill(s->cache_pid,SIGKILL);
+    waitpid(s->cache_pid,NULL,0);
 #endif
     s->cache_pid = 0;
   }
