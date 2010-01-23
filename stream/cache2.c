@@ -298,12 +298,13 @@ void cache_uninit(stream_t *s) {
 #if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
   free(c->stream);
   free(c->buffer);
+  c->buffer = NULL;
   free(s->cache_data);
 #else
   shmem_free(c->buffer,c->buffer_size);
+  c->buffer = NULL;
   shmem_free(s->cache_data,sizeof(cache_vars_t));
 #endif
-  c->buffer = NULL;
   s->cache_data = NULL;
 }
 
