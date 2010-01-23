@@ -743,6 +743,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 	int auth_retry=0;
 	int seekable=0;
 	char *content_type;
+	const char *content_length;
 	char *next_url;
 	URL_t *url = stream->streaming_ctrl->url;
 
@@ -816,15 +817,15 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 		// Assume standard http if not ICY
 		switch( http_hdr->status_code ) {
 			case 200: // OK
+				content_length = http_get_field(http_hdr, "Content-Length");
+				if (content_length) {
+					mp_msg(MSGT_NETWORK,MSGL_V,"Content-Length: [%s]\n", content_length);
+					stream->end_pos = atoll(content_length);
+				}
 				// Look if we can use the Content-Type
 				content_type = http_get_field( http_hdr, "Content-Type" );
 				if( content_type!=NULL ) {
-					char *content_length = NULL;
 					mp_msg(MSGT_NETWORK,MSGL_V,"Content-Type: [%s]\n", content_type );
-					if( (content_length = http_get_field(http_hdr, "Content-Length")) != NULL) {
-						mp_msg(MSGT_NETWORK,MSGL_V,"Content-Length: [%s]\n", http_get_field(http_hdr, "Content-Length"));
-						stream->end_pos = atoll(content_length);
-					}
 					// Check in the mime type table for a demuxer type
 					i = 0;
 					while(mime_type_table[i].mime_type != NULL) {
