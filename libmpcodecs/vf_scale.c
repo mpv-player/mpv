@@ -100,7 +100,7 @@ static unsigned int find_best_out(vf_instance_t *vf){
     int i;
 
     // find the best outfmt:
-    for(i=0; i<sizeof(outfmt_list)/sizeof(int)-1; i++){
+    for(i=0; outfmt_list[i]; i++){
         const int format= outfmt_list[i];
         int ret= vf->priv->query_format_cache[i]-1;
         if(ret == -1){
