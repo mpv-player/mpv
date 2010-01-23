@@ -30,7 +30,6 @@ static struct vf_priv_s {
     int interlaced;
     int noup;
     int accurate_rnd;
-    int query_format_cache[64];
 } const vf_priv_dflt = {
   -1,-1,
   0,
@@ -102,11 +101,7 @@ static unsigned int find_best_out(vf_instance_t *vf){
     // find the best outfmt:
     for(i=0; outfmt_list[i]; i++){
         const int format= outfmt_list[i];
-        int ret= vf->priv->query_format_cache[i]-1;
-        if(ret == -1){
-            ret= vf_next_query_format(vf, outfmt_list[i]);
-            vf->priv->query_format_cache[i]= ret+1;
-        }
+        int ret = vf_next_query_format(vf, format);
 
 	mp_msg(MSGT_VFILTER,MSGL_DBG2,"scale: query(%s) -> %d\n",vo_format_name(format),ret&3);
 	if(ret&VFCAP_CSP_SUPPORTED_BY_HW){
