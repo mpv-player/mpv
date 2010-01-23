@@ -15,6 +15,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "osdep/shmem.h"
 #include "osdep/timer.h"
@@ -284,13 +285,14 @@ cache_vars_t* cache_init(int size,int sector){
 
 void cache_uninit(stream_t *s) {
   cache_vars_t* c = s->cache_data;
-  if(!s->cache_pid) return;
+  if(s->cache_pid) {
 #if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
   cache_do_control(s, -2, NULL);
 #else
   kill(s->cache_pid,SIGKILL);
   waitpid(s->cache_pid,NULL,0);
 #endif
+  }
   if(!c) return;
 #if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
   free(c->stream);
@@ -334,6 +336,8 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
 
 #if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
   if((stream->cache_pid=fork())){
+    if ((pid_t)stream->cache_pid == -1)
+      stream->cache_pid = 0;
 #else
   {
     stream_t* stream2=malloc(sizeof(stream_t));
@@ -351,6 +355,11 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
     }
 #endif
 #endif
+    if (!stream->cache_pid) {
+        mp_msg(MSGT_CACHE, MSGL_ERR,
+               "Starting cache process/thread failed: %s.\n", strerror(errno));
+        return 0;
+    }
     // wait until cache is filled at least prefill_init %
     mp_msg(MSGT_CACHE,MSGL_V,"CACHE_PRE_INIT: %"PRId64" [%"PRId64"] %"PRId64"  pre:%d  eof:%d  \n",
 	(int64_t)s->min_filepos,(int64_t)s->read_filepos,(int64_t)s->max_filepos,min,s->eof);
