@@ -406,6 +406,8 @@ static void ThreadProc( void *s ){
 #ifdef PTHREAD_CACHE
   return NULL;
 #endif
+  // make sure forked code never leaves this function
+  exit(0);
 }
 
 int cache_stream_fill_buffer(stream_t *s){
