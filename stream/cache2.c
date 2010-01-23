@@ -247,7 +247,7 @@ static int cache_execute_control(cache_vars_t *s) {
   return res;
 }
 
-cache_vars_t* cache_init(int size,int sector){
+static cache_vars_t* cache_init(int size,int sector){
   int num;
 #if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
   cache_vars_t* s=shmem_alloc(sizeof(cache_vars_t));
