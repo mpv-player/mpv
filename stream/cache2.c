@@ -313,6 +313,9 @@ static void exit_sighandler(int x){
   exit(0);
 }
 
+/**
+ * \return 1 on success, 0 if the function was interrupted and -1 on error
+ */
 int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
   int ss = stream->sector_size ? stream->sector_size : STREAM_BUFFER_SIZE;
   cache_vars_t* s;
@@ -323,7 +326,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
   }
 
   s=cache_init(size,ss);
-  if(s == NULL) return 0;
+  if(s == NULL) return -1;
   stream->cache_data=s;
   s->stream=stream; // callback
   s->seek_limit=seek_limit;
@@ -362,7 +365,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
     if (!stream->cache_pid) {
         mp_msg(MSGT_CACHE, MSGL_ERR,
                "Starting cache process/thread failed: %s.\n", strerror(errno));
-        return 0;
+        return -1;
     }
     // wait until cache is filled at least prefill_init %
     mp_msg(MSGT_CACHE,MSGL_V,"CACHE_PRE_INIT: %"PRId64" [%"PRId64"] %"PRId64"  pre:%d  eof:%d  \n",
