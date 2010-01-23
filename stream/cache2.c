@@ -318,6 +318,7 @@ static void exit_sighandler(int x){
  */
 int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
   int ss = stream->sector_size ? stream->sector_size : STREAM_BUFFER_SIZE;
+  int res = -1;
   cache_vars_t* s;
 
   if (stream->flags & STREAM_NON_CACHEABLE) {
@@ -365,7 +366,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
     if (!stream->cache_pid) {
         mp_msg(MSGT_CACHE, MSGL_ERR,
                "Starting cache process/thread failed: %s.\n", strerror(errno));
-        return -1;
+        goto err_out;
     }
     // wait until cache is filled at least prefill_init %
     mp_msg(MSGT_CACHE,MSGL_V,"CACHE_PRE_INIT: %"PRId64" [%"PRId64"] %"PRId64"  pre:%d  eof:%d  \n",
@@ -376,11 +377,17 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
 	    (int64_t)s->max_filepos-s->read_filepos
 	);
 	if(s->eof) break; // file is smaller than prefill size
-	if(stream_check_interrupt(PREFILL_SLEEP_TIME))
-	  return 0;
+	if(stream_check_interrupt(PREFILL_SLEEP_TIME)) {
+	  res = 0;
+	  goto err_out;
+        }
     }
     mp_msg(MSGT_CACHE,MSGL_STATUS,"\n");
     return 1; // parent exits
+
+err_out:
+    cache_uninit(stream);
+    return res;
   }
 
 #if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
