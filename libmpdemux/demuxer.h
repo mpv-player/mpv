@@ -383,6 +383,7 @@ int ds_get_packet_pts(demux_stream_t *ds, unsigned char **start, double *pts);
 int ds_get_packet_sub(demux_stream_t *ds,unsigned char **start);
 double ds_get_next_pts(demux_stream_t *ds);
 int ds_parse(demux_stream_t *sh, uint8_t **buffer, int *len, double pts, off_t pos);
+void ds_clear_parser(demux_stream_t *sh);
 
 // This is defined here because demux_stream_t ins't defined in stream.h
 stream_t* new_ds_stream(demux_stream_t *ds);
