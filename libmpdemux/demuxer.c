@@ -1225,8 +1225,6 @@ void demux_flush(demuxer_t *demuxer)
 int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
                int flags)
 {
-    demux_stream_t *d_audio = demuxer->audio;
-    demux_stream_t *d_video = demuxer->video;
     double tmp = 0;
     double pts;
 
