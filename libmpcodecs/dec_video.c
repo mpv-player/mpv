@@ -133,6 +133,10 @@ int set_rectangle(sh_video_t *sh_video,int param,int value)
 
 void resync_video_stream(sh_video_t *sh_video)
 {
+    sh_video->timer = 0;
+    sh_video->next_frame_time = 0;
+    sh_video->num_buffered_pts = 0;
+    sh_video->last_pts = MP_NOPTS_VALUE;
     if(mpvdec) mpvdec->control(sh_video, VDCTRL_RESYNC_STREAM, NULL);
 }
 

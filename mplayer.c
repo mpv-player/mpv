@@ -2543,12 +2543,8 @@ static int seek(MPContext *mpctx, double amount, int style)
     mpctx->startup_decode_retry = DEFAULT_STARTUP_DECODE_RETRY;
     if (mpctx->sh_video) {
 	current_module = "seek_video_reset";
-	resync_video_stream(mpctx->sh_video);
 	if (vo_config_count)
 	    mpctx->video_out->control(VOCTRL_RESET, NULL);
-	mpctx->sh_video->next_frame_time = 0;
-	mpctx->sh_video->num_buffered_pts = 0;
-	mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
 	mpctx->num_buffered_frames = 0;
 	mpctx->delay = 0;
 	mpctx->time_frame = 0;
@@ -2563,8 +2559,6 @@ static int seek(MPContext *mpctx, double amount, int style)
     if (mpctx->sh_audio) {
 	current_module = "seek_audio_reset";
 	mpctx->audio_out->reset(); // stop audio, throwing away buffered data
-	mpctx->sh_audio->a_buffer_len = 0;
-	mpctx->sh_audio->a_out_buffer_len = 0;
 	if (!mpctx->sh_video)
 	    update_subtitles(NULL, mpctx->sh_audio->pts, mpctx->d_sub, 1);
     }

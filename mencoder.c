@@ -1708,7 +1708,6 @@ static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_st
         if(demux_seek(demuxer, next_edl_record->stop_sec - sh_video->pts, audio_delay, 0)){
             sh_video->pts = demuxer->video->pts;
             //if (vo_vobsub) vobsub_seek(vo_vobsub,sh_video->pts);
-            resync_video_stream(sh_video);
             //if(vo_spudec) spudec_reset(vo_spudec);
             if (audio_delay != 0.0) fixdelay(demuxer->video, d_audio, mux_a, frame_data, framecopy);
             return 1;

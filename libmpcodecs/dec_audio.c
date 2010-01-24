@@ -455,6 +455,8 @@ int decode_audio(sh_audio_t *sh_audio, int minlen)
 
 void resync_audio_stream(sh_audio_t *sh_audio)
 {
+    sh_audio->a_buffer_len = 0;
+    sh_audio->a_out_buffer_len = 0;
     sh_audio->a_in_buffer_len = 0;	// clear audio input buffer
     if (!sh_audio->initialized)
 	return;
