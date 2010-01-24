@@ -458,6 +458,9 @@ static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parse
     case 0x86:
         codec_id = CODEC_ID_DTS;
         break;
+    case MKTAG('M', 'L', 'P', ' '):
+        codec_id = CODEC_ID_MLP;
+        break;
     case 0x55:
     case 0x5500736d:
     case MKTAG('.', 'm', 'p', '3'):
@@ -469,6 +472,9 @@ static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parse
     case MKTAG('.', 'm', 'p', '2'):
     case MKTAG('.', 'm', 'p', '1'):
         codec_id = CODEC_ID_MP2;
+        break;
+    case MKTAG('T', 'R', 'H', 'D'):
+        codec_id = CODEC_ID_TRUEHD;
         break;
     }
     if (codec_id != CODEC_ID_NONE) {
