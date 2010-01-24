@@ -1,5 +1,5 @@
-.\" Synced with r30311
-.\" MPlayer (C) 2000-2010 MPlayer Team
+.\" Synced with r30414
+.\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
 .\" Encoding/kódolás: iso-8859-2
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2010. 01. 16." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2010. 01. 24." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -3924,6 +3924,16 @@ Az ITU-R BT.601 színteret használja.
 Az ITU-R BT.709 színteret használja.
 .IPs 3
 Az SMPTE-240M színteret használja.
+.RE
+.IPs levelconv=<n>
+Kiválasztja a fényesség konvertálási szintjét a YUV-RGB konvertálás során
+.RSss
+.IPs 0
+TV-rõl PC szintre (alapértelmezett).
+.IPs 1
+PC-rõl TV szintre.
+.IPs 2
+Nincs semmilyen konvertálás.
 .RE
 .IPs lscale=<n>
 Kiválasztja a használandó méretezõ függvényt a fényerõsséghez.
