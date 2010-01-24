@@ -17,7 +17,7 @@ test $version || version=$svn_revision
 
 NEW_REVISION="#define VERSION \"${version}${extra}\""
 OLD_REVISION=$(head -n 1 version.h 2> /dev/null)
-TITLE='#define MP_TITLE "%s "VERSION" (C) 2000-2009 MPlayer Team\n"'
+TITLE='#define MP_TITLE "%s "VERSION" (C) 2000-2010 MPlayer Team\n"'
 
 # Update version.h only on revision changes to avoid spurious rebuilds
 if test "$NEW_REVISION" != "$OLD_REVISION"; then
