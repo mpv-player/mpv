@@ -894,7 +894,9 @@ TAGS:
 tags:
 	rm -f $@; find . -name '*.[chS]' -o -name '*.asm' | xargs ctags -a
 
-
+generated_ebml:
+	TOOLS/matroska.py --generate-header >libmpdemux/ebml_types.h
+	TOOLS/matroska.py --generate-definitions >libmpdemux/ebml_defs.c
 
 ###### tests / tools #######
 

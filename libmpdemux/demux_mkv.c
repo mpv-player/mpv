@@ -607,7 +607,7 @@ static int demux_mkv_read_trackaudio(demuxer_t *demuxer, mkv_track_t *track)
     len += il;
     while (length > 0) {
         switch (ebml_read_id(s, &il)) {
-        case MATROSKA_ID_AUDIOSAMPLINGFREQ:
+        case MATROSKA_ID_SAMPLINGFREQUENCY:
             fnum = ebml_read_float(s, &l);
             if (fnum == EBML_FLOAT_INVALID)
                 return 0;
@@ -616,7 +616,7 @@ static int demux_mkv_read_trackaudio(demuxer_t *demuxer, mkv_track_t *track)
                    "[mkv] |   + Sampling frequency: %f\n", track->a_sfreq);
             break;
 
-        case MATROSKA_ID_AUDIOBITDEPTH:
+        case MATROSKA_ID_BITDEPTH:
             num = ebml_read_uint(s, &l);
             if (num == EBML_UINT_INVALID)
                 return 0;
@@ -625,7 +625,7 @@ static int demux_mkv_read_trackaudio(demuxer_t *demuxer, mkv_track_t *track)
                    track->a_bps);
             break;
 
-        case MATROSKA_ID_AUDIOCHANNELS:
+        case MATROSKA_ID_CHANNELS:
             num = ebml_read_uint(s, &l);
             if (num == EBML_UINT_INVALID)
                 return 0;
@@ -655,7 +655,7 @@ static int demux_mkv_read_trackvideo(demuxer_t *demuxer, mkv_track_t *track)
     len += il;
     while (length > 0) {
         switch (ebml_read_id(s, &il)) {
-        case MATROSKA_ID_VIDEOFRAMERATE:
+        case MATROSKA_ID_FRAMERATE:
             fnum = ebml_read_float(s, &l);
             if (fnum == EBML_FLOAT_INVALID)
                 return 0;
@@ -666,7 +666,7 @@ static int demux_mkv_read_trackvideo(demuxer_t *demuxer, mkv_track_t *track)
                 track->default_duration = 1 / track->v_frate;
             break;
 
-        case MATROSKA_ID_VIDEODISPLAYWIDTH:
+        case MATROSKA_ID_DISPLAYWIDTH:
             num = ebml_read_uint(s, &l);
             if (num == EBML_UINT_INVALID)
                 return 0;
@@ -675,7 +675,7 @@ static int demux_mkv_read_trackvideo(demuxer_t *demuxer, mkv_track_t *track)
                    track->v_dwidth);
             break;
 
-        case MATROSKA_ID_VIDEODISPLAYHEIGHT:
+        case MATROSKA_ID_DISPLAYHEIGHT:
             num = ebml_read_uint(s, &l);
             if (num == EBML_UINT_INVALID)
                 return 0;
@@ -684,7 +684,7 @@ static int demux_mkv_read_trackvideo(demuxer_t *demuxer, mkv_track_t *track)
                    track->v_dheight);
             break;
 
-        case MATROSKA_ID_VIDEOPIXELWIDTH:
+        case MATROSKA_ID_PIXELWIDTH:
             num = ebml_read_uint(s, &l);
             if (num == EBML_UINT_INVALID)
                 return 0;
@@ -693,7 +693,7 @@ static int demux_mkv_read_trackvideo(demuxer_t *demuxer, mkv_track_t *track)
                    track->v_width);
             break;
 
-        case MATROSKA_ID_VIDEOPIXELHEIGHT:
+        case MATROSKA_ID_PIXELHEIGHT:
             num = ebml_read_uint(s, &l);
             if (num == EBML_UINT_INVALID)
                 return 0;
@@ -755,7 +755,7 @@ static int demux_mkv_read_trackentry(demuxer_t *demuxer)
                    track->tnum);
             break;
 
-        case MATROSKA_ID_TRACKNAME:
+        case MATROSKA_ID_NAME:
             track->name = ebml_read_utf8(s, &l);
             if (track->name == NULL)
                 goto err_out;
@@ -785,14 +785,14 @@ static int demux_mkv_read_trackentry(demuxer_t *demuxer)
             }
             break;
 
-        case MATROSKA_ID_TRACKAUDIO:
+        case MATROSKA_ID_AUDIO:
             mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Audio track\n");
             l = demux_mkv_read_trackaudio(demuxer, track);
             if (l == 0)
                 goto err_out;
             break;
 
-        case MATROSKA_ID_TRACKVIDEO:
+        case MATROSKA_ID_VIDEO:
             mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Video track\n");
             l = demux_mkv_read_trackvideo(demuxer, track);
             if (l == 0)
@@ -838,7 +838,7 @@ static int demux_mkv_read_trackentry(demuxer_t *demuxer)
                    track->private_size);
             break;
 
-        case MATROSKA_ID_TRACKLANGUAGE:
+        case MATROSKA_ID_LANGUAGE:
             free(track->language);
             track->language = ebml_read_utf8(s, &l);
             if (track->language == NULL)
@@ -847,7 +847,7 @@ static int demux_mkv_read_trackentry(demuxer_t *demuxer)
                    track->language);
             break;
 
-        case MATROSKA_ID_TRACKFLAGDEFAULT:
+        case MATROSKA_ID_FLAGDEFAULT:
             num = ebml_read_uint(s, &l);
             if (num == EBML_UINT_INVALID)
                 goto err_out;
@@ -856,7 +856,7 @@ static int demux_mkv_read_trackentry(demuxer_t *demuxer)
                    track->default_track);
             break;
 
-        case MATROSKA_ID_TRACKDEFAULTDURATION:
+        case MATROSKA_ID_DEFAULTDURATION:
             num = ebml_read_uint(s, &l);
             if (num == EBML_UINT_INVALID)
                 goto err_out;
@@ -873,7 +873,7 @@ static int demux_mkv_read_trackentry(demuxer_t *demuxer)
             }
             break;
 
-        case MATROSKA_ID_TRACKENCODINGS:
+        case MATROSKA_ID_CONTENTENCODINGS:
             l = demux_mkv_read_trackencodings(demuxer, track);
             if (l == 0)
                 goto err_out;
@@ -955,7 +955,7 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
         time = track = pos = EBML_UINT_INVALID;
 
         switch (ebml_read_id(s, &il)) {
-        case MATROSKA_ID_POINTENTRY:;
+        case MATROSKA_ID_CUEPOINT:;
             uint64_t len;
 
             len = ebml_read_length(s, &i);
@@ -970,7 +970,7 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
                     time = ebml_read_uint(s, &l);
                     break;
 
-                case MATROSKA_ID_CUETRACKPOSITION:;
+                case MATROSKA_ID_CUETRACKPOSITIONS:;
                     uint64_t le = ebml_read_length(s, &i);
                     l = le + i;
 
@@ -1386,7 +1386,7 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
         seek_pos = EBML_UINT_INVALID;
 
         switch (ebml_read_id(s, &il)) {
-        case MATROSKA_ID_SEEKENTRY:;
+        case MATROSKA_ID_SEEK:;
             uint64_t len = ebml_read_length(s, &i);
             l = len + i;
 
@@ -2747,7 +2747,7 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
             if (mkv_d->cluster_size > 0) {
                 switch (ebml_read_id(s, &il)) {
-                case MATROSKA_ID_CLUSTERTIMECODE:;
+                case MATROSKA_ID_TIMECODE:;
                     uint64_t num = ebml_read_uint(s, &l);
                     if (num == EBML_UINT_INVALID)
                         return 0;
@@ -2858,7 +2858,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
                     if (type == MATROSKA_ID_CLUSTER) {
                         while (!s->eof && stream_tell(s) < end) {
                             if (ebml_read_id(s, NULL)
-                                == MATROSKA_ID_CLUSTERTIMECODE) {
+                                == MATROSKA_ID_TIMECODE) {
                                 uint64_t tc = ebml_read_uint(s, NULL);
                                 tc *= mkv_d->tc_scale;
                                 add_cluster_position(mkv_d, start, tc);
