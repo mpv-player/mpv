@@ -60,6 +60,7 @@
 // just be removed again.
 #define PARSE_ON_ADD 0
 
+static void clear_parser(sh_common_t *sh);
 void resync_video_stream(sh_video_t *sh_video);
 void resync_audio_stream(sh_audio_t *sh_audio);
 
@@ -286,8 +287,7 @@ void free_sh_sub(sh_sub_t *sh)
 #endif
     free(sh->lang);
 #ifdef CONFIG_LIBAVCODEC
-    av_parser_close(sh->parser);
-    av_freep(&sh->avctx);
+    clear_parser((sh_common_t *)sh);
 #endif
     free(sh);
 }
@@ -327,8 +327,7 @@ void free_sh_audio(demuxer_t *demuxer, int id)
     free(sh->codecdata);
     free(sh->lang);
 #ifdef CONFIG_LIBAVCODEC
-    av_parser_close(sh->parser);
-    av_freep(&sh->avctx);
+    clear_parser((sh_common_t *)sh);
 #endif
     free(sh);
 }
@@ -359,8 +358,7 @@ void free_sh_video(sh_video_t *sh)
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_video at %p\n", sh);
     free(sh->bih);
 #ifdef CONFIG_LIBAVCODEC
-    av_parser_close(sh->parser);
-    av_freep(&sh->avctx);
+    clear_parser((sh_common_t *)sh);
 #endif
     free(sh);
 }
@@ -509,6 +507,20 @@ int ds_parse(demux_stream_t *ds, uint8_t **buffer, int *len, double pts, off_t p
     if (!parser)
         return *len;
     return av_parser_parse2(parser, avctx, buffer, len, *buffer, *len, pts, pts, pos);
+}
+
+static void clear_parser(sh_common_t *sh)
+{
+    av_parser_close(sh->parser);
+    sh->parser = NULL;
+    av_freep(&sh->avctx);
+}
+
+void ds_clear_parser(demux_stream_t *ds)
+{
+    if (!ds->sh)
+        return;
+    clear_parser(ds->sh);
 }
 #endif
 
@@ -1200,6 +1212,11 @@ static void demux_resync(demuxer_t *demuxer)
 
 void demux_flush(demuxer_t *demuxer)
 {
+#if PARSE_ON_ADD
+    ds_clear_parser(demuxer->video);
+    ds_clear_parser(demuxer->audio);
+    ds_clear_parser(demuxer->sub);
+#endif
     ds_free_packs(demuxer->video);
     ds_free_packs(demuxer->audio);
     ds_free_packs(demuxer->sub);
