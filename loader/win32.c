@@ -208,8 +208,8 @@ static inline void dbgprintf(char* fmt, ...)
 	vprintf(fmt, va);
 //	mp_dbg(MSGT_WIN32, MSGL_DBG3, fmt, va);
 	va_end(va);
+	fflush(stdout);
     }
-  fflush(stdout);
 }
 
 

@@ -321,7 +321,7 @@ Codecs:
   --enable-libdca           enable libdca support [autodetect]
   --disable-mp3lib          disable builtin mp3lib [autodetect]
   --disable-liba52          disable liba52 [autodetect]
-  --disable-liba52-internal disable builtin liba52 [autodetect]
+  --enable-liba52-internal  enable builtin liba52 [disabled]
   --disable-libmpeg2        disable builtin libmpeg2 [autodetect]
   --disable-musepack        disable musepack support [autodetect]
 
@@ -576,7 +576,7 @@ _speex=auto
 _theora=auto
 _mp3lib=auto
 _liba52=auto
-_liba52_internal=auto
+_liba52_internal=no
 _libdca=auto
 _libmpeg2=auto
 _faad=auto
@@ -3011,7 +3011,7 @@ for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
   cc_check $_ld_tmp && inet_pton=yes && break
 done
 if test $inet_pton = yes ; then
-  test $_ld_tmp && _res_comment="using $_ld_tmp"
+  test "$_ld_tmp" && _res_comment="using $_ld_tmp"
   def_inet_pton='#define HAVE_INET_PTON 1'
 fi
 echores "$inet_pton"
@@ -3030,7 +3030,7 @@ for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
   cc_check $_ld_tmp && inet_aton=yes && break
 done
 if test $inet_aton = yes ; then
-  test $_ld_tmp && _res_comment="using $_ld_tmp"
+  test "$_ld_tmp" && _res_comment="using $_ld_tmp"
   def_inet_aton='#define HAVE_INET_ATON 1'
 fi
 echores "$inet_aton"
@@ -4802,15 +4802,14 @@ int main(void) {
 }
 EOF
   _gl=no
-  if cc_check -lGL $_ld_lm ; then
-    _gl=yes
-    _gl_x11=yes
-    libs_mplayer="$libs_mplayer -lGL $_ld_dl"
-  elif cc_check -lGL $_ld_lm $_ld_pthread ; then
-    _gl=yes
-    _gl_x11=yes
-    libs_mplayer="$libs_mplayer -lGL $_ld_pthread $_ld_dl"
-  fi
+  for _ld_tmp in -lGL "-lGL -lXdamage" "-lGL $_ld_pthread" ; do
+    if cc_check $_ld_tmp $_ld_lm ; then
+      _gl=yes
+      _gl_x11=yes
+      libs_mplayer="$libs_mplayer $_ld_tmp $_ld_dl"
+      break
+    fi
+  done
   if cc_check -DGL_WIN32 -lopengl32 ; then
     _gl=yes
     _gl_win32=yes
@@ -5092,6 +5091,7 @@ EOF
     fi
   done
   if test "$_sdl" = no && "$_sdlconfig" --version >>"$TMPLOG" 2>&1 ; then
+    _res_comment="using $_sdlconfig"
     if cygwin ; then
       _inc_tmp="$($_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/)"
       _ld_tmp="$($_sdlconfig --libs | cut -d " " -f 1,4,6 | sed s/no-cygwin/cygwin/)"
@@ -5121,7 +5121,6 @@ if test "$_sdl" = yes ; then
   libs_mplayer="$libs_mplayer $_ld_tmp"
   _vomodules="sdl $_vomodules"
   _aomodules="sdl $_aomodules"
-  _res_comment="using $_sdlconfig"
 else
   def_sdl='#undef CONFIG_SDL'
   _novomodules="sdl $_novomodules"
@@ -6494,7 +6493,7 @@ if test "$_libdca" = auto ; then
 #include <dts.h>
 int main(void) { dts_init(0); return 0; }
 EOF
-  for _ld_dca in -ldts -ldca ; do
+  for _ld_dca in -ldca -ldts ; do
     cc_check $_ld_dca $_ld_lm && extra_ldflags="$extra_ldflags $_ld_dca" \
       && _libdca=yes && break
   done
