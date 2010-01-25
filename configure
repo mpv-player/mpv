@@ -1467,7 +1467,7 @@ if test "$(basename $_cc)" = "icc" || test "$(basename $_cc)" = "ecc"; then
   esac
   echores "$cc_version"
 else
-  for _cc in "$_cc" cc gcc ; do
+  for _cc in "$_cc" gcc cc ; do
     cc_name_tmp=$($_cc -v 2>&1 | tail -n 1 | cut -d ' ' -f 1)
     if test "$cc_name_tmp" = "gcc"; then
     cc_name=$cc_name_tmp
@@ -1486,6 +1486,15 @@ else
     esac
     echores "$cc_version"
     break
+    fi
+    cc_name_tmp=$($_cc -V 2>&1 | head -n 1 | cut -d ' ' -f 2,3)
+    if test "$cc_name_tmp" = "Sun C"; then
+      echocheck "$_cc version"
+      cc_vendor=sun
+      cc_version=$($_cc -V 2>&1 | head -n 1 | cut -d ' ' -f 4)
+      _res_comment="experimental support only"
+      echores "Sun C $cc_version"
+      break
     fi
   done
 fi # icc
@@ -1548,9 +1557,10 @@ if test "$_runtime_cpudetection" = no ; then
 if test -r /proc/cpuinfo && ! cygwin; then
   # Linux with /proc mounted, extract CPU information from it
   _cpuinfo="cat /proc/cpuinfo"
-elif test -r /compat/linux/proc/cpuinfo && ! x86_32 ; then
+elif test -r /compat/linux/proc/cpuinfo && ! x86 ; then
   # FreeBSD with Linux emulation /proc mounted,
   # extract CPU information from it
+  # Don't use it on x86 though, it never reports 3Dnow
   _cpuinfo="cat /compat/linux/proc/cpuinfo"
 elif darwin && ! x86 ; then
   # use hostinfo on Darwin
@@ -2315,7 +2325,8 @@ echocheck "assembler support of -pipe option"
 cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
-cc_check -pipe && _pipe="-pipe" && echores "yes" || echores "no"
+# -I. helps to detect compilers that just misunderstand -pipe like Sun C
+cc_check -pipe -I. && _pipe="-pipe" && echores "yes" || echores "no"
 
 
 echocheck "compiler support of named assembler arguments"
@@ -2356,6 +2367,8 @@ if test "$_profile" != "" || test "$_debug" != "" ; then
 elif test -z "$CFLAGS" ; then
   if test "$cc_vendor" = "intel" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe -fomit-frame-pointer -wd167 -wd556 -wd144"
+  elif test "$cc_vendor" = "sun" ; then
+    CFLAGS="-O2 $_march $_mcpu $_pipe -xc99 -xregs=frameptr"
   elif test "$cc_vendor" != "gnu" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe"
   else
@@ -2905,7 +2918,7 @@ if test "$_posix4" = yes ; then
 fi
 echores "$_posix4"
 
-for func in llrint log2 lrint lrintf round roundf truncf; do
+for func in exp2 exp2f llrint log2 log2f lrint lrintf round roundf truncf; do
 echocheck $func
 cat > $TMPC << EOF
 #include <math.h>
@@ -4112,7 +4125,7 @@ echocheck "X11 headers presence"
     fi
   done
   if test $_cross_compile = no; then
-    for I in /usr/X11/include /usr/X11R7/include /usr/X11R6/include \
+    for I in /usr/X11/include /usr/X11R7/include /usr/local/include /usr/X11R6/include \
              /usr/include/X11R6 /usr/openwin/include ; do
       if test -f "$I/X11/Xlib.h" ; then
         extra_cflags="$extra_cflags -I$I"
@@ -4132,8 +4145,8 @@ if test "$_x11" = auto && test "$_x11_headers" = yes ; then
 #include <X11/Xutil.h>
 int main(void) { (void) XCreateWindow(0,0,0,0,0,0,0,0,0,0,0,0); return 0; }
 EOF
-  for I in "" -L/usr/X11R7/lib -L/usr/X11R6/lib -L/usr/lib/X11R6 \
-           -L/usr/X11/lib -L/usr/lib32 -L/usr/openwin/lib -L/usr/X11R6/lib64 \
+  for I in "" -L/usr/X11R7/lib -L/usr/local/lib -L/usr/X11R6/lib -L/usr/lib/X11R6 \
+           -L/usr/X11/lib -L/usr/lib32 -L/usr/openwin/lib -L/usr/local/lib64 -L/usr/X11R6/lib64 \
            -L/usr/lib ; do
     if netbsd; then
       _ld_tmp="$I -lXext -lX11 $_ld_pthread -Wl,-R$(echo $I | sed s/^-L//)"
@@ -8124,12 +8137,15 @@ $def_winsock2_h
 
 
 /* system functions */
+$def_exp2
+$def_exp2f
 $def_gethostbyname2
 $def_gettimeofday
 $def_glob
 $def_langinfo
 $def_llrint
 $def_log2
+$def_log2f
 $def_lrint
 $def_lrintf
 $def_map_memalign

@@ -201,7 +201,7 @@ static int play(void* data,int len,int flags){
   // MPEG and AC3 don't work :-(
     if(ao_data.format==AF_FORMAT_MPEG2)
       send_mpeg_ps_packet (data, len, 0xC0, ao_data.pts, 2, write_dxr2);
-    else if(ao_data.format==AF_FORMAT_AC3)
+    else if(AF_FORMAT_IS_AC3(ao_data.format))
       send_mpeg_ps_packet (data, len, 0x80, ao_data.pts, 2, write_dxr2);
     else {
 	int i;

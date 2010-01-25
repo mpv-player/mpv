@@ -98,6 +98,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
        af->data->bps == data->bps)
       return AF_DETACH;
 
+    // Allow trivial AC3-endianness conversion
+    if (!AF_FORMAT_IS_AC3(af->data->format) || !AF_FORMAT_IS_AC3(data->format))
     // Check for errors in configuration
     if((AF_OK != check_bps(data->bps)) ||
        (AF_OK != check_format(data->format)) ||
@@ -152,7 +154,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   }
   case AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET:{
     // Check for errors in configuration
-    if(AF_OK != check_format(*(int*)arg))
+    if(!AF_FORMAT_IS_AC3(*(int*)arg) && AF_OK != check_format(*(int*)arg))
       return AF_ERROR;
 
     af->data->format = *(int*)arg;

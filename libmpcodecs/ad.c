@@ -49,8 +49,8 @@ const ad_functions_t * const mpcodecs_ad_drivers[] =
 #endif
 #ifdef CONFIG_LIBA52
   &mpcodecs_ad_liba52,
-  &mpcodecs_ad_hwac3,
 #endif
+  &mpcodecs_ad_hwac3,
   &mpcodecs_ad_hwmpa,
 #ifdef CONFIG_LIBAVCODEC
   &mpcodecs_ad_ffmpeg,

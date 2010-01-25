@@ -263,7 +263,7 @@ int b_alive;
     ao->b_changed_mixing = 0;
 
     /* Probe whether device support S/PDIF stream output if input is AC3 stream. */
-    if ((format & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_AC3)
+    if (AF_FORMAT_IS_AC3(format))
     {
         /* Find the ID of the default Device. */
         i_param_size = sizeof(AudioDeviceID);
@@ -314,23 +314,7 @@ int b_alive;
 	inDesc.mSampleRate=rate;
 	inDesc.mFormatID=ao->b_supports_digital ? kAudioFormat60958AC3 : kAudioFormatLinearPCM;
 	inDesc.mChannelsPerFrame=channels;
-	switch(format&AF_FORMAT_BITS_MASK){
-	case AF_FORMAT_8BIT:
-		inDesc.mBitsPerChannel=8;
-		break;
-	case AF_FORMAT_16BIT:
-		inDesc.mBitsPerChannel=16;
-		break;
-	case AF_FORMAT_24BIT:
-		inDesc.mBitsPerChannel=24;
-		break;
-	case AF_FORMAT_32BIT:
-		inDesc.mBitsPerChannel=32;
-		break;
-	default:
-		ao_msg(MSGT_AO, MSGL_WARN, "Unsupported format (0x%08x)\n", format);
-		goto err_out;
-	}
+	inDesc.mBitsPerChannel=af_fmt2bits(format);
 
     if((format&AF_FORMAT_POINT_MASK)==AF_FORMAT_F) {
 	// float
@@ -344,13 +328,7 @@ int b_alive;
 	// unsigned int
 		inDesc.mFormatFlags = kAudioFormatFlagIsPacked;
     }
-    if ((format & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_AC3) {
-        // Currently ac3 input (comes from hwac3) is always in native byte-order.
-#if HAVE_BIGENDIAN
-        inDesc.mFormatFlags |= kAudioFormatFlagIsBigEndian;
-#endif
-    }
-    else if ((format & AF_FORMAT_END_MASK) == AF_FORMAT_BE)
+    if ((format & AF_FORMAT_END_MASK) == AF_FORMAT_BE)
         inDesc.mFormatFlags |= kAudioFormatFlagIsBigEndian;
 
     inDesc.mFramesPerPacket = 1;

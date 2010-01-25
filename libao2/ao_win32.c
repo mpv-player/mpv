@@ -143,8 +143,10 @@ static int init(int rate,int channels,int format,int flags)
 	unsigned char* buffer;
 	int i;
 
+	if (AF_FORMAT_IS_AC3(format))
+		format = AF_FORMAT_AC3_NE;
 	switch(format){
-		case AF_FORMAT_AC3:
+		case AF_FORMAT_AC3_NE:
 		case AF_FORMAT_S24_LE:
 		case AF_FORMAT_S16_LE:
 		case AF_FORMAT_U8:
@@ -180,7 +182,7 @@ static int init(int rate,int channels,int format,int flags)
     wformat.Format.cbSize          = (channels>2)?sizeof(WAVEFORMATEXTENSIBLE)-sizeof(WAVEFORMATEX):0;
     wformat.Format.nChannels       = channels;
     wformat.Format.nSamplesPerSec  = rate;
-    if(format == AF_FORMAT_AC3)
+    if(AF_FORMAT_IS_AC3(format))
     {
         wformat.Format.wFormatTag      = WAVE_FORMAT_DOLBY_AC3_SPDIF;
         wformat.Format.wBitsPerSample  = 16;
