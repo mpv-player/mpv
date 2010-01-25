@@ -2018,16 +2018,40 @@ static int demux_mkv_open(demuxer_t *demuxer)
     stream_t *s = demuxer->stream;
     mkv_demuxer_t *mkv_d;
     mkv_track_t *track;
-    int i, version, cont = 0;
-    char *str;
+    int i, cont = 0;
 
     stream_seek(s, s->start_pos);
-    str = ebml_read_header(s, &version);
-    if (str == NULL || strcmp(str, "matroska") || version > 2) {
+    if (ebml_read_id(s, NULL) != EBML_ID_EBML)
+        return 0;
+    struct ebml_ebml ebml_master = {};
+    struct ebml_parse_ctx parse_ctx = { .no_error_messages = true };
+    if (ebml_read_element(s, &parse_ctx, &ebml_master, &ebml_ebml_desc) < 0)
+        return 0;
+    if (ebml_master.doc_type.len != 8 || strncmp(ebml_master.doc_type.start,
+                                                 "matroska", 8)) {
         mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] no head found\n");
+        talloc_free(parse_ctx.talloc_ctx);
         return 0;
     }
-    free(str);
+    if (ebml_master.doc_type_read_version > 2) {
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] This looks like a Matroska file, "
+               "but we don't support format version %"PRIu64"\n",
+               ebml_master.doc_type_read_version);
+        talloc_free(parse_ctx.talloc_ctx);
+        return 0;
+    }
+    if ((ebml_master.n_ebml_read_version
+         && ebml_master.ebml_read_version != EBML_VERSION)
+        || (ebml_master.n_ebml_max_size_length
+            && ebml_master.ebml_max_size_length > 8)
+        || (ebml_master.n_ebml_max_id_length
+            && ebml_master.ebml_max_id_length != 4)) {
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] This looks like a Matroska file, "
+               "but the header has bad parameters\n");
+        talloc_free(parse_ctx.talloc_ctx);
+        return 0;
+    }
+    talloc_free(parse_ctx.talloc_ctx);
 
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Found the head...\n");
 
