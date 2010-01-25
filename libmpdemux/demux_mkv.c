@@ -175,10 +175,13 @@ typedef struct mkv_demuxer {
     mkv_index_t *indexes;
     int num_indexes;
 
-    off_t *parsed_cues;
-    int parsed_cues_num;
-    off_t *parsed_seekhead;
-    int parsed_seekhead_num;
+    off_t *parsed_pos;
+    int num_parsed_pos;
+    bool parsed_info;
+    bool parsed_tracks;
+    bool parsed_tags;
+    bool parsed_chapters;
+    bool parsed_attachments;
 
     struct cluster_pos {
         uint64_t filepos;
@@ -209,6 +212,29 @@ static void *grow_array(void *array, int nelem, size_t elsize)
     if (!(nelem & 31))
         array = realloc(array, (nelem + 32) * elsize);
     return array;
+}
+
+static bool is_parsed_header(struct mkv_demuxer *mkv_d, off_t pos)
+{
+    int low = 0;
+    int high = mkv_d->num_parsed_pos;
+    while (high > low + 1) {
+        int mid = high + low >> 1;
+        if (mkv_d->parsed_pos[mid] > pos)
+            high = mid;
+        else
+            low = mid;
+    }
+    if (mkv_d->num_parsed_pos && mkv_d->parsed_pos[low] == pos)
+        return true;
+    if (!(mkv_d->num_parsed_pos & 31))
+        mkv_d->parsed_pos = talloc_realloc(mkv_d, mkv_d->parsed_pos, off_t,
+                                       mkv_d->num_parsed_pos + 32);
+    mkv_d->num_parsed_pos++;
+    for (int i = mkv_d->num_parsed_pos - 1; i > low; i--)
+        mkv_d->parsed_pos[i] = mkv_d->parsed_pos[i - 1];
+    mkv_d->parsed_pos[low] = pos;
+    return false;
 }
 
 static mkv_track_t *demux_mkv_find_track_by_num(mkv_demuxer_t *d, int n,
@@ -930,23 +956,12 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     stream_t *s = demuxer->stream;
     uint64_t length, l, time, track, pos;
-    off_t off;
     int i, il;
 
     if (index_mode == 0 || index_mode == 2) {
         ebml_read_skip(s, NULL);
         return 0;
     }
-    off = stream_tell(s);
-    for (i = 0; i < mkv_d->parsed_cues_num; i++)
-        if (mkv_d->parsed_cues[i] == off) {
-            ebml_read_skip(s, NULL);
-            return 0;
-        }
-    mkv_d->parsed_cues =
-        realloc(mkv_d->parsed_cues, (mkv_d->parsed_cues_num + 1)
-                * sizeof(off_t));
-    mkv_d->parsed_cues[mkv_d->parsed_cues_num++] = off;
 
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] /---- [ parsing cues ] -----------\n");
     length = ebml_read_length(s, NULL);
@@ -1146,11 +1161,6 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
     uint64_t length, l;
     int i;
     uint32_t id;
-
-    if (demuxer->chapters) {
-        ebml_read_skip(s, NULL);
-        return 0;
-    }
 
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] /---- [ parsing chapters ] ---------\n");
     length = ebml_read_length(s, NULL);
@@ -1356,118 +1366,139 @@ static int demux_mkv_read_attachments(demuxer_t *demuxer)
     return 0;
 }
 
+static int read_header_element(struct demuxer *demuxer, uint32_t id,
+                               off_t at_filepos);
+
 static int demux_mkv_read_seekhead(demuxer_t *demuxer)
 {
-    mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-    stream_t *s = demuxer->stream;
-    uint64_t length, l, seek_pos, saved_pos, num;
-    uint32_t seek_id;
-    int i, il, res = 0;
-    off_t off;
-
-    off = stream_tell(s);
-    for (i = 0; i < mkv_d->parsed_seekhead_num; i++)
-        if (mkv_d->parsed_seekhead[i] == off) {
-            ebml_read_skip(s, NULL);
-            return 0;
-        }
-    mkv_d->parsed_seekhead = realloc(mkv_d->parsed_seekhead,
-                             (mkv_d->parsed_seekhead_num + 1) * sizeof(off_t));
-    mkv_d->parsed_seekhead[mkv_d->parsed_seekhead_num++] = off;
+    struct mkv_demuxer *mkv_d = demuxer->priv;
+    struct stream *s = demuxer->stream;
+    int res = 0;
+    struct ebml_seek_head seekhead = {};
+    struct ebml_parse_ctx parse_ctx = {};
 
     mp_msg(MSGT_DEMUX, MSGL_V,
            "[mkv] /---- [ parsing seek head ] ---------\n");
-    length = ebml_read_length(s, NULL);
-    /* off now holds the position of the next element after the seek head. */
-    off = stream_tell(s) + length;
-    while (length > 0 && !res) {
-
-        seek_id = 0;
-        seek_pos = EBML_UINT_INVALID;
-
-        switch (ebml_read_id(s, &il)) {
-        case MATROSKA_ID_SEEK:;
-            uint64_t len = ebml_read_length(s, &i);
-            l = len + i;
-
-            while (len > 0) {
-                uint64_t l;
-                int il;
-
-                switch (ebml_read_id(s, &il)) {
-                case MATROSKA_ID_SEEKID:
-                    num = ebml_read_uint(s, &l);
-                    if (num != EBML_UINT_INVALID)
-                        seek_id = num;
-                    break;
-
-                case MATROSKA_ID_SEEKPOSITION:
-                    seek_pos = ebml_read_uint(s, &l);
-                    break;
-
-                default:
-                    ebml_read_skip(s, &l);
-                    break;
-                }
-                len -= l + il;
-            }
-
-            break;
-
-        default:
-            ebml_read_skip(s, &l);
-            break;
-        }
-        length -= l + il;
-
-        if (seek_id == 0 || seek_id == MATROSKA_ID_CLUSTER
-            || seek_pos == EBML_UINT_INVALID
-            || ((mkv_d->segment_start + seek_pos) >=
-                (uint64_t) demuxer->movi_end))
-            continue;
-
-        saved_pos = stream_tell(s);
-        if (!stream_seek(s, mkv_d->segment_start + seek_pos))
-            res = 1;
-        else {
-            if (ebml_read_id(s, &il) != seek_id)
-                res = 1;
-            else
-                switch (seek_id) {
-                case MATROSKA_ID_CUES:
-                    if (demux_mkv_read_cues(demuxer))
-                        res = 1;
-                    break;
-
-                case MATROSKA_ID_TAGS:
-                    if (demux_mkv_read_tags(demuxer))
-                        res = 1;
-                    break;
-
-                case MATROSKA_ID_SEEKHEAD:
-                    if (demux_mkv_read_seekhead(demuxer))
-                        res = 1;
-                    break;
-
-                case MATROSKA_ID_CHAPTERS:
-                    if (demux_mkv_read_chapters(demuxer))
-                        res = 1;
-                    break;
-                }
-        }
-
-        stream_seek(s, saved_pos);
+    if (ebml_read_element(s, &parse_ctx, &seekhead, &ebml_seek_head_desc) < 0) {
+        res = 1;
+        goto out;
     }
-    if (res) {
-        /* If there was an error then try to skip this seek head. */
-        if (stream_seek(s, off))
-            res = 0;
-    } else if (length > 0)
-        stream_seek(s, stream_tell(s) + length);
+    /* off now holds the position of the next element after the seek head. */
+    off_t off = stream_tell(s);
+    for (int i = 0; i < seekhead.n_seek; i++) {
+        struct ebml_seek *seek = &seekhead.seek[i];
+        if (seek->n_seek_id != 1 || seek->n_seek_position != 1) {
+            mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Invalid SeekHead entry\n");
+            continue;
+        }
+        uint64_t pos = seek->seek_position + mkv_d->segment_start;
+        if (pos >= demuxer->movi_end) {
+            mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] SeekHead position beyond "
+                   "end of file - incomplete file?\n");
+            continue;
+        }
+        read_header_element(demuxer, seek->seek_id, pos);
+    }
+    if (!stream_seek(s, off)) {
+        mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Couldn't seek back after "
+               "SeekHead??\n");
+        res = 1;
+    }
+ out:
     mp_msg(MSGT_DEMUX, MSGL_V,
            "[mkv] \\---- [ parsing seek head ] ---------\n");
+    talloc_free(parse_ctx.talloc_ctx);
     return res;
 }
+
+static bool seek_pos_id(struct stream *s, off_t pos, uint32_t id)
+{
+    if (!stream_seek(s, pos)) {
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Failed to seek in file\n");
+        return false;
+    }
+    if (ebml_read_id(s, NULL) != id) {
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Expected element not found\n");
+        return false;
+    }
+    return true;
+}
+
+static int read_header_element(struct demuxer *demuxer, uint32_t id,
+                               off_t at_filepos)
+{
+    struct mkv_demuxer *mkv_d = demuxer->priv;
+    stream_t *s = demuxer->stream;
+    off_t pos = stream_tell(s) - 4;
+
+    switch(id) {
+    case MATROSKA_ID_INFO:
+        if (mkv_d->parsed_info)
+            break;
+        if (at_filepos && !seek_pos_id(s, at_filepos, id))
+            return -1;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |+ segment information...\n");
+        mkv_d->parsed_info = true;
+        return demux_mkv_read_info(demuxer) ? -1 : 1;
+
+    case MATROSKA_ID_TRACKS:
+        if (mkv_d->parsed_tracks)
+            break;
+        if (at_filepos && !seek_pos_id(s, at_filepos, id))
+            return -1;
+        mkv_d->parsed_tracks = true;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |+ segment tracks...\n");
+        return demux_mkv_read_tracks(demuxer) ? -1 : 1;
+
+    case MATROSKA_ID_CUES:
+        if (is_parsed_header(mkv_d, pos))
+            break;
+        if (at_filepos && !seek_pos_id(s, at_filepos, id))
+            return -1;
+        return demux_mkv_read_cues(demuxer) ? -1 : 1;
+
+    case MATROSKA_ID_TAGS:
+        if (mkv_d->parsed_tags)
+            break;
+        if (at_filepos && !seek_pos_id(s, at_filepos, id))
+            return -1;
+        mkv_d->parsed_tags = true;
+        return demux_mkv_read_tags(demuxer) ? -1 : 1;
+
+    case MATROSKA_ID_SEEKHEAD:
+        if (is_parsed_header(mkv_d, pos))
+            break;
+        if (at_filepos && !seek_pos_id(s, at_filepos, id))
+            return -1;
+        return demux_mkv_read_seekhead(demuxer) ? -1 : 1;
+
+    case MATROSKA_ID_CHAPTERS:
+        if (mkv_d->parsed_chapters)
+            break;
+        if (at_filepos && !seek_pos_id(s, at_filepos, id))
+            return -1;
+        mkv_d->parsed_chapters = true;
+        return demux_mkv_read_chapters(demuxer) ? -1 : 1;
+
+    case MATROSKA_ID_ATTACHMENTS:
+        if (mkv_d->parsed_attachments)
+            break;
+        if (at_filepos && !seek_pos_id(s, at_filepos, id))
+            return -1;
+        mkv_d->parsed_attachments = true;
+        return demux_mkv_read_attachments(demuxer) ? -1 : 1;
+
+    default:
+        if (!at_filepos)
+            ebml_read_skip(s, NULL);
+        return 0;
+    }
+    if (!at_filepos)
+        ebml_read_skip(s, NULL);
+    return 1;
+}
+
+
 
 static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
                                 int vid);
@@ -2063,45 +2094,14 @@ static int demux_mkv_open(demuxer_t *demuxer)
 
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] + a segment...\n");
 
-    mkv_d = calloc(1, sizeof(mkv_demuxer_t));
+    mkv_d = talloc_zero(demuxer, struct mkv_demuxer);
     demuxer->priv = mkv_d;
     mkv_d->tc_scale = 1000000;
     mkv_d->segment_start = stream_tell(s);
-    mkv_d->parsed_cues = malloc(sizeof(off_t));
-    mkv_d->parsed_seekhead = malloc(sizeof(off_t));
 
     while (!cont) {
-        switch (ebml_read_id(s, NULL)) {
-        case MATROSKA_ID_INFO:
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |+ segment information...\n");
-            cont = demux_mkv_read_info(demuxer);
-            break;
-
-        case MATROSKA_ID_TRACKS:
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |+ segment tracks...\n");
-            cont = demux_mkv_read_tracks(demuxer);
-            break;
-
-        case MATROSKA_ID_CUES:
-            cont = demux_mkv_read_cues(demuxer);
-            break;
-
-        case MATROSKA_ID_TAGS:
-            cont = demux_mkv_read_tags(demuxer);
-            break;
-
-        case MATROSKA_ID_SEEKHEAD:
-            cont = demux_mkv_read_seekhead(demuxer);
-            break;
-
-        case MATROSKA_ID_CHAPTERS:
-            cont = demux_mkv_read_chapters(demuxer);
-            break;
-
-        case MATROSKA_ID_ATTACHMENTS:
-            cont = demux_mkv_read_attachments(demuxer);
-            break;
-
+        uint32_t id = ebml_read_id(s, NULL);
+        switch (id) {
         case MATROSKA_ID_CLUSTER:
             mp_msg(MSGT_DEMUX, MSGL_V,
                    "[mkv] |+ found cluster, headers are "
@@ -2111,7 +2111,8 @@ static int demux_mkv_open(demuxer_t *demuxer)
             break;
 
         default:
-            cont = 1;
+            cont = read_header_element(demuxer, id, 0) < 1;
+            break;
         case EBML_ID_VOID:
             ebml_read_skip(s, NULL);
             break;
@@ -2221,9 +2222,6 @@ static void demux_close_mkv(demuxer_t *demuxer)
         }
         free(mkv_d->indexes);
         free(mkv_d->cluster_positions);
-        free(mkv_d->parsed_cues);
-        free(mkv_d->parsed_seekhead);
-        free(mkv_d);
     }
 }
 
