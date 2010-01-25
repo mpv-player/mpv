@@ -1385,6 +1385,7 @@ fi
 
 if win32 ; then
   _exesuf=".exe"
+  extra_cflags="$extra_cflags -fno-common"
   # -lwinmm is always needed for osdep/timer-win2.c
   extra_ldflags="$extra_ldflags -lwinmm"
   _pe_executable=yes
@@ -1921,7 +1922,6 @@ EOF
     else
         cpuopt=-mcpu
     fi
-    test $_fast_cmov = "auto" && _fast_cmov=yes
     if test "$_runtime_cpudetection" = no ; then
       case "$pvendor" in
       AuthenticAMD)
@@ -1933,6 +1933,7 @@ EOF
           # 64-bit prescotts exist, but as far as GCC is concerned they
           # have the same capabilities as a nocona.
           proc=nocona
+          test $_fast_cmov = "auto" && _fast_cmov=no
           ;;
         esac
         ;;
@@ -1960,6 +1961,9 @@ EOF
       fi
       # --- Intel processors ---
       if test "$proc" = "core2"; then
+        cc_check -march=$proc $cpuopt=$proc || proc=x86-64
+      fi
+      if test "$proc" = "x86-64"; then
         cc_check -march=$proc $cpuopt=$proc || proc=nocona
       fi
       if test "$proc" = "nocona"; then
@@ -1985,7 +1989,8 @@ EOF
       cc_check $_march $_mcpu || _march=""
     fi
 
-    _optimizing=""
+    _optimizing="$proc"
+    test $_fast_cmov = "auto" && _fast_cmov=yes
 
     echores "$proc"
     ;;
@@ -8466,8 +8471,9 @@ $def_yasm
 #define CONFIG_SWSCALE_ALPHA 1
 
 #define HAVE_ATTRIBUTE_PACKED 1
+#define HAVE_FAST_CLZ 0
 #define HAVE_GETHRTIME 0
-#define HAVE_INLINE_ASM 0
+#define HAVE_INLINE_ASM 1
 #define HAVE_LDBRX 0
 #define HAVE_POLL_H 1
 #define HAVE_PPC4XX 0

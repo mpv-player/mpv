@@ -72,6 +72,7 @@ static demuxer_t* demux_rawaudio_open(demuxer_t* demuxer) {
   demuxer->audio->id = 0;
   demuxer->audio->sh = sh_audio;
   sh_audio->ds = demuxer->audio;
+  sh_audio->needs_parsing = 1;
 
   return demuxer;
 }

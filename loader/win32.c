@@ -5326,6 +5326,8 @@ struct libs libraries[]={
 
 static WIN_BOOL WINAPI ext_stubs(void)
 {
+    // NOTE! these magic values will be replaced at runtime, make sure
+    // add_stub can still find them if you change them.
     volatile int idx = 0x0deadabc;
     // make sure gcc does not do eip-relative call or something like that
     void (* volatile my_printf)(char *, char *) = (void *)0xdeadfbcd;
@@ -5355,7 +5357,7 @@ static void* add_stub(void)
     memcpy(answ, ext_stubs, MAX_STUB_SIZE);
     for (i = 0; i < MAX_STUB_SIZE - 3; i++) {
       int *magic = (int *)(answ + i);
-      if (*magic == 0xdeadabcd) {
+      if (*magic == 0x0deadabc) {
         *magic = pos;
         found |= 1;
       }

@@ -1,4 +1,4 @@
-.\" Synced with r29905
+.\" Synced with r30311
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 11. 16." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2010. 01. 16." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1239,7 +1239,7 @@ mennyiségû memória használatával.
 Engedélyezi a socket használtatát más folyamatoknak, amint az bezárul.
 .
 .TP
-.B \-bandwidth <érték> (csak hálózatnál)
+.B \-bandwidth <bájt> (csak hálózatnál)
 Maximális sávszélesség megadása hálózati lejátszáshoz (olyan szerverekkel
 használható, melyek képesek különbözõ bitrátával küldeni).
 Hasznos ha élõben stream-elt médiát akarsz nézni lassú kapcsolattal.
@@ -3152,12 +3152,12 @@ Ha egy külsõ ablak is meg van adva a \-win opcióval, akkor az x és y
 koordináták az ablak bal felsõ sarkához viszonyulnak a képernyõ helyett.
 A \-xineramascreen kapcsolóval megadott koordináták a képernyõhöz
 viszonyítottak, azon videó kimeneti vezérlõknél, amelyek teljes mértékben
-támogatják a \-xineramascreen kapcsolót (direct3d, gl, gl2, vdpau, x11, xv, xvmc).
-
+támogatják a \-xineramascreen kapcsolót (direct3d, gl, gl2, vdpau, x11,
+xv, xvmc, corevideo).
 .br
 .I MEGJEGYZÉS:
 Ezt az opciót csak az x11, xmga, xv, xvmc, xvidix, gl, gl2, directx,
-fbdev és tdfxfb videó kimeneti vezérlõk támogatják.
+fbdev, tdfxfb és corevideo videó kimeneti vezérlõk támogatják.
 .sp 1
 .I PÉLDA:
 .PD 0
@@ -3345,7 +3345,8 @@ mûködik.
 Ez az opció nem alkalmas csak a kezdõ képernyõ beállítására (mert
 a megadott képernyõn mindig teljes képernyõsen jelenik meg), jelenleg
 a \-geometry a legalkalmasabb erre a célra.
-A direct3d, gl, gl2, x11 és az xv videó kimeneti vezérlõ támogatja.
+A direct3d, gl, gl2, x11, xv és a corevideo videó kimeneti vezérlõ
+támogatja.
 .
 .TP
 .B \-zrbw (csak \-vo zr)
@@ -3860,6 +3861,9 @@ A 0-nál kisebb értékek a rendszer alapértelmezését hagyják érvényben.
 Ez a framerátát (vízszíntes frissítési ráta / n)-ra korlátozza.
 GLX_SGI_swap_control támogatás kell a mûködéséhez.
 Néhány (legtöbb/összes?) implementációval csak teljes képernyõs módban mûködik.
+.IPs ycbcr
+Használja a GL_MESA_ycbcr_texture bõvítményt a YUV-RGB konverzióknál.
+A legtöbb esetben ez valószínûleg lassabb, mint az RGB-be történõ szoftveres konverzió.
 .IPs yuv=<n>
 Kiválasztja a YUV és az RGB konverzió típusát.
 .RSss
@@ -3909,9 +3913,18 @@ beállítását teszi lehetõvé.
 A gamma külön állítható a vörös, zöld és kék színre.
 A sebessége jobban függ a GPU memória sávszélességétõl, mint a többi módszernél.
 .RE
-.IPs ycbcr
-Használja a GL_MESA_ycbcr_texture bõvítményt a YUV-RGB konverzióknál.
-A legtöbb esetben ez valószínûleg lassabb, mint az RGB-be történõ szoftveres konverzió.
+.IPs colorspace
+Kiválasztja a színteret a YUV-RGB átalakításhoz.
+.RSss
+.IPs 0
+Az MPlayer által normálisan használt formulát választja (alapértelmezett).
+.IPs 1
+Az ITU-R BT.601 színteret használja.
+.IPs 2
+Az ITU-R BT.709 színteret használja.
+.IPs 3
+Az SMPTE-240M színteret használja.
+.RE
 .IPs lscale=<n>
 Kiválasztja a használandó méretezõ függvényt a fényerõsséghez.
 Csak a 2-es, 3-as, 4-es és 6-os yuv módoknál helyes.
@@ -3950,6 +3963,13 @@ Ha engedélyezett (alapértelmezett), GL_LINEAR interpoláció használata,
 különben GL_NEAREST a customtex textúrákhoz.
 .IPs (no)customtrect
 Ha engedélyezve van, texture_rectangle-t használ a customtex textúrákhoz.
+Alapértelmezésben le van tiltva.
+.IPs (no)mipmapgen
+Ha engedélyezve van, a videóhoz a mipmap-ok automatikusan generálódnak.
+Ez a customprog és a TXB utasítással együtt hasznos, a nagy sugarú elmosó
+szûrõ implementálásához.
+A legtöbb OpenGL implementációnál ez nagyon lassú bármely nem-RGB
+formátumnál.
 Alapértelmezésben le van tiltva.
 .RE
 .sp 1
@@ -4006,6 +4026,23 @@ Ha 0-tól különbözõ értékre van állítva, az OSD le lesz tiltva és a fényerõsség,
 a kontraszt és a gamma beállítások csak a globális X szerver beállításain
 keresztül érhetõek el.
 Ettõl eltekintve az értékeknek ugyan az a jelentésük, mint a \-vo gl esetén.
+.REss
+.
+.TP
+.B matrixview
+OpenGL alapú renderelõ Mátrix-szerû futó szöveg effektus létrehozásához.
+.PD 0
+.RSs
+.IPs cols=<n>
+A megjelenítendõ szöveg oszlopok száma.
+A nagyon alacsony értékek (< 16) valószínûleg nem lesznek jók a méretaránybeli
+korlátok miatt.
+A 16-tal nem osztható értékek is gondot okozhatnak.
+.IPs rows=<n>
+A megjelenítendõ szöveg sorok száma.
+A nagyon alacsony értékek (< 16) valószínûleg nem lesznek jók a méretaránybeli
+korlátok miatt.
+A 16-tal nem osztható értékek is gondot okozhatnak.
 .REss
 .
 .TP
