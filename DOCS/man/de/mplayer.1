@@ -2193,7 +2193,6 @@ Siehe auch \-vf expand.
 Schaltet das Zeichnen von SSA/ASS-Untertiteln ein.
 Mit dieser Option wird libass für externe SSA/ASS-Untertitel und
 Matroska-Spuren verwendet.
-Du möchtest vielleicht auch \-embeddedfonts verwenden.
 .br
 .I ANMERKUNG:
 Wenn fontconfig eincompiliert wurde, schaltet \-ass automatisch \-fontconfig
@@ -2320,17 +2319,10 @@ Speichert den Untertitel-Substream eines VOB-Streams.
 Siehe auch die Optionen \-dump*sub und \-vobsubout*.
 .
 .TP
-.B \-embeddedfonts (nur bei FreeType)
-Aktiviert die Extraktion von in Matroska eingebetteten Schriften (Standard:
-deaktiviert).
+.B \-noembeddedfonts
+Deaktiviert die Nutzung von in Matroska-Dateien und ASS-Untertiteln eingebetteten Schriften (Standard:
+aktiviert).
 Diese Schriften können für das Rendern von SSA/ASS-Untertiteln verwendet werden
-(Option \-ass).
-Schriftdateien werden im Verzeichnis ~/.mplayer/\:fonts angelegt.
-.br
-.I ANMERKUNG:
-Bei der Verwendung von FontConfig 2.4.2 oder neuer werden eingebettete
-Schriften direkt vom Speicher geöffnet; diese Option ist per Voreinstellung
-aktiviert.
 .
 .TP
 .B \-ffactor <Nummer>
