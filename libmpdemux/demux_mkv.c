@@ -955,8 +955,6 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     stream_t *s = demuxer->stream;
-    uint64_t length, l, time, track, pos;
-    int i, il;
 
     if (index_mode == 0 || index_mode == 2) {
         ebml_read_skip(s, NULL);
@@ -964,69 +962,22 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     }
 
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] /---- [ parsing cues ] -----------\n");
-    length = ebml_read_length(s, NULL);
-
-    while (length > 0) {
-        time = track = pos = EBML_UINT_INVALID;
-
-        switch (ebml_read_id(s, &il)) {
-        case MATROSKA_ID_CUEPOINT:;
-            uint64_t len;
-
-            len = ebml_read_length(s, &i);
-            l = len + i;
-
-            while (len > 0) {
-                uint64_t l;
-                int il;
-
-                switch (ebml_read_id(s, &il)) {
-                case MATROSKA_ID_CUETIME:
-                    time = ebml_read_uint(s, &l);
-                    break;
-
-                case MATROSKA_ID_CUETRACKPOSITIONS:;
-                    uint64_t le = ebml_read_length(s, &i);
-                    l = le + i;
-
-                    while (le > 0) {
-                        uint64_t l;
-                        int il;
-
-                        switch (ebml_read_id(s, &il)) {
-                        case MATROSKA_ID_CUETRACK:
-                            track = ebml_read_uint(s, &l);
-                            break;
-
-                        case MATROSKA_ID_CUECLUSTERPOSITION:
-                            pos = ebml_read_uint(s, &l);
-                            break;
-
-                        default:
-                            ebml_read_skip(s, &l);
-                            break;
-                        }
-                        le -= l + il;
-                    }
-                    break;
-
-                default:
-                    ebml_read_skip(s, &l);
-                    break;
-                }
-                len -= l + il;
-            }
-            break;
-
-        default:
-            ebml_read_skip(s, &l);
-            break;
+    struct ebml_cues cues = {};
+    struct ebml_parse_ctx parse_ctx = {};
+    if (ebml_read_element(s, &parse_ctx, &cues, &ebml_cues_desc) < 0)
+        goto out;
+    for (int i = 0; i < cues.n_cue_point; i++) {
+        struct ebml_cue_point *cuepoint = &cues.cue_point[i];
+        if (cuepoint->n_cue_time != 1 || !cuepoint->n_cue_track_positions) {
+            mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Malformed CuePoint element\n");
+            continue;
         }
-
-        length -= l + il;
-
-        if (time != EBML_UINT_INVALID && track != EBML_UINT_INVALID
-            && pos != EBML_UINT_INVALID) {
+        uint64_t time = cuepoint->cue_time;
+        for (int i = 0; i < cuepoint->n_cue_track_positions; i++) {
+            struct ebml_cue_track_positions *trackpos =
+                &cuepoint->cue_track_positions[i];
+            uint64_t track = trackpos->cue_track;
+            uint64_t pos = trackpos->cue_cluster_position;
             mkv_d->indexes =
                 grow_array(mkv_d->indexes, mkv_d->num_indexes,
                            sizeof(mkv_index_t));
@@ -1035,14 +986,16 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
             mkv_d->indexes[mkv_d->num_indexes].filepos =
                 mkv_d->segment_start + pos;
             mp_msg(MSGT_DEMUX, MSGL_DBG2,
-                   "[mkv] |+ found cue point " "for track %" PRIu64
+                   "[mkv] |+ found cue point for track %" PRIu64
                    ": timecode %" PRIu64 ", filepos: %" PRIu64 "\n", track,
                    time, mkv_d->segment_start + pos);
             mkv_d->num_indexes++;
         }
     }
 
+ out:
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] \\---- [ parsing cues ] -----------\n");
+    talloc_free(parse_ctx.talloc_ctx);
     return 0;
 }
 
