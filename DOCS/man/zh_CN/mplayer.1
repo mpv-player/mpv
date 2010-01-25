@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r30135
+.\" sync with en/mplayer.1 r30197
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -3623,9 +3623,21 @@ GL_ARB_fragment_shader！）。至少需要三个纹理单位。提供饱和度�
 对红, 绿和蓝色, Gamma 也能被独立设置。
 速度比其他方法更多地依赖于 GPU 内存带宽。
 .RE
+.IPs colorspace
+选择 YUV 至 RGB 转换所用的色彩空间
+.RSss
+.IPs 0
+使用 MPlayer 通常使用的程式（默认值）
+.IPs 1
+使用 ITU-R BT.601 色彩空间。
+.IPs 2
+使用 ITU-R BT.709 色彩空间。
+.IPs 3
+使用 SMPTE-240M 色彩空间。
+.RE
 .IPs lscale=<n>
-选择缩放功能供调节发光性。
-仅对 yuv 模式 2, 3, 4 和 6 有效。
+选择用于亮度调整的调节函数。
+仅对 yuv 模式 2、3、4 和 6 有效。
 .RSss
 0: 使用简单线性过滤 (默认)。
 .br
@@ -3711,6 +3723,21 @@ OpenGL 视频输出驱动的修改版。
 如果设置不同于 0 的其它值 OSD 被停用, 而亮度, 对比度和
 gamma 的设置只能是通过全局的 X 服务器的设置才有效。
 其它的值的意思同 \-vo gl 一样。
+.REss
+.
+.TP
+.B matrixview
+基于 OpenGL 的渲染器，生成类似于黑客帝国的滚动字幕效果。
+.PD 0
+.RSs
+.IPs cols=<n>
+所显示文字的列数。
+受限于图像缩放器的性能，值太小（<16）的话该选项很可能失效。
+不能被 16 整除的值也可能产生问题。
+.IPs rows=<n>
+所显示文字的行数。
+受限于图像缩放器的性能，值太小（<16）的话该选项很可能失效。
+不能被 16 整除的值也可能产生问题。
 .REss
 .
 .TP

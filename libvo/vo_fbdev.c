@@ -692,8 +692,9 @@ static int fb_preinit(int reset)
         mp_msg(MSGT_VO, MSGL_ERR, "notice: Can't open /dev/tty: %s\n", strerror(errno));
     }
 
-    fb_bpp = fb_vinfo.red.length  + fb_vinfo.green.length +
-             fb_vinfo.blue.length + fb_vinfo.transp.length;
+    fb_bpp = fb_vinfo.bits_per_pixel;
+    if (fb_bpp == 16)
+        fb_bpp = fb_vinfo.red.length  + fb_vinfo.green.length + fb_vinfo.blue.length;
 
     if (fb_bpp == 8 && !vo_dbpp) {
         mp_msg(MSGT_VO, MSGL_ERR, "8 bpp output is not supported.\n");
@@ -811,6 +812,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         fb_tty_fd = -1;
     }
 
+    if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_vinfo))
+        // Intel drivers fail if we request a transparency channel
+        fb_vinfo.transp.length = fb_vinfo.transp.offset = 0;
     if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
         mp_msg(MSGT_VO, MSGL_ERR, "Can't put VSCREENINFO: %s\n", strerror(errno));
         if (fb_tty_fd >= 0 && ioctl(fb_tty_fd, KDSETMODE, KD_TEXT) < 0) {
@@ -820,8 +824,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     }
 
     fb_pixel_size = fb_vinfo.bits_per_pixel / 8;
-    fb_bpp = fb_vinfo.red.length + fb_vinfo.green.length +
-        fb_vinfo.blue.length + fb_vinfo.transp.length;
+    fb_bpp = fb_vinfo.bits_per_pixel;
+    if (fb_bpp == 16)
+        fb_bpp = fb_vinfo.red.length  + fb_vinfo.green.length + fb_vinfo.blue.length;
     if (fb_bpp_we_want != fb_bpp)
         mp_msg(MSGT_VO, MSGL_WARN, "requested %d bpp, got %d bpp!!!\n",
                fb_bpp_we_want, fb_bpp);
