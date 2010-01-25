@@ -1227,94 +1227,35 @@ static int demux_mkv_read_tags(demuxer_t *demuxer)
 static int demux_mkv_read_attachments(demuxer_t *demuxer)
 {
     stream_t *s = demuxer->stream;
-    uint64_t length, l;
-    int il;
 
     mp_msg(MSGT_DEMUX, MSGL_V,
            "[mkv] /---- [ parsing attachments ] ---------\n");
-    length = ebml_read_length(s, NULL);
 
-    while (length > 0) {
-        switch (ebml_read_id(s, &il)) {
-        case MATROSKA_ID_ATTACHEDFILE:;
-            uint64_t len;
-            int i;
-            char *name = NULL;
-            char *mime = NULL;
-            char *data = NULL;
-            int data_size = 0;
+    struct ebml_attachments attachments = {};
+    struct ebml_parse_ctx parse_ctx = {};
+    if (ebml_read_element(s, &parse_ctx, &attachments,
+                          &ebml_attachments_desc) < 0)
+        goto out;
 
-            len = ebml_read_length(s, &i);
-            l = len + i;
-
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] | + an attachment...\n");
-
-            while (len > 0) {
-                uint64_t l;
-                int il;
-
-                switch (ebml_read_id(s, &il)) {
-                case MATROSKA_ID_FILENAME:
-                    free(name);
-                    name = ebml_read_utf8(s, &l);
-                    if (name == NULL)
-                        goto error;
-                    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + FileName: %s\n",
-                           name);
-                    break;
-
-                case MATROSKA_ID_FILEMIMETYPE:
-                    free(mime);
-                    mime = ebml_read_ascii(s, &l);
-                    if (mime == NULL)
-                        goto error;
-                    mp_msg(MSGT_DEMUX, MSGL_V,
-                           "[mkv] |  + FileMimeType: %s\n", mime);
-                    break;
-
-                case MATROSKA_ID_FILEDATA:;
-                    int x;
-                    uint64_t num = ebml_read_length(s, &x);
-                    l = x + num;
-                    free(data);
-                    data = malloc(num);
-                    if (stream_read(s, data, num) != (int) num) {
-                    error:
-                        free(data);
-                        free(mime);
-                        free(name);
-                        return 0;
-                    }
-                    data_size = num;
-                    mp_msg(MSGT_DEMUX, MSGL_V,
-                           "[mkv] |  + FileData, length " "%u\n",
-                           data_size);
-                    break;
-
-                default:
-                    ebml_read_skip(s, &l);
-                    break;
-                }
-                len -= l + il;
-            }
-
-            demuxer_add_attachment(demuxer, name, INT_MAX, mime,
-                                   INT_MAX, data, data_size);
-            free(data);
-            free(mime);
-            free(name);
-            mp_msg(MSGT_DEMUX, MSGL_V,
-                   "[mkv] Attachment: %s, %s, %u bytes\n", name, mime,
-                   data_size);
-            break;
-
-        default:
-            ebml_read_skip(s, &l);
-            break;
+    for (int i = 0; i < attachments.n_attached_file; i++) {
+        struct ebml_attached_file *attachment = &attachments.attached_file[i];
+        if (!attachment->n_file_name || !attachment->n_file_mime_type
+            || !attachment->n_file_data) {
+            mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Malformed attachment\n");
+            continue;
         }
-        length -= l + il;
+        struct bstr name = attachment->file_name;
+        struct bstr mime = attachment->file_mime_type;
+        char *data = attachment->file_data.start;
+        int data_size = attachment->file_data.len;
+        demuxer_add_attachment(demuxer, name.start, name.len, mime.start,
+                               mime.len, data, data_size);
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Attachment: %.*s, %.*s, %u bytes\n",
+               name.len, name.start, mime.len, mime.start, data_size);
     }
 
+ out:
+    talloc_free(parse_ctx.talloc_ctx);
     mp_msg(MSGT_DEMUX, MSGL_V,
            "[mkv] \\---- [ parsing attachments ] ---------\n");
     return 0;
