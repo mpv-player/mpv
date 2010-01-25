@@ -56,6 +56,8 @@ extern const GUID IID_IDivxFilterInterface;
 extern const GUID CLSID_IV50_Decoder;
 extern const GUID CLSID_MemoryAllocator;
 extern const GUID MEDIATYPE_Video;
+// avoid a clash with MinGW-W64 libuuid
+#define GUID_NULL MP_GUID_NULL
 extern const GUID GUID_NULL;
 extern const GUID FORMAT_VideoInfo;
 extern const GUID MEDIASUBTYPE_RGB1;

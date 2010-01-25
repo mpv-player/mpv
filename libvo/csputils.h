@@ -31,8 +31,16 @@ enum mp_csp_standard {
   MP_CSP_COUNT
 };
 
+enum mp_csp_levelconv {
+  MP_CSP_LEVELCONV_TV_TO_PC,
+  MP_CSP_LEVELCONV_PC_TO_TV,
+  MP_CSP_LEVELCONV_NONE,
+  MP_CSP_LEVELCONV_COUNT
+};
+
 struct mp_csp_params {
   enum mp_csp_standard format;
+  enum mp_csp_levelconv levelconv;
   float brightness;
   float contrast;
   float hue;

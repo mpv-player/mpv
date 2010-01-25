@@ -167,7 +167,7 @@ alpha() {
 
 arm() {
   case "$host_arch" in
-    arm) return 0;;
+    arm*) return 0;;
     *) return 1;;
   esac
 }
@@ -487,6 +487,7 @@ _sse2=auto
 _ssse3=auto
 _cmov=auto
 _fast_cmov=auto
+_fast_clz=auto
 _armv5te=auto
 _armv6=auto
 _armv6t2=auto
@@ -1225,6 +1226,8 @@ for ac_option do
   --disable-cmov) _cmov=no ;;
   --enable-fast-cmov) _fast_cmov=yes ;;
   --disable-fast-cmov) _fast_cmov=no ;;
+  --enable-fast-clz) _fast_clz=yes ;;
+  --disable-fast-clz) _fast_clz=no ;;
   --enable-altivec) _altivec=yes ;;
   --disable-altivec) _altivec=no ;;
   --enable-armv5te) _armv5te=yes ;;
@@ -1715,7 +1718,9 @@ case "$host_arch" in
         proc=k8
         ;;
 
-    *) proc=k8 iproc=686 ;;
+    *) proc=amdfam10 iproc=686
+        test $_fast_clz = "auto" && _fast_clz=yes
+        ;;
     esac
     ;;
   GenuineIntel)
@@ -1741,6 +1746,7 @@ case "$host_arch" in
         else
             proc=i686
         fi
+        test $_fast_clz = "auto" && _fast_clz=yes
         ;;
     15) iproc=686
         # A nocona in 32-bit mode has no more capabilities than a prescott.
@@ -1748,6 +1754,7 @@ case "$host_arch" in
             proc=prescott
         else
             proc=pentium4
+            test $_fast_clz = "auto" && _fast_clz=yes
         fi
         test $_fast_cmov = "auto" && _fast_cmov=no
         ;;
@@ -1786,6 +1793,7 @@ case "$host_arch" in
   *)
     proc=i586 iproc=586 ;;
   esac
+  test $_fast_clz = "auto" && _fast_clz=no
   fi # test "$_runtime_cpudetection" = no
 
 
@@ -1897,6 +1905,7 @@ EOF
     else
         _fast_cmov="no"
     fi
+    test $_fast_clz = "auto" && _fast_clz=yes
 
     echores "$proc"
     ;;
@@ -1925,7 +1934,13 @@ EOF
     if test "$_runtime_cpudetection" = no ; then
       case "$pvendor" in
       AuthenticAMD)
-        proc=k8;;
+        case "$pfamily" in
+        15) proc=k8
+          test $_fast_clz = "auto" && _fast_clz=no
+          ;;
+        *) proc=amdfam10;;
+        esac
+        ;;
       GenuineIntel)
         case "$pfamily" in
         6) proc=core2;;
@@ -1934,6 +1949,7 @@ EOF
           # have the same capabilities as a nocona.
           proc=nocona
           test $_fast_cmov = "auto" && _fast_cmov=no
+          test $_fast_clz = "auto" && _fast_clz=no
           ;;
         esac
         ;;
@@ -1991,6 +2007,7 @@ EOF
 
     _optimizing="$proc"
     test $_fast_cmov = "auto" && _fast_cmov=yes
+    test $_fast_clz = "auto" && _fast_clz=yes
 
     echores "$proc"
     ;;
@@ -2023,7 +2040,7 @@ EOF
     _optimizing="$proc"
     ;;
 
-  arm|armv4l|armv5tel)
+  arm*)
     _arch='ARM'
     _target_arch='ARCH_ARM = yes'
     iproc='arm'
@@ -2034,6 +2051,7 @@ EOF
     _target_arch='ARCH_AVR32 = yes'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='avr32'
+    test $_fast_clz = "auto" && _fast_clz=yes
     ;;
 
   sh|sh4)
@@ -2154,6 +2172,8 @@ EOF
         echores "none"
     fi
 
+    test $_fast_clz = "auto" && _fast_clz=yes
+
     ;;
 
   alpha*)
@@ -2195,6 +2215,8 @@ EOF
     _mcpu="-mcpu=$proc"
     echores "$proc"
 
+    test $_fast_clz = "auto" && _fast_clz=yes
+
     _optimizing="$proc"
     ;;
 
@@ -2220,6 +2242,8 @@ EOF
         fi
         echores "$proc"
     fi
+
+    test $_fast_clz = "auto" && _fast_clz=yes
 
     ;;
 
@@ -2654,6 +2678,8 @@ EOF
   fi
   echores "$_armv5te"
 
+  test $_armv5te = "yes" && test $_fast_clz = "auto" && _fast_clz=yes
+
   echocheck "ARMv6 (SIMD instructions)"
   if test $_armv6 = "auto" ; then
     cat > $TMPC << EOF
@@ -2705,7 +2731,7 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC MMX MMX2 AMD3DNOW AMD3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP NEON IWMMXT MMI VIS MVI'
+_cpuexts_all='ALTIVEC MMX MMX2 AMD3DNOW AMD3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV FAST_CLZ PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP NEON IWMMXT MMI VIS MVI'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
@@ -2716,6 +2742,7 @@ test "$_sse2"      = yes && _cpuexts="SSE2 $_cpuexts"
 test "$_ssse3"     = yes && _cpuexts="SSSE3 $_cpuexts"
 test "$_cmov"      = yes && _cpuexts="CMOV $_cpuexts"
 test "$_fast_cmov" = yes && _cpuexts="FAST_CMOV $_cpuexts"
+test "$_fast_clz"  = yes && _cpuexts="FAST_CLZ $_cpuexts"
 test "$pld"        = yes && _cpuexts="PLD $_cpuexts"
 test "$_armv5te"   = yes && _cpuexts="ARMV5TE $_cpuexts"
 test "$_armv6"     = yes && _cpuexts="ARMV6 $_cpuexts"
@@ -5101,7 +5128,7 @@ int main(int argc, char *argv[]) {
 }
 EOF
   _sdl=no
-  for _ld_tmp in "-lSDL" "-lSDL -lpthread" "-lSDL -lwinmm -lgdi32" ; do
+  for _ld_tmp in "-lSDL" "-lSDL -lpthread" "-lSDL -lwinmm -lgdi32" "-lSDL -lwinmm -lgdi32 -ldxguid" ; do
     if cc_check -DCONFIG_SDL_SDL_H $_inc_tmp $_ld_tmp ; then
       _sdl=yes
       def_sdl_sdl_h="#define CONFIG_SDL_SDL_H 1"
@@ -7610,6 +7637,14 @@ else
   echores "no"
 fi
 
+echocheck "linker support for --nxcompat --no-seh --dynamicbase"
+if cc_check "-Wl,--nxcompat -Wl,--no-seh -Wl,--dynamicbase" ; then
+  extra_ldflags="-Wl,--nxcompat -Wl,--no-seh -Wl,--dynamicbase $extra_ldflags"
+  echores "yes"
+else
+  echores "no"
+fi
+
 
 # Dynamic linking flags
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
@@ -8471,12 +8506,12 @@ $def_yasm
 #define CONFIG_SWSCALE_ALPHA 1
 
 #define HAVE_ATTRIBUTE_PACKED 1
-#define HAVE_FAST_CLZ 0
 #define HAVE_GETHRTIME 0
 #define HAVE_INLINE_ASM 1
 #define HAVE_LDBRX 0
 #define HAVE_POLL_H 1
 #define HAVE_PPC4XX 0
+#define HAVE_VFP_ARGS 1
 #define HAVE_VIRTUALALLOC 0
 
 /* Some FFmpeg codecs depend on these. Enable them unconditionally for now. */

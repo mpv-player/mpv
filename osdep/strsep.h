@@ -17,43 +17,14 @@
  * with MPlayer; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#ifndef MPLAYER_STRSEP_H
+#define MPLAYER_STRSEP_H
 
-#include <stdio.h>
 #include <string.h>
-
 #include "config.h"
-#include "strsep.h"
 
-char *strsep(char **stringp, const char *delim) {
-  char *begin, *end;
+#ifndef HAVE_STRSEP
+char *strsep(char **stringp, const char *delim);
+#endif
 
-  begin = *stringp;
-  if(begin == NULL)
-    return NULL;
-
-  if(delim[0] == '\0' || delim[1] == '\0') {
-    char ch = delim[0];
-
-    if(ch == '\0')
-      end = NULL;
-    else {
-      if(*begin == ch)
-        end = begin;
-      else if(*begin == '\0')
-        end = NULL;
-      else
-        end = strchr(begin + 1, ch);
-    }
-  }
-  else
-    end = strpbrk(begin, delim);
-
-  if(end) {
-    *end++ = '\0';
-    *stringp = end;
-  }
-  else
-    *stringp = NULL;
-
-  return begin;
-}
+#endif /* MPLAYER_STRSEP_H */
