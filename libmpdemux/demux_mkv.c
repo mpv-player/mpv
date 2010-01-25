@@ -2771,8 +2771,11 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
             }
         }
 
-        if (ebml_read_id(s, &il) != MATROSKA_ID_CLUSTER)
-            return 0;
+        while (ebml_read_id(s, &il) != MATROSKA_ID_CLUSTER) {
+            ebml_read_skip(s, NULL);
+            if (s->eof)
+                return 0;
+        }
         mkv_d->cluster_start = stream_tell(s) - il;
         mkv_d->cluster_size = ebml_read_length(s, NULL);
     }
