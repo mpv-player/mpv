@@ -111,31 +111,26 @@ static int init(int rate,int channels,int format,int flags){
             strdup(ao_pcm_waveheader?"audiodump.wav":"audiodump.pcm");
     }
 
-    bits=8;
-    switch(format){
-    case AF_FORMAT_S32_BE:
-        format=AF_FORMAT_S32_LE;
-    case AF_FORMAT_S32_LE:
-        bits=32;
-        break;
-    case AF_FORMAT_FLOAT_BE:
-        format=AF_FORMAT_FLOAT_LE;
-    case AF_FORMAT_FLOAT_LE:
-        bits=32;
-        break;
-    case AF_FORMAT_S8:
-        format=AF_FORMAT_U8;
-    case AF_FORMAT_U8:
-        break;
-    case AF_FORMAT_AC3_BE:
-    case AF_FORMAT_AC3_LE:
-        bits=16;
-        break;
-    default:
-        format=AF_FORMAT_S16_LE;
-        bits=16;
-        break;
+    if (ao_pcm_waveheader)
+    {
+        // WAV files must have one of the following formats
+
+        switch(format){
+        case AF_FORMAT_U8:
+        case AF_FORMAT_S16_LE:
+        case AF_FORMAT_S24_LE:
+        case AF_FORMAT_S32_LE:
+        case AF_FORMAT_FLOAT_LE:
+        case AF_FORMAT_AC3_BE:
+        case AF_FORMAT_AC3_LE:
+             break;
+        default:
+            format = AF_FORMAT_S16_LE;
+            break;
+        }
     }
+
+    bits = af_fmt2bits(format);
 
     ao_data.outburst = 65536;
     ao_data.buffersize= 2*65536;

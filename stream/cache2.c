@@ -15,6 +15,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "osdep/shmem.h"
 #include "osdep/timer.h"
@@ -280,22 +281,27 @@ static cache_vars_t* cache_init(int size,int sector){
 
 void cache_uninit(stream_t *s) {
   cache_vars_t* c = s->cache_data;
-  if(!s->cache_pid) return;
+  if(s->cache_pid) {
 #if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
-  cache_do_control(s, -2, NULL);
+    cache_do_control(s, -2, NULL);
 #else
-  kill(s->cache_pid,SIGKILL);
-  waitpid(s->cache_pid,NULL,0);
+    kill(s->cache_pid,SIGKILL);
+    waitpid(s->cache_pid,NULL,0);
 #endif
+    s->cache_pid = 0;
+  }
   if(!c) return;
 #if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
   free(c->stream);
   free(c->buffer);
+  c->buffer = NULL;
   free(s->cache_data);
 #else
   shmem_free(c->buffer,c->buffer_size);
+  c->buffer = NULL;
   shmem_free(s->cache_data,sizeof(cache_vars_t));
 #endif
+  s->cache_data = NULL;
 }
 
 static void exit_sighandler(int x){
@@ -303,8 +309,12 @@ static void exit_sighandler(int x){
   exit(0);
 }
 
+/**
+ * \return 1 on success, 0 if the function was interrupted and -1 on error
+ */
 int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
   int ss = stream->sector_size ? stream->sector_size : STREAM_BUFFER_SIZE;
+  int res = -1;
   cache_vars_t* s;
 
   if (stream->flags & STREAM_NON_CACHEABLE) {
@@ -313,7 +323,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
   }
 
   s=cache_init(size,ss);
-  if(s == NULL) return 0;
+  if(s == NULL) return -1;
   stream->cache_data=s;
   s->stream=stream; // callback
   s->seek_limit=seek_limit;
@@ -330,6 +340,8 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
 
 #if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
   if((stream->cache_pid=fork())){
+    if ((pid_t)stream->cache_pid == -1)
+      stream->cache_pid = 0;
 #else
   {
     stream_t* stream2=malloc(sizeof(stream_t));
@@ -347,6 +359,11 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
     }
 #endif
 #endif
+    if (!stream->cache_pid) {
+        mp_msg(MSGT_CACHE, MSGL_ERR,
+               "Starting cache process/thread failed: %s.\n", strerror(errno));
+        goto err_out;
+    }
     // wait until cache is filled at least prefill_init %
     mp_msg(MSGT_CACHE,MSGL_V,"CACHE_PRE_INIT: %"PRId64" [%"PRId64"] %"PRId64"  pre:%d  eof:%d  \n",
 	(int64_t)s->min_filepos,(int64_t)s->read_filepos,(int64_t)s->max_filepos,min,s->eof);
@@ -356,11 +373,17 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
 	    (int64_t)s->max_filepos-s->read_filepos
 	);
 	if(s->eof) break; // file is smaller than prefill size
-	if(stream_check_interrupt(PREFILL_SLEEP_TIME))
-	  return 0;
+	if(stream_check_interrupt(PREFILL_SLEEP_TIME)) {
+	  res = 0;
+	  goto err_out;
+        }
     }
     mp_msg(MSGT_CACHE,MSGL_STATUS,"\n");
     return 1; // parent exits
+
+err_out:
+    cache_uninit(stream);
+    return res;
   }
 
 #if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
@@ -386,6 +409,8 @@ static void ThreadProc( void *s ){
 #ifdef PTHREAD_CACHE
   return NULL;
 #endif
+  // make sure forked code never leaves this function
+  exit(0);
 }
 
 int cache_stream_fill_buffer(stream_t *s){

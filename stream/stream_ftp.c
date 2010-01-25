@@ -244,7 +244,7 @@ static int FtpOpenPort(struct stream_priv_s* p) {
   return fd;
 }
 
-static int FtpOpenData(stream_t* s,size_t newpos) {
+static int FtpOpenData(stream_t* s,off_t newpos) {
   struct stream_priv_s* p = s->priv;
   int resp;
   char str[256],rsp_txt[256];
@@ -369,7 +369,8 @@ static void close_f(stream_t *s) {
 
 
 static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
-  int len = 0,resp;
+  int resp;
+  int64_t len = 0;
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
   char str[256],rsp_txt[256];
 
@@ -438,7 +439,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
     mp_msg(MSGT_OPEN,MSGL_WARN, "[ftp] command '%s' failed: %s\n",str,rsp_txt);
   } else {
     int dummy;
-    sscanf(rsp_txt,"%d %d",&dummy,&len);
+    sscanf(rsp_txt,"%d %"SCNd64,&dummy,&len);
   }
 
   if(len > 0) {

@@ -31,7 +31,6 @@ static struct vf_priv_s {
     int interlaced;
     int noup;
     int accurate_rnd;
-    int query_format_cache[64];
 } const vf_priv_dflt = {
   -1,-1,
   0,
@@ -92,18 +91,48 @@ static const unsigned int outfmt_list[]={
     0
 };
 
-static unsigned int find_best_out(vf_instance_t *vf){
+/**
+ * A list of preferred conversions, in order of preference.
+ * This should be used for conversions that e.g. involve no scaling
+ * or to stop vf_scale from choosing a conversion that has no
+ * fast assembler implementation.
+ */
+static int preferred_conversions[][2] = {
+    {IMGFMT_YUY2, IMGFMT_UYVY},
+    {IMGFMT_YUY2, IMGFMT_422P},
+    {IMGFMT_UYVY, IMGFMT_YUY2},
+    {IMGFMT_UYVY, IMGFMT_422P},
+    {IMGFMT_422P, IMGFMT_YUY2},
+    {IMGFMT_422P, IMGFMT_UYVY},
+    {0, 0}
+};
+
+static unsigned int find_best_out(vf_instance_t *vf, int in_format){
     unsigned int best=0;
-    int i;
+    int i = -1;
+    int j = -1;
+    int format = 0;
 
     // find the best outfmt:
-    for(i=0; i<sizeof(outfmt_list)/sizeof(int)-1; i++){
-        const int format= outfmt_list[i];
-        int ret= vf->priv->query_format_cache[i]-1;
-        if(ret == -1){
-            ret= vf_next_query_format(vf, outfmt_list[i]);
-            vf->priv->query_format_cache[i]= ret+1;
+    while (1) {
+        int ret;
+        if (j < 0) {
+            format = in_format;
+            j = 0;
+        } else if (i < 0) {
+            while (preferred_conversions[j][0] &&
+                   preferred_conversions[j][0] != in_format)
+                j++;
+            format = preferred_conversions[j++][1];
+            // switch to standard list
+            if (!format)
+                i = 0;
         }
+        if (i >= 0)
+            format = outfmt_list[i++];
+        if (!format)
+            break;
+        ret = vf_next_query_format(vf, format);
 
 	mp_msg(MSGT_VFILTER,MSGL_DBG2,"scale: query(%s) -> %d\n",vo_format_name(format),ret&3);
 	if(ret&VFCAP_CSP_SUPPORTED_BY_HW){
@@ -120,7 +149,7 @@ static int config(struct vf_instance* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
     struct MPOpts *opts = vf->opts;
-    unsigned int best=find_best_out(vf);
+    unsigned int best=find_best_out(vf, outfmt);
     int vo_flags;
     int int_sws_flags=0;
     int round_w=0, round_h=0;
@@ -494,7 +523,7 @@ static int query_format(struct vf_instance* vf, unsigned int fmt){
     case IMGFMT_RGB48LE:
     case IMGFMT_RGB48BE:
     {
-	unsigned int best=find_best_out(vf);
+	unsigned int best=find_best_out(vf, fmt);
 	int flags;
 	if(!best) return 0;	 // no matching out-fmt
 	flags=vf_next_query_format(vf,best);
