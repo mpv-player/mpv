@@ -599,52 +599,30 @@ static int demux_mkv_read_trackencodings(demuxer_t *demuxer,
 static int demux_mkv_read_trackaudio(demuxer_t *demuxer, mkv_track_t *track)
 {
     stream_t *s = demuxer->stream;
-    uint64_t len, length, l;
-    uint64_t num;
-    double fnum;
-    int il;
 
-    track->a_sfreq = 8000.0;
-    track->a_channels = 1;
-
-    len = length = ebml_read_length(s, &il);
-    len += il;
-    while (length > 0) {
-        switch (ebml_read_id(s, &il)) {
-        case MATROSKA_ID_SAMPLINGFREQUENCY:
-            fnum = ebml_read_float(s, &l);
-            if (fnum == EBML_FLOAT_INVALID)
-                return 0;
-            track->a_sfreq = fnum;
-            mp_msg(MSGT_DEMUX, MSGL_V,
-                   "[mkv] |   + Sampling frequency: %f\n", track->a_sfreq);
-            break;
-
-        case MATROSKA_ID_BITDEPTH:
-            num = ebml_read_uint(s, &l);
-            if (num == EBML_UINT_INVALID)
-                return 0;
-            track->a_bps = num;
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Bit depth: %u\n",
-                   track->a_bps);
-            break;
-
-        case MATROSKA_ID_CHANNELS:
-            num = ebml_read_uint(s, &l);
-            if (num == EBML_UINT_INVALID)
-                return 0;
-            track->a_channels = num;
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Channels: %u\n",
-                   track->a_channels);
-            break;
-
-        default:
-            ebml_read_skip(s, &l);
-            break;
-        }
-        length -= l + il;
+    struct ebml_audio audio = {};
+    struct ebml_parse_ctx parse_ctx = {};
+    if (ebml_read_element(s, &parse_ctx, &audio, &ebml_audio_desc) < 0)
+        return 0;
+    if (audio.n_sampling_frequency) {
+        track->a_sfreq = audio.sampling_frequency;
+        mp_msg(MSGT_DEMUX, MSGL_V,
+               "[mkv] |   + Sampling frequency: %f\n", track->a_sfreq);
+    } else
+        track->a_sfreq = 8000;
+    if (audio.n_bit_depth) {
+        track->a_bps = audio.bit_depth;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Bit depth: %u\n",
+               track->a_bps);
     }
-    return len;
+    if (audio.n_channels) {
+        track->a_channels = audio.channels;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Channels: %u\n",
+               track->a_channels);
+    } else
+        track->a_channels = 1;
+    talloc_free(parse_ctx.talloc_ctx);
+    return parse_ctx.bytes_read;
 }
 
 static int demux_mkv_read_trackvideo(demuxer_t *demuxer, mkv_track_t *track)

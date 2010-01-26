@@ -643,7 +643,7 @@ int ebml_read_element(struct stream *s, struct ebml_parse_ctx *ctx,
 {
     ctx->has_errors = false;
     int msglevel = ctx->no_error_messages ? MSGL_DBG2 : MSGL_WARN;
-    uint64_t length = ebml_read_length(s, NULL);
+    uint64_t length = ebml_read_length(s, &ctx->bytes_read);
     if (s->eof) {
         mp_msg(MSGT_DEMUX, msglevel, "[mkv] Unexpected end of file "
                    "- partial or corrupt file?\n");
@@ -656,6 +656,7 @@ int ebml_read_element(struct stream *s, struct ebml_parse_ctx *ctx,
     }
     ctx->talloc_ctx = talloc_size(NULL, length + 8);
     int read_len = stream_read(s, ctx->talloc_ctx, length);
+    ctx->bytes_read += read_len;
     if (read_len < length)
         mp_msg(MSGT_DEMUX, msglevel, "[mkv] Unexpected end of file "
                "- partial or corrupt file?\n");

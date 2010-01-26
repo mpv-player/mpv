@@ -57,6 +57,7 @@ struct ebml_elem_desc {
 
 struct ebml_parse_ctx {
     void *talloc_ctx;
+    int bytes_read;
     bool has_errors;
     bool no_error_messages;
 };
