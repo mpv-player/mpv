@@ -5775,7 +5775,7 @@ Position of the cropped picture, defaults to center.
 .PD 1
 .
 .TP
-.B cropdetect[=limit:round]
+.B cropdetect[=limit:round[:reset]]
 Calculates necessary cropping parameters and prints the recommended parameters
 to stdout.
 .PD 0
@@ -5789,6 +5789,13 @@ Value which the width/\:height should be divisible by (default: 16).
 The offset is automatically adjusted to center the video.
 Use 2 to get only even dimensions (needed for 4:2:2 video).
 16 is best when encoding to most video codecs.
+.br
+.IPs <reset>
+Counter that determines after how many frames cropdetect will reset
+the previously detected largest video area and start over to detect
+the current optimal crop area.  This can be useful when channel
+logos distort the video area.  0 indicates never reset and return
+the largest area encountered during playback. (default: 0).
 .RE
 .PD 1
 .
