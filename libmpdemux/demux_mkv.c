@@ -326,6 +326,10 @@ static int demux_mkv_decode(mkv_track_t *track, uint8_t *src,
 #if CONFIG_ZLIB
         if (track->encodings[i].comp_algo == 0) {
             /* zlib encoded track */
+
+            if (*size == 0)
+                continue;
+
             z_stream zstream;
 
             zstream.zalloc = (alloc_func) 0;
