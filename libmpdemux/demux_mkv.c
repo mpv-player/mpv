@@ -2278,9 +2278,12 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
     } else if (num == demuxer->sub->id) {
         ds = demuxer->sub;
         if (track->subtitle_type != MATROSKA_SUBTYPE_VOBSUB) {
-            if (!mkv_d->v_skip_to_keyframe)
-                handle_subtitles(demuxer, track, block, length, block_duration,
-                                 tc);
+            uint8_t *buffer;
+            int size = length;
+            int modified = demux_mkv_decode(track, block, &buffer, &size, 1);
+            handle_subtitles(demuxer, track, buffer, size, block_duration, tc);
+            if (modified)
+                free(buffer);
             use_this_block = 0;
         }
     } else
