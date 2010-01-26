@@ -182,9 +182,9 @@ int64_t ebml_read_int(stream_t *s, uint64_t *length)
 /*
  * Read the next element as a float.
  */
-long double ebml_read_float(stream_t *s, uint64_t *length)
+double ebml_read_float(stream_t *s, uint64_t *length)
 {
-    long double value;
+    double value;
     uint64_t len;
     int l;
 

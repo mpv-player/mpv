@@ -403,7 +403,7 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
     uint64_t length, l;
     int i;
     uint64_t tc_scale = 1000000;
-    long double duration = 0.;
+    double duration = 0;
 
     length = ebml_read_length(s, NULL);
     while (length > 0) {
@@ -623,7 +623,7 @@ static int demux_mkv_read_trackaudio(demuxer_t *demuxer, mkv_track_t *track)
     stream_t *s = demuxer->stream;
     uint64_t len, length, l;
     uint64_t num;
-    long double fnum;
+    double fnum;
     int il;
 
     track->a_sfreq = 8000.0;
@@ -674,7 +674,7 @@ static int demux_mkv_read_trackvideo(demuxer_t *demuxer, mkv_track_t *track)
     stream_t *s = demuxer->stream;
     uint64_t len, length, l;
     uint64_t num;
-    long double fnum;
+    double fnum;
     int il;
 
     len = length = ebml_read_length(s, &il);

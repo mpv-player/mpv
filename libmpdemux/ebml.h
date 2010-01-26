@@ -104,7 +104,7 @@ int64_t ebml_read_vlen_int (uint8_t *buffer, int *length);
 uint64_t ebml_read_length (stream_t *s, int *length);
 uint64_t ebml_read_uint (stream_t *s, uint64_t *length);
 int64_t ebml_read_int (stream_t *s, uint64_t *length);
-long double ebml_read_float (stream_t *s, uint64_t *length);
+double ebml_read_float (stream_t *s, uint64_t *length);
 char *ebml_read_ascii (stream_t *s, uint64_t *length);
 char *ebml_read_utf8 (stream_t *s, uint64_t *length);
 int ebml_read_skip (stream_t *s, uint64_t *length);
