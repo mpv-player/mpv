@@ -82,9 +82,9 @@ static const int cook_fl2bps[COOK_FLAVORS] = {
     12016, 16408, 22911, 33506
 };
 
-typedef struct {
-    uint32_t order, type, scope;
-    uint32_t comp_algo;
+typedef struct mkv_content_encoding {
+    uint64_t order, type, scope;
+    uint64_t comp_algo;
     uint8_t *comp_settings;
     int comp_settings_len;
 } mkv_content_encoding_t;
@@ -437,163 +437,80 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
     return 0;
 }
 
-/**
- * \brief free array of kv_content_encoding_t
- * \param encodings pointer to array
- * \param numencodings number of encodings in array
- */
-static void demux_mkv_free_encodings(mkv_content_encoding_t *encodings,
-                                     int numencodings)
-{
-    while (numencodings-- > 0)
-        free(encodings[numencodings].comp_settings);
-    free(encodings);
-}
-
 static int demux_mkv_read_trackencodings(demuxer_t *demuxer,
                                          mkv_track_t *track)
 {
     stream_t *s = demuxer->stream;
-    mkv_content_encoding_t *ce, e;
-    uint64_t len1, len2, length, l;
-    int i, il, n;
+    // initial allocation to be a non-NULL context before realloc
+    mkv_content_encoding_t *ce = talloc_size(track, 1);
 
-    ce = malloc(sizeof(*ce));
-    n = 0;
-
-    len1 = length = ebml_read_length(s, &il);
-    len1 += il;
-    while (length > 0) {
-        switch (ebml_read_id(s, &il)) {
-        case MATROSKA_ID_CONTENTENCODING:
-            memset(&e, 0, sizeof(e));
+    struct ebml_content_encodings encodings = {};
+    struct ebml_parse_ctx parse_ctx = {};
+    if (ebml_read_element(s, &parse_ctx, &encodings,
+                          &ebml_content_encodings_desc) < 0)
+        return 0;
+    for (int n_enc = 0; n_enc < encodings.n_content_encoding; n_enc++) {
+        struct ebml_content_encoding *enc = encodings.content_encoding + n_enc;
+        struct mkv_content_encoding e = {};
+        e.order = enc->content_encoding_order;
+        if (enc->n_content_encoding_scope)
+            e.scope = enc->content_encoding_scope;
+        else
             e.scope = 1;
+        e.type = enc->content_encoding_type;
 
-            len2 = ebml_read_length(s, &i);
-            l = len2 + i;
-
-            while (len2 > 0) {
-                uint64_t num, l;
-                int il;
-
-                switch (ebml_read_id(s, &il)) {
-                case MATROSKA_ID_CONTENTENCODINGORDER:
-                    num = ebml_read_uint(s, &l);
-                    if (num == EBML_UINT_INVALID)
-                        goto err_out;
-                    e.order = num;
-                    break;
-
-                case MATROSKA_ID_CONTENTENCODINGSCOPE:
-                    num = ebml_read_uint(s, &l);
-                    if (num == EBML_UINT_INVALID)
-                        goto err_out;
-                    e.scope = num;
-                    break;
-
-                case MATROSKA_ID_CONTENTENCODINGTYPE:
-                    num = ebml_read_uint(s, &l);
-                    if (num == EBML_UINT_INVALID)
-                        goto err_out;
-                    e.type = num;
-                    break;
-
-                case MATROSKA_ID_CONTENTCOMPRESSION:;
-                    uint64_t le;
-
-                    le = ebml_read_length(s, &i);
-                    l = le + i;
-
-                    while (le > 0) {
-                        uint64_t l;
-                        int il;
-
-                        switch (ebml_read_id(s, &il)) {
-                        case MATROSKA_ID_CONTENTCOMPALGO:
-                            num = ebml_read_uint(s, &l);
-                            if (num == EBML_UINT_INVALID)
-                                goto err_out;
-                            e.comp_algo = num;
-                            break;
-
-                        case MATROSKA_ID_CONTENTCOMPSETTINGS:
-                            l = ebml_read_length(s, &i);
-                            e.comp_settings = malloc(l);
-                            stream_read(s, e.comp_settings, l);
-                            e.comp_settings_len = l;
-                            l += i;
-                            break;
-
-                        default:
-                            ebml_read_skip(s, &l);
-                            break;
-                        }
-                        le -= l + il;
-                    }
-
-                    if (e.type == 1) {
-                        mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[mkv] Track "
-                                "number %u has been encrypted and "
-                                "decryption has not yet been\n"
-                                "[mkv] implemented. Skipping track.\n",
-                                track->tnum);
-                    } else if (e.type != 0) {
-                        mp_tmsg(MSGT_DEMUX, MSGL_WARN,
-                                "[mkv] Unknown content encoding type for "
-                                "track %u. Skipping track.\n",
-                                track->tnum);
-                    }
-
-                    if (e.comp_algo != 0 && e.comp_algo != 2) {
-                        mp_tmsg(MSGT_DEMUX, MSGL_WARN,
-                                "[mkv] Track %u has been compressed with "
-                                "an unknown/unsupported compression\n"
-                                "[mkv] algorithm (%u). Skipping track.\n",
-                                track->tnum, e.comp_algo);
-                    }
-#if !CONFIG_ZLIB
-                    else if (e.comp_algo == 0) {
-                        mp_tmsg(MSGT_DEMUX, MSGL_WARN,
-                                "[mkv] Track %u was compressed with zlib "
-                                "but mplayer has not been compiled\n"
-                                "[mkv] with support for zlib compression. "
-                                "Skipping track.\n",
-                                track->tnum);
-                    }
-#endif
-
-                    break;
-
-                default:
-                    ebml_read_skip(s, &l);
-                    break;
-                }
-                len2 -= l + il;
+        if (enc->n_content_compression) {
+            struct ebml_content_compression *z = &enc->content_compression;
+            e.comp_algo = z->content_comp_algo;
+            if (z->n_content_comp_settings) {
+                int sz = z->content_comp_settings.len;
+                e.comp_settings = talloc_size(ce, sz);
+                memcpy(e.comp_settings, z->content_comp_settings.start, sz);
+                e.comp_settings_len = sz;
             }
-            for (i = 0; i < n; i++)
-                if (e.order <= ce[i].order)
-                    break;
-            ce = realloc(ce, (n + 1) * sizeof(*ce));
-            memmove(ce + i + 1, ce + i, (n - i) * sizeof(*ce));
-            memcpy(ce + i, &e, sizeof(e));
-            n++;
-            break;
-
-        default:
-            ebml_read_skip(s, &l);
-            break;
         }
 
-        length -= l + il;
+        if (e.type == 1) {
+            mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[mkv] Track "
+                    "number %u has been encrypted and "
+                    "decryption has not yet been\n"
+                    "[mkv] implemented. Skipping track.\n",
+                    track->tnum);
+        } else if (e.type != 0) {
+            mp_tmsg(MSGT_DEMUX, MSGL_WARN,
+                    "[mkv] Unknown content encoding type for "
+                    "track %u. Skipping track.\n",
+                    track->tnum);
+        } else if (e.comp_algo != 0 && e.comp_algo != 2) {
+            mp_tmsg(MSGT_DEMUX, MSGL_WARN,
+                    "[mkv] Track %u has been compressed with "
+                    "an unknown/unsupported compression\n"
+                    "[mkv] algorithm (%" PRIu64 "). Skipping track.\n",
+                    track->tnum, e.comp_algo);
+        }
+#if !CONFIG_ZLIB
+        else if (e.comp_algo == 0) {
+            mp_tmsg(MSGT_DEMUX, MSGL_WARN,
+                    "[mkv] Track %u was compressed with zlib "
+                    "but mplayer has not been compiled\n"
+                    "[mkv] with support for zlib compression. "
+                    "Skipping track.\n",
+                    track->tnum);
+        }
+#endif
+        int i;
+        for (i = 0; i < n_enc; i++)
+            if (e.order <= ce[i].order)
+                break;
+        ce = talloc_realloc_size(track, ce, (n_enc + 1) * sizeof(*ce));
+        memmove(ce + i + 1, ce + i, (n_enc - i) * sizeof(*ce));
+        memcpy(ce + i, &e, sizeof(e));
     }
 
     track->encodings = ce;
-    track->num_encodings = n;
-    return len1;
-
-  err_out:
-    demux_mkv_free_encodings(ce, n);
-    return 0;
+    track->num_encodings = encodings.n_content_encoding;
+    talloc_free(parse_ctx.talloc_ctx);
+    return parse_ctx.bytes_read;
 }
 
 static int demux_mkv_read_trackaudio(demuxer_t *demuxer, mkv_track_t *track)
@@ -677,8 +594,7 @@ static void demux_mkv_free_trackentry(mkv_track_t *track)
     free(track->private_data);
     free(track->audio_buf);
     free(track->audio_timestamp);
-    demux_mkv_free_encodings(track->encodings, track->num_encodings);
-    free(track);
+    talloc_free(track);
 }
 
 static int demux_mkv_read_trackentry(demuxer_t *demuxer)
@@ -690,7 +606,7 @@ static int demux_mkv_read_trackentry(demuxer_t *demuxer)
     uint64_t num;
     int il;
 
-    track = calloc(1, sizeof(*track));
+    track = talloc_zero_size(NULL, sizeof(*track));
     /* set default values */
     track->default_track = 1;
     track->name = 0;
