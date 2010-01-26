@@ -1201,17 +1201,20 @@ demuxer_t *demux_open(stream_t *vs, int file_format, int audio_id,
     return res;
 }
 
+/**
+ * Do necessary reinitialization after e.g. a seek.
+ * Do _not_ call ds_fill_buffer between the seek and this, it breaks at least
+ * seeking with ASF demuxer.
+ */
 static void demux_resync(demuxer_t *demuxer)
 {
     sh_video_t *sh_video = demuxer->video->sh;
     sh_audio_t *sh_audio = demuxer->audio->sh;
     demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
     if (sh_video) {
-        ds_fill_buffer(demuxer->video);
         resync_video_stream(sh_video);
     }
     if (sh_audio) {
-        ds_fill_buffer(demuxer->audio);
         resync_audio_stream(sh_audio);
     }
 }
