@@ -309,22 +309,24 @@ static void free_cached_dps(demuxer_t *demuxer)
     }
 }
 
-static int demux_mkv_decode(mkv_track_t *track, uint8_t *src,
-                            uint8_t **dest, uint32_t *size, uint32_t type)
+static void demux_mkv_decode(mkv_track_t *track, uint8_t *src,
+                             uint8_t **dest, uint32_t *size, uint32_t type)
 {
-    int i, result;
-    int modified = 0;
+    uint8_t *orig_src = src;
 
     *dest = src;
-    if (track->num_encodings <= 0)
-        return 0;
 
-    for (i = 0; i < track->num_encodings; i++) {
-        if (!(track->encodings[i].scope & type))
+    for (int i = 0; i < track->num_encodings; i++) {
+        struct mkv_content_encoding *enc = track->encodings + i;
+        if (!(enc->scope & type))
             continue;
 
+        if (src != *dest && src != orig_src)
+            free(src);
+        src = *dest;  // output from last iteration is new source
+
+        if (enc->comp_algo == 0) {
 #if CONFIG_ZLIB
-        if (track->encodings[i].comp_algo == 0) {
             /* zlib encoded track */
 
             if (*size == 0)
@@ -338,14 +340,14 @@ static int demux_mkv_decode(mkv_track_t *track, uint8_t *src,
             if (inflateInit(&zstream) != Z_OK) {
                 mp_tmsg(MSGT_DEMUX, MSGL_WARN,
                         "[mkv] zlib initialization failed.\n");
-                return modified;
+                goto error;
             }
             zstream.next_in = (Bytef *) src;
             zstream.avail_in = *size;
 
-            modified = 1;
             *dest = NULL;
             zstream.avail_out = *size;
+            int result;
             do {
                 *size += 4000;
                 *dest = realloc(*dest, *size);
@@ -357,7 +359,7 @@ static int demux_mkv_decode(mkv_track_t *track, uint8_t *src,
                     free(*dest);
                     *dest = NULL;
                     inflateEnd(&zstream);
-                    return modified;
+                    goto error;
                 }
                 zstream.avail_out += 4000;
             } while (zstream.avail_out == 4000 && zstream.avail_in != 0
@@ -365,9 +367,8 @@ static int demux_mkv_decode(mkv_track_t *track, uint8_t *src,
 
             *size = zstream.total_out;
             inflateEnd(&zstream);
-        }
 #endif
-        if (track->encodings[i].comp_algo == 2) {
+        } else if (enc->comp_algo == 2) {
             /* lzo encoded track */
             int dstlen = *size * 3;
 
@@ -377,7 +378,7 @@ static int demux_mkv_decode(mkv_track_t *track, uint8_t *src,
                 if (dstlen > SIZE_MAX - AV_LZO_OUTPUT_PADDING)
                     goto lzo_fail;
                 *dest = realloc(*dest, dstlen + AV_LZO_OUTPUT_PADDING);
-                result = av_lzo1x_decode(*dest, &dstlen, src, &srclen);
+                int result = av_lzo1x_decode(*dest, &dstlen, src, &srclen);
                 if (result == 0)
                     break;
                 if (!(result & AV_LZO_OUTPUT_FULL)) {
@@ -386,17 +387,24 @@ static int demux_mkv_decode(mkv_track_t *track, uint8_t *src,
                             "[mkv] lzo decompression failed.\n");
                     free(*dest);
                     *dest = NULL;
-                    return modified;
+                    goto error;
                 }
                 mp_msg(MSGT_DEMUX, MSGL_DBG2,
                        "[mkv] lzo decompression buffer too small.\n");
                 dstlen *= 2;
             }
             *size = dstlen;
+        } else if (enc->comp_algo == 3) {
+            *dest = malloc(*size + enc->comp_settings_len);
+            memcpy(*dest, enc->comp_settings, enc->comp_settings_len);
+            memcpy(*dest + enc->comp_settings_len, src, *size);
+            *size += enc->comp_settings_len;
         }
     }
 
-    return modified;
+ error:
+    if (src != *dest && src != orig_src)
+        free(src);
 }
 
 
@@ -499,7 +507,7 @@ static void parse_trackencodings(struct demuxer *demuxer,
 #endif
         int i;
         for (i = 0; i < n_enc; i++)
-            if (e.order <= ce[i].order)
+            if (e.order >= ce[i].order)
                 break;
         ce = talloc_realloc_size(track, ce, (n_enc + 1) * sizeof(*ce));
         memmove(ce + i + 1, ce + i, (n_enc - i) * sizeof(*ce));
@@ -1567,7 +1575,7 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track,
                               int sid)
 {
     if (track->subtitle_type != MATROSKA_SUBTYPE_UNKNOWN) {
-        int size, m;
+        int size;
         uint8_t *buffer;
         sh_sub_t *sh = new_sh_sub_sid(demuxer, track->tnum, sid);
         track->sh_sub = sh;
@@ -1577,8 +1585,8 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track,
         if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
             sh->type = 'a';
         size = track->private_size;
-        m = demux_mkv_decode(track, track->private_data, &buffer, &size, 2);
-        if (buffer && m) {
+        demux_mkv_decode(track, track->private_data, &buffer, &size, 2);
+        if (buffer && buffer != track->private_data) {
             free(track->private_data);
             track->private_data = buffer;
             track->private_size = size;
@@ -2188,9 +2196,9 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
         if (track->subtitle_type != MATROSKA_SUBTYPE_VOBSUB) {
             uint8_t *buffer;
             int size = length;
-            int modified = demux_mkv_decode(track, block, &buffer, &size, 1);
+            demux_mkv_decode(track, block, &buffer, &size, 1);
             handle_subtitles(demuxer, track, buffer, size, block_duration, tc);
-            if (modified)
+            if (buffer != block)
                 free(buffer);
             use_this_block = 0;
         }
@@ -2212,14 +2220,14 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
                 handle_video_bframes(demuxer, track, block, lace_size[i],
                                      block_bref, block_fref);
             else {
-                int modified, size = lace_size[i];
+                int size = lace_size[i];
                 demux_packet_t *dp;
                 uint8_t *buffer;
-                modified = demux_mkv_decode(track, block, &buffer, &size, 1);
+                demux_mkv_decode(track, block, &buffer, &size, 1);
                 if (buffer) {
                     dp = new_demux_packet(size);
                     memcpy(dp->buffer, buffer, size);
-                    if (modified)
+                    if (buffer != block)
                         free(buffer);
                     dp->flags = (block_bref == 0
                                  && block_fref == 0) ? 0x10 : 0;
