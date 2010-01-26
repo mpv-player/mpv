@@ -400,62 +400,40 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
 {
     mkv_demuxer_t *mkv_d = demuxer->priv;
     stream_t *s = demuxer->stream;
-    uint64_t length, l;
-    int i;
-    uint64_t tc_scale = 1000000;
-    double duration = 0;
 
-    length = ebml_read_length(s, NULL);
-    while (length > 0) {
-        uint32_t id = ebml_read_id(s, &i);
-        length -= i;
-        switch (id) {
-        case MATROSKA_ID_TIMECODESCALE:
-            tc_scale = ebml_read_uint(s, &l);
-            length -= l;
-            if (tc_scale == EBML_UINT_INVALID)
-                return 1;
-            mp_msg(MSGT_DEMUX, MSGL_V,
-                   "[mkv] | + timecode scale: %" PRIu64 "\n", tc_scale);
-            break;
+    mkv_d->tc_scale = 1000000;
+    mkv_d->duration = 0;
 
-        case MATROSKA_ID_DURATION:
-            duration = ebml_read_float(s, &l);
-            length -= l;
-            if (duration == EBML_FLOAT_INVALID)
-                return 1;
-            break;
-
-        case MATROSKA_ID_SEGMENTUID:;
-            l = ebml_read_length(s, &i);
-            length -= i;
-            if (l != sizeof(demuxer->matroska_data.segment_uid)) {
-                mp_msg(MSGT_DEMUX, MSGL_INFO,
-                       "[mkv] segment uid invalid length %" PRIu64 "\n", l);
-                stream_skip(s, l);
-            } else {
-                stream_read(s, demuxer->matroska_data.segment_uid, l);
-                mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] | + segment uid");
-                for (int i = 0; i < l; i++)
-                    mp_msg(MSGT_DEMUX, MSGL_V, " %02x",
-                           demuxer->matroska_data.segment_uid[i]);
-                mp_msg(MSGT_DEMUX, MSGL_V, "\n");
-            }
-            length -= l;
-            break;
-
-        default:
-            ebml_read_skip(s, &l);
-            length -= l;
-            break;
-        }
+    struct ebml_info info = {};
+    struct ebml_parse_ctx parse_ctx = {};
+    if (ebml_read_element(s, &parse_ctx, &info, &ebml_info_desc) < 0)
+        return 1;
+    if (info.n_timecode_scale) {
+        mkv_d->tc_scale = info.timecode_scale;
+        mp_msg(MSGT_DEMUX, MSGL_V,
+               "[mkv] | + timecode scale: %" PRIu64 "\n", mkv_d->tc_scale);
     }
-    mkv_d->tc_scale = tc_scale;
-    mkv_d->duration = duration * tc_scale / 1000000000.0;
-    if (duration)
+    if (info.n_duration) {
+        mkv_d->duration = info.duration * mkv_d->tc_scale / 1e9;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] | + duration: %.3fs\n",
                mkv_d->duration);
-
+    }
+    if (info.n_segment_uid) {
+        int len = info.segment_uid.len;
+        if (len != sizeof(demuxer->matroska_data.segment_uid)) {
+            mp_msg(MSGT_DEMUX, MSGL_INFO,
+                   "[mkv] segment uid invalid length %d\n", len);
+        } else {
+            memcpy(demuxer->matroska_data.segment_uid, info.segment_uid.start,
+                   len);
+            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] | + segment uid");
+            for (int i = 0; i < len; i++)
+                mp_msg(MSGT_DEMUX, MSGL_V, " %02x",
+                       demuxer->matroska_data.segment_uid[i]);
+            mp_msg(MSGT_DEMUX, MSGL_V, "\n");
+        }
+    }
+    talloc_free(parse_ctx.talloc_ctx);
     return 0;
 }
 
