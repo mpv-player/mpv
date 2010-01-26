@@ -452,10 +452,11 @@ int demuxer_type_by_filename(char* filename);
 void demuxer_help(void);
 int get_demuxer_type_from_name(char *demuxer_name, int *force);
 
-int demuxer_add_attachment(demuxer_t* demuxer, const char* name,
-                           const char* type, const void* data, size_t size);
-
-int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, uint64_t end);
+int demuxer_add_attachment(demuxer_t *demuxer, const char *name,
+                           int name_maxlen, const char *type, int type_maxlen,
+                           const void *data, size_t size);
+int demuxer_add_chapter(demuxer_t *demuxer, const char *name, int name_maxlen,
+                        uint64_t start, uint64_t end);
 int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, double *seek_pts,
                          char **chapter_name);
 

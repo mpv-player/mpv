@@ -1199,7 +1199,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                cur_idx + 1, selected_edition);
 
     for (i = 0; i < num_selected_chapters; i++)
-        demuxer_add_chapter(demuxer, selected_chapters[i].name,
+        demuxer_add_chapter(demuxer, selected_chapters[i].name, INT_MAX,
                             selected_chapters[i].start,
                             selected_chapters[i].end);
     struct matroska_data *m = &demuxer->matroska_data;
@@ -1298,7 +1298,8 @@ static int demux_mkv_read_attachments(demuxer_t *demuxer)
                 len -= l + il;
             }
 
-            demuxer_add_attachment(demuxer, name, mime, data, data_size);
+            demuxer_add_attachment(demuxer, name, INT_MAX, mime,
+                                   INT_MAX, data, data_size);
             free(data);
             free(mime);
             free(name);
