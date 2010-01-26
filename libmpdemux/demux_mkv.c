@@ -628,69 +628,41 @@ static int demux_mkv_read_trackaudio(demuxer_t *demuxer, mkv_track_t *track)
 static int demux_mkv_read_trackvideo(demuxer_t *demuxer, mkv_track_t *track)
 {
     stream_t *s = demuxer->stream;
-    uint64_t len, length, l;
-    uint64_t num;
-    double fnum;
-    int il;
 
-    len = length = ebml_read_length(s, &il);
-    len += il;
-    while (length > 0) {
-        switch (ebml_read_id(s, &il)) {
-        case MATROSKA_ID_FRAMERATE:
-            fnum = ebml_read_float(s, &l);
-            if (fnum == EBML_FLOAT_INVALID)
-                return 0;
-            track->v_frate = fnum;
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Frame rate: %f\n",
-                   track->v_frate);
-            if (track->v_frate > 0)
-                track->default_duration = 1 / track->v_frate;
-            break;
-
-        case MATROSKA_ID_DISPLAYWIDTH:
-            num = ebml_read_uint(s, &l);
-            if (num == EBML_UINT_INVALID)
-                return 0;
-            track->v_dwidth = num;
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Display width: %u\n",
-                   track->v_dwidth);
-            break;
-
-        case MATROSKA_ID_DISPLAYHEIGHT:
-            num = ebml_read_uint(s, &l);
-            if (num == EBML_UINT_INVALID)
-                return 0;
-            track->v_dheight = num;
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Display height: %u\n",
-                   track->v_dheight);
-            break;
-
-        case MATROSKA_ID_PIXELWIDTH:
-            num = ebml_read_uint(s, &l);
-            if (num == EBML_UINT_INVALID)
-                return 0;
-            track->v_width = num;
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Pixel width: %u\n",
-                   track->v_width);
-            break;
-
-        case MATROSKA_ID_PIXELHEIGHT:
-            num = ebml_read_uint(s, &l);
-            if (num == EBML_UINT_INVALID)
-                return 0;
-            track->v_height = num;
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Pixel height: %u\n",
-                   track->v_height);
-            break;
-
-        default:
-            ebml_read_skip(s, &l);
-            break;
-        }
-        length -= l + il;
+    struct ebml_video video = {};
+    struct ebml_parse_ctx parse_ctx = {};
+    if (ebml_read_element(s, &parse_ctx, &video, &ebml_video_desc) < 0)
+        return 0;
+    if (video.n_frame_rate) {
+        track->v_frate = video.frame_rate;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Frame rate: %f\n",
+               track->v_frate);
+        // XXX default_duration should take priority
+        if (track->v_frate > 0)
+            track->default_duration = 1 / track->v_frate;
     }
-    return len;
+    if (video.n_display_width) {
+        track->v_dwidth = video.display_width;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Display width: %u\n",
+               track->v_dwidth);
+    }
+    if (video.n_display_height) {
+        track->v_dheight = video.display_height;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Display height: %u\n",
+               track->v_dheight);
+    }
+    if (video.n_pixel_width) {
+        track->v_width = video.pixel_width;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Pixel width: %u\n",
+               track->v_width);
+    }
+    if (video.n_pixel_height) {
+        track->v_height = video.pixel_height;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Pixel height: %u\n",
+               track->v_height);
+    }
+    talloc_free(parse_ctx.talloc_ctx);
+    return parse_ctx.bytes_read;
 }
 
 /**
