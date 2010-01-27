@@ -74,9 +74,9 @@ static snd_pcm_sw_params_t *alsa_swparams;
 
 static size_t bytes_per_sample;
 
-static int ao_noblock = 0;
+static int ao_noblock;
 
-static int alsa_can_pause = 0;
+static int alsa_can_pause;
 
 #define ALSA_DEVICE_SIZE 256
 
