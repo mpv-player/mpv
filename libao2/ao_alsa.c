@@ -315,7 +315,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 {
     unsigned int alsa_buffer_time = 500000; /* 0.5 s */
     unsigned int alsa_fragcount = 16;
-    int open_mode;
     int err;
     int block;
     strarg_t device;
@@ -469,15 +468,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: using device %s\n", alsa_device);
 
-    //setting modes for block or nonblock-mode
-    if (!block) {
-      open_mode = SND_PCM_NONBLOCK;
-    }
-    else {
-      open_mode = 0;
-    }
-
     if (!alsa_handler) {
+      int open_mode = block ? 0 : SND_PCM_NONBLOCK;
       int isac3 =  AF_FORMAT_IS_AC3(format);
       //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
       if ((err = try_open_device(alsa_device, open_mode, isac3)) < 0)
