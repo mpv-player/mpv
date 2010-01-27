@@ -520,14 +520,13 @@ void vo_uninit(struct vo_x11_state *x11)
     {
         mp_msg(MSGT_VO, MSGL_V,
                "vo: x11 uninit called but X11 not initialized..\n");
-        return;
+    } else {
+        mp_msg(MSGT_VO, MSGL_V, "vo: uninit ...\n");
+        XSetErrorHandler(NULL);
+        XCloseDisplay(x11->display);
+        x11->depthonscreen = 0;
+        x11->display = NULL;
     }
-// if( !vo_depthonscreen ) return;
-    mp_msg(MSGT_VO, MSGL_V, "vo: uninit ...\n");
-    XSetErrorHandler(NULL);
-    XCloseDisplay(x11->display);
-    x11->depthonscreen = 0;
-    x11->display = NULL;
     talloc_free(x11);
 }
 
