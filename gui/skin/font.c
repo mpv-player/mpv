@@ -83,9 +83,9 @@ int fntRead( char * path,char * fname )
  if ( ( f=fopen( tmp,"rt" ) ) == NULL )
    { free( Fonts[id] ); return -3; }
 
- while ( !feof( f ) )
+ while ( fgets( tmp,255,f ) )
   {
-   fgets( tmp,255,f ); linenumber++;
+   linenumber++;
 
    // remove any kind of newline, if any
    tmp[strcspn(tmp, "\n\r")] = 0;
