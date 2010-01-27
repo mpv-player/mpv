@@ -174,7 +174,7 @@ libvo drivers:
     * vo_ivtv.c - Benjamin Zores
     * vo_jpeg.c - Ivo van Poorten
     * vo_md5sum.c - Ivo van Poorten
-    * vo_mga.c - Attila Kinali
+    * vo_mga.c - None
     * vo_mpegpes.c - None
     * vo_null.c - None
     * vo_png.c - Felix Bünemann
@@ -188,7 +188,7 @@ libvo drivers:
     * vo_wii.c - Benjamin Zores
     * vo_winvidix.c - Sascha Sommer
     * vo_x11.c - Alexander Strasser
-    * vo_xmga.c - Attila Kinali
+    * vo_xmga.c - None
     * vo_xover.c - Alban Bedel
     * vo_xv.c - Alexander Strasser
     * vo_xvidix.c - None
