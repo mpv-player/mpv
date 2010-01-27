@@ -72,14 +72,10 @@ static snd_pcm_format_t alsa_format;
 static snd_pcm_hw_params_t *alsa_hwparams;
 static snd_pcm_sw_params_t *alsa_swparams;
 
-static unsigned int alsa_buffer_time = 500000; /* 0.5 s */
-static unsigned int alsa_fragcount = 16;
-
 static size_t bytes_per_sample;
 
 static int ao_noblock = 0;
 
-static int open_mode;
 static int alsa_can_pause = 0;
 
 #define ALSA_DEVICE_SIZE 256
@@ -319,6 +315,9 @@ static int try_open_device(const char *device, int open_mode, int try_ac3)
 */
 static int init(int rate_hz, int channels, int format, int flags)
 {
+    unsigned int alsa_buffer_time = 500000; /* 0.5 s */
+    unsigned int alsa_fragcount = 16;
+    int open_mode;
     int err;
     int block;
     strarg_t device;
