@@ -717,8 +717,8 @@ int skinRead( char * dname )
   {
    linenumber++;
 
-   c=tmp[ strlen( tmp ) - 1 ]; if ( c == '\n' || c == '\r' ) tmp[ strlen( tmp ) - 1 ]=0;
-   c=tmp[ strlen( tmp ) - 1 ]; if ( c == '\n' || c == '\r' ) tmp[ strlen( tmp ) - 1 ]=0;
+   // remove any kind of newline, if any
+   tmp[strcspn(tmp, "\n\r")] = 0;
    for ( c=0;c<(int)strlen( tmp );c++ )
     if ( tmp[c] == ';' )
      {
