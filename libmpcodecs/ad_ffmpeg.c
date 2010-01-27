@@ -153,6 +153,7 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...)
     switch(cmd){
     case ADCTRL_RESYNC_STREAM:
         avcodec_flush_buffers(lavc_context);
+        ds_clear_parser(sh->ds);
     return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;

@@ -1418,7 +1418,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 		int ssid = parse_pes_extension_fields(p, pkt_len);
 		if((audio_substream_id!=-1) && (ssid != audio_substream_id))
 			return 0;
-		if(ssid == 0x72)
+		if(ssid == 0x72 && type_from_pmt != AUDIO_DTS)
 			es->type  = type_from_pmt = AUDIO_TRUEHD;
 	}
 
