@@ -77,10 +77,7 @@ static snd_pcm_sw_params_t *alsa_swparams;
 
 static size_t bytes_per_sample;
 
-static int ao_noblock = 0;
-
-static int open_mode;
-static int alsa_can_pause = 0;
+static int alsa_can_pause;
 static snd_pcm_sframes_t prepause_frames;
 
 #define ALSA_DEVICE_SIZE 256
@@ -120,9 +117,9 @@ static int control(int cmd, void *arg)
       snd_mixer_elem_t *elem;
       snd_mixer_selem_id_t *sid;
 
-      static char *mix_name = "PCM";
-      static char *card = "default";
-      static int mix_index = 0;
+      char *mix_name = "PCM";
+      char *card = "default";
+      int mix_index = 0;
 
       long pmin, pmax;
       long get_vol, set_vol;
@@ -478,25 +475,17 @@ static int init(int rate_hz, int channels, int format, int flags)
         print_help();
         return 0;
     }
-    ao_noblock = !block;
     parse_device(alsa_device, device.str, device.len);
 
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: using device %s\n", alsa_device);
 
-    //setting modes for block or nonblock-mode
-    if (ao_noblock) {
-      open_mode = SND_PCM_NONBLOCK;
-    }
-    else {
-      open_mode = 0;
-    }
-
     if (!alsa_handler) {
+      int open_mode = block ? 0 : SND_PCM_NONBLOCK;
       int isac3 =  AF_FORMAT_IS_AC3(format);
       //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
       if ((err = try_open_device(alsa_device, open_mode, isac3)) < 0)
 	{
-	  if (err != -EBUSY && ao_noblock) {
+	  if (err != -EBUSY && !block) {
 	    mp_tmsg(MSGT_AO,MSGL_INFO,"[AO_ALSA] Open in nonblock-mode failed, trying to open in block-mode.\n");
 	    if ((err = try_open_device(alsa_device, 0, isac3)) < 0) {
 	      mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Playback open error: %s\n", snd_strerror(err));
