@@ -74,8 +74,6 @@ static snd_pcm_sw_params_t *alsa_swparams;
 
 static size_t bytes_per_sample;
 
-static int ao_noblock;
-
 static int alsa_can_pause;
 
 #define ALSA_DEVICE_SIZE 256
@@ -467,13 +465,12 @@ static int init(int rate_hz, int channels, int format, int flags)
         print_help();
         return 0;
     }
-    ao_noblock = !block;
     parse_device(alsa_device, device.str, device.len);
 
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: using device %s\n", alsa_device);
 
     //setting modes for block or nonblock-mode
-    if (ao_noblock) {
+    if (!block) {
       open_mode = SND_PCM_NONBLOCK;
     }
     else {
@@ -485,7 +482,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
       if ((err = try_open_device(alsa_device, open_mode, isac3)) < 0)
 	{
-	  if (err != -EBUSY && ao_noblock) {
+	  if (err != -EBUSY && !block) {
 	    mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_ALSA_OpenInNonblockModeFailed);
 	    if ((err = try_open_device(alsa_device, 0, isac3)) < 0) {
 	      mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PlaybackOpenError, snd_strerror(err));
