@@ -115,9 +115,9 @@ static int control(int cmd, void *arg)
       snd_mixer_elem_t *elem;
       snd_mixer_selem_id_t *sid;
 
-      static char *mix_name = "PCM";
-      static char *card = "default";
-      static int mix_index = 0;
+      char *mix_name = "PCM";
+      char *card = "default";
+      int mix_index = 0;
 
       long pmin, pmax;
       long get_vol, set_vol;
