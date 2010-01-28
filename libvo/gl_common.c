@@ -441,7 +441,7 @@ static const extfunc_desc_t extfuncs[] = {
   {&ProgramString, "_program", {"glProgramStringARB", NULL}},
   {&GetProgramiv, "_program", {"glGetProgramivARB", NULL}},
   {&ProgramEnvParameter4f, "_program", {"glProgramEnvParameter4fARB", NULL}},
-  {&SwapInterval, "_swap_control", {"glXSwapInterval", "glXSwapIntervalSGI", "wglSwapInterval", "wglSwapIntervalEXT", "wglSwapIntervalSGI", NULL}},
+  {&SwapInterval, "_swap_control", {"glXSwapIntervalSGI", "glXSwapInterval", "wglSwapIntervalSGI", "wglSwapInterval", "wglSwapIntervalEXT", NULL}},
   {&TexImage3D, NULL, {"glTexImage3D", NULL}},
   {&AllocateMemoryMESA, "GLX_MESA_allocate_memory", {"glXAllocateMemoryMESA", NULL}},
   {&FreeMemoryMESA, "GLX_MESA_allocate_memory", {"glXFreeMemoryMESA", NULL}},
