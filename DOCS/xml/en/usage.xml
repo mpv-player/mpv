@@ -930,8 +930,8 @@ more. Unfortunately, the suboptions are much more complicated.
   <para>
   The remaining suboptions specify how much of each channel gets mixed into each
   other channel. This is the complicated part. To break the task down, split the
-  suboptions into several sets, one set for each output channel. Each suboption
-  within a set corresponds to an input channel. The number you specify will be
+  suboptions into several sets, one set for each input channel. Each suboption
+  within a set corresponds to an output channel. The number you specify will be
   the percentage of the input channel that gets mixed into the output channel.
   </para>
   <para>
