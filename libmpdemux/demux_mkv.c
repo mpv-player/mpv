@@ -488,7 +488,7 @@ static void parse_trackencodings(struct demuxer *demuxer,
                     "[mkv] Unknown content encoding type for "
                     "track %u. Skipping track.\n",
                     track->tnum);
-        } else if (e.comp_algo != 0 && e.comp_algo != 2) {
+        } else if (e.comp_algo != 0 && e.comp_algo != 2 && e.comp_algo != 3) {
             mp_tmsg(MSGT_DEMUX, MSGL_WARN,
                     "[mkv] Track %u has been compressed with "
                     "an unknown/unsupported compression\n"
