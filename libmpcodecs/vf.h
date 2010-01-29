@@ -129,4 +129,19 @@ int vf_config_wrapper(struct vf_instance_s* vf,
 		      int width, int height, int d_width, int d_height,
 		      unsigned int flags, unsigned int outfmt);
 
+static inline int norm_qscale(int qscale, int type)
+{
+    switch (type) {
+    case 0: // MPEG-1
+        return qscale;
+    case 1: // MPEG-2
+        return qscale >> 1;
+    case 2: // H264
+        return qscale >> 2;
+    case 3: // VP56
+        return (63 - qscale + 2) >> 2;
+    }
+    return qscale;
+}
+
 #endif /* MPLAYER_VF_H */
