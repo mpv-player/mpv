@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r30336
+.\" sync with en/mplayer.1 r30436
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -5388,7 +5388,7 @@ Completely empties the filter list.
 .PD 1
 .
 .TP
-.B cropdetect[=0\-255]
+.B cropdetect[=limit:round[:reset]]
 计算必要的切割参数并把推荐值显示在标准输出上。
 .PD 0
 .RSs
@@ -5400,6 +5400,11 @@ Completely empties the filter list.
 偏移值将被自动调整以使视频位于屏幕中心。
 使用 2 以只得到偶数尺寸（ 4:2:2 的视频需要此选项）。
 16 对于大多数编码器的编码来说是很适合的。
+.br
+.IPs <reset>
+计数值,用以决定多少帧后 cropdetect 将重置先前侦测到的最大视频区域，并重
+新侦测当前的最优切割区域。该选项在电视台台标影响了视频区域时可能有用。0 
+表示从不重置而是返回播放过程中遇到的最大区域。（默认值：0）。
 .RE
 .PD 1
 .
