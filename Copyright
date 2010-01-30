@@ -128,7 +128,7 @@ License:    GNU General Public License
 Name:       dvbstream
 Version:    0.4.3-pre3 (CVS checkout)
 URL:        http://sourceforge.net/projects/dvbtools/
-Directory:  stream/dvbin.h stream/rtp.[ch] stream/stream_dvb.c
+Directory:  stream/dvbin.h stream/rtp.c stream/stream_dvb.c
 Copyright:  2001-2002 Dave Chapman <dave@dchapman.com>
 License:    GNU General Public License
 
