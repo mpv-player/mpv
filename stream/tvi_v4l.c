@@ -1,19 +1,35 @@
 /*
-  Video 4 Linux input
-
-  (C) Alex Beregszaszi
-
-  Some ideas are based on xawtv/libng's grab-v4l.c written by
-    Gerd Knorr <kraxel@bytesex.org>
-
-  Multithreading, a/v sync and native ALSA support by
-    Jindrich Makovicka <makovick@gmail.com>
-
-  Mjpeg hardware encoding support by
-    Ivan Szanto <szivan@freemail.hu>
-
-  CODE IS UNDER DEVELOPMENT, NO FEATURE REQUESTS PLEASE!
-*/
+ * Video 4 Linux input
+ *
+ * Copyright (C) 2001 Alex Beregszaszi
+ *
+ * Some ideas are based on xawtv/libng's grab-v4l.c written by
+ *   Gerd Knorr <kraxel@bytesex.org>
+ *
+ * Multithreading, a/v sync and native ALSA support by
+ *   Jindrich Makovicka <makovick@gmail.com>
+ *
+ * MJPEG hardware encoding support by
+ *   Ivan Szanto <szivan@freemail.hu>
+ *
+ * CODE IS UNDER DEVELOPMENT, NO FEATURE REQUESTS PLEASE!
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "config.h"
 
