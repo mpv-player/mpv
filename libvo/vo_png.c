@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "fmt-conversion.h"
 #include "mp_msg.h"
 #include "mp_msg.h"
 #include "help_mp.h"
