@@ -1,7 +1,5 @@
 /*
  * codec.conf parser
- * by Szabolcs Berecz <szabi@inf.elte.hu>
- * (C) 2001
  *
  * to compile test application:
  *  cc -I. -DTESTING -o codec-cfg-test codec-cfg.c mp_msg.o osdep/getch2.o -ltermcap
@@ -9,6 +7,24 @@
  *   gcc -DCODECS2HTML -o codecs2html codec-cfg.c mp_msg.o
  *
  * TODO: implement informat in CODECS2HTML too
+ *
+ * Copyright (C) 2001 Szabolcs Berecz <szabi@inf.elte.hu>
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #define DEBUG
