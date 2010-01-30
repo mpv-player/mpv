@@ -9169,6 +9169,7 @@ $def_yasm
 #define CONFIG_IPV6 0
 #endif
 
+#define HAVE_ATTRIBUTE_MAY_ALIAS 1
 #define HAVE_ATTRIBUTE_PACKED 1
 #define HAVE_GETHRTIME 0
 #define HAVE_INLINE_ASM 1
@@ -9176,6 +9177,8 @@ $def_yasm
 #define HAVE_POLL_H 1
 #define HAVE_PPC4XX 0
 #define HAVE_SETMODE 0
+#define HAVE_STRUCT_IPV6_MREQ 1
+#define HAVE_STRUCT_SOCKADDR_IN6 1
 #define HAVE_SYS_SELECT_H 0
 #define HAVE_VFP_ARGS 1
 #define HAVE_VIRTUALALLOC 0
