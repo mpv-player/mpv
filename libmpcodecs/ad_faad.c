@@ -174,7 +174,7 @@ static int init(sh_audio_t *sh)
     sh->samplesize=2;
     //sh->o_bps = sh->samplesize*faac_channels*faac_samplerate;
     if(!sh->i_bps) {
-      mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: compressed input bitrate missing, assuming 128kbit/s!\n");
+      mp_msg(MSGT_DECAUDIO, MSGL_V, "FAAD: compressed input bitrate missing, assuming 128kbit/s!\n");
       sh->i_bps = 128*1000/8; // XXX: HACK!!! ::atmos
     } else
       mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: got %dkbit/s bitrate from MP4 header!\n",sh->i_bps*8/1000);
