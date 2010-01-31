@@ -16,5 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/* Build an exact copy of the logging facilities without GUI dependencies. */
+
 #define FOR_MENCODER 1
 #include "mp_msg.c"
