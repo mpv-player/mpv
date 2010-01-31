@@ -232,9 +232,6 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_VESA
         &video_out_vesa,
 #endif
-#ifdef CONFIG_DIRECTFB
-        &video_out_directfb,
-#endif
 #ifdef CONFIG_DFBMGA
         &video_out_dfbmga,
 #endif
@@ -249,6 +246,10 @@ const struct vo_driver *video_out_drivers[] =
 #endif
         &video_out_null,
         // should not be auto-selected
+#ifdef CONFIG_DIRECTFB
+        // vo directfb can call exit() if initialization fails
+        &video_out_directfb,
+#endif
 #if CONFIG_XVMC
         &video_out_xvmc,
 #endif
