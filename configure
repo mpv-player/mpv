@@ -3304,6 +3304,7 @@ else
   _noinputmodules="network $_noinputmodules"
   def_network='#undef CONFIG_NETWORK'
   _ftp=no
+  _libavprotocols=$(echo $_libavprotocols | sed -e s/GOPHER_PROTOCOL// -e s/HTTP_PROTOCOL// -e s/RTMP_PROTOCOL// -e s/RTP_PROTOCOL// -e s/TCP_PROTOCOL// -e s/UDP_PROTOCOL//)
 fi
 echores "$_network"
 
