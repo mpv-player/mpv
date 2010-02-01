@@ -43,13 +43,16 @@ static void deint(unsigned char *dest, int ds, unsigned char *src, int ss, int w
 	int x, y;
 	src += ss;
 	dest += ds;
+	h--;
 	if (field) {
+		fast_memcpy(dest - ds, src - ss, w);
 		src += ss;
 		dest += ds;
-		h -= 2;
+		h--;
 	}
-	for (y=h/2; y; y--) {
-		for (x=0; x<w; x++) {
+	for (y=h/2; y > 0; y--) {
+		dest[0] = src[0];
+		for (x=1; x<w-1; x++) {
 			if (((src[x-ss] < src[x]) && (src[x+ss] < src[x])) ||
 				((src[x-ss] > src[x]) && (src[x+ss] > src[x]))) {
 				//dest[x] = (src[x+ss] + src[x-ss])>>1;
@@ -59,9 +62,12 @@ static void deint(unsigned char *dest, int ds, unsigned char *src, int ss, int w
 			}
 			else dest[x] = src[x];
 		}
+		dest[w-1] = src[w-1];
 		dest += ds<<1;
 		src += ss<<1;
 	}
+	if (h & 1)
+		fast_memcpy(dest, src, w);
 }
 
 #if HAVE_AMD3DNOW
