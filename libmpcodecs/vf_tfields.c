@@ -455,11 +455,13 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 	return ret;
 }
 
-#if 0
 static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 {
-	/* FIXME - figure out which other formats work */
+	/* FIXME - figure out which formats exactly work */
 	switch (fmt) {
+	default:
+		if (vf->priv->mode == 1)
+			return 0;
 	case IMGFMT_YV12:
 	case IMGFMT_IYUV:
 	case IMGFMT_I420:
@@ -467,7 +469,6 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 	}
 	return 0;
 }
-#endif
 
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
@@ -495,7 +496,7 @@ static int open(vf_instance_t *vf, char* args)
 	struct vf_priv_s *p;
 	vf->config = config;
 	vf->put_image = put_image;
-	//vf->query_format = query_format;
+	vf->query_format = query_format;
 	vf->uninit = uninit;
 	vf->default_reqs = VFCAP_ACCEPT_STRIDE;
 	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
