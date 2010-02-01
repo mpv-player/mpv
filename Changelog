@@ -5,25 +5,25 @@ MPlayer (1.0)
     * YUY2 Lossless Codec (YLC0) via binary DLL
     * Truemotion RT codec (TR20) via binary DLL
     * Nogantech Codec (NTN1 and NTN2) via binary DLL
-    * add new FourCCs (m1v1,yuvs,VYUY,Y42B,V422,YUNV,UYNV,UYNY,uyv1,2Vu1,P422,HDYC,
-      IJLV,MVJP)
-      TwoCCs (0xA106,0x6c75,0xAAC0,0x55005354)
+    * add new FourCCs (m1v1, yuvs, VYUY, Y42B, V422, YUNV, UYNV, UYNY, uyv1,
+      2Vu1, P422, HDYC, IJLV, MVJP)
+      TwoCCs (0xA106, 0x6c75, 0xAAC0, 0x55005354)
       to existing decoders.
-    * AMR now handled via opencore decoder
-    * updated Windoes Media Screen Codec (MSS1,MSS2) via binary DLL
-    * h264 decoder (CoreAVC) on Windows only via binary DLL
+    * AMR now handled via OpenCORE decoder
+    * updated Windows Media Screen Codec (MSS1, MSS2) via binary DLL
+    * CoreAVC H.264 decoder via binary DLL (Windows only)
     * Kega Game video codec (KGV1) via binary DLL
-    * SoftLab-NSK Forward MPEG2 I-frames (SLIF) via binary DLL
-    * JPEG2000 support via OpenJPEG
+    * SoftLab-NSK Forward MPEG-2 I-frames (SLIF) via binary DLL
+    * JPEG 2000 support via OpenJPEG
 
     Demuxers:
-    * support for TrueHD in BluRay streams in libmpdemux
-    * more BluRay codec support with lavf
-    * fix length in asf/wmv files
-    * support ISDB-Tb dvb streams
+    * support for TrueHD in Blu-ray streams in libmpdemux
+    * more Blu-ray codec support with lavf
+    * fix length in ASF/WMV files
+    * support ISDB-Tb DVB streams
 
     Drivers:
-    * Support for more formats in OpenGL vos (different YUV
+    * Support for more formats in OpenGL video output drivers (different YUV
       subsampling, 16 bit per component)
     * Selectable YUV to RGB conversion standard for -vo gl
       (-vo gl:colorspace=...:levelconv=...)
@@ -31,16 +31,16 @@ MPlayer (1.0)
 
     Other:
     * -nosub option for disabling auto-selected subtitles
-    * support for displaying subs in the term (FIXME)
-    * support for subtitles with audio only files
+    * support for displaying subs in the terminal (FIXME)
+    * support for subtitles with audio-only files
     * support for right-to-left languages with embedded subtitles
     * support for 8 channel audio
     * sync dvd:// and dvdnav:// features
-    * support for mpeg4 asp in VDPAU video output (non B-frame only)
+    * support for MPEG-4 ASP in VDPAU video output (non B-frame only)
     * support for live and non-live DVB teletext with demuxer lavf
     * -name, -title and -use-filename-title options for MPlayer
     * support for stream handling via FFmpeg
-      Use e.g. ffmpeg://http://example.com/test
+      (use e.g. ffmpeg://http://example.com/test)
     * experimental support for external libass, configure with
       --disable-ass-internal
     * better support for 16-bit-per-component formats and formats
