@@ -28,6 +28,7 @@ MPlayer (1.0)
     * Selectable YUV to RGB conversion standard for -vo gl
       (-vo gl:colorspace=...:levelconv=...)
     * -vo matrixview finally added
+    * add OS/2 KAI audio driver (-ao kai)
 
     Other:
     * -nosub option for disabling auto-selected subtitles

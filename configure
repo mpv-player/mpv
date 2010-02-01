@@ -424,6 +424,7 @@ Audio output:
   --disable-nas          disable NAS audio output [autodetect]
   --disable-sgiaudio     disable SGI audio output [autodetect]
   --disable-sunaudio     disable Sun audio output [autodetect]
+  --disable-kai          disable KAI audio output [autodetect]
   --disable-dart         disable DART audio output [autodetect]
   --disable-win32waveout disable Windows waveout audio output [autodetect]
   --disable-coreaudio    disable CoreAudio audio output [autodetect]
@@ -617,6 +618,7 @@ _arts=auto
 _esd=auto
 _pulse=auto
 _jack=auto
+_kai=auto
 _dart=auto
 _openal=auto
 _libcdio=auto
@@ -1010,6 +1012,8 @@ for ac_option do
   --disable-jack)       _jack=no        ;;
   --enable-openal)      _openal=yes     ;;
   --disable-openal)     _openal=no      ;;
+  --enable-kai)         _kai=yes        ;;
+  --disable-kai)        _kai=no         ;;
   --enable-dart)        _dart=yes       ;;
   --disable-dart)       _dart=no        ;;
   --enable-mad)         _mad=yes        ;;
@@ -6021,6 +6025,26 @@ fi #if irix
 
 
 if os2 ; then
+echocheck "KAI (UNIAUD/DART)"
+if test "$_kai" = auto; then
+  cat > $TMPC << EOF
+#include <os2.h>
+#include <kai.h>
+int main(void) { return 0; }
+EOF
+  _kai=no;
+  cc_check -lkai && _kai=yes
+fi
+if test "$_kai" = yes ; then
+  def_kai='#define CONFIG_KAI 1'
+  libs_mplayer="$libs_mplayer -lkai"
+  _aomodules="kai $_aomodules"
+else
+  def_kai='#undef CONFIG_KAI'
+  _noaomodules="kai $_noaomodules"
+fi
+echores "$_kai"
+
 echocheck "DART"
 if test "$_dart" = auto; then
   cat > $TMPC << EOF
@@ -8533,6 +8557,7 @@ IVTV = $_ivtv
 JACK = $_jack
 JOYSTICK = $_joystick
 JPEG = $_jpeg
+KAI = $_kai
 KVA = $_kva
 LADSPA = $_ladspa
 LIBA52 = $_liba52
@@ -8972,6 +8997,7 @@ $def_dart
 $def_esd
 $def_esd_latency
 $def_jack
+$def_kai
 $def_nas
 $def_openal
 $def_openal_h
