@@ -336,6 +336,12 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	return continue_buffered_image(vf);
 }
 
+static double calc_pts(double base_pts, int field)
+{
+    // FIXME this assumes 25 fps / 50 fields per second
+    return base_pts + 0.02 * field;
+}
+
 static int continue_buffered_image(struct vf_instance_s *vf)
 {
 	int i=vf->priv->buffered_i;
@@ -349,7 +355,6 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 
 	if (i == 0)
 		vf_queue_frame(vf, continue_buffered_image);
-	pts += i * .02;  // XXX not right
 
 	if (!(mpi->flags & MP_IMGFLAG_PLANAR)) bpp = mpi->bpp/8;
 	if (vf->priv->parity < 0) {
@@ -387,7 +392,7 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 				dmpi->stride[1] = 2*mpi->stride[1];
 				dmpi->stride[2] = 2*mpi->stride[2];
 			}
-			ret |= vf_next_put_image(vf, dmpi, pts);
+			ret |= vf_next_put_image(vf, dmpi, calc_pts(pts, i));
 			if (correct_pts)
 				break;
 			else
@@ -417,7 +422,7 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 				deint(dmpi->planes[2], dmpi->stride[2], mpi->planes[2], mpi->stride[2],
 					mpi->chroma_width, mpi->chroma_height, (i^!tff));
 			}
-			ret |= vf_next_put_image(vf, dmpi, pts);
+			ret |= vf_next_put_image(vf, dmpi, calc_pts(pts, i));
 			if (correct_pts)
 				break;
 			else
@@ -443,7 +448,7 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 					mpi->chroma_width, mpi->chroma_height/2,
 					dmpi->stride[2], mpi->stride[2]*2, (i^!tff));
 			}
-			ret |= vf_next_put_image(vf, dmpi, pts);
+			ret |= vf_next_put_image(vf, dmpi, calc_pts(pts, i));
 			if (correct_pts)
 				break;
 			else
