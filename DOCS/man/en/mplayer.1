@@ -3858,8 +3858,9 @@ Use the GL_MESA_ycbcr_texture extension to convert YUV to RGB.
 In most cases this is probably slower than doing software conversion to RGB.
 .IPs yuv=<n>
 Select the type of YUV to RGB conversion.
+The default is auto-detection deciding between values 0 and 2.
 .RSss
-0: Use software conversion (default).
+0: Use software conversion.
 Compatible with all OpenGL versions.
 Provides brightness, contrast and saturation control.
 .br
