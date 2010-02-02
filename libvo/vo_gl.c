@@ -459,11 +459,12 @@ static void autodetectGlExtensions(void) {
   if (ati_hack      == -1) ati_hack      = ati_broken_pbo;
   if (force_pbo     == -1) force_pbo     = strstr(extensions, "_pixel_buffer_object")      ? is_ati : 0;
   if (use_rectangle == -1) use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      0 : 0;
+  if (use_yuv       == -1) use_yuv       = strstr(extensions, "GL_ARB_fragment_program")   ?      2 : 0;
   if (is_ati && (lscale == 1 || lscale == 2 || cscale == 1 || cscale == 2))
     mp_msg(MSGT_VO, MSGL_WARN, "[gl] Selected scaling mode may be broken on ATI cards.\n"
              "Tell _them_ to fix GL_REPEAT if you have issues.\n");
-  mp_msg(MSGT_VO, MSGL_V, "[gl] Settings after autodetection: ati-hack = %i, force-pbo = %i, rectangle = %i\n",
-         ati_hack, force_pbo, use_rectangle);
+  mp_msg(MSGT_VO, MSGL_V, "[gl] Settings after autodetection: ati-hack = %i, force-pbo = %i, rectangle = %i, yuv = %i\n",
+         ati_hack, force_pbo, use_rectangle, use_yuv);
 }
 
 /**
@@ -540,6 +541,30 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
   return 1;
 }
 
+static int create_window(uint32_t d_width, uint32_t d_height, uint32_t flags, const char *title)
+{
+#ifdef CONFIG_GL_WIN32
+  if (glctx.type == GLTYPE_W32 && !vo_w32_config(d_width, d_height, flags))
+    return -1;
+#endif
+#ifdef CONFIG_GL_X11
+  if (glctx.type == GLTYPE_X11) {
+    XVisualInfo *vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
+    if (vinfo == NULL)
+    {
+      mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
+      return -1;
+    }
+    mp_msg(MSGT_VO, MSGL_V, "[gl] GLX chose visual with ID 0x%x\n", (int)vinfo->visualid);
+
+    vo_x11_create_vo_window(vinfo, vo_dx, vo_dy, d_width, d_height, flags,
+            XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone),
+            "gl", title);
+  }
+#endif
+  return 0;
+}
+
 /* connect to server, create and map window,
  * allocate colors and (shared) memory
  */
@@ -564,25 +589,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     goto glconfig;
   }
 #endif
-#ifdef CONFIG_GL_WIN32
-  if (glctx.type == GLTYPE_W32 && !vo_w32_config(d_width, d_height, flags))
+  if (create_window(d_width, d_height, flags, title) < 0)
     return -1;
-#endif
-#ifdef CONFIG_GL_X11
-  if (glctx.type == GLTYPE_X11) {
-    XVisualInfo *vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
-    if (vinfo == NULL)
-    {
-      mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
-      return -1;
-    }
-    mp_msg(MSGT_VO, MSGL_V, "[gl] GLX chose visual with ID 0x%x\n", (int)vinfo->visualid);
-
-    vo_x11_create_vo_window(vinfo, vo_dx, vo_dy, d_width, d_height, flags,
-            XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone),
-            "gl", title);
-  }
-#endif
 
 glconfig:
   if (vo_config_count)
@@ -1056,7 +1064,7 @@ static int preinit(const char *arg)
     scaled_osd = 0;
     use_aspect = 1;
     use_ycbcr = 0;
-    use_yuv = 0;
+    use_yuv = -1;
     colorspace = -1;
     levelconv = -1;
     lscale = 0;
@@ -1156,9 +1164,21 @@ static int preinit(const char *arg)
                "Use -vo gl:nomanyfmts if playback fails.\n");
     mp_msg(MSGT_VO, MSGL_V, "[gl] Using %d as slice height "
              "(0 means image height).\n", slice_height);
-    if (!init_mpglcontext(&glctx, gltype)) return -1;
+    if (!init_mpglcontext(&glctx, gltype))
+      goto err_out;
+    if (use_yuv == -1) {
+      if (create_window(320, 200, 0, NULL) < 0)
+        goto err_out;
+      if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
+        goto err_out;
+      autodetectGlExtensions();
+    }
 
     return 0;
+
+err_out:
+    uninit();
+    return -1;
 }
 
 static const struct {
