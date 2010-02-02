@@ -3152,12 +3152,13 @@ if test "$_struct_addrinfo" = auto; then
   cat > $TMPC << EOF
 #if HAVE_WINSOCK2_H
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #endif
-int main(void) { struct addrinfo *ai; return 0; }
+int main(void) { struct addrinfo ai; return 0; }
 EOF
   cc_check $cc_check_winsock2_h && _struct_addrinfo=yes
 fi
