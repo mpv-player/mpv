@@ -473,6 +473,9 @@ static void autodetectGlExtensions(void) {
 static int initGl(uint32_t d_width, uint32_t d_height) {
   int scale_type = mipmap_gen ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR;
   autodetectGlExtensions();
+  gl_target = use_rectangle == 1 ? GL_TEXTURE_RECTANGLE : GL_TEXTURE_2D;
+  yuvconvtype = use_yuv | lscale << YUV_LUM_SCALER_SHIFT | cscale << YUV_CHROM_SCALER_SHIFT;
+
   texSize(image_width, image_height, &texture_width, &texture_height);
 
   Disable(GL_BLEND);
@@ -1148,11 +1151,6 @@ static int preinit(const char *arg)
               "\n" );
       return -1;
     }
-    if (use_rectangle == 1)
-      gl_target = GL_TEXTURE_RECTANGLE;
-    else
-      gl_target = GL_TEXTURE_2D;
-    yuvconvtype = use_yuv | lscale << YUV_LUM_SCALER_SHIFT | cscale << YUV_CHROM_SCALER_SHIFT;
     if (many_fmts)
       mp_msg(MSGT_VO, MSGL_INFO, "[gl] using extended formats. "
                "Use -vo gl:nomanyfmts if playback fails.\n");
