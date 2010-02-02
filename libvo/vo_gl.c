@@ -993,7 +993,6 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
-  if (!vo_config_count) return;
   uninitGl();
   if (custom_prog) free(custom_prog);
   custom_prog = NULL;
