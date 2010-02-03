@@ -37,6 +37,7 @@
 #include "libavformat/avformat.h"
 #include "libavformat/avio.h"
 #include "libavutil/avutil.h"
+#include "libavutil/avstring.h"
 #include "libavcodec/opt.h"
 
 #include "mp_taglists.h"
@@ -462,11 +463,11 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     if(demuxer->stream->url) {
         if (!strncmp(demuxer->stream->url, "ffmpeg://rtsp:", 14))
-            strncpy(mp_filename, demuxer->stream->url + 9, sizeof(mp_filename)-3);
+            av_strlcpy(mp_filename, demuxer->stream->url + 9, sizeof(mp_filename));
         else
-            strncpy(mp_filename + 3, demuxer->stream->url, sizeof(mp_filename)-3);
+            av_strlcat(mp_filename, demuxer->stream->url, sizeof(mp_filename));
     } else
-        strncpy(mp_filename + 3, "foobar.dummy", sizeof(mp_filename)-3);
+        av_strlcat(mp_filename, "foobar.dummy", sizeof(mp_filename));
 
     priv->pb = av_alloc_put_byte(priv->buffer, BIO_BUFFER_SIZE, 0,
                                  demuxer->stream, mp_read, NULL, mp_seek);
