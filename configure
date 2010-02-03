@@ -3217,6 +3217,51 @@ else
 fi
 
 
+echocheck "struct ipv6_mreq"
+_struct_ipv6_mreq=no
+def_struct_ipv6_mreq="#define HAVE_STRUCT_IPV6_MREQ 0"
+for header in "netinet/in.h" "ws2tcpip.h" ; do
+  cat > $TMPC << EOF
+#include <$header>
+int main(void) { struct ipv6_mreq mreq6; return 0; }
+EOF
+  cc_check && _struct_ipv6_mreq=yes && \
+    def_struct_ipv6_mreq="#define HAVE_STRUCT_IPV6_MREQ 1" && break
+done
+echores "$_struct_ipv6_mreq"
+
+
+echocheck "struct sockaddr_in6"
+_struct_sockaddr_in6=no
+def_struct_sockaddr_in6="#define HAVE_STRUCT_SOCKADDR_IN6 0"
+for header in "netinet/in.h" "ws2tcpip.h" ; do
+  cat > $TMPC << EOF
+#include <$header>
+int main(void) { struct sockaddr_in6 addr; return 0; }
+EOF
+  cc_check && _struct_sockaddr_in6=yes && \
+    def_struct_sockaddr_in6="#define HAVE_STRUCT_SOCKADDR_IN6 1" && break
+done
+echores "$_struct_sockaddr_in6"
+
+
+echocheck "struct sockaddr sa_len"
+_struct_sockaddr_sa_len=no
+def_struct_sockaddr_sa_len="#define HAVE_STRUCT_SOCKADDR_SA_LEN 0"
+cat > $TMPC << EOF
+#if HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#endif
+int main(void) { const void *p = &((struct sockaddr *)0)->sa_len; return 0; }
+EOF
+cc_check $cc_check_winsock2_h && _struct_sockaddr_sa_len=yes && \
+  def_struct_sockaddr_sa_len="#define HAVE_STRUCT_SOCKADDR_SA_LEN 1"
+echores "$_struct_sockaddr_sa_len"
+
+
 echocheck "arpa/inet.h"
 arpa_inet_h=no
 def_arpa_inet_h='#define HAVE_ARPA_INET_H 0'
@@ -9057,6 +9102,9 @@ $def_nemesi
 $def_network
 $def_smb
 $def_socklen_t
+$def_struct_ipv6_mreq
+$def_struct_sockaddr_in6
+$def_struct_sockaddr_sa_len
 $def_vstream
 $def_addrinfo
 $def_getaddrinfo
@@ -9206,8 +9254,6 @@ $def_yasm
 #define HAVE_POLL_H 1
 #define HAVE_PPC4XX 0
 #define HAVE_SETMODE 0
-#define HAVE_STRUCT_IPV6_MREQ 1
-#define HAVE_STRUCT_SOCKADDR_IN6 1
 #define HAVE_SYS_SELECT_H 0
 #define HAVE_VFP_ARGS 1
 #define HAVE_VIRTUALALLOC 0
