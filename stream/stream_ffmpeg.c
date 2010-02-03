@@ -75,6 +75,7 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     URLContext *ctx = NULL;
     int res = STREAM_ERROR;
     int64_t size;
+    int dummy;
 
     av_register_all();
     if (mode == STREAM_READ)
@@ -95,25 +96,28 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     }
     if (!strncmp(filename, prefix, strlen(prefix)))
         filename += strlen(prefix);
+    dummy = !strncmp(filename, "rtsp:", 5);
     mp_msg(MSGT_OPEN, MSGL_V, "[ffmpeg] Opening %s\n", filename);
 
-    if (url_open(&ctx, filename, flags) < 0)
+    if (!dummy && url_open(&ctx, filename, flags) < 0)
         goto out;
 
     stream->priv = ctx;
-    size = url_filesize(ctx);
+    size = dummy ? 0 : url_filesize(ctx);
     if (size >= 0)
         stream->end_pos = size;
     stream->type = STREAMTYPE_FILE;
     stream->seek = seek;
-    if (ctx->is_streamed) {
+    if (dummy || ctx->is_streamed) {
         stream->type = STREAMTYPE_STREAM;
         stream->seek = NULL;
     }
+    if (!dummy) {
     stream->fill_buffer = fill_buffer;
     stream->write_buffer = write_buffer;
     stream->control = control;
     stream->close = close_f;
+    }
     res = STREAM_OK;
 
 out:
