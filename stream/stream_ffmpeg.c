@@ -113,10 +113,10 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
         stream->seek = NULL;
     }
     if (!dummy) {
-    stream->fill_buffer = fill_buffer;
-    stream->write_buffer = write_buffer;
-    stream->control = control;
-    stream->close = close_f;
+        stream->fill_buffer = fill_buffer;
+        stream->write_buffer = write_buffer;
+        stream->control = control;
+        stream->close = close_f;
     }
     res = STREAM_OK;
 

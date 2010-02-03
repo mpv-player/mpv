@@ -464,7 +464,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         if (!strncmp(demuxer->stream->url, "ffmpeg://rtsp:", 14))
             strncpy(mp_filename, demuxer->stream->url + 9, sizeof(mp_filename)-3);
         else
-        strncpy(mp_filename + 3, demuxer->stream->url, sizeof(mp_filename)-3);
+            strncpy(mp_filename + 3, demuxer->stream->url, sizeof(mp_filename)-3);
     } else
         strncpy(mp_filename + 3, "foobar.dummy", sizeof(mp_filename)-3);
 
