@@ -391,6 +391,9 @@ static int createRenderingContext(void) {
  * \return 1 - Success, 0 - Failure
  */
 int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
+    // we already have a fully initialized window, so nothing needs to be done
+    if (flags & VOFLAG_HIDDEN)
+        return;
     // store original size for videomode switching
     o_dwidth = width;
     o_dheight = height;
