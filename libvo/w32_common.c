@@ -329,10 +329,7 @@ static void resetMode(void) {
 
 static int createRenderingContext(void) {
     HWND layer = HWND_NOTOPMOST;
-    PIXELFORMATDESCRIPTOR pfd;
-    HDC vo_hdc = vo_w32_get_dc(vo_window);
     RECT r;
-    int pf;
   if (WinID < 0) {
     int style = (vo_border && !vo_fs) ?
                 (WS_OVERLAPPEDWINDOW | WS_SIZEBOX) : WS_POPUP;
@@ -378,26 +375,6 @@ static int createRenderingContext(void) {
     AdjustWindowRect(&r, style, 0);
     SetWindowPos(vo_window, layer, r.left, r.top, r.right - r.left, r.bottom - r.top, SWP_SHOWWINDOW);
   }
-
-    memset(&pfd, 0, sizeof pfd);
-    pfd.nSize = sizeof pfd;
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 24;
-    pfd.iLayerType = PFD_MAIN_PLANE;
-    pf = ChoosePixelFormat(vo_hdc, &pfd);
-    if (!pf) {
-            mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to select a valid pixel format!\n");
-        ReleaseDC(vo_window, vo_hdc);
-        return 0;
-    }
-
-    SetPixelFormat(vo_hdc, pf, &pfd);
-
-    mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d with depth %d\n", vo_screenwidth, vo_screenheight, vo_depthonscreen);
-
-    vo_w32_release_dc(vo_window, vo_hdc);
     return 1;
 }
 
@@ -461,6 +438,9 @@ static char *get_display_name(void) {
  * \return 1 = Success, 0 = Failure
  */
 int vo_w32_init(void) {
+    PIXELFORMATDESCRIPTOR pfd;
+    HDC vo_hdc;
+    int pf;
     HICON mplayerIcon = 0;
     char exedir[MAX_PATH];
     HINSTANCE user32;
@@ -516,6 +496,26 @@ int vo_w32_init(void) {
     dev = get_display_name();
     if (dev) dev_hdc = CreateDC(dev, NULL, NULL, NULL);
     updateScreenProperties();
+
+    vo_hdc = vo_w32_get_dc(vo_window);
+    memset(&pfd, 0, sizeof pfd);
+    pfd.nSize = sizeof pfd;
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 24;
+    pfd.iLayerType = PFD_MAIN_PLANE;
+    pf = ChoosePixelFormat(vo_hdc, &pfd);
+    if (!pf) {
+            mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to select a valid pixel format!\n");
+        vo_w32_release_dc(vo_window, vo_hdc);
+        return 0;
+    }
+
+    SetPixelFormat(vo_hdc, pf, &pfd);
+    vo_w32_release_dc(vo_window, vo_hdc);
+
+    mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d with depth %d\n", vo_screenwidth, vo_screenheight, vo_depthonscreen);
 
     return 1;
 }
