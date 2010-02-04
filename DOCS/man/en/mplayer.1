@@ -3528,7 +3528,9 @@ Makes temporal deinterlacers operate both on luma and chroma (default).
 Use nochroma\-deint to solely use luma and speed up advanced deinterlacing.
 Useful with slow video memory.
 .IPs pullup
-Try to apply inverse telecine, needs motion adaptive temporal deinterlacing.
+Try to skip deinterlacing for progressive frames, useful for watching
+telecined content, needs fast video hardware for high resolutions.
+Only works with motion adaptive temporal deinterlacing.
 .IPs colorspace
 Select the color space for YUV to RGB conversion.
 In general BT.601 should be used for standard definition (SD) content and

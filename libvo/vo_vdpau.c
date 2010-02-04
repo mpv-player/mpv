@@ -1203,7 +1203,8 @@ static const char help_msg[] =
     "    Operate on luma and chroma when using temporal deinterlacing (default)\n"
     "    Use nochroma-deint to speed up temporal deinterlacing\n"
     "  pullup\n"
-    "    Try to apply inverse-telecine (needs temporal deinterlacing)\n"
+    "    Try to skip deinterlacing for progressive frames
+    "    (only works with temporal deinterlacing, useful for telecined content)\n"
     "  denoise\n"
     "    Apply denoising, argument is strength from 0.0 to 1.0\n"
     "  sharpen\n"
