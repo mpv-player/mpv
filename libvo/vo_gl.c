@@ -1167,7 +1167,7 @@ static int preinit(const char *arg)
     if (!init_mpglcontext(&glctx, gltype))
       goto err_out;
     if (use_yuv == -1) {
-      if (create_window(320, 200, 0, NULL) < 0)
+      if (create_window(320, 200, VOFLAG_HIDDEN, NULL) < 0)
         goto err_out;
       if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
         goto err_out;

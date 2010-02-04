@@ -104,6 +104,7 @@ int mLocalDisplay;
 int vo_mouse_autohide = 0;
 int vo_wm_type = 0;
 int vo_fs_type = 0; // needs to be accessible for GUI X11 code
+static int window_state;
 static int vo_fs_flip = 0;
 char **vo_fstype_list;
 
@@ -1102,13 +1103,18 @@ void vo_x11_create_vo_window(XVisualInfo *vis, int x, int y,
     goto final;
   }
   if (vo_window == None) {
-    XSizeHints hint;
-    XEvent xev;
     vo_fs = 0;
     vo_dwidth = width;
     vo_dheight = height;
     vo_window = vo_x11_create_smooth_window(mDisplay, mRootWin, vis->visual,
                       x, y, width, height, vis->depth, col_map);
+    window_state = VOFLAG_HIDDEN;
+  }
+  if (flags & VOFLAG_HIDDEN)
+    goto final;
+  if (window_state & VOFLAG_HIDDEN) {
+    XSizeHints hint;
+    XEvent xev;
     vo_x11_classhint(mDisplay, vo_window, classname);
     XStoreName(mDisplay, vo_window, title);
     vo_hidecursor(mDisplay, vo_window);
