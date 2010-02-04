@@ -41,7 +41,7 @@ MPlayer (1.0)
     * support for MPEG-4 ASP in VDPAU video output (non B-frame only)
     * support for live and non-live DVB teletext with demuxer lavf
     * -name, -title and -use-filename-title options for MPlayer
-    * support for stream handling via FFmpeg
+    * support for stream handling via FFmpeg, in particular rtmp and rtsp
       (use e.g. ffmpeg://http://example.com/test)
     * experimental support for external libass, configure with
       --disable-ass-internal
