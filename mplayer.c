@@ -1082,9 +1082,9 @@ void add_subtitles(char *filename, float fps, int noerr)
 #ifdef CONFIG_ASS
     if (ass_enabled)
 #ifdef CONFIG_ICONV
-        asst = ass_read_file(ass_library, filename, sub_cp);
+        asst = ass_read_stream(ass_library, filename, sub_cp);
 #else
-        asst = ass_read_file(ass_library, filename, 0);
+        asst = ass_read_stream(ass_library, filename, 0);
 #endif
     if (ass_enabled && subd && !asst)
         asst = ass_read_subdata(ass_library, subd, fps);

@@ -1718,7 +1718,7 @@ static const char help_text[]=
 #define MSGTR_LIBASS_ErrorRecodingFile "[ass] hiba a fájl rögzítésekor.\n"
 #define MSGTR_LIBASS_FopenFailed "[ass] ass_read_file(%s): fopen sikertelen\n"
 #define MSGTR_LIBASS_FseekFailed "[ass] ass_read_file(%s): fseek sikertelen\n"
-#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan10M "[ass] ass_read_file(%s): 10M-nél nagyobb felirat fájl betöltése visszautasítva\n"
+#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan100M "[ass] ass_read_file(%s): 100M-nél nagyobb felirat fájl betöltése visszautasítva\n"
 #define MSGTR_LIBASS_ReadFailed "Olvasás sikertelen, %d: %s\n"
 #define MSGTR_LIBASS_AddedSubtitleFileMemory "[ass] Felirat fájl hozzáadása: <memória> (%d stílus, %d esemény)\n"
 #define MSGTR_LIBASS_AddedSubtitleFileFname "[ass] Felirat fájl hozzáadása: %s (%d stílus, %d esemény)\n"

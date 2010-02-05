@@ -1968,7 +1968,7 @@ static const char help_text[]=
 #define MSGTR_LIBASS_ErrorRecodingFile "[ass] 記録到文件出錯。\n"
 #define MSGTR_LIBASS_FopenFailed "[ass] ass_read_file(%s): 文件打開(fopen)失敗\n"
 #define MSGTR_LIBASS_FseekFailed "[ass] ass_read_file(%s): 文件定位(fseek)失敗\n"
-#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan10M "[ass] ass_read_file(%s): 拒絶裝入大于10M的字幕\n"
+#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan100M "[ass] ass_read_file(%s): 拒絶裝入大于100M的字幕\n"
 #define MSGTR_LIBASS_ReadFailed "讀失敗, %d: %s\n"
 #define MSGTR_LIBASS_AddedSubtitleFileMemory "[ass] 已加入字幕文件: <内存> (%d styles, %d events)\n"
 #define MSGTR_LIBASS_AddedSubtitleFileFname "[ass] 已加入字幕文件: %s (%d styles, %d events)\n"

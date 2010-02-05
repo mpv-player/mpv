@@ -1713,7 +1713,7 @@ static const char help_text[]=
 #define MSGTR_LIBASS_ErrorRecodingFile "[ass] errore ricodificando il file.\n"
 #define MSGTR_LIBASS_FopenFailed "[ass] ass_read_file(%s): fopen fallita\n"
 #define MSGTR_LIBASS_FseekFailed "[ass] ass_read_file(%s): fseek fallita\n"
-#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan10M "[ass] ass_read_file(%s): Mi rifiuto di caricare sottotitoli più grandi di 10M\n"
+#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan100M "[ass] ass_read_file(%s): Mi rifiuto di caricare sottotitoli più grandi di 100M\n"
 #define MSGTR_LIBASS_ReadFailed "Lettura fallita, %d: %s\n"
 #define MSGTR_LIBASS_AddedSubtitleFileMemory "[ass] Aggiunto file sottotitoli: <memoria> (%d stili, %d eventi)\n"
 #define MSGTR_LIBASS_AddedSubtitleFileFname "[ass] Added subtitle file: %s (%d stili, %d eventi)\n"

@@ -1713,7 +1713,7 @@ static const char help_text[]=
 #define MSGTR_LIBASS_ErrorRecodingFile "[ass] chyba překódování souboru.\n"
 #define MSGTR_LIBASS_FopenFailed "[ass] ass_read_file(%s): fopen selhalo\n"
 #define MSGTR_LIBASS_FseekFailed "[ass] ass_read_file(%s): fseek selhalo\n"
-#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan10M "[ass] ass_read_file(%s): Odmítám nahrát titulky delší než 10M\n"
+#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan100M "[ass] ass_read_file(%s): Odmítám nahrát titulky delší než 100M\n"
 #define MSGTR_LIBASS_ReadFailed "Čtení selhalo, %d: %s\n"
 #define MSGTR_LIBASS_AddedSubtitleFileMemory "[ass] Přidán soubos s titulky: <memory> (%d stylů, %d událostí)\n"
 #define MSGTR_LIBASS_AddedSubtitleFileFname "[ass] Přidán soubos s titulky: %s (%d stylů, %d událostí)\n"

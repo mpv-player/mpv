@@ -2017,7 +2017,7 @@ static const char help_text[]=
 #define MSGTR_LIBASS_ErrorRecodingFile "[ass] Dosyayı tekrar kodlamada hata.\n"
 #define MSGTR_LIBASS_FopenFailed "[ass] ass_read_file(%s): fopen başarısız\n"
 #define MSGTR_LIBASS_FseekFailed "[ass] ass_read_file(%s): fseek başarısız\n"
-#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan10M "[ass] ass_read_file(%s): 10 megabayttan büyük altyazıları yüklemeyi reddediyor\n"
+#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan100M "[ass] ass_read_file(%s): 100 megabayttan büyük altyazıları yüklemeyi reddediyor\n"
 #define MSGTR_LIBASS_ReadFailed "Okuma başarısız, %d: %s\n"
 #define MSGTR_LIBASS_AddedSubtitleFileMemory "[ass] Altyazı dosyasını ekledi: <bellek> (%d tarz, %d olay)\n"
 #define MSGTR_LIBASS_AddedSubtitleFileFname "[ass] Altyazı dosyasını ekledi: %s (%d tarz, %d olay)\n"

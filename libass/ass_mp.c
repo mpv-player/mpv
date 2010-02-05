@@ -28,6 +28,8 @@
 #include "get_path.h"
 
 #include "ass_mp.h"
+#include "help_mp.h"
+#include "stream/stream.h"
 
 #ifdef CONFIG_FONTCONFIG
 #include <fontconfig/fontconfig.h>
@@ -213,6 +215,51 @@ ass_track_t* ass_read_subdata(ass_library_t* library, sub_data* subdata, double 
 			track->events[eid].Duration *= 100. / fps;
 		}
 	}
+	return track;
+}
+
+ass_track_t* ass_read_stream(ass_library_t* library, char *fname, char *charset) {
+	int i;
+	char *buf = NULL;
+	ass_track_t *track;
+	size_t sz = 0;
+	size_t buf_alloc = 0;
+	stream_t *fd;
+
+	fd = open_stream(fname, NULL, &i);
+	if (!fd) {
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FopenFailed, fname);
+		return NULL;
+	}
+	if (fd->end_pos > STREAM_BUFFER_SIZE)
+		/* read entire file if size is known */
+		buf_alloc = fd->end_pos;
+	for (;;) {
+		if (buf_alloc >= 100*1024*1024) {
+			mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan100M, fname);
+			sz = 0;
+			break;
+		}
+		if (buf_alloc < sz + STREAM_BUFFER_SIZE)
+			buf_alloc += STREAM_BUFFER_SIZE;
+		buf = realloc(buf, buf_alloc + 1);
+		i = stream_read(fd, buf + sz, buf_alloc - sz);
+		if (i <= 0) break;
+		sz += i;
+	}
+	free_stream(fd);
+	if (!sz) {
+		free(buf);
+		return NULL;
+	}
+	buf[sz] = 0;
+	buf = realloc(buf, sz + 1);
+	track = ass_read_memory(library, buf, sz, charset);
+	if (track) {
+		free(track->name);
+		track->name = strdup(fname);
+	}
+	free(buf);
 	return track;
 }
 

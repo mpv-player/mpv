@@ -2008,7 +2008,7 @@ static const char help_text[]=
 #define MSGTR_LIBASS_ErrorRecodingFile "[ass] erreur lors de l'enregistrement du fichier.\n"
 #define MSGTR_LIBASS_FopenFailed "[ass] ass_read_file(%s) : fopen a échoué\n"
 #define MSGTR_LIBASS_FseekFailed "[ass] ass_read_file(%s) : fseek à échoué\n"
-#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan10M "[ass] ass_read_file(%s) : Chargement des fichiers plus grands que 10Mo refusé\n"
+#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan100M "[ass] ass_read_file(%s) : Chargement des fichiers plus grands que 100Mo refusé\n"
 #define MSGTR_LIBASS_ReadFailed "Lecture impossible, %d: %s\n"
 #define MSGTR_LIBASS_AddedSubtitleFileMemory "[ass] Ajout d'un fichier de sous-titres : <memory> (%d styles, %d évènements)\n"
 #define MSGTR_LIBASS_AddedSubtitleFileFname "[ass] Ajout d'un fichier de sous-titres : %s (%d styles, %d events)\n"

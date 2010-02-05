@@ -1753,7 +1753,7 @@ static const char help_text[]=
 #define MSGTR_LIBASS_ErrorRecodingFile "[ass] ошибка записи файла.\n"
 #define MSGTR_LIBASS_FopenFailed "[ass] ass_read_file(%s): сбой fopen\n"
 #define MSGTR_LIBASS_FseekFailed "[ass] ass_read_file(%s): сбой fseek\n"
-#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan10M "[ass] ass_read_file(%s): Отклонение загрузки субтитров больше 10M\n"
+#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan100M "[ass] ass_read_file(%s): Отклонение загрузки субтитров больше 100M\n"
 #define MSGTR_LIBASS_ReadFailed "Ошибка чтения, %d: %s\n"
 #define MSGTR_LIBASS_AddedSubtitleFileMemory "[ass] Добавлен файл субтитров: <память> (стилей: %d, событий: %d)\n"
 #define MSGTR_LIBASS_AddedSubtitleFileFname "[ass] Добавлен файл субтитров: %s (стилей: %d, событий: %d)\n"
