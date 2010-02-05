@@ -3514,6 +3514,21 @@ Override autodetected display refresh rate value (the value is needed for framed
 Default 0 means use autodetected value.
 A positive value is interpreted as a refresh rate in Hz and overrides the autodetected value.
 A negative value disables all timing adjustment and framedrop logic.
+.IPs queuetime_windowed=<number>
+.IPs queuetime_fs=<number>
+Use VDPAU's presentation queue functionality to queue future video frame
+changes at most this many milliseconds in advance (default: 50).
+This makes MPlayer's flip timing less sensitive to system CPU load and allows
+it to start decoding the next frame slightly earlier which can reduce jitter
+caused by individual slow-to-decode frames.
+However the NVIDIA graphics drivers can make other window behavior such as
+window moves choppy if VDPAU is using the blit queue (mainly happens
+if you have the composite extension enabled) and this feature is active.
+If this happens on your system and you care about it then you can set the
+time to 0 to disable this feature.
+The settings to use in windowed and fullscreen mode are separate because there
+should be less reason to disable this for fullscreen mode (as the driver issue
+shouldn't affect the video itself).
 .RE
 .PD 1
 .

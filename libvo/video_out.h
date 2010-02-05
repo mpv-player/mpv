@@ -239,6 +239,8 @@ struct vo {
     double next_pts;    // pts value of the next frame if any
     double next_pts2;   // optional pts of frame after that
 
+    double flip_queue_offset; // queue flip events at most this much in advance
+
     const struct vo_driver *driver;
     void *priv;
     struct MPOpts *opts;

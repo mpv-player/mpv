@@ -2167,13 +2167,11 @@ static int sleep_until_update(struct MPContext *mpctx, float *time_frame,
 
     //============================== SLEEP: ===================================
 
-    if (mpctx->video_out->driver->flip_page_timed)
-        *time_frame -= 0.05;
+    *time_frame -= mpctx->video_out->flip_queue_offset;
     // flag 256 means: libvo driver does its timing (dvb card)
     if (*time_frame > 0.001 && !(mpctx->sh_video->output_flags&256))
 	*time_frame = timing_sleep(mpctx, *time_frame);
-    if (mpctx->video_out->driver->flip_page_timed)
-        *time_frame += 0.05;
+    *time_frame += mpctx->video_out->flip_queue_offset;
     return frame_time_remaining;
 }
 

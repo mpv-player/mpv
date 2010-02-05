@@ -134,6 +134,8 @@ struct vdpctx {
     float                              sharpen;
     int                                hqscaling;
     int                                chroma_deint;
+    int                                flip_offset_window;
+    int                                flip_offset_fs;
     int                                top_field_first;
     bool                               flip;
 
@@ -386,6 +388,8 @@ static void resize(struct vo *vo)
     force_load_font = 1;
 #endif
     vo_osd_changed(OSDTYPE_OSD);
+    int flip_offset_ms = vo_fs ? vc->flip_offset_fs : vc->flip_offset_window;
+    vo->flip_queue_offset = flip_offset_ms / 1000.;
 
     bool had_frames = vc->num_shown_frames;
     if (vc->output_surface_width < vo->dwidth
@@ -1593,6 +1597,8 @@ static int preinit(struct vo *vo, const char *arg)
     vc->deint_type = 3;
     vc->chroma_deint = 1;
     vc->user_colorspace = 1;
+    vc->flip_offset_window = 50;
+    vc->flip_offset_fs = 50;
     const opt_t subopts[] = {
         {"deint",   OPT_ARG_INT,   &vc->deint,   (opt_test_f)int_non_neg},
         {"chroma-deint", OPT_ARG_BOOL,  &vc->chroma_deint,  NULL},
@@ -1602,6 +1608,8 @@ static int preinit(struct vo *vo, const char *arg)
         {"colorspace", OPT_ARG_INT, &vc->user_colorspace, NULL},
         {"hqscaling", OPT_ARG_INT, &vc->hqscaling, NULL},
         {"fps",     OPT_ARG_FLOAT, &vc->user_fps, NULL},
+        {"queuetime_windowed", OPT_ARG_INT, &vc->flip_offset_window, NULL},
+        {"queuetime_fs", OPT_ARG_INT, &vc->flip_offset_fs, NULL},
         {NULL}
     };
     if (subopt_parse(arg, subopts) != 0) {
