@@ -68,6 +68,11 @@ int   network_ipv4_only_proxy = 0;
 
 
 const mime_struct_t mime_type_table[] = {
+#ifdef CONFIG_LIBAVFORMAT
+	// Flash Video
+	{ "video/x-flv", DEMUXER_TYPE_LAVF_PREFERRED},
+	{ "video/quicktime", DEMUXER_TYPE_LAVF_PREFERRED },
+#endif
 	// MP3 streaming, some MP3 streaming server answer with audio/mpeg
 	{ "audio/mpeg", DEMUXER_TYPE_AUDIO },
 	// MPEG streaming
@@ -101,10 +106,6 @@ const mime_struct_t mime_type_table[] = {
 	// NullSoft Streaming Video
 	{ "video/nsv", DEMUXER_TYPE_NSV},
 	{ "misc/ultravox", DEMUXER_TYPE_NSV},
-#ifdef CONFIG_LIBAVFORMAT
-	// Flash Video
-	{ "video/x-flv", DEMUXER_TYPE_LAVF},
-#endif
 	{ NULL, DEMUXER_TYPE_UNKNOWN},
 };
 
