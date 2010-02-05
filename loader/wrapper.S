@@ -1,4 +1,4 @@
-.section .data
+.data
 .globl caller_return
 caller_return:
 	.long 0
@@ -12,7 +12,7 @@ report_ret:
 wrapper_target:
 	.long null_call
 
-.section .text
+.text
 .globl null_call
 	.type null_call, @function
 	.balign 16,0x90
