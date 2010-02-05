@@ -1115,6 +1115,7 @@ void vo_x11_create_vo_window(XVisualInfo *vis, int x, int y,
   if (window_state & VOFLAG_HIDDEN) {
     XSizeHints hint;
     XEvent xev;
+    window_state &= ~VOFLAG_HIDDEN;
     vo_x11_classhint(mDisplay, vo_window, classname);
     XStoreName(mDisplay, vo_window, title);
     vo_hidecursor(mDisplay, vo_window);
