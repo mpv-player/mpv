@@ -175,14 +175,9 @@ static inline int mkalpha(int i)
 {
   /* In mplayer's alpha planes, 0 is transparent, then 1 is nearly
      opaque upto 255 which is transparent */
-  switch (i) {
-  case 0xf:
-    return 1;
-  case 0:
-    return 0;
-  default:
-    return (0xf - i) << 4;
-  }
+  // extend 4 -> 8 bit
+  i |= i << 4;
+  return (uint8_t)(-i);
 }
 
 /* Cut the sub to visible part */
