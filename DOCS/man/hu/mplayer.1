@@ -1,4 +1,4 @@
-.\" Synced with r30414
+.\" Synced with r30503
 .\" MPlayer (C) 2000-2010 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2010. 01. 24." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2010. 02. 06." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -443,8 +443,6 @@ Teletext ki/\:bekapcsolása.
 Ugrás a következõ/\:elõzõ teletext oldalra.
 .RE
 .PD 1
-.PP
-.RS
 .
 .TP
 .B irányítás egérrel
@@ -2875,6 +2873,22 @@ Egy fájl \-v kapcsolóval történõ lejátszásával kilistázza az elérhetõ eszközöket
 .PD 1
 .
 .TP
+.B kai (csak OS/2)
+OS/2 KAI audió kimeneti vezérlõ
+.PD 0
+.RSs
+.IPs uniaud
+UNIAUD mód kényszerítése
+.IPs dart
+DART mód kényszerítése
+.IPs (no)share
+Audió megosztott vagy kizárólagos módban történõ megnyitása.
+.IPs bufsize=<méret>
+Beállítja a buffer méretét <méret> nagyságúra mintákban (alapértelmezett: 2048).
+.RE
+.PD 1
+.
+.TP
 .B dart (csak OS/2)
 OS/2 DART audió kimeneti vezérlõ
 .PD 0
@@ -3531,7 +3545,9 @@ Használd a nochroma\-deint kapcsolót, ha csak a fényerõsséget akarod változtatni
 szeretnél a fejlett deinterlacing-en.
 Hasznos lassú videó memóriánál.
 .IPs pullup
-Inverz telecine-t próbál alkalmazni, mozgás adaptív idõbeli deinterlace kell hozzá.
+Megpróbálja kihagyni a deinterlacing-et a progresszív kockáknál, hasznos,
+ha telecine-s tartalmat nézel, de gyors videó hardver kell hozzá a nagy felbontásokhoz.
+Csak mozgás adaptív idõbeli deinterlace mellett mûködik.
 .IPs colorspace
 Kiválasztja a színteret a YUV-RGB konverzióhoz.
 Általában a BT.601 használatos a szabvány felbontású (SD) tartalomhoz és
@@ -3866,8 +3882,9 @@ Használja a GL_MESA_ycbcr_texture bõvítményt a YUV-RGB konverzióknál.
 A legtöbb esetben ez valószínûleg lassabb, mint az RGB-be történõ szoftveres konverzió.
 .IPs yuv=<n>
 Kiválasztja a YUV és az RGB konverzió típusát.
+Az alapértelmezett az automatikus döntés a 0 és a 2 között.
 .RSss
-0: Szoftveres konverzió használata (alapértelmezett).
+0: Szoftveres konverzió használata.
 Kompatibilis minden OpenGL verzióval.
 Fényerõsség, kontraszt és telítettség beállítását teszi lehetõvé.
 .br
@@ -4531,7 +4548,7 @@ Audió szûrõ opcióinak haladó szintû megadása:
 .IPs force=<0\-7>
 Az audió szûrõ beillesztésének módját írja elõ a következõképpen:
 .RSss
-0: Teljesen automatikus szûrõ beillesztés.
+0: Teljesen automatikus szûrõ beillesztés (jelenleg azonos az 1-gyel).
 .br
 1: Pontosságra optimalizálva (alapértelmezett).
 .br
@@ -5813,7 +5830,7 @@ A vágott kép pozíciója, alapértelmezettként középen.
 .PD 1
 .
 .TP
-.B cropdetect[=határ:kerekítés]
+.B cropdetect[=határ:kerekítés[:reset]]
 Kiszámítja a szükséges vágási paramétereket és kiírja a javasolt paramétereket
 az stdout-ra.
 .PD 0
@@ -5826,6 +5843,13 @@ Küszöb, mely opcionálisan megadható a semmitõl (0) a mindenig (255) (alapértelme
 Az offset automatikusan beállítódik a videó közepére.
 Használj 2-t csak a páros dimenziókhoz (4:2:2 videónál szükséges).
 16 a legjobb a legtöbb videó codec-nél.
+.br
+.IPs <reset>
+Számláló, mely megadja, hogy hány képkocka után fogja törölni a cropdetect
+az elõzõleg detektált legnagyobb videó méretet és végzi el újra az optimális
+vágási terület megállapítását. Ez hasznos lehet, ha csatorna logók zavarják
+a videó területét. A 0 azt jelenti, hogy soha nem resetel és a lejátszás
+során talált legnagyobb területet használja. (alapértelmezett: 0).
 .RE
 .PD 1
 .
@@ -7103,8 +7127,8 @@ Változatlan magasság mellett a frameráta felezõdik.
 .B tfields[=mód[:mezõ_dominancia]]
 Ideiglenes mezõ szétválasztás \- a mezõket kockákra vágja, megduplázva a
 kimeneti framerátát.
-Csakúgy mint a telecine szûrõ, a tfields is csak a MEncoder-rel
-mûködik és csak ha az \-fps és \-ofps be van állítva a
+Csakúgy mint a telecine szûrõ, a tfields sem biztos, hogy helyesen mûködik,
+csak ha MEncoder-rel használod és az \-fps és \-ofps be van állítva a
 kívánt (dupla) framerátára!
 .PD 0
 .RSs
