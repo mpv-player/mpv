@@ -354,7 +354,7 @@ static void compute_palette(spudec_handle_t *this, packet_t *packet)
 
 static void spudec_process_control(spudec_handle_t *this, int pts100)
 {
-  int a,b; /* Temporary vars */
+  int a,b,c,d; /* Temporary vars */
   unsigned int date, type;
   unsigned int off;
   unsigned int start_off = 0;
@@ -417,10 +417,22 @@ static void spudec_process_control(spudec_handle_t *this, int pts100)
 	break;
       case 0x04:
 	/* Alpha */
-	this->alpha[0] = this->packet[off] >> 4;
-	this->alpha[1] = this->packet[off] & 0xf;
-	this->alpha[2] = this->packet[off + 1] >> 4;
-	this->alpha[3] = this->packet[off + 1] & 0xf;
+	a = this->packet[off] >> 4;
+	b = this->packet[off] & 0xf;
+	c = this->packet[off + 1] >> 4;
+	d = this->packet[off + 1] & 0xf;
+	// Note: some DVDs change these values to create a fade-in/fade-out effect
+	// We can not handle this, so just keep the highest value during the display time.
+	if (display) {
+		a = FFMAX(a, this->alpha[0]);
+		b = FFMAX(b, this->alpha[1]);
+		c = FFMAX(c, this->alpha[2]);
+		d = FFMAX(d, this->alpha[3]);
+	}
+	this->alpha[0] = a;
+	this->alpha[1] = b;
+	this->alpha[2] = c;
+	this->alpha[3] = d;
 	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Alpha %d, %d, %d, %d\n",
 	       this->alpha[0], this->alpha[1], this->alpha[2], this->alpha[3]);
 	off+=2;
