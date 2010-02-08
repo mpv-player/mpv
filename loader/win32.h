@@ -12,15 +12,6 @@
 #include "wine/winbase.h"
 #include "com.h"
 
-#ifdef AVIFILE
-#ifdef __GNUC__
-#include "avm_output.h"
-#ifndef __cplusplus
-#define printf(a, ...)  avm_printf("Win32 plugin", a, ## __VA_ARGS__)
-#endif
-#endif
-#endif
-
 void my_garbagecollection(void);
 
 typedef struct {
