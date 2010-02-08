@@ -207,8 +207,10 @@ SRCS_MP3LIB-$(ARCH_X86_32)           += mp3lib/decode_i586.c \
 SRCS_MP3LIB-$(HAVE_ALTIVEC)          += mp3lib/dct64_altivec.c
 SRCS_MP3LIB-$(HAVE_MMX)              += mp3lib/decode_mmx.c
 SRCS_MP3LIB-$(HAVE_SSE)              += mp3lib/dct64_sse.c
-SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c mp3lib/sr1.c \
+SRCS_MP3LIB                          += mp3lib/sr1.c \
                                         $(SRCS_MP3LIB-yes)
+SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c \
+                                        $(SRCS_MP3LIB)
 
 SRCS_COMMON-$(MUSEPACK)              += libmpcodecs/ad_mpc.c \
                                         libmpdemux/demux_mpc.c
@@ -1016,7 +1018,7 @@ LOADER_TEST_OBJS = $(filter loader/%,$(SRCS_COMMON:.c=.o)) libmpdemux/aviprint.o
 loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): CFLAGS += -g
 loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): $(LOADER_TEST_OBJS)
 
-mp3lib/test$(EXESUF) mp3lib/test2$(EXESUF): $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
+mp3lib/test$(EXESUF) mp3lib/test2$(EXESUF): $(SRCS_MP3LIB:.c=.o) libvo/aclib.o cpudetect.o $(TEST_OBJS)
 
 TESTS = codecs2html codec-cfg-test liba52/test libvo/aspecttest \
         mp3lib/test mp3lib/test2
