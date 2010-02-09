@@ -72,6 +72,7 @@ for DLL to know too much about its environment.
 #include "osdep/mmap.h"
 #endif
 #include "osdep/mmap_anon.h"
+#include "libavutil/avstring.h"
 
 char* def_path = WIN32_PATH;
 
@@ -562,6 +563,7 @@ static HMODULE WINAPI expGetDriverModuleHandle(DRVR* pdrv)
 #define	MODULE_HANDLE_msvcrt	((HMODULE)0x126)
 #define	MODULE_HANDLE_ole32	((HMODULE)0x127)
 #define	MODULE_HANDLE_winmm	((HMODULE)0x128)
+#define	MODULE_HANDLE_psapi	((HMODULE)0x129)
 
 static HMODULE WINAPI expGetModuleHandleA(const char* name)
 {
@@ -1133,6 +1135,10 @@ static WIN_BOOL WINAPI expIsProcessorFeaturePresent(DWORD v)
     return result;
 }
 
+static WIN_BOOL WINAPI expIsDebuggerPresent(void)
+{
+    return 0;
+}
 
 static long WINAPI expGetVersion(void)
 {
@@ -2269,6 +2275,21 @@ static int WINAPI expGetModuleFileNameA(int module, char* s, int len)
     return result;
 }
 
+static int WINAPI expGetModuleBaseNameA(int process, int module, char* s, int len)
+{
+    int result = 0;
+
+    if (s && len) {
+        av_strlcpy(s, "aviplay.dll", len);
+        result = strlen(s);
+    }
+
+    dbgprintf("GetModuleBaseNameA(0x%x, 0x%x, 0x%x, %d) => %d\n",
+        process, module, s, len, result);
+
+    return result;
+}
+
 static int WINAPI expSetUnhandledExceptionFilter(void* filter)
 {
     dbgprintf("SetUnhandledExceptionFilter(0x%x) => 1\n", filter);
@@ -2329,6 +2350,8 @@ static int WINAPI expLoadLibraryA(char* name)
 	return MODULE_HANDLE_ole32;
     if (strcasecmp(name, "winmm.dll") == 0 || strcasecmp(name, "winmm") == 0)
 	return MODULE_HANDLE_winmm;
+    if (strcasecmp(name, "psapi.dll") == 0 || strcasecmp(name, "psapi") == 0)
+	return MODULE_HANDLE_psapi;
 
     result=LoadLibraryA(name);
     dbgprintf("Returned LoadLibraryA(0x%x='%s'), def_path=%s => 0x%x\n", name, name, def_path, result);
@@ -2371,6 +2394,8 @@ static void* WINAPI expGetProcAddress(HMODULE mod, char* name)
 	result=LookupExternalByName("ole32.dll", name); break;
     case MODULE_HANDLE_winmm:
 	result=LookupExternalByName("winmm.dll", name); break;
+    case MODULE_HANDLE_psapi:
+	result=LookupExternalByName("psapi.dll", name); break;
     default:
 	result=GetProcAddress(mod, name);
     }
@@ -4543,6 +4568,12 @@ static WIN_BOOL WINAPI expSetThreadPriority(
     return TRUE;
 }
 
+static void WINAPI expTerminateProcess( DWORD process, DWORD status )
+{
+    printf("EXIT - process %ld code %ld\n", process, status);
+    exit(status);
+}
+
 static void WINAPI expExitProcess( DWORD status )
 {
     printf("EXIT - code %ld\n",status);
@@ -4592,6 +4623,28 @@ static WINAPI inline unsigned long int expntohl(unsigned long int netlong)
 //    dbgprintf("ntohl(%x) => %x\n", netlong, ntohl(netlong));
     return ntohl(netlong);
 }
+
+static char* WINAPI expSysAllocStringLen(char *pch, unsigned cch)
+{
+    char *str;
+    dbgprintf("SysAllocStringLen('%s', %d)\n", pch, cch);
+    str = malloc(cch * 2 + sizeof(unsigned) + 2);
+    *(unsigned *)str = cch;
+    str += sizeof(unsigned);
+    if (pch)
+        memcpy(str, pch, cch * 2);
+    str[cch * 2] = 0;
+    str[cch * 2 + 1] = 0;
+    return str;
+}
+
+static void WINAPI expSysFreeString(char *str)
+{
+    if (str) {
+        free(str - sizeof(unsigned));
+    }
+}
+
 static void WINAPI expVariantInit(void* p)
 {
     printf("InitCommonControls called!\n");
@@ -4846,6 +4899,25 @@ static void * WINAPI expDecodePointer(void *p)
     return p;
 }
 
+static DWORD WINAPI expGetThreadLocale(void)
+{
+    return 0;
+}
+
+/**
+ * Very incomplete implementation, return an error for almost all cases.
+ */
+static DWORD WINAPI expGetLocaleInfoA(DWORD locale, DWORD lctype, char* lpLCData, int cchData)
+{
+    if (lctype == 0x1004) {  // LOCALE_IDEFAULTANSICODEPAGE
+       if (cchData < 4)
+           return cchData == 0 ? 4 : 0;
+       strcpy(lpLCData, "437");
+       return 4;
+    }
+    return 0;
+}
+
 struct exports
 {
     char name[64];
@@ -4997,6 +5069,7 @@ struct exports exp_kernel32[]=
     FF(GetFullPathNameA,-1)
     FF(SetErrorMode, -1)
     FF(IsProcessorFeaturePresent, -1)
+    FF(IsDebuggerPresent, -1)
     FF(GetProcessAffinityMask, -1)
     FF(InterlockedExchange, -1)
     FF(InterlockedCompareExchange, -1)
@@ -5017,12 +5090,15 @@ struct exports exp_kernel32[]=
     FF(GlobalMemoryStatus,-1)
     FF(GetThreadPriority,-1)
     FF(SetThreadPriority,-1)
+    FF(TerminateProcess,-1)
     FF(ExitProcess,-1)
     {"LoadLibraryExA", -1, (void*)&LoadLibraryExA},
     FF(SetThreadIdealProcessor,-1)
     FF(SetProcessAffinityMask, -1)
     FF(EncodePointer, -1)
     FF(DecodePointer, -1)
+    FF(GetThreadLocale, -1)
+    FF(GetLocaleInfoA, -1)
     UNDEFF(FlsAlloc, -1)
     UNDEFF(FlsGetValue, -1)
     UNDEFF(FlsSetValue, -1)
@@ -5105,6 +5181,9 @@ struct exports exp_winmm[]={
     FF(timeEndPeriod, -1)
     FF(waveOutGetNumDevs, -1)
 #endif
+};
+struct exports exp_psapi[]={
+    FF(GetModuleBaseNameA, -1)
 };
 struct exports exp_user32[]={
     FF(LoadIconA,-1)
@@ -5220,6 +5299,8 @@ struct exports exp_msdmo[]={
     FF(MoInitMediaType, -1)
 };
 struct exports exp_oleaut32[]={
+    FF(SysAllocStringLen, 4)
+    FF(SysFreeString, 6)
     FF(VariantInit, 8)
 #ifdef QTX
     FF(SysStringByteLen, 149)
@@ -5302,6 +5383,7 @@ struct libs libraries[]={
     LL(kernel32)
     LL(msvcrt)
     LL(winmm)
+    LL(psapi)
     LL(user32)
     LL(advapi32)
     LL(gdi32)
