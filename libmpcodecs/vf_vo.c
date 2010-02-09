@@ -148,10 +148,11 @@ static int control(struct vf_instance_s* vf, int request, void* data)
             mp_eosd_res_t res;
             memset(&res, 0, sizeof(res));
             if (video_out->control(VOCTRL_GET_EOSD_RES, &res) == VO_TRUE) {
+                double dar = (double) (res.w - res.ml - res.mr) / (res.h - res.mt - res.mb);
                 ass_set_frame_size(vf->priv->ass_priv, res.w, res.h);
                 ass_set_margins(vf->priv->ass_priv, res.mt, res.mb, res.ml, res.mr);
 #if defined(LIBASS_VERSION) && LIBASS_VERSION >= 0x00908000
-                ass_set_aspect_ratio(vf->priv->ass_priv, (double)res.w / res.h, (double)res.srcw/res.srch);
+                ass_set_aspect_ratio(vf->priv->ass_priv, dar, (double)res.srcw/res.srch);
 #else
                 ass_set_aspect_ratio(vf->priv->ass_priv, (double)res.w / res.h);
 #endif
