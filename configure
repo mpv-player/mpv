@@ -8908,7 +8908,6 @@ $def_sysi86
 $def_sysi86_iv
 $def_termcap
 $def_termios
-$def_truncf
 $def_vsscanf
 
 
@@ -9228,6 +9227,7 @@ $def_round
 $def_roundf
 $def_ten_operands
 $def_threads
+$def_truncf
 $def_xform_asm
 $def_yasm
 
