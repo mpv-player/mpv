@@ -8924,6 +8924,7 @@ $def_vsscanf
 $def_asmalign_pot
 $def_builtin_expect
 $def_dl
+$def_dos_paths
 $def_extern_asm
 $def_extern_prefix
 $def_iconv
@@ -9217,7 +9218,6 @@ $def_arpa_inet_h
 $def_bswap
 $def_bzlib
 $def_dcbzl
-$def_dos_paths
 $def_fast_64bit
 $def_fast_unaligned
 $def_libavcodec_mpegaudio_hp
