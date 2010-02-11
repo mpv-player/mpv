@@ -13,10 +13,6 @@
 
 # include "config.h"
 
-#ifdef _EGCS_
-#define __stdcall
-#endif
-
 /* Misc. constants. */
 
 #ifdef FALSE
@@ -87,11 +83,9 @@
 
 #ifdef __i386__
 # if defined(__GNUC__) && ((__GNUC__ > 2) || ((__GNUC__ == 2) && (__GNUC_MINOR__ >= 7)))
-#  ifndef _EGCS_
 #define __stdcall __attribute__((__stdcall__))
 #define __cdecl   __attribute__((__cdecl__))
 #  define RESTORE_ES  __asm__ volatile("pushl %ds\n\tpopl %es")
-#  endif
 # else
 // #  error You need gcc >= 2.7 to build Wine on a 386
 # endif
@@ -456,11 +450,9 @@ typedef LRESULT CALLBACK (*WNDPROC16)(HWND16,UINT16,WPARAM16,LPARAM);
 /* Macro for structure packing. */
 
 #ifdef __GNUC__
-#ifndef _EGCS_
 #define WINE_PACKED   __attribute__((packed))
 #define WINE_UNUSED   __attribute__((unused))
 #define WINE_NORETURN __attribute__((noreturn))
-#endif
 #else
 #define WINE_PACKED    /* nothing */
 #define WINE_UNUSED    /* nothing */
