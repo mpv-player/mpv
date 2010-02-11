@@ -7,10 +7,6 @@
 #include "winbase.h"
 #include "winnt.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* defined(__cplusplus) */
-
 /*
 #define SHELL_ERROR_SUCCESS           0L
 #define SHELL_ERROR_BADDB             1L
@@ -49,9 +45,5 @@ typedef struct value_entW {
 } VALENTW, *PVALENTW;
 
 typedef ACCESS_MASK REGSAM;
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif /* defined(__cplusplus) */
 
 #endif /* MPLAYER_WINREG_H */

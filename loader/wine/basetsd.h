@@ -13,10 +13,6 @@
 
 #include "config.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* defined(__cplusplus) */
-
 /*
  * Win32 was easy to implement under Unix since most (all?) 32-bit
  * Unices uses the same type model (ILP32) as Win32, where int, long
@@ -164,9 +160,5 @@ typedef __uint32 DWORD_PTR, *PDWORD_PTR;
 
 typedef INT_PTR SSIZE_T, *PSSIZE_T;
 typedef UINT_PTR SIZE_T, *PSIZE_T;
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif /* defined(__cplusplus) */
 
 #endif /* MPLAYER_BASETSD_H */

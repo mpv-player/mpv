@@ -14,10 +14,6 @@
 #ifndef MPLAYER_LOADER_H
 #define MPLAYER_LOADER_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "wine/windef.h"
 #include "wine/driver.h"
 #include "wine/mmreg.h"
@@ -32,9 +28,5 @@ int WritePrivateProfileStringA_(const char* appname, const char* keyname,
 
 INT WINAPI LoadStringA( HINSTANCE instance, UINT resource_id,
                             LPSTR buffer, INT buflen );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* MPLAYER_LOADER_H */

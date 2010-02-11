@@ -17,10 +17,6 @@
 #define __stdcall
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* Misc. constants. */
 
 #ifdef FALSE
@@ -632,9 +628,5 @@ typedef const RECTL *LPCRECTL;
 #define CONV_RECT32TO16(r32,r16) \
     ((r16)->left  = (INT16)(r32)->left,  (r16)->top    = (INT16)(r32)->top, \
      (r16)->right = (INT16)(r32)->right, (r16)->bottom = (INT16)(r32)->bottom)
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* MPLAYER_WINDEF_H */

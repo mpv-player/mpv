@@ -18,10 +18,6 @@
  * Internal functions and structures for COM emulation code.
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef GUID_TYPE
 #define GUID_TYPE
 typedef struct
@@ -82,9 +78,5 @@ long STDCALL CoCreateInstance(GUID* rclsid, struct IUnknown* pUnkOuter,
 void* STDCALL  CoTaskMemAlloc(unsigned long);
 void  STDCALL  CoTaskMemFree(void*);
 #endif
-
-#ifdef __cplusplus
-};
-#endif /* __cplusplus */
 
 #endif /* MPLAYER_COM_H */

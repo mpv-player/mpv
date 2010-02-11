@@ -9,11 +9,6 @@
 
 #include "wine/msacmdrv.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* defined(__cplusplus) */
-
-
 typedef struct WINE_ACMDRIVERID *PWINE_ACMDRIVERID;
 typedef struct WINE_ACMDRIVER   *PWINE_ACMDRIVER;
 
@@ -64,9 +59,5 @@ void MSACM_UnregisterAllDrivers(void);
 PWINE_ACMDRIVERID MSACM_GetDriverID(HACMDRIVERID hDriverID);
 PWINE_ACMDRIVER MSACM_GetDriver(HACMDRIVER hDriver);
 PWINE_ACMOBJ MSACM_GetObj(HACMOBJ hObj);
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif /* defined(__cplusplus) */
 
 #endif /* MPLAYER_WINEACM_H */

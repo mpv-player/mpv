@@ -7,10 +7,6 @@
 #include "pshpack1.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct tagCOORD {
     INT16 x;
     INT16 y;
@@ -1777,9 +1773,5 @@ VOID        WINAPI SetLastError(DWORD);
 
 #define GetCurrentProcess() ((HANDLE)0xffffffff)
 #define GetCurrentThread()  ((HANDLE)0xfffffffe)
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* MPLAYER_WINBASE_H */

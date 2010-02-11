@@ -6,10 +6,6 @@
 #ifndef MPLAYER_VFW_H
 #define MPLAYER_VFW_H
 //#include "pshpack1.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "windef.h"
 
 typedef struct __attribute__((__packed__))
@@ -667,7 +663,4 @@ typedef struct {
 #define AVIERR_USERABORT	MAKE_AVIERR(198)
 #define AVIERR_ERROR		MAKE_AVIERR(199)
 
-#ifdef __cplusplus
-}
-#endif
 #endif /* MPLAYER_VFW_H */

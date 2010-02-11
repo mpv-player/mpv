@@ -9,10 +9,6 @@
 #include "driver.h"
 #include "mmreg.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* defined(__cplusplus) */
-
 //typedef WORD    VERSION;        /* major (high byte), minor (low byte) */
 
 typedef UINT16	MMVERSION16;
@@ -933,9 +929,5 @@ MMRESULT WINAPI acmStreamSize(
 MMRESULT WINAPI acmStreamUnprepareHeader(
   HACMSTREAM has, PACMSTREAMHEADER pash, DWORD fdwUnprepare
 );
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif /* defined(__cplusplus) */
 
 #endif /* MPLAYER_MSACM_H */

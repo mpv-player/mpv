@@ -43,18 +43,11 @@
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,47)
 #define modify_ldt_ldt_s user_desc
 #endif
-/* prototype it here, so we won't depend on kernel headers */
-#ifdef  __cplusplus
-extern "C" {
-#endif
 /// declare modify_ldt with the _syscall3 macro for older glibcs
 #if defined(__GLIBC__) &&  (__GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ == 0))
 _syscall3( int, modify_ldt, int, func, void *, ptr, unsigned long, bytecount );
 #else
 int modify_ldt(int func, void *ptr, unsigned long bytecount);
-#endif
-#ifdef  __cplusplus
-}
 #endif
 #else
 #if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
@@ -69,13 +62,7 @@ int modify_ldt(int func, void *ptr, unsigned long bytecount);
 
 /* solaris x86: add missing prototype for sysi86(), but only when sysi86(int, void*) is known to be valid */
 #ifdef HAVE_SYSI86_iv
-#ifdef  __cplusplus
-extern "C" {
-#endif
 int sysi86(int, void*);
-#ifdef  __cplusplus
-}
-#endif
 #endif
 
 #ifndef NUMSYSLDTS             /* SunOS 2.5.1 does not define NUMSYSLDTS */
@@ -127,9 +114,6 @@ static unsigned int fs_ldt = TEB_SEL_IDX;
  * in C++ we use static class for this...
  */
 
-#ifdef __cplusplus
-extern "C"
-#endif
 void Setup_FS_Segment(void)
 {
     unsigned int ldt_desc = LDT_SEL(fs_ldt);

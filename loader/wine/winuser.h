@@ -5,10 +5,6 @@
 #include <stdarg.h>
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "windef.h"
 #include "pshpack1.h"
 
@@ -2922,9 +2918,5 @@ INT       WINAPI LoadMessageW(HMODULE,UINT,WORD,LPWSTR,INT);
 VOID        WINAPI ScreenSwitchEnable16(WORD);
 
 #define WC_DIALOG    (LPSTR)((DWORD)((WORD)( 0x8002)))
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* MPLAYER_WINUSER_H */
