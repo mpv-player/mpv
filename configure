@@ -8890,23 +8890,15 @@ $def_winsock2_h
 
 
 /* system functions */
-$def_exp2
-$def_exp2f
 $def_gethostbyname2
 $def_gettimeofday
 $def_glob
 $def_langinfo
-$def_llrint
-$def_log2
-$def_log2f
-$def_lrint
 $def_lrintf
 $def_map_memalign
 $def_memalign
 $def_nanosleep
 $def_posix_select
-$def_round
-$def_roundf
 $def_select
 $def_setenv
 $def_shm
@@ -9218,14 +9210,22 @@ $def_arpa_inet_h
 $def_bswap
 $def_bzlib
 $def_dcbzl
+$def_exp2
+$def_exp2f
 $def_fast_64bit
 $def_fast_unaligned
 $def_libavcodec_mpegaudio_hp
+$def_llrint
+$def_log2
+$def_log2f
+$def_lrint
 $def_memalign_hack
 $def_mlib
 $def_mkstemp
 $def_posix_memalign
 $def_pthreads
+$def_round
+$def_roundf
 $def_ten_operands
 $def_threads
 $def_xform_asm
