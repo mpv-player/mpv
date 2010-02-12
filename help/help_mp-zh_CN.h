@@ -1,4 +1,4 @@
-// Synced with help_mp-en.h r30044 (MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4)
+// Synced with help_mp-en.h rev. 30515 (MSGTR_INPUT_JOYSTICK_Opening)
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);
 //   NAV; section/subsection;  XScreenSaver; keycolor;
@@ -888,7 +888,7 @@ static const char help_text[]=
 #define MSGTR_LIBVO_DXR3_OutOfMemory "[VO_DXR3] 内存耗尽\n"
 #define MSGTR_LIBVO_DXR3_UnableToAllocateKeycolor "[VO_DXR3] 无法分配关键色！\n"
 #define MSGTR_LIBVO_DXR3_UnableToAllocateExactKeycolor "[VO_DXR3] 无法精确分配关键色，使用最接近的匹配（0x%lx）。\n"
-#define MSGTR_LIBVO_DXR3_Uninitializing "[VO_DXR3] 正在逆初始化。\n"
+#define MSGTR_LIBVO_DXR3_Uninitializing "[VO_DXR3] 正在卸载。\n"
 #define MSGTR_LIBVO_DXR3_FailedRestoringTVNorm "[VO_DXR3] 未能恢复电视制式！\n"
 #define MSGTR_LIBVO_DXR3_EnablingPrebuffering "[VO_DXR3] 启用预缓冲模式。\n"
 #define MSGTR_LIBVO_DXR3_UsingNewSyncEngine "[VO_DXR3] 使用新的同步引擎。\n"
@@ -929,7 +929,7 @@ static const char help_text[]=
 
 // vo_mga.c
 #define MSGTR_LIBVO_MGA_AspectResized "[VO_MGA] aspect()：改变大小为 %dx%d。\n"
-#define MSGTR_LIBVO_MGA_Uninit "[VO] 反初始化！\n"
+#define MSGTR_LIBVO_MGA_Uninit "[VO] 卸载！\n"
 
 // mga_common.c
 #define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "[MGA] mga_vid_config ioctl 错误（mga_vid.o 版本错误？）"
@@ -1094,7 +1094,7 @@ static const char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "无法为隔行扫描模式分配扫描行缓冲。"
 #define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "输入信号不是 RGB 格式，不能按色彩域拆分色度信息！"
 #define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "图像宽度必须能被 2 整除。"
-#define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "内存不够, 无法分配 RGB 帧缓冲。"
+#define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "内存不够，无法分配 RGB 帧缓冲。"
 #define MSGTR_VO_YUV4MPEG_OutFileOpenError "无法获取内存或文件句柄以写入“%s”！"
 #define MSGTR_VO_YUV4MPEG_OutFileWriteError "图像写入输出错误！"
 #define MSGTR_VO_YUV4MPEG_UnknownSubDev "未知子设备：%s"
@@ -1128,8 +1128,8 @@ static const char help_text[]=
 #define MSGTR_NoBalance "[混音器] 没有可用的均衡控制器。\n"
 
 // old vo drivers that have been replaced
-#define MSGTR_VO_PGM_HasBeenReplaced "PGM 视频输出驱动已换为 -vo pnm:pgmyuv。\n"
-#define MSGTR_VO_MD5_HasBeenReplaced "MD5 视频输出驱动已换为 -vo md5sum。\n"
+#define MSGTR_VO_PGM_HasBeenReplaced "PGM 视频输出驱动已替换为 -vo pnm:pgmyuv。\n"
+#define MSGTR_VO_MD5_HasBeenReplaced "MD5 视频输出驱动已替换为 -vo md5sum。\n"
 
 
 // ======================= audio output drivers ========================
@@ -1138,7 +1138,7 @@ static const char help_text[]=
 #define MSGTR_AO_ALSA9_1x_Removed "音频输出：alsa9 和 alsa1x 模块已不支持，请用 -ao alsa 代替。\n"
 #define MSGTR_AO_TryingPreferredAudioDriver "尝试使用偏好的音频驱动‘%.*s’，选项设为‘%s’\n"
 #define MSGTR_AO_NoSuchDriver "无此音频驱动‘%.*s’\n"
-#define MSGTR_AO_FailedInit "初始化音频驱动失败‘%s’\n"
+#define MSGTR_AO_FailedInit "未能初始化音频驱动‘%s’\n"
 #define MSGTR_AO_TryingEveryKnown "尝试每个已知的音频驱动...\n"
 
 // ao_oss.c
@@ -1161,8 +1161,8 @@ static const char help_text[]=
 #define MSGTR_AO_ARTS_BufferSize "[AO ARTS] 缓冲大小：%d\n"
 
 // ao_dxr2.c
-#define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] 设定音量为 %d 失败。\n"
-#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] 不支持 %d Hz，尝试重新采样音频。\n"
+#define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] 未能设定音量为 %d。\n"
+#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] 不支持 %d Hz，尝试对音频重新采样。\n"
 
 // ao_esd.c
 #define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound 失败：%s\n"
@@ -1171,7 +1171,7 @@ static const char help_text[]=
 
 // ao_mpegpes.c
 #define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB 音频组件混音器错误：%s。\n"
-#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] 不支持 %d Hz，尝试重新采样音频。\n"
+#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] 不支持 %d Hz，尝试对音频重新采样。\n"
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] 文件: %s (%s)\nPCM：采样率：%iHz 声道：%s 格式 %s\n"
@@ -1195,7 +1195,7 @@ static const char help_text[]=
 #define MSGTR_AO_SGI_SampleRateInfo "[AO SGI] 初始化：当前的采样率为 %lf（所需的速率为 %lf）\n"
 #define MSGTR_AO_SGI_InitConfigError "[AO SGI] 初始化：%s\n"
 #define MSGTR_AO_SGI_InitOpenAudioFailed "[AO SGI] 初始化：无法打开音频声道：%s\n"
-#define MSGTR_AO_SGI_Uninit "[AO SGI] 解除初始化：...\n"
+#define MSGTR_AO_SGI_Uninit "[AO SGI] 卸载：...\n"
 #define MSGTR_AO_SGI_Reset "[AO SGI] 重启：...\n"
 #define MSGTR_AO_SGI_PauseInfo "[AO SGI] audio_pause：...\n"
 #define MSGTR_AO_SGI_ResumeInfo "[AO SGI] audio_resume：...\n"
@@ -1224,13 +1224,13 @@ static const char help_text[]=
 #define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit：PCM 关闭错误：%s\n"
 #define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset：播放数据清空错误：%s\n"
 #define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset：播放数据刷新错误：%s\n"
-#define MSGTR_AO_ALSA5_ResetChanPrepareError "[AO ALSA5] alsa-reset：准备声道错误：%s\n"
+#define MSGTR_AO_ALSA5_ResetChanPrepareError "[AO ALSA5] alsa-reset：声道准备错误：%s\n"
 #define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause：播放数据刷新错误：%s\n"
 #define MSGTR_AO_ALSA5_PauseFlushError "[AO ALSA5] alsa-pause：播放数据刷新错误：%s\n"
-#define MSGTR_AO_ALSA5_ResumePrepareError "[AO ALSA5] alsa-resume：准备声道错误：%s\n"
+#define MSGTR_AO_ALSA5_ResumePrepareError "[AO ALSA5] alsa-resume：声道准备错误：%s\n"
 #define MSGTR_AO_ALSA5_Underrun "[AO ALSA5] alsa-play：alsa 输出滞后，重新设置音频流。\n"
-#define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play：准备播放错误：%s\n"
-#define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play：重启后写入错误：%s - 放弃。\n"
+#define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play：播放准备错误：%s\n"
+#define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play：重置后写入错误：%s - 放弃。\n"
 #define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-play：输出错误：%s\n"
 
 // ao_alsa.c
@@ -1277,11 +1277,11 @@ static const char help_text[]=
 #define MSGTR_AO_ALSA_PcmPrepareError "[AO_ALSA] pcm 准备错误：%s\n"
 #define MSGTR_AO_ALSA_PcmPauseError "[AO_ALSA] pcm 暂停错误：%s\n"
 #define MSGTR_AO_ALSA_PcmDropError "[AO_ALSA] pcm 丢弃错误：%s\n"
-#define MSGTR_AO_ALSA_PcmResumeError "[AO_ALSA] pcm 继续错误：%s\n"
+#define MSGTR_AO_ALSA_PcmResumeError "[AO_ALSA] pcm 继续播放错误：%s\n"
 #define MSGTR_AO_ALSA_DeviceConfigurationError "[AO_ALSA] 设备配置错误。"
 #define MSGTR_AO_ALSA_PcmInSuspendModeTryingResume "[AO_ALSA] Pcm 处于挂起模式，尝试继续播放。\n"
 #define MSGTR_AO_ALSA_WriteError "[AO_ALSA] 写入错误：%s\n"
-#define MSGTR_AO_ALSA_TryingToResetSoundcard "[AO_ALSA] 试着重启声卡。\n"
+#define MSGTR_AO_ALSA_TryingToResetSoundcard "[AO_ALSA] 尝试重启声卡。\n"
 #define MSGTR_AO_ALSA_CannotGetPcmStatus "[AO_ALSA] 无法获得 pcm 状态：%s\n"
 
 // ao_plugin.c
@@ -1293,11 +1293,11 @@ static const char help_text[]=
 #define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
 
 // af_ladspa.c
-#define MSGTR_AF_LADSPA_AvailableLabels "可用的标签"
-#define MSGTR_AF_LADSPA_WarnNoInputs "警告！该 LADSPA 插件没有音频入口。\n 输入的音频信号将会丢失。"
-#define MSGTR_AF_LADSPA_ErrMultiChannel "尚未支持多声道（>2）插件。\n 只使用单声道或立体声插件。"
-#define MSGTR_AF_LADSPA_ErrNoOutputs "该 LADSPA 插件没有音频出口。"
-#define MSGTR_AF_LADSPA_ErrInOutDiff "LADSPA 插件的音频入口和音频出口的数目不相等。"
+#define MSGTR_AF_LADSPA_AvailableLabels "可用标签"
+#define MSGTR_AF_LADSPA_WarnNoInputs "警告！该 LADSPA 插件没有音频输入。\n输入的音频信号将会丢失。"
+#define MSGTR_AF_LADSPA_ErrMultiChannel "尚未支持多声道（>2）插件。\n只使用单声道或立体声插件。"
+#define MSGTR_AF_LADSPA_ErrNoOutputs "该 LADSPA 插件没有音频输出。"
+#define MSGTR_AF_LADSPA_ErrInOutDiff "LADSPA 插件的音频输入和音频输出的数目不相等。"
 #define MSGTR_AF_LADSPA_ErrFailedToLoad "装载失败"
 #define MSGTR_AF_LADSPA_ErrNoDescriptor "指定的库文件中未能找到 ladspa_descriptor() 函数。"
 #define MSGTR_AF_LADSPA_ErrLabelNotFound "未能在插件库里找到标签。"
@@ -1701,7 +1701,7 @@ static const char help_text[]=
 #define MSGTR_LIBASS_ErrorRecodingFile "[ass] 记录到文件出错。\n"
 #define MSGTR_LIBASS_FopenFailed "[ass] ass_read_file(%s): 文件打开(fopen)失败\n"
 #define MSGTR_LIBASS_FseekFailed "[ass] ass_read_file(%s): 文件定位(fseek)失败\n"
-#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan100M "[ass] ass_read_file(%s): 拒绝装入大于100M的字幕\n"
+#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan100M "[ass] ass_read_file(%s)：拒绝装入大于 100M 的字幕\n"
 #define MSGTR_LIBASS_ReadFailed "读失败, %d: %s\n"
 #define MSGTR_LIBASS_AddedSubtitleFileMemory "[ass] 已加入字幕文件: <内存> (%d styles, %d events)\n"
 #define MSGTR_LIBASS_AddedSubtitleFileFname "[ass] 已加入字幕文件: %s (%d styles, %d events)\n"
