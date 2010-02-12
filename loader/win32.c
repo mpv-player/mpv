@@ -21,6 +21,9 @@ for DLL to know too much about its environment.
 
 #define REALPLAYER
 //#define LOADLIB_TRY_NATIVE
+
+/* Hack to make sure the correct function declaration in com.h is used when
+ * this file is built for the test applications with WIN32_LOADER disabled. */
 #define WIN32_LOADER
 
 #ifdef CONFIG_QTX_CODECS
