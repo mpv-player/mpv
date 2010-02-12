@@ -42,7 +42,8 @@
 
 #include "mp_taglists.h"
 
-#define PROBE_BUF_SIZE (32*1024)
+#define INITIAL_PROBE_SIZE (32*1024)
+#define PROBE_BUF_SIZE (2*1024*1024)
 
 extern char *audio_lang;
 extern char *dvdsub_lang;
@@ -68,7 +69,7 @@ typedef struct lavf_priv_t{
     AVInputFormat *avif;
     AVFormatContext *avfc;
     ByteIOContext *pb;
-    uint8_t buffer[FFMAX(BIO_BUFFER_SIZE, PROBE_BUF_SIZE)];
+    uint8_t buffer[BIO_BUFFER_SIZE];
     int audio_streams;
     int video_streams;
     int sub_streams;
@@ -133,7 +134,8 @@ static void list_formats(void) {
 static int lavf_check_file(demuxer_t *demuxer){
     AVProbeData avpd;
     lavf_priv_t *priv;
-    int probe_data_size;
+    int probe_data_size = 0;
+    int read_size = INITIAL_PROBE_SIZE;
 
     if(!demuxer->priv)
         demuxer->priv=calloc(sizeof(lavf_priv_t),1);
@@ -155,16 +157,26 @@ static int lavf_check_file(demuxer_t *demuxer){
         return DEMUXER_TYPE_LAVF;
     }
 
-    probe_data_size = stream_read(demuxer->stream, priv->buffer, PROBE_BUF_SIZE);
-    if(probe_data_size < 0)
+    avpd.buf = av_mallocz(FFMAX(BIO_BUFFER_SIZE, PROBE_BUF_SIZE) +
+                          FF_INPUT_BUFFER_PADDING_SIZE);
+    do {
+    read_size = stream_read(demuxer->stream, avpd.buf + probe_data_size, read_size);
+    if(read_size < 0) {
+        av_free(avpd.buf);
         return 0;
+    }
+    probe_data_size += read_size;
     avpd.filename= demuxer->stream->url;
     if (!strncmp(avpd.filename, "ffmpeg://", 9))
         avpd.filename += 9;
-    avpd.buf= priv->buffer;
     avpd.buf_size= probe_data_size;
 
     priv->avif= av_probe_input_format(&avpd, probe_data_size > 0);
+    read_size = FFMIN(2*read_size, PROBE_BUF_SIZE - probe_data_size);
+    } while (demuxer->desc->type != DEMUXER_TYPE_LAVF_PREFERRED &&
+             !priv->avif && read_size > 0 && probe_data_size < PROBE_BUF_SIZE);
+    av_free(avpd.buf);
+
     if(!priv->avif){
         mp_msg(MSGT_HEADER,MSGL_V,"LAVF_check: no clue about this gibberish!\n");
         return 0;
