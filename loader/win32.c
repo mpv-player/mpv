@@ -19,14 +19,11 @@ for DLL to know too much about its environment.
 #include "config.h"
 #include "mangle.h"
 
-#ifdef CONFIG_QTX_CODECS
-#define QTX
-#endif
 #define REALPLAYER
 //#define LOADLIB_TRY_NATIVE
 #define WIN32_LOADER
 
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 #define PSEUDO_SCREEN_WIDTH	/*640*/800
 #define PSEUDO_SCREEN_HEIGHT	/*480*/600
 #endif
@@ -555,7 +552,7 @@ static HMODULE WINAPI expGetDriverModuleHandle(DRVR* pdrv)
 
 #define	MODULE_HANDLE_kernel32	((HMODULE)0x120)
 #define	MODULE_HANDLE_user32	((HMODULE)0x121)
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 #define	MODULE_HANDLE_wininet	((HMODULE)0x122)
 #define	MODULE_HANDLE_ddraw	((HMODULE)0x123)
 #define	MODULE_HANDLE_advapi32	((HMODULE)0x124)
@@ -571,7 +568,7 @@ static HMODULE WINAPI expGetModuleHandleA(const char* name)
     WINE_MODREF* wm;
     HMODULE result;
     if(!name)
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 	result=1;
 #else
 	result=0;
@@ -587,7 +584,7 @@ static HMODULE WINAPI expGetModuleHandleA(const char* name)
     {
 	if(name && (strcasecmp(name, "kernel32")==0 || !strcasecmp(name, "kernel32.dll")))
 	    result=MODULE_HANDLE_kernel32;
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 	if(name && strcasecmp(name, "user32")==0)
 	    result=MODULE_HANDLE_user32;
 #endif
@@ -847,7 +844,7 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
     return (void *)ret;
 }
 
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 static void* WINAPI expWaitForMultipleObjects(int count, const void** objects,
 		    int WaitAll, int duration)
 {
@@ -887,7 +884,7 @@ static HANDLE WINAPI expCreateMutexA(void *pSecAttr,
     else
 	dbgprintf("CreateMutexA(0x%x, %d, NULL) => 0x%x\n",
 	    pSecAttr, bInitialOwner, mlist);
-#ifndef QTX
+#ifndef CONFIG_QTX_CODECS
     /* 10l to QTX, if CreateMutex returns a real mutex, WaitForSingleObject
        waits for ever, else it works ;) */
     return mlist;
@@ -1444,7 +1441,7 @@ static int WINAPI expGetCurrentProcess(void)
     return getpid();
 }
 
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 // this version is required for Quicktime codecs (.qtx/.qts) to work.
 // (they assume some pointers at FS: segment)
 
@@ -2208,7 +2205,7 @@ static int WINAPI expGetStdHandle(int z)
     return z+0x1234;
 }
 
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 #define FILE_HANDLE_quicktimeqts	((HANDLE)0x444)
 #define FILE_HANDLE_quicktimeqtx	((HANDLE)0x445)
 #endif
@@ -2218,7 +2215,7 @@ static int WINAPI expGetFileType(int handle)
     dbgprintf("GetFileType(0x%x) => 0x3 = pipe\n", handle);
     return 0x3;
 }
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 static int WINAPI expGetFileAttributesA(char *filename)
 {
     dbgprintf("GetFileAttributesA(%s) => FILE_ATTR_NORMAL\n", filename);
@@ -2334,7 +2331,7 @@ static int WINAPI expLoadLibraryA(char* name)
 //	return MODULE_HANDLE_kernel32;
 	return MODULE_HANDLE_user32;
 
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     if (strcasecmp(name, "wininet.dll") == 0 || strcasecmp(name, "wininet") == 0)
 	return MODULE_HANDLE_wininet;
     if (strcasecmp(name, "ddraw.dll") == 0 || strcasecmp(name, "ddraw") == 0)
@@ -2362,7 +2359,7 @@ static int WINAPI expLoadLibraryA(char* name)
 
 static int WINAPI expFreeLibrary(int module)
 {
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     int result=0; /* FIXME:XXX: qtx svq3 frees up qt.qts */
 #else
     int result=FreeLibrary(module);
@@ -2379,7 +2376,7 @@ static void* WINAPI expGetProcAddress(HMODULE mod, char* name)
 	result=LookupExternalByName("kernel32.dll", name); break;
     case MODULE_HANDLE_user32:
 	result=LookupExternalByName("user32.dll", name); break;
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     case MODULE_HANDLE_wininet:
 	result=LookupExternalByName("wininet.dll", name); break;
     case MODULE_HANDLE_ddraw:
@@ -2476,7 +2473,7 @@ static int WINAPI expCreateCompatibleDC(int hdc)
 static int WINAPI expGetDeviceCaps(int hdc, int unk)
 {
     dbgprintf("GetDeviceCaps(0x%x, %d) => 0\n", hdc, unk);
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     #define BITSPIXEL 12
     #define PLANES    14
     if (unk == BITSPIXEL)
@@ -2509,7 +2506,7 @@ static void* WINAPI expGetWindowDC(int hdc)
     return 0;
 }
 
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 static int WINAPI expGetWindowRect(HWND win, RECT *r)
 {
     dbgprintf("GetWindowRect(0x%x, 0x%x) => 1\n", win, r);
@@ -2963,7 +2960,7 @@ static int WINAPI expGetCursorPos(void *cursor)
     dbgprintf("GetCursorPos(0x%x) => 0x%x\n", cursor, cursor);
     return 1;
 }
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 static int show_cursor = 0;
 static int WINAPI expShowCursor(int show)
 {
@@ -3001,7 +2998,7 @@ static int WINAPI expGetCPInfo(int cp,void *info)
     dbgprintf("GetCPInfo()\n");
     return 0;
 }
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 #define SM_CXSCREEN		0
 #define SM_CYSCREEN		1
 #define SM_XVIRTUALSCREEN	76
@@ -3013,7 +3010,7 @@ static int WINAPI expGetCPInfo(int cp,void *info)
 static int WINAPI expGetSystemMetrics(int index)
 {
     dbgprintf("GetSystemMetrics(%d)\n", index);
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     switch(index)
     {
 	case SM_XVIRTUALSCREEN:
@@ -3340,7 +3337,7 @@ static DIR* qtx_dir=NULL;
 
 static WIN_BOOL WINAPI expFindNextFileA(HANDLE h,LPWIN32_FIND_DATAA lpfd)
 {
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     dbgprintf("FindNextFileA(0x%x, 0x%x) => 0\n", h, lpfd);
     if(h==FILE_HANDLE_quicktimeqtx){
 	struct dirent* d;
@@ -3366,7 +3363,7 @@ static HANDLE WINAPI expFindFirstFileA(LPCSTR s, LPWIN32_FIND_DATAA lpfd)
 {
     dbgprintf("FindFirstFileA(0x%x='%s', 0x%x) => 0\n", s, s, lpfd);
 //    printf("\n### FindFirstFileA('%s')...\n",s);
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     if(strstr(s, "quicktime\\*.QTX")){
 	dbgprintf("FindFirstFileA(0x%x='%s', 0x%x) => QTX\n", s, s, lpfd);
 	dbgprintf("\n### Searching for QuickTime plugins (*.qtx) at %s...\n",def_path);
@@ -3402,7 +3399,7 @@ static HANDLE WINAPI expFindFirstFileA(LPCSTR s, LPWIN32_FIND_DATAA lpfd)
 static WIN_BOOL WINAPI expFindClose(HANDLE h)
 {
     dbgprintf("FindClose(0x%x) => 0\n", h);
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 //    if(h==FILE_HANDLE_quicktimeqtx && qtx_dir){
 //	closedir(qtx_dir);
 //	qtx_dir=NULL;
@@ -3424,7 +3421,7 @@ static UINT WINAPI expGetWindowsDirectoryA(LPSTR s,UINT c)
     dbgprintf("GetWindowsDirectoryA(0x%x, %d) => %d\n", s, c, result);
     return result;
 }
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 static UINT WINAPI expGetCurrentDirectoryA(UINT c, LPSTR s)
 {
     char curdir[]="c:\\";
@@ -3508,7 +3505,7 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
 	      i2, p1, i3, i4, i5);
     if((!cs1) || (strlen(cs1)<2))return -1;
 
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     if(strstr(cs1, "QuickTime.qts"))
     {
 	int result;
@@ -3624,7 +3621,7 @@ static DWORD WINAPI expGetFullPathNameA
     dbgprintf("GetFullPathNameA('%s',%d,%p,%p)\n",lpFileName,nBufferLength,
 	lpBuffer, lpFilePart);
 #if 0
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     strcpy(lpFilePart, "Quick123.qts");
 #else
     strcpy(lpFilePart, lpFileName);
@@ -3688,7 +3685,7 @@ static DWORD  WINAPI expSetFilePointer(HANDLE h, LONG val, LPLONG ext, DWORD whe
     default:
 	return -1;
     }
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     if (val == 0 && ext != 0)
 	val = val&(*ext);
 #endif
@@ -3794,7 +3791,7 @@ static void WINAPI expInitCommonControls(void)
     return;
 }
 
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 /* needed by QuickTime.qts */
 static HWND WINAPI expCreateUpDownControl (DWORD style, INT x, INT y, INT cx, INT cy,
 	      HWND parent, INT id, HINSTANCE inst,
@@ -4453,7 +4450,7 @@ static MMRESULT WINAPI exptimeBeginPeriod(UINT wPeriod)
     return 0;
 }
 
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 static MMRESULT WINAPI exptimeEndPeriod(UINT wPeriod)
 {
     dbgprintf("timeEndPeriod(%u) !\n", wPeriod);
@@ -4583,7 +4580,7 @@ static void WINAPI expExitProcess( DWORD status )
 
 static INT WINAPI expMessageBoxA(HWND hWnd, LPCSTR text, LPCSTR title, UINT type){
     printf("MSGBOX '%s' '%s' (%d)\n",text,title,type);
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     if (type == MB_ICONHAND && !strlen(text) && !strlen(title))
 	return IDIGNORE;
 #endif
@@ -4664,7 +4661,7 @@ static int WINAPI expUnregisterClassA(const char *className, HINSTANCE hInstance
     return 0;
 }
 
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 /* should be fixed bcs it's not fully strlen equivalent */
 static int expSysStringByteLen(void *str)
 {
@@ -4953,7 +4950,7 @@ struct exports exp_kernel32[]=
     FF(SetEvent, -1)
     FF(ResetEvent, -1)
     FF(WaitForSingleObject, -1)
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     FF(WaitForMultipleObjects, -1)
     FF(ExitThread, -1)
     FF(CreateMutexA,-1)
@@ -5014,7 +5011,7 @@ struct exports exp_kernel32[]=
     FF(GetStartupInfoA, -1)
     FF(GetStdHandle, -1)
     FF(GetFileType, -1)
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     FF(GetFileAttributesA, -1)
 #endif
     FF(SetHandleCount, -1)
@@ -5061,7 +5058,7 @@ struct exports exp_kernel32[]=
     FF(CreateFileA,-1)
     FF(GetSystemDirectoryA,-1)
     FF(GetWindowsDirectoryA,-1)
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     FF(GetCurrentDirectoryA,-1)
     FF(SetCurrentDirectoryA,-1)
     FF(CreateDirectoryA,-1)
@@ -5178,7 +5175,7 @@ struct exports exp_winmm[]={
     FF(OpenDriver, -1)
     FF(timeGetDevCaps, -1)
     FF(timeBeginPeriod, -1)
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     FF(timeEndPeriod, -1)
     FF(waveOutGetNumDevs, -1)
 #endif
@@ -5197,7 +5194,7 @@ struct exports exp_user32[]={
     FF(LoadCursorA,-1)
     FF(SetCursor,-1)
     FF(GetCursorPos,-1)
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     FF(ShowCursor,-1)
 #endif
     FF(RegisterWindowMessageA,-1)
@@ -5209,7 +5206,7 @@ struct exports exp_user32[]={
     FF(MessageBoxA, -1)
     FF(RegisterClassA, -1)
     FF(UnregisterClassA, -1)
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     FF(GetWindowRect, -1)
     FF(MonitorFromWindow, -1)
     FF(MonitorFromRect, -1)
@@ -5253,7 +5250,7 @@ struct exports exp_gdi32[]={
     FF(DeleteObject, -1)
     FF(GetDeviceCaps, -1)
     FF(GetSystemPaletteEntries, -1)
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     FF(CreatePalette, -1)
     FF(GetObjectA, -1)
     FF(CreateRectRgn, -1)
@@ -5282,7 +5279,7 @@ struct exports exp_crtdll[]={
 struct exports exp_comctl32[]={
     FF(StringFromGUID2, -1)
     FF(InitCommonControls, 17)
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     FF(CreateUpDownControl, 16)
 #endif
 };
@@ -5303,7 +5300,7 @@ struct exports exp_oleaut32[]={
     FF(SysAllocStringLen, 4)
     FF(SysFreeString, 6)
     FF(VariantInit, 8)
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     FF(SysStringByteLen, 149)
 #endif
 };
@@ -5343,7 +5340,7 @@ struct exports exp_pncrt[]={
 };
 #endif
 
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
 struct exports exp_ddraw[]={
     FF(DirectDrawCreate, -1)
 };
@@ -5398,7 +5395,7 @@ struct libs libraries[]={
 #ifdef REALPLAYER
     LL(pncrt)
 #endif
-#ifdef QTX
+#ifdef CONFIG_QTX_CODECS
     LL(ddraw)
 #endif
     LL(comdlg32)
