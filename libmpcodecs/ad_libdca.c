@@ -32,7 +32,7 @@
 
 #include <dts.h>
 
-static ad_info_t info =
+static const ad_info_t info =
 {
     "DTS decoding with libdca",
     "libdca",

@@ -31,7 +31,7 @@
 #include "ad_internal.h"
 #include "loader/wine/windef.h"
 
-static ad_info_t info =  {
+static const ad_info_t info =  {
 	"RealAudio decoder",
 	"realaud",
 	"Alex Beregszaszi",

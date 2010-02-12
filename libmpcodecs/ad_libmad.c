@@ -24,7 +24,7 @@
 
 #include "ad_internal.h"
 
-static ad_info_t info =  {
+static const ad_info_t info =  {
 	"libmad mpeg audio decoder",
 	"libmad",
 	"A'rpi",

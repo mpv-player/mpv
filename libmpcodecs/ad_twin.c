@@ -29,7 +29,7 @@
 
 #include "help_mp.h"
 
-static ad_info_t info =
+static const ad_info_t info =
 {
     "TWinVQ decoder",
     "vqf",

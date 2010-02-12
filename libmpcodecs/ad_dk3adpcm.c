@@ -36,7 +36,7 @@
 #include "mpbswap.h"
 #include "ad_internal.h"
 
-static ad_info_t info =
+static const ad_info_t info =
 {
 	"Duck Corp. DK3 ADPCM decoder",
 	"dk3adpcm",

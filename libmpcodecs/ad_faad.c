@@ -28,7 +28,7 @@
 #include "ad_internal.h"
 #include "libaf/reorder_ch.h"
 
-static ad_info_t info =
+static const ad_info_t info =
 {
 	"AAC (MPEG2/4 Advanced Audio Coding)",
 	"faad",

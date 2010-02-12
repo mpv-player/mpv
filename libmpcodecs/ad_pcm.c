@@ -25,7 +25,7 @@
 #include "libaf/af_format.h"
 #include "libaf/reorder_ch.h"
 
-static ad_info_t info =
+static const ad_info_t info =
 {
 	"Uncompressed PCM audio decoder",
 	"pcm",

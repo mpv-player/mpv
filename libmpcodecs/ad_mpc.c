@@ -32,7 +32,7 @@
 #include "libaf/af_format.h"
 #include "libvo/fastmemcpy.h"
 
-static ad_info_t info =
+static const ad_info_t info =
 {
 	"Musepack audio decoder",
 	"mpcdec",

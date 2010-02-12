@@ -29,7 +29,7 @@
 #include "ad_internal.h"
 #include "osdep/timer.h"
 
-static ad_info_t info =
+static const ad_info_t info =
 {
 	"Win32/ACM decoders",
 	"acm",

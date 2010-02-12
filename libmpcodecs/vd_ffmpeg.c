@@ -33,7 +33,7 @@
 
 #include "vd_internal.h"
 
-static vd_info_t info = {
+static const vd_info_t info = {
     "FFmpeg's libavcodec codec family",
     "ffmpeg",
     "A'rpi",

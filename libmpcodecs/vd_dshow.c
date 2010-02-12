@@ -29,7 +29,7 @@
 
 #include "loader/dshow/DS_VideoDecoder.h"
 
-static vd_info_t info = {
+static const vd_info_t info = {
 	"DirectShow video codecs",
 	"dshow",
 	"A'rpi",

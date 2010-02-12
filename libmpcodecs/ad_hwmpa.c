@@ -33,7 +33,7 @@
 
 //based on ad_hwac3.c and ad_libmad.c
 
-static ad_info_t info =
+static const ad_info_t info =
 {
 	"MPEG audio pass-through (fake decoder)",
 	"hwmpa",

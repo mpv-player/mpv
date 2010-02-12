@@ -24,7 +24,7 @@
 
 #include "ad_internal.h"
 
-static ad_info_t info =
+static const ad_info_t info =
 {
 	"MPEG layer-2, layer-3",
 	"mp3lib",

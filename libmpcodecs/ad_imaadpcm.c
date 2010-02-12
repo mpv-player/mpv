@@ -79,7 +79,7 @@ static const int8_t adpcm_index[8] =
 // clamp a number above 16
 #define CLAMP_ABOVE_16(x)  if (x < 16) x = 16;
 
-static ad_info_t info =
+static const ad_info_t info =
 {
 	"IMA ADPCM audio decoder",
 	"imaadpcm",

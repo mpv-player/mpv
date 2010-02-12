@@ -37,7 +37,7 @@
 #define OUT_PIXEL_STRIDE 3 /* RGB */
 
 
-static vd_info_t info =
+static const vd_info_t info =
 {
   "SGI Image decoder",
   "sgi",

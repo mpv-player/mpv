@@ -25,7 +25,7 @@
 #include "help_mp.h"
 #include "ad_internal.h"
 
-static ad_info_t info =
+static const ad_info_t info =
 {
 	"Uncompressed DVD/VOB LPCM audio decoder",
 	"dvdpcm",

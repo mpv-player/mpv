@@ -26,7 +26,7 @@
 
 #define TEMP_BUF_SIZE (720*576)
 
-static vd_info_t info = {
+static const vd_info_t info = {
 	"Hauppauge Macroblock/NV12/NV21 Decoder",
 	"hmblck",
 	"Alex <d18c7db@hotmail.com>, A'rpi, Alex Beregszaszi",

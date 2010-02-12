@@ -378,7 +378,7 @@ static float stats2aspect(xvid_dec_stats_t *stats)
  * Module structure definition
  ****************************************************************************/
 
-static vd_info_t info =
+static const vd_info_t info =
 {
 	"XviD 1.0 decoder",
 	"xvid",

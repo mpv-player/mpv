@@ -38,7 +38,7 @@
 
 static int isdts = -1;
 
-static ad_info_t info =
+static const ad_info_t info =
 {
   "AC3/DTS pass-through S/PDIF",
   "hwac3",

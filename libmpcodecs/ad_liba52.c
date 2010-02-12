@@ -63,7 +63,7 @@ static sample_t a52_level = 1;
 float a52_drc_level = 1.0;
 static int a52_drc_action = DRC_NO_ACTION;
 
-static ad_info_t info =
+static const ad_info_t info =
 {
 	"AC3 decoding with liba52",
 	"liba52",

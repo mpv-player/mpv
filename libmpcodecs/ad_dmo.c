@@ -27,7 +27,7 @@
 #include "ad_internal.h"
 #include "libaf/reorder_ch.h"
 
-static ad_info_t info =
+static const ad_info_t info =
 {
 	"Win32/DMO decoders",
 	"dmo",

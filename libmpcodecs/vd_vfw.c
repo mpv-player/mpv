@@ -28,7 +28,7 @@
 #include "loader/wine/driver.h"
 #include "loader/wine/vfw.h"
 
-static vd_info_t info = {
+static const vd_info_t info = {
 #ifdef BUILD_VFWEX
 	"Win32/VfWex video codecs",
 	"vfwex",
