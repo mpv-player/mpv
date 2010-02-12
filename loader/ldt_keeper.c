@@ -255,6 +255,9 @@ ldt_fs_t* Setup_LDT_Keeper(void)
 	    printf("Couldn't install fs segment, expect segfault\n");
 	}
     }
+#elif defined(__OS2__)
+    /* convert flat addr to sel idx for LDT_SEL() */
+    fs_ldt = (uintptr_t)fs_seg >> 16;
 #endif
 
     Setup_FS_Segment();

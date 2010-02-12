@@ -7129,7 +7129,7 @@ if test "$_real" = auto ; then
   _real=no
   _res_comment="dynamic loader support needed"
   if test "$_dl" = yes || test "$_win32dll" = yes &&
-     (linux || freebsd || netbsd || openbsd || dragonfly || darwin || win32) ; then
+     (linux || freebsd || netbsd || openbsd || dragonfly || darwin || win32 || os2) ; then
     _real=yes
   fi
 fi
