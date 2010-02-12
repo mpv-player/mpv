@@ -24,6 +24,7 @@ for DLL to know too much about its environment.
 #endif
 #define REALPLAYER
 //#define LOADLIB_TRY_NATIVE
+#define WIN32_LOADER
 
 #ifdef QTX
 #define PSEUDO_SCREEN_WIDTH	/*640*/800
