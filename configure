@@ -8937,7 +8937,6 @@ $def_crash_debug
 $def_debug
 $def_dynamic_plugins
 $def_fastmemcpy
-$def_hardcoded_tables
 $def_menu
 $def_runtime_cpudetection
 $def_sighandler
@@ -9213,6 +9212,7 @@ $def_exp2
 $def_exp2f
 $def_fast_64bit
 $def_fast_unaligned
+$def_hardcoded_tables
 $def_libavcodec_mpegaudio_hp
 $def_llrint
 $def_log2
