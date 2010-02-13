@@ -7249,7 +7249,7 @@ elif test "$_libavutil_so" = auto ; then
   _libavutil_so=no
   cat > $TMPC << EOF
 #include <libavutil/common.h>
-int main(void) { av_gcd(1,1); return 0; }
+int main(void) { av_clip(1, 1, 1); return 0; }
 EOF
   if $_pkg_config --exists libavutil ; then
     _inc_libavutil=$($_pkg_config --cflags libavutil)
