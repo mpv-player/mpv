@@ -176,8 +176,7 @@ SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
 SRCS_COMMON-$(LIBNUT)                += libmpdemux/demux_nut.c
 SRCS_COMMON-$(LIBPOSTPROC)           += libmpcodecs/vf_pp.c
 SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
-SRCS_COMMON-$(LIBSWSCALE_INTERNALS)  += libmpcodecs/vf_halfpack.c \
-                                        libmpcodecs/vf_palette.c \
+SRCS_COMMON-$(LIBSWSCALE_INTERNALS)  += libmpcodecs/vf_palette.c \
                                         libmpcodecs/vf_rgb2bgr.c \
                                         libmpcodecs/vf_yuy2.c
 SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
@@ -421,6 +420,7 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_format.c \
               libmpcodecs/vf_framestep.c \
               libmpcodecs/vf_gradfun.c \
+              libmpcodecs/vf_halfpack.c \
               libmpcodecs/vf_harddup.c \
               libmpcodecs/vf_hqdn3d.c \
               libmpcodecs/vf_hue.c \
