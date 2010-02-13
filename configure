@@ -3528,7 +3528,6 @@ echores "$_fastmemcpy"
 echocheck "hard-coded tables"
 if test "$hardcoded_tables" = yes ; then
   def_hardcoded_tables='#define CONFIG_HARDCODED_TABLES 1'
-  mak_hardcoded_tables='CONFIG_HARDCODED_TABLES = yes'
 else
   def_hardcoded_tables='#define CONFIG_HARDCODED_TABLES 0'
 fi
@@ -7310,8 +7309,7 @@ test "$_libavcodec"    = yes && def_libavcodec='#define CONFIG_LIBAVCODEC 1'
 test "$_libavcodec_a"  = yes && def_libavcodec_a='#define CONFIG_LIBAVCODEC_A 1'
 test "$_libavcodec_so" = yes && def_libavcodec_so='#define CONFIG_LIBAVCODEC_SO 1'
 test "$_libavcodec_mpegaudio_hp" = yes \
-  && def_libavcodec_mpegaudio_hp='#define CONFIG_MPEGAUDIO_HP 1' \
-  && mak_libavcodec_mpegaudio_hp='CONFIG_MPEGAUDIO_HP = yes'
+  && def_libavcodec_mpegaudio_hp='#define CONFIG_MPEGAUDIO_HP 1'
 if test "$_libavcodec_a" = yes ; then
   _codecmodules="libavcodec(internal) $_codecmodules"
 elif test "$_libavcodec_so" = yes ; then
@@ -8584,8 +8582,6 @@ FAAC=$_faac
 FAAD = $_faad
 FAAD_INTERNAL = $_faad_internal
 FASTMEMCPY = $_fastmemcpy
-$mak_hardcoded_tables
-$mak_libavcodec_mpegaudio_hp
 FBDEV = $_fbdev
 FREETYPE = $_freetype
 FTP = $_ftp
@@ -8755,6 +8751,7 @@ CONFIG_RDFT=yes
 CONFIG_BZLIB=$bzlib
 CONFIG_ENCODERS=yes
 CONFIG_GPL=yes
+CONFIG_HARDCODED_TABLES=$hardcoded_tables
 CONFIG_LIBDIRAC_DECODER=$_libdirac_lavc
 CONFIG_LIBDIRAC_ENCODER=$_libdirac_lavc
 CONFIG_LIBFAAC_ENCODER=$_faac_lavc
@@ -8770,6 +8767,7 @@ CONFIG_LIBVORBIS_ENCODER=$_libvorbis
 CONFIG_LIBX264_ENCODER=$_x264_lavc
 CONFIG_LIBXVID_ENCODER=$_xvid_lavc
 CONFIG_MLIB = $_mlib
+CONFIG_MPEGAUDIO_HP = $_libavcodec_mpegaudio_hp
 CONFIG_MUXERS=$_mencoder
 CONFIG_POSTPROC = yes
 # Prevent building libavcodec/imgresample.c with conflicting symbols
