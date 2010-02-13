@@ -1138,6 +1138,11 @@ void init_vo_spudec(void) {
     spudec_free(vo_spudec);
   initialized_flags &= ~INITIALIZED_SPUDEC;
   vo_spudec = NULL;
+
+  // we currently can't work without video stream
+  if (!mpctx->sh_video)
+    return;
+
   if (spudec_ifo) {
     unsigned int palette[16], width, height;
     current_module="spudec_init_vobsub";
@@ -3514,7 +3519,7 @@ if(!mpctx->sh_video && !mpctx->sh_audio){
 demux_info_print(mpctx->demuxer);
 
 //================== Read SUBTITLES (DVD & TEXT) ==========================
-if(vo_spudec==NULL && mpctx->sh_video &&
+if(vo_spudec==NULL &&
      (mpctx->stream->type==STREAMTYPE_DVD || mpctx->stream->type == STREAMTYPE_DVDNAV)){
   init_vo_spudec();
 }
