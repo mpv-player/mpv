@@ -691,7 +691,8 @@ void uninit_player(unsigned int mask){
   current_module=NULL;
 }
 
-void exit_player_with_rc(exit_reason_t how, int rc){
+void exit_player_with_rc(enum exit_reason how, int rc)
+{
 
   if (mpctx->user_muted && !mpctx->edl_muted) mixer_mute(&mpctx->mixer);
   uninit_player(INITIALIZED_ALL);
@@ -758,7 +759,8 @@ void exit_player_with_rc(exit_reason_t how, int rc){
   exit(rc);
 }
 
-void exit_player(exit_reason_t how){
+void exit_player(enum exit_reason how)
+{
   exit_player_with_rc(how, 1);
 }
 
