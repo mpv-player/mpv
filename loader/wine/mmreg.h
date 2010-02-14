@@ -89,19 +89,19 @@ typedef struct {
 
 #ifndef _MPEGLAYER3WAVEFORMAT_
 #define _MPEGLAYER3WAVEFORMAT_
-typedef struct mpeglayer3waveformat_tag {
-  WORD   wFormatTag WINE_PACKED;
-  WORD   nChannels WINE_PACKED;
-  DWORD  nSamplesPerSec WINE_PACKED;
-  DWORD  nAvgBytesPerSec WINE_PACKED;
-  WORD   nBlockAlign WINE_PACKED;
-  WORD   wBitsPerSample WINE_PACKED;
-  WORD   cbSize WINE_PACKED;
-  WORD          wID WINE_PACKED;
-  DWORD         fdwFlags WINE_PACKED;
-  WORD          nBlockSize WINE_PACKED;
-  WORD          nFramesPerBlock WINE_PACKED;
-  WORD          nCodecDelay WINE_PACKED;
+typedef struct WINE_PACKED mpeglayer3waveformat_tag {
+  WORD   wFormatTag;
+  WORD   nChannels;
+  DWORD  nSamplesPerSec;
+  DWORD  nAvgBytesPerSec;
+  WORD   nBlockAlign;
+  WORD   wBitsPerSample;
+  WORD   cbSize;
+  WORD   wID;
+  DWORD  fdwFlags;
+  WORD   nBlockSize;
+  WORD   nFramesPerBlock;
+  WORD   nCodecDelay;
 } MPEGLAYER3WAVEFORMAT;
 #endif /* !_MPEGLAYER3WAVEFORMAT_ */
 
