@@ -131,7 +131,7 @@ static int init(sh_video_t *sh){
  */
 static void uninit(sh_video_t *sh)
 {
-   theora_struct_t *context = (theora_struct_t *)sh->context;
+   theora_struct_t *context = sh->context;
 
    if (context)
    {
@@ -147,7 +147,7 @@ static void uninit(sh_video_t *sh)
  */
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 {
-   theora_struct_t *context = (theora_struct_t *)sh->context;
+   theora_struct_t *context = sh->context;
    int errorCode = 0;
    ogg_packet op;
    yuv_buffer yuv;
