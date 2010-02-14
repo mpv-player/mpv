@@ -39,6 +39,7 @@ typedef struct vd_functions_s
 extern const vd_functions_t * const mpcodecs_vd_drivers[];
 
 extern int vd_use_slices;
+extern float movie_aspect;
 
 #define VDCTRL_QUERY_FORMAT 3 /* test for availabilty of a format */
 #define VDCTRL_QUERY_MAX_PP_LEVEL 4 /* test for postprocessing support (max level) */

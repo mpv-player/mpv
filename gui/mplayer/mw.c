@@ -42,6 +42,7 @@
 #include "libvo/sub.h"
 #include "access_mpcontext.h"
 
+#include "libmpcodecs/vd.h"
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
 #include "codec-cfg.h"
