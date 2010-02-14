@@ -4655,7 +4655,8 @@ the codec dialog display before encoding starts.
   <application>QuickTime</application> 7 does not support SAR (sample
   aspect ratio) information in MPEG-4 files; it assumes that SAR=1. Read
   <link linkend="menc-feat-quicktime-7-scale">the section on scaling</link>
-  for a workaround.
+  for a workaround. <application>QuickTime</application> X no longer has this
+  limitation.
 </para></listitem>
 </itemizedlist>
 
