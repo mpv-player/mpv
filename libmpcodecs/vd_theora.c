@@ -64,18 +64,14 @@ typedef struct theora_struct_st {
  */
 static int init(sh_video_t *sh){
     theora_struct_t *context = NULL;
-    int failed = 1;
     int errorCode = 0;
     ogg_packet op;
     int i;
 
-    /* this is not a loop, just a context, from which we can break on error */
-    do
-    {
        context = calloc (sizeof (theora_struct_t), 1);
        sh->context = context;
        if (!context)
-	  break;
+	  goto err_out;
 
        theora_info_init(&context->inf);
        theora_comment_init(&context->cc);
@@ -88,11 +84,9 @@ static int init(sh_video_t *sh){
           if ( (errorCode = theora_decode_header (&context->inf, &context->cc, &op)) )
           {
             mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Broken Theora header; errorCode=%i!\n", errorCode);
-            break;
+            goto err_out;
           }
        }
-       if (errorCode)
-          break;
 
        /* now init codec */
        errorCode = theora_decode_init (&context->st, &context->inf);
@@ -100,20 +94,8 @@ static int init(sh_video_t *sh){
        {
 	  mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Theora decode init failed: %i \n",
 		 errorCode);
-	  break;
+	  goto err_out;
        }
-       failed = 0;
-    } while (0);
-
-    if (failed)
-    {
-       if (context)
-       {
-	  free (context);
-	  sh->context = NULL;
-       }
-       return 0;
-    }
 
     if(sh->aspect==0.0 && context->inf.aspect_denominator!=0)
     {
@@ -124,6 +106,11 @@ static int init(sh_video_t *sh){
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Theora video init ok!\n");
 
     return mpcodecs_config_vo (sh,context->inf.frame_width,context->inf.frame_height,IMGFMT_YV12);
+
+err_out:
+    free(context);
+    sh->context = NULL;
+    return 0;
 }
 
 /*
