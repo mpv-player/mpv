@@ -334,7 +334,6 @@ char* current_module=NULL; // for debugging
 #ifdef CONFIG_MENU
 #include "m_struct.h"
 #include "libmenu/menu.h"
-void vf_menu_pause_update(struct vf_instance_s* vf);
 extern vf_info_t vf_info_menu;
 static vf_info_t* libmenu_vfs[] = {
   &vf_info_menu,

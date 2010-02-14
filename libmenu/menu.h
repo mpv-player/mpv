@@ -21,6 +21,7 @@
 
 #include "m_struct.h"
 #include "libmpcodecs/mp_image.h"
+#include "libmpcodecs/vf.h"
 
 struct menu_priv_s;
 typedef struct  menu_s menu_t;
@@ -112,5 +113,7 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
 			 int vspace, int warp, int align, int anchor);
 
 void menu_draw_box(mp_image_t* mpi, unsigned char grey, unsigned char alpha, int x, int y, int w, int h);
+
+void vf_menu_pause_update(struct vf_instance_s* vf);
 
 #endif /* MPLAYER_MENU_H */
