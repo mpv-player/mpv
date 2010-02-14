@@ -847,8 +847,6 @@ static void exit_sighandler(int x){
   exit(1);
 }
 
-void mp_input_register_options(m_config_t* cfg);
-
 #include "cfg-mplayer.h"
 
 static void parse_cfgfiles( m_config_t* conf )

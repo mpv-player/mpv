@@ -19,6 +19,8 @@
 #ifndef MPLAYER_INPUT_H
 #define MPLAYER_INPUT_H
 
+#include "m_config.h"
+
 // All command IDs
 typedef enum {
   MP_CMD_SEEK,
@@ -317,6 +319,8 @@ mp_input_init(int use_gui);
 
 void
 mp_input_uninit(void);
+
+void mp_input_register_options(m_config_t* cfg);
 
 // Interruptible usleep:  (used by libmpdemux)
 int
