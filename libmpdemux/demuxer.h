@@ -389,13 +389,9 @@ void ds_clear_parser(demux_stream_t *sh);
 stream_t* new_ds_stream(demux_stream_t *ds);
 
 static inline int avi_stream_id(unsigned int id){
-  unsigned char *p=(unsigned char *)&id;
   unsigned char a,b;
-#if HAVE_BIGENDIAN
-  a=p[3]-'0'; b=p[2]-'0';
-#else
-  a=p[0]-'0'; b=p[1]-'0';
-#endif
+  a = id - '0';
+  b = (id >> 8) - '0';
   if(a>9 || b>9) return 100; // invalid ID
   return a*10+b;
 }
