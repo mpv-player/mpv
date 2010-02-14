@@ -22,6 +22,7 @@
 
 #include "cut.h"
 #include "font.h"
+#include "skin.h"
 #include "gui/app.h"
 
 #include "config.h"

@@ -44,7 +44,7 @@
 #include "access_mpcontext.h"
 #include "libavutil/avstring.h"
 
-
+#include "gui_common.h"
 #include "play.h"
 #include "widgets.h"
 

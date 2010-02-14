@@ -19,6 +19,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "cut.h"
+
 void cutItem( char * in,char * out,char sep,int num )
 {
  int i,n,c;
