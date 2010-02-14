@@ -37,6 +37,7 @@
 #include "cfg.h"
 #include "help_mp.h"
 #include "get_path.h"
+#include "mp_core.h"
 #include "libvo/x11_common.h"
 #include "libvo/video_out.h"
 #include "libvo/font_load.h"
@@ -781,7 +782,7 @@ int guiGetEvent( int type,char * arg )
 	     }
 	 }
 
-	if ( !video_driver_list && !video_driver_list[0] ) { gtkMessageBox( GTK_MB_FATAL,MSGTR_IDFGCVD ); exit_player( "gui init" ); }
+	if ( !video_driver_list && !video_driver_list[0] ) { gtkMessageBox( GTK_MB_FATAL,MSGTR_IDFGCVD ); exit_player(EXIT_ERROR); }
 
 	{
 	 int i = 0;

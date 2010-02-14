@@ -25,7 +25,7 @@
 
 #include "mp_msg.h"
 #include "help_mp.h"
-#include "mplayer.h" /* for exit_player() */
+#include "mp_core.h" /* for exit_player() */
 
 // there are some globals:
 ao_data_t ao_data={0,0,0,0,OUTBURST,-1,0};
@@ -147,7 +147,7 @@ const ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate
         int ao_len;
         if (strncmp(ao, "alsa9", 5) == 0 || strncmp(ao, "alsa1x", 6) == 0) {
             mp_msg(MSGT_AO, MSGL_FATAL, MSGTR_AO_ALSA9_1x_Removed);
-            exit_player(NULL);
+            exit_player(EXIT_NONE);
         }
         if (ao_subdevice) {
             free(ao_subdevice);

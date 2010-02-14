@@ -39,7 +39,7 @@
 #include "mp_msg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "mplayer.h"			/* for exit_player() */
+#include "mp_core.h"			/* for exit_player() */
 #include "help_mp.h"
 
 /* ------------------------------------------------------------------------- */
@@ -98,7 +98,7 @@ char *pnm_file_extension = NULL;
 
 static void pnm_write_error(void) {
     mp_msg(MSGT_VO, MSGL_ERR, MSGTR_ErrorWritingFile, info.short_name);
-    exit_player(MSGTR_Exit_error);
+    exit_player(EXIT_ERROR);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -214,17 +214,17 @@ static void pnm_mkdir(char *buf, int verbose) {
                             MSGTR_VO_GenericError, strerror(errno) );
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
                             MSGTR_VO_UnableToAccess,buf);
-                    exit_player(MSGTR_Exit_error);
+                    exit_player(EXIT_ERROR);
                 }
                 if ( !S_ISDIR(stat_p.st_mode) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
                             buf, MSGTR_VO_ExistsButNoDirectory);
-                    exit_player(MSGTR_Exit_error);
+                    exit_player(EXIT_ERROR);
                 }
                 if ( !(stat_p.st_mode & S_IWUSR) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
                             buf, MSGTR_VO_DirExistsButNotWritable);
-                    exit_player(MSGTR_Exit_error);
+                    exit_player(EXIT_ERROR);
                 }
 
                 if (strcmp(buf, ".") != 0) {
@@ -238,7 +238,7 @@ static void pnm_mkdir(char *buf, int verbose) {
                         MSGTR_VO_GenericError, strerror(errno) );
                 mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
                         buf, MSGTR_VO_CantCreateDirectory);
-                exit_player(MSGTR_Exit_error);
+                exit_player(EXIT_ERROR);
         } /* end switch */
     } else if ( verbose ) {
         mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
@@ -442,7 +442,7 @@ static void pnm_write_image(mp_image_t *mpi)
 
     if (!mpi) {
         mp_msg(MSGT_VO, MSGL_ERR, "%s: No image data suplied to video output driver\n", info.short_name );
-        exit_player(MSGTR_Exit_error);
+        exit_player(EXIT_ERROR);
     }
 
     /* Start writing to new subdirectory after a certain amount of frames */
@@ -474,7 +474,7 @@ static void pnm_write_image(mp_image_t *mpi)
         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n",
                 info.short_name, MSGTR_VO_GenericError,
                 strerror(errno) );
-        exit_player(MSGTR_Exit_error);
+        exit_player(EXIT_ERROR);
     }
 
     pnm_write_pnm(outfile, mpi);

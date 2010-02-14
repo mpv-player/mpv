@@ -44,7 +44,7 @@
 #include "mp_msg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "mplayer.h"			/* for exit_player() */
+#include "mp_core.h"
 #include "help_mp.h"
 
 /* ------------------------------------------------------------------------- */
@@ -121,17 +121,17 @@ static void jpeg_mkdir(char *buf, int verbose) {
                             MSGTR_VO_GenericError, strerror(errno) );
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
                             MSGTR_VO_UnableToAccess,buf);
-                    exit_player(MSGTR_Exit_error);
+                    exit_player(EXIT_ERROR);
                 }
                 if ( !S_ISDIR(stat_p.st_mode) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
                             buf, MSGTR_VO_ExistsButNoDirectory);
-                    exit_player(MSGTR_Exit_error);
+                    exit_player(EXIT_ERROR);
                 }
                 if ( !(stat_p.st_mode & S_IWUSR) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
                             buf, MSGTR_VO_DirExistsButNotWritable);
-                    exit_player(MSGTR_Exit_error);
+                    exit_player(EXIT_ERROR);
                 }
 
                 mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
@@ -143,7 +143,7 @@ static void jpeg_mkdir(char *buf, int verbose) {
                         MSGTR_VO_GenericError, strerror(errno) );
                 mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
                         buf, MSGTR_VO_CantCreateDirectory);
-                exit_player(MSGTR_Exit_error);
+                exit_player(EXIT_ERROR);
         } /* end switch */
     } else if ( verbose ) {
         mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
@@ -192,7 +192,7 @@ static uint32_t jpeg_write(uint8_t * name, uint8_t * buffer)
         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n",
                 info.short_name, MSGTR_VO_GenericError,
                 strerror(errno) );
-        exit_player(MSGTR_Exit_error);
+        exit_player(EXIT_ERROR);
     }
 
     cinfo.err = jpeg_std_error(&jerr);

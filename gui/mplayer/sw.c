@@ -24,6 +24,7 @@
 #include "config.h"
 #include "libvo/x11_common.h"
 #include "help_mp.h"
+#include "mp_core.h"
 
 #include "gmplayer.h"
 #include "gui/app.h"
@@ -39,7 +40,7 @@ extern int             i,pot;
 
 void mplSubDraw( void )
 {
- if ( appMPlayer.subWindow.State == wsWindowClosed ) exit_player( MSGTR_Exit_quit );
+ if ( appMPlayer.subWindow.State == wsWindowClosed ) exit_player( EXIT_QUIT );
 
  if ( appMPlayer.subWindow.State == wsWindowFocusIn ) SubVisible++;
  if ( appMPlayer.subWindow.State == wsWindowFocusOut && metacity_hack != 3 ) SubVisible--;

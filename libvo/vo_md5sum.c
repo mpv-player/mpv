@@ -40,7 +40,7 @@
 #include "mp_msg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "mplayer.h"			/* for exit_player() */
+#include "mp_core.h"			/* for exit_player() */
 #include "help_mp.h"
 #include "libavutil/md5.h"
 
@@ -86,7 +86,7 @@ int framenum = 0;
 
 static void md5sum_write_error(void) {
     mp_msg(MSGT_VO, MSGL_ERR, MSGTR_ErrorWritingFile, info.short_name);
-    exit_player(MSGTR_Exit_error);
+    exit_player(EXIT_ERROR);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -152,7 +152,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                 MSGTR_VO_CantCreateFile);
         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n",
                 info.short_name, MSGTR_VO_GenericError, strerror(errno) );
-        exit_player(MSGTR_Exit_error);
+        exit_player(EXIT_ERROR);
     }
 
     return 0;

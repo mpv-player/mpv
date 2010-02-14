@@ -154,6 +154,7 @@ void reinit_audio_chain(void);
 void init_vo_spudec(void);
 double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
 			 const ao_functions_t *audio_out);
+void exit_player(exit_reason_t how);
 void exit_player_with_rc(exit_reason_t how, int rc);
 void add_subtitles(char *filename, float fps, int noerr);
 int reinit_video_chain(void);
