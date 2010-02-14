@@ -39,6 +39,7 @@
 #include "gui/app.h"
 #include "gui/cfg.h"
 #include "gui/interface.h"
+#include "gui/mplayer/gmplayer.h"
 #include "gui/mplayer/widgets.h"
 #include "opts.h"
 #include "fs.h"

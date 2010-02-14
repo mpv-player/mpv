@@ -21,9 +21,6 @@
 
 extern char* current_module;
 
-extern char * dvd_device;
-extern char * cdrom_device;
-
 extern char ** audio_fm_list;
 extern char ** video_fm_list;
 extern char ** video_driver_list;
@@ -50,10 +47,6 @@ extern char * filename;
 
 extern int stream_cache_size;
 extern int autosync;
-
-// libmpcodecs:
-extern int fullscreen;
-extern int flip;
 
 extern int frame_dropping;
 

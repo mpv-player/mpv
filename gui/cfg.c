@@ -37,6 +37,7 @@
 #include "cfg.h"
 #include "app.h"
 #include "interface.h"
+#include "mplayer/gmplayer.h"
 #include "mplayer/play.h"
 
 // --- params

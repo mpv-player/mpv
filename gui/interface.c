@@ -38,6 +38,7 @@
 #include "help_mp.h"
 #include "get_path.h"
 #include "mp_core.h"
+#include "mplayer.h"
 #include "libvo/x11_common.h"
 #include "libvo/video_out.h"
 #include "libvo/font_load.h"
