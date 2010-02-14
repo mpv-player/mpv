@@ -151,7 +151,7 @@ void mplMenuInit( void )
  if ( ( mplMenuDrawBuffer = calloc( 1,appMPlayer.menuBase.Bitmap.ImageSize ) ) == NULL )
   {
 #ifdef DEBUG
-    mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[menu.h] %s",MSGTR_NEMFMR );
+    mp_msg( MSGT_GPLAYER,MSGL_DBG2,MSGTR_NEMFMR );
 #endif
    gtkMessageBox( GTK_MB_FATAL,MSGTR_NEMFMR );
    return;
@@ -164,7 +164,7 @@ void mplMenuInit( void )
  wsSetShape( &appMPlayer.menuWindow,appMPlayer.menuBase.Mask.Image );
 
 #ifdef DEBUG
-  mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[menu.h] menu: 0x%x\n",(int)appMPlayer.menuWindow.WindowID );
+  mp_msg( MSGT_GPLAYER,MSGL_DBG2,"menu: 0x%x\n",(int)appMPlayer.menuWindow.WindowID );
 #endif
 
  mplMenuIsInitialized=1;

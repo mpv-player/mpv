@@ -572,9 +572,9 @@ SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
                                 gui/mplayer/gtk/eq.c \
                                 gui/mplayer/gtk/fs.c \
                                 gui/mplayer/gtk/gtk_common.c \
+                                gui/mplayer/gtk/gtk_menu.c \
                                 gui/mplayer/gtk/gtk_url.c \
                                 gui/mplayer/gtk/mb.c \
-                                gui/mplayer/gtk/menu.c \
                                 gui/mplayer/gtk/opts.c \
                                 gui/mplayer/gtk/pl.c \
                                 gui/mplayer/gtk/sb.c \

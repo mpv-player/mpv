@@ -25,7 +25,7 @@
 #include "access_mpcontext.h"
 #include "mixer.h"
 
-#include "menu.h"
+#include "gtk_menu.h"
 #include "gui/mplayer/widgets.h"
 #include "gui/mplayer/gmplayer.h"
 #include "gui/app.h"
