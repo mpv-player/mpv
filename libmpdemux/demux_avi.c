@@ -541,7 +541,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
     int i;
     for(i=0;i<priv->idx_size;i++){
       int id=avi_stream_id(idx[i].ckid);
-      int len=idx[i].dwChunkLength;
+      unsigned len=idx[i].dwChunkLength;
       if(sh_video->ds->id == id) {
         vsize+=len;
         ++vsamples;
