@@ -69,16 +69,6 @@ static int init(sh_video_t *sh){
     ogg_packet op;
     int i;
 
-    /* check whether video output format is supported */
-    switch(sh->codec->outfmt[sh->outfmtidx])
-    {
-       case IMGFMT_YV12: /* well, this should work... */ break;
-       default:
-	  mp_msg (MSGT_DECVIDEO,MSGL_ERR,"Unsupported out_fmt: 0x%X\n",
-		  sh->codec->outfmt[sh->outfmtidx]);
-	  return 0;
-    }
-
     /* this is not a loop, just a context, from which we can break on error */
     do
     {
