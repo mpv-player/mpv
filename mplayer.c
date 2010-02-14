@@ -129,9 +129,6 @@ char *heartbeat_cmd;
 #include "playtree.h"
 #include "playtreeparser.h"
 
-int import_playtree_playlist_into_gui(play_tree_t* my_playtree, m_config_t* config);
-int import_initial_playtree_into_gui(play_tree_t* my_playtree, m_config_t* config, int enqueue);
-
 //**************************************************************************//
 //             Config
 //**************************************************************************//
