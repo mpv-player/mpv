@@ -137,6 +137,7 @@ int xv_test_ckm( void * arg );
 void vo_setwindow( Window w,GC g );
 void vo_x11_putkey(int key);
 
+void xscreensaver_heartbeat(void);
 void saver_off( Display * );
 void saver_on( Display * );
 
