@@ -844,27 +844,10 @@ static font_desc_t* init_font_desc(void)
     desc->dynamic = 1;
 
     /* setup sane defaults */
-    desc->name = NULL;
-    desc->fpath = NULL;
-
-    desc->face_cnt = 0;
-    desc->charspace = 0;
-    desc->spacewidth = 0;
-    desc->height = 0;
-    desc->max_width = 0;
-    desc->max_height = 0;
     desc->freetype = 1;
-
-    desc->tables.g = NULL;
-    desc->tables.gt2 = NULL;
-    desc->tables.om = NULL;
-    desc->tables.omt = NULL;
-    desc->tables.tmp = NULL;
 
     for(i = 0; i < 65536; i++)
 	desc->start[i] = desc->width[i] = desc->font[i] = -1;
-    for(i = 0; i < 16; i++)
-	desc->pic_a[i] = desc->pic_b[i] = NULL;
 
     return desc;
 }
