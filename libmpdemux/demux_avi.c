@@ -533,14 +533,15 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
   // calculating audio/video bitrate:
   if(priv->idx_size>0){
     // we have index, let's count 'em!
+    AVIINDEXENTRY *idx = priv->idx;
     int64_t vsize=0;
     int64_t asize=0;
     size_t vsamples=0;
     size_t asamples=0;
     int i;
     for(i=0;i<priv->idx_size;i++){
-      int id=avi_stream_id(((AVIINDEXENTRY *)priv->idx)[i].ckid);
-      int len=((AVIINDEXENTRY *)priv->idx)[i].dwChunkLength;
+      int id=avi_stream_id(idx[i].ckid);
+      int len=idx[i].dwChunkLength;
       if(sh_video->ds->id == id) {
         vsize+=len;
         ++vsamples;
