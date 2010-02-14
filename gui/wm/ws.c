@@ -127,7 +127,7 @@ inline int wsSearch( Window win );
 typedef void(*wsTConvFunc)( const unsigned char * in_pixels, unsigned char * out_pixels, unsigned num_pixels );
 wsTConvFunc wsConvFunc = NULL;
 
-void rgb32torgb32( const unsigned char * src, unsigned char * dst,unsigned int src_size )
+static void rgb32torgb32( const unsigned char * src, unsigned char * dst,unsigned int src_size )
 { memcpy( dst,src,src_size ); }
 
 // ---
@@ -180,13 +180,13 @@ void wsWindowDecoration( wsTWindow * win,long d )
 //   Init X Window System.
 // ----------------------------------------------------------------------------------------------
 
-int wsIOErrorHandler( Display * dpy )
+static int wsIOErrorHandler( Display * dpy )
 {
  fprintf( stderr,"[ws] IO error in display.\n" );
  exit( 0 );
 }
 
-int wsErrorHandler( Display * dpy,XErrorEvent * Event )
+static int wsErrorHandler( Display * dpy, XErrorEvent * Event )
 {
  char type[128];
  XGetErrorText( wsDisplay,Event->error_code,type,128 );
@@ -706,7 +706,7 @@ buttonreleased:
  return !wsTrue;
 }
 
-Bool wsDummyEvents( Display * display,XEvent * Event,XPointer arg )
+static Bool wsDummyEvents( Display * display, XEvent * Event, XPointer arg )
 { return True; }
 
 void wsHandleEvents( void ){

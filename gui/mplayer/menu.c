@@ -35,7 +35,7 @@ int             mplOldMenuItem = -1;
 int             mplMenuX,mplMenuY;
 static int      mplMenuIsInitialized = 0;
 
-void mplMenuDraw( void )
+static void mplMenuDraw( void )
 {
  uint32_t * buf = NULL;
  uint32_t * drw = NULL;

@@ -34,7 +34,7 @@ void ShowAboutBox( void )
  gtk_widget_show( About );
 }
 
-void abWidgetDestroy( GtkWidget * widget,GtkWidget ** widget_pointer )
+static void abWidgetDestroy( GtkWidget * widget, GtkWidget ** widget_pointer )
 { WidgetDestroy( NULL,&About ); }
 
 GtkWidget * create_About( void )

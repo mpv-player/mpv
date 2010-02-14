@@ -50,7 +50,7 @@ static wItem         * currSubItems = NULL;
 
 #include <stdarg.h>
 
-void ERRORMESSAGE( const char * format, ... )
+static void ERRORMESSAGE( const char * format, ... )
 {
  char      p[512];
  char      tmp[512];
@@ -114,7 +114,7 @@ int skinBPRead( char * fname, txSample * bf )
  return i;
 }
 
-int cmd_section( char * in )
+static int cmd_section( char * in )
 {
  strlower( in );
  defList=NULL;
@@ -123,7 +123,7 @@ int cmd_section( char * in )
  return 0;
 }
 
-int cmd_end( char * in )
+static int cmd_end( char * in )
 {
  if ( strlen( window_name ) ) { window_name[0]=0; currSection=NULL; currSubItem=NULL; currSubItems=NULL; }
   else defList=NULL;
@@ -131,7 +131,7 @@ int cmd_end( char * in )
  return 0;
 }
 
-int cmd_window( char * in )
+static int cmd_window( char * in )
 {
  CHECKDEFLIST( "window" );
 
@@ -145,7 +145,7 @@ int cmd_window( char * in )
  return 0;
 }
 
-int cmd_base( char * in )
+static int cmd_base( char * in )
 {
  unsigned char fname[512];
  unsigned char tmp[512];
@@ -231,7 +231,7 @@ int cmd_base( char * in )
  return 0;
 }
 
-int cmd_background( char * in )
+static int cmd_background( char * in )
 {
  CHECKDEFLIST( "background" );
  CHECKWINLIST( "background" );
@@ -247,7 +247,7 @@ int cmd_background( char * in )
  return 0;
 }
 
-int cmd_button( char * in )
+static int cmd_button( char * in )
 {
  unsigned char   fname[512];
  unsigned char   tmp[512];
@@ -294,7 +294,7 @@ int cmd_button( char * in )
  return 0;
 }
 
-int cmd_selected( char * in )
+static int cmd_selected( char * in )
 {
  unsigned char   fname[512];
  unsigned char   tmp[512];
@@ -317,7 +317,7 @@ int cmd_selected( char * in )
  return 0;
 }
 
-int cmd_menu( char * in )
+static int cmd_menu( char * in )
 { // menu = number,x,y,sx,sy,msg
  int             x,y,sx,sy,msg;
  unsigned char   tmp[64];
@@ -353,7 +353,7 @@ int cmd_menu( char * in )
  return 0;
 }
 
-int cmd_hpotmeter( char * in )
+static int cmd_hpotmeter( char * in )
 { // hpotmeter=buttonbitmaps,sx,sy,phasebitmaps,phases,default value,x,y,sx,sy,msg
  int             x,y,psx,psy,ph,sx,sy,msg,d;
  unsigned char   tmp[512];
@@ -413,7 +413,7 @@ int cmd_hpotmeter( char * in )
  return 0;
 }
 
-int cmd_vpotmeter( char * in )
+static int cmd_vpotmeter( char * in )
 {
  int     r = cmd_hpotmeter( in );
  wItem * item;
@@ -423,7 +423,7 @@ int cmd_vpotmeter( char * in )
  return r;
 }
 
-int cmd_potmeter( char * in )
+static int cmd_potmeter( char * in )
 { // potmeter=phasebitmaps,phases,default value,x,y,sx,sy,msg
  int             x,y,ph,sx,sy,msg,d;
  unsigned char   tmp[512];
@@ -470,7 +470,7 @@ int cmd_potmeter( char * in )
  return 0;
 }
 
-int cmd_font( char * in )
+static int cmd_font( char * in )
 { // font=fontname,fontid
  char    name[512];
  char    id[512];
@@ -503,7 +503,7 @@ int cmd_font( char * in )
  return 0;
 }
 
-int cmd_slabel( char * in )
+static int cmd_slabel( char * in )
 {
  char    tmp[512];
  char    sid[63];
@@ -541,7 +541,7 @@ int cmd_slabel( char * in )
  return 0;
 }
 
-int cmd_dlabel( char * in )
+static int cmd_dlabel( char * in )
 { // dlabel=x,y,sx,align,fontid,string ...
  char    tmp[512];
  char    sid[63];
@@ -581,7 +581,7 @@ int cmd_dlabel( char * in )
  return 0;
 }
 
-int cmd_decoration( char * in )
+static int cmd_decoration( char * in )
 {
  char    tmp[512];
 
@@ -673,7 +673,7 @@ char * trim( char * in )
 
 FILE * skinFile;
 
-void setname( char * item1, char * item2 )
+static void setname( char * item1, char * item2 )
 {
   av_strlcpy(fn, item1, sizeof( fn ));
   av_strlcat(fn, "/", sizeof( fn )); av_strlcat(fn, item2, sizeof( fn ));

@@ -56,7 +56,7 @@ int		mplPBVisible = 0;
 int  		mplPBLength = 0;
 int		mplPBFade = 0;
 
-void mplPBDraw( void )
+static void mplPBDraw( void )
 {
  int x;
 
@@ -115,7 +115,7 @@ void mplPBDraw( void )
 #define itPLMButton (itNULL - 1)
 #define itPRMButton (itNULL - 2)
 
-void mplPBMouseHandle( int Button,int X,int Y,int RX,int RY )
+static void mplPBMouseHandle( int Button, int X, int Y, int RX, int RY )
 {
  static int     itemtype = 0;
         int     i;

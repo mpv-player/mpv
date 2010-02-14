@@ -77,7 +77,7 @@
 #include "gui/mplayer/pixmaps/playvcd.xpm"
 #endif
 
-void ActivateMenuItem( int Item )
+static void ActivateMenuItem( int Item )
 {
 // fprintf( stderr,"[menu] item: %d.%d\n",Item&0xffff,Item>>16 );
  gtkPopupMenu=Item & 0x0000ffff;
@@ -384,7 +384,7 @@ static char * ChannelNumbers[] =
 	{ "","Stereo","","","","5.1" };
 #endif
 
-const char * GetLanguage( int language )
+static const char * GetLanguage( int language )
 {
  unsigned int i;
  for ( i=0;i<sizeof( Languages ) / sizeof( Languages_t );i++ )

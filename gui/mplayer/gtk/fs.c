@@ -177,7 +177,7 @@ static void clist_append_fname(GtkWidget * list, char *fname,
   gtk_clist_set_pixmap(GTK_CLIST(list), pos, 0, pixmap, mask);
 }
 
-void CheckDir( GtkWidget * list,char * directory )
+static void CheckDir( GtkWidget * list,char * directory )
 {
  struct stat     fs;
  int             i;
@@ -228,8 +228,6 @@ void CheckDir( GtkWidget * list,char * directory )
  gtk_clist_select_row( GTK_CLIST( list ),0,1 );
  gtk_widget_show( list );
 }
-
-void fs_PersistantHistory( char *subject ); /* forward declaration */
 
 void ShowFileSelect( int type,int modal )
 {
@@ -346,7 +344,7 @@ void HideFileSelect( void )
  fsFileSelect=NULL;
 }
 
-void fs_PersistantHistory( char * subject )
+static void fs_PersistantHistory( char * subject )
 {
  int i;
 
@@ -364,13 +362,15 @@ void fs_PersistantHistory( char * subject )
 }
 //-----------------------------------------------
 
-void fs_fsFilterCombo_activate( GtkEditable * editable,gpointer user_data )
+static void fs_fsFilterCombo_activate( GtkEditable * editable,
+                                       gpointer user_data )
 {
  fsFilter=gtk_entry_get_text( GTK_ENTRY( user_data ) );
  CheckDir( fsFNameList,get_current_dir_name() );
 }
 
-void fs_fsFilterCombo_changed( GtkEditable * editable,gpointer user_data )
+static void fs_fsFilterCombo_changed( GtkEditable * editable,
+                                      gpointer user_data )
 {
  const char * str;
  int    i;
@@ -409,7 +409,8 @@ void fs_fsFilterCombo_changed( GtkEditable * editable,gpointer user_data )
  CheckDir( fsFNameList,get_current_dir_name() );
 }
 
-void fs_fsPathCombo_activate( GtkEditable * editable,gpointer user_data )
+static void fs_fsPathCombo_activate( GtkEditable * editable,
+                                     gpointer user_data )
 {
  const unsigned char * str;
 
@@ -417,7 +418,8 @@ void fs_fsPathCombo_activate( GtkEditable * editable,gpointer user_data )
  if ( chdir( str ) != -1 ) CheckDir( fsFNameList,get_current_dir_name() );
 }
 
-void fs_fsPathCombo_changed( GtkEditable * editable,gpointer user_data )
+static void fs_fsPathCombo_changed( GtkEditable * editable,
+                                    gpointer user_data )
 {
  const unsigned char * str;
 
@@ -425,7 +427,7 @@ void fs_fsPathCombo_changed( GtkEditable * editable,gpointer user_data )
  if ( chdir( str ) != -1 ) CheckDir( fsFNameList,get_current_dir_name() );
 }
 
-void fs_Up_released( GtkButton * button,gpointer user_data )
+static void fs_Up_released( GtkButton * button, gpointer user_data )
 {
  chdir( ".." );
  fsSelectedFile=fsThatDir;
@@ -434,7 +436,7 @@ void fs_Up_released( GtkButton * button,gpointer user_data )
  return;
 }
 
-int fsFileExist( unsigned char * fname )
+static int fsFileExist( unsigned char * fname )
 {
  FILE * f = fopen( fname,"r" );
  if ( f == NULL ) return 0;
@@ -442,7 +444,7 @@ int fsFileExist( unsigned char * fname )
  return 1;
 }
 
-void fs_Ok_released( GtkButton * button,gpointer user_data )
+static void fs_Ok_released( GtkButton * button, gpointer user_data )
 {
  GList         * item;
  int             i = 1;
@@ -499,19 +501,22 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
   else guiGetEvent( guiCEvent,guiSetStop );
 }
 
-void fs_Cancel_released( GtkButton * button,gpointer user_data )
+static void fs_Cancel_released( GtkButton * button,gpointer user_data )
 {
  HideFileSelect();
  fs_PersistantHistory( get_current_dir_name() );      //totem, write into history file
 }
 
-void fs_fsFNameList_select_row( GtkWidget * widget,gint row,gint column,GdkEventButton *bevent,gpointer user_data )
+static void fs_fsFNameList_select_row( GtkWidget * widget, gint row, gint column,
+                                       GdkEventButton *bevent, gpointer user_data)
 {
  gtk_clist_get_text( GTK_CLIST(widget ),row,1,&fsSelectedFile );
  if( bevent && bevent->type == GDK_BUTTON_PRESS )  gtk_button_released( GTK_BUTTON( fsOk ) );
 }
 
-gboolean on_FileSelect_key_release_event( GtkWidget * widget,GdkEventKey * event,gpointer user_data )
+static gboolean on_FileSelect_key_release_event( GtkWidget * widget,
+                                                 GdkEventKey * event,
+                                                 gpointer user_data )
 {
  switch ( event->keyval )
   {

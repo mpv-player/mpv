@@ -165,7 +165,7 @@ void ShowEqualizer( void )
  gtk_widget_show( Equalizer );
 }
 
-void HideEqualizer( void )
+static void HideEqualizer( void )
 {
  if ( !Equalizer ) return;
  gtk_widget_hide( Equalizer );
@@ -261,7 +261,8 @@ static void eqSelectChannelsListRow( GtkCList * clist,gint row,gint column,GdkEv
   }
 }
 
-void eqNotebook( GtkNotebook * notebook,GtkNotebookPage * page,gint page_num,gpointer user_data )
+static void eqNotebook( GtkNotebook * notebook, GtkNotebookPage * page,
+                        gint page_num, gpointer user_data )
 {
  if ( page_num ) gtk_widget_hide( Config );
    else gtk_widget_show( Config );
