@@ -68,34 +68,33 @@ static int init(sh_video_t *sh){
     ogg_packet op;
     int i;
 
-       context = calloc (sizeof (theora_struct_t), 1);
-       sh->context = context;
-       if (!context)
-	  goto err_out;
+    context = calloc (sizeof (theora_struct_t), 1);
+    sh->context = context;
+    if (!context)
+        goto err_out;
 
-       theora_info_init(&context->inf);
-       theora_comment_init(&context->cc);
+    theora_info_init(&context->inf);
+    theora_comment_init(&context->cc);
 
-       /* Read all header packets, pass them to theora_decode_header. */
-       for (i = 0; i < THEORA_NUM_HEADER_PACKETS; i++)
-       {
-          op.bytes = ds_get_packet (sh->ds, &op.packet);
-          op.b_o_s = 1;
-          if ( (errorCode = theora_decode_header (&context->inf, &context->cc, &op)) )
-          {
+    /* Read all header packets, pass them to theora_decode_header. */
+    for (i = 0; i < THEORA_NUM_HEADER_PACKETS; i++)
+    {
+        op.bytes = ds_get_packet (sh->ds, &op.packet);
+        op.b_o_s = 1;
+        if ( (errorCode = theora_decode_header (&context->inf, &context->cc, &op)) )
+        {
             mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Broken Theora header; errorCode=%i!\n", errorCode);
             goto err_out;
-          }
-       }
+        }
+    }
 
-       /* now init codec */
-       errorCode = theora_decode_init (&context->st, &context->inf);
-       if (errorCode)
-       {
-	  mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Theora decode init failed: %i \n",
-		 errorCode);
-	  goto err_out;
-       }
+    /* now init codec */
+    errorCode = theora_decode_init (&context->st, &context->inf);
+    if (errorCode)
+    {
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Theora decode init failed: %i \n", errorCode);
+        goto err_out;
+    }
 
     if(sh->aspect==0.0 && context->inf.aspect_denominator!=0)
     {
