@@ -836,7 +836,6 @@ static int prepare_charset_unicode(FT_Face face, FT_ULong *charset, FT_ULong *ch
 static font_desc_t* init_font_desc(void)
 {
     font_desc_t *desc;
-    int i;
 
     desc = calloc(1, sizeof(*desc));
     if(!desc) return NULL;
