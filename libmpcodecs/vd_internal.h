@@ -37,7 +37,7 @@ static int init(sh_video_t *sh);
 static void uninit(sh_video_t *sh);
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags);
 
-#define LIBVD_EXTERN(x) vd_functions_t mpcodecs_vd_##x = {\
+#define LIBVD_EXTERN(x) const vd_functions_t mpcodecs_vd_##x = {\
 	&info,\
 	init,\
         uninit,\

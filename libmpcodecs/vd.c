@@ -39,28 +39,28 @@
 
 //#include "vd_internal.h"
 
-extern vd_functions_t mpcodecs_vd_null;
-extern vd_functions_t mpcodecs_vd_ffmpeg;
-extern vd_functions_t mpcodecs_vd_theora;
-extern vd_functions_t mpcodecs_vd_dshow;
-extern vd_functions_t mpcodecs_vd_dmo;
-extern vd_functions_t mpcodecs_vd_vfw;
-extern vd_functions_t mpcodecs_vd_vfwex;
-extern vd_functions_t mpcodecs_vd_raw;
-extern vd_functions_t mpcodecs_vd_hmblck;
-extern vd_functions_t mpcodecs_vd_xanim;
-extern vd_functions_t mpcodecs_vd_mpng;
-extern vd_functions_t mpcodecs_vd_ijpg;
-extern vd_functions_t mpcodecs_vd_mtga;
-extern vd_functions_t mpcodecs_vd_sgi;
-extern vd_functions_t mpcodecs_vd_libmpeg2;
-extern vd_functions_t mpcodecs_vd_mpegpes;
-extern vd_functions_t mpcodecs_vd_zrmjpeg;
-extern vd_functions_t mpcodecs_vd_realvid;
-extern vd_functions_t mpcodecs_vd_xvid;
-extern vd_functions_t mpcodecs_vd_libdv;
-extern vd_functions_t mpcodecs_vd_lzo;
-extern vd_functions_t mpcodecs_vd_qtvideo;
+extern const vd_functions_t mpcodecs_vd_null;
+extern const vd_functions_t mpcodecs_vd_ffmpeg;
+extern const vd_functions_t mpcodecs_vd_theora;
+extern const vd_functions_t mpcodecs_vd_dshow;
+extern const vd_functions_t mpcodecs_vd_dmo;
+extern const vd_functions_t mpcodecs_vd_vfw;
+extern const vd_functions_t mpcodecs_vd_vfwex;
+extern const vd_functions_t mpcodecs_vd_raw;
+extern const vd_functions_t mpcodecs_vd_hmblck;
+extern const vd_functions_t mpcodecs_vd_xanim;
+extern const vd_functions_t mpcodecs_vd_mpng;
+extern const vd_functions_t mpcodecs_vd_ijpg;
+extern const vd_functions_t mpcodecs_vd_mtga;
+extern const vd_functions_t mpcodecs_vd_sgi;
+extern const vd_functions_t mpcodecs_vd_libmpeg2;
+extern const vd_functions_t mpcodecs_vd_mpegpes;
+extern const vd_functions_t mpcodecs_vd_zrmjpeg;
+extern const vd_functions_t mpcodecs_vd_realvid;
+extern const vd_functions_t mpcodecs_vd_xvid;
+extern const vd_functions_t mpcodecs_vd_libdv;
+extern const vd_functions_t mpcodecs_vd_lzo;
+extern const vd_functions_t mpcodecs_vd_qtvideo;
 
 /* Please do not add any new decoders here. If you want to implement a new
  * decoder, add it to libavcodec, except for wrappers around external
