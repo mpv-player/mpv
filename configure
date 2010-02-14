@@ -6392,6 +6392,9 @@ if test "$_fontconfig" = auto ; then
 #include <stdio.h>
 #include <stdlib.h>
 #include <fontconfig/fontconfig.h>
+#if FC_VERSION < 20402
+#error At least version 2.4.2 of fontconfig required
+#endif
 int main(void) {
     int err = FcInit();
     if (err == FcFalse) {
