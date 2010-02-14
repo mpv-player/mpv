@@ -117,8 +117,8 @@ static int init(sh_video_t *sh){
 
     if(sh->aspect==0.0 && context->inf.aspect_denominator!=0)
     {
-       sh->aspect = (float)(context->inf.aspect_numerator * context->inf.frame_width)/
-          (context->inf.aspect_denominator * context->inf.frame_height);
+       sh->aspect = ((double)context->inf.aspect_numerator * context->inf.frame_width)/
+          ((double)context->inf.aspect_denominator * context->inf.frame_height);
     }
 
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Theora video init ok!\n");
