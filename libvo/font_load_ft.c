@@ -838,9 +838,8 @@ static font_desc_t* init_font_desc(void)
     font_desc_t *desc;
     int i;
 
-    desc = malloc(sizeof(font_desc_t));
+    desc = calloc(1, sizeof(*desc));
     if(!desc) return NULL;
-    memset(desc,0,sizeof(font_desc_t));
 
     desc->dynamic = 1;
 
