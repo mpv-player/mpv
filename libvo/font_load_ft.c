@@ -846,8 +846,9 @@ static font_desc_t* init_font_desc(void)
     /* setup sane defaults */
     desc->freetype = 1;
 
-    for(i = 0; i < 65536; i++)
-	desc->start[i] = desc->width[i] = desc->font[i] = -1;
+    memset(desc->start, 0xff, sizeof(desc->start));
+    memset(desc->width, 0xff, sizeof(desc->width));
+    memset(desc->font,  0xff, sizeof(desc->font));
 
     return desc;
 }
