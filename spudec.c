@@ -1161,9 +1161,13 @@ static void spudec_parse_extradata(spudec_handle_t *this,
   buffer[extradata_len] = 0;
 
   do {
-    sscanf(ptr, "size: %dx%d", &this->orig_frame_width, &this->orig_frame_height);
-    if (sscanf(ptr, "palette: %x, %x, %x, %x, %x, %x, %x, %x,"
-                            " %x, %x, %x, %x, %x, %x, %x, %x",
+    if (*ptr == '#')
+        continue;
+    if (!strncmp(ptr, "size: ", 6))
+        sscanf(ptr + 6, "%dx%d", &this->orig_frame_width, &this->orig_frame_height);
+    if (!strncmp(ptr, "palette: ", 9) &&
+        sscanf(ptr + 9, "%x, %x, %x, %x, %x, %x, %x, %x, "
+                        "%x, %x, %x, %x, %x, %x, %x, %x",
                &pal[ 0], &pal[ 1], &pal[ 2], &pal[ 3],
                &pal[ 4], &pal[ 5], &pal[ 6], &pal[ 7],
                &pal[ 8], &pal[ 9], &pal[10], &pal[11],
@@ -1174,7 +1178,8 @@ static void spudec_parse_extradata(spudec_handle_t *this,
     }
     if (!strncasecmp(ptr, "forced subs: on", 15))
       this->forced_subs_only = 1;
-    if (sscanf(ptr, "custom colors: ON, tridx: %x, colors: %x, %x, %x, %x",
+    if (!strncmp(ptr, "custom colors: ON, tridx: ", 26) &&
+        sscanf(ptr + 26, "%x, colors: %x, %x, %x, %x",
                &tridx, cuspal+0, cuspal+1, cuspal+2, cuspal+3) == 5) {
       for (i=0; i<4; i++) {
         cuspal[i] = vobsub_rgb_to_yuv(cuspal[i]);
