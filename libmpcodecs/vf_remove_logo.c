@@ -877,7 +877,7 @@ static int open(vf_instance_t * vf, char * args)
  *
  * This is called at exit-time.
  */
-void uninit(vf_instance_t * vf)
+static void uninit(vf_instance_t * vf)
 {
   /* Destroy our masks and images. */
   destroy_pgm(((vf_priv_s *)vf->priv)->filter);
