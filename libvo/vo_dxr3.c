@@ -458,13 +458,13 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_OutOfMemory);
 		return -1;
 	}
-	spued = (encodedata *) malloc(sizeof(encodedata));
+	spued = malloc(sizeof(encodedata));
 	if (spued == NULL) {
 	        free( osdpicbuf );
 		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_OutOfMemory);
 		return -1;
 	}
-	spubuf = (encodedata *) malloc(sizeof(encodedata));
+	spubuf = malloc(sizeof(encodedata));
 	if (spubuf == NULL) {
 	        free( osdpicbuf );
 		free( spued );
@@ -949,7 +949,7 @@ static overlay_t *overlay_init(int dev)
 {
     overlay_t *o;
 
-    o = (overlay_t *) malloc(sizeof(overlay_t));
+    o = malloc(sizeof(overlay_t));
 
     if(!o)
 	return NULL;
