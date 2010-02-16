@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include "ad_internal.h"
+#include "ad_mp3lib.h"
 
 static const ad_info_t info =
 {

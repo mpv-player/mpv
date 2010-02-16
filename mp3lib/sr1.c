@@ -20,7 +20,7 @@
 #include "cpudetect.h"
 //#include "liba52/mm_accel.h"
 #include "mp_msg.h"
-
+#include "libmpcodecs/ad_mp3lib.h"
 #include "libvo/fastmemcpy.h"
 
 #include "libavutil/common.h"
@@ -55,8 +55,6 @@ static long outscale = 32768;
 #include "tabinit.c"
 
 #if 1
-int mplayer_audio_read(char *buf,int size);
-
 LOCAL int mp3_read(char *buf,int size){
 //  int len=fread(buf,1,size,mp3_file);
   int len=mplayer_audio_read(buf,size);
