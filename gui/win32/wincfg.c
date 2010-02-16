@@ -32,6 +32,7 @@
 #include "m_option.h"
 #include "libvo/video_out.h"
 #include "mixer.h"
+#include "gui/mplayer/gmplayer.h"
 #include "gui/interface.h"
 #include "gui.h"
 

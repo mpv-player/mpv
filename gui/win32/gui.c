@@ -40,6 +40,7 @@
 #include "stream/stream.h"
 #include "libvo/video_out.h"
 #include "gui/interface.h"
+#include "gui/mplayer/gmplayer.h"
 #include "gui.h"
 #include "dialogs.h"
 

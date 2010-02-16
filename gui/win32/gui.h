@@ -105,7 +105,6 @@ int create_window(gui_t *gui, char *skindir);
 int create_subwindow(gui_t *gui, char *skindir);
 int parse_filename(char *file, play_tree_t *playtree, m_config_t *mconfig, int clear);
 void capitalize(char *filename);
-int import_playtree_playlist_into_gui(play_tree_t *my_playtree, m_config_t *config);
 
 /* Dialogs */
 void display_playlistwindow(gui_t *gui);
