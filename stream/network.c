@@ -464,7 +464,7 @@ void fixup_network_stream_cache(stream_t *stream) {
 }
 
 
-int
+static int
 streaming_stop( stream_t *stream ) {
 	stream->streaming_ctrl->status = streaming_stopped_e;
 	return 0;

@@ -354,7 +354,7 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm)
     return 1;
 }
 
-int tv_set_norm_i(tvi_handle_t *tvh, int norm)
+static int tv_set_norm_i(tvi_handle_t *tvh, int norm)
 {
    tvh->norm = norm;
 

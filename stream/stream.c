@@ -140,9 +140,10 @@ static const stream_info_t* const auto_open_streams[] = {
   NULL
 };
 
-stream_t* open_stream_plugin(const stream_info_t* sinfo,char* filename,int mode,
-			     char** options, int* file_format, int* ret,
-			     char** redirected_url) {
+static stream_t* open_stream_plugin(const stream_info_t* sinfo, char* filename,
+                                    int mode, char** options, int* file_format,
+                                    int* ret, char** redirected_url)
+{
   void* arg = NULL;
   stream_t* s;
   m_struct_t* desc = (m_struct_t*)sinfo->opts;
