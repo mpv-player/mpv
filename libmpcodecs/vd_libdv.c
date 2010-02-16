@@ -35,6 +35,7 @@
 #include "libmpdemux/stheader.h"
 
 #include "vd_internal.h"
+#include "vd_libdv.h"
 
 static const vd_info_t info =
 {
