@@ -31,6 +31,12 @@
 #include "unistd.h"
 #include "spuenc.h"
 
+typedef struct {
+	int x, y;
+	unsigned int rgb[4];
+	unsigned char* pixels;
+} pixbuf;
+
 static void
 encode_do_control(int x,int y, encodedata* ed, pixbuf* pb) {
 	int controlstart= ed->count;

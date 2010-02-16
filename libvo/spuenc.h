@@ -26,13 +26,6 @@
 #include <stdlib.h>
 #define DATASIZE 53220
 
-
-typedef struct {
-	int x, y;
-	unsigned int rgb[4];
-	unsigned char* pixels;
-} pixbuf;
-
 typedef struct {
 	unsigned char data[DATASIZE];
 	int count;	/* the count of bytes written */
