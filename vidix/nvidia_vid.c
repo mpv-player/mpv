@@ -441,12 +441,14 @@ struct rivatv_info {
 };
 typedef struct rivatv_info rivatv_info;
 
-uint8_t nvReadVGA (struct rivatv_chip *chip, int index) {
+static uint8_t nvReadVGA(struct rivatv_chip *chip, int index)
+{
 	VID_WR08 (chip->PCIO, 0x3D4, index);
 	return VID_RD08 (chip->PCIO, 0x3D5);
 }
 
-void nvWriteVGA (struct rivatv_chip *chip, int index, int data) {
+static void nvWriteVGA(struct rivatv_chip *chip, int index, int data)
+{
 	VID_WR08 (chip->PCIO, 0x3D4, index);
 	VID_WR08 (chip->PCIO, 0x3D5, data);
 }
