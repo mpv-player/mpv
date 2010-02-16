@@ -40,6 +40,7 @@
 #include <fcntl.h>
 
 #include "mp_msg.h"
+#include "shmem.h"
 
 #ifdef AIX
 #include <sys/select.h>

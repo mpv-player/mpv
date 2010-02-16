@@ -29,6 +29,7 @@
 #include "stream/stream.h"
 #include "libmpdemux/muxer.h"
 #include "help_mp.h"
+#include "ae_lame.h"
 #include "ae_pcm.h"
 #include "libaf/af_format.h"
 #include "libmpdemux/mp3_hdr.h"

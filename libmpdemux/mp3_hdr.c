@@ -20,6 +20,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "mp3_hdr.h"
 
 //----------------------- mp3 audio frame header parser -----------------------
 

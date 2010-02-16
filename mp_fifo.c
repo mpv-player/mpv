@@ -20,7 +20,7 @@
 #include "osdep/timer.h"
 #include "input/input.h"
 #include "input/mouse.h"
-
+#include "mp_fifo.h"
 
 int key_fifo_size = 7;
 static int *key_fifo_data = NULL;
