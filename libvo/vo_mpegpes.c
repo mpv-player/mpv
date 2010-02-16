@@ -220,11 +220,14 @@ static int my_write(unsigned char* data,int len){
     return orig_len;
 }
 
-void send_pes_packet(unsigned char* data,int len,int id,int timestamp){
+static void send_pes_packet(unsigned char* data, int len, int id, int timestamp)
+{
     send_mpeg_pes_packet (data, len, id, timestamp, 1, my_write);
 }
 
-void send_lpcm_packet(unsigned char* data,int len,int id,unsigned int timestamp,int freq_id){
+static void send_lpcm_packet(unsigned char* data, int len, int id,
+                             unsigned int timestamp, int freq_id)
+{
     send_mpeg_lpcm_packet(data, len, id, timestamp, freq_id, my_write);
 }
 

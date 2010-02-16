@@ -231,7 +231,7 @@ pixbuf_encode_rle(int x, int y, int w, int h, char *inbuf,  int stride,encodedat
 }
 
 
-void
+static void
 pixbuf_load_xpm( pixbuf* pb, char* xpm[] ) {
 	int colors, chrs, l, n;
 	char c[4], table[256];
@@ -271,7 +271,7 @@ pixbuf_load_xpm( pixbuf* pb, char* xpm[] ) {
 	}
 }
 
-void
+static void
 pixbuf_delete( pixbuf* pb ) {
 	free( pb->pixels );
 }

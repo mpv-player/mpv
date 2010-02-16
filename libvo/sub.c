@@ -1090,8 +1090,10 @@ void free_osd_list(void){
 
 #define FONT_LOAD_DEFER 6
 
-int vo_update_osd_ext(int dxs,int dys, int left_border, int top_border,
-                      int right_border, int bottom_border, int orig_w, int orig_h){
+static int vo_update_osd_ext(int dxs,int dys, int left_border, int top_border,
+                             int right_border, int bottom_border, int orig_w,
+                             int orig_h)
+{
     mp_osd_obj_t* obj=vo_osd_list;
     int chg=0;
 #ifdef CONFIG_FREETYPE

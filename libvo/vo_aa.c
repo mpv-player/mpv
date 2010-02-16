@@ -96,7 +96,7 @@ static struct SwsContext *sws=NULL;
 int aaopt_osdcolor = AA_SPECIAL;
 int aaopt_subcolor = AA_SPECIAL;
 
-void
+static void
 resize(void){
     /*
      * this function is called by aa lib if windows resizes

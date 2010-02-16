@@ -138,7 +138,8 @@ static int field_parity = -1;
 *	   implementation     *
 ******************************/
 
-void unlock(void) {
+static void unlock(void)
+{
 if (frame && framelocked) frame->Unlock(frame);
 if (primary && primarylocked) primary->Unlock(primary);
 }
@@ -310,7 +311,7 @@ static int preinit(const char *arg)
 
 }
 
-DFBSurfacePixelFormat convformat(uint32_t format)
+static DFBSurfacePixelFormat convformat(uint32_t format)
 {
 // add more formats !!!
 	switch (format) {
@@ -350,9 +351,9 @@ unsigned int height;
 int setsize;
 } enum1_t;
 
-DFBEnumerationResult test_format_callback( unsigned int                 id,
-                                           DFBDisplayLayerDescription  desc,
-                                           void *data)
+static DFBEnumerationResult test_format_callback(unsigned int id,
+                                                 DFBDisplayLayerDescription  desc,
+                                                 void *data)
 {
      enum1_t *params =(enum1_t *)data;
      IDirectFBDisplayLayer *layer;
@@ -448,7 +449,8 @@ int bpp;
 } videomode_t;
 
 
-DFBEnumerationResult video_modes_callback( int width,int height,int bpp, void *data)
+static DFBEnumerationResult video_modes_callback(int width, int height,
+                                                 int bpp, void *data)
 {
      videomode_t *params =(videomode_t *)data;
 
