@@ -43,7 +43,7 @@ static int PixelsPerMask = 2;
 #define makecol(r,g,b) (r+(g<<8)+(b<<16))
 #define makecol_depth(d,r,g,b) (r+(g<<8)+(b<<16))
 
-int Init_2xSaI(int d)
+static int Init_2xSaI(int d)
 {
 
 	int minr = 0, ming = 0, minb = 0;
@@ -95,9 +95,10 @@ int Init_2xSaI(int d)
 	+ ((((A & qlowpixelMask) + (B & qlowpixelMask) + (C & qlowpixelMask) + (D & qlowpixelMask)) >> 2) & qlowpixelMask)
 
 
-void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
-		   uint8_t *dst, uint32_t dst_pitch,
-		   uint32_t width, uint32_t height, int sbpp) {
+static void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
+                          uint8_t *dst, uint32_t dst_pitch,
+                          uint32_t width, uint32_t height, int sbpp)
+{
 
 	unsigned int x, y;
 	uint32_t color[16];

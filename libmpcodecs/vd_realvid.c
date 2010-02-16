@@ -84,15 +84,18 @@ static int bufsz = 0;
 static int dll_type = 0; /* 0 = unix dlopen, 1 = win32 dll */
 #endif
 
-void *__builtin_vec_new(unsigned long size) {
+static void *__builtin_vec_new(unsigned long size)
+{
 	return malloc(size);
 }
 
-void __builtin_vec_delete(void *mem) {
+static void __builtin_vec_delete(void *mem)
+{
 	free(mem);
 }
 
-void __pure_virtual(void) {
+static void __pure_virtual(void)
+{
 	printf("FATAL: __pure_virtual() called!\n");
 //	exit(1);
 }

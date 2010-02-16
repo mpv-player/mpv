@@ -41,12 +41,14 @@ static const ad_info_t info =  {
 
 LIBAD_EXTERN(realaud)
 
-void *__builtin_new(unsigned long size) {
+static void *__builtin_new(unsigned long size)
+{
 	return malloc(size);
 }
 
 // required for cook's uninit:
-void __builtin_delete(void* ize) {
+static void __builtin_delete(void* ize)
+{
 	free(ize);
 }
 

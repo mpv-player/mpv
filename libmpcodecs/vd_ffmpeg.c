@@ -172,7 +172,8 @@ static int control(sh_video_t *sh, int cmd, void *arg, ...){
     return CONTROL_UNKNOWN;
 }
 
-void mp_msp_av_log_callback(void *ptr, int level, const char *fmt, va_list vl)
+static void mp_msp_av_log_callback(void *ptr, int level, const char *fmt,
+                                   va_list vl)
 {
     static int print_prefix=1;
     AVClass *avc= ptr ? *(AVClass **)ptr : NULL;
@@ -766,7 +767,8 @@ typedef struct dp_hdr_s {
     uint32_t chunktab;        // offset to chunk offset array
 } dp_hdr_t;
 
-void swap_palette(void *pal) {
+static void swap_palette(void *pal)
+{
     int i;
     uint32_t *p = pal;
     for (i = 0; i < AVPALETTE_COUNT; i++)
