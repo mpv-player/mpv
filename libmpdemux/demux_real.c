@@ -47,6 +47,7 @@
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
+#include "demux_real.h"
 
 //#define mp_dbg(mod,lev, args... ) mp_msg_c((mod<<8)|lev, ## args )
 
