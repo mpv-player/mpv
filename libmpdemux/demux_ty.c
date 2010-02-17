@@ -41,6 +41,7 @@
 
 #include "stream/stream.h"
 #include "demuxer.h"
+#include "demux_ty_osd.h"
 #include "parse_es.h"
 #include "stheader.h"
 #include "sub_cc.h"
@@ -105,7 +106,6 @@ typedef struct
 } TiVoInfo;
 
 off_t vstream_streamsize( );
-void ty_ClearOSD( int start );
 
 // ===========================================================================
 #define TMF_SIG "showing.xml"
