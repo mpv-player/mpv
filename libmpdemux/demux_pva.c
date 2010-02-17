@@ -73,7 +73,7 @@ typedef struct {
 
 
 
-int pva_sync(demuxer_t * demuxer)
+static int pva_sync(demuxer_t * demuxer)
 {
 	uint8_t buffer[5]={0,0,0,0,0};
 	int count;

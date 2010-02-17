@@ -59,7 +59,8 @@ static int odml_get_vstream_id(int id, unsigned char res[])
     return 0;
 }
 
-int avi_idx_cmp(const void *elem1,const void *elem2) {
+static int avi_idx_cmp(const void *elem1, const void *elem2)
+{
   register off_t a = AVI_IDX_OFFSET((AVIINDEXENTRY *)elem1);
   register off_t b = AVI_IDX_OFFSET((AVIINDEXENTRY *)elem2);
   return (a > b) - (b > a);

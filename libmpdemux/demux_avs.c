@@ -85,7 +85,7 @@ typedef struct tagAVS
     imp_avs_get_audio avs_get_audio;
 } AVS_T;
 
-AVS_T *initAVS(const char *filename)
+static AVS_T *initAVS(const char *filename)
 {
     AVS_T *AVS = malloc (sizeof(AVS_T));
     AVS_Value arg0 = avs_new_value_string(filename);

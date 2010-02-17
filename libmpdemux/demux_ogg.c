@@ -177,7 +177,8 @@ extern int dvdsub_id;
 static subtitle ogg_sub;
 //FILE* subout;
 
-void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
+static void demux_ogg_add_sub(ogg_stream_t *os, ogg_packet *pack)
+{
   int lcv;
   char *packet = pack->packet;
 
@@ -513,7 +514,8 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,int id,ogg_p
 
 /// if -forceidx build a table of all syncpoints to make seeking easier
 /// otherwise try to get at least the final_granulepos
-void demux_ogg_scan_stream(demuxer_t* demuxer) {
+static void demux_ogg_scan_stream(demuxer_t *demuxer)
+{
   ogg_demuxer_t* ogg_d = demuxer->priv;
   stream_t *s = demuxer->stream;
   ogg_sync_state* sync = &ogg_d->sync;

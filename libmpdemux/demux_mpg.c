@@ -814,7 +814,8 @@ static int demux_mpg_gxf_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
   return 1;
 }
 
-int demux_mpg_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
+static int demux_mpg_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
+{
 unsigned int head=0;
 int skipped=0;
 int max_packs=256; // 512kbyte
@@ -901,7 +902,9 @@ do{
 
 void skip_audio_frame(sh_audio_t *sh_audio);
 
-void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, int flags){
+static void demux_seek_mpg(demuxer_t *demuxer, float rel_seek_secs,
+                           float audio_delay, int flags)
+{
     demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=d_audio->sh;
@@ -1007,7 +1010,8 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, in
     }
 }
 
-int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
+static int demux_mpg_control(demuxer_t *demuxer, int cmd, void *arg)
+{
     mpg_demuxer_t *mpg_d=(mpg_demuxer_t*)demuxer->priv;
 
     switch(cmd) {
