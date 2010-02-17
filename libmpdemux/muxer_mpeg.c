@@ -34,6 +34,7 @@
 #include "demuxer.h"
 #include "stheader.h"
 #include "m_option.h"
+#include "aac_hdr.h"
 #include "mpeg_hdr.h"
 #include "mp3_hdr.h"
 #include "liba52/a52.h"
@@ -2066,8 +2067,6 @@ static int analyze_mpa(muxer_stream_t *s)
 
 	return layer;	//actual layer with the highest score
 }
-
-int aac_parse_frame(uint8_t *buf, int *srate, int *num);
 
 static int parse_audio(muxer_stream_t *s, int finalize, unsigned int *nf, double *timer, double delay, int drop)
 {
