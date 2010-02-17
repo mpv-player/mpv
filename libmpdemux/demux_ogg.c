@@ -376,7 +376,8 @@ static int demux_ogg_check_lang(const char *clang, const char *langlist)
   \returns The Ogg stream number ( = page serial number) of the newly selected
   track.
 */
-int demux_ogg_sub_id(demuxer_t *demuxer, int index) {
+static int demux_ogg_sub_id(demuxer_t *demuxer, int index)
+{
   ogg_demuxer_t *ogg_d = demuxer->priv;
   return (index < 0) ? index : (index >= ogg_d->n_text) ? -1 : ogg_d->text_ids[index];
 }
