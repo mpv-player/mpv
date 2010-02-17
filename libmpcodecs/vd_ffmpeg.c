@@ -480,6 +480,7 @@ static void draw_slice(struct AVCodecContext *s,
                         int y, int type, int height){
     sh_video_t *sh = s->opaque;
     uint8_t *source[MP_MAX_PLANES]= {src->data[0] + offset[0], src->data[1] + offset[1], src->data[2] + offset[2]};
+    int strides[MP_MAX_PLANES] = {src->linesize[0], src->linesize[1], src->linesize[2]};
 #if 0
     int start=0, i;
     int width= s->width;
@@ -502,8 +503,19 @@ static void draw_slice(struct AVCodecContext *s,
         }
     }else
 #endif
+    if (height < 0)
+    {
+        int i;
+        height = -height;
+        y -= height;
+        for (i = 0; i < MP_MAX_PLANES; i++)
+        {
+            strides[i] = -strides[i];
+            source[i] -= strides[i];
+        }
+    }
     if (y < sh->disp_h) {
-        mpcodecs_draw_slice (sh, source, src->linesize, sh->disp_w, (y+height)<=sh->disp_h?height:sh->disp_h-y, 0, y);
+        mpcodecs_draw_slice (sh, source, strides, sh->disp_w, (y+height)<=sh->disp_h?height:sh->disp_h-y, 0, y);
     }
 }
 
