@@ -118,7 +118,6 @@ static int loader_init(void)
         mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed loading qtmlClient.dll\n" );
 	return 1;
     }
-#if 1
     InitializeQTML = (LPFUNC1)GetProcAddress(qtml_dll,"InitializeQTML");
 	if ( InitializeQTML == NULL )
     {
@@ -173,7 +172,6 @@ static int loader_init(void)
         mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed getting proc address SoundConverterBeginConversion\n");
 		return 1;
     }
-#endif
     mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"loader_init DONE???\n");
 	return 0;
 }
@@ -207,7 +205,6 @@ static int preinit(sh_audio_t *sh){
     }
 #endif
 
-#if 1
 	OutputFormatInfo.flags = InputFormatInfo.flags = 0;
 	OutputFormatInfo.sampleCount = InputFormatInfo.sampleCount = 0;
 	OutputFormatInfo.buffer = InputFormatInfo.buffer = NULL;
@@ -256,8 +253,6 @@ static int preinit(sh_audio_t *sh){
 
     sh->i_bps=sh->wf->nAvgBytesPerSec;
 //InputBufferSize*WantedBufferSize/OutputBufferSize;
-
-#endif
 
    if(sh->format==0x3343414D){
        // MACE 3:1

@@ -96,7 +96,6 @@ static BITMAPINFOHEADER* vfw_open_encoder(char *dll_name, char *compdatafile, BI
   }
   mp_msg(MSGT_WIN32,MSGL_INFO,"HIC: %x\n", encoder_hic);
 
-#if 1
 {
   ICINFO icinfo;
 
@@ -118,7 +117,6 @@ if (icinfo.dwFlags & VIDCF_QUALITYTIME)
     mp_msg(MSGT_WIN32,MSGL_INFO," temp-quality");
 mp_msg(MSGT_WIN32,MSGL_INFO,"\n");
 }
-#endif
 
   if(compdatafile){
     if (!strncmp(compdatafile, "dialog", 6)){

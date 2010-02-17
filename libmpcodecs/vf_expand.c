@@ -285,13 +285,11 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	    mpi->type, mpi->flags,
             FFMAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x),
             FFMAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
-#if 1
 	if((vf->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
 	  !(vf->dmpi->flags & MP_IMGFLAG_DIRECT)){
 	    mp_msg(MSGT_VFILTER, MSGL_INFO, MSGTR_MPCODECS_FullDRNotPossible);
 	    return;
 	}
-#endif
 	// set up mpi as a cropped-down image of dmpi:
 	if(mpi->flags&MP_IMGFLAG_PLANAR){
 	    mpi->planes[0]=vf->dmpi->planes[0]+
