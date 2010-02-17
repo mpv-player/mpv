@@ -32,6 +32,7 @@
 #include "stheader.h"
 #include "libavutil/intreadwrite.h"
 #include "demux_mov.h"
+#include "demux_ogg.h"
 
 #define FOURCC_VORBIS mmioFOURCC('v', 'r', 'b', 's')
 #define FOURCC_SPEEX  mmioFOURCC('s', 'p', 'x', ' ')

@@ -30,11 +30,8 @@
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
-
+#include "demux_ogg.h"
 #include "aviheader.h"
-
-demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
-int demux_ogg_open(demuxer_t* demuxer);
 
 extern const demuxer_desc_t demuxer_desc_avi_ni;
 extern const demuxer_desc_t demuxer_desc_avi_nini;
