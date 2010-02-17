@@ -31,6 +31,7 @@
 #include "demuxer.h"
 #include "stheader.h"
 #include "libavutil/intreadwrite.h"
+#include "demux_mov.h"
 
 #define FOURCC_VORBIS mmioFOURCC('v', 'r', 'b', 's')
 #define FOURCC_SPEEX  mmioFOURCC('s', 'p', 'x', ' ')
@@ -639,9 +640,6 @@ static void demux_ogg_scan_stream(demuxer_t *demuxer)
 
 void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
-
-/* defined in demux_mov.c */
-unsigned int store_ughvlc(unsigned char *s, unsigned int v);
 
 /** \brief Change the current subtitle stream and return its ID.
 
