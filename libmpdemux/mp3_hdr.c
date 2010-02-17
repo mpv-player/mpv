@@ -38,7 +38,7 @@ static long freqs[9] = { 44100, 48000, 32000,	// MPEG 1.0
 			 22050, 24000, 16000,   // MPEG 2.0
 			 11025, 12000,  8000};  // MPEG 2.5
 
-int mp_mp3_get_lsf(unsigned char* hbuf){
+static int mp_mp3_get_lsf(unsigned char* hbuf){
     unsigned long newhead =
       hbuf[0] << 24 |
       hbuf[1] << 16 |
