@@ -335,7 +335,23 @@ static int xacodec_query(sh_video_t *sh, XA_CODEC_HDR *codec_hdr)
     }
 }
 
-static void XA_Print(char *fmt, ...)
+/* These functions are required for loading XAnim binary libs.
+ * Add forward declarations to avoid warnings with -Wmissing-prototypes. */
+void XA_Print(char *fmt, ...);
+void TheEnd1(char *err_mess);
+void XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)());
+unsigned long XA_Time_Read(void);
+void XA_Gen_YUV_Tabs(XA_ANIM_HDR *anim_hdr);
+void JPG_Setup_Samp_Limit_Table(XA_ANIM_HDR *anim_hdr);
+void JPG_Alloc_MCU_Bufs(XA_ANIM_HDR *anim_hdr, unsigned int width,
+                        unsigned int height, unsigned int full_flag);
+void *YUV2x2_Blk_Func(unsigned int image_type, int blks,
+                      unsigned int dith_flag);
+void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type);
+void *XA_YUV1611_Func(unsigned int image_type);
+void *XA_YUV221111_Func(unsigned int image_type);
+
+void XA_Print(char *fmt, ...)
 {
     va_list vallist;
     char buf[1024];
@@ -351,7 +367,7 @@ static void XA_Print(char *fmt, ...)
 /* 0 is no debug (needed by 3ivX) */
 long xa_debug = 0;
 
-static void TheEnd1(char *err_mess)
+void TheEnd1(char *err_mess)
 {
     XA_Print("error: %s - exiting\n", err_mess);
     /* we should exit here... */
@@ -359,7 +375,7 @@ static void TheEnd1(char *err_mess)
     return;
 }
 
-static void XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)())
+void XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)())
 {
 //    XA_Print("XA_Add_Func_To_Free_Chain('anim_hdr: %08x', 'function: %08x')",
 //	    anim_hdr, function);
@@ -370,7 +386,7 @@ static void XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)())
     return;
 }
 
-static unsigned long XA_Time_Read(void)
+unsigned long XA_Time_Read(void)
 {
     return GetTimer(); //(GetRelativeTime());
 }
@@ -380,20 +396,20 @@ static void XA_dummy(void)
     XA_Print("dummy() called");
 }
 
-static void XA_Gen_YUV_Tabs(XA_ANIM_HDR *anim_hdr)
+void XA_Gen_YUV_Tabs(XA_ANIM_HDR *anim_hdr)
 {
     XA_Print("XA_Gen_YUV_Tabs('anim_hdr: %08x')", anim_hdr);
     return;
 }
 
-static void JPG_Setup_Samp_Limit_Table(XA_ANIM_HDR *anim_hdr)
+void JPG_Setup_Samp_Limit_Table(XA_ANIM_HDR *anim_hdr)
 {
     XA_Print("JPG_Setup_Samp_Limit_Table('anim_hdr: %08x')", anim_hdr);
     return;
 }
 
-static void JPG_Alloc_MCU_Bufs(XA_ANIM_HDR *anim_hdr, unsigned int width,
-	unsigned int height, unsigned int full_flag)
+void JPG_Alloc_MCU_Bufs(XA_ANIM_HDR *anim_hdr, unsigned int width,
+                        unsigned int height, unsigned int full_flag)
 {
     XA_Print("JPG_Alloc_MCU_Bufs('anim_hdr: %08x', 'width: %d', 'height: %d', 'full_flag: %d')",
 	    anim_hdr, width, height, full_flag);
@@ -452,7 +468,7 @@ static void XA_2x2_OUT_4BLKS_Convert(unsigned char *image_p, unsigned int x, uns
     return;
 }
 
-static void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
+void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
 {
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2, "YUV2x2_Blk_Func(image_type=%d, blks=%d, dith_flag=%d)\n",
 	image_type, blks, dith_flag);
@@ -486,7 +502,7 @@ static void XA_YUV_2x2_clr(XA_2x2_Color *cmap2x2, unsigned int Y0, unsigned int 
   return;
 }
 
-static void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
+void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
 {
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2, "YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
 	    image_type, dith_type);
@@ -593,7 +609,7 @@ static void XA_YUV1611_Convert(unsigned char *image_p, unsigned int imagex, unsi
     }
 }
 
-static void *XA_YUV1611_Func(unsigned int image_type)
+void *XA_YUV1611_Func(unsigned int image_type)
 {
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2, "XA_YUV1611_Func('image_type: %d')", image_type);
     return (void *)XA_YUV1611_Convert;
@@ -631,7 +647,7 @@ static void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, un
     mpi->stride[1]=mpi->stride[2]=uvstride;  //=i_x/4; // yuv->uv_w
 }
 
-static void *XA_YUV221111_Func(unsigned int image_type)
+void *XA_YUV221111_Func(unsigned int image_type)
 {
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2, "XA_YUV221111_Func('image_type: %d')\n",image_type);
     return (void *)XA_YUV221111_Convert;
