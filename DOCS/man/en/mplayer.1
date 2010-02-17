@@ -10120,6 +10120,13 @@ This is not recommended and wastes bitrate as scenecuts encoded as P-frames
 are just as big as I-frames, but do not reset the "keyint counter".
 .
 .TP
+.B (no)intra_refresh
+Periodic intra block refresh instead of keyframes (default: disabled).
+This option disables IDR-frames, and, instead, uses a moving vertical bar
+of intra-coded blocks. This reduces compression efficiency but benefits
+low-latency streaming and resilience to packet loss.
+.
+.TP
 .B frameref=<1\-16>
 Number of previous frames used as predictors in B- and P-frames (default: 3).
 This is effective in anime, but in live-action material the improvements
@@ -10204,6 +10211,20 @@ maximum quantizer (default: 51)
 .B qp_step=<1\-50> (ABR or two pass)
 maximum value by which the quantizer may be incremented/decremented between
 frames (default: 4)
+.
+.TP
+.B (no)mbtree
+Enable macroblock tree ratecontrol (default: enabled).
+Use a large lookahead to track temporal propagation of data and weight quality
+accordingly.
+In multi-pass mode, this writes to a separate stats file named
+<passlogfile>.mbtree.
+.
+.TP
+.B rc_lookahead=<0\-250>
+Adjust the mbtree lookahead distance (default: 40).
+Larger values will be slower and cause x264 to consume more memory, but can
+yield higher quality.
 .
 .TP
 .B ratetol=<0.1\-100.0> (ABR or two pass)
@@ -10296,6 +10317,20 @@ Auto is slightly better, but slower.
 Auto is most effective when combined with multipass.
 direct_pred=none is both slower and lower quality.
 .RE
+.
+.TP
+.B weightp
+Weighted P-frame prediction mode (default: 2).
+.PD 0
+.RSs
+.IPs 0
+disabled (fastest)
+.IPs 1
+blind mode (slightly better quality)
+.IPs 2
+smart mode (best)
+.RE
+.PD 1
 .
 .TP
 .B (no)weight_b
@@ -10455,6 +10490,11 @@ trellis (requires trellis, experimental) (default: 0.0)
 .PD 1
 .
 .TP
+.B (no)psy
+Enable psychovisual optimizations that hurt PSNR and SSIM but ought to look
+better (default: enabled).
+.
+.TP
 .B deadzone_inter=<0\-32>
 Set the size of the inter luma quantization deadzone for non-trellis
 quantization (default: 21).
@@ -10592,6 +10632,37 @@ This has a slight penalty to compression quality.
 appropriate number of threads.
 .
 .TP
+.B (no)sliced_threads
+Use slice-based threading (default: disabled).
+Unlike normal threading, this option adds no encoding latency, but is slightly
+slower and less effective at compression.
+.
+.TP
+.B slice_max_size=<0 or positive integer>
+Maximum slice size in bytes (default:0).
+A value of zero disables the maximum.
+.
+.TP
+.B slice_max_mbs=<0 or positive integer>
+Maximum slice size in number of macroblocks (default:0).
+A value of zero disables the maximum.
+.
+.TP
+.B slices=<0 or positive integer>
+Maximum number of slices per frame (default:0).
+A value of zero disables the maximum.
+.
+.TP
+.B sync_lookahead=<0\-250>
+Adjusts the size of the threaded lookahead buffer (default: 0).
+0 or 'auto' tells x264 to automatically determine buffer size.
+.
+.TP
+.B (no)deterministic
+Use only deterministic optimizations with multithreaded encoding (default:
+enabled).
+.
+.TP
 .B (no)global_header
 Causes SPS and PPS to appear only once, at the beginning of the bitstream
 (default: disabled).
@@ -10601,6 +10672,16 @@ The default behavior causes SPS and PPS to repeat prior to each IDR frame.
 .TP
 .B (no)interlaced
 Treat the video content as interlaced.
+.
+.TP
+.B (no)constrained_intra
+Enable constrained intra prediction (default: disabled).
+This significantly reduces compression, but is required for the base layer of
+SVC encodes.
+.
+.TP
+.B (no)aud
+Write access unit delimeters to the stream (default: disabled).
 .
 .TP
 .B log=<\-1\-3>
@@ -10644,6 +10725,11 @@ If the x264 on your system supports it, a new window will be opened during
 the encoding process, in which x264 will attempt to present an overview of
 how each frame gets encoded.
 Each block type on the visualized movie will be colored as follows:
+.
+.TP
+.B dump_yuv=<file name>
+Dump YUV frames to the specified file.
+For debugging use.
 .PD 0
 .RSs
 .IPs red/pink
