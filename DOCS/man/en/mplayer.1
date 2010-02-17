@@ -10121,7 +10121,7 @@ are just as big as I-frames, but do not reset the "keyint counter".
 .
 .TP
 .B frameref=<1\-16>
-Number of previous frames used as predictors in B- and P-frames (default: 1).
+Number of previous frames used as predictors in B- and P-frames (default: 3).
 This is effective in anime, but in live-action material the improvements
 usually drop off very rapidly above 6 or so reference frames.
 This has no effect on decoding speed, but does increase the memory needed for
@@ -10130,7 +10130,7 @@ Some decoders can only handle a maximum of 15 reference frames.
 .
 .TP
 .B bframes=<0\-16>
-maximum number of consecutive B-frames between I- and P-frames (default: 0)
+maximum number of consecutive B-frames between I- and P-frames (default: 3)
 .
 .TP
 .B (no)b_adapt
@@ -10401,9 +10401,9 @@ SATD metric, rather than reusing vectors from the forward and backward
 searches.
 .IPs 6
 Enables rate-distortion optimization of macroblock types in
-I- and P-frames (default).
+I- and P-frames.
 .IPs 7
-Enables rate-distortion optimization of macroblock types in all frames.
+Enables rate-distortion optimization of macroblock types in all frames (default).
 .IPs 8
 Enables rate-distortion optimization of motion vectors and intra prediction modes in I- and P-frames.
 .IPs 9
@@ -10434,9 +10434,9 @@ rate-distortion optimal quantization
 .PD 0
 .RSs
 .IPs 0
-disabled (default)
+disabled
 .IPs 1
-enabled only for the final encode
+enabled only for the final encode (default)
 .IPs 2
 enabled during all mode decisions (slow, requires subq>=6)
 .RE
@@ -10586,7 +10586,7 @@ and you have a need to set it.
 .
 .TP
 .B threads=<0\-16>
-Spawn threads to encode in parallel on multiple CPUs (default: 1).
+Spawn threads to encode in parallel on multiple CPUs (default: 0).
 This has a slight penalty to compression quality.
 0 or 'auto' tells x264 to detect how many CPUs you have and pick an
 appropriate number of threads.
