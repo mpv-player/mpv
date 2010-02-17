@@ -1115,7 +1115,6 @@ static void demux_close_ts(demuxer_t * demuxer)
 }
 
 
-unsigned char mp_getbits(unsigned char*, unsigned int, unsigned char);
 #define getbits mp_getbits
 
 static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, int pid, ES_stream_t *pes_es)
