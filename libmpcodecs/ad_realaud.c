@@ -41,18 +41,46 @@ static const ad_info_t info =  {
 
 LIBAD_EXTERN(realaud)
 
-static void *__builtin_new(unsigned long size)
+/* These functions are required for loading Real binary libs.
+ * Add forward declarations to avoid warnings with -Wmissing-prototypes. */
+void *__builtin_new(unsigned long size);
+void  __builtin_delete(void *ize);
+void *__builtin_vec_new(unsigned long size);
+void  __builtin_vec_delete(void *mem);
+void  __pure_virtual(void);
+
+void *__builtin_new(unsigned long size)
 {
 	return malloc(size);
 }
 
-// required for cook's uninit:
-static void __builtin_delete(void* ize)
+void __builtin_delete(void* ize)
 {
 	free(ize);
 }
 
+void *__builtin_vec_new(unsigned long size)
+{
+	return malloc(size);
+}
+
+void __builtin_vec_delete(void *mem)
+{
+	free(mem);
+}
+
+void __pure_virtual(void)
+{
+	printf("FATAL: __pure_virtual() called!\n");
+//	exit(1);
+}
+
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+void ___brk_addr(void);
+void ___brk_addr(void) {exit(0);}
+char **__environ={NULL};
+#undef stderr
+FILE *stderr=NULL;
 void *__ctype_b=NULL;
 #endif
 

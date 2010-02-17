@@ -84,29 +84,6 @@ static int bufsz = 0;
 static int dll_type = 0; /* 0 = unix dlopen, 1 = win32 dll */
 #endif
 
-static void *__builtin_vec_new(unsigned long size)
-{
-	return malloc(size);
-}
-
-static void __builtin_vec_delete(void *mem)
-{
-	free(mem);
-}
-
-static void __pure_virtual(void)
-{
-	printf("FATAL: __pure_virtual() called!\n");
-//	exit(1);
-}
-
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
-void ___brk_addr(void) {exit(0);}
-char **__environ={NULL};
-#undef stderr
-FILE *stderr=NULL;
-#endif
-
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
 //    switch(cmd){
