@@ -824,11 +824,9 @@ int ret=0;
 // System stream
 do{
   demux->filepos=stream_tell(demux->stream);
-#if 1
   //lame workaround: this is needed to show the progress bar when playing dvdnav://
   //(ths poor guy doesn't know teh length of the stream at startup)
   demux->movi_end = demux->stream->end_pos;
-#endif
   head=stream_read_dword(demux->stream);
   if((head&0xFFFFFF00)!=0x100){
    // sync...
