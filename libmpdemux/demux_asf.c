@@ -30,15 +30,11 @@
 
 #include "stream/stream.h"
 #include "asf.h"
+#include "asfheader.h"
 #include "demuxer.h"
 #include "libmpcodecs/dec_audio.h"
 #include "libvo/fastmemcpy.h"
 #include "libavutil/intreadwrite.h"
-
-// defined at asfheader.c:
-
-int asf_check_header(demuxer_t *demuxer);
-int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf);
 
 // based on asf file-format doc by Eugene [http://divx.euro.ru]
 

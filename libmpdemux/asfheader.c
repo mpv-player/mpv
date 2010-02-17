@@ -33,8 +33,8 @@
 #include "stheader.h"
 
 #include "asf.h"
-
 #include "asfguid.h"
+#include "asfheader.h"
 
 typedef struct {
   // must be 0 for metadata record, might be non-zero for metadata lib record
