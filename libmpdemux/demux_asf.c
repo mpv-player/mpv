@@ -31,7 +31,7 @@
 #include "stream/stream.h"
 #include "asf.h"
 #include "demuxer.h"
-
+#include "libmpcodecs/dec_audio.h"
 #include "libvo/fastmemcpy.h"
 #include "libavutil/intreadwrite.h"
 
@@ -549,8 +549,6 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 }
 
 #include "stheader.h"
-
-void skip_audio_frame(sh_audio_t *sh_audio);
 
 static void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
     struct asf_priv* asf = demuxer->priv;
