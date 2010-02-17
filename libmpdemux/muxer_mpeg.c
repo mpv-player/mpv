@@ -32,6 +32,7 @@
 #include "stream/stream.h"
 #include "muxer.h"
 #include "demuxer.h"
+#include "demux_ts.h"
 #include "stheader.h"
 #include "m_option.h"
 #include "aac_hdr.h"
@@ -231,8 +232,6 @@ m_option_t mpegopts_conf[] = {
 	{"tele_dest", &(conf_telecine_dest), CONF_TYPE_FLOAT, M_OPT_GLOBAL, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
-
-int mp_a52_framesize(uint8_t *buf, int *srate);
 
 static void fix_audio_sys_header(muxer_priv_t *priv, uint8_t id, uint8_t newid, uint32_t size)
 {

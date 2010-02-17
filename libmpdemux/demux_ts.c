@@ -34,9 +34,9 @@
 #include "demuxer.h"
 #include "parse_es.h"
 #include "stheader.h"
-
 #include "ms_hdr.h"
 #include "mpeg_hdr.h"
+#include "demux_ts.h"
 
 #define TS_PH_PACKET_SIZE 192
 #define TS_FEC_PACKET_SIZE 204
