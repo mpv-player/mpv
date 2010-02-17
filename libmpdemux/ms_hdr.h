@@ -19,6 +19,8 @@
 #ifndef MPLAYER_MS_HDR_H
 #define MPLAYER_MS_HDR_H
 
+#include "config.h"
+
 #ifndef _WAVEFORMATEX_
 #define _WAVEFORMATEX_
 typedef struct __attribute__((__packed__)) _WAVEFORMATEX {
