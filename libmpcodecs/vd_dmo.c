@@ -90,7 +90,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	return NULL;
     }
 
-    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, 0 /*MP_IMGFLAG_ACCEPT_STRIDE*/,
+    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_COMMON_PLANE,
 	sh->disp_w, sh->disp_h);
 
     if(!mpi){	// temporary!
