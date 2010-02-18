@@ -5516,7 +5516,7 @@ void* LookupExternal(const char* library, int ordinal)
 
 no_dll:
     if(pos>150)return 0;
-    sprintf(export_names[pos], "%s:%d", library, ordinal);
+    snprintf(export_names[pos], sizeof(export_names[pos]), "%s:%d", library, ordinal);
     return add_stub();
 }
 
@@ -5583,7 +5583,7 @@ void* LookupExternalByName(const char* library, const char* name)
 
 no_dll_byname:
     if(pos>150)return 0;// to many symbols
-    strcpy(export_names[pos], name);
+    snprintf(export_names[pos], sizeof(export_names[pos]), "%s", name);
     return add_stub();
 }
 
