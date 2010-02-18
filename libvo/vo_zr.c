@@ -41,8 +41,8 @@
 #include "mp_msg.h"
 #include "m_option.h"
 #include "fastmemcpy.h"
-
 #include "jpeg_enc.h"
+#include "vo_zr.h"
 
 static const vo_info_t info =
 {

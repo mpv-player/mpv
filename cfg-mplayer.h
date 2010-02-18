@@ -24,6 +24,7 @@
  */
 
 #include "cfg-common.h"
+#include "libvo/vo_zr.h"
 
 extern int key_fifo_size;
 extern unsigned doubleclick_time;
@@ -57,9 +58,6 @@ extern int menu_flip_hebrew;
 extern int menu_fribidi_flip_commas;
 
 extern char *unrar_executable;
-
-int vo_zr_parseoption(const m_option_t* conf, char *opt, char * param);
-void vo_zr_revertoption(const m_option_t* opt,char* pram);
 
 extern m_option_t dxr2_opts[];
 
