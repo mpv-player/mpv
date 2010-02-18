@@ -36,7 +36,7 @@ extern m_config_t* mconfig;
 
 ////// List utils
 
-void
+static void
 asx_list_add(void* list_ptr,void* entry){
   void** list = *(void***)list_ptr;
   int c = 0;
@@ -53,7 +53,7 @@ asx_list_add(void* list_ptr,void* entry){
 }
 
 
-void
+static void
 asx_list_remove(void* list_ptr,void* entry,ASX_FreeFunc free_func) {
   void** list = *(void***)list_ptr;
   int c,e = -1;

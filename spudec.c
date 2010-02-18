@@ -767,8 +767,9 @@ static void scale_image(int x, int y, scale_pixel* table_x, scale_pixel* table_y
   }
 }
 
-void sws_spu_image(unsigned char *d1, unsigned char *d2, int dw, int dh, int ds,
-	unsigned char *s1, unsigned char *s2, int sw, int sh, int ss)
+static void sws_spu_image(unsigned char *d1, unsigned char *d2, int dw, int dh,
+                          int ds, unsigned char *s1, unsigned char *s2, int sw,
+                          int sh, int ss)
 {
 	struct SwsContext *ctx;
 	static SwsFilter filter;

@@ -415,7 +415,7 @@ play_tree_set_params_from(play_tree_t* dest,play_tree_t* src) {
 }
 
 // all children if deep < 0
-void
+static void
 play_tree_set_flag(play_tree_t* pt, int flags , int deep) {
   play_tree_t*  i;
 
@@ -428,7 +428,7 @@ play_tree_set_flag(play_tree_t* pt, int flags , int deep) {
   }
 }
 
-void
+static void
 play_tree_unset_flag(play_tree_t* pt, int flags , int deep) {
   play_tree_t*  i;
 

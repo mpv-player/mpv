@@ -1494,7 +1494,7 @@ mp_input_get_input_from_name(char* name,int* keys) {
 #define BS_MAX 256
 #define SPACE_CHAR " \n\r\t"
 
-void
+static void
 mp_input_bind_keys(const int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
   int i = 0,j;
   mp_cmd_bind_t* bind = NULL;
@@ -1538,7 +1538,7 @@ mp_input_bind_keys(const int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
   memcpy(bind->input,keys,(MP_MAX_KEY_DOWN+1)*sizeof(int));
 }
 
-void
+static void
 mp_input_add_binds(const mp_cmd_bind_t* list) {
   int i;
   for(i = 0 ; list[i].cmd ; i++)
