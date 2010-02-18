@@ -1348,6 +1348,11 @@ static void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
     return;
 }
 
+static void WINAPI expInitializeCriticalSectionAndSpinCount(CRITICAL_SECTION* c, DWORD spin)
+{
+    expInitializeCriticalSection(c);
+}
+
 static void WINAPI expEnterCriticalSection(CRITICAL_SECTION* c)
 {
 #ifdef CRITSECS_NEWTYPE
@@ -4984,6 +4989,7 @@ struct exports exp_kernel32[]=
     FF(VirtualAlloc, -1)
     FF(VirtualFree, -1)
     FF(InitializeCriticalSection, -1)
+    FF(InitializeCriticalSectionAndSpinCount, -1)
     FF(EnterCriticalSection, -1)
     FF(LeaveCriticalSection, -1)
     FF(DeleteCriticalSection, -1)
