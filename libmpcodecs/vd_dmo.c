@@ -52,8 +52,8 @@ static int init(sh_video_t *sh){
         mp_msg(MSGT_DECVIDEO,MSGL_HINT,MSGTR_DownloadCodecPackage);
 	return 0;
     }
-    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2)) return 0;
     out_fmt=sh->codec->outfmt[sh->outfmtidx];
+    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,out_fmt)) return 0;
     switch(out_fmt){
     case IMGFMT_YUY2:
     case IMGFMT_UYVY:
