@@ -26,8 +26,6 @@
 #include "cfg-common.h"
 
 extern int sws_flags;
-int readPPOpt(void *, char *arg);
-void revertPPOpt(void *conf, char* opt);
 extern char *pp_help;
 
 extern m_option_t lameopts_conf[];

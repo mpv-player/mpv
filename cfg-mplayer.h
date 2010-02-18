@@ -72,8 +72,6 @@ extern float force_monitor_aspect;
 extern float monitor_pixel_aspect;
 
 extern int sws_flags;
-int readPPOpt(void *conf, char *arg);
-void revertPPOpt(void *conf, char* opt);
 extern char* pp_help;
 
 const m_option_t vd_conf[]={
