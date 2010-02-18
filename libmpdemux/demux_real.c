@@ -45,6 +45,7 @@
 #include "mpbswap.h"
 
 #include "stream/stream.h"
+#include "aviprint.h"
 #include "demuxer.h"
 #include "stheader.h"
 #include "demux_real.h"
@@ -1088,8 +1089,6 @@ discard:
   }//    goto loop;
   return 0;
 }
-
-void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 static demuxer_t* demux_open_real(demuxer_t* demuxer)
 {

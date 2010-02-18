@@ -31,6 +31,7 @@
 #include "demuxer.h"
 #include "stheader.h"
 #include "libavutil/intreadwrite.h"
+#include "aviprint.h"
 #include "demux_mov.h"
 #include "demux_ogg.h"
 
@@ -663,9 +664,6 @@ static void demux_ogg_scan_stream(demuxer_t *demuxer)
   }
 
 }
-
-void print_wave_header(WAVEFORMATEX *h, int verbose_level);
-void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
 
 static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
 {

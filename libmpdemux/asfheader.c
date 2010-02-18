@@ -29,6 +29,7 @@
 #include "help_mp.h"
 
 #include "stream/stream.h"
+#include "aviprint.h"
 #include "demuxer.h"
 #include "stheader.h"
 
@@ -134,10 +135,6 @@ int asf_check_header(demuxer_t *demuxer){
   demuxer->priv = asf;
   return DEMUXER_TYPE_ASF;
 }
-
-void print_wave_header(WAVEFORMATEX *h, int verbose_level);
-void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
-
 
 static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, struct asf_priv* asf, int is_video)
 {

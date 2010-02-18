@@ -66,6 +66,7 @@
 #include "get_path.h"
 
 #include "stream/stream.h"
+#include "libmpdemux/aviprint.h"
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
 #include "libmpdemux/mp3_hdr.h"
@@ -368,8 +369,6 @@ static void exit_sighandler(int x){
 }
 
 static muxer_t* muxer=NULL;
-
-void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 int main(int argc,char* argv[]){
 

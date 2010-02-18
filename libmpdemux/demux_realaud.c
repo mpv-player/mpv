@@ -28,6 +28,7 @@
 #include "help_mp.h"
 
 #include "stream/stream.h"
+#include "aviprint.h"
 #include "demuxer.h"
 #include "stheader.h"
 
@@ -154,10 +155,6 @@ static int demux_ra_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 
 	return 1;
 }
-
-
-
-void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 
 

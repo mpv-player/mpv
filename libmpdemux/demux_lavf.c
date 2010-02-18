@@ -29,6 +29,7 @@
 #include "av_opts.h"
 
 #include "stream/stream.h"
+#include "aviprint.h"
 #include "demuxer.h"
 #include "stheader.h"
 #include "m_option.h"
@@ -79,9 +80,6 @@ typedef struct lavf_priv_t{
     int sstreams[MAX_S_STREAMS];
     int cur_program;
 }lavf_priv_t;
-
-void print_wave_header(WAVEFORMATEX *h, int verbose_level);
-void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
 
 static int mp_read(void *opaque, uint8_t *buf, int size) {
     stream_t *stream = opaque;

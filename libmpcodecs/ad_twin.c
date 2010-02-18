@@ -23,6 +23,7 @@
 
 #include "ad_internal.h"
 #include "vqf.h"
+#include "libmpdemux/aviprint.h"
 #include "loader/ldt_keeper.h"
 #include "loader/wine/windef.h"
 #include "libaf/af_format.h"
@@ -106,7 +107,6 @@ static int load_dll( char *libname )
      TvqGetNumFixedBitsPerFrame;
 }
 
-void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 static int init_vqf_audio_codec(sh_audio_t *sh_audio){
     WAVEFORMATEX *in_fmt=sh_audio->wf;
     vqf_priv_t*priv=sh_audio->context;
