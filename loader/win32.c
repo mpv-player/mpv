@@ -596,6 +596,19 @@ static HMODULE WINAPI expGetModuleHandleA(const char* name)
     return result;
 }
 
+static HMODULE WINAPI expGetModuleHandleW(const uint16_t* name)
+{
+    char aname[256];
+    int pos = 0;
+    while (*name) {
+        if (*name > 256 || pos >= sizeof(aname) - 1)
+            return NULL;
+        aname[pos++] = *name++;
+    }
+    aname[pos] = 0;
+    return expGetModuleHandleA(aname);
+}
+
 static void* WINAPI expCreateThread(void* pSecAttr, long dwStackSize,
 				    void* lpStartAddress, void* lpParameter,
 				    long dwFlags, long* dwThreadId)
@@ -5030,6 +5043,7 @@ struct exports exp_kernel32[]=
     FF(UnmapViewOfFile, -1)
     FF(Sleep, -1)
     FF(GetModuleHandleA, -1)
+    FF(GetModuleHandleW, -1)
     FF(GetProfileIntA, -1)
     FF(GetPrivateProfileIntA, -1)
     FF(GetPrivateProfileStringA, -1)
