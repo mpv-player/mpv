@@ -1856,7 +1856,7 @@ char** sub_filenames(const char* path, char *fname)
     subcnt = 0;
 
     tmp = strrchr(fname,'/');
-#if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
+#if HAVE_DOS_PATHS
     if(!tmp)tmp = strrchr(fname,'\\');
     if(!tmp)tmp = strrchr(fname,':');
 #endif
