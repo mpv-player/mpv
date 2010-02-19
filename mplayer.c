@@ -3058,6 +3058,8 @@ if(!noconsolecontrols && !slave_mode){
 while (player_idle_mode && !filename) {
     play_tree_t * entry = NULL;
     mp_cmd_t * cmd;
+    if (mpctx->video_out && vo_config_count)
+        mpctx->video_out->control(VOCTRL_PAUSE, NULL);
     while (!(cmd = mp_input_get_cmd(0,1,0))) { // wait for command
         if (mpctx->video_out && vo_config_count) mpctx->video_out->check_events();
         usec_sleep(20000);
@@ -3108,6 +3110,9 @@ while (player_idle_mode && !filename) {
     }
 }
 //---------------------------------------------------------------------------
+
+    if (mpctx->video_out && vo_config_count)
+        mpctx->video_out->control(VOCTRL_RESUME, NULL);
 
     if(filename) {
 	mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing,
