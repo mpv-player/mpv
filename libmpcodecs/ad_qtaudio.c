@@ -277,6 +277,11 @@ static void uninit(sh_audio_t *sh){
     int error;
     unsigned long ConvertedFrames=0;
     unsigned long ConvertedBytes=0;
+
+#ifdef WIN32_LOADER
+    Setup_FS_Segment();
+#endif
+
     error=SoundConverterEndConversion(myConverter,NULL,&ConvertedFrames,&ConvertedBytes);
     mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"SoundConverterEndConversion:%i\n",error);
     error = SoundConverterClose(myConverter);
@@ -299,6 +304,10 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
     unsigned long InputBufferSize=0; //size of the input buffer
     unsigned long ConvertedFrames=0;
     unsigned long ConvertedBytes=0;
+
+#ifdef WIN32_LOADER
+    Setup_FS_Segment();
+#endif
 
     FramesToGet=minlen/OutFrameSize;
     if(FramesToGet*OutFrameSize<minlen &&
