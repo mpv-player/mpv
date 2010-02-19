@@ -630,9 +630,7 @@ static void draw_osd(void)
 		 */
 /*		Subpics are not stable yet =(
 		expect lockups if you enable */
-#if 1
 		write(fd_spu, spued->data, spued->count);
-#endif
 	}
 	disposd++;
 #endif

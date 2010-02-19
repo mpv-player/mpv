@@ -55,7 +55,6 @@ LIBAO_EXTERN(dsound)
 /**
 \todo use the definitions from the win32 api headers when they define these
 */
-#if 1
 #define WAVE_FORMAT_IEEE_FLOAT 0x0003
 #define WAVE_FORMAT_DOLBY_AC3_SPDIF 0x0092
 #define WAVE_FORMAT_EXTENSIBLE 0xFFFE
@@ -101,8 +100,6 @@ typedef struct {
                                         /* present in stream  */
     GUID            SubFormat;
 } WAVEFORMATEXTENSIBLE, *PWAVEFORMATEXTENSIBLE;
-#endif
-
 #endif
 
 static const int channel_mask[] = {

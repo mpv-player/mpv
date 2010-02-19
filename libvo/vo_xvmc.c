@@ -1110,7 +1110,6 @@ static int draw_slice(uint8_t *image[], int stride[],
                             rndr->flags,
                             rndr->filled_mv_blocks_num,rndr->start_mv_blocks_num,
                             &mv_blocks,&data_blocks);
-#if 1
     if(rez != Success)
     {
     int i;
@@ -1136,7 +1135,6 @@ static int draw_slice(uint8_t *image[], int stride[],
                     testblock->PMV[0][0][0],testblock->PMV[0][0][1]);
         }
     }
-#endif
     assert(rez==Success);
     mp_msg(MSGT_VO,MSGL_DBG4,"vo_xvmc: flush surface\n");
     rez = XvMCFlushSurface(mDisplay, rndr->p_surface);

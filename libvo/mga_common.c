@@ -142,11 +142,9 @@ vo_mga_flip_page(void)
 
 //    printf("-- flip to %d --\n",mga_next_frame);
 
-#if 1
 	ioctl(f,MGA_VID_FSEL,&mga_next_frame);
 	mga_next_frame=(mga_next_frame+1)%mga_vid_config.num_frames;
 	vid_data=frames[mga_next_frame];
-#endif
 
 }
 
