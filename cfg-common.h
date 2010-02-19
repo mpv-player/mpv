@@ -370,6 +370,4 @@ extern const m_option_t noconfig_opts[];
 extern const m_option_t lavc_decode_opts_conf[];
 extern const m_option_t xvid_dec_opts[];
 
-int dvd_parse_chapter_range(const m_option_t*, const char*);
-
 #endif /* MPLAYER_CFG_COMMON_H */
