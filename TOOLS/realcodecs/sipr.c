@@ -426,7 +426,6 @@ ulong RASetFlavor(ulong p1,ulong p2,ulong p3) {
 	result=(*raSetFlavor)(p1,p2,p3);
 	fprintf(stderr, "--> 0x%0lx(%ld)\n\n\n", result, result);
 
-#if 1
 	fputs("######################## FLAVOR PROPERTIES ###################\n\n", stderr);
 	numflavors=3;//raGetNumberOfFlavors();
 	flavor=0;
@@ -444,7 +443,6 @@ ulong RASetFlavor(ulong p1,ulong p2,ulong p3) {
 	}
 
 	fputs("######################## FLAVOR PROPERTIES ###################\n\n", stderr);
-#endif
 
 	return result;
 }

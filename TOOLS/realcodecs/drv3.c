@@ -192,7 +192,6 @@ ulong RV20toYUV420CustomMessage(ulong* p1,ulong p2) {
 //	ulong *pp1=p1;
 	ulong temp[16];
 	fprintf(stderr, "#R# => RV20toYUV420CustomMessage(%p,%p) [%ld,%ld,%ld] \n", p1, p2, p1[0],p1[1],p1[2]);
-#if 1
 	if(p1[0]==0x24){
 	    hexdump(p1[2],16);
 	    memset(temp,0x77,16*4);
@@ -201,7 +200,6 @@ ulong RV20toYUV420CustomMessage(ulong* p1,ulong p2) {
 	} else {
 	    return 0;
 	}
-#endif
 
 //	fprintf(stderr, "ulong p2=0x%0lx(%ld))\n", p2, p2);
 //	hexdump((void*)p1, 12);

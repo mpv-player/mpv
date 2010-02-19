@@ -205,12 +205,10 @@ ulong RV20toYUV420CustomMessage(ulong* p1,ulong p2) {
 */
 
 	if(p1[0]==0x24){
-#if 1
 	    hexdump(p1[2],64);
 	    memset(temp,0x77,16*4);
 	    memcpy(temp,p1[2],16);
 	    p1[2]=temp;
-#endif
 	} else {
 	    switch(p1[0]){
 	    case 17:
