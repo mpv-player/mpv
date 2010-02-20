@@ -366,8 +366,8 @@ void free_sh_video(sh_video_t *sh)
 void free_demuxer(demuxer_t *demuxer)
 {
     int i;
-    mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing demuxer at %p\n",
-           demuxer);
+    mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing %s demuxer at %p\n",
+           demuxer->desc->shortdesc, demuxer);
     if (demuxer->desc->close)
         demuxer->desc->close(demuxer);
     // Very ugly hack to make it behave like old implementation
