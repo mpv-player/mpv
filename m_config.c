@@ -415,7 +415,7 @@ m_config_get_option(m_config_t *config, char* arg) {
     return NULL;
 }
 
-const void*
+static const void*
 m_config_get_option_ptr(m_config_t *config, char* arg) {
   const m_option_t* conf;
 
