@@ -1537,6 +1537,9 @@ This option is obsolete now that MPlayer has OpenDML support.
 .TP
 .B \-mc <seconds/frame>
 maximum A-V sync correction per frame (in seconds)
+.br
+\-mc 0 should always be combined with \-noskip for mencoder, otherwise
+it will almost certainly cause A-V desync.
 .
 .TP
 .B \-mf <option1:option2:...>
