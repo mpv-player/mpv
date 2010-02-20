@@ -19,6 +19,8 @@
 #ifndef MPLAYER_ASXPARSER_H
 #define MPLAYER_ASXPARSER_H
 
+#include "playtree.h"
+
 typedef struct ASX_Parser_t ASX_Parser_t;
 
 typedef struct {
@@ -66,5 +68,8 @@ typedef void (*ASX_FreeFunc)(void* arg);
 
 void
 asx_list_free(void* list_ptr,ASX_FreeFunc free_func);
+
+play_tree_t*
+asx_parser_build_tree(char* buffer,int deep);
 
 #endif /* MPLAYER_ASXPARSER_H */

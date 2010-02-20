@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <ctype.h>
+#include "asxparser.h"
 #include "m_config.h"
 #include "playtree.h"
 #include "playtreeparser.h"
@@ -37,9 +38,6 @@
 #include "libmpdemux/demuxer.h"
 #include "mp_msg.h"
 
-
-extern play_tree_t*
-asx_parser_build_tree(char* buffer, int ref);
 
 #define BUF_STEP 1024
 
