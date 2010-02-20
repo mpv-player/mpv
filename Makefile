@@ -770,6 +770,7 @@ DIRS =  . \
         libavutil/bfin \
         libavutil/ppc \
         libavutil/sh4 \
+        libavutil/tomi \
         libavutil/x86 \
         libdvdcss \
         libdvdnav \
