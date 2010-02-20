@@ -247,7 +247,7 @@ demuxer_t *new_demuxer(stream_t *stream, int type, int a_id, int v_id,
                    "big troubles ahead.");
     if (filename) // Filename hack for avs_check_file
         d->filename = strdup(filename);
-    stream_reset(stream);
+    stream->eof = 0;
     stream_seek(stream, stream->start_pos);
     return d;
 }

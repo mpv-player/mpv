@@ -264,7 +264,7 @@ stream_t* open_output_stream(char* filename,char** options) {
 
 int stream_fill_buffer(stream_t *s){
   int len;
-  if (/*s->fd == NULL ||*/ s->eof) { s->buf_pos = s->buf_len = 0; return 0; }
+  if (/*s->fd == NULL ||*/ s->eof) { return 0; }
   switch(s->type){
   case STREAMTYPE_STREAM:
 #ifdef CONFIG_NETWORK
@@ -285,7 +285,7 @@ int stream_fill_buffer(stream_t *s){
   default:
     len= s->fill_buffer ? s->fill_buffer(s,s->buffer,STREAM_BUFFER_SIZE) : 0;
   }
-  if(len<=0){ s->eof=1; s->buf_pos=s->buf_len=0; return 0; }
+  if(len<=0){ s->eof=1; return 0; }
   s->buf_pos=0;
   s->buf_len=len;
   s->pos+=len;
@@ -392,8 +392,8 @@ while(stream_fill_buffer(s) > 0 && pos >= 0) {
 
 void stream_reset(stream_t *s){
   if(s->eof){
-    s->pos=0; //ftell(f);
-//    s->buf_pos=s->buf_len=0;
+    s->pos=0;
+    s->buf_pos=s->buf_len=0;
     s->eof=0;
   }
   if(s->control) s->control(s,STREAM_CTRL_RESET,NULL);
