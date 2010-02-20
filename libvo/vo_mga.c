@@ -116,4 +116,3 @@ static void flip_page(void)
 static void check_events(void)
 {
 }
-

@@ -84,4 +84,3 @@ typedef struct mp_osd_obj_s {
 	} group;
     } params;
 } mp_osd_obj_t;
-

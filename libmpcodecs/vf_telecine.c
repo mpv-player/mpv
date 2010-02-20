@@ -153,5 +153,3 @@ const vf_info_t vf_info_telecine = {
     open,
     NULL
 };
-
-

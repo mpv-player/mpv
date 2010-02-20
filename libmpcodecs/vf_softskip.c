@@ -100,5 +100,3 @@ const vf_info_t vf_info_softskip = {
     open,
     NULL
 };
-
-

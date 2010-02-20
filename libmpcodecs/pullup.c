@@ -820,12 +820,3 @@ void pullup_free_context(struct pullup_context *c)
 	free(c->frame);
 	free(c);
 }
-
-
-
-
-
-
-
-
-

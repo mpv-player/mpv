@@ -1547,4 +1547,3 @@ void __exit cleanup_module(void)
                      radeon_ram_size*0x100000);
 #endif /* CONFIG_MTRR */
 }
-

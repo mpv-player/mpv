@@ -952,4 +952,3 @@ static const char help_text[]=
 // ao_plugin.c
 
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] icke godkänd plugin: %s\n" // FIXME plugin - translate?
-

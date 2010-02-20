@@ -25,4 +25,3 @@ void subcc_init(void);
 void subcc_process_data(unsigned char *inputdata,unsigned int len);
 
 #endif /* MPLAYER_SUB_CC_H */
-

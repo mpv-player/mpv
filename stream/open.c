@@ -62,4 +62,3 @@ if(!filename) {
 
   return open_stream_full(filename,STREAM_READ,options,file_format);
 }
-

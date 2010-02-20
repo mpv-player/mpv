@@ -87,4 +87,3 @@ vcodec=snow:vstrict=-2:vpass=2:vbitrate=$B:pred=0:cmp=12:subcmp=12:mbcmp=1:qpel:
 Decent, fast options are
 vcodec=snow:vstrict=-2:vpass=1:vbitrate=$B:pred=0:cmp=1:subcmp=1:mbcmp=1
 vcodec=snow:vstrict=-2:vpass=2:vbitrate=$B:pred=0:cmp=2:subcmp=2:mbcmp=1:refs=2
-

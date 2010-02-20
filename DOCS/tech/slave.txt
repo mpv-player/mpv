@@ -555,4 +555,3 @@ teletext_format    int       0       3       X   X   X    0 - opaque,
                                                           3 - transp. inv.
 teletext_half_page int       0       2       X   X   X    0 - off, 1 - top half,
                                                           2- bottom half
-

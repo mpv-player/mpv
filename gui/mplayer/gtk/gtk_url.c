@@ -168,4 +168,3 @@ GtkWidget * create_URL( void )
 
  return URL;
 }
-

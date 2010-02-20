@@ -154,4 +154,3 @@ int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate, int* spf, int*
 
     return framesize;
 }
-

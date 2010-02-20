@@ -622,4 +622,3 @@ const demuxer_desc_t demuxer_desc_mng = {
     demux_mng_seek,
     demux_mng_control
 };
-

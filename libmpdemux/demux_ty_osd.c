@@ -910,6 +910,3 @@ void ty_processuserdata( unsigned char* buf, int len )
 		}
 	}
 }
-
-
-

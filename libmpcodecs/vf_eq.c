@@ -256,4 +256,3 @@ const vf_info_t vf_info_eq = {
 	open,
 	&vf_opts
 };
-

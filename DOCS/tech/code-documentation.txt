@@ -130,5 +130,3 @@ There are a couple of special tags for doxygen:
 
 For a complete list of tags please read section 20 "Special commands" of the
 doxygen manual.
-
-

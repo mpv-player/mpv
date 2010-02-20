@@ -220,4 +220,3 @@ static float get_delay(void){
 
     return 0.0;
 }
-

@@ -189,4 +189,3 @@ void print_avisuperindex_chunk(avisuperindex_chunk *h, int verbose_level){
 	    h->dwReserved[0], h->dwReserved[1], h->dwReserved[2]);
     mp_msg (MSGT_HEADER, verbose_level, "===========================\n");
 }
-

@@ -198,4 +198,3 @@ const vf_info_t vf_info_hue = {
 	open,
 	&vf_opts
 };
-

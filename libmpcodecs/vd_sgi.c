@@ -341,4 +341,3 @@ mp_image_t *decode(sh_video_t *sh, void *raw, int len, int flags)
 
   return mpi;
 }
-

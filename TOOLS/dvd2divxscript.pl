@@ -254,11 +254,3 @@ if ($shutdown) {
 	exit;
 }
 exit;
-
-
-
-
-
-
-
-

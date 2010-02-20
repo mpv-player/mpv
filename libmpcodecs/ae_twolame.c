@@ -233,4 +233,3 @@ int mpae_init_twolame(audio_encoder_t *encoder)
 
 	return 1;
 }
-

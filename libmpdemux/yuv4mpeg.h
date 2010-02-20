@@ -450,5 +450,3 @@ int y4m_allow_unknown_tags(int yn);
  ************************************************************************/
 
 #endif /* MPLAYER_YUV4MPEG_H */
-
-

@@ -40,5 +40,3 @@ I tested charmap2enc script only with /usr/share/i18n/charmaps/EUC-KR.gz
 
 --
 Artur Zaprzala
-
-

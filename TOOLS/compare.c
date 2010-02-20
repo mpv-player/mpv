@@ -71,4 +71,3 @@ int main(int argc, char **argv)
 	printf("%d (+/-1)differences found\n", dif);
 	exit(0);
 }
-

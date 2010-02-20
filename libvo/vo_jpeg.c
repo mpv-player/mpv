@@ -417,4 +417,3 @@ static int control(uint32_t request, void *data, ...)
 #undef BUFLENGTH
 
 /* ------------------------------------------------------------------------- */
-

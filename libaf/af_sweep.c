@@ -105,4 +105,3 @@ af_info_t af_info_sweep = {
   AF_FLAGS_REENTRANT,
   af_open
 };
-

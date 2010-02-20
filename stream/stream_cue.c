@@ -617,4 +617,3 @@ const stream_info_t stream_info_cue = {
   &stream_opts,
   1 // Urls are an option string
 };
-

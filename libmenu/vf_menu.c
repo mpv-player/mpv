@@ -264,6 +264,3 @@ vf_info_t vf_info_menu  = {
   open_vf,
   NULL
 };
-
-
-

@@ -135,4 +135,3 @@ static int decode_audio(sh_audio_t *sh, unsigned char *buf,
 static int control(sh_audio_t *sh, int cmd, void *arg, ...) {
   return CONTROL_UNKNOWN;
 }
-

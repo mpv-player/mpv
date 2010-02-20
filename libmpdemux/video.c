@@ -645,4 +645,3 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     if(frame_time_ptr) *frame_time_ptr=frame_time;
     return in_size;
 }
-

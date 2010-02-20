@@ -1347,5 +1347,3 @@ static int do_layer3(struct frame *fr,int single){
 
   return clip;
 }
-
-

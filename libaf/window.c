@@ -211,4 +211,3 @@ void af_window_kaiser(int n, FLOAT_TYPE* w, FLOAT_TYPE b)
     w[end-(1&(!k2))+i] = w[end-1-i] = k1 * besselizero(b*sqrt(1.0 - tmp*tmp));
   }
 }
-

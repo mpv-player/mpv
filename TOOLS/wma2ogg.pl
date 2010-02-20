@@ -338,4 +338,3 @@ sub decode {
 	}
 	print "\n\nDone.\n\n";
 }
-

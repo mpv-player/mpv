@@ -764,5 +764,3 @@ const char *y4m_strerr(int err)
     return "unknown error code";
   }
 }
-
-

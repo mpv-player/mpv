@@ -28,4 +28,3 @@ extern char *proc_priority;
 void set_priority(void);
 
 #endif /* MPLAYER_PRIORITY_H */
-

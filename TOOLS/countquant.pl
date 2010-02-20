@@ -33,5 +33,3 @@ while (<STDIN>) {
 }
 
 display_quants();
-
-

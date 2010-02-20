@@ -10,4 +10,3 @@
 #else /* MPLAYER_PSHPACK_H */
 #error "Nested pushing of alignment isn't supported by the compiler"
 #endif /* MPLAYER_PSHPACK_H */
-

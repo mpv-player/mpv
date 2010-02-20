@@ -420,4 +420,3 @@ void dct64_sse(short *out0,short *out1,real *c)
 #endif
     out1[0] = out0[0];
 }
-

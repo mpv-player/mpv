@@ -52,4 +52,3 @@ void cutChunk( char * in,char * s1 )
  cutItem( in,s1,'=',0 );
  memmove( in,strchr( in,'=' )+1,strlen( in ) - strlen( s1 ) );
 }
-

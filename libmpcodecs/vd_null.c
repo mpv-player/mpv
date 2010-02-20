@@ -54,4 +54,3 @@ static void uninit(sh_video_t *sh){
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     return NULL;
 }
-

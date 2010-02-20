@@ -171,4 +171,3 @@ Each vo driver _has_ to implement these:
 	 real. This is 'swapbuffers' when doublebuffering.
 	 Try to do as little work here as possible, since that affect jitter/
 	 A-V sync.
-

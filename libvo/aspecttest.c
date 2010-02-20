@@ -63,4 +63,3 @@ int main(int argc, char *argv[]) {
   printf("new size:       %dx%d\n",w,h);
   return 0;
 }
-

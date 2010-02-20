@@ -252,4 +252,3 @@ static float get_delay(void) {
   alGetSourcei(sources[0], AL_BUFFERS_QUEUED, &queued);
   return queued * CHUNK_SIZE / 2 / (float)ao_data.samplerate;
 }
-

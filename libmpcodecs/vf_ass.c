@@ -434,4 +434,3 @@ const vf_info_t vf_info_ass = {
 	open,
 	&vf_opts
 };
-

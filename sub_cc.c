@@ -345,4 +345,3 @@ void subcc_process_data(unsigned char *inputdata,unsigned int len)
 
 	subcc_decode(inputdata, len);
 }
-

@@ -267,4 +267,3 @@ static void dct36(real *inbuf,real *o1,real *o2,real *wintab,real *tsbuf)
 
   }
 }
-

@@ -360,4 +360,3 @@ static float get_delay(void) {
   }
   return (float)buffered / (float)ao_data.bps + in_jack;
 }
-

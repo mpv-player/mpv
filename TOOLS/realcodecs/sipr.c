@@ -478,4 +478,3 @@ void  RASetPwd(ulong p1,ulong p2) {
 //	hexdump((void*)p1, 44);
 	fprintf(stderr, "--> void\n\n\n");
 }
-

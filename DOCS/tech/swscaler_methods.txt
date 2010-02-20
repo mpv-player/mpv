@@ -66,4 +66,3 @@ m mosaic (blocky) (upscale only)
 
 Notes:
 	area upscale is identical to bilinear
-

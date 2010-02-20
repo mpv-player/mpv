@@ -51,4 +51,3 @@ enum metadata_s {
 char *get_metadata (metadata_t type);
 
 #endif /* MPLAYER_METADATA_H */
-

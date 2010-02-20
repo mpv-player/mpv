@@ -248,10 +248,3 @@ af_info_t af_info_equalizer = {
   AF_FLAGS_NOT_REENTRANT,
   af_open
 };
-
-
-
-
-
-
-

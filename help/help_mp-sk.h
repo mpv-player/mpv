@@ -910,4 +910,3 @@ static const char help_text[]=
 #define MSGTR_MSGBOX_LABEL_Warning "Upozornenie!"
 
 #endif
-

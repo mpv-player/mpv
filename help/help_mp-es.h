@@ -2128,4 +2128,3 @@ static const char help_text[]=
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Error abriendo la fuente en memoria: %s\n"
 #define MSGTR_LIBASS_NoCharmaps "[ass] Este font face no tiene charmaps\n"
 #define MSGTR_LIBASS_NoCharmapAutodetected "[ass] No se detectó un charmap automaticamente, probando con el primero\n"
-

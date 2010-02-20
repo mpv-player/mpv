@@ -153,6 +153,3 @@ output_buffer points to the output buffer from the last
 decode operation.
 retval is unknown, returning always 0x18 in a specific sample
 -> further investigation needed
-
-
-

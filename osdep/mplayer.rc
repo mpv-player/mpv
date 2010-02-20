@@ -51,4 +51,3 @@ FILETYPE VFT_APP
 }
 
 IDI_ICON1 ICON DISCARDABLE  "etc/mplayer.ico"
-

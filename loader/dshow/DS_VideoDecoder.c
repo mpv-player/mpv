@@ -917,7 +917,3 @@ int DS_SetAttr_DivX(char* attribute, int value){
         printf("Unknown attribute!\n");
         return -200;
 }
-
-
-
-

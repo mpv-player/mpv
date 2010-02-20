@@ -1065,4 +1065,3 @@ const vf_info_t vf_info_zrmjpeg = {
     open,
     NULL
 };
-

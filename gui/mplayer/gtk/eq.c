@@ -689,4 +689,3 @@ GtkWidget * create_EquConfig( void )
 
   return EquConfig;
 }
-

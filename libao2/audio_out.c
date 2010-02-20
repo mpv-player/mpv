@@ -197,4 +197,3 @@ const ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate
     }
     return NULL;
 }
-

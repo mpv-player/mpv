@@ -332,4 +332,3 @@ void menu_list_uninit(menu_t* menu,free_entry_t free_func) {
   mpriv->menu = mpriv->current = NULL;
 
 }
-

@@ -387,4 +387,3 @@ const m_option_t mplayer_opts[]={
 };
 
 #endif /* MPLAYER_CFG_MPLAYER_H */
-

@@ -658,4 +658,3 @@ GtkWidget * create_FileSelect( void )
 
  return fsFileSelect;
 }
-

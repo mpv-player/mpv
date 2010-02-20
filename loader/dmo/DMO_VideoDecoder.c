@@ -552,4 +552,3 @@ int DMO_VideoDecoder_SetDirection(DMO_VideoDecoder *this, int d)
     this->m_sVhdr2->bmiHeader.biHeight = this->iv.m_obh.biHeight;
     return 0;
 }
-

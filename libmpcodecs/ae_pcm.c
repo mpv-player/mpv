@@ -99,4 +99,3 @@ int mpae_init_pcm(audio_encoder_t *encoder)
 
 	return 1;
 }
-

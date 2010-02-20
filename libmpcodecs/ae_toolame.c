@@ -234,4 +234,3 @@ int mpae_init_toolame(audio_encoder_t *encoder)
 
 	return 1;
 }
-

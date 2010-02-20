@@ -548,5 +548,3 @@ const vf_info_t vf_info_ivtc = {
     open,
     NULL
 };
-
-

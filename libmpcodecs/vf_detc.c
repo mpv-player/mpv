@@ -451,5 +451,3 @@ const vf_info_t vf_info_detc = {
     open,
     NULL
 };
-
-

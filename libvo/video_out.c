@@ -523,4 +523,3 @@ out_err:
 
 /* Borrowed from vo_fbdev.c END */
 #endif
-

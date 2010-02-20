@@ -694,4 +694,3 @@ static float get_delay(void){
 	return (float)((queued_bursts - info.play.eof) * ao_data.outburst) / (float)byte_per_sec;
 #endif
 }
-

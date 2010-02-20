@@ -316,9 +316,3 @@ static float get_delay(void){
     int buffered = av_fifo_size(buffer); // could be less
     return (float)(buffered + ao_data.buffersize)/(float)ao_data.bps;
 }
-
-
-
-
-
-

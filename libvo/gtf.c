@@ -302,5 +302,3 @@ void GTF_calcTimings(double X,double Y,double freq, int type,
     result-> RefreshRate = actual_V_frame_freq*100;/* Refresh rate in units of 0.01 Hz*/
 
     }
-
-

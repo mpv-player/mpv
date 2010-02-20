@@ -86,4 +86,3 @@ MANGLE(wrapper):
 	popf
 	popa
 	ret
-

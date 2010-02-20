@@ -362,4 +362,3 @@
 <external-specification id="docbook" document="docbook.dsl">
 
 </style-sheet>
-

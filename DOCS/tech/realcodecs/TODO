@@ -20,5 +20,3 @@ TODO:
   also statistics->streams->video->POST FILTER: ON
   (i've found that custommessage calls differ wiht pp on/off, but adding
   these calls to mplayer didn't make a pixel difference between outputs)
-
-

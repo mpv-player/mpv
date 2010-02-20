@@ -45,4 +45,3 @@ int vobsub_set_from_lang(void *vobhandle, unsigned char * lang);
 void vobsub_seek(void * vobhandle, float pts);
 
 #endif /* MPLAYER_VOBSUB_H */
-

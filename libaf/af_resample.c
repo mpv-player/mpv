@@ -393,4 +393,3 @@ af_info_t af_info_resample = {
   AF_FLAGS_REENTRANT,
   af_open
 };
-

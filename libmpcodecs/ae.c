@@ -114,5 +114,3 @@ audio_encoder_t *new_audio_encoder(muxer_stream_t *stream, audio_encoding_params
 	encoder->codec = stream->codec;
 	return encoder;
 }
-
-

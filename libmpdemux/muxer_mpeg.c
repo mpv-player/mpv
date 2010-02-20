@@ -2731,4 +2731,3 @@ int muxer_init_muxer_mpeg(muxer_t *muxer)
 	muxer->fix_stream_parameters = &fix_parameters;
 	return 1;
 }
-

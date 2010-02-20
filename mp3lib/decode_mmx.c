@@ -368,4 +368,3 @@ ASMALIGN(4)
 	:"memory", "%eax");
     return 0;
 }
-

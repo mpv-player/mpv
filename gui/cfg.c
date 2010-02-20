@@ -367,4 +367,3 @@ int cfg_write( void )
 
  return 0;
 }
-

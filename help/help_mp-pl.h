@@ -1837,4 +1837,3 @@ static const char help_text[]=
 #define MSGTR_RADIO_DriverUnknownStr "[radio] Nieznana nazwa sterownika: %s\n"
 #define MSGTR_RADIO_DriverV4L2 "[radio] Używam interfejsu radiowego V4Lv2.\n"
 #define MSGTR_RADIO_DriverV4L "[radio] Używam interfejsu radiowego V4Lv1.\n"
-

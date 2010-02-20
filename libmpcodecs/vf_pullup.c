@@ -312,5 +312,3 @@ const vf_info_t vf_info_pullup = {
     open,
     NULL
 };
-
-

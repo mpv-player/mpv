@@ -73,4 +73,3 @@ vf_instance_t* vf_open_encoder(vf_instance_t* next, const char *name, char *args
     char* vf_args[] = { "_oldargs_", args, NULL };
     return vf_open_plugin(encoder_list,next,name,vf_args);
 }
-

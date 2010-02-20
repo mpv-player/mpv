@@ -347,4 +347,3 @@ int strargcasecmp(strarg_t *arg, char *str) {
     res = arg->len - strlen(str);
   return res;
 }
-

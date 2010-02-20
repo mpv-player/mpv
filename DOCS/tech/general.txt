@@ -226,4 +226,3 @@ Now, go on:
 6.a audio plugins
 
    for details on this, read libao2.txt
-

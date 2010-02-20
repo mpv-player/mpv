@@ -231,4 +231,3 @@ static int control(sh_audio_t *sh, int cmd, void* arg, ...) {
   }
   return CONTROL_UNKNOWN;
 }
-

@@ -227,4 +227,3 @@ int VFWAPI ICDoSomething(void)
 {
   return 0;
 }
-
