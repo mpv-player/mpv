@@ -1779,6 +1779,8 @@ fi
 
 def_fast_64bit='#define HAVE_FAST_64BIT 0'
 def_fast_unaligned='#define HAVE_FAST_UNALIGNED 0'
+def_local_aligned_8='#define HAVE_LOCAL_ALIGNED_8 0'
+def_local_aligned_16='#define HAVE_LOCAL_ALIGNED_16 0'
 _arch_all='X86 X86_32 X86_64 IA64 SPARC ARM AVR32 SH4 PPC PPC64 ALPHA MIPS SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA TOMI GENERIC'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
@@ -1786,6 +1788,8 @@ case "$host_arch" in
   _target_arch="ARCH_X86 = yes"
   _target_subarch="ARCH_X86_32 = yes"
   def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
+  def_local_aligned_8='#define HAVE_LOCAL_ALIGNED_8 1'
+  def_local_aligned_16='#define HAVE_LOCAL_ALIGNED_16 1'
   iproc=486
   proc=i486
 
@@ -2175,6 +2179,8 @@ EOF
     def_dcbzl='#define HAVE_DCBZL 0'
     _target_arch='ARCH_PPC = yes'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
+    def_local_aligned_8='#define HAVE_LOCAL_ALIGNED_8 1'
+    def_local_aligned_16='#define HAVE_LOCAL_ALIGNED_16 1'
     iproc='ppc'
 
     if test "$host_arch" = "ppc64" -o "$host_arch" = "powerpc64" ; then
@@ -9218,6 +9224,8 @@ $def_fast_unaligned
 $def_hardcoded_tables
 $def_libavcodec_mpegaudio_hp
 $def_llrint
+$def_local_aligned_8
+$def_local_aligned_16
 $def_log2
 $def_log2f
 $def_lrint
