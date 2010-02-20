@@ -32,34 +32,34 @@
 /* Missed vorbis, mad, dshow */
 
 //extern ad_functions_t mpcodecs_ad_null;
-extern ad_functions_t mpcodecs_ad_mp3lib;
-extern ad_functions_t mpcodecs_ad_ffmpeg;
-extern ad_functions_t mpcodecs_ad_liba52;
-extern ad_functions_t mpcodecs_ad_hwac3;
-extern ad_functions_t mpcodecs_ad_hwmpa;
-extern ad_functions_t mpcodecs_ad_pcm;
-extern ad_functions_t mpcodecs_ad_dvdpcm;
-extern ad_functions_t mpcodecs_ad_alaw;
-extern ad_functions_t mpcodecs_ad_imaadpcm;
-extern ad_functions_t mpcodecs_ad_msadpcm;
-extern ad_functions_t mpcodecs_ad_dk3adpcm;
-extern ad_functions_t mpcodecs_ad_dk4adpcm;
-extern ad_functions_t mpcodecs_ad_dshow;
-extern ad_functions_t mpcodecs_ad_dmo;
-extern ad_functions_t mpcodecs_ad_acm;
-extern ad_functions_t mpcodecs_ad_msgsm;
-extern ad_functions_t mpcodecs_ad_faad;
-extern ad_functions_t mpcodecs_ad_libvorbis;
-extern ad_functions_t mpcodecs_ad_speex;
-extern ad_functions_t mpcodecs_ad_libmad;
-extern ad_functions_t mpcodecs_ad_realaud;
-extern ad_functions_t mpcodecs_ad_libdv;
-extern ad_functions_t mpcodecs_ad_qtaudio;
-extern ad_functions_t mpcodecs_ad_twin;
-extern ad_functions_t mpcodecs_ad_libmusepack;
-extern ad_functions_t mpcodecs_ad_libdca;
+extern const ad_functions_t mpcodecs_ad_mp3lib;
+extern const ad_functions_t mpcodecs_ad_ffmpeg;
+extern const ad_functions_t mpcodecs_ad_liba52;
+extern const ad_functions_t mpcodecs_ad_hwac3;
+extern const ad_functions_t mpcodecs_ad_hwmpa;
+extern const ad_functions_t mpcodecs_ad_pcm;
+extern const ad_functions_t mpcodecs_ad_dvdpcm;
+extern const ad_functions_t mpcodecs_ad_alaw;
+extern const ad_functions_t mpcodecs_ad_imaadpcm;
+extern const ad_functions_t mpcodecs_ad_msadpcm;
+extern const ad_functions_t mpcodecs_ad_dk3adpcm;
+extern const ad_functions_t mpcodecs_ad_dk4adpcm;
+extern const ad_functions_t mpcodecs_ad_dshow;
+extern const ad_functions_t mpcodecs_ad_dmo;
+extern const ad_functions_t mpcodecs_ad_acm;
+extern const ad_functions_t mpcodecs_ad_msgsm;
+extern const ad_functions_t mpcodecs_ad_faad;
+extern const ad_functions_t mpcodecs_ad_libvorbis;
+extern const ad_functions_t mpcodecs_ad_speex;
+extern const ad_functions_t mpcodecs_ad_libmad;
+extern const ad_functions_t mpcodecs_ad_realaud;
+extern const ad_functions_t mpcodecs_ad_libdv;
+extern const ad_functions_t mpcodecs_ad_qtaudio;
+extern const ad_functions_t mpcodecs_ad_twin;
+extern const ad_functions_t mpcodecs_ad_libmusepack;
+extern const ad_functions_t mpcodecs_ad_libdca;
 
-ad_functions_t* mpcodecs_ad_drivers[] =
+const ad_functions_t * const mpcodecs_ad_drivers[] =
 {
 //  &mpcodecs_ad_null,
 #ifdef CONFIG_MP3LIB

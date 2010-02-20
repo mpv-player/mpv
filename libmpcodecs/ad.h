@@ -36,7 +36,7 @@ typedef struct ad_functions_s
 } ad_functions_t;
 
 // NULL terminated array of all drivers
-extern ad_functions_t* mpcodecs_ad_drivers[];
+extern const ad_functions_t * const mpcodecs_ad_drivers[];
 
 // fallback if ADCTRL_RESYNC not implemented: sh_audio->a_in_buffer_len=0;
 #define ADCTRL_RESYNC_STREAM 1       /* resync, called after seeking! */
