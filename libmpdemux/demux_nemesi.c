@@ -455,7 +455,7 @@ static void demux_seek_rtp(demuxer_t *demuxer, float rel_seek_secs,
         mp_msg(MSGT_DEMUX, MSGL_ERR, "Unsupported seek type\n");
 }
 
-static int demux_rtp_control(struct demuxer_st *demuxer, int cmd, void *arg)
+static int demux_rtp_control(struct demuxer *demuxer, int cmd, void *arg)
 {
     Nemesi_DemuxerStreamData * ndsd = demuxer->priv;
     rtsp_ctrl * ctl = ndsd->rtsp;

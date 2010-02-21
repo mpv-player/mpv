@@ -666,7 +666,7 @@ demux_packet_t* ReadBufferQueue::getPendingBuffer() {
   return dp;
 }
 
-static int demux_rtp_control(struct demuxer_st *demuxer, int cmd, void *arg) {
+static int demux_rtp_control(struct demuxer *demuxer, int cmd, void *arg) {
   double endpts = ((RTPState*)demuxer->priv)->mediaSession->playEndTime();
 
   switch(cmd) {

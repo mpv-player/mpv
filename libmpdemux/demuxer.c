@@ -193,7 +193,7 @@ void free_demuxer_stream(demux_stream_t *ds)
     free(ds);
 }
 
-demux_stream_t *new_demuxer_stream(struct demuxer_st *demuxer, int id)
+demux_stream_t *new_demuxer_stream(struct demuxer *demuxer, int id)
 {
     demux_stream_t *ds = malloc(sizeof(demux_stream_t));
     *ds = (demux_stream_t){
