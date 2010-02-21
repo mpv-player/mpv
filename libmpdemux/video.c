@@ -318,7 +318,7 @@ mpeg_header_parser:
 
    // display info:
    sh_video->format=picture.mpeg1?0x10000001:0x10000002; // mpeg video
-   sh_video->fps=picture.fps;
+   sh_video->fps=picture.fps * picture.frame_rate_extension_n / picture.frame_rate_extension_d;
    if(!sh_video->fps){
      sh_video->frametime=0;
    } else {
