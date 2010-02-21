@@ -67,6 +67,8 @@ int mp_header_process_sequence_header (mp_mpeg_header_t * picture, const unsigne
     picture->mpeg1 = 1;
     picture->picture_structure = 3; //FRAME_PICTURE;
     picture->display_time=100;
+    picture->frame_rate_extension_n = 1;
+    picture->frame_rate_extension_d = 1;
     return 0;
 }
 
