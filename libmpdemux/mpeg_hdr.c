@@ -81,6 +81,9 @@ static int header_process_sequence_extension (mp_mpeg_header_t * picture,
 	return 1;
 
     picture->progressive_sequence = (buffer[1] >> 3) & 1;
+    picture->frame_rate_extension_n = ((buffer[5] >> 5) & 3) + 1;
+    picture->frame_rate_extension_d = (buffer[5] & 0x1f) + 1;
+
     picture->mpeg1 = 0;
     return 0;
 }

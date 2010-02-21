@@ -433,6 +433,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     float frame_time=1;
     float pts1=d_video->pts;
     float pts=0;
+    float fps;
     int picture_coding_type=0;
     int in_size=0;
     video_codec_t video_codec = find_video_codec(sh_video);
@@ -469,14 +470,15 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
             case 0x100: picture_coding_type=(videobuffer[start+1] >> 3) & 7;break;
           }
         }
+        fps = picture.fps * picture.frame_rate_extension_n / picture.frame_rate_extension_d;
 
         *start=videobuffer; in_size=videobuf_len;
 
     // get mpeg fps:
-    if(sh_video->fps!=picture.fps) if(!force_fps && !telecine){
-            mp_msg(MSGT_CPLAYER,MSGL_WARN,"Warning! FPS changed %5.3f -> %5.3f  (%f) [%d]  \n",sh_video->fps,picture.fps,sh_video->fps-picture.fps,picture.frame_rate_code);
-            sh_video->fps=picture.fps;
-            sh_video->frametime=1.0/picture.fps;
+    if(sh_video->fps!=fps) if(!force_fps && !telecine){
+            mp_msg(MSGT_CPLAYER,MSGL_WARN,"Warning! FPS changed %5.3f -> %5.3f  (%f) [%d]  \n",sh_video->fps,fps,sh_video->fps-fps,picture.frame_rate_code);
+            sh_video->fps=fps;
+            sh_video->frametime=1.0/fps;
     }
 
     // fix mpeg2 frametime:
