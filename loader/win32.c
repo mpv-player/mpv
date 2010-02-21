@@ -24,7 +24,9 @@ for DLL to know too much about its environment.
 
 /* Hack to make sure the correct function declaration in com.h is used when
  * this file is built for the test applications with WIN32_LOADER disabled. */
+#ifndef WIN32_LOADER
 #define WIN32_LOADER
+#endif
 
 #ifdef CONFIG_QTX_CODECS
 #define PSEUDO_SCREEN_WIDTH	/*640*/800
