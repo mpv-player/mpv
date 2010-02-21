@@ -27,6 +27,7 @@ void print_avih(MainAVIHeader *h, int verbose_level);
 void print_strh(AVIStreamHeader *h, int verbose_level);
 void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
+void print_vprp(VideoPropHeader *vprp, int verbose_level);
 void print_index(AVIINDEXENTRY *idx, int idx_size, int verbose_level);
 void print_avistdindex_chunk(avistdindex_chunk *h, int verbose_level);
 void print_avisuperindex_chunk(avisuperindex_chunk *h, int verbose_level);
