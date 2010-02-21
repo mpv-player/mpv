@@ -91,8 +91,6 @@ int dvb_get_tuner_type(int fe_fd)
 
 }
 
-int dvb_set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype);
-
 int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 {
 	int i;
@@ -245,89 +243,6 @@ int dvb_demux_start(int fd)
 }
 
 
-static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int srate, char pol, int tone,
-	fe_spectral_inversion_t specInv, unsigned int diseqc, fe_modulation_t modulation, fe_code_rate_t HP_CodeRate,
-	fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
-	fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int tmout);
-
-
-int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
-		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
-		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate,
-		fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
-{
-	int ris;
-
-	mp_msg(MSGT_DEMUX, MSGL_INFO, "dvb_tune Freq: %lu\n", (long unsigned int) freq);
-
-		ris = tune_it(priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth, LP_CodeRate, hier, timeout);
-
-	if(ris != 0)
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "dvb_tune, TUNING FAILED\n");
-
-	return ris == 0;
-}
-
-
-#ifndef CONFIG_DVB_HEAD
-static int SecGetStatus (int fd, struct secStatus *state)
-{
-    if(ioctl(fd, SEC_GET_STATUS, state) < 0)
-    {
-        mp_msg(MSGT_DEMUX, MSGL_ERR, ("SEC GET STATUS: "));
-        return -1;
-    }
-
-    switch (state->busMode)
-    {
-	case SEC_BUS_IDLE:
-    	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  IDLE (%d)\n",state->busMode);
-    	    break;
-	case SEC_BUS_BUSY:
-    	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  BUSY (%d)\n",state->busMode);
-	    break;
-        case SEC_BUS_OFF:
-	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  OFF  (%d)\n",state->busMode);
-    	    break;
-        case SEC_BUS_OVERLOAD:
-	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  OVERLOAD (%d)\n",state->busMode);
-    	    break;
-	default:
-    	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  unknown  (%d)\n",state->busMode);
-            break;
-    }
-
-    switch (state->selVolt)
-    {
-	case SEC_VOLTAGE_OFF:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  OFF (%d)\n",state->selVolt);
-		break;
-	case SEC_VOLTAGE_LT:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  LT  (%d)\n",state->selVolt);
-		break;
-	case SEC_VOLTAGE_13:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  13  (%d)\n",state->selVolt);
-		break;
-	case SEC_VOLTAGE_13_5:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  13.5 (%d)\n",state->selVolt);
-		break;
-	case SEC_VOLTAGE_18:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  18 (%d)\n",state->selVolt);
-		break;
-	case SEC_VOLTAGE_18_5:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  18.5 (%d)\n",state->selVolt);
-		break;
-	default:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  unknown (%d)\n",state->selVolt);
-		break;
-    }
-
-    mp_msg(MSGT_DEMUX, MSGL_V, "SEC CONT TONE: %s\n", (state->contTone == SEC_TONE_ON ? "ON" : "OFF"));
-    return 0;
-}
-
-#endif
-
 static void print_status(fe_status_t festatus)
 {
 	mp_msg(MSGT_DEMUX, MSGL_V, "FE_STATUS:");
@@ -407,7 +322,108 @@ static int check_status(int fd_frontend, int tmout)
 	return 0;
 }
 
+
+struct diseqc_cmd {
+   struct dvb_diseqc_master_cmd cmd;
+   uint32_t wait;
+};
+
+static int diseqc_send_msg(int fd, fe_sec_voltage_t v, struct diseqc_cmd *cmd,
+		     fe_sec_tone_mode_t t, fe_sec_mini_cmd_t b)
+{
+   if(ioctl(fd, FE_SET_TONE, SEC_TONE_OFF) == -1)
+    return -1;
+   if(ioctl(fd, FE_SET_VOLTAGE, v) == -1)
+    return -1;
+   usleep(15 * 1000);
+   if(ioctl(fd, FE_DISEQC_SEND_MASTER_CMD, &cmd->cmd) == -1)
+    return -1;
+   usleep(cmd->wait * 1000);
+   usleep(15 * 1000);
+   if(ioctl(fd, FE_DISEQC_SEND_BURST, b) == -1)
+    return -1;
+   usleep(15 * 1000);
+   if(ioctl(fd, FE_SET_TONE, t) == -1)
+    return -1;
+
+    return 0;
+}
+
+/* digital satellite equipment control,
+ * specification is available from http://www.eutelsat.com/
+ */
+static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
+{
+   struct diseqc_cmd cmd =  { {{0xe0, 0x10, 0x38, 0xf0, 0x00, 0x00}, 4}, 0 };
+
+   /* param: high nibble: reset bits, low nibble set bits,
+    * bits are: option, position, polarizaion, band
+    */
+   cmd.cmd.msg[3] =
+       0xf0 | (((sat_no * 4) & 0x0f) | (hi_lo ? 1 : 0) | (polv ? 0 : 2));
+
+   return diseqc_send_msg(secfd, polv ? SEC_VOLTAGE_13 : SEC_VOLTAGE_18,
+		   &cmd, hi_lo ? SEC_TONE_ON : SEC_TONE_OFF,
+		   (sat_no / 4) % 2 ? SEC_MINI_B : SEC_MINI_A);
+}
+
 #else
+
+static int SecGetStatus (int fd, struct secStatus *state)
+{
+    if(ioctl(fd, SEC_GET_STATUS, state) < 0)
+    {
+        mp_msg(MSGT_DEMUX, MSGL_ERR, ("SEC GET STATUS: "));
+        return -1;
+    }
+
+    switch (state->busMode)
+    {
+	case SEC_BUS_IDLE:
+    	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  IDLE (%d)\n",state->busMode);
+    	    break;
+	case SEC_BUS_BUSY:
+    	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  BUSY (%d)\n",state->busMode);
+	    break;
+        case SEC_BUS_OFF:
+	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  OFF  (%d)\n",state->busMode);
+    	    break;
+        case SEC_BUS_OVERLOAD:
+	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  OVERLOAD (%d)\n",state->busMode);
+    	    break;
+	default:
+    	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  unknown  (%d)\n",state->busMode);
+            break;
+    }
+
+    switch (state->selVolt)
+    {
+	case SEC_VOLTAGE_OFF:
+		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  OFF (%d)\n",state->selVolt);
+		break;
+	case SEC_VOLTAGE_LT:
+		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  LT  (%d)\n",state->selVolt);
+		break;
+	case SEC_VOLTAGE_13:
+		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  13  (%d)\n",state->selVolt);
+		break;
+	case SEC_VOLTAGE_13_5:
+		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  13.5 (%d)\n",state->selVolt);
+		break;
+	case SEC_VOLTAGE_18:
+		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  18 (%d)\n",state->selVolt);
+		break;
+	case SEC_VOLTAGE_18_5:
+		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  18.5 (%d)\n",state->selVolt);
+		break;
+	default:
+		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  unknown (%d)\n",state->selVolt);
+		break;
+    }
+
+    mp_msg(MSGT_DEMUX, MSGL_V, "SEC CONT TONE: %s\n", (state->contTone == SEC_TONE_ON ? "ON" : "OFF"));
+    return 0;
+}
 
 static int check_status(int fd_frontend, int tmout)
 {
@@ -499,55 +515,6 @@ static int check_status(int fd_frontend, int tmout)
 	}
 	return 0;
 }
-#endif
-
-#ifdef CONFIG_DVB_HEAD
-
-struct diseqc_cmd {
-   struct dvb_diseqc_master_cmd cmd;
-   uint32_t wait;
-};
-
-static int diseqc_send_msg(int fd, fe_sec_voltage_t v, struct diseqc_cmd *cmd,
-		     fe_sec_tone_mode_t t, fe_sec_mini_cmd_t b)
-{
-   if(ioctl(fd, FE_SET_TONE, SEC_TONE_OFF) == -1)
-    return -1;
-   if(ioctl(fd, FE_SET_VOLTAGE, v) == -1)
-    return -1;
-   usleep(15 * 1000);
-   if(ioctl(fd, FE_DISEQC_SEND_MASTER_CMD, &cmd->cmd) == -1)
-    return -1;
-   usleep(cmd->wait * 1000);
-   usleep(15 * 1000);
-   if(ioctl(fd, FE_DISEQC_SEND_BURST, b) == -1)
-    return -1;
-   usleep(15 * 1000);
-   if(ioctl(fd, FE_SET_TONE, t) == -1)
-    return -1;
-
-    return 0;
-}
-
-/* digital satellite equipment control,
- * specification is available from http://www.eutelsat.com/
- */
-static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
-{
-   struct diseqc_cmd cmd =  { {{0xe0, 0x10, 0x38, 0xf0, 0x00, 0x00}, 4}, 0 };
-
-   /* param: high nibble: reset bits, low nibble set bits,
-    * bits are: option, position, polarizaion, band
-    */
-   cmd.cmd.msg[3] =
-       0xf0 | (((sat_no * 4) & 0x0f) | (hi_lo ? 1 : 0) | (polv ? 0 : 2));
-
-   return diseqc_send_msg(secfd, polv ? SEC_VOLTAGE_13 : SEC_VOLTAGE_18,
-		   &cmd, hi_lo ? SEC_TONE_ON : SEC_TONE_OFF,
-		   (sat_no / 4) % 2 ? SEC_MINI_B : SEC_MINI_A);
-}
-
-#else
 
 static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
 {
@@ -741,4 +708,22 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
   }
 
   return check_status(fd_frontend, timeout);
+}
+
+
+int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
+		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
+		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate,
+		fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
+{
+	int ris;
+
+	mp_msg(MSGT_DEMUX, MSGL_INFO, "dvb_tune Freq: %lu\n", (long unsigned int) freq);
+
+		ris = tune_it(priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth, LP_CodeRate, hier, timeout);
+
+	if(ris != 0)
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "dvb_tune, TUNING FAILED\n");
+
+	return ris == 0;
 }
