@@ -51,7 +51,7 @@
 #include "libmpdemux/asf.h"
 
 #include "stream.h"
-
+#include "asf_mmst_streaming.h"
 #include "network.h"
 #include "tcp.h"
 
