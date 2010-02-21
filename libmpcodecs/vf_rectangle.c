@@ -156,7 +156,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi, double pts){
 }
 
 static int
-open(vf_instance_t* vf, char* args) {
+vf_open(vf_instance_t *vf, char *args) {
     vf->config = config;
     vf->control = control;
     vf->put_image = put_image;
@@ -176,6 +176,6 @@ const vf_info_t vf_info_rectangle = {
     "rectangle",
     "Kim Minh Kaplan",
     "",
-    open,
+    vf_open,
     NULL
 };

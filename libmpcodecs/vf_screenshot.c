@@ -282,8 +282,7 @@ static void uninit(vf_instance_t *vf)
     free(vf->priv);
 }
 
-// open conflicts with stdio.h at least under MinGW
-static int screenshot_open(vf_instance_t *vf, char* args)
+static int vf_open(vf_instance_t *vf, char *args)
 {
     vf->config=config;
     vf->control=control;
@@ -315,7 +314,7 @@ const vf_info_t vf_info_screenshot = {
     "screenshot",
     "A'rpi, Jindrich Makovicka",
     "",
-    screenshot_open,
+    vf_open,
     NULL
 };
 

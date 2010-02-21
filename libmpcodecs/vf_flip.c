@@ -90,7 +90,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
 //===========================================================================//
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->get_image=get_image;
     vf->put_image=put_image;
@@ -103,7 +103,7 @@ const vf_info_t vf_info_flip = {
     "flip",
     "A'rpi",
     "",
-    open,
+    vf_open,
     NULL
 };
 

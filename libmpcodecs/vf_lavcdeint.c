@@ -161,7 +161,7 @@ query_format (struct vf_instance_s* vf, unsigned int fmt)
 
 
 static int
-open (vf_instance_t *vf, char* args)
+vf_open(vf_instance_t *vf, char *args)
 {
   /* We don't have any args */
   (void) args;
@@ -192,7 +192,7 @@ const vf_info_t vf_info_lavcdeint = {
     "Joe Rabinoff",
     "libavcodec's internal deinterlacer, in case you don't like "
       "the builtin ones (invoked with -pp or -npp)",
-    open,
+    vf_open,
     NULL
 };
 

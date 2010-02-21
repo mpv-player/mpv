@@ -134,7 +134,7 @@ static void uninit(struct vf_instance_s* vf){
 }
 
 //===========================================================================//
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
     char eq[3][2000] = { { 0 }, { 0 }, { 0 } };
     int plane;
 
@@ -193,6 +193,6 @@ const vf_info_t vf_info_geq = {
     "geq",
     "Michael Niedermayer",
     "",
-    open,
+    vf_open,
     NULL
 };

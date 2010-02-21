@@ -304,7 +304,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 	return 0;
 }
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
 	int e;
 
 	vf->config=config;
@@ -336,7 +336,7 @@ const vf_info_t vf_info_perspective = {
     "perspective",
     "Michael Niedermayer",
     "",
-    open,
+    vf_open,
     NULL
 };
 

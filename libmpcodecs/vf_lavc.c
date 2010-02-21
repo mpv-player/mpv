@@ -130,7 +130,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;
 }
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
     int p_quality=0;
     float p_fps=0;
 
@@ -180,7 +180,7 @@ const vf_info_t vf_info_lavc = {
     "lavc",
     "A'rpi",
     "",
-    open,
+    vf_open,
     NULL
 };
 

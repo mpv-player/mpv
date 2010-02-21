@@ -440,7 +440,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
     return vf_next_control(vf,request,data);
 }
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->put_image=put_image;
     vf->get_image=get_image;
@@ -486,6 +486,6 @@ const vf_info_t vf_info_pp7 = {
     "pp7",
     "Michael Niedermayer",
     "",
-    open,
+    vf_open,
     NULL
 };

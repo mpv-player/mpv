@@ -182,7 +182,7 @@ static void PrecalcCoefs(int *Ct, double Dist25)
 }
 
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
         double LumSpac, LumTmp, ChromSpac, ChromTmp;
         double Param1, Param2, Param3;
 
@@ -261,7 +261,7 @@ const vf_info_t vf_info_denoise3d = {
     "denoise3d",
     "Daniel Moreno",
     "",
-    open,
+    vf_open,
     NULL
 };
 

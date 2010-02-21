@@ -404,7 +404,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 	return 0;
 }
 
-static int open(vf_instance_t *vf, char* args)
+static int vf_open(vf_instance_t *vf, char *args)
 {
 	vf->config=config;
 	vf->query_format=query_format;
@@ -448,6 +448,6 @@ const vf_info_t vf_info_ilpack = {
 	"ilpack",
 	"Richard Felker",
 	"",
-	open,
+	vf_open,
 	NULL
 };

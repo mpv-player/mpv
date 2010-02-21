@@ -302,7 +302,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
 	return vf_next_control (vf, request, data);
 }
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
 
 	vf->control=control;
 	vf->config=config;
@@ -338,7 +338,7 @@ const vf_info_t vf_info_kerndeint = {
     "kerndeint",
     "Donald Graft",
     "",
-    open,
+    vf_open,
     NULL
 };
 

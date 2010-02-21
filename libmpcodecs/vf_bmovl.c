@@ -458,7 +458,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi, double pts){
 } // put_image
 
 static int
-vf_open(vf_instance_t* vf, char* args)
+vf_open(vf_instance_t *vf, char *args)
 {
     char filename[1000];
 

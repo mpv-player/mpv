@@ -464,7 +464,7 @@ vf_instance_t* vf_open_plugin(const vf_info_t* const* filter_list, vf_instance_t
 	args = (char**)args[1];
       else
 	args = NULL;
-    if(vf->info->open(vf,(char*)args)>0) return vf; // Success!
+    if(vf->info->vf_open(vf,(char*)args)>0) return vf; // Success!
     free(vf);
     mp_msg(MSGT_VFILTER,MSGL_ERR,MSGTR_CouldNotOpenVideoFilter,name);
     return NULL;

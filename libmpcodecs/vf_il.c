@@ -119,7 +119,7 @@ static void parse(FilterParam *fp, char* args){
 	if(pos && pos<max) fp->interleave=-1;
 }
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
 
 	vf->put_image=put_image;
 //	vf->get_image=get_image;
@@ -141,7 +141,7 @@ const vf_info_t vf_info_il = {
     "il",
     "Michael Niedermayer",
     "",
-    open,
+    vf_open,
     NULL
 };
 

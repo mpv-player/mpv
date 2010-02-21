@@ -388,7 +388,7 @@ static const unsigned int fmt_list[]={
 	0
 };
 
-static int open(vf_instance_t *vf, char* args)
+static int vf_open(vf_instance_t *vf, char *args)
 {
 	int flags;
 	vf->priv->outfmt = vf_match_csp(&vf->next,fmt_list,IMGFMT_YV12);
@@ -431,6 +431,6 @@ const vf_info_t vf_info_ass = {
 	"ass",
 	"Evgeniy Stepanov",
 	"",
-	open,
+	vf_open,
 	&vf_opts
 };

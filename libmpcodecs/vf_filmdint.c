@@ -1406,7 +1406,7 @@ static void uninit(struct vf_instance_s* vf)
     free(p);
 }
 
-static int open(vf_instance_t *vf, char* args)
+static int vf_open(vf_instance_t *vf, char *args)
 {
     struct vf_priv_s *p;
     vf->get_image = get_image;
@@ -1458,6 +1458,6 @@ const vf_info_t vf_info_filmdint = {
     "filmdint",
     "Zoltan Hidvegi",
     "",
-    open,
+    vf_open,
     NULL
 };

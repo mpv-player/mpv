@@ -196,7 +196,7 @@ static unsigned int fmt_list[]={
     0
 };
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->put_image=put_image;
     vf->get_image=get_image;
@@ -255,7 +255,7 @@ const vf_info_t vf_info_delogo = {
     "delogo",
     "Jindrich Makovicka, Alex Beregszaszi",
     "",
-    open,
+    vf_open,
     &vf_opts
 };
 

@@ -311,7 +311,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return vf_next_query_format(vf,IMGFMT_YV12) & (~VFCAP_CSP_SUPPORTED_BY_HW);
 }
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->put_image=put_image;
     vf->query_format=query_format;
@@ -326,7 +326,7 @@ const vf_info_t vf_info_test = {
     "test",
     "Michael Niedermayer",
     "",
-    open,
+    vf_open,
     NULL
 };
 

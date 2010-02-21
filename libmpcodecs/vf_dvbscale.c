@@ -46,7 +46,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->default_caps=0;
     vf->priv=malloc(sizeof(struct vf_priv_s));
@@ -60,7 +60,7 @@ const vf_info_t vf_info_dvbscale = {
     "dvbscale",
     "A'rpi",
     "",
-    open,
+    vf_open,
     NULL
 };
 

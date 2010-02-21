@@ -496,7 +496,7 @@ static void uninit(struct vf_instance_s* vf)
 	free(vf->priv);
 }
 
-static int open(vf_instance_t *vf, char* args)
+static int vf_open(vf_instance_t *vf, char *args)
 {
 	struct vf_priv_s *p;
 	vf->config = config;
@@ -530,6 +530,6 @@ const vf_info_t vf_info_tfields = {
     "tfields",
     "Rich Felker",
     "",
-    open,
+    vf_open,
     NULL
 };

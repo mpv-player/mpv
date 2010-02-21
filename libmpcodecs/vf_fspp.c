@@ -622,7 +622,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
     return vf_next_control(vf,request,data);
 }
 
-static int open(vf_instance_t *vf, char* args)
+static int vf_open(vf_instance_t *vf, char *args)
 {
     int i=0, bias;
     int custom_threshold_m[64];
@@ -683,7 +683,7 @@ const vf_info_t vf_info_fspp = {
     "fspp",
     "Michael Niedermayer, Nikolaj Poroshin",
     "",
-    open,
+    vf_open,
     NULL
 };
 

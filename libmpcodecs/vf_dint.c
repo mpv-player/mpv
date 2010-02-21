@@ -191,7 +191,7 @@ static int put_image (struct vf_instance_s* vf, mp_image_t *mpi, double pts)
     return vf_next_put_image (vf, mpi, pts);
 }
 
-static int open (vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
     vf->config = config;
     vf->put_image = put_image;
 //    vf->default_reqs=VFCAP_ACCEPT_STRIDE;
@@ -209,6 +209,6 @@ const vf_info_t vf_info_dint = {
     "dint",
     "A.G.",
     "",
-    open,
+    vf_open,
     NULL
 };

@@ -231,7 +231,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
  * If the value is less then 0 def_val is used.
  * Return 0 for ok
  *
- * Look below ( in open(...) ) for a use ...
+ * Look below ( in vf_open(...) ) for a use ...
  */
 static int parse_int(char **s, int *rt, int def_val)
 {
@@ -266,7 +266,7 @@ static int parse_int(char **s, int *rt, int def_val)
 }
 
 /* Main entry funct for the filter */
-static int open(vf_instance_t *vf, char* args)
+static int vf_open(vf_instance_t *vf, char *args)
 {
     struct vf_priv_s *p;
     int              er;
@@ -323,6 +323,6 @@ const vf_info_t vf_info_tile = {
     "tile",
     "Daniele Forghieri",
     "",
-    open,
+    vf_open,
     NULL
 };

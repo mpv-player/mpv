@@ -595,7 +595,7 @@ static void uninit(struct vf_instance_s* vf)
       }
    }
 
-static int open(vf_instance_t *vf, char* args)
+static int vf_open(vf_instance_t *vf, char *args)
    {
    struct vf_priv_s *p;
    char *filename="framediff.log", *ap, *q, *a;
@@ -715,6 +715,6 @@ const vf_info_t vf_info_divtc =
    "divtc",
    "Ville Saari",
    "",
-   open,
+   vf_open,
    NULL
    };

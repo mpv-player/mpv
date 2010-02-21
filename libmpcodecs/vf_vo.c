@@ -239,7 +239,7 @@ static void uninit(struct vf_instance_s* vf)
 }
 //===========================================================================//
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->control=control;
     vf->query_format=query_format;
@@ -260,7 +260,7 @@ const vf_info_t vf_info_vo = {
     "vo",
     "A'rpi",
     "for internal use",
-    open,
+    vf_open,
     NULL
 };
 

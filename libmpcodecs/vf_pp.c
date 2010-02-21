@@ -169,7 +169,7 @@ static unsigned int fmt_list[]={
     0
 };
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
     char *endptr, *name;
     int i;
     int hex_mode=0;
@@ -237,7 +237,7 @@ const vf_info_t vf_info_pp = {
     "pp",
     "A'rpi",
     "",
-    open,
+    vf_open,
     NULL
 };
 

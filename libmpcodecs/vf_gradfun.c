@@ -364,7 +364,7 @@ static void uninit(struct vf_instance_s* vf)
     vf->priv = NULL;
 }
 
-static int open(vf_instance_t *vf, char* args)
+static int vf_open(vf_instance_t *vf, char *args)
 {
     float thresh = 1.2;
     int radius = 16;
@@ -402,6 +402,6 @@ const vf_info_t vf_info_gradfun = {
     "gradfun",
     "Loren Merritt",
     "",
-    open,
+    vf_open,
     NULL
 };

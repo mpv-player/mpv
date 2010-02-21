@@ -828,7 +828,7 @@ static int query_format(struct vf_instance_s * vf, unsigned int fmt)
  *
  * This sets up our instance variables and parses the arguments to the filter.
  */
-static int open(vf_instance_t * vf, char * args)
+static int vf_open(vf_instance_t *vf, char *args)
 {
   vf->priv = safe_malloc(sizeof(vf_priv_s));
 
@@ -898,7 +898,7 @@ const vf_info_t vf_info_remove_logo = {
     "remove-logo",
     "Robert Edele",
     "",
-    open,
+    vf_open,
     NULL
 };
 
