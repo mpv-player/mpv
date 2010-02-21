@@ -44,6 +44,7 @@
 #endif
 
 #include "dvbin.h"
+#include "dvb_tune.h"
 #include "mp_msg.h"
 
 
