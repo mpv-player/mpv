@@ -32,13 +32,13 @@ struct vf_priv_s {
 
 //===========================================================================//
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
     return vf_next_config(vf,width,height/2,d_width,d_height,flags,outfmt);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	MP_IMGTYPE_EXPORT, MP_IMGFLAG_ACCEPT_STRIDE,
 	mpi->width, mpi->height/2);
@@ -61,7 +61,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
 //===========================================================================//
 
-static void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance *vf)
 {
 	free(vf->priv);
 }

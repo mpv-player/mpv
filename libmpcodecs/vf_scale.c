@@ -166,7 +166,7 @@ static unsigned int find_best_out(vf_instance_t *vf, int in_format){
     return best;
 }
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
     unsigned int best=find_best_out(vf, outfmt);
@@ -366,7 +366,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,vf->priv->w,vf->priv->h,d_width,d_height,flags,best);
 }
 
-static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
+static void start_slice(struct vf_instance *vf, mp_image_t *mpi){
 //    printf("start_slice called! flag=%d\n",mpi->flags&MP_IMGFLAG_DRAW_CALLBACK);
     if(!(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)) return; // shouldn't happen
     // they want slices!!! allocate the buffer.
@@ -406,7 +406,7 @@ static void scale(struct SwsContext *sws1, struct SwsContext *sws2, uint8_t *src
     }
 }
 
-static void draw_slice(struct vf_instance_s* vf,
+static void draw_slice(struct vf_instance *vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
     mp_image_t *dmpi=vf->dmpi;
     if(!dmpi){
@@ -417,7 +417,7 @@ static void draw_slice(struct vf_instance_s* vf,
     scale(vf->priv->ctx, vf->priv->ctx2, src, stride, y, h, dmpi->planes, dmpi->stride, vf->priv->interlaced);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi=mpi->priv;
 
 //    printf("vf_scale::put_image(): processing whole frame! dmpi=%p flag=%d\n",
@@ -444,7 +444,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     return vf_next_put_image(vf,dmpi, pts);
 }
 
-static int control(struct vf_instance_s* vf, int request, void* data){
+static int control(struct vf_instance *vf, int request, void* data){
     int *table;
     int *inv_table;
     int r;
@@ -507,7 +507,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
 
 //  supported Input formats: YV12, I420, IYUV, YUY2, UYVY, BGR32, BGR24, BGR16, BGR15, RGB32, RGB24, Y8, Y800
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt){
     switch(fmt){
     case IMGFMT_YV12:
     case IMGFMT_I420:
@@ -556,7 +556,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;	// nomatching in-fmt
 }
 
-static void uninit(struct vf_instance_s *vf){
+static void uninit(struct vf_instance *vf){
     if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
     if(vf->priv->ctx2) sws_freeContext(vf->priv->ctx2);
     if(vf->priv->palette) free(vf->priv->palette);

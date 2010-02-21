@@ -89,7 +89,7 @@ struct vf_priv_s {
 };
 
 /* Filter handler */
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     mp_image_t        *dmpi;
     struct vf_priv_s  *priv;
@@ -146,7 +146,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
     return 0;
 }
 
-static void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance *vf)
 {
     /* Free private data */
     free(vf->priv);

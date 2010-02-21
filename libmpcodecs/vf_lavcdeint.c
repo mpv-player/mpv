@@ -88,7 +88,7 @@ imgfmt_to_pixfmt (int imgfmt)
 
 
 static int
-config (struct vf_instance_s* vf,
+config (struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
         unsigned int flags, unsigned int outfmt)
 {
@@ -114,7 +114,7 @@ config (struct vf_instance_s* vf,
 }
 
 static int
-put_image (struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+put_image (struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
   struct vf_priv_s *priv = vf->priv;
   mp_image_t* dmpi;
@@ -151,7 +151,7 @@ put_image (struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 
 
 static int
-query_format (struct vf_instance_s* vf, unsigned int fmt)
+query_format (struct vf_instance *vf, unsigned int fmt)
 {
   if(imgfmt_to_pixfmt(fmt) == -1)
     return 0;

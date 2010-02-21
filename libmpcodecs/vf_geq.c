@@ -42,13 +42,13 @@ struct vf_priv_s {
     mp_image_t *mpi;
 };
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
         unsigned int flags, unsigned int outfmt){
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static inline double getpix(struct vf_instance_s* vf, double x, double y, int plane){
+static inline double getpix(struct vf_instance *vf, double x, double y, int plane){
     int xi, yi;
     mp_image_t *mpi= vf->priv->mpi;
     int stride= mpi->stride[plane];
@@ -66,19 +66,19 @@ static inline double getpix(struct vf_instance_s* vf, double x, double y, int pl
 
 //FIXME cubic interpolate
 //FIXME keep the last few frames
-static double lum(struct vf_instance_s* vf, double x, double y){
+static double lum(struct vf_instance *vf, double x, double y){
     return getpix(vf, x, y, 0);
 }
 
-static double cb(struct vf_instance_s* vf, double x, double y){
+static double cb(struct vf_instance *vf, double x, double y){
     return getpix(vf, x, y, 1);
 }
 
-static double cr(struct vf_instance_s* vf, double x, double y){
+static double cr(struct vf_instance *vf, double x, double y){
     return getpix(vf, x, y, 2);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
     int x,y, plane;
 
@@ -126,7 +126,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     return vf_next_put_image(vf,dmpi, pts);
 }
 
-static void uninit(struct vf_instance_s* vf){
+static void uninit(struct vf_instance *vf){
     if(!vf->priv) return;
 
     av_free(vf->priv);

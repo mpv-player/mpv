@@ -426,7 +426,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 //============================================================================
 
 // By default vf doesn't accept MPEGPES
-static int vf_default_query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int vf_default_query_format(struct vf_instance *vf, unsigned int fmt){
   if(fmt == IMGFMT_MPEGPES) return 0;
   return vf_next_query_format(vf,fmt);
 }
@@ -607,7 +607,7 @@ int vf_output_queued_frame(vf_instance_t *vf)
  * are unchanged, and returns either success or error.
  *
 */
-int vf_config_wrapper(struct vf_instance_s* vf,
+int vf_config_wrapper(struct vf_instance *vf,
 		    int width, int height, int d_width, int d_height,
 		    unsigned int flags, unsigned int outfmt)
 {
@@ -630,7 +630,7 @@ int vf_config_wrapper(struct vf_instance_s* vf,
     return r;
 }
 
-int vf_next_config(struct vf_instance_s* vf,
+int vf_next_config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int voflags, unsigned int outfmt){
     int miss;
@@ -662,11 +662,11 @@ int vf_next_config(struct vf_instance_s* vf,
     return vf_config_wrapper(vf->next,width,height,d_width,d_height,voflags,outfmt);
 }
 
-int vf_next_control(struct vf_instance_s* vf, int request, void* data){
+int vf_next_control(struct vf_instance *vf, int request, void* data){
     return vf->next->control(vf->next,request,data);
 }
 
-void vf_extra_flip(struct vf_instance_s* vf) {
+void vf_extra_flip(struct vf_instance *vf) {
     vf_next_control(vf, VFCTRL_DRAW_OSD, NULL);
 #ifdef CONFIG_ASS
     vf_next_control(vf, VFCTRL_DRAW_EOSD, NULL);
@@ -674,17 +674,17 @@ void vf_extra_flip(struct vf_instance_s* vf) {
     vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 }
 
-int vf_next_query_format(struct vf_instance_s* vf, unsigned int fmt){
+int vf_next_query_format(struct vf_instance *vf, unsigned int fmt){
     int flags=vf->next->query_format(vf->next,fmt);
     if(flags) flags|=vf->default_caps;
     return flags;
 }
 
-int vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi, double pts){
+int vf_next_put_image(struct vf_instance *vf,mp_image_t *mpi, double pts){
     return vf->next->put_image(vf->next,mpi, pts);
 }
 
-void vf_next_draw_slice(struct vf_instance_s* vf,unsigned char** src, int * stride,int w, int h, int x, int y){
+void vf_next_draw_slice(struct vf_instance *vf,unsigned char** src, int * stride,int w, int h, int x, int y){
     if (vf->next->draw_slice) {
 	vf->next->draw_slice(vf->next,src,stride,w,h,x,y);
 	return;

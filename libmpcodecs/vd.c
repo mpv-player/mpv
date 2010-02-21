@@ -368,7 +368,7 @@ mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, i
 }
 
 void mpcodecs_draw_slice(sh_video_t *sh, unsigned char** src, int* stride, int w,int h, int x, int y) {
-  struct vf_instance_s* vf = sh->vfilter;
+  struct vf_instance *vf = sh->vfilter;
 
   if(vf->draw_slice)
     vf->draw_slice(vf,src,stride,w,h,x,y);

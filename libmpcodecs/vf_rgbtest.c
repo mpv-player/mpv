@@ -95,7 +95,7 @@ static void put_pixel(uint8_t *buf, int x, int y, int stride, int r, int g, int 
     }
 }
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
     if (vf->priv->w > 0) { d_width  = width  = vf->priv->w; }
@@ -105,7 +105,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,vf->priv->fmt);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
     int x, y;
     int w = vf->priv->w > 0 ? vf->priv->w : mpi->w;
@@ -134,7 +134,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
 //===========================================================================//
 
-static int query_format(struct vf_instance_s* vf, unsigned int outfmt){
+static int query_format(struct vf_instance *vf, unsigned int outfmt){
     unsigned int fmt=getfmt(outfmt);
     if(!fmt) return 0;
     return vf_next_query_format(vf,fmt) & (~VFCAP_CSP_SUPPORTED_BY_HW);

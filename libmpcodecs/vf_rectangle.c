@@ -31,7 +31,7 @@ struct vf_priv_s {
 };
 
 static int
-config(struct vf_instance_s* vf,
+config(struct vf_instance *vf,
        int width, int height, int d_width, int d_height,
        unsigned int flags, unsigned int outfmt)
 {
@@ -52,7 +52,7 @@ config(struct vf_instance_s* vf,
 }
 
 static int
-control(struct vf_instance_s* vf, int request, void *data)
+control(struct vf_instance *vf, int request, void *data)
 {
     const int *const tmp = data;
     switch(request){
@@ -83,7 +83,7 @@ control(struct vf_instance_s* vf, int request, void *data)
     return 0;
 }
 static int
-put_image(struct vf_instance_s* vf, mp_image_t* mpi, double pts){
+put_image(struct vf_instance *vf, mp_image_t* mpi, double pts){
     mp_image_t* dmpi;
     unsigned int bpp = mpi->bpp / 8;
     int x, y, w, h;

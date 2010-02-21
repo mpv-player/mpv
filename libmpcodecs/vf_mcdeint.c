@@ -178,7 +178,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
 
 }
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
         int i;
@@ -235,7 +235,7 @@ static int config(struct vf_instance_s* vf,
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static void get_image(struct vf_instance *vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
 return; //caused problems, dunno why
     // ok, we can do pp in-place (or pp disabled):
@@ -253,7 +253,7 @@ return; //caused problems, dunno why
     mpi->flags|=MP_IMGFLAG_DIRECT;
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
 
     if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
@@ -272,7 +272,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     return vf_next_put_image(vf,dmpi, pts);
 }
 
-static void uninit(struct vf_instance_s* vf){
+static void uninit(struct vf_instance *vf){
     if(!vf->priv) return;
 
 #if 0
@@ -294,7 +294,7 @@ static void uninit(struct vf_instance_s* vf){
 }
 
 //===========================================================================//
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt){
     switch(fmt){
 	case IMGFMT_YV12:
 	case IMGFMT_I420:

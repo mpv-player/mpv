@@ -934,7 +934,7 @@ static inline double get_time(void)
     return tv.tv_sec + tv.tv_usec * 1e-6;
 }
 
-static void get_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static void get_image(struct vf_instance *vf, mp_image_t *mpi)
 {
     struct vf_priv_s *p = vf->priv;
     static unsigned char **planes, planes_idx;
@@ -1138,7 +1138,7 @@ find_breaks(struct vf_priv_s *p, struct frame_stats *s)
 
 #define ITOC(X) (!(X) ? ' ' : (X) + ((X)>9 ? 'a'-10 : '0'))
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     mp_image_t *dmpi;
     struct vf_priv_s *p = vf->priv;
@@ -1336,7 +1336,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
     return show_fields ? vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE) : 0;
 }
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt)
+static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
     /* FIXME - support more formats */
     switch (fmt) {
@@ -1351,7 +1351,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
     return 0;
 }
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
 		  int width, int height, int d_width, int d_height,
 		  unsigned int flags, unsigned int outfmt)
 {
@@ -1396,7 +1396,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf, p->w, p->h, d_width, d_height, flags, outfmt);
 }
 
-static void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
     mp_msg(MSGT_VFILTER, MSGL_INFO, "diff_time: %.3f, merge_time: %.3f, "

@@ -31,7 +31,7 @@ struct vf_priv_s {
 	mp_image_t *last_mpi;
 };
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
 	mp_image_t *dmpi;
 
@@ -52,7 +52,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	return vf_next_put_image(vf, dmpi, pts);
 }
 
-static int control(struct vf_instance_s* vf, int request, void* data)
+static int control(struct vf_instance *vf, int request, void* data)
 {
 	switch (request) {
 	case VFCTRL_DUPLICATE_FRAME:
@@ -68,7 +68,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
 	return vf_next_control(vf, request, data);
 }
 
-static void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance *vf)
 {
 	free(vf->priv);
 }

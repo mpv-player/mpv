@@ -35,7 +35,7 @@ struct vf_priv_s {
 	long long out;
 };
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
 	mp_image_t *dmpi;
 	int ret = 0;
@@ -129,14 +129,14 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	return ret;
 }
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt)
 {
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance *vf)
 {
 	mp_msg(MSGT_VFILTER, MSGL_INFO, "softpulldown: %lld frames in, %lld frames out\n", vf->priv->in, vf->priv->out);
 	free(vf->priv);

@@ -42,7 +42,7 @@ struct vf_priv_s {
 	char *qbuf;
 };
 
-static void init_pullup(struct vf_instance_s* vf, mp_image_t *mpi)
+static void init_pullup(struct vf_instance *vf, mp_image_t *mpi)
 {
 	struct pullup_context *c = vf->priv->ctx;
 
@@ -78,7 +78,7 @@ static void init_pullup(struct vf_instance_s* vf, mp_image_t *mpi)
 
 
 #if 0
-static void get_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static void get_image(struct vf_instance *vf, mp_image_t *mpi)
 {
 	struct pullup_context *c = vf->priv->ctx;
 	struct pullup_buffer *b;
@@ -104,7 +104,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi)
 }
 #endif
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
 	struct pullup_context *c = vf->priv->ctx;
 	struct pullup_buffer *b;
@@ -254,7 +254,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	return ret;
 }
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt)
+static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
 	/* FIXME - support more formats */
 	switch (fmt) {
@@ -266,7 +266,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 	return 0;
 }
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt)
 {
@@ -274,7 +274,7 @@ static int config(struct vf_instance_s* vf,
 	return vf_next_config(vf, width, height, d_width, d_height, flags, outfmt);
 }
 
-static void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance *vf)
 {
 	pullup_free_context(vf->priv->ctx);
 	free(vf->priv);

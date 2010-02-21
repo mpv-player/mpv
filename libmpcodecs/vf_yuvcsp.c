@@ -34,7 +34,7 @@ struct vf_priv_s {
 
 //===========================================================================//
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
     return vf_next_config(vf, width, height, d_width, d_height, flags, outfmt);
@@ -48,7 +48,7 @@ static inline int clamp_c(int x){
     return (x > 240) ? 240 : (x < 16) ? 16 : x;
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     int i,j;
     uint8_t *y_in, *cb_in, *cr_in;
     uint8_t *y_out, *cb_out, *cr_out;
@@ -82,12 +82,12 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 //===========================================================================//
 
 /*
-static void uninit(struct vf_instance_s* vf){
+static void uninit(struct vf_instance *vf){
 	free(vf->priv);
 }
 */
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt){
     switch(fmt){
 	case IMGFMT_YV12:
 	case IMGFMT_I420:

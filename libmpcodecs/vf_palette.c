@@ -54,7 +54,7 @@ static unsigned int rgb_list[]={
 
 static unsigned int gray_pal[256];
 
-static unsigned int find_best(struct vf_instance_s* vf, unsigned int fmt){
+static unsigned int find_best(struct vf_instance *vf, unsigned int fmt){
     unsigned int best=0;
     int ret;
     unsigned int* p;
@@ -78,7 +78,7 @@ struct vf_priv_s {
     int pal_msg;
 };
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
     if (!vf->priv->fmt)
@@ -92,7 +92,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,vf->priv->fmt);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
     uint8_t *old_palette = mpi->planes[1];
 
@@ -178,7 +178,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
 //===========================================================================//
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt){
     int best=find_best(vf,fmt);
     if(!best) return 0; // no match
     return vf->next->query_format(vf->next,best);

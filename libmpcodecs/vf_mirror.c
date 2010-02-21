@@ -83,7 +83,7 @@ static void mirror(unsigned char* dst,unsigned char* src,int dststride,int srcst
 
 //===========================================================================//
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
 
     // hope we'll get DR buffer:

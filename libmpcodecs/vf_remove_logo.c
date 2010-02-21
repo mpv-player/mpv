@@ -670,7 +670,7 @@ static pgm_structure * generate_half_size_image(vf_instance_t * vf, pgm_structur
 /**
  * \brief Checks if YV12 is supported by the next filter.
  */
-static unsigned int find_best(struct vf_instance_s* vf){
+static unsigned int find_best(struct vf_instance *vf){
   int is_format_okay = vf->next->query_format(vf->next, IMGFMT_YV12);
   if ((is_format_okay & VFCAP_CSP_SUPPORTED_BY_HW) || (is_format_okay & VFCAP_CSP_SUPPORTED))
     return IMGFMT_YV12;
@@ -683,7 +683,7 @@ static unsigned int find_best(struct vf_instance_s* vf){
 /**
  * \brief Configure the filter and call the next filter's config function.
  */
-static int config(struct vf_instance_s* vf, int width, int height, int d_width, int d_height, unsigned int flags, unsigned int outfmt)
+static int config(struct vf_instance *vf, int width, int height, int d_width, int d_height, unsigned int flags, unsigned int outfmt)
 {
   if(!(((vf_priv_s *)vf->priv)->fmt=find_best(vf)))
     return 0;
@@ -764,7 +764,7 @@ static void convert_yv12(const vf_instance_t * const vf, const char * const sour
  * filter, has the logo removed by the filter, and is then sent to the next
  * filter.
  */
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
 
     dmpi=vf_get_image(vf->next,((vf_priv_s *)vf->priv)->fmt,
@@ -811,7 +811,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 /**
  * \brief Checks to see if the next filter accepts YV12 images.
  */
-static int query_format(struct vf_instance_s * vf, unsigned int fmt)
+static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
   if (fmt == IMGFMT_YV12)
     return vf->next->query_format(vf->next, IMGFMT_YV12);

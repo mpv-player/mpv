@@ -132,7 +132,7 @@ static void (*process)(unsigned char *dest, int dstride, unsigned char *src, int
 
 /* FIXME: add packed yuv version of process */
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
 	mp_image_t *dmpi;
 
@@ -161,7 +161,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	return vf_next_put_image(vf,dmpi, pts);
 }
 
-static int control(struct vf_instance_s* vf, int request, void* data)
+static int control(struct vf_instance *vf, int request, void* data)
 {
 	vf_equalizer_t *eq;
 
@@ -192,7 +192,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
 	return vf_next_control(vf, request, data);
 }
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt)
+static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
 	switch (fmt) {
 	case IMGFMT_YVU9:
@@ -213,7 +213,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 	return 0;
 }
 
-static void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance *vf)
 {
 	if (vf->priv->buf) free(vf->priv->buf);
 	free(vf->priv);

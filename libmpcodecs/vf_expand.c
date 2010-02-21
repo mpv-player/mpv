@@ -76,7 +76,7 @@ extern int opt_screen_size_y;
 //===========================================================================//
 #ifdef OSD_SUPPORT
 
-static struct vf_instance_s* vf=NULL; // fixme (needs sub.c changes)
+static struct vf_instance *vf=NULL; // fixme (needs sub.c changes)
 static int orig_w,orig_h;
 
 static void remove_func_2(int x0,int y0, int w,int h){
@@ -182,7 +182,7 @@ static void draw_func(int x0,int y0, int w,int h,unsigned char* src, unsigned ch
     }
 }
 
-static void draw_osd(struct vf_instance_s* vf_,int w,int h){
+static void draw_osd(struct vf_instance *vf_,int w,int h){
     vf=vf_;orig_w=w;orig_h=h;
 //    printf("======================================\n");
     if(vf->priv->exp_w!=w || vf->priv->exp_h!=h ||
@@ -213,7 +213,7 @@ static void draw_osd(struct vf_instance_s* vf_,int w,int h){
 #endif
 //===========================================================================//
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
     if(outfmt == IMGFMT_MPEGPES) {
@@ -268,7 +268,7 @@ static int config(struct vf_instance_s* vf,
 // codec -copy-> expand --DR--> vo
 // codec -copy-> expand -copy-> vo (worst case)
 
-static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static void get_image(struct vf_instance *vf, mp_image_t *mpi){
 //    if(mpi->type==MP_IMGTYPE_IPB) return; // not yet working
 #ifdef OSD_SUPPORT
     if(vf->priv->osd && (mpi->flags&MP_IMGFLAG_PRESERVE)){
@@ -313,7 +313,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     }
 }
 
-static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
+static void start_slice(struct vf_instance *vf, mp_image_t *mpi){
 //    printf("start_slice called! flag=%d\n",mpi->flags&MP_IMGFLAG_DRAW_CALLBACK);
     if(!vf->next->draw_slice){
 	mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
@@ -331,7 +331,7 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
     vf->priv->first_slice = 1;
 }
 
-static void draw_top_blackbar_slice(struct vf_instance_s* vf,
+static void draw_top_blackbar_slice(struct vf_instance *vf,
 				    unsigned char** src, int* stride, int w,int h, int x, int y){
     if(vf->priv->exp_y>0 && y == 0) {
 	vf_next_draw_slice(vf, vf->dmpi->planes, vf->dmpi->stride,
@@ -340,7 +340,7 @@ static void draw_top_blackbar_slice(struct vf_instance_s* vf,
 
 }
 
-static void draw_bottom_blackbar_slice(struct vf_instance_s* vf,
+static void draw_bottom_blackbar_slice(struct vf_instance *vf,
 				    unsigned char** src, int* stride, int w,int h, int x, int y){
     if(vf->priv->exp_y+vf->h<vf->dmpi->h && y+h == vf->h) {
 	unsigned char *src2[MP_MAX_PLANES];
@@ -360,7 +360,7 @@ static void draw_bottom_blackbar_slice(struct vf_instance_s* vf,
     }
 }
 
-static void draw_slice(struct vf_instance_s* vf,
+static void draw_slice(struct vf_instance *vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
 //    printf("draw_slice() called %d at %d\n",h,y);
 
@@ -383,7 +383,7 @@ static void draw_slice(struct vf_instance_s* vf,
     vf->priv->first_slice = 0;
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     if (vf->priv->passthrough) {
       mp_image_t *dmpi = vf_get_image(vf->next, IMGFMT_MPEGPES,
                                       MP_IMGTYPE_EXPORT, 0, mpi->w, mpi->h);
@@ -438,7 +438,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
 //===========================================================================//
 
-static int control(struct vf_instance_s* vf, int request, void* data){
+static int control(struct vf_instance *vf, int request, void* data){
 #ifdef OSD_SUPPORT
     switch(request){
     case VFCTRL_DRAW_OSD:
@@ -448,7 +448,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
     return vf_next_control(vf,request,data);
 }
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt){
   return vf_next_query_format(vf,fmt);
 }
 

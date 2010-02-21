@@ -285,7 +285,7 @@ static void copy_image(mp_image_t *dmpi, mp_image_t *mpi, int field)
 	}
 }
 
-static int do_put_image(struct vf_instance_s* vf, mp_image_t *dmpi)
+static int do_put_image(struct vf_instance *vf, mp_image_t *dmpi)
 {
 	struct vf_priv_s *p = vf->priv;
 	int dropflag;
@@ -313,7 +313,7 @@ static int do_put_image(struct vf_instance_s* vf, mp_image_t *dmpi)
 	return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
 	int ret=0;
 	mp_image_t *dmpi;
@@ -357,7 +357,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	return ret;
 }
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt)
+static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
 	/* FIXME - figure out which other formats work */
 	switch (fmt) {
@@ -369,14 +369,14 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 	return 0;
 }
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt)
 {
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance *vf)
 {
 	free(vf->priv);
 }

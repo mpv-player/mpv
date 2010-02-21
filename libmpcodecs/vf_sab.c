@@ -135,7 +135,7 @@ static int allocStuff(FilterParam *f, int width, int height){
 	return 0;
 }
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
 
@@ -160,7 +160,7 @@ static void freeBuffers(FilterParam *f){
 	f->distCoeff=NULL;
 }
 
-static void uninit(struct vf_instance_s* vf){
+static void uninit(struct vf_instance *vf){
 	if(!vf->priv) return;
 
 	freeBuffers(&vf->priv->luma);
@@ -238,7 +238,7 @@ if((x/32)&1){
 	}
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	int cw= mpi->w >> mpi->chroma_x_shift;
 	int ch= mpi->h >> mpi->chroma_y_shift;
 
@@ -257,7 +257,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
 //===========================================================================//
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt){
 	switch(fmt)
 	{
 	case IMGFMT_YV12:

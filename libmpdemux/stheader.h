@@ -108,7 +108,7 @@ typedef struct {
   int disp_w,disp_h;      // display size (filled by fileformat parser)
   // output driver/filters: (set by libmpcodecs core)
   unsigned int outfmtidx;
-  struct vf_instance_s *vfilter;          // the video filter chain, used for this video stream
+  struct vf_instance *vfilter;          // the video filter chain, used for this video stream
   int vf_initialized;
 #ifdef CONFIG_DYNAMIC_PLUGINS
   void *dec_handle;

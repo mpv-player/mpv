@@ -61,7 +61,7 @@ static int checkline(unsigned char* src,int stride,int len,int bpp){
 
 //===========================================================================//
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
     vf->priv->x1=width - 1;
@@ -72,7 +72,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
     int bpp=mpi->bpp/8;
     int w,h,x,y,shrink_by;
@@ -164,7 +164,7 @@ if(++vf->priv->fno>0){	// ignore first 2 frames - they may be empty
     return vf_next_put_image(vf,dmpi, pts);
 }
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt) {
+static int query_format(struct vf_instance *vf, unsigned int fmt) {
   switch(fmt) {
     // the default limit value works only right with YV12 right now.
     case IMGFMT_YV12:

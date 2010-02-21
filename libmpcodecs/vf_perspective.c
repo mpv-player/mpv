@@ -102,7 +102,7 @@ static double getCoeff(double d){
 	return coeff;
 }
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
 	int i, j;
@@ -129,7 +129,7 @@ static int config(struct vf_instance_s* vf,
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static void uninit(struct vf_instance_s* vf){
+static void uninit(struct vf_instance *vf){
 	if(!vf->priv) return;
 
 	if(vf->priv->pv) free(vf->priv->pv);
@@ -258,7 +258,7 @@ static inline void resampleLinear(uint8_t *dst, uint8_t *src, int w, int h, int 
 	}
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	int cw= mpi->w >> mpi->chroma_x_shift;
 	int ch= mpi->h >> mpi->chroma_y_shift;
 
@@ -289,7 +289,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
 //===========================================================================//
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt){
 	switch(fmt)
 	{
 	case IMGFMT_YV12:

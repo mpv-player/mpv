@@ -35,7 +35,7 @@ struct vf_priv_s {
 
 //===========================================================================//
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
         int pixel_stride= (width+15)&~15; //FIXME this is ust a guess ... especially for non planar its somewhat bad one
@@ -63,7 +63,7 @@ static int config(struct vf_instance_s* vf,
         (d_width*vf->priv->stridefactor)>>1, 2*d_height/vf->priv->stridefactor, flags, outfmt);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     if(mpi->flags&MP_IMGFLAG_DIRECT){
 	// we've used DR, so we're ready...
 	return vf_next_put_image(vf,(mp_image_t*)mpi->priv, pts);
@@ -89,7 +89,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
 //===========================================================================//
 
-static void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance *vf)
 {
 	free(vf->priv);
 }

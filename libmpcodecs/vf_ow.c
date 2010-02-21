@@ -203,7 +203,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 //    printf("%f\n", sum/height/width);
 }
 
-static int config(struct vf_instance_s* vf, int width, int height, int d_width, int d_height, unsigned int flags, unsigned int outfmt){
+static int config(struct vf_instance *vf, int width, int height, int d_width, int d_height, unsigned int flags, unsigned int outfmt){
     int h= (height+15)&(~15);
     int i,j;
 
@@ -216,7 +216,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static void get_image(struct vf_instance *vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
     // ok, we can do pp in-place (or pp disabled):
     vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
@@ -233,7 +233,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mpi->flags|=MP_IMGFLAG_DIRECT;
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
 
     if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
@@ -254,7 +254,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     return vf_next_put_image(vf,dmpi, pts);
 }
 
-static void uninit(struct vf_instance_s* vf){
+static void uninit(struct vf_instance *vf){
     int i,j;
     if(!vf->priv) return;
 
@@ -270,7 +270,7 @@ static void uninit(struct vf_instance_s* vf){
 }
 
 //===========================================================================//
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt){
     switch(fmt){
         case IMGFMT_YVU9:
         case IMGFMT_IF09:

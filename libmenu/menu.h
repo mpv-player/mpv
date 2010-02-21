@@ -114,6 +114,6 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
 
 void menu_draw_box(mp_image_t* mpi, unsigned char grey, unsigned char alpha, int x, int y, int w, int h);
 
-void vf_menu_pause_update(struct vf_instance_s* vf);
+void vf_menu_pause_update(struct vf_instance *vf);
 
 #endif /* MPLAYER_MENU_H */

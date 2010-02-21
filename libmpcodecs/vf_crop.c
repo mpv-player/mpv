@@ -44,7 +44,7 @@ extern int opt_screen_size_y;
 
 //===========================================================================//
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
     // calculate the missing parameters:
@@ -86,7 +86,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,vf->priv->crop_w,vf->priv->crop_h,d_width,d_height,flags,outfmt);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
     if (mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)
 	return vf_next_put_image(vf,vf->dmpi, pts);
@@ -113,12 +113,12 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     return vf_next_put_image(vf,dmpi, pts);
 }
 
-static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
+static void start_slice(struct vf_instance *vf, mp_image_t *mpi){
     vf->dmpi = vf_get_image(vf->next, mpi->imgfmt, mpi->type, mpi->flags,
 	vf->priv->crop_w, vf->priv->crop_h);
 }
 
-static void draw_slice(struct vf_instance_s* vf,
+static void draw_slice(struct vf_instance *vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
     unsigned char *src2[3];
     src2[0] = src[0];

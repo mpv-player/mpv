@@ -35,7 +35,7 @@ struct vf_priv_s {
 	float aspect;
 };
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
 	int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt)
 {

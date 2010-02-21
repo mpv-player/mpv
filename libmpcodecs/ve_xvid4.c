@@ -374,7 +374,7 @@ static const char *errorstring(int err);
  *==========================================================================*/
 
 static int
-config(struct vf_instance_s* vf,
+config(struct vf_instance *vf,
        int width, int height, int d_width, int d_height,
        unsigned int flags, unsigned int outfmt)
 {
@@ -439,7 +439,7 @@ config(struct vf_instance_s* vf,
  *==========================================================================*/
 
 static void
-uninit(struct vf_instance_s* vf)
+uninit(struct vf_instance *vf)
 {
 
 	xvid_mplayer_module_t *mod = (xvid_mplayer_module_t *)vf->priv;
@@ -477,7 +477,7 @@ uninit(struct vf_instance_s* vf)
  *==========================================================================*/
 
 static int
-control(struct vf_instance_s* vf, int request, void* data)
+control(struct vf_instance *vf, int request, void* data)
 {
 xvid_mplayer_module_t *mod = (xvid_mplayer_module_t *)vf->priv;
 
@@ -495,7 +495,7 @@ xvid_mplayer_module_t *mod = (xvid_mplayer_module_t *)vf->priv;
  *==========================================================================*/
 
 static int
-query_format(struct vf_instance_s* vf, unsigned int fmt)
+query_format(struct vf_instance *vf, unsigned int fmt)
 {
 	switch(fmt){
 	case IMGFMT_YV12:
@@ -514,7 +514,7 @@ query_format(struct vf_instance_s* vf, unsigned int fmt)
  *==========================================================================*/
 
 static int
-put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
 	int size;
 	xvid_enc_stats_t stats;

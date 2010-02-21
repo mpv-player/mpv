@@ -345,9 +345,9 @@ struct vf_priv_s {
 #define mux_v (vf->priv->mux)
 #define lavc_venc_context (vf->priv->context)
 
-static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts);
+static int encode_frame(struct vf_instance *vf, AVFrame *pic, double pts);
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
     int size, i;
@@ -716,7 +716,7 @@ static int config(struct vf_instance_s* vf,
     return 1;
 }
 
-static int control(struct vf_instance_s* vf, int request, void* data){
+static int control(struct vf_instance *vf, int request, void* data){
 
     switch(request){
         case VFCTRL_FLUSH_FRAMES:
@@ -728,7 +728,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
     }
 }
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt){
     switch(fmt){
     case IMGFMT_YV12:
     case IMGFMT_IYUV:
@@ -765,7 +765,7 @@ static double psnr(double d){
     return -10.0*log(d)/log(10);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     AVFrame *pic= vf->priv->pic;
 
     pic->data[0]=mpi->planes[0];
@@ -788,7 +788,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     return encode_frame(vf, pic, pts) >= 0;
 }
 
-static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts){
+static int encode_frame(struct vf_instance *vf, AVFrame *pic, double pts){
     const char pict_type_char[5]= {'?', 'I', 'P', 'B', 'S'};
     int out_size;
     double dts;
@@ -893,7 +893,7 @@ static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts){
     return out_size;
 }
 
-static void uninit(struct vf_instance_s* vf){
+static void uninit(struct vf_instance *vf){
 
     if(lavc_param_psnr){
         double f= lavc_venc_context->width*lavc_venc_context->height*255.0*255.0;

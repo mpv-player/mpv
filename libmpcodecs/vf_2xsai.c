@@ -281,7 +281,7 @@ static void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 
 //===========================================================================//
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
 
@@ -290,7 +290,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,2*width,2*height,2*d_width,2*d_height,flags,outfmt);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
 
     // hope we'll get DR buffer:
@@ -307,7 +307,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
 //===========================================================================//
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt){
     switch(fmt){
 //    case IMGFMT_BGR15:
 //    case IMGFMT_BGR16:

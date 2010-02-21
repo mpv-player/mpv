@@ -42,7 +42,7 @@ struct vf_priv_s {
 
 #define MAXROWSIZE 1200
 
-static int config (struct vf_instance_s* vf,
+static int config (struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt)
 {
@@ -79,7 +79,7 @@ static int config (struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static int put_image (struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+static int put_image (struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     char rrow0[MAXROWSIZE];
     char rrow1[MAXROWSIZE];
