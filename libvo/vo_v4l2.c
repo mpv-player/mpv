@@ -42,6 +42,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "libmpdemux/mpeg_packetizer.h"
+#include "vo_v4l2.h"
 
 #define DEFAULT_MPEG_DECODER "/dev/video16"
 #define V4L2_VO_HDR "VO: [v4l2]"
