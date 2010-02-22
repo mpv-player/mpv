@@ -38,8 +38,15 @@ typedef struct vd_functions_s
 // NULL terminated array of all drivers
 extern const vd_functions_t * const mpcodecs_vd_drivers[];
 
+extern int flip;
+extern int fullscreen;
+extern int opt_screen_size_x;
+extern int opt_screen_size_y;
+extern int softzoom;
 extern int vd_use_slices;
+extern int vidmode;
 extern float movie_aspect;
+extern float screen_size_xy;
 
 #define VDCTRL_QUERY_FORMAT 3 /* test for availabilty of a format */
 #define VDCTRL_QUERY_MAX_PP_LEVEL 4 /* test for postprocessing support (max level) */

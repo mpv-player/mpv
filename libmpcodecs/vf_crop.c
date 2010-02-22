@@ -26,6 +26,7 @@
 
 #include "img_format.h"
 #include "mp_image.h"
+#include "vd.h"
 #include "vf.h"
 
 #include "m_option.h"
@@ -38,9 +39,6 @@ static const struct vf_priv_s {
   -1,-1,
   -1,-1
 };
-
-extern int opt_screen_size_x;
-extern int opt_screen_size_y;
 
 //===========================================================================//
 

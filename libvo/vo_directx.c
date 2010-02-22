@@ -31,6 +31,7 @@
 #include "video_out_internal.h"
 #include "fastmemcpy.h"
 #include "input/input.h"
+#include "libmpcodecs/vd.h"
 #include "osdep/keycodes.h"
 #include "input/mouse.h"
 #include "mp_msg.h"
@@ -89,8 +90,6 @@ static RECT monitor_rect;	                        //monitor coordinates
 static float window_aspect;
 static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO) = NULL;
 static RECT last_rect = {0xDEADC0DE, 0xDEADC0DE, 0xDEADC0DE, 0xDEADC0DE};
-
-extern int vidmode;
 
 /*****************************************************************************
  * DirectDraw GUIDs.

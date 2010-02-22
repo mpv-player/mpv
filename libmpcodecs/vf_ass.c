@@ -34,6 +34,7 @@
 
 #include "img_format.h"
 #include "mp_image.h"
+#include "vd.h"
 #include "vf.h"
 
 #include "libvo/fastmemcpy.h"
@@ -66,9 +67,6 @@ static const struct vf_priv_s {
 	unsigned char* planes[3];
 	unsigned char* dirty_rows;
 } vf_priv_dflt;
-
-extern int opt_screen_size_x;
-extern int opt_screen_size_y;
 
 extern ass_track_t* ass_track;
 extern float sub_delay;

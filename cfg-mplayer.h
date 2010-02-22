@@ -24,6 +24,7 @@
  */
 
 #include "cfg-common.h"
+#include "libmpcodecs/vd.h"
 #include "libvo/vo_zr.h"
 
 extern int key_fifo_size;
@@ -38,11 +39,6 @@ extern char *lirc_configfile;
 extern float vo_panscanrange;
 /* only used at startup (setting these values from configfile) */
 extern char *vo_geometry;
-
-extern int opt_screen_size_x;
-extern int opt_screen_size_y;
-extern int fullscreen;
-extern int vidmode;
 
 extern char *ao_outputfilename;
 extern int ao_pcm_waveheader;

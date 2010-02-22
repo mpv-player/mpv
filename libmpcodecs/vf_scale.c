@@ -27,6 +27,7 @@
 
 #include "img_format.h"
 #include "mp_image.h"
+#include "vd.h"
 #include "vf.h"
 #include "fmt-conversion.h"
 #include "mpbswap.h"
@@ -57,10 +58,6 @@ static struct vf_priv_s {
   NULL,
   NULL
 };
-
-extern int opt_screen_size_x;
-extern int opt_screen_size_y;
-extern float screen_size_xy;
 
 //===========================================================================//
 

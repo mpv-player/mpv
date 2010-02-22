@@ -28,11 +28,6 @@ extern char *mp_msg_charset;
 extern int mp_msg_color;
 extern int mp_msg_module;
 
-// codec/filter opts: (defined at libmpcodecs/vd.c)
-extern float screen_size_xy;
-extern int softzoom;
-extern int flip;
-
 /* defined in codec-cfg.c */
 extern char * codecs_file;
 

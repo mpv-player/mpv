@@ -28,6 +28,7 @@
 #include "m_config.h"
 #include "m_option.h"
 #include "get_path.h"
+#include "libmpcodecs/vd.h"
 #include "libvo/sub.h"
 #include "libvo/video_out.h"
 #include "stream/stream.h"

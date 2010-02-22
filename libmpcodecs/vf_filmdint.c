@@ -27,6 +27,7 @@
 
 #include "img_format.h"
 #include "mp_image.h"
+#include "vd.h"
 #include "vf.h"
 #include "cmmx.h"
 
@@ -96,9 +97,6 @@ struct vf_priv_s {
 #define PPR { 2000, 2000, 0, 2000 }
 static const struct frame_stats ppzs = {PPZ,PPZ,PPZ,PPZ,PPZ,PPZ,PPZ,0,0,9999};
 static const struct frame_stats pprs = {PPR,PPR,PPR,PPR,PPR,PPR,PPR,0,0,9999};
-
-extern int opt_screen_size_x;
-extern int opt_screen_size_y;
 
 #ifndef MIN
 #define        MIN(a,b) (((a)<(b))?(a):(b))

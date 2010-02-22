@@ -28,6 +28,7 @@
 
 #include "img_format.h"
 #include "mp_image.h"
+#include "vd.h"
 #include "vf.h"
 
 #include "libvo/fastmemcpy.h"
@@ -69,9 +70,6 @@ static struct vf_priv_s {
   0,
   0
 };
-
-extern int opt_screen_size_x;
-extern int opt_screen_size_y;
 
 //===========================================================================//
 #ifdef OSD_SUPPORT

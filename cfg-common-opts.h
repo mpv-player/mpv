@@ -20,7 +20,7 @@
 #define MPLAYER_CFG_COMMON_OPTS_H
 
 #include "config.h"
-
+#include "libmpcodecs/vd.h"
 #include "osdep/priority.h"
 
 // ------------------------- common options --------------------

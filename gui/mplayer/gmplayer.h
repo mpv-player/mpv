@@ -31,8 +31,6 @@ extern int             mplMiddleMenu;
 
 extern char          * dvd_device;
 extern char          * cdrom_device;
-extern int             fullscreen;
-extern int             flip;
 
 void mplInit( void * disp );
 
