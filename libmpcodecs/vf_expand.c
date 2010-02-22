@@ -470,7 +470,7 @@ static int vf_open(vf_instance_t *vf, char *args){
 }
 
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
-static m_option_t vf_opts_fields[] = {
+static const m_option_t vf_opts_fields[] = {
   {"w", ST_OFF(cfg_exp_w), CONF_TYPE_INT, 0, 0 ,0, NULL},
   {"h", ST_OFF(cfg_exp_h), CONF_TYPE_INT, 0, 0 ,0, NULL},
   {"x", ST_OFF(cfg_exp_x), CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL},
@@ -481,7 +481,7 @@ static m_option_t vf_opts_fields[] = {
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 
-static m_struct_t vf_opts = {
+static const m_struct_t vf_opts = {
   "expand",
   sizeof(struct vf_priv_s),
   &vf_priv_dflt,

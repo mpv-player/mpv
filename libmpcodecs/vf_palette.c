@@ -37,14 +37,14 @@
 // routines are incorrrect.  they assume the palette to be of the same
 // depth as the output, which is incorrect. --Joey
 
-static unsigned int bgr_list[]={
+static const unsigned int bgr_list[]={
     IMGFMT_BGR32,
     IMGFMT_BGR24,
 //    IMGFMT_BGR16,
 //    IMGFMT_BGR15,
     0
 };
-static unsigned int rgb_list[]={
+static const unsigned int rgb_list[]={
     IMGFMT_RGB32,
     IMGFMT_RGB24,
 //    IMGFMT_RGB16,
@@ -57,7 +57,7 @@ static unsigned int gray_pal[256];
 static unsigned int find_best(struct vf_instance *vf, unsigned int fmt){
     unsigned int best=0;
     int ret;
-    unsigned int* p;
+    const unsigned int* p;
     if(fmt==IMGFMT_BGR8) p=bgr_list;
     else if(fmt==IMGFMT_RGB8) p=rgb_list;
     else return 0;

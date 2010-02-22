@@ -235,13 +235,13 @@ static int vf_open(vf_instance_t *vf, char *args)
 }
 
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
-static m_option_t vf_opts_fields[] = {
+static const m_option_t vf_opts_fields[] = {
   {"brightness", ST_OFF(brightness), CONF_TYPE_INT, M_OPT_RANGE,-100 ,100, NULL},
   {"contrast", ST_OFF(contrast), CONF_TYPE_INT, M_OPT_RANGE,-100 ,100, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 
-static m_struct_t vf_opts = {
+static const m_struct_t vf_opts = {
   "eq",
   sizeof(struct vf_priv_s),
   &vf_priv_dflt,
