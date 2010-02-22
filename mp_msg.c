@@ -22,18 +22,11 @@
 #include <string.h>
 
 #include "config.h"
+#include "osdep/getch2.h"
 
 #ifdef CONFIG_ICONV
 #include <iconv.h>
 #include <errno.h>
-/**
- * \brief gets the name of the system's terminal character set
- * \return a malloced string indicating the system charset
- *
- * Be warned that this function on many systems is in no way thread-safe
- * since it modifies global data
- */
-char* get_term_charset(void);
 #endif
 
 #if defined(FOR_MENCODER)

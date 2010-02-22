@@ -24,6 +24,8 @@
 #ifndef MPLAYER_GETCH2_H
 #define MPLAYER_GETCH2_H
 
+#include "config.h"
+
 /* Screen size. Initialized by load_termcap() and get_screen_size() */
 extern int screen_width;
 extern int screen_height;
@@ -43,6 +45,17 @@ void getch2_disable(void);
 
 /* Read a character or a special key code (see keycodes.h) */
 void getch2(void);
+
+#ifdef CONFIG_ICONV
+/**
+ * \brief gets the name of the system's terminal character set
+ * \return a malloced string indicating the system charset
+ *
+ * Be warned that this function on many systems is in no way thread-safe
+ * since it modifies global data
+ */
+char *get_term_charset(void);
+#endif
 
 /* slave cmd function for Windows and OS/2 */
 int mp_input_slave_cmd_func(int fd,char* dest,int size);
