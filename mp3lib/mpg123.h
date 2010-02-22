@@ -129,6 +129,15 @@ void dct36_3dnow(real *, real *, real *, real *, real *);
 void dct36_3dnowex(real *, real *, real *, real *, real *);
 void dct36_sse(real *, real *, real *, real *, real *);
 
+void dct64_MMX(short *, short *, real *);
+void dct64_MMX_3dnow(short *, short *, real *);
+void dct64_MMX_3dnowex(short *, short *, real *);
+void dct64_sse(short *, short *, real *);
+void dct64_altivec(real *, real *, real *);
+void (*dct64_MMX_func)(short *, short *, real *);
+
+void mp3lib_dct64(real *, real *, real *);
+
 typedef int (*synth_func_t)( real *,int,short * );
 typedef void (*dct36_func_t)(real *,real *,real *,real *,real *);
 
