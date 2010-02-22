@@ -86,7 +86,7 @@ int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 	return VCD_SECTOR_DATA*vcd_get_msf(vcd);
 }
 
-int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
+static int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 {
 	struct CDTrackInfo entry;
 
@@ -117,7 +117,7 @@ int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 	return VCD_SECTOR_DATA*vcd_get_msf(vcd);
 }
 
-mp_vcd_priv_t* vcd_read_toc(int fd)
+static mp_vcd_priv_t* vcd_read_toc(int fd)
 {
 	dk_cd_read_disc_info_t tochdr;
 	struct CDDiscInfo hdr;

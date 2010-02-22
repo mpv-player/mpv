@@ -144,7 +144,7 @@ vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
   return VCD_SECTOR_DATA * vcd_get_msf(vcd);
 }
 
-int
+static int
 vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 {
   if (!read_toc_entry(vcd,
@@ -153,7 +153,7 @@ vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
   return VCD_SECTOR_DATA * vcd_get_msf(vcd);
 }
 
-mp_vcd_priv_t*
+static mp_vcd_priv_t*
 vcd_read_toc(int fd)
 {
   struct ioc_toc_header tochdr;

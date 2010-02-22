@@ -63,14 +63,14 @@ int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
     return VCD_SECTOR_DATA * (sect + 2);
 }
 
-int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
+static int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 {
     if (track < vcd->toc.FirstTrack || track > vcd->toc.LastTrack)
 	return -1;
     return VCD_SECTOR_DATA * (vcd_get_msf(vcd, track + 1));
 }
 
-mp_vcd_priv_t* vcd_read_toc(int fd)
+static mp_vcd_priv_t* vcd_read_toc(int fd)
 {
     DWORD dwBytesReturned;
     HANDLE hd;

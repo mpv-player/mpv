@@ -72,7 +72,7 @@ int vcd_seek_to_track(mp_vcd_priv_t* vcd,int track){
   return VCD_SECTOR_DATA*vcd_get_msf(vcd);
 }
 
-int vcd_get_track_end(mp_vcd_priv_t* vcd,int track){
+static int vcd_get_track_end(mp_vcd_priv_t* vcd,int track){
   vcd->entry.cdte_format = CDROM_MSF;
   vcd->entry.cdte_track  = track<vcd->tochdr.cdth_trk1?(track+1):CDROM_LEADOUT;
   if (ioctl(vcd->fd, CDROMREADTOCENTRY, &vcd->entry)) {
@@ -82,7 +82,7 @@ int vcd_get_track_end(mp_vcd_priv_t* vcd,int track){
   return VCD_SECTOR_DATA*vcd_get_msf(vcd);
 }
 
-mp_vcd_priv_t* vcd_read_toc(int fd){
+static mp_vcd_priv_t* vcd_read_toc(int fd){
   struct cdrom_tochdr tochdr;
   mp_vcd_priv_t* vcd;
   int i, min = 0, sec = 0, frame = 0;
