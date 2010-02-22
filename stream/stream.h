@@ -21,6 +21,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "url.h"
 #include <string.h>
 #include <inttypes.h>
 #include <sys/types.h>
@@ -89,9 +90,24 @@
 #define STREAM_CTRL_SET_ANGLE 11
 
 
-#ifdef CONFIG_NETWORK
-#include "network.h"
-#endif
+typedef enum {
+	streaming_stopped_e,
+	streaming_playing_e
+} streaming_status;
+
+typedef struct streaming_control {
+	URL_t *url;
+	streaming_status status;
+	int buffering;	// boolean
+	unsigned int prebuffer_size;
+	char *buffer;
+	unsigned int buffer_size;
+	unsigned int buffer_pos;
+	unsigned int bandwidth;	// The downstream available
+	int (*streaming_read)( int fd, char *buffer, int buffer_size, struct streaming_control *stream_ctrl );
+	int (*streaming_seek)( int fd, off_t pos, struct streaming_control *stream_ctrl );
+	void *data;
+} streaming_ctrl_t;
 
 struct stream_st;
 typedef struct stream_info_st {
@@ -141,6 +157,10 @@ typedef struct stream_st {
 #endif
   unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];
 } stream_t;
+
+#ifdef CONFIG_NETWORK
+#include "network.h"
+#endif
 
 int stream_fill_buffer(stream_t *s);
 int stream_seek_long(stream_t *s, off_t pos);

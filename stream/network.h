@@ -35,6 +35,7 @@
 #include <arpa/inet.h>
 #endif
 
+#include "stream.h"
 #include "url.h"
 #include "http.h"
 
@@ -51,25 +52,6 @@ typedef struct {
 	const char *mime_type;
 	int demuxer_type;
 } mime_struct_t;
-
-typedef enum {
-	streaming_stopped_e,
-	streaming_playing_e
-} streaming_status;
-
-typedef struct streaming_control {
-	URL_t *url;
-	streaming_status status;
-	int buffering;	// boolean
-	unsigned int prebuffer_size;
-	char *buffer;
-	unsigned int buffer_size;
-	unsigned int buffer_pos;
-	unsigned int bandwidth;	// The downstream available
-	int (*streaming_read)( int fd, char *buffer, int buffer_size, struct streaming_control *stream_ctrl );
-	int (*streaming_seek)( int fd, off_t pos, struct streaming_control *stream_ctrl );
-	void *data;
-} streaming_ctrl_t;
 
 streaming_ctrl_t *streaming_ctrl_new(void);
 int streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size);
