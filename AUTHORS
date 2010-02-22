@@ -768,8 +768,11 @@ Syrjälä, Ville <syrjala@sci.fi>
 Szecsi, Gabor <deje@miki.hu>
     * directsound AO driver
 
-Tackaberry, Jason <tack@sault.org>
+Tackaberry, Jason <tack@urandom.ca>
     * second DVD ripping guide
+    * multichannel audio fixes
+    * support for 8 channel audio
+    * various minor features and bug fixes
 
 Tam, Howell (Pigeon) <pigeon@pigeond.net>
     * native libcaca driver (-vo caca)
