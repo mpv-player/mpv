@@ -89,6 +89,12 @@ void print_wave_header(WAVEFORMATEX *h, int verbose_level){
       mp_msg(MSGT_HEADER, verbose_level, "mp3.nFramesPerBlock=%d\n",h2->nFramesPerBlock);
       mp_msg(MSGT_HEADER, verbose_level, "mp3.nCodecDelay=%d\n",h2->nCodecDelay);
   }
+  else if (h->wFormatTag == 0xfffe && h->cbSize >= 22) {
+      WAVEFORMATEXTENSIBLE *h2 = (WAVEFORMATEXTENSIBLE *)h;
+      mp_msg(MSGT_HEADER, verbose_level, "ex.wValidBitsPerSample=%d\n", h2->wValidBitsPerSample);
+      mp_msg(MSGT_HEADER, verbose_level, "ex.dwChannelMask=0x%X\n", h2->dwChannelMask);
+      mp_msg(MSGT_HEADER, verbose_level, "ex.SubFormat=%d (0x%X)\n", h2->SubFormat, h2->SubFormat);
+  }
   else if (h->cbSize > 0)
   {
     int i;
