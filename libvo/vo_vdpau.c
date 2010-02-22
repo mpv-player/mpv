@@ -1785,16 +1785,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_GET_EOSD_RES: {
         mp_eosd_res_t *r = data;
-        r->mt = r->mb = r->ml = r->mr = 0;
-        if (vo_fs) {
-            r->w = vo->opts->vo_screenwidth;
-            r->h = vo->opts->vo_screenheight;
-            r->ml = r->mr = vc->border_x;
-            r->mt = r->mb = vc->border_y;
-        } else {
-            r->w = vo->dwidth;
-            r->h = vo->dheight;
-        }
+        r->w = vo->dwidth;
+        r->h = vo->dheight;
+        r->ml = r->mr = vc->border_x;
+        r->mt = r->mb = vc->border_y;
         return VO_TRUE;
     }
     case VOCTRL_REDRAW_OSD:
