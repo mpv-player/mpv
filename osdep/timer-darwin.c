@@ -35,7 +35,7 @@ const char *timer_name = "Darwin accurate";
 
 
 /* the core sleep function, uses floats and is used in MPlayer G2 */
-float sleep_accurate(float time_frame)
+static float sleep_accurate(float time_frame)
 {
 	uint64_t deadline = time_frame / timebase_ratio + mach_absolute_time();
 
