@@ -83,9 +83,10 @@
 #include "codec-cfg.h"
 
 #include "edl.h"
-
+#include "mplayer.h"
 #include "spudec.h"
 #include "vobsub.h"
+#include "access_mpcontext.h"
 
 #include "osdep/getch2.h"
 #include "osdep/timer.h"
