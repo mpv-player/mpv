@@ -208,7 +208,7 @@ static int preinit(const char *arg)
 	return vo_mpegpes_fd2;
 }
 
-static int my_ao_write(unsigned char* data,int len){
+static int my_ao_write(const unsigned char* data,int len){
     int orig_len = len;
 #ifdef CONFIG_DVB
 #define NFD   1
