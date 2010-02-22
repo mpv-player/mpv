@@ -47,8 +47,6 @@ extern const mime_struct_t mime_type_table[];
 extern int stream_cache_size;
 extern int network_bandwidth;
 
-int http_seek(stream_t *stream, off_t pos);
-
 typedef struct {
   unsigned metaint;
   unsigned metapos;
