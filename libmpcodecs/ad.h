@@ -27,7 +27,7 @@ typedef mp_codec_info_t ad_info_t;
 /* interface of video decoder drivers */
 typedef struct ad_functions_s
 {
-	ad_info_t *info;
+        const ad_info_t *info;
         int (*preinit)(sh_audio_t *sh);
         int (*init)(sh_audio_t *sh);
         void (*uninit)(sh_audio_t *sh);
