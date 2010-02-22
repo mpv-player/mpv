@@ -251,7 +251,6 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->priv=calloc(1, sizeof(struct vf_priv_s));
     vf->priv->vo = (const vo_functions_t *)args;
     if(!video_out) return 0; // no vo ?
-//    if(video_out->preinit(args)) return 0; // preinit failed
     return 1;
 }
 
