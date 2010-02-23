@@ -387,6 +387,8 @@ static int _has_mmx = 0;  // used by layer2.c, layer3.c to pre-scale coeffs
 /*           PUBLIC FUNCTIONS                  */
 /******************************************************************************/
 
+void (*dct64_MMX_func)(short *, short *, real *);
+
 #include "layer2.c"
 #include "layer3.c"
 #include "layer1.c"

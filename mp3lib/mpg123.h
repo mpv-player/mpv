@@ -134,7 +134,7 @@ void dct64_MMX_3dnow(short *, short *, real *);
 void dct64_MMX_3dnowex(short *, short *, real *);
 void dct64_sse(short *, short *, real *);
 void dct64_altivec(real *, real *, real *);
-void (*dct64_MMX_func)(short *, short *, real *);
+extern void (*dct64_MMX_func)(short *, short *, real *);
 
 void mp3lib_dct64(real *, real *, real *);
 
