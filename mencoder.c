@@ -62,7 +62,7 @@
 #include "m_config.h"
 #include "parser-mecmd.h"
 #include "parser-cfg.h"
-
+#include "mp_fifo.h"
 #include "get_path.h"
 
 #include "stream/stream.h"
@@ -72,7 +72,7 @@
 #include "libmpdemux/mp3_hdr.h"
 #include "libmpdemux/muxer.h"
 
-
+#include "input/input.h"
 #include "libvo/video_out.h"
 
 #include "libaf/af_format.h"
