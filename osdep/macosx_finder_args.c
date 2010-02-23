@@ -23,6 +23,7 @@
 #include "m_option.h"
 #include "m_config.h"
 #include "playtree.h"
+#include "macosx_finder_args.h"
 
 static play_tree_t *files=NULL;
 

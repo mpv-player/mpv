@@ -36,6 +36,7 @@
 #include "m_config.h"
 #include "playtree.h"
 #include "parser-mpcmd.h"
+#include "osdep/macosx_finder_args.h"
 
 static int recursion_depth = 0;
 static int mode = 0;
@@ -91,9 +92,6 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
   int no_more_opts = 0;
   int opt_exit = 0; // flag indicating whether mplayer should exit without playing anything
   play_tree_t *last_parent, *last_entry = NULL, *root;
-#ifdef CONFIG_MACOSX_FINDER
-  play_tree_t *macosx_finder_args(m_config_t *, int , char **);
-#endif
 
 #ifdef MP_DEBUG
   assert(config != NULL);
