@@ -238,5 +238,7 @@ void mp_msg(int mod, int lev, const char *format, ... ){
     header = tmp[strlen(tmp)-1] == '\n' || tmp[strlen(tmp)-1] == '\r';
 
     fprintf(stream, "%s", tmp);
+    if (mp_msg_color)
+        fprintf(stream, "\033[0m");
     fflush(stream);
 }
