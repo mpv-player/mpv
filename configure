@@ -2534,6 +2534,7 @@ if test "$cc_vendor" = "gnu" ; then
   cc_check -Wno-pointer-sign && CFLAGS="-Wno-pointer-sign $CFLAGS"
   cc_check -Wdisabled-optimization && CFLAGS="-Wdisabled-optimization $CFLAGS"
   cc_check -Wundef && CFLAGS="-Wundef $CFLAGS"
+  cc_check -Wmissing-prototypes && CFLAGS="-Wmissing-prototypes $CFLAGS"
 else
   CFLAGS="-D_ISOC99_SOURCE -D_BSD_SOURCE $CFLAGS"
 fi
