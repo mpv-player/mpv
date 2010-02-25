@@ -186,16 +186,15 @@ const vo_functions_t* const video_out_drivers[] =
 #ifdef CONFIG_XV
         &video_out_xv,
 #endif
+#ifdef CONFIG_GL
+        &video_out_gl,
+#endif
 #ifdef CONFIG_X11
         &video_out_x11,
         &video_out_xover,
 #endif
 #ifdef CONFIG_GL
-        &video_out_gl,
         &video_out_gl2,
-#endif
-#ifdef CONFIG_MATRIXVIEW
-        &video_out_matrixview,
 #endif
 #ifdef CONFIG_DGA
         &video_out_dga,
@@ -212,6 +211,9 @@ const vo_functions_t* const video_out_drivers[] =
 #endif
 #ifdef CONFIG_SVGALIB
         &video_out_svga,
+#endif
+#ifdef CONFIG_MATRIXVIEW
+        &video_out_matrixview,
 #endif
 #ifdef CONFIG_AA
         &video_out_aa,
