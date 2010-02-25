@@ -86,7 +86,7 @@ stream_t* open_cdda(char *dev, char *track);
 static cd_toc_t cdtoc[100];
 static int cdtoc_last_track;
 
-int read_toc(const char *dev)
+static int read_toc(const char *dev)
 {
     int first = 0, last = -1;
     int i;
@@ -256,7 +256,7 @@ int cdd_identify(const char *dev)
     return cdtoc_last_track;
 }
 
-unsigned int cddb_sum(int n)
+static unsigned int cddb_sum(int n)
 {
     unsigned int ret;
 
@@ -268,7 +268,7 @@ unsigned int cddb_sum(int n)
     return ret;
 }
 
-unsigned long cddb_discid(int tot_trks)
+static unsigned long cddb_discid(int tot_trks)
 {
     unsigned int i, t = 0, n = 0;
 
@@ -284,7 +284,7 @@ unsigned long cddb_discid(int tot_trks)
 
 
 
-int cddb_http_request(char *command,
+static int cddb_http_request(char *command,
                       int (*reply_parser)(HTTP_header_t*, cddb_data_t*),
                       cddb_data_t *cddb_data)
 {
@@ -341,7 +341,7 @@ int cddb_http_request(char *command,
     return ret;
 }
 
-int cddb_read_cache(cddb_data_t *cddb_data)
+static int cddb_read_cache(cddb_data_t *cddb_data)
 {
     char file_name[100];
     struct stat stats;
@@ -387,7 +387,7 @@ int cddb_read_cache(cddb_data_t *cddb_data)
     return 0;
 }
 
-int cddb_write_cache(cddb_data_t *cddb_data)
+static int cddb_write_cache(cddb_data_t *cddb_data)
 {
     // We have the file, save it for cache.
     struct stat file_stat;
@@ -441,7 +441,7 @@ int cddb_write_cache(cddb_data_t *cddb_data)
     return 0;
 }
 
-int cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
+static int cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
 {
     unsigned long disc_id;
     char category[100];
@@ -500,7 +500,7 @@ int cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
     return 0;
 }
 
-int cddb_request_titles(cddb_data_t *cddb_data)
+static int cddb_request_titles(cddb_data_t *cddb_data)
 {
     char command[1024];
     sprintf(command, "cddb+read+%s+%08lx",
@@ -508,7 +508,7 @@ int cddb_request_titles(cddb_data_t *cddb_data)
     return cddb_http_request(command, cddb_read_parse, cddb_data);
 }
 
-int cddb_parse_matches_list(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
+static int cddb_parse_matches_list(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
 {
     char album_title[100];
     char *ptr = NULL;
@@ -547,7 +547,7 @@ int cddb_parse_matches_list(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
     return 0;
 }
 
-int cddb_query_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
+static int cddb_query_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
 {
     char album_title[100];
     char *ptr = NULL;
@@ -614,7 +614,7 @@ blues c711930d Santana / Supernatural
     return -1;
 }
 
-int cddb_proto_level_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
+static int cddb_proto_level_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
 {
     int max;
     int ret, status;
@@ -646,12 +646,12 @@ int cddb_proto_level_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
     return -1;
 }
 
-int cddb_get_proto_level(cddb_data_t *cddb_data)
+static int cddb_get_proto_level(cddb_data_t *cddb_data)
 {
     return cddb_http_request("stat", cddb_proto_level_parse, cddb_data);
 }
 
-int cddb_freedb_sites_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
+static int cddb_freedb_sites_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
 {
     int ret, status;
 
@@ -675,12 +675,12 @@ int cddb_freedb_sites_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
     return -1;
 }
 
-int cddb_get_freedb_sites(cddb_data_t *cddb_data)
+static int cddb_get_freedb_sites(cddb_data_t *cddb_data)
 {
     return cddb_http_request("sites", cddb_freedb_sites_parse, cddb_data);
 }
 
-void cddb_create_hello(cddb_data_t *cddb_data)
+static void cddb_create_hello(cddb_data_t *cddb_data)
 {
     char host_name[51];
     char *user_name;
@@ -703,7 +703,7 @@ void cddb_create_hello(cddb_data_t *cddb_data)
             user_name, host_name, "MPlayer", VERSION);
 }
 
-int cddb_retrieve(cddb_data_t *cddb_data)
+static int cddb_retrieve(cddb_data_t *cddb_data)
 {
     char offsets[1024], command[1024];
     char *ptr;
@@ -813,7 +813,7 @@ int cddb_resolve(const char *dev, char **xmcd_file)
 /***************
  * xmcd parser *
  ***************/
-char *xmcd_parse_dtitle(cd_info_t *cd_info, char *line)
+static char *xmcd_parse_dtitle(cd_info_t *cd_info, char *line)
 {
     char *ptr, *album;
     ptr = strstr(line, "DTITLE=");
@@ -838,7 +838,7 @@ char *xmcd_parse_dtitle(cd_info_t *cd_info, char *line)
     return ptr;
 }
 
-char *xmcd_parse_dgenre(cd_info_t *cd_info, char *line)
+static char *xmcd_parse_dgenre(cd_info_t *cd_info, char *line)
 {
     char *ptr;
     ptr = strstr(line, "DGENRE=");
@@ -853,7 +853,7 @@ char *xmcd_parse_dgenre(cd_info_t *cd_info, char *line)
     return ptr;
 }
 
-char *xmcd_parse_ttitle(cd_info_t *cd_info, char *line)
+static char *xmcd_parse_ttitle(cd_info_t *cd_info, char *line)
 {
     unsigned int track_nb;
     unsigned long sec, off;
