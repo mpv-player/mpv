@@ -59,7 +59,7 @@ extern int ass_hinting;
 ass_track_t* ass_default_track(ass_library_t* library);
 int ass_process_subtitle(ass_track_t* track, subtitle* sub);
 ass_track_t* ass_read_subdata(ass_library_t* library, sub_data* subdata, double fps);
-ass_track_t* ass_read_stream(ass_library_t* library, char *fname, char *charset);
+ass_track_t* ass_read_stream(ass_library_t* library, const char *fname, char *charset);
 
 void ass_configure(ass_renderer_t* priv, int w, int h, int hinting);
 void ass_configure_fonts(ass_renderer_t* priv);

@@ -218,7 +218,7 @@ ass_track_t* ass_read_subdata(ass_library_t* library, sub_data* subdata, double 
 	return track;
 }
 
-ass_track_t* ass_read_stream(ass_library_t* library, char *fname, char *charset) {
+ass_track_t* ass_read_stream(ass_library_t* library, const char *fname, char *charset) {
 	int i;
 	char *buf = NULL;
 	ass_track_t *track;
