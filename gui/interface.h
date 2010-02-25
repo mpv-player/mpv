@@ -163,7 +163,7 @@ extern int use_gui;
 
 void guiInit( void );
 void guiDone( void );
-int  guiGetEvent( int type,char * arg );
+int  guiGetEvent( int type,void * arg );
 void guiEventHandling( void );
 void guiLoadFont( void );
 void guiLoadSubtitle( char * name );

@@ -523,15 +523,15 @@ static void remove_vf( char * str )
   }
 }
 
-int guiGetEvent( int type,char * arg )
+int guiGetEvent( int type,void * arg )
 {
   const ao_functions_t *audio_out = NULL;
   const vo_functions_t *video_out = NULL;
   mixer_t *mixer = NULL;
 
- stream_t * stream = (stream_t *) arg;
+ stream_t * stream = arg;
 #ifdef CONFIG_DVDREAD
- dvd_priv_t * dvdp = (dvd_priv_t *) arg;
+ dvd_priv_t * dvdp = arg;
 #endif
 
  if (guiIntfStruct.mpcontext) {
@@ -543,8 +543,8 @@ int guiGetEvent( int type,char * arg )
  switch ( type )
   {
    case guiXEvent:
-        guiIntfStruct.event_struct=(void *)arg;
-        wsEvents( wsDisplay,(XEvent *)arg,NULL );
+        guiIntfStruct.event_struct=arg;
+        wsEvents( wsDisplay,arg,NULL );
         gtkEventHandling();
         break;
    case guiCEvent:
@@ -574,12 +574,12 @@ int guiGetEvent( int type,char * arg )
 	  else wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
 	break;
    case guiSetContext:
-	guiIntfStruct.mpcontext=(void *)arg;
+	guiIntfStruct.mpcontext=arg;
    case guiSetDemuxer:
-	guiIntfStruct.demuxer=(void *)arg;
+	guiIntfStruct.demuxer=arg;
 	break;
    case guiSetAfilter:
-	guiIntfStruct.afilter=(void *)arg;
+	guiIntfStruct.afilter=arg;
 	break;
    case guiSetShVideo:
 	 {
@@ -675,7 +675,7 @@ int guiGetEvent( int type,char * arg )
 	guiIntfStruct.sh_video=arg;
 	if ( arg )
 	 {
-	  sh_video_t * sh = (sh_video_t *)arg;
+	  sh_video_t * sh = arg;
 	  guiIntfStruct.FPS=sh->fps;
 	 }
 
