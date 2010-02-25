@@ -144,7 +144,7 @@ int vo_gamma_contrast = 1000;
 int vo_gamma_saturation = 1000;
 int vo_gamma_hue = 1000;
 
-extern vd_functions_t* mpvdec; // FIXME!
+extern const vd_functions_t* mpvdec; // FIXME!
 
 #define SCREEN_SIZE_X 1
 #define SCREEN_SIZE_Y 1

@@ -57,7 +57,7 @@ int field_dominance=-1;
 
 int divx_quality=0;
 
-vd_functions_t* mpvdec=NULL;
+const vd_functions_t* mpvdec=NULL;
 
 int get_video_quality_max(sh_video_t *sh_video){
   vf_instance_t* vf=sh_video->vfilter;
