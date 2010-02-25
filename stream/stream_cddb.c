@@ -81,8 +81,6 @@
 #define DEFAULT_FREEDB_SERVER "freedb.freedb.org"
 #define DEFAULT_CACHE_DIR     "/.cddb/"
 
-stream_t* open_cdda(char *dev, char *track);
-
 static cd_toc_t cdtoc[100];
 static int cdtoc_last_track;
 
