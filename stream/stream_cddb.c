@@ -74,6 +74,10 @@
 #include "network.h"
 #include "libavutil/common.h"
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 #define DEFAULT_FREEDB_SERVER "freedb.freedb.org"
 #define DEFAULT_CACHE_DIR     "/.cddb/"
 
@@ -349,11 +353,7 @@ int cddb_read_cache(cddb_data_t *cddb_data)
 
     sprintf(file_name, "%s%08lx", cddb_data->cache_dir, cddb_data->disc_id);
 
-    file_fd = open(file_name, O_RDONLY
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-    | O_BINARY
-#endif
-   );
+    file_fd = open(file_name, O_RDONLY | O_BINARY);
     if (file_fd < 0) {
         mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_NoCacheFound);
         return -1;
