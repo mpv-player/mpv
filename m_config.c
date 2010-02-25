@@ -37,10 +37,10 @@
 #define MAX_PROFILE_DEPTH 20
 
 static int
-parse_profile(const m_option_t *opt, const char *name, char *param, void *dst, int src);
+parse_profile(const m_option_t *opt, const char *name, const char *param, void *dst, int src);
 
 static void
-set_profile(const m_option_t *opt, void* dst, void* src);
+set_profile(const m_option_t *opt, void* dst, const void* src);
 
 static int
 show_profile(m_option_t *opt, char* name, char *param);
@@ -515,7 +515,7 @@ m_config_set_profile(m_config_t* config, m_profile_t* p) {
 }
 
 static int
-parse_profile(const m_option_t *opt, const char *name, char *param, void *dst, int src)
+parse_profile(const m_option_t *opt, const char *name, const char *param, void *dst, int src)
 {
   m_config_t* config = opt->priv;
   char** list = NULL;
@@ -551,7 +551,7 @@ parse_profile(const m_option_t *opt, const char *name, char *param, void *dst, i
 }
 
 static void
-set_profile(const m_option_t *opt, void *dst, void *src) {
+set_profile(const m_option_t *opt, void *dst, const void *src) {
   m_config_t* config = opt->priv;
   m_profile_t* p;
   char** list = NULL;
