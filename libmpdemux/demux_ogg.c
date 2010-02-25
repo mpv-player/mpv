@@ -1251,7 +1251,7 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   demux_packet_t *dp;
   sh_audio_t *sh_audio = demuxer->audio->sh;
   int np;
-  uint8_t *extradata = sh_audio->wf + 1;
+  uint8_t *extradata = (uint8_t *)(sh_audio->wf + 1);
   int i;
   unsigned char *p = NULL,*buf;
   int plen;
