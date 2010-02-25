@@ -58,9 +58,6 @@ static void *ThreadProc(void *s);
 #include "cache2.h"
 extern int use_gui;
 
-int stream_fill_buffer(stream_t *s);
-int stream_seek_long(stream_t *s,off_t pos);
-
 typedef struct {
   // constats:
   unsigned char *buffer;      // base pointer of the alllocated buffer memory
