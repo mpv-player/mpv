@@ -140,7 +140,7 @@ static const stream_info_t* const auto_open_streams[] = {
   NULL
 };
 
-static stream_t* open_stream_plugin(const stream_info_t* sinfo, char* filename,
+static stream_t* open_stream_plugin(const stream_info_t* sinfo, const char* filename,
                                     int mode, char** options, int* file_format,
                                     int* ret, char** redirected_url)
 {
@@ -208,7 +208,7 @@ static stream_t* open_stream_plugin(const stream_info_t* sinfo, char* filename,
 }
 
 
-stream_t* open_stream_full(char* filename,int mode, char** options, int* file_format) {
+stream_t* open_stream_full(const char* filename,int mode, char** options, int* file_format) {
   int i,j,l,r;
   const stream_info_t* sinfo;
   stream_t* s;
@@ -250,7 +250,7 @@ stream_t* open_stream_full(char* filename,int mode, char** options, int* file_fo
   return NULL;
 }
 
-stream_t* open_output_stream(char* filename,char** options) {
+stream_t* open_output_stream(const char* filename, char** options) {
   int file_format; //unused
   if(!filename) {
     mp_msg(MSGT_OPEN,MSGL_ERR,"open_output_stream(), NULL filename, report this bug\n");
