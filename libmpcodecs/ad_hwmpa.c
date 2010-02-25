@@ -151,7 +151,7 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...)
 				return CONTROL_FALSE;
 		case ADCTRL_SKIP_FRAME:
 			start = mpa_sync(sh, 2, &len, NULL, NULL, NULL, NULL, NULL);
-			if(len < 0)
+			if(start < 0)
 				return CONTROL_FALSE;
 
 			sh->a_in_buffer_len -= start;
