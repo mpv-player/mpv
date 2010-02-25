@@ -39,6 +39,7 @@
 #include "osdep/keycodes.h"
 #include "stream/stream.h"
 #include "libvo/video_out.h"
+#include "libmpcodecs/vd.h"
 #include "gui/interface.h"
 #include "gui/mplayer/gmplayer.h"
 #include "gui.h"
