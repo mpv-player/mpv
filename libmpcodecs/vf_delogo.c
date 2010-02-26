@@ -233,7 +233,7 @@ static int vf_open(vf_instance_t *vf, char *args){
 }
 
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
-static m_option_t vf_opts_fields[] = {
+static const m_option_t vf_opts_fields[] = {
     { "x", ST_OFF(xoff), CONF_TYPE_INT, 0, 0, 0, NULL },
     { "y", ST_OFF(yoff), CONF_TYPE_INT, 0, 0, 0, NULL },
     { "w", ST_OFF(lw), CONF_TYPE_INT, 0, 0, 0, NULL },
@@ -243,7 +243,7 @@ static m_option_t vf_opts_fields[] = {
     { NULL, NULL, 0, 0, 0, 0, NULL }
 };
 
-static m_struct_t vf_opts = {
+static const m_struct_t vf_opts = {
     "delogo",
     sizeof(struct vf_priv_s),
     &vf_priv_dflt,
