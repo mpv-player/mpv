@@ -1,4 +1,4 @@
-.\" synced with r30336
+.\" synced with r30610
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2010 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -462,8 +462,6 @@ Attiva/\:disattiva il televideo.
 Va alla pagina televideo successiva/\:precedente.
 .RE
 .PD 1
-.PP
-.RS
 .
 .TP
 .B controlli da mouse
@@ -2942,7 +2940,7 @@ driver di uscita audio PulseAudio
 .PD 0
 .RSs
 .IPs "[<host>][:<sink di uscita>]"
-specifica l'host e facoltativamente il sink di uscita da usare.
+Specifica l'host e facoltativamente il sink di uscita da usare.
 Una stringa <host> vuota usa una connessione locale, "localhost" usa
 un trasferimento via rete (molto probabilmente non è quello che vuoi).
 .RE
@@ -2983,6 +2981,22 @@ Driver di uscita audio DirectX DirectSound
 Seleziona il numero di dispositivo da utilizzare.
 Riproducendo un file con l'opzione \-v viene visualizzata la lista dei
 dispositivi disponibili.
+.RE
+.PD 1
+.
+.TP
+.B kai (solo OS/2)
+driver di uscita video OS/2 KAI
+.PD 0
+.RSs
+.IPs uniaud
+Forza la modalità UNIAUD.
+.IPs dart
+Forza la modalità DART.
+.IPs (no)share
+Apre l'audio in modalità condivisa o esclusiva.
+.IPs bufsize=<dimensione>
+Imposta la dimensione del buffer a <dimensione> in campioni (default: 2048).
 .RE
 .PD 1
 .
@@ -3716,8 +3730,10 @@ Usa nochroma\-deint per usare solo la luminanza ed accellerare il
 deinterlacciamento avanzato.
 Utile con memoria video lenta.
 .IPs pullup
-Cerca di applicare il telecine inverso, richiede un deinterlacciamento
-temporale adattivo al movimento.
+Cerca di evitare il deinterlacciamento per i fotogrammi progressivi, utile per
+guardare contenuto in telecine, ha bisogno di hardware video veloce per alte
+risoluzioni.
+Funziona solo con un deinterlacciamento temporale adattivo al movimento.
 .IPs colorspace
 Seleziona lo spazio colore per la conversione da YUV a RGB (default: 1, BT.601).
 In linea di massima si dovrebbero usare BT.601 per contenuto con una
@@ -4030,8 +4046,9 @@ Nella maggior parte dei casi è probabilmente più lento di una conversione
 software verso RGB.
 .IPs yuv=<n>
 Seleziona il tipo di conversione da YUV a RGB.
+Il default è una selezione automatica tra i valori 0 e 2.
 .RSss
-0: Usa conversione software (default).
+0: Usa conversione software.
 Compatibile con tutte le versioni di OpenGL.
 Fornisce controllo di luminosità, contrasto e saturazione.
 .br
@@ -4715,7 +4732,7 @@ Specifica le opzioni avanzate dei filtri audio:
 .IPs force=<0\-7>
 Forza l'inserimento del filtro audio a uno dei seguenti:
 .RSss
-0: Inserimento completamente automatico dei filtri.
+0: Inserimento completamente automatico dei filtri (identico a 1 per ora).
 .br
 1: Ottimizza per la precisione (default).
 .br
@@ -6055,7 +6072,7 @@ Posizione dell'immagine da mantenere, il default è il centro.
 .PD 1
 .
 .TP
-.B cropdetect[=limite:arrotondamento]
+.B cropdetect[=limite:arrotondamento[:azzeramento]]
 Calcola i parametri necessari per applicare automaticamente il filtro 'crop' e
 stampa i parametri raccomandati su stdout.
 .PD 0
@@ -6069,6 +6086,14 @@ Valore per cui devono essere divisibili i valori di larghezza/\:altezza (default
 Lo scostamento viene regolato automaticamente per centrare il video.
 Utilizza 2 per avere solo dimensioni pari (necessario per i filmati in formato 4:2:2).
 Con molti codec video conviene utilizzare 16 quando si effettua la codifica.
+.br
+.IPs <azzeramento>
+Contatore che determina il numero di fotogrammi dopo i quali cropdetect azzererà
+la più ampia area rilevata e ricomincerà a cercare la migliore superficie per
+il ritaglio (default: 0).
+Questo può tornare utile quando il logo di un canale falsa l'area del video.
+Un valore di 0 disattiva l'opzione e restituisce l'area più ampia rilevata
+durante la riproduzione.
 .RE
 .PD 1
 .
@@ -7403,11 +7428,11 @@ Altezza completa a metà della frequenza (framerate).
 .
 .TP
 .B tfields[=modo[:posizione_campo]]
-Separazione temporale dei campi \- divide i campi in fotogrammi,
-raddoppiando il framerate di uscita.
-Come il filtro telecine, tfield lavorerà correttamente solo con
-MEncoder, e solo se entrambe le opzioni \-fps e \-ofps sono
-caricate al valore desiderato (doppio) del framerate.
+Separazione temporale dei campi \- divide i campi in fotogrammi, raddoppiando
+la frequenza dei fotogrammi (framerate) di uscita.
+Come il filtro telecine, tfields potrebbe lavorare in modo non corretto, tranne
+quando usato con MEncoder e con entrambe le opzioni \-fps e \-ofps impostate al
+valore desiderato (doppio) della frequenza fotogrammi.
 .PD 0
 .RSs
 .IPs <modo>
@@ -10554,17 +10579,17 @@ ma non azzerano il contatore "keyint".
 .
 .TP
 .B frameref=<1\-16>
-Numero di fotogrammi precedenti utilizzati come previsori nei fotogrammi
-B e P (default: 1).
+Numero di fotogrammi precedenti utilizzati come predittori nei fotogrammi B e P
+(default: 3).
 E' efficace con alcuni anime o cartoni animati, ma su filmati ripresi dal vivo
 i miglioramenti calano rapidamente dopo circa 6 fotogrammi di riferimento.
 Non ha effetto sulla velocità di decodifica ma incrementa la memoria necessaria
 alla decodifica.
-Alcuni decodificatori possono gestire un massimo di 15 fotogrammi di riferimento.
+Alcuni decodificatori possono gestire al massimo 15 fotogrammi di riferimento.
 .
 .TP
 .B bframes=<0\-16>
-Numero massimo di fotogrammi B consecutivi tra fotogrammi I e P (default: 0).
+numero massimo di fotogrammi B consecutivi tra fotogrammi I e P (default: 3)
 .
 .TP
 .B (no)b_adapt
@@ -10842,30 +10867,30 @@ Come 2, ma utilizza una rifinitura del quarto di pixel più lenta.
 .IPs 4
 Esegue una stima del movimento a quarto di pixel rapida su tutti i tipi di
 macroblocchi candidati.
-Poi seleziona il tipo migliore.
+Poi seleziona il tipo migliore con una metrica SATD.
 Infine finisce la rifinitura a quarto di pixel per quel tipo.
 .IPs 5
 Esegue la miglior stima del movimento a quarto di pixel in tutti i
-tipi di macroblocchi candidati prima di selezionare il tipo migliore.
+tipi di macroblocco candidati prima di selezionare il tipo migliore.
 Inoltre rifinisce con una metrica SATD i due vettori di movimento usati nei
 macroblocchi bidirezionali, invece di riutilizzare i vettori delle ricerche
 in avanti e all'indietro.
 .IPs 6
-Abilita l'ottimizzazione rate-distorsion (?) dei tipi di macroblocco nei
-fotogrammi I e P (default).
+Abilita l'ottimizzazione rate-distorsion dei tipi di macroblocco nei
+fotogrammi I e P.
 .IPs 7
 Abilita l'ottimizzazione rate-distortion dei tipi di macroblocco in tutti i
-fotogrammi (qualità migliore).
+fotogrammi (default).
 .IPs 8
-Abilita l'ottimizzazione rate-distortion dei vettori di movimento nei
-fotogrammi I e P.
+Abilita l'ottimizzazione rate-distortion dei vettori di movimento e le modalità
+di previsione intra nei fotogrammi I e P.
 .IPs 9
-Abilita l'ottimizzazione rate-distortion dei vettori di movimento in tutti i
-fotogrammi (qualità migliore).
+Abilita l'ottimizzazione rate-distortion dei vettori di movimento e le modalità
+di previsione intra in tutti i fotogrammi (qualità migliore).
 .RE
 .PD 1
 .RS
-Sopra, 'tutti i tipi di macroblocco candidati' non indica esattamente tutti
+Sopra, "tutti i tipi di macroblocco candidati" non indica esattamente tutti
 i tipi abilitati: 4x4, 4x8, 8x4 vengono provati solo se 8x8 è migliore di
 16x16.
 .RE
@@ -10890,9 +10915,9 @@ quantizzazione ottimale della rate-distortion
 .PD 0
 .RSs
 .IPs 0
-disabilitata (default)
+disabilitata
 .IPs 1
-abilitata solo per la codifica finale
+abilitata solo per la codifica finale (default)
 .IPs 2
 abilitata durante ogni decisione di modalità (lento, richiede subq>=6)
 .RE
@@ -11047,8 +11072,8 @@ Utilizza questo parametro solo se sai cosa significa ed hai effettivamente
 bisogno di usarlo.
 .
 .TP
-.B threads=<1\-4>
-Genera diversi thread per codificare in parallelo su CPU multiple (default: 1).
+.B threads=<0\-16>
+Genera diversi thread per codificare in parallelo su CPU multiple (default: 0).
 Si ottiene una leggera penalizzazione della compressione.
 0 oppure 'auto' dicono a x264 di rilevare il numero delle CPU ed utilizzare un
 appropriato numero di thread.
