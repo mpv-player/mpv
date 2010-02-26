@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 rev. 30611
+.\" sync with en/mplayer.1 rev. 30677
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -1446,6 +1446,9 @@ MPlayer 不阻止你装载产生于不同 AVI 的索引文件,
 .TP
 .B \-mc <每帧秒数>
 每帧的最大 A-V 同步修正(以秒为单位)。
+.br
+对于 mencoder，\-mc 0 应当总是与 \-noskip 一同使用，否则几乎必然导致音视频
+不同步。
 .
 .TP
 .B \-mf <选项1:选项2:...>
