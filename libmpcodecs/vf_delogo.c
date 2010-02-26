@@ -189,7 +189,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
     return 0;
 }
 
-static unsigned int fmt_list[]={
+static const unsigned int fmt_list[]={
     IMGFMT_YV12,
     IMGFMT_I420,
     IMGFMT_IYUV,

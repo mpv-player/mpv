@@ -159,7 +159,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 
 extern int divx_quality;
 
-static unsigned int fmt_list[]={
+static const unsigned int fmt_list[]={
     IMGFMT_YV12,
     IMGFMT_I420,
     IMGFMT_IYUV,

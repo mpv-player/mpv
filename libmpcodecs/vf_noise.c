@@ -416,7 +416,7 @@ static void parse(FilterParam *fp, char* args){
 	if(fp->strength) initNoise(fp);
 }
 
-static unsigned int fmt_list[]={
+static const unsigned int fmt_list[]={
     IMGFMT_YV12,
     IMGFMT_I420,
     IMGFMT_IYUV,
