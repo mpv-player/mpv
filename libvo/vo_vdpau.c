@@ -30,7 +30,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <dlfcn.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <limits.h>
@@ -102,15 +101,12 @@ struct vdpctx {
     bool                               preemption_acked;
     bool                               preemption_user_notified;
     unsigned int                       last_preemption_retry_fail;
-    VdpDeviceCreateX11                *vdp_device_create;
     VdpGetProcAddress                 *vdp_get_proc_address;
 
     VdpPresentationQueueTarget         flip_target;
     VdpPresentationQueue               flip_queue;
     uint64_t                           last_vdp_time;
     unsigned int                       last_sync_update;
-
-    void                              *vdpau_lib_handle;
 
     /* output_surfaces[NUM_OUTPUT_SURFACES] is misused for OSD. */
 #define osd_surface vc->output_surfaces[NUM_OUTPUT_SURFACES]
@@ -455,7 +451,7 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
         {0, -1}
     };
 
-    vdp_st = vc->vdp_device_create(x11->display, x11->screen,&vc->vdp_device,
+    vdp_st = vdp_device_create_x11(x11->display, x11->screen,&vc->vdp_device,
                                    &vc->vdp_get_proc_address);
     if (vdp_st != VDP_STATUS_OK) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error when calling "
@@ -1579,8 +1575,6 @@ static void uninit(struct vo *vo)
     // Free bitstream buffers allocated by FFmpeg
     for (int i = 0; i < MAX_VIDEO_SURFACES; i++)
         av_freep(&vc->surface_render[i].bitstream_buffers);
-
-    dlclose(vc->vdpau_lib_handle);
 }
 
 static int preinit(struct vo *vo, const char *arg)
@@ -1624,25 +1618,8 @@ static int preinit(struct vo *vo, const char *arg)
     if (vc->deint)
         vc->deint_type = vc->deint;
 
-    char *vdpaulibrary = "libvdpau.so.1";
-    char *vdpau_device_create = "vdp_device_create_x11";
-    vc->vdpau_lib_handle = dlopen(vdpaulibrary, RTLD_LAZY);
-    if (!vc->vdpau_lib_handle) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "[vdpau] Could not open dynamic library %s\n", vdpaulibrary);
+    if (!vo_init(vo))
         return -1;
-    }
-    vc->vdp_device_create = dlsym(vc->vdpau_lib_handle, vdpau_device_create);
-    if (!vc->vdp_device_create) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Could not find function %s in %s\n",
-               vdpau_device_create, vdpaulibrary);
-        dlclose(vc->vdpau_lib_handle);
-        return -1;
-    }
-    if (!vo_init(vo)) {
-        dlclose(vc->vdpau_lib_handle);
-        return -1;
-    }
 
     // After this calling uninit() should work to free resources
 
@@ -1650,7 +1627,6 @@ static int preinit(struct vo *vo, const char *arg)
         if (vc->vdp->device_destroy)
             vc->vdp->device_destroy(vc->vdp_device);
         vo_x11_uninit(vo);
-        dlclose(vc->vdpau_lib_handle);
         return -1;
     }
 
