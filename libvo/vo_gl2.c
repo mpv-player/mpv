@@ -865,7 +865,7 @@ static int preinit(const char *arg)
 #ifdef CONFIG_GL_WIN32
   gltype = GLTYPE_W32;
 #endif
-  use_yuv = 0;
+  use_yuv = -1;
   use_glFinish = 1;
   if (subopt_parse(arg, subopts) != 0) {
     mp_msg(MSGT_VO, MSGL_FATAL,
@@ -884,8 +884,25 @@ static int preinit(const char *arg)
             "\n" );
     return -1;
   }
-    if(!init_mpglcontext(&glctx, gltype)) return -1;
+    if(!init_mpglcontext(&glctx, gltype)) goto err_out;
+    if (use_yuv == -1) {
+      const char *extensions;
+#ifdef CONFIG_GL_WIN32
+      if (config_w32(320, 200, 320, 200, VOFLAG_HIDDEN, "", 0) == -1)
+#else
+      if (config_glx(320, 200, 320, 200, VOFLAG_HIDDEN, "", 0) == -1)
+#endif
+        goto err_out;
+      if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
+        goto err_out;
+      extensions = GetString(GL_EXTENSIONS);
+      use_yuv = strstr(extensions, "GL_ARB_fragment_program") ? 2 : 0;
+    }
     return 0;
+
+err_out:
+    uninit();
+    return -1;
 }
 
 static int control(uint32_t request, void *data, ...)
