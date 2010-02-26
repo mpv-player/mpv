@@ -69,12 +69,12 @@ IMPLEMENT_IUNKNOWN(CMediaBuffer)
 CMediaBuffer* CMediaBufferCreate(unsigned long maxlen, void* mem,
 				 unsigned long len, int copy)
 {
-    CMediaBuffer* This = (CMediaBuffer*) malloc(sizeof(CMediaBuffer));
+    CMediaBuffer* This = malloc(sizeof(CMediaBuffer));
 
     if (!This)
         return NULL;
 
-    This->vt = (IMediaBuffer_vt*) malloc(sizeof(IMediaBuffer_vt));
+    This->vt = malloc(sizeof(IMediaBuffer_vt));
     if (!This->vt)
     {
         CMediaBuffer_Destroy(This);

@@ -89,8 +89,7 @@ static int net_read(int fd, char* buf, int len) {
 
 static mp_net_stream_packet_t* read_packet(int fd) {
   uint16_t len;
-  mp_net_stream_packet_t* pack =
-    (mp_net_stream_packet_t*)malloc(sizeof(mp_net_stream_packet_t));
+  mp_net_stream_packet_t* pack = malloc(sizeof(mp_net_stream_packet_t));
 
   if(!net_read(fd,(char*)pack,sizeof(mp_net_stream_packet_t))) {
     free(pack);

@@ -139,7 +139,7 @@ mp_msg(MSGT_WIN32,MSGL_INFO,"\n");
         mp_msg(MSGT_WIN32,MSGL_ERR,"Cannot open Compressor data file!\n");
         return NULL;
       }
-      drvdata = (char *) malloc(st.st_size);
+      drvdata = malloc(st.st_size);
       if (fread(drvdata, st.st_size, 1, fd) != 1) {
         mp_msg(MSGT_WIN32,MSGL_ERR,"Cannot read Compressor data file!\n");
         fclose(fd);

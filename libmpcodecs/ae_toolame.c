@@ -165,7 +165,7 @@ int mpae_init_toolame(audio_encoder_t *encoder)
 	else
 		mp_msg(MSGT_MENCODER, MSGL_ERR, "ae_toolame, Toolame can't encode > 2 channels, exiting\n");
 
-	ctx = (mpae_toolame_ctx *) calloc(1, sizeof(mpae_toolame_ctx));
+	ctx = calloc(1, sizeof(mpae_toolame_ctx));
 	if(ctx == NULL)
 	{
 		mp_msg(MSGT_MENCODER, MSGL_ERR, "ae_toolame, couldn't alloc a %d bytes context, exiting\n", sizeof(mpae_toolame_ctx));

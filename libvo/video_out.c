@@ -482,7 +482,7 @@ range_t *str2range(char *s)
 	for (i = 0; *endptr; i++) {
 		if (*s == ',')
 			goto out_err;
-		if (!(r = (range_t *) realloc(r, sizeof(*r) * (i + 2)))) {
+		if (!(r = realloc(r, sizeof(*r) * (i + 2)))) {
 			mp_msg(MSGT_GLOBAL, MSGL_WARN,"can't realloc 'r'\n");
 			return NULL;
 		}

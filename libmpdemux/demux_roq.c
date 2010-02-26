@@ -191,7 +191,7 @@ static demuxer_t* demux_open_roq(demuxer_t* demuxer)
       }
 
       // index the chunk
-      roq_data->chunks = (roq_chunk_t *)realloc(roq_data->chunks,
+      roq_data->chunks = realloc(roq_data->chunks,
         (roq_data->total_chunks + 1) * sizeof (roq_chunk_t));
       roq_data->chunks[roq_data->total_chunks].chunk_type = CHUNK_TYPE_AUDIO;
       roq_data->chunks[roq_data->total_chunks].chunk_offset =
@@ -214,7 +214,7 @@ static demuxer_t* demux_open_roq(demuxer_t* demuxer)
     {
       // index a new chunk if it's a codebook or quad VQ not following a
       // codebook
-      roq_data->chunks = (roq_chunk_t *)realloc(roq_data->chunks,
+      roq_data->chunks = realloc(roq_data->chunks,
         (roq_data->total_chunks + 1) * sizeof (roq_chunk_t));
       roq_data->chunks[roq_data->total_chunks].chunk_type = CHUNK_TYPE_VIDEO;
       roq_data->chunks[roq_data->total_chunks].chunk_offset =

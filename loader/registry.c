@@ -277,7 +277,7 @@ static struct reg_value* insert_reg_value(int handle, const char* name, int type
 	{
 		if(regs==0)
 		    create_registry();
-		regs=(struct reg_value*)realloc(regs, sizeof(struct reg_value)*(reg_size+1));
+		regs = realloc(regs, sizeof(struct reg_value) * (reg_size +1 ));
 		//regs=(struct reg_value*)my_realloc(regs, sizeof(struct reg_value)*(reg_size+1));
 		v=regs+reg_size;
 		reg_size++;

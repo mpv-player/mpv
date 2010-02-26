@@ -261,7 +261,7 @@ typedef struct {
 } demux_program_t;
 
 static inline demux_packet_t* new_demux_packet(int len){
-  demux_packet_t* dp=(demux_packet_t*)malloc(sizeof(demux_packet_t));
+  demux_packet_t* dp = malloc(sizeof(demux_packet_t));
   dp->len=len;
   dp->next=NULL;
   dp->pts=MP_NOPTS_VALUE;
@@ -272,7 +272,7 @@ static inline demux_packet_t* new_demux_packet(int len){
   dp->refcount=1;
   dp->master=NULL;
   dp->buffer=NULL;
-  if (len > 0 && (dp->buffer = (unsigned char *)malloc(len + MP_INPUT_BUFFER_PADDING_SIZE)))
+  if (len > 0 && (dp->buffer = malloc(len + MP_INPUT_BUFFER_PADDING_SIZE)))
     memset(dp->buffer + len, 0, 8);
   else
     dp->len = 0;
@@ -283,7 +283,7 @@ static inline void resize_demux_packet(demux_packet_t* dp, int len)
 {
   if(len > 0)
   {
-     dp->buffer=(unsigned char *)realloc(dp->buffer,len+8);
+     dp->buffer = realloc(dp->buffer, len + 8);
   }
   else
   {
@@ -298,7 +298,7 @@ static inline void resize_demux_packet(demux_packet_t* dp, int len)
 }
 
 static inline demux_packet_t* clone_demux_packet(demux_packet_t* pack){
-  demux_packet_t* dp=(demux_packet_t*)malloc(sizeof(demux_packet_t));
+  demux_packet_t* dp = malloc(sizeof(demux_packet_t));
   while(pack->master) pack=pack->master; // find the master
   memcpy(dp,pack,sizeof(demux_packet_t));
   dp->next=NULL;

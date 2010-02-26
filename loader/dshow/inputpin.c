@@ -167,7 +167,7 @@ IMPLEMENT_IUNKNOWN(CEnumPins)
  */
 static CEnumPins* CEnumPinsCreate(IPin* p, IPin* pp)
 {
-    CEnumPins* This = (CEnumPins*) malloc(sizeof(CEnumPins));
+    CEnumPins* This = malloc(sizeof(CEnumPins));
 
     if (!This)
         return NULL;
@@ -177,7 +177,7 @@ static CEnumPins* CEnumPinsCreate(IPin* p, IPin* pp)
     This->pin2 = pp;
     This->counter = 0;
 
-    This->vt = (IEnumPins_vt*) malloc(sizeof(IEnumPins_vt));
+    This->vt = malloc(sizeof(IEnumPins_vt));
     if (!This->vt)
     {
 	free(This);
@@ -539,7 +539,7 @@ IMPLEMENT_IUNKNOWN(CInputPin)
  */
 CInputPin* CInputPinCreate(CBaseFilter* p, const AM_MEDIA_TYPE* amt)
 {
-    CInputPin* This = (CInputPin*) malloc(sizeof(CInputPin));
+    CInputPin* This = malloc(sizeof(CInputPin));
 
     if (!This)
         return NULL;
@@ -548,7 +548,7 @@ CInputPin* CInputPinCreate(CBaseFilter* p, const AM_MEDIA_TYPE* amt)
     This->parent = p;
     CopyMediaType(&(This->type),amt);
 
-    This->vt= (IPin_vt*) malloc(sizeof(IPin_vt));
+    This->vt= malloc(sizeof(IPin_vt));
 
     if (!This->vt)
     {
@@ -879,7 +879,7 @@ IMPLEMENT_IUNKNOWN(CBaseFilter)
  */
 CBaseFilter* CBaseFilterCreate(const AM_MEDIA_TYPE* type, CBaseFilter2* parent)
 {
-    CBaseFilter* This = (CBaseFilter*) malloc(sizeof(CBaseFilter));
+    CBaseFilter* This = malloc(sizeof(CBaseFilter));
     if (!This)
 	return NULL;
 
@@ -888,7 +888,7 @@ CBaseFilter* CBaseFilterCreate(const AM_MEDIA_TYPE* type, CBaseFilter2* parent)
     This->pin = (IPin*) CInputPinCreate(This, type);
     This->unused_pin = (IPin*) CRemotePinCreate(This, parent->GetPin(parent));
 
-    This->vt = (IBaseFilter_vt*) malloc(sizeof(IBaseFilter_vt));
+    This->vt = malloc(sizeof(IBaseFilter_vt));
     if (!This->vt || !This->pin || !This->unused_pin)
     {
         CBaseFilter_Destroy(This);
@@ -1214,7 +1214,7 @@ static GUID CBaseFilter2_interf3 =
  */
 CBaseFilter2* CBaseFilter2Create()
 {
-    CBaseFilter2* This = (CBaseFilter2*) malloc(sizeof(CBaseFilter2));
+    CBaseFilter2* This = malloc(sizeof(CBaseFilter2));
 
     if (!This)
 	return NULL;
@@ -1222,7 +1222,7 @@ CBaseFilter2* CBaseFilter2Create()
     This->refcount = 1;
     This->pin = (IPin*) CRemotePin2Create(This);
 
-    This->vt = (IBaseFilter_vt*) malloc(sizeof(IBaseFilter_vt));
+    This->vt = malloc(sizeof(IBaseFilter_vt));
 
     if (!This->pin || !This->vt)
     {
@@ -1374,7 +1374,7 @@ IMPLEMENT_IUNKNOWN(CRemotePin)
  */
 CRemotePin* CRemotePinCreate(CBaseFilter* pt, IPin* rpin)
 {
-    CRemotePin* This = (CRemotePin*) malloc(sizeof(CRemotePin));
+    CRemotePin* This = malloc(sizeof(CRemotePin));
 
     if (!This)
         return NULL;
@@ -1385,7 +1385,7 @@ CRemotePin* CRemotePinCreate(CBaseFilter* pt, IPin* rpin)
     This->remote_pin = rpin;
     This->refcount = 1;
 
-    This->vt = (IPin_vt*) malloc(sizeof(IPin_vt));
+    This->vt = malloc(sizeof(IPin_vt));
 
     if (!This->vt)
     {
@@ -1464,7 +1464,7 @@ IMPLEMENT_IUNKNOWN(CRemotePin2)
  */
 CRemotePin2* CRemotePin2Create(CBaseFilter2* p)
 {
-    CRemotePin2* This = (CRemotePin2*) malloc(sizeof(CRemotePin2));
+    CRemotePin2* This = malloc(sizeof(CRemotePin2));
 
     if (!This)
         return NULL;
@@ -1474,7 +1474,7 @@ CRemotePin2* CRemotePin2Create(CBaseFilter2* p)
     This->parent = p;
     This->refcount = 1;
 
-    This->vt = (IPin_vt*) malloc(sizeof(IPin_vt));
+    This->vt = malloc(sizeof(IPin_vt));
 
     if (!This->vt)
     {

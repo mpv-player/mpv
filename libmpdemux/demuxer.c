@@ -1306,8 +1306,7 @@ int demux_info_add(demuxer_t *demuxer, const char *opt, const char *param)
         }
     }
 
-    info = demuxer->info = (char **) realloc(info,
-                                             (2 * (n + 2)) * sizeof(char *));
+    info = demuxer->info = realloc(info, (2 * (n + 2)) * sizeof(char *));
     info[2 * n] = strdup(opt);
     info[2 * n + 1] = strdup(param);
     memset(&info[2 * (n + 1)], 0, 2 * sizeof(char *));

@@ -1655,7 +1655,7 @@ if ((suboverlap_enabled == 2) ||
 	    if (higher_line >= SUB_MAX_TEXT) {
 		// the 'block' has too much lines, so we don't overlap the
 		// subtitles
-		second = (subtitle *) realloc(second, (sub_num + sub_to_add + 1) * sizeof(subtitle));
+		second = realloc(second, (sub_num + sub_to_add + 1) * sizeof(subtitle));
 		for (j = 0; j <= sub_to_add; ++j) {
 		    int ls;
 		    memset(&second[sub_num + j], '\0', sizeof(subtitle));
@@ -1675,7 +1675,7 @@ if ((suboverlap_enabled == 2) ||
 
 	    // we read the placeholder structure and create the new
 	    // subs.
-	    second = (subtitle *) realloc(second, (sub_num + 1) * sizeof(subtitle));
+	    second = realloc(second, (sub_num + 1) * sizeof(subtitle));
 	    memset(&second[sub_num], '\0', sizeof(subtitle));
 	    second[sub_num].start = local_start;
 	    second[sub_num].end   = local_end;

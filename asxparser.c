@@ -44,7 +44,7 @@ asx_list_add(void* list_ptr,void* entry){
   if(list != NULL)
     for( ; list[c] != NULL; c++) ;
 
-  list = (void*)realloc(list,sizeof(void*)*(c+2));
+  list = realloc(list, sizeof(void*) * (c + 2));
 
   list[c] = entry;
   list[c+1] = NULL;
@@ -77,7 +77,7 @@ asx_list_remove(void* list_ptr,void* entry,ASX_FreeFunc free_func) {
   if(c > e) // If c==e the memmove is not needed
     memmove(list+e,list+e+1,(c-e)*sizeof(void*));
 
-  list = (void*)realloc(list,(c-1)*sizeof(void*));
+  list = realloc(list, (c - 1) * sizeof(void*));
   list[c-1] = NULL;
 
   *(void***)list_ptr = list;
@@ -186,7 +186,7 @@ asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs) {
     val[ptr2-ptr1] = '\0';
     n_attrib++;
 
-    attribs = (char**)realloc(attribs,(2*n_attrib+1)*sizeof(char*));
+    attribs = realloc(attribs, (2 * n_attrib + 1) * sizeof(char*));
     attribs[n_attrib*2-2] = attrib;
     attribs[n_attrib*2-1] = val;
 
@@ -241,7 +241,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
 	memmove(parser->ret_stack,parser->ret_stack+i, (parser->ret_stack_size - i)*sizeof(ASX_LineSave_t));
       parser->ret_stack_size -= i;
       if(parser->ret_stack_size > 0)
-	parser->ret_stack = (ASX_LineSave_t*)realloc(parser->ret_stack,parser->ret_stack_size*sizeof(ASX_LineSave_t));
+	parser->ret_stack = realloc(parser->ret_stack,parser->ret_stack_size*sizeof(ASX_LineSave_t));
       else {
 	free(parser->ret_stack);
 	parser->ret_stack = NULL;
@@ -422,7 +422,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
 
   parser->last_body = body;
   parser->ret_stack_size++;
-  parser->ret_stack = (ASX_LineSave_t*)realloc(parser->ret_stack,parser->ret_stack_size*sizeof(ASX_LineSave_t));
+  parser->ret_stack = realloc(parser->ret_stack,parser->ret_stack_size*sizeof(ASX_LineSave_t));
   if(parser->ret_stack_size > 1)
     memmove(parser->ret_stack+1,parser->ret_stack,(parser->ret_stack_size-1)*sizeof(ASX_LineSave_t));
   parser->ret_stack[0].buffer = ret;

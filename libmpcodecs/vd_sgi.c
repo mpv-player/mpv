@@ -84,7 +84,7 @@ control(sh_video_t* sh, int cmd, void *arg, ...)
 static int
 init(sh_video_t *sh)
 {
-  sh->context = (SGIInfo *) calloc(1, sizeof(SGIInfo));
+  sh->context = calloc(1, sizeof(SGIInfo));
   last_x = -1;
 
   return 1;

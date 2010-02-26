@@ -291,7 +291,7 @@ int b_alive;
         }
 
         /* Retrieve the name of the device. */
-        psz_name = (char *)malloc(i_param_size);
+        psz_name = malloc(i_param_size);
         err = AudioDeviceGetProperty(devid_def, 0, 0,
                                      kAudioDevicePropertyDeviceName,
                                      &i_param_size, psz_name);
@@ -513,7 +513,7 @@ static int OpenSPDIF(void)
     }
 
     i_streams = i_param_size / sizeof(AudioStreamID);
-    p_streams = (AudioStreamID *)malloc(i_param_size);
+    p_streams = malloc(i_param_size);
     if (p_streams == NULL)
     {
         ao_msg(MSGT_AO, MSGL_WARN, "out of memory\n" );
@@ -549,7 +549,7 @@ static int OpenSPDIF(void)
         }
 
         i_formats = i_param_size / sizeof(AudioStreamBasicDescription);
-        p_format_list = (AudioStreamBasicDescription *)malloc(i_param_size);
+        p_format_list = malloc(i_param_size);
         if (p_format_list == NULL)
         {
             ao_msg(MSGT_AO, MSGL_WARN, "could not malloc the memory\n" );
@@ -742,7 +742,7 @@ static int AudioDeviceSupportsDigital( AudioDeviceID i_dev_id )
     }
 
     i_streams = i_param_size / sizeof(AudioStreamID);
-    p_streams = (AudioStreamID *)malloc(i_param_size);
+    p_streams = malloc(i_param_size);
     if (p_streams == NULL)
     {
         ao_msg(MSGT_AO,MSGL_V, "out of memory\n");
@@ -791,7 +791,7 @@ static int AudioStreamSupportsDigital( AudioStreamID i_stream_id )
     }
 
     i_formats = i_param_size / sizeof(AudioStreamBasicDescription);
-    p_format_list = (AudioStreamBasicDescription *)malloc(i_param_size);
+    p_format_list = malloc(i_param_size);
     if (p_format_list == NULL)
     {
         ao_msg(MSGT_AO,MSGL_V, "could not malloc the memory\n" );

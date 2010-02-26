@@ -796,19 +796,19 @@ static HRESULT init_ringbuffer(grabber_ringbuffer_t * rb, int buffersize,
     mp_msg(MSGT_TV, MSGL_DBG2, "tvi_dshow: Capture buffer: %d blocks of %d bytes.\n",
 	   rb->buffersize, rb->blocksize);
 
-    rb->ringbuffer = (char **) malloc(rb->buffersize * sizeof(char *));
+    rb->ringbuffer = malloc(rb->buffersize * sizeof(char *));
     if (!rb)
 	return E_POINTER;
     memset(rb->ringbuffer, 0, rb->buffersize * sizeof(char *));
 
     for (i = 0; i < rb->buffersize; i++) {
-	rb->ringbuffer[i] = (char *) malloc(rb->blocksize * sizeof(char));
+	rb->ringbuffer[i] = malloc(rb->blocksize * sizeof(char));
 	if (!rb->ringbuffer[i]) {
 	    destroy_ringbuffer(rb);
 	    return E_OUTOFMEMORY;
 	}
     }
-    rb->dpts = (double*) malloc(rb->buffersize * sizeof(double));
+    rb->dpts = malloc(rb->buffersize * sizeof(double));
     if (!rb->dpts) {
 	destroy_ringbuffer(rb);
 	return E_OUTOFMEMORY;
@@ -817,7 +817,7 @@ static HRESULT init_ringbuffer(grabber_ringbuffer_t * rb, int buffersize,
     rb->tail = 0;
     rb->count = 0;
     rb->tStart = -1;
-    rb->pMutex = (CRITICAL_SECTION *) malloc(sizeof(CRITICAL_SECTION));
+    rb->pMutex = malloc(sizeof(CRITICAL_SECTION));
     if (!rb->pMutex) {
 	destroy_ringbuffer(rb);
 	return E_OUTOFMEMORY;
@@ -966,7 +966,7 @@ static HRESULT load_freq_table(int nCountry, int nInputType,
     }
     *pnFirst = plFreqTable[0];
     *pnLen = (int) (plFreqTable[1] - plFreqTable[0] + 1);
-    *pplFreqTable = (long *) malloc((*pnLen) * sizeof(long));
+    *pplFreqTable = malloc((*pnLen) * sizeof(long));
     if (!*pplFreqTable) {
 	FreeLibrary(hDLL);
 	return E_FAIL;
@@ -1273,7 +1273,7 @@ static void get_capabilities(priv_t * priv)
 	OLE_CALL_ARGS(priv->pCrossbar, get_PinCounts, &lOutputPins,
 		  &lInputPins);
 
-	tv_available_inputs = (long *) malloc(sizeof(long) * lInputPins);
+	tv_available_inputs = malloc(sizeof(long) * lInputPins);
 	tv_available_inputs_count = 0;
 
 	mp_msg(MSGT_TV, MSGL_V, MSGTR_TVI_DS_AvailableVideoInputs);
@@ -2063,11 +2063,11 @@ static HRESULT get_available_formats_stream(chain_t *chain)
     }
     done = 0;
 
-    arpmt = (AM_MEDIA_TYPE **) malloc((count + 1) * sizeof(AM_MEDIA_TYPE *));
+    arpmt = malloc((count + 1) * sizeof(AM_MEDIA_TYPE *));
     if (arpmt) {
 	memset(arpmt, 0, (count + 1) * sizeof(AM_MEDIA_TYPE *));
 
-	pBuf = (void **) malloc((count + 1) * sizeof(void *));
+	pBuf = malloc((count + 1) * sizeof(void *));
 	if (pBuf) {
 	    memset(pBuf, 0, (count + 1) * sizeof(void *));
 
@@ -2170,8 +2170,7 @@ static HRESULT get_available_formats_pin(ICaptureGraphBuilder2 * pBuilder,
     OLE_CALL(pEnum,Reset);
 
     count = i;
-    arpmt =
-	(AM_MEDIA_TYPE **) malloc((count + 1) * sizeof(AM_MEDIA_TYPE *));
+    arpmt = malloc((count + 1) * sizeof(AM_MEDIA_TYPE *));
     if (!arpmt)
 	return E_OUTOFMEMORY;
     memset(arpmt, 0, (count + 1) * sizeof(AM_MEDIA_TYPE *));
@@ -2184,7 +2183,7 @@ static HRESULT get_available_formats_pin(ICaptureGraphBuilder2 * pBuilder,
     OLE_RELEASE_SAFE(pEnum);
 
 
-    pBuf = (void **) malloc((count + 1) * sizeof(void *));
+    pBuf = malloc((count + 1) * sizeof(void *));
     if (!pBuf) {
 	for (i = 0; i < count; i++)
 	    if (arpmt[i])

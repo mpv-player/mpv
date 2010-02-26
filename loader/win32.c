@@ -358,7 +358,7 @@ void* mreq_private(int size, int to_zero, int type);
 void* mreq_private(int size, int to_zero, int type)
 {
     int nsize = size + sizeof(alloc_header);
-    alloc_header* header = (alloc_header* ) malloc(nsize);
+    alloc_header* header = malloc(nsize);
     if (!header)
         return 0;
     if (to_zero)
@@ -4716,7 +4716,7 @@ static HPALETTE WINAPI expCreatePalette(CONST LOGPALETTE *lpgpl)
     dbgprintf("CreatePalette(%x) => NULL\n", lpgpl);
 
     i = sizeof(LOGPALETTE)+((lpgpl->palNumEntries-1)*sizeof(PALETTEENTRY));
-    test = (HPALETTE)malloc(i);
+    test = malloc(i);
     memcpy((void *)test, lpgpl, i);
 
     return test;

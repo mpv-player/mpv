@@ -185,7 +185,7 @@ static char *generatetextfromlabel(widget *item)
 /* cuts text to buflen scrolling from right to left */
 static void scrolltext(char *text, unsigned int buflen, float *value)
 {
-    char *buffer = (char *) malloc(buflen + 1);
+    char *buffer = malloc(buflen + 1);
     unsigned int x,i;
     if(*value < buflen) x = 0;
     else x = *value - buflen;

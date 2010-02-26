@@ -1011,7 +1011,7 @@ static int parse_subconf(const m_option_t* opt,const char *name, const char *par
 			     subparam[0] == 0 ? NULL : subparam,NULL,src);
 	  if(r < 0) return r;
 	  if(dst) {
-	    lst = (char**)realloc(lst,2 * (nr+2) * sizeof(char*));
+	    lst = realloc(lst,2 * (nr+2) * sizeof(char*));
 	    lst[2*nr] = strdup(subopt);
 	    lst[2*nr+1] = subparam[0] == 0 ? NULL : strdup(subparam);
 	    memset(&lst[2*(nr+1)],0,2*sizeof(char*));

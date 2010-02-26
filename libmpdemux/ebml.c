@@ -230,7 +230,7 @@ ebml_read_ascii (stream_t *s, uint64_t *length)
   if (length)
     *length = len + l;
 
-  str = (char *) malloc (len+1);
+  str = malloc (len + 1);
   if (stream_read(s, str, len) != (int) len)
     {
       free (str);

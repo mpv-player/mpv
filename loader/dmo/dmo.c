@@ -36,7 +36,7 @@ DMO_Filter* DMO_FilterCreate(const char* dllname, const GUID* id,
 {
     HRESULT hr = 0;
     const char* em = NULL;
-    DMO_Filter* This = (DMO_Filter*) malloc(sizeof(DMO_Filter));
+    DMO_Filter* This = malloc(sizeof(DMO_Filter));
     if (!This)
 	return NULL;
 

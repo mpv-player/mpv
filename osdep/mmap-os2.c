@@ -84,7 +84,7 @@ void *mmap( void *addr, size_t len, int prot, int flags, int fildes, off_t off )
             return MAP_FAILED;
     }
 
-    new_mmap = ( os2_mmap * )malloc( sizeof( os2_mmap ));
+    new_mmap = malloc( sizeof( os2_mmap ));
     new_mmap->addr  = ret;
     new_mmap->len   = len;
     new_mmap->flags = flags;

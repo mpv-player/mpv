@@ -52,7 +52,7 @@ typedef struct mad_decoder_s {
 
 static int preinit(sh_audio_t *sh){
 
-  mad_decoder_t *this = (mad_decoder_t *) malloc(sizeof(mad_decoder_t));
+  mad_decoder_t *this = malloc(sizeof(mad_decoder_t));
   memset(this,0,sizeof(mad_decoder_t));
   sh->context = this;
 
