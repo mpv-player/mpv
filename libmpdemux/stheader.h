@@ -27,7 +27,7 @@
 
 #define SH_COMMON \
   demux_stream_t *ds; \
-  struct codecs_st *codec; \
+  struct codecs *codec; \
   unsigned int format; \
   int initialized; \
   float stream_delay; /* number of seconds stream should be delayed (according to dwStart or similar) */ \

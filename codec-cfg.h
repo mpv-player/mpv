@@ -56,7 +56,7 @@ typedef struct {
 #endif
 
 
-typedef struct codecs_st {
+typedef struct codecs {
 	unsigned int fourcc[CODECS_MAX_FOURCC];
 	unsigned int fourccmap[CODECS_MAX_FOURCC];
 	unsigned int outfmt[CODECS_MAX_OUTFMT];
