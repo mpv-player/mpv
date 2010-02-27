@@ -225,13 +225,6 @@ static void send_pes_packet(unsigned char* data, int len, int id, int timestamp)
     send_mpeg_pes_packet (data, len, id, timestamp, 1, my_write);
 }
 
-static void send_lpcm_packet(unsigned char* data, int len, int id,
-                             unsigned int timestamp, int freq_id)
-{
-    send_mpeg_lpcm_packet(data, len, id, timestamp, freq_id, my_write);
-}
-
-
 static int draw_frame(uint8_t * src[])
 {
     vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
