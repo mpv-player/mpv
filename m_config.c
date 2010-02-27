@@ -415,19 +415,6 @@ m_config_get_option(m_config_t *config, char* arg) {
     return NULL;
 }
 
-static const void*
-m_config_get_option_ptr(m_config_t *config, char* arg) {
-  const m_option_t* conf;
-
-#ifdef MP_DEBUG
-  assert(config != NULL);
-  assert(arg != NULL);
-#endif
-
-  conf = m_config_get_option(config,arg);
-  if(!conf) return NULL;
-  return conf->p;
-}
 
 void
 m_config_print_option_list(m_config_t *config) {
