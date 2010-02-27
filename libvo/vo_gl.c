@@ -462,7 +462,6 @@ static void uninitGl(void) {
 static int isSoftwareGl(void)
 {
   const char *renderer = GetString(GL_RENDERER);
-renderer = "Software Rasterizer";
   return strcmp(renderer, "Software Rasterizer") == 0;
 }
 
