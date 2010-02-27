@@ -22,9 +22,6 @@
 #include <stdlib.h>
 
 extern "C" {
-#ifndef STREAM_H
-#include "stream/stream.h"
-#endif
 #ifndef DEMUXER_H
 #include "demuxer.h"
 #endif
