@@ -38,18 +38,6 @@ static long freqs[9] = { 44100, 48000, 32000,	// MPEG 1.0
 			 22050, 24000, 16000,   // MPEG 2.0
 			 11025, 12000,  8000};  // MPEG 2.5
 
-static int mp_mp3_get_lsf(unsigned char* hbuf){
-    unsigned long newhead =
-      hbuf[0] << 24 |
-      hbuf[1] << 16 |
-      hbuf[2] <<  8 |
-      hbuf[3];
-    if( newhead & ((long)1<<20) ) {
-      return (newhead & ((long)1<<19)) ? 0x0 : 0x1;
-    }
-    return 1;
-}
-
 /*
  * return frame size or -1 (bad frame)
  */
