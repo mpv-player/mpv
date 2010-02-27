@@ -22,9 +22,7 @@
 #include <stdlib.h>
 
 extern "C" {
-#ifndef DEMUXER_H
 #include "demuxer.h"
-#endif
 #ifdef CONFIG_LIBAVCODEC
 #include "libavcodec/avcodec.h"
 #endif
