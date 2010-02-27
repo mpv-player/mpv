@@ -35,11 +35,16 @@
 int mp_input_slave_cmd_func(int fd,char* dest,int size){
   DWORD retval;
   HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
-  if(!PeekNamedPipe(in, NULL, size, &retval, NULL, NULL) || !retval){
+  if(PeekNamedPipe(in, NULL, size, &retval, NULL, NULL)){
+    if (size > retval) size = retval;
+  } else {
+    if (WaitForSingleObject(in, 0))
+      size = 0;
+  }
+  if(!size){
 	  return MP_INPUT_NOTHING;
   }
-  if(retval>size)retval=size;
-  ReadFile(in, dest, retval, &retval, NULL);
+  ReadFile(in, dest, size, &retval, NULL);
   if(retval)return retval;
   return MP_INPUT_NOTHING;
 }
