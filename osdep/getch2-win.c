@@ -31,17 +31,15 @@
 #include "input/input.h"
 #include "mp_fifo.h"
 #include "getch2.h"
-// HACK, stdin is used as something else below
-#undef stdin
 
 int mp_input_slave_cmd_func(int fd,char* dest,int size){
   DWORD retval;
-  HANDLE stdin = GetStdHandle(STD_INPUT_HANDLE);
-  if(!PeekNamedPipe(stdin, NULL, size, &retval, NULL, NULL) || !retval){
+  HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
+  if(!PeekNamedPipe(in, NULL, size, &retval, NULL, NULL) || !retval){
 	  return MP_INPUT_NOTHING;
   }
   if(retval>size)retval=size;
-  ReadFile(stdin, dest, retval, &retval, NULL);
+  ReadFile(in, dest, retval, &retval, NULL);
   if(retval)return retval;
   return MP_INPUT_NOTHING;
 }
@@ -53,7 +51,7 @@ char * erase_to_end_of_line = NULL;
 void get_screen_size(void){
 }
 
-static HANDLE stdin;
+static HANDLE in;
 static int getch2_status=0;
 
 static int getch2_internal(void)
@@ -63,7 +61,7 @@ static int getch2_internal(void)
    	int i=0;
     if(!getch2_status)return -1;
     /*check if there are input events*/
-	if(!GetNumberOfConsoleInputEvents(stdin,&retval))
+	if(!GetNumberOfConsoleInputEvents(in,&retval))
 	{
 		printf("getch2: can't get number of input events: %i\n",GetLastError());
 		return -1;
@@ -71,7 +69,7 @@ static int getch2_internal(void)
     if(retval<=0)return -1;
 
 	/*read all events*/
-	if(!ReadConsoleInput(stdin,eventbuffer,128,&retval))
+	if(!ReadConsoleInput(in,eventbuffer,128,&retval))
 	{
 		printf("getch: can't read input events\n");
 		return -1;
@@ -150,8 +148,8 @@ void getch2(void)
 void getch2_enable(void)
 {
 	DWORD retval;
-    stdin = GetStdHandle(STD_INPUT_HANDLE);
-   	if(!GetNumberOfConsoleInputEvents(stdin,&retval))
+    in = GetStdHandle(STD_INPUT_HANDLE);
+   	if(!GetNumberOfConsoleInputEvents(in,&retval))
 	{
 		printf("getch2: %i can't get number of input events  [disabling console input]\n",GetLastError());
 		getch2_status = 0;
