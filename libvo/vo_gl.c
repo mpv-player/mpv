@@ -39,9 +39,9 @@
 
 static const vo_info_t info =
 {
-  "X11 (OpenGL)",
+  "OpenGL",
   "gl",
-  "Arpad Gereoffy <arpi@esp-team.scene.hu>",
+  "Reimar Doeffinger <Reimar.Doeffinger@gmx.de>",
   ""
 };
 
@@ -50,9 +50,9 @@ const LIBVO_EXTERN(gl)
 
 static const vo_info_t info_nosw =
 {
-  "X11 (OpenGL) no software rendering",
+  "OpenGL no software rendering",
   "gl_nosw",
-  "Arpad Gereoffy <arpi@esp-team.scene.hu>",
+  "Reimar Doeffinger <Reimar.Doeffinger@gmx.de>",
   ""
 };
 static int preinit_nosw(const char *arg);
