@@ -519,11 +519,11 @@ void guiDone(void)
 }
 
 /* this function gets called by mplayer to update the gui */
-int guiGetEvent(int type, char *arg)
+int guiGetEvent(int type, void *arg)
 {
-    stream_t *stream = (stream_t *) arg;
+    stream_t *stream = arg;
 #ifdef CONFIG_DVDREAD
-    dvd_priv_t *dvdp = (dvd_priv_t *) arg;
+    dvd_priv_t *dvdp = arg;
 #endif
     if(!mygui || !mygui->skin) return 0;
 
@@ -577,17 +577,17 @@ int guiGetEvent(int type, char *arg)
             break;
         }
         case guiSetContext:
-            guiIntfStruct.mpcontext = (void *) arg;
+            guiIntfStruct.mpcontext = arg;
             break;
         case guiSetDemuxer:
-            guiIntfStruct.demuxer = (void *) arg;
+            guiIntfStruct.demuxer = arg;
             break;
         case guiSetValues:
         {
             guiIntfStruct.sh_video = arg;
             if (arg)
             {
-                sh_video_t *sh = (sh_video_t *)arg;
+                sh_video_t *sh = arg;
                 codecname = sh->codec->name;
                 guiIntfStruct.FPS = sh->fps;
 
@@ -644,7 +644,7 @@ int guiGetEvent(int type, char *arg)
             mygui->updatedisplay(mygui, mygui->mainwindow);
             break;
         case guiSetAfilter:
-            guiIntfStruct.afilter = (void *) arg;
+            guiIntfStruct.afilter = arg;
             break;
         case guiCEvent:
         {
@@ -719,7 +719,7 @@ int guiGetEvent(int type, char *arg)
             break;
         }
         case guiSetFileName:
-            if (arg) guiIntfStruct.Filename = (char *) arg;
+            if (arg) guiIntfStruct.Filename = arg;
             break;
         case guiSetDefaults:
         {
