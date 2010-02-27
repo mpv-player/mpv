@@ -36,53 +36,6 @@ extern m_config_t* mconfig;
 
 ////// List utils
 
-static void
-asx_list_add(void* list_ptr,void* entry){
-  void** list = *(void***)list_ptr;
-  int c = 0;
-
-  if(list != NULL)
-    for( ; list[c] != NULL; c++) ;
-
-  list = realloc(list, sizeof(void*) * (c + 2));
-
-  list[c] = entry;
-  list[c+1] = NULL;
-
-  *(void***)list_ptr = list;
-}
-
-
-static void
-asx_list_remove(void* list_ptr,void* entry,ASX_FreeFunc free_func) {
-  void** list = *(void***)list_ptr;
-  int c,e = -1;
-
-  if(list == NULL) return;
-
-  for(c = 0 ; list[c] != NULL; c++){
-    if(list[c] == entry) e = c;
-  }
-
-  if(e == -1) return; // Not found
-
-  if(free_func != NULL) free_func(list[e]);
-
-  if(c == 1) { // Only one entry, we drop all
-    free(list);
-    *(void**)list_ptr = NULL;
-    return;
-  }
-
-  if(c > e) // If c==e the memmove is not needed
-    memmove(list+e,list+e+1,(c-e)*sizeof(void*));
-
-  list = realloc(list, (c - 1) * sizeof(void*));
-  list[c-1] = NULL;
-
-  *(void***)list_ptr = list;
-}
-
 void
 asx_list_free(void* list_ptr,ASX_FreeFunc free_func) {
   void** ptr = *(void***)list_ptr;
