@@ -820,6 +820,25 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 }
 
 /**
+ * \brief Frees memory that our filter allocated.
+ *
+ * This is called at exit-time.
+ */
+static void uninit(vf_instance_t *vf)
+{
+  vf_priv_s *ctx = (vf_priv_s *)vf->priv;
+  /* Destroy our masks and images. */
+  destroy_pgm(ctx->filter);
+  destroy_pgm(ctx->half_size_filter);
+  destroy_masks(vf);
+
+  /* Destroy our private structure that had been used to store those masks and images. */
+  free(vf->priv);
+
+  return;
+}
+
+/**
  * \brief Initializes our filter.
  *
  * \param args The arguments passed in from the command line go here. This
@@ -831,6 +850,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 static int vf_open(vf_instance_t *vf, char *args)
 {
   vf->priv = safe_malloc(sizeof(vf_priv_s));
+  vf->uninit = uninit;
 
   /* Load our filter image. */
   if (args)
@@ -870,24 +890,6 @@ static int vf_open(vf_instance_t *vf, char *args)
   vf->put_image=put_image;
   vf->query_format=query_format;
   return 1;
-}
-
-/**
- * \brief Frees memory that our filter allocated.
- *
- * This is called at exit-time.
- */
-static void uninit(vf_instance_t * vf)
-{
-  /* Destroy our masks and images. */
-  destroy_pgm(((vf_priv_s *)vf->priv)->filter);
-  destroy_pgm(((vf_priv_s *)vf->priv)->half_size_filter);
-  destroy_masks(vf);
-
-  /* Destroy our private structure that had been used to store those masks and images. */
-  free(vf->priv);
-
-  return;
 }
 
 /**
