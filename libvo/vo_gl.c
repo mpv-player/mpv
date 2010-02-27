@@ -47,6 +47,21 @@ static const vo_info_t info =
 
 const LIBVO_EXTERN(gl)
 
+
+static const vo_info_t info_nosw =
+{
+  "X11 (OpenGL) no software rendering",
+  "gl_nosw",
+  "Arpad Gereoffy <arpi@esp-team.scene.hu>",
+  ""
+};
+static int preinit_nosw(const char *arg);
+#define info info_nosw
+#define preinit preinit_nosw
+const LIBVO_EXTERN(gl_nosw)
+#undef info
+#undef preinit
+
 #ifdef CONFIG_GL_X11
 static int                  wsGLXAttrib[] = { GLX_RGBA,
                                        GLX_RED_SIZE,1,
@@ -442,6 +457,13 @@ static void uninitGl(void) {
 #endif
   mesa_bufferptr = NULL;
   err_shown = 0;
+}
+
+static int isSoftwareGl(void)
+{
+  const char *renderer = GetString(GL_RENDERER);
+renderer = "Software Rasterizer";
+  return strcmp(renderer, "Software Rasterizer") == 0;
 }
 
 static void autodetectGlExtensions(void) {
@@ -1052,7 +1074,7 @@ static const opt_t subopts[] = {
   {NULL}
 };
 
-static int preinit(const char *arg)
+static int preinit_internal(const char *arg, int allow_sw)
 {
     enum MPGLType gltype = GLTYPE_X11;
     // set defaults
@@ -1161,10 +1183,12 @@ static int preinit(const char *arg)
     }
     if (!init_mpglcontext(&glctx, gltype))
       goto err_out;
-    if (use_yuv == -1) {
+    if (use_yuv == -1 || !allow_sw) {
       if (create_window(320, 200, VOFLAG_HIDDEN, NULL) < 0)
         goto err_out;
       if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
+        goto err_out;
+      if (!allow_sw && isSoftwareGl())
         goto err_out;
       autodetectGlExtensions();
     }
@@ -1179,6 +1203,16 @@ static int preinit(const char *arg)
 err_out:
     uninit();
     return -1;
+}
+
+static int preinit(const char *arg)
+{
+    return preinit_internal(arg, 1);
+}
+
+static int preinit_nosw(const char *arg)
+{
+    return preinit_internal(arg, 0);
 }
 
 static const struct {

@@ -94,6 +94,7 @@ extern vo_functions_t video_out_xover;
 extern vo_functions_t video_out_xvmc;
 extern vo_functions_t video_out_vdpau;
 extern vo_functions_t video_out_xv;
+extern vo_functions_t video_out_gl_nosw;
 extern vo_functions_t video_out_gl;
 extern vo_functions_t video_out_gl2;
 extern vo_functions_t video_out_matrixview;
@@ -186,14 +187,15 @@ const vo_functions_t* const video_out_drivers[] =
 #ifdef CONFIG_XV
         &video_out_xv,
 #endif
-#ifdef CONFIG_GL
-        &video_out_gl,
-#endif
 #ifdef CONFIG_X11
+#ifdef CONFIG_GL
+        &video_out_gl_nosw,
+#endif
         &video_out_x11,
         &video_out_xover,
 #endif
 #ifdef CONFIG_GL
+        &video_out_gl,
         &video_out_gl2,
 #endif
 #ifdef CONFIG_DGA
