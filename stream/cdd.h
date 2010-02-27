@@ -86,7 +86,7 @@ typedef struct {
 	cd_info_t *cd_info;
 } cdda_priv;
 
-cd_info_t* 	cd_info_new();
+cd_info_t* 	cd_info_new(void);
 void		cd_info_free(cd_info_t *cd_info);
 cd_track_t*	cd_info_add_track(cd_info_t *cd_info, char *track_name, unsigned int track_nb, unsigned int min, unsigned int sec, unsigned int msec, unsigned long frame_begin, unsigned long frame_length);
 cd_track_t*	cd_info_get_track(cd_info_t *cd_info, unsigned int track_nb);
