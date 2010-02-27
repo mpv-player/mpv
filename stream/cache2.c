@@ -430,12 +430,12 @@ static void ThreadProc( void *s ){
   } while (cache_execute_control(s));
 #if defined(__MINGW32__) || defined(__OS2__)
   _endthread();
-#endif
-#ifdef PTHREAD_CACHE
+#elif defined(PTHREAD_CACHE)
   return NULL;
-#endif
+#else
   // make sure forked code never leaves this function
   exit(0);
+#endif
 }
 
 int cache_stream_fill_buffer(stream_t *s){
