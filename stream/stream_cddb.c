@@ -68,6 +68,8 @@
 #include "mpbswap.h"
 #endif
 
+#include "osdep/osdep.h"
+
 #include "cdd.h"
 #include "version.h"
 #include "stream.h"
@@ -112,6 +114,78 @@ static int read_toc(const char *dev)
     }
     CloseHandle(drive);
 
+#elif defined(__OS2__)
+    UCHAR auchParamDisk[4] = {'C', 'D', '0', '1'};
+
+    struct {
+        BYTE    bFirstTrack;
+        BYTE    bLastTrack;
+        BYTE    bLeadOutF;
+        BYTE    bLeadOutS;
+        BYTE    bLeadOutM;
+        BYTE    bLeadOutReserved;
+    } __attribute__((packed)) sDataDisk;
+
+    struct {
+        UCHAR   auchSign[4];
+        BYTE    bTrack;
+    } __attribute__((packed)) sParamTrack = {{'C', 'D', '0', '1'},};
+
+    struct {
+        BYTE    bStartF;
+        BYTE    bStartS;
+        BYTE    bStartM;
+        BYTE    bStartReserved;
+        BYTE    bControlInfo;
+    } __attribute__((packed)) sDataTrack;
+
+    HFILE hcd;
+    ULONG ulAction;
+    ULONG ulParamLen;
+    ULONG ulDataLen;
+    ULONG rc;
+
+    rc = DosOpen(dev, &hcd, &ulAction, 0, FILE_NORMAL,
+                 OPEN_ACTION_OPEN_IF_EXISTS | OPEN_ACTION_FAIL_IF_NEW,
+                 OPEN_ACCESS_READONLY | OPEN_SHARE_DENYNONE | OPEN_FLAGS_DASD,
+                 NULL);
+    if (rc) {
+        mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToReadTOC);
+        return -1;
+    }
+
+    rc = DosDevIOCtl(hcd, IOCTL_CDROMAUDIO, CDROMAUDIO_GETAUDIODISK,
+                     auchParamDisk, sizeof(auchParamDisk), &ulParamLen,
+                     &sDataDisk, sizeof(sDataDisk), &ulDataLen);
+    if (!rc) {
+        first = sDataDisk.bFirstTrack - 1;
+        last  = sDataDisk.bLastTrack;
+        for (i = first; i <= last; i++) {
+            if (i == last) {
+                sDataTrack.bStartM = sDataDisk.bLeadOutM;
+                sDataTrack.bStartS = sDataDisk.bLeadOutS;
+                sDataTrack.bStartF = sDataDisk.bLeadOutF;
+            } else {
+                sParamTrack.bTrack = i + 1;
+                rc = DosDevIOCtl(hcd, IOCTL_CDROMAUDIO, CDROMAUDIO_GETAUDIOTRACK,
+                                 &sParamTrack, sizeof(sParamTrack), &ulParamLen,
+                                 &sDataTrack, sizeof(sDataTrack), &ulDataLen);
+                if (rc)
+                    break;
+            }
+
+            cdtoc[i].min   = sDataTrack.bStartM;
+            cdtoc[i].sec   = sDataTrack.bStartS;
+            cdtoc[i].frame = sDataTrack.bStartF;
+        }
+    }
+
+    DosClose(hcd);
+
+    if (rc) {
+        mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToReadTOC);
+        return -1;
+    }
 #else
     int drive;
     drive = open(dev, O_RDONLY | O_NONBLOCK);
