@@ -141,7 +141,7 @@ typedef struct
  * Variables stored here are kept from frame to frame, and separate instances of
  * the filter will get their own separate copies.
  */
-typedef struct
+struct vf_priv_s
 {
   unsigned int fmt; /* Not exactly sure of the use for this. It came with the example filter I used as a basis for this, and it looks like a lot of stuff will break if I remove it. */
   int max_mask_size; /* The largest possible mask size that will be needed with the given filter and corresponding half_size_filter. The half_size_filter can have a larger requirment in some rare (but not degenerate) cases. */
@@ -264,8 +264,8 @@ static void destroy_masks(vf_instance_t * vf)
   int a, b;
 
   /* Load values from the vf->priv struct for faster dereferencing. */
-  int * * * mask = ((vf_priv_s *)vf->priv)->mask;
-  int max_mask_size = ((vf_priv_s *)vf->priv)->max_mask_size;
+  int * * * mask = vf->priv->mask;
+  int max_mask_size = vf->priv->max_mask_size;
 
   if (mask == NULL)
     return; /* Nothing allocated, so return before we segfault. */
@@ -282,7 +282,7 @@ static void destroy_masks(vf_instance_t * vf)
   free(mask); /* Free the array of pointers pointing to the masks. */
 
   /* Set the pointer to NULL, so that any duplicate calls to this function will not cause a crash. */
-  ((vf_priv_s *)vf->priv)->mask = NULL;
+  vf->priv->mask = NULL;
 
   return;
 }
@@ -301,8 +301,8 @@ static void initialize_masks(vf_instance_t * vf)
   int a, b, c;
 
   /* Load values from the vf->priv struct for faster dereferencing. */
-  int * * * mask = ((vf_priv_s *)vf->priv)->mask;
-  int max_mask_size = ((vf_priv_s *)vf->priv)->max_mask_size; /* This tells us how many masks we'll need to generate. */
+  int * * * mask = vf->priv->mask;
+  int max_mask_size = vf->priv->max_mask_size; /* This tells us how many masks we'll need to generate. */
 
   /* Create a circular mask for each size up to max_mask_size. When the filter is applied, the mask size is
      determined on a pixel by pixel basis, with pixels nearer the edge of the logo getting smaller mask sizes. */
@@ -324,7 +324,7 @@ static void initialize_masks(vf_instance_t * vf)
   }
 
   /* Store values back to vf->priv so they aren't lost after the function returns. */
-  ((vf_priv_s *)vf->priv)->mask = mask;
+  vf->priv->mask = mask;
 
   return;
 }
@@ -404,7 +404,7 @@ static void convert_mask_to_strength_mask(vf_instance_t * vf, pgm_structure * ma
   max_mask_size = current_pass + 1; /* As a side-effect, we now know the maximum mask size, which we'll use to generate our masks. */
   max_mask_size = apply_mask_fudge_factor(max_mask_size); /* Apply the fudge factor to this number too, since we must
                                                              ensure that enough masks are generated. */
-  ((vf_priv_s *)vf->priv)->max_mask_size = max_mask_size; /* Commit the newly calculated max_mask_size to the vf->priv struct. */
+  vf->priv->max_mask_size = max_mask_size; /* Commit the newly calculated max_mask_size to the vf->priv struct. */
 
   return;
 }
@@ -430,7 +430,7 @@ static void get_blur(const vf_instance_t * const vf, unsigned int * const value_
 {
   int mask_size; /* Mask size tells how large a circle to use. The radius is about (slightly larger than) mask size. */
   /* Get values from vf->priv for faster dereferencing. */
-  int * * * mask = ((vf_priv_s *)vf->priv)->mask;
+  int * * * mask = vf->priv->mask;
 
   int start_posx, start_posy, end_posx, end_posy;
   int i, j;
@@ -662,7 +662,7 @@ static pgm_structure * generate_half_size_image(vf_instance_t * vf, pgm_structur
   max_mask_size = current_pass + 1; /* As a side-effect, we now know the maximum mask size, which we'll use to generate our masks. */
   max_mask_size = apply_mask_fudge_factor(max_mask_size);
   /* Commit the newly calculated max_mask_size to the vf->priv struct. */
-  ((vf_priv_s *)vf->priv)->max_mask_size = max(max_mask_size, ((vf_priv_s *)vf->priv)->max_mask_size);
+  vf->priv->max_mask_size = max(max_mask_size, vf->priv->max_mask_size);
 
   return new_pgm;
 }
@@ -685,10 +685,10 @@ static unsigned int find_best(struct vf_instance *vf){
  */
 static int config(struct vf_instance *vf, int width, int height, int d_width, int d_height, unsigned int flags, unsigned int outfmt)
 {
-  if(!(((vf_priv_s *)vf->priv)->fmt=find_best(vf)))
+  if(!(vf->priv->fmt=find_best(vf)))
     return 0;
   else
-    return vf_next_config(vf,width,height,d_width,d_height,flags,((vf_priv_s *)vf->priv)->fmt);
+    return vf_next_config(vf,width,height,d_width,d_height,flags,vf->priv->fmt);
 }
 
 /**
@@ -767,15 +767,15 @@ static void convert_yv12(const vf_instance_t * const vf, const char * const sour
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
 
-    dmpi=vf_get_image(vf->next,((vf_priv_s *)vf->priv)->fmt,
+    dmpi=vf_get_image(vf->next,vf->priv->fmt,
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 	mpi->w, mpi->h);
 
     /* Check to make sure that the filter image and the video stream are the same size. */
-    if ((((vf_priv_s *)vf->priv)->filter->width != mpi->w) || (((vf_priv_s *)vf->priv)->filter->height != mpi->h))
+    if (vf->priv->filter->width != mpi->w || vf->priv->filter->height != mpi->h)
     {
       mp_msg(MSGT_VFILTER,MSGL_ERR, "Filter image and video stream are not of the same size. (Filter: %d x %d, Stream: %d x %d)\n",
-             ((vf_priv_s *)vf->priv)->filter->width, ((vf_priv_s *)vf->priv)->filter->height, mpi->w, mpi->h);
+             vf->priv->filter->width, vf->priv->filter->height, mpi->w, mpi->h);
       return 0;
     }
 
@@ -783,19 +783,19 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     case IMGFMT_YV12:
           convert_yv12(vf, mpi->planes[0],  mpi->stride[0], mpi, mpi->w, mpi->h,
                           dmpi->planes[0], dmpi->stride[0],
-                          mpi->flags & MP_IMGFLAG_DIRECT, ((vf_priv_s *)vf->priv)->filter, 0,
-                          ((vf_priv_s *)vf->priv)->bounding_rectangle_posx1, ((vf_priv_s *)vf->priv)->bounding_rectangle_posy1,
-                          ((vf_priv_s *)vf->priv)->bounding_rectangle_posx2, ((vf_priv_s *)vf->priv)->bounding_rectangle_posy2);
+                          mpi->flags & MP_IMGFLAG_DIRECT, vf->priv->filter, 0,
+                          vf->priv->bounding_rectangle_posx1, vf->priv->bounding_rectangle_posy1,
+                          vf->priv->bounding_rectangle_posx2, vf->priv->bounding_rectangle_posy2);
           convert_yv12(vf, mpi->planes[1],  mpi->stride[1], mpi, mpi->w / 2, mpi->h / 2,
                           dmpi->planes[1], dmpi->stride[1],
-                          mpi->flags & MP_IMGFLAG_DIRECT, ((vf_priv_s *)vf->priv)->half_size_filter, 1,
-                          ((vf_priv_s *)vf->priv)->bounding_rectangle_half_size_posx1, ((vf_priv_s *)vf->priv)->bounding_rectangle_half_size_posy1,
-                          ((vf_priv_s *)vf->priv)->bounding_rectangle_half_size_posx2, ((vf_priv_s *)vf->priv)->bounding_rectangle_half_size_posy2);
+                          mpi->flags & MP_IMGFLAG_DIRECT, vf->priv->half_size_filter, 1,
+                          vf->priv->bounding_rectangle_half_size_posx1, vf->priv->bounding_rectangle_half_size_posy1,
+                          vf->priv->bounding_rectangle_half_size_posx2, vf->priv->bounding_rectangle_half_size_posy2);
           convert_yv12(vf, mpi->planes[2],  mpi->stride[2], mpi, mpi->w / 2, mpi->h / 2,
                           dmpi->planes[2], dmpi->stride[2],
-                          mpi->flags & MP_IMGFLAG_DIRECT, ((vf_priv_s *)vf->priv)->half_size_filter, 2,
-                          ((vf_priv_s *)vf->priv)->bounding_rectangle_half_size_posx1, ((vf_priv_s *)vf->priv)->bounding_rectangle_half_size_posy1,
-                          ((vf_priv_s *)vf->priv)->bounding_rectangle_half_size_posx2, ((vf_priv_s *)vf->priv)->bounding_rectangle_half_size_posy2);
+                          mpi->flags & MP_IMGFLAG_DIRECT, vf->priv->half_size_filter, 2,
+                          vf->priv->bounding_rectangle_half_size_posx1, vf->priv->bounding_rectangle_half_size_posy1,
+                          vf->priv->bounding_rectangle_half_size_posx2, vf->priv->bounding_rectangle_half_size_posy2);
           break;
 
     default:
@@ -826,10 +826,9 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
  */
 static void uninit(vf_instance_t *vf)
 {
-  vf_priv_s *ctx = (vf_priv_s *)vf->priv;
   /* Destroy our masks and images. */
-  destroy_pgm(ctx->filter);
-  destroy_pgm(ctx->half_size_filter);
+  destroy_pgm(vf->priv->filter);
+  destroy_pgm(vf->priv->half_size_filter);
   destroy_masks(vf);
 
   /* Destroy our private structure that had been used to store those masks and images. */
@@ -854,7 +853,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 
   /* Load our filter image. */
   if (args)
-    ((vf_priv_s *)vf->priv)->filter = load_pgm(args);
+    vf->priv->filter = load_pgm(args);
   else
   {
     mp_msg(MSGT_VFILTER, MSGL_ERR, "[vf]remove_logo usage: remove_logo=/path/to/filter_image_file.pgm\n");
@@ -862,7 +861,7 @@ static int vf_open(vf_instance_t *vf, char *args)
     return 0;
   }
 
-  if (((vf_priv_s *)vf->priv)->filter == NULL)
+  if (vf->priv->filter == NULL)
   {
     /* Error message was displayed by load_pgm(). */
     free(vf->priv);
@@ -870,21 +869,21 @@ static int vf_open(vf_instance_t *vf, char *args)
   }
 
   /* Create the scaled down filter image for the chroma planes. */
-  convert_mask_to_strength_mask(vf, ((vf_priv_s *)vf->priv)->filter);
-  ((vf_priv_s *)vf->priv)->half_size_filter = generate_half_size_image(vf, ((vf_priv_s *)vf->priv)->filter);
+  convert_mask_to_strength_mask(vf, vf->priv->filter);
+  vf->priv->half_size_filter = generate_half_size_image(vf, vf->priv->filter);
 
   /* Now that we know how many masks we need (the info is in vf), we can generate the masks. */
   initialize_masks(vf);
 
   /* Calculate our bounding rectangles, which determine in what region the logo resides for faster processing. */
-  calculate_bounding_rectangle(&((vf_priv_s *)vf->priv)->bounding_rectangle_posx1, &((vf_priv_s *)vf->priv)->bounding_rectangle_posy1,
-                               &((vf_priv_s *)vf->priv)->bounding_rectangle_posx2, &((vf_priv_s *)vf->priv)->bounding_rectangle_posy2,
-                                ((vf_priv_s *)vf->priv)->filter);
-  calculate_bounding_rectangle(&((vf_priv_s *)vf->priv)->bounding_rectangle_half_size_posx1,
-                               &((vf_priv_s *)vf->priv)->bounding_rectangle_half_size_posy1,
-                               &((vf_priv_s *)vf->priv)->bounding_rectangle_half_size_posx2,
-                               &((vf_priv_s *)vf->priv)->bounding_rectangle_half_size_posy2,
-                                ((vf_priv_s *)vf->priv)->half_size_filter);
+  calculate_bounding_rectangle(&vf->priv->bounding_rectangle_posx1, &vf->priv->bounding_rectangle_posy1,
+                               &vf->priv->bounding_rectangle_posx2, &vf->priv->bounding_rectangle_posy2,
+                                vf->priv->filter);
+  calculate_bounding_rectangle(&vf->priv->bounding_rectangle_half_size_posx1,
+                               &vf->priv->bounding_rectangle_half_size_posy1,
+                               &vf->priv->bounding_rectangle_half_size_posx2,
+                               &vf->priv->bounding_rectangle_half_size_posy2,
+                                vf->priv->half_size_filter);
 
   vf->config=config;
   vf->put_image=put_image;
