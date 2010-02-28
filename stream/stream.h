@@ -268,6 +268,8 @@ inline static int stream_read(stream_t *s,char* mem,int total){
 inline static unsigned char* stream_read_line(stream_t *s,unsigned char* mem, int max) {
   int len;
   unsigned char* end,*ptr = mem;
+  if (max < 1) return NULL;
+  max--; // reserve one for 0-termination
   do {
     len = s->buf_len-s->buf_pos;
     // try to fill the buffer
@@ -276,8 +278,8 @@ inline static unsigned char* stream_read_line(stream_t *s,unsigned char* mem, in
         (len = s->buf_len-s->buf_pos) <= 0)) break;
     end = (unsigned char*) memchr((void*)(s->buffer+s->buf_pos),'\n',len);
     if(end) len = end - (s->buffer+s->buf_pos) + 1;
-    if(len > 0 && max > 1) {
-      int l = len > max-1 ? max-1 : len;
+    if(len > 0 && max > 0) {
+      int l = len > max ? max : len;
       memcpy(ptr,s->buffer+s->buf_pos,l);
       max -= l;
       ptr += l;
@@ -285,7 +287,7 @@ inline static unsigned char* stream_read_line(stream_t *s,unsigned char* mem, in
     s->buf_pos += len;
   } while(!end);
   if(s->eof && ptr == mem) return NULL;
-  if(max > 0) ptr[0] = 0;
+  ptr[0] = 0;
   return mem;
 }
 
