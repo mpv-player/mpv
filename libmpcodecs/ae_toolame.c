@@ -121,7 +121,7 @@ static int encode_toolame(audio_encoder_t *encoder, uint8_t *dest, void *src, in
 	return ret_size;
 }
 
-int close_toolame(audio_encoder_t *encoder)
+static int close_toolame(audio_encoder_t *encoder)
 {
 	free(encoder->priv);
 	return 1;
