@@ -92,7 +92,7 @@ static void close_s(stream_t *stream) {
 }
 
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
-  struct stream_priv_s* p = (struct stream_priv_s*)opts;
+  struct stream_priv_s* p = opts;
   int ret,ret2,f,sect,tmp;
   mp_vcd_priv_t* vcd;
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
