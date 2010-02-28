@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <limits.h>
 #include "asxparser.h"
 #include "m_config.h"
 #include "playtree.h"
@@ -80,8 +81,15 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
   while(1) {
 
     if(resize) {
+      char *tmp;
       r = p->iter - p->buffer;
-      p->buffer = realloc(p->buffer, p->buffer_size + BUF_STEP);
+      end = p->buffer + p->buffer_end;
+      if (p->buffer_size > INT_MAX - BUF_STEP)
+        break;
+      tmp = realloc(p->buffer, p->buffer_size + BUF_STEP);
+      if (!tmp)
+        break;
+      p->buffer = tmp;
       p->iter = p->buffer + r;
       p->buffer_size += BUF_STEP;
       resize = 0;
@@ -238,6 +246,7 @@ static int
 pls_read_entry(char* line,pls_entry_t** _e,int* _max_entry,char** val) {
   int num,max_entry = (*_max_entry);
   pls_entry_t* e = (*_e);
+  int limit = INT_MAX / sizeof(*e);
   char* v;
 
   v = pls_entry_get_value(line);
@@ -247,12 +256,18 @@ pls_read_entry(char* line,pls_entry_t** _e,int* _max_entry,char** val) {
   }
 
   num = atoi(line);
-  if(num < 0) {
+  if(num < 0 || num > limit) {
+    if (max_entry >= limit) {
+        mp_msg(MSGT_PLAYTREE, MSGL_WARN, "Too many index entries\n");
+        return 0;
+    }
     num = max_entry+1;
-    mp_msg(MSGT_PLAYTREE,MSGL_WARN,"No entry index in entry %s\nAssuming %d\n",line,num);
+    mp_msg(MSGT_PLAYTREE,MSGL_WARN,"No or invalid entry index in entry %s\nAssuming %d\n",line,num);
   }
   if(num > max_entry) {
     e = realloc(e, num * sizeof(pls_entry_t));
+    if (!e)
+      return 0;
     memset(&e[max_entry],0,(num-max_entry)*sizeof(pls_entry_t));
     max_entry = num;
   }
