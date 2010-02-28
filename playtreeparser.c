@@ -256,7 +256,7 @@ pls_read_entry(char* line,pls_entry_t** _e,int* _max_entry,char** val) {
   }
 
   num = atoi(line);
-  if(num < 0 || num > limit) {
+  if(num <= 0 || num > limit) {
     if (max_entry >= limit) {
         mp_msg(MSGT_PLAYTREE, MSGL_WARN, "Too many index entries\n");
         return 0;
