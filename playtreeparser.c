@@ -252,14 +252,14 @@ pls_read_entry(char* line,pls_entry_t** _e,int* _max_entry,char** val) {
   v = pls_entry_get_value(line);
   if(!v) {
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"No value in entry %s\n",line);
-    return 0;
+    return -1;
   }
 
   num = atoi(line);
   if(num <= 0 || num > limit) {
     if (max_entry >= limit) {
         mp_msg(MSGT_PLAYTREE, MSGL_WARN, "Too many index entries\n");
-        return 0;
+        return -1;
     }
     num = max_entry+1;
     mp_msg(MSGT_PLAYTREE,MSGL_WARN,"No or invalid entry index in entry %s\nAssuming %d\n",line,num);
@@ -267,7 +267,7 @@ pls_read_entry(char* line,pls_entry_t** _e,int* _max_entry,char** val) {
   if(num > max_entry) {
     e = realloc(e, num * sizeof(pls_entry_t));
     if (!e)
-      return 0;
+      return -1;
     memset(&e[max_entry],0,(num-max_entry)*sizeof(pls_entry_t));
     max_entry = num;
   }
