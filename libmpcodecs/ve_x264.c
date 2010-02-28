@@ -258,10 +258,7 @@ static int encode_frame(struct vf_instance *vf, x264_picture_t *pic_in)
         return -1;
     }
     if(i_size>0) {
-        int keyframe = (pic_out.i_type == X264_TYPE_IDR) ||
-                       (pic_out.i_type == X264_TYPE_I
-                        && param.i_frame_reference == 1
-                        && !param.i_bframe);
+        int keyframe = pic_out.b_keyframe;
         memcpy(mod->mux->buffer, nal->p_payload, i_size);
         muxer_write_chunk(mod->mux, i_size, keyframe?AVIIF_KEYFRAME:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     }
