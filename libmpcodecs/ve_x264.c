@@ -263,7 +263,7 @@ static int encode_frame(struct vf_instance *vf, x264_picture_t *pic_in)
                         && param.i_frame_reference == 1
                         && !param.i_bframe);
         memcpy(mod->mux->buffer, nal->p_payload, i_size);
-        muxer_write_chunk(mod->mux, i_size, keyframe?0x10:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
+        muxer_write_chunk(mod->mux, i_size, keyframe?AVIIF_KEYFRAME:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     }
     else
         ++mod->mux->encoder_delay;
