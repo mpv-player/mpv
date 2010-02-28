@@ -25,6 +25,7 @@
 
 #include "config.h"
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <windows.h>
 #include "keycodes.h"
@@ -64,7 +65,15 @@ static int getch2_internal(void)
 	INPUT_RECORD eventbuffer[128];
     DWORD retval;
    	int i=0;
-    if(!getch2_status)return -1;
+    if(!getch2_status){
+      // supports e.g. MinGW xterm, unfortunately keys are only received after
+      // enter was pressed.
+      uint8_t c;
+      if (!PeekNamedPipe(in, NULL, 1, &retval, NULL, NULL) || !retval)
+        return -1;
+      ReadFile(in, &c, 1, &retval, NULL);
+      return retval == 1 ? c : -1;
+    }
     /*check if there are input events*/
 	if(!GetNumberOfConsoleInputEvents(in,&retval))
 	{
