@@ -1433,7 +1433,7 @@ sub_data* sub_read_file (char *filename, float fps) {
         sub=srp->read(fd,sub);
         if(!sub) break;   // EOF
 #ifdef CONFIG_ICONV
-	if ((sub!=ERR) && (sub_utf8 & 2)) sub=subcp_recode(sub);
+	if ((sub!=ERR) && sub_utf8 == 2) sub=subcp_recode(sub);
 #endif
 #ifdef CONFIG_FRIBIDI
 	if (sub!=ERR) sub=sub_fribidi(sub,sub_utf8,0);
