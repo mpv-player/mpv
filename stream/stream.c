@@ -41,6 +41,7 @@
 #include "network.h"
 #include "stream.h"
 #include "libmpdemux/demuxer.h"
+#include "libavutil/intreadwrite.h"
 
 #include "m_option.h"
 #include "m_struct.h"
@@ -488,9 +489,103 @@ int stream_check_interrupt(int time) {
     return stream_check_interrupt_cb(time);
 }
 
-unsigned char* stream_read_line(stream_t *s,unsigned char* mem, int max) {
+/**
+ * Helper function to read 16 bits little-endian and advance pointer
+ */
+static uint16_t get_le16_inc(const uint8_t **buf)
+{
+  uint16_t v = AV_RL16(*buf);
+  *buf += 2;
+  return v;
+}
+
+/**
+ * Helper function to read 16 bits big-endian and advance pointer
+ */
+static uint16_t get_be16_inc(const uint8_t **buf)
+{
+  uint16_t v = AV_RB16(*buf);
+  *buf += 2;
+  return v;
+}
+
+/**
+ * Find a newline character in buffer
+ * \param buf buffer to search
+ * \param len amount of bytes to search in buffer, may not overread
+ * \param utf16 chose between UTF-8/ASCII/other and LE and BE UTF-16
+ *              0 = UTF-8/ASCII/other, 1 = UTF-16-LE, 2 = UTF-16-BE
+ */
+static const uint8_t *find_newline(const uint8_t *buf, int len, int utf16)
+{
+  uint32_t c;
+  const uint8_t *end = buf + len;
+  switch (utf16) {
+  case 0:
+    return (uint8_t *)memchr(buf, '\n', len);
+  case 1:
+    while (buf < end - 1) {
+      GET_UTF16(c, buf < end - 1 ? get_le16_inc(&buf) : 0, return NULL;)
+      if (buf <= end && c == '\n')
+        return buf - 1;
+    }
+    break;
+  case 2:
+    while (buf < end - 1) {
+      GET_UTF16(c, buf < end - 1 ? get_be16_inc(&buf) : 0, return NULL;)
+      if (buf <= end && c == '\n')
+        return buf - 1;
+    }
+    break;
+  }
+  return NULL;
+}
+
+/**
+ * Copy a number of bytes, converting to UTF-8 if input is UTF-16
+ * \param dst buffer to copy to
+ * \param dstsize size of dst buffer
+ * \param src buffer to copy from
+ * \param len amount of bytes to copy from src
+ * \param utf16 chose between UTF-8/ASCII/other and LE and BE UTF-16
+ *              0 = UTF-8/ASCII/other, 1 = UTF-16-LE, 2 = UTF-16-BE
+ */
+static int copy_characters(uint8_t *dst, int dstsize,
+                           const uint8_t *src, int *len, int utf16)
+{
+  uint32_t c;
+  uint8_t *dst_end = dst + dstsize;
+  const uint8_t *end = src + *len;
+  switch (utf16) {
+  case 0:
+    if (*len > dstsize)
+      *len = dstsize;
+    memcpy(dst, src, *len);
+    return *len;
+  case 1:
+    while (src < end - 1 && dst_end - dst > 8) {
+      uint8_t tmp;
+      GET_UTF16(c, src < end - 1 ? get_le16_inc(&src) : 0, ;)
+      PUT_UTF8(c, tmp, *dst++ = tmp;)
+    }
+    *len -= end - src;
+    return dstsize - (dst_end - dst);
+  case 2:
+    while (src < end - 1 && dst_end - dst > 8) {
+      uint8_t tmp;
+      GET_UTF16(c, src < end - 1 ? get_be16_inc(&src) : 0, ;)
+      PUT_UTF8(c, tmp, *dst++ = tmp;)
+    }
+    *len -= end - src;
+    return dstsize - (dst_end - dst);
+  }
+  return 0;
+}
+
+unsigned char* stream_read_line(stream_t *s,unsigned char* mem, int max, int utf16) {
   int len;
-  unsigned char* end,*ptr = mem;
+  const unsigned char *end;
+  unsigned char *ptr = mem;
   if (max < 1) return NULL;
   max--; // reserve one for 0-termination
   do {
@@ -499,13 +594,14 @@ unsigned char* stream_read_line(stream_t *s,unsigned char* mem, int max) {
     if(len <= 0 &&
        (!cache_stream_fill_buffer(s) ||
         (len = s->buf_len-s->buf_pos) <= 0)) break;
-    end = (unsigned char*) memchr((void*)(s->buffer+s->buf_pos),'\n',len);
+    end = find_newline(s->buffer+s->buf_pos, len, utf16);
     if(end) len = end - (s->buffer+s->buf_pos) + 1;
     if(len > 0 && max > 0) {
-      int l = len > max ? max : len;
-      memcpy(ptr,s->buffer+s->buf_pos,l);
+      int l = copy_characters(ptr, max, s->buffer+s->buf_pos, &len, utf16);
       max -= l;
       ptr += l;
+      if (!len)
+        break;
     }
     s->buf_pos += len;
   } while(!end);

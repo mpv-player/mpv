@@ -265,7 +265,7 @@ inline static int stream_read(stream_t *s,char* mem,int total){
   return total;
 }
 
-unsigned char* stream_read_line(stream_t *s,unsigned char* mem, int max);
+unsigned char* stream_read_line(stream_t *s,unsigned char* mem, int max, int utf16);
 
 inline static int stream_eof(stream_t *s){
   return s->eof;

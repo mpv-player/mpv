@@ -36,6 +36,7 @@ MPlayer (1.0)
     * support for displaying subs in the terminal (FIXME)
     * support for subtitles with audio-only files
     * support for right-to-left languages with embedded subtitles
+    * support for UTF-16 encoded external subtitles
     * support for 8 channel audio
     * sync dvd:// and dvdnav:// features
     * support for MPEG-4 ASP in VDPAU video output (non B-frame only)
