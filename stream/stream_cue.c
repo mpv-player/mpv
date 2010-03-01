@@ -178,6 +178,7 @@ static int cue_getTrackinfo(char *Line, tTrack *track)
  * sure the sizes are in sync.
  */
 static int cue_find_bin (char *firstline) {
+  const char *cur_name;
   int i,j;
   char s[256];
   char t[256];
@@ -213,67 +214,61 @@ static int cue_find_bin (char *firstline) {
 
   }
 
+  fd_bin = -1;
+  for (i = 0; fd_bin == -1 && i < 6; i++) {
+    switch (i) {
+    case 0:
   /* now try to open that file, without path */
-  fd_bin = open (bin_filename, O_RDONLY);
-  if (fd_bin == -1)
-  {
-    mp_msg(MSGT_OPEN,MSGL_STATUS, MSGTR_MPDEMUX_CUEREAD_BinFilenameTested,
-           bin_filename);
-
+      cur_name = bin_filename;
+      break;
+    case 1:
     /* now try to find it with the path of the cue file */
     snprintf(s,sizeof( s ),"%s/%s",bincue_path,bin_filename);
-    fd_bin = open (s, O_RDONLY);
-    if (fd_bin == -1)
-    {
-      mp_msg(MSGT_OPEN,MSGL_STATUS,
-             MSGTR_MPDEMUX_CUEREAD_BinFilenameTested, s);
+      cur_name = s;
+      break;
+    case 2:
       /* now I would say the whole filename is shit, build our own */
       strncpy(s, cue_filename, strlen(cue_filename) - 3 );
       s[strlen(cue_filename) - 3] = '\0';
       strcat(s, "bin");
-      fd_bin = open (s, O_RDONLY);
-      if (fd_bin == -1)
-      {
-        mp_msg(MSGT_OPEN,MSGL_STATUS,
-               MSGTR_MPDEMUX_CUEREAD_BinFilenameTested, s);
-
+      cur_name = s;
+      break;
+    case 3:
         /* ok try it with path */
         snprintf(t, sizeof( t ), "%s/%s", bincue_path, s);
         fd_bin = open (t, O_RDONLY);
-        if (fd_bin == -1)
-        {
-          mp_msg(MSGT_OPEN,MSGL_STATUS,
-                 MSGTR_MPDEMUX_CUEREAD_BinFilenameTested,t);
+      cur_name = t;
+      break;
+    case 4:
           /* now I would say the whole filename is shit, build our own */
           strncpy(s, cue_filename, strlen(cue_filename) - 3 );
           s[strlen(cue_filename) - 3] = '\0';
           strcat(s, "img");
-          fd_bin = open (s, O_RDONLY);
-          if (fd_bin == -1)
-          {
-            mp_msg(MSGT_OPEN,MSGL_STATUS,
-                   MSGTR_MPDEMUX_CUEREAD_BinFilenameTested, s);
+      cur_name = s;
+      break;
+    case 5:
             /* ok try it with path */
             snprintf(t, sizeof( t ), "%s/%s", bincue_path, s);
-            fd_bin = open (t, O_RDONLY);
+      cur_name = t;
+      break;
+    }
+    fd_bin = open(cur_name, O_RDONLY);
+    if (fd_bin == -1) {
+      mp_msg(MSGT_OPEN,MSGL_STATUS, MSGTR_MPDEMUX_CUEREAD_BinFilenameTested,
+            cur_name);
+    }
+  }
+
             if (fd_bin == -1)
             {
-              mp_msg(MSGT_OPEN,MSGL_STATUS,
-                     MSGTR_MPDEMUX_CUEREAD_BinFilenameTested, s);
-
               /* I'll give up */
               mp_msg(MSGT_OPEN,MSGL_ERR,
                      MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile);
               return -1;
             }
-          }
-        } else strcpy(bin_filename, t);
 
-      } else strcpy(bin_filename, s);
-
-    } else strcpy(bin_filename, s);
-
-  }
+  if (cur_name != bin_filename)
+    strcpy(bin_filename, cur_name);
 
   mp_msg(MSGT_OPEN,MSGL_INFO,
          MSGTR_MPDEMUX_CUEREAD_UsingBinFile, bin_filename);
