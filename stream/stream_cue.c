@@ -555,7 +555,7 @@ static int control(stream_t *stream, int cmd, void *arg) {
     case STREAM_CTRL_SEEK_TO_CHAPTER:
     {
       int r;
-      unsigned int track = *(unsigned int *)arg;
+      unsigned int track = *(unsigned int *)arg + 1;
       r = cue_vcd_seek_to_track(track);
       if (r >= 0) {
         stream->start_pos = r;
@@ -566,7 +566,7 @@ static int control(stream_t *stream, int cmd, void *arg) {
     }
     case STREAM_CTRL_GET_CURRENT_CHAPTER:
     {
-      *(unsigned int *)arg = cue_current_pos.track;
+      *(unsigned int *)arg = cue_current_pos.track - 1;
       return STREAM_OK;
     }
   }
