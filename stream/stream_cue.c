@@ -468,8 +468,18 @@ static int cue_read_toc_entry(int track) {
   return 0;
 }
 
-static int seek(stream_t *s,off_t newpos);
-static int cue_vcd_get_track_end (int track);
+static int cue_vcd_get_track_end (int track){
+  int sector = cue_msf_2_sector(tracks[track].minute, tracks[track].second,
+                                tracks[track].frame);
+
+  return VCD_SECTOR_DATA * sector;
+}
+
+static int seek(stream_t *s,off_t newpos) {
+  s->pos=newpos;
+  cue_set_msf(s->pos/VCD_SECTOR_DATA);
+  return 1;
+}
 
 static int cue_vcd_seek_to_track (stream_t *stream, int track){
   int pos;
@@ -481,13 +491,6 @@ static int cue_vcd_seek_to_track (stream_t *stream, int track){
   stream->end_pos = cue_vcd_get_track_end(track);
   seek(stream, pos);
   return pos;
-}
-
-static int cue_vcd_get_track_end (int track){
-  int sector = cue_msf_2_sector(tracks[track].minute, tracks[track].second,
-                                tracks[track].frame);
-
-  return VCD_SECTOR_DATA * sector;
 }
 
 static void cue_vcd_read_toc(void){
@@ -542,12 +545,6 @@ static int cue_vcd_read(stream_t *stream, char *mem, int size) {
   }
 
   return VCD_SECTOR_DATA;
-}
-
-static int seek(stream_t *s,off_t newpos) {
-  s->pos=newpos;
-  cue_set_msf(s->pos/VCD_SECTOR_DATA);
-  return 1;
 }
 
 static int control(stream_t *stream, int cmd, void *arg) {
