@@ -479,11 +479,10 @@ static int cue_vcd_seek_to_track (int track){
 }
 
 static int cue_vcd_get_track_end (int track){
-  cue_current_pos.frame = tracks[track].frame;
-  cue_current_pos.second = tracks[track].second;
-  cue_current_pos.minute = tracks[track].minute;
+  int sector = cue_msf_2_sector(tracks[track].minute, tracks[track].second,
+                                tracks[track].frame);
 
-  return VCD_SECTOR_DATA * cue_get_msf();
+  return VCD_SECTOR_DATA * sector;
 }
 
 static void cue_vcd_read_toc(void){
