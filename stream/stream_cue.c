@@ -444,7 +444,7 @@ static int cue_read_toc_entry(void) {
   int track = cue_current_pos.track - 1;
 
   /* check if its a valid track, if not return -1 */
-  if (track >= nTracks)
+  if (track < 0 || track >= nTracks)
     return -1;
 
 
