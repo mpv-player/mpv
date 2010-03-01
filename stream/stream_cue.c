@@ -333,6 +333,8 @@ static int cue_read_cue (char *in_cue_filename)
 
   av_strlcpy(bincue_path,t,sizeof( bincue_path ));
   mp_msg(MSGT_OPEN,MSGL_V,"dirname: %s, cuepath: %s\n", t, bincue_path);
+  free(s);
+  s = t = NULL;
 
   /* no path at all? */
   if (strcmp(bincue_path, ".") == 0) {
