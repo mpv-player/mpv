@@ -368,7 +368,7 @@ static int cue_read_cue (char *in_cue_filename)
   /* read the first line and hand it to find_bin, which will
      test more than one possible name of the file */
 
-  if(! fgets( sLine, 256, fd_cue ) )
+  if(! fgets( sLine, sizeof(sLine), fd_cue ) )
   {
     mp_msg(MSGT_OPEN,MSGL_ERR,
            MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile, in_cue_filename);
@@ -384,7 +384,7 @@ static int cue_read_cue (char *in_cue_filename)
 
   /* now build the track list */
   /* red the next line and call our track finder */
-  if(! fgets( sLine, 256, fd_cue ) )
+  if(! fgets( sLine, sizeof(sLine), fd_cue ) )
   {
     mp_msg(MSGT_OPEN,MSGL_ERR,
            MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile, in_cue_filename);
