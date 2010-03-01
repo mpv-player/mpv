@@ -545,6 +545,33 @@ static int seek(stream_t *s,off_t newpos) {
   return 1;
 }
 
+static int control(stream_t *stream, int cmd, void *arg) {
+  switch(cmd) {
+    case STREAM_CTRL_GET_NUM_CHAPTERS:
+    {
+      *(unsigned int *)arg = nTracks;
+      return STREAM_OK;
+    }
+    case STREAM_CTRL_SEEK_TO_CHAPTER:
+    {
+      int r;
+      unsigned int track = *(unsigned int *)arg;
+      r = cue_vcd_seek_to_track(track);
+      if (r >= 0) {
+        stream->start_pos = r;
+        stream->end_pos = cue_vcd_get_track_end(track);
+        return STREAM_OK;
+      }
+      break;
+    }
+    case STREAM_CTRL_GET_CURRENT_CHAPTER:
+    {
+      *(unsigned int *)arg = cue_current_pos.track;
+      return STREAM_OK;
+    }
+  }
+  return STREAM_UNSUPPORTED;
+}
 
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
@@ -591,6 +618,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   stream->end_pos = ret2;
   stream->fill_buffer = cue_vcd_read;
   stream->seek = seek;
+  stream->control = control;
 
   free(filename);
   m_struct_free(&stream_opts,opts);
