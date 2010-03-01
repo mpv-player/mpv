@@ -38,7 +38,6 @@
 #include "m_struct.h"
 #include "libavutil/avstring.h"
 
-#define byte    unsigned char
 #define SIZERAW 2352
 #define SIZEISO_MODE1 2048
 #define SIZEISO_MODE2_RAW 2352
