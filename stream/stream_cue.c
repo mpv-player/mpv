@@ -439,15 +439,14 @@ static int cue_read_cue (char *in_cue_filename)
 
 
 
-static int cue_read_toc_entry(void) {
-
-  int track = cue_current_pos.track - 1;
-
+static int cue_read_toc_entry(int track) {
   /* check if its a valid track, if not return -1 */
-  if (track < 0 || track >= nTracks)
+  if (track <= 0 || track > nTracks)
     return -1;
 
 
+  cue_current_pos.track = track;
+  track--;
   switch (tracks[track].mode)
   {
     case AUDIO:
@@ -470,9 +469,7 @@ static int cue_read_toc_entry(void) {
 }
 
 static int cue_vcd_seek_to_track (int track){
-  cue_current_pos.track  = track;
-
-  if (cue_read_toc_entry ())
+  if (cue_read_toc_entry (track))
     return -1;
 
   return VCD_SECTOR_DATA * cue_get_msf();
