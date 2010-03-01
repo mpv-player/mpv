@@ -75,8 +75,6 @@ static const struct m_struct_st stream_opts = {
 static FILE* fd_cue;
 static int fd_bin = 0;
 
-static char bin_filename[256];
-
 static char cue_filename[256];
 static char bincue_path[256];
 
@@ -180,6 +178,7 @@ static int cue_getTrackinfo(char *Line, tTrack *track)
 static int cue_find_bin (char *firstline) {
   const char *cur_name;
   int i,j;
+  char bin_filename[256];
   char s[256];
   char t[256];
 
@@ -267,11 +266,8 @@ static int cue_find_bin (char *firstline) {
     return -1;
   }
 
-  if (cur_name != bin_filename)
-    strcpy(bin_filename, cur_name);
-
   mp_msg(MSGT_OPEN,MSGL_INFO,
-         MSGTR_MPDEMUX_CUEREAD_UsingBinFile, bin_filename);
+         MSGTR_MPDEMUX_CUEREAD_UsingBinFile, cur_name);
   return 0;
 }
 
