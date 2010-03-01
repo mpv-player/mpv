@@ -218,12 +218,12 @@ static int cue_find_bin (char *firstline) {
   for (i = 0; fd_bin == -1 && i < 6; i++) {
     switch (i) {
     case 0:
-  /* now try to open that file, without path */
+      /* now try to open that file, without path */
       cur_name = bin_filename;
       break;
     case 1:
-    /* now try to find it with the path of the cue file */
-    snprintf(s,sizeof( s ),"%s/%s",bincue_path,bin_filename);
+      /* now try to find it with the path of the cue file */
+      snprintf(s,sizeof( s ),"%s/%s",bincue_path,bin_filename);
       cur_name = s;
       break;
     case 2:
@@ -234,21 +234,21 @@ static int cue_find_bin (char *firstline) {
       cur_name = s;
       break;
     case 3:
-        /* ok try it with path */
-        snprintf(t, sizeof( t ), "%s/%s", bincue_path, s);
-        fd_bin = open (t, O_RDONLY);
+      /* ok try it with path */
+      snprintf(t, sizeof( t ), "%s/%s", bincue_path, s);
+      fd_bin = open (t, O_RDONLY);
       cur_name = t;
       break;
     case 4:
-          /* now I would say the whole filename is shit, build our own */
-          strncpy(s, cue_filename, strlen(cue_filename) - 3 );
-          s[strlen(cue_filename) - 3] = '\0';
-          strcat(s, "img");
+      /* now I would say the whole filename is shit, build our own */
+      strncpy(s, cue_filename, strlen(cue_filename) - 3 );
+      s[strlen(cue_filename) - 3] = '\0';
+      strcat(s, "img");
       cur_name = s;
       break;
     case 5:
-            /* ok try it with path */
-            snprintf(t, sizeof( t ), "%s/%s", bincue_path, s);
+      /* ok try it with path */
+      snprintf(t, sizeof( t ), "%s/%s", bincue_path, s);
       cur_name = t;
       break;
     }
@@ -259,13 +259,13 @@ static int cue_find_bin (char *firstline) {
     }
   }
 
-            if (fd_bin == -1)
-            {
-              /* I'll give up */
-              mp_msg(MSGT_OPEN,MSGL_ERR,
-                     MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile);
-              return -1;
-            }
+  if (fd_bin == -1)
+  {
+    /* I'll give up */
+    mp_msg(MSGT_OPEN,MSGL_ERR,
+           MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile);
+    return -1;
+  }
 
   if (cur_name != bin_filename)
     strcpy(bin_filename, cur_name);
