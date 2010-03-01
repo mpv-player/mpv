@@ -468,11 +468,19 @@ static int cue_read_toc_entry(int track) {
   return 0;
 }
 
-static int cue_vcd_seek_to_track (int track){
+static int seek(stream_t *s,off_t newpos);
+static int cue_vcd_get_track_end (int track);
+
+static int cue_vcd_seek_to_track (stream_t *stream, int track){
+  int pos;
   if (cue_read_toc_entry (track))
     return -1;
 
-  return VCD_SECTOR_DATA * cue_get_msf();
+  pos = VCD_SECTOR_DATA * cue_get_msf();
+  stream->start_pos = pos;
+  stream->end_pos = cue_vcd_get_track_end(track);
+  seek(stream, pos);
+  return pos;
 }
 
 static int cue_vcd_get_track_end (int track){
@@ -553,11 +561,8 @@ static int control(stream_t *stream, int cmd, void *arg) {
     {
       int r;
       unsigned int track = *(unsigned int *)arg + 1;
-      r = cue_vcd_seek_to_track(track);
+      r = cue_vcd_seek_to_track(stream, track);
       if (r >= 0) {
-        stream->start_pos = r;
-        stream->pos = r;
-        stream->end_pos = cue_vcd_get_track_end(track);
         return STREAM_OK;
       }
       break;
@@ -573,7 +578,7 @@ static int control(stream_t *stream, int cmd, void *arg) {
 
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
-  int ret,ret2,f,track = 0;
+  int ret,f,track = 0;
   char *filename = NULL, *colon = NULL;
 
   if(mode != STREAM_READ || !p->filename) {
@@ -600,20 +605,18 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     return STREAM_UNSUPPORTED;
   }
   cue_vcd_read_toc();
-  ret2=cue_vcd_get_track_end(track);
-  ret=cue_vcd_seek_to_track(track);
+  ret=cue_vcd_seek_to_track(stream, track);
   if(ret<0){
     mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (seek)\n");
     return STREAM_UNSUPPORTED;
   }
-  mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail, filename, track, ret, ret2);
+  mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail,
+         filename, track, ret, (int)stream->end_pos);
 
   stream->fd = f;
   stream->type = STREAMTYPE_VCDBINCUE;
   stream->sector_size = VCD_SECTOR_DATA;
   stream->flags = STREAM_READ | MP_STREAM_SEEK_FW;
-  stream->start_pos = ret;
-  stream->end_pos = ret2;
   stream->fill_buffer = cue_vcd_read;
   stream->seek = seek;
   stream->control = control;
