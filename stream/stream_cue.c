@@ -556,6 +556,7 @@ static int control(stream_t *stream, int cmd, void *arg) {
       r = cue_vcd_seek_to_track(track);
       if (r >= 0) {
         stream->start_pos = r;
+        stream->pos = r;
         stream->end_pos = cue_vcd_get_track_end(track);
         return STREAM_OK;
       }
