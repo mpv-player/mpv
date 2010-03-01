@@ -72,9 +72,6 @@ static const struct m_struct_st stream_opts = {
   stream_opts_fields
 };
 
-static FILE* fd_cue;
-static int fd_bin = 0;
-
 static char cue_filename[256];
 static char bincue_path[256];
 
@@ -120,7 +117,7 @@ static int digits2int(char s[2], int errval) {
 }
 
 /* presumes Line is preloaded with the "current" line of the file */
-static int cue_getTrackinfo(char *Line, tTrack *track)
+static int cue_getTrackinfo(FILE *fd_cue, char *Line, tTrack *track)
 {
   int already_set = 0;
 
@@ -181,6 +178,7 @@ static int cue_find_bin (char *firstline) {
   char bin_filename[256];
   char s[256];
   char t[256];
+  int fd_bin;
 
   /* get the filename out of that */
   /*                      12345 6  */
@@ -268,7 +266,7 @@ static int cue_find_bin (char *firstline) {
 
   mp_msg(MSGT_OPEN,MSGL_INFO,
          MSGTR_MPDEMUX_CUEREAD_UsingBinFile, cur_name);
-  return 0;
+  return fd_bin;
 }
 
 static inline int cue_msf_2_sector(int minute, int second, int frame) {
@@ -315,11 +313,11 @@ static int cue_read_cue (char *in_cue_filename)
   unsigned int sect;
   char *s,*t;
   int i;
+  int fd_bin;
+  FILE *fd_cue;
 
   /* we have no tracks at the beginning */
   nTracks = 0;
-
-  fd_bin = 0;
 
   /* split the filename into a path and filename part */
   s = strdup(in_cue_filename);
@@ -367,7 +365,8 @@ static int cue_read_cue (char *in_cue_filename)
     return -1;
   }
 
-  if (cue_find_bin(sLine)) {
+  fd_bin = cue_find_bin(sLine);
+  if (fd_bin == -1) {
     fclose (fd_cue);
     return -1;
   }
@@ -385,7 +384,7 @@ static int cue_read_cue (char *in_cue_filename)
 
   while(!feof(fd_cue))
   {
-    if (cue_getTrackinfo(sLine, &tracks[nTracks++]) != 0)
+    if (cue_getTrackinfo(fd_cue, sLine, &tracks[nTracks++]) != 0)
     {
       mp_msg(MSGT_OPEN,MSGL_ERR,
              MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile, in_cue_filename);
@@ -504,6 +503,7 @@ static void cue_vcd_read_toc(void){
 
 static int cue_vcd_read(stream_t *stream, char *mem, int size) {
   unsigned long position;
+  int fd_bin = stream->fd;
   int track = cue_current_pos.track - 1;
 
   position = tracks[track].start_offset +
