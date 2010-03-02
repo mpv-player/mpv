@@ -1754,10 +1754,6 @@ If you want to do software transcoding you should have at least a 1GHz CPU.
 <para>
 Configure should detect your DVB card. If it did not, force detection with
 <screen>./configure --enable-dvb</screen>
-If you have ost headers at a non-standard path, set the path with
-<screen>
-./configure --with-extraincdir=<replaceable>DVB source directory</replaceable>/ost/include
-</screen>
 Then compile and install as usual.</para>
 
 <formalpara><title>USAGE</title>

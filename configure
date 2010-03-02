@@ -384,7 +384,6 @@ Video output:
   --enable-ivtv            enable IVTV TV-Out video output [autodetect]
   --enable-v4l2            enable V4L2 Decoder audio/video output [autodetect]
   --enable-dvb             enable DVB video output [autodetect]
-  --enable-dvbhead         enable DVB video output (HEAD version) [autodetect]
   --enable-mga             enable mga_vid video output [autodetect]
   --enable-xmga            enable mga_vid X11 video output [autodetect]
   --enable-xv              enable Xv video output [autodetect]
@@ -605,7 +604,6 @@ _svga=auto
 _vesa=auto
 _fbdev=auto
 _dvb=auto
-_dvbhead=auto
 _dxr2=auto
 _dxr3=auto
 _ivtv=auto
@@ -982,8 +980,6 @@ for ac_option do
   --disable-fbdev)      _fbdev=no       ;;
   --enable-dvb)         _dvb=yes        ;;
   --disable-dvb)        _dvb=no         ;;
-  --enable-dvbhead)     _dvbhead=yes    ;;
-  --disable-dvbhead)    _dvbhead=no     ;;
   --enable-dxr2)        _dxr2=yes       ;;
   --disable-dxr2)       _dxr2=no        ;;
   --enable-dxr3)        _dxr3=yes       ;;
@@ -4965,36 +4961,6 @@ cat >$TMPC << EOF
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
-#include <ost/dmx.h>
-#include <ost/frontend.h>
-#include <ost/sec.h>
-#include <ost/video.h>
-#include <ost/audio.h>
-int main(void) {return 0;}
-EOF
-  for _inc_tmp in "" "-I/usr/src/DVB/ost/include" ; do
-    cc_check $_inc_tmp && _dvb=yes && \
-     extra_cflags="$extra_cflags $_inc_tmp" && break
-  done
-fi
-echores "$_dvb"
-if test "$_dvb" = yes ; then
-  def_dvb='#define CONFIG_DVB 1'
-  def_dvbin='#define CONFIG_DVBIN 1'
-  _aomodules="mpegpes(dvb) $_aomodules"
-  _vomodules="mpegpes(dvb) $_vomodules"
-fi
-
-echocheck "DVB HEAD"
-if test "$_dvbhead" = auto ; then
-  _dvbhead=no
-
-cat >$TMPC << EOF
-#include <poll.h>
-#include <sys/ioctl.h>
-#include <stdio.h>
-#include <time.h>
-#include <unistd.h>
 #include <linux/dvb/dmx.h>
 #include <linux/dvb/frontend.h>
 #include <linux/dvb/video.h>
@@ -5002,33 +4968,25 @@ cat >$TMPC << EOF
 int main(void) {return 0;}
 EOF
   for _inc_tmp in "" "-I/usr/src/DVB/include" ; do
-    cc_check $_inc_tmp && _dvbhead=yes && \
+    cc_check $_inc_tmp && _dvb=yes && \
       extra_cflags="$extra_cflags $_inc_tmp" && break
   done
 fi
-echores "$_dvbhead"
-if test "$_dvbhead" = yes ; then
+echores "$_dvb"
+if test "$_dvb" = yes ; then
+  _dvbin=yes
+  _inputmodules="dvb $_inputmodules"
   def_dvb='#define CONFIG_DVB 1'
-  def_dvb_head='#define CONFIG_DVB_HEAD 1'
   def_dvbin='#define CONFIG_DVBIN 1'
   _aomodules="mpegpes(dvb) $_aomodules"
   _vomodules="mpegpes(dvb) $_vomodules"
-fi
-
-if test "$_dvbhead" = no && test "$_dvb" = no ; then
+else
+  _dvbin=no
+  _noinputmodules="dvb $_noinputmodules"
   def_dvb='#undef CONFIG_DVB'
-  def_dvb_head='#undef CONFIG_DVB_HEAD'
   def_dvbin='#undef CONFIG_DVBIN '
   _aomodules="mpegpes(file) $_aomodules"
   _vomodules="mpegpes(file) $_vomodules"
-fi
-
-if test "$_dvb" = yes || test "$_dvbhead" = yes ; then
-    _dvbin=yes
-    _inputmodules="dvb $_inputmodules"
-else
-    _dvbin=no
-    _noinputmodules="dvb $_noinputmodules"
 fi
 
 
@@ -9129,7 +9087,6 @@ $def_directfb
 $def_directfb_version
 $def_directx
 $def_dvb
-$def_dvb_head
 $def_dvbin
 $def_dxr2
 $def_dxr3
