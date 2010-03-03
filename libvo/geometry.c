@@ -77,9 +77,15 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 			return 0;
 		      }
 
+		mp_msg(MSGT_VO, MSGL_V,"geometry window parameter: widw: %i,"
+		  " widh: %i, scrw: %i, scrh: %i\n",*widw, *widh, scrw, scrh);
+
 		mp_msg(MSGT_VO, MSGL_V,"geometry set to width: %i,"
 		  "height: %i, xoff: %s%i, yoff: %s%i, xper: %i, yper: %i\n",
 		  width, height, xsign, xoff, ysign, yoff, xper, yper);
+
+		if (width  > 0 && widw) *widw = width;
+		if (height > 0 && widh) *widh = height;
 
 		if(xoff != INT_MIN && xsign[0] == '-') xoff = scrw - *widw - xoff;
 		if(yoff != INT_MIN && ysign[0] == '-') yoff = scrh - *widh - yoff;
@@ -89,13 +95,9 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 		mp_msg(MSGT_VO, MSGL_V,"geometry set to width: %i,"
 		  "height: %i, xoff: %i, yoff: %i, xper: %i, yper: %i\n",
 		  width, height, xoff, yoff, xper, yper);
-		mp_msg(MSGT_VO, MSGL_V,"geometry window parameter: widw: %i,"
-		  " widh: %i, scrw: %i, scrh: %i\n",*widw, *widh, scrw, scrh);
 
 		if (xoff != INT_MIN && xpos) *xpos = xoff;
 		if (yoff != INT_MIN && ypos) *ypos = yoff;
-		if (width  > 0 && widw) *widw = width;
-		if (height > 0 && widh) *widh = height;
 
 		geometry_wh_changed = width > 0 || height > 0;
 		geometry_xy_changed = xoff != INT_MIN || yoff != INT_MIN;
