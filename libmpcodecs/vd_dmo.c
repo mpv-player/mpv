@@ -55,7 +55,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 // init driver
 static int init(sh_video_t *sh){
-    unsigned int out_fmt=sh->codec->outfmt[sh->outfmtidx];
+    unsigned int out_fmt=sh->codec->outfmt[0];
     struct context *ctx;
     void *decoder;
     if(!(decoder=DMO_VideoDecoder_Open(sh->codec->dll,&sh->codec->guid, sh->bih, 0, 0))){
@@ -64,6 +64,8 @@ static int init(sh_video_t *sh){
 	return 0;
     }
     if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,out_fmt)) return 0;
+    // mpcodecs_config_vo can change the format
+    out_fmt=sh->codec->outfmt[sh->outfmtidx];
     sh->context = ctx = calloc(1, sizeof(*ctx));
     ctx->decoder = decoder;
     switch(out_fmt){
