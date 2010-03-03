@@ -36,20 +36,23 @@ int geometry_xy_changed;
 int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 {
         if(vo_geometry != NULL) {
+            char xsign[2], ysign[2];
             int width, height, xoff, yoff, xper, yper;
             int i;
             int ok = 0;
             for (i = 0; !ok && i < 8; i++) {
                 width = height = xoff = yoff = xper = yper = INT_MIN;
+                strcpy(xsign, "+");
+                strcpy(ysign, "+");
                 switch (i) {
                 case 0:
-                    ok = sscanf(vo_geometry, "%ix%i+%i+%i", &width, &height, &xoff, &yoff) == 4;
+                    ok = sscanf(vo_geometry, "%ix%i%1[+-]%i%1[+-]%i", &width, &height, xsign, &xoff, ysign, &yoff) == 6;
                     break;
                 case 1:
                     ok = sscanf(vo_geometry, "%ix%i", &width, &height) == 2;
                     break;
                 case 2:
-                    ok = sscanf(vo_geometry, "+%i+%i", &xoff, &yoff) == 2;
+                    ok = sscanf(vo_geometry, "%1[+-]%i%1[+-]%i", xsign, &xoff, ysign, &yoff) == 4;
                     break;
                 case 3:
                     ok = sscanf(vo_geometry, "%i%%:%i%%", &xper, &yper) == 2;
@@ -70,14 +73,16 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
             }
 		      if (!ok) {
 			mp_msg(MSGT_VO, MSGL_ERR,
-			    "-geometry must be in [WxH][+X+Y] | [X[%%]:[Y[%%]]] format, incorrect (%s)\n", vo_geometry);
+			    "-geometry must be in [WxH][[+-]X[+-]Y] | [X[%%]:[Y[%%]]] format, incorrect (%s)\n", vo_geometry);
 			return 0;
 		      }
 
 		mp_msg(MSGT_VO, MSGL_V,"geometry set to width: %i,"
-		  "height: %i, xoff: %i, yoff: %i, xper: %i, yper: %i\n",
-		  width, height, xoff, yoff, xper, yper);
+		  "height: %i, xoff: %s%i, yoff: %s%i, xper: %i, yper: %i\n",
+		  width, height, xsign, xoff, ysign, yoff, xper, yper);
 
+		if(xoff != INT_MIN && xsign[0] == '-') xoff = scrw - *widw - xoff;
+		if(yoff != INT_MIN && ysign[0] == '-') yoff = scrh - *widh - yoff;
 		if(xper >= 0 && xper <= 100) xoff = (scrw - *widw) * ((float)xper / 100.0);
 		if(yper >= 0 && yper <= 100) yoff = (scrh - *widh) * ((float)yper / 100.0);
 

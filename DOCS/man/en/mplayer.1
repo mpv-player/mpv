@@ -3143,13 +3143,16 @@ Fixes fullscreen switching on OpenBox 1.x.
 .PD 1
 .
 .TP
-.B \-geometry x[%][:y[%]] or [WxH][+x+y]
+.B \-geometry x[%][:y[%]] or [WxH][+-x+-y]
 Adjust where the output is on the screen initially.
 The x and y specifications are in pixels measured from the top-left of the
 screen to the top-left of the image being displayed, however if a percentage
 sign is given after the argument it turns the value into a percentage of the
 screen size in that direction.
-It also supports the standard X11 \-geometry option format.
+It also supports the standard X11 \-geometry option format, in which e.g.
++10-50 means "place 10 pixels from the left border and 50 pixels from the lower
+border" and "--20+-10" means "place 20 pixels beyond the right and 10 pixels
+beyond the top border".
 If an external window is specified using the \-wid option, then the x and
 y coordinates are relative to the top-left corner of the window rather
 than the screen.
