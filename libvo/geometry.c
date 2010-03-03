@@ -40,7 +40,6 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
             int i;
             int ok = 0;
             for (i = 0; !ok && i < 8; i++) {
-                char percent[2];
                 width = height = xoff = yoff = xper = yper = INT_MIN;
                 switch (i) {
                 case 0:
@@ -53,10 +52,10 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
                     ok = sscanf(vo_geometry, "+%i+%i", &xoff, &yoff) == 2;
                     break;
                 case 3:
-                    ok = sscanf(vo_geometry, "%i%%:%i%1[%]", &xper, &yper, percent) == 3;
+                    ok = sscanf(vo_geometry, "%i%%:%i%%", &xper, &yper) == 2;
                     break;
                 case 4:
-		    ok = sscanf(vo_geometry, "%i:%i%1[%]", &xoff, &yper, percent) == 3;
+		    ok = sscanf(vo_geometry, "%i:%i%%", &xoff, &yper) == 2;
                     break;
                 case 5:
                     ok = sscanf(vo_geometry, "%i%%:%i", &xper, &yoff) == 2;
@@ -65,7 +64,7 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
                     ok = sscanf(vo_geometry, "%i:%i", &xoff, &yoff) == 2;
                     break;
                 case 7:
-                    ok = sscanf(vo_geometry, "%i%1[%]", &xper, percent) == 2;
+                    ok = sscanf(vo_geometry, "%i%%", &xper) == 1;
                     break;
                 }
             }
