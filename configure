@@ -6113,7 +6113,7 @@ fi
 echocheck "VCD support"
 if test "$_vcd" = auto; then
   _vcd=no
-  if linux || freebsd || netbsd || openbsd || dragonfly || bsdos || darwin || sunos; then
+  if linux || freebsd || netbsd || openbsd || dragonfly || bsdos || darwin || sunos || os2; then
     _vcd=yes
   elif mingw32; then
     cat > $TMPC << EOF

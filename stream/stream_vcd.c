@@ -22,6 +22,8 @@
 #include <windows.h>
 #endif
 
+#include "osdep/osdep.h"
+
 #include "mp_msg.h"
 #include "stream.h"
 #include "help_mp.h"
@@ -42,6 +44,8 @@
 #include "vcd_read_darwin.h"
 #elif defined(__MINGW32__) || defined(__CYGWIN__)
 #include "vcd_read_win32.h"
+#elif defined(__OS2__)
+#include "vcd_read_os2.h"
 #else
 #include "vcd_read.h"
 #endif
@@ -102,6 +106,12 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   HANDLE hd;
   char device[] = "\\\\.\\?:";
 #endif
+#if defined(__OS2__)
+  char device[] = "X:";
+  HFILE hcd;
+  ULONG ulAction;
+  ULONG rc;
+#endif
 
   if(mode != STREAM_READ
 #if defined(__MINGW32__) || defined(__CYGWIN__)
@@ -125,6 +135,13 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   hd = CreateFile(device, GENERIC_READ, FILE_SHARE_READ, NULL,
 	  OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
   f = _open_osfhandle((long)hd, _O_RDONLY);
+#elif defined(__OS2__)
+  device[0] = p->device[0];
+  rc = DosOpen(device, &hcd, &ulAction, 0, FILE_NORMAL,
+               OPEN_ACTION_OPEN_IF_EXISTS | OPEN_ACTION_FAIL_IF_NEW,
+               OPEN_ACCESS_READONLY | OPEN_SHARE_DENYNONE | OPEN_FLAGS_DASD,
+               NULL);
+  f = rc ? -1 : hcd;
 #else
   f=open(p->device,O_RDONLY);
 #endif
