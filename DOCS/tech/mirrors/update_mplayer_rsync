@@ -31,8 +31,7 @@ rsync -pxlrHtWv --delete --delete-after --exclude '/benchmark' \
       MPlayer  >> $TMPFILE 2>&1
 
 x=$(wc -l $TMPFILE | awk '{print $1}')
-if [ "$x" -ne "10" ]
-then
+if [ "$x" -ne "10" ]; then
   mailx -s "MPlayer mirror" $MAILADR < $TMPFILE
 fi
 rm -f $TMPFILE
