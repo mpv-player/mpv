@@ -736,7 +736,7 @@ static void* WINAPI expCreateEventA(void* pSecAttr, char bManualReset,
     mlist->pm=pm;
     mlist->pc=pc;
     mlist->state=bInitialState;
-    mlist->reset=bManualReset;
+    mlist->reset=!bManualReset;
     if(name)
 	strncpy(mlist->name, name, 127);
     else
