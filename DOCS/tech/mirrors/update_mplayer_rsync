@@ -10,7 +10,7 @@ MAILADR=<report_mail_to_adr>
 #TMPDIR = /tmp
 #export TMPDIR
 
-TMPFILE=`mktemp -t mplayer.XXXXXXXXXXX`
+TMPFILE=$(mktemp -t mplayer.XXXXXXXXXXX)
 
 # Check to see if another sync is in progress
 if lockfile -! -l 43200 -r 0 "$LOCK"; then
@@ -30,7 +30,7 @@ rsync -pxlrHtWv --delete --delete-after --exclude '/benchmark' \
       --exclude '/old_stuff' --exclude '/tests' rsync.mplayerhq.hu::ftp/ \
       MPlayer  >> $TMPFILE 2>&1
 
-x=`wc -l $TMPFILE | awk '{print $1}'`
+x=$(wc -l $TMPFILE | awk '{print $1}')
 if [ "$x" -ne "10" ]
 then
   mailx -s "MPlayer mirror" $MAILADR < $TMPFILE
