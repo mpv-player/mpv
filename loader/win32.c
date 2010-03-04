@@ -817,8 +817,8 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
     switch(ml->type) {
     case 0: /* Event */
 	if (duration == 0) { /* Check Only */
-	    if (ml->state == 1) ret = WAIT_FAILED;
-	    else                   ret = WAIT_OBJECT_0;
+	    if (ml->state == 1) ret = WAIT_OBJECT_0;
+	    else                   ret = WAIT_FAILED;
 	}
 	if (duration == -1) { /* INFINITE */
 	    if (ml->state == 0)
