@@ -4701,10 +4701,9 @@ typedef struct tagPALETTEENTRY {
     BYTE peFlags;
 } PALETTEENTRY;
 
-/* reversed the first 2 entries */
 typedef struct tagLOGPALETTE {
-    WORD         palNumEntries;
     WORD         palVersion;
+    WORD         palNumEntries;
     PALETTEENTRY palPalEntry[1];
 } LOGPALETTE;
 
