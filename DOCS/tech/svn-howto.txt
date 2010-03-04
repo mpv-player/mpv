@@ -21,7 +21,7 @@ http://svnbook.org/
 
 For more information about the Subversion project, visit
 
-http://subversion.tigris.org/
+http://subversion.apache.org/
 
 Consult these resources whenever you have problems, they are quite exhaustive.
 
