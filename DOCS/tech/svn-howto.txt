@@ -25,6 +25,10 @@ http://subversion.apache.org/
 
 Consult these resources whenever you have problems, they are quite exhaustive.
 
+You do not need a special checkout that works through ssh or similar in order
+to be able to commit changes. All you need is the username and password pair
+that you received from the MPlayer Subversion server admin.
+
 What follows now is a basic introduction to Subversion and some MPlayer-specific
 guidelines. Read it at least once, if you are granted commit privileges to the
 MPlayer project you are expected to be familiar with these rules.
