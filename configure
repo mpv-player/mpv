@@ -4050,6 +4050,17 @@ fi
 echores "$_setenv"
 
 
+echocheck "setmode()"
+_setmode=no
+def_setmode='#define HAVE_SETMODE 0'
+cat > $TMPC << EOF
+#include <io.h>
+int main(void) { setmode(0, 0); return 0; }
+EOF
+cc_check && _setmode=yes && def_setmode='#define HAVE_SETMODE 1'
+echores "$_setmode"
+
+
 if sunos; then
 echocheck "sysi86()"
 cat > $TMPC << EOF
@@ -8870,6 +8881,7 @@ $def_nanosleep
 $def_posix_select
 $def_select
 $def_setenv
+$def_setmode
 $def_shm
 $def_strsep
 $def_swab
@@ -9225,7 +9237,6 @@ $def_yasm
 #define HAVE_LDBRX 0
 #define HAVE_POLL_H 1
 #define HAVE_PPC4XX 0
-#define HAVE_SETMODE 0
 #define HAVE_SYS_SELECT_H 0
 #define HAVE_VFP_ARGS 1
 #define HAVE_VIRTUALALLOC 0

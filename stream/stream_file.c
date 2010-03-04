@@ -145,14 +145,14 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
       // read from stdin
       mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ReadSTDIN);
       f=0; // 0=stdin
-#if defined(__MINGW32__) || defined(__OS2__)
-	  setmode(fileno(stdin),O_BINARY);
+#if HAVE_SETMODE
+      setmode(fileno(stdin),O_BINARY);
 #endif
     } else {
       mp_msg(MSGT_OPEN,MSGL_INFO,"Writing to stdout\n");
       f=1;
-#if defined(__MINGW32__) || defined(__OS2__)
-	  setmode(fileno(stdout),O_BINARY);
+#if HAVE_SETMODE
+      setmode(fileno(stdout),O_BINARY);
 #endif
     }
   } else {
