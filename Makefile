@@ -430,6 +430,7 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_field.c \
               libmpcodecs/vf_fil.c \
               libmpcodecs/vf_filmdint.c \
+              libmpcodecs/vf_fixpts.c \
               libmpcodecs/vf_flip.c \
               libmpcodecs/vf_format.c \
               libmpcodecs/vf_framestep.c \

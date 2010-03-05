@@ -370,6 +370,46 @@ static void exit_sighandler(int x){
 
 static muxer_t* muxer=NULL;
 
+void add_subtitles(char *filename, float fps, int silent)
+{
+    sub_data *subd;
+#ifdef CONFIG_ASS
+    ass_track_t *asst = 0;
+#endif
+
+    if (!filename) return;
+
+    subd = sub_read_file(filename, fps);
+#ifdef CONFIG_ASS
+    if (ass_enabled)
+#ifdef CONFIG_ICONV
+        asst = ass_read_file(ass_library, filename, sub_cp);
+#else
+        asst = ass_read_file(ass_library, filename, 0);
+#endif
+    if (ass_enabled && subd && !asst)
+        asst = ass_read_subdata(ass_library, subd, fps);
+
+    if (!asst && !subd && !silent)
+#else
+    if (!subd && !silent)
+#endif
+        mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_CantLoadSub,
+		    filename_recode(filename));
+
+#ifdef CONFIG_ASS
+    if (!asst && !subd) return;
+    ass_track = asst;
+#else
+    if (!subd) return;
+#endif
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_FILENAME=%s\n",
+	   filename_recode(filename));
+    subdata = subd;
+}
+
+void print_wave_header(WAVEFORMATEX *h, int verbose_level);
+
 int main(int argc,char* argv[]){
 
 stream_t* stream=NULL;
@@ -527,6 +567,10 @@ play_next_file:
   m_entry_set_options(mconfig,&filelist[curfile]);
   filename = filelist[curfile].name;
 
+#ifdef CONFIG_ASS
+  ass_library = ass_init();
+#endif
+
   if(!filename){
 	mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_MissingFilename);
 	mencoder_exit(1,NULL);
@@ -656,26 +700,6 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf || playback_spee
         if (new_srate > 192000) new_srate = 192000;
         playback_speed = (float)new_srate / (float)sh_audio->samplerate;
     }
-  }
-
-// after reading video params we should load subtitles because
-// we know fps so now we can adjust subtitles time to ~6 seconds AST
-// check .sub
-//  current_module="read_subtitles_file";
-  if(sub_name && sub_name[0]){
-    subdata=sub_read_file(sub_name[0], sh_video->fps);
-    if(!subdata) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name[0]);
-  } else
-  if(sub_auto && filename) { // auto load sub file ...
-    char **tmp = NULL;
-    int i = 0;
-    char *psub = get_path( "sub/" );
-    tmp = sub_filenames((psub ? psub : ""), filename);
-    free(psub);
-    subdata=sub_read_file(tmp[0], sh_video->fps);
-    while (tmp[i])
-      free(tmp[i++]);
-    free(tmp);
   }
 
 // set up video encoder:
@@ -857,11 +881,76 @@ default: {
     ve = sh_video->vfilter;
   } else sh_video->vfilter = ve;
     // append 'expand' filter, it fixes stride problems and renders osd:
+#ifdef CONFIG_ASS
+    if (auto_expand && !ass_enabled) { /* we do not want both */
+#else
     if (auto_expand) {
+#endif
       char* vf_args[] = { "osd", "1", NULL };
       sh_video->vfilter=vf_open_filter(sh_video->vfilter,"expand",vf_args);
     }
+
+#ifdef CONFIG_ASS
+  if(ass_enabled) {
+    int i;
+    int insert = 1;
+    if (vf_settings)
+      for (i = 0; vf_settings[i].name; ++i)
+        if (strcmp(vf_settings[i].name, "ass") == 0) {
+          insert = 0;
+          break;
+        }
+    if (insert) {
+      extern vf_info_t vf_info_ass;
+      vf_info_t* libass_vfs[] = {&vf_info_ass, NULL};
+      char* vf_arg[] = {"auto", "1", NULL};
+      vf_instance_t* vf_ass = vf_open_plugin(libass_vfs,sh_video->vfilter,"ass",vf_arg);
+      if (vf_ass)
+        sh_video->vfilter=(void*)vf_ass;
+      else
+        mp_msg(MSGT_CPLAYER,MSGL_ERR, "ASS: cannot add video filter\n");
+    }
+
+    if (ass_library) {
+      for (i = 0; i < demuxer->num_attachments; ++i) {
+        demux_attachment_t* att = demuxer->attachments + i;
+        if (extract_embedded_fonts &&
+            att->name && att->type && att->data && att->data_size &&
+            (strcmp(att->type, "application/x-truetype-font") == 0 ||
+             strcmp(att->type, "application/x-font") == 0))
+          ass_add_font(ass_library, att->name, att->data, att->data_size);
+      }
+    }
+  }
+#endif
+
     sh_video->vfilter=append_filters(sh_video->vfilter);
+
+#ifdef CONFIG_ASS
+  if (ass_enabled)
+    ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_INIT_EOSD, ass_library);
+#endif
+
+// after reading video params we should load subtitles because
+// we know fps so now we can adjust subtitles time to ~6 seconds AST
+// check .sub
+  if(sub_name && sub_name[0]){
+    for (i = 0; sub_name[i] != NULL; ++i)
+        add_subtitles (sub_name[i], sh_video->fps, 0);
+  } else
+  if(sub_auto && filename) { // auto load sub file ...
+    char **tmp = NULL;
+    int i = 0;
+    char *psub = get_path( "sub/" );
+    tmp = sub_filenames((psub ? psub : ""), filename);
+    free(psub);
+    while (tmp[i])
+    {
+      add_subtitles (tmp[i], sh_video->fps, 0);
+      free(tmp[i++]);
+    }
+    free(tmp);
+  }
 
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
     init_best_video_codec(sh_video,video_codec_list,video_fm_list);

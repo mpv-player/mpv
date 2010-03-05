@@ -7500,6 +7500,48 @@ Larger radius makes for smoother gradients, but also prevents the filter
 from modifying pixels near detailed regions (default: 16).
 .RE
 .
+.TP
+.B fixpts[=options]
+Fixes the presentation timestamps (PTS) of the frames.
+By default, the PTS passed to the next filter is dropped, but the following
+options can change that:
+.RSs
+.IPs print
+Print the incoming PTS.
+.IPs fps=<fps>
+Specify a frame per second value.
+.IPs start=<pts>
+Specify an initial value for the PTS.
+.IPs autostart=<n>
+Uses the
+.IR n th
+incoming PTS as the initial PTS.
+All previous pts are kept, so setting a huge value or \-1 keeps the PTS
+intact.
+.IPs autofps=<n>
+Uses the
+.IR n th
+incoming PTS after the end of autostart to determine the framerate.
+.RE
+.sp 1
+.RS
+.I EXAMPLE:
+.RE
+.PD 0
+.RSs
+.IPs "\-vf fixpts=fps=24000/1001,ass,fixpts"
+Generates a new sequence of PTS, uses it for ASS subtitles, then drops it.
+Generating a new sequence is useful when the timestamps are reset during the
+program; this is frequent on DVDs.
+Dropping it may be necessary to avoid confusing encoders.
+.RE
+.PD 1
+.sp 1
+.RS
+.I NOTE:
+Using this filter together with any sort of seeking (including -ss and EDLs)
+may make demons fly out of your nose.
+.RE
 .
 .
 .SH "GENERAL ENCODING OPTIONS (MENCODER ONLY)"
