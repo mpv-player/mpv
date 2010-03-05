@@ -569,16 +569,30 @@ static HMODULE WINAPI expGetDriverModuleHandle(DRVR* pdrv)
 #define	MODULE_HANDLE_winmm	((HMODULE)0x128)
 #define	MODULE_HANDLE_psapi	((HMODULE)0x129)
 
+// Fake PE header, since some software (and the Microsoft CRT v8 and newer)
+// assume GetModuleHandle(NULL) returns a pointer to a PE header.
+// We simulate a very simple header with only one section.
+//
+// NOTE: If you have a section called .mixcrt, the Microsoft CRT will assume
+// it's running in a POSIX binary, and stop using EncodePointer/DecodePointer.
+static const struct {
+    IMAGE_DOS_HEADER doshdr;
+    IMAGE_NT_HEADERS nthdr;
+    IMAGE_SECTION_HEADER opthdr;
+} __attribute__((__packed__)) mp_exe = {
+    .doshdr.e_lfanew = sizeof(IMAGE_DOS_HEADER),
+    .nthdr.FileHeader.NumberOfSections = 1,
+    .nthdr.FileHeader.SizeOfOptionalHeader =
+        sizeof(IMAGE_NT_HEADERS) - FIELD_OFFSET(IMAGE_NT_HEADERS, OptionalHeader), /* 0xe0 */
+    .opthdr.Name = ".text"
+};
+
 static HMODULE WINAPI expGetModuleHandleA(const char* name)
 {
     WINE_MODREF* wm;
     HMODULE result;
     if(!name)
-#ifdef CONFIG_QTX_CODECS
-	result=1;
-#else
-	result=0;
-#endif
+	result=(HMODULE)&mp_exe.doshdr;
     else
     {
 	wm=MODULE_FindModule(name);
