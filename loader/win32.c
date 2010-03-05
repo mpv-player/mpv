@@ -569,28 +569,16 @@ static HMODULE WINAPI expGetDriverModuleHandle(DRVR* pdrv)
 #define	MODULE_HANDLE_winmm	((HMODULE)0x128)
 #define	MODULE_HANDLE_psapi	((HMODULE)0x129)
 
-/* fake EXE struct to make msvcrt8+ not to crash:
-   it checks all exe sections for a section named .mixcrt
-   we fake a section with that name, so the crt will avoid
-   using Encode/Decode Pointer, as we was a posix binary */
-static const struct {
-    IMAGE_DOS_HEADER doshdr;
-    IMAGE_NT_HEADERS nthdr;
-    IMAGE_SECTION_HEADER opthdr;
-} __attribute__((__packed__)) mp_exe = {
-    .doshdr.e_lfanew = sizeof(IMAGE_DOS_HEADER),
-    .nthdr.FileHeader.NumberOfSections = 1,
-    .nthdr.FileHeader.SizeOfOptionalHeader = sizeof(IMAGE_NT_HEADERS) - FIELD_OFFSET(IMAGE_NT_HEADERS, OptionalHeader), /* 0xe0 */
-    .opthdr.Name = ".mixcrt"
-};
-
 static HMODULE WINAPI expGetModuleHandleA(const char* name)
 {
     WINE_MODREF* wm;
     HMODULE result;
     if(!name)
-      result=(HMODULE)&mp_exe.doshdr;
-
+#ifdef CONFIG_QTX_CODECS
+	result=1;
+#else
+	result=0;
+#endif
     else
     {
 	wm=MODULE_FindModule(name);
