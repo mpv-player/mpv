@@ -569,16 +569,28 @@ static HMODULE WINAPI expGetDriverModuleHandle(DRVR* pdrv)
 #define	MODULE_HANDLE_winmm	((HMODULE)0x128)
 #define	MODULE_HANDLE_psapi	((HMODULE)0x129)
 
+/* fake EXE struct to make msvcrt8+ not to crash:
+   it checks all exe sections for a section named .mixcrt
+   we fake a section with that name, so the crt will avoid
+   using Encode/Decode Pointer, as we was a posix binary */
+static const struct {
+    IMAGE_DOS_HEADER doshdr;
+    IMAGE_NT_HEADERS nthdr;
+    IMAGE_SECTION_HEADER opthdr;
+} __attribute__((__packed__)) mp_exe = {
+    .doshdr.e_lfanew = sizeof(IMAGE_DOS_HEADER),
+    .nthdr.FileHeader.NumberOfSections = 1,
+    .nthdr.FileHeader.SizeOfOptionalHeader = sizeof(IMAGE_NT_HEADERS) - FIELD_OFFSET(IMAGE_NT_HEADERS, OptionalHeader), /* 0xe0 */
+    .opthdr.Name = ".mixcrt"
+};
+
 static HMODULE WINAPI expGetModuleHandleA(const char* name)
 {
     WINE_MODREF* wm;
     HMODULE result;
     if(!name)
-#ifdef CONFIG_QTX_CODECS
-	result=1;
-#else
-	result=0;
-#endif
+      result=(HMODULE)&mp_exe.doshdr;
+
     else
     {
 	wm=MODULE_FindModule(name);
@@ -787,6 +799,7 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
     // FIXME FIXME FIXME - this value is sometime unititialize !!!
     int ret = WAIT_FAILED;
     mutex_list* pp=mlist;
+    th_list* tp=list;
     if(object == (void*)0xcfcf9898)
     {
 	/**
@@ -801,6 +814,17 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
 	return (void*)WAIT_FAILED;
     }
     dbgprintf("WaitForSingleObject(0x%x, duration %d) =>\n",object, duration);
+
+    // See if this is a thread.
+    while (tp && (tp->thread != object))
+        tp = tp->prev;
+    if (tp) {
+        if (pthread_join(*(pthread_t*)object, NULL) == 0) {
+            return (void*)WAIT_OBJECT_0;
+        } else {
+            return (void*)WAIT_FAILED;
+        }
+    }
 
     // loop below was slightly fixed - its used just for checking if
     // this object really exists in our list
