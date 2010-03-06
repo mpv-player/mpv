@@ -890,7 +890,7 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
 	if (duration == 0) {
 	    if(ml->semaphore==0) ret = WAIT_FAILED;
 	    else {
-		ml->semaphore++;
+		ml->semaphore--;
 		ret = WAIT_OBJECT_0;
 	    }
 	}
@@ -898,6 +898,7 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
 	    if (ml->semaphore==0)
 		pthread_cond_wait(ml->pc,ml->pm);
 	    ml->semaphore--;
+	    ret = WAIT_OBJECT_0;
 	}
 	break;
     }
