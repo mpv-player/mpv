@@ -240,6 +240,7 @@ typedef struct th_list_t{
 //static int heap_counter=0;
 static tls_t* g_tls=NULL;
 static th_list* list=NULL;
+static pthread_mutex_t list_lock = PTHREAD_MUTEX_INITIALIZER;
 
 #if 0
 static void test_heap(void)
@@ -638,6 +639,7 @@ static void* WINAPI expCreateThread(void* pSecAttr, long dwStackSize,
 	printf( "WARNING: CreateThread flags not supported\n");
     if(dwThreadId)
 	*dwThreadId=(long)pth;
+    pthread_mutex_lock(&list_lock);
     if(list==NULL)
     {
 	list=my_mreq(sizeof(th_list), 1);
@@ -651,6 +653,7 @@ static void* WINAPI expCreateThread(void* pSecAttr, long dwStackSize,
 	list=list->next;
     }
     list->thread=pth;
+    pthread_mutex_unlock(&list_lock);
     dbgprintf("CreateThread(0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x) => 0x%x\n",
 	      pSecAttr, dwStackSize, lpStartAddress, lpParameter, dwFlags, dwThreadId, pth);
     return pth;
@@ -672,9 +675,11 @@ struct mutex_list_t
 };
 typedef struct mutex_list_t mutex_list;
 static mutex_list* mlist=NULL;
+static pthread_mutex_t mlist_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void destroy_event(void* event)
 {
+    pthread_mutex_lock(&mlist_lock);
     mutex_list* pp=mlist;
     //    printf("garbage collector: destroy_event(%x)\n", event);
     while(pp)
@@ -696,10 +701,12 @@ void destroy_event(void* event)
 	     }
 	     printf("0\n");
 	     */
+	    pthread_mutex_unlock(&mlist_lock);
 	    return;
 	}
 	pp=pp->prev;
     }
+    pthread_mutex_unlock(&mlist_lock);
 }
 
 static void* WINAPI expCreateEventA(void* pSecAttr, char bManualReset,
@@ -707,6 +714,7 @@ static void* WINAPI expCreateEventA(void* pSecAttr, char bManualReset,
 {
     pthread_mutex_t *pm;
     pthread_cond_t  *pc;
+    void *ret;
     /*
      mutex_list* pp;
      pp=mlist;
@@ -717,6 +725,7 @@ static void* WINAPI expCreateEventA(void* pSecAttr, char bManualReset,
      }
      printf("0\n");
      */
+    pthread_mutex_lock(&mlist_lock);
     if(mlist!=NULL)
     {
 	mutex_list* pp=mlist;
@@ -727,6 +736,7 @@ static void* WINAPI expCreateEventA(void* pSecAttr, char bManualReset,
 	    {
 		dbgprintf("CreateEventA(0x%x, 0x%x, 0x%x, 0x%x='%s') => 0x%x\n",
 			  pSecAttr, bManualReset, bInitialState, name, name, pp->pm);
+		pthread_mutex_unlock(&mlist_lock);
 		return pp->pm;
 	    }
 	}while((pp=pp->prev) != NULL);
@@ -768,7 +778,9 @@ static void* WINAPI expCreateEventA(void* pSecAttr, char bManualReset,
     else
 	dbgprintf("CreateEventA(0x%x, 0x%x, 0x%x, NULL) => 0x%x\n",
 		  pSecAttr, bManualReset, bInitialState, mlist);
-    return mlist;
+    ret = mlist;
+    pthread_mutex_unlock(&mlist_lock);
+    return ret;
 }
 
 static void* WINAPI expSetEvent(void* event)
@@ -800,8 +812,8 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
     mutex_list *ml = (mutex_list *)object;
     // FIXME FIXME FIXME - this value is sometime unititialize !!!
     int ret = WAIT_FAILED;
-    mutex_list* pp=mlist;
-    th_list* tp=list;
+    mutex_list* pp;
+    th_list* tp;
     if(object == (void*)0xcfcf9898)
     {
 	/**
@@ -818,8 +830,11 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
     dbgprintf("WaitForSingleObject(0x%x, duration %d) =>\n",object, duration);
 
     // See if this is a thread.
+    pthread_mutex_lock(&list_lock);
+    tp=list;
     while (tp && (tp->thread != object))
         tp = tp->prev;
+    pthread_mutex_unlock(&list_lock);
     if (tp) {
         if (pthread_join(*(pthread_t*)object, NULL) == 0) {
             return (void*)WAIT_OBJECT_0;
@@ -832,8 +847,11 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
     // this object really exists in our list
     if (!ml)
 	return (void*) ret;
+    pthread_mutex_lock(&mlist_lock);
+    pp=mlist;
     while (pp && (pp->pm != ml->pm))
 	pp = pp->prev;
+    pthread_mutex_unlock(&mlist_lock);
     if (!pp) {
 	dbgprintf("WaitForSingleObject: NotFound\n");
 	return (void*)ret;
@@ -1801,6 +1819,7 @@ static HANDLE WINAPI expCreateSemaphoreA(char* v1, long init_count,
 {
     pthread_mutex_t *pm;
     pthread_cond_t  *pc;
+    HANDLE ret;
     /*
     mutex_list* pp;
      printf("CreateSemaphoreA(%p = %s)\n", name, (name ? name : "<null>"));
@@ -1812,6 +1831,7 @@ static HANDLE WINAPI expCreateSemaphoreA(char* v1, long init_count,
      }
      printf("0\n");
      */
+    pthread_mutex_lock(&mlist_lock);
     if(mlist!=NULL)
     {
 	mutex_list* pp=mlist;
@@ -1822,7 +1842,9 @@ static HANDLE WINAPI expCreateSemaphoreA(char* v1, long init_count,
 	    {
 		dbgprintf("CreateSemaphoreA(0x%x, init_count %d, max_count %d, name 0x%x='%s') => 0x%x\n",
 			  v1, init_count, max_count, name, name, mlist);
-		return (HANDLE)mlist;
+		ret = (HANDLE)mlist;
+		pthread_mutex_unlock(&mlist_lock);
+		return ret;
 	    }
 	}while((pp=pp->prev) != NULL);
     }
@@ -1861,7 +1883,9 @@ static HANDLE WINAPI expCreateSemaphoreA(char* v1, long init_count,
     else
 	dbgprintf("CreateSemaphoreA(0x%x, init_count %d, max_count %d, name 0) => 0x%x\n",
 		  v1, init_count, max_count, mlist);
-    return (HANDLE)mlist;
+    ret = (HANDLE)mlist;
+    pthread_mutex_unlock(&mlist_lock);
+    return ret;
 }
 
 static long WINAPI expReleaseSemaphore(long hsem, long increment, long* prev_count)
@@ -5662,5 +5686,7 @@ void my_garbagecollection(void)
     dbgprintf("Total Unfree %d bytes cnt %d [%p,%d]\n",unfree, unfreecnt, last_alloc, alccnt);
 #endif
     g_tls = NULL;
+    pthread_mutex_lock(&list_lock);
     list = NULL;
+    pthread_mutex_unlock(&list_lock);
 }
