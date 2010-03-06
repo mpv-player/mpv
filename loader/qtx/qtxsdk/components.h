@@ -12,7 +12,7 @@ typedef unsigned char                   Boolean;
 typedef unsigned char                   Str31[32];
 typedef int32_t                         Fixed;
 
-typedef int32_t OSErr;
+typedef int16_t OSErr;
 typedef int OSType;
 
 typedef int32_t ComponentResult;

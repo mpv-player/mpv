@@ -69,7 +69,7 @@ static OSErr        (*QTNewGWorldFromPtr)(GWorldPtr *gw,
                         GWorldFlags flags,
                         void *baseAddr,
                         long rowBytes);
-static OSErr        (*NewHandleClear)(Size byteCount);
+static Handle       (*NewHandleClear)(Size byteCount);
 static OSErr        (*CompressSequenceBegin) (
      ImageSequence             *seqID,
      PixMapHandle              src,

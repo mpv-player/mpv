@@ -90,7 +90,7 @@ static    OSErr           (*QTNewGWorldFromPtr)(GWorldPtr *gw,
                                GWorldFlags flags,
                                void *baseAddr,
                                long rowBytes);
-static    OSErr           (*NewHandleClear)(Size byteCount);
+static    Handle          (*NewHandleClear)(Size byteCount);
 #endif /* #ifndef CONFIG_QUICKTIME */
 
 // to set/get/query special features/parameters
@@ -103,7 +103,7 @@ static int codec_initialized=0;
 // init driver
 static int init(sh_video_t *sh){
 #ifndef CONFIG_QUICKTIME
-    long result = 1;
+    OSErr result = 1;
 #endif
     ComponentResult cres;
     ComponentDescription desc;
@@ -156,7 +156,7 @@ static int init(sh_video_t *sh){
 
     result=InitializeQTML(6+16);
 //    result=InitializeQTML(0);
-    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"InitializeQTML returned %li\n",result);
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"InitializeQTML returned %d\n",result);
 //    result=EnterMovies();
 //    printf("EnterMovies->%d\n",result);
 #endif /* CONFIG_QUICKTIME */
@@ -305,7 +305,7 @@ static void uninit(sh_video_t *sh){
 
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
-    long result = 1;
+    OSErr result = 1;
     int i;
     mp_image_t* mpi;
     ComponentResult cres;
@@ -335,7 +335,7 @@ if(!codec_initialized){
         0,
         mpi->planes[0],
         mpi->stride[0]);
-    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"NewGWorldFromPtr returned:%ld\n",65536-(result&0xffff));
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"NewGWorldFromPtr returned:%d\n",result);
 //    if (65536-(result&0xFFFF) != 10000)
 //	return NULL;
 
@@ -406,7 +406,7 @@ if(!codec_initialized){
 
     ++decpar.frameNumber;
 
-    if(cres&0xFFFF){
+    if(cres) {
 	mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageCodecBandDecompress cres=0x%X (-0x%X) %d\n",cres,-cres,cres);
 	return NULL;
     }
