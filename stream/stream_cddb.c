@@ -76,10 +76,6 @@
 #include "network.h"
 #include "libavutil/common.h"
 
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
-
 #define DEFAULT_FREEDB_SERVER "freedb.freedb.org"
 #define DEFAULT_CACHE_DIR     "/.cddb/"
 
