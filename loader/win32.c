@@ -670,6 +670,8 @@ struct mutex_list_t
     char reset;
     char name[128];
     int  semaphore;
+    int  lock_count;
+    pthread_t owner;
     struct mutex_list_t* next;
     struct mutex_list_t* prev;
 };
@@ -901,6 +903,24 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
 	    ret = WAIT_OBJECT_0;
 	}
 	break;
+    case 2:  /* Mutex */
+	if (duration == 0) {
+	   if(ml->lock_count > 0 && ml->owner != pthread_self()) ret = WAIT_FAILED;
+	   else {
+		ml->lock_count++;
+		ml->owner = pthread_self();
+		ret = WAIT_OBJECT_0;
+	   }
+	}
+	if (duration == -1) {
+	    if (ml->lock_count > 0 && ml->owner != pthread_self()) {
+		pthread_cond_wait(ml->pc,ml->pm);
+	    }
+	    ml->lock_count++;
+	    ml->owner = pthread_self();
+	    ret = WAIT_OBJECT_0;
+	}
+	break;
     }
     pthread_mutex_unlock(ml->pm);
 
@@ -935,31 +955,6 @@ static void WINAPI expExitThread(int retcode)
 {
     dbgprintf("ExitThread(%d)\n", retcode);
     pthread_exit(&retcode);
-}
-
-static HANDLE WINAPI expCreateMutexA(void *pSecAttr,
-		    char bInitialOwner, const char *name)
-{
-    HANDLE mlist = (HANDLE)expCreateEventA(pSecAttr, 0, 0, name);
-
-    if (name)
-	dbgprintf("CreateMutexA(0x%x, %d, '%s') => 0x%x\n",
-	    pSecAttr, bInitialOwner, name, mlist);
-    else
-	dbgprintf("CreateMutexA(0x%x, %d, NULL) => 0x%x\n",
-	    pSecAttr, bInitialOwner, mlist);
-#ifndef CONFIG_QTX_CODECS
-    /* 10l to QTX, if CreateMutex returns a real mutex, WaitForSingleObject
-       waits for ever, else it works ;) */
-    return mlist;
-#endif
-}
-
-static int WINAPI expReleaseMutex(HANDLE hMutex)
-{
-    dbgprintf("ReleaseMutex(%x) => 1\n", hMutex);
-    /* FIXME:XXX !! not yet implemented */
-    return 1;
 }
 #endif
 
@@ -1907,6 +1902,83 @@ static long WINAPI expReleaseSemaphore(long hsem, long increment, long* prev_cou
     return 1;
 }
 
+static HANDLE WINAPI expCreateMutexA(void *pSecAttr,
+                   char bInitialOwner, const char *name)
+{
+    pthread_mutex_t *pm;
+    pthread_cond_t  *pc;
+    HANDLE ret;
+    pthread_mutex_lock(&mlist_lock);
+    if(mlist!=NULL)
+    {
+       mutex_list* pp=mlist;
+       if(name!=NULL)
+           do
+       {
+           if((strcmp(pp->name, name)==0) && (pp->type==2))
+           {
+               dbgprintf("CreateMutexA(0x%x, %d, '%s') => 0x%x\n", pSecAttr, bInitialOwner, name, mlist);
+               ret = (HANDLE)mlist;
+               pthread_mutex_unlock(&mlist_lock);
+               return ret;
+           }
+       }while((pp=pp->prev) != NULL);
+    }
+    pm=mreq_private(sizeof(pthread_mutex_t), 0, AREATYPE_MUTEX);
+    pthread_mutex_init(pm, NULL);
+    pc=mreq_private(sizeof(pthread_cond_t), 0, AREATYPE_COND);
+    pthread_cond_init(pc, NULL);
+    if(mlist==NULL)
+    {
+       mlist=mreq_private(sizeof(mutex_list), 00, AREATYPE_EVENT);
+       mlist->next=mlist->prev=NULL;
+    }
+    else
+    {
+       mlist->next=mreq_private(sizeof(mutex_list), 00, AREATYPE_EVENT);
+       mlist->next->prev=mlist;
+       mlist->next->next=NULL;
+       mlist=mlist->next;
+    }
+    mlist->type=2; /* Type Mutex */
+    mlist->pm=pm;
+    mlist->pc=pc;
+    mlist->state=0;
+    mlist->reset=0;
+    mlist->semaphore=0;
+    if (bInitialOwner) {
+      mlist->owner = pthread_self();
+      mlist->lock_count = 1;
+    } else {
+      mlist->owner = (pthread_t)0;
+      mlist->lock_count = 0;
+    }
+    if(name!=NULL)
+       strncpy(mlist->name, name, 64);
+    else
+       mlist->name[0]=0;
+    if(pm==NULL)
+       dbgprintf("ERROR::: CreateMutexA failure\n");
+    if(name)
+       dbgprintf("CreateMutexA(0x%x, %d, '%s') => 0x%x\n",
+           pSecAttr, bInitialOwner, name, mlist);
+    else
+       dbgprintf("CreateMutexA(0x%x, %d, NULL) => 0x%x\n",
+           pSecAttr, bInitialOwner, mlist);
+    ret = (HANDLE)mlist;
+    pthread_mutex_unlock(&mlist_lock);
+    return ret;
+}
+
+static int WINAPI expReleaseMutex(HANDLE hMutex)
+{
+    mutex_list *ml = (mutex_list *)hMutex;
+
+    pthread_mutex_lock(ml->pm);
+    if (--ml->lock_count == 0) pthread_cond_signal(ml->pc);
+    pthread_mutex_unlock(ml->pm);
+    return 1;
+}
 
 static long WINAPI expRegOpenKeyExA(long key, const char* subkey, long reserved, long access, int* newkey)
 {
@@ -5034,8 +5106,6 @@ struct exports exp_kernel32[]=
 #ifdef CONFIG_QTX_CODECS
     FF(WaitForMultipleObjects, -1)
     FF(ExitThread, -1)
-    FF(CreateMutexA,-1)
-    FF(ReleaseMutex,-1)
 #endif
     FF(GetSystemInfo, -1)
     FF(GetVersion, 332)
@@ -5080,6 +5150,8 @@ struct exports exp_kernel32[]=
     FF(GlobalFree, -1)
     FF(LoadResource, -1)
     FF(ReleaseSemaphore, -1)
+    FF(CreateMutexA, -1)
+    FF(ReleaseMutex, -1)
     FF(FindResourceA, -1)
     FF(LockResource, -1)
     FF(FreeResource, -1)
