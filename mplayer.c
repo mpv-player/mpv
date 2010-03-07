@@ -41,7 +41,6 @@
 #include "mp_msg.h"
 #include "av_log.h"
 
-#define HELP_MP_DEFINE_STATIC
 #include "help_mp.h"
 
 #include "m_option.h"
@@ -159,6 +158,47 @@ static int max_framesize=0;
 #include "mp_core.h"
 #include "options.h"
 #include "defaultopts.h"
+
+static const char help_text[]=_(
+"Usage:   mplayer [options] [url|path/]filename\n"
+"\n"
+"Basic options: (complete list in the man page)\n"
+" -vo <drv>        select video output driver ('-vo help' for a list)\n"
+" -ao <drv>        select audio output driver ('-ao help' for a list)\n"
+#ifdef CONFIG_VCD
+" vcd://<trackno>  play (S)VCD (Super Video CD) track (raw device, no mount)\n"
+#endif
+#ifdef CONFIG_DVDREAD
+" dvd://<titleno>  play DVD title from device instead of plain file\n"
+#endif
+" -alang/-slang    select DVD audio/subtitle language (by 2-char country code)\n"
+" -ss <position>   seek to given (seconds or hh:mm:ss) position\n"
+" -nosound         do not play sound\n"
+" -fs              fullscreen playback (or -vm, -zoom, details in the man page)\n"
+" -x <x> -y <y>    set display resolution (for use with -vm or -zoom)\n"
+" -sub <file>      specify subtitle file to use (also see -subfps, -subdelay)\n"
+" -playlist <file> specify playlist file\n"
+" -vid x -aid y    select video (x) and audio (y) stream to play\n"
+" -fps x -srate y  change video (x fps) and audio (y Hz) rate\n"
+" -pp <quality>    enable postprocessing filter (details in the man page)\n"
+" -framedrop       enable frame dropping (for slow machines)\n"
+"\n"
+"Basic keys: (complete list in the man page, also check input.conf)\n"
+" <-  or  ->       seek backward/forward 10 seconds\n"
+" down or up       seek backward/forward  1 minute\n"
+" pgdown or pgup   seek backward/forward 10 minutes\n"
+" < or >           step backward/forward in playlist\n"
+" p or SPACE       pause movie (press any key to continue)\n"
+" q or ESC         stop playing and quit program\n"
+" + or -           adjust audio delay by +/- 0.1 second\n"
+" o                cycle OSD mode:  none / seekbar / seekbar + timer\n"
+" * or /           increase or decrease PCM volume\n"
+" x or z           adjust subtitle delay by +/- 0.1 second\n"
+" r or t           adjust subtitle position up/down, also see -vf expand\n"
+"\n"
+" * * * SEE THE MAN PAGE FOR DETAILS, FURTHER (ADVANCED) OPTIONS AND KEYS * * *\n"
+"\n");
+
 
 #define Exit_SIGILL_RTCpuSel _(\
 "- MPlayer crashed by an 'Illegal Instruction'.\n"\
@@ -3140,7 +3180,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 
     if(!mpctx->filename && !player_idle_mode){
 	// no file/vcd/dvd -> show HELP:
-	mp_msg(MSGT_CPLAYER, MSGL_INFO, help_text);
+	mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", mp_gtext(help_text));
         exit_player_with_rc(mpctx, EXIT_NONE, 0);
     }
 

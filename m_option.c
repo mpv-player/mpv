@@ -858,7 +858,7 @@ static int parse_print(const m_option_t* opt,const char *name, char *param, void
   else if(opt->type == CONF_TYPE_PRINT_FUNC)
     return ((m_opt_func_full_t) opt->p)(opt,name,param);
   else
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", (char *) opt->p);
+      mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", mp_gtext(opt->p));
 
   if(opt->priv == NULL)
     return M_OPT_EXIT;
