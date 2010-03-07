@@ -492,7 +492,8 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
         }
       }
       if(v_pos==-1){
-        mp_tmsg(MSGT_DEMUX,MSGL_ERR,"AVI_NI: " "No video stream found.\n");
+          mp_msg(MSGT_DEMUX, MSGL_ERR, "AVI_NI: %s",
+                 mp_gtext("No video stream found.\n"));
 	return NULL;
       }
       if(a_pos==-1){
@@ -518,14 +519,17 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
       demuxer->seekable=0;
   }
   if(!ds_fill_buffer(d_video)){
-    mp_tmsg(MSGT_DEMUX,MSGL_ERR,"AVI: " "Missing video stream!? Contact the author, it may be a bug :(\n");
+      mp_msg(MSGT_DEMUX, MSGL_ERR, "AVI: %s",
+             mp_gtext("Missing video stream!? Contact the author, "
+                      "it may be a bug :(\n"));
     return NULL;
   }
   sh_video=d_video->sh;sh_video->ds=d_video;
   if(d_audio->id!=-2){
     mp_msg(MSGT_DEMUX,MSGL_V,"AVI: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!priv->audio_streams || !ds_fill_buffer(d_audio)){
-      mp_tmsg(MSGT_DEMUX,MSGL_INFO,"AVI: " "No audio stream found -> no sound.\n");
+        mp_msg(MSGT_DEMUX, MSGL_INFO, "AVI: %s",
+               mp_gtext("No audio stream found -> no sound.\n"));
       d_audio->sh=sh_audio=NULL;
     } else {
       sh_audio=d_audio->sh;sh_audio->ds=d_audio;

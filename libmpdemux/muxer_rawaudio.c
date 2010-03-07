@@ -34,7 +34,8 @@ static muxer_stream_t* rawaudiofile_new_stream(muxer_t *muxer,int type){
     muxer_stream_t* s;
     if (!muxer) return NULL;
     if(type==MUXER_TYPE_AUDIO && muxer->avih.dwStreams>=1){
-        mp_tmsg(MSGT_MUXER,MSGL_ERR,"Too many streams!"" ""Rawaudio muxer supports only one audio stream!\n");
+        mp_msg(MSGT_MUXER, MSGL_ERR, "%s %s", mp_gtext("Too many streams!"),
+               mp_gtext("Rawaudio muxer supports only one audio stream!\n"));
         return NULL;
     }
     s=malloc(sizeof(muxer_stream_t));

@@ -344,14 +344,16 @@ static demuxer_t* demux_open_lmlm4(demuxer_t* demuxer){
     demuxer->seekable = 0;
 
     if(!ds_fill_buffer(demuxer->video)){
-        mp_tmsg(MSGT_DEMUXER,MSGL_INFO,"LMLM4: " "No video stream found.\n");
+        mp_msg(MSGT_DEMUXER, MSGL_INFO, "LMLM4: %s",
+               mp_gtext("No video stream found.\n"));
         demuxer->video->sh=NULL;
     } else {
         sh_video=demuxer->video->sh;sh_video->ds=demuxer->video;
     }
     if(demuxer->audio->id!=-2) {
         if(!ds_fill_buffer(demuxer->audio)){
-            mp_tmsg(MSGT_DEMUXER,MSGL_INFO,"LMLM4: " "No audio stream found -> no sound.\n");
+            mp_msg(MSGT_DEMUXER, MSGL_INFO, "LMLM4: %s",
+                   mp_gtext("No audio stream found -> no sound.\n"));
             demuxer->audio->sh=NULL;
         } else {
             sh_audio=demuxer->audio->sh;sh_audio->ds=demuxer->audio;

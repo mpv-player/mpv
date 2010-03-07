@@ -126,7 +126,8 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
   ret2=vcd_get_track_end(vcd,p->track);
   if(ret2<0){
-    mp_tmsg(MSGT_OPEN,MSGL_ERR,"Error selecting VCD track." " (get)\n");
+      mp_msg(MSGT_OPEN, MSGL_ERR, "%s (get)\n",
+             mp_gtext("Error selecting VCD track."));
     close(f);
     free(vcd);
     m_struct_free(&stream_opts,opts);
@@ -134,7 +135,8 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
   ret=vcd_seek_to_track(vcd,p->track);
   if(ret<0){
-    mp_tmsg(MSGT_OPEN,MSGL_ERR,"Error selecting VCD track." " (seek)\n");
+      mp_msg(MSGT_OPEN, MSGL_ERR, "%s (seek)\n",
+             mp_gtext("Error selecting VCD track."));
     close(f);
     free(vcd);
     m_struct_free(&stream_opts,opts);

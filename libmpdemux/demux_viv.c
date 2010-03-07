@@ -562,7 +562,8 @@ static demuxer_t* demux_open_vivo(demuxer_t* demuxer){
     vivo_priv_t* priv=demuxer->priv;
 
   if(!ds_fill_buffer(demuxer->video)){
-    mp_tmsg(MSGT_DEMUX,MSGL_ERR,"VIVO: " "Missing video stream!? Contact the author, it may be a bug :(\n");
+      mp_msg(MSGT_DEMUX, MSGL_ERR, "VIVO: %s",
+             mp_gtext("Missing video stream!? Contact the author, it may be a bug :(\n"));
     return NULL;
   }
 
@@ -645,7 +646,8 @@ static demuxer_t* demux_open_vivo(demuxer_t* demuxer){
 /* AUDIO init */
 if (demuxer->audio->id >= -1){
   if(!ds_fill_buffer(demuxer->audio)){
-    mp_tmsg(MSGT_DEMUX,MSGL_ERR,"VIVO: " "No audio stream found -> no sound.\n");
+      mp_msg(MSGT_DEMUX, MSGL_ERR, "VIVO: %s",
+             mp_gtext("No audio stream found -> no sound.\n"));
   } else
 {		sh_audio_t* sh=new_sh_audio(demuxer,1);
 

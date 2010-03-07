@@ -820,9 +820,10 @@ static void exit_sighandler(int x){
     kill(getpid(),SIGKILL);
 #endif
   }
-  mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"\n" "\nMPlayer interrupted by signal %d in module: %s\n",x,
-      current_module?current_module:"unknown"
-  );
+  mp_msg(MSGT_CPLAYER, MSGL_FATAL, "\n");
+  mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,
+          "\nMPlayer interrupted by signal %d in module: %s\n", x,
+          current_module ? current_module : "unknown");
   mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SIGNAL=%d\n", x);
   if(sig_count<=1)
   switch(x){

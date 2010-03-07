@@ -642,7 +642,8 @@ static demuxer_t* demux_open_asf(demuxer_t* demuxer)
 //    demuxer->endpos=avi_header.movi_end;
     if(demuxer->video->id != -2) {
         if(!ds_fill_buffer(demuxer->video)){
-            mp_tmsg(MSGT_DEMUXER,MSGL_WARN,"ASF: " "No video stream found.\n");
+            mp_msg(MSGT_DEMUXER, MSGL_WARN, "ASF: %s",
+                   mp_gtext("No video stream found.\n"));
             demuxer->video->sh=NULL;
             //printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
         } else {
@@ -659,7 +660,8 @@ static demuxer_t* demux_open_asf(demuxer_t* demuxer)
     if(demuxer->audio->id!=-2){
         mp_tmsg(MSGT_DEMUXER,MSGL_V,"ASF: Searching for audio stream (id:%d).\n",demuxer->audio->id);
         if(!ds_fill_buffer(demuxer->audio)){
-            mp_tmsg(MSGT_DEMUXER,MSGL_INFO,"ASF: " "No audio stream found -> no sound.\n");
+            mp_msg(MSGT_DEMUXER, MSGL_INFO, "ASF: %s",
+                   mp_gtext("No audio stream found -> no sound.\n"));
             demuxer->audio->sh=NULL;
         } else {
             sh_audio=demuxer->audio->sh;sh_audio->ds=demuxer->audio;

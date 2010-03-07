@@ -471,27 +471,28 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       return AF_ERROR;
     }
     if (s->scale_nominal <= 0) {
-      mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-             _("error parsing command line") ": " _("value out of range")
-             ": scale > 0\n");
+        mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] %s: %s: scale > 0\n",
+               mp_gtext("error parsing command line"),
+               mp_gtext("value out of range"));
       return AF_ERROR;
     }
     if (s->ms_stride <= 0) {
-      mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-             _("error parsing command line") ": " _("value out of range")
-             ": stride > 0\n");
+        mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] %s: %s: stride > 0\n",
+               mp_gtext("error parsing command line"),
+               mp_gtext("value out of range"));
       return AF_ERROR;
     }
     if (s->percent_overlap < 0 || s->percent_overlap > 1) {
-      mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-             _("error parsing command line") ": " _("value out of range")
-             ": 0 <= overlap <= 1\n");
+        mp_msg(MSGT_AFILTER, MSGL_ERR,
+               "[scaletempo] %s: %s: 0 <= overlap <= 1\n",
+               mp_gtext("error parsing command line"),
+               mp_gtext("value out of range"));
       return AF_ERROR;
     }
     if (s->ms_search < 0) {
-      mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-             _("error parsing command line") ": " _("value out of range")
-             ": search >= 0\n");
+        mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] %s: %s: search >= 0\n",
+               mp_gtext("error parsing command line"),
+               mp_gtext("value out of range"));
       return AF_ERROR;
     }
     if (speed.len > 0) {
@@ -508,9 +509,10 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
         s->speed_tempo = 1;
         s->speed_pitch = 1;
       } else {
-        mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-               _("error parsing command line") ": " _("value out of range")
-               ": speed=[pitch|tempo|none|both]\n");
+        mp_msg(MSGT_AFILTER, MSGL_ERR,
+               "[scaletempo] %s: %s: speed=[pitch|tempo|none|both]\n",
+               mp_gtext("error parsing command line"),
+               mp_gtext("value out of range"));
         return AF_ERROR;
       }
     }

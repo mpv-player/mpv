@@ -489,15 +489,16 @@ vf_instance_t* vf_open_filter(struct MPOpts *opts, vf_instance_t* next, const ch
       p += sprintf(str,"%s",name);
       for(i = 0 ; args && args[2*i] ; i++)
 	p += sprintf(p," %s=%s",args[2*i],args[2*i+1]);
-      mp_tmsg(MSGT_VFILTER,MSGL_INFO,"Opening video filter: " "[%s]\n",str);
+      mp_msg(MSGT_VFILTER, MSGL_INFO, "%s[%s]\n",
+             mp_gtext("Opening video filter: "), str);
     }
   } else if(strcmp(name,"vo")) {
     if(args && strcmp(args[0],"_oldargs_") == 0)
-      mp_tmsg(MSGT_VFILTER,MSGL_INFO,"Opening video filter: "
-	     "[%s=%s]\n", name,args[1]);
+        mp_msg(MSGT_VFILTER, MSGL_INFO, "%s[%s=%s]\n",
+               mp_gtext("Opening video filter: "), name, args[1]);
     else
-      mp_tmsg(MSGT_VFILTER,MSGL_INFO,"Opening video filter: "
-	     "[%s]\n", name);
+        mp_msg(MSGT_VFILTER, MSGL_INFO, "%s[%s]\n",
+               mp_gtext("Opening video filter: "), name);
   }
   return vf_open_plugin(opts, filter_list,next,name,args);
 }

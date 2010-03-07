@@ -570,7 +570,8 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   ret2=cue_vcd_get_track_end(track);
   ret=cue_vcd_seek_to_track(track);
   if(ret<0){
-    mp_tmsg(MSGT_OPEN,MSGL_ERR,"Error selecting VCD track." " (seek)\n");
+      mp_msg(MSGT_OPEN, MSGL_ERR, "%s (seek)\n",
+             mp_gtext("Error selecting VCD track."));
     return STREAM_UNSUPPORTED;
   }
   mp_tmsg(MSGT_OPEN,MSGL_INFO,"CUE stream_open, filename=%s, track=%d, available tracks: %d -> %d\n", filename, track, ret, ret2);

@@ -1740,13 +1740,15 @@ header_end:
     if(demuxer->video->id==-1 && v_streams>0){
 	// find the valid video stream:
 	if(!ds_fill_buffer(demuxer->video)){
-          mp_tmsg(MSGT_DEMUXER,MSGL_INFO,"RM: " "No video stream found.\n");
+            mp_msg(MSGT_DEMUXER, MSGL_INFO, "RM: %s",
+                   mp_gtext("No video stream found.\n"));
 	}
     }
     if(demuxer->audio->id==-1 && a_streams>0){
 	// find the valid audio stream:
 	if(!ds_fill_buffer(demuxer->audio)){
-          mp_tmsg(MSGT_DEMUXER,MSGL_INFO,"RM: " "No audio stream found -> no sound.\n");
+            mp_msg(MSGT_DEMUXER, MSGL_INFO, "RM: %s",
+                   mp_gtext("No audio stream found -> no sound.\n"));
 	}
     }
 
