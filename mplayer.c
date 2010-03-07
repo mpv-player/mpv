@@ -2546,13 +2546,13 @@ static void pause_loop(struct MPContext *mpctx)
         // The pause string is: "\n == PAUSE == \r" so we need to
         // take the first and the last char out
 	if (term_osd && !mpctx->sh_video) {
-	    char msg[128] = _("\n ===== PAUSE =====\r");
+	    char msg[128] = _("\n  =====  PAUSE  =====\r");
 	    int mlen = strlen(msg);
 	    msg[mlen-1] = '\0';
 	    set_osd_msg(OSD_MSG_PAUSE, 1, 0, "%s", msg+1);
 	    update_osd_msg(mpctx);
 	} else
-	    mp_tmsg(MSGT_CPLAYER,MSGL_STATUS,"\n ===== PAUSE =====\r");
+	    mp_tmsg(MSGT_CPLAYER,MSGL_STATUS,"\n  =====  PAUSE  =====\r");
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
     }
 
@@ -3785,7 +3785,7 @@ if(mpctx->sh_video){
     mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Video: Cannot read properties.\n");
     mpctx->sh_video=mpctx->d_video->sh=NULL;
   } else {
-    mp_tmsg(MSGT_CPLAYER,MSGL_V,"[V] filefmt:%d fourcc:0x%X size:%dx%d fps:%5.3f ftime:=%6.4f\n",
+    mp_tmsg(MSGT_CPLAYER,MSGL_V,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.3f  ftime:=%6.4f\n",
 	   mpctx->demuxer->file_format,mpctx->sh_video->format, mpctx->sh_video->disp_w,mpctx->sh_video->disp_h,
 	   mpctx->sh_video->fps,mpctx->sh_video->frametime
 	   );
@@ -3999,7 +3999,7 @@ if (!mpctx->sh_video && !mpctx->sh_audio)
 if(force_fps && mpctx->sh_video){
   vo_fps = mpctx->sh_video->fps=force_fps;
   mpctx->sh_video->frametime=1.0f/mpctx->sh_video->fps;
-  mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"FPS forced to be %5.3f (ftime: %5.3f).\n",mpctx->sh_video->fps,mpctx->sh_video->frametime);
+  mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"FPS forced to be %5.3f  (ftime: %5.3f).\n",mpctx->sh_video->fps,mpctx->sh_video->frametime);
 }
 
  mp_input_set_section(mpctx->input, NULL);

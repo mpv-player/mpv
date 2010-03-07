@@ -454,7 +454,7 @@ while(1){
   if(list_end>0 &&
      chunksize+stream_tell(demuxer->stream) == list_end) list_end=0;
   if(list_end>0 && chunksize+stream_tell(demuxer->stream)>list_end){
-      mp_tmsg(MSGT_HEADER,MSGL_V,"Broken chunk? chunksize=%d (id=%.4s)\n",chunksize,(char *) &id);
+      mp_tmsg(MSGT_HEADER,MSGL_V,"Broken chunk?  chunksize=%d  (id=%.4s)\n",chunksize,(char *) &id);
       stream_seek(demuxer->stream,list_end);
       list_end=0;
   } else

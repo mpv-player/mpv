@@ -534,7 +534,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     if(vidix_name[0]){
         vidix_init(width, height, x_pos, y_pos, modeinfo->width, modeinfo->height,
                    format, mode_bpp, modeinfo->width,modeinfo->height);
-        mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_SVGA] Using VIDIX. w=%i h=%i mw=%i mh=%i\n",width,height,
+        mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_SVGA] Using VIDIX. w=%i h=%i  mw=%i mh=%i\n",width,height,
                modeinfo->width,modeinfo->height);
         vidix_start();
         /*set colorkey*/

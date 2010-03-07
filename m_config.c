@@ -411,7 +411,7 @@ m_config_print_option_list(m_config_t *config) {
 
   if(!config->opts) return;
 
-  mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "\n Name Type Min Max Global CL Cfg\n\n");
+  mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "\n Name                 Type            Min        Max      Global  CL    Cfg\n\n");
   for(co = config->opts ; co ; co = co->next) {
     const m_option_t* opt = co->opt;
     if(opt->type->flags & M_OPT_TYPE_HAS_CHILD) continue;

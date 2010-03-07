@@ -529,7 +529,7 @@ play_next_file:
 	mencoder_exit(1,NULL);
   }
 
-  mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "success: format: %d data: 0x%X - 0x%x\n", file_format, (int)(stream->start_pos), (int)(stream->end_pos));
+  mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "success: format: %d  data: 0x%X - 0x%x\n", file_format, (int)(stream->start_pos), (int)(stream->end_pos));
 
 #ifdef CONFIG_DVDREAD
 if(stream->type==STREAMTYPE_DVD){
@@ -607,7 +607,7 @@ sh_video=d_video->sh;
       mencoder_exit(1,NULL);
   }
 
-  mp_tmsg(MSGT_MENCODER,MSGL_INFO, "[V] filefmt:%d fourcc:0x%X size:%dx%d fps:%5.3f ftime:=%6.4f\n",
+  mp_tmsg(MSGT_MENCODER,MSGL_INFO, "[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.3f  ftime:=%6.4f\n",
    demuxer->file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
    sh_video->fps,sh_video->frametime
   );
@@ -1556,10 +1556,10 @@ if(out_video_codec==VCODEC_FRAMENO && mux_v->timer>100){
     mp_tmsg(MSGT_MENCODER, MSGL_INFO, "Recommended video bitrate for %s CD: %d\n","2 x 800MB",(int)((2*800*1024*1024-muxer_f_size)/mux_v->timer/125));
 }
 
-mp_tmsg(MSGT_MENCODER, MSGL_INFO, "\nVideo stream: %8.3f kbit/s (%d B/s) size: %"PRIu64" bytes %5.3f secs %d frames\n",
+mp_tmsg(MSGT_MENCODER, MSGL_INFO, "\nVideo stream: %8.3f kbit/s  (%d B/s)  size: %"PRIu64" bytes  %5.3f secs  %d frames\n",
     (float)(mux_v->size/mux_v->timer*8.0f/1000.0f), (int)(mux_v->size/mux_v->timer), (uint64_t)mux_v->size, (float)mux_v->timer, decoded_frameno);
 if(sh_audio)
-mp_tmsg(MSGT_MENCODER, MSGL_INFO, "\nAudio stream: %8.3f kbit/s (%d B/s) size: %"PRIu64" bytes %5.3f secs\n",
+mp_tmsg(MSGT_MENCODER, MSGL_INFO, "\nAudio stream: %8.3f kbit/s  (%d B/s)  size: %"PRIu64" bytes  %5.3f secs\n",
     (float)(mux_a->size/mux_a->timer*8.0f/1000.0f), (int)(mux_a->size/mux_a->timer), (uint64_t)mux_a->size, (float)mux_a->timer);
 
 if(sh_audio){ uninit_audio(sh_audio);sh_audio=NULL; }

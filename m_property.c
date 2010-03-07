@@ -181,7 +181,7 @@ void m_properties_print_help_list(const m_option_t* list) {
     char min[50],max[50];
     int i,count = 0;
 
-    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "\n Name Type Min Max\n\n");
+    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "\n Name                 Type            Min        Max\n\n");
     for(i = 0 ; list[i].name ; i++) {
         const m_option_t* opt = &list[i];
         if(opt->flags & M_OPT_MIN)

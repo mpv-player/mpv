@@ -213,7 +213,7 @@ static int af_ladspa_parse_plugin(af_ladspa_t *setup) {
 
     if (setup->ninputs == 0) {
         mp_msg(MSGT_AFILTER, MSGL_WARN, "%s: %s\n", setup->myname,
-                                                _("WARNING! This LADSPA plugin has no audio inputs.\n The incoming audio signal will be lost."));
+                                                _("WARNING! This LADSPA plugin has no audio inputs.\n  The incoming audio signal will be lost."));
     } else if (setup->ninputs == 1) {
         mp_msg(MSGT_AFILTER, MSGL_V, "%s: this is a mono effect\n", setup->myname);
     } else if (setup->ninputs == 2) {

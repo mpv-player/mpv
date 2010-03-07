@@ -444,7 +444,7 @@ static int open_tv(tvi_handle_t *tvh)
             tvh->tv_param->height = 480/tvh->tv_param->decimation;
         }
       mp_tmsg(MSGT_TV, MSGL_INFO,
-	       " MJP: width %d height %d\n", tvh->tv_param->width, tvh->tv_param->height);
+	       "  MJP: width %d height %d\n", tvh->tv_param->width, tvh->tv_param->height);
     }
 #endif
 
@@ -798,7 +798,7 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
 	sh_audio->wf->nBlockAlign = sh_audio->samplesize * sh_audio->channels;
 	sh_audio->wf->nAvgBytesPerSec = sh_audio->i_bps;
 
-	mp_tmsg(MSGT_DECVIDEO, MSGL_V, " TV audio: %d channels, %d bits, %d Hz\n",
+	mp_tmsg(MSGT_DECVIDEO, MSGL_V, "  TV audio: %d channels, %d bits, %d Hz\n",
           sh_audio->wf->nChannels, sh_audio->wf->wBitsPerSample,
           sh_audio->wf->nSamplesPerSec);
 

@@ -483,7 +483,7 @@ static void cue_vcd_read_toc(void){
   for (i = 0; i < nTracks; ++i) {
 
     mp_tmsg(MSGT_OPEN,MSGL_INFO,
-           "track %02d: format=%d %02d:%02d:%02d\n",
+           "track %02d:  format=%d  %02d:%02d:%02d\n",
            i+1,
            tracks[i].mode,
            tracks[i].minute,
