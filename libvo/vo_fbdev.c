@@ -572,6 +572,7 @@ static int fb_bpp_we_want;      // 32: 32  24: 24  16: 16  15: 15
 static int fb_line_len;
 static int fb_xres;
 static int fb_yres;
+static int fb_page;
 static void (*draw_alpha_p)(int w, int h, unsigned char *src,
                             unsigned char *srca, int stride,
                             unsigned char *dst, int dstride);
@@ -804,6 +805,12 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     set_bpp(&fb_vinfo, fb_bpp);
     fb_vinfo.xres_virtual = fb_vinfo.xres;
     fb_vinfo.yres_virtual = fb_vinfo.yres;
+    fb_page = 0;
+    if (vo_doublebuffering) {
+        fb_vinfo.yres_virtual <<= 1;
+        fb_vinfo.yoffset = 0;
+        fb_page = 1; // start writing into the page we don't display
+    }
 
     if (fb_tty_fd >= 0 && ioctl(fb_tty_fd, KDSETMODE, KD_GRAPHICS) < 0) {
         mp_msg(MSGT_VO, MSGL_V, "Can't set graphics mode: %s\n", strerror(errno));
@@ -903,6 +910,12 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     fb_line_len = fb_finfo.line_length;
     fb_size     = fb_finfo.smem_len;
+    if (vo_doublebuffering && fb_size < 2 * fb_yres * fb_line_len)
+    {
+        mp_msg(MSGT_VO, MSGL_WARN, "framebuffer too small for double-buffering, disabling\n");
+        vo_doublebuffering = 0;
+        fb_page = 0;
+    }
 
 #ifdef CONFIG_VIDIX
     if (vidix_name) {
@@ -963,14 +976,19 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         center = frame_buffer +
                  ( (out_width  - in_width)  / 2 ) * fb_pixel_size +
                  ( (out_height - in_height) / 2 ) * fb_line_len +
-                 x_offset * fb_pixel_size + y_offset * fb_line_len;
+                 x_offset * fb_pixel_size + y_offset * fb_line_len +
+                 fb_page * fb_yres * fb_line_len;
 
         mp_msg(MSGT_VO, MSGL_DBG2, "frame_buffer @ %p\n", frame_buffer);
         mp_msg(MSGT_VO, MSGL_DBG2, "center @ %p\n", center);
         mp_msg(MSGT_VO, MSGL_V, "pixel per line: %d\n", fb_line_len / fb_pixel_size);
 
-        if (fs || vm)
-            memset(frame_buffer, '\0', fb_line_len * fb_yres);
+        if (fs || vm) {
+            int clear_size = fb_line_len * fb_yres;
+            if (vo_doublebuffering)
+                clear_size <<= 1;
+            memset(frame_buffer, 0, clear_size);
+        }
     }
 
     vt_set_textarea(last_row, fb_yres);
@@ -1027,6 +1045,20 @@ static void check_events(void)
 
 static void flip_page(void)
 {
+    int next_page = !fb_page;
+    int page_delta = next_page - fb_page;
+#ifdef CONFIG_VIDIX
+    if (vidix_name)
+        return;
+#endif
+    if (!vo_doublebuffering)
+        return;
+
+    fb_vinfo.yoffset = fb_page * fb_yres;
+    ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_vinfo);
+
+    center += page_delta * fb_yres * fb_line_len;
+    fb_page = next_page;
 }
 
 static void draw_osd(void)
