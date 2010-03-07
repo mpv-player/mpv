@@ -115,7 +115,7 @@
 #define SEEK_ABSOLUTE (1 << 0)
 #define SEEK_FACTOR   (1 << 1)
 
-#define MP_INPUT_BUFFER_PADDING_SIZE 8
+#define MP_INPUT_BUFFER_PADDING_SIZE 64
 
 // Holds one packet/frame/whatever
 typedef struct demux_packet {
