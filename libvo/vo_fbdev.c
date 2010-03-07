@@ -1055,7 +1055,7 @@ static void flip_page(void)
         return;
 
     fb_vinfo.yoffset = fb_page * fb_yres;
-    ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_vinfo);
+    ioctl(fb_dev_fd, FBIOPAN_DISPLAY, &fb_vinfo);
 
     center += page_delta * fb_yres * fb_line_len;
     fb_page = next_page;
