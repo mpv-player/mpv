@@ -1211,7 +1211,7 @@ static void saddf(char *buf, unsigned *pos, int len, const char *format, ...)
  * \param time time value to convert/append
  */
 static void sadd_hhmmssf(char *buf, unsigned *pos, int len, float time) {
-  long tenths = 10 * time;
+  int64_t tenths = 10 * time;
   int f1 = tenths % 10;
   int ss = (tenths /  10) % 60;
   int mm = (tenths / 600) % 60;
