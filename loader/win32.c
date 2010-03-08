@@ -659,6 +659,13 @@ static void* WINAPI expCreateThread(void* pSecAttr, long dwStackSize,
     return pth;
 }
 
+static DWORD WINAPI expResumeThread(HANDLE hThread)
+{
+    int ret = 1;
+    dbgprintf("ResumeThread(0x%x) => 0x%x\n", hThread, ret);
+    return ret;
+}
+
 struct mutex_list_t;
 
 struct mutex_list_t
@@ -1978,6 +1985,28 @@ static int WINAPI expReleaseMutex(HANDLE hMutex)
     if (--ml->lock_count == 0) pthread_cond_signal(ml->pc);
     pthread_mutex_unlock(ml->pm);
     return 1;
+}
+
+static DWORD WINAPI expSignalObjectAndWait(HANDLE hObjectToSignal,
+                                           HANDLE hObjectToWaitOn,
+                                           DWORD dwMilliseconds,
+                                           WIN_BOOL bAlertable) {
+    mutex_list* mlist = (mutex_list*)hObjectToSignal;
+
+    switch (mlist->type) {
+    case 0:  // Event
+        expSetEvent(mlist);
+        break;
+    case 1:  // Semaphore
+        expReleaseSemaphore(mlist, 1, NULL);
+        break;
+    case 2:  // Mutex
+        expReleaseMutex(mlist);
+        break;
+    default:
+        dbgprintf("Signalling unknown object type %d!\n", hObjectToSignal);
+    }
+    return expWaitForSingleObject(hObjectToWaitOn, dwMilliseconds);
 }
 
 static long WINAPI expRegOpenKeyExA(long key, const char* subkey, long reserved, long access, int* newkey)
@@ -5099,6 +5128,7 @@ struct exports exp_kernel32[]=
     FF(IsBadStringPtrA, -1)
     FF(DisableThreadLibraryCalls, -1)
     FF(CreateThread, -1)
+    FF(ResumeThread, -1)
     FF(CreateEventA, -1)
     FF(SetEvent, -1)
     FF(ResetEvent, -1)
@@ -5152,6 +5182,7 @@ struct exports exp_kernel32[]=
     FF(ReleaseSemaphore, -1)
     FF(CreateMutexA, -1)
     FF(ReleaseMutex, -1)
+    FF(SignalObjectAndWait, -1)
     FF(FindResourceA, -1)
     FF(LockResource, -1)
     FF(FreeResource, -1)
