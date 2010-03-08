@@ -5,6 +5,11 @@
 
 #include "config.h"
 
+#ifdef CONFIG_TRANSLATION
+#include <locale.h>
+#include <libintl.h>
+#endif
+
 #ifdef CONFIG_ICONV
 #include <iconv.h>
 #include <errno.h>
@@ -76,6 +81,14 @@ void mp_msg_init(void){
     mp_msg_charset = getenv("MPLAYER_CHARSET");
     if (!mp_msg_charset)
       mp_msg_charset = get_term_charset();
+#endif
+#ifdef CONFIG_TRANSLATION
+    textdomain("mplayer");
+    char *localedir = getenv("MPLAYER_LOCALEDIR");
+    if (localedir == NULL && strlen(MPLAYER_LOCALEDIR))
+        localedir = MPLAYER_LOCALEDIR;
+    bindtextdomain("mplayer", localedir);
+    bind_textdomain_codeset("mplayer", "UTF-8");
 #endif
 }
 
@@ -224,8 +237,63 @@ void mp_msg(int mod, int lev, const char *format, ...)
     va_end(va);
 }
 
-
 char *mp_gtext(const char *string)
 {
+#ifdef CONFIG_TRANSLATION
+    /* gettext expects the global locale to be set with
+     * setlocale(LC_ALL, ""). However doing that would suck for a
+     * couple of reasons (locale stuff is badly designed and sucks in
+     * general).
+     *
+     * First setting the locale, especially LC_CTYPE, changes the
+     * behavior of various C functions and we don't want that - we
+     * want isalpha() for example to always behave like in the C
+     * locale.
+
+     * Second, there is no way to enforce a sane character set. All
+     * strings inside MPlayer must always be in utf-8, not in the
+     * character set specified by the system locale which could be
+     * something different and completely insane. The locale system
+     * lacks any way to say "set LC_CTYPE to utf-8, ignoring the
+     * default system locale if it specifies something different". We
+     * could try to work around that flaw by leaving LC_CTYPE to the C
+     * locale and only setting LC_MESSAGES (which is the variable that
+     * must be set to tell gettext which language to translate
+     * to). However if we leave LC_MESSAGES set then things like
+     * strerror() may produce completely garbled output when they try
+     * to translate their results but then try to convert some
+     * translated non-ASCII text to the character set specified by
+     * LC_CTYPE which would still be in the C locale (this doesn't
+     * affect gettext itself because it supports specifying the
+     * character set directly with bind_textdomain_codeset()).
+     *
+     * So the only solution (at leat short of trying to work around
+     * things possibly producing non-utf-8 output) is to leave all the
+     * locale variables unset. Note that this means it's not possible
+     * to get translated output from any libraries we call if they
+     * only rely on the broken locale system to specify the language
+     * to use; this is the case with libc for example.
+     *
+     * The locale changing below is rather ugly, but hard to avoid.
+     * gettext doesn't support specifying the translation target
+     * directly, only through locale.
+     * The main actual problem this could cause is interference with
+     * other threads; that could be avoided with thread-specific
+     * locale changes, but such functionality is less standard and I
+     * think it's not worth adding pre-emptively unless someone sees
+     * an actual problem case.
+     */
+    setlocale(LC_MESSAGES, "");
+    string = gettext(string);
+    setlocale(LC_MESSAGES, "C");
+#endif
     return string;
+}
+
+void mp_tmsg(int mod, int lev, const char *format, ...)
+{
+    va_list va;
+    va_start(va, format);
+    mp_msg_va(mod, lev, mp_gtext(format), va);
+    va_end(va);
 }

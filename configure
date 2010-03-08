@@ -216,6 +216,7 @@ Installation directories:
   --mandir=DIR           directory for installing man pages [PREFIX/share/man]
   --confdir=DIR          directory for installing configuration files
                          [PREFIX/etc/mplayer]
+  --localedir=DIR        directory for locale tree [PREFIX/share/locale]
   --libdir=DIR           directory for object code libraries [PREFIX/lib]
   --codecsdir=DIR        directory for binary codecs [LIBDIR/codecs]
   --win32codecsdir=DIR   directory for Windows DLLs [LIBDIR/codecs]
@@ -398,6 +399,7 @@ Audio output:
   --disable-select       disable using select() on the audio device [enable]
 
 Language options:
+  --enable-translation   enable support for translated output [disable]
   --charset=charset      convert the console messages to this character set
   --language-doc=lang    language to use for the documentation [en]
   --language-man=lang    language to use for the man pages [en]
@@ -656,6 +658,7 @@ _largefiles=yes
 #language=en
 _shm=auto
 _linux_devfs=no
+_translation=no
 _charset="UTF-8"
 _dynamic_plugins=no
 _crash_debug=no
@@ -732,6 +735,9 @@ for ac_option do
     ;;
   --realcodecsdir=*)
     _realcodecsdir=$(echo $ac_option | cut -d '=' -f 2)
+    ;;
+  --localedir=*)
+    _localedir=$(echo $ac_option | cut -d '=' -f 2)
     ;;
 
   --with-install=*)
@@ -843,6 +849,8 @@ for ac_option do
   --disable-debug)
     _debug=
     ;;
+  --enable-translation)              _translation=yes           ;;
+  --disable-translation)             _translation=no            ;;
   --enable-runtime-cpudetection)    _runtime_cpudetection=yes   ;;
   --disable-runtime-cpudetection)   _runtime_cpudetection=no    ;;
   --enable-cross-compile)           _cross_compile=yes          ;;
@@ -1265,6 +1273,7 @@ test -z "$_datadir" && _datadir="$_prefix/share/mplayer"
 test -z "$_mandir"  && _mandir="$_prefix/share/man"
 test -z "$_confdir" && _confdir="$_prefix/etc/mplayer"
 test -z "$_libdir"  && _libdir="$_prefix/lib"
+test -z "$_localedir"  && _localedir="$_prefix/share/locale"
 
 # Determine our OS name and CPU architecture
 if test -z "$_target" ; then
@@ -2824,6 +2833,14 @@ else
 fi
 echores "$_langinfo"
 
+
+echocheck "translation support"
+if test "$_translation" = yes; then
+  def_translation="#define CONFIG_TRANSLATION 1"
+else
+  def_translation="#undef CONFIG_TRANSLATION"
+fi
+echores "$_translation"
 
 echocheck "language"
 # Set preferred languages, "all" uses English as main language.
@@ -7840,6 +7857,7 @@ DATADIR = \$(DESTDIR)$_datadir
 LIBDIR = \$(DESTDIR)$_libdir
 MANDIR = \$(DESTDIR)$_mandir
 CONFDIR = \$(DESTDIR)$_confdir
+LOCALEDIR = \$(DESTDIR)$_localedir
 
 AR = $_ar
 AS = $_cc
@@ -8137,6 +8155,9 @@ cat > $TMPH << EOF
 #define MPLAYER_DATADIR "$_datadir"
 #define MPLAYER_CONFDIR "$_confdir"
 #define MPLAYER_LIBDIR "$_libdir"
+#define MPLAYER_LOCALEDIR "$_localedir"
+
+$def_translation
 
 /* definitions needed by included libraries */
 #define HAVE_INTTYPES_H 1
