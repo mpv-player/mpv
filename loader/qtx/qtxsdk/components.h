@@ -641,10 +641,10 @@ static inline void dump_ImageDescription(void* xxx){
     printf("=============== ImageDescription at %p ==================\n",xxx);
     printf("idSize=0x%X  fourcc=0x%08X\n",id->idSize,id->cType);
     printf("ver=%d rev=%d vendor=0x%08X\n",id->version,id->revisionLevel,id->vendor);
-    printf("tempQ=%d spatQ=%d  dim: %d x %d  dpi: %d x %d  depth: %d\n",
+    printf("tempQ=%d spatQ=%d  dim: %d x %d  dpi: %.2f x %.2f  depth: %d\n",
 	id->temporalQuality,id->spatialQuality,
 	id->width, id->height,
-	id->hRes, id->vRes,
+	id->hRes / 65536.0, id->vRes / 65536.0,
 	id->depth);
     printf("dataSize=%d frameCount=%d clutID=%d\n",id->dataSize, id->frameCount, id->clutID);
     printf("name='%.*s'\n",((char*)(&id->name))[0],((char*)(&id->name))+1);
