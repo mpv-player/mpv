@@ -1062,7 +1062,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     if (!vo_border) vo_x11_decoration(vo, 0);
     // map window
     XMapWindow(mDisplay, x11->window);
-    XClearWindow(mDisplay, x11->window);
+    vo_x11_clearwindow(vo, x11->window);
     // wait for map
     do {
       XNextEvent(mDisplay, &xev);

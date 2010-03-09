@@ -133,7 +133,7 @@ static char *load_file(const char *filename, off_t * length)
 	return NULL;
     }
 
-    lseek(fd, SEEK_SET, 0);
+    lseek(fd, 0, SEEK_SET);
 
     if (!(buffer = malloc(*length + 1))) {
 	mp_msg(MSGT_NETWORK, MSGL_V, "Could not malloc.");

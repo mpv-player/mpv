@@ -242,7 +242,7 @@ static int init(int rate, int channels, int format, int flags)
     ao_data.outburst    = nBytesPerSample * OUTBURST_SAMPLES;
     ao_data.buffersize  = m_kaiSpec.ulBufferSize;
 
-    m_nBufSize = (m_kaiSpec.ulBufferSize * m_kaiSpec.ulNumBuffers) << 3;
+    m_nBufSize = (m_kaiSpec.ulBufferSize * m_kaiSpec.ulNumBuffers) << 2;
 
     // multiple of CHUNK_SIZE
     m_nBufSize = (m_nBufSize / CHUNK_SIZE) * CHUNK_SIZE;

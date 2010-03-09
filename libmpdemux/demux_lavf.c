@@ -39,6 +39,7 @@
 #include "libavformat/avformat.h"
 #include "libavformat/avio.h"
 #include "libavutil/avutil.h"
+#include "libavutil/avstring.h"
 #include "libavcodec/opt.h"
 
 #include "mp_taglists.h"
@@ -154,13 +155,15 @@ static int lavf_check_file(demuxer_t *demuxer){
     }
 
     probe_data_size = stream_read(demuxer->stream, priv->buffer, PROBE_BUF_SIZE);
-    if(probe_data_size <= 0)
+    if(probe_data_size < 0)
         return 0;
     avpd.filename= demuxer->stream->url;
+    if (!strncmp(avpd.filename, "ffmpeg://", 9))
+        avpd.filename += 9;
     avpd.buf= priv->buffer;
     avpd.buf_size= probe_data_size;
 
-    priv->avif= av_probe_input_format(&avpd, 1);
+    priv->avif= av_probe_input_format(&avpd, probe_data_size > 0);
     if(!priv->avif){
         mp_msg(MSGT_HEADER,MSGL_V,"LAVF_check: no clue about this gibberish!\n");
         return 0;
@@ -458,10 +461,13 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         }
     }
 
-    if(demuxer->stream->url)
-        strncpy(mp_filename + 3, demuxer->stream->url, sizeof(mp_filename)-3);
-    else
-        strncpy(mp_filename + 3, "foobar.dummy", sizeof(mp_filename)-3);
+    if(demuxer->stream->url) {
+        if (!strncmp(demuxer->stream->url, "ffmpeg://rtsp:", 14))
+            av_strlcpy(mp_filename, demuxer->stream->url + 9, sizeof(mp_filename));
+        else
+            av_strlcat(mp_filename, demuxer->stream->url, sizeof(mp_filename));
+    } else
+        av_strlcat(mp_filename, "foobar.dummy", sizeof(mp_filename));
 
     priv->pb = av_alloc_put_byte(priv->buffer, BIO_BUFFER_SIZE, 0,
                                  demuxer->stream, mp_read, NULL, mp_seek);
