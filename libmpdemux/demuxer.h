@@ -117,7 +117,7 @@ struct MPOpts;
 #define SEEK_FORWARD  (1 << 2)
 #define SEEK_BACKWARD (1 << 3)
 
-#define MP_INPUT_BUFFER_PADDING_SIZE 8
+#define MP_INPUT_BUFFER_PADDING_SIZE 64
 
 // Holds one packet/frame/whatever
 typedef struct demux_packet {
