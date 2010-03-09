@@ -168,7 +168,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
     if(p->qp)
         p->frame->quality= p->qp * FF_QP2LAMBDA;
     else
-        p->frame->quality= (qp_store[0] * FF_QP2LAMBDA)>>p->mpeg2;
+        p->frame->quality= norm_qscale(qp_store[0], p->mpeg2) * FF_QP2LAMBDA;
 //    init per MB qscale stuff FIXME
 
     for(i=0; i<count; i++){

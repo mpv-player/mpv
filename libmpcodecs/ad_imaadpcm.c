@@ -1,20 +1,37 @@
 /*
-    IMA ADPCM Decoder for MPlayer
-      by Mike Melanson
-
-    This file is in charge of decoding all of the various IMA ADPCM data
-    formats that various entities have created. Details about the data
-    formats can be found here:
-      http://www.pcisys.net/~melanson/codecs/
-
-    So far, this file handles these formats:
-      'ima4': IMA ADPCM found in QT files
-        0x11: IMA ADPCM found in MS AVI/ASF/WAV files
-        0x61: DK4 ADPCM found in certain AVI files on Sega Saturn CD-ROMs;
-              note that this is a 'rogue' format number in that it was
-              never officially registered with Microsoft
-    0x1100736d: IMA ADPCM coded like in MS AVI/ASF/WAV found in QT files
-*/
+ * IMA ADPCM decoder
+ *
+ * This file is in charge of decoding all of the various IMA ADPCM data
+ * formats that various entities have created. Details about the data
+ * formats can be found here:
+ *   http://www.pcisys.net/~melanson/codecs/
+ *
+ * So far, this file handles these formats:
+ *   'ima4': IMA ADPCM found in QT files
+ *     0x11: IMA ADPCM found in MS AVI/ASF/WAV files
+ *     0x61: DK4 ADPCM found in certain AVI files on Sega Saturn CD-ROMs;
+ *           note that this is a 'rogue' format number in that it was
+ *           never officially registered with Microsoft
+ * 0x1100736d: IMA ADPCM coded like in MS AVI/ASF/WAV found in QT files
+ *
+ * Copyright (c) 2002 Mike Melanson
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

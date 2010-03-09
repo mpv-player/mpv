@@ -2,6 +2,7 @@
  * Direct Hardware Access (DHA) kernel helper
  *
  * Copyright (C) 2002 Alex Beregszaszi <alex@fsn.hu>
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify

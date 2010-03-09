@@ -1,3 +1,21 @@
+/*
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 #ifndef MPLAYER_VF_H
 #define MPLAYER_VF_H
 
@@ -138,5 +156,20 @@ void vf_uninit_filter_chain(vf_instance_t* vf);
 int vf_config_wrapper(struct vf_instance* vf,
 		      int width, int height, int d_width, int d_height,
 		      unsigned int flags, unsigned int outfmt);
+
+static inline int norm_qscale(int qscale, int type)
+{
+    switch (type) {
+    case 0: // MPEG-1
+        return qscale;
+    case 1: // MPEG-2
+        return qscale >> 1;
+    case 2: // H264
+        return qscale >> 2;
+    case 3: // VP56
+        return (63 - qscale + 2) >> 2;
+    }
+    return qscale;
+}
 
 #endif /* MPLAYER_VF_H */
