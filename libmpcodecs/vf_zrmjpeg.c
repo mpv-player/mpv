@@ -893,9 +893,9 @@ static void uninit(vf_instance_t *vf) {
  * This routine will do some basic initialization of local structures etc.,
  * and then parse the command line arguments specific for the ZRMJPEG filter.
  */
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
 	struct vf_priv_s *priv;
-	VERBOSE("open() called: args=\"%s\"\n", args);
+	VERBOSE("vf_open() called: args=\"%s\"\n", args);
 
 	vf->config = config;
 	vf->put_image = put_image;
@@ -1062,6 +1062,6 @@ const vf_info_t vf_info_zrmjpeg = {
     "zrmjpeg",
     "Rik Snel",
     "",
-    open,
+    vf_open,
     NULL
 };

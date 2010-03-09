@@ -557,7 +557,7 @@ static int control(struct vf_instance* vf, int request, void* data){
     return vf_next_control(vf,request,data);
 }
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
 
     int log2c=-1;
 
@@ -609,6 +609,6 @@ const vf_info_t vf_info_spp = {
     "spp",
     "Michael Niedermayer",
     "",
-    open,
+    vf_open,
     NULL
 };

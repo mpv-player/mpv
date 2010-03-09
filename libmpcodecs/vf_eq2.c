@@ -446,7 +446,7 @@ void uninit (vf_instance_t *vf)
 }
 
 static
-int open (vf_instance_t *vf, char *args)
+int vf_open(vf_instance_t *vf, char *args)
 {
   unsigned i;
   vf_eq2_t *eq2;
@@ -514,6 +514,6 @@ const vf_info_t vf_info_eq2 = {
   "eq2",
   "Hampa Hug, Daniel Moreno, Richard Felker",
   "",
-  &open,
+  &vf_open,
   NULL
 };

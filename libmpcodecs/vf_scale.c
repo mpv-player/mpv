@@ -562,7 +562,7 @@ static void uninit(struct vf_instance *vf){
     free(vf->priv);
 }
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->start_slice=start_slice;
     vf->draw_slice=draw_slice;
@@ -723,7 +723,7 @@ const vf_info_t vf_info_scale = {
     "scale",
     "A'rpi",
     "",
-    open,
+    vf_open,
     &vf_opts
 };
 

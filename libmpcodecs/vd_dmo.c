@@ -16,11 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "config.h"
+
+#if HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-
-#include "config.h"
 
 #include "mp_msg.h"
 #include "help_mp.h"

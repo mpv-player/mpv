@@ -188,7 +188,7 @@ static void uninit(vf_instance_t *vf) {
   free(vf->priv);
 }
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
     unsigned int i;
     vf->config=config;
     vf->uninit=uninit;
@@ -220,7 +220,7 @@ const vf_info_t vf_info_palette = {
     "palette",
     "A'rpi & Alex",
     "",
-    open,
+    vf_open,
     NULL
 };
 

@@ -475,7 +475,7 @@ struct vf_instance *vf_open_plugin_noerr(struct MPOpts *opts,
 	args = (char**)args[1];
       else
 	args = NULL;
-    *retcode = vf->info->open(vf,(char*)args);
+    *retcode = vf->info->vf_open(vf,(char*)args);
     if (*retcode > 0)
         return vf;
     free(vf);

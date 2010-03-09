@@ -155,7 +155,7 @@ static void draw_slice(struct vf_instance* vf,
 
 //===========================================================================//
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->put_image=put_image;
     vf->start_slice=start_slice;
@@ -190,7 +190,7 @@ const vf_info_t vf_info_crop = {
     "crop",
     "A'rpi",
     "",
-    open,
+    vf_open,
     &vf_opts
 };
 

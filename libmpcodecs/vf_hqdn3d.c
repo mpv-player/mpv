@@ -273,7 +273,7 @@ static void PrecalcCoefs(int *Ct, double Dist25)
 }
 
 
-static int open(vf_instance_t *vf, char* args){
+static int vf_open(vf_instance_t *vf, char *args){
         double LumSpac, LumTmp, ChromSpac, ChromTmp;
         double Param1, Param2, Param3, Param4;
 
@@ -360,7 +360,7 @@ const vf_info_t vf_info_hqdn3d = {
     "hqdn3d",
     "Daniel Moreno & A'rpi",
     "",
-    open,
+    vf_open,
     NULL
 };
 

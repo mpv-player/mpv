@@ -27,6 +27,8 @@ typedef struct {
     int aspect_ratio_information;
     int frame_rate_code;
     float fps;
+    int frame_rate_extension_n;
+    int frame_rate_extension_d;
     int bitrate; // 0x3FFFF==VBR
     // timing:
     int picture_structure;

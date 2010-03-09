@@ -30,7 +30,7 @@ typedef struct vf_info_s {
     const char *name;
     const char *author;
     const char *comment;
-    int (*open)(struct vf_instance* vf,char* args);
+    int (*vf_open)(struct vf_instance* vf,char* args);
     // Ptr to a struct dscribing the options
     const void* opts;
 } vf_info_t;
