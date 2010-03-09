@@ -10734,6 +10734,50 @@ Enable this only if your target container format requires access unit
 delimiters.
 .
 .TP
+.B overscan=<undef|show|crop>
+Include VUI overscan information in the stream (default: disabled).
+See doc/vui.txt in the x264 source code for more information.
+.
+.TP
+.B videoformat=<component|pal|ntsc|secam|mac|undef>
+Include VUI video format information in the stream (default: disabled).
+This is a purely informative setting for describing the original source.
+See doc/vui.txt in the x264 source code for more information.
+.
+.TP
+.B (no)fullrange
+Include VUI full range information in the stream (default: disabled).
+Use this option if your source video is not range limited.
+See doc/vui.txt in the x264 source code for more information.
+.
+.TP
+.B colorprim=<bt709|bt470m|bt470bg|smpte170m|smpte240m|film|undef>
+Include color primaries information (default: disabled).
+This can be used for color correction.
+See doc/vui.txt in the x264 source code for more information.
+.
+.TP
+.B transfer=<bt709|bt470m|bt470bg|linear|log100|log316|smpte170m|smpte240m>
+Include VUI transfer characteristics information in the stream
+(default: disabled).
+This can be used for color correction.
+See doc/vui.txt in the x264 source code for more information.
+.
+.TP
+.B colormatrix=<bt709|fcc|bt470bg|smpte170m|smpte240m|GBR|YCgCo>
+Include VUI matrix coefficients in the stream (default: disabled).
+This can be used for color correction.
+See doc/vui.txt in the x264 source code for more information.
+.
+.TP
+.B chromaloc=<0-5>
+Include VUI chroma sample location information in the stream (default:
+disabled).
+Use this option to ensure alignment of the chroma and luma planes after
+color space conversions.
+See doc/vui.txt in the x264 source code for more information.
+.
+.TP
 .B log=<\-1\-3>
 Adjust the amount of logging info printed to the screen.
 .PD 0
