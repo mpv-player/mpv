@@ -1117,9 +1117,9 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
 #ifdef CONFIG_ASS
     if (opts->ass_enabled) {
 #ifdef CONFIG_ICONV
-        asst = ass_read_file(ass_library, filename, sub_cp);
+        asst = ass_read_stream(ass_library, filename, sub_cp);
 #else
-        asst = ass_read_file(ass_library, filename, 0);
+        asst = ass_read_stream(ass_library, filename, 0);
 #endif
         if (!asst) {
             subd = sub_read_file(filename, fps);

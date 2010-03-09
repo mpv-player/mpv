@@ -26,10 +26,13 @@
 #include <ass/ass.h>
 #include <ass/ass_types.h>
 
+#include <libavutil/common.h>
+
 #include "mp_msg.h"
 #include "get_path.h"
 #include "ass_mp.h"
 #include "subreader.h"
+#include "stream/stream.h"
 
 #ifdef CONFIG_FONTCONFIG
 #include <fontconfig/fontconfig.h>
@@ -224,6 +227,55 @@ ASS_Track *ass_read_subdata(ASS_Library *library, sub_data *subdata,
             track->events[eid].Duration *= 100. / fps;
         }
     }
+    return track;
+}
+
+ASS_Track *ass_read_stream(ASS_Library *library, char *fname, char *charset)
+{
+    int i;
+    char *buf = NULL;
+    ASS_Track *track;
+    size_t sz = 0;
+    size_t buf_alloc = 0;
+    stream_t *fd;
+
+    fd = open_stream(fname, NULL, &i);
+    if (!fd)
+        // Stream code should have printed an error already
+        return NULL;
+    if (fd->end_pos > STREAM_BUFFER_SIZE)
+        /* read entire file if size is known */
+        buf_alloc = fd->end_pos;
+    else
+        buf_alloc = 1000;
+    for (;;) {
+        if (sz > 100000000) {
+            mp_tmsg(MSGT_ASS, MSGL_ERR, "Refusing to load subtitle file "
+                    "larger than 100 MB: %s\n", fname);
+            sz = 0;
+            break;
+        }
+        buf_alloc = FFMAX(buf_alloc, sz + (sz >> 1));
+        buf_alloc = FFMIN(buf_alloc, 100000001);
+        buf = realloc(buf, buf_alloc + 1);
+        i = stream_read(fd, buf + sz, buf_alloc - sz);
+        if (i <= 0)
+            break;
+        sz += i;
+    }
+    free_stream(fd);
+    if (!sz) {
+        free(buf);
+        return NULL;
+    }
+    buf[sz] = 0;
+    buf = realloc(buf, sz + 1);
+    track = ass_read_memory(library, buf, sz, charset);
+    if (track) {
+        free(track->name);
+        track->name = strdup(fname);
+    }
+    free(buf);
     return track;
 }
 
