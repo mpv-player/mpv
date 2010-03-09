@@ -18,10 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stdlib.h>
-#include <inttypes.h>
-
-#include "config.h"
+#include <stdint.h>
 
 /// \param srate (out) sample rate
 /// \param num (out) number of audio frames in this ADTS frame

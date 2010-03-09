@@ -28,6 +28,7 @@
 #include <unistd.h>
 
 #include "dha.h"
+#include "sis_bridge.h"
 #include "sis_regs.h"
 #include "sis_defs.h"
 

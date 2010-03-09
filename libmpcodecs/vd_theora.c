@@ -41,23 +41,34 @@ LIBVD_EXTERN(theora)
 
 #define THEORA_NUM_HEADER_PACKETS 3
 
+typedef struct theora_struct_st {
+    theora_state st;
+    theora_comment cc;
+    theora_info inf;
+} theora_struct_t;
+
+/** Convert Theora pixelformat to the corresponding IMGFMT_ */
+static uint32_t theora_pixelformat2imgfmt(theora_pixelformat fmt){
+    switch(fmt) {
+       case OC_PF_420: return IMGFMT_YV12;
+       case OC_PF_422: return IMGFMT_422P;
+       case OC_PF_444: return IMGFMT_444P;
+    }
+    return 0;
+}
+
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
+    theora_struct_t *context = sh->context;
     switch(cmd) {
     case VDCTRL_QUERY_FORMAT:
-        if (*(int*)arg == IMGFMT_YV12)
+        if (*(int*)arg == theora_pixelformat2imgfmt(context->inf.pixelformat))
 	    return CONTROL_TRUE;
 	return CONTROL_FALSE;
     }
 
     return CONTROL_UNKNOWN;
 }
-
-typedef struct theora_struct_st {
-    theora_state st;
-    theora_comment cc;
-    theora_info inf;
-} theora_struct_t;
 
 /*
  * init driver
@@ -104,7 +115,7 @@ static int init(sh_video_t *sh){
 
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Theora video init ok!\n");
 
-    return mpcodecs_config_vo (sh,context->inf.frame_width,context->inf.frame_height,IMGFMT_YV12);
+    return mpcodecs_config_vo (sh,context->inf.frame_width,context->inf.frame_height,theora_pixelformat2imgfmt(context->inf.pixelformat));
 
 err_out:
     free(context);

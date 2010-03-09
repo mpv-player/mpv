@@ -37,6 +37,7 @@
 #include "libmpdemux/stheader.h"
 
 #include "ad_internal.h"
+#include "vd_libdv.h"
 
 static const ad_info_t info =
 {
@@ -48,9 +49,6 @@ static const ad_info_t info =
 };
 
 LIBAD_EXTERN(libdv)
-
-// defined in vd_libdv.c:
-dv_decoder_t*  init_global_rawdv_decoder(void);
 
 static int preinit(sh_audio_t *sh_audio)
 {
