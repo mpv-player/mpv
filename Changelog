@@ -27,6 +27,7 @@ MPlayer (1.0)
       subsampling, 16 bit per component)
     * Selectable YUV to RGB conversion standard for -vo gl
       (-vo gl:colorspace=...:levelconv=...)
+    * -vo gl now tries to use yuv=2 by default if possible.
     * -vo matrixview finally added
     * add OS/2 KAI audio driver (-ao kai)
 

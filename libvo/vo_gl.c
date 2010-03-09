@@ -456,11 +456,12 @@ static void autodetectGlExtensions(void) {
   if (ati_hack      == -1) ati_hack      = ati_broken_pbo;
   if (force_pbo     == -1) force_pbo     = strstr(extensions, "_pixel_buffer_object")      ? is_ati : 0;
   if (use_rectangle == -1) use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      0 : 0;
+  if (use_yuv       == -1) use_yuv       = strstr(extensions, "GL_ARB_fragment_program")   ?      2 : 0;
   if (is_ati && (lscale == 1 || lscale == 2 || cscale == 1 || cscale == 2))
     mp_msg(MSGT_VO, MSGL_WARN, "[gl] Selected scaling mode may be broken on ATI cards.\n"
              "Tell _them_ to fix GL_REPEAT if you have issues.\n");
-  mp_msg(MSGT_VO, MSGL_V, "[gl] Settings after autodetection: ati-hack = %i, force-pbo = %i, rectangle = %i\n",
-         ati_hack, force_pbo, use_rectangle);
+  mp_msg(MSGT_VO, MSGL_V, "[gl] Settings after autodetection: ati-hack = %i, force-pbo = %i, rectangle = %i, yuv = %i\n",
+         ati_hack, force_pbo, use_rectangle, use_yuv);
 }
 
 /**
@@ -470,6 +471,9 @@ static void autodetectGlExtensions(void) {
 static int initGl(uint32_t d_width, uint32_t d_height) {
   int scale_type = mipmap_gen ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR;
   autodetectGlExtensions();
+  gl_target = use_rectangle == 1 ? GL_TEXTURE_RECTANGLE : GL_TEXTURE_2D;
+  yuvconvtype = use_yuv | lscale << YUV_LUM_SCALER_SHIFT | cscale << YUV_CHROM_SCALER_SHIFT;
+
   texSize(image_width, image_height, &texture_width, &texture_height);
 
   Disable(GL_BLEND);
@@ -534,22 +538,8 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
   return 1;
 }
 
-/* connect to server, create and map window,
- * allocate colors and (shared) memory
- */
-static int
-config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+static int create_window(uint32_t d_width, uint32_t d_height, uint32_t flags, const char *title)
 {
-  int xs, ys;
-  image_height = height;
-  image_width = width;
-  image_format = format;
-  is_yuv = mp_get_chroma_shift(image_format, &xs, &ys) > 0;
-  is_yuv |= (xs << 8) | (ys << 16);
-  glFindFormat(format, NULL, &gl_texfmt, &gl_format, &gl_type);
-
-  vo_flipped = !!(flags & VOFLAG_FLIPPING);
-
 #ifdef CONFIG_GL_WIN32
   if (glctx.type == GLTYPE_W32 && !vo_w32_config(d_width, d_height, flags))
     return -1;
@@ -569,6 +559,27 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
             "gl", title);
   }
 #endif
+  return 0;
+}
+
+/* connect to server, create and map window,
+ * allocate colors and (shared) memory
+ */
+static int
+config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+{
+  int xs, ys;
+  image_height = height;
+  image_width = width;
+  image_format = format;
+  is_yuv = mp_get_chroma_shift(image_format, &xs, &ys) > 0;
+  is_yuv |= (xs << 8) | (ys << 16);
+  glFindFormat(format, NULL, &gl_texfmt, &gl_format, &gl_type);
+
+  vo_flipped = !!(flags & VOFLAG_FLIPPING);
+
+  if (create_window(d_width, d_height, flags, title) < 0)
+    return -1;
 
 glconfig:
   if (vo_config_count)
@@ -982,7 +993,6 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
-  if (!vo_config_count) return;
   uninitGl();
   if (custom_prog) free(custom_prog);
   custom_prog = NULL;
@@ -1043,7 +1053,7 @@ static int preinit(const char *arg)
     scaled_osd = 0;
     use_aspect = 1;
     use_ycbcr = 0;
-    use_yuv = 0;
+    use_yuv = -1;
     colorspace = -1;
     levelconv = -1;
     lscale = 0;
@@ -1138,19 +1148,26 @@ static int preinit(const char *arg)
               "\n" );
       return -1;
     }
-    if (use_rectangle == 1)
-      gl_target = GL_TEXTURE_RECTANGLE;
-    else
-      gl_target = GL_TEXTURE_2D;
-    yuvconvtype = use_yuv | lscale << YUV_LUM_SCALER_SHIFT | cscale << YUV_CHROM_SCALER_SHIFT;
     if (many_fmts)
       mp_msg(MSGT_VO, MSGL_INFO, "[gl] using extended formats. "
                "Use -vo gl:nomanyfmts if playback fails.\n");
     mp_msg(MSGT_VO, MSGL_V, "[gl] Using %d as slice height "
              "(0 means image height).\n", slice_height);
-    if (!init_mpglcontext(&glctx, gltype)) return -1;
+    if (!init_mpglcontext(&glctx, gltype))
+      goto err_out;
+    if (use_yuv == -1) {
+      if (create_window(320, 200, 0, NULL) < 0)
+        goto err_out;
+      if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
+        goto err_out;
+      autodetectGlExtensions();
+    }
 
     return 0;
+
+err_out:
+    uninit();
+    return -1;
 }
 
 static const struct {

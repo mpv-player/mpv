@@ -25,10 +25,10 @@
 #include "mp_msg.h"
 
 /* A string of the form [WxH][+X+Y] or xpos[%]:ypos[%] */
-char *vo_geometry = NULL;
+char *vo_geometry;
 // set when either width or height is changed
-int geometry_wh_changed = 0;
-int geometry_xy_changed = 0;
+int geometry_wh_changed;
+int geometry_xy_changed;
 
 #define RESET_GEOMETRY width = height = xoff = yoff = xper = yper = INT_MIN;
 
@@ -96,10 +96,8 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 		if (width  > 0 && widw) *widw = width;
 		if (height > 0 && widh) *widh = height;
 
-		if (width > 0 || height > 0)
-		    geometry_wh_changed = 1;
-		if (xoff != INT_MIN || yoff != INT_MIN)
-		    geometry_xy_changed = 1;
+		geometry_wh_changed = width > 0 || height > 0;
+		geometry_xy_changed = xoff != INT_MIN || yoff != INT_MIN;
         }
 	return 1;
 }

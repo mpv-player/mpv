@@ -1059,7 +1059,6 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     hint.width = width; hint.height = height;
     hint.flags = PPosition | PSize;
     XSetStandardProperties(mDisplay, x11->window, title, title, None, NULL, 0, &hint);
-    vo_x11_sizehint(vo, x, y, width, height, 0);
     if (!vo_border) vo_x11_decoration(vo, 0);
     // map window
     XMapWindow(mDisplay, x11->window);
