@@ -1,15 +1,29 @@
 /*
  * CDDB HTTP protocol
- * by Bertrand Baudet <bertrand_baudet@yahoo.com>
- * (C) 2002, MPlayer team.
+ *
+ * Copyright (C) 2002 Bertrand Baudet <bertrand_baudet@yahoo.com>
  *
  * Implementation follow the freedb.howto1.06.txt specification
  * from http://freedb.freedb.org
  *
  * discid computation by Jeremy D. Zawodny
  *	 Copyright (c) 1998-2000 Jeremy D. Zawodny <Jeremy@Zawodny.com>
- *	 Code release under GPL
  *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "config.h"

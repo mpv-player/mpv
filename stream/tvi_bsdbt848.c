@@ -1,14 +1,31 @@
 /*
-    (C)2002 Charles R. Henrich (henrich@msu.edu)
-    *BSD (hopefully, requires working driver!) BrookTree capture support.
-
-    Still in (active) development!
-
-	v1.1	Mar 13 2002   Fully functional, need to move ring buffer to
-						  the kernel driver.
-    v1.0    Feb 19 2002   First Release, need to add support for changing
-                            audio parameters.
-*/
+ * *BSD (hopefully, requires working driver!) BrookTree capture support.
+ *
+ * Still in (active) development!
+ *
+ * v1.1 Mar 13 2002   Fully functional, need to move ring buffer to
+ *                    the kernel driver.
+ * v1.0 Feb 19 2002   First Release, need to add support for changing
+ *                    audio parameters.
+ *
+ * Copyright (C) 2002 Charles R. Henrich (henrich@msu.edu)
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "config.h"
 
