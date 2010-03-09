@@ -5,7 +5,7 @@
  * Daniel Moreno <comac@comac.darktech.org> (saturation, R/G/B gamma support)
  * Richard Felker (original MMX contrast/brightness code (vf_eq.c))
  * Michael Niedermayer <michalni@gmx.at> (LUT16)
-/*
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify

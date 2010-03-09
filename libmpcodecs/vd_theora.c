@@ -45,7 +45,7 @@ LIBVD_EXTERN(theora)
 static int control(sh_video_t *sh,int cmd,void* arg,...){
     switch(cmd) {
     case VDCTRL_QUERY_FORMAT:
-        if ((*((int*)arg)) == IMGFMT_YV12)
+        if (*(int*)arg == IMGFMT_YV12)
 	    return CONTROL_TRUE;
 	return CONTROL_FALSE;
     }
