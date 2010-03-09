@@ -38,7 +38,7 @@
 
 #include "stream.h"
 #include "libmpdemux/demuxer.h"
-
+#include "asf_mmst_streaming.h"
 #include "network.h"
 #include "tcp.h"
 
@@ -48,7 +48,6 @@
 
 extern int network_bandwidth;
 
-int asf_mmst_streaming_start( stream_t *stream );
 static int asf_http_streaming_start(stream_t *stream, int *demuxer_type);
 
 static int asf_read_wrapper(int fd, void *buffer, int len, streaming_ctrl_t *stream_ctrl) {

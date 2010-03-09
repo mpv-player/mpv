@@ -16,20 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MPLAYER_AVIPRINT_H
-#define MPLAYER_AVIPRINT_H
+#ifndef MPLAYER_ASF_MMST_STREAMING_H
+#define MPLAYER_ASF_MMST_STREAMING_H
 
-#include "ms_hdr.h"
-#include "aviheader.h"
+#include "stream.h"
 
-void print_avih_flags(MainAVIHeader *h, int verbose_level);
-void print_avih(MainAVIHeader *h, int verbose_level);
-void print_strh(AVIStreamHeader *h, int verbose_level);
-void print_wave_header(WAVEFORMATEX *h, int verbose_level);
-void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
-void print_vprp(VideoPropHeader *vprp, int verbose_level);
-void print_index(AVIINDEXENTRY *idx, int idx_size, int verbose_level);
-void print_avistdindex_chunk(avistdindex_chunk *h, int verbose_level);
-void print_avisuperindex_chunk(avisuperindex_chunk *h, int verbose_level);
+int asf_mmst_streaming_start(stream_t *stream);
 
-#endif /* MPLAYER_AVIPRINT_H */
+#endif /* MPLAYER_ASF_MMST_STREAMING_H */

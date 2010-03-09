@@ -207,6 +207,9 @@ typedef struct {
     void*		lpPrev;
 } ICCOMPRESS;
 
+
+long VFWAPI VideoForWindowsVersion(void);
+
 long VFWAPIV ICCompress(
 	HIC hic,long dwFlags,LPBITMAPINFOHEADER lpbiOutput,void* lpData,
 	LPBITMAPINFOHEADER lpbiInput,void* lpBits,long* lpckid,

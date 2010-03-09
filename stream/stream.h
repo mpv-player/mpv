@@ -144,7 +144,8 @@ typedef struct stream {
 } stream_t;
 
 int stream_fill_buffer(stream_t *s);
-int stream_seek_long(stream_t *s,off_t pos);
+int stream_seek_long(stream_t *s, off_t pos);
+
 #ifdef CONFIG_STREAM_CACHE
 int stream_enable_cache(stream_t *stream,int size,int min,int prefill);
 int cache_stream_fill_buffer(stream_t *s);
