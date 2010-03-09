@@ -1148,20 +1148,20 @@ static int preinit(const char *arg)
               "\n" );
       return -1;
     }
-    if (many_fmts)
-      mp_msg(MSGT_VO, MSGL_INFO, "[gl] using extended formats. "
-               "Use -vo gl:nomanyfmts if playback fails.\n");
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Using %d as slice height "
-             "(0 means image height).\n", slice_height);
     if (!init_mpglcontext(&glctx, gltype))
       goto err_out;
     if (use_yuv == -1) {
-      if (create_window(320, 200, 0, NULL) < 0)
+      if (create_window(320, 200, VOFLAG_HIDDEN, NULL) < 0)
         goto err_out;
       if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
         goto err_out;
       autodetectGlExtensions();
     }
+    if (many_fmts)
+      mp_msg(MSGT_VO, MSGL_INFO, "[gl] using extended formats. "
+               "Use -vo gl:nomanyfmts if playback fails.\n");
+    mp_msg(MSGT_VO, MSGL_V, "[gl] Using %d as slice height "
+             "(0 means image height).\n", slice_height);
 
     return 0;
 

@@ -1044,13 +1044,19 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     goto final;
   }
   if (x11->window == None) {
-    XSizeHints hint;
-    XEvent xev;
     vo_fs = 0;
     vo->dwidth = width;
     vo->dheight = height;
     x11->window = vo_x11_create_smooth_window(x11, x11->rootwin, vis->visual,
                       x, y, width, height, vis->depth, col_map);
+    x11->window_state = VOFLAG_HIDDEN;
+  }
+  if (flags & VOFLAG_HIDDEN)
+    goto final;
+  if (x11->window_state & VOFLAG_HIDDEN) {
+    XSizeHints hint;
+    XEvent xev;
+    x11->window_state &= ~VOFLAG_HIDDEN;
     vo_x11_classhint(vo, x11->window, classname);
     XStoreName(mDisplay, x11->window, title);
     vo_hidecursor(mDisplay, x11->window);

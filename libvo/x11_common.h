@@ -47,6 +47,7 @@ struct vo_x11_state {
     int vo_mouse_autohide;
     int wm_type;
     int fs_type;
+    int window_state;
     int fs_flip;
 
     GC f_gc;
