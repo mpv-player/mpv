@@ -58,4 +58,3 @@ Update release version in #mplayer topic
 Update project page on Freshmeat
 
 Done.
-

@@ -322,4 +322,3 @@ static int control(uint32_t request, void *data)
     }
     return VO_NOTIMPL;
 }
-

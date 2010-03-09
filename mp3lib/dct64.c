@@ -321,4 +321,3 @@ void mp3lib_dct64(real *a,real *b,real *c)
   real bufs[0x40];
   dct64_1(a,b,bufs,bufs+0x20,c);
 }
-

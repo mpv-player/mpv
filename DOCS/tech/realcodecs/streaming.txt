@@ -56,5 +56,3 @@ ulong  blocksize
 ushort streamid
 uchar  reserved
 uchar  flags 1=reliable, 2=keyframe
-
-

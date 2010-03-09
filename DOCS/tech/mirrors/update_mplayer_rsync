@@ -36,4 +36,3 @@ then
   mailx -s "MPlayer mirror" $MAILADR < $TMPFILE
 fi
 rm -f $TMPFILE
-
