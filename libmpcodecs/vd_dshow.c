@@ -66,7 +66,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 // init driver
 static int init(sh_video_t *sh){
-    unsigned int out_fmt;
+    unsigned int out_fmt=sh->codec->outfmt[sh->outfmtidx];
 
     /* Hack for VSSH codec: new dll can't decode old files
      * In my samples old files have no extradata, so use that info
@@ -80,8 +80,7 @@ static int init(sh_video_t *sh){
         mp_tmsg(MSGT_DECVIDEO,MSGL_HINT,"You need to upgrade/install the binary codecs package.\nGo to http://www.mplayerhq.hu/dload.html\n");
 	return 0;
     }
-    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2)) return 0;
-    out_fmt=sh->codec->outfmt[sh->outfmtidx];
+    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,out_fmt)) return 0;
     switch(out_fmt){
     case IMGFMT_YUY2:
     case IMGFMT_UYVY:
@@ -119,7 +118,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	return NULL;
     }
 
-    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, 0 /*MP_IMGFLAG_ACCEPT_STRIDE*/,
+    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_COMMON_PLANE,
 	sh->disp_w, sh->disp_h);
 
     if(!mpi){	// temporary!

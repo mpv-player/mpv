@@ -1051,8 +1051,6 @@
 	#define PM3FillRectanglePosition_XOffset(x)            ((x)&0xffff)
 	#define PM3FillRectanglePosition_YOffset(y)            (((y)&0xffff)<<16)
 
-#if 1
-
 /**********************************************
 *  GLINT Permedia3 Macros                     *
 ***********************************************/
@@ -1109,5 +1107,5 @@ do{						\
     RAMDAC_SET_INDEX(index);					\
     temp = READ_REG(PM3RD_IndexedData);			\
 }
-#endif
+
 #endif /* MPLAYER_PM3_REGS_H */

@@ -360,6 +360,58 @@ void af_uninit(af_stream_t* s)
     af_remove(s,s->first);
 }
 
+/**
+ * Extend the filter chain so we get the required output format at the end.
+ * \return AF_ERROR on error, AF_OK if successful.
+ */
+static int fixup_output_format(af_stream_t* s)
+{
+    af_instance_t* af = NULL;
+    // Check number of output channels fix if not OK
+    // If needed always inserted last -> easy to screw up other filters
+    if(s->output.nch && s->last->data->nch!=s->output.nch){
+      if(!strcmp(s->last->info->name,"format"))
+	af = af_prepend(s,s->last,"channels");
+      else
+	af = af_append(s,s->last,"channels");
+      // Init the new filter
+      if(!af || (AF_OK != af->control(af,AF_CONTROL_CHANNELS,&(s->output.nch))))
+	return AF_ERROR;
+      if(AF_OK != af_reinit(s,af))
+	return AF_ERROR;
+    }
+
+    // Check output format fix if not OK
+    if(s->output.format != AF_FORMAT_UNKNOWN &&
+		s->last->data->format != s->output.format){
+      if(strcmp(s->last->info->name,"format"))
+	af = af_append(s,s->last,"format");
+      else
+	af = s->last;
+      // Init the new filter
+      s->output.format |= af_bits2fmt(s->output.bps*8);
+      if(!af || (AF_OK != af->control(af,AF_CONTROL_FORMAT_FMT,&(s->output.format))))
+	return AF_ERROR;
+      if(AF_OK != af_reinit(s,af))
+	return AF_ERROR;
+    }
+
+    // Re init again just in case
+    if(AF_OK != af_reinit(s,s->first))
+      return AF_ERROR;
+
+    if (s->output.format == AF_FORMAT_UNKNOWN)
+	s->output.format = s->last->data->format;
+    if (!s->output.nch) s->output.nch = s->last->data->nch;
+    if (!s->output.rate) s->output.rate = s->last->data->rate;
+    if((s->last->data->format != s->output.format) ||
+       (s->last->data->nch    != s->output.nch)    ||
+       (s->last->data->rate   != s->output.rate))  {
+      return AF_ERROR;
+    }
+    return AF_OK;
+}
+
 /* Initialize the stream "s". This function creates a new filter list
    if necessary according to the values set in input and output. Input
    and output should contain the format of the current movie and the
@@ -454,47 +506,7 @@ int af_init(af_stream_t* s)
       if(AF_OK != af_reinit(s,af))
       	return -1;
     }
-
-    // Check number of output channels fix if not OK
-    // If needed always inserted last -> easy to screw up other filters
-    if(s->output.nch && s->last->data->nch!=s->output.nch){
-      if(!strcmp(s->last->info->name,"format"))
-	af = af_prepend(s,s->last,"channels");
-      else
-	af = af_append(s,s->last,"channels");
-      // Init the new filter
-      if(!af || (AF_OK != af->control(af,AF_CONTROL_CHANNELS,&(s->output.nch))))
-	return -1;
-      if(AF_OK != af_reinit(s,af))
-	return -1;
-    }
-
-    // Check output format fix if not OK
-    if(s->output.format != AF_FORMAT_UNKNOWN &&
-		s->last->data->format != s->output.format){
-      if(strcmp(s->last->info->name,"format"))
-	af = af_append(s,s->last,"format");
-      else
-	af = s->last;
-      // Init the new filter
-      s->output.format |= af_bits2fmt(s->output.bps*8);
-      if(!af || (AF_OK != af->control(af,AF_CONTROL_FORMAT_FMT,&(s->output.format))))
-	return -1;
-      if(AF_OK != af_reinit(s,af))
-	return -1;
-    }
-
-    // Re init again just in case
-    if(AF_OK != af_reinit(s,s->first))
-      return -1;
-
-    if (s->output.format == AF_FORMAT_UNKNOWN)
-	s->output.format = s->last->data->format;
-    if (!s->output.nch) s->output.nch = s->last->data->nch;
-    if (!s->output.rate) s->output.rate = s->last->data->rate;
-    if((s->last->data->format != s->output.format) ||
-       (s->last->data->nch    != s->output.nch)    ||
-       (s->last->data->rate   != s->output.rate))  {
+    if (AF_OK != fixup_output_format(s)) {
       // Something is stuffed audio out will not work
       mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Unable to setup filter system can not"
 	     " meet sound-card demands, please send bugreport. \n");
@@ -523,7 +535,8 @@ af_instance_t* af_add(af_stream_t* s, char* name){
     return NULL;
 
   // Reinitalize the filter list
-  if(AF_OK != af_reinit(s, s->first)){
+  if(AF_OK != af_reinit(s, s->first) ||
+     AF_OK != fixup_output_format(s)){
     free(new);
     return NULL;
   }

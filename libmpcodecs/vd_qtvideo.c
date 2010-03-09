@@ -316,6 +316,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	sh->disp_w, sh->disp_h);
     if(!mpi) return NULL;
 
+#ifdef WIN32_LOADER
+    Setup_FS_Segment();
+#endif
+
     decpar.data = (char*)data;
     decpar.bufferSize = len;
     (**framedescHandle).dataSize=len;

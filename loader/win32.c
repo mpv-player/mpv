@@ -4131,11 +4131,9 @@ static int expfprintf(void* stream, const char* format, ...)
     va_list args;
     int r = 0;
     dbgprintf("fprintf(%p, %s, ...)\n", stream, format);
-#if 1
     va_start(args, format);
     r = vfprintf((FILE*) stream, format, args);
     va_end(args);
-#endif
     return r;
 }
 
@@ -4424,7 +4422,6 @@ static int exp_setjmp3(void* jmpbuf, int x)
 	 : "d"(jmpbuf) // input
 	 : "eax"
 	);
-#if 1
     __asm__ volatile
 	(
 	 "mov %%fs:0, %%eax	\n\t" // unsure
@@ -4437,7 +4434,6 @@ static int exp_setjmp3(void* jmpbuf, int x)
 	 :
 	 : "eax"
 	);
-#endif
 
 	return 0;
 }
@@ -4494,7 +4490,6 @@ static void WINAPI expGlobalMemoryStatus(
 	return;
     }
 
-#if 1
     f = fopen( "/proc/meminfo", "r" );
     if (f)
     {
@@ -4542,7 +4537,6 @@ static void WINAPI expGlobalMemoryStatus(
                                       / (TotalPhysical / 100);
         }
     } else
-#endif
     {
 	/* FIXME: should do something for other systems */
 	lpmem->dwMemoryLoad    = 0;

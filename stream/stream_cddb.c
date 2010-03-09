@@ -60,7 +60,7 @@
 	#include <sys/cdio.h>
 #elif defined(__MINGW32__) || defined(__CYGWIN__)
         #include <ddk/ntddcdrm.h>
-#elif (__bsdi__)
+#elif defined(__bsdi__)
         #include <dvd.h>
 #elif defined(__APPLE__) || defined(__DARWIN__)
         #include <IOKit/storage/IOCDTypes.h>

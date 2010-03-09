@@ -1727,7 +1727,6 @@ void reinit_audio_chain(struct MPContext *mpctx)
     ao_data.samplerate=force_srate;
     ao_data.channels=0;
     ao_data.format=audio_output_format;
-#if 1
     // first init to detect best values
     if(!init_audio_filters(mpctx->sh_audio,   // preliminary init
                            // input:
@@ -1738,7 +1737,6 @@ void reinit_audio_chain(struct MPContext *mpctx)
                 "pre-init!\n");
         exit_player(mpctx, EXIT_ERROR);
     }
-#endif
     current_module="ao2_init";
     mpctx->audio_out = init_best_audio_out(opts->audio_driver_list,
                                            0, // plugin flag
@@ -1760,13 +1758,11 @@ void reinit_audio_chain(struct MPContext *mpctx)
     if(strlen(mpctx->audio_out->info->comment) > 0)
         mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Comment: %s\n", mpctx->audio_out->info->comment);
     // init audio filters:
-#if 1
     current_module="af_init";
     if(!build_afilter_chain(mpctx, mpctx->sh_audio, &ao_data)) {
         mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter/ao format!\n");
         goto init_error;
     }
-#endif
     mpctx->mixer.audio_out = mpctx->audio_out;
     mpctx->mixer.volstep = volstep;
     return;
@@ -3386,6 +3382,8 @@ if(!noconsolecontrols && !slave_mode){
 while (player_idle_mode && !mpctx->filename) {
     play_tree_t * entry = NULL;
     mp_cmd_t * cmd;
+    if (mpctx->video_out && mpctx->video_out->config_ok)
+	vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
     while (!(cmd = mp_input_get_cmd(mpctx->input, 0,1,0))) { // wait for command
         if (mpctx->video_out)
 	    vo_check_events(mpctx->video_out);
@@ -3437,6 +3435,9 @@ while (player_idle_mode && !mpctx->filename) {
     }
 }
 //---------------------------------------------------------------------------
+
+    if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
+	vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);
 
     if (mpctx->filename) {
 	mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"\nPlaying %s.\n",

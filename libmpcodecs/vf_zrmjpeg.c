@@ -50,7 +50,6 @@
 #define HAVE_AV_CONFIG_H
 #include "libavcodec/avcodec.h"
 #include "libavcodec/mjpegenc.h"
-//#include "jpeg_enc.h" /* this file is not present yet */
 
 #undef malloc
 #undef free

@@ -146,14 +146,14 @@ static int mylstat(char *dir, char *file,struct stat* st) {
     char *slash;
     l -= 3;
     strcpy(s, dir);
-#if defined(__MINGW32__) || defined(__CYGWIN__)
+#if HAVE_DOS_PATHS
     if (s[l] == '/' || s[l] == '\\')
 #else
     if (s[l] == '/')
 #endif
       s[l] = '\0';
     slash = strrchr(s, '/');
-#if defined(__MINGW32__) || defined(__CYGWIN__)
+#if HAVE_DOS_PATHS
     if (!slash)
       slash = strrchr(s,'\\');
 #endif
@@ -355,7 +355,7 @@ static void read_cmd(menu_t* menu,int cmd) {
 	  if(l <= 1) break;
 	  mpriv->dir[l-1] = '\0';
 	  slash = strrchr(mpriv->dir,'/');
-#if defined(__MINGW32__) || defined(__CYGWIN__)
+#if HAVE_DOS_PATHS
 	  if (!slash)
 	    slash = strrchr(mpriv->dir,'\\');
 #endif
@@ -455,7 +455,7 @@ static int open_fs(menu_t* menu, char* args) {
     char *slash = NULL;
     if (filename && !strstr(filename, "://") && (path=realpath(filename, b))) {
       slash = strrchr(path, '/');
-#if defined(__MINGW32__) || defined(__CYGWIN__)
+#if HAVE_DOS_PATHS
       // FIXME: Do we need and can convert all '\\' in path to '/' on win32?
       if (!slash)
         slash = strrchr(path, '\\');

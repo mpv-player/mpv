@@ -99,6 +99,14 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	struct timeval to;
 #endif
 
+#if HAVE_WINSOCK2_H && defined(HAVE_AF_INET6)
+	// our winsock name resolution code can not handle IPv6
+	if (af == AF_INET6) {
+		mp_msg(MSGT_NETWORK, MSGL_WARN, "IPv6 not supported for winsock2\n");
+		return TCP_ERROR_FATAL;
+	}
+#endif
+
 	socket_server_fd = socket(af, SOCK_STREAM, 0);
 
 
