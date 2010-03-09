@@ -264,7 +264,7 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,fl
   unsigned char* data = pack->packet;
   int size = pack->bytes;
 
-  *pts = 0;
+  *pts = MP_NOPTS_VALUE;
   *flags = 0;
 
   if(os->vorbis) {
