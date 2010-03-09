@@ -374,6 +374,9 @@ http_seek( stream_t *stream, off_t pos ) {
 
 	if( http_hdr==NULL ) return 0;
 
+	if( mp_msg_test(MSGT_NETWORK,MSGL_V) )
+		http_debug_hdr( http_hdr );
+
 	switch( http_hdr->status_code ) {
 		case 200:
 		case 206: // OK
@@ -388,7 +391,7 @@ http_seek( stream_t *stream, off_t pos ) {
 			break;
 		default:
 			mp_tmsg(MSGT_NETWORK,MSGL_ERR,"Server returns %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
-			close( fd );
+			closesocket( fd );
 			fd = -1;
 	}
 	stream->fd = fd;

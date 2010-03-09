@@ -246,7 +246,7 @@ demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
                    "big troubles ahead.");
     if (filename) // Filename hack for avs_check_file
         d->filename = strdup(filename);
-    stream_reset(stream);
+    stream->eof = 0;
     stream_seek(stream, stream->start_pos);
     return d;
 }
@@ -366,8 +366,8 @@ void free_sh_video(sh_video_t *sh)
 void free_demuxer(demuxer_t *demuxer)
 {
     int i;
-    mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing demuxer at %p\n",
-           demuxer);
+    mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing %s demuxer at %p\n",
+           demuxer->desc->shortdesc, demuxer);
     if (demuxer->desc->close)
         demuxer->desc->close(demuxer);
     // Very ugly hack to make it behave like old implementation
