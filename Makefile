@@ -796,7 +796,7 @@ $(DEPS) $(MENCODER_DEPS) $(MPLAYER_DEPS): help_mp.h
 $(call ADDSUFFIXES,.d .o,mpcommon vobsub stream/stream_cddb stream/network libmpdemux/muxer_avi osdep/mplayer.rc): version.h
 
 # Files that depend on libswscale internals
-libvo/vo_mga.o libvo/vo_xmga.o libmpcodecs/vf_halfpack.o libmpcodecs/vf_palette.o libmpcodecs/vf_rgb2bgr.o libmpcodecs/vf_yuy2.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
+libvo/vo_mga.o libvo/vo_xmga.o libmpcodecs/vf_palette.o libmpcodecs/vf_rgb2bgr.o libmpcodecs/vf_yuy2.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
 
 # Files that depend on libavcodec internals
 libaf/af_lavcac3enc.o libmpcodecs/vf_fspp.o libmpcodecs/vf_geq.o libmpcodecs/vf_mcdeint.o libmpcodecs/vf_qp.o libmpcodecs/vf_spp.o libvo/jpeg_enc.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
