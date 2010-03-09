@@ -4,10 +4,6 @@
 #include "dmo_guids.h"
 #include "dmo_interfaces.h"
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 typedef struct DMO_Filter
 {
     int m_iHandle;
@@ -39,9 +35,5 @@ void DMO_Filter_Destroy(DMO_Filter* This);
  * copy - make a local copy of data
  */
 CMediaBuffer* CMediaBufferCreate(unsigned long maxlen, void* mem, unsigned long len, int copy);
-
-#if defined(__cplusplus)
-}
-#endif
 
 #endif /* MPLAYER_DMO_FILTER_H */

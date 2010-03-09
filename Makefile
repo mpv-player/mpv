@@ -245,7 +245,6 @@ SRCS_COMMON-$(PRIORITY)              += osdep/priority.c
 SRCS_COMMON-$(PVR)                   += stream/stream_pvr.c
 SRCS_COMMON-$(QTX_CODECS)            += libmpcodecs/ad_qtaudio.c \
                                         libmpcodecs/vd_qtvideo.c
-SRCS_COMMON-$(QTX_EMULATION)         += loader/wrapper.S
 SRCS_COMMON-$(RADIO)                 += stream/stream_radio.c
 SRCS_COMMON-$(RADIO_CAPTURE)         += stream/audio_in.c
 SRCS_COMMON-$(REAL_CODECS)           += libmpcodecs/ad_realaud.c \
@@ -282,7 +281,9 @@ SRCS_COMMON-$(VCD)                   += stream/stream_vcd.c
 SRCS_COMMON-$(VORBIS)                += libmpcodecs/ad_libvorbis.c \
                                         libmpdemux/demux_ogg.c
 SRCS_COMMON-$(VSTREAM)               += stream/stream_vstream.c
-SRCS_COMMON-$(WIN32_EMULATION)       += loader/elfdll.c \
+SRCS_QTX_EMULATION                   += loader/wrapper.S
+SRCS_COMMON-$(QTX_EMULATION)         += $(SRCS_QTX_EMULATION)
+SRCS_WIN32_EMULATION                 += loader/elfdll.c \
                                         loader/ext.c \
                                         loader/ldt_keeper.c \
                                         loader/module.c \
@@ -291,6 +292,8 @@ SRCS_COMMON-$(WIN32_EMULATION)       += loader/elfdll.c \
                                         loader/registry.c \
                                         loader/resource.c \
                                         loader/win32.c \
+
+SRCS_COMMON-$(WIN32_EMULATION)       += $(SRCS_WIN32_EMULATION)
 
 SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
                                         libmpcodecs/ad_dmo.c \
@@ -790,7 +793,7 @@ version.h: version.sh
 # Make sure all generated header files are created.
 codec-cfg.d codec-cfg.o: codecs.conf.h
 $(DEPS) $(MENCODER_DEPS) $(MPLAYER_DEPS): help_mp.h
-$(call ADDSUFFIXES,.d .o,mpcommon vobsub stream/stream_cddb stream/network libmpdemux/muxer_avi): version.h
+$(call ADDSUFFIXES,.d .o,mpcommon vobsub stream/stream_cddb stream/network libmpdemux/muxer_avi osdep/mplayer.rc): version.h
 
 # Files that depend on libswscale internals
 libvo/vo_mga.o libvo/vo_xmga.o libmpcodecs/vf_halfpack.o libmpcodecs/vf_palette.o libmpcodecs/vf_rgb2bgr.o libmpcodecs/vf_yuy2.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
@@ -916,7 +919,7 @@ liba52/test$(EXESUF): cpudetect.o $(SRCS_LIBA52_INTERNAL:.c=.o) -lm
 
 libvo/aspecttest$(EXESUF): libvo/aspect.o libvo/geometry.o $(TEST_OBJS)
 
-LOADER_TEST_OBJS = $(filter loader/%,$(SRCS_COMMON:.c=.o)) libmpdemux/aviprint.o osdep/mmap_anon.o cpudetect.o $(TEST_OBJS)
+LOADER_TEST_OBJS = $(SRCS_WIN32_EMULATION:.c=.o) $(SRCS_QTX_EMULATION:.S=.o) libavutil/libavutil.a osdep/mmap_anon.o cpudetect.o $(TEST_OBJS)
 
 loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): CFLAGS += -g
 loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): $(LOADER_TEST_OBJS)
