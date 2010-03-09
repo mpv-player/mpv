@@ -726,7 +726,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
   current_module=NULL;
 }
 
-void exit_player_with_rc(struct MPContext *mpctx, exit_reason_t how, int rc)
+void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
 {
   if (mpctx->user_muted && !mpctx->edl_muted) mixer_mute(&mpctx->mixer);
   uninit_player(mpctx, INITIALIZED_ALL);
@@ -798,7 +798,7 @@ void exit_player_with_rc(struct MPContext *mpctx, exit_reason_t how, int rc)
   exit(rc);
 }
 
-static void exit_player(struct MPContext *mpctx, exit_reason_t how)
+static void exit_player(struct MPContext *mpctx, enum exit_reason how)
 {
   exit_player_with_rc(mpctx, how, 1);
 }
