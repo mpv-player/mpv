@@ -2668,6 +2668,22 @@ DirectX DirectSound 音频输出驱动
 .PD 1
 .
 .TP
+.B kai（仅适用于 OS/2）
+OS/2 KAI 音频输出驱动
+.PD 0
+.RSs
+.IPs uniaud
+强制使用 UNIAUD 模式
+.IPs dart
+强制使用 DART 模式
+.IPs (no)share
+以共享或独占模式打开音频
+.IPs bufsize=<size>
+设置缓冲大小为 <size>，以采样数为单位（默认值：2048）。
+.RE
+.PD 1
+.
+.TP
 .B dart（仅适用于 OS/2）
 OS/2 DART 音频输出驱动
 .PD 0
@@ -3285,7 +3301,9 @@ ffodivxvdpau 一同使用）
 使用 nochroma\-deint 以使其仅作用于亮度通道，从而加速高级反隔行扫描算法。
 对于低速显存很有用。
 .IPs pullup
-尝试应用反电视电影模式，需要使用运动自适应的瞬间反隔行扫描算法。
+尝试跳过逐行扫描帧的解除隔行扫描操作，适用于观看电视图像化的内容，高分辨率
+的情况下需要高速的视频硬件。
+仅适用于运动自适应瞬时解除隔行扫描操作。
 .IPs colorspace
 选择 YUV 至 RGB 转换时使用的色彩空间
 通常标清（SD）内容应使用 BT.601，而高清（HD）内容用 BT.709。
@@ -3586,37 +3604,38 @@ OSD 颜色（默认值是：0x00ffffff，对应不透明的白色）。
 在大多数情况下，该方法很可能比使用软件转换成 RGB 慢。
 .IPs yuv=<n>
 选择 YUV 到 RGB 转换的类型。
+默认方式是自动侦测，选取 0 到 2 之间的一个值。
 .RSss
-0: 使用软件转换 (默认)。
+0：使用软件转换 。
 兼容于所有的 OpenGL 版本。
 提供亮度, 对比度和饱和度控制。
 .br
-1: 使用寄存器组合。
+1：使用寄存器组合。
 这里使用 nVidia 专用的扩展 (GL_NV_register_combiners)。
 至少需要三个纹理单位。提供饱和度和色调的控制。
 此方法快速但不精确。
 .br
-2: 使用片断程序。
+2：使用片断程序。
 需要 GL_ARB_fragment_program 扩展和至少三个纹理单位。
 提供亮度, 对比度, 饱和度和色调控制。
 .br
-3: 使用片断程序, 用到 POW 指令。
+3：使用片断程序, 用到 POW 指令。
 需要 GL_ARB_fragment_program 扩展和至少三个纹理单位。
 提供亮度, 对比度, 饱和度, 色调和 gamma 控制。
 对红, 绿和蓝色, Gamma 也能被独立设置。
 方法 4 通常更快。
 .br
-4: 使用片断程序及附加的查询。
+4：使用片断程序及附加的查询。
 需要 GL_ARB_fragment_program 扩展和至少四个纹理单位。
 提供亮度, 对比度, 饱和度, 色调和 gamma 控制。
 对红, 绿和蓝色, Gamma 也能被独立设置。
 .br
-5: 使用 ATI 专用的方式（用于较老的显卡）。
+5：使用 ATI 专用的方式（用于较老的显卡）。
 这里使用 ATI 专用的扩展（GL_ATI_fragment_shader——不是
 GL_ARB_fragment_shader！）。至少需要三个纹理单位。提供饱和度和色调的控制。
 此方法快速但不精确。
 .br
-6: 使用 3D 纹理通过查询做转换。
+6：使用 3D 纹理通过查询做转换。
 需要 GL_ARB_fragment_program 扩展和至少四个纹理单位。
 既然使用一个纹理和边框像素, 在某些(所有?) ATI 卡上 (软件模拟) 极其慢。
 提供亮度, 对比度, 饱和度, 色调和 gamma 控制。
@@ -4197,7 +4216,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .IPs force=<0\-7>
 锁定音频过滤器的插入为下面其中之一:
 .RSss
-0: 使用完全自动的过滤器插入。
+0: 使用完全自动的过滤器插入（目前与选项 1 相同）。
 .br
 1: 精度优化 (默认)。
 .br
@@ -6596,8 +6615,8 @@ CPU的运算能力。
 .TP
 .B tfields[=mode[:field_dominance]]
 瞬时扫描场分离——将扫描场分离成帧，输出帧率加倍。
-就像telecine滤镜，tfields只在MEncoder中能正常工作，并且只在\-fps
-和\-ofps设置成所需的（加倍的）帧率的情况下！
+就像 telecine 滤镜，tfields 可能无法正常工作，除非用于 MEncoder，并且 \-fps
+和 \-ofps 设置成所需的（加倍的）帧率的情况下！
 .PD 0
 .RSs
 .IPs <mode>

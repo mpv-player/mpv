@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r29001 -->
+<!-- synced with r30449 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -934,8 +934,8 @@ szűrővel, és még többet is. Sajnos az alopciók még komplikáltabbak.
 <listitem><para>
   A fennmaradó alopciók megadják, hogy melyik csatornát milyen mértékben kell
   bekeverni mindegyik másik csatornába. Ez az igazán bonyolult dolog. Könnyítésként
-  válaszd szét az alopciókat különböző részekre, egy rész minden egyes kimeneti
-  csatornához. Minden egy részen belül található alopció egy bemeneti csatornának
+  válaszd szét az alopciókat különböző részekre, egy rész minden egyes bemeneti
+  csatornához. Minden egy részen belül található alopció egy kimeneti csatornának
   felel meg. A szám, amit megadsz, a bemeneti csatorna kimeneti csatornába
   történő bekeverésének százalékos aránya lesz.
   </para>

@@ -60,14 +60,10 @@ int modify_ldt(int func, void *ptr, unsigned long bytecount);
 #if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 #include <machine/segments.h>
 #include <machine/sysarch.h>
-#endif
-
-#if defined(__APPLE__)
+#elif defined(__APPLE__)
 #include <architecture/i386/table.h>
 #include <i386/user_ldt.h>
-#endif
-
-#ifdef __svr4__
+#elif defined(__svr4__)
 #include <sys/segment.h>
 #include <sys/sysi86.h>
 
@@ -238,9 +234,7 @@ ldt_fs_t* Setup_LDT_Keeper(void)
 	perror("install_fs");
 	printf("Couldn't install fs segment, expect segfault\n");
     }
-#endif /*linux*/
-
-#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) || defined(__APPLE__)
+#elif defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) || defined(__APPLE__)
     {
         unsigned long d[2];
 
@@ -262,9 +256,7 @@ ldt_fs_t* Setup_LDT_Keeper(void)
 #endif
         }
     }
-#endif  /* __NetBSD__ || __FreeBSD__ || __OpenBSD__ || __DragonFly__ || __APPLE__ */
-
-#if defined(__svr4__)
+#elif defined(__svr4__)
     {
 	struct ssd ssd;
 	ssd.sel = LDT_SEL(TEB_SEL_IDX);
