@@ -332,6 +332,7 @@ SRCS_COMMON = asxparser.c \
               m_config.c \
               m_option.c \
               m_struct.c \
+              mp_msg.c \
               mpcommon.c \
               parser-cfg.c \
               playtree.c \
@@ -622,7 +623,6 @@ SRCS_MPLAYER = command.c \
                m_property.c \
                mixer.c \
                mp_fifo.c \
-               mp_msg.c \
                mplayer.c \
                parser-mpcmd.c \
                input/input.c \
@@ -654,7 +654,6 @@ SRCS_MENCODER-$(X264)             += libmpcodecs/ve_x264.c
 SRCS_MENCODER-$(XVID4)            += libmpcodecs/ve_xvid4.c
 
 SRCS_MENCODER = mencoder.c \
-                mp_msg-mencoder.c \
                 parser-mecmd.c \
                 xvid_vbr.c \
                 libmpcodecs/ae.c \
@@ -900,7 +899,7 @@ generated_ebml:
 
 ###### tests / tools #######
 
-TEST_OBJS = mp_msg-mencoder.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
+TEST_OBJS = mp_msg.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
 
 codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h help_mp.h $(TEST_OBJS)
 	$(CC) -I. -DTESTING -o $@ $^
