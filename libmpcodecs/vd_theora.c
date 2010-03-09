@@ -64,76 +64,52 @@ typedef struct theora_struct_st {
  */
 static int init(sh_video_t *sh){
     theora_struct_t *context = NULL;
-    int failed = 1;
     int errorCode = 0;
     ogg_packet op;
     int i;
 
-    /* check whether video output format is supported */
-    switch(sh->codec->outfmt[sh->outfmtidx])
+    context = calloc (sizeof (theora_struct_t), 1);
+    sh->context = context;
+    if (!context)
+        goto err_out;
+
+    theora_info_init(&context->inf);
+    theora_comment_init(&context->cc);
+
+    /* Read all header packets, pass them to theora_decode_header. */
+    for (i = 0; i < THEORA_NUM_HEADER_PACKETS; i++)
     {
-       case IMGFMT_YV12: /* well, this should work... */ break;
-       default:
-	  mp_msg (MSGT_DECVIDEO,MSGL_ERR,"Unsupported out_fmt: 0x%X\n",
-		  sh->codec->outfmt[sh->outfmtidx]);
-	  return 0;
+        op.bytes = ds_get_packet (sh->ds, &op.packet);
+        op.b_o_s = 1;
+        if ( (errorCode = theora_decode_header (&context->inf, &context->cc, &op)) )
+        {
+            mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Broken Theora header; errorCode=%i!\n", errorCode);
+            goto err_out;
+        }
     }
 
-    /* this is not a loop, just a context, from which we can break on error */
-    do
+    /* now init codec */
+    errorCode = theora_decode_init (&context->st, &context->inf);
+    if (errorCode)
     {
-       context = calloc (sizeof (theora_struct_t), 1);
-       sh->context = context;
-       if (!context)
-	  break;
-
-       theora_info_init(&context->inf);
-       theora_comment_init(&context->cc);
-
-       /* Read all header packets, pass them to theora_decode_header. */
-       for (i = 0; i < THEORA_NUM_HEADER_PACKETS; i++)
-       {
-          op.bytes = ds_get_packet (sh->ds, &op.packet);
-          op.b_o_s = 1;
-          if ( (errorCode = theora_decode_header (&context->inf, &context->cc, &op)) )
-          {
-            mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Broken Theora header; errorCode=%i!\n", errorCode);
-            break;
-          }
-       }
-       if (errorCode)
-          break;
-
-       /* now init codec */
-       errorCode = theora_decode_init (&context->st, &context->inf);
-       if (errorCode)
-       {
-	  mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Theora decode init failed: %i \n",
-		 errorCode);
-	  break;
-       }
-       failed = 0;
-    } while (0);
-
-    if (failed)
-    {
-       if (context)
-       {
-	  free (context);
-	  sh->context = NULL;
-       }
-       return 0;
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Theora decode init failed: %i \n", errorCode);
+        goto err_out;
     }
 
     if(sh->aspect==0.0 && context->inf.aspect_denominator!=0)
     {
-       sh->aspect = (float)(context->inf.aspect_numerator * context->inf.frame_width)/
-          (context->inf.aspect_denominator * context->inf.frame_height);
+       sh->aspect = ((double)context->inf.aspect_numerator * context->inf.frame_width)/
+          ((double)context->inf.aspect_denominator * context->inf.frame_height);
     }
 
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Theora video init ok!\n");
 
     return mpcodecs_config_vo (sh,context->inf.frame_width,context->inf.frame_height,IMGFMT_YV12);
+
+err_out:
+    free(context);
+    sh->context = NULL;
+    return 0;
 }
 
 /*
@@ -141,7 +117,7 @@ static int init(sh_video_t *sh){
  */
 static void uninit(sh_video_t *sh)
 {
-   theora_struct_t *context = (theora_struct_t *)sh->context;
+   theora_struct_t *context = sh->context;
 
    if (context)
    {
@@ -157,7 +133,7 @@ static void uninit(sh_video_t *sh)
  */
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 {
-   theora_struct_t *context = (theora_struct_t *)sh->context;
+   theora_struct_t *context = sh->context;
    int errorCode = 0;
    ogg_packet op;
    yuv_buffer yuv;
@@ -181,7 +157,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
    {
       mp_msg(MSGT_DEMUX,MSGL_ERR,"Theora decode YUVout failed: %i \n",
 	     errorCode);
-      return 0;
+      return NULL;
    }
 
     mpi = mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0, yuv.y_width, yuv.y_height);
