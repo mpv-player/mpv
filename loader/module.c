@@ -849,7 +849,6 @@ static int report_func(void *stack_base, int stack_size, reg386_t *reg, uint32_t
 
 #endif
 
-#if 1
   // emulate some functions:
   switch(reg->eax){
   // memory management:
@@ -895,7 +894,6 @@ static int report_func(void *stack_base, int stack_size, reg386_t *reg, uint32_t
 #endif
       return 1;
   }
-#endif
 
 #if 0
   switch(reg->eax){

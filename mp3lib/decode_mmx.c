@@ -11,7 +11,6 @@
 #include "mangle.h"
 #include "mpg123.h"
 
-extern void (*dct64_MMX_func)(short*, short*, real*);
 static const unsigned long long attribute_used __attribute__((aligned(8))) null_one = 0x0000ffff0000ffffULL;
 static const unsigned long long attribute_used __attribute__((aligned(8))) one_null = 0xffff0000ffff0000ULL;
 const unsigned int __attribute__((aligned(16))) costab_mmx[] =

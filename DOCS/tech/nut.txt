@@ -1,5 +1,6 @@
-the nut spec has been moved to another svn repo you can find it at:
+The NUT specification has been moved to another Subversion repository.
+You can find it at:
 http://svn.mplayerhq.hu/nut/docs/nut.txt?view=markup
 
-its future location will be in a git repository, ill update this file
-here when its location changes again
+Its future location will be in a git repository. This file will be
+updated when its location changes again.

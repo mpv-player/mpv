@@ -4611,6 +4611,7 @@ static INT WINAPI expMessageBoxA(HWND hWnd, LPCSTR text, LPCSTR title, UINT type
  * \param dest jump target
  */
 void exp_EH_prolog(void *dest);
+void exp_EH_prolog_dummy(void);
 //! just a dummy function that acts a container for the asm section
 void exp_EH_prolog_dummy(void) {
   __asm__ volatile (
