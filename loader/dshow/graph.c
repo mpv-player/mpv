@@ -5,12 +5,13 @@
  * http://svn.mplayerhq.hu/mplayer/trunk/
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "config.h"
 #include "loader/com.h"
 #include "loader/dshow/graph.h"
 #include "loader/wine/winerror.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 // How many FilterGraph objects exist.
 // Used for knowing when to register and unregister the class in COM.
@@ -114,27 +115,26 @@ FilterGraph* FilterGraphCreate()
 
     This->vt = calloc(1, sizeof(*This->vt));
 
-    if (!This->vt)
-    {
+    if (!This->vt) {
         free(This);
         return NULL;
     }
 
-    This->vt->QueryInterface = FilterGraph_QueryInterface;
-    This->vt->AddRef = FilterGraph_AddRef;
-    This->vt->Release = FilterGraph_Release;
+    This->vt->QueryInterface       = FilterGraph_QueryInterface;
+    This->vt->AddRef               = FilterGraph_AddRef;
+    This->vt->Release              = FilterGraph_Release;
 
-    This->vt->AddFilter = FilterGraph_AddFilter;
-    This->vt->RemoveFilter = FilterGraph_RemoveFilter;
-    This->vt->EnumFilters = FilterGraph_EnumFilters;
-    This->vt->FindFilterByName = FilterGraph_FindFilterByName;
-    This->vt->ConnectDirect = FilterGraph_ConnectDirect;
-    This->vt->Reconnect = FilterGraph_Reconnect;
-    This->vt->Disconnect = FilterGraph_Disconnect;
+    This->vt->AddFilter            = FilterGraph_AddFilter;
+    This->vt->RemoveFilter         = FilterGraph_RemoveFilter;
+    This->vt->EnumFilters          = FilterGraph_EnumFilters;
+    This->vt->FindFilterByName     = FilterGraph_FindFilterByName;
+    This->vt->ConnectDirect        = FilterGraph_ConnectDirect;
+    This->vt->Reconnect            = FilterGraph_Reconnect;
+    This->vt->Disconnect           = FilterGraph_Disconnect;
     This->vt->SetDefaultSyncSource = FilterGraph_SetDefaultSyncSource;
 
-    This->interfaces[0]=IID_IUnknown;
-    This->interfaces[1]=IID_IFilterGraph;
+    This->interfaces[0] = IID_IUnknown;
+    This->interfaces[1] = IID_IFilterGraph;
 
 #ifdef WIN32_LOADER
     if (GraphKeeper++ == 0)
