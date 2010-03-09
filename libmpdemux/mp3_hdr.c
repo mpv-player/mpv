@@ -65,13 +65,11 @@ int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate, int* spf, int*
 
 //    printf("head=0x%08X\n",newhead);
 
-#if 1
     // head_check:
     if( (newhead & 0xffe00000) != 0xffe00000 ){
 	mp_msg(MSGT_DEMUXER,MSGL_DBG2,"head_check failed\n");
 	return -1;
     }
-#endif
 
     layer = 4-((newhead>>17)&3);
     if(layer==4){

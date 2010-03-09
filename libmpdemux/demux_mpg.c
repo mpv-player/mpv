@@ -815,7 +815,8 @@ static int demux_mpg_gxf_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
   return 1;
 }
 
-static int demux_mpg_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
+static int demux_mpg_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
+{
 unsigned int head=0;
 int skipped=0;
 int max_packs=256; // 512kbyte
@@ -824,11 +825,9 @@ int ret=0;
 // System stream
 do{
   demux->filepos=stream_tell(demux->stream);
-#if 1
   //lame workaround: this is needed to show the progress bar when playing dvdnav://
   //(ths poor guy doesn't know teh length of the stream at startup)
   demux->movi_end = demux->stream->end_pos;
-#endif
   head=stream_read_dword(demux->stream);
   if((head&0xFFFFFF00)!=0x100){
    // sync...
@@ -902,7 +901,9 @@ do{
 
 void skip_audio_frame(sh_audio_t *sh_audio);
 
-static void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, int flags){
+static void demux_seek_mpg(demuxer_t *demuxer, float rel_seek_secs,
+                           float audio_delay, int flags)
+{
     demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=d_audio->sh;
@@ -1008,7 +1009,8 @@ static void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_de
     }
 }
 
-static int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
+static int demux_mpg_control(demuxer_t *demuxer, int cmd, void *arg)
+{
     mpg_demuxer_t *mpg_d=(mpg_demuxer_t*)demuxer->priv;
 
     switch(cmd) {

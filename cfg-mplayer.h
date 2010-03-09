@@ -26,6 +26,7 @@
 #include <stddef.h>
 
 #include "cfg-common.h"
+#include "libvo/vo_zr.h"
 #include "options.h"
 
 extern char *fb_mode_cfgfile;
@@ -52,14 +53,9 @@ extern int menu_fribidi_flip_commas;
 
 extern char *unrar_executable;
 
-int vo_zr_parseoption(const m_option_t* conf, char *opt, char * param);
-void vo_zr_revertoption(const m_option_t* opt,char* pram);
-
 extern m_option_t dxr2_opts[];
 
 extern int sws_flags;
-int readPPOpt(void *conf, char *arg);
-void revertPPOpt(void *conf, char* opt);
 extern char* pp_help;
 
 const m_option_t vd_conf[]={

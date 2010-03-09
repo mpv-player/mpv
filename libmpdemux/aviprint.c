@@ -29,6 +29,7 @@
 
 #include "aviheader.h"
 #include "ms_hdr.h"
+#include "aviprint.h"
 
 //#include "codec-cfg.h"
 //#include "stheader.h"

@@ -28,7 +28,7 @@
 #include "demuxer.h"
 #include "parse_es.h"
 #include "stheader.h"
-
+#include "aac_hdr.h"
 #include "ms_hdr.h"
 
 typedef struct {
@@ -38,12 +38,6 @@ typedef struct {
 	float last_pts; /// last pts seen
 	int bitrate;	/// bitrate computed as size/time
 } aac_priv_t;
-
-/// \param srate (out) sample rate
-/// \param num (out) number of audio frames in this ADTS frame
-/// \return size of the ADTS frame in bytes
-/// aac_parse_frames needs a buffer at least 8 bytes long
-int aac_parse_frame(uint8_t *buf, int *srate, int *num);
 
 static int demux_aac_init(demuxer_t *demuxer)
 {

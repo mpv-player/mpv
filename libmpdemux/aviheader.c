@@ -28,21 +28,11 @@
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
-
+#include "aviprint.h"
 #include "aviheader.h"
 #include "libavutil/common.h"
 
 static MainAVIHeader avih;
-
-void print_avih(MainAVIHeader *h, int verbose_level);
-void print_avih_flags(MainAVIHeader *h, int verbose_level);
-void print_strh(AVIStreamHeader *h, int verbose_level);
-void print_wave_header(WAVEFORMATEX *h, int verbose_level);
-void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
-void print_index(AVIINDEXENTRY *idx,int idx_size, int verbose_level);
-void print_avistdindex_chunk(avistdindex_chunk *h, int verbose_level);
-void print_avisuperindex_chunk(avisuperindex_chunk *h, int verbose_level);
-void print_vprp(VideoPropHeader *vprp, int verbose_level);
 
 static int odml_get_vstream_id(int id, unsigned char res[])
 {
@@ -59,7 +49,8 @@ static int odml_get_vstream_id(int id, unsigned char res[])
     return 0;
 }
 
-static int avi_idx_cmp(const void *elem1,const void *elem2) {
+static int avi_idx_cmp(const void *elem1, const void *elem2)
+{
   register off_t a = AVI_IDX_OFFSET((AVIINDEXENTRY *)elem1);
   register off_t b = AVI_IDX_OFFSET((AVIINDEXENTRY *)elem2);
   return (a > b) - (b > a);

@@ -19,6 +19,7 @@
  */
 
 #include <stdint.h>
+#include "aac_hdr.h"
 
 /// \param srate (out) sample rate
 /// \param num (out) number of audio frames in this ADTS frame

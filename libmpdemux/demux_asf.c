@@ -30,15 +30,11 @@
 
 #include "stream/stream.h"
 #include "asf.h"
+#include "asfheader.h"
 #include "demuxer.h"
-
+#include "libmpcodecs/dec_audio.h"
 #include "libvo/fastmemcpy.h"
 #include "ffmpeg_files/intreadwrite.h"
-
-// defined at asfheader.c:
-
-int asf_check_header(demuxer_t *demuxer);
-int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf);
 
 // based on asf file-format doc by Eugene [http://divx.euro.ru]
 
@@ -549,8 +545,6 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 }
 
 #include "stheader.h"
-
-void skip_audio_frame(sh_audio_t *sh_audio);
 
 static void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
     struct asf_priv* asf = demuxer->priv;

@@ -596,6 +596,19 @@ static HMODULE WINAPI expGetModuleHandleA(const char* name)
     return result;
 }
 
+static HMODULE WINAPI expGetModuleHandleW(const uint16_t* name)
+{
+    char aname[256];
+    int pos = 0;
+    while (*name) {
+        if (*name > 256 || pos >= sizeof(aname) - 1)
+            return NULL;
+        aname[pos++] = *name++;
+    }
+    aname[pos] = 0;
+    return expGetModuleHandleA(aname);
+}
+
 static void* WINAPI expCreateThread(void* pSecAttr, long dwStackSize,
 				    void* lpStartAddress, void* lpParameter,
 				    long dwFlags, long* dwThreadId)
@@ -1333,6 +1346,11 @@ static void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
     }
 #endif
     return;
+}
+
+static void WINAPI expInitializeCriticalSectionAndSpinCount(CRITICAL_SECTION* c, DWORD spin)
+{
+    expInitializeCriticalSection(c);
 }
 
 static void WINAPI expEnterCriticalSection(CRITICAL_SECTION* c)
@@ -4971,6 +4989,7 @@ struct exports exp_kernel32[]=
     FF(VirtualAlloc, -1)
     FF(VirtualFree, -1)
     FF(InitializeCriticalSection, -1)
+    FF(InitializeCriticalSectionAndSpinCount, -1)
     FF(EnterCriticalSection, -1)
     FF(LeaveCriticalSection, -1)
     FF(DeleteCriticalSection, -1)
@@ -5030,6 +5049,7 @@ struct exports exp_kernel32[]=
     FF(UnmapViewOfFile, -1)
     FF(Sleep, -1)
     FF(GetModuleHandleA, -1)
+    FF(GetModuleHandleW, -1)
     FF(GetProfileIntA, -1)
     FF(GetPrivateProfileIntA, -1)
     FF(GetPrivateProfileStringA, -1)
@@ -5516,7 +5536,7 @@ void* LookupExternal(const char* library, int ordinal)
 
 no_dll:
     if(pos>150)return 0;
-    sprintf(export_names[pos], "%s:%d", library, ordinal);
+    snprintf(export_names[pos], sizeof(export_names[pos]), "%s:%d", library, ordinal);
     return add_stub();
 }
 
@@ -5583,7 +5603,7 @@ void* LookupExternalByName(const char* library, const char* name)
 
 no_dll_byname:
     if(pos>150)return 0;// to many symbols
-    strcpy(export_names[pos], name);
+    snprintf(export_names[pos], sizeof(export_names[pos]), "%s", name);
     return add_stub();
 }
 

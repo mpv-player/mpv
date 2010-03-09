@@ -33,6 +33,7 @@
 
 #include "stream/stream.h"
 #include "demuxer.h"
+#include "demux_ty_osd.h"
 #include "stheader.h"
 #include "parse_es.h"
 #include "mpeg_hdr.h"
@@ -404,8 +405,6 @@ mpeg_header_parser:
 
 return 1;
 }
-
-void ty_processuserdata( unsigned char* buf, int len );
 
 static void process_userdata(unsigned char* buf,int len){
     int i;

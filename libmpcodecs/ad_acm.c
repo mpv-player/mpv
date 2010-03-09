@@ -23,7 +23,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
-
+#include "libmpdemux/aviprint.h"
 #include "loader/wineacm.h"
 
 #include "ad_internal.h"
@@ -55,8 +55,6 @@ static int init(sh_audio_t *sh_audio)
     sh_audio->a_buffer_len=ret;
   return 1;
 }
-
-void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 static int preinit(sh_audio_t *sh_audio)
 {

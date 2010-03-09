@@ -67,6 +67,7 @@
 
 #include "libvo/sub.h"
 
+#include "demux_mov.h"
 #include "qtpalette.h"
 #include "parse_mp4.h" // .MP4 specific stuff
 

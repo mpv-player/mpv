@@ -26,6 +26,7 @@
 //#include "subreader.h"
 #include "sub_cc.h"
 #include "libvo/sub.h"
+#include "demux_ty_osd.h"
 
 //#include "dvdauth.h"
 

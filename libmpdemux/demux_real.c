@@ -45,8 +45,10 @@
 #include "mpbswap.h"
 
 #include "stream/stream.h"
+#include "aviprint.h"
 #include "demuxer.h"
 #include "stheader.h"
+#include "demux_real.h"
 
 //#define mp_dbg(mod,lev, args... ) mp_msg_c((mod<<8)|lev, ## args )
 
@@ -495,7 +497,6 @@ double real_fix_timestamp(unsigned char *buf, unsigned int timestamp, unsigned i
   int pict_type;
   unsigned int orig_kf;
 
-#if 1
   if(format==mmioFOURCC('R','V','3','0') || format==mmioFOURCC('R','V','4','0')){
     if(format==mmioFOURCC('R','V','3','0')){
       SKIP_BITS(3);
@@ -530,7 +531,6 @@ double real_fix_timestamp(unsigned char *buf, unsigned int timestamp, unsigned i
     }
     mp_msg(MSGT_DEMUX, MSGL_DBG2,"\nTS: %08X -> %08X (%04X) %d %02X %02X %02X %02X %5u\n",timestamp,kf,orig_kf,pict_type,s[0],s[1],s[2],s[3],pts?kf-(unsigned int)(*pts*1000.0):0);
   }
-#endif
     v_pts=kf*0.001f;
 //    if(pts && (v_pts<*pts || !kf)) v_pts=*pts+frametime;
     if(pts) *pts=v_pts;
@@ -1089,8 +1089,6 @@ discard:
   }//    goto loop;
   return 0;
 }
-
-void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 static demuxer_t* demux_open_real(demuxer_t* demuxer)
 {

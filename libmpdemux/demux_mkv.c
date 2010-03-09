@@ -36,6 +36,7 @@
 #include "stheader.h"
 #include "ebml.h"
 #include "matroska.h"
+#include "demux_real.h"
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -1885,10 +1886,6 @@ static void handle_subtitles(demuxer_t *demuxer, mkv_track_t *track,
     dp->endpts = (timecode + block_duration) / 1000.0;
     ds_add_packet(demuxer->sub, dp);
 }
-
-double real_fix_timestamp(unsigned char *buf, unsigned int timestamp,
-                          unsigned int format, int64_t *kf_base, int *kf_pts,
-                          double *pts);
 
 static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
                              uint8_t *buffer, uint32_t size, int block_bref)
