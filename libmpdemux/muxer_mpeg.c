@@ -339,13 +339,13 @@ static mpeg_frame_t *init_frames(uint16_t num, size_t size)
 	mpeg_frame_t *tmp;
 	uint16_t i;
 
-	tmp = (mpeg_frame_t *) calloc(num, sizeof(mpeg_frame_t));
+	tmp = calloc(num, sizeof(mpeg_frame_t));
 	if(tmp == NULL)
 		return NULL;
 
 	for(i=0; i < num; i++)
 	{
-		tmp[i].buffer = (uint8_t *) calloc(1, size);
+		tmp[i].buffer = calloc(1, size);
 		if(tmp[i].buffer == NULL)
 			return NULL;
 		tmp[i].size = 0;
@@ -386,14 +386,14 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
       mp_msg(MSGT_MUXER, MSGL_ERR, "Unknown stream type!\n");
       return NULL;
   }
-  s = (muxer_stream_t*) calloc(1, sizeof(muxer_stream_t));
+  s = calloc(1, sizeof(muxer_stream_t));
   if(!s) return NULL; // no mem!?
   if (!(s->b_buffer = malloc(priv->packet_size)))
     goto init_fail;
   s->b_buffer_size = priv->packet_size;
   s->b_buffer_ptr = 0;
   s->b_buffer_len = 0;
-  s->priv = (muxer_headers_t*) calloc(1, sizeof(muxer_headers_t));
+  s->priv = calloc(1, sizeof(muxer_headers_t));
   if(s->priv == NULL)
     goto init_fail;
   spriv = (muxer_headers_t *) s->priv;
@@ -1964,7 +1964,7 @@ static int fill_last_frame(muxer_headers_t *spriv,  uint8_t *ptr, int len)
 	{
 		if(spriv->framebuf[idx].size > SIZE_MAX - (size_t)len)
 			return 0;
-		spriv->framebuf[idx].buffer = (uint8_t*) realloc(spriv->framebuf[idx].buffer, spriv->framebuf[idx].size + len);
+		spriv->framebuf[idx].buffer = realloc(spriv->framebuf[idx].buffer, spriv->framebuf[idx].size + len);
 		if(! spriv->framebuf[idx].buffer)
 			return 0;
 		spriv->framebuf[idx].alloc_size = spriv->framebuf[idx].size + len;
@@ -1983,7 +1983,7 @@ static int add_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, int le
 	idx = spriv->framebuf_used;
 	if(idx >= spriv->framebuf_cnt)
 	{
-		spriv->framebuf = (mpeg_frame_t*) realloc_struct(spriv->framebuf, (spriv->framebuf_cnt+1), sizeof(mpeg_frame_t));
+		spriv->framebuf = realloc_struct(spriv->framebuf, (spriv->framebuf_cnt+1), sizeof(mpeg_frame_t));
 		if(spriv->framebuf == NULL)
 		{
 			mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't realloc frame buffer(idx), abort\n");
@@ -1994,7 +1994,7 @@ static int add_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, int le
 		spriv->framebuf[spriv->framebuf_cnt].alloc_size = 0;
 		spriv->framebuf[spriv->framebuf_cnt].pos = 0;
 
-		spriv->framebuf[spriv->framebuf_cnt].buffer = (uint8_t*) malloc(len);
+		spriv->framebuf[spriv->framebuf_cnt].buffer = malloc(len);
 		if(spriv->framebuf[spriv->framebuf_cnt].buffer == NULL)
 		{
 			mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't realloc frame buffer(frame), abort\n");
@@ -2500,7 +2500,7 @@ static void generate_flags(uint8_t *bff_mask, int source, int target)
 int muxer_init_muxer_mpeg(muxer_t *muxer)
 {
 	muxer_priv_t *priv;
-	priv = (muxer_priv_t *) calloc(1, sizeof(muxer_priv_t));
+	priv = calloc(1, sizeof(muxer_priv_t));
 	if(priv == NULL)
 	return 0;
 	priv->update_system_header = 1;
@@ -2716,7 +2716,7 @@ int muxer_init_muxer_mpeg(muxer_t *muxer)
 
 	priv->drop = conf_drop;
 
-	priv->buff = (uint8_t *) malloc(priv->packet_size);
+	priv->buff = malloc(priv->packet_size);
 	if((priv->buff == NULL))
 	{
 		mp_msg(MSGT_MUXER, MSGL_ERR, "\nCouldn't allocate %d bytes, exit\n", priv->packet_size);

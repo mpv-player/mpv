@@ -345,9 +345,11 @@ int stream_control(stream_t *s, int cmd, void *arg);
 stream_t* new_stream(int fd,int type);
 void free_stream(stream_t *s);
 stream_t* new_memory_stream(unsigned char* data,int len);
-stream_t* open_stream(char* filename, struct MPOpts *options,int* file_format);
-stream_t* open_stream_full(char* filename,int mode, struct MPOpts *options, int* file_format);
-stream_t* open_output_stream(char* filename,struct MPOpts *options);
+stream_t *open_stream(const char *filename, struct MPOpts *options,
+                      int *file_format);
+stream_t *open_stream_full(const char *filename,int mode,
+                           struct MPOpts *options, int *file_format);
+stream_t *open_output_stream(const char *filename, struct MPOpts *options);
 /// Set the callback to be used by libstream to check for user
 /// interruption during long blocking operations (cache filling, etc).
 struct input_ctx;

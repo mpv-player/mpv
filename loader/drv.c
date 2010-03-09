@@ -75,7 +75,7 @@ void SetCodecPath(const char* path)
 	needs_free=0;
 	return;
     }
-    def_path = (char*) malloc(strlen(path)+1);
+    def_path = malloc(strlen(path)+1);
     strcpy(def_path, path);
     needs_free=1;
 }
@@ -153,7 +153,7 @@ HDRVR DrvOpen(LPARAM lParam2)
 #endif
     printf("Loading codec DLL: '%s'\n",filename);
 
-    hDriver = (NPDRVR) malloc(sizeof(DRVR));
+    hDriver = malloc(sizeof(DRVR));
     if (!hDriver)
 	return (HDRVR) 0;
     memset((void*)hDriver, 0, sizeof(DRVR));

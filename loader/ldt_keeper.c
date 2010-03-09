@@ -182,7 +182,7 @@ ldt_fs_t* Setup_LDT_Keeper(void)
 {
     struct modify_ldt_ldt_s array;
     int ret;
-    ldt_fs_t* ldt_fs = (ldt_fs_t*) malloc(sizeof(ldt_fs_t));
+    ldt_fs_t* ldt_fs = malloc(sizeof(ldt_fs_t));
 
     if (!ldt_fs)
 	return NULL;

@@ -162,7 +162,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
  if (out_fmt==IMGFMT_BGR8) {
      png_get_PLTE( png,info,&pal,&cols );
-     mpi->planes[1] = (char*)realloc(mpi->planes[1], 4*cols);
+     mpi->planes[1] = realloc(mpi->planes[1], 4*cols);
      p = mpi->planes[1];
      for (i = 0; i < cols; i++) {
 	 *p++ = pal[i].blue;

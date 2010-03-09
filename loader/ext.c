@@ -197,7 +197,7 @@ WIN_BOOL WINAPI IsBadReadPtr(LPCVOID data, UINT size)
 LPSTR HEAP_strdupA(HANDLE heap, DWORD flags, LPCSTR string)
 {
 //    return strdup(string);
-    char* answ = (char*) malloc(strlen(string) + 1);
+    char* answ = malloc(strlen(string) + 1);
     strcpy(answ, string);
     return answ;
 }
@@ -208,7 +208,7 @@ LPWSTR HEAP_strdupAtoW(HANDLE heap, DWORD flags, LPCSTR string)
     if(string==0)
 	return 0;
     size=strlen(string);
-    answer = (WCHAR*) malloc(sizeof(WCHAR) * (size + 1));
+    answer = malloc(sizeof(WCHAR) * (size + 1));
     for(i=0; i<=size; i++)
 	answer[i]=(short)string[i];
     return answer;
@@ -222,7 +222,7 @@ LPSTR HEAP_strdupWtoA(HANDLE heap, DWORD flags, LPCWSTR string)
     size=0;
     while(string[size])
        size++;
-    answer = (char*) malloc(size + 2);
+    answer = malloc(size + 2);
     for(i=0; i<=size; i++)
 	answer[i]=(char)string[i];
     return answer;
@@ -372,12 +372,12 @@ HANDLE WINAPI CreateFileMappingA(HANDLE handle, LPSECURITY_ATTRIBUTES lpAttr,
     {
 	if(fm==0)
 	{
-	    fm = (file_mapping*) malloc(sizeof(file_mapping));
+	    fm = malloc(sizeof(file_mapping));
 	    fm->prev=NULL;
 	}
 	else
 	{
-	    fm->next = (file_mapping*) malloc(sizeof(file_mapping));
+	    fm->next = malloc(sizeof(file_mapping));
 	    fm->next->prev=fm;
 	    fm=fm->next;
 	}
@@ -385,7 +385,7 @@ HANDLE WINAPI CreateFileMappingA(HANDLE handle, LPSECURITY_ATTRIBUTES lpAttr,
 	fm->handle=answer;
 	if(name)
 	{
-	    fm->name = (char*) malloc(strlen(name)+1);
+	    fm->name = malloc(strlen(name)+1);
 	    strcpy(fm->name, name);
 	}
 	else
@@ -510,7 +510,7 @@ LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protec
     }
     else
     {
-	virt_alloc *new_vm = (virt_alloc*) malloc(sizeof(virt_alloc));
+	virt_alloc *new_vm = malloc(sizeof(virt_alloc));
 	new_vm->mapping_size=size;
 	new_vm->address=(char*)answer;
         new_vm->prev=vm;

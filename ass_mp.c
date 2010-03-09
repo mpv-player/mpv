@@ -230,7 +230,7 @@ ASS_Track *ass_read_subdata(ASS_Library *library, sub_data *subdata,
     return track;
 }
 
-ASS_Track *ass_read_stream(ASS_Library *library, char *fname, char *charset)
+ASS_Track *ass_read_stream(ASS_Library *library, const char *fname, char *charset)
 {
     int i;
     char *buf = NULL;

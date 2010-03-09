@@ -81,7 +81,7 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
 
     if(resize) {
       r = p->iter - p->buffer;
-      p->buffer = (char*)realloc(p->buffer,p->buffer_size+BUF_STEP);
+      p->buffer = realloc(p->buffer, p->buffer_size + BUF_STEP);
       p->iter = p->buffer + r;
       p->buffer_size += BUF_STEP;
       resize = 0;
@@ -113,7 +113,7 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
 
   line_end = (end > p->iter && *(end-1) == '\r') ? end-1 : end;
   if(line_end - p->iter >= 0)
-    p->line = (char*)realloc(p->line,line_end - p->iter+1);
+    p->line = realloc(p->line, line_end - p->iter + 1);
   else
     return NULL;
   if(line_end - p->iter > 0)
@@ -252,7 +252,7 @@ pls_read_entry(char* line,pls_entry_t** _e,int* _max_entry,char** val) {
     mp_msg(MSGT_PLAYTREE,MSGL_WARN,"No entry index in entry %s\nAssuming %d\n",line,num);
   }
   if(num > max_entry) {
-    e = (pls_entry_t*)realloc(e,num*sizeof(pls_entry_t));
+    e = realloc(e, num * sizeof(pls_entry_t));
     memset(&e[max_entry],0,(num-max_entry)*sizeof(pls_entry_t));
     max_entry = num;
   }
@@ -713,12 +713,12 @@ play_tree_add_basepath(play_tree_t* pt, char* bp) {
     if (pt->files[i][0] == '\\') {
       if (pt->files[i][1] == '\\')
         continue;
-      pt->files[i] = (char*)realloc(pt->files[i],2+fl+1);
+      pt->files[i] = realloc(pt->files[i], 2 + fl + 1);
       memmove(pt->files[i] + 2,pt->files[i],fl+1);
       memcpy(pt->files[i],bp,2);
       continue;
     }
-    pt->files[i] = (char*)realloc(pt->files[i],bl+fl+1);
+    pt->files[i] = realloc(pt->files[i], bl + fl + 1);
     memmove(pt->files[i] + bl,pt->files[i],fl+1);
     memcpy(pt->files[i],bp,bl);
   }

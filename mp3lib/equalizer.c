@@ -5,7 +5,7 @@ void init_spline(float *x, float *y, int n, float *y2)
 
 	int i, k;
 	float p, qn, sig, un, *u;
-	u = (float *) malloc(n * sizeof (float));
+	u = malloc(n * sizeof (float));
 
 	y2[0] = u[0] = 0.0;
 

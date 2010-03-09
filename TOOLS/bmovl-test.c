@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
 		blit(fifo, image->pixels, image->w, image->h, i, i, 0, 1);
 
 	// Create a 75x75 bitmap
-	bitmap = (unsigned char*)malloc(75*75*4);
+	bitmap = malloc(75 * 75 * 4);
 
 	// Paint bitmap red, 50% transparent and blit at position 50,50
 	paint(bitmap, (75*75*4), 255, 0, 0, 128);

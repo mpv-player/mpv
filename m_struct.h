@@ -88,7 +88,7 @@ m_struct_alloc(const m_struct_t* st);
  *  \return 0 on error, 1 on success.
  */
 int
-m_struct_set(const m_struct_t* st, void* obj, char* field, char* param);
+m_struct_set(const m_struct_t* st, void* obj, const char* field, const char* param);
 
 /// Reset a field (or all if field == NULL) to defaults.
 /** \param st Struct definition.

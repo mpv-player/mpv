@@ -197,7 +197,7 @@ static WINE_MODREF *ELFDLL_CreateModref(HMODULE hModule, LPCSTR path)
 //		wm->binfmt.pe.pe_resource = (PIMAGE_RESOURCE_DIRECTORY)RVA(hModule, dir->VirtualAddress);
 
 
-	wm->filename = (char*) malloc(strlen(path)+1);
+	wm->filename = malloc(strlen(path)+1);
 	strcpy(wm->filename, path);
 	wm->modname = strrchr( wm->filename, '\\' );
 	if (!wm->modname) wm->modname = wm->filename;
@@ -216,7 +216,7 @@ static WINE_MODREF *ELFDLL_CreateModref(HMODULE hModule, LPCSTR path)
 
 	if(local_wm)
         {
-    	    local_wm->next = (modref_list*) malloc(sizeof(modref_list));
+    	    local_wm->next = malloc(sizeof(modref_list));
     	    local_wm->next->prev=local_wm;
     	    local_wm->next->next=NULL;
             local_wm->next->wm=wm;
@@ -224,7 +224,7 @@ static WINE_MODREF *ELFDLL_CreateModref(HMODULE hModule, LPCSTR path)
 	}
 	else
         {
-	    local_wm = (modref_list*) malloc(sizeof(modref_list));
+	    local_wm = malloc(sizeof(modref_list));
 	    local_wm->next=local_wm->prev=NULL;
     	    local_wm->wm=wm;
 	}

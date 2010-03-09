@@ -47,7 +47,8 @@ int dvd_title=0;
 
 // Open a new stream  (stdin/file/vcd/url)
 
-stream_t* open_stream(char* filename, struct MPOpts *options, int* file_format)
+stream_t* open_stream(const char *filename, struct MPOpts *options,
+                      int *file_format)
 {
   // Check if playlist or unknown
   if (*file_format != DEMUXER_TYPE_PLAYLIST){

@@ -38,10 +38,10 @@
 #define MAX_PROFILE_DEPTH 20
 
 static int
-parse_profile(const m_option_t *opt, const char *name, char *param, void *dst, int src);
+parse_profile(const m_option_t *opt, const char *name, const char *param, void *dst, int src);
 
 static void
-set_profile(const m_option_t *opt, void* dst, void* src);
+set_profile(const m_option_t *opt, void* dst, const void* src);
 
 static int
 show_profile(m_option_t *opt, char* name, char *param);
@@ -56,13 +56,13 @@ static void m_option_save(const m_config_t *config, const m_option_t *opt,
                           void *dst)
 {
     if (opt->type->save) {
-        void *src = opt->new ? (char*)config->optstruct + opt->offset : opt->p;
+        const void *src = opt->new ? (char*)config->optstruct + opt->offset : opt->p;
         opt->type->save(opt, dst, src);
     }
 }
 
 static void m_option_set(const m_config_t *config, const m_option_t *opt,
-			 void *src)
+			 const void *src)
 {
     if (opt->type->set) {
         void *dst = opt->new ? (char*)config->optstruct + opt->offset : opt->p;
@@ -505,7 +505,7 @@ m_config_set_profile(m_config_t* config, m_profile_t* p) {
 }
 
 static int
-parse_profile(const m_option_t *opt, const char *name, char *param, void *dst, int src)
+parse_profile(const m_option_t *opt, const char *name, const char *param, void *dst, int src)
 {
   m_config_t* config = opt->priv;
   char** list = NULL;
@@ -541,7 +541,7 @@ parse_profile(const m_option_t *opt, const char *name, char *param, void *dst, i
 }
 
 static void
-set_profile(const m_option_t *opt, void *dst, void *src) {
+set_profile(const m_option_t *opt, void *dst, const void *src) {
   m_config_t* config = opt->priv;
   m_profile_t* p;
   char** list = NULL;

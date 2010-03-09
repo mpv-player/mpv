@@ -542,10 +542,11 @@ are not usable remotely because they are implemented at the demuxer level.
 
 Be aware that currently the server is not secure at all.
 
-Compile the server by running 'make TOOLS/netstream' from the root of mplayer
-source and then copy the netstream binary to the right place on your system
-(usually /usr/local/bin on Unix). Start the netstream server on the computer you
-intend to access remotely. There are no command line arguments.
+Compile the server by running 'make TOOLS/netstream' ('make TOOLS/netstream.exe'
+on windows) from the root of mplayer source and then copy the netstream binary
+to the right place on your system (usually /usr/local/bin on Unix). Start the
+netstream server on the computer you intend to access remotely. There are no
+command line arguments.
 
 Play the second track of a VCD on the server with:
 

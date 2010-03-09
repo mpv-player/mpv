@@ -300,7 +300,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		 ( (out_height - in_height) / 2 ) * fb_line_len;
 
 #ifndef USE_CONVERT2FB
-	if (!(next_frame = (uint8_t *) realloc(next_frame, in_width * in_height * fb_pixel_size))) {
+	if (!(next_frame = realloc(next_frame, in_width * in_height * fb_pixel_size))) {
 		mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] Can't malloc next_frame: %s\n", strerror(errno));
 		return 1;
 	}

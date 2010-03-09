@@ -68,7 +68,7 @@ m_struct_alloc(const m_struct_t* st) {
 }
 
 int
-m_struct_set(const m_struct_t* st, void* obj, char* field, char* param) {
+m_struct_set(const m_struct_t* st, void* obj, const char* field, const char* param) {
   const m_option_t* f = m_struct_get_field(st,field);
 
   if(!f) {

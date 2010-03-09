@@ -313,7 +313,7 @@ static HRESULT STDCALL CMediaSample_SetActualDataLength(IMediaSample* This,
         char* c = cms->own_block;
 	Debug printf("CMediaSample - buffer overflow   %ld %d   %p %p\n",
 		     __MIDL_0010, ((CMediaSample*)This)->size, cms->own_block, cms->block);
-	cms->own_block = (char*) realloc(cms->own_block, (size_t) __MIDL_0010 + SAFETY_ACEL);
+	cms->own_block = realloc(cms->own_block, (size_t) __MIDL_0010 + SAFETY_ACEL);
 	if (c == cms->block)
 	    cms->block = cms->own_block;
         cms->size = __MIDL_0010;
@@ -510,7 +510,7 @@ static void CMediaSample_ResetPointer(CMediaSample* This)
  */
 CMediaSample* CMediaSampleCreate(IMemAllocator* allocator, int size)
 {
-    CMediaSample* This = (CMediaSample*) malloc(sizeof(CMediaSample));
+    CMediaSample* This = malloc(sizeof(CMediaSample));
     if (!This)
 	return NULL;
 
@@ -524,8 +524,8 @@ CMediaSample* CMediaSampleCreate(IMemAllocator* allocator, int size)
     //if (size < 0x1000)
     //    size = (size + 0xfff) & ~0xfff;
 
-    This->vt = (IMediaSample_vt*) malloc(sizeof(IMediaSample_vt));
-    This->own_block = (char*) malloc((size_t)size + SAFETY_ACEL);
+    This->vt        = malloc(sizeof(IMediaSample_vt));
+    This->own_block = malloc((size_t)size + SAFETY_ACEL);
     This->media_type.pbFormat = 0;
     This->media_type.pUnk = 0;
 

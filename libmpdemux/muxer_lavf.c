@@ -340,7 +340,7 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 "will play these INCORRECT files as if nothing were wrong!\n"
 "*******************************************************************************\n");
 
-	priv = (muxer_priv_t *) calloc(1, sizeof(muxer_priv_t));
+	priv = calloc(1, sizeof(muxer_priv_t));
 	if(priv == NULL)
 		return 0;
 

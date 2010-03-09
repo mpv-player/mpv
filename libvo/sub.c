@@ -730,7 +730,7 @@ inline static void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj,i
 	      render_one_glyph(sub_font, c);
 
 		if (c == ' ') {
-		    struct osd_text_t *tmp_ott = (struct osd_text_t *) calloc(1, sizeof(struct osd_text_t));
+		    struct osd_text_t *tmp_ott = calloc(1, sizeof(struct osd_text_t));
 
 		    if (osl == NULL) {
 			osl = cp_ott = tmp_ott;
@@ -743,7 +743,7 @@ inline static void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj,i
 		    }
 		    tmp_ott->osd_length = xsize;
 		    tmp_ott->text_length = char_position;
-		    tmp_ott->text = (int *) malloc(char_position * sizeof(int));
+		    tmp_ott->text = malloc(char_position * sizeof(int));
 		    for (counter = 0; counter < char_position; ++counter)
 			tmp_ott->text[counter] = char_seq[counter];
 		    char_position = 0;
@@ -773,7 +773,7 @@ inline static void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj,i
 
 	    // osl holds an ordered (as they appear in the lines) chain of the subtitle words
 	    {
-		struct osd_text_t *tmp_ott = (struct osd_text_t *) calloc(1, sizeof(struct osd_text_t));
+		struct osd_text_t *tmp_ott = calloc(1, sizeof(struct osd_text_t));
 
 		if (osl == NULL) {
 		    osl = cp_ott = tmp_ott;
@@ -786,7 +786,7 @@ inline static void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj,i
 		}
 		tmp_ott->osd_length = xsize;
 		tmp_ott->text_length = char_position;
-		tmp_ott->text = (int *) malloc(char_position * sizeof(int));
+		tmp_ott->text = malloc(char_position * sizeof(int));
 		for (counter = 0; counter < char_position; ++counter)
 		    tmp_ott->text[counter] = char_seq[counter];
 		char_position = 0;
@@ -798,7 +798,7 @@ inline static void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj,i
 		int value = 0, exit = 0, minimum = 0;
 
 		// otp will contain the chain of the osd subtitle lines coming from the single vo_sub line.
-		otp = tmp_otp = (struct osd_text_p *) calloc(1, sizeof(struct osd_text_p));
+		otp = tmp_otp = calloc(1, sizeof(struct osd_text_p));
 		tmp_otp->ott = osl;
 		for (tmp_ott = tmp_otp->ott; exit == 0; ) {
 		    do {
@@ -806,7 +806,7 @@ inline static void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj,i
 			tmp_ott = tmp_ott->next;
 		    } while ((tmp_ott != NULL) && (value + tmp_ott->osd_kerning + tmp_ott->osd_length <= xlimit));
 		    if (tmp_ott != NULL) {
-			struct osd_text_p *tmp = (struct osd_text_p *) calloc(1, sizeof(struct osd_text_p));
+			struct osd_text_p *tmp = calloc(1, sizeof(struct osd_text_p));
 
 			tmp_otp->value = value;
 			tmp_otp->next = tmp;

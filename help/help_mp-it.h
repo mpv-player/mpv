@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <see AUTHORS for email address>
 
-// Updated to help_mp-en.h r30044
+// Updated to help_mp-en.h r30515
 
 
 // ========================= MPlayer help ===========================

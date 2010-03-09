@@ -192,7 +192,7 @@ static char **get_extensions(menu_t *menu){
   if(!fp)
     return NULL;
 
-  extensions = (char **) malloc(sizeof(*extensions));
+  extensions = malloc(sizeof(*extensions));
   *extensions = NULL;
 
   while(fgets(ext,sizeof(ext),fp)) {
@@ -203,9 +203,9 @@ static char **get_extensions(menu_t *menu){
       ext[s-1] = '\0';
       s--;
     }
-    e = (char *) malloc(s+1);
-    extensions = (char **) realloc(extensions, ++n * sizeof(*extensions));
-    extensions = (char **) realloc(extensions, ++n * sizeof(*extensions));
+    e = malloc(s+1);
+    extensions = realloc(extensions, ++n * sizeof(*extensions));
+    extensions = realloc(extensions, ++n * sizeof(*extensions));
     strcpy (e, ext);
     for (l=extensions; *l; l++);
     *l++ = e;
@@ -261,7 +261,7 @@ static int open_dir(menu_t* menu,char* args) {
     }
   }
 
-  namelist = (char **) malloc(sizeof(char *));
+  namelist = malloc(sizeof(char *));
   extensions = get_extensions(menu);
 
   n=0;
@@ -289,7 +289,7 @@ static int open_dir(menu_t* menu,char* args) {
         continue;
     }
     if(n%20 == 0){ // Get some more mem
-      if((tp = (char **) realloc(namelist, (n+20) * sizeof (char *)))
+      if((tp = realloc(namelist, (n+20) * sizeof (char *)))
          == NULL) {
         mp_tmsg(MSGT_GLOBAL,MSGL_ERR,"[MENU] realloc error: %s\n", strerror(errno));
 	n--;
@@ -298,7 +298,7 @@ static int open_dir(menu_t* menu,char* args) {
       namelist=tp;
     }
 
-    namelist[n] = (char *) malloc(strlen(dp->d_name) + 2);
+    namelist[n] = malloc(strlen(dp->d_name) + 2);
     if(namelist[n] == NULL){
       mp_tmsg(MSGT_GLOBAL,MSGL_ERR,"[MENU] memory allocation error: %s\n", strerror(errno));
       n--;
