@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "osdep/getch2.h"
 
 #ifdef CONFIG_TRANSLATION
 #include <locale.h>
@@ -31,14 +32,6 @@
 #ifdef CONFIG_ICONV
 #include <iconv.h>
 #include <errno.h>
-/**
- * \brief gets the name of the system's terminal character set
- * \return a malloced string indicating the system charset
- *
- * Be warned that this function on many systems is in no way thread-safe
- * since it modifies global data
- */
-char* get_term_charset(void);
 #endif
 
 #include "mp_msg.h"
@@ -244,6 +237,8 @@ void mp_msg_va(int mod, int lev, const char *format, va_list va)
     header = tmp[strlen(tmp)-1] == '\n' || tmp[strlen(tmp)-1] == '\r';
 
     fprintf(stream, "%s", tmp);
+    if (mp_msg_color)
+        fprintf(stream, "\033[0m");
     fflush(stream);
 }
 

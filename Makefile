@@ -21,6 +21,7 @@
 
 include config.mak
 
+.SUFFIXES:
 
 ###### variable declarations #######
 
@@ -751,6 +752,9 @@ all: $(ALL_PRG-yes)
 
 %.ho: %.h
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
+
+%.o: %.S
+	$(CC) $(ASFLAGS) -c -o $@ $<
 
 %-rc.o: %.rc
 	$(WINDRES) -I. $< $@

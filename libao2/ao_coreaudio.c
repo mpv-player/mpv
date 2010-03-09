@@ -119,7 +119,11 @@ static int read_buffer(unsigned char* data,int len){
   return len;
 }
 
-OSStatus theRenderProc(void *inRefCon, AudioUnitRenderActionFlags *inActionFlags, const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber, UInt32 inNumFrames, AudioBufferList *ioData)
+static OSStatus theRenderProc(void *inRefCon,
+                              AudioUnitRenderActionFlags *inActionFlags,
+                              const AudioTimeStamp *inTimeStamp,
+                              UInt32 inBusNumber, UInt32 inNumFrames,
+                              AudioBufferList *ioData)
 {
 int amt=av_fifo_size(ao->buffer);
 int req=(inNumFrames)*ao->packetSize;

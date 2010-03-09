@@ -550,7 +550,8 @@ DVDs usually have surround audio encoded in AC-3 (Dolby Digital) or DTS
 (Digital Theater System) format. Some modern audio equipment is capable of
 decoding these formats internally. <application>MPlayer</application> can be
 configured to relay the audio data without decoding it. This will only work if
-you have a S/PDIF (Sony/Philips Digital Interface) jack in your sound card.
+you have a S/PDIF (Sony/Philips Digital Interface) jack in your sound card, or
+if you are passing audio over HDMI.
 </para>
 
 <para>
