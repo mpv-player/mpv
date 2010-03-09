@@ -291,7 +291,7 @@ Codecs:
   --enable-jpeg             enable JPEG input/output support [autodetect]
   --enable-libcdio          enable libcdio support [autodetect]
   --enable-liblzo           enable liblzo support [autodetect]
-  --disable-win32dll        disable Win32 DLL support [enabled]
+  --disable-win32dll        disable Win32 DLL support [autodetect]
   --disable-qtx             disable QuickTime codecs support [enabled]
   --disable-xanim           disable XAnim codecs support [enabled]
   --disable-real            disable RealPlayer codecs support [enabled]
