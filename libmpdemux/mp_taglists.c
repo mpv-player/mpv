@@ -23,8 +23,8 @@
 #include "libavformat/riff.h"
 
 static const AVCodecTag mp_wav_tags[] = {
-    { CODEC_ID_ADPCM_ADX,         MKTAG('S', 'a', 'd', 'x')},
     { CODEC_ID_ADPCM_4XM,         MKTAG('4', 'X', 'M', 'A')},
+    { CODEC_ID_ADPCM_ADX,         MKTAG('S', 'a', 'd', 'x')},
     { CODEC_ID_ADPCM_EA,          MKTAG('A', 'D', 'E', 'A')},
     { CODEC_ID_ADPCM_EA_MAXIS_XA, MKTAG('A', 'D', 'X', 'A')},
     { CODEC_ID_ADPCM_IMA_WS,      MKTAG('A', 'I', 'W', 'S')},
