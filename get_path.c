@@ -40,10 +40,9 @@
 #elif defined(__CYGWIN__)
 #include <windows.h>
 #include <sys/cygwin.h>
-#elif defined(__OS2__)
-#define INCL_DOS
-#include <os2.h>
 #endif
+
+#include "osdep/osdep.h"
 
 char *get_path(const char *filename){
 	char *homedir;
