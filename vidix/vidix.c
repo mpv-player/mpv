@@ -153,11 +153,6 @@ int vdlPlaybackSetEq (VDXContext *ctx, const vidix_video_eq_t *e)
   return ctx->drv->set_eq ? ctx->drv->set_eq (e) : ENOSYS;
 }
 
-static int vdlPlaybackCopyFrame(VDXContext *ctx, const vidix_dma_t *f)
-{
-  return ctx->drv->copy_frame ? ctx->drv->copy_frame (f) : ENOSYS;
-}
-
 int vdlGetGrKeys (VDXContext *ctx, vidix_grkey_t *k)
 {
   return ctx->drv->get_gkey ? ctx->drv->get_gkey (k) : ENOSYS;

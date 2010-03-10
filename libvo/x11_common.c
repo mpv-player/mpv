@@ -746,6 +746,7 @@ void vo_x11_uninit(struct vo *vo)
                 XEvent xev;
 
                 XUnmapWindow(x11->display, x11->window);
+                XSelectInput(x11->display, x11->window, StructureNotifyMask);
                 XDestroyWindow(x11->display, x11->window);
                 do
                 {

@@ -1440,50 +1440,6 @@ fsdp_get_encryption_content (const fsdp_description_t * dsc)
   return dsc->k_encryption_content;
 }
 
-unsigned int
-fsdp_get_rtpmap_count (const fsdp_description_t * dsc)
-{
-  if (!dsc)
-    return 0;
-  return dsc->a_rtpmaps_count;
-}
-
-const char *
-fsdp_get_rtpmap_payload_type (const fsdp_description_t * dsc,
-			      unsigned int index)
-{
-  if ((!dsc) || (index >= dsc->a_rtpmaps_count))
-    return NULL;
-  return dsc->a_rtpmaps[index]->pt;
-}
-
-const char *
-fsdp_get_rtpmap_encoding_name (const fsdp_description_t * dsc,
-			       unsigned int index)
-{
-  if ((!dsc) || (index >= dsc->a_rtpmaps_count))
-    return NULL;
-  return dsc->a_rtpmaps[index]->encoding_name;
-}
-
-unsigned int
-fsdp_get_rtpmap_clock_rate (const fsdp_description_t * dsc,
-			    unsigned int index)
-{
-  if ((!dsc) || (index >= dsc->a_rtpmaps_count))
-    return 0;
-  return dsc->a_rtpmaps[index]->clock_rate;
-}
-
-const char *
-fsdp_get_rtpmap_encoding_parameters (const fsdp_description_t * dsc,
-				     unsigned int index)
-{
-  if ((!dsc) || (index >= dsc->a_rtpmaps_count))
-    return NULL;
-  return dsc->a_rtpmaps[index]->parameters;
-}
-
 const char *
 fsdp_get_str_att (const fsdp_description_t * dsc, fsdp_session_str_att_t att)
 {
@@ -1528,22 +1484,6 @@ fsdp_get_sdplang (const fsdp_description_t * dsc, unsigned int index)
   if ((!dsc) || (index >= dsc->a_sdplangs_count))
     return NULL;
   return dsc->a_sdplangs[index];
-}
-
-unsigned int
-fsdp_get_lang_count (const fsdp_description_t * dsc)
-{
-  if (!dsc)
-    return 0;
-  return dsc->a_langs_count;
-}
-
-const char *
-fsdp_get_lang (const fsdp_description_t * dsc, unsigned int index)
-{
-  if ((!dsc) || (index >= dsc->a_langs_count))
-    return NULL;
-  return dsc->a_langs[index];
 }
 
 unsigned int

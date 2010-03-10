@@ -918,6 +918,8 @@ static int read_cmd(mp_input_fd_t* mp_fd, char** ret)
     int l = 0;
     // Find the cmd end
     mp_fd->buffer[mp_fd->pos] = '\0';
+    end = strchr(mp_fd->buffer,'\r');
+    if (end) *end = '\n';
     end = strchr(mp_fd->buffer,'\n');
     // No cmd end ?
     if(!end) {

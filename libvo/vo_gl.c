@@ -36,13 +36,47 @@
 
 static const vo_info_t info =
 {
-  "X11 (OpenGL)",
+  "OpenGL",
   "gl",
-  "Arpad Gereoffy <arpi@esp-team.scene.hu>",
+  "Reimar Doeffinger <Reimar.Doeffinger@gmx.de>",
   ""
 };
 
 const LIBVO_EXTERN(gl)
+
+
+static const vo_info_t info_nosw =
+{
+  "OpenGL no software rendering",
+  "gl_nosw",
+  "Reimar Doeffinger <Reimar.Doeffinger@gmx.de>",
+  ""
+};
+static int preinit_nosw(const char *arg);
+const struct vo_driver video_out_gl_nosw =
+{
+    .is_new = 0,
+    .info = &info_nosw,
+    .preinit = old_vo_preinit,
+    .config = old_vo_config,
+    .control = old_vo_control,
+    .draw_slice = old_vo_draw_slice,
+    .draw_osd = old_vo_draw_osd,
+    .flip_page = old_vo_flip_page,
+    .check_events = old_vo_check_events,
+    .uninit = old_vo_uninit,
+    .old_functions = &(struct vo_old_functions){
+	preinit_nosw,
+	config,
+	control,
+	draw_frame,
+	draw_slice,
+     	draw_osd,
+	flip_page,
+	check_events,
+        uninit,
+    }
+};
 
 #ifdef CONFIG_GL_X11
 static int                  wsGLXAttrib[] = { GLX_RGBA,
@@ -439,6 +473,12 @@ static void uninitGl(void) {
 #endif
   mesa_bufferptr = NULL;
   err_shown = 0;
+}
+
+static int isSoftwareGl(void)
+{
+  const char *renderer = GetString(GL_RENDERER);
+  return strcmp(renderer, "Software Rasterizer") == 0;
 }
 
 static void autodetectGlExtensions(void) {
@@ -1041,7 +1081,7 @@ static const opt_t subopts[] = {
   {NULL}
 };
 
-static int preinit(const char *arg)
+static int preinit_internal(const char *arg, int allow_sw)
 {
     enum MPGLType gltype = GLTYPE_X11;
     // set defaults
@@ -1150,10 +1190,12 @@ static int preinit(const char *arg)
     }
     if (!init_mpglcontext(&glctx, gltype))
       goto err_out;
-    if (use_yuv == -1) {
+    if (use_yuv == -1 || !allow_sw) {
       if (create_window(320, 200, VOFLAG_HIDDEN, NULL) < 0)
         goto err_out;
       if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
+        goto err_out;
+      if (!allow_sw && isSoftwareGl())
         goto err_out;
       autodetectGlExtensions();
     }
@@ -1168,6 +1210,16 @@ static int preinit(const char *arg)
 err_out:
     uninit();
     return -1;
+}
+
+static int preinit(const char *arg)
+{
+    return preinit_internal(arg, 1);
+}
+
+static int preinit_nosw(const char *arg)
+{
+    return preinit_internal(arg, 0);
 }
 
 static const struct {

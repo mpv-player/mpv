@@ -475,10 +475,3 @@ void fixup_network_stream_cache(stream_t *stream) {
     mp_tmsg(MSGT_NETWORK,MSGL_INFO,"Cache size set to %d KBytes\n", stream_cache_size);
   }
 }
-
-
-int
-streaming_stop( stream_t *stream ) {
-	stream->streaming_ctrl->status = streaming_stopped_e;
-	return 0;
-}

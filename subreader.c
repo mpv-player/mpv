@@ -1355,7 +1355,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     subtitle *first, *second, *sub, *return_sub, *alloced_sub = NULL;
     sub_data *subt_data;
     int uses_time = 0, sub_num = 0, sub_errs = 0;
-    struct subreader sr[]=
+    static const struct subreader sr[]=
     {
 	    { sub_read_line_microdvd, NULL, "microdvd" },
 	    { sub_read_line_subrip, NULL, "subrip" },
@@ -1372,7 +1372,7 @@ sub_data* sub_read_file (char *filename, float fps) {
 	    { sub_read_line_jacosub, NULL, "jacosub" },
 	    { sub_read_line_mpl2, NULL, "mpl2" }
     };
-    struct subreader *srp;
+    const struct subreader *srp;
 
     if(filename==NULL) return NULL; //qnx segfault
     i = 0;
@@ -1433,7 +1433,7 @@ sub_data* sub_read_file (char *filename, float fps) {
         sub=srp->read(fd,sub);
         if(!sub) break;   // EOF
 #ifdef CONFIG_ICONV
-	if ((sub!=ERR) && (sub_utf8 & 2)) sub=subcp_recode(sub);
+	if ((sub!=ERR) && sub_utf8 == 2) sub=subcp_recode(sub);
 #endif
 #ifdef CONFIG_FRIBIDI
 	if (sub!=ERR) sub=sub_fribidi(sub,sub_utf8,0);
