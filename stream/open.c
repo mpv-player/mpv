@@ -26,7 +26,6 @@
 
 #include "config.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #ifdef __FreeBSD__
 #include <sys/cdrio.h>

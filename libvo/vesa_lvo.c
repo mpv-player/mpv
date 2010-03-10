@@ -32,7 +32,6 @@
 
 #include "config.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include "vesa_lvo.h"
 #include "libmpcodecs/img_format.h"

@@ -102,7 +102,6 @@
 
 #include "dec_teletext.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "libmpcodecs/img_format.h"
 #include "libavutil/common.h"
 #include "input/input.h"

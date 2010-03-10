@@ -36,7 +36,6 @@
 #endif
 
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "osdep/shmem.h"
 #include "network.h"
 #include "stream.h"

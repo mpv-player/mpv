@@ -39,7 +39,6 @@
 #include "demux_real.h"
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include "vobsub.h"
 #include "subreader.h"

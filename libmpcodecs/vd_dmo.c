@@ -26,7 +26,6 @@
 #include <stdarg.h>
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include "vd_internal.h"
 

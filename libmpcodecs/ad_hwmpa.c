@@ -24,7 +24,6 @@
 #include "config.h"
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include "libaf/af_format.h"
 #include "ad_internal.h"

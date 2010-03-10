@@ -40,7 +40,6 @@
 #include "stream.h"
 #include "libmpdemux/demuxer.h"
 #include "network.h"
-#include "help_mp.h"
 
 
 extern const mime_struct_t mime_type_table[];

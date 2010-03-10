@@ -35,7 +35,6 @@
 #include "spudec.h"
 #include "m_option.h"
 #include "m_struct.h"
-#include "help_mp.h"
 #include "stream_dvd_common.h"
 
 /* state flags */

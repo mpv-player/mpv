@@ -50,7 +50,6 @@
 #include "video_out_internal.h"
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include "sub.h"
 

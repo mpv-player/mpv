@@ -54,7 +54,6 @@ static int CompletionType = -1;
 #define MODE_BGR  0x2
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 static const vo_info_t info = {
     "X11 ( XImage/Shm )",

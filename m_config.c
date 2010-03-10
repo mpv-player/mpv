@@ -33,7 +33,6 @@
 #include "m_config.h"
 #include "m_option.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #define MAX_PROFILE_DEPTH 20
 

@@ -26,7 +26,6 @@
 #endif
 
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "mpbswap.h"
 
 #include "vd_internal.h"

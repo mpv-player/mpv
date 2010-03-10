@@ -47,7 +47,6 @@
 
 #include "stream.h"
 #include "libmpdemux/demuxer.h"
-#include "help_mp.h"
 #include "osdep/timer.h"
 #include "network.h"
 #include "pnm.h"

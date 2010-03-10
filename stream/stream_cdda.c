@@ -31,7 +31,6 @@
 #include "cdd.h"
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #ifndef CD_FRAMESIZE_RAW
 #define CD_FRAMESIZE_RAW CDIO_CD_FRAMESIZE_RAW

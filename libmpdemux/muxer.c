@@ -30,7 +30,6 @@
 #include "muxer.h"
 #include "demuxer.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "stheader.h"
 
 muxer_t *muxer_new_muxer(int type,stream_t *stream){

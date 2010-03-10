@@ -53,7 +53,6 @@
 #endif
 #endif
 
-#include "help_mp.h"
 
 #include "libmpcodecs/img_format.h"
 #include "codec-cfg.h"

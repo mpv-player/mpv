@@ -30,7 +30,6 @@
 #include "libaf/af_format.h"
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 static const ao_info_t info =
 {

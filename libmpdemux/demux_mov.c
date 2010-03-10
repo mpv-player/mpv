@@ -55,7 +55,6 @@
 #endif
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include "stream/stream.h"
 #include "demuxer.h"

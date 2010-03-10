@@ -22,7 +22,6 @@
 
 #include "config.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "ad_internal.h"
 
 static const ad_info_t info =

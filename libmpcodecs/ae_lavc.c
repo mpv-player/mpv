@@ -30,7 +30,6 @@
 #include "stream/stream.h"
 #include "libmpdemux/muxer.h"
 #include "ae_lavc.h"
-#include "help_mp.h"
 #include "libaf/af_format.h"
 #include "libaf/reorder_ch.h"
 #include "libavcodec/avcodec.h"

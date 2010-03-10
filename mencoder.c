@@ -56,7 +56,6 @@
 
 #include "mp_msg.h"
 #include "av_log.h"
-#include "help_mp.h"
 
 #include "codec-cfg.h"
 #include "m_option.h"

@@ -41,7 +41,6 @@
 #include <linux/videodev2.h>
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include "stream.h"
 #include "pvr.h"

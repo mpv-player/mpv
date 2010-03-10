@@ -38,7 +38,6 @@
 #include "subopt-helper.h"
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #ifdef CONFIG_DVB
 #include <poll.h>

@@ -26,7 +26,6 @@
 #include "config.h"
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include "codec-cfg.h"
 //#include "stream/stream.h"

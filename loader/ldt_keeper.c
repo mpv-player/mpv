@@ -34,7 +34,6 @@
 #include <unistd.h>
 #include "osdep/mmap_anon.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 #ifdef __linux__
 #include <asm/unistd.h>
 #include <asm/ldt.h>

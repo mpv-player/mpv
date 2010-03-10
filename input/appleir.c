@@ -38,7 +38,6 @@
 #include <linux/input.h>
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #define EVDEV_MAX_EVENTS 32
 

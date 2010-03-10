@@ -44,7 +44,6 @@ Buffer allocation:
 #include "options.h"
 #include "talloc.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "video_out.h"
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"

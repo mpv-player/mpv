@@ -34,7 +34,6 @@
 #include "libvo/sub.h"
 #include "m_option.h"
 #include "m_property.h"
-#include "help_mp.h"
 #include "metadata.h"
 #include "libmpcodecs/vf.h"
 #include "libmpcodecs/vd.h"

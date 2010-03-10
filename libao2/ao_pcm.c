@@ -32,7 +32,6 @@
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #ifdef __MINGW32__
 // for GetFileType to detect pipes

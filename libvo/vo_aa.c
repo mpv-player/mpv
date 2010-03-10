@@ -45,7 +45,6 @@
 #include "osdep/keycodes.h"
 #include <aalib.h>
 #include "subopt-helper.h"
-#include "help_mp.h"
 #include "mp_msg.h"
 #include "mp_fifo.h"
 

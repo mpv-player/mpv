@@ -39,7 +39,6 @@
 #include "subopt-helper.h"
 #include "mixer.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #define ALSA_PCM_NEW_SW_PARAMS_API

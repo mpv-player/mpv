@@ -39,7 +39,6 @@
 #include "video_out.h"
 #include "aspect.h"
 #include "geometry.h"
-#include "help_mp.h"
 #include "osdep/timer.h"
 
 #include <X11/Xmd.h>

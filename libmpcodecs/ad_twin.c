@@ -28,7 +28,6 @@
 #include "loader/wine/windef.h"
 #include "libaf/af_format.h"
 
-#include "help_mp.h"
 
 static const ad_info_t info =
 {

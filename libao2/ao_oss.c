@@ -33,7 +33,6 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "mixer.h"
-#include "help_mp.h"
 
 #ifdef HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>

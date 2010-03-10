@@ -28,7 +28,6 @@
 
 #include "url.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #ifndef SIZE_MAX
 #define SIZE_MAX ((size_t)-1)

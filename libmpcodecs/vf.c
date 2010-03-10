@@ -30,7 +30,6 @@
 #endif
 
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "m_option.h"
 #include "m_struct.h"
 

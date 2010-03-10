@@ -52,7 +52,6 @@
 #include <sys/stat.h>
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #if defined(__linux__)
 #include <linux/cdrom.h>

@@ -772,7 +772,7 @@ mplayer$(EXESUF): EXTRALIBS += $(EXTRALIBS_MPLAYER)
 mencoder$(EXESUF) mplayer$(EXESUF):
 	$(CC) -o $@ $^ $(EXTRALIBS)
 
-codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
+codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h
 	$(HOST_CC) -O -DCODECS2HTML -I. -o $@ $<
 
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
@@ -783,9 +783,6 @@ config.mak: configure
 	@echo "############################################################"
 	@echo "####### Please run ./configure again - it's changed! #######"
 	@echo "############################################################"
-
-help_mp.h: help/help_mp-en.h $(HELP_FILE)
-	help/help_create.sh $(HELP_FILE) $(CHARSET)
 
 version.h: version.sh
 	./$< `$(CC) -dumpversion`
@@ -798,7 +795,6 @@ version.h: version.sh
 
 # Make sure all generated header files are created.
 codec-cfg.d codec-cfg.o: codecs.conf.h
-$(DEPS) $(MENCODER_DEPS) $(MPLAYER_DEPS): help_mp.h
 $(call ADDSUFFIXES,.d .o,mpcommon vobsub stream/stream_cddb stream/network libmpdemux/muxer_avi osdep/mplayer.rc): version.h
 
 # Files that depend on libswscale internals
@@ -894,7 +890,7 @@ clean:
 distclean: clean testsclean toolsclean driversclean dhahelperclean dhahelperwinclean
 	-rm -rf DOCS/tech/doxygen
 	-rm -f $(call ADD_ALL_DIRS,/*.d)
-	-rm -f configure.log config.mak config.h codecs.conf.h help_mp.h \
+	-rm -f configure.log config.mak config.h codecs.conf.h \
            version.h $(VIDIX_PCI_FILES) TAGS tags
 	-rm -f $(call ADD_ALL_EXESUFS,codec-cfg cpuinfo)
 
@@ -915,10 +911,10 @@ generated_ebml:
 
 TEST_OBJS = mp_msg.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
 
-codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h help_mp.h $(TEST_OBJS)
+codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h $(TEST_OBJS)
 	$(CC) -I. -DTESTING -o $@ $^
 
-codecs2html$(EXESUF): codec-cfg.c help_mp.h $(TEST_OBJS)
+codecs2html$(EXESUF): codec-cfg.c $(TEST_OBJS)
 	$(CC) -I. -DCODECS2HTML -o $@ $^
 
 liba52/test$(EXESUF): cpudetect.o $(SRCS_LIBA52_INTERNAL:.c=.o) -lm

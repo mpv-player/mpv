@@ -36,7 +36,6 @@
 #include "old_vo_wrapper.h"
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include "osdep/shmem.h"
 #ifdef CONFIG_X11

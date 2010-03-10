@@ -29,7 +29,6 @@
 
 #include "config.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "yuv4mpeg.h"
 
 //#include "stream/stream.h"

@@ -25,7 +25,6 @@
 #include <unistd.h>
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include "osdep/timer.h"
 #include "osdep/shmem.h"

@@ -30,7 +30,6 @@
 #include "m_option.h"
 #include "m_property.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
 

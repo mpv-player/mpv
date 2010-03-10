@@ -78,7 +78,6 @@
 #include "libmpcodecs/img_format.h"
 #include "libmpcodecs/dec_teletext.h"
 #include "libaf/af_format.h"
-#include "help_mp.h"
 #include "osdep/timer.h"
 
 

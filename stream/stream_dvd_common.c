@@ -36,7 +36,6 @@
 #endif
 
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "stream_dvd_common.h"
 #include "ffmpeg_files/intreadwrite.h"
 

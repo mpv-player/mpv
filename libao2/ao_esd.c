@@ -51,7 +51,6 @@
 #include "audio_out_internal.h"
 #include "libaf/af_format.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 
 #define ESD_RESAMPLES 0

@@ -33,7 +33,6 @@
 #include "video_out_internal.h"
 #include "aspect.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include "fastmemcpy.h"
 #include "drivers/tdfx_vid.h"

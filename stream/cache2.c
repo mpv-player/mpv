@@ -52,7 +52,6 @@ static void *ThreadProc(void *s);
 #endif
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include "stream.h"
 #include "cache2.h"

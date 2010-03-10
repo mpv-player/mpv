@@ -34,7 +34,6 @@
 #include "aviheader.h"
 #include "ms_hdr.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 extern char *info_name;
 extern char *info_artist;

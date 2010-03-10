@@ -27,7 +27,6 @@
 
 #include "config.h"
 #include "af.h"
-#include "help_mp.h"
 #include "reorder_ch.h"
 
 #include "libavcodec/avcodec.h"

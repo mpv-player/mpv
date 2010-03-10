@@ -27,7 +27,6 @@
 #include "config.h"
 #include "options.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "av_opts.h"
 
 #include "stream/stream.h"

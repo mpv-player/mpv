@@ -21,7 +21,6 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "edl.h"
-#include "help_mp.h"
 
 char *edl_filename; // file to extract EDL entries from (-edl)
 char *edl_output_filename; // file to put EDL entries in (-edlout)

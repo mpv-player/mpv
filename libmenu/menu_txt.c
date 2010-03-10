@@ -18,7 +18,6 @@
 
 #include "config.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include <stdlib.h>
 #include <stdio.h>

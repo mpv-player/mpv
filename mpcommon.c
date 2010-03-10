@@ -26,7 +26,6 @@
 #include "libvo/sub.h"
 #include "libvo/video_out.h"
 #include "cpudetect.h"
-#include "help_mp.h"
 #include "mp_msg.h"
 #include "spudec.h"
 #include "version.h"

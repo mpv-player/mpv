@@ -39,7 +39,6 @@
 #include "stheader.h"
 
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #define XMMS_PACKETSIZE 65536  // some plugins won't play if this is too small
 

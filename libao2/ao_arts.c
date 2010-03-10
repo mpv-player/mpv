@@ -28,7 +28,6 @@
 #include "audio_out_internal.h"
 #include "libaf/af_format.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #define OBTAIN_BITRATE(a) (((a != AF_FORMAT_U8) && (a != AF_FORMAT_S8)) ? 16 : 8)
 

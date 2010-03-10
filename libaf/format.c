@@ -25,7 +25,6 @@
 #include <limits.h>
 
 #include "af.h"
-#include "help_mp.h"
 
 // Convert from string to format
 int af_str2fmt(const char* str)

@@ -37,7 +37,6 @@
 #include "config.h"
 #include "options.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #if HAVE_WINSOCK2_H
 #include <winsock2.h>

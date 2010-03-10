@@ -29,7 +29,6 @@
 #include "libaf/af.h"
 #include "mixer.h"
 
-#include "help_mp.h"
 
 char * mixer_device=NULL;
 char * mixer_channel=NULL;

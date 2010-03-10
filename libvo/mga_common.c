@@ -22,7 +22,6 @@
 #include "libswscale/rgb2rgb.h"
 #include "libmpcodecs/vf_scale.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "old_vo_wrapper.h"
 
 // mga_vid drawing functions

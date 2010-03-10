@@ -40,7 +40,6 @@
 #include "osdep/timer.h"
 #include "libavutil/avstring.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "m_config.h"
 #include "m_option.h"
 #include "get_path.h"

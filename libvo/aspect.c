@@ -22,7 +22,6 @@
 #include "video_out.h"
 //#ifndef ASPECT_TEST
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "options.h"
 //#endif
 

@@ -27,7 +27,6 @@
 #include "subreader.h"
 
 #include "mp_msg.h"
-#include "help_mp.h"
 #include "mpcommon.h"
 
 static int current_sub=0;

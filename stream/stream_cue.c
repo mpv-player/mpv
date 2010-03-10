@@ -29,11 +29,9 @@
 
 #include "config.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 #include "stream.h"
 
-#include "help_mp.h"
 #include "m_option.h"
 #include "m_struct.h"
 #include "libavutil/avstring.h"

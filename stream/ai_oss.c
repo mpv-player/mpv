@@ -38,7 +38,6 @@
 
 #include "audio_in.h"
 #include "mp_msg.h"
-#include "help_mp.h"
 
 int ai_oss_set_samplerate(audio_in_t *ai)
 {

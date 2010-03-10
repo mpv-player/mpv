@@ -26,7 +26,6 @@
 #ifdef HAVE_LIBDL
 #include <dlfcn.h>
 #endif
-#include "help_mp.h"
 
 #include "ad_internal.h"
 #include "loader/wine/windef.h"

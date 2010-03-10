@@ -21,7 +21,6 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "help_mp.h"
 #include "mp_msg.h"
 
 #include "aviheader.h"

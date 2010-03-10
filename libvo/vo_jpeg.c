@@ -45,7 +45,6 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "mplayer.h"			/* for exit_player_bad() */
-#include "help_mp.h"
 
 /* ------------------------------------------------------------------------- */
 
