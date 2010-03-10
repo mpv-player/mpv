@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include "DS_Filter.h"
+#include "graph.h"
 #include "loader/drv.h"
 #include "loader/com.h"
 #include <stdio.h>
@@ -125,6 +126,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 //    char eb[250];
     const char* em = NULL;
     MemAllocator* tempAll;
+    FilterGraph* graph;
     ALLOCATOR_PROPERTIES props,props1;
     DS_Filter* This = malloc(sizeof(DS_Filter));
     if (!This)
@@ -166,6 +168,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	ULONG fetched;
         HRESULT result;
         unsigned int i;
+        static const uint16_t filter_name[] = { 'F', 'i', 'l', 't', 'e', 'r', 0 };
 
 	This->m_iHandle = LoadLibraryA(dllname);
 	if (!This->m_iHandle)
@@ -199,6 +202,10 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	    em = "object does not provide IBaseFilter interface";
             break;
 	}
+
+	graph = FilterGraphCreate();
+	result = This->m_pFilter->vt->JoinFilterGraph(This->m_pFilter, (IFilterGraph*)graph, filter_name);
+
 	// enumerate pins
 	result = This->m_pFilter->vt->EnumPins(This->m_pFilter, &enum_pins);
 	if (result || !enum_pins)

@@ -116,7 +116,7 @@ static inline avm_list_t* avm_list_find(avm_list_t* head, void* member)
 
 static long MemAllocator_CreateAllocator(GUID* clsid, const GUID* iid, void** ppv)
 {
-    IMemAllocator* p;
+    IUnknown* p;
     int result;
     if (!ppv)
 	return -1;
@@ -124,9 +124,9 @@ static long MemAllocator_CreateAllocator(GUID* clsid, const GUID* iid, void** pp
     if (memcmp(clsid, &CLSID_MemoryAllocator, sizeof(GUID)))
 	return -1;
 
-    p = (IMemAllocator*) MemAllocatorCreate();
-    result = p->vt->QueryInterface((IUnknown*)p, iid, ppv);
-    p->vt->Release((IUnknown*)p);
+    p = (IUnknown*) MemAllocatorCreate();
+    result = p->vt->QueryInterface(p, iid, ppv);
+    p->vt->Release(p);
 
     return result;
 }

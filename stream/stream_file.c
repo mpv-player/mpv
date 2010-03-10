@@ -136,9 +136,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
     filename++;
 #endif
 
-#if defined(__CYGWIN__)|| defined(__MINGW32__) || defined(__OS2__)
   m |= O_BINARY;
-#endif
 
   if(!strcmp(filename,"-")){
     if(mode == STREAM_READ) {

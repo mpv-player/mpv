@@ -25,6 +25,11 @@
 #include <string.h>
 #include <inttypes.h>
 #include <sys/types.h>
+#include <fcntl.h>
+
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 #define STREAMTYPE_DUMMY -1    // for placeholders, when the actual reading is handled in the demuxer
 #define STREAMTYPE_FILE 0      // read from seekable file

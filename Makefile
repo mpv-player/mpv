@@ -313,6 +313,7 @@ SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
                                         loader/dshow/DS_VideoDecoder.c \
                                         loader/dshow/allocator.c \
                                         loader/dshow/cmediasample.c \
+                                        loader/dshow/graph.c \
                                         loader/dshow/guids.c \
                                         loader/dshow/inputpin.c \
                                         loader/dshow/mediatype.c \
@@ -425,6 +426,7 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_field.c \
               libmpcodecs/vf_fil.c \
               libmpcodecs/vf_filmdint.c \
+              libmpcodecs/vf_fixpts.c \
               libmpcodecs/vf_flip.c \
               libmpcodecs/vf_format.c \
               libmpcodecs/vf_framestep.c \

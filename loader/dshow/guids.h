@@ -46,6 +46,7 @@ typedef GUID IID;
 extern const GUID IID_IBaseFilter;
 extern const GUID IID_IEnumPins;
 extern const GUID IID_IEnumMediaTypes;
+extern const GUID IID_IFilterGraph;
 extern const GUID IID_IMemInputPin;
 extern const GUID IID_IMemAllocator;
 extern const GUID IID_IMediaSample;
@@ -54,6 +55,7 @@ extern const GUID IID_Iv50Hidden;
 extern const GUID CLSID_DivxDecompressorCF;
 extern const GUID IID_IDivxFilterInterface;
 extern const GUID CLSID_IV50_Decoder;
+extern const GUID CLSID_FilterGraph;
 extern const GUID CLSID_MemoryAllocator;
 extern const GUID MEDIATYPE_Video;
 // avoid a clash with MinGW-W64 libuuid
