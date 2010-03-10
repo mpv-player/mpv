@@ -756,7 +756,7 @@ all: $(ALL_PRG-yes)
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
 
 %.o: %.S
-	$(CC) $(ASFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 %-rc.o: %.rc
 	$(WINDRES) -I. $< $@
