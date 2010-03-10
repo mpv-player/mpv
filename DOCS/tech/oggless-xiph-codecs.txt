@@ -1,6 +1,0 @@
-oggless-xiph-codecs.txt has been moved to another Subversion repository.
-You can find it at:
-http://svn.mplayerhq.hu/nut/docs/oggless-xiph-codecs.txt?view=markup
-
-Its future location will be in a git repository. This file will be
-updated when its location changes again.

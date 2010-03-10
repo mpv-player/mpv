@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 rev. 30677
+.\" sync with en/mplayer.1 rev. 30822
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -2676,11 +2676,11 @@ OS/2 KAI 音频输出驱动
 .PD 0
 .RSs
 .IPs uniaud
-强制使用 UNIAUD 模式
+强制使用 UNIAUD 模式。
 .IPs dart
-强制使用 DART 模式
+强制使用 DART 模式。
 .IPs (no)share
-以共享或独占模式打开音频
+以共享或独占模式打开音频。
 .IPs bufsize=<size>
 设置缓冲大小为 <size>，以采样数为单位（默认值：2048）。
 .RE
@@ -2946,13 +2946,14 @@ VESA 帧缓冲不支持改变模式。
 .PD 1
 .
 .TP
-.B \-geometry x[%][:y[%]] or [WxH][+x+y]
+.B \-geometry x[%][:y[%]] 或 [WxH][+-x+-y]
 调整屏幕输出的初始位置。
 x 和 y 代表从屏幕左上角到显示图像左上角的距离(以像素为单位)。
 不过如果在参数值后有百分号记号, 参数值就变为该方向上的屏幕尺寸的百分数。
-它也支持标准 X11 的 \-geometry 选项格式。
-如果使用 \-wid 选项指定了外部窗口,
-那么 x 和 y 坐标是相对于窗口而不是屏幕的左上角。
+它也支持标准 X11 的 \-geometry 选项格式。在这种方式下，例如，‘+10-50’表示“放在距左
+边界 10 个像素，距下边界 50 个像素的地方”，而‘--20+-10’表示“放在越出右边界 20 个像
+素，越出上边界 10 个像素的地方。”
+如果使用 \-wid 选项指定了外部窗口，那么 x 和 y 坐标是相对于窗口而不是屏幕的左上角。
 坐标是相对于 \-xineramascreen 选项给出的屏幕，该屏幕用于完全支持 \-xineramascreen 的
 视频输出的驱动（direct3d、gl、gl2、vdpau、x11、xv、xvmc、corevideo）。
 The coordinates are relative to the screen given with \-xineramascreen for
@@ -5427,6 +5428,10 @@ Completely empties the filter list.
 计数值,用以决定多少帧后 cropdetect 将重置先前侦测到的最大视频区域，并重
 新侦测当前的最优切割区域。该选项在电视台台标影响了视频区域时可能有用。0 
 表示从不重置而是返回播放过程中遇到的最大区域。（默认值：0）。
+计数值，用以决定多少帧后 cropdetect 将重置先前侦测到的最大视频区域，并
+重新开始侦测当前的最优切割区域（默认值：0）。
+该选项在频道台标破坏了视频区域的情况下很有效。
+0 代表从不重置并返回整个播放过程中遇到的最大视频区域。
 .RE
 .PD 1
 .

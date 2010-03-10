@@ -350,7 +350,8 @@ struct CRITSECT
 {
     pthread_t id;
     pthread_mutex_t mutex;
-    int locked;
+    pthread_cond_t unlocked;
+    int lock_count;
     long deadbeef;
 };
 
@@ -568,16 +569,30 @@ static HMODULE WINAPI expGetDriverModuleHandle(DRVR* pdrv)
 #define	MODULE_HANDLE_winmm	((HMODULE)0x128)
 #define	MODULE_HANDLE_psapi	((HMODULE)0x129)
 
+// Fake PE header, since some software (and the Microsoft CRT v8 and newer)
+// assume GetModuleHandle(NULL) returns a pointer to a PE header.
+// We simulate a very simple header with only one section.
+//
+// NOTE: If you have a section called .mixcrt, the Microsoft CRT will assume
+// it's running in a POSIX binary, and stop using EncodePointer/DecodePointer.
+static const struct {
+    IMAGE_DOS_HEADER doshdr;
+    IMAGE_NT_HEADERS nthdr;
+    IMAGE_SECTION_HEADER opthdr;
+} __attribute__((__packed__)) mp_exe = {
+    .doshdr.e_lfanew = sizeof(IMAGE_DOS_HEADER),
+    .nthdr.FileHeader.NumberOfSections = 1,
+    .nthdr.FileHeader.SizeOfOptionalHeader =
+        sizeof(IMAGE_NT_HEADERS) - FIELD_OFFSET(IMAGE_NT_HEADERS, OptionalHeader), /* 0xe0 */
+    .opthdr.Name = ".text"
+};
+
 static HMODULE WINAPI expGetModuleHandleA(const char* name)
 {
     WINE_MODREF* wm;
     HMODULE result;
     if(!name)
-#ifdef CONFIG_QTX_CODECS
-	result=1;
-#else
-	result=0;
-#endif
+	result=(HMODULE)&mp_exe.doshdr;
     else
     {
 	wm=MODULE_FindModule(name);
@@ -736,7 +751,7 @@ static void* WINAPI expCreateEventA(void* pSecAttr, char bManualReset,
     mlist->pm=pm;
     mlist->pc=pc;
     mlist->state=bInitialState;
-    mlist->reset=bManualReset;
+    mlist->reset=!bManualReset;
     if(name)
 	strncpy(mlist->name, name, 127);
     else
@@ -786,6 +801,7 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
     // FIXME FIXME FIXME - this value is sometime unititialize !!!
     int ret = WAIT_FAILED;
     mutex_list* pp=mlist;
+    th_list* tp=list;
     if(object == (void*)0xcfcf9898)
     {
 	/**
@@ -800,6 +816,17 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
 	return (void*)WAIT_FAILED;
     }
     dbgprintf("WaitForSingleObject(0x%x, duration %d) =>\n",object, duration);
+
+    // See if this is a thread.
+    while (tp && (tp->thread != object))
+        tp = tp->prev;
+    if (tp) {
+        if (pthread_join(*(pthread_t*)object, NULL) == 0) {
+            return (void*)WAIT_OBJECT_0;
+        } else {
+            return (void*)WAIT_FAILED;
+        }
+    }
 
     // loop below was slightly fixed - its used just for checking if
     // this object really exists in our list
@@ -817,8 +844,8 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
     switch(ml->type) {
     case 0: /* Event */
 	if (duration == 0) { /* Check Only */
-	    if (ml->state == 1) ret = WAIT_FAILED;
-	    else                   ret = WAIT_OBJECT_0;
+	    if (ml->state == 1) ret = WAIT_OBJECT_0;
+	    else                   ret = WAIT_FAILED;
 	}
 	if (duration == -1) { /* INFINITE */
 	    if (ml->state == 0)
@@ -1331,7 +1358,8 @@ static void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
 	    return;
 	}
 	pthread_mutex_init(&cs->mutex, NULL);
-	cs->locked = 0;
+	pthread_cond_init(&cs->unlocked, NULL);
+	cs->lock_count = 0;
 	critsecs_list[i].cs_win = c;
 	critsecs_list[i].cs_unix = cs;
 	dbgprintf("InitializeCriticalSection -> itemno=%d, cs_win=%p, cs_unix=%p\n",
@@ -1342,7 +1370,8 @@ static void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
 	struct CRITSECT* cs = mreq_private(sizeof(struct CRITSECT) + sizeof(CRITICAL_SECTION),
 					   0, AREATYPE_CRITSECT);
 	pthread_mutex_init(&cs->mutex, NULL);
-	cs->locked=0;
+	pthread_cond_init(&cs->unlocked, NULL);
+	cs->lock_count = 0;
         cs->deadbeef = 0xdeadbeef;
 	*(void**)c = cs;
     }
@@ -1374,12 +1403,17 @@ static void WINAPI expEnterCriticalSection(CRITICAL_SECTION* c)
 #endif
 	dbgprintf("Win32 Warning: Accessed uninitialized Critical Section (%p)!\n", c);
     }
-    if(cs->locked)
-	if(cs->id==pthread_self())
-	    return;
     pthread_mutex_lock(&(cs->mutex));
-    cs->locked=1;
-    cs->id=pthread_self();
+    if (cs->lock_count > 0 && cs->id == pthread_self()) {
+        cs->lock_count++;
+    } else {
+        while (cs->lock_count != 0) {
+            pthread_cond_wait(&(cs->unlocked), &(cs->mutex));
+        }
+        cs->lock_count = 1;
+        cs->id = pthread_self();
+    }
+    pthread_mutex_unlock(&(cs->mutex));
     return;
 }
 static void WINAPI expLeaveCriticalSection(CRITICAL_SECTION* c)
@@ -1396,13 +1430,16 @@ static void WINAPI expLeaveCriticalSection(CRITICAL_SECTION* c)
 	dbgprintf("Win32 Warning: Leaving uninitialized Critical Section %p!!\n", c);
 	return;
     }
-    if (cs->locked)
-    {
-	cs->locked=0;
-	pthread_mutex_unlock(&(cs->mutex));
+    pthread_mutex_lock(&(cs->mutex));
+    if (cs->lock_count == 0) {
+        dbgprintf("Win32 Warning: Unlocking unlocked Critical Section %p!!\n", c);
+    } else {
+        cs->lock_count--;
     }
-    else
-	dbgprintf("Win32 Warning: Unlocking unlocked Critical Section %p!!\n", c);
+    if (cs->lock_count == 0) {
+        pthread_cond_signal(&(cs->unlocked));
+    }
+    pthread_mutex_unlock(&(cs->mutex));
     return;
 }
 
@@ -1424,14 +1461,16 @@ static void WINAPI expDeleteCriticalSection(CRITICAL_SECTION *c)
 	return;
     }
 
-    if (cs->locked)
+    pthread_mutex_lock(&(cs->mutex));
+    if (cs->lock_count > 0)
     {
-	dbgprintf("Win32 Warning: Deleting unlocked Critical Section %p!!\n", c);
-	pthread_mutex_unlock(&(cs->mutex));
+       dbgprintf("Win32 Warning: Deleting locked Critical Section %p!!\n", c);
     }
+    pthread_mutex_unlock(&(cs->mutex));
 
 #ifndef GARBAGE
     pthread_mutex_destroy(&(cs->mutex));
+    pthread_cond_destroy(&(cs->unlocked));
     // released by GarbageCollector in my_relase otherwise
 #endif
     my_release(cs);
@@ -4701,10 +4740,9 @@ typedef struct tagPALETTEENTRY {
     BYTE peFlags;
 } PALETTEENTRY;
 
-/* reversed the first 2 entries */
 typedef struct tagLOGPALETTE {
-    WORD         palNumEntries;
     WORD         palVersion;
+    WORD         palNumEntries;
     PALETTEENTRY palPalEntry[1];
 } LOGPALETTE;
 

@@ -27,7 +27,24 @@
 #define INCL_DOS
 #define INCL_DOSDEVIOCTL
 #include <os2.h>
-#endif
+
+#include <process.h>    /* getpid() */
+
+#define REALTIME_PRIORITY_CLASS     MAKESHORT(0, PRTYC_TIMECRITICAL)
+#define HIGH_PRIORITY_CLASS         MAKESHORT(PRTYD_MAXIMUM, PRTYC_REGULAR)
+#define ABOVE_NORMAL_PRIORITY_CLASS MAKESHORT(PRTYD_MAXIMUM / 2, PRTYC_REGULAR)
+#define NORMAL_PRIORITY_CLASS       MAKESHORT(0, PRTYC_REGULAR)
+#define BELOW_NORMAL_PRIORITY_CLASS MAKESHORT(PRTYD_MAXIMUM, PRTYC_IDLETIME)
+#define IDLE_PRIORITY_CLASS         MAKESHORT(0, PRTYC_IDLETIME)
+
+#define SetPriorityClass(pid, prio) \
+            DosSetPriority(PRTYS_PROCESS, \
+                           HIBYTE(prio), \
+                           LOBYTE(prio), \
+                           pid)
+
+#define GetCurrentProcess() getpid()
+#endif /* __OS2__ */
 
 #endif /* MPLAYER_OSDEP_H */
 

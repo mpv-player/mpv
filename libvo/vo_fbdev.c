@@ -554,9 +554,6 @@ char *fb_mode_name = NULL;
 
 static fb_mode_t *fb_mode = NULL;
 
-/* vt related variables */
-static FILE *vt_fp = NULL;
-
 /* vo_fbdev related variables */
 static int fb_dev_fd;
 static int fb_tty_fd = -1;
@@ -736,9 +733,11 @@ static void vt_set_textarea(int u, int l)
     int lrow = l / 16;
 
     mp_msg(MSGT_VO, MSGL_DBG2, "vt_set_textarea(%d,%d): %d,%d\n", u, l, urow, lrow);
-    if (vt_fp) {
-        fprintf(vt_fp, "\33[%d;%dr\33[%d;%dH", urow, lrow, lrow, 0);
-        fflush(vt_fp);
+    if (fb_tty_fd >= 0) {
+        char modestring[100];
+        snprintf(modestring, sizeof(modestring), "\33[%d;%dr\33[%d;%dH", urow, lrow, lrow, 0);
+        write(fb_tty_fd, modestring, strlen(modestring));
+        fsync(fb_tty_fd);
     }
 }
 
@@ -973,9 +972,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         if (fs || vm)
             memset(frame_buffer, '\0', fb_line_len * fb_yres);
     }
-    if (!(vt_fp = fopen("/dev/tty", "w"))) {
-        mp_msg(MSGT_VO, MSGL_ERR, "can't fopen /dev/tty: %s\n", strerror(errno));
-    }
 
     vt_set_textarea(last_row, fb_yres);
 
@@ -1056,8 +1052,6 @@ static void uninit(void)
             mp_msg(MSGT_VO, MSGL_WARN, "Can't restore text mode: %s\n", strerror(errno));
     }
     vt_set_textarea(0, fb_orig_vinfo.yres);
-    if (vt_fp)
-        fclose(vt_fp);
     close(fb_tty_fd);
     close(fb_dev_fd);
     if (frame_buffer)

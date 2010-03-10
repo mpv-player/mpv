@@ -66,7 +66,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 // init driver
 static int init(sh_video_t *sh){
-    unsigned int out_fmt=sh->codec->outfmt[sh->outfmtidx];
+    unsigned int out_fmt=sh->codec->outfmt[0];
 
     /* Hack for VSSH codec: new dll can't decode old files
      * In my samples old files have no extradata, so use that info
@@ -81,6 +81,8 @@ static int init(sh_video_t *sh){
 	return 0;
     }
     if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,out_fmt)) return 0;
+    // mpcodecs_config_vo can change the format
+    out_fmt=sh->codec->outfmt[sh->outfmtidx];
     switch(out_fmt){
     case IMGFMT_YUY2:
     case IMGFMT_UYVY:

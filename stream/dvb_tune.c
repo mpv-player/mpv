@@ -32,17 +32,9 @@
 #include <fcntl.h>
 #include <time.h>
 #include <errno.h>
+#include <linux/dvb/dmx.h>
+#include <linux/dvb/frontend.h>
 #include "config.h"
-
-#ifdef CONFIG_DVB_HEAD
-	#include <linux/dvb/dmx.h>
-	#include <linux/dvb/frontend.h>
-#else
-	#include <ost/dmx.h>
-	#include <ost/sec.h>
-	#include <ost/frontend.h>
-#endif
-
 #include "dvbin.h"
 #include "dvb_tune.h"
 #include "mp_msg.h"
@@ -51,11 +43,7 @@
 
 int dvb_get_tuner_type(int fe_fd)
 {
-#ifdef CONFIG_DVB_HEAD
   struct dvb_frontend_info fe_info;
-#else
-  FrontendInfo fe_info;
-#endif
 
   int res;
 
@@ -96,35 +84,16 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 {
 	int i;
 	char frontend_dev[32], dvr_dev[32], demux_dev[32];
-#ifndef CONFIG_DVB_HEAD
-	char sec_dev[32];
-#endif
 
-#ifdef CONFIG_DVB_HEAD
 	sprintf(frontend_dev, "/dev/dvb/adapter%d/frontend0", n);
 	sprintf(dvr_dev, "/dev/dvb/adapter%d/dvr0", n);
 	sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", n);
-#else
-	sprintf(frontend_dev, "/dev/ost/frontend%d", n);
-	sprintf(dvr_dev, "/dev/ost/dvr%d", n);
-	sprintf(demux_dev, "/dev/ost/demux%d", n);
-	sprintf(sec_dev, "/dev/ost/sec%d", n);
-#endif
 	priv->fe_fd = open(frontend_dev, O_RDWR | O_NONBLOCK);
 	if(priv->fe_fd < 0)
 	{
 		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING FRONTEND DEVICE %s: ERRNO %d\n", frontend_dev, errno);
 		return 0;
 	}
-#ifndef CONFIG_DVB_HEAD
-	priv->sec_fd = open(sec_dev, O_RDWR);
-	if(priv->sec_fd < 0)
-	{
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING SEC DEVICE %s: ERRNO %d\n", sec_dev, errno);
-		close(priv->fe_fd);
-		return 0;
-	}
-#endif
 	priv->demux_fds_cnt = 0;
 	mp_msg(MSGT_DEMUX, MSGL_V, "DVB_OPEN_DEVICES(%d)\n", demux_cnt);
 	for(i = 0; i < demux_cnt; i++)
@@ -159,12 +128,7 @@ int dvb_fix_demuxes(dvb_priv_t *priv, int cnt)
 	int i;
 	char demux_dev[32];
 
-#ifdef CONFIG_DVB_HEAD
 	sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", priv->card);
-#else
-	sprintf(demux_dev, "/dev/ost/demux%d", priv->card);
-#endif
-
 	mp_msg(MSGT_DEMUX, MSGL_V, "FIX %d -> %d\n", priv->demux_fds_cnt, cnt);
 	if(priv->demux_fds_cnt >= cnt)
 	{
@@ -202,12 +166,7 @@ int dvb_set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype)
 	pesFilterParams.pid     = pid;
 	pesFilterParams.input   = DMX_IN_FRONTEND;
 	pesFilterParams.output  = DMX_OUT_TS_TAP;
-#ifdef CONFIG_DVB_HEAD
 	pesFilterParams.pes_type = pestype;
-#else
-	pesFilterParams.pesType = pestype;
-#endif
-
 	pesFilterParams.flags   = DMX_IMMEDIATE_START;
 
 	errno = 0;
@@ -248,13 +207,7 @@ static void print_status(fe_status_t festatus)
 {
 	mp_msg(MSGT_DEMUX, MSGL_V, "FE_STATUS:");
 	if (festatus & FE_HAS_SIGNAL) mp_msg(MSGT_DEMUX, MSGL_V," FE_HAS_SIGNAL");
-#ifdef CONFIG_DVB_HEAD
 	if (festatus & FE_TIMEDOUT) mp_msg(MSGT_DEMUX, MSGL_V, " FE_TIMEDOUT");
-#else
-	if (festatus & FE_HAS_POWER) mp_msg(MSGT_DEMUX, MSGL_V, " FE_HAS_POWER");
-	if (festatus & FE_SPECTRUM_INV) mp_msg(MSGT_DEMUX, MSGL_V, " FE_SPECTRUM_INV");
-	if (festatus & FE_TUNER_HAS_LOCK) mp_msg(MSGT_DEMUX, MSGL_V, " FE_TUNER_HAS_LOCK");
-#endif
 	if (festatus & FE_HAS_LOCK) mp_msg(MSGT_DEMUX, MSGL_V, " FE_HAS_LOCK");
 	if (festatus & FE_HAS_CARRIER) mp_msg(MSGT_DEMUX, MSGL_V, " FE_HAS_CARRIER");
 	if (festatus & FE_HAS_VITERBI) mp_msg(MSGT_DEMUX, MSGL_V, " FE_HAS_VITERBI");
@@ -263,7 +216,6 @@ static void print_status(fe_status_t festatus)
 }
 
 
-#ifdef CONFIG_DVB_HEAD
 static int check_status(int fd_frontend, int tmout)
 {
 	int32_t strength;
@@ -368,202 +320,14 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
 		   (sat_no / 4) % 2 ? SEC_MINI_B : SEC_MINI_A);
 }
 
-#else
-
-static int SecGetStatus (int fd, struct secStatus *state)
-{
-    if(ioctl(fd, SEC_GET_STATUS, state) < 0)
-    {
-        mp_msg(MSGT_DEMUX, MSGL_ERR, ("SEC GET STATUS: "));
-        return -1;
-    }
-
-    switch (state->busMode)
-    {
-	case SEC_BUS_IDLE:
-    	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  IDLE (%d)\n",state->busMode);
-    	    break;
-	case SEC_BUS_BUSY:
-    	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  BUSY (%d)\n",state->busMode);
-	    break;
-        case SEC_BUS_OFF:
-	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  OFF  (%d)\n",state->busMode);
-    	    break;
-        case SEC_BUS_OVERLOAD:
-	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  OVERLOAD (%d)\n",state->busMode);
-    	    break;
-	default:
-    	    mp_msg(MSGT_DEMUX, MSGL_V, "SEC BUS MODE:  unknown  (%d)\n",state->busMode);
-            break;
-    }
-
-    switch (state->selVolt)
-    {
-	case SEC_VOLTAGE_OFF:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  OFF (%d)\n",state->selVolt);
-		break;
-	case SEC_VOLTAGE_LT:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  LT  (%d)\n",state->selVolt);
-		break;
-	case SEC_VOLTAGE_13:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  13  (%d)\n",state->selVolt);
-		break;
-	case SEC_VOLTAGE_13_5:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  13.5 (%d)\n",state->selVolt);
-		break;
-	case SEC_VOLTAGE_18:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  18 (%d)\n",state->selVolt);
-		break;
-	case SEC_VOLTAGE_18_5:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  18.5 (%d)\n",state->selVolt);
-		break;
-	default:
-		mp_msg(MSGT_DEMUX, MSGL_V, "SEC VOLTAGE:  unknown (%d)\n",state->selVolt);
-		break;
-    }
-
-    mp_msg(MSGT_DEMUX, MSGL_V, "SEC CONT TONE: %s\n", (state->contTone == SEC_TONE_ON ? "ON" : "OFF"));
-    return 0;
-}
-
-static int check_status(int fd_frontend, int tmout)
-{
-	int i,res;
-	int32_t strength;
-	fe_status_t festatus;
-	FrontendEvent event;
-
-	struct pollfd pfd[1];
-
-	i = 0; res = -1;
-	while ((i < 3) && (res < 0))
-	{
-		pfd[0].fd = fd_frontend;
-		pfd[0].events = POLLIN | POLLPRI;
-
-		if(poll(pfd,1,tmout*1000) > 0)
-		{
-			if (pfd[0].revents & POLLPRI)
-			{
-				mp_msg(MSGT_DEMUX, MSGL_V, "Getting frontend event\n");
-				if ( ioctl(fd_frontend, FE_GET_EVENT, &event) < 0)
-				{
-					mp_msg(MSGT_DEMUX, MSGL_ERR, "FE_GET_EVENT");
-					return -1;
-				}
-				mp_msg(MSGT_DEMUX, MSGL_V, "Received ");
-				switch(event.type)
-				{
-					case FE_UNEXPECTED_EV:
-					mp_msg(MSGT_DEMUX, MSGL_V, "unexpected event\n");
-					res = -1;
-					break;
-
-					case FE_FAILURE_EV:
-					mp_msg(MSGT_DEMUX, MSGL_V, "failure event\n");
-					res = -1;
-					break;
-
-					case FE_COMPLETION_EV:
-					mp_msg(MSGT_DEMUX, MSGL_V, "completion event\n");
-					res = 0;
-					break;
-				}
-			}
-			i++;
-		}
-	}
-
-	if (res > 0)
-	switch (event.type)
-	{
-		case FE_UNEXPECTED_EV: mp_msg(MSGT_DEMUX, MSGL_V, "FE_UNEXPECTED_EV\n");
-			break;
-		case FE_COMPLETION_EV: mp_msg(MSGT_DEMUX, MSGL_V, "FE_COMPLETION_EV\n");
-			break;
-		case FE_FAILURE_EV: mp_msg(MSGT_DEMUX, MSGL_V, "FE_FAILURE_EV\n");
-			break;
-	}
-
-	if (event.type == FE_COMPLETION_EV)
-	{
-		strength=0;
-		if(ioctl(fd_frontend,FE_READ_BER,&strength) >= 0)
-		mp_msg(MSGT_DEMUX, MSGL_V, "Bit error rate: %d\n",strength);
-
-		strength=0;
-		if(ioctl(fd_frontend,FE_READ_SIGNAL_STRENGTH,&strength) >= 0)
-		mp_msg(MSGT_DEMUX, MSGL_V, "Signal strength: %d\n",strength);
-
-		strength=0;
-		if(ioctl(fd_frontend,FE_READ_SNR,&strength) >= 0)
-		mp_msg(MSGT_DEMUX, MSGL_V, "SNR: %d\n",strength);
-
-		festatus=0;
-		mp_msg(MSGT_DEMUX, MSGL_V, "FE_STATUS:");
-
-		if(ioctl(fd_frontend,FE_READ_STATUS,&festatus) >= 0)
-			print_status(festatus);
-		else
-			mp_msg(MSGT_DEMUX, MSGL_ERR, " ERROR, UNABLE TO READ_STATUS");
-
-		mp_msg(MSGT_DEMUX, MSGL_V, "\n");
-	}
-	else
-	{
-		mp_msg(MSGT_DEMUX, MSGL_V, "Not able to lock to the signal on the given frequency\n");
-		return -1;
-	}
-	return 0;
-}
-
-static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
-{
-	struct secCommand scmd;
-        struct secCmdSequence scmds;
-
-        scmds.continuousTone = (hi_lo ? SEC_TONE_ON : SEC_TONE_OFF);
-        scmds.voltage = (polv ? SEC_VOLTAGE_13 : SEC_VOLTAGE_18);
-        scmds.miniCommand = SEC_MINI_NONE;
-
-        scmd.type = SEC_CMDTYPE_DISEQC;
-        scmds.numCommands = 1;
-        scmds.commands = &scmd;
-
-        scmd.u.diseqc.addr = 0x10;
-        scmd.u.diseqc.cmd = 0x38;
-        scmd.u.diseqc.numParams = 1;
-        scmd.u.diseqc.params[0] = 0xf0 |
-                                  (((sat_no) << 2) & 0x0F) |
-				  (hi_lo ? 1 : 0) |
-                                  (polv ? 0 : 2);
-
-        if (ioctl(secfd,SEC_SEND_SEQUENCE,&scmds) < 0)
-	{
-          mp_msg(MSGT_DEMUX, MSGL_ERR, "Error sending DisEqC");
-          return -1;
-        }
-
-	return 0;
-}
-#endif
-
 static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int srate, char pol, int tone,
 	fe_spectral_inversion_t specInv, unsigned int diseqc, fe_modulation_t modulation, fe_code_rate_t HP_CodeRate,
 	fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
 	fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
 {
   int res, hi_lo, dfd;
-#ifdef CONFIG_DVB_HEAD
   struct dvb_frontend_parameters feparams;
   struct dvb_frontend_info fe_info;
-#else
-  FrontendParameters feparams;
-  FrontendInfo fe_info;
-  FrontendEvent event;
-  struct secStatus sec_state;
-#endif
-
 
   mp_msg(MSGT_DEMUX, MSGL_V,  "TUNE_IT, fd_frontend %d, fd_sec %d\nfreq %lu, srate %lu, pol %c, tone %i, specInv, diseqc %u, fe_modulation_t modulation,fe_code_rate_t HP_CodeRate, fe_transmit_mode_t TransmissionMode,fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth\n",
     fd_frontend, fd_sec, (long unsigned int)freq, (long unsigned int)srate, pol, tone, diseqc);
@@ -576,15 +340,11 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
         return -1;
   }
 
-
-#ifdef CONFIG_DVB_HEAD
   mp_msg(MSGT_DEMUX, MSGL_V, "Using DVB card \"%s\"\n", fe_info.name);
-#endif
 
   switch(fe_info.type)
   {
     case FE_OFDM:
-#ifdef CONFIG_DVB_HEAD
       if (freq < 1000000) freq*=1000UL;
       feparams.frequency=freq;
       feparams.inversion=specInv;
@@ -595,18 +355,6 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
       feparams.u.ofdm.transmission_mode=TransmissionMode;
       feparams.u.ofdm.guard_interval=guardInterval;
       feparams.u.ofdm.hierarchy_information=hier;
-#else
-      if (freq < 1000000) freq*=1000UL;
-      feparams.Frequency=freq;
-      feparams.Inversion=specInv;
-      feparams.u.ofdm.bandWidth=bandwidth;
-      feparams.u.ofdm.HP_CodeRate=HP_CodeRate;
-      feparams.u.ofdm.LP_CodeRate=LP_CodeRate;
-      feparams.u.ofdm.Constellation=modulation;
-      feparams.u.ofdm.TransmissionMode=TransmissionMode;
-      feparams.u.ofdm.guardInterval=guardInterval;
-      feparams.u.ofdm.HierarchyInformation=hier;
-#endif
       mp_msg(MSGT_DEMUX, MSGL_V, "tuning DVB-T to %d Hz, bandwidth: %d\n",freq, bandwidth);
       break;
     case FE_QPSK:
@@ -615,44 +363,25 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
         // this must be an absolute frequency
         if (freq < SLOF)
         {
-#ifdef CONFIG_DVB_HEAD
           freq = feparams.frequency=(freq-LOF1);
-#else
-          freq = feparams.Frequency=(freq-LOF1);
-#endif
           hi_lo = 0;
         }
         else
         {
-#ifdef CONFIG_DVB_HEAD
           freq = feparams.frequency=(freq-LOF2);
-#else
-          freq = feparams.Frequency=(freq-LOF2);
-#endif
           hi_lo = 1;
         }
       }
       else
       {
         // this is an L-Band frequency
-#ifdef CONFIG_DVB_HEAD
        feparams.frequency=freq;
-#else
-       feparams.Frequency=freq;
-#endif
       }
 
-#ifdef CONFIG_DVB_HEAD
       feparams.inversion=specInv;
       feparams.u.qpsk.symbol_rate=srate;
       feparams.u.qpsk.fec_inner=HP_CodeRate;
       dfd = fd_frontend;
-#else
-      feparams.Inversion=specInv;
-      feparams.u.qpsk.SymbolRate=srate;
-      feparams.u.qpsk.FEC_inner=HP_CodeRate;
-      dfd = fd_sec;
-#endif
 
       mp_msg(MSGT_DEMUX, MSGL_V, "tuning DVB-S to Freq: %u, Pol: %c Srate: %d, 22kHz: %s, LNB:  %d\n",freq,pol,srate,hi_lo ? "on" : "off", diseqc);
 
@@ -666,19 +395,11 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
       break;
     case FE_QAM:
       mp_msg(MSGT_DEMUX, MSGL_V, "tuning DVB-C to %d, srate=%d\n",freq,srate);
-#ifdef CONFIG_DVB_HEAD
       feparams.frequency=freq;
       feparams.inversion=specInv;
       feparams.u.qam.symbol_rate = srate;
       feparams.u.qam.fec_inner = HP_CodeRate;
       feparams.u.qam.modulation = modulation;
-#else
-      feparams.Frequency=freq;
-      feparams.Inversion=specInv;
-      feparams.u.qam.SymbolRate = srate;
-      feparams.u.qam.FEC_inner = HP_CodeRate;
-      feparams.u.qam.QAM = modulation;
-#endif
       break;
 #ifdef DVB_ATSC
     case FE_ATSC:
@@ -692,15 +413,6 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
       return 0;
   }
   usleep(100000);
-
-#ifndef CONFIG_DVB_HEAD
-  if (fd_sec) SecGetStatus(fd_sec, &sec_state);
-  while(1)
-  {
-    if(ioctl(fd_frontend, FE_GET_EVENT, &event) == -1)
-    break;
-  }
-#endif
 
   if(ioctl(fd_frontend,FE_SET_FRONTEND,&feparams) < 0)
   {
