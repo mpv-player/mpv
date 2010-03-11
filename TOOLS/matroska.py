@@ -332,8 +332,13 @@ def read_float(s, length):
         f = ldexp((i & 0x7fffff) + (1 << 23), (i >> 23 & 0xff) - 150)
         if i & (1 << 31):
             f = -f
-        return f
-    raise SyntaxError
+    elif length == 8:
+        f = ldexp((i & ((1 << 52) - 1)) + (1 << 52), (i >> 52 & 0x7ff) - 1075)
+        if i & (1 << 63):
+            f = -f
+    else:
+        raise SyntaxError
+    return f
 
 def parse_one(s, depth, parent, maxlen):
     elid = read_id(s).encode('hex')
