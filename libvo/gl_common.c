@@ -855,168 +855,168 @@ static void gen_spline_lookup_tex(GLenum unit) {
 }
 
 static const char *bilin_filt_template =
-  "TEX yuv.%c, fragment.texcoord[%c], texture[%c], %s;";
+  "TEX yuv.%c, fragment.texcoord[%c], texture[%c], %s;\n";
 
 #define BICUB_FILT_MAIN(textype) \
   /* first y-interpolation */ \
-  "ADD coord, fragment.texcoord[%c].xyxy, cdelta.xyxw;" \
-  "ADD coord2, fragment.texcoord[%c].xyxy, cdelta.zyzw;" \
-  "TEX a.r, coord.xyxy, texture[%c], "textype";" \
-  "TEX a.g, coord.zwzw, texture[%c], "textype";" \
+  "ADD coord, fragment.texcoord[%c].xyxy, cdelta.xyxw;\n" \
+  "ADD coord2, fragment.texcoord[%c].xyxy, cdelta.zyzw;\n" \
+  "TEX a.r, coord.xyxy, texture[%c], "textype";\n" \
+  "TEX a.g, coord.zwzw, texture[%c], "textype";\n" \
   /* second y-interpolation */ \
-  "TEX b.r, coord2.xyxy, texture[%c], "textype";" \
-  "TEX b.g, coord2.zwzw, texture[%c], "textype";" \
-  "LRP a.b, parmy.b, a.rrrr, a.gggg;" \
-  "LRP a.a, parmy.b, b.rrrr, b.gggg;" \
+  "TEX b.r, coord2.xyxy, texture[%c], "textype";\n" \
+  "TEX b.g, coord2.zwzw, texture[%c], "textype";\n" \
+  "LRP a.b, parmy.b, a.rrrr, a.gggg;\n" \
+  "LRP a.a, parmy.b, b.rrrr, b.gggg;\n" \
   /* x-interpolation */ \
-  "LRP yuv.%c, parmx.b, a.bbbb, a.aaaa;"
+  "LRP yuv.%c, parmx.b, a.bbbb, a.aaaa;\n"
 
 static const char *bicub_filt_template_2D =
-  "MAD coord.xy, fragment.texcoord[%c], {%e, %e}, {0.5, 0.5};"
-  "TEX parmx, coord.x, texture[%c], 1D;"
-  "MUL cdelta.xz, parmx.rrgg, {-%e, 0, %e, 0};"
-  "TEX parmy, coord.y, texture[%c], 1D;"
-  "MUL cdelta.yw, parmy.rrgg, {0, -%e, 0, %e};"
+  "MAD coord.xy, fragment.texcoord[%c], {%e, %e}, {0.5, 0.5};\n"
+  "TEX parmx, coord.x, texture[%c], 1D;\n"
+  "MUL cdelta.xz, parmx.rrgg, {-%e, 0, %e, 0};\n"
+  "TEX parmy, coord.y, texture[%c], 1D;\n"
+  "MUL cdelta.yw, parmy.rrgg, {0, -%e, 0, %e};\n"
   BICUB_FILT_MAIN("2D");
 
 static const char *bicub_filt_template_RECT =
-  "ADD coord, fragment.texcoord[%c], {0.5, 0.5};"
-  "TEX parmx, coord.x, texture[%c], 1D;"
-  "MUL cdelta.xz, parmx.rrgg, {-1, 0, 1, 0};"
-  "TEX parmy, coord.y, texture[%c], 1D;"
-  "MUL cdelta.yw, parmy.rrgg, {0, -1, 0, 1};"
+  "ADD coord, fragment.texcoord[%c], {0.5, 0.5};\n"
+  "TEX parmx, coord.x, texture[%c], 1D;\n"
+  "MUL cdelta.xz, parmx.rrgg, {-1, 0, 1, 0};\n"
+  "TEX parmy, coord.y, texture[%c], 1D;\n"
+  "MUL cdelta.yw, parmy.rrgg, {0, -1, 0, 1};\n"
   BICUB_FILT_MAIN("RECT");
 
 #define CALCWEIGHTS(t, s) \
-  "MAD "t", {-0.5, 0.1666, 0.3333, -0.3333}, "s", {1, 0, -0.5, 0.5};" \
-  "MAD "t", "t", "s", {0, 0, -0.5, 0.5};" \
-  "MAD "t", "t", "s", {-0.6666, 0, 0.8333, 0.1666};" \
-  "RCP a.x, "t".z;" \
-  "RCP a.y, "t".w;" \
-  "MAD "t".xy, "t".xyxy, a.xyxy, {1, 1, 0, 0};" \
-  "ADD "t".x, "t".xxxx, "s";" \
-  "SUB "t".y, "t".yyyy, "s";"
+  "MAD "t", {-0.5, 0.1666, 0.3333, -0.3333}, "s", {1, 0, -0.5, 0.5};\n" \
+  "MAD "t", "t", "s", {0, 0, -0.5, 0.5};\n" \
+  "MAD "t", "t", "s", {-0.6666, 0, 0.8333, 0.1666};\n" \
+  "RCP a.x, "t".z;\n" \
+  "RCP a.y, "t".w;\n" \
+  "MAD "t".xy, "t".xyxy, a.xyxy, {1, 1, 0, 0};\n" \
+  "ADD "t".x, "t".xxxx, "s";\n" \
+  "SUB "t".y, "t".yyyy, "s";\n"
 
 static const char *bicub_notex_filt_template_2D =
-  "MAD coord.xy, fragment.texcoord[%c], {%e, %e}, {0.5, 0.5};"
-  "FRC coord.xy, coord.xyxy;"
+  "MAD coord.xy, fragment.texcoord[%c], {%e, %e}, {0.5, 0.5};\n"
+  "FRC coord.xy, coord.xyxy;\n"
   CALCWEIGHTS("parmx", "coord.xxxx")
-  "MUL cdelta.xz, parmx.rrgg, {-%e, 0, %e, 0};"
+  "MUL cdelta.xz, parmx.rrgg, {-%e, 0, %e, 0};\n"
   CALCWEIGHTS("parmy", "coord.yyyy")
-  "MUL cdelta.yw, parmy.rrgg, {0, -%e, 0, %e};"
+  "MUL cdelta.yw, parmy.rrgg, {0, -%e, 0, %e};\n"
   BICUB_FILT_MAIN("2D");
 
 static const char *bicub_notex_filt_template_RECT =
-  "ADD coord, fragment.texcoord[%c], {0.5, 0.5};"
-  "FRC coord.xy, coord.xyxy;"
+  "ADD coord, fragment.texcoord[%c], {0.5, 0.5};\n"
+  "FRC coord.xy, coord.xyxy;\n"
   CALCWEIGHTS("parmx", "coord.xxxx")
-  "MUL cdelta.xz, parmx.rrgg, {-1, 0, 1, 0};"
+  "MUL cdelta.xz, parmx.rrgg, {-1, 0, 1, 0};\n"
   CALCWEIGHTS("parmy", "coord.yyyy")
-  "MUL cdelta.yw, parmy.rrgg, {0, -1, 0, 1};"
+  "MUL cdelta.yw, parmy.rrgg, {0, -1, 0, 1};\n"
   BICUB_FILT_MAIN("RECT");
 
 #define BICUB_X_FILT_MAIN(textype) \
-  "ADD coord.xy, fragment.texcoord[%c].xyxy, cdelta.xyxy;" \
-  "ADD coord2.xy, fragment.texcoord[%c].xyxy, cdelta.zyzy;" \
-  "TEX a.r, coord, texture[%c], "textype";" \
-  "TEX b.r, coord2, texture[%c], "textype";" \
+  "ADD coord.xy, fragment.texcoord[%c].xyxy, cdelta.xyxy;\n" \
+  "ADD coord2.xy, fragment.texcoord[%c].xyxy, cdelta.zyzy;\n" \
+  "TEX a.r, coord, texture[%c], "textype";\n" \
+  "TEX b.r, coord2, texture[%c], "textype";\n" \
   /* x-interpolation */ \
-  "LRP yuv.%c, parmx.b, a.rrrr, b.rrrr;"
+  "LRP yuv.%c, parmx.b, a.rrrr, b.rrrr;\n"
 
 static const char *bicub_x_filt_template_2D =
-  "MAD coord.x, fragment.texcoord[%c], {%e}, {0.5};"
-  "TEX parmx, coord, texture[%c], 1D;"
-  "MUL cdelta.xyz, parmx.rrgg, {-%e, 0, %e};"
+  "MAD coord.x, fragment.texcoord[%c], {%e}, {0.5};\n"
+  "TEX parmx, coord, texture[%c], 1D;\n"
+  "MUL cdelta.xyz, parmx.rrgg, {-%e, 0, %e};\n"
   BICUB_X_FILT_MAIN("2D");
 
 static const char *bicub_x_filt_template_RECT =
-  "ADD coord.x, fragment.texcoord[%c], {0.5};"
-  "TEX parmx, coord, texture[%c], 1D;"
-  "MUL cdelta.xyz, parmx.rrgg, {-1, 0, 1};"
+  "ADD coord.x, fragment.texcoord[%c], {0.5};\n"
+  "TEX parmx, coord, texture[%c], 1D;\n"
+  "MUL cdelta.xyz, parmx.rrgg, {-1, 0, 1};\n"
   BICUB_X_FILT_MAIN("RECT");
 
 static const char *unsharp_filt_template =
-  "PARAM dcoord%c = {%e, %e, %e, %e};"
-  "ADD coord, fragment.texcoord[%c].xyxy, dcoord%c;"
-  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord%c;"
-  "TEX a.r, fragment.texcoord[%c], texture[%c], %s;"
-  "TEX b.r, coord.xyxy, texture[%c], %s;"
-  "TEX b.g, coord.zwzw, texture[%c], %s;"
-  "ADD b.r, b.r, b.g;"
-  "TEX b.b, coord2.xyxy, texture[%c], %s;"
-  "TEX b.g, coord2.zwzw, texture[%c], %s;"
-  "DP3 b, b, {0.25, 0.25, 0.25};"
-  "SUB b.r, a.r, b.r;"
-  "MAD yuv.%c, b.r, {%e}, a.r;";
+  "PARAM dcoord%c = {%e, %e, %e, %e};\n"
+  "ADD coord, fragment.texcoord[%c].xyxy, dcoord%c;\n"
+  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord%c;\n"
+  "TEX a.r, fragment.texcoord[%c], texture[%c], %s;\n"
+  "TEX b.r, coord.xyxy, texture[%c], %s;\n"
+  "TEX b.g, coord.zwzw, texture[%c], %s;\n"
+  "ADD b.r, b.r, b.g;\n"
+  "TEX b.b, coord2.xyxy, texture[%c], %s;\n"
+  "TEX b.g, coord2.zwzw, texture[%c], %s;\n"
+  "DP3 b, b, {0.25, 0.25, 0.25};\n"
+  "SUB b.r, a.r, b.r;\n"
+  "MAD yuv.%c, b.r, {%e}, a.r;\n";
 
 static const char *unsharp_filt_template2 =
-  "PARAM dcoord%c = {%e, %e, %e, %e};"
-  "PARAM dcoord2%c = {%e, 0, 0, %e};"
-  "ADD coord, fragment.texcoord[%c].xyxy, dcoord%c;"
-  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord%c;"
-  "TEX a.r, fragment.texcoord[%c], texture[%c], %s;"
-  "TEX b.r, coord.xyxy, texture[%c], %s;"
-  "TEX b.g, coord.zwzw, texture[%c], %s;"
-  "ADD b.r, b.r, b.g;"
-  "TEX b.b, coord2.xyxy, texture[%c], %s;"
-  "TEX b.g, coord2.zwzw, texture[%c], %s;"
-  "ADD b.r, b.r, b.b;"
-  "ADD b.a, b.r, b.g;"
-  "ADD coord, fragment.texcoord[%c].xyxy, dcoord2%c;"
-  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord2%c;"
-  "TEX b.r, coord.xyxy, texture[%c], %s;"
-  "TEX b.g, coord.zwzw, texture[%c], %s;"
-  "ADD b.r, b.r, b.g;"
-  "TEX b.b, coord2.xyxy, texture[%c], %s;"
-  "TEX b.g, coord2.zwzw, texture[%c], %s;"
-  "DP4 b.r, b, {-0.1171875, -0.1171875, -0.1171875, -0.09765625};"
-  "MAD b.r, a.r, {0.859375}, b.r;"
-  "MAD yuv.%c, b.r, {%e}, a.r;";
+  "PARAM dcoord%c = {%e, %e, %e, %e};\n"
+  "PARAM dcoord2%c = {%e, 0, 0, %e};\n"
+  "ADD coord, fragment.texcoord[%c].xyxy, dcoord%c;\n"
+  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord%c;\n"
+  "TEX a.r, fragment.texcoord[%c], texture[%c], %s;\n"
+  "TEX b.r, coord.xyxy, texture[%c], %s;\n"
+  "TEX b.g, coord.zwzw, texture[%c], %s;\n"
+  "ADD b.r, b.r, b.g;\n"
+  "TEX b.b, coord2.xyxy, texture[%c], %s;\n"
+  "TEX b.g, coord2.zwzw, texture[%c], %s;\n"
+  "ADD b.r, b.r, b.b;\n"
+  "ADD b.a, b.r, b.g;\n"
+  "ADD coord, fragment.texcoord[%c].xyxy, dcoord2%c;\n"
+  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord2%c;\n"
+  "TEX b.r, coord.xyxy, texture[%c], %s;\n"
+  "TEX b.g, coord.zwzw, texture[%c], %s;\n"
+  "ADD b.r, b.r, b.g;\n"
+  "TEX b.b, coord2.xyxy, texture[%c], %s;\n"
+  "TEX b.g, coord2.zwzw, texture[%c], %s;\n"
+  "DP4 b.r, b, {-0.1171875, -0.1171875, -0.1171875, -0.09765625};\n"
+  "MAD b.r, a.r, {0.859375}, b.r;\n"
+  "MAD yuv.%c, b.r, {%e}, a.r;\n";
 
 static const char *yuv_prog_template =
-  "PARAM ycoef = {%e, %e, %e};"
-  "PARAM ucoef = {%e, %e, %e};"
-  "PARAM vcoef = {%e, %e, %e};"
-  "PARAM offsets = {%e, %e, %e};"
-  "TEMP res;"
-  "MAD res.rgb, yuv.rrrr, ycoef, offsets;"
-  "MAD res.rgb, yuv.gggg, ucoef, res;"
-  "MAD result.color.rgb, yuv.bbbb, vcoef, res;"
+  "PARAM ycoef = {%e, %e, %e};\n"
+  "PARAM ucoef = {%e, %e, %e};\n"
+  "PARAM vcoef = {%e, %e, %e};\n"
+  "PARAM offsets = {%e, %e, %e};\n"
+  "TEMP res;\n"
+  "MAD res.rgb, yuv.rrrr, ycoef, offsets;\n"
+  "MAD res.rgb, yuv.gggg, ucoef, res;\n"
+  "MAD result.color.rgb, yuv.bbbb, vcoef, res;\n"
   "END";
 
 static const char *yuv_pow_prog_template =
-  "PARAM ycoef = {%e, %e, %e};"
-  "PARAM ucoef = {%e, %e, %e};"
-  "PARAM vcoef = {%e, %e, %e};"
-  "PARAM offsets = {%e, %e, %e};"
-  "PARAM gamma = {%e, %e, %e};"
-  "TEMP res;"
-  "MAD res.rgb, yuv.rrrr, ycoef, offsets;"
-  "MAD res.rgb, yuv.gggg, ucoef, res;"
-  "MAD_SAT res.rgb, yuv.bbbb, vcoef, res;"
-  "POW result.color.r, res.r, gamma.r;"
-  "POW result.color.g, res.g, gamma.g;"
-  "POW result.color.b, res.b, gamma.b;"
+  "PARAM ycoef = {%e, %e, %e};\n"
+  "PARAM ucoef = {%e, %e, %e};\n"
+  "PARAM vcoef = {%e, %e, %e};\n"
+  "PARAM offsets = {%e, %e, %e};\n"
+  "PARAM gamma = {%e, %e, %e};\n"
+  "TEMP res;\n"
+  "MAD res.rgb, yuv.rrrr, ycoef, offsets;\n"
+  "MAD res.rgb, yuv.gggg, ucoef, res;\n"
+  "MAD_SAT res.rgb, yuv.bbbb, vcoef, res;\n"
+  "POW result.color.r, res.r, gamma.r;\n"
+  "POW result.color.g, res.g, gamma.g;\n"
+  "POW result.color.b, res.b, gamma.b;\n"
   "END";
 
 static const char *yuv_lookup_prog_template =
-  "PARAM ycoef = {%e, %e, %e, 0};"
-  "PARAM ucoef = {%e, %e, %e, 0};"
-  "PARAM vcoef = {%e, %e, %e, 0};"
-  "PARAM offsets = {%e, %e, %e, 0.125};"
-  "TEMP res;"
-  "MAD res, yuv.rrrr, ycoef, offsets;"
-  "MAD res.rgb, yuv.gggg, ucoef, res;"
-  "MAD res.rgb, yuv.bbbb, vcoef, res;"
-  "TEX result.color.r, res.raaa, texture[%c], 2D;"
-  "ADD res.a, res.a, 0.25;"
-  "TEX result.color.g, res.gaaa, texture[%c], 2D;"
-  "ADD res.a, res.a, 0.25;"
-  "TEX result.color.b, res.baaa, texture[%c], 2D;"
+  "PARAM ycoef = {%e, %e, %e, 0};\n"
+  "PARAM ucoef = {%e, %e, %e, 0};\n"
+  "PARAM vcoef = {%e, %e, %e, 0};\n"
+  "PARAM offsets = {%e, %e, %e, 0.125};\n"
+  "TEMP res;\n"
+  "MAD res, yuv.rrrr, ycoef, offsets;\n"
+  "MAD res.rgb, yuv.gggg, ucoef, res;\n"
+  "MAD res.rgb, yuv.bbbb, vcoef, res;\n"
+  "TEX result.color.r, res.raaa, texture[%c], 2D;\n"
+  "ADD res.a, res.a, 0.25;\n"
+  "TEX result.color.g, res.gaaa, texture[%c], 2D;\n"
+  "ADD res.a, res.a, 0.25;\n"
+  "TEX result.color.b, res.baaa, texture[%c], 2D;\n"
   "END";
 
 static const char *yuv_lookup3d_prog_template =
-  "TEX result.color, yuv, texture[%c], 3D;"
+  "TEX result.color, yuv, texture[%c], 3D;\n"
   "END";
 
 /**
@@ -1254,10 +1254,10 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
   int rect = params->target == GL_TEXTURE_RECTANGLE;
   static const char prog_hdr[] =
     "!!ARBfp1.0\n"
-    "OPTION ARB_precision_hint_fastest;"
+    "OPTION ARB_precision_hint_fastest;\n"
     // all scaler variables must go here so they aren't defined
     // multiple times when the same scaler is used more than once
-    "TEMP coord, coord2, cdelta, parmx, parmy, a, b, yuv;";
+    "TEMP coord, coord2, cdelta, parmx, parmy, a, b, yuv;\n";
   int prog_remain;
   char *yuv_prog, *prog_pos;
   int cur_texu = 3;
