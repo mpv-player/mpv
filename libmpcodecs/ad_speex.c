@@ -61,6 +61,10 @@ static int init(sh_audio_t *sh) {
     return 0;
   }
   ctx->hdr = speex_packet_to_header((char *)&sh->wf[1], sh->wf->cbSize);
+  if (!ctx->hdr) {
+    mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Invalid extradata!\n");
+    return 0;
+  }
   if (ctx->hdr->nb_channels != 1 && ctx->hdr->nb_channels != 2) {
     mp_msg(MSGT_DECAUDIO, MSGL_WARN, "Invalid number of channels (%i), "
             "assuming mono\n", ctx->hdr->nb_channels);
