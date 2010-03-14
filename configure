@@ -2681,11 +2681,11 @@ echo "pabsw xmm0, xmm0" > $TMPS
 yasm_check || _yasm=""
 if test $_yasm ; then
   def_yasm='#define HAVE_YASM 1'
-  _have_yasm="yes"
+  have_yasm="yes"
   echores "$_yasm"
 else
   def_yasm='#define HAVE_YASM 0'
-  _have_yasm="no"
+  have_yasm="no"
   echores "no"
 fi
 
@@ -8737,7 +8737,7 @@ CONFIG_ZLIB=$_zlib
 HAVE_PTHREADS = $_pthreads
 HAVE_SHM = $_shm
 HAVE_W32THREADS = $_w32threads
-HAVE_YASM = $_have_yasm
+HAVE_YASM = $have_yasm
 
 $(echo $_libavdecoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/')
 $(echo $_libavencoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/')
