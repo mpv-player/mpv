@@ -2680,13 +2680,11 @@ fi
 echo "pabsw xmm0, xmm0" > $TMPS
 yasm_check || _yasm=""
 if test $_yasm ; then
-  test "$_mmx" = "yes" && fft_mmx="yes"
   def_yasm='#define HAVE_YASM 1'
   _have_yasm="yes"
   echores "$_yasm"
 else
   def_yasm='#define HAVE_YASM 0'
-  fft_mmx="no"
   _have_yasm="no"
   echores "no"
 fi
@@ -8704,7 +8702,6 @@ CONFIG_AANDCT=yes
 CONFIG_DCT=yes
 CONFIG_DWT=yes
 CONFIG_FFT=yes
-CONFIG_FFT_MMX=$fft_mmx
 CONFIG_GOLOMB=yes
 CONFIG_LPC=yes
 CONFIG_LSP=yes
