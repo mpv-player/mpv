@@ -159,11 +159,9 @@ char *get_path(const char *filename){
 void set_path_env(void)
 {
 	/*make our codec dirs available for LoadLibraryA()*/
-	char tmppath[MAX_PATH*2 + 1];
 	char win32path[MAX_PATH];
 #ifdef __CYGWIN__
 	cygwin_conv_to_full_win32_path(BINARY_CODECS_PATH, win32path);
-	strcpy(tmppath,win32path);
 #else /*__CYGWIN__*/
 	/* Expand to absolute path unless it's already absolute */
 	if (!strstr(BINARY_CODECS_PATH,":") && BINARY_CODECS_PATH[0] != '\\') {
@@ -171,10 +169,9 @@ void set_path_env(void)
 		strcpy(strrchr(win32path, '\\') + 1, BINARY_CODECS_PATH);
 	}
 	else strcpy(win32path, BINARY_CODECS_PATH);
-	strcpy(tmppath,win32path);
 #endif /*__CYGWIN__*/
-	mp_msg(MSGT_WIN32, MSGL_V,"Setting PATH to %s\n",tmppath);
-	if (!SetEnvironmentVariableA("PATH", tmppath))
+	mp_msg(MSGT_WIN32, MSGL_V, "Setting PATH to %s\n", win32path);
+	if (!SetEnvironmentVariableA("PATH", win32path))
 		mp_msg(MSGT_WIN32, MSGL_WARN, "Cannot set PATH!");
 }
 #endif /* (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL) */
