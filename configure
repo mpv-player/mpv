@@ -7038,8 +7038,7 @@ fi
 # Fall back on default directory.
 if test -z "$_codecsdir" ; then
   _codecsdir="$_libdir/codecs"
-  mingw32 && _codecsdir="codecs"
-  os2 && _codecsdir="codecs"
+  mingw32 || os2 && _codecsdir="codecs"
 fi
 
 
