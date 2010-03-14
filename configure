@@ -8702,6 +8702,7 @@ FULLNAME=\$(NAME)\$(BUILDSUF)
 # Some FFmpeg codecs depend on these. Enable them unconditionally for now.
 CONFIG_AANDCT=yes
 CONFIG_DCT=yes
+CONFIG_DWT=yes
 CONFIG_FFT=yes
 CONFIG_FFT_MMX=$fft_mmx
 CONFIG_GOLOMB=yes
