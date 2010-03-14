@@ -218,9 +218,6 @@ Installation directories:
                          [PREFIX/etc/mplayer]
   --libdir=DIR           directory for object code libraries [PREFIX/lib]
   --codecsdir=DIR        directory for binary codecs [LIBDIR/codecs]
-  --win32codecsdir=DIR   directory for Windows DLLs [LIBDIR/codecs]
-  --xanimcodecsdir=DIR   directory for XAnim codecs [LIBDIR/codecs]
-  --realcodecsdir=DIR    directory for RealPlayer codecs [LIBDIR/codecs]
 
 Optional features:
   --disable-mencoder     disable MEncoder (A/V encoder) compilation [enable]
@@ -790,15 +787,6 @@ for ac_option do
     ;;
   --codecsdir=*)
     _codecsdir=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --win32codecsdir=*)
-    _win32codecsdir=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --xanimcodecsdir=*)
-    _xanimcodecsdir=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --realcodecsdir=*)
-    _realcodecsdir=$(echo $ac_option | cut -d '=' -f 2)
     ;;
 
   --with-install=*)
@@ -7063,8 +7051,6 @@ if test "$_win32dll" = auto ; then
 fi
 if test "$_win32dll" = yes ; then
   def_win32dll='#define CONFIG_WIN32DLL 1'
-  test -z "$_win32codecsdir" && _win32codecsdir=$_codecsdir
-  _res_comment="using $_win32codecsdir"
   if ! win32 ; then
     def_win32_loader='#define WIN32_LOADER 1'
     _win32_emulation=yes
@@ -7090,14 +7076,10 @@ if test "$_xanim" = auto ; then
   fi
 fi
 if test "$_xanim" = yes ; then
-  test -z "$_xanimcodecsdir" && _xanimcodecsdir=$_codecsdir
   def_xanim='#define CONFIG_XANIM 1'
-  def_xanim_path="#define XACODEC_PATH \"$_xanimcodecsdir\""
   _codecmodules="xanim $_codecmodules"
-  _res_comment="using $_xanimcodecsdir"
 else
   def_xanim='#undef CONFIG_XANIM'
-  def_xanim_path='#undef XACODEC_PATH'
   _nocodecmodules="xanim $_nocodecmodules"
 fi
 echores "$_xanim"
@@ -7113,14 +7095,10 @@ if test "$_real" = auto ; then
   fi
 fi
 if test "$_real" = yes ; then
-  test -z "$_realcodecsdir" && _realcodecsdir="$_codecsdir"
   def_real='#define CONFIG_REALCODECS 1'
-  def_real_path="#define REALCODEC_PATH \"$_realcodecsdir\""
   _codecmodules="real $_codecmodules"
-  _res_comment="using $_realcodecsdir"
 else
   def_real='#undef CONFIG_REALCODECS'
-  def_real_path="#undef REALCODEC_PATH"
   _nocodecmodules="real $_nocodecmodules"
 fi
 echores "$_real"
@@ -8989,13 +8967,11 @@ $def_libnut
 $def_qtx
 $def_qtx_win32
 $def_real
-$def_real_path
 $def_win32_loader
 $def_win32dll
-#define WIN32_PATH "$_win32codecsdir"
 $def_xanim
-$def_xanim_path
 $def_xmms
+#define BINARY_CODECS_PATH "$_codecsdir"
 #define XMMS_INPUT_PLUGIN_DIR "$_xmmsplugindir"
 
 

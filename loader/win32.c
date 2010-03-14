@@ -77,7 +77,7 @@ for DLL to know too much about its environment.
 #include "osdep/mmap_anon.h"
 #include "libavutil/avstring.h"
 
-char* def_path = WIN32_PATH;
+char* def_path = BINARY_CODECS_PATH;
 
 static void do_cpuid(unsigned int ax, unsigned int *regs)
 {

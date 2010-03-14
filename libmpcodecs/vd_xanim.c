@@ -664,7 +664,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 static int init(sh_video_t *sh)
 {
     vd_xanim_ctx *priv;
-    char *def_path = XACODEC_PATH;
+    char *def_path = BINARY_CODECS_PATH;
     char dll[1024];
     XA_CODEC_HDR codec_hdr;
     int i;
