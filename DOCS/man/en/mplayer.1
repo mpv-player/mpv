@@ -638,6 +638,10 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 .SH "GENERAL OPTIONS"
 .
 .TP
+.B \-codecpath <dir>
+Specify a directory for binary codecs.
+.
+.TP
 .B \-codecs\-file <filename> (also see \-afm, \-ac, \-vfm, \-vc)
 Override the standard search path and use the specified file
 instead of the builtin codecs.conf.
@@ -752,10 +756,6 @@ idle|belownormal|normal|abovenormal|high|realtime
 .I WARNING:
 Using realtime priority can cause system lockup.
 .RE
-.
-.TP
-.B \-codecpath <dir>
-Specify a directory for binary codecs.
 .
 .TP
 .B \-profile <profile1,profile2,...>
