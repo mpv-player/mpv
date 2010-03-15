@@ -25,6 +25,8 @@ DECL_COMPONENT(yuvu,"YUVU_CDComponentDispatch",0)
 DECL_COMPONENT(qdm2d,"QDM2Decompressor",0)
 DECL_COMPONENT(mace3d,"Mace3DecompDispatch",0)
 
+DECL_COMPONENT(prores,"IcpDecompressorComponentDispatch",0)
+
 //DECL_COMPONENT(,"",0)
 
 #endif /* MPLAYER_QT_COMP_H */
