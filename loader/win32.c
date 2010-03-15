@@ -792,6 +792,18 @@ static void* WINAPI expCreateEventA(void* pSecAttr, char bManualReset,
     return ret;
 }
 
+static void* WINAPI expCreateEventW(void* pSecAttr, char bManualReset,
+                                    char bInitialState, const WCHAR* name)
+{
+    char ascii_name[256];
+    char *aname = NULL;
+    if (name) {
+        WideCharToMultiByte(65001, 0x0, name, -1, ascii_name, 256, NULL, NULL);
+        aname = ascii_name;
+    }
+    return expCreateEventA(pSecAttr, bManualReset, bInitialState, aname);
+}
+
 static void* WINAPI expSetEvent(void* event)
 {
     mutex_list *ml = (mutex_list *)event;
@@ -1798,6 +1810,7 @@ static long WINAPI expWideCharToMultiByte(long v1, long v2, short* s1, long siz1
     if(s2)dbgprintf("  dest: %s\n", s2);
     return result;
 }
+
 static long WINAPI expGetVersionExA(OSVERSIONINFOA* c)
 {
     dbgprintf("GetVersionExA(0x%x) => 1\n");
@@ -1817,6 +1830,33 @@ static long WINAPI expGetVersionExA(OSVERSIONINFOA* c)
 	      "  Platform Id: VER_PLATFORM_WIN32_NT\n Version string: 'Service Pack 3'\n");
     return 1;
 }
+
+static long WINAPI expGetVersionExW(OSVERSIONINFOW* c)
+{
+    char CSDVersion[128];
+    dbgprintf("GetVersionExW(0x%x) => 1\n");
+    c->dwOSVersionInfoSize=sizeof(*c);
+    c->dwMajorVersion=5;
+    c->dwMinorVersion=0;
+    c->dwBuildNumber=0x5000457;
+#if 1
+    // leave it here for testing win9x-only codecs
+    c->dwPlatformId=VER_PLATFORM_WIN32_WINDOWS;
+    strcpy(CSDVersion, " B");
+#else
+    c->dwPlatformId=VER_PLATFORM_WIN32_NT; // let's not make DLL assume that it can read CR* registers
+    strcpy(CSDVersion, "Service Pack 3");
+#endif
+    MultiByteToWideChar(65001, 0x0, CSDVersion, -1, c->szCSDVersion, 128);
+    dbgprintf("  Major version: %d\n  Minor version: %d\n  Build number: 0x%08x\n"
+             "  Platform Id: %s\n Version string: '%s'\n",
+      c->dwMajorVersion, c->dwMinorVersion, c->dwBuildNumber,
+             (c->dwPlatformId==VER_PLATFORM_WIN32_WINDOWS ? "VER_PLATFORM_WIN32_WINDOWS" :
+       (c->dwPlatformId==VER_PLATFORM_WIN32_NT ? "VER_PLATFORM_WIN32_NT" : "Unknown")),
+             CSDVersion);
+    return 1;
+}
+
 static HANDLE WINAPI expCreateSemaphoreA(char* v1, long init_count,
 					 long max_count, char* name)
 {
@@ -1889,6 +1929,18 @@ static HANDLE WINAPI expCreateSemaphoreA(char* v1, long init_count,
     ret = (HANDLE)mlist;
     pthread_mutex_unlock(&mlist_lock);
     return ret;
+}
+
+static HANDLE WINAPI expCreateSemaphoreW(char* v1, long init_count,
+                                         long max_count, const WCHAR* name)
+{
+    char ascii_name[256];
+    char *aname = NULL;
+    if (name) {
+        WideCharToMultiByte(65001, 0x0, name, -1, ascii_name, 256, NULL, NULL);
+        aname = ascii_name;
+    }
+    return expCreateSemaphoreA(v1, init_count, max_count, aname);
 }
 
 static long WINAPI expReleaseSemaphore(long hsem, long increment, long* prev_count)
@@ -1975,6 +2027,17 @@ static HANDLE WINAPI expCreateMutexA(void *pSecAttr,
     ret = (HANDLE)mlist;
     pthread_mutex_unlock(&mlist_lock);
     return ret;
+}
+
+static HANDLE WINAPI expCreateMutexW(void *pSecAttr, char bInitialOwner, const WCHAR *name)
+{
+    char ascii_name[256];
+    char *aname = NULL;
+    if (name) {
+        WideCharToMultiByte(65001, 0x0, name, -1, ascii_name, 256, NULL, NULL);
+        aname = ascii_name;
+    }
+    return expCreateMutexA(pSecAttr, bInitialOwner, aname);
 }
 
 static int WINAPI expReleaseMutex(HANDLE hMutex)
@@ -5130,6 +5193,7 @@ struct exports exp_kernel32[]=
     FF(CreateThread, -1)
     FF(ResumeThread, -1)
     FF(CreateEventA, -1)
+    FF(CreateEventW, -1)
     FF(SetEvent, -1)
     FF(ResetEvent, -1)
     FF(WaitForSingleObject, -1)
@@ -5169,7 +5233,9 @@ struct exports exp_kernel32[]=
     FF(MultiByteToWideChar, 427)
     FF(WideCharToMultiByte, -1)
     FF(GetVersionExA, -1)
+    FF(GetVersionExW, -1)
     FF(CreateSemaphoreA, -1)
+    FF(CreateSemaphoreW, -1)
     FF(QueryPerformanceCounter, -1)
     FF(QueryPerformanceFrequency, -1)
     FF(LocalHandle, -1)
@@ -5181,6 +5247,7 @@ struct exports exp_kernel32[]=
     FF(LoadResource, -1)
     FF(ReleaseSemaphore, -1)
     FF(CreateMutexA, -1)
+    FF(CreateMutexW, -1)
     FF(ReleaseMutex, -1)
     FF(SignalObjectAndWait, -1)
     FF(FindResourceA, -1)
