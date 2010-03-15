@@ -2701,6 +2701,11 @@ int gui_no_filename=0;
     set_priority();
 #endif
 
+#ifdef CONFIG_WIN32DLL
+  if (codec_path)
+    SetCodecPath(codec_path);
+#endif
+
 #ifndef CONFIG_GUI
     if(use_gui){
       mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoGui);

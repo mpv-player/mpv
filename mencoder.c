@@ -534,6 +534,11 @@ if (frameno_filename) {
   set_priority();
 #endif
 
+#ifdef CONFIG_WIN32DLL
+  if (codec_path)
+    SetCodecPath(codec_path);
+#endif
+
 // check font
 #ifdef CONFIG_FREETYPE
   init_freetype();
