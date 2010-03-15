@@ -1849,11 +1849,11 @@ static long WINAPI expGetVersionExW(OSVERSIONINFOW* c)
 #endif
     MultiByteToWideChar(65001, 0x0, CSDVersion, -1, c->szCSDVersion, 128);
     dbgprintf("  Major version: %d\n  Minor version: %d\n  Build number: 0x%08x\n"
-             "  Platform Id: %s\n Version string: '%s'\n",
-      c->dwMajorVersion, c->dwMinorVersion, c->dwBuildNumber,
-             (c->dwPlatformId==VER_PLATFORM_WIN32_WINDOWS ? "VER_PLATFORM_WIN32_WINDOWS" :
-       (c->dwPlatformId==VER_PLATFORM_WIN32_NT ? "VER_PLATFORM_WIN32_NT" : "Unknown")),
-             CSDVersion);
+              "  Platform Id: %s\n Version string: '%s'\n",
+              c->dwMajorVersion, c->dwMinorVersion, c->dwBuildNumber,
+              (c->dwPlatformId==VER_PLATFORM_WIN32_WINDOWS ? "VER_PLATFORM_WIN32_WINDOWS" :
+                  (c->dwPlatformId==VER_PLATFORM_WIN32_NT ? "VER_PLATFORM_WIN32_NT" : "Unknown")),
+              CSDVersion);
     return 1;
 }
 
