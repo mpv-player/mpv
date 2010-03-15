@@ -9217,6 +9217,8 @@ $def_yasm
 
 /* Some FFmpeg codecs depend on these. Enable them unconditionally for now. */
 #define CONFIG_AANDCT 1
+#define CONFIG_DCT 1
+#define CONFIG_DWT 1
 #define CONFIG_FFT 1
 #define CONFIG_GOLOMB 1
 #define CONFIG_LPC 1
