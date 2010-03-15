@@ -258,6 +258,13 @@ int mp4_header_process_vol(mp_mpeg_header_t * picture, unsigned char * buffer)
         picture->fps = (float) picture->timeinc_resolution / (float) picture->timeinc_unit;
     }
 
+    n++; //marker bit
+    picture->display_picture_width = getbits16(buffer, n, 13);
+    n += 13;
+    n++; //marker bit
+    picture->display_picture_height = getbits16(buffer, n, 13);
+    n += 13;
+
     //fprintf(stderr, "ASPECT: %d, PARW=%d, PARH=%d, TIMEINCRESOLUTION: %d, FIXED_TIMEINC: %d (number of bits: %d), FPS: %u\n",
     //	aspect, aspectw, aspecth, picture->timeinc_resolution, picture->timeinc_unit, picture->timeinc_bits, picture->fps);
 

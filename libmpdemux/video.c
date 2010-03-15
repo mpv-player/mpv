@@ -169,6 +169,8 @@ switch(video_codec){
      return 0;
    }
    mp4_header_process_vop(&picture, &(videobuffer[pos]));
+   sh_video->disp_w = picture.display_picture_width;
+   sh_video->disp_h = picture.display_picture_height;
    units[vop_cnt] = picture.timeinc_unit;
    vop_cnt++;
    //mp_msg(MSGT_DECVIDEO,MSGL_V, "TYPE: %d, unit: %d\n", picture.picture_type, picture.timeinc_unit);
