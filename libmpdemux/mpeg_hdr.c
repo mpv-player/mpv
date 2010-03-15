@@ -251,9 +251,8 @@ int mp4_header_process_vol(mp_mpeg_header_t * picture, unsigned char * buffer)
 
     n++; //marker bit
 
-    if(getbits(buffer, n, 1)) {	//fixed_vop_timeinc
-      n++;
-      n = read_timeinc(picture, buffer, n);
+    if(getbits(buffer, n++, 1)) {      //fixed_vop_timeinc
+      n += read_timeinc(picture, buffer, n);
 
       if(picture->timeinc_unit)
         picture->fps = (float) picture->timeinc_resolution / (float) picture->timeinc_unit;
@@ -276,7 +275,7 @@ void mp4_header_process_vop(mp_mpeg_header_t * picture, unsigned char * buffer)
   n++;
   getbits(buffer, n, 1);
   n++;
-  n = read_timeinc(picture, buffer, n);
+  n += read_timeinc(picture, buffer, n);
 }
 
 #define min(a, b) ((a) <= (b) ? (a) : (b))
