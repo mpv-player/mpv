@@ -274,29 +274,12 @@ typedef struct {
     int already_read;
 } s_frame_data;
 
-/// Returns a_pts
-static float calc_a_pts(demux_stream_t *d_audio);
-/** \brief Seeks audio forward to pts by dumping audio packets
-    \return The current audio pts.
-*/
-static float forward_audio(float pts, demux_stream_t *d_audio, muxer_stream_t* mux_a);
-/** \brief Seeks slowly by dumping frames.
-    \return 1 for success, 2 for EOF.
-*/
-static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_audio, muxer_stream_t* mux_a, s_frame_data * frame_data, int framecopy, int print_info);
-/// Deletes audio or video as told by -delay to sync
-static void fixdelay(demux_stream_t *d_video, demux_stream_t *d_audio, muxer_stream_t* mux_a, s_frame_data * frame_data, int framecopy);
-
 #include "edl.h"
 static edl_record_ptr edl_records = NULL; ///< EDL entries memory area
 static edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_records
 static short edl_muted; ///< Stores whether EDL is currently in muted mode.
 static short edl_seeking; ///< When non-zero, stream is seekable.
 static short edl_seek_type; ///< When non-zero, frames are discarded instead of seeking.
-/** \brief Seeks for EDL
-    \return 1 for success, 0 for failure, 2 for EOF.
-*/
-static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t *d_audio, muxer_stream_t* mux_a, s_frame_data * frame_data, int framecopy);
 
 #include "cfg-mencoder.h"
 
@@ -354,10 +337,6 @@ static int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
 
 //---------------------------------------------------------------------------
 
-// this function returns the absoloute time for which MEncoder will switch files or move in the file.
-// so audio can be cut correctly. -1 if there is no limit.
-static float stop_time(demuxer_t* demuxer, muxer_stream_t* mux_v);
-
 static volatile int at_eof=0;
 static volatile int interrupted=0;
 
@@ -406,6 +385,8 @@ void add_subtitles(char *filename, float fps, int silent)
     subdata = subd;
 }
 
+/* This function returns the absolute time for which MEncoder will switch files
+ * or move in the file so audio can be cut correctly. -1 if there is no limit. */
 static float stop_time(demuxer_t* demuxer, muxer_stream_t* mux_v)
 {
 	float timeleft = -1;
@@ -426,6 +407,7 @@ static float stop_time(demuxer_t* demuxer, muxer_stream_t* mux_v)
 	return timeleft;
 }
 
+/// Returns a_pts
 static float calc_a_pts(demux_stream_t *d_audio)
 {
     sh_audio_t * sh_audio = d_audio ? d_audio->sh : NULL;
@@ -435,6 +417,8 @@ static float calc_a_pts(demux_stream_t *d_audio)
     return a_pts;
 }
 
+/** \brief Seeks audio forward to pts by dumping audio packets
+ *  \return The current audio pts. */
 static float forward_audio(float pts, demux_stream_t *d_audio, muxer_stream_t* mux_a)
 {
     sh_audio_t * sh_audio = d_audio ? d_audio->sh : NULL;
@@ -471,6 +455,8 @@ static float forward_audio(float pts, demux_stream_t *d_audio, muxer_stream_t* m
     return a_pts;
 }
 
+/** \brief Seeks slowly by dumping frames.
+ *  \return 1 for success, 2 for EOF. */
 static int slowseek(float end_pts, demux_stream_t *d_video,
                     demux_stream_t *d_audio, muxer_stream_t *mux_a,
                     s_frame_data *frame_data, int framecopy, int print_info)
@@ -516,6 +502,7 @@ static int slowseek(float end_pts, demux_stream_t *d_video,
     return 1;
 }
 
+/// Deletes audio or video as told by -delay to sync
 static void fixdelay(demux_stream_t *d_video, demux_stream_t *d_audio,
                      muxer_stream_t *mux_a, s_frame_data *frame_data,
                      int framecopy)
@@ -540,6 +527,8 @@ static void fixdelay(demux_stream_t *d_video, demux_stream_t *d_audio,
     slowseek(a_pts - audio_delay, d_video, d_audio, mux_a, frame_data, framecopy, 0);
 }
 
+/** \brief Seeks for EDL
+ *  \return 1 for success, 0 for failure, 2 for EOF. */
 static int edl_seek(edl_record_ptr next_edl_record, demuxer_t *demuxer,
                     demux_stream_t *d_audio, muxer_stream_t *mux_a,
                     s_frame_data *frame_data, int framecopy)
