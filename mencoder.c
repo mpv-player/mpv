@@ -267,8 +267,6 @@ static m_time_size_t end_at = { .type = END_AT_NONE, .pos = 0 };
 
 static char * frameno_filename=NULL;
 
-//static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, int height);
-
 typedef struct {
     unsigned char* start;
     int in_size;
@@ -1659,27 +1657,6 @@ if(stream) free_stream(stream); // kill cache thread
 
 return interrupted;
 }
-
-
-#if 0
-/* Flip the image in src and store the result in dst. src and dst may overlap.
-   width is the size of each line in bytes. */
-static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width,
-                                 int height)
-{
-    uint8_t* tmp = malloc(width);
-    int i;
-
-    for(i = 0; i < height/2; i++) {
-        fast_memcpy(tmp, &src[i*width], width);
-        fast_memcpy(&dst[i * width], &src[(height - i) * width], width);
-        fast_memcpy(&dst[(height - i) * width], tmp, width);
-    }
-
-    free(tmp);
-    return dst;
-}
-#endif
 
 
 static float stop_time(demuxer_t* demuxer, muxer_stream_t* mux_v) {
