@@ -138,12 +138,6 @@ static int out_audio_codec=-1;
 static int out_video_codec=-1;
 
 int out_file_format=MUXER_TYPE_AVI;	// default to AVI
-
-// audio stream skip/resync functions requires only for seeking.
-// (they should be implemented in the audio codec layer)
-//void skip_audio_frame(sh_audio_t *sh_audio){}
-//void resync_audio_stream(sh_audio_t *sh_audio){}
-
 int quiet=0;
 double video_time_usage=0;
 double vout_time_usage=0;
@@ -241,14 +235,6 @@ void set_osd_subtitle(subtitle *subs) {
     vo_sub = subs;
     vo_osd_changed(OSDTYPE_SUBTITLE);
 }
-
-//char *out_audio_codec=NULL; // override audio codec
-//char *out_video_codec=NULL; // override video codec
-
-//#include "libmpeg2/mpeg2.h"
-//#include "libmpeg2/mpeg2_internal.h"
-
-//static int vo_w=0, vo_h=0;
 
 //-------------------------- config stuff:
 
@@ -755,7 +741,6 @@ if(stream->type==STREAMTYPE_DVDNAV){
 
   if(demuxer2) audio_id=-2; /* do NOT read audio packets... */
 
-  //demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
   demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id,filename);
   if(!demuxer){
     mp_msg(MSGT_DEMUXER, MSGL_FATAL, MSGTR_FormatNotRecognized);
@@ -1499,7 +1484,6 @@ if(demuxer2){	// 3-pass encoding, read control file (frameno.avi)
 	    if(len==4) next_frameno=start[0];
 	}
     if(at_eof) break;
-	// if(skip_flag) printf("!!!!!!!!!!!!\n");
 	skip_flag=next_frameno-decoded_frameno;
     // find next frame:
 	while(next_frameno<=decoded_frameno){
@@ -1509,13 +1493,10 @@ if(demuxer2){	// 3-pass encoding, read control file (frameno.avi)
 	    if(len==0) --skip_flag; else  // duplicate
 	    if(len==4) next_frameno=start[0];
 	}
-//    if(at_eof) break;
-//	    printf("Current fno=%d  requested=%d  skip=%d  \n",decoded_frameno,fno,skip_flag);
 } else {
 
 // check frame duplicate/drop:
 
-//printf("\r### %5.3f ###\n",v_timer_corr);
 float mux_frametime = (float)mux_v->h.dwScale/mux_v->h.dwRate;
 
 if (v_timer_corr >= mux_frametime && (skip_limit<0 || skip_flag < skip_limit)) {
@@ -1616,7 +1597,6 @@ if(sh_audio && !demuxer2){
         unsigned int samples=(sh_audio->audio.dwSampleSize)?
           ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
           (d_audio->block_no); // <- used for VBR audio
-//	printf("samples=%d  \n",samples);
         a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
       delay_corrected=1;
     } else
@@ -1625,7 +1605,6 @@ if(sh_audio && !demuxer2){
       // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
       a_pts=d_audio->pts;
       if(!delay_corrected) if(a_pts) delay_corrected=1;
-      //printf("*** %5.3f ***\n",a_pts);
       a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
     }
     v_pts=sh_video ? sh_video->pts : d_video->pts;
@@ -1650,23 +1629,6 @@ if(sh_audio && !demuxer2){
 	v_pts_corr+=x;
 }
 
-//    printf("A:%6.1f V:%6.1f A-V:%7.3f oAV:%7.3f diff:%7.3f ct:%7.3f vpc:%7.3f   \r",
-//	a_pts,v_pts,a_pts-v_pts,
-//	(float)(mux_a->timer-mux_v->timer),
-//	AV_delay, c_total, v_pts_corr );
-//    printf("V:%6.1f \r", d_video->pts );
-
-#if 0
-    mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%%  %d%%\r",
-	  a_pts,v_pts,a_pts-v_pts,c_total,
-          (int)sh_video->num_frames,(int)sh_video->num_frames_decoded,
-          (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
-          (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
-          (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
-	  ,cache_fill_status
-        );
-#endif
-
     {	float t=(GetTimerMS()-timer_start)*0.001f;
 	float len=(demuxer->movi_end-demuxer->movi_start);
 	off_t pos = demuxer->filepos >= 0 ? demuxer->filepos : stream_tell(demuxer->stream);
@@ -1678,12 +1640,6 @@ if(sh_audio && !demuxer2){
 	     / (float)(sh_audio->audio.dwLength);
 	}
 #endif
-#if 0
-	mp_msg(MSGT_AVSYNC,MSGL_STATUS,"%d < %d < %d  \r",
-	    (int)demuxer->movi_start,
-	    (int)demuxer->filepos,
-	    (int)demuxer->movi_end);
-#else
       if(!quiet) {
 	if( mp_msg_test(MSGT_STATUSLINE,MSGL_V) ) {
 		mp_msg(MSGT_STATUSLINE,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d] A/Vms %d/%d D/B/S %d/%d/%d \r",
@@ -1708,7 +1664,6 @@ if(sh_audio && !demuxer2){
 	    (mux_a && mux_a->timer>1) ? (int)(mux_a->size/mux_a->timer/125) : 0
 	);
       }
-#endif
     }
         fflush(stdout);
 
