@@ -239,7 +239,6 @@ static int init(sh_video_t *sh){
 
 // uninit driver
 static void uninit(sh_video_t *sh){
-    OSErr result;
     if(OutBufferGWorld) {
         DisposeGWorld(OutBufferGWorld);
         OutBufferGWorld = NULL;
