@@ -59,7 +59,7 @@ static    HINSTANCE qtime_qts; // handle to the preloaded quicktime.qts
 static    HMODULE handler;
 static    OSErr (*InitializeQTML)(long flags);
 static    OSErr (*EnterMovies)(void);
-static    OSErr (*ExitMovies)(void);
+static    void (*ExitMovies)(void);
 static    OSErr (*DecompressSequenceBegin)(ImageSequence *seqID,
                                            ImageDescriptionHandle desc,
                                            CGrafPtr port,
@@ -99,9 +99,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 // init driver
 static int init(sh_video_t *sh){
-#ifndef CONFIG_QUICKTIME
     OSErr result = 1;
-#endif
 
     if (sh->ImageDesc == NULL) {
         mp_msg(MSGT_DECVIDEO,MSGL_ERR,"sh->ImageDesc not set, cannot use binary QuickTime codecs (try -demuxer mov?)\n");
@@ -128,7 +126,7 @@ static int init(sh_video_t *sh){
 
     InitializeQTML = (OSErr (*)(long))GetProcAddress(handler, "InitializeQTML");
     EnterMovies = (OSErr (*)(void))GetProcAddress(handler, "EnterMovies");
-    ExitMovies = (OSErr (*)(void))GetProcAddress(handler, "ExitMovies");
+    ExitMovies = (void (*)(void))GetProcAddress(handler, "ExitMovies");
     DecompressSequenceBegin = (OSErr (*)(ImageSequence*,ImageDescriptionHandle,CGrafPtr,void *,const Rect *,MatrixRecordPtr,short,RgnHandle,CodecFlags,CodecQ,DecompressorComponent))GetProcAddress(handler, "DecompressSequenceBegin");
     DecompressSequenceFrameS = (OSErr (*)(ImageSequence,Ptr,long,CodecFlags,CodecFlags*,ICMCompletionProcRecordPtr))GetProcAddress(handler, "DecompressSequenceFrameS");
     GetGWorldPixMap = (PixMapHandle (*)(GWorldPtr))GetProcAddress(handler, "GetGWorldPixMap");
@@ -254,8 +252,7 @@ static void uninit(sh_video_t *sh){
         CDSequenceEnd(imageSeq);
         imageSeq = 0;
     }
-    result=ExitMovies();
-    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ExitMovies returned %d\n",result);
+    ExitMovies();
 }
 
 // decode a frame
