@@ -408,8 +408,6 @@ void add_subtitles(char *filename, float fps, int silent)
     subdata = subd;
 }
 
-void print_wave_header(WAVEFORMATEX *h, int verbose_level);
-
 int main(int argc,char* argv[]){
 
 stream_t* stream=NULL;
