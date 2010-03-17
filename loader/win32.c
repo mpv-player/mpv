@@ -1807,47 +1807,31 @@ static long WINAPI expWideCharToMultiByte(long v1, long v2, short* s1, long siz1
 
 static long WINAPI expGetVersionExA(OSVERSIONINFOA* c)
 {
-    dbgprintf("GetVersionExA(0x%x) => 1\n");
+    dbgprintf("GetVersionExA(0x%x) => 1\n", c);
     c->dwOSVersionInfoSize=sizeof(*c);
-    c->dwMajorVersion=4;
-    c->dwMinorVersion=0;
-    c->dwBuildNumber=0x4000457;
-#if 1
-    // leave it here for testing win9x-only codecs
-    c->dwPlatformId=VER_PLATFORM_WIN32_WINDOWS;
-    strcpy(c->szCSDVersion, " B");
-#else
-    c->dwPlatformId=VER_PLATFORM_WIN32_NT; // let's not make DLL assume that it can read CR* registers
-    strcpy(c->szCSDVersion, "Service Pack 3");
-#endif
-    dbgprintf("  Major version: 4\n  Minor version: 0\n  Build number: 0x4000457\n"
-	      "  Platform Id: VER_PLATFORM_WIN32_NT\n Version string: 'Service Pack 3'\n");
+    c->dwMajorVersion=5;
+    c->dwMinorVersion=1;
+    c->dwBuildNumber=0x5010a28;
+    c->dwPlatformId=VER_PLATFORM_WIN32_NT;
+    strcpy(c->szCSDVersion, "Service Pack 2");
+    dbgprintf("  Major version: 5\n  Minor version: 1\n  Build number: 0x5010a28\n"
+	      "  Platform Id: VER_PLATFORM_WIN32_NT\n Version string: 'Service Pack 2'\n");
     return 1;
 }
 
 static long WINAPI expGetVersionExW(OSVERSIONINFOW* c)
 {
     char CSDVersion[128];
-    dbgprintf("GetVersionExW(0x%x) => 1\n");
+    dbgprintf("GetVersionExW(0x%x) => 1\n", c);
     c->dwOSVersionInfoSize=sizeof(*c);
     c->dwMajorVersion=5;
-    c->dwMinorVersion=0;
-    c->dwBuildNumber=0x5000457;
-#if 1
-    // leave it here for testing win9x-only codecs
-    c->dwPlatformId=VER_PLATFORM_WIN32_WINDOWS;
-    strcpy(CSDVersion, " B");
-#else
-    c->dwPlatformId=VER_PLATFORM_WIN32_NT; // let's not make DLL assume that it can read CR* registers
-    strcpy(CSDVersion, "Service Pack 3");
-#endif
+    c->dwMinorVersion=1;
+    c->dwBuildNumber=0x5010a28;
+    c->dwPlatformId=VER_PLATFORM_WIN32_NT;
+    strcpy(CSDVersion, "Service Pack 2");
     MultiByteToWideChar(65001, 0x0, CSDVersion, -1, c->szCSDVersion, 128);
-    dbgprintf("  Major version: %d\n  Minor version: %d\n  Build number: 0x%08x\n"
-              "  Platform Id: %s\n Version string: '%s'\n",
-              c->dwMajorVersion, c->dwMinorVersion, c->dwBuildNumber,
-              (c->dwPlatformId==VER_PLATFORM_WIN32_WINDOWS ? "VER_PLATFORM_WIN32_WINDOWS" :
-                  (c->dwPlatformId==VER_PLATFORM_WIN32_NT ? "VER_PLATFORM_WIN32_NT" : "Unknown")),
-              CSDVersion);
+    dbgprintf("  Major version: 5\n  Minor version: 1\n  Build number: 0x5010a28\n"
+	      "  Platform Id: VER_PLATFORM_WIN32_NT\n Version string: 'Service Pack 2'\n");
     return 1;
 }
 
