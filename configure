@@ -1765,10 +1765,12 @@ def_fast_64bit='#define HAVE_FAST_64BIT 0'
 def_fast_unaligned='#define HAVE_FAST_UNALIGNED 0'
 def_local_aligned_8='#define HAVE_LOCAL_ALIGNED_8 0'
 def_local_aligned_16='#define HAVE_LOCAL_ALIGNED_16 0'
-arch_all='X86 X86_32 X86_64 IA64 SPARC ARM AVR32 SH4 PPC PPC64 ALPHA MIPS SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA TOMI GENERIC'
+arch_all='X86 IA64 SPARC ARM AVR32 SH4 PPC ALPHA MIPS SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA TOMI GENERIC'
+subarch_all='X86_32 X86_64 PPC64'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
-  arch='X86 X86_32'
+  arch='X86'
+  subarch='X86_32'
   libavcodec_arch="x86"
   target_arch="ARCH_X86 = yes"
   target_subarch="ARCH_X86_32 = yes"
@@ -2017,7 +2019,8 @@ EOF
     ;;
 
   x86_64|amd64)
-    arch='X86 X86_64'
+    arch='X86'
+    subarch='X86_64'
     libavcodec_arch="x86"
     target_subarch='ARCH_X86_64 = yes'
     target_arch="ARCH_X86 = yes"
@@ -2175,7 +2178,7 @@ EOF
     iproc='ppc'
 
     if test "$host_arch" = "ppc64" -o "$host_arch" = "powerpc64" ; then
-      arch='PPC PPC64'
+      subarch='PPC64'
       target_subarch='ARCH_PPC64 = yes'
       def_fast_64bit='#define HAVE_FAST_64BIT 1'
     fi
@@ -8918,6 +8921,7 @@ $def_pthread_cache
 $def_words_endian
 $def_bigendian
 $(ff_config_enable "$arch_all" "$arch" "ARCH")
+$(ff_config_enable "$subarch_all" "$subarch" "ARCH")
 $(ff_config_enable "$_cpuexts_all" "$_cpuexts" "HAVE")
 
 
