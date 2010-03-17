@@ -1765,12 +1765,12 @@ def_fast_64bit='#define HAVE_FAST_64BIT 0'
 def_fast_unaligned='#define HAVE_FAST_UNALIGNED 0'
 def_local_aligned_8='#define HAVE_LOCAL_ALIGNED_8 0'
 def_local_aligned_16='#define HAVE_LOCAL_ALIGNED_16 0'
-_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM AVR32 SH4 PPC PPC64 ALPHA MIPS SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA TOMI GENERIC'
+arch_all='X86 X86_32 X86_64 IA64 SPARC ARM AVR32 SH4 PPC PPC64 ALPHA MIPS SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA TOMI GENERIC'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
-  _arch='X86 X86_32'
-  _target_arch="ARCH_X86 = yes"
-  _target_subarch="ARCH_X86_32 = yes"
+  arch='X86 X86_32'
+  target_arch="ARCH_X86 = yes"
+  target_subarch="ARCH_X86_32 = yes"
   def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
   def_local_aligned_8='#define HAVE_LOCAL_ALIGNED_8 1'
   def_local_aligned_16='#define HAVE_LOCAL_ALIGNED_16 1'
@@ -2009,16 +2009,16 @@ EOF
     ;;
 
   ia64)
-    _arch='IA64'
-    _target_arch='ARCH_IA64 = yes'
+    arch='IA64'
+    target_arch='ARCH_IA64 = yes'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='ia64'
     ;;
 
   x86_64|amd64)
-    _arch='X86 X86_64'
-    _target_subarch='ARCH_X86_64 = yes'
-    _target_arch="ARCH_X86 = yes"
+    arch='X86 X86_64'
+    target_subarch='ARCH_X86_64 = yes'
+    target_arch="ARCH_X86 = yes"
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='x86_64'
@@ -2111,8 +2111,8 @@ EOF
     ;;
 
   sparc|sparc64)
-    _arch='SPARC'
-    _target_arch='ARCH_SPARC = yes'
+    arch='SPARC'
+    target_arch='ARCH_SPARC = yes'
     iproc='sparc'
     if test "$host_arch" = "sparc64" ; then
       _vis='yes'
@@ -2139,37 +2139,37 @@ EOF
     ;;
 
   arm*)
-    _arch='ARM'
-    _target_arch='ARCH_ARM = yes'
+    arch='ARM'
+    target_arch='ARCH_ARM = yes'
     iproc='arm'
     ;;
 
   avr32)
-    _arch='AVR32'
-    _target_arch='ARCH_AVR32 = yes'
+    arch='AVR32'
+    target_arch='ARCH_AVR32 = yes'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='avr32'
     test $_fast_clz = "auto" && _fast_clz=yes
     ;;
 
   sh|sh4)
-    _arch='SH4'
-    _target_arch='ARCH_SH4 = yes'
+    arch='SH4'
+    target_arch='ARCH_SH4 = yes'
     iproc='sh4'
     ;;
 
   ppc|ppc64|powerpc|powerpc64)
-    _arch='PPC'
+    arch='PPC'
     def_dcbzl='#define HAVE_DCBZL 0'
-    _target_arch='ARCH_PPC = yes'
+    target_arch='ARCH_PPC = yes'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     def_local_aligned_8='#define HAVE_LOCAL_ALIGNED_8 1'
     def_local_aligned_16='#define HAVE_LOCAL_ALIGNED_16 1'
     iproc='ppc'
 
     if test "$host_arch" = "ppc64" -o "$host_arch" = "powerpc64" ; then
-      _arch='PPC PPC64'
-      _target_subarch='ARCH_PPC64 = yes'
+      arch='PPC PPC64'
+      target_subarch='ARCH_PPC64 = yes'
       def_fast_64bit='#define HAVE_FAST_64BIT 1'
     fi
     echocheck "CPU type"
@@ -2277,8 +2277,8 @@ EOF
     ;;
 
   alpha*)
-    _arch='ALPHA'
-    _target_arch='ARCH_ALPHA = yes'
+    arch='ALPHA'
+    target_arch='ARCH_ALPHA = yes'
     iproc='alpha'
 
     echocheck "CPU type"
@@ -2320,8 +2320,8 @@ EOF
     ;;
 
   mips)
-    _arch='SGI_MIPS'
-    _target_arch='ARCH_SGI_MIPS = yes'
+    arch='SGI_MIPS'
+    target_arch='ARCH_SGI_MIPS = yes'
     iproc='sgi-mips'
 
     if irix ; then
@@ -2347,38 +2347,38 @@ EOF
     ;;
 
   hppa)
-    _arch='PA_RISC'
-    _target_arch='ARCH_PA_RISC = yes'
+    arch='PA_RISC'
+    target_arch='ARCH_PA_RISC = yes'
     iproc='PA-RISC'
     ;;
 
   s390)
-    _arch='S390'
-    _target_arch='ARCH_S390 = yes'
+    arch='S390'
+    target_arch='ARCH_S390 = yes'
     iproc='390'
     ;;
 
   s390x)
-    _arch='S390X'
-    _target_arch='ARCH_S390X = yes'
+    arch='S390X'
+    target_arch='ARCH_S390X = yes'
     iproc='390x'
     ;;
 
   vax)
-    _arch='VAX'
-    _target_arch='ARCH_VAX = yes'
+    arch='VAX'
+    target_arch='ARCH_VAX = yes'
     iproc='vax'
     ;;
 
   xtensa)
-    _arch='XTENSA'
-    _target_arch='ARCH_XTENSA = yes'
+    arch='XTENSA'
+    target_arch='ARCH_XTENSA = yes'
     iproc='xtensa'
     ;;
 
   generic)
-    _arch='GENERIC'
-    _target_arch='ARCH_GENERIC = yes'
+    arch='GENERIC'
+    target_arch='ARCH_GENERIC = yes'
     ;;
 
   *)
@@ -8488,8 +8488,8 @@ TIMER = $_timer
 EXESUF = $_exesuf
 EXESUFS_ALL = .exe
 
-$_target_arch
-$_target_subarch
+$target_arch
+$target_subarch
 $(echo $_cpuexts | tr '[a-z] ' '[A-Z]\n' | sed 's/^/HAVE_/;s/$/=yes/')
 
 MENCODER = $_mencoder
@@ -8907,7 +8907,7 @@ $def_pthread_cache
 #define __CPU__ $iproc
 $def_words_endian
 $def_bigendian
-$(ff_config_enable "$_arch_all" "$_arch" "ARCH")
+$(ff_config_enable "$arch_all" "$arch" "ARCH")
 $(ff_config_enable "$_cpuexts_all" "$_cpuexts" "HAVE")
 
 
