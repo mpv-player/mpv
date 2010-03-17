@@ -8766,10 +8766,12 @@ EOF
 #############################################################################
 
 ff_config_enable () {
+list=$(echo $1 | tr '[a-z]' '[A-Z]')
+item=$(echo $2 | tr '[a-z]' '[A-Z]')
 _nprefix=$3;
 test -z "$_nprefix" && _nprefix='CONFIG'
-for part in $1; do
-  if $(echo $2 | grep -q -E "(^| )$part($| )"); then
+for part in $list; do
+  if $(echo $item | grep -q -E "(^| )$part($| )"); then
     echo "#define ${_nprefix}_$part 1"
   else
     echo "#define ${_nprefix}_$part 0"
