@@ -2845,27 +2845,27 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC MMX MMX2 AMD3DNOW AMD3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV FAST_CLZ PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP NEON IWMMXT MMI VIS MVI'
-test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
-test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
-test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
-test "$_3dnow"     = yes && _cpuexts="AMD3DNOW $_cpuexts"
-test "$_3dnowext"  = yes && _cpuexts="AMD3DNOWEXT $_cpuexts"
-test "$_sse"       = yes && _cpuexts="SSE $_cpuexts"
-test "$_sse2"      = yes && _cpuexts="SSE2 $_cpuexts"
-test "$_ssse3"     = yes && _cpuexts="SSSE3 $_cpuexts"
-test "$_cmov"      = yes && _cpuexts="CMOV $_cpuexts"
-test "$_fast_cmov" = yes && _cpuexts="FAST_CMOV $_cpuexts"
-test "$_fast_clz"  = yes && _cpuexts="FAST_CLZ $_cpuexts"
-test "$pld"        = yes && _cpuexts="PLD $_cpuexts"
-test "$_armv5te"   = yes && _cpuexts="ARMV5TE $_cpuexts"
-test "$_armv6"     = yes && _cpuexts="ARMV6 $_cpuexts"
-test "$_armv6t2"   = yes && _cpuexts="ARMV6T2 $_cpuexts"
-test "$_armvfp"    = yes && _cpuexts="ARMVFP $_cpuexts"
-test "$neon"       = yes && _cpuexts="NEON $_cpuexts"
-test "$_iwmmxt"    = yes && _cpuexts="IWMMXT $_cpuexts"
-test "$_vis"       = yes && _cpuexts="VIS $_cpuexts"
-test "$_mvi"       = yes && _cpuexts="MVI $_cpuexts"
+cpuexts_all='ALTIVEC MMX MMX2 AMD3DNOW AMD3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV FAST_CLZ PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP NEON IWMMXT MMI VIS MVI'
+test "$_altivec"   = yes && cpuexts="ALTIVEC $cpuexts"
+test "$_mmx"       = yes && cpuexts="MMX $cpuexts"
+test "$_mmxext"    = yes && cpuexts="MMX2 $cpuexts"
+test "$_3dnow"     = yes && cpuexts="AMD3DNOW $cpuexts"
+test "$_3dnowext"  = yes && cpuexts="AMD3DNOWEXT $cpuexts"
+test "$_sse"       = yes && cpuexts="SSE $cpuexts"
+test "$_sse2"      = yes && cpuexts="SSE2 $cpuexts"
+test "$_ssse3"     = yes && cpuexts="SSSE3 $cpuexts"
+test "$_cmov"      = yes && cpuexts="CMOV $cpuexts"
+test "$_fast_cmov" = yes && cpuexts="FAST_CMOV $cpuexts"
+test "$_fast_clz"  = yes && cpuexts="FAST_CLZ $cpuexts"
+test "$pld"        = yes && cpuexts="PLD $cpuexts"
+test "$_armv5te"   = yes && cpuexts="ARMV5TE $cpuexts"
+test "$_armv6"     = yes && cpuexts="ARMV6 $cpuexts"
+test "$_armv6t2"   = yes && cpuexts="ARMV6T2 $cpuexts"
+test "$_armvfp"    = yes && cpuexts="ARMVFP $cpuexts"
+test "$neon"       = yes && cpuexts="NEON $cpuexts"
+test "$_iwmmxt"    = yes && cpuexts="IWMMXT $cpuexts"
+test "$_vis"       = yes && cpuexts="VIS $cpuexts"
+test "$_mvi"       = yes && cpuexts="MVI $cpuexts"
 
 # Checking kernel version...
 if x86_32 && linux ; then
@@ -8503,7 +8503,7 @@ EXESUFS_ALL = .exe
 $target_arch
 ARCH = $libavcodec_arch
 $target_subarch
-$(echo $_cpuexts | tr '[a-z] ' '[A-Z]\n' | sed 's/^/HAVE_/;s/$/=yes/')
+$(echo $cpuexts | tr '[a-z] ' '[A-Z]\n' | sed 's/^/HAVE_/;s/$/=yes/')
 
 MENCODER = $_mencoder
 MPLAYER = $_mplayer
@@ -8924,7 +8924,7 @@ $def_words_endian
 $def_bigendian
 $(ff_config_enable "$arch_all" "$arch" "ARCH")
 $(ff_config_enable "$subarch_all" "$subarch" "ARCH")
-$(ff_config_enable "$_cpuexts_all" "$_cpuexts" "HAVE")
+$(ff_config_enable "$cpuexts_all" "$cpuexts" "HAVE")
 
 
 /* DVD/VCD/CD */
