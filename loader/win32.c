@@ -1182,13 +1182,6 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	    }
 	}
 	fclose (f);
-	/*
-	 *	ad hoc fix for smp machines.
-	 *	some problems on WaitForSingleObject,CreateEvent,SetEvent
-	 *			CreateThread ...etc..
-	 *
-	 */
-	cachedsi.dwNumberOfProcessors=1;
     }
 #endif /* __linux__ */
     cache = 1;
