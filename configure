@@ -1771,8 +1771,6 @@ case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
   arch='x86'
   subarch='x86_32'
-  target_arch="ARCH_X86 = yes"
-  target_subarch="ARCH_X86_32 = yes"
   def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
   def_local_aligned_8='#define HAVE_LOCAL_ALIGNED_8 1'
   def_local_aligned_16='#define HAVE_LOCAL_ALIGNED_16 1'
@@ -2012,7 +2010,6 @@ EOF
 
   ia64)
     arch='ia64'
-    target_arch='ARCH_IA64 = yes'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='ia64'
     ;;
@@ -2020,8 +2017,6 @@ EOF
   x86_64|amd64)
     arch='x86'
     subarch='x86_64'
-    target_subarch='ARCH_X86_64 = yes'
-    target_arch="ARCH_X86 = yes"
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='x86_64'
@@ -2115,7 +2110,6 @@ EOF
 
   sparc|sparc64)
     arch='sparc'
-    target_arch='ARCH_SPARC = yes'
     iproc='sparc'
     if test "$host_arch" = "sparc64" ; then
       _vis='yes'
@@ -2143,13 +2137,11 @@ EOF
 
   arm*)
     arch='arm'
-    target_arch='ARCH_ARM = yes'
     iproc='arm'
     ;;
 
   avr32)
     arch='avr32'
-    target_arch='ARCH_AVR32 = yes'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='avr32'
     test $_fast_clz = "auto" && _fast_clz=yes
@@ -2157,14 +2149,12 @@ EOF
 
   sh|sh4)
     arch='sh4'
-    target_arch='ARCH_SH4 = yes'
     iproc='sh4'
     ;;
 
   ppc|ppc64|powerpc|powerpc64)
     arch='ppc'
     def_dcbzl='#define HAVE_DCBZL 0'
-    target_arch='ARCH_PPC = yes'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     def_local_aligned_8='#define HAVE_LOCAL_ALIGNED_8 1'
     def_local_aligned_16='#define HAVE_LOCAL_ALIGNED_16 1'
@@ -2172,7 +2162,6 @@ EOF
 
     if test "$host_arch" = "ppc64" -o "$host_arch" = "powerpc64" ; then
       subarch='ppc64'
-      target_subarch='ARCH_PPC64 = yes'
       def_fast_64bit='#define HAVE_FAST_64BIT 1'
     fi
     echocheck "CPU type"
@@ -2281,7 +2270,6 @@ EOF
 
   alpha*)
     arch='alpha'
-    target_arch='ARCH_ALPHA = yes'
     iproc='alpha'
 
     echocheck "CPU type"
@@ -2324,7 +2312,6 @@ EOF
 
   mips)
     arch='mips'
-    target_arch='ARCH_MIPS = yes'
     iproc='mips'
 
     if irix ; then
@@ -2351,37 +2338,31 @@ EOF
 
   hppa)
     arch='pa_risc'
-    target_arch='ARCH_PA_RISC = yes'
     iproc='PA-RISC'
     ;;
 
   s390)
     arch='s390'
-    target_arch='ARCH_S390 = yes'
     iproc='390'
     ;;
 
   s390x)
     arch='s390x'
-    target_arch='ARCH_S390X = yes'
     iproc='390x'
     ;;
 
   vax)
     arch='vax'
-    target_arch='ARCH_VAX = yes'
     iproc='vax'
     ;;
 
   xtensa)
     arch='xtensa'
-    target_arch='ARCH_XTENSA = yes'
     iproc='xtensa'
     ;;
 
   generic)
     arch='generic'
-    target_arch='ARCH_GENERIC = yes'
     ;;
 
   *)
@@ -8426,6 +8407,17 @@ echores "$_dvdnav"
 # DO NOT ADD ANY TESTS THAT USE LINKER FLAGS HERE (like cc_check).
 # Read dvdnav comment above.
 
+mak_enable () {
+list=$(echo $1 | tr '[a-z]' '[A-Z]')
+item=$(echo $2 | tr '[a-z]' '[A-Z]')
+nprefix=$3;
+for part in $list; do
+  if $(echo $item | grep -q -E "(^| )$part($| )"); then
+    echo "${nprefix}_$part = yes"
+  fi
+done
+}
+
 #############################################################################
 echo "Creating config.mak"
 cat > config.mak << EOF
@@ -8492,9 +8484,9 @@ EXESUF = $_exesuf
 EXESUFS_ALL = .exe
 
 ARCH = $arch
-$target_arch
-$target_subarch
-$(echo $cpuexts | tr '[a-z] ' '[A-Z]\n' | sed 's/^/HAVE_/;s/$/=yes/')
+$(mak_enable "$arch_all"    "$arch"    ARCH)
+$(mak_enable "$subarch_all" "$subarch" ARCH)
+$(mak_enable "$cpuexts_all" "$cpuexts" HAVE)
 
 MENCODER = $_mencoder
 MPLAYER = $_mplayer
