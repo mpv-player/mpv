@@ -146,7 +146,7 @@ static void longcount_stub(long long*);
 static unsigned int (*localcount)()=localcount_stub;
 static void (*longcount)(long long*)=longcount_stub;
 
-static pthread_mutex_t memmut;
+static pthread_mutex_t memmut = PTHREAD_MUTEX_INITIALIZER;
 
 static unsigned int localcount_stub(void)
 {
@@ -366,14 +366,9 @@ void* mreq_private(int size, int to_zero, int type)
     if (to_zero)
 	memset(header, 0, nsize);
 #ifdef GARBAGE
-    if (!last_alloc)
+    pthread_mutex_lock(&memmut);
+    if (last_alloc)
     {
-	pthread_mutex_init(&memmut, NULL);
-	pthread_mutex_lock(&memmut);
-    }
-    else
-    {
-	pthread_mutex_lock(&memmut);
 	last_alloc->next = header;  /* set next */
     }
 
