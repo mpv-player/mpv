@@ -1771,7 +1771,6 @@ case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
   arch='x86'
   subarch='x86_32'
-  libavcodec_arch="x86"
   target_arch="ARCH_X86 = yes"
   target_subarch="ARCH_X86_32 = yes"
   def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
@@ -2021,7 +2020,6 @@ EOF
   x86_64|amd64)
     arch='x86'
     subarch='x86_64'
-    libavcodec_arch="x86"
     target_subarch='ARCH_X86_64 = yes'
     target_arch="ARCH_X86 = yes"
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
@@ -2117,7 +2115,6 @@ EOF
 
   sparc|sparc64)
     arch='sparc'
-    libavcodec_arch="sparc"
     target_arch='ARCH_SPARC = yes'
     iproc='sparc'
     if test "$host_arch" = "sparc64" ; then
@@ -2146,14 +2143,12 @@ EOF
 
   arm*)
     arch='arm'
-    libavcodec_arch="arm"
     target_arch='ARCH_ARM = yes'
     iproc='arm'
     ;;
 
   avr32)
     arch='avr32'
-    libavcodec_arch="avr32"
     target_arch='ARCH_AVR32 = yes'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='avr32'
@@ -2162,7 +2157,6 @@ EOF
 
   sh|sh4)
     arch='sh4'
-    libavcodec_arch="sh4"
     target_arch='ARCH_SH4 = yes'
     iproc='sh4'
     ;;
@@ -2170,7 +2164,6 @@ EOF
   ppc|ppc64|powerpc|powerpc64)
     arch='ppc'
     def_dcbzl='#define HAVE_DCBZL 0'
-    libavcodec_arch="ppc"
     target_arch='ARCH_PPC = yes'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     def_local_aligned_8='#define HAVE_LOCAL_ALIGNED_8 1'
@@ -2288,7 +2281,6 @@ EOF
 
   alpha*)
     arch='alpha'
-    libavcodec_arch="alpha"
     target_arch='ARCH_ALPHA = yes'
     iproc='alpha'
 
@@ -2332,7 +2324,6 @@ EOF
 
   mips)
     arch='sgi_mips'
-    libavcodec_arch="mips"
     target_arch='ARCH_SGI_MIPS = yes'
     iproc='sgi-mips'
 
@@ -8500,8 +8491,8 @@ TIMER = $_timer
 EXESUF = $_exesuf
 EXESUFS_ALL = .exe
 
+ARCH = $arch
 $target_arch
-ARCH = $libavcodec_arch
 $target_subarch
 $(echo $cpuexts | tr '[a-z] ' '[A-Z]\n' | sed 's/^/HAVE_/;s/$/=yes/')
 
