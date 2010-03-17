@@ -95,6 +95,10 @@
 
 #include "input/input.h"
 
+#ifdef CONFIG_WIN32DLL
+#include "loader/drv.h"         // for SetCodecPath()
+#endif
+
 int slave_mode=0;
 int player_idle_mode=0;
 int quiet=0;
