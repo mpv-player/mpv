@@ -1769,8 +1769,8 @@ arch_all='X86 IA64 SPARC ARM AVR32 SH4 PPC ALPHA MIPS SGI_MIPS PA_RISC S390 S390
 subarch_all='X86_32 X86_64 PPC64'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
-  arch='X86'
-  subarch='X86_32'
+  arch='x86'
+  subarch='x86_32'
   libavcodec_arch="x86"
   target_arch="ARCH_X86 = yes"
   target_subarch="ARCH_X86_32 = yes"
@@ -2012,15 +2012,15 @@ EOF
     ;;
 
   ia64)
-    arch='IA64'
+    arch='ia64'
     target_arch='ARCH_IA64 = yes'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='ia64'
     ;;
 
   x86_64|amd64)
-    arch='X86'
-    subarch='X86_64'
+    arch='x86'
+    subarch='x86_64'
     libavcodec_arch="x86"
     target_subarch='ARCH_X86_64 = yes'
     target_arch="ARCH_X86 = yes"
@@ -2116,7 +2116,7 @@ EOF
     ;;
 
   sparc|sparc64)
-    arch='SPARC'
+    arch='sparc'
     libavcodec_arch="sparc"
     target_arch='ARCH_SPARC = yes'
     iproc='sparc'
@@ -2145,14 +2145,14 @@ EOF
     ;;
 
   arm*)
-    arch='ARM'
+    arch='arm'
     libavcodec_arch="arm"
     target_arch='ARCH_ARM = yes'
     iproc='arm'
     ;;
 
   avr32)
-    arch='AVR32'
+    arch='avr32'
     libavcodec_arch="avr32"
     target_arch='ARCH_AVR32 = yes'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
@@ -2161,14 +2161,14 @@ EOF
     ;;
 
   sh|sh4)
-    arch='SH4'
+    arch='sh4'
     libavcodec_arch="sh4"
     target_arch='ARCH_SH4 = yes'
     iproc='sh4'
     ;;
 
   ppc|ppc64|powerpc|powerpc64)
-    arch='PPC'
+    arch='ppc'
     def_dcbzl='#define HAVE_DCBZL 0'
     libavcodec_arch="ppc"
     target_arch='ARCH_PPC = yes'
@@ -2178,7 +2178,7 @@ EOF
     iproc='ppc'
 
     if test "$host_arch" = "ppc64" -o "$host_arch" = "powerpc64" ; then
-      subarch='PPC64'
+      subarch='ppc64'
       target_subarch='ARCH_PPC64 = yes'
       def_fast_64bit='#define HAVE_FAST_64BIT 1'
     fi
@@ -2287,7 +2287,7 @@ EOF
     ;;
 
   alpha*)
-    arch='ALPHA'
+    arch='alpha'
     libavcodec_arch="alpha"
     target_arch='ARCH_ALPHA = yes'
     iproc='alpha'
@@ -2331,7 +2331,7 @@ EOF
     ;;
 
   mips)
-    arch='SGI_MIPS'
+    arch='sgi_mips'
     libavcodec_arch="mips"
     target_arch='ARCH_SGI_MIPS = yes'
     iproc='sgi-mips'
@@ -2359,37 +2359,37 @@ EOF
     ;;
 
   hppa)
-    arch='PA_RISC'
+    arch='pa_risc'
     target_arch='ARCH_PA_RISC = yes'
     iproc='PA-RISC'
     ;;
 
   s390)
-    arch='S390'
+    arch='s390'
     target_arch='ARCH_S390 = yes'
     iproc='390'
     ;;
 
   s390x)
-    arch='S390X'
+    arch='s390x'
     target_arch='ARCH_S390X = yes'
     iproc='390x'
     ;;
 
   vax)
-    arch='VAX'
+    arch='vax'
     target_arch='ARCH_VAX = yes'
     iproc='vax'
     ;;
 
   xtensa)
-    arch='XTENSA'
+    arch='xtensa'
     target_arch='ARCH_XTENSA = yes'
     iproc='xtensa'
     ;;
 
   generic)
-    arch='GENERIC'
+    arch='generic'
     target_arch='ARCH_GENERIC = yes'
     ;;
 
