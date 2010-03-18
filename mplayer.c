@@ -94,10 +94,7 @@
 #include "gui/interface.h"
 
 #include "input/input.h"
-
-#ifdef CONFIG_WIN32DLL
-#include "loader/codecpath.h"         // for SetCodecPath()
-#endif
+#include "loader/codecpath.h"
 
 int slave_mode=0;
 int player_idle_mode=0;

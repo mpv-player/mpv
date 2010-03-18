@@ -65,10 +65,7 @@
 #include "mp_fifo.h"
 #include "get_path.h"
 
-#ifdef CONFIG_WIN32DLL
-#include "loader/codecpath.h"         // for SetCodecPath()
-#endif
-
+#include "loader/codecpath.h"
 #include "stream/stream.h"
 #include "libmpdemux/aviprint.h"
 #include "libmpdemux/demuxer.h"
