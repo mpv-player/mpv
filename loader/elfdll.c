@@ -18,6 +18,7 @@
 #include "wine/debugtools.h"
 #include "wine/winerror.h"
 #include "debug.h"
+#include "codecpath.h"
 
 //DEFAULT_DEBUG_CHANNEL(elfdll)
 
@@ -38,7 +39,6 @@ void dump_exports(HMODULE hModule);
 /*---------------- END HACKS ---------------*/
 
 //char *extra_ld_library_path = "/usr/lib/win32";
-extern char* def_path;
 
 struct elfdll_image
 {

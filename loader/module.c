@@ -46,6 +46,7 @@
 #endif
 #include "win32.h"
 #include "drv.h"
+#include "codecpath.h"
 
 #ifdef EMU_QTX_API
 #include "wrapper.h"
@@ -366,7 +367,6 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 {
 	WINE_MODREF *wm = 0;
 	char* listpath[] = { "", "", "/usr/lib/win32", "/usr/local/lib/win32", 0 };
-	extern char* def_path;
 	char path[512];
 	char checked[2000];
         int i = -1;

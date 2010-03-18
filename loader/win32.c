@@ -49,6 +49,7 @@ for DLL to know too much about its environment.
 #include "loader.h"
 #include "com.h"
 #include "ext.h"
+#include "codecpath.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -76,8 +77,6 @@ for DLL to know too much about its environment.
 #endif
 #include "osdep/mmap_anon.h"
 #include "libavutil/avstring.h"
-
-char* def_path = BINARY_CODECS_PATH;
 
 static void do_cpuid(unsigned int ax, unsigned int *regs)
 {

@@ -66,7 +66,7 @@
 #include "get_path.h"
 
 #ifdef CONFIG_WIN32DLL
-#include "loader/drv.h"         // for SetCodecPath()
+#include "loader/codecpath.h"         // for SetCodecPath()
 #endif
 
 #include "stream/stream.h"

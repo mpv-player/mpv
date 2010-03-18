@@ -9,7 +9,6 @@
 #include "wine/windef.h"
 #include "wine/driver.h"
 
-void SetCodecPath(const char* path);
 void CodecAlloc(void);
 void CodecRelease(void);
 

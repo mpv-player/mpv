@@ -96,7 +96,7 @@
 #include "input/input.h"
 
 #ifdef CONFIG_WIN32DLL
-#include "loader/drv.h"         // for SetCodecPath()
+#include "loader/codecpath.h"         // for SetCodecPath()
 #endif
 
 int slave_mode=0;
