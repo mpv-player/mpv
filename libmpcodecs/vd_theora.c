@@ -105,8 +105,8 @@ static int init(sh_video_t *sh){
             extradata      += op.bytes + 2;
             extradata_size -= op.bytes + 2;
         } else {
-        op.bytes = ds_get_packet (sh->ds, &op.packet);
-        op.b_o_s = 1;
+            op.bytes = ds_get_packet (sh->ds, &op.packet);
+            op.b_o_s = 1;
         }
 
         if ( (errorCode = theora_decode_header (&context->inf, &context->cc, &op)) )
