@@ -33,6 +33,7 @@
 #include "mp_msg.h"
 
 #include "vd_internal.h"
+#include "loader/codecpath.h"
 
 static const vd_info_t info = {
 	"XAnim codecs",
@@ -664,7 +665,6 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 static int init(sh_video_t *sh)
 {
     vd_xanim_ctx *priv;
-    char *def_path = BINARY_CODECS_PATH;
     char dll[1024];
     XA_CODEC_HDR codec_hdr;
     int i;
