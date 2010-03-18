@@ -27,6 +27,8 @@
 
 #include "vd_internal.h"
 
+#include "libavutil/intreadwrite.h"
+
 static const vd_info_t info = {
    "Theora/VP3",
    "theora",
@@ -75,6 +77,8 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
  */
 static int init(sh_video_t *sh){
     theora_struct_t *context = NULL;
+    uint8_t *extradata = (uint8_t *)(sh->bih + 1);
+    int extradata_size = sh->bih->biSize - sizeof(*sh->bih);
     int errorCode = 0;
     ogg_packet op;
     int i;
@@ -90,8 +94,21 @@ static int init(sh_video_t *sh){
     /* Read all header packets, pass them to theora_decode_header. */
     for (i = 0; i < THEORA_NUM_HEADER_PACKETS; i++)
     {
+        if (extradata_size > 2) {
+            op.bytes  = AV_RB16(extradata);
+            op.packet = extradata + 2;
+            op.b_o_s  = 1;
+            if (extradata_size < op.bytes + 2) {
+                mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Theora header too small\n");
+                goto err_out;
+            }
+            extradata      += op.bytes + 2;
+            extradata_size -= op.bytes + 2;
+        } else {
         op.bytes = ds_get_packet (sh->ds, &op.packet);
         op.b_o_s = 1;
+        }
+
         if ( (errorCode = theora_decode_header (&context->inf, &context->cc, &op)) )
         {
             mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Broken Theora header; errorCode=%i!\n", errorCode);
