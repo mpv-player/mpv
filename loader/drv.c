@@ -25,7 +25,7 @@
 #ifndef __MINGW32__
 #include "ext.h"
 #endif
-#include "codecpath.h"
+#include "get_path.h"
 
 #if 1
 

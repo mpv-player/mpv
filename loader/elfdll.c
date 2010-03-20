@@ -18,7 +18,7 @@
 #include "wine/debugtools.h"
 #include "wine/winerror.h"
 #include "debug.h"
-#include "codecpath.h"
+#include "get_path.h"
 
 //DEFAULT_DEBUG_CHANNEL(elfdll)
 

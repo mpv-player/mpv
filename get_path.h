@@ -21,7 +21,10 @@
 #ifndef MPLAYER_GET_PATH_H
 #define MPLAYER_GET_PATH_H
 
+extern char *def_path;
+
 char *get_path(const char *filename);
 void set_path_env(void);
+void SetCodecPath(const char *path);
 
 #endif /* MPLAYER_GET_PATH_H */

@@ -175,3 +175,21 @@ void set_path_env(void)
 		mp_msg(MSGT_WIN32, MSGL_WARN, "Cannot set PATH!");
 }
 #endif /* (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL) */
+
+char *def_path = BINARY_CODECS_PATH;
+
+static int needs_free = 0;
+
+void SetCodecPath(const char *path)
+{
+    if (needs_free)
+        free(def_path);
+    if (path == 0) {
+        def_path   = BINARY_CODECS_PATH;
+        needs_free = 0;
+        return;
+    }
+    def_path = malloc(strlen(path) + 1);
+    strcpy(def_path, path);
+    needs_free = 1;
+}

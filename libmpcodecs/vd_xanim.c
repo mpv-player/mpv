@@ -29,11 +29,10 @@
 #include <string.h> /* strerror */
 
 #include "config.h"
-
+#include "get_path.h"
 #include "mp_msg.h"
 
 #include "vd_internal.h"
-#include "loader/codecpath.h"
 
 static const vd_info_t info = {
 	"XAnim codecs",

@@ -46,7 +46,7 @@
 #endif
 #include "win32.h"
 #include "drv.h"
-#include "codecpath.h"
+#include "get_path.h"
 
 #ifdef EMU_QTX_API
 #include "wrapper.h"

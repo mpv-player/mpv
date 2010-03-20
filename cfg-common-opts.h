@@ -40,9 +40,7 @@
 #ifdef CONFIG_PRIORITY
 	{"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
-#ifdef CONFIG_WIN32DLL
 	{"codecpath", &codec_path, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#endif
 	{"noconfig", noconfig_opts, CONF_TYPE_SUBCONFIG, CONF_GLOBAL|CONF_NOCFG|CONF_PRE_PARSE, 0, 0, NULL},
 
 // ------------------------- stream options --------------------

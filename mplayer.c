@@ -94,7 +94,6 @@
 #include "gui/interface.h"
 
 #include "input/input.h"
-#include "loader/codecpath.h"
 
 int slave_mode=0;
 int player_idle_mode=0;
@@ -2702,10 +2701,8 @@ int gui_no_filename=0;
     set_priority();
 #endif
 
-#ifdef CONFIG_WIN32DLL
   if (codec_path)
     SetCodecPath(codec_path);
-#endif
 
 #ifndef CONFIG_GUI
     if(use_gui){

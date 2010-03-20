@@ -65,7 +65,6 @@
 #include "mp_fifo.h"
 #include "get_path.h"
 
-#include "loader/codecpath.h"
 #include "stream/stream.h"
 #include "libmpdemux/aviprint.h"
 #include "libmpdemux/demuxer.h"
@@ -667,10 +666,8 @@ if (frameno_filename) {
   set_priority();
 #endif
 
-#ifdef CONFIG_WIN32DLL
   if (codec_path)
     SetCodecPath(codec_path);
-#endif
 
 // check font
 #ifdef CONFIG_FREETYPE
