@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 rev. 30868
+.\" sync with en/mplayer.1 rev. 30936
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -623,6 +623,11 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 .\" --------------------------------------------------------------------------
 .
 .SH "通用选项"
+.
+.TP
+.B \-codecpath <dir>
+指定已编译编解码器的存放目录。
+Specify a directory for binary codecs.
 .
 .TP
 .B \-codecs\-file <文件名>（也请参见 \-afm，\-ac，\-vfm，\-vc）
@@ -3271,7 +3276,7 @@ ggi 和 gl2 的都支持此功能。
 .PD 1
 .
 .TP
-.B vdpau（与 \-vc ffmpeg12vdpau，ffwmv3vdpau，ffvc1vdpau，ffh264vdpau 或
+.B vdpau（与 \-vc ffmpeg12vdpau，ffwmv3vdpau，ffvc1vdpau，ffh264vdpau 或 
 ffodivxvdpau 一同使用）
 使用 VDPAU 硬件解码视频的视频输出方式。
 同时支持显示软件解码的视频。
