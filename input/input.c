@@ -43,7 +43,7 @@
 #include "help_mp.h"
 #include "m_config.h"
 #include "m_option.h"
-#include "get_path.h"
+#include "path.h"
 
 #include "joystick.h"
 

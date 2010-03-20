@@ -35,7 +35,7 @@
 #include "mp_msg.h"
 #include "m_option.h"
 #include "sub.h"
-#include "get_path.h"
+#include "path.h"
 #include "libmpdemux/mpeg_packetizer.h"
 #include "x11_common.h"
 

@@ -29,7 +29,7 @@
 #include <string.h> /* strerror */
 
 #include "config.h"
-#include "get_path.h"
+#include "path.h"
 #include "mp_msg.h"
 
 #include "vd_internal.h"

@@ -49,7 +49,7 @@ for DLL to know too much about its environment.
 #include "loader.h"
 #include "com.h"
 #include "ext.h"
-#include "get_path.h"
+#include "path.h"
 
 #include <stdlib.h>
 #include <assert.h>

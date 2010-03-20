@@ -22,7 +22,7 @@
  */
 
 #include <windows.h>
-#include <get_path.h>
+#include "path.h"
 #include "gui/interface.h"
 #include "m_option.h"
 #include "mixer.h"

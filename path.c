@@ -28,7 +28,7 @@
 #include <string.h>
 #include "config.h"
 #include "mp_msg.h"
-#include "get_path.h"
+#include "path.h"
 
 #ifdef CONFIG_MACOSX_BUNDLE
 #include <CoreFoundation/CoreFoundation.h>

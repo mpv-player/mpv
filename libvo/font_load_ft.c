@@ -48,7 +48,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "mplayer.h"
-#include "get_path.h"
+#include "path.h"
 #include "osd_font.h"
 
 #if (FREETYPE_MAJOR > 2) || (FREETYPE_MAJOR == 2 && FREETYPE_MINOR >= 1)

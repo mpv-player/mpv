@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MPLAYER_GET_PATH_H
-#define MPLAYER_GET_PATH_H
+#ifndef MPLAYER_PATH_H
+#define MPLAYER_PATH_H
 
 extern char *def_path;
 
@@ -27,4 +27,4 @@ char *get_path(const char *filename);
 void set_path_env(void);
 void SetCodecPath(const char *path);
 
-#endif /* MPLAYER_GET_PATH_H */
+#endif /* MPLAYER_PATH_H */

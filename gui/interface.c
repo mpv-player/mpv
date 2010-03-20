@@ -36,7 +36,7 @@
 #include "app.h"
 #include "cfg.h"
 #include "help_mp.h"
-#include "get_path.h"
+#include "path.h"
 #include "mp_core.h"
 #include "mplayer.h"
 #include "libmpcodecs/vd.h"

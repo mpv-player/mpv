@@ -23,7 +23,7 @@
 
 #include <windows.h>
 #include <commctrl.h>
-#include <get_path.h>
+#include "path.h"
 #include "gui/interface.h"
 #include "mp_msg.h"
 #include "help_mp.h"

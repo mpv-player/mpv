@@ -25,7 +25,7 @@
 #ifndef __MINGW32__
 #include "ext.h"
 #endif
-#include "get_path.h"
+#include "path.h"
 
 #if 1
 

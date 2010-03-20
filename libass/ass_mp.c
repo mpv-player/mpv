@@ -25,7 +25,7 @@
 #include <stdlib.h>
 
 #include "mp_msg.h"
-#include "get_path.h"
+#include "path.h"
 
 #include "ass_mp.h"
 #include "help_mp.h"

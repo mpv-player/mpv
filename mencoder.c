@@ -63,7 +63,7 @@
 #include "parser-mecmd.h"
 #include "parser-cfg.h"
 #include "mp_fifo.h"
-#include "get_path.h"
+#include "path.h"
 
 #include "stream/stream.h"
 #include "libmpdemux/aviprint.h"

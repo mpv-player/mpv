@@ -344,12 +344,12 @@ SRCS_COMMON = asxparser.c \
               edl.c \
               find_sub.c \
               fmt-conversion.c \
-              get_path.c \
               m_config.c \
               m_option.c \
               m_struct.c \
               mpcommon.c \
               parser-cfg.c \
+              path.c \
               playtree.c \
               playtreeparser.c \
               spudec.c \
