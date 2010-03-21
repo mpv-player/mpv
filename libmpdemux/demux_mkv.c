@@ -322,7 +322,7 @@ static void demux_mkv_decode(mkv_track_t *track, uint8_t *src,
             continue;
 
         if (src != *dest && src != orig_src)
-            free(src);
+            talloc_free(src);
         src = *dest;  // output from last iteration is new source
 
         if (enc->comp_algo == 0) {
@@ -350,13 +350,13 @@ static void demux_mkv_decode(mkv_track_t *track, uint8_t *src,
             int result;
             do {
                 *size += 4000;
-                *dest = realloc(*dest, *size);
+                *dest = talloc_realloc_size(NULL, *dest, *size);
                 zstream.next_out = (Bytef *) (*dest + zstream.total_out);
                 result = inflate(&zstream, Z_NO_FLUSH);
                 if (result != Z_OK && result != Z_STREAM_END) {
                     mp_tmsg(MSGT_DEMUX, MSGL_WARN,
                             "[mkv] zlib decompression failed.\n");
-                    free(*dest);
+                    talloc_free(*dest);
                     *dest = NULL;
                     inflateEnd(&zstream);
                     goto error;
@@ -377,7 +377,8 @@ static void demux_mkv_decode(mkv_track_t *track, uint8_t *src,
                 int srclen = *size;
                 if (dstlen > SIZE_MAX - AV_LZO_OUTPUT_PADDING)
                     goto lzo_fail;
-                *dest = realloc(*dest, dstlen + AV_LZO_OUTPUT_PADDING);
+                *dest = talloc_realloc_size(NULL, *dest,
+                                            dstlen + AV_LZO_OUTPUT_PADDING);
                 int result = av_lzo1x_decode(*dest, &dstlen, src, &srclen);
                 if (result == 0)
                     break;
@@ -385,7 +386,7 @@ static void demux_mkv_decode(mkv_track_t *track, uint8_t *src,
                   lzo_fail:
                     mp_tmsg(MSGT_DEMUX, MSGL_WARN,
                             "[mkv] lzo decompression failed.\n");
-                    free(*dest);
+                    talloc_free(*dest);
                     *dest = NULL;
                     goto error;
                 }
@@ -395,7 +396,7 @@ static void demux_mkv_decode(mkv_track_t *track, uint8_t *src,
             }
             *size = dstlen;
         } else if (enc->comp_algo == 3) {
-            *dest = malloc(*size + enc->comp_settings_len);
+            *dest = talloc_size(NULL, *size + enc->comp_settings_len);
             memcpy(*dest, enc->comp_settings, enc->comp_settings_len);
             memcpy(*dest + enc->comp_settings_len, src, *size);
             *size += enc->comp_settings_len;
@@ -404,7 +405,7 @@ static void demux_mkv_decode(mkv_track_t *track, uint8_t *src,
 
  error:
     if (src != *dest && src != orig_src)
-        free(src);
+        talloc_free(src);
 }
 
 
@@ -1587,7 +1588,8 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track,
         size = track->private_size;
         demux_mkv_decode(track, track->private_data, &buffer, &size, 2);
         if (buffer && buffer != track->private_data) {
-            free(track->private_data);
+            talloc_free(track->private_data);
+            talloc_steal(track, buffer);
             track->private_data = buffer;
             track->private_size = size;
         }
@@ -2195,7 +2197,7 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
             demux_mkv_decode(track, block, &buffer, &size, 1);
             handle_subtitles(demuxer, track, buffer, size, block_duration, tc);
             if (buffer != block)
-                free(buffer);
+                talloc_free(buffer);
             use_this_block = 0;
         }
     } else
@@ -2224,7 +2226,7 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
                     dp = new_demux_packet(size);
                     memcpy(dp->buffer, buffer, size);
                     if (buffer != block)
-                        free(buffer);
+                        talloc_free(buffer);
                     dp->flags = (block_bref == 0
                                  && block_fref == 0) ? 0x10 : 0;
                     /* If default_duration is 0, assume no pts value is known
