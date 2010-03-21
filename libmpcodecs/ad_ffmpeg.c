@@ -142,7 +142,12 @@ static int init(sh_audio_t *sh_audio)
           mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Unsupported sample format\n");
           return 0;
   }
-  if(sh_audio->wf){
+  /* If the audio is AAC the container level data may be unreliable
+   * because of SBR handling problems (possibly half real sample rate at
+   * container level). Default AAC decoding with ad_faad has used codec-level
+   * values for a long time without generating complaints so it should be OK.
+   */
+  if (sh_audio->wf && lavc_context->codec_id != CODEC_ID_AAC) {
       // If the decoder uses the wrong number of channels all is lost anyway.
       // sh_audio->channels=sh_audio->wf->nChannels;
       if (sh_audio->wf->nSamplesPerSec)
