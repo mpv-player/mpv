@@ -180,7 +180,7 @@ char *def_path = BINARY_CODECS_PATH;
 
 static int needs_free = 0;
 
-void SetCodecPath(const char *path)
+void set_codec_path(const char *path)
 {
     if (needs_free)
         free(def_path);

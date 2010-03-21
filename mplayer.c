@@ -2702,7 +2702,7 @@ int gui_no_filename=0;
 #endif
 
   if (codec_path)
-    SetCodecPath(codec_path);
+    set_codec_path(codec_path);
 
 #ifndef CONFIG_GUI
     if(use_gui){

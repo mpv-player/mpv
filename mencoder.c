@@ -667,7 +667,7 @@ if (frameno_filename) {
 #endif
 
   if (codec_path)
-    SetCodecPath(codec_path);
+    set_codec_path(codec_path);
 
 // check font
 #ifdef CONFIG_FREETYPE
