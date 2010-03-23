@@ -27,6 +27,7 @@
 #include <dlfcn.h>
 #endif
 #include "help_mp.h"
+#include "path.h"
 
 #include "ad_internal.h"
 #include "loader/wine/windef.h"
@@ -251,9 +252,9 @@ static int preinit(sh_audio_t *sh){
   unsigned int result;
   char *path;
 
-  path = malloc(strlen(BINARY_CODECS_PATH) + strlen(sh->codec->dll) + 2);
+  path = malloc(strlen(def_path) + strlen(sh->codec->dll) + 2);
   if (!path) return 0;
-  sprintf(path, BINARY_CODECS_PATH "/%s", sh->codec->dll);
+  sprintf(path, "%s/%s", def_path, sh->codec->dll);
 
     /* first try to load linux dlls, if failed and we're supporting win32 dlls,
        then try to load the windows ones */
@@ -277,8 +278,8 @@ static int preinit(sh_audio_t *sh){
   if(raSetDLLAccessPath){
 #endif
       // used by 'SIPR'
-      path = realloc(path, strlen(BINARY_CODECS_PATH) + 13);
-      sprintf(path, "DT_Codecs=" BINARY_CODECS_PATH);
+      path = realloc(path, strlen(def_path) + 13);
+      sprintf(path, "DT_Codecs=%s", def_path);
       if(path[strlen(path)-1]!='/'){
         path[strlen(path)+1]=0;
         path[strlen(path)]='/';
@@ -299,15 +300,17 @@ static int preinit(sh_audio_t *sh){
 
 #ifdef CONFIG_WIN32DLL
     if (dll_type == 1){
-      if(wraOpenCodec2)
-	result = wraOpenCodec2(&sh->context, BINARY_CODECS_PATH "\\");
-      else
+      if (wraOpenCodec2) {
+        sprintf(path, "%s\\", def_path);
+        result = wraOpenCodec2(&sh->context, path);
+      } else
 	result=wraOpenCodec(&sh->context);
     } else
 #endif
-    if(raOpenCodec2)
-      result = raOpenCodec2(&sh->context, BINARY_CODECS_PATH "/");
-    else
+    if (raOpenCodec2) {
+      sprintf(path, "%s/", def_path);
+      result = raOpenCodec2(&sh->context, path);
+    } else
       result=raOpenCodec(&sh->context);
     if(result){
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Decoder open failed, error code: 0x%X\n",result);

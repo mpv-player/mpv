@@ -28,6 +28,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "mpbswap.h"
+#include "path.h"
 
 #include "vd_internal.h"
 #include "loader/wine/windef.h"
@@ -273,9 +274,9 @@ static int init(sh_video_t *sh){
 
 	mp_msg(MSGT_DECVIDEO,MSGL_V,"realvideo codec id: 0x%08X  sub-id: 0x%08X\n",be2me_32(((unsigned int*)extrahdr)[1]),be2me_32(((unsigned int*)extrahdr)[0]));
 
-	path = malloc(strlen(BINARY_CODECS_PATH) + strlen(sh->codec->dll) + 2);
+	path = malloc(strlen(def_path) + strlen(sh->codec->dll) + 2);
 	if (!path) return 0;
-	sprintf(path, BINARY_CODECS_PATH "/%s", sh->codec->dll);
+	sprintf(path, "%s/%s", def_path, sh->codec->dll);
 
 	/* first try to load linux dlls, if failed and we're supporting win32 dlls,
 	   then try to load the windows ones */
