@@ -299,7 +299,10 @@ http_read_response( int fd ) {
 		}
 		http_response_append( http_hdr, response, i );
 	} while( !http_is_header_entire( http_hdr ) );
-	http_response_parse( http_hdr );
+	if (http_response_parse( http_hdr ) < 0) {
+		http_free( http_hdr );
+		return NULL;
+	}
 	return http_hdr;
 }
 
