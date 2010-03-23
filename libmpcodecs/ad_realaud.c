@@ -252,9 +252,9 @@ static int preinit(sh_audio_t *sh){
   unsigned int result;
   char *path;
 
-  path = malloc(strlen(codecs_path) + strlen(sh->codec->dll) + 2);
+  path = malloc(strlen(codec_path) + strlen(sh->codec->dll) + 2);
   if (!path) return 0;
-  sprintf(path, "%s/%s", codecs_path, sh->codec->dll);
+  sprintf(path, "%s/%s", codec_path, sh->codec->dll);
 
     /* first try to load linux dlls, if failed and we're supporting win32 dlls,
        then try to load the windows ones */
@@ -278,8 +278,8 @@ static int preinit(sh_audio_t *sh){
   if(raSetDLLAccessPath){
 #endif
       // used by 'SIPR'
-      path = realloc(path, strlen(codecs_path) + 13);
-      sprintf(path, "DT_Codecs=%s", codecs_path);
+      path = realloc(path, strlen(codec_path) + 13);
+      sprintf(path, "DT_Codecs=%s", codec_path);
       if(path[strlen(path)-1]!='/'){
         path[strlen(path)+1]=0;
         path[strlen(path)]='/';
@@ -301,14 +301,14 @@ static int preinit(sh_audio_t *sh){
 #ifdef CONFIG_WIN32DLL
     if (dll_type == 1){
       if (wraOpenCodec2) {
-        sprintf(path, "%s\\", codecs_path);
+        sprintf(path, "%s\\", codec_path);
         result = wraOpenCodec2(&sh->context, path);
       } else
 	result=wraOpenCodec(&sh->context);
     } else
 #endif
     if (raOpenCodec2) {
-      sprintf(path, "%s/", codecs_path);
+      sprintf(path, "%s/", codec_path);
       result = raOpenCodec2(&sh->context, path);
     } else
       result=raOpenCodec(&sh->context);
