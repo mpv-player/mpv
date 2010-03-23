@@ -38,8 +38,6 @@ DWORD fixup_imports(WINE_MODREF *wm);
 void dump_exports(HMODULE hModule);
 /*---------------- END HACKS ---------------*/
 
-//char *extra_ld_library_path = "/usr/lib/win32";
-
 struct elfdll_image
 {
 	HMODULE		pe_module_start;
