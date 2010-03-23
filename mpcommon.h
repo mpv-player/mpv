@@ -37,6 +37,4 @@ void set_osd_subtitle(subtitle *subs);
 extern int disable_system_conf;
 extern int disable_user_conf;
 
-extern char *codec_path;
-
 #endif /* MPLAYER_MPCOMMON_H */

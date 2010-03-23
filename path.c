@@ -176,20 +176,20 @@ void set_path_env(void)
 }
 #endif /* (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL) */
 
-char *def_path = BINARY_CODECS_PATH;
+char *codec_path = BINARY_CODECS_PATH;
 
 static int needs_free = 0;
 
 void set_codec_path(const char *path)
 {
     if (needs_free)
-        free(def_path);
+        free(codec_path);
     if (path == 0) {
-        def_path   = BINARY_CODECS_PATH;
+        codec_path = BINARY_CODECS_PATH;
         needs_free = 0;
         return;
     }
-    def_path = malloc(strlen(path) + 1);
-    strcpy(def_path, path);
+    codec_path = malloc(strlen(path) + 1);
+    strcpy(codec_path, path);
     needs_free = 1;
 }

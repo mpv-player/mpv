@@ -2575,7 +2575,8 @@ static int WINAPI expLoadLibraryA(char* name)
 	return MODULE_HANDLE_psapi;
 
     result=LoadLibraryA(name);
-    dbgprintf("Returned LoadLibraryA(0x%x='%s'), def_path=%s => 0x%x\n", name, name, def_path, result);
+    dbgprintf("Returned LoadLibraryA(0x%x='%s'), codec_path=%s => 0x%x\n",
+              name, name, codec_path, result);
 
     return result;
 }
@@ -3589,13 +3590,15 @@ static HANDLE WINAPI expFindFirstFileA(LPCSTR s, LPWIN32_FIND_DATAA lpfd)
 #ifdef CONFIG_QTX_CODECS
     if(strstr(s, "quicktime\\*.QTX")){
 	dbgprintf("FindFirstFileA(0x%x='%s', 0x%x) => QTX\n", s, s, lpfd);
-	dbgprintf("\n### Searching for QuickTime plugins (*.qtx) at %s...\n",def_path);
-	qtx_dir=opendir(def_path);
+	dbgprintf("\n### Searching for QuickTime plugins (*.qtx) at %s...\n",
+	          codec_path);
+	qtx_dir = opendir(codec_path);
 	if(!qtx_dir) return (HANDLE)-1;
 	memset(lpfd,0,sizeof(*lpfd));
 	if(expFindNextFileA(FILE_HANDLE_quicktimeqtx,lpfd))
 	    return FILE_HANDLE_quicktimeqtx;
-	printf("loader: Couldn't find the QuickTime plugins (.qtx files) at %s\n",def_path);
+	printf("loader: Couldn't find the QuickTime plugins (.qtx files) at %s\n",
+	       codec_path);
 	return (HANDLE)-1;
     }
 #if 0
@@ -3732,8 +3735,8 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
     if(strstr(cs1, "QuickTime.qts"))
     {
 	int result;
-	char* tmp=malloc(strlen(def_path)+50);
-	strcpy(tmp, def_path);
+	char* tmp = malloc(strlen(codec_path) + 50);
+	strcpy(tmp, codec_path);
 	strcat(tmp, "/");
 	strcat(tmp, "QuickTime.qts");
 	result=open(tmp, O_RDONLY);
@@ -3743,9 +3746,9 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
     if(strstr(cs1, ".qtx"))
     {
 	int result;
-	char* tmp=malloc(strlen(def_path)+250);
+	char* tmp = malloc(strlen(codec_path) + 250);
 	char* x=strrchr(cs1,'\\');
-	sprintf(tmp,"%s/%s",def_path,x?(x+1):cs1);
+	sprintf(tmp, "%s/%s", codec_path, x ? (x + 1) : cs1);
 //	printf("### Open: %s -> %s\n",cs1,tmp);
 	result=open(tmp, O_RDONLY);
 	free(tmp);
@@ -3756,8 +3759,8 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
     if(strncmp(cs1, "AP", 2) == 0)
     {
 	int result;
-	char* tmp=malloc(strlen(def_path)+50);
-	strcpy(tmp, def_path);
+	char* tmp = malloc(strlen(codec_path) + 50);
+	strcpy(tmp, codec_path);
 	strcat(tmp, "/");
 	strcat(tmp, "APmpg4v1.apl");
 	result=open(tmp, O_RDONLY);

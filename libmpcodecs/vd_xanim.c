@@ -682,7 +682,7 @@ static int init(sh_video_t *sh)
     for (i=0; i < XA_CLOSE_FUNCS; i++)
 	xa_close_func[i] = NULL;
 
-    snprintf(dll, 1024, "%s/%s", def_path, sh->codec->dll);
+    snprintf(dll, 1024, "%s/%s", codec_path, sh->codec->dll);
     if (xacodec_load(sh, dll) == 0)
 	return 0;
 

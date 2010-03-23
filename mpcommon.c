@@ -314,5 +314,3 @@ const m_option_t noconfig_opts[] = {
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-char *codec_path = NULL;
-

@@ -68,7 +68,7 @@ void *ELFDLL_dlopen(const char *libname, int flags)
 
 	/* Now try to construct searches through our extra search-path */
 	namelen = strlen(libname);
-	ldpath = def_path;
+	ldpath = codec_path;
 	while(ldpath && *ldpath)
 	{
 		int len;

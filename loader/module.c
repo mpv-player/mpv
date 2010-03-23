@@ -393,9 +393,9 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 		    strncpy(path, libname, 511);
                 else
 		    /* check default user path */
-		    strncpy(path, def_path, 300);
+		    strncpy(path, codec_path, 300);
 	    }
-	    else if (strcmp(def_path, listpath[i]))
+	    else if (strcmp(codec_path, listpath[i]))
                 /* path from the list */
 		strncpy(path, listpath[i], 300);
 	    else
