@@ -333,7 +333,7 @@ static void exit_sighandler(int x){
 
 static muxer_t* muxer=NULL;
 
-void add_subtitles(char *filename, float fps, int silent)
+static void add_subtitles(char *filename, float fps, int silent)
 {
     sub_data *subd;
 #ifdef CONFIG_ASS
