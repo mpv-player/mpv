@@ -8572,7 +8572,6 @@ LIBSMBCLIENT = $_smb
 LIBTHEORA = $_theora
 LIRC = $_lirc
 LIVE555 = $_live
-MACOSX_BUNDLE = $_macosx_bundle
 MACOSX_FINDER = $_macosx_finder
 MD5SUM = $_md5sum
 MGA = $_mga
