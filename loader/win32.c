@@ -436,10 +436,7 @@ static int my_release(void* memory)
 
     alccnt--;
 
-    if (last_alloc)
-	pthread_mutex_unlock(&memmut);
-    else
-	pthread_mutex_destroy(&memmut);
+    pthread_mutex_unlock(&memmut);
 
     //if (alccnt < 40000) printf("MY_RELEASE: %p\t%ld    (%d)\n", header, header->size, alccnt);
 #else
