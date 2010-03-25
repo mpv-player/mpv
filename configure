@@ -8452,7 +8452,6 @@ WINDRES = $_windres
 
 CFLAGS = $CFLAGS $extra_cflags
 ASFLAGS = $CFLAGS $extra_cflags
-OPTFLAGS = $CFLAGS $extra_cflags
 CXXFLAGS = $CXXFLAGS $extra_cflags $extra_cxxflags
 CFLAGS_DHAHELPER = $cflags_dhahelper
 CFLAGS_FAAD_FIXED = $cflags_faad_fixed
