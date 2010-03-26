@@ -1088,27 +1088,7 @@ static int preinit(const char *arg)
         }
     }
 
-#if !defined (CONFIG_MACOSX_FINDER) || !defined (CONFIG_SDL)
-    // this chunk of code is heavily based off SDL_macosx.m from SDL
-    // the CPSEnableForegroundOperation that was here before is private and shouldn't be used
-    // replaced by a call to the 10.3+ TransformProcessType
-    {
-        ProcessSerialNumber myProc, frProc;
-        Boolean sameProc;
-
-        if (GetFrontProcess(&frProc) == noErr)
-        {
-            if (GetCurrentProcess(&myProc) == noErr)
-            {
-                if (SameProcess(&frProc, &myProc, &sameProc) == noErr && !sameProc)
-                {
-                    TransformProcessType(&myProc, kProcessTransformToForegroundApplication);
-                }
-                SetFrontProcess(&myProc);
-            }
-        }
-    }
-#endif
+    osx_foreground_hack();
 
     return 0;
 }
