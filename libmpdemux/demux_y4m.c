@@ -76,6 +76,7 @@ static int y4m_check_file(demuxer_t* demuxer){
     return DEMUXER_TYPE_Y4M;
 }
 
+static void read_streaminfo(demuxer_t *demuxer);
 
 // return value:
 //     0 = EOF or no stream found
@@ -87,6 +88,14 @@ static int demux_y4m_fill_buffer(demuxer_t *demux, demux_stream_t *dsds) {
   y4m_frame_info_t fi;
   unsigned char *buf[3];
   int err, size;
+  int nextc;
+
+  nextc = stream_read_char(demux->stream);
+  stream_skip(demux->stream, -1);
+  if (nextc == 'Y') {
+    read_streaminfo(demux);
+    demux->seekable = 0;
+  }
 
   y4m_init_frame_info(&fi);
 
@@ -136,14 +145,12 @@ static int demux_y4m_fill_buffer(demuxer_t *demux, demux_stream_t *dsds) {
   return 1;
 }
 
-static demuxer_t* demux_open_y4m(demuxer_t* demuxer){
-    y4m_priv_t* priv = demuxer->priv;
+static void read_streaminfo(demuxer_t *demuxer)
+{
+    y4m_priv_t *priv = demuxer->priv;
+    sh_video_t *sh = demuxer->video->sh;
     y4m_ratio_t ratio;
-    sh_video_t* sh=new_sh_video(demuxer,0);
     int err;
-
-    priv->framenum = 0;
-    priv->si = malloc(sizeof(y4m_stream_info_t));
 
     if (priv->is_older)
     {
@@ -228,7 +235,6 @@ static demuxer_t* demux_open_y4m(demuxer_t* demuxer){
 
     sh->format = mmioFOURCC('Y', 'V', '1', '2');
 
-    sh->bih=calloc(1, sizeof(BITMAPINFOHEADER));
     sh->bih->biSize=40;
     sh->bih->biWidth = sh->disp_w;
     sh->bih->biHeight = sh->disp_h;
@@ -237,14 +243,25 @@ static demuxer_t* demux_open_y4m(demuxer_t* demuxer){
     sh->bih->biCompression=sh->format;
     sh->bih->biSizeImage=sh->bih->biWidth*sh->bih->biHeight*3/2; /* YV12 */
 
+    mp_msg(MSGT_DEMUX, MSGL_INFO, "YUV4MPEG2 Video stream %d size: display: %dx%d, codec: %ux%u\n",
+            demuxer->video->id, sh->disp_w, sh->disp_h, sh->bih->biWidth,
+            sh->bih->biHeight);
+}
+
+static demuxer_t* demux_open_y4m(demuxer_t* demuxer){
+    y4m_priv_t* priv = demuxer->priv;
+    sh_video_t* sh=new_sh_video(demuxer,0);
+
+    priv->framenum = 0;
+    priv->si = malloc(sizeof(y4m_stream_info_t));
+
+    sh->bih=calloc(1, sizeof(BITMAPINFOHEADER));
+
     demuxer->video->sh=sh;
     sh->ds=demuxer->video;
     demuxer->video->id=0;
 
-
-    mp_msg(MSGT_DEMUX, MSGL_INFO, "YUV4MPEG2 Video stream %d size: display: %dx%d, codec: %ux%u\n",
-            demuxer->video->id, sh->disp_w, sh->disp_h, sh->bih->biWidth,
-            sh->bih->biHeight);
+    read_streaminfo(demuxer);
 
     return demuxer;
 }
