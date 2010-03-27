@@ -195,18 +195,10 @@ void GetCpuCaps( CpuCaps *caps)
 #endif
 
 		/* FIXME: Does SSE2 need more OS support, too? */
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) \
-  || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) \
-  || defined(__APPLE__) || defined(__CYGWIN__) || defined(__MINGW32__) \
-  || defined(__OS2__)
 		if (caps->hasSSE)
 			check_os_katmai_support();
 		if (!caps->hasSSE)
 			caps->hasSSE2 = 0;
-#else
-		caps->hasSSE=0;
-		caps->hasSSE2 = 0;
-#endif
 //		caps->has3DNow=1;
 //		caps->hasMMX2 = 0;
 //		caps->hasMMX = 0;
