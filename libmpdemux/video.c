@@ -324,7 +324,7 @@ mpeg_header_parser:
    if(!sh_video->fps){
      sh_video->frametime=0;
    } else {
-     sh_video->frametime=1.0/picture.fps;
+     sh_video->frametime=1.0/sh_video->fps;
    }
    sh_video->disp_w=picture.display_picture_width;
    sh_video->disp_h=picture.display_picture_height;
