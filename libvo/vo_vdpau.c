@@ -59,7 +59,7 @@ static vo_info_t info = {
     ""
 };
 
-LIBVO_EXTERN(vdpau)
+const LIBVO_EXTERN(vdpau)
 
 #define CHECK_ST_ERROR(message) \
     if (vdp_st != VDP_STATUS_OK) { \

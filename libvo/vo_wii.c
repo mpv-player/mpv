@@ -61,7 +61,7 @@ static const vo_info_t info = {
   ""
 };
 
-LIBVO_EXTERN(wii)
+const LIBVO_EXTERN(wii)
 
 static signed int pre_init_err = -2;
 

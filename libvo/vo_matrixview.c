@@ -44,7 +44,7 @@ static const vo_info_t info = {
     "Based on MatrixView from rss-glx.sf.net"
 };
 
-LIBVO_EXTERN(matrixview)
+const LIBVO_EXTERN(matrixview)
 
 static MPGLContext glctx;
 
