@@ -694,7 +694,9 @@ ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
 
 INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mencoder-man
-INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
+INSTALL_TARGETS-$(MPLAYER)  += install-mplayer \
+                               install-mplayer-man \
+                               install-mplayer-msg
 
 DIRS =  . \
         input \
@@ -733,6 +735,8 @@ DIRS =  . \
         TOOLS \
         vidix \
 
+MOFILES := $(MSG_LANGS:%=locale/%/LC_MESSAGES/mplayer.mo)
+
 ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
 
 ADDSUFFIXES     = $(foreach suf,$(1),$(addsuffix $(suf),$(2)))
@@ -741,7 +745,7 @@ ADD_ALL_EXESUFS = $(1) $(call ADDSUFFIXES,$(EXESUFS_ALL),$(1))
 
 ###### generic rules #######
 
-all: $(ALL_PRG-yes)
+all: $(ALL_PRG-yes) locales
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ -MD -MP -MF $*.d $<
@@ -788,6 +792,12 @@ version.h: version.sh
 	./$< `$(CC) -dumpversion`
 
 %(EXESUF): %.c
+
+locales: $(MOFILES)
+
+locale/%/LC_MESSAGES/mplayer.mo: po/%.po
+	mkdir -p $(dir $@)
+	msgfmt -c -o $@ $<
 
 
 
@@ -852,6 +862,7 @@ install-%: %$(EXESUF) install-dirs
 
 install-mencoder-man: $(foreach lang,$(MAN_LANGS),install-mencoder-man-$(lang))
 install-mplayer-man:  $(foreach lang,$(MAN_LANGS),install-mplayer-man-$(lang))
+install-mplayer-msg:  $(foreach lang,$(MSG_LANGS),install-mplayer-msg-$(lang))
 
 install-mencoder-man-en: install-mplayer-man-en
 	cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1
@@ -874,6 +885,14 @@ endef
 $(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MENCODER_MAN_RULE)))
 $(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MPLAYER_MAN_RULE)))
 
+define MPLAYER_MSG_RULE
+install-mplayer-msg-$(lang):
+	if test ! -d $(LOCALEDIR)/$(lang)/LC_MESSAGES ; then $(INSTALL) -d $(LOCALEDIR)/$(lang)/LC_MESSAGES ; fi
+	$(INSTALL) -m 644 locale/$(lang)/LC_MESSAGES/mplayer.mo $(LOCALEDIR)/$(lang)/LC_MESSAGES/
+endef
+
+$(foreach lang,$(MSG_LANG_ALL),$(eval $(MPLAYER_MSG_RULE)))
+
 uninstall:
 	rm -f $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
 	rm -f $(BINDIR)/mencoder$(EXESUF)
@@ -882,6 +901,7 @@ uninstall:
 	rm -f $(prefix)/share/applications/mplayer.desktop
 	rm -f $(MANDIR)/man1/mplayer.1 $(MANDIR)/man1/mencoder.1
 	rm -f $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1 mencoder.1,$(MANDIR)/$(lang)/man1/$(man)))
+	rm -f $(foreach lang,$(MSG_LANGS),$(LOCALEDIR)/$(lang)/LC_MESSAGES/mplayer.1)
 
 clean:
 	-rm -f $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
