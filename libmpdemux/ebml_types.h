@@ -102,18 +102,46 @@
 #define MATROSKA_ID_TAG                          0x7373
 #define MATROSKA_ID_TARGETS                      0x63c0
 #define MATROSKA_ID_TARGETTYPEVALUE              0x68ca
+#define MATROSKA_ID_TARGETTRACKUID               0x63c5
+#define MATROSKA_ID_TARGETEDITIONUID             0x63c9
+#define MATROSKA_ID_TARGETCHAPTERUID             0x63c4
+#define MATROSKA_ID_TARGETATTACHMENTUID          0x63c6
+#define MATROSKA_ID_SIMPLETAG                    0x67c8
+#define MATROSKA_ID_TAGNAME                      0x45a3
+#define MATROSKA_ID_TAGLANGUAGE                  0x447a
+#define MATROSKA_ID_TAGSTRING                    0x4487
 
+
+struct ebml_simple_tag {
+    struct bstr   tag_name;
+    struct bstr   tag_language;
+    struct bstr   tag_string;
+
+    int  n_tag_name;
+    int  n_tag_language;
+    int  n_tag_string;
+};
 
 struct ebml_targets {
     uint64_t   target_type_value;
+    uint64_t   target_track_uid;
+    uint64_t   target_edition_uid;
+    uint64_t   target_chapter_uid;
+    uint64_t   target_attachment_uid;
 
     int  n_target_type_value;
+    int  n_target_track_uid;
+    int  n_target_edition_uid;
+    int  n_target_chapter_uid;
+    int  n_target_attachment_uid;
 };
 
 struct ebml_tag {
-    struct ebml_targets   targets;
+    struct ebml_targets      targets;
+    struct ebml_simple_tag  *simple_tag;
 
     int  n_targets;
+    int  n_simple_tag;
 };
 
 struct ebml_tags {
@@ -429,5 +457,6 @@ extern const struct ebml_elem_desc ebml_chapter_display_desc;
 extern const struct ebml_elem_desc ebml_tags_desc;
 extern const struct ebml_elem_desc ebml_tag_desc;
 extern const struct ebml_elem_desc ebml_targets_desc;
+extern const struct ebml_elem_desc ebml_simple_tag_desc;
 
 #define MAX_EBML_SUBELEMENTS 19

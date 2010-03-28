@@ -888,7 +888,23 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
 
 static int demux_mkv_read_tags(demuxer_t *demuxer)
 {
-    ebml_read_skip(demuxer->stream, NULL);
+    stream_t *s = demuxer->stream;
+
+    struct ebml_parse_ctx parse_ctx = {};
+    struct ebml_tags           tags = {};
+    if (ebml_read_element(s, &parse_ctx, &tags, &ebml_tags_desc) < 0)
+        return 1;
+
+    for (int i = 0; i < tags.n_tag; i++) {
+        struct ebml_tag tag = tags.tag[i];
+        if (tag.targets.target_track_uid  || tag.targets.target_edition_uid ||
+            tag.targets.target_chapter_uid || tag.targets.target_attachment_uid)
+            continue;
+
+        for (int j; j < tag.n_simple_tag; j++)
+            demux_info_add_bstr(demuxer, tag.simple_tag[j].tag_name, tag.simple_tag[j].tag_string);
+    }
+
     return 0;
 }
 

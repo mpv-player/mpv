@@ -159,7 +159,16 @@ elements_matroska = (
             'Tag*, 7373, sub', (
                 'Targets, 63c0, sub', (
                     'TargetTypeValue, 68ca, uint',
+                    'TargetTrackUID, 63c5, uint',
+                    'TargetEditionUID, 63c9, uint',
+                    'TargetChapterUID, 63c4, uint',
+                    'TargetAttachmentUID, 63c6, uint',
                  ),
+                'SimpleTag*, 67c8, sub', (
+                    'TagName, 45a3, str',
+                    'TagLanguage, 447a, str',
+                    'TagString, 4487, str'
+                ),
             ),
         ),
     ),
