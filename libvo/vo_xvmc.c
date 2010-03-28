@@ -120,7 +120,7 @@ static void   init_osd_yuv_pal(void);
 
 static const struct{
     int id;//id as xvimages or as mplayer RGB|{8,15,16,24,32}
-    void (* init_func_ptr)();
+    void (* init_func_ptr)(void);
     void (* draw_func_ptr)();
     void (* clear_func_ptr)();
     } osd_render[]={
