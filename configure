@@ -9192,6 +9192,7 @@ $def_yasm
 #define CONFIG_FFSERVER 0
 #define CONFIG_GPL 1
 #define CONFIG_GRAY 0
+#define CONFIG_LIBRTMP 0
 #define CONFIG_LIBVORBIS 0
 #define CONFIG_POWERPC_PERF 0
 #define CONFIG_SMALL 0
