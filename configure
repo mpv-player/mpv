@@ -8704,6 +8704,7 @@ CONFIG_RDFT=yes
 
 $mak_hardcoded_tables
 $mak_libavcodec_mpegaudio_hp
+!CONFIG_LIBRTMP=yes
 
 CONFIG_BZLIB=$bzlib
 CONFIG_ENCODERS=yes
