@@ -124,8 +124,13 @@ static void scast_meta_read(int fd, streaming_ctrl_t *sc) {
   my_read(fd, &tmp, 1, sc);
   metalen = tmp * 16;
   if (metalen > 0) {
+    int i;
     char *info = malloc(metalen + 1);
     unsigned nlen = my_read(fd, info, metalen, sc);
+    // avoid breaking the user's terminal too much
+    if (nlen > 256) nlen = 256;
+    for (i = 0; i < nlen; i++)
+      if (info[i] && info[i] < 32) info[i] = '?';
     info[nlen] = 0;
     mp_msg(MSGT_DEMUXER, MSGL_INFO, "\nICY Info: %s\n", info);
     free(info);
