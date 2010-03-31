@@ -801,7 +801,7 @@ static int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
 	    int maxid = FFMIN(100, audio ? MAX_A_STREAMS : MAX_V_STREAMS);
 	    int chunkid;
 	    if (ds->id < -1)
-	      return DEMUXER_CTRL_NOTIMPL;
+	      ds->id = -1;
 
 	    if (*(int *)arg >= 0)
 	      ds->id = *(int *)arg;
