@@ -344,7 +344,7 @@
       <para>
         <screen>
           mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -of lavf \
-          -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
+          -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=libfaac \
           -lavfopts format=psp \
           <replaceable>input.video</replaceable> -o <replaceable>output.psp</replaceable>
         </screen>

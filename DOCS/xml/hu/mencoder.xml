@@ -400,9 +400,9 @@ Nyugodt lehetsz, ha a következő korlátokat figyelembe veszed:
 <title>kódolás PSP-be</title>
 <para>
 <screen>
-mencoder -ofps 30000/1001 -af resample=24000 -vf harddup -of lavf \
-    -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
-    -lavfopts format=psp \
+mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -oac lavc \
+    -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=libfaac \
+    -of lavf -lavfopts format=psp \
     <replaceable>bemenet.video</replaceable> -o <replaceable>kimenet.psp</replaceable>
 </screen>
 Figyelj rá, hogy beállíthatod a videó címét a
