@@ -56,8 +56,8 @@ that your patch will be included.
     and committed separately. Logical units should stay together, though,
     i.e. do not send a patch for every file or directory you change.
 
- 9. Send your patch to the mplayer-dev-eng mailing list as a base64-encoded
-    attachment with the subject line:
+ 9. Send your patch to the mplayer-dev-eng mailing list as attachment with
+    the subject line:
     '[PATCH] very short description of the patch'.
     In the mail, describe in a few sentences what you change and why.
     The subject line is very important if you do not want your patch to get
