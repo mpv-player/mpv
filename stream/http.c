@@ -125,7 +125,7 @@ static void scast_meta_read(int fd, streaming_ctrl_t *sc) {
   metalen = tmp * 16;
   if (metalen > 0) {
     int i;
-    char *info = malloc(metalen + 1);
+    uint8_t *info = malloc(metalen + 1);
     unsigned nlen = my_read(fd, info, metalen, sc);
     // avoid breaking the user's terminal too much
     if (nlen > 256) nlen = 256;
