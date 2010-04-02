@@ -50,7 +50,6 @@
 
 #include "mp_msg.h"
 
-
 static const unsigned char sipr_swaps[38][2] = {
     {0,63},{1,22},{2,44},{3,90},{5,81},{7,31},{8,86},{9,58},{10,36},{12,68},
     {13,39},{14,73},{15,53},{16,69},{17,57},{19,88},{20,34},{21,71},{24,46},
@@ -1301,6 +1300,7 @@ static struct mkv_audio_tag {
     { MKV_A_REALCOOK,  0, mmioFOURCC('c', 'o', 'o', 'k') },
     { MKV_A_REALDNET,  0, mmioFOURCC('d', 'n', 'e', 't') },
     { MKV_A_REALSIPR,  0, mmioFOURCC('s', 'i', 'p', 'r') },
+    { MKV_A_TTA1,      0, mmioFOURCC('T', 'T', 'A', '1') },
     { NULL },
 };
 
@@ -1532,6 +1532,19 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
             sh_a->codecdata_len = track->private_size;
             memcpy(sh_a->codecdata, track->private_data, track->private_size);
         }
+    } else if (track->a_formattag == mmioFOURCC('T', 'T', 'A', '1')) {
+        sh_a->codecdata_len = 30;
+        sh_a->codecdata = calloc(1, sh_a->codecdata_len);
+        if (!sh_a->codecdata)
+            goto error;
+        char *data = sh_a->codecdata;
+        memcpy(data + 0, "TTA1", 4);
+        AV_WL16(data + 4, 1);
+        AV_WL16(data + 6, sh_a->channels);
+        AV_WL16(data + 8, sh_a->wf->wBitsPerSample);
+        AV_WL32(data + 10, sh_a->samplerate);
+        // Bogus: last frame won't be played.
+        AV_WL32(data + 14, 0);
     } else if (!track->ms_compat) {
         goto error;
     }
