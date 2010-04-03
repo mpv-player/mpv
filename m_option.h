@@ -280,7 +280,7 @@ struct m_option {
    *  use the priv field but this was inherited from older versions of the
    *  config code.
    */
-  void *p;
+  const void *p;
 
   /// Option type.
   const m_option_type_t* type;
