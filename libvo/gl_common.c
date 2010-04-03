@@ -1768,6 +1768,12 @@ static int setGlWindow_x11(MPGLContext *ctx)
         appendstr(&glxstr, glXExtStr(mDisplay, GLX_EXTENSIONS));
 
     getFunctions(getProcAddress, glxstr);
+    if (!mpglGenPrograms && mpglGetString &&
+        getProcAddress != (void *)getdladdr &&
+        strstr(mpglGetString(GL_EXTENSIONS), "GL_ARB_vertex_program")) {
+      mp_msg(MSGT_VO, MSGL_WARN, "Broken glXGetProcAddress detected, trying workaround\n");
+      getFunctions((void *)getdladdr, glxstr);
+    }
     free(glxstr);
 
     // and inform that reinit is neccessary
