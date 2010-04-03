@@ -183,7 +183,6 @@ static char *lavc_param_avopt = NULL;
 
 #include "m_option.h"
 
-#ifdef CONFIG_LIBAVCODEC
 m_option_t lavcopts_conf[]={
 	{"acodec", &lavc_param_acodec, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"abitrate", &lavc_param_abitrate, CONF_TYPE_INT, CONF_RANGE, 1, 1000000, NULL},
@@ -331,7 +330,6 @@ m_option_t lavcopts_conf[]={
         {"o", &lavc_param_avopt, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
-#endif
 
 struct vf_priv_s {
     muxer_stream_t* mux;
