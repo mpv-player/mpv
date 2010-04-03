@@ -809,6 +809,37 @@ static void glSetupYUVCombinersATI(float uvcos, float uvsin) {
 }
 
 /**
+ * \brief Variant of glYUVSetupCombinersATI using the API
+ *        implemented by Apple.
+ */
+static void glSetupYUVTextFragment(float uvcos, float uvsin) {
+  static const char template[] =
+    "!!ATIfs1.0\n"
+    "StartConstants;\n"
+    "  CONSTANT c0 = {%f, %f, %f};\n"
+    "  CONSTANT c1 = {%f, %f, %f};\n"
+    "EndConstants;\n"
+    "StartOutputPass;\n"
+    "  SampleMap r0, t0.str;\n"
+    "  SampleMap r1, t1.str;\n"
+    "  SampleMap r2, t2.str;\n"
+    "  MUL r1, r1.bias, c0.bias;\n"
+    "  MAD r2.4x, r2.bias, c1.bias, r1;\n"
+    "  ADD r0, r0, r2;\n"
+    "EndPass;\n";
+  GLfloat ucoef[4];
+  GLfloat vcoef[4];
+  char buffer[512];
+
+  fillUVcoeff(ucoef, vcoef, uvcos, uvsin);
+  snprintf(buffer, sizeof(buffer), template,
+           ucoef[0], ucoef[1], ucoef[2],
+           vcoef[0], vcoef[1], vcoef[2]);
+  mp_msg(MSGT_VO, MSGL_DBG2, "[gl] generated fragment program:\n%s\n", buffer);
+  loadGPUProgram(GL_TEXT_FRAGMENT_SHADER_ATI, buffer);
+}
+
+/**
  * \brief helper function for gen_spline_lookup_tex
  * \param x subpixel-position ((0,1) range) to calculate weights for
  * \param dst where to store transformed weights, must provide space for 4 GLfloats
@@ -1346,6 +1377,9 @@ void glSetupYUVConversion(gl_conversion_params_t *params) {
     case YUV_CONVERSION_COMBINERS_ATI:
       glSetupYUVCombinersATI(uvcos, uvsin);
       break;
+    case YUV_CONVERSION_TEXT_FRAGMENT:
+      glSetupYUVTextFragment(uvcos, uvsin);
+      break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT:
@@ -1383,6 +1417,14 @@ void glEnableYUVConversion(GLenum target, int type) {
       mpglActiveTexture(GL_TEXTURE0);
       mpglEnable(GL_FRAGMENT_SHADER_ATI);
       break;
+    case YUV_CONVERSION_TEXT_FRAGMENT:
+      mpglActiveTexture(GL_TEXTURE1);
+      mpglEnable(target);
+      mpglActiveTexture(GL_TEXTURE2);
+      mpglEnable(target);
+      mpglActiveTexture(GL_TEXTURE0);
+      mpglEnable(GL_TEXT_FRAGMENT_SHADER_ATI);
+      break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_POW:
@@ -1416,6 +1458,14 @@ void glDisableYUVConversion(GLenum target, int type) {
       mpglDisable(target);
       mpglActiveTexture(GL_TEXTURE0);
       mpglDisable(GL_FRAGMENT_SHADER_ATI);
+      break;
+    case YUV_CONVERSION_TEXT_FRAGMENT:
+      mpglActiveTexture(GL_TEXTURE1);
+      mpglDisable(target);
+      mpglActiveTexture(GL_TEXTURE2);
+      mpglDisable(target);
+      mpglActiveTexture(GL_TEXTURE0);
+      mpglDisable(GL_TEXT_FRAGMENT_SHADER_ATI);
       break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT_LOOKUP:

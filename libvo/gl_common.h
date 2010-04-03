@@ -71,6 +71,9 @@
 #ifndef GL_GENERATE_MIPMAP
 #define GL_GENERATE_MIPMAP 0x8191
 #endif
+#ifndef GL_TEXT_FRAGMENT_SHADER_ATI
+#define GL_TEXT_FRAGMENT_SHADER_ATI 0x8200
+#endif
 #ifndef GL_REGISTER_COMBINERS_NV
 #define GL_REGISTER_COMBINERS_NV 0x8522
 #endif
@@ -303,6 +306,8 @@ int loadGPUProgram(GLenum target, char *prog);
 #define YUV_CONVERSION_COMBINERS_ATI 5
 //! use a fragment program with 3D table lookup for YUV conversion
 #define YUV_CONVERSION_FRAGMENT_LOOKUP3D 6
+//! use ATI specific "text" register combiners ("fragment program")
+#define YUV_CONVERSION_TEXT_FRAGMENT 7
 //! use normal bilinear scaling for textures
 #define YUV_SCALER_BILIN 0
 //! use higher quality bicubic scaling for textures
