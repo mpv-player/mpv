@@ -1702,7 +1702,7 @@ static int setGlWindow_x11(MPGLContext *ctx)
     if (*vinfo)
       XFree(*vinfo);
     *vinfo = new_vinfo;
-      getProcAddress = getdladdr("glXGetProcAddress");
+    getProcAddress = getdladdr("glXGetProcAddress");
     if (!getProcAddress)
       getProcAddress = getdladdr("glXGetProcAddressARB");
     if (!getProcAddress)
