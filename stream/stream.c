@@ -48,8 +48,6 @@
 
 #include "cache2.h"
 
-//#include "vcd_read_bincue.h"
-
 static int (*stream_check_interrupt_cb)(int time) = NULL;
 
 extern const stream_info_t stream_info_vcd;
