@@ -266,11 +266,11 @@ static int initTextures(void)
       glBindTexture (GL_TEXTURE_2D, tsq->texobj);
       if (is_yuv) {
         glGenTextures(2, tsq->uvtexobjs);
-        ActiveTexture(GL_TEXTURE1);
+        mpglActiveTexture(GL_TEXTURE1);
         glBindTexture (GL_TEXTURE_2D, tsq->uvtexobjs[0]);
-        ActiveTexture(GL_TEXTURE2);
+        mpglActiveTexture(GL_TEXTURE2);
         glBindTexture (GL_TEXTURE_2D, tsq->uvtexobjs[1]);
-        ActiveTexture(GL_TEXTURE0);
+        mpglActiveTexture(GL_TEXTURE0);
       }
 
       glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, gl_bitmap_format,  gl_bitmap_type, GL_LINEAR,
@@ -280,13 +280,13 @@ static int initTextures(void)
       if (is_yuv) {
         int xs, ys;
         mp_get_chroma_shift(image_format, &xs, &ys);
-        ActiveTexture(GL_TEXTURE1);
+        mpglActiveTexture(GL_TEXTURE1);
         glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, gl_bitmap_format,  gl_bitmap_type, GL_LINEAR,
                          texture_width >> xs, texture_height >> ys, 128);
-        ActiveTexture(GL_TEXTURE2);
+        mpglActiveTexture(GL_TEXTURE2);
         glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, gl_bitmap_format,  gl_bitmap_type, GL_LINEAR,
                          texture_width >> xs, texture_height >> ys, 128);
-        ActiveTexture(GL_TEXTURE0);
+        mpglActiveTexture(GL_TEXTURE0);
       }
 
       tsq++;
@@ -396,11 +396,11 @@ static void drawTextureDisplay (void)
         thisw = image_width % texture_width;
       glBindTexture (GL_TEXTURE_2D, square->texobj);
       if (is_yuv) {
-        ActiveTexture(GL_TEXTURE1);
+        mpglActiveTexture(GL_TEXTURE1);
         glBindTexture (GL_TEXTURE_2D, square->uvtexobjs[0]);
-        ActiveTexture(GL_TEXTURE2);
+        mpglActiveTexture(GL_TEXTURE2);
         glBindTexture (GL_TEXTURE_2D, square->uvtexobjs[1]);
-        ActiveTexture(GL_TEXTURE0);
+        mpglActiveTexture(GL_TEXTURE0);
       }
 
       if (texdirty) {
@@ -576,18 +576,18 @@ static int initGl(uint32_t d_width, uint32_t d_height)
     switch (use_yuv) {
       case YUV_CONVERSION_FRAGMENT_LOOKUP:
         glGenTextures(1, &lookupTex);
-        ActiveTexture(GL_TEXTURE3);
+        mpglActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, lookupTex);
-        ActiveTexture(GL_TEXTURE0);
+        mpglActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
       case YUV_CONVERSION_FRAGMENT_POW:
       case YUV_CONVERSION_FRAGMENT:
-        if (!GenPrograms || !BindProgram) {
+        if (!mpglGenPrograms || !mpglBindProgram) {
           mp_msg(MSGT_VO, MSGL_ERR, "[gl] fragment program functions missing!\n");
           break;
         }
-        GenPrograms(1, &fragprog);
-        BindProgram(GL_FRAGMENT_PROGRAM, fragprog);
+        mpglGenPrograms(1, &fragprog);
+        mpglBindProgram(GL_FRAGMENT_PROGRAM, fragprog);
         break;
     }
     mp_get_chroma_shift(image_format, &xs, &ys);
@@ -773,17 +773,17 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
       int subtex_w = rem_w;
       if (subtex_x + subtex_w > texture_width)
         subtex_w = texture_width - subtex_x;
-      ActiveTexture(GL_TEXTURE0);
+      mpglActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, tsq->texobj);
       glUploadTex(GL_TEXTURE_2D, gl_bitmap_format,  gl_bitmap_type,
                   yptr, ystride, subtex_x, subtex_y,
                   subtex_w, subtex_h, 0);
-      ActiveTexture(GL_TEXTURE1);
+      mpglActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, tsq->uvtexobjs[0]);
       glUploadTex(GL_TEXTURE_2D, gl_bitmap_format,  gl_bitmap_type,
                   uptr, ustride, subtex_x >> xs, subtex_y >> ys,
                   subtex_w >> xs, subtex_h >> ys, 0);
-      ActiveTexture(GL_TEXTURE2);
+      mpglActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, tsq->uvtexobjs[1]);
       glUploadTex(GL_TEXTURE_2D, gl_bitmap_format,  gl_bitmap_type,
                   vptr, vstride, subtex_x >> xs, subtex_y >> ys,
@@ -802,7 +802,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
     texline += texnumx;
     rem_h -= subtex_h;
   }
-  ActiveTexture(GL_TEXTURE0);
+  mpglActiveTexture(GL_TEXTURE0);
     return 0;
 }
 
@@ -895,7 +895,7 @@ static int preinit(const char *arg)
         goto err_out;
       if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
         goto err_out;
-      extensions = GetString(GL_EXTENSIONS);
+      extensions = mpglGetString(GL_EXTENSIONS);
       use_yuv = strstr(extensions, "GL_ARB_fragment_program") ? 2 : 0;
     }
     return 0;
