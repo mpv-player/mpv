@@ -23,6 +23,7 @@
  * config for cfgparser
  */
 
+#include "libmpcodecs/ve_x264.h"
 #include "cfg-common.h"
 
 extern int sws_flags;
@@ -35,9 +36,6 @@ extern m_option_t twolameopts_conf[];
 extern m_option_t faacopts_conf[];
 extern m_option_t vfwopts_conf[];
 extern m_option_t xvidencopts_conf[];
-
-void x264enc_set_param(const m_option_t* opt, char* arg);
-
 extern m_option_t nuvopts_conf[];
 extern m_option_t mpegopts_conf[];
 extern m_option_t lavfopts_conf[];
