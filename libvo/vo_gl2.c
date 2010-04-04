@@ -198,8 +198,9 @@ static int initTextures(void)
     glGetTexLevelParameteriv
       (GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
 
-    if (format != gl_internal_format)
-    {
+    if (format == gl_internal_format)
+      break;
+
       mp_msg (MSGT_VO, MSGL_V, "[gl2] Needed texture [%dx%d] too big, trying ",
               texture_width, texture_height);
 
@@ -214,9 +215,8 @@ static int initTextures(void)
         mp_msg (MSGT_VO, MSGL_FATAL, "[gl2] Give up .. usable texture size not avaiable, or texture config error !\n");
         return -1;
       }
-    }
   }
-  while (format != gl_internal_format && texture_width > 1 && texture_height > 1);
+  while (texture_width > 1 && texture_height > 1);
 #ifdef TEXTURE_WIDTH
   texture_width = TEXTURE_WIDTH;
 #endif
