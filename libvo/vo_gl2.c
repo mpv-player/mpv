@@ -172,7 +172,6 @@ static int initTextures(void)
   GLfloat texpercx, texpercy;
   int s;
   int x=0, y=0;
-  GLint format=0;
 
   // textures smaller than 64x64 might not be supported
   s=64;
@@ -190,15 +189,16 @@ static int initTextures(void)
 
   /* Test the max texture size */
   do {
+    GLint w;
     glTexImage2D (GL_PROXY_TEXTURE_2D, 0,
                   gl_internal_format,
                   texture_width, texture_height,
                   0, gl_bitmap_format, gl_bitmap_type, NULL);
 
     glGetTexLevelParameteriv
-      (GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
+      (GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w);
 
-    if (format == gl_internal_format)
+    if (w >= texture_width)
       break;
 
     mp_msg (MSGT_VO, MSGL_V, "[gl2] Needed texture [%dx%d] too big, trying ",
