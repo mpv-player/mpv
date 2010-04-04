@@ -670,7 +670,7 @@ static const struct size_preset {
 };
 
 #define ST_OFF(f) M_ST_OFF(struct size_preset,f)
-static m_option_t vf_size_preset_fields[] = {
+static const m_option_t vf_size_preset_fields[] = {
   {"w", ST_OFF(w), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
   {"h", ST_OFF(h), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
