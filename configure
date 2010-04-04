@@ -8455,7 +8455,7 @@ INSTALLSTRIP = $_install_strip
 WINDRES = $_windres
 
 CFLAGS   = $CFLAGS $extra_cflags
-ASFLAGS  = $CFLAGS $extra_cflags
+ASFLAGS  = \$(CFLAGS)
 CXXFLAGS = $CXXFLAGS $extra_cflags $extra_cxxflags
 
 CFLAGS_DHAHELPER         = $cflags_dhahelper
