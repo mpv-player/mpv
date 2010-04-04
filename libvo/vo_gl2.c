@@ -201,7 +201,7 @@ static int initTextures(void)
     if (format != gl_internal_format)
     {
       mp_msg (MSGT_VO, MSGL_V, "[gl2] Needed texture [%dx%d] too big, trying ",
-              texture_height, texture_width);
+              texture_width, texture_height);
 
       if (texture_width > texture_height)
         texture_width /= 2;
