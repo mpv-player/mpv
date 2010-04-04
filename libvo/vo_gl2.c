@@ -186,7 +186,7 @@ static int initTextures(void)
   texture_height=s;
 
   if (!is_yuv)
-  gl_internal_format = getInternalFormat();
+    gl_internal_format = getInternalFormat();
 
   /* Test the max texture size */
   do {
@@ -201,22 +201,21 @@ static int initTextures(void)
     if (format == gl_internal_format)
       break;
 
-      mp_msg (MSGT_VO, MSGL_V, "[gl2] Needed texture [%dx%d] too big, trying ",
-              texture_width, texture_height);
+    mp_msg (MSGT_VO, MSGL_V, "[gl2] Needed texture [%dx%d] too big, trying ",
+            texture_width, texture_height);
 
-      if (texture_width > texture_height)
-        texture_width /= 2;
-      else
-        texture_height /= 2;
+    if (texture_width > texture_height)
+      texture_width /= 2;
+    else
+      texture_height /= 2;
 
-      mp_msg (MSGT_VO, MSGL_V, "[%dx%d] !\n", texture_width, texture_height);
+    mp_msg (MSGT_VO, MSGL_V, "[%dx%d] !\n", texture_width, texture_height);
 
-      if(texture_width < 64 || texture_height < 64) {
-        mp_msg (MSGT_VO, MSGL_FATAL, "[gl2] Give up .. usable texture size not avaiable, or texture config error !\n");
-        return -1;
-      }
-  }
-  while (texture_width > 1 && texture_height > 1);
+    if(texture_width < 64 || texture_height < 64) {
+      mp_msg (MSGT_VO, MSGL_FATAL, "[gl2] Give up .. usable texture size not avaiable, or texture config error !\n");
+      return -1;
+    }
+  } while (texture_width > 1 && texture_height > 1);
 #ifdef TEXTURE_WIDTH
   texture_width = TEXTURE_WIDTH;
 #endif
