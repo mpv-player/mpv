@@ -110,7 +110,7 @@ static struct menu_priv_s cfg_dflt = {
 
 #define ST_OFF(m) M_ST_OFF(struct menu_priv_s,m)
 
-static m_option_t cfg_fields[] = {
+static const m_option_t cfg_fields[] = {
   { "prompt", ST_OFF(mp_prompt), CONF_TYPE_STRING, M_OPT_MIN, 1, 0, NULL },
   { "child-prompt", ST_OFF(child_prompt), CONF_TYPE_STRING, M_OPT_MIN, 1, 0, NULL },
   { "buffer-lines", ST_OFF(buf_lines), CONF_TYPE_INT, M_OPT_MIN, 5, 0, NULL },

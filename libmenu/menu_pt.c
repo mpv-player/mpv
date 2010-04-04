@@ -60,7 +60,7 @@ static struct menu_priv_s cfg_dflt = {
 
 #define ST_OFF(m) M_ST_OFF(struct menu_priv_s,m)
 
-static m_option_t cfg_fields[] = {
+static const m_option_t cfg_fields[] = {
   MENU_LIST_PRIV_FIELDS,
   { "title", ST_OFF(title),  CONF_TYPE_STRING, 0, 0, 0, NULL },
   { "auto-close", ST_OFF(auto_close), CONF_TYPE_FLAG, 0, 0, 1, NULL },

@@ -56,7 +56,7 @@ static struct menu_priv_s cfg_dflt = {
 
 #define ST_OFF(m) M_ST_OFF(struct menu_priv_s,m)
 
-static m_option_t cfg_fields[] = {
+static const m_option_t cfg_fields[] = {
   { "minbor", ST_OFF(minb), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL },
   { "hspace", ST_OFF(hspace), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL },
   { "file", ST_OFF(file), CONF_TYPE_STRING, 0, 0, 0, NULL },

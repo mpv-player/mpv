@@ -69,7 +69,7 @@ static struct menu_priv_s cfg_dflt = {
   1
 };
 
-static m_option_t cfg_fields[] = {
+static const m_option_t cfg_fields[] = {
   MENU_LIST_PRIV_FIELDS,
   { "title", M_ST_OFF(menu_list_priv_t,title),  CONF_TYPE_STRING, 0, 0, 0, NULL },
   { "na", M_ST_OFF(struct menu_priv_s,na), CONF_TYPE_STRING, 0, 0, 0, NULL },
