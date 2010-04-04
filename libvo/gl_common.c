@@ -1380,6 +1380,20 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
 }
 
 /**
+ * \brief detect the best YUV->RGB conversion method available
+ */
+int glAutodetectYUVConversion(void) {
+  const char *extensions = mpglGetString(GL_EXTENSIONS);
+  if (strstr(extensions, "GL_ARB_fragment_program"))
+    return YUV_CONVERSION_FRAGMENT;
+  if (strstr(extensions, "GL_ATI_text_fragment_shader"))
+    return YUV_CONVERSION_TEXT_FRAGMENT;
+  if (strstr(extensions, "GL_ATI_fragment_shader"))
+    return YUV_CONVERSION_COMBINERS_ATI;
+  return YUV_CONVERSION_NONE;
+}
+
+/**
  * \brief setup YUV->RGB conversion
  * \param parms struct containing parameters like conversion and scaler type,
  *              brightness, ...

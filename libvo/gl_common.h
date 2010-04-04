@@ -345,6 +345,7 @@ typedef struct {
   float filter_strength;
 } gl_conversion_params_t;
 
+int glAutodetectYUVConversion(void);
 void glSetupYUVConversion(gl_conversion_params_t *params);
 void glEnableYUVConversion(GLenum target, int type);
 void glDisableYUVConversion(GLenum target, int type);

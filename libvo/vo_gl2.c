@@ -886,7 +886,6 @@ static int preinit(const char *arg)
   }
     if(!init_mpglcontext(&glctx, gltype)) goto err_out;
     if (use_yuv == -1) {
-      const char *extensions;
 #ifdef CONFIG_GL_WIN32
       if (config_w32(320, 200, 320, 200, VOFLAG_HIDDEN, "", 0) == -1)
 #else
@@ -895,8 +894,7 @@ static int preinit(const char *arg)
         goto err_out;
       if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
         goto err_out;
-      extensions = mpglGetString(GL_EXTENSIONS);
-      use_yuv = strstr(extensions, "GL_ARB_fragment_program") ? 2 : 0;
+      use_yuv = glAutodetectYUVConversion();
     }
     return 0;
 
