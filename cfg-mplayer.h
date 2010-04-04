@@ -55,7 +55,7 @@ extern int menu_fribidi_flip_commas;
 
 extern char *unrar_executable;
 
-extern m_option_t dxr2_opts[];
+extern const m_option_t dxr2_opts[];
 
 extern char * skinName;
 extern int guiWinID;
