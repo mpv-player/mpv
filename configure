@@ -8730,8 +8730,6 @@ CONFIG_LIBXVID_ENCODER=$_xvid_lavc
 CONFIG_MLIB = $_mlib
 CONFIG_MUXERS=$_mencoder
 CONFIG_POSTPROC = yes
-# Prevent building libavcodec/imgresample.c with conflicting symbols
-CONFIG_SWSCALE=yes
 CONFIG_VDPAU=$_vdpau
 CONFIG_XVMC=$_xvmc
 CONFIG_ZLIB=$_zlib
@@ -9200,7 +9198,6 @@ $def_yasm
 #define CONFIG_LIBVORBIS 0
 #define CONFIG_POWERPC_PERF 0
 #define CONFIG_SMALL 0
-#define CONFIG_SWSCALE 1
 #define CONFIG_SWSCALE_ALPHA 1
 
 #if defined(HAVE_AF_INET6) && (!defined(_WIN32) || defined(__CYGWIN__))
