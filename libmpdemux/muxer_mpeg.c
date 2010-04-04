@@ -208,7 +208,7 @@ typedef struct {
 #define TELECINE_FILM2PAL 2
 #define TELECINE_DGPULLDOWN 3
 
-m_option_t mpegopts_conf[] = {
+const m_option_t mpegopts_conf[] = {
 	{"format", &(conf_mux), CONF_TYPE_STRING, M_OPT_GLOBAL, 0 ,0, NULL},
 	{"size", &(conf_packet_size), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 0, 65535, NULL},
 	{"muxrate", &(conf_muxrate), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 0, 12000000, NULL},	//12 Mb/s

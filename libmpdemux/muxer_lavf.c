@@ -74,7 +74,7 @@ static float mux_preload= 0.5;
 static float mux_max_delay= 0.7;
 static char *mux_avopt = NULL;
 
-m_option_t lavfopts_conf[] = {
+const m_option_t lavfopts_conf[] = {
 	{"format", &(conf_format), CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"muxrate", &mux_rate, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
 	{"packetsize", &mux_packet_size, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
