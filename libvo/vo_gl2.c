@@ -208,7 +208,7 @@ static int initTextures(void)
       else
         texture_height /= 2;
 
-      mp_msg (MSGT_VO, MSGL_V, "[%dx%d] !\n", texture_height, texture_width);
+      mp_msg (MSGT_VO, MSGL_V, "[%dx%d] !\n", texture_width, texture_height);
 
       if(texture_width < 64 || texture_height < 64) {
         mp_msg (MSGT_VO, MSGL_FATAL, "[gl2] Give up .. usable texture size not avaiable, or texture config error !\n");
