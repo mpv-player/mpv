@@ -71,7 +71,7 @@ struct vf_priv_s nuv_priv_dflt = {
   NULL,NULL
 };
 
-m_option_t nuvopts_conf[]={
+const m_option_t nuvopts_conf[] = {
   {"raw", &nuv_priv_dflt.raw, CONF_TYPE_FLAG, 0, 0, 1, NULL},
   {"rtjpeg", &nuv_priv_dflt.raw, CONF_TYPE_FLAG, 0, 1, 0, NULL},
   {"lzo", &nuv_priv_dflt.lzo, CONF_TYPE_FLAG, 0, 0, 1, NULL},

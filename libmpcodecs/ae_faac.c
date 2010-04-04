@@ -52,7 +52,7 @@ static unsigned long samples_input, max_bytes_output;
 static unsigned char *decoder_specific_buffer = NULL;
 static unsigned long decoder_specific_len = 0;
 
-m_option_t faacopts_conf[] = {
+const m_option_t faacopts_conf[] = {
 	{"br", &param_bitrate, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"quality", &param_quality, CONF_TYPE_INT, CONF_RANGE, 0, 1000, NULL},
 	{"object", &param_object_type, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},

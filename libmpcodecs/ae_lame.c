@@ -59,7 +59,7 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
 #endif
 
 
-m_option_t lameopts_conf[]={
+const m_option_t lameopts_conf[] = {
 	{"q", &lame_param_quality, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
 	{"aq", &lame_param_algqual, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
 	{"vbr", &lame_param_vbr, CONF_TYPE_INT, CONF_RANGE, 0, vbr_max_indicator, NULL},

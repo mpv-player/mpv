@@ -55,7 +55,7 @@ static HRESULT CoInitRes = -1;
 
 #include "m_option.h"
 
-m_option_t vfwopts_conf[]={
+const m_option_t vfwopts_conf[]={
     {"codec", &vfw_param_codec, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"compdata", &vfw_param_compdata, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}

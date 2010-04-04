@@ -43,7 +43,7 @@ static int
 static float param_vbr = 0;
 static char *param_mode = "stereo";
 
-m_option_t toolameopts_conf[] = {
+const m_option_t toolameopts_conf[] = {
 	{"br", &param_bitrate, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"mode", &param_mode, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"psy", &param_psy, CONF_TYPE_INT, CONF_RANGE, -1, 4, NULL},
