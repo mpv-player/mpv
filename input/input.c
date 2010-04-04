@@ -599,7 +599,7 @@ static int mp_input_print_key_list(m_option_t* cfg);
 static int mp_input_print_cmd_list(m_option_t* cfg);
 
 // Our command line options
-static m_option_t input_conf[] = {
+static const m_option_t input_conf[] = {
   { "conf", &config_file, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL },
   { "ar-dev", &ar_dev, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL },
   { "ar-delay", &ar_delay, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
@@ -613,7 +613,7 @@ static m_option_t input_conf[] = {
   { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-static m_option_t mp_input_opts[] = {
+static const m_option_t mp_input_opts[] = {
   { "input", &input_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
   { "nojoystick", &use_joystick,  CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL },
   { "joystick", &use_joystick,  CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
