@@ -8472,8 +8472,8 @@ EXTRALIBS          = $extra_ldflags $_ld_static $_ld_lm $extra_libs
 EXTRALIBS_MPLAYER  = $libs_mplayer
 EXTRALIBS_MENCODER = $libs_mencoder
 
-MPDEPEND_CMD     = \$(CC) -MM \$(CFLAGS)   \$(filter-out %.xpm,\$(filter-out %.h,$^)) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&," -e "s,\(.*\)\.o: ,\1.d &,"
-MPDEPEND_CMD_CXX = \$(CC) -MM \$(CXXFLAGS) \$(filter-out  %.hh,\$(filter-out %.h,$^)) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&," -e "s,\(.*\)\.o: ,\1.d &,"
+MPDEPEND_CMD     = \$(CC) -MM -MP \$(CFLAGS)   \$(filter-out %.xpm,\$(filter-out %.h,$^)) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&," -e "s,\(.*\)\.o: ,\1.d &,"
+MPDEPEND_CMD_CXX = \$(CC) -MM -MP \$(CXXFLAGS) \$(filter-out  %.hh,\$(filter-out %.h,$^)) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&," -e "s,\(.*\)\.o: ,\1.d &,"
 
 GETCH = $_getch
 HELP_FILE = $_mp_help
