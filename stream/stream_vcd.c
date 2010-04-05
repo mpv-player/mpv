@@ -91,6 +91,40 @@ static int seek(stream_t *s,off_t newpos) {
   return 1;
 }
 
+static int control(stream_t *stream, int cmd, void *arg) {
+  struct stream_priv_s *p = stream->priv;
+  switch(cmd) {
+    case STREAM_CTRL_GET_NUM_CHAPTERS:
+    {
+      mp_vcd_priv_t *vcd = vcd_read_toc(stream->fd);
+      if (!vcd)
+        break;
+      *(unsigned int *)arg = vcd->tochdr.cdth_trk1;
+      return STREAM_OK;
+    }
+    case STREAM_CTRL_SEEK_TO_CHAPTER:
+    {
+      int r;
+      unsigned int track = *(unsigned int *)arg + 1;
+      mp_vcd_priv_t *vcd = vcd_read_toc(stream->fd);
+      if (!vcd)
+        break;
+      r = vcd_seek_to_track(vcd, track);
+      if (r >= 0) {
+        p->track = track;
+        return STREAM_OK;
+      }
+      break;
+    }
+    case STREAM_CTRL_GET_CURRENT_CHAPTER:
+    {
+      *(unsigned int *)arg = p->track - 1;
+      return STREAM_OK;
+    }
+  }
+  return STREAM_UNSUPPORTED;
+}
+
 static void close_s(stream_t *stream) {
   free(stream->priv);
 }
@@ -203,6 +237,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
   stream->fill_buffer = fill_buffer;
   stream->seek = seek;
+  stream->control = control;
   stream->close = close_s;
   *file_format = DEMUXER_TYPE_MPEG_PS;
 
