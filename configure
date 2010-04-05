@@ -8472,8 +8472,6 @@ EXTRALIBS          = $extra_ldflags $_ld_static $_ld_lm $extra_libs
 EXTRALIBS_MPLAYER  = $libs_mplayer
 EXTRALIBS_MENCODER = $libs_mencoder
 
-DEPEND_CMD       = \$(CC) -MM \$(CFLAGS)   \$(filter-out %.h,\$^) | sed "s,[0-9a-z._-]*: \(\$(SRC_DIR)/\)*\([a-z0-9]*/\)[^/]* ,\\2&,"
-
 MPDEPEND_CMD     = \$(CC) -MM \$(CFLAGS)   \$(filter-out %.xpm,\$(filter-out %.h,$^)) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&," -e "s,\(.*\)\.o: ,\1.d &,"
 MPDEPEND_CMD_CXX = \$(CC) -MM \$(CXXFLAGS) \$(filter-out  %.hh,\$(filter-out %.h,$^)) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&," -e "s,\(.*\)\.o: ,\1.d &,"
 
