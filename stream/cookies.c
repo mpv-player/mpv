@@ -158,8 +158,6 @@ static struct cookie_list_type *load_cookies_from(const char *filename,
     char *ptr;
     off_t length;
 
-    mp_msg(MSGT_NETWORK, MSGL_V, "Loading cookie file: %s\n", filename);
-
     ptr = load_file(filename, &length);
     if (!ptr)
 	return list;
