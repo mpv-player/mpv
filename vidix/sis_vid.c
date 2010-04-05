@@ -93,7 +93,7 @@ typedef struct {
 
     uint8_t lineBufSize;
 
-     uint8_t(*VBlankActiveFunc) ();
+     uint8_t(*VBlankActiveFunc)(void);
 
     uint16_t SCREENheight;
 
