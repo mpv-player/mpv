@@ -104,6 +104,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 {
 	switch (image_format)
 	{
+		case IMGFMT_BGR32:
 		case IMGFMT_RGB32:
 			vo_draw_alpha_rgb32(w,h,src,srca,stride,image_data+4*(y0*image_width+x0),4*image_width);
 			break;
