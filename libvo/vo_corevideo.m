@@ -287,17 +287,12 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 
 static int draw_frame(uint8_t *src[])
 {
-	switch (image_format)
-	{
-		case IMGFMT_BGR32:
-		case IMGFMT_RGB32:
-			fast_memcpy(image_data, src[0], image_width*image_height*image_bytes);
-			break;
+	return 0;
+}
 
-		case IMGFMT_YUY2:
-			memcpy_pic(image_data, src[0], image_width * 2, image_height, image_width * 2, image_width * 2);
-			break;
-	}
+static uint32_t draw_image(mp_image_t *mpi)
+{
+	memcpy_pic(image_data, mpi->planes[0], image_width*image_bytes, image_height, image_width*image_bytes, mpi->stride[0]);
 
 	return 0;
 }
@@ -405,6 +400,7 @@ static int control(uint32_t request, void *data, ...)
 {
 	switch (request)
 	{
+		case VOCTRL_DRAW_IMAGE: return draw_image(data);
 		case VOCTRL_PAUSE: return int_pause = 1;
 		case VOCTRL_RESUME: return int_pause = 0;
 		case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t*)data));
