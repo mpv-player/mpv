@@ -188,6 +188,11 @@ static mp_vcd_priv_t *vcd_read_toc(int fd)
     return vcd;
 }
 
+static int vcd_end_track(mp_vcd_priv_t* vcd)
+{
+    return vcd->iLastTrack;
+}
+
 static int vcd_read(mp_vcd_priv_t *vcd, char *mem)
 {
     struct {

@@ -99,7 +99,7 @@ static int control(stream_t *stream, int cmd, void *arg) {
       mp_vcd_priv_t *vcd = vcd_read_toc(stream->fd);
       if (!vcd)
         break;
-      *(unsigned int *)arg = vcd->tochdr.cdth_trk1;
+      *(unsigned int *)arg = vcd_end_track(vcd);
       return STREAM_OK;
     }
     case STREAM_CTRL_SEEK_TO_CHAPTER:
