@@ -75,27 +75,6 @@ int vcd_seek_to_track(void *vcd, int track);
 guiInterface_t guiIntfStruct;
 int guiWinID=-1;
 
-static char * gstrcat( char ** dest, const char * src )
-{
- char * tmp = NULL;
-
- if ( !src ) return NULL;
-
- if ( *dest )
-  {
-   tmp=malloc( strlen( *dest ) + strlen( src ) + 1 );
-
-   if ( tmp ) /* TODO: advanced error handling */
-    {
-     strcpy( tmp,*dest ); strcat( tmp,src ); free( *dest );
-    }
-   }
-  else
-   { tmp=malloc( strlen( src ) + 1 ); strcpy( tmp,src ); }
- *dest=tmp;
- return tmp;
-}
-
 int gstrcmp( const char * a,const char * b )
 {
  if ( !a && !b ) return 0;
@@ -126,12 +105,6 @@ void gfree( void ** p )
 {
  if ( *p == NULL ) return;
  free( *p ); *p=NULL;
-}
-
-static void gset( char ** str, const char * what )
-{
- if ( *str ) { if ( !strstr( *str,what ) ) { gstrcat( str,"," ); gstrcat( str,what ); }}
-   else gstrcat( str,what );
 }
 
 /**
