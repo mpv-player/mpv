@@ -831,15 +831,6 @@ FFMPEGFILES = $(foreach part, $(FFMPEGPARTS), $(wildcard $(part)/*.[chS] $(part)
 
 all: $(ALL_PRG-yes)
 
-%.d: %.c
-	$(MPDEPEND_CMD) > $@
-
-%.d: %.cpp
-	$(MPDEPEND_CMD_CXX) > $@
-
-%.d: %.m
-	$(MPDEPEND_CMD) > $@
-
 %.ho: %.h
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
 

@@ -2513,6 +2513,7 @@ else
 fi
 
 cc_check -mno-omit-leaf-frame-pointer && cflags_no_omit_leaf_frame_pointer="-mno-omit-leaf-frame-pointer"
+cc_check -MD -MP && CFLAGS="-MD -MP $CFLAGS"
 
 
 if test -n "$LDFLAGS" ; then
@@ -8471,9 +8472,6 @@ CFLAGS_TREMOR_LOW        = $cflags_tremor_low
 EXTRALIBS          = $extra_ldflags $_ld_static $_ld_lm $extra_libs
 EXTRALIBS_MPLAYER  = $libs_mplayer
 EXTRALIBS_MENCODER = $libs_mencoder
-
-MPDEPEND_CMD     = \$(CC) -MM -MP \$(CFLAGS)   \$(filter-out %.xpm,\$(filter-out %.h,$^)) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&," -e "s,\(.*\)\.o: ,\1.d &,"
-MPDEPEND_CMD_CXX = \$(CC) -MM -MP \$(CXXFLAGS) \$(filter-out  %.hh,\$(filter-out %.h,$^)) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&," -e "s,\(.*\)\.o: ,\1.d &,"
 
 GETCH = $_getch
 HELP_FILE = $_mp_help
