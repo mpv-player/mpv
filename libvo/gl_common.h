@@ -146,6 +146,12 @@
 #ifndef GL_CON_1_ATI
 #define GL_CON_1_ATI 0x8942
 #endif
+#ifndef GL_CON_2_ATI
+#define GL_CON_2_ATI 0x8943
+#endif
+#ifndef GL_CON_3_ATI
+#define GL_CON_3_ATI 0x8944
+#endif
 #ifndef GL_ADD_ATI
 #define GL_ADD_ATI 0x8963
 #endif
@@ -160,6 +166,9 @@
 #endif
 #ifndef GL_4X_BIT_ATI
 #define GL_4X_BIT_ATI 2
+#endif
+#ifndef GL_8X_BIT_ATI
+#define GL_8X_BIT_ATI 4
 #endif
 #ifndef GL_BIAS_BIT_ATI
 #define GL_BIAS_BIT_ATI 8
