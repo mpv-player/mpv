@@ -2763,6 +2763,17 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    brk_cmd = 1;
 	    break;
 
+	case MP_CMD_OSD_SHOW_PROGRESSION:{
+		int len = demuxer_get_time_length(mpctx->demuxer);
+		int pts = demuxer_get_current_time(mpctx->demuxer);
+		set_osd_bar(0, "Position", 0, 100, demuxer_get_percent_pos(mpctx->demuxer));
+		set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
+			    "%c %02d:%02d:%02d / %02d:%02d:%02d",
+			    mpctx->osd_function, pts/3600, (pts/60)%60, pts%60,
+			    len/3600, (len/60)%60, len%60);
+	    }
+	    break;
+
 #ifdef CONFIG_RADIO
 	case MP_CMD_RADIO_STEP_CHANNEL:
 	    if (mpctx->demuxer->stream->type == STREAMTYPE_RADIO) {

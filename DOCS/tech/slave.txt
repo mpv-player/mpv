@@ -201,6 +201,10 @@ mute [value]
 osd [level]
     Toggle OSD mode or set it to [level] when [level] >= 0.
 
+osd_show_progression
+    Show the progression bar, the elapsed time and the total duration of the
+    movie on the OSD.
+
 osd_show_property_text <string> [duration] [level]
     Show an expanded property string on the OSD, see -playing-msg for a
     description of the available expansions. If [duration] is >= 0 the text
