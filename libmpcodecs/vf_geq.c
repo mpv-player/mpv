@@ -37,7 +37,7 @@
 #include "libavcodec/eval.h"
 
 struct vf_priv_s {
-    AVEvalExpr * e[3];
+    AVExpr * e[3];
     int framenum;
     mp_image_t *mpi;
 };
