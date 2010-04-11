@@ -45,6 +45,17 @@ Various tips and tricks (please help expand it!):
 
 Available commands ('mplayer -input cmdlist' will print a list):
 
+af_add <filter_arguments_list>  (comma separated list of audio filters with parameters)
+    (experimental) Load the given list of audio filters.
+
+af_clr
+    (experimental) Unload all loaded audio filters.
+
+af_del <filter_name_list> (comma separated list of audio filter's names)
+    (experimental) Unload the first occurrence of the filters, if loaded.
+
+af_switch <filter_arguments_list> (comma separated list of audio filters with parameters)
+    (experimental) Remove all the audio filters and replace them with the given list.
 
 alt_src_step <value> (ASX playlist only)
     When more than one source is available it selects the next/previous one.

@@ -385,6 +385,9 @@ Hůrka, Tomáš <tom@hukatronic.cz>
     * Darwin DVD support (mpdvdkit2)
     * various fixes
 
+Hysseo, Jehan <hysseo@zemarmot.net>
+    * af_add, af_switch, af_del, af_clr commands.
+
 Isani, Sidik <lksi@cfht.hawaii.edu>
     * get_delay() smoothing code (-autosync)
     * RTC initialization fixes

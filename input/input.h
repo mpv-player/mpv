@@ -162,6 +162,13 @@ typedef enum {
   MP_CMD_CHELP = 7000,
   MP_CMD_CEXIT,
   MP_CMD_CHIDE,
+
+  /// Audio Filter commands
+  MP_CMD_AF_SWITCH,
+  MP_CMD_AF_ADD,
+  MP_CMD_AF_DEL,
+  MP_CMD_AF_CLR,
+
 } mp_command_type;
 
 // The arg types

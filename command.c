@@ -3242,6 +3242,43 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 
 #endif
 
+    case MP_CMD_AF_SWITCH:
+        if (sh_audio)
+        {
+            af_uninit(mpctx->mixer.afilter);
+            af_init(mpctx->mixer.afilter);
+        }
+    case MP_CMD_AF_ADD:
+    case MP_CMD_AF_DEL:
+        if (!sh_audio)
+            break;
+        {
+            char* af_args = strdup(cmd->args[0].v.s);
+            char* af_commands = af_args;
+            char* af_command;
+            af_instance_t* af;
+            while ((af_command = strsep(&af_commands, ",")) != NULL)
+            {
+                if (cmd->id == MP_CMD_AF_DEL)
+                {
+                    af = af_get(mpctx->mixer.afilter, af_command);
+                    if (af != NULL)
+                        af_remove(mpctx->mixer.afilter, af);
+                }
+                else
+                    af_add(mpctx->mixer.afilter, af_command);
+            }
+            build_afilter_chain(sh_audio, &ao_data);
+            free(af_args);
+        }
+        break;
+    case MP_CMD_AF_CLR:
+        if (!sh_audio)
+            break;
+        af_uninit(mpctx->mixer.afilter);
+        af_init(mpctx->mixer.afilter);
+        build_afilter_chain(sh_audio, &ao_data);
+        break;
 	default:
 #ifdef CONFIG_GUI
 	    if ((use_gui) && (cmd->id > MP_CMD_GUI_EVENTS))
