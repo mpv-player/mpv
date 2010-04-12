@@ -40,12 +40,12 @@ anything and is only called in the beginning.
 result=RV20toYUV420Init(struct init_data *, struct rvyuvMain **);
 
 struct init_data {
-	short constant=0xb;
-	short width, height;
-	short 0, 0, 0;
-	ulong format1;
-	long  1;
-	ulong format2;
+        short constant=0xb;
+        short width, height;
+        short 0, 0, 0;
+        ulong format1;
+        long  1;
+        ulong format2;
 };
 
 format1 and format2 are stored in the .rm file's stream headers.
@@ -53,22 +53,22 @@ format1 and format2 are stored in the .rm file's stream headers.
 it's the only difference between low and high bitrate files.
 
 result=RV20toYUV420Transform(char *input_stream, char *output_data,
-	struct transin *, struct transout *, struct rvyuvMain *);
+        struct transin *, struct transout *, struct rvyuvMain *);
 
 struct transin {
-	ulong length_of_input_data;
-	ulong null;
-	ulong num_sub_packets_in_block_minus_one;
-	ulong *sub_packets_list;
-	ulong another_null;
-	ulong timestamp_from_stream;
+        ulong length_of_input_data;
+        ulong null;
+        ulong num_sub_packets_in_block_minus_one;
+        ulong *sub_packets_list;
+        ulong another_null;
+        ulong timestamp_from_stream;
 };
 
 struct transout {
-	ulong flag1; // ((var_94&2!=0)&&(result==0))?1:0
-	ulong flag2; // 4 LBS from var_94
-	ulong zero;
-	ulong width, height;
+        ulong flag1; // ((var_94&2!=0)&&(result==0))?1:0
+        ulong flag2; // 4 LBS from var_94
+        ulong zero;
+        ulong width, height;
 };
 
 The length of output_stream is 1.5*width*height (I420 planar yuv 4:2:0).
@@ -131,37 +131,37 @@ DWORDS (the entries are not always constant)
 there are two w/h pairs at 05C. the first is the size of the
 unscaled video stream, the second possibly image size
 
-000	1	6	3	1
-010	1	0	AEBFC0D1(magic)	0
-020	0	ptr->?	0	0
-030	0	0	->rvyuvMain+0x050	?
-040	width	height	0x17	0x479
-050	->rvyuvMain	0x17	0x17	width
-060	height	width	height	0
-070	0	1	0	0
-080	0	0xb	w	h
-090	w	h	0	0
-0A0	1	0xb0(w?)	0x58	0x58
-0B0	ptr->?	0	0	1
-0C0	0x32	1	0	0
-0D0	0	0	0	0
-0E0	0	0	0	0
-0F0	0	0	0	0
-100	0	0	0	0
-110	p	p	p	p p are pointers to several function, for
-120	p	p	p	p example to the actual public functions
-130	p	p	p	p (except init, the others are some kind of
-140	p	p	p	p interfaces)
-150	p	0	0	0
-160	0	0x2000	1	0
-170	0	0	0	0
-180	1	1	0	0
-190	0	0	0	0
-1A0	0	0	0	0
-1B0	1	0	ptr->?	ptr->?
-1C0	1	0	0	0
-1D0	0	0	0	0
-1E0	0	0	0	0
+000     1       6       3       1
+010     1       0       AEBFC0D1(magic) 0
+020     0       ptr->?  0       0
+030     0       0       ->rvyuvMain+0x050       ?
+040     width   height  0x17    0x479
+050     ->rvyuvMain     0x17    0x17    width
+060     height  width   height  0
+070     0       1       0       0
+080     0       0xb     w       h
+090     w       h       0       0
+0A0     1       0xb0(w?)        0x58    0x58
+0B0     ptr->?  0       0       1
+0C0     0x32    1       0       0
+0D0     0       0       0       0
+0E0     0       0       0       0
+0F0     0       0       0       0
+100     0       0       0       0
+110     p       p       p       p p are pointers to several function, for
+120     p       p       p       p example to the actual public functions
+130     p       p       p       p (except init, the others are some kind of
+140     p       p       p       p interfaces)
+150     p       0       0       0
+160     0       0x2000  1       0
+170     0       0       0       0
+180     1       1       0       0
+190     0       0       0       0
+1A0     0       0       0       0
+1B0     1       0       ptr->?  ptr->?
+1C0     1       0       0       0
+1D0     0       0       0       0
+1E0     0       0       0       0
 ...
 
 

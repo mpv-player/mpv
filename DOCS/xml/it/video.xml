@@ -2334,7 +2334,7 @@ eseguire il comando seguente
 <screen>
 mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
     -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 \
-	<replaceable>film.avi</replaceable>
+    <replaceable>film.avi</replaceable>
 </screen>
 </para>
 

@@ -45,7 +45,7 @@ Autre façon de lire un fichier:
 </synopsis>
 </para>
 
-	 <para>
+<para>
 Lecture de plusieurs fichiers:
 <synopsis>
 <command>mplayer</command><!--

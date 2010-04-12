@@ -239,7 +239,7 @@ static const char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: For mange (%d i %d bytes) lydpakker i bufferen!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: For mange (%d i %d bytes) videopakker i bufferen!\n"
 #define MSGTR_MaybeNI "Måske afspiller du en 'ikke-interleaved' stream/fil ellers der kan være en fejl i afspilleren\n"\
-		      "For AVI filer, prøv at påtvinge non-interleaved tilstand med -ni.\n"
+                      "For AVI filer, prøv at påtvinge non-interleaved tilstand med -ni.\n"
 #define MSGTR_SwitchToNi "\nDefekt .AVI - skifter til ikke-interleaved (-ni)...\n"
 #define MSGTR_Detected_XXX_FileFormat "Filformat er %s\n"
 #define MSGTR_DetectedAudiofile "Filen er en lydfil!\n"

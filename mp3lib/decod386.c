@@ -22,10 +22,10 @@
 #if 0
  /* old WRITE_SAMPLE */
    /* is portable */
-#define WRITE_SAMPLE(samples,sum,clip) {			\
-  if( (sum) > 32767.0) { *(samples) = 0x7fff; (clip)++; }	\
+#define WRITE_SAMPLE(samples,sum,clip) {                        \
+  if( (sum) > 32767.0) { *(samples) = 0x7fff; (clip)++; }       \
   else if( (sum) < -32768.0) { *(samples) = -0x8000; (clip)++; }\
-  else { *(samples) = sum;  }					\
+  else { *(samples) = sum;  }                                   \
 }
 #else
  /* new WRITE_SAMPLE */
@@ -55,9 +55,9 @@
  * it doesn't work for you, just enable the "old WRITE_SAMPLE" macro.
  */
 #if HAVE_BIGENDIAN
-#define	MANTISSA_OFFSET	1
+#define MANTISSA_OFFSET 1
 #else
-#define	MANTISSA_OFFSET	0
+#define MANTISSA_OFFSET 0
 #endif
 
    /* sizeof(int) == 4 */

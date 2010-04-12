@@ -496,7 +496,7 @@ blocks.
   <informaltable>
   <tgroup cols="2">
   <thead>
-	<row><entry>Variable</entry><entry>Meaning</entry></row>
+    <row><entry>Variable</entry><entry>Meaning</entry></row>
   </thead>
   <tbody>
   <row>
@@ -504,84 +504,84 @@ blocks.
     <entry>play time in <emphasis>hh:mm:ss</emphasis> format</entry>
   </row>
   <row>
-	<entry>$2</entry>
-	<entry>play time in <emphasis>mmmm:ss</emphasis> format</entry>
+    <entry>$2</entry>
+    <entry>play time in <emphasis>mmmm:ss</emphasis> format</entry>
   </row>
   <row>
-	<entry>$3</entry>
-	<entry>play time in <emphasis>hh</emphasis> format (hours)</entry>
+    <entry>$3</entry>
+    <entry>play time in <emphasis>hh</emphasis> format (hours)</entry>
   </row>
   <row>
-	<entry>$4</entry>
-	<entry>play time in <emphasis>mm</emphasis> format (minutes)</entry>
+    <entry>$4</entry>
+    <entry>play time in <emphasis>mm</emphasis> format (minutes)</entry>
   </row>
   <row>
-	<entry>$5</entry>
-	<entry>play time in <emphasis>ss</emphasis> format (seconds)</entry>
+    <entry>$5</entry>
+    <entry>play time in <emphasis>ss</emphasis> format (seconds)</entry>
   </row>
   <row>
-	<entry>$6</entry>
-	<entry>movie length in <emphasis>hh:mm:ss</emphasis> format</entry>
+    <entry>$6</entry>
+    <entry>movie length in <emphasis>hh:mm:ss</emphasis> format</entry>
   </row>
   <row>
-	<entry>$7</entry>
-	<entry>movie length in <emphasis>mmmm:ss</emphasis> format</entry>
+    <entry>$7</entry>
+    <entry>movie length in <emphasis>mmmm:ss</emphasis> format</entry>
   </row>
   <row>
-	<entry>$8</entry>
-	<entry>play time in <emphasis>h:mm:ss</emphasis> format</entry>
+    <entry>$8</entry>
+    <entry>play time in <emphasis>h:mm:ss</emphasis> format</entry>
   </row>
   <row>
-	<entry>$v</entry>
-	<entry>volume in <emphasis>xxx.xx</emphasis>% format</entry>
+    <entry>$v</entry>
+    <entry>volume in <emphasis>xxx.xx</emphasis>% format</entry>
   </row>
   <row>
-	<entry>$V</entry>
-	<entry>volume in <emphasis>xxx.xx</emphasis> format</entry>
+    <entry>$V</entry>
+    <entry>volume in <emphasis>xxx.xx</emphasis> format</entry>
   </row>
   <row>
-	<entry>$b</entry>
-	<entry>balance in <emphasis>xxx.xx</emphasis>% format</entry>
+    <entry>$b</entry>
+    <entry>balance in <emphasis>xxx.xx</emphasis>% format</entry>
   </row>
   <row>
-	<entry>$B</entry>
-	<entry>balance in <emphasis>xxx.xx</emphasis> format</entry>
+    <entry>$B</entry>
+    <entry>balance in <emphasis>xxx.xx</emphasis> format</entry>
   </row>
   <row>
-	<entry>$$</entry>
-	<entry>the $ character</entry>
+    <entry>$$</entry>
+    <entry>the $ character</entry>
   </row>
   <row>
-	<entry>$a</entry>
-	<entry>a character according to the audio type (none: <literal>n</literal>,
-	mono: <literal>m</literal>, stereo: <literal>t</literal>)</entry>
+    <entry>$a</entry>
+    <entry>a character according to the audio type (none: <literal>n</literal>,
+    mono: <literal>m</literal>, stereo: <literal>t</literal>)</entry>
   </row>
   <row>
-	<entry>$t</entry>
-	<entry>track number (in playlist)</entry>
+    <entry>$t</entry>
+    <entry>track number (in playlist)</entry>
   </row>
   <row>
-	<entry>$o</entry>
-	<entry>filename</entry>
+    <entry>$o</entry>
+    <entry>filename</entry>
   </row>
   <row>
-	<entry>$f</entry>
-	<entry>filename in lower case</entry>
+    <entry>$f</entry>
+    <entry>filename in lower case</entry>
   </row>
   <row>
-	<entry>$F</entry>
-	<entry>filename in upper case</entry>
+    <entry>$F</entry>
+    <entry>filename in upper case</entry>
   </row>
   <row>
-	<entry>$T</entry>
-	<entry>
-	a character according to the stream type (file: <literal>f</literal>,
-	Video CD: <literal>v</literal>, DVD: <literal>d</literal>,
-	URL: <literal>u</literal>)
-	</entry>
+    <entry>$T</entry>
+    <entry>
+    a character according to the stream type (file: <literal>f</literal>,
+    Video CD: <literal>v</literal>, DVD: <literal>d</literal>,
+    URL: <literal>u</literal>)
+    </entry>
   </row>
   <row>
-	<entry>$p</entry>
+    <entry>$p</entry>
     <entry>the <keycap>p</keycap> character (if a movie is playing and the font
     has the <keycap>p</keycap> character)</entry>
   </row>

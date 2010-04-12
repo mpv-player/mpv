@@ -540,14 +540,14 @@ static const char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Príliš mnoho (%d v %d bajtoch) audio paketov v bufferi!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Príliš mnoho (%d v %d bajtoch) video paketov v bufferi!\n"
 #define MSGTR_MaybeNI "(možno prehrávate neprekladaný prúd/súbor alebo kodek zlyhal)\n" \
-		      "Pre .AVI súbory skúste vynútiť neprekladaný mód voľbou -ni\n"
+                      "Pre .AVI súbory skúste vynútiť neprekladaný mód voľbou -ni\n"
 #define MSGTR_SwitchToNi "\nDetekovaný zle prekladaný .AVI - prepnite -ni mód!\n"
 #define MSGTR_Detected_XXX_FileFormat "Detekovaný %s formát súboru!\n"
 #define MSGTR_DetectedAudiofile "Detekovaný audio súbor!\n"
 #define MSGTR_NotSystemStream "Nie je to MPEG System Stream formát... (možno Transport Stream?)\n"
 #define MSGTR_InvalidMPEGES "Neplatný MPEG-ES prúd??? kontaktujte autora, možno je to chyba (bug) :(\n"
 #define MSGTR_FormatNotRecognized "========== Žiaľ, tento formát súboru nie je rozpoznaný/podporovaný =======\n"\
-				  "==== Pokiaľ je tento súbor AVI, ASF alebo MPEG prúd, kontaktujte autora! ====\n"
+                                  "==== Pokiaľ je tento súbor AVI, ASF alebo MPEG prúd, kontaktujte autora! ====\n"
 #define MSGTR_MissingVideoStream "Žiadny video prúd nenájdený!\n"
 #define MSGTR_MissingAudioStream "Žiadny audio prúd nenájdený...  -> bez zvuku\n"
 #define MSGTR_MissingVideoStreamBug "Chýbajúci video prúd!? Kontaktujte autora, možno to je chyba (bug) :(\n"

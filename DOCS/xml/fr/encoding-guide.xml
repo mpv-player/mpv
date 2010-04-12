@@ -2096,7 +2096,7 @@ mplayer <replaceable>fichier_source.vob</replaceable> -aid 129 -dumpaudio -dumpf
   et <option>-ofps</option> à deux fois le nombre d'image par seconde de votre source originale.
 
   <screen>mencoder dvd://1 -oac copy -vf tfields=2 -ovc lavc \
-	-fps 60000/1001 -ofps 60000/1001</screen>
+  -fps 60000/1001 -ofps 60000/1001</screen>
   </para></listitem>
 <listitem><para>
   Si vous avez prévu de beaucoup réduire la taille, vous pouvez
@@ -4460,16 +4460,16 @@ fichiers compatibles <application>QuickTime</application>
 </para>
 <itemizedlist>
 <listitem><para>
-	Vous souhaitez que n'importe quel utilisateur non expérimenté soit capable
-	de regarder votre vidéo sur les plateformes majeures (Windows, Mac OS X, Unices &hellip;).
+  Vous souhaitez que n'importe quel utilisateur non expérimenté soit capable
+  de regarder votre vidéo sur les plateformes majeures (Windows, Mac OS X, Unices &hellip;).
 </para></listitem>
 <listitem><para>
-	<application>QuickTime</application> est capable de tirer plus
-	amplement profit des accélérations matérielles et logicielles
-	de Mac OS X que les lecteurs plus indépendant de la plateforme
-	comme <application>MPlayer</application> ou <application>VLC</application>.
-	Ainsi, vos vidéos ont plus de chance d'être jouées sans accros sur de
-	veilles machines basées sur des processeurs G4.
+  <application>QuickTime</application> est capable de tirer plus
+  amplement profit des accélérations matérielles et logicielles
+  de Mac OS X que les lecteurs plus indépendant de la plateforme
+  comme <application>MPlayer</application> ou <application>VLC</application>.
+  Ainsi, vos vidéos ont plus de chance d'être jouées sans accros sur de
+  veilles machines basées sur des processeurs G4.
 </para></listitem>
 <listitem><para>
   <application>QuickTime</application> 7 supporte la nouvelle génération de
@@ -4484,45 +4484,45 @@ fichiers compatibles <application>QuickTime</application>
 <title>Limitations de <application>QuickTime</application></title>
 
 <para>
-	<application>QuickTime</application> 7 supporte la vidéo en H.264 et l'audio en AAC,
-	mais il ne les supporte pas multipléxés dans le format de container AVI.
-	Cependant, vous pouvez utiliser <application>MEncoder</application> pour encoder
-	la vidéo et l'audio, et ensuite utiliser un programme externe comme
-	<application>mp4creator</application> (appartenant à la
-	<ulink url="http://mpeg4ip.sourceforge.net/">suite MPEG4IP</ulink>)
-	pour remultiplexer les pistes vidéos et audios dans un container MP4.
+  <application>QuickTime</application> 7 supporte la vidéo en H.264 et l'audio en AAC,
+  mais il ne les supporte pas multipléxés dans le format de container AVI.
+  Cependant, vous pouvez utiliser <application>MEncoder</application> pour encoder
+  la vidéo et l'audio, et ensuite utiliser un programme externe comme
+  <application>mp4creator</application> (appartenant à la
+  <ulink url="http://mpeg4ip.sourceforge.net/">suite MPEG4IP</ulink>)
+  pour remultiplexer les pistes vidéos et audios dans un container MP4.
 </para>
 
 <para>
-	Le support <application>QuickTime</application> du H.264 étant limité,
-	il vous faudra laisser tomber certaines options avancées.
-	Si vous encodez votre vidéo en utilisant des options que
-	<application>QuickTime</application> 7 ne supporte pas,
-	les lecteurs basés sur <application>QuickTime</application> afficheront
-	un joli écran blanc au lieu de la vidéo attendue.
+  Le support <application>QuickTime</application> du H.264 étant limité,
+  il vous faudra laisser tomber certaines options avancées.
+  Si vous encodez votre vidéo en utilisant des options que
+  <application>QuickTime</application> 7 ne supporte pas,
+  les lecteurs basés sur <application>QuickTime</application> afficheront
+  un joli écran blanc au lieu de la vidéo attendue.
 </para>
 
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">trames-B</emphasis>&nbsp;:
-	<application>QuickTime</application> 7 supporte un maximum d'une trame-B, i.e.
-	<option>-x264encopts bframes=1</option>. Ainsi,
-	<option>b_pyramid</option> et <option>weight_b</option> n'auront aucun
-	effet car ces options requierent que <option>bframes</option> soit supérieure à 1.
+  <application>QuickTime</application> 7 supporte un maximum d'une trame-B, i.e.
+  <option>-x264encopts bframes=1</option>. Ainsi,
+  <option>b_pyramid</option> et <option>weight_b</option> n'auront aucun
+  effet car ces options requierent que <option>bframes</option> soit supérieure à 1.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Macroblocs</emphasis>&nbsp;:
-	<application>QuickTime</application> 7 ne supporte pas les macroblocs de type 8x8 DCT.
-	Cette option (<option>8x8dct</option>) est désactivée par défaut,
-	donc soyez sûr de ne pas l'activer explicitement. Ceci signifie aussi que l'option
-	<option>i8x8</option> n'aura aucun effet, car elle nécessite l'option <option>8x8dct</option>.
+  <application>QuickTime</application> 7 ne supporte pas les macroblocs de type 8x8 DCT.
+  Cette option (<option>8x8dct</option>) est désactivée par défaut,
+  donc soyez sûr de ne pas l'activer explicitement. Ceci signifie aussi que l'option
+  <option>i8x8</option> n'aura aucun effet, car elle nécessite l'option <option>8x8dct</option>.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Ratio d'aspect</emphasis>&nbsp;:
-	<application>QuickTime</application> 7 ne supporte pas l'information sur le SAR (l'échantillonage
-	de ratio d'aspect ou Sample Aspect Ratio) dans les fichiers MPEG-4; il suppose que SAR=1.
-	Lisez <link linkend="menc-feat-quicktime-7-scale"> la section sur le redimensionnement</link> pour une
-	parade à cette limitation.
+  <application>QuickTime</application> 7 ne supporte pas l'information sur le SAR (l'échantillonage
+  de ratio d'aspect ou Sample Aspect Ratio) dans les fichiers MPEG-4; il suppose que SAR=1.
+  Lisez <link linkend="menc-feat-quicktime-7-scale"> la section sur le redimensionnement</link> pour une
+  parade à cette limitation.
 </para></listitem>
 </itemizedlist>
 
@@ -4531,26 +4531,26 @@ fichiers compatibles <application>QuickTime</application>
 <sect2 id="menc-feat-quicktime-7-crop">
 <title>Recadrage</title>
 <para>
-	Supposons que vous voulez encoder votre DVD "Les chroniques de Narnia".
-	Votre DVD étant de région 1, il est en NTSC. L'exemple ci-dessous serait aussi
-	applicable au PAL, hormis qu'il faudrait omettre l'option <option>-ofps 24000/1001</option>
-	et utiliser des dimensions pour <option>crop</option> et <option>scale</option>
-	sensiblement différentes.
+  Supposons que vous voulez encoder votre DVD "Les chroniques de Narnia".
+  Votre DVD étant de région 1, il est en NTSC. L'exemple ci-dessous serait aussi
+  applicable au PAL, hormis qu'il faudrait omettre l'option <option>-ofps 24000/1001</option>
+  et utiliser des dimensions pour <option>crop</option> et <option>scale</option>
+  sensiblement différentes.
 </para>
 
 <para>
-	Aprés avoir lancé <option>mplayer dvd://1</option>, vous suivez la procédure
-	détaillée dans la section
-	<link linkend="menc-feat-telecine">Comment gérer le téléciné et le dés-entrelacement avec les DVDs NTSC</link>
-	et découvrez que c'est une vidéo progréssive en 24000/1001 image par seconde.
-	Ceci simplifie quelque peu la procédure, car nous n'avons pas besoin d'utliser un filtre téléciné inverse
-	comme <option>pullup</option> ou un filtre de désentrelacement comme
-	<option>yadif</option>.
+  Aprés avoir lancé <option>mplayer dvd://1</option>, vous suivez la procédure
+  détaillée dans la section
+  <link linkend="menc-feat-telecine">Comment gérer le téléciné et le dés-entrelacement avec les DVDs NTSC</link>
+  et découvrez que c'est une vidéo progréssive en 24000/1001 image par seconde.
+  Ceci simplifie quelque peu la procédure, car nous n'avons pas besoin d'utliser un filtre téléciné inverse
+  comme <option>pullup</option> ou un filtre de désentrelacement comme
+  <option>yadif</option>.
 </para>
 
 <para>
-	Ensuite il faut rogner les bandes noires du haut et du bas de la vidéo,
-	comme détaillé dans la section précédente.
+  Ensuite il faut rogner les bandes noires du haut et du bas de la vidéo,
+  comme détaillé dans la section précédente.
 </para>
 
 </sect2>
@@ -4559,24 +4559,24 @@ fichiers compatibles <application>QuickTime</application>
 <title>Redimensionnement</title>
 
 <para>
-	La prochaine étape à de quoi vous briser le coeur.
-	<application>QuickTime</application> 7 ne supporte pas les
-	vidéos MPEG-4 avec échantillonage du ratio d'aspect différent de 1,
-	de fait il vous faudra redimensionner à la hausse (ce qui gaspille
-	beaucoup d'espace disque) ou à la baisse (ce qui diminue le niveau
-	de détail de la source) la vidéo de façon à obtenir des pixels carrés.
-	D'une manière ou d'une autre, cette opération est très inéficace, mais
-	ne peut être evitée si vous souhaitez que votre vidéo soit lisible par
-	<application>QuickTime</application> 7.
-	<application>MEncoder</application> permet d'appliquer le redimensionnement
-	à la hausse ou à la baisse en spécifiant respectivement
-	<option>-vf scale=-10:-1</option> ou <option>-vf scale=-1:-10</option>.
-	Ces options vont redimensionner la vidéo à la bonne largeur pour la hauteur rognée,
-	arrondi au plus proche multiple de 16 pour une compression optimale.
+  La prochaine étape à de quoi vous briser le coeur.
+  <application>QuickTime</application> 7 ne supporte pas les
+  vidéos MPEG-4 avec échantillonage du ratio d'aspect différent de 1,
+  de fait il vous faudra redimensionner à la hausse (ce qui gaspille
+  beaucoup d'espace disque) ou à la baisse (ce qui diminue le niveau
+  de détail de la source) la vidéo de façon à obtenir des pixels carrés.
+  D'une manière ou d'une autre, cette opération est très inéficace, mais
+  ne peut être evitée si vous souhaitez que votre vidéo soit lisible par
+  <application>QuickTime</application> 7.
+  <application>MEncoder</application> permet d'appliquer le redimensionnement
+  à la hausse ou à la baisse en spécifiant respectivement
+  <option>-vf scale=-10:-1</option> ou <option>-vf scale=-1:-10</option>.
+  Ces options vont redimensionner la vidéo à la bonne largeur pour la hauteur rognée,
+  arrondi au plus proche multiple de 16 pour une compression optimale.
   Rappelez vous que si vous rognez, vous devez d'abord rogner et ensuite
   redimensionner&nbsp;:
 
-	<screen>-vf crop=720:352:0:62,scale=-10:-1</screen>
+  <screen>-vf crop=720:352:0:62,scale=-10:-1</screen>
 </para>
 
 </sect2>
@@ -4585,19 +4585,19 @@ fichiers compatibles <application>QuickTime</application>
 <title>Synchronisation de l'audio et de la vidéo</title>
 
 <para>
-	Parce que vous allez remultiplexer dans un container différent,
-	vous devriez toujours utiliser l'option <option>harddup</option>
-	afin de s'assurer que les trames dupliquées soient effectivement
-	dupliquées dans la vidéo de sortie. Sans cette option, <application>MEncoder</application>
-	placera simplement un marqueur dans la flux vidéo signalant qu'une trame
-	a été dupliquée, et délèguera au logiciel client l'initiative d'afficher
-	la même trame deux fois. Malheureusement, cette "duplication douce" ne survivant pas
-	au multiplexage, l'audio perdra lentement la synchronisation avec la vidéo.
+  Parce que vous allez remultiplexer dans un container différent,
+  vous devriez toujours utiliser l'option <option>harddup</option>
+  afin de s'assurer que les trames dupliquées soient effectivement
+  dupliquées dans la vidéo de sortie. Sans cette option, <application>MEncoder</application>
+  placera simplement un marqueur dans la flux vidéo signalant qu'une trame
+  a été dupliquée, et délèguera au logiciel client l'initiative d'afficher
+  la même trame deux fois. Malheureusement, cette "duplication douce" ne survivant pas
+  au multiplexage, l'audio perdra lentement la synchronisation avec la vidéo.
 </para>
 
 <para>
   La chaîne de filtre résultante a cette forme&nbsp;:
-  	<screen>-vf crop=720:352:0:62,scale=-10:-1,harddup</screen>
+    <screen>-vf crop=720:352:0:62,scale=-10:-1,harddup</screen>
 </para>
 
 </sect2>
@@ -4606,16 +4606,16 @@ fichiers compatibles <application>QuickTime</application>
 <title>Débit</title>
 
 <para>
-	Comme toujours, le choix du débit est aussi bien une question de propriétés techniques
-	de la source, comme expliqué
-  	<link linkend="menc-feat-dvd-mpeg4-resolution-bitrate">ici</link>, qu'une
-	question de goût.
-	Dans ce film, il y a pas mal d'action et beaucoup de détails, mais le H.264
-	apparait plus beau que le XviD ou tout autre codec MPEG-4 à des débits moindres.
-	Après moultes expérimentations, l'auteur de ce guide a choisi d'encoder ce film à
-	900kbps, et pense que le résultat est joli.
-	Vous pouvez diminuer le débit si vous souhaitez sauver de la place,
-	ou l'augmenter si vous voulez améliorer la qualité.
+  Comme toujours, le choix du débit est aussi bien une question de propriétés techniques
+  de la source, comme expliqué
+    <link linkend="menc-feat-dvd-mpeg4-resolution-bitrate">ici</link>, qu'une
+  question de goût.
+  Dans ce film, il y a pas mal d'action et beaucoup de détails, mais le H.264
+  apparait plus beau que le XviD ou tout autre codec MPEG-4 à des débits moindres.
+  Après moultes expérimentations, l'auteur de ce guide a choisi d'encoder ce film à
+  900kbps, et pense que le résultat est joli.
+  Vous pouvez diminuer le débit si vous souhaitez sauver de la place,
+  ou l'augmenter si vous voulez améliorer la qualité.
 </para>
 
 </sect2>
@@ -4624,19 +4624,19 @@ fichiers compatibles <application>QuickTime</application>
 <title>Exemple d'encodage</title>
 
 <para>
-	Vous êtes maintenant prêt à encoder la vidéo. Comme vous
-	tenez à la qualité, vous effectuerez un encodage en 2 passes, bien entendu.
-	Pour sauver un peu de temps d'encodage, vous pouvez spécifier
-	l'option <option>turbo</option> pour la première passe; cette option
-	réduit <option>subq</option> et <option>frameref</option> à 1.
-	Pour sauvegarder de l'espace disque vous pouvez utiliser l'option <option>ss</option>
-	afin d'enlever les toutes premières secondes de la vidéo.
-	(Je me suis aperçu que ce film a 32 secondes de générique et de logo.)
-	<option>bframes</option> peut être 0 ou 1.
-	Les autres options sont documentées dans <link
-  	linkend="menc-feat-x264-encoding-options-speedvquality">Encodage avec
-  	le codec <systemitem class="library">x264</systemitem></link> et la page
-	de man.
+  Vous êtes maintenant prêt à encoder la vidéo. Comme vous
+  tenez à la qualité, vous effectuerez un encodage en 2 passes, bien entendu.
+  Pour sauver un peu de temps d'encodage, vous pouvez spécifier
+  l'option <option>turbo</option> pour la première passe; cette option
+  réduit <option>subq</option> et <option>frameref</option> à 1.
+  Pour sauvegarder de l'espace disque vous pouvez utiliser l'option <option>ss</option>
+  afin d'enlever les toutes premières secondes de la vidéo.
+  (Je me suis aperçu que ce film a 32 secondes de générique et de logo.)
+  <option>bframes</option> peut être 0 ou 1.
+  Les autres options sont documentées dans <link
+    linkend="menc-feat-x264-encoding-options-speedvquality">Encodage avec
+    le codec <systemitem class="library">x264</systemitem></link> et la page
+  de man.
 
   <screen>mencoder dvd://1 -o /dev/null -ss 32 -ovc x264 \
 -x264encopts pass=1:turbo:bitrate=900:bframes=1:\
@@ -4645,16 +4645,16 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 -oac faac -faacopts br=192:mpeg=4:object=2 -channels 2 -srate 48000 \
 -ofps 24000/1001</screen>
 
-	Si vous possédez une machine multi-processeur, ne manquez pas l'opportunité
-	d'augmenter grandement la vitesse d'encodage en activant
-  	<link linkend="menc-feat-x264-encoding-options-speedvquality-threads">
-	le mode multi-thread du <systemitem class="library">x264</systemitem></link>
-	en ajoutant <option>threads=auto</option> à votre ligne de commande <option>x264encopts</option>.
+  Si vous possédez une machine multi-processeur, ne manquez pas l'opportunité
+  d'augmenter grandement la vitesse d'encodage en activant
+    <link linkend="menc-feat-x264-encoding-options-speedvquality-threads">
+  le mode multi-thread du <systemitem class="library">x264</systemitem></link>
+  en ajoutant <option>threads=auto</option> à votre ligne de commande <option>x264encopts</option>.
 </para>
 
 <para>
-	La seconde passe est la même, excepté qu'il faut spécifier le fichier de sortie
-	et mettre <option>pass=2</option>.
+  La seconde passe est la même, excepté qu'il faut spécifier le fichier de sortie
+  et mettre <option>pass=2</option>.
 
   <screen>mencoder dvd://1 <emphasis role="bold">-o narnia.avi</emphasis> -ss 32 -ovc x264 \
 -x264encopts <emphasis role="bold">pass=2</emphasis>:turbo:bitrate=900:frameref=5:bframes=1:\
@@ -4665,12 +4665,12 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 </para>
 
 <para>
-	L'AVI résultant doit être parfaitement lu
-	par <application>MPlayer</application>, mais bien entendu
-	<application>QuickTime</application> ne peut le lire
-	car il ne supporte pas le H.264 multiplexé dans de l'AVI.
-	De fait, la prochaine étape est de remultiplexer la vidéo dans
-	un container MP4.
+  L'AVI résultant doit être parfaitement lu
+  par <application>MPlayer</application>, mais bien entendu
+  <application>QuickTime</application> ne peut le lire
+  car il ne supporte pas le H.264 multiplexé dans de l'AVI.
+  De fait, la prochaine étape est de remultiplexer la vidéo dans
+  un container MP4.
 </para>
 </sect2>
 
@@ -4678,50 +4678,50 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 <title>Remultiplexage en MP4</title>
 
 <para>
-	Il existe différentes manières de remultiplexer des fichiers AVI en MP4.
-	Vous pouvez utiliser <application>mp4creator</application>, qui fait parti de la
-	<ulink url="http://mpeg4ip.sourceforge.net/">suite MPEG4IP</ulink>.
+  Il existe différentes manières de remultiplexer des fichiers AVI en MP4.
+  Vous pouvez utiliser <application>mp4creator</application>, qui fait parti de la
+  <ulink url="http://mpeg4ip.sourceforge.net/">suite MPEG4IP</ulink>.
 </para>
 
 <para>
-	Premièrement, demultiplexez l'AVI en un flux audio et un flux vidéo séparés
-	en utilisant <application>MPlayer</application>.
-  	<screen>mplayer narnia.avi -dumpaudio -dumpfile narnia.aac
-	mplayer narnia.avi -dumpvideo -dumpfile narnia.h264</screen>
+  Premièrement, demultiplexez l'AVI en un flux audio et un flux vidéo séparés
+  en utilisant <application>MPlayer</application>.
+    <screen>mplayer narnia.avi -dumpaudio -dumpfile narnia.aac
+  mplayer narnia.avi -dumpvideo -dumpfile narnia.h264</screen>
 
-	Les noms de fichier sont important; <application>mp4creator</application>
-	nécessite que les flux audios AAC soient nommés <systemitem>.aac</systemitem>
-	et les flux vidéos H.264 soient nommés <systemitem>.h264</systemitem>.
+  Les noms de fichier sont important; <application>mp4creator</application>
+  nécessite que les flux audios AAC soient nommés <systemitem>.aac</systemitem>
+  et les flux vidéos H.264 soient nommés <systemitem>.h264</systemitem>.
 </para>
 
 <para>
-	Maintenant utilisez <application>mp4creator</application> pour créer
-	un nouveau fichier MP4 depuis les flux audio et vidéo.
+  Maintenant utilisez <application>mp4creator</application> pour créer
+  un nouveau fichier MP4 depuis les flux audio et vidéo.
 
-	<screen>mp4creator -create=narnia.aac narnia.mp4
-	mp4creator -create=narnia.h264 -rate=23.976 narnia.mp4</screen>
+  <screen>mp4creator -create=narnia.aac narnia.mp4
+  mp4creator -create=narnia.h264 -rate=23.976 narnia.mp4</screen>
 
-	Contrairement à l'étape d'encodage, vous devez spécifier le nombre
-	d'image par seconde comme une valeur décimale (par exemple 23.976), et non
-	comme une valeur fractionnaire (par exemple 24000/1001).
+  Contrairement à l'étape d'encodage, vous devez spécifier le nombre
+  d'image par seconde comme une valeur décimale (par exemple 23.976), et non
+  comme une valeur fractionnaire (par exemple 24000/1001).
 </para>
 
 <para>
-	Le fichier <systemitem>narnia.mp4</systemitem> devrait être lisible
-	par n'importe quelle application <application>QuickTime</application> 7,
-	comme le <application>lecteur QuickTime</application> ou
-	comme <application>iTunes</application>. Si vous planifiez de voir la
-	vidéo dans un navigateur Internet avec le plugin <application>QuickTime</application>,
-	vous devriez aussi renseigner le film de sorte que le plugin
-	<application>QuickTime</application> puisse commencer à le lire
-	pendant qu'il se télécharge. <application>mp4creator</application>
+  Le fichier <systemitem>narnia.mp4</systemitem> devrait être lisible
+  par n'importe quelle application <application>QuickTime</application> 7,
+  comme le <application>lecteur QuickTime</application> ou
+  comme <application>iTunes</application>. Si vous planifiez de voir la
+  vidéo dans un navigateur Internet avec le plugin <application>QuickTime</application>,
+  vous devriez aussi renseigner le film de sorte que le plugin
+  <application>QuickTime</application> puisse commencer à le lire
+  pendant qu'il se télécharge. <application>mp4creator</application>
   peut créer ces pistes de renseignement&nbsp;:
 
-	<screen>mp4creator -hint=1 narnia.mp4
-	mp4creator -hint=2 narnia.mp4
-	mp4creator -optimize narnia.mp4</screen>
+  <screen>mp4creator -hint=1 narnia.mp4
+  mp4creator -hint=2 narnia.mp4
+  mp4creator -optimize narnia.mp4</screen>
 
-	Vous pouvez vérifier le résultat final pour vous assurer
+  Vous pouvez vérifier le résultat final pour vous assurer
   que les pistes de renseignement ont été créées avec succès&nbsp;:
 
   <screen>mp4creator -list narnia.mp4</screen>
@@ -4729,12 +4729,12 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
   Vous devriez voir une liste de pistes&nbsp;: 1 audio, 1 vidéo, et 2 pistes
   de renseignement
 
-	<screen>Track   Type    Info
-	1       audio   MPEG-4 AAC LC, 8548.714 secs, 190 kbps, 48000 Hz
-	2       video   H264 Main@5.1, 8549.132 secs, 899 kbps, 848x352 @ 23.976001 fps
-	3       hint    Payload mpeg4-generic for track 1
-	4       hint    Payload H264 for track 2
-	</screen>
+  <screen>Track   Type    Info
+  1       audio   MPEG-4 AAC LC, 8548.714 secs, 190 kbps, 48000 Hz
+  2       video   H264 Main@5.1, 8549.132 secs, 899 kbps, 848x352 @ 23.976001 fps
+  3       hint    Payload mpeg4-generic for track 1
+  4       hint    Payload H264 for track 2
+  </screen>
 </para>
 
 </sect2>
@@ -4744,20 +4744,20 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 <title>Ajouter des tags de méta-données</title>
 
 <para>
-	Si vous voulez ajouter des tags dans votre vidéo qui soient visible dans <application>iTunes</application>,
-	vous pouvez utiliser
-  	<ulink url="http://atomicparsley.sourceforge.net/">AtomicParsley</ulink>.
+  Si vous voulez ajouter des tags dans votre vidéo qui soient visible dans <application>iTunes</application>,
+  vous pouvez utiliser
+    <ulink url="http://atomicparsley.sourceforge.net/">AtomicParsley</ulink>.
 
-  	<screen>AtomicParsley narnia.mp4 --metaEnema --title "The Chronicles of Narnia" --year 2005 --stik Movie --freefree --overWrite</screen>
+    <screen>AtomicParsley narnia.mp4 --metaEnema --title "The Chronicles of Narnia" --year 2005 --stik Movie --freefree --overWrite</screen>
 
-	L'option <option>--metaEnema</option> efface toutes meta-données existantes.
-	(<application>mp4creator</application> insère son nom dans le tag "encoding tool"),
-	et <option>--freefree</option> récupère l'espace libéré par les méta-données effacées.
-	L'option <option>--stik</option> paramétre le type de vidéo (tel que Film ou Show TV),
-	qu'<application>iTunes</application> utilise pour grouper des fichiers vidéos similaires.
-	L'option <option>--overWrite</option> écrase le fichier d'origine;
-	sans cette option, <application>AtomicParsley</application> créé un fichier automatiquement
-	nommé dans le même répertoire et laisse le fichier d'origine tel quel.
+  L'option <option>--metaEnema</option> efface toutes meta-données existantes.
+  (<application>mp4creator</application> insère son nom dans le tag "encoding tool"),
+  et <option>--freefree</option> récupère l'espace libéré par les méta-données effacées.
+  L'option <option>--stik</option> paramétre le type de vidéo (tel que Film ou Show TV),
+  qu'<application>iTunes</application> utilise pour grouper des fichiers vidéos similaires.
+  L'option <option>--overWrite</option> écrase le fichier d'origine;
+  sans cette option, <application>AtomicParsley</application> créé un fichier automatiquement
+  nommé dans le même répertoire et laisse le fichier d'origine tel quel.
 </para>
 
 </sect2>
@@ -4822,8 +4822,8 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
     <row>
         <entry>NTSC DVD</entry>
         <entry>352x240<footnote id='fn-rare-resolutions'><para>
-	  Ces résolutions sont rarement utilisées pour les DVDs
-	  parce qu'elles sont d'assez basse qualité.</para></footnote></entry>
+    Ces résolutions sont rarement utilisées pour les DVDs
+    parce qu'elles sont d'assez basse qualité.</para></footnote></entry>
         <entry>MPEG-1</entry>
         <entry>1856</entry>
         <entry>48000 Hz</entry>

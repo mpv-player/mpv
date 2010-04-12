@@ -175,20 +175,20 @@ procesorze z taktowaniem 400MHz. Będziesz potrzebował do tego biblioteki
 
 <para><emphasis role="bold">Caveat:</emphasis></para>
 <itemizedlist>
-	<listitem><para><emphasis role="bold">mediaLib</emphasis> jest
-			<emphasis role="bold">aktualnie wyłączone</emphasis> w domyślnej
-			konfiguracji <application>MPlayera</application>, z powodu błędów.
-			Użytkownicy SPARC-ów, którzy budują MPlayera z obsługą mediaLib
-			informowali o delikatnym, zielonymi miganiu wideo kodowane i dekodowanego
-			przez libavcodec. Możesz włączyć mediaLib, jeżeli chcesz używając:
-			<screen>
-				$ ./configure --enable-mlib
-				</screen>
-			Robisz to na własne ryzyko. Użytkownicy x86 powinni
-			<emphasis role="bold">nigdy</emphasis> nie używać mediaLib,
-			ponieważ w efekcie otrzymają kiepską wydajność MPlayera.
-			</para></listitem>
-	</itemizedlist>
+<listitem><para><emphasis role="bold">mediaLib</emphasis> jest
+<emphasis role="bold">aktualnie wyłączone</emphasis> w domyślnej
+konfiguracji <application>MPlayera</application>, z powodu błędów.
+Użytkownicy SPARC-ów, którzy budują MPlayera z obsługą mediaLib
+informowali o delikatnym, zielonymi miganiu wideo kodowane i dekodowanego
+przez libavcodec. Możesz włączyć mediaLib, jeżeli chcesz używając:
+<screen>
+$ ./configure --enable-mlib
+</screen>
+Robisz to na własne ryzyko. Użytkownicy x86 powinni
+<emphasis role="bold">nigdy</emphasis> nie używać mediaLib,
+ponieważ w efekcie otrzymają kiepską wydajność MPlayera.
+</para></listitem>
+</itemizedlist>
 
 <para>
 Aby zbudować pakiet, będziesz potrzebował GNU <application>make</application>
@@ -224,9 +224,9 @@ systemie).
 
 <para>Rozwiązania najczęstszych problemów:</para>
 <itemizedlist>
-	<listitem><para>
-			Błąd jaki wyświetli <filename>configure</filename> na Solarisie x86,
-			używającym GCC bez GNU assemblera:
+<listitem><para>
+Błąd jaki wyświetli <filename>configure</filename> na Solarisie x86,
+używającym GCC bez GNU assemblera:
 <screen>
    % configure
    ...
@@ -252,32 +252,31 @@ Typowy błąd, jaki otrzymasz przy próbie budowy kompilatorem GNU C, który nie
 </listitem>
 
 <listitem><para><application>MPlayer</application> może się wysypać
-		podczas dekodowania i kodowania wideo używających win32codecs:
-		<screen>
-			...
-			Trying to force audio codec driver family acm...
-			Opening audio decoder: [acm] Win32/ACM decoders
-			sysi86(SI86DSCR): Invalid argument
-			Couldn't install fs segment, expect segfault
+podczas dekodowania i kodowania wideo używających win32codecs:
+<screen>
+...
+Trying to force audio codec driver family acm...
+Opening audio decoder: [acm] Win32/ACM decoders
+sysi86(SI86DSCR): Invalid argument
+Couldn't install fs segment, expect segfault
 
-
-			MPlayer interrupted by signal 11 in module: init_audio_codec
-			...
-		</screen>
-		Dzieje się tak z powodu zmian w sysi86() w Solaris 10 i wydaniach
-		pre-Solaris Nevada b31. Zostało to naprawione w Solaris Nevada b32;
-		jednak Sun nie przeniósł jeszcze poprawki do Solarisa 10. Projekt
-		MPlayer poinformował o tym problemie Sun i łatka jest aktualnie
-		wprowadzana do Solarisa 10. Więcej informacji o tym błędzie może
-		zostać znaleziona  na stronie:
-		<ulink
-			   url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
-		</para>
-	</listitem>
+MPlayer interrupted by signal 11 in module: init_audio_codec
+...
+</screen>
+Dzieje się tak z powodu zmian w sysi86() w Solaris 10 i wydaniach
+pre-Solaris Nevada b31. Zostało to naprawione w Solaris Nevada b32;
+jednak Sun nie przeniósł jeszcze poprawki do Solarisa 10. Projekt
+MPlayer poinformował o tym problemie Sun i łatka jest aktualnie
+wprowadzana do Solarisa 10. Więcej informacji o tym błędzie może
+zostać znaleziona  na stronie:
+<ulink
+   url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
+</para>
+</listitem>
 
 <listitem><para>
-		Ze względu na błędy występujące w Solarisie 8, możesz nie być w stanie odtwarzać
-		płyt DVD o pojemności większej niż 4 GB:
+Ze względu na błędy występujące w Solarisie 8, możesz nie być w stanie odtwarzać
+płyt DVD o pojemności większej niż 4 GB:
 </para>
 
 <itemizedlist>
@@ -469,33 +468,33 @@ znajdziesz je na
 4Front Technologies udostępnia swoje sterowniki OSS za darmo do niekomercyjnego
 zastosowania; jednakże, nie ma aktualnie sterowników wyjścia audio dla AIX 5.2 lub 5.3.
 Oznacza to, że <emphasis role="bold">AIX 5.2 i 5.3 nie potrafią aktualnie używać
-	wyjścia audio MPlayera.</emphasis>
+wyjścia audio MPlayera.</emphasis>
 </para>
 
 <para>Rozwiązania częstych problemów:</para>
 
 <itemizedlist>
-	<listitem>
-		<para>
-			Jeżeli otrzymujesz od <filename>configure</filename> taki komunikat błędu:
-			<screen>
-				$ ./configure
-				...
-				Checking for iconv program ... no
-				No working iconv program found, use
-				--charset=US-ASCII to continue anyway.
-				Messages in the GTK-2 interface will be broken then.
-				</screen>
-				To dzieje się tak dlatego, że AIX używa nie standardowych
-				zestawów nazw znaków; dlatego też, konwersja wyjścia MPlayera
-				do innego zestawu znaków (kodowania) nie jest aktualnie obsługiwana.
-				Rozwiązaniem jest użycie:
-			<screen>
-				$ ./configure --charset=noconv
-				</screen>
-			</para>
-		</listitem>
-	</itemizedlist>
+<listitem>
+<para>
+Jeżeli otrzymujesz od <filename>configure</filename> taki komunikat błędu:
+<screen>
+$ ./configure
+...
+Checking for iconv program ... no
+No working iconv program found, use
+--charset=US-ASCII to continue anyway.
+Messages in the GTK-2 interface will be broken then.
+</screen>
+To dzieje się tak dlatego, że AIX używa nie standardowych
+zestawów nazw znaków; dlatego też, konwersja wyjścia MPlayera
+do innego zestawu znaków (kodowania) nie jest aktualnie obsługiwana.
+Rozwiązaniem jest użycie:
+<screen>
+$ ./configure --charset=noconv
+</screen>
+</para>
+</listitem>
+</itemizedlist>
 
 </sect2>
 
@@ -625,15 +624,15 @@ wolna.
 <note>
 
 <para>Na Windowsie automatyczne wykrywanie typu procesora
-	wyłącza rozszerzenie SSE z powodu okazjonalnych i ciężkich
-	do wyśledzenia błędów powodujących zakończenie aplikacji. Jeżeli
-	nadal chesz mieć obsługę SSE pod Windowsem, będziesz musiał
-	skompilować program bez wykrywania typu CPU w trakcie działania.
+  wyłącza rozszerzenie SSE z powodu okazjonalnych i ciężkich
+  do wyśledzenia błędów powodujących zakończenie aplikacji. Jeżeli
+  nadal chesz mieć obsługę SSE pod Windowsem, będziesz musiał
+  skompilować program bez wykrywania typu CPU w trakcie działania.
 </para>
 
 <para>Jeżeli masz Pentium 4 i program wysypuje Ci się podczas używania
-	kodeków RealPlayer'a, prawdopodobnie będziesz musiał wyłączyć
-	obsługę hyperthreading'u.
+  kodeków RealPlayer'a, prawdopodobnie będziesz musiał wyłączyć
+  obsługę hyperthreading'u.
 </para>
 </note>
 
@@ -697,51 +696,51 @@ skorzystać ze sterownika wyjścia video <option>corevideo</option>.
 </para>
 
 <para>
-	Niestety, to podstawowe środowisko ni epozwoli ci na skorzystanie ze
-	wszystkich fajnych możliwości <application>MPlayera</application>.
-	Przykładowo, żeby uzyskać wkompilowaną obsługę OSD, będziesz
-	potrzebował bibliotek <systemitem class="library">fontconfig</systemitem>
-	i <systemitem class="library">freetype</systemitem>
-	zainstalowanych na swojej maszynie.
-	W przeciwieństwie do innych Uniksów, takich jak większość odmian
-	Linuksa i BSD, OS X nie ma systemu pakietów dostarczanego razem
-	z systemem.
-	</para>
+Niestety, to podstawowe środowisko ni epozwoli ci na skorzystanie ze
+wszystkich fajnych możliwości <application>MPlayera</application>.
+Przykładowo, żeby uzyskać wkompilowaną obsługę OSD, będziesz
+potrzebował bibliotek <systemitem class="library">fontconfig</systemitem>
+i <systemitem class="library">freetype</systemitem>
+zainstalowanych na swojej maszynie.
+W przeciwieństwie do innych Uniksów, takich jak większość odmian
+Linuksa i BSD, OS X nie ma systemu pakietów dostarczanego razem
+z systemem.
+</para>
 
 <para>
-	Można wybierać spośród co najmniej dwóch systemów pakietów:
-	<ulink url="http://fink.sourceforge.net/">Fink</ulink> i
-	<ulink url="http://darwinports.opendarwin.org/">DarwinPorts</ulink>.\
-	Oba dostarczają takie same usługi (np. dużo pakietów do wyboru,
-	rozwiązywanie zależności, możliwość łatwego dodania/aktualizacji/usunięcia
-	pakietów itp.).
-	Fink oferuje zarówno binarne pakiety, jak i możliwość zbudowania wszystkiego
-	ze źródeł. Natomiast DarwinPorts pozwala tylko na budowanie ze źródeł.
-	Autorzy tego przewodnika wybrali DarwinPorts z powodu tej prostej przyczyny,
-	że jego podstawowa wersja była lżejsza.
-	Podane przykłady będą oparte na DarwinPorts.
-	</para>
+Można wybierać spośród co najmniej dwóch systemów pakietów:
+<ulink url="http://fink.sourceforge.net/">Fink</ulink> i
+<ulink url="http://darwinports.opendarwin.org/">DarwinPorts</ulink>.\
+Oba dostarczają takie same usługi (np. dużo pakietów do wyboru,
+rozwiązywanie zależności, możliwość łatwego dodania/aktualizacji/usunięcia
+pakietów itp.).
+Fink oferuje zarówno binarne pakiety, jak i możliwość zbudowania wszystkiego
+ze źródeł. Natomiast DarwinPorts pozwala tylko na budowanie ze źródeł.
+Autorzy tego przewodnika wybrali DarwinPorts z powodu tej prostej przyczyny,
+że jego podstawowa wersja była lżejsza.
+Podane przykłady będą oparte na DarwinPorts.
+</para>
 
 <para>
-	Przykładowo, żeby skomilować <application>MPlayera</application> z obsługą
-	OSD:
-	<screen>sudo port install pkgconfig</screen>
-	Zainstaluje to <application>pkg-config</application>, który jest systemem
-	do zarządzania flagami kompilacji/dowiązań bibliotek.
-	<application>MPlayerowy</application> skrypt
-	<systemitem>configure</systemitem>używa go do prawidłowego
-	wykrywania bibliotek.
-	Następnie możesz zainstalować <application>fontconfig</application>
-	w podobny sposób:
-	<screen>sudo port install fontconfig</screen>
-	Następnie możesz uruchomić <application>MPlayerowy</application> skrypt
-	<systemitem>configure</systemitem> (zapisz zmienne systemowe
-	<systemitem>PKG_CONFIG_PATH</systemitem>
-	i <systemitem>PATH</systemitem>, żeby
-	<systemitem>configure</systemitem> znalazł biblioteki zainstalowane
-	przez DarwinPorts):
-	<screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
-	</para>
+Przykładowo, żeby skomilować <application>MPlayera</application> z obsługą
+OSD:
+<screen>sudo port install pkgconfig</screen>
+Zainstaluje to <application>pkg-config</application>, który jest systemem
+do zarządzania flagami kompilacji/dowiązań bibliotek.
+<application>MPlayerowy</application> skrypt
+<systemitem>configure</systemitem>używa go do prawidłowego
+wykrywania bibliotek.
+Następnie możesz zainstalować <application>fontconfig</application>
+w podobny sposób:
+<screen>sudo port install fontconfig</screen>
+Następnie możesz uruchomić <application>MPlayerowy</application> skrypt
+<systemitem>configure</systemitem> (zapisz zmienne systemowe
+<systemitem>PKG_CONFIG_PATH</systemitem>
+i <systemitem>PATH</systemitem>, żeby
+<systemitem>configure</systemitem> znalazł biblioteki zainstalowane
+przez DarwinPorts):
+<screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
+</para>
 
 <sect2 id="osx_gui">
 <title>MPlayer OS X GUI</title>
@@ -775,8 +774,8 @@ AltiVec.
 <para>
 Aby pobrać moduł z repozytorium SVN wykonaj polecenia:
 <screen>
-	svn checkout svn://svn.mplayerhq.hu/mplayerosx/trunk/ mplayerosx
-	svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ main
+svn checkout svn://svn.mplayerhq.hu/mplayerosx/trunk/ mplayerosx
+svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ main
 </screen>
 </para>
 <para>

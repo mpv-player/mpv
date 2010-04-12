@@ -237,14 +237,14 @@ static const char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nПремногу аудио пакети во баферот: (%d во %d бајти).\n"
 #define MSGTR_TooManyVideoInBuffer "\nПремногу видео пакети во баферот: (%d во %d бајти).\n"
 #define MSGTR_MaybeNI "Можеби вие пуштате непреклопувачки стрим/датотека или кодекот не работи?\n" \
-		      "За AVI датотеки, обиди се да го присилиш непреклопувачкиот мод со опцијата -ni.\n"
+                      "За AVI датотеки, обиди се да го присилиш непреклопувачкиот мод со опцијата -ni.\n"
 #define MSGTR_SwitchToNi "\nОткриена е лошо преклопена AVI датотека - се префрла на модот -ni...\n"
 #define MSGTR_Detected_XXX_FileFormat "Пронајден е %s формат на датотеката.\n"
 #define MSGTR_DetectedAudiofile "Пронајдена е аудио датотека.\n"
 #define MSGTR_NotSystemStream "Не е формат на MPEG системски проток... (можеби е транспортен проток?)\n"
 #define MSGTR_InvalidMPEGES "Невалиден MPEG-ES проток??? Контактирајте со авторот, можеби е баг :(\n"
 #define MSGTR_FormatNotRecognized "============ Извинете, овој формат на датотеката не е пропознат/подржан =============\n"\
-				  "=== Ако оваа датотека е AVI, ASF или MPEG проток, ве молиме контактирајте со авторот! ===\n"
+                                  "=== Ако оваа датотека е AVI, ASF или MPEG проток, ве молиме контактирајте со авторот! ===\n"
 #define MSGTR_MissingVideoStream "Не е пронајден видео проток.\n"
 #define MSGTR_MissingAudioStream "Не е пронајден аудио проток -> нема звук.\n"
 #define MSGTR_MissingVideoStreamBug "Недостига видео проток!? Контактирајте со авторот, можеби е баг :(\n"

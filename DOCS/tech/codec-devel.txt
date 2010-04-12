@@ -43,7 +43,7 @@ understand, then you will either need to somehow convert the format to a
 media file format that the program does understand, or write your own
 MPlayer file demuxer that can handle the data. Writing a file demuxer
 is beyond the scope of this document.
-	Try to obtain media that stresses all possible modes of a
+        Try to obtain media that stresses all possible modes of a
 decoder. If an audio codec is known to work with both mono and stereo
 data, search for sample media of both types. If a video codec is known to
 work at 7 different bit depths, then, as painful as it may be, do what you

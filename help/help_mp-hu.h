@@ -1399,7 +1399,7 @@ static const char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Túl sok (%d db, %d bájt) audio-csomag a pufferben!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Túl sok (%d db, %d bájt) video-csomag a pufferben!\n"
 #define MSGTR_MaybeNI "Talán ez egy nem összefésült (interleaved) fájl vagy a codec nem működik jól?\n" \
-		      "AVI fájloknál próbáld meg a non-interleaved mód kényszerítését a -ni opcióval.\n"
+                      "AVI fájloknál próbáld meg a non-interleaved mód kényszerítését a -ni opcióval.\n"
 #define MSGTR_WorkAroundBlockAlignHeaderBug "AVI: CBR-MP3 nBlockAlign fejléc hiba megkerülése!\n"
 #define MSGTR_SwitchToNi "\nRosszul összefésült (interleaved) fájl, átváltás -ni módba!\n"
 #define MSGTR_InvalidAudioStreamNosound "AVI: hibás audió folyam ID: %d - figyelmen kívül hagyva (nosound)\n"
@@ -1410,7 +1410,7 @@ static const char help_text[]=
 #define MSGTR_NotSystemStream "Nem MPEG System Stream formátum... (talán Transport Stream?)\n"
 #define MSGTR_InvalidMPEGES "Hibás MPEG-ES-folyam? Lépj kapcsolatba a készítőkkel, lehet, hogy hiba!\n"
 #define MSGTR_FormatNotRecognized "========= Sajnos ez a fájlformátum ismeretlen vagy nem támogatott ===========\n"\
-				  "= Ha ez egy AVI, ASF vagy MPEG fájl, lépj kapcsolatba a készítőkkel (hiba)! =\n"
+                                  "= Ha ez egy AVI, ASF vagy MPEG fájl, lépj kapcsolatba a készítőkkel (hiba)! =\n"
 #define MSGTR_SettingProcessPriority "Folyamat priorításának beállítása: %s\n"
 #define MSGTR_FilefmtFourccSizeFpsFtime "[V] filefmt:%d  fourcc:0x%X  méret:%dx%d  fps:%5.3f  ftime:=%6.4f\n"
 #define MSGTR_CannotInitializeMuxer "A muxer nem inicializálható."

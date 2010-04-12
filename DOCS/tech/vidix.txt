@@ -1,5 +1,5 @@
-		VIDIX - VIDeo Interface for *niX
-		~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                VIDIX - VIDeo Interface for *niX
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This interface was designed and introduced as interface to userspace drivers
 to provide DGA everywhere where it's possible (unline X11).
@@ -40,43 +40,43 @@ So any suggestions, reports, criticism are gladly accepted.
 7) APP calls vixConfigPlayback. Driver should prepare BES on this call.
    APP pass to driver following info:
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   vidix_playback_t.fourcc	- contains fourcc of movie
-   vidix_playback_t.capability	- currently contsinas copy of vidix_capability_t.flags
+   vidix_playback_t.fourcc      - contains fourcc of movie
+   vidix_playback_t.capability  - currently contsinas copy of vidix_capability_t.flags
    vidix_playback_t.blend_factor- currently unused
-   vidix_playback_t.src		- x,y,w,h fields contain original movie size
-				  (in pixels) x and y often are nulls.
+   vidix_playback_t.src         - x,y,w,h fields contain original movie size
+                                  (in pixels) x and y often are nulls.
    vidix_playback_t.src.pitch.y   These fields contain source pitches
    vidix_playback_t.src.pitch.u - for each Y,U,V plane in bytes.
    vidix_playback_t.src.pitch.v   (For packed fourcc only Y value is used)
-				  They are hints for driver to use same destinition
-				  pitches as in source memory (to speed up
-				  memcpy process).
-				  Note: when source pitches are unknown or
-				  variable these field will be filled into 0.
-   vidix_playback_t.dest	- x,y,w,h fields contains destinition rectange
-				  on the screen in pixels.
+                                  They are hints for driver to use same destinition
+                                  pitches as in source memory (to speed up
+                                  memcpy process).
+                                  Note: when source pitches are unknown or
+                                  variable these field will be filled into 0.
+   vidix_playback_t.dest        - x,y,w,h fields contains destinition rectange
+                                  on the screen in pixels.
    vidix_playback_t.num_frames  - maximal # of frames which can be used by APP.
-				  (Currently 10).
+                                  (Currently 10).
    Driver should fill following fields:
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    vidix_playback_t.num_frames  - real # of frames which will be used by driver.
-				  (Should be less or equal to app's num_frames).
+                                  (Should be less or equal to app's num_frames).
 
    vidix_playback_t.dest.pitch.y   These fields should contain alignment
    vidix_playback_t.dest.pitch.u - for each Y,U,V plane in bytes.
    vidix_playback_t.dest.pitch.v   (For packed fourcc only Y value is used)
 
-   vidix_playback_t.frame_size	- Driver should tell to app which size of
-				      source frame (src.w and src.h) should
-				      use APP (according to pitches and offsets)
+   vidix_playback_t.frame_size  - Driver should tell to app which size of
+                                      source frame (src.w and src.h) should
+                                      use APP (according to pitches and offsets)
 
-   vidix_playback_t.offsets	- offsets from begin of BES memory for each frame
+   vidix_playback_t.offsets     - offsets from begin of BES memory for each frame
 
-   vidix_playback_t.offset.y	  These field should contain offset
-   vidix_playback_t.offset.u	- for each Y,U,V plane within frame.
-   vidix_playback_t.offset.v	  (For packed fourcc only Y value is used)
+   vidix_playback_t.offset.y      These field should contain offset
+   vidix_playback_t.offset.u    - for each Y,U,V plane within frame.
+   vidix_playback_t.offset.v      (For packed fourcc only Y value is used)
 
-   vidix_playback_t.dga_addr	- Address of BES memory.
+   vidix_playback_t.dga_addr    - Address of BES memory.
 
 Also see this picture:
 
@@ -85,9 +85,9 @@ VIDEO MEMORY layout:
  |                                                                             |
  v                                                                             v
  [      RGB memory                         |         YUV memory    |  UNDEF    ]
-					   ^
-					   |
-					   +---- begin of BES memory
+                                           ^
+                                           |
+                                           +---- begin of BES memory
 
 BES MEMORY layout:
  +-------- begin of BES memory
@@ -109,22 +109,22 @@ offset of Y plane != offset of first frame
 But often: vidix_playback_t.offsets[0] = vidix_playback_t.offset.y = 0;
 
 Formula: (For Y plane) copy source to:
-		  vidix_playback_t.dga_addr +
-		  vidix_playback_t.offsets[i] +
-		  vidix_playback_t.offset.y
+                  vidix_playback_t.dga_addr +
+                  vidix_playback_t.offsets[i] +
+                  vidix_playback_t.offset.y
 
 8) APP calls vixPlaybackOn. Driver should activate BES on this call.
 9) PLAYBACK. Driver should sleep here ;)
    But during playback can be called:
      vixFrameSelect (if this function is exported)
-	Driver should prepare and activate corresponded frame.
-	This function is used only for double and trilpe buffering and
-	never used for single buffering playback.
+        Driver should prepare and activate corresponded frame.
+        This function is used only for double and trilpe buffering and
+        never used for single buffering playback.
      vixGet(Set)GrKeys (if this function is exported)
-	This interface should be tuned but intriduced for overlapped playback
-	and video effects (TYPE_FX)
+        This interface should be tuned but intriduced for overlapped playback
+        and video effects (TYPE_FX)
      vixPlaybackGet(Set)Eq (if this function is exported)
-	For color correction.
+        For color correction.
 10) APP calls vixPlaybackOff. Driver should deactivate BES on this call.
 11) If vixDestroy is defined APP calls this function before unloading driver
     from memory.
@@ -144,10 +144,10 @@ All other functions are optionaly.
 
 Useful links:
 ~~~~~~~~~~~~~
-Guide to DTV		http://www.digitaltelevision.com/dtvbook/toc.shtml
-Fourcc			http://www.webartz.com/fourcc/
-MPEG			http://www.mpeg.org/MPEG/index.html
-Analog colors		http://www.miranda.com/en/app_notes/TN/TN-05/TN-05.htm
+Guide to DTV            http://www.digitaltelevision.com/dtvbook/toc.shtml
+Fourcc                  http://www.webartz.com/fourcc/
+MPEG                    http://www.mpeg.org/MPEG/index.html
+Analog colors           http://www.miranda.com/en/app_notes/TN/TN-05/TN-05.htm
 
 Please send your suggestions, reports, feedback to mplayer-dev-eng@mplayerhq.hu
 Best regards! Nick Kurshev.

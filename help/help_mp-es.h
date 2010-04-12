@@ -1406,7 +1406,7 @@ static const char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Demasiados (%d en %d bytes) paquetes de audio en el buffer!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Demasiados (%d en %d bytes) paquetes de video en el buffer!\n"
 #define MSGTR_MaybeNI "¿Estás reproduciendo un stream o archivo 'non-interleaved' o falló el codec?\n " \
-		"Para archivos .AVI, intente forzar el modo 'non-interleaved' con la opción -ni.\n"
+                "Para archivos .AVI, intente forzar el modo 'non-interleaved' con la opción -ni.\n"
 #define MSGTR_WorkAroundBlockAlignHeaderBug "AVI: Rodeo CBR-MP3 nBlockAlign"
 #define MSGTR_SwitchToNi "\nDetectado .AVI mal interleaveado - cambiando al modo -ni!\n"
 #define MSGTR_InvalidAudioStreamNosound "AVI: flujo de audio inválido ID: %d - ignorado (sin sonido)\n"

@@ -236,14 +236,14 @@ static const char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\n버퍼에 너무 많은 오디오 패킷이 있습니다.: (%d in %d bytes)\n"
 #define MSGTR_TooManyVideoInBuffer "\n버퍼에 너무 많은 비디오 패킷이 있습니다.: (%d in %d bytes)\n"
 #define MSGTR_MaybeNI "non-interleaved 스트림/파일을 재생하고있거나 코덱에 문제가 있나요?\n" \
-		      "AVI 파일의 경우, -ni 옵션으로 non-interleaved 모드로 강제 시도해보세요.\n"
+                      "AVI 파일의 경우, -ni 옵션으로 non-interleaved 모드로 강제 시도해보세요.\n"
 #define MSGTR_SwitchToNi "\n잘못된 interleaved AVI 파일을 발견했습니다. -ni 모드로 변경합니다...\n"
 #define MSGTR_Detected_XXX_FileFormat "%s 파일 형식을 발견했습니다.\n"
 #define MSGTR_DetectedAudiofile "오디오 파일을 감지하였습니다.\n"
 #define MSGTR_NotSystemStream "MPEG 시스템 스트림 포맷이 아닙니다... (혹시 전송 스트림일지도?)\n"
 #define MSGTR_InvalidMPEGES "유효하지 않은 MPEG-ES 스트림??? 저작자에게 문의하세요, 버그일지도 모릅니다. :(\n"
 #define MSGTR_FormatNotRecognized "============= 죄송합니다. 이 파일형식을 인식하지못했거나 지원하지않습니다 ===============\n"\
-				  "=== 만약 이 파일이 AVI, ASF 또는 MPEG 스트림이라면, 저작자에게 문의하세요! ===\n"
+                                  "=== 만약 이 파일이 AVI, ASF 또는 MPEG 스트림이라면, 저작자에게 문의하세요! ===\n"
 #define MSGTR_MissingVideoStream "비디오 스트림을 찾지 못했습니다.\n"
 #define MSGTR_MissingAudioStream "오디오 스트림을 찾지 못했습니다. -> 소리없음\n"
 #define MSGTR_MissingVideoStreamBug "찾을 수 없는 비디오 스트림!? 저작자에게 문의하세요, 버그일지도 모릅니다. :(\n"

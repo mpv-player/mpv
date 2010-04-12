@@ -117,7 +117,7 @@ static const char help_text[]=
 #define MSGTR_Detected_XXX_FileFormat "Detekterte %s filformat!\n"
 #define MSGTR_InvalidMPEGES "Ugyldig MPEG-ES stream??? kontakt utvikleren, det kan være en feil :(\n"
 #define MSGTR_FormatNotRecognized "======== Beklager, dette filformatet er ikke gjenkjent/støttet ===============\n"\
-				  "=== Hvis det er en AVI, ASF eller MPEG stream, kontakt utvikleren! ===\n"
+                                  "=== Hvis det er en AVI, ASF eller MPEG stream, kontakt utvikleren! ===\n"
 #define MSGTR_MissingVideoStream "Ingen video stream funnet!\n"
 #define MSGTR_MissingAudioStream "Ingen lyd stream funnet...  ->nosound\n"
 #define MSGTR_MissingVideoStreamBug "Manglende video stream!? Kontakt utvikleren, det kan være en  feil :(\n"

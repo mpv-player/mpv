@@ -189,21 +189,21 @@ static void dct36(real *inbuf,real *o1,real *o2,real *wintab,real *tsbuf)
     ts[SBLIMIT*(8-(v))] = out1[8-(v)] + sum0 * w[8-(v)]; \
     ts[SBLIMIT*(9+(v))] = out1[9+(v)] + sum0 * w[9+(v)];
 #define MACRO1(v) { \
-	real sum0,sum1; \
+    real sum0, sum1; \
     sum0 = tmp1a + tmp2a; \
-	sum1 = (tmp1b + tmp2b) * tfcos36[(v)]; \
-	MACRO0(v); }
+    sum1 = (tmp1b + tmp2b) * tfcos36[(v)]; \
+    MACRO0(v); }
 #define MACRO2(v) { \
-    real sum0,sum1; \
+    real sum0, sum1; \
     sum0 = tmp2a - tmp1a; \
     sum1 = (tmp2b - tmp1b) * tfcos36[(v)]; \
-	MACRO0(v); }
+    MACRO0(v); }
 
     register const real *c = COS9;
     register real *out2 = o2;
-	register real *w = wintab;
-	register real *out1 = o1;
-	register real *ts = tsbuf;
+    register real *w    = wintab;
+    register real *out1 = o1;
+    register real *ts   = tsbuf;
 
     real ta33,ta66,tb33,tb66;
 
@@ -256,12 +256,12 @@ static void dct36(real *inbuf,real *o1,real *o2,real *wintab,real *tsbuf)
       MACRO2(5);
     }
 
-	{
-		real sum0,sum1;
-    	sum0 =  in[2*0+0] - in[2*2+0] + in[2*4+0] - in[2*6+0] + in[2*8+0];
-    	sum1 = (in[2*0+1] - in[2*2+1] + in[2*4+1] - in[2*6+1] + in[2*8+1] ) * tfcos36[4];
-		MACRO0(4);
-	}
+    {
+      real sum0,sum1;
+      sum0 =  in[2*0+0] - in[2*2+0] + in[2*4+0] - in[2*6+0] + in[2*8+0];
+      sum1 = (in[2*0+1] - in[2*2+1] + in[2*4+1] - in[2*6+1] + in[2*8+1] ) * tfcos36[4];
+      MACRO0(4);
+    }
   }
 #endif
 

@@ -435,7 +435,7 @@ static const char help_text[]=
 "                2: dostosuj\n"\
 "\n"\
 " fast          Ustaw szybsze kodowanie na następnych ustawieniach VBR,\n"\
-"		nieznacznie niższa jakość i wyższy bitrate.\n"\
+"                nieznacznie niższa jakość i wyższy bitrate.\n"\
 "\n"\
 " preset=<value> Ustaw możliwie najwyższe ustawienia jakości.\n"\
 "                 medium:  kodowanie VBR,  dobra jakość\n"\
@@ -554,14 +554,14 @@ static const char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nZa dużo pakietów audio w buforze: (%d w %d bajtach).\n"
 #define MSGTR_TooManyVideoInBuffer "\nZa dużo pakietów video w buforze: (%d w %d bajtach).\n"
 #define MSGTR_MaybeNI "Może odtwarzasz strumień/plik bez przeplotu (non-interleaved) albo kodek nie działa?\n" \
-		      "Spróbuj wymusić tryb bez przeplotu dla plików AVI opcją -ni.\n"
+                      "Spróbuj wymusić tryb bez przeplotu dla plików AVI opcją -ni.\n"
 #define MSGTR_SwitchToNi "\nWykryłem plik AVI z błędnym przeplotem - przełączam na tryb -ni...\n"
 #define MSGTR_Detected_XXX_FileFormat "Wykryto format pliku %s.\n"
 #define MSGTR_DetectedAudiofile "Wykryto plik audio.\n"
 #define MSGTR_NotSystemStream "Strumień nie w formacie MPEG... (może Transport Stream?)\n"
 #define MSGTR_InvalidMPEGES "Błędny strumień MPEG-ES??? Skontaktuj się z autorem, to może być błąd :(\n"
 #define MSGTR_FormatNotRecognized "============ Niestety, ten format pliku jest nieobsługiwany =============\n"\
-				  "=== Jeśli plik to AVI lub strumień ASF, MPEG proszę skontaktuj się z autorem! ===\n"
+                                  "=== Jeśli plik to AVI lub strumień ASF, MPEG proszę skontaktuj się z autorem! ===\n"
 #define MSGTR_MissingVideoStream "Brak strumienia video.\n"
 #define MSGTR_MissingAudioStream "Brak strumienia audio -> brak dźwięku.\n"
 #define MSGTR_MissingVideoStreamBug "Brak strumienia video!? Skontaktuj się z autorem, to może być błąd :(\n"

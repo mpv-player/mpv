@@ -38,8 +38,8 @@ cccc: mask 3FFF: _total_ length of the packet
 dddd: when it's 0, {} exists (only in this case)
       mask 3FFF: offset of fragment inside the whole packet. it's counted
                  from the beginning of the packet, except when hdr&0x80,
-		 hten it's relative to the _end_ of the packet, so it's
-		 equal to fragment size!
+                 hten it's relative to the _end_ of the packet, so it's
+                 equal to fragment size!
       mask C000: like cccc, except the first case (always 4000)
       when it's all 0000, it indicates value >=0x4000, you should read {eeee}
       and use all 16 bits of it. dunno what happens when length>=65536...

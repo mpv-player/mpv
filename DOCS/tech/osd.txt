@@ -51,36 +51,36 @@ typedef struct mp_osd_obj_s {
     unsigned char type;
     unsigned char alignment; // 2 bits: x;y percentages, 2 bits: x;y relative to parent; 2 bits: alignment left/right/center
     unsigned short flags;
-    int x,y;	// coords
+    int x,y;    // coords
     unsigned char color[4]; // YUVA
     mp_osd_bbox_t bbox; // bounding box
     unsigned int start,duration; // PTS
     union {
-	struct {
-	    int x1,y1,x2,y2;
-	} line;
-	struct {
-	    int x,y,w,h;
-	} rect;
-	struct {
-	    char* text;
-	    mp_font_t* font;
-	} text;
-	struct {
-	    int symbol; // unicode
-	    mp_font_t* font;
-	} symbol;
-	struct {
-	    float value;
-	    mp_font_t* font;
-	} pbar;
-	struct {
-	    int w,h;
-	    unsigned char* image;
-	    unsigned int* palette;
-	} spu;  // FIXME!
-	struct {
-	    struct mp_osd_obj_s* children;
-	} group;
+        struct {
+            int x1,y1,x2,y2;
+        } line;
+        struct {
+            int x,y,w,h;
+        } rect;
+        struct {
+            char* text;
+            mp_font_t* font;
+        } text;
+        struct {
+            int symbol; // unicode
+            mp_font_t* font;
+        } symbol;
+        struct {
+            float value;
+            mp_font_t* font;
+        } pbar;
+        struct {
+            int w,h;
+            unsigned char* image;
+            unsigned int* palette;
+        } spu;  // FIXME!
+        struct {
+            struct mp_osd_obj_s* children;
+        } group;
     } params;
 } mp_osd_obj_t;

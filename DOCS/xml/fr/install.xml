@@ -500,14 +500,14 @@ Vous pouvez rendre ce réglagle permanant en ajoutant la seconde commande au fic
 </para>
 
 <para>
-   Vous pouvez voir l'efficacité du nouveau timer sur la ligne d'état.
-	Les fonctions de gestion de l'énergie des BIOS des certains portables
-	avec des processeurs supportant SpeedStep ne font pas bon ménage avec la RTC.
-	Le son et les images risquent d'être désynchronisés. Brancher le portable sur
-	le secteur avant de le démarrer semble régler le problème dans la plupart des cas.
-	Avec certaines configurations matérielles (confirmé par l'utilisation de lecteurs DVD ne supportant pas
-	le DMA avec une carte-mère basée sur le chipset ALi1541), l'utilisation du timer RTC rend la lecture
-	saccadée (NdT: skippy). Il est recommandé d'utiliser la troisième méthode dans ce cas.
+  Vous pouvez voir l'efficacité du nouveau timer sur la ligne d'état.
+  Les fonctions de gestion de l'énergie des BIOS des certains portables
+  avec des processeurs supportant SpeedStep ne font pas bon ménage avec la RTC.
+  Le son et les images risquent d'être désynchronisés. Brancher le portable sur
+  le secteur avant de le démarrer semble régler le problème dans la plupart des cas.
+  Avec certaines configurations matérielles (confirmé par l'utilisation de lecteurs DVD ne supportant pas
+  le DMA avec une carte-mère basée sur le chipset ALi1541), l'utilisation du timer RTC rend la lecture
+  saccadée (NdT: skippy). Il est recommandé d'utiliser la troisième méthode dans ce cas.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">La troisième méthode de synchro</emphasis> est activée par l'option

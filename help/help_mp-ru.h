@@ -771,7 +771,7 @@ static const char help_text[]=
 #define MSGTR_PREFERENCES_FPS "FPS фильма:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Показывать окно видео, когда неактивен"
 #define MSGTR_PREFERENCES_ArtsBroken "Новые версии aRts несовместимы с GTK 1.x "\
-	   "и приведут к фатальной ошибке GMPlayer!"
+           "и приведут к фатальной ошибке GMPlayer!"
 
 // --- aboutbox
 #define MSGTR_ABOUT_UHU "Разработка GUI спонсирована UHU Linux\n"
@@ -1407,7 +1407,7 @@ static const char help_text[]=
 #define MSGTR_NotSystemStream "Не MPEG System Stream формат... (возможно, Transport Stream?)\n"
 #define MSGTR_InvalidMPEGES "Недопустимый MPEG-ES поток??? свяжитесь с автором, это может быть ошибкой :(\n"
 #define MSGTR_FormatNotRecognized "======= Извините, формат этого файла не распознан/не поддерживается ==========\n"\
-				  "===== Если это AVI, ASF или MPEG поток, пожалуйста свяжитесь с автором! ======\n"
+                                  "===== Если это AVI, ASF или MPEG поток, пожалуйста свяжитесь с автором! ======\n"
 #define MSGTR_SettingProcessPriority "Устанавливаю приоритет процесса: %s\n"
 #define MSGTR_FilefmtFourccSizeFpsFtime "[V] формат:%d  fourcc:0x%X  размер:%dx%d  fps:%5.3f  ftime:=%6.4f\n"
 #define MSGTR_CannotInitializeMuxer "Невозможно инициализировать мультиплексор."

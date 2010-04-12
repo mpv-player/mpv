@@ -1381,7 +1381,7 @@ static const char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\n缓冲中音频包太多（%d 个包存在于 %d 字节中）。\n"
 #define MSGTR_TooManyVideoInBuffer "\n缓冲中视频包太多（%d 个包存在于 %d 字节中）。\n"
 #define MSGTR_MaybeNI "可能播放了一个非交错合并的媒体流/文件，或者是编解码运行失败？\n" \
-		      "对于 AVI 文件，可尝试用 -ni 选项强制使用非交错模式。\n"
+                      "对于 AVI 文件，可尝试用 -ni 选项强制使用非交错模式。\n"
 #define MSGTR_WorkAroundBlockAlignHeaderBug "AVI：避开 CBR-MP3 nBlockAlign 头部缺陷！\n"
 #define MSGTR_SwitchToNi "\n检测到未正确交错合并的 AVI 文件 - 切换到 -ni 模式...\n"
 #define MSGTR_InvalidAudioStreamNosound "AVI：无效的音频流 ID: %d - 忽略 (nosound)\n"
@@ -1392,7 +1392,7 @@ static const char help_text[]=
 #define MSGTR_NotSystemStream "非 MPEG 系统的媒体流格式...（可能是网络传输的媒体流？）\n"
 #define MSGTR_InvalidMPEGES "无法的 MPEG-ES 媒体流？？？请联系开发者，这可能是软件的缺陷 :(\n"
 #define MSGTR_FormatNotRecognized "============= 抱歉, 此文件格式无法辨认或支持 ===============\n"\
-				  "===     如果此文件是 AVI、ASF 或 MPEG 媒体流，请联系开发者！   ===\n"
+                                  "===     如果此文件是 AVI、ASF 或 MPEG 媒体流，请联系开发者！   ===\n"
 #define MSGTR_SettingProcessPriority "设置进程优先级：%s\n"
 #define MSGTR_FilefmtFourccSizeFpsFtime "[V] 文件格式:%d  fourcc代码:0x%X  大小:%dx%d  帧速:%5.3f  每帧时长:=%6.4f\n"
 #define MSGTR_CannotInitializeMuxer "不能初始化流合并器。"

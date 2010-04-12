@@ -66,9 +66,9 @@ The most misunderstood thingie...
 In MPlayer, we usually have 3 pointers to the Y, U and V planes, so it
 doesn't matter what the order of the planes in the memory is:
     for mp_image_t and libvo's draw_slice():
-	planes[0] = Y = luminance
-	planes[1] = U = Cb = blue
-	planes[2] = V = Cr = red
+        planes[0] = Y = luminance
+        planes[1] = U = Cb = blue
+        planes[2] = V = Cr = red
     Note: planes[1] is ALWAYS U, and planes[2] is V, the FOURCC
     (YV12 vs. I420) doesn't matter here! So, every codec using 3 pointers
     (not only the first one) normally supports YV12 and I420 (=IYUV), too!

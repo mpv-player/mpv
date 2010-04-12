@@ -1,6 +1,6 @@
                        ATI chips hacking
                        =================
-						Dedicated to ATI's hackers.
+                                                Dedicated to ATI's hackers.
 
 Preface
 ~~~~~~~
@@ -11,20 +11,20 @@ This document doesn't include information about ATI AIW (All In Wonder) chips.
 
 What are units on modern ATI chips:
 DAC   - (Digital to Analog Convertor) controls CRTC, LCD, DFP monitor's output
-	Consists from:
-		PLL  - (Programable line length) registers
-		CRTC - CRT controller
-		LCD/DFP scaler
-		surface control
+        Consists from:
+                PLL  - (Programable line length) registers
+                CRTC - CRT controller
+                LCD/DFP scaler
+                surface control
 DAC2  - controls CRTC, LCD, DFP monitor's output on second head
 TVDAC - controls Composite Video and Super Video output ports
-	Consists from:
-		TV_PLL
-		TV scaler & sync unit
-		TV format convertor (PAL/NTSC)
+        Consists from:
+                TV_PLL
+                TV scaler & sync unit
+                TV format convertor (PAL/NTSC)
 TVCAP - controls Video-In port
 MPP   - Miscellaneous peripheral port. (includes macrovision's filter - copy
-	protection mechanism)
+        protection mechanism)
 OV    - Video overlay (YUV BES) (include subpictures, gamma correction and
         adaptive deinterlacing)
 CAP0  - Video capturing
@@ -61,100 +61,100 @@ of this question:
 3. Mach32
 
 4. Mach64.
-	It's first chip which has support from side of open
-	source drivers. Set of mach64 chips is:
-		mach64GX (ATI888GX00)
-		mach64CX (ATI888CX00)
-		mach64CT (ATI264CT)
-		mach64ET (ATI264ET)
-		mach64VTA3 (ATI264VT)
-		mach64VTA4 (ATI264VT)
-		mach64VTB (ATI264VTB)
-		mach64VT4 (ATI264VT4)
+        It's first chip which has support from side of open
+        source drivers. Set of mach64 chips is:
+                mach64GX (ATI888GX00)
+                mach64CX (ATI888CX00)
+                mach64CT (ATI264CT)
+                mach64ET (ATI264ET)
+                mach64VTA3 (ATI264VT)
+                mach64VTA4 (ATI264VT)
+                mach64VTB (ATI264VTB)
+                mach64VT4 (ATI264VT4)
 
 5. 3D rage chips.
-	It seems that these chips have fully compatible by GPU with Mach64
-	which is extended by 3D possibilities. Set of 3D rage chips is:
-		3D RAGE (GT)
-		3D RAGE II+ (GTB)
-		3D RAGE IIC (PCI)
-		3D RAGE IIC (AGP)
-		3D RAGE LT
-		3D RAGE LT-G
-		3D RAGE PRO (BGA, AGP)
-		3D RAGE PRO (BGA, AGP, 1x only)
-		3D RAGE PRO (BGA, PCI)
-		3D RAGE PRO (PQFP, PCI)
-		3D RAGE PRO (PQFP, PCI, limited 3D)
-		3D RAGE (XL)
-		3D RAGE LT PRO (AGP)
-		3D RAGE LT PRO (PCI)
-		3D RAGE Mobility (PCI)
-		3D RAGE Mobility (AGP)
+        It seems that these chips have fully compatible by GPU with Mach64
+        which is extended by 3D possibilities. Set of 3D rage chips is:
+                3D RAGE (GT)
+                3D RAGE II+ (GTB)
+                3D RAGE IIC (PCI)
+                3D RAGE IIC (AGP)
+                3D RAGE LT
+                3D RAGE LT-G
+                3D RAGE PRO (BGA, AGP)
+                3D RAGE PRO (BGA, AGP, 1x only)
+                3D RAGE PRO (BGA, PCI)
+                3D RAGE PRO (PQFP, PCI)
+                3D RAGE PRO (PQFP, PCI, limited 3D)
+                3D RAGE (XL)
+                3D RAGE LT PRO (AGP)
+                3D RAGE LT PRO (PCI)
+                3D RAGE Mobility (PCI)
+                3D RAGE Mobility (AGP)
 
 6. Rage128 chips.
-	These chips have perfectly new GPU which supports memory mapped IO
-	space for accelerating port access (It's main cause of incompatibility
-	with mach64). Set of Rage128 chips is:
-		Rage128 GL RE
-		Rage128 GL RF
-		Rage128 GL RG
-		Rage128 GL RH
-		Rage128 GL RI
-		Rage128 VR RK
-		Rage128 VR RL
-		Rage128 VR RM
-		Rage128 VR RN
-		Rage128 VR RO
-		Rage128 Mobility M3 LE
-		Rage128 Mobility M3 LF
+        These chips have perfectly new GPU which supports memory mapped IO
+        space for accelerating port access (It's main cause of incompatibility
+        with mach64). Set of Rage128 chips is:
+                Rage128 GL RE
+                Rage128 GL RF
+                Rage128 GL RG
+                Rage128 GL RH
+                Rage128 GL RI
+                Rage128 VR RK
+                Rage128 VR RL
+                Rage128 VR RM
+                Rage128 VR RN
+                Rage128 VR RO
+                Rage128 Mobility M3 LE
+                Rage128 Mobility M3 LF
 7. Rage128Pro chips.
-	These chips are successors of Rage128 ones.
-		Rage128Pro GL PA
-		Rage128Pro GL PB
-		Rage128Pro GL PC
-		Rage128Pro GL PD
-		Rage128Pro GL PE
-		Rage128Pro GL PF
-		Rage128Pro VR PG
-		Rage128Pro VR PH
-		Rage128Pro VR PI
-		Rage128Pro VR PJ
-		Rage128Pro VR PK
-		Rage128Pro VR PL
-		Rage128Pro VR PM
-		Rage128Pro VR PN
-		Rage128Pro VR PO
-		Rage128Pro VR PP
-		Rage128Pro VR PQ
-		Rage128Pro VR PR
-		Rage128Pro VR TR
-		Rage128Pro VR PS
-		Rage128Pro VR PT
-		Rage128Pro VR PU
-		Rage128Pro VR PV
-		Rage128Pro VR PW
-		Rage128Pro VR PX
-		Rage128Pro Ultra U1
-		Rage128Pro Ultra U2
-		Rage128Pro Ultra U3
+        These chips are successors of Rage128 ones.
+                Rage128Pro GL PA
+                Rage128Pro GL PB
+                Rage128Pro GL PC
+                Rage128Pro GL PD
+                Rage128Pro GL PE
+                Rage128Pro GL PF
+                Rage128Pro VR PG
+                Rage128Pro VR PH
+                Rage128Pro VR PI
+                Rage128Pro VR PJ
+                Rage128Pro VR PK
+                Rage128Pro VR PL
+                Rage128Pro VR PM
+                Rage128Pro VR PN
+                Rage128Pro VR PO
+                Rage128Pro VR PP
+                Rage128Pro VR PQ
+                Rage128Pro VR PR
+                Rage128Pro VR TR
+                Rage128Pro VR PS
+                Rage128Pro VR PT
+                Rage128Pro VR PU
+                Rage128Pro VR PV
+                Rage128Pro VR PW
+                Rage128Pro VR PX
+                Rage128Pro Ultra U1
+                Rage128Pro Ultra U2
+                Rage128Pro Ultra U3
 
 8. Radeon chips.
-	Indeed they could be named Rage256 Pro. (With minor changes is fully
-	compatible with Rage128 chips).
-		Radeon QD
-		Radeon QE
-		Radeon QF
-		Radeon QG
-		Radeon VE QY
-		Radeon VE QZ
-		Radeon M6 LY
-		Radeon M6 LZ
-		Radeon M7 LW
+        Indeed they could be named Rage256 Pro. (With minor changes is fully
+        compatible with Rage128 chips).
+                Radeon QD
+                Radeon QE
+                Radeon QF
+                Radeon QG
+                Radeon VE QY
+                Radeon VE QZ
+                Radeon M6 LY
+                Radeon M6 LZ
+                Radeon M7 LW
 9. Radeon2 chips.
-	Indeed they could be named Rage512 Pro.
-		Radeon2 8500 QL
-		Radeon2 7500 QW
+        Indeed they could be named Rage512 Pro.
+                Radeon2 8500 QL
+                Radeon2 7500 QW
 
 10. Radeon3 and newest are cooming soon, but I hope that they will be fully
     compatible with Radeon1 chips.
@@ -185,31 +185,31 @@ Please compare:
  Sample for Mach64 compatible chips:
  ***********************************
 
-#define SPARSE_IO_BASE		0x03fcu
-#define SPARSE_IO_SELECT	0xfc00u
+#define SPARSE_IO_BASE          0x03fcu
+#define SPARSE_IO_SELECT        0xfc00u
 
-#define BLOCK_IO_BASE		0xff00u
-#define BLOCK_IO_SELECT		0x00fcu
+#define BLOCK_IO_BASE           0xff00u
+#define BLOCK_IO_SELECT         0x00fcu
 
-#define MM_IO_SELECT		0x03fcu
-#define BLOCK_SELECT		0x0400u
-#define DWORD_SELECT		(BLOCK_SELECT | MM_IO_SELECT)
+#define MM_IO_SELECT            0x03fcu
+#define BLOCK_SELECT            0x0400u
+#define DWORD_SELECT            (BLOCK_SELECT | MM_IO_SELECT)
 
-#define IO_BYTE_SELECT		0x0003u
+#define IO_BYTE_SELECT          0x0003u
 
-#define SPARSE_IO_PORT		(SPARSE_IO_BASE | IO_BYTE_SELECT)
-#define BLOCK_IO_PORT		(BLOCK_IO_BASE | IO_BYTE_SELECT)
+#define SPARSE_IO_PORT          (SPARSE_IO_BASE | IO_BYTE_SELECT)
+#define BLOCK_IO_PORT           (BLOCK_IO_BASE | IO_BYTE_SELECT)
 
-#define IOPortTag(_SparseIOSelect, _BlockIOSelect)	\
-	(SetBits(_SparseIOSelect, SPARSE_IO_SELECT) |	\
-	 SetBits(_BlockIOSelect, BLOCK_SELECT | MM_IO_SELECT))
-#define SparseIOTag(_IOSelect)	IOPortTag(_IOSelect, 0)
-#define BlockIOTag(_IOSelect)	IOPortTag(0, _IOSelect)
+#define IOPortTag(_SparseIOSelect, _BlockIOSelect)      \
+        (SetBits(_SparseIOSelect, SPARSE_IO_SELECT) |   \
+         SetBits(_BlockIOSelect, BLOCK_SELECT | MM_IO_SELECT))
+#define SparseIOTag(_IOSelect)  IOPortTag(_IOSelect, 0)
+#define BlockIOTag(_IOSelect)   IOPortTag(0, _IOSelect)
 
 ...
 
-#define OVERLAY_Y_X_START	BlockIOTag(0x100u)
-#define OVERLAY_Y_X_END		BlockIOTag(0x101u)
+#define OVERLAY_Y_X_START       BlockIOTag(0x100u)
+#define OVERLAY_Y_X_END         BlockIOTag(0x101u)
 
 ...
 
@@ -231,8 +231,8 @@ OUTREG(OVERLAY_Y_X_END,((drw_x+drw_w)<<16)|(drw_y+drw_h));
 
 ...
 
-#define INREG(addr)		readl((rage_mmio_base)+addr)
-#define OUTREG(addr,val)	writel(val, (rage_mmio_base)+addr)
+#define INREG(addr)             readl((rage_mmio_base)+addr)
+#define OUTREG(addr,val)        writel(val, (rage_mmio_base)+addr)
 
 ...
 
@@ -263,7 +263,7 @@ GATOS was designed and introduced as General ATI TV and Overlay Sowfware.
 You will be able to find out there a lots of useful hacking utilities
 (at location gatos-ati/gatos):
 gfxdump - Program for dumping graphics chips registers on Linux and Windows 9X.
-	  (it's more useful for Win9x to hack their values).
+          (it's more useful for Win9x to hack their values).
 xatitv  - For working with tv-in (currently is under hard development)
 atitvout- For working with tv-out
 and lot of other stuff.
@@ -271,11 +271,11 @@ BUT: After studing of Gatos and X11 stuffs I've found that they are bad
 optimized for movie playback.
 Please compare:
  radeon_vid - configures video overlay only once and provides DGA to it.
-	      (doesn't require to be MMX optimized)
+              (doesn't require to be MMX optimized)
  gatos and X11 - configures video overlay at every slice of frame, then
               performs unoptimized copying of source stuff to video memory
-	      often with using CopyMungedData (it's C-analog of YV12_to_YUY2)
-	      since there are lacks in yv12 support.
+              often with using CopyMungedData (it's C-analog of YV12_to_YUY2)
+              since there are lacks in yv12 support.
               (is not MMX optimized that's gladly accepted, but probably
                will be never optimized due portability).
 

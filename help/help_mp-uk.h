@@ -1100,7 +1100,7 @@ static const char help_text[]=
 #define MSGTR_DetectedAudiofile "Аудіо файл детектовано.\n"
 #define MSGTR_NotSystemStream "Не в форматі MPEG System Stream... (можливо, Transport Stream?)\n"
 #define MSGTR_FormatNotRecognized "========= Вибачте, формат цього файлу не розпізнаний чи не підтримується ===========\n"\
-				  "===== Якщо це AVI, ASF або MPEG потік, будь ласка зв'яжіться з автором! ======\n"
+                                  "===== Якщо це AVI, ASF або MPEG потік, будь ласка зв'яжіться з автором! ======\n"
 #define MSGTR_MissingVideoStream "Відео потік не знайдений!\n"
 #define MSGTR_MissingAudioStream "Аудіо потік не знайдений...  -> програю без звуку\n"
 #define MSGTR_MissingVideoStreamBug "Відео потік загублений!? Зв'яжіться з автором, це мабуть помилка :(\n"

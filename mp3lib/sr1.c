@@ -412,34 +412,34 @@ void MP3_Init(void){
 #if HAVE_MMX
     if (gCpuCaps.hasMMX)
     {
-	_has_mmx = 1;
-	synth_func = synth_1to1_MMX;
+        _has_mmx = 1;
+        synth_func = synth_1to1_MMX;
     }
 #endif
 
 #if HAVE_AMD3DNOWEXT
     if (gCpuCaps.has3DNowExt)
     {
-	dct36_func=dct36_3dnowex;
-	dct64_MMX_func= dct64_MMX_3dnowex;
-	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using 3DNow!Ex optimized decore!\n");
+        dct36_func=dct36_3dnowex;
+        dct64_MMX_func= dct64_MMX_3dnowex;
+        mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using 3DNow!Ex optimized decore!\n");
     }
     else
 #endif
 #if HAVE_AMD3DNOW
     if (gCpuCaps.has3DNow)
     {
-	dct36_func = dct36_3dnow;
-	dct64_MMX_func = dct64_MMX_3dnow;
-	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using 3DNow! optimized decore!\n");
+        dct36_func = dct36_3dnow;
+        dct64_MMX_func = dct64_MMX_3dnow;
+        mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using 3DNow! optimized decore!\n");
     }
     else
 #endif
 #if HAVE_SSE
     if (gCpuCaps.hasSSE)
     {
-	dct64_MMX_func = dct64_sse;
-	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using SSE optimized decore!\n");
+        dct64_MMX_func = dct64_sse;
+        mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using SSE optimized decore!\n");
     }
     else
 #endif
@@ -447,28 +447,28 @@ void MP3_Init(void){
 #if HAVE_MMX
     if (gCpuCaps.hasMMX)
     {
-	dct64_MMX_func = dct64_MMX;
-	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using MMX optimized decore!\n");
+        dct64_MMX_func = dct64_MMX;
+        mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using MMX optimized decore!\n");
     }
     else
 #endif
     if (gCpuCaps.cpuType >= CPUTYPE_I586)
     {
-	synth_func = synth_1to1_pent;
-	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using Pentium optimized decore!\n");
+        synth_func = synth_1to1_pent;
+        mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using Pentium optimized decore!\n");
     }
     else
 #endif /* ARCH_X86_32 */
 #if HAVE_ALTIVEC
     if (gCpuCaps.hasAltiVec)
     {
-	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using AltiVec optimized decore!\n");
+        mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using AltiVec optimized decore!\n");
     }
     else
 #endif
     {
-	synth_func = NULL; /* use default c version */
-	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using generic C decore!\n");
+        synth_func = NULL; /* use default c version */
+        mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using generic C decore!\n");
     }
 
 #ifdef CONFIG_FAKE_MONO
@@ -535,7 +535,7 @@ int MP3_DecodeFrame(unsigned char *hova,short single){
      case 3: do_layer3(&fr,single);break;
      case 1: do_layer1(&fr,single);break;
      default:
-         return 0;	// unsupported
+         return 0;      // unsupported
    }
 //   ++MP3_frames;
    return pcm_point ? pcm_point : 2;

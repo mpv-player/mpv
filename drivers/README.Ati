@@ -1,5 +1,5 @@
-	framebuffer driver for ATI Radeon chipset video boards
-	======================================================
+        framebuffer driver for ATI Radeon chipset video boards
+        ======================================================
 
 These files are replacement for linux-2.4.x-ac.y drivers.
 To use this driver you should have at least linux-2.4.5-ac.1
@@ -21,7 +21,7 @@ and at least '8bpp packed pixel support' compiled and installed as module.
 
 
                       Radeon video overlay
-		      ====================
+                      ====================
 
 It was designed for MPlayer and currently can be used only by MPlayer.
 It's RGB-YUV BES for Radeon cards (althrough there is experimental
@@ -93,7 +93,7 @@ List of driver parameters:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 mtrr=1/0                   Configures MTRR (if available), default = 1.
 swap_fourcc=1/0            Performs byte swapping of passed fourcc.
-			   (It's required for compatibility with -vo mga.)
+                           (It's required for compatibility with -vo mga.)
 
 To know more about driver parameters execute:
 modinfo radeon_vid

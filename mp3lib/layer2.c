@@ -18,7 +18,7 @@ static int grp_3tab[32 * 3] = { 0, };   /* used: 27 */
 static int grp_5tab[128 * 3] = { 0, };  /* used: 125 */
 static int grp_9tab[1024 * 3] = { 0, }; /* used: 729 */
 
-static real muls[27][64];	/* also used by layer 1 */
+static real muls[27][64];       /* also used by layer 1 */
 
 static void init_layer2(void)
 {
@@ -59,7 +59,7 @@ static void init_layer2(void)
     if(_has_mmx)
     {
         for(j=3,i=0;i<63;i++,j--)
-	  *table++ = 16384 * m * pow(2.0,(double) j / 3.0);
+          *table++ = 16384 * m * pow(2.0,(double) j / 3.0);
     }
     else
     for(j=3,i=0;i<63;i++,j--)
@@ -189,7 +189,7 @@ static void II_step_two(unsigned int *bit_alloc,real fraction[2][4][SBLIMIT],int
     for (i=jsbound;i<sblimit;i++,alloc1+=(1<<step))
     {
       step = alloc1->bits;
-      bita++;	/* channel 1 and channel 2 bitalloc are the same */
+      bita++;   /* channel 1 and channel 2 bitalloc are the same */
       if ( (ba=*bita++) )
       {
         k=(alloc2 = alloc1+ba)->bits;

@@ -1395,7 +1395,7 @@ static const char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nPříliš mnoho audio paketů ve vyrovnávací paměti: (%d v %d bajtech)\n"
 #define MSGTR_TooManyVideoInBuffer "\nPříliš mnoho video paketů ve vyrovnávací paměti: (%d v %d bajtech)\n"
 #define MSGTR_MaybeNI "Možná přehráváte neprokládaný proud/soubor nebo kodek selhal?\n"\
-		      "V AVI souborech zkuste vynutit neprokládaný režim pomocí volby -ni.\n"
+                      "V AVI souborech zkuste vynutit neprokládaný režim pomocí volby -ni.\n"
 #define MSGTR_WorkAroundBlockAlignHeaderBug "AVI: Obcházím chybu CBR-MP3 nBlockAlign header!\n"
 #define MSGTR_SwitchToNi "\nDetekován špatně prokládaný AVI soubor - přepínám do -ni režimu...\n"
 #define MSGTR_InvalidAudioStreamNosound "AVI: neplatný audio proud ID: %d - ignoruji (nebude zvuk)\n"

@@ -68,7 +68,7 @@ static const char help_text[]=
 #define MSGTR_NoHomeDir "Nu gãsesc directorul HOME.\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") problem\n"
 #define MSGTR_CreatingCfgFile "Creez fiºierul de configurare: %s\n"\
-	"Încearcã '-vo help' pentru o listã cu driveri video disponibili.\n"
+        "Încearcã '-vo help' pentru o listã cu driveri video disponibili.\n"
 #define MSGTR_BuiltinCodecsConf "Folosesc 'codecs.conf' built-in.\n"
 #define MSGTR_CantLoadFont "Nu pot încãrca fontul: %s\n"
 #define MSGTR_CantLoadSub "Nu pot încãrca subtitrarea: %s\n"

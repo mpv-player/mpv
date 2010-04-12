@@ -259,8 +259,8 @@ Egy Macromedia Flash videó létrehozása, mely lejátszható web böngészőben
 a Macromedia Flash plugin-nel:
 <screen>
 mencoder <replaceable>bemenet.avi</replaceable> -o <replaceable>kimenet.flv</replaceable> -of lavf \
-	-oac mp3lame -lameopts abr:br=56 -srate 22050 -ovc lavc \
-	-lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3
+  -oac mp3lame -lameopts abr:br=56 -srate 22050 -ovc lavc \
+  -lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3
 </screen>
 </para>
 </example>
@@ -342,7 +342,7 @@ audió sáv másolásával.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o /dev/null
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
-	-oac copy -o <replaceable>kimenet.avi</replaceable>
+  -oac copy -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -356,9 +356,9 @@ Vigyázz ezzela  módszerrel, mivel bizonyos esetekben audió/videó
 deszinkronizációhoz vezethet.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 \
-	-oac mp3lame -lameopts vbr=3 -o /dev/null
+  -oac mp3lame -lameopts vbr=3 -o /dev/null
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
-	-oac mp3lame -lameopts vbr=3 -o <replaceable>kimenet.avi</replaceable>
+  -oac mp3lame -lameopts vbr=3 -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -438,15 +438,15 @@ használd a <option>-of mpeg</option> kapcsolót.
 Példa:
 <screen>
 mencoder <replaceable>bemenet.avi</replaceable> -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video \
-	-oac copy <replaceable>egyéb_kapcsolók</replaceable> -o <replaceable>kimenet.mpg</replaceable>
+  -oac copy <replaceable>egyéb_kapcsolók</replaceable> -o <replaceable>kimenet.mpg</replaceable>
 </screen>
 Egy MPEG-1-es fájl létrehozása, mely alkalmas minimális multimédia
 támogatással rendelkező rendszereken, például alapértelmezett Windows
 telepítéseken történő lejátszásra is:
 <screen>
 mencoder <replaceable>bemenet.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 \
-	-o <replaceable>kimenet.mpg</replaceable> -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
-	-lavcopts vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
+  -o <replaceable>kimenet.mpg</replaceable> -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
+  -lavcopts vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
 </screen>
 Ugyan ez a <systemitem class="library">libavformat</systemitem> MPEG muxer-ének használatával:
 <screen>
@@ -497,7 +497,7 @@ Ha ez nincs megadva, akkor a <application>MEncoder</application> a 2: bicubic-et
 Használat:
 <screen>
 mencoder <replaceable>bemenet.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell \
-	-vf scale=640:480 -o <replaceable>kimenet.avi</replaceable>
+  -vf scale=640:480 -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </sect1>
@@ -548,7 +548,7 @@ tag-ek listáját megtalálod a <filename>codecs.conf</filename> fájlban.
 Példa:
 <screen>
 mencoder <replaceable>bemenet.nsv</replaceable> -oac copy -fafmttag 0x706D \
-	-ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>kimenet.avi</replaceable>
+  -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </sect1>
@@ -590,7 +590,7 @@ Egy MPEG-4-es fájl létrehozása az aktuális könyvtárból található össze
 JPEG fájlból:
 <screen>
 mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc \
-	-lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>kimenet.avi</replaceable>
+  -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -600,7 +600,7 @@ mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc \
 Egy MPEG-4 fájl létrehozása néhány JPEG fájlból az aktuális könyvtárban:
 <screen>
 mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg \
-	-ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>kimenet.avi</replaceable>
+  -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -611,7 +611,7 @@ Egy MPEG-4 fájl létrehozása JPEG fájlok explicit listájából (az aktuális
 lévő lista.txt tartalmazza a forrásként felhasználandó fájlokat, soronként egyet):
 <screen>
 mencoder mf://<replaceable>@lista.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \
-	-ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>kimenet.avi</replaceable>
+  -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -715,9 +715,9 @@ ezeket le kell törölnöd, mielőtt nekiállnál.
 <screen>
 rm <replaceable>subtitles.idx</replaceable> <replaceable>subtitles.sub</replaceable>
 mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 \
-	-vobsubout <replaceable>subtitles</replaceable> -vobsuboutindex 0 -sid 2
+  -vobsubout <replaceable>subtitles</replaceable> -vobsuboutindex 0 -sid 2
 mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
-	-vobsubout <replaceable>subtitles</replaceable> -vobsuboutindex 1 -sid 5<!--
+  -vobsubout <replaceable>subtitles</replaceable> -vobsuboutindex 1 -sid 5<!--
 --></screen>
 </example>
 
@@ -726,7 +726,7 @@ mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 
 <screen>
 rm <replaceable>subtitles.idx</replaceable> <replaceable>subtitles.sub</replaceable>
 mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</replaceable> -vobsubout <replaceable>subtitles</replaceable> -vobsuboutindex 0 \
-	-vobsuboutid fr -sid 1 -nosound -ovc copy
+  -vobsuboutid fr -sid 1 -nosound -ovc copy
 </screen>
 </example>
 </sect1>
@@ -772,7 +772,7 @@ Lásd a man oldalt a <systemitem>cropdetect</systemitem> és a
 <para>
 Használat
 <screen>mencoder <replaceable>sample-svcd.mpg</replaceable> -vf crop=714:548:0:14 -oac copy -ovc lavc \
-	-lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -o <replaceable>kimenet.avi</replaceable></screen>
+  -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -o <replaceable>kimenet.avi</replaceable></screen>
 </para>
 </sect1>
 

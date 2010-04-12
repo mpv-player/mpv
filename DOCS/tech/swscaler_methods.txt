@@ -2,29 +2,29 @@
 artifact types:
 ---------------------------------------------------------------------
 ringing
-	wave or noise like patterns around sharp edges
-	bad: sinc, lanczos (with high filter length)
-	acceptable: lanczos (with low filter length), cubic, spline
-	ok: area, (fast)blinear, gauss, point
+        wave or noise like patterns around sharp edges
+        bad: sinc, lanczos (with high filter length)
+        acceptable: lanczos (with low filter length), cubic, spline
+        ok: area, (fast)blinear, gauss, point
 
 blur
-	loss of detail / high frequency
-	bad: gauss with high variance
-	acceptable: (fast)bilinear, area
-	ok: others
+        loss of detail / high frequency
+        bad: gauss with high variance
+        acceptable: (fast)bilinear, area
+        ok: others
 
 aliasing (only downscale)
-	straight lines look like staircases
-	areas of high detail look worse
-	regular patterns turn into a funny looking mess (moire patterns)
-	bad: fast bilinear, point, gauss with low variance
-	acceptable: area
-	ok: others
+        straight lines look like staircases
+        areas of high detail look worse
+        regular patterns turn into a funny looking mess (moire patterns)
+        bad: fast bilinear, point, gauss with low variance
+        acceptable: area
+        ok: others
 
 blocky (upscale only)
-	looks like the image is made of rectangular blocks like a mosaic
-	bad: point
-	ok: others
+        looks like the image is made of rectangular blocks like a mosaic
+        bad: point
+        ok: others
 
 recommendations: (based upon my personal opinion many ppl might disagree ...)
 ---------------------------------------------------------------------
@@ -49,20 +49,20 @@ b blurry
 a aliasing (downscale only)
 m mosaic (blocky) (upscale only)
 
--sws 0	fast bilinear			 bA
--sws 1	bilinear			 b
--sws 2	bicubic	high sharpness		r
-		low sharpness		 b
--sws 3	experimental			????
--sws 4	nearest neighbour		  AM
--sws 5	area				 ba
--sws 6	luma bicubic / chroma bilinear	r
--sws 7	gauss	low sharpness		 B
-		high sharpness		  AM
--sws 8	sinc				R
--sws 9	lanczos	long filter		R
-		short filter		 b
--sws 10	bicubic spline			r
+-sws 0  fast bilinear                   bA
+-sws 1  bilinear                        b
+-sws 2  bicubic high sharpness          r
+                low sharpness           b
+-sws 3  experimental                    ????
+-sws 4  nearest neighbour               AM
+-sws 5  area                            ba
+-sws 6  luma bicubic / chroma bilinear  r
+-sws 7  gauss   low sharpness           B
+                high sharpness          AM
+-sws 8  sinc                            R
+-sws 9  lanczos long filter             R
+                short filter            b
+-sws 10 bicubic spline                  r
 
 Notes:
-	area upscale is identical to bilinear
+        area upscale is identical to bilinear

@@ -150,15 +150,15 @@ screen #0
 (...)
     Number of image formats: 7
       id: 0x32595559 (YUY2)
-	guid: 59555932-0000-0010-8000-00aa00389b71
-	bits per pixel: 16
-	number of planes: 1
-	type: YUV (packed)
+        guid: 59555932-0000-0010-8000-00aa00389b71
+        bits per pixel: 16
+        number of planes: 1
+        type: YUV (packed)
       id: 0x32315659 (YV12)
-	guid: 59563132-0000-0010-8000-00aa00389b71
-	bits per pixel: 12
-	number of planes: 3
-	type: YUV (planar)
+        guid: 59563132-0000-0010-8000-00aa00389b71
+        bits per pixel: 12
+        number of planes: 3
+        type: YUV (planar)
 (...etc...)<!--
 --></screen>
   Cela doit supporter les formats de pixels YUY2 packed et YV12 planar pour
@@ -2614,7 +2614,7 @@ qualité
 10, alors vous taperez la commande suivante
 <screen>
 mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
-	-zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10
+    -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10
 <replaceable>film.avi</replaceable>
 </screen>
 </para>
@@ -2915,20 +2915,20 @@ l'exemple suivant (adaptez à votre carte/TV)&nbsp;:
 
 <programlisting>
 Section "Device"
-	Identifier      "GeForce"
-	VendorName      "ASUS"
-	BoardName       "nVidia GeForce2/MX 400"
-	pilote          "nvidia"
-	#Option         "NvAGP" "1"
-	Option          "NoLogo"
-	Option          "CursorShadow"  "on"
+        Identifier      "GeForce"
+        VendorName      "ASUS"
+        BoardName       "nVidia GeForce2/MX 400"
+        pilote          "nvidia"
+        #Option         "NvAGP" "1"
+        Option          "NoLogo"
+        Option          "CursorShadow"  "on"
 
-	Option          "TwinView"
-	Option          "TwinViewOrientation" "Clone"
-	Option          "MetaModes" "1024x768,640x480"
-	Option          "ConnectedMonitor" "CRT, TV"
-	Option          "TVStandard" "PAL-B"
-	Option          "TVOutFormat" "Composite"
+        Option          "TwinView"
+        Option          "TwinViewOrientation" "Clone"
+        Option          "MetaModes" "1024x768,640x480"
+        Option          "ConnectedMonitor" "CRT, TV"
+        Option          "TVStandard" "PAL-B"
+        Option          "TVOutFormat" "Composite"
 
 EndSection
 </programlisting>

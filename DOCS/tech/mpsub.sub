@@ -1,12 +1,12 @@
 TITLE=Weird Al Yankovic - The Saga Begins (clip)
-					# just to be informative (maybe future
-					# use?)
-FILE=14233792,7972c637f619e01854ecb453b7339e3f	# size,md5
+                                        # just to be informative (maybe future
+                                        # use?)
+FILE=14233792,7972c637f619e01854ecb453b7339e3f  # size,md5
 AUTHOR=Gabucino
-TYPE=VIDEO				# maybe AUDIO in future (for displaying
-					# mp3 lyrics while playing or whatever)
-FORMAT=TIME				# this file contains measures based on
-					# TIME, not frames.
+TYPE=VIDEO                              # maybe AUDIO in future (for displaying
+                                        # mp3 lyrics while playing or whatever)
+FORMAT=TIME                             # this file contains measures based on
+                                        # TIME, not frames.
 
 # if FORMAT is a number, then it's frame based, i.e.:
 # FORMAT=25

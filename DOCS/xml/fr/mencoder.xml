@@ -359,7 +359,7 @@ MPEG-4 ("DivX") avec la simple copie de la piste audio.
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o
 <replaceable>sortie.avi</replaceable>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
-	-oac copy -o <replaceable>sortie.avi</replaceable>
+  -oac copy -o <replaceable>sortie.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -374,9 +374,9 @@ Soyez prudent en utilisant cette méthode car elle peut mener, dans certains cas
 à des désynchronisation audio/vidéo.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 \
-	-oac mp3lame -lameopts vbr=3 -o /dev/null
+  -oac mp3lame -lameopts vbr=3 -o /dev/null
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
-	-oac mp3lame -lameopts vbr=3 -o <replaceable>sortie.avi</replaceable>
+  -oac mp3lame -lameopts vbr=3 -o <replaceable>sortie.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -514,7 +514,7 @@ utilisera 2: bicubique.
 Utilisation :
 <screen>
 mencoder <replaceable>entree.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell \
-	-vf scale=640:480 -o <replaceable>sortie.avi</replaceable>
+  -vf scale=640:480 -o <replaceable>sortie.avi</replaceable>
 </screen>
 </para>
 </sect1>
@@ -569,7 +569,7 @@ jetez un coup d'oeil à <filename>codecs.conf</filename>.
 Exemple:
 <screen>
 mencoder <replaceable>entree.nsv</replaceable> -oac copy -fafmttag 0x706D \
-	-ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>sortie.avi</replaceable>
+  -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>sortie.avi</replaceable>
 </screen>
 </para>
 
@@ -757,9 +757,9 @@ deux passes</title>
 <screen>
 rm <replaceable>soustitres.idx</replaceable> <replaceable>soustitres.sub</replaceable>
 mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 \
-	-vobsubout <replaceable>soustitres</replaceable> -vobsuboutindex 0 -sid 2
+  -vobsubout <replaceable>soustitres</replaceable> -vobsuboutindex 0 -sid 2
 mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
-	-vobsubout <replaceable>soustitres</replaceable> -vobsuboutindex 1 -sid 5
+  -vobsubout <replaceable>soustitres</replaceable> -vobsuboutindex 1 -sid 5
 </screen>
 </example>
 
@@ -768,7 +768,7 @@ mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 
 <screen>
 rm <replaceable>soustitres.idx</replaceable> <replaceable>soustitres.sub</replaceable>
 mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replaceable> -vobsubout <replaceable>soustitres</replaceable> -vobsuboutindex 0  \
-	-vobsuboutid fr -sid 1 -nosound -ovc copy
+  -vobsuboutid fr -sid 1 -nosound -ovc copy
 </screen>
 </example>
 </sect1>

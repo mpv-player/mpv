@@ -443,14 +443,14 @@ static const char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Te veel (%d in %d bytes) audio packetten in de buffer!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Te veel (%d in %d bytes) video packetten in de buffer!\n"
 #define MSGTR_MaybeNI "(misschien speel je een non-interleaved stream/bestand of werkte de codec niet)\n" \
-		      "Voor .AVI bestanden probeer je best non-interleaved mode met de optie -ni\n"
+                      "Voor .AVI bestanden probeer je best non-interleaved mode met de optie -ni\n"
 #define MSGTR_SwitchToNi "\nSlecht geinterleaved .AVI bestand gedetecteerd - schakel om naar -ni mode!\n"
 #define MSGTR_Detected_XXX_FileFormat "%s bestandsformaat gedetecteerd!\n"
 #define MSGTR_DetectedAudiofile "Audio bestandsformaat gedetecteerd!\n"
 #define MSGTR_NotSystemStream "Geen MPEG System Stream formaat... (misschien Transport Stream?)\n"
 #define MSGTR_InvalidMPEGES "Invalid MPEG-ES stream??? Contacteer de auteur, het zou een bug kunnen zijn :(\n"
 #define MSGTR_FormatNotRecognized "============= Sorry, dit bestandsformaat niet herkend/ondersteund ===============\n"\
-				  "=== Als dit een AVI bestand, ASF bestand of MPEG stream is, contacteer dan aub de auteur! ===\n"
+                                  "=== Als dit een AVI bestand, ASF bestand of MPEG stream is, contacteer dan aub de auteur! ===\n"
 #define MSGTR_MissingVideoStream "Geen video stream gevonden!\n"
 #define MSGTR_MissingAudioStream "Geen audio stream gevonden...  ->nosound\n"
 #define MSGTR_MissingVideoStreamBug "Ontbrekende video stream!? Contacteer de auteur, het zou een bug kunnen zijn :(\n"

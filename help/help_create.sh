@@ -19,20 +19,20 @@ missing_messages(){
 curr=""
 
 while read -r line; do
-	if echo "$line" | grep -q '^#define' ; then
-		curr=`printf "%s\n" "$line" | cut -d ' ' -f 2`
-		if grep -q "^#define $curr[	 ]" "$TRANSLATION" ; then
-			curr=""
-		fi
-	else
-		if [ -z "$line" ]; then
-			curr=""
-		fi
-	fi
+    if echo "$line" | grep -q '^#define' ; then
+        curr=`printf "%s\n" "$line" | cut -d ' ' -f 2`
+        if grep -q "^#define $curr[	 ]" "$TRANSLATION" ; then
+            curr=""
+        fi
+    else
+        if [ -z "$line" ]; then
+            curr=""
+        fi
+    fi
 
-	if [ -n "$curr" ]; then
-		printf "%s\n" "$line"
-	fi
+    if [ -n "$curr" ]; then
+        printf "%s\n" "$line"
+    fi
 done
 }
 

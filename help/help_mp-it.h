@@ -1407,7 +1407,7 @@ static const char help_text[]=
 #define MSGTR_NotSystemStream "il formato non è 'MPEG System Stream'... (è forse 'Transport Stream'?)\n"
 #define MSGTR_InvalidMPEGES "Flusso MPEG-ES non valido??? Contatta l'autore, può essere un baco :(\n"
 #define MSGTR_FormatNotRecognized "===== Mi dispiace, questo formato file non è riconosciuto/supportato ======\n"\
-				  "=== Se questo è un file AVI, ASF o MPEG, per favore contatta l'autore! ===\n"
+                                  "=== Se questo è un file AVI, ASF o MPEG, per favore contatta l'autore! ===\n"
 #define MSGTR_SettingProcessPriority "Imposto la priorità del processo: %s\n"
 #define MSGTR_CannotInitializeMuxer "Impossibile inizializzare il muxer."
 #define MSGTR_MissingVideoStream "Nessun flusso video trovato!\n"
@@ -1448,7 +1448,7 @@ static const char help_text[]=
 #define MSGTR_CacheFill "\rRiempio cache: %5.2f%% (%"PRId64" byte)   "
 #define MSGTR_NoBindFound "Nessun controllo legato al tasto '%s'."
 #define MSGTR_FailedToOpen "Apertura di '%s' fallita.\n"
-							       //
+                                                               //
 #define MSGTR_VideoID "[%s] Trovato flusso video, -vid %d\n"
 #define MSGTR_AudioID "[%s] Trovato flusso audio, -aid %d\n"
 #define MSGTR_SubtitleID "[%s] Trovato flusso sottotitoli, -sid %d\n"

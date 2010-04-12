@@ -348,9 +348,9 @@
 (define (shade-verbatim-attr-element element)
   (list
    (list "BORDER"
-	(cond
-		((equal? element (normalize "SCREEN")) "1")
-		(else "0")))
+         (cond
+          ((equal? element (normalize "SCREEN")) "1")
+          (else "0")))
    (list "BGCOLOR" (car (cdr (shade-verbatim-element-colors element))))
    (list "WIDTH" ($table-width$))))
 

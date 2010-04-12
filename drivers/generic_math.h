@@ -233,7 +233,7 @@ static gen_sincos_t g_sincos[201] = {
 { 3.141600e+00, -7.346410e-06, -1.000000e-00 }
 };
 
-# define M_PI		3.14159265358979323846	/* pi */
+#define M_PI 3.14159265358979323846 /* pi */
 
 static double inline gen_sin(double x)
 {

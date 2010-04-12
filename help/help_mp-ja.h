@@ -192,7 +192,7 @@ static const char help_text[]=
 #define MSGTR_Detected_XXX_FileFormat "%s ファイルフォーマットと判断.\n"
 #define MSGTR_DetectedAudiofile "音声ファイルと判断.\n"
 #define MSGTR_FormatNotRecognized "============ このファイルフォーマットは サポートしていません =============\n"\
-				  "======= もしこのファイルが AVI、ASF、MPEGなら作成者に連絡して下さい ======\n"
+                                  "======= もしこのファイルが AVI、ASF、MPEGなら作成者に連絡して下さい ======\n"
 #define MSGTR_MissingVideoStream "映像ストリームが存在しません.\n"
 #define MSGTR_MissingAudioStream "音声ストリームが存在しません -> 無音声になります\n"
 #define MSGTR_MissingVideoStreamBug "Missing video stream!? 作成者に連絡して下さい、恐らくこれはバグです :(\n"

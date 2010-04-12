@@ -2229,7 +2229,7 @@ následující příkaz
 <screen>
 mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
     -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 \
-	<replaceable>movie.avi</replaceable>
+        <replaceable>movie.avi</replaceable>
 </screen>
 </para>
 
