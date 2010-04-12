@@ -202,6 +202,9 @@ void update_subtitles(sh_video_t *sh_video, double refpts, demux_stream_t *d_dvd
                 ass_track = sh ? sh->ass_track : NULL;
                 if (!ass_track) continue;
                 if (type == 'a') { // ssa/ass subs with libass
+                    if (len > 10 && memcmp(packet, "Dialogue: ", 10) == 0)
+                        ass_process_data(ass_track, packet, len);
+                    else
                     ass_process_chunk(ass_track, packet, len,
                                       (long long)(subpts*1000 + 0.5),
                                       (long long)((endpts-subpts)*1000 + 0.5));
@@ -225,7 +228,10 @@ void update_subtitles(sh_video_t *sh_video, double refpts, demux_stream_t *d_dvd
                 if (type == 'a') { // ssa/ass subs without libass => convert to plaintext
                     int i;
                     unsigned char* p = packet;
-                    for (i=0; i < 8 && *p != '\0'; p++)
+                    int skip_commas = 8;
+                    if (len > 10 && memcmp(packet, "Dialogue: ", 10) == 0)
+                        skip_commas = 9;
+                    for (i=0; i < skip_commas && *p != '\0'; p++)
                         if (*p == ',')
                             i++;
                     if (*p == '\0')  /* Broken line? */
