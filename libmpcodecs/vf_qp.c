@@ -68,7 +68,7 @@ static int config(struct vf_instance *vf,
             };
 
             const char *error = NULL;
-            vf->priv->lut[i+129]= lrintf(ff_eval2(vf->priv->eq, const_values, const_names, NULL, NULL, NULL, NULL, NULL, &error));
+            vf->priv->lut[i+129]= lrintf(ff_parse_and_eval_expr(vf->priv->eq, const_values, const_names, NULL, NULL, NULL, NULL, NULL, &error));
             if (error)
                 mp_msg(MSGT_VFILTER, MSGL_ERR, "qp: Error evaluating \"%s\": %s\n", vf->priv->eq, error);
         }
