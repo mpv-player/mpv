@@ -240,7 +240,7 @@ static void update_yuvconv(void) {
   params.chrom_texh = params.texh >> ys;
   glSetupYUVConversion(&params);
   if (custom_prog) {
-    FILE *f = fopen(custom_prog, "r");
+    FILE *f = fopen(custom_prog, "rb");
     if (!f)
       mp_msg(MSGT_VO, MSGL_WARN,
              "[gl] Could not read customprog %s\n", custom_prog);
