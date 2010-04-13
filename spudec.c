@@ -174,7 +174,7 @@ static inline unsigned char get_nibble(packet_t *packet)
 static inline int mkalpha(int i)
 {
   /* In mplayer's alpha planes, 0 is transparent, then 1 is nearly
-     opaque upto 255 which is transparent */
+     opaque upto 255 which is fully opaque */
   // extend 4 -> 8 bit
   i |= i << 4;
   return (uint8_t)(-i);
