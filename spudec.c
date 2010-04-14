@@ -533,12 +533,6 @@ void spudec_assemble(void *this, unsigned char *packet, unsigned int len, int pt
       mp_msg(MSGT_SPUDEC,MSGL_WARN,"SPUasm: packet too short\n");
       return;
   }
-#if 0
-  if ((spu->packet_pts + 10000) < pts100) {
-    // [cb] too long since last fragment: force new packet
-    spu->packet_offset = 0;
-  }
-#endif
   spu->packet_pts = pts100;
   if (spu->packet_offset == 0) {
     unsigned int len2 = get_be16(packet);
