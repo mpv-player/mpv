@@ -1,4 +1,4 @@
-// Synced with help_mp-en.h rev. 30515 (MSGTR_INPUT_JOYSTICK_Opening)
+// Synced with help_mp-en.h rev. 31032 (MSGTR_AudioStreamRedefined)
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);
 //   NAV; section/subsection;  XScreenSaver; keycolor;
