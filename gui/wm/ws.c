@@ -180,12 +180,6 @@ void wsWindowDecoration( wsTWindow * win,long d )
 //   Init X Window System.
 // ----------------------------------------------------------------------------------------------
 
-static int wsIOErrorHandler( Display * dpy )
-{
- fprintf( stderr,"[ws] IO error in display.\n" );
- exit( 0 );
-}
-
 static int wsErrorHandler( Display * dpy, XErrorEvent * Event )
 {
  char type[128];
