@@ -152,6 +152,7 @@ static int config(struct vf_instance *vf, int width, int height, int d_width, in
     param.i_height = height;
     param.i_fps_num = mod->mux->h.dwRate;
     param.i_fps_den = mod->mux->h.dwScale;
+    param.b_vfr_input = 0;
     param.vui.i_sar_width = d_width*height;
     param.vui.i_sar_height = d_height*width;
 
