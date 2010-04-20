@@ -146,15 +146,16 @@ static int init(sh_audio_t *sh_audio)
   if(sh_audio->wf){
       // If the decoder uses the wrong number of channels all is lost anyway.
       // sh_audio->channels=sh_audio->wf->nChannels;
+
       if (lavc_context->codec_id == CODEC_ID_AAC &&
           sh_audio->samplerate == 2*sh_audio->wf->nSamplesPerSec) {
           mp_msg(MSGT_DECAUDIO, MSGL_WARN,
                  "Ignoring broken container sample rate for ACC with SBR\n");
-      } else
-      if (sh_audio->wf->nSamplesPerSec)
-      sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
+      } else if (sh_audio->wf->nSamplesPerSec)
+          sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
+
       if (sh_audio->wf->nAvgBytesPerSec)
-      sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
+          sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
   }
   sh_audio->samplesize=af_fmt2bits(sh_audio->sample_format)/ 8;
   return 1;
