@@ -436,14 +436,6 @@ static void fs_Up_released( GtkButton * button, gpointer user_data )
  return;
 }
 
-static int fsFileExist( unsigned char * fname )
-{
- FILE * f = fopen( fname,"r" );
- if ( f == NULL ) return 0;
- fclose( f );
- return 1;
-}
-
 static void fs_Ok_released( GtkButton * button, gpointer user_data )
 {
  GList         * item;
