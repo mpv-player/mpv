@@ -83,7 +83,7 @@ static int init(sh_video_t *sh){
         if (sh->disp_w & 3)
         {
             ctx->stride = ((sh->disp_w * 3) + 3) & ~3;
-            ctx->buffer = memalign(64, ctx->stride * sh->disp_h);
+            ctx->buffer = av_malloc(ctx->stride * sh->disp_h);
         }
     default:
 	DMO_VideoDecoder_SetDestFmt(ctx->decoder,out_fmt&255,0);    // RGB/BGR
@@ -97,6 +97,7 @@ static int init(sh_video_t *sh){
 static void uninit(sh_video_t *sh){
     struct context *ctx = sh->context;
     DMO_VideoDecoder_Destroy(ctx->decoder);
+    av_free(ctx->buffer);
     free(ctx);
     sh->context = NULL;
 }

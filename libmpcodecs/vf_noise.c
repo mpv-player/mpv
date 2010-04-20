@@ -36,6 +36,7 @@
 #include "mp_image.h"
 #include "vf.h"
 #include "libvo/fastmemcpy.h"
+#include "libavutil/mem.h"
 
 #define MAX_NOISE 4096
 #define MAX_SHIFT 1024
@@ -80,7 +81,7 @@ static int8_t *initNoise(FilterParam *fp){
 	int uniform= fp->uniform;
 	int averaged= fp->averaged;
 	int pattern= fp->pattern;
-	int8_t *noise= memalign(16, MAX_NOISE*sizeof(int8_t));
+	int8_t *noise= av_malloc(MAX_NOISE*sizeof(int8_t));
 	int i, j;
 
 	srand(123457);
@@ -369,10 +370,10 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 static void uninit(struct vf_instance *vf){
 	if(!vf->priv) return;
 
-	if(vf->priv->chromaParam.noise) free(vf->priv->chromaParam.noise);
+	if(vf->priv->chromaParam.noise) av_free(vf->priv->chromaParam.noise);
 	vf->priv->chromaParam.noise= NULL;
 
-	if(vf->priv->lumaParam.noise) free(vf->priv->lumaParam.noise);
+	if(vf->priv->lumaParam.noise) av_free(vf->priv->lumaParam.noise);
 	vf->priv->lumaParam.noise= NULL;
 
 	free(vf->priv);

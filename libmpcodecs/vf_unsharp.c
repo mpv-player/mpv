@@ -143,7 +143,7 @@ static int config( struct vf_instance *vf,
     stepsX = fp->msizeX/2;
     stepsY = fp->msizeY/2;
     for( z=0; z<2*stepsY; z++ )
-	fp->SC[z] = memalign( 16, sizeof(*(fp->SC[z])) * (width+2*stepsX) );
+	fp->SC[z] = av_malloc(sizeof(*(fp->SC[z])) * (width+2*stepsX));
 
     fp = &vf->priv->chromaParam;
     effect = fp->amount == 0 ? "don't touch" : fp->amount < 0 ? "blur" : "sharpen";
@@ -152,7 +152,7 @@ static int config( struct vf_instance *vf,
     stepsX = fp->msizeX/2;
     stepsY = fp->msizeY/2;
     for( z=0; z<2*stepsY; z++ )
-	fp->SC[z] = memalign( 16, sizeof(*(fp->SC[z])) * (width+2*stepsX) );
+	fp->SC[z] = av_malloc(sizeof(*(fp->SC[z])) * (width+2*stepsX));
 
     return vf_next_config( vf, width, height, d_width, d_height, flags, outfmt );
 }
@@ -212,12 +212,12 @@ static void uninit( struct vf_instance *vf ) {
 
     fp = &vf->priv->lumaParam;
     for( z=0; z<sizeof(fp->SC)/sizeof(fp->SC[0]); z++ ) {
-	if( fp->SC[z] ) free( fp->SC[z] );
+	if( fp->SC[z] ) av_free( fp->SC[z] );
 	fp->SC[z] = NULL;
     }
     fp = &vf->priv->chromaParam;
     for( z=0; z<sizeof(fp->SC)/sizeof(fp->SC[0]); z++ ) {
-	if( fp->SC[z] ) free( fp->SC[z] );
+	if( fp->SC[z] ) av_free( fp->SC[z] );
 	fp->SC[z] = NULL;
     }
 
