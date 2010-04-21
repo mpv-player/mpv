@@ -3444,8 +3444,6 @@ if test "$_malloc" = yes ; then
 else
   def_malloc_h='#define HAVE_MALLOC_H 0'
 fi
-# malloc.h emits a warning in FreeBSD and OpenBSD
-freebsd || openbsd || dragonfly && def_malloc_h='#define HAVE_MALLOC_H 0'
 echores "$_malloc"
 
 
