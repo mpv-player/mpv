@@ -30,14 +30,12 @@
 #ifdef __i386__
 //#include <sys/perm.h> doesn't exist on libc5 systems
 int iopl();
+#elif defined(__sh__)
+#define iopl(x) 1
 #else
-#if !defined(__sparc__) && !defined(__powerpc__) && !defined(__x86_64__) && !defined(__sh__)
+#if !defined(__sparc__) && !defined(__powerpc__) && !defined(__x86_64__)
 #include <sys/io.h>
 #endif
-#endif
-
-#ifdef __sh__
-#define iopl(x) 1
 #endif
 
 #include "config.h"
