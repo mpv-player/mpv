@@ -50,9 +50,7 @@ int dhahelper_fd = 0;
 
 #ifdef CONFIG_SVGAHELPER
 #include <svgalib_helper.h>
-#ifdef __linux__
 #include <linux/ioctl.h>
-#endif
 #include <fcntl.h>
 #ifndef SVGALIB_HELPER_IOC_MAGIC
 /* svgalib 1.9.18+ compatibility ::atmos */
