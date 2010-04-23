@@ -35,9 +35,9 @@
 #include <string.h>
 
 #ifdef __linux__
-#include <sys/kd.h>
-#else
 #include <linux/kd.h>
+#else
+#include <sys/kd.h>
 #endif
 
 #include "config.h"
