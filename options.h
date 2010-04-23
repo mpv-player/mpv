@@ -66,6 +66,15 @@ typedef struct MPOpts {
         int bitexact;
         char *avopt;
     } lavc_param;
+
+    struct lavfdopts {
+        unsigned int probesize;
+        unsigned int analyzeduration;
+        char *format;
+        char *cryptokey;
+        char *avopt;
+    } lavfdopts;
+
     struct input_conf {
         char *config_file;
         unsigned int ar_delay;

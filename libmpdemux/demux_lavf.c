@@ -47,19 +47,13 @@
 #define INITIAL_PROBE_SIZE (32*1024)
 #define PROBE_BUF_SIZE (2*1024*1024)
 
-static unsigned int opt_probesize = 0;
-static unsigned int opt_analyzeduration = 0;
-static char *opt_format;
-static char *opt_cryptokey;
-static char *opt_avopt = NULL;
-
 const m_option_t lavfdopts_conf[] = {
-	{"probesize", &(opt_probesize), CONF_TYPE_INT, CONF_RANGE, 32, INT_MAX, NULL},
-	{"format",    &(opt_format),    CONF_TYPE_STRING,       0,  0,       0, NULL},
-	{"analyzeduration",    &(opt_analyzeduration),    CONF_TYPE_INT,       CONF_RANGE,  0,       INT_MAX, NULL},
-	{"cryptokey", &(opt_cryptokey), CONF_TYPE_STRING,       0,  0,       0, NULL},
-        {"o",                  &opt_avopt,                CONF_TYPE_STRING,    0,           0,             0, NULL},
-	{NULL, NULL, 0, 0, 0, 0, NULL}
+    OPT_INTRANGE("probesize", lavfdopts.probesize, 0, 32, INT_MAX),
+    OPT_STRING("format", lavfdopts.format, 0),
+    OPT_INTRANGE("analyzeduration", lavfdopts.analyzeduration, 0, 0, INT_MAX),
+    OPT_STRING("cryptokey", lavfdopts.cryptokey, 0),
+    OPT_STRING("o", lavfdopts.avopt, 0),
+    {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
 #define BIO_BUFFER_SIZE 32768
@@ -128,6 +122,8 @@ static void list_formats(void) {
 }
 
 static int lavf_check_file(demuxer_t *demuxer){
+    struct MPOpts *opts = demuxer->opts;
+    struct lavfdopts *lavfdopts = &opts->lavfdopts;
     AVProbeData avpd;
     lavf_priv_t *priv;
     int probe_data_size = 0;
@@ -139,14 +135,15 @@ static int lavf_check_file(demuxer_t *demuxer){
 
     av_register_all();
 
-    if (opt_format) {
-        if (strcmp(opt_format, "help") == 0) {
+    if (lavfdopts->format) {
+        if (strcmp(lavfdopts->format, "help") == 0) {
            list_formats();
            return 0;
         }
-        priv->avif= av_find_input_format(opt_format);
+        priv->avif= av_find_input_format(lavfdopts->format);
         if (!priv->avif) {
-            mp_msg(MSGT_DEMUX,MSGL_FATAL,"Unknown lavf format %s\n", opt_format);
+            mp_msg(MSGT_DEMUX,MSGL_FATAL,"Unknown lavf format %s\n",
+                   lavfdopts->format);
             return 0;
         }
         mp_msg(MSGT_DEMUX,MSGL_INFO,"Forced lavf %s demuxer\n", priv->avif->long_name);
@@ -432,6 +429,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
 
 static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     struct MPOpts *opts = demuxer->opts;
+    struct lavfdopts *lavfdopts = &opts->lavfdopts;
     AVFormatContext *avfc;
     AVFormatParameters ap;
     const AVOption *opt;
@@ -446,26 +444,29 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     avfc = avformat_alloc_context();
 
-    if (opt_cryptokey)
-        parse_cryptokey(avfc, opt_cryptokey);
+    if (lavfdopts->cryptokey)
+        parse_cryptokey(avfc, lavfdopts->cryptokey);
     if (opts->user_correct_pts != 0)
         avfc->flags |= AVFMT_FLAG_GENPTS;
     if (index_mode == 0)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
 
     ap.prealloced_context = 1;
-    if(opt_probesize) {
-        opt = av_set_int(avfc, "probesize", opt_probesize);
-        if(!opt) mp_msg(MSGT_HEADER,MSGL_ERR, "demux_lavf, couldn't set option probesize to %u\n", opt_probesize);
+    if (lavfdopts->probesize) {
+        opt = av_set_int(avfc, "probesize", lavfdopts->probesize);
+        if(!opt) mp_msg(MSGT_HEADER,MSGL_ERR, "demux_lavf, couldn't set option probesize to %u\n", lavfdopts->probesize);
     }
-    if(opt_analyzeduration) {
-        opt = av_set_int(avfc, "analyzeduration", opt_analyzeduration * AV_TIME_BASE);
-        if(!opt) mp_msg(MSGT_HEADER,MSGL_ERR, "demux_lavf, couldn't set option analyzeduration to %u\n", opt_analyzeduration);
+    if (lavfdopts->analyzeduration) {
+        opt = av_set_int(avfc, "analyzeduration",
+                         lavfdopts->analyzeduration * AV_TIME_BASE);
+        if (!opt)
+            mp_msg(MSGT_HEADER, MSGL_ERR, "demux_lavf, couldn't set option "
+                   "analyzeduration to %u\n", lavfdopts->analyzeduration);
     }
 
-    if(opt_avopt){
-        if(parse_avopts(avfc, opt_avopt) < 0){
-            mp_msg(MSGT_HEADER,MSGL_ERR, "Your options /%s/ look like gibberish to me pal\n", opt_avopt);
+    if (lavfdopts->avopt){
+        if(parse_avopts(avfc, lavfdopts->avopt) < 0){
+            mp_msg(MSGT_HEADER,MSGL_ERR, "Your options /%s/ look like gibberish to me pal\n", lavfdopts->avopt);
             return NULL;
         }
     }
