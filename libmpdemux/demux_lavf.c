@@ -58,7 +58,7 @@ const m_option_t lavfdopts_conf[] = {
 
 #define BIO_BUFFER_SIZE 32768
 
-typedef struct lavf_priv_t{
+typedef struct lavf_priv {
     AVInputFormat *avif;
     AVFormatContext *avfc;
     ByteIOContext *pb;
@@ -74,7 +74,8 @@ typedef struct lavf_priv_t{
 }lavf_priv_t;
 
 static int mp_read(void *opaque, uint8_t *buf, int size) {
-    stream_t *stream = opaque;
+    struct demuxer *demuxer = opaque;
+    struct stream *stream = demuxer->stream;
     int ret;
 
     if(stream_eof(stream)) //needed?
@@ -86,7 +87,8 @@ static int mp_read(void *opaque, uint8_t *buf, int size) {
 }
 
 static int64_t mp_seek(void *opaque, int64_t pos, int whence) {
-    stream_t *stream = opaque;
+    struct demuxer *demuxer = opaque;
+    struct stream *stream = demuxer->stream;
     int64_t current_pos;
     mp_msg(MSGT_HEADER,MSGL_DBG2,"mp_seek(%p, %"PRId64", %d)\n", stream, pos, whence);
     if(whence == SEEK_CUR)
@@ -112,6 +114,20 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence) {
     }
 
     return pos - stream->start_pos;
+}
+
+static int64_t mp_read_seek(void *opaque, int stream_idx, int64_t ts, int flags)
+{
+    struct demuxer *demuxer = opaque;
+    struct stream *stream = demuxer->stream;
+    struct lavf_priv *priv = demuxer->priv;
+
+    AVStream *st = priv->avfc->streams[stream_idx];
+    double pts = (double)ts * st->time_base.num / st->time_base.den;
+    int ret = stream_control(stream, STREAM_CTRL_SEEK_TO_TIME, &pts);
+    if (ret < 0)
+        ret = AVERROR(ENOSYS);
+    return ret;
 }
 
 static void list_formats(void) {
@@ -482,7 +498,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         av_strlcat(mp_filename, "foobar.dummy", sizeof(mp_filename));
 
     priv->pb = av_alloc_put_byte(priv->buffer, BIO_BUFFER_SIZE, 0,
-                                 demuxer->stream, mp_read, NULL, mp_seek);
+                                 demuxer, mp_read, NULL, mp_seek);
+    priv->pb->read_seek = mp_read_seek;
     priv->pb->is_streamed = !demuxer->stream->end_pos || (demuxer->stream->flags & MP_STREAM_SEEK) != MP_STREAM_SEEK;
 
     if(av_open_input_stream(&avfc, priv->pb, mp_filename, priv->avif, &ap)<0){
