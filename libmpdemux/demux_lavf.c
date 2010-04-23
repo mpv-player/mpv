@@ -135,15 +135,17 @@ static int lavf_check_file(demuxer_t *demuxer){
 
     av_register_all();
 
-    if (lavfdopts->format) {
-        if (strcmp(lavfdopts->format, "help") == 0) {
+    char *format = lavfdopts->format;
+    if (!format)
+        format = demuxer->stream->lavf_type;
+    if (format) {
+        if (strcmp(format, "help") == 0) {
            list_formats();
            return 0;
         }
-        priv->avif= av_find_input_format(lavfdopts->format);
+        priv->avif = av_find_input_format(format);
         if (!priv->avif) {
-            mp_msg(MSGT_DEMUX,MSGL_FATAL,"Unknown lavf format %s\n",
-                   lavfdopts->format);
+            mp_msg(MSGT_DEMUX, MSGL_FATAL, "Unknown lavf format %s\n", format);
             return 0;
         }
         mp_msg(MSGT_DEMUX,MSGL_INFO,"Forced lavf %s demuxer\n", priv->avif->long_name);

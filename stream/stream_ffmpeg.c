@@ -24,6 +24,7 @@
 #include "stream.h"
 #include "m_option.h"
 #include "m_struct.h"
+#include "libmpdemux/demuxer.h"
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
@@ -102,6 +103,12 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     if (!dummy && url_open(&ctx, filename, flags) < 0)
         goto out;
 
+    mp_msg(MSGT_OPEN, MSGL_V, "[ffmpeg] libavformat URL type: %s\n",
+           ctx->prot->name);
+    if (!strncmp("rtmp", ctx->prot->name, 4)) {
+        *file_format = DEMUXER_TYPE_LAVF;
+        stream->lavf_type = "flv";
+    }
     stream->priv = ctx;
     size = dummy ? 0 : url_filesize(ctx);
     if (size >= 0)
