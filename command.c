@@ -45,6 +45,7 @@
 #include "mpcommon.h"
 #include "mixer.h"
 #include "libmpcodecs/dec_video.h"
+#include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_teletext.h"
 #include "vobsub.h"
 #include "spudec.h"
@@ -523,6 +524,16 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
     angle = demuxer_set_angle(mpctx->demuxer, angle);
+    if (angle >= 0) {
+        struct sh_video *sh_video = mpctx->demuxer->video->sh;
+        if (sh_video)
+            resync_video_stream(sh_video);
+
+        struct sh_audio *sh_audio = mpctx->demuxer->audio->sh;
+        if (sh_audio)
+            resync_audio_stream(sh_audio);
+    }
+
     set_osd_tmsg(OSD_MSG_TEXT, 1, opts->osd_duration,
                  "Angle: %d/%d", angle, angles);
     if (angle_name)

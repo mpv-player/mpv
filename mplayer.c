@@ -2741,7 +2741,9 @@ static int seek(MPContext *mpctx, double amount, int style)
     if (mpctx->sh_video) {
 	current_module = "seek_video_reset";
 	resync_video_stream(mpctx->sh_video);
+        mpctx->sh_video->timer = 0;
         vo_seek_reset(mpctx->video_out);
+        mpctx->sh_video->timer = 0;
 	mpctx->sh_video->num_buffered_pts = 0;
 	mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
 	mpctx->delay = 0;
@@ -2759,6 +2761,7 @@ static int seek(MPContext *mpctx, double amount, int style)
 
     if (mpctx->sh_audio) {
 	current_module = "seek_audio_reset";
+        resync_audio_stream(mpctx->sh_audio);
 	mpctx->audio_out->reset(); // stop audio, throwing away buffered data
 	mpctx->sh_audio->a_buffer_len = 0;
 	mpctx->sh_audio->a_out_buffer_len = 0;
@@ -2806,9 +2809,21 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter)
 int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
                  char **chapter_name)
 {
-    if (!mpctx->chapters || !mpctx->sh_video)
-        return demuxer_seek_chapter(mpctx->demuxer, chapter, seek_pts,
-                                    chapter_name);
+    if (!mpctx->chapters || !mpctx->sh_video) {
+        int res = demuxer_seek_chapter(mpctx->demuxer, chapter, seek_pts,
+                                       chapter_name);
+        if (res >= 0) {
+            struct sh_video *sh_video = mpctx->demuxer->video->sh;
+            if (sh_video)
+                resync_video_stream(sh_video);
+
+            struct sh_audio *sh_audio = mpctx->demuxer->audio->sh;
+            if (sh_audio)
+                resync_audio_stream(sh_audio);
+        }
+        return res;
+    }
+
     if (chapter >= mpctx->num_chapters)
         return -1;
     if (chapter < 0)
