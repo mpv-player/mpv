@@ -70,7 +70,7 @@ const LIBVO_EXTERN(kva)
 
 #define HWNDFROMWINID(wid)    ((wid) + 0x80000000UL)
 
-static const struct keymap m_vk_map[] = {
+static const struct mp_keymap m_vk_map[] = {
     {VK_NEWLINE, KEY_ENTER}, {VK_TAB, KEY_TAB}, {VK_SPACE, ' '},
 
     // control keys
@@ -92,7 +92,7 @@ static const struct keymap m_vk_map[] = {
     {0, 0}
 };
 
-static const struct keymap m_keypad_map[] = {
+static const struct mp_keymap m_keypad_map[] = {
     // keypad keys
     {0x52, KEY_KP0}, {0x4F, KEY_KP1}, {0x50, KEY_KP2},   {0x51, KEY_KP3},
     {0x4B, KEY_KP4}, {0x4C, KEY_KP5}, {0x4D, KEY_KP6},   {0x47, KEY_KP7},
@@ -101,7 +101,7 @@ static const struct keymap m_keypad_map[] = {
     {0, 0}
 };
 
-static const struct keymap m_mouse_map[] = {
+static const struct mp_keymap m_mouse_map[] = {
     {WM_BUTTON1DOWN,   MOUSE_BTN0},
     {WM_BUTTON3DOWN,   MOUSE_BTN1},
     {WM_BUTTON2DOWN,   MOUSE_BTN2},

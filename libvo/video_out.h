@@ -269,11 +269,11 @@ extern char *monitor_hfreq_str;
 extern char *monitor_vfreq_str;
 extern char *monitor_dotclock_str;
 
-struct keymap {
+struct mp_keymap {
   int from;
   int to;
 };
-int lookup_keymap_table(const struct keymap *map, int key);
+int lookup_keymap_table(const struct mp_keymap *map, int key);
 struct vo_rect {
   int left, right, top, bottom, width, height;
 };

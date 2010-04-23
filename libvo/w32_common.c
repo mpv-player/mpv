@@ -60,7 +60,7 @@ static HMONITOR (WINAPI* myMonitorFromWindow)(HWND, DWORD);
 static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO);
 static BOOL (WINAPI* myEnumDisplayMonitors)(HDC, LPCRECT, MONITORENUMPROC, LPARAM);
 
-static const struct keymap vk_map[] = {
+static const struct mp_keymap vk_map[] = {
     // special keys
     {VK_ESCAPE, KEY_ESC}, {VK_BACK, KEY_BS}, {VK_TAB, KEY_TAB}, {VK_CONTROL, KEY_CTRL},
 

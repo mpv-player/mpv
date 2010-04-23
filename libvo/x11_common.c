@@ -561,7 +561,7 @@ void vo_uninit(void)
 #include "wskeys.h"
 
 #ifdef XF86XK_AudioPause
-static const struct keymap keysym_map[] = {
+static const struct mp_keymap keysym_map[] = {
     {XF86XK_MenuKB, KEY_MENU},
     {XF86XK_AudioPlay, KEY_PLAY}, {XF86XK_AudioPause, KEY_PAUSE}, {XF86XK_AudioStop, KEY_STOP},
     {XF86XK_AudioPrev, KEY_PREV}, {XF86XK_AudioNext, KEY_NEXT},
@@ -577,7 +577,7 @@ static void vo_x11_putkey_ext(int keysym)
 }
 #endif
 
-static const struct keymap keymap[] = {
+static const struct mp_keymap keymap[] = {
     // special keys
     {wsEscape, KEY_ESC}, {wsBackSpace, KEY_BS}, {wsTab, KEY_TAB}, {wsEnter, KEY_ENTER},
 

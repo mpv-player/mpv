@@ -76,7 +76,7 @@
 #define kVK_UpArrow 0x7e
 #endif /* MAC_OS_X_VERSION_MAX_ALLOWED <= 1040 */
 
-static const struct keymap keymap[] = {
+static const struct mp_keymap keymap[] = {
     // special keys
     {0x34, KEY_ENTER}, // Enter key on some iBooks?
     {kVK_Return, KEY_ENTER},

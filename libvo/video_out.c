@@ -371,7 +371,7 @@ int config_video_out(const vo_functions_t *vo, uint32_t width, uint32_t height,
  * \result translation corresponding to key or "to" value of last mapping
  *         if not found.
  */
-int lookup_keymap_table(const struct keymap *map, int key) {
+int lookup_keymap_table(const struct mp_keymap *map, int key) {
   while (map->from && map->from != key) map++;
   return map->to;
 }
