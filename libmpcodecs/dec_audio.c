@@ -69,6 +69,8 @@ void afm_help(void)
 
 static int init_audio_codec(sh_audio_t *sh_audio)
 {
+    assert(!sh_audio->initialized);
+    resync_audio_stream(sh_audio);
     if ((af_cfg.force & AF_INIT_FORMAT_MASK) == AF_INIT_FLOAT) {
 	int fmt = AF_FORMAT_FLOAT_NE;
 	if (sh_audio->ad_driver->control(sh_audio, ADCTRL_QUERY_FORMAT,
@@ -77,6 +79,7 @@ static int init_audio_codec(sh_audio_t *sh_audio)
 	    sh_audio->samplesize = 4;
 	}
     }
+    sh_audio->audio_out_minsize = 8192; // default, preinit() may change it
     if (!sh_audio->ad_driver->preinit(sh_audio)) {
 	mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "ADecoder preinit failed :(\n");
 	return 0;
@@ -88,7 +91,6 @@ static int init_audio_codec(sh_audio_t *sh_audio)
 	mp_tmsg(MSGT_DECAUDIO, MSGL_V, "dec_audio: Allocating %d bytes for input buffer.\n",
 	       sh_audio->a_in_buffer_size);
 	sh_audio->a_in_buffer = av_mallocz(sh_audio->a_in_buffer_size);
-	sh_audio->a_in_buffer_len = 0;
     }
 
     const int base_size = 65536;
@@ -474,6 +476,7 @@ int decode_audio(sh_audio_t *sh_audio, int minlen)
 void resync_audio_stream(sh_audio_t *sh_audio)
 {
     sh_audio->a_in_buffer_len = 0;	// clear audio input buffer
+    sh_audio->pts = MP_NOPTS_VALUE;
     if (!sh_audio->initialized)
 	return;
     sh_audio->ad_driver->control(sh_audio, ADCTRL_RESYNC_STREAM, NULL);
