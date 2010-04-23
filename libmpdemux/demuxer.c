@@ -1214,9 +1214,6 @@ void demux_flush(demuxer_t *demuxer)
 int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
                int flags)
 {
-    double tmp = 0;
-    double pts;
-
     if (!demuxer->seekable) {
         if (demuxer->file_format == DEMUXER_TYPE_AVI)
             mp_tmsg(MSGT_SEEK, MSGL_WARN, "Cannot seek in raw AVI streams. (Index required, try with the -idx switch.)\n");
@@ -1233,26 +1230,36 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
     demuxer->video->eof = 0;
     demuxer->audio->eof = 0;
 
-    if (flags & SEEK_ABSOLUTE)
-        pts = 0.0f;
-    else {
-        if (demuxer->stream_pts == MP_NOPTS_VALUE)
-            goto dmx_seek;
-        pts = demuxer->stream_pts;
-    }
+    /* HACK: assume any demuxer used with these streams can cope with
+     * the stream layer suddenly seeking to a different position under it
+     * (nothing actually implements DEMUXER_CTRL_RESYNC now).
+     */
+    struct stream *stream = demuxer->stream;
+    if (stream->type == STREAMTYPE_DVD || stream->type == STREAMTYPE_DVDNAV) {
+        double pts;
 
-    if (flags & SEEK_FACTOR) {
-        if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &tmp)
-            == STREAM_UNSUPPORTED)
-            goto dmx_seek;
-        pts += tmp * rel_seek_secs;
-    } else
-        pts += rel_seek_secs;
+        if (flags & SEEK_ABSOLUTE)
+            pts = 0.0f;
+        else {
+            if (demuxer->stream_pts == MP_NOPTS_VALUE)
+                goto dmx_seek;
+            pts = demuxer->stream_pts;
+        }
 
-    if (stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, &pts) !=
-        STREAM_UNSUPPORTED) {
-        demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
-        return 1;
+        if (flags & SEEK_FACTOR) {
+            double tmp = 0;
+            if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH,
+                               &tmp) == STREAM_UNSUPPORTED)
+                goto dmx_seek;
+            pts += tmp * rel_seek_secs;
+        } else
+            pts += rel_seek_secs;
+
+        if (stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, &pts)
+            != STREAM_UNSUPPORTED) {
+            demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
+            return 1;
+        }
     }
 
   dmx_seek:
