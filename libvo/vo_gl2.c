@@ -476,8 +476,9 @@ static int config_w32(uint32_t width, uint32_t height, uint32_t d_width, uint32_
   return 0;
 }
 
-#else
+#endif
 
+#ifdef CONFIG_GL_X11
 static int choose_glx_visual(Display *dpy, int scr, XVisualInfo *res_vi)
 {
   XVisualInfo template, *vi_list;
@@ -641,7 +642,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 #endif
 #ifdef CONFIG_GL_WIN32
   if (config_w32(width, height, d_width, d_height, flags, title, format) == -1)
-#else
+#endif
+#ifdef CONFIG_GL_X11
   if (config_glx(width, height, d_width, d_height, flags, title, format) == -1)
 #endif
     return -1;
@@ -689,7 +691,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   return 0;
 }
 
-#ifndef CONFIG_GL_WIN32
+#ifdef CONFIG_GL_X11
 static int gl_handlekey(int key)
 {
   if(key=='a'||key=='A') {
@@ -706,7 +708,7 @@ static int gl_handlekey(int key)
 static void check_events(void)
 {
   int e;
-#ifndef CONFIG_GL_WIN32
+#ifdef CONFIG_GL_X11
   XEvent         Event;
   char           buf[100];
   KeySym         keySym;
@@ -887,7 +889,8 @@ static int preinit(const char *arg)
     if (use_yuv == -1) {
 #ifdef CONFIG_GL_WIN32
       if (config_w32(320, 200, 320, 200, VOFLAG_HIDDEN, "", 0) == -1)
-#else
+#endif
+#ifdef CONFIG_GL_X11
       if (config_glx(320, 200, 320, 200, VOFLAG_HIDDEN, "", 0) == -1)
 #endif
         goto err_out;
@@ -930,7 +933,7 @@ static int control(uint32_t request, void *data, ...)
     case VOCTRL_SET_PANSCAN:
       resize(vo_dwidth, vo_dheight);
       return VO_TRUE;
-#ifndef CONFIG_GL_WIN32
+#ifdef CONFIG_GL_X11
     case VOCTRL_SET_EQUALIZER:
     {
       va_list ap;
