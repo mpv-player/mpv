@@ -349,8 +349,24 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
   return supported;
 }
 
-static void *setNull(const GLubyte *s) {
-  return NULL;
+#ifdef HAVE_LIBDL
+#include <dlfcn.h>
+#endif
+/**
+ * \brief find address of a linked function
+ * \param s name of function to find
+ * \return address of function or NULL if not found
+ */
+static void *getdladdr(const char *s) {
+  void *ret = NULL;
+#ifdef HAVE_LIBDL
+  void *handle = dlopen(NULL, RTLD_LAZY);
+  if (!handle)
+    return NULL;
+  ret = dlsym(handle, s);
+  dlclose(handle);
+#endif
+  return ret;
 }
 
 typedef struct {
@@ -460,7 +476,7 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *),
   char *allexts;
 
   if (!getProcAddress)
-    getProcAddress = setNull;
+    getProcAddress = (void *)getdladdr;
 
   // special case, we need glGetString before starting to find the other functions
   mpglGetString = getProcAddress("glGetString");
@@ -1670,26 +1686,7 @@ static void swapGlBuffers_w32(MPGLContext *ctx) {
 }
 #endif
 #ifdef CONFIG_GL_X11
-#ifdef HAVE_LIBDL
-#include <dlfcn.h>
-#endif
 #include "x11_common.h"
-/**
- * \brief find address of a linked function
- * \param s name of function to find
- * \return address of function or NULL if not found
- */
-static void *getdladdr(const char *s) {
-  void *ret = NULL;
-#ifdef HAVE_LIBDL
-  void *handle = dlopen(NULL, RTLD_LAZY);
-  if (!handle)
-    return NULL;
-  ret = dlsym(handle, s);
-  dlclose(handle);
-#endif
-  return ret;
-}
 
 /**
  * \brief Returns the XVisualInfo associated with Window win.
@@ -1789,8 +1786,6 @@ static int setGlWindow_x11(MPGLContext *ctx)
     getProcAddress = getdladdr("glXGetProcAddress");
     if (!getProcAddress)
       getProcAddress = getdladdr("glXGetProcAddressARB");
-    if (!getProcAddress)
-      getProcAddress = (void *)getdladdr;
     glXExtStr = getdladdr("glXQueryExtensionsString");
     if (glXExtStr)
         appendstr(&glxstr, glXExtStr(mDisplay, DefaultScreen(mDisplay)));
@@ -1803,10 +1798,10 @@ static int setGlWindow_x11(MPGLContext *ctx)
 
     getFunctions(getProcAddress, glxstr);
     if (!mpglGenPrograms && mpglGetString &&
-        getProcAddress != (void *)getdladdr &&
+        getProcAddress &&
         strstr(mpglGetString(GL_EXTENSIONS), "GL_ARB_vertex_program")) {
       mp_msg(MSGT_VO, MSGL_WARN, "Broken glXGetProcAddress detected, trying workaround\n");
-      getFunctions((void *)getdladdr, glxstr);
+      getFunctions(NULL, glxstr);
     }
     free(glxstr);
 
@@ -1858,7 +1853,7 @@ static void swapGlBuffers_sdl(MPGLContext *ctx) {
 #endif
 
 static int setGlWindow_dummy(MPGLContext *ctx) {
-  getFunctions(setNull, NULL);
+  getFunctions(NULL, NULL);
   return SET_WINDOW_OK;
 }
 
