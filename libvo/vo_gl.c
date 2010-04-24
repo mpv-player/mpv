@@ -490,6 +490,8 @@ static void autodetectGlExtensions(void) {
     force_pbo     = strstr(extensions, "_pixel_buffer_object")      ? is_ati : 0;
   if (extensions && use_rectangle == -1)
     use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      0 : 0;
+  if (use_osd == -1)
+    use_osd = mpglBindTexture != NULL;
   if (use_yuv == -1)
     use_yuv = glAutodetectYUVConversion();
   if (is_ati && (lscale == 1 || lscale == 2 || cscale == 1 || cscale == 2))
@@ -1106,7 +1108,7 @@ static int preinit_internal(const char *arg, int allow_sw)
     gltype = GLTYPE_W32;
 #endif
     many_fmts = 1;
-    use_osd = 1;
+    use_osd = -1;
     scaled_osd = 0;
     use_aspect = 1;
     use_ycbcr = 0;
