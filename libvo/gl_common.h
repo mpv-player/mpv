@@ -39,6 +39,9 @@
 #include <GL/glx.h>
 #include "x11_common.h"
 #endif
+#ifdef CONFIG_GL_SDL
+#include <GL/gl.h>
+#endif
 
 // workaround for some gl.h headers
 #ifndef GLAPIENTRY
