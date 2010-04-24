@@ -5396,15 +5396,7 @@ EOF
       _ld_tmp="$($_sdlconfig --libs)"
     fi
     if cc_check $_inc_tmp $_ld_tmp >>"$TMPLOG" 2>&1 ; then
-      _sdlversion=$($_sdlconfig --version | sed 's/[^0-9]//g')
-        if test "$_sdlversion" -gt 116 ; then
-          if test "$_sdlversion" -lt 121 ; then
-            def_sdlbuggy='#define BUGGY_SDL'
-          else
-            def_sdlbuggy='#undef BUGGY_SDL'
-          fi
           _sdl=yes
-        fi
      fi
   fi
 fi
@@ -9096,7 +9088,6 @@ $def_quartz
 $def_s3fb
 $def_sdl
 $def_sdl_sdl_h
-$def_sdlbuggy
 $def_svga
 $def_tdfxfb
 $def_tdfxvid
