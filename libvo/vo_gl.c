@@ -37,6 +37,14 @@
 #include "fastmemcpy.h"
 #include "libass/ass_mp.h"
 
+#ifdef CONFIG_GL_SDL
+#ifdef CONFIG_SDL_SDL_H
+#include <SDL/SDL.h>
+#else
+#include <SDL.h>
+#endif
+#endif
+
 static const vo_info_t info =
 {
   "OpenGL",
@@ -469,7 +477,7 @@ static void autodetectGlExtensions(void) {
   const char *extensions = mpglGetString(GL_EXTENSIONS);
   const char *vendor     = mpglGetString(GL_VENDOR);
   const char *version    = mpglGetString(GL_VERSION);
-  int is_ati = strstr(vendor, "ATI") != NULL;
+  int is_ati = vendor && strstr(vendor, "ATI") != NULL;
   int ati_broken_pbo = 0;
   mp_msg(MSGT_VO, MSGL_V, "[gl] Running on OpenGL by '%s', versions '%s'\n", vendor, version);
   if (is_ati && strncmp(version, "2.1.", 4) == 0) {
@@ -478,8 +486,10 @@ static void autodetectGlExtensions(void) {
     ati_broken_pbo = ver && ver < 8395;
   }
   if (ati_hack      == -1) ati_hack      = ati_broken_pbo;
-  if (force_pbo     == -1) force_pbo     = strstr(extensions, "_pixel_buffer_object")      ? is_ati : 0;
-  if (use_rectangle == -1) use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      0 : 0;
+  if (extensions && force_pbo     == -1)
+    force_pbo     = strstr(extensions, "_pixel_buffer_object")      ? is_ati : 0;
+  if (extensions && use_rectangle == -1)
+    use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      0 : 0;
   if (use_yuv == -1)
     use_yuv = glAutodetectYUVConversion();
   if (is_ati && (lscale == 1 || lscale == 2 || cscale == 1 || cscale == 2))
@@ -582,6 +592,17 @@ static int create_window(uint32_t d_width, uint32_t d_height, uint32_t flags, co
     vo_x11_create_vo_window(vinfo, vo_dx, vo_dy, d_width, d_height, flags,
             XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone),
             "gl", title);
+  }
+#endif
+#ifdef CONFIG_GL_SDL
+  if (glctx.type == GLTYPE_SDL) {
+    SDL_Surface *s = SDL_SetVideoMode(d_width, d_height, 0, SDL_OPENGL | SDL_RESIZABLE);
+    if (!s) {
+      mp_msg(MSGT_VO, MSGL_FATAL, "SDL SetVideoMode failed: %s\n", SDL_GetError());
+      return -1;
+    }
+    vo_dwidth  = s->w;
+    vo_dheight = s->h;
   }
 #endif
   return 0;
@@ -1076,8 +1097,11 @@ static const opt_t subopts[] = {
 
 static int preinit_internal(const char *arg, int allow_sw)
 {
-    enum MPGLType gltype = GLTYPE_X11;
+    enum MPGLType gltype = GLTYPE_SDL;
     // set defaults
+#ifdef CONFIG_GL_X11
+    gltype = GLTYPE_X11;
+#endif
 #ifdef CONFIG_GL_WIN32
     gltype = GLTYPE_W32;
 #endif
@@ -1317,6 +1341,8 @@ static int control(uint32_t request, void *data, ...)
     }
     break;
   case VOCTRL_UPDATE_SCREENINFO:
+    if (!glctx.update_xinerama_info)
+      break;
     glctx.update_xinerama_info();
     return VO_TRUE;
   }
