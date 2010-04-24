@@ -1529,11 +1529,11 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, double *seek_pts,
 
 int demuxer_get_current_chapter(demuxer_t *demuxer)
 {
-    int chapter = -1;
+    int chapter = -2;
     if (!demuxer->num_chapters || !demuxer->chapters) {
         if (stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_CHAPTER,
                            &chapter) == STREAM_UNSUPPORTED)
-            chapter = -1;
+            chapter = -2;
     } else {
         sh_video_t *sh_video = demuxer->video->sh;
         sh_audio_t *sh_audio = demuxer->audio->sh;

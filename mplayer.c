@@ -2790,6 +2790,7 @@ static int seek(MPContext *mpctx, double amount, int style)
     return 0;
 }
 
+// -2 is no chapters, -1 is before first chapter
 int get_current_chapter(struct MPContext *mpctx)
 {
     if (!mpctx->chapters || !mpctx->sh_video)
@@ -4058,7 +4059,7 @@ if (seek_to_sec || mpctx->timeline) {
     seek(mpctx, seek_to_sec, SEEK_ABSOLUTE);
     end_at.pos += seek_to_sec;
 }
-if (opts->chapterrange[0] > 1) {
+if (opts->chapterrange[0] > 0) {
     double pts;
     if (seek_chapter(mpctx, opts->chapterrange[0]-1, &pts, NULL) >= 0
         && pts > -1.0)

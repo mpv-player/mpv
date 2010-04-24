@@ -396,7 +396,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
 
     if (mpctx->demuxer)
         chapter = get_current_chapter(mpctx);
-    if (chapter < 0)
+    if (chapter < -1)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
