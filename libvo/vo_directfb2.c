@@ -33,12 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifdef __linux__
-#include <linux/kd.h>
-#else
-#include <sys/kd.h>
-#endif
+//#include <sys/kd.h>
 
 #include "config.h"
 #include "video_out.h"
