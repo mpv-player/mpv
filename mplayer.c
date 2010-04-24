@@ -3716,12 +3716,6 @@ if(!mpctx->demuxer)
      mpctx->num_sources = 1;
  }
 
-if(opts->chapterrange[0]>1) {
-  double pts;
-  if (seek_chapter(mpctx, opts->chapterrange[0]-1, &pts, NULL) >= 0 && pts > -1.0)
-    seek(mpctx, pts, SEEK_ABSOLUTE);
-}
-
 mpctx->initialized_flags|=INITIALIZED_DEMUXER;
 
 if (mpctx->stream->type != STREAMTYPE_DVD && mpctx->stream->type != STREAMTYPE_DVDNAV) {
@@ -4063,6 +4057,12 @@ if(play_n_frames==0){
 if (seek_to_sec || mpctx->timeline) {
     seek(mpctx, seek_to_sec, SEEK_ABSOLUTE);
     end_at.pos += seek_to_sec;
+}
+if (opts->chapterrange[0] > 1) {
+    double pts;
+    if (seek_chapter(mpctx, opts->chapterrange[0]-1, &pts, NULL) >= 0
+        && pts > -1.0)
+        seek(mpctx, pts, SEEK_ABSOLUTE);
 }
 
 if (end_at.type == END_AT_SIZE) {
