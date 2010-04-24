@@ -853,7 +853,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
 
             mp_msg(MSGT_DEMUX, MSGL_V,
                    "[mkv] Chapter %u from %02d:%02d:%02d.%03d "
-                   "to %02d:%02d:%02d.%03d, %.*s\n", idx,
+                   "to %02d:%02d:%02d.%03d, %.*s\n", i,
                    (int) (chapter.start / 60 / 60 / 1000),
                    (int) ((chapter.start / 60 / 1000) % 60),
                    (int) ((chapter.start / 1000) % 60),
