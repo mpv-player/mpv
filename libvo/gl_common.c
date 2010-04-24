@@ -1510,12 +1510,16 @@ void glDisableYUVConversion(GLenum target, int type) {
       mpglDisable(GL_FRAGMENT_SHADER_ATI);
       break;
     case YUV_CONVERSION_TEXT_FRAGMENT:
+      mpglDisable(GL_TEXT_FRAGMENT_SHADER_ATI);
+      // HACK: at least the 10.5 Radeon drivers are broken
+      // and without this disable the texture units while
+      // the program is still running
+      mpglFlush();
       mpglActiveTexture(GL_TEXTURE1);
       mpglDisable(target);
       mpglActiveTexture(GL_TEXTURE2);
       mpglDisable(target);
       mpglActiveTexture(GL_TEXTURE0);
-      mpglDisable(GL_TEXT_FRAGMENT_SHADER_ATI);
       break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
