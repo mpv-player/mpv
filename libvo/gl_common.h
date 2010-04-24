@@ -372,6 +372,7 @@ void glDisableYUVConversion(GLenum target, int type);
 enum MPGLType {
   GLTYPE_W32,
   GLTYPE_X11,
+  GLTYPE_SDL,
 };
 
 typedef struct MPGLContext {

@@ -1842,8 +1842,36 @@ static int x11_check_events(void) {
 }
 #endif
 
+#ifdef CONFIG_GL_SDL
+#ifdef CONFIG_SDL_SDL_H
+#include <SDL/SDL.h>
+#else
+#include <SDL.h>
+#endif
+
+static void swapGlBuffers_sdl(MPGLContext *ctx) {
+  SDL_GL_SwapBuffers();
+}
+
+#endif
+
+static int setGlWindow_dummy(MPGLContext *ctx) {
+  getFunctions(setNull, NULL);
+  return SET_WINDOW_OK;
+}
+
+static void releaseGlContext_dummy(MPGLContext *ctx) {
+}
+
+static int dummy_check_events(void) {
+  return 0;
+}
+
 int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
   memset(ctx, 0, sizeof(*ctx));
+  ctx->setGlWindow = setGlWindow_dummy;
+  ctx->releaseGlContext = releaseGlContext_dummy;
+  ctx->check_events = dummy_check_events;
   ctx->type = type;
   switch (ctx->type) {
 #ifdef CONFIG_GL_WIN32
@@ -1870,6 +1898,12 @@ int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
     ctx->ontop = vo_x11_ontop;
     return vo_init();
 #endif
+#ifdef CONFIG_GL_SDL
+  case GLTYPE_SDL:
+    SDL_Init(SDL_INIT_VIDEO);
+    ctx->swapGlBuffers = swapGlBuffers_sdl;
+    return 1;
+#endif
   default:
     return 0;
   }
@@ -1886,6 +1920,11 @@ void uninit_mpglcontext(MPGLContext *ctx) {
 #ifdef CONFIG_GL_X11
   case GLTYPE_X11:
     vo_x11_uninit();
+    break;
+#endif
+#ifdef CONFIG_GL_SDL
+  case GLTYPE_SDL:
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
     break;
 #endif
   }
