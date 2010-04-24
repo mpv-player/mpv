@@ -29,6 +29,7 @@ typedef struct MPOpts {
     int osd_duration;
     int loop_times;
     int ordered_chapters;
+    int chapterrange[2];
     int edition_id;
     int correct_pts;
     int user_correct_pts;

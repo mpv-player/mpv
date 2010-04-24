@@ -644,9 +644,9 @@ if(stream->type==STREAMTYPE_DVDNAV){
     }
   }
 
-  if(dvd_chapter>1) {
+  if(opts.chapterrange[0]>1) {
     double pts;
-    if (demuxer_seek_chapter(demuxer, dvd_chapter-1, &pts, NULL) >= 0 && pts > -1.0)
+    if (demuxer_seek_chapter(demuxer, opts.chapterrange[0]-1, &pts, NULL) >= 0 && pts > -1.0)
       seek_to_sec = pts;
   }
 
@@ -1193,9 +1193,9 @@ while(!at_eof){
       --play_n_frames;
       if(play_n_frames<0) break;
     }
-    if(dvd_last_chapter>0) {
+    if(opts.chapterrange[1]>0) {
       int cur_chapter = demuxer_get_current_chapter(demuxer);
-      if(cur_chapter!=-1 && cur_chapter+1>dvd_last_chapter)
+      if(cur_chapter!=-1 && cur_chapter+1>opts.chapterrange[1])
         break;
     }
 

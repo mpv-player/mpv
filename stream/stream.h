@@ -342,8 +342,6 @@ void stream_set_interrupt_callback(int (*cb)(struct input_ctx*, int),
 int stream_check_interrupt(int time);
 
 extern int dvd_title;
-extern int dvd_chapter;
-extern int dvd_last_chapter;
 extern int dvd_angle;
 
 extern char * audio_stream;

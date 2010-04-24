@@ -83,42 +83,6 @@ static const struct m_struct_st stream_opts = {
   stream_opts_fields
 };
 
-int dvd_parse_chapter_range(const m_option_t *conf, const char *range) {
-  const char *s;
-  char *t;
-  if (!range)
-    return M_OPT_MISSING_PARAM;
-  s = range;
-  dvd_chapter = 1;
-  dvd_last_chapter = 0;
-  if(*range && isdigit(*range)) {
-    dvd_chapter = strtol(range, &s, 10);
-    if(range == s) {
-      mp_tmsg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
-      return M_OPT_INVALID;
-    }
-  }
-  if(*s == 0)
-    return 0;
-  else if(*s != '-') {
-    mp_tmsg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
-    return M_OPT_INVALID;
-  }
-  ++s;
-  if(*s == 0)
-      return 0;
-  if(! isdigit(*s)) {
-    mp_tmsg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
-    return M_OPT_INVALID;
-  }
-  dvd_last_chapter = strtol(s, &t, 10);
-  if (s == t || *t) {
-    mp_tmsg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
-    return M_OPT_INVALID;
-  }
-  return 0;
-}
-
 int dvd_chapter_from_cell(dvd_priv_t* dvd,int title,int cell)
 {
   pgc_t * cur_pgc;
@@ -411,8 +375,6 @@ static void dvd_close(dvd_priv_t *d) {
   ifoClose(d->vmg_file);
   DVDCloseFile(d->title);
   DVDClose(d->dvd);
-  dvd_chapter = 1;
-  dvd_last_chapter = 0;
   dvd_set_speed(dvd_device_current, -1); /* -1 => restore default */
 }
 

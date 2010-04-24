@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include "options.h"
 #include "mp_msg.h"
 #include "osdep/timer.h"
 #include "input/input.h"
@@ -379,9 +380,9 @@ static int fill_buffer(stream_t *s, char *but, int len)
           priv->state &= ~NAV_FLAG_WAIT;
           if (priv->state & NAV_FLAG_WAIT_READ_AUTO)
             priv->state |= NAV_FLAG_WAIT_READ;
-          if(priv->title > 0 && dvd_last_chapter > 0) {
+          if(priv->title > 0 && s->opts->chapterrange[1] > 0) {
             int tit=0, part=0;
-            if(dvdnav_current_title_info(priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK && part > dvd_last_chapter) {
+            if(dvdnav_current_title_info(priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK && part > s->opts->chapterrange[1]) {
               priv->state |= NAV_FLAG_EOF;
               return 0;
             }

@@ -62,6 +62,5 @@ int dvd_lang_from_sid(stream_t *stream, int id);
 int dvd_aid_from_lang(stream_t *stream, unsigned char* lang);
 int dvd_sid_from_lang(stream_t *stream, unsigned char* lang);
 int dvd_chapter_from_cell(dvd_priv_t *dvd,int title,int cell);
-int dvd_parse_chapter_range(const m_option_t *conf, const char *range);
 
 #endif /* MPLAYER_STREAM_DVD_H */

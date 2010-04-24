@@ -221,6 +221,52 @@ const m_option_type_t m_option_type_int64 = {
   NULL
 };
 
+static int parse_intpair(const struct m_option *opt, const char *name,
+                         const char *param, void *dst, int src)
+{
+    if (param == NULL)
+        return M_OPT_MISSING_PARAM;
+
+    char *s = (char *)param;
+    int start = -1;
+    int end = -1;
+    if (*s) {
+        start = strtol(s, &s, 10);
+        if (s == param)
+            goto bad;
+    }
+    if (*s) {
+        if (*s != '-')
+            goto bad;
+        s++;
+    }
+    if (*s)
+        end = strtol(s, &s, 10);
+    if (*s)
+        goto bad;
+
+    if (dst) {
+        int *p = dst;
+        p[0] = start;
+        p[1] = end;
+    }
+
+    return 1;
+
+ bad:
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Invalid integer range "
+           "specification for option %s: %s\n", name, param);
+    return M_OPT_INVALID;
+}
+
+const struct m_option_type m_option_type_intpair = {
+    .name = "Int[-Int]",
+    .size = sizeof(int[2]),
+    .parse = parse_intpair,
+    .save = copy_opt,
+    .set = copy_opt,
+};
+
 // Float
 
 #undef VAL

@@ -3571,8 +3571,8 @@ if(stream_dump_type==5){
     mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"Cannot open dump file.\n");
     exit_player(mpctx, EXIT_ERROR);
   }
-  if (dvd_chapter > 1) {
-    int chapter = dvd_chapter - 1;
+  if (opts->chapterrange[0] > 1) {
+    int chapter = opts->chapterrange[0] - 1;
     stream_control(mpctx->stream, STREAM_CTRL_SEEK_TO_CHAPTER, &chapter);
   }
   while(!mpctx->stream->eof && !async_quit_request){
@@ -3583,10 +3583,11 @@ if(stream_dump_type==5){
           exit_player(mpctx, EXIT_ERROR);
         }
       }
-      if(dvd_last_chapter > 0) {
+      if (opts->chapterrange[1] > 0) {
         int chapter = -1;
         if (stream_control(mpctx->stream, STREAM_CTRL_GET_CURRENT_CHAPTER,
-                           &chapter) == STREAM_OK && chapter + 1 > dvd_last_chapter)
+                           &chapter) == STREAM_OK
+            && chapter + 1 > opts->chapterrange[1])
           break;
       }
   }
@@ -3715,9 +3716,9 @@ if(!mpctx->demuxer)
      mpctx->num_sources = 1;
  }
 
-if(dvd_chapter>1) {
+if(opts->chapterrange[0]>1) {
   double pts;
-  if (seek_chapter(mpctx, dvd_chapter-1, &pts, NULL) >= 0 && pts > -1.0)
+  if (seek_chapter(mpctx, opts->chapterrange[0]-1, &pts, NULL) >= 0 && pts > -1.0)
     seek(mpctx, pts, SEEK_ABSOLUTE);
 }
 
@@ -3799,9 +3800,9 @@ if((stream_dump_type)&&(stream_dump_type<4)){
     if( (mpctx->demuxer->file_format==DEMUXER_TYPE_AVI || mpctx->demuxer->file_format==DEMUXER_TYPE_ASF || mpctx->demuxer->file_format==DEMUXER_TYPE_MOV)
 	&& stream_dump_type==2) fwrite(&in_size,1,4,f);
     if(in_size>0) fwrite(start,in_size,1,f);
-    if(dvd_last_chapter>0) {
+    if (opts->chapterrange[1] > 0) {
       int cur_chapter = demuxer_get_current_chapter(mpctx->demuxer);
-      if(cur_chapter!=-1 && cur_chapter+1>dvd_last_chapter)
+      if(cur_chapter!=-1 && cur_chapter+1 > opts->chapterrange[1])
         break;
     }
   }
@@ -4090,9 +4091,9 @@ if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
 while(!mpctx->stop_play){
     float aq_sleep_time=0;
 
-if(dvd_last_chapter>0) {
+if (opts->chapterrange[1] > 0) {
   int cur_chapter = get_current_chapter(mpctx);
-  if(cur_chapter!=-1 && cur_chapter+1>dvd_last_chapter)
+  if(cur_chapter!=-1 && cur_chapter+1 > opts->chapterrange[1])
     goto goto_next_file;
 }
 
