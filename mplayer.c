@@ -2657,6 +2657,54 @@ static void reinit_decoders(struct MPContext *mpctx)
     mp_property_do("sub", M_PROPERTY_SET, &mpctx->global_sub_pos, mpctx);
 }
 
+static void seek_reset(struct MPContext *mpctx)
+{
+    if (mpctx->sh_video) {
+	current_module = "seek_video_reset";
+	resync_video_stream(mpctx->sh_video);
+        mpctx->sh_video->timer = 0;
+        vo_seek_reset(mpctx->video_out);
+        mpctx->sh_video->timer = 0;
+	mpctx->sh_video->num_buffered_pts = 0;
+	mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
+	mpctx->delay = 0;
+        mpctx->time_frame = 0;
+        mpctx->update_video_immediately = true;
+	// Not all demuxers set d_video->pts during seek, so this value
+	// (which is used by at least vobsub and edl code below) may
+	// be completely wrong (probably 0).
+	mpctx->sh_video->pts = mpctx->d_video->pts + mpctx->video_offset;
+	update_subtitles(mpctx, &mpctx->opts, mpctx->sh_video,
+                         mpctx->sh_video->pts, mpctx->video_offset,
+                         mpctx->d_sub, 1);
+	update_teletext(mpctx->sh_video, mpctx->demuxer, 1);
+    }
+
+    if (mpctx->sh_audio) {
+	current_module = "seek_audio_reset";
+        resync_audio_stream(mpctx->sh_audio);
+	mpctx->audio_out->reset(); // stop audio, throwing away buffered data
+	mpctx->sh_audio->a_buffer_len = 0;
+	mpctx->sh_audio->a_out_buffer_len = 0;
+	if (!mpctx->sh_video)
+	    update_subtitles(mpctx, &mpctx->opts, NULL, mpctx->sh_audio->pts,
+                             mpctx->video_offset, mpctx->d_sub, 1);
+    }
+
+    if (vo_vobsub && mpctx->sh_video) {
+	current_module = "seek_vobsub_reset";
+	vobsub_seek(vo_vobsub, mpctx->sh_video->pts);
+    }
+
+    edl_seek_reset(mpctx);
+
+    mpctx->total_avsync_change = 0;
+    audio_time_usage = 0; video_time_usage = 0; vout_time_usage = 0;
+    drop_frame_cnt = 0;
+
+    current_module = NULL;
+}
+
 static bool timeline_set_part(struct MPContext *mpctx, int i)
 {
     struct timeline_part *p = mpctx->timeline + mpctx->timeline_part;
@@ -2738,50 +2786,7 @@ static int seek(MPContext *mpctx, double amount, int style)
     if (seekresult == 0)
 	return -1;
 
-    if (mpctx->sh_video) {
-	current_module = "seek_video_reset";
-	resync_video_stream(mpctx->sh_video);
-        mpctx->sh_video->timer = 0;
-        vo_seek_reset(mpctx->video_out);
-        mpctx->sh_video->timer = 0;
-	mpctx->sh_video->num_buffered_pts = 0;
-	mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
-	mpctx->delay = 0;
-        mpctx->time_frame = 0;
-        mpctx->update_video_immediately = true;
-	// Not all demuxers set d_video->pts during seek, so this value
-	// (which is used by at least vobsub and edl code below) may
-	// be completely wrong (probably 0).
-	mpctx->sh_video->pts = mpctx->d_video->pts + mpctx->video_offset;
-	update_subtitles(mpctx, &mpctx->opts, mpctx->sh_video,
-                         mpctx->sh_video->pts, mpctx->video_offset,
-                         mpctx->d_sub, 1);
-	update_teletext(mpctx->sh_video, mpctx->demuxer, 1);
-    }
-
-    if (mpctx->sh_audio) {
-	current_module = "seek_audio_reset";
-        resync_audio_stream(mpctx->sh_audio);
-	mpctx->audio_out->reset(); // stop audio, throwing away buffered data
-	mpctx->sh_audio->a_buffer_len = 0;
-	mpctx->sh_audio->a_out_buffer_len = 0;
-	if (!mpctx->sh_video)
-	    update_subtitles(mpctx, &mpctx->opts, NULL, mpctx->sh_audio->pts,
-                             mpctx->video_offset, mpctx->d_sub, 1);
-    }
-
-    if (vo_vobsub && mpctx->sh_video) {
-	current_module = "seek_vobsub_reset";
-	vobsub_seek(vo_vobsub, mpctx->sh_video->pts);
-    }
-
-    edl_seek_reset(mpctx);
-
-    mpctx->total_avsync_change = 0;
-    audio_time_usage = 0; video_time_usage = 0; vout_time_usage = 0;
-    drop_frame_cnt = 0;
-
-    current_module = NULL;
+    seek_reset(mpctx);
     return 0;
 }
 
@@ -2812,15 +2817,8 @@ int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
     if (!mpctx->chapters || !mpctx->sh_video) {
         int res = demuxer_seek_chapter(mpctx->demuxer, chapter, seek_pts,
                                        chapter_name);
-        if (res >= 0) {
-            struct sh_video *sh_video = mpctx->demuxer->video->sh;
-            if (sh_video)
-                resync_video_stream(sh_video);
-
-            struct sh_audio *sh_audio = mpctx->demuxer->audio->sh;
-            if (sh_audio)
-                resync_audio_stream(sh_audio);
-        }
+        if (res >= 0 && *seek_pts == -1)
+            seek_reset(mpctx);
         return res;
     }
 
