@@ -159,12 +159,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 mplayer_put_key(MOUSE_BTN2);
             break;
         case WM_MOUSEMOVE:
-            if (enable_mouse_movements) {
-                char cmd_str[40];
-                snprintf(cmd_str, sizeof(cmd_str), "set_mouse_pos %i %i",
-                        GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-                mp_input_queue_cmd(mp_input_parse_cmd(cmd_str));
-            }
+            vo_mouse_movement(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
             break;
         case WM_MOUSEWHEEL:
             if (!vo_nomouse_input) {

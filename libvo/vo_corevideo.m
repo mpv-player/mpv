@@ -953,11 +953,8 @@ static int control(uint32_t request, void *data, ...)
 	if (enable_mouse_movements && !isRootwin) {
 		NSPoint p =[self convertPoint:[theEvent locationInWindow] fromView:nil];
 		if ([self mouse:p inRect:textureFrame]) {
-                	char cmdstr[40];
-                	snprintf(cmdstr, sizeof(cmdstr), "set_mouse_pos %i %i",
-			         (int)(vo_fs ? p.x : (p.x - textureFrame.origin.x)),
-			         (int)(vo_fs ? [self frame].size.height - p.y: (NSMaxY(textureFrame) - p.y)));
-                	mp_input_queue_cmd(mp_input_parse_cmd(cmdstr));
+			vo_mouse_movement(vo_fs ? p.x : p.x - textureFrame.origin.x,
+			                  vo_fs ? [self frame].size.height - p.y : NSMaxY(textureFrame) - p.y);
 		}
 	}
 }

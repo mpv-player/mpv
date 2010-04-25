@@ -873,12 +873,7 @@ int vo_x11_check_events(Display * mydisplay)
                 }
                 break;
             case MotionNotify:
-                if(enable_mouse_movements)
-                {
-                    char cmd_str[40];
-                    sprintf(cmd_str,"set_mouse_pos %i %i",Event.xmotion.x, Event.xmotion.y);
-                    mp_input_queue_cmd(mp_input_parse_cmd(cmd_str));
-                }
+                vo_mouse_movement(Event.xmotion.x, Event.xmotion.y);
 
                 if (vo_mouse_autohide)
                 {

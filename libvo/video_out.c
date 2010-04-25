@@ -446,6 +446,21 @@ void calc_src_dst_rects(int src_width, int src_height, struct vo_rect *src, stru
   dst->height = dst->bottom - dst->top;
 }
 
+/**
+ * Generates a mouse movement message if those are enable and sends it
+ * to the "main" MPlayer.
+ *
+ * \param posx new x position of mouse
+ * \param posy new y position of mouse
+ */
+void vo_mouse_movement(int posx, int posy) {
+  char cmd_str[40];
+  if (!enable_mouse_movements)
+    return;
+  snprintf(cmd_str, sizeof(cmd_str), "set_mouse_pos %i %i", posx, posy);
+  mp_input_queue_cmd(mp_input_parse_cmd(cmd_str));
+}
+
 #if defined(CONFIG_FBDEV) || defined(CONFIG_VESA)
 /* Borrowed from vo_fbdev.c
 Monitor ranges related functions*/
