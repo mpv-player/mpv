@@ -39,6 +39,9 @@ int vo_sdl_init(void)
     // Setup Keyrepeats (500/30 are defaults)
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, 100 /*SDL_DEFAULT_REPEAT_INTERVAL*/);
 
+    // Easiest way to get uppercase characters
+    SDL_EnableUNICODE(1);
+
     // We don't want those in our event queue.
     SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
     SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
@@ -114,7 +117,6 @@ int sdl_default_handle_event(SDL_Event *event)
         switch(keypressed) {
         case SDLK_RETURN: mplayer_put_key(KEY_ENTER);break;
         case SDLK_ESCAPE: mplayer_put_key(KEY_ESC);break;
-        case SDLK_q: mplayer_put_key('q');break;
         case SDLK_F1: mplayer_put_key(KEY_F+1);break;
         case SDLK_F2: mplayer_put_key(KEY_F+2);break;
         case SDLK_F3: mplayer_put_key(KEY_F+3);break;
@@ -127,13 +129,7 @@ int sdl_default_handle_event(SDL_Event *event)
         case SDLK_F10: mplayer_put_key(KEY_F+10);break;
         case SDLK_F11: mplayer_put_key(KEY_F+11);break;
         case SDLK_F12: mplayer_put_key(KEY_F+12);break;
-        /*case SDLK_o: mplayer_put_key('o');break;
-        case SDLK_SPACE: mplayer_put_key(' ');break;
-        case SDLK_p: mplayer_put_key('p');break;*/
-        case SDLK_7: mplayer_put_key(shift_key?'/':'7');break;
-        case SDLK_PLUS: mplayer_put_key(shift_key?'*':'+');break;
         case SDLK_KP_PLUS: mplayer_put_key('+');break;
-        case SDLK_MINUS:
         case SDLK_KP_MINUS: mplayer_put_key('-');break;
         case SDLK_TAB: mplayer_put_key('\t');break;
         case SDLK_PAGEUP: mplayer_put_key(KEY_PAGE_UP);break;
@@ -142,11 +138,7 @@ int sdl_default_handle_event(SDL_Event *event)
         case SDLK_DOWN: mplayer_put_key(KEY_DOWN);break;
         case SDLK_LEFT: mplayer_put_key(KEY_LEFT);break;
         case SDLK_RIGHT: mplayer_put_key(KEY_RIGHT);break;
-        case SDLK_LESS: mplayer_put_key(shift_key?'>':'<'); break;
-        case SDLK_GREATER: mplayer_put_key('>'); break;
-        case SDLK_ASTERISK:
         case SDLK_KP_MULTIPLY: mplayer_put_key('*'); break;
-        case SDLK_SLASH:
         case SDLK_KP_DIVIDE: mplayer_put_key('/'); break;
         case SDLK_KP0: mplayer_put_key(KEY_KP0); break;
         case SDLK_KP1: mplayer_put_key(KEY_KP1); break;
@@ -162,7 +154,8 @@ int sdl_default_handle_event(SDL_Event *event)
         case SDLK_KP_ENTER: mplayer_put_key(KEY_KPENTER); break;
         default:
             //printf("got scancode: %d keysym: %d mod: %d %d\n", event.key.keysym.scancode, keypressed, event.key.keysym.mod);
-            mplayer_put_key(keypressed);
+            if (event->key.keysym.unicode > 0 && event->key.keysym.unicode < 128)
+                mplayer_put_key(event->key.keysym.unicode);
         }
 
         break;
