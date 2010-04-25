@@ -131,7 +131,7 @@ int sdl_default_handle_event(SDL_Event *event)
         case SDLK_F12: mplayer_put_key(KEY_F+12);break;
         case SDLK_KP_PLUS: mplayer_put_key('+');break;
         case SDLK_KP_MINUS: mplayer_put_key('-');break;
-        case SDLK_TAB: mplayer_put_key('\t');break;
+        case SDLK_TAB: mplayer_put_key(KEY_TAB);break;
         case SDLK_PAGEUP: mplayer_put_key(KEY_PAGE_UP);break;
         case SDLK_PAGEDOWN: mplayer_put_key(KEY_PAGE_DOWN);break;
         case SDLK_UP: mplayer_put_key(KEY_UP);break;
