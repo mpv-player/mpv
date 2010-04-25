@@ -90,10 +90,27 @@ int sdl_set_mode(int bpp, uint32_t flags)
     return 0;
 }
 
-#define shift_key (event->key.keysym.mod==(KMOD_LSHIFT||KMOD_RSHIFT))
+static const struct mp_keymap keysym_map[] = {
+    {SDLK_RETURN, KEY_ENTER}, {SDLK_ESCAPE, KEY_ESC},
+    {SDLK_F1, KEY_F+1}, {SDLK_F2, KEY_F+2}, {SDLK_F3, KEY_F+3},
+    {SDLK_F4, KEY_F+4}, {SDLK_F5, KEY_F+5}, {SDLK_F6, KEY_F+6},
+    {SDLK_F7, KEY_F+7}, {SDLK_F8, KEY_F+8}, {SDLK_F9, KEY_F+9},
+    {SDLK_F10, KEY_F+10}, {SDLK_F11, KEY_F+11}, {SDLK_F12, KEY_F+12},
+    {SDLK_KP_PLUS, '+'}, {SDLK_KP_MINUS, '-'}, {SDLK_TAB, KEY_TAB},
+    {SDLK_PAGEUP, KEY_PAGE_UP}, {SDLK_PAGEDOWN, KEY_PAGE_DOWN},
+    {SDLK_UP, KEY_UP}, {SDLK_DOWN, KEY_DOWN},
+    {SDLK_LEFT, KEY_LEFT}, {SDLK_RIGHT, KEY_RIGHT},
+    {SDLK_KP_MULTIPLY, '*'}, {SDLK_KP_DIVIDE, '/'},
+    {SDLK_KP0, KEY_KP0}, {SDLK_KP1, KEY_KP1}, {SDLK_KP2, KEY_KP2},
+    {SDLK_KP3, KEY_KP3}, {SDLK_KP4, KEY_KP4}, {SDLK_KP5, KEY_KP5},
+    {SDLK_KP6, KEY_KP6}, {SDLK_KP7, KEY_KP7}, {SDLK_KP8, KEY_KP8},
+    {SDLK_KP9, KEY_KP9},
+    {SDLK_KP_PERIOD, KEY_KPDEC}, {SDLK_KP_ENTER, KEY_KPENTER},
+};
+
 int sdl_default_handle_event(SDL_Event *event)
 {
-    SDLKey keypressed = SDLK_UNKNOWN;
+    int mpkey;
     switch (event->type) {
     case SDL_VIDEORESIZE:
         vo_dwidth  = event->resize.w;
@@ -112,52 +129,13 @@ int sdl_default_handle_event(SDL_Event *event)
         break;
 
     case SDL_KEYDOWN:
-        keypressed = event->key.keysym.sym;
-        mp_msg(MSGT_VO,MSGL_DBG2, "SDL: Key pressed: '%i'\n", keypressed);
-        switch(keypressed) {
-        case SDLK_RETURN: mplayer_put_key(KEY_ENTER);break;
-        case SDLK_ESCAPE: mplayer_put_key(KEY_ESC);break;
-        case SDLK_F1: mplayer_put_key(KEY_F+1);break;
-        case SDLK_F2: mplayer_put_key(KEY_F+2);break;
-        case SDLK_F3: mplayer_put_key(KEY_F+3);break;
-        case SDLK_F4: mplayer_put_key(KEY_F+4);break;
-        case SDLK_F5: mplayer_put_key(KEY_F+5);break;
-        case SDLK_F6: mplayer_put_key(KEY_F+6);break;
-        case SDLK_F7: mplayer_put_key(KEY_F+7);break;
-        case SDLK_F8: mplayer_put_key(KEY_F+8);break;
-        case SDLK_F9: mplayer_put_key(KEY_F+9);break;
-        case SDLK_F10: mplayer_put_key(KEY_F+10);break;
-        case SDLK_F11: mplayer_put_key(KEY_F+11);break;
-        case SDLK_F12: mplayer_put_key(KEY_F+12);break;
-        case SDLK_KP_PLUS: mplayer_put_key('+');break;
-        case SDLK_KP_MINUS: mplayer_put_key('-');break;
-        case SDLK_TAB: mplayer_put_key(KEY_TAB);break;
-        case SDLK_PAGEUP: mplayer_put_key(KEY_PAGE_UP);break;
-        case SDLK_PAGEDOWN: mplayer_put_key(KEY_PAGE_DOWN);break;
-        case SDLK_UP: mplayer_put_key(KEY_UP);break;
-        case SDLK_DOWN: mplayer_put_key(KEY_DOWN);break;
-        case SDLK_LEFT: mplayer_put_key(KEY_LEFT);break;
-        case SDLK_RIGHT: mplayer_put_key(KEY_RIGHT);break;
-        case SDLK_KP_MULTIPLY: mplayer_put_key('*'); break;
-        case SDLK_KP_DIVIDE: mplayer_put_key('/'); break;
-        case SDLK_KP0: mplayer_put_key(KEY_KP0); break;
-        case SDLK_KP1: mplayer_put_key(KEY_KP1); break;
-        case SDLK_KP2: mplayer_put_key(KEY_KP2); break;
-        case SDLK_KP3: mplayer_put_key(KEY_KP3); break;
-        case SDLK_KP4: mplayer_put_key(KEY_KP4); break;
-        case SDLK_KP5: mplayer_put_key(KEY_KP5); break;
-        case SDLK_KP6: mplayer_put_key(KEY_KP6); break;
-        case SDLK_KP7: mplayer_put_key(KEY_KP7); break;
-        case SDLK_KP8: mplayer_put_key(KEY_KP8); break;
-        case SDLK_KP9: mplayer_put_key(KEY_KP9); break;
-        case SDLK_KP_PERIOD: mplayer_put_key(KEY_KPDEC); break;
-        case SDLK_KP_ENTER: mplayer_put_key(KEY_KPENTER); break;
-        default:
-            //printf("got scancode: %d keysym: %d mod: %d %d\n", event.key.keysym.scancode, keypressed, event.key.keysym.mod);
-            if (event->key.keysym.unicode > 0 && event->key.keysym.unicode < 128)
-                mplayer_put_key(event->key.keysym.unicode);
-        }
-
+        mpkey = lookup_keymap_table(keysym_map, event->key.keysym.sym);
+        if (!mpkey &&
+            event->key.keysym.unicode > 0 &&
+            event->key.keysym.unicode < 128)
+            mpkey = event->key.keysym.unicode;
+        if (mpkey)
+            mplayer_put_key(mpkey);
         break;
 
     case SDL_QUIT: mplayer_put_key(KEY_CLOSE_WIN);break;
