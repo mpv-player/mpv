@@ -26,6 +26,18 @@
 #include "input/mouse.h"
 #include "video_out.h"
 
+int sdl_set_mode(int bpp, uint32_t flags)
+{
+    SDL_Surface *s = SDL_SetVideoMode(vo_dwidth, vo_dheight, bpp, flags);
+    if (!s) {
+      mp_msg(MSGT_VO, MSGL_FATAL, "SDL SetVideoMode failed: %s\n", SDL_GetError());
+      return -1;
+    }
+    vo_dwidth  = s->w;
+    vo_dheight = s->h;
+    return 0;
+}
+
 #define shift_key (event->key.keysym.mod==(KMOD_LSHIFT||KMOD_RSHIFT))
 int sdl_default_handle_event(SDL_Event *event)
 {

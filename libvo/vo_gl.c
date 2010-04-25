@@ -598,13 +598,8 @@ static int create_window(uint32_t d_width, uint32_t d_height, uint32_t flags, co
 #endif
 #ifdef CONFIG_GL_SDL
   if (glctx.type == GLTYPE_SDL) {
-    SDL_Surface *s = SDL_SetVideoMode(d_width, d_height, 0, SDL_OPENGL | SDL_RESIZABLE);
-    if (!s) {
-      mp_msg(MSGT_VO, MSGL_FATAL, "SDL SetVideoMode failed: %s\n", SDL_GetError());
-      return -1;
-    }
-    vo_dwidth  = s->w;
-    vo_dheight = s->h;
+    vo_dwidth  = d_width;
+    vo_dheight = d_height;
   }
 #endif
   return 0;

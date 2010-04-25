@@ -1855,6 +1855,8 @@ static void *sdlgpa(const GLubyte *name) {
 }
 
 static int setGlWindow_sdl(MPGLContext *ctx) {
+  if (sdl_set_mode(0, SDL_OPENGL | SDL_RESIZABLE) < 0)
+    return SET_WINDOW_FAILED;
   SDL_GL_LoadLibrary(NULL);
   getFunctions(sdlgpa, NULL);
   return SET_WINDOW_OK;
@@ -1866,6 +1868,8 @@ static int sdl_check_events(void) {
   while (SDL_PollEvent(&event)) {
     res |= sdl_default_handle_event(&event);
   }
+  if (res & VO_EVENT_RESIZE)
+    sdl_set_mode(0, SDL_OPENGL | SDL_RESIZABLE);
   return res;
 }
 
