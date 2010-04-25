@@ -1901,6 +1901,14 @@ static void dummy_update_xinerama_info(void) {
 }
 
 int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
+  if (type == GLTYPE_AUTO) {
+    int res = init_mpglcontext(ctx, GLTYPE_W32);
+    if (res) return res;
+    res = init_mpglcontext(ctx, GLTYPE_X11);
+    if (res) return res;
+    res = init_mpglcontext(ctx, GLTYPE_SDL);
+    return res;
+  }
   memset(ctx, 0, sizeof(*ctx));
   ctx->setGlWindow = setGlWindow_dummy;
   ctx->releaseGlContext = releaseGlContext_dummy;

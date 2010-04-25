@@ -373,6 +373,7 @@ void glDisableYUVConversion(GLenum target, int type);
 /** \} */
 
 enum MPGLType {
+  GLTYPE_AUTO,
   GLTYPE_W32,
   GLTYPE_X11,
   GLTYPE_SDL,

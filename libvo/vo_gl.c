@@ -1099,14 +1099,8 @@ static const opt_t subopts[] = {
 
 static int preinit_internal(const char *arg, int allow_sw)
 {
-    enum MPGLType gltype = GLTYPE_SDL;
     // set defaults
-#ifdef CONFIG_GL_X11
-    gltype = GLTYPE_X11;
-#endif
-#ifdef CONFIG_GL_WIN32
-    gltype = GLTYPE_W32;
-#endif
+    enum MPGLType gltype = GLTYPE_AUTO;
     many_fmts = 1;
     use_osd = -1;
     scaled_osd = 0;
