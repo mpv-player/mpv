@@ -583,6 +583,8 @@ static void set_video_mode(int width, int height, int bpp, uint32_t sdlflags)
         priv->surface = newsurface;
         priv->dstwidth = width;
         priv->dstheight = height;
+        vo_dwidth  = width;
+        vo_dheight = height;
 
         setup_surfaces();
     }
