@@ -116,6 +116,8 @@ int sdl_default_handle_event(SDL_Event *event)
         vo_dwidth  = event->resize.w;
         vo_dheight = event->resize.h;
         return VO_EVENT_RESIZE;
+    case SDL_VIDEOEXPOSE:
+        return VO_EVENT_EXPOSE;
     case SDL_MOUSEBUTTONDOWN:
         if(vo_nomouse_input)
             break;
