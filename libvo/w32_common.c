@@ -30,8 +30,6 @@
 #include "w32_common.h"
 #include "mp_fifo.h"
 
-extern int enable_mouse_movements;
-
 #ifndef MONITOR_DEFAULTTOPRIMARY
 #define MONITOR_DEFAULTTOPRIMARY 1
 #endif

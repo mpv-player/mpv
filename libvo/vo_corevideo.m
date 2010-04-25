@@ -83,7 +83,6 @@ static uint32_t image_format;
 static int isFullscreen;
 static int isOntop;
 static int isRootwin;
-extern int enable_mouse_movements;
 
 static float winAlpha = 1;
 static int int_pause = 0;

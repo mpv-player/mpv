@@ -85,7 +85,6 @@
 #define WIN_LAYER_ONTOP                  6
 #define WIN_LAYER_ABOVE_DOCK             10
 
-extern int enable_mouse_movements;
 int fs_layer = WIN_LAYER_ABOVE_DOCK;
 static int orig_layer = 0;
 static int old_gravity = NorthWestGravity;
