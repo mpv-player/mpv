@@ -1339,8 +1339,6 @@ static int control(uint32_t request, void *data, ...)
     }
     break;
   case VOCTRL_UPDATE_SCREENINFO:
-    if (!glctx.update_xinerama_info)
-      break;
     glctx.update_xinerama_info();
     return VO_TRUE;
   }
