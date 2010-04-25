@@ -2750,6 +2750,10 @@ static int seek(MPContext *mpctx, double amount, int style)
     current_module = "seek";
     if (mpctx->stop_play == AT_END_OF_FILE)
         mpctx->stop_play = KEEP_PLAYING;
+    if (style & SEEK_FACTOR
+        || style & SEEK_ABSOLUTE && amount < mpctx->last_chapter_pts
+        || amount < 0)
+        mpctx->last_chapter_seek = -1;
     if (mpctx->timeline && style & SEEK_FACTOR) {
         amount *= mpctx->timeline[mpctx->num_timeline_parts].start;
         style &= ~SEEK_FACTOR;
@@ -2795,14 +2799,15 @@ static int seek(MPContext *mpctx, double amount, int style)
 int get_current_chapter(struct MPContext *mpctx)
 {
     if (!mpctx->chapters || !mpctx->sh_video)
-        return demuxer_get_current_chapter(mpctx->demuxer);
+        return FFMAX(mpctx->last_chapter_seek,
+                     demuxer_get_current_chapter(mpctx->demuxer));
 
     int i;
     double current_pts = mpctx->sh_video->pts;
     for (i = 1; i < mpctx->num_chapters; i++)
         if (current_pts < mpctx->chapters[i].start)
             break;
-    return i - 1;
+    return FFMAX(mpctx->last_chapter_seek, i - 1);
 }
 
 // currently returns a string allocated with malloc, not talloc
@@ -2816,11 +2821,18 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter)
 int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
                  char **chapter_name)
 {
+    mpctx->last_chapter_seek = -1;
     if (!mpctx->chapters || !mpctx->sh_video) {
         int res = demuxer_seek_chapter(mpctx->demuxer, chapter, seek_pts,
                                        chapter_name);
-        if (res >= 0 && *seek_pts == -1)
-            seek_reset(mpctx);
+        if (res >= 0) {
+            if (*seek_pts == -1)
+                seek_reset(mpctx);
+            else {
+                mpctx->last_chapter_seek = res;
+                mpctx->last_chapter_pts = *seek_pts;
+            }
+        }
         return res;
     }
 
@@ -2829,6 +2841,8 @@ int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
     if (chapter < 0)
         chapter = 0;
     *seek_pts = mpctx->chapters[chapter].start;
+    mpctx->last_chapter_seek = chapter;
+    mpctx->last_chapter_pts = *seek_pts;
     if (chapter_name)
         *chapter_name = talloc_strdup(NULL, mpctx->chapters[chapter].name);
     return chapter;
@@ -4085,6 +4099,7 @@ if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
  mpctx->drop_message_shown = 0;
  mpctx->update_video_immediately = true;
  mpctx->total_avsync_change = 0;
+ mpctx->last_chapter_seek = -1;
  // Make sure VO knows current pause state
  if (mpctx->sh_video)
      vo_control(mpctx->video_out, mpctx->paused ? VOCTRL_PAUSE : VOCTRL_RESUME,

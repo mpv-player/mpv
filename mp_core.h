@@ -154,6 +154,12 @@ typedef struct MPContext {
     double rel_seek_secs;
     int abs_seek_pos;
 
+    /* Heuristic for relative chapter seeks: keep track which chapter
+     * the user wanted to go to, even if we aren't exactly within the
+     * boundaries of that chapter due to an inaccurate seek. */
+    int last_chapter_seek;
+    double last_chapter_pts;
+
     float begin_skip; ///< start time of the current skip while on edlout mode
     // audio is muted if either EDL or user activates mute
     short edl_muted; ///< Stores whether EDL is currently in muted mode.
