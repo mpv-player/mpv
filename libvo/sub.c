@@ -1095,9 +1095,9 @@ void osd_free(struct osd_state *osd)
 
 #define FONT_LOAD_DEFER 6
 
-int osd_update_ext(struct osd_state *osd, int dxs, int dys, int left_border,
-                   int top_border, int right_border, int bottom_border,
-                   int orig_w, int orig_h)
+static int osd_update_ext(struct osd_state *osd, int dxs, int dys,
+                          int left_border, int top_border, int right_border,
+                          int bottom_border, int orig_w, int orig_h)
 {
     mp_osd_obj_t* obj=vo_osd_list;
     int chg=0;
