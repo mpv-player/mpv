@@ -127,18 +127,18 @@ int sdl_default_handle_event(SDL_Event *event)
         vo_dwidth  = event->resize.w;
         vo_dheight = event->resize.h;
         return VO_EVENT_RESIZE;
+
     case SDL_VIDEOEXPOSE:
         return VO_EVENT_EXPOSE;
+
     case SDL_MOUSEBUTTONDOWN:
-        if(vo_nomouse_input)
-            break;
-        mplayer_put_key((MOUSE_BTN0 + event->button.button - 1) | MP_KEY_DOWN);
+        if (!vo_nomouse_input)
+            mplayer_put_key((MOUSE_BTN0 + event->button.button - 1) | MP_KEY_DOWN);
         break;
 
     case SDL_MOUSEBUTTONUP:
-        if(vo_nomouse_input)
-            break;
-        mplayer_put_key(MOUSE_BTN0 + event->button.button - 1);
+        if(!vo_nomouse_input)
+            mplayer_put_key(MOUSE_BTN0 + event->button.button - 1);
         break;
 
     case SDL_KEYDOWN:
@@ -151,7 +151,9 @@ int sdl_default_handle_event(SDL_Event *event)
             mplayer_put_key(mpkey);
         break;
 
-    case SDL_QUIT: mplayer_put_key(KEY_CLOSE_WIN);break;
+    case SDL_QUIT:
+        mplayer_put_key(KEY_CLOSE_WIN);
+        break;
     }
     return 0;
 }
