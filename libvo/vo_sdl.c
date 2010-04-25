@@ -397,9 +397,6 @@ static int sdl_open (void *plugin, void *name)
 	    priv->sdlflags |= SDL_DOUBLEBUF;
 #endif
 
-	/* Setup Keyrepeats (500/30 are defaults) */
-	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, 100 /*SDL_DEFAULT_REPEAT_INTERVAL*/);
-
 	/* get information about the graphics adapter */
 	vidInfo = SDL_GetVideoInfo ();
 
@@ -443,16 +440,6 @@ static int sdl_open (void *plugin, void *name)
 
 		priv->bpp = 16;
 	}
-
-	/* We don't want those in our event queue.
-	 * We use SDL_KEYUP cause SDL_KEYDOWN seems to cause problems
-	 * with keys need to be pressed twice, to be recognized.
-	 */
-	SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
-	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
-//	SDL_EventState(SDL_QUIT, SDL_IGNORE);
-	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
-	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 
 	/* Success! */
 	return 0;
@@ -1407,8 +1394,7 @@ uninit(void)
 	sdl_close();
 
 	/* Cleanup SDL */
-    if(SDL_WasInit(SDL_INIT_VIDEO))
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    vo_sdl_uninit();
 
  	mp_msg(MSGT_VO,MSGL_DBG3, "SDL: Closed Plugin\n");
 
@@ -1458,12 +1444,10 @@ static int preinit(const char *arg)
     priv->bpp = 0;
 
     /* initialize the SDL Video system */
-    if (!SDL_WasInit(SDL_INIT_VIDEO)) {
-        if (SDL_Init (SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE)) {
+    if (!vo_sdl_init()) {
             mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SDL_InitializationFailed, SDL_GetError());
 
             return -1;
-        }
     }
 
     SDL_VideoDriverName(priv->driver, 8);

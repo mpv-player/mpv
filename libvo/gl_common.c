@@ -1937,7 +1937,7 @@ int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
     ctx->swapGlBuffers = swapGlBuffers_sdl;
     ctx->check_events = sdl_check_events;
     ctx->fullscreen = vo_sdl_fullscreen;
-    return 1;
+    return vo_sdl_init();
 #endif
   default:
     return 0;
@@ -1959,7 +1959,7 @@ void uninit_mpglcontext(MPGLContext *ctx) {
 #endif
 #ifdef CONFIG_GL_SDL
   case GLTYPE_SDL:
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    vo_sdl_uninit();
     break;
 #endif
   }

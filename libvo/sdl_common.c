@@ -30,6 +30,30 @@ static int old_w;
 static int old_h;
 static int mode_flags;
 
+int vo_sdl_init(void)
+{
+    if (!SDL_WasInit(SDL_INIT_VIDEO) &&
+        SDL_Init(SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE) < 0)
+        return 0;
+
+    // Setup Keyrepeats (500/30 are defaults)
+    SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, 100 /*SDL_DEFAULT_REPEAT_INTERVAL*/);
+
+    // We don't want those in our event queue.
+    SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
+    SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
+    SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
+    SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
+
+    return 1;
+}
+
+void vo_sdl_uninit(void)
+{
+    if (SDL_WasInit(SDL_INIT_VIDEO))
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+}
+
 void vo_sdl_fullscreen(void)
 {
     if (vo_fs) {
