@@ -140,7 +140,7 @@ int sdl_default_handle_event(SDL_Event *event)
         break;
 
     case SDL_MOUSEBUTTONUP:
-        if(!vo_nomouse_input)
+        if (!vo_nomouse_input)
             mplayer_put_key(MOUSE_BTN0 + event->button.button - 1);
         break;
 
