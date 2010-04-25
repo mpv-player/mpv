@@ -1890,7 +1890,7 @@ static int dummy_check_events(void) {
 
 static void dummy_update_xinerama_info(void) {
   if (vo_screenwidth <= 0 || vo_screenheight <= 0) {
-    mp_msg(MSGT_VO, MSGL_ERR, "You must specify the screen dimensions"
+    mp_msg(MSGT_VO, MSGL_ERR, "You must specify the screen dimensions "
                               "with -screenw and -screenh\n");
     vo_screenwidth  = 1280;
     vo_screenheight = 768;
