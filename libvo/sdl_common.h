@@ -34,4 +34,4 @@ void vo_sdl_fullscreen(void);
 int sdl_set_mode(int bpp, uint32_t flags);
 int sdl_default_handle_event(SDL_Event *event);
 
-#endif
+#endif /* MPLAYER_SDL_COMMON_H */
