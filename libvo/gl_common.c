@@ -1511,9 +1511,9 @@ void glDisableYUVConversion(GLenum target, int type) {
       break;
     case YUV_CONVERSION_TEXT_FRAGMENT:
       mpglDisable(GL_TEXT_FRAGMENT_SHADER_ATI);
-      // HACK: at least the 10.5 Radeon drivers are broken
-      // and without this disable the texture units while
-      // the program is still running
+      // HACK: at least the Mac OS X 10.5 PPC Radeon drivers are broken and
+      // without this disable the texture units while the program is still
+      // running (10.4 PPC seems to work without this though).
       mpglFlush();
       mpglActiveTexture(GL_TEXTURE1);
       mpglDisable(target);
