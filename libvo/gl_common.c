@@ -1869,6 +1869,8 @@ static int sdl_check_events(void) {
   while (SDL_PollEvent(&event)) {
     res |= sdl_default_handle_event(&event);
   }
+  // poll "events" from within MPlayer code
+  res |= sdl_default_handle_event(NULL);
   if (res & VO_EVENT_RESIZE)
     sdl_set_mode(0, SDL_OPENGL | SDL_RESIZABLE);
   return res;

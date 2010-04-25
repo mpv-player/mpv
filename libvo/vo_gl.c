@@ -650,6 +650,10 @@ glconfig:
 static void check_events(void)
 {
     int e=glctx.check_events();
+    if(e&VO_EVENT_REINIT) {
+        uninitGl();
+        initGl(vo_dwidth, vo_dheight);
+    }
     if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
     if(e&VO_EVENT_EXPOSE && int_pause) redraw();
 }

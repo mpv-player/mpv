@@ -29,9 +29,12 @@
 static int old_w;
 static int old_h;
 static int mode_flags;
+static int reinit;
 
 int vo_sdl_init(void)
 {
+    reinit = 0;
+
     if (!SDL_WasInit(SDL_INIT_VIDEO) &&
         SDL_Init(SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE) < 0)
         return 0;
@@ -70,6 +73,9 @@ void vo_sdl_fullscreen(void)
     }
     vo_fs = !vo_fs;
     sdl_set_mode(0, mode_flags);
+    // on OSX at least we now need to do a full reinit.
+    // TODO: this should only be set if really necessary.
+    reinit = 1;
 }
 
 int sdl_set_mode(int bpp, uint32_t flags)
@@ -111,6 +117,11 @@ static const struct mp_keymap keysym_map[] = {
 int sdl_default_handle_event(SDL_Event *event)
 {
     int mpkey;
+    if (!event) {
+        int res = reinit ? VO_EVENT_REINIT : 0;
+        reinit = 0;
+        return res;
+    }
     switch (event->type) {
     case SDL_VIDEORESIZE:
         vo_dwidth  = event->resize.w;

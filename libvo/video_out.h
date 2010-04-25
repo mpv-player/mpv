@@ -33,6 +33,7 @@
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2
 #define VO_EVENT_KEYPRESS 4
+#define VO_EVENT_REINIT 8
 
 /* Obsolete: VOCTRL_QUERY_VAA 1 */
 /* does the device support the required format */
