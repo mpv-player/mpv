@@ -1,7 +1,7 @@
 /*
  * common OpenGL routines
  *
- * copyleft (C) 2005 Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>
+ * copyleft (C) 2005-2010 Reimar Döffinger <Reimar.Doeffinger@gmx.de>
  * Special thanks go to the xine team and Matthias Hopf, whose video_out_opengl.c
  * gave me lots of good ideas.
  *
