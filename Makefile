@@ -558,6 +558,7 @@ SRCS_MPLAYER-$(GGI)          += libvo/vo_ggi.c
 SRCS_MPLAYER-$(GIF)          += libvo/vo_gif89a.c
 SRCS_MPLAYER-$(GL)           += libvo/gl_common.c libvo/vo_gl.c \
                                 libvo/vo_gl2.c libvo/csputils.c
+SRCS_MPLAYER-$(GL_SDL)       += libvo/sdl_common.c
 SRCS_MPLAYER-$(GL_WIN32)     += libvo/w32_common.c
 SRCS_MPLAYER-$(GL_X11)       += libvo/x11_common.c
 SRCS_MPLAYER-$(MATRIXVIEW)   += libvo/vo_matrixview.c libvo/matrixview.c
@@ -626,7 +627,7 @@ SRCS_MPLAYER-$(PNM)           += libvo/vo_pnm.c
 SRCS_MPLAYER-$(PULSE)         += libao2/ao_pulse.c
 SRCS_MPLAYER-$(QUARTZ)        += libvo/vo_quartz.c libvo/osx_common.c
 SRCS_MPLAYER-$(S3FB)          += libvo/vo_s3fb.c
-SRCS_MPLAYER-$(SDL)           += libao2/ao_sdl.c libvo/vo_sdl.c
+SRCS_MPLAYER-$(SDL)           += libao2/ao_sdl.c libvo/vo_sdl.c libvo/sdl_common.c
 SRCS_MPLAYER-$(SGIAUDIO)      += libao2/ao_sgi.c
 SRCS_MPLAYER-$(SUNAUDIO)      += libao2/ao_sun.c
 SRCS_MPLAYER-$(SVGA)          += libvo/vo_svga.c

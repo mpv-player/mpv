@@ -1844,11 +1844,7 @@ static int x11_check_events(void) {
 #endif
 
 #ifdef CONFIG_GL_SDL
-#ifdef CONFIG_SDL_SDL_H
-#include <SDL/SDL.h>
-#else
-#include <SDL.h>
-#endif
+#include "sdl_common.h"
 
 static void swapGlBuffers_sdl(MPGLContext *ctx) {
   SDL_GL_SwapBuffers();
@@ -1863,6 +1859,16 @@ static int setGlWindow_sdl(MPGLContext *ctx) {
   getFunctions(sdlgpa, NULL);
   return SET_WINDOW_OK;
 }
+
+static int sdl_check_events(void) {
+  int res = 0;
+  SDL_Event event;
+  while (SDL_PollEvent(&event)) {
+    res |= sdl_default_handle_event(&event);
+  }
+  return res;
+}
+
 #endif
 
 static int setGlWindow_dummy(MPGLContext *ctx) {
@@ -1913,6 +1919,7 @@ int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
     SDL_Init(SDL_INIT_VIDEO);
     ctx->setGlWindow = setGlWindow_sdl;
     ctx->swapGlBuffers = swapGlBuffers_sdl;
+    ctx->check_events = sdl_check_events;
     return 1;
 #endif
   default:
