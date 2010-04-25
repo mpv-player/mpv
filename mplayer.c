@@ -4309,6 +4309,13 @@ if(auto_quality>0){
       mp_cmd_free(cmd);
       if (mpctx->stop_play)
           break;
+      if (mpctx->rel_seek_secs || mpctx->abs_seek_pos) {
+          cmd = mp_input_get_cmd(mpctx->input, 0, 1);
+          /* Allow seek commands to be combined, but execute the real seek
+           * before processing other commands */
+          if (!cmd || cmd->id != MP_CMD_SEEK)
+              break;
+      }
   }
   if (!mpctx->paused || mpctx->stop_play || mpctx->rel_seek_secs
       || mpctx->abs_seek_pos)
