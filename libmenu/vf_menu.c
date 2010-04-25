@@ -65,7 +65,9 @@ void vf_menu_pause_update(struct vf_instance* vf) {
   }
 }
 
-static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
+static int cmd_filter(mp_cmd_t* cmd, void *ctx)
+{
+    struct vf_priv_s *priv = ctx;
 
   switch(cmd->id) {
   case MP_CMD_MENU : {  // Convert txt cmd from the users into libmenu stuff
@@ -240,7 +242,7 @@ static int open_vf(vf_instance_t *vf, char* args){
       return 0;
     }
     st_priv->root->show = menu_startup;
-    mp_input_add_cmd_filter((mp_input_cmd_filter)cmd_filter,st_priv);
+    mp_input_add_cmd_filter(cmd_filter,st_priv);
   }
 
   vf->config = config;

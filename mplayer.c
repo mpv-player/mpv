@@ -1051,7 +1051,7 @@ static void load_per_file_config (m_config_t* conf, const char *const file)
 static int libmpdemux_was_interrupted(struct MPContext *mpctx, int stop_play)
 {
   mp_cmd_t* cmd;
-  if((cmd = mp_input_get_cmd(mpctx->input, 0,0,0)) != NULL) {
+  if((cmd = mp_input_get_cmd(mpctx->input, 0, 0)) != NULL) {
        switch(cmd->id) {
        case MP_CMD_QUIT:
 	 exit_player_with_rc(mpctx, EXIT_QUIT, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
@@ -2573,10 +2573,10 @@ static void pause_loop(struct MPContext *mpctx)
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
     }
 
-    while ( (cmd = mp_input_get_cmd(mpctx->input, 20, 1, 1)) == NULL
+    while ( (cmd = mp_input_get_cmd(mpctx->input, 20, 1)) == NULL
             || cmd->id == MP_CMD_SET_MOUSE_POS || cmd->pausing == 4) {
 	if (cmd) {
-	  cmd = mp_input_get_cmd(mpctx->input, 0,1,0);
+	  cmd = mp_input_get_cmd(mpctx->input, 0, 0);
 	  run_command(mpctx, cmd);
 	  mp_cmd_free(cmd);
 	  continue;
@@ -3397,7 +3397,7 @@ while (player_idle_mode && !mpctx->filename) {
     mp_cmd_t * cmd;
     if (mpctx->video_out && mpctx->video_out->config_ok)
 	vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
-    while (!(cmd = mp_input_get_cmd(mpctx->input, 0,1,0))) { // wait for command
+    while (!(cmd = mp_input_get_cmd(mpctx->input, 0, 0))) { // wait for command
         if (mpctx->video_out)
 	    vo_check_events(mpctx->video_out);
         usec_sleep(20000);
@@ -4304,7 +4304,7 @@ if(auto_quality>0){
 {
   while (1) {
   mp_cmd_t* cmd;
-  while ((cmd = mp_input_get_cmd(mpctx->input, 0,0,0)) != NULL) {
+  while ((cmd = mp_input_get_cmd(mpctx->input, 0, 0)) != NULL) {
       run_command(mpctx, cmd);
       mp_cmd_free(cmd);
       if (mpctx->stop_play)
