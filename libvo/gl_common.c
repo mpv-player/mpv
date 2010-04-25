@@ -1854,6 +1854,15 @@ static void swapGlBuffers_sdl(MPGLContext *ctx) {
   SDL_GL_SwapBuffers();
 }
 
+static void *sdlgpa(const GLubyte *name) {
+  return SDL_GL_GetProcAddress(name);
+}
+
+static int setGlWindow_sdl(MPGLContext *ctx) {
+  SDL_GL_LoadLibrary(NULL);
+  getFunctions(sdlgpa, NULL);
+  return SET_WINDOW_OK;
+}
 #endif
 
 static int setGlWindow_dummy(MPGLContext *ctx) {
@@ -1902,6 +1911,7 @@ int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
 #ifdef CONFIG_GL_SDL
   case GLTYPE_SDL:
     SDL_Init(SDL_INIT_VIDEO);
+    ctx->setGlWindow = setGlWindow_sdl;
     ctx->swapGlBuffers = swapGlBuffers_sdl;
     return 1;
 #endif
