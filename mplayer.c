@@ -1666,12 +1666,13 @@ static void update_osd_msg(struct MPContext *mpctx)
             char percentage_text[10];
             int pts = demuxer_get_current_time(mpctx->demuxer);
 
-            if (mpctx->osd_show_percentage_until)
+            if (mpctx->osd_show_percentage_until) {
                 if (mpctx->timeline)
                     percentage = mpctx->sh_video->pts * 100 /
                         mpctx->timeline[mpctx->num_timeline_parts].start;
                 else
                     percentage = demuxer_get_percent_pos(mpctx->demuxer);
+            }
 
             if (percentage >= 0)
                 snprintf(percentage_text, 9, " (%d%%)", percentage);
@@ -2956,7 +2957,7 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
     uint64_t missing_time = 0;
     int part_count = 0;
     int num_chapters = 0;
-    uint64_t prev_part_offset;
+    uint64_t prev_part_offset = 0;
     for (int i = 0; i < m->num_ordered_chapters; i++) {
         struct matroska_chapter *c = m->ordered_chapters + i;
 
@@ -4324,13 +4325,14 @@ if(auto_quality>0){
       update_osd_msg(mpctx);
       int hack = vo_osd_changed(0);
       vo_osd_changed(hack);
-      if (hack)
+      if (hack) {
           if (redraw_osd(mpctx->sh_video, mpctx->osd) < 0) {
               add_step_frame(mpctx);
               break;
           }
           else
               vo_osd_changed(0);
+      }
   }
   pause_loop(mpctx);
   }
