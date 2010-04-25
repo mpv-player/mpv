@@ -47,7 +47,6 @@ int vo_sdl_init(void)
 
     // We don't want those in our event queue.
     SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
-    SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
     SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
     SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 
@@ -130,6 +129,10 @@ int sdl_default_handle_event(SDL_Event *event)
 
     case SDL_VIDEOEXPOSE:
         return VO_EVENT_EXPOSE;
+
+    case SDL_MOUSEMOTION:
+        vo_mouse_movement(event->motion.x, event->motion.y);
+        break;
 
     case SDL_MOUSEBUTTONDOWN:
         if (!vo_nomouse_input)
