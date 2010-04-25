@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r30449 -->
+<!-- synced with r30714 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -557,7 +557,8 @@ A DVD-k általában AC-3 (Dolby Digital) vagy DTS (Digital Theater System) form�
 kódolt térhatású hanggal rendelkeznek. Néhány modern audió berendezés képes ezen
 formátumok belső dekódolására. Az <application>MPlayer</application> beállítható
 úgy, hogy dekódolás nélkül adja át az audió adatot. Ez csak akkor fog működni, ha
-van egy S/PDIF (Sony/Philips Digital Interface) jack dugó a hangkártyádon.
+van egy S/PDIF (Sony/Philips Digital Interface) jack dugó a hangkártyádon, vagy
+HDMI-n keresztül küldöd át a hangot.
 </para>
 
 <para>
