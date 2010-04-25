@@ -34,6 +34,7 @@
 #include <math.h>
 #include "gl_common.h"
 #include "csputils.h"
+#include "aspect.h"
 
 void (GLAPIENTRY *mpglBegin)(GLenum);
 void (GLAPIENTRY *mpglEnd)(void);
@@ -1887,10 +1888,21 @@ static int dummy_check_events(void) {
   return 0;
 }
 
+static void dummy_update_xinerama_info(void) {
+  if (vo_screenwidth <= 0 || vo_screenheight <= 0) {
+    mp_msg(MSGT_VO, MSGL_ERR, "You must specify the screen dimensions"
+                              "with -screenw and -screenh\n");
+    vo_screenwidth  = 1280;
+    vo_screenheight = 768;
+  }
+  aspect_save_screenres(vo_screenwidth, vo_screenheight);
+}
+
 int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
   memset(ctx, 0, sizeof(*ctx));
   ctx->setGlWindow = setGlWindow_dummy;
   ctx->releaseGlContext = releaseGlContext_dummy;
+  ctx->update_xinerama_info = dummy_update_xinerama_info;
   ctx->check_events = dummy_check_events;
   ctx->type = type;
   switch (ctx->type) {
@@ -1924,6 +1936,7 @@ int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
     ctx->setGlWindow = setGlWindow_sdl;
     ctx->swapGlBuffers = swapGlBuffers_sdl;
     ctx->check_events = sdl_check_events;
+    ctx->fullscreen = vo_sdl_fullscreen;
     return 1;
 #endif
   default:

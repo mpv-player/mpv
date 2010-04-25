@@ -26,9 +26,34 @@
 #include "input/mouse.h"
 #include "video_out.h"
 
+static int old_w;
+static int old_h;
+static int mode_flags;
+
+void vo_sdl_fullscreen(void)
+{
+    if (vo_fs) {
+        vo_dwidth  = old_w;
+        vo_dheight = old_h;
+    } else {
+        old_w = vo_dwidth;
+        old_h = vo_dheight;
+        vo_dwidth  = vo_screenwidth;
+        vo_dheight = vo_screenheight;
+    }
+    vo_fs = !vo_fs;
+    sdl_set_mode(0, mode_flags);
+}
+
 int sdl_set_mode(int bpp, uint32_t flags)
 {
-    SDL_Surface *s = SDL_SetVideoMode(vo_dwidth, vo_dheight, bpp, flags);
+    SDL_Surface *s;
+    mode_flags = flags;
+    if (vo_fs) flags |= SDL_FULLSCREEN;
+    // doublebuf with opengl creates flickering
+    if (vo_doublebuffering && !(flags & SDL_OPENGL))
+        flags |= SDL_DOUBLEBUF;
+    s = SDL_SetVideoMode(vo_dwidth, vo_dheight, bpp, flags);
     if (!s) {
       mp_msg(MSGT_VO, MSGL_FATAL, "SDL SetVideoMode failed: %s\n", SDL_GetError());
       return -1;
