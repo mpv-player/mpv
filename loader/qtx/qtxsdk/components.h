@@ -29,6 +29,14 @@ typedef int32_t                         SInt32;
 typedef void *GlobalsPtr;
 typedef void **Globals;
 
+enum {
+    kInitializeQTMLNoSoundFlag = (1L << 0),
+    kInitializeQTMLUseGDIFlag = (1L << 1),
+    kInitializeQTMLDisableDirectSound = (1L << 2),
+    kInitializeQTMLUseExclusiveFullScreenModeFlag = (1L << 3),
+    kInitializeQTMLDisableDDClippers = (1L << 4)
+};
+
 //==================== COMPONENTS ===========================
 
 struct __attribute__((__packed__)) ComponentParameters {

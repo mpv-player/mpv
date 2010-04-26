@@ -220,9 +220,6 @@ Installation directories:
   --localedir=DIR        directory for locale tree [PREFIX/share/locale]
   --libdir=DIR           directory for object code libraries [PREFIX/lib]
   --codecsdir=DIR        directory for binary codecs [LIBDIR/codecs]
-  --win32codecsdir=DIR   directory for Windows DLLs [LIBDIR/codecs]
-  --xanimcodecsdir=DIR   directory for XAnim codecs [LIBDIR/codecs]
-  --realcodecsdir=DIR    directory for RealPlayer codecs [LIBDIR/codecs]
 
 Optional features:
   --disable-mencoder     disable MEncoder (A/V encoder) compilation [enable]
@@ -730,15 +727,6 @@ for ac_option do
     ;;
   --codecsdir=*)
     _codecsdir=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --win32codecsdir=*)
-    _win32codecsdir=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --xanimcodecsdir=*)
-    _xanimcodecsdir=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --realcodecsdir=*)
-    _realcodecsdir=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --localedir=*)
     _localedir=$(echo $ac_option | cut -d '=' -f 2)
@@ -2430,6 +2418,7 @@ if test "$cc_vendor" = "gnu" ; then
   cc_check -Wdisabled-optimization && CFLAGS="-Wdisabled-optimization $CFLAGS"
   cc_check -Wundef && CFLAGS="-Wundef $CFLAGS"
   cc_check -Wmissing-prototypes && CFLAGS="-Wmissing-prototypes $CFLAGS"
+  cc_check -Wstrict-prototypes && CFLAGS="-Wstrict-prototypes $CFLAGS"
 else
   CFLAGS="-D_ISOC99_SOURCE -D_BSD_SOURCE $CFLAGS"
 fi
@@ -2590,14 +2579,12 @@ fi
 echo "pabsw xmm0, xmm0" > $TMPS
 yasm_check || _yasm=""
 if test $_yasm ; then
-  test "$_mmx" = "yes" && fft_mmx="yes"
   def_yasm='#define HAVE_YASM 1'
-  _have_yasm="yes"
+  have_yasm="yes"
   echores "$_yasm"
 else
   def_yasm='#define HAVE_YASM 0'
-  fft_mmx="no"
-  _have_yasm="no"
+  have_yasm="no"
   echores "no"
 fi
 
@@ -6754,8 +6741,7 @@ fi
 # Fall back on default directory.
 if test -z "$_codecsdir" ; then
   _codecsdir="$_libdir/codecs"
-  mingw32 && _codecsdir="codecs"
-  os2 && _codecsdir="codecs"
+  mingw32 || os2 && _codecsdir="codecs"
 fi
 
 
@@ -6768,8 +6754,6 @@ if test "$_win32dll" = auto ; then
 fi
 if test "$_win32dll" = yes ; then
   def_win32dll='#define CONFIG_WIN32DLL 1'
-  test -z "$_win32codecsdir" && _win32codecsdir=$_codecsdir
-  _res_comment="using $_win32codecsdir"
   if ! win32 ; then
     def_win32_loader='#define WIN32_LOADER 1'
     _win32_emulation=yes
@@ -6795,14 +6779,10 @@ if test "$_xanim" = auto ; then
   fi
 fi
 if test "$_xanim" = yes ; then
-  test -z "$_xanimcodecsdir" && _xanimcodecsdir=$_codecsdir
   def_xanim='#define CONFIG_XANIM 1'
-  def_xanim_path="#define XACODEC_PATH \"$_xanimcodecsdir\""
   _codecmodules="xanim $_codecmodules"
-  _res_comment="using $_xanimcodecsdir"
 else
   def_xanim='#undef CONFIG_XANIM'
-  def_xanim_path='#undef XACODEC_PATH'
   _nocodecmodules="xanim $_nocodecmodules"
 fi
 echores "$_xanim"
@@ -6818,14 +6798,10 @@ if test "$_real" = auto ; then
   fi
 fi
 if test "$_real" = yes ; then
-  test -z "$_realcodecsdir" && _realcodecsdir="$_codecsdir"
   def_real='#define CONFIG_REALCODECS 1'
-  def_real_path="#define REALCODEC_PATH \"$_realcodecsdir\""
   _codecmodules="real $_codecmodules"
-  _res_comment="using $_realcodecsdir"
 else
   def_real='#undef CONFIG_REALCODECS'
-  def_real_path="#undef REALCODEC_PATH"
   _nocodecmodules="real $_nocodecmodules"
 fi
 echores "$_real"
@@ -8074,8 +8050,8 @@ FFMPEG_SOURCE_PATH = $_ffmpeg_source
 # Some FFmpeg codecs depend on these. Enable them unconditionally for now.
 CONFIG_AANDCT=yes
 CONFIG_FFT=yes
-CONFIG_FFT_MMX=$fft_mmx
 CONFIG_GOLOMB=yes
+CONFIG_H264DSP=yes
 CONFIG_LPC=yes
 CONFIG_MDCT=yes
 CONFIG_RDFT=yes
@@ -8092,7 +8068,7 @@ CONFIG_ZLIB=$_zlib
 HAVE_PTHREADS = $_pthreads
 HAVE_SHM = $_shm
 HAVE_W32THREADS = $_w32threads
-HAVE_YASM = $_have_yasm
+HAVE_YASM = $have_yasm
 
 EOF
 
@@ -8312,13 +8288,11 @@ $def_libnut
 $def_qtx
 $def_qtx_win32
 $def_real
-$def_real_path
 $def_win32_loader
 $def_win32dll
-#define WIN32_PATH "$_win32codecsdir"
 $def_xanim
-$def_xanim_path
 $def_xmms
+#define BINARY_CODECS_PATH "$_codecsdir"
 #define XMMS_INPUT_PLUGIN_DIR "$_xmmsplugindir"
 
 
@@ -8533,8 +8507,11 @@ $def_yasm
 
 /* Some FFmpeg codecs depend on these. Enable them unconditionally for now. */
 #define CONFIG_AANDCT 1
+#define CONFIG_DCT 1
+#define CONFIG_DWT 1
 #define CONFIG_FFT 1
 #define CONFIG_GOLOMB 1
+#define CONFIG_H264DSP 1
 #define CONFIG_LPC 1
 #define CONFIG_MDCT 1
 #define CONFIG_RDFT 1

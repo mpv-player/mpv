@@ -27,7 +27,7 @@
 #endif
 
 #ifndef WIN32_LOADER
-char* def_path=WIN32_PATH;
+char* def_path = BINARY_CODECS_PATH;
 #else
 extern char* def_path;
 #endif
@@ -71,7 +71,7 @@ void SetCodecPath(const char* path)
     if(needs_free)free(def_path);
     if(path==0)
     {
-	def_path=WIN32_PATH;
+	def_path = BINARY_CODECS_PATH;
 	needs_free=0;
 	return;
     }

@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 rev. 30822
+.\" sync with en/mplayer.1 rev. 30868
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -7003,6 +7003,45 @@ h参数值。
 的像素（默认值：16）。
 .RE.
 .
+.TP
+.B fixpts[=options]
+修正视频帧的呈现时间戳（PTS）。
+默认行为是丢弃传递至下一级滤镜的 PTS，但以下选项可以改变这一行为：
+.RSs
+.IPs print
+打印得到的 PTS。
+.IPs fps=<fps>
+指定一个每秒帧数值
+.IPs start=<pts>
+为 PTS 指定一个初始值
+Specify an initial value for the PTS.
+.IPs autostart=<n>
+使用
+.IR 第 n 个
+得到的 PTS 作为初始 PTS。
+保留所有之前的 PTS，因此如果设置了一个很大的值或设为 \-1 则将完整保留 PTS。
+.IPs autofps=<n>
+在自动开始后使用
+.IR 第 n 个
+得到的 PTS 判断帧率。
+.RE
+.sp 1
+.RS
+.I 示例：
+.RE
+.PD 0
+.RSs
+.IPs "\-vf fixpts=fps=24000/1001,ass,fixpts"
+产生一个新的 PTS 序列，将其用于 ASS 字幕，然后将其丢弃。
+在节目结束后时间戳就重置的情况下，生成一个新的序列是有效的；该情形在 DVD 中很常见。
+丢弃该序列对于避免编码器判断错误是有必要的
+.RE
+.PD 1
+.sp 1
+.RS
+.I 注意：
+将该滤镜与任何种类的定位选项（包括 -ss 和 EDL）一同使用可能会产生意想不到的结果。
+.RE
 .
 .
 .SH "通用编码选项（仅用于MENCODER）"
@@ -9971,6 +10010,48 @@ Windows CMD.EXE的用户如果尝试使用全部CQM列表时，可能在解析�
 .TP
 .B (no)aud
 将存取单元的分隔标志写入数据流（默认值：禁用）。
+除非你的目标存储格式需要有存取单元分隔标志，否则不要启用该选项。
+.
+.TP
+.B overscan=<undef|show|crop>
+在媒体流中包含 VUI 全画面模式信息（默认值：禁用）。
+参见 x264 源代码中的 doc/vui.txt 以获取更多信息。
+.
+.TP
+.B videoformat=<component|pal|ntsc|secam|mac|undef>
+在媒体流中包含 VUI 视频格式信息（默认值：禁用）。
+该选项只是用以描述最初媒体来源的一个提供信息的选项。
+参见 x264 源代码中的 doc/vui.txt 以获取更多信息。
+.
+.TP
+.B (no)fullrange
+在媒体流中包含 VUI 全信号范围信息（默认值：禁用）。
+如果你的源视频不限制信号范围则使用该选项。
+参见 x264 源代码中的 doc/vui.txt 以获取更多信息。
+.
+.TP
+.B colorprim=<bt709|bt470m|bt470bg|smpte170m|smpte240m|film|undef>
+包含元色彩信息（默认值：禁用）。
+该选项可用于色彩修正。
+参见 x264 源代码中的 doc/vui.txt 以获取更多信息。
+.
+.TP
+.B transfer=<bt709|bt470m|bt470bg|linear|log100|log316|smpte170m|smpte240m>
+在媒体流中包含 VUI 传输特征信息（默认值：禁用）。
+该选项可用于色彩修正。
+参见 x264 源代码中的 doc/vui.txt 以获取更多信息。
+.
+.TP
+.B colormatrix=<bt709|fcc|bt470bg|smpte170m|smpte240m|GBR|YCgCo>
+在媒体流中包含 VUI 矩阵系数（默认值：禁用）。
+该选项可用于色彩修正。
+参见 x264 源代码中的 doc/vui.txt 以获取更多信息。
+.
+.TP
+.B chromaloc=<0-5>
+在媒体流中包含 VUI 色度样本位置信息（默认值：禁用）。
+使用该选项能保证色彩空间转换后色度和亮度平面正确排列。
+参见 x264 源代码中的 doc/vui.txt 以获取更多信息。
 .
 .TP
 .B log=<\-1\-3>

@@ -38,6 +38,7 @@
 #include "mp_msg.h"
 #include "libvo/fastmemcpy.h"
 #include "subopt-helper.h"
+#include "libavutil/avutil.h"
 #include "libavutil/fifo.h"
 
 static const ao_info_t info = {

@@ -3142,6 +3142,11 @@ int i;
     set_priority();
 #endif
 
+#ifdef CONFIG_WIN32DLL
+  if (codec_path)
+    SetCodecPath(codec_path);
+#endif
+
     if(opts->video_driver_list && strcmp(opts->video_driver_list[0],"help")==0){
       list_video_out();
       opt_exit = 1;
