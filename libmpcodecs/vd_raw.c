@@ -124,7 +124,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 #endif
 	}
 	frame_size=mpi->stride[0]*mpi->h;
-	if (format == MKTAG('y', 'u', 'v', '2')) {
+	if (len >= frame_size && format == MKTAG('y', 'u', 'v', '2')) {
 	  int i;
 	  for (i = 1; i < frame_size; i += 2)
 	    mpi->planes[0][i] ^= 128;
