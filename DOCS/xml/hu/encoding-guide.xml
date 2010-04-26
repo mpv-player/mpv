@@ -1300,7 +1300,7 @@ Fokozott figyelemmel kell eljárni, ha átlapolt videóval dolgozol:
 Mindezt észben tartva, itt az első példánk:
 <screen>
 mencoder <replaceable>capture.avi</replaceable> -mc 0 -oac lavc -ovc lavc -lavcopts \
-	vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224
+  vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224
 </screen>
 Figyelj az <option>ilme</option> és az <option>ildct</option> kapcsolókra.
 </para>
@@ -1560,7 +1560,7 @@ codec használhassa bemenetként.
 Például:
 <screen>
 mplayer <replaceable>forras_fajl.vob</replaceable> -ao pcm:file=<replaceable>cel_hang.wav</replaceable> \
-	-vc dummy -aid 1 -vo null
+  -vc dummy -aid 1 -vo null
 </screen>
 ki fogja szedni a második audió sávot a <replaceable>source_file.vob</replaceable>
 fájlból a <replaceable>destination_sound.wav</replaceable> fájlba.
@@ -1600,7 +1600,7 @@ konténer formátumokba tud natív audió és videó kimenetet készíteni.
 Például:
 <screen>
 mencoder -oac copy -ovc copy  -o <replaceable>kimenet_film.avi</replaceable> \
-	-audiofile <replaceable>bemenet_audio.mp2</replaceable> <replaceable>bemenet_video.avi</replaceable></screen>
+  -audiofile <replaceable>bemenet_audio.mp2</replaceable> <replaceable>bemenet_video.avi</replaceable></screen>
 Ez a <replaceable>bemenet_video.avi</replaceable> videó fájlból
 és a <replaceable>bemenet_audio.mp2</replaceable> audió fájlból
 elkészíti a <replaceable>kimenet_film.avi</replaceable> fájlt.
@@ -1616,7 +1616,7 @@ demux-álását támogatja.
 Például:
 <screen>
 mencoder -oac copy -ovc copy  -o <replaceable>kimenet_film.asf</replaceable> -audiofile <replaceable>bemenet_audio.mp2</replaceable> \
-	<replaceable>bemenet_video.avi</replaceable> -of lavf -lavfopts format=asf</screen>
+  <replaceable>bemenet_video.avi</replaceable> -of lavf -lavfopts format=asf</screen>
 Ez ugyan azt csinálja, mint az előbbi példa, de a kimeneti
 konténer ASF lesz.
 Kérlek figyelj, hogy ez a támogatás még nagyon kísérleti (de minden
@@ -2170,7 +2170,7 @@ felépítéséhez (ennek vannak hátrányai - lásd a 3. módszert).
   <emphasis role="bold">kell megadnod</emphasis>.
   <screen>
 mencoder dvd://1 -oac copy -vf tfields=2 -ovc lavc \
-	-fps 60000/1001 -ofps 60000/1001<!--
+  -fps 60000/1001 -ofps 60000/1001<!--
   --></screen>
 </para></listitem>
 <listitem><para>
@@ -2217,7 +2217,7 @@ képkocka per másodperc sebességű lesz.
   videók elkódolásához.
   <screen>
 mencoder dvd://1 -oac copy -vf pullup,softskip
-	-ovc lavc -ofps 24000/1001<!--
+  -ovc lavc -ofps 24000/1001<!--
   --></screen>
 </para></listitem>
 <listitem><para>
@@ -3079,7 +3079,7 @@ Inter:
 Használat:
 <screen>
 mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -oac copy -ovc lavc \
-	-lavcopts inter_matrix=...:intra_matrix=...
+  -lavcopts inter_matrix=...:intra_matrix=...
 </screen>
 </para>
 

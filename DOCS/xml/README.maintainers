@@ -5,9 +5,9 @@ in each of those directories to create the HTML documentation
 in subdirectories of the 'HTML' directory.
 
 IMPORTANT: Do NOT place sensitive files under 'HTML'!
-	   It is for generated documentation only.
-	   The whole directory tree is wiped out by the Makefile
-	   when running 'make distclean' or 'make clean'.
+           It is for generated documentation only.
+           The whole directory tree is wiped out by the Makefile
+           when running 'make distclean' or 'make clean'.
 
 Each subdirectory must have a Makefile.  Its purpose is to include
 the toplevel Makefile.inc file (with the rules to build the docs)

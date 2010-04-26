@@ -164,7 +164,7 @@ for lang in `grep 'DOC_LANGS =' ../../config.mak|cut -d= -f2`; do
 EOF
 
   for file in `find $lang en -name \*.xml -exec basename \{\} \; | sort -u`; do
-    echo '<!ENTITY '$file'	SYSTEM "'$file'">' >> $lang/main.xml
+    echo '<!ENTITY '$file' SYSTEM "'$file'">' >> $lang/main.xml
   done
 
   cat >> $lang/main.xml << EOF
@@ -237,7 +237,7 @@ then
       if test -z "$_fake_chunk_xsl"
       then
 #        _xsltcommand="cd \$1 && if test \"\`dirname \$2 | head -c 1\`\" = \".\" ; then $_java  -classpath $_saxon_jar com.icl.saxon.StyleSheet \$_IN_DIR/\$3 \$_IN_DIR/\$2 ; else $_java  -classpath $_saxon_jar com.icl.saxon.StyleSheet \$_IN_DIR/\$3 \$2 ;fi"
-	_xsltcommand="
+        _xsltcommand="
 if test \"\`dirname \$2 | head -c 1\`\" = \".\"
 then
   _STYLESHEET=\$_IN_DIR/\$2
@@ -306,9 +306,9 @@ then
     done
       if test "x$_docbook_dsl" = "x" -o "x$_xml_dcl" = "x"
       then
-  	echo "One of the files docbook.dsl and xml.dcl or both of them weren't found."
-  	echo "Bailing out."
-  	exit 1
+        echo "One of the files docbook.dsl and xml.dcl or both of them weren't found."
+        echo "Bailing out."
+        exit 1
       fi
     _xsltcommand="cd \$1 && $_jade -t xml -d $_docbook_dsl $_xml_dcl \$_IN_DIR/\$3"
   else

@@ -93,6 +93,7 @@ typedef enum {
   MP_CMD_SET_PROPERTY_OSD,
   MP_CMD_GET_PROPERTY,
   MP_CMD_OSD_SHOW_PROPERTY_TEXT,
+  MP_CMD_OSD_SHOW_PROGRESSION,
   MP_CMD_SEEK_CHAPTER,
   MP_CMD_FILE_FILTER,
   MP_CMD_GET_FILENAME,
@@ -149,6 +150,13 @@ typedef enum {
   MP_CMD_CHELP = 7000,
   MP_CMD_CEXIT,
   MP_CMD_CHIDE,
+
+  /// Audio Filter commands
+  MP_CMD_AF_SWITCH,
+  MP_CMD_AF_ADD,
+  MP_CMD_AF_DEL,
+  MP_CMD_AF_CLR,
+
 } mp_command_type;
 
 // The arg types

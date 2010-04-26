@@ -38,17 +38,17 @@ ulong result=RAOpenCodec2(ra_main_t *raMain);
 
 ulong result=RAInitDecoder(ra_main_t *raMain, ra_init_struct *raInit);
 struct ra_init_struct {
-	ulong sample_rate;
-	ushort bits_per_sample;	// unused by RAInitDecoder
-	ushort number_of_channels;
-	ushort unknown1;	// 0
-	ushort unknown2;	// also unused (100)
-	ulong leaf_size;	// leaf size (used for interleaving, but
-				// exists in audio stream description header (ASDH))
-	ulong block_align;	// packet size
-	ulong bits_per_sample;	// unused (always 16)
-	char *ext_data;		// 16 bytes located at the end of the
-				// ASDH
+        ulong sample_rate;
+        ushort bits_per_sample; // unused by RAInitDecoder
+        ushort number_of_channels;
+        ushort unknown1;        // 0
+        ushort unknown2;        // also unused (100)
+        ulong leaf_size;        // leaf size (used for interleaving, but
+                                // exists in audio stream description header (ASDH))
+        ulong block_align;      // packet size
+        ulong bits_per_sample;  // unused (always 16)
+        char *ext_data;         // 16 bytes located at the end of the
+                                // ASDH
 };
 
 There are some information missing that you usually need for playback,
@@ -61,7 +61,7 @@ following command:
 
 
 void *GetRAFlavorProperty(ra_main_t *raMain, ulong flavor, ulong property,
-	short *property_length_in_bytes);
+        short *property_length_in_bytes);
 returns property data for a specific data
 
 This is not important, because it's just a read only function.
@@ -69,8 +69,8 @@ These flavor properties don't seem to exist in
 
 
 ulong RADecode(ra_main_t *raMain, char *input_buffer,
-	ulong input_buffer_size, char *output_buffer,
-	ulong *decoded_bytes, ulong p6=-1);
+        ulong input_buffer_size, char *output_buffer,
+        ulong *decoded_bytes, ulong p6=-1);
 
 RAFreeDecoder(ra_main_t *);
 

@@ -46,7 +46,7 @@
             <screen>-tv channels=26-MTV1,23-TV2</screen>
             Erklärung: Durch Verwendung dieser Option sind nur die Kanäle 26 und 23 in Gebrauch,
             und es wird beim Kanalwechsel einen netten OSD-Text geben, der den Namen des Kanals
-            anzeigt. Leerzeichen im Kanalnamen müssen durch das Zeichen	"_" ersetzt werden.
+            anzeigt. Leerzeichen im Kanalnamen müssen durch das Zeichen "_" ersetzt werden.
           </para>
         </listitem>
 

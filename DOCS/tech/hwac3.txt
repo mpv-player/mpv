@@ -131,9 +131,9 @@ configure mplayer to use adsp instead of dsp. The samplerate constrain
 is no big deal here since movies usually are in 48Khz anyway. The
 configuration in '/etc/modules.conf' is no big deal also:
 
-alias snd-card-0 snd-card-cmipci	# insert your card here
-alias snd-card-1 snd-pcm-oss		# load OSS emulation
-options snd-pcm-oss snd_dsp_map=0 snd_adsp_map=2	# do the mapping
+alias snd-card-0 snd-card-cmipci        # insert your card here
+alias snd-card-1 snd-pcm-oss            # load OSS emulation
+options snd-pcm-oss snd_dsp_map=0 snd_adsp_map=2        # do the mapping
 
 This works flawlessly in combination with alsa's native
 SysVrc-init-script 'alsasound'. Be sure to disable any distribution

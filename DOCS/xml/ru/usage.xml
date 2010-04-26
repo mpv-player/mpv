@@ -193,7 +193,7 @@ VOBsub субтитры состоят из большого (несколько
   <term><option>-subdelay <replaceable>sec</replaceable></option></term>
   <listitem><para>
     Задерживает субтитры на <option><replaceable>sec</replaceable></option>
-	секунд. Это значение может быть отрицательным.
+    секунд. Это значение может быть отрицательным.
   </para></listitem>
 </varlistentry>
 <varlistentry>

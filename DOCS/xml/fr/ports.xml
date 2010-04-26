@@ -282,14 +282,14 @@ x86 en utilisant GCC sans assembleur GNU&nbsp;:
 Erreur typique obtenue en construisant avec un compilateur C GNU qui n'utilise
 pas GNU as&nbsp;:
 <screen>
-   % gmake
-   ...
-   gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math
-	-fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
-   Assembler: mplayer.c
-   "(stdin)", line 3567 : Illegal mnemonic
-   "(stdin)", line 3567 : Syntax error
-   ... more "Illegal mnemonic" and "Syntax error" errors ...
+% gmake
+...
+gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math
+     -fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
+Assembler: mplayer.c
+"(stdin)", line 3567 : Illegal mnemonic
+"(stdin)", line 3567 : Syntax error
+... more "Illegal mnemonic" and "Syntax error" errors ...
 </screen>
 </para>
 </listitem>
@@ -381,12 +381,11 @@ Class          I            H/W   Path          Driver    S/W State    H/W Type 
 ...
 ext_bus 1    8/16/5      c720  CLAIMED INTERFACE  Built-in SCSI
 target  3    8/16/5.2    tgt   CLAIMED DEVICE
-disk    4    8/16/5.<emphasis role="bold">2</emphasis>.<emphasis role="bold">0</emphasis>  sdisk CLAIMED DEVICE
-					<emphasis role="bold">PIONEER DVD-ROM DVD-305</emphasis> /dev/dsk/c1t2d0
-					<emphasis role="bold">/dev/rdsk/c1t2d0</emphasis>
+disk    4    8/16/5.<emphasis role="bold">2</emphasis>.<emphasis role="bold">0</emphasis>  sdisk CLAIMED DEVICE     <emphasis role="bold">PIONEER DVD-ROM DVD-305</emphasis>
+                         /dev/dsk/c1t2d0 <emphasis role="bold">/dev/rdsk/c1t2d0</emphasis>
 target  4    8/16/5.7    tgt   CLAIMED DEVICE
 ctl     <emphasis role="bold">1</emphasis>    8/16/5.7.0  sctl  CLAIMED DEVICE     Initiator
-			/dev/rscsi/c1t7d0 /dev/rscsi/c1t7l0 /dev/scsi/c1t7l0
+                         /dev/rscsi/c1t7d0 /dev/rscsi/c1t7l0 /dev/scsi/c1t7l0
 ...
 </screen>
 

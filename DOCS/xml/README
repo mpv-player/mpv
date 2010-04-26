@@ -39,13 +39,13 @@ Installing the required tools from source
 2) Download the docbook-xml package from http://www.oasis-open.org/docbook/xml/
    Use the newest version. The URL will be something like this:
 
-	http://www.oasis-open.org/docbook/xml/4.2/docbook-xml-4.2.zip
+    http://www.oasis-open.org/docbook/xml/4.2/docbook-xml-4.2.zip
 
    Extract this package into a directory, enter it, and execute the following
    commands:
 
-	mkdir -p /usr/share/sgml/docbook/dtd/xml/4.2/
-	cp -r * /usr/share/sgml/docbook/dtd/xml/4.2/
+    mkdir -p /usr/share/sgml/docbook/dtd/xml/4.2/
+    cp -r * /usr/share/sgml/docbook/dtd/xml/4.2/
 
 
 3) Download the docbook-xsl package from
@@ -53,14 +53,13 @@ Installing the required tools from source
 
    Use the newest version. The URL will be something like this:
 
-	http://prdownloads.sourceforge.net/docbook/docbook-xsl-1.62.0.tar.gz
+    http://prdownloads.sourceforge.net/docbook/docbook-xsl-1.62.0.tar.gz
 
    Extract this package into a directory, enter it, and execute the following
    commands:
 
-	mkdir -p /usr/share/sgml/docbook/stylesheet/xsl/nwalsh
-	cp -r VERSION common html lib \
-		/usr/share/sgml/docbook/stylesheet/xsl/nwalsh
+    mkdir -p /usr/share/sgml/docbook/stylesheet/xsl/nwalsh
+    cp -r VERSION common html lib /usr/share/sgml/docbook/stylesheet/xsl/nwalsh
 
 
 Building the documentation
@@ -68,7 +67,7 @@ Building the documentation
 
 Before trying to build the documentation, run
 
-	make help
+  make help
 
 to see all available build targets and make your choice. If something goes
 wrong, check the Configuration section of the toplevel Makefile and adjust
@@ -82,15 +81,15 @@ As far as I know, the document type declaration in XML files requires
 both a public and a system identifier. For example:
 
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-	"/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd">
+  "/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd">
 
 where
 
-	"-//OASIS//DTD DocBook XML V4.1.2//EN"
+  "-//OASIS//DTD DocBook XML V4.1.2//EN"
 
 is the public, and
 
-	"/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd"
+  "/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd"
 
 is the system identifier.
 

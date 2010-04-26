@@ -201,8 +201,8 @@
       <title>DVD-Entschlüsselung</title>
       <para>
         DVD-Entschlüsselung geschieht durch <systemitem>libdvdcss</systemitem>. Die dafür
-	verwendete Methode kann durch Umgebungsvariable <envar>DVDCSS_METHOD</envar> festgelegt werden,
-	siehe Manpage für Details.
+        verwendete Methode kann durch Umgebungsvariable <envar>DVDCSS_METHOD</envar> festgelegt werden,
+        siehe Manpage für Details.
       </para>
     </formalpara>
 

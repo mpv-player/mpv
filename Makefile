@@ -750,19 +750,19 @@ ADD_ALL_EXESUFS = $(1) $(call ADDSUFFIXES,$(EXESUFS_ALL),$(1))
 
 all: $(ALL_PRG-yes) locales
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ -MD -MP -MF $*.d $<
-
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ -MD -MP -MF $*.d $<
-
-%.o: %.m
-	$(CC) $(CFLAGS) -c -o $@ -MD -MP -MF $*.d $<
-
 %.ho: %.h
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
 
 %.o: %.S
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+%.o: %.cpp
+	$(CC) $(CXXFLAGS) -c -o $@ $<
+
+%.o: %.m
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 %-rc.o: %.rc

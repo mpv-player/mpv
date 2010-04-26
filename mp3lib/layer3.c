@@ -25,7 +25,7 @@
 #define CUT_HF
 #endif
 
-# define REAL_MUL(x, y)		((x) * (y))
+#define REAL_MUL(x, y) ((x) * (y))
 
 static real ispow[8207];
 static real aa_ca[8],aa_cs[8];
@@ -734,8 +734,8 @@ static int III_dequantize_sample(real xr[SBLIMIT][SSLIMIT],int *scf,
         mask <<= 1;
       }
       if(part2remain+num <= 0) {
-	num -= part2remain+num;
-	break;
+        num -= part2remain+num;
+        break;
       }
 
       for(i=0;i<4;i++) {
@@ -851,7 +851,7 @@ static int III_dequantize_sample(real xr[SBLIMIT][SSLIMIT],int *scf,
 
         if (x == 15 && h->linbits) {
           max = cb;
-	  REFRESH_MASK;
+          REFRESH_MASK;
           x += ((unsigned long) mask) >> (BITSHIFT+8-h->linbits);
           num -= h->linbits+1;
           mask <<= h->linbits;
@@ -875,7 +875,7 @@ static int III_dequantize_sample(real xr[SBLIMIT][SSLIMIT],int *scf,
 
         if (y == 15 && h->linbits) {
           max = cb;
-	  REFRESH_MASK;
+          REFRESH_MASK;
           y += ((unsigned long) mask) >> (BITSHIFT+8-h->linbits);
           num -= h->linbits+1;
           mask <<= h->linbits;
@@ -914,7 +914,7 @@ static int III_dequantize_sample(real xr[SBLIMIT][SSLIMIT],int *scf,
         mask <<= 1;
       }
       if(part2remain+num <= 0) {
-	num -= part2remain+num;
+        num -= part2remain+num;
         break;
       }
 
@@ -1003,7 +1003,7 @@ static void III_i_stereo(real xr_buf[2][SBLIMIT][SSLIMIT],int *scalefac,
 #if 0
       if(lsf) {
         int p = gr_info->scalefac_compress & 0x1;
-	if(ms_stereo) {
+        if(ms_stereo) {
           tab1 = pow1_2[p]; tab2 = pow2_2[p];
         }
         else {
@@ -1329,17 +1329,17 @@ static int do_layer3(struct frame *fr,int single){
 
     for(ch=0;ch<stereo1;ch++) {
       struct gr_info_s *gr_info = &(sideinfo.ch[ch].gr[gr]);
-		  III_antialias(hybridIn[ch],gr_info);
-		  III_hybrid(hybridIn[ch], hybridOut[ch], ch,gr_info);
+                  III_antialias(hybridIn[ch],gr_info);
+                  III_hybrid(hybridIn[ch], hybridOut[ch], ch,gr_info);
     }
 
     for(ss=0;ss<SSLIMIT;ss++) {
       if(single >= 0) {
-		    clip += (fr->synth_mono)(hybridOut[0][ss],pcm_sample,&pcm_point);
-  		} else {
-	  	  int p1 = pcm_point;
-		    clip += (fr->synth)(hybridOut[0][ss],0,pcm_sample,&p1);
-		    clip += (fr->synth)(hybridOut[1][ss],1,pcm_sample,&pcm_point);
+                    clip += (fr->synth_mono)(hybridOut[0][ss],pcm_sample,&pcm_point);
+                } else {
+                  int p1 = pcm_point;
+                    clip += (fr->synth)(hybridOut[0][ss],0,pcm_sample,&p1);
+                    clip += (fr->synth)(hybridOut[1][ss],1,pcm_sample,&pcm_point);
       }
     }
 

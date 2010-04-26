@@ -409,7 +409,7 @@ Czy używasz FVWM? Spróbuj tego:
 <listitem><para>
   <menuchoice><guimenu>Start</guimenu> <guisubmenu>Settings</guisubmenu>
     <guisubmenu>Configuration</guisubmenu>
-	<guimenuitem>Base Configuration</guimenuitem></menuchoice>
+    <guimenuitem>Base Configuration</guimenuitem></menuchoice>
 </para></listitem>
 <listitem><para>
   Ustaw <systemitem>Use Applications position hints</systemitem>

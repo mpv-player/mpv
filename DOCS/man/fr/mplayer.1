@@ -303,6 +303,8 @@ Réalise une capture d'écran.
 Amorce/arrête la capture d'écran.
 .IPs "I\ \ \ \ "
 Affiche le nom de fichier dans l'OSD.
+.IPs "P\ \ \ \ "
+Affiche la barre d'avancement, le temps écoulé et la durée totale sur l'OSD.
 .IPs "! and @"
 Saute au début du chapitre précédent/suivant.
 .IPs "D (\-vo xvmc, \-vo vdpau, \-vf yadif et \-vf kerndeint uniquement)"
@@ -5782,8 +5784,8 @@ Les aires de mémoire mappées contiennent une entête:
 int nch                      /*nombre de canaux*/
 int size                     /*taille du tampon*/
 unsigned long long counter   /*Utilisé pour garder la synchro, mis à jour
-			       chaque fois que de nouvelles données son
-			       exportées.*/
+                               chaque fois que de nouvelles données son
+                               exportées.*/
 .fi
 .sp 1
 Le reste est charge utile, constitué de données 16bit (non-entrelacées).

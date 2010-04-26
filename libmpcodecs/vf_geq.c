@@ -37,7 +37,7 @@
 #include "libavcodec/eval.h"
 
 struct vf_priv_s {
-    AVEvalExpr * e[3];
+    AVExpr * e[3];
     int framenum;
     mp_image_t *mpi;
 };
@@ -116,7 +116,8 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
             const_values[3]=y;
             for(x=0; x<w; x++){
                 const_values[2]=x;
-                dst[x+y* dst_stride]= ff_parse_eval(vf->priv->e[plane], const_values, vf);
+                dst[x + y * dst_stride] = ff_eval_expr(vf->priv->e[plane],
+                                                       const_values, vf);
             }
         }
     }
@@ -178,7 +179,7 @@ static int vf_open(vf_instance_t *vf, char *args){
             NULL
         };
         char * a;
-        vf->priv->e[plane] = ff_parse(eq[plane], const_names, NULL, NULL, func2, func2_names, &a);
+        vf->priv->e[plane] = ff_parse_expr(eq[plane], const_names, NULL, NULL, func2, func2_names, &a);
 
         if (!vf->priv->e[plane]) {
             mp_msg(MSGT_VFILTER, MSGL_ERR, "geq: error loading equation `%s': %s\n", eq[plane], a);

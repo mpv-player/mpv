@@ -1118,55 +1118,55 @@ Otwórz okno przeglądarki skórek.
 </sect1>
 
 <sect1 id="skin-quality">
-	<title>Tworzenie dobrych skórek</title>
+  <title>Tworzenie dobrych skórek</title>
 
-	<para>
-		Wygląda na to, że przeczytałeś o tworzeniu skórek
-		dla GUI <application>MPlayera</application>, dałeś z siebie
-		wszystko używając <application>Gimpa</application>
-		i chciałbyś umieścić u nas swoją skórkę?
-		Zapoznaj się z kilkoma wytycznymi, żeby uniknąć najczęstszych pomyłek
-		i stworzyć skórkę wysokiej jakości.
-	</para>
+  <para>
+    Wygląda na to, że przeczytałeś o tworzeniu skórek
+    dla GUI <application>MPlayera</application>, dałeś z siebie
+    wszystko używając <application>Gimpa</application>
+    i chciałbyś umieścić u nas swoją skórkę?
+    Zapoznaj się z kilkoma wytycznymi, żeby uniknąć najczęstszych pomyłek
+    i stworzyć skórkę wysokiej jakości.
+  </para>
 
-	<para>
-		Chcemy aby skórki, które dodajemy do naszego repozytorium,
-		spełniały określone standardy jakości. Istnieje również kilka rzeczy,
-		które możesz zrobić, żeby ułatwić sobie życie.
-	</para>
+  <para>
+    Chcemy aby skórki, które dodajemy do naszego repozytorium,
+    spełniały określone standardy jakości. Istnieje również kilka rzeczy,
+    które możesz zrobić, żeby ułatwić sobie życie.
+  </para>
 
-	<para>
-		Jako wzorzec możesz wziąć skórkę <systemitem>Blue</systemitem>,
-		od wersji 1.5 spełnia one wszystkie wymienione niżej kryteria.
-	</para>
+  <para>
+    Jako wzorzec możesz wziąć skórkę <systemitem>Blue</systemitem>,
+    od wersji 1.5 spełnia one wszystkie wymienione niżej kryteria.
+  </para>
 
-	<itemizedlist>
-		<listitem><para>Do każdej skórki powinien być dołączony plik
-				<filename>README</filename> zawierający informacje
-				o tobie, czyli autorze, prawach autorskich i licencji i wszystkie
-				inne informacje, które zechcesz dodać. Jeżeli chcesz prowadzić
-				listę zmian, ten plik jest na to dobrym miejscem.</para></listitem>
+  <itemizedlist>
+    <listitem><para>Do każdej skórki powinien być dołączony plik
+      <filename>README</filename> zawierający informacje
+      o tobie, czyli autorze, prawach autorskich i licencji i wszystkie
+      inne informacje, które zechcesz dodać. Jeżeli chcesz prowadzić
+      listę zmian, ten plik jest na to dobrym miejscem.</para></listitem>
 
-		<listitem><para>Należy dodać plik <filename>VERSION</filename>
-				zawierający tylko i wyłącznie wersję skórki zapisaną w jednej linii (np. 1.0)
-			</para></listitem>
+    <listitem><para>Należy dodać plik <filename>VERSION</filename>
+      zawierający tylko i wyłącznie wersję skórki zapisaną w jednej linii (np. 1.0)
+      </para></listitem>
 
-		<listitem><para>Poziome i pionowe kontrolki (suwaki do zmiany głośności
-				albo pozycji) powinny mieć gałki prawidłowo wycentrowane na środku
-				suwaka. Powinno się dać przesunąć gałkę na oba końce suwaka, ale nie
-				poza jego obszar.</para></listitem>
+    <listitem><para>Poziome i pionowe kontrolki (suwaki do zmiany głośności
+      albo pozycji) powinny mieć gałki prawidłowo wycentrowane na środku
+      suwaka. Powinno się dać przesunąć gałkę na oba końce suwaka, ale nie
+      poza jego obszar.</para></listitem>
 
-		<listitem><para>Elementy skórki powinny mieć prawidłowo zadeklarowane
-				rozmiary w pliku skórki. W przeciwnym wypadku możliwe będzie
-				kliknięcie poza obszarem np. przycisku i jego naciśnięcia
-				lub kliknięcie wewnątrz obszaru przycisku i nie naciśnięcie go.
-			</para></listitem>
+    <listitem><para>Elementy skórki powinny mieć prawidłowo zadeklarowane
+      rozmiary w pliku skórki. W przeciwnym wypadku możliwe będzie
+      kliknięcie poza obszarem np. przycisku i jego naciśnięcia
+      lub kliknięcie wewnątrz obszaru przycisku i nie naciśnięcie go.
+      </para></listitem>
 
-		<listitem><para>Plik <filename>skin</filename> powinien być
-				ładnie sformatowany i nie powinien zawierać tabulacji. Ładnie
-				sformatowany, czyli taki w którym numery są ładnie ustawione
-				w kolumnach.</para></listitem>
-	</itemizedlist>
+    <listitem><para>Plik <filename>skin</filename> powinien być
+      ładnie sformatowany i nie powinien zawierać tabulacji. Ładnie
+      sformatowany, czyli taki w którym numery są ładnie ustawione
+      w kolumnach.</para></listitem>
+  </itemizedlist>
 
 </sect1>
 

@@ -311,8 +311,8 @@ int synth_1to1_pent(real *bandPtr, int channel, short *samples)
 "        jnz .L68\n\t"
 "        movl %%edi,%%eax\n\t"
 "        movl "MANGLE(saved_ebp)",%%ebp\n\t"
-	:"=a"(retval)
-	:"m"(bandPtr),"m"(channel),"m"(samples),"m"(tmp[0])
-	:"memory","%edi","%esi","%ebx","%ecx","%edx");
+        :"=a"(retval)
+        :"m"(bandPtr),"m"(channel),"m"(samples),"m"(tmp[0])
+        :"memory","%edi","%esi","%ebx","%ecx","%edx");
   return retval;
 }

@@ -1,6 +1,6 @@
-			  ------------------------------
+                          ------------------------------
                           How to build an MPlayer mirror
-			  ------------------------------
+                          ------------------------------
 
 This document might be inacurate or even incomplete, please
 send feedback + corrections to the mplayer-mirror mailing list.

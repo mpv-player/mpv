@@ -123,13 +123,13 @@ echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt; /proc/mtrr
 
   in <filename>/var/log/XFree86.0.log</filename>
 
-	<note><para>
+  <note><para>
   Diese Meldung besagt nur, dass die XFree86-Erweiterung
   geladen wird. Bei einer guten Installation sollte das immer der Fall
   sein. Das heißt allerdings noch nicht, dass die
   <emphasis role="bold">XVideo-Unterstützung der Grafikkarte</emphasis>
   auch geladen wurde!
-	</para></note>
+  </para></note>
   </para></listitem>
 <listitem><para>
   Deine Karte muss unter Linux Xv-Unterstützung haben. Du kannst dich
@@ -2367,8 +2367,8 @@ mplayer -vo zr -vf crop=720:320:80:0 <replaceable>benhur.avi</replaceable>
   möchtest. Dann benutzt du dafür das folgende Kommando:
 <screen>
 mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
-          -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 \
-	  <replaceable>movie.avi</replaceable>
+    -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 \
+        <replaceable>movie.avi</replaceable>
 </screen>
 </para>
 

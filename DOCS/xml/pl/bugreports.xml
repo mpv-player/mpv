@@ -485,7 +485,7 @@ info all-registers
 </screen>
 A następnie uruchomić następujące polecenie:
 <screen>
-gdb mplayer --core=core -batch 	--command=<replaceable>plik_z_poleceniami</replaceable> &gt; mplayer.bug
+gdb mplayer --core=core -batch --command=<replaceable>plik_z_poleceniami</replaceable> &gt; mplayer.bug
 </screen>
 </para>
 </sect3>
