@@ -24,10 +24,4 @@
 char *get_path(const char *filename);
 void set_path_env(void);
 
-#ifdef CONFIG_WIN32DLL
-extern void SetCodecPath(const char *);   // in loader/drv.c
-
-static char *codec_path=NULL;
-#endif
-
 #endif /* MPLAYER_GET_PATH_H */

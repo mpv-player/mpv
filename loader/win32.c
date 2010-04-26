@@ -1412,9 +1412,10 @@ static void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
     return;
 }
 
-static void WINAPI expInitializeCriticalSectionAndSpinCount(CRITICAL_SECTION* c, DWORD spin)
+static WIN_BOOL WINAPI expInitializeCriticalSectionAndSpinCount(CRITICAL_SECTION* c, DWORD spin)
 {
     expInitializeCriticalSection(c);
+    return 1;
 }
 
 static void WINAPI expEnterCriticalSection(CRITICAL_SECTION* c)
