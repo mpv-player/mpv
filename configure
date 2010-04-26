@@ -3234,8 +3234,6 @@ if test "$_malloc" = yes ; then
 else
   def_malloc_h='#define HAVE_MALLOC_H 0'
 fi
-# malloc.h emits a warning in FreeBSD and OpenBSD
-freebsd || openbsd || dragonfly && def_malloc_h='#define HAVE_MALLOC_H 0'
 echores "$_malloc"
 
 
@@ -4496,7 +4494,7 @@ if test "$_vidix" = auto ; then
   _vidix=no
   x86 && (linux || freebsd || netbsd || openbsd || dragonfly || sunos || win32) \
     && _vidix=yes
-  x86_64 && win32 && _vidix=no
+  x86_64 && ! linux && _vidix=no
   (ppc || alpha) && linux && _vidix=yes
 fi
 echores "$_vidix"
@@ -5125,15 +5123,7 @@ EOF
       _ld_tmp="$($_sdlconfig --libs)"
     fi
     if cc_check $_inc_tmp $_ld_tmp >>"$TMPLOG" 2>&1 ; then
-      _sdlversion=$($_sdlconfig --version | sed 's/[^0-9]//g')
-        if test "$_sdlversion" -gt 116 ; then
-          if test "$_sdlversion" -lt 121 ; then
-            def_sdlbuggy='#define BUGGY_SDL'
-          else
-            def_sdlbuggy='#undef BUGGY_SDL'
-          fi
           _sdl=yes
-        fi
      fi
   fi
 fi
@@ -8410,7 +8400,6 @@ $def_quartz
 $def_s3fb
 $def_sdl
 $def_sdl_sdl_h
-$def_sdlbuggy
 $def_svga
 $def_tdfxfb
 $def_tdfxvid

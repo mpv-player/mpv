@@ -379,7 +379,7 @@ int _dvdcss_titlekey( dvdcss_t dvdcss, int i_pos, dvd_key_t p_title_key )
         /* We need to authenticate again every time to get a new session key */
         if( GetBusKey( dvdcss ) < 0 )
         {
-            return -1;
+            i_ret = -1;
         }
 
         /* Get encrypted title key */

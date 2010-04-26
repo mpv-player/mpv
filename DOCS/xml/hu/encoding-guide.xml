@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r29461 -->
+<!-- synced with r31032 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -4620,7 +4620,8 @@ készítése a <application>MEncoder</application> használatával</title>
   aspect ratio) információkat az MPEG-4 fájlokban; feltételezi, hogy a SAR=1.
   Olvasd el a
   <link linkend="menc-feat-quicktime-7-scale">méretezés részt</link>
-  a tüneti kezeléshez.
+  a tüneti kezeléshez. A <application>QuickTime</application> X-ben már nincs
+  meg ez a korlátozás.
 </para></listitem>
 </itemizedlist>
 

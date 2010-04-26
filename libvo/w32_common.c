@@ -32,8 +32,6 @@
 #include "w32_common.h"
 #include "mp_fifo.h"
 
-extern int enable_mouse_movements;
-
 #ifndef MONITOR_DEFAULTTOPRIMARY
 #define MONITOR_DEFAULTTOPRIMARY 1
 #endif
@@ -63,7 +61,7 @@ static HMONITOR (WINAPI* myMonitorFromWindow)(HWND, DWORD);
 static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO);
 static BOOL (WINAPI* myEnumDisplayMonitors)(HDC, LPCRECT, MONITORENUMPROC, LPARAM);
 
-static const struct keymap vk_map[] = {
+static const struct mp_keymap vk_map[] = {
     // special keys
     {VK_ESCAPE, KEY_ESC}, {VK_BACK, KEY_BS}, {VK_TAB, KEY_TAB}, {VK_CONTROL, KEY_CTRL},
 
@@ -164,12 +162,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 mplayer_put_key(MOUSE_BTN2);
             break;
         case WM_MOUSEMOVE:
-            if (enable_mouse_movements) {
-                char cmd_str[40];
-                snprintf(cmd_str, sizeof(cmd_str), "set_mouse_pos %i %i",
-                        GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-                mp_input_queue_cmd(global_vo->input_ctx, mp_input_parse_cmd(cmd_str));
-            }
+            vo_mouse_movement(global_vo, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
             break;
         case WM_MOUSEWHEEL:
             if (!vo_nomouse_input) {

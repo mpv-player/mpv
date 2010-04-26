@@ -34,12 +34,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __linux__
-#include <sys/kd.h>
-#else
-#include <linux/kd.h>
-#endif
-
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"

@@ -35,6 +35,7 @@
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2
 #define VO_EVENT_KEYPRESS 4
+#define VO_EVENT_REINIT 8
 
 /* Obsolete: VOCTRL_QUERY_VAA 1 */
 /* does the device support the required format */
@@ -311,6 +312,7 @@ extern int vo_rootwin;
 extern int vo_border;
 
 extern int vo_nomouse_input;
+extern int enable_mouse_movements;
 
 extern int vo_pts;
 extern float vo_fps;
@@ -336,17 +338,19 @@ extern char *monitor_hfreq_str;
 extern char *monitor_vfreq_str;
 extern char *monitor_dotclock_str;
 
-struct keymap {
+struct mp_keymap {
   int from;
   int to;
 };
-int lookup_keymap_table(const struct keymap *map, int key);
+int lookup_keymap_table(const struct mp_keymap *map, int key);
 struct vo_rect {
   int left, right, top, bottom, width, height;
 };
 void calc_src_dst_rects(struct vo *vo, int src_width, int src_height,
                         struct vo_rect *src, struct vo_rect *dst,
                         struct vo_rect *borders, const struct vo_rect *crop);
+struct input_ctx;
+void vo_mouse_movement(struct vo *vo, int posx, int posy);
 
 static inline int aspect_scaling(void)
 {

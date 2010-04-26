@@ -1,4 +1,4 @@
-.\" Synced with r30503
+.\" Synced with r31096
 .\" MPlayer (C) 2000-2010 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2010. 02. 06." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2010. 04. 25." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -289,6 +289,8 @@ Képernyõmentés készítése.
 Képernyõmentések készítésének elindítása/leállítása.
 .IPs "I\ \ \ \ "
 Fájlnév megjelenítése az OSD-n.
+.IPs "P\ \ \ \ "
+Megjeleníti a folyamatsávot, az eltelt idõt és az össz hosszot az OSD-n.
 .IPs "! és @"
 Ugrás az elõzõ/következõ fejezet elejére.
 .IPs "D (csak \-vo xvmc, \-vo vdpau, \-vf yadif, \-vf kerndeint mellett)"
@@ -635,6 +637,10 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 .\" --------------------------------------------------------------------------
 .
 .SH "ÁLTALÁNOS OPCIÓK"
+.
+.TP
+.B \-codecpath <könyvtár>
+Megadja a bináris codec-ek könyvtárát.
 .
 .TP
 .B \-codecs\-file <fájlnév> (lásd még \-afm, \-ac, \-vfm, \-vc)
@@ -1548,6 +1554,9 @@ Ez a kapcsoló már idejétmúlt, mivel az MPlayerben van OpenDML támogatás.
 .TP
 .B \-mc <másodperc/képkocka>
 Maximális A-V szinkron javítás egy képkocka alatt (másodpercben).
+.br
+A \-mc 0 opciót mindig a \-noskip opcióval kell használni a mencodernél,
+különben majdnem biztosan A-V csúszást okoz.
 .
 .TP
 .B \-mf <opció1:opció2:...>
@@ -2878,9 +2887,9 @@ OS/2 KAI audió kimeneti vezérlõ
 .PD 0
 .RSs
 .IPs uniaud
-UNIAUD mód kényszerítése
+UNIAUD mód kényszerítése.
 .IPs dart
-DART mód kényszerítése
+DART mód kényszerítése.
 .IPs (no)share
 Audió megosztott vagy kizárólagos módban történõ megnyitása.
 .IPs bufsize=<méret>
@@ -3156,13 +3165,16 @@ A teljes képernyõs váltás javítása OpenBox 1.x-en.
 .PD 1
 .
 .TP
-.B \-geometry x[%][:y[%]] vagy [WxH][+x+y]
+.B \-geometry x[%][:y[%]] vagy [WxH][+-x+-y]
 Annak beállítása hogy kezdéskor hova lesz kirakva a video.
 Az x és y érték a képernyõ bal felsõ sarkától a megjelenítendõ ablak
 bal felsõ sarkáig mért távolság pixelben, vagy ha egy százalék jelet
 írsz az érték mögé, akkor a képernyõ adott irányú méretének százalék
-érték lesz. Támogatja továbbá a szabványos X11 \-geometry formátumot is.
-Ha egy külsõ ablak is meg van adva a \-win opcióval, akkor az x és y
+érték lesz. Támogatja továbbá a szabványos X11 \-geometry opció formátumot
+is, melyben pl. a +10-50 azt jelenti, hogy "tedd 10 pixellel a bal szegély
+mellé és 50 pixellel az alsó szegély fölé", a "--20+-10" pedig azt, hogy
+"tedd 20 pixellel a jobb szegélyen túl és 10 pixellel a felsõ szegély fölé".
+Ha egy külsõ ablak is meg van adva a \-wid opcióval, akkor az x és y
 koordináták az ablak bal felsõ sarkához viszonyulnak a képernyõ helyett.
 A \-xineramascreen kapcsolóval megadott koordináták a képernyõhöz
 viszonyítottak, azon videó kimeneti vezérlõknél, amelyek teljes mértékben
@@ -3510,8 +3522,7 @@ Vezérlõ kiválasztása az overlay forrásaként az X11 felett.
 .PD 1
 .
 .TP
-.B vdpau (\-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau, ffh264vdpau vagy
-ffodivxvdpau kapcsolókkal)
+.B vdpau (\-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau, ffh264vdpau vagy ffodivxvdpau kapcsolókkal)
 Videó kimenet, ami a VDPAU-t használja a videó hardveres dekódolásához.
 Támogatja a szoftveresen dekódolt videó megjelenítését is.
 .PD 0
@@ -5847,9 +5858,10 @@ Használj 2-t csak a páros dimenziókhoz (4:2:2 videónál szükséges).
 .IPs <reset>
 Számláló, mely megadja, hogy hány képkocka után fogja törölni a cropdetect
 az elõzõleg detektált legnagyobb videó méretet és végzi el újra az optimális
-vágási terület megállapítását. Ez hasznos lehet, ha csatorna logók zavarják
-a videó területét. A 0 azt jelenti, hogy soha nem resetel és a lejátszás
-során talált legnagyobb területet használja. (alapértelmezett: 0).
+vágási terület megállapítását (alapértelmezett: 0).
+Ez hasznos lehet, ha csatorna logók zavarják a videó területét.
+A 0 azt jelenti, hogy soha nem resetel és a lejátszás során talált legnagyobb
+területet használja.
 .RE
 .PD 1
 .
@@ -7524,6 +7536,48 @@ A nagyobb sugár simább szögeket ad, de megakadályozza a szûrõt a részletesebb
 területek közelében lévõ pixelek módosításában (alapértelmezett: 16).
 .RE
 .
+.TP
+.B fixpts[=opciók]
+Javítja a kockák prezentációs idõbélyegjeit (PTS).
+Alapértelmezetten a következõ szûrõnek átadott PTS el lesz dobva, de az
+alábbi opciók megváltoztathatják ezt:
+.RSs
+.IPs print
+Kiírja a bejövõ PTS-t.
+.IPs fps=<fps>
+Megadja a kocka per másodperc értéket.
+.IPs start=<pts>
+Megad egy kezdeti PTS értéket.
+.IPs autostart=<n>
+Az
+.IR n-dik
+bejövõ PTS-t használja kezdetiként.
+Minden elõzõ PTS-t megtart, így egy nagy vagy \-1 érték érintetlenül
+hagyja a PTS-t.
+.IPs autofps=<n>
+Az
+.IR n-dik
+bejövõ PTS-t használja az autostart után a kocka ráta megállapításához.
+.RE
+.sp 1
+.RS
+.I PÉLDA:
+.RE
+.PD 0
+.RSs
+.IPs "\-vf fixpts=fps=24000/1001,ass,fixpts"
+A PTS-ek új sorozatát állítja elõ, használja az ASS feliratokhoz, majd eldobja.
+Egy új sorozat generálása hasznos, ha az idõbélyegek törlõdnek a program közben;
+ez gyakori a DVD-knél.
+Az eldobásuk szükséges lehet, hogy a kódolók ne zavarodjanak össze.
+.RE
+.PD 1
+.sp 1
+.RS
+.I MEGJEGYZÉS:
+Ezen szûrõ és bármelyik keresési forma (beleértve a -ss -t és az EDL-eket)
+együttes használata kiszabadíthatja a szellemet a palackból.
+.RE
 .
 .
 .SH "ÁLTALÁNOS KÓDOLÁSI OPCIÓK (CSAK MENCODER)"
@@ -10149,9 +10203,16 @@ P-kockákként kerülnek elkódolásra, majdnem olyan nagyok, mint az I-kockák,
 de nem nullázzák a "keyint számlálót".
 .
 .TP
+.B (no)intra_refresh
+Periódikus intra blokk frissítés a kulcskockák helyett (alapértelmezett: letiltva).
+Ez az opció letiltja az IDR-kockákat és helyettük azintra-kódolású blokkok egy mozgó,
+függõleges sávját használja. Ez csökkenti a tömörítési hatékonyságot, de
+jó az alacsony késleltetésû stream-elésnél és ellenálló a csomagvesztéssel szemben.
+.
+.TP
 .B frameref=<1\-16>
 A B- és P-kockák becsléséhez felhasznált elõzetes képkockák száma
-(alapértelmezett: 1).
+(alapértelmezett: 3).
 Ez hatásos anime-nál, de élõ akciós anyagnál a javulás általában
 nagyon gyorsan el is veszik 6 vagy több referenciakocka felett.
 Ennek nincs hatása a dekódolási sebességre, de növeli a dekódoláshoz
@@ -10160,7 +10221,7 @@ Néhány dekóder csak maximum 15 referenciakockát tud kezelni.
 .
 .TP
 .B bframes=<0\-16>
-maximálisan egymást követõ B-kockák száma az I- és P-kockák között (alapértelmezett: 0)
+maximálisan egymást követõ B-kockák száma az I- és P-kockák között (alapértelmezett: 3)
 .
 .TP
 .B (no)b_adapt
@@ -10234,6 +10295,20 @@ maximális kvantáló (alapértelmezett: 51)
 .B qp_step=<1\-50> (ABR vagy két lépéses)
 maximális érték, amennyivel a kvantáló növekedhet/csökkenhet a
 kockák között (alapértelmezett: 4)
+.
+.TP
+.B (no)mbtree
+Engedélyezi a makroblokk fa rátavezérlését (alapértelmezett: engedélyezve).
+Hosszú elõretekintést használ az adat idõbeli terjedésének vizsgálatához és
+megfelelõen súlyozza a minõséget.
+Több lépéses módban ez egy külön statisztika fájlt készít, melynek neve
+<passlogfile>.mbtree.
+.
+.TP
+.B rc_lookahead=<0\-250>
+Beállítja az mbtree elõretekintésének távolságát (alapértelmezett: 40).
+A nagyobb értékek lassabbak lesznek és az x264 több memóriát fog használni,
+de jobb minõséget fog eredményezni.
 .
 .TP
 .B ratetol=<0.1\-100.0> (ABR vagy két lépéses)
@@ -10325,6 +10400,20 @@ járnak, a választás a videó tartalmától függ.
 Az auto a leghatásosabb ha több lépésben használják.
 A direct_pred=none lassabb is és rosszabb minõségû.
 .RE
+.
+.TP
+.B weightp
+Súlyozott P-kocka jóslás mód (alapértelmezett: 2).
+.PD 0
+.RSs
+.IPs 0
+letiltva (leggyorsabb)
+.IPs 1
+vak mód (kicsit jobb minõség)
+.IPs 2
+okos mód (legjobb)
+.RE
+.PD 1
 .
 .TP
 .B (no)weight_b
@@ -10430,9 +10519,9 @@ Finomítja a két, bidirekcionális makroblokkban használt mozgás vektort is
 SATD metrikával a kétirányú kereséssel megtalált vektorok újra felhasználása helyett.
 .IPs 6
 Engedélyezi a ráta-torzítás optimalizálását a makroblokk típusokra
-az I- és P-kockáknál (alapértelmezett).
+az I- és P-kockáknál.
 .IPs 7
-Engedélyezi a ráta-torzítás optimalizálását a makroblokk típusokra minden kockánál.
+Engedélyezi a ráta-torzítás optimalizálását a makroblokk típusokra minden kockánál (alapértelmezett).
 .IPs 8
 Engedélyezi a ráta-torzítás optimalizálását a mozgás vektorokra és a
 belsõ jósló módokra az I- és P-kockáknál.
@@ -10465,9 +10554,9 @@ ráta-torzító optimális kvantálás
 .PD 0
 .RSs
 .IPs 0
-letiltva (alapértelmezett)
+letiltva
 .IPs 1
-csak a végsõ kódoláshoz engedélyezi
+csak a végsõ kódoláshoz engedélyezi (alapértelmezett)
 .IPs 2
 minden mód döntésnél engedélyezi (lassú, subq>=6 szükséges)
 .RE
@@ -10484,6 +10573,11 @@ psy optimalizáció erõssége (subq>=6 kell hozzá) (alapértelmezett: 1.0)
 trellis (trellis kell hozzá, kísérleti) (alapértelmezett: 0.0)
 .RE
 .PD 1
+.
+.TP
+.B (no)psy
+Engedélyezi a pszichovizuális optimalizációkat, melyek rontják a PSNR-t és az
+SSIM-et, de jobban néznek ki (alapértelmezett: engedélyezve).
 .
 .TP
 .B deadzone_inter=<0\-32>
@@ -10618,10 +10712,41 @@ Csak akkor használd ezt a paramétert, ha tudod, hogy mit jelent
 .
 .TP
 .B threads=<0\-16>
-Gyermek szálak száma párhuzamos kódolásnál több CPU esetén (alapértelmezett: 1).
+Gyermek szálak száma párhuzamos kódolásnál több CPU esetén (alapértelmezett: 0).
 Ez nagyon kis mértékben ront a tömörített minõségen.
 A 0 vagy 'auto' az x264-re bízza a CPU-k számának detektálását és
 a szálak megfelelõ számának kiválasztását.
+.
+.TP
+.B (no)sliced_threads
+Szelet alapú szálkezelést használ (alapértelmezett: letiltva).
+A normális szálkezeléstõl eltérõen ez az opció nem növeli a kódolási késleltetést,
+de kicsit lassabb és kisebb a hatékonysága a tömörítésnél.
+.
+.TP
+.B slice_max_size=<0 vagy pozitív egész>
+Maximális szelet méret bájtban (alapértelmezett: 0).
+A nulla érték letiltja a maximumot.
+.
+.TP
+.B slice_max_mbs=<0 vagy pozitív egész>
+Maximális szelet méret a makroblokkok számában (alapértelmezett: 0).
+A nulla érték letiltja a maximumot.
+.
+.TP
+.B slices=<0 vagy pozitív egész>
+A szeletek maximális száma kockánként (alapértelmezett: 0).
+A nulla érték letiltja a maximumot.
+.
+.TP
+.B sync_lookahead=<0\-250>
+Beállítja a szálas elõretekintõ buffer méretét (alapértelmezett: 0).
+A 0 vagy 'auto' hatására az x264 automatikusan megállapítja a buffer méretét.
+.
+.TP
+.B (no)deterministic
+Csak determinisztikus optimalizációt használ többszálas kódolással (alapértelmezett:
+engedélyezve).
 .
 .TP
 .B (no)global_header
@@ -10633,6 +10758,61 @@ Alapértelmezésként az SPS és a PPS minden IDR kocka elõtt ismétlõdik.
 .TP
 .B (no)interlaced
 Videó tartalmának átlapoltként történõ kezelése.
+.
+.TP
+.B (no)constrained_intra
+Engedélyezi a kényszerített intra elõrejelzést (alapértelmezett: letiltva).
+Ez jelentõsen rontja a tömörítést, de szükséges az SVC kódolások alaprétegéhez.
+.
+.TP
+.B (no)aud
+Elérési egység elválasztókat ír a folyamba (alapértelmezett: letiltva).
+Csak akkor engedélyezd ezt, ha a cél konténer formátumnak szüksége van az
+elérési egység elválasztókra.
+.
+.TP
+.B overscan=<undef|show|crop>
+Beveszi a VUI overscan információkat a folyamba (alapértelmezett: letiltva).
+Lásd a doc/vui.txt fájlt az x264 forráskódjában a további információkért.
+.
+.TP
+.B videoformat=<component|pal|ntsc|secam|mac|undef>
+Beveszi a VUI videó formátum információt a folyamba (alapértelmezett: letiltva).
+Ez egy pusztán informatív beállítás az eredeti forrás leírásához.
+Lásd a doc/vui.txt fájlt az x264 forráskódjában a további információkért.
+.
+.TP
+.B (no)fullrange
+Beveszi a VUI full range információt a folyamba (alapértelmezett: letiltva).
+Használd ezt az opciót, ha a forrás videód nem range korlátozott.
+Lásd a doc/vui.txt fájlt az x264 forráskódjában a további információkért.
+.
+.TP
+.B colorprim=<bt709|bt470m|bt470bg|smpte170m|smpte240m|film|undef>
+Beveszi a szín információt (alapértelmezett: letiltva).
+Ez színkorrekcióhoz használható.
+Lásd a doc/vui.txt fájlt az x264 forráskódjában a további információkért.
+.
+.TP
+.B transfer=<bt709|bt470m|bt470bg|linear|log100|log316|smpte170m|smpte240m>
+Beveszi a VUI átviteli karakterisztika információját a folyamba
+(alapértelmezett: letiltva).
+Ez színkorrekcióhoz használható.
+Lásd a doc/vui.txt fájlt az x264 forráskódjában a további információkért.
+.
+.TP
+.B colormatrix=<bt709|fcc|bt470bg|smpte170m|smpte240m|GBR|YCgCo>
+Beveszi a VUI mátrix együtthatókat a folyamba (alapértelmezett: letiltva).
+Ez színkorrekcióhoz használható.
+Lásd a doc/vui.txt fájlt az x264 forráskódjában a további információkért.
+.
+.TP
+.B chromaloc=<0-5>
+Beveszi a VUI szín minta helyének információját a folyamba (alapértelmezett:
+letiltva).
+Használd ezt az opciót a színezet és a fényerõ síkok igazításának biztosításához
+színtér konverziók után.
+Lásd a doc/vui.txt fájlt az x264 forráskódjában a további információkért.
 .
 .TP
 .B log=<\-1\-3>
@@ -10676,6 +10856,11 @@ Ha a rendszereden lévõ x264 támogatja, egy új ablak nyílik meg a kódolási
 folyamat közben, amiben az x264 megpróbálegy áttekintést adni minden egyes
 kocka kódolásáról.
 Minden blokk típus a megjelenített filmben színezve lesz az alábbiak szerint:
+.
+.TP
+.B dump_yuv=<fájlnév>
+A YUV kockákat kiírja a megadott fájlba.
+Hibakeresénél használatos.
 .PD 0
 .RSs
 .IPs vörös/rózsaszín

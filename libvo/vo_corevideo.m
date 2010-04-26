@@ -83,7 +83,6 @@ static uint32_t image_format;
 static int isFullscreen;
 static int isOntop;
 static int isRootwin;
-extern int enable_mouse_movements;
 
 static float winAlpha = 1;
 static int int_pause = 0;
@@ -954,11 +953,8 @@ static int control(uint32_t request, void *data)
 	if (enable_mouse_movements && !isRootwin) {
 		NSPoint p =[self convertPoint:[theEvent locationInWindow] fromView:nil];
 		if ([self mouse:p inRect:textureFrame]) {
-                	char cmdstr[40];
-                	snprintf(cmdstr, sizeof(cmdstr), "set_mouse_pos %i %i",
-			         (int)(vo_fs ? p.x : (p.x - textureFrame.origin.x)),
-			         (int)(vo_fs ? [self frame].size.height - p.y: (NSMaxY(textureFrame) - p.y)));
-                	mp_input_queue_cmd(global_vo->input_ctx, mp_input_parse_cmd(cmdstr));
+                       vo_mouse_movement(global_vo, vo_fs ? p.x : p.x - textureFrame.origin.x,
+			                  vo_fs ? [self frame].size.height - p.y : NSMaxY(textureFrame) - p.y);
 		}
 	}
 }

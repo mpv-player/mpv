@@ -1,7 +1,7 @@
 /*
  * common OpenGL routines
  *
- * copyleft (C) 2005 Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>
+ * copyleft (C) 2005-2010 Reimar Döffinger <Reimar.Doeffinger@gmx.de>
  * Special thanks go to the xine team and Matthias Hopf, whose video_out_opengl.c
  * gave me lots of good ideas.
  *
@@ -35,6 +35,7 @@
 #include "old_vo_defines.h"
 #include "gl_common.h"
 #include "csputils.h"
+#include "aspect.h"
 
 void (GLAPIENTRY *mpglBegin)(GLenum);
 void (GLAPIENTRY *mpglEnd)(void);
@@ -350,8 +351,24 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
   return supported;
 }
 
-static void *setNull(const GLubyte *s) {
-  return NULL;
+#ifdef HAVE_LIBDL
+#include <dlfcn.h>
+#endif
+/**
+ * \brief find address of a linked function
+ * \param s name of function to find
+ * \return address of function or NULL if not found
+ */
+static void *getdladdr(const char *s) {
+  void *ret = NULL;
+#ifdef HAVE_LIBDL
+  void *handle = dlopen(NULL, RTLD_LAZY);
+  if (!handle)
+    return NULL;
+  ret = dlsym(handle, s);
+  dlclose(handle);
+#endif
+  return ret;
 }
 
 typedef struct {
@@ -461,7 +478,7 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *),
   char *allexts;
 
   if (!getProcAddress)
-    getProcAddress = setNull;
+    getProcAddress = (void *)getdladdr;
 
   // special case, we need glGetString before starting to find the other functions
   mpglGetString = getProcAddress("glGetString");
@@ -1385,6 +1402,8 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
  */
 int glAutodetectYUVConversion(void) {
   const char *extensions = mpglGetString(GL_EXTENSIONS);
+  if (!extensions || !mpglMultiTexCoord2f)
+    return YUV_CONVERSION_NONE;
   if (strstr(extensions, "GL_ARB_fragment_program"))
     return YUV_CONVERSION_FRAGMENT;
   if (strstr(extensions, "GL_ATI_text_fragment_shader"))
@@ -1493,12 +1512,16 @@ void glDisableYUVConversion(GLenum target, int type) {
       mpglDisable(GL_FRAGMENT_SHADER_ATI);
       break;
     case YUV_CONVERSION_TEXT_FRAGMENT:
+      mpglDisable(GL_TEXT_FRAGMENT_SHADER_ATI);
+      // HACK: at least the Mac OS X 10.5 PPC Radeon drivers are broken and
+      // without this disable the texture units while the program is still
+      // running (10.4 PPC seems to work without this though).
+      mpglFlush();
       mpglActiveTexture(GL_TEXTURE1);
       mpglDisable(target);
       mpglActiveTexture(GL_TEXTURE2);
       mpglDisable(target);
       mpglActiveTexture(GL_TEXTURE0);
-      mpglDisable(GL_TEXT_FRAGMENT_SHADER_ATI);
       break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
@@ -1669,26 +1692,7 @@ static void swapGlBuffers_w32(MPGLContext *ctx) {
 }
 #endif
 #ifdef CONFIG_GL_X11
-#ifdef HAVE_LIBDL
-#include <dlfcn.h>
-#endif
 #include "x11_common.h"
-/**
- * \brief find address of a linked function
- * \param s name of function to find
- * \return address of function or NULL if not found
- */
-static void *getdladdr(const char *s) {
-  void *ret = NULL;
-#ifdef HAVE_LIBDL
-  void *handle = dlopen(NULL, RTLD_LAZY);
-  if (!handle)
-    return NULL;
-  ret = dlsym(handle, s);
-  dlclose(handle);
-#endif
-  return ret;
-}
 
 /**
  * \brief Returns the XVisualInfo associated with Window win.
@@ -1788,8 +1792,6 @@ static int setGlWindow_x11(MPGLContext *ctx)
     getProcAddress = getdladdr("glXGetProcAddress");
     if (!getProcAddress)
       getProcAddress = getdladdr("glXGetProcAddressARB");
-    if (!getProcAddress)
-      getProcAddress = (void *)getdladdr;
     glXExtStr = getdladdr("glXQueryExtensionsString");
     if (glXExtStr)
         appendstr(&glxstr, glXExtStr(mDisplay, DefaultScreen(mDisplay)));
@@ -1802,10 +1804,10 @@ static int setGlWindow_x11(MPGLContext *ctx)
 
     getFunctions(getProcAddress, glxstr);
     if (!mpglGenPrograms && mpglGetString &&
-        getProcAddress != (void *)getdladdr &&
+        getProcAddress &&
         strstr(mpglGetString(GL_EXTENSIONS), "GL_ARB_vertex_program")) {
       mp_msg(MSGT_VO, MSGL_WARN, "Broken glXGetProcAddress detected, trying workaround\n");
-      getFunctions((void *)getdladdr, glxstr);
+      getFunctions(NULL, glxstr);
     }
     free(glxstr);
 
@@ -1863,8 +1865,76 @@ static void gl_ontop(void)
 }
 #endif
 
+#ifdef CONFIG_GL_SDL
+#include "sdl_common.h"
+
+static void swapGlBuffers_sdl(MPGLContext *ctx) {
+  SDL_GL_SwapBuffers();
+}
+
+static void *sdlgpa(const GLubyte *name) {
+  return SDL_GL_GetProcAddress(name);
+}
+
+static int setGlWindow_sdl(MPGLContext *ctx) {
+  if (sdl_set_mode(0, SDL_OPENGL | SDL_RESIZABLE) < 0)
+    return SET_WINDOW_FAILED;
+  SDL_GL_LoadLibrary(NULL);
+  getFunctions(sdlgpa, NULL);
+  return SET_WINDOW_OK;
+}
+
+static int sdl_check_events(void) {
+  int res = 0;
+  SDL_Event event;
+  while (SDL_PollEvent(&event)) {
+    res |= sdl_default_handle_event(&event);
+  }
+  // poll "events" from within MPlayer code
+  res |= sdl_default_handle_event(NULL);
+  if (res & VO_EVENT_RESIZE)
+    sdl_set_mode(0, SDL_OPENGL | SDL_RESIZABLE);
+  return res;
+}
+
+#endif
+
+static int setGlWindow_dummy(MPGLContext *ctx) {
+  getFunctions(NULL, NULL);
+  return SET_WINDOW_OK;
+}
+
+static void releaseGlContext_dummy(MPGLContext *ctx) {
+}
+
+static int dummy_check_events(void) {
+  return 0;
+}
+
+static void dummy_update_xinerama_info(void) {
+  if (vo_screenwidth <= 0 || vo_screenheight <= 0) {
+    mp_msg(MSGT_VO, MSGL_ERR, "You must specify the screen dimensions "
+                              "with -screenw and -screenh\n");
+    vo_screenwidth  = 1280;
+    vo_screenheight = 768;
+  }
+  aspect_save_screenres(vo_screenwidth, vo_screenheight);
+}
+
 int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
+  if (type == GLTYPE_AUTO) {
+    int res = init_mpglcontext(ctx, GLTYPE_W32);
+    if (res) return res;
+    res = init_mpglcontext(ctx, GLTYPE_X11);
+    if (res) return res;
+    res = init_mpglcontext(ctx, GLTYPE_SDL);
+    return res;
+  }
   memset(ctx, 0, sizeof(*ctx));
+  ctx->setGlWindow = setGlWindow_dummy;
+  ctx->releaseGlContext = releaseGlContext_dummy;
+  ctx->update_xinerama_info = dummy_update_xinerama_info;
+  ctx->check_events = dummy_check_events;
   ctx->type = type;
   switch (ctx->type) {
 #ifdef CONFIG_GL_WIN32
@@ -1891,6 +1961,15 @@ int init_mpglcontext(MPGLContext *ctx, enum MPGLType type) {
     ctx->ontop = gl_ontop;
     return vo_init();
 #endif
+#ifdef CONFIG_GL_SDL
+  case GLTYPE_SDL:
+    SDL_Init(SDL_INIT_VIDEO);
+    ctx->setGlWindow = setGlWindow_sdl;
+    ctx->swapGlBuffers = swapGlBuffers_sdl;
+    ctx->check_events = sdl_check_events;
+    ctx->fullscreen = vo_sdl_fullscreen;
+    return vo_sdl_init();
+#endif
   default:
     return 0;
   }
@@ -1907,6 +1986,11 @@ void uninit_mpglcontext(MPGLContext *ctx) {
 #ifdef CONFIG_GL_X11
   case GLTYPE_X11:
     vo_x11_uninit();
+    break;
+#endif
+#ifdef CONFIG_GL_SDL
+  case GLTYPE_SDL:
+    vo_sdl_uninit();
     break;
 #endif
   }

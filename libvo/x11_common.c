@@ -81,7 +81,6 @@
 #define WIN_LAYER_ONTOP                  6
 #define WIN_LAYER_ABOVE_DOCK             10
 
-extern int enable_mouse_movements;
 int fs_layer = WIN_LAYER_ABOVE_DOCK;
 
 int stop_xscreensaver = 0;
@@ -533,7 +532,7 @@ void vo_uninit(struct vo_x11_state *x11)
 #include "wskeys.h"
 
 #ifdef XF86XK_AudioPause
-static const struct keymap keysym_map[] = {
+static const struct mp_keymap keysym_map[] = {
     {XF86XK_MenuKB, KEY_MENU},
     {XF86XK_AudioPlay, KEY_PLAY}, {XF86XK_AudioPause, KEY_PAUSE}, {XF86XK_AudioStop, KEY_STOP},
     {XF86XK_AudioPrev, KEY_PREV}, {XF86XK_AudioNext, KEY_NEXT},
@@ -550,7 +549,7 @@ static void vo_x11_putkey_ext(struct vo *vo, int keysym)
 }
 #endif
 
-static const struct keymap keymap[] = {
+static const struct mp_keymap keymap[] = {
     // special keys
     {wsEscape, KEY_ESC}, {wsBackSpace, KEY_BS}, {wsTab, KEY_TAB}, {wsEnter, KEY_ENTER},
 
@@ -814,13 +813,7 @@ int vo_x11_check_events(struct vo *vo)
                 }
                 break;
             case MotionNotify:
-                if(enable_mouse_movements)
-                {
-                    char cmd_str[40];
-                    sprintf(cmd_str,"set_mouse_pos %i %i",Event.xmotion.x, Event.xmotion.y);
-                    mp_input_queue_cmd(vo->input_ctx,
-                                       mp_input_parse_cmd(cmd_str));
-                }
+                    vo_mouse_movement(vo, Event.xmotion.x, Event.xmotion.y);
 
                 if (x11->vo_mouse_autohide)
                 {

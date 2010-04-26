@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r28707 -->
+<!-- synced with r30862 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -795,13 +795,8 @@ A <option>-mc 0.1</option> segíthet.
 Mi van a DVD navigációval/menükkel?
 </para></question>
 <answer><para>
-Az <application>MPlayer</application> nem támogatja a DVD menüket súlyos
-tervezési korlátok miatt, amik megakadályozzák a still images és az interaktív
-tartalom használatát. Ha szép menüket akarsz használni, másik lejátszót kell
-használnod, mint pl. a <application>xine</application>,
-a <application>VLC</application> vagy az <application>Ogle</application>.
-Ha DVD navigációt akarsz látni az <application>MPlayer</application>ben,
-neked magadnak kell megcsinálnod, de vigyázz, nagy fába vágod a fejszédet.
+Az <application>MPlayer</application> ma már támogatja a DVD menüket.
+A használhatóság mértéke viszont változhat.
 </para></answer>
 </qandaentry>
 

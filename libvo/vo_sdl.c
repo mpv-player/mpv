@@ -48,8 +48,6 @@
 /* define to enable surface locks, this might be needed on SMP machines */
 #undef SDL_ENABLE_LOCKS
 
-//#define BUGGY_SDL //defined by configure
-
 /* MONITOR_ASPECT MUST BE FLOAT */
 #define MONITOR_ASPECT 4.0/3.0
 
@@ -74,10 +72,7 @@
 #include "x11_common.h"
 #endif
 
-#include "input/input.h"
-#include "input/mouse.h"
 #include "subopt-helper.h"
-#include "mp_fifo.h"
 
 static const vo_info_t info =
 {
@@ -89,11 +84,7 @@ static const vo_info_t info =
 
 const LIBVO_EXTERN(sdl)
 
-#ifdef CONFIG_SDL_SDL_H
-#include <SDL/SDL.h>
-#else
-#include <SDL.h>
-#endif
+#include "sdl_common.h"
 //#include <SDL/SDL_syswm.h>
 
 
@@ -405,9 +396,6 @@ static int sdl_open (void *plugin, void *name)
 	    priv->sdlflags |= SDL_DOUBLEBUF;
 #endif
 
-	/* Setup Keyrepeats (500/30 are defaults) */
-	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, 100 /*SDL_DEFAULT_REPEAT_INTERVAL*/);
-
 	/* get information about the graphics adapter */
 	vidInfo = SDL_GetVideoInfo ();
 
@@ -451,18 +439,6 @@ static int sdl_open (void *plugin, void *name)
 
 		priv->bpp = 16;
 	}
-
-	/* We don't want those in our event queue.
-	 * We use SDL_KEYUP cause SDL_KEYDOWN seems to cause problems
-	 * with keys need to be pressed twice, to be recognized.
-	 */
-#ifndef BUGGY_SDL
-	SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
-	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
-//	SDL_EventState(SDL_QUIT, SDL_IGNORE);
-	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
-	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
-#endif
 
 	/* Success! */
 	return 0;
@@ -606,6 +582,8 @@ static void set_video_mode(int width, int height, int bpp, uint32_t sdlflags)
         priv->surface = newsurface;
         priv->dstwidth = width;
         priv->dstheight = height;
+        vo_dwidth  = width;
+        vo_dheight = height;
 
         setup_surfaces();
     }
@@ -1101,9 +1079,6 @@ static int draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
  *  returns : doesn't return
  **/
 
-#include "osdep/keycodes.h"
-
-#define shift_key (event.key.keysym.mod==(KMOD_LSHIFT||KMOD_RSHIFT))
 static void check_events (void)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
@@ -1127,39 +1102,8 @@ static void check_events (void)
  				mp_msg(MSGT_VO,MSGL_DBG3, "SDL: Window resize\n");
 			break;
 
-			case SDL_MOUSEBUTTONDOWN:
-				if(vo_nomouse_input)
-				    break;
-					mplayer_put_key((MOUSE_BTN0+event.button.button-1) | MP_KEY_DOWN);
-				break;
-
-			case SDL_MOUSEBUTTONUP:
-				if(vo_nomouse_input)
-				    break;
-				mplayer_put_key(MOUSE_BTN0+event.button.button-1);
-				break;
-
 			/* graphics mode selection shortcuts */
-#ifdef BUGGY_SDL
 			case SDL_KEYDOWN:
-				switch(event.key.keysym.sym) {
-                                case SDLK_UP: mplayer_put_key(KEY_UP); break;
-                                case SDLK_DOWN: mplayer_put_key(KEY_DOWN); break;
-                                case SDLK_LEFT: mplayer_put_key(KEY_LEFT); break;
-                                case SDLK_RIGHT: mplayer_put_key(KEY_RIGHT); break;
-                                case SDLK_LESS: mplayer_put_key(shift_key?'>':'<'); break;
-                                case SDLK_GREATER: mplayer_put_key('>'); break;
-                                case SDLK_ASTERISK:
-				case SDLK_KP_MULTIPLY:
-				case SDLK_SLASH:
-				case SDLK_KP_DIVIDE:
-				default: break;
-				}
-			break;
-			case SDL_KEYUP:
-#else
-			case SDL_KEYDOWN:
-#endif
 				keypressed = event.key.keysym.sym;
  				mp_msg(MSGT_VO,MSGL_DBG2, "SDL: Key pressed: '%i'\n", keypressed);
 
@@ -1191,78 +1135,13 @@ static void check_events (void)
 					}
 				}
 
-                                else switch(keypressed){
-				case SDLK_RETURN: mplayer_put_key(KEY_ENTER);break;
-                                case SDLK_ESCAPE: mplayer_put_key(KEY_ESC);break;
-				case SDLK_q: mplayer_put_key('q');break;
- 				case SDLK_F1: mplayer_put_key(KEY_F+1);break;
- 				case SDLK_F2: mplayer_put_key(KEY_F+2);break;
- 				case SDLK_F3: mplayer_put_key(KEY_F+3);break;
- 				case SDLK_F4: mplayer_put_key(KEY_F+4);break;
- 				case SDLK_F5: mplayer_put_key(KEY_F+5);break;
- 				case SDLK_F6: mplayer_put_key(KEY_F+6);break;
- 				case SDLK_F7: mplayer_put_key(KEY_F+7);break;
- 				case SDLK_F8: mplayer_put_key(KEY_F+8);break;
- 				case SDLK_F9: mplayer_put_key(KEY_F+9);break;
- 				case SDLK_F10: mplayer_put_key(KEY_F+10);break;
- 				case SDLK_F11: mplayer_put_key(KEY_F+11);break;
- 				case SDLK_F12: mplayer_put_key(KEY_F+12);break;
-                                /*case SDLK_o: mplayer_put_key('o');break;
-                                case SDLK_SPACE: mplayer_put_key(' ');break;
-                                case SDLK_p: mplayer_put_key('p');break;*/
-                                case SDLK_7: mplayer_put_key(shift_key?'/':'7');break;
-                                case SDLK_PLUS: mplayer_put_key(shift_key?'*':'+');break;
-                                case SDLK_KP_PLUS: mplayer_put_key('+');break;
-                                case SDLK_MINUS:
-                                case SDLK_KP_MINUS: mplayer_put_key('-');break;
-				case SDLK_TAB: mplayer_put_key('\t');break;
-				case SDLK_PAGEUP: mplayer_put_key(KEY_PAGE_UP);break;
-				case SDLK_PAGEDOWN: mplayer_put_key(KEY_PAGE_DOWN);break;
-#ifdef BUGGY_SDL
-                                case SDLK_UP:
-                                case SDLK_DOWN:
-                                case SDLK_LEFT:
-                                case SDLK_RIGHT:
-                                case SDLK_ASTERISK:
-				case SDLK_KP_MULTIPLY:
-				case SDLK_SLASH:
-				case SDLK_KP_DIVIDE:
-				break;
-#else
-                                case SDLK_UP: mplayer_put_key(KEY_UP);break;
-                                case SDLK_DOWN: mplayer_put_key(KEY_DOWN);break;
-                                case SDLK_LEFT: mplayer_put_key(KEY_LEFT);break;
-                                case SDLK_RIGHT: mplayer_put_key(KEY_RIGHT);break;
-                                case SDLK_LESS: mplayer_put_key(shift_key?'>':'<'); break;
-                                case SDLK_GREATER: mplayer_put_key('>'); break;
-                                case SDLK_ASTERISK:
-				case SDLK_KP_MULTIPLY: mplayer_put_key('*'); break;
-				case SDLK_SLASH:
-				case SDLK_KP_DIVIDE: mplayer_put_key('/'); break;
-#endif
-				case SDLK_KP0: mplayer_put_key(KEY_KP0); break;
-				case SDLK_KP1: mplayer_put_key(KEY_KP1); break;
-				case SDLK_KP2: mplayer_put_key(KEY_KP2); break;
-				case SDLK_KP3: mplayer_put_key(KEY_KP3); break;
-				case SDLK_KP4: mplayer_put_key(KEY_KP4); break;
-				case SDLK_KP5: mplayer_put_key(KEY_KP5); break;
-				case SDLK_KP6: mplayer_put_key(KEY_KP6); break;
-				case SDLK_KP7: mplayer_put_key(KEY_KP7); break;
-				case SDLK_KP8: mplayer_put_key(KEY_KP8); break;
-				case SDLK_KP9: mplayer_put_key(KEY_KP9); break;
-				case SDLK_KP_PERIOD: mplayer_put_key(KEY_KPDEC); break;
-				case SDLK_KP_ENTER: mplayer_put_key(KEY_KPENTER); break;
-				default:
-					//printf("got scancode: %d keysym: %d mod: %d %d\n", event.key.keysym.scancode, keypressed, event.key.keysym.mod);
-					mplayer_put_key(keypressed);
-                                }
+                                else sdl_default_handle_event(&event);
 
 				break;
-				case SDL_QUIT: mplayer_put_key(KEY_CLOSE_WIN);break;
+			default: sdl_default_handle_event(&event); break;
 		}
 	}
 }
-#undef shift_key
 
 /* Erase (paint it black) the rectangle specified by x, y, w and h in the surface
    or overlay which is used for OSD
@@ -1516,8 +1395,7 @@ uninit(void)
 	sdl_close();
 
 	/* Cleanup SDL */
-    if(SDL_WasInit(SDL_INIT_VIDEO))
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    vo_sdl_uninit();
 
  	mp_msg(MSGT_VO,MSGL_DBG3, "SDL: Closed Plugin\n");
 
@@ -1567,12 +1445,10 @@ static int preinit(const char *arg)
     priv->bpp = 0;
 
     /* initialize the SDL Video system */
-    if (!SDL_WasInit(SDL_INIT_VIDEO)) {
-        if (SDL_Init (SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE)) {
+    if (!vo_sdl_init()) {
             mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SDL] SDL initialization failed: %s.\n", SDL_GetError());
 
             return -1;
-        }
     }
 
     SDL_VideoDriverName(priv->driver, 8);

@@ -34,6 +34,14 @@
 #include "fastmemcpy.h"
 #include "ass_mp.h"
 
+#ifdef CONFIG_GL_SDL
+#ifdef CONFIG_SDL_SDL_H
+#include <SDL/SDL.h>
+#else
+#include <SDL.h>
+#endif
+#endif
+
 static const vo_info_t info =
 {
   "OpenGL",
@@ -485,7 +493,7 @@ static void autodetectGlExtensions(void) {
   const char *extensions = mpglGetString(GL_EXTENSIONS);
   const char *vendor     = mpglGetString(GL_VENDOR);
   const char *version    = mpglGetString(GL_VERSION);
-  int is_ati = strstr(vendor, "ATI") != NULL;
+  int is_ati = vendor && strstr(vendor, "ATI") != NULL;
   int ati_broken_pbo = 0;
   mp_msg(MSGT_VO, MSGL_V, "[gl] Running on OpenGL by '%s', versions '%s'\n", vendor, version);
   if (is_ati && strncmp(version, "2.1.", 4) == 0) {
@@ -494,8 +502,12 @@ static void autodetectGlExtensions(void) {
     ati_broken_pbo = ver && ver < 8395;
   }
   if (ati_hack      == -1) ati_hack      = ati_broken_pbo;
-  if (force_pbo     == -1) force_pbo     = strstr(extensions, "_pixel_buffer_object")      ? is_ati : 0;
-  if (use_rectangle == -1) use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      0 : 0;
+  if (extensions && force_pbo     == -1)
+    force_pbo     = strstr(extensions, "_pixel_buffer_object")      ? is_ati : 0;
+  if (extensions && use_rectangle == -1)
+    use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      0 : 0;
+  if (use_osd == -1)
+    use_osd = mpglBindTexture != NULL;
   if (use_yuv == -1)
     use_yuv = glAutodetectYUVConversion();
   if (is_ati && (lscale == 1 || lscale == 2 || cscale == 1 || cscale == 2))
@@ -600,6 +612,13 @@ static int create_window(uint32_t d_width, uint32_t d_height, uint32_t flags, co
             "gl", title);
   }
 #endif
+#ifdef CONFIG_GL_SDL
+  if (glctx.type == GLTYPE_SDL) {
+    SDL_WM_SetCaption(title, NULL);
+    vo_dwidth  = d_width;
+    vo_dheight = d_height;
+  }
+#endif
   return 0;
 }
 
@@ -639,6 +658,10 @@ glconfig:
 static void check_events(void)
 {
     int e=glctx.check_events();
+    if(e&VO_EVENT_REINIT) {
+        uninitGl();
+        initGl(vo_dwidth, vo_dheight);
+    }
     if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
     if(e&VO_EVENT_EXPOSE && int_pause) redraw();
 }
@@ -1084,13 +1107,10 @@ static const opt_t subopts[] = {
 
 static int preinit_internal(const char *arg, int allow_sw)
 {
-    enum MPGLType gltype = GLTYPE_X11;
     // set defaults
-#ifdef CONFIG_GL_WIN32
-    gltype = GLTYPE_W32;
-#endif
+    enum MPGLType gltype = GLTYPE_AUTO;
     many_fmts = 1;
-    use_osd = 1;
+    use_osd = -1;
     scaled_osd = 0;
     use_aspect = 1;
     use_ycbcr = 0;

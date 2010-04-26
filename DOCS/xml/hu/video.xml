@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r29001 -->
+<!-- synced with r31032 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -1762,10 +1762,6 @@ Ha szoftveres átkódolást akarsz csinálni, legalább egy 1GHz-es CPU-ra lesz 
 <para>
 A configure megtalálja a DVB kártyádat. Ha mégsem, kényszerítheted:
 <screen>./configure --enable-dvb</screen>
-Ha ost fejléc fájlaid vannak egy nem szabványos elérési útvonalon, add meg:
-<screen>
-./configure --with-extraincdir=<replaceable>DVB forrás könyvtár</replaceable>/ost/include
-</screen>
 Majd fordíts és telepíts, mint rendesen.</para>
 
 <formalpara><title>HASZNÁLAT</title>

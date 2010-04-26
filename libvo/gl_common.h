@@ -41,6 +41,9 @@
 // This old-vo wrapper macro would conflict with the struct member
 #undef update_xinerama_info
 #endif
+#ifdef CONFIG_GL_SDL
+#include <GL/gl.h>
+#endif
 
 // workaround for some gl.h headers
 #ifndef GLAPIENTRY
@@ -372,8 +375,10 @@ void glDisableYUVConversion(GLenum target, int type);
 /** \} */
 
 enum MPGLType {
+  GLTYPE_AUTO,
   GLTYPE_W32,
   GLTYPE_X11,
+  GLTYPE_SDL,
 };
 
 typedef struct MPGLContext {
