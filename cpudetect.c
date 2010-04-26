@@ -535,8 +535,8 @@ if (ARCH_PPC)
 if (ARCH_ALPHA)
 	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: Digital Alpha\n");
 
-if (ARCH_SGI_MIPS)
-	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: SGI MIPS\n");
+if (ARCH_MIPS)
+	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: MIPS\n");
 
 if (ARCH_PA_RISC)
 	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: Hewlett-Packard PA-RISC\n");

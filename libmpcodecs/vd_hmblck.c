@@ -24,8 +24,6 @@
 
 #include "vd_internal.h"
 
-#define TEMP_BUF_SIZE (720*576)
-
 static const vd_info_t info = {
 	"Hauppauge Macroblock/NV12/NV21 Decoder",
 	"hmblck",
@@ -90,11 +88,6 @@ static int nv12_to_yv12(unsigned char *data, int len, mp_image_t* mpi, int swapp
     if ( (len != (Y_size + (UV_size<<1))) ) {
         mp_msg(MSGT_DECVIDEO, MSGL_ERR,
                "hmblck: Image size inconsistent with data size.\n");
-        return 0;
-    }
-    if ( (mpi->width > 720) || (mpi->height > 576) ) {
-        mp_msg(MSGT_DECVIDEO,MSGL_ERR,
-               "hmblck: Image size is too big.\n");
         return 0;
     }
     if (mpi->num_planes != 3) {

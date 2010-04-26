@@ -49,7 +49,7 @@
 #include "libmpcodecs/dec_teletext.h"
 #include "vobsub.h"
 #include "spudec.h"
-#include "get_path.h"
+#include "path.h"
 #include "ass_mp.h"
 #include "stream/tv.h"
 #include "stream/stream_radio.h"

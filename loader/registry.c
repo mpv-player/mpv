@@ -21,7 +21,7 @@
 #include "ext.h"
 #include "registry.h"
 
-#include "get_path.h"
+#include "path.h"
 
 //#undef TRACE
 //#define TRACE printf

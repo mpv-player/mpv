@@ -42,7 +42,7 @@
 #include "mp_msg.h"
 #include "m_config.h"
 #include "m_option.h"
-#include "get_path.h"
+#include "path.h"
 #include "talloc.h"
 #include "options.h"
 

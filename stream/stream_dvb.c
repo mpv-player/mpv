@@ -43,7 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include "libmpdemux/demuxer.h"
 #include "m_option.h"
 #include "m_struct.h"
-#include "get_path.h"
+#include "path.h"
 #include "libavutil/avstring.h"
 
 #include "dvbin.h"

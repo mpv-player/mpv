@@ -29,7 +29,7 @@
 #include <string.h> /* strerror */
 
 #include "config.h"
-
+#include "path.h"
 #include "mp_msg.h"
 
 #include "vd_internal.h"
@@ -649,7 +649,6 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 static int init(sh_video_t *sh)
 {
     vd_xanim_ctx *priv;
-    char *def_path = BINARY_CODECS_PATH;
     char dll[1024];
     XA_CODEC_HDR codec_hdr;
     int i;
@@ -668,10 +667,7 @@ static int init(sh_video_t *sh)
     for (i=0; i < XA_CLOSE_FUNCS; i++)
 	xa_close_func[i] = NULL;
 
-    if (getenv("XANIM_MOD_DIR"))
-	def_path = getenv("XANIM_MOD_DIR");
-
-    snprintf(dll, 1024, "%s/%s", def_path, sh->codec->dll);
+    snprintf(dll, 1024, "%s/%s", codec_path, sh->codec->dll);
     if (xacodec_load(sh, dll) == 0)
 	return 0;
 

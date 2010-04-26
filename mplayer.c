@@ -97,10 +97,6 @@
 
 #include "input/input.h"
 
-#ifdef CONFIG_WIN32DLL
-#include "loader/drv.h"         // for SetCodecPath()
-#endif
-
 const int under_mencoder = 0;
 int slave_mode=0;
 int player_idle_mode=0;
@@ -149,7 +145,7 @@ char *heartbeat_cmd;
 
 static int cfg_inc_verbose(m_option_t *conf){ ++verbose; return 0;}
 
-#include "get_path.h"
+#include "path.h"
 
 //**************************************************************************//
 //**************************************************************************//
@@ -3146,10 +3142,8 @@ int i;
     set_priority();
 #endif
 
-#ifdef CONFIG_WIN32DLL
   if (codec_path)
-    SetCodecPath(codec_path);
-#endif
+    set_codec_path(codec_path);
 
     if(opts->video_driver_list && strcmp(opts->video_driver_list[0],"help")==0){
       list_video_out();

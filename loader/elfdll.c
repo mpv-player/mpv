@@ -18,6 +18,7 @@
 #include "wine/debugtools.h"
 #include "wine/winerror.h"
 #include "debug.h"
+#include "path.h"
 
 //DEFAULT_DEBUG_CHANNEL(elfdll)
 
@@ -36,9 +37,6 @@ extern modref_list* local_wm;
 DWORD fixup_imports(WINE_MODREF *wm);
 void dump_exports(HMODULE hModule);
 /*---------------- END HACKS ---------------*/
-
-//char *extra_ld_library_path = "/usr/lib/win32";
-extern char* def_path;
 
 struct elfdll_image
 {
@@ -68,7 +66,7 @@ void *ELFDLL_dlopen(const char *libname, int flags)
 
 	/* Now try to construct searches through our extra search-path */
 	namelen = strlen(libname);
-	ldpath = def_path;
+	ldpath = codec_path;
 	while(ldpath && *ldpath)
 	{
 		int len;

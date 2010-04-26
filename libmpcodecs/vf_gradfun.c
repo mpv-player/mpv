@@ -102,7 +102,7 @@ static void filter_line_mmx2(uint8_t *dst, uint8_t *src, uint16_t *dc,
         width = x;
     }
     x = -width;
-    asm volatile(
+    __asm__ volatile(
         "movd          %4, %%mm5 \n"
         "pxor       %%mm7, %%mm7 \n"
         "pshufw $0, %%mm5, %%mm5 \n"
@@ -150,7 +150,7 @@ static void filter_line_ssse3(uint8_t *dst, uint8_t *src, uint16_t *dc,
         width = x;
     }
     x = -width;
-    asm volatile(
+    __asm__ volatile(
         "movd           %4, %%xmm5 \n"
         "pxor       %%xmm7, %%xmm7 \n"
         "pshuflw $0,%%xmm5, %%xmm5 \n"
@@ -187,7 +187,7 @@ static void filter_line_ssse3(uint8_t *dst, uint8_t *src, uint16_t *dc,
 
 #define BLURV(load)\
     intptr_t x = -2*width;\
-    asm volatile(\
+    __asm__ volatile(\
         "movdqa %6, %%xmm7 \n"\
         "1: \n"\
         load"   (%4,%0), %%xmm0 \n"\

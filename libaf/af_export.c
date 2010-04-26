@@ -38,7 +38,7 @@
 #include <fcntl.h>
 
 #include "af.h"
-#include "get_path.h"
+#include "path.h"
 
 #define DEF_SZ 512 // default buffer size (in samples)
 #define SHARED_FILE "mplayer-af_export" /* default file name

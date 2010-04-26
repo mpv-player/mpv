@@ -386,23 +386,7 @@ static int preinit(const char *arg)
 		NSApp = [NSApplication sharedApplication];
 		isLeopardOrLater = floor(NSAppKitVersionNumber) > 824;
 
-		#if !defined (CONFIG_MACOSX_FINDER) || !defined (CONFIG_SDL)
-		//this chunk of code is heavily based off SDL_macosx.m from SDL
-		ProcessSerialNumber myProc, frProc;
-		Boolean sameProc;
-
-		if (GetFrontProcess(&frProc) == noErr)
-		{
-			if (GetCurrentProcess(&myProc) == noErr)
-			{
-				if (SameProcess(&frProc, &myProc, &sameProc) == noErr && !sameProc)
-				{
-					TransformProcessType(&myProc, kProcessTransformToForegroundApplication);
-				}
-				SetFrontProcess(&myProc);
-			}
-		}
-		#endif
+		osx_foreground_hack();
 
 		if(!mpGLView)
 		{

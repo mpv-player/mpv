@@ -63,11 +63,7 @@
 #include "parser-mecmd.h"
 #include "parser-cfg.h"
 #include "mp_fifo.h"
-#include "get_path.h"
-
-#ifdef CONFIG_WIN32DLL
-#include "loader/drv.h"         // for SetCodecPath()
-#endif
+#include "path.h"
 
 #include "stream/stream.h"
 #include "libmpdemux/aviprint.h"
@@ -341,7 +337,7 @@ static void exit_sighandler(int x){
 
 static muxer_t* muxer=NULL;
 
-void add_subtitles(char *filename, float fps, int silent)
+static void add_subtitles(char *filename, float fps, int silent)
 {
     sub_data *subd;
 #ifdef CONFIG_ASS
@@ -684,10 +680,8 @@ if (frameno_filename) {
   set_priority();
 #endif
 
-#ifdef CONFIG_WIN32DLL
   if (codec_path)
-    SetCodecPath(codec_path);
-#endif
+    set_codec_path(codec_path);
 
 // check font
 #ifdef CONFIG_FREETYPE

@@ -46,6 +46,7 @@
 #endif
 #include "win32.h"
 #include "drv.h"
+#include "path.h"
 
 #ifdef EMU_QTX_API
 #include "wrapper.h"
@@ -365,8 +366,7 @@ static WIN_BOOL MODULE_FreeLibrary( WINE_MODREF *wm )
 HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 {
 	WINE_MODREF *wm = 0;
-	char* listpath[] = { "", "", "/usr/lib/win32", "/usr/local/lib/win32", 0 };
-	extern char* def_path;
+	char* listpath[] = { "", "", 0 };
 	char path[512];
 	char checked[2000];
         int i = -1;
@@ -393,9 +393,9 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 		    strncpy(path, libname, 511);
                 else
 		    /* check default user path */
-		    strncpy(path, def_path, 300);
+		    strncpy(path, codec_path, 300);
 	    }
-	    else if (strcmp(def_path, listpath[i]))
+	    else if (strcmp(codec_path, listpath[i]))
                 /* path from the list */
 		strncpy(path, listpath[i], 300);
 	    else

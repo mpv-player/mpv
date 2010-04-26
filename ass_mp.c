@@ -29,7 +29,7 @@
 #include <libavutil/common.h>
 
 #include "mp_msg.h"
-#include "get_path.h"
+#include "path.h"
 #include "ass_mp.h"
 #include "subreader.h"
 #include "stream/stream.h"

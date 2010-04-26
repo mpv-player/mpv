@@ -1670,13 +1670,12 @@ fi
 
 def_fast_64bit='#define HAVE_FAST_64BIT 0'
 def_fast_unaligned='#define HAVE_FAST_UNALIGNED 0'
-arch_all='X86 X86_32 X86_64 IA64 SPARC ARM AVR32 SH4 PPC PPC64 ALPHA MIPS SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA TOMI GENERIC'
+arch_all='X86 IA64 SPARC ARM AVR32 SH4 PPC ALPHA MIPS PA_RISC S390 S390X VAX BFIN XTENSA TOMI GENERIC'
+subarch_all='X86_32 X86_64 PPC64'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
-  arch='X86 X86_32'
-  libavcodec_arch="x86"
-  target_arch="ARCH_X86 = yes"
-  target_subarch="ARCH_X86_32 = yes"
+  arch='x86'
+  subarch='x86_32'
   def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
   iproc=486
   proc=i486
@@ -1913,17 +1912,14 @@ EOF
     ;;
 
   ia64)
-    arch='IA64'
-    target_arch='ARCH_IA64 = yes'
+    arch='ia64'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='ia64'
     ;;
 
   x86_64|amd64)
-    arch='X86 X86_64'
-    libavcodec_arch="x86"
-    target_subarch='ARCH_X86_64 = yes'
-    target_arch="ARCH_X86 = yes"
+    arch='x86'
+    subarch='x86_64'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='x86_64'
@@ -2016,9 +2012,7 @@ EOF
     ;;
 
   sparc|sparc64)
-    arch='SPARC'
-    libavcodec_arch="sparc"
-    target_arch='ARCH_SPARC = yes'
+    arch='sparc'
     iproc='sparc'
     if test "$host_arch" = "sparc64" ; then
       _vis='yes'
@@ -2045,39 +2039,30 @@ EOF
     ;;
 
   arm*)
-    arch='ARM'
-    libavcodec_arch="arm"
-    target_arch='ARCH_ARM = yes'
+    arch='arm'
     iproc='arm'
     ;;
 
   avr32)
-    arch='AVR32'
-    libavcodec_arch="avr32"
-    target_arch='ARCH_AVR32 = yes'
+    arch='avr32'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='avr32'
     test $_fast_clz = "auto" && _fast_clz=yes
     ;;
 
   sh|sh4)
-    arch='SH4'
-    libavcodec_arch="sh4"
-    target_arch='ARCH_SH4 = yes'
+    arch='sh4'
     iproc='sh4'
     ;;
 
   ppc|ppc64|powerpc|powerpc64)
-    arch='PPC'
+    arch='ppc'
     def_dcbzl='#define HAVE_DCBZL 0'
-    libavcodec_arch="ppc"
-    target_arch='ARCH_PPC = yes'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='ppc'
 
     if test "$host_arch" = "ppc64" -o "$host_arch" = "powerpc64" ; then
-      arch='PPC PPC64'
-      target_subarch='ARCH_PPC64 = yes'
+      subarch='ppc64'
       def_fast_64bit='#define HAVE_FAST_64BIT 1'
     fi
     echocheck "CPU type"
@@ -2185,9 +2170,7 @@ EOF
     ;;
 
   alpha*)
-    arch='ALPHA'
-    libavcodec_arch="alpha"
-    target_arch='ARCH_ALPHA = yes'
+    arch='alpha'
     iproc='alpha'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
 
@@ -2230,10 +2213,8 @@ EOF
     ;;
 
   mips)
-    arch='SGI_MIPS'
-    libavcodec_arch="mips"
-    target_arch='ARCH_SGI_MIPS = yes'
-    iproc='sgi-mips'
+    arch='mips'
+    iproc='mips'
 
     if irix ; then
         echocheck "CPU type"
@@ -2258,38 +2239,32 @@ EOF
     ;;
 
   hppa)
-    arch='PA_RISC'
-    target_arch='ARCH_PA_RISC = yes'
+    arch='pa_risc'
     iproc='PA-RISC'
     ;;
 
   s390)
-    arch='S390'
-    target_arch='ARCH_S390 = yes'
+    arch='s390'
     iproc='390'
     ;;
 
   s390x)
-    arch='S390X'
-    target_arch='ARCH_S390X = yes'
+    arch='s390x'
     iproc='390x'
     ;;
 
   vax)
-    arch='VAX'
-    target_arch='ARCH_VAX = yes'
+    arch='vax'
     iproc='vax'
     ;;
 
   xtensa)
-    arch='XTENSA'
-    target_arch='ARCH_XTENSA = yes'
+    arch='xtensa'
     iproc='xtensa'
     ;;
 
   generic)
-    arch='GENERIC'
-    target_arch='ARCH_GENERIC = yes'
+    arch='generic'
     ;;
 
   *)
@@ -2741,27 +2716,27 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC MMX MMX2 AMD3DNOW AMD3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV FAST_CLZ PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP NEON IWMMXT MMI VIS MVI'
-test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
-test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
-test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
-test "$_3dnow"     = yes && _cpuexts="AMD3DNOW $_cpuexts"
-test "$_3dnowext"  = yes && _cpuexts="AMD3DNOWEXT $_cpuexts"
-test "$_sse"       = yes && _cpuexts="SSE $_cpuexts"
-test "$_sse2"      = yes && _cpuexts="SSE2 $_cpuexts"
-test "$_ssse3"     = yes && _cpuexts="SSSE3 $_cpuexts"
-test "$_cmov"      = yes && _cpuexts="CMOV $_cpuexts"
-test "$_fast_cmov" = yes && _cpuexts="FAST_CMOV $_cpuexts"
-test "$_fast_clz"  = yes && _cpuexts="FAST_CLZ $_cpuexts"
-test "$pld"        = yes && _cpuexts="PLD $_cpuexts"
-test "$_armv5te"   = yes && _cpuexts="ARMV5TE $_cpuexts"
-test "$_armv6"     = yes && _cpuexts="ARMV6 $_cpuexts"
-test "$_armv6t2"   = yes && _cpuexts="ARMV6T2 $_cpuexts"
-test "$_armvfp"    = yes && _cpuexts="ARMVFP $_cpuexts"
-test "$neon"       = yes && _cpuexts="NEON $_cpuexts"
-test "$_iwmmxt"    = yes && _cpuexts="IWMMXT $_cpuexts"
-test "$_vis"       = yes && _cpuexts="VIS $_cpuexts"
-test "$_mvi"       = yes && _cpuexts="MVI $_cpuexts"
+cpuexts_all='ALTIVEC MMX MMX2 AMD3DNOW AMD3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV FAST_CLZ PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP NEON IWMMXT MMI VIS MVI'
+test "$_altivec"   = yes && cpuexts="ALTIVEC $cpuexts"
+test "$_mmx"       = yes && cpuexts="MMX $cpuexts"
+test "$_mmxext"    = yes && cpuexts="MMX2 $cpuexts"
+test "$_3dnow"     = yes && cpuexts="AMD3DNOW $cpuexts"
+test "$_3dnowext"  = yes && cpuexts="AMD3DNOWEXT $cpuexts"
+test "$_sse"       = yes && cpuexts="SSE $cpuexts"
+test "$_sse2"      = yes && cpuexts="SSE2 $cpuexts"
+test "$_ssse3"     = yes && cpuexts="SSSE3 $cpuexts"
+test "$_cmov"      = yes && cpuexts="CMOV $cpuexts"
+test "$_fast_cmov" = yes && cpuexts="FAST_CMOV $cpuexts"
+test "$_fast_clz"  = yes && cpuexts="FAST_CLZ $cpuexts"
+test "$pld"        = yes && cpuexts="PLD $cpuexts"
+test "$_armv5te"   = yes && cpuexts="ARMV5TE $cpuexts"
+test "$_armv6"     = yes && cpuexts="ARMV6 $cpuexts"
+test "$_armv6t2"   = yes && cpuexts="ARMV6T2 $cpuexts"
+test "$_armvfp"    = yes && cpuexts="ARMVFP $cpuexts"
+test "$neon"       = yes && cpuexts="NEON $cpuexts"
+test "$_iwmmxt"    = yes && cpuexts="IWMMXT $cpuexts"
+test "$_vis"       = yes && cpuexts="VIS $cpuexts"
+test "$_mvi"       = yes && cpuexts="MVI $cpuexts"
 
 # Checking kernel version...
 if x86_32 && linux ; then
@@ -7810,6 +7785,17 @@ echores "$_dvdnav"
 # DO NOT ADD ANY TESTS THAT USE LINKER FLAGS HERE (like cc_check).
 # Read dvdnav comment above.
 
+mak_enable () {
+list=$(echo $1 | tr '[a-z]' '[A-Z]')
+item=$(echo $2 | tr '[a-z]' '[A-Z]')
+nprefix=$3;
+for part in $list; do
+  if $(echo $item | grep -q -E "(^| )$part($| )"); then
+    echo "${nprefix}_$part = yes"
+  fi
+done
+}
+
 #############################################################################
 echo "Creating config.mak"
 cat > config.mak << EOF
@@ -7841,10 +7827,8 @@ AS = $_cc
 CC = $_cc
 CXX = $_cc
 HOST_CC = $_host_cc
-YASM = $_yasm
 INSTALL = $_install
 INSTALLSTRIP = $_install_strip
-RANLIB = $_ranlib
 WINDRES = $_windres
 
 CFLAGS = $CFLAGS $extra_cflags
@@ -7858,7 +7842,6 @@ CFLAGS_NO_OMIT_LEAF_FRAME_POINTER = $cflags_no_omit_leaf_frame_pointer
 CFLAGS_STACKREALIGN = $cflags_stackrealign
 CFLAGS_SVGALIB_HELPER = $cflags_svgalib_helper
 CFLAGS_TREMOR_LOW = $cflags_tremor_low
-YASMFLAGS = $YASMFLAGS
 
 EXTRALIBS = $extra_ldflags $_ld_static $_ld_lm $extra_libs
 EXTRALIBS_MPLAYER = $libs_mplayer
@@ -7873,10 +7856,10 @@ TIMER = $_timer
 EXESUF = $_exesuf
 EXESUFS_ALL = .exe
 
-$target_arch
-ARCH = $libavcodec_arch
-$target_subarch
-$(echo $_cpuexts | tr '[a-z] ' '[A-Z]\n' | sed 's/^/HAVE_/;s/$/=yes/')
+ARCH = $arch
+$(mak_enable "$arch_all"    "$arch"    ARCH)
+$(mak_enable "$subarch_all" "$subarch" ARCH)
+$(mak_enable "$cpuexts_all" "$cpuexts" HAVE)
 
 MENCODER = $_mencoder
 MPLAYER = $_mplayer
@@ -7961,7 +7944,6 @@ LIBSMBCLIENT = $_smb
 LIBTHEORA = $_theora
 LIRC = $_lirc
 LIVE555 = $_live
-MACOSX_BUNDLE = $_macosx_bundle
 MACOSX_FINDER = $_macosx_finder
 MD5SUM = $_md5sum
 MGA = $_mga
@@ -8057,6 +8039,10 @@ LIBAVCODEC_INTERNALS = $_libavcodec_internals
 LIBSWSCALE_INTERNALS = $_libswscale_internals
 FFMPEG_SOURCE_PATH = $_ffmpeg_source
 
+RANLIB = $_ranlib
+YASM = $_yasm
+YASMFLAGS = $YASMFLAGS
+
 # Some FFmpeg codecs depend on these. Enable them unconditionally for now.
 CONFIG_AANDCT=yes
 CONFIG_FFT=yes
@@ -8085,10 +8071,12 @@ EOF
 #############################################################################
 
 ff_config_enable () {
+list=$(echo $1 | tr '[a-z]' '[A-Z]')
+item=$(echo $2 | tr '[a-z]' '[A-Z]')
 _nprefix=$3;
 test -z "$_nprefix" && _nprefix='CONFIG'
-for part in $1; do
-  if $(echo $2 | grep -q -E "(^| )$part($| )"); then
+for part in $list; do
+  if $(echo $item | grep -q -E "(^| )$part($| )"); then
     echo "#define ${_nprefix}_$part 1"
   else
     echo "#define ${_nprefix}_$part 0"
@@ -8240,7 +8228,8 @@ $def_pthread_cache
 $def_words_endian
 $def_bigendian
 $(ff_config_enable "$arch_all" "$arch" "ARCH")
-$(ff_config_enable "$_cpuexts_all" "$_cpuexts" "HAVE")
+$(ff_config_enable "$subarch_all" "$subarch" "ARCH")
+$(ff_config_enable "$cpuexts_all" "$cpuexts" "HAVE")
 
 
 /* DVD/VCD/CD */

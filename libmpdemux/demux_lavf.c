@@ -44,7 +44,8 @@
 
 #include "mp_taglists.h"
 
-#define INITIAL_PROBE_SIZE (32*1024)
+#define INITIAL_PROBE_SIZE STREAM_BUFFER_SIZE
+#define SMALL_MAX_PROBE_SIZE (32 * 1024)
 #define PROBE_BUF_SIZE (2*1024*1024)
 
 const m_option_t lavfdopts_conf[] = {
@@ -171,20 +172,21 @@ static int lavf_check_file(demuxer_t *demuxer){
     avpd.buf = av_mallocz(FFMAX(BIO_BUFFER_SIZE, PROBE_BUF_SIZE) +
                           FF_INPUT_BUFFER_PADDING_SIZE);
     do {
-    read_size = stream_read(demuxer->stream, avpd.buf + probe_data_size, read_size);
-    if(read_size < 0) {
-        av_free(avpd.buf);
-        return 0;
-    }
-    probe_data_size += read_size;
-    avpd.filename= demuxer->stream->url;
-    if (!strncmp(avpd.filename, "ffmpeg://", 9))
-        avpd.filename += 9;
-    avpd.buf_size= probe_data_size;
+        read_size = stream_read(demuxer->stream, avpd.buf + probe_data_size, read_size);
+        if(read_size < 0) {
+            av_free(avpd.buf);
+            return 0;
+        }
+        probe_data_size += read_size;
+        avpd.filename= demuxer->stream->url;
+        if (!strncmp(avpd.filename, "ffmpeg://", 9))
+            avpd.filename += 9;
+        avpd.buf_size= probe_data_size;
 
-    priv->avif= av_probe_input_format(&avpd, probe_data_size > 0);
-    read_size = FFMIN(2*read_size, PROBE_BUF_SIZE - probe_data_size);
-    } while (demuxer->desc->type != DEMUXER_TYPE_LAVF_PREFERRED &&
+        priv->avif= av_probe_input_format(&avpd, probe_data_size > 0);
+        read_size = FFMIN(2*read_size, PROBE_BUF_SIZE - probe_data_size);
+    } while ((demuxer->desc->type != DEMUXER_TYPE_LAVF_PREFERRED ||
+              probe_data_size < SMALL_MAX_PROBE_SIZE) &&
              !priv->avif && read_size > 0 && probe_data_size < PROBE_BUF_SIZE);
     av_free(avpd.buf);
 
