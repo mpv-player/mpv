@@ -364,9 +364,9 @@ PSP软件修改，对不同软件限制也许会有不同。
 <title>编码到PSP</title>
 <para>
 <screen>
-mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -of lavf \
-    -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
-    -lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
+mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -oac lavc \
+    -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=libfaac \
+    -of lavf -lavfopts format=psp \
     <replaceable>input.video</replaceable> -o <replaceable>output.psp</replaceable>
 </screen>
 注意你可以通过

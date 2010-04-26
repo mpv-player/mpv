@@ -45,6 +45,7 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
+#include "ve_x264.h"
 
 #include <x264.h>
 

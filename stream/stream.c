@@ -47,8 +47,6 @@
 
 #include "cache2.h"
 
-//#include "vcd_read_bincue.h"
-
 struct input_ctx;
 static int (*stream_check_interrupt_cb)(struct input_ctx *ctx, int time);
 static struct input_ctx *stream_check_interrupt_ctx;

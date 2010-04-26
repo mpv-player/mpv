@@ -216,7 +216,7 @@ static int xvidenc_autoaspect = 0;
 
 static char *xvidenc_zones = NULL; // zones string
 
-m_option_t xvidencopts_conf[] =
+const m_option_t xvidencopts_conf[] =
 {
 	/* Standard things mencoder should be able to treat directly */
 	{"bitrate", &xvidenc_bitrate, CONF_TYPE_INT, 0, 0, 0, NULL},

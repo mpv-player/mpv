@@ -76,17 +76,17 @@ static void draw_char(int num, float light, float x, float y, float z)
     num3 = num - (num2 * 10);
     ty = (float)num2 / 7;
     tx = (float)num3 / 10;
-    Normal3f(0.0f, 0.0f, 1.0f);        // Needed for lighting
-    Color4f(0.0, 1.0, 0.0, light);        // Basic polygon color
+    mpglNormal3f(0.0f, 0.0f, 1.0f);        // Needed for lighting
+    mpglColor4f(0.0, 1.0, 0.0, light);        // Basic polygon color
 
-    TexCoord2f(tx, ty);
-    Vertex3f(x, y, z);
-    TexCoord2f(tx + 0.1, ty);
-    Vertex3f(x + 1, y, z);
-    TexCoord2f(tx + 0.1, ty + 0.166);
-    Vertex3f(x + 1, y - 1, z);
-    TexCoord2f(tx, ty + 0.166);
-    Vertex3f(x, y - 1, z);
+    mpglTexCoord2f(tx, ty);
+    mpglVertex3f(x, y, z);
+    mpglTexCoord2f(tx + 0.1, ty);
+    mpglVertex3f(x + 1, y, z);
+    mpglTexCoord2f(tx + 0.1, ty + 0.166);
+    mpglVertex3f(x + 1, y - 1, z);
+    mpglTexCoord2f(tx, ty + 0.166);
+    mpglVertex3f(x, y - 1, z);
 }
 
 static void draw_illuminatedchar(int num, float x, float y, float z)
@@ -98,32 +98,32 @@ static void draw_illuminatedchar(int num, float x, float y, float z)
     num3 = num - (num2 * 10);
     ty = (float)num2 / 7;
     tx = (float)num3 / 10;
-    Normal3f(0.0f, 0.0f, 1.0f);        // Needed for lighting
-    Color4f(1.0, 1.0, 1.0, .5);        // Basic polygon color
+    mpglNormal3f(0.0f, 0.0f, 1.0f);        // Needed for lighting
+    mpglColor4f(1.0, 1.0, 1.0, .5);        // Basic polygon color
 
-    TexCoord2f(tx, ty);
-    Vertex3f(x, y, z);
-    TexCoord2f(tx + 0.1, ty);
-    Vertex3f(x + 1, y, z);
-    TexCoord2f(tx + 0.1, ty + 0.166);
-    Vertex3f(x + 1, y - 1, z);
-    TexCoord2f(tx, ty + 0.166);
-    Vertex3f(x, y - 1, z);
+    mpglTexCoord2f(tx, ty);
+    mpglVertex3f(x, y, z);
+    mpglTexCoord2f(tx + 0.1, ty);
+    mpglVertex3f(x + 1, y, z);
+    mpglTexCoord2f(tx + 0.1, ty + 0.166);
+    mpglVertex3f(x + 1, y - 1, z);
+    mpglTexCoord2f(tx, ty + 0.166);
+    mpglVertex3f(x, y - 1, z);
 }
 
 static void draw_flare(float x, float y, float z)        //flare
 {
-    Normal3f(0.0f, 0.0f, 1.0f);        // Needed for lighting
-    Color4f(1.0, 1.0, 1.0, .8);        // Basic polygon color
+    mpglNormal3f(0.0f, 0.0f, 1.0f);        // Needed for lighting
+    mpglColor4f(1.0, 1.0, 1.0, .8);        // Basic polygon color
 
-    TexCoord2f(0, 0);
-    Vertex3f(x - 1, y + 1, z);
-    TexCoord2f(0.75, 0);
-    Vertex3f(x + 2, y + 1, z);
-    TexCoord2f(0.75, 0.75);
-    Vertex3f(x + 2, y - 2, z);
-    TexCoord2f(0, 0.75);
-    Vertex3f(x - 1, y - 2, z);
+    mpglTexCoord2f(0, 0);
+    mpglVertex3f(x - 1, y + 1, z);
+    mpglTexCoord2f(0.75, 0);
+    mpglVertex3f(x + 2, y + 1, z);
+    mpglTexCoord2f(0.75, 0.75);
+    mpglVertex3f(x + 2, y - 2, z);
+    mpglTexCoord2f(0, 0.75);
+    mpglVertex3f(x - 1, y - 2, z);
 }
 
 static void draw_text(uint8_t *pic)
@@ -251,21 +251,21 @@ static void make_text(void)
 
 static void ourBuildTextures(void)
 {
-    TexImage2D(GL_TEXTURE_2D, 0, 1, 128, 64, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
-               font_texture);
-    TexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    TexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    mpglTexImage2D(GL_TEXTURE_2D, 0, 1, 128, 64, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
+                   font_texture);
+    mpglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    mpglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    BindTexture(GL_TEXTURE_2D, 1);
-    TexImage2D(GL_TEXTURE_2D, 0, 1, 4, 4, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
-               flare);
-    TexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    TexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    mpglBindTexture(GL_TEXTURE_2D, 1);
+    mpglTexImage2D(GL_TEXTURE_2D, 0, 1, 4, 4, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE,
+                   flare);
+    mpglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    mpglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Some pretty standard settings for wrapping and filtering.
-    TexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    TexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    BindTexture(GL_TEXTURE_2D, 0);
+    mpglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    mpglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    mpglBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void matrixview_init(int w, int h)
@@ -275,27 +275,27 @@ void matrixview_init(int w, int h)
     ourBuildTextures();
 
     // Color to clear color buffer to.
-    ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    mpglClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     // Depth to clear depth buffer to; type of test.
-    ClearDepth(1.0);
-    DepthFunc(GL_LESS);
+    mpglClearDepth(1.0);
+    mpglDepthFunc(GL_LESS);
 
     // Enables Smooth Color Shading; try GL_FLAT for (lack of) fun.
-    ShadeModel(GL_SMOOTH);
+    mpglShadeModel(GL_SMOOTH);
 
     // Set up a light, turn it on.
-    Lightfv(GL_LIGHT1, GL_POSITION, Light_Position);
-    Lightfv(GL_LIGHT1, GL_AMBIENT, Light_Ambient);
-    Lightfv(GL_LIGHT1, GL_DIFFUSE, Light_Diffuse);
-    Enable(GL_LIGHT1);
+    mpglLightfv(GL_LIGHT1, GL_POSITION, Light_Position);
+    mpglLightfv(GL_LIGHT1, GL_AMBIENT, Light_Ambient);
+    mpglLightfv(GL_LIGHT1, GL_DIFFUSE, Light_Diffuse);
+    mpglEnable(GL_LIGHT1);
 
     // A handy trick -- have surface material mirror the color.
-    ColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-    Enable(GL_COLOR_MATERIAL);
+    mpglColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+    mpglEnable(GL_COLOR_MATERIAL);
 
     // Allow adjusting of texture color via glColor
-    TexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    mpglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
     matrixview_reshape(w, h);
 }
@@ -303,48 +303,48 @@ void matrixview_init(int w, int h)
 
 void matrixview_reshape(int w, int h)
 {
-    Viewport(0, 0, w, h);
+    mpglViewport(0, 0, w, h);
 
-    MatrixMode(GL_PROJECTION);
-    LoadIdentity();
-    Frustum(-_text_x, _text_x, -_text_y, _text_y, -Z_Off - Z_Depth, -Z_Off);
+    mpglMatrixMode(GL_PROJECTION);
+    mpglLoadIdentity();
+    mpglFrustum(-_text_x, _text_x, -_text_y, _text_y, -Z_Off - Z_Depth, -Z_Off);
 
-    MatrixMode(GL_MODELVIEW);
+    mpglMatrixMode(GL_MODELVIEW);
 }
 
 
 void matrixview_draw(int w, int h, double currentTime, float frameTime,
                      uint8_t *data)
 {
-    Enable(GL_BLEND);
-    Enable(GL_TEXTURE_2D);
+    mpglEnable(GL_BLEND);
+    mpglEnable(GL_TEXTURE_2D);
 
-    Disable(GL_LIGHTING);
-    BlendFunc(GL_SRC_ALPHA, GL_ONE);
-    Disable(GL_DEPTH_TEST);
+    mpglDisable(GL_LIGHTING);
+    mpglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    mpglDisable(GL_DEPTH_TEST);
 
-    MatrixMode(GL_MODELVIEW);
-    LoadIdentity();
-    Translated(0.0f, 0.0f, Z_Off);
+    mpglMatrixMode(GL_MODELVIEW);
+    mpglLoadIdentity();
+    mpglTranslated(0.0f, 0.0f, Z_Off);
 
     // Clear the color and depth buffers.
-    Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mpglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // OK, let's start drawing our planer quads.
-    Begin(GL_QUADS);
+    mpglBegin(GL_QUADS);
     draw_text(data);
-    End();
+    mpglEnd();
 
-    BindTexture(GL_TEXTURE_2D, 1);
-    Begin(GL_QUADS);
+    mpglBindTexture(GL_TEXTURE_2D, 1);
+    mpglBegin(GL_QUADS);
     draw_flares();
-    End();
-    BindTexture(GL_TEXTURE_2D, 0);
+    mpglEnd();
+    mpglBindTexture(GL_TEXTURE_2D, 0);
 
     make_change(currentTime);
 
-    LoadIdentity();
-    MatrixMode(GL_PROJECTION);
+    mpglLoadIdentity();
+    mpglMatrixMode(GL_PROJECTION);
 }
 
 void matrixview_contrast_set(float contrast)

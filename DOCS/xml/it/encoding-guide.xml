@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 44% synced with r22753 (row 2361) -->
+<!-- 44% synced with r22753 (row 2377) -->
 <chapter id="encoding-guide">
 <title>La codifica con <application>MEncoder</application></title>
 
@@ -2360,18 +2360,18 @@ tipi.
 </listitem>
 
 <listitem><formalpara>
-  <title>About encoding parameters and quality:</title>
+  <title>Riguardo i parameti di codifica e la qualità:</title>
   <para>
-  Just because I recommend <option>mbd=2</option> here does not mean it
-  should not be used elsewhere. Along with <option>trell</option>,
-  <option>mbd=2</option> is one of the two
-   <systemitem class="library">libavcodec</systemitem> options that
-  increases quality the most, and you should always use at least those
-  two unless the drop in encoding speed is prohibitive (e.g. realtime
-  encoding). There are many other options to
-  <systemitem class="library">libavcodec</systemitem> that increase
-  encoding quality (and decrease encoding speed) but that is beyond
-  the scope of this document.
+  Il fatto che qui venga cosigliata <option>mbd=2</option> non significa che
+  non si debba usare altrimenti. Insieme con <option>trell</option>,
+  <option>mbd=2</option> è una delle due opzioni di
+  <systemitem class="library">libavcodec</systemitem> che ottimizzano al
+  meglio la qualità e sarebbero sempre da utilizzare entrambe a meno che
+  l'aumento della velocità di codifica sua proibitivo (ad es. per la codifica
+  in tempo reale (realtime)). Ci sono molte altre opzioni di
+  <systemitem class="library">libavcodec</systemitem> che aumentano la
+  qualità (e rallentano la codifica), ma questo non è l'obiettivo di
+  questa documentaziione.
   </para>
 </formalpara></listitem>
 
@@ -2570,16 +2570,48 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
 </thead>
 <tbody>
 <row>
-  <entry>mp2</entry>
-  <entry>MPEG Layer 2</entry>
-</row>
-<row>
   <entry>ac3</entry>
-  <entry>AC-3, AKA Dolby Digital</entry>
+  <entry>Dolby Digital (AC-3)</entry>
 </row>
 <row>
-  <entry>adpcm_ima_wav</entry>
-  <entry>IMA adaptive PCM (4 bits per sample, 4:1 compression)</entry>
+  <entry>adpcm_*</entry>
+  <entry>Adaptive PCM formats - see supplementary table</entry>
+</row>
+<row>
+  <entry>flac</entry>
+  <entry>Free Lossless Audio Codec (FLAC)</entry>
+</row>
+<row>
+  <entry>g726</entry>
+  <entry>G.726 ADPCM</entry>
+</row>
+<row>
+  <entry>libfaac</entry>
+  <entry>Advanced Audio Coding (AAC) - using FAAC</entry>
+</row>
+<row>
+  <entry>libgsm</entry>
+  <entry>ETSI GSM 06.10 full rate</entry>
+</row>
+<row>
+  <entry>libgsm_ms</entry>
+  <entry>Microsoft GSM</entry>
+</row>
+<row>
+  <entry>libmp3lame</entry>
+  <entry>MPEG-1 audio layer 3 (MP3) - using LAME</entry>
+</row>
+<row>
+  <entry>mp2</entry>
+  <entry>MPEG-1 audio layer 2 (MP2)</entry>
+</row>
+<row>
+  <entry>pcm_*</entry>
+  <entry>PCM formats - see supplementary table</entry>
+</row>
+<row>
+  <entry>roq_dpcm</entry>
+  <entry>Id Software RoQ DPCM</entry>
 </row>
 <row>
   <entry>sonic</entry>
@@ -2591,15 +2623,15 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
 </row>
 <row>
   <entry>vorbis</entry>
-  <entry>Xiph Ogg Vorbis codec</entry>
+  <entry>Vorbis</entry>
 </row>
 <row>
   <entry>wmav1</entry>
-  <entry>Windows Media Audio v1 codec</entry>
+  <entry>Windows Media Audio v1</entry>
 </row>
 <row>
   <entry>wmav2</entry>
-  <entry>Windows Media Audio v2 codec</entry>
+  <entry>Windows Media Audio v2</entry>
 </row>
 </tbody>
 </tgroup>

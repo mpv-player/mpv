@@ -401,9 +401,9 @@ You should be safe if you respect the following constraints:
 <title>encode for PSP</title>
 <para>
 <screen>
-mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -of lavf \
-    -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
-    -lavfopts format=psp \
+mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -oac lavc \
+    -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=libfaac \
+    -of lavf -lavfopts format=psp \
     <replaceable>input.video</replaceable> -o <replaceable>output.psp</replaceable>
 </screen>
 Note that you can set the title of the video with
@@ -615,7 +615,7 @@ mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=j
 </informalexample>
 
 You can mix different types of images, regardless of the method you use
-&mdash; individual filenames, wildcard or file with list &mdash; provided of
+t &mdash; individual filenames, wildcard or file with list &mdash; provided of
 course they have the same dimensions.
 So you can e.g. take title frame from PNG file,
 and then put a slideshow of your JPEG photos.

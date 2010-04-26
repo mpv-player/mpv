@@ -394,9 +394,9 @@ Sony PSP, но, в зависимости от ревизии программн
 <title>Кодирование для PSP</title>
 <para>
 <screen>
-mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -of lavf \
-    -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
-    -lavfopts format=psp \
+mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -oac lavc \
+    -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=libfaac \
+    -of lavf -lavfopts format=psp \
 <replaceable>input.video</replaceable> -o <replaceable>output.psp</replaceable>
 </screen>
 Заметьте, что можно задать заголовок видео опцией

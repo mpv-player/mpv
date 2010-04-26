@@ -417,9 +417,9 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
  <title>Encodage pour PSP</title>
  <para>
  <screen>
-mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -of lavf \
-    -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
-    -lavfopts format=psp \
+mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -oac lavc \
+    -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=libfaac \
+    -of lavf -lavfopts format=psp \
     <replaceable>entree.video</replaceable> -o <replaceable>sortie.psp</replaceable>
  </screen>
    Vous pouvez définir le titre de la vidéo avec

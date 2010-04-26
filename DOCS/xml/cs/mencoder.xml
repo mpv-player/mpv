@@ -402,9 +402,9 @@ Budete-li respektovat následující omezení, neměli byste narazit na potíže
 <title>Enkódování  do PSP</title>
 <para>
 <screen>
-mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -of lavf \
-    -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
-    -lavfopts format=psp \
+mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -oac lavc \
+    -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=libfaac \
+    -of lavf -lavfopts format=psp \
     <replaceable>vstupní.video</replaceable> -o <replaceable>výstupní.psp</replaceable>
 </screen>
 Poznamenejme, že můžete nastavit jméno videa pomocí
