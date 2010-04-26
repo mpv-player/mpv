@@ -6587,7 +6587,7 @@ int main(void) { unsigned long x, y; faacEncOpen(48000, 2, &x, &y); return 0; }
 EOF
   _faac=no
   for _ld_faac in "-lfaac" "-lfaac -lmp4v2 -lstdc++" ; do
-    cc_check -O2 $_ld_faac $_ld_lm && libs_mencoder="$libs_mencoder $_ld_faac" && _faac=yes && break
+    cc_check $_ld_faac $_ld_lm && libs_mencoder="$libs_mencoder $_ld_faac" && _faac=yes && break
   done
 fi
 if test "$_faac" = yes ; then
@@ -7818,46 +7818,47 @@ MAN_LANG_ALL = $man_lang_all
 MSG_LANGS = $language_msg
 MSG_LANG_ALL = $msg_lang_all
 
-prefix = \$(DESTDIR)$_prefix
-BINDIR = \$(DESTDIR)$_bindir
+prefix  = \$(DESTDIR)$_prefix
+BINDIR  = \$(DESTDIR)$_bindir
 DATADIR = \$(DESTDIR)$_datadir
-LIBDIR = \$(DESTDIR)$_libdir
-MANDIR = \$(DESTDIR)$_mandir
+LIBDIR  = \$(DESTDIR)$_libdir
+MANDIR  = \$(DESTDIR)$_mandir
 CONFDIR = \$(DESTDIR)$_confdir
 LOCALEDIR = \$(DESTDIR)$_localedir
 
-AR = $_ar
-AS = $_cc
-CC = $_cc
-CXX = $_cc
+AR      = $_ar
+AS      = $_cc
+CC      = $_cc
+CXX     = $_cc
 HOST_CC = $_host_cc
 INSTALL = $_install
 INSTALLSTRIP = $_install_strip
 WINDRES = $_windres
 
-CFLAGS = $CFLAGS $extra_cflags
+CFLAGS   = $CFLAGS $extra_cflags
 CXXFLAGS = $CXXFLAGS $extra_cflags $extra_cxxflags
-CFLAGS_DHAHELPER = $cflags_dhahelper
-CFLAGS_FAAD_FIXED = $cflags_faad_fixed
-CFLAGS_LIBDVDCSS = $cflags_libdvdcss
-CFLAGS_LIBDVDCSS_DVDREAD = $cflags_libdvdcss_dvdread
-CFLAGS_LIBDVDNAV = $cflags_libdvdnav
-CFLAGS_NO_OMIT_LEAF_FRAME_POINTER = $cflags_no_omit_leaf_frame_pointer
-CFLAGS_STACKREALIGN = $cflags_stackrealign
-CFLAGS_SVGALIB_HELPER = $cflags_svgalib_helper
-CFLAGS_TREMOR_LOW = $cflags_tremor_low
 
-EXTRALIBS = $extra_ldflags $_ld_static $_ld_lm $extra_libs
-EXTRALIBS_MPLAYER = $libs_mplayer
+CFLAGS_DHAHELPER         = $cflags_dhahelper
+CFLAGS_FAAD_FIXED        = $cflags_faad_fixed
+CFLAGS_LIBDVDCSS         = $cflags_libdvdcss
+CFLAGS_LIBDVDCSS_DVDREAD = $cflags_libdvdcss_dvdread
+CFLAGS_LIBDVDNAV         = $cflags_libdvdnav
+CFLAGS_NO_OMIT_LEAF_FRAME_POINTER = $cflags_no_omit_leaf_frame_pointer
+CFLAGS_STACKREALIGN      = $cflags_stackrealign
+CFLAGS_SVGALIB_HELPER    = $cflags_svgalib_helper
+CFLAGS_TREMOR_LOW        = $cflags_tremor_low
+
+EXTRALIBS          = $extra_ldflags $_ld_static $_ld_lm $extra_libs
+EXTRALIBS_MPLAYER  = $libs_mplayer
 EXTRALIBS_MENCODER = $libs_mencoder
 
 MPDEPEND_CMD     = \$(CC) -MM \$(CFLAGS)   \$(filter-out %.xpm,\$(filter-out %.h,$^)) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&," -e "s,\(.*\)\.o: ,\1.d &,"
-MPDEPEND_CMD_CXX = \$(CC) -MM \$(CXXFLAGS) \$(filter-out %.hh,\$(filter-out %.h,$^))  | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&," -e "s,\(.*\)\.o: ,\1.d &,"
+MPDEPEND_CMD_CXX = \$(CC) -MM \$(CXXFLAGS) \$(filter-out  %.hh,\$(filter-out %.h,$^)) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&," -e "s,\(.*\)\.o: ,\1.d &,"
 
 GETCH = $_getch
 TIMER = $_timer
 
-EXESUF = $_exesuf
+EXESUF      = $_exesuf
 EXESUFS_ALL = .exe
 
 ARCH = $arch
@@ -7866,16 +7867,16 @@ $(mak_enable "$subarch_all" "$subarch" ARCH)
 $(mak_enable "$cpuexts_all" "$cpuexts" HAVE)
 
 MENCODER = $_mencoder
-MPLAYER = $_mplayer
+MPLAYER  = $_mplayer
 
-NEED_GETTIMEOFDAY    = $_need_gettimeofday
-NEED_GLOB    = $_need_glob
-NEED_MMAP    = $_need_mmap
-NEED_SETENV  = $_need_setenv
-NEED_SHMEM   = $_need_shmem
-NEED_STRSEP  = $_need_strsep
-NEED_SWAB    = $_need_swab
-NEED_VSSCANF = $_need_vsscanf
+NEED_GETTIMEOFDAY = $_need_gettimeofday
+NEED_GLOB         = $_need_glob
+NEED_MMAP         = $_need_mmap
+NEED_SETENV       = $_need_setenv
+NEED_SHMEM        = $_need_shmem
+NEED_STRSEP       = $_need_strsep
+NEED_SWAB         = $_need_swab
+NEED_VSSCANF      = $_need_vsscanf
 
 # features
 3DFX = $_3dfx
@@ -8034,41 +8035,41 @@ YUV4MPEG = $_yuv4mpeg
 ZR = $_zr
 
 # FFmpeg
-LIBAVUTIL = $_libavutil
-LIBAVCODEC = $_libavcodec
-LIBAVFORMAT = $_libavformat
-LIBPOSTPROC = $_libpostproc
-LIBSWSCALE = $_libswscale
+LIBAVUTIL      = $_libavutil
+LIBAVCODEC     = $_libavcodec
+LIBAVFORMAT    = $_libavformat
+LIBPOSTPROC    = $_libpostproc
+LIBSWSCALE     = $_libswscale
 LIBAVCODEC_INTERNALS = $_libavcodec_internals
 LIBSWSCALE_INTERNALS = $_libswscale_internals
 FFMPEG_SOURCE_PATH = $_ffmpeg_source
 
-RANLIB = $_ranlib
-YASM = $_yasm
-YASMFLAGS = $YASMFLAGS
+RANLIB     = $_ranlib
+YASM       = $_yasm
+YASMFLAGS  = $YASMFLAGS
 
 # Some FFmpeg codecs depend on these. Enable them unconditionally for now.
-CONFIG_AANDCT=yes
-CONFIG_FFT=yes
-CONFIG_GOLOMB=yes
-CONFIG_H264DSP=yes
-CONFIG_LPC=yes
-CONFIG_MDCT=yes
-CONFIG_RDFT=yes
+CONFIG_AANDCT  = yes
+CONFIG_FFT     = yes
+CONFIG_GOLOMB  = yes
+CONFIG_H264DSP = yes
+CONFIG_LPC     = yes
+CONFIG_MDCT    = yes
+CONFIG_RDFT    = yes
 
-CONFIG_BZLIB=$bzlib
-CONFIG_ENCODERS=yes
-CONFIG_GPL=yes
-CONFIG_MLIB = $_mlib
-CONFIG_MUXERS=$_mencoder
-CONFIG_VDPAU=$_vdpau
-CONFIG_XVMC=$_xvmc
-CONFIG_ZLIB=$_zlib
+CONFIG_BZLIB    = $bzlib
+CONFIG_ENCODERS = yes
+CONFIG_GPL      = yes
+CONFIG_MLIB     = $_mlib
+CONFIG_MUXERS   = $_mencoder
+CONFIG_VDPAU    = $_vdpau
+CONFIG_XVMC     = $_xvmc
+CONFIG_ZLIB     = $_zlib
 
-HAVE_PTHREADS = $_pthreads
-HAVE_SHM = $_shm
+HAVE_PTHREADS   = $_pthreads
+HAVE_SHM        = $_shm
 HAVE_W32THREADS = $_w32threads
-HAVE_YASM = $have_yasm
+HAVE_YASM       = $have_yasm
 
 EOF
 

@@ -169,7 +169,6 @@ static int initTextures(void)
   GLfloat texpercx, texpercy;
   int s;
   int x=0, y=0;
-  GLint format=0;
 
   // textures smaller than 64x64 might not be supported
   s=64;
@@ -183,37 +182,37 @@ static int initTextures(void)
   texture_height=s;
 
   if (!is_yuv)
-  gl_internal_format = getInternalFormat();
+    gl_internal_format = getInternalFormat();
 
   /* Test the max texture size */
   do {
+    GLint w;
     glTexImage2D (GL_PROXY_TEXTURE_2D, 0,
                   gl_internal_format,
                   texture_width, texture_height,
                   0, gl_bitmap_format, gl_bitmap_type, NULL);
 
     glGetTexLevelParameteriv
-      (GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
+      (GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w);
 
-    if (format != gl_internal_format)
-    {
-      mp_msg (MSGT_VO, MSGL_V, "[gl2] Needed texture [%dx%d] too big, trying ",
-              texture_height, texture_width);
+    if (w >= texture_width)
+      break;
 
-      if (texture_width > texture_height)
-        texture_width /= 2;
-      else
-        texture_height /= 2;
+    mp_msg (MSGT_VO, MSGL_V, "[gl2] Needed texture [%dx%d] too big, trying ",
+            texture_width, texture_height);
 
-      mp_msg (MSGT_VO, MSGL_V, "[%dx%d] !\n", texture_height, texture_width);
+    if (texture_width > texture_height)
+      texture_width /= 2;
+    else
+      texture_height /= 2;
 
-      if(texture_width < 64 || texture_height < 64) {
-        mp_msg (MSGT_VO, MSGL_FATAL, "[gl2] Give up .. usable texture size not avaiable, or texture config error !\n");
-        return -1;
-      }
+    mp_msg (MSGT_VO, MSGL_V, "[%dx%d] !\n", texture_width, texture_height);
+
+    if(texture_width < 64 || texture_height < 64) {
+      mp_msg (MSGT_VO, MSGL_FATAL, "[gl2] Give up .. usable texture size not avaiable, or texture config error !\n");
+      return -1;
     }
-  }
-  while (format != gl_internal_format && texture_width > 1 && texture_height > 1);
+  } while (texture_width > 1 && texture_height > 1);
 #ifdef TEXTURE_WIDTH
   texture_width = TEXTURE_WIDTH;
 #endif
@@ -865,7 +864,6 @@ static int preinit(const char *arg)
   }
     if(!init_mpglcontext(&glctx, gltype)) goto err_out;
     if (use_yuv == -1) {
-      const char *extensions;
 #ifdef CONFIG_GL_WIN32
       if (config_w32(320, 200, 320, 200, VOFLAG_HIDDEN, "", 0) == -1)
 #else
@@ -874,8 +872,7 @@ static int preinit(const char *arg)
         goto err_out;
       if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
         goto err_out;
-      extensions = mpglGetString(GL_EXTENSIONS);
-      use_yuv = strstr(extensions, "GL_ARB_fragment_program") ? 2 : 0;
+      use_yuv = glAutodetectYUVConversion();
     }
     return 0;
 

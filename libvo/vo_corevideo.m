@@ -104,7 +104,11 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 {
 	switch (image_format)
 	{
-		case IMGFMT_RGB32:
+		case IMGFMT_RGB24:
+			vo_draw_alpha_rgb24(w,h,src,srca,stride,image_data+3*(y0*image_width+x0),3*image_width);
+			break;
+		case IMGFMT_ARGB:
+		case IMGFMT_BGRA:
 			vo_draw_alpha_rgb32(w,h,src,srca,stride,image_data+4*(y0*image_width+x0),4*image_width);
 			break;
 		case IMGFMT_YUY2:
@@ -170,8 +174,11 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	image_height = height;
 	switch (image_format)
 	{
-		case IMGFMT_BGR32:
-		case IMGFMT_RGB32:
+		case IMGFMT_RGB24:
+			image_depth = 24;
+			break;
+		case IMGFMT_ARGB:
+		case IMGFMT_BGRA:
 			image_depth = 32;
 			break;
 		case IMGFMT_YUY2:
@@ -287,35 +294,38 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 
 static int draw_frame(uint8_t *src[])
 {
-	switch (image_format)
-	{
-		case IMGFMT_BGR32:
-		case IMGFMT_RGB32:
-			fast_memcpy(image_data, src[0], image_width*image_height*image_bytes);
-			break;
+	return 0;
+}
 
-		case IMGFMT_YUY2:
-			memcpy_pic(image_data, src[0], image_width * 2, image_height, image_width * 2, image_width * 2);
-			break;
-	}
+static uint32_t draw_image(mp_image_t *mpi)
+{
+	memcpy_pic(image_data, mpi->planes[0], image_width*image_bytes, image_height, image_width*image_bytes, mpi->stride[0]);
 
 	return 0;
 }
 
 static int query_format(uint32_t format)
 {
+    const int supportflags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
 	image_format = format;
 
     switch(format)
 	{
 		case IMGFMT_YUY2:
 			pixelFormat = kYUVSPixelFormat;
-			return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
+			return supportflags;
 
-		case IMGFMT_RGB32:
-		case IMGFMT_BGR32:
+		case IMGFMT_RGB24:
+			pixelFormat = k24RGBPixelFormat;
+			return supportflags;
+
+		case IMGFMT_ARGB:
 			pixelFormat = k32ARGBPixelFormat;
-			return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
+			return supportflags;
+
+		case IMGFMT_BGRA:
+			pixelFormat = k32BGRAPixelFormat;
+			return supportflags;
     }
     return 0;
 }
@@ -405,6 +415,7 @@ static int control(uint32_t request, void *data)
 {
 	switch (request)
 	{
+		case VOCTRL_DRAW_IMAGE: return draw_image(data);
 		case VOCTRL_PAUSE: return int_pause = 1;
 		case VOCTRL_RESUME: return int_pause = 0;
 		case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t*)data));
