@@ -329,8 +329,6 @@ const m_option_t mplayer_opts[]={
         OPT_INTRANGE("pts-association-mode", user_pts_assoc_mode, 0, 0, 2),
 	{"noautosync", &autosync, CONF_TYPE_FLAG, 0, 0, -1, NULL},
 	{"autosync", &autosync, CONF_TYPE_INT, CONF_RANGE, 0, 10000, NULL},
-//	{"dapsync", &dapsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-//	{"nodapsync", &dapsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
 	{"softsleep", &softsleep, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #ifdef HAVE_RTC

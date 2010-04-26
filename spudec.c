@@ -174,7 +174,7 @@ static inline unsigned char get_nibble(packet_t *packet)
 static inline int mkalpha(int i)
 {
   /* In mplayer's alpha planes, 0 is transparent, then 1 is nearly
-     opaque upto 255 which is transparent */
+     opaque upto 255 which is fully opaque */
   // extend 4 -> 8 bit
   i |= i << 4;
   return (uint8_t)(-i);
@@ -533,12 +533,6 @@ void spudec_assemble(void *this, unsigned char *packet, unsigned int len, int pt
       mp_msg(MSGT_SPUDEC,MSGL_WARN,"SPUasm: packet too short\n");
       return;
   }
-#if 0
-  if ((spu->packet_pts + 10000) < pts100) {
-    // [cb] too long since last fragment: force new packet
-    spu->packet_offset = 0;
-  }
-#endif
   spu->packet_pts = pts100;
   if (spu->packet_offset == 0) {
     unsigned int len2 = get_be16(packet);
