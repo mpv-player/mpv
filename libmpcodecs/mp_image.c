@@ -30,14 +30,15 @@
 #include "libmpcodecs/mp_image.h"
 
 #include "libvo/fastmemcpy.h"
+#include "libavutil/mem.h"
 
 void mp_image_alloc_planes(mp_image_t *mpi) {
   // IF09 - allocate space for 4. plane delta info - unused
   if (mpi->imgfmt == IMGFMT_IF09) {
-    mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8+
+    mpi->planes[0]=av_malloc(mpi->bpp*mpi->width*(mpi->height+2)/8+
                             mpi->chroma_width*mpi->chroma_height);
   } else
-    mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8);
+    mpi->planes[0]=av_malloc(mpi->bpp*mpi->width*(mpi->height+2)/8);
   if (mpi->flags&MP_IMGFLAG_PLANAR) {
     int bpp = IMGFMT_IS_YUVP16(mpi->imgfmt)? 2 : 1;
     // YV12/I420/YVU9/IF09. feel free to add other planar formats here...
@@ -65,7 +66,7 @@ void mp_image_alloc_planes(mp_image_t *mpi) {
   } else {
     mpi->stride[0]=mpi->width*mpi->bpp/8;
     if (mpi->flags & MP_IMGFLAG_RGB_PALETTE)
-      mpi->planes[1] = memalign(64, 1024);
+      mpi->planes[1] = av_malloc(1024);
   }
   mpi->flags|=MP_IMGFLAG_ALLOCATED;
 }
@@ -191,9 +192,9 @@ void free_mp_image(mp_image_t* mpi){
     if(!mpi) return;
     if(mpi->flags&MP_IMGFLAG_ALLOCATED){
 	/* becouse we allocate the whole image in once */
-	if(mpi->planes[0]) free(mpi->planes[0]);
+	if(mpi->planes[0]) av_free(mpi->planes[0]);
 	if (mpi->flags & MP_IMGFLAG_RGB_PALETTE)
-	    free(mpi->planes[1]);
+	    av_free(mpi->planes[1]);
     }
     free(mpi);
 }
