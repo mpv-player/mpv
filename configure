@@ -8353,7 +8353,7 @@ if test "$_largefiles" = yes || freebsd ; then
   fi
 fi
 
-CXXFLAGS=" $CFLAGS -D__STDC_LIMIT_MACROS"
+CXXFLAGS=" $CFLAGS -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS"
 
 # This must be the last test to be performed. Any other tests following it
 # could fail due to linker errors. libdvdnavmini is intentionally not linked
