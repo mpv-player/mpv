@@ -368,9 +368,9 @@ static void init_atoms(void)
 void update_xinerama_info(void) {
     xinerama_x = xinerama_y = 0;
 #ifdef CONFIG_XINERAMA
-    int screen = xinerama_screen;
-    if (screen >= -1 && XineramaIsActive(mDisplay))
+    if (xinerama_screen >= -1 && XineramaIsActive(mDisplay))
     {
+        int screen = xinerama_screen;
         XineramaScreenInfo *screens;
         int num_screens;
 
