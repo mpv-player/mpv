@@ -3041,7 +3041,7 @@ if test "$_posix4" = yes ; then
 fi
 echores "$_posix4"
 
-for func in exp2 exp2f llrint log2 log2f lrint lrintf round roundf truncf; do
+for func in exp2 exp2f llrint llrintf log2 log2f lrint lrintf round roundf truncf; do
 echocheck $func
 cat > $TMPC << EOF
 #include <math.h>
@@ -9158,6 +9158,7 @@ $def_fast_unaligned
 $def_hardcoded_tables
 $def_libavcodec_mpegaudio_hp
 $def_llrint
+$def_llrintf
 $def_local_aligned_8
 $def_local_aligned_16
 $def_log2
