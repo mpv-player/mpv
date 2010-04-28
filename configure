@@ -1673,6 +1673,12 @@ elif x86; then
   _cpuinfo="./cpuinfo$_exesuf"
 fi
 
+if [ "$cc_vendor" = "gnu" ] && [ "$_cc_major" = 2 ] ; then
+  test $_sse      = auto && _sse=no
+  test $_win32dll = auto && _win32dll=no
+  ass_internal=no
+fi
+
 if x86 ; then
   # gather more CPU information
   pname=$($_cpuinfo | grep 'model name' | cut -d ':' -f 2 | head -n 1)
