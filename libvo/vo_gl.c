@@ -264,7 +264,7 @@ static void update_yuvconv(void) {
                texture_width, texture_height);
   }
   if (custom_tex) {
-    FILE *f = fopen(custom_tex, "r");
+    FILE *f = fopen(custom_tex, "rb");
     if (!f)
       mp_msg(MSGT_VO, MSGL_WARN,
              "[gl] Could not read customtex %s\n", custom_tex);
