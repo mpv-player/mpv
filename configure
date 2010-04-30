@@ -2496,7 +2496,7 @@ elif test -z "$CFLAGS" ; then
   elif test "$cc_vendor" != "gnu" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe"
   else
-    CFLAGS="-Wall -Wno-switch -Wpointer-arith -Wredundant-decls -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
+    CFLAGS="-g3 -Wall -Wno-switch -Wpointer-arith -Wredundant-decls -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
     extra_ldflags="$extra_ldflags -ffast-math"
   fi
 else
@@ -5053,83 +5053,6 @@ echores "$_corevideo"
 fi #if darwin
 
 
-# make sure this stays below CoreVideo to avoid issues due to namespace
-# conflicts between -lGL and -framework OpenGL
-echocheck "OpenGL"
-#Note: this test is run even with --enable-gl since we autodetect linker flags
-if (test "$_x11" = yes || win32) && test "$_gl" != no ; then
-  cat > $TMPC << EOF
-#ifdef GL_WIN32
-#include <windows.h>
-#include <GL/gl.h>
-#else
-#include <GL/gl.h>
-#include <X11/Xlib.h>
-#include <GL/glx.h>
-#endif
-int main(void) {
-#ifdef GL_WIN32
-  HDC dc;
-  wglCreateContext(dc);
-#else
-  glXCreateContext(NULL, NULL, NULL, True);
-#endif
-  glFinish();
-  return 0;
-}
-EOF
-  _gl=no
-  for _ld_tmp in -lGL "-lGL -lXdamage" "-lGL $_ld_pthread" ; do
-    if cc_check $_ld_tmp $_ld_lm ; then
-      _gl=yes
-      _gl_x11=yes
-      libs_mplayer="$libs_mplayer $_ld_tmp $_ld_dl"
-      break
-    fi
-  done
-  if cc_check -DGL_WIN32 -lopengl32 ; then
-    _gl=yes
-    _gl_win32=yes
-    libs_mplayer="$libs_mplayer -lopengl32 -lgdi32"
-  fi
-else
-  _gl=no
-fi
-if test "$_gl" = yes ; then
-  def_gl='#define CONFIG_GL 1'
-  _res_comment="backends:"
-  if test "$_gl_win32" = yes ; then
-    def_gl_win32='#define CONFIG_GL_WIN32 1'
-    _res_comment="$_res_comment win32"
-  fi
-  if test "$_gl_x11" = yes ; then
-    def_gl_x11='#define CONFIG_GL_X11 1'
-    _res_comment="$_res_comment x11"
-  fi
-  _vomodules="opengl $_vomodules"
-else
-  def_gl='#undef CONFIG_GL'
-  def_gl_win32='#undef CONFIG_GL_WIN32'
-  def_gl_x11='#undef CONFIG_GL_X11'
-  _novomodules="opengl $_novomodules"
-fi
-echores "$_gl"
-
-
-echocheck "MatrixView"
-if test "$_gl" = no ; then
-  matrixview=no
-fi
-if test "$matrixview" = yes ; then
-  _vomodules="matrixview $_vomodules"
-  def_matrixview='#define CONFIG_MATRIXVIEW 1'
-else
-  _novomodules="matrixview $_novomodules"
-  def_matrixview='#undef CONFIG_MATRIXVIEW'
-fi
-echores "$matrixview"
-
-
 echocheck "PNG support"
 if test "$_png" = auto ; then
   _png=no
@@ -5418,6 +5341,114 @@ else
   _noaomodules="sdl $_noaomodules"
 fi
 echores "$_sdl"
+
+
+# make sure this stays below CoreVideo to avoid issues due to namespace
+# conflicts between -lGL and -framework OpenGL
+echocheck "OpenGL"
+#Note: this test is run even with --enable-gl since we autodetect linker flags
+if (test "$_x11" = yes || test "$_sdl" = yes || win32) && test "$_gl" != no ; then
+  cat > $TMPC << EOF
+#ifdef GL_WIN32
+#include <windows.h>
+#include <GL/gl.h>
+#elif defined(GL_SDL)
+#include <GL/gl.h>
+#ifdef CONFIG_SDL_SDL_H
+#include <SDL/SDL.h>
+#else
+#include <SDL.h>
+#endif
+#ifndef __APPLE__
+// we allow SDL hacking our main() only on OSX
+#undef main
+#endif
+#else
+#include <GL/gl.h>
+#include <X11/Xlib.h>
+#include <GL/glx.h>
+#endif
+int main(void) {
+#ifdef GL_WIN32
+  HDC dc;
+  wglCreateContext(dc);
+#elif defined(GL_SDL)
+  SDL_GL_SwapBuffers();
+#else
+  glXCreateContext(NULL, NULL, NULL, True);
+#endif
+  glFinish();
+  return 0;
+}
+EOF
+  _gl=no
+  for _ld_tmp in "" -lGL "-lGL -lXdamage" "-lGL $_ld_pthread" ; do
+    if cc_check $_ld_tmp $_ld_lm ; then
+      _gl=yes
+      _gl_x11=yes
+      libs_mplayer="$libs_mplayer $_ld_tmp $_ld_dl"
+      break
+    fi
+  done
+  if cc_check -DGL_WIN32 -lopengl32 ; then
+    _gl=yes
+    _gl_win32=yes
+    libs_mplayer="$libs_mplayer -lopengl32 -lgdi32"
+  fi
+  # last so it can reuse any linker etc. flags detected before
+  if test "$_sdl" = yes ; then
+    if cc_check -DGL_SDL ||
+       cc_check -DCONFIG_SDL_SDL_H -DGL_SDL ; then
+      _gl=yes
+      _gl_sdl=yes
+    elif cc_check -DGL_SDL -lGL ||
+       cc_check -DCONFIG_SDL_SDL_H -DGL_SDL -lGL ; then
+      _gl=yes
+      _gl_sdl=yes
+      libs_mplayer="$libs_mplayer -lGL"
+    fi
+  fi
+else
+  _gl=no
+fi
+if test "$_gl" = yes ; then
+  def_gl='#define CONFIG_GL 1'
+  _res_comment="backends:"
+  if test "$_gl_win32" = yes ; then
+    def_gl_win32='#define CONFIG_GL_WIN32 1'
+    _res_comment="$_res_comment win32"
+  fi
+  if test "$_gl_x11" = yes ; then
+    def_gl_x11='#define CONFIG_GL_X11 1'
+    _res_comment="$_res_comment x11"
+  fi
+  if test "$_gl_sdl" = yes ; then
+    def_gl_sdl='#define CONFIG_GL_SDL 1'
+    _res_comment="$_res_comment sdl"
+  fi
+  _vomodules="opengl $_vomodules"
+else
+  def_gl='#undef CONFIG_GL'
+  def_gl_win32='#undef CONFIG_GL_WIN32'
+  def_gl_x11='#undef CONFIG_GL_X11'
+  def_gl_sdl='#undef CONFIG_GL_SDL'
+  _novomodules="opengl $_novomodules"
+fi
+echores "$_gl"
+
+
+echocheck "MatrixView"
+if test "$_gl" = no ; then
+  matrixview=no
+fi
+if test "$matrixview" = yes ; then
+  _vomodules="matrixview $_vomodules"
+  def_matrixview='#define CONFIG_MATRIXVIEW 1'
+else
+  _novomodules="matrixview $_novomodules"
+  def_matrixview='#undef CONFIG_MATRIXVIEW'
+fi
+echores "$matrixview"
 
 
 if os2 ; then
@@ -8536,6 +8567,7 @@ GGI = $_ggi
 GL = $_gl
 GL_WIN32 = $_gl_win32
 GL_X11 = $_gl_x11
+GL_SDL = $_gl_sdl
 MATRIXVIEW = $matrixview
 GUI = $_gui
 GUI_GTK = $_gui_gtk
@@ -9081,6 +9113,7 @@ $def_gif_tvt_hack
 $def_gl
 $def_gl_win32
 $def_gl_x11
+$def_gl_sdl
 $def_matrixview
 $def_ivtv
 $def_jpeg
