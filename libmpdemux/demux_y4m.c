@@ -31,7 +31,7 @@
 #include "mp_msg.h"
 #include "yuv4mpeg.h"
 
-//#include "stream/stream.h"
+#include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
 
@@ -89,11 +89,14 @@ static int demux_y4m_fill_buffer(demuxer_t *demux, demux_stream_t *dsds) {
   int err, size;
   int nextc;
 
-  nextc = stream_read_char(demux->stream);
-  stream_skip(demux->stream, -1);
-  if (nextc == 'Y') {
-    read_streaminfo(demux);
-    demux->seekable = 0;
+  // Concatenated stream check; only done if seekable so skip(-1) works
+  if (demux->stream->flags & MP_STREAM_SEEK_BW) {
+    nextc = stream_read_char(demux->stream);
+    stream_skip(demux->stream, -1);
+    if (nextc == 'Y') {
+      read_streaminfo(demux);
+      demux->seekable = 0;
+    }
   }
 
   y4m_init_frame_info(&fi);
