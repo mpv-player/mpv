@@ -176,7 +176,7 @@ static int lavf_check_file(demuxer_t *demuxer){
         read_size = FFMIN(2*read_size, PROBE_BUF_SIZE - probe_data_size);
     } while ((demuxer->desc->type != DEMUXER_TYPE_LAVF_PREFERRED ||
               probe_data_size < SMALL_MAX_PROBE_SIZE) &&
-             score < AVPROBE_SCORE_MAX / 4 &&
+             score <= AVPROBE_SCORE_MAX / 4 &&
              read_size > 0 && probe_data_size < PROBE_BUF_SIZE);
     av_free(avpd.buf);
 
