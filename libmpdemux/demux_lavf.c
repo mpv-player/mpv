@@ -135,6 +135,7 @@ static int lavf_check_file(demuxer_t *demuxer){
     lavf_priv_t *priv;
     int probe_data_size = 0;
     int read_size = INITIAL_PROBE_SIZE;
+    int score;
 
     if(!demuxer->priv)
         demuxer->priv=calloc(sizeof(lavf_priv_t),1);
@@ -170,11 +171,13 @@ static int lavf_check_file(demuxer_t *demuxer){
             avpd.filename += 9;
         avpd.buf_size= probe_data_size;
 
-        priv->avif= av_probe_input_format(&avpd, probe_data_size > 0);
+        score = 0;
+        priv->avif= av_probe_input_format2(&avpd, probe_data_size > 0, &score);
         read_size = FFMIN(2*read_size, PROBE_BUF_SIZE - probe_data_size);
     } while ((demuxer->desc->type != DEMUXER_TYPE_LAVF_PREFERRED ||
               probe_data_size < SMALL_MAX_PROBE_SIZE) &&
-             !priv->avif && read_size > 0 && probe_data_size < PROBE_BUF_SIZE);
+             score < AVPROBE_SCORE_MAX / 4 &&
+             read_size > 0 && probe_data_size < PROBE_BUF_SIZE);
     av_free(avpd.buf);
 
     if(!priv->avif){
