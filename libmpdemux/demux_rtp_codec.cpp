@@ -134,12 +134,17 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
     unsigned char* configData
       = parseH264ConfigStr(subsession->fmtp_spropparametersets(), configLen);
     sh_video->bih = bih = insertVideoExtradata(bih, configData, configLen);
-    delete[] configData;
 #ifdef CONFIG_LIBAVCODEC
+    int fooLen;
+    const uint8_t* fooData;
     avcodec_register_all();
     h264parserctx = av_parser_init(CODEC_ID_H264);
     avcctx = avcodec_alloc_context();
+    // Pass the config to the parser
+    h264parserctx->parser->parser_parse(h264parserctx, avcctx,
+                  &fooData, &fooLen, configData, configLen);
 #endif
+    delete[] configData;
     needVideoFrameRate(demuxer, subsession);
   } else if (strcmp(subsession->codecName(), "H261") == 0) {
     bih->biCompression = sh_video->format
