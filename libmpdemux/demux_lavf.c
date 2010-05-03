@@ -240,6 +240,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
     lavf_priv_t *priv= demuxer->priv;
     AVStream *st= avfc->streams[i];
     AVCodecContext *codec= st->codec;
+    char *stream_type = NULL;
+    int stream_id;
     AVMetadataTag *lang = av_metadata_get(st->metadata, "language", NULL, 0);
     AVMetadataTag *title= av_metadata_get(st->metadata, "title",    NULL, 0);
     int g, override_tag = av_codec_get_tag(mp_codecid_override_taglists,
@@ -253,9 +255,9 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             WAVEFORMATEX *wf;
             sh_audio_t* sh_audio;
             sh_audio = new_sh_audio_aid(demuxer, i, priv->audio_streams);
-            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "lavf", priv->audio_streams);
             if(!sh_audio)
                 break;
+            stream_type = "audio";
             priv->astreams[priv->audio_streams] = i;
             wf= calloc(sizeof(WAVEFORMATEX) + codec->extradata_size, 1);
             // mp4a tag is used for all mp4 files no matter what they actually contain
@@ -323,15 +325,15 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 demuxer->audio->sh= demuxer->a_streams[i];
             } else
                 st->discard= AVDISCARD_ALL;
-            priv->audio_streams++;
+            stream_id = priv->audio_streams++;
             break;
         }
         case CODEC_TYPE_VIDEO:{
             sh_video_t* sh_video;
             BITMAPINFOHEADER *bih;
             sh_video=new_sh_video_vid(demuxer, i, priv->video_streams);
-            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "lavf", priv->video_streams);
             if(!sh_video) break;
+            stream_type = "video";
             priv->vstreams[priv->video_streams] = i;
             bih=calloc(sizeof(BITMAPINFOHEADER) + codec->extradata_size,1);
 
@@ -392,7 +394,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 demuxer->video->id = i;
                 demuxer->video->sh= demuxer->v_streams[i];
             }
-            priv->video_streams++;
+            stream_id = priv->video_streams++;
             break;
         }
         case CODEC_TYPE_SUBTITLE:{
@@ -412,8 +414,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             else
                 break;
             sh_sub = new_sh_sub_sid(demuxer, i, priv->sub_streams);
-            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_SubtitleID, "lavf", priv->sub_streams);
             if(!sh_sub) break;
+            stream_type = "subtitles";
             priv->sstreams[priv->sub_streams] = i;
             sh_sub->type = type;
             if (codec->extradata_size) {
@@ -429,7 +431,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             }
             if (st->disposition & AV_DISPOSITION_DEFAULT)
               sh_sub->default_track = 1;
-            priv->sub_streams++;
+            stream_id = priv->sub_streams++;
             break;
         }
         case CODEC_TYPE_ATTACHMENT:{
@@ -441,6 +443,15 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
         }
         default:
             st->discard= AVDISCARD_ALL;
+    }
+    if (stream_type) {
+        AVCodec *avc = avcodec_find_decoder(codec->codec_id);
+        mp_msg(MSGT_DEMUX, MSGL_INFO, "[lavf] stream %d: %s (%s), -%cid %d", i, stream_type, avc ? avc->name : "unknown", *stream_type, stream_id);
+        if (lang && lang->value && *stream_type != 'v')
+            mp_msg(MSGT_DEMUX, MSGL_INFO, ", -%clang %s", *stream_type, lang->value);
+        if (title && title->value)
+            mp_msg(MSGT_DEMUX, MSGL_INFO, ", %s", title->value);
+        mp_msg(MSGT_DEMUX, MSGL_INFO, "\n");
     }
 }
 
