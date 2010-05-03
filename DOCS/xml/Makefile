@@ -57,7 +57,6 @@ clean:
 releaseclean:
 	-rm -f $(CONFIGURE_GENERATED)
 	-rm -f $(MAIN_XML_ALL)
-	-rm -f $$(find . -name *.xml -type l)
 
 distclean: clean releaseclean
 
