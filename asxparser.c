@@ -112,8 +112,8 @@ asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs) {
     if(ptr3 == NULL) break;
     for(ptr2 = ptr3-1; strchr(SPACE,*ptr2) != NULL; ptr2--) {
       if (ptr2 == ptr1) {
-	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : this should never append, back to attribute begin while skipping end space",parser->line);
-	break;
+        mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : this should never append, back to attribute begin while skipping end space",parser->line);
+        break;
       }
     }
     attrib = malloc(ptr2-ptr1+2);
@@ -159,7 +159,7 @@ asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs) {
  */
 int
 asx_get_element(ASX_Parser_t* parser,char** _buffer,
-		char** _element,char** _body,char*** _attribs) {
+                char** _element,char** _body,char*** _attribs) {
   char *ptr1,*ptr2, *ptr3, *ptr4;
   char *attribs = NULL;
   char *element = NULL, *body = NULL, *ret = NULL, *buffer;
@@ -183,21 +183,21 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
     int i;
     for(i = 0 ; i < parser->ret_stack_size ; i++) {
       if(buffer == ls[i].buffer) {
-	parser->line = ls[i].line;
-	break;
+        parser->line = ls[i].line;
+        break;
       }
 
     }
     if( i < parser->ret_stack_size) {
       i++;
       if( i < parser->ret_stack_size)
-	memmove(parser->ret_stack,parser->ret_stack+i, (parser->ret_stack_size - i)*sizeof(ASX_LineSave_t));
+        memmove(parser->ret_stack,parser->ret_stack+i, (parser->ret_stack_size - i)*sizeof(ASX_LineSave_t));
       parser->ret_stack_size -= i;
       if(parser->ret_stack_size > 0)
-	parser->ret_stack = realloc(parser->ret_stack,parser->ret_stack_size*sizeof(ASX_LineSave_t));
+        parser->ret_stack = realloc(parser->ret_stack,parser->ret_stack_size*sizeof(ASX_LineSave_t));
       else {
-	free(parser->ret_stack);
-	parser->ret_stack = NULL;
+        free(parser->ret_stack);
+        parser->ret_stack = NULL;
       }
     }
   }
@@ -206,8 +206,8 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
   while(1) {
     for( ; ptr1[0] != '<' ; ptr1++) {
       if(ptr1[0] == '\0') {
-	ptr1 = NULL;
-	break;
+        ptr1 = NULL;
+        break;
       }
       if(ptr1[0] == '\n') parser->line++;
     }
@@ -216,16 +216,16 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
 
     if(strncmp(ptr1,"<!--",4) == 0) { // Comments
       for( ; strncmp(ptr1,"-->",3) != 0 ; ptr1++) {
-	if(ptr1[0] == '\0') {
-	  ptr1 = NULL;
-	  break;
-	}
-	if(ptr1[0] == '\n') parser->line++;
+        if(ptr1[0] == '\0') {
+          ptr1 = NULL;
+          break;
+        }
+        if(ptr1[0] == '\n') parser->line++;
       }
       //ptr1 = strstr(ptr1,"-->");
       if(!ptr1) {
-	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : unfinished comment",parser->line);
-	return -1;
+        mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : unfinished comment",parser->line);
+        return -1;
       }
     } else {
       break;
@@ -288,10 +288,10 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
     ptr3++;
     for( ; strchr(SPACE,*ptr3) != NULL; ptr3++) { // Skip space on body begin
       if(*ptr3 == '\0') {
-	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : EOB reached while parsing %s element body",parser->line,element);
-	free(element);
-	if(attribs) free(attribs);
-	return -1;
+        mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : EOB reached while parsing %s element body",parser->line,element);
+        free(element);
+        if(attribs) free(attribs);
+        return -1;
       }
       if(ptr3[0] == '\n') parser->line++;
     }
@@ -299,52 +299,52 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
     body_line = parser->line;
     while(1) { // Find closing element
       for( ; ptr4[0] != '<' ; ptr4++) {
-	if(ptr4[0] == '\0') {
-	  ptr4 = NULL;
-	  break;
-	}
-	if(ptr4[0] == '\n') parser->line++;
+        if(ptr4[0] == '\0') {
+          ptr4 = NULL;
+          break;
+        }
+        if(ptr4[0] == '\n') parser->line++;
       }
       if(ptr4 && strncmp(ptr4,"<!--",4) == 0) { // Comments
-	for( ; strncmp(ptr4,"-->",3) != 0 ; ptr4++) {
-	if(ptr4[0] == '\0') {
-	  ptr4 = NULL;
-	  break;
-	}
-	if(ptr1[0] == '\n') parser->line++;
-	}
-	continue;
+        for( ; strncmp(ptr4,"-->",3) != 0 ; ptr4++) {
+        if(ptr4[0] == '\0') {
+          ptr4 = NULL;
+          break;
+        }
+        if(ptr1[0] == '\n') parser->line++;
+        }
+        continue;
       }
       if(ptr4 == NULL || ptr4[1] == '\0') {
-	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : EOB reached while parsing %s element body",parser->line,element);
-	free(element);
-	if(attribs) free(attribs);
-	return -1;
+        mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : EOB reached while parsing %s element body",parser->line,element);
+        free(element);
+        if(attribs) free(attribs);
+        return -1;
       }
       if(ptr4[1] != '/' && strncasecmp(element,ptr4+1,strlen(element)) == 0) {
-	in++;
-	ptr4+=2;
-	continue;
+        in++;
+        ptr4+=2;
+        continue;
       } else if(strncasecmp(element,ptr4+2,strlen(element)) == 0) { // Extract body
-	if(in > 0) {
-	  in--;
-	  ptr4 += 2+strlen(element);
-	  continue;
-	}
-	ret = ptr4+strlen(element)+3;
-	if(ptr4 != ptr3) {
-	  ptr4--;
-	  for( ; ptr4 != ptr3 && strchr(SPACE,*ptr4) != NULL; ptr4--) ;// Skip space on body end
-	  //	    if(ptr4[0] == '\0') parser->line--;
-	  //}
-	  ptr4++;
-	  body = malloc(ptr4-ptr3+1);
-	  strncpy(body,ptr3,ptr4-ptr3);
-	  body[ptr4-ptr3] = '\0';
-	}
-	break;
+        if(in > 0) {
+          in--;
+          ptr4 += 2+strlen(element);
+          continue;
+        }
+        ret = ptr4+strlen(element)+3;
+        if(ptr4 != ptr3) {
+          ptr4--;
+          for( ; ptr4 != ptr3 && strchr(SPACE,*ptr4) != NULL; ptr4--) ;// Skip space on body end
+          //        if(ptr4[0] == '\0') parser->line--;
+          //}
+          ptr4++;
+          body = malloc(ptr4-ptr3+1);
+          strncpy(body,ptr3,ptr4-ptr3);
+          body[ptr4-ptr3] = '\0';
+        }
+        break;
       } else {
-	ptr4 += 2;
+        ptr4 += 2;
       }
     }
   } else {
@@ -543,23 +543,23 @@ asx_parse_repeat(ASX_Parser_t* parser,char* buffer,char** _attribs) {
     if(strcasecmp(element,"ENTRY") == 0) {
        entry = asx_parse_entry(parser,body,attribs);
        if(entry) {
-	 if(!list) list =  entry;
-	 else play_tree_append_entry(list,entry);
-	 mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to repeat\n",element);
+         if(!list) list =  entry;
+         else play_tree_append_entry(list,entry);
+         mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to repeat\n",element);
        }
     } else if(strcasecmp(element,"ENTRYREF") == 0) {
        entry = asx_parse_entryref(parser,body,attribs);
        if(entry) {
-	 if(!list) list =  entry;
-	 else play_tree_append_entry(list,entry);
-	 mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to repeat\n",element);
+         if(!list) list =  entry;
+         else play_tree_append_entry(list,entry);
+         mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to repeat\n",element);
        }
      } else if(strcasecmp(element,"REPEAT") == 0) {
        entry = asx_parse_repeat(parser,body,attribs);
        if(entry) {
-	 if(!list) list =  entry;
-	 else play_tree_append_entry(list,entry);
-	 mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to repeat\n",element);
+         if(!list) list =  entry;
+         else play_tree_append_entry(list,entry);
+         mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to repeat\n",element);
        }
      } else if(strcasecmp(element,"PARAM") == 0) {
        asx_parse_param(parser,attribs,repeat);
@@ -630,23 +630,23 @@ asx_parser_build_tree(char* buffer,int deep) {
      if(strcasecmp(element,"ENTRY") == 0) {
        entry = asx_parse_entry(parser,body,attribs);
        if(entry) {
-	 if(!list) list =  entry;
-	 else play_tree_append_entry(list,entry);
-	 mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to asx\n",element);
+         if(!list) list =  entry;
+         else play_tree_append_entry(list,entry);
+         mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to asx\n",element);
        }
      } else if(strcasecmp(element,"ENTRYREF") == 0) {
        entry = asx_parse_entryref(parser,body,attribs);
        if(entry) {
-	 if(!list) list =  entry;
-	 else play_tree_append_entry(list,entry);
-	 mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to asx\n",element);
+         if(!list) list =  entry;
+         else play_tree_append_entry(list,entry);
+         mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to asx\n",element);
        }
      } else if(strcasecmp(element,"REPEAT") == 0) {
        entry = asx_parse_repeat(parser,body,attribs);
        if(entry) {
-	 if(!list) list =  entry;
-	 else play_tree_append_entry(list,entry);
-	 mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to asx\n",element);
+         if(!list) list =  entry;
+         else play_tree_append_entry(list,entry);
+         mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to asx\n",element);
        }
      } else
        mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Ignoring element %s\n",element);

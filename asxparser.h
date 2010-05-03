@@ -47,7 +47,7 @@ asx_parser_free(ASX_Parser_t* parser);
  */
 int
 asx_get_element(ASX_Parser_t* parser,char** _buffer,
-		char** _element,char** _body,char*** _attribs);
+                char** _element,char** _body,char*** _attribs);
 
 int
 asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs);

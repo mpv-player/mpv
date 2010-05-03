@@ -21,30 +21,30 @@
 
 #include "config.h"
 
-#define CPUTYPE_I386	3
-#define CPUTYPE_I486	4
-#define CPUTYPE_I586	5
+#define CPUTYPE_I386    3
+#define CPUTYPE_I486    4
+#define CPUTYPE_I586    5
 #define CPUTYPE_I686    6
 
 #include "libavutil/x86_cpu.h"
 
 typedef struct cpucaps_s {
-	int cpuType;
-	int cpuModel;
-	int cpuStepping;
-	int hasMMX;
-	int hasMMX2;
-	int has3DNow;
-	int has3DNowExt;
-	int hasSSE;
-	int hasSSE2;
-	int hasSSE3;
-	int hasSSSE3;
-	int hasSSE4a;
-	int isX86;
-	unsigned cl_size; /* size of cache line */
-        int hasAltiVec;
-	int hasTSC;
+    int cpuType;
+    int cpuModel;
+    int cpuStepping;
+    int hasMMX;
+    int hasMMX2;
+    int has3DNow;
+    int has3DNowExt;
+    int hasSSE;
+    int hasSSE2;
+    int hasSSE3;
+    int hasSSSE3;
+    int hasSSE4a;
+    int isX86;
+    unsigned cl_size; /* size of cache line */
+    int hasAltiVec;
+    int hasTSC;
 } CpuCaps;
 
 extern CpuCaps gCpuCaps;
