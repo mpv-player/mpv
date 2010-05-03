@@ -241,6 +241,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
     AVStream *st= avfc->streams[i];
     AVCodecContext *codec= st->codec;
     AVMetadataTag *lang = av_metadata_get(st->metadata, "language", NULL, 0);
+    AVMetadataTag *title= av_metadata_get(st->metadata, "title",    NULL, 0);
     int g, override_tag = av_codec_get_tag(mp_codecid_override_taglists,
                                            codec->codec_id);
     // For some formats (like PCM) always trust CODEC_ID_* more than codec_tag
@@ -307,6 +308,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                     sh_audio->format = 0x7;
                     break;
             }
+            if (title && title->value)
+                mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_NAME=%s\n", priv->audio_streams, title->value);
             if (lang && lang->value) {
               sh_audio->lang = strdup(lang->value);
               mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", priv->audio_streams, sh_audio->lang);
@@ -366,6 +369,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 sh_video->aspect=codec->width  * codec->sample_aspect_ratio.num
                        / (float)(codec->height * codec->sample_aspect_ratio.den);
             sh_video->i_bps=codec->bit_rate/8;
+            if (title && title->value)
+                mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VID_%d_NAME=%s\n", priv->video_streams, title->value);
             mp_msg(MSGT_DEMUX,MSGL_DBG2,"aspect= %d*%d/(%d*%d)\n",
                 codec->width, codec->sample_aspect_ratio.num,
                 codec->height, codec->sample_aspect_ratio.den);
@@ -416,6 +421,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 memcpy(sh_sub->extradata, codec->extradata, codec->extradata_size);
                 sh_sub->extradata_len = codec->extradata_size;
             }
+            if (title && title->value)
+                mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_NAME=%s\n", priv->sub_streams, title->value);
             if (lang && lang->value) {
               sh_sub->lang = strdup(lang->value);
               mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", priv->sub_streams, sh_sub->lang);
