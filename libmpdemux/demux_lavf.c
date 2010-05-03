@@ -251,12 +251,11 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
         case CODEC_TYPE_AUDIO:{
             WAVEFORMATEX *wf;
             sh_audio_t* sh_audio;
-            sh_audio=new_sh_audio(demuxer, i);
-            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "lavf", i);
+            sh_audio = new_sh_audio_aid(demuxer, i, priv->audio_streams);
+            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "lavf", priv->audio_streams);
             if(!sh_audio)
                 break;
             priv->astreams[priv->audio_streams] = i;
-            priv->audio_streams++;
             wf= calloc(sizeof(WAVEFORMATEX) + codec->extradata_size, 1);
             // mp4a tag is used for all mp4 files no matter what they actually contain
             if(codec->codec_tag == MKTAG('m', 'p', '4', 'a'))
@@ -310,7 +309,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             }
             if (lang && lang->value) {
               sh_audio->lang = strdup(lang->value);
-              mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", i, sh_audio->lang);
+              mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", priv->audio_streams, sh_audio->lang);
             }
             if (st->disposition & AV_DISPOSITION_DEFAULT)
               sh_audio->default_track = 1;
@@ -321,16 +320,16 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 demuxer->audio->sh= demuxer->a_streams[i];
             } else
                 st->discard= AVDISCARD_ALL;
+            priv->audio_streams++;
             break;
         }
         case CODEC_TYPE_VIDEO:{
             sh_video_t* sh_video;
             BITMAPINFOHEADER *bih;
-            sh_video=new_sh_video(demuxer, i);
-            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "lavf", i);
+            sh_video=new_sh_video_vid(demuxer, i, priv->audio_streams);
+            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "lavf", priv->audio_streams);
             if(!sh_video) break;
             priv->vstreams[priv->video_streams] = i;
-            priv->video_streams++;
             bih=calloc(sizeof(BITMAPINFOHEADER) + codec->extradata_size,1);
 
             if(codec->codec_id == CODEC_ID_RAWVIDEO) {
@@ -388,6 +387,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 demuxer->video->id = i;
                 demuxer->video->sh= demuxer->v_streams[i];
             }
+            priv->video_streams++;
             break;
         }
         case CODEC_TYPE_SUBTITLE:{
@@ -690,13 +690,9 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 	    }
 	    else // select track by id
 	    {
-	        for(i = 0; i < nstreams; i++)
-	        {
-		    if(pstreams[i] == id)
-		    {
-		        newid = id;
-		        break;
-		    }
+	        if (id >= 0 && id < nstreams) {
+	            i = id;
+	            newid = pstreams[i];
 	        }
 	    }
 	    if(i == curridx)
