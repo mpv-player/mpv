@@ -329,8 +329,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
         case CODEC_TYPE_VIDEO:{
             sh_video_t* sh_video;
             BITMAPINFOHEADER *bih;
-            sh_video=new_sh_video_vid(demuxer, i, priv->audio_streams);
-            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "lavf", priv->audio_streams);
+            sh_video=new_sh_video_vid(demuxer, i, priv->video_streams);
+            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "lavf", priv->video_streams);
             if(!sh_video) break;
             priv->vstreams[priv->video_streams] = i;
             bih=calloc(sizeof(BITMAPINFOHEADER) + codec->extradata_size,1);
