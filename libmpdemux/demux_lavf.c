@@ -415,7 +415,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 break;
             sh_sub = new_sh_sub_sid(demuxer, i, priv->sub_streams);
             if(!sh_sub) break;
-            stream_type = "subtitles";
+            stream_type = "subtitle";
             priv->sstreams[priv->sub_streams] = i;
             sh_sub->type = type;
             if (codec->extradata_size) {
