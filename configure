@@ -7591,7 +7591,7 @@ if test "$_libschroedinger_lavc" = auto ; then
   else
     cat > $TMPC << EOF
 #include <schroedinger/schro.h>
-int main(void) { schro_init(); return 0; }
+int main(void) { schro_init(); return SCHRO_ENCODER_RATE_CONTROL_CONSTANT_QUALITY; }
 EOF
     if $_pkg_config --exists schroedinger-1.0 ; then
       _inc_schroedinger=$($_pkg_config --silence-errors --cflags schroedinger-1.0)
