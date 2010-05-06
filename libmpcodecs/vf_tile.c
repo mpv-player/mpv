@@ -198,16 +198,18 @@ static void uninit(struct vf_instance *vf)
     free(vf->priv);
 }
 
-/* rgb/bgr 15->32 supported & some Yxxx */
+/* rgb/bgr 12...32 supported & some Yxxx */
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
 	switch (fmt) {
-        /* rgb 15 -> 32 bit */
+        /* rgb 12...32 bit */
+        case IMGFMT_RGB12:
         case IMGFMT_RGB15:
 	case IMGFMT_RGB16:
 	case IMGFMT_RGB24:
         case IMGFMT_RGB32:
-        /* bgr 15 -> 32 bit */
+        /* bgr 12...32 bit */
+        case IMGFMT_BGR12:
 	case IMGFMT_BGR15:
 	case IMGFMT_BGR16:
 	case IMGFMT_BGR24:

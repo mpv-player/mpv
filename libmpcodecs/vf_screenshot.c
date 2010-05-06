@@ -258,6 +258,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
     case IMGFMT_BGR24:
     case IMGFMT_BGR16:
     case IMGFMT_BGR15:
+    case IMGFMT_BGR12:
     case IMGFMT_RGB32:
     case IMGFMT_RGB24:
     case IMGFMT_Y800:

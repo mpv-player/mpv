@@ -146,6 +146,10 @@ static void draw_func(int x0,int y0, int w,int h,unsigned char* src, unsigned ch
 			vf->dmpi->stride[0]*y0+
 			(vf->dmpi->bpp>>3)*x0;
     switch(vf->dmpi->imgfmt){
+    case IMGFMT_BGR12:
+    case IMGFMT_RGB12:
+        vo_draw_alpha_rgb12(w, h, src, srca, stride, dst, vf->dmpi->stride[0]);
+        break;
     case IMGFMT_BGR15:
     case IMGFMT_RGB15:
 	vo_draw_alpha_rgb15(w,h,src,srca,stride,dst,vf->dmpi->stride[0]);

@@ -45,6 +45,8 @@ static const unsigned int bgr_list[]={
     IMGFMT_444P,
 
     IMGFMT_YUY2,
+    IMGFMT_BGR12,
+    IMGFMT_RGB12,
     IMGFMT_BGR15,
     IMGFMT_RGB15,
     IMGFMT_BGR16,
@@ -150,6 +152,10 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     case IMGFMT_YUY2:
 	convert(mpi,dmpi,0x8000,0x80ff,2);
 	break;
+    case IMGFMT_BGR12:
+    case IMGFMT_RGB12:
+        convert(mpi,dmpi,0,0x0fff,2);
+        break;
     case IMGFMT_BGR15:
     case IMGFMT_RGB15:
 	convert(mpi,dmpi,0,0x7fff,2);

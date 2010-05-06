@@ -376,6 +376,9 @@ typedef void (*draw_alpha_f)(int w,int h, unsigned char* src, unsigned char *src
 
 inline static draw_alpha_f get_draw_alpha(uint32_t fmt) {
   switch(fmt) {
+  case IMGFMT_BGR12:
+  case IMGFMT_RGB12:
+    return vo_draw_alpha_rgb12;
   case IMGFMT_BGR15:
   case IMGFMT_RGB15:
     return vo_draw_alpha_rgb15;

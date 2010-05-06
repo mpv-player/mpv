@@ -29,6 +29,7 @@ const char *vo_format_name(int format)
 	case IMGFMT_RGB4: return "RGB 4-bit";
 	case IMGFMT_RG4B: return "RGB 4-bit per byte";
 	case IMGFMT_RGB8: return "RGB 8-bit";
+	case IMGFMT_RGB12: return "RGB 12-bit";
 	case IMGFMT_RGB15: return "RGB 15-bit";
 	case IMGFMT_RGB16: return "RGB 16-bit";
 	case IMGFMT_RGB24: return "RGB 24-bit";
@@ -39,6 +40,7 @@ const char *vo_format_name(int format)
 	case IMGFMT_BGR4: return "BGR 4-bit";
 	case IMGFMT_BG4B: return "BGR 4-bit per byte";
 	case IMGFMT_BGR8: return "BGR 8-bit";
+	case IMGFMT_BGR12: return "BGR 12-bit";
 	case IMGFMT_BGR15: return "BGR 15-bit";
 	case IMGFMT_BGR16: return "BGR 16-bit";
 	case IMGFMT_BGR24: return "BGR 24-bit";

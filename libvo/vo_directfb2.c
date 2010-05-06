@@ -318,9 +318,13 @@ static DFBSurfacePixelFormat convformat(uint32_t format)
 #if DIRECTFBVERSION > DFB_VERSION(0,9,15)
             case IMGFMT_RGB15: return  DSPF_ARGB1555; break;
             case IMGFMT_BGR15: return  DSPF_ARGB1555; break;
+            case IMGFMT_RGB12: return  DSPF_ARGB4444; break;
+            case IMGFMT_BGR12: return  DSPF_ARGB4444; break;
 #else
             case IMGFMT_RGB15: return  DSPF_RGB15; break;
             case IMGFMT_BGR15: return  DSPF_RGB15; break;
+            case IMGFMT_RGB12: return  DSPF_RGB12; break;
+            case IMGFMT_BGR12: return  DSPF_RGB12; break;
 #endif
             case IMGFMT_YUY2:  return  DSPF_YUY2; break;
             case IMGFMT_UYVY:  return  DSPF_UYVY; break;
@@ -541,6 +545,8 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
     		    case IMGFMT_BGR16:
             	    case IMGFMT_RGB15:
 	    	    case IMGFMT_BGR15:
+                    case IMGFMT_RGB12:
+                    case IMGFMT_BGR12:
 					params.bpp=16;
 					break;
 		    default:		params.bpp=0;
@@ -665,8 +671,10 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	            case DSPF_RGB16: bpp=16;break;
 #if DIRECTFBVERSION > DFB_VERSION(0,9,15)
     		    case DSPF_ARGB1555: bpp=15;break;
+                    case DSPF_ARGB4444: bpp=12; break;
 #else
         	    case DSPF_RGB15: bpp=15;break;
+                    case DSPF_RGB12: bpp=12; break;
 #endif
 		    case DSPF_RGB332 : bpp=8;break;
 		}
@@ -678,8 +686,10 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	            case DSPF_RGB16:
 #if DIRECTFBVERSION > DFB_VERSION(0,9,15)
     		    case DSPF_ARGB1555:
+                    case DSPF_ARGB4444:
 #else
         	    case DSPF_RGB15:
+                    case DSPF_RGB12:
 #endif
 		    case DSPF_RGB332:
 				    mp_msg(MSGT_VO, MSGL_V,"DirectFB: Trying to recover via videomode change (VM).\n");
@@ -1487,6 +1497,15 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 #endif
                         vo_draw_alpha_rgb15(w,h,src,srca,stride,((uint8_t *) dst)+pitch*y0 + 2*x0,pitch);
                         break;
+#if DIRECTFBVERSION > DFB_VERSION(0,9,15)
+                case DSPF_ARGB4444:
+#else
+                case DSPF_RGB12:
+#endif
+                    vo_draw_alpha_rgb12(w, h, src, srca, stride,
+                                        ((uint8_t *) dst) + pitch * y0 + 2 * x0,
+                                        pitch);
+                    break;
 
 		case DSPF_YUY2:
     			vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) dst) + pitch*y0 + 2*x0,pitch);

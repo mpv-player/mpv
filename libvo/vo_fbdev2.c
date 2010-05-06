@@ -77,6 +77,13 @@ static void set_bpp(struct fb_var_screeninfo *p, int bpp)
 			p->green.offset = 5;
 			p->blue.length = 5;
 			break;
+		case 12:
+			p->red.offset   = 8;
+			p->green.length = 4;
+			p->red.length   = 4;
+			p->green.offset = 4;
+			p->blue.length  = 4;
+			break;
 	}
 }
 
@@ -247,6 +254,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		case 24: draw_alpha_p = vo_draw_alpha_rgb24; break;
 		case 16: draw_alpha_p = vo_draw_alpha_rgb16; break;
 		case 15: draw_alpha_p = vo_draw_alpha_rgb15; break;
+		case 12: draw_alpha_p = vo_draw_alpha_rgb12; break;
 		default: return 1;
 	}
 
