@@ -56,6 +56,10 @@
 
 #include "ass_mp.h"
 
+#define WRAP_ADD(x, a, m) ((a) < 0 \
+                           ? ((x)+(a)+(m) < (m) ? (x)+(a)+(m) : (x)+(a)) \
+                           : ((x)+(a) < (m) ? (x)+(a) : (x)+(a)-(m)))
+
 #define CHECK_ST_ERROR(message) \
     do { \
         if (vdp_st != VDP_STATUS_OK) { \
@@ -932,8 +936,8 @@ static void check_events(struct vo *vo)
         if (vc->num_shown_frames) {
             /* redraw the last visible buffer */
             VdpStatus vdp_st;
-            int last_surface = (vc->surface_num + NUM_OUTPUT_SURFACES - 1)
-                % NUM_OUTPUT_SURFACES;
+            int last_surface = WRAP_ADD(vc->surface_num, -1,
+                                        NUM_OUTPUT_SURFACES);
             vdp_st = vdp->presentation_queue_display(vc->flip_queue,
                                          vc->output_surfaces[last_surface],
                                          vo->dwidth, vo->dheight, 0);
@@ -1316,8 +1320,7 @@ static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration)
      * not make the target time in reality. Without this check we could drop
      * every frame, freezing the display completely if video lags behind.
      */
-    if (now > PREV_VSYNC(FFMAX(pts,
-                               vc->last_queue_time + vsync_interval)))
+    if (now > PREV_VSYNC(FFMAX(pts, vc->last_queue_time + vsync_interval)))
         npts = UINT64_MAX;
 
     /* Allow flipping a frame at a vsync if its presentation time is a
@@ -1374,7 +1377,7 @@ static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration)
     vc->last_queue_time = pts;
     vc->last_ideal_time = ideal_pts;
     vc->dropped_frame = false;
-    vc->surface_num = (vc->surface_num + 1) % NUM_OUTPUT_SURFACES;
+    vc->surface_num = WRAP_ADD(vc->surface_num, 1, NUM_OUTPUT_SURFACES);
     vc->num_shown_frames = FFMIN(vc->num_shown_frames + 1, 1000);
 }
 
@@ -1445,7 +1448,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
         VdpStatus vdp_st;
         void *destdata[3] = {mpi->planes[0], mpi->planes[2], mpi->planes[1]};
         rndr = get_surface(vo, vc->deint_counter);
-        vc->deint_counter = (vc->deint_counter + 1) % NUM_BUFFERED_VIDEO;
+        vc->deint_counter = WRAP_ADD(vc->deint_counter, 1, NUM_BUFFERED_VIDEO);
         if (vc->image_format == IMGFMT_NV12)
             destdata[1] = destdata[2];
         vdp_st =
