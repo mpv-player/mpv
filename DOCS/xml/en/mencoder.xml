@@ -615,7 +615,7 @@ mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=j
 </informalexample>
 
 You can mix different types of images, regardless of the method you use
-t &mdash; individual filenames, wildcard or file with list &mdash; provided of
+&mdash; individual filenames, wildcard or file with list &mdash; provided of
 course they have the same dimensions.
 So you can e.g. take title frame from PNG file,
 and then put a slideshow of your JPEG photos.
