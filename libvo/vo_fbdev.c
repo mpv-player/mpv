@@ -521,6 +521,13 @@ static void set_bpp(struct fb_var_screeninfo *p, int bpp)
         p->green.offset = 5;
         p->blue.length  = 5;
         break;
+    case 12:
+        p->red.offset   = 8;
+        p->green.length = 4;
+        p->red.length   = 4;
+        p->green.offset = 4;
+        p->blue.length  = 4;
+        break;
     }
 }
 
@@ -700,7 +707,8 @@ static int fb_preinit(int reset)
     }
 
     if (vo_dbpp) {
-        if (vo_dbpp != 15 && vo_dbpp != 16 && vo_dbpp != 24 && vo_dbpp != 32) {
+        if (vo_dbpp != 12 && vo_dbpp != 15 && vo_dbpp != 16
+                          && vo_dbpp != 24 && vo_dbpp != 32) {
             mp_msg(MSGT_VO, MSGL_ERR, "can't switch to %d bpp\n", vo_dbpp);
             goto err_out;
         }
@@ -849,6 +857,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         break;
     case 15:
         draw_alpha_p = vo_draw_alpha_rgb15;
+        break;
+    case 12:
+        draw_alpha_p = vo_draw_alpha_rgb12;
         break;
     default:
         return 1;

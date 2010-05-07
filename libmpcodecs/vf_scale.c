@@ -96,6 +96,8 @@ static const unsigned int outfmt_list[]={
     IMGFMT_RGB16,
     IMGFMT_BGR15,
     IMGFMT_RGB15,
+    IMGFMT_BGR12,
+    IMGFMT_RGB12,
     IMGFMT_Y800,
     IMGFMT_Y8,
     IMGFMT_BGR8,

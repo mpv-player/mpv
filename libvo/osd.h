@@ -29,6 +29,8 @@ void vo_draw_alpha_yuy2(int w,  int h, unsigned char* src, unsigned char *srca, 
 void vo_draw_alpha_uyvy(int w,  int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase, int dststride);
 void vo_draw_alpha_rgb24(int w, int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase, int dststride);
 void vo_draw_alpha_rgb32(int w, int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase, int dststride);
+void vo_draw_alpha_rgb12(int w, int h, unsigned char* src, unsigned char *srca,
+                         int srcstride, unsigned char* dstbase, int dststride);
 void vo_draw_alpha_rgb15(int w, int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase, int dststride);
 void vo_draw_alpha_rgb16(int w, int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase, int dststride);
 

@@ -37,11 +37,13 @@ struct vf_priv_s {
 
 static unsigned int getfmt(unsigned int outfmt){
     switch(outfmt){
+    case IMGFMT_RGB12:
     case IMGFMT_RGB15:
     case IMGFMT_RGB16:
     case IMGFMT_RGB24:
     case IMGFMT_RGBA:
     case IMGFMT_ARGB:
+    case IMGFMT_BGR12:
     case IMGFMT_BGR15:
     case IMGFMT_BGR16:
     case IMGFMT_BGR24:
@@ -54,6 +56,12 @@ static unsigned int getfmt(unsigned int outfmt){
 
 static void put_pixel(uint8_t *buf, int x, int y, int stride, int r, int g, int b, int fmt){
     switch(fmt){
+    case IMGFMT_BGR12: ((uint16_t*)(buf + y*stride))[x]=
+                           ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);
+    break;
+    case IMGFMT_RGB12: ((uint16_t*)(buf + y*stride))[x]=
+                           ((b >> 4) << 8) | ((g >> 4) << 4) | (r >> 4);
+    break;
     case IMGFMT_BGR15: ((uint16_t*)(buf + y*stride))[x]= ((r>>3)<<10) | ((g>>3)<<5) | (b>>3);
     break;
     case IMGFMT_RGB15: ((uint16_t*)(buf + y*stride))[x]= ((b>>3)<<10) | ((g>>3)<<5) | (r>>3);
