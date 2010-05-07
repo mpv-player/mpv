@@ -30,20 +30,16 @@
 
 #ifdef CONFIG_GL_WIN32
 #include <windows.h>
-#include <GL/gl.h>
 #include "w32_common.h"
 #endif
 #ifdef CONFIG_GL_X11
-#include <GL/gl.h>
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 #include "x11_common.h"
 // This old-vo wrapper macro would conflict with the struct member
 #undef update_xinerama_info
 #endif
-#ifdef CONFIG_GL_SDL
 #include <GL/gl.h>
-#endif
 
 // workaround for some gl.h headers
 #ifndef GLAPIENTRY

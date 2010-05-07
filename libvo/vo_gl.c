@@ -280,7 +280,7 @@ static void update_yuvconv(void) {
                texture_width, texture_height);
   }
   if (custom_tex) {
-    FILE *f = fopen(custom_tex, "r");
+    FILE *f = fopen(custom_tex, "rb");
     if (!f)
       mp_msg(MSGT_VO, MSGL_WARN,
              "[gl] Could not read customtex %s\n", custom_tex);
@@ -493,9 +493,10 @@ static void autodetectGlExtensions(void) {
   const char *extensions = mpglGetString(GL_EXTENSIONS);
   const char *vendor     = mpglGetString(GL_VENDOR);
   const char *version    = mpglGetString(GL_VERSION);
+  const char *renderer   = mpglGetString(GL_RENDERER);
   int is_ati = vendor && strstr(vendor, "ATI") != NULL;
   int ati_broken_pbo = 0;
-  mp_msg(MSGT_VO, MSGL_V, "[gl] Running on OpenGL by '%s', versions '%s'\n", vendor, version);
+  mp_msg(MSGT_VO, MSGL_V, "[gl] Running on OpenGL '%s' by '%s', version '%s'\n", renderer, vendor, version);
   if (is_ati && strncmp(version, "2.1.", 4) == 0) {
     int ver = atoi(version + 4);
     mp_msg(MSGT_VO, MSGL_V, "[gl] Detected ATI driver version: %i\n", ver);
