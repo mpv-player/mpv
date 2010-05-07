@@ -28,12 +28,12 @@
 #define EDL_MUTE_END 0
 
 struct edl_record {
-  float start_sec;
-  float stop_sec;
-  float length_sec;
-  short action;
-  struct edl_record* next;
-  struct edl_record* prev;
+    float start_sec;
+    float stop_sec;
+    float length_sec;
+    short action;
+    struct edl_record* next;
+    struct edl_record* prev;
 };
 
 typedef struct edl_record* edl_record_ptr;
