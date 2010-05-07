@@ -67,7 +67,6 @@
 
 #include "cfg-mplayer-def.h"
 
-#include "ffmpeg_files/intreadwrite.h"
 #include "libavutil/avstring.h"
 
 #include "subreader.h"
