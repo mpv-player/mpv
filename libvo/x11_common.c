@@ -338,9 +338,9 @@ void update_xinerama_info(struct vo *vo) {
     struct MPOpts *opts = vo->opts;
     xinerama_x = xinerama_y = 0;
 #ifdef CONFIG_XINERAMA
-    int screen = xinerama_screen;
-    if (screen >= -1 && XineramaIsActive(vo->x11->display))
+    if (xinerama_screen >= -1 && XineramaIsActive(vo->x11->display))
     {
+        int screen = xinerama_screen;
         XineramaScreenInfo *screens;
         int num_screens;
 

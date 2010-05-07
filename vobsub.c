@@ -285,6 +285,8 @@ typedef struct {
     unsigned char *packet;
     unsigned int packet_reserve;
     unsigned int packet_size;
+    int padding_was_here;
+    int merge;
 } mpeg_t;
 
 static mpeg_t *mpeg_open(const char *filename)
@@ -297,6 +299,8 @@ static mpeg_t *mpeg_open(const char *filename)
         res->packet         = NULL;
         res->packet_size    = 0;
         res->packet_reserve = 0;
+        res->padding_was_here = 1;
+        res->merge          = 0;
         res->stream         = rar_open(filename, "rb");
         err = res->stream == NULL;
         if (err)
@@ -368,10 +372,13 @@ static int mpeg_run(mpeg_t *mpeg)
                 return -1;
         } else
             abort();
+        if (!mpeg->padding_was_here)
+            mpeg->merge = 1;
         break;
     case 0xbd:                  /* packet */
         if (rar_read(buf, 2, 1, mpeg->stream) != 1)
             return -1;
+        mpeg->padding_was_here = 0;
         len = buf[0] << 8 | buf[1];
         idx = mpeg_tell(mpeg);
         c = rar_getc(mpeg->stream);
@@ -454,6 +461,7 @@ static int mpeg_run(mpeg_t *mpeg)
         len = buf[0] << 8 | buf[1];
         if (len > 0 && rar_seek(mpeg->stream, len, SEEK_CUR))
             return -1;
+        mpeg->padding_was_here = 1;
         break;
     default:
         if (0xc0 <= buf[3] && buf[3] < 0xf0) {
@@ -1026,6 +1034,11 @@ void *vobsub_open(const char *const name, const char *const ifo,
                                             last_pts_diff = pkt->pts100 - mpg->pts;
                                         else
                                             pkt->pts100 = mpg->pts;
+                                        if (mpg->merge) {
+                                            packet_t *last = &queue->packets[queue->current_index - 1];
+                                            pkt->pts100 = last->pts100;
+                                            mpg->merge = 0;
+                                        }
                                         /* FIXME: should not use mpg_sub internal informations, make a copy */
                                         pkt->data = mpg->packet;
                                         pkt->size = mpg->packet_size;
