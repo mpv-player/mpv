@@ -23,46 +23,6 @@
 #include "config.h"
 #include "bswap.h"
 
-/*
- * Arch-specific headers can provide any combination of
- * AV_[RW][BLN](16|32|64) macros.  Preprocessor symbols must be
- * defined, even if these are implemented as inline functions.
- */
-
-#if   ARCH_ARM
-#   include "arm/intreadwrite.h"
-#elif ARCH_MIPS
-#   include "mips/intreadwrite.h"
-#elif ARCH_PPC
-#   include "ppc/intreadwrite.h"
-#endif
-
-/*
- * Define AV_[RW]N helper macros to simplify definitions not provided
- * by per-arch headers.
- */
-
-#if   defined(__GNUC__)
-
-struct unaligned_64 { uint64_t l; } __attribute__((packed));
-struct unaligned_32 { uint32_t l; } __attribute__((packed));
-struct unaligned_16 { uint16_t l; } __attribute__((packed));
-
-#   define AV_RN(s, p) (((const struct unaligned_##s *) (p))->l)
-#   define AV_WN(s, p, v) (((struct unaligned_##s *) (p))->l) = (v)
-
-#elif defined(__DECC)
-
-#   define AV_RN(s, p) (*((const __unaligned uint##s##_t*)(p)))
-#   define AV_WN(s, p, v) *((__unaligned uint##s##_t*)(p)) = (v)
-
-#elif HAVE_FAST_UNALIGNED
-
-#   define AV_RN(s, p) (*((const uint##s##_t*)(p)))
-#   define AV_WN(s, p, v) *((uint##s##_t*)(p)) = (v)
-
-#else
-
 #ifndef AV_RB16
 #define AV_RB16(x)  ((((const uint8_t*)(x))[0] << 8) | \
                       ((const uint8_t*)(x))[1])
@@ -162,8 +122,6 @@ struct unaligned_16 { uint16_t l; } __attribute__((packed));
 #   define AV_RN(s, p)    AV_RL##s(p)
 #   define AV_WN(s, p, v) AV_WL##s(p, v)
 #endif
-
-#endif /* HAVE_FAST_UNALIGNED */
 
 #ifndef AV_RN16
 #   define AV_RN16(p) AV_RN(16, p)
