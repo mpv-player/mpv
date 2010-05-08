@@ -1172,7 +1172,6 @@ static subtitle* sub_fribidi (subtitle *sub, int sub_utf8, int from)
 {
   FriBidiChar logical[LINE_LEN+1], visual[LINE_LEN+1]; // Hopefully these two won't smash the stack
   char        *ip      = NULL, *op     = NULL;
-  FriBidiCharType base;
   size_t len,orig_len;
   int l=sub->lines;
   int char_set_num;
@@ -1196,7 +1195,7 @@ static subtitle* sub_fribidi (subtitle *sub, int sub_utf8, int from)
       break;
     }
     len = fribidi_charset_to_unicode (char_set_num, ip, len, logical);
-    base = fribidi_flip_commas?FRIBIDI_TYPE_ON:FRIBIDI_TYPE_L;
+    FriBidiParType base = fribidi_flip_commas?FRIBIDI_TYPE_ON:FRIBIDI_TYPE_L;
     log2vis = fribidi_log2vis (logical, len, &base,
 			       /* output */
 			       visual, NULL, NULL, NULL);
