@@ -528,8 +528,11 @@ void glCreateClearTex(GLenum target, GLenum fmt, GLenum format, GLenum type, GLi
                       int w, int h, unsigned char val) {
   GLfloat fval = (GLfloat)val / 255.0;
   GLfloat border[4] = {fval, fval, fval, fval};
-  int stride = w * glFmt2bpp(format, type);
+  int stride;
   char *init;
+  if (w == 0) w = 1;
+  if (h == 0) h = 1;
+  stride = w * glFmt2bpp(format, type);
   if (!stride) return;
   init = malloc(stride * h);
   memset(init, val, stride * h);
@@ -1421,6 +1424,8 @@ int glAutodetectYUVConversion(void) {
 void glSetupYUVConversion(gl_conversion_params_t *params) {
   float uvcos = params->csp_params.saturation * cos(params->csp_params.hue);
   float uvsin = params->csp_params.saturation * sin(params->csp_params.hue);
+  if (params->chrom_texw == 0) params->chrom_texw = 1;
+  if (params->chrom_texh == 0) params->chrom_texh = 1;
   switch (YUV_CONVERSION(params->type)) {
     case YUV_CONVERSION_COMBINERS:
       glSetupYUVCombiners(uvcos, uvsin);
