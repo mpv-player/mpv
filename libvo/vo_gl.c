@@ -487,10 +487,10 @@ static void autodetectGlExtensions(void) {
     ati_broken_pbo = ver && ver < 8395;
   }
   if (ati_hack      == -1) ati_hack      = ati_broken_pbo;
-  if (extensions && force_pbo     == -1)
-    force_pbo     = strstr(extensions, "_pixel_buffer_object")      ? is_ati : 0;
-  if (extensions && use_rectangle == -1)
-    use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      0 : 0;
+  if (force_pbo     == -1 && extensions && strstr(extensions, "_pixel_buffer_object"))
+    force_pbo = is_ati;
+  if (use_rectangle == -1 && extensions && strstr(extensions, "_texture_non_power_of_two"))
+    use_rectangle = 0;
   if (use_osd == -1)
     use_osd = mpglBindTexture != NULL;
   if (use_yuv == -1)
