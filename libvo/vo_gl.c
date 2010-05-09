@@ -491,6 +491,8 @@ static void autodetectGlExtensions(void) {
     force_pbo = is_ati;
   if (use_rectangle == -1 && extensions && strstr(extensions, "_texture_non_power_of_two"))
     use_rectangle = 0;
+  if (use_rectangle == -1 && extensions && strstr(extensions, "_texture_rectangle"))
+    use_rectangle = renderer && strstr(renderer, "Mesa DRI R200") ? 1 : 0;
   if (use_osd == -1)
     use_osd = mpglBindTexture != NULL;
   if (use_yuv == -1)
