@@ -41,8 +41,6 @@
 
 #ifdef CONFIG_LIBA52
 #include <a52dec/a52.h>
-#else
-#include "liba52/a52.h"
 #endif
 
 #define PACK_HEADER_START_CODE 0x01ba

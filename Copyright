@@ -37,18 +37,6 @@ Copyright:  1992 by Jutta Degener and Carsten Bormann, TU Berlin
 License:    permissive, see libmpcodecs/native/xa_gsm.c
 
 
-Name:       liba52
-Version:    0.7.4 + patches
-URL:        http://liba52.sourceforge.net/
-Directory:  liba52
-Copyright:  1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
-            2000-2001 Michel Lespinasse <walken@zoy.org>
-            2000 Yuqing Deng <Yuqing_Deng@brown.edu>
-            2002 Nick Kurshev
-            2004 Romain Dolbeau <romain@dolbeau.org>
-License:    GNU General Public License
-
-
 Name:       libdvdcss
 Version:    1.2.10
 URL:        http://developers.videolan.org/libdvdcss/

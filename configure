@@ -335,7 +335,6 @@ Codecs:
   --enable-libdca           enable libdca support [autodetect]
   --disable-mp3lib          disable builtin mp3lib [autodetect]
   --disable-liba52          disable liba52 [autodetect]
-  --enable-liba52-internal  enable builtin liba52 [disabled]
   --disable-libmpeg2        disable builtin libmpeg2 [autodetect]
   --disable-musepack        disable musepack support [autodetect]
   --disable-libopencore_amrnb disable libopencore_amr narrowband [autodetect]
@@ -631,7 +630,6 @@ _speex=auto
 _theora=auto
 _mp3lib=auto
 _liba52=auto
-_liba52_internal=no
 _libdca=auto
 _libmpeg2=auto
 _faad=auto
@@ -1028,8 +1026,6 @@ for ac_option do
   --disable-theora)     _theora=no      ;;
   --enable-mp3lib)      _mp3lib=yes     ;;
   --disable-mp3lib)     _mp3lib=no      ;;
-  --enable-liba52-internal)     _liba52_internal=yes    ;;
-  --disable-liba52-internal)    _liba52_internal=no     ;;
   --enable-liba52)      _liba52=yes     ;;
   --disable-liba52)     _liba52=no      ;;
   --enable-libdca)      _libdca=yes     ;;
@@ -6796,27 +6792,19 @@ fi
 echores "$_mp3lib"
 
 echocheck "liba52 support"
-if test "$_liba52_internal" = auto ; then
-  test "$cc_vendor" = intel && test "$_cc_major" -le 10 -o "$_cc_major" -eq 11 -a "$_cc_minor" -eq 0 && _liba52_internal=no || _liba52_internal=yes
-fi
 def_liba52='#undef CONFIG_LIBA52'
-def_liba52_internal="#undef CONFIG_LIBA52_INTERNAL"
-if test "$_liba52_internal" = yes ; then
-  _liba52=yes
-  def_liba52_internal="#define CONFIG_LIBA52_INTERNAL 1"
-  res_comment="internal"
-elif test "$_liba52_internal" = no && test "$_liba52" = auto ; then
+if test "$_liba52" = auto ; then
   _liba52=no
   cat > $TMPC << EOF
 #include <inttypes.h>
 #include <a52dec/a52.h>
 int main(void) { a52_state_t *testHand; testHand=a52_init(0); return 0; }
 EOF
-  cc_check -la52 && _liba52=yes && res_comment="external" && extra_ldflags="$extra_ldflags -la52"
+  cc_check -la52 && _liba52=yes && extra_ldflags="$extra_ldflags -la52"
 fi
 if test "$_liba52" = yes ; then
   def_liba52='#define CONFIG_LIBA52 1'
-  codecmodules="liba52($res_comment) $codecmodules"
+  codecmodules="liba52 $codecmodules"
 else
   nocodecmodules="liba52 $nocodecmodules"
 fi
@@ -8582,7 +8570,6 @@ KAI = $_kai
 KVA = $_kva
 LADSPA = $_ladspa
 LIBA52 = $_liba52
-LIBA52_INTERNAL = $_liba52_internal
 LIBASS = $_ass
 LIBASS_INTERNAL = $ass_internal
 LIBBS2B = $_libbs2b
@@ -8965,7 +8952,6 @@ $def_faac
 $def_faad
 $def_faad_internal
 $def_liba52
-$def_liba52_internal
 $def_libdca
 $def_libdv
 $def_liblzo

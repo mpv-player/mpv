@@ -35,14 +35,9 @@
 
 #include "libaf/af_format.h"
 
-#ifdef CONFIG_LIBA52_INTERNAL
-#include "liba52/a52.h"
-#include "liba52/mm_accel.h"
-#else
 #include <a52dec/a52.h>
 #include <a52dec/mm_accel.h>
 int (* a52_resample) (float * _f, int16_t * s16);
-#endif
 
 static a52_state_t *a52_state;
 static uint32_t a52_flags=0;
@@ -150,11 +145,7 @@ static int preinit(sh_audio_t *sh)
 {
   /* Dolby AC3 audio: */
   /* however many channels, 2 bytes in a word, 256 samples in a block, 6 blocks in a frame */
-#ifdef CONFIG_LIBA52_INTERNAL
-  if (sh->samplesize < 2) sh->samplesize = 2;
-#else
   if (sh->samplesize < 4) sh->samplesize = 4;
-#endif
   sh->audio_out_minsize=audio_output_channels*sh->samplesize*256*6;
   sh->audio_in_minsize=3840;
   a52_level = 1.0;
@@ -208,9 +199,7 @@ static int init(sh_audio_t *sh_audio)
 	mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 init failed\n");
 	return 0;
   }
-#ifndef CONFIG_LIBA52_INTERNAL
   sh_audio->sample_format = AF_FORMAT_FLOAT_NE;
-#endif
   if(a52_fillbuff(sh_audio)<0){
 	mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 sync failed\n");
 	return 0;
@@ -283,12 +272,7 @@ while(sh_audio->channels>0){
 	  break;
       }
   } else
-#ifdef CONFIG_LIBA52_INTERNAL
-  if(a52_resample_init(a52_accel,flags,sh_audio->channels)) break;
-  --sh_audio->channels; /* try to decrease no. of channels*/
-#else
   break;
-#endif
 }
   if(sh_audio->channels<=0){
     mp_msg(MSGT_DECAUDIO,MSGL_ERR,"a52: no resampler. try different channel setup!\n");

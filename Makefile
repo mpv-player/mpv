@@ -108,16 +108,6 @@ SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c osdep/mmap_anon.c
 SRCS_COMMON-$(JPEG)                  += libmpcodecs/vd_ijpg.c
 SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
 SRCS_COMMON-$(LIBA52)                += libmpcodecs/ad_liba52.c
-SRCS_LIBA52_INTERNAL                 += liba52/crc.c \
-                                        liba52/resample.c \
-                                        liba52/bit_allocate.c \
-                                        liba52/bitstream.c \
-                                        liba52/downmix.c \
-                                        liba52/imdct.c \
-                                        liba52/parse.c \
-
-SRCS_COMMON-$(LIBA52_INTERNAL)       += $(SRCS_LIBA52_INTERNAL)
-
 SRCS_COMMON-$(LIBASS)                += libmpcodecs/vf_ass.c \
                                         libass/ass_mp.c \
 
@@ -758,7 +748,6 @@ DIRS =  . \
         gui/wm \
         gui/win32 \
         input \
-        liba52 \
         libaf \
         libao2 \
         libass \
@@ -1020,8 +1009,6 @@ codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h help_mp.h $(TEST_OBJS)
 codecs2html$(EXESUF): codec-cfg.c help_mp.h $(TEST_OBJS)
 	$(CC) -I. -DCODECS2HTML -o $@ $^
 
-liba52/test$(EXESUF): cpudetect.o $(SRCS_LIBA52_INTERNAL:.c=.o) -lm
-
 libvo/aspecttest$(EXESUF): libvo/aspect.o libvo/geometry.o $(TEST_OBJS)
 
 LOADER_TEST_OBJS = $(SRCS_WIN32_EMULATION:.c=.o) $(SRCS_QTX_EMULATION:.S=.o) libavutil/libavutil.a osdep/mmap_anon.o cpudetect.o $(TEST_OBJS)
@@ -1031,8 +1018,7 @@ loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): $(LOADER_TEST_OBJS)
 
 mp3lib/test$(EXESUF) mp3lib/test2$(EXESUF): $(SRCS_MP3LIB:.c=.o) libvo/aclib.o cpudetect.o $(TEST_OBJS)
 
-TESTS = codecs2html codec-cfg-test liba52/test libvo/aspecttest \
-        mp3lib/test mp3lib/test2
+TESTS = codecs2html codec-cfg-test libvo/aspecttest mp3lib/test mp3lib/test2
 
 ifdef ARCH_X86
 TESTS += loader/qtx/list loader/qtx/qtxload

@@ -93,7 +93,6 @@ Imported libs/projects:
     * VIDIX core: Benjamin Zores
     * mp3lib: None
     * loader: None
-    * liba52: None
     * libmpeg2: None
     * libdvdcss: Diego Biurrun
     * libdvdread: Diego Biurrun
