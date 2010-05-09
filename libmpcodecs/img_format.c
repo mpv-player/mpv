@@ -151,13 +151,18 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift)
         xs = 0;
         ys = 1;
         break;
+    case IMGFMT_Y8:
+    case IMGFMT_Y800:
+        xs = 31;
+        ys = 31;
+        break;
     default:
         err = 1;
         break;
     }
     if (x_shift) *x_shift = xs;
     if (y_shift) *y_shift = ys;
-    bpp = 8 + (16 >> (xs + ys));
+    bpp = 8 + ((16 >> xs) >> ys);
     if (format == IMGFMT_420A)
         bpp += 8;
     bpp *= bpp_factor;
