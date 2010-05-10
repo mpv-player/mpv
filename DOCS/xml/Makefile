@@ -40,10 +40,10 @@ define lang-def
 html-chunked-$(lang) html-single-$(lang): $(HTML)/$(lang) $(CONFIGURE_GENERATED)
 
 html-chunked-$(lang):
-	$(MAKE) HTMLDIR=../$$< -C $(lang) html-chunked
+	$(MAKE) HTMLDIR=$$< LANG=$(lang) -f Makefile.inc html-chunked
 
 html-single-$(lang):
-	$(MAKE) HTMLDIR=../$$< -C $(lang) html-single
+	$(MAKE) HTMLDIR=$$< LANG=$(lang) -f Makefile.inc html-single
 
 xmllint-$(lang): xmllint.sh
 	$(MAKE) -C $(lang) xmllint
