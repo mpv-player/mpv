@@ -37,9 +37,9 @@ $(CONFIGURE_GENERATED) $(MAIN_XML_ALL):
 	sh configure
 
 define lang-def
-html-chunked-$(lang): $(HTML)/$(lang)/index.html
-html-single-$(lang):  $(HTML)/$(lang)/MPlayer.html
-$(HTML)/$(lang)/index.html $(HTML)/$(lang)/MPlayer.html: $(lang)/main.xml $(wildcard $(lang)/*.xml) $(HTML)/$(lang) $(CONFIGURE_GENERATED) html-common.xsl $(HTML)/$(lang)/default.css xmllint-$(lang)
+html-chunked-$(lang): xmllint-$(lang) $(HTML)/$(lang)/index.html
+html-single-$(lang):  xmllint-$(lang) $(HTML)/$(lang)/MPlayer.html
+$(HTML)/$(lang)/index.html $(HTML)/$(lang)/MPlayer.html: $(lang)/main.xml $(wildcard $(lang)/*.xml) $(HTML)/$(lang) html-common.xsl $(HTML)/$(lang)/default.css
 
 $(HTML)/$(lang)/default.css: $(HTML)/$(lang)
 	cp -f default.css $$(@D)
