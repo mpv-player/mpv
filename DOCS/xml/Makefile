@@ -37,16 +37,21 @@ $(CONFIGURE_GENERATED) $(MAIN_XML_ALL):
 	sh configure
 
 define lang-def
-html-chunked-$(lang) html-single-$(lang): $(HTML)/$(lang) $(CONFIGURE_GENERATED)
+html-chunked-$(lang): $(HTML)/$(lang)/index.html
+html-single-$(lang):  $(HTML)/$(lang)/MPlayer.html
+$(HTML)/$(lang)/index.html $(HTML)/$(lang)/MPlayer.html: $(lang)/main.xml $(wildcard $(lang)/*.xml) $(HTML)/$(lang) $(CONFIGURE_GENERATED) html-common.xsl $(HTML)/$(lang)/default.css xmllint-$(lang)
 
-html-chunked-$(lang):
-	$(MAKE) HTMLDIR=$$< LANG=$(lang) -f Makefile.inc html-chunked
+$(HTML)/$(lang)/default.css: $(HTML)/$(lang)
+	cp -f default.css $$(@D)
 
-html-single-$(lang):
-	$(MAKE) HTMLDIR=$$< LANG=$(lang) -f Makefile.inc html-single
+$(HTML)/$(lang)/index.html:
+	./xsltproc.sh $$(@D)/ html-chunk.xsl $$<
 
-xmllint-$(lang): xmllint.sh
-	$(MAKE) -C $(lang) xmllint
+$(HTML)/$(lang)/MPlayer.html:
+	./xsltproc.sh $$@ html-single.xsl $$<
+
+xmllint-$(lang): $(lang)/main.xml
+	./xmllint.sh $$<
 endef
 
 $(foreach lang, $(DOC_LANG_ALL),$(eval $(lang-def)))
