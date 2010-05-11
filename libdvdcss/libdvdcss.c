@@ -367,7 +367,14 @@ LIBDVDCSS_EXPORT dvdcss_t dvdcss_open ( char *psz_target )
     if( dvdcss->b_ioctls )
     {
         i_ret = _dvdcss_test( dvdcss );
-        if( i_ret < 0 )
+        if( i_ret == -2 )
+        {
+            /* Scrambled disk, RPC-II drive, no region set: bail out */
+            free( dvdcss->psz_device );
+            free( dvdcss );
+            return NULL;
+        }
+        else if( i_ret < 0 )
         {
             /* Disable the CSS ioctls and hope that it works? */
             print_debug( dvdcss,
@@ -420,7 +427,6 @@ LIBDVDCSS_EXPORT dvdcss_t dvdcss_open ( char *psz_target )
     if( psz_cache )
     {
         uint8_t p_sector[DVDCSS_BLOCK_SIZE];
-        char psz_debug[PATH_MAX + 30];
         char psz_key[1 + KEY_SIZE * 2 + 1];
         char *psz_title;
         uint8_t *psz_serial;
@@ -548,9 +554,8 @@ LIBDVDCSS_EXPORT dvdcss_t dvdcss_open ( char *psz_target )
         /* Pointer to the filename we will use. */
         dvdcss->psz_block = dvdcss->psz_cachefile + i;
 
-        sprintf( psz_debug, "using CSS key cache dir: %s",
-                            dvdcss->psz_cachefile );
-        print_debug( dvdcss, psz_debug );
+        print_debug( dvdcss, "using CSS key cache dir: %s",
+                             dvdcss->psz_cachefile );
     }
     nocache:
 
