@@ -30,18 +30,16 @@ html-single:  $(addprefix html-single-,$(DOC_LANGS))
 
 xmllint: $(addprefix xmllint-,$(DOC_LANGS))
 
-$(foreach lang,$(DOC_LANG_ALL),$(HTML)/$(lang)):
-	mkdir -p $@
-
 $(CONFIGURE_GENERATED) $(MAIN_XML_ALL):
 	sh configure
 
 define lang-def
 html-chunked-$(lang): $(HTML)/$(lang)/index.html
 html-single-$(lang):  $(HTML)/$(lang)/MPlayer.html
-$(HTML)/$(lang)/index.html $(HTML)/$(lang)/MPlayer.html: $(lang)/main.xml $(wildcard $(lang)/*.xml) $(HTML)/$(lang) html-common.xsl $(HTML)/$(lang)/default.css
+$(HTML)/$(lang)/index.html $(HTML)/$(lang)/MPlayer.html: $(lang)/main.xml $(wildcard $(lang)/*.xml) html-common.xsl $(HTML)/$(lang)/default.css
 
-$(HTML)/$(lang)/default.css: $(HTML)/$(lang)
+$(HTML)/$(lang)/default.css:
+	mkdir -p $$@
 	cp -f default.css $$(@D)
 
 $(HTML)/$(lang)/index.html:
