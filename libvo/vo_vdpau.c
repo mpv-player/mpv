@@ -626,10 +626,6 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
     if (vc->sharpen)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_SHARPNESS;
     if (vc->hqscaling) {
-#ifndef VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] MPlayer was compiled with (old?) "
-               "libvdpau headers with no support for requested hqscaling.\n");
-#else
         VdpVideoMixerFeature hqscaling_feature =
             VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 + vc->hqscaling-1;
         VdpBool hqscaling_available;
@@ -642,7 +638,6 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
         else
             mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Your hardware or VDPAU "
                    "library does not support requested hqscaling.\n");
-#endif
     }
 
     vdp_st = vdp->video_mixer_create(vc->vdp_device, feature_count, features,
