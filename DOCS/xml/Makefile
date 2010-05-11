@@ -31,7 +31,7 @@ html-single:  $(addprefix html-single-,$(DOC_LANGS))
 xmllint: $(addprefix xmllint-,$(DOC_LANGS))
 
 $(CONFIGURE_GENERATED) $(MAIN_XML_ALL):
-	sh configure
+	./configure
 
 define lang-def
 html-chunked-$(lang): $(HTML)/$(lang)/index.html
