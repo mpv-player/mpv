@@ -52,7 +52,7 @@ int  _dvdcss_close      ( dvdcss_t );
 /*****************************************************************************
  * Device reading prototypes, raw-device specific
  *****************************************************************************/
-#ifndef WIN32
+#if !defined(WIN32) && !defined(SYS_OS2)
 int _dvdcss_raw_open     ( dvdcss_t, char const * );
 #endif
 

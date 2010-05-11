@@ -62,7 +62,7 @@ struct dvdcss_s
     int    i_readv_buf_size;
 #endif
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(SYS_OS2)
     int    i_raw_fd;
 #endif
 };

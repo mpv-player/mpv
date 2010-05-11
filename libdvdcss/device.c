@@ -65,6 +65,14 @@
 #   include <IOKit/storage/IODVDMedia.h>
 #endif
 
+#ifdef SYS_OS2
+#   define INCL_DOS
+#   define INCL_DOSDEVIOCTL
+#   include <os2.h>
+#   include <io.h>                                              /* setmode() */
+#   include <fcntl.h>                                           /* O_BINARY  */
+#endif
+
 #include "dvdcss/dvdcss.h"
 
 #include "common.h"
@@ -91,6 +99,12 @@ static int aspi_read  ( dvdcss_t, void *, int );
 static int win_readv  ( dvdcss_t, struct iovec *, int );
 
 static int aspi_read_internal  ( int, void *, int );
+#elif defined( SYS_OS2 )
+static int os2_open ( dvdcss_t, char const * );
+/* just use macros for libc */
+#   define os2_seek     libc_seek
+#   define os2_read     libc_read
+#   define os2_readv    libc_readv
 #endif
 
 int _dvdcss_use_ioctls( dvdcss_t dvdcss )
@@ -110,6 +124,16 @@ int _dvdcss_use_ioctls( dvdcss_t dvdcss )
     {
         return 1;
     }
+#elif defined( SYS_OS2 )
+    ULONG ulMode;
+
+    if( DosQueryFHState( dvdcss->i_fd, &ulMode ) != 0 )
+        return 1;  /* What to do?  Be conservative and try to use the ioctls */
+
+    if( ulMode & OPEN_FLAGS_DASD )
+        return 1;
+
+    return 0;
 #else
     struct stat fileinfo;
     int ret;
@@ -157,6 +181,28 @@ void _dvdcss_check ( dvdcss_t dvdcss )
     kern_return_t kern_result;
     io_iterator_t media_iterator;
     CFMutableDictionaryRef classes_to_match;
+#elif defined( SYS_OS2 )
+#pragma pack( 1 )
+    struct
+    {
+        BYTE bCmdInfo;
+        BYTE bDrive;
+    } param;
+
+    struct
+    {
+        BYTE    abEBPB[31];
+        USHORT  usCylinders;
+        BYTE    bDevType;
+        USHORT  usDevAttr;
+    } data;
+#pragma pack()
+
+    ULONG ulParamLen;
+    ULONG ulDataLen;
+    ULONG rc;
+
+    int i;
 #else
     char *ppsz_devices[] = { "/dev/dvd", "/dev/cdrom", "/dev/hdc", NULL };
     int i, i_fd;
@@ -270,6 +316,32 @@ void _dvdcss_check ( dvdcss_t dvdcss )
     }
 
     IOObjectRelease( media_iterator );
+#elif defined( SYS_OS2 )
+    for( i = 0; i < 26; i++ )
+    {
+        param.bCmdInfo = 0;
+        param.bDrive = i;
+
+        rc = DosDevIOCtl( ( HFILE )-1, IOCTL_DISK, DSK_GETDEVICEPARAMS,
+                          &param, sizeof( param ), &ulParamLen,
+                          &data, sizeof( data ), &ulDataLen );
+
+        if( rc == 0 )
+        {
+            /* Check for removable and for cylinders */
+            if( ( data.usDevAttr & 1 ) == 0 && data.usCylinders == 0xFFFF )
+            {
+                char psz_dvd[] = "A:";
+
+                psz_dvd[0] += i;
+
+                print_debug( dvdcss, "defaulting to drive `%s'", psz_dvd );
+                free( dvdcss->psz_device );
+                dvdcss->psz_device = strdup( psz_dvd );
+                return;
+            }
+        }
+    }
 #else
     for( i = 0; ppsz_devices[i]; i++ )
     {
@@ -322,6 +394,18 @@ int _dvdcss_open ( dvdcss_t dvdcss )
         return aspi_open( dvdcss, psz_device );
     }
     else
+#elif defined( SYS_OS2 )
+    /* If device is "X:" or "X:\", we are not actually opening a file. */
+    if( psz_device[0] && psz_device[1] == ':' &&
+        ( !psz_device[2] || ( psz_device[2] == '\\' && !psz_device[3] ) ) )
+    {
+        print_debug( dvdcss, "using OS2 API for access" );
+        dvdcss->pf_seek  = os2_seek;
+        dvdcss->pf_read  = os2_read;
+        dvdcss->pf_readv = os2_readv;
+        return os2_open( dvdcss, psz_device );
+    }
+    else
 #endif
     {
         print_debug( dvdcss, "using libc for access" );
@@ -332,7 +416,7 @@ int _dvdcss_open ( dvdcss_t dvdcss )
     }
 }
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(SYS_OS2)
 int _dvdcss_raw_open ( dvdcss_t dvdcss, char const *psz_device )
 {
     dvdcss->i_raw_fd = open( psz_device, 0 );
@@ -385,11 +469,13 @@ int _dvdcss_close ( dvdcss_t dvdcss )
 #else
     close( dvdcss->i_fd );
 
+#ifndef SYS_OS2
     if( dvdcss->i_raw_fd >= 0 )
     {
         close( dvdcss->i_raw_fd );
         dvdcss->i_raw_fd = -1;
     }
+#endif
 
     return 0;
 #endif
@@ -402,7 +488,7 @@ int _dvdcss_close ( dvdcss_t dvdcss )
  *****************************************************************************/
 static int libc_open ( dvdcss_t dvdcss, char const *psz_device )
 {
-#if !defined( WIN32 )
+#if !defined( WIN32 ) && !defined( SYS_OS2 )
     dvdcss->i_fd = dvdcss->i_read_fd = open( psz_device, 0 );
 #else
     dvdcss->i_fd = dvdcss->i_read_fd = open( psz_device, O_BINARY );
@@ -575,6 +661,37 @@ static int aspi_open( dvdcss_t dvdcss, char const * psz_device )
     FreeLibrary( hASPI );
     print_error( dvdcss, "unable to get haid and target (aspi)" );
     return -1;
+}
+#endif
+
+#ifdef SYS_OS2
+static int os2_open ( dvdcss_t dvdcss, char const *psz_device )
+{
+    char  psz_dvd[] = "X:";
+    HFILE hfile;
+    ULONG ulAction;
+    ULONG rc;
+
+    psz_dvd[0] = psz_device[0];
+
+    rc = DosOpenL( ( PSZ )psz_dvd, &hfile, &ulAction, 0, FILE_NORMAL,
+                   OPEN_ACTION_OPEN_IF_EXISTS | OPEN_ACTION_FAIL_IF_NEW,
+                   OPEN_ACCESS_READONLY | OPEN_SHARE_DENYNONE | OPEN_FLAGS_DASD,
+                   NULL );
+
+    if( rc )
+    {
+        print_error( dvdcss, "failed to open device" );
+        return -1;
+    }
+
+    setmode( hfile, O_BINARY );
+
+    dvdcss->i_fd = dvdcss->i_read_fd = hfile;
+
+    dvdcss->i_pos = 0;
+
+    return 0;
 }
 #endif
 
