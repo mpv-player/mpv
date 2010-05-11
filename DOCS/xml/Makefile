@@ -39,7 +39,7 @@ html-single-$(lang):  $(HTML)/$(lang)/MPlayer.html
 $(HTML)/$(lang)/index.html $(HTML)/$(lang)/MPlayer.html: $(lang)/main.xml $(wildcard $(lang)/*.xml) html-common.xsl $(HTML)/$(lang)/default.css
 
 $(HTML)/$(lang)/default.css:
-	mkdir -p $$@
+	mkdir -p $$(@D)
 	cp -f default.css $$(@D)
 
 $(HTML)/$(lang)/index.html:
