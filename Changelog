@@ -51,6 +51,7 @@ MPlayer (1.0)
     * better out-of-the-box support for compiling for ARM, IA64,
       MinGW32 and MinGW-w64, MinGW has ASLR enabled with recent
       enough binutils.
+    * libdvdcss synced with upstream Subversion snapshot
 
     MEncoder:
     * add -tsprog for demuxer lavf
