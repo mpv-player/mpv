@@ -15,6 +15,7 @@ MPlayer (1.0)
     * Kega Game video codec (KGV1) via binary DLL
     * SoftLab-NSK Forward MPEG-2 I-frames (SLIF) via binary DLL
     * JPEG 2000 support via OpenJPEG
+    * internal liba52 copy removed
 
     Demuxers:
     * support for TrueHD in Blu-ray streams in libmpdemux
