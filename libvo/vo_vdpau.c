@@ -126,6 +126,7 @@ struct vdpctx {
     VdpVideoMixer                      video_mixer;
     int                                user_colorspace;
     int                                colorspace;
+    int                                studio_levels;
     int                                deint;
     int                                deint_type;
     int                                deint_counter;
@@ -582,6 +583,19 @@ static void update_csc_matrix(struct vo *vo)
     VdpCSCMatrix matrix;
     vdp_st = vdp->generate_csc_matrix(&vc->procamp, vdp_colors[csp], &matrix);
     CHECK_ST_WARNING("Error when generating CSC matrix");
+
+    if (vc->studio_levels) {
+        /* Modify matrix to change output range from 0..255 to 16..235.
+         * Clipping limits can't be changed, so out-of-range results that
+         * would have been clipped to 0 or 255 before can still go below
+         * 16 or above 235.
+         */
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 4; j++)
+                matrix[i][j] *= 220. / 256;
+            matrix[i][3] += 16. / 256;
+        }
+    }
 
     set_video_attribute(vc, VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX,
                         &matrix, "CSC matrix");
@@ -1598,6 +1612,7 @@ static int preinit(struct vo *vo, const char *arg)
         {"denoise", OPT_ARG_FLOAT, &vc->denoise, NULL},
         {"sharpen", OPT_ARG_FLOAT, &vc->sharpen, NULL},
         {"colorspace", OPT_ARG_INT, &vc->user_colorspace, NULL},
+        {"studio", OPT_ARG_BOOL, &vc->studio_levels, NULL},
         {"hqscaling", OPT_ARG_INT, &vc->hqscaling, NULL},
         {"fps",     OPT_ARG_FLOAT, &vc->user_fps, NULL},
         {"queuetime_windowed", OPT_ARG_INT, &vc->flip_offset_window, NULL},

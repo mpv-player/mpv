@@ -3509,7 +3509,7 @@ Use nochroma\-deint to solely use luma and speed up advanced deinterlacing.
 Useful with slow video memory.
 .IPs pullup
 Try to apply inverse telecine, needs motion adaptive temporal deinterlacing.
-.IPs colorspace
+.IPs colorspace=<0-3>
 Select the color space for YUV to RGB conversion.
 In general BT.601 should be used for standard definition (SD) content and
 BT.709 for high definition (HD) content.
@@ -3527,13 +3527,19 @@ Use ITU-R BT.709 color space.
 .IPs 3
 Use SMPTE-240M color space.
 .RE
-.IPs hqscaling
+.IPs hqscaling=<0-9>
 .RSss
 .IPs 0
 Use default VDPAU scaling (default).
 .IPs 1\-9
 Apply high quality VDPAU scaling (needs capable hardware).
 .RE
+.IPs studio
+Output video in studio level RGB (16-235).
+This is what TVs and video monitors generally expect.
+By default PC level RGB (0-255) suitable for PC monitors is used.
+Providing studio level output to a device expecting PC level input results in
+grey blacks and dim whites, the reverse in crushed blacks and whites.
 .IPs fps=<number>
 Override autodetected display refresh rate value (the value is needed for framedrop to allow video playback rates higher than display refresh rate, and for vsync-aware frame timing adjustments).
 Default 0 means use autodetected value.
