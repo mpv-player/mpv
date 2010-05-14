@@ -51,7 +51,6 @@ extern const vf_info_t vf_info_pp;
 extern const vf_info_t vf_info_scale;
 extern const vf_info_t vf_info_format;
 extern const vf_info_t vf_info_noformat;
-extern const vf_info_t vf_info_yuy2;
 extern const vf_info_t vf_info_flip;
 extern const vf_info_t vf_info_rgb2bgr;
 extern const vf_info_t vf_info_rotate;
@@ -137,7 +136,6 @@ static const vf_info_t* const filter_list[]={
     &vf_info_vo,
     &vf_info_format,
     &vf_info_noformat,
-    &vf_info_yuy2,
     &vf_info_flip,
     &vf_info_rgb2bgr,
     &vf_info_rotate,
