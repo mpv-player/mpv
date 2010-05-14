@@ -7699,9 +7699,11 @@ echocheck "mencoder"
 if test "$_mencoder" = yes ; then
   def_muxers='#define CONFIG_MUXERS 1'
 else
-  # mpeg1video for vf_lavc, snow for vf_uspp and vf_mcdeint, png for vf_screenshot
+  # mpeg1video for vf_lavc, snow for vf_uspp / vf_mcdeint,
+  # png for vf_screenshot, mjpeg for zr
   _libavencoders="MPEG1VIDEO_ENCODER SNOW_ENCODER"
   test "$_zlib" = yes && _libavencoders="$_libavencoders PNG_ENCODER"
+  test "$_zr" = yes && _libavencoders="$_libavencoders MJPEG_ENCODER"
   _libavmuxers=""
   def_muxers='#define CONFIG_MUXERS 0'
 fi
