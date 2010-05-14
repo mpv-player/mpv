@@ -3855,7 +3855,7 @@ def_termios_h='#undef HAVE_TERMIOS_H'
 def_termios_sys_h='#undef HAVE_SYS_TERMIOS_H'
 if test "$_termios" = auto ; then
   _termios=no
-  for _termios_header in "sys/termios.h" "termios.h"; do
+  for _termios_header in "termios.h" "sys/termios.h"; do
   cat > $TMPC <<EOF
 #include <$_termios_header>
 int main(void) { return 0; }
