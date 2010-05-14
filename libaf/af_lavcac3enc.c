@@ -24,14 +24,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <assert.h>
 
 #include "config.h"
 #include "af.h"
 #include "reorder_ch.h"
 
 #include "libavcodec/avcodec.h"
-#include "libavcodec/ac3.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
+
+#define AC3_MAX_CHANNELS 6
+#define AC3_MAX_CODED_FRAME_SIZE 3840
+#define AC3_FRAME_SIZE (6  * 256)
+const uint16_t ac3_bitrate_tab[19] = {
+    32, 40, 48, 56, 64, 80, 96, 112, 128,
+    160, 192, 224, 256, 320, 384, 448, 512, 576, 640
+};
 
 // Data for specific instances of this filter
 typedef struct af_ac3enc_s {
@@ -39,6 +47,7 @@ typedef struct af_ac3enc_s {
     struct AVCodecContext *lavc_actx;
     int add_iec61937_header;
     int bit_rate;
+    int pending_data_size;
     char *pending_data;
     int pending_len;
     int expect_len;
@@ -63,6 +72,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
 
         s->pending_len = 0;
         s->expect_len = AC3_FRAME_SIZE * data->nch * data->bps;
+        assert(s->expect_len <= s->pending_data_size);
         if (s->add_iec61937_header)
             af->mul = (double)AC3_FRAME_SIZE * 2 * 2 / s->expect_len;
         else
@@ -102,6 +112,11 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
                 return AF_ERROR;
             }
         }
+        if (s->lavc_actx->frame_size != AC3_FRAME_SIZE) {
+            mp_msg(MSGT_AFILTER, MSGL_ERR, "lavcac3enc: unexpected ac3 "
+                   "encoder frame size %d\n", s->lavc_actx->frame_size);
+            return AF_ERROR;
+        }
         af->data->format = AF_FORMAT_AC3_BE;
         af->data->nch = 2;
         return test_output_res;
@@ -116,7 +131,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
             s->bit_rate *= 1000;
         if (s->bit_rate) {
             for (i = 0; i < 19; ++i)
-                if (ff_ac3_bitrate_tab[i] * 1000 == s->bit_rate)
+                if (ac3_bitrate_tab[i] * 1000 == s->bit_rate)
                     break;
             if (i >= 19) {
                 mp_msg(MSGT_AFILTER, MSGL_WARN, "af_lavcac3enc unable set unsupported "
@@ -262,8 +277,8 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 static int af_open(af_instance_t* af){
 
     af_ac3enc_t *s = calloc(1,sizeof(af_ac3enc_t));
-    int pending_space = 2 * AC3_MAX_CHANNELS * AC3_FRAME_SIZE;
-    s->pending_data = calloc(pending_space, sizeof(char));
+    s->pending_data_size = 2 * AF_NCH * AC3_FRAME_SIZE;
+    s->pending_data = malloc(s->pending_data_size);
 
     af->control=control;
     af->uninit=uninit;

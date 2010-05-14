@@ -122,6 +122,7 @@ SRCS_COMMON-$(LIBASS)                += ass_mp.c \
                                         libmpcodecs/vf_ass.c \
 
 SRCS_COMMON-$(LIBAVCODEC)            += av_opts.c \
+                                        libaf/af_lavcac3enc.c \
                                         libaf/af_lavcresample.c \
                                         libmpcodecs/ad_ffmpeg.c \
                                         libmpcodecs/vd_ffmpeg.c \
@@ -131,8 +132,7 @@ SRCS_COMMON-$(LIBAVCODEC)            += av_opts.c \
                                         libmpcodecs/vf_uspp.c \
 
 # These filters use private headers and do not work with shared libavcodec.
-SRCS_COMMON-$(LIBAVCODEC_INTERNALS)  += libaf/af_lavcac3enc.c \
-                                        libmpcodecs/vf_fspp.c \
+SRCS_COMMON-$(LIBAVCODEC_INTERNALS)  += libmpcodecs/vf_fspp.c \
                                         libmpcodecs/vf_geq.c \
                                         libmpcodecs/vf_mcdeint.c \
                                         libmpcodecs/vf_qp.c \
@@ -815,7 +815,7 @@ $(call ADDSUFFIXES,.d .o,mpcommon vobsub stream/stream_cddb stream/network libmp
 libvo/vo_mga.o libvo/vo_xmga.o libmpcodecs/vf_palette.o libmpcodecs/vf_rgb2bgr.o libmpcodecs/vf_yuy2.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
 
 # Files that depend on libavcodec internals
-libaf/af_lavcac3enc.o libmpcodecs/vf_fspp.o libmpcodecs/vf_geq.o libmpcodecs/vf_mcdeint.o libmpcodecs/vf_qp.o libmpcodecs/vf_spp.o libvo/jpeg_enc.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
+libmpcodecs/vf_fspp.o libmpcodecs/vf_geq.o libmpcodecs/vf_mcdeint.o libmpcodecs/vf_qp.o libmpcodecs/vf_spp.o libvo/jpeg_enc.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
 
 # yuv4mpeg has rgb conversion code under #ifdef CONFIG_LIBSWSCALE_INTERNALS
 ifeq ($(LIBSWSCALE_INTERNALS),yes)
