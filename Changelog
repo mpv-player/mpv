@@ -121,6 +121,7 @@ MPlayer (1.0)
     * add af_scaletempo which maintains audio pitch when changing playback speed
     * fix multi-channel reordering
     * af_stats, filter to print information about the audio stream
+    * remove vf_yuy2, functionality is replaced by -vf format=yuv2
 
     Streaming:
     * tv:// support for Windows

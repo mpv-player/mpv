@@ -463,7 +463,6 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_vo.c \
               libmpcodecs/vf_yadif.c \
               libmpcodecs/vf_yuvcsp.c \
-              libmpcodecs/vf_yuy2.c \
               libmpcodecs/vf_yvu9.c \
               libmpdemux/aac_hdr.c \
               libmpdemux/asfheader.c \
