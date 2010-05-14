@@ -7427,7 +7427,6 @@ if test "$_libopencore_amrwb" = yes ; then
   extra_ldflags="$extra_ldflags -lopencore-amrwb"
   def_libopencore_amrwb='#define CONFIG_LIBOPENCORE_AMRWB 1'
   _libavdecoders="$_libavdecoders LIBOPENCORE_AMRWB_DECODER"
-  _libavencoders="$_libavencoders LIBOPENCORE_AMRWB_DECODER"
   codecmodules="libopencore_amrwb $codecmodules"
 else
   def_libopencore_amrwb='#define LIBOPENCORE_AMRWB 0'
