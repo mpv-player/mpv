@@ -3549,17 +3549,36 @@ A negative value disables all timing adjustment and framedrop logic.
 .IPs queuetime_fs=<number>
 Use VDPAU's presentation queue functionality to queue future video frame
 changes at most this many milliseconds in advance (default: 50).
-This makes MPlayer's flip timing less sensitive to system CPU load and allows
-it to start decoding the next frame slightly earlier which can reduce jitter
-caused by individual slow-to-decode frames.
+See below for additional information.
+.IPs output_surfaces=<2-15>
+Allocate this many output surfaces to display video frames (default: 3).
+See below for additional information.
+.RE
+.RS
+.sp 1
+Using the VDPAU frame queueing functionality controlled by the queuetime
+options makes MPlayer's frame flip timing less sensitive to system CPU load
+and allows MPlayer to start decoding the next frame(s) slightly earlier
+which can reduce jitter caused by individual slow-to-decode frames.
 However the NVIDIA graphics drivers can make other window behavior such as
 window moves choppy if VDPAU is using the blit queue (mainly happens
 if you have the composite extension enabled) and this feature is active.
-If this happens on your system and you care about it then you can set the
-time to 0 to disable this feature.
+If this happens on your system and it bothers you then you can set the
+queuetime value to 0 to disable this feature.
 The settings to use in windowed and fullscreen mode are separate because there
 should be less reason to disable this for fullscreen mode (as the driver issue
 shouldn't affect the video itself).
+.sp 1
+You can queue more frames ahead by increasing the queuetime values and the
+output_surfaces count (to ensure enough surfaces to buffer video for a
+certain time ahead you need at least as many surfaces as the video has
+frames during that time, plus two).
+This could help make video smoother in some cases.
+The main downsides are increased video RAM requirements for the surfaces
+and laggier display response to user commands (display changes only become
+visible some time after they're queued). The graphics driver implementation may
+also have limits on the length of maximum queuing time or number of queued
+surfaces that work well or at all.
 .RE
 .PD 1
 .

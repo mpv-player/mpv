@@ -77,7 +77,7 @@
     } while (0)
 
 /* number of video and output surfaces */
-#define NUM_OUTPUT_SURFACES                3
+#define MAX_OUTPUT_SURFACES                15
 #define MAX_VIDEO_SURFACES                 50
 #define NUM_BUFFERED_VIDEO                 4
 
@@ -112,9 +112,9 @@ struct vdpctx {
     uint64_t                           last_vdp_time;
     unsigned int                       last_sync_update;
 
-    /* output_surfaces[NUM_OUTPUT_SURFACES] is misused for OSD. */
-#define osd_surface vc->output_surfaces[NUM_OUTPUT_SURFACES]
-    VdpOutputSurface                   output_surfaces[NUM_OUTPUT_SURFACES + 1];
+    /* an extra last output surface is misused for OSD. */
+    VdpOutputSurface                   output_surfaces[MAX_OUTPUT_SURFACES + 1];
+    int                                num_output_surfaces;
     struct buffered_video_surface {
         VdpVideoSurface surface;
         double pts;
@@ -149,10 +149,12 @@ struct vdpctx {
 
     struct vdpau_render_state          surface_render[MAX_VIDEO_SURFACES];
     int                                surface_num;
+    int                                query_surface_num;
     VdpTime                            recent_vsync_time;
     float                              user_fps;
     unsigned int                       vsync_interval;
     uint64_t                           last_queue_time;
+    uint64_t                           queue_time[MAX_OUTPUT_SURFACES];
     uint64_t                           last_ideal_time;
     bool                               dropped_frame;
     uint64_t                           dropped_time;
@@ -406,7 +408,7 @@ static void resize(struct vo *vo)
                                               vo->dheight);
         }
         // Creation of output_surfaces
-        for (i = 0; i <= NUM_OUTPUT_SURFACES; i++) {
+        for (i = 0; i <= vc->num_output_surfaces; i++) {
             if (vc->output_surfaces[i] != VDP_INVALID_HANDLE)
                 vdp->output_surface_destroy(vc->output_surfaces[i]);
             vdp_st = vdp->output_surface_create(vc->vdp_device,
@@ -809,7 +811,7 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
     vc->video_mixer = VDP_INVALID_HANDLE;
     vc->flip_queue = VDP_INVALID_HANDLE;
     vc->flip_target = VDP_INVALID_HANDLE;
-    for (int i = 0; i <= NUM_OUTPUT_SURFACES; i++)
+    for (int i = 0; i <= vc->num_output_surfaces; i++)
         vc->output_surfaces[i] = VDP_INVALID_HANDLE;
     vc->vdp_device = VDP_INVALID_HANDLE;
     vc->eosd_surface = (struct eosd_bitmap_surface){
@@ -946,7 +948,7 @@ static void check_events(struct vo *vo)
             /* redraw the last visible buffer */
             VdpStatus vdp_st;
             int last_surface = WRAP_ADD(vc->surface_num, -1,
-                                        NUM_OUTPUT_SURFACES);
+                                        vc->num_output_surfaces);
             vdp_st = vdp->presentation_queue_display(vc->flip_queue,
                                          vc->output_surfaces[last_surface],
                                          vo->dwidth, vo->dheight, 0);
@@ -994,6 +996,7 @@ static void draw_osd_I8A8(void *ctx, int x0, int y0, int w, int h,
     pitch = w*2;
 
     // write source_data to osd_surface.
+    VdpOutputSurface osd_surface = vc->output_surfaces[vc->num_output_surfaces];
     vdp_st = vdp->
         output_surface_put_bits_indexed(osd_surface, VDP_INDEXED_FORMAT_I8A8,
                                         (const void *const*)&vc->index_data,
@@ -1260,30 +1263,39 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
                       vc->vid_height, draw_osd_I8A8, vo);
 }
 
-static void wait_for_previous_frame(struct vo *vo)
+static int update_presentation_queue_status(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
 
-    if (vc->num_shown_frames < 2)
-        return;
-
-    VdpTime vtime;
-    VdpOutputSurface visible_s, prev_s;
-    int base = vc->surface_num + NUM_OUTPUT_SURFACES;
-    visible_s = vc->output_surfaces[(base - 1) % NUM_OUTPUT_SURFACES];
-    prev_s = vc->output_surfaces[(base - 2) % NUM_OUTPUT_SURFACES];
-    vdp_st = vdp->presentation_queue_block_until_surface_idle(vc->flip_queue,
-                                                              prev_s, &vtime);
-    CHECK_ST_WARNING("Error calling "
-                     "presentation_queue_block_until_surface_idle");
-    VdpPresentationQueueStatus status;
-    vdp_st = vdp->presentation_queue_query_surface_status(vc->flip_queue,
-                                                          visible_s,
-                                                          &status, &vtime);
-    CHECK_ST_WARNING("Error calling presentation_queue_query_surface_status");
-    vc->recent_vsync_time = vtime;
+    while (vc->query_surface_num != vc->surface_num) {
+        VdpTime vtime;
+        VdpPresentationQueueStatus status;
+        VdpOutputSurface surface = vc->output_surfaces[vc->query_surface_num];
+        vdp_st = vdp->presentation_queue_query_surface_status(vc->flip_queue,
+                                                              surface,
+                                                              &status, &vtime);
+        CHECK_ST_WARNING("Error calling "
+                         "presentation_queue_query_surface_status");
+        if (status == VDP_PRESENTATION_QUEUE_STATUS_QUEUED)
+            break;
+        if (vc->vsync_interval > 1) {
+            uint64_t qtime = vc->queue_time[vc->query_surface_num];
+            if (vtime < qtime + vc->vsync_interval / 2)
+                mp_msg(MSGT_VO, MSGL_V, "[vdpau] Frame shown too early\n");
+            if (vtime > qtime + vc->vsync_interval)
+                mp_msg(MSGT_VO, MSGL_V, "[vdpau] Frame shown late\n");
+        }
+        vc->query_surface_num = WRAP_ADD(vc->query_surface_num, 1,
+                                         vc->num_output_surfaces);
+        vc->recent_vsync_time = vtime;
+    }
+    int num_queued = WRAP_ADD(vc->surface_num, -vc->query_surface_num,
+                              vc->num_output_surfaces);
+    mp_msg(MSGT_VO, MSGL_DBG2, "[vdpau] Queued surface count (before add): "
+           "%d\n", num_queued);
+    return num_queued;
 }
 
 static inline uint64_t prev_vs2(struct vdpctx *vc, uint64_t ts, int shift)
@@ -1362,17 +1374,11 @@ static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration)
     if (npts < PREV_VSYNC(pts) + vsync_interval)
         return;
 
-    /* At least on my NVIDIA 9500GT with driver versions 185.18.36 and 190.42
-     * trying to queue two unshown frames simultaneously caused bad behavior
-     * (high CPU use in _other_ VDPAU functions called later). Avoiding
-     * longer queues also makes things simpler. So currently we always
-     * try to keep exactly one frame queued for the future, queuing the
-     * current frame immediately after the previous one is shown.
-     */
-    wait_for_previous_frame(vo);
-
+    int num_flips = update_presentation_queue_status(vo);
+    vsync = vc->recent_vsync_time + num_flips * vc->vsync_interval;
     now = sync_vdptime(vo);
     pts = FFMAX(pts, now);
+    pts = FFMAX(pts, vsync + (vsync_interval >> 2));
     vsync = PREV_VSYNC(pts);
     if (npts < vsync + vsync_interval)
         return;
@@ -1384,9 +1390,10 @@ static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration)
     CHECK_ST_WARNING("Error when calling vdp_presentation_queue_display");
 
     vc->last_queue_time = pts;
+    vc->queue_time[vc->surface_num] = pts;
     vc->last_ideal_time = ideal_pts;
     vc->dropped_frame = false;
-    vc->surface_num = WRAP_ADD(vc->surface_num, 1, NUM_OUTPUT_SURFACES);
+    vc->surface_num = WRAP_ADD(vc->surface_num, 1, vc->num_output_surfaces);
     vc->num_shown_frames = FFMIN(vc->num_shown_frames + 1, 1000);
 }
 
@@ -1555,7 +1562,7 @@ static void destroy_vdpau_objects(struct vo *vo)
                          "vdp_presentation_queue_target_destroy");
     }
 
-    for (i = 0; i <= NUM_OUTPUT_SURFACES; i++) {
+    for (i = 0; i <= vc->num_output_surfaces; i++) {
         if (vc->output_surfaces[i] == VDP_INVALID_HANDLE)
             continue;
         vdp_st = vdp->output_surface_destroy(vc->output_surfaces[i]);
@@ -1605,6 +1612,7 @@ static int preinit(struct vo *vo, const char *arg)
     vc->user_colorspace = 1;
     vc->flip_offset_window = 50;
     vc->flip_offset_fs = 50;
+    vc->num_output_surfaces = 3;
     const opt_t subopts[] = {
         {"deint",   OPT_ARG_INT,   &vc->deint,   (opt_test_f)int_non_neg},
         {"chroma-deint", OPT_ARG_BOOL,  &vc->chroma_deint,  NULL},
@@ -1617,6 +1625,7 @@ static int preinit(struct vo *vo, const char *arg)
         {"fps",     OPT_ARG_FLOAT, &vc->user_fps, NULL},
         {"queuetime_windowed", OPT_ARG_INT, &vc->flip_offset_window, NULL},
         {"queuetime_fs", OPT_ARG_INT, &vc->flip_offset_fs, NULL},
+        {"output_surfaces", OPT_ARG_INT, &vc->num_output_surfaces, NULL},
         {NULL}
     };
     if (subopt_parse(arg, subopts) != 0) {
@@ -1627,6 +1636,16 @@ static int preinit(struct vo *vo, const char *arg)
         mp_msg(MSGT_VO, MSGL_FATAL, "[vdpau] Invalid value for suboption "
                "hqscaling\n");
         return -1;
+    }
+    if (vc->num_output_surfaces < 2) {
+        mp_msg(MSGT_VO, MSGL_FATAL, "[vdpau] Invalid suboption "
+               "output_surfaces: can't use less than 2 surfaces\n");
+        return -1;
+    }
+    if (vc->num_output_surfaces > MAX_OUTPUT_SURFACES) {
+        mp_msg(MSGT_VO, MSGL_WARN, "[vdpau] Number of output surfaces "
+               "is limited to %d.\n", MAX_OUTPUT_SURFACES);
+        vc->num_output_surfaces = MAX_OUTPUT_SURFACES;
     }
     if (vc->deint)
         vc->deint_type = vc->deint;
