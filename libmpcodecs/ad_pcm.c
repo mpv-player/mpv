@@ -151,7 +151,7 @@ static int control(sh_audio_t * sh, int cmd, void *arg, ...)
 static int decode_audio(sh_audio_t * sh_audio, unsigned char *buf, int minlen,
                         int maxlen)
 {
-    unsigned len = sh_audio->channels * sh_audio->samplesize;
+    int len = sh_audio->channels * sh_audio->samplesize;
     minlen = (minlen + len - 1) / len * len;
     if (minlen > maxlen)
         // if someone needs hundreds of channels adjust audio_out_minsize
