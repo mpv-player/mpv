@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #include "talloc.h"
 #include "config.h"
@@ -35,8 +36,10 @@ static const ad_info_t info = {
 };
 
 struct ad_pcm_context {
-    unsigned char *packet_ptr;
-    int packet_len;
+    unsigned char *buffer;
+    int buffer_pos;
+    int buffer_len;
+    int buffer_size;
 };
 
 LIBAD_EXTERN(pcm)
@@ -137,8 +140,12 @@ static void uninit(sh_audio_t * sh)
 
 static int control(sh_audio_t * sh, int cmd, void *arg, ...)
 {
+    struct ad_pcm_context *ctx = sh->context;
     int skip;
     switch (cmd) {
+    case ADCTRL_RESYNC_STREAM:
+        ctx->buffer_len = 0;
+        return true;
     case ADCTRL_SKIP_FRAME:
         skip = sh->i_bps / 16;
         skip = skip & (~3);
@@ -161,23 +168,30 @@ static int decode_audio(sh_audio_t * sh_audio, unsigned char *buf, int minlen,
     len = 0;
     struct ad_pcm_context *ctx = sh_audio->context;
     while (len < minlen) {
-        if (ctx->packet_len == 0) {
+        if (ctx->buffer_len - ctx->buffer_pos <= 0) {
             double pts;
-            int plen = ds_get_packet_pts(sh_audio->ds, &ctx->packet_ptr, &pts);
+            unsigned char *ptr;
+            int plen = ds_get_packet_pts(sh_audio->ds, &ptr, &pts);
             if (plen < 0)
                 break;
-            ctx->packet_len = plen;
+            if (ctx->buffer_size < plen) {
+                talloc_free(ctx->buffer);
+                ctx->buffer = talloc_size(ctx, plen);
+                ctx->buffer_size = plen;
+            }
+            memcpy(ctx->buffer, ptr, plen);
+            ctx->buffer_len = plen;
+            ctx->buffer_pos = 0;
             if (pts != MP_NOPTS_VALUE) {
                 sh_audio->pts = pts;
                 sh_audio->pts_bytes = 0;
             }
         }
-        int from_stored = ctx->packet_len;
+        int from_stored = ctx->buffer_len - ctx->buffer_pos;
         if (from_stored > minlen - len)
             from_stored = minlen - len;
-        memcpy(buf + len, ctx->packet_ptr, from_stored);
-        ctx->packet_len -= from_stored;
-        ctx->packet_ptr += from_stored;
+        memcpy(buf + len, ctx->buffer + ctx->buffer_pos, from_stored);
+        ctx->buffer_pos += from_stored;
         sh_audio->pts_bytes += from_stored;
         len += from_stored;
     }
