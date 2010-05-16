@@ -1195,7 +1195,11 @@ static subtitle* sub_fribidi (subtitle *sub, int sub_utf8, int from)
       break;
     }
     len = fribidi_charset_to_unicode (char_set_num, ip, len, logical);
+#if FRIBIDI_INTERFACE_VERSION < 3
+    FriBidiCharType base = fribidi_flip_commas?FRIBIDI_TYPE_ON:FRIBIDI_TYPE_L;
+#else
     FriBidiParType base = fribidi_flip_commas?FRIBIDI_TYPE_ON:FRIBIDI_TYPE_L;
+#endif
     log2vis = fribidi_log2vis (logical, len, &base,
 			       /* output */
 			       visual, NULL, NULL, NULL);
