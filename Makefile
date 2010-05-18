@@ -517,6 +517,7 @@ SRCS_COMMON = asxparser.c \
               stream/stream_null.c \
               stream/url.c \
               sub/dec_sub.c \
+              sub/subassconvert.c \
               $(SRCS_COMMON-yes)
 
 

@@ -20,6 +20,7 @@
 #define MPLAYER_SUBREADER_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "config.h"
 
@@ -84,7 +85,8 @@ extern char *fribidi_charset;
 extern int flip_hebrew;
 extern int fribidi_flip_commas;
 
-sub_data* sub_read_file (char *filename, float pts);
+struct MPOpts;
+sub_data* sub_read_file (char *filename, float pts, struct MPOpts *opts);
 subtitle* subcp_recode (subtitle *sub);
 // enca_fd is the file enca uses to determine the codepage.
 // setting to NULL disables enca.

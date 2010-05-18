@@ -1105,7 +1105,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
         asst = ass_read_stream(ass_library, filename, 0);
 #endif
         if (!asst) {
-            subd = sub_read_file(filename, fps);
+            subd = sub_read_file(filename, fps, &mpctx->opts);
             if (subd) {
                 asst = ass_read_subdata(ass_library, subd, fps);
                 if (asst) {
@@ -1116,7 +1116,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
         }
     } else
 #endif
-        subd = sub_read_file(filename, fps);
+        subd = sub_read_file(filename, fps, &mpctx->opts);
 
 
     if (!asst && !subd) {
