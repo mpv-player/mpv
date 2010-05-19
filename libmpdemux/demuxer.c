@@ -383,11 +383,6 @@ void free_demuxer(demuxer_t *demuxer)
     free_demuxer_stream(demuxer->video);
     free_demuxer_stream(demuxer->sub);
  skip_streamfree:
-    if (demuxer->info) {
-        for (i = 0; demuxer->info[i] != NULL; i++)
-            free(demuxer->info[i]);
-        free(demuxer->info);
-    }
     free(demuxer->filename);
     if (demuxer->teletext)
         teletext_control(demuxer->teletext, TV_VBI_CONTROL_STOP, NULL);
@@ -1271,27 +1266,33 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
 
 int demux_info_add(demuxer_t *demuxer, const char *opt, const char *param)
 {
+    return demux_info_add_bstr(demuxer, BSTR(opt), BSTR(param));
+}
+
+int demux_info_add_bstr(demuxer_t *demuxer, struct bstr opt, struct bstr param)
+{
     char **info = demuxer->info;
     int n = 0;
 
 
     for (n = 0; info && info[2 * n] != NULL; n++) {
-        if (!strcasecmp(opt, info[2 * n])) {
-            if (!strcmp(param, info[2 * n + 1])) {
-                mp_msg(MSGT_DEMUX, MSGL_V, "Demuxer info %s set to unchanged value %s\n", opt, param);
+        if (!bstrcasecmp(opt, BSTR(info[2*n]))) {
+            if (!bstrcmp(param, BSTR(info[2*n + 1]))) {
+                mp_msg(MSGT_DEMUX, MSGL_V, "Demuxer info %.*s set to unchanged value %.*s\n",
+                       BSTR_P(opt), BSTR_P(param));
                 return 0;
             }
-            mp_tmsg(MSGT_DEMUX, MSGL_INFO, "Demuxer info %s changed to %s\n", opt,
-                   param);
-            free(info[2 * n + 1]);
-            info[2 * n + 1] = strdup(param);
+            mp_tmsg(MSGT_DEMUX, MSGL_INFO, "Demuxer info %.*s changed to %.*s\n",
+                    BSTR_P(opt), BSTR_P(param));
+            talloc_free(info[2*n + 1]);
+            info[2*n + 1] = talloc_strndup(demuxer->info, param.start, param.len);
             return 0;
         }
     }
 
-    info = demuxer->info = realloc(info, (2 * (n + 2)) * sizeof(char *));
-    info[2 * n] = strdup(opt);
-    info[2 * n + 1] = strdup(param);
+    info = demuxer->info = talloc_realloc(demuxer, info, char *, 2 * (n + 2));
+    info[2*n]     = talloc_strndup(demuxer->info, opt.start,   opt.len);
+    info[2*n + 1] = talloc_strndup(demuxer->info, param.start, param.len);
     memset(&info[2 * (n + 1)], 0, 2 * sizeof(char *));
 
     return 1;
