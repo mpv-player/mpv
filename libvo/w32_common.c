@@ -200,15 +200,19 @@ int vo_w32_check_events(void) {
         DispatchMessage(&msg);
     }
     if (WinID >= 0) {
+        BOOL res;
         RECT r;
-        GetClientRect(vo_window, &r);
-        if (r.right != vo_dwidth || r.bottom != vo_dheight) {
+        res = GetClientRect(vo_window, &r);
+        if (res && (r.right != vo_dwidth || r.bottom != vo_dheight)) {
             vo_dwidth = r.right; vo_dheight = r.bottom;
             event_flags |= VO_EVENT_RESIZE;
         }
-        GetClientRect(WinID, &r);
-        if (r.right != vo_dwidth || r.bottom != vo_dheight)
+        res = GetClientRect(WinID, &r);
+        if (res && (r.right != vo_dwidth || r.bottom != vo_dheight))
             MoveWindow(vo_window, 0, 0, r.right, r.bottom, FALSE);
+        if (!IsWindow(WinID))
+            // Window has probably been closed, e.g. due to program crash
+            mplayer_put_key(KEY_CLOSE_WIN);
     }
 
     return event_flags;
