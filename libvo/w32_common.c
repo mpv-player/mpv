@@ -410,6 +410,7 @@ int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
 
 /**
  * \brief return the name of the selected device if it is indepedant
+ * \return pointer to string, must be freed.
  */
 static char *get_display_name(void) {
     DISPLAY_DEVICE disp;
@@ -417,7 +418,7 @@ static char *get_display_name(void) {
     EnumDisplayDevices(NULL, vo_adapter_num, &disp, 0);
     if (disp.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)
         return NULL;
-    return disp.DeviceName;
+    return strdup(disp.DeviceName);
 }
 
 /**
@@ -495,6 +496,7 @@ int vo_w32_init(void) {
     dev_hdc = 0;
     dev = get_display_name();
     if (dev) dev_hdc = CreateDC(dev, NULL, NULL, NULL);
+    free(dev);
     updateScreenProperties();
 
     vo_hdc = vo_w32_get_dc(vo_window);
