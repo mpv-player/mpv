@@ -1429,9 +1429,8 @@ int demuxer_switch_video(demuxer_t *demuxer, int index)
     return index;
 }
 
-int demuxer_add_attachment(demuxer_t *demuxer, const char *name,
-                           int name_maxlen, const char *type, int type_maxlen,
-                           const void *data, size_t size)
+int demuxer_add_attachment(demuxer_t *demuxer, struct bstr name,
+                           struct bstr type, struct bstr data)
 {
     if (!(demuxer->num_attachments % 32))
         demuxer->attachments = talloc_realloc(demuxer, demuxer->attachments,
@@ -1440,16 +1439,16 @@ int demuxer_add_attachment(demuxer_t *demuxer, const char *name,
 
     struct demux_attachment *att =
         demuxer->attachments + demuxer->num_attachments;
-    att->name = talloc_strndup(demuxer->attachments, name, name_maxlen);
-    att->type = talloc_strndup(demuxer->attachments, type, type_maxlen);
-    att->data = talloc_size(demuxer->attachments, size);
-    memcpy(att->data, data, size);
-    att->data_size = size;
+    att->name = talloc_strndup(demuxer->attachments, name.start, name.len);
+    att->type = talloc_strndup(demuxer->attachments, type.start, type.len);
+    att->data = talloc_size(demuxer->attachments, data.len);
+    memcpy(att->data, data.start, data.len);
+    att->data_size = data.len;
 
     return demuxer->num_attachments++;
 }
 
-int demuxer_add_chapter(demuxer_t *demuxer, const char *name, int name_maxlen,
+int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
                         uint64_t start, uint64_t end)
 {
     if (!(demuxer->num_chapters % 32))
@@ -1459,16 +1458,16 @@ int demuxer_add_chapter(demuxer_t *demuxer, const char *name, int name_maxlen,
 
     demuxer->chapters[demuxer->num_chapters].start = start;
     demuxer->chapters[demuxer->num_chapters].end = end;
-    demuxer->chapters[demuxer->num_chapters].name = name ?
-        talloc_strndup(demuxer->chapters, name, name_maxlen) :
+    demuxer->chapters[demuxer->num_chapters].name = name.len ?
+        talloc_strndup(demuxer->chapters, name.start, name.len) :
         talloc_strdup(demuxer->chapters, mp_gtext("unknown"));
 
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_ID=%d\n", demuxer->num_chapters);
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_START=%"PRIu64"\n", demuxer->num_chapters, start);
     if (end)
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_END=%"PRIu64"\n", demuxer->num_chapters, end);
-    if (name)
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_NAME=%.*s\n", demuxer->num_chapters, name_maxlen, name);
+    if (name.start)
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_NAME=%.*s\n", demuxer->num_chapters, BSTR_P(name));
 
     return demuxer->num_chapters++;
 }

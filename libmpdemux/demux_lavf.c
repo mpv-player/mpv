@@ -28,6 +28,7 @@
 #include "options.h"
 #include "mp_msg.h"
 #include "av_opts.h"
+#include "bstr.h"
 
 #include "stream/stream.h"
 #include "aviprint.h"
@@ -449,9 +450,10 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
         }
         case CODEC_TYPE_ATTACHMENT:{
             if (st->codec->codec_id == CODEC_ID_TTF)
-                demuxer_add_attachment(demuxer, st->filename, INT_MAX,
-                                       "application/x-truetype-font", INT_MAX,
-                                       codec->extradata, codec->extradata_size);
+                demuxer_add_attachment(demuxer, BSTR(st->filename),
+                                       BSTR("application/x-truetype-font"),
+                                       (struct bstr){codec->extradata,
+                                                     codec->extradata_size});
             break;
         }
         default:
@@ -547,7 +549,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         uint64_t start = av_rescale_q(c->start, c->time_base, (AVRational){1,1000});
         uint64_t end   = av_rescale_q(c->end, c->time_base, (AVRational){1,1000});
         t = av_metadata_get(c->metadata, "title", NULL, 0);
-        demuxer_add_chapter(demuxer, t ? t->value : NULL, INT_MAX, start, end);
+        demuxer_add_chapter(demuxer, t ? BSTR(t->value) : BSTR(NULL), start, end);
     }
 
     for(i=0; i<avfc->nb_streams; i++)

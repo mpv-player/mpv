@@ -865,8 +865,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                    BSTR_P(name));
 
             if (idx == selected_edition){
-                demuxer_add_chapter(demuxer, name.start, name.len,
-                                    chapter.start, chapter.end);
+                demuxer_add_chapter(demuxer, name, chapter.start, chapter.end);
                 if (editions[idx].edition_flag_ordered) {
                     chapter.name = talloc_strndup(m_chapters, name.start,
                                                   name.len);
@@ -915,12 +914,9 @@ static int demux_mkv_read_attachments(demuxer_t *demuxer)
         }
         struct bstr name = attachment->file_name;
         struct bstr mime = attachment->file_mime_type;
-        char *data = attachment->file_data.start;
-        int data_size = attachment->file_data.len;
-        demuxer_add_attachment(demuxer, name.start, name.len, mime.start,
-                               mime.len, data, data_size);
-        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Attachment: %.*s, %.*s, %u bytes\n",
-               BSTR_P(name), BSTR_P(mime), data_size);
+        demuxer_add_attachment(demuxer, name, mime, attachment->file_data);
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Attachment: %.*s, %.*s, %zu bytes\n",
+               BSTR_P(name), BSTR_P(mime), attachment->file_data.len);
     }
 
  out:
