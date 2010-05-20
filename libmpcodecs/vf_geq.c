@@ -178,11 +178,11 @@ static int vf_open(vf_instance_t *vf, char *args){
             plane==0 ? lum : (plane==1 ? cb : cr),
             NULL
         };
-        char * a;
-        vf->priv->e[plane] = ff_parse_expr(eq[plane], const_names, NULL, NULL, func2, func2_names, &a);
+        vf->priv->e[plane] = ff_parse_expr(eq[plane], const_names, NULL, NULL, func2_names, func2, 0, NULL);
 
         if (!vf->priv->e[plane]) {
-            mp_msg(MSGT_VFILTER, MSGL_ERR, "geq: error loading equation `%s': %s\n", eq[plane], a);
+            mp_msg(MSGT_VFILTER, MSGL_ERR, "geq: error loading equation `%s'\n", eq[plane]);
+            return 0;
         }
     }
 
