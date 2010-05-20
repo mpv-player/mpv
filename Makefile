@@ -331,6 +331,7 @@ SRCS_COMMON-$(ZR)                    += libmpcodecs/vd_zrmjpeg.c \
                                         libmpcodecs/vf_zrmjpeg.c
 SRCS_COMMON = asxparser.c \
               av_log.c \
+              bstr.c \
               codec-cfg.c \
               cpudetect.c \
               defaultopts.c \

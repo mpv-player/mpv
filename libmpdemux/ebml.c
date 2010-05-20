@@ -612,9 +612,9 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             strptr->len = length;
             if (ed->type == EBML_TYPE_STR)
                 mp_msg(MSGT_DEMUX, MSGL_DBG2, "string \"%.*s\"\n",
-                       strptr->len, strptr->start);
+                       BSTR_P(*strptr));
             else
-                mp_msg(MSGT_DEMUX, MSGL_DBG2, "binary %d bytes\n",
+                mp_msg(MSGT_DEMUX, MSGL_DBG2, "binary %zd bytes\n",
                        strptr->len);
             break;
 

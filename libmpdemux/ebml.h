@@ -24,6 +24,7 @@
 #include <stdbool.h>
 
 #include "stream/stream.h"
+#include "bstr.h"
 
 
 /* EBML version supported */
@@ -60,11 +61,6 @@ struct ebml_parse_ctx {
     int bytes_read;
     bool has_errors;
     bool no_error_messages;
-};
-
-struct bstr {
-    uint8_t *start;
-    int len;
 };
 
 #include "ebml_types.h"
