@@ -243,7 +243,6 @@ demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
                    "big troubles ahead.");
     if (filename) // Filename hack for avs_check_file
         d->filename = strdup(filename);
-    stream->eof = 0;
     stream_seek(stream, stream->start_pos);
     return d;
 }
