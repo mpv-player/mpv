@@ -210,9 +210,11 @@ static void uninit(int immed){
 #endif
         if (broken_seek || fseek(fp, 0, SEEK_SET) != 0)
             mp_msg(MSGT_AO, MSGL_ERR, "Could not seek to start, WAV size headers not updated!\n");
-        else if (data_length > 0x7ffff000)
-            mp_msg(MSGT_AO, MSGL_ERR, "File larger than allowed for WAV files, may play truncated!\n");
         else {
+            if (data_length > 0xfffff000) {
+                mp_msg(MSGT_AO, MSGL_ERR, "File larger than allowed for WAV files, may play truncated!\n");
+                data_length = 0xfffff000;
+            }
             write_wave_header(fp, data_length);
         }
     }
