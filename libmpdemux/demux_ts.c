@@ -28,6 +28,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "options.h"
 
 #include "stream/stream.h"
 #include "demuxer.h"
@@ -60,7 +61,6 @@ int ts_prog;
 int ts_keep_broken=0;
 off_t ts_probe = 0;
 int audio_substream_id = -1;
-extern char *dvdsub_lang, *audio_lang;	//for -alang
 
 typedef enum
 {
@@ -1007,17 +1007,17 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	params.prog = ts_prog;
 	params.probe = ts_probe;
 
-	if(dvdsub_lang != NULL)
+	if(demuxer->opts->sub_lang != NULL)
 	{
-		strncpy(params.slang, dvdsub_lang, 3);
+		strncpy(params.slang, demuxer->opts->sub_lang, 3);
 		params.slang[3] = 0;
 	}
 	else
 		memset(params.slang, 0, 4);
 
-	if(audio_lang != NULL)
+	if(demuxer->opts->audio_lang != NULL)
 	{
-		strncpy(params.alang, audio_lang, 3);
+		strncpy(params.alang, demuxer->opts->audio_lang, 3);
 		params.alang[3] = 0;
 	}
 	else
@@ -2937,10 +2937,10 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 						int asgn = 0;
 						uint8_t *lang;
 
-						if(dvdsub_lang)
+						if(demuxer->opts->sub_lang)
 						{
 							if ((lang = pid_lang_from_pmt(priv, pid)))
-								asgn = (strncmp(lang, dvdsub_lang, 3) == 0);
+								asgn = (strncmp(lang, demuxer->opts->sub_lang, 3) == 0);
 						}
 						else		//no language specified with -slang
 							asgn = 1;

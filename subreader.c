@@ -53,8 +53,6 @@ int flip_hebrew = 1;            ///flip subtitles using fribidi
 int fribidi_flip_commas = 0;    ///flip comma when fribidi is used
 #endif
 
-extern char* dvdsub_lang;
-
 /* Maximal length of line of a subtitle */
 #define LINE_LEN 1000
 static float mpsub_position=0;
@@ -1888,11 +1886,17 @@ char** sub_filenames(const char* path, char *fname)
     strcpy_strip_ext(f_fname_noext, f_fname);
     strcpy_trim(f_fname_trim, f_fname_noext);
 
+    /* The code using sub language here is broken - it assumes strict
+     * "videoname languagename" syntax for the subtitle file, which is
+     * very unlikely to match especially if language name uses "en,de"
+     * syntax... */
     tmp_sub_id = NULL;
+#if 0
     if (dvdsub_lang && !whiteonly(dvdsub_lang)) {
 	tmp_sub_id = malloc(strlen(dvdsub_lang)+1);
 	strcpy_trim(tmp_sub_id, dvdsub_lang);
     }
+#endif
 
     // 0 = nothing
     // 1 = any subtitle file

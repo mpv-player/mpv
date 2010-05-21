@@ -125,8 +125,6 @@ float stream_cache_seek_min_percent=50.0;
 #endif
 
 int vobsub_id=-1;
-char* audio_lang=NULL;
-char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
 
 static char** audio_codec_list=NULL;  // override audio codec
@@ -735,15 +733,15 @@ play_next_file:
 
 #ifdef CONFIG_DVDREAD
 if(stream->type==STREAMTYPE_DVD){
-  if(audio_lang && opts.audio_id==-1) opts.audio_id=dvd_aid_from_lang(stream,audio_lang);
-  if(dvdsub_lang && opts.sub_id==-1) opts.sub_id=dvd_sid_from_lang(stream,dvdsub_lang);
+  if(opts.audio_lang && opts.audio_id==-1) opts.audio_id=dvd_aid_from_lang(stream,opts.audio_lang);
+  if(opts.sub_lang && opts.sub_id==-1) opts.sub_id=dvd_sid_from_lang(stream,opts.sub_lang);
 }
 #endif
 
 #ifdef CONFIG_DVDNAV
 if(stream->type==STREAMTYPE_DVDNAV){
-  if(audio_lang && opts.audio_id==-1) opts.audio_id=mp_dvdnav_aid_from_lang(stream,audio_lang);
-  if(dvdsub_lang && opts.sub_id==-1) opts.sub_id=mp_dvdnav_sid_from_lang(stream,dvdsub_lang);
+  if(opts.audio_lang && opts.audio_id==-1) opts.audio_id=mp_dvdnav_aid_from_lang(stream,opts.audio_lang);
+  if(opts.sub_lang && opts.sub_id==-1) opts.sub_id=mp_dvdnav_sid_from_lang(stream,opts.sub_lang);
 }
 #endif
 
@@ -768,10 +766,10 @@ if(stream->type==STREAMTYPE_DVDNAV){
       demuxer_switch_video(demuxer, opts.video_id);
     }
   }
-  select_audio(demuxer, opts.audio_id, audio_lang);
+  select_audio(demuxer, opts.audio_id, opts.audio_lang);
 
-  if (opts.sub_id < -1 && dvdsub_lang)
-    opts.sub_id = demuxer_sub_track_by_lang(demuxer, dvdsub_lang);
+  if (opts.sub_id < -1 && opts.sub_lang)
+    opts.sub_id = demuxer_sub_track_by_lang(demuxer, opts.sub_lang);
 
   if (opts.sub_id < -1)
     opts.sub_id = demuxer_default_sub_track(demuxer);

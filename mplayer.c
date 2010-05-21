@@ -313,8 +313,6 @@ extern char *sub_demuxer_name; // override sub demuxer
 // in particular the subtitle ID for a language changes
 int dvdsub_lang_id;
 int vobsub_id=-1;
-char* audio_lang=NULL;
-char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
 int forced_subs_only=0;
 int file_filter=1;
@@ -1915,8 +1913,8 @@ static void select_subtitle(MPContext *mpctx)
     mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_SUBS];
   } else if (opts->sub_id == -1 && mpctx->global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
     // finally select subs by language and container hints
-    if (opts->sub_id == -1 && dvdsub_lang)
-      opts->sub_id = demuxer_sub_track_by_lang(mpctx->demuxer, dvdsub_lang);
+    if (opts->sub_id == -1 && opts->sub_lang)
+      opts->sub_id = demuxer_sub_track_by_lang(mpctx->demuxer, opts->sub_lang);
     if (opts->sub_id == -1)
       opts->sub_id = demuxer_default_sub_track(mpctx->demuxer);
     if (opts->sub_id >= 0)
@@ -1985,8 +1983,8 @@ static void mp_dvdnav_reset_stream (MPContext *ctx) {
 
     audio_delay = 0.0f;
     ctx->global_sub_size = ctx->global_sub_indices[SUB_SOURCE_DEMUX] + mp_dvdnav_number_of_subs(ctx->stream);
-    if (dvdsub_lang && opts->sub_id == dvdsub_lang_id) {
-        dvdsub_lang_id = mp_dvdnav_sid_from_lang(ctx->stream, dvdsub_lang);
+    if (opts->sub_lang && opts->sub_id == dvdsub_lang_id) {
+        dvdsub_lang_id = mp_dvdnav_sid_from_lang(ctx->stream, opts->sub_lang);
         if (dvdsub_lang_id != opts->sub_id) {
             opts->sub_id = dvdsub_lang_id;
             select_subtitle(ctx);
@@ -3530,7 +3528,7 @@ if (edl_output_filename) {
     }
     if(vo_vobsub){
       mpctx->initialized_flags|=INITIALIZED_VOBSUB;
-      vobsub_set_from_lang(vo_vobsub, dvdsub_lang);
+      vobsub_set_from_lang(vo_vobsub, opts->sub_lang);
       mp_property_do("sub_forced_only", M_PROPERTY_SET, &forced_subs_only, mpctx);
 
       // setup global sub numbering
@@ -3622,8 +3620,8 @@ if(stream_dump_type==5){
 #ifdef CONFIG_DVDREAD
 if(mpctx->stream->type==STREAMTYPE_DVD){
   current_module="dvd lang->id";
-  if(opts->audio_id==-1) opts->audio_id=dvd_aid_from_lang(mpctx->stream,audio_lang);
-  if(dvdsub_lang && opts->sub_id==-1) opts->sub_id=dvd_sid_from_lang(mpctx->stream,dvdsub_lang);
+  if(opts->audio_id==-1) opts->audio_id=dvd_aid_from_lang(mpctx->stream,opts->audio_lang);
+  if(opts->sub_lang && opts->sub_id==-1) opts->sub_id=dvd_sid_from_lang(mpctx->stream,opts->sub_lang);
   // setup global sub numbering
   mpctx->global_sub_indices[SUB_SOURCE_DEMUX] = mpctx->global_sub_size; // the global # of the first demux-specific sub.
   mpctx->global_sub_size += dvd_number_of_subs(mpctx->stream);
@@ -3634,10 +3632,10 @@ if(mpctx->stream->type==STREAMTYPE_DVD){
 #ifdef CONFIG_DVDNAV
 if(mpctx->stream->type==STREAMTYPE_DVDNAV){
   current_module="dvdnav lang->id";
-  if(opts->audio_id==-1) opts->audio_id=mp_dvdnav_aid_from_lang(mpctx->stream,audio_lang);
+  if(opts->audio_id==-1) opts->audio_id=mp_dvdnav_aid_from_lang(mpctx->stream,opts->audio_lang);
   dvdsub_lang_id = -3;
-  if(dvdsub_lang && opts->sub_id==-1)
-    dvdsub_lang_id = opts->sub_id = mp_dvdnav_sid_from_lang(mpctx->stream,dvdsub_lang);
+  if(opts->sub_lang && opts->sub_id==-1)
+    dvdsub_lang_id = opts->sub_id = mp_dvdnav_sid_from_lang(mpctx->stream,opts->sub_lang);
   // setup global sub numbering
   mpctx->global_sub_indices[SUB_SOURCE_DEMUX] = mpctx->global_sub_size; // the global # of the first demux-specific sub.
   mpctx->global_sub_size += mp_dvdnav_number_of_subs(mpctx->stream);
@@ -3781,7 +3779,7 @@ if (ts_prog) {
   mp_property_do("switch_program", M_PROPERTY_SET, &tmp, mpctx);
 }
 // select audio stream
-select_audio(mpctx->demuxer, opts->audio_id, audio_lang);
+select_audio(mpctx->demuxer, opts->audio_id, opts->audio_lang);
 
 // DUMP STREAMS:
 if((stream_dump_type)&&(stream_dump_type<4)){

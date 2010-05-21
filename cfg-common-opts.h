@@ -60,8 +60,6 @@
 #endif /* CONFIG_DVDREAD */
     OPT_INTPAIR("chapter", chapterrange, 0),
     OPT_INTRANGE("edition", edition_id, 0, -1, 8190),
-    {"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
     {"dvdauth", "libcss is obsolete. Try libdvdread instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
     {"dvdkey", "libcss is obsolete. Try libdvdread instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
@@ -146,6 +144,10 @@
     OPT_INTRANGE("sid", sub_id, 0, -2, 8190),
     OPT_FLAG_CONSTANTS("nosub", sub_id, 0, -1, -2),
     OPT_FLAG_CONSTANTS("novideo", video_id, 0, -1, -2),
+    OPT_FLAG_CONSTANTS("sound", audio_id, 0, -2, -1),
+    OPT_FLAG_CONSTANTS("nosound", audio_id, 0, -1, -2),
+    OPT_STRING("alang", audio_lang, 0),
+    OPT_STRING("slang", sub_lang, 0),
 
     { "hr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 0, 1, NULL },
     { "nohr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -221,10 +223,6 @@
 #ifdef CONFIG_FAKE_MONO
     {"stereo", &fakemono, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
 #endif
-
-    // disable audio
-    OPT_FLAG_CONSTANTS("sound", audio_id, 0, -2, -1),
-    OPT_FLAG_CONSTANTS("nosound", audio_id, 0, -1, -2),
 
     {"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
     {"af-adv", (void *) audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},

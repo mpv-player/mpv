@@ -163,8 +163,6 @@ typedef struct ogg_demuxer {
 #define PACKET_LEN_BITS2    0x02
 #define PACKET_IS_SYNCPOINT 0x08
 
-extern char *dvdsub_lang, *audio_lang;
-
 //-------- subtitle support - should be moved to decoder layer, and queue
 //                          - subtitles up in demuxer buffer...
 
@@ -449,7 +447,8 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os,
                     sh->lang = strdup(val);
             }
             // check for -slang if subs are uninitialized yet
-            if (os->text && d->sub->id < 0 && demux_ogg_check_lang(val, dvdsub_lang)) {
+            if (os->text && d->sub->id < 0
+                && demux_ogg_check_lang(val, d->opts->sub_lang)) {
                 d->sub->id = index;
                 d->opts->sub_id  = index;
                 mp_msg(MSGT_DEMUX, MSGL_V,

@@ -26,6 +26,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "options.h"
 
 #include "stream/stream.h"
 #include "demuxer.h"
@@ -57,7 +58,6 @@ typedef struct mpg_demuxer {
   int a_stream_ids[MAX_A_STREAMS];
 } mpg_demuxer_t;
 
-extern char* dvdsub_lang;
 static int mpeg_pts_error=0;
 off_t ps_probe = 0;
 
@@ -482,7 +482,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 
         if(demux->sub->id > -1)
           demux->sub->id &= 0x1F;
-        if(!dvdsub_lang && demux->sub->id == -1)
+        if(!demux->opts->sub_lang && demux->sub->id == -1)
           demux->sub->id = aid;
         if(demux->sub->id==aid){
             ds=demux->sub;
