@@ -3779,7 +3779,12 @@ if (ts_prog) {
   mp_property_do("switch_program", M_PROPERTY_SET, &tmp, mpctx);
 }
 // select audio stream
-select_audio(mpctx->demuxer, opts->audio_id, opts->audio_lang);
+    if (mpctx->num_sources)
+         for (int i = 0; i < mpctx->num_sources; i++)
+             select_audio(mpctx->sources[i].demuxer, opts->audio_id,
+                          opts->audio_lang);
+    else
+        select_audio(mpctx->demuxer, opts->audio_id, opts->audio_lang);
 
 // DUMP STREAMS:
 if((stream_dump_type)&&(stream_dump_type<4)){
