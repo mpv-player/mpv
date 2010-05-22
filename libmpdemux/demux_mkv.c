@@ -2609,24 +2609,19 @@ static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)
         *((int *) arg) = (int) (100 * mkv_d->last_pts / mkv_d->duration);
         return DEMUXER_CTRL_OK;
 
-    case DEMUXER_CTRL_SWITCH_AUDIO:
-        if (demuxer->audio && demuxer->audio->sh) {
-            sh_audio_t *sh = demuxer->a_streams[demuxer->audio->id];
-            int aid = *(int *) arg;
-            if (aid < 0)
-                aid = (sh->aid + 1) % mkv_d->num_audio_tracks;
-            if (aid != sh->aid) {
-                mkv_track_t *track =
-                    find_track_by_num(mkv_d, aid, MATROSKA_TRACK_AUDIO);
-                if (track) {
-                    demuxer->audio->id = track->id;
-                    sh = demuxer->a_streams[demuxer->audio->id];
-                    ds_free_packs(demuxer->audio);
-                }
-            }
-            *(int *) arg = sh->aid;
-        } else
-            *(int *) arg = -2;
+    case DEMUXER_CTRL_SWITCH_AUDIO:;
+        int new_aid = *(int *) arg;
+        int current_aid = demuxer->audio->id;
+        if (current_aid < 0)
+            current_aid = -1;
+        if (new_aid == -1)  // cycle to next
+            new_aid = (current_aid + 2) % (mkv_d->num_audio_tracks + 1) - 1;
+        if (new_aid < 0 || new_aid >= mkv_d->num_audio_tracks)
+            new_aid = -2;
+        *(int *) arg = new_aid;
+        if (current_aid != new_aid)
+            ds_free_packs(demuxer->audio);
+        demuxer->audio->id = new_aid;
         return DEMUXER_CTRL_OK;
 
     default:
