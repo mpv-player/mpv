@@ -851,11 +851,10 @@ static int mp_property_balance(m_option_t *prop, int action, void *arg,
 static int mp_property_audio(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
-    struct MPOpts *opts = &mpctx->opts;
     int current_id, tmp;
     if (!mpctx->demuxer || !mpctx->demuxer->audio)
         return M_PROPERTY_UNAVAILABLE;
-    current_id = mpctx->demuxer->audio->id;
+    current_id = mpctx->sh_audio ? mpctx->sh_audio->aid : -2;
 
     switch (action) {
     case M_PROPERTY_GET:
@@ -901,21 +900,17 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
             tmp = *((int *) arg);
         else
             tmp = -1;
-        opts->audio_id = demuxer_switch_audio(mpctx->demuxer, tmp);
-        if (opts->audio_id == -2
-            || (opts->audio_id > -1
-                && mpctx->demuxer->audio->id != current_id && current_id != -2))
+        int new_id = demuxer_switch_audio(mpctx->demuxer, tmp);
+        if (new_id != current_id)
             uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC);
-        if (opts->audio_id > -1 && mpctx->demuxer->audio->id != current_id) {
+        if (new_id != current_id && new_id >= 0) {
             sh_audio_t *sh2;
             sh2 = mpctx->demuxer->a_streams[mpctx->demuxer->audio->id];
-            if (sh2) {
-                sh2->ds = mpctx->demuxer->audio;
-                mpctx->sh_audio = sh2;
-                reinit_audio_chain(mpctx);
-            }
+            sh2->ds = mpctx->demuxer->audio;
+            mpctx->sh_audio = sh2;
+            reinit_audio_chain(mpctx);
         }
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", opts->audio_id);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", new_id);
         return M_PROPERTY_OK;
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;

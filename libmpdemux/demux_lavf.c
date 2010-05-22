@@ -737,14 +737,15 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 	            newid = pstreams[i];
 	        }
 	    }
-	    if(i == curridx)
-	        return DEMUXER_CTRL_NOTIMPL;
-	    else
-	    {
+	    if (i == curridx) {
+                *(int *) arg = curridx;
+                return DEMUXER_CTRL_OK;
+            } else {
 	        ds_free_packs(ds);
 	        if(ds->id >= 0)
 	            priv->avfc->streams[ds->id]->discard = AVDISCARD_ALL;
-	        *((int*)arg) = ds->id = newid;
+                ds->id = newid;
+                *(int *) arg = i < 0 ? -2 : i;
 	        if(newid >= 0)
 	            priv->avfc->streams[newid]->discard = AVDISCARD_NONE;
 	        return DEMUXER_CTRL_OK;

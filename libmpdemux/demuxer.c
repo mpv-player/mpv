@@ -1407,10 +1407,15 @@ int demuxer_get_percent_pos(demuxer_t *demuxer)
 int demuxer_switch_audio(demuxer_t *demuxer, int index)
 {
     int res = demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &index);
-    if (res == DEMUXER_CTRL_NOTIMPL)
-        index = demuxer->audio->id;
-    if (demuxer->audio->id >= 0)
-        demuxer->audio->sh = demuxer->a_streams[demuxer->audio->id];
+    if (res == DEMUXER_CTRL_NOTIMPL) {
+        struct sh_audio *sh_audio = demuxer->audio->sh;
+        return sh_audio ? sh_audio->aid : -2;
+    }
+    if (demuxer->audio->id >= 0) {
+        struct sh_audio *sh_audio = demuxer->a_streams[demuxer->audio->id];
+        demuxer->audio->sh = sh_audio;
+        index = sh_audio->aid; // internal MPEG demuxers don't set it right
+    }
     else
         demuxer->audio->sh = NULL;
     return index;
