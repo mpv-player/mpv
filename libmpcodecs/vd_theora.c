@@ -126,13 +126,14 @@ static int init(sh_video_t *sh){
 
     if(sh->aspect==0.0 && context->inf.aspect_denominator!=0)
     {
-       sh->aspect = ((double)context->inf.aspect_numerator * context->inf.frame_width)/
-          ((double)context->inf.aspect_denominator * context->inf.frame_height);
+       sh->aspect = ((double)context->inf.aspect_numerator * context->inf.width)/
+          ((double)context->inf.aspect_denominator * context->inf.height);
     }
 
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Theora video init ok!\n");
+    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"Frame: %dx%d, Picture %dx%d, Offset [%d,%d]\n", context->inf.width, context->inf.height, context->inf.frame_width, context->inf.frame_height, context->inf.offset_x, context->inf.offset_y);
 
-    return mpcodecs_config_vo (sh,context->inf.frame_width,context->inf.frame_height,theora_pixelformat2imgfmt(context->inf.pixelformat));
+    return mpcodecs_config_vo (sh,context->inf.width,context->inf.height,theora_pixelformat2imgfmt(context->inf.pixelformat));
 
 err_out:
     free(context);
