@@ -23,6 +23,10 @@
 // TODO: seeking, data consistency checking
 
 #define READ_USLEEP_TIME 10000
+// These defines are used to reduce the cost of many succesive
+// seeks (e.g. when a file has no index) by spinning quickly at first.
+#define INITIAL_FILL_USLEEP_TIME 1000
+#define INITIAL_FILL_USLEEP_COUNT 10
 #define FILL_USLEEP_TIME 50000
 #define PREFILL_SLEEP_TIME 200
 #define CONTROL_SLEEP_TIME 0
@@ -432,10 +436,17 @@ static void ThreadProc( void *s ){
 // cache thread mainloop:
   signal(SIGTERM,exit_sighandler); // kill
   signal(SIGUSR1, dummy_sighandler); // wakeup
+ {
+  int sleep_count = 0;
   do {
     if(!cache_fill(s)){
+         if (sleep_count < INITIAL_FILL_USLEEP_COUNT) {
+             sleep_count++;
+             usec_sleep(INITIAL_FILL_USLEEP_TIME);
+         } else
 	 usec_sleep(FILL_USLEEP_TIME); // idle
-    }
+    } else
+         sleep_count = 0;
 //	 cache_stats(s->cache_data);
   } while (cache_execute_control(s));
 #if defined(__MINGW32__) || defined(__OS2__)
@@ -446,6 +457,7 @@ static void ThreadProc( void *s ){
   // make sure forked code never leaves this function
   exit(0);
 #endif
+  }
 }
 
 int cache_stream_fill_buffer(stream_t *s){
