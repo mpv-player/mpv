@@ -279,13 +279,25 @@ static int cache_execute_control(cache_vars_t *s) {
   return 1;
 }
 
+static void *shared_alloc(int size) {
+#if FORKED_CACHE
+    return shmem_alloc(size);
+#else
+    return malloc(size);
+#endif
+}
+
+static void shared_free(void *ptr, int size) {
+#if FORKED_CACHE
+    shmem_free(ptr, size);
+#else
+    free(ptr);
+#endif
+}
+
 static cache_vars_t* cache_init(int size,int sector){
   int num;
-#if FORKED_CACHE
-  cache_vars_t* s=shmem_alloc(sizeof(cache_vars_t));
-#else
-  cache_vars_t* s=malloc(sizeof(cache_vars_t));
-#endif
+  cache_vars_t* s=shared_alloc(sizeof(cache_vars_t));
   if(s==NULL) return NULL;
 
   memset(s,0,sizeof(cache_vars_t));
@@ -295,18 +307,10 @@ static cache_vars_t* cache_init(int size,int sector){
   }//32kb min_size
   s->buffer_size=num*sector;
   s->sector_size=sector;
-#if FORKED_CACHE
-  s->buffer=shmem_alloc(s->buffer_size);
-#else
-  s->buffer=malloc(s->buffer_size);
-#endif
+  s->buffer=shared_alloc(s->buffer_size);
 
   if(s->buffer == NULL){
-#if FORKED_CACHE
-    shmem_free(s,sizeof(cache_vars_t));
-#else
-    free(s);
-#endif
+    shared_free(s, sizeof(cache_vars_t));
     return NULL;
   }
 
@@ -327,16 +331,10 @@ void cache_uninit(stream_t *s) {
     s->cache_pid = 0;
   }
   if(!c) return;
-#if !FORKED_CACHE
-  free(c->buffer);
+  shared_free(c->buffer, c->buffer_size);
   c->buffer = NULL;
   c->stream = NULL;
-  free(s->cache_data);
-#else
-  shmem_free(c->buffer,c->buffer_size);
-  c->buffer = NULL;
-  shmem_free(s->cache_data,sizeof(cache_vars_t));
-#endif
+  shared_free(s->cache_data, sizeof(cache_vars_t));
   s->cache_data = NULL;
 }
 
