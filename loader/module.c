@@ -347,9 +347,6 @@ static WIN_BOOL MODULE_FreeLibrary( WINE_MODREF *wm )
 {
     TRACE("(%s) - START\n", wm->modname );
 
-    /* Recursively decrement reference counts */
-    //MODULE_DecRefCount( wm );
-
     /* Call process detach notifications */
     MODULE_DllProcessDetach( wm, FALSE, NULL );
 
@@ -607,36 +604,6 @@ WIN_BOOL WINAPI FreeLibrary(HINSTANCE hLibModule)
     if (local_wm == NULL) my_garbagecollection();
 
     return retv;
-}
-
-/***********************************************************************
- *           MODULE_DecRefCount
- *
- * NOTE: Assumes that the process critical section is held!
- */
-static void MODULE_DecRefCount( WINE_MODREF *wm )
-{
-    int i;
-
-    if ( wm->flags & WINE_MODREF_MARKER )
-        return;
-
-    if ( wm->refCount <= 0 )
-        return;
-
-    --wm->refCount;
-    TRACE("(%s) refCount: %d\n", wm->modname, wm->refCount );
-
-    if ( wm->refCount == 0 )
-    {
-        wm->flags |= WINE_MODREF_MARKER;
-
-        for ( i = 0; i < wm->nDeps; i++ )
-            if ( wm->deps[i] )
-                MODULE_DecRefCount( wm->deps[i] );
-
-        wm->flags &= ~WINE_MODREF_MARKER;
-    }
 }
 
 /***********************************************************************
