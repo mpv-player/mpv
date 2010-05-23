@@ -261,13 +261,9 @@ II. POLICY / RULES:
    not apply to files you wrote and/or maintain.
 
 
-6. We refuse source indentation and other cosmetic changes if they are mixed
-   with functional changes, such commits will be rejected and removed. Every
-   developer has his own indentation style, you should not change it. Of course
-   if you (re)write something, you can use your own style... (Many projects
-   force a given indentation style - we don't.) If you really need to make
-   indentation changes (try to avoid this), separate them strictly from real
-   changes.
+6. Do not mix cosmetic changes (indentation, function / variable renaming and
+   similar) with functional changes in a single commit. Instead, commit such
+   changes as a separate commit of their own.
 
    NOTE: If you had to put if(){ .. } over a large (> 5 lines) chunk of code,
    do NOT change the indentation of the inner part (don't move it to the right)!
@@ -326,6 +322,12 @@ II. POLICY / RULES:
     the differences as small as possible.
     If you have to modify external code, do not forget to update the diff file
     with our local changes.
+
+
+15. Use K&R style with 4 space indentation, no tabs and no trailing whitespace.
+    Unnecessary braces should be avoided. This policy applies to new files. In
+    existing files that don't follow K&R style, try to respect the surrounding
+    style, but in doubt, go for K&R.
 
 
 Also read DOCS/tech/patches.txt !!!!
