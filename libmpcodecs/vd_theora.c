@@ -168,6 +168,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
    yuv_buffer yuv;
    mp_image_t* mpi;
 
+   // no delayed frames
+   if (!data || !len)
+       return NULL;
+
    memset (&op, 0, sizeof (op));
    op.bytes = len;
    op.packet = data;
