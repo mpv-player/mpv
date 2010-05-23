@@ -265,9 +265,6 @@ II. POLICY / RULES:
    similar) with functional changes in a single commit. Instead, commit such
    changes as a separate commit of their own.
 
-   NOTE: If you had to put if(){ .. } over a large (> 5 lines) chunk of code,
-   do NOT change the indentation of the inner part (don't move it to the right)!
-
 
 7. Always fill out the commit log message. Describe in a few lines what you
    changed and why. You can refer to mailing list postings if you fix a
