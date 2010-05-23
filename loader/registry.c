@@ -400,9 +400,32 @@ long __stdcall RegQueryValueExA(long key, const char* value, int* reserved, int*
     if (!c)
 	return 1;
     t=find_value_by_name(c);
+    if (t==0) {
+        // Hacks for CineForm.
+        if (strcmp(c, "HKCU\\SOFTWARE\\CineForm\\DecoderProperties\\Resolution") == 0) {
+            if (data)
+                *data = 1000;
+            if (type)
+                *type = REG_DWORD;
+            if (count)
+                *count = sizeof(DWORD);
+            free(c);
+            return ERROR_SUCCESS;
+        }
+        if (strcmp(c, "HKCU\\SOFTWARE\\CineForm\\DecoderProperties\\PixelFormats") == 0) {
+            if (data)
+                *data = 0xffff;
+            if (type)
+                *type = REG_DWORD;
+            if (count)
+                *count = sizeof(DWORD);
+            free(c);
+            return ERROR_SUCCESS;
+        }
+        free(c);
+        return ERROR_FILE_NOT_FOUND;
+    }
     free(c);
-    if (t==0)
-	return 2;
     if (type)
 	*type=t->type;
     if (data)
@@ -419,7 +442,7 @@ long __stdcall RegQueryValueExA(long key, const char* value, int* reserved, int*
     {
 	*count=t->len;
     }
-    return 0;
+    return ERROR_SUCCESS;
 }
 long __stdcall RegCreateKeyExA(long key, const char* name, long reserved,
 		     void* classs, long options, long security,
