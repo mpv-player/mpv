@@ -1801,7 +1801,7 @@ static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
 	if (in_size < 0) {
 	    // try to extract last frames in case of decoder lag
 	    in_size = 0;
-	    pts = 1e300;
+	    pts = MP_NOPTS_VALUE;
 	    hit_eof = 1;
 	}
 	if (in_size > max_framesize)
