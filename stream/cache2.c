@@ -439,31 +439,29 @@ err_out:
     return res;
   }
 
-#if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
-}
-#ifdef PTHREAD_CACHE
-static void *ThreadProc( void *s ){
-#else
-static void ThreadProc( void *s ){
-#endif
-#endif
-
+#if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
 #ifdef CONFIG_GUI
   use_gui = 0; // mp_msg may not use gui stuff in forked code
 #endif
-// cache thread mainloop:
   signal(SIGTERM,exit_sighandler); // kill
   signal(SIGUSR1, dummy_sighandler); // wakeup
   cache_mainloop(s);
-#if defined(__MINGW32__) || defined(__OS2__)
-  _endthread();
-#elif defined(PTHREAD_CACHE)
-  return NULL;
-#else
   // make sure forked code never leaves this function
   exit(0);
 #endif
 }
+
+#ifdef PTHREAD_CACHE
+static void *ThreadProc( void *s ){
+  cache_mainloop(s);
+  return NULL;
+}
+#elif defined(__MINGW32__) || defined(__OS2__)
+static void ThreadProc( void *s ){
+  cache_mainloop(s);
+  _endthread();
+}
+#endif
 
 int cache_stream_fill_buffer(stream_t *s){
   int len;
