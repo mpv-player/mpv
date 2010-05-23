@@ -345,6 +345,24 @@ static void dummy_sighandler(int x) {
 }
 
 /**
+ * Main loop of the cache process or thread.
+ */
+static void cache_mainloop(cache_vars_t *s) {
+    int sleep_count = 0;
+    do {
+        if (!cache_fill(s)) {
+            if (sleep_count < INITIAL_FILL_USLEEP_COUNT) {
+                sleep_count++;
+                usec_sleep(INITIAL_FILL_USLEEP_TIME);
+            } else
+                usec_sleep(FILL_USLEEP_TIME); // idle
+        } else
+            sleep_count = 0;
+//        cache_stats(s->cache_data);
+    } while (cache_execute_control(s));
+}
+
+/**
  * \return 1 on success, 0 if the function was interrupted and -1 on error
  */
 int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
@@ -436,19 +454,7 @@ static void ThreadProc( void *s ){
 // cache thread mainloop:
   signal(SIGTERM,exit_sighandler); // kill
   signal(SIGUSR1, dummy_sighandler); // wakeup
- {
-  int sleep_count = 0;
-  do {
-    if(!cache_fill(s)){
-         if (sleep_count < INITIAL_FILL_USLEEP_COUNT) {
-             sleep_count++;
-             usec_sleep(INITIAL_FILL_USLEEP_TIME);
-         } else
-	 usec_sleep(FILL_USLEEP_TIME); // idle
-    } else
-         sleep_count = 0;
-//	 cache_stats(s->cache_data);
-  } while (cache_execute_control(s));
+  cache_mainloop(s);
 #if defined(__MINGW32__) || defined(__OS2__)
   _endthread();
 #elif defined(PTHREAD_CACHE)
@@ -457,7 +463,6 @@ static void ThreadProc( void *s ){
   // make sure forked code never leaves this function
   exit(0);
 #endif
-  }
 }
 
 int cache_stream_fill_buffer(stream_t *s){
