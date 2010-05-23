@@ -53,6 +53,10 @@ static void ThreadProc( void *s );
 static void *ThreadProc(void *s);
 #else
 #include <sys/wait.h>
+#define FORKED_CACHE 1
+#endif
+#ifndef FORKED_CACHE
+#define FORKED_CACHE 0
 #endif
 
 #include "mp_msg.h"
@@ -96,7 +100,7 @@ int cache_fill_status=0;
 
 static void cache_wakeup(stream_t *s)
 {
-#if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
+#if FORKED_CACHE
   // signal process to wake up immediately
   kill(s->cache_pid, SIGUSR1);
 #endif
@@ -277,7 +281,7 @@ static int cache_execute_control(cache_vars_t *s) {
 
 static cache_vars_t* cache_init(int size,int sector){
   int num;
-#if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
+#if FORKED_CACHE
   cache_vars_t* s=shmem_alloc(sizeof(cache_vars_t));
 #else
   cache_vars_t* s=malloc(sizeof(cache_vars_t));
@@ -291,14 +295,14 @@ static cache_vars_t* cache_init(int size,int sector){
   }//32kb min_size
   s->buffer_size=num*sector;
   s->sector_size=sector;
-#if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
+#if FORKED_CACHE
   s->buffer=shmem_alloc(s->buffer_size);
 #else
   s->buffer=malloc(s->buffer_size);
 #endif
 
   if(s->buffer == NULL){
-#if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
+#if FORKED_CACHE
     shmem_free(s,sizeof(cache_vars_t));
 #else
     free(s);
@@ -314,7 +318,7 @@ static cache_vars_t* cache_init(int size,int sector){
 void cache_uninit(stream_t *s) {
   cache_vars_t* c = s->cache_data;
   if(s->cache_pid) {
-#if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
+#if !FORKED_CACHE
     cache_do_control(s, -2, NULL);
 #else
     kill(s->cache_pid,SIGKILL);
@@ -323,7 +327,7 @@ void cache_uninit(stream_t *s) {
     s->cache_pid = 0;
   }
   if(!c) return;
-#if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
+#if !FORKED_CACHE
   free(c->buffer);
   c->buffer = NULL;
   c->stream = NULL;
@@ -391,7 +395,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
      min = s->buffer_size - s->fill_limit;
   }
 
-#if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
+#if FORKED_CACHE
   if((stream->cache_pid=fork())){
     if ((pid_t)stream->cache_pid == -1)
       stream->cache_pid = 0;
@@ -439,7 +443,7 @@ err_out:
     return res;
   }
 
-#if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
+#if FORKED_CACHE
 #ifdef CONFIG_GUI
   use_gui = 0; // mp_msg may not use gui stuff in forked code
 #endif
@@ -451,16 +455,18 @@ err_out:
 #endif
 }
 
-#ifdef PTHREAD_CACHE
-static void *ThreadProc( void *s ){
-  cache_mainloop(s);
-  return NULL;
-}
-#elif defined(__MINGW32__) || defined(__OS2__)
+#if !FORKED_CACHE
+#if defined(__MINGW32__) || defined(__OS2__)
 static void ThreadProc( void *s ){
   cache_mainloop(s);
   _endthread();
 }
+#else
+static void *ThreadProc( void *s ){
+  cache_mainloop(s);
+  return NULL;
+}
+#endif
 #endif
 
 int cache_stream_fill_buffer(stream_t *s){
