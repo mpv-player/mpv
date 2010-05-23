@@ -16,6 +16,7 @@ MPlayer (1.0)
     * SoftLab-NSK Forward MPEG-2 I-frames (SLIF) via binary DLL
     * JPEG 2000 support via OpenJPEG
     * internal liba52 copy removed
+    * CineForm HD (CFHD) via binary DLL
 
     Demuxers:
     * support for TrueHD in Blu-ray streams in libmpdemux
