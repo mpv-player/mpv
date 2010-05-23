@@ -90,6 +90,14 @@ static int min_fill=0;
 
 int cache_fill_status=0;
 
+static void cache_wakeup(stream_t *s)
+{
+#if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
+  // signal process to wake up immediately
+  kill(s->cache_pid, SIGUSR1);
+#endif
+}
+
 static void cache_stats(cache_vars_t *s)
 {
   int newb=s->max_filepos-s->read_filepos; // new bytes in the buffer
@@ -329,6 +337,9 @@ static void exit_sighandler(int x){
   exit(0);
 }
 
+static void dummy_sighandler(int x) {
+}
+
 /**
  * \return 1 on success, 0 if the function was interrupted and -1 on error
  */
@@ -420,6 +431,7 @@ static void ThreadProc( void *s ){
 #endif
 // cache thread mainloop:
   signal(SIGTERM,exit_sighandler); // kill
+  signal(SIGUSR1, dummy_sighandler); // wakeup
   do {
     if(!cache_fill(s)){
 	 usec_sleep(FILL_USLEEP_TIME); // idle
@@ -470,6 +482,7 @@ int cache_stream_seek_long(stream_t *stream,off_t pos){
   newpos=pos/s->sector_size; newpos*=s->sector_size; // align
   stream->pos=s->read_filepos=newpos;
   s->eof=0; // !!!!!!!
+  cache_wakeup(stream);
 
   cache_stream_fill_buffer(stream);
 
@@ -514,6 +527,7 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
     default:
       return STREAM_UNSUPPORTED;
   }
+  cache_wakeup(stream);
   while (s->control != -1)
     usec_sleep(CONTROL_SLEEP_TIME);
   switch (cmd) {
