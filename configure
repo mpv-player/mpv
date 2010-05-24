@@ -6453,9 +6453,15 @@ int main(void) {
 }
 EOF
     _fribidi=no
-    _inc_tmp="$($_pkg_config --cflags fribidi)"
-    _ld_tmp="$($_pkg_config --libs fribidi)"
+    _inc_tmp=""
+    _ld_tmp="-lfribidi"
     cc_check $_inc_tmp $_ld_tmp && _fribidi=yes
+    if $_pkg_config --exists fribidi > /dev/null 2>&1 &&
+       test "$_fribidi" = no ; then
+        _inc_tmp="$($_pkg_config --cflags)"
+        _ld_tmp="$($_pkg_config --libs)"
+        cc_check $_inc_tmp $_ld_tmp && _fribidi=yes
+    fi
 fi
 if test "$_fribidi" = yes ; then
     def_fribidi='#define CONFIG_FRIBIDI 1'
