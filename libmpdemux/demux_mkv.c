@@ -1722,7 +1722,7 @@ static int demux_mkv_open(demuxer_t *demuxer)
             /* let's take the first video track */
             for (i = 0; i < mkv_d->num_tracks; i++)
                 if (mkv_d->tracks[i]->type == MATROSKA_TRACK_VIDEO
-                    && track->id >= 0) {
+                    && mkv_d->tracks[i]->id >= 0) {
                     track = mkv_d->tracks[i];
                     break;
                 }
@@ -1756,7 +1756,7 @@ static int demux_mkv_open(demuxer_t *demuxer)
         /* let's take the first audio track */
         for (i = 0; i < mkv_d->num_tracks; i++)
             if (mkv_d->tracks[i]->type == MATROSKA_TRACK_AUDIO
-                && track->id >= 0) {
+                && mkv_d->tracks[i]->id >= 0) {
                 track = mkv_d->tracks[i];
                 break;
             }
