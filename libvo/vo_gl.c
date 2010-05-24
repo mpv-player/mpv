@@ -487,12 +487,19 @@ static void autodetectGlExtensions(void) {
     ati_broken_pbo = ver && ver < 8395;
   }
   if (ati_hack      == -1) ati_hack      = ati_broken_pbo;
-  if (force_pbo     == -1 && extensions && strstr(extensions, "_pixel_buffer_object"))
-    force_pbo = is_ati;
-  if (use_rectangle == -1 && extensions && strstr(extensions, "_texture_non_power_of_two"))
+  if (force_pbo     == -1) {
+    force_pbo = 0;
+    if (extensions && strstr(extensions, "_pixel_buffer_object"))
+      force_pbo = is_ati;
+  }
+  if (use_rectangle == -1) {
     use_rectangle = 0;
-  if (use_rectangle == -1 && extensions && strstr(extensions, "_texture_rectangle"))
-    use_rectangle = renderer && strstr(renderer, "Mesa DRI R200") ? 1 : 0;
+    if (extensions) {
+//      if (strstr(extensions, "_texture_non_power_of_two"))
+      if (strstr(extensions, "_texture_rectangle"))
+        use_rectangle = renderer && strstr(renderer, "Mesa DRI R200") ? 1 : 0;
+    }
+  }
   if (use_osd == -1)
     use_osd = mpglBindTexture != NULL;
   if (use_yuv == -1)
