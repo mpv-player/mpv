@@ -219,6 +219,8 @@ static uint32_t draw_image(mp_image_t *mpi)
             h = h / 2;
             for (i=0; i<h; i++) {
                 av_md5_update(md5_context, planeU + i * strideU, w);
+            }
+            for (i=0; i<h; i++) {
                 av_md5_update(md5_context, planeV + i * strideV, w);
             }
             av_md5_final(md5_context, md5sum);
