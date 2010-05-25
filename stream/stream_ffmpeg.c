@@ -49,7 +49,8 @@ static int seek(stream_t *s, off_t newpos)
 
 static int control(stream_t *s, int cmd, void *arg)
 {
-    int64_t size;
+    int64_t size, ts;
+    double pts;
     switch(cmd) {
     case STREAM_CTRL_GET_SIZE:
         size = url_filesize(s->priv);
@@ -57,6 +58,14 @@ static int control(stream_t *s, int cmd, void *arg)
             *(off_t *)arg = size;
             return 1;
         }
+        break;
+    case STREAM_CTRL_SEEK_TO_TIME:
+        pts = *(double *)arg;
+        ts = pts * AV_TIME_BASE;
+        ts = av_url_read_seek(s->priv, -1, ts, 0);
+        if (ts >= 0)
+            return 1;
+        break;
     }
     return STREAM_UNSUPPORTED;
 }
