@@ -299,6 +299,7 @@ Codecs:
   --disable-libdirac-lavc   disable Dirac in libavcodec [autodetect]
   --disable-libschroedinger-lavc   disable Dirac in libavcodec (Schroedinger
                                    decoder) [autodetect]
+  --disable-libvpx-lavc     disable libvpx in libavcodec [autodetect]
   --disable-libnut          disable libnut [autodetect]
   --disable-libavutil_a     disable static libavutil [autodetect]
   --disable-libavcodec_a    disable static libavcodec [autodetect]
@@ -693,6 +694,7 @@ _x264=auto
 _x264_lavc=auto
 _libdirac_lavc=auto
 _libschroedinger_lavc=auto
+_libvpx_lavc=auto
 _libnut=auto
 _lirc=auto
 _lircc=auto
@@ -1137,6 +1139,8 @@ for ac_option do
   --disable-libdirac-lavc)  _libdirac_lavc=no   ;;
   --enable-libschroedinger-lavc)   _libschroedinger_lavc=yes  ;;
   --disable-libschroedinger-lavc)  _libschroedinger_lavc=no   ;;
+  --enable-libvpx-lavc)   _libvpx_lavc=yes  ;;
+  --disable-libvpx-lavc)  _libvpx_lavc=no   ;;
   --enable-libnut)      _libnut=yes     ;;
   --disable-libnut)     _libnut=no      ;;
   --enable-libavutil_a)         _libavutil_a=yes        ;;
@@ -7595,6 +7599,30 @@ else
   nocodecmodules="libschroedinger $nocodecmodules"
 fi
 echores "$_libschroedinger_lavc"
+
+echocheck "libvpx"
+if test "$_libvpx_lavc" = auto; then
+  _libvpx_lavc=no
+  if test "$_libavcodec_a" != yes; then
+    res_comment="libavcodec (static) is required by libvpx, sorry"
+  else
+    cat > $TMPC << EOF
+#include <vpx/vpx_decoder.h>
+#include <vpx/vp8dx.h>
+int main(void) { vpx_codec_dec_init(NULL, &vpx_codec_vp8_dx_algo, NULL, 0); return 0; }
+EOF
+    cc_check -lvpx && _libvpx_lavc=yes && extra_ldflags="$extra_ldflags -lvpx"
+  fi
+fi
+if test "$_libvpx_lavc" = yes ; then
+  def_libvpx_lavc='#define CONFIG_LIBVPX 1'
+  _libavdecoders="$_libavdecoders LIBVPX_DECODER"
+  codecmodules="libvpx $codecmodules"
+else
+  def_libvpx_lavc='#define CONFIG_LIBVPX 0'
+  nocodecmodules="libvpx $nocodecmodules"
+fi
+echores "$_libvpx_lavc"
 
 echocheck "libnut"
 if test "$_libnut" = auto ; then
