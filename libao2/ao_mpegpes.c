@@ -293,8 +293,6 @@ static void audio_resume(void)
 {
 }
 
-void send_pes_packet(unsigned char* data,int len,int id,int timestamp);
-void send_lpcm_packet(unsigned char* data,int len,int id,int timestamp,int freq_id);
 extern int vo_pts;
 
 // return: how many bytes can be played without blocking
