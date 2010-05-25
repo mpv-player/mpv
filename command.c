@@ -98,7 +98,7 @@ static void rescale_input_coordinates(int ix, int iy, double *dx, double *dy)
            vo_dheight, vo_fs);
 }
 
-static int sub_source_by_pos(MPContext * mpctx, int pos)
+static int sub_source_by_pos(MPContext *mpctx, int pos)
 {
     int source = -1;
     int top = -1;
@@ -113,7 +113,7 @@ static int sub_source_by_pos(MPContext * mpctx, int pos)
     return source;
 }
 
-static int sub_source(MPContext * mpctx)
+static int sub_source(MPContext *mpctx)
 {
     return sub_source_by_pos(mpctx, mpctx->global_sub_pos);
 }
@@ -168,15 +168,15 @@ static void log_sub(void)
 ///@{
 
 /// OSD level (RW)
-static int mp_property_osdlevel(m_option_t * prop, int action, void *arg,
-                                MPContext * mpctx)
+static int mp_property_osdlevel(m_option_t *prop, int action, void *arg,
+                                MPContext *mpctx)
 {
     return m_property_choice(prop, action, arg, &osd_level);
 }
 
 /// Loop (RW)
-static int mp_property_loop(m_option_t * prop, int action, void *arg,
-                            MPContext * mpctx)
+static int mp_property_loop(m_option_t *prop, int action, void *arg,
+                            MPContext *mpctx)
 {
     switch (action) {
     case M_PROPERTY_PRINT:
@@ -193,8 +193,8 @@ static int mp_property_loop(m_option_t * prop, int action, void *arg,
 }
 
 /// Playback speed (RW)
-static int mp_property_playback_speed(m_option_t * prop, int action,
-                                      void *arg, MPContext * mpctx)
+static int mp_property_playback_speed(m_option_t *prop, int action,
+                                      void *arg, MPContext *mpctx)
 {
     switch (action) {
     case M_PROPERTY_SET:
@@ -216,15 +216,15 @@ static int mp_property_playback_speed(m_option_t * prop, int action,
 }
 
 /// filename with path (RO)
-static int mp_property_path(m_option_t * prop, int action, void *arg,
-                            MPContext * mpctx)
+static int mp_property_path(m_option_t *prop, int action, void *arg,
+                            MPContext *mpctx)
 {
     return m_property_string_ro(prop, action, arg, filename);
 }
 
 /// filename without path (RO)
-static int mp_property_filename(m_option_t * prop, int action, void *arg,
-                                MPContext * mpctx)
+static int mp_property_filename(m_option_t *prop, int action, void *arg,
+                                MPContext *mpctx)
 {
     char *f;
     if (!filename)
@@ -237,8 +237,8 @@ static int mp_property_filename(m_option_t * prop, int action, void *arg,
 }
 
 /// Demuxer name (RO)
-static int mp_property_demuxer(m_option_t * prop, int action, void *arg,
-                               MPContext * mpctx)
+static int mp_property_demuxer(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
 {
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
@@ -247,8 +247,8 @@ static int mp_property_demuxer(m_option_t * prop, int action, void *arg,
 }
 
 /// Position in the stream (RW)
-static int mp_property_stream_pos(m_option_t * prop, int action, void *arg,
-                                  MPContext * mpctx)
+static int mp_property_stream_pos(m_option_t *prop, int action, void *arg,
+                                  MPContext *mpctx)
 {
     if (!mpctx->demuxer || !mpctx->demuxer->stream)
         return M_PROPERTY_UNAVAILABLE;
@@ -267,8 +267,8 @@ static int mp_property_stream_pos(m_option_t * prop, int action, void *arg,
 }
 
 /// Stream start offset (RO)
-static int mp_property_stream_start(m_option_t * prop, int action,
-                                    void *arg, MPContext * mpctx)
+static int mp_property_stream_start(m_option_t *prop, int action,
+                                    void *arg, MPContext *mpctx)
 {
     if (!mpctx->demuxer || !mpctx->demuxer->stream)
         return M_PROPERTY_UNAVAILABLE;
@@ -281,8 +281,8 @@ static int mp_property_stream_start(m_option_t * prop, int action,
 }
 
 /// Stream end offset (RO)
-static int mp_property_stream_end(m_option_t * prop, int action, void *arg,
-                                  MPContext * mpctx)
+static int mp_property_stream_end(m_option_t *prop, int action, void *arg,
+                                  MPContext *mpctx)
 {
     if (!mpctx->demuxer || !mpctx->demuxer->stream)
         return M_PROPERTY_UNAVAILABLE;
@@ -295,8 +295,8 @@ static int mp_property_stream_end(m_option_t * prop, int action, void *arg,
 }
 
 /// Stream length (RO)
-static int mp_property_stream_length(m_option_t * prop, int action,
-                                     void *arg, MPContext * mpctx)
+static int mp_property_stream_length(m_option_t *prop, int action,
+                                     void *arg, MPContext *mpctx)
 {
     if (!mpctx->demuxer || !mpctx->demuxer->stream)
         return M_PROPERTY_UNAVAILABLE;
@@ -310,8 +310,8 @@ static int mp_property_stream_length(m_option_t * prop, int action,
 }
 
 /// Media length in seconds (RO)
-static int mp_property_length(m_option_t * prop, int action, void *arg,
-                              MPContext * mpctx)
+static int mp_property_length(m_option_t *prop, int action, void *arg,
+                              MPContext *mpctx)
 {
     double len;
 
@@ -323,8 +323,8 @@ static int mp_property_length(m_option_t * prop, int action, void *arg,
 }
 
 /// Current position in percent (RW)
-static int mp_property_percent_pos(m_option_t * prop, int action,
-                                   void *arg, MPContext * mpctx) {
+static int mp_property_percent_pos(m_option_t *prop, int action,
+                                   void *arg, MPContext *mpctx) {
     int pos;
 
     if (!mpctx->demuxer)
@@ -354,8 +354,8 @@ static int mp_property_percent_pos(m_option_t * prop, int action,
 }
 
 /// Current position in seconds (RW)
-static int mp_property_time_pos(m_option_t * prop, int action,
-                                void *arg, MPContext * mpctx) {
+static int mp_property_time_pos(m_option_t *prop, int action,
+                                void *arg, MPContext *mpctx) {
     if (!(mpctx->sh_video || (mpctx->sh_audio && mpctx->audio_out)))
         return M_PROPERTY_UNAVAILABLE;
 
@@ -525,8 +525,8 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
 }
 
 /// Demuxer meta data
-static int mp_property_metadata(m_option_t * prop, int action, void *arg,
-                                MPContext * mpctx) {
+static int mp_property_metadata(m_option_t *prop, int action, void *arg,
+                                MPContext *mpctx) {
     m_property_action_t* ka;
     char* meta;
     static m_option_t key_type =
@@ -558,8 +558,8 @@ static int mp_property_metadata(m_option_t * prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_pause(m_option_t * prop, int action, void *arg,
-                             MPContext * mpctx)
+static int mp_property_pause(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
 {
     return m_property_flag_ro(prop, action, arg, mpctx->osd_function == OSD_PAUSE);
 }
@@ -572,8 +572,8 @@ static int mp_property_pause(m_option_t * prop, int action, void *arg,
 ///@{
 
 /// Volume (RW)
-static int mp_property_volume(m_option_t * prop, int action, void *arg,
-                              MPContext * mpctx)
+static int mp_property_volume(m_option_t *prop, int action, void *arg,
+                              MPContext *mpctx)
 {
 
     if (!mpctx->sh_audio)
@@ -628,8 +628,8 @@ static int mp_property_volume(m_option_t * prop, int action, void *arg,
 }
 
 /// Mute (RW)
-static int mp_property_mute(m_option_t * prop, int action, void *arg,
-                            MPContext * mpctx)
+static int mp_property_mute(m_option_t *prop, int action, void *arg,
+                            MPContext *mpctx)
 {
 
     if (!mpctx->sh_audio)
@@ -666,8 +666,8 @@ static int mp_property_mute(m_option_t * prop, int action, void *arg,
 }
 
 /// Audio delay (RW)
-static int mp_property_audio_delay(m_option_t * prop, int action,
-                                   void *arg, MPContext * mpctx)
+static int mp_property_audio_delay(m_option_t *prop, int action,
+                                   void *arg, MPContext *mpctx)
 {
     if (!(mpctx->sh_audio && mpctx->sh_video))
         return M_PROPERTY_UNAVAILABLE;
@@ -690,8 +690,8 @@ static int mp_property_audio_delay(m_option_t * prop, int action,
 }
 
 /// Audio codec tag (RO)
-static int mp_property_audio_format(m_option_t * prop, int action,
-                                    void *arg, MPContext * mpctx)
+static int mp_property_audio_format(m_option_t *prop, int action,
+                                    void *arg, MPContext *mpctx)
 {
     if (!mpctx->sh_audio)
         return M_PROPERTY_UNAVAILABLE;
@@ -699,8 +699,8 @@ static int mp_property_audio_format(m_option_t * prop, int action,
 }
 
 /// Audio codec name (RO)
-static int mp_property_audio_codec(m_option_t * prop, int action,
-                                   void *arg, MPContext * mpctx)
+static int mp_property_audio_codec(m_option_t *prop, int action,
+                                   void *arg, MPContext *mpctx)
 {
     if (!mpctx->sh_audio || !mpctx->sh_audio->codec)
         return M_PROPERTY_UNAVAILABLE;
@@ -708,8 +708,8 @@ static int mp_property_audio_codec(m_option_t * prop, int action,
 }
 
 /// Audio bitrate (RO)
-static int mp_property_audio_bitrate(m_option_t * prop, int action,
-                                     void *arg, MPContext * mpctx)
+static int mp_property_audio_bitrate(m_option_t *prop, int action,
+                                     void *arg, MPContext *mpctx)
 {
     if (!mpctx->sh_audio)
         return M_PROPERTY_UNAVAILABLE;
@@ -717,8 +717,8 @@ static int mp_property_audio_bitrate(m_option_t * prop, int action,
 }
 
 /// Samplerate (RO)
-static int mp_property_samplerate(m_option_t * prop, int action, void *arg,
-                                  MPContext * mpctx)
+static int mp_property_samplerate(m_option_t *prop, int action, void *arg,
+                                  MPContext *mpctx)
 {
     if (!mpctx->sh_audio)
         return M_PROPERTY_UNAVAILABLE;
@@ -733,8 +733,8 @@ static int mp_property_samplerate(m_option_t * prop, int action, void *arg,
 }
 
 /// Number of channels (RO)
-static int mp_property_channels(m_option_t * prop, int action, void *arg,
-                                MPContext * mpctx)
+static int mp_property_channels(m_option_t *prop, int action, void *arg,
+                                MPContext *mpctx)
 {
     if (!mpctx->sh_audio)
         return M_PROPERTY_UNAVAILABLE;
@@ -759,8 +759,8 @@ static int mp_property_channels(m_option_t * prop, int action, void *arg,
 }
 
 /// Balance (RW)
-static int mp_property_balance(m_option_t * prop, int action, void *arg,
-                              MPContext * mpctx)
+static int mp_property_balance(m_option_t *prop, int action, void *arg,
+                              MPContext *mpctx)
 {
     float bal;
 
@@ -810,8 +810,8 @@ static int mp_property_balance(m_option_t * prop, int action, void *arg,
 }
 
 /// Selected audio id (RW)
-static int mp_property_audio(m_option_t * prop, int action, void *arg,
-                             MPContext * mpctx)
+static int mp_property_audio(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
 {
     int current_id, tmp;
     if (!mpctx->demuxer || !mpctx->demuxer->audio)
@@ -884,8 +884,8 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 }
 
 /// Selected video id (RW)
-static int mp_property_video(m_option_t * prop, int action, void *arg,
-                             MPContext * mpctx)
+static int mp_property_video(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
 {
     int current_id, tmp;
     if (!mpctx->demuxer || !mpctx->demuxer->video)
@@ -940,8 +940,8 @@ static int mp_property_video(m_option_t * prop, int action, void *arg,
     }
 }
 
-static int mp_property_program(m_option_t * prop, int action, void *arg,
-                               MPContext * mpctx)
+static int mp_property_program(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
 {
     demux_program_t prog;
 
@@ -977,8 +977,8 @@ static int mp_property_program(m_option_t * prop, int action, void *arg,
 ///@{
 
 /// Fullscreen state (RW)
-static int mp_property_fullscreen(m_option_t * prop, int action, void *arg,
-                                  MPContext * mpctx)
+static int mp_property_fullscreen(m_option_t *prop, int action, void *arg,
+                                  MPContext *mpctx)
 {
 
     if (!mpctx->video_out)
@@ -1006,8 +1006,8 @@ static int mp_property_fullscreen(m_option_t * prop, int action, void *arg,
     }
 }
 
-static int mp_property_deinterlace(m_option_t * prop, int action,
-                                   void *arg, MPContext * mpctx)
+static int mp_property_deinterlace(m_option_t *prop, int action,
+                                   void *arg, MPContext *mpctx)
 {
     int deinterlace;
     vf_instance_t *vf;
@@ -1039,8 +1039,8 @@ static int mp_property_deinterlace(m_option_t * prop, int action,
 }
 
 /// Panscan (RW)
-static int mp_property_panscan(m_option_t * prop, int action, void *arg,
-                               MPContext * mpctx)
+static int mp_property_panscan(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
 {
 
     if (!mpctx->video_out
@@ -1073,8 +1073,8 @@ static int mp_property_panscan(m_option_t * prop, int action, void *arg,
 /// Helper to set vo flags.
 /** \ingroup PropertyImplHelper
  */
-static int mp_property_vo_flag(m_option_t * prop, int action, void *arg,
-                               int vo_ctrl, int *vo_var, MPContext * mpctx)
+static int mp_property_vo_flag(m_option_t *prop, int action, void *arg,
+                               int vo_ctrl, int *vo_var, MPContext *mpctx)
 {
 
     if (!mpctx->video_out)
@@ -1098,32 +1098,32 @@ static int mp_property_vo_flag(m_option_t * prop, int action, void *arg,
 }
 
 /// Window always on top (RW)
-static int mp_property_ontop(m_option_t * prop, int action, void *arg,
-                             MPContext * mpctx)
+static int mp_property_ontop(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
 {
     return mp_property_vo_flag(prop, action, arg, VOCTRL_ONTOP, &vo_ontop,
                                mpctx);
 }
 
 /// Display in the root window (RW)
-static int mp_property_rootwin(m_option_t * prop, int action, void *arg,
-                               MPContext * mpctx)
+static int mp_property_rootwin(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
 {
     return mp_property_vo_flag(prop, action, arg, VOCTRL_ROOTWIN,
                                &vo_rootwin, mpctx);
 }
 
 /// Show window borders (RW)
-static int mp_property_border(m_option_t * prop, int action, void *arg,
-                              MPContext * mpctx)
+static int mp_property_border(m_option_t *prop, int action, void *arg,
+                              MPContext *mpctx)
 {
     return mp_property_vo_flag(prop, action, arg, VOCTRL_BORDER,
                                &vo_border, mpctx);
 }
 
 /// Framedropping state (RW)
-static int mp_property_framedropping(m_option_t * prop, int action,
-                                     void *arg, MPContext * mpctx)
+static int mp_property_framedropping(m_option_t *prop, int action,
+                                     void *arg, MPContext *mpctx)
 {
 
     if (!mpctx->sh_video)
@@ -1143,8 +1143,8 @@ static int mp_property_framedropping(m_option_t * prop, int action,
 }
 
 /// Color settings, try to use vf/vo then fall back on TV. (RW)
-static int mp_property_gamma(m_option_t * prop, int action, void *arg,
-                             MPContext * mpctx)
+static int mp_property_gamma(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
 {
     int *gamma = prop->priv, r, val;
 
@@ -1200,15 +1200,15 @@ static int mp_property_gamma(m_option_t * prop, int action, void *arg,
 }
 
 /// VSync (RW)
-static int mp_property_vsync(m_option_t * prop, int action, void *arg,
-                             MPContext * mpctx)
+static int mp_property_vsync(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
 {
     return m_property_flag(prop, action, arg, &vo_vsync);
 }
 
 /// Video codec tag (RO)
-static int mp_property_video_format(m_option_t * prop, int action,
-                                    void *arg, MPContext * mpctx)
+static int mp_property_video_format(m_option_t *prop, int action,
+                                    void *arg, MPContext *mpctx)
 {
     char* meta;
     if (!mpctx->sh_video)
@@ -1242,8 +1242,8 @@ static int mp_property_video_format(m_option_t * prop, int action,
 }
 
 /// Video codec name (RO)
-static int mp_property_video_codec(m_option_t * prop, int action,
-                                   void *arg, MPContext * mpctx)
+static int mp_property_video_codec(m_option_t *prop, int action,
+                                   void *arg, MPContext *mpctx)
 {
     if (!mpctx->sh_video || !mpctx->sh_video->codec)
         return M_PROPERTY_UNAVAILABLE;
@@ -1252,8 +1252,8 @@ static int mp_property_video_codec(m_option_t * prop, int action,
 
 
 /// Video bitrate (RO)
-static int mp_property_video_bitrate(m_option_t * prop, int action,
-                                     void *arg, MPContext * mpctx)
+static int mp_property_video_bitrate(m_option_t *prop, int action,
+                                     void *arg, MPContext *mpctx)
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
@@ -1261,8 +1261,8 @@ static int mp_property_video_bitrate(m_option_t * prop, int action,
 }
 
 /// Video display width (RO)
-static int mp_property_width(m_option_t * prop, int action, void *arg,
-                             MPContext * mpctx)
+static int mp_property_width(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
@@ -1270,8 +1270,8 @@ static int mp_property_width(m_option_t * prop, int action, void *arg,
 }
 
 /// Video display height (RO)
-static int mp_property_height(m_option_t * prop, int action, void *arg,
-                              MPContext * mpctx)
+static int mp_property_height(m_option_t *prop, int action, void *arg,
+                              MPContext *mpctx)
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
@@ -1279,8 +1279,8 @@ static int mp_property_height(m_option_t * prop, int action, void *arg,
 }
 
 /// Video fps (RO)
-static int mp_property_fps(m_option_t * prop, int action, void *arg,
-                           MPContext * mpctx)
+static int mp_property_fps(m_option_t *prop, int action, void *arg,
+                           MPContext *mpctx)
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
@@ -1288,8 +1288,8 @@ static int mp_property_fps(m_option_t * prop, int action, void *arg,
 }
 
 /// Video aspect (RO)
-static int mp_property_aspect(m_option_t * prop, int action, void *arg,
-                              MPContext * mpctx)
+static int mp_property_aspect(m_option_t *prop, int action, void *arg,
+                              MPContext *mpctx)
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
@@ -1303,8 +1303,8 @@ static int mp_property_aspect(m_option_t * prop, int action, void *arg,
 ///@{
 
 /// Text subtitle position (RW)
-static int mp_property_sub_pos(m_option_t * prop, int action, void *arg,
-                               MPContext * mpctx)
+static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
 {
     switch (action) {
     case M_PROPERTY_SET:
@@ -1319,8 +1319,8 @@ static int mp_property_sub_pos(m_option_t * prop, int action, void *arg,
 }
 
 /// Selected subtitles (RW)
-static int mp_property_sub(m_option_t * prop, int action, void *arg,
-                           MPContext * mpctx)
+static int mp_property_sub(m_option_t *prop, int action, void *arg,
+                           MPContext *mpctx)
 {
     demux_stream_t *const d_sub = mpctx->d_sub;
     const int global_sub_size = mpctx->global_sub_size;
@@ -1522,8 +1522,8 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 }
 
 /// Selected sub source (RW)
-static int mp_property_sub_source(m_option_t * prop, int action, void *arg,
-                                  MPContext * mpctx)
+static int mp_property_sub_source(m_option_t *prop, int action, void *arg,
+                                  MPContext *mpctx)
 {
     int source;
     if (!mpctx->sh_video || mpctx->global_sub_size <= 0)
@@ -1600,8 +1600,8 @@ static int mp_property_sub_source(m_option_t * prop, int action, void *arg,
 }
 
 /// Selected subtitles from specific source (RW)
-static int mp_property_sub_by_type(m_option_t * prop, int action, void *arg,
-                                   MPContext * mpctx)
+static int mp_property_sub_by_type(m_option_t *prop, int action, void *arg,
+                                   MPContext *mpctx)
 {
     int source, is_cur_source, offset;
     if (!mpctx->sh_video || mpctx->global_sub_size <= 0)
@@ -1700,8 +1700,8 @@ static int mp_property_sub_by_type(m_option_t * prop, int action, void *arg,
 }
 
 /// Subtitle delay (RW)
-static int mp_property_sub_delay(m_option_t * prop, int action, void *arg,
-                                 MPContext * mpctx)
+static int mp_property_sub_delay(m_option_t *prop, int action, void *arg,
+                                 MPContext *mpctx)
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
@@ -1709,8 +1709,8 @@ static int mp_property_sub_delay(m_option_t * prop, int action, void *arg,
 }
 
 /// Alignment of text subtitles (RW)
-static int mp_property_sub_alignment(m_option_t * prop, int action,
-                                     void *arg, MPContext * mpctx)
+static int mp_property_sub_alignment(m_option_t *prop, int action,
+                                     void *arg, MPContext *mpctx)
 {
     char *name[] = { MSGTR_Top, MSGTR_Center, MSGTR_Bottom };
 
@@ -1737,8 +1737,8 @@ static int mp_property_sub_alignment(m_option_t * prop, int action,
 }
 
 /// Subtitle visibility (RW)
-static int mp_property_sub_visibility(m_option_t * prop, int action,
-                                      void *arg, MPContext * mpctx)
+static int mp_property_sub_visibility(m_option_t *prop, int action,
+                                      void *arg, MPContext *mpctx)
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
@@ -1759,8 +1759,8 @@ static int mp_property_sub_visibility(m_option_t * prop, int action,
 
 #ifdef CONFIG_ASS
 /// Use margins for libass subtitles (RW)
-static int mp_property_ass_use_margins(m_option_t * prop, int action,
-                                      void *arg, MPContext * mpctx)
+static int mp_property_ass_use_margins(m_option_t *prop, int action,
+                                      void *arg, MPContext *mpctx)
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
@@ -1779,8 +1779,8 @@ static int mp_property_ass_use_margins(m_option_t * prop, int action,
 #endif
 
 /// Show only forced subtitles (RW)
-static int mp_property_sub_forced_only(m_option_t * prop, int action,
-                                       void *arg, MPContext * mpctx)
+static int mp_property_sub_forced_only(m_option_t *prop, int action,
+                                       void *arg, MPContext *mpctx)
 {
     if (!vo_spudec)
         return M_PROPERTY_UNAVAILABLE;
@@ -1802,8 +1802,8 @@ static int mp_property_sub_forced_only(m_option_t * prop, int action,
 
 #ifdef CONFIG_FREETYPE
 /// Subtitle scale (RW)
-static int mp_property_sub_scale(m_option_t * prop, int action, void *arg,
-                              MPContext * mpctx)
+static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
+                              MPContext *mpctx)
 {
 
     switch (action) {
@@ -1855,8 +1855,8 @@ static int mp_property_sub_scale(m_option_t * prop, int action, void *arg,
 #ifdef CONFIG_TV
 
 /// TV color settings (RW)
-static int mp_property_tv_color(m_option_t * prop, int action, void *arg,
-                                MPContext * mpctx)
+static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
+                                MPContext *mpctx)
 {
     int r, val;
     tvi_handle_t *tvh = mpctx->demuxer->priv;
@@ -1888,8 +1888,8 @@ static int mp_property_tv_color(m_option_t * prop, int action, void *arg,
 
 #endif
 
-static int mp_property_teletext_common(m_option_t * prop, int action, void *arg,
-                  MPContext * mpctx)
+static int mp_property_teletext_common(m_option_t *prop, int action, void *arg,
+                  MPContext *mpctx)
 {
     int val,result;
     int base_ioctl=(int)prop->priv;
@@ -1928,8 +1928,8 @@ static int mp_property_teletext_common(m_option_t * prop, int action, void *arg,
     return result == VBI_CONTROL_TRUE ? M_PROPERTY_OK : M_PROPERTY_ERROR;
 }
 
-static int mp_property_teletext_mode(m_option_t * prop, int action, void *arg,
-                  MPContext * mpctx)
+static int mp_property_teletext_mode(m_option_t *prop, int action, void *arg,
+                  MPContext *mpctx)
 {
     int result;
     int val;
@@ -1947,8 +1947,8 @@ static int mp_property_teletext_mode(m_option_t * prop, int action, void *arg,
     return M_PROPERTY_OK;
 }
 
-static int mp_property_teletext_page(m_option_t * prop, int action, void *arg,
-                  MPContext * mpctx)
+static int mp_property_teletext_page(m_option_t *prop, int action, void *arg,
+                  MPContext *mpctx)
 {
     int result;
     int val;
@@ -2147,7 +2147,7 @@ char* mp_property_print(const char *name, void* ctx)
     return ret;
 }
 
-char *property_expand_string(MPContext * mpctx, char *str)
+char *property_expand_string(MPContext *mpctx, char *str)
 {
     return m_properties_expand_string(mp_properties, str, mpctx);
 }
@@ -2247,10 +2247,10 @@ static struct {
 
 
 /// Handle commands that set a property.
-static int set_property_command(MPContext * mpctx, mp_cmd_t * cmd)
+static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     int i, r;
-    m_option_t* prop;
+    m_option_t *prop;
     const char *pname;
 
     // look for the command
@@ -2407,7 +2407,7 @@ static void remove_subtitle_range(MPContext *mpctx, int start, int count)
     }
 }
 
-int run_command(MPContext * mpctx, mp_cmd_t * cmd)
+int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     sh_audio_t * const sh_audio = mpctx->sh_audio;
     sh_video_t * const sh_video = mpctx->sh_video;
@@ -2461,7 +2461,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
                 double d;
                 off_t o;
                 if (cmd->args[1].v.f) {
-                    m_option_t* prop;
+                    m_option_t *prop;
                     if((r = mp_property_do(cmd->args[0].v.s,
                                            M_PROPERTY_GET_TYPE,
                                            &prop, mpctx)) <= 0)
