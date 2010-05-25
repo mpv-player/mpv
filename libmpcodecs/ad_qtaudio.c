@@ -33,7 +33,7 @@
 #include "loader/wine/windef.h"
 #endif
 
-static const ad_info_t info =  {
+static const ad_info_t info = {
 	"QuickTime Audio Decoder",
 	"qtaudio",
 	"A'rpi",

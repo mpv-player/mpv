@@ -25,7 +25,7 @@
 #include "config.h"
 #include "ad_internal.h"
 
-static const ad_info_t info =  {
+static const ad_info_t info = {
 	"Sample audio decoder",  // name of the driver
 	"sample",    // driver name. should be the same as filename without ad_
 	"A'rpi",     // writer/maintainer of _this_ file
