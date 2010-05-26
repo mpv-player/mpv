@@ -225,7 +225,7 @@ static int cache_fill(cache_vars_t *s)
   //memcpy(&s->buffer[pos],s->stream->buffer,len); // avoid this extra copy!
   // ....
   len=stream_read(s->stream,&s->buffer[pos],space);
-  if(!len) s->eof=1;
+  s->eof= !len;
 
   s->max_filepos+=len;
   if(pos+len>=s->buffer_size){
@@ -477,7 +477,6 @@ static void *ThreadProc( void *s ){
 
 int cache_stream_fill_buffer(stream_t *s){
   int len;
-  if(s->eof){ s->buf_pos=s->buf_len=0; return 0; }
   if(!s->cache_pid) return stream_fill_buffer(s);
 
 //  cache_stats(s->cache_data);
@@ -488,6 +487,7 @@ int cache_stream_fill_buffer(stream_t *s){
   //printf("cache_stream_fill_buffer->read -> %d\n",len);
 
   if(len<=0){ s->eof=1; s->buf_pos=s->buf_len=0; return 0; }
+  s->eof=0;
   s->buf_pos=0;
   s->buf_len=len;
   s->pos+=len;
