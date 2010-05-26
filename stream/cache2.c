@@ -102,7 +102,10 @@ static void cache_wakeup(stream_t *s)
 {
 #if FORKED_CACHE
   // signal process to wake up immediately
-  kill(s->cache_pid, SIGUSR1);
+  // Disabled for now since it causes incorrect EOFs
+  // due to interrupting read syscalls - this should be
+  // fixed instead though
+//  kill(s->cache_pid, SIGUSR1);
 #endif
 }
 
