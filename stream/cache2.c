@@ -102,10 +102,7 @@ static void cache_wakeup(stream_t *s)
 {
 #if FORKED_CACHE
   // signal process to wake up immediately
-  // Disabled for now since it causes incorrect EOFs
-  // due to interrupting read syscalls - this should be
-  // fixed instead though
-//  kill(s->cache_pid, SIGUSR1);
+  kill(s->cache_pid, SIGUSR1);
 #endif
 }
 
@@ -356,11 +353,20 @@ static void cache_mainloop(cache_vars_t *s) {
     int sleep_count = 0;
     do {
         if (!cache_fill(s)) {
+#if FORKED_CACHE
+            // Let signal wake us up, we cannot leave this
+            // enabled since we do not handle EINTR in most places.
+            // This might need extra code to work on BSD.
+            signal(SIGUSR1, dummy_sighandler);
+#endif
             if (sleep_count < INITIAL_FILL_USLEEP_COUNT) {
                 sleep_count++;
                 usec_sleep(INITIAL_FILL_USLEEP_TIME);
             } else
                 usec_sleep(FILL_USLEEP_TIME); // idle
+#if FORKED_CACHE
+            signal(SIGUSR1, SIG_IGN);
+#endif
         } else
             sleep_count = 0;
 //        cache_stats(s->cache_data);
@@ -449,7 +455,6 @@ err_out:
   use_gui = 0; // mp_msg may not use gui stuff in forked code
 #endif
   signal(SIGTERM,exit_sighandler); // kill
-  signal(SIGUSR1, dummy_sighandler); // wakeup
   cache_mainloop(s);
   // make sure forked code never leaves this function
   exit(0);
