@@ -284,6 +284,7 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
 }
 
 #ifdef FAST_OSD_TABLE
+static unsigned short fast_osd_12bpp_table[256];
 static unsigned short fast_osd_15bpp_table[256];
 static unsigned short fast_osd_16bpp_table[256];
 #endif
@@ -292,6 +293,7 @@ void vo_draw_alpha_init(void){
 #ifdef FAST_OSD_TABLE
     int i;
     for(i=0;i<256;i++){
+        fast_osd_12bpp_table[i]=((i>>4)<< 8)|((i>>4)<<4)|(i>>4);
         fast_osd_15bpp_table[i]=((i>>3)<<10)|((i>>3)<<5)|(i>>3);
         fast_osd_16bpp_table[i]=((i>>3)<<11)|((i>>2)<<5)|(i>>3);
     }
