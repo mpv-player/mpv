@@ -409,8 +409,11 @@ static void resize(struct vo *vo)
         }
         // Creation of output_surfaces
         for (i = 0; i <= vc->num_output_surfaces; i++) {
-            if (vc->output_surfaces[i] != VDP_INVALID_HANDLE)
-                vdp->output_surface_destroy(vc->output_surfaces[i]);
+            if (vc->output_surfaces[i] != VDP_INVALID_HANDLE) {
+                vdp_st = vdp->output_surface_destroy(vc->output_surfaces[i]);
+                CHECK_ST_WARNING("Error when calling "
+                                 "vdp_output_surface_destroy");
+            }
             vdp_st = vdp->output_surface_create(vc->vdp_device,
                                                 VDP_RGBA_FORMAT_B8G8R8A8,
                                                 vc->output_surface_width,
@@ -811,7 +814,7 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
     vc->video_mixer = VDP_INVALID_HANDLE;
     vc->flip_queue = VDP_INVALID_HANDLE;
     vc->flip_target = VDP_INVALID_HANDLE;
-    for (int i = 0; i <= vc->num_output_surfaces; i++)
+    for (int i = 0; i <= MAX_OUTPUT_SURFACES; i++)
         vc->output_surfaces[i] = VDP_INVALID_HANDLE;
     vc->vdp_device = VDP_INVALID_HANDLE;
     vc->eosd_surface = (struct eosd_bitmap_surface){
@@ -1211,8 +1214,10 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
         reallocate = true;
     }
     if (reallocate) {
-        if (sfc->surface != VDP_INVALID_HANDLE)
-            vdp->bitmap_surface_destroy(sfc->surface);
+        if (sfc->surface != VDP_INVALID_HANDLE) {
+            vdp_st = vdp->bitmap_surface_destroy(sfc->surface);
+            CHECK_ST_WARNING("Error when calling vdp_bitmap_surface_destroy");
+        }
         mp_msg(MSGT_VO, MSGL_V, "[vdpau] Allocating a %dx%d surface for "
                "EOSD bitmaps.\n", sfc->w, sfc->h);
         vdp_st = vdp->bitmap_surface_create(vc->vdp_device, VDP_RGBA_FORMAT_A8,
