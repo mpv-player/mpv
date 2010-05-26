@@ -1229,8 +1229,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
                     mmioFOURCC('R', 'V', track->codec_id[9], '0');
             dst = (unsigned char *) (bih + 1);
             // copy type1 and type2 info from rv properties
-            memcpy(dst, src - 8, 8);
-            stream_read(demuxer->stream, dst + 8, cnt);
+            memcpy(dst, src - 8, 8 + cnt);
             track->realmedia = 1;
 
 #ifdef CONFIG_QTX_CODECS
