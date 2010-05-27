@@ -25,6 +25,9 @@ MPlayer (1.0)
     * fix length in ASF/WMV files
     * support ISDB-Tb DVB streams
 
+    Filters:
+    * remove vf_yuy2, functionality is replaced by -vf format=yuv2
+
     Drivers:
     * -vo md5sum md5 calculation changed so output matches FFmpeg's -f framemd5
     * Support for more formats in OpenGL video output drivers (different YUV
@@ -126,7 +129,6 @@ MPlayer (1.0)
     * add af_scaletempo which maintains audio pitch when changing playback speed
     * fix multi-channel reordering
     * af_stats filter to print information about the audio stream
-    * remove vf_yuy2, functionality is replaced by -vf format=yuv2
 
     Streaming:
     * tv:// support for Windows
