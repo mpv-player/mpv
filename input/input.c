@@ -541,17 +541,17 @@ typedef struct mp_input_fd {
   int pos,size;
 } mp_input_fd_t;
 
-typedef struct mp_cmd_filter_st mp_cmd_filter_t;
+typedef struct mp_cmd_filter mp_cmd_filter_t;
 
-struct mp_cmd_filter_st {
+struct mp_cmd_filter {
   mp_input_cmd_filter filter;
   void* ctx;
   mp_cmd_filter_t* next;
 };
 
-typedef struct mp_cmd_bind_section_st mp_cmd_bind_section_t;
+typedef struct mp_cmd_bind_section mp_cmd_bind_section_t;
 
-struct mp_cmd_bind_section_st {
+struct mp_cmd_bind_section {
   mp_cmd_bind_t* cmd_binds;
   char* section;
   mp_cmd_bind_section_t* next;
