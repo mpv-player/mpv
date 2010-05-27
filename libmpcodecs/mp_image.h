@@ -96,7 +96,7 @@
 #define MP_IMGFIELD_BOTTOM 0x10
 #define MP_IMGFIELD_INTERLACED 0x20
 
-typedef struct mp_image_s {
+typedef struct mp_image {
     unsigned int flags;
     unsigned char type;
     int number;
