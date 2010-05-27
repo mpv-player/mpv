@@ -353,7 +353,7 @@ const m_option_t msgl_config[]={
     "   netst      - Netstream\n"
     "   muxer      - muxer layer\n"
     "   identify   - identify output\n"
-    "   ass    - libass messages\n"
+    "   ass        - libass messages\n"
     "   statusline - playback/encoding status line\n"
     "\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
