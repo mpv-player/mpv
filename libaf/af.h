@@ -106,7 +106,7 @@ typedef struct af_cfg_s{
 }af_cfg_t;
 
 // Current audio stream
-typedef struct af_stream_s
+typedef struct af_stream
 {
   // The first and last filter in the list
   af_instance_t* first;

@@ -72,7 +72,7 @@ typedef struct sh_audio {
   int a_out_buffer_len;
   int a_out_buffer_size;
 //  void* audio_out;        // the audio_out handle, used for this audio stream
-  struct af_stream_s *afilter;          // the audio filter stream
+  struct af_stream *afilter;          // the audio filter stream
   struct ad_functions *ad_driver;
 #ifdef CONFIG_DYNAMIC_PLUGINS
   void *dec_handle;
