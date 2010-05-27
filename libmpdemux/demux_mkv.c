@@ -1963,14 +1963,13 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
 
       if (track->a_formattag == mmioFOURCC('f', 'L', 'a', 'C'))
         {
-          ptr = (unsigned char *)track->private_data;
+          ptr = track->private_data;
           size = track->private_size;
         }
       else
         {
           sh_a->format = mmioFOURCC('f', 'L', 'a', 'C');
-          ptr = (unsigned char *) track->private_data
-            + sizeof (WAVEFORMATEX);
+          ptr = track->private_data + sizeof (WAVEFORMATEX);
           size = track->private_size - sizeof (WAVEFORMATEX);
         }
       if (size < 4 || ptr[0] != 'f' || ptr[1] != 'L' ||
