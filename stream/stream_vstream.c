@@ -95,11 +95,11 @@ static int seek(stream_t *s,off_t newpos) {
   return 1;
 }
 
-static int control(struct stream_st *s,int cmd,void* arg) {
+static int control(struct stream *s, int cmd, void *arg) {
   return STREAM_UNSUPPORTED;
 }
 
-static void close_s(struct stream_st *s) {
+static void close_s(struct stream *s) {
 }
 
 static int open_s(stream_t *stream, int mode, void* opts, int* file_format) {

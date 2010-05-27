@@ -155,7 +155,7 @@ static const struct m_struct_st stream_opts = {
     stream_opts_fields
 };
 
-static void close_s(struct stream_st * stream);
+static void close_s(struct stream *stream);
 #ifdef CONFIG_RADIO_CAPTURE
 static int clear_buffer(radio_priv_t* priv);
 #endif
@@ -900,7 +900,7 @@ static int init_audio(radio_priv_t *priv)
  * \parameter frequency pointer to float, which will contain frequency in MHz
  * \return 1 if success,0 - otherwise
  */
-int radio_get_freq(struct stream_st *stream, float* frequency){
+int radio_get_freq(struct stream *stream, float *frequency){
     radio_priv_t* priv=(radio_priv_t*)stream->priv;
 
     if (!frequency)
@@ -915,7 +915,7 @@ int radio_get_freq(struct stream_st *stream, float* frequency){
  * \parameter frequency frequency in MHz
  * \return 1 if success,0 - otherwise
  */
-int radio_set_freq(struct stream_st *stream, float frequency){
+int radio_set_freq(struct stream *stream, float frequency){
     radio_priv_t* priv=(radio_priv_t*)stream->priv;
 
     if (set_frequency(priv,frequency)!=STREAM_OK){
@@ -934,7 +934,7 @@ int radio_set_freq(struct stream_st *stream, float frequency){
  * \return 1 if success,0 - otherwise
  *
  */
-int radio_step_freq(struct stream_st *stream, float step_interval){
+int radio_step_freq(struct stream *stream, float step_interval){
     float frequency;
     radio_priv_t* priv=(radio_priv_t*)stream->priv;
 
@@ -957,7 +957,7 @@ int radio_step_freq(struct stream_st *stream, float step_interval){
  *  if channel parameter is NULL function prints error message and does nothing, otherwise
  *  changes channel to prev or next in list
  */
-int radio_step_channel(struct stream_st *stream, int direction) {
+int radio_step_channel(struct stream *stream, int direction) {
     radio_priv_t* priv=(radio_priv_t*)stream->priv;
 
     if (priv->radio_channel_list) {
@@ -999,7 +999,7 @@ int radio_step_channel(struct stream_st *stream, int direction) {
  *  if channel parameter is NULL function prints error message and does nothing, otherwise
  *  changes channel to given
  */
-int radio_set_channel(struct stream_st *stream, char *channel) {
+int radio_set_channel(struct stream *stream, char *channel) {
     radio_priv_t* priv=(radio_priv_t*)stream->priv;
     int i, channel_int;
     radio_channels_t* tmp;
@@ -1047,7 +1047,7 @@ int radio_set_channel(struct stream_st *stream, char *channel) {
  *
  *  NOTE: return value may be NULL (e.g. when channel list not initialized)
  */
-char* radio_get_channel_name(struct stream_st *stream){
+char* radio_get_channel_name(struct stream *stream){
     radio_priv_t* priv=(radio_priv_t*)stream->priv;
     if (priv->radio_channel_current) {
         return priv->radio_channel_current->name;
@@ -1059,7 +1059,7 @@ char* radio_get_channel_name(struct stream_st *stream){
  * \brief fills given buffer with audio data
  * \return number of bytes, written into buffer
  */
-static int fill_buffer_s(struct stream_st *s, char* buffer, int max_len){
+static int fill_buffer_s(struct stream *s, char* buffer, int max_len){
     int len=max_len;
 
 #ifdef CONFIG_RADIO_CAPTURE
@@ -1220,7 +1220,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 /*****************************************************************
  * Close stream. Clear structures.
  */
-static void close_s(struct stream_st * stream){
+static void close_s(struct stream *stream){
     radio_priv_t* priv=(radio_priv_t*)stream->priv;
     radio_channels_t * tmp;
     if (!priv) return;

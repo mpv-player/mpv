@@ -30,10 +30,10 @@
 
 /// \file
 
-struct stream_st;
+struct stream;
 
 typedef struct play_tree_parser {
-  struct stream_st* stream;
+  struct stream *stream;
   char *buffer,*iter,*line;
   int buffer_size , buffer_end;
   int deep,keep;
@@ -46,7 +46,7 @@ typedef struct play_tree_parser {
  *  \return The new parser.
  */
 play_tree_parser_t*
-play_tree_parser_new(struct stream_st* stream,int deep);
+play_tree_parser_new(struct stream *stream, int deep);
 
 /// Destroy a parser.
 void

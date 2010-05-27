@@ -22,7 +22,7 @@
 /// \file
 /// \ingroup Playtree
 
-struct stream_st;
+struct stream;
 struct m_config;
 
 /// \defgroup PlaytreeIterReturn Playtree iterator return code
@@ -246,7 +246,7 @@ play_tree_iter_get_file(play_tree_iter_t* iter, int d);
 /** \ingroup PlaytreeParser
  */
 play_tree_t*
-parse_playtree(struct stream_st *stream, int forced);
+parse_playtree(struct stream *stream, int forced);
 
 /// Clean a tree by destroying all empty elements.
 play_tree_t*

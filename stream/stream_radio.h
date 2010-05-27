@@ -55,11 +55,11 @@ typedef struct radio_param_s{
 
 extern radio_param_t stream_radio_defaults;
 
-int radio_set_freq(struct stream_st *stream, float freq);
-int radio_get_freq(struct stream_st *stream, float* freq);
-char* radio_get_channel_name(struct stream_st *stream);
-int radio_set_channel(struct stream_st *stream, char *channel);
-int radio_step_channel(struct stream_st *stream, int direction);
-int radio_step_freq(struct stream_st *stream, float step_interval);
+int radio_set_freq(struct stream *stream, float freq);
+int radio_get_freq(struct stream *stream, float* freq);
+char* radio_get_channel_name(struct stream *stream);
+int radio_set_channel(struct stream *stream, char *channel);
+int radio_step_channel(struct stream *stream, int direction);
+int radio_step_freq(struct stream *stream, float step_interval);
 
 #endif /* MPLAYER_STREAM_RADIO_H */

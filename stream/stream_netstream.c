@@ -201,7 +201,7 @@ static int seek(stream_t *s,off_t newpos) {
   return 1;
 }
 
-static int net_stream_reset(struct stream_st *s) {
+static int net_stream_reset(struct stream *s) {
   mp_net_stream_packet_t* pack;
 
   pack = send_net_stream_cmd(s,NET_STREAM_RESET,NULL,0);
@@ -212,7 +212,7 @@ static int net_stream_reset(struct stream_st *s) {
   return 1;
 }
 
-static int control(struct stream_st *s,int cmd,void* arg) {
+static int control(struct stream *s,int cmd,void* arg) {
   switch(cmd) {
   case STREAM_CTRL_RESET:
     return net_stream_reset(s);
@@ -220,7 +220,7 @@ static int control(struct stream_st *s,int cmd,void* arg) {
   return STREAM_UNSUPPORTED;
 }
 
-static void close_s(struct stream_st *s) {
+static void close_s(struct stream *s) {
   mp_net_stream_packet_t* pack;
 
   pack = send_net_stream_cmd(s,NET_STREAM_CLOSE,NULL,0);

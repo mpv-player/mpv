@@ -114,7 +114,7 @@ typedef struct streaming_control {
 	void *data;
 } streaming_ctrl_t;
 
-struct stream_st;
+struct stream;
 typedef struct stream_info_st {
   const char *info;
   const char *name;
@@ -123,7 +123,7 @@ typedef struct stream_info_st {
   /// mode isn't used atm (ie always READ) but it shouldn't be ignored
   /// opts is at least in it's defaults settings and may have been
   /// altered by url parsing if enabled and the options string parsing.
-  int (*open)(struct stream_st* st, int mode, void* opts, int* file_format);
+  int (*open)(struct stream* st, int mode, void* opts, int* file_format);
   const char* protocols[MAX_STREAM_PROTOCOLS];
   const void* opts;
   int opts_url; /* If this is 1 we will parse the url as an option string
@@ -131,19 +131,19 @@ typedef struct stream_info_st {
 		 * options string given to open_stream_plugin */
 } stream_info_t;
 
-typedef struct stream_st {
+typedef struct stream {
   // Read
-  int (*fill_buffer)(struct stream_st *s, char* buffer, int max_len);
+  int (*fill_buffer)(struct stream *s, char* buffer, int max_len);
   // Write
-  int (*write_buffer)(struct stream_st *s, char* buffer, int len);
+  int (*write_buffer)(struct stream *s, char* buffer, int len);
   // Seek
-  int (*seek)(struct stream_st *s,off_t pos);
+  int (*seek)(struct stream *s,off_t pos);
   // Control
   // Will be later used to let streams like dvd and cdda report
   // their structure (ie tracks, chapters, etc)
-  int (*control)(struct stream_st *s,int cmd,void* arg);
+  int (*control)(struct stream *s,int cmd,void* arg);
   // Close
-  void (*close)(struct stream_st *s);
+  void (*close)(struct stream *s);
 
   int fd;   // file descriptor, see man open(2)
   int type; // see STREAMTYPE_*
