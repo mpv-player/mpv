@@ -2040,8 +2040,6 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
   return 0;
 }
 
-static void demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags);
-
 static int
 demux_mkv_open (demuxer_t *demuxer)
 {
