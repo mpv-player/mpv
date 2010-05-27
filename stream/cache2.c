@@ -19,11 +19,11 @@
 #include "config.h"
 
 // Initial draft of my new cache system...
-// Note it runs in 2 processes (using fork()), but doesn't requires locking!!
+// Note it runs in 2 processes (using fork()), but doesn't require locking!!
 // TODO: seeking, data consistency checking
 
 #define READ_USLEEP_TIME 10000
-// These defines are used to reduce the cost of many succesive
+// These defines are used to reduce the cost of many successive
 // seeks (e.g. when a file has no index) by spinning quickly at first.
 #define INITIAL_FILL_USLEEP_TIME 1000
 #define INITIAL_FILL_USLEEP_COUNT 10
@@ -68,12 +68,12 @@ extern int use_gui;
 
 typedef struct {
   // constats:
-  unsigned char *buffer;      // base pointer of the alllocated buffer memory
-  int buffer_size; // size of the alllocated buffer memory
+  unsigned char *buffer;      // base pointer of the allocated buffer memory
+  int buffer_size; // size of the allocated buffer memory
   int sector_size; // size of a single sector (2048/2324)
   int back_size;   // we should keep back_size amount of old bytes for backward seek
   int fill_limit;  // we should fill buffer only if space>=fill_limit
-  int seek_limit;  // keep filling cache if distanse is less that seek limit
+  int seek_limit;  // keep filling cache if distance is less that seek limit
   // filler's pointers:
   int eof;
   off_t min_filepos; // buffer contain only a part of the file, from min-max pos
@@ -394,7 +394,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
 
 
   //make sure that we won't wait from cache_fill
-  //more data than it is alowed to fill
+  //more data than it is allowed to fill
   if (s->seek_limit > s->buffer_size - s->fill_limit ){
      s->seek_limit = s->buffer_size - s->fill_limit;
   }
