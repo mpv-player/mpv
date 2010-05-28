@@ -1203,6 +1203,9 @@ static mp_cmd_t *check_autorepeat(int paused)
 }
 
 
+/**
+ * \param time time to wait at most for an event in milliseconds
+ */
 static mp_cmd_t *read_events(int time, int paused)
 {
     int i;
@@ -1899,6 +1902,9 @@ static int mp_input_print_cmd_list(m_option_t* cfg) {
   exit(0);
 }
 
+/**
+ * \param time time to wait for an interruption in milliseconds
+ */
 int
 mp_input_check_interrupt(int time) {
   mp_cmd_t* cmd;
