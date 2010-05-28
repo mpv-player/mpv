@@ -578,7 +578,7 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
   cache_wakeup(stream);
   while (s->control != -1) {
     if (sleep_count++ == 1000)
-      mp_msg(MSGT_CACHE, MSGL_WARN, "Cache no responding!\n");
+      mp_msg(MSGT_CACHE, MSGL_WARN, "Cache not responding!\n");
     if (stream_check_interrupt(CONTROL_SLEEP_TIME)) {
       s->eof = 1;
       return STREAM_UNSUPPORTED;
