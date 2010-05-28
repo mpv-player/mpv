@@ -22,7 +22,7 @@
 // Note it runs in 2 processes (using fork()), but doesn't require locking!!
 // TODO: seeking, data consistency checking
 
-#define READ_USLEEP_TIME 10000
+#define READ_SLEEP_TIME 10
 // These defines are used to reduce the cost of many successive
 // seeks (e.g. when a file has no index) by spinning quickly at first.
 #define INITIAL_FILL_USLEEP_TIME 1000
@@ -127,14 +127,14 @@ static int cache_read(cache_vars_t *s, unsigned char *buf, int size)
 	// eof?
 	if(s->eof) break;
 	if (s->max_filepos == last_max) {
-	    if (sleep_count++ == 5)
+	    if (sleep_count++ == 10)
 	        mp_msg(MSGT_CACHE, MSGL_WARN, "Cache not filling!\n");
 	} else {
 	    last_max = s->max_filepos;
 	    sleep_count = 0;
 	}
 	// waiting for buffer fill...
-	if (stream_check_interrupt(READ_USLEEP_TIME)) {
+	if (stream_check_interrupt(READ_SLEEP_TIME)) {
 	    s->eof = 1;
 	    break;
 	}
