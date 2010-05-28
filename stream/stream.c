@@ -486,7 +486,10 @@ void stream_set_interrupt_callback(int (*cb)(int)) {
 }
 
 int stream_check_interrupt(int time) {
-    if(!stream_check_interrupt_cb) return 0;
+    if(!stream_check_interrupt_cb) {
+        usec_sleep(time * 1000);
+        return 0;
+    }
     return stream_check_interrupt_cb(time);
 }
 
