@@ -351,6 +351,9 @@ static void dummy_sighandler(int x) {
  */
 static void cache_mainloop(cache_vars_t *s) {
     int sleep_count = 0;
+#if FORKED_CACHE
+    signal(SIGUSR1, SIG_IGN);
+#endif
     do {
         if (!cache_fill(s)) {
 #if FORKED_CACHE
@@ -401,6 +404,10 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
   if (min > s->buffer_size - s->fill_limit) {
      min = s->buffer_size - s->fill_limit;
   }
+  // to make sure we wait for the cache process/thread to be active
+  // before continuing
+  if (min <= 0)
+    min = 1;
 
 #if FORKED_CACHE
   if((stream->cache_pid=fork())){
