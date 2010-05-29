@@ -127,18 +127,18 @@ static int init(sh_audio_t * sh_audio)
     return 1;
 }
 
-static int preinit(sh_audio_t * sh)
+static int preinit(sh_audio_t *sh)
 {
     sh->audio_out_minsize = 2048;
     return 1;
 }
 
-static void uninit(sh_audio_t * sh)
+static void uninit(sh_audio_t *sh)
 {
     talloc_free(sh->context);
 }
 
-static int control(sh_audio_t * sh, int cmd, void *arg, ...)
+static int control(sh_audio_t *sh, int cmd, void *arg, ...)
 {
     struct ad_pcm_context *ctx = sh->context;
     int skip;
@@ -155,7 +155,7 @@ static int control(sh_audio_t * sh, int cmd, void *arg, ...)
     return CONTROL_UNKNOWN;
 }
 
-static int decode_audio(sh_audio_t * sh_audio, unsigned char *buf, int minlen,
+static int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
                         int maxlen)
 {
     int len = sh_audio->channels * sh_audio->samplesize;

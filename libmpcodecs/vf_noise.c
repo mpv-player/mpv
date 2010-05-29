@@ -313,14 +313,14 @@ static void noise(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int 
 	if (fp->shiftptr == 3) fp->shiftptr = 0;
 }
 
-static int config(struct vf_instance* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
 
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static void get_image(struct vf_instance* vf, mp_image_t *mpi){
+static void get_image(struct vf_instance *vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
     if(mpi->imgfmt!=vf->priv->outfmt) return; // colorspace differ
     // ok, we can do pp in-place (or pp disabled):
@@ -338,7 +338,7 @@ static void get_image(struct vf_instance* vf, mp_image_t *mpi){
     mpi->flags|=MP_IMGFLAG_DIRECT;
 }
 
-static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	mp_image_t *dmpi;
 
 	if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
@@ -367,7 +367,7 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
 	return vf_next_put_image(vf,dmpi, pts);
 }
 
-static void uninit(struct vf_instance* vf){
+static void uninit(struct vf_instance *vf){
 	if(!vf->priv) return;
 
 	if(vf->priv->chromaParam.noise) av_free(vf->priv->chromaParam.noise);
@@ -382,7 +382,7 @@ static void uninit(struct vf_instance* vf){
 
 //===========================================================================//
 
-static int query_format(struct vf_instance* vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt){
 	switch(fmt)
 	{
 	case IMGFMT_YV12:

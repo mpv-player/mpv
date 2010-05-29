@@ -2433,7 +2433,7 @@ static struct {
 static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     int i, r;
-    m_option_t* prop;
+    m_option_t *prop;
     const char *pname;
 
     // look for the command

@@ -707,7 +707,8 @@ typedef struct dp_hdr_s {
     uint32_t chunktab;        // offset to chunk offset array
 } dp_hdr_t;
 
-static void swap_palette(void *pal) {
+static void swap_palette(void *pal)
+{
     int i;
     uint32_t *p = pal;
     for (i = 0; i < AVPALETTE_COUNT; i++)

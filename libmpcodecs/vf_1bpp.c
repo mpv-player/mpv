@@ -60,7 +60,7 @@ static const unsigned int bgr_list[]={
     0
 };
 
-static unsigned int find_best(struct vf_instance* vf){
+static unsigned int find_best(struct vf_instance *vf){
     unsigned int best=0;
     int ret;
     const unsigned int* p=bgr_list;
@@ -80,7 +80,7 @@ struct vf_priv_s {
     unsigned int fmt;
 };
 
-static int config(struct vf_instance* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
     if (!vf->priv->fmt)
@@ -123,7 +123,7 @@ static void convert(mp_image_t *mpi, mp_image_t *dmpi, int value0, int value1,in
     }
 }
 
-static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
 
     // hope we'll get DR buffer:
@@ -178,7 +178,7 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
 
 //===========================================================================//
 
-static int query_format(struct vf_instance* vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt){
     int best;
     if(fmt!=IMGFMT_RGB1 && fmt!=IMGFMT_BGR1) return 0;
     best=find_best(vf);

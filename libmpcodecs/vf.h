@@ -30,7 +30,7 @@ typedef struct vf_info_s {
     const char *name;
     const char *author;
     const char *comment;
-    int (*vf_open)(struct vf_instance* vf,char* args);
+    int (*vf_open)(struct vf_instance *vf,char* args);
     // Ptr to a struct dscribing the options
     const void* opts;
 } vf_info_t;
@@ -53,24 +53,24 @@ typedef struct vf_format_context_t {
 typedef struct vf_instance {
     const vf_info_t* info;
     // funcs:
-    int (*config)(struct vf_instance* vf,
+    int (*config)(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt);
-    int (*control)(struct vf_instance* vf,
+    int (*control)(struct vf_instance *vf,
         int request, void* data);
-    int (*query_format)(struct vf_instance* vf,
+    int (*query_format)(struct vf_instance *vf,
         unsigned int fmt);
-    void (*get_image)(struct vf_instance* vf,
+    void (*get_image)(struct vf_instance *vf,
         mp_image_t *mpi);
-    int (*put_image)(struct vf_instance* vf,
+    int (*put_image)(struct vf_instance *vf,
         mp_image_t *mpi, double pts);
-    void (*start_slice)(struct vf_instance* vf,
+    void (*start_slice)(struct vf_instance *vf,
         mp_image_t *mpi);
-    void (*draw_slice)(struct vf_instance* vf,
+    void (*draw_slice)(struct vf_instance *vf,
         unsigned char** src, int* stride, int w,int h, int x, int y);
-    void (*uninit)(struct vf_instance* vf);
+    void (*uninit)(struct vf_instance *vf);
 
-    int (*continue_buffered_image)(struct vf_instance* vf);
+    int (*continue_buffered_image)(struct vf_instance *vf);
     // caps:
     unsigned int default_caps; // used by default query_format()
     unsigned int default_reqs; // used by default config()
@@ -78,7 +78,7 @@ typedef struct vf_instance {
     int w, h;
     vf_image_context_t imgctx;
     vf_format_context_t fmt;
-    struct vf_instance* next;
+    struct vf_instance *next;
     mp_image_t *dmpi;
     struct vf_priv_s* priv;
     struct MPOpts *opts;
@@ -139,13 +139,13 @@ void vf_queue_frame(vf_instance_t *vf, int (*)(vf_instance_t *));
 int vf_output_queued_frame(vf_instance_t *vf);
 
 // default wrappers:
-int vf_next_config(struct vf_instance* vf,
+int vf_next_config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt);
-int vf_next_control(struct vf_instance* vf, int request, void* data);
-int vf_next_query_format(struct vf_instance* vf, unsigned int fmt);
-int vf_next_put_image(struct vf_instance* vf,mp_image_t *mpi, double pts);
-void vf_next_draw_slice (struct vf_instance* vf, unsigned char** src, int* stride, int w,int h, int x, int y);
+int vf_next_control(struct vf_instance *vf, int request, void* data);
+int vf_next_query_format(struct vf_instance *vf, unsigned int fmt);
+int vf_next_put_image(struct vf_instance *vf,mp_image_t *mpi, double pts);
+void vf_next_draw_slice (struct vf_instance *vf, unsigned char** src, int* stride, int w,int h, int x, int y);
 
 struct m_obj_settings;
 vf_instance_t* append_filters(vf_instance_t* last, struct m_obj_settings *vf_settings);
@@ -153,7 +153,7 @@ vf_instance_t* append_filters(vf_instance_t* last, struct m_obj_settings *vf_set
 void vf_uninit_filter(vf_instance_t* vf);
 void vf_uninit_filter_chain(vf_instance_t* vf);
 
-int vf_config_wrapper(struct vf_instance* vf,
+int vf_config_wrapper(struct vf_instance *vf,
 		      int width, int height, int d_width, int d_height,
 		      unsigned int flags, unsigned int outfmt);
 

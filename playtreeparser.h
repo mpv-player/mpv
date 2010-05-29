@@ -33,7 +33,7 @@
 struct stream;
 
 typedef struct play_tree_parser {
-  struct stream* stream;
+  struct stream *stream;
   struct m_config *mconfig;
   char *buffer,*iter,*line;
   int buffer_size , buffer_end;

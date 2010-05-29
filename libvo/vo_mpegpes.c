@@ -199,7 +199,8 @@ static int my_write(const unsigned char* data,int len){
     return orig_len;
 }
 
-static void send_pes_packet(unsigned char* data,int len,int id,int timestamp){
+static void send_pes_packet(unsigned char* data, int len, int id, int timestamp)
+{
     send_mpeg_pes_packet (data, len, id, timestamp, 1, my_write);
 }
 

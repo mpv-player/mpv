@@ -94,7 +94,7 @@ static int seek(stream_t *s,off_t newpos) {
   return 1;
 }
 
-static int control(struct stream *s,int cmd,void *arg) {
+static int control(struct stream *s, int cmd, void *arg) {
   return STREAM_UNSUPPORTED;
 }
 

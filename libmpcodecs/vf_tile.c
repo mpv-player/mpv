@@ -83,7 +83,7 @@ struct vf_priv_s {
 };
 
 
-static int config(struct vf_instance* vf,
+static int config(struct vf_instance *vf,
                   int width, int height, int d_width, int d_height,
 	          unsigned int flags, unsigned int outfmt){
 
@@ -106,7 +106,7 @@ static int config(struct vf_instance* vf,
 }
 
 /* Filter handler */
-static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     mp_image_t        *dmpi;
     struct vf_priv_s  *priv;
@@ -191,14 +191,14 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts)
     }
 }
 
-static void uninit(struct vf_instance* vf)
+static void uninit(struct vf_instance *vf)
 {
     /* free local data */
     free(vf->priv);
 }
 
 /* rgb/bgr 12->32 supported & some Yxxx */
-static int query_format(struct vf_instance* vf, unsigned int fmt)
+static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
 	switch (fmt) {
         /* rgb 12...32 bit */

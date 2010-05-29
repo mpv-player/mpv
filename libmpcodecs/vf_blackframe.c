@@ -40,7 +40,7 @@ struct vf_priv_s {
     unsigned int bamount, bthresh, frame, lastkeyframe;
 };
 
-static int config(struct vf_instance* vf, int width, int height, int d_width,
+static int config(struct vf_instance *vf, int width, int height, int d_width,
                     int d_height, unsigned int flags, unsigned int outfmt) {
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
@@ -66,7 +66,7 @@ static int query_format(struct vf_instance *vf, unsigned fmt) {
     return 0;
 }
 
-static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
     int x, y;
     int nblack=0, pblack=0;
@@ -110,7 +110,7 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
     return vf_next_put_image(vf, dmpi, pts);
 }
 
-static int control(struct vf_instance* vf, int request, void* data){
+static int control(struct vf_instance *vf, int request, void* data){
     return vf_next_control(vf,request,data);
 }
 

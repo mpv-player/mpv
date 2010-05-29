@@ -326,9 +326,9 @@ static void qpel_4tap_C(unsigned char *d, unsigned char *s, int w, int h, int ds
 static void (*qpel_li)(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up);
 static void (*qpel_4tap)(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up);
 
-static int continue_buffered_image(struct vf_instance *);
+static int continue_buffered_image(struct vf_instance *vf);
 
-static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
 	vf->priv->buffered_mpi = mpi;
 	vf->priv->buffered_pts = pts;
@@ -451,7 +451,7 @@ static int continue_buffered_image(struct vf_instance *vf)
 	return ret;
 }
 
-static int query_format(struct vf_instance* vf, unsigned int fmt)
+static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
 	/* FIXME - figure out which formats exactly work */
 	switch (fmt) {
@@ -466,7 +466,7 @@ static int query_format(struct vf_instance* vf, unsigned int fmt)
 	return 0;
 }
 
-static int config(struct vf_instance* vf,
+static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt)
 {
@@ -482,7 +482,7 @@ static int config(struct vf_instance* vf,
 	return 0;
 }
 
-static void uninit(struct vf_instance* vf)
+static void uninit(struct vf_instance *vf)
 {
 	free(vf->priv);
 }

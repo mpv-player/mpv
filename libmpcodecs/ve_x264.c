@@ -135,7 +135,7 @@ void x264enc_set_param(const m_option_t* opt, char* arg)
     }
 }
 
-static int config(struct vf_instance* vf, int width, int height, int d_width, int d_height, unsigned int flags, unsigned int outfmt) {
+static int config(struct vf_instance *vf, int width, int height, int d_width, int d_height, unsigned int flags, unsigned int outfmt) {
     h264_module_t *mod=(h264_module_t*)vf->priv;
 
     if(parse_error)
@@ -195,7 +195,7 @@ static int config(struct vf_instance* vf, int width, int height, int d_width, in
     return 1;
 }
 
-static int control(struct vf_instance* vf, int request, void *data)
+static int control(struct vf_instance *vf, int request, void *data)
 {
     h264_module_t *mod=(h264_module_t*)vf->priv;
     switch(request){
@@ -208,7 +208,7 @@ static int control(struct vf_instance* vf, int request, void *data)
     }
 }
 
-static int query_format(struct vf_instance* vf, unsigned int fmt)
+static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
     switch(fmt) {
     case IMGFMT_I420:

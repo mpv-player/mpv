@@ -74,7 +74,7 @@ extern ASS_Track *ass_track;
 extern float sub_delay;
 extern int sub_visibility;
 
-static int config(struct vf_instance* vf,
+static int config(struct vf_instance *vf,
 	int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt)
 {
@@ -101,7 +101,7 @@ static int config(struct vf_instance* vf,
 	return vf_next_config(vf, vf->priv->outw, vf->priv->outh, d_width, d_height, flags, outfmt);
 }
 
-static void get_image(struct vf_instance* vf, mp_image_t *mpi)
+static void get_image(struct vf_instance *vf, mp_image_t *mpi)
 {
 	if(mpi->type == MP_IMGTYPE_IPB) return;
 	if(mpi->flags & MP_IMGFLAG_PRESERVE) return;
@@ -160,7 +160,7 @@ static void blank(mp_image_t *mpi, int y1, int y2)
 	}
 }
 
-static int prepare_image(struct vf_instance* vf, mp_image_t *mpi)
+static int prepare_image(struct vf_instance *vf, mp_image_t *mpi)
 {
 	if(mpi->flags&MP_IMGFLAG_DIRECT || mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
 		vf->dmpi = mpi->priv;
@@ -224,7 +224,7 @@ static void update_limits(struct vf_instance *vf, int starty, int endy,
 /**
  * \brief Copy specified rows from render_context.dmpi to render_context.planes, upsampling to 4:4:4
  */
-static void copy_from_image(struct vf_instance* vf)
+static void copy_from_image(struct vf_instance *vf)
 {
 	int pl;
 
@@ -253,7 +253,7 @@ static void copy_from_image(struct vf_instance* vf)
 /**
  * \brief Copy all previously copied rows back to render_context.dmpi
  */
-static void copy_to_image(struct vf_instance* vf)
+static void copy_to_image(struct vf_instance *vf)
 {
 	int pl;
 	int i, j;
@@ -280,7 +280,7 @@ static void copy_to_image(struct vf_instance* vf)
 	}
 }
 
-static void my_draw_bitmap(struct vf_instance* vf, unsigned char* bitmap, int bitmap_w, int bitmap_h, int stride, int dst_x, int dst_y, unsigned color)
+static void my_draw_bitmap(struct vf_instance *vf, unsigned char* bitmap, int bitmap_w, int bitmap_h, int stride, int dst_x, int dst_y, unsigned color)
 {
 	unsigned char y = rgba2y(color);
 	unsigned char u = rgba2u(color);
@@ -308,7 +308,7 @@ static void my_draw_bitmap(struct vf_instance* vf, unsigned char* bitmap, int bi
 	}
 }
 
-static int render_frame(struct vf_instance* vf, mp_image_t *mpi, const ASS_Image *img)
+static int render_frame(struct vf_instance *vf, mp_image_t *mpi, const ASS_Image *img)
 {
 	if (img) {
 		for (int i = 0; i < (vf->priv->outh + 1) / 2; i++)
@@ -326,7 +326,7 @@ static int render_frame(struct vf_instance* vf, mp_image_t *mpi, const ASS_Image
 	return 0;
 }
 
-static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
 	ASS_Image* images = 0;
 	if (sub_visibility && vf->priv->ass_priv && ass_track && (pts != MP_NOPTS_VALUE))
@@ -338,7 +338,7 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts)
 	return vf_next_put_image(vf, vf->dmpi, pts);
 }
 
-static int query_format(struct vf_instance* vf, unsigned int fmt)
+static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
 	switch(fmt){
 	case IMGFMT_YV12:
@@ -364,7 +364,7 @@ static int control(vf_instance_t *vf, int request, void *data)
 	return vf_next_control(vf, request, data);
 }
 
-static void uninit(struct vf_instance* vf)
+static void uninit(struct vf_instance *vf)
 {
 	if (vf->priv->ass_priv)
 		ass_renderer_done(vf->priv->ass_priv);

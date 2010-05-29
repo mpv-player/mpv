@@ -125,14 +125,14 @@ struct vf_priv_s {
 };
 
 static int
-query_format(struct vf_instance* vf, unsigned int fmt){
+query_format(struct vf_instance *vf, unsigned int fmt){
     if(fmt==IMGFMT_YV12) return VFCAP_CSP_SUPPORTED;
     return 0;
 }
 
 
 static int
-config(struct vf_instance* vf,
+config(struct vf_instance *vf,
        int width, int height, int d_width, int d_height,
        unsigned int flags, unsigned int outfmt)
 {
@@ -214,7 +214,7 @@ _read_cmd(int fd, char *cmd, char *args) {
 
 
 static int
-put_image(struct vf_instance* vf, mp_image_t* mpi, double pts){
+put_image(struct vf_instance *vf, mp_image_t* mpi, double pts){
 	int buf_x=0, buf_y=0, buf_pos=0;
 	int have, got, want;
 	int xpos=0, ypos=0, pos=0;

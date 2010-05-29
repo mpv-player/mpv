@@ -39,7 +39,7 @@ static struct vf_priv_s {
 
 //===========================================================================//
 
-static int query_format(struct vf_instance* vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt){
     if(fmt!=vf->priv->fmt)
 	return vf_next_query_format(vf,fmt);
     return 0;
