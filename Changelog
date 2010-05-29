@@ -65,7 +65,7 @@ MPlayer (1.0)
 
 
 
-  rc3: "BikeshedCounter" March 27, 2009
+  rc3: "BikeshedCounter AKA Godot" May 30, 2010
     Decoders:
     * support for X8 frames (fixes "J-type picture is not supported" for WMV2)
     * support for DTS WAV/DTS-CD passthrough by ad_hwac3
