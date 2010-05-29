@@ -110,7 +110,7 @@ METHODDEF(void) skip_input_data (j_decompress_ptr cinfo, long num_bytes)
 
 METHODDEF(void) term_source (j_decompress_ptr cinfo) { }
 
-static GLOBAL(void) jpeg_buf_src (j_decompress_ptr cinfo, char * inbuf, int bufsize)
+static void jpeg_buf_src (j_decompress_ptr cinfo, char * inbuf, int bufsize)
 {
  my_src_ptr src;
  if (cinfo->src == NULL) cinfo->src=malloc( sizeof( my_source_mgr ) );
