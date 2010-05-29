@@ -1916,6 +1916,9 @@ EOF
     if test $cc_vendor != "intel" ; then
       cc_check -march=native && proc=native
     fi
+    if test "$proc" = "amdfam10"; then
+      cc_check -march=$proc $cpuopt=$proc || proc=k8
+    fi
     if test "$proc" = "k8"; then
       cc_check -march=$proc $cpuopt=$proc || proc=athlon-xp
     fi
