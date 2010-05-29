@@ -25,7 +25,6 @@
 #include "help_mp.h"
 
 #include "codec-cfg.h"
-//#include "mp_image.h"
 
 #include "img_format.h"
 
@@ -36,8 +35,6 @@
 
 #include "vd.h"
 #include "vf.h"
-
-//#include "vd_internal.h"
 
 extern const vd_functions_t mpcodecs_vd_null;
 extern const vd_functions_t mpcodecs_vd_ffmpeg;
@@ -237,7 +234,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
             goto csp_again;
         } else {                // sws failed, if the last filter (vf_vo) support MPEGPES try to append vf_lavc
             vf_instance_t *vo, *vp = NULL, *ve, *vpp = NULL;
-            // Remove the scale filter if we added it ourself
+            // Remove the scale filter if we added it ourselves
             if (vf == sc) {
                 ve = vf;
                 vf = vf->next;
