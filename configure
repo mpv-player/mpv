@@ -6424,8 +6424,23 @@ EOF
         ass_internal=no
         res_comment="FreeType >= 2.2.1 needed"
     elif test "$ass_internal" = no ; then
-        res_comment="external"
-        extra_ldflags="$extra_ldflags -lass"
+    cat > $TMPC << EOF
+#include <ass/ass.h>
+int main(void) {
+#if defined(LIBASS_VERSION) && LIBASS_VERSION >= 0x00907010
+  ass_process_force_style(0);
+#else
+  process_force_style(0);
+#endif
+  return 0;
+}
+EOF
+        if cc_check -lass ; then
+            res_comment="external"
+            extra_ldflags="$extra_ldflags -lass"
+        else
+            _ass=no
+        fi
     fi
 fi
 if test "$_ass" = yes ; then
