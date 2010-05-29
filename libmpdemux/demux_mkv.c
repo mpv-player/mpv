@@ -1870,7 +1870,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
             size = track->private_size;
         } else {
             sh_a->format = mmioFOURCC('f', 'L', 'a', 'C');
-            ptr = track->private_data + sizeof(WAVEFORMATEX);
+            ptr  = (unsigned char *) track->private_data + sizeof(WAVEFORMATEX);
             size = track->private_size - sizeof(WAVEFORMATEX);
         }
         if (size < 4 || ptr[0] != 'f' || ptr[1] != 'L' || ptr[2] != 'a'
