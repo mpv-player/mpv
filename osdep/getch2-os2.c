@@ -32,6 +32,7 @@
 #include "keycodes.h"
 #include "input/input.h"
 #include "mp_fifo.h"
+#include "getch2.h"
 
 #if defined(HAVE_LANGINFO) && defined(CONFIG_ICONV)
 #include <locale.h>
