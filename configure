@@ -9260,8 +9260,6 @@ $def_yasm
 #define CONFIG_IPV6 0
 #endif
 
-#define HAVE_ATTRIBUTE_MAY_ALIAS 1
-#define av_alias __attribute__((may_alias))
 #define HAVE_ATTRIBUTE_PACKED 1
 #define HAVE_GETHRTIME 0
 #define HAVE_INLINE_ASM 1
