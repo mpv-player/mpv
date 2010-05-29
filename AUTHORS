@@ -771,6 +771,11 @@ Syrjälä, Ville <syrjala@sci.fi>
 Szecsi, Gabor <deje@miki.hu>
     * directsound AO driver
 
+Tartler, Reinhard <siretart@tauware.de>
+    * release assistance
+    * various backports from trunk
+    * official debian and ubuntu packages
+
 Tackaberry, Jason <tack@urandom.ca>
     * second DVD ripping guide
     * multichannel audio fixes
