@@ -529,7 +529,7 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
                                 MPContext *mpctx) {
     m_property_action_t* ka;
     char* meta;
-    static m_option_t key_type =
+    static const m_option_t key_type =
         { "metadata", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL };
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
