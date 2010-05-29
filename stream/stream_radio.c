@@ -1059,7 +1059,7 @@ char* radio_get_channel_name(struct stream *stream){
  * \brief fills given buffer with audio data
  * \return number of bytes, written into buffer
  */
-static int fill_buffer_s(struct stream *s, char* buffer, int max_len){
+static int fill_buffer_s(struct stream *s, char *buffer, int max_len){
     int len=max_len;
 
 #ifdef CONFIG_RADIO_CAPTURE

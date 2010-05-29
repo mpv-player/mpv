@@ -61,6 +61,8 @@
 #include "m_option.h"
 #include "m_config.h"
 #include "m_property.h"
+#include "mplayer.h"
+#include "access_mpcontext.h"
 
 #include "cfg-mplayer-def.h"
 
@@ -83,10 +85,8 @@
 #include "codec-cfg.h"
 
 #include "edl.h"
-#include "mplayer.h"
 #include "spudec.h"
 #include "vobsub.h"
-#include "access_mpcontext.h"
 
 #include "osdep/getch2.h"
 #include "osdep/timer.h"
@@ -1861,7 +1861,8 @@ static float timing_sleep(float time_frame)
     return time_frame;
 }
 
-static void select_subtitle(MPContext *mpctx) {
+static void select_subtitle(MPContext *mpctx)
+{
   // find the best sub to use
   int vobsub_index_id = vobsub_get_index_by_id(vo_vobsub, vobsub_id);
   mpctx->global_sub_pos = -1; // no subs by default
@@ -2349,9 +2350,12 @@ static double update_video(int *blit_frame)
 #ifdef CONFIG_DVDNAV
 	/// wait, still frame or EOF
 	if (mpctx->stream->type == STREAMTYPE_DVDNAV && in_size < 0) {
-	    if (mp_dvdnav_is_eof(mpctx->stream)) return -1;
-	    if (mpctx->d_video) mpctx->d_video->eof = 0;
-	    if (mpctx->d_audio) mpctx->d_audio->eof = 0;
+	    if (mp_dvdnav_is_eof(mpctx->stream))
+                return -1;
+	    if (mpctx->d_video)
+                mpctx->d_video->eof = 0;
+	    if (mpctx->d_audio)
+                mpctx->d_audio->eof = 0;
 	    mpctx->stream->eof = 0;
 	} else
 #endif
