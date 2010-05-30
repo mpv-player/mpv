@@ -537,7 +537,7 @@ typedef struct
     UINT16  flags;
     DWORD   dwOptions WINE_PACKED;
     DWORD   dwFilter WINE_PACKED;
-    CHAR    achAllocModule[8] WINE_PACKED;
+    CHAR    achAllocModule[8];
     DWORD   dwAllocBreak WINE_PACKED;
     DWORD   dwAllocCount WINE_PACKED;
 } WINDEBUGINFO, *LPWINDEBUGINFO;
