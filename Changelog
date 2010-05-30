@@ -17,6 +17,7 @@ MPlayer (1.0)
     * JPEG 2000 support via OpenJPEG
     * internal liba52 copy removed
     * CineForm HD (CFHD) via binary DLL
+    * VP8 decoding through libvpx wrapper in FFmpeg
 
     Demuxers:
     * support for TrueHD in Blu-ray streams in libmpdemux
