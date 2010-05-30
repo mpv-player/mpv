@@ -25,6 +25,7 @@ MPlayer (1.0)
     * support ISDB-Tb DVB streams
 
     Drivers:
+    * -vo md5sum md5 calculation changed so output matches FFmpeg's -f framemd5
     * Support for more formats in OpenGL video output drivers (different YUV
       subsampling, 16 bit per component)
     * Selectable YUV to RGB conversion standard for -vo gl

@@ -462,7 +462,6 @@ Use these options if autodetection fails:
   --with-xvmclib=NAME         adapter-specific library name (e.g. XvMCNVIDIA)
 
   --with-freetype-config=PATH path to freetype-config
-  --with-fribidi-config=PATH  path to fribidi-config
   --with-glib-config=PATH     path to glib*-config
   --with-gtk-config=PATH      path to gtk*-config
   --with-sdl-config=PATH      path to sdl*-config
@@ -681,7 +680,6 @@ _macosx_bundle=auto
 _sortsub=yes
 _freetypeconfig='freetype-config'
 _fribidi=auto
-_fribidiconfig='fribidi-config'
 _enca=auto
 _inet6=auto
 _gethostbyname2=auto
@@ -742,9 +740,6 @@ for ac_option do
     ;;
   --with-freetype-config=*)
     _freetypeconfig=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --with-fribidi-config=*)
-    _fribidiconfig=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --with-gtk-config=*)
     _gtkconfig=$(echo $ac_option | cut -d '=' -f 2)
@@ -6171,10 +6166,10 @@ EOF
     _inc_tmp=""
     _ld_tmp="-lfribidi"
     cc_check $_inc_tmp $_ld_tmp && _fribidi=yes
-    if $_fribidiconfig --version > /dev/null 2>&1 &&
+    if $_pkg_config --exists fribidi > /dev/null 2>&1 &&
        test "$_fribidi" = no ; then
-        _inc_tmp="$($_fribidiconfig --cflags)"
-        _ld_tmp="$($_fribidiconfig --libs)"
+        _inc_tmp="$($_pkg_config --cflags)"
+        _ld_tmp="$($_pkg_config --libs)"
         cc_check $_inc_tmp $_ld_tmp && _fribidi=yes
     fi
 fi
