@@ -203,15 +203,19 @@ int vo_w32_check_events(void) {
         DispatchMessage(&msg);
     }
     if (WinID >= 0) {
+        BOOL res;
         RECT r;
-        GetClientRect(vo_window, &r);
-        if (r.right != vo_dwidth || r.bottom != vo_dheight) {
+        res = GetClientRect(vo_window, &r);
+        if (res && (r.right != vo_dwidth || r.bottom != vo_dheight)) {
             vo_dwidth = r.right; vo_dheight = r.bottom;
             event_flags |= VO_EVENT_RESIZE;
         }
-        GetClientRect(WinID, &r);
-        if (r.right != vo_dwidth || r.bottom != vo_dheight)
+        res = GetClientRect(WinID, &r);
+        if (res && (r.right != vo_dwidth || r.bottom != vo_dheight))
             MoveWindow(vo_window, 0, 0, r.right, r.bottom, FALSE);
+        if (!IsWindow(WinID))
+            // Window has probably been closed, e.g. due to program crash
+            mplayer_put_key(KEY_CLOSE_WIN);
     }
 
     return event_flags;
@@ -389,7 +393,7 @@ static int createRenderingContext(void) {
 int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
     // we already have a fully initialized window, so nothing needs to be done
     if (flags & VOFLAG_HIDDEN)
-        return;
+        return 1;
     // store original size for videomode switching
     o_dwidth = width;
     o_dheight = height;
@@ -409,6 +413,7 @@ int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
 
 /**
  * \brief return the name of the selected device if it is indepedant
+ * \return pointer to string, must be freed.
  */
 static char *get_display_name(void) {
     DISPLAY_DEVICE disp;
@@ -416,7 +421,7 @@ static char *get_display_name(void) {
     EnumDisplayDevices(NULL, vo_adapter_num, &disp, 0);
     if (disp.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)
         return NULL;
-    return disp.DeviceName;
+    return strdup(disp.DeviceName);
 }
 
 /**
@@ -493,6 +498,7 @@ int vo_w32_init(void) {
     dev_hdc = 0;
     dev = get_display_name();
     if (dev) dev_hdc = CreateDC(dev, NULL, NULL, NULL);
+    free(dev);
     updateScreenProperties();
 
     vo_hdc = vo_w32_get_dc(vo_window);

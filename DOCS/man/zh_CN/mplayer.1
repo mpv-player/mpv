@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 rev. 31028
+.\" sync with en/mplayer.1 rev. 31173
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later:
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -3899,10 +3899,11 @@ mga 视频输出驱动, 运行在 X11 窗口。
 .PD 1
 .
 .TP
-.B s3fb（仅适用于Linux）（另参见 \-vf yuv2 和 \-dr）
-S3 Virge专用的视频输出驱动。
-此驱动支持显卡的YUV转换与缩放、双重缓冲和直接渲染的功能。
-使用\-vf yuy2以采用硬件加速下的YUV2渲染，这种方式在此款显卡下比YV12快很多。
+.B s3fb（仅适用于 Linux ）（另参见 \-dr）
+S3 Virge 专用的视频输出驱动。
+此驱动支持显卡的 YUV 转换与缩放、双重缓冲和直接渲染的功能。
+使用 \-vf format=yuy2 以采用硬件加速下的 YUV2 渲染，这种方式
+在此款显卡下比 YV12 快很多。
 .PD 0
 .RSs
 .IPs <device>
@@ -5668,11 +5669,6 @@ spal：   768x576 （正方形像素PAL）
 .IPs "<r>\ \ "
 将宽度和高度值舍入至可被<r>整除（默认值：1）。
 .RE
-.
-.TP
-.B "yuy2\ \ \ "
-强制执行YV12/\:I420/\:422P至YUY2的软件转换。
-对于那些对YV12支持较差但对YUY2支持较好的显卡很有用。
 .
 .TP
 .B "yvu9\ \ \ "

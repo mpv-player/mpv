@@ -861,6 +861,10 @@ int vo_x11_check_events(struct vo *vo)
                 XSetWMNormalHints(display, x11->window, &x11->vo_hint);
                 x11->fs_flip = 0;
                 break;
+            case DestroyNotify:
+                mp_msg(MSGT_VO, MSGL_WARN, "Our window was destroyed, exiting\n");
+                mplayer_put_key(vo->key_fifo, KEY_CLOSE_WIN);
+                break;
 	    case ClientMessage:
                 if (Event.xclient.message_type == x11->XAWM_PROTOCOLS &&
                     Event.xclient.data.l[0] == x11->XAWM_DELETE_WINDOW)
