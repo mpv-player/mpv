@@ -153,8 +153,7 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     case IMGFMT_Y800:
     case IMGFMT_Y8:
 	/* they're planar ones, but for easier handling use them as packed */
-//	mpi->flags|=MP_IMGFLAG_PLANAR;
-	mpi->bpp=8;
+	mpi->flags&=~MP_IMGFLAG_PLANAR;
 	mpi->num_planes=1;
 	return;
     case IMGFMT_UYVY:
