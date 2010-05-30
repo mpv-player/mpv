@@ -194,15 +194,15 @@ const vo_functions_t* const video_out_drivers[] =
         &video_out_x11,
         &video_out_xover,
 #endif
+#ifdef CONFIG_SDL
+        &video_out_sdl,
+#endif
 #ifdef CONFIG_GL
         &video_out_gl,
         &video_out_gl2,
 #endif
 #ifdef CONFIG_DGA
         &video_out_dga,
-#endif
-#ifdef CONFIG_SDL
-        &video_out_sdl,
 #endif
 #ifdef CONFIG_GGI
         &video_out_ggi,
