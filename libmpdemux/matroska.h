@@ -69,6 +69,7 @@
 #define MKV_V_MPEG4_AP   "V_MPEG4/ISO/AP"
 #define MKV_V_MPEG4_AVC  "V_MPEG4/ISO/AVC"
 #define MKV_V_THEORA     "V_THEORA"
+#define MKV_V_VP8        "V_VP8"
 
 #define MKV_S_TEXTASCII  "S_TEXT/ASCII"
 #define MKV_S_TEXTUTF8   "S_TEXT/UTF8"
