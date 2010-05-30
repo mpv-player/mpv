@@ -7234,9 +7234,11 @@ EOF
   fi
 fi
 if test "$_librtmp" = yes && test "$_network" = yes; then
+  nolibrtmp=no
   def_librtmp='#define CONFIG_LIBRTMP 1'
   inputmodules="librtmp $inputmodules"
 else
+  nolibrtmp=yes
   _librtmp=no
   def_librtmp='#undef CONFIG_LIBRTMP'
   noinputmodules="librtmp $noinputmodules"
@@ -8792,6 +8794,7 @@ CONFIG_RDFT    = yes
 
 $mak_hardcoded_tables
 $mak_libavcodec_mpegaudio_hp
+!CONFIG_LIBRTMP = $nolibrtmp
 CONFIG_LIBRTMP  = $_librtmp
 
 CONFIG_BZLIB    = $bzlib
