@@ -470,7 +470,7 @@ static void uninitGl(void) {
 static int isSoftwareGl(void)
 {
   const char *renderer = mpglGetString(GL_RENDERER);
-  return strcmp(renderer, "Software Rasterizer") == 0;
+  return !renderer || strcmp(renderer, "Software Rasterizer") == 0;
 }
 
 static void autodetectGlExtensions(void) {
