@@ -24,6 +24,10 @@
 #include "m_config.h"
 #include "m_option.h"
 
+#include "libmpcodecs/ad.h"
+#include "libmpcodecs/vd.h"
+#include "osdep/priority.h"
+
 extern char *mp_msg_charset;
 extern int mp_msg_color;
 extern int mp_msg_module;
@@ -51,8 +55,6 @@ extern int network_ipv4_only_proxy;
 extern int reuse_socket;
 
 extern int dvd_speed; /* stream/stream_dvd.c */
-
-extern float a52_drc_level;
 
 /* defined in libmpdemux: */
 extern int hr_mp3_seek;

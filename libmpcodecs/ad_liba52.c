@@ -54,8 +54,6 @@ static uint32_t channel_map;
 
 /** The output is multiplied by this var.  Used for volume control */
 static sample_t a52_level = 1;
-/** The value of the -a52drc switch. */
-float a52_drc_level = 1.0;
 static int a52_drc_action = DRC_NO_ACTION;
 
 static const ad_info_t info =
@@ -136,8 +134,8 @@ int channels=0;
 
 static sample_t dynrng_call (sample_t c, void *data)
 {
-//	fprintf(stderr, "(%lf, %lf): %lf\n", (double)c, (double)a52_drc_level, (double)pow((double)c, a52_drc_level));
-	return pow((double)c, a52_drc_level);
+//	fprintf(stderr, "(%lf, %lf): %lf\n", (double)c, (double)drc_level, (double)pow((double)c, drc_level));
+	return pow((double)c, drc_level);
 }
 
 
@@ -207,10 +205,10 @@ static int init(sh_audio_t *sh_audio)
 
 
   /* Init a52 dynrng */
-  if (a52_drc_level < 0.001) {
+  if (drc_level < 0.001) {
 	  /* level == 0 --> no compression, init library without callback */
 	  a52_drc_action = DRC_NO_COMPRESSION;
-  } else if (a52_drc_level > 0.999) {
+  } else if (drc_level > 0.999) {
 	  /* level == 1 --> full compression, do nothing at all (library default = full compression) */
 	  a52_drc_action = DRC_NO_ACTION;
   } else {

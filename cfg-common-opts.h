@@ -19,9 +19,8 @@
 #ifndef MPLAYER_CFG_COMMON_OPTS_H
 #define MPLAYER_CFG_COMMON_OPTS_H
 
-#include "config.h"
-#include "libmpcodecs/vd.h"
-#include "osdep/priority.h"
+// you may _not_ include any files here since this is included
+// in the middle of an array declaration
 
 // ------------------------- common options --------------------
     {"quiet", &quiet, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
@@ -218,9 +217,7 @@
     {"ignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"noignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
-#ifdef CONFIG_LIBA52
-    {"a52drc", &a52_drc_level, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
-#endif
+    {"a52drc", &drc_level, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
 
 // ------------------------- codec/vfilter options --------------------
 

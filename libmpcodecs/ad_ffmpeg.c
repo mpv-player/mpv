@@ -75,6 +75,7 @@ static int init(sh_audio_t *sh_audio)
     lavc_context = avcodec_alloc_context();
     sh_audio->context=lavc_context;
 
+    lavc_context->drc_scale = drc_level;
     lavc_context->sample_rate = sh_audio->samplerate;
     lavc_context->bit_rate = sh_audio->i_bps * 8;
     if(sh_audio->wf){

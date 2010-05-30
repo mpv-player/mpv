@@ -29,6 +29,8 @@
 #include "libmpdemux/stheader.h"
 #include "ad.h"
 
+float drc_level = 1.0;
+
 /* Missed vorbis, mad, dshow */
 
 //extern ad_functions_t mpcodecs_ad_null;
