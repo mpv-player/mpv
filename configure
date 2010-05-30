@@ -252,6 +252,7 @@ Optional features:
   --enable-smb           enable Samba (SMB) input [autodetect]
   --enable-live          enable LIVE555 Streaming Media [autodetect]
   --enable-nemesi        enable Nemesi Streaming Media [autodetect]
+  --enable-librtmp       enable RTMPDump Streaming Media [autodetect]
   --disable-vcd          disable VCD support [autodetect]
   --disable-dvdnav       disable libdvdnav [autodetect]
   --disable-dvdread      disable libdvdread [autodetect]
@@ -651,6 +652,7 @@ _xanim=auto
 _real=auto
 _live=auto
 _nemesi=auto
+_librtmp=auto
 _native_rtsp=yes
 _xinerama=auto
 _mga=auto
@@ -1065,6 +1067,8 @@ for ac_option do
   --disable-live)       _live=no        ;;
   --enable-nemesi)      _nemesi=yes     ;;
   --disable-nemesi)     _nemesi=no      ;;
+  --enable-librtmp)     _librtmp=yes    ;;
+  --disable-librtmp)    _librtmp=no     ;;
   --enable-xinerama)    _xinerama=yes   ;;
   --disable-xinerama)   _xinerama=no    ;;
   --enable-mga)         _mga=yes        ;;
@@ -7212,6 +7216,30 @@ else
 fi
 echores "$_live"
 
+echocheck "RTMPDump Streaming Media library"
+if test "$_librtmp" = auto  && test "$_network" = yes ; then
+  cat > $TMPC << EOF
+#include <librtmp/rtmp.h>
+int main(void) { RTMP r; RTMP_Init(&r); return 0; }
+EOF
+  cc_check -lrtmp && _librtmp=yes && extra_ldflags="$extra_ldflags -lrtmp"
+  if test "$_librtmp" != yes && $_pkg_config --exists librtmp ; then
+    _inc_tmp=$($_pkg_config --cflags librtmp)
+	_ld_tmp=$($_pkg_config --libs librtmp)
+	cc_check $_inc_tmp $_ld_tmp && _librtmp=yes && \
+	  extra_ldflags="$extra_ldflags $_ld_tmp" && \
+	  extra_cflags="$extra_cflags $_inc_tmp"
+  fi
+fi
+if test "$_librtmp" = yes && test "$_network" = yes; then
+  def_librtmp='#define CONFIG_LIBRTMP 1'
+  inputmodules="librtmp $inputmodules"
+else
+  _librtmp=no
+  def_librtmp='#undef CONFIG_LIBRTMP'
+  noinputmodules="librtmp $noinputmodules"
+fi
+echores "$_librtmp"
 
 echocheck "FFmpeg libavutil"
 if test "$_libavutil_a" = auto ; then
@@ -8762,7 +8790,7 @@ CONFIG_RDFT    = yes
 
 $mak_hardcoded_tables
 $mak_libavcodec_mpegaudio_hp
-!CONFIG_LIBRTMP = yes
+CONFIG_LIBRTMP  = $_librtmp
 
 CONFIG_BZLIB    = $bzlib
 CONFIG_ENCODERS = yes
@@ -9248,7 +9276,6 @@ $def_yasm
 #define CONFIG_FFSERVER 0
 #define CONFIG_GPL 1
 #define CONFIG_GRAY 0
-#define CONFIG_LIBRTMP 0
 #define CONFIG_LIBVORBIS 0
 #define CONFIG_POWERPC_PERF 0
 #define CONFIG_SMALL 0
@@ -9299,6 +9326,7 @@ $def_libdirac_lavc
 $def_libopencore_amrnb
 $def_libopencore_amrwb
 $def_libopenjpeg
+$def_librtmp
 $def_libschroedinger_lavc
 $def_mp3lame_lavc
 $def_x264_lavc
