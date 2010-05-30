@@ -3764,7 +3764,7 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
 	free(tmp);
 	return result;
     }
-    if (strstr(cs1, "vp3") || strstr(cs1, ".fpf"))
+    if (strstr(cs1, "vp3") || strstr(cs1, ".fpf") || strstr(cs1, ".col"))
     {
 	int r;
 	int flg = 0;
