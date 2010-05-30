@@ -98,7 +98,7 @@ static int init(sh_video_t *sh){
             op.packet = extradata + 2;
             op.b_o_s  = 1;
             if (extradata_size < op.bytes + 2) {
-                mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Theora header too small\n");
+                mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Theora header too small\n");
                 goto err_out;
             }
             extradata      += op.bytes + 2;
@@ -110,7 +110,7 @@ static int init(sh_video_t *sh){
 
         if ( (errorCode = theora_decode_header (&context->inf, &context->cc, &op)) )
         {
-            mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Broken Theora header; errorCode=%i!\n", errorCode);
+            mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Broken Theora header; errorCode=%i!\n", errorCode);
             goto err_out;
         }
     }
@@ -167,6 +167,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
    yuv_buffer yuv;
    mp_image_t* mpi;
 
+   // no delayed frames
+   if (!data || !len)
+       return NULL;
+
    memset (&op, 0, sizeof (op));
    op.bytes = len;
    op.packet = data;
@@ -183,7 +187,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
    errorCode = theora_decode_YUVout (&context->st, &yuv);
    if (errorCode)
    {
-      mp_msg(MSGT_DEMUX,MSGL_ERR,"Theora decode YUVout failed: %i \n",
+      mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Theora decode YUVout failed: %i \n",
 	     errorCode);
       return NULL;
    }

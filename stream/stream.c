@@ -37,6 +37,7 @@
 
 #include "mp_msg.h"
 #include "osdep/shmem.h"
+#include "osdep/timer.h"
 #include "network.h"
 #include "stream.h"
 #include "libmpdemux/demuxer.h"
@@ -260,7 +261,7 @@ stream_t *open_output_stream(const char *filename, struct MPOpts *options)
 
 int stream_fill_buffer(stream_t *s){
   int len;
-  if (/*s->fd == NULL ||*/ s->eof) { return 0; }
+  // we will retry even if we already reached EOF previously.
   switch(s->type){
   case STREAMTYPE_STREAM:
 #ifdef CONFIG_NETWORK
@@ -282,6 +283,9 @@ int stream_fill_buffer(stream_t *s){
     len= s->fill_buffer ? s->fill_buffer(s,s->buffer,STREAM_BUFFER_SIZE) : 0;
   }
   if(len<=0){ s->eof=1; return 0; }
+  // When reading succeeded we are obviously not at eof.
+  // This e.g. avoids issues with eof getting stuck when lavf seeks in MPEG-TS
+  s->eof=0;
   s->buf_pos=0;
   s->buf_len=len;
   s->pos+=len;
@@ -487,7 +491,10 @@ void stream_set_interrupt_callback(int (*cb)(struct input_ctx *, int),
 }
 
 int stream_check_interrupt(int time) {
-    if(!stream_check_interrupt_cb) return 0;
+    if(!stream_check_interrupt_cb) {
+        usec_sleep(time * 1000);
+        return 0;
+    }
     return stream_check_interrupt_cb(stream_check_interrupt_ctx, time);
 }
 

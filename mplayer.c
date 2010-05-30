@@ -2468,7 +2468,7 @@ static double update_video(struct MPContext *mpctx)
         if (in_size < 0) {
             // try to extract last frames in case of decoder lag
             in_size = 0;
-            pts = 1e300;
+            pts = MP_NOPTS_VALUE;
             hit_eof = true;
         }
         if (in_size > max_framesize)
