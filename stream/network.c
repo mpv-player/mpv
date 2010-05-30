@@ -62,6 +62,7 @@ char *network_password=NULL;
 int   network_bandwidth=0;
 int   network_cookies_enabled = 0;
 char *network_useragent=NULL;
+char *network_referrer=NULL;
 
 /* IPv6 options */
 int   network_ipv4_only_proxy = 0;
@@ -225,6 +226,23 @@ http_send_request( URL_t *url, off_t pos ) {
 	}
 	else
 	    http_set_field( http_hdr, "User-Agent: MPlayer/"VERSION);
+
+	if (network_referrer) {
+	    char *referrer = NULL;
+	    size_t len = strlen(network_referrer) + 10;
+
+	    // Check len to ensure we don't do something really bad in case of an overflow
+	    if (len > 10)
+		referrer = malloc(len);
+
+	    if (referrer == NULL) {
+		mp_msg(MSGT_NETWORK, MSGL_FATAL, MSGTR_MemAllocFailed);
+	    } else {
+		snprintf(referrer, len, "Referer: %s", network_referrer);
+		http_set_field(http_hdr, referrer);
+		free(referrer);
+	    }
+	}
 
 	if( strcasecmp(url->protocol, "noicyx") )
 	    http_set_field(http_hdr, "Icy-MetaData: 1");
