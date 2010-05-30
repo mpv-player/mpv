@@ -25,6 +25,7 @@
 
 #include "cfg-common.h"
 #include "libmpcodecs/vd.h"
+#include "libmpdemux/demux_ts.h"
 #include "libvo/vo_zr.h"
 
 extern int key_fifo_size;

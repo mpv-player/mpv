@@ -45,7 +45,6 @@
 
 #define MAX_HEADER_SIZE 6			/* enough for PES header + length */
 #define MAX_CHECK_SIZE	65535
-#define TS_MAX_PROBE_SIZE 2000000 /* do not forget to change this in cfg-common-opts.h, too */
 #define NUM_CONSECUTIVE_TS_PACKETS 32
 #define NUM_CONSECUTIVE_AUDIO_PACKETS 348
 #define MAX_A52_FRAME_SIZE 3840

@@ -24,6 +24,7 @@
  */
 
 #include "libmpcodecs/ve_x264.h"
+#include "libmpdemux/demux_ts.h"
 #include "cfg-common.h"
 
 extern int sws_flags;
