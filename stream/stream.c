@@ -37,6 +37,7 @@
 
 #include "mp_msg.h"
 #include "osdep/shmem.h"
+#include "osdep/timer.h"
 #include "network.h"
 #include "stream.h"
 #include "libmpdemux/demuxer.h"
@@ -490,7 +491,10 @@ void stream_set_interrupt_callback(int (*cb)(struct input_ctx *, int),
 }
 
 int stream_check_interrupt(int time) {
-    if(!stream_check_interrupt_cb) return 0;
+    if(!stream_check_interrupt_cb) {
+        usec_sleep(time * 1000);
+        return 0;
+    }
     return stream_check_interrupt_cb(stream_check_interrupt_ctx, time);
 }
 

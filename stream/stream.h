@@ -336,7 +336,8 @@ stream_t *open_output_stream(const char *filename, struct MPOpts *options);
 struct input_ctx;
 void stream_set_interrupt_callback(int (*cb)(struct input_ctx*, int),
                                    struct input_ctx *ctx);
-/// Call the interrupt checking callback if there is one.
+/// Call the interrupt checking callback if there is one and
+/// wait for time milliseconds
 int stream_check_interrupt(int time);
 
 extern int dvd_title;

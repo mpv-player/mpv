@@ -22,7 +22,7 @@
 // Note it runs in 2 processes (using fork()), but doesn't require locking!!
 // TODO: seeking, data consistency checking
 
-#define READ_USLEEP_TIME 10000
+#define READ_SLEEP_TIME 10
 // These defines are used to reduce the cost of many successive
 // seeks (e.g. when a file has no index) by spinning quickly at first.
 #define INITIAL_FILL_USLEEP_TIME 1000
@@ -114,6 +114,8 @@ static void cache_stats(cache_vars_t *s)
 static int cache_read(cache_vars_t *s, unsigned char *buf, int size)
 {
   int total=0;
+  int sleep_count = 0;
+  int last_max = s->max_filepos;
   while(size>0){
     int pos,newb,len;
 
@@ -122,10 +124,21 @@ static int cache_read(cache_vars_t *s, unsigned char *buf, int size)
     if(s->read_filepos>=s->max_filepos || s->read_filepos<s->min_filepos){
 	// eof?
 	if(s->eof) break;
+	if (s->max_filepos == last_max) {
+	    if (sleep_count++ == 10)
+	        mp_msg(MSGT_CACHE, MSGL_WARN, "Cache not filling!\n");
+	} else {
+	    last_max = s->max_filepos;
+	    sleep_count = 0;
+	}
 	// waiting for buffer fill...
-	usec_sleep(READ_USLEEP_TIME); // 10ms
+	if (stream_check_interrupt(READ_SLEEP_TIME)) {
+	    s->eof = 1;
+	    break;
+	}
 	continue; // try again...
     }
+    sleep_count = 0;
 
     newb=s->max_filepos-s->read_filepos; // new bytes in the buffer
     if(newb<min_fill) min_fill=newb; // statistics...
@@ -349,6 +362,9 @@ static void dummy_sighandler(int x) {
  */
 static void cache_mainloop(cache_vars_t *s) {
     int sleep_count = 0;
+#if FORKED_CACHE
+    signal(SIGUSR1, SIG_IGN);
+#endif
     do {
         if (!cache_fill(s)) {
 #if FORKED_CACHE
@@ -399,6 +415,10 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
   if (min > s->buffer_size - s->fill_limit) {
      min = s->buffer_size - s->fill_limit;
   }
+  // to make sure we wait for the cache process/thread to be active
+  // before continuing
+  if (min <= 0)
+    min = 1;
 
 #if FORKED_CACHE
   if((stream->cache_pid=fork())){
@@ -522,6 +542,7 @@ int cache_stream_seek_long(stream_t *stream,off_t pos){
 }
 
 int cache_do_control(stream_t *stream, int cmd, void *arg) {
+  int sleep_count = 0;
   cache_vars_t* s = stream->cache_data;
   switch (cmd) {
     case STREAM_CTRL_SEEK_TO_TIME:
@@ -550,8 +571,14 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
       return STREAM_UNSUPPORTED;
   }
   cache_wakeup(stream);
-  while (s->control != -1)
-    usec_sleep(CONTROL_SLEEP_TIME);
+  while (s->control != -1) {
+    if (sleep_count++ == 1000)
+      mp_msg(MSGT_CACHE, MSGL_WARN, "Cache not responding!\n");
+    if (stream_check_interrupt(CONTROL_SLEEP_TIME)) {
+      s->eof = 1;
+      return STREAM_UNSUPPORTED;
+    }
+  }
   switch (cmd) {
     case STREAM_CTRL_GET_TIME_LENGTH:
     case STREAM_CTRL_GET_CURRENT_TIME:
