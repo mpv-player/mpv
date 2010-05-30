@@ -29,6 +29,8 @@ MPlayer (1.0)
     * remove vf_yuy2, functionality is replaced by -vf format=yuv2
 
     Drivers:
+    * X11: Window manager choses Window position by default.
+      Add geometry=50%:50% to your configuration to get the old behaviour.
     * -vo md5sum md5 calculation changed so output matches FFmpeg's -f framemd5
     * Support for more formats in OpenGL video output drivers (different YUV
       subsampling, 16 bit per component)
