@@ -129,7 +129,7 @@ static int osd_color;
 static int use_aspect;
 static int use_ycbcr;
 #define MASK_ALL_YUV (~(1 << YUV_CONVERSION_NONE))
-#define MASK_NOT_COMBINERS (~((1 << YUV_CONVERSION_NONE) | (1 << YUV_CONVERSION_COMBINERS) | (1 << YUV_CONVERSION_COMBINERS_ATI)))
+#define MASK_NOT_COMBINERS (~((1 << YUV_CONVERSION_NONE) | (1 << YUV_CONVERSION_COMBINERS)))
 #define MASK_GAMMA_SUPPORT (MASK_NOT_COMBINERS & ~(1 << YUV_CONVERSION_FRAGMENT))
 static int use_yuv;
 static int colorspace;
@@ -503,10 +503,12 @@ static void autodetectGlExtensions(void) {
     ati_broken_pbo = ver && ver < 8395;
   }
   if (ati_hack      == -1) ati_hack      = ati_broken_pbo;
-  if (extensions && force_pbo     == -1)
-    force_pbo     = strstr(extensions, "_pixel_buffer_object")      ? is_ati : 0;
-  if (extensions && use_rectangle == -1)
-    use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      0 : 0;
+  if (force_pbo     == -1 && extensions && strstr(extensions, "_pixel_buffer_object"))
+    force_pbo = is_ati;
+  if (use_rectangle == -1 && extensions && strstr(extensions, "_texture_non_power_of_two"))
+    use_rectangle = 0;
+  if (use_rectangle == -1 && extensions && strstr(extensions, "_texture_rectangle"))
+    use_rectangle = renderer && strstr(renderer, "Mesa DRI R200") ? 1 : 0;
   if (use_osd == -1)
     use_osd = mpglBindTexture != NULL;
   if (use_yuv == -1)

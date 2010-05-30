@@ -30,23 +30,26 @@ html-single:  $(addprefix html-single-,$(DOC_LANGS))
 
 xmllint: $(addprefix xmllint-,$(DOC_LANGS))
 
-$(foreach lang,$(DOC_LANG_ALL),$(HTML)/$(lang)):
-	mkdir -p $@
-
 $(CONFIGURE_GENERATED) $(MAIN_XML_ALL):
-	sh configure
+	./configure
 
 define lang-def
-html-chunked-$(lang) html-single-$(lang): $(HTML)/$(lang) $(CONFIGURE_GENERATED)
+html-chunked-$(lang): $(HTML)/$(lang)/index.html
+html-single-$(lang):  $(HTML)/$(lang)/MPlayer.html
+$(HTML)/$(lang)/index.html $(HTML)/$(lang)/MPlayer.html: $(lang)/main.xml $(wildcard $(lang)/*.xml) html-common.xsl $(HTML)/$(lang)/default.css
 
-html-chunked-$(lang):
-	$(MAKE) HTMLDIR=../$$< -C $(lang) html-chunked
+$(HTML)/$(lang)/default.css:
+	mkdir -p $$(@D)
+	cp -f default.css $$(@D)
 
-html-single-$(lang):
-	$(MAKE) HTMLDIR=../$$< -C $(lang) html-single
+$(HTML)/$(lang)/index.html:
+	./xsltproc.sh $$(@D)/ html-chunk.xsl $$<
 
-xmllint-$(lang): xmllint.sh
-	$(MAKE) -C $(lang) xmllint
+$(HTML)/$(lang)/MPlayer.html:
+	./xsltproc.sh $$@ html-single.xsl $$<
+
+xmllint-$(lang): $(lang)/main.xml
+	./xmllint.sh $$<
 endef
 
 $(foreach lang, $(DOC_LANG_ALL),$(eval $(lang-def)))
@@ -61,4 +64,4 @@ releaseclean:
 distclean: clean releaseclean
 
 .PHONY: all help html-chunked html-single xmllint
-.PHONY: html-chunked-* html-single-* xmllint-* *clean*
+.PHONY: html-chunked-* html-single-* xmllint-* *clean

@@ -196,7 +196,7 @@ Now, go on:
            Only used if none of the above works.
 
 4. Codecs. Consists of libmpcodecs/* and separate files or libs,
-   for example liba52, libmpeg2, loader, mp3lib.
+   for example libmpeg2, loader, mp3lib.
 
    mplayer.c doesn't call them directly, but through the dec_audio.c and
    dec_video.c files, so the mplayer.c doesn't have to know anything about

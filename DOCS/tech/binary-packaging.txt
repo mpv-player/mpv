@@ -45,7 +45,7 @@ the following features MUST be included in any official binary package:
 * codecs
   - FAAD(internal)
   - libavcodec(internal)
-  - native codecs (libmpeg2/liba52/mp3lib)
+  - native codecs (libmpeg2/mp3lib)
   - Vorbis Tremor codec(internal)
   - RealPlayer codecs support (*)
   - Win32/VfW/DShow/QT codecs support (*)

@@ -37,7 +37,10 @@
 #include "aac_hdr.h"
 #include "mpeg_hdr.h"
 #include "mp3_hdr.h"
-#include "liba52/a52.h"
+
+#ifdef CONFIG_LIBA52
+#include <a52dec/a52.h>
+#endif
 
 #define PACK_HEADER_START_CODE 0x01ba
 #define SYSTEM_HEADER_START_CODE 0x01bb

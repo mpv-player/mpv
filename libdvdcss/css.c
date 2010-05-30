@@ -16,19 +16,19 @@
  *  - DecVOB
  *  see http://www.lemuria.org/DeCSS/ by Tom Vogt for more information.
  *
- * This program is free software; you can redistribute it and/or modify
+ * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *****************************************************************************/
 
 /*****************************************************************************
@@ -89,10 +89,19 @@ static int  AttackPadding   ( uint8_t const[], int, uint8_t * );
 
 /*****************************************************************************
  * _dvdcss_test: check if the disc is encrypted or not
+ *****************************************************************************
+ * Return values:
+ *   1: DVD is scrambled but can be read
+ *   0: DVD is not scrambled and can be read
+ *  -1: could not get "copyright" information
+ *  -2: could not get RPC information (reading the disc might be possible)
+ *  -3: drive is RPC-II, region is not set, and DVD is scrambled: the RPC
+ *      scheme will prevent us from reading the scrambled data
  *****************************************************************************/
 int _dvdcss_test( dvdcss_t dvdcss )
 {
-    int i_ret, i_copyright;
+    char const *psz_type, *psz_rpc;
+    int i_ret, i_copyright, i_type, i_mask, i_rpc;
 
     i_ret = ioctl_ReadCopyright( dvdcss->i_fd, 0 /* i_layer */, &i_copyright );
 
@@ -115,14 +124,51 @@ int _dvdcss_test( dvdcss_t dvdcss )
     if( i_ret < 0 )
     {
         /* Since it's the first ioctl we try to issue, we add a notice */
-        print_error( dvdcss, "css error: ioctl_ReadCopyright failed, "
-                     "make sure there is a DVD in the drive, and that "
-                     "you have used the correct device node." );
+        print_error( dvdcss, "css error: could not get \"copyright\""
+                     " information, make sure there is a DVD in the drive,"
+                     " and that you have used the correct device node." );
 
-        return i_ret;
+        return -1;
     }
 
-    return i_copyright;
+    print_debug( dvdcss, "disc reports copyright information 0x%x",
+                         i_copyright );
+
+    i_ret = ioctl_ReportRPC( dvdcss->i_fd, &i_type, &i_mask, &i_rpc);
+
+    if( i_ret < 0 )
+    {
+        print_error( dvdcss, "css error: could not get RPC status" );
+        return -2;
+    }
+
+    switch( i_rpc )
+    {
+        case 0: psz_rpc = "RPC-I"; break;
+        case 1: psz_rpc = "RPC-II"; break;
+        default: psz_rpc = "unknown RPC scheme"; break;
+    }
+
+    switch( i_type )
+    {
+        case 0: psz_type = "no region code set"; break;
+        case 1: psz_type = "region code set"; break;
+        case 2: psz_type = "one region change remaining"; break;
+        case 3: psz_type = "region code set permanently"; break;
+        default: psz_type = "unknown status"; break;
+    }
+
+    print_debug( dvdcss, "drive region mask %x, %s, %s",
+                         i_mask, psz_rpc, psz_type );
+
+    if( i_copyright && i_rpc == 1 && i_type == 0 )
+    {
+        print_error( dvdcss, "css error: drive will prevent access to "
+                             "scrambled data" );
+        return -3;
+    }
+
+    return i_copyright ? 1 : 0;
 }
 
 /*****************************************************************************
