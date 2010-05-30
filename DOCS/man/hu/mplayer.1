@@ -1,4 +1,4 @@
-.\" Synced with r31096
+.\" Synced with r31288
 .\" MPlayer (C) 2000-2010 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2010. 04. 25." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2010. 05. 31." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1800,6 +1800,10 @@ Lejátsza a népszerû "foreman" minta videót.
 Nyers YUV minta lejátszása.
 .RE
 .PD 1
+.
+.TP
+.B \-referrer <karakterlánc> (csak hálózaton)
+Megadja a hivatkozó elérési útját vagy URL-jét a HTTP kérésekhez.
 .
 .TP
 .B \-rtsp\-port
@@ -4213,7 +4217,7 @@ Explicit megadja a használandó Matrox eszköz nevét (alapértelmezett: /dev/\:mga_
 .PD 1
 .
 .TP
-.B s3fb (csak Linux) (lásd még \-vf yuv2 és \-dr)
+.B s3fb (csak Linux) (lásd még \-dr)
 S3 Virge specifikus videó kimeneti vezérlõ.
 Ez a vezérlõ támogatja a kártya YUV konverzióját és méretezését, a dupla
 bufferelést és a direkt renderelést.
@@ -6103,12 +6107,6 @@ Megad egy legfeljebb 800x600-as felbontást a képarány megtartásához.
 Kerekítést végez úgy, hogy mind a szélesség, mind a magasság osztható
 legyen <r>-rel (alapértelmezett: 1).
 .RE
-.
-.TP
-.B "yuy2\ \ \ "
-Szoftveres YV12/\:I420/\:422P-bõl YUY2-be konvertálást kényszerít ki.
-Hasznos lassú YV12, de gyors YUY2 támogatással rendelkezõ videó kártyák/\:vezérlõk
-esetén.
 .
 .TP
 .B "yvu9\ \ \ "
