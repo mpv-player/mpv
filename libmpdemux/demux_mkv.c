@@ -2413,11 +2413,11 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
     uint64_t v_tnum = -1;
     if (demuxer->video->id >= 0)
         v_tnum = find_track_by_num(mkv_d, demuxer->video->id,
-                                        MATROSKA_TRACK_VIDEO)->tnum;
+                                   MATROSKA_TRACK_VIDEO)->tnum;
     uint64_t a_tnum = -1;
     if (demuxer->audio->id >= 0)
         a_tnum = find_track_by_num(mkv_d, demuxer->audio->id,
-                                        MATROSKA_TRACK_VIDEO)->tnum;
+                                   MATROSKA_TRACK_AUDIO)->tnum;
     if (!(flags & (SEEK_BACKWARD | SEEK_FORWARD))) {
         if (flags & SEEK_ABSOLUTE || rel_seek_secs < 0)
             flags |= SEEK_BACKWARD;
