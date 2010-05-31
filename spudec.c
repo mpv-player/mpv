@@ -1202,11 +1202,15 @@ void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigne
       spudec_parse_extradata(this, extradata, extradata_len);
     /* XXX Although the video frame is some size, the SPU frame is
        always maximum size i.e. 720 wide and 576 or 480 high */
+    // For HD files in MKV the VobSub resolution can be higher though,
+    // see largeres_vobsub.mkv
+    if (this->orig_frame_width <= 720 && this->orig_frame_height <= 576) {
     this->orig_frame_width = 720;
     if (this->orig_frame_height == 480 || this->orig_frame_height == 240)
       this->orig_frame_height = 480;
     else
       this->orig_frame_height = 576;
+    }
   }
   else
     mp_msg(MSGT_SPUDEC,MSGL_FATAL, "FATAL: spudec_init: calloc");
