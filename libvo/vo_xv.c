@@ -114,11 +114,20 @@ static void (*draw_alpha_fnc) (int x0, int y0, int w, int h,
                                unsigned char *src, unsigned char *srca,
                                int stride);
 
+static void fixup_osd_position(int *x0, int *y0, int *w, int *h)
+{
+    *x0 += image_width * (vo_panscan_x >> 1) / (vo_dwidth + vo_panscan_x);
+    *w = av_clip(*w, 0, image_width);
+    *h = av_clip(*h, 0, image_height);
+    *x0 = FFMIN(*x0, image_width  - *w);
+    *y0 = FFMIN(*y0, image_height - *h);
+}
+
 static void draw_alpha_yv12(int x0, int y0, int w, int h,
                             unsigned char *src, unsigned char *srca,
                             int stride)
 {
-    x0 += image_width * (vo_panscan_x >> 1) / (vo_dwidth + vo_panscan_x);
+    fixup_osd_position(&x0, &y0, &w, &h);
     vo_draw_alpha_yv12(w, h, src, srca, stride,
                        xvimage[current_buf]->data +
                        xvimage[current_buf]->offsets[0] +
@@ -130,7 +139,7 @@ static void draw_alpha_yuy2(int x0, int y0, int w, int h,
                             unsigned char *src, unsigned char *srca,
                             int stride)
 {
-    x0 += image_width * (vo_panscan_x >> 1) / (vo_dwidth + vo_panscan_x);
+    fixup_osd_position(&x0, &y0, &w, &h);
     vo_draw_alpha_yuy2(w, h, src, srca, stride,
                        xvimage[current_buf]->data +
                        xvimage[current_buf]->offsets[0] +
@@ -142,7 +151,7 @@ static void draw_alpha_uyvy(int x0, int y0, int w, int h,
                             unsigned char *src, unsigned char *srca,
                             int stride)
 {
-    x0 += image_width * (vo_panscan_x >> 1) / (vo_dwidth + vo_panscan_x);
+    fixup_osd_position(&x0, &y0, &w, &h);
     vo_draw_alpha_yuy2(w, h, src, srca, stride,
                        xvimage[current_buf]->data +
                        xvimage[current_buf]->offsets[0] +
