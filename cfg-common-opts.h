@@ -218,7 +218,7 @@
     {"ignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"noignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
-    {"a52drc", &drc_level, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
+    {"a52drc", &drc_level, CONF_TYPE_FLOAT, CONF_RANGE, 0, 2, NULL},
 
 // ------------------------- codec/vfilter options --------------------
 
