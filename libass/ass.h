@@ -317,6 +317,12 @@ void ass_process_chunk(ASS_Track *track, char *data, int size,
                        long long timecode, long long duration);
 
 /**
+ * \brief Flush buffered events.
+ * \param track track
+*/
+void ass_flush_events(ASS_Track *track);
+
+/**
  * \brief Read subtitles from file.
  * \param library library handle
  * \param fname file name

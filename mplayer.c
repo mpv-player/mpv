@@ -2581,6 +2581,11 @@ static int seek(MPContext *mpctx, double amount, int style)
 	vobsub_seek(vo_vobsub, mpctx->sh_video->pts);
     }
 
+#ifdef CONFIG_ASS
+    if (ass_enabled && mpctx->d_sub->sh && ((sh_sub_t *)mpctx->d_sub->sh)->ass_track)
+        ass_flush_events(((sh_sub_t *)mpctx->d_sub->sh)->ass_track);
+#endif
+
     edl_seek_reset(mpctx);
 
     c_total = 0;
