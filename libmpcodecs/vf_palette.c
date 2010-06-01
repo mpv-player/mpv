@@ -114,11 +114,6 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	// no stride conversion needed
 	switch(IMGFMT_RGB_DEPTH(dmpi->imgfmt)){
 	case 15:
-	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		palette8tobgr15(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
-	    else
-		palette8torgb15(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
-	    break;
 	case 16:
 	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
 		palette8tobgr16(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
@@ -145,11 +140,6 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	    unsigned char* dst=dmpi->planes[0]+y*dmpi->stride[0];
 	    switch(IMGFMT_RGB_DEPTH(dmpi->imgfmt)){
 	    case 15:
-		if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		    palette8tobgr15(src,dst,mpi->w,mpi->planes[1]);
-		else
-		    palette8torgb15(src,dst,mpi->w,mpi->planes[1]);
-		break;
 	    case 16:
 		if (IMGFMT_IS_BGR(dmpi->imgfmt))
 		    palette8tobgr16(src,dst,mpi->w,mpi->planes[1]);
