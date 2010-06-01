@@ -28,9 +28,9 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
+#include "mpbswap.h"
 
 #include "libswscale/swscale.h"
-#include "libswscale/rgb2rgb.h"
 
 //===========================================================================//
 
@@ -52,6 +52,23 @@ static const unsigned int rgb_list[]={
 //    IMGFMT_RGB15,
     0
 };
+
+/**
+ * Palette is assumed to contain BGR16, see rgb32to16 to convert the palette.
+ */
+static void palette8torgb16(const uint8_t *src, uint8_t *dst, long num_pixels, const uint8_t *palette)
+{
+    long i;
+    for (i=0; i<num_pixels; i++)
+        ((uint16_t *)dst)[i] = ((const uint16_t *)palette)[src[i]];
+}
+
+static void palette8tobgr16(const uint8_t *src, uint8_t *dst, long num_pixels, const uint8_t *palette)
+{
+    long i;
+    for (i=0; i<num_pixels; i++)
+        ((uint16_t *)dst)[i] = bswap_16(((const uint16_t *)palette)[src[i]]);
+}
 
 static unsigned int gray_pal[256];
 
