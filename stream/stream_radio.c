@@ -401,7 +401,7 @@ static int get_volume_v4l2(radio_priv_t* priv,int* volume){
 /* v4l2 driver info structure */
 static const radio_driver_t radio_driver_v4l2={
     "v4l2",
-    _("[radio] Using V4Lv1 radio interface.\n")2,
+    _("[radio] Using V4Lv2 radio interface.\n"),
     init_frac_v4l2,
     set_volume_v4l2,
     get_volume_v4l2,
