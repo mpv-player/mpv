@@ -29,6 +29,7 @@
 #include "mp_image.h"
 #include "vf.h"
 
+#include "libswscale/swscale.h"
 #include "libswscale/rgb2rgb.h"
 
 //===========================================================================//
@@ -122,15 +123,15 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	    break;
 	case 24:
 	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		palette8topacked24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
+		sws_convertPalette8ToPacked24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    else
-		palette8topacked24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
+		sws_convertPalette8ToPacked24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    break;
 	case 32:
 	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		palette8topacked32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
+		sws_convertPalette8ToPacked32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    else
-		palette8topacked32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
+		sws_convertPalette8ToPacked32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    break;
 	}
     } else {
@@ -148,15 +149,15 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 		break;
 	    case 24:
 		if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		    palette8topacked24(src,dst,mpi->w,mpi->planes[1]);
+		    sws_convertPalette8ToPacked24(src,dst,mpi->w,mpi->planes[1]);
 		else
-		    palette8topacked24(src,dst,mpi->w,mpi->planes[1]);
+		    sws_convertPalette8ToPacked24(src,dst,mpi->w,mpi->planes[1]);
 		break;
 	    case 32:
 		if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		    palette8topacked32(src,dst,mpi->w,mpi->planes[1]);
+		    sws_convertPalette8ToPacked32(src,dst,mpi->w,mpi->planes[1]);
 		else
-		    palette8topacked32(src,dst,mpi->w,mpi->planes[1]);
+		    sws_convertPalette8ToPacked32(src,dst,mpi->w,mpi->planes[1]);
 		break;
 	    }
 	}
