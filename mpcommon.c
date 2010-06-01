@@ -297,6 +297,24 @@ int select_audio(demuxer_t* demuxer, int audio_id, char* audio_lang)
     return demuxer->audio->id;
 }
 
+bool attachment_is_font(struct demux_attachment *att)
+{
+    if (!att->name || !att->type || !att->data || !att->data_size)
+        return false;
+    // match against MIME types
+    if (strcmp(att->type, "application/x-truetype-font") == 0
+        || strcmp(att->type, "application/x-font") == 0)
+        return true;
+    // fallback: match against file extension
+    if (strlen(att->name) > 4) {
+        char *ext = att->name + strlen(att->name) - 4;
+        if (strcasecmp(ext, ".ttf") == 0 || strcasecmp(ext, ".ttc") == 0
+            || strcasecmp(ext, ".otf") == 0)
+            return true;
+    }
+    return false;
+}
+
 /* Parse -noconfig common to both programs */
 int disable_system_conf=0;
 int disable_user_conf=0;

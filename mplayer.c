@@ -3756,10 +3756,7 @@ if (opts->ass_enabled && ass_library) {
         struct demuxer *d = mpctx->sources[j].demuxer;
         for (int i = 0; i < d->num_attachments; i++) {
             struct demux_attachment *att = d->attachments + i;
-            if (use_embedded_fonts
-                && att->name && att->type && att->data && att->data_size
-                && (strcmp(att->type, "application/x-truetype-font") == 0
-                    || strcmp(att->type, "application/x-font") == 0))
+            if (use_embedded_fonts && attachment_is_font(att))
                 ass_add_font(ass_library, att->name, att->data, att->data_size);
         }
     }

@@ -1060,10 +1060,7 @@ default: {
     if (ass_library) {
       for (i = 0; i < demuxer->num_attachments; ++i) {
         demux_attachment_t* att = demuxer->attachments + i;
-        if (use_embedded_fonts &&
-            att->name && att->type && att->data && att->data_size &&
-            (strcmp(att->type, "application/x-truetype-font") == 0 ||
-             strcmp(att->type, "application/x-font") == 0))
+        if (use_embedded_fonts && attachment_is_font(att))
           ass_add_font(ass_library, att->name, att->data, att->data_size);
       }
     }

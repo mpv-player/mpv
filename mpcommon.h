@@ -35,6 +35,7 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
 void update_teletext(sh_video_t *sh_video, demuxer_t *demuxer, int reset);
 int select_audio(demuxer_t* demuxer, int audio_id, char* audio_lang);
 void set_osd_subtitle(struct MPContext *mpctx, subtitle *subs);
+bool attachment_is_font(struct demux_attachment *att);
 
 extern int disable_system_conf;
 extern int disable_user_conf;
