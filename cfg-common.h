@@ -52,8 +52,6 @@ extern int reuse_socket;
 
 extern int dvd_speed; /* stream/stream_dvd.c */
 
-extern float a52_drc_level;
-
 /* defined in libmpdemux: */
 extern int hr_mp3_seek;
 extern const m_option_t demux_rawaudio_opts[];

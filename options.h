@@ -42,6 +42,7 @@ typedef struct MPOpts {
     char *audio_lang;
     char *sub_lang;
     float playback_speed;
+    float drc_level;
     struct m_obj_settings *vf_settings;
     int softzoom;
     float movie_aspect;

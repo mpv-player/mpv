@@ -213,9 +213,7 @@
     {"ignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"noignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
-#ifdef CONFIG_LIBA52
-    {"a52drc", &a52_drc_level, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
-#endif
+    OPT_FLOATRANGE("a52drc", drc_level, 0, 0, 2),
 
 // ------------------------- codec/vfilter options --------------------
 

@@ -24,7 +24,7 @@
 #include <assert.h>
 
 #include "config.h"
-
+#include "options.h"
 #include "mp_msg.h"
 #include "mpbswap.h"
 
@@ -53,8 +53,6 @@ static uint32_t channel_map;
 
 /** The output is multiplied by this var.  Used for volume control */
 static sample_t a52_level = 1;
-/** The value of the -a52drc switch. */
-float a52_drc_level = 1.0;
 static int a52_drc_action = DRC_NO_ACTION;
 
 static const ad_info_t info =
@@ -135,8 +133,9 @@ int channels=0;
 
 static sample_t dynrng_call (sample_t c, void *data)
 {
-//	fprintf(stderr, "(%lf, %lf): %lf\n", (double)c, (double)a52_drc_level, (double)pow((double)c, a52_drc_level));
-	return pow((double)c, a52_drc_level);
+    struct MPOpts *opts = data;
+    //fprintf(stderr, "(%lf, %lf): %lf\n", (double)c, opts->drc_level, pow(c, opts->drc_level));
+    return pow(c, opts->drc_level);
 }
 
 
@@ -177,6 +176,7 @@ static int a52_resample_float(float *in, int16_t *out)
 
 static int init(sh_audio_t *sh_audio)
 {
+    struct MPOpts *opts = sh_audio->opts;
   uint32_t a52_accel=0;
   sample_t level=a52_level, bias=384;
   int flags=0;
@@ -204,12 +204,11 @@ static int init(sh_audio_t *sh_audio)
 	return 0;
   }
 
-
   /* Init a52 dynrng */
-  if (a52_drc_level < 0.001) {
+  if (opts->drc_level < 0.001) {
 	  /* level == 0 --> no compression, init library without callback */
 	  a52_drc_action = DRC_NO_COMPRESSION;
-  } else if (a52_drc_level > 0.999) {
+  } else if (opts->drc_level > 0.999 || opts->drc_level < 1.001) {
 	  /* level == 1 --> full compression, do nothing at all (library default = full compression) */
 	  a52_drc_action = DRC_NO_ACTION;
   } else {
@@ -328,7 +327,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 	    if (a52_drc_action == DRC_NO_COMPRESSION)
 		a52_dynrng(a52_state, NULL, NULL);
 	    else
-		a52_dynrng(a52_state, dynrng_call, NULL);
+		a52_dynrng(a52_state, dynrng_call, sh_audio->opts);
 	}
 
 	len=0;
