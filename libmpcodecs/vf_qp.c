@@ -67,10 +67,11 @@ static int config(struct vf_instance *vf,
                 NULL
             };
             double temp_val;
+	    int res;
 
-            temp_val= ff_parse_and_eval_expr(vf->priv->eq, const_names, const_values, NULL, NULL, NULL, NULL, NULL, 0, NULL);
+            res= ff_parse_and_eval_expr(&temp_val, vf->priv->eq, const_names, const_values, NULL, NULL, NULL, NULL, NULL, 0, NULL);
 
-            if (isnan(temp_val)){
+            if (res < 0){
                 mp_msg(MSGT_VFILTER, MSGL_ERR, "qp: Error evaluating \"%s\" \n", vf->priv->eq);
                 return 0;
             }

@@ -137,7 +137,7 @@ static void uninit(struct vf_instance *vf){
 //===========================================================================//
 static int vf_open(vf_instance_t *vf, char *args){
     char eq[3][2000] = { { 0 }, { 0 }, { 0 } };
-    int plane;
+    int plane, res;
 
     vf->config=config;
     vf->put_image=put_image;
@@ -178,9 +178,9 @@ static int vf_open(vf_instance_t *vf, char *args){
             plane==0 ? lum : (plane==1 ? cb : cr),
             NULL
         };
-        vf->priv->e[plane] = ff_parse_expr(eq[plane], const_names, NULL, NULL, func2_names, func2, 0, NULL);
+        res = ff_parse_expr(&vf->priv->e[plane], eq[plane], const_names, NULL, NULL, func2_names, func2, 0, NULL);
 
-        if (!vf->priv->e[plane]) {
+        if (res < 0) {
             mp_msg(MSGT_VFILTER, MSGL_ERR, "geq: error loading equation `%s'\n", eq[plane]);
             return 0;
         }

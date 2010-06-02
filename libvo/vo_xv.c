@@ -119,14 +119,24 @@ struct xvctx {
 static void allocate_xvimage(struct vo *, int);
 
 
+static void fixup_osd_position(struct vo *vo, int *x0, int *y0, int *w, int *h)
+{
+    struct xvctx *ctx = vo->priv;
+    *x0 += ctx->image_width * (vo->panscan_x >> 1)
+                            / (vo->dwidth + vo->panscan_x);
+    *w = av_clip(*w, 0, ctx->image_width);
+    *h = av_clip(*h, 0, ctx->image_height);
+    *x0 = FFMIN(*x0, ctx->image_width  - *w);
+    *y0 = FFMIN(*y0, ctx->image_height - *h);
+}
+
 static void draw_alpha_yv12(void *p, int x0, int y0, int w, int h,
                             unsigned char *src, unsigned char *srca,
                             int stride)
 {
     struct vo *vo = p;
     struct xvctx *ctx = vo->priv;
-    x0 += ctx->image_width * (vo->panscan_x >> 1)
-                           / (vo->dwidth + vo->panscan_x);
+    fixup_osd_position(vo, &x0, &y0, &w, &h);
     vo_draw_alpha_yv12(w, h, src, srca, stride,
                        ctx->xvimage[ctx->current_buf]->data +
                        ctx->xvimage[ctx->current_buf]->offsets[0] +
@@ -141,8 +151,7 @@ static void draw_alpha_yuy2(void *p, int x0, int y0, int w, int h,
 {
     struct vo *vo = p;
     struct xvctx *ctx = vo->priv;
-    x0 += ctx->image_width * (vo->panscan_x >> 1)
-                           / (vo->dwidth + vo->panscan_x);
+    fixup_osd_position(vo, &x0, &y0, &w, &h);
     vo_draw_alpha_yuy2(w, h, src, srca, stride,
                        ctx->xvimage[ctx->current_buf]->data +
                        ctx->xvimage[ctx->current_buf]->offsets[0] +
@@ -157,8 +166,7 @@ static void draw_alpha_uyvy(void *p, int x0, int y0, int w, int h,
 {
     struct vo *vo = p;
     struct xvctx *ctx = vo->priv;
-    x0 += ctx->image_width * (vo->panscan_x >> 1)
-                           / (vo->dwidth + vo->panscan_x);
+    fixup_osd_position(vo, &x0, &y0, &w, &h);
     vo_draw_alpha_yuy2(w, h, src, srca, stride,
                        ctx->xvimage[ctx->current_buf]->data +
                        ctx->xvimage[ctx->current_buf]->offsets[0] +

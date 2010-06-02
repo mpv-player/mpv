@@ -27,8 +27,9 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
+#include "mpbswap.h"
 
-#include "libswscale/rgb2rgb.h"
+#include "libswscale/swscale.h"
 
 //===========================================================================//
 
@@ -50,6 +51,23 @@ static const unsigned int rgb_list[]={
 //    IMGFMT_RGB15,
     0
 };
+
+/**
+ * Palette is assumed to contain BGR16, see rgb32to16 to convert the palette.
+ */
+static void palette8torgb16(const uint8_t *src, uint8_t *dst, long num_pixels, const uint8_t *palette)
+{
+    long i;
+    for (i=0; i<num_pixels; i++)
+        ((uint16_t *)dst)[i] = ((const uint16_t *)palette)[src[i]];
+}
+
+static void palette8tobgr16(const uint8_t *src, uint8_t *dst, long num_pixels, const uint8_t *palette)
+{
+    long i;
+    for (i=0; i<num_pixels; i++)
+        ((uint16_t *)dst)[i] = bswap_16(((const uint16_t *)palette)[src[i]]);
+}
 
 static unsigned int gray_pal[256];
 
@@ -113,11 +131,6 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	// no stride conversion needed
 	switch(IMGFMT_RGB_DEPTH(dmpi->imgfmt)){
 	case 15:
-	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		palette8tobgr15(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
-	    else
-		palette8torgb15(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
-	    break;
 	case 16:
 	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
 		palette8tobgr16(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
@@ -126,15 +139,15 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	    break;
 	case 24:
 	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		palette8topacked24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
+		sws_convertPalette8ToPacked24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    else
-		palette8topacked24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
+		sws_convertPalette8ToPacked24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    break;
 	case 32:
 	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		palette8topacked32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
+		sws_convertPalette8ToPacked32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    else
-		palette8topacked32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
+		sws_convertPalette8ToPacked32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    break;
 	}
     } else {
@@ -144,11 +157,6 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	    unsigned char* dst=dmpi->planes[0]+y*dmpi->stride[0];
 	    switch(IMGFMT_RGB_DEPTH(dmpi->imgfmt)){
 	    case 15:
-		if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		    palette8tobgr15(src,dst,mpi->w,mpi->planes[1]);
-		else
-		    palette8torgb15(src,dst,mpi->w,mpi->planes[1]);
-		break;
 	    case 16:
 		if (IMGFMT_IS_BGR(dmpi->imgfmt))
 		    palette8tobgr16(src,dst,mpi->w,mpi->planes[1]);
@@ -157,15 +165,15 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 		break;
 	    case 24:
 		if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		    palette8topacked24(src,dst,mpi->w,mpi->planes[1]);
+		    sws_convertPalette8ToPacked24(src,dst,mpi->w,mpi->planes[1]);
 		else
-		    palette8topacked24(src,dst,mpi->w,mpi->planes[1]);
+		    sws_convertPalette8ToPacked24(src,dst,mpi->w,mpi->planes[1]);
 		break;
 	    case 32:
 		if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		    palette8topacked32(src,dst,mpi->w,mpi->planes[1]);
+		    sws_convertPalette8ToPacked32(src,dst,mpi->w,mpi->planes[1]);
 		else
-		    palette8topacked32(src,dst,mpi->w,mpi->planes[1]);
+		    sws_convertPalette8ToPacked32(src,dst,mpi->w,mpi->planes[1]);
 		break;
 	    }
 	}

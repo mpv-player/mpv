@@ -36,7 +36,7 @@ int geometry_xy_changed;
 int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 {
         if(vo_geometry != NULL) {
-            char xsign[2], ysign[2];
+            char xsign[2], ysign[2], dummy[2];
             int width, height, xoff, yoff, xper, yper;
             int i;
             int ok = 0;
@@ -46,28 +46,31 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
                 strcpy(ysign, "+");
                 switch (i) {
                 case 0:
-                    ok = sscanf(vo_geometry, "%ix%i%1[+-]%i%1[+-]%i", &width, &height, xsign, &xoff, ysign, &yoff) == 6;
+                    ok = sscanf(vo_geometry, "%ix%i%1[+-]%i%1[+-]%i%c",
+                                &width, &height, xsign, &xoff, ysign,
+                                &yoff, dummy) == 6;
                     break;
                 case 1:
-                    ok = sscanf(vo_geometry, "%ix%i", &width, &height) == 2;
+                    ok = sscanf(vo_geometry, "%ix%i%c", &width, &height, dummy) == 2;
                     break;
                 case 2:
-                    ok = sscanf(vo_geometry, "%1[+-]%i%1[+-]%i", xsign, &xoff, ysign, &yoff) == 4;
+                    ok = sscanf(vo_geometry, "%1[+-]%i%1[+-]%i%c",
+                                xsign, &xoff, ysign, &yoff, dummy) == 4;
                     break;
                 case 3:
-                    ok = sscanf(vo_geometry, "%i%%:%i%%", &xper, &yper) == 2;
+                    ok = sscanf(vo_geometry, "%i%%:%i%1[%]%c", &xper, &yper, dummy, dummy) == 3;
                     break;
                 case 4:
-		    ok = sscanf(vo_geometry, "%i:%i%%", &xoff, &yper) == 2;
+                    ok = sscanf(vo_geometry, "%i:%i%1[%]%c", &xoff, &yper, dummy, dummy) == 3;
                     break;
                 case 5:
-                    ok = sscanf(vo_geometry, "%i%%:%i", &xper, &yoff) == 2;
+                    ok = sscanf(vo_geometry, "%i%%:%i%c", &xper, &yoff, dummy) == 2;
                     break;
                 case 6:
-                    ok = sscanf(vo_geometry, "%i:%i", &xoff, &yoff) == 2;
+                    ok = sscanf(vo_geometry, "%i:%i%c", &xoff, &yoff, dummy) == 2;
                     break;
                 case 7:
-                    ok = sscanf(vo_geometry, "%i%%", &xper) == 1;
+                    ok = sscanf(vo_geometry, "%i%1[%]%c", &xper, dummy, dummy) == 2;
                     break;
                 }
             }
