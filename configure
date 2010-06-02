@@ -59,12 +59,14 @@ _configuration="$*"
 # Prefer these macros to full length text !
 # These macros only return an error code - NO display is done
 compile_check() {
+  source="$1"
+  shift
   echo >> "$TMPLOG"
-  cat "$1" >> "$TMPLOG"
+  cat "$source" >> "$TMPLOG"
   echo >> "$TMPLOG"
-  echo "$_cc $CFLAGS $extra_cflags $_ld_static $extra_ldflags $libs_mplayer $libs_mencoder -o $TMPEXE $@" >> "$TMPLOG"
+  echo "$_cc $source $CFLAGS $extra_cflags $_ld_static $extra_ldflags $libs_mplayer $libs_mencoder -o $TMPEXE $@" >> "$TMPLOG"
   rm -f "$TMPEXE"
-  $_cc $CFLAGS $extra_cflags $_ld_static $extra_ldflags $libs_mplayer $libs_mencoder -o "$TMPEXE" "$@" >> "$TMPLOG" 2>&1
+  $_cc $CFLAGS "$source" $extra_cflags $_ld_static $extra_ldflags $libs_mplayer $libs_mencoder -o "$TMPEXE" "$@" >> "$TMPLOG" 2>&1
   TMPRES="$?"
   echo >> "$TMPLOG"
   echo >> "$TMPLOG"
