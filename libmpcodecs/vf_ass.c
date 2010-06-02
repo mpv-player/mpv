@@ -92,7 +92,7 @@ static int config(struct vf_instance *vf,
 
 	if (vf->priv->ass_priv) {
 		ass_configure(vf->priv->ass_priv, vf->priv->outw, vf->priv->outh, 0);
-#if defined(LIBASS_VERSION) && LIBASS_VERSION >= 0x00908000
+#if defined(LIBASS_VERSION) && LIBASS_VERSION >= 0x00907010
 		ass_set_aspect_ratio(vf->priv->ass_priv, 1, 1);
 #else
 		ass_set_aspect_ratio(vf->priv->ass_priv, 1);
