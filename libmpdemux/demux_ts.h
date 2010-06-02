@@ -21,6 +21,8 @@
 
 #include <stdint.h>
 
+#define TS_MAX_PROBE_SIZE 2000000
+
 int mp_a52_framesize(uint8_t *buf, int *srate);
 
 #endif /* MPLAYER_DEMUX_TS_H */

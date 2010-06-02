@@ -1060,7 +1060,9 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     XSelectInput(mDisplay, x11->window, StructureNotifyMask);
     hint.x = x; hint.y = y;
     hint.width = width; hint.height = height;
-    hint.flags = PPosition | PSize;
+    hint.flags = PSize;
+    if (geometry_xy_changed)
+      hint.flags |= PPosition;
     XSetStandardProperties(mDisplay, x11->window, title, title, None, NULL, 0, &hint);
     if (!vo_border) vo_x11_decoration(vo, 0);
     // map window
@@ -1077,6 +1079,8 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
           ButtonPressMask | ButtonReleaseMask | ExposureMask);
   }
   if (opts->vo_ontop) vo_x11_setlayer(vo, x11->window, opts->vo_ontop);
+  if (!geometry_xy_changed)
+    vo_x11_update_geometry(vo);
   vo_x11_nofs_sizepos(vo, vo->dx, vo->dy, width, height);
   if (!!vo_fs != !!(flags & VOFLAG_FULLSCREEN))
     vo_x11_fullscreen(vo);

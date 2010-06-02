@@ -26,6 +26,7 @@
 #include <stddef.h>
 
 #include "cfg-common.h"
+#include "libmpdemux/demux_ts.h"
 #include "libvo/vo_zr.h"
 #include "options.h"
 
