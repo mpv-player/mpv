@@ -1770,7 +1770,7 @@ static int demux_mkv_open(demuxer_t *demuxer)
         demuxer->audio->id = -2;
     }
 
-    if (s->end_pos == 0 || (mkv_d->indexes == NULL && index_mode < 0))
+    if (s->end_pos == 0)
         demuxer->seekable = 0;
     else {
         demuxer->movi_start = s->start_pos;
