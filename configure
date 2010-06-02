@@ -1809,6 +1809,9 @@ EOF
     if test $cc_vendor != "intel" ; then
       cc_check -march=native && proc=native
     fi
+    if test "$proc" = "amdfam10"; then
+      cc_check -march=$proc $cpuopt=$proc || proc=k8
+    fi
     if test "$proc" = "k8"; then
       cc_check -march=$proc $cpuopt=$proc || proc=athlon-xp
     fi
@@ -3113,7 +3116,7 @@ if test "$_network" = yes ; then
   extra_ldflags="$extra_ldflags $_ld_sock"
   inputmodules="network $inputmodules"
 else
-  _noinputmodules="network $_noinputmodules"
+  noinputmodules="network $noinputmodules"
   def_network='#undef CONFIG_NETWORK'
   _ftp=no
 fi
@@ -3963,7 +3966,7 @@ if test "$_smb" = yes; then
     inputmodules="smb $inputmodules"
 else
     def_smb="#undef CONFIG_LIBSMBCLIENT"
-    _noinputmodules="smb $_noinputmodules"
+    noinputmodules="smb $noinputmodules"
 fi
 echores "$_smb"
 
@@ -4707,7 +4710,7 @@ if test "$_dvb" = yes ; then
   vomodules="mpegpes(dvb) $vomodules"
 else
   _dvbin=no
-  _noinputmodules="dvb $_noinputmodules"
+  noinputmodules="dvb $noinputmodules"
   def_dvb='#undef CONFIG_DVB'
   def_dvbin='#undef CONFIG_DVBIN '
   aomodules="mpegpes(file) $aomodules"
@@ -5863,7 +5866,7 @@ if test "$_vcd" = yes; then
   def_vcd='#define CONFIG_VCD 1'
 else
   def_vcd='#undef CONFIG_VCD'
-  _noinputmodules="vcd $_noinputmodules"
+  noinputmodules="vcd $noinputmodules"
   res_comment="not supported on this OS"
 fi
 echores "$_vcd"
@@ -5921,7 +5924,7 @@ elif test "$_dvdread" = yes; then
   res_comment="external"
 else
   def_dvdread='#undef CONFIG_DVDREAD'
-  _noinputmodules="dvdread $_noinputmodules"
+  noinputmodules="dvdread $noinputmodules"
 fi
 echores "$_dvdread"
 
@@ -5953,7 +5956,7 @@ if test "$_libdvdcss_internal" = yes ; then
   inputmodules="libdvdcss(internal) $inputmodules"
   _largefiles=yes
 else
-  _noinputmodules="libdvdcss(internal) $_noinputmodules"
+  noinputmodules="libdvdcss(internal) $noinputmodules"
 fi
 echores "$_libdvdcss_internal"
 
@@ -6025,7 +6028,7 @@ if test "$_cdda" = yes ; then
     inputmodules="cdda $inputmodules"
 else
     def_cdparanoia='#undef CONFIG_CDDA'
-    _noinputmodules="cdda $_noinputmodules"
+    noinputmodules="cdda $noinputmodules"
 fi
 
 if test "$_cddb" = yes ; then
@@ -6034,7 +6037,7 @@ if test "$_cddb" = yes ; then
 else
     _cddb=no
     def_cddb='#undef CONFIG_CDDB'
-    _noinputmodules="cddb $_noinputmodules"
+    noinputmodules="cddb $noinputmodules"
 fi
 
 echocheck "bitmap font support"
@@ -6834,7 +6837,7 @@ else
     _native_rtsp="$_network"
     _nemesi=no
     def_nemesi='#undef CONFIG_LIBNEMESI'
-    _noinputmodules="nemesi $_noinputmodules"
+    noinputmodules="nemesi $noinputmodules"
 fi
 echores "$_nemesi"
 
@@ -6885,7 +6888,7 @@ elif test "$_live_dist" = yes && test "$_network" = yes; then
 else
   _live=no
   def_live='#undef CONFIG_LIVE555'
-  _noinputmodules="live555 $_noinputmodules"
+  noinputmodules="live555 $noinputmodules"
 fi
 echores "$_live"
 
@@ -7234,7 +7237,7 @@ if test "$_tv" = yes ; then
   def_tv='#define CONFIG_TV 1'
   inputmodules="tv $inputmodules"
 else
-  _noinputmodules="tv $_noinputmodules"
+  noinputmodules="tv $noinputmodules"
   def_tv='#undef CONFIG_TV'
 fi
 echores "$_tv"
@@ -7319,7 +7322,7 @@ EOF
     inputmodules="tv-bsdbt848 $inputmodules"
   else
     def_tv_bsdbt848='#undef CONFIG_TV_BSDBT848'
-    _noinputmodules="tv-bsdbt848 $_noinputmodules"
+    noinputmodules="tv-bsdbt848 $noinputmodules"
   fi
   echores "$_tv_bsdbt848"
 fi #if freebsd || netbsd || openbsd || dragonfly || bsdos
@@ -7345,7 +7348,7 @@ if test "$_tv_dshow" = yes ; then
   def_tv_dshow='#define CONFIG_TV_DSHOW 1'
   extra_ldflags="$extra_ldflags -lole32 -luuid"
 else
-  _noinputmodules="tv-dshow $_noinputmodules"
+  noinputmodules="tv-dshow $noinputmodules"
   def_tv_dshow='#undef CONFIG_TV_DSHOW'
 fi
 echores "$_tv_dshow"
@@ -7370,7 +7373,7 @@ if test "$_tv_v4l1" = yes ; then
   def_tv_v4l1='#define CONFIG_TV_V4L1 1'
   inputmodules="tv-v4l $inputmodules"
 else
-  _noinputmodules="tv-v4l1 $_noinputmodules"
+  noinputmodules="tv-v4l1 $noinputmodules"
   def_tv_v4l='#undef CONFIG_TV_V4L'
 fi
 echores "$_tv_v4l1"
@@ -7396,7 +7399,7 @@ if test "$_tv_v4l2" = yes ; then
   def_tv_v4l2='#define CONFIG_TV_V4L2 1'
   inputmodules="tv-v4l2 $inputmodules"
 else
-  _noinputmodules="tv-v4l2 $_noinputmodules"
+  noinputmodules="tv-v4l2 $noinputmodules"
   def_tv_v4l2='#undef CONFIG_TV_V4L2'
 fi
 echores "$_tv_v4l2"
@@ -7416,7 +7419,7 @@ if test "$_radio" = yes ; then
     def_radio_capture="#undef CONFIG_RADIO_CAPTURE"
   fi
 else
-  _noinputmodules="radio $_noinputmodules"
+  noinputmodules="radio $noinputmodules"
   def_radio='#undef CONFIG_RADIO'
   def_radio_capture="#undef CONFIG_RADIO_CAPTURE"
   _radio_capture=no
@@ -7509,7 +7512,7 @@ if test "$_pvr" = yes ; then
   def_pvr='#define CONFIG_PVR 1'
   inputmodules="pvr $inputmodules"
 else
-  _noinputmodules="pvr $_noinputmodules"
+  noinputmodules="pvr $noinputmodules"
   def_pvr='#undef CONFIG_PVR'
 fi
 echores "$_pvr"
@@ -7520,7 +7523,7 @@ if ! beos && test "$_ftp" = yes ; then
   def_ftp='#define CONFIG_FTP 1'
   inputmodules="ftp $inputmodules"
 else
-  _noinputmodules="ftp $_noinputmodules"
+  noinputmodules="ftp $noinputmodules"
   def_ftp='#undef CONFIG_FTP'
 fi
 echores "$_ftp"
@@ -7540,7 +7543,7 @@ if test "$_vstream" = yes ; then
   inputmodules="vstream $inputmodules"
   extra_ldflags="$extra_ldflags -lvstream-client"
 else
-  _noinputmodules="vstream $_noinputmodules"
+  noinputmodules="vstream $noinputmodules"
   def_vstream='#undef CONFIG_VSTREAM'
 fi
 echores "$_vstream"
@@ -7787,7 +7790,7 @@ if test "$_dvdnav" = yes ; then
   fi
 else
   def_dvdnav='#undef CONFIG_DVDNAV'
-  _noinputmodules="dvdnav $_noinputmodules"
+  noinputmodules="dvdnav $noinputmodules"
 fi
 echores "$_dvdnav"
 
@@ -8568,7 +8571,7 @@ Config files successfully generated by ./configure $_configuration !
     Video output: $vomodules
 
   Disabled optional drivers:
-    Input: $_noinputmodules
+    Input: $noinputmodules
     Codecs: $nocodecmodules
     Audio output: $noaomodules
     Video output: $novomodules
