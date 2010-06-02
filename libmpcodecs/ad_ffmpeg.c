@@ -22,6 +22,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "options.h"
 
 #include "ad_internal.h"
 #include "libaf/reorder_ch.h"
@@ -53,6 +54,7 @@ static int preinit(sh_audio_t *sh)
 
 static int init(sh_audio_t *sh_audio)
 {
+    struct MPOpts *opts = sh_audio->opts;
     int tries = 0;
     int x;
     AVCodecContext *lavc_context;
@@ -74,6 +76,7 @@ static int init(sh_audio_t *sh_audio)
     lavc_context = avcodec_alloc_context();
     sh_audio->context=lavc_context;
 
+    lavc_context->drc_scale = opts->drc_level;
     lavc_context->sample_rate = sh_audio->samplerate;
     lavc_context->bit_rate = sh_audio->i_bps * 8;
     if(sh_audio->wf){
