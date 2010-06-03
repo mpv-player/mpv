@@ -2581,7 +2581,7 @@ static int seek(MPContext *mpctx, double amount, int style)
 	vobsub_seek(vo_vobsub, mpctx->sh_video->pts);
     }
 
-#if defined(CONFIG_ASS_INTERNAL) || defined(LIBASS_VERSION) && LIBASS_VERSION > 0x00909000
+#if defined(LIBASS_VERSION) && LIBASS_VERSION >= 0x00910000
     if (ass_enabled && mpctx->d_sub->sh && ((sh_sub_t *)mpctx->d_sub->sh)->ass_track)
         ass_flush_events(((sh_sub_t *)mpctx->d_sub->sh)->ass_track);
 #endif
