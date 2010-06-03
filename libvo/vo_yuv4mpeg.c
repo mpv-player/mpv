@@ -149,6 +149,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		return -1;
 	}
 
+#ifdef CONFIG_LIBSWSCALE_A
 	if(using_format != IMGFMT_YV12)
 	{
 		sws_rgb2rgb_init(get_sws_cpuflags());
@@ -160,6 +161,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 			return -1;
 		}
 	}
+#endif
 
 	write_bytes = image_width * image_height * 3 / 2;
 	image = malloc(write_bytes);
@@ -464,9 +466,11 @@ static int query_format(uint32_t format)
 		{
 			case IMGFMT_YV12:
 				return VFCAP_CSP_SUPPORTED|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
+#ifdef CONFIG_LIBSWSCALE_A
 			case IMGFMT_BGR|24:
 			case IMGFMT_RGB|24:
 				return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
+#endif
 		}
 	}
 	else
@@ -476,9 +480,11 @@ static int query_format(uint32_t format)
 		{
 			case IMGFMT_YV12:
 				return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
+#ifdef CONFIG_LIBSWSCALE_A
     		case IMGFMT_BGR|24:
     		case IMGFMT_RGB|24:
         		return VFCAP_CSP_SUPPORTED|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
+#endif
     	}
 	}
 	return 0;
