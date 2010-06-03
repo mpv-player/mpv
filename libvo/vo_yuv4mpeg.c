@@ -56,7 +56,9 @@
 
 #include "fastmemcpy.h"
 #include "libswscale/swscale.h"
+#ifdef CONFIG_LIBSWSCALE_A
 #include "libswscale/rgb2rgb.h"
+#endif
 #include "libmpcodecs/vf_scale.h"
 #include "libavutil/rational.h"
 
@@ -228,6 +230,7 @@ static void draw_osd(void)
     vo_draw_text(image_width, image_height, draw_alpha);
 }
 
+#ifdef CONFIG_LIBSWSCALE_A
 static void deinterleave_fields(uint8_t *ptr, const int stride,
 							  const int img_height)
 {
@@ -258,6 +261,7 @@ static void deinterleave_fields(uint8_t *ptr, const int stride,
 	}
 	free(line_state);
 }
+#endif
 
 static void vo_y4m_write(const void *ptr, const size_t num_bytes)
 {
@@ -318,14 +322,15 @@ static int write_last_frame(void)
 
 static void flip_page (void)
 {
-	uint8_t *upper_y, *upper_u, *upper_v, *rgb_buffer_lower;
-	int rgb_stride, uv_stride, field_height;
-	unsigned int i, low_ofs;
-
 	fprintf(yuv_out, "FRAME\n");
 
+#ifdef CONFIG_LIBSWSCALE_A
 	if (using_format != IMGFMT_YV12)
 	{
+		uint8_t *upper_y, *upper_u, *upper_v, *rgb_buffer_lower;
+		int rgb_stride, uv_stride, field_height;
+		unsigned int i, low_ofs;
+
 		rgb_stride = image_width * 3;
 		uv_stride = image_width / 2;
 
@@ -374,6 +379,7 @@ static void flip_page (void)
 					image_width, image_height,
 					image_width, uv_stride, rgb_stride);
 	}
+#endif
 
 	/* Write progressive frame */
 	vo_y4m_write(image, write_bytes);
