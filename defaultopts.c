@@ -30,6 +30,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .video_id = -1,
         .sub_id = -1,
         .playback_speed = 1.,
+        .drc_level = 1.,
         .movie_aspect = -1.,
         .flip = -1,
         .vd_use_slices = 1,
