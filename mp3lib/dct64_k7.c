@@ -11,7 +11,7 @@
 #include "config.h"
 #include "mangle.h"
 #include "mpg123.h"
-#include "libavutil/x86_cpu.h"
+#include "ffmpeg_files/x86_cpu.h"
 
 static unsigned long long int attribute_used __attribute__((aligned(8))) x_plus_minus_3dnow = 0x8000000000000000ULL;
 static float attribute_used plus_1f = 1.0;

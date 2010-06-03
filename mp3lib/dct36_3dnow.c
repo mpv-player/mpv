@@ -30,7 +30,7 @@
 #include "config.h"
 #include "mangle.h"
 #include "mpg123.h"
-#include "libavutil/x86_cpu.h"
+#include "ffmpeg_files/x86_cpu.h"
 
 #ifdef DCT36_OPTIMIZE_FOR_K7
 void dct36_3dnowex(real *inbuf, real *o1,

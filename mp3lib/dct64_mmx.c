@@ -6,7 +6,7 @@
 #include "config.h"
 #include "mangle.h"
 #include "mpg123.h"
-#include "libavutil/x86_cpu.h"
+#include "ffmpeg_files/x86_cpu.h"
 
 void dct64_MMX(short *a,short *b,real *c)
 {
