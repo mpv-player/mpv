@@ -394,20 +394,6 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
     double tt;
 
     if (correct_pts && pts != MP_NOPTS_VALUE) {
-        int delay = get_current_video_decoder_lag(sh_video);
-        if (delay >= 0) {
-            if (delay > sh_video->num_buffered_pts)
-#if 0
-                // this is disabled because vd_ffmpeg reports the same lag
-                // after seek even when there are no buffered frames,
-                // leading to incorrect error messages
-                mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Not enough buffered pts\n");
-#else
-                ;
-#endif
-            else
-                sh_video->num_buffered_pts = delay;
-        }
         if (sh_video->num_buffered_pts ==
             sizeof(sh_video->buffered_pts) / sizeof(double))
             mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Too many buffered pts\n");
@@ -451,6 +437,7 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
         mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
 
     if (correct_pts) {
+        int delay = get_current_video_decoder_lag(sh_video);
         if (sh_video->num_buffered_pts) {
             sh_video->num_buffered_pts--;
             sh_video->pts = sh_video->buffered_pts[sh_video->num_buffered_pts];
@@ -458,6 +445,22 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
             mp_msg(MSGT_CPLAYER, MSGL_ERR,
                    "No pts value from demuxer to " "use for frame!\n");
             sh_video->pts = MP_NOPTS_VALUE;
+        }
+        if (delay >= 0) {
+            // limit buffered pts only afterwards so we do not get confused
+            // by packets that produce no output (e.g. a single field of a
+            // H.264 frame).
+            if (delay > sh_video->num_buffered_pts)
+#if 0
+                // this is disabled because vd_ffmpeg reports the same lag
+                // after seek even when there are no buffered frames,
+                // leading to incorrect error messages
+                mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Not enough buffered pts\n");
+#else
+                ;
+#endif
+            else
+                sh_video->num_buffered_pts = delay;
         }
     }
     return mpi;
