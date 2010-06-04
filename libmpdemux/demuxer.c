@@ -30,6 +30,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "m_config.h"
+#include "mplayer.h"
 
 #include "libvo/fastmemcpy.h"
 
@@ -251,8 +252,6 @@ demuxer_t *new_demuxer(stream_t *stream, int type, int a_id, int v_id,
     stream_seek(stream, stream->start_pos);
     return d;
 }
-
-extern int dvdsub_id;
 
 sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
 {
@@ -1196,7 +1195,7 @@ demuxer_t *demux_open(stream_t *vs, int file_format, int audio_id,
 
     correct_pts = user_correct_pts;
     if (correct_pts < 0)
-        correct_pts = demux_control(res, DEMUXER_CTRL_CORRECT_PTS, NULL)
+        correct_pts = !force_fps && demux_control(res, DEMUXER_CTRL_CORRECT_PTS, NULL)
                       == DEMUXER_CTRL_OK;
     return res;
 }
