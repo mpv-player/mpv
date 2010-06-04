@@ -7121,6 +7121,7 @@ if test "$_mga" = yes ; then
     vomodules="mga $vomodules"
   else
     res_comment="libswscale internal headers are required by mga, sorry"
+    _mga=no
     def_mga='#undef CONFIG_MGA'
     novomodules="mga $novomodules"
   fi
@@ -7141,7 +7142,8 @@ if test "$_xmga" = yes ; then
     def_xmga='#define CONFIG_XMGA 1'
     vomodules="xmga $vomodules"
   else
-    res_comment="libswscale internal headers are required by mga, sorry"
+    res_comment="libswscale internal headers are required by xmga, sorry"
+    _xmga=no
     def_xmga='#undef CONFIG_XMGA'
     novomodules="xmga $novomodules"
   fi
