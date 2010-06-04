@@ -356,6 +356,7 @@ int config_video_out(const vo_functions_t *vo, uint32_t width, uint32_t height,
   vo_dy = (int)(vo_screenheight - d_height) / 2;
   geometry(&vo_dx, &vo_dy, &d_width, &d_height,
            vo_screenwidth, vo_screenheight);
+  geometry_xy_changed |= xinerama_screen >= 0;
   vo_dx += xinerama_x;
   vo_dy += xinerama_y;
   vo_dwidth = d_width;
