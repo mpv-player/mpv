@@ -55,11 +55,6 @@
 #include "sub.h"
 
 #include "fastmemcpy.h"
-#include "libswscale/swscale.h"
-#ifdef CONFIG_LIBSWSCALE_A
-#include "libswscale/rgb2rgb.h"
-#endif
-#include "libmpcodecs/vf_scale.h"
 #include "libavutil/rational.h"
 
 static const vo_info_t info =
@@ -80,9 +75,6 @@ static uint8_t *image = NULL;
 static uint8_t *image_y = NULL;
 static uint8_t *image_u = NULL;
 static uint8_t *image_v = NULL;
-
-static uint8_t *rgb_buffer = NULL;
-static uint8_t *rgb_line_buffer = NULL;
 
 static char *yuv_filename = NULL;
 
@@ -128,18 +120,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 				MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4);
 			return -1;
 		}
-
-		rgb_line_buffer = malloc(image_width * 3);
-		if (!rgb_line_buffer)
-		{
-			mp_msg(MSGT_VO,MSGL_FATAL,
-				MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail);
-			return -1;
-		}
-
-		if (using_format == IMGFMT_YV12)
-			mp_msg(MSGT_VO,MSGL_WARN,
-				MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB);
 	}
 
 	if (width % 2)
@@ -148,20 +128,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 			MSGTR_VO_YUV4MPEG_WidthDivisibleBy2);
 		return -1;
 	}
-
-#ifdef CONFIG_LIBSWSCALE_A
-	if(using_format != IMGFMT_YV12)
-	{
-		sws_rgb2rgb_init(get_sws_cpuflags());
-		rgb_buffer = malloc(image_width * image_height * 3);
-		if (!rgb_buffer)
-		{
-			mp_msg(MSGT_VO,MSGL_FATAL,
-				MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf);
-			return -1;
-		}
-	}
-#endif
 
 	write_bytes = image_width * image_height * 3 / 2;
 	image = malloc(write_bytes);
@@ -187,83 +153,16 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	return 0;
 }
 
-/* Only use when h divisable by 2! */
-static void swap_fields(uint8_t *ptr, const int h, const int stride)
-{
-	int i;
-
-	for (i=0; i<h; i +=2)
-	{
-		fast_memcpy(rgb_line_buffer     , ptr + stride *  i   , stride);
-		fast_memcpy(ptr + stride *  i   , ptr + stride * (i+1), stride);
-		fast_memcpy(ptr + stride * (i+1), rgb_line_buffer     , stride);
-	}
-}
-
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
                        unsigned char *srca, int stride) {
-	switch (using_format)
-	{
-    	case IMGFMT_YV12:
 	    	vo_draw_alpha_yv12(w, h, src, srca, stride,
 				       image + y0 * image_width + x0, image_width);
-			break;
-
-		case IMGFMT_BGR|24:
-		case IMGFMT_RGB|24:
-			if (config_interlace != Y4M_ILACE_BOTTOM_FIRST)
-				vo_draw_alpha_rgb24(w, h, src, srca, stride,
-						rgb_buffer + (y0 * image_width + x0) * 3, image_width * 3);
-			else
-			{
-				swap_fields (rgb_buffer, image_height, image_width * 3);
-
-				vo_draw_alpha_rgb24(w, h, src, srca, stride,
-						rgb_buffer + (y0 * image_width  + x0) * 3, image_width * 3);
-
-				swap_fields (rgb_buffer, image_height, image_width * 3);
-			}
-			break;
-	}
 }
 
 static void draw_osd(void)
 {
     vo_draw_text(image_width, image_height, draw_alpha);
 }
-
-#ifdef CONFIG_LIBSWSCALE_A
-static void deinterleave_fields(uint8_t *ptr, const int stride,
-							  const int img_height)
-{
-	unsigned int i, j, k_start = 1, modv = img_height - 1;
-	unsigned char *line_state = malloc(modv);
-
-	for (i=0; i<modv; i++)
-		line_state[i] = 0;
-
-	line_state[0] = 1;
-
-	while(k_start < modv)
-	{
-		i = j = k_start;
-		fast_memcpy(rgb_line_buffer, ptr + stride * i, stride);
-
-		while (!line_state[j])
-		{
-			line_state[j] = 1;
-			i = j;
-			j = j * 2 % modv;
-			fast_memcpy(ptr + stride * i, ptr + stride * j, stride);
-		}
-		fast_memcpy(ptr + stride * i, rgb_line_buffer, stride);
-
-		while(k_start < modv && line_state[k_start])
-			k_start++;
-	}
-	free(line_state);
-}
-#endif
 
 static void vo_y4m_write(const void *ptr, const size_t num_bytes)
 {
@@ -274,50 +173,8 @@ static void vo_y4m_write(const void *ptr, const size_t num_bytes)
 
 static int write_last_frame(void)
 {
-
-    uint8_t *upper_y, *upper_u, *upper_v, *rgb_buffer_lower;
-    int rgb_stride, uv_stride, field_height;
-    unsigned int i, low_ofs;
-
     fprintf(yuv_out, "FRAME\n");
 
-    if (using_format != IMGFMT_YV12)
-    {
-	rgb_stride = image_width * 3;
-	uv_stride = image_width / 2;
-
-	if (Y4M_IS_INTERLACED)
-	{
-	    field_height = image_height / 2;
-
-	    upper_y = image;
-	    upper_u = upper_y + image_width * field_height;
-	    upper_v = upper_u + image_width * field_height / 4;
-	    low_ofs = image_width * field_height * 3 / 2;
-	    rgb_buffer_lower = rgb_buffer + rgb_stride * field_height;
-
-	    /* Write Y plane */
-	    for(i = 0; i < field_height; i++)
-	    {
-		vo_y4m_write(upper_y + image_width * i,           image_width);
-		vo_y4m_write(upper_y + image_width * i + low_ofs, image_width);
-	    }
-
-	    /* Write U and V plane */
-	    for(i = 0; i < field_height / 2; i++)
-	    {
-		vo_y4m_write(upper_u + uv_stride * i,           uv_stride);
-		vo_y4m_write(upper_u + uv_stride * i + low_ofs, uv_stride);
-	    }
-	    for(i = 0; i < field_height / 2; i++)
-	    {
-		vo_y4m_write(upper_v + uv_stride * i,           uv_stride);
-		vo_y4m_write(upper_v + uv_stride * i + low_ofs, uv_stride);
-	    }
-	    return VO_TRUE; /* Image written; We have to stop here */
-	}
-    }
-    /* Write progressive frame */
     vo_y4m_write(image, write_bytes);
     return VO_TRUE;
 }
@@ -326,64 +183,6 @@ static void flip_page (void)
 {
 	fprintf(yuv_out, "FRAME\n");
 
-#ifdef CONFIG_LIBSWSCALE_A
-	if (using_format != IMGFMT_YV12)
-	{
-		uint8_t *upper_y, *upper_u, *upper_v, *rgb_buffer_lower;
-		int rgb_stride, uv_stride, field_height;
-		unsigned int i, low_ofs;
-
-		rgb_stride = image_width * 3;
-		uv_stride = image_width / 2;
-
-		if (Y4M_IS_INTERLACED)
-		{
-			field_height = image_height / 2;
-
-			upper_y = image;
-			upper_u = upper_y + image_width * field_height;
-			upper_v = upper_u + image_width * field_height / 4;
-			low_ofs = image_width * field_height * 3 / 2;
-			rgb_buffer_lower = rgb_buffer + rgb_stride * field_height;
-
-			deinterleave_fields(rgb_buffer, rgb_stride, image_height);
-
-			rgb24toyv12(rgb_buffer, upper_y, upper_u, upper_v,
-						 image_width, field_height,
-						 image_width, uv_stride, rgb_stride);
-			rgb24toyv12(rgb_buffer_lower,  upper_y + low_ofs,
-						 upper_u + low_ofs, upper_v + low_ofs,
-						 image_width, field_height,
-						 image_width, uv_stride, rgb_stride);
-
-			/* Write Y plane */
-			for(i = 0; i < field_height; i++)
-			{
-				vo_y4m_write(upper_y + image_width * i,           image_width);
-				vo_y4m_write(upper_y + image_width * i + low_ofs, image_width);
-			}
-
-			/* Write U and V plane */
-			for(i = 0; i < field_height / 2; i++)
-			{
-				vo_y4m_write(upper_u + uv_stride * i,           uv_stride);
-				vo_y4m_write(upper_u + uv_stride * i + low_ofs, uv_stride);
-			}
-			for(i = 0; i < field_height / 2; i++)
-			{
-				vo_y4m_write(upper_v + uv_stride * i,           uv_stride);
-				vo_y4m_write(upper_v + uv_stride * i + low_ofs, uv_stride);
-			}
-			return; /* Image written; We have to stop here */
-		}
-
-		rgb24toyv12(rgb_buffer, image_y, image_u, image_v,
-					image_width, image_height,
-					image_width, uv_stride, rgb_stride);
-	}
-#endif
-
-	/* Write progressive frame */
 	vo_y4m_write(image, write_bytes);
 }
 
@@ -391,10 +190,6 @@ static int draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x,int y)
 {
 	int i;
 	uint8_t *dst, *src = srcimg[0];
-
-	switch (using_format)
-	{
-		case IMGFMT_YV12:
 
 		// copy Y:
 		dst = image_y + image_width * y + x;
@@ -421,72 +216,19 @@ static int draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x,int y)
 				dstv += imgstride;
 			}
 		}
-		break;
-
-		case IMGFMT_BGR24:
-		case IMGFMT_RGB24:
-			dst = rgb_buffer + (image_width * y + x) * 3;
-			for (i = 0; i < h; i++)
-			{
-				fast_memcpy(dst, src, w * 3);
-				src += stride[0];
-				dst += image_width * 3;
-			}
-			break;
-	}
 	return 0;
 }
 
 static int draw_frame(uint8_t * src[])
 {
-	switch(using_format)
-	{
-		case IMGFMT_YV12:
 			// gets done in draw_slice
-			break;
-
-		case IMGFMT_BGR24:
-		case IMGFMT_RGB24:
-			fast_memcpy(rgb_buffer, src[0], image_width * image_height * 3);
-			break;
-	}
     return 0;
 }
 
 static int query_format(uint32_t format)
 {
-
-	if (Y4M_IS_INTERLACED)
-    {
-		/* When processing interlaced material we want to get the raw RGB
-         * data and do the YV12 conversion ourselves to have the chrominance
-         * information sampled correct. */
-
-		switch(format)
-		{
-			case IMGFMT_YV12:
-				return VFCAP_CSP_SUPPORTED|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
-#ifdef CONFIG_LIBSWSCALE_A
-			case IMGFMT_BGR|24:
-			case IMGFMT_RGB|24:
-				return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
-#endif
-		}
-	}
-	else
-	{
-
-		switch(format)
-		{
-			case IMGFMT_YV12:
-				return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
-#ifdef CONFIG_LIBSWSCALE_A
-    		case IMGFMT_BGR|24:
-    		case IMGFMT_RGB|24:
-        		return VFCAP_CSP_SUPPORTED|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
-#endif
-    	}
-	}
+	if (format == IMGFMT_YV12)
+		return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
 	return 0;
 }
 
@@ -500,14 +242,6 @@ static void uninit(void)
 	if(yuv_out)
 		fclose(yuv_out);
 	yuv_out = NULL;
-
-	if(rgb_buffer)
-		free(rgb_buffer);
-	rgb_buffer = NULL;
-
-	if(rgb_line_buffer)
-		free(rgb_line_buffer);
-	rgb_line_buffer = NULL;
 
 	if (yuv_filename)
 		free(yuv_filename);

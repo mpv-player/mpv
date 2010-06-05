@@ -4349,7 +4349,9 @@ Transforms the video stream into a sequence of uncompressed YUV 4:2:0
 images and stores it in a file (default: ./stream.yuv).
 The format is the same as the one employed by mjpegtools, so this is
 useful if you want to process the video with the mjpegtools suite.
-It supports the YV12, RGB (24 bpp) and BGR (24 bpp) format.
+It supports the YV12 format.
+If your source file has a different format and is interlaced, make sure
+to use -vf scale=::1 to ensure the conversion uses interlaced mode.
 You can combine it with the \-fixed\-vo option to concatenate files
 with the same dimensions and fps value.
 .PD 0
