@@ -1461,6 +1461,7 @@ static const videocodec_info_t vinfo[] = {
     {MKV_V_MPEG4_AP,  mmioFOURCC('m', 'p', '4', 'v'), 1},
     {MKV_V_MPEG4_AVC, mmioFOURCC('a', 'v', 'c', '1'), 1},
     {MKV_V_THEORA,    mmioFOURCC('t', 'h', 'e', 'o'), 1},
+    {MKV_V_VP8,       mmioFOURCC('V', 'P', '8', '0'), 0},
     {NULL, 0, 0}
 };
 
@@ -1941,7 +1942,7 @@ static int demux_mkv_open(demuxer_t *demuxer)
 
     stream_seek(s, s->start_pos);
     str = ebml_read_header(s, &version);
-    if (str == NULL || strcmp(str, "matroska") || version > 2) {
+    if (str == NULL || (strcmp(str, "matroska") && strcmp(str, "webm")) || version > 2) {
         mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] no head found\n");
         return 0;
     }
