@@ -460,6 +460,7 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
         vo->dy = (int)(opts->vo_screenheight - d_height) / 2;
         geometry(&vo->dx, &vo->dy, &d_width, &d_height,
                  opts->vo_screenwidth, opts->vo_screenheight);
+        geometry_xy_changed |= xinerama_screen >= 0;
         vo->dx += xinerama_x;
         vo->dy += xinerama_y;
         vo->dwidth = d_width;
