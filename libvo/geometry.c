@@ -40,7 +40,7 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
             int width, height, xoff, yoff, xper, yper;
             int i;
             int ok = 0;
-            for (i = 0; !ok && i < 8; i++) {
+            for (i = 0; !ok && i < 9; i++) {
                 width = height = xoff = yoff = xper = yper = INT_MIN;
                 strcpy(xsign, "+");
                 strcpy(ysign, "+");
@@ -71,6 +71,9 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
                     break;
                 case 7:
                     ok = sscanf(vo_geometry, "%i%1[%]%c", &xper, dummy, dummy) == 2;
+                    break;
+                case 8:
+                    ok = sscanf(vo_geometry, "%i%c", &xoff, dummy) == 1;
                     break;
                 }
             }
