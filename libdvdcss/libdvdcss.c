@@ -367,12 +367,12 @@ LIBDVDCSS_EXPORT dvdcss_t dvdcss_open ( char *psz_target )
     if( dvdcss->b_ioctls )
     {
         i_ret = _dvdcss_test( dvdcss );
-        if( i_ret == -2 )
+
+        if( i_ret == -3 )
         {
-            /* Scrambled disk, RPC-II drive, no region set: bail out */
-            free( dvdcss->psz_device );
-            free( dvdcss );
-            return NULL;
+            print_debug( dvdcss, "scrambled disc on a region-free RPC-II "
+                                 "drive: possible failure, but continuing "
+                                 "anyway" );
         }
         else if( i_ret < 0 )
         {

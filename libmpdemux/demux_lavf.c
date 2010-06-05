@@ -80,11 +80,10 @@ static int mp_read(void *opaque, uint8_t *buf, int size) {
     struct stream *stream = demuxer->stream;
     int ret;
 
-    if(stream_eof(stream)) //needed?
-        return -1;
     ret=stream_read(stream, buf, size);
 
-    mp_msg(MSGT_HEADER,MSGL_DBG2,"%d=mp_read(%p, %p, %d), eof:%d\n", ret, stream, buf, size, stream->eof);
+    mp_msg(MSGT_HEADER,MSGL_DBG2,"%d=mp_read(%p, %p, %d), pos: %"PRId64", eof:%d\n",
+           ret, stream, buf, size, stream_tell(stream), stream->eof);
     return ret;
 }
 
@@ -106,8 +105,6 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence) {
 
     if(pos<0)
         return -1;
-    if(pos<stream->end_pos && stream->eof)
-        stream_reset(stream);
     current_pos = stream_tell(stream);
     if(stream_seek(stream, pos)==0) {
         stream_reset(stream);

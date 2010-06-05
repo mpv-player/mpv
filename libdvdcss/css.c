@@ -158,7 +158,7 @@ int _dvdcss_test( dvdcss_t dvdcss )
         default: psz_type = "unknown status"; break;
     }
 
-    print_debug( dvdcss, "drive region mask %x, %s, %s",
+    print_debug( dvdcss, "drive region mask 0x%x, %s, %s",
                          i_mask, psz_rpc, psz_type );
 
     if( i_copyright && i_rpc == 1 && i_type == 0 )

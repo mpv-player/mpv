@@ -3849,7 +3849,7 @@ if(mpctx->sh_video){
 
     if(!mpctx->sh_video->fps && !force_fps){
       mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"FPS not specified in the header or invalid, use the -fps option.\n");
-      mpctx->sh_video=mpctx->d_video->sh=NULL;
+      mpctx->opts.correct_pts = 1;
     }
   }
 
