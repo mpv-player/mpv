@@ -87,8 +87,6 @@ static int mp_read(void *opaque, uint8_t *buf, int size) {
     stream_t *stream = demuxer->stream;
     int ret;
 
-    if(stream_eof(stream)) //needed?
-        return -1;
     ret=stream_read(stream, buf, size);
 
     mp_msg(MSGT_HEADER,MSGL_DBG2,"%d=mp_read(%p, %p, %d), eof:%d\n", ret, stream, buf, size, stream->eof);
