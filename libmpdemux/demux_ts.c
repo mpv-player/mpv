@@ -70,6 +70,7 @@ typedef enum
 	VIDEO_MPEG4 	= 0x10000004,
 	VIDEO_H264 	= 0x10000005,
 	VIDEO_AVC	= mmioFOURCC('a', 'v', 'c', '1'),
+	VIDEO_DIRAC	= mmioFOURCC('d', 'r', 'a', 'c'),
 	VIDEO_VC1	= mmioFOURCC('W', 'V', 'C', '1'),
 	AUDIO_MP2   	= 0x50,
 	AUDIO_A52   	= 0x2000,
@@ -246,7 +247,7 @@ typedef struct {
 
 
 #define IS_AUDIO(x) (((x) == AUDIO_MP2) || ((x) == AUDIO_A52) || ((x) == AUDIO_LPCM_BE) || ((x) == AUDIO_AAC) || ((x) == AUDIO_DTS) || ((x) == AUDIO_TRUEHD))
-#define IS_VIDEO(x) (((x) == VIDEO_MPEG1) || ((x) == VIDEO_MPEG2) || ((x) == VIDEO_MPEG4) || ((x) == VIDEO_H264) || ((x) == VIDEO_AVC)  || ((x) == VIDEO_VC1))
+#define IS_VIDEO(x) (((x) == VIDEO_MPEG1) || ((x) == VIDEO_MPEG2) || ((x) == VIDEO_MPEG4) || ((x) == VIDEO_H264) || ((x) == VIDEO_AVC)  || ((x) == VIDEO_DIRAC) || ((x) == VIDEO_VC1))
 #define IS_SUB(x) (((x) == SPU_DVD) || ((x) == SPU_DVB) || ((x) == SPU_TELETEXT))
 
 static int ts_parse(demuxer_t *demuxer, ES_stream_t *es, unsigned char *packet, int probe);
@@ -2327,6 +2328,10 @@ static int parse_descriptors(struct pmt_es_t *es, uint8_t *ptr)
 				{
 					es->type = VIDEO_VC1;
 				}
+				else if(d[0] == 'd' && d[1] == 'r' && d[2] == 'a' && d[3] == 'c')
+				{
+					es->type = VIDEO_DIRAC;
+				}
 				else
 					es->type = UNKNOWN;
 				mp_msg(MSGT_DEMUX, MSGL_DBG2, "FORMAT %s\n", es->format_descriptor);
@@ -2523,6 +2528,9 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 			case 0x85:
 			case 0x86:
 				pmt->es[idx].type = AUDIO_DTS;
+				break;
+			case 0xD1:
+				pmt->es[idx].type = VIDEO_DIRAC;
 				break;
 			case 0xEA:
 				pmt->es[idx].type = VIDEO_VC1;
