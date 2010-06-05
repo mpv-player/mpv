@@ -3498,9 +3498,9 @@ if(mpctx->sh_video){
     }
     vo_fps = mpctx->sh_video->fps;
 
-    if(!mpctx->sh_video->fps && !force_fps){
+    if(!mpctx->sh_video->fps && !force_fps && !correct_pts){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_FPSnotspecified);
-      mpctx->sh_video=mpctx->d_video->sh=NULL;
+      correct_pts = 1;
     }
   }
 
