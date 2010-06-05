@@ -1,18 +1,10 @@
-.\" sync with en/mplayer.1 rev. 31173
+.\" sync with en/mplayer.1 rev. 31292
 .\" Encoding: UTF-8
-.\" Reminder of hard terms which need better/final solution later:
-.\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
-.\"   wrapper script ... shellescapes; keyframe; deblock; dering;
-.\"   encoding audio rate; alphamap; upsampling; sweep;
-.\"   aligned buffers; instancenumber;
 .\"
 .\" MPlayer (C) 2000-2010 MPlayer 团队
 .\" 本(英文)手册页由 Gabucino, Diego Biurrun, Jonas Jermann 编写
 .\" 视频滤镜、通用编解码器选项、特定编解码器专用选项三个章节由
 .\" JRaSH <jrash06 AT 163.com>重新翻译
-.\" 参于翻译本中文手册页的有:
-.\"   JRaSH <jrash06 AT 163.com>,
-.\"   Lu Ran <hephooey@fastmail.fm>, Sheldon Jin <jinsh2 AT yahoo.com>,
 .
 .\" --------------------------------------------------------------------------
 .\" 宏定义
@@ -1116,6 +1108,7 @@ MPlayer 从标准输入读取以新行 (\\n) 分隔开的命令行,
 选择 AC-3 音频流的动态范围压缩(DRC)级别。
 <级别> 是 0 到 1 的浮点数, 其中 0 表示无压缩,
 (默认值) 1 表示全压缩 (使得响亮的通路更安静或相反)。
+可使用大于 2 的值，但仅供试验。
 此选项仅当 AC-3 流包含所需范围的压缩信息时显示效果。
 .
 .TP
@@ -1685,6 +1678,10 @@ radio://1, radio://104.4, radio_set_channel 1
 播放原始 YUV 样本。
 .RE
 .PD 1
+.
+.TP
+.B \-referrer <字符串>（仅用于网络环境）
+为 HTTP 请求指定引用页面的路径或 URL。
 .
 .TP
 .B \-rtsp\-port
