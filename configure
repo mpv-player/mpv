@@ -1965,6 +1965,9 @@ EOF
         cc_check -march=native && proc=native
       fi
       # --- AMD processors ---
+      if test "$proc" = "amdfam10"; then
+        cc_check -march=$proc $cpuopt=$proc || proc=k8
+      fi
       if test "$proc" = "k8"; then
         cc_check -march=$proc $cpuopt=$proc || proc=athlon-xp
       fi
@@ -7067,7 +7070,7 @@ if test "$_x264" = auto ; then
   cat > $TMPC << EOF
 #include <inttypes.h>
 #include <x264.h>
-#if X264_BUILD < 89
+#if X264_BUILD < 98
 #error We do not support old versions of x264. Get the latest from git.
 #endif
 int main(void) { x264_encoder_open((void*)0); return 0; }
