@@ -6101,7 +6101,7 @@ Also perform  R <\-> B swapping.
 RGB/BGR 8 \-> 15/16/24/32bpp colorspace conversion using palette.
 .
 .TP
-.B format[=fourcc]
+.B format[=fourcc[:outfourcc]]
 Restricts the colorspace for the next filter without doing any conversion.
 Use together with the scale filter for a real conversion.
 .br
@@ -6111,6 +6111,17 @@ For a list of available formats see format=fmt=help.
 .RSs
 .IPs <fourcc>
 format name like rgb15, bgr24, yv12, etc (default: yuy2)
+.IPs <outfourcc>
+Format name that should be substituted for the output.
+If this is not 100% compatible with the <fourcc> value it will crash.
+.br
+Valid examples:
+.br
+format=rgb24:bgr24 format=yuyv:yuy2
+.br
+Invalid examples (will crash):
+.br
+format=rgb24:yv12
 .RE
 .PD 1
 .
