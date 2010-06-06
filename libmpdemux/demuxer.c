@@ -801,7 +801,9 @@ int ds_get_packet_sub(demux_stream_t *ds, unsigned char **start)
 double ds_get_next_pts(demux_stream_t *ds)
 {
     demuxer_t *demux = ds->demuxer;
-    while (!ds->first) {
+    // if we have not read from the "current" packet, consider it
+    // as the next, otherwise we never get the pts for the first packet.
+    while (!ds->first && (!ds->current || ds->buffer_pos)) {
         if (demux->audio->packs >= MAX_PACKS
             || demux->audio->bytes >= MAX_PACK_BYTES) {
             mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "\nToo many audio packets in the buffer: (%d in %d bytes).\n",
@@ -819,6 +821,9 @@ double ds_get_next_pts(demux_stream_t *ds)
         if (!demux_fill_buffer(demux, ds))
             return MP_NOPTS_VALUE;
     }
+    // take pts from "current" if we never read from it.
+    if (ds->current && !ds->buffer_pos)
+        return ds->current->pts;
     return ds->first->pts;
 }
 
