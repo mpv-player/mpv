@@ -829,7 +829,6 @@ static void redraw(void) {
   flip_page();
 }
 
-//static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
 static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
   mpi_flipped = stride[0] < 0;
