@@ -1711,7 +1711,8 @@ header_end:
 
     switch (index_mode){
 	case -1: // untouched
-	    if (priv->index_chunk_offset && parse_index_chunk(demuxer))
+	    if ((demuxer->stream->flags & MP_STREAM_SEEK) == MP_STREAM_SEEK &&
+                priv->index_chunk_offset && parse_index_chunk(demuxer))
 	    {
 		demuxer->seekable = 1;
 	    }
