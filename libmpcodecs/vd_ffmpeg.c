@@ -438,7 +438,8 @@ static void draw_slice(struct AVCodecContext *s,
         }
     }
     if (y < sh->disp_h) {
-        mpcodecs_draw_slice (sh, source, strides, sh->disp_w, (y+height)<=sh->disp_h?height:sh->disp_h-y, 0, y);
+        height = FFMIN(height, sh->disp_h-y);
+        mpcodecs_draw_slice (sh, source, strides, sh->disp_w, height, 0, y);
     }
 }
 
