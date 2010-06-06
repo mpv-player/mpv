@@ -141,7 +141,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current, int utf16) 
 	    }
 	    break;
 
-	case 1: /* find (optionnal) "<P", skip other TAGs */
+	case 1: /* find (optional) "<P", skip other TAGs */
 	    for  (; *s == ' ' || *s == '\t'; s++); /* strip blanks, if any */
 	    if (*s == '\0') break;
 	    if (*s != '<') { state = 3; p = text; continue; } /* not a TAG */
