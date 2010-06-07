@@ -606,6 +606,8 @@ char *get_metadata(struct MPContext *mpctx, metadata_t type)
 
 static void print_file_properties(const MPContext *mpctx, const char *filename)
 {
+  double start_pts = MP_NOPTS_VALUE;
+  double video_start_pts = MP_NOPTS_VALUE;
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_FILENAME=%s\n",
 	  filename_recode(filename));
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_DEMUXER=%s\n", mpctx->demuxer->desc->name);
@@ -620,6 +622,7 @@ static void print_file_properties(const MPContext *mpctx, const char *filename)
     mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_HEIGHT=%d\n", mpctx->sh_video->disp_h);
     mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_FPS=%5.3f\n", mpctx->sh_video->fps);
     mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_ASPECT=%1.4f\n", mpctx->sh_video->aspect);
+    video_start_pts = ds_get_next_pts(mpctx->d_video);
   }
   if (mpctx->sh_audio) {
     /* Assume FOURCC if all bytes >= 0x20 (' ') */
@@ -630,7 +633,17 @@ static void print_file_properties(const MPContext *mpctx, const char *filename)
     mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_BITRATE=%d\n", mpctx->sh_audio->i_bps*8);
     mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_RATE=%d\n", mpctx->sh_audio->samplerate);
     mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_NCH=%d\n", mpctx->sh_audio->channels);
+    start_pts = ds_get_next_pts(mpctx->d_audio);
   }
+  if (video_start_pts != MP_NOPTS_VALUE) {
+    if (start_pts == MP_NOPTS_VALUE || !mpctx->sh_audio ||
+        (mpctx->sh_video && video_start_pts < start_pts))
+      start_pts = video_start_pts;
+  }
+  if (start_pts != MP_NOPTS_VALUE)
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_START_TIME=%.2f\n", start_pts);
+  else
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_START_TIME=unknown\n");
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_LENGTH=%.2f\n", mpctx->timeline ?
          mpctx->timeline[mpctx->num_timeline_parts].start :
          demuxer_get_time_length(mpctx->demuxer));
