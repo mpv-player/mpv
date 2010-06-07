@@ -109,6 +109,15 @@ static char *stristr(const char *haystack, const char *needle) {
     return NULL;
 }
 
+static void sami_add_line(subtitle *current, char *buffer, char **pos) {
+    char *p = *pos;
+    *p = 0;
+    trail_space(buffer);
+    if (*buffer && current->lines < SUB_MAX_TEXT)
+        current->text[current->lines++] = strdup(buffer);
+    *pos = buffer;
+}
+
 static subtitle *sub_read_line_sami(stream_t* st, subtitle *current, int utf16) {
     static char line[LINE_LEN+1];
     static char *s = NULL, *slacktime_s;
@@ -160,9 +169,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current, int utf16) 
 	case 3: /* get all text until '<' appears */
 	    if (*s == '\0') break;
 	    else if (!strncasecmp (s, "<br>", 4)) {
-		*p = '\0'; p = text; trail_space (text);
-		if (text[0] != '\0' && current->lines < SUB_MAX_TEXT)
-		    current->text[current->lines++] = strdup (text);
+                sami_add_line(current, text, &p);
 		s += 4;
 	    }
 	    else if ((*s == '{') && !sub_no_text_pp) { state = 5; ++s; continue; }
@@ -241,9 +248,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current, int utf16) 
     // For the last subtitle
     if (current->end <= 0) {
         current->end = current->start + sub_slacktime;
-	*p = '\0'; trail_space (text);
-	if (text[0] != '\0' && current->lines < SUB_MAX_TEXT)
-	    current->text[current->lines++] = strdup (text);
+        sami_add_line(current, text, &p);
     }
 
     return current;
