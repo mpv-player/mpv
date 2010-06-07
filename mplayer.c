@@ -604,6 +604,45 @@ char *get_metadata(struct MPContext *mpctx, metadata_t type)
   return meta;
 }
 
+static void print_file_properties(const MPContext *mpctx, const char *filename)
+{
+  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_FILENAME=%s\n",
+	  filename_recode(filename));
+  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_DEMUXER=%s\n", mpctx->demuxer->desc->name);
+  if (mpctx->sh_video) {
+    /* Assume FOURCC if all bytes >= 0x20 (' ') */
+    if (mpctx->sh_video->format >= 0x20202020)
+	mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_FORMAT=%.4s\n", (char *)&mpctx->sh_video->format);
+    else
+	mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_FORMAT=0x%08X\n", mpctx->sh_video->format);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_BITRATE=%d\n", mpctx->sh_video->i_bps*8);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_WIDTH=%d\n", mpctx->sh_video->disp_w);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_HEIGHT=%d\n", mpctx->sh_video->disp_h);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_FPS=%5.3f\n", mpctx->sh_video->fps);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_ASPECT=%1.4f\n", mpctx->sh_video->aspect);
+  }
+  if (mpctx->sh_audio) {
+    /* Assume FOURCC if all bytes >= 0x20 (' ') */
+    if (mpctx->sh_audio->format >= 0x20202020)
+      mp_msg(MSGT_IDENTIFY,MSGL_INFO, "ID_AUDIO_FORMAT=%.4s\n", (char *)&mpctx->sh_audio->format);
+    else
+      mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_FORMAT=%d\n", mpctx->sh_audio->format);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_BITRATE=%d\n", mpctx->sh_audio->i_bps*8);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_RATE=%d\n", mpctx->sh_audio->samplerate);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_NCH=%d\n", mpctx->sh_audio->channels);
+  }
+  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_LENGTH=%.2f\n", mpctx->timeline ?
+         mpctx->timeline[mpctx->num_timeline_parts].start :
+         demuxer_get_time_length(mpctx->demuxer));
+  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_SEEKABLE=%d\n",
+         mpctx->stream->seek && (!mpctx->demuxer || mpctx->demuxer->seekable));
+  if (mpctx->demuxer) {
+      if (mpctx->demuxer->num_chapters == 0)
+          stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS, &mpctx->demuxer->num_chapters);
+      mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_CHAPTERS=%d\n", mpctx->demuxer->num_chapters);
+  }
+}
+
 /// step size of mixer changes
 int volstep = 3;
 
@@ -3925,41 +3964,7 @@ if (mpctx->global_sub_size) {
     }
 }
 
-  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_FILENAME=%s\n",
-	  filename_recode(mpctx->filename));
-  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_DEMUXER=%s\n", mpctx->demuxer->desc->name);
-  if (mpctx->sh_video) {
-    /* Assume FOURCC if all bytes >= 0x20 (' ') */
-    if (mpctx->sh_video->format >= 0x20202020)
-	mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_FORMAT=%.4s\n", (char *)&mpctx->sh_video->format);
-    else
-	mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_FORMAT=0x%08X\n", mpctx->sh_video->format);
-    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_BITRATE=%d\n", mpctx->sh_video->i_bps*8);
-    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_WIDTH=%d\n", mpctx->sh_video->disp_w);
-    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_HEIGHT=%d\n", mpctx->sh_video->disp_h);
-    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_FPS=%5.3f\n", mpctx->sh_video->fps);
-    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_ASPECT=%1.4f\n", mpctx->sh_video->aspect);
-  }
-  if (mpctx->sh_audio) {
-    /* Assume FOURCC if all bytes >= 0x20 (' ') */
-    if (mpctx->sh_audio->format >= 0x20202020)
-      mp_msg(MSGT_IDENTIFY,MSGL_INFO, "ID_AUDIO_FORMAT=%.4s\n", (char *)&mpctx->sh_audio->format);
-    else
-      mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_FORMAT=%d\n", mpctx->sh_audio->format);
-    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_BITRATE=%d\n", mpctx->sh_audio->i_bps*8);
-    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_RATE=%d\n", mpctx->sh_audio->samplerate);
-    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_NCH=%d\n", mpctx->sh_audio->channels);
-  }
-  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_LENGTH=%.2f\n", mpctx->timeline ?
-         mpctx->timeline[mpctx->num_timeline_parts].start :
-         demuxer_get_time_length(mpctx->demuxer));
-  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_SEEKABLE=%d\n",
-         mpctx->stream->seek && (!mpctx->demuxer || mpctx->demuxer->seekable));
-  if (mpctx->demuxer) {
-      if (mpctx->demuxer->num_chapters == 0)
-          stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS, &mpctx->demuxer->num_chapters);
-      mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_CHAPTERS=%d\n", mpctx->demuxer->num_chapters);
-  }
+  print_file_properties(mpctx, mpctx->filename);
 
 if(!mpctx->sh_video) goto main; // audio-only
 
