@@ -27,6 +27,7 @@
 #include "nemesi/rtp.h"
 #include <sched.h>
 
+int rtsp_transport_http = 0;
 int rtsp_transport_tcp = 0;
 int rtsp_transport_sctp = 0;
 int rtsp_port = 0;

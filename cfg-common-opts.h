@@ -93,6 +93,9 @@
 
 #ifdef CONFIG_LIVE555
     {"sdp", "-sdp has been removed, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+    {"rtsp-stream-over-http", &rtsp_transport_http, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+#else
+    {"rtsp-stream-over-http", "-rtsp-stream-over-http requires the \"LIVE555 Streaming Media\" library.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif /* CONFIG_LIVE555 */
 #if defined(CONFIG_LIBNEMESI) || defined(CONFIG_LIVE555)
     // -rtsp-stream-over-tcp option, specifying TCP streaming of RTP/RTCP

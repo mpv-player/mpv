@@ -113,8 +113,10 @@ static char* openURL_sip(SIPClient* client, char const* url) {
 
 #ifdef CONFIG_LIBNEMESI
 extern int rtsp_transport_tcp;
+extern int rtsp_transport_http;
 #else
 int rtsp_transport_tcp = 0;
+int rtsp_transport_http = 0;
 #endif
 
 extern int rtsp_port;
@@ -147,7 +149,11 @@ extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
       char const* url = demuxer->stream->streaming_ctrl->url->url;
       extern int verbose;
       if (strcmp(protocol, "rtsp") == 0) {
-	rtspClient = RTSPClient::createNew(*env, verbose, "MPlayer");
+	if (rtsp_transport_http == 1) {
+	  rtsp_transport_http = demuxer->stream->streaming_ctrl->url->port;
+	  rtsp_transport_tcp = 1;
+	}
+	rtspClient = RTSPClient::createNew(*env, verbose, "MPlayer", rtsp_transport_http);
 	if (rtspClient == NULL) {
 	  fprintf(stderr, "Failed to create RTSP client: %s\n",
 		  env->getResultMsg());

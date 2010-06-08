@@ -185,6 +185,7 @@ extern const m_option_t lavfdopts_conf[];
 
 extern int rtspStreamOverTCP;
 extern int rtsp_transport_tcp;
+extern int rtsp_transport_http;
 extern int rtsp_transport_sctp;
 extern int rtsp_port;
 extern char *rtsp_destination;
