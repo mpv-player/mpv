@@ -50,7 +50,7 @@ static const ao_info_t info =
 LIBAO_EXTERN(jack)
 
 //! maximum number of channels supported, avoids lots of mallocs
-#define MAX_CHANS 6
+#define MAX_CHANS 8
 static jack_port_t *ports[MAX_CHANS];
 static int num_ports; ///< Number of used ports == number of channels
 static jack_client_t *client;
