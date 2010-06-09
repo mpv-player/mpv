@@ -38,7 +38,7 @@ License:    permissive, see libmpcodecs/native/xa_gsm.c
 
 
 Name:       libdvdcss
-Version:    Subversion r225 + r229 + r231
+Version:    Subversion r231
 URL:        http://developers.videolan.org/libdvdcss/
 Directory:  libdvdcss
 Copyright:  1998-2008 VideoLAN
