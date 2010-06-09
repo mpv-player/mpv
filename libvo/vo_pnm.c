@@ -132,8 +132,8 @@ static int preinit(const char *arg)
     };
     const char *info_message = NULL;
 
-    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-           _("Parsing suboptions."));
+    mp_msg(MSGT_VO, MSGL_V, "%s: %s\n", info.short_name,
+           "Parsing suboptions.");
 
     pnm_maxfiles = 1000;
     pnm_outdir = strdup(".");
@@ -175,8 +175,8 @@ static int preinit(const char *arg)
     }
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name, info_message);
 
-    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-           _("Suboptions parsed OK."));
+    mp_msg(MSGT_VO, MSGL_V, "%s: %s\n", info.short_name,
+           "Suboptions parsed OK.");
     return 0;
 }
 
