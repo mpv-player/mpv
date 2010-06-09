@@ -229,7 +229,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 }
 
 For the more complex case, when you have an N -> M colorspace mapping matrix,
-see vf_scale or vf_rgb2bgr for examples.
+see vf_scale or vf_format for examples.
 
 
     int (*config)(struct vf_instance *vf,

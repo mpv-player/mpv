@@ -51,7 +51,6 @@ extern const vf_info_t vf_info_scale;
 extern const vf_info_t vf_info_format;
 extern const vf_info_t vf_info_noformat;
 extern const vf_info_t vf_info_flip;
-extern const vf_info_t vf_info_rgb2bgr;
 extern const vf_info_t vf_info_rotate;
 extern const vf_info_t vf_info_mirror;
 extern const vf_info_t vf_info_palette;
@@ -136,9 +135,6 @@ static const vf_info_t* const filter_list[]={
     &vf_info_format,
     &vf_info_noformat,
     &vf_info_flip,
-#ifdef CONFIG_LIBSWSCALE_INTERNALS
-    &vf_info_rgb2bgr,
-#endif
     &vf_info_rotate,
     &vf_info_mirror,
 #ifdef CONFIG_LIBSWSCALE_INTERNALS
