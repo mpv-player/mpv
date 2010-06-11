@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 rev. 31292
+.\" sync with en/mplayer.1 rev. 31364
 .\" Encoding: UTF-8
 .\"
 .\" MPlayer (C) 2000-2010 MPlayer 团队
@@ -1701,6 +1701,11 @@ radio://1, radio://104.4, radio_set_channel 1
 (使用与 RTSP 相同的 TCP 连接)。
 如果你的破 internet 连接不传递 UDP 进入包, 此选项可能有用
 (参见 http://www.live555.com/\:mplayer/)。
+.
+.TP
+.B \-rtsp\-stream\-over\-http（仅用于 LIVE555）
+与‘http://’形式的 URL 一同使用，用以指定生成的 RTP 和 RTCP 输入包通过 HTTP 协
+议传送。
 .
 .TP
 .B \-saveidx <文件名>
@@ -4053,11 +4058,14 @@ iTVC16) MPEG 解码器芯片 (Hauppauge WinTV PVR-150/250/350/500)
 .
 .TP
 .B yuv4mpeg
-变换视频流为无压缩 YUV 4:2:0 图像序列并储存到文件 (默认是: ./stream.yuv)。
-格式与 mjpegtools 所用的一样,
-所以如果想要用 mjpegtools 套装软件处理视频, 这就有用。
-它支持 YV12, RGB (24 bpp) 和 BGR (24 bpp) 格式。
-能与 \-fixed\-vo 选项组合来连接具有相同维数和 fps 值的文件。
+将视频流转换为未压缩的 YUV 4:2:0 图像序列并将其储存到文件中（默认位置：
+./stream.yuv）。
+使用的格式与 mjpegtools 所用的相同，所以如果想用 mjpegtools 套装软件处理视频, 
+该选项就有所帮助。
+该选项支持 YV12 格式。
+如果源文件格式不同且为隔行扫描制式，则注意要使用 -vf scale=::1 以确保转换时
+使用隔行扫描模式。
+可与 \-fixed\-vo 选项组合使用以拼接具有相同宽高值和频速的文件。
 .PD 0
 .RSs
 .IPs interlaced
@@ -5677,21 +5685,11 @@ spal：   768x576 （正方形像素PAL）
 将YUV色彩值限制在CCIR 601定义的范围内而不做实际的色彩转换。
 .
 .TP
-.B rgb2bgr[=swap]
-RGB 24/32 <\-> BGR 24/32色彩空间转换。
-.PD 0
-.RSs
-.IPs "swap\ "
-同样是执行R <\-> B转换。
-.RE
-.PD 1
-.
-.TP
 .B palette
 使用palette（调色板）进行RGB/BGR 8 \-> 15/16/24/32bpp色彩空间转换。
 .
 .TP
-.B format[=fourcc]
+.B format[=fourcc[:outfourcc]]
 限制下一个滤镜使用的色彩空间而不做任何转换。
 与色彩调整滤镜共同作用完成实际转换。
 .br
@@ -5700,7 +5698,18 @@ RGB 24/32 <\-> BGR 24/32色彩空间转换。
 .PD 0
 .RSs
 .IPs <fourcc>
-格式名称如rgb15、bgr24、yv12（默认值：yuy2）
+格式名称如 rgb15、bgr24、yv12（默认值：yuy2）
+.IPs <outfourcc>
+用于替换为输出格式的格式名。
+如果该值不能 100% 与 <fourcc> 的值相兼容，将导致程序崩溃。
+.br
+有效用法示例：
+.br
+format=rgb24:bgr24 format=yuyv:yuy2
+.br
+无效用法示例（程序将崩溃）：
+.br
+format=rgb24:yv12
 .RE
 .PD 1
 .
@@ -9456,28 +9465,90 @@ H.264的量化参数是基于对数尺度的。
 后续的阶段是ABR模式的，并且必须指定比特率。
 .REss
 .
+.
 .TP
-.B turbo=<0\-2>
-快速第一阶段模式。
-在二阶段或更多阶段编码的第一阶段中，可以通过禁用一些对于最终阶段输出质量影响甚
-小，甚至没有影响的选项，以提升运行速度。
+.B profile=<配置集名>
+限制所用选项必须与一个 H.264 配置集相兼容。
 .PD 0
 .RSs
-.IPs 0
-禁用（默认值）
-.IPs 1
-减小subq、frameref的值，并且禁用一些宏块间划分分析的模式。
-.IPs 2
-减小subq、frameref至1，使用菱形运动估计搜索，并且禁用所有划分分析模式。
+.IPs baseline
+no8x8dct bframes=0 nocabac cqm=flat weightp=0 nointerlaced qp>0
+.IPs main
+no8x8dct cqm=flat qp>0
+.IPs high
+qp>0（默认限制）
 .RE
-.RS
-第1级可以最多使第一阶段的速度加快至2倍，而与完全质量的第一阶段模式相比，对于最
-终阶段的全局PSNR没有任何改变。
-.br
-第2级可以最多使第一阶段的速度加快至4倍，而与完全质量的第一阶段模式相比，对于最
-终阶段的全局PSNR有大约+/\- 0.05dB的改变。
-.REss
+.PD 1
 .
+.TP
+.B preset=<预设值集>
+使用一套预设值集以选用编码设置。
+.PD 0
+.RSs
+.IPs ultrafast
+no8x8dct aq_mode=0 b_adapt=0 bframes=0 nodeblock nombtree me=dia
+nomixed_refs partitions=none ref=1 scenecut=0 subq=0 trellis=0
+noweight_b weightp=0
+.IPs superfast
+nombtree me=dia nomixed_refs partitions=i8x8,i4x4 ref=1 subq=1 trellis=0
+weightp=0
+.IPs veryfast
+nombtree nomixed_refs ref=1 subq=2 trellis=0 weightp=0
+.IPs faster
+nomixed_refs rc_lookahead=20 ref=5 subq=4 weightp=1
+.IPs fast
+rc_lookahead=30 ref=2 subq=6
+.IPs medium
+Default settings apply.
+.IPs slow
+b_adapt=2 direct=auto me=umh rc_lookahead=50 ref=5 subq=8
+.IPs slower
+b_adapt=2 direct=auto me=umh partitions=all rc_lookahead=60 ref=8 subq=9
+trellis=2
+.IPs veryslow
+b_adapt=2 b_frames=8 direct=auto me=umh me_range=24 partitions=all ref=16
+subq=10 trellis=2 rc_lookahead=60
+.IPs placebo
+bframes=16 b_adapt=2 direct=auto nofast_pskip me=tesa me_range=24
+partitions=all rc_lookahead=60 ref=16 subq=10 trellis=2
+.RE
+.PD 1
+.
+.TP
+.B tune=<名称,[名称,...]>
+调整设置以适应一个特定种类的视频片源或场景。
+用户明确指定的设置会覆盖任何调整的设置。
+多个调整选项间以逗号分隔，但同一时间只能使用一个心理调整选项。
+.PD 0
+.RSs
+.IPs film（心理调整选项）
+deblock=-1,-1 psy-rd=<unset>,0.15
+.IPs animation（心理调整选项）
+b_frames={+2} deblock=1,1 psy-rd=0.4:<unset> aq_strength=0.6
+ref={double if >1 else 1}
+.IPs grain（心理调整选项）
+aq_strength=0.5 nodct_decimate deadzone_inter=6 deadzone_intra=6
+deblock=-2,-2 ipratio=1.1 pbratio=1.1 psy-rd=<unset>,0.25 qcomp=0.8
+.IPs stillimage（心理调整选项）
+aq_strength=1.2 deblock=-3,-3 psy-rd=2.0,0.7
+.IPs psnr（心理调整选项）
+aq_mode=0 nopsy
+.IPs ssim（心理调整选项）
+aq_mode=2 nopsy
+.IPs fastdecode
+nocabac nodeblock noweight_b weightp=0
+.IPs zerolatency
+bframes=0 force_cfr rc_lookahead=0 sync_lookahead=0 sliced_threads
+.RE
+.PD 1
+.
+.TP
+.B slow_firstpass
+当 pass=1 时禁用以下运行较快的选项：
+no_8x8dct me=dia partitions=none ref=1 subq={2 if >2 else unchanged}
+trellis=0 fast_pskip
+这些选项大幅度地提高编码速度，同时对于最终阶段的编码质量只有很少甚至没有影响。
+使用 preset=placebo 隐含地开启了该选项。
 .TP
 .B keyint=<value>
 设置IDR帧间的最大间隔（默认值：250）。
