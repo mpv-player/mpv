@@ -4896,7 +4896,7 @@ if test "$_gif" = auto ; then
   _gif=no
 cat > $TMPC << EOF
 #include <gif_lib.h>
-int main(void) { return 0; }
+int main(void) { QuantizeBuffer(0, 0, 0, 0, 0, 0, 0, 0); return 0; }
 EOF
   for _ld_gif in "-lungif" "-lgif" ; do
     cc_check $_ld_gif && _gif=yes && break
