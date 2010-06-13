@@ -85,7 +85,7 @@ typedef struct {
 } video_buffer_entry;
 
 /* private data */
-typedef struct {
+typedef struct priv {
     /* video */
     char                        *video_dev;
     int                         video_fd;

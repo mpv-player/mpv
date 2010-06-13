@@ -87,7 +87,7 @@ const tvi_info_t tvi_info_v4l = {
 #define VID_BUF_SIZE_IMMEDIATE   2
 #define VIDEO_AVG_BUFFER_SIZE  600
 
-typedef struct {
+typedef struct priv {
     /* general */
     char                        *video_device;
     int                         video_fd;

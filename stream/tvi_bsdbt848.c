@@ -100,7 +100,7 @@ typedef struct {
 } RBFRAME;
 
 /* private data's */
-typedef struct {
+typedef struct priv {
 
 /* Audio */
     char *dspdev;

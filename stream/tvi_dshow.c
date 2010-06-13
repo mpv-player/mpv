@@ -166,7 +166,7 @@ typedef struct {
     void** arStreamCaps;               ///< VIDEO_STREAM_CONFIG_CAPS or AUDIO_STREAM_CONFIG_CAPS
 } chain_t;
 
-typedef struct {
+typedef struct priv {
     int dev_index;              ///< capture device index in device list (defaul: 0, first available device)
     int adev_index;             ///< audio capture device index in device list (default: -1, not used)
     int immediate_mode;         ///< immediate mode (no sound capture)

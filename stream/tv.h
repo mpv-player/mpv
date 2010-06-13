@@ -109,16 +109,19 @@ typedef struct tvi_info_s
     const char *comment;
 } tvi_info_t;
 
+
+struct priv;
+
 typedef struct tvi_functions_s
 {
-    int (*init)();
-    int (*uninit)();
-    int (*control)();
-    int (*start)();
-    double (*grab_video_frame)();
-    int (*get_video_framesize)();
-    double (*grab_audio_frame)();
-    int (*get_audio_framesize)();
+    int (*init)(struct priv *priv);
+    int (*uninit)(struct priv *priv);
+    int (*control)(struct priv *priv, int cmd, void *arg);
+    int (*start)(struct priv *priv);
+    double (*grab_video_frame)(struct priv *priv, char *buffer, int len);
+    int (*get_video_framesize)(struct priv *priv);
+    double (*grab_audio_frame)(struct priv *priv, char *buffer, int len);
+    int (*get_audio_framesize)(struct priv *priv);
 } tvi_functions_t;
 
 typedef struct tvi_handle_s {

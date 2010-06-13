@@ -35,7 +35,7 @@ const tvi_info_t tvi_info_dummy = {
 };
 
 /* private data's */
-typedef struct {
+typedef struct priv {
     int width;
     int height;
 } priv_t;
