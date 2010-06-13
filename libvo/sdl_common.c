@@ -112,6 +112,7 @@ static const struct mp_keymap keysym_map[] = {
     {SDLK_KP6, KEY_KP6}, {SDLK_KP7, KEY_KP7}, {SDLK_KP8, KEY_KP8},
     {SDLK_KP9, KEY_KP9},
     {SDLK_KP_PERIOD, KEY_KPDEC}, {SDLK_KP_ENTER, KEY_KPENTER},
+    {0, 0}
 };
 
 int sdl_default_handle_event(SDL_Event *event)
