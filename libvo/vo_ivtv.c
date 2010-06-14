@@ -46,6 +46,7 @@
 #include "subopt-helper.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+#include "vo_ivtv.h"
 #include "libmpdemux/mpeg_packetizer.h"
 
 #define DEFAULT_MPEG_DECODER "/dev/video16"

@@ -35,6 +35,7 @@
 #include "audio_out_internal.h"
 #include "libaf/af_format.h"
 #include "libmpdemux/mpeg_packetizer.h"
+#include "libvo/vo_ivtv.h"
 
 #define MPEG_AUDIO_ID 0x1C0
 
@@ -146,8 +147,6 @@ get_space (void)
 static int
 play (void *data, int len, int flags)
 {
-  int ivtv_write (const unsigned char *data, int len);
-
   if (ao_data.format != AF_FORMAT_MPEG2)
     return 0;
 
