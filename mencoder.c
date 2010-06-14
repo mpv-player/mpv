@@ -605,6 +605,7 @@ audio_encoder_t *aencoder = NULL;
   set_default_mencoder_options(&opts);
   mconfig = m_config_new(&opts, cfg_include);
   m_config_register_options(mconfig,mencoder_opts);
+  m_config_register_options(mconfig, common_opts);
 
   // Preparse the command line
   m_config_preparse_command_line(mconfig,argc,argv);

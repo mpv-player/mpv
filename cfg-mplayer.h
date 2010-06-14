@@ -26,7 +26,6 @@
 #include <stddef.h>
 
 #include "cfg-common.h"
-#include "libmpdemux/demux_ts.h"
 #include "libvo/vo_zr.h"
 #include "options.h"
 
@@ -49,9 +48,6 @@ extern int menu_fribidi_flip_commas;
 extern char *unrar_executable;
 
 extern const m_option_t dxr2_opts[];
-
-extern int sws_flags;
-extern char* pp_help;
 
 const m_option_t vd_conf[]={
     {"help", "Use MPlayer with an appropriate video file instead of live partners to avoid vd.\n", CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
@@ -352,8 +348,6 @@ const m_option_t mplayer_opts[]={
 #else
     {"tvscan", "MPlayer was compiled without TV interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif /* CONFIG_TV */
-
-#include "cfg-common-opts.h"
 
     {"list-properties", &list_properties, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
     {"identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_FLAG, CONF_GLOBAL, 0, MSGL_V, NULL},

@@ -3141,6 +3141,7 @@ int i;
   // Create the config context and register the options
   mpctx->mconfig = m_config_new(opts, cfg_include);
   m_config_register_options(mpctx->mconfig,mplayer_opts);
+  m_config_register_options(mpctx->mconfig, common_opts);
   mp_input_register_options(mpctx->mconfig);
 
   // Preparse the command line

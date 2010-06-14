@@ -24,11 +24,7 @@
  */
 
 #include "libmpcodecs/ve_x264.h"
-#include "libmpdemux/demux_ts.h"
 #include "cfg-common.h"
-
-extern int sws_flags;
-extern char *pp_help;
 
 extern const m_option_t faacopts_conf[];
 extern const m_option_t lameopts_conf[];
@@ -272,8 +268,6 @@ const m_option_t mencoder_opts[]={
 #ifdef CONFIG_LIBAVFORMAT
     {"lavfopts",  lavfopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
-
-#include "cfg-common-opts.h"
 
 //   {"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 //   {"help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
