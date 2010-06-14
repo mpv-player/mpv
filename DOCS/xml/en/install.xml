@@ -155,13 +155,13 @@ in <application>MPlayer</application>'s root directory. See
 <para>
 <emphasis role="bold">Always browse the output of</emphasis>
 <filename>./configure</filename>, and the
-<filename>configure.log</filename> file, they contain information about
+<filename>config.log</filename> file, they contain information about
 what will be built, and what will not. You may also want to view
 <filename>config.h</filename> and <filename>config.mak</filename> files.
 If you have some libraries installed, but not detected by
 <filename>./configure</filename>, then check if you also have the proper
 header files (usually the -dev packages) and their version matches. The
-<filename>configure.log</filename> file usually tells you what is missing.
+<filename>config.log</filename> file usually tells you what is missing.
 </para>
 
 <para>

@@ -174,13 +174,13 @@ w głównym katalogu <application>MPlayera</application>. Przeczytaj rozdział
 <para>
 <emphasis role="bold">Zawsze przejrzyj wyniki</emphasis>
 <filename>./configure</filename> i plik
-<filename>configure.log</filename>, zawierają one informacje o tym, co będzie zbudowane,
+<filename>config.log</filename>, zawierają one informacje o tym, co będzie zbudowane,
 a co nie. Możesz również obejrzeć pliki
 <filename>config.h</filename> i <filename>config.mak</filename>.
 Jeżeli masz zainstalowane jakieś biblioteki, ale nie są one wykrywane przez
 <filename>./configure</filename>, sprawdź czy masz również odpowiednie
 pliki nagłówkowe (przeważnie pakiety -dev) i ich wersje się zgadzają. Plik
-<filename>configure.log</filename> zazwyczaj powie Ci, czego brakuje.
+<filename>config.log</filename> zazwyczaj powie Ci, czego brakuje.
 </para>
 
 <para>

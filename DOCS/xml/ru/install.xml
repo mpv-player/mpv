@@ -165,13 +165,13 @@ make install
 
 <para>
 <emphasis role="bold">Всегда просматривайте вывод</emphasis> <filename>./configure</filename>, и файл
-<filename>configure.log</filename>, они содержат информацию о том, что будет собрано,
+<filename>config.log</filename>, они содержат информацию о том, что будет собрано,
 а что нет. Возможно Вы захотите просмотреть файлы <filename>config.h</filename> и
 <filename>config.mak</filename>.
 Если у Вас стоят какие-то библиотеки, которые не определяются
 <filename>./configure</filename>, проверьте, что у Вас установлены соответствующие
 заголовки[header files] (обычно это -dev пакеты) и их версии совпадают. Файл
-<filename>configure.log</filename> Обычно сообщит Вам, чего не хватает для сборки.
+<filename>config.log</filename> Обычно сообщит Вам, чего не хватает для сборки.
 </para>
 
 

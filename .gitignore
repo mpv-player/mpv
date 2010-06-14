@@ -6,7 +6,7 @@
 /ffmpeg
 /config.h
 /config.mak
-/configure.log
+/config.log
 /mencoder
 /mplayer
 /version.h

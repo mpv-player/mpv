@@ -64,7 +64,7 @@ all_filenames() {
     if [ "$_svn" = "no" ]; then
         find . -type f \
         | grep -v "\.\#\|\~$\|\.depend\|\/\.svn\/\|config.mak\|^\./config\.h" \
-        | grep -v "^\./version\.h\|\.o$\|\.a$\|configure.log\|^\./help_mp.h"
+        | grep -v "^\./version\.h\|\.o$\|\.a$\|config.log\|^\./help_mp.h"
     else
         for p in . libavcodec libavutil libavformat libpostproc ; do
             svn info -R $p 2>/dev/null | sed -n \

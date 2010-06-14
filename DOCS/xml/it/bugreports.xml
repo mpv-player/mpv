@@ -359,11 +359,11 @@ ld -v<!--
 
 <para>
 Se ricevi degli errori eseguendo <command>./configure</command>, o se fallisce
-la rilevazione automatica di qualcosa, leggi <filename>configure.log</filename>.
+la rilevazione automatica di qualcosa, leggi <filename>config.log</filename>.
 Puoi travarci la soluzione, per esempio varie versioni della stessa libreria
 mescolate sul tuo sistema, o hai dimenticato di installare il pacchetto di
 scviluppo (quelli con il suffisso -dev). Se pensi ci sia un bug, includi
-<filename>configure.log</filename> nel tuo rapporto sul bug stesso.
+<filename>config.log</filename> nel tuo rapporto sul bug stesso.
 </para>
 </sect2>
 

@@ -159,13 +159,13 @@ nella directory radice di <application>MPlayer</application>. Vedi
 <para>
 <emphasis role="bold">Controlla sempre l'output di</emphasis>
 <filename>./configure</filename> e il file
-<filename>configure.log</filename>, essi contengono informazioni su cosa
+<filename>config.log</filename>, essi contengono informazioni su cosa
 sarà compilato e cosa no. Puoi anche voler guardare i file
 <filename>config.h</filename> e <filename>config.mak</filename>.
 Se hai alcune librerie installate, ma non rilevate da
 <filename>./configure</filename>, allora controlla di avere anche i file
 header corretti (di solito i pacchetti -dev ) e di versioni corrispondenti.
-Il file <filename>configure.log</filename> solitamente ti dice cosa manca.
+Il file <filename>config.log</filename> solitamente ti dice cosa manca.
 </para>
 
 <para>

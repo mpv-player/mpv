@@ -348,11 +348,11 @@ ld -v<!--
 
 <para>
 Pokud nastanou chyby během běhu <command>./configure</command>, nebo selže
-autodetekce něčeho, prostudujte <filename>configure.log</filename>. Možná
+autodetekce něčeho, prostudujte <filename>config.log</filename>. Možná
 naleznete odpověď zde. Například několik verzí stejné knihovny v systému, nebo
 jste zapomněli nainstalovat vývojový (devel) balíček (to jsou ty s koncovkou
 -dev). Pokud si myslíte, že je zde chyba, přidejte
-<filename>configure.log</filename> do svého hlášení.
+<filename>config.log</filename> do svého hlášení.
 </para>
 </sect2>
 

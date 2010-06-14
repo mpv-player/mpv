@@ -32,7 +32,7 @@ followed by your preferred parameters.
 Be warned that you *MUST* disable MPlayer's internal copy of dvdread or something
 - most likely - won't work as expected (if at all).
 After configure is run it should say that support for dvdnav and dvdread was
-enabled. If not, investigate the dvdnav and dvdread sections in configure.log
+enabled. If not, investigate the dvdnav and dvdread sections in config.log
 and try to understand what went wrong. If you can't solve the problem yourself
 post the two sections to mplayer-users.
 

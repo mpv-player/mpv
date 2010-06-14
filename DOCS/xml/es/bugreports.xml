@@ -214,11 +214,11 @@ en sistemas Linux.
 <title>Problemas de configuración</title>
 <para>
 Si obtiene errores cuando ejecuta <command>./configure</command>, o la
-autodetección o algo falla, lea <filename>configure.log</filename>. Puede
+autodetección o algo falla, lea <filename>config.log</filename>. Puede
 encontrar la respuesta ahí, por ejemplo múltiples versiones de la misma
 biblioteca mezcladas en su sistema, o ha olvidado instalar los paquetes
 de desarrollo (los que tienen el sufijo -dev). Si cree que puede ser un error,
-incluya <filename>configure.log</filename> en su informe.
+incluya <filename>config.log</filename> en su informe.
 </para>
 </sect2>
 

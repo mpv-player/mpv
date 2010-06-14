@@ -332,11 +332,11 @@ ld -v</screen>
       <title>Configure-Probleme</title>
       <para>
         Wenn du Fehlermeldungen beim Aufruf von <command>./configure</command> bekommst oder
-        die automatische Erkennung von etwas fehlschlägt, so lies <filename>configure.log</filename>.
+        die automatische Erkennung von etwas fehlschlägt, so lies <filename>config.log</filename>.
         Du könntest dort die Antwort finden, zum Beispiel mehrere Versionen derselben Bibliothek,
         die gemischt auf deinem System vorliegen, oder du hast vergessen, das Entwicklerpaket
         (die mit dem Suffix -dev) zu installieren. Wenn du denkst, dass es sich um einen
-        Fehler handelt, binde <filename>configure.log</filename> in deinen Fehlerbericht ein.
+        Fehler handelt, binde <filename>config.log</filename> in deinen Fehlerbericht ein.
       </para>
     </sect2>
 

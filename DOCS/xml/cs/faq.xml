@@ -122,7 +122,7 @@ Configure skončí s následujícím textem a <application>MPlayer</application>
 </para></question>
 <answer><para>
 Vaše gcc není správně nainstalováno, detaily naleznete v souboru
-<filename>configure.log</filename>.
+<filename>config.log</filename>.
 </para></answer>
 </qandaentry>
 

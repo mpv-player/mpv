@@ -158,13 +158,13 @@ parancsot az <application>MPlayer</application> főkönyvtárában. Lásd a
 
 <para>
 <emphasis role="bold">Mindig nézd végig a <filename>./configure</filename>
-kimenetét</emphasis>, és a <filename>configure.log</filename> fájl, melyek
+kimenetét</emphasis>, és a <filename>config.log</filename> fájl, melyek
 információkat tartalmaznak arról, hogy mi is lesz lefordítva és mi nem.
 Szintén tanácsos megnézni a <filename>config.h</filename> és
 <filename>config.mak</filename> fájlokat. Ha van olyan telepített függvénykönyvtárad,
 amit a <filename>./configure</filename> mégsem talált meg, ellenőrizd, hogy a
 megfelelő fejléc fájlok (általában a -dev csomagokban vannak) is elérhetőek-e, és
-egyező verziójúak. A <filename>configure.log</filename> fájl legtöbbször megmondja,
+egyező verziójúak. A <filename>config.log</filename> fájl legtöbbször megmondja,
 hogy mi hiányzik.
 </para>
 

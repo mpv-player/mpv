@@ -131,7 +131,7 @@ Configure termina con este texto, y ¡<application>MPlayer</application> no comp
 </para></question>
 <answer><para>
 Si su gcc no está instalado correctamente, compruebe el archivo
-<filename>configure.log</filename> para más detalles.
+<filename>config.log</filename> para más detalles.
 </para></answer>
 </qandaentry>
 

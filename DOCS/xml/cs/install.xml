@@ -149,7 +149,7 @@ make install
 
 <para>
   <emphasis role="bold">Vždy si prostudujte výstup skriptu</emphasis>
-  <filename>./configure</filename>, a soubor <filename>configure.log</filename>,
+  <filename>./configure</filename>, a soubor <filename>config.log</filename>,
   které obsahují informace o tom co bude zakompilováno a co ne. Také můžete
   chtít vidět soubory <filename>config.h</filename> a
   <filename>config.mak</filename>.
@@ -157,7 +157,7 @@ make install
   <filename>./configure</filename>, pak ověřte, zda máte příslušné hlavičkové
   soubory
   (obvykle -dev balíčky) a jejich verze jsou shodné. Soubor
-  <filename>configure.log</filename> vám obvykle prozradí co vám chybí.
+  <filename>config.log</filename> vám obvykle prozradí co vám chybí.
 </para>
 
 <para>

@@ -158,7 +158,7 @@
         </question>
         <answer>
           <para>
-            Dein gcc ist nicht richtig installiert, überprüfe die Datei <filename>configure.log</filename>
+            Dein gcc ist nicht richtig installiert, überprüfe die Datei <filename>config.log</filename>
             für Details.
           </para>
         </answer>

@@ -120,7 +120,7 @@ Configure завершается с указанным сообщением, и 
 <screen>Your gcc does not support even i386 for '-march' and '-mcpu'</screen>
 </para></question>
 <answer><para>
-Ваш gcc некорректно установлен, проверьте <filename>configure.log</filename>
+Ваш gcc некорректно установлен, проверьте <filename>config.log</filename>
 для более подробной информации.
 </para></answer>
 </qandaentry>

@@ -352,10 +352,10 @@ ld -v<!--
 
 <para>
 Ha a <command>./configure</command> futtatása közben fordult elő valami hiba,
-vagy valaminek az automatikus detektálása nem sikerült, olvasd el a <filename>configure.log</filename>
+vagy valaminek az automatikus detektálása nem sikerült, olvasd el a <filename>config.log</filename>
 fájlt. Ott megtalálod a választ, például ugyanazon függvénykönyvtár több verziója elszórva
 a rendszerben, vagy elfelejtetted telepíteni a fejlesztői csomagokat (amiknek -dev
-utótagjuk van). Ha úgy hiszed, hogy hibát találtál, csatold a <filename>configure.log</filename>
+utótagjuk van). Ha úgy hiszed, hogy hibát találtál, csatold a <filename>config.log</filename>
 fájlt a hibajelentésedhez.
 </para>
 </sect2>

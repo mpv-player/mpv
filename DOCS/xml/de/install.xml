@@ -198,14 +198,14 @@ make install</screen>
 
     <para>
       <emphasis role="bold">Überprüfe immer die Ausgabe von </emphasis>
-      <filename>./configure</filename> und die Datei <filename>configure.log</filename>,
+      <filename>./configure</filename> und die Datei <filename>config.log</filename>,
       sie enthalten Informationen darüber, was eingebaut wird und was nicht.
       Du möchtest dir vielleicht auch die Dateien
       <filename>config.h</filename> und <filename>config.mak</filename> anschauen.
       Wenn du manche Bibliotheken installiert hast, die von
       <filename>./configure</filename> aber nicht erkannt werden, überprüfe auch
       die entsprechenden Header-Dateien (normalerweise die -dev-Pakete) und ob deren
-      Versionen passen. Die Datei <filename>configure.log</filename> gibt
+      Versionen passen. Die Datei <filename>config.log</filename> gibt
       normalerweise Auskunft darüber, was fehlt.
     </para>
 

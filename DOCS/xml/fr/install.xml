@@ -160,13 +160,13 @@ instructions.
 <para>
 <emphasis role="bold">Regardez toujours le listing généré par</emphasis>
 <filename>./configure</filename>, ainsi que le fichier
-<filename>configure.log</filename>, ils contiennent des informations sur
+<filename>config.log</filename>, ils contiennent des informations sur
 ce qui sera compilé, et ce qui ne le sera pas. Vous pouvez également consulter
 les fichiers <filename>config.h</filename> et <filename>config.mak</filename>.
 Si vous avez quelques librairies installées, mais pas détectées par
 <filename>./configure</filename>, alors vérifiez que vous avez les fichiers
 d'en-tête (généralement les paquets -dev) et que leur version correspond. Le fichier
-<filename>configure.log</filename> vous dit généralement ce qui manque.
+<filename>config.log</filename> vous dit généralement ce qui manque.
 </para>
 
 <para>

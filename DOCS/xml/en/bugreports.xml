@@ -352,10 +352,10 @@ ld -v<!--
 
 <para>
 If you get errors while running <command>./configure</command>, or autodetection
-of something fails, read <filename>configure.log</filename>. You may find the
+of something fails, read <filename>config.log</filename>. You may find the
 answer there, for example multiple versions of the same library mixed on your
 system, or you forgot to install the development package (those with the -dev
-suffix). If you think there is a bug, include <filename>configure.log</filename>
+suffix). If you think there is a bug, include <filename>config.log</filename>
 in your bug report.
 </para>
 </sect2>

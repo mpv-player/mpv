@@ -124,7 +124,7 @@ nie chce się skompilować!
 </para></question>
 <answer><para>
 Twój gcc nie jest poprawnie zainstalowany. Sprawdź szczegóły
-w <filename>configure.log</filename>.
+w <filename>config.log</filename>.
 </para></answer>
 </qandaentry>
 

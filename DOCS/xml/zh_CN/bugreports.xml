@@ -325,9 +325,9 @@ CPU信息（这只在Linux上工作）：
 
 <para>
 当你在执行<command>./configure</command>,或一些自动检测发生错误，阅读
-<filename>configure.log</filename>。你可能会在那里发现答案。例如同一链接库的不同
+<filename>config.log</filename>。你可能会在那里发现答案。例如同一链接库的不同
 版本共存于你的系统上，或者你忘记安装开发包（包含有-dev后缀）。如果你认为有错误，
-在你的错误报告中包含<filename>configure.log</filename>。
+在你的错误报告中包含<filename>config.log</filename>。
 </para>
 </sect2>
 

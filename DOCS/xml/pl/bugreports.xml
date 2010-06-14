@@ -371,11 +371,11 @@ ld -v<!--
 <para>
 Jeżeli <command>./configure</command> zwraca błąd albo
 automatyczne wykrywanie czegoś zawiedzie, przeczytaj
-<filename>configure.log</filename>. Możliwe, że znajdziesz tam odpowiedź, na
+<filename>config.log</filename>. Możliwe, że znajdziesz tam odpowiedź, na
 przykład kilka połączonych wersji tej samej biblioteki w Twoim systemie albo że
 zapomniałeś zainstalować pakietów rozwojowych (tych z przyrostkiem -dev albo
 -devel). Jeżeli wydaje Ci się, że istnieje jednak błąd, załącz
-<filename>configure.log</filename> w twoim raporcie.
+<filename>config.log</filename> w twoim raporcie.
 </para>
 </sect2>
 

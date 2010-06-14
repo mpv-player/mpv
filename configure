@@ -1423,7 +1423,7 @@ for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
 done
 
 
-TMPLOG="configure.log"
+TMPLOG="config.log"
 TMPC="$I/mplayer-conf-$RANDOM-$$.c"
 TMPCPP="$I/mplayer-conf-$RANDOM-$$.cpp"
 TMPEXE="$I/mplayer-conf-$RANDOM-$$$_exesuf"

@@ -904,7 +904,7 @@ clean:
 distclean: clean testsclean toolsclean driversclean dhahelperclean dhahelperwinclean
 	-rm -rf DOCS/tech/doxygen
 	-rm -f $(call ADD_ALL_DIRS,/*.d)
-	-rm -f configure.log config.mak config.h codecs.conf.h \
+	-rm -f config.log config.mak config.h codecs.conf.h \
            version.h $(VIDIX_PCI_FILES) TAGS tags
 	-rm -f $(call ADD_ALL_EXESUFS,codec-cfg cpuinfo)
 

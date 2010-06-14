@@ -362,12 +362,12 @@ En cas de doute, joignez-y le résultat de <command>lspci -vv</command> sur les 
 
 <para>
 Si vous rencontrez des erreurs pendant l'éxecution de <command>./configure</command>,
-ou si l'auto-détection ou autre chose échoue, lisez <filename>configure.log</filename>.
+ou si l'auto-détection ou autre chose échoue, lisez <filename>config.log</filename>.
 Vous pourriez y trouver la réponse, par exemple des versions multiples
 mélangées de la même librairie dans votre système, ou vous avez oublié
 d'installer les paquets de développement (ceux avec le suffixe -dev).
 Si vous pensez que c'est un bogue, incluez
-<filename>configure.log</filename> dans votre rapport de bogue.
+<filename>config.log</filename> dans votre rapport de bogue.
 </para>
 </sect2>
 

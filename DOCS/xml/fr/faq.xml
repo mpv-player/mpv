@@ -120,7 +120,7 @@ Configure se termine par ce texte, et <application>MPlayer</application> ne comp
 <screen>Your gcc does not support even i386 for '-march' and '-mcpu'</screen>
 </para></question>
 <answer><para>
-Votre gcc n'est pas installé correctement, voir le fichier <filename>configure.log</filename>
+Votre gcc n'est pas installé correctement, voir le fichier <filename>config.log</filename>
 pour plus de détails.
 </para></answer>
 </qandaentry>

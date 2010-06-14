@@ -96,7 +96,7 @@ to see the available options and select what you need.
 
 The configure script prints a summary of enabled and disabled options. If you
 have something installed that configure fails to detect, check the file
-configure.log for errors and reasons for the failure. Repeat this step until
+config.log for errors and reasons for the failure. Repeat this step until
 you are satisfied with the enabled feature set.
 
 

@@ -122,7 +122,7 @@ A konfiguráció ezzel a szöveggel ér véget és az <application>MPlayer</appl
 <screen>Your gcc does not support even i386 for '-march' and '-mcpu'</screen>
 </para></question>
 <answer><para>
-A gcc-d nincs megfelelően installálva, ellenőrizd a <filename>configure.log</filename> fájlt
+A gcc-d nincs megfelelően installálva, ellenőrizd a <filename>config.log</filename> fájlt
 a részletekért!
 </para></answer>
 </qandaentry>

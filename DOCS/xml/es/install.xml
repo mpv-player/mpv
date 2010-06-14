@@ -178,13 +178,13 @@ más detalladas.
 <para>
 <emphasis role="bold">Siempre revise la salida de</emphasis>
 <filename>./configure</filename>, y el archivo
-<filename>configure.log</filename>, ellos contienen información acerca
+<filename>config.log</filename>, ellos contienen información acerca
 de lo que se compilará, y que no. Quizá quiera ver también los archivos
 <filename>config.h</filename> y <filename>config.mak</filename>.
 Si alguna de las librerías que tiene instaladas no fueron detectadas
 por <filename>./configure</filename>, por favor revise si tiene los
 archivos de encabezados correspondientes (normalmente los paquetes -dev)
-y que sus versiones sean las mismas. El archivo <filename>configure.log</filename>
+y que sus versiones sean las mismas. El archivo <filename>config.log</filename>
 normalmente dice que falta.
 </para>
 
