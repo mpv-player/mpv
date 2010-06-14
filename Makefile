@@ -785,6 +785,7 @@ version.h: version.sh
 	./$< `$(CC) -dumpversion`
 
 %$(EXESUF): %.c
+	$(CC) $(CFLAGS) -o $@ $^
 
 locales: $(MOFILES)
 
