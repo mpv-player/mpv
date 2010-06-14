@@ -35,6 +35,7 @@
 #endif
 
 #include "loader/qtx/qtxsdk/components.h"
+#include "loader/wine/winbase.h"
 #include "loader/wine/windef.h"
 
 #include "codec-cfg.h"
@@ -49,9 +50,7 @@
 #include "mp_image.h"
 #include "vf.h"
 
-HMODULE   WINAPI LoadLibraryA(LPCSTR);
-FARPROC   WINAPI GetProcAddress(HMODULE,LPCSTR);
-int       WINAPI FreeLibrary(HMODULE);
+
 static HINSTANCE qtime_qts; //handle to preloaded quicktime.qts
 static HMODULE handler;
 

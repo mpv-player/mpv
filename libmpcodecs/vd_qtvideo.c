@@ -31,6 +31,7 @@
 #else
 #include "loader/ldt_keeper.h"
 #include "loader/qtx/qtxsdk/components.h"
+#include "loader/wine/winbase.h"
 #include "loader/wine/windef.h"
 #endif
 
@@ -52,9 +53,6 @@ static ImageDescriptionHandle framedescHandle;
 static ImageSequence imageSeq;
 
 #ifndef CONFIG_QUICKTIME
-HMODULE   WINAPI LoadLibraryA(LPCSTR);
-FARPROC   WINAPI GetProcAddress(HMODULE,LPCSTR);
-int       WINAPI FreeLibrary(HMODULE);
 static    HINSTANCE qtime_qts; // handle to the preloaded quicktime.qts
 static    HMODULE handler;
 static    OSErr (*InitializeQTML)(long flags);
