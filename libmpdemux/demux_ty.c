@@ -104,8 +104,6 @@ typedef struct
    int             tmf_totalparts;
 } TiVoInfo;
 
-off_t vstream_streamsize( );
-
 // ===========================================================================
 #define TMF_SIG "showing.xml"
 
@@ -361,16 +359,14 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    // ======================================================================
    // If we haven't figured out the size of the stream, let's do so
    // ======================================================================
-#ifdef STREAMTYPE_STREAM_TY
-   if ( demux->stream->type == STREAMTYPE_STREAM_TY )
+   if ( demux->stream->type == STREAMTYPE_VSTREAM )
    {
       // The vstream code figures out the exact size of the stream
       demux->movi_start = 0;
-      demux->movi_end = vstream_streamsize();
-      tivo->size = vstream_streamsize();
+      demux->movi_end = demux->stream->end_pos;
+      tivo->size = demux->stream->end_pos;
    }
    else
-#endif
    {
       // If its a local file, try to find the Part Headers, so we can
       // calculate the ACTUAL stream size
