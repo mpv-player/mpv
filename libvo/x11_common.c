@@ -724,17 +724,17 @@ void vo_x11_uninit(struct vo *vo)
     if (x11->window != None)
         vo_showcursor(x11->display, x11->window);
 
-    if (x11->f_gc)
+    if (x11->f_gc != None)
     {
         XFreeGC(vo->x11->display, x11->f_gc);
-        x11->f_gc = NULL;
+        x11->f_gc = None;
     }
     {
-        if (x11->vo_gc)
+        if (x11->vo_gc != None)
         {
             XSetBackground(vo->x11->display, x11->vo_gc, 0);
             XFreeGC(vo->x11->display, x11->vo_gc);
-            x11->vo_gc = NULL;
+            x11->vo_gc = None;
         }
         if (x11->window != None)
         {
@@ -1002,7 +1002,7 @@ static Window vo_x11_create_smooth_window(struct vo_x11_state *x11, Window mRoot
         XCreateWindow(x11->display, x11->rootwin, x, y, width, height, 0, depth,
                       CopyFromParent, vis, xswamask, &xswa);
     XSetWMProtocols(x11->display, ret_win, &x11->XAWM_DELETE_WINDOW, 1);
-    if (!x11->f_gc)
+    if (x11->f_gc == None)
         x11->f_gc = XCreateGC(x11->display, ret_win, 0, 0);
     XSetForeground(x11->display, x11->f_gc, 0);
 
@@ -1116,7 +1116,7 @@ void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
     Display *mDisplay = vo->x11->display;
     int u_dheight, u_dwidth, left_ov, left_ov2;
 
-    if (!x11->f_gc)
+    if (x11->f_gc == None)
         return;
 
     u_dheight = use_fs ? opts->vo_screenheight : vo->dheight;
@@ -1146,7 +1146,7 @@ void vo_x11_clearwindow(struct vo *vo, Window vo_window)
 {
     struct vo_x11_state *x11 = vo->x11;
     struct MPOpts *opts = vo->opts;
-    if (!x11->f_gc)
+    if (x11->f_gc == None)
         return;
     XFillRectangle(x11->display, vo_window, x11->f_gc, 0, 0,
                    opts->vo_screenwidth, opts->vo_screenheight);
