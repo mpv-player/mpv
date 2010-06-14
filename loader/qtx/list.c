@@ -26,14 +26,7 @@
 #include "qtxsdk/components.h"
 #include "qtxsdk/select.h"
 #include "loader/ldt_keeper.h"
-
-char* get_path(const char* x){  return strdup(x);}
-void* LoadLibraryA(char* name);
-void* GetProcAddress(void* handle,char* func);
-
-#define __stdcall __attribute__((__stdcall__))
-#define __cdecl   __attribute__((__cdecl__))
-#define APIENTRY
+#include "loader/wine/winbase.h"
 
 int main(void) {
     void *handler;

@@ -23,29 +23,8 @@
 #include "qtxsdk/components.h"
 #include "qtxsdk/select.h"
 #include "loader/ldt_keeper.h"
+#include "loader/wine/winbase.h"
 #include "mp_msg.h"
-
-/* this is what a plain component looks like */
-ComponentResult ComponentDummy(
-    ComponentParameters *params,
-    void **globals,
-    ComponentResult (*ComponentDispatch)(ComponentParameters *, void **))
-{
-    printf("ComponentDummy(params: %p, globals: %p, dispatcher: %p) called!\n",
-	params, globals, ComponentDispatch);
-    printf(" Dummy: global datas: %p\n", *globals);
-    printf(" Dummy: returning 0\n");
-    return 0;
-}
-
-char *get_path(const char* x){  return strdup(x);}
-
-void* LoadLibraryA(char* name);
-void* GetProcAddress(void* handle,char* func);
-
-#define __stdcall __attribute__((__stdcall__))
-#define __cdecl   __attribute__((__cdecl__))
-#define APIENTRY
 
 unsigned int* x_table[0x00001837];
 
