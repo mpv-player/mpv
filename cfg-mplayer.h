@@ -32,17 +32,11 @@
 
 extern char *fb_mode_cfgfile;
 extern char *fb_mode_name;
-extern char *dfb_params;
 
 extern char *lirc_configfile;
 
 /* only used at startup (setting these values from configfile) */
 extern char *vo_geometry;
-
-extern char *ao_outputfilename;
-extern int ao_pcm_waveheader;
-
-extern int fs_layer;
 extern int stop_xscreensaver;
 
 extern int menu_startup;

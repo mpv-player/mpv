@@ -67,9 +67,6 @@ static void draw_osd(void)
 }
 
 
-//static void
-//write_slice_g200(uint8_t *y,uint8_t *cr, uint8_t *cb,uint32_t slice_num)
-
 static void
 draw_slice_g200(uint8_t *image[], int stride[], int width,int height,int x,int y)
 {
