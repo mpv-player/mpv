@@ -81,6 +81,15 @@ cxx_check() {
   compile_check $TMPCPP $@ -lstdc++
 }
 
+header_check() {
+  cat > $TMPC << EOF
+#include <$1>
+int main(void) { return 0; }
+EOF
+  shift
+  compile_check $TMPC $@
+}
+
 yasm_check() {
   echo >> "$TMPLOG"
   cat "$TMPS" >> "$TMPLOG"
