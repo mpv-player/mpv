@@ -47,7 +47,7 @@ static const vo_info_t info =
 
 const LIBVO_EXTERN(mga)
 
-#include "mga_common.c"
+#include "mga_template.c"
 
 #define FBDEV	"/dev/fb0"
 

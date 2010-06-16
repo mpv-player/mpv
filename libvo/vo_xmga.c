@@ -78,7 +78,7 @@ static XSetWindowAttributes xWAttribs;
 static int initialized = 0;
 
 #define VO_XMGA
-#include "mga_common.c"
+#include "mga_template.c"
 #undef  VO_XMGA
 
 static void mDrawColorKey(void)
