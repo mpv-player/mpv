@@ -3748,7 +3748,6 @@ echores "$_select"
 
 echocheck "gettimeofday()"
 cat > $TMPC << EOF
-#include <stdio.h>
 #include <sys/time.h>
 int main(void) {struct timeval tv_start; gettimeofday(&tv_start, NULL); return 0; }
 EOF
@@ -6945,7 +6944,6 @@ if test "$_libavformat" = auto ; then
   _libavformat=no
   cat > $TMPC <<EOF
   #include <libavformat/avformat.h>
-  #include <libavcodec/opt.h>
   int main(void) { av_alloc_format_context(); return 0; }
 EOF
   if $_pkg_config --exists libavformat ; then
@@ -6966,7 +6964,6 @@ echocheck "FFmpeg libpostproc"
 if test "$_libpostproc" = auto ; then
   _libpostproc=no
   cat > $TMPC << EOF
-  #include <inttypes.h>
   #include <libpostproc/postprocess.h>
   int main(void) { pp_get_mode_by_name_and_quality("de", 0); return 0; }
 EOF
