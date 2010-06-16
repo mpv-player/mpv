@@ -892,6 +892,7 @@ static void exit_sighandler(int x){
   if(sig_count<=1)
   switch(x){
   case SIGINT:
+  case SIGPIPE:
   case SIGQUIT:
   case SIGTERM:
   case SIGKILL:
