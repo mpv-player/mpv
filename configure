@@ -3749,7 +3749,7 @@ echores "$_select"
 echocheck "gettimeofday()"
 cat > $TMPC << EOF
 #include <sys/time.h>
-int main(void) {struct timeval tv_start; gettimeofday(&tv_start, NULL); return 0; }
+int main(void) {struct timeval tv; struct timezone tz; gettimeofday(&tv, &tz); return 0; }
 EOF
 _gettimeofday=no
 cc_check && _gettimeofday=yes
