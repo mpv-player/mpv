@@ -6156,16 +6156,13 @@ _inc_tmp=""
 _ld_tmp=""
 if test "$_fribidi" = auto ; then
     cat > $TMPC << EOF
-#include <stdio.h>
 #include <stdlib.h>
 /* workaround for fribidi 0.10.4 and below */
 #define FRIBIDI_CHARSET_UTF8 FRIBIDI_CHAR_SET_UTF8
 #include <fribidi/fribidi.h>
 int main(void) {
-    if (fribidi_parse_charset("UTF-8") != FRIBIDI_CHAR_SET_UTF8) {
-       printf("Fribidi headers are not consistents with the library!\n");
+    if (fribidi_parse_charset("UTF-8") != FRIBIDI_CHAR_SET_UTF8)
        exit(1);
-    }
     return 0;
 }
 EOF
