@@ -132,7 +132,7 @@ static int demux_y4m_fill_buffer(demuxer_t *demux, demux_stream_t *dsds) {
   else
   {
     if ((err=y4m_read_frame(demux->stream, priv->si, &fi, buf)) != Y4M_OK) {
-      mp_msg(MSGT_DEMUX, MSGL_V, "error reading frame %s\n", y4m_strerr(err));
+      mp_msg(MSGT_DEMUX, MSGL_ERR, "error reading frame %s\n", y4m_strerr(err));
       return 0;
     }
   }
