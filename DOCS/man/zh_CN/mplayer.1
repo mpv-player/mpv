@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 rev. 31364
+.\" sync with en/mplayer.1 rev. 31372
 .\" Encoding: UTF-8
 .\"
 .\" MPlayer (C) 2000-2010 MPlayer 团队
@@ -9521,19 +9521,19 @@ partitions=all rc_lookahead=60 ref=16 subq=10 trellis=2
 多个调整选项间以逗号分隔，但同一时间只能使用一个心理调整选项。
 .PD 0
 .RSs
-.IPs film（心理调整选项）
+.IPs "film（心理调整选项）"
 deblock=-1,-1 psy-rd=<unset>,0.15
-.IPs animation（心理调整选项）
+.IPs "animation（心理调整选项）"
 b_frames={+2} deblock=1,1 psy-rd=0.4:<unset> aq_strength=0.6
 ref={double if >1 else 1}
-.IPs grain（心理调整选项）
+.IPs "grain（心理调整选项）"
 aq_strength=0.5 nodct_decimate deadzone_inter=6 deadzone_intra=6
 deblock=-2,-2 ipratio=1.1 pbratio=1.1 psy-rd=<unset>,0.25 qcomp=0.8
-.IPs stillimage（心理调整选项）
+.IPs "stillimage（心理调整选项）"
 aq_strength=1.2 deblock=-3,-3 psy-rd=2.0,0.7
-.IPs psnr（心理调整选项）
+.IPs "psnr（心理调整选项）"
 aq_mode=0 nopsy
-.IPs ssim（心理调整选项）
+.IPs "ssim（心理调整选项）"
 aq_mode=2 nopsy
 .IPs fastdecode
 nocabac nodeblock noweight_b weightp=0
@@ -10923,14 +10923,11 @@ rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \
 MPlayer 最初由 Arpad Gereoffy 制作。
 其它许多贡献者的部分清单, 请参见 AUTHORS(作者) 文件。
 .PP
-MPlayer 是 (C) 2000\-2009 The MPlayer Team (MPlayer 团队) 所有
+MPlayer 是 (C) 2000\-2010 The MPlayer Team (MPlayer 团队) 所有
 .PP
 本(英文)手册页主要由 Gabucino, Jonas Jermann 和 Diego Biurrun 编写,
 由 Diego Biurrun 维护。
-视频滤镜、通用编解码器选项、特定编解码器专用选项三个章节由
-JRaSH <jrash06 AT 163.com> 重新翻译
-参于翻译本中文手册页的有: JRaSH<jrash06 At 163.com>,
-Sheldon Jin <jinsh2 AT yahoo.com>, Lu Ran <hephooey AT fastmail.fm> 等。
+JRaSH <jrash06 AT 163.com> 翻译
 有关本文的联系请发送邮件到 MPlayer-DOCS 邮件列表。
 与翻译相关的邮件属于 MPlayer-translations 邮件列表。
 .\" end of file
