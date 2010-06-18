@@ -303,7 +303,7 @@ inline static int stream_seek(stream_t *s,off_t pos){
 }
 
 inline static int stream_skip(stream_t *s,off_t len){
-  if( (len<0 && (s->flags & MP_STREAM_SEEK_BW)) || (len>2*STREAM_BUFFER_SIZE && (s->flags & MP_STREAM_SEEK_FW)) ) {
+  if( len<0 || (len>2*STREAM_BUFFER_SIZE && (s->flags & MP_STREAM_SEEK_FW)) ) {
     // negative or big skip!
     return stream_seek(s,stream_tell(s)+len);
   }
