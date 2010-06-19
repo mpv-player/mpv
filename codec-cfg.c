@@ -921,7 +921,7 @@ void list_codecs(int audioflag){
 
 
 #ifdef CODECS2HTML
-void wrapline(FILE *f2,char *s){
+static void wrapline(FILE *f2,char *s){
     int c;
     if(!s){
         fprintf(f2,"-");
@@ -932,7 +932,7 @@ void wrapline(FILE *f2,char *s){
     }
 }
 
-void parsehtml(FILE *f1,FILE *f2,codecs_t *codec,int section,int dshow){
+static void parsehtml(FILE *f1,FILE *f2,codecs_t *codec,int section,int dshow){
     int c,d;
     while((c=fgetc(f1))>=0){
         if(c!='%'){
