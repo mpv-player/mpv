@@ -57,7 +57,9 @@
 #include "libmpcodecs/img_format.h"
 #include "codec-cfg.h"
 
-#ifndef CODECS2HTML
+#ifdef CODECS2HTML
+#define CODEC_CFG_MIN 20100000
+#else
 #include "codecs.conf.h"
 #endif
 
@@ -77,6 +79,7 @@
 #define TYPE_VIDEO      0
 #define TYPE_AUDIO      1
 
+static int codecs_conf_release;
 char * codecs_file = NULL;
 
 static int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
@@ -580,6 +583,7 @@ int parse_codec_cfg(const char *cfgfile)
         tmp = atoi(token[0]);
         if (tmp < CODEC_CFG_MIN)
             goto err_out_release_num;
+        codecs_conf_release = tmp;
         while ((tmp = get_token(1, 1)) == RET_EOL)
             /* NOTHING */;
         if (tmp == RET_EOF)
@@ -1034,6 +1038,8 @@ int main(int argc, char* argv[])
      */
     if (!(nr_codecs = parse_codec_cfg((argc>1)?argv[1]:"etc/codecs.conf")))
         exit(1);
+    if (codecs_conf_release < CODEC_CFG_MIN)
+        exit(1);
 
     if (argc > 1) {
         int i, j;
@@ -1052,6 +1058,7 @@ int main(int argc, char* argv[])
         printf("/* GENERATED FROM %s, DO NOT EDIT! */\n\n",argv[1]);
         printf("#include <stddef.h>\n");
         printf("#include \"codec-cfg.h\"\n\n");
+        printf("#define CODEC_CFG_MIN %i\n\n", codecs_conf_release);
 
         for (i=0; i<2; i++) {
             printf("const codecs_t %s[] = {\n", nm[i]);

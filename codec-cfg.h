@@ -19,8 +19,6 @@
 #ifndef MPLAYER_CODEC_CFG_H
 #define MPLAYER_CODEC_CFG_H
 
-#define CODEC_CFG_MIN   20070407
-
 #define CODECS_MAX_FOURCC       92
 #define CODECS_MAX_OUTFMT       16
 #define CODECS_MAX_INFMT        16
