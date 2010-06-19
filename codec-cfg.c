@@ -932,7 +932,7 @@ static void wrapline(FILE *f2,char *s){
     }
 }
 
-static void parsehtml(FILE *f1,FILE *f2,codecs_t *codec,int section,int dshow){
+static void parsehtml(FILE *f1,FILE *f2,codecs_t *codec){
     int c,d;
     while((c=fgetc(f1))>=0){
         if(c!='%'){
@@ -1138,30 +1138,30 @@ int main(int argc, char* argv[])
                 case 5:
                     if(cl[i].status==CODECS_STATUS_WORKING)
 //                if(!(!strcmp(cl[i].drv,"vfw") || !strcmp(cl[i].drv,"dshow") || !strcmp(cl[i].drv,"vfwex") || !strcmp(cl[i].drv,"acm")))
-                        parsehtml(f1,f2,&cl[i],section,dshow);
+                        parsehtml(f1,f2,&cl[i]);
                     break;
 #if 0
                 case 1:
                 case 6:
                     if(cl[i].status==CODECS_STATUS_WORKING)
                         if((!strcmp(cl[i].drv,"vfw") || !strcmp(cl[i].drv,"dshow") || !strcmp(cl[i].drv,"vfwex") || !strcmp(cl[i].drv,"acm")))
-                            parsehtml(f1,f2,&cl[i],section,dshow);
+                            parsehtml(f1,f2,&cl[i]);
                     break;
 #endif
                 case 2:
                 case 7:
                     if(cl[i].status==CODECS_STATUS_PROBLEMS)
-                        parsehtml(f1,f2,&cl[i],section,dshow);
+                        parsehtml(f1,f2,&cl[i]);
                     break;
                 case 3:
                 case 8:
                     if(cl[i].status==CODECS_STATUS_NOT_WORKING)
-                        parsehtml(f1,f2,&cl[i],section,dshow);
+                        parsehtml(f1,f2,&cl[i]);
                     break;
                 case 4:
                 case 9:
                     if(cl[i].status==CODECS_STATUS_UNTESTED)
-                        parsehtml(f1,f2,&cl[i],section,dshow);
+                        parsehtml(f1,f2,&cl[i]);
                     break;
                 default:
                     printf("Warning! unimplemented section: %d\n",section);
@@ -1169,7 +1169,6 @@ int main(int argc, char* argv[])
             }
             fseek(f1,pos,SEEK_SET);
             skiphtml(f1);
-//void parsehtml(FILE *f1,FILE *f2,codecs_t *codec,int section,int dshow){
 
             continue;
         }
