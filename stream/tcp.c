@@ -186,10 +186,10 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 			return TCP_ERROR_FATAL;
 	}
 
-#if HAVE_INET_ATON || defined(HAVE_WINSOCK2_H)
-	av_strlcpy( buf, inet_ntoa( *((struct in_addr*)our_s_addr) ), 255);
-#else
+#if HAVE_INET_PTON
 	inet_ntop(af, our_s_addr, buf, 255);
+#elif HAVE_INET_ATON || defined(HAVE_WINSOCK2_H)
+	av_strlcpy( buf, inet_ntoa( *((struct in_addr*)our_s_addr) ), 255);
 #endif
 	if(verb) mp_tmsg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s[%s]: %d...\n", host, buf , port );
 
