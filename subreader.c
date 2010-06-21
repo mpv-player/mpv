@@ -2315,7 +2315,9 @@ void sub_add_text(subtitle *sub, const char *txt, int len, double endpts) {
   int double_newline = 1; // ignore newlines at the beginning
   int i, pos;
   char *buf;
+#ifdef CONFIG_FRIBIDI
   int orig_lines = sub->lines;
+#endif
   if (sub->lines >= SUB_MAX_TEXT) return;
   pos = 0;
   buf = malloc(MAX_SUBLINE + 1);
