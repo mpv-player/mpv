@@ -711,35 +711,6 @@ static int cddb_get_proto_level(cddb_data_t *cddb_data)
     return cddb_http_request("stat", cddb_proto_level_parse, cddb_data);
 }
 
-static int cddb_freedb_sites_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data)
-{
-    int ret, status;
-
-    ret = sscanf(http_hdr->body, "%d ", &status);
-    if (ret != 1) {
-        mp_tmsg(MSGT_DEMUX, MSGL_ERR, "parse error");
-        return -1;
-    }
-
-    switch (status) {
-    case 210:
-        // TODO: Parse the sites
-        ret = cddb_data->anonymous;    // For gcc complaining about unused parameter.
-        return 0;
-    case 401:
-        mp_tmsg(MSGT_DEMUX, MSGL_FIXME, "No sites information available.\n");
-        break;
-    default:
-        mp_tmsg(MSGT_DEMUX, MSGL_FIXME, "unhandled code\n");
-    }
-    return -1;
-}
-
-static int cddb_get_freedb_sites(cddb_data_t *cddb_data)
-{
-    return cddb_http_request("sites", cddb_freedb_sites_parse, cddb_data);
-}
-
 static void cddb_create_hello(cddb_data_t *cddb_data)
 {
     char host_name[51];
@@ -787,8 +758,6 @@ static int cddb_retrieve(cddb_data_t *cddb_data)
         mp_tmsg(MSGT_DEMUX, MSGL_ERR, "Failed to get the protocol level.\n");
         return -1;
     }
-
-    //cddb_get_freedb_sites(&cddb_data);
 
     sprintf(command, "cddb+query+%08lx+%d+%s%d", cddb_data->disc_id,
             cddb_data->tracks, offsets, time_len);
