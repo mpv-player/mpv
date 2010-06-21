@@ -19,14 +19,6 @@
 #ifndef MPLAYER_CDD_H
 #define MPLAYER_CDD_H
 
-#include "config.h"
-#ifndef CONFIG_LIBCDIO
-#include <cdda_interface.h>
-#include <cdda_paranoia.h>
-#else
-#include <cdio/cdda.h>
-#include <cdio/paranoia.h>
-#endif
 #include <sys/types.h>
 
 typedef struct {
@@ -71,20 +63,6 @@ typedef struct {
 	cd_track_t *last;
 	cd_track_t *current;
 } cd_info_t;
-
-typedef struct {
-#ifndef CONFIG_LIBCDIO
-	cdrom_drive* cd;
-	cdrom_paranoia* cdp;
-#else
-	cdrom_drive_t* cd;
-	cdrom_paranoia_t* cdp;
-#endif
-	int sector;
-	int start_sector;
-	int end_sector;
-	cd_info_t *cd_info;
-} cdda_priv;
 
 cd_info_t* 	cd_info_new(void);
 void		cd_info_free(cd_info_t *cd_info);
