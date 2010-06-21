@@ -186,7 +186,7 @@ const m_option_t pvropts_conf[]={
 };
 #endif /* CONFIG_PVR */
 
-extern const m_config_t dvbin_opts_conf[];
+extern const m_option_t dvbin_opts_conf[];
 extern const m_option_t lavfdopts_conf[];
 
 extern int rtsp_transport_tcp;
