@@ -3493,7 +3493,6 @@ echores "$_soundcard_h"
 
 echocheck "sys/dvdio.h"
 cat > $TMPC << EOF
-#include <unistd.h>
 #include <sys/dvdio.h>
 int main(void) { return 0; }
 EOF
@@ -3509,7 +3508,6 @@ echores "$_dvdio"
 
 echocheck "sys/cdio.h"
 cat > $TMPC << EOF
-#include <unistd.h>
 #include <sys/cdio.h>
 int main(void) { return 0; }
 EOF
@@ -3525,7 +3523,6 @@ echores "$_cdio"
 
 echocheck "linux/cdrom.h"
 cat > $TMPC << EOF
-#include <sys/types.h>
 #include <linux/cdrom.h>
 int main(void) { return 0; }
 EOF
@@ -3592,8 +3589,6 @@ fi #if hpux
 if sunos; then
 echocheck "userspace SCSI headers (Solaris)"
 cat > $TMPC << EOF
-#include <unistd.h>
-#include <stropts.h>
 #include <sys/scsi/scsi_types.h>
 #include <sys/scsi/impl/uscsi.h>
 int main(void) { return 0; }
@@ -5596,7 +5591,6 @@ fi
 if test "$_alsa" != no ; then
   _alsa=no
   cat > $TMPC << EOF
-#include <sys/time.h>
 #include <sys/asoundlib.h>
 #if !((SND_LIB_MAJOR == 0) && (SND_LIB_MINOR == 5))
 #error "alsa version != 0.5.x"
@@ -5606,7 +5600,6 @@ EOF
   cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='0.5.x'
 
   cat > $TMPC << EOF
-#include <sys/time.h>
 #include <sys/asoundlib.h>
 #if !((SND_LIB_MAJOR == 0) && (SND_LIB_MINOR == 9))
 #error "alsa version != 0.9.x"
@@ -5615,7 +5608,6 @@ int main(void) { return 0; }
 EOF
   cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='0.9.x-sys'
   cat > $TMPC << EOF
-#include <sys/time.h>
 #include <alsa/asoundlib.h>
 #if !((SND_LIB_MAJOR == 0) && (SND_LIB_MINOR == 9))
 #error "alsa version != 0.9.x"
@@ -5625,7 +5617,6 @@ EOF
   cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='0.9.x-alsa'
 
   cat > $TMPC << EOF
-#include <sys/time.h>
 #include <sys/asoundlib.h>
 #if !((SND_LIB_MAJOR == 1) && (SND_LIB_MINOR == 0))
 #error "alsa version != 1.0.x"
@@ -5634,7 +5625,6 @@ int main(void) { return 0; }
 EOF
   cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='1.0.x-sys'
   cat > $TMPC << EOF
-#include <sys/time.h>
 #include <alsa/asoundlib.h>
 #if !((SND_LIB_MAJOR == 1) && (SND_LIB_MINOR == 0))
 #error "alsa version != 1.0.x"
@@ -6671,7 +6661,6 @@ echores "$_faad"
 echocheck "LADSPA plugin support"
 if test "$_ladspa" = auto ; then
   cat > $TMPC <<EOF
-#include <stdio.h>
 #include <ladspa.h>
 int main(void) {
 const LADSPA_Descriptor *ld = NULL;
@@ -7360,7 +7349,6 @@ if test "$_tv_v4l1" = auto ; then
   _tv_v4l1=no
   if test "$_tv" = yes && linux ; then
     cat > $TMPC <<EOF
-#include <stdlib.h>
 #include <linux/videodev.h>
 int main(void) { return 0; }
 EOF
@@ -7385,8 +7373,6 @@ if test "$_tv_v4l2" = auto ; then
   _tv_v4l2=no
   if test "$_tv" = yes && linux ; then
     cat > $TMPC <<EOF
-#include <stdlib.h>
-#include <linux/types.h>
 #include <linux/videodev2.h>
 int main(void) { return 0; }
 EOF
@@ -7434,8 +7420,6 @@ if test "$_radio_v4l2" = auto ; then
   _radio_v4l2=no
   if test "$_radio" = yes && linux ; then
     cat > $TMPC <<EOF
-#include <stdlib.h>
-#include <linux/types.h>
 #include <linux/videodev2.h>
 int main(void) { return 0; }
 EOF
@@ -7454,7 +7438,6 @@ if test "$_radio_v4l" = auto ; then
   _radio_v4l=no
   if test "$_radio" = yes && linux ; then
     cat > $TMPC <<EOF
-#include <stdlib.h>
 #include <linux/videodev.h>
 int main(void) { return 0; }
 EOF
@@ -7500,9 +7483,6 @@ if test "$_pvr" = auto ; then
  _pvr=no
  if test "$_tv_v4l2" = yes && linux ; then
   cat > $TMPC <<EOF
-#include <stdlib.h>
-#include <inttypes.h>
-#include <linux/types.h>
 #include <linux/videodev2.h>
 int main(void) { struct v4l2_ext_controls ext; return ext.controls->value; }
 EOF
