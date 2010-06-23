@@ -13,12 +13,6 @@ ones successfully, so they are required:
 * xsltproc (part of libxslt1) is used for transforming XML files into HTML
   files. Version 1.0.18 or later is recommended.
 
-It's also possible to use the Saxon XSLT Processor. The Russian translator
-used it (version 6.4.4) for a while. If you have a suitable JavaVM and a
-saxon.jar installed somewhere, configure will try to detect them. If
-autodetection fails, try to tweak DOCS/xml/configure to get it working and
-send us a patch :)
-
 On Red Hat systems you need the following packages:
 libxml2, libxslt, docbook-dtds, docbook-style-xsl
 
