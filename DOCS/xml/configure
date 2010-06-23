@@ -3,8 +3,6 @@
 # Script to check for catalogs, stylesheets, XSL processors and all
 # the other stuff necessary to convert the XML documentation.
 
-_xsltwrapper="xsltproc.sh"
-
 echo "Searching for XML catalogs..."
 for _try_catalog in \
   /etc/sgml/catalog \
@@ -29,7 +27,6 @@ done
 if test -n "$_catalog"
 then
   echo "Found SGML catalog at $_catalog"
-  _sgmlcatalog="export SGML_CATALOG_FILES=$_catalog"
 else
   echo "No SGML catalog found."
 fi
@@ -183,31 +180,15 @@ then
     echo "Found xsltproc. If it works, it's probably the best choice."
     if test -n "$_catalog"
     then
-      _xsltcommand="xsltproc --catalogs -o \$1 \$2 \$3"
+      _xsltcommand="xsltproc --catalogs -o \$\$1 \$\$2 \$\$3"
     else
-      _xsltcommand="xsltproc -o \$1 \$2 \$3"
+      _xsltcommand="xsltproc -o \$\$1 \$\$2 \$\$3"
     fi
   else
     echo "Found xsltproc but no stylesheets on your system."
     echo "xsltproc is unusable without stylesheets."
   fi
 fi
-
-
-
-cat > $_xsltwrapper << EOF
-#!/bin/sh
-# **************************************************
-# This file is generated automatically. DO NOT EDIT.
-# **************************************************
-# This is a small wrapper script around many ways to call the XSLT processor.
-# It accepts 3 arguments: <output_dir> <stylesheet_name> <main XML file name>
-
-$_sgmlcatalog
-$_xsltcommand
-EOF
-
-chmod +x $_xsltwrapper
 
 
 echo "Searching for XML checker..."
@@ -235,4 +216,5 @@ fi
 cat > xml.mak << EOF
 CATALOG = $_catalog
 XMLLINT_COMMAND = $_xmllint_command
+XSLT_COMMAND = $_xsltcommand
 EOF

@@ -7,7 +7,7 @@ include xml.mak
 HTML = ../HTML
 
 MAIN_XML_ALL = $(foreach lang,$(DOC_LANG_ALL),$(lang)/main.xml)
-CONFIGURE_GENERATED = html-chunk.xsl html-single.xsl xml.mak xsltproc.sh
+CONFIGURE_GENERATED = html-chunk.xsl html-single.xsl xml.mak
 
 all: html-chunked html-single
 
@@ -44,10 +44,10 @@ $(HTML)/$(lang)/default.css:
 	cp -f default.css $$(@D)
 
 $(HTML)/$(lang)/dummy.html:
-	./xsltproc.sh $$@ html-chunk.xsl $$<
+	SGML_CATALOG_FILES=$(CATALOG) $(XSLT_COMMAND) $$@ html-chunk.xsl $$<
 
 $(HTML)/$(lang)/MPlayer.html:
-	./xsltproc.sh $$@ html-single.xsl $$<
+	SGML_CATALOG_FILES=$(CATALOG) $(XSLT_COMMAND) $$@ html-single.xsl $$<
 
 xmllint-$(lang):
 	SGML_CATALOG_FILES=$(CATALOG) $(XMLLINT_COMMAND) $(lang)/main.xml
