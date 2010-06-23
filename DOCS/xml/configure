@@ -4,7 +4,6 @@
 # the other stuff necessary to convert the XML documentation.
 
 _xsltwrapper="xsltproc.sh"
-_xmllintwrapper="xmllint.sh"
 
 echo "Searching for XML catalogs..."
 for _try_catalog in \
@@ -358,14 +357,7 @@ then
   _xmllint_command=true
 fi
 
-cat > $_xmllintwrapper << EOF
-#!/bin/sh
-# **************************************************
-# This file is generated automatically. DO NOT EDIT.
-# **************************************************
-# This is a small wrapper for XML lintian programs.
-$_sgmlcatalog
-$_xmllint_command
+cat > xml.mak << EOF
+CATALOG = $_catalog
+XMLLINT_COMMAND = $_xmllint_command
 EOF
-
-chmod +x $_xmllintwrapper

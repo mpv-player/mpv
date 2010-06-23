@@ -1,12 +1,13 @@
 # Makefile for generating the HTML documentation
 
 include ../../config.mak
+include xml.mak
 
 # Generated HTML files go here.
 HTML = ../HTML
 
 MAIN_XML_ALL = $(foreach lang,$(DOC_LANG_ALL),$(lang)/main.xml)
-CONFIGURE_GENERATED = html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
+CONFIGURE_GENERATED = html-chunk.xsl html-single.xsl xml.mak xsltproc.sh
 
 all: html-chunked html-single
 
@@ -48,8 +49,8 @@ $(HTML)/$(lang)/index.html:
 $(HTML)/$(lang)/MPlayer.html:
 	./xsltproc.sh $$@ html-single.xsl $$<
 
-xmllint-$(lang): $(lang)/main.xml
-	./xmllint.sh $$<
+xmllint-$(lang):
+	SGML_CATALOG_FILES=$(CATALOG) $(XMLLINT_COMMAND) $(lang)/main.xml
 endef
 
 $(foreach lang, $(DOC_LANG_ALL),$(eval $(lang-def)))
