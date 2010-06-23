@@ -181,13 +181,11 @@ then
   if test -z "$_fake_chunk_xsl"
   then
     echo "Found xsltproc. If it works, it's probably the best choice."
-    # HACK: xslt always need a target file if a doctype is set
-    _xsltcommand="OUTPUT=\"\$1\"; if test -d \"\$OUTPUT\" ; then OUTPUT=\"\$OUTPUT/dummy.html\" ; fi;"
     if test -n "$_catalog"
     then
-      _xsltcommand="$_xsltcommand xsltproc --catalogs -o \$OUTPUT \$2 \$3"
+      _xsltcommand="xsltproc --catalogs -o \$1 \$2 \$3"
     else
-      _xsltcommand="$_xsltcommand xsltproc -o \$OUTPUT \$2 \$3"
+      _xsltcommand="xsltproc -o \$1 \$2 \$3"
     fi
   else
     echo "Found xsltproc but no stylesheets on your system."

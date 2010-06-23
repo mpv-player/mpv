@@ -35,16 +35,16 @@ $(CONFIGURE_GENERATED) $(MAIN_XML_ALL):
 	./configure
 
 define lang-def
-html-chunked-$(lang): $(HTML)/$(lang)/index.html
+html-chunked-$(lang): $(HTML)/$(lang)/dummy.html
 html-single-$(lang):  $(HTML)/$(lang)/MPlayer.html
-$(HTML)/$(lang)/index.html $(HTML)/$(lang)/MPlayer.html: $(lang)/main.xml $(wildcard $(lang)/*.xml) html-common.xsl $(HTML)/$(lang)/default.css
+$(HTML)/$(lang)/dummy.html $(HTML)/$(lang)/MPlayer.html: $(lang)/main.xml $(wildcard $(lang)/*.xml) html-common.xsl $(HTML)/$(lang)/default.css
 
 $(HTML)/$(lang)/default.css:
 	mkdir -p $$(@D)
 	cp -f default.css $$(@D)
 
-$(HTML)/$(lang)/index.html:
-	./xsltproc.sh $$(@D)/ html-chunk.xsl $$<
+$(HTML)/$(lang)/dummy.html:
+	./xsltproc.sh $$@ html-chunk.xsl $$<
 
 $(HTML)/$(lang)/MPlayer.html:
 	./xsltproc.sh $$@ html-single.xsl $$<
