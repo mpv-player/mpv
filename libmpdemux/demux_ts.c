@@ -246,9 +246,46 @@ typedef struct {
 } TS_pids_t;
 
 
-#define IS_AUDIO(x) (((x) == AUDIO_MP2) || ((x) == AUDIO_A52) || ((x) == AUDIO_LPCM_BE) || ((x) == AUDIO_AAC) || ((x) == AUDIO_DTS) || ((x) == AUDIO_TRUEHD) || ((x) == AUDIO_AAC_LATM))
-#define IS_VIDEO(x) (((x) == VIDEO_MPEG1) || ((x) == VIDEO_MPEG2) || ((x) == VIDEO_MPEG4) || ((x) == VIDEO_H264) || ((x) == VIDEO_AVC)  || ((x) == VIDEO_DIRAC) || ((x) == VIDEO_VC1))
-#define IS_SUB(x) (((x) == SPU_DVD) || ((x) == SPU_DVB) || ((x) == SPU_TELETEXT))
+static int IS_AUDIO(es_stream_type_t type)
+{
+	switch (type) {
+	case AUDIO_MP2:
+	case AUDIO_A52:
+	case AUDIO_LPCM_BE:
+	case AUDIO_AAC:
+	case AUDIO_AAC_LATM:
+	case AUDIO_DTS:
+	case AUDIO_TRUEHD:
+		return 1;
+	}
+	return 0;
+}
+
+static int IS_VIDEO(es_stream_type_t type)
+{
+	switch (type) {
+	case VIDEO_MPEG1:
+	case VIDEO_MPEG2:
+	case VIDEO_MPEG4:
+	case VIDEO_H264:
+	case VIDEO_AVC:
+	case VIDEO_DIRAC:
+	case VIDEO_VC1:
+		return 1;
+	}
+	return 0;
+}
+
+static int IS_SUB(es_stream_type_t type)
+{
+	switch (type) {
+	case SPU_DVD:
+	case SPU_DVB:
+	case SPU_TELETEXT:
+		return 1;
+	}
+	return 0;
+}
 
 static int ts_parse(demuxer_t *demuxer, ES_stream_t *es, unsigned char *packet, int probe);
 
