@@ -42,7 +42,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "mpbswap.h"
-
+#include "libavutil/common.h"
 #include "stream/stream.h"
 #include "aviprint.h"
 #include "demuxer.h"
@@ -50,8 +50,6 @@
 #include "demux_real.h"
 
 //#define mp_dbg(mod,lev, args... ) mp_msg_c((mod<<8)|lev, ## args )
-
-#define MKTAG(a, b, c, d) (a | (b << 8) | (c << 16) | (d << 24))
 
 #define MAX_STREAMS 32
 
