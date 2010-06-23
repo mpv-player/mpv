@@ -86,7 +86,8 @@ int32_t NEAACDECAPI NeAACDecInit(NeAACDecHandle hDecoder,
                                  uint8_t *buffer,
                                  uint32_t buffer_size,
                                  uint32_t *samplerate,
-                                 uint8_t *channels);
+                                 uint8_t *channels,
+                                 int      latm_stream);
 
 /* Init the library using a DecoderSpecificInfo */
 int8_t NEAACDECAPI NeAACDecInit2(NeAACDecHandle hDecoder, uint8_t *pBuffer,

@@ -222,7 +222,7 @@ static int latmCheck(latm_header *latm, bitfile *ld)
 
 int32_t NEAACDECAPI NeAACDecInit(NeAACDecHandle hDecoder, uint8_t *buffer,
                                  uint32_t buffer_size,
-                                 uint32_t *samplerate, uint8_t *channels)
+                                 uint32_t *samplerate, uint8_t *channels, int latm_stream)
 {
     uint32_t bits = 0;
     bitfile ld;
@@ -256,6 +256,9 @@ int32_t NEAACDECAPI NeAACDecInit(NeAACDecHandle hDecoder, uint8_t *buffer,
             if(x!=0)
                 hDecoder->latm_header_present = 0;
             return x;
+        }
+        else if (latm_stream) {
+            return -1;
         }
         else
         /* Check if an ADIF header is present */
