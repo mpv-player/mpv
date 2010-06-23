@@ -150,7 +150,7 @@ static int af_open(af_instance_t* af){
 
 // Description of this filter
 af_info_t af_info_extrastereo = {
-    "Extra stereo",
+    "Increase difference between audio channels",
     "extrastereo",
     "Alex Beregszaszi & Pierre Lombard",
     "",
