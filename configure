@@ -5119,7 +5119,7 @@ if test "$_kva" = auto; then
   cat > $TMPC << EOF
 #include <os2.h>
 #include <kva.h>
-int main( void ) { return 0; }
+int main(void) { return 0; }
 EOF
   _kva=no;
   cc_check -lkva && _kva=yes
@@ -5208,7 +5208,7 @@ if test "$_dxr2" = auto; then
   _dxr2=no
   for _inc_tmp in "" -I/usr/local/include/dxr2 -I/usr/include/dxr2; do
     header_check dxr2ioctl.h $_inc_tmp && _dxr2=yes &&
-     extra_cflags="$extra_cflags $_inc_tmp" && break
+      extra_cflags="$extra_cflags $_inc_tmp" && break
   done
 fi
 if test "$_dxr2" = yes; then
@@ -5710,7 +5710,7 @@ if test "$_dart" = auto; then
   cat > $TMPC << EOF
 #include <os2.h>
 #include <dart.h>
-int main( void ) { return 0; }
+int main(void) { return 0; }
 EOF
   _dart=no;
   cc_check -ldart && _dart=yes
@@ -6173,7 +6173,7 @@ if test "$_liblzo" = auto ; then
   _liblzo=no
   cat > $TMPC << EOF
 #include <lzo/lzo1x.h>
-int main(void) { lzo_init();return 0; }
+int main(void) { lzo_init(); return 0; }
 EOF
   cc_check -llzo2 && _liblzo=yes
 fi
