@@ -1614,7 +1614,7 @@ if x86 && test "$_runtime_cpudetection" = no ; then
       cat > $TMPC <<EOF
 #include <stdlib.h>
 #include <signal.h>
-void catch() { exit(1); }
+void catch(void) { exit(1); }
 int main(void) {
   signal(SIGILL, catch);
   __asm__ volatile ("$3":::"memory"); return 0;
@@ -4870,7 +4870,7 @@ if test "$_gif" = yes ; then
   cat > $TMPC << EOF
 #include <signal.h>
 #include <gif_lib.h>
-void catch() { exit(1); }
+void catch(void) { exit(1); }
 int main(void) {
   signal(SIGSEGV, catch);  // catch segfault
   printf("EGifPutExtensionFirst is at address %p\n", EGifPutExtensionFirst);
