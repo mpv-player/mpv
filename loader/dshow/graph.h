@@ -52,6 +52,25 @@ struct FilterGraph {
     HRESULT STDCALL (*SetDefaultSyncSource)(FilterGraph* This);
 };
 
+
+HRESULT STDCALL FilterGraph_AddFilter(FilterGraph* This,
+                                      IBaseFilter* pFilter,
+                                      unsigned short* pName);
+HRESULT STDCALL FilterGraph_RemoveFilter(FilterGraph* This,
+                                         IBaseFilter* pFilter);
+HRESULT STDCALL FilterGraph_EnumFilters(FilterGraph* This,
+                                        IEnumFilters** ppEnum);
+HRESULT STDCALL FilterGraph_FindFilterByName(FilterGraph* This,
+                                             unsigned short* pName,
+                                             IBaseFilter** ppFilter);
+HRESULT STDCALL FilterGraph_ConnectDirect(FilterGraph* This,
+                                          IPin* ppinOut,
+                                          IPin* ppinIn,
+                                          const AM_MEDIA_TYPE* pmt);
+HRESULT STDCALL FilterGraph_Reconnect(FilterGraph* This, IPin* ppin);
+HRESULT STDCALL FilterGraph_Disconnect(FilterGraph* This, IPin* ppin);
+HRESULT STDCALL FilterGraph_SetDefaultSyncSource(FilterGraph* This);
+
 FilterGraph* FilterGraphCreate(void);
 
 #endif /* MPLAYER_GRAPH_H */
