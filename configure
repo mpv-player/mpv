@@ -2601,11 +2601,7 @@ EOF
     if $(cc_check -maltivec -mabi=altivec) ; then
     _altivec_gcc_flags="-maltivec -mabi=altivec"
     # check if <altivec.h> should be included
-    cat > $TMPC << EOF
-#include <altivec.h>
-int main(void) { return 0; }
-EOF
-        if $(cc_check $_altivec_gcc_flags) ; then
+        if $(header_check altivec.h $_altivec_gcc_flags) ; then
             def_altivec_h='#define HAVE_ALTIVEC_H 1'
             inc_altivec_h='#include <altivec.h>'
         else
@@ -3040,11 +3036,8 @@ fi
 echocheck "arpa/inet.h"
 arpa_inet_h=no
 def_arpa_inet_h='#define HAVE_ARPA_INET_H 0'
-cat > $TMPC << EOF
-#include <arpa/inet.h>
-int main(void) { return 0; }
-EOF
-cc_check && arpa_inet_h=yes && def_arpa_inet_h='#define HAVE_ARPA_INET_H 1'
+header_check arpa/inet.h && arpa_inet_h=yes &&
+  def_arpa_inet_h='#define HAVE_ARPA_INET_H 1'
 echores "$arpa_inet_h"
 
 
@@ -3180,21 +3173,13 @@ echores "$_gethostbyname2"
 
 
 echocheck "inttypes.h (required)"
-cat > $TMPC << EOF
-#include <inttypes.h>
-int main(void) { return 0; }
-EOF
 _inttypes=no
-cc_check && _inttypes=yes
+header_check inttypes.h && _inttypes=yes
 echores "$_inttypes"
 
 if test "$_inttypes" = no ; then
-  echocheck "bitypes.h (inttypes.h predecessor)"
-  cat > $TMPC << EOF
-#include <sys/bitypes.h>
-int main(void) { return 0; }
-EOF
-  cc_check && _inttypes=yes
+  echocheck "sys/bitypes.h (inttypes.h predecessor)"
+  header_check sys/bitypes.h && _inttypes=yes
   if test "$_inttypes" = yes ; then
     die "You don't have inttypes.h, but sys/bitypes.h is present. Please copy etc/inttypes.h into the include path, and re-run configure."
   else
@@ -3227,12 +3212,8 @@ echores "$_fast_inttypes"
 
 
 echocheck "malloc.h"
-cat > $TMPC << EOF
-#include <malloc.h>
-int main(void) { (void) malloc(0); return 0; }
-EOF
 _malloc=no
-cc_check && _malloc=yes
+header_check malloc.h && _malloc=yes
 if test "$_malloc" = yes ; then
   def_malloc_h='#define HAVE_MALLOC_H 1'
 else
@@ -3474,11 +3455,8 @@ _soundcard_h=no
 def_soundcard_h='#undef HAVE_SOUNDCARD_H'
 def_sys_soundcard_h='#undef HAVE_SYS_SOUNDCARD_H'
 for _soundcard_header in "sys/soundcard.h" "soundcard.h"; do
-  cat > $TMPC << EOF
-#include <$_soundcard_header>
-int main(void) { return 0; }
-EOF
-  cc_check && _soundcard_h=yes && res_comment="$_soundcard_header" && break
+  header_check $_soundcard_header && _soundcard_h=yes &&
+    res_comment="$_soundcard_header" && break
 done
 
 if test "$_soundcard_h" = yes ; then
@@ -3492,12 +3470,8 @@ echores "$_soundcard_h"
 
 
 echocheck "sys/dvdio.h"
-cat > $TMPC << EOF
-#include <sys/dvdio.h>
-int main(void) { return 0; }
-EOF
 _dvdio=no
-cc_check && _dvdio=yes
+header_check sys/dvdio.h && _dvdio=yes
 if test "$_dvdio" = yes ; then
   def_dvdio='#define DVD_STRUCT_IN_SYS_DVDIO_H 1'
 else
@@ -3507,12 +3481,8 @@ echores "$_dvdio"
 
 
 echocheck "sys/cdio.h"
-cat > $TMPC << EOF
-#include <sys/cdio.h>
-int main(void) { return 0; }
-EOF
 _cdio=no
-cc_check && _cdio=yes
+header_check sys/cdio.h && _cdio=yes
 if test "$_cdio" = yes ; then
   def_cdio='#define DVD_STRUCT_IN_SYS_CDIO_H 1'
 else
@@ -3522,12 +3492,8 @@ echores "$_cdio"
 
 
 echocheck "linux/cdrom.h"
-cat > $TMPC << EOF
-#include <linux/cdrom.h>
-int main(void) { return 0; }
-EOF
 _cdrom=no
-cc_check && _cdrom=yes
+header_check linux/cdrom.h && _cdrom=yes
 if test "$_cdrom" = yes ; then
   def_cdrom='#define DVD_STRUCT_IN_LINUX_CDROM_H 1'
 else
@@ -3537,12 +3503,8 @@ echores "$_cdrom"
 
 
 echocheck "dvd.h"
-cat > $TMPC << EOF
-#include <dvd.h>
-int main(void) { return 0; }
-EOF
 _dvd=no
-cc_check && _dvd=yes
+header_check dvd.h && _dvd=yes
 if test "$_dvd" = yes ; then
   def_dvd='#define DVD_STRUCT_IN_DVD_H 1'
 else
@@ -3553,12 +3515,8 @@ echores "$_dvd"
 
 if bsdos; then
 echocheck "BSDI dvd.h"
-cat > $TMPC << EOF
-#include <dvd.h>
-int main(void) { return 0; }
-EOF
 _bsdi_dvd=no
-cc_check && _bsdi_dvd=yes
+header_check dvd.h && _bsdi_dvd=yes
 if test "$_bsdi_dvd" = yes ; then
   def_bsdi_dvd='#define DVD_STRUCT_IN_BSDI_DVDIOCTL_DVD_H 1'
 else
@@ -3571,12 +3529,8 @@ fi #if bsdos
 if hpux; then
 # also used by AIX, but AIX does not support VCD and/or libdvdread
 echocheck "HP-UX SCSI header"
-cat > $TMPC << EOF
-#include <sys/scsi.h>
-int main(void) { return 0; }
-EOF
 _hpux_scsi_h=no
-cc_check && _hpux_scsi_h=yes
+header_check sys/scsi.h && _hpux_scsi_h=yes
 if test "$_hpux_scsi_h" = yes ; then
   def_hpux_scsi_h='#define HPUX_SCTL_IO 1'
 else
@@ -3588,13 +3542,9 @@ fi #if hpux
 
 if sunos; then
 echocheck "userspace SCSI headers (Solaris)"
-cat > $TMPC << EOF
-#include <sys/scsi/scsi_types.h>
-#include <sys/scsi/impl/uscsi.h>
-int main(void) { return 0; }
-EOF
 _sol_scsi_h=no
-cc_check && _sol_scsi_h=yes
+header_check sys/scsi/scsi_types.h && header_check sys/scsi/impl/uscsi.h &&
+   _sol_scsi_h=yes
 if test "$_sol_scsi_h" = yes ; then
   def_sol_scsi_h='#define SOLARIS_USCSI 1'
 else
@@ -3633,11 +3583,8 @@ def_termios_sys_h='#undef HAVE_SYS_TERMIOS_H'
 if test "$_termios" = auto ; then
   _termios=no
   for _termios_header in "termios.h" "sys/termios.h"; do
-  cat > $TMPC <<EOF
-#include <$_termios_header>
-int main(void) { return 0; }
-EOF
-  cc_check && _termios=yes && res_comment="using $_termios_header" && break
+  header_check $_termios_header && _termios=yes &&
+    res_comment="using $_termios_header" && break
 done
 fi
 
@@ -4650,12 +4597,8 @@ echores "$_caca"
 
 echocheck "SVGAlib"
 if test "$_svga" = auto ; then
-  cat > $TMPC << EOF
-#include <vga.h>
-int main(void) { return 0; }
-EOF
   _svga=no
-  cc_check -lvga $_ld_lm && _svga=yes
+  header_check vga.h -lvga $_ld_lm && _svga=yes
 fi
 if test "$_svga" = yes ; then
   def_svga='#define CONFIG_SVGALIB 1'
@@ -5263,12 +5206,8 @@ fi #if win32; then
 echocheck "DXR2"
 if test "$_dxr2" = auto; then
   _dxr2=no
-    cat > $TMPC << EOF
-#include <dxr2ioctl.h>
-int main(void) { return 0; }
-EOF
   for _inc_tmp in "" -I/usr/local/include/dxr2 -I/usr/include/dxr2; do
-    cc_check $_inc_tmp && _dxr2=yes && \
+    header_check dxr2ioctl.h $_inc_tmp && _dxr2=yes &&
      extra_cflags="$extra_cflags $_inc_tmp" && break
   done
 fi
@@ -5285,12 +5224,8 @@ echores "$_dxr2"
 
 echocheck "DXR3/H+"
 if test "$_dxr3" = auto ; then
-  cat > $TMPC << EOF
-#include <linux/em8300.h>
-int main(void) { return 0; }
-EOF
   _dxr3=no
-  cc_check && _dxr3=yes
+  header_check linux/em8300.h && _dxr3=yes
 fi
 if test "$_dxr3" = yes ; then
   def_dxr3='#define CONFIG_DXR3 1'
@@ -5426,13 +5361,8 @@ echocheck "aRts"
 if test "$_arts" = auto ; then
   _arts=no
   if ( artsc-config --version ) >> "$TMPLOG" 2>&1 ; then
-
-cat > $TMPC << EOF
-#include <artsc.h>
-int main(void) { return 0; }
-EOF
-cc_check $(artsc-config --libs) $(artsc-config --cflags) && _arts=yes
-
+    header_check artsc.h $(artsc-config --libs) $(artsc-config --cflags) &&
+      _arts=yes
   fi
 fi
 
@@ -5484,12 +5414,8 @@ fi
 
 echocheck "NAS"
 if test "$_nas" = auto ; then
-  cat > $TMPC << EOF
-#include <audio/audiolib.h>
-int main(void) { return 0; }
-EOF
   _nas=no
-  cc_check $_ld_lm -laudio -lXt && _nas=yes
+  header_check audio/audiolib.h $_ld_lm -laudio -lXt && _nas=yes
 fi
 if test "$_nas" = yes ; then
   def_nas='#define CONFIG_NAS 1'
@@ -5506,13 +5432,8 @@ echocheck "pulse"
 if test "$_pulse" = auto ; then
   _pulse=no
   if $_pkg_config --exists 'libpulse >= 0.9' ; then
-
-cat > $TMPC << EOF
-#include <pulse/pulseaudio.h>
-int main(void) { return 0; }
-EOF
-cc_check $($_pkg_config --libs --cflags libpulse) && _pulse=yes
-
+    header_check pulse/pulseaudio.h $($_pkg_config --libs --cflags libpulse) &&
+      _pulse=yes
   fi
 fi
 echores "$_pulse"
@@ -5748,13 +5669,8 @@ fi #if darwin
 if irix; then
 echocheck "SGI audio"
 if test "$_sgiaudio" = auto ; then
-  # check for SGI audio
-  cat > $TMPC << EOF
-#include <dmedia/audio.h>
-int main(void) { return 0; }
-EOF
   _sgiaudio=no
-  cc_check && _sgiaudio=yes
+  header_check dmedia/audio.h && _sgiaudio=yes
 fi
 if test "$_sgiaudio" = "yes" ; then
   def_sgiaudio='#define CONFIG_SGI_AUDIO 1'
@@ -5848,11 +5764,7 @@ if test "$_vcd" = auto; then
   if linux || freebsd || netbsd || openbsd || dragonfly || bsdos || darwin || sunos || os2; then
     _vcd=yes
   elif mingw32; then
-    cat > $TMPC << EOF
-#include <ddk/ntddcdrm.h>
-int main(void) { return 0; }
-EOF
-  cc_check && _vcd=yes
+  header_check ddk/ntddcdrm.h && _vcd=yes
   fi
 fi
 if test "$_vcd" = yes; then
@@ -6279,11 +6191,7 @@ echores "$_liblzo"
 echocheck "mad support"
 if test "$_mad" = auto ; then
   _mad=no
-  cat > $TMPC << EOF
-#include <mad.h>
-int main(void) { return 0; }
-EOF
-  cc_check -lmad && _mad=yes
+  header_check mad.h -lmad && _mad=yes
 fi
 if test "$_mad" = yes ; then
   def_mad='#define CONFIG_LIBMAD 1'
@@ -7348,11 +7256,7 @@ echocheck "Video 4 Linux TV interface"
 if test "$_tv_v4l1" = auto ; then
   _tv_v4l1=no
   if test "$_tv" = yes && linux ; then
-    cat > $TMPC <<EOF
-#include <linux/videodev.h>
-int main(void) { return 0; }
-EOF
-    cc_check && _tv_v4l1=yes
+    header_check linux/videodev.h && _tv_v4l1=yes
   fi
 fi
 if test "$_tv_v4l1" = yes ; then
@@ -7372,11 +7276,7 @@ echocheck "Video 4 Linux 2 TV interface"
 if test "$_tv_v4l2" = auto ; then
   _tv_v4l2=no
   if test "$_tv" = yes && linux ; then
-    cat > $TMPC <<EOF
-#include <linux/videodev2.h>
-int main(void) { return 0; }
-EOF
-    cc_check && _tv_v4l2=yes
+    header_check linux/videodev2.h && _tv_v4l2=yes
   fi
 fi
 if test "$_tv_v4l2" = yes ; then
@@ -7419,11 +7319,7 @@ echocheck "Video 4 Linux 2 Radio interface"
 if test "$_radio_v4l2" = auto ; then
   _radio_v4l2=no
   if test "$_radio" = yes && linux ; then
-    cat > $TMPC <<EOF
-#include <linux/videodev2.h>
-int main(void) { return 0; }
-EOF
-    cc_check && _radio_v4l2=yes
+    header_check linux/videodev2.h && _radio_v4l2=yes
   fi
 fi
 if test "$_radio_v4l2" = yes ; then
@@ -7437,11 +7333,7 @@ echocheck "Video 4 Linux Radio interface"
 if test "$_radio_v4l" = auto ; then
   _radio_v4l=no
   if test "$_radio" = yes && linux ; then
-    cat > $TMPC <<EOF
-#include <linux/videodev.h>
-int main(void) { return 0; }
-EOF
-    cc_check && _radio_v4l=yes
+    header_check linux/videodev.h && _radio_v4l=yes
   fi
 fi
 if test "$_radio_v4l" = yes ; then
@@ -7641,11 +7533,7 @@ echores "$_joystick"
 echocheck "lirc"
 if test "$_lirc" = auto ; then
   _lirc=no
-  cat > $TMPC <<EOF
-#include <lirc/lirc_client.h>
-int main(void) { return 0; }
-EOF
-  cc_check -llirc_client && _lirc=yes
+  header_check lirc/lirc_client.h -llirc_client && _lirc=yes
 fi
 if test "$_lirc" = yes ; then
   def_lirc='#define CONFIG_LIRC 1'
@@ -7658,11 +7546,7 @@ echores "$_lirc"
 echocheck "lircc"
 if test "$_lircc" = auto ; then
   _lircc=no
-  cat > $TMPC <<EOF
-#include <lirc/lircc.h>
-int main(void) { return 0; }
-EOF
-  cc_check -llircc && _lircc=yes
+  header_check lirc/lircc.h -llircc && _lircc=yes
 fi
 if test "$_lircc" = yes ; then
   def_lircc='#define CONFIG_LIRCC 1'
