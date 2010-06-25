@@ -833,12 +833,11 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data) {
 
             /* Activate filter (if it isn't already :) ) */
 
-            if ( (pdes->activate) && (setup->activated == 0) ) {
+            if (pdes->activate && !setup->activated && i % setup->ninputs == 0)
                 pdes->activate(setup->chhandles[i]);
-                setup->activated = 1;
-            }
 
         } /* All channels/filters done! except for... */
+        setup->activated = 1;
 
         /* Stereo effect with one channel left. Use same buffer for left
          * and right. connect it to the second port.
