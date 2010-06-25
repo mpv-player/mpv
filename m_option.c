@@ -531,10 +531,12 @@ static int str_list_add(char** add, int n,void* dst,int pre) {
   lst = realloc(lst,(n+ln+1)*sizeof(char*));
 
   if(pre) {
-    memmove(&lst[n],lst,(ln+1)*sizeof(char*));
+    memmove(&lst[n],lst,ln*sizeof(char*));
     memcpy(lst,add,n*sizeof(char*));
   } else
-    memcpy(&lst[ln],add,(n+1)*sizeof(char*));
+    memcpy(&lst[ln],add,n*sizeof(char*));
+  // (re-)add NULL-termination
+  lst[ln+n] = NULL;
 
   free(add);
 
