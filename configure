@@ -1490,6 +1490,15 @@ else
     echores "$cc_version"
     break
     fi
+    cc_name_tmp=$($_cc -v 2>&1 | head -n 1 | cut -d ' ' -f 1)
+    if test "$cc_name_tmp" = "clang"; then
+      echocheck "$_cc version"
+      cc_vendor=clang
+      cc_version=$($_cc -dumpversion 2>&1)
+      res_comment="experimental support only"
+      echores "clang $cc_version"
+      break
+    fi
     cc_name_tmp=$($_cc -V 2>&1 | head -n 1 | cut -d ' ' -f 2,3)
     if test "$cc_name_tmp" = "Sun C"; then
       echocheck "$_cc version"
@@ -1813,7 +1822,7 @@ cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
   if test "$_runtime_cpudetection" = no ; then
-    if test $cc_vendor != "intel" ; then
+    if test $cc_vendor != "intel" && test $cc_vendor != "clang" ; then
       cc_check -march=native && proc=native
     fi
     if test "$proc" = "amdfam10"; then
@@ -1966,7 +1975,7 @@ int main(void) { return 0; }
 EOF
     # This is a stripped-down version of the i386 fallback.
     if test "$_runtime_cpudetection" = no ; then
-      if test $cc_vendor != "intel" ; then
+      if test $cc_vendor != "intel" && test $cc_vendor != "clang" ; then
         cc_check -march=native && proc=native
       fi
       # --- AMD processors ---
