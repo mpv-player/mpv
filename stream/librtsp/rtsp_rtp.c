@@ -93,7 +93,7 @@ rtcp_send_rr (rtsp_t *s, struct rtp_rtsp_session_t *st)
   {
     char rtcp_content[RTCP_RR_SIZE];
     strcpy (rtcp_content, RTCP_RR);
-    send (st->rtcp_socket, rtcp_content, RTCP_RR_SIZE, 0);
+    send (st->rtcp_socket, rtcp_content, RTCP_RR_SIZE, DEFAULT_SEND_FLAGS);
 
     /* ping RTSP server to keep connection alive.
        we use OPTIONS instead of PING as not all servers support it */

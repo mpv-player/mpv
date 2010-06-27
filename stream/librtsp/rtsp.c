@@ -51,6 +51,7 @@
 #include "rtsp.h"
 #include "rtsp_session.h"
 #include "osdep/timer.h"
+#include "stream/network.h"
 
 /*
 #define LOG
@@ -67,7 +68,7 @@ static int write_stream(int s, const char *buf, int len) {
   while (total < len){
     int n;
 
-    n = send (s, &buf[total], len - total, 0);
+    n = send (s, &buf[total], len - total, DEFAULT_SEND_FLAGS);
 
     if (n > 0)
       total += n;

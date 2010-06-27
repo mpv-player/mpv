@@ -727,7 +727,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 		http_hdr = asf_http_request( stream->streaming_ctrl );
 		mp_msg(MSGT_NETWORK,MSGL_DBG2,"Request [%s]\n", http_hdr->buffer );
 		for(i=0; i < (int)http_hdr->buffer_size ; ) {
-			int r = send( fd, http_hdr->buffer+i, http_hdr->buffer_size-i, 0 );
+			int r = send( fd, http_hdr->buffer+i, http_hdr->buffer_size-i, DEFAULT_SEND_FLAGS );
 			if(r <0) {
 				mp_tmsg(MSGT_NETWORK,MSGL_ERR,"socket write error: %s\n",strerror(errno));
 				goto err_out;

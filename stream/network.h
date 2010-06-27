@@ -39,6 +39,12 @@
 #include "url.h"
 #include "http.h"
 
+#ifdef MSG_NOSIGNAL
+#define DEFAULT_SEND_FLAGS MSG_NOSIGNAL
+#else
+#define DEFAULT_SEND_FLAGS 0
+#endif
+
 #if !HAVE_CLOSESOCKET
 #define closesocket close
 #endif

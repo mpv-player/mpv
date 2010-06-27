@@ -124,7 +124,7 @@ static mp_net_stream_packet_t* read_packet(int fd) {
 static int net_write(int fd, char* buf, int len) {
   int w;
   while(len) {
-    w = send(fd,buf,len,0);
+    w = send(fd,buf,len,DEFAULT_SEND_FLAGS);
     if(w <= 0) {
       if(errno == EINTR) continue;
       if(w < 0)
