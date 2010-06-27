@@ -1473,22 +1473,22 @@ else
   for _cc in "$_cc" gcc cc ; do
     cc_name_tmp=$($_cc -v 2>&1 | tail -n 1 | cut -d ' ' -f 1)
     if test "$cc_name_tmp" = "gcc"; then
-    cc_name=$cc_name_tmp
-    echocheck "$_cc version"
-    cc_vendor=gnu
-    cc_version=$($_cc -dumpversion 2>&1)
-    case $cc_version in
-      2.96*)
-        cc_fail=yes
-        ;;
-      *)
-        _cc_major=$(echo $cc_version | cut -d '.' -f 1)
-        _cc_minor=$(echo $cc_version | cut -d '.' -f 2)
-        _cc_mini=$(echo $cc_version | cut -d '.' -f 3)
-        ;;
-    esac
-    echores "$cc_version"
-    break
+      cc_name=$cc_name_tmp
+      echocheck "$_cc version"
+      cc_vendor=gnu
+      cc_version=$($_cc -dumpversion 2>&1)
+      case $cc_version in
+        2.96*)
+          cc_fail=yes
+          ;;
+        *)
+          _cc_major=$(echo $cc_version | cut -d '.' -f 1)
+          _cc_minor=$(echo $cc_version | cut -d '.' -f 2)
+          _cc_mini=$(echo $cc_version | cut -d '.' -f 3)
+          ;;
+      esac
+      echores "$cc_version"
+      break
     fi
     cc_name_tmp=$($_cc -v 2>&1 | head -n 1 | cut -d ' ' -f 1)
     if test "$cc_name_tmp" = "clang"; then
