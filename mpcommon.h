@@ -27,7 +27,11 @@ extern double sub_last_pts;
 extern struct ass_track *ass_track;
 extern subtitle *vo_sub_last;
 
+extern const char *mencoder_version;
+extern const char *mplayer_version;
+
 struct MPContext;
+
 void print_version(const char* name);
 void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
                       sh_video_t *sh_video, double refpts, double sub_offset,

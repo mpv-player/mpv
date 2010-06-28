@@ -42,14 +42,12 @@
 #include "stream.h"
 #include "libmpdemux/demuxer.h"
 #include "m_config.h"
-
+#include "mpcommon.h"
 #include "network.h"
 #include "tcp.h"
 #include "http.h"
 #include "cookies.h"
 #include "url.h"
-
-#include "version.h"
 
 extern int stream_cache_size;
 
@@ -219,12 +217,10 @@ http_send_request( URL_t *url, off_t pos ) {
 	    snprintf(str, 256, "Host: %s", server_url->hostname );
 	http_set_field( http_hdr, str);
 	if (network_useragent)
-	{
 	    snprintf(str, 256, "User-Agent: %s", network_useragent);
-	    http_set_field(http_hdr, str);
-	}
 	else
-	    http_set_field( http_hdr, "User-Agent: MPlayer/"VERSION);
+	    snprintf(str, 256, "User-Agent: %s", mplayer_version);
+        http_set_field(http_hdr, str);
 
 	if (network_referrer) {
 	    char *referrer = NULL;

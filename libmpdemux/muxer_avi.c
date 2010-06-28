@@ -24,8 +24,7 @@
 #include <limits.h>
 
 #include "config.h"
-#include "version.h"
-
+#include "mpcommon.h"
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
@@ -501,7 +500,7 @@ static void avifile_write_header(muxer_t *muxer){
 // ============= INFO ===============
 // always include software info
 info[0].id=mmioFOURCC('I','S','F','T'); // Software:
-info[0].text="MEncoder " VERSION;
+info[0].text=mencoder_version;
 // include any optional strings
 i=1;
 if(info_name!=NULL){

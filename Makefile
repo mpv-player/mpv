@@ -797,7 +797,7 @@ locale/%/LC_MESSAGES/mplayer.mo: po/%.po
 
 # Make sure all generated header files are created.
 codec-cfg.d codec-cfg.o: codecs.conf.h
-$(call ADDSUFFIXES,.d .o,mpcommon vobsub stream/stream_cddb stream/network libmpdemux/muxer_avi osdep/mplayer.rc): version.h
+$(call ADDSUFFIXES,.d .o,mpcommon osdep/mplayer.rc): version.h
 
 # Files that depend on libswscale internals
 libvo/vo_mga.o libvo/vo_xmga.o libmpcodecs/vf_palette.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
