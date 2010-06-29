@@ -178,6 +178,10 @@ static int lavf_check_file(demuxer_t *demuxer){
         }
         probe_data_size += read_size;
         avpd.filename= demuxer->stream->url;
+        if (!avpd.filename) {
+            mp_msg(MSGT_DEMUX, MSGL_WARN, "Stream url is not set!\n");
+            avpd.filename = "";
+        }
         if (!strncmp(avpd.filename, "ffmpeg://", 9))
             avpd.filename += 9;
         avpd.buf_size= probe_data_size;
