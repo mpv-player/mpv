@@ -5039,7 +5039,7 @@ if (test "$_x11" = yes || test "$_sdl" = yes || win32) && test "$_gl" != no ; th
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 #endif
-int main(void) {
+int main(int argc, char *argv[]) {
 #ifdef GL_WIN32
   HDC dc;
   wglCreateContext(dc);
