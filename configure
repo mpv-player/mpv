@@ -322,6 +322,7 @@ Codecs:
   --disable-ladspa          disable LADSPA plugin support [autodetect]
   --disable-libbs2b         disable libbs2b audio filter support [autodetect]
   --disable-libdv           disable libdv 0.9.5 en/decoding support [autodetect]
+  --disable-mpg123          disable libmpg123 MP3 decoding support [autodetect]
   --disable-mad             disable libmad (MPEG audio) support [autodetect]
   --disable-mp3lame         disable LAME MP3 encoding support [autodetect]
   --disable-toolame         disable Toolame (MPEG layer 2) encoding [autodetect]
@@ -586,6 +587,7 @@ _tremor_low=no
 _libvorbis=auto
 _speex=auto
 _theora=auto
+_mpg123=auto
 _mp3lib=auto
 _liba52=auto
 _libdca=auto
@@ -969,6 +971,8 @@ for ac_option do
   --disable-tremor-low) _tremor_low=no  ;;
   --enable-theora)      _theora=yes     ;;
   --disable-theora)     _theora=no      ;;
+  --enable-mpg123)      _mpg123=yes     ;;
+  --disable-mpg123)     _mpg123=no      ;;
   --enable-mp3lib)      _mp3lib=yes     ;;
   --disable-mp3lib)     _mp3lib=no      ;;
   --enable-liba52)      _liba52=yes     ;;
@@ -6405,6 +6409,25 @@ else
 fi
 echores "$_mp3lib"
 
+# Any version of libmpg123 shall be fine.
+echocheck "mpg123 support"
+def_mpg123='#undef CONFIG_MPG123'
+if test "$_mpg123" = auto; then
+  _mpg123=no
+  cat > $TMPC <<EOF
+#include <mpg123.h>
+int main(void){ mpg123_init(); return 0; }
+EOF
+  cc_check -lmpg123 && _mpg123=yes && extra_ldflags="$extra_ldflags -lmpg123"
+fi
+if test "$_mpg123" = yes ; then
+  def_mpg123='#define CONFIG_MPG123 1'
+  codecmodules="mpg123 $codecmodules"
+else
+  nocodecmodules="mpg123 $nocodecmodules"
+fi
+echores "$_mpg123"
+
 echocheck "liba52 support"
 def_liba52='#undef CONFIG_LIBA52'
 if test "$_liba52" = auto ; then
@@ -7831,6 +7854,7 @@ MGA = $_mga
 MNG = $_mng
 MP3LAME = $_mp3lame
 MP3LIB = $_mp3lib
+MPG123 = $_mpg123
 MUSEPACK = $_musepack
 NAS = $_nas
 NATIVE_RTSP = $_native_rtsp
@@ -8149,6 +8173,7 @@ $def_mp3lame
 $def_mp3lame_preset
 $def_mp3lame_preset_medium
 $def_mp3lib
+$def_mpg123
 $def_musepack
 $def_speex
 $def_theora

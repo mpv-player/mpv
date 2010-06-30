@@ -175,6 +175,7 @@ SRCS_COMMON-$(LIVE555)               += libmpdemux/demux_rtp.cpp \
                                         stream/stream_live555.c
 SRCS_COMMON-$(MACOSX_FINDER)         += osdep/macosx_finder_args.c
 SRCS_COMMON-$(MNG)                   += libmpdemux/demux_mng.c
+SRCS_COMMON-$(MPG123)                += libmpcodecs/ad_mpg123.c
 
 SRCS_MP3LIB-X86-$(HAVE_AMD3DNOW)     += mp3lib/dct36_3dnow.c \
                                         mp3lib/dct64_3dnow.c
