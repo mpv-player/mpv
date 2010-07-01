@@ -197,9 +197,10 @@ static void redraw(void);
 static void resize(int x,int y){
   mp_msg(MSGT_VO, MSGL_V, "[gl] Resize: %dx%d\n",x,y);
   if (WinID >= 0) {
-    int top = 0, left = 0, w = x, h = y;
-    geometry(&top, &left, &w, &h, vo_dwidth, vo_dheight);
-    mpglViewport(top, left, w, h);
+    int left = 0, top = 0, w = x, h = y;
+    geometry(&left, &top, &w, &h, vo_dwidth, vo_dheight);
+    top = y - h - top;
+    mpglViewport(left, top, w, h);
   } else
     mpglViewport( 0, 0, x, y );
 
