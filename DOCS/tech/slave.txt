@@ -41,6 +41,8 @@ Various tips and tricks (please help expand it!):
     get_property pause
   to switch to the next file. It avoids audio playback starting to play
   the old file for a short time before switching to the new one.
+- To ensure the user can't control MPlayer "behind your back" use
+  something like -input nodefault-bindings -noconfig all
 
 
 Available commands ('mplayer -input cmdlist' will print a list):
