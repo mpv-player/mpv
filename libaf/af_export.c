@@ -55,7 +55,7 @@ typedef struct af_export_s
   int 	wi;  		// Write index
   int	fd;           	// File descriptor to shared memory area
   char* filename;      	// File to export data
-  void* mmap_area;     	// MMap shared area
+  uint8_t *mmap_area;  	// MMap shared area
 } af_export_t;
 
 
@@ -98,7 +98,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if(NULL == s->buf[0])
       mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] Out of memory\n");
     for(i = 1; i < af->data->nch; i++)
-      s->buf[i] = s->buf[0] + i*s->sz*af->data->bps;
+      s->buf[i] = (uint8_t *)s->buf[0] + i*s->sz*af->data->bps;
 
     // Init memory mapping
     s->fd = open(s->filename, O_RDWR | O_CREAT | O_TRUNC, 0640);
