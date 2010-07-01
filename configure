@@ -81,6 +81,15 @@ cxx_check() {
   compile_check $TMPCPP $@ -lstdc++
 }
 
+function_check() {
+  cat > $TMPC << EOF
+#include <$1>
+int main(void) { $2; }
+EOF
+  shift
+  compile_check $TMPC $@
+}
+
 header_check() {
   cat > $TMPC << EOF
 #include <$1>
