@@ -763,6 +763,15 @@ void vo_x11_uninit(struct vo *vo)
     }
 }
 
+static int check_resize(struct vo *vo)
+{
+    int old_w = vo->dwidth, old_h = vo->dheight;
+    vo_x11_update_geometry(vo);
+    if (vo->dwidth != old_w || vo->dheight != old_h)
+        return VO_EVENT_RESIZE;
+    return 0;
+}
+
 int vo_x11_check_events(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -780,6 +789,8 @@ int vo_x11_check_events(struct vo *vo)
         x11->mouse_waiting_hide = 0;
     }
 
+    if (WinID > 0)
+        ret |= check_resize(vo);
     while (XPending(display))
     {
         XNextEvent(display, &Event);
@@ -792,12 +803,7 @@ int vo_x11_check_events(struct vo *vo)
             case ConfigureNotify:
                 if (x11->window == None)
                     break;
-                {
-                    int old_w = vo->dwidth, old_h = vo->dheight;
-                    vo_x11_update_geometry(vo);
-                    if (vo->dwidth != old_w || vo->dheight != old_h)
-                        ret |= VO_EVENT_RESIZE;
-                }
+                ret |= check_resize(vo);
                 break;
             case KeyPress:
                 {
@@ -1044,8 +1050,15 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
       XChangeWindowAttributes(mDisplay, x11->window, xswamask, &xswa);
       XInstallColormap(mDisplay, col_map);
     }
-    if (WinID) vo_x11_update_geometry(vo);
-    vo_x11_selectinput_witherr(mDisplay, x11->window,
+    if (WinID) {
+        vo_x11_update_geometry(vo);
+        // Expose events can only really be handled by us, so request them.
+        vo_x11_selectinput_witherr(mDisplay, x11->window, ExposureMask);
+    } else
+        // Do not capture events since it might break the parent application
+        // if it relies on events being forwarded to the parent of WinID.
+        // It also is consistent with the w32_common.c code.
+        vo_x11_selectinput_witherr(mDisplay, x11->window,
           StructureNotifyMask | KeyPressMask | PointerMotionMask |
           ButtonPressMask | ButtonReleaseMask | ExposureMask);
     goto final;
