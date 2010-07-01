@@ -126,6 +126,7 @@ static int init(sh_audio_t *sh)
     faacDecSetConfiguration(faac_hdec, faac_conf);
 
     sh->a_in_buffer_len = demux_read_data(sh->ds, sh->a_in_buffer, sh->a_in_buffer_size);
+#if CONFIG_FAAD_INTERNAL
     /* init the codec, look for LATM */
     faac_init = faacDecInit(faac_hdec, sh->a_in_buffer,
                             sh->a_in_buffer_len, &faac_samplerate, &faac_channels,1);
@@ -144,6 +145,11 @@ static int init(sh_audio_t *sh)
             if (faac_init >= 0) break;
         }
     }
+#else
+    /* external faad does not have latm lookup support */
+    faac_init = faacDecInit(faac_hdec, sh->a_in_buffer,
+                            sh->a_in_buffer_len, &faac_samplerate, &faac_channels);
+#endif
 
     if (faac_init < 0) {
     pos = aac_probe(sh->a_in_buffer, sh->a_in_buffer_len);
@@ -157,8 +163,13 @@ static int init(sh_audio_t *sh)
     }
 
     /* init the codec */
+#if CONFIG_FAAD_INTERNAL
     faac_init = faacDecInit(faac_hdec, sh->a_in_buffer,
           sh->a_in_buffer_len, &faac_samplerate, &faac_channels,0);
+#else
+    faac_init = faacDecInit(faac_hdec, sh->a_in_buffer,
+          sh->a_in_buffer_len, &faac_samplerate, &faac_channels);
+#endif
     }
 
     sh->a_in_buffer_len -= (faac_init > 0)?faac_init:0; // how many bytes init consumed
