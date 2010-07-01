@@ -156,7 +156,7 @@ static void vo_hidecursor(Display * disp, Window win)
     colormap = DefaultColormap(disp, DefaultScreen(disp));
     if ( !XAllocNamedColor(disp, colormap, "black", &black, &dummy) )
     {
-      return; // color alloc failed, give up
+        return; // color alloc failed, give up
     }
     bm_no = XCreateBitmapFromData(disp, win, bm_no_data, 8, 8);
     no_ptr = XCreatePixmapCursor(disp, bm_no, bm_no, &black, &black, 0, 0);
@@ -388,8 +388,8 @@ int vo_init(struct vo *vo)
     XWindowAttributes attribs;
     char *dispName;
 
-	if (vo_rootwin)
-		WinID = 0; // use root window
+    if (vo_rootwin)
+        WinID = 0; // use root window
 
     if (x11->depthonscreen)
     {
@@ -907,13 +907,13 @@ static void vo_x11_nofs_sizepos(struct vo *vo, int x, int y,
   }
   else
   {
-   vo->dwidth = width;
-   vo->dheight = height;
-   if (vo->opts->force_window_position)
-       XMoveResizeWindow(vo->x11->display, vo->x11->window, x, y, width,
-                         height);
-   else
-       XResizeWindow(vo->x11->display, vo->x11->window, width, height);
+    vo->dwidth = width;
+    vo->dheight = height;
+    if (vo->opts->force_window_position)
+        XMoveResizeWindow(vo->x11->display, vo->x11->window, x, y, width,
+                          height);
+    else
+        XResizeWindow(vo->x11->display, vo->x11->window, width, height);
   }
 }
 
