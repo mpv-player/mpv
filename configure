@@ -81,6 +81,13 @@ cxx_check() {
   compile_check $TMPCPP $@ -lstdc++
 }
 
+cflag_check() {
+  cat > $TMPC << EOF
+int main(void) { return 0; }
+EOF
+  compile_check $TMPC $@
+}
+
 function_check() {
   cat > $TMPC << EOF
 #include <$1>
@@ -1985,39 +1992,36 @@ EOF
     fi # test "$_runtime_cpudetection" = no
 
     echocheck "GCC & CPU optimization abilities"
-cat > $TMPC << EOF
-int main(void) { return 0; }
-EOF
     # This is a stripped-down version of the i386 fallback.
     if test "$_runtime_cpudetection" = no ; then
       if test $cc_vendor != "intel" && test $cc_vendor != "clang" ; then
-        cc_check -march=native && proc=native
+        cflag_check -march=native && proc=native
       fi
       # --- AMD processors ---
       if test "$proc" = "amdfam10"; then
-        cc_check -march=$proc $cpuopt=$proc || proc=k8
+        cflag_check -march=$proc $cpuopt=$proc || proc=k8
       fi
       if test "$proc" = "k8"; then
-        cc_check -march=$proc $cpuopt=$proc || proc=athlon-xp
+        cflag_check -march=$proc $cpuopt=$proc || proc=athlon-xp
       fi
       # This will fail if gcc version < 3.3, which is ok because earlier
       # versions don't really support 64-bit on amd64.
       # Is this a valid assumption? -Corey
       if test "$proc" = "athlon-xp"; then
-        cc_check -march=$proc $cpuopt=$proc || proc=error
+        cflag_check -march=$proc $cpuopt=$proc || proc=error
       fi
       # --- Intel processors ---
       if test "$proc" = "core2"; then
-        cc_check -march=$proc $cpuopt=$proc || proc=x86-64
+        cflag_check -march=$proc $cpuopt=$proc || proc=x86-64
       fi
       if test "$proc" = "x86-64"; then
-        cc_check -march=$proc $cpuopt=$proc || proc=nocona
+        cflag_check -march=$proc $cpuopt=$proc || proc=nocona
       fi
       if test "$proc" = "nocona"; then
-        cc_check -march=$proc $cpuopt=$proc || proc=pentium4
+        cflag_check -march=$proc $cpuopt=$proc || proc=pentium4
       fi
       if test "$proc" = "pentium4"; then
-        cc_check -march=$proc $cpuopt=$proc || proc=error
+        cflag_check -march=$proc $cpuopt=$proc || proc=error
       fi
 
       _march="-march=$proc"
@@ -2031,9 +2035,9 @@ EOF
       # x86-64 is an undocumented option, an intersection of k8 and nocona.
       _march="-march=x86-64"
       _mcpu="$cpuopt=generic"
-      cc_check $_mcpu || _mcpu="x86-64"
-      cc_check $_mcpu || _mcpu=""
-      cc_check $_march $_mcpu || _march=""
+      cflag_check $_mcpu || _mcpu="x86-64"
+      cflag_check $_mcpu || _mcpu=""
+      cflag_check $_march $_mcpu || _march=""
     fi
 
     _optimizing="$proc"
@@ -2368,11 +2372,8 @@ echores $extern_prefix
 
 
 echocheck "assembler support of -pipe option"
-cat > $TMPC << EOF
-int main(void) { return 0; }
-EOF
 # -I. helps to detect compilers that just misunderstand -pipe like Sun C
-cc_check -pipe -I. && _pipe="-pipe" && echores "yes" || echores "no"
+cflag_check -pipe -I. && _pipe="-pipe" && echores "yes" || echores "no"
 
 
 echocheck "compiler support of named assembler arguments"
@@ -2425,22 +2426,19 @@ else
   warn_cflags=yes
 fi
 
-cat > $TMPC << EOF
-int main(void) { return 0; }
-EOF
 if test "$cc_vendor" = "gnu" ; then
-  cc_check -std=gnu99 && CFLAGS="-std=gnu99 $CFLAGS"
-  cc_check -Wno-pointer-sign && CFLAGS="-Wno-pointer-sign $CFLAGS"
-  cc_check -Wdisabled-optimization && CFLAGS="-Wdisabled-optimization $CFLAGS"
-  cc_check -Wundef && CFLAGS="-Wundef $CFLAGS"
-  cc_check -Wmissing-prototypes && CFLAGS="-Wmissing-prototypes $CFLAGS"
-  cc_check -Wstrict-prototypes && CFLAGS="-Wstrict-prototypes $CFLAGS"
+  cflag_check -std=gnu99 && CFLAGS="-std=gnu99 $CFLAGS"
+  cflag_check -Wno-pointer-sign && CFLAGS="-Wno-pointer-sign $CFLAGS"
+  cflag_check -Wdisabled-optimization && CFLAGS="-Wdisabled-optimization $CFLAGS"
+  cflag_check -Wundef && CFLAGS="-Wundef $CFLAGS"
+  cflag_check -Wmissing-prototypes && CFLAGS="-Wmissing-prototypes $CFLAGS"
+  cflag_check -Wstrict-prototypes && CFLAGS="-Wstrict-prototypes $CFLAGS"
 else
   CFLAGS="-D_ISOC99_SOURCE -D_BSD_SOURCE $CFLAGS"
 fi
 
-cc_check -mno-omit-leaf-frame-pointer && cflags_no_omit_leaf_frame_pointer="-mno-omit-leaf-frame-pointer"
-cc_check -MD -MP && CFLAGS="-MD -MP $CFLAGS"
+cflag_check -mno-omit-leaf-frame-pointer && cflags_no_omit_leaf_frame_pointer="-mno-omit-leaf-frame-pointer"
+cflag_check -MD -MP && CFLAGS="-MD -MP $CFLAGS"
 
 
 if test -n "$LDFLAGS" ; then
@@ -2619,20 +2617,14 @@ if ppc && ( test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ) ; th
 
     # check if AltiVec is supported by the compiler, and how to enable it
     echocheck "GCC AltiVec flags"
-    cat > $TMPC << EOF
-int main(void) { return 0; }
-EOF
-    if $(cc_check -maltivec -mabi=altivec) ; then
+    if $(cflag_check -maltivec -mabi=altivec) ; then
     _altivec_gcc_flags="-maltivec -mabi=altivec"
     # check if <altivec.h> should be included
         if $(header_check altivec.h $_altivec_gcc_flags) ; then
             def_altivec_h='#define HAVE_ALTIVEC_H 1'
             inc_altivec_h='#include <altivec.h>'
         else
-        cat > $TMPC << EOF
-int main(void) { return 0; }
-EOF
-            if $(cc_check -faltivec) ; then
+            if $(cflag_check -faltivec) ; then
                 _altivec_gcc_flags="-faltivec"
             else
                 _altivec=no
@@ -2799,10 +2791,7 @@ fi
 
 
 echocheck "-lposix"
-cat > $TMPC <<EOF
-int main(void) { return 0; }
-EOF
-if cc_check -lposix ; then
+if cflag_check -lposix ; then
   extra_ldflags="$extra_ldflags -lposix"
   echores "yes"
 else
@@ -2810,10 +2799,7 @@ else
 fi
 
 echocheck "-lm"
-cat > $TMPC <<EOF
-int main(void) { return 0; }
-EOF
-if cc_check -lm ; then
+if cflag_check -lm ; then
   _ld_lm="-lm"
   echores "yes"
 else
@@ -7522,10 +7508,7 @@ fi
 echores "$_crash_debug"
 
 echocheck "compiler support for noexecstack"
-cat > $TMPC <<EOF
-int main(void) { return 0; }
-EOF
-if cc_check -Wl,-z,noexecstack ; then
+if cflag_check -Wl,-z,noexecstack ; then
   extra_ldflags="-Wl,-z,noexecstack $extra_ldflags"
   echores "yes"
 else
@@ -7533,7 +7516,7 @@ else
 fi
 
 echocheck "linker support for --nxcompat --no-seh --dynamicbase"
-if cc_check "-Wl,--nxcompat -Wl,--no-seh -Wl,--dynamicbase" ; then
+if cflag_check "-Wl,--nxcompat -Wl,--no-seh -Wl,--dynamicbase" ; then
   extra_ldflags="-Wl,--nxcompat -Wl,--no-seh -Wl,--dynamicbase $extra_ldflags"
   echores "yes"
 else
