@@ -2422,7 +2422,7 @@ elif test -z "$CFLAGS" ; then
     extra_ldflags="$extra_ldflags -ffast-math"
   fi
 else
-  _warn_CFLAGS=yes
+  warn_cflags=yes
 fi
 
 cat > $TMPC << EOF
@@ -2445,13 +2445,13 @@ cc_check -MD -MP && CFLAGS="-MD -MP $CFLAGS"
 
 if test -n "$LDFLAGS" ; then
   extra_ldflags="$extra_ldflags $LDFLAGS"
-  _warn_CFLAGS=yes
+  warn_cflags=yes
 elif test "$cc_vendor" = "intel" ; then
   extra_ldflags="$extra_ldflags -i-static"
 fi
 if test -n "$CPPFLAGS" ; then
   extra_cflags="$extra_cflags $CPPFLAGS"
-  _warn_CFLAGS=yes
+  warn_cflags=yes
 fi
 
 
@@ -2590,7 +2590,7 @@ if test -z "$YASMFLAGS" ; then
     *)                   YASMFLAGS="$YASMFLAGS -DPREFIX"  ;;
   esac
 else
-  _warn_CFLAGS=yes
+  warn_cflags=yes
 fi
 
 echo "pabsw xmm0, xmm0" > $TMPS
@@ -8525,7 +8525,7 @@ If you suspect a bug, please read DOCS/HTML/$doc_lang/bugreports.html.
 
 EOF
 
-if test "$_warn_CFLAGS" = yes; then
+if test "$warn_cflags" = yes; then
   cat <<EOF
 
 MPlayer compilation will use the CPPFLAGS/CFLAGS/LDFLAGS/YASMFLAGS set by you,
