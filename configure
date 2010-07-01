@@ -1427,17 +1427,19 @@ if os2 ; then
   def_priority="#define CONFIG_PRIORITY 1"
 fi
 
-for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
-  test "$I" && break
+for tmpdir in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
+  test "$tmpdir" && break
 done
 
+mplayer_tmpdir="$tmpdir/mplayer-configure-$RANDOM-$$"
+mkdir $mplayer_tmpdir || die "Unable to create tmpdir."
 
 TMPLOG="config.log"
-TMPC="$I/mplayer-conf-$RANDOM-$$.c"
-TMPCPP="$I/mplayer-conf-$RANDOM-$$.cpp"
-TMPEXE="$I/mplayer-conf-$RANDOM-$$$_exesuf"
-TMPH="$I/mplayer-conf-$RANDOM-$$.h"
-TMPS="$I/mplayer-conf-$RANDOM-$$.S"
+TMPC="$mplayer_tmpdir/tmp.c"
+TMPCPP="$mplayer_tmpdir/tmp.cpp"
+TMPEXE="$mplayer_tmpdir/tmp$_exesuf"
+TMPH="$mplayer_tmpdir/tmp.h"
+TMPS="$mplayer_tmpdir/tmp.S"
 
 rm -f "$TMPLOG"
 echo configuration: $configuration > "$TMPLOG"
@@ -8529,4 +8531,4 @@ EOF
 fi
 
 # Last move:
-rm -f "$TMPEXE" "$TMPC" "$TMPS" "$TMPCPP" "$TMPH"
+rm -rf "$mplayer_tmpdir"
