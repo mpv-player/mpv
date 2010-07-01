@@ -1553,11 +1553,8 @@ echores $_host_cc
 
 echocheck "cross compilation"
 if test $_cross_compile = auto ; then
-  cat > $TMPC << EOF
-int main(void) { return 0; }
-EOF
   _cross_compile=yes
-  cc_check && "$TMPEXE" && _cross_compile=no
+  cflag_check "" && "$TMPEXE" && _cross_compile=no
 fi
 echores $_cross_compile
 
@@ -1688,10 +1685,7 @@ EOF
     # if we had to disable sse/sse2 because the active kernel does not
     # support this instruction set extension, we also have to tell
     # gcc3 to not generate sse/sse2 instructions for normal C code
-    cat > $TMPC << EOF
-int main(void) { return 0; }
-EOF
-    cc_check $_march $_gcc3_ext && _march="$_march $_gcc3_ext"
+    cflag_check $_march $_gcc3_ext && _march="$_march $_gcc3_ext"
   fi
 
 fi
@@ -1840,28 +1834,25 @@ case "$host_arch" in
     fi
 
     echocheck "GCC & CPU optimization abilities"
-cat > $TMPC << EOF
-int main(void) { return 0; }
-EOF
   if test "$_runtime_cpudetection" = no ; then
     if test $cc_vendor != "intel" && test $cc_vendor != "clang" ; then
-      cc_check -march=native && proc=native
+      cflag_check -march=native && proc=native
     fi
     if test "$proc" = "amdfam10"; then
-      cc_check -march=$proc $cpuopt=$proc || proc=k8
+      cflag_check -march=$proc $cpuopt=$proc || proc=k8
     fi
     if test "$proc" = "k8"; then
-      cc_check -march=$proc $cpuopt=$proc || proc=athlon-xp
+      cflag_check -march=$proc $cpuopt=$proc || proc=athlon-xp
     fi
     if test "$proc" = "athlon-xp"; then
-      cc_check -march=$proc $cpuopt=$proc || proc=athlon
+      cflag_check -march=$proc $cpuopt=$proc || proc=athlon
     fi
     if test "$proc" = "k6-3" || test "$proc" = "k6-2"; then
-      cc_check -march=$proc $cpuopt=$proc  || proc=k6
+      cflag_check -march=$proc $cpuopt=$proc  || proc=k6
     fi
     if test "$proc" = "k6" || test "$proc" = "c3"; then
-      if ! cc_check -march=$proc $cpuopt=$proc; then
-        if cc_check -march=i586 $cpuopt=i686; then
+      if ! cflag_check -march=$proc $cpuopt=$proc; then
+        if cflag_check -march=i586 $cpuopt=i686; then
           proc=i586-i686
         else
           proc=i586
@@ -1869,25 +1860,25 @@ EOF
       fi
     fi
     if test "$proc" = "prescott" ; then
-      cc_check -march=$proc $cpuopt=$proc || proc=pentium4
+      cflag_check -march=$proc $cpuopt=$proc || proc=pentium4
     fi
     if test "$proc" = "core2" ; then
-      cc_check -march=$proc $cpuopt=$proc || proc=pentium-m
+      cflag_check -march=$proc $cpuopt=$proc || proc=pentium-m
     fi
     if test "$proc" = "pentium4" || test "$proc" = "pentium-m" || test "$proc" = "pentium3" || test "$proc" = "pentium2" || test "$proc" = "athlon" || test "$proc" = "c3-2" || test "$proc" = "geode"; then
-      cc_check -march=$proc $cpuopt=$proc  || proc=i686
+      cflag_check -march=$proc $cpuopt=$proc  || proc=i686
     fi
     if test "$proc" = "i686" || test "$proc" = "pentium-mmx" || test "$proc" = "winchip-c6" || test "$proc" = "winchip2"; then
-      cc_check -march=$proc $cpuopt=$proc  || proc=i586
+      cflag_check -march=$proc $cpuopt=$proc  || proc=i586
     fi
     if test "$proc" = "i586"; then
-      cc_check -march=$proc $cpuopt=$proc  || proc=i486
+      cflag_check -march=$proc $cpuopt=$proc  || proc=i486
     fi
     if test "$proc" = "i486" ; then
-      cc_check -march=$proc $cpuopt=$proc  || proc=i386
+      cflag_check -march=$proc $cpuopt=$proc  || proc=i386
     fi
     if test "$proc" = "i386" ; then
-      cc_check -march=$proc $cpuopt=$proc  || proc=error
+      cflag_check -march=$proc $cpuopt=$proc  || proc=error
     fi
     if test "$proc" = "error" ; then
         echores "CPU optimization disabled. CPU not recognized or your compiler is too old."
@@ -1907,9 +1898,9 @@ EOF
     _mcpu="$cpuopt=generic"
     # at least i486 required, for bswap instruction
     _march="-march=i486"
-    cc_check $_mcpu || _mcpu="$cpuopt=i686"
-    cc_check $_mcpu || _mcpu=""
-    cc_check $_march $_mcpu || _march=""
+    cflag_check $_mcpu || _mcpu="$cpuopt=i686"
+    cflag_check $_mcpu || _mcpu=""
+    cflag_check $_march $_mcpu || _march=""
   fi
 
     ## Gabucino : --target takes effect here (hopefully...) by overwriting
