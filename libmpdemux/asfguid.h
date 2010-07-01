@@ -26,11 +26,7 @@
 #include "mpbswap.h"
 
 
-#if ARCH_X86
-#define	ASF_LOAD_GUID_PREFIX(guid)	(*(uint32_t *)(guid))
-#else
 #define	ASF_LOAD_GUID_PREFIX(guid)	AV_RL32(guid)
-#endif
 
 #define ASF_GUID_PREFIX_audio_stream	0xF8699E40
 #define ASF_GUID_PREFIX_video_stream	0xBC19EFC0
