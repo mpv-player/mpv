@@ -154,7 +154,7 @@ static int init_audio(sh_audio_t *sh_audio, char *codecname, char *afm,
     }
     sh_audio->codec = NULL;
     while (1) {
-	ad_functions_t *mpadec;
+	const ad_functions_t *mpadec;
 	int i;
 	sh_audio->ad_driver = 0;
 	// restore original fourcc:
