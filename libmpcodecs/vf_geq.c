@@ -66,15 +66,15 @@ static inline double getpix(struct vf_instance *vf, double x, double y, int plan
 
 //FIXME cubic interpolate
 //FIXME keep the last few frames
-static double lum(struct vf_instance *vf, double x, double y){
+static double lum(void *vf, double x, double y){
     return getpix(vf, x, y, 0);
 }
 
-static double cb(struct vf_instance *vf, double x, double y){
+static double cb(void *vf, double x, double y){
     return getpix(vf, x, y, 1);
 }
 
-static double cr(struct vf_instance *vf, double x, double y){
+static double cr(void *vf, double x, double y){
     return getpix(vf, x, y, 2);
 }
 
