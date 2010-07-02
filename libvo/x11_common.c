@@ -781,9 +781,7 @@ int vo_x11_check_events(struct vo *vo)
     char buf[100];
     KeySym keySym;
 
-// unsigned long  vo_KeyTable[512];
-
-    if ((x11->vo_mouse_autohide) && x11->mouse_waiting_hide &&
+    if (x11->vo_mouse_autohide && x11->mouse_waiting_hide &&
                                  (GetTimerMS() - x11->mouse_timer >= 1000)) {
         vo_hidecursor(display, x11->window);
         x11->mouse_waiting_hide = 0;
