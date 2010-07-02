@@ -91,7 +91,7 @@ EOF
 function_check() {
   cat > $TMPC << EOF
 #include <$1>
-int main(void) { $2; }
+int main(void) { $2; return 0; }
 EOF
   shift
   compile_check $TMPC $@
