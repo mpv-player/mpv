@@ -1049,7 +1049,6 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
       XInstallColormap(mDisplay, col_map);
     }
     if (WinID) {
-        vo_x11_update_geometry(vo);
         // Expose events can only really be handled by us, so request them.
         vo_x11_selectinput_witherr(mDisplay, x11->window, ExposureMask);
     } else
@@ -1059,6 +1058,8 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
         vo_x11_selectinput_witherr(mDisplay, x11->window,
           StructureNotifyMask | KeyPressMask | PointerMotionMask |
           ButtonPressMask | ButtonReleaseMask | ExposureMask);
+
+    vo_x11_update_geometry(vo);
     goto final;
   }
   if (x11->window == None) {
