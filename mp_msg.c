@@ -234,7 +234,9 @@ void mp_msg_va(int mod, int lev, const char *format, va_list va)
     if (header)
         print_msg_module(stream, mod);
     set_msg_color(stream, lev);
-    header = tmp[strlen(tmp)-1] == '\n' || tmp[strlen(tmp)-1] == '\r';
+
+    size_t len = strlen(tmp);
+    header = len && (tmp[len-1] == '\n' || tmp[len-1] == '\r');
 
     fprintf(stream, "%s", tmp);
     if (mp_msg_color)
