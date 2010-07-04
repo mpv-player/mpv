@@ -811,6 +811,8 @@ ifeq ($(LIBSWSCALE_INTERNALS),yes)
 libvo/vo_yuv4mpeg.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
 endif
 
+osdep/mplayer-rc.o: osdep/mplayer.exe.manifest
+
 libdvdcss/%:   CFLAGS := -Ilibdvdcss -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.10\" $(CFLAGS_LIBDVDCSS) $(CFLAGS)
 libdvdnav/%:   CFLAGS := -Ilibdvdnav -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H -DVERSION=\"MPlayer-custom\" $(CFLAGS)
 libdvdread4/%: CFLAGS := -Ilibdvdread4 -D__USE_UNIX98 -D_GNU_SOURCE $(CFLAGS_LIBDVDCSS_DVDREAD) $(CFLAGS)

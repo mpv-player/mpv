@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+    <assemblyIdentity
+        version="0.0.9.0"
+        processorArchitecture="*"
+        name="MPlayer - The Movie Player"
+        type="win32"
+    />
+    <description>MPlayer - The Movie Player</description>
+    <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+        <security>
+            <requestedPrivileges>
+                <requestedExecutionLevel
+                    level="asInvoker"
+                />
+            </requestedPrivileges>
+        </security>
+    </trustInfo>
+</assembly>
