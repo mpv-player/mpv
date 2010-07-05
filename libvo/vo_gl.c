@@ -220,10 +220,10 @@ static void resize(int x,int y){
 
   if (!scaled_osd) {
 #ifdef CONFIG_FREETYPE
-  // adjust font size to display size
-  force_load_font = 1;
+    // adjust font size to display size
+    force_load_font = 1;
 #endif
-  vo_osd_changed(OSDTYPE_OSD);
+    vo_osd_changed(OSDTYPE_OSD);
   }
   mpglClear(GL_COLOR_BUFFER_BIT);
   redraw();
@@ -264,10 +264,10 @@ static void update_yuvconv(void) {
   glSetupYUVConversion(&params);
   if (custom_prog) {
     FILE *f = fopen(custom_prog, "rb");
-    if (!f)
+    if (!f) {
       mp_msg(MSGT_VO, MSGL_WARN,
              "[gl] Could not read customprog %s\n", custom_prog);
-    else {
+    } else {
       char *prog = calloc(1, MAX_CUSTOM_PROG_SIZE + 1);
       fread(prog, 1, MAX_CUSTOM_PROG_SIZE, f);
       fclose(f);
@@ -280,18 +280,18 @@ static void update_yuvconv(void) {
   }
   if (custom_tex) {
     FILE *f = fopen(custom_tex, "rb");
-    if (!f)
+    if (!f) {
       mp_msg(MSGT_VO, MSGL_WARN,
              "[gl] Could not read customtex %s\n", custom_tex);
-    else {
+    } else {
       int width, height, maxval;
       mpglActiveTexture(GL_TEXTURE3);
       if (glCreatePPMTex(custom_trect?GL_TEXTURE_RECTANGLE:GL_TEXTURE_2D, 0,
-                     custom_tlin?GL_LINEAR:GL_NEAREST,
-                     f, &width, &height, &maxval))
+                         custom_tlin?GL_LINEAR:GL_NEAREST,
+                         f, &width, &height, &maxval)) {
         mpglProgramEnvParameter4f(GL_FRAGMENT_PROGRAM, 1,
                    1.0 / width, 1.0 / height, width, height);
-      else
+      } else
         mp_msg(MSGT_VO, MSGL_WARN,
                "[gl] Error parsing customtex %s\n", custom_tex);
       fclose(f);
@@ -608,9 +608,12 @@ static int create_window(uint32_t d_width, uint32_t d_height, uint32_t flags, co
 #endif
 #ifdef CONFIG_GL_X11
   if (glctx.type == GLTYPE_X11) {
-    static int default_glx_attribs[] = {GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1, GLX_DOUBLEBUFFER, None};
+    static int default_glx_attribs[] = {
+      GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1,
+      GLX_DOUBLEBUFFER, None
+    };
     static int stereo_glx_attribs[]  = {
-      GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1,GLX_BLUE_SIZE, 1,
+      GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1,
       GLX_DOUBLEBUFFER, GLX_STEREO, None
     };
     XVisualInfo *vinfo = NULL;
@@ -622,8 +625,7 @@ static int create_window(uint32_t d_width, uint32_t d_height, uint32_t flags, co
     }
     if (!vinfo)
       vinfo = glXChooseVisual(mDisplay, mScreen, default_glx_attribs);
-    if (vinfo == NULL)
-    {
+    if (!vinfo) {
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
       return -1;
     }
@@ -828,11 +830,11 @@ static void do_render(void) {
               mpi_flipped ^ vo_flipped);
     glDisable3D(stereo_mode);
   } else {
-  glDrawTex(0, 0, image_width, image_height,
-            0, 0, image_width, image_height,
-            texture_width, texture_height,
-            use_rectangle == 1, is_yuv,
-            mpi_flipped ^ vo_flipped);
+    glDrawTex(0, 0, image_width, image_height,
+              0, 0, image_width, image_height,
+              texture_width, texture_height,
+              use_rectangle == 1, is_yuv,
+              mpi_flipped ^ vo_flipped);
   }
   if (is_yuv || custom_prog)
     glDisableYUVConversion(gl_target, yuvconvtype);
