@@ -91,14 +91,6 @@ const struct vo_driver video_out_gl_nosw =
     }
 };
 
-#ifdef CONFIG_GL_X11
-static int                  wsGLXAttrib[] = { GLX_RGBA,
-                                       GLX_RED_SIZE,1,
-                                       GLX_GREEN_SIZE,1,
-                                       GLX_BLUE_SIZE,1,
-                                       GLX_DOUBLEBUFFER,
-                                       None };
-#endif
 static MPGLContext glctx;
 
 static int use_osd;
@@ -616,7 +608,8 @@ static int create_window(uint32_t d_width, uint32_t d_height, uint32_t flags, co
 #endif
 #ifdef CONFIG_GL_X11
   if (glctx.type == GLTYPE_X11) {
-    XVisualInfo *vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
+    static int default_glx_attribs[] = {GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1, GLX_DOUBLEBUFFER, None};
+    XVisualInfo *vinfo=glXChooseVisual(mDisplay, mScreen, default_glx_attribs);
     if (vinfo == NULL)
     {
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
