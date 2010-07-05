@@ -80,6 +80,7 @@ extern const stream_info_t stream_info_ffmpeg;
 extern const stream_info_t stream_info_file;
 extern const stream_info_t stream_info_ifo;
 extern const stream_info_t stream_info_dvd;
+extern const stream_info_t stream_info_bluray;
 
 static const stream_info_t* const auto_open_streams[] = {
 #ifdef CONFIG_VCD
@@ -130,6 +131,9 @@ static const stream_info_t* const auto_open_streams[] = {
 #endif
 #ifdef CONFIG_DVDNAV
   &stream_info_dvdnav,
+#endif
+#ifdef CONFIG_LIBBLURAY
+  &stream_info_bluray,
 #endif
 #ifdef CONFIG_LIBAVFORMAT
   &stream_info_ffmpeg,

@@ -129,6 +129,7 @@ SRCS_COMMON-$(LIBAVCODEC_INTERNALS)  += libmpcodecs/vf_fspp.c \
 SRCS_COMMON-$(LIBAVFORMAT)           += libmpdemux/demux_lavf.c \
                                         stream/stream_ffmpeg.c \
 
+SRCS_COMMON-$(LIBBLURAY)             += stream/stream_bluray.c
 SRCS_COMMON-$(LIBBS2B)               += libaf/af_bs2b.c
 SRCS_COMMON-$(LIBDCA)                += libmpcodecs/ad_libdca.c
 SRCS_COMMON-$(LIBDV)                 += libmpcodecs/ad_libdv.c \

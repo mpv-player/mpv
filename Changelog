@@ -29,6 +29,10 @@ MPlayer (1.0)
     * remove vf_yuy2, functionality is replaced by -vf format=yuv2
     * remove vf_rgb2bgr, functionality is replaced by sws and vf_format
 
+    Streaming:
+    * Support for unencrypted Blu-ray playback through libbluray.
+      Use it through: mplayer br:////path/to/disc
+
     Drivers:
     * X11: Window manager choses Window position by default.
       Add geometry=50%:50% to your configuration to get the old behaviour.

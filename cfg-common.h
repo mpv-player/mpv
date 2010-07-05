@@ -412,6 +412,15 @@ const m_option_t common_opts[] = {
 #endif /* CONFIG_DVDREAD */
     OPT_INTPAIR("chapter", chapterrange, 0),
     OPT_INTRANGE("edition", edition_id, 0, -1, 8190),
+#ifdef CONFIG_LIBBLURAY
+    {"bluray-device",  &bluray_device,  CONF_TYPE_STRING, 0,          0,  0, NULL},
+    {"bluray-angle",   &bluray_angle,   CONF_TYPE_INT,    CONF_RANGE, 0, 999, NULL},
+    {"bluray-chapter", &bluray_chapter, CONF_TYPE_INT,    CONF_RANGE, 0, 999, NULL},
+#else
+    {"bluray-device",  "MPlayer was compiled without libbluray support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+    {"bluray-angle",   "MPlayer was compiled without libbluray support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+    {"bluray-chapter", "MPlayer was compiled without libbluray support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+#endif /* CONFIG_LIBBLURAY */
 
     {"dvdauth", "libcss is obsolete. Try libdvdread instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
     {"dvdkey", "libcss is obsolete. Try libdvdread instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},

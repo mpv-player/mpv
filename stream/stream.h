@@ -50,6 +50,7 @@
 #define STREAMTYPE_TV 17
 #define STREAMTYPE_MF 18
 #define STREAMTYPE_RADIO 19
+#define STREAMTYPE_BLURAY 20
 
 #define STREAM_BUFFER_SIZE 2048
 
@@ -340,9 +341,12 @@ void stream_set_interrupt_callback(int (*cb)(struct input_ctx*, int),
 /// wait for time milliseconds
 int stream_check_interrupt(int time);
 
+extern int bluray_angle;
+extern int bluray_chapter;
 extern int dvd_title;
 extern int dvd_angle;
 
+extern char *bluray_device;
 extern char * audio_stream;
 
 typedef struct {
