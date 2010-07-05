@@ -609,7 +609,19 @@ static int create_window(uint32_t d_width, uint32_t d_height, uint32_t flags, co
 #ifdef CONFIG_GL_X11
   if (glctx.type == GLTYPE_X11) {
     static int default_glx_attribs[] = {GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1, GLX_DOUBLEBUFFER, None};
-    XVisualInfo *vinfo=glXChooseVisual(mDisplay, mScreen, default_glx_attribs);
+    static int stereo_glx_attribs[]  = {
+      GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1,GLX_BLUE_SIZE, 1,
+      GLX_DOUBLEBUFFER, GLX_STEREO, None
+    };
+    XVisualInfo *vinfo = NULL;
+    if (stereo_mode == GL_3D_QUADBUFFER) {
+      vinfo = glXChooseVisual(mDisplay, mScreen, stereo_glx_attribs);
+      if (!vinfo)
+        mp_msg(MSGT_VO, MSGL_ERR, "[gl] Could not find a stereo visual, "
+                                  "3D will probably not work!\n");
+    }
+    if (!vinfo)
+      vinfo = glXChooseVisual(mDisplay, mScreen, default_glx_attribs);
     if (vinfo == NULL)
     {
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
