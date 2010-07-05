@@ -174,6 +174,7 @@ static char *custom_tex;
 static int custom_tlin;
 static int custom_trect;
 static int mipmap_gen;
+static int stereo_mode;
 
 static int int_pause;
 static int eq_bri = 0;
@@ -807,11 +808,27 @@ static void do_render(void) {
   mpglColor3f(1,1,1);
   if (is_yuv || custom_prog)
     glEnableYUVConversion(gl_target, yuvconvtype);
+  if (stereo_mode) {
+    glEnable3DLeft(stereo_mode);
+    glDrawTex(0, 0, image_width, image_height,
+              0, 0, image_width >> 1, image_height,
+              texture_width, texture_height,
+              use_rectangle == 1, is_yuv,
+              mpi_flipped ^ vo_flipped);
+    glEnable3DRight(stereo_mode);
+    glDrawTex(0, 0, image_width, image_height,
+              image_width >> 1, 0, image_width >> 1, image_height,
+              texture_width, texture_height,
+              use_rectangle == 1, is_yuv,
+              mpi_flipped ^ vo_flipped);
+    glDisable3D(stereo_mode);
+  } else {
   glDrawTex(0, 0, image_width, image_height,
             0, 0, image_width, image_height,
             texture_width, texture_height,
             use_rectangle == 1, is_yuv,
             mpi_flipped ^ vo_flipped);
+  }
   if (is_yuv || custom_prog)
     glDisableYUVConversion(gl_target, yuvconvtype);
 }
@@ -1117,6 +1134,7 @@ static const opt_t subopts[] = {
   {"customtrect",  OPT_ARG_BOOL, &custom_trect, NULL},
   {"mipmapgen",    OPT_ARG_BOOL, &mipmap_gen,   NULL},
   {"osdcolor",     OPT_ARG_INT,  &osd_color,    NULL},
+  {"stereo",       OPT_ARG_INT,  &stereo_mode,  NULL},
   {NULL}
 };
 
@@ -1148,6 +1166,7 @@ static int preinit_internal(const char *arg, int allow_sw)
     custom_trect = 0;
     mipmap_gen = 0;
     osd_color = 0xffffff;
+    stereo_mode = 0;
     if (subopt_parse(arg, subopts) != 0) {
       mp_msg(MSGT_VO, MSGL_FATAL,
               "\n-vo gl command line help:\n"
@@ -1221,6 +1240,11 @@ static int preinit_internal(const char *arg, int allow_sw)
               "    generate mipmaps for the video image (use with TXB in customprog)\n"
               "  osdcolor=<0xAARRGGBB>\n"
               "    use the given color for the OSD\n"
+              "  stereo=<n>\n"
+              "    0: normal display\n"
+              "    1: side-by-side to red-cyan stereo\n"
+              "    2: side-by-side to green-magenta stereo\n"
+              "    3: side-by-side to quadbuffer stereo (broken?)\n"
               "\n" );
       return -1;
     }

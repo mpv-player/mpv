@@ -93,6 +93,7 @@ void (GLAPIENTRY *mpglLightfv)(GLenum, GLenum, const GLfloat *);
 void (GLAPIENTRY *mpglColorMaterial)(GLenum, GLenum);
 void (GLAPIENTRY *mpglShadeModel)(GLenum);
 void (GLAPIENTRY *mpglGetIntegerv)(GLenum, GLint *);
+void (GLAPIENTRY *mpglColorMask)(GLboolean, GLboolean, GLboolean, GLboolean);
 
 /**
  * \defgroup glextfunctions OpenGL extension functions
@@ -437,6 +438,7 @@ static const extfunc_desc_t extfuncs[] = {
   DEF_FUNC_DESC(ColorMaterial),
   DEF_FUNC_DESC(ShadeModel),
   DEF_FUNC_DESC(GetIntegerv),
+  DEF_FUNC_DESC(ColorMask),
 
   // here start the real extensions
   {&mpglGenBuffers, NULL, {"glGenBuffers", "glGenBuffersARB", NULL}},
@@ -1539,6 +1541,89 @@ void glDisableYUVConversion(GLenum target, int type) {
     case YUV_CONVERSION_FRAGMENT:
     case YUV_CONVERSION_NONE:
       mpglDisable(GL_FRAGMENT_PROGRAM);
+      break;
+  }
+}
+
+void glEnable3DLeft(int type) {
+  GLint buffer;
+  switch (type) {
+    case GL_3D_RED_CYAN:
+      mpglColorMask(GL_TRUE,  GL_FALSE, GL_FALSE, GL_FALSE);
+      break;
+    case GL_3D_GREEN_MAGENTA:
+      mpglColorMask(GL_FALSE, GL_TRUE,  GL_FALSE, GL_FALSE);
+      break;
+    case GL_3D_QUADBUFFER:
+      mpglGetIntegerv(GL_DRAW_BUFFER, &buffer);
+      switch (buffer) {
+        case GL_FRONT:
+        case GL_FRONT_LEFT:
+        case GL_FRONT_RIGHT:
+          buffer = GL_FRONT_LEFT;
+          break;
+        case GL_BACK:
+        case GL_BACK_LEFT:
+        case GL_BACK_RIGHT:
+          buffer = GL_BACK_LEFT;
+          break;
+      }
+      mpglDrawBuffer(buffer);
+      break;
+  }
+}
+
+void glEnable3DRight(int type) {
+  GLint buffer;
+  switch (type) {
+    case GL_3D_RED_CYAN:
+      mpglColorMask(GL_FALSE, GL_TRUE,  GL_TRUE,  GL_FALSE);
+      break;
+    case GL_3D_GREEN_MAGENTA:
+      mpglColorMask(GL_TRUE,  GL_FALSE, GL_TRUE,  GL_FALSE);
+      break;
+    case GL_3D_QUADBUFFER:
+      mpglGetIntegerv(GL_DRAW_BUFFER, &buffer);
+      switch (buffer) {
+        case GL_FRONT:
+        case GL_FRONT_LEFT:
+        case GL_FRONT_RIGHT:
+          buffer = GL_FRONT_RIGHT;
+          break;
+        case GL_BACK:
+        case GL_BACK_LEFT:
+        case GL_BACK_RIGHT:
+          buffer = GL_BACK_RIGHT;
+          break;
+      }
+      mpglDrawBuffer(buffer);
+      break;
+  }
+}
+
+void glDisable3D(int type) {
+  GLint buffer;
+  switch (type) {
+    case GL_3D_RED_CYAN:
+    case GL_3D_GREEN_MAGENTA:
+      mpglColorMask(GL_TRUE,  GL_TRUE,  GL_TRUE,  GL_TRUE);
+      break;
+    case GL_3D_QUADBUFFER:
+      mpglDrawBuffer(vo_doublebuffering ? GL_BACK : GL_FRONT);
+      mpglGetIntegerv(GL_DRAW_BUFFER, &buffer);
+      switch (buffer) {
+        case GL_FRONT:
+        case GL_FRONT_LEFT:
+        case GL_FRONT_RIGHT:
+          buffer = GL_FRONT;
+          break;
+        case GL_BACK:
+        case GL_BACK_LEFT:
+        case GL_BACK_RIGHT:
+          buffer = GL_BACK;
+          break;
+      }
+      mpglDrawBuffer(buffer);
       break;
   }
 }

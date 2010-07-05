@@ -365,6 +365,14 @@ void glSetupYUVConversion(gl_conversion_params_t *params);
 void glEnableYUVConversion(GLenum target, int type);
 void glDisableYUVConversion(GLenum target, int type);
 
+#define GL_3D_RED_CYAN        1
+#define GL_3D_GREEN_MAGENTA   2
+#define GL_3D_QUADBUFFER      3
+
+void glEnable3DLeft(int type);
+void glEnable3DRight(int type);
+void glDisable3D(int type);
+
 /** \addtogroup glcontext
   * \{ */
 //! could not set new window, will continue drawing into the old one.
@@ -462,6 +470,7 @@ extern void (GLAPIENTRY *mpglLightfv)(GLenum, GLenum, const GLfloat *);
 extern void (GLAPIENTRY *mpglColorMaterial)(GLenum, GLenum);
 extern void (GLAPIENTRY *mpglShadeModel)(GLenum);
 extern void (GLAPIENTRY *mpglGetIntegerv)(GLenum, GLint *);
+extern void (GLAPIENTRY *mpglColorMask)(GLboolean, GLboolean, GLboolean, GLboolean);
 
 extern void (GLAPIENTRY *mpglGenBuffers)(GLsizei, GLuint *);
 extern void (GLAPIENTRY *mpglDeleteBuffers)(GLsizei, const GLuint *);

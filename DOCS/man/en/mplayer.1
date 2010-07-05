@@ -3995,6 +3995,27 @@ Select the scaling function to use for chrominance scaling.
 For details see lscale.
 .IPs filter-strength=<value>
 Set the effect strength for the lscale/cscale filters that support it.
+.IPs stereo=<value>
+Select a method for stereo display.
+You may have to use -aspect to fix the aspect value.
+Experimental, do not expect too much from it.
+.RSss
+0: Normal 2D display
+.br
+1: left-right split input to full-color red-cyan stereo.
+.br
+2: left-right split input to full-color red-cyan stereo.
+.br
+3: left-right split input to quadbuffered stereo.
+Only supported by very few OpenGL cards, thus untested and not working.
+.RE
+.RE
+.sp 1
+.RS
+The following options are only useful if writing your own fragment programs.
+.RE
+.sp 1
+.RSs
 .IPs customprog=<filename>
 Load a custom fragment program from <filename>.
 See TOOLS/edgedect.fp for an example.
