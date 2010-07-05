@@ -49,6 +49,13 @@ char *bluray_device  = NULL;
 int   bluray_angle   = 0;
 int   bluray_chapter = 0;
 
+struct bluray_priv_s {
+    BLURAY *bd;
+    int current_angle;
+    int current_chapter;
+    int current_title;
+};
+
 static struct stream_priv_s {
     int title;
     char *device;
@@ -73,15 +80,19 @@ static const struct m_struct_st bluray_stream_opts = {
 
 static void bluray_stream_close(stream_t *s)
 {
-    bd_close(s->priv);
-    s->priv = NULL;
+    struct bluray_priv_s *b = s->priv;
+
+    bd_close(b->bd);
+    b->bd = NULL;
+    free(b);
 }
 
 static int bluray_stream_seek(stream_t *s, off_t pos)
 {
+    struct bluray_priv_s *b = s->priv;
     off_t p;
 
-    p = bd_seek(s->priv, pos);
+    p = bd_seek(b->bd, pos);
     if (p == -1)
         return 0;
 
@@ -91,20 +102,115 @@ static int bluray_stream_seek(stream_t *s, off_t pos)
 
 static int bluray_stream_fill_buffer(stream_t *s, char *buf, int len)
 {
-    return bd_read(s->priv, buf, len);
+    struct bluray_priv_s *b = s->priv;
+
+    return bd_read(b->bd, buf, len);
+}
+
+static int bluray_stream_control(stream_t *s, int cmd, void *arg)
+{
+    struct bluray_priv_s *b = s->priv;
+
+    switch (cmd) {
+
+    case STREAM_CTRL_GET_NUM_CHAPTERS: {
+        BLURAY_TITLE_INFO *ti;
+
+        ti = bd_get_title_info(b->bd, b->current_title);
+        if (!ti)
+            return STREAM_UNSUPPORTED;
+
+        *((unsigned int *) arg) = ti->chapter_count;
+        bd_free_title_info(ti);
+
+        return 1;
+    }
+
+    case STREAM_CTRL_GET_CURRENT_CHAPTER: {
+        *((unsigned int *) arg) = b->current_chapter;
+        return 1;
+    }
+
+    case STREAM_CTRL_SEEK_TO_CHAPTER: {
+        BLURAY_TITLE_INFO *ti;
+        int chapter = *((unsigned int *) arg);
+        int64_t pos;
+        int r;
+
+        ti = bd_get_title_info(b->bd, b->current_title);
+        if (!ti)
+            return STREAM_UNSUPPORTED;
+
+        if (chapter < 0 || chapter > ti->chapter_count) {
+            bd_free_title_info(ti);
+            return STREAM_UNSUPPORTED;
+        }
+
+        pos = bd_chapter_pos(b->bd, chapter);
+        r = bluray_stream_seek(s, pos);
+        bd_free_title_info(ti);
+
+        return r ? 1 : STREAM_UNSUPPORTED;
+    }
+
+    case STREAM_CTRL_GET_NUM_ANGLES: {
+        BLURAY_TITLE_INFO *ti;
+
+        ti = bd_get_title_info(b->bd, b->current_title);
+        if (!ti)
+            return STREAM_UNSUPPORTED;
+
+        *((int *) arg) = ti->angle_count;
+        bd_free_title_info(ti);
+
+        return 1;
+    }
+
+    case STREAM_CTRL_GET_ANGLE: {
+        *((int *) arg) = b->current_angle;
+        return 1;
+    }
+
+    case STREAM_CTRL_SET_ANGLE: {
+        BLURAY_TITLE_INFO *ti;
+        int angle = *((int *) arg);
+
+        ti = bd_get_title_info(b->bd, b->current_title);
+        if (!ti)
+            return STREAM_UNSUPPORTED;
+
+        if (angle < 0 || angle > ti->angle_count) {
+            bd_free_title_info(ti);
+            return STREAM_UNSUPPORTED;
+        }
+
+        b->current_angle = angle;
+        bd_seamless_angle_change(b->bd, angle);
+        bd_free_title_info(ti);
+
+        return 1;
+    }
+
+    default:
+        break;
+    }
+
+    return STREAM_UNSUPPORTED;
 }
 
 static int bluray_stream_open(stream_t *s, int mode,
                               void *opts, int *file_format)
 {
     struct stream_priv_s *p = opts;
+    struct bluray_priv_s *b;
+
     BLURAY_TITLE_INFO *info = NULL;
     BLURAY *bd;
 
     int title, title_guess, title_count;
     uint64_t title_size;
 
-    unsigned int chapter, angle;
+    unsigned int chapter = 0, angle = 0;
     uint64_t max_duration = 0;
     int64_t chapter_pos = 0;
 
@@ -210,12 +316,19 @@ err_no_info:
     s->fill_buffer = bluray_stream_fill_buffer;
     s->seek        = bluray_stream_seek;
     s->close       = bluray_stream_close;
+    s->control     = bluray_stream_control;
+
+    b                  = calloc(1, sizeof(struct bluray_priv_s));
+    b->bd              = bd;
+    b->current_angle   = angle;
+    b->current_chapter = chapter;
+    b->current_title   = title;
 
     s->start_pos   = chapter_pos;
     s->end_pos     = title_size;
     s->sector_size = BLURAY_SECTOR_SIZE;
     s->flags       = mode | MP_STREAM_SEEK;
-    s->priv        = bd;
+    s->priv        = b;
     s->type        = STREAMTYPE_BLURAY;
     s->url         = strdup("br://");
 
