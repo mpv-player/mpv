@@ -1251,7 +1251,7 @@ static int preinit_internal(const char *arg, int allow_sw)
               "    0: normal display\n"
               "    1: side-by-side to red-cyan stereo\n"
               "    2: side-by-side to green-magenta stereo\n"
-              "    3: side-by-side to quadbuffer stereo (broken?)\n"
+              "    3: side-by-side to quadbuffer stereo\n"
               "\n" );
       return -1;
     }
