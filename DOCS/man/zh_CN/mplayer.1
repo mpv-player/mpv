@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 rev. 31552
+.\" sync with en/mplayer.1 rev. 31648
 .\" Encoding: UTF-8
 .\"
 .\" MPlayer (C) 2000-2010 MPlayer 团队
@@ -65,8 +65,13 @@ mencoder \- 影视编解码器
 .
 .br
 .B mplayer
+[br]://[标题][/设备]
+[选项组]
+.
+.br
+.B mplayer
 [dvd|dvdnav]://[标题|[开始标题]\-结束标题][/设备]
-[选项]
+[选项组]
 .
 .br
 .B mplayer
@@ -154,7 +159,7 @@ tivo://主机/[list|llist|fsid]
 通过许多原生的和可执行的编解码器的支持, 它能播放绝大部分的 MPEG/\:VOB, AVI,
 ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, Ogg/\:OGM, MKV, VIVO, FLI, NuppelVideo,
 yuv4mpeg, FILM 和 RoQ 文件。
-你还能观看 VCD、SVCD、DVD、3ivx、DivX 3/4/5、WMV 甚至 H.264 格式的电影。
+你还能观看 VCD、SVCD、DVD、蓝光 DVD、3ivx、DivX 3/4/5、WMV 甚至 H.264 格式的电影。
 .PP
 MPlayer 广泛地支持音视频输出驱动。
 它不仅可以使用 X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca,
@@ -244,7 +249,7 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 静音。
 .IPs "_ (仅用于 MPEG-TS、AVI 和 libav 库格式)"
 循环可用的像轨。
-.IPs "# (仅用于 DVD、MPEG、Matroska、AVI 和 libav 库格式)"
+.IPs "# (仅用于 DVD、蓝光 DVD、MPEG、Matroska、AVI 和 libav 库格式)"
 循环可用的音轨。
 .IPs "TAB（仅用于 MPEG-TS 和 libav 库格式）"
 循环可用的节目。
@@ -826,10 +831,19 @@ MOUSE_BTN0\-MOUSE_BTN0_DBL。
 .
 .TP
 .B \-edlout <文件名>
-新建文件并写入 EDL(编辑决定列表) 记录。
-回放时, 用户击 "i" 键标记跳过块的开始结束处。
-这提供了用户一个以后能精调 EDL (记录)项的开始点。
+新建文件并写入 EDL（编辑决定列表）记录。
+回放时, 用户按“i”键标记跳过块的开始结束处。
+这提供了用户一个以后能精调 EDL 项的开始点。
 详情请参见 http://www.mplayerhq.hu/\:DOCS/\:HTML/\:en/\:edl.html。
+.
+.TP
+.B \-edl-backward-delay <数值>
+当在播放并回倒过程中使用 EDL 时，可能会停在某条 EDL 记录中间。
+在此情况下，MPlayer 会进一步回倒至这条 EDL 记录的起始位值，之后会立即跳过
+EDL 记录所描述的场景。
+为避免这种现象，MPlayer 会跳至距 EDL 记录前端固定间隔的一个位置。
+该参数使你能够以秒为单位指定这个时间间隔。
+（默认值：2 秒）。
 .
 .TP
 .B \-enqueue (仅用于 GUI)
@@ -888,7 +902,7 @@ mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 是 \-msglevel identify=4 的简写形式。使用便于解析的格式显示文件参数。
 同时打印更为详细的关于字幕和音轨的语言与 ID 号的信息。
 在某些情形下，使用 \-msglevel identify=6 能得到更多的信息。
-例如，对于一张 DVD 碟片，该选项能列出每个标题的章节和时长，以及一个碟片 ID 号。
+例如，对于一张 DVD 或蓝光 DVD，该选项能列出每个标题的章节和时长，以及一个碟片 ID 号。
 将此选项与 \-frames 0 一起使用能禁止所有视频输出。
 封装脚本 TOOLS/\:midentify.sh 禁止 MPlayer 的其它输出，
 并且（很可能）shellescapes（脚本转义）了文件名。
@@ -1172,6 +1186,19 @@ MPlayer 在 verbose (\-v) 模式下会打印可用的语言。
 当你以慢速连接观看现场流媒体时有用。
 对于 Real RTSP 流, 也用来设置最大的传送带宽
 以容许较快的缓存填充和流转储。
+.
+.TP
+.B \-bluray\-angle <角度 ID>（仅用于蓝光 DVD）
+有些蓝光碟片包含一些可从多个角度观看的场景。
+这里你可以告诉 MPlayer 使用哪个角度（默认值：1）。
+.
+.TP
+.B \-bluray\-chapter <章节 ID>（仅用于蓝光 DVD）
+告诉 MPlayer 从哪个蓝光 DVD 章节开始当前标题内容的播放（默认值：1）。
+.
+.TP
+.B \-bluray\-device <碟片路径>（仅用于蓝光 DVD）
+指定蓝光碟片的位置。必须是一个具有蓝光 DVD 结构的目录。
 .
 .TP
 .B \-cache <千字节>
@@ -3570,9 +3597,9 @@ OpenGL 视频输出驱动, 简版。
 视频尺寸一定小于 OpenGL 实现的最大纹理尺寸。
 瞄准能与甚至最基本的 OpenGL 实现一起工作,
 但也利用较新的扩展, 允许支持更多的色彩空间和直接渲染。
-要获取最佳的速度，请尝试类似于
+要获取最佳的速度，请尝试添加选项
 .br
-\-vo gl:yuv=2:rectangle=2:force\-pbo:ati\-hack \-dr \-noslices
+\-dr \-noslices
 .br
 的选项。
 此代码执行极少的检测, 所以如果某个特性不工作,
@@ -3701,6 +3728,27 @@ GL_ARB_fragment_shader！）。至少需要三个纹理单位。提供饱和度�
 详情参见 lscale。
 .IPs filter-strength=<值>
 设置支持该强度值的 lscale/cscale 滤镜的效果强度。
+.IPs stereo=<值>
+选择立体显示的方式。
+可能需要使用 -aspect 以修正宽高比的数值。
+实验性的选项，勿对其期望太高。
+.RSss
+0：标准 2D 显示
+.br
+1：左右分割的输入信号，产生全色彩的红蓝立体图像。
+.br
+2：左右分割的输入信号，产生全色彩的红蓝立体图像。
+.br
+3：左右分割的输入信号，产生四重缓冲的立体图像。
+只有少数 OpenGL 显卡支持
+.RE
+.RE
+.sp 1
+.RS
+以下选项只有助于编写自定义的片断程序。
+.RE
+.sp 1
+.RSs
 .IPs customprog=<文件名>
 从 <文件名> 装载定制的片断程序。
 示例参见 TOOLS/edgedect.fp。
@@ -10729,10 +10777,17 @@ GUI 播放列表
 .\" 示例
 .\" --------------------------------------------------------------------------
 .
-.SH "MPLAYER的使用范例"
+.SH "MPLAYER 的使用范例"
 .
 .PP
-.B 快速上手播放 DVD:
+.B 快递上手播放蓝光 DVD：
+.nf
+mplayer br:////path/to/disc
+mplayer br:// \-bluray\-device /path/to/disc
+.fi
+.
+.PP
+.B 快速上手播放 DVD：
 .nf
 mplayer dvd://1
 .fi
