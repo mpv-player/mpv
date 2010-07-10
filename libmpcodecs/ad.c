@@ -48,7 +48,6 @@ extern const ad_functions_t mpcodecs_ad_dk4adpcm;
 extern const ad_functions_t mpcodecs_ad_dshow;
 extern const ad_functions_t mpcodecs_ad_dmo;
 extern const ad_functions_t mpcodecs_ad_acm;
-extern const ad_functions_t mpcodecs_ad_msgsm;
 extern const ad_functions_t mpcodecs_ad_faad;
 extern const ad_functions_t mpcodecs_ad_libvorbis;
 extern const ad_functions_t mpcodecs_ad_speex;
@@ -83,7 +82,6 @@ const ad_functions_t * const mpcodecs_ad_drivers[] =
   &mpcodecs_ad_imaadpcm,
   &mpcodecs_ad_msadpcm,
   &mpcodecs_ad_dk3adpcm,
-  &mpcodecs_ad_msgsm,
 #ifdef CONFIG_WIN32DLL
   &mpcodecs_ad_dshow,
   &mpcodecs_ad_dmo,

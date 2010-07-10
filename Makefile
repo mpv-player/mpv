@@ -377,14 +377,12 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/ad_hwmpa.c \
               libmpcodecs/ad_imaadpcm.c \
               libmpcodecs/ad_msadpcm.c \
-              libmpcodecs/ad_msgsm.c \
               libmpcodecs/ad_pcm.c \
               libmpcodecs/dec_audio.c \
               libmpcodecs/dec_teletext.c \
               libmpcodecs/dec_video.c \
               libmpcodecs/img_format.c \
               libmpcodecs/mp_image.c \
-              libmpcodecs/native/xa_gsm.c \
               libmpcodecs/pullup.c \
               libmpcodecs/vd.c \
               libmpcodecs/vd_hmblck.c \
