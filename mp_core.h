@@ -169,7 +169,7 @@ typedef struct MPContext {
     int global_sub_pos; // this encompasses all subtitle sources
     int set_of_sub_pos;
     int set_of_sub_size;
-    int global_sub_indices[SUB_SOURCES];
+    int sub_counts[SUB_SOURCES];
     // set_of_ass_tracks[i] contains subtitles from set_of_subtitles[i]
     // parsed by libass or NULL if format unsupported
     struct ass_track *set_of_ass_tracks[MAX_SUBTITLE_FILES];
