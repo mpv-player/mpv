@@ -624,6 +624,7 @@ void spudec_heartbeat(void *this, unsigned int pts100)
   spudec_handle_t *spu = (spudec_handle_t*) this;
   spu->now_pts = pts100;
 
+  // TODO: detect and handle broken timestamps (e.g. due to wrapping)
   while (spu->queue_head != NULL && pts100 >= spu->queue_head->start_pts) {
     packet_t *packet = spudec_dequeue_packet(spu);
     spu->start_pts = packet->start_pts;
