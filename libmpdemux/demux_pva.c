@@ -359,7 +359,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 	}
 	flags=stream_read_char(d->stream);
 	payload->is_packet_start=flags & 0x10;
-	pack_size=le2me_16(stream_read_word(d->stream));
+	pack_size=stream_read_word(d->stream);
 	mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_pva::pva_get_payload(): pack_size=%u field read at offset %"PRIu64"\n",pack_size,(int64_t)stream_tell(d->stream)-2);
 	pva_payload_start=stream_tell(d->stream);
 	next_offset=pva_payload_start+pack_size;
@@ -399,7 +399,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 		switch(payload->type)
 		{
 			case VIDEOSTREAM:
-				payload->pts=(float)(le2me_32(stream_read_dword(d->stream)))/90000;
+				payload->pts=(float)(stream_read_dword(d->stream))/90000;
 				//printf("Video PTS: %f\n",payload->pts);
 				if((flags&0x03)
 #ifdef PVA_NEW_PREBYTES_CODE
@@ -465,7 +465,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 						/*
 					 	* PTS parsing is hopefully finished.
 					 	*/
-						payload->pts=(float)le2me_64(temp_pts)/90000;
+						payload->pts=(float)temp_pts/90000;
 					}
 				}
 				payload->offset=stream_tell(d->stream);
