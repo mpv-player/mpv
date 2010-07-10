@@ -39,7 +39,7 @@
 #include <inttypes.h>
 
 #include "config.h"
-#include "libavutil/common.h"
+#include "ffmpeg_files/intreadwrite.h"
 #include "mpbswap.h"
 #include "ad_internal.h"
 
@@ -48,9 +48,6 @@
 #define QT_IMA_ADPCM_PREAMBLE_SIZE 2
 #define QT_IMA_ADPCM_BLOCK_SIZE 0x22
 #define QT_IMA_ADPCM_SAMPLES_PER_BLOCK 64
-
-#define BE_16(x) (be2me_16(*(unsigned short *)(x)))
-#define LE_16(x) (le2me_16(*(unsigned short *)(x)))
 
 // pertinent tables for IMA ADPCM
 static const int16_t adpcm_step[89] =
@@ -189,7 +186,7 @@ static int qt_ima_adpcm_decode_block(unsigned short *output,
     return -1;
 
   for (i = 0; i < channels; i++) {
-    initial_index[i] = initial_predictor[i] = (int16_t)BE_16(&input[i * QT_IMA_ADPCM_BLOCK_SIZE]);
+    initial_index[i] = initial_predictor[i] = (int16_t)AV_RB16(&input[i * QT_IMA_ADPCM_BLOCK_SIZE]);
 
     // mask, sign-extend, and clamp the predictor portion
     initial_predictor[i] &= ~0x7F;
@@ -239,7 +236,7 @@ static int ms_ima_adpcm_decode_block(unsigned short *output,
     return -1;
 
   for (i = 0; i < channels; i++) {
-    predictor[i] = (int16_t)LE_16(&input[i * 4]);
+    predictor[i] = (int16_t)AV_RL16(&input[i * 4]);
     index[i] = input[i * 4 + 2];
   }
 
@@ -303,7 +300,7 @@ static int dk4_ima_adpcm_decode_block(unsigned short *output,
 
   for (i = 0; i < channels; i++) {
     // the first predictor value goes straight to the output
-    predictor[i] = output[i] = (int16_t)LE_16(&input[i * 4]);
+    predictor[i] = output[i] = (int16_t)AV_RL16(&input[i * 4]);
     index[i] = input[i * 4 + 2];
   }
 

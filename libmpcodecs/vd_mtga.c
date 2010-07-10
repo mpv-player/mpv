@@ -29,7 +29,7 @@
 #include "config.h"
 #include "mp_msg.h"
 
-#include "mpbswap.h"
+#include "ffmpeg_files/intreadwrite.h"
 #include "libvo/fastmemcpy.h"
 
 #include "vd_internal.h"
@@ -176,8 +176,8 @@ static short read_tga_header(unsigned char *buf, TGAInfo *info)
     info->img_type = buf[2];
 
     /* targa data is always stored in little endian byte order */
-    info->width = le2me_16(*(unsigned short *) &buf[12]);
-    info->height = le2me_16(*(unsigned short *) &buf[14]);
+    info->width  = AV_RL16(&buf[12]);
+    info->height = AV_RL16(&buf[14]);
 
     info->bpp = buf[16];
 

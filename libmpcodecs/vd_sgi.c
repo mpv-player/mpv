@@ -23,7 +23,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
-#include "libavutil/common.h"
+#include "ffmpeg_files/intreadwrite.h"
 #include "mpbswap.h"
 #include "vd_internal.h"
 
@@ -194,7 +194,7 @@ decode_rle_sgi(SGIInfo *info, unsigned char *data, mp_image_t *mpi)
        dest_row = mpi->planes[0] + mpi->stride[0] * (ysize - 1 - y);
 
       /* set start of next run (offsets are from start of header) */
-      start_offset = be2me_32(*(uint32_t*) &starttab[y + z * ysize]);
+      start_offset = AV_RB32(&starttab[y + z * ysize]);
 
       rle_data = &data[start_offset];
 
@@ -261,13 +261,13 @@ static void
 read_sgi_header(unsigned char *buf, SGIInfo *info)
 {
   /* sgi data is always stored in big endian byte order */
-  info->magic = be2me_16(*(unsigned short *) &buf[0]);
+  info->magic = AV_RB16(&buf[0]);
   info->rle = buf[2];
   info->bytes_per_channel = buf[3];
-  info->dimension = be2me_16(*(unsigned short *) &buf[4]);
-  info->xsize = be2me_16(*(unsigned short *) &buf[6]);
-  info->ysize = be2me_16(*(unsigned short *) &buf[8]);
-  info->zsize = be2me_16(*(unsigned short *) &buf[10]);
+  info->dimension = AV_RB16(&buf[4]);
+  info->xsize = AV_RB16(&buf[6]);
+  info->ysize = AV_RB16(&buf[8]);
+  info->zsize = AV_RB16(&buf[10]);
 }
 
 

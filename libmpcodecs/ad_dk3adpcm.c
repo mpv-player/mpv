@@ -33,7 +33,7 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "mpbswap.h"
+#include "ffmpeg_files/intreadwrite.h"
 #include "ad_internal.h"
 
 static const ad_info_t info =
@@ -48,9 +48,6 @@ static const ad_info_t info =
 LIBAD_EXTERN(dk3adpcm)
 
 #define DK3_ADPCM_PREAMBLE_SIZE 16
-
-#define LE_16(x) (le2me_16(*(unsigned short *)(x)))
-#define LE_32(x) (le2me_32(*(unsigned int *)(x)))
 
 // useful macros
 // clamp a number between 0 and 88
@@ -154,8 +151,8 @@ static int dk3_adpcm_decode_block(unsigned short *output, unsigned char *input,
   int step;
   int diff;
 
-  sum_pred = LE_16(&input[10]);
-  diff_pred = LE_16(&input[12]);
+  sum_pred = AV_RL16(&input[10]);
+  diff_pred = AV_RL16(&input[12]);
   SE_16BIT(sum_pred);
   SE_16BIT(diff_pred);
   diff_channel = diff_pred;
