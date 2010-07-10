@@ -224,6 +224,27 @@ static inline void spudec_cut_image(spudec_handle_t *this)
   }
 }
 
+
+static int spudec_alloc_image(spudec_handle_t *this, int stride, int height)
+{
+  if (this->width > stride) // just a safeguard
+    this->width = stride;
+  this->stride = stride;
+  this->height = height;
+  if (this->image_size < this->stride * this->height) {
+    if (this->image != NULL) {
+      free(this->image);
+      this->image_size = 0;
+    }
+    this->image = malloc(2 * this->stride * this->height);
+    if (this->image) {
+      this->image_size = this->stride * this->height;
+      this->aimage = this->image + this->image_size;
+    }
+  }
+  return this->image != NULL;
+}
+
 static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
 {
   unsigned int cmap[4], alpha[4];
@@ -256,18 +277,7 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
     }
   }
 
-  if (this->image_size < this->stride * this->height) {
-    if (this->image != NULL) {
-      free(this->image);
-      this->image_size = 0;
-    }
-    this->image = malloc(2 * this->stride * this->height);
-    if (this->image) {
-      this->image_size = this->stride * this->height;
-      this->aimage = this->image + this->image_size;
-    }
-  }
-  if (this->image == NULL)
+  if (!spudec_alloc_image(this, this->stride, this->height))
     return;
 
   /* Kludge: draw_alpha needs width multiple of 8. */
