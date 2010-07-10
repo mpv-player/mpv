@@ -135,7 +135,7 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
     }
 
     // DVD sub:
-    if (vo_spudec && (vobsub_id >= 0 || (opts->sub_id >= 0 && type == 'v'))) {
+    if (vobsub_id >= 0 || (opts->sub_id >= 0 && type == 'v')) {
         int timestamp;
         current_module = "spudec";
         /* Get a sub packet from the DVD or a vobsub */
@@ -169,6 +169,12 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
                 }
             }
             if (len<=0 || !packet) break;
+            // create it only here, since with some broken demuxers we might
+            // type = v but no DVD sub and we currently do not change the
+            // "original frame size" ever after init, leading to wrong-sized
+            // PGS subtitles.
+            if (!vo_spudec)
+                vo_spudec = spudec_new(NULL);
             if (vo_vobsub || timestamp >= 0)
                 spudec_assemble(vo_spudec, packet, len, timestamp);
         }
