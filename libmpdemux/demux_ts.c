@@ -1483,7 +1483,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 
 		if(
 			(type_from_pmt == AUDIO_A52) ||		 /* A52 - raw */
-			(p[0] == 0x0B && p[1] == 0x77)		/* A52 - syncword */
+			(packet_len >= 2 && p[0] == 0x0B && p[1] == 0x77)		/* A52 - syncword */
 		)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_DBG2, "A52 RAW OR SYNCWORD\n");
@@ -1496,7 +1496,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 		}
 		/* SPU SUBS */
 		else if(type_from_pmt == SPU_DVB ||
-		((p[0] == 0x20) && pes_is_aligned)) // && p[1] == 0x00))
+		(packet_len >= 1 && (p[0] == 0x20) && pes_is_aligned)) // && p[1] == 0x00))
 		{
 			es->start = p;
 			es->size  = packet_len;
@@ -1505,7 +1505,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 
 			return 1;
 		}
-		else if (pes_is_aligned && ((p[0] & 0xE0) == 0x20))	//SPU_DVD
+		else if (pes_is_aligned && packet_len >= 1 && ((p[0] & 0xE0) == 0x20))	//SPU_DVD
 		{
 			//DVD SUBS
 			es->start   = p+1;
@@ -1515,7 +1515,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 
 			return 1;
 		}
-		else if (pes_is_aligned && (p[0] & 0xF8) == 0x80)
+		else if (pes_is_aligned && packet_len >= 4 && (p[0] & 0xF8) == 0x80)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_DBG2, "A52 WITH HEADER\n");
 			es->start   = p+4;
@@ -1525,7 +1525,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 
 			return 1;
 		}
-		else if (pes_is_aligned && ((p[0]&0xf0) == 0xa0))
+		else if (pes_is_aligned && packet_len >= 1 && ((p[0]&0xf0) == 0xa0))
 		{
 			int pcm_offset;
 
