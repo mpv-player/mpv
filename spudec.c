@@ -59,7 +59,9 @@ extern int sub_pos;
 
 typedef struct packet_t packet_t;
 struct packet_t {
+  int is_decoded;
   unsigned char *packet;
+  int data_len;
   unsigned int palette[4];
   unsigned int alpha[4];
   unsigned int control_start;	/* index of start of control data */
@@ -629,9 +631,28 @@ void spudec_heartbeat(void *this, unsigned int pts100)
     packet_t *packet = spudec_dequeue_packet(spu);
     spu->start_pts = packet->start_pts;
     spu->end_pts = packet->end_pts;
+    if (packet->is_decoded) {
+      free(spu->image);
+      spu->image_size = packet->data_len;
+      spu->image      = packet->packet;
+      spu->aimage     = packet->packet + packet->stride * packet->height;
+      packet->packet  = NULL;
+      spu->width      = packet->width;
+      spu->height     = packet->height;
+      spu->stride     = packet->stride;
+      spu->start_col  = packet->start_col;
+      spu->start_row  = packet->start_row;
+
+      // TODO use correct values
+      spu->scaled_frame_width = 0;
+      spu->scaled_frame_height = 0;
+      spu->orig_frame_width = 1920;
+      spu->orig_frame_height = 1080;
+    } else {
     if (spu->auto_palette)
       compute_palette(spu, packet);
     spudec_process_data(spu, packet);
+    }
     spudec_free_packet(packet);
     spu->spu_changed = 1;
   }
@@ -1259,4 +1280,55 @@ void spudec_set_hw_spu(void *this, struct vo *hw_spu)
     return;
   spu->hw_spu = hw_spu;
   vo_control(hw_spu, VOCTRL_SET_SPU_PALETTE, spu->global_palette);
+}
+
+#define MP_NOPTS_VALUE (-1LL<<63) //both int64_t and double should be able to represent this exactly
+
+/**
+ * palette must contain at least 256 32-bit entries, otherwise crashes
+ * are possible
+ */
+void spudec_set_paletted(void *this, const uint8_t *pal_img, int pal_stride,
+                         const void *palette,
+                         int x, int y, int w, int h,
+                         double pts, double endpts)
+{
+  packet_t *packet;
+  const uint32_t *pal = palette;
+  spudec_handle_t *spu = this;
+  uint8_t *img;
+  uint8_t *aimg;
+  int stride = (w + 7) & ~7;
+  if ((unsigned)w >= 0x8000 || (unsigned)h > 0x4000)
+    return;
+  packet = calloc(1, sizeof(packet_t));
+  packet->is_decoded = 1;
+  packet->width = w;
+  packet->height = h;
+  packet->stride = stride;
+  packet->start_col = x;
+  packet->start_row = y;
+  packet->data_len = 2 * stride * h;
+  packet->packet = malloc(packet->data_len);
+  img  = packet->packet;
+  aimg = packet->packet + stride * h;
+  for (y = 0; y < h; y++) {
+    for (x = 0; x < w; x++) {
+      uint32_t pixel = pal[pal_img[x]];
+      *aimg++ = -(pixel >> 24);
+      *img++  = (((pixel & 0x000000ff) >>  0) +
+                 ((pixel & 0x0000ff00) >>  7) +
+                 ((pixel & 0x00ff0000) >> 16)) >> 2;
+    }
+    for (; x < stride; x++)
+      *aimg++ = *img++ = 0;
+    pal_img += pal_stride;
+  }
+  packet->start_pts = 0;
+  packet->end_pts = 0x7fffffff;
+  if (pts != MP_NOPTS_VALUE)
+    packet->start_pts = pts * 90000;
+  if (endpts != MP_NOPTS_VALUE)
+    packet->end_pts = endpts * 90000;
+  spudec_queue_packet(spu, packet);
 }

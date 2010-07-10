@@ -36,5 +36,9 @@ void spudec_set_hw_spu(void *this, struct vo *hw_spu);
 int spudec_changed(void *this);
 void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int* bbox);
 void spudec_set_forced_subs_only(void * const this, const unsigned int flag);
+void spudec_set_paletted(void *this, const uint8_t *pal_img, int stride,
+                         const void *palette,
+                         int x, int y, int w, int h,
+                         double pts, double endpts);
 
 #endif /* MPLAYER_SPUDEC_H */

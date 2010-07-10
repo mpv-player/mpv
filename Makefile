@@ -111,6 +111,7 @@ SRCS_COMMON-$(LIBASS)                += ass_mp.c \
 
 SRCS_COMMON-$(LIBAVCODEC)            += av_opts.c \
                                         libaf/af_lavcac3enc.c \
+                                        av_sub.c \
                                         libaf/af_lavcresample.c \
                                         libmpcodecs/ad_ffmpeg.c \
                                         libmpcodecs/vd_ffmpeg.c \
