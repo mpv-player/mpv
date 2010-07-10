@@ -656,7 +656,7 @@ void spudec_set_forced_subs_only(void * const this, const unsigned int flag)
 void spudec_draw(void *this, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
 {
     spudec_handle_t *spu = (spudec_handle_t *)this;
-    if (spu->start_pts <= spu->now_pts && spu->now_pts < spu->end_pts && spu->image)
+    if (spudec_visible(spu))
     {
 	draw_alpha(spu->start_col, spu->start_row, spu->width, spu->height,
 		   spu->image, spu->aimage, spu->stride);
@@ -807,7 +807,7 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
   scale_pixel *table_x;
   scale_pixel *table_y;
 
-  if (spu->start_pts <= spu->now_pts && spu->now_pts < spu->end_pts) {
+  if (spudec_visible(spu)) {
 
     // check if only forced subtitles are requested
     if( (spu->forced_subs_only) && !(spu->is_forced_sub) ){
