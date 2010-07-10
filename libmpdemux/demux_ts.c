@@ -3151,6 +3151,10 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 				demuxer->filepos = stream_tell(demuxer->stream) - es->size;
 
+				if(es->size < 0 || es->size > buf_size) {
+					mp_msg(MSGT_DEMUX, MSGL_ERR, "Broken ES packet size\n");
+					es->size = 0;
+				}
 				memmove(p, es->start, es->size);
 				*dp_offset += es->size;
 				(*dp)->flags = 0;
