@@ -706,6 +706,9 @@ void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int
       bbox[3] = spu->start_row * scaley / 0x100 + spu->height * scaley / 0x100;
       break;
     }
+  } else {
+    mp_msg(MSGT_SPUDEC, MSGL_ERR, "Bad values in spudec_calc_bbox\n");
+    bbox[0] = bbox[1] = bbox[2] = bbox[3] = 0;
   }
 }
 /* transform mplayer's alpha value into an opacity value that is linear */
