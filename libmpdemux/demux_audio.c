@@ -481,13 +481,12 @@ static int demux_audio_open(demuxer_t* demuxer) {
 	    if (demuxer->movi_end > demuxer->movi_start) {
 	      // try to find out approx. bitrate
 	      int64_t size = demuxer->movi_end - demuxer->movi_start;
-	      int64_t num_samples = 0;
-	      int32_t srate = 0;
+	      int64_t num_samples;
+	      int32_t srate;
 	      stream_skip(s, 14);
-	      stream_read(s, (char *)&srate, 3);
-	      srate = be2me_32(srate) >> 12;
-	      stream_read(s, (char *)&num_samples, 5);
-	      num_samples = (be2me_64(num_samples) >> 24) & 0xfffffffffULL;
+	      srate = stream_read_int24(s) >> 4;
+	      num_samples  = stream_read_int24(s) << 16;
+	      num_samples |= stream_read_word(s);
 	      if (num_samples && srate)
 	        sh_audio->i_bps = size * srate / num_samples;
 	    }

@@ -630,8 +630,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
         for( i=0 ; i<stream_count ; i++ ) {
           stream_id = AV_RL16(ptr);
           ptr += sizeof(uint16_t);
-          memcpy(&max_bitrate, ptr, sizeof(uint32_t));// workaround unaligment bug on sparc
-          max_bitrate = le2me_32(max_bitrate);
+          max_bitrate = AV_RL32(ptr);
           ptr += sizeof(uint32_t);
           mp_msg(MSGT_HEADER,MSGL_V,"   stream id=[0x%x][%u]\n", stream_id, stream_id );
           mp_msg(MSGT_HEADER,MSGL_V,"   max bitrate=[0x%x][%u]\n", max_bitrate, max_bitrate );
@@ -651,8 +650,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
     return 0;
   }
   // read length of chunk
-  stream_read(demuxer->stream, (char *)&data_len, sizeof(data_len));
-  data_len = le2me_64(data_len);
+  data_len = stream_read_qword_le(demuxer->stream);
   demuxer->movi_start = stream_tell(demuxer->stream) + 26;
   demuxer->movi_end = start + data_len;
   mp_msg(MSGT_HEADER, MSGL_V, "Found movie at 0x%X - 0x%X\n",
