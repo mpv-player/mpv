@@ -8145,6 +8145,7 @@ $def_pthread_cache
 
 /* CPU stuff */
 #define __CPU__ $iproc
+$def_ebx_available
 $def_words_endian
 $def_bigendian
 $(ff_config_enable "$arch_all" "$arch" "ARCH")
@@ -8436,7 +8437,6 @@ $def_yasm
 #define CONFIG_RDFT 1
 
 /* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
-$def_ebx_available
 #ifndef MP_DEBUG
 #define HAVE_EBP_AVAILABLE 1
 #else
