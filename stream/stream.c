@@ -35,6 +35,8 @@
 #include <winsock2.h>
 #endif
 
+#include <libavutil/common.h>
+
 #include "mp_msg.h"
 #include "osdep/shmem.h"
 #include "osdep/timer.h"
