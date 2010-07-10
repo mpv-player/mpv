@@ -35,13 +35,10 @@ static MainAVIHeader avih;
 
 static int odml_get_vstream_id(int id, unsigned char res[])
 {
-    unsigned char *p = (unsigned char *)&id;
-    id = le2me_32(id);
-
-    if (p[2] == 'd') {
+    if ((char)(id >> 16) == 'd') {
 	if (res) {
-	    res[0] = p[0];
-	    res[1] = p[1];
+	    res[0] = id;
+	    res[1] = id >> 8;
 	}
 	return 1;
     }
