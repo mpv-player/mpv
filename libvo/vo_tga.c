@@ -67,7 +67,6 @@ const LIBVO_EXTERN (tga)
 
 /* locals vars */
 static int      frame_num = 0;
-static void     *line_buff;
 
 static void tga_make_header(uint8_t *h, int dx, int dy, int bpp)
 {
@@ -127,39 +126,6 @@ static int write_tga( char *file, int bpp, int dx, int dy, uint8_t *buf, int str
             int    wb;
 
             wb = ((bpp + 7) / 8) * dx;
-            if (bpp == 32) {
-                /* Setup the alpha channel for every pixel */
-                while (dy-- > 0) {
-                    uint8_t    *d;
-                    uint8_t    *s;
-                    int         x;
-
-                    s = buf;
-                    d = line_buff;
-                    for(x = 0; x < dx; x++) {
-                    #if HAVE_BIGENDIAN
-                        d[0] = s[3];
-                        d[1] = s[2];
-                        d[2] = s[1];
-                        d[3] = 0xff;
-                    #else
-                        d[0] = 0xff;
-                        d[1] = s[1];
-                        d[2] = s[2];
-                        d[3] = s[3];
-                    #endif
-                        d+=4;
-                        s+=4;
-                    }
-                    if (fwrite(line_buff, wb, 1, fo) != 1) {
-                        er = 4;
-                        break;
-                    }
-                    buf += stride;
-                }
-
-            }
-            else {
                 while (dy-- > 0) {
                     if (fwrite(buf, wb, 1, fo) != 1) {
                         er = 4;
@@ -167,7 +133,6 @@ static int write_tga( char *file, int bpp, int dx, int dy, uint8_t *buf, int str
                     }
                     buf += stride;
                 }
-            }
         }
         else {
             er = 2;
@@ -203,11 +168,6 @@ static uint32_t draw_image(mp_image_t* mpi)
 
 static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
-    /* buffer for alpha */
-    if(line_buff){ free(line_buff); line_buff=NULL; }
-    if (format == (IMGFMT_BGR | 32)) {
-        line_buff = malloc(width * 4);
-    }
     return 0;
 }
 
@@ -235,7 +195,7 @@ static int query_format(uint32_t format)
     switch(format){
         case IMGFMT_BGR|15:
         case IMGFMT_BGR|24:
-        case IMGFMT_BGR|32:
+        case IMGFMT_BGRA:
             return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     }
     return 0;
@@ -243,7 +203,6 @@ static int query_format(uint32_t format)
 
 static void uninit(void)
 {
-    if(line_buff){ free(line_buff); line_buff=NULL; }
 }
 
 static void check_events(void)
