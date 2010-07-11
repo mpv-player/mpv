@@ -673,12 +673,12 @@ void spudec_set_forced_subs_only(void * const this, const unsigned int flag)
   }
 }
 
-void spudec_draw(void *this, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
+void spudec_draw(void *this, void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx)
 {
     spudec_handle_t *spu = this;
     if (spudec_visible(spu))
     {
-	draw_alpha(spu->start_col, spu->start_row, spu->width, spu->height,
+	draw_alpha(ctx, spu->start_col, spu->start_row, spu->width, spu->height,
 		   spu->image, spu->aimage, spu->stride);
 	spu->spu_changed = 0;
     }
@@ -834,12 +834,7 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 
     if (!(spu_aamode&16) && (spu->orig_frame_width == 0 || spu->orig_frame_height == 0
 	|| (spu->orig_frame_width == dxs && spu->orig_frame_height == dys))) {
-      if (spu->image)
-      {
-	draw_alpha(ctx, spu->start_col, spu->start_row, spu->width, spu->height,
-		   spu->image, spu->aimage, spu->stride);
-	spu->spu_changed = 0;
-      }
+        spudec_draw(spu, draw_alpha, ctx);
     }
     else {
       if (spu->scaled_frame_width != dxs || spu->scaled_frame_height != dys) {	/* Resizing is needed */
