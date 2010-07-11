@@ -39,6 +39,13 @@ typedef struct af_resample_s{
     int linear;
     int phase_shift;
     double cutoff;
+
+    int ctx_out_rate;
+    int ctx_in_rate;
+    int ctx_filter_size;
+    int ctx_phase_shift;
+    int ctx_linear;
+    double ctx_cutoff;
 }af_resample_t;
 
 
@@ -61,8 +68,17 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->mul = (double)af->data->rate / data->rate;
     af->delay = af->data->nch * s->filter_length / min(af->mul, 1); // *bps*.5
 
-    if(s->avrctx) av_resample_close(s->avrctx);
-    s->avrctx= av_resample_init(af->data->rate, /*in_rate*/data->rate, s->filter_length, s->phase_shift, s->linear, s->cutoff);
+    if (s->ctx_out_rate != af->data->rate || s->ctx_in_rate != data->rate || s->ctx_filter_size != s->filter_length ||
+        s->ctx_phase_shift != s->phase_shift || s->ctx_linear != s->linear || s->ctx_cutoff != s->cutoff) {
+        if(s->avrctx) av_resample_close(s->avrctx);
+        s->avrctx= av_resample_init(af->data->rate, /*in_rate*/data->rate, s->filter_length, s->phase_shift, s->linear, s->cutoff);
+        s->ctx_out_rate    = af->data->rate;
+        s->ctx_in_rate     = data->rate;
+        s->ctx_filter_size = s->filter_length;
+        s->ctx_phase_shift = s->phase_shift;
+        s->ctx_linear      = s->linear;
+        s->ctx_cutoff      = s->cutoff;
+    }
 
     // hack to make af_test_output ignore the samplerate change
     out_rate = af->data->rate;
