@@ -94,7 +94,7 @@ static bool is_text_sub(int type)
 
 static bool is_av_sub(int type)
 {
-    return type == 'p';
+    return type == 'b' || type == 'p' || type == 'x';
 }
 
 void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,

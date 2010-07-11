@@ -425,6 +425,10 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 type = 'a';
             else if(codec->codec_id == CODEC_ID_DVD_SUBTITLE)
                 type = 'v';
+            else if(codec->codec_id == CODEC_ID_XSUB)
+                type = 'x';
+            else if(codec->codec_id == CODEC_ID_DVB_SUBTITLE)
+                type = 'b';
             else if(codec->codec_id == CODEC_ID_DVB_TELETEXT)
                 type = 'd';
             else if(codec->codec_id == CODEC_ID_HDMV_PGS_SUBTITLE)
