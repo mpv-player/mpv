@@ -643,11 +643,9 @@ void spudec_heartbeat(void *this, unsigned int pts100)
       spu->start_col  = packet->start_col;
       spu->start_row  = packet->start_row;
 
-      // TODO use correct values
+      // reset scaled image
       spu->scaled_frame_width = 0;
       spu->scaled_frame_height = 0;
-      spu->orig_frame_width = 1920;
-      spu->orig_frame_height = 1080;
     } else {
       if (spu->auto_palette)
         compute_palette(spu, packet);

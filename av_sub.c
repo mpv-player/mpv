@@ -38,11 +38,24 @@ void reset_avsub(struct sh_sub *sh)
 int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size, double *pts, double *endpts)
 {
     AVCodecContext *ctx = sh->context;
+    enum CodecID cid = CODEC_ID_NONE;
+    int srcw = 0, srch = 0;
     int new_type = 0;
     int res;
     int got_sub;
     AVSubtitle sub;
     AVPacket pkt;
+
+    switch (sh->type) {
+    case 'b':
+        cid = CODEC_ID_DVB_SUBTITLE; break;
+    case 'p':
+        srcw = 1920; srch = 1080;
+        cid = CODEC_ID_HDMV_PGS_SUBTITLE; break;
+    case 'x':
+        cid = CODEC_ID_XSUB; break;
+    }
+
     av_init_packet(&pkt);
     pkt.data = *data;
     pkt.size = *size;
@@ -50,19 +63,10 @@ int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size, double *pts, doub
     if (*pts != MP_NOPTS_VALUE && *endpts != MP_NOPTS_VALUE)
         pkt.convergence_duration = (*endpts - *pts) * 1000;
     if (!ctx) {
-        enum CodecID cid = CODEC_ID_NONE;
         AVCodec *sub_codec;
         avcodec_init();
         avcodec_register_all();
         ctx = avcodec_alloc_context();
-        switch (sh->type) {
-        case 'b':
-            cid = CODEC_ID_DVB_SUBTITLE; break;
-        case 'p':
-            cid = CODEC_ID_HDMV_PGS_SUBTITLE; break;
-        case 'x':
-            cid = CODEC_ID_XSUB; break;
-        }
         sub_codec = avcodec_find_decoder(cid);
         if (!ctx || !sub_codec || avcodec_open(ctx, sub_codec) < 0) {
             mp_msg(MSGT_SUBREADER, MSGL_FATAL, "Could not open subtitle decoder\n");
@@ -83,7 +87,7 @@ int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size, double *pts, doub
         switch (sub.rects[0]->type) {
         case SUBTITLE_BITMAP:
             if (!vo_spudec)
-                vo_spudec = spudec_new(NULL);
+                vo_spudec = spudec_new_scaled(NULL, srcw, srch, NULL, 0);
             spudec_set_paletted(vo_spudec,
                                 sub.rects[0]->pict.data[0],
                                 sub.rects[0]->pict.linesize[0],
