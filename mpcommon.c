@@ -135,7 +135,7 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
     }
 
     // DVD sub:
-    if (vobsub_id >= 0 || (opts->sub_id >= 0 && type == 'v')) {
+    if (vobsub_id >= 0 || type == 'v') {
         int timestamp;
         current_module = "spudec";
         /* Get a sub packet from the DVD or a vobsub */
@@ -178,7 +178,7 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
             if (vo_vobsub || timestamp >= 0)
                 spudec_assemble(vo_spudec, packet, len, timestamp);
         }
-    } else if (opts->sub_id >= 0 && (is_text_sub(type) || is_av_sub(type) || type == 'd')) {
+    } else if (is_text_sub(type) || is_av_sub(type) || type == 'd') {
         if (type == 'd' && !d_dvdsub->demuxer->teletext) {
             tt_stream_props tsp = {0};
             void *ptr = &tsp;
