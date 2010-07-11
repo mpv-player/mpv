@@ -102,10 +102,12 @@ int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size, double *pts, doub
             break;
         case SUBTITLE_TEXT:
             *data = strdup(sub.rects[0]->text);
+            *size = strlen(*data);
             new_type = 't';
             break;
         case SUBTITLE_ASS:
             *data = strdup(sub.rects[0]->ass);
+            *size = strlen(*data);
             new_type = 'a';
             break;
         }
