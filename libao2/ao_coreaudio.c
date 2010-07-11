@@ -352,10 +352,9 @@ ComponentDescription desc;
 Component comp;
 AURenderCallbackStruct renderCallback;
 OSStatus err;
-UInt32 size, maxFrames, i_param_size;
+UInt32 size, maxFrames, i_param_size, b_alive;
 char *psz_name;
 AudioDeviceID devid_def = 0;
-int b_alive;
 
     ao_msg(MSGT_AO,MSGL_V, "init([%dHz][%dch][%s][%d])\n", rate, channels, af_fmt2str_short(format), flags);
 
@@ -1043,7 +1042,7 @@ static void uninit(int immed)
 
       if (ao->b_changed_mixing && ao->sfmt_revert.mFormatID != kAudioFormat60958AC3)
       {
-          int b_mix;
+          UInt32 b_mix;
           Boolean b_writeable;
           /* Revert mixable to true if we are allowed to. */
           err = IsAudioPropertySettable(ao->i_selected_dev,
