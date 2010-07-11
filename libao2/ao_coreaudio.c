@@ -53,6 +53,7 @@
 #include "libaf/af_format.h"
 #include "osdep/timer.h"
 #include "libavutil/fifo.h"
+#include "subopt-helper.h"
 
 static const ao_info_t info =
   {
@@ -345,6 +346,51 @@ static OSStatus DeviceListener( AudioObjectID inObjectID,
                                 const AudioObjectPropertyAddress inAddresses[],
                                 void *inClientData );
 
+static void print_help(void)
+{
+    OSStatus err;
+    UInt32 i_param_size;
+    int num_devices;
+    AudioDeviceID *devids;
+    AudioObjectPropertyAddress property_address;
+    char *device_name;
+
+    mp_msg(MSGT_AO, MSGL_FATAL,
+           "\n-ao coreaudio commandline help:\n"
+           "Example: mplayer -ao coreaudio:device_id=266\n"
+           "    open Core Audio with output device ID 266.\n"
+           "\nOptions:\n"
+           "    device_id\n"
+           "        ID of output device to use (0 = default device)\n"
+           "    help\n"
+           "        This help including list of available devices.\n"
+           "\n"
+           "Available output devices:\n");
+
+    i_param_size = GetGlobalAudioPropertyArray(kAudioObjectSystemObject, kAudioHardwarePropertyDevices, (void **)&devids);
+
+    if (!i_param_size) {
+        mp_msg(MSGT_AO, MSGL_FATAL, "Failed to get list of output devices.\n");
+        return;
+    }
+
+    num_devices = i_param_size / sizeof(AudioDeviceID);
+
+    for (int i = 0; i < num_devices; ++i) {
+        err = GetAudioPropertyString(devids[i], kAudioObjectPropertyName, &device_name);
+
+        if (err == noErr) {
+            mp_msg(MSGT_AO, MSGL_FATAL, "%s (id: %"PRIu32")\n", device_name, devids[i]);
+            free(device_name);
+        } else
+            mp_msg(MSGT_AO, MSGL_FATAL, "Unknown (id: %"PRIu32")\n", devids[i]);
+    }
+
+    mp_msg(MSGT_AO, MSGL_FATAL, "\n");
+
+    free(devids);
+}
+
 static int init(int rate,int channels,int format,int flags)
 {
 AudioStreamBasicDescription inDesc;
@@ -355,6 +401,20 @@ OSStatus err;
 UInt32 size, maxFrames, i_param_size, b_alive;
 char *psz_name;
 AudioDeviceID devid_def = 0;
+int device_id;
+
+    const opt_t subopts[] = {
+        {"device_id", OPT_ARG_INT, &device_id, NULL},
+        {NULL}
+    };
+
+    // set defaults
+    device_id = 0;
+
+    if (subopt_parse(ao_subdevice, subopts) != 0) {
+        print_help();
+        return 0;
+    }
 
     ao_msg(MSGT_AO,MSGL_V, "init([%dHz][%dch][%s][%d])\n", rate, channels, af_fmt2str_short(format), flags);
 
@@ -371,9 +431,7 @@ AudioDeviceID devid_def = 0;
     ao->b_revert = 0;
     ao->b_changed_mixing = 0;
 
-    /* Probe whether device support S/PDIF stream output if input is AC3 stream. */
-    if (AF_FORMAT_IS_AC3(format))
-    {
+    if (device_id == 0) {
         /* Find the ID of the default Device. */
         err = GetAudioProperty(kAudioObjectSystemObject,
                                kAudioHardwarePropertyDefaultOutputDevice,
@@ -383,28 +441,35 @@ AudioDeviceID devid_def = 0;
             ao_msg(MSGT_AO, MSGL_WARN, "could not get default audio device: [%4.4s]\n", (char *)&err);
             goto err_out;
         }
+    } else {
+        devid_def = device_id;
+    }
 
-        /* Retrieve the name of the device. */
-        err = GetAudioPropertyString(devid_def,
-                                    kAudioObjectPropertyName,
-                                    &psz_name);
-        if (err != noErr)
-        {
-            ao_msg(MSGT_AO, MSGL_WARN, "could not get default audio device name: [%4.4s]\n", (char *)&err);
-            goto err_out;
-        }
+    /* Retrieve the name of the device. */
+    err = GetAudioPropertyString(devid_def,
+                                 kAudioObjectPropertyName,
+                                 &psz_name);
+    if (err != noErr)
+    {
+        ao_msg(MSGT_AO, MSGL_WARN, "could not get default audio device name: [%4.4s]\n", (char *)&err);
+        goto err_out;
+    }
 
-        ao_msg(MSGT_AO,MSGL_V, "got default audio output device ID: %"PRIu32" Name: %s\n", devid_def, psz_name );
+    ao_msg(MSGT_AO,MSGL_V, "got audio output device ID: %"PRIu32" Name: %s\n", devid_def, psz_name );
 
+    /* Probe whether device support S/PDIF stream output if input is AC3 stream. */
+    if (AF_FORMAT_IS_AC3(format)) {
         if (AudioDeviceSupportsDigital(devid_def))
         {
             ao->b_supports_digital = 1;
-            ao->i_selected_dev = devid_def;
         }
         ao_msg(MSGT_AO,MSGL_V, "probe default audio output device whether support digital s/pdif output:%d\n", ao->b_supports_digital );
-
-        free( psz_name);
     }
+
+    free(psz_name);
+
+    // Save selected device id
+    ao->i_selected_dev = devid_def;
 
 	// Build Description for the input format
 	inDesc.mSampleRate=rate;
@@ -441,6 +506,7 @@ AudioDeviceID devid_def = 0;
             ao_msg(MSGT_AO, MSGL_WARN, "could not check whether device is alive: [%4.4s]\n", (char *)&err);
         if (!b_alive)
             ao_msg(MSGT_AO, MSGL_WARN, "device is not alive\n" );
+
         /* S/PDIF output need device in HogMode. */
         err = GetAudioProperty(ao->i_selected_dev,
                                kAudioDevicePropertyHogMode,
@@ -464,7 +530,7 @@ AudioDeviceID devid_def = 0;
 
 	/* original analog output code */
 	desc.componentType = kAudioUnitType_Output;
-	desc.componentSubType = kAudioUnitSubType_DefaultOutput;
+	desc.componentSubType = (device_id == 0) ? kAudioUnitSubType_DefaultOutput : kAudioUnitSubType_HALOutput;
 	desc.componentManufacturer = kAudioUnitManufacturer_Apple;
 	desc.componentFlags = 0;
 	desc.componentFlagsMask = 0;
@@ -504,6 +570,9 @@ AudioDeviceID devid_def = 0;
 		ao_msg(MSGT_AO,MSGL_WARN, "AudioUnitGetProperty returned [%4.4s] when getting kAudioDevicePropertyBufferSize\n", (char *)&err);
 		goto err_out2;
 	}
+
+	//Set the Current Device to the Default Output Unit.
+    err = AudioUnitSetProperty(ao->theOutputUnit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &ao->i_selected_dev, sizeof(ao->i_selected_dev));
 
 	ao->chunk_size = maxFrames;//*inDesc.mBytesPerFrame;
 
@@ -547,11 +616,11 @@ err_out:
  *****************************************************************************/
 static int OpenSPDIF(void)
 {
-    OSStatus                err = noErr;
-    UInt32                  i_param_size, b_mix = 0;
-    Boolean                 b_writeable = 0;
-    AudioStreamID           *p_streams = NULL;
-    int                     i, i_streams = 0;
+    OSStatus                    err = noErr;
+    UInt32                      i_param_size, b_mix = 0;
+    Boolean                     b_writeable = 0;
+    AudioStreamID               *p_streams = NULL;
+    int                         i, i_streams = 0;
     AudioObjectPropertyAddress  property_address;
 
     /* Start doing the SPDIF setup process. */
