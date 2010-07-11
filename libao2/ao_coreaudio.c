@@ -200,7 +200,7 @@ Float32 vol;
 
 static void print_format(int lev, const char* str, const AudioStreamBasicDescription *f){
     uint32_t flags=(uint32_t) f->mFormatFlags;
-    ao_msg(MSGT_AO,lev, "%s %7.1fHz %lubit [%c%c%c%c][%lu][%lu][%lu][%lu][%lu] %s %s %s%s%s%s\n",
+    ao_msg(MSGT_AO,lev, "%s %7.1fHz %"PRIu32"bit [%c%c%c%c][%"PRIu32"][%"PRIu32"][%"PRIu32"][%"PRIu32"][%"PRIu32"] %s %s %s%s%s%s\n",
 	    str, f->mSampleRate, f->mBitsPerChannel,
 	    (int)(f->mFormatID & 0xff000000) >> 24,
 	    (int)(f->mFormatID & 0x00ff0000) >> 16,
@@ -302,7 +302,7 @@ int b_alive;
             goto err_out;
         }
 
-        ao_msg(MSGT_AO,MSGL_V, "got default audio output device ID: %#lx Name: %s\n", devid_def, psz_name );
+        ao_msg(MSGT_AO,MSGL_V, "got default audio output device ID: %"PRIu32" Name: %s\n", devid_def, psz_name );
 
         if (AudioDeviceSupportsDigital(devid_def))
         {
