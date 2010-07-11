@@ -649,9 +649,9 @@ void spudec_heartbeat(void *this, unsigned int pts100)
       spu->orig_frame_width = 1920;
       spu->orig_frame_height = 1080;
     } else {
-    if (spu->auto_palette)
-      compute_palette(spu, packet);
-    spudec_process_data(spu, packet);
+      if (spu->auto_palette)
+        compute_palette(spu, packet);
+      spudec_process_data(spu, packet);
     }
     spudec_free_packet(packet);
     spu->spu_changed = 1;
