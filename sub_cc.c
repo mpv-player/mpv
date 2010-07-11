@@ -300,7 +300,6 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
     case 0xfe:
       /* expect 2 byte encoding (perhaps CC3, CC4?) */
       /* ignore for time being */
-      skip = 2;
       break;
 
     case 0xff:
@@ -314,14 +313,11 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
 
     case 0x00:
       /* This seems to be just padding */
-      skip = 2;
       break;
 
     case 0x01:
       odd_offset = data2 & 0x80;
-      if (odd_offset)
-	skip = 2;
-      else
+      if (!odd_offset)
 	skip = 5;
       break;
 
@@ -329,7 +325,6 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
 //#ifdef LOG_DEBUG
       fprintf(stderr, "Unknown CC encoding: %x\n", cc_code);
 //#endif
-      skip = 2;
       break;
     }
     current += skip;
