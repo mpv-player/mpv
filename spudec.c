@@ -1309,10 +1309,12 @@ void spudec_set_paletted(void *this, const uint8_t *pal_img, int pal_stride,
   for (y = 0; y < h; y++) {
     for (x = 0; x < w; x++) {
       uint32_t pixel = pal[pal_img[x]];
-      *aimg++ = -(pixel >> 24);
-      *img++  = (((pixel & 0x000000ff) >>  0) +
-                 ((pixel & 0x0000ff00) >>  7) +
-                 ((pixel & 0x00ff0000) >> 16)) >> 2;
+      int alpha = pixel >> 24;
+      int gray = (((pixel & 0x000000ff) >>  0) +
+                  ((pixel & 0x0000ff00) >>  7) +
+                  ((pixel & 0x00ff0000) >> 16)) >> 2;
+      *aimg++ = -alpha;
+      *img++  = FFMIN(gray, alpha);
     }
     for (; x < stride; x++)
       *aimg++ = *img++ = 0;
