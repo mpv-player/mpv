@@ -1228,6 +1228,7 @@ void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigne
   spudec_handle_t *this = calloc(1, sizeof(spudec_handle_t));
   if (this){
     this->orig_frame_height = frame_height;
+    this->orig_frame_width  = frame_width;
     // set up palette:
     if (palette)
       memcpy(this->global_palette, palette, sizeof(this->global_palette));
