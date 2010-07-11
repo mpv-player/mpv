@@ -97,7 +97,9 @@ int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size, double *pts, doub
             break;
         }
     }
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 82, 0)
     if (got_sub)
-        ; // TODO: free sub once there is a free function...
+        avsubtitle_free(&sub);
+#endif
     return new_type;
 }
