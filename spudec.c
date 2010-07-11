@@ -1285,6 +1285,8 @@ void spudec_set_paletted(void *this, const uint8_t *pal_img, int pal_stride,
                          int x, int y, int w, int h,
                          double pts, double endpts)
 {
+  int i;
+  uint16_t g8a8_pal[256];
   packet_t *packet;
   const uint32_t *pal = palette;
   spudec_handle_t *spu = this;
@@ -1304,17 +1306,20 @@ void spudec_set_paletted(void *this, const uint8_t *pal_img, int pal_stride,
   packet->packet = malloc(packet->data_len);
   img  = packet->packet;
   aimg = packet->packet + stride * h;
-  // TODO: this would be a lot faster by converting the
-  // palette first.
-  for (y = 0; y < h; y++) {
-    for (x = 0; x < w; x++) {
-      uint32_t pixel = pal[pal_img[x]];
+  for (i = 0; i < 256; i++) {
+      uint32_t pixel = pal[i];
       int alpha = pixel >> 24;
       int gray = (((pixel & 0x000000ff) >>  0) +
                   ((pixel & 0x0000ff00) >>  7) +
                   ((pixel & 0x00ff0000) >> 16)) >> 2;
-      *aimg++ = -alpha;
-      *img++  = FFMIN(gray, alpha);
+      gray = FFMIN(gray, alpha);
+      g8a8_pal[i] = (-alpha << 8) | gray;
+  }
+  for (y = 0; y < h; y++) {
+    for (x = 0; x < w; x++) {
+      uint16_t pixel = g8a8_pal[pal_img[x]];
+      *img++  = pixel;
+      *aimg++ = pixel >> 8;
     }
     for (; x < stride; x++)
       *aimg++ = *img++ = 0;
