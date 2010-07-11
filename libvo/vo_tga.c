@@ -193,7 +193,7 @@ static int draw_frame(uint8_t * src[])
 static int query_format(uint32_t format)
 {
     switch(format){
-        case IMGFMT_BGR15:
+        case IMGFMT_BGR15LE:
         case IMGFMT_BGR24:
         case IMGFMT_BGRA:
             return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
