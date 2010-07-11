@@ -533,13 +533,13 @@ static void spudec_decode(spudec_handle_t *this, int pts100)
 
 int spudec_changed(void * this)
 {
-    spudec_handle_t * spu = (spudec_handle_t*)this;
+    spudec_handle_t * spu = this;
     return spu->spu_changed || spu->now_pts > spu->end_pts;
 }
 
 void spudec_assemble(void *this, unsigned char *packet, unsigned int len, int pts100)
 {
-  spudec_handle_t *spu = (spudec_handle_t*)this;
+  spudec_handle_t *spu = this;
 //  spudec_heartbeat(this, pts100);
   if (len < 2) {
       mp_msg(MSGT_SPUDEC,MSGL_WARN,"SPUasm: packet too short\n");
@@ -613,7 +613,7 @@ void spudec_assemble(void *this, unsigned char *packet, unsigned int len, int pt
 
 void spudec_reset(void *this)	// called after seek
 {
-  spudec_handle_t *spu = (spudec_handle_t*)this;
+  spudec_handle_t *spu = this;
   while (spu->queue_head)
     spudec_free_packet(spudec_dequeue_packet(spu));
   spu->now_pts = 0;
@@ -623,7 +623,7 @@ void spudec_reset(void *this)	// called after seek
 
 void spudec_heartbeat(void *this, unsigned int pts100)
 {
-  spudec_handle_t *spu = (spudec_handle_t*) this;
+  spudec_handle_t *spu = this;
   spu->now_pts = pts100;
 
   // TODO: detect and handle broken timestamps (e.g. due to wrapping)
@@ -657,7 +657,7 @@ void spudec_heartbeat(void *this, unsigned int pts100)
 }
 
 int spudec_visible(void *this){
-    spudec_handle_t *spu = (spudec_handle_t *)this;
+    spudec_handle_t *spu = this;
     int ret=(spu->start_pts <= spu->now_pts &&
 	     spu->now_pts < spu->end_pts &&
 	     spu->height > 0);
@@ -675,7 +675,7 @@ void spudec_set_forced_subs_only(void * const this, const unsigned int flag)
 
 void spudec_draw(void *this, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
 {
-    spudec_handle_t *spu = (spudec_handle_t *)this;
+    spudec_handle_t *spu = this;
     if (spudec_visible(spu))
     {
 	draw_alpha(spu->start_col, spu->start_row, spu->width, spu->height,
@@ -687,8 +687,7 @@ void spudec_draw(void *this, void (*draw_alpha)(int x0,int y0, int w,int h, unsi
 /* calc the bbox for spudec subs */
 void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int* bbox)
 {
-  spudec_handle_t *spu;
-  spu = (spudec_handle_t *)me;
+  spudec_handle_t *spu = me;
   if (spu->orig_frame_width == 0 || spu->orig_frame_height == 0
   || (spu->orig_frame_width == dxs && spu->orig_frame_height == dys)) {
     // unscaled
@@ -733,7 +732,7 @@ void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int
 /* transform mplayer's alpha value into an opacity value that is linear */
 static inline int canon_alpha(int alpha)
 {
-  return alpha ? 256 - alpha : 0;
+  return (uint8_t)-alpha;
 }
 
 typedef struct {
@@ -822,7 +821,7 @@ static void sws_spu_image(unsigned char *d1, unsigned char *d2, int dw, int dh,
 
 void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx)
 {
-  spudec_handle_t *spu = (spudec_handle_t *)me;
+  spudec_handle_t *spu = me;
   scale_pixel *table_x;
   scale_pixel *table_y;
 
@@ -1153,7 +1152,7 @@ nothing_to_do:
 
 void spudec_update_palette(void * this, unsigned int *palette)
 {
-  spudec_handle_t *spu = (spudec_handle_t *) this;
+  spudec_handle_t *spu = this;
   if (spu && palette) {
     memcpy(spu->global_palette, palette, sizeof(spu->global_palette));
     if(spu->hw_spu)
@@ -1163,7 +1162,7 @@ void spudec_update_palette(void * this, unsigned int *palette)
 
 void spudec_set_font_factor(void * this, double factor)
 {
-  spudec_handle_t *spu = (spudec_handle_t *) this;
+  spudec_handle_t *spu = this;
   spu->font_start_level = (int)(0xF0-(0xE0*factor));
 }
 
@@ -1257,7 +1256,7 @@ void *spudec_new(unsigned int *palette)
 
 void spudec_free(void *this)
 {
-  spudec_handle_t *spu = (spudec_handle_t*)this;
+  spudec_handle_t *spu = this;
   if (spu) {
     while (spu->queue_head)
       spudec_free_packet(spudec_dequeue_packet(spu));
@@ -1273,7 +1272,7 @@ void spudec_free(void *this)
 
 void spudec_set_hw_spu(void *this, struct vo *hw_spu)
 {
-  spudec_handle_t *spu = (spudec_handle_t*)this;
+  spudec_handle_t *spu = this;
   if (!spu)
     return;
   spu->hw_spu = hw_spu;
@@ -1310,6 +1309,8 @@ void spudec_set_paletted(void *this, const uint8_t *pal_img, int pal_stride,
   packet->packet = malloc(packet->data_len);
   img  = packet->packet;
   aimg = packet->packet + stride * h;
+  // TODO: this would be a lot faster by converting the
+  // palette first.
   for (y = 0; y < h; y++) {
     for (x = 0; x < w; x++) {
       uint32_t pixel = pal[pal_img[x]];
