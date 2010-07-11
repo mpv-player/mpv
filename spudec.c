@@ -691,12 +691,14 @@ void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int
   spu = (spudec_handle_t *)me;
   if (spu->orig_frame_width == 0 || spu->orig_frame_height == 0
   || (spu->orig_frame_width == dxs && spu->orig_frame_height == dys)) {
+    // unscaled
     bbox[0] = spu->start_col;
     bbox[1] = spu->start_col + spu->width;
     bbox[2] = spu->start_row;
     bbox[3] = spu->start_row + spu->height;
   }
-  else if (spu->scaled_frame_width != dxs || spu->scaled_frame_height != dys) {
+  else {
+    // scaled
     unsigned int scalex = 0x100 * dxs / spu->orig_frame_width;
     unsigned int scaley = 0x100 * dys / spu->orig_frame_height;
     bbox[0] = spu->start_col * scalex / 0x100;
@@ -726,9 +728,6 @@ void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int
       bbox[3] = spu->start_row * scaley / 0x100 + spu->height * scaley / 0x100;
       break;
     }
-  } else {
-    mp_msg(MSGT_SPUDEC, MSGL_ERR, "Bad values in spudec_calc_bbox\n");
-    bbox[0] = bbox[1] = bbox[2] = bbox[3] = 0;
   }
 }
 /* transform mplayer's alpha value into an opacity value that is linear */
