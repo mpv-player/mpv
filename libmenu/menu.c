@@ -738,24 +738,6 @@ int menu_text_num_lines(char* txt, int max_width) {
   return l;
 }
 
-static char* menu_text_get_next_line(char* txt, int max_width)
-{
-  int i = 0;
-  render_txt(txt);
-  while (*txt) {
-    int c=utf8_get_char((const char**)&txt);
-    if(c == '\n') {
-      txt++;
-      break;
-    }
-    i += vo_font->width[c];
-    if(i >= max_width)
-      break;
-    i += vo_font->charspace;
-  }
-  return txt;
-}
-
 
 void menu_draw_box(mp_image_t* mpi,unsigned char grey,unsigned char alpha, int x, int y, int w, int h) {
   draw_alpha_f draw_alpha = get_draw_alpha(mpi->imgfmt);
