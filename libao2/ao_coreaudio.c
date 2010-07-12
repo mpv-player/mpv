@@ -352,7 +352,6 @@ static void print_help(void)
     UInt32 i_param_size;
     int num_devices;
     AudioDeviceID *devids;
-    AudioObjectPropertyAddress property_address;
     char *device_name;
 
     mp_msg(MSGT_AO, MSGL_FATAL,
@@ -398,7 +397,7 @@ ComponentDescription desc;
 Component comp;
 AURenderCallbackStruct renderCallback;
 OSStatus err;
-UInt32 size, maxFrames, i_param_size, b_alive;
+UInt32 size, maxFrames, b_alive;
 char *psz_name;
 AudioDeviceID devid_def = 0;
 int device_id;
@@ -852,7 +851,6 @@ err_out:
  *****************************************************************************/
 static int AudioDeviceSupportsDigital( AudioDeviceID i_dev_id )
 {
-    OSStatus                    err = noErr;
     UInt32                      i_param_size = 0;
     AudioStreamID               *p_streams = NULL;
     int                         i = 0, i_streams = 0;
@@ -886,7 +884,6 @@ static int AudioDeviceSupportsDigital( AudioDeviceID i_dev_id )
  *****************************************************************************/
 static int AudioStreamSupportsDigital( AudioStreamID i_stream_id )
 {
-    OSStatus err = noErr;
     UInt32 i_param_size;
     AudioStreamBasicDescription *p_format_list = NULL;
     int i, i_formats, b_return = CONTROL_FALSE;
@@ -1088,7 +1085,6 @@ static float get_delay(void)
 static void uninit(int immed)
 {
   OSStatus            err = noErr;
-  UInt32              i_param_size = 0;
 
   if (!immed) {
     long long timeleft=(1000000LL*av_fifo_size(ao->buffer))/ao_data.bps;
