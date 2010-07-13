@@ -210,6 +210,9 @@ static int preinit(sh_audio_t *sh)
 #ifdef AD_MPG123_SEEKBUFFER
     mpg123_param(con->handle, MPG123_ADD_FLAGS, 0x100, 0.0);
 #endif
+    /* Do not bail out on malformed streams at all.
+     * MPlayer does not handle a decoder throwing the towel on crappy input. */
+    mpg123_param(con->handle, MPG123_RESYNC_LIMIT, -1, 0.0);
 
     /* Open decisions: Configure libmpg123 to force encoding (or stay open about
      * library builds that support only float or int32 output), (de)configure
