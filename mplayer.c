@@ -3496,6 +3496,7 @@ while (player_idle_mode && !mpctx->filename) {
         case MP_CMD_QUIT:
             exit_player_with_rc(mpctx, EXIT_QUIT, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
             break;
+        case MP_CMD_VO_FULLSCREEN:
         case MP_CMD_GET_PROPERTY:
         case MP_CMD_SET_PROPERTY:
         case MP_CMD_STEP_PROPERTY:
