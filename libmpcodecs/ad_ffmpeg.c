@@ -52,6 +52,44 @@ static int preinit(sh_audio_t *sh)
   return 1;
 }
 
+static int setup_format(sh_audio_t *sh_audio, const AVCodecContext *lavc_context)
+{
+    int broken_srate = 0;
+    int samplerate    = lavc_context->sample_rate;
+    int sample_format = sh_audio->sample_format;
+    switch (lavc_context->sample_fmt) {
+        case SAMPLE_FMT_U8:  sample_format = AF_FORMAT_U8;       break;
+        case SAMPLE_FMT_S16: sample_format = AF_FORMAT_S16_NE;   break;
+        case SAMPLE_FMT_S32: sample_format = AF_FORMAT_S32_NE;   break;
+        case SAMPLE_FMT_FLT: sample_format = AF_FORMAT_FLOAT_NE; break;
+        default:
+            mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Unsupported sample format\n");
+    }
+    if(sh_audio->wf){
+        // If the decoder uses the wrong number of channels all is lost anyway.
+        // sh_audio->channels=sh_audio->wf->nChannels;
+
+        if (lavc_context->codec_id == CODEC_ID_AAC &&
+            samplerate == 2*sh_audio->wf->nSamplesPerSec) {
+            broken_srate = 1;
+        } else if (sh_audio->wf->nSamplesPerSec)
+            samplerate=sh_audio->wf->nSamplesPerSec;
+    }
+    if (lavc_context->channels != sh_audio->channels ||
+        samplerate != sh_audio->samplerate ||
+        sample_format != sh_audio->sample_format) {
+        sh_audio->channels=lavc_context->channels;
+        sh_audio->samplerate=samplerate;
+        sh_audio->sample_format = sample_format;
+        sh_audio->samplesize=af_fmt2bits(sh_audio->sample_format)/ 8;
+        if (broken_srate)
+            mp_msg(MSGT_DECAUDIO, MSGL_WARN,
+                   "Ignoring broken container sample rate for AAC with SBR\n");
+        return 1;
+    }
+    return 0;
+}
+
 static int init(sh_audio_t *sh_audio)
 {
     struct MPOpts *opts = sh_audio->opts;
@@ -133,32 +171,19 @@ static int init(sh_audio_t *sh_audio)
    } while (x <= 0 && tries++ < 5);
    if(x>0) sh_audio->a_buffer_len=x;
 
-  sh_audio->channels=lavc_context->channels;
-  sh_audio->samplerate=lavc_context->sample_rate;
   sh_audio->i_bps=lavc_context->bit_rate/8;
+  if (sh_audio->wf && sh_audio->wf->nAvgBytesPerSec)
+      sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
+
   switch (lavc_context->sample_fmt) {
-      case SAMPLE_FMT_U8:  sh_audio->sample_format = AF_FORMAT_U8;       break;
-      case SAMPLE_FMT_S16: sh_audio->sample_format = AF_FORMAT_S16_NE;   break;
-      case SAMPLE_FMT_S32: sh_audio->sample_format = AF_FORMAT_S32_NE;   break;
-      case SAMPLE_FMT_FLT: sh_audio->sample_format = AF_FORMAT_FLOAT_NE; break;
+      case SAMPLE_FMT_U8:
+      case SAMPLE_FMT_S16:
+      case SAMPLE_FMT_S32:
+      case SAMPLE_FMT_FLT:
+          break;
       default:
-          mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Unsupported sample format\n");
           return 0;
   }
-  /* If the audio is AAC the container level data may be unreliable
-   * because of SBR handling problems (possibly half real sample rate at
-   * container level). Default AAC decoding with ad_faad has used codec-level
-   * values for a long time without generating complaints so it should be OK.
-   */
-  if (sh_audio->wf && lavc_context->codec_id != CODEC_ID_AAC) {
-      // If the decoder uses the wrong number of channels all is lost anyway.
-      // sh_audio->channels=sh_audio->wf->nChannels;
-      if (sh_audio->wf->nSamplesPerSec)
-      sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
-      if (sh_audio->wf->nAvgBytesPerSec)
-      sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
-  }
-  sh_audio->samplesize=af_fmt2bits(sh_audio->sample_format)/ 8;
   return 1;
 }
 
@@ -232,6 +257,9 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 	  sh_audio->pts_bytes += len2;
 	}
         mp_dbg(MSGT_DECAUDIO,MSGL_DBG2,"Decoded %d -> %d  \n",y,len2);
+
+        if (setup_format(sh_audio, sh_audio->context))
+            break;
     }
   return len;
 }

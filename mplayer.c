@@ -1764,49 +1764,54 @@ void reinit_audio_chain(struct MPContext *mpctx)
     struct MPOpts *opts = &mpctx->opts;
     if (!mpctx->sh_audio)
         return;
-    current_module="init_audio_codec";
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-    if(!init_best_audio_codec(mpctx->sh_audio,audio_codec_list,audio_fm_list)){
-        goto init_error;
+    if (!(mpctx->initialized_flags & INITIALIZED_ACODEC)) {
+        current_module="init_audio_codec";
+        mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+        if(!init_best_audio_codec(mpctx->sh_audio,audio_codec_list,audio_fm_list)){
+            goto init_error;
+        }
+        mpctx->initialized_flags|=INITIALIZED_ACODEC;
+        mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
     }
-    mpctx->initialized_flags|=INITIALIZED_ACODEC;
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
 
-    current_module="af_preinit";
-    ao_data.samplerate=force_srate;
-    ao_data.channels=0;
-    ao_data.format=audio_output_format;
-    // first init to detect best values
-    if(!init_audio_filters(mpctx->sh_audio,   // preliminary init
-                           // input:
-                           mpctx->sh_audio->samplerate,
-                           // output:
-                           &ao_data.samplerate, &ao_data.channels, &ao_data.format)){
-        mp_tmsg(MSGT_CPLAYER,MSGL_ERR, "Error at audio filter chain "
-                "pre-init!\n");
-        exit_player(mpctx, EXIT_ERROR);
+    if (!(mpctx->initialized_flags & INITIALIZED_AO)) {
+        current_module="af_preinit";
+        ao_data.samplerate=force_srate;
+        ao_data.channels=0;
+        ao_data.format=audio_output_format;
+        // first init to detect best values
+        if(!init_audio_filters(mpctx->sh_audio,   // preliminary init
+                               // input:
+                               mpctx->sh_audio->samplerate,
+                               // output:
+                               &ao_data.samplerate, &ao_data.channels, &ao_data.format)){
+            mp_tmsg(MSGT_CPLAYER,MSGL_ERR, "Error at audio filter chain "
+                    "pre-init!\n");
+            exit_player(mpctx, EXIT_ERROR);
+        }
+        current_module="ao2_init";
+        mpctx->audio_out = init_best_audio_out(opts->audio_driver_list,
+                                               0, // plugin flag
+                                               ao_data.samplerate,
+                                               ao_data.channels,
+                                               ao_data.format, 0);
+        if(!mpctx->audio_out){
+            mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Could not open/initialize audio device -> no sound.\n");
+            goto init_error;
+        }
+        mpctx->initialized_flags|=INITIALIZED_AO;
+        mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
+               mpctx->audio_out->info->short_name,
+               ao_data.samplerate, ao_data.channels,
+               af_fmt2str_short(ao_data.format),
+               af_fmt2bits(ao_data.format)/8 );
+        mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Description: %s\nAO: Author: %s\n",
+               mpctx->audio_out->info->name, mpctx->audio_out->info->author);
+        if(strlen(mpctx->audio_out->info->comment) > 0)
+            mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Comment: %s\n", mpctx->audio_out->info->comment);
     }
-    current_module="ao2_init";
-    mpctx->audio_out = init_best_audio_out(opts->audio_driver_list,
-                                           0, // plugin flag
-                                           ao_data.samplerate,
-                                           ao_data.channels,
-                                           ao_data.format, 0);
-    if(!mpctx->audio_out){
-        mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Could not open/initialize audio device -> no sound.\n");
-        goto init_error;
-    }
-    mpctx->initialized_flags|=INITIALIZED_AO;
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
-           mpctx->audio_out->info->short_name,
-           ao_data.samplerate, ao_data.channels,
-           af_fmt2str_short(ao_data.format),
-           af_fmt2bits(ao_data.format)/8 );
-    mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Description: %s\nAO: Author: %s\n",
-           mpctx->audio_out->info->name, mpctx->audio_out->info->author);
-    if(strlen(mpctx->audio_out->info->comment) > 0)
-        mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Comment: %s\n", mpctx->audio_out->info->comment);
+
     // init audio filters:
     current_module="af_init";
     if(!build_afilter_chain(mpctx, mpctx->sh_audio, &ao_data)) {
@@ -2167,6 +2172,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     int playsize;
     int playflags=0;
     int audio_eof=0;
+    bool format_change = false;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
 
     current_module="play_audio";
@@ -2192,12 +2198,16 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     // Fill buffer if needed:
     current_module="decode_audio";
     t = GetTimer();
-    if (decode_audio(sh_audio, playsize) < 0) // EOF or error
-        if (mpctx->d_audio->eof) {
+    int res = decode_audio(sh_audio, playsize);
+    if (res < 0) {  // EOF, error or format change
+        if (res == -2)
+            format_change = true;
+        else if (mpctx->d_audio->eof) {
             audio_eof = 1;
             if (sh_audio->a_out_buffer_len == 0)
                 return 0;
         }
+    }
     t = GetTimer() - t;
     tt = t*0.000001f; audio_time_usage+=tt;
     if (playsize > sh_audio->a_out_buffer_len) {
@@ -2228,6 +2238,15 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
         // partial chunks and doesn't check for AOPLAY_FINAL_CHUNK
         mp_msg(MSGT_CPLAYER, MSGL_WARN, "Audio output truncated at end.\n");
         sh_audio->a_out_buffer_len = 0;
+    }
+
+    /* The format change isn't handled too gracefully. A more precise
+     * implementation would require draining buffered old-format audio
+     * while displaying video, then doing the output format switch.
+     */
+    if (format_change) {
+        uninit_player(mpctx, INITIALIZED_AO);
+        reinit_audio_chain(mpctx);
     }
 
     return 1;
