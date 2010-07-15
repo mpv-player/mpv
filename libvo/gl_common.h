@@ -347,6 +347,9 @@ int loadGPUProgram(GLenum target, char *prog);
 #define YUV_LUM_SCALER(t) (((t) >> YUV_LUM_SCALER_SHIFT) & YUV_SCALER_MASK)
 //! extract chrominance scaler out of type
 #define YUV_CHROM_SCALER(t) (((t) >> YUV_CHROM_SCALER_SHIFT) & YUV_SCALER_MASK)
+#define SET_YUV_CONVERSION(c)   ((c) & YUV_CONVERSION_MASK)
+#define SET_YUV_LUM_SCALER(s)   (((s) & YUV_SCALER_MASK) << YUV_LUM_SCALER_SHIFT)
+#define SET_YUV_CHROM_SCALER(s) (((s) & YUV_SCALER_MASK) << YUV_CHROM_SCALER_SHIFT)
 /** \} */
 
 typedef struct {

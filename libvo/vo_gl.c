@@ -534,7 +534,9 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
   int scale_type = mipmap_gen ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR;
   autodetectGlExtensions();
   gl_target = use_rectangle == 1 ? GL_TEXTURE_RECTANGLE : GL_TEXTURE_2D;
-  yuvconvtype = use_yuv | lscale << YUV_LUM_SCALER_SHIFT | cscale << YUV_CHROM_SCALER_SHIFT;
+  yuvconvtype = SET_YUV_CONVERSION(use_yuv) |
+                SET_YUV_LUM_SCALER(lscale) |
+                SET_YUV_CHROM_SCALER(cscale);
 
   texSize(image_width, image_height, &texture_width, &texture_height);
 
