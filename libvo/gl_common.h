@@ -342,11 +342,11 @@ int loadGPUProgram(GLenum target, char *prog);
 //! shift value for chrominance scaler type
 #define YUV_CHROM_SCALER_SHIFT 12
 //! extract conversion out of type
-#define YUV_CONVERSION(t) (t & YUV_CONVERSION_MASK)
+#define YUV_CONVERSION(t) ((t) & YUV_CONVERSION_MASK)
 //! extract luminance scaler out of type
-#define YUV_LUM_SCALER(t) ((t >> YUV_LUM_SCALER_SHIFT) & YUV_SCALER_MASK)
+#define YUV_LUM_SCALER(t) (((t) >> YUV_LUM_SCALER_SHIFT) & YUV_SCALER_MASK)
 //! extract chrominance scaler out of type
-#define YUV_CHROM_SCALER(t) ((t >> YUV_CHROM_SCALER_SHIFT) & YUV_SCALER_MASK)
+#define YUV_CHROM_SCALER(t) (((t) >> YUV_CHROM_SCALER_SHIFT) & YUV_SCALER_MASK)
 /** \} */
 
 typedef struct {
