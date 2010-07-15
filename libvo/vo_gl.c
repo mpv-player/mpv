@@ -549,6 +549,11 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
   mp_msg(MSGT_VO, MSGL_V, "[gl] Creating %dx%d texture...\n",
           texture_width, texture_height);
 
+  glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, scale_type,
+                   texture_width, texture_height, 0);
+  if (mipmap_gen)
+    mpglTexParameteri(gl_target, GL_GENERATE_MIPMAP, GL_TRUE);
+
   if (is_yuv) {
     int i;
     int xs, ys;
@@ -586,10 +591,6 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
     }
     update_yuvconv();
   }
-  glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, scale_type,
-                   texture_width, texture_height, 0);
-  if (mipmap_gen)
-    mpglTexParameteri(gl_target, GL_GENERATE_MIPMAP, GL_TRUE);
 
   resize(d_width, d_height);
 
