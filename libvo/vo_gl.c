@@ -526,12 +526,19 @@ static void autodetectGlExtensions(void) {
          ati_hack, force_pbo, use_rectangle, use_yuv);
 }
 
+static GLint get_scale_type(int chroma) {
+  int nearest = (chroma ? cscale : lscale) & 64;
+  if (nearest)
+    return mipmap_gen ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST;
+  return mipmap_gen ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR;
+}
+
 /**
  * \brief Initialize a (new or reused) OpenGL context.
  * set global gl-related variables to their default values
  */
 static int initGl(uint32_t d_width, uint32_t d_height) {
-  int scale_type = mipmap_gen ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR;
+  GLint scale_type = get_scale_type(0);
   autodetectGlExtensions();
   gl_target = use_rectangle == 1 ? GL_TEXTURE_RECTANGLE : GL_TEXTURE_2D;
   yuvconvtype = SET_YUV_CONVERSION(use_yuv) |
@@ -559,6 +566,7 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
   if (is_yuv) {
     int i;
     int xs, ys;
+    scale_type = get_scale_type(1);
     mp_get_chroma_shift(image_format, &xs, &ys);
     mpglGenTextures(21, default_texs);
     default_texs[21] = 0;
