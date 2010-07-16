@@ -2062,7 +2062,7 @@ mplayer <replaceable>fichier_source.vob</replaceable> -aid 129 -dumpaudio -dumpf
   lisez <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">comparaison des filtres de désentrelacement</ulink>
   de Michael Niedermayer,
   et fouillez dans les
-  <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">
+  <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">
   listes de diffusion MPlayer</ulink>, vous trouverez nombres de discussions sur les
   différents filtres.
   Encore une fois, le nombre d'images par seconde ne change pas, donc l'option

@@ -1069,7 +1069,7 @@ Notas:
   filtros disponibles para elegir, cada uno con sus ventajas y sus
   desventajas. Consulte <option>mplayer -pphelp</option> para ver
   qué hay disponible (grep &quot;deint&quot;), y busque en las
-  <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">
+  <ulink url="http://www.mplayerhq.hu/design7/mailing_lists-es.html">
   listas de correo <application>MPlayer</application></ulink> para encontrar
   discusiones acerca de varios filtros. De nuevo, la tasa de bits por segundo
   no cambia, nada de <option>-ofps</option>. Además, el desentrelazado debe
