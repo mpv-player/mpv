@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 rev. 31648
+.\" sync with en/mplayer.1 rev. 31715
 .\" Encoding: UTF-8
 .\"
 .\" MPlayer (C) 2000-2010 MPlayer 团队
@@ -2653,6 +2653,14 @@ OSS 音频输出驱动
 .TP
 .B coreaudio（仅适用于 Mac OS X）
 Mac OS X 自带的音频输出驱动
+.PD 0
+.RSs
+.IPs device_id=<标识符>
+所使用的输出设备的标识符（0 = 默认设备）
+.IPs help
+列出所有可用输出设备的标识符。
+.RE
+.PD 1
 .
 .TP
 .B "openal\ "
