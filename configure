@@ -273,7 +273,7 @@ Optional features:
   --disable-tv-bsdbt848  disable BSD BT848 interface [autodetect]
   --disable-pvr          disable Video4Linux2 MPEG PVR [autodetect]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
-  --disable-network      disable networking [enable]
+  --disable-networking   disable networking [enable]
   --enable-winsock2_h    enable winsock2_h [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
   --enable-live          enable LIVE555 Streaming Media [autodetect]
@@ -653,7 +653,7 @@ _tv_v4l2=auto
 _tv_bsdbt848=auto
 _tv_dshow=auto
 _pvr=auto
-_network=yes
+networking=yes
 _winsock2_h=auto
 _smb=auto
 _vidix=auto
@@ -1077,8 +1077,8 @@ for ac_option do
   --disable-pvr)        _pvr=no         ;;
   --enable-fastmemcpy)  _fastmemcpy=yes ;;
   --disable-fastmemcpy) _fastmemcpy=no  ;;
-  --enable-network)     _network=yes    ;;
-  --disable-network)    _network=no     ;;
+  --enable-networking)     networking=yes    ;;
+  --disable-networking)    networking=no     ;;
   --enable-winsock2_h)  _winsock2_h=yes ;;
   --disable-winsock2_h) _winsock2_h=no  ;;
   --enable-smb)         _smb=yes        ;;
@@ -3119,19 +3119,21 @@ fi
 echores "$_closesocket"
 
 
-echocheck "network"
+echocheck "networking"
 test $_winsock2_h = no && test $inet_pton = no &&
-  test $inet_aton = no && _network=no
-if test "$_network" = yes ; then
+  test $inet_aton = no && networking=no
+if test "$networking" = yes ; then
   def_network='#define CONFIG_NETWORK 1'
+  def_networking='#define CONFIG_NETWORKING 1'
   extra_ldflags="$extra_ldflags $_ld_sock"
-  inputmodules="network $inputmodules"
+  inputmodules="networking $inputmodules"
 else
-  noinputmodules="network $noinputmodules"
+  noinputmodules="networking $noinputmodules"
   def_network='#undef CONFIG_NETWORK'
+  def_networking='#undef CONFIG_NETWORKING'
   _ftp=no
 fi
-echores "$_network"
+echores "$networking"
 
 
 echocheck "inet6"
@@ -5961,7 +5963,7 @@ fi
 echores "$_libcdio"
 
 if test "$_cdda" = yes ; then
-    test $_cddb = auto && test $_network = yes && _cddb=yes
+    test $_cddb = auto && test $networking = yes && _cddb=yes
     def_cdparanoia='#define CONFIG_CDDA 1'
     inputmodules="cdda $inputmodules"
 else
@@ -6770,7 +6772,7 @@ fi
 echores "$_qtx"
 
 echocheck "Nemesi Streaming Media libraries"
-if test "$_nemesi" = auto  && test "$_network" = yes ; then
+if test "$_nemesi" = auto  && test "$networking" = yes ; then
     _nemesi=no
     if $_pkg_config libnemesi --atleast-version=0.6.3 ; then
         extra_cflags="$extra_cflags $($_pkg_config --cflags libnemesi)"
@@ -6783,7 +6785,7 @@ if test "$_nemesi" = yes; then
     def_nemesi='#define CONFIG_LIBNEMESI 1'
     inputmodules="nemesi $inputmodules"
 else
-    _native_rtsp="$_network"
+    _native_rtsp="$networking"
     _nemesi=no
     def_nemesi='#undef CONFIG_LIBNEMESI'
     noinputmodules="nemesi $noinputmodules"
@@ -6791,7 +6793,7 @@ fi
 echores "$_nemesi"
 
 echocheck "LIVE555 Streaming Media libraries"
-if test "$_live" = auto  && test "$_network" = yes ; then
+if test "$_live" = auto  && test "$networking" = yes ; then
   cat > $TMPCPP << EOF
 #include <liveMedia.hh>
 #if (LIVEMEDIA_LIBRARY_VERSION_INT < 1141257600)
@@ -6822,11 +6824,11 @@ EOF
       fi
   fi
 fi
-if test "$_live" = yes && test "$_network" = yes; then
+if test "$_live" = yes && test "$networking" = yes; then
   test $_livelibdir && res_comment="using $_livelibdir"
   def_live='#define CONFIG_LIVE555 1'
  inputmodules="live555 $inputmodules"
-elif test "$_live_dist" = yes && test "$_network" = yes; then
+elif test "$_live_dist" = yes && test "$networking" = yes; then
   res_comment="using distribution version"
   _live="yes"
   def_live='#define CONFIG_LIVE555 1'
@@ -7876,7 +7878,7 @@ MPG123 = $_mpg123
 MUSEPACK = $_musepack
 NAS = $_nas
 NATIVE_RTSP = $_native_rtsp
-NETWORK = $_network
+NETWORKING = $networking
 OPENAL = $_openal
 OSS = $_ossaudio
 PE_EXECUTABLE = $_pe_executable
@@ -8286,7 +8288,7 @@ $def_inet_aton
 $def_inet_pton
 $def_live
 $def_nemesi
-$def_network
+$def_networking
 $def_smb
 $def_socklen_t
 $def_vstream

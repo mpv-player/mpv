@@ -163,13 +163,13 @@ typedef struct stream {
   char* url;  // strdup() of filename/url
   char *lavf_type; // name of expected demuxer type for lavf
   struct MPOpts *opts;
-#ifdef CONFIG_NETWORK
+#ifdef CONFIG_NETWORKING
   streaming_ctrl_t *streaming_ctrl;
 #endif
   unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];
 } stream_t;
 
-#ifdef CONFIG_NETWORK
+#ifdef CONFIG_NETWORKING
 #include "network.h"
 #endif
 
