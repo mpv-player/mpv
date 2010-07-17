@@ -6622,7 +6622,7 @@ if test "$_ladspa" = auto ; then
   cat > $TMPC <<EOF
 #include <ladspa.h>
 int main(void) {
-const LADSPA_Descriptor *ld = NULL;
+LADSPA_Descriptor ld = {0};
 return 0;
 }
 EOF
