@@ -20,6 +20,7 @@
 #define MPLAYER_X11_COMMON_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
@@ -61,6 +62,17 @@ struct vo_x11_state {
     int vo_old_width;
     int vo_old_height;
 
+    /* Keep track of original video width/height to determine when to
+     * resize window when reconfiguring. Resize window when video size
+     * changes, but don't force window size changes as long as video size
+     * stays the same (even if that size is different from the current
+     * window size after the user modified the latter). */
+    int last_video_width;
+    int last_video_height;
+    /* Video size changed during fullscreen when we couldn't tell the new
+     * size to the window manager. Must set window size when turning
+     * fullscreen off. */
+    bool size_changed_during_fs;
 
     unsigned int olddecor;
     unsigned int oldfuncs;

@@ -757,6 +757,9 @@ void vo_x11_uninit(struct vo *vo)
         }
         vo_fs = 0;
         x11->vo_old_width = x11->vo_old_height = 0;
+        x11->last_video_width = 0;
+        x11->last_video_height = 0;
+        x11->size_changed_during_fs = false;
     }
 }
 
@@ -882,6 +885,13 @@ static void vo_x11_nofs_sizepos(struct vo *vo, int x, int y,
                                 int width, int height)
 {
     struct vo_x11_state *x11 = vo->x11;
+    if (width == x11->last_video_width && height == x11->last_video_height) {
+        if (!vo->opts->force_window_position && !x11->size_changed_during_fs)
+            return;
+    } else if (vo_fs)
+        x11->size_changed_during_fs = true;
+    x11->last_video_height = height;
+    x11->last_video_width = width;
     vo_x11_sizehint(vo, x, y, width, height, 0);
   if (vo_fs) {
     x11->vo_old_x = x;
@@ -1321,6 +1331,10 @@ void vo_x11_fullscreen(struct vo *vo)
     {
         vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_REMOVE);   // removes fullscreen state if wm supports EWMH
         vo_fs = VO_FALSE;
+        if (x11->size_changed_during_fs && (x11->fs_type & vo_wm_FULLSCREEN))
+            vo_x11_nofs_sizepos(vo, vo->dx, vo->dy, x11->last_video_width,
+                                x11->last_video_height);
+        x11->size_changed_during_fs = false;
     } else
     {
         // win->fs
