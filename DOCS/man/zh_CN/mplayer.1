@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 rev. 31715
+.\" sync with en/mplayer.1 rev. 31769
 .\" Encoding: UTF-8
 .\"
 .\" MPlayer (C) 2000-2010 MPlayer 团队
@@ -5083,6 +5083,8 @@ s8, floatle, floatbe, floatne, mulaw, alaw, mpeg2, ac3 和 imaadpcm。
 .br
 此过滤器有第二个功能: 测量总体的最高声音水平并通过 MPlayer 显示出来。
 此估计的音量能用来设置 MEncoder 的音量以使用最大动态范围。
+该功能当前只适用于浮点型数据，使用例如 \-af\-adv force=5 或 
+\-af stats。
 .br
 .I 注意:
 此过滤器不能重返进入, 所以对每个音频流只能启用一次。
