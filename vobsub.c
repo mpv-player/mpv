@@ -1033,11 +1033,11 @@ void *vobsub_open(const char *const name, const char *const ifo,
                                             last_pts_diff = pkt->pts100 - mpg->pts;
                                         else
                                             pkt->pts100 = mpg->pts;
-                                        if (mpg->merge) {
+                                        if (mpg->merge && queue->current_index > 0) {
                                             packet_t *last = &queue->packets[queue->current_index - 1];
                                             pkt->pts100 = last->pts100;
-                                            mpg->merge = 0;
                                         }
+                                        mpg->merge = 0;
                                         /* FIXME: should not use mpg_sub internal informations, make a copy */
                                         pkt->data = mpg->packet;
                                         pkt->size = mpg->packet_size;
