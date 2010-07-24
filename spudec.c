@@ -228,13 +228,15 @@ static int spudec_alloc_image(spudec_handle_t *this, int stride, int height)
   if (this->image_size < this->stride * this->height) {
     if (this->image != NULL) {
       free(this->image);
+      free(this->pal_image);
       this->image_size = 0;
     }
-    this->image = malloc(3 * this->stride * this->height);
+    this->image = malloc(2 * this->stride * this->height);
     if (this->image) {
       this->image_size = this->stride * this->height;
       this->aimage = this->image + this->image_size;
-      this->pal_image = this->aimage + this->image_size;
+      // use stride here as well to simplify reallocation checks
+      this->pal_image = malloc(this->stride * this->height);
     }
   }
   return this->image != NULL;
@@ -1269,6 +1271,7 @@ void spudec_free(void *this)
 	free(spu->scaled_image);
     if (spu->image)
       free(spu->image);
+    free(spu->pal_image);
     free(spu);
   }
 }
