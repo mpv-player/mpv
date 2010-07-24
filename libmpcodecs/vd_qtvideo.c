@@ -98,11 +98,11 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 // init driver
 static int init(sh_video_t *sh){
     OSErr result = 1;
+    int extradata_size = sh->bih ? sh->bih->biSize - sizeof(BITMAPINFOHEADER) : 0;
+    void *extradata = sh->bih + 1;
 
-    if (sh->ImageDesc == NULL) {
-        mp_msg(MSGT_DECVIDEO,MSGL_ERR,"sh->ImageDesc not set, cannot use binary QuickTime codecs (try -demuxer mov?)\n");
-        return 0;
-    }
+    if (!sh->ImageDesc)
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR,"sh->ImageDesc not set, try -demuxer mov if this fails.\n");
 
 #ifndef CONFIG_QUICKTIME
 #ifdef WIN32_LOADER
@@ -156,10 +156,25 @@ static int init(sh_video_t *sh){
 
     //Fill the imagedescription for our SVQ3 frame
     //we can probably get this from Demuxer
-    if(!sh->ImageDesc) sh->ImageDesc=(sh->bih+1); // hack for SVQ3-in-AVI
+    if (!sh->ImageDesc && extradata_size >= sizeof(ImageDescription) &&
+        ((ImageDescription *)extradata)->idSize <= extradata_size)
+        sh->ImageDesc = extradata;
+    if (sh->ImageDesc) {
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageDescription size: %d\n",((ImageDescription*)(sh->ImageDesc))->idSize);
     framedescHandle=(ImageDescriptionHandle)NewHandleClear(((ImageDescription*)(sh->ImageDesc))->idSize);
     memcpy(*framedescHandle,sh->ImageDesc,((ImageDescription*)(sh->ImageDesc))->idSize);
+    } else {
+        // assume extradata consists only of the atoms, build the other parts
+        ImageDescription *idesc;
+        int size = sizeof(*idesc) + extradata_size;
+        mp_msg(MSGT_DECVIDEO, MSGL_V, "Generating a ImageDescription\n");
+        framedescHandle=(ImageDescriptionHandle)NewHandleClear(size);
+        idesc = *framedescHandle;
+        memcpy(idesc + 1, extradata, extradata_size);
+        idesc->idSize = size;
+        idesc->width  = sh->disp_w;
+        idesc->height = sh->disp_h;
+    }
     dump_ImageDescription(*framedescHandle);
 
     (**framedescHandle).cType = bswap_32(sh->format);
