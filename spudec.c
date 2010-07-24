@@ -267,6 +267,7 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
 {
   uint16_t pal[4];
   unsigned int i, x, y;
+  uint8_t *dst;
 
   this->scaled_frame_width = 0;
   this->scaled_frame_height = 0;
@@ -298,6 +299,7 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
   i = packet->current_nibble[1];
   x = 0;
   y = 0;
+  dst = this->pal_image;
   while (packet->current_nibble[0] < i
 	 && packet->current_nibble[1] / 2 < packet->control_start
 	 && y < this->height) {
@@ -317,17 +319,17 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
     }
     color = 3 - (rle & 0x3);
     len = rle >> 2;
-    if (len > this->width - x || len == 0)
-      len = this->width - x;
-    memset(this->pal_image + y * this->stride + x, color, len);
     x += len;
-    if (x >= this->width) {
+    if (len == 0 || x >= this->width) {
+      len += this->width - x;
       next_line(packet);
       x = 0;
       ++y;
     }
+    memset(dst, color, len);
+    dst += len;
   }
-  pal2gray_alpha(pal, this->pal_image, this->stride,
+  pal2gray_alpha(pal, this->pal_image, this->width,
                  this->image, this->aimage, this->stride,
                  this->width, this->height);
   spudec_cut_image(this);
