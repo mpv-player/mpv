@@ -112,14 +112,14 @@ static int init(sh_video_t *sh){
     //preload quicktime.qts to avoid the problems caused by the hardcoded path inside the dll
     qtime_qts = LoadLibraryA("QuickTime.qts");
     if(!qtime_qts){
-    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"unable to load QuickTime.qts\n" );
-    return 0;
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR,"unable to load QuickTime.qts\n" );
+        return 0;
     }
 
     handler = LoadLibraryA("qtmlClient.dll");
     if(!handler){
-    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"unable to load qtmlClient.dll\n");
-    return 0;
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR,"unable to load qtmlClient.dll\n");
+        return 0;
     }
 
     InitializeQTML = (OSErr (*)(long))GetProcAddress(handler, "InitializeQTML");
@@ -160,9 +160,9 @@ static int init(sh_video_t *sh){
         ((ImageDescription *)extradata)->idSize <= extradata_size)
         sh->ImageDesc = extradata;
     if (sh->ImageDesc) {
-    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageDescription size: %d\n",((ImageDescription*)(sh->ImageDesc))->idSize);
-    framedescHandle=(ImageDescriptionHandle)NewHandleClear(((ImageDescription*)(sh->ImageDesc))->idSize);
-    memcpy(*framedescHandle,sh->ImageDesc,((ImageDescription*)(sh->ImageDesc))->idSize);
+        mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageDescription size: %d\n",((ImageDescription*)(sh->ImageDesc))->idSize);
+        framedescHandle=(ImageDescriptionHandle)NewHandleClear(((ImageDescription*)(sh->ImageDesc))->idSize);
+        memcpy(*framedescHandle,sh->ImageDesc,((ImageDescription*)(sh->ImageDesc))->idSize);
     } else {
         // assume extradata consists only of the atoms, build the other parts
         ImageDescription *idesc;
