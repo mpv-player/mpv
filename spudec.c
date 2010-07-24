@@ -1265,13 +1265,16 @@ void spudec_free(void *this)
   if (spu) {
     while (spu->queue_head)
       spudec_free_packet(spudec_dequeue_packet(spu));
-    if (spu->packet)
-      free(spu->packet);
-    if (spu->scaled_image)
-	free(spu->scaled_image);
-    if (spu->image)
-      free(spu->image);
+    free(spu->packet);
+    spu->packet = NULL;
+    free(spu->scaled_image);
+    spu->scaled_image = NULL;
+    free(spu->image);
+    spu->image = NULL;
+    spu->aimage = NULL;
     free(spu->pal_image);
+    spu->pal_image = NULL;
+    spu->image_size = 0;
     free(spu);
   }
 }
