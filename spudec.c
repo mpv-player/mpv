@@ -173,15 +173,6 @@ static inline unsigned char get_nibble(packet_t *packet)
   return nib;
 }
 
-static inline int mkalpha(int i)
-{
-  /* In mplayer's alpha planes, 0 is transparent, then 1 is nearly
-     opaque upto 255 which is fully opaque */
-  // extend 4 -> 8 bit
-  i |= i << 4;
-  return (uint8_t)(-i);
-}
-
 /* Cut the sub to visible part */
 static inline void spudec_cut_image(spudec_handle_t *this)
 {
@@ -262,21 +253,17 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
   this->width = packet->width;
   this->stride = packet->stride;
   for (i = 0; i < 4; ++i) {
-    alpha[i] = mkalpha(packet->alpha[i]);
+    alpha[i] = packet->alpha[i];
+    // extend 4 -> 8 bit
+    alpha[i] |= alpha[i] << 4;
     if (this->custom && (this->cuspal[i] >> 31) != 0)
       alpha[i] = 0;
-    if (alpha[i] == 0)
-      cmap[i] = 0;
-    else if (this->custom){
-      cmap[i] = ((this->cuspal[i] >> 16) & 0xff);
-      if (cmap[i] + alpha[i] > 255)
-	cmap[i] = 256 - alpha[i];
-    }
-    else {
-      cmap[i] = ((this->global_palette[packet->palette[i]] >> 16) & 0xff);
-      if (cmap[i] + alpha[i] > 255)
-	cmap[i] = 256 - alpha[i];
-    }
+    cmap[i] = this->custom ? this->cuspal[i] :
+              this->global_palette[packet->palette[i]];
+    cmap[i] = (cmap[i] >> 16) & 0xff;
+    // convert to MPlayer format
+    cmap[i] = FFMIN(cmap[i], alpha[i]);
+    alpha[i] = -alpha[i];
   }
 
   if (!spudec_alloc_image(this, this->stride, this->height))
