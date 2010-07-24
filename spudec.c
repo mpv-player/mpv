@@ -98,6 +98,7 @@ typedef struct {
   size_t image_size;		/* Size of the image buffer */
   unsigned char *image;		/* Grayscale value */
   unsigned char *aimage;	/* Alpha value */
+  unsigned char *pal_image;	/* palette entry value */
   unsigned int scaled_frame_width, scaled_frame_height;
   unsigned int scaled_start_col, scaled_start_row;
   unsigned int scaled_width, scaled_height, scaled_stride;
@@ -229,18 +230,42 @@ static int spudec_alloc_image(spudec_handle_t *this, int stride, int height)
       free(this->image);
       this->image_size = 0;
     }
-    this->image = malloc(2 * this->stride * this->height);
+    this->image = malloc(3 * this->stride * this->height);
     if (this->image) {
       this->image_size = this->stride * this->height;
       this->aimage = this->image + this->image_size;
+      this->pal_image = this->aimage + this->image_size;
     }
   }
   return this->image != NULL;
 }
 
+/**
+ * \param pal palette in MPlayer-style gray-alpha values, i.e.
+ *            alpha == 0 means transparent, 1 fully opaque,
+ *            gray value <= 256 - alpha.
+ */
+static void pal2gray_alpha(const uint16_t *pal,
+                           const uint8_t *src, int src_stride,
+                           uint8_t *dst, uint8_t *dsta,
+                           int dst_stride, int w, int h)
+{
+  int x, y;
+  for (y = 0; y < h; y++) {
+    for (x = 0; x < w; x++) {
+      uint16_t pixel = pal[src[x]];
+      *dst++  = pixel;
+      *dsta++ = pixel >> 8;
+    }
+    for (; x < dst_stride; x++)
+      *dsta++ = *dst++ = 0;
+    src += src_stride;
+  }
+}
+
 static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
 {
-  unsigned int cmap[4], alpha[4];
+  uint16_t pal[4];
   unsigned int i, x, y;
 
   this->scaled_frame_width = 0;
@@ -253,29 +278,22 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
   this->width = packet->width;
   this->stride = packet->stride;
   for (i = 0; i < 4; ++i) {
-    alpha[i] = packet->alpha[i];
+    int color;
+    int alpha = packet->alpha[i];
     // extend 4 -> 8 bit
-    alpha[i] |= alpha[i] << 4;
+    alpha |= alpha << 4;
     if (this->custom && (this->cuspal[i] >> 31) != 0)
-      alpha[i] = 0;
-    cmap[i] = this->custom ? this->cuspal[i] :
-              this->global_palette[packet->palette[i]];
-    cmap[i] = (cmap[i] >> 16) & 0xff;
-    // convert to MPlayer format
-    cmap[i] = FFMIN(cmap[i], alpha[i]);
-    alpha[i] = -alpha[i];
+      alpha = 0;
+    color = this->custom ? this->cuspal[i] :
+            this->global_palette[packet->palette[i]];
+    color = (color >> 16) & 0xff;
+    // convert to MPlayer-style gray/alpha palette
+    color = FFMIN(color, alpha);
+    pal[i] = (-alpha << 8) | color;
   }
 
   if (!spudec_alloc_image(this, this->stride, this->height))
     return;
-
-  /* Kludge: draw_alpha needs width multiple of 8. */
-  if (this->width < this->stride)
-    for (y = 0; y < this->height; ++y) {
-      memset(this->aimage + y * this->stride + this->width, 0, this->stride - this->width);
-      /* FIXME: Why is this one needed? */
-      memset(this->image + y * this->stride + this->width, 0, this->stride - this->width);
-    }
 
   i = packet->current_nibble[1];
   x = 0;
@@ -301,9 +319,7 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
     len = rle >> 2;
     if (len > this->width - x || len == 0)
       len = this->width - x;
-    /* FIXME have to use palette and alpha map*/
-    memset(this->image + y * this->stride + x, cmap[color], len);
-    memset(this->aimage + y * this->stride + x, alpha[color], len);
+    memset(this->pal_image + y * this->stride + x, color, len);
     x += len;
     if (x >= this->width) {
       next_line(packet);
@@ -311,6 +327,9 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
       ++y;
     }
   }
+  pal2gray_alpha(pal, this->pal_image, this->stride,
+                 this->image, this->aimage, this->stride,
+                 this->width, this->height);
   spudec_cut_image(this);
 }
 
@@ -1302,16 +1321,8 @@ void spudec_set_paletted(void *this, const uint8_t *pal_img, int pal_stride,
       gray = FFMIN(gray, alpha);
       g8a8_pal[i] = (-alpha << 8) | gray;
   }
-  for (y = 0; y < h; y++) {
-    for (x = 0; x < w; x++) {
-      uint16_t pixel = g8a8_pal[pal_img[x]];
-      *img++  = pixel;
-      *aimg++ = pixel >> 8;
-    }
-    for (; x < stride; x++)
-      *aimg++ = *img++ = 0;
-    pal_img += pal_stride;
-  }
+  pal2gray_alpha(g8a8_pal, pal_img, pal_stride,
+                 img, aimg, stride, w, h);
   packet->start_pts = 0;
   packet->end_pts = 0x7fffffff;
   if (pts != MP_NOPTS_VALUE)
