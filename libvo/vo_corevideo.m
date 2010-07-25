@@ -122,18 +122,17 @@ static void update_screen_info(void)
 		screen_id = xinerama_screen;
 
 	screen_array = [NSScreen screens];
-	if(screen_id < (int)[screen_array count])
-	{
-		screen_handle = [screen_array objectAtIndex:(screen_id < 0 ? 0 : screen_id)];
-	}
-	else
+	if(screen_id >= (int)[screen_array count])
 	{
 		mp_msg(MSGT_VO, MSGL_INFO, "[vo_corevideo] Device ID %d does not exist, falling back to main device\n", screen_id);
-		screen_handle = [screen_array objectAtIndex:0];
 		screen_id = -1;
 	}
+	if (screen_id < 0 && [mpGLView window])
+		screen_handle = [[mpGLView window] screen];
+	else
+	screen_handle = [screen_array objectAtIndex:(screen_id < 0 ? 0 : screen_id)];
 
-	screen_frame = ![mpGLView window] || screen_id >= 0 ? [screen_handle frame] : [[[mpGLView window] screen] frame];
+	screen_frame = [screen_handle frame];
 	vo_screenwidth = screen_frame.size.width;
 	vo_screenheight = screen_frame.size.height;
 	xinerama_x = xinerama_y = 0;
