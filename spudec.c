@@ -298,13 +298,12 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
     unsigned int rle = 0;
     rle = get_nibble(packet);
     if (rle < 0x04) {
-      rle = (rle << 4) | get_nibble(packet);
-      if (rle < 0x10) {
+      if (rle == 0) {
 	rle = (rle << 4) | get_nibble(packet);
-	if (rle < 0x040) {
+	if (rle < 0x04)
 	  rle = (rle << 4) | get_nibble(packet);
-	}
       }
+      rle = (rle << 4) | get_nibble(packet);
     }
     color = 3 - (rle & 0x3);
     len = rle >> 2;
