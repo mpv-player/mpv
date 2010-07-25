@@ -130,7 +130,7 @@ static void update_screen_info(void)
 	if (screen_id < 0 && [mpGLView window])
 		screen_handle = [[mpGLView window] screen];
 	else
-	screen_handle = [screen_array objectAtIndex:(screen_id < 0 ? 0 : screen_id)];
+		screen_handle = [screen_array objectAtIndex:(screen_id < 0 ? 0 : screen_id)];
 
 	screen_frame = [screen_handle frame];
 	vo_screenwidth = screen_frame.size.width;
@@ -450,7 +450,7 @@ static int control(uint32_t request, void *data)
 	[window setContentView:mpGLView];
 	[window setInitialFirstResponder:mpGLView];
 	[window setAcceptsMouseMovedEvents:YES];
-    [window setTitle:@"MPlayer - The Movie Player"];
+	[window setTitle:@"MPlayer - The Movie Player"];
 
 	isFullscreen = 0;
 	winSizeMult = 1;
@@ -553,24 +553,24 @@ static int control(uint32_t request, void *data)
 	kFullScreenCmd = menuItem;
 	menuItem = [NSMenuItem separatorItem]; [menu addItem:menuItem];
 
-		aspectMenu = [[NSMenu alloc] initWithTitle:@"Aspect Ratio"];
-		menuItem = [[NSMenuItem alloc] initWithTitle:@"Keep" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
-		if(vo_keepaspect) [menuItem setState:NSOnState];
-		kKeepAspectCmd = menuItem;
-		menuItem = [[NSMenuItem alloc] initWithTitle:@"Pan-Scan" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
-		if(vo_panscan) [menuItem setState:NSOnState];
-		kPanScanCmd = menuItem;
-		menuItem = [NSMenuItem separatorItem]; [aspectMenu addItem:menuItem];
-		menuItem = [[NSMenuItem alloc] initWithTitle:@"Original" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
-		kAspectOrgCmd = menuItem;
-		menuItem = [[NSMenuItem alloc] initWithTitle:@"4:3" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
-		kAspectFullCmd = menuItem;
-		menuItem = [[NSMenuItem alloc] initWithTitle:@"16:9" action:@selector(menuAction:) keyEquivalent:@""];	[aspectMenu addItem:menuItem];
-		kAspectWideCmd = menuItem;
-		menuItem = [[NSMenuItem alloc] initWithTitle:@"Aspect Ratio" action:nil keyEquivalent:@""];
-		[menuItem setSubmenu:aspectMenu];
-		[menu addItem:menuItem];
-		[aspectMenu release];
+	aspectMenu = [[NSMenu alloc] initWithTitle:@"Aspect Ratio"];
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"Keep" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
+	if(vo_keepaspect) [menuItem setState:NSOnState];
+	kKeepAspectCmd = menuItem;
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"Pan-Scan" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
+	if(vo_panscan) [menuItem setState:NSOnState];
+	kPanScanCmd = menuItem;
+	menuItem = [NSMenuItem separatorItem]; [aspectMenu addItem:menuItem];
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"Original" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
+	kAspectOrgCmd = menuItem;
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"4:3" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
+	kAspectFullCmd = menuItem;
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"16:9" action:@selector(menuAction:) keyEquivalent:@""];	[aspectMenu addItem:menuItem];
+	kAspectWideCmd = menuItem;
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"Aspect Ratio" action:nil keyEquivalent:@""];
+	[menuItem setSubmenu:aspectMenu];
+	[menu addItem:menuItem];
+	[aspectMenu release];
 
 	//Add to menubar
 	menuItem = [[NSMenuItem alloc] initWithTitle:@"Movie" action:nil keyEquivalent:@""];
@@ -919,10 +919,10 @@ static int control(uint32_t request, void *data)
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent
 {
 	switch([theEvent keyCode])
-    {
+	{
 		case 0x21: [window setAlphaValue: winAlpha-=0.05]; return YES;
 		case 0x1e: [window setAlphaValue: winAlpha+=0.05]; return YES;
-    }
+	}
 	return NO;
 }
 
@@ -1039,7 +1039,7 @@ static int control(uint32_t request, void *data)
 
 - (void)windowWillClose:(NSNotification *)aNotification
 {
-    mpGLView = NULL;
+	mpGLView = NULL;
 	mplayer_put_key(KEY_CLOSE_WIN);
 }
 @end

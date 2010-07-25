@@ -48,10 +48,10 @@
 	CVOpenGLTextureRef texture;
 	NSRect textureFrame;
 
-    GLfloat	lowerLeft[2];
-    GLfloat lowerRight[2];
-    GLfloat upperRight[2];
-    GLfloat upperLeft[2];
+	GLfloat lowerLeft[2];
+	GLfloat lowerRight[2];
+	GLfloat upperRight[2];
+	GLfloat upperLeft[2];
 
 	BOOL mouseHide;
 
