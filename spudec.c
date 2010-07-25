@@ -303,8 +303,6 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
 	rle = (rle << 4) | get_nibble(packet);
 	if (rle < 0x040) {
 	  rle = (rle << 4) | get_nibble(packet);
-	  if (rle < 0x0004)
-	    rle |= ((this->width - x) << 2);
 	}
       }
     }
