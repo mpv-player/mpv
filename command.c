@@ -371,6 +371,17 @@ static int mp_property_stream_length(m_option_t *prop, int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+/// Current stream position in seconds (RO)
+static int mp_property_stream_time_pos(m_option_t *prop, int action,
+                                       void *arg, MPContext *mpctx)
+{
+    if (!mpctx->demuxer || mpctx->demuxer->stream_pts == MP_NOPTS_VALUE)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_time_ro(prop, action, arg, mpctx->demuxer->stream_pts);
+}
+
+
 /// Media length in seconds (RO)
 static int mp_property_length(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
@@ -2128,6 +2139,8 @@ static const m_option_t mp_properties[] = {
     { "stream_end", mp_property_stream_end, CONF_TYPE_POSITION,
      M_OPT_MIN, 0, 0, NULL },
     { "stream_length", mp_property_stream_length, CONF_TYPE_POSITION,
+     M_OPT_MIN, 0, 0, NULL },
+    { "stream_time_pos", mp_property_stream_time_pos, CONF_TYPE_TIME,
      M_OPT_MIN, 0, 0, NULL },
     { "length", mp_property_length, CONF_TYPE_TIME,
      M_OPT_MIN, 0, 0, NULL },
