@@ -417,10 +417,10 @@ static int control(uint32_t request, void *data)
 		case VOCTRL_DRAW_IMAGE: return draw_image(data);
 		case VOCTRL_PAUSE: return int_pause = 1;
 		case VOCTRL_RESUME: return int_pause = 0;
-		case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t*)data));
-		case VOCTRL_ONTOP: vo_ontop = (!(vo_ontop)); if(!shared_buffer){ [mpGLView ontop]; } else { [mplayerosxProto ontop]; } return VO_TRUE;
-		case VOCTRL_ROOTWIN: vo_rootwin = (!(vo_rootwin)); [mpGLView rootwin]; return VO_TRUE;
-		case VOCTRL_FULLSCREEN: vo_fs = (!(vo_fs)); if(!shared_buffer){ [mpGLView fullscreen: NO]; } else { [mplayerosxProto toggleFullscreen]; } return VO_TRUE;
+		case VOCTRL_QUERY_FORMAT: return query_format(*(uint32_t*)data);
+		case VOCTRL_ONTOP: vo_ontop = !vo_ontop; if(!shared_buffer){ [mpGLView ontop]; } else { [mplayerosxProto ontop]; } return VO_TRUE;
+		case VOCTRL_ROOTWIN: vo_rootwin = !vo_rootwin; [mpGLView rootwin]; return VO_TRUE;
+		case VOCTRL_FULLSCREEN: vo_fs = !vo_fs; if(!shared_buffer){ [mpGLView fullscreen: NO]; } else { [mplayerosxProto toggleFullscreen]; } return VO_TRUE;
 		case VOCTRL_GET_PANSCAN: return VO_TRUE;
 		case VOCTRL_SET_PANSCAN: [mpGLView panscan]; return VO_TRUE;
 		case VOCTRL_UPDATE_SCREENINFO: update_screen_info(); return VO_TRUE;
@@ -554,7 +554,7 @@ static int control(uint32_t request, void *data)
 	kDoubleScreenCmd = menuItem;
 	menuItem = [[NSMenuItem alloc] initWithTitle:@"Full Size" action:@selector(menuAction:) keyEquivalent:@"f"]; [menu addItem:menuItem];
 	kFullScreenCmd = menuItem;
-	menuItem = (NSMenuItem *)[NSMenuItem separatorItem]; [menu addItem:menuItem];
+	menuItem = [NSMenuItem separatorItem]; [menu addItem:menuItem];
 
 		aspectMenu = [[NSMenu alloc] initWithTitle:@"Aspect Ratio"];
 		menuItem = [[NSMenuItem alloc] initWithTitle:@"Keep" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
@@ -563,7 +563,7 @@ static int control(uint32_t request, void *data)
 		menuItem = [[NSMenuItem alloc] initWithTitle:@"Pan-Scan" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
 		if(vo_panscan) [menuItem setState:NSOnState];
 		kPanScanCmd = menuItem;
-		menuItem = (NSMenuItem *)[NSMenuItem separatorItem]; [aspectMenu addItem:menuItem];
+		menuItem = [NSMenuItem separatorItem]; [aspectMenu addItem:menuItem];
 		menuItem = [[NSMenuItem alloc] initWithTitle:@"Original" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
 		kAspectOrgCmd = menuItem;
 		menuItem = [[NSMenuItem alloc] initWithTitle:@"4:3" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
@@ -632,13 +632,13 @@ static int control(uint32_t request, void *data)
 		[self set_winSizeMult: 2];
 	if(sender == kFullScreenCmd)
 	{
-		vo_fs = (!(vo_fs));
+		vo_fs = !vo_fs;
 		[self fullscreen:NO];
 	}
 
 	if(sender == kKeepAspectCmd)
 	{
-		vo_keepaspect = (!(vo_keepaspect));
+		vo_keepaspect = !vo_keepaspect;
 		if(vo_keepaspect)
 			[kKeepAspectCmd setState:NSOnState];
 		else
@@ -649,7 +649,7 @@ static int control(uint32_t request, void *data)
 
 	if(sender == kPanScanCmd)
 	{
-		vo_panscan = (!(vo_panscan));
+		vo_panscan = !vo_panscan;
 		if(vo_panscan)
 			[kPanScanCmd setState:NSOnState];
 		else
@@ -763,7 +763,7 @@ static int control(uint32_t request, void *data)
 	//automatically hide mouse cursor (and future on-screen control?)
 	if(isFullscreen && !mouseHide && !isRootwin)
 	{
-		if( ((curTime - lastMouseHide) >= 5) || (lastMouseHide == 0) )
+		if(curTime - lastMouseHide >= 5 || lastMouseHide == 0)
 		{
 			CGDisplayHideCursor(kCGDirectMainDisplay);
 			mouseHide = TRUE;
@@ -773,7 +773,7 @@ static int control(uint32_t request, void *data)
 
 	//update activity every 30 seconds to prevent
 	//screensaver from starting up.
-	if( ((curTime - lastScreensaverUpdate) >= 30) || (lastScreensaverUpdate == 0) )
+	if(curTime - lastScreensaverUpdate >= 30 || lastScreensaverUpdate == 0)
 	{
 		UpdateSystemActivity(UsrActivity);
 		lastScreensaverUpdate = curTime;
