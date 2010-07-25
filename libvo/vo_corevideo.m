@@ -717,8 +717,6 @@ static int control(uint32_t request, void *data)
 */
 - (void) render
 {
-	int curTime;
-
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glEnable(CVOpenGLTextureGetTarget(texture));
@@ -757,27 +755,6 @@ static int control(uint32_t request, void *data)
 	}
 
 	glFlush();
-
-	curTime  = TickCount()/60;
-
-	//automatically hide mouse cursor (and future on-screen control?)
-	if(isFullscreen && !mouseHide && !isRootwin)
-	{
-		if(curTime - lastMouseHide >= 5 || lastMouseHide == 0)
-		{
-			CGDisplayHideCursor(kCGDirectMainDisplay);
-			mouseHide = TRUE;
-			lastMouseHide = curTime;
-		}
-	}
-
-	//update activity every 30 seconds to prevent
-	//screensaver from starting up.
-	if(curTime - lastScreensaverUpdate >= 30 || lastScreensaverUpdate == 0)
-	{
-		UpdateSystemActivity(UsrActivity);
-		lastScreensaverUpdate = curTime;
-	}
 }
 
 /*
@@ -901,6 +878,27 @@ static int control(uint32_t request, void *data)
 */
 - (void) check_events
 {
+	int curTime = TickCount()/60;
+
+	//automatically hide mouse cursor (and future on-screen control?)
+	if(isFullscreen && !mouseHide && !isRootwin)
+	{
+		if(curTime - lastMouseHide >= 5 || lastMouseHide == 0)
+		{
+			CGDisplayHideCursor(kCGDirectMainDisplay);
+			mouseHide = TRUE;
+			lastMouseHide = curTime;
+		}
+	}
+
+	//update activity every 30 seconds to prevent
+	//screensaver from starting up.
+	if(curTime - lastScreensaverUpdate >= 30 || lastScreensaverUpdate == 0)
+	{
+		UpdateSystemActivity(UsrActivity);
+		lastScreensaverUpdate = curTime;
+	}
+
 	event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSEventTrackingRunLoopMode dequeue:YES];
 	if (event == nil)
 		return;
