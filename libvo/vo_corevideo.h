@@ -40,7 +40,6 @@
 {
 	//Cocoa
 	NSWindow *window;
-	NSEvent *event;
 
 	//CoreVideo
 	CVPixelBufferRef frameBuffers[2];

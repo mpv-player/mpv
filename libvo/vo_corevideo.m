@@ -878,6 +878,7 @@ static int control(uint32_t request, void *data)
 */
 - (void) check_events
 {
+	NSEvent *event;
 	int curTime = TickCount()/60;
 
 	//automatically hide mouse cursor (and future on-screen control?)
