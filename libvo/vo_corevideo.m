@@ -401,6 +401,15 @@ static int preinit(const char *arg)
 			mpGLView = [[MPlayerOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100) pixelFormat:[MPlayerOpenGLView defaultPixelFormat]];
 			[mpGLView autorelease];
 		}
+		// Install an event handler so the Quit menu entry works
+		// The proper way using NSApp setDelegate: and
+		// applicationShouldTerminate: does not work,
+		// probably NSApplication never installs its handler.
+		[[NSAppleEventManager sharedAppleEventManager]
+			setEventHandler:mpGLView
+			andSelector:@selector(handleQuitEvent:withReplyEvent:)
+			forEventClass:kCoreEventClass
+			andEventID:kAEQuitApplication];
 
 		[mpGLView display];
 		[mpGLView preinit];
@@ -1039,5 +1048,10 @@ static int control(uint32_t request, void *data)
 	// otherwise we are in trouble if the
 	// KEY_CLOSE_WIN handler is disabled
 	return NO;
+}
+
+- (void)handleQuitEvent:(NSAppleEventDescriptor*)e withReplyEvent:(NSAppleEventDescriptor*)r
+{
+	mplayer_put_key(KEY_CLOSE_WIN);
 }
 @end
