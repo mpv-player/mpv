@@ -685,8 +685,7 @@ static int control(uint32_t request, void *data)
 */
 - (void)reshape
 {
-	uint32_t d_width;
-	uint32_t d_height;
+	int d_width, d_height;
 
 	NSRect frame = [self frame];
 	vo_dwidth  = frame.size.width;
@@ -702,7 +701,7 @@ static int control(uint32_t request, void *data)
 	//set texture frame
 	if(vo_keepaspect)
 	{
-		aspect( (int *)&d_width, (int *)&d_height, A_WINZOOM);
+		aspect(&d_width, &d_height, A_WINZOOM);
 
 		textureFrame = NSMakeRect((vo_dwidth - d_width) / 2, (vo_dheight - d_height) / 2, d_width, d_height);
 	}
