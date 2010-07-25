@@ -56,7 +56,6 @@
 	BOOL mouseHide;
 
 	//menu command id
-	NSMenuItem *kQuitCmd;
 	NSMenuItem *kHalfScreenCmd;
 	NSMenuItem *kNormalScreenCmd;
 	NSMenuItem *kDoubleScreenCmd;

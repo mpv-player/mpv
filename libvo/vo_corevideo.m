@@ -616,11 +616,6 @@ static int control(uint32_t request, void *data)
  */
 - (void)menuAction:(id)sender
 {
-	if(sender == kQuitCmd)
-	{
-		mplayer_put_key(KEY_CLOSE_WIN);
-	}
-
 	if(sender == kHalfScreenCmd)
 		[self set_winSizeMult: 0.5];
 	if(sender == kNormalScreenCmd)
