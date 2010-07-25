@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
-<chapter id="tv">
-<title>TV</title>
-
-<sect1 id="tv-input" xreflabel="TV input">
+<chapter id="tv-input" xreflabel="TV input">
 <title>TV input</title>
 
 <para>
@@ -14,7 +11,7 @@ of TV options and keyboard controls.
 
 <!-- ********** -->
 
-<sect2 id="tv-compilation">
+<sect1 id="tv-compilation">
 <title>Compilation</title>
 
 <procedure>
@@ -29,11 +26,11 @@ of TV options and keyboard controls.
   example <application>XawTV</application>.
 </para></step>
 </procedure>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="tv-tips">
+<sect1 id="tv-tips">
 <title>Usage tips</title>
 
 <para>
@@ -128,11 +125,11 @@ Here are just a few tips:
 </para></listitem>
 </itemizedlist>
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="tv-examples">
+<sect1 id="tv-examples">
 <title>Examples</title>
 
 <informalexample><para>
@@ -177,14 +174,14 @@ uses the maximum available information and is a little more resistant to noise.
 The bt8x8 chips can do the pixel averaging only in the horizontal direction due
 to a hardware limitation.
 </para></informalexample>
-</sect2>
 </sect1>
+</chapter>
 
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
-<sect1 id="tv-teletext">
+<chapter id="tv-teletext">
 <title>Teletext</title>
 
 <para>
@@ -192,7 +189,7 @@ to a hardware limitation.
   for v4l and v4l2 drivers.
 </para>
 
-<sect2 id="tv-teletext-implementation-notes">
+<sect1 id="tv-teletext-implementation-notes">
 <title>Implementation notes</title>
 
 <para>
@@ -209,9 +206,9 @@ starting to receive TV input, so you do not need to wait until the requested pag
 <para>
 Note: Using teletext with <option>-vo xv</option> causes strange colors.
 </para>
-</sect2>
+</sect1>
 
-<sect2 id="tv-teletext-usage">
+<sect1 id="tv-teletext-usage">
 <title>Using teletext</title>
 
 <para>
@@ -231,9 +228,9 @@ Here is an example for Russian:
 
 <para>
 </para>
-</sect2>
+</sect1>
 
-<sect2 id="tv-teletext-hotkeys">
+<sect1 id="tv-teletext-hotkeys">
 <title>Teletext hot keys</title>
 
 <informaltable frame="all">
@@ -269,7 +266,6 @@ Here is an example for Russian:
 </tbody>
 </tgroup>
 </informaltable>
-</sect2>
 </sect1>
 
 </chapter>

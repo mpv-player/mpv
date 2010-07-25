@@ -3,9 +3,6 @@
 <chapter id="radio">
 <title>Radio</title>
 
-<sect1 id="radio-input" xreflabel="Radio input">
-<title>Radio input</title>
-
 <para>
 This section is about how to enable listening to radio from
 a V4L-compatible radio tuner. See the man page for a
@@ -14,7 +11,7 @@ description of radio options and keyboard controls.
 
 <!-- ********** -->
 
-<sect2 id="radio-compilation">
+<sect1 id="radio-compilation">
 <title>Compilation</title>
 
 <procedure>
@@ -28,11 +25,11 @@ description of radio options and keyboard controls.
   example <application>XawTV</application>.
 </para></step>
 </procedure>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="radio-tips">
+<sect1 id="radio-tips">
 <title>Usage tips</title>
 
 <para>
@@ -65,11 +62,11 @@ Here are just a few tips:
 </para></listitem>
 </itemizedlist>
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="radio-examples">
+<sect1 id="radio-examples">
 <title>Examples</title>
 
 <informalexample><para>
@@ -105,7 +102,6 @@ by equal signs, commas by periods.
 </para></note>
 </para>
 </informalexample>
-</sect2>
 </sect1>
 
 </chapter>

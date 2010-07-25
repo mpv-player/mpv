@@ -3,92 +3,6 @@
 <chapter id="video">
 <title>Video output devices</title>
 
-<sect1 id="mtrr">
-<title>Setting up MTRR</title>
-
-<para>
-It is VERY recommended to check if the MTRR registers
-are set up properly, because they can give a big performance boost.
-</para>
-
-<para>
-Do a <command>cat /proc/mtrr</command>:
-<screen>
-<prompt>--($:~)--</prompt> cat /proc/mtrr
-reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9
-reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<!--
---></screen>
-</para>
-
-<para>
-It's right, shows my Matrox G400 with 16MB memory. I did this from
-XFree 4.x.x, which sets up MTRR registers automatically.
-</para>
-
-<para>
-If nothing worked, you have to do it manually. First, you have to find the
-base address. You have 3 ways to find it:
-
-<orderedlist>
-<listitem><para>
-  from X11 startup messages, for example:
-  <screen>
-(--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000
-(--) SVGA: Linear framebuffer at 0xD8000000<!--
-  --></screen>
-</para></listitem>
-<listitem><para>
-  from <filename>/proc/pci</filename> (use <command>lspci -v</command>
-  command):
-  <screen>
-01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
-Memory at d8000000 (32-bit, prefetchable)<!--
-  --></screen>
-</para></listitem>
-<listitem><para>
-  from mga_vid kernel driver messages (use <command>dmesg</command>):
-  <screen>mga_mem_base = d8000000</screen>
-</para></listitem>
-</orderedlist>
-</para>
-
-<para>
-Then let's find the memory size. This is very easy, just convert video RAM
-size to hexadecimal, or use this table:
-<informaltable frame="none">
-<tgroup cols="2">
-<tbody>
-  <row><entry>1 MB</entry><entry>0x100000</entry></row>
-  <row><entry>2 MB</entry><entry>0x200000</entry></row>
-  <row><entry>4 MB</entry><entry>0x400000</entry></row>
-  <row><entry>8 MB</entry><entry>0x800000</entry></row>
-  <row><entry>16 MB</entry><entry>0x1000000</entry></row>
-  <row><entry>32 MB</entry><entry>0x2000000</entry></row>
-</tbody>
-</tgroup>
-</informaltable>
-</para>
-
-<para>
-You know base address and memory size, let's setup MTRR registers!
-For example, for the Matrox card above (<literal>base=0xd8000000</literal>)
-with 32MB ram (<literal>size=0x2000000</literal>) just execute:
-<screen>
-echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt; /proc/mtrr
-</screen>
-</para>
-
-<para>
-Not all CPUs have MTRRs. For example older K6-2 (around 266MHz,
-stepping 0) CPUs don't have MTRRs, but stepping 12 does
-(execute <command>cat /proc/cpuinfo</command> to check it).
-</para>
-</sect1>
-
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
 <sect1 id="xv">
 <title>Xv</title>
 
@@ -160,182 +74,6 @@ screen #0
 </para></listitem>
 </orderedlist>
 </para>
-
-
-<sect2 id="tdfx">
-<title>3dfx cards</title>
-
-<para>
-Older 3dfx drivers were known to have problems with XVideo acceleration, it
-didn't support YUY2 or YV12 colorspaces. Verify that you have XFree86
-version 4.2.0 or later, it can handle YV12 and YUY2 while previous
-versions, including 4.1.0, <emphasis role="bold">crash with YV12</emphasis>.
-If you experience strange effects using <option>-vo xv</option>, try SDL
-(it has XVideo, too) and see if it helps. Check the
-<link linkend="sdl">SDL</link> section for details.
-</para>
-
-<para>
-<emphasis role="bold">OR</emphasis>, try the NEW
-<option>-vo tdfxfb</option> driver! See the <link linkend="tdfxfb">tdfxfb</link>
-section.
-</para>
-</sect2>
-
-
-<sect2 id="s3">
-<title>S3 cards</title>
-
-<para>
-S3 Savage3D's should work fine, but for Savage4, use XFree86 version 4.0.3
-or greater (in case of image problems, try 16bpp). As for S3 Virge: there is
-xv support, but the card itself is very slow, so you better sell it.
-</para>
-
-<para>
-There is now a native framebuffer driver for S3 Virge cards similar to
-tdfxfb. Set up your framebuffer (e.g. append
-"<option>vga=792 video=vesa:mtrr</option>" to your kernel command line) and use
-<option>-vo s3fb</option> (<option>-vf yuy2</option> and <option>-dr</option>
-will also help).
-</para>
-
-<note><para>
-It's currently unclear which Savage models lack YV12 support, and convert by
-driver (slow). If you suspect your card, get a newer driver, or ask politely
-on the MPlayer-users mailing list for an MMX/3DNow! enabled driver.
-</para></note>
-</sect2>
-
-
-<sect2 id="nvidia">
-<title>nVidia cards</title>
-
-<para>
-nVidia isn't always a very good choice under Linux ... XFree86's
-open-source driver supports most of these cards, but for some cases, you'll
-have to use the binary closed-source nVidia driver, available at
-<ulink url="http://www.nvidia.com/object/linux.html">nVidia's web site</ulink>.
-You'll always need this driver if you want 3D acceleration, too.
-</para>
-
-<para>
-Riva128 cards don't have XVideo support with XFree86's nVidia driver :(
-Complain to nVidia.
-</para>
-
-<para>
-However, <application>MPlayer</application> contains a
-<link linkend="vidix">VIDIX</link> driver for most nVidia cards. Currently it
-is in beta stage, and has some drawbacks. For more information, see
-<link linkend="vidix-nvidia">nVidia VIDIX</link> section.
-</para>
-</sect2>
-
-
-<sect2 id="ati">
-<title>ATI cards</title>
-
-<para>
-The <ulink url="http://gatos.sf.net">GATOS driver</ulink>
-(which you should use, unless you have Rage128 or Radeon) has VSYNC enabled
-by default. It means that decoding speed (!) is synced to the monitor's
-refresh rate. If playing seems to be slow, try disabling VSYNC somehow, or
-set refresh rate to a n*(fps of the movie) Hz.
-</para>
-
-<para>
-Radeon VE - if you need X, use XFree86 4.2.0 or greater for this card.
-No TV out support. Of course with <application>MPlayer</application> you can
-happily get <emphasis role="bold">accelerated</emphasis> display, with or
-without <emphasis role="bold">TV output</emphasis>, and no libraries or X are
-needed.
-Read the <link linkend="vidix">VIDIX</link> section.
-</para>
-</sect2>
-
-
-<sect2 id="neomagic">
-<title>NeoMagic cards</title>
-
-<para>
-These cards can be found in many laptops. You must use XFree86 4.3.0 or
-above, or else use Stefan Seyfried's
-<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/">Xv-capable drivers</ulink>.
-Just choose the one that applies to your version of XFree86.
-</para>
-
-<para>
-XFree86 4.3.0 includes Xv support, yet Bohdan Horst sent a small
-<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">patch</ulink>
-against the XFree86 sources that speeds up framebuffer operations (so XVideo)
-up to four times. The patch has been included in XFree86 CVS and should be in
-the next release after 4.3.0.
-</para>
-
-<para>
-To allow playback of DVD sized content change your XF86Config like this:
-<programlisting>
-Section "Device"
-    [...]
-    Driver "neomagic"
-    <emphasis>Option "OverlayMem" "829440"</emphasis>
-    [...]
-EndSection<!--
---></programlisting>
-</para>
-</sect2>
-
-
-<sect2 id="trident">
-<title>Trident cards</title>
-
-<para>
-If you want to use Xv with a Trident card, provided that it doesn't work
-with 4.1.0, install XFree 4.2.0. 4.2.0 adds support for fullscreen Xv
-support with the Cyberblade XP card.
-</para>
-
-<para>
-Alternatively, <application>MPlayer</application> contains a
-<link linkend="vidix">VIDIX</link> driver for the Cyberblade/i1 card.
-</para>
-</sect2>
-
-
-<sect2 id="kyro">
-<title>Kyro/PowerVR cards</title>
-
-<para>
-If you want to use Xv with a Kyro based card (for example Hercules
-Prophet 4000XT), you should download the drivers from the
-<ulink url="http://www.powervr.com/">PowerVR site</ulink>.
-</para>
-</sect2>
-
-
-<sect2 id="intel">
-<title>Intel cards</title>
-
-<para>
-These cards can be found in many laptops. Recent Xorg is recommended.
-</para>
-
-<para>
-To allow playback of DVD sized (and larger) content change your XF86Config/xorg.conf like this:
-<programlisting>
-Section "Device"
-    [...]
-    Driver "intel"
-    <emphasis>Option "LinearAlloc" "6144"</emphasis>
-    [...]
-EndSection
-</programlisting>
-Lack of this option usually results in an error like
-<screen>X11 error: BadAlloc (insufficient resources for operation)</screen>
-when attempting to use <option>-vo xv</option>.
-</para>
-</sect2>
 </sect1>
 
 <!-- ********** -->
@@ -624,39 +362,6 @@ with every chipset driver for XFree out there.
 </para></listitem>
 </itemizedlist>
 
-</sect1>
-
-<!-- ********** -->
-
-<sect1 id="sdl">
-<title>SDL</title>
-
-<para>
-<acronym>SDL</acronym> (Simple Directmedia Layer) is basically a unified
-video/audio interface. Programs that use it know only about SDL, and not
-about what video or audio driver does SDL actually use. For example a Doom
-port using SDL can run on svgalib, aalib, X, fbdev, and others, you only
-have to specify the (for example) video driver to use with the
-<envar>SDL_VIDEODRIVER</envar> environment variable. Well, in theory.
-</para>
-
-<para>
-With <application>MPlayer</application>, we used its X11 driver's software
-scaler ability for cards/drivers that doesn't support XVideo, until we made
-our own (faster, nicer) software scaler. Also we used its aalib output, but
-now we have ours which is more comfortable. Its DGA mode was better than
-ours, until recently. Get it now? :)
-</para>
-
-<para>
-It also helps with some buggy drivers/cards if the video is jerky (not slow
-system problem), or audio is lagging.
-</para>
-
-<para>
-SDL video output supports displaying subtitles under the movie, on the (if
-present) black bar.
-</para>
 </sect1>
 
 <!-- ********** -->
@@ -2175,10 +1880,7 @@ problems, or DVD subtitle problems, give <option>:sync</option> a try.
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
-<sect1 id="other">
-<title>Other visualization hardware</title>
-
-<sect2 id="zr">
+<sect1 id="zr">
 <title>Zr</title>
 
 <para>
@@ -2275,11 +1977,11 @@ during playback, it will crash your computer. It is, however, fine to
 wait for <application>MPlayer</application>
 to finish and <emphasis role="bold">THEN</emphasis> stop XawTV.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="blinkenlights">
+<sect1 id="blinkenlights">
 <title>Blinkenlights</title>
 
 <para>
@@ -2294,7 +1996,6 @@ has to offer. Just watch some of the
 On the Arcade video you can see the Blinkenlights output driver in
 action at 00:07:50.
 </para>
-</sect2>
 </sect1>
 
 

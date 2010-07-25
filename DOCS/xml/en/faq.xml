@@ -848,8 +848,7 @@ My DVD playback is sluggish!
 </para></question>
 <answer><para>
 Use the <option>-cache</option> option (described in the man page) and try
-enabling DMA for the DVD drive with the <command>hdparm</command> tool
-(described in the <link linkend="drives">CD chapter</link>).
+enabling DMA for the DVD drive with the <command>hdparm</command> tool.
 </para></answer>
 </qandaentry>
 
