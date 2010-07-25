@@ -1032,9 +1032,12 @@ static int control(uint32_t request, void *data)
 	return YES;
 }
 
-- (void)windowWillClose:(NSNotification *)aNotification
+- (BOOL)windowShouldClose:(id)sender
 {
-	mpGLView = NULL;
 	mplayer_put_key(KEY_CLOSE_WIN);
+	// We have to wait for MPlayer to handle this,
+	// otherwise we are in trouble if the
+	// KEY_CLOSE_WIN handler is disabled
+	return NO;
 }
 @end
