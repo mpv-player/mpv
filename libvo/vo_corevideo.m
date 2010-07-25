@@ -621,7 +621,7 @@ static int control(uint32_t request, void *data)
 {
 	if(sender == kQuitCmd)
 	{
-		mplayer_put_key(KEY_ESC);
+		mplayer_put_key(KEY_CLOSE_WIN);
 	}
 
 	if(sender == kHalfScreenCmd)
@@ -1044,6 +1044,6 @@ static int control(uint32_t request, void *data)
 - (void)windowWillClose:(NSNotification *)aNotification
 {
     mpGLView = NULL;
-	mplayer_put_key(KEY_ESC);
+	mplayer_put_key(KEY_CLOSE_WIN);
 }
 @end
