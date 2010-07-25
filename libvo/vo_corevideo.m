@@ -498,10 +498,8 @@ static int control(uint32_t request, void *data)
 
 	// Use visibleFrame to position the window taking the menu bar and dock into account.
 	// Also flip vo_dy since the screen origin is in the bottom left on OSX.
-	if (screen_id < 0)
-		visibleFrame = [[[mpGLView window] screen] visibleFrame];
-	else
-		visibleFrame = [[[NSScreen screens] objectAtIndex:screen_id] visibleFrame];
+	update_screen_info();
+	visibleFrame = [screen_handle visibleFrame];
 	[window setFrameTopLeftPoint:NSMakePoint(
 		visibleFrame.origin.x + vo_dx,
 		visibleFrame.origin.y + visibleFrame.size.height - vo_dy)];
