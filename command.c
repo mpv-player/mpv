@@ -633,7 +633,7 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_OK;
         case M_PROPERTY_GET_TYPE:
             if(!ka->arg) return M_PROPERTY_ERROR;
-            *(m_option_t**)ka->arg = &key_type;
+            *(const m_option_t**)ka->arg = &key_type;
             return M_PROPERTY_OK;
         }
     }
