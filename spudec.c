@@ -76,6 +76,13 @@ struct packet_t {
   packet_t *next;
 };
 
+struct palette_crop_cache {
+  int valid;
+  uint32_t palette;
+  int sx, sy, ex, ey;
+  int result;
+};
+
 typedef struct {
   packet_t *queue_head;
   packet_t *queue_tail;
@@ -98,6 +105,8 @@ typedef struct {
   size_t image_size;		/* Size of the image buffer */
   unsigned char *image;		/* Grayscale value */
   unsigned char *aimage;	/* Alpha value */
+  unsigned int pal_start_col, pal_start_row;
+  unsigned int pal_width, pal_height;
   unsigned char *pal_image;	/* palette entry value */
   unsigned int scaled_frame_width, scaled_frame_height;
   unsigned int scaled_start_col, scaled_start_row;
@@ -111,6 +120,8 @@ typedef struct {
   int spu_changed;
   unsigned int forced_subs_only;     /* flag: 0=display all subtitle, !0 display only forced subtitles */
   unsigned int is_forced_sub;         /* true if current subtitle is a forced subtitle */
+
+  struct palette_crop_cache palette_crop_cache;
 } spudec_handle_t;
 
 static void spudec_queue_packet(spudec_handle_t *this, packet_t *packet)
@@ -219,6 +230,7 @@ static int spudec_alloc_image(spudec_handle_t *this, int stride, int height)
       free(this->image);
       free(this->pal_image);
       this->image_size = 0;
+      this->pal_width = this->pal_height  = 0;
     }
     this->image = malloc(2 * this->stride * this->height);
     if (this->image) {
@@ -254,36 +266,94 @@ static void pal2gray_alpha(const uint16_t *pal,
   }
 }
 
-static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
+static int apply_palette_crop(spudec_handle_t *this,
+                              unsigned crop_x, unsigned crop_y,
+                              unsigned crop_w, unsigned crop_h)
 {
+  int i;
+  uint8_t *src;
   uint16_t pal[4];
-  unsigned int i, x, y;
-  uint8_t *dst;
-
-  this->scaled_frame_width = 0;
-  this->scaled_frame_height = 0;
-  this->start_col = packet->start_col;
-  this->start_row = packet->start_row;
-  this->height = packet->height;
-  this->width = packet->width;
-  this->stride = packet->stride;
+  unsigned stride = (crop_w + 7) & ~7;
+  if (crop_x > this->pal_width || crop_y > this->pal_height ||
+      crop_w > this->pal_width - crop_x || crop_h > this->pal_width - crop_y ||
+      crop_w > 0x8000 || crop_h > 0x8000 ||
+      stride * crop_h  > this->image_size) {
+    return 0;
+  }
   for (i = 0; i < 4; ++i) {
     int color;
-    int alpha = packet->alpha[i];
+    int alpha = this->alpha[i];
     // extend 4 -> 8 bit
     alpha |= alpha << 4;
     if (this->custom && (this->cuspal[i] >> 31) != 0)
       alpha = 0;
     color = this->custom ? this->cuspal[i] :
-            this->global_palette[packet->palette[i]];
+            this->global_palette[this->palette[i]];
     color = (color >> 16) & 0xff;
     // convert to MPlayer-style gray/alpha palette
     color = FFMIN(color, alpha);
     pal[i] = (-alpha << 8) | color;
   }
+  src = this->pal_image + crop_y * this->pal_width + crop_x;
+  pal2gray_alpha(pal, src, this->pal_width,
+                 this->image, this->aimage, stride,
+                 crop_w, crop_h);
+  this->width  = crop_w;
+  this->height = crop_h;
+  this->stride = stride;
+  this->start_col = this->pal_start_col + crop_x;
+  this->start_row = this->pal_start_row + crop_y;
+  spudec_cut_image(this);
 
-  if (!spudec_alloc_image(this, this->stride, this->height))
+  // reset scaled image
+  this->scaled_frame_width = 0;
+  this->scaled_frame_height = 0;
+  this->palette_crop_cache.valid = 0;
+  return 1;
+}
+
+int spudec_apply_palette_crop(void *this, uint32_t palette,
+                              int sx, int sy, int ex, int ey)
+{
+  spudec_handle_t *spu = this;
+  struct palette_crop_cache *c = &spu->palette_crop_cache;
+  if (c->valid && c->palette == palette &&
+      c->sx == sx && c->sy == sy && c->ex == ex && c->ey == ey)
+    return c->result;
+  spu->palette[0] = (palette >> 28) & 0xf;
+  spu->palette[1] = (palette >> 24) & 0xf;
+  spu->palette[2] = (palette >> 20) & 0xf;
+  spu->palette[3] = (palette >> 16) & 0xf;
+  spu->alpha[0]   = (palette >> 12) & 0xf;
+  spu->alpha[1]   = (palette >>  8) & 0xf;
+  spu->alpha[2]   = (palette >>  4) & 0xf;
+  spu->alpha[3]   =  palette        & 0xf;
+  spu->spu_changed = 1;
+  c->result = apply_palette_crop(spu,
+                                 sx - spu->pal_start_col, sy - spu->pal_start_row,
+                                 ex - sx, ey - sy);
+  c->palette = palette;
+  c->sx = sx; c->sy = sy;
+  c->ex = ex; c->ey = ey;
+  c->valid = 1;
+  return c->result;
+}
+
+static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
+{
+  unsigned int i, x, y;
+  uint8_t *dst;
+
+  if (!spudec_alloc_image(this, packet->stride, packet->height))
     return;
+
+  this->pal_start_col = packet->start_col;
+  this->pal_start_row = packet->start_row;
+  this->pal_height = packet->height;
+  this->pal_width  = packet->width;
+  this->stride = packet->stride;
+  memcpy(this->palette, packet->palette, sizeof(this->palette));
+  memcpy(this->alpha,   packet->alpha,   sizeof(this->alpha));
 
   i = packet->current_nibble[1];
   x = 0;
@@ -291,7 +361,7 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
   dst = this->pal_image;
   while (packet->current_nibble[0] < i
 	 && packet->current_nibble[1] / 2 < packet->control_start
-	 && y < this->height) {
+	 && y < this->pal_height) {
     unsigned int len, color;
     unsigned int rle = 0;
     rle = get_nibble(packet);
@@ -306,8 +376,8 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
     color = 3 - (rle & 0x3);
     len = rle >> 2;
     x += len;
-    if (len == 0 || x >= this->width) {
-      len += this->width - x;
+    if (len == 0 || x >= this->pal_width) {
+      len += this->pal_width - x;
       next_line(packet);
       x = 0;
       ++y;
@@ -315,10 +385,7 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
     memset(dst, color, len);
     dst += len;
   }
-  pal2gray_alpha(pal, this->pal_image, this->width,
-                 this->image, this->aimage, this->stride,
-                 this->width, this->height);
-  spudec_cut_image(this);
+  apply_palette_crop(this, 0, 0, this->pal_width, this->pal_height);
 }
 
 
@@ -1257,6 +1324,7 @@ void spudec_free(void *this)
     free(spu->pal_image);
     spu->pal_image = NULL;
     spu->image_size = 0;
+    spu->pal_width = spu->pal_height  = 0;
     free(spu);
   }
 }

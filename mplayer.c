@@ -4332,8 +4332,14 @@ if(auto_quality>0){
  if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
    nav_highlight_t hl;
    mp_dvdnav_get_highlight (mpctx->stream, &hl);
+   if (!vo_spudec || !spudec_apply_palette_crop(vo_spudec, hl.palette, hl.sx, hl.sy, hl.ex, hl.ey)) {
    osd_set_nav_box (hl.sx, hl.sy, hl.ex, hl.ey);
    vo_osd_changed (OSDTYPE_DVDNAV);
+   } else {
+     osd_set_nav_box(0, 0, 0, 0);
+     vo_osd_changed(OSDTYPE_DVDNAV);
+     vo_osd_changed(OSDTYPE_SPU);
+   }
 
    if (mp_dvdnav_stream_has_changed(mpctx->stream)) {
      double ar = -1.0;
