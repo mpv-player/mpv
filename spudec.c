@@ -69,8 +69,8 @@ struct packet_t {
                                      processed (for RLE decoding) for
                                      even and odd lines */
   int deinterlace_oddness;	/* 0 or 1, index into current_nibble */
-  unsigned int start_col, end_col;
-  unsigned int start_row, end_row;
+  unsigned int start_col;
+  unsigned int start_row;
   unsigned int width, height, stride;
   unsigned int start_pts, end_pts;
   packet_t *next;
@@ -92,8 +92,8 @@ typedef struct {
   unsigned int custom;
   unsigned int now_pts;
   unsigned int start_pts, end_pts;
-  unsigned int start_col, end_col;
-  unsigned int start_row, end_row;
+  unsigned int start_col;
+  unsigned int start_row;
   unsigned int width, height, stride;
   size_t image_size;		/* Size of the image buffer */
   unsigned char *image;		/* Grayscale value */
@@ -263,9 +263,7 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
   this->scaled_frame_width = 0;
   this->scaled_frame_height = 0;
   this->start_col = packet->start_col;
-  this->end_col = packet->end_col;
   this->start_row = packet->start_row;
-  this->end_row = packet->end_row;
   this->height = packet->height;
   this->width = packet->width;
   this->stride = packet->stride;
@@ -495,9 +493,7 @@ static void spudec_process_control(spudec_handle_t *this, int pts100)
       packet->current_nibble[0] = current_nibble[0];
       packet->current_nibble[1] = current_nibble[1];
       packet->start_row = start_row;
-      packet->end_row = end_row;
       packet->start_col = start_col;
-      packet->end_col = end_col;
       packet->width = width;
       packet->height = height;
       packet->stride = stride;
