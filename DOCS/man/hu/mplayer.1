@@ -1,4 +1,4 @@
-.\" Synced with r31288
+.\" Synced with r31814
 .\" MPlayer (C) 2000-2010 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2010. 05. 31." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2010. 07. 27." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -60,6 +60,11 @@ mencoder \- film kódoló
 [opciók]
 {fájlok csoportja és opcióik}
 [csoport specifikus opciók]
+.
+.br
+.B mplayer
+[br]://[sáv][/eszköz]
+[opciók]
 .
 .br
 .B mplayer
@@ -153,7 +158,7 @@ lásd a dokumentációt).
 Lejátsza a legtöbb MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, Ogg/\:OGM,
 MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM és RoQ fájlt, számos natív és bináris
 codec-et támogat.
-Tudsz nézni vele VCD-t, SVCD-t, DVD-t, 3ivx-et, DivX 3/4/5-öt, WMV-t és még
+Tudsz nézni vele VCD, SVCD, DVD, Blu\-ray lemezeket, 3ivx-et, DivX 3/4/5-öt, WMV-t és még
 H.264 filmeket is.
 .PP
 Az MPlayer a videó és audió kimeneti vezérlõk széles skáláját támogatja.
@@ -252,7 +257,7 @@ Beállítja az audió egyensúlyt a bal/\:jobb csatornának megfelelõen.
 Hang elnémítása.
 .IPs "_ (csak MPEG-TS, AVI és libavformat mellett)"
 Váltás az elérhetõ videó sávok között.
-.IPs "# (csak DVD, MPEG, Matroska, AVI és libavformat mellett)"
+.IPs "# (csak DVD, Blu-Ray, MPEG, Matroska, AVI és libavformat mellett)"
 Váltás az elérhetõ audió sávok között.
 .IPs "TAB (csak MPEG-TS és libavformat)"
 Váltás az elérhetõ programok között.
@@ -432,8 +437,7 @@ Választás jóváhagyása.
 .PP
 .RS
 .
-(A következõ gombok csak akkor mûködnek, ha teletext támogatással fordítottál:
-a TV teletext irányítására szolgálnak, melynek adatai jöhetnek
+(A következõ gombok a TV teletext irányítására szolgálnak. Az adatai jöhetnek
 analóg TV forrásból vagy egy MPEG Transport Stream-bõl.)
 .RE
 .PP
@@ -876,6 +880,17 @@ Ez egy kezdõpont a felhasználónak az EDL bejegyzések késõbbi finomhangolásához.
 Lásd http://www.mplayerhq.hu/\:DOCS/\:HTML/\:hu/\:edl.html fájlt a részletekért.
 .
 .TP
+.B \-edl-backward-delay <szám>
+Ha EDL-t használsz a lejátszás során és visszafelé ugrálsz, lehet, hogy
+egy EDL rekord közepére jutsz.
+Ebben az esetben az MPlayer tovább keres visszafelé az EDL rekord induló
+pozíciója felé, majd azonnal kihagyja az EDL rekordban megadott részt.
+Ezen viselkedés elkerüléséhez az MPlayer egy megadott, fix idõ intervallummal
+az EDL rekord kezdete elé ugrik.
+Ezzel a paraméterrel megadhatod ezt az idõ intervallumot másodpercekben
+(alapértelmezett: 2 másodperc).
+.
+.TP
 .B \-enqueue (csak GUI)
 A parancssorban megadott fájlok a lejátszási listába kerülnek sorba az azonnali
 lejátszás helyett.
@@ -942,9 +957,9 @@ A \-msglevel identify=4 rövidítése.
 A fájl paramétereinek kiírása emészthetõ formában.
 Bõvebb információt kínál a feliratról, az audiósávok nyelvérõl és ID-irõl is.
 Néhány esetben több információt kapsz a \-msglevel identify=6 kapcsolóval.
-Például egy DVD esetén kiírja a fejezeteket és az egyes címek idõbeli hosszát,
-valamint a lemez ID-t is.
-Ha a \-frames 0 kapcsolóval használod, elnyom minden kimenetet.
+Például egy DVD vagy Blu\-Ray esetén kiírja a fejezeteket és az egyes címek idõbeli
+hosszát, valamint a lemez ID-t is.
+Ha a \-frames 0 kapcsolóval használod, elnyom minden videó kimenetet.
 A TOOLS/\:midentify.sh wrapper script eltünteti a maradék kimenetet, és
 (remélhetõleg) shell escape-eli a fájlneveket.
 .
@@ -1153,7 +1168,7 @@ parancsokat olvas az stdin-rõl.
 A \-input cmdlist kapcsoló kilistázza a szolga módban használható parancsokat,
 a DOCS/tech/slave.txt fájlban megtalálod a leírásukat.
 Ez nem a többi, pl.\& a videó ablakon keresztül érkezõ input letiltására készült,
-arra használj mást, mint a \-input nodefault\-binds:conf=/dev/null.
+arra használj mást, mint a \-input nodefault\-bindings:conf=/dev/null.
 .
 .TP
 .B \-softsleep
@@ -1178,6 +1193,7 @@ A Dynamic Range Compression szintjét választja ki AC-3 audió folyamokhoz.
 A <szint> egy 0 és 1 közötti lebegõpontos érték, ahol a 0 jelenti, hogy nincs
 tömörítés és az 1 (ami az alapértelmezett) a teljes tömörítést (a hangos
 átmeneteket sokkal halkabbá teszi és fordítva).
+Egészen 2-ig adható meg érték, de ezek még csak kísérleti jellegûek.
 Ez a kapcsoló csak akkor hatásos, ha az AC-3 folyam tartalmazza a szükséges
 tartomány tömörítési információkat.
 .
@@ -1249,6 +1265,19 @@ használható, melyek képesek különbözõ bitrátával küldeni).
 Hasznos ha élõben stream-elt médiát akarsz nézni lassú kapcsolattal.
 Real RTSP steam-mel a maximális küldési sávszélesség is beállítható vele,
 lehetõséget teremtve a gyorsabb cache feltöltésre és a stream dump-olásra.
+.
+.TP
+.B \-bluray\-angle <szög ID> (csak Blu\-ray)
+Néhány Blu\-ray lemez tartalmaz olyan jeleneteket, melyek több szögbõl is megtekinthetõek.
+Itt magadhatod az MPlayernek, hogy melyik szöget használja (alapértelmezett: 1).
+.
+.TP
+.B \-bluray\-chapter <fejezet ID> (csak Blu\-ray)
+Megadja az MPlayernek melyik Blu\-ray fejezetet kell elindítania az aktuális címbõl (alapértelmezett: 1).
+.
+.TP
+.B \-bluray\-device <lemez elérési útja> (csak Blu\-ray)
+Megadja a Blu\-ray lemez helyét. Egy könyvtárnak kell lennie Blu\-ray struktúrával.
 .
 .TP
 .B \-cache <kByte>
@@ -1826,6 +1855,11 @@ rtsp:// URL-ekkel használandó, azt adja meg hogy a bejövõ RTP és RTCP
 csomagok TCP-n keresztül jöjjenek (ugyan azt a TCP kapcsolatot használva,
 mint az RTSP). Olyan internet kapcsolat esetében hasznos, amely nem
 engedi be az UDP csomagokat (lásd http://www.live555.com/\:mplayer/).
+.
+.TP
+.B \-rtsp\-stream\-over\-http (csak LIVE555)
+A 'http://' URL-ekkel együtt megadja, hogy a bejövõ RTP és RTCP csomagokat
+HTTP-n keresztül kell stream-elni.
 .
 .TP
 .B \-saveidx <fájlnév>
@@ -2831,6 +2865,14 @@ NAS-on keresztüli audió kimenet
 .TP
 .B coreaudio (csak Mac OS X)
 natív Mac OS X audió kimeneti vezérlõ
+.PD 0
+.RSs
+.IPs device_id=<id>
+a használandó kimeneti eszköz ID-je (0 = alapértelmezett eszköz)
+.IPs help
+Kilistázza az összes elérhetõ kimeneti eszközt az ID-jével eggyütt.
+.RE
+.PD 1
 .
 .TP
 .B "openal\ "
@@ -3841,9 +3883,9 @@ textúra mérete.
 A szándékok szerint a legegyszerûbb OpenGL implementációkkal is mûködik, de
 használhat újabb kiterjesztéseket is, melyek engedélyezik több színtér és a
 direct rendering támogatását.
-Az optimális sebességhez próbálj ki valami ehhez hasonlót
+Az optimális sebességhez add hozzá a következõ opciókat a parancssorhoz
 .br
-\-vo gl:yuv=2:rectangle=2:force\-pbo:ati\-hack \-dr \-noslices
+\-dr \-noslices
 .br
 A kód nagyon kevés ellenõrzést végez, így ha egy tulajdonság nem elérhetõ, az
 azért lehet, mert a kártyád/OpenGL implementációd nem támogatja, akkor sem, ha
@@ -3994,6 +4036,27 @@ Kiválasztja a használandó méretezõ függvényt a színességhez.
 A részletekért lásd a lscale-t.
 .IPs filter-strength=<érték>
 Beállítja a lscale/cscale szûrõk erõsségét, ahol ez támogatott.
+.IPs stereo=<érték>
+Kiválaszt egy módszert a sztereó képernyõkhöz.
+Valószínûleg használnod kell a -aspect kapcsolót a képarány javításához.
+Kísérleti dolog, ne várj tõle túl sokat.
+.RSss
+0: Normális 2D képernyõ
+.br
+1: a bemenet bal-jobb osztása teljes színû, vörös-cián sztereóra.
+.br
+2: a bemenet bal-jobb osztása teljes színû vörös-cián sztereóra.
+.br
+3: a bemenet bal-jobb osztása quadbuffer-es sztereóra.
+Csak nagyon kevés OpenGL kártya támogatja.
+.RE
+.RE
+.sp 1
+.RS
+A következõ opciók csak akkor hasznosak, ha a saját fragmentum programodat írod.
+.RE
+.sp 1
+.RSs
 .IPs customprog=<fájlnév>
 Saját fragmentum programot tölt be a <fájlnév>-bõl.
 Lásd a TOOLS/edgedect.fp fájl példáért.
@@ -4385,7 +4448,9 @@ A videó folyamot tömörítetlen YUV 4:2:0-ás képek sorozatává alakítja át
 és eltárolja egy fájlban (alapértelmezett: ./stream.yuv).
 A formátum ugyan az, mint amit az mjpegtools alkalmaz, így ez akkor
 hasznos, ha a videót az mjpegtools-szal akarod feldolgozni.
-Támogatja az YV12, RGB (24 bpp) és BGR (24 bpp) formátumot.
+Az YV12 formátumot támogatja.
+Ha a forrás fájlodnak eltérõ formátuma van és átlapolt, akkor használd
+a -vf scale=::1 opciót, hogy kényszerítsd az átlapolt módú konvertálást.
 Kombinálhatod a \-fixed\-vo opcióval ugyanolyan képméretû és fps
 értékû fájlok összefûzéséhez.
 .PD 0
@@ -5407,6 +5472,8 @@ Ez a szûrõ rendelkezik egy másik képességgel is: Megméri az össz
 maximum hangerõt és kiírja azt az MPlayer kilépésekor.
 Ez a hangerõ becslés felhasználható a hangerõ szint beállításakor
 a MEncoderben, így a maximális dinamikus tartomány kihasználható.
+Ez a képesség jelenleg csak a lebegõpontos adatokkal mûködik,
+használd így pl. \-af\-adv force=5, vagy \-af stats.
 .br
 .I MEGJEGYZÉS:
 Ez a szûrõ nem újrahívható és ezért egy audió folyamra csak egyszer
@@ -6118,21 +6185,11 @@ Idejétmúlt a szoftveres méretezõ miatt.
 A YUV színértékeket a CCIR 601 tartományba szorítja valódi konverzió nélkül.
 .
 .TP
-.B rgb2bgr[=swap]
-RGB 24/32 <\-> BGR 24/32 színtér konvertálás.
-.PD 0
-.RSs
-.IPs "swap\ "
-R <\-> B cserét is végrehajt.
-.RE
-.PD 1
-.
-.TP
 .B palette
 RGB/BGR 8 \-> 15/16/24/32bpp színtér konverzió paletta használattal.
 .
 .TP
-.B format[=fourcc]
+.B format[=fourcc[:kifourcc]]
 Korlátozza a színteret a következõ szûrõnek bármiféle konverzió nélkül.
 A scale szûrõvel együtt használva végez valódi konverziót.
 .br
@@ -6142,6 +6199,17 @@ A használható formátumok listájához lásd a format=fmt=help kapcsolót.
 .RSs
 .IPs <fourcc>
 formátum név mint pl.\& rgb15, bgr24, yv12, stb. (alapértelmezett: yuy2)
+.IPs <kifourcc>
+Formátum név, amit helyettesíteni kell a kimenetben.
+Ha az értéke nem 100%-ig kompatibilis a <fourcc>-vel, összeomlást okoz.
+.br
+Jó példák:
+.br
+format=rgb24:bgr24 format=yuyv:yuy2
+.br
+Rossz példa (összeomlik):
+.br
+format=rgb24:yv12
 .RE
 .PD 1
 .
@@ -10140,31 +10208,93 @@ használni. Az ABR a javasolt, mivel nem kell hozzá kvantálót kitalálni.
 A rákövetkezõ lépések ABR-esek és meg kell adni egy bitrátát is.
 .REss
 .
+.
 .TP
-.B turbo=<0\-2>
-Gyors elsõ lépéses mód.
-A két vagy több lépéses kódolás elsõ lépése alatt lehet növelni a sebességet
-néhány opció letiltásával, melynek elhanyagolható vagy akár semmilyen hatása
-sem lesz az utolsó lépés kimenetének minõségére.
+.B profile=<név>
+Elõírja az opciók egy H.264 profillal való kompatibilitását.
 .PD 0
 .RSs
-.IPs 0
-letiltva (alapértelmezett)
-.IPs 1
-Csökkenti a subq és frameref értékét és néhány inter-makroblokk partíció
-analizáló mód letiltása.
-.IPs 2
-Csökkenti a subq és frameref értékét 1-re, rombusz ME keresés és letilt
-minden partíció analizáló módot.
+.IPs baseline
+no8x8dct bframes=0 nocabac cqm=flat weightp=0 nointerlaced qp>0
+.IPs main
+no8x8dct cqm=flat qp>0
+.IPs high
+qp>0 (alapértelmezett)
 .RE
-.RS
-Az 1. szint akár 2x-esére is gyorsíthatja az elsõ lépést úgy, hogy az utolsó
-lépés globális PSNR-je változatlan marad a teljes minõségû elsõ lépéshez képest.
+.PD 1
+.
+.TP
+.B preset=<név>
+Egy elõre eltárolt beállítást használ a kódoláshoz.
+.PD 0
+.RSs
+.IPs ultrafast
+no8x8dct aq_mode=0 b_adapt=0 bframes=0 nodeblock nombtree me=dia
+nomixed_refs partitions=none ref=1 scenecut=0 subq=0 trellis=0
+noweight_b weightp=0
+.IPs superfast
+nombtree me=dia nomixed_refs partitions=i8x8,i4x4 ref=1 subq=1 trellis=0
+weightp=0
+.IPs veryfast
+nombtree nomixed_refs ref=1 subq=2 trellis=0 weightp=0
+.IPs faster
+nomixed_refs rc_lookahead=20 ref=5 subq=4 weightp=1
+.IPs fast
+rc_lookahead=30 ref=2 subq=6
+.IPs medium
+Az alapértelmezett beállítások lesznek érvényesek.
+.IPs slow
+b_adapt=2 direct=auto me=umh rc_lookahead=50 ref=5 subq=8
+.IPs slower
+b_adapt=2 direct=auto me=umh partitions=all rc_lookahead=60 ref=8 subq=9
+trellis=2
+.IPs veryslow
+b_adapt=2 b_frames=8 direct=auto me=umh me_range=24 partitions=all ref=16
+subq=10 trellis=2 rc_lookahead=60
+.IPs placebo
+bframes=16 b_adapt=2 direct=auto nofast_pskip me=tesa me_range=24
+partitions=all rc_lookahead=60 ref=16 subq=10 trellis=2
+.RE
+.PD 1
+.
+.TP
+.B tune=<név,[név,...]>
+A beállításokat egy bizonyos forráshoz vagy szituációhoz hangolja.
+Minden behangolt beállítást felülírnak az explicit megadott felhasználói beállítások.
+A többszörös hangolás vesszõvel elválasztva adható meg, de egyszerre csak egy psy
+hangolás használható.
+.PD 0
+.RSs
+.IPs "film (psy hangolás)"
+deblock=-1,-1 psy-rd=<unset>,0.15
+.IPs "animation (psy hangolás)"
+b_frames={+2} deblock=1,1 psy-rd=0.4:<nem beállított> aq_strength=0.6
+ref={kétszeres ha >1 különben 1}
+.IPs "grain (psy hangolás)"
+aq_strength=0.5 nodct_decimate deadzone_inter=6 deadzone_intra=6
+deblock=-2,-2 ipratio=1.1 pbratio=1.1 psy-rd=<nem beállított>,0.25 qcomp=0.8
+.IPs "stillimage (psy hangolás)"
+aq_strength=1.2 deblock=-3,-3 psy-rd=2.0,0.7
+.IPs "psnr (psy hangolás)"
+aq_mode=0 nopsy
+.IPs "ssim (psy hangolás)"
+aq_mode=2 nopsy
+.IPs fastdecode
+nocabac nodeblock noweight_b weightp=0
+.IPs zerolatency
+bframes=0 force_cfr rc_lookahead=0 sync_lookahead=0 sliced_threads
+.RE
+.PD 1
+.
+.TP
+.B slow_firstpass
+Letiltja a következõ, gyorsabb opciókat pass=1-nél:
+no_8x8dct me=dia partitions=none ref=1 subq={2 ha >2 különben változatlan}
+trellis=0 fast_pskip.
+Ezek a beállítások jelentõsen javítják a kódolási sebességet, miközben csekély
+vagy semmilyen hatásuk nincs a minõségre a végsõ lépésben.
 .br
-A 2. szint akár a 4x-esére is gyorsíthatja az elsõ lépést, kb. +/\- 0.05dB
-változással a globális PSNR-ben az utolsó lépésben a teljes minõségû elsõ
-lépéshez képest.
-.REss
+Ezt az opciót preset=placebo magában foglalja.
 .
 .TP
 .B keyint=<érték>
@@ -11453,7 +11583,14 @@ alábbi sorrendben keresi a felirat fájlokat:
 .SH PÉLDÁK AZ MPLAYER HASZNÁLATÁRA
 .
 .PP
-.B DVD lejátszás gyorsindítása:
+.B Blu\-ray lejátszás gyors indítása:
+.nf
+mplayer br:////lemez/eleresi/utja
+mplayer br:// \-bluray\-device /lemez/eleresi/utja
+.fi
+.
+.PP
+.B DVD lejátszás gyors indítása:
 .nf
 mplayer dvd://1
 .fi

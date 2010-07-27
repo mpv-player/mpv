@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r30862 -->
+<!-- synced with r31816 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -854,8 +854,7 @@ A DVD lejátszásom lassú!
 </para></question>
 <answer><para>
 Használd a <option>-cache</option> kapcsolót (ahogy le van írva a man oldalon) és
-próbáld meg engedélyezni a DMA-t a DVD meghajtóra a <command>hdparm</command> eszközzel
-(ahogy le van írva a <link linkend="drives">CD fejezetben</link>).
+próbáld meg engedélyezni a DMA-t a DVD meghajtóra a <command>hdparm</command> eszközzel.
 </para></answer>
 </qandaentry>
 

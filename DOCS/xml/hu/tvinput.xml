@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r29001 -->
-<chapter id="tv">
-<title>TV</title>
-
-<sect1 id="tv-input" xreflabel="TV input">
+<!-- synced with r31819 -->
+<chapter id="tv-input" xreflabel="TV input">
 <title>TV bemenet</title>
 
 <para>
@@ -14,7 +11,7 @@ a vezérlő billentyűk listájáért.
 
 <!-- ********** -->
 
-<sect2 id="tv-compilation">
+<sect1 id="tv-compilation">
 <title>Fordítás</title>
 
 <procedure>
@@ -29,11 +26,11 @@ a vezérlő billentyűk listájáért.
   például a <application>XawTV</application>-vel.
 </para></step>
 </procedure>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="tv-tips">
+<sect1 id="tv-tips">
 <title>Használati tippek</title>
 
 <para>
@@ -128,11 +125,11 @@ Itt csak pár tippet említünk meg:
 </para></listitem>
 </itemizedlist>
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="tv-examples">
+<sect1 id="tv-examples">
 <title>Példák</title>
 
 <informalexample><para>
@@ -178,14 +175,14 @@ lehető legtöbb információt használja fel és egy kicsit ellenállóbb a
 zajokkal szemben. A bt8x8 chip-ek a pixel átlagolást csak vízszintesen
 tudják hardveres korlátok miatt.
 </para></informalexample>
-</sect2>
 </sect1>
+</chapter>
 
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
-<sect1 id="tv-teletext">
+<chapter id="tv-teletext">
 <title>Teletext</title>
 
 <para>
@@ -193,7 +190,7 @@ tudják hardveres korlátok miatt.
   az <application>MPlayerben</application>.
 </para>
 
-<sect2 id="tv-teletext-implementation-notes">
+<sect1 id="tv-teletext-implementation-notes">
 <title>Megjegyzések az implementációhoz</title>
 
 <para>
@@ -212,9 +209,9 @@ teletext oldalakat, így nem kell várnod a kért oldal betöltésére.
 Megjegyzés: A teletext <option>-vo xv</option> melletti használata érdekes színeket
 jelenít meg.
 </para>
-</sect2>
+</sect1>
 
-<sect2 id="tv-teletext-usage">
+<sect1 id="tv-teletext-usage">
 <title>A teletext használata</title>
 
 <para>
@@ -234,9 +231,9 @@ Egy példa az orosz nyelv kiválasztására:
 
 <para>
 </para>
-</sect2>
+</sect1>
 
-<sect2 id="tv-teletext-hotkeys">
+<sect1 id="tv-teletext-hotkeys">
 <title>Teletext gyorsbillentyűk</title>
 
 <informaltable frame="all">
@@ -272,7 +269,6 @@ Egy példa az orosz nyelv kiválasztására:
 </tbody>
 </tgroup>
 </informaltable>
-</sect2>
 </sect1>
 
 </chapter>

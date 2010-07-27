@@ -1,96 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r31032 -->
+<!-- synced with r31821 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
-
-<sect1 id="mtrr">
-<title>Az MTRR beállítása</title>
-
-<para>
-NAGYON javasoljuk, hogy ellenőrizd le, hogy az MTRR regiszterek
-megfelelően be vannak-e állítva, mert hatalmas teljesítményjavulást
-hozhatnak.
-</para>
-
-<para>
-Írd be: <command>cat /proc/mtrr</command>:
-<screen>
-<prompt>--($:~)--</prompt> cat /proc/mtrr
-reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9
-reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<!--
---></screen>
-</para>
-
-<para>
-Ez jó, mutatja a 16 MB memóriával rendelkező Matrox G400-as kártyámat.
-Ezt XFree 4.x.x-ből csináltam, ami automatikusan beállítja az MTRR
-regisztereket.
-</para>
-
-<para>
-Ha semmi sem működik, kézzel kell beállítanod. Először meg kell találnod
-a bázis címet. 3 módszer van a megtalálására:
-
-<orderedlist>
-<listitem><para>
-  az X11 indulási üzeneteiből, például:
-  <screen>
-(--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000
-(--) SVGA: Linear framebuffer at 0xD8000000<!--
-  --></screen>
-</para></listitem>
-<listitem><para>
-  a <filename>/proc/pci</filename> fájlból (használd az <command>lspci -v</command>
-  parancsot):
-  <screen>
-01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
-Memory at d8000000 (32-bit, prefetchable)
-  </screen>
-</para></listitem>
-<listitem><para>
-  az mga_vid kernel vezérlő üzeneteiből (használd a <command>dmesg</command>-et):
-  <screen>mga_mem_base = d8000000</screen>
-</para></listitem>
-</orderedlist>
-</para>
-
-<para>
-Ezután keresd meg a memória méretét. Ez nagyon egyszerű, csak számold át
-a videó RAM méretét hexadecimálisra, vagy használd ezt a táblázatot:
-<informaltable frame="none">
-<tgroup cols="2">
-<tbody>
-  <row><entry>1 MB</entry><entry>0x100000</entry></row>
-  <row><entry>2 MB</entry><entry>0x200000</entry></row>
-  <row><entry>4 MB</entry><entry>0x400000</entry></row>
-  <row><entry>8 MB</entry><entry>0x800000</entry></row>
-  <row><entry>16 MB</entry><entry>0x1000000</entry></row>
-  <row><entry>32 MB</entry><entry>0x2000000</entry></row>
-</tbody>
-</tgroup>
-</informaltable>
-</para>
-
-<para>
-Már tudjuk a bázis címet és a memória méretét, hát állítsuk be az
-MTRR regisztereket!
-Például a fenti Matrox kártyánál (<literal>base=0xd8000000</literal>)
-32MB RAM-mal (<literal>size=0x2000000</literal>) csak futtasd ezt:
-<screen>
-echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt; /proc/mtrr
-</screen>
-</para>
-
-<para>
-Nem minden CPU-ban van MTRR. Például a régebbi K6-2 (266MHz körül,
-stepping 0) CPU-kban nincs MTRR, de a stepping 12-ben van
-(futtasd le a <command>cat /proc/cpuinfo</command> parancsot az ellenőrzéshez).
-</para>
-</sect1>
-
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
 
 <sect1 id="xv">
 <title>Xv</title>
@@ -163,184 +74,6 @@ screen #0
 </para></listitem>
 </orderedlist>
 </para>
-
-
-<sect2 id="tdfx">
-<title>3dfx kártyák</title>
-
-<para>
-A régebbi 3dfx vezérlőknek tudvalevőleg problémáik vannak az XVideo gyorsítással,
-nem támogatják a YUY2 és YV12 színtereket. Nézd meg, hogy 4.2.0 vagy
-újabb XFree86-tal rendelkezel-e, ez jól kezeli a YV12-őt és a YUY2-őt, míg a
-korábbi verziók beleértve a 4.1.0-t is, <emphasis role="bold">összeomlanak az YV12-vel</emphasis>.
-Ha különös effekteket tapasztalsz a <option>-vo xv</option> használatakor,
-próbáld ki az SDL-t (ebben is van XVideo) és nézd meg, hogy ez segít-e. Lásd az
-<link linkend="sdl">SDL</link> fejezetet a részletekért.
-</para>
-
-<para>
-<emphasis role="bold">VAGY</emphasis>, próbáld ki az ÚJ
-<option>-vo tdfxfb</option> vezérlőt! Lásd a <link linkend="tdfxfb">tdfxfb</link>
-részt.
-</para>
-</sect2>
-
-
-<sect2 id="s3">
-<title>S3 kártyák</title>
-
-<para>
-Az S3 Savage3D nem működik megfelelően, de a Savage4 igen 4.0.3 vagy újabb XFree86
-használata mellett (képhibák esetén próbáld 16bpp-vel). Ami az S3 Virge-eket illeti:
-van xv támogatás, de maga a kártya túl lassú, így jobb, ha eladod.
-</para>
-
-<para>
-Már van natív framebuffer vezérlő az S3 Virge kártyákhoz, hasonlóan a tdfxfb-hez.
-Állítsd be a framebuffer-ed (pl. add hozzá a
-"<option>vga=792 video=vesa:mtrr</option>" opciót a kernel parancs sorához) és használd
-a <option>-vo s3fb</option> opciót (<option>-vf yuy2</option> és <option>-dr</option>
-szintén segíthet).
-</para>
-
-<note><para>
-Jelenleg nem tisztázott, hogy mely Savage modellekből hiányzik a YV12 támogatás, és
-konvertál a vezérlő (lassú). Ha a kártyára gyanakodsz, szerezz be egy újabb vezérlőt,
-vagy udvariasan kérj az MPlayer-users levelezési listán egy MMX/3DNow! támogatású vezérlőt.
-</para></note>
-</sect2>
-
-
-<sect2 id="nvidia">
-<title>nVidia kártyák</title>
-
-<para>
-Az nVidia nem mindig a legjobb választás Linux alatt... Az XFree86
-nyílt forráskódú vezérlője támogatja a legtöbb kártyát, de a legtöbb esetben a
-bináris, zárt forrású nVidia vezérlőt kell használnod, ami elérhető
-az <ulink url="http://www.nvidia.com/object/linux.html">nVidia weboldalán</ulink>.
-Erre a vezérlőre mindenképpen szükséged lesz, ha 3D gyorsítást akarsz.
-</para>
-
-<para>
-A Riva128 kártyákkal nincs XVideo támogatás az XFree86 nVidia vezérlőjével :(
-Panaszkodj az nVidia-nak.
-</para>
-
-<para>
-Habár az <application>MPlayer</application> a legtöbb nVidia kártyához
-rendelkezik <link linkend="vidix">VIDIX</link> vezérlővel. Jelenleg még
-béta állapotú, és van pár bökkenője. További információkért lásd az
-<link linkend="vidix-nvidia">nVidia VIDIX</link> részt.
-</para>
-</sect2>
-
-
-<sect2 id="ati">
-<title>ATI kártyák</title>
-
-<para>
-A <ulink url="http://gatos.sf.net">GATOS vezérlő</ulink> (amit
-használnod illene, hacsak nem Rage128 vagy Radeon kártyád van) alapértelmezésként
-engedélyezi a VSYNC-et. Ez azt jelenti, hogy a dekódolási sebesség (!) a
-monitor frissítési rátájához van szinkronizálva. Ha a lejátszás lassúnak
-tűnik, próbáld meg valahogy kikapcsolni a VSYNC-et vagy állítsd be a
-frissítést n*(film fps értéke) Hz-re.
-</para>
-
-<para>
-A Radeon VE - ha X kell, használj XFree 4.2.0-t vagy újabbat ehhez a kártyához.
-Nincs TV kimenet támogatás. Természetesen az <application>MPlayer</application>rel
-simán is <emphasis role="bold">gyorsított</emphasis> megjelenítést kapsz,
-<emphasis role="bold">TV kimenettel</emphasis> vagy anélkül, és így sem
-függvénykönyvtárra sem X-re nincs szükség.
-Olvasd el a <link linkend="vidix">VIDIX</link> részt.
-</para>
-</sect2>
-
-
-<sect2 id="neomagic">
-<title>NeoMagic kártyák</title>
-
-<para>
-Ilyen kártyák általában laptopokban találhatóak. XFree86 4.3.0 vagy
-újabbat kell használnod, vagy Stefan Seyfried
-<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/">Xv-t támogató vezérlőjét</ulink>.
-Csak válaszd ki az te XFree86-odhoz illő verziót.
-</para>
-
-<para>
-Az XFree86 4.3.0-ban van Xv támogatás, Bohdan Horst pedig küldött egy kis
-<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">javítást</ulink>
-az XFree86 forrásához, ami a framebuffer műveleteket felgyorsítja (XVideo-t
-is) akár négyszeresére is. A javítás belekerült az XFree86 CVS-ébe és a
-4.3.0 utáni következő kiadásban is benne lesz.
-</para>
-
-<para>
-A DVD méretű tartalmak lejátszásához az XF86Config-odat módosítanod kell:
-<programlisting>
-Section "Device"
-    [...]
-    Driver "neomagic"
-    <emphasis>Option "OverlayMem" "829440"</emphasis>
-    [...]
-EndSection<!--
---></programlisting>
-</para>
-</sect2>
-
-
-<sect2 id="trident">
-<title>Trident kártyák</title>
-
-<para>
-Ha az Xv-t Trident kártyával akarod használni, feltéve hogy nem megy 4.1.0-val,
-telepítsd fel az XFree 4.2.0-t. A 4.2.0-ban teljes képernyős Xv támogatás van
-a Cyberblade XP kártyával.
-</para>
-
-<para>
-Alternatívaként az <application>MPlayer</application> is tartalmaz egy
-<link linkend="vidix">VIDIX</link> vezérlőt a Cyberblade/i1 kártyához.
-</para>
-</sect2>
-
-
-<sect2 id="kyro">
-<title>Kyro/PowerVR kártyák</title>
-
-<para>
-Ha az Xv-t Kyro alapú kártyával akarod használni (például Hercules
-Prophet 4000XT-vel), akkor le kell töltened a vezérlőt a
-<ulink url="http://www.powervr.com/">PowerVR oldaláról</ulink>.
-</para>
-</sect2>
-
-
-<sect2 id="intel">
-<title>Intel kártyák</title>
-
-<para>
-Ez a kártya sok laptopban megtalálható. A legújabb Xorg javasolt hozzá.
-</para>
-
-<para>
-A DVD méretű (és nagyobb) tartalom lejátszásának engedélyezéséhez módosítanod
-kell az XF86Config/xorg.conf fájlodat így:
-<programlisting>
-Section "Device"
-    [...]
-    Driver "intel"
-    <emphasis>Option "LinearAlloc" "6144"</emphasis>
-    [...]
-EndSection
-</programlisting>
-Ezen opció hiánya általában egy ehhez hasonló hibát eredményez:
-<screen>X11 error: BadAlloc (insufficient resources for operation)</screen>
-when attempting to use <option>-vo xv</option>.
-</para>
-</sect2>
 </sect1>
 
 <!-- ********** -->
@@ -630,41 +363,6 @@ tartozó chipset vezérlőkkel.
 </para></listitem>
 </itemizedlist>
 
-</sect1>
-
-<!-- ********** -->
-
-<sect1 id="sdl">
-<title>SDL</title>
-
-<para>
-Az <acronym>SDL</acronym> (Simple Directmedia Layer) tulajdonképpen egy
-egységesített videó/audió interfész. Az ezt használó programok csak az
-SDL-ről tudnak, arról nem, az hogy milyen videó és audió vezérlőt használ.
-Például egy SDL-t használó Doom port futhat svgalib, aalib, X, fbdev és
-még más vezérlők segítségével, de neked csak (például) a videó vezérlőt kell
-megadnod az <envar>SDL_VIDEODRIVER</envar> környezeti változóval. Legalábbis
-elméletben.
-</para>
-
-<para>
-Az <application>MPlayer</application>rel mi az X11 vezérlő szoftveres
-képméretező képességét használtuk XVideo-t nem támogató kártyák/vezérlők
-esetén, amíg el nem készült a mi saját (gyorsabb, szebb) szoftveres méretezőnk.
-Használtuk az aalib kimeneti képességét is, de most már abból is van saját,
-ami sokkal komfortosabb. A DGA módja jobb volt a mienkénél, legalábbis a
-közelmúltig. Vágod? :)
-</para>
-
-<para>
-Segít pár hibás vezérlő/kártya esetén is, ha a videó szaggatott (nem lassú
-rendszer miatt) vagy az audió késett.
-</para>
-
-<para>
-Az SDL videó kimenet támogatja a feliratok megjelenítését a film alatt, a
-(ha van) fekete soron.
-</para>
 </sect1>
 
 <!-- ********** -->
@@ -2188,10 +1886,7 @@ meg, majd ha szinkron vagy DVD felirat problémáid vannak, adj egy esélyt a
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
-<sect1 id="other">
-<title>Egyéb vizualizációs hardverek</title>
-
-<sect2 id="zr">
+<sect1 id="zr">
 <title>Zr</title>
 
 <para>
@@ -2288,11 +1983,11 @@ eszközön a lejátszás alatt, ez összeomlasztja a számítógépedet. Legjobb
 várni, míg az <application>MPlayer</application>
 végez, és <emphasis role="bold">EZUTÁN</emphasis> megállítani a XawTV-t.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="blinkenlights">
+<sect1 id="blinkenlights">
 <title>Blinkenlights</title>
 
 <para>
@@ -2306,7 +2001,6 @@ videót</ulink>.
 Az Arcade videóban láthatod a Blinkenlights kimeneti vezérlőt akcióban a
 00:07:50-en.
 </para>
-</sect2>
 </sect1>
 
 
