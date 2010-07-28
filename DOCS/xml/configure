@@ -4,10 +4,11 @@
 # the other stuff necessary to convert the XML documentation.
 
 echo "Searching for XML catalogs..."
-for _try_catalog in \
+for try_catalog in \
   /etc/sgml/catalog \
   /usr/share/xml/docbook/*/catalog.xml \
   /opt/local/share/xml/docbook-xml/*/catalog.xml \
+  /opt/local/share/xml/docbook/*/catalog.xml \
   /usr/share/sgml/docbook/*/*catalog \
   /usr/share/apps/ksgmltools2/customization/en/catalog \
   /usr/share/sgml/catalog \
@@ -17,16 +18,15 @@ for _try_catalog in \
   /usr/share/docbook-xml42/catalog.xml \
   /usr/share/sgml/docbook/xmlcatalog
 do
-  if test -f "$_try_catalog"
-  then
-    _catalog=$_try_catalog
+  if test -f "$try_catalog"; then
+    catalog=$try_catalog
     break
   fi
 done
 
-if test -n "$_catalog"
-then
-  echo "Found SGML catalog at $_catalog"
+if test -n "$catalog"; then
+  echo "Found SGML catalog at $catalog"
+  catalog_opts=--catalogs
 else
   echo "No SGML catalog found."
 fi
@@ -35,7 +35,7 @@ fi
 
 echo "Searching for stylesheets..."
 echo "Searching for html/chunk.xsl..."
-for _try_chunk_xsl in \
+for try_chunk_xsl in \
   /usr/share/xml/docbook/*/html/chunk.xsl \
   /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl \
   /usr/share/sgml/docbook/yelp/docbook/html/chunk.xsl \
@@ -47,24 +47,22 @@ for _try_chunk_xsl in \
   /opt/local/share/xsl/docbook-xsl/html/chunk.xsl \
 
 do
-  if test -f "$_try_chunk_xsl"
-  then
-    _chunk_xsl=$_try_chunk_xsl
+  if test -f "$try_chunk_xsl"; then
+    chunk_xsl=$try_chunk_xsl
     break
   fi
 done
 
-if test -z "$_chunk_xsl"
-then
-  _chunk_xsl=/usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl
-  echo "Not found. Using default ($_chunk_xsl)"
-  _fake_chunk_xsl=yes
+if test -z "$chunk_xsl"; then
+  chunk_xsl=/usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl
+  echo "Not found. Using default ($chunk_xsl)"
+  fake_chunk_xsl=yes
 else
-  echo "Found chunk.xsl at $_chunk_xsl"
+  echo "Found chunk.xsl at $chunk_xsl"
 fi
 
 echo "Searching for html/docbook.xsl..."
-for _try_docbook_xsl in \
+for try_docbook_xsl in \
   /usr/share/xml/docbook/*/html/docbook.xsl \
   /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl \
   /usr/share/sgml/docbook/yelp/docbook/html/docbook.xsl \
@@ -76,20 +74,17 @@ for _try_docbook_xsl in \
   /opt/local/share/xsl/docbook-xsl/html/docbook.xsl \
 
 do
-  if test -f "$_try_docbook_xsl"
-  then
-    _docbook_xsl=$_try_docbook_xsl
+  if test -f "$try_docbook_xsl"; then
+    docbook_xsl=$try_docbook_xsl
     break
   fi
 done
 
-if test -z "$_docbook_xsl"
-then
-  _docbook_xsl=/usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl
-  echo "Not found. Using default ($_docbook_xsl)"
-  _fake_docbook_xsl=yes
+if test -z "$docbook_xsl"; then
+  docbook_xsl=/usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl
+  echo "Not found. Using default ($docbook_xsl)"
 else
-  echo "Found docbook.xsl at $_docbook_xsl"
+  echo "Found docbook.xsl at $docbook_xsl"
 fi
 
 cat > html-chunk.xsl << EOF
@@ -100,7 +95,7 @@ cat > html-chunk.xsl << EOF
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 version="1.0">
 
-  <xsl:import href="$_chunk_xsl"/>
+  <xsl:import href="$chunk_xsl"/>
   <xsl:include href="html-common.xsl"/>
 
 </xsl:stylesheet>
@@ -115,7 +110,7 @@ cat > html-single.xsl << EOF
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 version="1.0">
 
-  <xsl:import href="$_docbook_xsl"/>
+  <xsl:import href="$docbook_xsl"/>
   <xsl:include href="html-common.xsl"/>
 
 </xsl:stylesheet>
@@ -123,7 +118,7 @@ EOF
 
 echo "Searching for DTD..."
 #FIXME: This should prefer higher version numbers, not the other way around ..
-for _try_dtd in \
+for try_dtd in \
   /usr/share/xml/docbook/*/dtd/4*/docbookx.dtd \
   /usr/share/xml/docbook/*/docbookx.dtd \
   /usr/share/sgml/docbook/*/docbookx.dtd \
@@ -133,19 +128,17 @@ for _try_dtd in \
   /opt/local/share/xml/docbook*/*/docbookx.dtd \
   /usr/share/apps/ksgmltools2/docbook/*/docbookx.dtd
 do
-  if test -f "$_try_dtd"
-  then
-    _dtd=$_try_dtd
+  if test -f "$try_dtd"; then
+    dtd=$try_dtd
     break
   fi
 done
 
-if test -z "$_dtd"
-then
-  _dtd=/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd
-  echo "Not found. Using default ($_dtd)."
+if test -z "$dtd"; then
+  dtd=/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd
+  echo "Not found. Using default ($dtd)."
 else
-  echo "Found docbookx.dtd at $_dtd"
+  echo "Found docbookx.dtd at $dtd"
 fi
 
 for lang in `grep 'DOC_LANGS =' ../../config.mak|cut -d= -f2`; do
@@ -155,11 +148,11 @@ for lang in `grep 'DOC_LANGS =' ../../config.mak|cut -d= -f2`; do
      This file is generated automatically. DO NOT EDIT.
      ************************************************** -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-    "$_dtd"
+    "$dtd"
 [
 EOF
 
-  for file in `find $lang en -name \*.xml -exec basename \{\} \; | sort -u`; do
+  for file in $(find en -name \*.xml -exec basename \{\} \;); do
     echo '<!ENTITY '$file' SYSTEM "'$file'">' >> $lang/main.xml
   done
 
@@ -173,17 +166,10 @@ EOF
 done
 
 echo "Looking for a valid XSLT processor..."
-if xsltproc --version > /dev/null 2>&1
-then
-  if test -z "$_fake_chunk_xsl"
-  then
+if xsltproc --version > /dev/null 2>&1; then
+  if test -z "$fake_chunk_xsl"; then
     echo "Found xsltproc. If it works, it's probably the best choice."
-    if test -n "$_catalog"
-    then
-      _xsltcommand="xsltproc --catalogs -o \$\$1 \$\$2 \$\$3"
-    else
-      _xsltcommand="xsltproc -o \$\$1 \$\$2 \$\$3"
-    fi
+    xsltcommand="xsltproc $catalog_opts -o \$\$1 \$\$2 \$\$3"
   else
     echo "Found xsltproc but no stylesheets on your system."
     echo "xsltproc is unusable without stylesheets."
@@ -191,30 +177,8 @@ then
 fi
 
 
-echo "Searching for XML checker..."
-for _try_xmllint in xmllint
-do
-  if command -v $_try_xmllint > /dev/null 2>&1
-  then
-    echo "Found $_try_xmllint"
-    if test -n "$_catalog"
-    then
-      _xmllint_command="$_try_xmllint --noout --noent --postvalid --catalogs \$*"
-    else
-      _xmllint_command="$_try_xmllint --noout --noent --postvalid \$*"
-    fi
-    break
-  fi
-done
-
-if test -z "$_xmllint_command"
-then
-  echo "Not found"
-  _xmllint_command=true
-fi
-
 cat > xml.mak << EOF
-CATALOG = $_catalog
-XMLLINT_COMMAND = $_xmllint_command
-XSLT_COMMAND = $_xsltcommand
+CATALOG = $catalog
+XMLLINT_COMMAND = xmllint --noout --noent --postvalid $catalog_opts \$*
+XSLT_COMMAND = $xsltcommand
 EOF
