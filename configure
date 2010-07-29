@@ -106,6 +106,20 @@ EOF
   compile_check $TMPC $@
 }
 
+# this is a special check only to be
+# used for broken headers that do not
+# include all dependencies
+header_check_broken() {
+  cat > $TMPC << EOF
+#include <$1>
+#include <$2>
+int main(void) { return 0; }
+EOF
+  shift
+  shift
+  compile_check $TMPC $@
+}
+
 yasm_check() {
   echo >> "$TMPLOG"
   cat "$TMPS" >> "$TMPLOG"
@@ -3492,7 +3506,8 @@ echores "$_dvdio"
 
 echocheck "sys/cdio.h"
 _cdio=no
-header_check sys/cdio.h && _cdio=yes
+# at least OpenSolaris has a broken cdio.h
+header_check_broken sys/types.h sys/cdio.h && _cdio=yes
 if test "$_cdio" = yes ; then
   def_cdio='#define DVD_STRUCT_IN_SYS_CDIO_H 1'
 else
@@ -3553,7 +3568,8 @@ fi #if hpux
 if sunos; then
 echocheck "userspace SCSI headers (Solaris)"
 _sol_scsi_h=no
-header_check sys/scsi/scsi_types.h && header_check sys/scsi/impl/uscsi.h &&
+header_check sys/scsi/scsi_types.h &&
+  header_check_broken sys/types.h sys/scsi/impl/uscsi.h &&
    _sol_scsi_h=yes
 if test "$_sol_scsi_h" = yes ; then
   def_sol_scsi_h='#define SOLARIS_USCSI 1'
