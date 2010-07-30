@@ -117,25 +117,29 @@ static int init_device(int card)
 	if( (ioctl(vo_mpegpes_fd2,AUDIO_SELECT_SOURCE, AUDIO_SOURCE_MEMORY) < 0))
 	{
 		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO SELECT SOURCE: %s\n", strerror(errno));
-		return -1;
+		goto fail;
 	}
 	if((ioctl(vo_mpegpes_fd2,AUDIO_PLAY) < 0))
 	{
 		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO PLAY: %s\n", strerror(errno));
-		return -1;
+		goto fail;
 	}
 	if((ioctl(vo_mpegpes_fd2,AUDIO_SET_AV_SYNC, true) < 0))
 	{
 		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO SET AV SYNC: %s\n", strerror(errno));
-		return -1;
+		goto fail;
 	}
 	//FIXME: in vo_mpegpes audio was initialized as MUTEd
 	if((ioctl(vo_mpegpes_fd2,AUDIO_SET_MUTE, false) < 0))
 	{
 		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO SET MUTE: %s\n", strerror(errno));
-		return -1;
+		goto fail;
 	}
 	return vo_mpegpes_fd2;
+fail:
+	close(vo_mpegpes_fd2);
+	vo_mpegpes_fd2 = -1;
+	return -1;
 }
 #endif
 
@@ -272,7 +276,9 @@ static int init(int rate,int channels,int format,int flags){
 
 // close audio device
 static void uninit(int immed){
-
+	if (vo_mpegpes_fd2 >= 0)
+		close(vo_mpegpes_fd2);
+	vo_mpegpes_fd2 = -1;
 }
 
 // stop playing and empty buffers (for seeking/pause)
