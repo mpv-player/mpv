@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 rev. 31769
+.\" sync with en/mplayer.1 rev. 31814
 .\" Encoding: UTF-8
 .\"
 .\" MPlayer (C) 2000-2010 MPlayer 团队
@@ -427,11 +427,13 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 .
 （以下按键只有当编译时启用对于电视字幕的支持（teletext）时才有效：这些按键用于控制电
 视字幕，数据可能来自模拟电视输入或是 MPEG 传输流。）
+（以下按键用于控制电视信号的电视字幕。数据可能来源于模拟电视信号或 MPEG 传
+输数据流。）
 .RE
 .PP
 .PD 0
 .RS
-.IPs "X\\\\"
+.IPs "X\ \ \ \ "
 打开/\:关闭电视字幕。
 .IPs "Q和W"
 切换至下一个/\:上一个电视字幕页面。
@@ -1099,7 +1101,7 @@ MPlayer 从标准输入读取以新行 (\\n) 分隔开的命令行,
 .I 注意:
 请参见 \-input cmdlist 的命令列表和 DOCS/tech/slave.txt 中的描述。
 另外，该选项并非用来禁用其它的输入，例如通过视频窗口。要使用其它方法实现那种效果，例如
-\-input nodefault\-binds:conf=/dev/null。
+\-input nodefault\-bindings:conf=/dev/null。
 .
 .TP
 .B \-softsleep
