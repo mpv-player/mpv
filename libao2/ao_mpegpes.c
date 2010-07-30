@@ -107,8 +107,8 @@ static int freq_id=0;
 static int init_device(int card)
 {
 	char ao_file[30];
-	mp_msg(MSGT_VO,MSGL_INFO, "Opening /dev/dvb/adapter%d/audio0\n", card);
 	sprintf(ao_file, "/dev/dvb/adapter%d/audio0", card);
+	mp_msg(MSGT_VO,MSGL_INFO, "Opening %s\n", ao_file);
 	if((vo_mpegpes_fd2 = open(ao_file,O_RDWR|O_NONBLOCK)) < 0)
 	{
         	mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO DEVICE: %s\n", strerror(errno));
