@@ -668,7 +668,7 @@ int mp_a52_framesize(uint8_t * buf, int *srate)
 //second stage: returns the count of A52 syncwords found
 static int a52_check(char *buf, int len)
 {
-	int cnt, frame_length, ok, srate;
+	int cnt, frame_length = 0, ok, srate;
 
 	cnt = ok = 0;
 	if(len < 8)
