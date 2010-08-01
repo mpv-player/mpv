@@ -778,35 +778,35 @@ static void create_osd_texture(int x0, int y0, int w, int h,
 static void do_render_osd(int type) {
   int draw_osd  = (type & RENDER_OSD)  && osdtexCnt > 0;
   int draw_eosd = (type & RENDER_EOSD) && eosdDispList;
-  if (draw_osd || draw_eosd) {
-    // set special rendering parameters
-    if (!scaled_osd) {
-      mpglMatrixMode(GL_PROJECTION);
-      mpglPushMatrix();
-      mpglLoadIdentity();
-      mpglOrtho(0, vo_dwidth, vo_dheight, 0, -1, 1);
-    }
-    mpglEnable(GL_BLEND);
-    if (draw_eosd) {
-      mpglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      mpglCallList(eosdDispList);
-    }
-    if (draw_osd) {
-      mpglColor4ub((osd_color >> 16) & 0xff, (osd_color >> 8) & 0xff, osd_color & 0xff, 0xff - (osd_color >> 24));
-      // draw OSD
-#ifndef FAST_OSD
-      mpglBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
-      mpglCallLists(osdtexCnt, GL_UNSIGNED_INT, osdaDispList);
-#endif
-      mpglBlendFunc(GL_SRC_ALPHA, GL_ONE);
-      mpglCallLists(osdtexCnt, GL_UNSIGNED_INT, osdDispList);
-    }
-    // set rendering parameters back to defaults
-    mpglDisable(GL_BLEND);
-    if (!scaled_osd)
-      mpglPopMatrix();
-    mpglBindTexture(gl_target, 0);
+  if (!draw_osd && !draw_eosd)
+    return;
+  // set special rendering parameters
+  if (!scaled_osd) {
+    mpglMatrixMode(GL_PROJECTION);
+    mpglPushMatrix();
+    mpglLoadIdentity();
+    mpglOrtho(0, vo_dwidth, vo_dheight, 0, -1, 1);
   }
+  mpglEnable(GL_BLEND);
+  if (draw_eosd) {
+    mpglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    mpglCallList(eosdDispList);
+  }
+  if (draw_osd) {
+    mpglColor4ub((osd_color >> 16) & 0xff, (osd_color >> 8) & 0xff, osd_color & 0xff, 0xff - (osd_color >> 24));
+    // draw OSD
+#ifndef FAST_OSD
+    mpglBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
+    mpglCallLists(osdtexCnt, GL_UNSIGNED_INT, osdaDispList);
+#endif
+    mpglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    mpglCallLists(osdtexCnt, GL_UNSIGNED_INT, osdDispList);
+  }
+  // set rendering parameters back to defaults
+  mpglDisable(GL_BLEND);
+  if (!scaled_osd)
+    mpglPopMatrix();
+  mpglBindTexture(gl_target, 0);
 }
 
 static void draw_osd(void)
