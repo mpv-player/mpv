@@ -468,7 +468,7 @@ static int get_num_chapter(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title
 
 static int seek_to_chapter(stream_t *stream, ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_no, int chapter)
 {
-    int cell;
+    dvd_priv_t *d = stream->priv;
     ptt_info_t ptt;
     pgc_t *pgc;
     off_t pos;
@@ -491,11 +491,18 @@ static int seek_to_chapter(stream_t *stream, ifo_handle_t *vts_file, tt_srpt_t *
     ptt = vts_file->vts_ptt_srpt->title[title_no].ptt[chapter];
     pgc = vts_file->vts_pgcit->pgci_srp[ptt.pgcn-1].pgc;
 
-    cell = pgc->program_map[ptt.pgn - 1] - 1;
-    pos = (off_t) pgc->cell_playback[cell].first_sector * 2048;
+    d->cur_cell = pgc->program_map[ptt.pgn - 1] - 1;
+    if(pgc->cell_playback[d->cur_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK)
+       d->cur_cell += dvd_angle;
+    d->cur_pack       = pgc->cell_playback[d->cur_cell].first_sector;
+    d->cell_last_pack = pgc->cell_playback[d->cur_cell].last_sector;
+
+    d->packs_left     = -1;
+    d->angle_seek     = 0;
+
+    pos = (off_t) d->cur_pack * 2048;
     mp_msg(MSGT_OPEN,MSGL_V,"\r\nSTREAM_DVD, seeked to chapter: %d, cell: %u, pos: %"PRIu64"\n",
-        chapter, pgc->cell_playback[cell].first_sector, pos);
-    stream_seek(stream, pos);
+        chapter, d->cur_pack, pos);
 
     return chapter;
 }
