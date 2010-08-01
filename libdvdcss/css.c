@@ -90,57 +90,48 @@ static int  AttackPadding   ( uint8_t const[], int, uint8_t * );
 /*****************************************************************************
  * _dvdcss_test: check if the disc is encrypted or not
  *****************************************************************************
- * Return values:
- *   1: DVD is scrambled but can be read
- *   0: DVD is not scrambled and can be read
- *  -1: could not get "copyright" information
- *  -3: drive is RPC-II, region is not set, and DVD is scrambled: the RPC
- *      scheme will prevent us from reading the scrambled data
+ * Sets b_scrambled, b_ioctl
  *****************************************************************************/
-int _dvdcss_test( dvdcss_t dvdcss )
+void _dvdcss_test( dvdcss_t dvdcss )
 {
     char const *psz_type, *psz_rpc;
     int i_ret, i_copyright, i_type, i_mask, i_rpc;
 
     i_ret = ioctl_ReadCopyright( dvdcss->i_fd, 0 /* i_layer */, &i_copyright );
 
-#ifdef WIN32
     if( i_ret < 0 )
     {
         /* Maybe we didn't have enough privileges to read the copyright
          * (see ioctl_ReadCopyright comments).
          * Apparently, on unencrypted DVDs _dvdcss_disckey() always fails, so
          * we can check this as a workaround. */
+#ifdef WIN32
         i_ret = 0;
+#else
+        /* Since it's the first ioctl we try to issue, we add a notice */
+        print_error( dvdcss, "css error: could not get \"copyright\""
+                     " information, make sure there is a DVD in the drive,"
+                     " and that you have used the correct device node." );
+        /* Try without ioctls */
+        dvdcss->b_ioctls = 0;
+#endif
         i_copyright = 1;
         if( _dvdcss_disckey( dvdcss ) < 0 )
         {
             i_copyright = 0;
         }
     }
-#endif
-
-    if( i_ret < 0 )
-    {
-        /* Since it's the first ioctl we try to issue, we add a notice */
-        print_error( dvdcss, "css error: could not get \"copyright\""
-                     " information, make sure there is a DVD in the drive,"
-                     " and that you have used the correct device node." );
-
-        return -1;
-    }
 
     print_debug( dvdcss, "disc reports copyright information 0x%x",
                          i_copyright );
+    dvdcss->b_scrambled = i_copyright;
 
     i_ret = ioctl_ReportRPC( dvdcss->i_fd, &i_type, &i_mask, &i_rpc);
 
     if( i_ret < 0 )
     {
-        print_error( dvdcss, "css error: could not get RPC status" );
-        // do not return an error, the drive might be a region-free one
-        // and we definitely should not just fail for that case.
-        return i_copyright ? 1 : 0;
+        print_error( dvdcss, "css error: could not get RPC status, region-free drive?" );
+        return;
     }
 
     switch( i_rpc )
@@ -166,10 +157,7 @@ int _dvdcss_test( dvdcss_t dvdcss )
     {
         print_error( dvdcss, "css error: drive will prevent access to "
                              "scrambled data" );
-        return -3;
     }
-
-    return i_copyright ? 1 : 0;
 }
 
 /*****************************************************************************
