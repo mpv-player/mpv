@@ -343,24 +343,17 @@ static void dvd_seek(dvd_priv_t *d, int pos)
      d->cur_pack<d->cur_pgc->cell_playback[ d->cur_cell ].first_sector) {
 
     // ok, cell change, find the right cell!
-    d->cur_cell=0;
-    if(d->cur_pgc->cell_playback[d->cur_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK )
-      d->cur_cell+=dvd_angle;
-
-    while(1) {
-      int next;
-      d->cell_last_pack=d->cur_pgc->cell_playback[ d->cur_cell ].last_sector;
-      if(d->cur_pack<d->cur_pgc->cell_playback[ d->cur_cell ].first_sector) {
-        d->cur_pack=d->cur_pgc->cell_playback[ d->cur_cell ].first_sector;
+    cell_playback_t *cell;
+    for(d->cur_cell=0; d->cur_cell < d->cur_pgc->nr_of_cells; d->cur_cell++) {
+      cell = &(d->cur_pgc->cell_playback[d->cur_cell]);
+      if(cell->block_type == BLOCK_TYPE_ANGLE_BLOCK && cell->block_mode != BLOCK_MODE_FIRST_CELL)
+        continue;
+      d->cell_last_pack=cell->last_sector;
+      if(d->cur_pack<cell->first_sector) {
+        d->cur_pack=cell->first_sector;
         break;
       }
       if(d->cur_pack<=d->cell_last_pack) break; // ok, we find it! :)
-      next=dvd_next_cell(d);
-      if(next<0) {
-        //d->cur_pack=d->cell_last_pack+1;
-        break; // we're after the last cell
-      }
-      d->cur_cell=next;
     }
   }
 
