@@ -94,7 +94,6 @@ static int  AttackPadding   ( uint8_t const[], int, uint8_t * );
  *   1: DVD is scrambled but can be read
  *   0: DVD is not scrambled and can be read
  *  -1: could not get "copyright" information
- *  -2: could not get RPC information (reading the disc might be possible)
  *  -3: drive is RPC-II, region is not set, and DVD is scrambled: the RPC
  *      scheme will prevent us from reading the scrambled data
  *****************************************************************************/
@@ -139,7 +138,9 @@ int _dvdcss_test( dvdcss_t dvdcss )
     if( i_ret < 0 )
     {
         print_error( dvdcss, "css error: could not get RPC status" );
-        return -2;
+        // do not return an error, the drive might be a region-free one
+        // and we definitely should not just fail for that case.
+        return i_copyright ? 1 : 0;
     }
 
     switch( i_rpc )
