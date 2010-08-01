@@ -769,11 +769,16 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   osdtexCnt++;
 }
 
+#define RENDER_OSD  1
+#define RENDER_EOSD 2
+
 /**
  * \param type bit 0: render OSD, bit 1: render EOSD
  */
 static void do_render_osd(int type) {
-  if (((type & 1) && osdtexCnt > 0) || ((type & 2) && eosdDispList)) {
+  int draw_osd  = (type & RENDER_OSD)  && osdtexCnt > 0;
+  int draw_eosd = (type & RENDER_EOSD) && eosdDispList;
+  if (draw_osd || draw_eosd) {
     // set special rendering parameters
     if (!scaled_osd) {
       mpglMatrixMode(GL_PROJECTION);
@@ -782,11 +787,11 @@ static void do_render_osd(int type) {
       mpglOrtho(0, vo_dwidth, vo_dheight, 0, -1, 1);
     }
     mpglEnable(GL_BLEND);
-    if ((type & 2) && eosdDispList) {
+    if (draw_eosd) {
       mpglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       mpglCallList(eosdDispList);
     }
-    if ((type & 1) && osdtexCnt > 0) {
+    if (draw_osd) {
       mpglColor4ub((osd_color >> 16) & 0xff, (osd_color >> 8) & 0xff, osd_color & 0xff, 0xff - (osd_color >> 24));
       // draw OSD
 #ifndef FAST_OSD
@@ -815,7 +820,7 @@ static void draw_osd(void)
     vo_draw_text_ext(osd_w, osd_h, ass_border_x, ass_border_y, ass_border_x, ass_border_y,
                      image_width, image_height, create_osd_texture);
   }
-  if (vo_doublebuffering) do_render_osd(1);
+  if (vo_doublebuffering) do_render_osd(RENDER_OSD);
 }
 
 static void do_render(void) {
@@ -858,14 +863,14 @@ static void flip_page(void) {
       mpglClear(GL_COLOR_BUFFER_BIT);
   } else {
     do_render();
-    do_render_osd(3);
+    do_render_osd(RENDER_OSD | RENDER_EOSD);
     if (use_glFinish) mpglFinish();
     else mpglFlush();
   }
 }
 
 static void redraw(void) {
-  if (vo_doublebuffering) { do_render(); do_render_osd(3); }
+  if (vo_doublebuffering) { do_render(); do_render_osd(RENDER_OSD | RENDER_EOSD); }
   flip_page();
 }
 
@@ -1332,7 +1337,7 @@ static int control(uint32_t request, void *data)
     if (!data)
       return VO_FALSE;
     genEOSD(data);
-    if (vo_doublebuffering) do_render_osd(2);
+    if (vo_doublebuffering) do_render_osd(RENDER_EOSD);
     return VO_TRUE;
   case VOCTRL_GET_EOSD_RES:
     {
