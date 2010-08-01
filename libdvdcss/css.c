@@ -90,7 +90,7 @@ static int  AttackPadding   ( uint8_t const[], int, uint8_t * );
 /*****************************************************************************
  * _dvdcss_test: check if the disc is encrypted or not
  *****************************************************************************
- * Sets b_scrambled, b_ioctl
+ * Sets b_scrambled, b_ioctls
  *****************************************************************************/
 void _dvdcss_test( dvdcss_t dvdcss )
 {
