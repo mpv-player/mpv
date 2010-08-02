@@ -92,13 +92,6 @@ static int has_cpuid(void)
 static void
 do_cpuid(unsigned int ax, unsigned int *p)
 {
-#if 0
-    __asm__ volatile(
-        "cpuid;"
-        : "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])
-        :  "0" (ax)
-        );
-#else
 // code from libavcodec:
     __asm__ volatile
         ("mov %%"REG_b", %%"REG_S"\n\t"
@@ -107,7 +100,6 @@ do_cpuid(unsigned int ax, unsigned int *p)
          : "=a" (p[0]), "=S" (p[1]),
            "=c" (p[2]), "=d" (p[3])
          : "0" (ax));
-#endif
 }
 
 void GetCpuCaps( CpuCaps *caps)
