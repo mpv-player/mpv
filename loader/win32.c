@@ -76,22 +76,8 @@ for DLL to know too much about its environment.
 #endif
 #include "osdep/mmap_anon.h"
 #include "libavutil/avstring.h"
+#include "cpudetect.h"
 
-static void do_cpuid(unsigned int ax, unsigned int *regs)
-{
-    __asm__ volatile
-	(
-	 "pushl %%ebx; pushl %%ecx; pushl %%edx;"
-	 ".byte  0x0f, 0xa2;"
-	 "movl   %%eax, (%2);"
-	 "movl   %%ebx, 4(%2);"
-	 "movl   %%ecx, 8(%2);"
-	 "movl   %%edx, 12(%2);"
-	 "popl %%edx; popl %%ecx; popl %%ebx;"
-	 : "=a" (ax)
-	 :  "0" (ax), "S" (regs)
-	);
-}
 static unsigned int c_localcount_tsc(void)
 {
     int a;

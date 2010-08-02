@@ -89,7 +89,7 @@ static int has_cpuid(void)
 #endif
 }
 
-static void
+void
 do_cpuid(unsigned int ax, unsigned int *p)
 {
 // code from libavcodec:

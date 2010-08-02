@@ -49,6 +49,8 @@ typedef struct cpucaps_s {
 
 extern CpuCaps gCpuCaps;
 
+void do_cpuid(unsigned int ax, unsigned int *p);
+
 void GetCpuCaps(CpuCaps *caps);
 
 /* returned value is malloc()'ed so free() it after use */
