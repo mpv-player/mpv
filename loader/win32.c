@@ -5585,6 +5585,15 @@ static const struct exports exp_msvcp60[]={
     {"??1_Lockit@std@@QAE@XZ", -1, exp_1Lockit_dummy}
 };
 
+static const struct exports exp_msvcr100[]={
+    FF(memcpy, -1)
+    FF(memset, -1)
+    FF(_initterm_e, -1)
+    FF(_initterm, -1)
+    {"??2@YAPAXI@Z", -1, expnew},
+    {"??3@YAXPAX@Z", -1, expdelete}
+};
+
 #define LL(X) \
     {#X".dll", sizeof(exp_##X)/sizeof(struct exports), exp_##X},
 
@@ -5613,6 +5622,7 @@ static const struct libs libraries[]={
     LL(shlwapi)
     LL(msvcr80)
     LL(msvcp60)
+    LL(msvcr100)
 };
 
 static WIN_BOOL WINAPI ext_stubs(void)
