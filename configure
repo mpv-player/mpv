@@ -1268,21 +1268,25 @@ if test -z "$_target" ; then
     ;;
   esac
 else # if test -z "$_target"
-  system_name=$(echo $_target | cut -d '-' -f 2)
-  case "$(echo $system_name | tr A-Z a-z)" in
-    linux) system_name=Linux ;;
-    freebsd) system_name=FreeBSD ;;
-    gnu/kfreebsd) system_name=FreeBSD ;;
-    netbsd) system_name=NetBSD ;;
-    bsd/os) system_name=BSD/OS ;;
-    openbsd) system_name=OpenBSD ;;
-    dragonfly) system_name=DragonFly ;;
-    sunos) system_name=SunOS ;;
-    qnx) system_name=QNX ;;
-    morphos) system_name=MorphOS ;;
-    amigaos) system_name=AmigaOS ;;
-    mingw32*) system_name=MINGW32 ;;
-  esac
+  for i in 2 3; do
+    system_name=$(echo $_target | cut -d '-' -f $i)
+    case "$(echo $system_name | tr A-Z a-z)" in
+      linux) system_name=Linux ;;
+      freebsd) system_name=FreeBSD ;;
+      gnu/kfreebsd) system_name=FreeBSD ;;
+      netbsd) system_name=NetBSD ;;
+      bsd/os) system_name=BSD/OS ;;
+      openbsd) system_name=OpenBSD ;;
+      dragonfly) system_name=DragonFly ;;
+      sunos) system_name=SunOS ;;
+      qnx) system_name=QNX ;;
+      morphos) system_name=MorphOS ;;
+      amigaos) system_name=AmigaOS ;;
+      mingw32*) system_name=MINGW32 ;;
+      *) continue ;;
+    esac
+    break
+  done
   # We need to convert underscores so that values like k6-2 and pentium-mmx can be passed
   host_arch=$(echo $_target | cut -d '-' -f 1)
   if test $(echo $host_arch) != "x86_64" ; then
