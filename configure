@@ -5765,7 +5765,7 @@ elif dragonfly ; then
 elif freebsd ; then
   default_cdrom_device="/dev/acd0"
 elif openbsd ; then
-  default_cdrom_device="/dev/rcd0a"
+  default_cdrom_device="/dev/rcd0c"
 elif sunos ; then
   default_cdrom_device="/vol/dev/aliases/cdrom0"
   # Modern Solaris versions use HAL instead of the vold daemon, the volfs
