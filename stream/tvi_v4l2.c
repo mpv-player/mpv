@@ -609,7 +609,7 @@ static int vbi_init(priv_t* priv,char* device)
     }
 
     if(ioctl(vbi_fd,VIDIOC_QUERYCAP,&cap)<0){
-        mp_msg(MSGT_TV,MSGL_ERR,"vbi: Query capatibilities failed for %s\n",priv->vbi_dev);
+        mp_msg(MSGT_TV,MSGL_ERR,"vbi: Query capabilities failed for %s\n",priv->vbi_dev);
         close(vbi_fd);
         return  TVI_CONTROL_FALSE;
     }
@@ -1263,7 +1263,7 @@ static int init(priv_t *priv)
                 (priv->tuner.rxsubchans & V4L2_TUNER_SUB_LANG1)  ? " LANG1"  : "",
                 (priv->tuner.rxsubchans & V4L2_TUNER_SUB_LANG2)  ? " LANG2"  : "");
     }
-    mp_msg(MSGT_TV, MSGL_INFO, " Capabilites:%s%s%s%s%s%s%s%s%s%s%s\n",
+    mp_msg(MSGT_TV, MSGL_INFO, " Capabilities:%s%s%s%s%s%s%s%s%s%s%s\n",
            priv->capability.capabilities & V4L2_CAP_VIDEO_CAPTURE?
            "  video capture": "",
            priv->capability.capabilities & V4L2_CAP_VIDEO_OUTPUT?

@@ -328,7 +328,7 @@ static char* print_double(const m_option_t* opt,  const void* val) {
 
 const m_option_type_t m_option_type_double = {
   "Double",
-  "double precission floating point number or ratio (numerator[:/]denominator)",
+  "double precision floating point number or ratio (numerator[:/]denominator)",
   sizeof(double),
   0,
   parse_double,

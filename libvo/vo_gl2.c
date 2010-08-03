@@ -209,7 +209,7 @@ static int initTextures(void)
     mp_msg (MSGT_VO, MSGL_V, "[%dx%d] !\n", texture_width, texture_height);
 
     if(texture_width < 64 || texture_height < 64) {
-      mp_msg (MSGT_VO, MSGL_FATAL, "[gl2] Give up .. usable texture size not avaiable, or texture config error !\n");
+      mp_msg (MSGT_VO, MSGL_FATAL, "[gl2] Give up .. usable texture size not available, or texture config error !\n");
       return -1;
     }
   } while (texture_width > 1 && texture_height > 1);

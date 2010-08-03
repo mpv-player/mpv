@@ -298,7 +298,7 @@ static int xvmc_find_surface_by_format(int format,int width,int height,
         /* check if adaptor number has been specified */
         if (xv_adaptor != -1 && xv_adaptor != i)
             continue;
-        mp_msg(MSGT_VO,MSGL_DBG3,"vo_xvmc: Quering adaptor #%d\n",i);
+        mp_msg(MSGT_VO,MSGL_DBG3,"vo_xvmc: Querying adaptor #%d\n",i);
         if( ai[i].type == 0 ) continue;// we need at least dummy type!
 //probing ports
         for(p=ai[i].base_id; p<ai[i].base_id+ai[i].num_ports; p++)
@@ -1071,7 +1071,7 @@ static int query_format(uint32_t format){
     mp_msg(MSGT_VO,MSGL_DBG4,"vo_xvmc: query_format=%X\n",format);
 
     if(!IMGFMT_IS_XVMC(format)) return 0;// no caps supported
-    mode_id = xvmc_find_surface_by_format(format, 16, 16, &qsurface_info, 1);//true=1 - quering
+    mode_id = xvmc_find_surface_by_format(format, 16, 16, &qsurface_info, 1);//true=1 - querying
 
     if( mode_id == 0 ) return 0;
 
@@ -1151,7 +1151,7 @@ static void check_osd_source(struct xvmc_pix_fmt *src_rndr) {
 
     //If this is source surface, check does the OSD rendering is compleate
     if(src_rndr->state & AV_XVMC_STATE_OSD_SOURCE){
-        mp_msg(MSGT_VO,MSGL_DBG4,"vo_xvmc: OSD surface=%p quering\n",src_rndr);
+        mp_msg(MSGT_VO,MSGL_DBG4,"vo_xvmc: OSD surface=%p querying\n",src_rndr);
         osd_rndr = src_rndr->p_osd_target_surface_render;
         XvMCGetSurfaceStatus(mDisplay, osd_rndr->p_surface, &stat);
         if(!(stat & XVMC_RENDERING))

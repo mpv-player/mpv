@@ -122,10 +122,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 
 	if (w == 0) {
 	    priv->codec = IMGFMT_BGR24;
-	    mp_msg (MSGT_DECVIDEO, MSGL_V, "[%s] codec choosen is BGR24\n", MOD_NAME);
+	    mp_msg (MSGT_DECVIDEO, MSGL_V, "[%s] codec chosen is BGR24\n", MOD_NAME);
 	} else if (w == (sh->bih->biSizeImage)/2) {
 	    priv->codec = IMGFMT_YV12;
-	    mp_msg (MSGT_DECVIDEO, MSGL_V, "[%s] codec choosen is YV12\n", MOD_NAME);
+	    mp_msg (MSGT_DECVIDEO, MSGL_V, "[%s] codec chosen is YV12\n", MOD_NAME);
 	} else {
 	    priv->codec = -1;
 	    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"[%s] Unsupported out_fmt\n", MOD_NAME);

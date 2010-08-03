@@ -78,7 +78,7 @@ int ai_alsa_setup(audio_in_t *ai)
     assert(ai->alsa.period_time >= 0);
     err = snd_pcm_hw_params(ai->alsa.handle, params);
     if (err < 0) {
-	mp_tmsg(MSGT_TV, MSGL_ERR, "Unable to install hardware paramameters: %s");
+	mp_tmsg(MSGT_TV, MSGL_ERR, "Unable to install hardware parameters: %s");
 	snd_pcm_hw_params_dump(params, ai->alsa.log);
 	return -1;
     }

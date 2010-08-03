@@ -99,7 +99,7 @@ const char * const genres[] = {
 "Native American",			/* 64 */
 "Cabaret",					/* 65 */
 "New Wave",					/* 66 */
-"Psychadelic",				/* 67 */
+"Psychadelic",			/* 67 */ /* typo taken from the id3v2spec*/
 "Rave",						/* 68 */
 "Show Tunes",				/* 69 */
 "Trailer",					/* 70 */

@@ -214,7 +214,7 @@ void fstype_help(void)
     mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "below",
            "use _NETWM_STATE_BELOW hint if available");
     mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "fullscreen",
-           "use _NETWM_STATE_FULLSCREEN hint if availale");
+           "use _NETWM_STATE_FULLSCREEN hint if available");
     mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "stays_on_top",
            "use _NETWM_STATE_STAYS_ON_TOP hint if available");
     mp_msg(MSGT_VO, MSGL_INFO,

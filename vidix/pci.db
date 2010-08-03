@@ -6067,7 +6067,7 @@ v	1137	Cisco Systems Inc	0
 v	1138	Ziatech Corporation	0
 d	11388905	8905 [STD 32 Bridge]	0
 v	1139	Dynamic Pictures, Inc	0
-d	11390001	VGA Compatable 3D Graphics	0
+d	11390001	VGA Compatible 3D Graphics	0
 v	113a	FWB Inc	0
 v	113b	Network Computing Devices	0
 v	113c	Cyclone Microsystems, Inc.	0
@@ -9437,9 +9437,9 @@ d	14f20122	EV1000 Serial port	0
 d	14f20123	EV1000 Keyboard controller	0
 d	14f20124	EV1000 Mouse controller	0
 v	14f3	BroadLogic	0
-d	14f32030	2030 DVB-S Satellite Reciever	0
-d	14f32050	2050 DVB-T Terrestrial (Cable) Reciever	0
-d	14f32060	2060 ATSC Terrestrial (Cable) Reciever	0
+d	14f32030	2030 DVB-S Satellite Receiver	0
+d	14f32050	2050 DVB-T Terrestrial (Cable) Receiver	0
+d	14f32060	2060 ATSC Terrestrial (Cable) Receiver	0
 v	14f4	TOKYO Electronic Industry CO Ltd	0
 v	14f5	SOPAC Ltd	0
 v	14f6	COYOTE Technologies LLC	0
@@ -12580,7 +12580,7 @@ v	8401	TRENDware International Inc.	0
 v	8686	ScaleMP	0
 d	86861010	vSMPowered system controller [vSMP CTL]	0
 v	8800	Trigem Computer Inc.	0
-d	88002008	Video assistent component	0
+d	88002008	Video assistant component	0
 v	8866	T-Square Design Inc.	0
 v	8888	Silicon Magic	0
 v	8912	TRX	0

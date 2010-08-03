@@ -496,14 +496,14 @@ static int init(priv_t *priv)
     /* get capabilities (priv->capability is needed!) */
     if (ioctl(priv->video_fd, VIDIOCGCAP, &priv->capability) == -1)
     {
-        mp_msg(MSGT_TV, MSGL_ERR, "ioctl get capabilites failed: %s\n", strerror(errno));
+        mp_msg(MSGT_TV, MSGL_ERR, "ioctl get capabilities failed: %s\n", strerror(errno));
         goto err;
     }
 
     fcntl(priv->video_fd, F_SETFD, FD_CLOEXEC);
 
     mp_msg(MSGT_TV, MSGL_INFO, "Selected device: %s\n", priv->capability.name);
-    mp_msg(MSGT_TV, MSGL_INFO, " Capabilites: ");
+    mp_msg(MSGT_TV, MSGL_INFO, " Capabilities: ");
     for (i = 0; device_cap2name[i] != NULL; i++)
         if (priv->capability.type & (1 << i))
             mp_msg(MSGT_TV, MSGL_INFO, "%s ", device_cap2name[i]);
@@ -810,7 +810,7 @@ static int vbi_init(priv_t* priv,char* device)
     }
 
     if(ioctl(vbi_fd,VIDIOCGCAP,&cap)<0){
-        mp_msg(MSGT_TV,MSGL_ERR,"vbi: Query capatibilities failed for %s\n",priv->vbi_dev);
+        mp_msg(MSGT_TV,MSGL_ERR,"vbi: Query capabilities failed for %s\n",priv->vbi_dev);
         close(vbi_fd);
         return  TVI_CONTROL_FALSE;
     }
@@ -1397,7 +1397,7 @@ static int control(priv_t *priv, int cmd, void *arg)
             }
 
             if (ioctl(priv->video_fd, VIDIOCGCAP, &priv->capability) == -1) {
-                mp_msg(MSGT_TV, MSGL_ERR, "ioctl get capabilites failed: %s\n", strerror(errno));
+                mp_msg(MSGT_TV, MSGL_ERR, "ioctl get capabilities failed: %s\n", strerror(errno));
                 return TVI_CONTROL_FALSE;
             }
 

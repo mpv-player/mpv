@@ -1149,7 +1149,7 @@ card_found:
 	probed = 1;
 	memcpy(&pci_info, &lst[i], sizeof(pciinfo_t));
 
-	mga_cap.device_id = pci_info.device; /* set device id in capabilites */
+	mga_cap.device_id = pci_info.device; /* set device id in capabilities */
 
 	return 0;
 }

@@ -440,7 +440,7 @@ static void pnm_write_image(mp_image_t *mpi)
     FILE *outfile;
 
     if (!mpi) {
-        mp_msg(MSGT_VO, MSGL_ERR, "%s: No image data suplied to video output driver\n", info.short_name );
+        mp_msg(MSGT_VO, MSGL_ERR, "%s: No image data supplied to video output driver\n", info.short_name );
         exit_player_bad(_("Fatal error"));
     }
 

@@ -171,7 +171,7 @@ while(1){
     // required to produce the file (the format depends on the hardware used).
     case mmioFOURCC('I','S','H','P'): hdr="Sharpness";break;
     // ISRC - Identifies the name of the person or organization who
-    // suplied the original subject of the file; for example, "Try Research."
+    // supplied the original subject of the file; for example, "Try Research."
     case mmioFOURCC('I','S','R','C'): hdr="Source";break;
     // ISRF - Identifies the original form of the material that was digitized,
     // such as "slide," "paper," "map," and so on. This is not necessarily
