@@ -1236,7 +1236,7 @@ void init_vo_spudec(struct MPContext *mpctx)
 #endif
 
   if (vo_spudec==NULL) {
-    sh_sub_t *sh = (sh_sub_t *)mpctx->d_sub->sh;
+    sh_sub_t *sh = mpctx->d_sub->sh;
     current_module="spudec_init_normal";
     vo_spudec=spudec_new_scaled(NULL, mpctx->sh_video->disp_w, mpctx->sh_video->disp_h, sh->extradata, sh->extradata_len);
     spudec_set_font_factor(vo_spudec,font_factor);
