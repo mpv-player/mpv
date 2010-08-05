@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -113,4 +114,45 @@ int skip_video_packet(demux_stream_t *ds){
 
   // SYNC AGAIN:
   return sync_video_packet(ds);
+}
+
+/* stripped down version of a52_syncinfo() from liba52
+ * copyright belongs to Michel Lespinasse <walken@zoy.org>
+ * and Aaron Holtzman <aholtzma@ess.engr.uvic.ca> */
+int mp_a52_framesize(uint8_t * buf, int *srate)
+{
+    int rate[] = {  32,  40,  48,  56,  64,  80,  96, 112,
+                   128, 160, 192, 224, 256, 320, 384, 448,
+                   512, 576, 640
+    };
+    uint8_t halfrate[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3 };
+    int frmsizecod, bitrate, half;
+
+    if ((buf[0] != 0x0b) || (buf[1] != 0x77))    /* syncword */
+        return 0;
+
+    if (buf[5] >= 0x60)                          /* bsid >= 12 */
+        return 0;
+
+    half = halfrate[buf[5] >> 3];
+
+    frmsizecod = buf[4] & 63;
+    if (frmsizecod >= 38)
+        return 0;
+
+    bitrate = rate[frmsizecod >> 1];
+
+    switch (buf[4] & 0xc0) {
+    case 0:    /* 48 KHz */
+        *srate = 48000 >> half;
+        return 4 * bitrate;
+    case 0x40: /* 44.1 KHz */
+        *srate = 44100 >> half;
+        return 2 * (320 * bitrate / 147 + (frmsizecod & 1));
+    case 0x80: /* 32 KHz */
+        *srate = 32000 >> half;
+        return 6 * bitrate;
+    }
+
+    return 0;
 }

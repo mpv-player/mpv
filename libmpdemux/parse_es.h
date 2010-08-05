@@ -19,6 +19,8 @@
 #ifndef MPLAYER_PARSE_ES_H
 #define MPLAYER_PARSE_ES_H
 
+#include <stdint.h>
+
 #include "demuxer.h"
 
 #define MAX_VIDEO_PACKET_SIZE (224*1024+4)
@@ -37,5 +39,7 @@ int read_video_packet(demux_stream_t *ds);
 
 // return: next packet code
 int skip_video_packet(demux_stream_t *ds);
+
+int mp_a52_framesize(uint8_t *buf, int *srate);
 
 #endif /* MPLAYER_PARSE_ES_H */
