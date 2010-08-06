@@ -71,7 +71,9 @@ static int imeHeaderValid(FrameInfo *frame)
     if ( frame->channelNo > 7 ||
          frame->frameSize > MAX_PACKET_SIZE || frame->frameSize <= 0)
     {
-        mp_msg(MSGT_DEMUX, MSGL_V, "Invalid packet in LMLM4 stream: ch=%d size=%d\n", frame->channelNo, frame->frameSize);
+        mp_msg(MSGT_DEMUX, MSGL_V,
+               "Invalid packet in LMLM4 stream: ch=%d size=%zd\n",
+               frame->channelNo, frame->frameSize);
         return 0;
     }
     switch (frame->frameType) {
@@ -155,7 +157,7 @@ static int getFrame(demuxer_t *demuxer, FrameInfo *frameInfo)
     frameInfo->frameSize = packetSize - 8; //sizeof(IME6400Header);
     frameInfo->paddingSize = (packetSize & PACKET_BLOCK_LAST) ? PACKET_BLOCK_SIZE - (packetSize & PACKET_BLOCK_LAST) : 0;
 
-    mp_msg(MSGT_DEMUX, MSGL_DBG2, "typ: %d chan: %d size: %d pad: %d\n",
+    mp_msg(MSGT_DEMUX, MSGL_DBG2, "typ: %d chan: %d size: %zd pad: %zd\n",
             frameInfo->frameType,
             frameInfo->channelNo,
             frameInfo->frameSize,

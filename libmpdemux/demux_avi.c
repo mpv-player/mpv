@@ -553,7 +553,9 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
 	asamples+=(len+priv->audio_block_size-1)/priv->audio_block_size;
       }
     }
-    mp_msg(MSGT_DEMUX,MSGL_V,"AVI video size=%"PRId64" (%u) audio size=%"PRId64" (%u)\n",vsize,vsamples,asize,asamples);
+    mp_msg(MSGT_DEMUX, MSGL_V,
+           "AVI video size=%"PRId64" (%zu) audio size=%"PRId64" (%zu)\n",
+           vsize, vsamples, asize, asamples);
     priv->numberofframes=vsamples;
     sh_video->i_bps=((float)vsize/(float)vsamples)*(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
     if(sh_audio) sh_audio->i_bps=((float)asize/(float)asamples)*(float)sh_audio->audio.dwRate/(float)sh_audio->audio.dwScale;

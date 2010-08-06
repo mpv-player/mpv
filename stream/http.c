@@ -672,7 +672,7 @@ http_debug_hdr( HTTP_header_t *http_hdr ) {
 	mp_msg(MSGT_NETWORK,MSGL_V,"method:             [%s]\n", http_hdr->method );
 	mp_msg(MSGT_NETWORK,MSGL_V,"status code:        [%d]\n", http_hdr->status_code );
 	mp_msg(MSGT_NETWORK,MSGL_V,"reason phrase:      [%s]\n", http_hdr->reason_phrase );
-	mp_msg(MSGT_NETWORK,MSGL_V,"body size:          [%d]\n", http_hdr->body_size );
+	mp_msg(MSGT_NETWORK,MSGL_V,"body size:          [%zd]\n", http_hdr->body_size );
 
 	mp_msg(MSGT_NETWORK,MSGL_V,"Fields:\n");
 	field = http_hdr->first_field;
