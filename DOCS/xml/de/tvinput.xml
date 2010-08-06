@@ -265,43 +265,6 @@ mencoder -tv driver=v4l:width=768:height=576 \
 
     </sect2>
 
-    <sect2 id="tv-teletext-hotkeys">
-      <title>Videotext-Hotkeys</title>
-
-      <informaltable frame="all">
-        <tgroup cols="2">
-          <thead>
-            <row>
-              <entry>Taste</entry>
-              <entry>Beschreibung</entry>
-            </row>
-          </thead>
-          <tbody>
-            <row>
-              <entry>X</entry>
-              <entry>Videotextanzeige an-/ausschalten</entry>
-            </row>
-            <row>
-              <entry>C</entry>
-              <entry>Durch die verschiedenen Zeichnungsmodi wechseln (deckend, transparent,
-                umgekehrt deckend, umgekehrt transparent</entry>
-            </row>
-            <row>
-              <entry>Links/Rechts</entry>
-              <entry>Go to previous/next teletext page</entry>
-            </row>
-            <row>
-              <entry>BildHoch/BildRunter</entry>
-              <entry>Gehe zur nächsten/vorigen Videotextseite</entry>
-            </row>
-            <row>
-              <entry>Ziffern</entry>
-              <entry>Gib die Seitenzahl an, zu der gesprungen werden soll</entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </informaltable>
-    </sect2>
   </sect1>
 
 </chapter>

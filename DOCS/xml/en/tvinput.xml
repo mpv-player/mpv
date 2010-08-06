@@ -230,42 +230,4 @@ Here is an example for Russian:
 </para>
 </sect1>
 
-<sect1 id="tv-teletext-hotkeys">
-<title>Teletext hot keys</title>
-
-<informaltable frame="all">
-<tgroup cols="2">
-<thead>
-<row>
-  <entry>Key</entry>
-  <entry>Description</entry>
-</row>
-</thead>
-<tbody>
-<row>
-  <entry>X</entry>
-  <entry>Switch teletext display on/off</entry>
-</row>
-<row>
-  <entry>C</entry>
-  <entry>Cycle through teletext rendering modes (opaque, transparent, inverted opaque,
-  inverted transparent</entry>
-</row>
-<row>
-  <entry>Left/Right</entry>
-  <entry>Go to previous/next teletext page</entry>
-</row>
-<row>
-  <entry>PageUp/PageDown</entry>
-  <entry>Go to next/previous teletext subpage</entry>
-</row>
-<row>
-  <entry>digits</entry>
-  <entry>Enter teletext page number to jump to</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-</sect1>
-
 </chapter>

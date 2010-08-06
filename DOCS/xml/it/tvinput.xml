@@ -244,43 +244,6 @@ Qui c'è un esempio per il russo:
 </para>
 </sect2>
 
-<sect2 id="tv-teletext-hotkeys">
-<title>Tasti comando per il televideo</title>
-
-<informaltable frame="all">
-<tgroup cols="2">
-<thead>
-<row>
-  <entry>Tasto</entry>
-  <entry>Descrizione</entry>
-</row>
-</thead>
-<tbody>
-<row>
-  <entry>X</entry>
-  <entry>Abilita/disabilita il televideo</entry>
-</row>
-<row>
-  <entry>C</entry>
-  <entry>Passa attraverso le modalità di visione del televideo (opaco,
-  trasparente, opaco invertito, trasparente invertito</entry>
-</row>
-<row>
-  <entry>Sinistra/Destra</entry>
-  <entry>Va alla pagina precedente/successiva del televideo</entry>
-</row>
-<row>
-  <entry>PaginaSu/PaginaGiù</entry>
-  <entry>Va alla sottopagina successiva/precedente del televideo</entry>
-</row>
-<row>
-  <entry>cifre</entry>
-  <entry>Indica il numero della pagina del televideo a cui andare</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-</sect2>
 </sect1>
 
 </chapter>

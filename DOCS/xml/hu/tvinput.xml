@@ -233,42 +233,4 @@ Egy példa az orosz nyelv kiválasztására:
 </para>
 </sect1>
 
-<sect1 id="tv-teletext-hotkeys">
-<title>Teletext gyorsbillentyűk</title>
-
-<informaltable frame="all">
-<tgroup cols="2">
-<thead>
-<row>
-  <entry>Gomb</entry>
-  <entry>Leírás</entry>
-</row>
-</thead>
-<tbody>
-<row>
-  <entry>X</entry>
-  <entry>Ki-/bekapcsolja a teletext képernyőt</entry>
-</row>
-<row>
-  <entry>C</entry>
-  <entry>Lépked a teletext renderelési módjai között (nem átlátszó, átlátszó, inverz nem átlátszó,
-  inverz átlátszó</entry>
-</row>
-<row>
-  <entry>Bal/Jobb</entry>
-  <entry>Ugrás az előző/következő teletext oldalra</entry>
-</row>
-<row>
-  <entry>PageUp/PageDown</entry>
-  <entry>Ugrás az előző/következő teletext aloldalra</entry>
-</row>
-<row>
-  <entry>számok</entry>
-  <entry>Annak a teletext oldalnak a száma írható be, ahova ugrani akarsz</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-</sect1>
-
 </chapter>

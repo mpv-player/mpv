@@ -309,42 +309,5 @@ Voici un exemple pour du Russe&nbsp;:
 </para>
 </sect2>
 
-<sect2 id="tv-teletext-hotkeys">
-<title>Raccourcis clavier pour le Télétexte</title>
-
-<informaltable frame="all">
-  <tgroup cols="2">
-    <thead>
-      <row>
-        <entry>Touche</entry>
-        <entry>Description</entry>
-      </row>
-    </thead>
-    <tbody>
-      <row>
-        <entry>X</entry>
-        <entry>Bascule l'affichage du Télétexte on/off</entry>
-      </row>
-      <row>
-        <entry>C</entry>
-        <entry>Parcourir les modes de rendu du Télétexte (opaque,
-transparent, opaque inversé, transparent inversé)</entry>
-      </row>
-      <row>
-        <entry>Gauche/Droite</entry>
-        <entry>Aller à la page Télétexte précédente/suivante</entry>
-      </row>
-      <row>
-        <entry>Bas/Haut</entry>
-        <entry>Aller à la sous-page Télétexte précédente/suivante</entry>
-      </row>
-      <row>
-        <entry>Chiffres</entry>
-        <entry>Numéro de page où aller</entry>
-      </row>
-    </tbody>
-  </tgroup>
-</informaltable>
-</sect2>
 </sect1>
 </chapter>

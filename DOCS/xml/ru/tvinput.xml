@@ -246,42 +246,5 @@ mencoder -tv driver=v4l:width=768:height=576 \
 </para>
 </sect2>
 
-<sect2 id="tv-teletext-hotkeys">
-<title>Горячие клавиши телетекста</title>
-
-<informaltable frame="all">
-<tgroup cols="2">
-<thead>
-<row>
-  <entry>Клавиша</entry>
-  <entry>Описание</entry>
-</row>
-</thead>
-<tbody>
-<row>
-  <entry>X</entry>
-  <entry>Включает/выключает отображение телетекста</entry>
-</row>
-<row>
-  <entry>C</entry>
-  <entry>Циклически переключает режими отрисовки (непрозрачный, прозрачный, инфертированный непрозрачный,
-  инвертированный прозрачный</entry>
-</row>
-<row>
-  <entry>Left/Right</entry>
-  <entry>Переходит к предыдущей/следующей странице телетекста</entry>
-</row>
-<row>
-  <entry>PageUp/PageDown</entry>
-  <entry>Перходит к следующей/предыдущей дополнительной странице телетекста</entry>
-</row>
-<row>
-  <entry>Цифры</entry>
-  <entry>Вводят номер страницы для перехода к ней</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-</sect2>
 </sect1>
 </chapter>
