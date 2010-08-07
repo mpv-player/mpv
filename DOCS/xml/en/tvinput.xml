@@ -11,25 +11,6 @@ of TV options and keyboard controls.
 
 <!-- ********** -->
 
-<sect1 id="tv-compilation">
-<title>Compilation</title>
-
-<procedure>
-<step><para>
-  First, you have to recompile. <filename>./configure</filename> will
-  autodetect kernel headers of v4l stuff and the existence of
-  <filename>/dev/video*</filename> entries. If they exist, TV support will
-  be built (see  the output of <filename>./configure</filename>).
-</para></step>
-<step><para>
-  Make sure your tuner works with another TV software in Linux, for
-  example <application>XawTV</application>.
-</para></step>
-</procedure>
-</sect1>
-
-<!-- ********** -->
-
 <sect1 id="tv-tips">
 <title>Usage tips</title>
 
@@ -38,6 +19,10 @@ The full listing of the options is available on the manual page.
 Here are just a few tips:
 
 <itemizedlist>
+<listitem><para>
+  Make sure your tuner works with another TV software in Linux, for
+  example <application>XawTV</application>.
+</para></listitem>
 <listitem><para>
   Use the <option>channels</option> option. An example:
   <screen>-tv channels=26-MTV1,23-TV2</screen>
