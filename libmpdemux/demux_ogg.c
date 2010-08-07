@@ -260,7 +260,6 @@ static unsigned char *demux_ogg_read_packet(ogg_stream_t *os, ogg_packet *pack,
                                             int samplesize)
 {
     unsigned char *data = pack->packet;
-    int size = pack->bytes;
 
     *pts = MP_NOPTS_VALUE;
     *flags = 0;
@@ -298,7 +297,7 @@ static unsigned char *demux_ogg_read_packet(ogg_stream_t *os, ogg_packet *pack,
         /* header packets begin on 1-bit: thus check (*data&0x80).  We don't
            have theora_state st, until all header packets were passed to the
            decoder. */
-        if (!size || !(*data&0x80)) {
+        if (!pack->bytes || !(*data&0x80)) {
             int keyframe_granule_shift = _ilog(os->keyframe_frequency_force - 1);
             int64_t iframemask = (1 << keyframe_granule_shift) - 1;
 
