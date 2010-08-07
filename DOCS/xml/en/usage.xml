@@ -494,14 +494,10 @@ change the default operation which is to skip the block described by each line.
 </para>
 </sect2>
 </sect1>
-</chapter>
 
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-
-<chapter id="advaudio" xreflabel="Advanced Audio">
-<title>Advanced audio usage</title>
 
 <sect1 id="advaudio-surround">
 <title>Surround/Multichannel playback</title>
