@@ -239,7 +239,7 @@ ASS_Track *ass_read_stream(ASS_Library *library, const char *fname, char *charse
     size_t buf_alloc = 0;
     stream_t *fd;
 
-    fd = open_stream(fname, NULL, &i);
+    fd = open_stream(fname, NULL, NULL);
     if (!fd)
         // Stream code should have printed an error already
         return NULL;

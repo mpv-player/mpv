@@ -47,6 +47,8 @@ int dvd_title=0;
 stream_t* open_stream(const char *filename, struct MPOpts *options,
                       int *file_format)
 {
+  if (!file_format)
+    file_format = &(int){DEMUXER_TYPE_UNKNOWN};
   // Check if playlist or unknown
   if (*file_format != DEMUXER_TYPE_PLAYLIST){
     *file_format=DEMUXER_TYPE_UNKNOWN;

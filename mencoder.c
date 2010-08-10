@@ -667,7 +667,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 
 
 if (frameno_filename) {
-  stream2=open_stream(frameno_filename,0,&i);
+  stream2=open_stream(frameno_filename, NULL, NULL);
   if(stream2){
     demuxer2=demux_open(&opts, stream2,DEMUXER_TYPE_AVI,-1,-1,-2,NULL);
     if(demuxer2) mp_tmsg(MSGT_MENCODER, MSGL_INFO, "Using pass3 control file: %s\n", frameno_filename);
