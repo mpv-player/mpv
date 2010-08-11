@@ -733,7 +733,7 @@ static int mp_dvdnav_get_aid_from_format (stream_t *stream, int index, uint8_t l
  * \param lang: 2-characters language code[s], eventually separated by spaces of commas
  * \return -1 on error, current subtitle id if successful
  */
-int mp_dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
+int mp_dvdnav_aid_from_lang(stream_t *stream, const unsigned char *language) {
   dvdnav_priv_t * priv = stream->priv;
   int k;
   uint8_t lg;
@@ -785,7 +785,7 @@ int mp_dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
  * \param lang: 2-characters language code[s], eventually separated by spaces of commas
  * \return -1 on error, current subtitle id if successful
  */
-int mp_dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
+int mp_dvdnav_sid_from_lang(stream_t *stream, const unsigned char *language) {
   dvdnav_priv_t * priv = stream->priv;
   uint8_t lg, k;
   uint16_t lang, lcode;

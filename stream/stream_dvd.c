@@ -125,7 +125,7 @@ int dvd_lang_from_aid(stream_t *stream, int id) {
   return 0;
 }
 
-int dvd_aid_from_lang(stream_t *stream, unsigned char* lang) {
+int dvd_aid_from_lang(stream_t *stream, const unsigned char* lang) {
   dvd_priv_t *d=stream->priv;
   int code,i;
   if(lang) {
@@ -169,7 +169,7 @@ int dvd_lang_from_sid(stream_t *stream, int id) {
   return 0;
 }
 
-int dvd_sid_from_lang(stream_t *stream, unsigned char* lang) {
+int dvd_sid_from_lang(stream_t *stream, const unsigned char* lang) {
   dvd_priv_t *d=stream->priv;
   int code,i;
   while(lang && strlen(lang)>=2) {
