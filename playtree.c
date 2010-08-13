@@ -218,8 +218,15 @@ void
 play_tree_set_child(play_tree_t* pt, play_tree_t* child) {
   play_tree_t* iter;
 
+  /* Roughly validate input data. Both, pt and child are going to be
+   * dereferenced, hence assure they're not NULL.
+   */
+  if (!pt || !child) {
+    mp_msg(MSGT_PLAYTREE, MSGL_ERR, "Internal error, attempt to add an empty child or use empty playlist\n");
+    return;
+  }
+
 #ifdef MP_DEBUG
-  assert(pt != NULL);
   assert(pt->entry_type == PLAY_TREE_ENTRY_NODE);
 #endif
 
