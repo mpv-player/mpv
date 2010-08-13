@@ -367,6 +367,9 @@ parse_pls(play_tree_parser_t* p) {
 
   free(entries);
 
+  if (!list)
+    return NULL;
+
   entry = play_tree_new();
   play_tree_set_child(entry,list);
   return entry;
