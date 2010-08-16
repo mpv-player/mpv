@@ -167,10 +167,11 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
 
   len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
 #ifdef __MINGW32__
-  if(f==0 || len == -1) {
-#else
-  if(len == -1) {
+  // seeks on stdin incorrectly succeed on MinGW
+  if(f==0)
+    len = -1;
 #endif
+  if(len == -1) {
     if(mode == STREAM_READ) stream->seek = seek_forward;
     stream->type = STREAMTYPE_STREAM; // Must be move to STREAMTYPE_FILE
     stream->flags |= MP_STREAM_SEEK_FW;
