@@ -3703,7 +3703,7 @@ if(stream_dump_type==5){
 #ifdef CONFIG_DVDREAD
 if(mpctx->stream->type==STREAMTYPE_DVD){
   current_module="dvd lang->id";
-  if(opts->audio_id==-1) opts->audio_id=dvd_aid_from_lang(mpctx->stream,opts->audio_lang);
+  if(opts->audio_lang && opts->audio_id==-1) opts->audio_id=dvd_aid_from_lang(mpctx->stream,opts->audio_lang);
   if(opts->sub_lang && opts->sub_id==-1) opts->sub_id=dvd_sid_from_lang(mpctx->stream,opts->sub_lang);
   // setup global sub numbering
   mpctx->sub_counts[SUB_SOURCE_DEMUX] = dvd_number_of_subs(mpctx->stream);
@@ -3714,7 +3714,7 @@ if(mpctx->stream->type==STREAMTYPE_DVD){
 #ifdef CONFIG_DVDNAV
 if(mpctx->stream->type==STREAMTYPE_DVDNAV){
   current_module="dvdnav lang->id";
-  if(opts->audio_id==-1) opts->audio_id=mp_dvdnav_aid_from_lang(mpctx->stream,opts->audio_lang);
+  if(opts->audio_lang && opts->audio_id==-1) opts->audio_id=mp_dvdnav_aid_from_lang(mpctx->stream,opts->audio_lang);
   dvdsub_lang_id = -3;
   if(opts->sub_lang && opts->sub_id==-1)
     dvdsub_lang_id = opts->sub_id = mp_dvdnav_sid_from_lang(mpctx->stream,opts->sub_lang);
