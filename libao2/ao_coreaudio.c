@@ -464,7 +464,9 @@ int device_id, display_help = 0;
         {
             ao->b_supports_digital = 1;
         }
-        ao_msg(MSGT_AO,MSGL_V, "probe default audio output device whether support digital s/pdif output:%d\n", ao->b_supports_digital );
+        ao_msg(MSGT_AO, MSGL_V,
+               "probe default audio output device about support for digital s/pdif output: %d\n",
+               ao->b_supports_digital );
     }
 
     free(psz_name);
@@ -687,7 +689,8 @@ static int OpenSPDIF(void)
                                                    (void **)&p_format_list);
 
         if (!i_param_size) {
-            ao_msg(MSGT_AO, MSGL_WARN, "could not get number of streamformats.\n");
+            ao_msg(MSGT_AO, MSGL_WARN,
+                   "Could not get number of stream formats.\n");
             continue;
         }
 
@@ -722,7 +725,9 @@ static int OpenSPDIF(void)
                                        sizeof(ao->sfmt_revert), &ao->sfmt_revert);
                 if (err != noErr)
                 {
-                    ao_msg(MSGT_AO, MSGL_WARN, "could not retrieve the original streamformat: [%4.4s]\n", (char *)&err);
+                    ao_msg(MSGT_AO, MSGL_WARN,
+                           "Could not retrieve the original stream format: [%4.4s]\n",
+                           (char *)&err);
                     if (p_format_list) free(p_format_list);
                     continue;
                 }
@@ -756,7 +761,8 @@ static int OpenSPDIF(void)
 
     if (ao->i_stream_index < 0)
     {
-        ao_msg(MSGT_AO, MSGL_WARN, "can not find any digital output stream format when OpenSPDIF().\n");
+        ao_msg(MSGT_AO, MSGL_WARN,
+               "Cannot find any digital output stream format when OpenSPDIF().\n");
         goto err_out;
     }
 
@@ -784,7 +790,8 @@ static int OpenSPDIF(void)
 #else
     if (ao->stream_format.mFormatFlags & kAudioFormatFlagIsBigEndian)
 #endif
-        ao_msg(MSGT_AO, MSGL_WARN, "output stream has a no-native byte-order, digital output may failed.\n");
+        ao_msg(MSGT_AO, MSGL_WARN,
+               "Output stream has non-native byte order, digital output may fail.\n");
 
     /* For ac3/dts, just use packet size 6144 bytes as chunk size. */
     ao->chunk_size = ao->stream_format.mBytesPerPacket;
@@ -896,7 +903,7 @@ static int AudioStreamSupportsDigital( AudioStreamID i_stream_id )
                                                (void **)&p_format_list);
 
     if (!i_param_size) {
-        ao_msg(MSGT_AO, MSGL_WARN, "could not get number of streamformats.\n");
+        ao_msg(MSGT_AO, MSGL_WARN, "Could not get number of stream formats.\n");
         return CONTROL_FALSE;
     }
 
@@ -1033,21 +1040,22 @@ static int play(void* output_samples,int num_bytes,int flags)
         b_digital = AudioStreamSupportsDigital(ao->i_stream_id);
         if (b_digital)
         {
-            /* Current stream support digital format output, let's set it. */
-            ao_msg(MSGT_AO, MSGL_V, "detected current stream support digital, try to restore digital output...\n");
+            /* Current stream supports digital format output, let's set it. */
+            ao_msg(MSGT_AO, MSGL_V,
+                   "Detected current stream supports digital, try to restore digital output...\n");
 
             if (!AudioStreamChangeFormat(ao->i_stream_id, ao->stream_format))
             {
-                ao_msg(MSGT_AO, MSGL_WARN, "restore digital output failed.\n");
+                ao_msg(MSGT_AO, MSGL_WARN, "Restoring digital output failed.\n");
             }
             else
             {
-                ao_msg(MSGT_AO, MSGL_WARN, "restore digital output succeed.\n");
+                ao_msg(MSGT_AO, MSGL_WARN, "Restoring digital output succeeded.\n");
                 reset();
             }
         }
         else
-            ao_msg(MSGT_AO, MSGL_V, "detected current stream do not support digital.\n");
+            ao_msg(MSGT_AO, MSGL_V, "Detected current stream does not support digital.\n");
     }
 
     wrote=write_buffer(output_samples, num_bytes);
