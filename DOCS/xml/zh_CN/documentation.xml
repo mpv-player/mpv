@@ -179,8 +179,6 @@ It can encode with various codecs, like
 
 &usage.xml;
 &video.xml;
-&tvinput.xml;
-&radio.xml;
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
