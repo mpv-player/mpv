@@ -4,10 +4,10 @@
 %define __spec_install_post %{nil}
 %define debug_package %{nil}
 
-%define i386_ver 20061022
+%define i386_ver 20100303
 %define ppc_ver 20061022
 %define alpha_ver 20061028
-%define x86_64_ver 20061203
+%define x86_64_ver 20071007
 
 %define ver %{expand:%{%{_target_cpu}_ver}}
 
@@ -24,7 +24,7 @@ Source3: http://www.mplayerhq.hu/MPlayer/releases/codecs/essential-amd64-%{x86_6
 License: Unknown
 ExclusiveArch: i386 ppc alpha x86_64
 %ifarch i386
-Provides: w32codec
+Provides: w32codec = %{version}-%{release}
 %endif
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 
@@ -62,16 +62,16 @@ rm -rf $RPM_BUILD_ROOT
 
 install -d $RPM_BUILD_ROOT%{_codecsdir}
 %ifarch i386
-install -pm644 all-%{version}/* $RPM_BUILD_ROOT%{_codecsdir}/
+install -p all-%{version}/* $RPM_BUILD_ROOT%{_codecsdir}/
 %endif
 %ifarch alpha
-install -pm644 all-alpha-%{alpha_ver}/* $RPM_BUILD_ROOT%{_codecsdir}/
+install -p all-alpha-%{alpha_ver}/* $RPM_BUILD_ROOT%{_codecsdir}/
 %endif
 %ifarch ppc
-install -pm644 all-ppc-%{ppc_ver}/* $RPM_BUILD_ROOT%{_codecsdir}/
+install -p all-ppc-%{ppc_ver}/* $RPM_BUILD_ROOT%{_codecsdir}/
 %endif
 %ifarch x86_64
-install -pm644 essential-amd64-%{x86_64_ver}/* $RPM_BUILD_ROOT%{_codecsdir}/
+install -p essential-amd64-%{x86_64_ver}/* $RPM_BUILD_ROOT%{_codecsdir}/
 %endif
 rm -f $RPM_BUILD_ROOT%{_codecsdir}/README
 
@@ -96,6 +96,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_codecsdir}/DECVW_32.DLL
 %{_codecsdir}/drvc.so
 %{_codecsdir}/dspr.so.6.0
+%{_codecsdir}/frapsvid.dll
 %{_codecsdir}/iac25_32.ax
 %{_codecsdir}/icmw_32.dll
 %{_codecsdir}/imc32.acm
@@ -152,6 +153,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_codecsdir}/wmvdmod.dll
 %{_codecsdir}/wnvwinx.dll
 %{_codecsdir}/wvc1dmod.dll
+%{_codecsdir}/xanlib.dll
 %endif
 %ifarch alpha
 %doc all-alpha-%{alpha_ver}/README
@@ -174,7 +176,6 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %ifarch x86_64
 %doc essential-amd64-%{x86_64_ver}/README
-%{_codecsdir}/atrc.so
 %{_codecsdir}/cook.so
 %{_codecsdir}/drvc.so
 %{_codecsdir}/sipr.so
@@ -183,16 +184,26 @@ rm -rf $RPM_BUILD_ROOT
 %files extra
 %ifarch i386
 %defattr(0644,root,root,0755)
-%{_codecsdir}/LCodcCMP.dll
+%{_codecsdir}/ACDV.dll
+%{_codecsdir}/ADV601.dll
+%{_codecsdir}/aoxdxipl.ax
 %{_codecsdir}/aslcodec_vfw.dll
 %{_codecsdir}/asusasv2.dll
 %{_codecsdir}/asusasvd.dll
 %{_codecsdir}/ativcr2.dll
 %{_codecsdir}/avimszh.dll
 %{_codecsdir}/avizlib.dll
+%{_codecsdir}/blox.dll
+%{_codecsdir}/BTVVC32.DRV
+%{_codecsdir}/bw10.dll
+%{_codecsdir}/camfc.dll
+%{_codecsdir}/cinedec.ax
+%{_codecsdir}/cinevfw.dll
+%{_codecsdir}/CineWave.qtx
 %{_codecsdir}/cook.so.6.0
 %{_codecsdir}/ctadp32.acm
 %{_codecsdir}/ddnt.so.6.0
+%{_codecsdir}/decvdo.dll
 %{_codecsdir}/divx.dll
 %{_codecsdir}/divx_c32.ax
 %{_codecsdir}/divxa32.acm
@@ -202,17 +213,26 @@ rm -rf $RPM_BUILD_ROOT
 %{_codecsdir}/drv2.so.6.0
 %{_codecsdir}/drv3.so.6.0
 %{_codecsdir}/drv4.so.6.0
+%{_codecsdir}/DVACM.acm
+%{_codecsdir}/fmcodec.DLL
+%{_codecsdir}/G2M.dll
+%{_codecsdir}/GeoCodec.dll
+%{_codecsdir}/GXAMP4.dll
 %{_codecsdir}/huffyuv.dll
 %{_codecsdir}/i263_32.drv
 %{_codecsdir}/iccvid.dll
 %{_codecsdir}/imaadp32.acm
 %{_codecsdir}/ir32_32.dll
+%{_codecsdir}/kdvyuv8.dll
+%{_codecsdir}/KGV1-VFW.dll
+%{_codecsdir}/LCodcCMP.dll
 %{_codecsdir}/l3codeca.acm
 %{_codecsdir}/l3codecx.ax
 %{_codecsdir}/m3jpeg32.dll
 %{_codecsdir}/m3jpegdec.ax
 %{_codecsdir}/mcdvd_32.dll
 %{_codecsdir}/mcmjpg32.dll
+%{_codecsdir}/MLZCodec.dll
 %{_codecsdir}/mpg4c32.dll
 %{_codecsdir}/mpg4ds32.ax
 %{_codecsdir}/msadp32.acm
@@ -221,15 +241,36 @@ rm -rf $RPM_BUILD_ROOT
 %{_codecsdir}/msnaudio.acm
 %{_codecsdir}/msrle32.dll
 %{_codecsdir}/msvidc32.dll
+%{_codecsdir}/MVCodec.dll
+%{_codecsdir}/mvoice.vwp
 %{_codecsdir}/mvoiced.vwp
+%{_codecsdir}/Nsgsm32.acm
+%{_codecsdir}/Nstsp32.acm
+%{_codecsdir}/nsvideo.dll
+%{_codecsdir}/NuB2.dll
+%{_codecsdir}/nuvision.ax
 %{_codecsdir}/pclepim1.dll
 %{_codecsdir}/qdv.dll
 %{_codecsdir}/scg726.acm
+%{_codecsdir}/SCLS.DLL
+%{_codecsdir}/scrvid.dll
+%{_codecsdir}/Sif1Dec.ax
+%{_codecsdir}/Sif1_vfw.dll
+%{_codecsdir}/smcelp32.acm
+%{_codecsdir}/SN4Codec.dll
+%{_codecsdir}/sp4x_32.dll
 %{_codecsdir}/sp5x_32.dll
+%{_codecsdir}/tm2Xdec.ax
+%{_codecsdir}/tm2x.dll
+%{_codecsdir}/TRICDC32.DRV
 %{_codecsdir}/tsccvid.dll
 %{_codecsdir}/ubv263d+.ax
 %{_codecsdir}/ubvmp4d.dll
 %{_codecsdir}/ultimo.dll
+%{_codecsdir}/vdo32_30.drv
+%{_codecsdir}/vdowave2.acm
+%{_codecsdir}/vdowave.acm
+%{_codecsdir}/VFCodec.dll
 %{_codecsdir}/vgpix32d.dll
 %{_codecsdir}/vid_cvid.xa
 %{_codecsdir}/vid_cyuv.xa
@@ -238,11 +279,22 @@ rm -rf $RPM_BUILD_ROOT
 %{_codecsdir}/vid_iv32.xa
 %{_codecsdir}/vid_iv41.xa
 %{_codecsdir}/vid_iv50.xa
+%{_codecsdir}/voxmvdec.ax
 %{_codecsdir}/vp31vfw.dll
+%{_codecsdir}/WavCWAIP.dll
+%{_codecsdir}/wavelet.dll
+%{_codecsdir}/WAVLOR.DLL
+%{_codecsdir}/WCMV.dll
 %{_codecsdir}/wmv8ds32.ax
 %{_codecsdir}/wmvds32.ax
 %{_codecsdir}/wnvplay1.dll
+%{_codecsdir}/wtvc.DLL
+%{_codecsdir}/wv32vfw.dll
+%{_codecsdir}/xfcodec.dll
+%{_codecsdir}/ylc.vcm
+%{_codecsdir}/Zlib.dll
 %{_codecsdir}/zmbv.dll
+%{_codecsdir}/ZyGoAudioS.qtx
 %endif
 %ifarch alpha ppc
 %{_codecsdir}/14_4.so.6.0
@@ -254,7 +306,13 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
-* Sat Oct 06 2007 Dominik Mierzejewski <rpm at greysector.net>
+* Fri Aug 20 2010 Dominik Mierzejewski <rpm@greysector.net> 20100303-1
+- updated i386 pack
+
+* Mon Feb 11 2008 Dominik Mierzejewski <rpm@greysector.net> 20071007-1
+- updated i386 pack
+
+* Sat Oct 06 2007 Dominik Mierzejewski <rpm@greysector.net> 20060622-1
 - specfile cleanups
 - added backwards compatibility Provides:
 - dropped old history
