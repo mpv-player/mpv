@@ -39,7 +39,6 @@ int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size, double *pts, doub
 {
     AVCodecContext *ctx = sh->context;
     enum CodecID cid = CODEC_ID_NONE;
-    int srcw = 0, srch = 0;
     int new_type = 0;
     int res;
     int got_sub;
@@ -50,7 +49,6 @@ int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size, double *pts, doub
     case 'b':
         cid = CODEC_ID_DVB_SUBTITLE; break;
     case 'p':
-        srcw = 1920; srch = 1080;
         cid = CODEC_ID_HDMV_PGS_SUBTITLE; break;
     case 'x':
         cid = CODEC_ID_XSUB; break;
@@ -87,7 +85,7 @@ int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size, double *pts, doub
         switch (sub.rects[0]->type) {
         case SUBTITLE_BITMAP:
             if (!vo_spudec)
-                vo_spudec = spudec_new_scaled(NULL, srcw, srch, NULL, 0);
+                vo_spudec = spudec_new_scaled(NULL, ctx->width, ctx->height, NULL, 0);
             spudec_set_paletted(vo_spudec,
                                 sub.rects[0]->pict.data[0],
                                 sub.rects[0]->pict.linesize[0],
