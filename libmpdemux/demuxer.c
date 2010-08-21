@@ -247,6 +247,21 @@ demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
     return d;
 }
 
+const char *sh_sub_type2str(int type)
+{
+    switch (type) {
+    case 't': return "text";
+    case 'm': return "movtext";
+    case 'a': return "ass";
+    case 'v': return "vobsub";
+    case 'x': return "xsub";
+    case 'b': return "dvb";
+    case 'd': return "dvb-teletext";
+    case 'p': return "hdmv pgs";
+    }
+    return "unknown";
+}
+
 sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
 {
     if (id > MAX_S_STREAMS - 1 || id < 0) {

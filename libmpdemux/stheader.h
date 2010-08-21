@@ -151,6 +151,8 @@ struct sh_sub *new_sh_sub_sid_lang(struct demuxer *demuxer, int id, int sid,
 void free_sh_audio(struct demuxer *demuxer, int id);
 void free_sh_video(sh_video_t *sh);
 
+const char *sh_sub_type2str(int type);
+
 // video.c:
 int video_read_properties(sh_video_t *sh_video);
 int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** start,int force_fps);
