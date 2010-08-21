@@ -620,7 +620,7 @@ unsigned char* stream_read_line(stream_t *s,unsigned char* mem, int max, int utf
     }
     s->buf_pos += len;
   } while(!end);
-  if(s->eof && ptr == mem) return NULL;
   ptr[0] = 0;
+  if(s->eof && ptr == mem) return NULL;
   return mem;
 }
