@@ -177,7 +177,7 @@ static int init(sh_video_t *sh){
 
     ctx->last_sample_aspect_ratio = (AVRational){0, 1};
 
-    lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh->codec->dll);
+    lavc_codec = avcodec_find_decoder_by_name(sh->codec->dll);
     if(!lavc_codec){
         mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Cannot find codec '%s' in libavcodec...\n", sh->codec->dll);
         uninit(sh);

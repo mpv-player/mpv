@@ -105,7 +105,7 @@ static int init(sh_audio_t *sh_audio)
       avcodec_initialized=1;
     }
 
-    lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh_audio->codec->dll);
+    lavc_codec = avcodec_find_decoder_by_name(sh_audio->codec->dll);
     if(!lavc_codec){
 	mp_tmsg(MSGT_DECAUDIO,MSGL_ERR,"Cannot find codec '%s' in libavcodec...\n",sh_audio->codec->dll);
 	return 0;
