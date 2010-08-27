@@ -381,6 +381,10 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 //	if(fs_installed==0)
 //	    install_fs();
 
+	// Do not load libraries from a path relative to the current directory
+	if (*libname != '/')
+	    i++;
+
 	while (wm == 0 && listpath[++i])
 	{
 	    if (i < 2)

@@ -3210,9 +3210,13 @@ int i;
 	{
 		HMODULE kernel32 = GetModuleHandle("Kernel32.dll");
 		BOOL WINAPI (*setDEP)(DWORD) = NULL;
-		if (kernel32)
+		BOOL WINAPI (*setDllDir)(LPCTSTR) = NULL;
+		if (kernel32) {
 			setDEP = GetProcAddress(kernel32, "SetProcessDEPPolicy");
+			setDllDir = GetProcAddress(kernel32, "SetDllDirectoryA");
+		}
 		if (setDEP) setDEP(3);
+		if (setDllDir) setDllDir("");
 	}
 	// stop Windows from showing all kinds of annoying error dialogs
 	SetErrorMode(0x8003);
