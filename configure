@@ -94,6 +94,7 @@ function_check() {
 int main(void) { $2; return 0; }
 EOF
   shift
+  shift
   compile_check $TMPC $@
 }
 
@@ -5392,7 +5393,7 @@ echocheck "aRts"
 if test "$_arts" = auto ; then
   _arts=no
   if ( artsc-config --version ) >> "$TMPLOG" 2>&1 ; then
-    header_check artsc.h $(artsc-config --libs) $(artsc-config --cflags) &&
+    function_check artsc.h "arts_init()" $(artsc-config --libs) $(artsc-config --cflags) &&
       _arts=yes
   fi
 fi
