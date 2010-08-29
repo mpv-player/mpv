@@ -567,19 +567,20 @@ static subtitle *sub_read_line_ssa(stream_t *st,subtitle *current, int utf16) {
 
 	do {
 		if (!stream_read_line (st, line, LINE_LEN, utf16)) return NULL;
-	} while (sscanf (line, "Dialogue: Marked=%d,%d:%d:%d.%d,%d:%d:%d.%d,"
+	} while (sscanf (line, "Dialogue: Marked=%d,%d:%d:%d.%d,%d:%d:%d.%d"
 			"%[^\n\r]", &nothing,
 			&hour1, &min1, &sec1, &hunsec1,
 			&hour2, &min2, &sec2, &hunsec2,
 			line3) < 9
 		 &&
-		 sscanf (line, "Dialogue: %d,%d:%d:%d.%d,%d:%d:%d.%d,"
+		 sscanf (line, "Dialogue: %d,%d:%d:%d.%d,%d:%d:%d.%d"
 			 "%[^\n\r]", &nothing,
 			 &hour1, &min1, &sec1, &hunsec1,
 			 &hour2, &min2, &sec2, &hunsec2,
 			 line3) < 9	    );
 
         line2=strchr(line3, ',');
+        if (!line2) return NULL;
 
         for (comma = 4; comma < max_comma; comma ++)
           {
