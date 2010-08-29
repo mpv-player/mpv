@@ -1254,6 +1254,7 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
     demux_flush(demuxer);
     demuxer->video->eof = 0;
     demuxer->audio->eof = 0;
+    demuxer->sub->eof = 0;
 
     /* HACK: assume any demuxer used with these streams can cope with
      * the stream layer suddenly seeking to a different position under it
