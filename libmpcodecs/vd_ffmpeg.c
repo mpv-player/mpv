@@ -234,8 +234,8 @@ static int init(sh_video_t *sh){
 
     avctx->flags|= lavc_param->bitexact;
 
-    avctx->width = sh->disp_w;
-    avctx->height= sh->disp_h;
+    avctx->coded_width = sh->disp_w;
+    avctx->coded_height= sh->disp_h;
     avctx->workaround_bugs= lavc_param->workaround_bugs;
     avctx->error_recognition= lavc_param->error_resilience;
     if(lavc_param->gray) avctx->flags|= CODEC_FLAG_GRAY;
