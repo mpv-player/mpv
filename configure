@@ -3501,7 +3501,8 @@ echores "$_soundcard_h"
 
 echocheck "sys/dvdio.h"
 _dvdio=no
-header_check sys/dvdio.h && _dvdio=yes
+# FreeBSD 8.1 has broken dvdio.h
+header_check_broken sys/types.h sys/dvdio.h && _dvdio=yes
 if test "$_dvdio" = yes ; then
   def_dvdio='#define DVD_STRUCT_IN_SYS_DVDIO_H 1'
 else
