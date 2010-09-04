@@ -739,9 +739,6 @@ ADD_ALL_EXESUFS = $(1) $(call ADDSUFFIXES,$(EXESUFS_ALL),$(1))
 
 all: $(ALL_PRG-yes) locales
 
-%.ho: %.h
-	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
-
 %.o: %.S
 	$(CC) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
 
@@ -756,8 +753,6 @@ all: $(ALL_PRG-yes) locales
 
 %-rc.o: %.rc
 	$(WINDRES) -I. $< $@
-
-checkheaders: $(ALLHEADERS:.h=.ho)
 
 dep depend: $(DEPS)
 
@@ -791,6 +786,11 @@ locales: $(MOFILES)
 locale/%/LC_MESSAGES/mplayer.mo: po/%.po
 	mkdir -p $(dir $@)
 	msgfmt -c -o $@ $<
+
+%.ho: %.h
+	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
+
+checkheaders: $(ALLHEADERS:.h=.ho)
 
 
 
