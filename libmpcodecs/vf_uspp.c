@@ -35,6 +35,7 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
+#include "vd_ffmpeg.h"
 #include "libvo/fastmemcpy.h"
 
 #define XMIN(a,b) ((a) < (b) ? (a) : (b))
@@ -353,8 +354,7 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->priv=malloc(sizeof(struct vf_priv_s));
     memset(vf->priv, 0, sizeof(struct vf_priv_s));
 
-    avcodec_init();
-    avcodec_register_all();
+    init_avcodec();
 
     vf->priv->log2_count= 4;
 

@@ -45,6 +45,7 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
+#include "vd_ffmpeg.h"
 #include "libvo/fastmemcpy.h"
 
 #include "libavutil/internal.h"
@@ -636,7 +637,7 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->control= control;
     vf->priv=av_mallocz(sizeof(struct vf_priv_s));//assumes align 16 !
 
-    avcodec_init();
+    init_avcodec();
 
     //vf->priv->avctx= avcodec_alloc_context();
     //dsputil_init(&vf->priv->dsp, vf->priv->avctx);

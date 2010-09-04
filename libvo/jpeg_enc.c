@@ -41,9 +41,8 @@
 #include "libavcodec/mpegvideo.h"
 #include "libavcodec/mjpegenc.h"
 
+#include "libmpcodecs/vd_ffmpeg.h"
 #include "jpeg_enc.h"
-
-extern int avcodec_initialized;
 
 
 /* Begin excessive code duplication ************************************/
@@ -320,15 +319,7 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	j->cheap_upsample = cu;
 	j->bw = b;
 
-	/* if libavcodec is used by the decoder then we must not
-	 * initialize again, but if it is not initialized then we must
-	 * initialize it here. */
-	if (!avcodec_initialized) {
-		/* we need to initialize libavcodec */
-		avcodec_init();
-		avcodec_register_all();
-		avcodec_initialized=1;
-	}
+	init_avcodec();
 
 	if (ff_mjpeg_encode_init(j->s) < 0) {
 		av_free(j->s);

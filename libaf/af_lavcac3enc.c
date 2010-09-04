@@ -26,6 +26,7 @@
 #include <inttypes.h>
 #include <assert.h>
 
+#include "libmpcodecs/vd_ffmpeg.h"
 #include "config.h"
 #include "af.h"
 #include "reorder_ch.h"
@@ -53,8 +54,6 @@ typedef struct af_ac3enc_s {
     int expect_len;
     int min_channel_num;
 } af_ac3enc_t;
-
-extern int  avcodec_initialized;
 
 // Initialization and runtime control
 static int control(struct af_instance_s *af, int cmd, void *arg)
@@ -287,11 +286,7 @@ static int af_open(af_instance_t* af){
     af->data=calloc(1,sizeof(af_data_t));
     af->setup=s;
 
-    if (!avcodec_initialized){
-        avcodec_init();
-        avcodec_register_all();
-        avcodec_initialized=1;
-    }
+    init_avcodec();
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");
     if (!s->lavc_acodec) {

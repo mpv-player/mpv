@@ -27,9 +27,9 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
+#include "vd_ffmpeg.h"
 #include "libavcodec/avcodec.h"
 
-extern int avcodec_initialized;
 
 struct vf_priv_s
 {
@@ -174,12 +174,7 @@ vf_open(vf_instance_t *vf, char *args)
   /* This may not technically be necessary just for a deinterlace,
    * but it seems like a good idea.
    */
-  if(!avcodec_initialized)
-    {
-      avcodec_init();
-      avcodec_register_all();
-      avcodec_initialized=1;
-    }
+  init_avcodec();
 
   return 1;
 }

@@ -27,9 +27,9 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
+#include "vd_ffmpeg.h"
 #include "libavcodec/avcodec.h"
 
-extern int avcodec_initialized;
 
 struct vf_priv_s {
     unsigned char* outbuf;
@@ -139,11 +139,7 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->priv=malloc(sizeof(struct vf_priv_s));
     memset(vf->priv,0,sizeof(struct vf_priv_s));
 
-    if (!avcodec_initialized){
-	avcodec_init();
-	avcodec_register_all();
-	avcodec_initialized=1;
-    }
+    init_avcodec();
 
     vf->priv->codec = (AVCodec *)avcodec_find_encoder_by_name("mpeg1video");
     if (!vf->priv->codec) {

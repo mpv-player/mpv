@@ -37,6 +37,7 @@
 #include "img_format.h"
 #include "libmpdemux/stheader.h"
 #include "codec-cfg.h"
+#include "vd_ffmpeg.h"
 
 static const vd_info_t info = {
     "FFmpeg's libavcodec codec family",
@@ -158,6 +159,15 @@ static int control(sh_video_t *sh, int cmd, void *arg, ...){
     return CONTROL_UNKNOWN;
 }
 
+void init_avcodec(void)
+{
+    if (!avcodec_initialized) {
+        avcodec_init();
+        avcodec_register_all();
+        avcodec_initialized = 1;
+    }
+}
+
 // init driver
 static int init(sh_video_t *sh){
     struct lavc_param *lavc_param = &sh->opts->lavc_param;
@@ -167,11 +177,7 @@ static int init(sh_video_t *sh){
     int lowres_w=0;
     int do_vis_debug= lavc_param->vismv || (lavc_param->debug&(FF_DEBUG_VIS_MB_TYPE|FF_DEBUG_VIS_QP));
 
-    if(!avcodec_initialized){
-        avcodec_init();
-        avcodec_register_all();
-        avcodec_initialized=1;
-    }
+    init_avcodec();
 
     ctx = sh->context = talloc_zero(NULL, vd_ffmpeg_ctx);
 

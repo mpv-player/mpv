@@ -45,6 +45,7 @@
 #include "fmt-conversion.h"
 #include "mp_image.h"
 #include "vf.h"
+#include "vd_ffmpeg.h"
 
 extern char* passtmpfile;
 
@@ -52,7 +53,6 @@ extern char* passtmpfile;
 
 #include "libavcodec/avcodec.h"
 
-extern int avcodec_initialized;
 
 /* video options */
 static char *lavc_param_vcodec = "mpeg4";
@@ -1030,11 +1030,7 @@ static int vf_open(vf_instance_t *vf, char* args){
 	mux_v->bih->biCompression = mmioFOURCC(lavc_param_vcodec[0],
 		lavc_param_vcodec[1], lavc_param_vcodec[2], lavc_param_vcodec[3]); /* FIXME!!! */
 
-    if (!avcodec_initialized){
-	avcodec_init();
-	avcodec_register_all();
-	avcodec_initialized=1;
-    }
+    init_avcodec();
 
     vf->priv->codec = (AVCodec *)avcodec_find_encoder_by_name(lavc_param_vcodec);
     if (!vf->priv->codec) {

@@ -41,6 +41,7 @@
 
 #include "libaf/af_format.h"
 #include "libmpcodecs/dec_teletext.h"
+#include "libmpcodecs/vd_ffmpeg.h"
 
 #include "ass_mp.h"
 
@@ -439,12 +440,9 @@ static void ds_add_packet_internal(demux_stream_t *ds, demux_packet_t *dp)
 static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parser, unsigned format)
 {
     enum CodecID codec_id = CODEC_ID_NONE;
-    extern int avcodec_initialized;
-    if (!avcodec_initialized) {
-        avcodec_init();
-        avcodec_register_all();
-        avcodec_initialized = 1;
-    }
+
+    init_avcodec();
+
     switch (format) {
     case 0x2000:
     case 0x332D6361:

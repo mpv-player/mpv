@@ -43,6 +43,7 @@
 
 #include "img_format.h"
 #include "mp_image.h"
+#include "vd_ffmpeg.h"
 #include "vf.h"
 
 /* We need this #define because we need ../libavcodec/common.h to #define
@@ -62,10 +63,6 @@
 /// Printout with vf_zrmjpeg: prefix at WARNING level
 #define WARNING(...) mp_msg(MSGT_DECVIDEO, MSGL_WARN, \
 		"vf_zrmjpeg: " __VA_ARGS__)
-
-// "local" flag in vd_ffmpeg.c. If not set, avcodec_init() et. al. need to be called
-// set when init is done, so that initialization is not done twice.
-extern int avcodec_initialized;
 
 /// The get_pixels() routine to use. The real routine comes from dsputil
 static void (*get_pixels)(DCTELEM *restrict block, const uint8_t *pixels, int line_size);
@@ -473,15 +470,7 @@ static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize,
 	j->cheap_upsample = cu;
 	j->bw = b;
 
-	// Is this needed?
-	/* if libavcodec is used by the decoder then we must not
-	 * initialize again, but if it is not initialized then we must
-	 * initialize it here. */
-	if (!avcodec_initialized) {
-		avcodec_init();
-		avcodec_register_all();
-		avcodec_initialized=1;
-	}
+	init_avcodec();
 
 	// Build mjpeg huffman code tables, setting up j->s->mjpeg_ctx
 	if (ff_mjpeg_encode_init(j->s) < 0) {
@@ -919,14 +908,7 @@ static int vf_open(vf_instance_t *vf, char *args){
 	priv->hdec = 1;
 	priv->vdec = 1;
 
-	/* if libavcodec is already initialized, we must not initialize it
-	 * again, but if it is not initialized then we mustinitialize it now. */
-	if (!avcodec_initialized) {
-		/* we need to initialize libavcodec */
-		avcodec_init();
-		avcodec_register_all();
-		avcodec_initialized=1;
-	}
+	init_avcodec();
 
 	if (args) {
 		char *arg, *tmp, *ptr, junk;
