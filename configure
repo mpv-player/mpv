@@ -5021,6 +5021,10 @@ EOF
     fi
     if cc_check $_inc_tmp $_ld_tmp >>"$TMPLOG" 2>&1 ; then
           _sdl=yes
+    elif cc_check $_inc_tmp $_ld_tmp -lstdc++ >>"$TMPLOG" 2>&1 ; then
+          # HACK for BeOS/Haiku SDL
+          _ld_tmp="$_ld_tmp -lstdc++"
+          _sdl=yes
      fi
   fi
 fi
