@@ -31,7 +31,6 @@
 
 /* Missed vorbis, mad, dshow */
 
-//extern ad_functions_t mpcodecs_ad_null;
 extern const ad_functions_t mpcodecs_ad_mpg123;
 extern const ad_functions_t mpcodecs_ad_mp3lib;
 extern const ad_functions_t mpcodecs_ad_ffmpeg;
@@ -61,7 +60,6 @@ extern const ad_functions_t mpcodecs_ad_libdca;
 
 const ad_functions_t * const mpcodecs_ad_drivers[] =
 {
-//  &mpcodecs_ad_null,
 #ifdef CONFIG_MPG123
   &mpcodecs_ad_mpg123,
 #endif
