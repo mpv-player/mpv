@@ -35,9 +35,6 @@
 #define IMPL 1
 #include "menu_list.h"
 
-extern double menu_mouse_x;
-extern double menu_mouse_y;
-extern int menu_mouse_pos_updated;
 static int mouse_x;
 static int mouse_y;
 static int selection_x;
