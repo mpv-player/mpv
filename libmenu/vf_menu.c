@@ -257,7 +257,7 @@ static int open_vf(vf_instance_t *vf, char* args){
 }
 
 
-vf_info_t vf_info_menu  = {
+const vf_info_t vf_info_menu  = {
   "Internal filter for libmenu",
   "menu",
   "Albeu",
