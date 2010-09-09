@@ -27,6 +27,9 @@ extern double sub_last_pts;
 extern struct ass_track *ass_track;
 extern subtitle *vo_sub_last;
 
+extern int disable_system_conf;
+extern int disable_user_conf;
+
 extern const char *mencoder_version;
 extern const char *mplayer_version;
 
@@ -40,8 +43,5 @@ void update_teletext(sh_video_t *sh_video, demuxer_t *demuxer, int reset);
 int select_audio(demuxer_t* demuxer, int audio_id, char* audio_lang);
 void set_osd_subtitle(struct MPContext *mpctx, subtitle *subs);
 bool attachment_is_font(struct demux_attachment *att);
-
-extern int disable_system_conf;
-extern int disable_user_conf;
 
 #endif /* MPLAYER_MPCOMMON_H */
