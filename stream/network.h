@@ -59,6 +59,8 @@ typedef struct {
 	int demuxer_type;
 } mime_struct_t;
 
+extern const mime_struct_t mime_type_table[];
+
 streaming_ctrl_t *streaming_ctrl_new(void);
 int streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size);
 
