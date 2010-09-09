@@ -320,8 +320,6 @@ int file_filter=1;
 // cache2:
        int stream_cache_size=-1;
 #ifdef CONFIG_STREAM_CACHE
-extern int cache_fill_status;
-
 float stream_cache_min_percent=20.0;
 float stream_cache_seek_min_percent=50.0;
 #else

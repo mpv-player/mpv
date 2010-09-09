@@ -21,6 +21,8 @@
 
 #include "stream.h"
 
+extern int cache_fill_status;
+
 void cache_uninit(stream_t *s);
 int cache_do_control(stream_t *stream, int cmd, void *arg);
 
