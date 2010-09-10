@@ -49,6 +49,7 @@ for DLL to know too much about its environment.
 #include "loader.h"
 #include "com.h"
 #include "ext.h"
+#include "ldt_keeper.h"
 #include "path.h"
 
 #include <stdlib.h>
@@ -1510,8 +1511,6 @@ static int WINAPI expGetCurrentProcess(void)
 #ifdef CONFIG_QTX_CODECS
 // this version is required for Quicktime codecs (.qtx/.qts) to work.
 // (they assume some pointers at FS: segment)
-
-extern void* fs_seg;
 
 //static int tls_count;
 static int tls_use_map[64];

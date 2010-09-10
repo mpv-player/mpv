@@ -1,6 +1,8 @@
 #ifndef MPLAYER_LDT_KEEPER_H
 #define MPLAYER_LDT_KEEPER_H
 
+extern void *fs_seg;
+
 typedef struct {
   void* fs_seg;
   char* prev_struct;
