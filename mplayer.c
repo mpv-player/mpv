@@ -322,8 +322,6 @@ int file_filter=1;
 #ifdef CONFIG_STREAM_CACHE
 float stream_cache_min_percent=20.0;
 float stream_cache_seek_min_percent=50.0;
-#else
-#define cache_fill_status 0
 #endif
 
 // dump:
