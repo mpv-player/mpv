@@ -19,6 +19,7 @@
 #ifndef MPLAYER_MACOSX_FINDER_ARGS_H
 #define MPLAYER_MACOSX_FINDER_ARGS_H
 
+#include "m_config.h"
 #include "playtree.h"
 
 play_tree_t *macosx_finder_args(m_config_t *config, int argc, char **argv);
