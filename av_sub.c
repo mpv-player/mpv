@@ -35,7 +35,8 @@ void reset_avsub(struct sh_sub *sh)
  * Decode a subtitle packet via libavcodec.
  * \return < 0 on error, > 0 if further processing is needed
  */
-int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size, double *pts, double *endpts)
+int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size,
+                 double *pts, double *endpts)
 {
     AVCodecContext *ctx = sh->context;
     enum CodecID cid = CODEC_ID_NONE;
@@ -67,7 +68,8 @@ int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size, double *pts, doub
         ctx = avcodec_alloc_context();
         sub_codec = avcodec_find_decoder(cid);
         if (!ctx || !sub_codec || avcodec_open(ctx, sub_codec) < 0) {
-            mp_msg(MSGT_SUBREADER, MSGL_FATAL, "Could not open subtitle decoder\n");
+            mp_msg(MSGT_SUBREADER, MSGL_FATAL,
+                   "Could not open subtitle decoder\n");
             av_freep(&ctx);
             return -1;
         }
