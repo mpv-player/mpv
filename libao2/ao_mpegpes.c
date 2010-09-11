@@ -50,7 +50,7 @@ audio_mixer_t dvb_mixer={255,255};
 #define false 0
 
 extern int vo_mpegpes_fd;
-int vo_mpegpes_fd2 = -1;
+int ao_mpegpes_fd = -1;
 
 #include <errno.h>
 
@@ -74,20 +74,20 @@ static int control(int cmd,void *arg){
 #ifdef CONFIG_DVB
     switch(cmd){
 	case AOCONTROL_GET_VOLUME:
-	  if(vo_mpegpes_fd2>=0){
+	  if(ao_mpegpes_fd >= 0){
 	    ((ao_control_vol_t*)(arg))->left=dvb_mixer.volume_left/2.56;
 	    ((ao_control_vol_t*)(arg))->right=dvb_mixer.volume_right/2.56;
 	    return CONTROL_OK;
 	  }
 	  return CONTROL_ERROR;
 	case AOCONTROL_SET_VOLUME:
-	  if(vo_mpegpes_fd2>=0){
+	  if(ao_mpegpes_fd >= 0){
 	    dvb_mixer.volume_left=((ao_control_vol_t*)(arg))->left*2.56;
 	    dvb_mixer.volume_right=((ao_control_vol_t*)(arg))->right*2.56;
 	    if(dvb_mixer.volume_left>255) dvb_mixer.volume_left=255;
 	    if(dvb_mixer.volume_right>255) dvb_mixer.volume_right=255;
 	    //	 printf("Setting DVB volume: %d ; %d  \n",dvb_mixer.volume_left,dvb_mixer.volume_right);
-	    if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_MIXER, &dvb_mixer) < 0)){
+	    if ( (ioctl(vo_mpegpes_fd,AUDIO_SET_MIXER, &dvb_mixer) < 0)){
 		mp_tmsg(MSGT_AO, MSGL_ERR, "[AO MPEGPES] DVB audio set mixer failed: %s.\n",
 		    strerror(errno));
 	      return CONTROL_ERROR;
@@ -109,36 +109,36 @@ static int init_device(int card)
 	char ao_file[30];
 	sprintf(ao_file, "/dev/dvb/adapter%d/audio0", card);
 	mp_msg(MSGT_VO,MSGL_INFO, "Opening %s\n", ao_file);
-	if((vo_mpegpes_fd2 = open(ao_file,O_RDWR|O_NONBLOCK)) < 0)
+	if((ao_mpegpes_fd = open(ao_file,O_RDWR|O_NONBLOCK)) < 0)
 	{
         	mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO DEVICE: %s\n", strerror(errno));
         	return -1;
 	}
-	if( (ioctl(vo_mpegpes_fd2,AUDIO_SELECT_SOURCE, AUDIO_SOURCE_MEMORY) < 0))
+	if( (ioctl(ao_mpegpes_fd, AUDIO_SELECT_SOURCE, AUDIO_SOURCE_MEMORY) < 0))
 	{
 		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO SELECT SOURCE: %s\n", strerror(errno));
 		goto fail;
 	}
-	if((ioctl(vo_mpegpes_fd2,AUDIO_PLAY) < 0))
+	if((ioctl(ao_mpegpes_fd, AUDIO_PLAY) < 0))
 	{
 		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO PLAY: %s\n", strerror(errno));
 		goto fail;
 	}
-	if((ioctl(vo_mpegpes_fd2,AUDIO_SET_AV_SYNC, true) < 0))
+	if((ioctl(ao_mpegpes_fd, AUDIO_SET_AV_SYNC, true) < 0))
 	{
 		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO SET AV SYNC: %s\n", strerror(errno));
 		goto fail;
 	}
 	//FIXME: in vo_mpegpes audio was initialized as MUTEd
-	if((ioctl(vo_mpegpes_fd2,AUDIO_SET_MUTE, false) < 0))
+	if((ioctl(ao_mpegpes_fd, AUDIO_SET_MUTE, false) < 0))
 	{
 		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO SET MUTE: %s\n", strerror(errno));
 		goto fail;
 	}
-	return vo_mpegpes_fd2;
+	return ao_mpegpes_fd;
 fail:
-	close(vo_mpegpes_fd2);
-	vo_mpegpes_fd2 = -1;
+	close(ao_mpegpes_fd);
+	ao_mpegpes_fd = -1;
 	return -1;
 }
 #endif
@@ -189,13 +189,13 @@ static int preinit(const char *arg)
 		return vo_mpegpes_fd;	//video fd
 #endif
 
-	vo_mpegpes_fd2=open(ao_file,O_WRONLY|O_CREAT,0666);
-	if(vo_mpegpes_fd2<0)
+	ao_mpegpes_fd = open(ao_file, O_WRONLY | O_CREAT, 0666);
+	if(ao_mpegpes_fd < 0)
 	{
 		mp_msg(MSGT_VO, MSGL_ERR, "ao_mpegpes: %s\n", strerror(errno));
 		return -1;
 	}
-	return vo_mpegpes_fd2;
+	return ao_mpegpes_fd;
 }
 
 static int my_ao_write(const unsigned char* data,int len){
@@ -204,13 +204,13 @@ static int my_ao_write(const unsigned char* data,int len){
 #define NFD   1
     struct pollfd pfd[NFD];
 
-    pfd[0].fd = vo_mpegpes_fd2;
+    pfd[0].fd     = ao_mpegpes_fd;
     pfd[0].events = POLLOUT;
 
     while(len>0){
         if(poll(pfd,NFD,1)){
             if(pfd[0].revents & POLLOUT){
-                int ret=write(vo_mpegpes_fd2,data,len);
+                int ret = write(ao_mpegpes_fd, data, len);
                 if(ret<=0){
                     mp_msg(MSGT_VO, MSGL_ERR, "ao_mpegpes write: %s\n", strerror(errno));
                     usleep(0);
@@ -223,8 +223,8 @@ static int my_ao_write(const unsigned char* data,int len){
     }
 
 #else
-    if(vo_mpegpes_fd2<0) return 0; // no file
-    write(vo_mpegpes_fd2,data,len); // write to file
+    if(ao_mpegpes_fd < 0) return 0; // no file
+    write(ao_mpegpes_fd, data, len); // write to file
 #endif
     return orig_len;
 }
@@ -276,9 +276,9 @@ static int init(int rate,int channels,int format,int flags){
 
 // close audio device
 static void uninit(int immed){
-	if (vo_mpegpes_fd2 >= 0)
-		close(vo_mpegpes_fd2);
-	vo_mpegpes_fd2 = -1;
+	if (ao_mpegpes_fd >= 0)
+		close(ao_mpegpes_fd);
+	ao_mpegpes_fd = -1;
 }
 
 // stop playing and empty buffers (for seeking/pause)

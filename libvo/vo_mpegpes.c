@@ -58,7 +58,7 @@
 #include "libmpdemux/mpeg_packetizer.h"
 
 int vo_mpegpes_fd=-1;
-extern int vo_mpegpes_fd2;
+extern int ao_mpegpes_fd;
 
 static const vo_info_t info =
 {
@@ -175,7 +175,7 @@ static int my_write(const unsigned char* data,int len){
 	pfd[0].fd = vo_mpegpes_fd;
 	pfd[0].events = POLLOUT;
 
-	pfd[1].fd = vo_mpegpes_fd2;
+	pfd[1].fd = ao_mpegpes_fd;
 	pfd[1].events = POLLOUT;
 
     while(len>0){
@@ -231,8 +231,8 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
-    if(vo_mpegpes_fd2>=0 && vo_mpegpes_fd2!=vo_mpegpes_fd) close(vo_mpegpes_fd2);
-    vo_mpegpes_fd2=-1;
+    if(ao_mpegpes_fd >= 0 && ao_mpegpes_fd != vo_mpegpes_fd) close(ao_mpegpes_fd);
+    ao_mpegpes_fd =- 1;
     if(vo_mpegpes_fd>=0){ close(vo_mpegpes_fd);vo_mpegpes_fd=-1;}
 }
 
