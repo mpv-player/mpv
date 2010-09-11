@@ -62,8 +62,6 @@ control (int cmd,void *arg)
 static int
 init (int rate, int channels, int format, int flags)
 {
-  extern int ivtv_fd;
-
   if (ivtv_fd < 0)
     return 0;
 
