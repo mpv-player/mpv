@@ -18,6 +18,7 @@
 #include "wine/debugtools.h"
 #include "wine/winerror.h"
 #include "debug.h"
+#include "loader.h"
 #include "path.h"
 
 //DEFAULT_DEBUG_CHANNEL(elfdll)
@@ -27,10 +28,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <dlfcn.h>
-
-
-//WINE_MODREF *local_wm=NULL;
-extern modref_list* local_wm;
 
 
 /*------------------ HACKS -----------------*/

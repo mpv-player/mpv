@@ -19,6 +19,10 @@
 #include "wine/mmreg.h"
 #include "wine/vfw.h"
 #include "wine/msacm.h"
+#include "wine/module.h"
+
+
+extern modref_list* local_wm;
 
 unsigned int GetPrivateProfileIntA_(const char* appname, const char* keyname, int default_value, const char* filename);
 int GetPrivateProfileStringA_(const char* appname, const char* keyname,
