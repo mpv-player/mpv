@@ -80,6 +80,17 @@ static const tvi_info_t* tvi_driver_list[]={
     NULL
 };
 
+void tv_free_handle(tvi_handle_t *h)
+{
+    if (h) {
+        if (h->priv)
+            free(h->priv);
+        if (h->scan)
+            free(h->scan);
+        free(h);
+    }
+}
+
 void tv_start_scan(tvi_handle_t *tvh, int start)
 {
     mp_msg(MSGT_TV,MSGL_INFO,"start scan\n");

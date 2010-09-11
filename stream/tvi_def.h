@@ -68,17 +68,6 @@ static tvi_handle_t *new_handle(void)
     return h;
 }
 
-static void free_handle(tvi_handle_t *h)
-{
-    if (h) {
-	if (h->priv)
-	    free(h->priv);
-	if (h->scan)
-	    free(h->scan);
-	free(h);
-    }
-}
-
 /**
  Fills video frame in given buffer with blue color for yv12,i420,uyvy,yuy2.
  Other formats will be filled with 0xC0

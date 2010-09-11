@@ -1077,7 +1077,7 @@ static tvi_handle_t *tvi_init_v4l2(tv_param_t* tv_param)
 
     PRIV->video_dev = strdup(tv_param->device? tv_param->device: "/dev/video0");
     if (!PRIV->video_dev) {
-        free_handle(tvi_handle);
+        tv_free_handle(tvi_handle);
         return NULL;
     }
 
@@ -1085,7 +1085,7 @@ static tvi_handle_t *tvi_init_v4l2(tv_param_t* tv_param)
         PRIV->audio_dev = strdup(tv_param->adevice);
         if (!PRIV->audio_dev) {
             free(PRIV->video_dev);
-            free_handle(tvi_handle);
+            tv_free_handle(tvi_handle);
             return NULL;
         }
     }

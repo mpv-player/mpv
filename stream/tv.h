@@ -255,6 +255,8 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm);
 
 void tv_start_scan(tvi_handle_t *tvh, int start);
 
+void tv_free_handle(tvi_handle_t *h);
+
 #define TV_NORM_PAL		1
 #define TV_NORM_NTSC		2
 #define TV_NORM_SECAM		3

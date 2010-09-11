@@ -330,7 +330,7 @@ static tvi_handle_t *tvi_init_v4l(tv_param_t* tv_param)
 
     /* allocation failed */
     if (!priv->video_device) {
-        free_handle(h);
+        tv_free_handle(h);
         return NULL;
     }
 

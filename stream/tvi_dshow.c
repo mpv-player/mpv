@@ -3077,12 +3077,12 @@ static tvi_handle_t *tvi_init_dshow(tv_param_t* tv_param)
 	    priv->dev_index = a;
 	} else {
 	    mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Wrong device parameter: %s\n", tv_param->device);
-	    free_handle(h);
+	    tv_free_handle(h);
 	    return NULL;
 	}
 	if (priv->dev_index < 0) {
 	    mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Wrong device index: %d\n", a);
-	    free_handle(h);
+	    tv_free_handle(h);
 	    return NULL;
 	}
     }
@@ -3091,12 +3091,12 @@ static tvi_handle_t *tvi_init_dshow(tv_param_t* tv_param)
 	    priv->adev_index = a;
 	} else {
 	    mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Wrong adevice parameter: %s\n", tv_param->adevice);
-	    free_handle(h);
+	    tv_free_handle(h);
 	    return NULL;
 	}
 	if (priv->dev_index < 0) {
 	    mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Wrong adevice index: %d\n", a);
-	    free_handle(h);
+	    tv_free_handle(h);
 	    return NULL;
 	}
     }
