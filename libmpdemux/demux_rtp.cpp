@@ -78,7 +78,7 @@ private:
 
 // A structure of RTP-specific state, kept so that we can cleanly
 // reclaim it:
-typedef struct RTPState {
+struct RTPState {
   char const* sdpDescription;
   RTSPClient* rtspClient;
   SIPClient* sipClient;
