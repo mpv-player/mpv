@@ -23,6 +23,8 @@
 #ifndef MPLAYER_VO_V4L2_H
 #define MPLAYER_VO_V4L2_H
 
+extern int v4l2_fd;
+
 int v4l2_write(const unsigned char *data, int len);
 
 #endif /* MPLAYER_VO_V4L2_H */

@@ -59,8 +59,6 @@ control (int cmd,void *arg)
 static int
 init (int rate, int channels, int format, int flags)
 {
-  extern int v4l2_fd;
-
   if (v4l2_fd < 0)
     return 0;
 
