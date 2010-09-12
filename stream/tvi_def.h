@@ -51,13 +51,13 @@ static tvi_handle_t *new_handle(void)
 
     if (!h)
 	return NULL;
-    h->priv = malloc(sizeof(priv_t));
+    h->priv = calloc(1, sizeof(priv_t));
     if (!h->priv)
     {
 	free(h);
 	return NULL;
     }
-    memset(h->priv, 0, sizeof(priv_t));
+
     h->functions = &functions;
     h->seq = 0;
     h->chanlist = -1;

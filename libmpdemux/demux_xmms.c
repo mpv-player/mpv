@@ -265,7 +265,7 @@ static int demux_xmms_open(demuxer_t* demuxer) {
 
     xmms_channels=0;
     sh_audio = new_sh_audio(demuxer,0);
-    sh_audio->wf = w = malloc(sizeof(WAVEFORMATEX));
+    sh_audio->wf = w = malloc(sizeof(*w));
     w->wFormatTag = sh_audio->format = format;
 
     demuxer->movi_start = 0;

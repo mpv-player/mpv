@@ -71,7 +71,7 @@ static int preinit(sh_audio_t *sh_audio)
 
 //    priv->handle = NULL;
 
-    priv->o_wf = malloc(sizeof(WAVEFORMATEX));
+    priv->o_wf = malloc(sizeof(*priv->o_wf));
     if (!priv->o_wf)
     {
 	mp_tmsg(MSGT_DECAUDIO,MSGL_ERR,"Could not load/initialize Win32/ACM audio codec (missing DLL file?).\n");

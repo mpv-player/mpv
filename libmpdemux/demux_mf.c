@@ -159,8 +159,7 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   sh_video->frametime = 1 / sh_video->fps;
 
   // emulate BITMAPINFOHEADER:
-  sh_video->bih=malloc(sizeof(BITMAPINFOHEADER));
-  memset(sh_video->bih,0,sizeof(BITMAPINFOHEADER));
+  sh_video->bih=calloc(1, sizeof(*sh_video->bih));
   sh_video->bih->biSize=40;
   sh_video->bih->biWidth = mf_w;
   sh_video->bih->biHeight = mf_h;

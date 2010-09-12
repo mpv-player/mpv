@@ -294,10 +294,10 @@ static int init(sh_video_t *sh){
     /* AVRn stores huffman table in AVI header */
     /* Pegasus MJPEG stores it also in AVI header, but it uses the common
        MJPG fourcc :( */
-        if (!sh->bih || sh->bih->biSize <= sizeof(BITMAPINFOHEADER))
+        if (!sh->bih || sh->bih->biSize <= sizeof(*sh->bih))
             break;
         avctx->flags |= CODEC_FLAG_EXTERN_HUFF;
-        avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
+        avctx->extradata_size = sh->bih->biSize-sizeof(*sh->bih);
         avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
         memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
 
@@ -327,7 +327,7 @@ static int init(sh_video_t *sh){
                 (sh->format == mmioFOURCC('R', 'V', '1', '3')) ? 0x10003001 : 0x10000000;
         } else {
             /* has extra slice header (demux_rm or rm->avi streamcopy) */
-            avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
+            avctx->extradata_size = sh->bih->biSize-sizeof(*sh->bih);
             avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
             memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
         }
@@ -337,9 +337,9 @@ static int init(sh_video_t *sh){
         break;
 
     default:
-        if (!sh->bih || sh->bih->biSize <= sizeof(BITMAPINFOHEADER))
+        if (!sh->bih || sh->bih->biSize <= sizeof(*sh->bih))
             break;
-        avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
+        avctx->extradata_size = sh->bih->biSize-sizeof(*sh->bih);
         avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
         memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
         break;
@@ -348,10 +348,10 @@ static int init(sh_video_t *sh){
     if (sh->bih && (sh->bih->biBitCount <= 8)) {
         avctx->palctrl = calloc(1, sizeof(AVPaletteControl));
         avctx->palctrl->palette_changed = 1;
-        if (sh->bih->biSize-sizeof(BITMAPINFOHEADER))
+        if (sh->bih->biSize-sizeof(*sh->bih))
             /* Palette size in biSize */
             memcpy(avctx->palctrl->palette, sh->bih+1,
-                   FFMIN(sh->bih->biSize-sizeof(BITMAPINFOHEADER), AVPALETTE_SIZE));
+                   FFMIN(sh->bih->biSize-sizeof(*sh->bih), AVPALETTE_SIZE));
         else
             /* Palette size in biClrUsed */
             memcpy(avctx->palctrl->palette, sh->bih+1,

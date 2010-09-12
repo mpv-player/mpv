@@ -117,12 +117,12 @@ void print_video_header(BITMAPINFOHEADER *h, int verbose_level){
 	mp_msg(MSGT_HEADER, verbose_level, "  biBitCount %d\n", h->biBitCount);
 	mp_msg(MSGT_HEADER, verbose_level, "  biCompression %d='%.4s'\n", h->biCompression, (char *)&h->biCompression);
 	mp_msg(MSGT_HEADER, verbose_level, "  biSizeImage %d\n", h->biSizeImage);
-  if (h->biSize > sizeof(BITMAPINFOHEADER))
+  if (h->biSize > sizeof(*h))
   {
     int i;
     uint8_t* p = (uint8_t*)(h + 1);
     mp_msg(MSGT_HEADER, verbose_level, "Unknown extra header dump: ");
-    for (i = 0; i < h->biSize-sizeof(BITMAPINFOHEADER); i++)
+    for (i = 0; i < h->biSize-sizeof(*h); i++)
 	mp_msg(MSGT_HEADER, verbose_level, "[%x] ", *(p+i));
     mp_msg(MSGT_HEADER, verbose_level, "\n");
   }

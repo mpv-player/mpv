@@ -257,7 +257,7 @@ static demuxer_t* demux_open_y4m(demuxer_t* demuxer){
     priv->framenum = 0;
     priv->si = malloc(sizeof(y4m_stream_info_t));
 
-    sh->bih=calloc(1, sizeof(BITMAPINFOHEADER));
+    sh->bih=calloc(1, sizeof(*sh->bih));
 
     demuxer->video->sh=sh;
     sh->ds=demuxer->video;

@@ -719,7 +719,7 @@ static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
         os->vi_initialized = 1;
 
     len = op[0].bytes + op[1].bytes + op[2].bytes;
-    sh->wf = calloc(1, sizeof(WAVEFORMATEX) + len + len / 255 + 64);
+    sh->wf = calloc(1, sizeof(*sh->wf) + len + len / 255 + 64);
     ptr = (unsigned char*)(sh->wf + 1);
 
     ptr[0] = 2;
@@ -735,7 +735,7 @@ static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
     }
     sh->wf->cbSize = offset;
     mp_msg(MSGT_DEMUX, MSGL_V, "demux_ogg, extradata size: %d\n", sh->wf->cbSize);
-    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX) + sh->wf->cbSize);
+    sh->wf = realloc(sh->wf, sizeof(*sh->wf) + sh->wf->cbSize);
 
     if (op[0].bytes >= 29) {
         unsigned int br;
@@ -869,7 +869,7 @@ int demux_ogg_open(demuxer_t *demuxer)
                    ogg_d->num_sub, n_audio - 1);
         } else if (pack.bytes >= 80 && !strncmp(pack.packet, "Speex", 5)) {
             sh_a = new_sh_audio_aid(demuxer, ogg_d->num_sub, n_audio);
-            sh_a->wf         = calloc(1, sizeof(WAVEFORMATEX) + pack.bytes);
+            sh_a->wf         = calloc(1, sizeof(*sh_a->wf) + pack.bytes);
             sh_a->format     = FOURCC_SPEEX;
             sh_a->samplerate = sh_a->wf->nSamplesPerSec = AV_RL32(&pack.packet[36]);
             sh_a->channels   = sh_a->wf->nChannels = AV_RL32(&pack.packet[48]);
@@ -906,8 +906,8 @@ int demux_ogg_open(demuxer_t *demuxer)
             } else {
                 sh_v = new_sh_video_vid(demuxer, ogg_d->num_sub, n_video);
 
-                sh_v->bih = calloc(1, sizeof(BITMAPINFOHEADER));
-                sh_v->bih->biSize        = sizeof(BITMAPINFOHEADER);
+                sh_v->bih = calloc(1, sizeof(*sh_v->bih));
+                sh_v->bih->biSize        = sizeof(*sh_v->bih);
                 sh_v->bih->biCompression = sh_v->format = FOURCC_THEORA;
                 sh_v->fps = ((double)inf.fps_numerator) / (double)inf.fps_denominator;
                 sh_v->frametime = ((double)inf.fps_denominator) / (double)inf.fps_numerator;
@@ -950,7 +950,7 @@ int demux_ogg_open(demuxer_t *demuxer)
             ogg_d->subs[ogg_d->num_sub].id = n_audio;
             n_audio++;
             ogg_d->subs[ogg_d->num_sub].flac = 2;
-            sh_a->wf = calloc(1, sizeof(WAVEFORMATEX) + 34);
+            sh_a->wf = calloc(1, sizeof(*sh_a->wf) + 34);
             sh_a->wf->wFormatTag = sh_a->format;
             sh_a->wf->cbSize     = 34;
             memcpy(&sh_a->wf[1], &pack.packet[17], 34);
@@ -965,8 +965,8 @@ int demux_ogg_open(demuxer_t *demuxer)
             // Old video header
             if (AV_RL32(pack.packet + 96) == 0x05589f80 && pack.bytes >= 184) {
                 sh_v = new_sh_video_vid(demuxer, ogg_d->num_sub, n_video);
-                sh_v->bih = calloc(1, sizeof(BITMAPINFOHEADER));
-                sh_v->bih->biSize        = sizeof(BITMAPINFOHEADER);
+                sh_v->bih = calloc(1, sizeof(*sh_v->bih));
+                sh_v->bih->biSize        = sizeof(*sh_v->bih);
                 sh_v->bih->biCompression = sh_v->format = mmioFOURCC(pack.packet[68], pack.packet[69],
                                                                      pack.packet[70], pack.packet[71]);
                 sh_v->frametime = AV_RL64(pack.packet + 164) * 0.0000001;
@@ -994,7 +994,7 @@ int demux_ogg_open(demuxer_t *demuxer)
 
                 sh_a = new_sh_audio_aid(demuxer, ogg_d->num_sub, n_audio);
                 extra_size = AV_RL16(pack.packet + 140);
-                sh_a->wf         = calloc(1, sizeof(WAVEFORMATEX) + extra_size);
+                sh_a->wf         = calloc(1, sizeof(*sh_a->wf) + extra_size);
                 sh_a->format     = sh_a->wf->wFormatTag     = AV_RL16(pack.packet + 124);
                 sh_a->channels   = sh_a->wf->nChannels      = AV_RL16(pack.packet + 126);
                 sh_a->samplerate = sh_a->wf->nSamplesPerSec = AV_RL32(pack.packet + 128);
@@ -1004,7 +1004,7 @@ int demux_ogg_open(demuxer_t *demuxer)
                 sh_a->samplesize = (sh_a->wf->wBitsPerSample + 7) / 8;
                 sh_a->wf->cbSize = extra_size;
                 if (extra_size > 0)
-                    memcpy(((char *)sh_a->wf) + sizeof(WAVEFORMATEX),
+                    memcpy(sh_a->wf + 1,
                            pack.packet + 142, extra_size);
 
                 ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate; // * sh_a->channels;
@@ -1027,8 +1027,8 @@ int demux_ogg_open(demuxer_t *demuxer)
             /// New video header
             if (strncmp(st->streamtype, "video", 5) == 0) {
                 sh_v = new_sh_video_vid(demuxer, ogg_d->num_sub, n_video);
-                sh_v->bih         = calloc(1, sizeof(BITMAPINFOHEADER));
-                sh_v->bih->biSize = sizeof(BITMAPINFOHEADER);
+                sh_v->bih         = calloc(1, sizeof(*sh_v->bih));
+                sh_v->bih->biSize = sizeof(*sh_v->bih);
                 sh_v->bih->biCompression = sh_v->format = mmioFOURCC(st->subtype[0], st->subtype[1],
                                                                      st->subtype[2], st->subtype[3]);
                 sh_v->frametime = AV_RL64(&st->time_unit) * 0.0000001;
@@ -1070,7 +1070,7 @@ int demux_ogg_open(demuxer_t *demuxer)
                 }
 
                 sh_a = new_sh_audio_aid(demuxer, ogg_d->num_sub, n_audio);
-                sh_a->wf         = calloc(1, sizeof(WAVEFORMATEX) + extra_size);
+                sh_a->wf         = calloc(1, sizeof(*sh_a->wf) + extra_size);
                 sh_a->format     = sh_a->wf->wFormatTag = strtol(buffer, NULL, 16);
                 sh_a->channels   = sh_a->wf->nChannels  = AV_RL16(&st->sh.audio.channels);
                 sh_a->samplerate = sh_a->wf->nSamplesPerSec = AV_RL64(&st->samples_per_unit);
@@ -1080,7 +1080,7 @@ int demux_ogg_open(demuxer_t *demuxer)
                 sh_a->samplesize = (sh_a->wf->wBitsPerSample + 7) / 8;
                 sh_a->wf->cbSize = extra_size;
                 if (extra_size)
-                    memcpy(((char *)sh_a->wf)+sizeof(WAVEFORMATEX),
+                    memcpy(sh_a->wf+1,
                            ((char *)(st+1))+extra_offset, extra_size);
 
                 ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate; // * sh_a->channels;

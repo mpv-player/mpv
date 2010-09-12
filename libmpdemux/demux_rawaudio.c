@@ -51,7 +51,7 @@ static demuxer_t* demux_rawaudio_open(demuxer_t* demuxer) {
   WAVEFORMATEX* w;
 
   sh_audio = new_sh_audio(demuxer,0);
-  sh_audio->wf = w = malloc(sizeof(WAVEFORMATEX));
+  sh_audio->wf = w = malloc(sizeof(*w));
   w->wFormatTag = sh_audio->format = format;
   w->nChannels = sh_audio->channels = channels;
   w->nSamplesPerSec = sh_audio->samplerate = samplerate;

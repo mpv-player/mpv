@@ -401,15 +401,15 @@ MMRESULT WINAPI acmStreamOpen(PHACMSTREAM phas, HACMDRIVER had, PWAVEFORMATEX pw
     if (was == NULL)
 	return MMSYSERR_NOMEM;
     was->drvInst.cbStruct = sizeof(was->drvInst);
-    was->drvInst.pwfxSrc = (PWAVEFORMATEX)((LPSTR)was + sizeof(*was));
+    was->drvInst.pwfxSrc = (PWAVEFORMATEX)(was + 1);
     memcpy(was->drvInst.pwfxSrc, pwfxSrc, wfxSrcSize);
     // LHACM is checking for 0x1
     // but if this will not help
     // was->drvInst.pwfxSrc->wFormatTag = 1;
-    was->drvInst.pwfxDst = (PWAVEFORMATEX)((LPSTR)was + sizeof(*was) + wfxSrcSize);
+    was->drvInst.pwfxDst = (PWAVEFORMATEX)((LPSTR)(was + 1) + wfxSrcSize);
     memcpy(was->drvInst.pwfxDst, pwfxDst, wfxDstSize);
     if (pwfltr) {
-	was->drvInst.pwfltr = (PWAVEFILTER)((LPSTR)was + sizeof(*was) + wfxSrcSize + wfxDstSize);
+	was->drvInst.pwfltr = (PWAVEFILTER)((LPSTR)(was + 1) + wfxSrcSize + wfxDstSize);
 	memcpy(was->drvInst.pwfltr, pwfltr, sizeof(WAVEFILTER));
     } else {
 	was->drvInst.pwfltr = NULL;

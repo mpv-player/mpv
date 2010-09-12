@@ -276,7 +276,7 @@ static void write_avi_list(stream_t *stream,unsigned int id,int len){
   stream_write_buffer(stream, &le_id, 4);
 }
 
-#define WFSIZE(wf) (sizeof(WAVEFORMATEX)+(wf)->cbSize)
+#define WFSIZE(wf) (sizeof(*wf)+(wf)->cbSize)
 
 static void avifile_write_header(muxer_t *muxer){
   uint32_t riff[3];

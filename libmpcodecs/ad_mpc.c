@@ -134,8 +134,7 @@ static int init(sh_audio_t *sh) {
     mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Missing extradata!\n");
     return 0;
   }
-  cd->header = (char *)sh->wf;
-  cd->header = &cd->header[sizeof(WAVEFORMATEX)];
+  cd->header = (char *)(sh->wf + 1);
   cd->header_len = sh->wf->cbSize;
   cd->sh = sh;
   cd->pos = 0;

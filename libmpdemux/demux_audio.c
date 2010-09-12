@@ -333,7 +333,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
     sh_audio->audio.dwSampleSize= 0;
     sh_audio->audio.dwScale = mp3_found->mpa_spf;
     sh_audio->audio.dwRate = mp3_found->mp3_freq;
-    sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
+    sh_audio->wf = malloc(sizeof(*sh_audio->wf));
     sh_audio->wf->wFormatTag = sh_audio->format;
     sh_audio->wf->nChannels = mp3_found->mp3_chans;
     sh_audio->wf->nSamplesPerSec = mp3_found->mp3_freq;
@@ -394,7 +394,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
       mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] Bad wav header length: too long (%d)!!!\n",l);
       l = 16;
     }
-    sh_audio->wf = w = malloc(l > sizeof(WAVEFORMATEX) ? l : sizeof(WAVEFORMATEX));
+    sh_audio->wf = w = malloc(l > sizeof(*w) ? l : sizeof(*w));
     w->wFormatTag = sh_audio->format = stream_read_word_le(s);
     w->nChannels = sh_audio->channels = stream_read_word_le(s);
     w->nSamplesPerSec = sh_audio->samplerate = stream_read_dword_le(s);
@@ -413,7 +413,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
                l,w->cbSize);
         w->cbSize = l;
       }
-      stream_read(s,(char*)((char*)(w)+sizeof(WAVEFORMATEX)),w->cbSize);
+      stream_read(s,(char*)(w + 1),w->cbSize);
       l -= w->cbSize;
       if (w->wFormatTag & 0xfffe && w->cbSize >= 22)
           sh_audio->format = ((WAVEFORMATEXTENSIBLE *)w)->SubFormat;

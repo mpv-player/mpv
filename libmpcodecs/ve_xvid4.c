@@ -602,7 +602,7 @@ vf_open(vf_instance_t *vf, char* args)
 	mod->mux = (muxer_stream_t*)args;
 
 	/* Initialize muxer BITMAP header */
-	mod->mux->bih = calloc(1, sizeof(BITMAPINFOHEADER));
+	mod->mux->bih = calloc(1, sizeof(*mod->mux->bih));
 
 	if(mod->mux->bih  == NULL) {
 		mp_msg(MSGT_MENCODER,MSGL_ERR,
@@ -610,7 +610,7 @@ vf_open(vf_instance_t *vf, char* args)
 		return BAD;
 	}
 
-	mod->mux->bih->biSize = sizeof(BITMAPINFOHEADER);
+	mod->mux->bih->biSize = sizeof(*mod->mux->bih);
 	mod->mux->bih->biWidth = 0;
 	mod->mux->bih->biHeight = 0;
 	mod->mux->bih->biPlanes = 1;

@@ -189,7 +189,7 @@ static demuxer_t* demux_open_rawdv(demuxer_t* demuxer)
    sh_video->frametime = 1.0/sh_video->fps;
 
   // emulate BITMAPINFOHEADER for win32 decoders:
-  sh_video->bih=calloc(1, sizeof(BITMAPINFOHEADER));
+  sh_video->bih=calloc(1, sizeof(*sh_video->bih));
   sh_video->bih->biSize=40;
   sh_video->bih->biWidth = dv_decoder->width;
   sh_video->bih->biHeight = dv_decoder->height;
@@ -214,8 +214,7 @@ static demuxer_t* demux_open_rawdv(demuxer_t* demuxer)
        // custom fourcc for internal MPlayer use
        sh_audio->format = mmioFOURCC('R', 'A', 'D', 'V');
 
-	sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
-	memset(sh_audio->wf, 0, sizeof(WAVEFORMATEX));
+	sh_audio->wf = calloc(1, sizeof(*sh_audio->wf));
 	sh_audio->wf->wFormatTag = sh_audio->format;
 	sh_audio->wf->nChannels = dv_decoder->audio->num_channels;
 	sh_audio->wf->wBitsPerSample = 16;

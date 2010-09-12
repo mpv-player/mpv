@@ -233,11 +233,11 @@ static demuxer_t* demux_open_rtp(demuxer_t* demuxer)
                                             sess, &buff, NULL);
 
                 if (buff.len) {
-                    wf = calloc(1,sizeof(WAVEFORMATEX)+buff.len);
+                    wf = calloc(1,sizeof(*wf)+buff.len);
                     wf->cbSize = buff.len;
                     memcpy(wf+1, buff.data, buff.len);
                 } else {
-                    wf = calloc(1,sizeof(WAVEFORMATEX));
+                    wf = calloc(1,sizeof(*wf));
                 }
 
                 sh_audio->wf = wf;
@@ -269,12 +269,12 @@ static demuxer_t* demux_open_rtp(demuxer_t* demuxer)
                                             sess, &buff, &fps);
 
                 if (buff.len) {
-                    bih = calloc(1,sizeof(BITMAPINFOHEADER)+buff.len);
-                    bih->biSize = sizeof(BITMAPINFOHEADER)+buff.len;
+                    bih = calloc(1,sizeof(*bih)+buff.len);
+                    bih->biSize = sizeof(*bih)+buff.len;
                     memcpy(bih+1, buff.data, buff.len);
                 } else {
-                    bih = calloc(1,sizeof(BITMAPINFOHEADER));
-                    bih->biSize = sizeof(BITMAPINFOHEADER);
+                    bih = calloc(1,sizeof(*bih));
+                    bih->biSize = sizeof(*bih);
                 }
 
                 sh_video = new_sh_video(demuxer,0);

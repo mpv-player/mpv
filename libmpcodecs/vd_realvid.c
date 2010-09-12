@@ -282,11 +282,11 @@ static int init(sh_video_t *sh){
 	int result;
 	// we export codec id and sub-id from demuxer in bitmapinfohdr:
 	unsigned char* extrahdr=(unsigned char*)(sh->bih+1);
-	unsigned int extrahdr_size = sh->bih->biSize - sizeof(BITMAPINFOHEADER);
+	unsigned int extrahdr_size = sh->bih->biSize - sizeof(*sh->bih);
 	struct rv_init_t init_data;
 
 	if(extrahdr_size < 8) {
-	    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"realvideo: extradata too small (%u)\n", sh->bih->biSize - sizeof(BITMAPINFOHEADER));
+	    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"realvideo: extradata too small (%u)\n", extrahdr_size);
 	    return 0;
 	}
 	init_data = (struct rv_init_t){11, sh->disp_w, sh->disp_h, 0, 0, AV_RB32(extrahdr), 1, AV_RB32(extrahdr + 4)}; // rv30

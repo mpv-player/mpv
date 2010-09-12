@@ -360,7 +360,7 @@ static void ts_add_stream(demuxer_t * demuxer, ES_stream_t *es)
 
 		if(es->extradata && es->extradata_len)
 		{
-			sh->wf = malloc(sizeof (WAVEFORMATEX) + es->extradata_len);
+			sh->wf = malloc(sizeof(*sh->wf) + es->extradata_len);
 			sh->wf->cbSize = es->extradata_len;
 			memcpy(sh->wf + 1, es->extradata, es->extradata_len);
 		}
@@ -384,8 +384,8 @@ static void ts_add_stream(demuxer_t * demuxer, ES_stream_t *es)
 			if(sh->format == VIDEO_AVC && es->extradata && es->extradata_len)
 			{
 				int w = 0, h = 0;
-				sh->bih = calloc(1, sizeof(BITMAPINFOHEADER) + es->extradata_len);
-				sh->bih->biSize= sizeof(BITMAPINFOHEADER) + es->extradata_len;
+				sh->bih = calloc(1, sizeof(*sh->bih) + es->extradata_len);
+				sh->bih->biSize= sizeof(*sh->bih) + es->extradata_len;
 				sh->bih->biCompression = sh->format;
 				memcpy(sh->bih + 1, es->extradata, es->extradata_len);
 				mp_msg(MSGT_DEMUXER,MSGL_DBG2, "EXTRADATA(%d BYTES): \n", es->extradata_len);

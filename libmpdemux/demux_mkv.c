@@ -1177,7 +1177,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
         BITMAPINFOHEADER *src;
 
         if (track->private_data == NULL
-            || track->private_size < sizeof(BITMAPINFOHEADER))
+            || track->private_size < sizeof(*bih))
             return 1;
 
         src = (BITMAPINFOHEADER *) track->private_data;
@@ -1193,17 +1193,17 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
         bih->biYPelsPerMeter = le2me_32(src->biYPelsPerMeter);
         bih->biClrUsed = le2me_32(src->biClrUsed);
         bih->biClrImportant = le2me_32(src->biClrImportant);
-        memcpy((char *) bih + sizeof(BITMAPINFOHEADER),
-               (char *) src + sizeof(BITMAPINFOHEADER),
-               track->private_size - sizeof(BITMAPINFOHEADER));
+        memcpy(bih + 1,
+               src + 1,
+               track->private_size - sizeof(*bih));
 
         if (track->v_width == 0)
             track->v_width = bih->biWidth;
         if (track->v_height == 0)
             track->v_height = bih->biHeight;
     } else {
-        bih = calloc(1, sizeof(BITMAPINFOHEADER));
-        bih->biSize = sizeof(BITMAPINFOHEADER);
+        bih = calloc(1, sizeof(*bih));
+        bih->biSize = sizeof(*bih);
         bih->biWidth = track->v_width;
         bih->biHeight = track->v_height;
         bih->biBitCount = 24;
@@ -1221,7 +1221,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
             src = (uint8_t *) track->private_data + RVPROPERTIES_SIZE;
 
             cnt = track->private_size - RVPROPERTIES_SIZE;
-            bih = realloc(bih, sizeof(BITMAPINFOHEADER) + 8 + cnt);
+            bih = realloc(bih, sizeof(*bih) + 8 + cnt);
             bih->biSize = 48 + cnt;
             bih->biPlanes = 1;
             type2 = AV_RB32(src - 4);
@@ -1324,8 +1324,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
         sh_a->lang = strdup(track->language);
     sh_a->default_track = track->default_track;
     sh_a->ds = demuxer->audio;
-    sh_a->wf = malloc(sizeof(WAVEFORMATEX));
-    if (track->ms_compat && (track->private_size >= sizeof(WAVEFORMATEX))) {
+    sh_a->wf = malloc(sizeof(*sh_a->wf));
+    if (track->ms_compat && (track->private_size >= sizeof(*sh_a->wf))) {
         WAVEFORMATEX *wf = (WAVEFORMATEX *) track->private_data;
         sh_a->wf = realloc(sh_a->wf, track->private_size);
         sh_a->wf->wFormatTag = le2me_16(wf->wFormatTag);
@@ -1334,9 +1334,9 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
         sh_a->wf->nAvgBytesPerSec = le2me_32(wf->nAvgBytesPerSec);
         sh_a->wf->nBlockAlign = le2me_16(wf->nBlockAlign);
         sh_a->wf->wBitsPerSample = le2me_16(wf->wBitsPerSample);
-        sh_a->wf->cbSize = track->private_size - sizeof(WAVEFORMATEX);
+        sh_a->wf->cbSize = track->private_size - sizeof(*sh_a->wf);
         memcpy(sh_a->wf + 1, wf + 1,
-               track->private_size - sizeof(WAVEFORMATEX));
+               track->private_size - sizeof(*sh_a->wf));
         if (track->a_sfreq == 0.0)
             track->a_sfreq = sh_a->wf->nSamplesPerSec;
         if (track->a_channels == 0)
@@ -1345,7 +1345,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
             track->a_bps = sh_a->wf->wBitsPerSample;
         track->a_formattag = sh_a->wf->wFormatTag;
     } else {
-        memset(sh_a->wf, 0, sizeof(WAVEFORMATEX));
+        memset(sh_a->wf, 0, sizeof(*sh_a->wf));
         if (!strcmp(track->codec_id, MKV_A_MP3)
             || !strcmp(track->codec_id, MKV_A_MP2))
             track->a_formattag = 0x0055;
@@ -1489,7 +1489,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
         }
     } else if (track->a_formattag == mmioFOURCC('v', 'r', 'b', 's')) {  /* VORBIS */
         sh_a->wf->cbSize = track->private_size;
-        sh_a->wf = realloc(sh_a->wf, sizeof(WAVEFORMATEX) + sh_a->wf->cbSize);
+        sh_a->wf = realloc(sh_a->wf, sizeof(*sh_a->wf) + sh_a->wf->cbSize);
         memcpy((unsigned char *) (sh_a->wf + 1), track->private_data,
                sh_a->wf->cbSize);
     } else if (track->private_size >= RAPROPERTIES4_SIZE
@@ -1520,7 +1520,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
         codecdata_length = AV_RB32(src);
         src += 4;
         sh_a->wf->cbSize = codecdata_length;
-        sh_a->wf = realloc(sh_a->wf, sizeof(WAVEFORMATEX) + sh_a->wf->cbSize);
+        sh_a->wf = realloc(sh_a->wf, sizeof(*sh_a->wf) + sh_a->wf->cbSize);
         memcpy(((char *) (sh_a->wf + 1)), src, codecdata_length);
 
         switch (track->a_formattag) {
@@ -1571,8 +1571,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
             size = track->private_size;
         } else {
             sh_a->format = mmioFOURCC('f', 'L', 'a', 'C');
-            ptr = track->private_data + sizeof(WAVEFORMATEX);
-            size = track->private_size - sizeof(WAVEFORMATEX);
+            ptr = track->private_data + sizeof(*sh_a->wf);
+            size = track->private_size - sizeof(*sh_a->wf);
         }
         if (size < 4 || ptr[0] != 'f' || ptr[1] != 'L' || ptr[2] != 'a'
             || ptr[3] != 'C') {
@@ -1586,7 +1586,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
         }
     } else if (track->a_formattag == mmioFOURCC('W', 'V', 'P', 'K') || track->a_formattag == mmioFOURCC('T', 'R', 'H', 'D')) {  /* do nothing, still works */
     } else if (!track->ms_compat
-               || (track->private_size < sizeof(WAVEFORMATEX))) {
+               || (track->private_size < sizeof(*sh_a->wf))) {
         free_sh_audio(demuxer, track->id);
         return 1;
     }
@@ -2003,8 +2003,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
             track->audio_filepos = demuxer->filepos;
         if (++(track->sub_packet_cnt) == sph) {
             int apk_usize =
-                ((WAVEFORMATEX *) ((sh_audio_t *) demuxer->audio->sh)->wf)->
-                nBlockAlign;
+                ((sh_audio_t *) demuxer->audio->sh)->wf->nBlockAlign;
             track->sub_packet_cnt = 0;
             // Release all the audio packets
             for (x = 0; x < sph * w / apk_usize; x++) {

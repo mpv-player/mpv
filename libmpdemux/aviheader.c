@@ -265,12 +265,12 @@ while(1){
       break; }
     case ckidSTREAMFORMAT: {      // read 'strf'
       if(last_fccType==streamtypeVIDEO){
-        sh_video->bih=calloc(FFMAX(chunksize, sizeof(BITMAPINFOHEADER)), 1);
+        sh_video->bih=calloc(FFMAX(chunksize, sizeof(*sh_video->bih)), 1);
 //        sh_video->bih=malloc(chunksize); memset(sh_video->bih,0,chunksize);
-        mp_tmsg(MSGT_HEADER,MSGL_V,"Found 'bih', %u bytes of %d\n",chunksize,sizeof(BITMAPINFOHEADER));
+        mp_tmsg(MSGT_HEADER,MSGL_V,"Found 'bih', %u bytes of %d\n",chunksize,sizeof(*sh_video->bih));
         stream_read(demuxer->stream,(char*) sh_video->bih,chunksize);
 	le2me_BITMAPINFOHEADER(sh_video->bih);  // swap to machine endian
-	if (sh_video->bih->biSize > chunksize && sh_video->bih->biSize > sizeof(BITMAPINFOHEADER))
+	if (sh_video->bih->biSize > chunksize && sh_video->bih->biSize > sizeof(*sh_video->bih))
 		sh_video->bih->biSize = chunksize;
 	// fixup MS-RLE header (seems to be broken for <256 color files)
 	if(sh_video->bih->biCompression<=1 && sh_video->bih->biSize==40)
@@ -320,15 +320,15 @@ while(1){
         }
       } else
       if(last_fccType==streamtypeAUDIO){
-	unsigned wf_size = chunksize<sizeof(WAVEFORMATEX)?sizeof(WAVEFORMATEX):chunksize;
+	unsigned wf_size = chunksize<sizeof(*sh_audio->wf)?sizeof(*sh_audio->wf):chunksize;
         sh_audio->wf=calloc(wf_size,1);
 //        sh_audio->wf=malloc(chunksize); memset(sh_audio->wf,0,chunksize);
-        mp_tmsg(MSGT_HEADER,MSGL_V,"Found 'wf', %d bytes of %d\n",chunksize,sizeof(WAVEFORMATEX));
+        mp_tmsg(MSGT_HEADER,MSGL_V,"Found 'wf', %d bytes of %d\n",chunksize,sizeof(*sh_audio->wf));
         stream_read(demuxer->stream,(char*) sh_audio->wf,chunksize);
 	le2me_WAVEFORMATEX(sh_audio->wf);
 	if (sh_audio->wf->cbSize != 0 &&
-	    wf_size < sizeof(WAVEFORMATEX)+sh_audio->wf->cbSize) {
-	    sh_audio->wf=realloc(sh_audio->wf, sizeof(WAVEFORMATEX)+sh_audio->wf->cbSize);
+	    wf_size < sizeof(*sh_audio->wf)+sh_audio->wf->cbSize) {
+	    sh_audio->wf=realloc(sh_audio->wf, sizeof(*sh_audio->wf)+sh_audio->wf->cbSize);
 	}
 	sh_audio->format=sh_audio->wf->wFormatTag;
 	if (sh_audio->format == 1 &&

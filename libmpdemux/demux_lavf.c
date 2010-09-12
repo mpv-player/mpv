@@ -275,7 +275,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 break;
             stream_type = "audio";
             priv->astreams[priv->audio_streams] = i;
-            wf= calloc(sizeof(WAVEFORMATEX) + codec->extradata_size, 1);
+            wf= calloc(sizeof(*wf) + codec->extradata_size, 1);
             // mp4a tag is used for all mp4 files no matter what they actually contain
             if(codec->codec_tag == MKTAG('m', 'p', '4', 'a'))
                 codec->codec_tag= 0;
@@ -351,7 +351,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             if(!sh_video) break;
             stream_type = "video";
             priv->vstreams[priv->video_streams] = i;
-            bih=calloc(sizeof(BITMAPINFOHEADER) + codec->extradata_size,1);
+            bih=calloc(sizeof(*bih) + codec->extradata_size,1);
 
             if(codec->codec_id == CODEC_ID_RAWVIDEO) {
                 switch (codec->pix_fmt) {
@@ -361,7 +361,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             }
             if(!codec->codec_tag)
                 codec->codec_tag= mp_av_codec_get_tag(mp_bmp_taglists, codec->codec_id);
-            bih->biSize= sizeof(BITMAPINFOHEADER) + codec->extradata_size;
+            bih->biSize= sizeof(*bih) + codec->extradata_size;
             bih->biWidth= codec->width;
             bih->biHeight= codec->height;
             bih->biBitCount= codec->bits_per_coded_sample;

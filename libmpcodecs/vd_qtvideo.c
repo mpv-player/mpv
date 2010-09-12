@@ -98,7 +98,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 // init driver
 static int init(sh_video_t *sh){
     OSErr result = 1;
-    int extradata_size = sh->bih ? sh->bih->biSize - sizeof(BITMAPINFOHEADER) : 0;
+    int extradata_size = sh->bih ? sh->bih->biSize - sizeof(*sh->bih) : 0;
     void *extradata = sh->bih + 1;
 
     if (!sh->ImageDesc)

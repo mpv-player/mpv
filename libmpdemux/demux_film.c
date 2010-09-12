@@ -325,7 +325,7 @@ static demuxer_t* demux_open_film(demuxer_t* demuxer)
           demuxer->audio->sh = sh_audio;
           sh_audio->ds = demuxer->audio;
 
-          sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
+          sh_audio->wf = malloc(sizeof(*sh_audio->wf));
 
           // uncompressed PCM format
           sh_audio->wf->wFormatTag = 1;
@@ -356,7 +356,7 @@ static demuxer_t* demux_open_film(demuxer_t* demuxer)
         demuxer->audio->sh = sh_audio;
         sh_audio->ds = demuxer->audio;
 
-        sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
+        sh_audio->wf = malloc(sizeof(*sh_audio->wf));
 
         // uncompressed PCM format
         sh_audio->wf->wFormatTag = 1;

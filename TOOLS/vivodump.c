@@ -212,8 +212,8 @@ mux->buffer=malloc(mux->buffer_size);
 mux->h.dwScale=1;
 mux->h.dwRate=10;
 
-mux->bih=malloc(sizeof(BITMAPINFOHEADER));
-mux->bih->biSize=sizeof(BITMAPINFOHEADER);
+mux->bih=malloc(sizeof(*mux->bih));
+mux->bih->biSize=sizeof(*mux->bih);
 mux->bih->biPlanes=1;
 mux->bih->biBitCount=24;
 mux->bih->biCompression=0x6f766976;//      7669766f;
