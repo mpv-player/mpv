@@ -20,6 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef MPLAYER_VO_COREVIDEO_H
+#define MPLAYER_VO_COREVIDEO_H
+
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
 #import <Carbon/Carbon.h>
@@ -108,3 +111,5 @@
 - (void) mouseEvent: (NSEvent *) theEvent;
 - (void) check_events;
 @end
+
+#endif /* MPLAYER_VO_COREVIDEO_H */
