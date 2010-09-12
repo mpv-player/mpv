@@ -232,13 +232,9 @@ static demuxer_t* demux_open_rtp(demuxer_t* demuxer)
                 link_session_and_fetch_conf(ndsd, NEMESI_SESSION_AUDIO,
                                             sess, &buff, NULL);
 
-                if (buff.len) {
-                    wf = calloc(1,sizeof(*wf)+buff.len);
-                    wf->cbSize = buff.len;
-                    memcpy(wf+1, buff.data, buff.len);
-                } else {
-                    wf = calloc(1,sizeof(*wf));
-                }
+                wf = calloc(1,sizeof(*wf)+buff.len);
+                wf->cbSize = buff.len;
+                memcpy(wf+1, buff.data, buff.len);
 
                 sh_audio->wf = wf;
                 d_audio->sh = sh_audio;
@@ -268,14 +264,9 @@ static demuxer_t* demux_open_rtp(demuxer_t* demuxer)
                 link_session_and_fetch_conf(ndsd, NEMESI_SESSION_VIDEO,
                                             sess, &buff, &fps);
 
-                if (buff.len) {
-                    bih = calloc(1,sizeof(*bih)+buff.len);
-                    bih->biSize = sizeof(*bih)+buff.len;
-                    memcpy(bih+1, buff.data, buff.len);
-                } else {
-                    bih = calloc(1,sizeof(*bih));
-                    bih->biSize = sizeof(*bih);
-                }
+                bih = calloc(1,sizeof(*bih)+buff.len);
+                bih->biSize = sizeof(*bih)+buff.len;
+                memcpy(bih+1, buff.data, buff.len);
 
                 sh_video = new_sh_video(demuxer,0);
                 sh_video->bih = bih;
