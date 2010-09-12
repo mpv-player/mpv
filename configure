@@ -3886,7 +3886,7 @@ int main(void) {
   return 0;
 }
 EOF
-  cc_check -framework IOKit && tmp_run && _apple_remote=yes
+  cc_check -framework IOKit && _apple_remote=yes
 fi
 if test "$_apple_remote" = yes ; then
   def_apple_remote='#define CONFIG_APPLE_REMOTE 1'
