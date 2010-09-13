@@ -158,7 +158,3 @@ static int vcd_read(mp_vcd_priv_t* vcd, char *mem)
 }
 
 #endif /* MPLAYER_VCD_READ_WIN32_H */
-
-/*
-vim:noet:sw=4:cino=\:0,g0
-*/

@@ -1,5 +1,3 @@
-// -*- c-basic-offset: 8; indent-tabs-mode: t -*-
-// vim:ts=8:sw=8:noet:ai:
 /*
  * Copyright (C) 2006 Evgeniy Stepanov <eugeni.stepanov@gmail.com>
  *

@@ -859,9 +859,6 @@ int DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int value)
 //    printf("DS_SetValue for ????, name=%s  value=%d\n",name,value);
     return 0;
 }
-/*
-vim: vi* sux.
-*/
 
 int DS_SetAttr_DivX(char* attribute, int value){
     int result, status, newkey;

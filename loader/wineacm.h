@@ -1,6 +1,5 @@
 #ifndef MPLAYER_WINEACM_H
 #define MPLAYER_WINEACM_H
-/* -*- tab-width: 8; c-basic-offset: 4 -*- */
 
 /***********************************************************************
  * Wine specific - Win32
