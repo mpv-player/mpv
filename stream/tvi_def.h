@@ -47,7 +47,7 @@ static const tvi_functions_t functions =
 
 static tvi_handle_t *new_handle(void)
 {
-    tvi_handle_t *h = malloc(sizeof(tvi_handle_t));
+    tvi_handle_t *h = malloc(sizeof(*h));
 
     if (!h)
 	return NULL;
