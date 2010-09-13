@@ -1068,8 +1068,7 @@ static tvi_handle_t *tvi_init_v4l2(tv_param_t* tv_param)
 {
     tvi_handle_t *tvi_handle;
 
-    /* new_handle initializes priv with memset 0 */
-    tvi_handle = new_handle();
+    tvi_handle = tv_new_handle(sizeof(priv_t), &functions);
     if (!tvi_handle) {
         return NULL;
     }

@@ -3059,7 +3059,7 @@ static tvi_handle_t *tvi_init_dshow(tv_param_t* tv_param)
     priv_t *priv;
     int a;
 
-    h = new_handle();
+    h = tv_new_handle(sizeof(priv_t), &functions);
     if (!h)
 	return NULL;
 

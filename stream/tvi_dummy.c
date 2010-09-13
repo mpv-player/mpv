@@ -45,7 +45,7 @@ typedef struct priv {
 /* handler creator - entry point ! */
 static tvi_handle_t *tvi_init_dummy(tv_param_t* tv_param)
 {
-    return new_handle();
+    return tv_new_handle(sizeof(priv_t), &functions);
 }
 
 /* initialisation */

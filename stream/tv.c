@@ -80,6 +80,31 @@ static const tvi_info_t* tvi_driver_list[]={
     NULL
 };
 
+tvi_handle_t *tv_new_handle(int size, const tvi_functions_t *functions)
+{
+    tvi_handle_t *h = malloc(sizeof(*h));
+
+    if (!h)
+        return NULL;
+
+    h->priv = calloc(1, size);
+
+    if (!h->priv) {
+        free(h);
+        return NULL;
+    }
+
+    h->functions  = functions;
+    h->seq        = 0;
+    h->chanlist   = -1;
+    h->chanlist_s = NULL;
+    h->norm       = -1;
+    h->channel    = -1;
+    h->scan       = NULL;
+
+    return h;
+}
+
 void tv_free_handle(tvi_handle_t *h)
 {
     if (h) {

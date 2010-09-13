@@ -195,7 +195,7 @@ static tvi_handle_t *tvi_init_bsdbt848(tv_param_t* tv_param)
     tvi_handle_t* tvh;
     priv_t* priv;
 
-    tvh=new_handle();
+    tvh = tv_new_handle(sizeof(priv_t), &functions);
     if(!tvh)
         return NULL;
     priv=(priv_t*)tvh->priv;

@@ -309,7 +309,7 @@ static tvi_handle_t *tvi_init_v4l(tv_param_t* tv_param)
     tvi_handle_t *h;
     priv_t *priv;
 
-    h = new_handle();
+    h = tv_new_handle(sizeof(priv_t), &functions);
     if (!h)
         return NULL;
 

@@ -255,6 +255,7 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm);
 
 void tv_start_scan(tvi_handle_t *tvh, int start);
 
+tvi_handle_t *tv_new_handle(int size, const tvi_functions_t *functions);
 void tv_free_handle(tvi_handle_t *h);
 
 #define TV_NORM_PAL		1
