@@ -1641,7 +1641,7 @@ if x86 && test "$_runtime_cpudetection" = no ; then
       cat > $TMPC <<EOF
 #include <stdlib.h>
 #include <signal.h>
-void catch(int sig) { exit(1); }
+static void catch(int sig) { exit(1); }
 int main(void) {
   signal(SIGILL, catch);
   __asm__ volatile ("$3":::"memory"); return 0;
@@ -2325,7 +2325,7 @@ if test "$_big_endian" = auto ; then
   cat > $TMPC <<EOF
 short ascii_name[] = { (('M'<<8)|'P'),(('l'<<8)|'a'),(('y'<<8)|'e'),(('r'<<8)|'B'),
                        (('i'<<8)|'g'),(('E'<<8)|'n'),(('d'<<8)|'i'),(('a'<<8)|'n'),0};
-int main(void) { return (int)ascii_name; }
+int main(void) { return (long)ascii_name; }
 EOF
   if cc_check ; then
     if strings $TMPEXE | grep -q -l MPlayerBigEndian ; then
@@ -2917,7 +2917,7 @@ fi
 echocheck "__builtin_expect"
 # GCC branch prediction hint
 cat > $TMPC << EOF
-int foo(int a) {
+static int foo(int a) {
     a = __builtin_expect(a, 10);
     return a == 10 ? 0 : 1;
 }
@@ -3360,7 +3360,7 @@ fi
 if test "$_pthreads" = auto ; then
 cat > $TMPC << EOF
 #include <pthread.h>
-void* func(void *arg) { return arg; }
+static void *func(void *arg) { return arg; }
 int main(void) { pthread_t tid; return pthread_create(&tid, 0, func, 0) == 0 ? 0 : 1; }
 EOF
 _pthreads=no
@@ -3438,7 +3438,7 @@ int main(void) {
       char *optr=outbuffer;
       size_t inleft=numread;
       size_t outleft=OUTBUFSIZE;
-      if (iconv(icdsc, (const char **)&iptr, &inleft, &optr, &outleft)
+      if (iconv(icdsc, &iptr, &inleft, &optr, &outleft)
           != (size_t)(-1)) {
         write(1, outbuffer, OUTBUFSIZE - outleft);
       }
@@ -3673,7 +3673,7 @@ echocheck "swab()"
 cat > $TMPC << EOF
 #define _XOPEN_SOURCE 600
 #include <unistd.h>
-int main(void) { swab(0, 0, 0); return 0; }
+int main(void) { swab(NULL, NULL, 0); return 0; }
 EOF
 _swab=no
 cc_check && _swab=yes
@@ -4556,8 +4556,6 @@ echocheck "AA"
 if test "$_aa" = auto ; then
   cat > $TMPC << EOF
 #include <aalib.h>
-extern struct aa_hardware_params aa_defparams;
-extern struct aa_renderparams aa_defrenderparams;
 int main(void) {
 aa_context *c;
 aa_renderparams *p;
@@ -4885,8 +4883,10 @@ if test "$_gif" = yes ; then
 
   cat > $TMPC << EOF
 #include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <gif_lib.h>
-void catch(int sig) { exit(1); }
+static void catch(int sig) { exit(1); }
 int main(void) {
   signal(SIGSEGV, catch);  // catch segfault
   printf("EGifPutExtensionFirst is at address %p\n", EGifPutExtensionFirst);
@@ -4912,9 +4912,10 @@ case "$_gif" in yes*)
   def_gif_tvt_hack='#define CONFIG_GIF_TVT_HACK 1'
 
   cat > $TMPC << EOF
+#include <stdio.h>
 #include <gif_lib.h>
 int main(void) {
-  GifFileType gif;
+  GifFileType gif = {.UserData = NULL};
   printf("UserData is at address %p\n", gif.UserData);
   return 0;
 }
@@ -6344,8 +6345,9 @@ echocheck "libspeex (version >= 1.1 required)"
 if test "$_speex" = auto ; then
   _speex=no
   cat > $TMPC << EOF
+#include <stddef.h>
 #include <speex/speex.h>
-int main(void) { SpeexBits bits; void *dec; speex_decode_int(dec, &bits, dec); return 0; }
+int main(void) { SpeexBits bits; void *dec = NULL; speex_decode_int(dec, &bits, dec); return 0; }
 EOF
   cc_check -lspeex $_ld_lm && _speex=yes
 fi
