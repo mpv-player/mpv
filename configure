@@ -107,6 +107,14 @@ EOF
   compile_check $TMPC $@
 }
 
+inline_asm_check() {
+  cat > $TMPC << EOF
+int main(void) { __asm__ volatile ($1); return 0; }
+EOF
+  shift
+  compile_check $TMPC $@
+}
+
 # this is a special check only to be
 # used for broken headers that do not
 # include all dependencies
@@ -2506,10 +2514,7 @@ fi #if x86_32
 echocheck ".align is a power of two"
 if test "$_asmalign_pot" = auto ; then
 _asmalign_pot=no
-cat > $TMPC << EOF
-int main(void) { __asm__ (".align 3"); return 0; }
-EOF
-cc_check && _asmalign_pot=yes
+inline_asm_check '".align 3"' && _asmalign_pot=yes
 fi
 if test "$_asmalign_pot" = "yes" ; then
   def_asmalign_pot='#define ASMALIGN(ZEROBITS) ".align " #ZEROBITS "\n\t"'
@@ -2659,29 +2664,21 @@ if ppc ; then
 def_xform_asm='#define HAVE_XFORM_ASM 0'
 xform_asm=no
 echocheck "XFORM ASM support"
-  cat > $TMPC << EOF
-int main(void) { __asm__ volatile ("lwzx %1, %y0" :: "Z"(*(int*)0), "r"(0)); return 0; }
-EOF
-cc_check && xform_asm=yes && def_xform_asm='#define HAVE_XFORM_ASM 1'
+inline_asm_check '"lwzx %1, %y0" :: "Z"(*(int*)0), "r"(0)' &&
+  xform_asm=yes && def_xform_asm='#define HAVE_XFORM_ASM 1'
 echores "$xform_asm"
 fi
 
 if arm ; then
   echocheck "ARM pld instruction"
-  cat > $TMPC << EOF
-int main(void) { __asm__ volatile ("pld [r0]"); return 0; }
-EOF
   pld=no
-  cc_check && pld=yes
+  inline_asm_check '"pld [r0]"' && pld=yes
   echores "$pld"
 
   echocheck "ARMv5TE (Enhanced DSP Extensions)"
   if test $_armv5te = "auto" ; then
-    cat > $TMPC << EOF
-int main(void) { __asm__ volatile ("qadd r0, r0, r0"); return 0; }
-EOF
     _armv5te=no
-    cc_check && _armv5te=yes
+    inline_asm_check '"qadd r0, r0, r0"' && _armv5te=yes
   fi
   echores "$_armv5te"
 
@@ -2689,51 +2686,36 @@ EOF
 
   echocheck "ARMv6 (SIMD instructions)"
   if test $_armv6 = "auto" ; then
-    cat > $TMPC << EOF
-int main(void) { __asm__ volatile ("sadd16 r0, r0, r0"); return 0; }
-EOF
     _armv6=no
-    cc_check && _armv6=yes
+    inline_asm_check '"sadd16 r0, r0, r0"' && _armv6=yes
   fi
   echores "$_armv6"
 
   echocheck "ARMv6t2 (SIMD instructions)"
   if test $_armv6t2 = "auto" ; then
-    cat > $TMPC << EOF
-int main(void) { __asm__ volatile ("movt r0, #0"); return 0; }
-EOF
     _armv6t2=no
-    cc_check && _armv6t2=yes
+    inline_asm_check '"movt r0, #0"' && _armv6t2=yes
   fi
   echores "$_armv6"
 
   echocheck "ARM VFP"
   if test $_armvfp = "auto" ; then
-    cat > $TMPC << EOF
-int main(void) { __asm__ volatile ("fadds s0, s0, s0"); return 0; }
-EOF
     _armvfp=no
-    cc_check && _armvfp=yes
+    inline_asm_check '"fadds s0, s0, s0"' && _armvfp=yes
   fi
   echores "$_armvfp"
 
   echocheck "ARM NEON"
   if test $neon = "auto" ; then
-    cat > $TMPC << EOF
-int main(void) { __asm__ volatile ("vadd.i16 q0, q0, q0"); return 0; }
-EOF
     neon=no
-    cc_check && neon=yes
+    inline_asm_check '"vadd.i16 q0, q0, q0"' && neon=yes
   fi
   echores "$neon"
 
   echocheck "iWMMXt (Intel XScale SIMD instructions)"
   if test $_iwmmxt = "auto" ; then
-    cat > $TMPC << EOF
-int main(void) { __asm__ volatile ("wunpckelub wr6, wr4"); return 0; }
-EOF
     _iwmmxt=no
-    cc_check && _iwmmxt=yes
+    inline_asm_check '"wunpckelub wr6, wr4"' && _iwmmxt=yes
   fi
   echores "$_iwmmxt"
 fi
