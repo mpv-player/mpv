@@ -3237,7 +3237,7 @@ echores "$_fastmemcpy"
 
 echocheck "mman.h"
 _mman=no
-function_check sys/mman.h "mmap(0, 0, 0, 0, 0, 0)" && _mman=yes
+function_check sys/mman.h 'mmap(0, 0, 0, 0, 0, 0)' && _mman=yes
 if test "$_mman" = yes ; then
   def_mman_h='#define HAVE_SYS_MMAN_H 1'
 else
@@ -3975,7 +3975,7 @@ echocheck "DirectFB"
 if test "$_directfb" = auto ; then
   _directfb=no
   for _inc_tmp in "" -I/usr/local/include/directfb -I/usr/include/directfb -I/usr/local/include; do
-    function_check directfb.h "DirectFBInit(0, 0)" $_inc_tmp -ldirectfb &&
+    function_check directfb.h 'DirectFBInit(0, 0)' $_inc_tmp -ldirectfb &&
       _directfb=yes && extra_cflags="$extra_cflags $_inc_tmp" && break
   done
 fi
@@ -5275,7 +5275,7 @@ echocheck "aRts"
 if test "$_arts" = auto ; then
   _arts=no
   if ( artsc-config --version ) >> "$TMPLOG" 2>&1 ; then
-    function_check artsc.h "arts_init()" $(artsc-config --libs) $(artsc-config --cflags) &&
+    function_check artsc.h 'arts_init()' $(artsc-config --libs) $(artsc-config --cflags) &&
       _arts=yes
   fi
 fi
@@ -6744,7 +6744,7 @@ fi
 echocheck "libdv-0.9.5+"
 if test "$_libdv" = auto ; then
   _libdv=no
-  function_check libdv/dv.h "dv_encoder_new(1, 1, 1)" -ldv $_ld_pthread $_ld_lm && _libdv=yes
+  function_check libdv/dv.h 'dv_encoder_new(1, 1, 1)' -ldv $_ld_pthread $_ld_lm && _libdv=yes
 fi
 if test "$_libdv" = yes ; then
   def_libdv='#define CONFIG_LIBDV095 1'
