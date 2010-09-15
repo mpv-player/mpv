@@ -3974,60 +3974,28 @@ echores "$_bl"
 echocheck "DirectFB"
 if test "$_directfb" = auto ; then
   _directfb=no
+  cat > $TMPC << EOF
+#include <directfb.h>
+#include <directfb_version.h>
+#if (DIRECTFB_MAJOR_VERSION << 16 | DIRECTFB_MINOR_VERSION << 8 | DIRECTFB_MICRO_VERSION) < (0 << 16 | 9 << 8 | 22)
+#error "DirectFB version too old."
+#endif
+int main(void) { DirectFBInit(0, 0); return 0; }
+EOF
   for _inc_tmp in "" -I/usr/local/include/directfb -I/usr/include/directfb -I/usr/local/include; do
-    function_check directfb.h 'DirectFBInit(0, 0)' $_inc_tmp -ldirectfb &&
+    cc_check $_inc_tmp -ldirectfb &&
       _directfb=yes && extra_cflags="$extra_cflags $_inc_tmp" && break
   done
 fi
-
-dfb_version() {
-  expr $1 \* 65536 + $2 \* 256 + $3
-}
-
-if test "$_directfb" = yes; then
-  cat > $TMPC << EOF
-#include <directfb_version.h>
-int
-dfb_ver = DIRECTFB_MAJOR_VERSION.DIRECTFB_MINOR_VERSION.DIRECTFB_MICRO_VERSION
-;
-EOF
-  if $_cc -E $TMPC $extra_cflags > "$TMPEXE"; then
-    _directfb_version=$(sed -n 's/^dfb_ver[^0-9]*\(.*\)/\1/p' "$TMPEXE" | tr -d '()')
-    _dfb_major=$(echo $_directfb_version | cut -d . -f 1)
-    _dfb_minor=$(echo $_directfb_version | cut -d . -f 2)
-    _dfb_micro=$(echo $_directfb_version | cut -d . -f 3)
-    _dfb_version=$(dfb_version $_dfb_major $_dfb_minor $_dfb_micro)
-    if test "$_dfb_version" -ge $(dfb_version 0 9 13); then
-      def_directfb_version="#define DIRECTFBVERSION $_dfb_version"
-      res_comment="$_directfb_version"
-      test "$_dfb_version" -ge $(dfb_version 0 9 15) && _dfbmga=yes
-    else
-      def_directfb_version='#undef DIRECTFBVERSION'
-      _directfb=no
-      res_comment="version >=0.9.13 required"
-    fi
-  else
-    _directfb=no
-    res_comment="failed to get version"
-  fi
-fi
-echores "$_directfb"
-
 if test "$_directfb" = yes ; then
   def_directfb='#define CONFIG_DIRECTFB 1'
-  vomodules="directfb $vomodules"
+  vomodules="directfb dfbmga $vomodules"
   libs_mplayer="$libs_mplayer -ldirectfb"
 else
   def_directfb='#undef CONFIG_DIRECTFB'
-  novomodules="directfb $novomodules"
+  novomodules="directfb dfbmga $novomodules"
 fi
-if test "$_dfbmga" = yes; then
-  vomodules="dfbmga $vomodules"
-  def_dfbmga='#define CONFIG_DFBMGA 1'
-else
-  novomodules="dfbmga $novomodules"
-  def_dfbmga='#undef CONFIG_DFBMGA'
-fi
+echores "$_directfb"
 
 
 echocheck "X11 headers presence"
@@ -7554,7 +7522,6 @@ CDDB = $_cddb
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
 DART = $_dart
-DFBMGA = $_dfbmga
 DGA = $_dga
 DIRECT3D = $_direct3d
 DIRECTFB = $_directfb
@@ -8035,13 +8002,11 @@ $def_aa
 $def_bl
 $def_caca
 $def_corevideo
-$def_dfbmga
 $def_dga
 $def_dga1
 $def_dga2
 $def_direct3d
 $def_directfb
-$def_directfb_version
 $def_directx
 $def_dvb
 $def_dvbin

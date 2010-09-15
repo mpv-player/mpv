@@ -236,7 +236,7 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_VESA
         &video_out_vesa,
 #endif
-#ifdef CONFIG_DFBMGA
+#ifdef CONFIG_DIRECTFB
         &video_out_dfbmga,
 #endif
 #ifdef CONFIG_VIDIX

@@ -21,12 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/* directfb includes */
 #include <directfb.h>
-
-#define DFB_VERSION(a,b,c) (((a)<<16)|((b)<<8)|(c))
-
-/* other things */
+#include <directfb_version.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -103,16 +99,6 @@ static int osd_max;
 
 static int is_g200;
 
-#if DIRECTFBVERSION < DFB_VERSION(0,9,18)
- #define DSPF_ALUT44 DSPF_LUT8
- #define DLBM_TRIPLE ~0
- #define DSFLIP_ONSYNC 0
-#endif
-
-#if DIRECTFBVERSION < DFB_VERSION(0,9,16)
- #define DSPF_ARGB1555 DSPF_RGB15
-#endif
-
 static uint32_t in_width;
 static uint32_t in_height;
 static uint32_t buf_height;
@@ -143,12 +129,10 @@ pixelformat_name( DFBSurfacePixelFormat format )
           return "I420";
      case DSPF_ALUT44:
           return "ALUT44";
-#if DIRECTFBVERSION > DFB_VERSION(0,9,21)
      case DSPF_NV12:
           return "NV12";
      case DSPF_NV21:
           return "NV21";
-#endif
      default:
           return "Unknown pixel format";
      }
@@ -173,12 +157,10 @@ imgfmt_to_pixelformat( uint32_t format )
      case IMGFMT_I420:
      case IMGFMT_IYUV:
           return DSPF_I420;
-#if DIRECTFBVERSION > DFB_VERSION(0,9,21)
      case IMGFMT_NV12:
           return DSPF_NV12;
      case IMGFMT_NV21:
           return DSPF_NV21;
-#endif
      default:
           return DSPF_UNKNOWN;
      }
@@ -198,20 +180,9 @@ get_layer_by_name( DFBDisplayLayerID id,
 {
      struct layer_enum *l = (struct layer_enum *) data;
 
-#if DIRECTFBVERSION > DFB_VERSION(0,9,15)
-     /* We have desc.name so use it */
      if (!strcmp( l->name, desc.name ))
           if ((l->res = dfb->GetDisplayLayer( dfb, id, l->layer )) == DFB_OK)
                return DFENUM_CANCEL;
-#else
-     /* Fake it according to id */
-     if ((id == 0 && !strcmp( l->name, "FBDev Primary Layer" )) ||
-         (id == 1 && !strcmp( l->name, "Matrox Backend Scaler" )) ||
-         (id == 2 && !strcmp( l->name, "Matrox CRTC2" )) ||
-         (id == 3 && !strcmp( l->name, "Matrox CRTC2 Sub-Picture" )))
-          if ((l->res = dfb->GetDisplayLayer( dfb, id, l->layer )) == DFB_OK)
-               return DFENUM_CANCEL;
-#endif
 
      return DFENUM_OK;
 }
@@ -228,13 +199,8 @@ preinit( const char *arg )
      use_crtc2 = 1;
      use_spic = 1;
      field_parity = -1;
-#if DIRECTFBVERSION > DFB_VERSION(0,9,17)
      buffermode = DLBM_TRIPLE;
      osd_max = 4;
-#else
-     buffermode = DLBM_BACKVIDEO;
-     osd_max = 2;
-#endif
      flipping = 1;
      tvnorm = -1;
 
@@ -479,11 +445,7 @@ preinit( const char *arg )
 
      if (use_crtc2) {
           struct layer_enum l = {
-#if DIRECTFBVERSION > DFB_VERSION(0,9,20)
                "Matrox CRTC2 Layer",
-#else
-               "Matrox CRTC2",
-#endif
                &crtc2,
                DFB_UNSUPPORTED
           };
@@ -751,11 +713,9 @@ config( uint32_t width, uint32_t height,
           dlc.buffermode = buffermode;
           dlc.options    = DLOP_NONE;
 
-#if DIRECTFBVERSION > DFB_VERSION(0,9,16)
           if (field_parity != -1) {
                dlc.options |= DLOP_FIELD_PARITY;
           }
-#endif
           mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: Field parity set to: ");
           switch (field_parity) {
           case -1:
@@ -799,10 +759,8 @@ config( uint32_t width, uint32_t height,
                return -1;
           }
 
-#if DIRECTFBVERSION > DFB_VERSION(0,9,16)
           if (field_parity != -1)
                crtc2->SetFieldParity( crtc2, field_parity );
-#endif
 
           crtc2->GetSurface( crtc2, &c2frame );
           c2frame->SetBlittingFlags( c2frame, DSBLIT_NOFX );
@@ -878,11 +836,9 @@ config( uint32_t width, uint32_t height,
           dlc.flags       = DLCONF_PIXELFORMAT | DLCONF_BUFFERMODE;
           dlc.pixelformat = DSPF_ALUT44;
           dlc.buffermode  = buffermode;
-
-#if DIRECTFBVERSION > DFB_VERSION(0,9,16)
           dlc.flags      |= DLCONF_OPTIONS;
           dlc.options     = DLOP_ALPHACHANNEL;
-#endif
+
           if ((res = spic->TestConfiguration( spic, &dlc, &failed )) != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR,
                        "vo_dfbmga: Invalid sub-picture configuration - %s!\n",
@@ -971,13 +927,11 @@ query_format( uint32_t format )
           break;
      case IMGFMT_YUY2:
           break;
-#if DIRECTFBVERSION > DFB_VERSION(0,9,21)
      case IMGFMT_NV12:
      case IMGFMT_NV21:
           if (use_crtc1 || use_crtc2)
                return 0;
           break;
-#endif
      default:
           return 0;
      }
@@ -1077,10 +1031,8 @@ draw_alpha( int x0, int y0,
                               dst + pitch * y0 + 2 * x0 + 1,
                               pitch );
           break;
-#if DIRECTFBVERSION > DFB_VERSION(0,9,21)
      case DSPF_NV12:
      case DSPF_NV21:
-#endif
      case DSPF_I420:
      case DSPF_YV12:
           vo_draw_alpha_yv12( w, h, src, srca, stride,
@@ -1117,13 +1069,10 @@ draw_slice( uint8_t * src[], int stride[], int w, int h, int x, int y )
      y /= 2;
      h /= 2;
 
-#if DIRECTFBVERSION > DFB_VERSION(0,9,21)
      if (frame_format == DSPF_NV12 || frame_format == DSPF_NV21) {
           memcpy_pic( dst + pitch * y + x, src[1],
                       w, h, pitch, stride[1] );
-     } else
-#endif
-     {
+     } else {
           x /= 2;
           w /= 2;
           pitch /= 2;
@@ -1157,10 +1106,8 @@ blit_to_screen( void )
      DFBRectangle *srect = NULL;
 
      if (use_bes) {
-#if DIRECTFBVERSION > DFB_VERSION(0,9,15)
           if (vo_vsync && !flipping)
                bes->WaitForSync( bes );
-#endif
 
           besframe->Blit( besframe, blitsrc, NULL, besrect.x, besrect.y );
           blitsrc = besframe;
@@ -1168,10 +1115,8 @@ blit_to_screen( void )
      }
 
      if (use_crtc1) {
-#if DIRECTFBVERSION > DFB_VERSION(0,9,15)
           if (vo_vsync && !flipping)
                crtc1->WaitForSync( crtc1 );
-#endif
 
           if (c1stretch)
                c1frame->StretchBlit( c1frame, blitsrc, srect, &c1rect );
@@ -1180,10 +1125,8 @@ blit_to_screen( void )
      }
 
      if (use_crtc2) {
-#if DIRECTFBVERSION > DFB_VERSION(0,9,15)
           if (vo_vsync && !flipping)
                crtc2->WaitForSync( crtc2 );
-#endif
 
           if (c2stretch)
                c2frame->StretchBlit( c2frame, blitsrc, srect, &c2rect );
