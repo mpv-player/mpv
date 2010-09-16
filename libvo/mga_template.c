@@ -19,6 +19,7 @@
 #include "fastmemcpy.h"
 #include "cpudetect.h"
 #include "libswscale/swscale.h"
+#include "libavcore/imgutils.h"
 #include "libmpcodecs/vf_scale.h"
 #include "mp_msg.h"
 #include "old_vo_wrapper.h"
@@ -40,6 +41,8 @@ static uint32_t               drwX,drwY,drwWidth,drwHeight;
 static uint32_t               drwBorderWidth,drwDepth;
 #endif
 static uint32_t               drwcX,drwcY,dwidth,dheight;
+
+static struct SwsContext *sws_ctx;
 
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
     uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
@@ -66,25 +69,18 @@ static void draw_osd(void)
 }
 
 
-#if 0 // Should use libswscale's interface to NV12
 static void
 draw_slice_g200(uint8_t *image[], int stride[], int width,int height,int x,int y)
 {
-	uint8_t *dest;
 	uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
+	int dst_stride[4] = { bespitch, bespitch };
+	uint8_t *dst[4];
 
-	dest = vid_data + bespitch*y + x;
-	mem2agpcpy_pic(dest, image[0], width, height, bespitch, stride[0]);
+	av_image_fill_pointers(dst, PIX_FMT_NV12, mga_vid_config.src_height,
+	                       vid_data, dst_stride);
 
-        width/=2;height/=2;x/=2;y/=2;
-
-	dest = vid_data + bespitch*mga_vid_config.src_height + bespitch*y + 2*x;
-
-	interleaveBytes(image[1],image[2],dest,
-		width, height,
-		stride[1], stride[2], bespitch);
+	sws_scale(sws_ctx, image, stride, y, height, dst, dst_stride);
 }
-#endif
 
 static void
 draw_slice_g400(uint8_t *image[], int stride[], int w,int h,int x,int y)
@@ -127,11 +123,9 @@ draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 	    w,h,x,y);
 #endif
 
-#if 0
 	if (mga_vid_config.card_type == MGA_G200)
             draw_slice_g200(src,stride,w,h,x,y);
 	else
-#endif
             draw_slice_g400(src,stride,w,h,x,y);
 	return 0;
 }
@@ -423,8 +417,16 @@ static int mga_init(int width,int height,unsigned int format){
 		}
 	}
 	if (mga_vid_config.card_type == MGA_G200) {
-		mp_msg(MSGT_VO, MSGL_FATAL, "G200 cards support is currently broken. patches welcome.\n");
-		return -1;
+		sws_ctx = sws_getContext(width, height, PIX_FMT_YUV420P,
+		                         width, height, PIX_FMT_NV12,
+		                         SWS_BILINEAR, NULL, NULL, NULL);
+		if (!sws_ctx) {
+			mp_msg(MSGT_VO, MSGL_FATAL,
+			       "Could not get swscale context to scale for G200.\n");
+			return -1;
+		}
+		mp_msg(MSGT_VO, MSGL_WARN, "G200 cards support is untested. "
+		                           "Please report whether it works.\n");
 	}
 
 	mp_msg(MSGT_VO,MSGL_V,"[MGA] Using %d buffers.\n",mga_vid_config.num_frames);
@@ -452,6 +454,9 @@ static int mga_uninit(void){
 	munmap(frames[0],mga_vid_config.frame_size*mga_vid_config.num_frames);
 	close(f);
 	f = -1;
+  }
+  if (sws_ctx) {
+	sws_freeContext(sws_ctx);
   }
   return 0;
 }
