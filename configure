@@ -373,8 +373,8 @@ Codecs:
 Video output:
   --disable-vidix          disable VIDIX [for x86 *nix]
   --with-vidix-drivers[=*] list of VIDIX drivers to be compiled in
-                           Available: cyberblade,ivtv,mach64,mga,mga_crtc2,
-                           nvidia,pm2,pm3,radeon,rage128,s3,sis,unichrome
+                           Available: cyberblade, ivtv, mach64, mga, mga_crtc2,
+                           nvidia, pm2, pm3, radeon, rage128, s3, sis, unichrome
   --disable-vidix-pcidb    disable VIDIX PCI device name database
   --enable-dhahelper       enable VIDIX dhahelper support
   --enable-svgalib_helper  enable VIDIX svgalib_helper support
@@ -1679,7 +1679,7 @@ EOF
   extcheck $_sse      "sse"      "xorps %%xmm0, %%xmm0" || _gcc3_ext="$_gcc3_ext -mno-sse"
   extcheck $_sse2     "sse2"     "xorpd %%xmm0, %%xmm0" || _gcc3_ext="$_gcc3_ext -mno-sse2"
   extcheck $_ssse3    "ssse3"    "pabsd %%xmm0, %%xmm0"
-  extcheck $_cmov     "cmov"     "cmovb %%eax,%%ebx"
+  extcheck $_cmov     "cmov"     "cmovb %%eax,  %%ebx"
 
   echocheck "mtrr support"
   if test "$_mtrr" = kernel_check ; then
@@ -2331,8 +2331,10 @@ fi
 echocheck "byte order"
 if test "$_big_endian" = auto ; then
   cat > $TMPC <<EOF
-short ascii_name[] = { (('M'<<8)|'P'),(('l'<<8)|'a'),(('y'<<8)|'e'),(('r'<<8)|'B'),
-                       (('i'<<8)|'g'),(('E'<<8)|'n'),(('d'<<8)|'i'),(('a'<<8)|'n'),0};
+short ascii_name[] = {
+  (('M' << 8) | 'P'), (('l' << 8) | 'a'), (('y' << 8) | 'e'),
+  (('r' << 8) | 'B'), (('i' << 8) | 'g'), (('E' << 8) | 'n'),
+  (('d' << 8) | 'i'), (('a' << 8) | 'n'), 0 };
 int main(void) { return (long)ascii_name; }
 EOF
   if cc_check ; then
@@ -2395,7 +2397,7 @@ echocheck "GCC support of -mstackrealign"
 # http://www.dribin.org/dave/blog/archives/2006/12/05/missing_third_param/
 cat > $TMPC << EOF
 __attribute__((noinline)) static int foo3(int i1, int i2, int i3) { return i3; }
-int main(void) { return foo3(1,2,3) == 3 ? 0 : 1; }
+int main(void) { return foo3(1, 2, 3) == 3 ? 0 : 1; }
 EOF
   cc_check -O2 -mstackrealign && tmp_run && cflags_stackrealign=-mstackrealign
   test -z "$cflags_stackrealign" && cc_check -O2 -mstackrealign -fno-unit-at-a-time \
@@ -3158,9 +3160,7 @@ fi
 echocheck "int_fastXY_t in inttypes.h"
 cat > $TMPC << EOF
 #include <inttypes.h>
-int main(void) {
-volatile int_fast16_t v= 0;
-return v; }
+int main(void) { volatile int_fast16_t v = 0; return v; }
 EOF
 _fast_inttypes=no
 cc_check && _fast_inttypes=yes
@@ -3198,7 +3198,7 @@ if test "$_memalign" = yes ; then
   def_memalign='#define HAVE_MEMALIGN 1'
 else
   def_memalign='#define HAVE_MEMALIGN 0'
-  def_map_memalign='#define memalign(a,b) malloc(b)'
+  def_map_memalign='#define memalign(a, b) malloc(b)'
   darwin || def_memalign_hack='#define CONFIG_MEMALIGN_HACK 1'
 fi
 echores "$_memalign"
@@ -3624,7 +3624,7 @@ cat > $TMPC << EOF
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
-int main(void) {int nfds = 1; fd_set readfds; struct timeval timeout; select(nfds,&readfds,NULL,NULL,&timeout); return 0; }
+int main(void) {int nfds = 1; fd_set readfds; struct timeval timeout; select(nfds, &readfds, NULL, NULL, &timeout); return 0; }
 EOF
 _posix_select=no
 def_posix_select='#undef HAVE_POSIX_SELECT'
@@ -3714,11 +3714,7 @@ fi #if sunos
 echocheck "sys/sysinfo.h"
 cat > $TMPC << EOF
 #include <sys/sysinfo.h>
-int main(void) {
-  struct sysinfo s_info;
-  sysinfo(&s_info);
-  return 0;
-}
+int main(void) { struct sysinfo s_info; sysinfo(&s_info); return 0; }
 EOF
 _sys_sysinfo=no
 cc_check && _sys_sysinfo=yes
@@ -3796,11 +3792,7 @@ if test "$_apple_ir" = auto ; then
   cat > $TMPC <<EOF
 #include <linux/types.h>
 #include <linux/input.h>
-int main(void) {
-  struct input_event ev;
-  struct input_id id;
-  return 0;
-}
+int main(void) { struct input_event ev; struct input_id id; return 0; }
 EOF
   cc_check && _apple_ir=yes
 fi
@@ -4425,7 +4417,7 @@ aa_renderparams *p;
 aa_init(0, 0, 0);
 c = aa_autoinit(&aa_defparams);
 p = aa_getrenderparams();
-aa_autoinitkbd(c,0);
+aa_autoinitkbd(c, 0);
 return 0; }
 EOF
   _aa=no
@@ -5622,10 +5614,7 @@ if test "$_bluray" = auto ; then
   cat > $TMPC << EOF
 #include <stdlib.h>
 #include <libbluray/bluray.h>
-int main(void) {
-  BLURAY_TITLE_INFO *i = bd_get_title_info(NULL, 0);
-  return 0;
-}
+int main(void) { BLURAY_TITLE_INFO *i = bd_get_title_info(NULL, 0); return 0; }
 EOF
   compile_check $TMPC -lbluray && _bluray=yes
 fi
@@ -6408,10 +6397,7 @@ echocheck "LADSPA plugin support"
 if test "$_ladspa" = auto ; then
   cat > $TMPC <<EOF
 #include <ladspa.h>
-int main(void) {
-LADSPA_Descriptor ld = {0};
-return 0;
-}
+int main(void) { LADSPA_Descriptor ld = {0}; return 0; }
 EOF
   _ladspa=no
   cc_check && _ladspa=yes
