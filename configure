@@ -2948,8 +2948,9 @@ done
 
 echocheck "mkstemp"
 cat > $TMPC << EOF
+#define _XOPEN_SOURCE 500
 #include <stdlib.h>
-int main(void) { char a;  mkstemp(&a); return 0; }
+int main(void) { mkstemp(""); return 0; }
 EOF
 _mkstemp=no
 cc_check && _mkstemp=yes
@@ -3506,15 +3507,10 @@ fi #if sunos
 
 echocheck "termcap"
 if test "$_termcap" = auto ; then
-  cat > $TMPC <<EOF
-#include <stddef.h>
-#include <term.h>
-int main(void) { tgetent(NULL, NULL); return 0; }
-EOF
   _termcap=no
   for _ld_tmp in "-lncurses" "-ltinfo" "-ltermcap"; do
-    cc_check $_ld_tmp && extra_ldflags="$extra_ldflags $_ld_tmp" \
-      && _termcap=yes && break
+    function_check term.h 'tgetent(0, 0)' $_ld_tmp &&
+      extra_ldflags="$extra_ldflags $_ld_tmp" && _termcap=yes && break
   done
 fi
 if test "$_termcap" = yes ; then
@@ -3665,13 +3661,8 @@ echores "$_gettimeofday"
 
 
 echocheck "glob()"
-cat > $TMPC << EOF
-#include <stdio.h>
-#include <glob.h>
-int main(void) { glob_t gg; glob("filename",0,NULL,&gg); return 0; }
-EOF
 _glob=no
-cc_check && _glob=yes
+function_check glob.h 'glob("filename", 0, 0, 0)' && _glob=yes
 if test "$_glob" = yes ; then
   def_glob='#define HAVE_GLOB 1'
   _need_glob=no
@@ -4410,10 +4401,6 @@ echores "$_ggi"
 echocheck "GGI extension: libggiwmh"
 if test "$_ggiwmh" = auto ; then
   _ggiwmh=no
-  cat > $TMPC << EOF
-#include <ggi/wmh.h>
-int main(void) { ggiWmhInit(); return 0; }
-EOF
   function_check ggi/wmh.h 'ggiWmhInit()' -lggi -lggiwmh && _ggiwmh=yes
 fi
 # needed to get right output on obscure combination
@@ -4629,8 +4616,9 @@ if test "$_png" = auto ; then
     res_comment="disabled on irix (not GNU libpng)"
   else
 cat > $TMPC << EOF
-#include <png.h>
+#include <stdio.h>
 #include <string.h>
+#include <png.h>
 int main(void) {
   printf("png.h : %s\n", PNG_LIBPNG_VER_STRING);
   printf("libpng: %s\n", png_libpng_ver);
@@ -4998,13 +4986,8 @@ echores "$matrixview"
 if os2 ; then
 echocheck "KVA (SNAP/WarpOverlay!/DIVE)"
 if test "$_kva" = auto; then
-  cat > $TMPC << EOF
-#include <os2.h>
-#include <kva.h>
-int main(void) { return 0; }
-EOF
   _kva=no;
-  cc_check -lkva && _kva=yes
+  header_check_broken os2.h kva.h -lkva && _kva=yes
 fi
 if test "$_kva" = yes ; then
   def_kva='#define CONFIG_KVA 1'
@@ -5191,9 +5174,8 @@ echores "$_v4l2"
 echocheck "OSS Audio"
 if test "$_ossaudio" = auto ; then
   cat > $TMPC << EOF
-#include <sys/ioctl.h>
 #include <$_soundcard_header>
-int main(void) { int arg = SNDCTL_DSP_SETFRAGMENT; return 0; }
+int main(void) { return SNDCTL_DSP_SETFRAGMENT; }
 EOF
   _ossaudio=no
   cc_check && _ossaudio=yes
@@ -5202,7 +5184,6 @@ if test "$_ossaudio" = yes ; then
   def_ossaudio='#define CONFIG_OSS_AUDIO 1'
   aomodules="oss $aomodules"
   cat > $TMPC << EOF
-#include <sys/ioctl.h>
 #include <$_soundcard_header>
 #ifdef OPEN_SOUND_SYSTEM
 int main(void) { return 0; }
@@ -5263,13 +5244,7 @@ echocheck "EsounD"
 if test "$_esd" = auto ; then
   _esd=no
   if ( esd-config --version ) >> "$TMPLOG" 2>&1 ; then
-
-cat > $TMPC << EOF
-#include <esd.h>
-int main(void) { int fd = esd_open_sound("test"); return fd; }
-EOF
-cc_check $(esd-config --libs) $(esd-config --cflags) && _esd=yes
-
+    function_check esd.h 'esd_open_sound("test")' $(esd-config --libs) $(esd-config --cflags) && _esd=yes
   fi
 fi
 echores "$_esd"
@@ -5281,11 +5256,8 @@ if test "$_esd" = yes ; then
   extra_cflags="$extra_cflags $(esd-config --cflags)"
 
   echocheck "esd_get_latency()"
-  cat > $TMPC << EOF
-#include <esd.h>
-int main(void) { return esd_get_latency(0); }
-EOF
-  cc_check $(esd-config --libs) $(esd-config --cflags) && _esd_latency=yes && def_esd_latency='#define CONFIG_ESD_LATENCY 1'
+  function_check esd.h 'esd_get_latency(0)' $(esd-config --libs) $(esd-config --cflags) &&
+    _esd_latency=yes && def_esd_latency='#define CONFIG_ESD_LATENCY 1'
   echores "$_esd_latency"
 else
   def_esd='#undef CONFIG_ESD'
@@ -5561,13 +5533,8 @@ fi #if irix
 if os2 ; then
 echocheck "KAI (UNIAUD/DART)"
 if test "$_kai" = auto; then
-  cat > $TMPC << EOF
-#include <os2.h>
-#include <kai.h>
-int main(void) { return 0; }
-EOF
   _kai=no;
-  cc_check -lkai && _kai=yes
+  header_check_broken os2.h kai.h -lkai && _kai=yes
 fi
 if test "$_kai" = yes ; then
   def_kai='#define CONFIG_KAI 1'
@@ -5581,13 +5548,8 @@ echores "$_kai"
 
 echocheck "DART"
 if test "$_dart" = auto; then
-  cat > $TMPC << EOF
-#include <os2.h>
-#include <dart.h>
-int main(void) { return 0; }
-EOF
   _dart=no;
-  cc_check -ldart && _dart=yes
+  header_check_broken os2.h dart.h -ldart && _dart=yes
 fi
 if test "$_dart" = yes ; then
   def_dart='#define CONFIG_DART 1'
@@ -5695,18 +5657,9 @@ if test "$_dvdread_internal" = auto ; then
 elif test "$_dvdread" = auto ; then
   _dvdread=no
   if test "$_dl" = yes; then
-    cat > $TMPC << EOF
-#include <inttypes.h>
-#include <dvdread/dvd_reader.h>
-#include <dvdread/ifo_types.h>
-#include <dvdread/ifo_read.h>
-#include <dvdread/nav_read.h>
-int main(void) { return 0; }
-EOF
     _dvdreadcflags=$($_dvdreadconfig --cflags)
     _dvdreadlibs=$($_dvdreadconfig --libs)
-    if cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
-      $_dvdreadcflags $_dvdreadlibs $_ld_dl ; then
+    if header_check dvdread/dvd_reader.h $_dvdreadcflags $_dvdreadlibs $_ld_dl ; then
       _dvdread=yes
       extra_cflags="$extra_cflags $_dvdreadcflags"
       extra_ldflags="$extra_ldflags $_dvdreadlibs"
