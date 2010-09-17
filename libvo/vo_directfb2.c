@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libavutil/common.h>
 
 #include "config.h"
 #include "video_out.h"
@@ -37,10 +38,6 @@
 #include "aspect.h"
 #include "subopt-helper.h"
 #include "mp_fifo.h"
-
-#ifndef min
-#define min(x,y) (((x)<(y))?(x):(y))
-#endif
 
 // triple buffering
 #define TRIPLE 1
@@ -1183,7 +1180,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 		primarylocked = 1;
         };
 
-	p=min(w,pitch);
+	p = FFMIN(w, pitch);
 
 	dst += y*pitch + x;
 	dst2 = dst + pitch*height - y*pitch + y*pitch/4 - x/2;
@@ -1279,7 +1276,7 @@ static uint32_t put_image(mp_image_t *mpi){
 		primarylocked = 1;
         };
 
-	p=min(mpi->w,pitch);
+	p = FFMIN(mpi->w, pitch);
 
 	src = mpi->planes[0]+mpi->y*mpi->stride[0]+mpi->x;
 

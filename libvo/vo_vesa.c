@@ -41,7 +41,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include <libavutil/common.h>
 #include <vbe.h>
 
 #include "video_out.h"
@@ -63,13 +63,6 @@
 
 
 #define MAX_BUFFERS 3
-
-#ifndef max
-#define max(a,b) ((a)>(b)?(a):(b))
-#endif
-#ifndef min
-#define min(a,b) ((a)<(b)?(a):(b))
-#endif
 
 #define UNUSED(x) ((void)(x)) /**< Removes warning about unused arguments */
 
@@ -237,7 +230,7 @@ static void vbeCopyBlock(unsigned long offset,uint8_t *image,unsigned long size)
    while(size)
    {
 	if(!VALID_WIN_FRAME(offset)) vbeSwitchBank(offset);
-	delta = min(size,win.high - offset);
+	delta = FFMIN(size, win.high - offset);
 	fast_memcpy(VIDEO_PTR(offset),&image[src_idx],delta);
 	src_idx += delta;
 	offset += delta;
@@ -546,7 +539,7 @@ unsigned fillMultiBuffer( unsigned long vsize, unsigned nbuffs )
     mp_msg(MSGT_VO,MSGL_V, "vo_vesa: Can use up to %u video buffers\n",total);
   i = 0;
   offset = 0;
-  total = min(total,nbuffs);
+  total = FFMIN(total, nbuffs);
   while(i < total) { multi_buff[i++] = offset; offset += screen_size; }
   if(!i)
     mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_VESA] You have too little video memory for this mode:\n[VO_VESA] Required: %08lX present: %08lX.\n", screen_size, vsize);
@@ -739,9 +732,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	    dstH = d_height;
 	}
 	if(vo_screenwidth) w = vo_screenwidth;
-	else w = max(dstW,width);
+	else w = FFMAX(dstW, width);
 	if(vo_screenheight) h = vo_screenheight;
-	else h = max(dstH,height);
+	else h = FFMAX(dstH, height);
         for(i=0;i < num_modes;i++)
 	{
 		if((err=vbeGetModeInfo(mode_ptr[i],&vmib)) != VBE_OK)
