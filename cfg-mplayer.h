@@ -147,11 +147,6 @@ const m_option_t mplayer_opts[]={
     {"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"fbmodeconfig", &fb_mode_cfgfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
-#ifdef CONFIG_DIRECTFB
-#if DIRECTFBVERSION > 912
-    {"dfbopts", "-dfbopts has been removed. Use -vf directfb:dfbopts=... instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif
-#endif
 
     // force window width/height or resolution (with -vm)
     OPT_INTRANGE("x", screen_size_x, 0, 0, 4096),
