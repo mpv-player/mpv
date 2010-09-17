@@ -5646,8 +5646,8 @@ if test "$_dvdread_internal" = auto ; then
 elif test "$_dvdread" = auto ; then
   _dvdread=no
   if test "$_dl" = yes; then
-    _dvdreadcflags=$($_dvdreadconfig --cflags)
-    _dvdreadlibs=$($_dvdreadconfig --libs)
+    _dvdreadcflags=$($_dvdreadconfig --cflags 2> /dev/null)
+    _dvdreadlibs=$($_dvdreadconfig --libs 2> /dev/null)
     if header_check dvdread/dvd_reader.h $_dvdreadcflags $_dvdreadlibs $_ld_dl ; then
       _dvdread=yes
       extra_cflags="$extra_cflags $_dvdreadcflags"
