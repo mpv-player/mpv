@@ -183,7 +183,8 @@ static int vlvo_draw_slice_420(uint8_t *image[], int stride[],
     return 0;
 }
 
-int vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static int vlvo_draw_slice(uint8_t *image[], int stride[],
+                           int w,int h,int x,int y)
 {
  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
    mp_msg(MSGT_VO,MSGL_DBG2, "vesa_lvo: vlvo_draw_slice() was called\n");}
@@ -201,7 +202,7 @@ int vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
  return 0;
 }
 
-int vlvo_draw_frame(uint8_t *image[])
+static int vlvo_draw_frame(uint8_t *image[])
 {
 /* Note it's very strange but sometime for YUY2 draw_frame is called */
   fast_memcpy(lvo_mem,image[0],mga_vid_config.frame_size);
@@ -210,7 +211,7 @@ int vlvo_draw_frame(uint8_t *image[])
   return 0;
 }
 
-void     vlvo_flip_page(void)
+static void vlvo_flip_page(void)
 {
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
     mp_msg(MSGT_VO,MSGL_DBG2, "vesa_lvo: vlvo_draw_osd() was called\n");}
@@ -271,7 +272,7 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 }
 #endif
 
-void     vlvo_draw_osd(void)
+static void vlvo_draw_osd(void)
 {
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
     mp_msg(MSGT_VO,MSGL_DBG2,"vesa_lvo: vlvo_draw_osd() was called\n"); }
@@ -307,7 +308,7 @@ int vlvo_preinit(const char *drvname)
 	return 0;
 }
 
-uint32_t vlvo_query_info(uint32_t format)
+static uint32_t vlvo_query_info(uint32_t format)
 {
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
     mp_msg(MSGT_VO,MSGL_DBG2, "vesa_lvo: query_format was called: %x (%s)\n",format,vo_format_name(format)); }
