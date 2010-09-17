@@ -165,7 +165,8 @@ void vlvo_term( void )
 	if(lvo_handler != -1) close(lvo_handler);
 }
 
-int vlvo_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static int vlvo_draw_slice_420(uint8_t *image[], int stride[],
+                                    int w, int h, int x, int y)
 {
     uint8_t *src;
     uint8_t *dest;
