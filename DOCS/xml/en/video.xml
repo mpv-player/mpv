@@ -1025,11 +1025,6 @@ at least.)
 </para></listitem>
 </itemizedlist>
 
-<important><para>
-Don't use this driver with <emphasis role="bold">GCC 2.96</emphasis>!
-It won't work!
-</para></important>
-
 <variablelist>
 <title>COMMAND LINE OPTIONS AVAILABLE FOR VESA</title>
 <varlistentry>
