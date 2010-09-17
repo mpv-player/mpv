@@ -528,7 +528,7 @@ static char *model2str(unsigned char type)
   return retval;
 }
 
-unsigned fillMultiBuffer( unsigned long vsize, unsigned nbuffs )
+static unsigned fillMultiBuffer(unsigned long vsize, unsigned nbuffs)
 {
   unsigned long screen_size, offset;
   unsigned total,i;
