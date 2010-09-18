@@ -2968,7 +2968,7 @@ cc_check && _mkstemp=yes
 if test "$_mkstemp" = yes ; then
   def_mkstemp='#define HAVE_MKSTEMP 1'
 else
-  def_mkstemp='#undef HAVE_MKSTEMP'
+  def_mkstemp='#define HAVE_MKSTEMP 0'
 fi
 echores "$_mkstemp"
 
