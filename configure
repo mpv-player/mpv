@@ -115,8 +115,9 @@ EOF
   compile_check $TMPC $@
 }
 
-# This is a special check only to be used for broken headers that do not
-# include all dependencies.
+# The following checks are special and should only be used with broken and
+# non-selfsufficient headers that do not include all of their dependencies.
+
 header_check_broken() {
   cat > $TMPC << EOF
 #include <$1>
@@ -125,6 +126,16 @@ int main(void) { return 0; }
 EOF
   shift
   shift
+  compile_check $TMPC $@
+}
+
+function_check_broken() {
+  cat > $TMPC << EOF
+#include <$1>
+#include <$2>
+int main(void) { $3; return 0; }
+EOF
+  shift 3
   compile_check $TMPC $@
 }
 
@@ -6264,14 +6275,9 @@ echores "$_libmpeg2"
 echocheck "libdca support"
 if test "$_libdca" = auto ; then
   _libdca=no
-  cat > $TMPC << EOF
-#include <inttypes.h>
-#include <dts.h>
-int main(void) { dts_init(0); return 0; }
-EOF
   for _ld_dca in -ldca -ldts ; do
-    cc_check $_ld_dca $_ld_lm && extra_ldflags="$extra_ldflags $_ld_dca" \
-      && _libdca=yes && break
+    function_check_broken stdint.h dts.h 'dts_init(0)' $_ld_dca $_ld_lm &&
+      extra_ldflags="$extra_ldflags $_ld_dca" && _libdca=yes && break
   done
 fi
 if test "$_libdca" = yes ; then
