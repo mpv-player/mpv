@@ -6789,6 +6789,7 @@ echores "$_zr"
 if test "$_mencoder" != no ; then
 
 echocheck "libmp3lame"
+def_mp3lame='#undef CONFIG_MP3LAME'
 def_mp3lame_preset='#undef CONFIG_MP3LAME_PRESET'
 def_mp3lame_preset_medium='#undef CONFIG_MP3LAME_PRESET_MEDIUM'
 if test "$_mp3lame" = auto ; then
@@ -6807,8 +6808,6 @@ if test "$_mp3lame" = yes ; then
   libs_mencoder="$libs_mencoder $_ld_mp3lame"
   function_check lame/lame.h 'lame_set_preset(NULL, STANDARD_FAST)' $_ld_mp3lame $_ld_lm && def_mp3lame_preset="#define CONFIG_MP3LAME_PRESET 1"
   function_check lame/lame.h 'lame_set_preset(NULL,   MEDIUM_FAST)' $_ld_mp3lame $_ld_lm && def_mp3lame_preset_medium="#define CONFIG_MP3LAME_PRESET_MEDIUM 1"
-else
-  def_mp3lame='#undef CONFIG_MP3LAME'
 fi
 echores "$_mp3lame"
 
