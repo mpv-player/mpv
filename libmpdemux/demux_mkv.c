@@ -368,6 +368,7 @@ static void demux_mkv_decode(mkv_track_t *track, uint8_t *src,
 #endif
         } else if (enc->comp_algo == 2) {
             /* lzo encoded track */
+            int out_avail;
             int dstlen = *size * 3;
 
             *dest = NULL;
@@ -375,7 +376,8 @@ static void demux_mkv_decode(mkv_track_t *track, uint8_t *src,
                 int srclen = *size;
                 *dest = talloc_realloc_size(NULL, *dest,
                                             dstlen + AV_LZO_OUTPUT_PADDING);
-                int result = av_lzo1x_decode(*dest, &dstlen, src, &srclen);
+                out_avail = dstlen;
+                int result = av_lzo1x_decode(*dest, &out_avail, src, &srclen);
                 if (result == 0)
                     break;
                 if (!(result & AV_LZO_OUTPUT_FULL)) {
@@ -389,7 +391,7 @@ static void demux_mkv_decode(mkv_track_t *track, uint8_t *src,
                        "[mkv] lzo decompression buffer too small.\n");
                 dstlen *= 2;
             }
-            *size = dstlen;
+            *size = dstlen - out_avail;
         } else if (enc->comp_algo == 3) {
             *dest = talloc_size(NULL, *size + enc->comp_settings_len);
             memcpy(*dest, enc->comp_settings, enc->comp_settings_len);
