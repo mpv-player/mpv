@@ -115,9 +115,8 @@ EOF
   compile_check $TMPC $@
 }
 
-# this is a special check only to be
-# used for broken headers that do not
-# include all dependencies
+# This is a special check only to be used for broken headers that do not
+# include all dependencies.
 header_check_broken() {
   cat > $TMPC << EOF
 #include <$1>
@@ -2332,9 +2331,8 @@ echocheck "byte order"
 if test "$_big_endian" = auto ; then
   cat > $TMPC <<EOF
 short ascii_name[] = {
-  (('M' << 8) | 'P'), (('l' << 8) | 'a'), (('y' << 8) | 'e'),
-  (('r' << 8) | 'B'), (('i' << 8) | 'g'), (('E' << 8) | 'n'),
-  (('d' << 8) | 'i'), (('a' << 8) | 'n'), 0 };
+  'M' << 8 | 'P', 'l' << 8 | 'a', 'y' << 8 | 'e', 'r' << 8 | 'B',
+  'i' << 8 | 'g', 'E' << 8 | 'n', 'd' << 8 | 'i', 'a' << 8 | 'n', 0 };
 int main(void) { return (long)ascii_name; }
 EOF
   if cc_check ; then
@@ -3603,11 +3601,7 @@ echocheck "swab()"
 cat > $TMPC << EOF
 #define _XOPEN_SOURCE 600
 #include <unistd.h>
-int main(void) {
-    int a = 0, b = 0;
-    swab(&a, &b, 0);
-    return 0;
-}
+int main(void) { int a, b; swab(&a, &b, 0); return 0; }
 EOF
 _swab=no
 cc_check && _swab=yes
