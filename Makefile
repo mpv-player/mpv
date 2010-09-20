@@ -973,12 +973,6 @@ install-dhahelper: vidix/dhahelper/dhahelper.o
 
 dhahelperwin: vidix/dhahelperwin/dhasetup.exe vidix/dhahelperwin/dhahelper.sys
 
-vidix/dhahelperwin/dhasetup.exe: vidix/dhahelperwin/dhasetup.c
-	$(CC) -o $@ $<
-
-vidix/dhahelperwin/dhahelper.o: vidix/dhahelperwin/dhahelper.c vidix/dhahelperwin/dhahelper.h
-	$(CC) -Wall -Os -c $< -o $@
-
 vidix/dhahelperwin/dhahelper-rc.o: vidix/dhahelperwin/common.ver vidix/dhahelperwin/ntverp.h
 
 vidix/dhahelperwin/base.tmp: vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
