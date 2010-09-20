@@ -5619,13 +5619,7 @@ echores "$_vcd"
 echocheck "Blu-ray support"
 if test "$_bluray" = auto ; then
   _bluray=no
-
-  cat > $TMPC << EOF
-#include <stdlib.h>
-#include <libbluray/bluray.h>
-int main(void) { BLURAY_TITLE_INFO *i = bd_get_title_info(NULL, 0); return 0; }
-EOF
-  compile_check $TMPC -lbluray && _bluray=yes
+  function_check libbluray/bluray.h 'bd_get_title_info(0, 0)' -lbluray && _bluray=yes
 fi
 if test "$_bluray" = yes ; then
   def_bluray='#define CONFIG_LIBBLURAY 1'
