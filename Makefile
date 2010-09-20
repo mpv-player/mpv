@@ -752,7 +752,7 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 
 # Make sure all generated header files are created.
 codec-cfg.d codec-cfg.o: codecs.conf.h
-$(call ADDSUFFIXES,.d .o,mpcommon osdep/mplayer.rc): version.h
+$(call ADDSUFFIXES,.d .o,mpcommon osdep/mplayer-rc): version.h
 
 # Files that depend on libswscale internals
 libmpcodecs/vf_palette.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
