@@ -34,6 +34,9 @@
 #include "vobsub.h"
 #include "spudec.h"
 
+/* linking hacks */
+char *mplayer_version;
+
 /* XXX Kludge ahead, this MUST be the same as the definitions found in ../spudec.c */
 typedef struct packet_t packet_t;
 struct packet_t {
