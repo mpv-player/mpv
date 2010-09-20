@@ -838,7 +838,7 @@ clean:
 	-rm -f $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
 	-rm -f $(call ADD_ALL_EXESUFS,mplayer)
 
-distclean: clean testsclean toolsclean driversclean dhahelperclean dhahelperwinclean
+distclean: clean testsclean toolsclean driversclean dhahelperclean
 	-rm -rf DOCS/tech/doxygen
 	-rm -f $(call ADD_ALL_DIRS,/*.d)
 	-rm -f config.log config.mak config.h codecs.conf.h \
@@ -971,9 +971,6 @@ install-dhahelper: vidix/dhahelper/dhahelper.o
 	depmod -a
 	-mknod /dev/dhahelper c 180 0
 
-dhahelperclean:
-	-rm -f vidix/dhahelper/*.o vidix/dhahelper/*~ vidix/dhahelper/test
-
 dhahelperwin: vidix/dhahelperwin/dhasetup.exe vidix/dhahelperwin/dhahelper.sys
 
 vidix/dhahelperwin/dhasetup.exe: vidix/dhahelperwin/dhasetup.c
@@ -1002,7 +999,8 @@ vidix/dhahelperwin/dhahelper.sys: vidix/dhahelperwin/temp.exp vidix/dhahelperwin
 install-dhahelperwin:
 	vidix/dhahelperwin/dhasetup.exe install
 
-dhahelperwinclean:
+dhahelperclean:
+	-rm -f vidix/dhahelper/*.o vidix/dhahelper/*~ vidix/dhahelper/test
 	-rm -f $(addprefix vidix/dhahelperwin/,*.o *~ dhahelper.sys dhasetup.exe base.tmp temp.exp)
 
 
