@@ -752,7 +752,7 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 
 # Make sure all generated header files are created.
 codec-cfg.d codec-cfg.o: codecs.conf.h
-$(call ADDSUFFIXES,.d .o,mpcommon osdep/mplayer-rc): version.h
+mpcommon.o osdep/mplayer-rc.o: version.h
 
 # Files that depend on libswscale internals
 libmpcodecs/vf_palette.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
@@ -785,10 +785,9 @@ VIDIX_PCI_FILES = vidix/pci_dev_ids.c vidix/pci_ids.h vidix/pci_names.c \
 $(VIDIX_PCI_FILES): vidix/pci_db2c.awk vidix/pci.db
 	awk -f $^ $(VIDIX_PCIDB)
 
-VIDIX_DEPS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.d))
 VIDIX_OBJS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.o))
 
-$(VIDIX_DEPS) $(VIDIX_OBJS): $(VIDIX_PCI_FILES)
+$(VIDIX_OBJS): $(VIDIX_PCI_FILES)
 
 
 
