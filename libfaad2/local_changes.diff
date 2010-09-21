@@ -1,7 +1,7 @@
 --- libfaad2.orig/bits.h	2006-03-16 20:15:04.000000000 +0100
 +++ libfaad2/bits.h	2006-03-16 20:37:21.000000000 +0100
 @@ -58,7 +61,7 @@
-
+ 
  #if defined (_WIN32) && !defined(_WIN32_WCE) && !defined(__MINGW32__)
  #define BSWAP(a) __asm mov eax,a __asm bswap eax __asm mov a, eax
 -#elif defined(LINUX) || defined(DJGPP) || defined(__MINGW32__)
@@ -12,7 +12,7 @@
 --- libfaad2.orig/common.h	2006-03-16 20:15:04.000000000 +0100
 +++ libfaad2/common.h	2006-03-16 20:56:56.000000000 +0100
 @@ -32,8 +37,13 @@
-
+ 
  #ifdef HAVE_CONFIG_H
  #  include "../config.h"
  #endif
@@ -21,19 +21,19 @@
 +#if defined(__CYGWIN__)
 +#define __STRICT_ANSI__
 +#endif
-
+ 
  #define INLINE __inline
  #if 0 //defined(_WIN32) && !defined(_WIN32_WCE)
  #define ALIGN __declspec(align(16))
 @@ -61,7 +69,7 @@
  /* Use if target platform has address generators with autoincrement */
  //#define PREFER_POINTERS
-
+ 
 -#ifdef _WIN32_WCE
 +#if defined(_WIN32_WCE) || defined(__arm__) || defined(__avr32__)
  #define FIXED_POINT
  #endif
-
+ 
 @@ -117,6 +125,9 @@
  # ifdef MAIN_DEC
  #  undef MAIN_DEC
@@ -42,12 +42,12 @@
 +#  undef SBR_DEC
 +# endif
  #endif // FIXED_POINT
-
+ 
  #ifdef DRM
 @@ -151,6 +162,7 @@
-
+ 
  #include <stdlib.h>
-
+ 
 +#if 0
  typedef unsigned __int64 uint64_t;
  typedef unsigned __int32 uint32_t;
@@ -61,7 +61,7 @@
 +#endif
 +
  typedef float float32_t;
-
+ 
 @@ -245,7 +245,7 @@
  
  #endif
@@ -73,8 +73,8 @@
  
 @@ -289,7 +305,7 @@
    }
-
-
+ 
+ 
 -  #if defined(_WIN32) && !defined(__MINGW32__)
 +  #if defined(_WIN32) && !defined(__MINGW32__) && !HAVE_LRINTF
      #define HAS_LRINTF
@@ -90,9 +90,9 @@
      // from http://www.stereopsis.com/FPU.html
      static INLINE int lrintf(float f)
 @@ -330,6 +346,8 @@
-
+ 
    #else
-
+ 
 +#include <math.h>
 +
 -#ifdef HAVE_LRINTF
@@ -102,7 +102,7 @@
 @@ -338,8 +356,6 @@
  #  define __USE_ISOC99   1
  #endif
-
+ 
 -    #include <math.h>
 -
  #ifdef HAVE_SINF
@@ -113,7 +113,7 @@
 @@ -463,7 +462,7 @@
      }
  }
-
+ 
 -void* output_to_PCM(NeAACDecHandle hDecoder,
 +void* output_to_PCM_sux(NeAACDecHandle hDecoder,
                      real_t **input, void *sample_buffer, uint8_t channels,
@@ -122,7 +122,7 @@
 @@ -554,4 +553,51 @@
      return sample_buffer;
  }
-
+ 
 +void* output_to_PCM(NeAACDecHandle hDecoder,
 +                    real_t **input, void *sample_buffer, uint8_t channels,
 +                    uint16_t frame_len, uint8_t format)
@@ -174,7 +174,7 @@
 --- libfaad2.orig/ps_dec.c	2006-03-16 20:15:04.000000000 +0100
 +++ libfaad2/ps_dec.c	2006-04-18 20:29:38.000000000 +0200
 @@ -159,7 +162,7 @@
-
+ 
  /* static function declarations */
  static void ps_data_decode(ps_info *ps);
 -static hyb_info *hybrid_init();
@@ -184,13 +184,13 @@
  static void INLINE DCT3_4_unscaled(real_t *y, real_t *x);
 @@ -189,7 +192,7 @@
  /*  */
-
-
+ 
+ 
 -static hyb_info *hybrid_init()
 +static hyb_info *hybrid_init(void)
  {
      uint8_t i;
-
+ 
 @@ -1935,8 +1938,8 @@
  /* main Parametric Stereo decoding function */
  uint8_t ps_decode(ps_info *ps, qmf_t X_left[38][64], qmf_t X_right[38][64])
@@ -199,7 +199,7 @@
 -    qmf_t X_hybrid_right[32][32] = {{0}};
 +    qmf_t X_hybrid_left[32][32] = {{{0}}};
 +    qmf_t X_hybrid_right[32][32] = {{{0}}};
-
+ 
      /* delta decoding of the bitstream data */
      ps_data_decode(ps);
 --- libfaad2.orig/sbr_dec.c	2006-03-16 20:15:04.000000000 +0100
@@ -212,7 +212,7 @@
 -    ALIGN qmf_t X_right[38][64] = {{0}}; /* must set this to 0 */
 +    ALIGN qmf_t X_left[38][64] = {{{0}}};
 +    ALIGN qmf_t X_right[38][64] = {{{0}}}; /* must set this to 0 */
-
+ 
      if (sbr == NULL)
          return 20;
 --- libfaad2.orig/specrec.c	2006-03-16 20:15:04.000000000 +0100
@@ -230,7 +230,7 @@
 -        }
      }
  #endif
-
+ 
  #ifdef LTP_DEC
      if (is_ltp_ot(hDecoder->object_type))
      {
@@ -243,7 +243,7 @@
 -        }
      }
  #endif
-
+ 
 -    if (hDecoder->time_out[channel] == NULL)
 -    {
          mul = 1;
@@ -268,14 +268,14 @@
 -        }
      }
  #endif
-
+ 
 -    if (hDecoder->fb_intermed[channel] == NULL)
 -    {
 -        hDecoder->fb_intermed[channel] = (real_t*)faad_malloc(hDecoder->frameLength*sizeof(real_t));
 +        hDecoder->fb_intermed[channel] = (real_t*)realloc(hDecoder->fb_intermed[channel], hDecoder->frameLength*sizeof(real_t));
          memset(hDecoder->fb_intermed[channel], 0, hDecoder->frameLength*sizeof(real_t));
 -    }
-
+ 
  #ifdef SSR_DEC
      if (hDecoder->object_type == SSR)
      {
@@ -296,9 +296,9 @@
 -        }
      }
  #endif
-
+ 
 @@ -865,22 +842,14 @@
-
+ 
      /* always allocate 2 channels, PS can always "suddenly" turn up */
  #if (defined(PS_DEC) || defined(DRM_PS))
 -    output_channels = 2;
@@ -306,7 +306,7 @@
  #else
      output_channels = 1;
  #endif
-
+ 
 -    if (hDecoder->element_output_channels[hDecoder->fr_ch_ele] == 0)
 -    {
 -        /* element_output_channels not set yet */
@@ -328,7 +328,7 @@
          return 23;
      }
 -#endif
-
+ 
      /* copy L to R when no PS is used */
  #if (defined(PS_DEC) || defined(DRM_PS))
 -    if ((hDecoder->ps_used[hDecoder->fr_ch_ele] == 0))
@@ -341,6 +341,6 @@
      }
  #endif
 +#endif
-
+ 
      return 0;
  }
