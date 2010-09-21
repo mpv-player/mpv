@@ -305,7 +305,7 @@ char *strchr(), *strrchr();
   }
 
 
-  #if defined(_WIN32) && !defined(__MINGW32__) && !HAVE_LRINTF
+  #if defined(_WIN32) && !defined(__MINGW32__)
     #define HAS_LRINTF
     static INLINE int lrintf(float f)
     {
@@ -317,7 +317,7 @@ char *strchr(), *strrchr();
         }
         return i;
     }
-  #elif (defined(__i386__) && defined(__GNUC__)) && !HAVE_LRINTF
+  #elif (defined(__i386__) && defined(__GNUC__)) && __STDC_VERSION__ < 199901L
     #define HAS_LRINTF
     // from http://www.stereopsis.com/FPU.html
     static INLINE int lrintf(float f)
@@ -348,7 +348,7 @@ char *strchr(), *strrchr();
 
 #include <math.h>
 
-#if HAVE_LRINTF
+#ifdef HAVE_LRINTF
 #  define HAS_LRINTF
 #  define _ISOC9X_SOURCE 1
 #  define _ISOC99_SOURCE 1
