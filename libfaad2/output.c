@@ -462,9 +462,9 @@ static INLINE real_t get_sample(real_t **input, uint8_t channel, uint16_t sample
     }
 }
 
-void* output_to_PCM_sux(NeAACDecHandle hDecoder,
-                    real_t **input, void *sample_buffer, uint8_t channels,
-                    uint16_t frame_len, uint8_t format)
+static void* output_to_PCM_sux(NeAACDecHandle hDecoder,
+                               real_t **input, void *sample_buffer, uint8_t channels,
+                               uint16_t frame_len, uint8_t format)
 {
     uint8_t ch;
     uint16_t i;

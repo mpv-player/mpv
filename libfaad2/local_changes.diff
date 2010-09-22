@@ -99,15 +99,19 @@
  #error
 --- libfaad2.orig/output.c	2006-03-16 20:15:04.000000000 +0100
 +++ libfaad2/output.c	2006-04-18 19:50:26.000000000 +0200
-@@ -463,7 +462,7 @@
+@@ -463,9 +462,9 @@
      }
  }
  
 -void* output_to_PCM(NeAACDecHandle hDecoder,
-+void* output_to_PCM_sux(NeAACDecHandle hDecoder,
-                     real_t **input, void *sample_buffer, uint8_t channels,
-                     uint16_t frame_len, uint8_t format)
+-                    real_t **input, void *sample_buffer, uint8_t channels,
+-                    uint16_t frame_len, uint8_t format)
++static void* output_to_PCM_sux(NeAACDecHandle hDecoder,
++                               real_t **input, void *sample_buffer, uint8_t channels,
++                               uint16_t frame_len, uint8_t format)
  {
+     uint8_t ch;
+     uint16_t i;
 @@ -554,4 +553,51 @@
      return sample_buffer;
  }
