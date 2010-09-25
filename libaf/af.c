@@ -177,7 +177,7 @@ err_out:
 /* Create and insert a new filter of type name before the filter in the
    argument. This function can be called during runtime, the return
    value is the new filter */
-static af_instance_t* af_prepend(af_stream_t* s, af_instance_t* af, char* name)
+static af_instance_t* af_prepend(af_stream_t* s, af_instance_t* af, const char* name)
 {
   // Create the new filter and make sure it is OK
   af_instance_t* new=af_create(s,name);
@@ -201,7 +201,7 @@ static af_instance_t* af_prepend(af_stream_t* s, af_instance_t* af, char* name)
 /* Create and insert a new filter of type name after the filter in the
    argument. This function can be called during runtime, the return
    value is the new filter */
-static af_instance_t* af_append(af_stream_t* s, af_instance_t* af, char* name)
+static af_instance_t* af_append(af_stream_t* s, af_instance_t* af, const char* name)
 {
   // Create the new filter and make sure it is OK
   af_instance_t* new=af_create(s,name);
