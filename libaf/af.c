@@ -437,17 +437,18 @@ int af_init(af_stream_t* s)
   // Check if this is the first call
   if(!s->first){
     // Add all filters in the list (if there are any)
-    if(!s->cfg.list){      // To make automatic format conversion work
-      if(!af_append(s,s->first,"dummy"))
-	return -1;
-    }
-    else{
+    if (s->cfg.list) {
       while(s->cfg.list[i]){
 	if(!af_append(s,s->last,s->cfg.list[i++]))
 	  return -1;
       }
     }
   }
+
+  // If we do not have any filters otherwise
+  // add dummy to make automatic format conversion work
+  if (!s->first && !af_append(s, s->first, "dummy"))
+    return -1;
 
   // Init filters
   if(AF_OK != af_reinit(s,s->first))
