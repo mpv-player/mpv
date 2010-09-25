@@ -21,6 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *****************************************************************************/
 
+#ifndef DVDCSS_IOCTL_H
+#define DVDCSS_IOCTL_H
+
 int ioctl_ReadCopyright     ( int, int, int * );
 int ioctl_ReadDiscKey       ( int, int *, uint8_t * );
 int ioctl_ReadTitleKey      ( int, int *, int, uint8_t * );
@@ -427,3 +430,5 @@ struct OS2_ExecSCSICmd
 #pragma pack()
 
 #endif
+
+#endif /* DVDCSS_IOCTL_H */

@@ -24,6 +24,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *****************************************************************************/
 
+#ifndef DVDCSS_COMMON_H
+#define DVDCSS_COMMON_H
+
 /*****************************************************************************
  * Basic types definitions
  *****************************************************************************/
@@ -79,3 +82,4 @@ typedef __int64 off_t;
 
 #endif
 
+#endif /* DVDCSS_COMMON_H */

@@ -30,7 +30,7 @@ License:    GNU General Public License
 
 
 Name:       libdvdcss
-Version:    Subversion r231
+Version:    Subversion r237 + local changes
 URL:        http://developers.videolan.org/libdvdcss/
 Directory:  libdvdcss
 Copyright:  1998-2008 VideoLAN

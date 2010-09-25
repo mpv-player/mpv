@@ -29,6 +29,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *****************************************************************************/
 
+#ifndef DVDCSS_CSSTABLES_H
+#define DVDCSS_CSSTABLES_H
 
 static uint8_t p_css_tab1[ 256 ] =
 {
@@ -390,3 +392,4 @@ static uint8_t p_crypt_tab3[ 288 ] =
     0xC3, 0x82, 0xC9, 0x15, 0x57, 0x16, 0x5D, 0x81
 };
 
+#endif /* DVDCSS_CSSTABLES_H */

@@ -26,6 +26,12 @@
  * with libdvdcss; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *****************************************************************************/
+
+#ifndef DVDCSS_CSS_H
+#define DVDCSS_CSS_H
+
+#include "dvdcss/dvdcss.h"
+
 #define KEY_SIZE 5
 
 typedef uint8_t dvd_key_t[KEY_SIZE];
@@ -54,3 +60,4 @@ int   _dvdcss_disckey     ( dvdcss_t );
 int   _dvdcss_titlekey    ( dvdcss_t, int , dvd_key_t );
 int   _dvdcss_unscramble  ( uint8_t *, uint8_t * );
 
+#endif /* DVDCSS_CSS_H */
