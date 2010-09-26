@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r30714 -->
+<!-- synced with r32361 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -696,14 +696,69 @@ leírt blokkok kihagyása.
 </para>
 </sect2>
 </sect1>
-</chapter>
-
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
+<sect1 id="networksync" xreflabel="Network Synchronized Playback">
+<title>Szinkronizált lejátszás hálózaton</title>
 
-<chapter id="advaudio" xreflabel="Advanced Audio">
-<title>Továbbfejlesztett audió használata</title>
+<para>
+Az <application>MPlayer</application> több példánya szinkronizálni tudja a
+lejátszást hálózaton keresztül. EZ hasznos "videó falak" létrehozásakor, amikor
+a több képernyőt külön számítógép vezérel. Minden
+<application>MPlayer</application> példány különböző
+videót tud lejátszani, de megpróbálnak ugyan azon az idő eltoláson maradni
+a fájlban. Javasolt, de nem szükséges, hogy a videó fájlok ugyan azzal a codeccel
+és paraméterekkel legyenek elkódolva.
+</para>
+
+<para>A vonatkozó opciók az <option>-udp-master</option>,
+  <option>-udp-slave</option>, <option>-udp-ip</option>,
+  <option>-udp-port</option> és az <option>-udp-seek-threshold</option>.
+</para>
+
+<para>
+Ha az <option>-udp-master</option> meg van adva, az <application>MPlayer</application>
+egy adatcsomagot küld az <option>-udp-ip</option> címre (alapértelmezett: 127.0.0.1)
+az <option>-udp-port</option> porton (alapértelmezett: 23867) minden egyes kocka
+lejátszása előtt.
+Az adatcsomag a mester pozícióját mutatja a fájlban. Ha az
+<option>-udp-slave</option> meg van adva, az <application>MPlayer</application> figyeli az
+<option>-udp-ip</option>/<option>-udp-port</option>-ot
+és követi a mester pozícióját. Az <option>-udp-ip</option> a mester broadcast címére
+történő állításával több kiszolgáló azonos broadcast címen tud szinkronizálni a mesterrel.
+Ne feledd, hogy ez a képesség egy ethernet-szerű, alacsony késleltetésű hálózati kapcsolatot
+feltételez. A működés változhat nagy késleltetésű hálózatokon.
+</para>
+
+<para>
+Például tegyük fel, hogy 8 számítógép van a hálózaton, 192.168.0.1 és 192.168.0.8
+közötti IP címekkel. Tegyük fel, hogy az első számítógép lesz a mester. A gépeken
+lefuttatott ifconfig "Bcast:192.168.0.255"-öt ír. A mesteren futtasd ezt:
+</para>
+
+<screen>
+mplayer -udp-master -udp-ip 192.168.0.255 video1.mpg
+</screen>
+
+<para>
+A kiszolgálókon pedig ezt:
+</para>
+
+<screen>
+mplayer -udp-slave videoN.mpg
+</screen>
+
+<para>
+A keresés, pillanatállj, sőt még a lejátszás sebességének állítása is
+(lásd az <option>-input</option> opciót) végbemehet a mesteren, minden kiszolgáló
+követni fogja. Ha a mester kilép, kiküld egy "bye" üzenetet, aminek a hatására a
+kiszolgálók is kilépnek.
+</para>
+
+</sect1>
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 <sect1 id="advaudio-surround">
 <title>Térhatású/többcsatornás lejátszás</title>
@@ -1337,26 +1392,6 @@ a vezérlő billentyűk listájáért.
 
 <!-- ********** -->
 
-
-<sect1 id="tv-compilation">
-<title>Fordítás</title>
-
-<procedure>
-<step><para>
-  Először is újra fordítanod kell. A <filename>./configure</filename>
-  automatikusan megtalálja a v4l dolgok kernel fejléceit és a
-  <filename>/dev/video*</filename> bejegyzéseket. Ha léteznek, a TV támogatás
-  be lesz építve (lásd a <filename>./configure</filename> kimenetét).
-</para></step>
-<step><para>
-  Győződj meg róla, hogy a tunered működik másik Linuxos TV szoftverrel is,
-  például a <application>XawTV</application>-vel.
-</para></step>
-</procedure>
-</sect1>
-
-<!-- ********** -->
-
 <sect1 id="tv-tips">
 <title>Használati tippek</title>
 
@@ -1365,6 +1400,10 @@ A kapcsolók teljes listája a man oldalon található.
 Itt csak pár tippet említünk meg:
 
 <itemizedlist>
+<listitem><para>
+  Győződj meg róla, hogy a tuner működik más rádiós programmal Linuxon,
+  például a <application>XawTV</application>-vel.
+</para></listitem>
 <listitem><para>
   Használd a <option>channels</option> kapcsolót. Például:
   <screen>-tv channels=26-MTV1,23-TV2</screen>
@@ -1568,24 +1607,6 @@ rádiós opciók és a billentyűzeten keresztüli vezérlés leírásához.
 
 <!-- ********** -->
 
-<sect2 id="radio-compilation">
-<title>Fordítás</title>
-
-<procedure>
-<step><para>
-  Először újra kell fordítanod az MPlayer-t a
-  <filename>./configure</filename> <option>--enable-radio</option> és
-  (ha menteni is szeretnél) <option>--enable-radio-capture</option> opcióival.
-p</para></step>
-<step><para>
-  Győződj meg róla, hogy a tuner-ed működik más Linux-os rádiós
-  programmal, mint pl. a <application>XawTV</application>.
-</para></step>
-</procedure>
-</sect2>
-
-<!-- ********** -->
-
 <sect2 id="radio-tips">
 <title>Használati tippek</title>
 
@@ -1594,6 +1615,10 @@ Az összes használható opcióhoz nézd meg a man oldalt.
 Következzék pár tipp:
 
 <itemizedlist>
+<listitem><para>
+  Győződj meg róla, hogy a tuner működik más rádiós programmal Linuxon,
+  például a <application>XawTV</application>-vel.
+</para></listitem>
 <listitem><para>
   Használd a <option>channels</option> opciót. Egy példa:
   <screen>-radio channels=104.4-Sibir,103.9-Maximum</screen>

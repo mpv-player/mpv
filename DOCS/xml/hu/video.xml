@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r31821 -->
+<!-- synced with r32283 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -1022,11 +1022,6 @@ többi VBE funkció ezután az aktív vezérlővel dolgozik.
   Jelenleg csak <emphasis role="bold">Linux</emphasis> alatt elérhető.
 </para></listitem>
 </itemizedlist>
-
-<important><para>
-Ne használd ezt a vezérlőt <emphasis role="bold">GCC 2.96</emphasis>-tal!
-Nem fog menni!
-</para></important>
 
 <variablelist>
 <title>A VESA PARANCSSORI KAPCSOLÓI</title>

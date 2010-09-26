@@ -1,4 +1,4 @@
-.\" Synced with r31814
+.\" Synced with r32066
 .\" MPlayer (C) 2000-2010 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2010. 07. 27." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2010. 09. 26." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -891,6 +891,22 @@ Ezzel a paraméterrel megadhatod ezt az idõ intervallumot másodpercekben
 (alapértelmezett: 2 másodperc).
 .
 .TP
+.B \-edl-start-pts
+Beállítja a pozíciókat az EDL rekordokban a lejátszott fájl kezdõ idejének megfelelõen.
+Néhány formátum, különösen az MPEG TS általában nem nulla PTS értékkel kezdõdik,
+és amikor EDL fájl készül az \-edlout kapcsolóval, az EDL rekordok abszolút
+absolute értékeket tartalmaznak, ami csak az adott fájlnál jók.
+Ha egy más formátumra lesz átkódolva, ez az EDL fájl többé nem megfelelõ.
+A \-edl-start-pts megadásával az EDL pozíciók automatikusan igazodnak a kezdõ
+idõhöz: az EDL fájl létrehozásakor kivonja a kezdõ idõt minden EDL rekordból,
+az EDL fájllal történõ lejátszáskor pedig hozzáadja a fájl kezdõ idejét minden
+EDL pozícióhoz.
+.
+.TP
+.B \-noedl-start-pts
+Letiltja az EDL pozíciók beállítását.
+.
+.TP
 .B \-enqueue (csak GUI)
 A parancssorban megadott fájlok a lejátszási listába kerülnek sorba az azonnali
 lejátszás helyett.
@@ -1183,6 +1199,35 @@ Nagyobb CPU használat az ára.
 A film normális framerátája megmarad, így a lejátszás gyorsított. Mivel
 az MPlayer csak a következõ kulcs képkockára tud ugrani, ez pontatlan.
 .
+.TP
+.B \-udp\-ip <ip>
+Beállítja a cél címet az \-udp\-master által küldött adatcsomagoknak.
+Egy broadcast címre történõ állításával elérhetõ, hogy több kiszolgáló
+ugyan azon a broadcast címen tudjon szinkronizálni a mesterrel (alapértelmezett: 127.0.0.1).
+.
+.TP
+.B \-udp\-master
+Kiküld egy adatcsomagot az \-udp\-ip címre az \-udp\-port porton minden kocka
+lejátszása elõtt.
+Az adatcsomag a mester pozícióját mutatja a fájlban.
+.
+.TP
+.B \-udp\-port <port>
+Beállítja a cél portot az \-udp\-master által küldött adatcsomagoknak, és az
+\-udp\-slave által figyelt portot (alapértelmezett: 23867).
+.
+.TP
+.B \-udp\-seek\-threshold <sec>
+Amikor a mester keres, a kiszolgálónak el kell döntenie, hogy õ is ugrik
+vagy a kockák közötti szünet kiiktatásával beéri azt.
+Ha a mester több, mint <sec> másodperccel messzebb van a kiszolgálótól,
+a kiszolgáló ugrik.
+Egyébként "fut", hogy utolérje vagy vár a mesterre.
+Ezt majdnem mindig ajánlott az alapértelmezett 1 másodpercen hagyni.
+.
+.TP
+.B \-udp\-slave
+Figyel az \-udp\-port porton és követi a mester pozícióját.
 .
 .
 .SH "DEMUXER/FOLYAM OPCIÓK"
@@ -2406,8 +2451,9 @@ Ha a feliratok valamelyikét nem tudod kiválasztani a DVD_n, próbáld ki a
 .
 .TP
 .B \-nosub
-Letilt minden automatikusan kiválasztott feliratot (mint pl.\& amit a
+Letilt minden automatikusan kiválasztott belsõ feliratot (mint pl.\& amit a
 Matroska/mkv demuxer támogat).
+A külsõ felirat fájlok betöltését a \-noautosub kapcsolóval tilthatod le.
 .
 .TP
 .B \-slang <nyelv kód[,nyelv kód,...]> (lásd még \-sid)

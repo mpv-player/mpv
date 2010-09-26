@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r29305 -->
+<!-- synced with r31980 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -20,20 +20,19 @@
   <holder>MPlayer team</holder>
 </copyright>
 <legalnotice>
-  <title>License</title>
-  <para>MPlayer is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by the
-  Free Software Foundation; either version 2 of the License, or (at your
-  option) any later version.</para>
+  <title>Licensz</title>
+  <para>Az MPlayer egy szabad szoftver; terjesztheted és/vagy módosíthatod
+  a GNU General Public License 2-es verziója szerint, ahogy azt a Free
+  Software Foundation közzétette.</para>
 
-  <para>MPlayer is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
-  for more details.</para>
+  <para>Az MPlayert abban a hiszemben terjesztjük, hogy hasznos lesz, de
+  MINDENFÉLE GARANCIA NÉLKÜL; sőt, a bennefoglalt ELADHATÓSÁGI és ADOTT
+  CÉLRA MEGFELELŐSÉGI garanciát sem adunk. Lásd a GNU General Public License-et
+  a részletekért.</para>
 
-  <para>You should have received a copy of the GNU General Public License
-  along with MPlayer; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.</para>
+  <para>Az Mplayerrel meg kellett kapnod a GNU General Public License egy
+  másolatát is; ha nem, írj a Free Software Foundation, Inc.-nek, 51 Franklin
+  Street, Fifth Floor, Boston, MA 02110-1301 USA.</para>
 </legalnotice>
 </bookinfo>
 
