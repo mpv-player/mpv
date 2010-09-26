@@ -751,7 +751,7 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 ###### dependency declarations / specific CFLAGS ######
 
 # Make sure all generated header files are created.
-codec-cfg.d codec-cfg.o: codecs.conf.h
+codec-cfg.o: codecs.conf.h
 mpcommon.o osdep/mplayer-rc.o: version.h
 
 # Files that depend on libswscale internals
