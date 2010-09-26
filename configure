@@ -3011,14 +3011,8 @@ echores "$arpa_inet_h"
 echocheck "inet_pton()"
 def_inet_pton='#define HAVE_INET_PTON 0'
 inet_pton=no
-cat > $TMPC << EOF
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-int main(void) { inet_pton(0, 0, 0); return 0; }
-EOF
 for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
-  cc_check $_ld_tmp && inet_pton=yes && break
+  function_check arpa/inet.h 'inet_pton(0, 0, 0)' $_ld_tmp && inet_pton=yes && break
 done
 if test $inet_pton = yes ; then
   test "$_ld_tmp" && res_comment="using $_ld_tmp"
@@ -3030,14 +3024,8 @@ echores "$inet_pton"
 echocheck "inet_aton()"
 def_inet_aton='#define HAVE_INET_ATON 0'
 inet_aton=no
-cat > $TMPC << EOF
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-int main(void) { inet_aton(0, 0); return 0; }
-EOF
 for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
-  cc_check $_ld_tmp && inet_aton=yes && break
+  function_check arpa/inet.h 'inet_aton(0, 0)' $_ld_tmp && inet_aton=yes && break
 done
 if test $inet_aton = yes ; then
   test "$_ld_tmp" && res_comment="using $_ld_tmp"
@@ -3543,7 +3531,6 @@ echores "$_termios"
 echocheck "shm"
 if test "$_shm" = auto ; then
   cat > $TMPC << EOF
-#include <sys/types.h>
 #include <sys/shm.h>
 int main(void) { shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0); return 0; }
 EOF
@@ -3785,7 +3772,6 @@ echocheck "Apple IR"
 if test "$_apple_ir" = auto ; then
   _apple_ir=no
   cat > $TMPC <<EOF
-#include <linux/types.h>
 #include <linux/input.h>
 int main(void) { struct input_event ev; struct input_id id; return 0; }
 EOF
@@ -4648,15 +4634,7 @@ fi
 echocheck "JPEG support"
 if test "$_jpeg" = auto ; then
   _jpeg=no
-cat > $TMPC << EOF
-#include <stdio.h>
-#include <stdlib.h>
-#include <setjmp.h>
-#include <string.h>
-#include <jpeglib.h>
-int main(void) { return 0; }
-EOF
-  cc_check -ljpeg $_ld_lm && _jpeg=yes
+  header_check_broken stdio.h jpeglib.h -ljpeg $_ld_lm && _jpeg=yes
 fi
 echores "$_jpeg"
 
@@ -4992,13 +4970,8 @@ if win32; then
 
 echocheck "Windows waveout"
 if test "$_win32waveout" = auto ; then
-  cat > $TMPC << EOF
-#include <windows.h>
-#include <mmsystem.h>
-int main(void) { return 0; }
-EOF
   _win32waveout=no
-  cc_check -lwinmm && _win32waveout=yes
+  header_check_broken windows.h mmsystem.h -lwinmm && _win32waveout=yes
 fi
 if test "$_win32waveout" = yes ; then
   def_win32waveout='#define CONFIG_WIN32WAVEOUT 1'
@@ -5012,13 +4985,8 @@ echores "$_win32waveout"
 
 echocheck "Direct3D"
 if test "$_direct3d" = auto ; then
-  cat > $TMPC << EOF
-#include <windows.h>
-#include <d3d9.h>
-int main(void) { return 0; }
-EOF
   _direct3d=no
-  cc_check && _direct3d=yes
+  header_check d3d9.h && _direct3d=yes
 fi
 if test "$_direct3d" = yes ; then
   def_direct3d='#define CONFIG_DIRECT3D 1'
@@ -5032,7 +5000,6 @@ echores "$_direct3d"
 echocheck "Directx"
 if test "$_directx" = auto ; then
   cat > $TMPC << EOF
-#include <windows.h>
 #include <ddraw.h>
 #include <dsound.h>
 int main(void) { return 0; }
@@ -5919,18 +5886,8 @@ echores "$_fribidi"
 
 echocheck "ENCA"
 if test "$_enca" = auto ; then
-    cat > $TMPC << EOF
-#include <sys/types.h>
-#include <enca.h>
-int main(void) {
-    const char **langs;
-    size_t langcnt;
-    langs = enca_get_languages(&langcnt);
-    return 0;
-}
-EOF
     _enca=no
-    cc_check -lenca $_ld_lm && _enca=yes
+    function_check enca.h 'enca_get_languages(NULL)' -lenca $_ld_lm && _enca=yes
 fi
     if test "$_enca" = yes ; then
         def_enca='#define CONFIG_ENCA 1'
