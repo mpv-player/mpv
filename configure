@@ -19,23 +19,8 @@
 #  - config.h contains #defines that are used in the C code.
 #  - config.mak is included from the Makefiles.
 #
-# If you want to add a new check for $feature, here is a simple skeleton:
-#
-# echocheck "$feature"
-# if test "$_feature" = auto; then
-# cat > $TMPC << EOF
-# #include <feature.h>
-# int main(void) { return 0; }
-# EOF
-# _feature=no
-# cc_check && _feature=yes
-# fi
-# if test "$_feature" = yes ; then
-#   def_feature='#define CONFIG_FEATURE 1'
-# else
-#   def_feature='#undef CONFIG_FEATURE'
-# fi
-# echores "$_feature"
+# If you want to add a new check for $feature, look at the existing checks
+# and try to use helper functions where you can.
 #
 # Furthermore you need to add the variable _feature to the list of default
 # settings and set it to one of yes/no/auto. Also add appropriate
