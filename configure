@@ -3037,11 +3037,7 @@ echores "$inet_aton"
 echocheck "socklen_t"
 _socklen_t=no
 for header in "sys/socket.h" "ws2tcpip.h" "sys/types.h" ; do
-  cat > $TMPC << EOF
-#include <$header>
-int main(void) { socklen_t v = 0; return v; }
-EOF
-  cc_check && _socklen_t=yes && break
+  statement_check $header 'socklen_t v = 0' && _socklen_t=yes && break
 done
 if test "$_socklen_t" = yes ; then
   def_socklen_t='#define HAVE_SOCKLEN_T 1'
@@ -3230,12 +3226,8 @@ else
 fi
 echores "$_mman"
 
-cat > $TMPC << EOF
-#include <sys/mman.h>
-int main(void) { void *p = MAP_FAILED; return 0; }
-EOF
 _mman_has_map_failed=no
-cc_check && _mman_has_map_failed=yes
+statement_check sys/mman.h 'void *p = MAP_FAILED' && _mman_has_map_failed=yes
 if test "$_mman_has_map_failed" = yes ; then
   def_mman_has_map_failed=''
 else
@@ -3988,11 +3980,6 @@ echores "$_x11_headers"
 
 echocheck "X11"
 if test "$_x11" = auto && test "$_x11_headers" = yes ; then
-  cat > $TMPC <<EOF
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-int main(void) { XCreateWindow(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0); return 0; }
-EOF
   for I in "" -L/usr/X11R7/lib -L/usr/local/lib -L/usr/X11R6/lib -L/usr/lib/X11R6 \
            -L/usr/X11/lib -L/usr/lib32 -L/usr/openwin/lib -L/usr/local/lib64 -L/usr/X11R6/lib64 \
            -L/usr/lib ; do
@@ -4001,8 +3988,8 @@ EOF
     else
       _ld_tmp="$I -lXext -lX11 $_ld_pthread"
     fi
-    cc_check $_ld_tmp && libs_mplayer="$libs_mplayer $_ld_tmp" \
-                      && _x11=yes && break
+    statement_check X11/Xutil.h 'XCreateWindow(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)' $_ld_tmp &&
+      libs_mplayer="$libs_mplayer $_ld_tmp" && _x11=yes && break
   done
 fi
 if test "$_x11" = yes ; then
@@ -4150,13 +4137,8 @@ echores "$_vdpau"
 
 echocheck "Xinerama"
 if test "$_xinerama" = auto ; then
-  cat > $TMPC <<EOF
-#include <X11/Xlib.h>
-#include <X11/extensions/Xinerama.h>
-int main(void) { XineramaIsActive(0); return 0; }
-EOF
   _xinerama=no
-  cc_check -lXinerama && _xinerama=yes
+  statement_check X11/extensions/Xinerama.h 'XineramaIsActive(0)' -lXinerama && _xinerama=yes
 fi
 
 if test "$_xinerama" = yes ; then
@@ -4199,7 +4181,6 @@ echocheck "XF86keysym"
 if test "$_xf86keysym" = auto; then
   _xf86keysym=no
   cat > $TMPC <<EOF
-#include <X11/Xlib.h>
 #include <X11/XF86keysym.h>
 int main(void) { return XF86XK_AudioPause; }
 EOF
@@ -6336,12 +6317,8 @@ echores "$_faad"
 
 echocheck "LADSPA plugin support"
 if test "$_ladspa" = auto ; then
-  cat > $TMPC <<EOF
-#include <ladspa.h>
-int main(void) { LADSPA_Descriptor ld = {0}; return 0; }
-EOF
   _ladspa=no
-  cc_check && _ladspa=yes
+  statement_check ladspa.h 'LADSPA_Descriptor ld = {0}' && _ladspa=yes
 fi
 if test "$_ladspa" = yes; then
   def_ladspa="#define CONFIG_LADSPA 1"
@@ -7269,15 +7246,10 @@ if test "$_dvdnav" = auto ; then
   fi
 fi
 if test "$_dvdnav" = auto ; then
-  cat > $TMPC <<EOF
-#include <inttypes.h>
-#include <dvdnav/dvdnav.h>
-int main(void) { dvdnav_t *dvd=0; return 0; }
-EOF
   _dvdnav=no
   _dvdnavdir=$($_dvdnavconfig --cflags)
   _dvdnavlibs=$($_dvdnavconfig --libs)
-  cc_check $_dvdnavdir $_dvdnavlibs $_ld_dl $_ld_pthread && _dvdnav=yes
+  statement_check_broken stdint.h dvdnav/dvdnav.h 'dvdnav_t *dvd = 0' $_dvdnavdir $_dvdnavlibs $_ld_dl $_ld_pthread && _dvdnav=yes
 fi
 if test "$_dvdnav" = yes ; then
   _largefiles=yes
