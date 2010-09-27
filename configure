@@ -73,7 +73,7 @@ EOF
   compile_check $TMPC $@
 }
 
-function_check() {
+statement_check() {
   cat > $TMPC << EOF
 #include <$1>
 int main(void) { $2; return 0; }
@@ -114,7 +114,7 @@ EOF
   compile_check $TMPC $@
 }
 
-function_check_broken() {
+statement_check_broken() {
   cat > $TMPC << EOF
 #include <$1>
 #include <$2>
@@ -2792,7 +2792,7 @@ fi
 echocheck "langinfo"
 if test "$_langinfo" = auto ; then
   _langinfo=no
-  function_check langinfo.h 'nl_langinfo(CODESET)' && _langinfo=yes
+  statement_check langinfo.h 'nl_langinfo(CODESET)' && _langinfo=yes
 fi
 if test "$_langinfo" = yes ; then
   def_langinfo='#define HAVE_LANGINFO 1'
@@ -2911,7 +2911,7 @@ echores "$_builtin_expect"
 
 echocheck "kstat"
 _kstat=no
-function_check kstat.h 'kstat_open()' -lkstat && _kstat=yes
+statement_check kstat.h 'kstat_open()' -lkstat && _kstat=yes
 if test "$_kstat" = yes ; then
   def_kstat="#define HAVE_LIBKSTAT 1"
   extra_ldflags="$extra_ldflags -lkstat"
@@ -2924,7 +2924,7 @@ echores "$_kstat"
 echocheck "posix4"
 # required for nanosleep on some systems
 _posix4=no
-function_check time.h 'nanosleep(0, 0)' -lposix4 && _posix4=yes
+statement_check time.h 'nanosleep(0, 0)' -lposix4 && _posix4=yes
 if test "$_posix4" = yes ; then
   extra_ldflags="$extra_ldflags -lposix4"
 fi
@@ -2933,7 +2933,7 @@ echores "$_posix4"
 for func in exp2 exp2f llrint log2 log2f lrint lrintf round roundf truncf; do
 echocheck $func
 eval _$func=no
-function_check math.h "${func}(2.0)" -D_ISOC99_SOURCE $_ld_lm && eval _$func=yes
+statement_check math.h "${func}(2.0)" -D_ISOC99_SOURCE $_ld_lm && eval _$func=yes
 if eval test "x\$_$func" = "xyes"; then
   eval def_$func="\"#define HAVE_$(echo $func | tr '[a-z]' '[A-Z]') 1\""
   echores yes
@@ -2962,7 +2962,7 @@ echores "$_mkstemp"
 
 echocheck "nanosleep"
 _nanosleep=no
-function_check time.h 'nanosleep(0, 0)' && _nanosleep=yes
+statement_check time.h 'nanosleep(0, 0)' && _nanosleep=yes
 if test "$_nanosleep" = yes ; then
   def_nanosleep='#define HAVE_NANOSLEEP 1'
 else
@@ -2986,7 +2986,7 @@ done
 test $_socklib = yes && test $_winsock2_h = auto && _winsock2_h=no
 if test $_winsock2_h = auto ; then
   _winsock2_h=no
-  function_check winsock2.h 'gethostbyname(0)' -lws2_32 && _ld_sock="-lws2_32" && _winsock2_h=yes
+  statement_check winsock2.h 'gethostbyname(0)' -lws2_32 && _ld_sock="-lws2_32" && _winsock2_h=yes
 fi
 test "$_ld_sock" && res_comment="using $_ld_sock"
 echores "$_socklib"
@@ -3012,7 +3012,7 @@ echocheck "inet_pton()"
 def_inet_pton='#define HAVE_INET_PTON 0'
 inet_pton=no
 for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
-  function_check arpa/inet.h 'inet_pton(0, 0, 0)' $_ld_tmp && inet_pton=yes && break
+  statement_check arpa/inet.h 'inet_pton(0, 0, 0)' $_ld_tmp && inet_pton=yes && break
 done
 if test $inet_pton = yes ; then
   test "$_ld_tmp" && res_comment="using $_ld_tmp"
@@ -3025,7 +3025,7 @@ echocheck "inet_aton()"
 def_inet_aton='#define HAVE_INET_ATON 0'
 inet_aton=no
 for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
-  function_check arpa/inet.h 'inet_aton(0, 0)' $_ld_tmp && inet_aton=yes && break
+  statement_check arpa/inet.h 'inet_aton(0, 0)' $_ld_tmp && inet_aton=yes && break
 done
 if test $inet_aton = yes ; then
   test "$_ld_tmp" && res_comment="using $_ld_tmp"
@@ -3053,7 +3053,7 @@ echores "$_socklen_t"
 
 echocheck "closesocket()"
 _closesocket=no
-function_check winsock2.h 'closesocket(~0)' $_ld_sock && _closesocket=yes
+statement_check winsock2.h 'closesocket(~0)' $_ld_sock && _closesocket=yes
 if test "$_closesocket" = yes ; then
   def_closesocket='#define HAVE_CLOSESOCKET 1'
 else
@@ -3176,7 +3176,7 @@ echocheck "memalign()"
 # XXX restrict to x86 ? extend to other CPUs/cacheline sizes ?
 def_memalign_hack='#define CONFIG_MEMALIGN_HACK 0'
 _memalign=no
-function_check malloc.h 'memalign(64, sizeof(char))' && _memalign=yes
+statement_check malloc.h 'memalign(64, sizeof(char))' && _memalign=yes
 if test "$_memalign" = yes ; then
   def_memalign='#define HAVE_MEMALIGN 1'
 else
@@ -3201,7 +3201,7 @@ echores "$posix_memalign"
 
 echocheck "alloca.h"
 _alloca=no
-function_check alloca.h 'alloca(0)' && _alloca=yes
+statement_check alloca.h 'alloca(0)' && _alloca=yes
 if cc_check ; then
   def_alloca_h='#define HAVE_ALLOCA_H 1'
 else
@@ -3221,7 +3221,7 @@ echores "$_fastmemcpy"
 
 echocheck "mman.h"
 _mman=no
-function_check sys/mman.h 'mmap(0, 0, 0, 0, 0, 0)' && _mman=yes
+statement_check sys/mman.h 'mmap(0, 0, 0, 0, 0, 0)' && _mman=yes
 if test "$_mman" = yes ; then
   def_mman_h='#define HAVE_SYS_MMAN_H 1'
 else
@@ -3245,7 +3245,7 @@ fi
 echocheck "dynamic loader"
 _dl=no
 for _ld_tmp in "" "-ldl"; do
-  function_check dlfcn.h 'dlopen("", 0)' $_ld_tmp && _ld_dl="$_ld_tmp" && _dl=yes && break
+  statement_check dlfcn.h 'dlopen("", 0)' $_ld_tmp && _ld_dl="$_ld_tmp" && _dl=yes && break
 done
 if test "$_dl" = yes ; then
   def_dl='#define HAVE_LIBDL 1'
@@ -3492,7 +3492,7 @@ echocheck "termcap"
 if test "$_termcap" = auto ; then
   _termcap=no
   for _ld_tmp in "-lncurses" "-ltinfo" "-ltermcap"; do
-    function_check term.h 'tgetent(0, 0)' $_ld_tmp &&
+    statement_check term.h 'tgetent(0, 0)' $_ld_tmp &&
       extra_ldflags="$extra_ldflags $_ld_tmp" && _termcap=yes && break
   done
 fi
@@ -3644,7 +3644,7 @@ echores "$_gettimeofday"
 
 echocheck "glob()"
 _glob=no
-function_check glob.h 'glob("filename", 0, 0, 0)' && _glob=yes
+statement_check glob.h 'glob("filename", 0, 0, 0)' && _glob=yes
 if test "$_glob" = yes ; then
   def_glob='#define HAVE_GLOB 1'
   _need_glob=no
@@ -3657,7 +3657,7 @@ echores "$_glob"
 
 echocheck "setenv()"
 _setenv=no
-function_check stdlib.h 'setenv("", "", 0)' && _setenv=yes
+statement_check stdlib.h 'setenv("", "", 0)' && _setenv=yes
 if test "$_setenv" = yes ; then
   def_setenv='#define HAVE_SETENV 1'
   _need_setenv=no
@@ -3671,14 +3671,14 @@ echores "$_setenv"
 echocheck "setmode()"
 _setmode=no
 def_setmode='#define HAVE_SETMODE 0'
-function_check io.h 'setmode(0, 0)' && _setmode=yes && def_setmode='#define HAVE_SETMODE 1'
+statement_check io.h 'setmode(0, 0)' && _setmode=yes && def_setmode='#define HAVE_SETMODE 1'
 echores "$_setmode"
 
 
 if sunos; then
 echocheck "sysi86()"
 _sysi86=no
-function_check sys/sysi86.h 'sysi86(0)' && _sysi86=yes
+statement_check sys/sysi86.h 'sysi86(0)' && _sysi86=yes
 if test "$_sysi86" = yes ; then
   def_sysi86='#define HAVE_SYSI86 1'
   cat > $TMPC << EOF
@@ -3805,7 +3805,7 @@ fi
 if test "$_smb" = auto; then
   _smb=no
   for _ld_tmp in "-lsmbclient" "-lsmbclient $_ld_dl" "-lsmbclient $_ld_dl -lnsl" "-lsmbclient $_ld_dl -lssl -lnsl" ; do
-    function_check libsmbclient.h 'smbc_opendir("smb://")' $_ld_tmp &&
+    statement_check libsmbclient.h 'smbc_opendir("smb://")' $_ld_tmp &&
       extra_ldflags="$extra_ldflags $_ld_tmp" && _smb=yes && break
   done
 fi
@@ -4359,7 +4359,7 @@ fi
 echocheck "GGI"
 if test "$_ggi" = auto ; then
   _ggi=no
-  function_check ggi/ggi.h 'ggiInit()' -lggi && _ggi=yes
+  statement_check ggi/ggi.h 'ggiInit()' -lggi && _ggi=yes
 fi
 if test "$_ggi" = yes ; then
   def_ggi='#define CONFIG_GGI 1'
@@ -4374,7 +4374,7 @@ echores "$_ggi"
 echocheck "GGI extension: libggiwmh"
 if test "$_ggiwmh" = auto ; then
   _ggiwmh=no
-  function_check ggi/wmh.h 'ggiWmhInit()' -lggi -lggiwmh && _ggiwmh=yes
+  statement_check ggi/wmh.h 'ggiWmhInit()' -lggi -lggiwmh && _ggiwmh=yes
 fi
 # needed to get right output on obscure combination
 # like --disable-ggi --enable-ggiwmh
@@ -4543,7 +4543,7 @@ echores $quicktime
 echocheck "Quartz"
 if test "$_quartz" = auto ; then
   _quartz=no
-  function_check Carbon/Carbon.h 'CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, false)' -framework Carbon && _quartz=yes
+  statement_check Carbon/Carbon.h 'CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, false)' -framework Carbon && _quartz=yes
 fi
 if test "$_quartz" = yes ; then
   libs_mplayer="$libs_mplayer -framework Carbon"
@@ -4673,7 +4673,7 @@ fi
 if test "$_gif" = auto ; then
   _gif=no
   for _ld_gif in "-lungif" "-lgif" ; do
-    function_check gif_lib.h 'QuantizeBuffer(0, 0, 0, 0, 0, 0, 0, 0)' $_ld_gif && _gif=yes && break
+    statement_check gif_lib.h 'QuantizeBuffer(0, 0, 0, 0, 0, 0, 0, 0)' $_ld_gif && _gif=yes && break
   done
 fi
 
@@ -4751,7 +4751,7 @@ esac
 echocheck "VESA support"
 if test "$_vesa" = auto ; then
   _vesa=no
-  function_check vbe.h 'vbeInit()' -lvbe -llrmi && _vesa=yes
+  statement_check vbe.h 'vbeInit()' -lvbe -llrmi && _vesa=yes
 fi
 if test "$_vesa" = yes ; then
   def_vesa='#define CONFIG_VESA 1'
@@ -5178,7 +5178,7 @@ echocheck "aRts"
 if test "$_arts" = auto ; then
   _arts=no
   if ( artsc-config --version ) >> "$TMPLOG" 2>&1 ; then
-    function_check artsc.h 'arts_init()' $(artsc-config --libs) $(artsc-config --cflags) &&
+    statement_check artsc.h 'arts_init()' $(artsc-config --libs) $(artsc-config --cflags) &&
       _arts=yes
   fi
 fi
@@ -5198,7 +5198,7 @@ echocheck "EsounD"
 if test "$_esd" = auto ; then
   _esd=no
   if ( esd-config --version ) >> "$TMPLOG" 2>&1 ; then
-    function_check esd.h 'esd_open_sound("test")' $(esd-config --libs) $(esd-config --cflags) && _esd=yes
+    statement_check esd.h 'esd_open_sound("test")' $(esd-config --libs) $(esd-config --cflags) && _esd=yes
   fi
 fi
 echores "$_esd"
@@ -5210,7 +5210,7 @@ if test "$_esd" = yes ; then
   extra_cflags="$extra_cflags $(esd-config --cflags)"
 
   echocheck "esd_get_latency()"
-  function_check esd.h 'esd_get_latency(0)' $(esd-config --libs) $(esd-config --cflags) &&
+  statement_check esd.h 'esd_get_latency(0)' $(esd-config --libs) $(esd-config --cflags) &&
     _esd_latency=yes && def_esd_latency='#define CONFIG_ESD_LATENCY 1'
   echores "$_esd_latency"
 else
@@ -5260,9 +5260,9 @@ fi
 echocheck "JACK"
 if test "$_jack" = auto ; then
   _jack=yes
-  if function_check jack/jack.h 'jack_client_open("test", JackUseExactName, NULL)' -ljack ; then
+  if statement_check jack/jack.h 'jack_client_open("test", JackUseExactName, NULL)' -ljack ; then
     libs_mplayer="$libs_mplayer -ljack"
-  elif function_check jack/jack.h 'jack_client_open("test", JackUseExactName, NULL)' $($_pkg_config --libs --cflags --silence-errors jack) ; then
+  elif statement_check jack/jack.h 'jack_client_open("test", JackUseExactName, NULL)' $($_pkg_config --libs --cflags --silence-errors jack) ; then
     libs_mplayer="$libs_mplayer $($_pkg_config --libs jack)"
     extra_cflags="$extra_cflags "$($_pkg_config --cflags jack)""
   else
@@ -5572,7 +5572,7 @@ echores "$_vcd"
 echocheck "Blu-ray support"
 if test "$_bluray" = auto ; then
   _bluray=no
-  function_check libbluray/bluray.h 'bd_get_title_info(0, 0)' -lbluray && _bluray=yes
+  statement_check libbluray/bluray.h 'bd_get_title_info(0, 0)' -lbluray && _bluray=yes
 fi
 if test "$_bluray" = yes ; then
   def_bluray='#define CONFIG_LIBBLURAY 1'
@@ -5887,7 +5887,7 @@ echores "$_fribidi"
 echocheck "ENCA"
 if test "$_enca" = auto ; then
     _enca=no
-    function_check enca.h 'enca_get_languages(NULL)' -lenca $_ld_lm && _enca=yes
+    statement_check enca.h 'enca_get_languages(NULL)' -lenca $_ld_lm && _enca=yes
 fi
     if test "$_enca" = yes ; then
         def_enca='#define CONFIG_ENCA 1'
@@ -5900,7 +5900,7 @@ echores "$_enca"
 
 echocheck "zlib"
 _zlib=no
-function_check zlib.h 'inflate(0, Z_NO_FLUSH)' -lz && _zlib=yes
+statement_check zlib.h 'inflate(0, Z_NO_FLUSH)' -lz && _zlib=yes
 if test "$_zlib" = yes ; then
   def_zlib='#define CONFIG_ZLIB 1'
   extra_ldflags="$extra_ldflags -lz"
@@ -5913,7 +5913,7 @@ echores "$_zlib"
 echocheck "bzlib"
 bzlib=no
 def_bzlib='#define CONFIG_BZLIB 0'
-function_check bzlib.h 'BZ2_bzlibVersion()' -lbz2 && bzlib=yes
+statement_check bzlib.h 'BZ2_bzlibVersion()' -lbz2 && bzlib=yes
 if test "$bzlib" = yes ; then
   def_bzlib='#define CONFIG_BZLIB 1'
   extra_ldflags="$extra_ldflags -lbz2"
@@ -5948,7 +5948,7 @@ echores "$_rtc"
 echocheck "liblzo2 support"
 if test "$_liblzo" = auto ; then
   _liblzo=no
-  function_check lzo/lzo1x.h 'lzo_init()' -llzo2 && _liblzo=yes
+  statement_check lzo/lzo1x.h 'lzo_init()' -llzo2 && _liblzo=yes
 fi
 if test "$_liblzo" = yes ; then
   def_liblzo='#define CONFIG_LIBLZO 1'
@@ -5979,7 +5979,7 @@ echores "$_mad"
 echocheck "Twolame"
 if test "$_twolame" = auto ; then
   _twolame=no
-  function_check twolame.h 'twolame_init()' -ltwolame $_ld_lm && _twolame=yes
+  statement_check twolame.h 'twolame_init()' -ltwolame $_ld_lm && _twolame=yes
 fi
 if test "$_twolame" = yes ; then
   def_twolame='#define CONFIG_TWOLAME 1'
@@ -5997,7 +5997,7 @@ if test "$_toolame" = auto ; then
 if test "$_twolame" = yes ; then
   res_comment="disabled by twolame"
 else
-  function_check toolame.h 'toolame_init()' -ltoolame $_ld_lm && _toolame=yes
+  statement_check toolame.h 'toolame_init()' -ltoolame $_ld_lm && _toolame=yes
 fi
 fi
 if test "$_toolame" = yes ; then
@@ -6018,11 +6018,11 @@ if test "$_tremor_internal" = yes; then
   _libvorbis=no
 elif test "$_tremor" = auto; then
   _tremor=no
-  function_check tremor/ivorbiscodec.h 'vorbis_packet_blocksize(0, 0)' -logg -lvorbisidec $_ld_lm && _tremor=yes && _libvorbis=no
+  statement_check tremor/ivorbiscodec.h 'vorbis_packet_blocksize(0, 0)' -logg -lvorbisidec $_ld_lm && _tremor=yes && _libvorbis=no
 fi
 if test "$_libvorbis" = auto; then
   _libvorbis=no
-  function_check vorbis/codec.h 'vorbis_packet_blocksize(0, 0)' -lvorbis -logg $_ld_lm && _libvorbis=yes
+  statement_check vorbis/codec.h 'vorbis_packet_blocksize(0, 0)' -lvorbis -logg $_ld_lm && _libvorbis=yes
 fi
 if test "$_tremor_internal" = yes ; then
   _vorbis=yes
@@ -6159,7 +6159,7 @@ echocheck "mpg123 support"
 def_mpg123='#undef CONFIG_MPG123'
 if test "$_mpg123" = auto; then
   _mpg123=no
-  function_check mpg123.h 'mpg123_init()' -lmpg123 && _mpg123=yes && extra_ldflags="$extra_ldflags -lmpg123"
+  statement_check mpg123.h 'mpg123_init()' -lmpg123 && _mpg123=yes && extra_ldflags="$extra_ldflags -lmpg123"
 fi
 if test "$_mpg123" = yes ; then
   def_mpg123='#define CONFIG_MPG123 1'
@@ -6213,7 +6213,7 @@ echocheck "libdca support"
 if test "$_libdca" = auto ; then
   _libdca=no
   for _ld_dca in -ldca -ldts ; do
-    function_check_broken stdint.h dts.h 'dts_init(0)' $_ld_dca $_ld_lm &&
+    statement_check_broken stdint.h dts.h 'dts_init(0)' $_ld_dca $_ld_lm &&
       extra_ldflags="$extra_ldflags $_ld_dca" && _libdca=yes && break
   done
 fi
@@ -6592,7 +6592,7 @@ fi
 echocheck "libdv-0.9.5+"
 if test "$_libdv" = auto ; then
   _libdv=no
-  function_check libdv/dv.h 'dv_encoder_new(1, 1, 1)' -ldv $_ld_pthread $_ld_lm && _libdv=yes
+  statement_check libdv/dv.h 'dv_encoder_new(1, 1, 1)' -ldv $_ld_pthread $_ld_lm && _libdv=yes
 fi
 if test "$_libdv" = yes ; then
   def_libdv='#define CONFIG_LIBDV095 1'
@@ -6609,7 +6609,7 @@ echocheck "Xvid"
 if test "$_xvid" = auto ; then
   _xvid=no
   for _ld_tmp in "-lxvidcore $_ld_lm" "-lxvidcore $_ld_lm $_ld_pthread" ; do
-    function_check xvid.h 'xvid_global(0, 0, 0, 0)' $_ld_tmp &&
+    statement_check xvid.h 'xvid_global(0, 0, 0, 0)' $_ld_tmp &&
       extra_ldflags="$extra_ldflags $_ld_tmp" && _xvid=yes && break
   done
 fi
@@ -6743,8 +6743,8 @@ if test "$_mp3lame" = yes ; then
   def_mp3lame="#define CONFIG_MP3LAME 1"
   _ld_mp3lame=-lmp3lame
   libs_mencoder="$libs_mencoder $_ld_mp3lame"
-  function_check lame/lame.h 'lame_set_preset(NULL, STANDARD_FAST)' $_ld_mp3lame $_ld_lm && def_mp3lame_preset="#define CONFIG_MP3LAME_PRESET 1"
-  function_check lame/lame.h 'lame_set_preset(NULL,   MEDIUM_FAST)' $_ld_mp3lame $_ld_lm && def_mp3lame_preset_medium="#define CONFIG_MP3LAME_PRESET_MEDIUM 1"
+  statement_check lame/lame.h 'lame_set_preset(NULL, STANDARD_FAST)' $_ld_mp3lame $_ld_lm && def_mp3lame_preset="#define CONFIG_MP3LAME_PRESET 1"
+  statement_check lame/lame.h 'lame_set_preset(NULL,   MEDIUM_FAST)' $_ld_mp3lame $_ld_lm && def_mp3lame_preset_medium="#define CONFIG_MP3LAME_PRESET_MEDIUM 1"
 fi
 echores "$_mp3lame"
 
@@ -7203,7 +7203,7 @@ if arm; then
 echocheck "maemo (Nokia 770|8x0)"
 if test "$_maemo" = auto ; then
   _maemo=no
-  function_check libosso.h 'osso_initialize('', '', 0, NULL)' $($_pkg_config --cflags --libs libosso 2>/dev/null) && _maemo=yes
+  statement_check libosso.h 'osso_initialize('', '', 0, NULL)' $($_pkg_config --cflags --libs libosso 2>/dev/null) && _maemo=yes
 fi
 if test "$_maemo" = yes ; then
   def_maemo='#define CONFIG_MAEMO 1'
