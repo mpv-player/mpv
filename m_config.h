@@ -157,20 +157,20 @@ m_config_set_option(m_config_t *config, char* arg, char* param);
  *  \return See \ref OptionParserReturn.
  */
 int
-m_config_check_option(m_config_t *config, char* arg, char* param);
+m_config_check_option(const m_config_t *config, char *arg, char *param);
 
 /// Get the option matching the given name.
 /** \param config The config object.
  *  \param arg The option's name.
  */
 const struct m_option*
-m_config_get_option(m_config_t *config, char* arg);
+m_config_get_option(const m_config_t *config, char *arg);
 
 /// Print a list of all registered options.
 /** \param config The config object.
  */
 void
-m_config_print_option_list(m_config_t *config);
+m_config_print_option_list(const m_config_t *config);
 
 /// \addtogroup ConfigProfiles
 ///@{
@@ -181,7 +181,7 @@ m_config_print_option_list(m_config_t *config);
  *  \return The profile object or NULL.
  */
 m_profile_t*
-m_config_get_profile(m_config_t* config, char* name);
+m_config_get_profile(const m_config_t *config, char *name);
 
 /// Get the profile with the given name, creating it if necessary.
 /** \param config The config object.

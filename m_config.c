@@ -283,7 +283,7 @@ m_config_register_options(m_config_t *config, const m_option_t *args) {
 }
 
 static m_config_option_t*
-m_config_get_co(m_config_t *config, char* arg) {
+m_config_get_co(const m_config_t *config, char *arg) {
   m_config_option_t *co;
 
   for(co = config->opts ; co ; co = co->next ) {
@@ -299,7 +299,7 @@ m_config_get_co(m_config_t *config, char* arg) {
 }
 
 static int
-m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
+m_config_parse_option(const m_config_t *config, char *arg, char *param, int set) {
   m_config_option_t *co;
   int r = 0;
 
@@ -390,7 +390,7 @@ m_config_set_option(m_config_t *config, char* arg, char* param) {
 }
 
 int
-m_config_check_option(m_config_t *config, char* arg, char* param) {
+m_config_check_option(const m_config_t *config, char *arg, char *param) {
   int r;
   mp_msg(MSGT_CFGPARSER, MSGL_DBG2,"Checking %s=%s\n",arg,param);
   r=m_config_parse_option(config,arg,param,0);
@@ -403,7 +403,7 @@ m_config_check_option(m_config_t *config, char* arg, char* param) {
 
 
 const m_option_t*
-m_config_get_option(m_config_t *config, char* arg) {
+m_config_get_option(const m_config_t *config, char *arg) {
   m_config_option_t *co;
 
 #ifdef MP_DEBUG
@@ -420,7 +420,7 @@ m_config_get_option(m_config_t *config, char* arg) {
 }
 
 void
-m_config_print_option_list(m_config_t *config) {
+m_config_print_option_list(const m_config_t *config) {
   char min[50],max[50];
   m_config_option_t* co;
   int count = 0;
@@ -453,7 +453,7 @@ m_config_print_option_list(m_config_t *config) {
 }
 
 m_profile_t*
-m_config_get_profile(m_config_t* config, char* name) {
+m_config_get_profile(const m_config_t *config, char *name) {
   m_profile_t* p;
   for(p = config->profiles ; p ; p = p->next)
     if(!strcmp(p->name,name)) return p;
