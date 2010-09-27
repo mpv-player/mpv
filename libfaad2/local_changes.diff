@@ -52,7 +52,7 @@
  typedef unsigned __int64 uint64_t;
  typedef unsigned __int32 uint32_t;
  typedef unsigned __int16 uint16_t;
-@@ -159,5 +171,9 @@
+@@ -159,6 +171,10 @@
  typedef __int32 int32_t;
  typedef __int16 int16_t;
  typedef __int8  int8_t;
@@ -61,6 +61,7 @@
 +#endif
 +
  typedef float float32_t;
+ 
  
 @@ -245,7 +245,7 @@
  
@@ -80,7 +81,7 @@
      #define HAS_LRINTF
      // from http://www.stereopsis.com/FPU.html
      static INLINE int lrintf(float f)
-@@ -330,5 +346,7 @@
+@@ -330,6 +346,8 @@
  
    #else
  
@@ -88,6 +89,7 @@
 +
  #ifdef HAVE_LRINTF
  #  define HAS_LRINTF
+ #  define _ISOC9X_SOURCE 1
 @@ -338,8 +356,6 @@
  #  define __USE_ISOC99   1
  #endif
