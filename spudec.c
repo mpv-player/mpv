@@ -1367,20 +1367,22 @@ void spudec_set_paletted(void *this, const uint8_t *pal_img, int pal_stride,
   packet->start_col = x;
   packet->start_row = y;
   packet->data_len = 2 * stride * h;
-  packet->packet = malloc(packet->data_len);
-  img  = packet->packet;
-  aimg = packet->packet + stride * h;
-  for (i = 0; i < 256; i++) {
-      uint32_t pixel = pal[i];
-      int alpha = pixel >> 24;
-      int gray = (((pixel & 0x000000ff) >>  0) +
-                  ((pixel & 0x0000ff00) >>  7) +
-                  ((pixel & 0x00ff0000) >> 16)) >> 2;
-      gray = FFMIN(gray, alpha);
-      g8a8_pal[i] = (-alpha << 8) | gray;
+  if (packet->data_len) { // size 0 is a special "clear" packet
+      packet->packet = malloc(packet->data_len);
+      img  = packet->packet;
+      aimg = packet->packet + stride * h;
+      for (i = 0; i < 256; i++) {
+          uint32_t pixel = pal[i];
+          int alpha = pixel >> 24;
+          int gray = (((pixel & 0x000000ff) >>  0) +
+                      ((pixel & 0x0000ff00) >>  7) +
+                      ((pixel & 0x00ff0000) >> 16)) >> 2;
+          gray = FFMIN(gray, alpha);
+          g8a8_pal[i] = (-alpha << 8) | gray;
+      }
+      pal2gray_alpha(g8a8_pal, pal_img, pal_stride,
+                     img, aimg, stride, w, h);
   }
-  pal2gray_alpha(g8a8_pal, pal_img, pal_stride,
-                 img, aimg, stride, w, h);
   packet->start_pts = 0;
   packet->end_pts = 0x7fffffff;
   if (pts != MP_NOPTS_VALUE)
