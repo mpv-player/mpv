@@ -1865,8 +1865,7 @@ char** sub_filenames(const char* path, char *fname)
 
     tmpresult = malloc(len);
 
-    result = malloc(sizeof(subfn)*MAX_SUBTITLE_FILES);
-    memset(result, 0, sizeof(subfn)*MAX_SUBTITLE_FILES);
+    result = calloc(MAX_SUBTITLE_FILES, sizeof(*result));
 
     subcnt = 0;
 
@@ -2011,8 +2010,7 @@ char** sub_filenames(const char* path, char *fname)
 
     qsort(result, subcnt, sizeof(subfn), compare_sub_priority);
 
-    result2 = malloc(sizeof(char*)*(subcnt+1));
-    memset(result2, 0, sizeof(char*)*(subcnt+1));
+    result2 = calloc(subcnt + 1, sizeof(*result2));
 
     for (i = 0; i < subcnt; i++) {
 	result2[i] = result[i].fname;
