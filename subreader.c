@@ -1029,7 +1029,6 @@ static subtitle *sub_read_line_jacosub(stream_t* st, subtitle * current, int utf
 static int sub_autodetect (stream_t* st, int *uses_time, int utf16) {
     char line[LINE_LEN+1];
     int i,j=0;
-    char p;
 
     while (j < 100) {
 	j++;
@@ -1073,7 +1072,7 @@ static int sub_autodetect (stream_t* st, int *uses_time, int utf16) {
 		{*uses_time=1;return SUB_PJS;}
 	if (sscanf (line, "FORMAT=%d", &i) == 1)
 		{*uses_time=0; return SUB_MPSUB;}
-	if (sscanf (line, "FORMAT=TIM%c", &p)==1 && p=='E')
+	if (!memcmp(line, "FORMAT=TIME", 11))
 		{*uses_time=1; return SUB_MPSUB;}
 	if (strstr (line, "-->>"))
 		{*uses_time=0; return SUB_AQTITLE;}
