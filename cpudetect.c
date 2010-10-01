@@ -54,7 +54,174 @@ CpuCaps gCpuCaps;
 
 /* I believe this code works.  However, it has only been used on a PII and PIII */
 
-static void check_os_katmai_support( void );
+#if defined(__linux__) && defined(_POSIX_SOURCE) && !ARCH_X86_64
+static void sigill_handler_sse( int signal, struct sigcontext sc )
+{
+   mp_msg(MSGT_CPUDETECT,MSGL_V, "SIGILL, " );
+
+   /* Both the "xorps %%xmm0,%%xmm0" and "divps %xmm0,%%xmm1"
+    * instructions are 3 bytes long.  We must increment the instruction
+    * pointer manually to avoid repeated execution of the offending
+    * instruction.
+    *
+    * If the SIGILL is caused by a divide-by-zero when unmasked
+    * exceptions aren't supported, the SIMD FPU status and control
+    * word will be restored at the end of the test, so we don't need
+    * to worry about doing it here.  Besides, we may not be able to...
+    */
+   sc.eip += 3;
+
+   gCpuCaps.hasSSE=0;
+}
+#endif /* __linux__ && _POSIX_SOURCE */
+
+#if (defined(__MINGW32__) || defined(__CYGWIN__)) && !ARCH_X86_64
+LONG CALLBACK win32_sig_handler_sse(EXCEPTION_POINTERS* ep)
+{
+    if(ep->ExceptionRecord->ExceptionCode==EXCEPTION_ILLEGAL_INSTRUCTION){
+        mp_msg(MSGT_CPUDETECT,MSGL_V, "SIGILL, " );
+        ep->ContextRecord->Eip +=3;
+        gCpuCaps.hasSSE=0;
+        return EXCEPTION_CONTINUE_EXECUTION;
+    }
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+#endif /* defined(__MINGW32__) || defined(__CYGWIN__) */
+
+#ifdef __OS2__
+ULONG _System os2_sig_handler_sse(PEXCEPTIONREPORTRECORD       p1,
+                                  PEXCEPTIONREGISTRATIONRECORD p2,
+                                  PCONTEXTRECORD               p3,
+                                  PVOID                        p4)
+{
+    if(p1->ExceptionNum == XCPT_ILLEGAL_INSTRUCTION){
+        mp_msg(MSGT_CPUDETECT, MSGL_V, "SIGILL, ");
+
+        p3->ctx_RegEip += 3;
+        gCpuCaps.hasSSE = 0;
+
+        return XCPT_CONTINUE_EXECUTION;
+    }
+    return XCPT_CONTINUE_SEARCH;
+}
+#endif
+
+/* If we're running on a processor that can do SSE, let's see if we
+ * are allowed to or not.  This will catch 2.4.0 or later kernels that
+ * haven't been configured for a Pentium III but are running on one,
+ * and RedHat patched 2.2 kernels that have broken exception handling
+ * support for user space apps that do SSE.
+ */
+
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
+#define SSE_SYSCTL_NAME "hw.instruction_sse"
+#elif defined(__APPLE__)
+#define SSE_SYSCTL_NAME "hw.optional.sse"
+#endif
+
+static void check_os_katmai_support( void )
+{
+#if ARCH_X86_64
+    gCpuCaps.hasSSE=1;
+    gCpuCaps.hasSSE2=1;
+#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__) || defined(__APPLE__)
+    int has_sse=0, ret;
+    size_t len=sizeof(has_sse);
+
+    ret = sysctlbyname(SSE_SYSCTL_NAME, &has_sse, &len, NULL, 0);
+    if (ret || !has_sse)
+        gCpuCaps.hasSSE=0;
+
+#elif defined(__NetBSD__) || defined (__OpenBSD__)
+#if __NetBSD_Version__ >= 105250000 || (defined __OpenBSD__)
+    int has_sse, has_sse2, ret, mib[2];
+    size_t varlen;
+
+    mib[0] = CTL_MACHDEP;
+    mib[1] = CPU_SSE;
+    varlen = sizeof(has_sse);
+
+    mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
+    ret = sysctl(mib, 2, &has_sse, &varlen, NULL, 0);
+    gCpuCaps.hasSSE = ret >= 0 && has_sse;
+    mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
+
+    mib[1] = CPU_SSE2;
+    varlen = sizeof(has_sse2);
+    mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE2... " );
+    ret = sysctl(mib, 2, &has_sse2, &varlen, NULL, 0);
+    gCpuCaps.hasSSE2 = ret >= 0 && has_sse2;
+    mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE2 ? "yes.\n" : "no!\n" );
+#else
+    gCpuCaps.hasSSE = 0;
+    mp_msg(MSGT_CPUDETECT,MSGL_WARN, "No OS support for SSE, disabling to be safe.\n" );
+#endif
+#elif defined(__MINGW32__) || defined(__CYGWIN__)
+    LPTOP_LEVEL_EXCEPTION_FILTER exc_fil;
+    if ( gCpuCaps.hasSSE ) {
+        mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
+        exc_fil = SetUnhandledExceptionFilter(win32_sig_handler_sse);
+        __asm__ volatile ("xorps %xmm0, %xmm0");
+        SetUnhandledExceptionFilter(exc_fil);
+        mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
+    }
+#elif defined(__OS2__)
+    EXCEPTIONREGISTRATIONRECORD RegRec = { 0, &os2_sig_handler_sse };
+    if ( gCpuCaps.hasSSE ) {
+        mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
+        DosSetExceptionHandler( &RegRec );
+        __asm__ volatile ("xorps %xmm0, %xmm0");
+        DosUnsetExceptionHandler( &RegRec );
+        mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
+    }
+#elif defined(__linux__)
+#if defined(_POSIX_SOURCE)
+    struct sigaction saved_sigill;
+
+    /* Save the original signal handlers.
+     */
+    sigaction( SIGILL, NULL, &saved_sigill );
+
+    signal( SIGILL, (void (*)(int))sigill_handler_sse );
+
+    /* Emulate test for OSFXSR in CR4.  The OS will set this bit if it
+     * supports the extended FPU save and restore required for SSE.  If
+     * we execute an SSE instruction on a PIII and get a SIGILL, the OS
+     * doesn't support Streaming SIMD Exceptions, even if the processor
+     * does.
+     */
+    if ( gCpuCaps.hasSSE ) {
+        mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
+
+//      __asm__ volatile ("xorps %%xmm0, %%xmm0");
+        __asm__ volatile ("xorps %xmm0, %xmm0");
+
+        mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
+    }
+
+    /* Restore the original signal handlers.
+     */
+    sigaction( SIGILL, &saved_sigill, NULL );
+
+    /* If we've gotten to here and the XMM CPUID bit is still set, we're
+     * safe to go ahead and hook out the SSE code throughout Mesa.
+     */
+    mp_msg(MSGT_CPUDETECT,MSGL_V, "Tests of OS support for SSE %s\n", gCpuCaps.hasSSE ? "passed." : "failed!" );
+#else
+    /* We can't use POSIX signal handling to test the availability of
+     * SSE, so we disable it by default.
+     */
+    mp_msg(MSGT_CPUDETECT,MSGL_WARN, "Cannot test OS support for SSE, disabling to be safe.\n" );
+    gCpuCaps.hasSSE=0;
+#endif /* _POSIX_SOURCE */
+#else
+    /* Do nothing on other platforms for now.
+     */
+    mp_msg(MSGT_CPUDETECT,MSGL_WARN, "Cannot test OS support for SSE, leaving disabled.\n" );
+    gCpuCaps.hasSSE=0;
+#endif /* __linux__ */
+}
+
 
 // return TRUE if cpuid supported
 static int has_cpuid(void)
@@ -248,173 +415,6 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
     return retname;
 }
 
-#if defined(__linux__) && defined(_POSIX_SOURCE) && !ARCH_X86_64
-static void sigill_handler_sse( int signal, struct sigcontext sc )
-{
-   mp_msg(MSGT_CPUDETECT,MSGL_V, "SIGILL, " );
-
-   /* Both the "xorps %%xmm0,%%xmm0" and "divps %xmm0,%%xmm1"
-    * instructions are 3 bytes long.  We must increment the instruction
-    * pointer manually to avoid repeated execution of the offending
-    * instruction.
-    *
-    * If the SIGILL is caused by a divide-by-zero when unmasked
-    * exceptions aren't supported, the SIMD FPU status and control
-    * word will be restored at the end of the test, so we don't need
-    * to worry about doing it here.  Besides, we may not be able to...
-    */
-   sc.eip += 3;
-
-   gCpuCaps.hasSSE=0;
-}
-#endif /* __linux__ && _POSIX_SOURCE */
-
-#if (defined(__MINGW32__) || defined(__CYGWIN__)) && !ARCH_X86_64
-LONG CALLBACK win32_sig_handler_sse(EXCEPTION_POINTERS* ep)
-{
-    if(ep->ExceptionRecord->ExceptionCode==EXCEPTION_ILLEGAL_INSTRUCTION){
-        mp_msg(MSGT_CPUDETECT,MSGL_V, "SIGILL, " );
-        ep->ContextRecord->Eip +=3;
-        gCpuCaps.hasSSE=0;
-        return EXCEPTION_CONTINUE_EXECUTION;
-    }
-    return EXCEPTION_CONTINUE_SEARCH;
-}
-#endif /* defined(__MINGW32__) || defined(__CYGWIN__) */
-
-#ifdef __OS2__
-ULONG _System os2_sig_handler_sse(PEXCEPTIONREPORTRECORD       p1,
-                                  PEXCEPTIONREGISTRATIONRECORD p2,
-                                  PCONTEXTRECORD               p3,
-                                  PVOID                        p4)
-{
-    if(p1->ExceptionNum == XCPT_ILLEGAL_INSTRUCTION){
-        mp_msg(MSGT_CPUDETECT, MSGL_V, "SIGILL, ");
-
-        p3->ctx_RegEip += 3;
-        gCpuCaps.hasSSE = 0;
-
-        return XCPT_CONTINUE_EXECUTION;
-    }
-    return XCPT_CONTINUE_SEARCH;
-}
-#endif
-
-/* If we're running on a processor that can do SSE, let's see if we
- * are allowed to or not.  This will catch 2.4.0 or later kernels that
- * haven't been configured for a Pentium III but are running on one,
- * and RedHat patched 2.2 kernels that have broken exception handling
- * support for user space apps that do SSE.
- */
-
-#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
-#define SSE_SYSCTL_NAME "hw.instruction_sse"
-#elif defined(__APPLE__)
-#define SSE_SYSCTL_NAME "hw.optional.sse"
-#endif
-
-static void check_os_katmai_support( void )
-{
-#if ARCH_X86_64
-    gCpuCaps.hasSSE=1;
-    gCpuCaps.hasSSE2=1;
-#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__) || defined(__APPLE__)
-    int has_sse=0, ret;
-    size_t len=sizeof(has_sse);
-
-    ret = sysctlbyname(SSE_SYSCTL_NAME, &has_sse, &len, NULL, 0);
-    if (ret || !has_sse)
-        gCpuCaps.hasSSE=0;
-
-#elif defined(__NetBSD__) || defined (__OpenBSD__)
-#if __NetBSD_Version__ >= 105250000 || (defined __OpenBSD__)
-    int has_sse, has_sse2, ret, mib[2];
-    size_t varlen;
-
-    mib[0] = CTL_MACHDEP;
-    mib[1] = CPU_SSE;
-    varlen = sizeof(has_sse);
-
-    mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
-    ret = sysctl(mib, 2, &has_sse, &varlen, NULL, 0);
-    gCpuCaps.hasSSE = ret >= 0 && has_sse;
-    mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
-
-    mib[1] = CPU_SSE2;
-    varlen = sizeof(has_sse2);
-    mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE2... " );
-    ret = sysctl(mib, 2, &has_sse2, &varlen, NULL, 0);
-    gCpuCaps.hasSSE2 = ret >= 0 && has_sse2;
-    mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE2 ? "yes.\n" : "no!\n" );
-#else
-    gCpuCaps.hasSSE = 0;
-    mp_msg(MSGT_CPUDETECT,MSGL_WARN, "No OS support for SSE, disabling to be safe.\n" );
-#endif
-#elif defined(__MINGW32__) || defined(__CYGWIN__)
-    LPTOP_LEVEL_EXCEPTION_FILTER exc_fil;
-    if ( gCpuCaps.hasSSE ) {
-        mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
-        exc_fil = SetUnhandledExceptionFilter(win32_sig_handler_sse);
-        __asm__ volatile ("xorps %xmm0, %xmm0");
-        SetUnhandledExceptionFilter(exc_fil);
-        mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
-    }
-#elif defined(__OS2__)
-    EXCEPTIONREGISTRATIONRECORD RegRec = { 0, &os2_sig_handler_sse };
-    if ( gCpuCaps.hasSSE ) {
-        mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
-        DosSetExceptionHandler( &RegRec );
-        __asm__ volatile ("xorps %xmm0, %xmm0");
-        DosUnsetExceptionHandler( &RegRec );
-        mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
-    }
-#elif defined(__linux__)
-#if defined(_POSIX_SOURCE)
-    struct sigaction saved_sigill;
-
-    /* Save the original signal handlers.
-     */
-    sigaction( SIGILL, NULL, &saved_sigill );
-
-    signal( SIGILL, (void (*)(int))sigill_handler_sse );
-
-    /* Emulate test for OSFXSR in CR4.  The OS will set this bit if it
-     * supports the extended FPU save and restore required for SSE.  If
-     * we execute an SSE instruction on a PIII and get a SIGILL, the OS
-     * doesn't support Streaming SIMD Exceptions, even if the processor
-     * does.
-     */
-    if ( gCpuCaps.hasSSE ) {
-        mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
-
-//      __asm__ volatile ("xorps %%xmm0, %%xmm0");
-        __asm__ volatile ("xorps %xmm0, %xmm0");
-
-        mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
-    }
-
-    /* Restore the original signal handlers.
-     */
-    sigaction( SIGILL, &saved_sigill, NULL );
-
-    /* If we've gotten to here and the XMM CPUID bit is still set, we're
-     * safe to go ahead and hook out the SSE code throughout Mesa.
-     */
-    mp_msg(MSGT_CPUDETECT,MSGL_V, "Tests of OS support for SSE %s\n", gCpuCaps.hasSSE ? "passed." : "failed!" );
-#else
-    /* We can't use POSIX signal handling to test the availability of
-     * SSE, so we disable it by default.
-     */
-    mp_msg(MSGT_CPUDETECT,MSGL_WARN, "Cannot test OS support for SSE, disabling to be safe.\n" );
-    gCpuCaps.hasSSE=0;
-#endif /* _POSIX_SOURCE */
-#else
-    /* Do nothing on other platforms for now.
-     */
-    mp_msg(MSGT_CPUDETECT,MSGL_WARN, "Cannot test OS support for SSE, leaving disabled.\n" );
-    gCpuCaps.hasSSE=0;
-#endif /* __linux__ */
-}
 #else /* ARCH_X86 */
 
 #ifdef __APPLE__

@@ -58,8 +58,6 @@ static int initialized=0;
 static int cc_mode=CC_ROLLON;
 static int cc_lines=4; ///< number of visible rows in CC roll-up mode, not used in CC roll-on mode
 
-static void display_buffer(subtitle * buf);
-
 static void build_char_table(void)
 {
   int i;
@@ -120,6 +118,14 @@ void subcc_init(void)
 	initialized=1;
 }
 
+
+static void display_buffer(subtitle *buf)
+{
+	vo_sub = buf;
+	vo_osd_changed(OSDTYPE_SUBTITLE);
+}
+
+
 static void append_char(char c)
 {
 	if(!bb->lines) {bb->lines++; cursor_pos=0;}
@@ -161,12 +167,6 @@ static void swap_buffers(void)
 	foo=fb;
 	fb=bb;
 	bb=foo;
-}
-
-static void display_buffer(subtitle * buf)
-{
-	vo_sub=buf;
-	vo_osd_changed(OSDTYPE_SUBTITLE);
 }
 
 

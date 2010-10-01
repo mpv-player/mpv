@@ -47,10 +47,72 @@
   #define NDEBUG
 #endif
 
-/* prototypes for argument parsing */
-static char const * parse_int( char const * const str, int * const valp );
-static char const * parse_str( char const * const str, strarg_t * const valp );
-static char const * parse_float( char const * const str, float * const valp );
+
+static char const * parse_int( char const * const str, int * const valp )
+{
+  char * endp;
+
+  assert( str && "parse_int(): str == NULL" );
+
+  *valp = (int)strtol( str, &endp, 0 );
+
+  /* nothing was converted */
+  if ( str == endp ) { return NULL; }
+
+  return endp;
+}
+
+static char const * parse_float( char const * const str, float * const valp )
+{
+  char * endp;
+
+  assert( str && "parse_float(): str == NULL" );
+
+  *valp = strtod( str, &endp );
+
+  /* nothing was converted */
+  if ( str == endp ) { return NULL; }
+
+  return endp;
+}
+
+#define QUOTE_CHAR '%'
+static char const * parse_str( char const * str, strarg_t * const valp )
+{
+  char const * match = strchr( str, ':' );
+
+  if (str[0] == QUOTE_CHAR) {
+    int len = 0;
+    str = &str[1];
+    len = (int)strtol(str, (char **)&str, 0);
+    if (!str || str[0] != QUOTE_CHAR || (len > strlen(str) - 1))
+      return NULL;
+    str = &str[1];
+    match = &str[len];
+  }
+  else
+  if (str[0] == '"') {
+    str = &str[1];
+    match = strchr(str, '"');
+    if (!match)
+      return NULL;
+    valp->len = match - str;
+    valp->str = str;
+    return &match[1];
+  }
+  if ( !match )
+    match = &str[strlen(str)];
+
+  // empty string or too long
+  if ((match == str) || (match - str > INT_MAX))
+    return NULL;
+
+  valp->len = match - str;
+  valp->str = str;
+
+  return match;
+}
+
 
 /**
  * \brief Try to parse all options in str and fail if it was not possible.
@@ -247,71 +309,6 @@ else if ( substr_len == opt_len+2 )
 
   /* we could parse everything */
   return 0;
-}
-
-static char const * parse_int( char const * const str, int * const valp )
-{
-  char * endp;
-
-  assert( str && "parse_int(): str == NULL" );
-
-  *valp = (int)strtol( str, &endp, 0 );
-
-  /* nothing was converted */
-  if ( str == endp ) { return NULL; }
-
-  return endp;
-}
-
-static char const * parse_float( char const * const str, float * const valp )
-{
-  char * endp;
-
-  assert( str && "parse_float(): str == NULL" );
-
-  *valp = strtod( str, &endp );
-
-  /* nothing was converted */
-  if ( str == endp ) { return NULL; }
-
-  return endp;
-}
-
-#define QUOTE_CHAR '%'
-static char const * parse_str( char const * str, strarg_t * const valp )
-{
-  char const * match = strchr( str, ':' );
-
-  if (str[0] == QUOTE_CHAR) {
-    int len = 0;
-    str = &str[1];
-    len = (int)strtol(str, (char **)&str, 0);
-    if (!str || str[0] != QUOTE_CHAR || (len > strlen(str) - 1))
-      return NULL;
-    str = &str[1];
-    match = &str[len];
-  }
-  else
-  if (str[0] == '"') {
-    str = &str[1];
-    match = strchr(str, '"');
-    if (!match)
-      return NULL;
-    valp->len = match - str;
-    valp->str = str;
-    return &match[1];
-  }
-  if ( !match )
-    match = &str[strlen(str)];
-
-  // empty string or too long
-  if ((match == str) || (match - str > INT_MAX))
-    return NULL;
-
-  valp->len = match - str;
-  valp->str = str;
-
-  return match;
 }
 
 

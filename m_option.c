@@ -1677,8 +1677,6 @@ static int parse_obj_settings(const char* opt,char* str,const m_obj_list_t* list
   return 1;
 }
 
-static void free_obj_settings_list(void* dst);
-
 static int obj_settings_list_del(const char *opt_name,const char *param,void* dst, int src) {
   char** str_list = NULL;
   int r,i,idx_max = 0;
@@ -1735,6 +1733,23 @@ static int obj_settings_list_del(const char *opt_name,const char *param,void* ds
   VAL(dst) = obj_list;
 
   return 1;
+}
+
+static void free_obj_settings_list(void* dst) {
+  int n;
+  m_obj_settings_t *d;
+
+  if (!dst || !VAL(dst)) return;
+
+  d = VAL(dst);
+#ifndef NO_FREE
+  for (n = 0 ; d[n].name ; n++) {
+    free(d[n].name);
+    free_str_list(&(d[n].attribs));
+  }
+  free(d);
+#endif
+  VAL(dst) = NULL;
 }
 
 static int parse_obj_settings_list(const m_option_t* opt,const char *name,
@@ -1872,23 +1887,6 @@ static int parse_obj_settings_list(const m_option_t* opt,const char *name,
     VAL(dst) = res;
   }
   return 1;
-}
-
-static void free_obj_settings_list(void* dst) {
-  int n;
-  m_obj_settings_t *d;
-
-  if(!dst || !VAL(dst)) return;
-
-  d = VAL(dst);
-#ifndef NO_FREE
-  for(n = 0 ; d[n].name ; n++) {
-    free(d[n].name);
-    free_str_list(&(d[n].attribs));
-  }
-  free(d);
-#endif
-  VAL(dst) = NULL;
 }
 
 static void copy_obj_settings_list(const m_option_t* opt,void* dst, const void* src) {
