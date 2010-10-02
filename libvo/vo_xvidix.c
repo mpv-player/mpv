@@ -57,7 +57,7 @@ static const vo_info_t info = {
 };
 
 LIBVO_EXTERN(xvidix)
-#define UNUSED(x) ((void)(x))   /* Removes warning about unused arguments */
+
 /* X11 related variables */
 /* Colorkey handling */
 static int colorkey;
@@ -339,12 +339,6 @@ static void flip_page(void)
 static int draw_slice(uint8_t * src[], int stride[],
                            int w, int h, int x, int y)
 {
-    UNUSED(src);
-    UNUSED(stride);
-    UNUSED(w);
-    UNUSED(h);
-    UNUSED(x);
-    UNUSED(y);
     mp_msg(MSGT_VO, MSGL_FATAL,
            "[xvidix] error: didn't used vidix draw_slice!\n");
     return -1;
@@ -352,7 +346,6 @@ static int draw_slice(uint8_t * src[], int stride[],
 
 static int draw_frame(uint8_t * src[])
 {
-    UNUSED(src);
     mp_msg(MSGT_VO, MSGL_FATAL,
            "[xvidix] error: didn't used vidix draw_frame!\n");
     return -1;

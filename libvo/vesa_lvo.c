@@ -44,7 +44,6 @@
 
 #define WIDTH_ALIGN 32 /* should be 16 for rage:422 and 32 for rage:420 */
 #define NUM_FRAMES 10
-#define UNUSED(x) ((void)(x)) /**< Removes warning about unused arguments */
 
 static uint8_t *frames[NUM_FRAMES];
 
@@ -226,13 +225,6 @@ static void vlvo_flip_page(void)
 #if 0
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
-  UNUSED(x0);
-  UNUSED(y0);
-  UNUSED(w);
-  UNUSED(h);
-  UNUSED(src);
-  UNUSED(srca);
-  UNUSED(stride);
 }
 
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)

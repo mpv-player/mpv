@@ -64,8 +64,6 @@
 
 #define MAX_BUFFERS 3
 
-#define UNUSED(x) ((void)(x)) /**< Removes warning about unused arguments */
-
 static const vo_info_t info =
 {
 	"VESA VBE 2.0 video output",
@@ -345,13 +343,6 @@ static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsign
 
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
-  UNUSED(x0);
-  UNUSED(y0);
-  UNUSED(w);
-  UNUSED(h);
-  UNUSED(src);
-  UNUSED(srca);
-  UNUSED(stride);
 }
 
 
