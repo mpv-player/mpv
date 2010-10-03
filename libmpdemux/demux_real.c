@@ -480,8 +480,6 @@ static int real_check_file(demuxer_t* demuxer)
     return DEMUXER_TYPE_REAL;
 }
 
-void hexdump(char *, unsigned long);
-
 #define SKIP_BITS(n) buffer<<=n
 #define SHOW_BITS(n) ((buffer)>>(32-(n)))
 
