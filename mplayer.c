@@ -351,7 +351,6 @@ float sub_delay=0;
 float sub_fps=0;
 int   sub_auto = 1;
 char *vobsub_name=NULL;
-/*DSP!!char *dsp=NULL;*/
 int   subcc_enabled=0;
 int suboverlap_enabled = 1;
 
@@ -3135,9 +3134,6 @@ char * mem_ptr;
 
 /* Flag indicating whether MPlayer should exit without playing anything. */
 int opt_exit = 0;
-
-//float a_frame=0;    // Audio
-
 int i;
 
     struct MPContext *mpctx = &(struct MPContext){
@@ -3830,8 +3826,6 @@ if (opts->ass_enabled && ass_library) {
 
 current_module="demux_open2";
 
-//file_format=demuxer->file_format;
-
 mpctx->d_audio=mpctx->demuxer->audio;
 mpctx->d_video=mpctx->demuxer->video;
 mpctx->d_sub=mpctx->demuxer->sub;
@@ -4018,10 +4012,6 @@ current_module="main";
 if(verbose) term_osd = 0;
 
 {
-//int frame_corr_num=0;   //
-//float v_frame=0;    // Video
-//float num_frames=0;      // number of frames played
-
 int frame_time_remaining=0; // flag
 int blit_frame=0;
 
