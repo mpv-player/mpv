@@ -194,96 +194,7 @@ static demuxer_t * demux_open_pva (demuxer_t * demuxer)
 	return demuxer;
 }
 
-int pva_get_payload(demuxer_t * d,pva_payload_t * payload);
-
-// 0 = EOF or no stream found
-// 1 = successfully read a packet
-static int demux_pva_fill_buffer (demuxer_t * demux, demux_stream_t *ds)
-{
-	uint8_t done=0;
-	demux_packet_t * dp;
-	pva_priv_t * priv=demux->priv;
-	pva_payload_t current_payload;
-
-	while(!done)
-	{
-		if(!pva_get_payload(demux,&current_payload)) return 0;
-		switch(current_payload.type)
-		{
-			case VIDEOSTREAM:
-				if(demux->video->id==-1) demux->video->id=0;
-				if(!current_payload.is_packet_start && priv->last_video_pts==-1)
-				{
-					/* We should only be here at the beginning of a stream, when we have
-					 * not yet encountered a valid Video PTS, or after a seek.
-					 * So, skip these starting packets in order not to deliver the
-					 * player a bogus PTS.
-					 */
-					done=0;
-				}
-				else
-				{
-					/*
-					 * In every other condition, we are delivering the payload. Set this
-					 * so that the following code knows whether to skip it or read it.
-					 */
-					done=1;
-				}
-				if(demux->video->id!=0) done=0;
-				if(current_payload.is_packet_start)
-				{
-					priv->last_video_pts=current_payload.pts;
-					//mp_msg(MSGT_DEMUXER,MSGL_DBG2,"demux_pva: Video PTS=%llu , delivered %f\n",current_payload.pts,priv->last_video_pts);
-				}
-				if(done)
-				{
-					dp=new_demux_packet(current_payload.size);
-					dp->pts=priv->last_video_pts;
-					stream_read(demux->stream,dp->buffer,current_payload.size);
-					ds_add_packet(demux->video,dp);
-				}
-				else
-				{
-					//printf("Skipping %u video bytes\n",current_payload.size);
-					stream_skip(demux->stream,current_payload.size);
-				}
-				break;
-			case MAINAUDIOSTREAM:
-				if(demux->audio->id==-1) demux->audio->id=0;
-				if(!current_payload.is_packet_start && priv->last_audio_pts==-1)
-				{
-					/* Same as above for invalid video PTS, just for audio. */
-					done=0;
-				}
-				else
-				{
-					done=1;
-				}
-				if(current_payload.is_packet_start)
-				{
-					priv->last_audio_pts=current_payload.pts;
-				}
-				if(demux->audio->id!=0) done=0;
-				if(done)
-				{
-					dp=new_demux_packet(current_payload.size);
-					dp->pts=priv->last_audio_pts;
-					if(current_payload.offset != stream_tell(demux->stream))
-						stream_seek(demux->stream,current_payload.offset);
-					stream_read(demux->stream,dp->buffer,current_payload.size);
-					ds_add_packet(demux->audio,dp);
-				}
-				else
-				{
-					stream_skip(demux->stream,current_payload.size);
-				}
-				break;
-		}
-	}
-	return 1;
-}
-
-int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
+static int pva_get_payload(demuxer_t *d, pva_payload_t *payload)
 {
 	uint8_t flags,pes_head_len;
 	uint16_t pack_size;
@@ -470,6 +381,93 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 				}
 				payload->offset=stream_tell(d->stream);
 				payload->size=pack_size-stream_tell(d->stream)+pva_payload_start;
+				break;
+		}
+	}
+	return 1;
+}
+
+// 0 = EOF or no stream found
+// 1 = successfully read a packet
+static int demux_pva_fill_buffer (demuxer_t * demux, demux_stream_t *ds)
+{
+	uint8_t done=0;
+	demux_packet_t * dp;
+	pva_priv_t * priv=demux->priv;
+	pva_payload_t current_payload;
+
+	while(!done)
+	{
+		if(!pva_get_payload(demux,&current_payload)) return 0;
+		switch(current_payload.type)
+		{
+			case VIDEOSTREAM:
+				if(demux->video->id==-1) demux->video->id=0;
+				if(!current_payload.is_packet_start && priv->last_video_pts==-1)
+				{
+					/* We should only be here at the beginning of a stream, when we have
+					 * not yet encountered a valid Video PTS, or after a seek.
+					 * So, skip these starting packets in order not to deliver the
+					 * player a bogus PTS.
+					 */
+					done=0;
+				}
+				else
+				{
+					/*
+					 * In every other condition, we are delivering the payload. Set this
+					 * so that the following code knows whether to skip it or read it.
+					 */
+					done=1;
+				}
+				if(demux->video->id!=0) done=0;
+				if(current_payload.is_packet_start)
+				{
+					priv->last_video_pts=current_payload.pts;
+					//mp_msg(MSGT_DEMUXER,MSGL_DBG2,"demux_pva: Video PTS=%llu , delivered %f\n",current_payload.pts,priv->last_video_pts);
+				}
+				if(done)
+				{
+					dp=new_demux_packet(current_payload.size);
+					dp->pts=priv->last_video_pts;
+					stream_read(demux->stream,dp->buffer,current_payload.size);
+					ds_add_packet(demux->video,dp);
+				}
+				else
+				{
+					//printf("Skipping %u video bytes\n",current_payload.size);
+					stream_skip(demux->stream,current_payload.size);
+				}
+				break;
+			case MAINAUDIOSTREAM:
+				if(demux->audio->id==-1) demux->audio->id=0;
+				if(!current_payload.is_packet_start && priv->last_audio_pts==-1)
+				{
+					/* Same as above for invalid video PTS, just for audio. */
+					done=0;
+				}
+				else
+				{
+					done=1;
+				}
+				if(current_payload.is_packet_start)
+				{
+					priv->last_audio_pts=current_payload.pts;
+				}
+				if(demux->audio->id!=0) done=0;
+				if(done)
+				{
+					dp=new_demux_packet(current_payload.size);
+					dp->pts=priv->last_audio_pts;
+					if(current_payload.offset != stream_tell(demux->stream))
+						stream_seek(demux->stream,current_payload.offset);
+					stream_read(demux->stream,dp->buffer,current_payload.size);
+					ds_add_packet(demux->audio,dp);
+				}
+				else
+				{
+					stream_skip(demux->stream,current_payload.size);
+				}
 				break;
 		}
 	}
