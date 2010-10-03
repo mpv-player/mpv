@@ -28,6 +28,7 @@
 #include "mp_msg.h"
 #include "options.h"
 
+#include "libmpcodecs/dec_audio.h"
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "parse_es.h"
@@ -897,8 +898,6 @@ do{
   }
   return 1;
 }
-
-void skip_audio_frame(sh_audio_t *sh_audio);
 
 static void demux_seek_mpg(demuxer_t *demuxer, float rel_seek_secs,
                            float audio_delay, int flags)

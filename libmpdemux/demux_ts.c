@@ -30,6 +30,7 @@
 #include "mp_msg.h"
 #include "options.h"
 
+#include "libmpcodecs/dec_audio.h"
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "parse_es.h"
@@ -3168,8 +3169,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 	return 0;
 }
 
-
-void skip_audio_frame(sh_audio_t *sh_audio);
 
 static void reset_fifos(demuxer_t *demuxer, int a, int v, int s)
 {

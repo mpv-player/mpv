@@ -38,6 +38,7 @@
 #include "config.h"
 #include "mp_msg.h"
 
+#include "libmpcodecs/dec_audio.h"
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "demux_ty_osd.h"
@@ -47,7 +48,6 @@
 #include "libavutil/avstring.h"
 #include "ffmpeg_files/intreadwrite.h"
 
-void skip_audio_frame( sh_audio_t *sh_audio );
 extern int sub_justify;
 
 // 2/c0: audio data
