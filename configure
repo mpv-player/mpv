@@ -4036,12 +4036,7 @@ if test "$_x11" = yes ; then
 int main(void) { DPMSQueryExtension(0, 0, 0); return 0; }
 EOF
   cc_check -lXdpms && _xdpms3=yes
-  cat > $TMPC <<EOF
-#include <X11/Xlib.h>
-#include <X11/extensions/dpms.h>
-int main(void) { DPMSQueryExtension(0, 0, 0); return 0; }
-EOF
-  cc_check -lXext && _xdpms4=yes
+  statement_check_broken X11/Xlib.h X11/extensions/dpms.h 'DPMSQueryExtension(0, 0, 0)' -lXext && _xdpms4=yes
 fi
 if test "$_xdpms4" = yes ; then
   def_xdpms='#define CONFIG_XDPMS 1'
@@ -4060,16 +4055,8 @@ fi
 
 echocheck "Xv"
 if test "$_xv" = auto ; then
-  cat > $TMPC <<EOF
-#include <X11/Xlib.h>
-#include <X11/extensions/Xvlib.h>
-int main(void) {
-  XvGetPortAttribute(0, 0, 0, 0);
-  XvQueryPortAttributes(0, 0, 0);
-  return 0; }
-EOF
   _xv=no
-  cc_check -lXv && _xv=yes
+  statement_check_broken X11/Xlib.h X11/extensions/Xvlib.h 'XvGetPortAttribute(0, 0, 0, 0)' -lXv && _xv=yes
 fi
 
 if test "$_xv" = yes ; then
@@ -4157,13 +4144,8 @@ echores "$_xinerama"
 # If you run into problems, remove '-lXxf86vm'.
 echocheck "Xxf86vm"
 if test "$_vm" = auto ; then
-  cat > $TMPC <<EOF
-#include <X11/Xlib.h>
-#include <X11/extensions/xf86vmode.h>
-int main(void) { XF86VidModeQueryExtension(0, 0, 0); return 0; }
-EOF
   _vm=no
-  cc_check -lXxf86vm && _vm=yes
+  statement_check_broken X11/Xlib.h X11/extensions/xf86vmode.h 'XF86VidModeQueryExtension(0, 0, 0)' -lXxf86vm && _vm=yes
 fi
 if test "$_vm" = yes ; then
   def_vm='#define CONFIG_XF86VM 1'
@@ -4195,22 +4177,12 @@ echores "$_xf86keysym"
 
 echocheck "DGA"
 if test "$_dga2" = auto && test "$_x11" = yes ; then
-  cat > $TMPC << EOF
-#include <X11/Xlib.h>
-#include <X11/extensions/xf86dga.h>
-int main(void) { XDGASetViewport(0, 0, 0, 0, 0); return 0; }
-EOF
   _dga2=no
-  cc_check -lXxf86dga && _dga2=yes
+  statement_check_broken X11/Xlib.h X11/extensions/xf86dga.h 'XDGASetViewport(0, 0, 0, 0, 0)' -lXxf86dga && _dga2=yes
 fi
 if test "$_dga1" = auto && test "$_dga2" = no && test "$_vm" = yes ; then
-  cat > $TMPC << EOF
-#include <X11/Xlib.h>
-#include <X11/extensions/xf86dga.h>
-int main(void) { XF86DGASetViewPort(0, 0, 0, 0); return 0; }
-EOF
   _dga1=no
-  cc_check -lXxf86dga -lXxf86vm && _dga1=yes
+  statement_check_broken X11/Xlib.h X11/extensions/xf86dga.h 'XF86DGASetViewPort(0, 0, 0, 0)' -lXxf86dga -lXxf86vm && _dga1=yes
 fi
 
 _dga=no
@@ -5040,9 +5012,6 @@ echores "$_dxr3"
 echocheck "IVTV TV-Out (pre linux-2.6.24)"
 if test "$_ivtv" = auto ; then
   cat > $TMPC << EOF
-#include <stdlib.h>
-#include <inttypes.h>
-#include <linux/types.h>
 #include <linux/videodev2.h>
 #include <linux/ivtv.h>
 #include <sys/ioctl.h>
@@ -5071,9 +5040,6 @@ echores "$_ivtv"
 echocheck "V4L2 MPEG Decoder"
 if test "$_v4l2" = auto ; then
   cat > $TMPC << EOF
-#include <stdlib.h>
-#include <inttypes.h>
-#include <linux/types.h>
 #include <linux/videodev2.h>
 #include <linux/version.h>
 int main(void) {
