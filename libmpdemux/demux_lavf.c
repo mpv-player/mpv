@@ -73,6 +73,7 @@ typedef struct lavf_priv {
     int vstreams[MAX_V_STREAMS];
     int sstreams[MAX_S_STREAMS];
     int cur_program;
+    int nb_streams_last;
 }lavf_priv_t;
 
 static int mp_read(void *opaque, uint8_t *buf, int size) {
@@ -565,6 +566,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     for(i=0; i<avfc->nb_streams; i++)
         handle_stream(demuxer, avfc, i);
+    priv->nb_streams_last = avfc->nb_streams;
+
     if(avfc->nb_programs) {
         int p;
         for (p = 0; p < avfc->nb_programs; p++) {
@@ -603,6 +606,11 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
 
     if(av_read_frame(priv->avfc, &pkt) < 0)
         return 0;
+
+    // handle any new streams that might have been added
+    for (id = priv->nb_streams_last; id < priv->avfc->nb_streams; id++)
+        handle_stream(demux, priv->avfc, id);
+    priv->nb_streams_last = priv->avfc->nb_streams;
 
     id= pkt.stream_index;
 
