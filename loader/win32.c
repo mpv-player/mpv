@@ -4553,7 +4553,7 @@ static double exp_CIpow(void)
 {
     FPU_DOUBLES(x,y);
 
-    dbgprintf("_CIpow(%lf, %lf)\n", x, y);
+    dbgprintf("_CIpow(%f, %f)\n", x, y);
     return pow(x, y);
 }
 
@@ -5008,7 +5008,7 @@ static const char * WINAPI expPathFindFileNameA(const char *path) {
 
 static double expfloor(double x)
 {
-    dbgprintf("floor(%lf)\n", x);
+    dbgprintf("floor(%f)\n", x);
     return floor(x);
 }
 
@@ -5019,7 +5019,7 @@ static double exp_CIcos(void)
 {
     FPU_DOUBLE(x);
 
-    dbgprintf("_CIcos(%lf)\n", x);
+    dbgprintf("_CIcos(%f)\n", x);
     return cos(x);
 }
 
@@ -5027,7 +5027,7 @@ static double exp_CIsin(void)
 {
     FPU_DOUBLE(x);
 
-    dbgprintf("_CIsin(%lf)\n", x);
+    dbgprintf("_CIsin(%f)\n", x);
     return sin(x);
 }
 
@@ -5035,7 +5035,7 @@ static double exp_CIsqrt(void)
 {
     FPU_DOUBLE(x);
 
-    dbgprintf("_CIsqrt(%lf)\n", x);
+    dbgprintf("_CIsqrt(%f)\n", x);
     return sqrt(x);
 }
 

@@ -1702,7 +1702,7 @@ static void *video_grabber(void *data)
                 priv->video_interval_sum += orig_interval-prev_interval;
                 if (priv->video_avg_ptr >= VIDEO_AVG_BUFFER_SIZE) priv->video_avg_ptr = 0;
 
-//              fprintf(stderr, "fps: %lf\n", (double)1e6*VIDEO_AVG_BUFFER_SIZE/priv->video_interval_sum);
+//              fprintf(stderr, "fps: %f\n", (double)1e6*VIDEO_AVG_BUFFER_SIZE/priv->video_interval_sum);
 
                 // interpolate the skew in time
                 pthread_mutex_lock(&priv->skew_mutex);

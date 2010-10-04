@@ -1693,7 +1693,7 @@ static void *video_grabber(void *data)
             if (!priv->tv_param->noaudio) pthread_mutex_unlock(&priv->skew_mutex);
         }
         priv->curr_frame = (long long)buf.timestamp.tv_sec*1e6+buf.timestamp.tv_usec;
-//        fprintf(stderr, "idx = %d, ts = %lf\n", buf.index, (double)(priv->curr_frame) / 1e6);
+//        fprintf(stderr, "idx = %d, ts = %f\n", buf.index, (double)(priv->curr_frame) / 1e6);
 
         interval = priv->curr_frame - priv->first_frame;
         delta = interval - prev_interval;
@@ -1713,7 +1713,7 @@ static void *video_grabber(void *data)
             }
         }
 
-        mp_msg(MSGT_TV, MSGL_DBG3, "\nfps = %lf, interval = %lf, a_skew = %f, corr_skew = %f\n",
+        mp_msg(MSGT_TV, MSGL_DBG3, "\nfps = %f, interval = %f, a_skew = %f, corr_skew = %f\n",
                delta ? (double)1e6/delta : -1,
                (double)1e-6*interval, (double)1e-6*xskew, (double)1e-6*skew);
         mp_msg(MSGT_TV, MSGL_DBG3, "vcnt = %d, acnt = %d\n", priv->video_cnt, priv->audio_cnt);
@@ -1886,7 +1886,7 @@ static void *audio_grabber(void *data)
             priv->audio_start_time = start_time_avg/(priv->audio_recv_blocks_total+1);
         }
 
-//        fprintf(stderr, "spb = %lf, bs = %d, skew = %lf\n", priv->audio_secs_per_block, priv->audio_in.blocksize,
+//        fprintf(stderr, "spb = %f, bs = %d, skew = %f\n", priv->audio_secs_per_block, priv->audio_in.blocksize,
 //                (double)(current_time - 1e6*priv->audio_secs_per_block*priv->audio_recv_blocks_total)/1e6);
 
         // put the current skew into the ring buffer
@@ -1938,7 +1938,7 @@ static void *audio_grabber(void *data)
         priv->audio_skew += priv->audio_start_time - priv->first_frame;
         pthread_mutex_unlock(&priv->skew_mutex);
 
-//        fprintf(stderr, "audio_skew = %lf, delta = %lf\n", (double)priv->audio_skew/1e6, (double)priv->audio_skew_delta_total/1e6);
+//        fprintf(stderr, "audio_skew = %f, delta = %f\n", (double)priv->audio_skew/1e6, (double)priv->audio_skew_delta_total/1e6);
 
         pthread_mutex_lock(&priv->audio_mutex);
         if ((priv->audio_tail+1) % priv->audio_buffer_size == priv->audio_head) {

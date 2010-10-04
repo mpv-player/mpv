@@ -201,8 +201,8 @@ static int check_font(font_desc_t *desc, float ppem, int padding, int pic_idx,
 	}
 	desc->glyph_index[unicode?character:code] = glyph_index;
     }
-//    fprintf(stderr, "font height: %lf\n", (double)(face->bbox.yMax-face->bbox.yMin)/(double)face->units_per_EM*ppem);
-//    fprintf(stderr, "font width: %lf\n", (double)(face->bbox.xMax-face->bbox.xMin)/(double)face->units_per_EM*ppem);
+//    fprintf(stderr, "font height: %f\n", (double)(face->bbox.yMax-face->bbox.yMin)/(double)face->units_per_EM*ppem);
+//    fprintf(stderr, "font width: %f\n", (double)(face->bbox.xMax-face->bbox.xMin)/(double)face->units_per_EM*ppem);
 
     ymax = (double)(face->bbox.yMax)/(double)face->units_per_EM*ppem+1;
     ymin = (double)(face->bbox.yMin)/(double)face->units_per_EM*ppem-1;
@@ -592,13 +592,13 @@ void render_one_glyph(font_desc_t *desc, int c)
 		desc->tables.omt, desc->tables.o_r, desc->tables.o_w,
 		desc->tables.o_size);
     }
-//    fprintf(stderr, "fg: outline t = %lf\n", GetTimer()-t);
+//    fprintf(stderr, "fg: outline t = %f\n", GetTimer()-t);
 
     if (desc->tables.g_r) {
 	blur(abuffer+off, desc->tables.tmp, width, height, stride,
 	     desc->tables.gt2, desc->tables.g_r,
 	     desc->tables.g_w);
-//	fprintf(stderr, "fg: blur t = %lf\n", GetTimer()-t);
+//	fprintf(stderr, "fg: blur t = %f\n", GetTimer()-t);
     }
 
     resample_alpha(abuffer+off, bbuffer+off, width, height, stride, font_factor);
@@ -637,9 +637,9 @@ static int prepare_font(font_desc_t *desc, FT_Face face, float ppem, int pic_idx
 //    ttime = GetTimer();
     err = check_font(desc, ppem, padding, pic_idx, charset_size, charset, charcodes, unicode);
 //    ttime=GetTimer()-ttime;
-//    printf("render:   %7lf us\n",ttime);
+//    printf("render:   %7f us\n",ttime);
     if (err) return -1;
-//    fprintf(stderr, "fg: render t = %lf\n", GetTimer()-t);
+//    fprintf(stderr, "fg: render t = %f\n", GetTimer()-t);
 
     desc->pic_a[pic_idx]->w = desc->pic_b[pic_idx]->w;
     desc->pic_a[pic_idx]->h = desc->pic_b[pic_idx]->h;
@@ -1023,7 +1023,7 @@ font_desc_t* read_font_desc_ft(const char *fname, int face_index, int movie_widt
     goto err_out;
 #endif
 
-//    fprintf(stderr, "fg: prepare t = %lf\n", GetTimer()-t);
+//    fprintf(stderr, "fg: prepare t = %f\n", GetTimer()-t);
 
     err = prepare_font(desc, face, subtitle_font_ppem, desc->face_cnt-1,
 		       charset_size, my_charset, my_charcodes, unicode,

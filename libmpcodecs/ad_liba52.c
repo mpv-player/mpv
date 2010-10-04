@@ -134,6 +134,7 @@ int channels=0;
 static sample_t dynrng_call (sample_t c, void *data)
 {
     struct MPOpts *opts = data;
+    //fprintf(stderr, "(%f, %f): %f\n", (double)c, (double)drc_level, (double)pow((double)c, drc_level));
     //fprintf(stderr, "(%lf, %lf): %lf\n", (double)c, opts->drc_level, pow(c, opts->drc_level));
     return pow(c, opts->drc_level);
 }
