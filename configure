@@ -3068,7 +3068,7 @@ if test "$networking" = yes ; then
   inputmodules="networking $inputmodules"
 else
   noinputmodules="networking $noinputmodules"
-  def_network='#undef CONFIG_NETWORK'
+  def_network='#define CONFIG_NETWORK 0'
   def_networking='#undef CONFIG_NETWORKING'
 fi
 echores "$networking"
