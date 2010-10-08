@@ -788,6 +788,10 @@ static int OpenSPDIF(void)
 #if HAVE_BIGENDIAN
     if (!(ao->stream_format.mFormatFlags & kAudioFormatFlagIsBigEndian))
 #else
+    /* tell mplayer that we need a byteswap on AC3 streams, */
+    if (ao->stream_format.mFormatID & kAudioFormat60958AC3)
+        ao_data.format = AF_FORMAT_AC3_LE;
+
     if (ao->stream_format.mFormatFlags & kAudioFormatFlagIsBigEndian)
 #endif
         ao_msg(MSGT_AO, MSGL_WARN,
