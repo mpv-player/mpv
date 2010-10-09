@@ -41,7 +41,7 @@ int	mtrr_set_type(unsigned base,unsigned size,int type)
 {
 #ifdef __linux__
     FILE * mtrr_fd;
-    char * stype;
+    const char *stype;
     switch(type)
     {
 	case MTRR_TYPE_UNCACHABLE: stype = "uncachable"; break;
@@ -54,13 +54,9 @@ int	mtrr_set_type(unsigned base,unsigned size,int type)
     mtrr_fd = fopen("/proc/mtrr","wt");
     if(mtrr_fd)
     {
-	char sout[256];
-	unsigned wr_len;
-	sprintf(sout,"base=0x%08X size=0x%08X type=%s\n",base,size,stype);
-	wr_len = fprintf(mtrr_fd,sout);
-	/*printf("MTRR: %s\n",sout);*/
+	int wr_len = fprintf(mtrr_fd, "base=0x%08X size=0x%08X type=%s\n", base, size, stype);
 	fclose(mtrr_fd);
-	return wr_len == strlen(sout) ? 0 : EPERM;
+	return wr_len > 0 ? 0 : EPERM;
     }
     return ENOSYS;
 #elif defined (__i386__ ) && defined (__NetBSD__) && __NetBSD_Version__ > 105240000
