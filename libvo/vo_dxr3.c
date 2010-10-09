@@ -682,13 +682,13 @@ static void uninit(void)
 		}
 	}
 
-	if (fd_video) {
+	if (fd_video != -1) {
 		close(fd_video);
 	}
-	if (fd_spu) {
+	if (fd_spu != -1) {
 		close(fd_spu);
 	}
-	if (fd_control) {
+	if (fd_control != -1) {
 		close(fd_control);
 	}
 #ifdef SPU_SUPPORT
