@@ -171,8 +171,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                     flags, xWAttribs.colormap, "xmga", title);
             XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xWAttribs);
 
-    panscan_calc();
-
     mga_vid_config.colkey_on = 1;
     mga_vid_config.colkey_red = r;
     mga_vid_config.colkey_green = g;
