@@ -314,7 +314,7 @@ static void check_events(void)
 {
     const int event = vo_x11_check_events(mDisplay);
 
-    if ((event & VO_EVENT_RESIZE) || (event & VO_EVENT_EXPOSE))
+    if (event & (VO_EVENT_RESIZE | VO_EVENT_MOVE | VO_EVENT_EXPOSE))
         set_window(0);
 
     return;
