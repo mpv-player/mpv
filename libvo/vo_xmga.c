@@ -97,9 +97,6 @@ static void check_events(void)
         return;
     set_window();
     mDrawColorKey();
-    if (ioctl(f, MGA_VID_CONFIG, &mga_vid_config))
-        mp_msg(MSGT_VO, MSGL_WARN,
-               "Error in mga_vid_config ioctl (wrong mga_vid.o version?)");
 }
 
 static void flip_page(void)
