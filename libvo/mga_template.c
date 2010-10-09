@@ -42,7 +42,7 @@ static uint32_t               drwcX,drwcY;
 static struct SwsContext *sws_ctx;
 
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-    uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
+    uint32_t bespitch = FFALIGN(mga_vid_config.src_width, 32);
     x0+=mga_vid_config.src_width*(vo_panscan_x>>1)/(vo_dwidth+vo_panscan_x);
     switch(mga_vid_config.format){
     case MGA_VID_FORMAT_YV12:
@@ -69,7 +69,7 @@ static void draw_osd(void)
 static void
 draw_slice_g200(uint8_t *image[], int stride[], int width,int height,int x,int y)
 {
-	uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
+	uint32_t bespitch = FFALIGN(mga_vid_config.src_width, 32);
 	int dst_stride[4] = { bespitch, bespitch };
 	uint8_t *dst[4];
 
@@ -86,7 +86,7 @@ draw_slice_g400(uint8_t *image[], int stride[], int w,int h,int x,int y)
     uint8_t *dest2;
     uint32_t bespitch,bespitch2;
 
-    bespitch = (mga_vid_config.src_width + 31) & ~31;
+    bespitch = FFALIGN(mga_vid_config.src_width, 32);
     bespitch2 = bespitch/2;
 
     dest = vid_data + bespitch * y + x;
@@ -98,7 +98,7 @@ draw_slice_g400(uint8_t *image[], int stride[], int w,int h,int x,int y)
     dest2= dest + bespitch2*mga_vid_config.src_height / 2;
 
   if(mga_vid_config.format==MGA_VID_FORMAT_YV12){
-    // mga_vid's YV12 assumes Y,U,V order (insteda of Y,V,U) :(
+    // mga_vid's YV12 assumes Y,U,V order (instead of Y,V,U) :(
     mem2agpcpy_pic(dest, image[1], w, h, bespitch2, stride[1]);
     mem2agpcpy_pic(dest2,image[2], w, h, bespitch2, stride[2]);
   } else {
@@ -147,7 +147,7 @@ draw_frame(uint8_t *src[])
 }
 
 static uint32_t get_image(mp_image_t *mpi){
-    uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
+    uint32_t bespitch = FFALIGN(mga_vid_config.src_width, 32);
     uint32_t bespitch2 = bespitch/2;
 //    printf("mga: get_image() called\n");
     if(mpi->type==MP_IMGTYPE_STATIC && mga_vid_config.num_frames>1) return VO_FALSE; // it is not static
@@ -182,7 +182,7 @@ static uint32_t get_image(mp_image_t *mpi){
 
 static uint32_t
 draw_image(mp_image_t *mpi){
-    uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
+    uint32_t bespitch = FFALIGN(mga_vid_config.src_width, 32);
 
     // if -dr or -slices then do nothing:
     if(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK)) return VO_TRUE;
@@ -328,7 +328,7 @@ static int control(uint32_t request, void *data)
   case VOCTRL_FULLSCREEN:
       vo_x11_fullscreen();
       vo_panscan_amount=0;
-    /* indended, fallthrough to update panscan on fullscreen/windowed switch */
+    /* intended, fallthrough to update panscan on fullscreen/windowed switch */
 #endif
   case VOCTRL_SET_PANSCAN:
       if ( vo_fs && ( vo_panscan != vo_panscan_amount ) ) // || ( !vo_fs && vo_panscan_amount ) )
@@ -353,21 +353,24 @@ static int control(uint32_t request, void *data)
 
 static int mga_init(int width,int height,unsigned int format){
 
+        uint32_t bespitch = FFALIGN(width, 32);
         switch(format){
         case IMGFMT_YV12:
-	    width+=width&1;height+=height&1;
-	    mga_vid_config.frame_size = ((width + 31) & ~31) * height + (((width + 31) & ~31) * height) / 2;
+            width  = FFALIGN(width,  2);
+            height = FFALIGN(height, 2);
+            mga_vid_config.frame_size = bespitch * height + (bespitch * height) / 2;
             mga_vid_config.format=MGA_VID_FORMAT_I420; break;
         case IMGFMT_I420:
         case IMGFMT_IYUV:
-	    width+=width&1;height+=height&1;
-	    mga_vid_config.frame_size = ((width + 31) & ~31) * height + (((width + 31) & ~31) * height) / 2;
+            width  = FFALIGN(width,  2);
+            height = FFALIGN(height, 2);
+            mga_vid_config.frame_size = bespitch * height + (bespitch * height) / 2;
             mga_vid_config.format=MGA_VID_FORMAT_YV12; break;
         case IMGFMT_YUY2:
-	    mga_vid_config.frame_size = ((width + 31) & ~31) * height * 2;
+            mga_vid_config.frame_size = bespitch * height * 2;
             mga_vid_config.format=MGA_VID_FORMAT_YUY2; break;
         case IMGFMT_UYVY:
-	    mga_vid_config.frame_size = ((width + 31) & ~31) * height * 2;
+            mga_vid_config.frame_size = bespitch * height * 2;
             mga_vid_config.format=MGA_VID_FORMAT_UYVY; break;
         default:
             mp_tmsg(MSGT_VO,MSGL_WARN, "[MGA] invalid output format %0X\n",format);
