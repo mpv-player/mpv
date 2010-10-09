@@ -766,10 +766,14 @@ void vo_x11_uninit(struct vo *vo)
 static int check_resize(struct vo *vo)
 {
     int old_w = vo->dwidth, old_h = vo->dheight;
+    int old_x = vo->dx, old_y = vo->dy;
+    int rc = 0;
     vo_x11_update_geometry(vo);
     if (vo->dwidth != old_w || vo->dheight != old_h)
-        return VO_EVENT_RESIZE;
-    return 0;
+        rc |= VO_EVENT_RESIZE;
+    if (vo->dx     != old_x || vo->dy      != old_y)
+        rc |= VO_EVENT_MOVE;
+    return rc;
 }
 
 int vo_x11_check_events(struct vo *vo)
