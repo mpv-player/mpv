@@ -93,10 +93,10 @@ static void check_events(void)
 {
     int e = vo_x11_check_events(mDisplay);
 
-    if (!(e & VO_EVENT_RESIZE) && !(e & VO_EVENT_EXPOSE))
-        return;
-    set_window();
-    mDrawColorKey();
+    if (e & (VO_EVENT_RESIZE | VO_EVENT_MOVE))
+        set_window();
+    if (e & (VO_EVENT_RESIZE | VO_EVENT_EXPOSE))
+        mDrawColorKey();
 }
 
 static void flip_page(void)
