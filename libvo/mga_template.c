@@ -37,10 +37,7 @@ static uint8_t *vid_data, *frames[4];
 static int f = -1;
 
 static uint32_t               drwX,drwY,drwWidth,drwHeight;
-#ifdef VO_XMGA
-static uint32_t               drwBorderWidth,drwDepth;
-#endif
-static uint32_t               drwcX,drwcY,dwidth,dheight;
+static uint32_t               drwcX,drwcY;
 
 static struct SwsContext *sws_ctx;
 
@@ -342,6 +339,13 @@ static int control(uint32_t request, void *data)
 	set_window();
        }
       return VO_TRUE;
+  case VOCTRL_UPDATE_SCREENINFO:
+#ifdef VO_XMGA
+      update_xinerama_info();
+#else
+      aspect_save_screenres(vo_screenwidth, vo_screenheight);
+#endif
+      return VO_TRUE;
   }
   return VO_NOTIMPL;
 }
@@ -496,33 +500,21 @@ static int preinit(const char *vo_subdevice)
 
 static void set_window( void ){
 
-#ifdef VO_XMGA
-	 if ( WinID )
-	  {
-           XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
-           mp_msg(MSGT_VO,MSGL_V,"[xmga] x: %d y: %d w: %d h: %d\n",drwX,drwY,drwWidth,drwHeight );
-           drwX=0; drwY=0;
-           XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
-           mp_msg(MSGT_VO,MSGL_V,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+         drwcX = vo_dx;
+         drwcY = vo_dy;
+         drwWidth  = vo_dwidth;
+         drwHeight = vo_dheight;
 
-	  }
-	  else
-#endif
-	  { drwX=drwcX=vo_dx; drwY=drwcY=vo_dy; drwWidth=vo_dwidth; drwHeight=vo_dheight; }
-
-         aspect(&dwidth,&dheight,A_NOZOOM);
-         if ( vo_fs )
-          {
-           aspect(&dwidth,&dheight,A_ZOOM);
-           drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
-           drwcX+=drwX;
-           drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2;
-           drwcY+=drwY;
-           drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
-           drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
-           mp_msg(MSGT_VO,MSGL_V,"[xmga-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
-          }
-	 vo_dwidth=drwWidth; vo_dheight=drwHeight;
+         aspect(&drwWidth, &drwHeight, A_WINZOOM);
+         panscan_calc_windowed();
+         drwWidth  += vo_panscan_x;
+         drwHeight += vo_panscan_y;
+         drwWidth  = FFMIN(drwWidth, vo_screenwidth);
+         drwHeight = FFMIN(drwHeight, vo_screenheight);
+         drwX = (vo_dwidth  - drwWidth ) / 2;
+         drwY = (vo_dheight - drwHeight) / 2;
+         drwcX += drwX;
+         drwcY += drwY;
 
 #ifdef VO_XMGA
 #ifdef CONFIG_XINERAMA
@@ -582,20 +574,5 @@ static void set_window( void ){
          mga_vid_config.y_org=drwcY;
          mga_vid_config.dest_width=drwWidth;
          mga_vid_config.dest_height=drwHeight;
-	 if ( vo_panscan > 0.0f && vo_fs )
-	  {
-	   drwX-=vo_panscan_x>>1;
-	   drwY-=vo_panscan_y>>1;
-	   drwWidth+=vo_panscan_x;
-	   drwHeight+=vo_panscan_y;
-
-	   mga_vid_config.x_org-=vo_panscan_x>>1;
-	   mga_vid_config.y_org-=vo_panscan_y>>1;
-           mga_vid_config.dest_width=drwWidth;
-           mga_vid_config.dest_height=drwHeight;
-#ifdef VO_XMGA
-	   mDrawColorKey();
-#endif
-	  }
 	 if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) ) mp_msg(MSGT_VO,MSGL_WARN,"Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
 }

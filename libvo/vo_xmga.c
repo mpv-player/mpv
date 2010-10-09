@@ -71,8 +71,6 @@ static int colorkey;
 static uint32_t mvHeight;
 static uint32_t mvWidth;
 
-static Window mRoot;
-
 static XSetWindowAttributes xWAttribs;
 
 static int initialized = 0;
@@ -131,24 +129,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     if (mga_init(width, height, format))
         return -1;              // ioctl errors?
 
-    aspect_save_orig(width, height);
-    aspect_save_prescale(d_width, d_height);
-    update_xinerama_info();
-
     mvWidth = width;
     mvHeight = height;
-
-    vo_panscan_x = vo_panscan_y = vo_panscan_amount = 0;
-
-    aspect(&d_width, &d_height, A_NOZOOM);
-    vo_dx = (vo_screenwidth - d_width) / 2;
-    vo_dy = (vo_screenheight - d_height) / 2;
-    geometry(&vo_dx, &vo_dy, &d_width, &d_height, vo_screenwidth,
-             vo_screenheight);
-    vo_dx += xinerama_x;
-    vo_dy += xinerama_y;
-    vo_dwidth = d_width;
-    vo_dheight = d_height;
 
     r = (vo_colorkey & 0x00ff0000) >> 16;
     g = (vo_colorkey & 0x0000ff00) >> 8;
@@ -177,10 +159,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     initialized = 1;
 
-    {
-        if (flags & VOFLAG_FULLSCREEN)
-            aspect(&dwidth, &dheight, A_ZOOM);
-
         XGetWindowAttributes(mDisplay, mRootWin, &attribs);
         mDepth = attribs.depth;
         if (mDepth != 15 && mDepth != 16 && mDepth != 24 && mDepth != 32)
@@ -195,17 +173,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
             vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, d_width, d_height,
                     flags, xWAttribs.colormap, "xmga", title);
             XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xWAttribs);
-
-    }
-
-    if ((flags & VOFLAG_FULLSCREEN) && (!WinID))
-    {
-        vo_dx = 0;
-        vo_dy = 0;
-        vo_dwidth = vo_screenwidth;
-        vo_dheight = vo_screenheight;
-        vo_fs = 1;
-    }
 
     panscan_calc();
 
