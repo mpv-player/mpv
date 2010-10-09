@@ -3244,14 +3244,6 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   free( mem_ptr ); // release the buffer created by get_path()
 }
 
-#if 0
-    if(video_codec_list){
-	int i;
-	video_codec=video_codec_list[0];
-	for(i=0;video_codec_list[i];i++)
-	    mp_msg(MSGT_FIXME,MSGL_FIXME,"vc#%d: '%s'\n",i,video_codec_list[i]);
-    }
-#endif
     if(audio_codec_list && strcmp(audio_codec_list[0],"help")==0){
       mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Available audio codecs:\n");
       mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_CODECS\n");
