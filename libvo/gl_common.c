@@ -577,6 +577,47 @@ static void ppm_skip(FILE *f) {
 
 #define MAXDIM (16 * 1024)
 
+static uint8_t *read_pnm(FILE *f, int *width, int *height,
+                         int *bytes_per_pixel, int *maxval) {
+  uint8_t *data;
+  int type;
+  unsigned w, h, m, val, bpp;
+  *width = *height = *bytes_per_pixel = *maxval = 0;
+  ppm_skip(f);
+  if (fgetc(f) != 'P')
+    return NULL;
+  type = fgetc(f);
+  if (type != '5' && type != '6')
+    return NULL;
+  ppm_skip(f);
+  if (fscanf(f, "%u", &w) != 1)
+    return NULL;
+  ppm_skip(f);
+  if (fscanf(f, "%u", &h) != 1)
+    return NULL;
+  ppm_skip(f);
+  if (fscanf(f, "%u", &m) != 1)
+    return NULL;
+  val = fgetc(f);
+  if (!isspace(val))
+    return NULL;
+  if (w > MAXDIM || h > MAXDIM)
+    return NULL;
+  bpp = (m > 255) ? 2 : 1;
+  if (type == '6')
+    bpp *= 3;
+  data = malloc(w * h * bpp);
+  if (fread(data, w * bpp, h, f) != h) {
+    free(data);
+    return NULL;
+  }
+  *width  = w;
+  *height = h;
+  *bytes_per_pixel = bpp;
+  *maxval = m;
+  return data;
+}
+
 /**
  * \brief creates a texture from a PPM file
  * \param target texture taget, usually GL_TEXTURE_2D
@@ -591,36 +632,19 @@ static void ppm_skip(FILE *f) {
  */
 int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
                    FILE *f, int *width, int *height, int *maxval) {
-  unsigned w, h, m, val, bpp;
-  char *data;
+  int w, h, m, bpp;
   GLenum type;
-  ppm_skip(f);
-  if (fgetc(f) != 'P' || fgetc(f) != '6')
+  uint8_t *data = read_pnm(f, &w, &h, &bpp, &m);
+  if (!data || (bpp != 3 && bpp != 6)) {
+    free(data);
     return 0;
-  ppm_skip(f);
-  if (fscanf(f, "%u", &w) != 1)
-    return 0;
-  ppm_skip(f);
-  if (fscanf(f, "%u", &h) != 1)
-    return 0;
-  ppm_skip(f);
-  if (fscanf(f, "%u", &m) != 1)
-    return 0;
-  val = fgetc(f);
-  if (!isspace(val))
-    return 0;
-  if (w > MAXDIM || h > MAXDIM)
-    return 0;
-  bpp = (m > 255) ? 6 : 3;
-  data = malloc(w * h * bpp);
-  if (fread(data, w * bpp, h, f) != h)
-    return 0;
+  }
   if (!fmt) {
-    fmt = (m > 255) ? hqtexfmt : 3;
+    fmt = bpp == 6 ? hqtexfmt : 3;
     if (fmt == GL_FLOAT_RGB32_NV && target != GL_TEXTURE_RECTANGLE)
       fmt = GL_RGB16;
   }
-  type = m > 255 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE;
+  type = bpp == 6 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE;
   glCreateClearTex(target, fmt, GL_RGB, type, filter, w, h, 0);
   glUploadTex(target, GL_RGB, type,
               data, w * bpp, 0, 0, w, h, 0);
