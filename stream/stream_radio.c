@@ -51,7 +51,6 @@
 
 #ifdef CONFIG_RADIO_V4L
 #include <linux/videodev.h>
-#warning  "V4L is deprecated and will be removed in future"
 #endif
 
 #endif // !IOCTL_BT848_H_NAME

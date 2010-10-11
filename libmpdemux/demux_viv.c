@@ -322,7 +322,7 @@ static int demux_vivo_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
   if (c == 0x82)
   {
       /* ok, this works, but pts calculating from header is required! */
-#warning "Calculate PTS from picture header!"
+      /* FIXME: "Calculate PTS from picture header!" */
       prefix = 1;
       c = stream_read_char(demux->stream);
       mp_msg(MSGT_DEMUX, MSGL_V, "packet 0x82(pos=%u) chunk=%x\n",

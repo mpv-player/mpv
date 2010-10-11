@@ -1735,7 +1735,7 @@ static int WINAPI expLoadStringA(long instance, long  id, void* buf, long size)
 
 static long WINAPI expMultiByteToWideChar(long v1, long v2, char* s1, long siz1, short* s2, int siz2)
 {
-#warning FIXME
+    /* FIXME */
     int i;
     int result;
     if(s2==0)
@@ -3190,7 +3190,7 @@ static int WINAPI expGetProcessVersion(int pid)
 }
 static int WINAPI expGetCurrentThread(void)
 {
-#warning FIXME!
+    /* FIXME! */
     dbgprintf("GetCurrentThread() => %x\n", 0xcfcf9898);
     return 0xcfcf9898;
 }

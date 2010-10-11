@@ -393,14 +393,14 @@ static int validate_codec(codecs_t *c, int type)
     }
 
 #if 0
-#warning codec->driver == 4;... <- this should not be put in here...
-#warning Where are they defined ????????????
+//FIXME: codec->driver == 4;... <- this should not be put in here...
+//FIXME: Where are they defined ????????????
     if (!c->dll && (c->driver == 4 ||
                     (c->driver == 2 && type == TYPE_VIDEO))) {
         mp_tmsg(MSGT_CODECCFG,MSGL_ERR,"\ncodec(%s) needs a 'dll'!\n", c->name);
         return 0;
     }
-#warning Can guid.f1 be 0? How does one know that it was not given?
+// FIXME: Can guid.f1 be 0? How does one know that it was not given?
 //      if (!(codec->flags & CODECS_FLAG_AUDIO) && codec->driver == 4)
 
     if (type == TYPE_VIDEO)

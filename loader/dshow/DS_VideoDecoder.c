@@ -687,7 +687,7 @@ int DS_VideoDecoder_GetValue(DS_VideoDecoder *this, const char* name, int* value
 	IHidden* hidden=(IHidden*)((int)m_pDS_Filter->m_pFilter+0xb8);
 	if (strcmp(name, "Quality") == 0)
 	{
-#warning NOT SURE
+	    // NOT SURE
 	    int r = hidden->vt->GetSmth2(hidden, &value);
 	    if (value >= 10)
 		value -= 10;
@@ -715,7 +715,7 @@ int DS_VideoDecoder_GetValue(DS_VideoDecoder *this, const char* name, int* value
 	    Debug printf("No such interface\n");
 	    return -1;
 	}
-#warning FIXME
+	// FIXME
 	int recordpar[30];
 	recordpar[0]=0x7c;
 	recordpar[1]=fccIV50;
