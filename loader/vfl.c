@@ -218,7 +218,6 @@ LRESULT VFWAPI ICClose(HIC hic) {
 	/* FIXME: correct? */
 //	CloseDriver(whic->hdrv,0,0);
         DrvClose(whic->hdrv);
-        /* FIXME: DrvClose */
 	free(whic);
 	return 0;
 }

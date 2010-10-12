@@ -385,7 +385,6 @@ static void S3InitStreamsOld (void)
     format = 7 << 24;
     break;
   }
-  // FIXME: enable this again
   OUTREG (PSTREAM_FBSIZE_REG, info->screen_y * info->screen_x * (info->bpp >> 3));
   OUTREG (PSTREAM_WINDOW_START_REG, OS_XY (0, 0));
   OUTREG (PSTREAM_WINDOW_SIZE_REG, OS_WH (info->screen_x, info->screen_y));
