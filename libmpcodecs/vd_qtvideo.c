@@ -274,7 +274,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     if(len<=0) return NULL; // skipped frame
 
-#ifdef WIN32_LOADER
+#if defined(WIN32_LOADER) && !defined(CONFIG_QUICKTIME)
     Setup_FS_Segment();
 #endif
 
