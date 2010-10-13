@@ -13,7 +13,7 @@ CODECDIR=/usr/lib/codecs
 PREFDIR=/var/lib/mplayer/prefs
 MYSITE='http://people.debian.org/~mennucc1/mplayer'
 
-dpkgarch=$(dpkg --print-installation-architecture)
+dpkgarch=$(dpkg --print-architecture)
 
 [ -d $PREFDIR  ] || mkdir -v $PREFDIR
 [ -d $CODECDIR ] || mkdir -v $CODECDIR
