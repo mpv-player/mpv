@@ -218,7 +218,7 @@ parse_destination (const char *line)
   len = strlen (parse1) - strlen (parse2)
     - strlen (RTSP_SETUP_DESTINATION) + 1;
   dest = (char *) malloc (len + 1);
-  snprintf (dest, len, parse1 + strlen (RTSP_SETUP_DESTINATION));
+  av_strlcpy (dest, parse1 + strlen (RTSP_SETUP_DESTINATION), len);
   free (line_copy);
 
   return dest;
