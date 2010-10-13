@@ -43,7 +43,6 @@ choosemirror ()
       echo "(If you install 'netselect' or 'fping', it will select the best mirror for you"
       echo "  you may wish to stop this script and rerun after installation)"
       sleep 3
-      head -3 mirrors > bestsites
     fi
   fi
 }
@@ -62,7 +61,9 @@ INSTALL () {
   fi
 
   if [ "$url" = @MAINSITE@ ] ; then
-    cat $PREFDIR/bestsites | while read mainsite ; do
+    list=$PREFDIR/bestsites
+    test -r $list || list=$PREFDIR/mirrors
+    cat $list | while read mainsite ; do
       echo Downloading $filename from $mainsite ...
       wget -c -N $mainsite/$dir/$filename || true
       if [ -r "$filename" ] ; then
