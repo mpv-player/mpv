@@ -70,17 +70,6 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
         if (AF_FORMAT_IS_AC3(data->format) || data->nch < s->min_channel_num)
             return AF_DETACH;
 
-        s->pending_len = 0;
-        s->expect_len = AC3_FRAME_SIZE * data->nch * data->bps;
-        assert(s->expect_len <= s->pending_data_size);
-        if (s->add_iec61937_header)
-            af->mul = (double)AC3_FRAME_SIZE * 2 * 2 / s->expect_len;
-        else
-            af->mul = (double)AC3_MAX_CODED_FRAME_SIZE / s->expect_len;
-
-        mp_msg(MSGT_AFILTER, MSGL_DBG2, "af_lavcac3enc reinit: %d, %d, %f, %d.\n",
-               data->nch, data->rate, af->mul, s->expect_len);
-
         af->data->format = AF_FORMAT_S16_NE;
         if (data->rate == 48000 || data->rate == 44100 || data->rate == 32000)
             af->data->rate = data->rate;
@@ -92,6 +81,17 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
             af->data->nch = data->nch;
         af->data->bps = 2;
         test_output_res = af_test_output(af, data);
+
+        s->pending_len = 0;
+        s->expect_len = AC3_FRAME_SIZE * data->nch * af->data->bps;
+        assert(s->expect_len <= s->pending_data_size);
+        if (s->add_iec61937_header)
+            af->mul = (double)AC3_FRAME_SIZE * 2 * 2 / s->expect_len;
+        else
+            af->mul = (double)AC3_MAX_CODED_FRAME_SIZE / s->expect_len;
+
+        mp_msg(MSGT_AFILTER, MSGL_DBG2, "af_lavcac3enc reinit: %d, %d, %f, %d.\n",
+               data->nch, data->rate, af->mul, s->expect_len);
 
         bit_rate = s->bit_rate ? s->bit_rate : default_bit_rate[af->data->nch];
 
