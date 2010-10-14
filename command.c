@@ -3186,19 +3186,15 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             break;
 #endif /* CONFIG_TV */
         case MP_CMD_TV_TELETEXT_ADD_DEC:
-        {
             if (mpctx->demuxer->teletext)
                 teletext_control(mpctx->demuxer->teletext,TV_VBI_CONTROL_ADD_DEC,
                                  &(cmd->args[0].v.s));
             break;
-        }
         case MP_CMD_TV_TELETEXT_GO_LINK:
-        {
             if (mpctx->demuxer->teletext)
                 teletext_control(mpctx->demuxer->teletext,TV_VBI_CONTROL_GO_LINK,
                                  &(cmd->args[0].v.i));
             break;
-        }
 
         case MP_CMD_SUB_LOAD:
             if (sh_video) {
