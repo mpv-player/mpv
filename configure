@@ -5581,7 +5581,7 @@ echores "$_dvdread"
 echocheck "internal libdvdcss"
 if test "$_libdvdcss_internal" = auto ; then
   _libdvdcss_internal=no
-  test "$_dvdread_internal" = yes && _libdvdcss_internal=yes
+  test "$_dvdread_internal" = yes && test -d libdvdcss && _libdvdcss_internal=yes
   hpux && test "$_hpux_scsi_h" = no && _libdvdcss_internal=no
 fi
 if test "$_libdvdcss_internal" = yes ; then
