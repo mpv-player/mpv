@@ -22,6 +22,7 @@
 #include <time.h>
 #include <stdbool.h>
 
+#include "talloc.h"
 #include "config.h"
 #include "mp_msg.h"
 #include "options.h"
@@ -172,10 +173,7 @@ static int init(sh_video_t *sh){
         avcodec_initialized=1;
     }
 
-    ctx = sh->context = malloc(sizeof(vd_ffmpeg_ctx));
-    if (!ctx)
-        return 0;
-    memset(ctx, 0, sizeof(vd_ffmpeg_ctx));
+    ctx = sh->context = talloc_zero(NULL, vd_ffmpeg_ctx);
 
     lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh->codec->dll);
     if(!lavc_codec){
@@ -388,14 +386,13 @@ static void uninit(sh_video_t *sh){
             mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not close codec.\n");
 
         av_freep(&avctx->extradata);
-        av_freep(&avctx->palctrl);
+        free(avctx->palctrl);
         av_freep(&avctx->slice_offset);
     }
 
     av_freep(&avctx);
     av_freep(&ctx->pic);
-    if (ctx)
-        free(ctx);
+    talloc_free(ctx);
 }
 
 static void draw_slice(struct AVCodecContext *s,
