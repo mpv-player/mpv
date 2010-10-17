@@ -45,6 +45,7 @@
 #include "stream/network.h"
 #include "stream/freesdp/common.h"
 #include "stream/freesdp/parser.h"
+#include "libavutil/avstring.h"
 
 #define RTSP_DEFAULT_PORT 31336
 #define MAX_LENGTH 256
