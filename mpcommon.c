@@ -16,6 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+#include <windows.h>
+#endif
 #include <stdlib.h>
 #include <stdbool.h>
 
