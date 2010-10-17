@@ -1057,13 +1057,8 @@ static int sub_autodetect (stream_t* st, int *uses_time, int utf16) {
 		{*uses_time=1;return SUB_VPLAYER;}
 	if (sscanf (line, "%d:%d:%d ",     &i, &i, &i )==3)
 		{*uses_time=1;return SUB_VPLAYER;}
-	//TODO: just checking if first line of sub starts with "<" is WAY
-	// too weak test for RT
-	// Please someone who knows the format of RT... FIX IT!!!
-	// It may conflict with other sub formats in the future (actually it doesn't)
-	if ( *line == '<' )
+	if (!strncasecmp(line, "<window", 7))
 		{*uses_time=1;return SUB_RT;}
-
 	if (!memcmp(line, "Dialogue: Marked", 16))
 		{*uses_time=1; return SUB_SSA;}
 	if (!memcmp(line, "Dialogue: ", 10))
