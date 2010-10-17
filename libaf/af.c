@@ -248,10 +248,7 @@ void af_remove(af_stream_t* s, af_instance_t* af)
   free(af);
 }
 
-/* Reinitializes all filters downstream from the filter given in the
-   argument the return value is AF_OK if success and AF_ERROR if
-   failure */
-static int af_reinit(af_stream_t* s, af_instance_t* af)
+int af_reinit(af_stream_t* s, af_instance_t* af)
 {
   do{
     af_data_t in; // Format of the input to current filter

@@ -165,6 +165,13 @@ int af_init(af_stream_t* s);
 void af_uninit(af_stream_t* s);
 
 /**
+ * \brief  Reinit the filter list from the given filter on downwards
+ * \param  Filter instance to begin the reinit from
+ * \return AF_OK on success or AF_ERROR on failure
+ */
+int af_reinit(af_stream_t* s, af_instance_t* af);
+
+/**
  * \brief This function adds the filter "name" to the stream s.
  * \param name name of filter to add
  * \return pointer to the new filter, NULL if insert failed
