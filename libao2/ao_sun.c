@@ -664,9 +664,11 @@ static int get_space(void){
 // it should round it down to outburst*n
 // return: number of bytes played
 static int play(void* data,int len,int flags){
-    if (len < ao_data.outburst) return 0;
-    len /= ao_data.outburst;
-    len *= ao_data.outburst;
+    if (!(flags & AOPLAY_FINAL_CHUNK)) {
+	len /= ao_data.outburst;
+	len *= ao_data.outburst;
+    }
+    if (len <= 0) return 0;
 
     len = write(audio_fd, data, len);
     if(len > 0) {
