@@ -53,6 +53,9 @@ af_add <filter_arguments_list>  (comma separated list of audio filters with para
 af_clr
     (experimental) Unload all loaded audio filters.
 
+af_cmdline <filter_name> <filter_arguments>
+    (experimental) Send new command-line options to a filter with the given name.
+
 af_del <filter_name_list> (comma separated list of audio filter's names)
     (experimental) Unload the first occurrence of the filters, if loaded.
 

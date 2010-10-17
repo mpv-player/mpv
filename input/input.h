@@ -156,6 +156,7 @@ typedef enum {
   MP_CMD_AF_ADD,
   MP_CMD_AF_DEL,
   MP_CMD_AF_CLR,
+  MP_CMD_AF_CMDLINE,
 
 } mp_command_type;
 

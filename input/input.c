@@ -215,6 +215,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_AF_ADD, "af_add", 1,  { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
   { MP_CMD_AF_DEL, "af_del", 1,  { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
   { MP_CMD_AF_CLR, "af_clr", 0, { {-1,{0}} } },
+  { MP_CMD_AF_CMDLINE, "af_cmdline", 2, { {MP_CMD_ARG_STRING, {0}}, {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
 
   { 0, NULL, 0, {} }
 };
