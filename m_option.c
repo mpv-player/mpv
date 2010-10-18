@@ -1285,17 +1285,22 @@ const m_option_type_t m_option_type_afmt = {
 };
 
 
-static double parse_timestring(const char *str)
+int parse_timestring(const char *str, double *time, char endchar)
 {
-  int a, b;
+  int a, b, len;
   double d;
-  if (sscanf(str, "%d:%d:%lf", &a, &b, &d) == 3)
-    return 3600*a + 60*b + d;
-  else if (sscanf(str, "%d:%lf", &a, &d) == 2)
-    return 60*a + d;
-  else if (sscanf(str, "%lf", &d) == 1)
-    return d;
-  return -1e100;
+  *time = 0; /* ensure initialization for error cases */
+  if (sscanf(str, "%d:%d:%lf%n", &a, &b, &d, &len) >= 3)
+    *time = 3600*a + 60*b + d;
+  else if (sscanf(str, "%d:%lf%n", &a, &d, &len) >= 2)
+    *time = 60*a + d;
+  else if (sscanf(str, "%lf%n", &d, &len) >= 1)
+    *time = d;
+  else
+    return 0; /* unsupported time format */
+  if (str[len] && str[len] != endchar)
+    return 0; /* invalid extra characters at the end */
+  return len;
 }
 
 
@@ -1306,8 +1311,7 @@ static int parse_time(const m_option_t* opt,const char *name, const char *param,
   if (param == NULL || strlen(param) == 0)
     return M_OPT_MISSING_PARAM;
 
-  time = parse_timestring(param);
-  if (time == -1e100) {
+  if (!parse_timestring(param, &time, 0)) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: invalid time: '%s'\n",
            name,param);
     return M_OPT_INVALID;
@@ -1365,7 +1369,7 @@ static int parse_time_size(const m_option_t* opt,const char *name, const char *p
 
   /* End at time parsing. This has to be last because the parsing accepts
    * even a number followed by garbage */
-  if ((end_at = parse_timestring(param)) == -1e100) {
+  if (!parse_timestring(param, &end_at, 0)) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: invalid time or size: '%s'\n",
            name,param);
     return M_OPT_INVALID;

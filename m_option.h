@@ -520,6 +520,17 @@ m_option_free(const m_option_t* opt,void* dst) {
 
 /*@}*/
 
+/**
+ * Parse a string as a timestamp.
+ *
+ * @param[in]  str      the string to parse.
+ * @param[out] time     parsed time.
+ * @param[in]  endchar  return an error of the next character after the
+ *                      timestamp is neither nul nor endchar.
+ * @return              Number of chars in the timestamp.
+ */
+int parse_timestring(const char *str, double *time, char endchar);
+
 #define OPT_FLAG_ON(optname, varname, flags) {optname, NULL, &m_option_type_flag, flags, 0, 1, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_FLAG_OFF(optname, varname, flags) {optname, NULL, &m_option_type_flag, flags, 1, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_FLAG_CONSTANTS(optname, varname, flags, offvalue, value) {optname, NULL, &m_option_type_flag, flags, offvalue, value, NULL, 1, offsetof(struct MPOpts, varname)}
