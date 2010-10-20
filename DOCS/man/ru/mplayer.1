@@ -11492,7 +11492,7 @@ mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06
 .PP
 .B инвертирование изображения в шахматном порядке при помощи фильтра geq:
 .nf
-mplayer \-vf geq='128+(p(X\,Y)\-128)*(0.5\-gt(mod(X/SW\,128)\,64))*(0.5\-gt(mod(Y/SH\,128)\,64))*4'
+mplayer \-vf geq='128+(p(X\\,Y)\-128)*(0.5\-gt(mod(X/SW\\,128)\\,64))*(0.5\-gt(mod(Y/SH\\,128)\\,64))*4'
 .fi
 .
 .
