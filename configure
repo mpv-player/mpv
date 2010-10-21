@@ -2241,7 +2241,7 @@ EOF
     _optimizing="$proc"
     ;;
 
-  mips)
+  mips*)
     arch='mips'
     iproc='mips'
 
