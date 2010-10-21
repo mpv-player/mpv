@@ -151,6 +151,7 @@ elements_matroska = (
                     'ChapterDisplay*, 80, sub', (
                         'ChapString, 85, str',
                         'ChapLanguage*, 437c, str',
+                        'ChapCountry*, 437e, str',
                     ),
                 ),
             ),
