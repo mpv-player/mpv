@@ -1644,7 +1644,10 @@ static int demux_mkv_open(demuxer_t *demuxer)
     struct ebml_parse_ctx parse_ctx = { .no_error_messages = true };
     if (ebml_read_element(s, &parse_ctx, &ebml_master, &ebml_ebml_desc) < 0)
         return 0;
-    if (bstrcmp(ebml_master.doc_type, BSTR("matroska")) != 0
+    if (ebml_master.doc_type.start == NULL) {
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] File has EBML header but no doctype."
+               " Assuming \"matroska\".\n");
+    } else if (bstrcmp(ebml_master.doc_type, BSTR("matroska")) != 0
         && bstrcmp(ebml_master.doc_type, BSTR("webm")) != 0) {
         mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] no head found\n");
         talloc_free(parse_ctx.talloc_ctx);
