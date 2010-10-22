@@ -181,8 +181,6 @@ static int init(sh_video_t *sh){
 
     ctx = sh->context = talloc_zero(NULL, vd_ffmpeg_ctx);
 
-    ctx->last_sample_aspect_ratio = (AVRational){0, 1};
-
     lavc_codec = avcodec_find_decoder_by_name(sh->codec->dll);
     if(!lavc_codec){
         mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Cannot find codec '%s' in libavcodec...\n", sh->codec->dll);
@@ -476,9 +474,13 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
         !ctx->vo_initialized)
     {
         mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
-        if (sh->aspect == 0 ||
-            av_cmp_q(avctx->sample_aspect_ratio,
-                     ctx->last_sample_aspect_ratio))
+
+        // Do not overwrite s->aspect on the first call, so that a container
+        // aspect if available is preferred.
+        // But set it even if the sample aspect did not change, since a
+        // resolution change can cause an aspect change even if the
+        // _sample_ aspect is unchanged.
+        if (sh->aspect == 0 || ctx->last_sample_aspect_ratio.den)
             sh->aspect = aspect;
         ctx->last_sample_aspect_ratio = avctx->sample_aspect_ratio;
         sh->disp_w = width;
