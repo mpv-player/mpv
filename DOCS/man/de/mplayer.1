@@ -7539,6 +7539,103 @@ Prozentaler Anteil der Pixel, die unter dem Schwellenwert liegen m�ssen
 Schwellenwert, unter dem ein Pixelwert als schwarz angenommen wird
 (Standard: 32).
 .RE
+.PD 1
+.
+.TP
+.B stereo3d[=in:out]
+Stereo3d wandelt zwischen verschiedenen stereoskopischen Bildformaten um.
+.RSs
+.IPs <in>
+Stereoskopisches Eingabeformat. Mögliche Werte:
+.RS
+.B sbsl oder side_by_side_left_first
+.RS
+nebeneinander parallel (linkes Auge links, rechtes Auge rechts)
+.RE
+.B sbsr oder side_by_side_right_first
+.RS
+nebeneinander gekreuzt (rechtes Auge links, linkes Auge rechts)
+.RE
+.B abl oder above_below_left_first
+.RS
+oben-unten (linkes Auge oben, rechtes Auge unten)
+.RE
+.B abl oder above_below_right_first
+.RS
+oben-unten (rechtes Auge oben, linkes Auge unten)
+.RE
+.B ab2l oder above_below_half_height_left_first
+.RS
+oben-unten mit halber Höhenauflösung (linkes Auge oben, rechtes Auge unten)
+.RE
+.B ab2r oder above_below_half_height_right_first
+.RS
+oben-unten mit halber Höhenauflösung (rechtes Auge oben, linkes Auge unten)
+.RE
+.RE
+.IPs <out>
+Stereoskopisches Ausgabeformat. Mögliche Werte sind alle Eingabeformate, sowie:
+.RS
+.B arcg oder anaglyph_red_cyan_gray
+.RS
+anaglyph rot/cyan grau (roter Filter auf dem linken Auge, cyan Filter auf dem
+rechten Auge)
+.RE
+.B arch oder anaglyph_red_cyan_half_color
+.RS
+anaglyph rot/cyan halbfarbig (roter Filter auf dem linken Auge, cyan Filter auf
+dem rechten Auge)
+.RE
+.B arcc oder anaglyph_red_cyan_color
+.RS
+anaglyph rot/cyan farbig (roter Filter auf dem linken Auge, cyan Filter auf dem
+rechten Auge)
+.RE
+.B arcd oder anaglyph_red_cyan_dubios
+.RS
+anaglyph red/cyan farbig optimiert mit der Least-Squares-Projektion von Dubois
+(roter Filter auf dem linken Auge, cyan Filter auf dem rechten Auge)
+.RE
+.B agmg oder anaglyph_green_magenta_gray
+.RS
+anaglyph grün/magenta grau (grüner Filter auf dem linken Auge, magenta Filter
+auf dem rechten Auge)
+.RE
+.B agmh oder anaglyph_green_magenta_half_color
+.RS
+anaglyph grün/magenta halbfarbig (grüner Filter auf dem linken Auge, magenta
+Filter auf dem rechten Auge)
+.RE
+.B agmc oder anaglyph_green_magenta_color
+.RS
+anaglyph grün/magenta farbig (grüner Filter auf dem linken Auge, magenta Filter
+auf dem rechten Auge)
+.RE
+.B aybg oder anaglyph_yellow_blue_gray
+.RS
+anaglyph gelb/blau grau (gelber Filter auf dem linken Auge, blauer Filter auf
+dem rechten Auge)
+.RE
+.B aybh oder anaglyph_yellow_blue_half_color
+.RS
+anaglyph gelb/blau halbfarbig (gelber Filter auf dem linken Auge, blauer Filter
+auf dem rechten Auge)
+.RE
+.B aybc oder anaglyph_yellow_blue_color
+.RS
+anaglyph gelb/blau farbig (gelber Filter auf dem linken Auge, blauer Filter auf
+dem rechten Auge)
+.RE
+.B ml oder mono_left
+.RS
+mono Ausgabe (nur linkes Auge)
+.RE
+.B mr oder mono_right
+.RS
+mono Ausgabe (nur rechtes Auge)
+.RE
+.RE
+.RE
 .
 .
 .

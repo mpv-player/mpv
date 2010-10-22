@@ -7563,6 +7563,102 @@ Percentage of the pixels that have to be below the threshold (default: 98).
 .IPs <threshold>
 Threshold below which a pixel value is considered black (default: 32).
 .RE
+.PD 1
+.
+.TP
+.B stereo3d[=in:out]
+Stereo3d converts between different stereoscopic image formats.
+.RSs
+.IPs <in>
+Stereoscopic image format of input. Possible values:
+.RS
+.B sbsl or side_by_side_left_first
+.RS
+side by side parallel (left eye left, right eye right)
+.RE
+.B sbsr or side_by_side_right_first
+.RS
+side by side crosseye (right eye left, left eye right)
+.RE
+.B abl or above_below_left_first
+.RS
+above-below (left eye above, right eye below)
+.RE
+.B abl or above_below_right_first
+.RS
+above-below (right eye above, left eye below)
+.RE
+.B ab2l or above_below_half_height_left_first
+.RS
+above-below with half height resolution (left eye above, right eye below)
+.RE
+.B ab2r or above_below_half_height_right_first
+.RS
+above-below with half height resolution (right eye above, left eye below)
+.RE
+.RE
+.IPs <out>
+Stereoscopic image format of output. Possible values are all the input formats
+as well as:
+.RS
+.B arcg or anaglyph_red_cyan_gray
+.RS
+anaglyph red/cyan gray (red filter on left eye, cyan filter on right eye)
+.RE
+.B arch or anaglyph_red_cyan_half_color
+.RS
+anaglyph red/cyan half colored (red filter on left eye, cyan filter on right
+eye)
+.RE
+.B arcc or anaglyph_red_cyan_color
+.RS
+anaglyph red/cyan color (red filter on left eye, cyan filter on right eye)
+.RE
+.B arcd or anaglyph_red_cyan_dubois
+.RS
+anaglyph red/cyan color optimized with the least squares projection of dubois
+(red filter on left eye, cyan filter on right eye)
+.RE
+.B agmg or anaglyph_green_magenta_gray
+.RS
+anaglyph green/magenta gray (green filter on left eye, magenta filter on right
+eye)
+.RE
+.B agmh or anaglyph_green_magenta_half_color
+.RS
+anaglyph green/magenta half colored (green filter on left eye, magenta filter on
+right eye)
+.RE
+.B agmc or anaglyph_green_magenta_color
+.RS
+anaglyph green/magenta colored (green filter on left eye, magenta filter on
+right eye)
+.RE
+.B aybg or anaglyph_yellow_blue_gray
+.RS
+anaglyph yellow/blue gray (yellow filter on left eye, blue filter on right eye)
+.RE
+.B aybh or anaglyph_yellow_blue_half_color
+.RS
+anaglyph yellow/blue half colored (yellow filter on left eye, blue filter on
+right eye)
+.RE
+.B aybc or anaglyph_yellow_blue_color
+.RS
+anaglyph yellow/blue colored (yellow filter on left eye, blue filter on right
+eye)
+.RE
+.B ml or mono_left
+.RS
+mono output (left eye only)
+.RE
+.B mr or mono_right
+.RS
+mono output (right eye only)
+.RE
+.RE
+.RE
+.PD 1
 .
 .TP
 .B gradfun[=strength[:radius]]
