@@ -1153,6 +1153,7 @@ typedef struct {
 } videocodec_info_t;
 
 static const videocodec_info_t vinfo[] = {
+    {MKV_V_MJPEG,     mmioFOURCC('m', 'j', 'p', 'g'), 1},
     {MKV_V_MPEG1,     mmioFOURCC('m', 'p', 'g', '1'), 0},
     {MKV_V_MPEG2,     mmioFOURCC('m', 'p', 'g', '2'), 0},
     {MKV_V_MPEG4_SP,  mmioFOURCC('m', 'p', '4', 'v'), 1},
