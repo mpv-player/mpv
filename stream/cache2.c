@@ -181,7 +181,7 @@ static int cache_fill(cache_vars_t *s)
         s->offset= // FIXME!?
         s->min_filepos=s->max_filepos=read; // drop cache content :(
         if(s->stream->eof) stream_reset(s->stream);
-        stream_seek(s->stream,read);
+        stream_seek_internal(s->stream,read);
         mp_msg(MSGT_CACHE,MSGL_DBG2,"Seek done. new pos: 0x%"PRIX64"  \n",(int64_t)stream_tell(s->stream));
       }
   }
@@ -223,7 +223,7 @@ static int cache_fill(cache_vars_t *s)
   s->min_filepos=read-back; // avoid seeking-back to temp area...
 #endif
 
-  len=stream_read(s->stream,&s->buffer[pos],space);
+  len = stream_read_internal(s->stream, &s->buffer[pos], space);
   s->eof= !len;
 
   s->max_filepos+=len;

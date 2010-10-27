@@ -344,6 +344,10 @@ void stream_set_interrupt_callback(int (*cb)(struct input_ctx*, int),
 /// Call the interrupt checking callback if there is one and
 /// wait for time milliseconds
 int stream_check_interrupt(int time);
+/// Internal read function bypassing the stream buffer
+int stream_read_internal(stream_t *s, void *buf, int len);
+/// Internal seek function bypassing the stream buffer
+int stream_seek_internal(stream_t *s, off_t newpos);
 
 extern int bluray_angle;
 extern int bluray_chapter;
