@@ -503,7 +503,7 @@ static int seek_to_chapter(stream_t *stream, ifo_handle_t *vts_file, tt_srpt_t *
 static void list_chapters(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_no)
 {
     unsigned int i, cell, last_cell;
-    unsigned int t=0, t2=0;
+    unsigned int t=0;
     ptt_info_t *ptt;
     pgc_t *pgc;
 
@@ -521,8 +521,7 @@ static void list_chapters(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_
             last_cell = pgc->program_map[ptt[i].pgn];
         else
             last_cell = 0;
-        t2 = t/1000;
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "%02d:%02d:%02d,", t2/3600, (t2/60)%60, t2%60);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "%02d:%02d:%02d.%03d,", t/3600000, (t/60000)%60, (t/1000)%60, t%1000);
         do {
             if(!(pgc->cell_playback[cell-1].block_type == BLOCK_TYPE_ANGLE_BLOCK &&
                  pgc->cell_playback[cell-1].block_mode != BLOCK_MODE_FIRST_CELL)
