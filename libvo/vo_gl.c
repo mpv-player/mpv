@@ -665,7 +665,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   if (create_window(d_width, d_height, flags, title) < 0)
     return -1;
 
-glconfig:
   if (vo_config_count)
     uninitGl();
   if (glctx.setGlWindow(&glctx) == SET_WINDOW_FAILED)
