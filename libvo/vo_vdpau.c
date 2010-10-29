@@ -725,26 +725,26 @@ static int create_vdp_decoder(struct vo *vo, int max_refs)
     if (vc->decoder != VDP_INVALID_HANDLE)
         vdp->decoder_destroy(vc->decoder);
     switch (vc->image_format) {
-        case IMGFMT_VDPAU_MPEG1:
-            vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG1;
-            break;
-        case IMGFMT_VDPAU_MPEG2:
-            vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG2_MAIN;
-            break;
-        case IMGFMT_VDPAU_H264:
-            vdp_decoder_profile = VDP_DECODER_PROFILE_H264_HIGH;
-            mp_msg(MSGT_VO, MSGL_V, "[vdpau] Creating H264 hardware decoder "
-                   "for %d reference frames.\n", max_refs);
-            break;
-        case IMGFMT_VDPAU_WMV3:
-            vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_MAIN;
-            break;
-        case IMGFMT_VDPAU_VC1:
-            vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_ADVANCED;
-            break;
-        case IMGFMT_VDPAU_MPEG4:
-            vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG4_PART2_ASP;
-            break;
+    case IMGFMT_VDPAU_MPEG1:
+        vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG1;
+        break;
+    case IMGFMT_VDPAU_MPEG2:
+        vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG2_MAIN;
+        break;
+    case IMGFMT_VDPAU_H264:
+        vdp_decoder_profile = VDP_DECODER_PROFILE_H264_HIGH;
+        mp_msg(MSGT_VO, MSGL_V, "[vdpau] Creating H264 hardware decoder "
+               "for %d reference frames.\n", max_refs);
+        break;
+    case IMGFMT_VDPAU_WMV3:
+        vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_MAIN;
+        break;
+    case IMGFMT_VDPAU_VC1:
+        vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_ADVANCED;
+        break;
+    case IMGFMT_VDPAU_MPEG4:
+        vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG4_PART2_ASP;
+        break;
     default:
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Unknown image format!\n");
             goto fail;
@@ -771,21 +771,21 @@ static int initialize_vdpau_objects(struct vo *vo)
 
     vc->vdp_chroma_type = VDP_CHROMA_TYPE_420;
     switch (vc->image_format) {
-        case IMGFMT_YV12:
-        case IMGFMT_I420:
-        case IMGFMT_IYUV:
-            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YV12;
-            break;
-        case IMGFMT_NV12:
-            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_NV12;
-            break;
-        case IMGFMT_YUY2:
-            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YUYV;
-            vc->vdp_chroma_type  = VDP_CHROMA_TYPE_422;
-            break;
-        case IMGFMT_UYVY:
-            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_UYVY;
-            vc->vdp_chroma_type  = VDP_CHROMA_TYPE_422;
+    case IMGFMT_YV12:
+    case IMGFMT_I420:
+    case IMGFMT_IYUV:
+        vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YV12;
+        break;
+    case IMGFMT_NV12:
+        vc->vdp_pixel_format = VDP_YCBCR_FORMAT_NV12;
+        break;
+    case IMGFMT_YUY2:
+        vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YUYV;
+        vc->vdp_chroma_type  = VDP_CHROMA_TYPE_422;
+        break;
+    case IMGFMT_UYVY:
+        vc->vdp_pixel_format = VDP_YCBCR_FORMAT_UYVY;
+        vc->vdp_chroma_type  = VDP_CHROMA_TYPE_422;
     }
     if (win_x11_init_vdpau_flip_queue(vo) < 0)
         return -1;
@@ -1530,20 +1530,20 @@ static int query_format(uint32_t format)
         | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_EOSD
         | VFCAP_EOSD_UNSCALED | VFCAP_FLIP;
     switch (format) {
-        case IMGFMT_YV12:
-        case IMGFMT_I420:
-        case IMGFMT_IYUV:
-        case IMGFMT_NV12:
-        case IMGFMT_YUY2:
-        case IMGFMT_UYVY:
-            return default_flags | VOCAP_NOSLICES;
-        case IMGFMT_VDPAU_MPEG1:
-        case IMGFMT_VDPAU_MPEG2:
-        case IMGFMT_VDPAU_H264:
-        case IMGFMT_VDPAU_WMV3:
-        case IMGFMT_VDPAU_VC1:
-        case IMGFMT_VDPAU_MPEG4:
-            return default_flags;
+    case IMGFMT_YV12:
+    case IMGFMT_I420:
+    case IMGFMT_IYUV:
+    case IMGFMT_NV12:
+    case IMGFMT_YUY2:
+    case IMGFMT_UYVY:
+        return default_flags | VOCAP_NOSLICES;
+    case IMGFMT_VDPAU_MPEG1:
+    case IMGFMT_VDPAU_MPEG2:
+    case IMGFMT_VDPAU_H264:
+    case IMGFMT_VDPAU_WMV3:
+    case IMGFMT_VDPAU_VC1:
+    case IMGFMT_VDPAU_MPEG4:
+        return default_flags;
     }
     return 0;
 }
