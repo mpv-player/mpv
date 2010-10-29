@@ -271,6 +271,17 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
     return demuxer->s_streams[id];
 }
 
+struct sh_sub *new_sh_sub_sid_lang(struct demuxer *demuxer, int id, int sid,
+                                   const char *lang)
+{
+    struct sh_sub *sh = new_sh_sub_sid(demuxer, id, sid);
+    if (lang && lang[0] && strcmp(lang, "und")) {
+        sh->lang = strdup(lang);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", sid, lang);
+    }
+    return sh;
+}
+
 static void free_sh_sub(sh_sub_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);

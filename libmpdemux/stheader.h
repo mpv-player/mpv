@@ -146,6 +146,8 @@ sh_audio_t* new_sh_audio_aid(struct demuxer *demuxer,int id,int aid);
 sh_video_t* new_sh_video_vid(struct demuxer *demuxer,int id,int vid);
 #define new_sh_sub(d, i) new_sh_sub_sid(d, i, i)
 sh_sub_t *new_sh_sub_sid(struct demuxer *demuxer, int id, int sid);
+struct sh_sub *new_sh_sub_sid_lang(struct demuxer *demuxer, int id, int sid,
+                                   const char *lang);
 void free_sh_audio(struct demuxer *demuxer, int id);
 void free_sh_video(sh_video_t *sh);
 
