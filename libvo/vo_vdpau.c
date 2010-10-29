@@ -742,17 +742,19 @@ static int create_vdp_decoder(struct vo *vo, int max_refs)
         case IMGFMT_VDPAU_VC1:
             vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_ADVANCED;
             break;
-#ifdef VDP_DECODER_PROFILE_MPEG4_PART2_ASP
         case IMGFMT_VDPAU_MPEG4:
             vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG4_PART2_ASP;
             break;
-#endif
+    default:
+        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Unknown image format!\n");
+            goto fail;
     }
     vdp_st = vdp->decoder_create(vc->vdp_device, vdp_decoder_profile,
                                  vc->vid_width, vc->vid_height, max_refs,
                                  &vc->decoder);
     CHECK_ST_WARNING("Failed creating VDPAU decoder");
     if (vdp_st != VDP_STATUS_OK) {
+    fail:
         vc->decoder = VDP_INVALID_HANDLE;
         vc->decoder_max_refs = 0;
         return 0;
