@@ -754,8 +754,6 @@ all: $(ALL_PRG-yes) locales
 %-rc.o: %.rc
 	$(WINDRES) -I. $< $@
 
-dep depend: $(DEPS)
-
 mencoder$(EXESUF): $(MENCODER_DEPS)
 mencoder$(EXESUF): EXTRALIBS += $(EXTRALIBS_MENCODER)
 mplayer$(EXESUF): $(MPLAYER_DEPS)
@@ -1073,8 +1071,8 @@ dhahelperwinclean:
 
 -include $(DEPS)
 
-.PHONY: all doxygen *install* *tools drivers dhahelper*
-.PHONY: checkheaders *clean dep depend tests
+.PHONY: all doxygen locales *install* *tools drivers dhahelper*
+.PHONY: checkheaders *clean tests
 
 # Disable suffix rules.  Most of the builtin rules are suffix rules,
 # so this saves some time on slow systems.
