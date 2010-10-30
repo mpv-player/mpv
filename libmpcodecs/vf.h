@@ -25,7 +25,7 @@ struct MPOpts;
 struct vf_instance;
 struct vf_priv_s;
 
-typedef struct vf_info_s {
+typedef struct vf_info {
     const char *info;
     const char *name;
     const char *author;
