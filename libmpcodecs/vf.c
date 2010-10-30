@@ -137,9 +137,7 @@ static const vf_info_t* const filter_list[]={
     &vf_info_flip,
     &vf_info_rotate,
     &vf_info_mirror,
-#ifdef CONFIG_LIBSWSCALE_INTERNALS
     &vf_info_palette,
-#endif
     &vf_info_pp7,
 #ifdef CONFIG_LIBAVCODEC
     &vf_info_lavc,
@@ -158,9 +156,7 @@ static const vf_info_t* const filter_list[]={
     &vf_info_eq,
     &vf_info_eq2,
     &vf_info_gradfun,
-#ifdef CONFIG_LIBSWSCALE_INTERNALS
     &vf_info_halfpack,
-#endif
     &vf_info_dint,
     &vf_info_1bpp,
     &vf_info_2xsai,

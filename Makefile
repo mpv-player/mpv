@@ -169,7 +169,6 @@ SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
 SRCS_COMMON-$(LIBNUT)                += libmpdemux/demux_nut.c
 SRCS_COMMON-$(LIBPOSTPROC)           += libmpcodecs/vf_pp.c
 SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
-SRCS_COMMON-$(LIBSWSCALE_INTERNALS)  += libmpcodecs/vf_palette.c \
 
 SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
 SRCS_COMMON-$(LIVE555)               += libmpdemux/demux_rtp.cpp \
@@ -432,6 +431,7 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_noformat.c \
               libmpcodecs/vf_noise.c \
               libmpcodecs/vf_ow.c \
+              libmpcodecs/vf_palette.c \
               libmpcodecs/vf_perspective.c \
               libmpcodecs/vf_phase.c \
               libmpcodecs/vf_pp7.c \
@@ -799,15 +799,10 @@ codec-cfg.d codec-cfg.o: codecs.conf.h
 $(call ADDSUFFIXES,.d .o,mpcommon osdep/mplayer.rc): version.h
 
 # Files that depend on libswscale internals
-libvo/vo_mga.o libvo/vo_xmga.o libmpcodecs/vf_palette.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
+libmpcodecs/vf_palette.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
 
 # Files that depend on libavcodec internals
 libmpcodecs/vf_fspp.o libmpcodecs/vf_geq.o libmpcodecs/vf_mcdeint.o libmpcodecs/vf_qp.o libmpcodecs/vf_spp.o libvo/jpeg_enc.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
-
-# yuv4mpeg has rgb conversion code under #ifdef CONFIG_LIBSWSCALE_INTERNALS
-ifeq ($(LIBSWSCALE_INTERNALS),yes)
-libvo/vo_yuv4mpeg.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
-endif
 
 osdep/mplayer-rc.o: osdep/mplayer.exe.manifest
 

@@ -7087,15 +7087,8 @@ if test "$_mga" = auto ; then
   test -c /dev/mga_vid && _mga=yes
 fi
 if test "$_mga" = yes ; then
-  if test "$_libswscale_internals" = yes ; then
-    def_mga='#define CONFIG_MGA 1'
-    vomodules="mga $vomodules"
-  else
-    res_comment="libswscale internal headers are required by mga, sorry"
-    _mga=no
-    def_mga='#undef CONFIG_MGA'
-    novomodules="mga $novomodules"
-  fi
+  def_mga='#define CONFIG_MGA 1'
+  vomodules="mga $vomodules"
 else
   def_mga='#undef CONFIG_MGA'
   novomodules="mga $novomodules"
@@ -7109,15 +7102,8 @@ if test "$_xmga" = auto ; then
   test "$_x11" = yes && test "$_mga" = yes && _xmga=yes
 fi
 if test "$_xmga" = yes ; then
-  if test "$_libswscale_internals" = yes ; then
-    def_xmga='#define CONFIG_XMGA 1'
-    vomodules="xmga $vomodules"
-  else
-    res_comment="libswscale internal headers are required by xmga, sorry"
-    _xmga=no
-    def_xmga='#undef CONFIG_XMGA'
-    novomodules="xmga $novomodules"
-  fi
+  def_xmga='#define CONFIG_XMGA 1'
+  vomodules="xmga $vomodules"
 else
   def_xmga='#undef CONFIG_XMGA'
   novomodules="xmga $novomodules"
