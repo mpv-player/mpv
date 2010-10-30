@@ -264,7 +264,6 @@ Installation directories:
   --codecsdir=DIR        directory for binary codecs [LIBDIR/codecs]
 
 Optional features:
-  --disable-mencoder     disable MEncoder (A/V encoder) compilation [enable]
   --disable-mplayer      disable MPlayer compilation [enable]
   --disable-largefiles   disable support for files > 2GB [enable]
   --enable-termcap       use termcap database for key codes [autodetect]
@@ -501,7 +500,6 @@ Use these options if autodetection fails:
   --extra-ldflags=FLAGS       extra LDFLAGS
   --extra-libs=FLAGS          extra linker flags
   --extra-libs-mplayer=FLAGS  extra linker flags for MPlayer
-  --extra-libs-mencoder=FLAGS extra linker flags for MEncoder
   --with-xvmclib=NAME         adapter-specific library name (e.g. XvMCNVIDIA)
 
   --with-freetype-config=PATH path to freetype-config
@@ -559,7 +557,7 @@ _libpostproc=auto
 _libswscale=auto
 _libavcodec_internals=no
 _libswscale_internals=no
-_mencoder=yes
+_mencoder=no
 _mplayer=yes
 _x11=auto
 _xshape=auto
@@ -810,9 +808,6 @@ for ac_option do
   --extra-libs-mplayer=*)
     libs_mplayer=$(echo $ac_option | cut -d '=' -f 2)
     ;;
-  --extra-libs-mencoder=*)
-    libs_mencoder=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
 
   --target=*)
     _target=$(echo $ac_option | cut -d '=' -f 2)
@@ -884,8 +879,6 @@ for ac_option do
   --disable-runtime-cpudetection)   _runtime_cpudetection=no    ;;
   --enable-cross-compile)           _cross_compile=yes          ;;
   --disable-cross-compile)          _cross_compile=no           ;;
-  --enable-mencoder)    _mencoder=yes   ;;
-  --disable-mencoder)   _mencoder=no    ;;
   --enable-mplayer)     _mplayer=yes    ;;
   --disable-mplayer)    _mplayer=no     ;;
   --enable-dynamic-plugins) _dynamic_plugins=yes ;;

@@ -642,51 +642,18 @@ SRCS_MPLAYER = command.c \
                libvo/vo_null.c \
                $(SRCS_MPLAYER-yes)
 
-
-SRCS_MENCODER-$(FAAC)             += libmpcodecs/ae_faac.c
-SRCS_MENCODER-$(LIBAVCODEC)       += libmpcodecs/ae_lavc.c libmpcodecs/ve_lavc.c
-SRCS_MENCODER-$(LIBAVFORMAT)      += libmpdemux/muxer_lavf.c
-SRCS_MENCODER-$(LIBDV)            += libmpcodecs/ve_libdv.c
-SRCS_MENCODER-$(LIBLZO)           += libmpcodecs/ve_nuv.c \
-                                     libmpcodecs/native/rtjpegn.c
-SRCS_MENCODER-$(MP3LAME)          += libmpcodecs/ae_lame.c
-SRCS_MENCODER-$(QTX_CODECS_WIN32) += libmpcodecs/ve_qtvideo.c
-SRCS_MENCODER-$(TOOLAME)          += libmpcodecs/ae_toolame.c
-SRCS_MENCODER-$(TWOLAME)          += libmpcodecs/ae_twolame.c
-SRCS_MENCODER-$(WIN32DLL)         += libmpcodecs/ve_vfw.c
-SRCS_MENCODER-$(X264)             += libmpcodecs/ve_x264.c
-SRCS_MENCODER-$(XVID4)            += libmpcodecs/ve_xvid4.c
-
-SRCS_MENCODER = mencoder.c \
-                parser-mecmd.c \
-                xvid_vbr.c \
-                libmpcodecs/ae.c \
-                libmpcodecs/ae_pcm.c \
-                libmpcodecs/ve.c \
-                libmpcodecs/ve_raw.c \
-                libmpdemux/muxer.c \
-                libmpdemux/muxer_avi.c \
-                libmpdemux/muxer_mpeg.c \
-                libmpdemux/muxer_rawaudio.c \
-                libmpdemux/muxer_rawvideo.c \
-                $(SRCS_MENCODER-yes)
-
 COMMON_LIBS += $(COMMON_LIBS-yes)
 
 OBJS_COMMON    += $(addsuffix .o, $(basename $(SRCS_COMMON)))
-OBJS_MENCODER  += $(addsuffix .o, $(basename $(SRCS_MENCODER)))
 OBJS_MPLAYER   += $(addsuffix .o, $(basename $(SRCS_MPLAYER)))
 OBJS_MPLAYER-$(PE_EXECUTABLE) += osdep/mplayer-rc.o
 OBJS_MPLAYER   += $(OBJS_MPLAYER-yes)
 
-MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(COMMON_LIBS)
 MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
-DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER))))
+DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d))))
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
-ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
 
-INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mencoder-man
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer \
                                install-mplayer-man \
                                install-mplayer-msg
@@ -754,11 +721,9 @@ all: $(ALL_PRG-yes) locales
 %-rc.o: %.rc
 	$(WINDRES) -I. $< $@
 
-mencoder$(EXESUF): $(MENCODER_DEPS)
-mencoder$(EXESUF): EXTRALIBS += $(EXTRALIBS_MENCODER)
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 mplayer$(EXESUF): EXTRALIBS += $(EXTRALIBS_MPLAYER)
-mencoder$(EXESUF) mplayer$(EXESUF):
+mplayer$(EXESUF):
 	$(CC) -o $@ $^ $(EXTRALIBS)
 
 codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h
@@ -848,21 +813,12 @@ install-dirs:
 install-%: %$(EXESUF) install-dirs
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
 
-install-mencoder-man: $(foreach lang,$(MAN_LANGS),install-mencoder-man-$(lang))
 install-mplayer-man:  $(foreach lang,$(MAN_LANGS),install-mplayer-man-$(lang))
 install-mplayer-msg:  $(foreach lang,$(MSG_LANGS),install-mplayer-msg-$(lang))
-
-install-mencoder-man-en: install-mplayer-man-en
-	cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1
 
 install-mplayer-man-en:
 	if test ! -d $(MANDIR)/man1 ; then $(INSTALL) -d $(MANDIR)/man1 ; fi
 	$(INSTALL) -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
-
-define MENCODER_MAN_RULE
-install-mencoder-man-$(lang): install-mplayer-man-$(lang)
-	cd $(MANDIR)/$(lang)/man1 && ln -sf mplayer.1 mencoder.1
-endef
 
 define MPLAYER_MAN_RULE
 install-mplayer-man-$(lang):
@@ -870,7 +826,6 @@ install-mplayer-man-$(lang):
 	$(INSTALL) -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
 endef
 
-$(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MENCODER_MAN_RULE)))
 $(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MPLAYER_MAN_RULE)))
 
 define MPLAYER_MSG_RULE
@@ -883,17 +838,15 @@ $(foreach lang,$(MSG_LANG_ALL),$(eval $(MPLAYER_MSG_RULE)))
 
 uninstall:
 	rm -f $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
-	rm -f $(BINDIR)/mencoder$(EXESUF)
-	rm -f $(MANDIR)/man1/mencoder.1 $(MANDIR)/man1/mplayer.1
 	rm -f $(prefix)/share/pixmaps/mplayer.xpm
 	rm -f $(prefix)/share/applications/mplayer.desktop
-	rm -f $(MANDIR)/man1/mplayer.1 $(MANDIR)/man1/mencoder.1
-	rm -f $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1 mencoder.1,$(MANDIR)/$(lang)/man1/$(man)))
+	rm -f $(MANDIR)/man1/mplayer.1
+	rm -f $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1,$(MANDIR)/$(lang)/man1/$(man)))
 	rm -f $(foreach lang,$(MSG_LANGS),$(LOCALEDIR)/$(lang)/LC_MESSAGES/mplayer.1)
 
 clean:
 	-rm -f $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
-	-rm -f $(call ADD_ALL_EXESUFS,mplayer mencoder)
+	-rm -f $(call ADD_ALL_EXESUFS,mplayer)
 
 distclean: clean testsclean toolsclean driversclean dhahelperclean dhahelperwinclean
 	-rm -rf DOCS/tech/doxygen
