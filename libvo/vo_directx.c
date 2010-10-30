@@ -224,11 +224,11 @@ static uint32_t Directx_CreateOverlay(uint32_t imgfmt)
     HRESULT ddrval;
     DDSURFACEDESC2   ddsdOverlay;
     uint32_t        i=0;
-	while ( i < NUM_FORMATS +1 && imgfmt != g_ddpf[i].img_format)
+	while ( i < NUM_FORMATS && imgfmt != g_ddpf[i].img_format)
 	{
 		i++;
 	}
-	if (!g_lpdd || !g_lpddsPrimary)
+	if (!g_lpdd || !g_lpddsPrimary || i == NUM_FORMATS)
         return 1;
     //cleanup
 	if (g_lpddsOverlay)g_lpddsOverlay->lpVtbl->Release(g_lpddsOverlay);
