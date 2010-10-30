@@ -23,8 +23,7 @@
 
 #include <stdint.h>
 
-#include "ass_mp.h"
-
+#include "config.h"
 #include "subreader.h"
 
 #ifdef CONFIG_ASS

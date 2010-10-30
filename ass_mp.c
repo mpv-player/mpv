@@ -28,6 +28,7 @@
 
 #include <libavutil/common.h>
 
+#include "config.h"
 #include "mp_msg.h"
 #include "path.h"
 #include "ass_mp.h"
