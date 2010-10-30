@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 rev. 32066
+.\" sync with en/mplayer.1 rev. 32566
 .\" Encoding: UTF-8
 .\"
 .\" MPlayer (C) 2000-2010 MPlayer 团队
@@ -276,6 +276,8 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 切换对齐字幕: 上 / 中 / 下。
 .IPs "x 和 z"
 调整字幕延迟增加/减少 0.1 秒。
+.IPs "c（仅用于 \-capture）"
+开始/停止抓取主媒体流。
 .IPs "r 和 t"
 上/下调整字幕位置。
 .IPs "i (仅用于 \-edlout 模式)"
@@ -1261,6 +1263,15 @@ MPlayer 在 verbose (\-v) 模式下会打印可用的语言。
 MPlayer 等待填充缓存到此位置而不是执行流查寻(默认是: 50)。
 .
 .TP
+.B \-capture（仅用于 MPlayer）
+提供将主媒体流（并非额外的音频流或其它类型的媒体流）抓取至文件的功能。使用 
+\-dumpfile 指定存放的文件，默认为“stream.dump”。
+如果使用了该选项，则可以通过按绑定至该功能的按键来开始和停止抓取操作。（参见
+“交互式控制”部分）。
+与 \-dumpstream 相同，除了 MPEG 媒体流，该选项可能产生不了可用的输出。
+需注意的是，由于缓冲有延迟，抓取到的数据的开始和结束位置比你所见到的位置靠后。
+.
+.TP
 .B \-cdda <选项1:选项2> (仅适用于 CDDA)
 此选项用来调整 MPlayer 的 CD 音频读取特性。
 .sp 1
@@ -1376,7 +1387,7 @@ HTTP 请求时发送 cookies。
 .TP
 .B \-dumpfile <文件名> (仅用于 MPlayer)
 指定 MPlayer 应该转储到的文件。
-应该与 \-dumpaudio / \-dumpvideo / \-dumpstream 一起使用。
+应该与 \-dumpaudio / \-dumpvideo / \-dumpstream \-capture 一起使用。
 .
 .TP
 .B \-dumpstream (仅用于 MPlayer)
@@ -1879,7 +1890,7 @@ TV 制式取决于捕捉卡。参见控制台输出的可用 TV 制式列表。
 .IPs channel=<参数值>
 设置调谐器到 <参数值> 频道.
 .IPs chanlist=<参数值>
-可用参数: argentina, australia, china-bcast, europe-east, europe-west, france,
+可用参数：argentina, australia, china-bcast, europe-east, europe-west, france,
 ireland, italy, japan-bcast, japan-cable, newzealand, russia, southafrica,
 us-bcast, us-cable, us-cable-hrc
 .IPs channels=<频道>\-<名称>,<频道>\-<名称>,...
@@ -7097,6 +7108,94 @@ h参数值。
 .IPs <threshold>
 决定像素值低于多少就被认作是黑色的阈值（默认值：32）。
 .RE
+.PD 1
+.
+.TP
+.B stereo3d[=输入格式:输出格式]
+stereo3d 选项用于转换不同的立体图像格式。
+.RSs
+.IPs <输入格式>
+输入的立体图像格式。可设值有：
+.RS
+.B sbsl 或 side_by_side_left_first
+.RS
+由左而右平行排列（左眼图像在左，右眼图像在右）
+.RE
+.B sbsr 或 side_by_side_right_first
+.RS
+由左而右交换左右眼图像地排列（右眼图像在左，左眼图像在右）
+.RE
+.B abl 或 above_below_left_first
+.RS
+由上而下排列（左眼图像在上，右眼图像在下）
+.RE
+.B abl 或 above_below_right_first
+.RS
+由上而下排列（右眼图像在上，左眼图像在下）
+.RE
+.B ab2l 或 above_below_half_height_left_first
+.RS
+由上而下排列，纵向分辨率减半（左眼图像在上，右眼图像在下）
+.RE
+.B ab2r 或 above_below_half_height_right_first
+.RS
+由上而下排列，纵向分辨率减半（右眼图像在上，左眼图像在下）
+.RE
+.RE
+.IPs <输出格式>
+输出的立体图像格式。可设值除了所有输入格式外还有：
+.RS
+.B arcg 或 anaglyph_red_cyan_gray
+.RS
+红/青立体灰度图像（红色图层通过左眼图像，青色图层通过右眼图像）cyan
+.RE
+.B arch 或 anaglyph_red_cyan_half_color
+.RS
+红/青立体半彩色图像（红色图层通过左眼图像，青色图层通过右眼图像）
+.RE
+.B arcc 或 anaglyph_red_cyan_color
+.RS
+红/青立体彩色图像（红色图层通过左眼图像，青色图层通过右眼图像）
+.RE
+.B arcd 或 anaglyph_red_cyan_dubois
+.RS
+通过 Dubois 的最小二次影射优化的红/青立体彩色图像（红色图层通过左眼图像，青色图层通
+过右眼图像）
+.RE
+.B agmg 或 anaglyph_green_magenta_gray
+.RS
+绿/品红立体灰度图像（绿色图层通过左眼图像，品红图层通过右眼图像）
+.RE
+.B agmh 或 anaglyph_green_magenta_half_color
+.RS
+绿/品红立体半彩色图像（绿色图层通过左眼图像，品红图层通过右眼图像）
+.RE
+.B agmc 或 anaglyph_green_magenta_color
+.RS
+绿/品红立体彩色图像（绿色图层通过左眼图像，品红图层通过右眼图像）
+.RE
+.B aybg 或 anaglyph_yellow_blue_gray
+.RS
+黄/蓝立体灰度图像（黄色图层通过左眼图像，蓝色图层通过右眼图像）
+.B aybh 或 anaglyph_yellow_blue_half_color
+.RS
+黄/蓝立体半彩色图像（黄色图层通过左眼图像，蓝色图层通过右眼图像）
+.RE
+.B aybc 或 anaglyph_yellow_blue_color
+.RS
+黄/蓝立体彩色图像（黄色图层通过左眼图像，蓝色图层通过右眼图像）
+.RE
+.B ml 或 mono_left
+.RS
+单眼图像输出（只输出左眼图像）
+.RE
+.B mr 或 mono_right
+.RS
+单眼图像输出（只输出右眼图像）
+.RE
+.RE
+.RE
+.PD 1
 .
 .TP
 .B gradfun[=strength[:radius]]
@@ -7373,6 +7472,21 @@ Specify an initial value for the PTS.
 .TP
 .B \-vobsuboutindex <index>
 指定输出文件中字幕的索引号（默认值：0）。
+.
+.TP
+.B \-force\-key\-frames <时间点>,<时间点>,...
+强制在指定的时间点上使用关键帧，准确来说是每个指定的时间点之后的第一个帧。
+.sp 1
+该选项可用于保证输出文件的章节标记处或其它特定的位置有定位点。
+.sp 1
+指定的时间标记必须按升序排列。
+.sp 1
+因为 MEncoder 不在滤镜链中传递时间标记，所以很可能需要使用 fixpts 滤镜以使该选
+项生效。
+.sp 1
+并非所有的编解码器可以强制使用关键帧。
+当前已实现该功能的编码器如下：
+lavc，x264，xvid。
 .
 .
 .
@@ -9389,6 +9503,12 @@ DivX配置集（DivX Profile）限制选项的使用和VBV（短时间内的峰�
 第2级的简单配置集
 .IPs "sp3\ \ "
 第3级的简单配置集
+.IPs "sp4a\ \ "
+第4a级的简单配置集
+.IPs "sp5\ \ "
+第5级的简单配置集
+.IPs "sp6\ \ "
+第6级的简单配置集
 .IPs "asp0\ "
 第0级的高级简单配置集
 .IPs "asp1\ "
