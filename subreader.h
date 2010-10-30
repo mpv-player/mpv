@@ -60,7 +60,7 @@ extern int sub_format;
 #define SUB_ALIGNMENT_TOPCENTER        8
 #define SUB_ALIGNMENT_TOPRIGHT         9
 
-typedef struct {
+typedef struct subtitle {
 
     int lines;
 
@@ -72,7 +72,7 @@ typedef struct {
     unsigned char alignment;
 } subtitle;
 
-typedef struct {
+typedef struct sub_data {
     subtitle *subtitles;
     char *filename;
     int sub_uses_time;

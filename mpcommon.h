@@ -19,13 +19,13 @@
 #ifndef MPLAYER_MPCOMMON_H
 #define MPLAYER_MPCOMMON_H
 
-#include "subreader.h"
-#include "libmpdemux/demuxer.h"
-#include "libmpdemux/stheader.h"
+#include <stdbool.h>
+
+struct subtitle;
 
 extern double sub_last_pts;
 extern struct ass_track *ass_track;
-extern subtitle *vo_sub_last;
+extern struct subtitle *vo_sub_last;
 
 extern int disable_system_conf;
 extern int disable_user_conf;
@@ -34,14 +34,21 @@ extern const char *mencoder_version;
 extern const char *mplayer_version;
 
 struct MPContext;
+struct demuxer;
+struct demux_stream;
+struct demux_attachment;
+struct sh_video;
+struct MPOpts;
 
 void print_version(const char* name);
 void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
-                      sh_video_t *sh_video, double refpts, double sub_offset,
-                      demux_stream_t *d_dvdsub, int reset);
-void update_teletext(sh_video_t *sh_video, demuxer_t *demuxer, int reset);
-int select_audio(demuxer_t* demuxer, int audio_id, char* audio_lang);
-void set_osd_subtitle(struct MPContext *mpctx, subtitle *subs);
+                      struct sh_video *sh_video, double refpts,
+                      double sub_offset, struct demux_stream *d_dvdsub,
+                      int reset);
+void update_teletext(struct sh_video *sh_video, struct demuxer *demuxer,
+                     int reset);
+int select_audio(struct demuxer *demuxer, int audio_id, char *audio_lang);
+void set_osd_subtitle(struct MPContext *mpctx, struct subtitle *subs);
 bool attachment_is_font(struct demux_attachment *att);
 
 #endif /* MPLAYER_MPCOMMON_H */
