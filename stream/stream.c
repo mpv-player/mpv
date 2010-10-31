@@ -137,7 +137,7 @@ static const stream_info_t* const auto_open_streams[] = {
 #ifdef CONFIG_LIBBLURAY
   &stream_info_bluray,
 #endif
-#ifdef CONFIG_LIBAVFORMAT
+#ifdef CONFIG_FFMPEG
   &stream_info_ffmpeg,
 #endif
 

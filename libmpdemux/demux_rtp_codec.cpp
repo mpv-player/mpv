@@ -27,7 +27,7 @@ extern "C" {
 #include "libavutil/base64.h"
 }
 
-#ifdef CONFIG_LIBAVCODEC
+#ifdef CONFIG_FFMPEG
 AVCodecParserContext * h264parserctx;
 AVCodecContext *avcctx;
 #endif
@@ -134,7 +134,7 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
     unsigned char* configData
       = parseH264ConfigStr(subsession->fmtp_spropparametersets(), configLen);
     sh_video->bih = bih = insertVideoExtradata(bih, configData, configLen);
-#ifdef CONFIG_LIBAVCODEC
+#ifdef CONFIG_FFMPEG
     int fooLen;
     const uint8_t* fooData;
     avcodec_register_all();

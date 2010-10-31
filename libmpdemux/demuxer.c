@@ -45,7 +45,7 @@
 
 #include "ass_mp.h"
 
-#ifdef CONFIG_LIBAVCODEC
+#ifdef CONFIG_FFMPEG
 #include "libavcodec/avcodec.h"
 #if MP_INPUT_BUFFER_PADDING_SIZE < FF_INPUT_BUFFER_PADDING_SIZE
 #error MP_INPUT_BUFFER_PADDING_SIZE is too small!
@@ -116,7 +116,7 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_tv,
 #endif
     &demuxer_desc_mf,
-#ifdef CONFIG_LIBAVFORMAT
+#ifdef CONFIG_FFMPEG
     &demuxer_desc_lavf_preferred,
 #endif
     &demuxer_desc_avi,
@@ -159,7 +159,7 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef CONFIG_LIBNEMESI
     &demuxer_desc_rtp_nemesi,
 #endif
-#ifdef CONFIG_LIBAVFORMAT
+#ifdef CONFIG_FFMPEG
     &demuxer_desc_lavf,
 #endif
 #ifdef CONFIG_MUSEPACK
@@ -307,7 +307,7 @@ static void free_sh_sub(sh_sub_t *sh)
         ass_free_track(sh->ass_track);
 #endif
     free(sh->lang);
-#ifdef CONFIG_LIBAVCODEC
+#ifdef CONFIG_FFMPEG
     clear_parser((sh_common_t *)sh);
 #endif
     free(sh);
@@ -346,7 +346,7 @@ void free_sh_audio(demuxer_t *demuxer, int id)
     free(sh->wf);
     free(sh->codecdata);
     free(sh->lang);
-#ifdef CONFIG_LIBAVCODEC
+#ifdef CONFIG_FFMPEG
     clear_parser((sh_common_t *)sh);
 #endif
     free(sh);
@@ -378,7 +378,7 @@ void free_sh_video(sh_video_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_video at %p\n", sh);
     free(sh->bih);
-#ifdef CONFIG_LIBAVCODEC
+#ifdef CONFIG_FFMPEG
     clear_parser((sh_common_t *)sh);
 #endif
     free(sh);
@@ -436,7 +436,7 @@ static void ds_add_packet_internal(demux_stream_t *ds, demux_packet_t *dp)
            ds->demuxer->video->packs);
 }
 
-#ifdef CONFIG_LIBAVCODEC
+#ifdef CONFIG_FFMPEG
 static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parser, unsigned format)
 {
     enum CodecID codec_id = CODEC_ID_NONE;
@@ -532,7 +532,7 @@ void ds_clear_parser(demux_stream_t *ds)
 
 void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
 {
-#if PARSE_ON_ADD && defined(CONFIG_LIBAVCODEC)
+#if PARSE_ON_ADD && defined(CONFIG_FFMPEG)
     int len = dp->len;
     int pos = 0;
     while (len > 0) {
@@ -666,7 +666,7 @@ int ds_fill_buffer(demux_stream_t *ds)
             break;
         }
         if (!demux_fill_buffer(demux, ds)) {
-#if PARSE_ON_ADD && defined(CONFIG_LIBAVCODEC)
+#if PARSE_ON_ADD && defined(CONFIG_FFMPEG)
             uint8_t *parsed_start = NULL;
             int parsed_len = 0;
             ds_parse(ds->sh, &parsed_start, &parsed_len, MP_NOPTS_VALUE, 0);

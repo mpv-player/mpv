@@ -261,7 +261,7 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_YUV4MPEG
         &video_out_yuv4mpeg,
 #endif
-#ifdef CONFIG_LIBAVCODEC
+#ifdef CONFIG_FFMPEG
         &video_out_png,
 #endif
 #ifdef CONFIG_JPEG

@@ -115,7 +115,7 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
             spudec_reset(vo_spudec);
             vo_osd_changed(OSDTYPE_SPU);
         }
-#ifdef CONFIG_LIBAVCODEC
+#ifdef CONFIG_FFMPEG
         if (is_av_sub(type))
             reset_avsub(d_dvdsub->sh);
 #endif
@@ -203,7 +203,7 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
             double endpts = d_dvdsub->first->endpts + sub_offset;
             len = ds_get_packet_sub(d_dvdsub, &packet);
             if (is_av_sub(type)) {
-#ifdef CONFIG_LIBAVCODEC
+#ifdef CONFIG_FFMPEG
                 type = decode_avsub(d_dvdsub->sh, &packet, &len, &subpts, &endpts);
                 if (type <= 0)
 #endif

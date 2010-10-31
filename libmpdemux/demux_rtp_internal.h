@@ -23,7 +23,7 @@
 
 extern "C" {
 #include "demuxer.h"
-#ifdef CONFIG_LIBAVCODEC
+#ifdef CONFIG_FFMPEG
 #include "libavcodec/avcodec.h"
 #endif
 }

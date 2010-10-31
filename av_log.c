@@ -27,11 +27,8 @@
 #include "mp_msg.h"
 #include <libavutil/log.h>
 
-#ifdef CONFIG_LIBAVCODEC
+#ifdef CONFIG_FFMPEG
 #include <libavcodec/avcodec.h>
-#endif
-
-#ifdef CONFIG_LIBAVFORMAT
 #include <libavformat/avformat.h>
 #endif
 
@@ -55,7 +52,7 @@ static int extract_msg_type_from_ctx(void *ptr)
 
     AVClass *avc = *(AVClass **)ptr;
 
-#ifdef CONFIG_LIBAVCODEC
+#ifdef CONFIG_FFMPEG
     if (!strcmp(avc->class_name, "AVCodecContext")) {
         AVCodecContext *s = ptr;
         if (s->codec) {
@@ -73,7 +70,7 @@ static int extract_msg_type_from_ctx(void *ptr)
     }
 #endif
 
-#ifdef CONFIG_LIBAVFORMAT
+#ifdef CONFIG_FFMPEG
     if (!strcmp(avc->class_name, "AVFormatContext")) {
         AVFormatContext *s = ptr;
         if (s->iformat)

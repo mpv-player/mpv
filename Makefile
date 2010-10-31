@@ -98,6 +98,27 @@ SRCS_COMMON-$(FAAD_INTERNAL)         += libfaad2/bits.c \
                                         libfaad2/tns.c \
 
 SRCS_COMMON-$(FASTMEMCPY)            += libvo/aclib.c
+SRCS_COMMON-$(FFMPEG)                += libmpcodecs/vf_pp.c \
+                                        av_opts.c \
+                                        libaf/af_lavcac3enc.c \
+                                        av_sub.c \
+                                        libaf/af_lavcresample.c \
+                                        libmpcodecs/ad_ffmpeg.c \
+                                        libmpcodecs/vd_ffmpeg.c \
+                                        libmpcodecs/vf_lavc.c \
+                                        libmpcodecs/vf_lavcdeint.c \
+                                        libmpcodecs/vf_screenshot.c \
+                                        libmpcodecs/vf_uspp.c \
+                                        libmpdemux/demux_lavf.c \
+                                        stream/stream_ffmpeg.c \
+
+# These filters use private headers and do not work with shared libavcodec.
+SRCS_COMMON-$(FFMPEG_INTERNALS)      += libmpcodecs/vf_fspp.c \
+                                        libmpcodecs/vf_geq.c \
+                                        libmpcodecs/vf_mcdeint.c \
+                                        libmpcodecs/vf_qp.c \
+                                        libmpcodecs/vf_spp.c \
+
 SRCS_COMMON-$(FREETYPE)              += libvo/font_load_ft.c
 SRCS_COMMON-$(FTP)                   += stream/stream_ftp.c
 SRCS_COMMON-$(GIF)                   += libmpdemux/demux_gif.c
@@ -108,27 +129,6 @@ SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
 SRCS_COMMON-$(LIBA52)                += libmpcodecs/ad_liba52.c
 SRCS_COMMON-$(LIBASS)                += ass_mp.c \
                                         libmpcodecs/vf_ass.c \
-
-SRCS_COMMON-$(LIBAVCODEC)            += av_opts.c \
-                                        libaf/af_lavcac3enc.c \
-                                        av_sub.c \
-                                        libaf/af_lavcresample.c \
-                                        libmpcodecs/ad_ffmpeg.c \
-                                        libmpcodecs/vd_ffmpeg.c \
-                                        libmpcodecs/vf_lavc.c \
-                                        libmpcodecs/vf_lavcdeint.c \
-                                        libmpcodecs/vf_screenshot.c \
-                                        libmpcodecs/vf_uspp.c \
-
-# These filters use private headers and do not work with shared libavcodec.
-SRCS_COMMON-$(LIBAVCODEC_INTERNALS)  += libmpcodecs/vf_fspp.c \
-                                        libmpcodecs/vf_geq.c \
-                                        libmpcodecs/vf_mcdeint.c \
-                                        libmpcodecs/vf_qp.c \
-                                        libmpcodecs/vf_spp.c \
-
-SRCS_COMMON-$(LIBAVFORMAT)           += libmpdemux/demux_lavf.c \
-                                        stream/stream_ffmpeg.c \
 
 SRCS_COMMON-$(LIBBLURAY)             += stream/stream_bluray.c
 SRCS_COMMON-$(LIBBS2B)               += libaf/af_bs2b.c
@@ -167,7 +167,6 @@ SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c \
 SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
                                         stream/stream_nemesi.c
 SRCS_COMMON-$(LIBNUT)                += libmpdemux/demux_nut.c
-SRCS_COMMON-$(LIBPOSTPROC)           += libmpcodecs/vf_pp.c
 SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
 
 SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
@@ -536,6 +535,7 @@ SRCS_MPLAYER-$(DXR2)         += libao2/ao_dxr2.c libvo/vo_dxr2.c
 SRCS_MPLAYER-$(DXR3)         += libvo/vo_dxr3.c
 SRCS_MPLAYER-$(ESD)          += libao2/ao_esd.c
 SRCS_MPLAYER-$(FBDEV)        += libvo/vo_fbdev.c libvo/vo_fbdev2.c
+SRCS_MPLAYER-$(FFMPEG)       += libvo/vo_png.c
 SRCS_MPLAYER-$(GGI)          += libvo/vo_ggi.c
 SRCS_MPLAYER-$(GIF)          += libvo/vo_gif89a.c
 SRCS_MPLAYER-$(GL)           += libvo/gl_common.c libvo/vo_gl.c \
@@ -551,7 +551,6 @@ SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
 SRCS_MPLAYER-$(JPEG)         += libvo/vo_jpeg.c
 SRCS_MPLAYER-$(KAI)          += libao2/ao_kai.c
 SRCS_MPLAYER-$(KVA)          += libvo/vo_kva.c
-SRCS_MPLAYER-$(LIBAVCODEC)   += libvo/vo_png.c
 SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
                                 libmenu/menu_chapsel.c \
                                 libmenu/menu_cmdlist.c  \
