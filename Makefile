@@ -661,7 +661,6 @@ DIRS =  . \
         input \
         libaf \
         libao2 \
-        libass \
         libdvdcss \
         libdvdnav \
         libdvdnav/vm \
@@ -672,12 +671,6 @@ DIRS =  . \
         libmpcodecs/native \
         libmpdemux \
         libmpeg2 \
-        libswscale \
-        libswscale/bfin \
-        libswscale/mlib \
-        libswscale/ppc \
-        libswscale/sparc \
-        libswscale/x86 \
         libvo \
         loader \
         loader/dshow \
