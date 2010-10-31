@@ -284,7 +284,10 @@ static int preinit(sh_audio_t *sh)
     struct MPOpts *opts = sh->opts;
 
     /* 256 = samples per block, 16 = max number of blocks */
-    sh->audio_out_minsize = opts->audio_output_channels * sizeof(int16_t) * 256 * 16;
+    int channels = opts->audio_output_channels;
+    if (channels > 6)
+        channels = 6;
+    sh->audio_out_minsize = channels * sizeof(int16_t) * 256 * 16;
     sh->audio_in_minsize = DTSBUFFER_SIZE;
     sh->samplesize=2;
 
@@ -293,6 +296,7 @@ static int preinit(sh_audio_t *sh)
 
 static int init(sh_audio_t *sh)
 {
+    struct MPOpts *opts = sh->opts;
     dts_state_t *s;
     int flags;
     int decoded_bytes;
@@ -311,8 +315,11 @@ static int init(sh_audio_t *sh)
     }
     channels_info(flags);
 
-    assert(opts->audio_output_channels >= 1 && opts->audio_output_channels <= 6);
-    sh->channels = opts->audio_output_channels;
+    int channels = opts->audio_output_channels;
+    if (channels > 6)
+        channels = 6;
+    assert(channels >= 1 && channels <= 6);
+    sh->channels = channels;
 
     decoded_bytes = decode_audio(sh, sh->a_buffer, 1, sh->a_buffer_size);
     if(decoded_bytes > 0)
