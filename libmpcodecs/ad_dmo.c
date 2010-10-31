@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "options.h"
 #include "mp_msg.h"
 
 #include "ad_internal.h"
@@ -46,9 +47,10 @@ static int init(sh_audio_t *sh)
 
 static int preinit(sh_audio_t *sh_audio)
 {
+  struct MPOpts *opts = sh_audio->opts;
   DMO_AudioDecoder* ds_adec;
-  int chans=(audio_output_channels==sh_audio->wf->nChannels) ?
-      audio_output_channels : (sh_audio->wf->nChannels>=2 ? 2 : 1);
+  int chans=(opts->audio_output_channels==sh_audio->wf->nChannels) ?
+      opts->audio_output_channels : (sh_audio->wf->nChannels>=2 ? 2 : 1);
   if(!(ds_adec=DMO_AudioDecoder_Open(sh_audio->codec->dll,&sh_audio->codec->guid,sh_audio->wf,chans)))
   {
     mp_tmsg(MSGT_DECAUDIO,MSGL_ERR,"ERROR: Could not open required DirectShow codec %s.\n",sh_audio->codec->dll);

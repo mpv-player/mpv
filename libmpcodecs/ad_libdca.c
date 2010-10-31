@@ -25,8 +25,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
-#include "config.h"
 
+#include "config.h"
+#include "options.h"
 #include "mp_msg.h"
 #include "ad_internal.h"
 
@@ -280,8 +281,10 @@ end:
 
 static int preinit(sh_audio_t *sh)
 {
+    struct MPOpts *opts = sh->opts;
+
     /* 256 = samples per block, 16 = max number of blocks */
-    sh->audio_out_minsize = audio_output_channels * sizeof(int16_t) * 256 * 16;
+    sh->audio_out_minsize = opts->audio_output_channels * sizeof(int16_t) * 256 * 16;
     sh->audio_in_minsize = DTSBUFFER_SIZE;
     sh->samplesize=2;
 
@@ -308,8 +311,8 @@ static int init(sh_audio_t *sh)
     }
     channels_info(flags);
 
-    assert(audio_output_channels >= 1 && audio_output_channels <= 6);
-    sh->channels = audio_output_channels;
+    assert(opts->audio_output_channels >= 1 && opts->audio_output_channels <= 6);
+    sh->channels = opts->audio_output_channels;
 
     decoded_bytes = decode_audio(sh, sh->a_buffer, 1, sh->a_buffer_size);
     if(decoded_bytes > 0)

@@ -337,7 +337,6 @@ static int softsleep=0;
 
        double force_fps=0;
 static int force_srate=0;
-static int audio_output_format=-1; // AF_FORMAT_UNKNOWN
        int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
 static int play_n_frames=-1;
 static int play_n_frames_mf=-1;
@@ -1774,7 +1773,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         current_module="af_preinit";
         ao_data.samplerate=force_srate;
         ao_data.channels=0;
-        ao_data.format=audio_output_format;
+        ao_data.format = opts->audio_output_format;
         // first init to detect best values
         if(!init_audio_filters(mpctx->sh_audio,   // preliminary init
                                // input:

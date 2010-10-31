@@ -530,5 +530,6 @@ m_option_free(const m_option_t* opt,void* dst) {
 #define OPT_FLOATRANGE(optname, varname, flags, min, max) {optname, NULL, &m_option_type_float, (flags)|CONF_RANGE, min, max, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_STRING(optname, varname, flags) {optname, NULL, &m_option_type_string, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_SETTINGSLIST(optname, varname, flags, objlist) {optname, NULL, &m_option_type_obj_settings_list, flags, 0, 0, objlist, 1, offsetof(struct MPOpts, varname)}
+#define OPT_AUDIOFORMAT(optname, varname, flags) {optname, NULL, &m_option_type_afmt, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 
 #endif /* MPLAYER_M_OPTION_H */

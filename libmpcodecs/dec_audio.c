@@ -44,8 +44,6 @@
 int fakemono = 0;
 #endif
 
-/* used for ac3surround decoder - set using -channels option */
-int audio_output_channels = 2;
 af_cfg_t af_cfg = { 1, NULL };	// Configuration for audio filters
 
 void afm_help(void)

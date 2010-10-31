@@ -37,7 +37,6 @@ extern char * codecs_file;
 extern int field_dominance;
 
 /* from dec_audio, currently used for ac3surround decoder only */
-extern int audio_output_channels;
 extern int fakemono;
 
 /* defined in network.c */
@@ -569,8 +568,8 @@ const m_option_t common_opts[] = {
     // force video/audio rate:
     {"fps", &force_fps, CONF_TYPE_DOUBLE, CONF_MIN, 0, 0, NULL},
     {"srate", &force_srate, CONF_TYPE_INT, CONF_RANGE, 1000, 8*48000, NULL},
-    {"channels", &audio_output_channels, CONF_TYPE_INT, CONF_RANGE, 1, 8, NULL},
-    {"format", &audio_output_format, CONF_TYPE_AFMT, 0, 0, 0, NULL},
+    OPT_INTRANGE("channels", audio_output_channels, 0, 1, 8),
+    OPT_AUDIOFORMAT("format", audio_output_format, 0),
     OPT_FLOATRANGE("speed", playback_speed, 0, 0.01, 100.0),
 
     // set a-v distance
