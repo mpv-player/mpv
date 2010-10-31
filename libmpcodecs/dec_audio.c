@@ -328,8 +328,8 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
 {
     af_stream_t *afs = sh_audio->afilter;
     if (!afs) {
-	afs = malloc(sizeof(af_stream_t));
-	memset(afs, 0, sizeof(af_stream_t));
+	afs = calloc(1, sizeof(struct af_stream));
+	afs->opts = sh_audio->opts;
     }
     // input format: same as codec's output format:
     afs->input.rate   = in_samplerate;

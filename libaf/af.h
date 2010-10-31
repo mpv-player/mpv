@@ -23,6 +23,7 @@
 
 #include "config.h"
 
+#include "options.h"
 #include "af_format.h"
 #include "control.h"
 #include "cpudetect.h"
@@ -116,6 +117,7 @@ typedef struct af_stream
   af_data_t output;
   // Configuration for this stream
   af_cfg_t cfg;
+  struct MPOpts *opts;
 }af_stream_t;
 
 /*********************************************
