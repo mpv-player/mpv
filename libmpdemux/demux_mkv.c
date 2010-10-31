@@ -373,15 +373,12 @@ static void demux_mkv_decode(mkv_track_t *track, uint8_t *src,
             *dest = NULL;
             while (1) {
                 int srclen = *size;
-                if (dstlen > SIZE_MAX - AV_LZO_OUTPUT_PADDING)
-                    goto lzo_fail;
                 *dest = talloc_realloc_size(NULL, *dest,
                                             dstlen + AV_LZO_OUTPUT_PADDING);
                 int result = av_lzo1x_decode(*dest, &dstlen, src, &srclen);
                 if (result == 0)
                     break;
                 if (!(result & AV_LZO_OUTPUT_FULL)) {
-                  lzo_fail:
                     mp_tmsg(MSGT_DEMUX, MSGL_WARN,
                             "[mkv] lzo decompression failed.\n");
                     talloc_free(*dest);
@@ -1807,13 +1804,15 @@ static int demux_mkv_read_block_lacing(uint8_t *buffer, uint64_t *size,
                                        uint8_t *laces,
                                        uint32_t **all_lace_sizes)
 {
-    uint32_t total = 0, *lace_size;
+    uint32_t total = 0;
+    uint32_t *lace_size = NULL;
     uint8_t flags;
     int i;
 
     *all_lace_sizes = NULL;
-    lace_size = NULL;
     /* lacing flags */
+    if (*size < 1)
+        goto error;
     flags = *buffer++;
     (*size)--;
 
@@ -1827,6 +1826,8 @@ static int demux_mkv_read_block_lacing(uint8_t *buffer, uint64_t *size,
     case 1:                    /* xiph lacing */
     case 2:                    /* fixed-size lacing */
     case 3:                    /* EBML lacing */
+        if (*size < 1)
+            goto error;
         *laces = *buffer++;
         (*size)--;
         (*laces)++;
@@ -1837,9 +1838,13 @@ static int demux_mkv_read_block_lacing(uint8_t *buffer, uint64_t *size,
             for (i = 0; i < *laces - 1; i++) {
                 lace_size[i] = 0;
                 do {
+                    if (!*size)
+                        goto error;
                     lace_size[i] += *buffer;
                     (*size)--;
                 } while (*buffer++ == 0xFF);
+                if (lace_size[i] > *size - total || total > *size)
+                    goto error;
                 total += lace_size[i];
             }
             lace_size[i] = *size - total;
@@ -1853,24 +1858,27 @@ static int demux_mkv_read_block_lacing(uint8_t *buffer, uint64_t *size,
         case 3:;                /* EBML lacing */
             int l;
             uint64_t num = ebml_read_vlen_uint(buffer, &l);
-            if (num == EBML_UINT_INVALID) {
-                free(lace_size);
-                return 1;
-            }
+            if (num == EBML_UINT_INVALID)
+                goto error;
             buffer += l;
+            if (*size < l)
+                goto error;
             *size -= l;
+            if (num > *size)
+                goto error;
 
             total = lace_size[0] = num;
             for (i = 1; i < *laces - 1; i++) {
-                int64_t snum;
-                snum = ebml_read_vlen_int(buffer, &l);
-                if (snum == EBML_INT_INVALID) {
-                    free(lace_size);
-                    return 1;
-                }
+                int64_t snum = ebml_read_vlen_int(buffer, &l);
+                if (snum == EBML_INT_INVALID)
+                    goto error;
                 buffer += l;
+                if (*size < l)
+                    goto error;
                 *size -= l;
                 lace_size[i] = lace_size[i - 1] + snum;
+                if (lace_size[i] > *size - total || total > *size)
+                    goto error;
                 total += lace_size[i];
             }
             lace_size[i] = *size - total;
@@ -1880,6 +1888,11 @@ static int demux_mkv_read_block_lacing(uint8_t *buffer, uint64_t *size,
     }
     *all_lace_sizes = lace_size;
     return 0;
+
+ error:
+    free(lace_size);
+    mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Bad input [lacing]\n");
+    return 1;
 }
 
 static void handle_subtitles(demuxer_t *demuxer, mkv_track_t *track,
@@ -2299,7 +2312,7 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
                 case MATROSKA_ID_BLOCK:
                     block_length = ebml_read_length(s, &tmp);
                     free(block);
-                    if (block_length > SIZE_MAX - AV_LZO_INPUT_PADDING)
+                    if (block_length > 500000000)
                         return 0;
                     block = malloc(block_length + AV_LZO_INPUT_PADDING);
                     demuxer->filepos = stream_tell(s);
@@ -2365,6 +2378,8 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
                 case MATROSKA_ID_SIMPLEBLOCK:;
                     int res;
                     block_length = ebml_read_length(s, &tmp);
+                    if (block_length > 500000000)
+                        return 0;
                     block = malloc(block_length);
                     demuxer->filepos = stream_tell(s);
                     if (stream_read(s, block, block_length) !=
