@@ -1286,7 +1286,7 @@ static int mp_property_framedropping(m_option_t *prop, int action,
 static int mp_property_gamma(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
-    int *gamma = (int *)((char *)&mpctx->opts + (int)prop->priv);
+    int *gamma = (int *)((char *)&mpctx->opts + prop->offset);
     int r, val;
 
     if (!mpctx->sh_video)
@@ -2013,18 +2013,18 @@ static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
         if (!arg)
             return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(int *) arg);
-        return tv_set_color_options(tvh, (int) prop->priv, *(int *) arg);
+        return tv_set_color_options(tvh, prop->offset, *(int *) arg);
     case M_PROPERTY_GET:
-        return tv_get_color_options(tvh, (int) prop->priv, arg);
+        return tv_get_color_options(tvh, prop->offset, arg);
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-        if ((r = tv_get_color_options(tvh, (int) prop->priv, &val)) >= 0) {
+        if ((r = tv_get_color_options(tvh, prop->offset, &val)) >= 0) {
             if (!r)
                 return M_PROPERTY_ERROR;
             val += (arg ? *(int *) arg : 1) *
                 (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
             M_PROPERTY_CLAMP(prop, val);
-            return tv_set_color_options(tvh, (int) prop->priv, val);
+            return tv_set_color_options(tvh, prop->offset, val);
         }
         return M_PROPERTY_ERROR;
     }
@@ -2037,7 +2037,7 @@ static int mp_property_teletext_common(m_option_t *prop, int action, void *arg,
                   MPContext *mpctx)
 {
     int val,result;
-    int base_ioctl=(int)prop->priv;
+    int base_ioctl = prop->offset;
     /*
       for teletext's GET,SET,STEP ioctls this is not 0
       SET is GET+1
@@ -2085,7 +2085,7 @@ static int mp_property_teletext_mode(m_option_t *prop, int action, void *arg,
         return result;
 
     if(teletext_control(mpctx->demuxer->teletext,
-                        (int)prop->priv, &val)==VBI_CONTROL_TRUE && val)
+                        prop->offset, &val)==VBI_CONTROL_TRUE && val)
         mp_input_set_section(mpctx->input, "teletext");
     else
         mp_input_set_section(mpctx->input, "tv");
@@ -2197,15 +2197,15 @@ static const m_option_t mp_properties[] = {
     { "framedropping", mp_property_framedropping, CONF_TYPE_INT,
      M_OPT_RANGE, 0, 2, NULL },
     { "gamma", mp_property_gamma, CONF_TYPE_INT,
-      M_OPT_RANGE, -100, 100, (void *)offsetof(struct MPOpts, vo_gamma_gamma)},
+      M_OPT_RANGE, -100, 100, .offset=offsetof(struct MPOpts, vo_gamma_gamma)},
     { "brightness", mp_property_gamma, CONF_TYPE_INT,
-      M_OPT_RANGE, -100, 100, (void *)offsetof(struct MPOpts, vo_gamma_brightness) },
+      M_OPT_RANGE, -100, 100, .offset=offsetof(struct MPOpts, vo_gamma_brightness) },
     { "contrast", mp_property_gamma, CONF_TYPE_INT,
-      M_OPT_RANGE, -100, 100, (void *)offsetof(struct MPOpts, vo_gamma_contrast) },
+      M_OPT_RANGE, -100, 100, .offset=offsetof(struct MPOpts, vo_gamma_contrast) },
     { "saturation", mp_property_gamma, CONF_TYPE_INT,
-      M_OPT_RANGE, -100, 100, (void *)offsetof(struct MPOpts, vo_gamma_saturation) },
+      M_OPT_RANGE, -100, 100, .offset=offsetof(struct MPOpts, vo_gamma_saturation) },
     { "hue", mp_property_gamma, CONF_TYPE_INT,
-      M_OPT_RANGE, -100, 100, (void *)offsetof(struct MPOpts, vo_gamma_hue) },
+      M_OPT_RANGE, -100, 100, .offset=offsetof(struct MPOpts, vo_gamma_hue) },
     { "panscan", mp_property_panscan, CONF_TYPE_FLOAT,
      M_OPT_RANGE, 0, 1, NULL },
     { "vsync", mp_property_vsync, CONF_TYPE_FLAG,
@@ -2261,24 +2261,24 @@ static const m_option_t mp_properties[] = {
 
 #ifdef CONFIG_TV
     { "tv_brightness", mp_property_tv_color, CONF_TYPE_INT,
-     M_OPT_RANGE, -100, 100, (void *) TV_COLOR_BRIGHTNESS },
+     M_OPT_RANGE, -100, 100, .offset=TV_COLOR_BRIGHTNESS },
     { "tv_contrast", mp_property_tv_color, CONF_TYPE_INT,
-     M_OPT_RANGE, -100, 100, (void *) TV_COLOR_CONTRAST },
+     M_OPT_RANGE, -100, 100, .offset=TV_COLOR_CONTRAST },
     { "tv_saturation", mp_property_tv_color, CONF_TYPE_INT,
-     M_OPT_RANGE, -100, 100, (void *) TV_COLOR_SATURATION },
+     M_OPT_RANGE, -100, 100, .offset=TV_COLOR_SATURATION },
     { "tv_hue", mp_property_tv_color, CONF_TYPE_INT,
-     M_OPT_RANGE, -100, 100, (void *) TV_COLOR_HUE },
+     M_OPT_RANGE, -100, 100, .offset=TV_COLOR_HUE },
 #endif
     { "teletext_page", mp_property_teletext_page, CONF_TYPE_INT,
-     M_OPT_RANGE, 100, 899,  (void*)TV_VBI_CONTROL_GET_PAGE },
+     M_OPT_RANGE, 100, 899, .offset=TV_VBI_CONTROL_GET_PAGE },
     { "teletext_subpage", mp_property_teletext_common, CONF_TYPE_INT,
-     M_OPT_RANGE, 0, 64, (void*)TV_VBI_CONTROL_GET_SUBPAGE },
+     M_OPT_RANGE, 0, 64, .offset=TV_VBI_CONTROL_GET_SUBPAGE },
     { "teletext_mode", mp_property_teletext_mode, CONF_TYPE_FLAG,
-     M_OPT_RANGE, 0, 1, (void*)TV_VBI_CONTROL_GET_MODE },
+     M_OPT_RANGE, 0, 1, .offset=TV_VBI_CONTROL_GET_MODE },
     { "teletext_format", mp_property_teletext_common, CONF_TYPE_INT,
-     M_OPT_RANGE, 0, 3, (void*)TV_VBI_CONTROL_GET_FORMAT },
+     M_OPT_RANGE, 0, 3, .offset=TV_VBI_CONTROL_GET_FORMAT },
     { "teletext_half_page", mp_property_teletext_common, CONF_TYPE_INT,
-     M_OPT_RANGE, 0, 2, (void*)TV_VBI_CONTROL_GET_HALF_PAGE },
+     M_OPT_RANGE, 0, 2, .offset=TV_VBI_CONTROL_GET_HALF_PAGE },
     { NULL, NULL, NULL, 0, 0, 0, NULL }
 };
 
