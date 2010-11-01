@@ -183,6 +183,8 @@ from binascii import hexlify
 def byte2num(s):
     return int(hexlify(s), 16)
 
+class EOF(Exception): pass
+
 def camelcase_to_words(name):
     parts = []
     start = 0
@@ -295,7 +297,7 @@ def generate_C_definitions():
 def read(s, length):
     t = s.read(length)
     if len(t) != length:
-        raise IOError
+        raise EOF
     return t
 
 def read_id(s):
@@ -411,4 +413,10 @@ elif sys.argv[1] == '--generate-definitions':
 else:
     s = open(sys.argv[1], "rb")
     while 1:
-        parse_toplevel(s)
+        start = s.tell()
+        try:
+            parse_toplevel(s)
+        except EOF:
+            if s.tell() != start:
+                raise Exception("Unexpected end of file")
+            break
