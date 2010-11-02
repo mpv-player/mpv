@@ -139,8 +139,17 @@ struct {
 
 static inline void setAspectRatio(ULONG ulRatio)
 {
+    ULONG ulValue;
+    int   i;
+
     m_int.kvas.ulRatio = ulRatio;
     kvaSetup(&m_int.kvas);
+
+    // Setup initializes all attributes, so need to restore them.
+    for (i = 0; i < KVAA_LAST; i++) {
+        kvaQueryAttr(i, &ulValue);
+        kvaSetAttr(i, &ulValue);
+    }
 }
 
 static int query_format_info(int format, PBOOL pfHWAccel, PFOURCC pfcc,
