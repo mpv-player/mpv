@@ -325,7 +325,6 @@ float stream_cache_seek_min_percent=50.0;
 #endif
 
 // dump:
-static char *stream_dump_name="stream.dump";
        int stream_dump_type=0;
 
 // A-V sync:
@@ -3653,7 +3652,7 @@ if(stream_dump_type==5){
   current_module="dumpstream";
   stream_reset(mpctx->stream);
   stream_seek(mpctx->stream,mpctx->stream->start_pos);
-  f=fopen(stream_dump_name,"wb");
+  f=fopen(opts->stream_dump_name,"wb");
   if(!f){
     mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"Cannot open dump file.\n");
     exit_player(mpctx, EXIT_ERROR);
@@ -3666,7 +3665,7 @@ if(stream_dump_type==5){
       len=stream_read(mpctx->stream,buf,4096);
       if(len>0) {
         if(fwrite(buf,len,1,f) != 1) {
-          mp_tmsg(MSGT_MENCODER,MSGL_FATAL,"%s: Error writing file.\n",stream_dump_name);
+          mp_tmsg(MSGT_MENCODER,MSGL_FATAL,"%s: Error writing file.\n",opts->stream_dump_name);
           exit_player(mpctx, EXIT_ERROR);
         }
       }
@@ -3679,7 +3678,7 @@ if(stream_dump_type==5){
       }
   }
   if(fclose(f)) {
-    mp_tmsg(MSGT_MENCODER,MSGL_FATAL,"%s: Error writing file.\n",stream_dump_name);
+    mp_tmsg(MSGT_MENCODER,MSGL_FATAL,"%s: Error writing file.\n",opts->stream_dump_name);
     exit_player(mpctx, EXIT_ERROR);
   }
   mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Core dumped ;)\n");
@@ -3854,7 +3853,7 @@ if((stream_dump_type)&&(stream_dump_type<4)){
   if(mpctx->d_video && mpctx->d_video!=ds) {ds_free_packs(mpctx->d_video); mpctx->d_video->id=-2; }
   if(mpctx->d_sub && mpctx->d_sub!=ds) {ds_free_packs(mpctx->d_sub); mpctx->d_sub->id=-2; }
   // let's dump it!
-  f=fopen(stream_dump_name,"wb");
+  f=fopen(opts->stream_dump_name,"wb");
   if(!f){
     mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"Cannot open dump file.\n");
     exit_player(mpctx, EXIT_ERROR);

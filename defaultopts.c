@@ -19,6 +19,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .vo_gamma_hue = 1000,
         .osd_level = 1,
         .osd_duration = 1000,
+        .stream_dump_name = "stream.dump",
         .loop_times = -1,
         .ordered_chapters = 1,
         .chapterrange = {-1, -1},

@@ -283,7 +283,7 @@ const m_option_t mplayer_opts[]={
 
     // dump some stream out instead of playing the file
     // this really should be in MEncoder instead of MPlayer... -> TODO
-    {"dumpfile", &stream_dump_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    OPT_STRING("dumpfile", stream_dump_name, 0),
     {"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"dumpvideo", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 2, NULL},
     {"dumpsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 3, NULL},
