@@ -265,6 +265,16 @@ stream_t *open_output_stream(const char *filename, struct MPOpts *options)
 
 //=================== STREAMER =========================
 
+void stream_capture_do(stream_t *s)
+{
+  if (fwrite(s->buffer, s->buf_len, 1, s->capture_file) < 1) {
+    mp_tmsg(MSGT_GLOBAL, MSGL_ERR, "Error writing capture file: %s\n",
+            strerror(errno));
+    fclose(s->capture_file);
+    s->capture_file = NULL;
+  }
+}
+
 int stream_fill_buffer(stream_t *s){
   int len;
   // we will retry even if we already reached EOF previously.
@@ -296,6 +306,8 @@ int stream_fill_buffer(stream_t *s){
   s->buf_len=len;
   s->pos+=len;
 //  printf("[%d]",len);fflush(stdout);
+  if (s->capture_file)
+    stream_capture_do(s);
   return len;
 }
 
@@ -463,6 +475,11 @@ void free_stream(stream_t *s){
 #ifdef CONFIG_STREAM_CACHE
     cache_uninit(s);
 #endif
+  if (s->capture_file) {
+    fclose(s->capture_file);
+    s->capture_file = NULL;
+  }
+
   if(s->close) s->close(s);
   if(s->fd>0){
     /* on unix we define closesocket to close

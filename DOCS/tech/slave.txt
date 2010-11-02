@@ -76,6 +76,10 @@ audio_delay <value> [abs]
     If [abs] is non-zero, parameter is set to <value>.
     <value> is in the range [-100, 100].
 
+capturing [value]
+    Toggle/set capturing the primary stream like -dumpstream.
+    Requires the -capture parameter to be given.
+
 change_rectangle <val1> <val2>
     Change the position of the rectangle filter rectangle.
         <val1>
@@ -538,6 +542,7 @@ channels           int                       X
 switch_audio       int       -2      255     X   X   X    select audio stream
 switch_angle       int       -2      255     X   X   X    select DVD angle
 switch_title       int       -2      255     X   X   X    select DVD title
+capturing          flag      0       1       X   X   X    dump primary stream if enabled
 fullscreen         flag      0       1       X   X   X
 deinterlace        flag      0       1       X   X   X
 ontop              flag      0       1       X   X   X

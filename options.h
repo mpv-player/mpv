@@ -28,6 +28,7 @@ typedef struct MPOpts {
     int osd_level;
     int osd_duration;
     char *stream_dump_name;
+    int capture_dump;
     int loop_times;
     int ordered_chapters;
     int chapterrange[2];

@@ -294,6 +294,9 @@ const m_option_t mplayer_opts[]={
     {"dumpjacosub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 8, NULL},
     {"dumpsami", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 9, NULL},
 
+    OPT_FLAG_ON("capture", capture_dump, 0),
+    OPT_FLAG_OFF("nocapture", capture_dump, 0),
+
 #ifdef CONFIG_LIRC
     {"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif

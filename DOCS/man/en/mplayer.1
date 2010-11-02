@@ -273,6 +273,8 @@ Toggle displaying "forced subtitles".
 Toggle subtitle alignment: top / middle / bottom.
 .IPs "x and z"
 Adjust subtitle delay by +/\- 0.1 seconds.
+.IPs "C (\-capture only)"
+Start/stop capturing the primary stream.
 .IPs "r and t"
 Move subtitles up/down.
 .IPs "i (\-edlout mode only)"
@@ -1248,6 +1250,18 @@ from the current position, MPlayer will wait for the cache to be filled to
 this position rather than performing a stream seek (default: 50).
 .
 .TP
+.B \-capture (MPlayer only)
+Allows capturing the primary stream (not additional audio tracks or other
+kind of streams) into the file specified by \-dumpfile or \"stream.dump\"
+by default.
+If this option is given, capturing can be started and stopped by pressing
+the key bound to this function (see section INTERACTIVE CONTROL).
+Same as for \-dumpstream, this will likely not produce usable results for
+anything else than MPEG streams.
+Note that, due to cache latencies, captured data may begin and end
+somewhat delayed compared to what you see displayed.
+.
+.TP
 .B \-cdda <option1:option2> (CDDA only)
 This option can be used to tune the CD Audio reading feature of MPlayer.
 .sp 1
@@ -1379,7 +1393,8 @@ on the command line only the last one will work.
 .TP
 .B \-dumpfile <filename> (MPlayer only)
 Specify which file MPlayer should dump to.
-Should be used together with \-dumpaudio / \-dumpvideo / \-dumpstream.
+Should be used together with \-dumpaudio / \-dumpvideo / \-dumpstream /
+\-capture.
 .
 .TP
 .B \-dumpstream (MPlayer only)
