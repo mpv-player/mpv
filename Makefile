@@ -1011,3 +1011,9 @@ dhahelperclean:
 # Disable suffix rules.  Most of the builtin rules are suffix rules,
 # so this saves some time on slow systems.
 .SUFFIXES:
+
+# If a command returns failure but changed its target file, delete the
+# (presumably malformed) file. Otherwise the file would be considered to
+# be up to date if make is restarted.
+
+.DELETE_ON_ERROR:
