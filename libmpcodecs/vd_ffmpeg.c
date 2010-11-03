@@ -539,7 +539,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         return avctx->get_buffer(avctx, pic);
     }
 
-    if (IMGFMT_IS_XVMC(ctx->best_csp) || IMGFMT_IS_VDPAU(ctx->best_csp)) {
+    if (IMGFMT_IS_HWACCEL(ctx->best_csp)) {
         type =  MP_IMGTYPE_NUMBERED | (0xffff << 16);
     } else
     if (!pic->buffer_hints) {
@@ -571,13 +571,12 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         avctx->draw_horiz_band= draw_slice;
     } else
         avctx->draw_horiz_band= NULL;
-    if(IMGFMT_IS_VDPAU(mpi->imgfmt)) {
+    if(IMGFMT_IS_HWACCEL(mpi->imgfmt)) {
         avctx->draw_horiz_band= draw_slice;
     }
 #if CONFIG_XVMC
     if(IMGFMT_IS_XVMC(mpi->imgfmt)) {
         struct xvmc_pix_fmt *render = mpi->priv; //same as data[2]
-        avctx->draw_horiz_band= draw_slice;
         if(!avctx->xvmc_acceleration) {
             mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] The mc_get_buffer should work only with XVMC acceleration!!");
             assert(0);
@@ -910,7 +909,7 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
 
     for(i=0;fmt[i]!=PIX_FMT_NONE;i++){
         imgfmt = pixfmt2imgfmt(fmt[i]);
-        if(!IMGFMT_IS_XVMC(imgfmt) && !IMGFMT_IS_VDPAU(imgfmt)) continue;
+        if(!IMGFMT_IS_HWACCEL(imgfmt)) continue;
         mp_msg(MSGT_DECVIDEO, MSGL_V, "[VD_FFMPEG] Trying pixfmt=%d.\n", i);
         if(init_vo(sh, fmt[i]) >= 0) {
             break;

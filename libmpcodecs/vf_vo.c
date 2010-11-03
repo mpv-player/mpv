@@ -182,7 +182,7 @@ static void get_image(struct vf_instance *vf,
         return;
     // GET_IMAGE is required for hardware-accelerated formats
     if(vo_directrendering ||
-       IMGFMT_IS_XVMC(mpi->imgfmt) || IMGFMT_IS_VDPAU(mpi->imgfmt))
+       IMGFMT_IS_HWACCEL(mpi->imgfmt))
 	vo_control(video_out, VOCTRL_GET_IMAGE, mpi);
 }
 

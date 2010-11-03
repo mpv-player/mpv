@@ -101,7 +101,7 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     // compressed formats
     if(out_fmt == IMGFMT_MPEGPES ||
        out_fmt == IMGFMT_ZRMJPEGNI || out_fmt == IMGFMT_ZRMJPEGIT || out_fmt == IMGFMT_ZRMJPEGIB ||
-       IMGFMT_IS_VDPAU(out_fmt) || IMGFMT_IS_XVMC(out_fmt)){
+       IMGFMT_IS_HWACCEL(out_fmt)){
 	mpi->bpp=0;
 	return;
     }
