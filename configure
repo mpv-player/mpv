@@ -3316,7 +3316,6 @@ test "$_w32threads" = yes && def_threads='#define HAVE_THREADS 1'
 echores "$_w32threads"
 
 echocheck "rpath"
-netbsd &&_rpath=yes
 if test "$_rpath" = yes ; then
   for I in $(echo $extra_ldflags | sed 's/-L//g') ; do
     tmp="$tmp $(echo $I | sed 's/.*/ -L& -Wl,-R&/')"
