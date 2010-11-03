@@ -7110,7 +7110,7 @@ test "$_debug" != "" && def_debug='#define MP_DEBUG 1'
 echocheck "joystick"
 def_joystick='#undef CONFIG_JOYSTICK'
 if test "$_joystick" = yes ; then
-  if linux ; then
+  if linux || freebsd ; then
     # TODO add some check
     def_joystick='#define CONFIG_JOYSTICK 1'
   else
