@@ -509,40 +509,7 @@ static int control(struct vf_instance *vf, int request, void* data){
 //  supported Input formats: YV12, I420, IYUV, YUY2, UYVY, BGR32, BGR24, BGR16, BGR15, RGB32, RGB24, Y8, Y800
 
 static int query_format(struct vf_instance *vf, unsigned int fmt){
-    switch(fmt){
-    case IMGFMT_YV12:
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
-    case IMGFMT_UYVY:
-    case IMGFMT_YUY2:
-    case IMGFMT_BGR32:
-    case IMGFMT_BGR24:
-    case IMGFMT_BGR16:
-    case IMGFMT_BGR15:
-    case IMGFMT_RGB32:
-    case IMGFMT_RGB24:
-    case IMGFMT_Y800:
-    case IMGFMT_Y8:
-    case IMGFMT_YVU9:
-    case IMGFMT_IF09:
-    case IMGFMT_444P:
-    case IMGFMT_422P:
-    case IMGFMT_411P:
-    case IMGFMT_440P:
-    case IMGFMT_420A:
-    case IMGFMT_444P16_LE:
-    case IMGFMT_444P16_BE:
-    case IMGFMT_422P16_LE:
-    case IMGFMT_422P16_BE:
-    case IMGFMT_420P16_LE:
-    case IMGFMT_420P16_BE:
-    case IMGFMT_BGR8:
-    case IMGFMT_RGB8:
-    case IMGFMT_BG4B:
-    case IMGFMT_RG4B:
-    case IMGFMT_RGB48LE:
-    case IMGFMT_RGB48BE:
-    {
+    if (!IMGFMT_IS_HWACCEL(fmt) && imgfmt2pixfmt(fmt) != PIX_FMT_NONE) {
 	unsigned int best=find_best_out(vf, fmt);
 	int flags;
 	if(!best) return 0;	 // no matching out-fmt
@@ -552,7 +519,6 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
 	// do not allow scaling, if we are before the PP fliter!
 	if(!(flags&VFCAP_POSTPROC)) flags|=VFCAP_SWSCALE;
 	return flags;
-      }
     }
     return 0;	// nomatching in-fmt
 }
