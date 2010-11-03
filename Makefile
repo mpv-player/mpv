@@ -839,9 +839,11 @@ uninstall:
 clean:
 	-rm -f $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
 	-rm -f $(call ADD_ALL_EXESUFS,mplayer)
+	-rm -f $(MOFILES)
 
 distclean: clean testsclean toolsclean driversclean dhahelperclean
 	-rm -rf DOCS/tech/doxygen
+	-rm -rf locale
 	-rm -f $(call ADD_ALL_DIRS,/*.d)
 	-rm -f config.log config.mak config.h codecs.conf.h \
            version.h $(VIDIX_PCI_FILES) TAGS tags
