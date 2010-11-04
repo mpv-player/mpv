@@ -3541,8 +3541,8 @@ while (player_idle_mode && !mpctx->filename) {
     if (mpctx->filename) {
 	mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"\nPlaying %s.\n",
 		filename_recode(mpctx->filename));
-        if(use_filename_title && vo_wintitle == NULL)
-            vo_wintitle = strdup(mp_basename2(mpctx->filename));
+        if(use_filename_title && opts->vo_wintitle == NULL)
+            opts->vo_wintitle = strdup(mp_basename2(mpctx->filename));
     }
 
 if (edl_filename) {

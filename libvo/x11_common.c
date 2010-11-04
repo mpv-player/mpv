@@ -706,11 +706,12 @@ void vo_x11_decoration(struct vo *vo, int d)
 
 void vo_x11_classhint(struct vo *vo, Window window, const char *name)
 {
+    struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
     XClassHint wmClass;
     pid_t pid = getpid();
 
-    wmClass.res_name = vo_winname ? vo_winname : name;
+    wmClass.res_name = opts->vo_winname ? opts->vo_winname : name;
     wmClass.res_class = "MPlayer";
     XSetClassHint(x11->display, window, &wmClass);
     XChangeProperty(x11->display, window, x11->XA_NET_WM_PID, XA_CARDINAL,
@@ -1308,6 +1309,7 @@ static int vo_x11_get_fs_type(int supported)
  */
 int vo_x11_update_geometry(struct vo *vo)
 {
+    struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
     unsigned depth, w, h;
     int dummy_int;
@@ -1320,8 +1322,8 @@ int vo_x11_update_geometry(struct vo *vo)
     }
     XTranslateCoordinates(x11->display, x11->window, x11->rootwin, 0, 0,
                           &vo->dx, &vo->dy, &dummy_win);
-    if (vo_wintitle)
-        XStoreName(x11->display, x11->window, vo_wintitle);
+    if (opts->vo_wintitle)
+        XStoreName(x11->display, x11->window, opts->vo_wintitle);
 
     return depth <= INT_MAX ? depth : 0;
 }

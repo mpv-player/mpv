@@ -11,6 +11,8 @@ typedef struct MPOpts {
     int vo_screenwidth;
     int vo_screenheight;
     int force_window_position;
+    char *vo_winname;
+    char *vo_wintitle;
     float force_monitor_aspect;
     float monitor_pixel_aspect;
     int vidmode;
