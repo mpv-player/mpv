@@ -533,6 +533,7 @@ int parse_timestring(const char *str, double *time, char endchar);
 
 #define OPT_FLAG_ON(optname, varname, flags) {optname, NULL, &m_option_type_flag, flags, 0, 1, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_FLAG_OFF(optname, varname, flags) {optname, NULL, &m_option_type_flag, flags, 1, 0, NULL, 1, offsetof(struct MPOpts, varname)}
+#define OPT_MAKE_FLAGS(optname, varname, flags) OPT_FLAG_ON(optname, varname, flags), OPT_FLAG_OFF("no" optname, varname, flags)
 #define OPT_FLAG_CONSTANTS(optname, varname, flags, offvalue, value) {optname, NULL, &m_option_type_flag, flags, offvalue, value, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_STRINGLIST(optname, varname, flags) {optname, NULL, &m_option_type_string_list, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_INT(optname, varname, flags) {optname, NULL, &m_option_type_int, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}

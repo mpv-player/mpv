@@ -608,8 +608,7 @@ const m_option_t common_opts[] = {
     // scaling:
     {"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},
     {"ssf", (void *) scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-    OPT_FLAG_ON("zoom", softzoom, 0),
-    OPT_FLAG_OFF("nozoom", softzoom, 0),
+    OPT_MAKE_FLAGS("zoom", softzoom, 0),
     OPT_FLOATRANGE("aspect", movie_aspect, 0, 0.2, 3.0),
     OPT_FLAG_CONSTANTS("noaspect", movie_aspect, 0, 0, 0),
     OPT_FLOATRANGE("xy", screen_size_xy, 0, 0.001, 4096),
@@ -624,8 +623,7 @@ const m_option_t common_opts[] = {
     {"tskeepbroken", &ts_keep_broken, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
     // draw by slices or whole frame (useful with libmpeg2/libavcodec)
-    OPT_FLAG_ON("slices", vd_use_slices, 0),
-    OPT_FLAG_OFF("noslices", vd_use_slices, 0),
+    OPT_MAKE_FLAGS("slices", vd_use_slices, 0),
     {"field-dominance", &field_dominance, CONF_TYPE_INT, CONF_RANGE, -1, 1, NULL},
 
 #ifdef CONFIG_FFMPEG
@@ -693,8 +691,7 @@ const m_option_t common_opts[] = {
     {"subfont-autoscale", &subtitle_autoscale, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
 #endif
 #ifdef CONFIG_ASS
-    OPT_FLAG_ON("ass", ass_enabled, 0),
-    OPT_FLAG_OFF("noass", ass_enabled, 0),
+    OPT_MAKE_FLAGS("ass", ass_enabled, 0),
     {"ass-font-scale", &ass_font_scale, CONF_TYPE_FLOAT, CONF_RANGE, 0, 100, NULL},
     {"ass-line-spacing", &ass_line_spacing, CONF_TYPE_FLOAT, CONF_RANGE, -1000, 1000, NULL},
     {"ass-top-margin", &ass_top_margin, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},

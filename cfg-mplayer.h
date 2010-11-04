@@ -83,10 +83,8 @@ const m_option_t mplayer_opts[]={
      CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
     OPT_STRINGLIST("vo", video_driver_list, 0),
     OPT_STRINGLIST("ao", audio_driver_list, 0),
-    OPT_FLAG_ON("fixed-vo", fixed_vo, CONF_GLOBAL),
-    OPT_FLAG_OFF("nofixed-vo", fixed_vo, CONF_GLOBAL),
-    OPT_FLAG_ON("ontop", vo_ontop, 0),
-    OPT_FLAG_OFF("noontop", vo_ontop, 0),
+    OPT_MAKE_FLAGS("fixed-vo", fixed_vo, CONF_GLOBAL),
+    OPT_MAKE_FLAGS("ontop", vo_ontop, 0),
     {"rootwin", &vo_rootwin, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"border", &vo_border, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"noborder", &vo_border, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -156,8 +154,7 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("screenh", vo_screenheight, CONF_OLD, 0, 4096),
     // Geometry string
     {"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    OPT_FLAG_ON("force-window-position", force_window_position, 0),
-    OPT_FLAG_OFF("noforce-window-position", force_window_position, 0),
+    OPT_MAKE_FLAGS("force-window-position", force_window_position, 0),
     // vo name (X classname) and window title strings
     OPT_STRING("name", vo_winname, 0),
     OPT_STRING("title", vo_wintitle, 0),
@@ -165,11 +162,9 @@ const m_option_t mplayer_opts[]={
     OPT_FLOATRANGE("monitoraspect", force_monitor_aspect, 0, 0.0, 9.0),
     OPT_FLOATRANGE("monitorpixelaspect", monitor_pixel_aspect, 0, 0.2, 9.0),
     // video mode switching: (x11,xv,dga)
-    OPT_FLAG_ON("vm", vidmode, 0),
-    OPT_FLAG_OFF("novm", vidmode, 0),
+    OPT_MAKE_FLAGS("vm", vidmode, 0),
     // start in fullscreen mode:
-    OPT_FLAG_ON("fs", fullscreen, 0),
-    OPT_FLAG_OFF("nofs", fullscreen, 0),
+    OPT_MAKE_FLAGS("fs", fullscreen, 0),
     // set fullscreen switch method (workaround for buggy WMs)
     {"fsmode", "-fsmode is obsolete, avoid it and use -fstype instead.\nIf you really want it, try -fsmode-dontuse, but don't report bugs!\n", CONF_TYPE_PRINT, CONF_RANGE, 0, 31, NULL},
     {"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
@@ -294,8 +289,7 @@ const m_option_t mplayer_opts[]={
     {"dumpjacosub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 8, NULL},
     {"dumpsami", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 9, NULL},
 
-    OPT_FLAG_ON("capture", capture_dump, 0),
-    OPT_FLAG_OFF("nocapture", capture_dump, 0),
+    OPT_MAKE_FLAGS("capture", capture_dump, 0),
 
 #ifdef CONFIG_LIRC
     {"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
@@ -309,12 +303,10 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("loop", loop_times, 0, -1, 10000),
     {"playlist", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
-    OPT_FLAG_ON("ordered-chapters", ordered_chapters, 0),
-    OPT_FLAG_OFF("noordered-chapters", ordered_chapters, 0),
+    OPT_MAKE_FLAGS("ordered-chapters", ordered_chapters, 0),
 
     // a-v sync stuff:
-    OPT_FLAG_ON("correct-pts", user_correct_pts, 0),
-    OPT_FLAG_OFF("nocorrect-pts", user_correct_pts, 0),
+    OPT_MAKE_FLAGS("correct-pts", user_correct_pts, 0),
     OPT_INTRANGE("pts-association-mode", user_pts_assoc_mode, 0, 0, 2),
     {"noautosync", &autosync, CONF_TYPE_FLAG, 0, 0, -1, NULL},
     {"autosync", &autosync, CONF_TYPE_INT, CONF_RANGE, 0, 10000, NULL},
