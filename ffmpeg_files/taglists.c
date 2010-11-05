@@ -19,7 +19,9 @@
 
 /* This file contains:
  * - the tables ff_codec_bmp_tags and ff_codec_wav_tags from FFmpeg's
- *   libavformat/riff.c, renamed to have an extra mp_ prefix
+ *   libavformat/riff.c, renamed to have an extra mp_ prefix, and with
+ *   libavcodec version check added around CODEC_ID_ macros only available
+ *   in latest libavcodec versions
  * - an implementation of av_codec_get_tag and av_codec_get_id from
  *   libavformat/utils.c, renamed to have an extra mp_ prefix
  */
@@ -58,6 +60,7 @@ const struct mp_AVCodecTag mp_ff_codec_bmp_tags[] = {
     { CODEC_ID_MPEG4,        MKTAG('S', 'E', 'D', 'G') },
     { CODEC_ID_MPEG4,        MKTAG('R', 'M', 'P', '4') },
     { CODEC_ID_MPEG4,        MKTAG('3', 'I', 'V', '2') },
+    { CODEC_ID_MPEG4,        MKTAG('W', 'A', 'W', 'V') }, /* WaWv MPEG-4 Video Codec */
     { CODEC_ID_MPEG4,        MKTAG('F', 'F', 'D', 'S') },
     { CODEC_ID_MPEG4,        MKTAG('F', 'V', 'F', 'W') },
     { CODEC_ID_MPEG4,        MKTAG('D', 'C', 'O', 'D') },
@@ -80,8 +83,8 @@ const struct mp_AVCodecTag mp_ff_codec_bmp_tags[] = {
     { CODEC_ID_MPEG4,        MKTAG('U', 'L', 'D', 'X') },
     { CODEC_ID_MPEG4,        MKTAG('G', 'E', 'O', 'V') },
     { CODEC_ID_MPEG4,        MKTAG('S', 'I', 'P', 'P') }, /* Samsung SHR-6040 */
-    { CODEC_ID_MSMPEG4V3,    MKTAG('D', 'I', 'V', '3') }, /* default signature when using MSMPEG4 */
     { CODEC_ID_MSMPEG4V3,    MKTAG('M', 'P', '4', '3') },
+    { CODEC_ID_MSMPEG4V3,    MKTAG('D', 'I', 'V', '3') },
     { CODEC_ID_MSMPEG4V3,    MKTAG('M', 'P', 'G', '3') },
     { CODEC_ID_MSMPEG4V3,    MKTAG('D', 'I', 'V', '5') },
     { CODEC_ID_MSMPEG4V3,    MKTAG('D', 'I', 'V', '6') },
@@ -122,6 +125,7 @@ const struct mp_AVCodecTag mp_ff_codec_bmp_tags[] = {
     { CODEC_ID_MPEG2VIDEO,   MKTAG('L', 'M', 'P', '2') }, /* Lead MPEG2 in avi */
     { CODEC_ID_MPEG2VIDEO,   MKTAG('s', 'l', 'i', 'f') },
     { CODEC_ID_MPEG2VIDEO,   MKTAG('E', 'M', '2', 'V') },
+    { CODEC_ID_MPEG2VIDEO,   MKTAG('M', '7', '0', '1') }, /* Matrox MPEG2 intra-only */
     { CODEC_ID_MJPEG,        MKTAG('M', 'J', 'P', 'G') },
     { CODEC_ID_MJPEG,        MKTAG('L', 'J', 'P', 'G') },
     { CODEC_ID_MJPEG,        MKTAG('d', 'm', 'b', '1') },
@@ -176,6 +180,9 @@ const struct mp_AVCodecTag mp_ff_codec_bmp_tags[] = {
     { CODEC_ID_RAWVIDEO,     MKTAG('Y', 'U', 'V', '9') },
     { CODEC_ID_RAWVIDEO,     MKTAG('Y', 'V', 'U', '9') },
     { CODEC_ID_FRWU,         MKTAG('F', 'R', 'W', 'U') },
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 89, 0)
+    { CODEC_ID_R10K,         MKTAG('R', '1', '0', 'k') },
+#endif
     { CODEC_ID_R210,         MKTAG('r', '2', '1', '0') },
     { CODEC_ID_V210,         MKTAG('v', '2', '1', '0') },
     { CODEC_ID_INDEO3,       MKTAG('I', 'V', '3', '1') },
@@ -223,6 +230,7 @@ const struct mp_AVCodecTag mp_ff_codec_bmp_tags[] = {
     { CODEC_ID_QPEG,         MKTAG('Q', '1', '.', '0') },
     { CODEC_ID_QPEG,         MKTAG('Q', '1', '.', '1') },
     { CODEC_ID_WMV3,         MKTAG('W', 'M', 'V', '3') },
+    { CODEC_ID_WMV3,         MKTAG('W', 'M', 'V', 'P') },
     { CODEC_ID_VC1,          MKTAG('W', 'V', 'C', '1') },
     { CODEC_ID_VC1,          MKTAG('W', 'M', 'V', 'A') },
     { CODEC_ID_LOCO,         MKTAG('L', 'O', 'C', 'O') },
