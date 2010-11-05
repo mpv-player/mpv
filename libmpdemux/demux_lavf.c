@@ -23,6 +23,7 @@
 // #include <unistd.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "config.h"
 #include "options.h"
@@ -205,13 +206,28 @@ static int lavf_check_file(demuxer_t *demuxer){
     return DEMUXER_TYPE_LAVF;
 }
 
+static bool matches_avinputformat_name(struct lavf_priv *priv,
+                                       const char *name)
+{
+    const char *avifname = priv->avif->name;
+    while (1) {
+        const char *next = strchr(avifname, ',');
+        if (!next)
+            return !strcmp(avifname, name);
+        int len = next - avifname;
+        if (len == strlen(name) && !memcmp(avifname, name, len))
+            return true;
+        avifname = next + 1;
+    }
+}
+
 static const char * const preferred_list[] = {
     "dxa",
     "flv",
     "gxf",
     "nut",
     "nuv",
-    "mov,mp4,m4a,3gp,3g2,mj2",
+    "mov", "mp4",   // "mov,mp4,m4a,3gp,3g2,mj2" is one AVInputFormat
     "mpc",
     "mpc8",
     "mxf",
@@ -225,13 +241,11 @@ static const char * const preferred_list[] = {
 
 static int lavf_check_preferred_file(demuxer_t *demuxer){
     if (lavf_check_file(demuxer)) {
-        const char * const *p = preferred_list;
+        const char * const *p;
         lavf_priv_t *priv = demuxer->priv;
-        while (*p) {
-            if (strcmp(*p, priv->avif->name) == 0)
+        for (p = preferred_list; *p; p++)
+            if (matches_avinputformat_name(priv, *p))
                 return DEMUXER_TYPE_LAVF_PREFERRED;
-            p++;
-        }
     }
     return 0;
 }
