@@ -899,6 +899,18 @@ redo:
                         break;
                 }
             }
+            if (prog->aid >= 0 && prog->aid < MAX_A_STREAMS &&
+                demuxer->a_streams[prog->aid]) {
+                sh_audio_t *sh = demuxer->a_streams[prog->aid];
+                prog->aid = sh->aid;
+            } else
+                prog->aid = -2;
+            if (prog->vid >= 0 && prog->vid < MAX_V_STREAMS &&
+                demuxer->v_streams[prog->vid]) {
+                sh_video_t *sh = demuxer->v_streams[prog->vid];
+                prog->vid = sh->vid;
+            } else
+                prog->vid = -2;
             if(prog->progid == -1 && prog->vid == -2 && prog->aid == -2)
             {
                 p = (p + 1) % priv->avfc->nb_programs;
