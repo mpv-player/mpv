@@ -75,6 +75,7 @@ typedef struct lavf_priv {
     int sstreams[MAX_S_STREAMS];
     int cur_program;
     int nb_streams_last;
+    bool internet_radio_hack;
 }lavf_priv_t;
 
 static int mp_read(void *opaque, uint8_t *buf, int size) {
@@ -608,6 +609,58 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     return demuxer;
 }
 
+static void check_internet_radio_hack(struct demuxer *demuxer)
+{
+    struct lavf_priv *priv = demuxer->priv;
+    struct AVFormatContext *avfc = priv->avfc;
+
+    if (!matches_avinputformat_name(priv, "ogg"))
+        return;
+    if (priv->nb_streams_last == avfc->nb_streams)
+        return;
+    if (avfc->nb_streams - priv->nb_streams_last == 1
+        && priv->video_streams == 0 && priv->sub_streams == 0
+        && demuxer->a_streams[priv->audio_streams-1]->format == 0x566f // vorbis
+        && (priv->audio_streams == 2 || priv->internet_radio_hack)
+        && demuxer->a_streams[0]->format == 0x566f) {
+        // extradata match could be checked but would require parsing
+        // headers, as the comment section will vary
+        if (!priv->internet_radio_hack) {
+            mp_msg(MSGT_DEMUX, MSGL_V,
+                   "[lavf] enabling internet ogg radio hack\n");
+#if LIBAVFORMAT_VERSION_MAJOR < 53
+            mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[lavf] This looks like an "
+                    "internet radio ogg stream with track changes.\n"
+                    "Playback will likely fail after %d track changes "
+                    "due to libavformat limitations.\n"
+                    "You may be able to work around that limitation by "
+                    "using -demuxer ogg.\n", MAX_STREAMS);
+#endif
+        }
+#if LIBAVFORMAT_VERSION_MAJOR < 53
+        if (avfc->nb_streams == MAX_STREAMS) {
+            mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[lavf] This is the %dth "
+                    "track.\nPlayback will likely fail at the next change.\n"
+                    "You may be able to work around this limitation by "
+                    "using -demuxer ogg.\n", MAX_STREAMS);
+        }
+#endif
+        priv->internet_radio_hack = true;
+        // use new per-track metadata as global metadata
+        AVMetadataTag *t = NULL;
+        AVStream *stream = avfc->streams[avfc->nb_streams - 1];
+        while ((t = av_metadata_get(stream->metadata, "", t,
+                                   AV_METADATA_IGNORE_SUFFIX)))
+            demux_info_add(demuxer, t->key, t->value);
+    } else {
+        if (priv->internet_radio_hack)
+            mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[lavf] Internet radio ogg hack "
+                    "was enabled, but stream characteristics changed.\n"
+                    "This may or may not work.\n");
+        priv->internet_radio_hack = false;
+    }
+}
+
 static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
     lavf_priv_t *priv= demux->priv;
     AVPacket pkt;
@@ -624,11 +677,13 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
     // handle any new streams that might have been added
     for (id = priv->nb_streams_last; id < priv->avfc->nb_streams; id++)
         handle_stream(demux, priv->avfc, id);
+    check_internet_radio_hack(demux);
+
     priv->nb_streams_last = priv->avfc->nb_streams;
 
     id= pkt.stream_index;
 
-    if(id==demux->audio->id){
+    if (id == demux->audio->id || priv->internet_radio_hack) {
         // audio
         ds=demux->audio;
         if(!ds->sh){
