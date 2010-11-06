@@ -112,6 +112,9 @@ SRCS_COMMON-$(FFMPEG)                += libmpcodecs/vf_pp.c \
                                         libmpdemux/demux_lavf.c \
                                         stream/stream_ffmpeg.c \
 
+# Requires a new enough libavutil that installs eval.h
+SRCS_COMMON-$(FFMPEG_EVAL_API)          += libmpcodecs/vf_geq.c \
+
 # These filters use private headers and do not work with shared libavcodec.
 SRCS_COMMON-$(FFMPEG_INTERNALS)      += libmpcodecs/vf_fspp.c \
                                         libmpcodecs/vf_geq.c \

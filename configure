@@ -6516,9 +6516,15 @@ if test "$ffmpeg" = auto ; then
   fi
 fi
 
+ffmpeg_eval_api=no
+def_ffmpeg_eval_api="#undef CONFIG_FFMPEG_EVAL_API"
 if test "$ffmpeg" = yes; then
   def_ffmpeg='#define CONFIG_FFMPEG 1'
   codecmodules="ffmpeg $codecmodules"
+  if $_pkg_config --atleast-version=50.18.0 libavutil ; then
+    ffmpeg_eval_api=yes
+    def_ffmpeg_eval_api="#define CONFIG_FFMPEG_EVAL_API 1"
+  fi
 else
   def_ffmpeg='#undef CONFIG_FFMPEG'
   nocodecmodules="ffmpeg $nocodecmodules"
@@ -7483,6 +7489,7 @@ ZR = $_zr
 
 # FFmpeg
 FFMPEG     = $ffmpeg
+FFMPEG_EVAL_API = $ffmpeg_eval_api
 FFMPEG_INTERNALS = $ffmpeg_internals
 FFMPEG_SOURCE_PATH = $_ffmpeg_source
 
@@ -7895,6 +7902,7 @@ $def_zr
 
 /* FFmpeg */
 $def_ffmpeg
+$def_ffmpeg_eval_api
 $def_ffmpeg_internals
 
 #define CONFIG_DECODERS 1
