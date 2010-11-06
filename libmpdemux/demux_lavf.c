@@ -76,6 +76,7 @@ typedef struct lavf_priv {
     int cur_program;
     int nb_streams_last;
     bool internet_radio_hack;
+    bool use_dts;
 }lavf_priv_t;
 
 static int mp_read(void *opaque, uint8_t *buf, int size) {
@@ -516,8 +517,14 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     if (lavfdopts->cryptokey)
         parse_cryptokey(avfc, lavfdopts->cryptokey);
-    if (opts->user_correct_pts != 0)
-        avfc->flags |= AVFMT_FLAG_GENPTS;
+    if (matches_avinputformat_name(priv, "avi")) {
+        /* for avi libavformat returns the avi timestamps in .dts,
+         * some made-up stuff that's not really pts in .pts */
+        priv->use_dts = true;
+    } else {
+        if (opts->user_correct_pts != 0)
+            avfc->flags |= AVFMT_FLAG_GENPTS;
+    }
     if (index_mode == 0)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
 
@@ -721,8 +728,9 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
         av_free_packet(&pkt);
     }
 
-    if(pkt.pts != AV_NOPTS_VALUE){
-        dp->pts=pkt.pts * av_q2d(priv->avfc->streams[id]->time_base);
+    int64_t ts = priv->use_dts ? pkt.dts : pkt.pts;
+    if(ts != AV_NOPTS_VALUE){
+        dp->pts = ts * av_q2d(priv->avfc->streams[id]->time_base);
         priv->last_pts= dp->pts * AV_TIME_BASE;
         // always set endpts for subtitles, even if PKT_FLAG_KEY is not set,
         // otherwise they will stay on screen to long if e.g. ASS is demuxed from mkv
