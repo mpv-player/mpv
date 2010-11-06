@@ -376,14 +376,11 @@ static void dvd_close(dvd_priv_t *d)
 
 static int fill_buffer(stream_t *s, char *but, int len)
 {
-  if(s->type == STREAMTYPE_DVD) {
     off_t pos=dvd_read_sector(s->priv,s->buffer);
-    if(pos>=0) {
-      len=2048; // full sector
-      s->pos=2048*pos-len;
-    } else len=-1; // error
-  }
-  return len;
+  if (pos < 0)
+    return -1;
+  s->pos = 2048*(pos - 1);
+  return 2048; // full sector
 }
 
 static int seek(stream_t *s, off_t newpos) {
