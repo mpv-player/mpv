@@ -1224,7 +1224,7 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
     opts->correct_pts = opts->user_correct_pts;
     if (opts->correct_pts < 0)
         opts->correct_pts =
-            demux_control(res, DEMUXER_CTRL_CORRECT_PTS,
+            demux_control(vd ? vd : res, DEMUXER_CTRL_CORRECT_PTS,
                           NULL) == DEMUXER_CTRL_OK;
     return res;
 }
