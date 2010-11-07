@@ -469,7 +469,7 @@ static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parse
     case 0x55:
     case 0x5500736d:
     case MKTAG('.', 'm', 'p', '3'):
-    case MKTAG('M', 'P', 'E', ' '):
+    case MKTAG('M', 'P', '3', ' '):
     case MKTAG('L', 'A', 'M', 'E'):
         codec_id = CODEC_ID_MP3;
         break;
