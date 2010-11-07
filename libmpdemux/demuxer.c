@@ -1379,69 +1379,6 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
     return DEMUXER_CTRL_NOTIMPL;
 }
 
-
-
-double demuxer_get_time_length(demuxer_t *demuxer)
-{
-    double get_time_ans;
-    sh_video_t *sh_video = demuxer->video->sh;
-    sh_audio_t *sh_audio = demuxer->audio->sh;
-    // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
-    if (demux_control
-        (demuxer, DEMUXER_CTRL_GET_TIME_LENGTH, (void *) &get_time_ans) <= 0) {
-        if (sh_video && sh_video->i_bps && sh_audio && sh_audio->i_bps)
-            get_time_ans = (double) (demuxer->movi_end -
-                                     demuxer->movi_start) / (sh_video->i_bps +
-                                                             sh_audio->i_bps);
-        else if (sh_video && sh_video->i_bps)
-            get_time_ans = (double) (demuxer->movi_end -
-                                     demuxer->movi_start) / sh_video->i_bps;
-        else if (sh_audio && sh_audio->i_bps)
-            get_time_ans = (double) (demuxer->movi_end -
-                                     demuxer->movi_start) / sh_audio->i_bps;
-        else
-            get_time_ans = 0;
-    }
-    return get_time_ans;
-}
-
-/**
- * \brief demuxer_get_current_time() returns the time of the current play in three possible ways:
- *        either when the stream reader satisfies STREAM_CTRL_GET_CURRENT_TIME (e.g. dvd)
- *        or using sh_video->pts when the former method fails
- *        0 otherwise
- * \return the current play time
- */
-int demuxer_get_current_time(demuxer_t *demuxer)
-{
-    double get_time_ans = 0;
-    sh_video_t *sh_video = demuxer->video->sh;
-    if (demuxer->stream_pts != MP_NOPTS_VALUE)
-        get_time_ans = demuxer->stream_pts;
-    else if (sh_video)
-        get_time_ans = sh_video->pts;
-    return (int) get_time_ans;
-}
-
-int demuxer_get_percent_pos(demuxer_t *demuxer)
-{
-    int ans = 0;
-    int res = demux_control(demuxer, DEMUXER_CTRL_GET_PERCENT_POS, &ans);
-    int len = (demuxer->movi_end - demuxer->movi_start) / 100;
-    if (res <= 0) {
-        off_t pos = demuxer->filepos > 0 ? demuxer->filepos : stream_tell(demuxer->stream);
-        if (len > 0)
-            ans = (pos - demuxer->movi_start) / len;
-        else
-            ans = 0;
-    }
-    if (ans < 0)
-        ans = 0;
-    if (ans > 100)
-        ans = 100;
-    return ans;
-}
-
 int demuxer_switch_audio(demuxer_t *demuxer, int index)
 {
     int res = demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &index);

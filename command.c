@@ -389,7 +389,7 @@ static int mp_property_length(m_option_t *prop, int action, void *arg,
     double len;
 
     if (!mpctx->demuxer ||
-        !(int) (len = demuxer_get_time_length(mpctx->demuxer)))
+        !(int) (len = get_time_length(mpctx)))
         return M_PROPERTY_UNAVAILABLE;
 
     return m_property_time_ro(prop, action, arg, len);
@@ -411,14 +411,13 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
         break;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-        pos = demuxer_get_percent_pos(mpctx->demuxer);
+        pos = get_percent_pos(mpctx);
         pos += (arg ? *(int*)arg : 10) *
             (action == M_PROPERTY_STEP_UP ? 1 : -1);
         M_PROPERTY_CLAMP(prop, pos);
         break;
     default:
-        return m_property_int_ro(prop, action, arg,
-                                 demuxer_get_percent_pos(mpctx->demuxer));
+        return m_property_int_ro(prop, action, arg, get_percent_pos(mpctx));
     }
 
     mpctx->abs_seek_pos = SEEK_ABSOLUTE | SEEK_FACTOR;
@@ -445,9 +444,7 @@ static int mp_property_time_pos(m_option_t *prop, int action,
             (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
         return M_PROPERTY_OK;
     }
-    return m_property_time_ro(prop, action, arg,
-                              mpctx->sh_video ? mpctx->sh_video->pts :
-                              playing_audio_pts(mpctx));
+    return m_property_time_ro(prop, action, arg, get_current_time(mpctx));
 }
 
 /// Current chapter (RW)
@@ -2795,8 +2792,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
         case MP_CMD_EDL_MARK:
             if (edl_fd) {
-                float v = sh_video ? sh_video->pts :
-                    playing_audio_pts(mpctx);
+                float v = get_current_time(mpctx);
                 if (mpctx->begin_skip == MP_NOPTS_VALUE) {
                     mpctx->begin_skip = v;
                     mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "EDL skip start, press 'i' again to end block.\n");
@@ -3021,9 +3017,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             break;
 
         case MP_CMD_OSD_SHOW_PROGRESSION:{
-                int len = demuxer_get_time_length(mpctx->demuxer);
-                int pts = demuxer_get_current_time(mpctx->demuxer);
-                set_osd_bar(mpctx, 0, "Position", 0, 100, demuxer_get_percent_pos(mpctx->demuxer));
+                int len = get_time_length(mpctx);
+                int pts = get_current_time(mpctx);
+                set_osd_bar(mpctx, 0, "Position", 0, 100, get_percent_pos(mpctx));
                 set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
                             "%c %02d:%02d:%02d / %02d:%02d:%02d",
                             mpctx->osd_function, pts/3600, (pts/60)%60, pts%60,
@@ -3280,7 +3276,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
         case MP_CMD_GET_TIME_LENGTH:{
                 mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_LENGTH=%.2f\n",
-                       demuxer_get_time_length(mpctx->demuxer));
+                       get_time_length(mpctx));
             }
             break;
 
@@ -3415,15 +3411,11 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
         case MP_CMD_GET_PERCENT_POS:
             mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_PERCENT_POSITION=%d\n",
-                   demuxer_get_percent_pos(mpctx->demuxer));
+                   get_percent_pos(mpctx));
             break;
 
         case MP_CMD_GET_TIME_POS:{
-                float pos = 0;
-                if (sh_video)
-                    pos = sh_video->pts;
-                else if (sh_audio && mpctx->audio_out)
-                    pos = playing_audio_pts(mpctx);
+                float pos = get_current_time(mpctx);
                 mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_TIME_POSITION=%.1f\n", pos);
             }
             break;

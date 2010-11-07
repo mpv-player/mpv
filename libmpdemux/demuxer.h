@@ -434,9 +434,6 @@ char* demux_info_get(demuxer_t *demuxer, const char *opt);
 int demux_info_print(demuxer_t *demuxer);
 int demux_control(demuxer_t *demuxer, int cmd, void *arg);
 
-int demuxer_get_current_time(demuxer_t *demuxer);
-double demuxer_get_time_length(demuxer_t *demuxer);
-int demuxer_get_percent_pos(demuxer_t *demuxer);
 int demuxer_switch_audio(demuxer_t *demuxer, int index);
 int demuxer_switch_video(demuxer_t *demuxer, int index);
 

@@ -151,11 +151,8 @@ static int demux_demuxers_control(demuxer_t *demuxer,int cmd, void *arg){
   dd_priv_t* priv = demuxer->priv;
   switch (cmd) {
     case DEMUXER_CTRL_GET_TIME_LENGTH:
-      *((double *)arg) = demuxer_get_time_length(priv->vd);
-      return DEMUXER_CTRL_OK;
     case DEMUXER_CTRL_GET_PERCENT_POS:
-      *((int *)arg) = demuxer_get_percent_pos(priv->vd);
-      return DEMUXER_CTRL_OK;
+      return demux_control(priv->vd, cmd, arg);
   }
   return DEMUXER_CTRL_NOTIMPL;
 }

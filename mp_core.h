@@ -217,6 +217,9 @@ void unpause_player(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx);
 int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
                  char **chapter_name);
+double get_time_length(struct MPContext *mpctx);
+double get_current_time(struct MPContext *mpctx);
+int get_percent_pos(struct MPContext *mpctx);
 int get_current_chapter(struct MPContext *mpctx);
 char *chapter_display_name(struct MPContext *mpctx, int chapter);
 

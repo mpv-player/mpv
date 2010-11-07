@@ -596,7 +596,7 @@ char *get_metadata(struct MPContext *mpctx, metadata_t type)
   return meta;
 }
 
-static void print_file_properties(const MPContext *mpctx, const char *filename)
+static void print_file_properties(struct MPContext *mpctx, const char *filename)
 {
   double start_pts = MP_NOPTS_VALUE;
   double video_start_pts = MP_NOPTS_VALUE;
@@ -636,9 +636,7 @@ static void print_file_properties(const MPContext *mpctx, const char *filename)
     mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_START_TIME=%.2f\n", start_pts);
   else
     mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_START_TIME=unknown\n");
-  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_LENGTH=%.2f\n", mpctx->timeline ?
-         mpctx->timeline[mpctx->num_timeline_parts].start :
-         demuxer_get_time_length(mpctx->demuxer));
+  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_LENGTH=%.2f\n", get_time_length(mpctx));
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_SEEKABLE=%d\n",
          mpctx->stream->seek && (!mpctx->demuxer || mpctx->demuxer->seekable));
   if (mpctx->demuxer) {
@@ -1336,7 +1334,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
   if (mpctx->sh_audio) {
     saddf(line, &pos, width, "A:%6.1f ", a_pos);
     if (!sh_video) {
-      float len = demuxer_get_time_length(mpctx->demuxer);
+      float len = get_time_length(mpctx);
       saddf(line, &pos, width, "(");
       sadd_hhmmssf(line, &pos, width, a_pos);
       saddf(line, &pos, width, ") of %.1f (", len);
@@ -1674,12 +1672,7 @@ static void update_osd_msg(struct MPContext *mpctx)
     char osd_text_timer[128];
 
     if (mpctx->add_osd_seek_info) {
-        double percentage;
-        if (mpctx->timeline && mpctx->sh_video)
-            percentage = mpctx->sh_video->pts * 100 /
-                mpctx->timeline[mpctx->num_timeline_parts].start;
-        else
-            percentage = demuxer_get_percent_pos(mpctx->demuxer);
+        double percentage = get_percent_pos(mpctx);
         set_osd_bar(mpctx, 0, "Position", 0, 100, percentage);
         if (mpctx->sh_video)
             mpctx->osd_show_percentage_until = (GetTimerMS() + 1000) | 1;
@@ -1699,22 +1692,13 @@ static void update_osd_msg(struct MPContext *mpctx)
     if(mpctx->sh_video) {
         // fallback on the timer
         if (opts->osd_level >= 2) {
-            int len;
-            if (mpctx->timeline)
-                len = mpctx->timeline[mpctx->num_timeline_parts].start;
-            else
-                len = demuxer_get_time_length(mpctx->demuxer);
+            int len = get_time_length(mpctx);
             int percentage = -1;
             char percentage_text[10];
-            int pts = demuxer_get_current_time(mpctx->demuxer);
+            int pts = get_current_time(mpctx);
 
-            if (mpctx->osd_show_percentage_until) {
-                if (mpctx->timeline)
-                    percentage = mpctx->sh_video->pts * 100 /
-                        mpctx->timeline[mpctx->num_timeline_parts].start;
-                else
-                    percentage = demuxer_get_percent_pos(mpctx->demuxer);
-            }
+            if (mpctx->osd_show_percentage_until)
+                percentage = get_percent_pos(mpctx);
 
             if (percentage >= 0)
                 snprintf(percentage_text, 9, " (%d%%)", percentage);
@@ -2081,7 +2065,7 @@ static mp_image_t *mp_dvdnav_restore_smpi(struct MPContext *mpctx,
             decoded_frame = mpctx->nav_smpi;
 
         /// increment video frame : continue playing after still frame
-        len = demuxer_get_time_length(mpctx->demuxer);
+        len = get_time_length(mpctx);
         if (mpctx->sh_video->pts >= len &&
             mpctx->sh_video->pts > 0.0 && len > 0.0) {
             mp_dvdnav_skip_still(mpctx->stream);
@@ -2865,6 +2849,72 @@ static int seek(MPContext *mpctx, double amount, int style)
 
     seek_reset(mpctx);
     return 0;
+}
+
+
+double get_time_length(struct MPContext *mpctx)
+{
+    if (mpctx->timeline)
+        return mpctx->timeline[mpctx->num_timeline_parts].start;
+
+    struct demuxer *demuxer = mpctx->demuxer;
+    double get_time_ans;
+    // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
+    if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,
+                      (void *) &get_time_ans) > 0)
+        return get_time_ans;
+
+    struct sh_video *sh_video = mpctx->d_video->sh;
+    struct sh_audio *sh_audio = mpctx->d_audio->sh;
+    if (sh_video && sh_video->i_bps && sh_audio && sh_audio->i_bps)
+        return (double) (demuxer->movi_end - demuxer->movi_start) /
+            (sh_video->i_bps + sh_audio->i_bps);
+    if (sh_video && sh_video->i_bps)
+        return (double) (demuxer->movi_end - demuxer->movi_start) /
+            sh_video->i_bps;
+    if (sh_audio && sh_audio->i_bps)
+        return (double) (demuxer->movi_end - demuxer->movi_start) /
+            sh_audio->i_bps;
+    return 0;
+}
+
+/* If there are timestamps from stream level then use those (for example
+ * DVDs can have consistent times there while the MPEG-level timestamps
+ * reset). */
+double get_current_time(struct MPContext *mpctx)
+{
+    struct demuxer *demuxer = mpctx->demuxer;
+    if (demuxer->stream_pts != MP_NOPTS_VALUE)
+        return demuxer->stream_pts;
+    struct sh_video *sh_video = demuxer->video->sh;
+    if (sh_video)
+        return sh_video->pts;
+    return playing_audio_pts(mpctx);
+}
+
+int get_percent_pos(struct MPContext *mpctx)
+{
+    struct demuxer *demuxer = mpctx->demuxer;
+    int ans = 0;
+    if (mpctx->timeline)
+        ans = get_current_time(mpctx) * 100 /
+            mpctx->timeline[mpctx->num_timeline_parts].start;
+    else if (demux_control(demuxer, DEMUXER_CTRL_GET_PERCENT_POS, &ans) > 0)
+        ;
+    else {
+        int len = (demuxer->movi_end - demuxer->movi_start) / 100;
+        off_t pos = demuxer->filepos > 0 ?
+            demuxer->filepos : stream_tell(demuxer->stream);
+        if (len > 0)
+            ans = (pos - demuxer->movi_start) / len;
+        else
+            ans = 0;
+    }
+    if (ans < 0)
+        ans = 0;
+    if (ans > 100)
+        ans = 100;
+    return ans;
 }
 
 // -2 is no chapters, -1 is before first chapter
