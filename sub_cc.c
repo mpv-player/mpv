@@ -100,7 +100,7 @@ static void scroll_buffer(subtitle* buf)
 	{
 		free(buf->text[0]);
 
-		for(i = 0; i < (buf->lines - 1); i++) buf->text[i] = buf->text[i+1];
+		for(i = 0; i < buf->lines - 1; i++) buf->text[i] = buf->text[i+1];
 
 		buf->text[buf->lines-1] = NULL;
 		buf->lines--;
@@ -134,8 +134,7 @@ static void append_char(char c)
 	if(!bb->lines) {bb->lines++; cursor_pos=0;}
 	if(bb->text[bb->lines - 1]==NULL)
 	{
-		bb->text[bb->lines - 1]=malloc(CC_MAX_LINE_LENGTH);
-		memset(bb->text[bb->lines - 1],0,CC_MAX_LINE_LENGTH);
+		bb->text[bb->lines - 1] = calloc(1, CC_MAX_LINE_LENGTH);
 		cursor_pos=0;
 	}
 
@@ -286,7 +285,7 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
   while (curbytes < inputlength) {
     int skip = 2;
 
-    cc_code = *(current);
+    cc_code = current[0];
 
     if (inputlength - curbytes < 2) {
 #ifdef LOG_DEBUG
@@ -295,8 +294,8 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
       break;
     }
 
-    data1 = *(current+1);
-    data2 = *(current + 2);
+    data1 = current[1];
+    data2 = current[2];
     current++; curbytes++;
 
     switch (cc_code) {
