@@ -517,8 +517,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     else
         set_osd_tmsg(OSD_MSG_TEXT, 1, opts->osd_duration,
                      "Chapter: (%d) %s", 0, mp_gtext("unknown"));
-    if (chapter_name)
-        talloc_free(chapter_name);
+    talloc_free(chapter_name);
     return M_PROPERTY_OK;
 }
 
@@ -601,8 +600,7 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
 
     set_osd_tmsg(OSD_MSG_TEXT, 1, opts->osd_duration,
                  "Angle: %d/%d", angle, angles);
-    if (angle_name)
-        free(angle_name);
+    free(angle_name);
     return M_PROPERTY_OK;
 }
 

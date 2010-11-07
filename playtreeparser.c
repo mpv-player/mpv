@@ -355,14 +355,9 @@ parse_pls(play_tree_parser_t* p) {
 	list = entry;
       last_entry = entry;
     }
-    if(entries[num].title) {
-      // When we have info in playtree we add this info
-      free(entries[num].title);
-    }
-    if(entries[num].length) {
-      // When we have info in playtree we add this info
-      free(entries[num].length);
-    }
+    // When we have info in playtree we add these info
+    free(entries[num].title);
+    free(entries[num].length);
   }
 
   free(entries);
@@ -518,10 +513,8 @@ parse_smil(play_tree_parser_t* p) {
   line = NULL;
   do {
     strstrip(src_line);
-    if (line) {
-      free(line);
-      line = NULL;
-    }
+    free(line);
+    line = NULL;
     /* If we're parsing smil over realrtsp and this is not the last packet and
      * this is the last line in the packet (terminating with ") ) we must get
      * the next line, strip the header, and concatenate it to the current line.
@@ -601,8 +594,7 @@ parse_smil(play_tree_parser_t* p) {
    }
   } while((src_line = play_tree_parser_get_line(p)) != NULL);
 
-  if (line)
-    free(line);
+  free(line);
 
   if(!list) return NULL; // Nothing found
 
@@ -811,8 +803,8 @@ play_tree_parser_free(play_tree_parser_t* p) {
   assert(p != NULL);
 #endif
 
-  if(p->buffer) free(p->buffer);
-  if(p->line) free(p->line);
+  free(p->buffer);
+  free(p->line);
   free(p);
 }
 

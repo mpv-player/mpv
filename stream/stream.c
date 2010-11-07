@@ -512,8 +512,8 @@ void free_stream(stream_t *s){
 #endif
   // Disabled atm, i don't like that. s->priv can be anything after all
   // streams should destroy their priv on close
-  //if(s->priv) free(s->priv);
-  if(s->url) free(s->url);
+  //free(s->priv);
+  free(s->url);
   free(s);
 }
 

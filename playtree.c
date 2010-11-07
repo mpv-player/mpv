@@ -68,7 +68,7 @@ play_tree_free(play_tree_t* pt, int children) {
   for(iter = pt->child ; iter != NULL ; iter = iter->next)
     iter->parent = NULL;
 
-  //if(pt->params) free(pt->params);
+  //free(pt->params);
   if(pt->files) {
     int i;
     for(i = 0 ; pt->files[i] != NULL ; i++)
@@ -384,8 +384,8 @@ play_tree_unset_param(play_tree_t* pt, char* name) {
   if(ni < 0)
     return 0;
 
-  if(pt->params[ni].name) free(pt->params[ni].name);
-  if(pt->params[ni].value) free(pt->params[ni].value);
+  free(pt->params[ni].name);
+  free(pt->params[ni].value);
 
   if(n > 1) {
     memmove(&pt->params[ni],&pt->params[ni+1],(n-ni)*sizeof(play_tree_param_t));

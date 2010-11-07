@@ -53,15 +53,15 @@ void
 cd_info_free(cd_info_t *cd_info) {
 	cd_track_t *cd_track, *cd_track_next;
 	if( cd_info==NULL ) return;
-	if( cd_info->artist!=NULL ) free(cd_info->artist);
-	if( cd_info->album!=NULL ) free(cd_info->album);
-	if( cd_info->genre!=NULL ) free(cd_info->genre);
+	free(cd_info->artist);
+	free(cd_info->album);
+	free(cd_info->genre);
 
 	cd_track_next = cd_info->first;
 	while( cd_track_next!=NULL ) {
 		cd_track = cd_track_next;
 		cd_track_next = cd_track->next;
-		if( cd_track->name!=NULL ) free(cd_track->name);
+		free(cd_track->name);
 		free(cd_track);
 	}
 }

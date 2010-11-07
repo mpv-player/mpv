@@ -783,9 +783,7 @@ static int cddb_retrieve(cddb_data_t *cddb_data)
     if (ret < 0)
         return -1;
 
-    if (cddb_data->cache_dir != NULL) {
-        free(cddb_data->cache_dir);
-    }
+    free(cddb_data->cache_dir);
     return 0;
 }
 

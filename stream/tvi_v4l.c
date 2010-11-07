@@ -676,10 +676,8 @@ static int init(priv_t *priv)
     return 1;
 
 malloc_failed:
-    if (priv->channels)
-        free(priv->channels);
-    if (priv->buf)
-        free(priv->buf);
+    free(priv->channels);
+    free(priv->buf);
 err:
     if (priv->video_fd != -1)
         close(priv->video_fd);
@@ -702,10 +700,8 @@ static int uninit(priv_t *priv)
         priv->vbi_fd=0;
     }
 
-    if(priv->vbi_dev){
-        free(priv->vbi_dev);
-        priv->vbi_dev=0;
-    }
+    free(priv->vbi_dev);
+    priv->vbi_dev = NULL;
 
     priv->shutdown = 1;
 
@@ -752,15 +748,11 @@ static int uninit(priv_t *priv)
         free(priv->video_ringbuffer);
     }
 
-    if (priv->video_timebuffer)
-        free(priv->video_timebuffer);
-    if (priv->video_avg_buffer)
-        free(priv->video_avg_buffer);
+    free(priv->video_timebuffer);
+    free(priv->video_avg_buffer);
     if (!priv->tv_param->noaudio) {
-        if (priv->audio_ringbuffer)
-            free(priv->audio_ringbuffer);
-        if (priv->audio_skew_buffer)
-            free(priv->audio_skew_buffer);
+        free(priv->audio_ringbuffer);
+        free(priv->audio_skew_buffer);
     }
 
     return 1;

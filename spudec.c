@@ -146,8 +146,7 @@ static packet_t *spudec_dequeue_packet(spudec_handle_t *this)
 
 static void spudec_free_packet(packet_t *packet)
 {
-  if (packet->packet != NULL)
-    free(packet->packet);
+  free(packet->packet);
   free(packet);
 }
 
@@ -609,8 +608,7 @@ void spudec_assemble(void *this, unsigned char *packet, unsigned int len, int pt
     unsigned int len2 = get_be16(packet);
     // Start new fragment
     if (spu->packet_reserve < len2) {
-      if (spu->packet != NULL)
-	free(spu->packet);
+      free(spu->packet);
       spu->packet = malloc(len2);
       spu->packet_reserve = spu->packet != NULL ? len2 : 0;
     }

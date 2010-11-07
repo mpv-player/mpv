@@ -1112,10 +1112,8 @@ static int uninit(priv_t *priv)
         priv->vbi_fd=0;
     }
 
-    if(priv->vbi_dev){
-        free(priv->vbi_dev);
-	priv->vbi_dev=0;
-    }
+    free(priv->vbi_dev);
+    priv->vbi_dev = NULL;
     priv->shutdown = 1;
     if(priv->video_grabber_thread)
         pthread_join(priv->video_grabber_thread, NULL);
@@ -1173,12 +1171,9 @@ static int uninit(priv_t *priv)
         free(priv->video_ringbuffer);
     }
     if (!priv->tv_param->noaudio) {
-        if (priv->audio_ringbuffer)
-            free(priv->audio_ringbuffer);
-        if (priv->audio_skew_buffer)
-            free(priv->audio_skew_buffer);
-        if (priv->audio_skew_delta_buffer)
-            free(priv->audio_skew_delta_buffer);
+        free(priv->audio_ringbuffer);
+        free(priv->audio_skew_buffer);
+        free(priv->audio_skew_delta_buffer);
 
         audio_in_uninit(&priv->audio_in);
     }

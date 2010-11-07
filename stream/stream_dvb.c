@@ -402,8 +402,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 	fclose(f);
 	if(list->NUM_CHANNELS == 0)
 	{
-		if(list->channels != NULL)
-			free(list->channels);
+		free(list->channels);
 		free(list);
 		return NULL;
 	}
@@ -418,17 +417,13 @@ void dvb_free_config(dvb_config_t *config)
 
 	for(i=0; i<config->count; i++)
 	{
-		if(config->cards[i].name)
-			free(config->cards[i].name);
+		free(config->cards[i].name);
 		if(!config->cards[i].list)
 			continue;
 		if(config->cards[i].list->channels)
 		{
 			for(j=0; j<config->cards[i].list->NUM_CHANNELS; j++)
-			{
-				if(config->cards[i].list->channels[j].name)
-					free(config->cards[i].list->channels[j].name);
-			}
+				free(config->cards[i].list->channels[j].name);
 			free(config->cards[i].list->channels);
 		}
 		free(config->cards[i].list);
@@ -801,20 +796,17 @@ dvb_config_t *dvb_get_config(void)
 
 		if((access(conf_file, F_OK | R_OK) != 0))
 		{
-			if(conf_file)
-				free(conf_file);
+			free(conf_file);
 			conf_file = get_path("channels.conf");
 			if((access(conf_file, F_OK | R_OK) != 0))
 			{
-				if(conf_file)
-					free(conf_file);
+				free(conf_file);
 				conf_file = strdup(MPLAYER_CONFDIR "/channels.conf");
 			}
 		}
 
 		list = dvb_get_channels(conf_file, type);
-		if(conf_file)
-			free(conf_file);
+		free(conf_file);
 		if(list == NULL)
 			continue;
 

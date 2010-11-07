@@ -226,8 +226,7 @@ int subopt_parse( char const * const str, const opt_t * opts )
                   tmp.str = NULL;
                   tmp.len = 0;
                   last = parse_str( &str[parse_pos], &tmp );
-                  if (*valp)
-                    free(*valp);
+                  free(*valp);
                   *valp = NULL;
                   if (tmp.str && tmp.len > 0) {
                     *valp = malloc(tmp.len + 1);

@@ -132,7 +132,7 @@ int audio_in_set_device(audio_in_t *ai, char *device)
     switch (ai->type) {
 #ifdef CONFIG_ALSA
     case AUDIO_IN_ALSA:
-	if (ai->alsa.device) free(ai->alsa.device);
+	free(ai->alsa.device);
 	ai->alsa.device = strdup(device);
 	/* mplayer cannot handle colons in arguments */
 	for (i = 0; i < (int)strlen(ai->alsa.device); i++) {
@@ -142,7 +142,7 @@ int audio_in_set_device(audio_in_t *ai, char *device)
 #endif
 #ifdef CONFIG_OSS_AUDIO
     case AUDIO_IN_OSS:
-	if (ai->oss.device) free(ai->oss.device);
+	free(ai->oss.device);
 	ai->oss.device = strdup(device);
 	return 0;
 #endif

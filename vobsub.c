@@ -312,8 +312,7 @@ static mpeg_t *mpeg_open(const char *filename)
 
 static void mpeg_free(mpeg_t *mpeg)
 {
-    if (mpeg->packet)
-        free(mpeg->packet);
+    free(mpeg->packet);
     if (mpeg->stream)
         rar_close(mpeg->stream);
     free(mpeg);
@@ -434,8 +433,7 @@ static int mpeg_run(mpeg_t *mpeg)
             }
             mpeg->packet_size = len - ((unsigned int) mpeg_tell(mpeg) - idx);
             if (mpeg->packet_reserve < mpeg->packet_size) {
-                if (mpeg->packet)
-                    free(mpeg->packet);
+                free(mpeg->packet);
                 mpeg->packet = malloc(mpeg->packet_size);
                 if (mpeg->packet)
                     mpeg->packet_reserve = mpeg->packet_size;
@@ -508,8 +506,7 @@ static void packet_construct(packet_t *pkt)
 
 static void packet_destroy(packet_t *pkt)
 {
-    if (pkt->data)
-        free(pkt->data);
+    free(pkt->data);
 }
 
 static void packet_queue_construct(packet_queue_t *queue)
@@ -635,8 +632,7 @@ static int vobsub_add_id(vobsub_t *vob, const char *id, size_t idlen,
     if (vobsub_ensure_spu_stream(vob, index) < 0)
         return -1;
     if (id && idlen) {
-        if (vob->spu_streams[index].id)
-            free(vob->spu_streams[index].id);
+        free(vob->spu_streams[index].id);
         vob->spu_streams[index].id = malloc(idlen + 1);
         if (vob->spu_streams[index].id == NULL) {
             mp_msg(MSGT_VOBSUB, MSGL_FATAL, "vobsub_add_id: malloc failure");
@@ -867,8 +863,7 @@ static int vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd,
             mp_msg(MSGT_VOBSUB, MSGL_ERR,  "ERROR in %s", line);
         break;
     } while (1);
-    if (line)
-      free(line);
+    free(line);
     return res;
 }
 
@@ -984,8 +979,7 @@ void *vobsub_open(const char *const name, const char *const ifo,
             }
             if (spu)
                 *spu = spudec_new_scaled(vob->palette, vob->orig_frame_width, vob->orig_frame_height, extradata, extradata_len);
-            if (extradata)
-                free(extradata);
+            free(extradata);
 
             /* read the indexed mpeg_stream */
             strcpy(buf, name);

@@ -128,9 +128,9 @@ void
 streaming_ctrl_free( streaming_ctrl_t *streaming_ctrl ) {
 	if( streaming_ctrl==NULL ) return;
 	if( streaming_ctrl->url ) url_free( streaming_ctrl->url );
-	if( streaming_ctrl->buffer ) free( streaming_ctrl->buffer );
-	if( streaming_ctrl->data ) free( streaming_ctrl->data );
-	free( streaming_ctrl );
+	free(streaming_ctrl->buffer);
+	free(streaming_ctrl->data);
+	free(streaming_ctrl);
 }
 
 URL_t*
@@ -338,14 +338,10 @@ http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
 		return -1;
 	}
 	if( *auth_retry>0 ) {
-		if( url->username ) {
-			free( url->username );
-			url->username = NULL;
-		}
-		if( url->password ) {
-			free( url->password );
-			url->password = NULL;
-		}
+		free(url->username);
+		url->username = NULL;
+		free(url->password);
+		url->password = NULL;
 	}
 
 	aut = http_get_field(http_hdr, "WWW-Authenticate");

@@ -465,7 +465,7 @@ m_config_parse_option(const m_config_t *config, char *arg, char *param, int set)
       free(lst[2*i]);
       free(lst[2*i+1]);
     }
-    if(lst) free(lst);
+    free(lst);
   } else
     r = m_option_parse(co->opt,arg,param,set ? co->slots->data : NULL,config->mode);
 

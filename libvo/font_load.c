@@ -169,8 +169,7 @@ while(fgets(sor,1020,f)){
 
   if(strcmp(section,"[fpath]")==0){
       if(pdb==1){
-	  if (desc->fpath)
-	     free (desc->fpath); // release previously allocated memory
+          free (desc->fpath); // release previously allocated memory
           desc->fpath=strdup(p[0]);
           continue;
       }
@@ -345,12 +344,9 @@ return desc;
 fail_out:
   if (f)
     fclose(f);
-  if (desc->fpath)
-    free(desc->fpath);
-  if (desc->name)
-    free(desc->name);
-  if (desc)
-    free(desc);
+  free(desc->fpath);
+  free(desc->name);
+  free(desc);
   return NULL;
 }
 

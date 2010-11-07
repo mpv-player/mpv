@@ -81,7 +81,10 @@ static void clear_buffer(subtitle *buf)
 {
 	int i;
 	buf->lines=0;
-	for(i=0;i<SUB_MAX_TEXT;i++) if(buf->text[i]) {free(buf->text[i]);buf->text[i]=NULL;}
+	for (i = 0; i < SUB_MAX_TEXT; i++) {
+		free(buf->text[i]);
+		buf->text[i] = NULL;
+	}
 }
 
 
@@ -95,7 +98,7 @@ static void scroll_buffer(subtitle* buf)
 
 	while(buf->lines > cc_lines)
 	{
-		if(buf->text[0]) free(buf->text[0]);
+		free(buf->text[0]);
 
 		for(i = 0; i < (buf->lines - 1); i++) buf->text[i] = buf->text[i+1];
 

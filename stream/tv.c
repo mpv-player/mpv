@@ -107,13 +107,11 @@ tvi_handle_t *tv_new_handle(int size, const tvi_functions_t *functions)
 
 void tv_free_handle(tvi_handle_t *h)
 {
-    if (h) {
-        if (h->priv)
-            free(h->priv);
-        if (h->scan)
-            free(h->scan);
-        free(h);
-    }
+    if (!h)
+        return;
+    free(h->priv);
+    free(h->scan);
+    free(h);
 }
 
 void tv_start_scan(tvi_handle_t *tvh, int start)

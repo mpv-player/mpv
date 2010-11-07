@@ -782,19 +782,13 @@ static void codecs_free(codecs_t* codecs,int count) {
     int i;
     for ( i = 0; i < count; i++)
         if ( codecs[i].name ) {
-            if( codecs[i].name )
-                free(codecs[i].name);
-            if( codecs[i].info )
-                free(codecs[i].info);
-            if( codecs[i].comment )
-                free(codecs[i].comment);
-            if( codecs[i].dll )
-                free(codecs[i].dll);
-            if( codecs[i].drv )
-                free(codecs[i].drv);
+            free(codecs[i].name);
+            free(codecs[i].info);
+            free(codecs[i].comment);
+            free(codecs[i].dll);
+            free(codecs[i].drv);
         }
-    if (codecs)
-        free(codecs);
+    free(codecs);
 }
 
 void codecs_uninit_free(void) {

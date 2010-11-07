@@ -377,7 +377,7 @@ static void close_f(stream_t *s) {
   FtpSendCmd("QUIT",p,NULL);
 
   if(p->handle) closesocket(p->handle);
-  if(p->buf) free(p->buf);
+  free(p->buf);
 
   m_struct_free(&stream_opts,p);
 }

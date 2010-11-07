@@ -655,7 +655,7 @@ int volstep = 3;
 static void mp_dvdnav_context_free(MPContext *ctx){
     if (ctx->nav_smpi) free_mp_image(ctx->nav_smpi);
     ctx->nav_smpi = NULL;
-    if (ctx->nav_buffer) free(ctx->nav_buffer);
+    free(ctx->nav_buffer);
     ctx->nav_buffer = NULL;
     ctx->nav_start = NULL;
     ctx->nav_in_size = 0;
@@ -814,7 +814,7 @@ void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
 
   talloc_free(mpctx->key_fifo);
 
-  if(edl_records != NULL) free(edl_records); // free mem allocated for EDL
+  free(edl_records); // free mem allocated for EDL
   edl_records = NULL;
   switch(how) {
   case EXIT_QUIT:
@@ -2108,8 +2108,7 @@ static void mp_dvdnav_save_smpi(struct MPContext *mpctx, int in_size,
     if (mpctx->stream->type != STREAMTYPE_DVDNAV)
         return;
 
-    if (mpctx->nav_buffer)
-        free(mpctx->nav_buffer);
+    free(mpctx->nav_buffer);
 
     mpctx->nav_buffer = malloc(in_size);
     mpctx->nav_start = start;

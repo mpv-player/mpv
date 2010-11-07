@@ -446,8 +446,7 @@ static int parse_str(const m_option_t* opt,const char *name, const char *param, 
   }
 
   if(dst) {
-    if(VAL(dst))
-      free(VAL(dst));
+    free(VAL(dst));
     VAL(dst) = strdup(param);
   }
 
@@ -462,7 +461,7 @@ static char* print_str(const m_option_t* opt,  const void* val) {
 static void copy_str(const m_option_t* opt,void* dst, const void* src) {
   if(dst && src) {
 #ifndef NO_FREE
-    if(VAL(dst)) free(VAL(dst)); //FIXME!!!
+    free(VAL(dst)); //FIXME!!!
 #endif
     VAL(dst) = VAL(src) ? strdup(VAL(src)) : NULL;
   }
@@ -577,7 +576,7 @@ static int str_list_del(char** del, int n,void* dst) {
   free(del);
 
   if(s == 0) {
-    if(lst) free(lst);
+    free(lst);
     VAL(dst) = NULL;
     return 1;
   }
@@ -590,7 +589,7 @@ static int str_list_del(char** del, int n,void* dst) {
   }
   d[s] = NULL;
 
-  if(lst) free(lst);
+  free(lst);
   VAL(dst) = d;
 
   return 1;
@@ -783,7 +782,7 @@ static void free_func_pf(void* src) {
   while(s) {
     n = s->next;
     free(s->name);
-    if(s->param) free(s->param);
+    free(s->param);
     free(s);
     s = n;
   }

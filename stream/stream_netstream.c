@@ -223,8 +223,7 @@ static void close_s(struct stream *s) {
   mp_net_stream_packet_t* pack;
 
   pack = send_net_stream_cmd(s,NET_STREAM_CLOSE,NULL,0);
-  if(pack)
-    free(pack);
+  free(pack);
 }
 
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {

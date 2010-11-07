@@ -401,9 +401,9 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 
 len_err_out:
   mp_tmsg(MSGT_NETWORK, MSGL_FATAL, "Invalid length in ASF header!\n");
-  if (buffer) free(buffer);
-  if (v_rates) free(v_rates);
-  if (a_rates) free(a_rates);
+  free(buffer);
+  free(v_rates);
+  free(a_rates);
   return -1;
 }
 
