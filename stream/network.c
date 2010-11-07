@@ -216,14 +216,14 @@ http_send_request( URL_t *url, off_t pos ) {
 		http_set_uri( http_hdr, server_url->file );
 	}
 	if (server_url->port && server_url->port != 80)
-	    snprintf(str, 256, "Host: %s:%d", server_url->hostname, server_url->port );
+	    snprintf(str, sizeof(str), "Host: %s:%d", server_url->hostname, server_url->port );
 	else
-	    snprintf(str, 256, "Host: %s", server_url->hostname );
+	    snprintf(str, sizeof(str), "Host: %s", server_url->hostname );
 	http_set_field( http_hdr, str);
 	if (network_useragent)
-	    snprintf(str, 256, "User-Agent: %s", network_useragent);
+	    snprintf(str, sizeof(str), "User-Agent: %s", network_useragent);
 	else
-	    snprintf(str, 256, "User-Agent: %s", mplayer_version);
+	    snprintf(str, sizeof(str), "User-Agent: %s", mplayer_version);
         http_set_field(http_hdr, str);
 
 	if (network_referrer) {
@@ -248,7 +248,7 @@ http_send_request( URL_t *url, off_t pos ) {
 
 	if(pos>0) {
 	// Extend http_send_request with possibility to do partial content retrieval
-	    snprintf(str, 256, "Range: bytes=%"PRId64"-", (int64_t)pos);
+	    snprintf(str, sizeof(str), "Range: bytes=%"PRId64"-", (int64_t)pos);
 	    http_set_field(http_hdr, str);
 	}
 
