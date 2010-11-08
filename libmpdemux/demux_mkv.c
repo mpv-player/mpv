@@ -2522,12 +2522,12 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
     if (!(flags & SEEK_FACTOR)) {       /* time in secs */
         mkv_index_t *index = NULL;
         stream_t *s = demuxer->stream;
-        int64_t target_timecode = 0, diff, min_diff = 0xFFFFFFFFFFFFFFFLL;
+        int64_t diff, min_diff = 0xFFFFFFFFFFFFFFF;
         int i;
 
         if (!(flags & SEEK_ABSOLUTE))   /* relative seek */
-            target_timecode = (int64_t) (mkv_d->last_pts * 1000.0);
-        target_timecode += (int64_t) (rel_seek_secs * 1000.0);
+            rel_seek_secs += mkv_d->last_pts;
+        int64_t target_timecode = rel_seek_secs * 1000.0;
         if (target_timecode < 0)
             target_timecode = 0;
 
