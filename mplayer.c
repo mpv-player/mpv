@@ -1958,9 +1958,10 @@ static int select_subtitle(MPContext *mpctx)
   if (!found && opts->sub_id == -1) {
     // finally select subs by language and container hints
     if (opts->sub_id == -1 && opts->sub_lang)
-      opts->sub_id = demuxer_sub_track_by_lang(mpctx->demuxer, opts->sub_lang);
+      opts->sub_id = demuxer_sub_track_by_lang(mpctx->d_sub->demuxer,
+                                               opts->sub_lang);
     if (opts->sub_id == -1)
-      opts->sub_id = demuxer_default_sub_track(mpctx->demuxer);
+      opts->sub_id = demuxer_default_sub_track(mpctx->d_sub->demuxer);
     if (opts->sub_id >= 0) {
       id = opts->sub_id;
       found = mp_property_do("sub_demux", M_PROPERTY_SET, &id, mpctx) == M_PROPERTY_OK;
@@ -3880,7 +3881,7 @@ if (ts_prog) {
              select_audio(mpctx->sources[i].demuxer, opts->audio_id,
                           opts->audio_lang);
     else
-        select_audio(mpctx->demuxer, opts->audio_id, opts->audio_lang);
+        select_audio(mpctx->d_audio->demuxer, opts->audio_id, opts->audio_lang);
 
 // DUMP STREAMS:
 if((stream_dump_type)&&(stream_dump_type<4)){

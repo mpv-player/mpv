@@ -154,7 +154,7 @@ static void update_global_sub_size(MPContext *mpctx)
 
     // update number of demuxer sub streams
     for (i = 0; i < MAX_S_STREAMS; i++)
-        if (mpctx->demuxer->s_streams[i])
+        if (mpctx->d_sub->demuxer->s_streams[i])
             cnt++;
     if (cnt > mpctx->sub_counts[SUB_SOURCE_DEMUX])
         mpctx->sub_counts[SUB_SOURCE_DEMUX] = cnt;
@@ -912,7 +912,7 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
     int current_id, tmp;
-    if (!mpctx->demuxer || !mpctx->demuxer->audio)
+    if (!mpctx->demuxer || !mpctx->d_audio)
         return M_PROPERTY_UNAVAILABLE;
     current_id = mpctx->sh_audio ? mpctx->sh_audio->aid : -2;
 
@@ -960,12 +960,12 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
             tmp = *((int *) arg);
         else
             tmp = -1;
-        int new_id = demuxer_switch_audio(mpctx->demuxer, tmp);
+        int new_id = demuxer_switch_audio(mpctx->d_audio->demuxer, tmp);
         if (new_id != current_id)
             uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC);
         if (new_id != current_id && new_id >= 0) {
             sh_audio_t *sh2;
-            sh2 = mpctx->demuxer->a_streams[mpctx->demuxer->audio->id];
+            sh2 = mpctx->d_audio->demuxer->a_streams[mpctx->demuxer->audio->id];
             sh2->ds = mpctx->demuxer->audio;
             mpctx->sh_audio = sh2;
             reinit_audio_chain(mpctx);
@@ -984,9 +984,9 @@ static int mp_property_video(m_option_t *prop, int action, void *arg,
 {
     struct MPOpts *opts = &mpctx->opts;
     int current_id, tmp;
-    if (!mpctx->demuxer || !mpctx->demuxer->video)
+    if (!mpctx->demuxer || !mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
-    current_id = mpctx->demuxer->video->id;
+    current_id = mpctx->d_video->id;
 
     switch (action) {
     case M_PROPERTY_GET:
@@ -1014,17 +1014,17 @@ static int mp_property_video(m_option_t *prop, int action, void *arg,
             tmp = *((int *) arg);
         else
             tmp = -1;
-        opts->video_id = demuxer_switch_video(mpctx->demuxer, tmp);
+        opts->video_id = demuxer_switch_video(mpctx->d_video->demuxer, tmp);
         if (opts->video_id == -2
-            || (opts->video_id > -1 && mpctx->demuxer->video->id != current_id
+            || (opts->video_id > -1 && mpctx->d_video->id != current_id
                 && current_id != -2))
             uninit_player(mpctx, INITIALIZED_VCODEC |
                           (mpctx->opts.fixed_vo && opts->video_id != -2 ? 0 : INITIALIZED_VO));
-        if (opts->video_id > -1 && mpctx->demuxer->video->id != current_id) {
+        if (opts->video_id > -1 && mpctx->d_video->id != current_id) {
             sh_video_t *sh2;
-            sh2 = mpctx->demuxer->v_streams[mpctx->demuxer->video->id];
+            sh2 = mpctx->d_video->demuxer->v_streams[mpctx->d_video->id];
             if (sh2) {
-                sh2->ds = mpctx->demuxer->video;
+                sh2->ds = mpctx->d_video;
                 mpctx->sh_video = sh2;
                 reinit_video_chain(mpctx);
             }
@@ -1546,11 +1546,11 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
         }
 #endif
 
-        if ((mpctx->demuxer->type == DEMUXER_TYPE_MATROSKA
-             || mpctx->demuxer->type == DEMUXER_TYPE_LAVF
-             || mpctx->demuxer->type == DEMUXER_TYPE_LAVF_PREFERRED
-             || mpctx->demuxer->type == DEMUXER_TYPE_OGG)
-             && d_sub && d_sub->sh && opts->sub_id >= 0) {
+        if ((d_sub->demuxer->type == DEMUXER_TYPE_MATROSKA
+             || d_sub->demuxer->type == DEMUXER_TYPE_LAVF
+             || d_sub->demuxer->type == DEMUXER_TYPE_LAVF_PREFERRED
+             || d_sub->demuxer->type == DEMUXER_TYPE_OGG)
+             && d_sub->sh && opts->sub_id >= 0) {
             const char* lang = ((sh_sub_t*)d_sub->sh)->lang;
             if (!lang) lang = mp_gtext("unknown");
             snprintf(*(char **) arg, 63, "(%d) %s", opts->sub_id, lang);
@@ -1653,10 +1653,10 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
             int i = 0;
             // default: assume 1:1 mapping of sid and stream id
             d_sub->id = opts->sub_id;
-            d_sub->sh = mpctx->demuxer->s_streams[d_sub->id];
+            d_sub->sh = mpctx->d_sub->demuxer->s_streams[d_sub->id];
             ds_free_packs(d_sub);
             for (i = 0; i < MAX_S_STREAMS; i++) {
-                sh_sub_t *sh = mpctx->demuxer->s_streams[i];
+                sh_sub_t *sh = mpctx->d_sub->demuxer->s_streams[i];
                 if (sh && sh->sid == opts->sub_id) {
                     d_sub->id = i;
                     d_sub->sh = sh;

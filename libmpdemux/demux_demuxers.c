@@ -63,12 +63,12 @@ demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd) {
   if (vd) vd->video->demuxer = ret;
   if (ad) ad->audio->demuxer = ret;
   if (sd) sd->sub->demuxer = ret;
-#endif
 
   // HACK?, necessary for subtitle (and audio and video when implemented) switching
   memcpy(ret->v_streams, vd->v_streams, sizeof(ret->v_streams));
   memcpy(ret->a_streams, ad->a_streams, sizeof(ret->a_streams));
   memcpy(ret->s_streams, sd->s_streams, sizeof(ret->s_streams));
+#endif
 
   ret->desc = &demuxer_desc_demuxers;
 
