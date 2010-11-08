@@ -80,6 +80,7 @@ elements_matroska = (
                 'FlagForced, 55aa, uint',
                 'FlagLacing, 9c, uint',
                 'MinCache, 6de7, uint',
+                'MaxCache, 6df8, uint',
                 'DefaultDuration, 23e383, uint',
                 'TrackTimecodeScale, 23314f, float',
                 'MaxBlockAdditionID, 55ee, uint',
