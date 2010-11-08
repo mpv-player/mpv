@@ -263,8 +263,9 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
    * repeat
    *
    *   0xfe starts 2 byte sequence of unknown purpose. It might denote
-   *        field #2 in line 21 of the VBI. We'll ignore it for the
-   *        time being.
+   *        field #2 in line 21 of the VBI.
+   *        Treating it identical of 0xff fixes
+   *        http://samples.mplayerhq.hu/MPEG-VOB/ClosedCaptions/Starship_Troopers.vob
    *
    *   0xff starts 2 byte EIA-608 sequence, field #1 in line 21 of the VBI.
    *        Followed by a 3-code triplet that starts either with 0xff or
@@ -308,10 +309,6 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
 
     switch (cc_code) {
     case 0xfe:
-      /* expect 2 byte encoding (perhaps CC3, CC4?) */
-      /* ignore for time being */
-      break;
-
     case 0xff:
       odd_offset ^= 1;
       if (odd_offset != selected_channel() >> 1)
