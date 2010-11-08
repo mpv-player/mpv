@@ -107,6 +107,7 @@ static void scroll_buffer(subtitle* buf)
 	}
 }
 
+static int channel;
 
 void subcc_init(void)
 {
@@ -117,6 +118,7 @@ void subcc_init(void)
 	buf1.lines=buf2.lines=0;
 	fb=&buf1;
 	bb=&buf2;
+	channel = -1;
 
 	initialized=1;
 }
@@ -171,6 +173,10 @@ static void swap_buffers(void)
 	bb=foo;
 }
 
+static int selected_channel(void)
+{
+    return subcc_enabled - 1;
+}
 
 static void cc_decode_EIA608(unsigned short int data)
 {
@@ -180,13 +186,17 @@ static void cc_decode_EIA608(unsigned short int data)
   unsigned char c2 = (data >> 8) & 0x7f;
 
   if (c1 & 0x60) {		/* normal character, 0x20 <= c1 <= 0x7f */
+	   if (channel != (selected_channel() & 1))
+		   return;
 	   append_char(chartbl[c1]);
 	   if(c2 & 0x60)	/*c2 might not be a normal char even if c1 is*/
 		   append_char(chartbl[c2]);
   }
   else if (c1 & 0x10)		// control code / special char
   {
-//	  int channel= (c1 & 0x08) >> 3;
+	  channel = (c1 & 0x08) >> 3;
+	  if (channel != (selected_channel() & 1))
+		return;
 	  c1&=~0x08;
 	  if(data!=lastcode)
 	  {
@@ -283,8 +293,6 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
   int odd_offset = 1;
 
   while (curbytes < inputlength) {
-    int skip = 2;
-
     cc_code = current[0];
 
     if (inputlength - curbytes < 2) {
@@ -296,7 +304,7 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
 
     data1 = current[1];
     data2 = current[2];
-    current++; curbytes++;
+    current += 3; curbytes += 3;
 
     switch (cc_code) {
     case 0xfe:
@@ -305,12 +313,14 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
       break;
 
     case 0xff:
+      odd_offset ^= 1;
+      if (odd_offset != selected_channel() >> 1)
+          break;
       /* expect EIA-608 CC1/CC2 encoding */
       // FIXME check parity!
       // Parity check omitted assuming we are reading from a DVD and therefore
       // we should encounter no "transmission errors".
       cc_decode_EIA608(data1 | (data2 << 8));
-      skip = 5;
       break;
 
     case 0x00:
@@ -318,9 +328,7 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
       break;
 
     case 0x01:
-      odd_offset = data2 & 0x80;
-      if (!odd_offset)
-	skip = 5;
+      odd_offset = data2 >> 7;
       break;
 
     default:
@@ -329,8 +337,6 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
 //#endif
       break;
     }
-    current += skip;
-    curbytes += skip;
   }
 }
 
