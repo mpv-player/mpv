@@ -2465,6 +2465,8 @@ static int seek_creating_index(struct demuxer *demuxer, float rel_seek_secs,
                     }
                 }
             }
+            if (s->eof)
+                break;
             stream_seek(s, end);
         }
     enough_index:
