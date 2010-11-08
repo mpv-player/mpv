@@ -229,21 +229,15 @@ static bool matches_avinputformat_name(struct lavf_priv *priv,
     }
 }
 
-static const char * const preferred_list[] = {
-    "dxa",
-    "flv",
-    "gxf",
-    "nut",
-    "nuv",
-    "mov", "mp4",   // "mov,mp4,m4a,3gp,3g2,mj2" is one AVInputFormat
-    "mpc",
-    "mpc8",
-    "mxf",
-    "ogg",
-    "swf",
-    "vqf",
-    "w64",
-    "wv",
+/* formats for which an internal demuxer is preferred */
+static const char * const preferred_internal[] = {
+    /* lavf Matroska demuxer doesn't support ordered chapters and fails
+     * for more files */
+    "matroska",
+    /* seeking won't work in lavf FLAC demuxer until a parser is committed */
+    "flac",
+    /* lavf gives neither pts nor dts for some video frames in .rm */
+    "rm",
     NULL
 };
 
@@ -251,11 +245,11 @@ static int lavf_check_preferred_file(demuxer_t *demuxer){
     if (lavf_check_file(demuxer)) {
         const char * const *p;
         lavf_priv_t *priv = demuxer->priv;
-        for (p = preferred_list; *p; p++)
+        for (p = preferred_internal; *p; p++)
             if (matches_avinputformat_name(priv, *p))
-                return DEMUXER_TYPE_LAVF_PREFERRED;
+                return 0;
     }
-    return 0;
+    return DEMUXER_TYPE_LAVF_PREFERRED;
 }
 
 static uint8_t char2int(char c) {
