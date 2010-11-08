@@ -466,15 +466,18 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle);
 /// Get number of angles.
 int demuxer_angles_count(demuxer_t *demuxer);
 
-// get the index of a track
-// lang is a comma-separated list
-int demuxer_audio_track_by_lang(demuxer_t* demuxer, char* lang);
-int demuxer_sub_track_by_lang(demuxer_t* demuxer, char* lang);
-
-// find the default track
-// for subtitles, it is the first track with default attribute
-// for audio, additionally, the first track is selected if no track has default attribute set
-int demuxer_default_audio_track(demuxer_t* d);
-int demuxer_default_sub_track(demuxer_t* d);
+/* Get the index of a track.
+ * lang is a comma-separated list, NULL is same as empty list
+ * Sort tracks based on the following criteria:
+ * 1) earlier match in lang list, or last no match
+ * 2) track is marked default (default wins)
+ * 3) track number (lower wins)
+ * For audio, select best track according to these criteria; only return -1
+ * if there are no tracks at all.
+ * For subs, select best track according to the same criteria, but return -1
+ * if all tracks are no-lang-match, not-default.
+ */
+int demuxer_audio_track_by_lang_and_default(struct demuxer *d, char *lang);
+int demuxer_sub_track_by_lang_and_default(struct demuxer *d, char *lang);
 
 #endif /* MPLAYER_DEMUXER_H */

@@ -1618,61 +1618,54 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle)
     return angle;
 }
 
-int demuxer_audio_track_by_lang(demuxer_t *d, char *lang)
+int demuxer_audio_track_by_lang_and_default(struct demuxer *d, char *lang)
 {
-    int i, len;
-    lang += strspn(lang, ",");
-    while ((len = strcspn(lang, ",")) > 0) {
-        for (i = 0; i < MAX_A_STREAMS; ++i) {
-            sh_audio_t *sh = d->a_streams[i];
-            if (sh && sh->lang && strncmp(sh->lang, lang, len) == 0)
-                return sh->aid;
-        }
-        lang += len;
+    if (!lang)
+        lang = "";
+    while (1) {
         lang += strspn(lang, ",");
-    }
-    return -1;
-}
-
-int demuxer_sub_track_by_lang(demuxer_t *d, char *lang)
-{
-    int i, len;
-    lang += strspn(lang, ",");
-    while ((len = strcspn(lang, ",")) > 0) {
-        for (i = 0; i < MAX_S_STREAMS; ++i) {
-            sh_sub_t *sh = d->s_streams[i];
-            if (sh && sh->lang && strncmp(sh->lang, lang, len) == 0)
-                return sh->sid;
+        int len = strcspn(lang, ",");
+        int id = -1;
+        for (int i = 0; i < MAX_A_STREAMS; i++) {
+            struct sh_audio *sh = d->a_streams[i];
+            if (sh && (!len || sh->lang && strlen(sh->lang) == len &&
+                       !memcmp(lang, sh->lang, len))) {
+                if (sh->default_track)
+                    return sh->aid;
+                if (id < 0)
+                    id = sh->aid;
+            }
         }
+        if (id >= 0)
+            return id;
+        if (!len)
+            return -1;
         lang += len;
+    }
+}
+
+int demuxer_sub_track_by_lang_and_default(struct demuxer *d, char *lang)
+{
+    if (!lang)
+        lang = "";
+    while (1) {
         lang += strspn(lang, ",");
+        int len = strcspn(lang, ",");
+        int id = -1;
+        for (int i = 0; i < MAX_A_STREAMS; i++) {
+            struct sh_audio *sh = d->a_streams[i];
+            if (sh && (!len || sh->lang && strlen(sh->lang) == len &&
+                       !memcmp(lang, sh->lang, len))) {
+                if (sh->default_track)
+                    return sh->aid;
+                if (id < 0)
+                    id = sh->aid;
+            }
+        }
+        if (!len)
+            return -1;
+        if (id >= 0)
+            return id;
+        lang += len;
     }
-    return -1;
-}
-
-int demuxer_default_audio_track(demuxer_t *d)
-{
-    int i;
-    for (i = 0; i < MAX_A_STREAMS; ++i) {
-        sh_audio_t *sh = d->a_streams[i];
-        if (sh && sh->default_track)
-            return sh->aid;
-    }
-    for (i = 0; i < MAX_A_STREAMS; ++i) {
-        sh_audio_t *sh = d->a_streams[i];
-        if (sh)
-            return sh->aid;
-    }
-    return -1;
-}
-
-int demuxer_default_sub_track(demuxer_t *d)
-{
-    int i;
-    for (i = 0; i < MAX_S_STREAMS; ++i) {
-        sh_sub_t *sh = d->s_streams[i];
-        if (sh && sh->default_track)
-            return sh->sid;
-    }
-    return -1;
 }
