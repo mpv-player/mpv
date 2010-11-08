@@ -50,6 +50,7 @@ demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd) {
   // Video is the most important :-)
   ret->stream = vd->stream;
   ret->seekable = vd->seekable && ad->seekable && sd->seekable;
+  ret->stream_pts = MP_NOPTS_VALUE;
 
   ret->video = vd->video;
   ret->audio = ad->audio;
