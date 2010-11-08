@@ -167,4 +167,44 @@ Apple's "rle " codec).
 The "flags" keywords identifies any additional abilities of this
 codec. Currently, seekable is the only supported flag.
 
+
+Adding FFmpeg Codecs
+-------------------
+example codec:
+
+videocodec ffmdec
+  info "FFmpeg Sony PlayStation MDEC (Motion DECoder)"
+  status working
+  fourcc MDEC ; internal MPlayer FourCC
+  driver ffmpeg
+  dll mdec
+  out YV12
+
+The "videocodec" name should start with ff to differentiate it from other
+libraries or binary codecs.
+
+The "dll" name comes from the codec source file or the libavcodec/allcodecs.c
+file.
+
+The "out" colorspace can be found in the codec source file in the PIX_FMT
+struct. Note that some codecs may have several pix_fmt structs.
+The pix_fmt can be converted to the codecs.conf "out" format by reading
+the fmt_conversion.c file.
+
+libmpdemux/mp_taglists.c
+--------------
+Sometimes the lavf demuxer will not pass on a fourcc (mostly video game
+formats or other containers that do not support isom/riff tags). You will have
+to make one based on the codec_id listed in the codec source file.
+
+Note that it is a good idea to mark any fourcc you create as
+' ; internal MPlayer FourCC'. In case another codec uses that fourcc,
+you can easily change the internal one. Also this will stop other projects
+from thinking of the internal tag as a real fourcc found in the wild.
+
+libmpdemux/demuxer.c
+--------------
+Some audio codecs require a parser, you can see which ones do
+by reading the parsers section in libavcodec/allcodecs.c.
+
 EOF
