@@ -110,17 +110,17 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             break;
         case WM_WINDOWPOSCHANGING:
             if (vo_keepaspect && !vo_fs && WinID < 0) {
-              WINDOWPOS *wpos = lParam;
-              int xborder, yborder;
-              r.left = r.top = 0;
-              r.right = wpos->cx;
-              r.bottom = wpos->cy;
-              AdjustWindowRect(&r, GetWindowLong(vo_window, GWL_STYLE), 0);
-              xborder = (r.right - r.left) - wpos->cx;
-              yborder = (r.bottom - r.top) - wpos->cy;
-              wpos->cx -= xborder; wpos->cy -= yborder;
-              aspect_fit(global_vo, &wpos->cx, &wpos->cy, wpos->cx, wpos->cy);
-              wpos->cx += xborder; wpos->cy += yborder;
+                WINDOWPOS *wpos = lParam;
+                int xborder, yborder;
+                r.left = r.top = 0;
+                r.right = wpos->cx;
+                r.bottom = wpos->cy;
+                AdjustWindowRect(&r, GetWindowLong(vo_window, GWL_STYLE), 0);
+                xborder = (r.right - r.left) - wpos->cx;
+                yborder = (r.bottom - r.top) - wpos->cy;
+                wpos->cx -= xborder; wpos->cy -= yborder;
+                aspect_fit(global_vo, &wpos->cx, &wpos->cy, wpos->cx, wpos->cy);
+                wpos->cx += xborder; wpos->cy += yborder;
             }
             return 0;
         case WM_CLOSE:
@@ -318,7 +318,7 @@ static void changeMode(void) {
         if (bestMode != -1)
             EnumDisplaySettings(0, bestMode, &dm);
 
-    ChangeDisplaySettings(&dm, CDS_FULLSCREEN);
+        ChangeDisplaySettings(&dm, CDS_FULLSCREEN);
     }
 }
 
@@ -330,9 +330,11 @@ static void resetMode(void) {
 static int createRenderingContext(void) {
     HWND layer = HWND_NOTOPMOST;
     RECT r;
-  if (WinID < 0) {
     int style = (vo_border && !vo_fs) ?
                 (WS_OVERLAPPEDWINDOW | WS_SIZEBOX) : WS_POPUP;
+
+    if (WinID >= 0)
+        return 1;
 
     if (vo_fs || vo_ontop) layer = HWND_TOPMOST;
     if (vo_fs) {
@@ -374,7 +376,6 @@ static int createRenderingContext(void) {
     r.bottom = r.top + vo_dheight;
     AdjustWindowRect(&r, style, 0);
     SetWindowPos(vo_window, layer, r.left, r.top, r.right - r.left, r.bottom - r.top, SWP_SHOWWINDOW);
-  }
     return 1;
 }
 
@@ -478,9 +479,9 @@ int vo_w32_init(void) {
                      0, 0, vo_dwidth, vo_dheight, WinID, 0, hInstance, 0);
         EnableWindow(vo_window, 0);
     } else
-    vo_window = CreateWindowEx(0, classname, classname,
-                  vo_border ? (WS_OVERLAPPEDWINDOW | WS_SIZEBOX) : WS_POPUP,
-                  CW_USEDEFAULT, 0, 100, 100, 0, 0, hInstance, 0);
+        vo_window = CreateWindowEx(0, classname, classname,
+                      vo_border ? (WS_OVERLAPPEDWINDOW | WS_SIZEBOX) : WS_POPUP,
+                      CW_USEDEFAULT, 0, 100, 100, 0, 0, hInstance, 0);
     if (!vo_window) {
         mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to create window!\n");
         return 0;
@@ -511,7 +512,7 @@ int vo_w32_init(void) {
     pfd.iLayerType = PFD_MAIN_PLANE;
     pf = ChoosePixelFormat(vo_hdc, &pfd);
     if (!pf) {
-            mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to select a valid pixel format!\n");
+        mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to select a valid pixel format!\n");
         vo_w32_release_dc(vo_window, vo_hdc);
         return 0;
     }
