@@ -400,6 +400,8 @@ int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
     pfd.nSize = sizeof pfd;
     pfd.nVersion = 1;
     pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    if (flags & VOFLAG_STEREO)
+        pfd.dwFlags |= PFD_STEREO;
     pfd.iPixelType = PFD_TYPE_RGBA;
     pfd.cColorBits = 24;
     pfd.iLayerType = PFD_MAIN_PLANE;
