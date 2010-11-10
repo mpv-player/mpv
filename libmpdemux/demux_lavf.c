@@ -77,6 +77,8 @@ typedef struct lavf_priv {
     int nb_streams_last;
     bool internet_radio_hack;
     bool use_dts;
+    bool seek_by_bytes;
+    int bitrate;
 }lavf_priv_t;
 
 static int mp_read(void *opaque, uint8_t *buf, int size) {
@@ -612,7 +614,22 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         demuxer->video->id=-2; // audio-only
     } //else if (best_video > 0 && demuxer->video->id == -1) demuxer->video->id = best_video;
 
-    demuxer->accurate_seek = true;
+    /* libavformat sets bitrate for mpeg based on pts at start and end
+     * of file, which fails for files with pts resets. So calculate our
+     * own bitrate estimate. */
+    if (priv->avif->flags & AVFMT_TS_DISCONT) {
+        for (int i = 0; i < avfc->nb_streams; i++)
+            priv->bitrate += avfc->streams[i]->codec->bit_rate;
+        /* pts-based is more accurate if there are no resets; try to make
+         * a somewhat reasonable guess */
+        if (!avfc->duration || avfc->duration == AV_NOPTS_VALUE
+            || priv->bitrate && (avfc->bit_rate < priv->bitrate / 2
+                                 || avfc->bit_rate > priv->bitrate * 2))
+            priv->seek_by_bytes = true;
+        if (!priv->bitrate)
+            priv->bitrate = 1440000;
+    }
+    demuxer->accurate_seek = !priv->seek_by_bytes;
 
     return demuxer;
 }
@@ -751,6 +768,14 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, float audio
     int avsflags = 0;
     mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_seek_lavf(%p, %f, %f, %d)\n", demuxer, rel_seek_secs, audio_delay, flags);
 
+    if (priv->seek_by_bytes) {
+        int64_t pos = demuxer->filepos;
+        rel_seek_secs *= priv->bitrate / 8;
+        pos += rel_seek_secs;
+        av_seek_frame(priv->avfc, -1, pos, AVSEEK_FLAG_BYTE);
+        return;
+    }
+
     if (flags & SEEK_ABSOLUTE) {
       priv->last_pts = 0;
     } else {
@@ -780,14 +805,25 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
     switch (cmd) {
         case DEMUXER_CTRL_CORRECT_PTS:
 	    return DEMUXER_CTRL_OK;
-        case DEMUXER_CTRL_GET_TIME_LENGTH:
+    case DEMUXER_CTRL_GET_TIME_LENGTH:
+        if (priv->seek_by_bytes) {
+            /* Our bitrate estimate may be better than would be used in
+             * otherwise similar fallback code at higher level */
+            if (demuxer->movi_end <= 0)
+                return DEMUXER_CTRL_DONTKNOW;
+            *(double *)arg = (demuxer->movi_end - demuxer->movi_start) * 8 /
+                priv->bitrate;
+            return DEMUXER_CTRL_GUESS;
+        }
 	    if (priv->avfc->duration == 0 || priv->avfc->duration == AV_NOPTS_VALUE)
 	        return DEMUXER_CTRL_DONTKNOW;
 
 	    *((double *)arg) = (double)priv->avfc->duration / AV_TIME_BASE;
 	    return DEMUXER_CTRL_OK;
 
-	case DEMUXER_CTRL_GET_PERCENT_POS:
+    case DEMUXER_CTRL_GET_PERCENT_POS:
+        if (priv->seek_by_bytes)
+            return DEMUXER_CTRL_DONTKNOW; // let it use the fallback code
 	    if (priv->avfc->duration == 0 || priv->avfc->duration == AV_NOPTS_VALUE)
 	        return DEMUXER_CTRL_DONTKNOW;
 
