@@ -3836,8 +3836,10 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
   }
 }
 
-if(!mpctx->demuxer)
-  goto goto_next_file;
+ if(!mpctx->demuxer) {
+     mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Failed to recognize file format.\n");
+     goto goto_next_file;
+ }
 
  if (mpctx->demuxer->matroska_data.ordered_chapters)
      build_ordered_chapter_timeline(mpctx);
