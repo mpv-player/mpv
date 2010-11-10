@@ -1133,18 +1133,23 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
          get_demuxer_type_from_name(demuxer_name, &demuxer_force)) < 0) {
         mp_msg(MSGT_DEMUXER, MSGL_ERR, "-demuxer %s does not exist.\n",
                demuxer_name);
+        return NULL;
     }
     if ((audio_demuxer_type =
          get_demuxer_type_from_name(audio_demuxer_name,
                                     &audio_demuxer_force)) < 0) {
         mp_msg(MSGT_DEMUXER, MSGL_ERR, "-audio-demuxer %s does not exist.\n",
                audio_demuxer_name);
+        if (audio_stream)
+            return NULL;
     }
     if ((sub_demuxer_type =
          get_demuxer_type_from_name(sub_demuxer_name,
                                     &sub_demuxer_force)) < 0) {
         mp_msg(MSGT_DEMUXER, MSGL_ERR, "-sub-demuxer %s does not exist.\n",
                sub_demuxer_name);
+        if (sub_stream)
+            return NULL;
     }
 
     if (audio_stream) {
