@@ -922,163 +922,125 @@ int get_demuxer_type_from_name(char *demuxer_name, int *force)
 
 int extension_parsing = 1; // 0=off 1=mixed (used only for unstable formats)
 
-/*
-  NOTE : Several demuxers may be opened at the same time so
-  demuxers should NEVER rely on an external var to enable them
-  self. If a demuxer can't do any auto-detection it should only use
-  file_format. The user can explicitly set file_format with the -demuxer
-  option so there is really no need for another extra var.
-  For convenience an option can be added to set file_format directly
-  to the right type (ex: rawaudio,rawvideo).
-  Also the stream can override the file_format so a demuxer which rely
-  on a special stream type can set file_format at the stream level
-  (ex: tv,mf).
-*/
-
-static demuxer_t *demux_open_stream(struct MPOpts *opts, stream_t *stream,
-                                    int file_format, int force, int audio_id,
-                                    int video_id, int dvdsub_id,
-                                    char *filename)
+static struct demuxer *open_given_type(struct MPOpts *opts,
+                                       const struct demuxer_desc *desc,
+                                       struct stream *stream, bool force,
+                                       int audio_id, int video_id, int sub_id,
+                                       char *filename)
 {
-    demuxer_t *demuxer = NULL;
+    struct demuxer *demuxer;
+    int fformat;
+    demuxer = new_demuxer(opts, stream, desc->type, audio_id,
+                          video_id, sub_id, filename);
+    if (desc->check_file)
+        fformat = desc->check_file(demuxer);
+    else
+        fformat = desc->type;
+    if (force)
+        fformat = desc->type;
+    if (fformat == 0)
+        goto fail;
+    if (fformat == desc->type) {
+        mp_tmsg(MSGT_DEMUXER, MSGL_INFO, "%s file format detected.\n",
+                desc->shortdesc);
+        if (demuxer->desc->open) {
+            struct demuxer *demux2 = demuxer->desc->open(demuxer);
+            if (!demux2) {
+                mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "Opening as detected format "
+                        "\"%s\" failed.\n", desc->shortdesc);
+                goto fail;
+            }
+            /* At least demux_mov can return a demux_demuxers instance
+             * from open() instead of the original fed in. */
+            demuxer = demux2;
+        }
+        demuxer->file_format = fformat;
+        return demuxer;
+    } else {
+        // demux_mov can return playlist instead of mov
+        if (fformat == DEMUXER_TYPE_PLAYLIST)
+            return demuxer; // handled in mplayer.c
+        /* Internal MPEG PS demuxer check can return other MPEG subtypes
+         * which don't have their own checks; recurse to try opening as
+         * the returned type instead. */
+        free_demuxer(demuxer);
+        desc = get_demuxer_desc_from_type(fformat);
+        if (!desc) {
+            mp_msg(MSGT_DEMUXER, MSGL_ERR,
+                   "BUG: recursion to nonexistent file format\n");
+            return NULL;
+        }
+        return open_given_type(opts, desc, stream, false, audio_id,
+                               video_id, sub_id, filename);
+    }
+ fail:
+    free_demuxer(demuxer);
+    return NULL;
+}
 
-    sh_video_t *sh_video = NULL;
-
-    const demuxer_desc_t *demuxer_desc;
-    int fformat = 0;
-    int i;
+static struct demuxer *demux_open_stream(struct MPOpts *opts,
+                                         struct stream *stream,
+                                         int file_format, bool force,
+                                         int audio_id, int video_id, int sub_id,
+                                         char *filename)
+{
+    struct demuxer *demuxer = NULL;
+    const struct demuxer_desc *desc;
 
     // If somebody requested a demuxer check it
     if (file_format) {
-        if ((demuxer_desc = get_demuxer_desc_from_type(file_format))) {
-            demuxer = new_demuxer(opts, stream, demuxer_desc->type, audio_id,
-                                  video_id, dvdsub_id, filename);
-            if (demuxer_desc->check_file)
-                fformat = demuxer_desc->check_file(demuxer);
-            if (force || !demuxer_desc->check_file)
-                fformat = demuxer_desc->type;
-            if (fformat != 0) {
-                if (fformat == demuxer_desc->type) {
-                    demuxer_t *demux2 = demuxer;
-                    // Move messages to demuxer detection code?
-                    mp_tmsg(MSGT_DEMUXER, MSGL_INFO,
-                           "%s file format detected.\n",
-                           demuxer_desc->shortdesc);
-                    file_format = fformat;
-                    if (!demuxer->desc->open
-                        || (demux2 = demuxer->desc->open(demuxer))) {
-                        demuxer = demux2;
-                        goto dmx_open;
-                    }
-                } else {
-                    // Format changed after check, recurse
-                    free_demuxer(demuxer);
-                    return demux_open_stream(opts, stream, fformat, force,
-                                             audio_id, video_id, dvdsub_id,
-                                             filename);
-                }
-            }
-            // Check failed for forced demuxer, quit
-            free_demuxer(demuxer);
+        desc = get_demuxer_desc_from_type(file_format);
+        if (!desc)
+            // should only happen with obsolete -demuxer 99 numeric format
             return NULL;
-        }
+        demuxer = open_given_type(opts, desc, stream, force, audio_id,
+                                  video_id, sub_id, filename);
+        if (demuxer)
+            goto dmx_open;
+        return NULL;
     }
+
     // Test demuxers with safe file checks
-    for (i = 0; (demuxer_desc = demuxer_list[i]); i++) {
-        if (demuxer_desc->safe_check) {
-            demuxer = new_demuxer(opts, stream, demuxer_desc->type, audio_id,
-                                  video_id, dvdsub_id, filename);
-            if ((fformat = demuxer_desc->check_file(demuxer)) != 0) {
-                if (fformat == demuxer_desc->type) {
-                    demuxer_t *demux2 = demuxer;
-                    mp_tmsg(MSGT_DEMUXER, MSGL_INFO,
-                           "%s file format detected.\n",
-                           demuxer_desc->shortdesc);
-                    file_format = fformat;
-                    if (!demuxer->desc->open
-                        || (demux2 = demuxer->desc->open(demuxer))) {
-                        demuxer = demux2;
-                        goto dmx_open;
-                    }
-                } else {
-                    if (fformat == DEMUXER_TYPE_PLAYLIST)
-                        return demuxer; // handled in mplayer.c
-                    // Format changed after check, recurse
-                    free_demuxer(demuxer);
-                    demuxer = demux_open_stream(opts, stream, fformat, force,
-                                                audio_id, video_id,
-                                                dvdsub_id, filename);
-                    if (demuxer)
-                        return demuxer; // done!
-                    file_format = DEMUXER_TYPE_UNKNOWN;
-                }
-            }
-            free_demuxer(demuxer);
-            demuxer = NULL;
+    for (int i = 0; (desc = demuxer_list[i]); i++) {
+        if (desc->safe_check) {
+            demuxer = open_given_type(opts, desc, stream, false, audio_id,
+                                      video_id, sub_id, filename);
+            if (demuxer)
+                goto dmx_open;
         }
     }
 
-    // If no forced demuxer perform file extension based detection
     // Ok. We're over the stable detectable fileformats, the next ones are
     // a bit fuzzy. So by default (extension_parsing==1) try extension-based
     // detection first:
-    if (file_format == DEMUXER_TYPE_UNKNOWN && filename
-        && extension_parsing == 1) {
-        file_format = demuxer_type_by_filename(filename);
-        if (file_format != DEMUXER_TYPE_UNKNOWN) {
-            // we like recursion :)
-            demuxer = demux_open_stream(opts, stream, file_format, force,
-                                        audio_id, video_id, dvdsub_id,
-                                        filename);
-            if (demuxer)
-                return demuxer; // done!
-            file_format = DEMUXER_TYPE_UNKNOWN; // continue fuzzy guessing...
-            mp_msg(MSGT_DEMUXER, MSGL_V,
-                   "demuxer: continue fuzzy content-based format guessing...\n");
-        }
+    if (filename && extension_parsing == 1) {
+        desc = get_demuxer_desc_from_type(demuxer_type_by_filename(filename));
+        if (desc)
+            demuxer = open_given_type(opts, desc, stream, false, audio_id,
+                                      video_id, sub_id, filename);
+        if (demuxer)
+            goto dmx_open;
     }
-    // Try detection for all other demuxers
-    for (i = 0; (demuxer_desc = demuxer_list[i]); i++) {
-        if (!demuxer_desc->safe_check && demuxer_desc->check_file) {
-            demuxer = new_demuxer(opts, stream, demuxer_desc->type, audio_id,
-                                  video_id, dvdsub_id, filename);
-            if ((fformat = demuxer_desc->check_file(demuxer)) != 0) {
-                if (fformat == demuxer_desc->type) {
-                    demuxer_t *demux2 = demuxer;
-                    mp_tmsg(MSGT_DEMUXER, MSGL_INFO,
-                           "%s file format detected.\n",
-                           demuxer_desc->shortdesc);
-                    file_format = fformat;
-                    if (!demuxer->desc->open
-                        || (demux2 = demuxer->desc->open(demuxer))) {
-                        demuxer = demux2;
-                        goto dmx_open;
-                    }
-                } else {
-                    if (fformat == DEMUXER_TYPE_PLAYLIST)
-                        return demuxer; // handled in mplayer.c
-                    // Format changed after check, recurse
-                    free_demuxer(demuxer);
-                    demuxer = demux_open_stream(opts, stream, fformat, force,
-                                                audio_id, video_id,
-                                                dvdsub_id, filename);
-                    if (demuxer)
-                        return demuxer; // done!
-                    file_format = DEMUXER_TYPE_UNKNOWN;
-                }
-            }
-            free_demuxer(demuxer);
-            demuxer = NULL;
+
+    // Finally try detection for demuxers with unsafe checks
+    for (int i = 0; (desc = demuxer_list[i]); i++) {
+        if (!desc->safe_check && desc->check_file) {
+            demuxer = open_given_type(opts, desc, stream, false, audio_id,
+                                      video_id, sub_id, filename);
+            if (demuxer)
+                goto dmx_open;
         }
     }
 
     return NULL;
-    //====== File format recognized, set up these for compatibility: =========
+
  dmx_open:
 
-    demuxer->file_format = file_format;
+    if (demuxer->type == DEMUXER_TYPE_PLAYLIST)
+        return demuxer;
 
-    if ((sh_video = demuxer->video->sh) && sh_video->bih) {
+    struct sh_video *sh_video = demuxer->video->sh;
+    if (sh_video && sh_video->bih) {
         int biComp = le2me_32(sh_video->bih->biCompression);
         mp_msg(MSGT_DEMUX, MSGL_INFO,
                "VIDEO:  [%.4s]  %dx%d  %dbpp  %5.3f fps  %5.1f kbps (%4.1f kbyte/s)\n",
@@ -1089,7 +1051,7 @@ static demuxer_t *demux_open_stream(struct MPOpts *opts, stream_t *stream,
     }
 #ifdef CONFIG_ASS
     if (opts->ass_enabled && ass_library) {
-        for (i = 0; i < MAX_S_STREAMS; ++i) {
+        for (int i = 0; i < MAX_S_STREAMS; ++i) {
             sh_sub_t *sh = demuxer->s_streams[i];
             if (sh && sh->type == 'a') {
                 sh->ass_track = ass_new_track(ass_library);
