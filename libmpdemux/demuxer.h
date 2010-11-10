@@ -234,6 +234,7 @@ typedef struct demux_attachment
 
 typedef struct demuxer {
   const demuxer_desc_t *desc;  ///< Demuxer description structure
+  char *filetype; // format name when not identified by demuxer (libavformat)
   off_t filepos; // input stream current pos.
   off_t movi_start;
   off_t movi_end;

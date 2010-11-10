@@ -207,6 +207,10 @@ static int lavf_check_file(demuxer_t *demuxer){
     }else
         mp_msg(MSGT_HEADER,MSGL_V,"LAVF_check: %s\n", priv->avif->long_name);
 
+    demuxer->filetype = priv->avif->long_name;
+    if (!demuxer->filetype)
+        demuxer->filetype = priv->avif->name;
+
     return DEMUXER_TYPE_LAVF;
 }
 

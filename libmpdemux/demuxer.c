@@ -941,8 +941,12 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
     if (fformat == 0)
         goto fail;
     if (fformat == desc->type) {
-        mp_tmsg(MSGT_DEMUXER, MSGL_INFO, "%s file format detected.\n",
-                desc->shortdesc);
+        if (demuxer->filetype)
+            mp_tmsg(MSGT_DEMUXER, MSGL_INFO, "Detected file format: %s (%s)\n",
+                    demuxer->filetype, desc->shortdesc);
+        else
+            mp_tmsg(MSGT_DEMUXER, MSGL_INFO, "Detected file format: %s\n",
+                    desc->shortdesc);
         if (demuxer->desc->open) {
             struct demuxer *demux2 = demuxer->desc->open(demuxer);
             if (!demux2) {
