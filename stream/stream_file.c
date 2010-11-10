@@ -187,6 +187,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
   stream->fill_buffer = fill_buffer;
   stream->write_buffer = write_buffer;
   stream->control = control;
+  stream->read_chunk = 64*1024;
 
   m_struct_free(&stream_opts,opts);
   return STREAM_OK;

@@ -155,6 +155,7 @@ typedef struct stream {
   int type; // see STREAMTYPE_*
   int flags;
   int sector_size; // sector size (seek will be aligned on this size if non 0)
+  int read_chunk; // maximum amount of data to read at once to limit latency (0 for default)
   unsigned int buf_pos,buf_len;
   off_t pos,start_pos,end_pos;
   int eof;

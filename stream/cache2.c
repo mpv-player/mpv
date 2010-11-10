@@ -39,6 +39,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include "libavutil/avutil.h"
 #include "osdep/shmem.h"
 #include "osdep/timer.h"
 #if defined(__MINGW32__)
@@ -168,6 +169,7 @@ static int cache_fill(cache_vars_t *s)
 {
   int back,back2,newb,space,len,pos;
   off_t read=s->read_filepos;
+  int read_chunk;
 
   if(read<s->min_filepos || read>s->max_filepos){
       // seek...
@@ -213,7 +215,9 @@ static int cache_fill(cache_vars_t *s)
   if(space>s->buffer_size-pos) space=s->buffer_size-pos;
 
   // limit one-time block size
-  if(space>4*s->sector_size) space=4*s->sector_size;
+  read_chunk = s->stream->read_chunk;
+  if (!read_chunk) read_chunk = 4*s->sector_size;
+  space = FFMIN(space, read_chunk);
 
 #if 1
   // back+newb+space <= buffer_size
