@@ -392,6 +392,27 @@ static int createRenderingContext(void) {
  * \return 1 - Success, 0 - Failure
  */
 int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
+    PIXELFORMATDESCRIPTOR pfd;
+    int pf;
+    HDC vo_hdc = vo_w32_get_dc(vo_window);
+
+    memset(&pfd, 0, sizeof pfd);
+    pfd.nSize = sizeof pfd;
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 24;
+    pfd.iLayerType = PFD_MAIN_PLANE;
+    pf = ChoosePixelFormat(vo_hdc, &pfd);
+    if (!pf) {
+        mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to select a valid pixel format!\n");
+        vo_w32_release_dc(vo_window, vo_hdc);
+        return 0;
+    }
+
+    SetPixelFormat(vo_hdc, pf, &pfd);
+    vo_w32_release_dc(vo_window, vo_hdc);
+
     // we already have a fully initialized window, so nothing needs to be done
     if (flags & VOFLAG_HIDDEN)
         return 1;
@@ -442,9 +463,6 @@ static char *get_display_name(void) {
  * \return 1 = Success, 0 = Failure
  */
 int vo_w32_init(void) {
-    PIXELFORMATDESCRIPTOR pfd;
-    HDC vo_hdc;
-    int pf;
     HICON mplayerIcon = 0;
     char exedir[MAX_PATH];
     HINSTANCE user32;
@@ -501,24 +519,6 @@ int vo_w32_init(void) {
     if (dev) dev_hdc = CreateDC(dev, NULL, NULL, NULL);
     free(dev);
     updateScreenProperties();
-
-    vo_hdc = vo_w32_get_dc(vo_window);
-    memset(&pfd, 0, sizeof pfd);
-    pfd.nSize = sizeof pfd;
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 24;
-    pfd.iLayerType = PFD_MAIN_PLANE;
-    pf = ChoosePixelFormat(vo_hdc, &pfd);
-    if (!pf) {
-        mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to select a valid pixel format!\n");
-        vo_w32_release_dc(vo_window, vo_hdc);
-        return 0;
-    }
-
-    SetPixelFormat(vo_hdc, pf, &pfd);
-    vo_w32_release_dc(vo_window, vo_hdc);
 
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d with depth %d\n", vo_screenwidth, vo_screenheight, depthonscreen);
 
