@@ -17,6 +17,7 @@
  */
 
 #include "config.h"
+#include "options.h"
 #include "mp_msg.h"
 
 #include <stdlib.h>
@@ -61,8 +62,6 @@ typedef struct mp3_hdr {
   int cons_hdrs; // if this reaches MIN_MP3_HDRS we accept as MP3 file
   struct mp3_hdr *next;
 } mp3_hdr_t;
-
-int hr_mp3_seek = 0;
 
 /**
  * \brief free a list of MP3 header descriptions
@@ -618,6 +617,7 @@ static void high_res_mp3_seek(demuxer_t *demuxer,float time) {
 }
 
 static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
+  struct MPOpts *opts = demuxer->opts;
   sh_audio_t* sh_audio;
   stream_t* s;
   int64_t base,pos;
@@ -629,7 +629,7 @@ static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_
   s = demuxer->stream;
   priv = demuxer->priv;
 
-  if(priv->frmt == MP3 && hr_mp3_seek && !(flags & SEEK_FACTOR)) {
+  if(priv->frmt == MP3 && opts->hr_mp3_seek && !(flags & SEEK_FACTOR)) {
     len = (flags & SEEK_ABSOLUTE) ? rel_seek_secs - priv->next_pts : rel_seek_secs;
     if(len < 0) {
       stream_seek(s,demuxer->movi_start);

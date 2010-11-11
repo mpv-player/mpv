@@ -45,6 +45,7 @@ typedef struct MPOpts {
     int sub_id;
     char *audio_lang;
     char *sub_lang;
+    int hr_mp3_seek;
 
     char *audio_stream;
     int audio_stream_cache;

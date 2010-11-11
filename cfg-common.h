@@ -55,7 +55,6 @@ extern int reuse_socket;
 extern int dvd_speed; /* stream/stream_dvd.c */
 
 /* defined in libmpdemux: */
-extern int hr_mp3_seek;
 extern const m_option_t demux_rawaudio_opts[];
 extern const m_option_t demux_rawvideo_opts[];
 extern const m_option_t cdda_opts[];
@@ -512,8 +511,7 @@ const m_option_t common_opts[] = {
     OPT_STRING("alang", audio_lang, 0),
     OPT_STRING("slang", sub_lang, 0),
 
-    { "hr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 0, 1, NULL },
-    { "nohr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    OPT_MAKE_FLAGS("hr-mp3-seek", hr_mp3_seek, 0),
 
     { "rawaudio", &demux_rawaudio_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     { "rawvideo", &demux_rawvideo_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
