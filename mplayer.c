@@ -1881,7 +1881,7 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time) {
 	    // we should avoid dropping too many frames in sequence unless we
 	    // are too late. and we allow 100ms A-V delay here:
 	    if (d < -dropped_frames*frame_time-0.100 && !mpctx->paused
-                && !mpctx->update_video_immediately) {
+                && !mpctx->restart_playback) {
 		++drop_frame_cnt;
 		++dropped_frames;
 		return frame_dropping;
@@ -2417,7 +2417,7 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
             continue;
         unsigned char *packet = NULL;
         frame_time = sh_video->next_frame_time;
-        if (mpctx->update_video_immediately)
+        if (mpctx->restart_playback)
             frame_time = 0;
         int in_size = video_read_frame(sh_video, &sh_video->next_frame_time,
                                        &packet, force_fps);
@@ -2726,7 +2726,7 @@ static void seek_reset(struct MPContext *mpctx)
 	mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
 	mpctx->delay = 0;
         mpctx->time_frame = 0;
-        mpctx->update_video_immediately = true;
+        mpctx->restart_playback = true;
 	// Not all demuxers set d_video->pts during seek, so this value
 	// (which is used by at least vobsub and edl code below) may
 	// be completely wrong (probably 0).
@@ -4159,7 +4159,7 @@ if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
  get_relative_time(mpctx); // reset current delta
  mpctx->time_frame = 0;
  mpctx->drop_message_shown = 0;
- mpctx->update_video_immediately = true;
+ mpctx->restart_playback = true;
  mpctx->total_avsync_change = 0;
  mpctx->last_chapter_seek = -1;
  // Make sure VO knows current pause state
@@ -4238,9 +4238,9 @@ if(!mpctx->sh_video) {
       if (frame_time < 0)
 	  mpctx->stop_play = AT_END_OF_FILE;
       else {
-          if (mpctx->update_video_immediately) {
+          if (mpctx->restart_playback) {
               // Show this frame immediately, rest normally
-              mpctx->update_video_immediately = false;
+              mpctx->restart_playback = false;
           } else {
               mpctx->time_frame += frame_time / opts->playback_speed;
               adjust_sync(mpctx, frame_time);

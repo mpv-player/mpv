@@ -122,9 +122,9 @@ typedef struct MPContext {
     mixer_t mixer;
     struct vo *video_out;
 
-    // Show a video frame as quickly as possible without trying to adjust
-    // for AV sync. Used when starting a file or after seeking.
-    bool update_video_immediately;
+    /* We're starting playback from scratch or after a seek. Show first
+     * video frame immediately and reinitialize sync. */
+    bool restart_playback;
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
     // written to the ao, decreased when moving to the next frame.
