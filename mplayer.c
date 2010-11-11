@@ -303,11 +303,6 @@ char **video_codec_list=NULL; // override video codec
 char **audio_fm_list=NULL;    // override audio codec family
 char **video_fm_list=NULL;    // override video codec family
 
-// demuxer:
-extern char *demuxer_name; // override demuxer
-extern char *audio_demuxer_name; // override audio demuxer
-extern char *sub_demuxer_name; // override sub demuxer
-
 // this dvdsub_id was selected via slang
 // use this to allow dvdnav to follow -slang across stream resets,
 // in particular the subtitle ID for a language changes
@@ -3328,9 +3323,9 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
       opt_exit = 1;
     }
 #endif
-    if((demuxer_name && strcmp(demuxer_name,"help")==0) ||
-       (audio_demuxer_name && strcmp(audio_demuxer_name,"help")==0) ||
-       (sub_demuxer_name && strcmp(sub_demuxer_name,"help")==0)){
+    if((opts->demuxer_name && strcmp(opts->demuxer_name,"help")==0) ||
+       (opts->audio_demuxer_name && strcmp(opts->audio_demuxer_name,"help")==0) ||
+       (opts->sub_demuxer_name && strcmp(opts->sub_demuxer_name,"help")==0)){
       demuxer_help();
       mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
       opt_exit = 1;

@@ -355,7 +355,6 @@ extern int dvd_title;
 extern int dvd_angle;
 
 extern char *bluray_device;
-extern char * audio_stream;
 
 typedef struct {
  int id; // 0 - 31 mpeg; 128 - 159 ac3; 160 - 191 pcm

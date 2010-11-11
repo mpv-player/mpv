@@ -60,7 +60,6 @@ extern const m_option_t demux_rawaudio_opts[];
 extern const m_option_t demux_rawvideo_opts[];
 extern const m_option_t cdda_opts[];
 
-extern char* sub_stream;
 extern int demuxer_type, audio_demuxer_type, sub_demuxer_type;
 extern int ts_prog;
 extern int ts_keep_broken;
@@ -194,8 +193,6 @@ extern int rtsp_transport_sctp;
 extern int rtsp_port;
 extern char *rtsp_destination;
 
-
-extern int audio_stream_cache;
 
 extern int sws_chr_vshift;
 extern int sws_chr_hshift;
@@ -526,14 +523,13 @@ const m_option_t common_opts[] = {
 #endif
 
     // demuxer.c - select audio/sub file/demuxer
-    { "audiofile", &audio_stream, CONF_TYPE_STRING, 0, 0, 0, NULL },
-    { "audiofile-cache", &audio_stream_cache, CONF_TYPE_INT, CONF_RANGE, 50, 65536, NULL},
-    { "subfile", &sub_stream, CONF_TYPE_STRING, 0, 0, 0, NULL },
-    { "demuxer", &demuxer_name, CONF_TYPE_STRING, 0, 0, 0, NULL },
-    { "audio-demuxer", &audio_demuxer_name, CONF_TYPE_STRING, 0, 0, 0, NULL },
-    { "sub-demuxer", &sub_demuxer_name, CONF_TYPE_STRING, 0, 0, 0, NULL },
-    { "extbased", &extension_parsing, CONF_TYPE_FLAG, 0, 0, 1, NULL },
-    { "noextbased", &extension_parsing, CONF_TYPE_FLAG, 0, 1, 0, NULL },
+    OPT_STRING("audiofile", audio_stream, 0),
+    OPT_INTRANGE("audiofile-cache", audio_stream_cache, 0, 50, 65536),
+    OPT_STRING("subfile", sub_stream, 0),
+    OPT_STRING("demuxer", demuxer_name, 0),
+    OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
+    OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
+    OPT_MAKE_FLAGS("extbased", extension_parsing, 0),
 
     {"mf", (void *) mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
 #ifdef CONFIG_RADIO

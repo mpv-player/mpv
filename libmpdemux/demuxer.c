@@ -920,8 +920,6 @@ int get_demuxer_type_from_name(char *demuxer_name, int *force)
     return -1;
 }
 
-int extension_parsing = 1; // 0=off 1=mixed (used only for unstable formats)
-
 static struct demuxer *open_given_type(struct MPOpts *opts,
                                        const struct demuxer_desc *desc,
                                        struct stream *stream, bool force,
@@ -1017,7 +1015,7 @@ static struct demuxer *demux_open_stream(struct MPOpts *opts,
     // Ok. We're over the stable detectable fileformats, the next ones are
     // a bit fuzzy. So by default (extension_parsing==1) try extension-based
     // detection first:
-    if (filename && extension_parsing == 1) {
+    if (filename && opts->extension_parsing == 1) {
         desc = get_demuxer_desc_from_type(demuxer_type_by_filename(filename));
         if (desc)
             demuxer = open_given_type(opts, desc, stream, false, audio_id,
@@ -1070,14 +1068,6 @@ static struct demuxer *demux_open_stream(struct MPOpts *opts,
     return demuxer;
 }
 
-char *audio_stream = NULL;
-char *sub_stream = NULL;
-int audio_stream_cache = 0;
-
-char *demuxer_name = NULL;       // parameter from -demuxer
-char *audio_demuxer_name = NULL; // parameter from -audio-demuxer
-char *sub_demuxer_name = NULL;   // parameter from -sub-demuxer
-
 extern int hr_mp3_seek;
 
 extern float stream_cache_min_percent;
@@ -1096,42 +1086,42 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
     int demuxer_force = 0, audio_demuxer_force = 0, sub_demuxer_force = 0;
 
     if ((demuxer_type =
-         get_demuxer_type_from_name(demuxer_name, &demuxer_force)) < 0) {
+         get_demuxer_type_from_name(opts->demuxer_name, &demuxer_force)) < 0) {
         mp_msg(MSGT_DEMUXER, MSGL_ERR, "-demuxer %s does not exist.\n",
-               demuxer_name);
+               opts->demuxer_name);
         return NULL;
     }
     if ((audio_demuxer_type =
-         get_demuxer_type_from_name(audio_demuxer_name,
+         get_demuxer_type_from_name(opts->audio_demuxer_name,
                                     &audio_demuxer_force)) < 0) {
         mp_msg(MSGT_DEMUXER, MSGL_ERR, "-audio-demuxer %s does not exist.\n",
-               audio_demuxer_name);
-        if (audio_stream)
+               opts->audio_demuxer_name);
+        if (opts->audio_stream)
             return NULL;
     }
     if ((sub_demuxer_type =
-         get_demuxer_type_from_name(sub_demuxer_name,
+         get_demuxer_type_from_name(opts->sub_demuxer_name,
                                     &sub_demuxer_force)) < 0) {
         mp_msg(MSGT_DEMUXER, MSGL_ERR, "-sub-demuxer %s does not exist.\n",
-               sub_demuxer_name);
-        if (sub_stream)
+               opts->sub_demuxer_name);
+        if (opts->sub_stream)
             return NULL;
     }
 
-    if (audio_stream) {
-        as = open_stream(audio_stream, 0, &afmt);
+    if (opts->audio_stream) {
+        as = open_stream(opts->audio_stream, 0, &afmt);
         if (!as) {
             mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "Cannot open audio stream: %s\n",
-                   audio_stream);
+                   opts->audio_stream);
             return NULL;
         }
-        if (audio_stream_cache) {
+        if (opts->audio_stream_cache) {
             if (!stream_enable_cache
-                (as, audio_stream_cache * 1024,
-                 audio_stream_cache * 1024 * (stream_cache_min_percent /
-                                              100.0),
-                 audio_stream_cache * 1024 * (stream_cache_seek_min_percent /
-                                              100.0))) {
+                (as, opts->audio_stream_cache * 1024,
+                 opts->audio_stream_cache * 1024 *
+                                    (stream_cache_min_percent / 100.0),
+                 opts->audio_stream_cache * 1024 *
+                                    (stream_cache_seek_min_percent / 100.0))) {
                 free_stream(as);
                 mp_msg(MSGT_DEMUXER, MSGL_ERR,
                        "Can't enable audio stream cache\n");
@@ -1139,18 +1129,18 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
             }
         }
     }
-    if (sub_stream) {
-        ss = open_stream(sub_stream, 0, &sfmt);
+    if (opts->sub_stream) {
+        ss = open_stream(opts->sub_stream, 0, &sfmt);
         if (!ss) {
             mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "Cannot open subtitle stream: %s\n",
-                   sub_stream);
+                   opts->sub_stream);
             return NULL;
         }
     }
 
     vd = demux_open_stream(opts, vs, demuxer_type ? demuxer_type : file_format,
-                           demuxer_force, audio_stream ? -2 : audio_id,
-                           video_id, sub_stream ? -2 : dvdsub_id, filename);
+                           demuxer_force, opts->audio_stream ? -2 : audio_id,
+                           video_id, opts->sub_stream ? -2 : dvdsub_id, filename);
     if (!vd) {
         if (as)
             free_stream(as);
@@ -1162,10 +1152,10 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
         ad = demux_open_stream(opts, as,
                                audio_demuxer_type ? audio_demuxer_type : afmt,
                                audio_demuxer_force, audio_id, -2, -2,
-                               audio_stream);
+                               opts->audio_stream);
         if (!ad) {
             mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "Failed to open audio demuxer: %s\n",
-                   audio_stream);
+                   opts->audio_stream);
             free_stream(as);
         } else if (ad->audio->sh
                    && ((sh_audio_t *) ad->audio->sh)->format == 0x55) // MP3
@@ -1175,10 +1165,10 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
         sd = demux_open_stream(opts, ss,
                                sub_demuxer_type ? sub_demuxer_type : sfmt,
                                sub_demuxer_force, -2, -2, dvdsub_id,
-                               sub_stream);
+                               opts->sub_stream);
         if (!sd) {
             mp_tmsg(MSGT_DEMUXER, MSGL_WARN,
-                   "Failed to open subtitle demuxer: %s\n", sub_stream);
+                   "Failed to open subtitle demuxer: %s\n", opts->sub_stream);
             free_stream(ss);
         }
     }

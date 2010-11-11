@@ -45,6 +45,15 @@ typedef struct MPOpts {
     int sub_id;
     char *audio_lang;
     char *sub_lang;
+
+    char *audio_stream;
+    int audio_stream_cache;
+    char *sub_stream;
+    char *demuxer_name;
+    char *audio_demuxer_name;
+    char *sub_demuxer_name;
+    int extension_parsing;
+
     int audio_output_channels;
     int audio_output_format;
     float playback_speed;
