@@ -314,10 +314,6 @@ int file_filter=1;
 
 // cache2:
        int stream_cache_size=-1;
-#ifdef CONFIG_STREAM_CACHE
-float stream_cache_min_percent=20.0;
-float stream_cache_seek_min_percent=50.0;
-#endif
 
 // dump:
        int stream_dump_type=0;
@@ -3757,6 +3753,8 @@ if(mpctx->stream->type==STREAMTYPE_DVDNAV){
 goto_enable_cache:
 if(stream_cache_size>0){
   int res;
+  float stream_cache_min_percent = opts->stream_cache_min_percent;
+  float stream_cache_seek_min_percent = opts->stream_cache_seek_min_percent;
   current_module="enable_cache";
   res = stream_enable_cache(mpctx->stream,stream_cache_size*1024,
                           stream_cache_size*1024*(stream_cache_min_percent / 100.0),

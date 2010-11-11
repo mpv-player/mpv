@@ -1068,9 +1068,6 @@ static struct demuxer *demux_open_stream(struct MPOpts *opts,
     return demuxer;
 }
 
-extern float stream_cache_min_percent;
-extern float stream_cache_seek_min_percent;
-
 demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
                       int audio_id, int video_id, int dvdsub_id,
                       char *filename)
@@ -1117,9 +1114,9 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
             if (!stream_enable_cache
                 (as, opts->audio_stream_cache * 1024,
                  opts->audio_stream_cache * 1024 *
-                                    (stream_cache_min_percent / 100.0),
+                            (opts->stream_cache_min_percent / 100.0),
                  opts->audio_stream_cache * 1024 *
-                                    (stream_cache_seek_min_percent / 100.0))) {
+                            (opts->stream_cache_seek_min_percent / 100.0))) {
                 free_stream(as);
                 mp_msg(MSGT_DEMUXER, MSGL_ERR,
                        "Can't enable audio stream cache\n");
