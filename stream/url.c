@@ -152,7 +152,9 @@ url_new(const char* url) {
 			}
 			strncpy( Curl->password, ptr3+1, len2);
 			Curl->password[len2]='\0';
+			url_unescape_string(Curl->password, Curl->password);
 		}
+		url_unescape_string(Curl->username, Curl->username);
 		ptr1 = ptr2+1;
 		pos1 = ptr1-escfilename;
 	}
@@ -251,7 +253,8 @@ url_free(URL_t* url) {
 
 
 /* Replace escape sequences in an URL (or a part of an URL) */
-/* works like strcpy(), but without return argument */
+/* works like strcpy(), but without return argument,
+   except that outbuf == inbuf is allowed */
 void
 url_unescape_string(char *outbuf, const char *inbuf)
 {
