@@ -2170,7 +2170,8 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
             format_change = true;
         else if (mpctx->d_audio->eof) {
             audio_eof = 1;
-            if (sh_audio->a_out_buffer_len == 0)
+            int unitsize = ao_data.channels * af_fmt2bits(ao_data.format) / 8;
+            if (sh_audio->a_out_buffer_len < unitsize)
                 return 0;
         }
     }
