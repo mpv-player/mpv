@@ -1742,22 +1742,25 @@ void reinit_audio_chain(struct MPContext *mpctx)
     }
 
 
+    current_module="af_preinit";
     if (!(mpctx->initialized_flags & INITIALIZED_AO)) {
-        current_module="af_preinit";
         ao_data.samplerate=force_srate;
         ao_data.channels=0;
         ao_data.format = opts->audio_output_format;
-        // first init to detect best values
-        if(!init_audio_filters(mpctx->sh_audio,   // preliminary init
-                               // input:
-                               mpctx->sh_audio->samplerate,
-                               // output:
-                               &ao_data.samplerate, &ao_data.channels, &ao_data.format)){
-            mp_tmsg(MSGT_CPLAYER,MSGL_ERR, "Error at audio filter chain "
-                    "pre-init!\n");
-            exit_player(mpctx, EXIT_ERROR);
-        }
+    }
+    // first init to detect best values
+    if(!init_audio_filters(mpctx->sh_audio,   // preliminary init
+                           // input:
+                           mpctx->sh_audio->samplerate,
+                           // output:
+                           &ao_data.samplerate, &ao_data.channels, &ao_data.format)){
+        mp_tmsg(MSGT_CPLAYER,MSGL_ERR, "Error at audio filter chain "
+                "pre-init!\n");
+        exit_player(mpctx, EXIT_ERROR);
+    }
+    if (!(mpctx->initialized_flags & INITIALIZED_AO)) {
         current_module="ao2_init";
+        ao_data.buffersize = opts->ao_buffersize;
         mpctx->audio_out = init_best_audio_out(opts->audio_driver_list,
                                                0, // plugin flag
                                                ao_data.samplerate,
@@ -4488,7 +4491,12 @@ if(benchmark){
 }
 
 // time to uninit all, except global stuff:
-uninit_player(mpctx, INITIALIZED_ALL-(opts->fixed_vo?INITIALIZED_VO:0));
+int uninitialize_parts = INITIALIZED_ALL;
+if (opts->fixed_vo)
+    uninitialize_parts -= INITIALIZED_VO;
+if (opts->gapless_audio && mpctx->stop_play == AT_END_OF_FILE)
+    uninitialize_parts -= INITIALIZED_AO;
+uninit_player(mpctx, uninitialize_parts);
 
 if(mpctx->set_of_sub_size > 0) {
     current_module="sub_free";

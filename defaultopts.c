@@ -10,6 +10,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .audio_driver_list = NULL,
         .video_driver_list = NULL,
         .fixed_vo = 1,
+        .ao_buffersize = -1,
         .monitor_pixel_aspect = 1.0,
         .vo_panscanrange = 1.0,
         .vo_gamma_gamma = 1000,

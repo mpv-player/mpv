@@ -98,9 +98,10 @@ const m_option_t mplayer_opts[]={
     {"softvol-max", &soft_vol_max, CONF_TYPE_FLOAT, CONF_RANGE, 10, 10000, NULL},
     {"volstep", &volstep, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
     {"volume", &start_volume, CONF_TYPE_FLOAT, CONF_RANGE, -1, 10000, NULL},
+    OPT_MAKE_FLAGS("gapless-audio", gapless_audio, 0),
     {"master", "Option -master has been removed, use -af volume instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-    // override audio buffer size (used only by -ao oss, anyway obsolete...)
-    {"abs", &ao_data.buffersize, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+    // override audio buffer size (used only by -ao oss/win32, obsolete)
+    OPT_INT("abs", ao_buffersize, 0),
 
     // -ao pcm options:
     {"aofile", "-aofile has been removed. Use -ao pcm:file=<filename> instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
