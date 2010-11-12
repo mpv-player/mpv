@@ -101,7 +101,6 @@
 const int under_mencoder = 0;
 int slave_mode=0;
 int player_idle_mode=0;
-int quiet=0;
 int enable_mouse_movements=0;
 float start_volume = -1;
 
@@ -296,9 +295,6 @@ static off_t step_sec=0;
 
 static m_time_size_t end_at = { .type = END_AT_NONE, .pos = 0 };
 
-// A/V sync:
-       int autosync=0; // 30 might be a good default value.
-
 // codecs:
 char **audio_codec_list=NULL; // override audio codec
 char **video_codec_list=NULL; // override video codec
@@ -324,8 +320,6 @@ int file_filter=1;
 static float default_max_pts_correction=-1;//0.01f;
        float audio_delay=0;
 static int ignore_start=0;
-
-static int softsleep=0;
 
        double force_fps=0;
 static int force_srate=0;
@@ -366,11 +360,6 @@ static char* menu_cfg = NULL;
 static char* menu_root = "main";
 #endif
 
-
-#ifdef HAVE_RTC
-static int nortc = 1;
-static char* rtc_device;
-#endif
 
 edl_record_ptr edl_records = NULL; ///< EDL entries memory area
 edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_records
@@ -1304,7 +1293,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
           mpctx->drop_message_shown = true;
       }
   }
-  if (quiet)
+  if (opts->quiet)
       return;
 
 
@@ -1910,13 +1899,14 @@ static float timing_sleep(struct MPContext *mpctx, float time_frame)
     {
 	// assume kernel HZ=100 for softsleep, works with larger HZ but with
 	// unnecessarily high CPU usage
-	float margin = softsleep ? 0.011 : 0;
+        struct MPOpts *opts = &mpctx->opts;
+        float margin = opts->softsleep ? 0.011 : 0;
 	current_module = "sleep_timer";
 	while (time_frame > margin) {
 	    usec_sleep(1000000 * (time_frame - margin));
             time_frame -= get_relative_time(mpctx);
 	}
-	if (softsleep){
+	if (opts->softsleep){
 	    current_module = "sleep_soft";
 	    if (time_frame < 0)
 		mp_tmsg(MSGT_AVSYNC, MSGL_WARN, "Warning! Softsleep underflow!\n");
@@ -2309,7 +2299,7 @@ static int sleep_until_update(struct MPContext *mpctx, float *time_frame,
 	float delay = mpctx->audio_out->get_delay();
 	mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "delay=%f\n", delay);
 
-	if (autosync) {
+	if (opts->autosync) {
 	    /*
 	     * Adjust this raw delay value by calculating the expected
 	     * delay for this frame and generating a new value which is
@@ -2321,7 +2311,7 @@ static int sleep_until_update(struct MPContext *mpctx, float *time_frame,
 	     */
 	    float predicted = mpctx->delay / opts->playback_speed + *time_frame;
 	    float difference = delay - predicted;
-	    delay = predicted + difference / (float)autosync;
+	    delay = predicted + difference / (float)opts->autosync;
 	}
 
 	*time_frame = delay - mpctx->delay / opts->playback_speed;
@@ -2683,8 +2673,9 @@ void add_step_frame(struct MPContext *mpctx)
 
 static void pause_loop(struct MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     mp_cmd_t* cmd;
-    if (!quiet) {
+    if (!opts->quiet) {
         // Small hack to display the pause message on the OSD line.
         // The pause string is: "\n == PAUSE == \r" so we need to
         // take the first and the last char out
@@ -3466,8 +3457,9 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 #endif
 
 #ifdef HAVE_RTC
-  if(!nortc)
+  if(opts->rtc)
   {
+    char *rtc_device = opts->rtc_device;
     // seteuid(0); /* Can't hurt to try to get root here */
     if ((rtc_fd = open(rtc_device ? rtc_device : "/dev/rtc", O_RDONLY)) < 0)
 	mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Failed to open %s: %s (it should be readable by the user.)\n",
@@ -3492,7 +3484,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
     if(rtc_fd<0)
 #endif /* HAVE_RTC */
       mp_msg(MSGT_CPLAYER, MSGL_V, "Using %s timing\n",
-	     softsleep?"software":timer_name);
+             opts->softsleep ? "software" : timer_name);
 
 #ifdef HAVE_TERMCAP
   load_termcap(NULL); // load key-codes

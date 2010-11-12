@@ -35,6 +35,7 @@ typedef struct MPOpts {
     int capture_dump;
     int loop_times;
     int ordered_chapters;
+    int quiet;
     float stream_cache_min_percent;
     float stream_cache_seek_min_percent;
     int chapterrange[2];
@@ -43,6 +44,10 @@ typedef struct MPOpts {
     int user_correct_pts;
     int user_pts_assoc_mode;
     int initial_audio_sync;
+    int autosync;
+    int softsleep;
+    int rtc;
+    char *rtc_device;
     int key_fifo_size;
     int doubleclick_time;
     int audio_id;

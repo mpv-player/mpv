@@ -310,14 +310,13 @@ const m_option_t mplayer_opts[]={
     OPT_MAKE_FLAGS("correct-pts", user_correct_pts, 0),
     OPT_INTRANGE("pts-association-mode", user_pts_assoc_mode, 0, 0, 2),
     OPT_MAKE_FLAGS("initial-audio-sync", initial_audio_sync, 0),
-    {"noautosync", &autosync, CONF_TYPE_FLAG, 0, 0, -1, NULL},
-    {"autosync", &autosync, CONF_TYPE_INT, CONF_RANGE, 0, 10000, NULL},
+    OPT_FLAG_CONSTANTS("noautosync", autosync, 0, 0, -1),
+    OPT_INTRANGE("autosync", autosync, 0, 0, 10000),
 
-    {"softsleep", &softsleep, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    OPT_FLAG_ON("softsleep", softsleep, 0),
 #ifdef HAVE_RTC
-    {"nortc", &nortc, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"rtc", &nortc, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-    {"rtc-device", &rtc_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    OPT_MAKE_FLAGS("rtc", rtc, 0),
+    OPT_STRING("rtc-device", rtc_device, 0),
 #endif
 
     {"term-osd", &term_osd, CONF_TYPE_FLAG, 0, 0, 1, NULL},

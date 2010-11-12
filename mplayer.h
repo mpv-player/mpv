@@ -42,7 +42,6 @@ extern float  sub_fps;
 extern int    sub_auto;
 
 extern int stream_cache_size;
-extern int autosync;
 
 extern int frame_dropping;
 
