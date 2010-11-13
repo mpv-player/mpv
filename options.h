@@ -31,6 +31,8 @@ typedef struct MPOpts {
 
     int osd_level;
     int osd_duration;
+    int auto_quality;
+    int benchmark;
     char *stream_dump_name;
     int capture_dump;
     int loop_times;
@@ -48,8 +50,14 @@ typedef struct MPOpts {
     int softsleep;
     int rtc;
     char *rtc_device;
+    int term_osd;
+    char *term_osd_esc;
+    char *playing_msg;
+    int player_idle_mode;
     int key_fifo_size;
+    int consolecontrols;
     int doubleclick_time;
+    int list_properties;
     int audio_id;
     int video_id;
     int sub_id;

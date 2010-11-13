@@ -100,7 +100,6 @@
 
 const int under_mencoder = 0;
 int slave_mode=0;
-int player_idle_mode=0;
 int enable_mouse_movements=0;
 float start_volume = -1;
 
@@ -265,10 +264,7 @@ static const char help_text[]=_(
 //**************************************************************************//
 //**************************************************************************//
 
-// Common FIFO functions, and keyboard/event FIFO code
 #include "mp_fifo.h"
-int noconsolecontrols=0;
-//**************************************************************************//
 
 // benchmark:
 double video_time_usage=0;
@@ -277,17 +273,10 @@ static double audio_time_usage=0;
 static int total_time_usage_start=0;
 static int total_frame_cnt=0;
 static int drop_frame_cnt=0; // total number of dropped frames
-int benchmark=0;
 
 // options:
-       int auto_quality=0;
 static int output_quality=0;
 
-static int list_properties = 0;
-
-int term_osd = 1;
-static char* term_osd_esc = "\x1b[A\r\x1b[K";
-static char* playing_msg = NULL;
 // seek:
 static double seek_to_sec;
 static off_t seek_to_byte=0;
@@ -1666,7 +1655,9 @@ static void update_osd_msg(struct MPContext *mpctx)
         if (strcmp(osd->osd_text, msg->msg)) {
             strncpy(osd->osd_text, msg->msg, 127);
             if(mpctx->sh_video) vo_osd_changed(OSDTYPE_OSD); else
-            if(term_osd) mp_msg(MSGT_CPLAYER,MSGL_STATUS,"%s%s\n",term_osd_esc,msg->msg);
+            if(opts->term_osd)
+                mp_msg(MSGT_CPLAYER,MSGL_STATUS, "%s%s\n", opts->term_osd_esc,
+                       msg->msg);
         }
         return;
     }
@@ -1707,9 +1698,9 @@ static void update_osd_msg(struct MPContext *mpctx)
     }
 
     // Clear the term osd line
-    if (term_osd && osd->osd_text[0]) {
+    if (opts->term_osd && osd->osd_text[0]) {
         osd->osd_text[0] = 0;
-        printf("%s\n",term_osd_esc);
+        printf("%s\n", opts->term_osd_esc);
     }
 }
 
@@ -2331,7 +2322,7 @@ static int sleep_until_update(struct MPContext *mpctx, float *time_frame,
 	// don't try to "catch up".
 	// If benchmark is set always output frames as fast as possible
 	// without sleeping.
-	if (*time_frame < -0.2 || benchmark)
+	if (*time_frame < -0.2 || opts->benchmark)
 	    *time_frame = 0;
         *time_frame -= mpctx->video_out->flip_queue_offset;
     }
@@ -2442,11 +2433,13 @@ int reinit_video_chain(struct MPContext *mpctx)
   sh_video->num_buffered_pts = 0;
   sh_video->next_frame_time = 0;
 
-  if(auto_quality>0){
+  if (opts->auto_quality > 0) {
     // Auto quality option enabled
     output_quality=get_video_quality_max(sh_video);
-    if(auto_quality>output_quality) auto_quality=output_quality;
-    else output_quality=auto_quality;
+    if (opts->auto_quality > output_quality)
+        opts->auto_quality = output_quality;
+    else
+        output_quality = opts->auto_quality;
     mp_msg(MSGT_CPLAYER,MSGL_V,"AutoQ: setting quality to %d.\n",output_quality);
     set_video_quality(sh_video,output_quality);
   }
@@ -2679,7 +2672,7 @@ static void pause_loop(struct MPContext *mpctx)
         // Small hack to display the pause message on the OSD line.
         // The pause string is: "\n == PAUSE == \r" so we need to
         // take the first and the last char out
-	if (term_osd && !mpctx->sh_video) {
+	if (opts->term_osd && !mpctx->sh_video) {
 	    char msg[128] = _("\n  =====  PAUSE  =====\r");
 	    int mlen = strlen(msg);
 	    msg[mlen-1] = '\0';
@@ -3395,7 +3388,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
       opt_exit = 1;
     }
-    if(list_properties) {
+    if (opts->list_properties) {
       property_print_help();
       opt_exit = 1;
     }
@@ -3403,7 +3396,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
     if(opt_exit)
       exit_player(mpctx, EXIT_NONE);
 
-    if(!mpctx->filename && !player_idle_mode){
+    if (!mpctx->filename && !opts->player_idle_mode) {
 	// no file/vcd/dvd -> show HELP:
 	mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", mp_gtext(help_text));
         exit_player_with_rc(mpctx, EXIT_NONE, 0);
@@ -3498,7 +3491,7 @@ current_module = "init_input";
  mp_input_add_key_fd(mpctx->input, -1,0,mplayer_get_key,NULL, mpctx->key_fifo);
 if(slave_mode)
     mp_input_add_cmd_fd(mpctx->input, 0,USE_SELECT,MP_INPUT_SLAVE_CMD_FUNC,NULL);
-else if(!noconsolecontrols)
+else if (opts->consolecontrols)
     mp_input_add_key_fd(mpctx->input, 0, 1, read_keys, NULL, mpctx->key_fifo);
 // Set the libstream interrupt callback
 stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
@@ -3577,7 +3570,7 @@ play_next_file:
 
 // We must enable getch2 here to be able to interrupt network connection
 // or cache filling
-if(!noconsolecontrols && !slave_mode){
+if (opts->consolecontrols && !slave_mode) {
   if(mpctx->initialized_flags&INITIALIZED_GETCH2)
     mp_tmsg(MSGT_CPLAYER,MSGL_WARN,"WARNING: getch2_init called twice!\n");
   else
@@ -3587,7 +3580,7 @@ if(!noconsolecontrols && !slave_mode){
 }
 
 // =================== GUI idle loop (STOP state) ===========================
-while (player_idle_mode && !mpctx->filename) {
+while (opts->player_idle_mode && !mpctx->filename) {
     play_tree_t * entry = NULL;
     mp_cmd_t * cmd;
     if (mpctx->video_out && mpctx->video_out->config_ok)
@@ -4106,15 +4099,16 @@ if(!reinit_video_chain(mpctx)) {
 main:
 current_module="main";
 
-    if(playing_msg) {
-        char* msg = property_expand_string(mpctx, playing_msg);
+    if (opts->playing_msg) {
+        char* msg = property_expand_string(mpctx, opts->playing_msg);
         mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",msg);
         free(msg);
     }
 
 
 // Disable the term OSD in verbose mode
-if(verbose) term_osd = 0;
+if (verbose)
+    opts->term_osd = 0;
 
 {
 int frame_time_remaining=0; // flag
@@ -4388,11 +4382,11 @@ if(!mpctx->sh_video) {
 //============================ Auto QUALITY ============================
 
 /*Output quality adjustments:*/
-if(auto_quality>0){
+if (opts->auto_quality > 0) {
   current_module="autoq";
 //  float total=0.000001f * (GetTimer()-aq_total_time);
-//  if(output_quality<auto_quality && aq_sleep_time>0.05f*total)
-  if(output_quality<auto_quality && aq_sleep_time>0)
+//  if (output_quality < opts->auto_quality && aq_sleep_time > 0.05f * total)
+  if (output_quality < opts->auto_quality && aq_sleep_time > 0)
       ++output_quality;
   else
 //  if(output_quality>0 && aq_sleep_time<-0.05f*total)
@@ -4536,7 +4530,7 @@ goto_next_file:  // don't jump here after ao/vo/getch initialization!
 
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n");
 
-if(benchmark){
+if (opts->benchmark) {
     double tot=video_time_usage+vout_time_usage+audio_time_usage;
     double total_time_usage;
     total_time_usage_start=GetTimer()-total_time_usage_start;
@@ -4625,7 +4619,7 @@ while(mpctx->playtree_iter != NULL) {
         break;
 }
 
-if(mpctx->playtree_iter != NULL || player_idle_mode){
+if (mpctx->playtree_iter != NULL || opts->player_idle_mode) {
     if(!mpctx->playtree_iter) mpctx->filename = NULL;
     mpctx->stop_play = 0;
     goto play_next_file;

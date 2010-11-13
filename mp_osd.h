@@ -34,9 +34,6 @@
 #define MAX_OSD_LEVEL 3
 #define MAX_TERM_OSD_LEVEL 1
 
-// These appear in options list
-extern int term_osd;
-
 struct MPContext;
 
 void set_osd_bar(struct MPContext *mpctx, int type,const char* name,double min,double max,double val);

@@ -273,9 +273,9 @@ const m_option_t mplayer_opts[]={
     {"hardframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 2, NULL},
     {"noframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
-    {"autoq", &auto_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
+    OPT_INTRANGE("autoq", auto_quality, 0, 0, 100),
 
-    {"benchmark", &benchmark, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    OPT_FLAG_ON("benchmark", benchmark, 0),
 
     // dump some stream out instead of playing the file
     // this really should be in MEncoder instead of MPlayer... -> TODO
@@ -319,18 +319,15 @@ const m_option_t mplayer_opts[]={
     OPT_STRING("rtc-device", rtc_device, 0),
 #endif
 
-    {"term-osd", &term_osd, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"noterm-osd", &term_osd, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-    {"term-osd-esc", &term_osd_esc, CONF_TYPE_STRING, 0, 0, 1, NULL},
-    {"playing-msg", &playing_msg, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    OPT_MAKE_FLAGS("term-osd", term_osd, 0),
+    OPT_STRING("term-osd-esc", term_osd_esc, 0),
+    OPT_STRING("playing-msg", playing_msg, 0),
 
     {"slave", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
-    {"idle", &player_idle_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
-    {"noidle", &player_idle_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 1, 0, NULL},
+    OPT_MAKE_FLAGS("idle", player_idle_mode, CONF_GLOBAL),
     {"use-stdin", "-use-stdin has been renamed to -noconsolecontrols, use that instead.", CONF_TYPE_PRINT, 0, 0, 0, NULL},
     OPT_INTRANGE("key-fifo-size", key_fifo_size, CONF_GLOBAL, 2, 65000),
-    {"noconsolecontrols", &noconsolecontrols, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-    {"consolecontrols", &noconsolecontrols, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
+    OPT_MAKE_FLAGS("consolecontrols", consolecontrols, CONF_GLOBAL),
     {"mouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
     {"nomouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
     OPT_INTRANGE("doubleclick-time", doubleclick_time, 0, 0, 1000),
@@ -340,7 +337,7 @@ const m_option_t mplayer_opts[]={
     {"tvscan", "MPlayer was compiled without TV interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif /* CONFIG_TV */
 
-    {"list-properties", &list_properties, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+    OPT_FLAG_ON("list-properties", list_properties, CONF_GLOBAL),
     {"identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_FLAG, CONF_GLOBAL, 0, MSGL_V, NULL},
     {"-help", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
     {"help", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},

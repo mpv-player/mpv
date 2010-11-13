@@ -2924,7 +2924,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
         case MP_CMD_OSD:{
                 int v = cmd->args[0].v.i;
-                int max = (term_osd
+                int max = (opts->term_osd
                            && !sh_video) ? MAX_TERM_OSD_LEVEL : MAX_OSD_LEVEL;
                 if (opts->osd_level > max)
                     opts->osd_level = max;
