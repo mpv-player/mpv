@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
+
 #include "config.h"
 #include "talloc.h"
 
@@ -1790,6 +1792,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     }
     mpctx->mixer.audio_out = mpctx->audio_out;
     mpctx->mixer.volstep = volstep;
+    mpctx->syncing_audio = true;
     return;
 
 init_error:
@@ -2112,7 +2115,7 @@ static void adjust_sync(struct MPContext *mpctx, double frame_time)
 {
     current_module = "av_sync";
 
-    if (!mpctx->sh_audio)
+    if (!mpctx->sh_audio || mpctx->syncing_audio)
         return;
 
     double a_pts = written_audio_pts(mpctx) - mpctx->delay;
@@ -2131,6 +2134,67 @@ static void adjust_sync(struct MPContext *mpctx, double frame_time)
         change = max_change;
     mpctx->delay += change;
     mpctx->total_avsync_change += change;
+}
+
+#define ASYNC_PLAY_DONE -3
+static int audio_start_sync(struct MPContext *mpctx, int playsize)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    sh_audio_t * const sh_audio = mpctx->sh_audio;
+    int res;
+
+    // Timing info may not be set without
+    res = decode_audio(sh_audio, 1);
+    if (res < 0)
+        return res;
+    double ptsdiff = written_audio_pts(mpctx) - mpctx->sh_video->pts -
+        mpctx->delay - audio_delay;
+    int bytes = ptsdiff * ao_data.bps / mpctx->opts.playback_speed;
+    bytes -= bytes % (ao_data.channels * af_fmt2bits(ao_data.format) / 8);
+
+    if (fabs(ptsdiff) > 300) // pts reset or just broken?
+        bytes = 0;
+
+    if (bytes <= 0) {
+        mpctx->syncing_audio = false;
+        while (1) {
+            int a = FFMIN(-bytes, FFMAX(playsize, 20000));
+            int res = decode_audio(sh_audio, a);
+            bytes += sh_audio->a_out_buffer_len;
+            if (bytes >= 0) {
+                memmove(sh_audio->a_out_buffer,
+                        sh_audio->a_out_buffer +
+                        sh_audio->a_out_buffer_len - bytes,
+                        bytes);
+                sh_audio->a_out_buffer_len = bytes;
+                if (res < 0)
+                    return res;
+                return decode_audio(sh_audio, playsize);
+            }
+            sh_audio->a_out_buffer_len = 0;
+            if (res < 0)
+                return res;
+        }
+    } else {
+        int fillbyte = 0;
+        if ((ao_data.format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
+            fillbyte = 0x80;
+        if (bytes >= playsize) {
+            /* This case could fall back to the one below with
+             * bytes = playsize, but then silence would keep accumulating
+             * in a_out_buffer if the AO accepts less data than it asks for
+             * in playsize. */
+            char *p = malloc(playsize);
+            memset(p, fillbyte, playsize);
+            playsize = mpctx->audio_out->play(p, playsize, 0);
+            free(p);
+            mpctx->delay += opts->playback_speed*playsize/(double)ao_data.bps;
+            return ASYNC_PLAY_DONE;
+        }
+        mpctx->syncing_audio = false;
+        decode_audio_prepend_bytes(sh_audio, bytes, fillbyte);
+        return decode_audio(sh_audio, playsize);
+    }
 }
 
 static int fill_audio_out_buffers(struct MPContext *mpctx)
@@ -2167,10 +2231,20 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     // Fill buffer if needed:
     current_module="decode_audio";
     t = GetTimer();
-    int res = decode_audio(sh_audio, playsize);
+
+    if (!opts->initial_audio_sync || (ao_data.format & AF_FORMAT_SPECIAL_MASK))
+        mpctx->syncing_audio = false;
+
+    int res;
+    if (mpctx->syncing_audio && mpctx->sh_video)
+        res = audio_start_sync(mpctx, playsize);
+    else
+        res = decode_audio(sh_audio, playsize);
     if (res < 0) {  // EOF, error or format change
         if (res == -2)
             format_change = true;
+        else if (res == ASYNC_PLAY_DONE)
+            return 1;
         else if (mpctx->d_audio->eof) {
             audio_eof = 1;
             int unitsize = ao_data.channels * af_fmt2bits(ao_data.format) / 8;
@@ -4181,7 +4255,8 @@ if(!mpctx->sh_audio && mpctx->d_audio->sh) {
 
 /*========================== PLAY AUDIO ============================*/
 
-if (mpctx->sh_audio && !mpctx->paused)
+if (mpctx->sh_audio && !mpctx->paused
+    && (!mpctx->restart_playback || !mpctx->sh_video))
     if (!fill_audio_out_buffers(mpctx))
 	// at eof, all audio at least written to ao
 	if (!mpctx->sh_video)
@@ -4234,14 +4309,9 @@ if(!mpctx->sh_video) {
       }
       if (frame_time < 0)
 	  mpctx->stop_play = AT_END_OF_FILE;
-      else {
-          if (mpctx->restart_playback) {
-              // Show this frame immediately, rest normally
-              mpctx->restart_playback = false;
-          } else {
-              mpctx->time_frame += frame_time / opts->playback_speed;
-              adjust_sync(mpctx, frame_time);
-          }
+      else if (!mpctx->restart_playback) {
+          mpctx->time_frame += frame_time / opts->playback_speed;
+          adjust_sync(mpctx, frame_time);
       }
   }
   if (mpctx->timeline) {
@@ -4287,7 +4357,8 @@ if(!mpctx->sh_video) {
            unsigned int pts_us = mpctx->last_time + mpctx->time_frame * 1e6;
            int duration = -1;
            double pts2 = mpctx->video_out->next_pts2;
-           if (pts2 != MP_NOPTS_VALUE && opts->correct_pts) {
+           if (pts2 != MP_NOPTS_VALUE && opts->correct_pts
+               && !mpctx->restart_playback) {
                // expected A/V sync correction is ignored
                double diff = (pts2 - mpctx->sh_video->pts);
                diff /= opts->playback_speed;
@@ -4308,6 +4379,14 @@ if(!mpctx->sh_video) {
                mpctx->last_vo_flip_duration = 0;
                // For print_status - VO call finishing early is OK for sync
                mpctx->time_frame -= get_relative_time(mpctx);
+           }
+           if (mpctx->restart_playback) {
+               mpctx->syncing_audio = true;
+               if (mpctx->sh_audio && !mpctx->paused)
+                   fill_audio_out_buffers(mpctx);
+               mpctx->restart_playback = false;
+               mpctx->time_frame = 0;
+               get_relative_time(mpctx);
            }
            print_status(mpctx, MP_NOPTS_VALUE, true);
         }

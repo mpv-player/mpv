@@ -1036,6 +1036,17 @@ in a playlist or intend to read from stdin later on via the loadfile or
 loadlist slave commands.
 .
 .TP
+.B \-noinitial-audio-sync
+When starting a video file or after events such as seeking MPlayer will by
+default modify the audio stream to make it start from the same timestamp as
+video, by either inserting silence at the start or cutting away the first
+samples.
+This option disables that functionality and makes the player behave like
+older MPlayer versions did: video and audio are both started immediately
+even if their start timestamps differ, and then video timing is gradually
+adjusted if necessary to reach correct synchronization later.
+.
+.TP
 .B \-nojoystick
 Turns off joystick support.
 .

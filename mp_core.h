@@ -125,6 +125,10 @@ typedef struct MPContext {
     /* We're starting playback from scratch or after a seek. Show first
      * video frame immediately and reinitialize sync. */
     bool restart_playback;
+    /* After playback restart (above) or audio stream change, adjust audio
+     * stream by cutting samples or adding silence at the beginning to make
+     * audio playback position match video position. */
+    bool syncing_audio;
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
     // written to the ao, decreased when moving to the next frame.

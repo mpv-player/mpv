@@ -28,6 +28,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .chapterrange = {-1, -1},
         .edition_id = -1,
         .user_correct_pts = -1,
+        .initial_audio_sync = 1,
         .key_fifo_size = 7,
         .doubleclick_time = 300,
         .audio_id = -1,

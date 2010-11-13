@@ -369,6 +369,16 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
     return 1;
 }
 
+static void set_min_out_buffer_size(struct sh_audio *sh, int len)
+{
+    if (sh->a_out_buffer_size < len) {
+	mp_msg(MSGT_DECAUDIO, MSGL_V, "Increasing filtered audio buffer size "
+	       "from %d to %d\n", sh->a_out_buffer_size, len);
+	sh->a_out_buffer = realloc(sh->a_out_buffer, len);
+	sh->a_out_buffer_size = len;
+    }
+}
+
 static int filter_n_bytes(sh_audio_t *sh, int len)
 {
     assert(len-1 + sh->audio_out_minsize <= sh->a_buffer_size);
@@ -408,13 +418,7 @@ static int filter_n_bytes(sh_audio_t *sh, int len)
     af_data_t *filter_output = af_play(sh->afilter, &filter_input);
     if (!filter_output)
 	return -1;
-    if (sh->a_out_buffer_size < sh->a_out_buffer_len + filter_output->len) {
-	int newlen = sh->a_out_buffer_len + filter_output->len;
-	mp_msg(MSGT_DECAUDIO, MSGL_V, "Increasing filtered audio buffer size "
-	       "from %d to %d\n", sh->a_out_buffer_size, newlen);
-	sh->a_out_buffer = realloc(sh->a_out_buffer, newlen);
-	sh->a_out_buffer_size = newlen;
-    }
+    set_min_out_buffer_size(sh, sh->a_out_buffer_len + filter_output->len);
     memcpy(sh->a_out_buffer + sh->a_out_buffer_len, filter_output->audio,
 	   filter_output->len);
     sh->a_out_buffer_len += filter_output->len;
@@ -478,6 +482,15 @@ int decode_audio(sh_audio_t *sh_audio, int minlen)
     }
     return 0;
 }
+
+void decode_audio_prepend_bytes(struct sh_audio *sh, int count, int byte)
+{
+    set_min_out_buffer_size(sh, sh->a_out_buffer_len + count);
+    memmove(sh->a_out_buffer + count, sh->a_out_buffer, sh->a_out_buffer_len);
+    memset(sh->a_out_buffer, byte, count);
+    sh->a_out_buffer_len += count;
+}
+
 
 void resync_audio_stream(sh_audio_t *sh_audio)
 {
