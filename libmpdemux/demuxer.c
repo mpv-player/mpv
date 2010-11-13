@@ -1462,7 +1462,7 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, double *seek_pts,
     }
 }
 
-int demuxer_get_current_chapter(demuxer_t *demuxer)
+int demuxer_get_current_chapter(demuxer_t *demuxer, double time_now)
 {
     int chapter = -2;
     if (!demuxer->num_chapters || !demuxer->chapters) {
@@ -1470,11 +1470,7 @@ int demuxer_get_current_chapter(demuxer_t *demuxer)
                            &chapter) == STREAM_UNSUPPORTED)
             chapter = -2;
     } else {
-        sh_video_t *sh_video = demuxer->video->sh;
-        sh_audio_t *sh_audio = demuxer->audio->sh;
-        uint64_t now;
-        now = (sh_video ? sh_video->pts : (sh_audio ? sh_audio->pts : 0))
-              * 1000 + 0.5;
+        uint64_t now = time_now * 1000 + 0.5;
         for (chapter = demuxer->num_chapters - 1; chapter >= 0; --chapter) {
             if (demuxer->chapters[chapter].start <= now)
                 break;

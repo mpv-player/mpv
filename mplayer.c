@@ -2915,12 +2915,12 @@ int get_percent_pos(struct MPContext *mpctx)
 // -2 is no chapters, -1 is before first chapter
 int get_current_chapter(struct MPContext *mpctx)
 {
-    if (!mpctx->chapters || !mpctx->sh_video)
+    double current_pts = get_current_time(mpctx);
+    if (!mpctx->chapters)
         return FFMAX(mpctx->last_chapter_seek,
-                     demuxer_get_current_chapter(mpctx->demuxer));
+                     demuxer_get_current_chapter(mpctx->demuxer, current_pts));
 
     int i;
-    double current_pts = mpctx->sh_video->pts;
     for (i = 1; i < mpctx->num_chapters; i++)
         if (current_pts < mpctx->chapters[i].start)
             break;
@@ -3913,7 +3913,7 @@ if((stream_dump_type)&&(stream_dump_type<4)){
 	&& stream_dump_type==2) fwrite(&in_size,1,4,f);
     if(in_size>0) fwrite(start,in_size,1,f);
     if (opts->chapterrange[1] > 0) {
-      int cur_chapter = demuxer_get_current_chapter(mpctx->demuxer);
+      int cur_chapter = demuxer_get_current_chapter(mpctx->demuxer, 0);
       if(cur_chapter!=-1 && cur_chapter+1 > opts->chapterrange[1])
         break;
     }

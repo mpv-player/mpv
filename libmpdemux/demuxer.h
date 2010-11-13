@@ -451,7 +451,7 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, double *seek_pts,
                          char **chapter_name);
 
 /// Get current chapter index if available.
-int demuxer_get_current_chapter(demuxer_t *demuxer);
+int demuxer_get_current_chapter(demuxer_t *demuxer, double time_now);
 /// Get chapter name by index if available.
 char *demuxer_chapter_name(demuxer_t *demuxer, int chapter);
 /// Get chapter display name by index.
