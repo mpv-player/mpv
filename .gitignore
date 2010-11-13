@@ -3,14 +3,14 @@
 *.d
 .depend
 
-/ffmpeg
 /config.h
 /config.mak
 /config.log
-/mencoder
 /mplayer
 /version.h
 /codecs.conf.h
 /codec-cfg
 /codec-cfg-test
 /codecs2html
+/tags
+/TAGS
