@@ -95,7 +95,7 @@ static int demux_nsv_fill_buffer ( demuxer_t *demuxer, demux_stream_t *ds )
     }
 
     if (sh_video)
-    sh_video->pts = priv->v_pts =demuxer->video->pts=  priv->video_pack_no *
+        priv->v_pts =demuxer->video->pts=  priv->video_pack_no *
          (float)sh_video->frametime;
     else
         priv->v_pts = priv->video_pack_no;
