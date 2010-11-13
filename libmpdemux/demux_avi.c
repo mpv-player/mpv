@@ -38,6 +38,32 @@ extern const demuxer_desc_t demuxer_desc_avi_nini;
 // PTS:  0=interleaved  1=BPS-based
 int pts_from_bps=1;
 
+static void update_audio_block_size(demuxer_t *demux)
+{
+  avi_priv_t *priv = demux->priv;
+  sh_audio_t *sh = demux->audio->sh;
+  if (!sh)
+    return;
+  priv->audio_block_size = sh->audio.dwSampleSize;
+  if (sh->wf) {
+    priv->audio_block_size = sh->wf->nBlockAlign;
+    if (!priv->audio_block_size) {
+      // for PCM audio we can calculate the blocksize:
+      if (sh->format == 1)
+        priv->audio_block_size = sh->wf->nChannels*(sh->wf->wBitsPerSample/8);
+      else
+        priv->audio_block_size = 1; // hope the best...
+    } else {
+      // workaround old mencoder bug:
+      if (sh->audio.dwSampleSize == 1 && sh->audio.dwScale == 1 &&
+          (sh->wf->nBlockAlign == 1152 || sh->wf->nBlockAlign == 576)) {
+        mp_tmsg(MSGT_DEMUX,MSGL_WARN,"AVI: Working around CBR-MP3 nBlockAlign header bug!\n");
+        priv->audio_block_size = 1;
+      }
+    }
+  }
+}
+
 // Select ds from ID
 static demux_stream_t *demux_avi_select_stream(demuxer_t *demux,
                                                unsigned int id)
@@ -55,29 +81,9 @@ static demux_stream_t *demux_avi_select_stream(demuxer_t *demux,
 
   if(stream_id==demux->audio->id){
       if(!demux->audio->sh){
-        sh_audio_t* sh;
-	avi_priv_t *priv=demux->priv;
-        sh=demux->audio->sh=demux->a_streams[stream_id];
+        demux->audio->sh=demux->a_streams[stream_id];
         mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected AVI audio ID = %d\n",demux->audio->id);
-	if(sh->wf){
-	  priv->audio_block_size=sh->wf->nBlockAlign;
-	  if(!priv->audio_block_size){
-	    // for PCM audio we can calculate the blocksize:
-	    if(sh->format==1)
-		priv->audio_block_size=sh->wf->nChannels*(sh->wf->wBitsPerSample/8);
-	    else
-		priv->audio_block_size=1; // hope the best...
-	  } else {
-	    // workaround old mencoder's bug:
-	    if(sh->audio.dwSampleSize==1 && sh->audio.dwScale==1 &&
-	       (sh->wf->nBlockAlign==1152 || sh->wf->nBlockAlign==576)){
-		mp_tmsg(MSGT_DEMUX,MSGL_WARN,"AVI: Working around CBR-MP3 nBlockAlign header bug!\n");
-		priv->audio_block_size=1;
-	    }
-	  }
-	} else {
-	  priv->audio_block_size=sh->audio.dwSampleSize;
-	}
+        update_audio_block_size(demux);
       }
       return demux->audio;
   }
@@ -441,6 +447,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
 
   //---- AVI header:
   read_avi_header(demuxer,(demuxer->stream->flags & MP_STREAM_SEEK_BW)?index_mode:-2);
+  update_audio_block_size(demuxer);
 
   if(demuxer->audio->id>=0 && !demuxer->a_streams[demuxer->audio->id]){
       mp_tmsg(MSGT_DEMUX,MSGL_WARN,"AVI: invalid audio stream ID: %d - ignoring (nosound)\n",demuxer->audio->id);
