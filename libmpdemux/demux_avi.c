@@ -158,8 +158,8 @@ static int demux_avi_read_packet(demuxer_t *demux,demux_stream_t *ds,unsigned in
           pts=priv->avi_audio_pts; //+priv->pts_correction;
       priv->avi_audio_pts=0;
       // update blockcount:
-      priv->audio_block_no+=priv->audio_block_size ?
-	((len+priv->audio_block_size-1)/priv->audio_block_size) : 1;
+      priv->audio_block_no+=
+	(len+priv->audio_block_size-1)/priv->audio_block_size;
   } else
   if(ds==demux->video){
      // video
@@ -690,8 +690,8 @@ static void demux_seek_avi(demuxer_t *demuxer, float rel_seek_secs,
                   break;
                 }
                 ++d_audio->pack_no;
-                priv->audio_block_no+=priv->audio_block_size ?
-		    ((len+priv->audio_block_size-1)/priv->audio_block_size) : 1;
+                priv->audio_block_no+=
+		    (len+priv->audio_block_size-1)/priv->audio_block_size;
                 d_audio->dpos+=len;
             }
           }
@@ -716,12 +716,11 @@ static void demux_seek_avi(demuxer_t *demuxer, float rel_seek_secs,
 		  skip_audio_bytes+=len;
 		} else {
 		  ++d_audio->pack_no;
-                  priv->audio_block_no+=priv->audio_block_size ?
-		    ((len+priv->audio_block_size-1)/priv->audio_block_size) : 1;
+                  priv->audio_block_no+=
+		    (len+priv->audio_block_size-1)/priv->audio_block_size;
                   d_audio->dpos+=len;
 		  audio_chunk_pos=i;
 		}
-		if(priv->audio_block_size)
 		    chunks-=(len+priv->audio_block_size-1)/priv->audio_block_size;
             }
           }
