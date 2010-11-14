@@ -99,6 +99,11 @@ struct MPOpts;
 
 #define MP_NOPTS_VALUE (-1LL<<63) //both int64_t and double should be able to represent this exactly
 
+enum timestamp_type {
+    TIMESTAMP_TYPE_PTS,
+    TIMESTAMP_TYPE_SORT,
+};
+
 
 // DEMUXER control commands/answers
 #define DEMUXER_CTRL_NOTIMPL -1
@@ -249,6 +254,7 @@ typedef struct demuxer {
     /* Set if using absolute seeks for small movements is OK (no pts resets
      * that would make pts ambigious, preferably supports back/forward flags */
     bool accurate_seek;
+    enum timestamp_type timestamp_type;
   //
   demux_stream_t *audio; // audio buffer/demuxer
   demux_stream_t *video; // video buffer/demuxer

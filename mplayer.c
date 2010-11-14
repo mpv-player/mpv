@@ -2526,7 +2526,8 @@ static void determine_frame_pts(struct MPContext *mpctx)
     if (opts->user_pts_assoc_mode) {
         sh_video->pts_assoc_mode = opts->user_pts_assoc_mode;
     } else if (sh_video->pts_assoc_mode == 0) {
-        if (sh_video->codec_reordered_pts != MP_NOPTS_VALUE)
+        if (mpctx->d_video->demuxer->timestamp_type == TIMESTAMP_TYPE_PTS
+            && sh_video->codec_reordered_pts != MP_NOPTS_VALUE)
             sh_video->pts_assoc_mode = 1;
         else
             sh_video->pts_assoc_mode = 2;

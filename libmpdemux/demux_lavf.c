@@ -521,6 +521,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         /* for avi libavformat returns the avi timestamps in .dts,
          * some made-up stuff that's not really pts in .pts */
         priv->use_dts = true;
+        demuxer->timestamp_type = TIMESTAMP_TYPE_SORT;
     } else {
         if (opts->user_correct_pts != 0)
             avfc->flags |= AVFMT_FLAG_GENPTS;
