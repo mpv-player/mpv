@@ -66,7 +66,6 @@ typedef struct component {
     unsigned int off_left;
     unsigned int off_right;
     unsigned int stride;
-    unsigned int hres;
 } component;
 
 //==global variables==//
@@ -139,7 +138,6 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
     vf->priv->height            = height;
     vf->priv->in.width          = width;
     vf->priv->in.height         = height;
-    vf->priv->in.hres           = 1;
     vf->priv->in.off_left       = 0;
     vf->priv->in.off_right      = 0;
     vf->priv->in.stride         = vf->priv->width * 3;
@@ -156,21 +154,17 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
         vf->priv->in.off_left   = vf->priv->width * 3;
         vf->priv->in.stride     = vf->priv->width * 6;
         break;
+    case ABOVE_BELOW_2_LR:
+        d_height               *= 2;
     case ABOVE_BELOW_LR:
         vf->priv->height        = height / 2;
         vf->priv->in.off_right  = vf->priv->width * vf->priv->height * 3;
         break;
+    case ABOVE_BELOW_2_RL:
+        d_height               *= 2;
     case ABOVE_BELOW_RL:
         vf->priv->height        = height / 2;
         vf->priv->in.off_left   = vf->priv->width * vf->priv->height * 3;
-        break;
-    case ABOVE_BELOW_2_LR:
-        vf->priv->in.hres       = 2;
-        vf->priv->in.off_right  = vf->priv->width * vf->priv->height / 2 * 3;
-        break;
-    case ABOVE_BELOW_2_RL:
-        vf->priv->in.hres       = 2;
-        vf->priv->in.off_left   = vf->priv->width * vf->priv->height / 2 * 3;
         break;
     default:
         mp_msg(MSGT_VFILTER, MSGL_WARN,
@@ -181,7 +175,6 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
     //default output values
     vf->priv->out.width         = vf->priv->width;
     vf->priv->out.height        = vf->priv->height;
-    vf->priv->out.hres          = 1;
     vf->priv->out.off_left      = 0;
     vf->priv->out.off_right     = 0;
     vf->priv->out.stride        = vf->priv->width * 3;
@@ -211,21 +204,17 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
         vf->priv->out.off_left  = vf->priv->width * 3;
         vf->priv->out.stride    = vf->priv->width * 6;
         break;
+    case ABOVE_BELOW_2_LR:
+        d_height               /= 2;
     case ABOVE_BELOW_LR:
         vf->priv->out.height    = vf->priv->height * 2;
         vf->priv->out.off_right = vf->priv->width * vf->priv->height * 3;
         break;
+    case ABOVE_BELOW_2_RL:
+        d_height               /= 2;
     case ABOVE_BELOW_RL:
         vf->priv->out.height    = vf->priv->height * 2;
         vf->priv->out.off_left  = vf->priv->width * vf->priv->height * 3;
-        break;
-    case ABOVE_BELOW_2_LR:
-        vf->priv->out.hres      = 2;
-        vf->priv->out.off_right = vf->priv->width * vf->priv->height / 2 * 3;
-        break;
-    case ABOVE_BELOW_2_RL:
-        vf->priv->out.hres      = 2;
-        vf->priv->out.off_left  = vf->priv->width * vf->priv->height / 2 * 3;
         break;
     case MONO_R:
         //same as MONO_L only needs switching of input offsets
@@ -265,32 +254,27 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
         case ABOVE_BELOW_RL:
         case ABOVE_BELOW_2_LR:
         case ABOVE_BELOW_2_RL:
-            for (int i = 0; i < vf->priv->in.hres; i++) {
-                memcpy_pic(dmpi->planes[0] + vf->priv->out.off_left +
-                           (i * vf->priv->out.stride), mpi->planes[0] +
-                           vf->priv->in.off_left, 3 * vf->priv->width,
-                           vf->priv->height / (vf->priv->in.hres *
-                           vf->priv->out.hres), vf->priv->out.stride *
-                           vf->priv->in.hres, vf->priv->in.stride *
-                           vf->priv->out.hres);
-                memcpy_pic(dmpi->planes[0] + vf->priv->out.off_right +
-                           (i * vf->priv->out.stride), mpi->planes[0] +
-                           vf->priv->in.off_right, 3 * vf->priv->width,
-                           vf->priv->height / (vf->priv->in.hres *
-                           vf->priv->out.hres), vf->priv->out.stride *
-                           vf->priv->in.hres, vf->priv->in.stride *
-                           vf->priv->out.hres);
-            }
+            memcpy_pic(dmpi->planes[0] + vf->priv->out.off_left,
+                       mpi->planes[0] + vf->priv->in.off_left,
+                       3 * vf->priv->width,
+                       vf->priv->height,
+                       vf->priv->out.stride,
+                       vf->priv->in.stride);
+            memcpy_pic(dmpi->planes[0] + vf->priv->out.off_right,
+                       mpi->planes[0] + vf->priv->in.off_right,
+                       3 * vf->priv->width,
+                       vf->priv->height,
+                       vf->priv->out.stride,
+                       vf->priv->in.stride);
             break;
         case MONO_L:
         case MONO_R:
-            for (int i = 0; i < vf->priv->in.hres; i++) {
-                memcpy_pic(dmpi->planes[0] + (i * vf->priv->out.stride),
-                           mpi->planes[0] + vf->priv->in.off_left, 3 *
-                           vf->priv->width, vf->priv->height /
-                           vf->priv->in.hres, vf->priv->out.stride *
-                           vf->priv->in.hres, vf->priv->in.stride);
-            }
+            memcpy_pic(dmpi->planes[0],
+                       mpi->planes[0] + vf->priv->in.off_left,
+                       3 * vf->priv->width,
+                       vf->priv->height,
+                       vf->priv->out.stride,
+                       vf->priv->in.stride);
             break;
         case ANAGLYPH_RC_GRAY:
         case ANAGLYPH_RC_HALF:
@@ -313,9 +297,9 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 
             for (y = 0; y < vf->priv->out.height; y++) {
                 o   = vf->priv->out.stride * y;
-                il  = vf->priv->in.off_left  + (y / vf->priv->in.hres) *
+                il  = vf->priv->in.off_left  + y *
                       vf->priv->in.stride;
-                ir  = vf->priv->in.off_right + (y / vf->priv->in.hres) *
+                ir  = vf->priv->in.off_right + y *
                       vf->priv->in.stride;
                 for (x = 0; x < out_width; x++) {
                     dest[o    ]  = ana_convert(
