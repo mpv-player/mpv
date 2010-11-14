@@ -153,10 +153,10 @@ static void freeBuffers(FilterParam *f){
 	if(f->preFilterContext) sws_freeContext(f->preFilterContext);
 	f->preFilterContext=NULL;
 
-	if(f->preFilterBuf) free(f->preFilterBuf);
+	free(f->preFilterBuf);
 	f->preFilterBuf=NULL;
 
-	if(f->distCoeff) free(f->distCoeff);
+	free(f->distCoeff);
 	f->distCoeff=NULL;
 }
 

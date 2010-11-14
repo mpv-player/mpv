@@ -215,7 +215,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 
 static void uninit(struct vf_instance *vf)
 {
-	if (vf->priv->buf) free(vf->priv->buf);
+	free(vf->priv->buf);
 	free(vf->priv);
 }
 

@@ -141,7 +141,7 @@ static void add_line(struct menu_priv_s* priv, char* l) {
     return;
   }
 
-  if(priv->num_lines >= priv->buf_lines && priv->lines[priv->last_line])
+  if(priv->num_lines >= priv->buf_lines)
     free(priv->lines[priv->last_line]);
   else
     priv->num_lines++;

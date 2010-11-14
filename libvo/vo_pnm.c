@@ -556,14 +556,10 @@ static int control(uint32_t request, void *data)
 
 static void uninit(void)
 {
-    if (pnm_subdirs) {
-        free(pnm_subdirs);
-        pnm_subdirs = NULL;
-    }
-    if (pnm_outdir) {
-        free(pnm_outdir);
-        pnm_outdir = NULL;
-    }
+    free(pnm_subdirs);
+    pnm_subdirs = NULL;
+    free(pnm_outdir);
+    pnm_outdir = NULL;
 }
 
 /* ------------------------------------------------------------------------- */

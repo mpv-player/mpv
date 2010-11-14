@@ -673,12 +673,8 @@ static void demux_close_asf(demuxer_t *demuxer) {
 
     if (!asf) return;
 
-    if (asf->aud_repdata_sizes)
-      free(asf->aud_repdata_sizes);
-
-    if (asf->vid_repdata_sizes)
-      free(asf->vid_repdata_sizes);
-
+    free(asf->aud_repdata_sizes);
+    free(asf->vid_repdata_sizes);
     free(asf);
 }
 

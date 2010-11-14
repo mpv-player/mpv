@@ -132,7 +132,7 @@ static int config(struct vf_instance *vf,
 static void uninit(struct vf_instance *vf){
 	if(!vf->priv) return;
 
-	if(vf->priv->pv) free(vf->priv->pv);
+	free(vf->priv->pv);
 	vf->priv->pv= NULL;
 
 	free(vf->priv);

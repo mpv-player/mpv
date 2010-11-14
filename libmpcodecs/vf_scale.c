@@ -303,10 +303,8 @@ static int config(struct vf_instance *vf,
     }
     vf->priv->fmt=best;
 
-    if(vf->priv->palette){
-	free(vf->priv->palette);
-	vf->priv->palette=NULL;
-    }
+    free(vf->priv->palette);
+    vf->priv->palette=NULL;
     switch(best){
     case IMGFMT_RGB8: {
       /* set 332 palette for 8 bpp */
@@ -526,7 +524,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
 static void uninit(struct vf_instance *vf){
     if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
     if(vf->priv->ctx2) sws_freeContext(vf->priv->ctx2);
-    if(vf->priv->palette) free(vf->priv->palette);
+    free(vf->priv->palette);
     free(vf->priv);
 }
 

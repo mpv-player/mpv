@@ -455,8 +455,7 @@ static int preinit(const char *arg)
 
 static void uninit(void)
 {
-    if (ggi_conf.driver)
-        free(ggi_conf.driver);
+    free(ggi_conf.driver);
 
 #ifdef CONFIG_GGIWMH
     ggiWmhDetach(ggi_conf.vis);

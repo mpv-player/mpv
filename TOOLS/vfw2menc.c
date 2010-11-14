@@ -295,9 +295,9 @@ int main(int argc, char *argv[])
     }
 
 cleanup:
-    if (driver) free(driver);
-    if (fourcc) free(fourcc);
-    if (filename) free(filename);
+    free(driver);
+    free(fourcc);
+    free(filename);
     if (hDriver) CloseDriver(hDriver, 0, 0);
     if ((coinit == S_OK) || coinit == S_FALSE) CoUninitialize();
     return ret;

@@ -128,8 +128,6 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 }
 
 static void uninit(struct vf_instance *vf){
-    if(!vf->priv) return;
-
     av_free(vf->priv);
     vf->priv=NULL;
 }

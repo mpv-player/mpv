@@ -507,8 +507,7 @@ rtsp_send_describe:
   }
 autherr:
 
-  if (authfield)
-     free(authfield);
+  free(authfield);
 
   if ( status<200 || status>299 )
   {

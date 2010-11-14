@@ -131,8 +131,7 @@ rtp_session_free (struct rtp_rtsp_session_t *st)
   if (st->rtcp_socket != -1)
     close (st->rtcp_socket);
 
-  if (st->control_url)
-    free (st->control_url);
+  free (st->control_url);
   free (st);
 }
 

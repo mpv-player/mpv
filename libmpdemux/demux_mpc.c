@@ -199,8 +199,6 @@ static void demux_mpc_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
 static void demux_close_mpc(demuxer_t* demuxer) {
   da_priv_t* priv = demuxer->priv;
 
-  if(!priv)
-    return;
   free(priv);
 }
 

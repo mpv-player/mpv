@@ -322,8 +322,6 @@ static int nsv_check_file ( demuxer_t* demuxer )
 static void demux_close_nsv(demuxer_t* demuxer) {
     nsv_priv_t* priv = demuxer->priv;
 
-    if(!priv)
-        return;
     free(priv);
 
 }

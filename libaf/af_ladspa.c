@@ -562,7 +562,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
 
         /* set new setup->myname */
 
-        if(setup->myname) free(setup->myname);
+        free(setup->myname);
         setup->myname = calloc(strlen(af_info_ladspa.name)+strlen(setup->file)+
                                                     strlen(setup->label)+6, 1);
         snprintf(setup->myname, strlen(af_info_ladspa.name)+
@@ -652,8 +652,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
 static void uninit(struct af_instance_s *af) {
     int i;
 
-    if (af->data)
-        free(af->data);
+    free(af->data);
     if (af->setup) {
         af_ladspa_t *setup = (af_ladspa_t*) af->setup;
         const LADSPA_Descriptor *pdes = setup->plugin_descriptor;
@@ -671,36 +670,24 @@ static void uninit(struct af_instance_s *af) {
             free(setup->chhandles);
         }
 
-        if (setup->file)
-            free(setup->file);
-        if (setup->label)
-            free(setup->label);
-        if (setup->inputcontrolsmap)
-            free(setup->inputcontrolsmap);
-        if (setup->inputcontrols)
-            free(setup->inputcontrols);
-        if (setup->outputcontrolsmap)
-            free(setup->outputcontrolsmap);
-        if (setup->outputcontrols)
-            free(setup->outputcontrols);
-        if (setup->inputs)
-            free(setup->inputs);
-        if (setup->outputs)
-            free(setup->outputs);
+        free(setup->file);
+        free(setup->label);
+        free(setup->inputcontrolsmap);
+        free(setup->inputcontrols);
+        free(setup->outputcontrolsmap);
+        free(setup->outputcontrols);
+        free(setup->inputs);
+        free(setup->outputs);
 
         if (setup->inbufs) {
-            for(i=0; i<setup->nch; i++) {
-                if (setup->inbufs[i])
-                    free(setup->inbufs[i]);
-            }
+            for(i=0; i<setup->nch; i++)
+                free(setup->inbufs[i]);
             free(setup->inbufs);
         }
 
         if (setup->outbufs) {
-            for(i=0; i<setup->nch; i++) {
-                if (setup->outbufs[i])
-                    free(setup->outbufs[i]);
-            }
+            for(i=0; i<setup->nch; i++)
+                free(setup->outbufs[i]);
             free(setup->outbufs);
         }
 
@@ -753,17 +740,13 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data) {
                                                                 setup->myname);
 
             if(setup->inbufs) {
-                for(i=0; i<setup->nch; i++) {
-                    if(setup->inbufs[i])
-                        free(setup->inbufs[i]);
-                }
+                for(i=0; i<setup->nch; i++)
+                    free(setup->inbufs[i]);
                 free(setup->inbufs);
             }
             if(setup->outbufs) {
-                for(i=0; i<setup->nch; i++) {
-                    if(setup->outbufs[i])
-                        free(setup->outbufs[i]);
-                }
+                for(i=0; i<setup->nch; i++)
+                    free(setup->outbufs[i]);
                 free(setup->outbufs);
             }
         } /* everything is freed */

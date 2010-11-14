@@ -220,7 +220,7 @@ static int preinit(const char *subdevice)
 {
 	if (subdevice)
 	{
-	    if (fb_dev_name) free(fb_dev_name);
+	    free(fb_dev_name);
 	    fb_dev_name = strdup(subdevice);
 	}
 	return fb_preinit(0);
@@ -413,7 +413,7 @@ static void uninit(void)
 			mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] Can't restore original cmap\n");
 		fb_cmap_changed = 0;
 	}
-	if(next_frame) free(next_frame);
+	free(next_frame);
 	if (fb_dev_fd >= 0) {
 		if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_orig_vinfo))
 			mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] Can't reset original fb_var_screeninfo: %s\n", strerror(errno));

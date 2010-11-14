@@ -64,8 +64,7 @@ static void demux_close_aac(demuxer_t *demuxer)
 	if(!priv)
 		return;
 
-	if(priv->buf)
-		free(priv->buf);
+	free(priv->buf);
 
 	free(demuxer->priv);
 

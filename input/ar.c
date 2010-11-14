@@ -277,8 +277,7 @@ int mp_input_ar_init(void)
         (*queue)->addElement(queue, cookies[i], 0);
 
     // not used anymore
-    if (cookies != NULL)
-        free(cookies);
+    free(cookies);
 
     // Start data delivery to the queue.
     (*queue)->start(queue);
@@ -290,8 +289,7 @@ int mp_input_ar_init(void)
     return 0;
 
 mp_input_ar_init_error:
-    if (cookies != NULL)
-        free(cookies);
+    free(cookies);
     if (hidDeviceInterface != NULL) {
         if (*hidDeviceInterface != NULL) {
             (*hidDeviceInterface)->close(hidDeviceInterface);

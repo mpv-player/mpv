@@ -49,10 +49,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     int i;
 
     // Free prevous delay queues
-    for(i=0;i<af->data->nch;i++){
-      if(s->q[i])
-	free(s->q[i]);
-    }
+    for(i=0;i<af->data->nch;i++)
+      free(s->q[i]);
 
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->nch    = ((af_data_t*)arg)->nch;
@@ -112,13 +110,11 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 static void uninit(struct af_instance_s* af)
 {
   int i;
-  if(af->data)
-    free(af->data);
+
+  free(af->data);
   for(i=0;i<AF_NCH;i++)
-    if(((af_delay_t*)(af->setup))->q[i])
       free(((af_delay_t*)(af->setup))->q[i]);
-  if(af->setup)
-    free(af->setup);
+  free(af->setup);
 }
 
 // Filter data through filter

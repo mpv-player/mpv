@@ -60,12 +60,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 // Deallocate memory
 static void uninit(struct af_instance_s* af)
 {
-    if(af->data)
-        free(af->data);
-    if(af->setup){
-        af_sweept *s = af->setup;
-        free(s);
-    }
+    free(af->data);
+    free(af->setup);
 }
 
 // Filter data through filter

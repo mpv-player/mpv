@@ -1163,8 +1163,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
 
 void init_vo_spudec(struct MPContext *mpctx)
 {
-  if (vo_spudec)
-    spudec_free(vo_spudec);
+  spudec_free(vo_spudec);
   mpctx->initialized_flags &= ~INITIALIZED_SPUDEC;
   vo_spudec = NULL;
 

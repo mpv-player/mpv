@@ -83,7 +83,7 @@ static void entry_set_text(menu_t* menu, list_entry_t* e) {
     mp_property_print(e->prop, menu->ctx);
   int l,edit = (mpriv->edit && e == mpriv->p.current);
   if(!val || !val[0]) {
-    if(val) free(val);
+    free(val);
     if(mpriv->hide_na) {
       e->p.hide = 1;
       return;
@@ -92,7 +92,7 @@ static void entry_set_text(menu_t* menu, list_entry_t* e) {
   } else if(mpriv->hide_na)
       e->p.hide = 0;
   l = strlen(e->name) + 2 + strlen(val) + (edit ? 4 : 0) + 1;
-  if(e->p.txt) free(e->p.txt);
+  free(e->p.txt);
   e->p.txt = malloc(l);
   sprintf(e->p.txt,"%s: %s%s%s",e->name,edit ? "> " : "",val,edit ? " <" : "");
   free(val);
@@ -153,7 +153,8 @@ static int parse_args(menu_t* menu,char* args) {
     txt = asx_get_attrib("txt",attribs);
     if(!(name || txt)) {
       mp_tmsg(MSGT_OSD_MENU,MSGL_WARN,"[MENU] Pref menu entry definitions need a valid 'property' or 'txt' attribute (line %d).\n",parser->line);
-      if(txt) free(txt), txt = NULL;
+      free(txt);
+      txt = NULL;
       goto next_element;
     }
     m = calloc(1,sizeof(struct list_entry_s));
@@ -176,8 +177,8 @@ static int parse_args(menu_t* menu,char* args) {
 
   next_element:
     free(element);
-    if(body) free(body);
-    if(name) free(name);
+    free(body);
+    free(name);
     asx_free_attribs(attribs);
   }
 }
@@ -253,10 +254,10 @@ static void read_cmd(menu_t* menu,int cmd) {
 
 static void free_entry(list_entry_t* entry) {
   free(entry->p.txt);
-  if(entry->name) free(entry->name);
-  if(entry->txt)  free(entry->txt);
-  if(entry->prop) free(entry->prop);
-  if(entry->menu) free(entry->menu);
+  free(entry->name);
+  free(entry->txt);
+  free(entry->prop);
+  free(entry->menu);
   free(entry);
 }
 

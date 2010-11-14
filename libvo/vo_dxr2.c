@@ -790,10 +790,8 @@ static void uninit(void)
     close(dxr2_fd);
     dxr2_fd = -1;
   }
-  if(sub_img) {
-    free(sub_img);
-    sub_img = NULL;
-  }
+  free(sub_img);
+  sub_img = NULL;
   if(sub_vo) {
     int cc = vo_config_count;
     vo_config_count = sub_config_count;

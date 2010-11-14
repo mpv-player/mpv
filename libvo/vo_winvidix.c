@@ -312,11 +312,8 @@ static void uninit(void){
     if ( !vo_config_count ) return;
     vidix_term();
 
-    if (vidix_name){
-	free(vidix_name);
-	vidix_name = NULL;
-    }
-    //
+    free(vidix_name);
+    vidix_name = NULL;
 }
 
 static int preinit(const char *arg){

@@ -345,7 +345,7 @@ static void uninit(void)
         [finalPool release];
     }
 
-    if (buffer_name) free(buffer_name);
+    free(buffer_name);
     buffer_name = NULL;
 }
 

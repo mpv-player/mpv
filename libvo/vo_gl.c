@@ -1114,9 +1114,9 @@ static void
 uninit(void)
 {
   uninitGl();
-  if (custom_prog) free(custom_prog);
+  free(custom_prog);
   custom_prog = NULL;
-  if (custom_tex) free(custom_tex);
+  free(custom_tex);
   custom_tex = NULL;
   uninit_mpglcontext(&glctx);
 }

@@ -234,16 +234,14 @@ static int query_format(uint32_t format)
 // WARNING: config(...) also uses this
 static void uninit(void)
 {
-    if(image)
-		free(image);
+	free(image);
 	image = NULL;
 
 	if(yuv_out)
 		fclose(yuv_out);
 	yuv_out = NULL;
 
-	if (yuv_filename)
-		free(yuv_filename);
+	free(yuv_filename);
 	yuv_filename = NULL;
 	image_width = 0;
 	image_height = 0;

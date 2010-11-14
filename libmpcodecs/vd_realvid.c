@@ -375,8 +375,7 @@ static void uninit(sh_video_t *sh){
 #endif
 	rv_handle=NULL;
 	initialized = 0;
-	if (buffer)
-	    free(buffer);
+	free(buffer);
 	buffer = NULL;
 	bufsz = 0;
 }
@@ -406,7 +405,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	if(len<=0 || flags&2) return NULL; // skipped frame || hardframedrop
 
 	if (bufsz < sh->disp_w*sh->disp_h*3/2) {
-	    if (buffer) free(buffer);
+	    free(buffer);
 	    bufsz = sh->disp_w*sh->disp_h*3/2;
 	    buffer=malloc(bufsz);
 	    if (!buffer) return 0;

@@ -93,14 +93,10 @@ static void read_cmd(menu_t* menu,int cmd) {
 }
 
 static void free_entry(list_entry_t* entry) {
-  if(entry->ok)
-    free(entry->ok);
-  if(entry->cancel)
-    free(entry->cancel);
-  if(entry->left)
-    free(entry->left);
-  if(entry->right)
-    free(entry->right);
+  free(entry->ok);
+  free(entry->cancel);
+  free(entry->left);
+  free(entry->right);
   free(entry->p.txt);
   free(entry);
 }
@@ -132,7 +128,7 @@ static int parse_args(menu_t* menu,char* args) {
     if(!name) {
       mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] List menu entry definitions need a name (line %d).\n",parser->line);
       free(element);
-      if(body) free(body);
+      free(body);
       asx_free_attribs(attribs);
       continue;
     }
@@ -145,7 +141,7 @@ static int parse_args(menu_t* menu,char* args) {
     menu_list_add_entry(menu,m);
 
     free(element);
-    if(body) free(body);
+    free(body);
     asx_free_attribs(attribs);
   }
 }

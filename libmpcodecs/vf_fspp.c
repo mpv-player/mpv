@@ -576,13 +576,13 @@ static void uninit(struct vf_instance *vf)
 {
     if(!vf->priv) return;
 
-    if(vf->priv->temp) av_free(vf->priv->temp);
+    av_free(vf->priv->temp);
     vf->priv->temp= NULL;
-    if(vf->priv->src)  av_free(vf->priv->src);
+    av_free(vf->priv->src);
     vf->priv->src= NULL;
-    //if(vf->priv->avctx) free(vf->priv->avctx);
+    //free(vf->priv->avctx);
     //vf->priv->avctx= NULL;
-    if(vf->priv->non_b_qp) free(vf->priv->non_b_qp);
+    free(vf->priv->non_b_qp);
     vf->priv->non_b_qp= NULL;
 
     av_free(vf->priv);

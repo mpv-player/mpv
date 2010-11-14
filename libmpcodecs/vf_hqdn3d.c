@@ -44,11 +44,17 @@ struct vf_priv_s {
 
 /***************************************************************************/
 
-static void uninit(struct vf_instance *vf){
-	if(vf->priv->Line){free(vf->priv->Line);vf->priv->Line=NULL;}
-	if(vf->priv->Frame[0]){free(vf->priv->Frame[0]);vf->priv->Frame[0]=NULL;}
-	if(vf->priv->Frame[1]){free(vf->priv->Frame[1]);vf->priv->Frame[1]=NULL;}
-	if(vf->priv->Frame[2]){free(vf->priv->Frame[2]);vf->priv->Frame[2]=NULL;}
+static void uninit(struct vf_instance *vf)
+{
+	free(vf->priv->Line);
+	free(vf->priv->Frame[0]);
+	free(vf->priv->Frame[1]);
+	free(vf->priv->Frame[2]);
+
+	vf->priv->Line     = NULL;
+	vf->priv->Frame[0] = NULL;
+	vf->priv->Frame[1] = NULL;
+	vf->priv->Frame[2] = NULL;
 }
 
 static int config(struct vf_instance *vf,

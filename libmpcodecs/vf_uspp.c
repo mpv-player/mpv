@@ -303,9 +303,9 @@ static void uninit(struct vf_instance *vf){
     if(!vf->priv) return;
 
     for(i=0; i<3; i++){
-        if(vf->priv->temp[i]) free(vf->priv->temp[i]);
+        free(vf->priv->temp[i]);
         vf->priv->temp[i]= NULL;
-        if(vf->priv->src[i]) free(vf->priv->src[i]);
+        free(vf->priv->src[i]);
         vf->priv->src[i]= NULL;
     }
     for(i=0; i<BLOCK*BLOCK; i++){

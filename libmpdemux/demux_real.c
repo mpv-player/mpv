@@ -1625,8 +1625,7 @@ skip_this_chunk:
 #else
 		stream_skip(demuxer->stream, codec_data_size - tmp);
 #endif
-		if (mimet)
-		    free (mimet);
+		free (mimet);
 		break;
 //	    }
 	    }
@@ -1765,12 +1764,9 @@ static void demux_close_real(demuxer_t *demuxer)
 
     if (priv){
     	for(i=0; i<MAX_STREAMS; i++)
-	    if(priv->index_table[i])
-	        free(priv->index_table[i]);
-    if (priv->audio_buf)
-        free(priv->audio_buf);
-    if (priv->audio_timestamp)
-        free(priv->audio_timestamp);
+	    free(priv->index_table[i]);
+	free(priv->audio_buf);
+	free(priv->audio_timestamp);
 	free(priv);
     }
 

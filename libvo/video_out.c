@@ -643,8 +643,7 @@ range_t *str2range(char *s)
 	r[i].min = r[i].max = -1;
 	return r;
 out_err:
-	if (r)
-		free(r);
+	free(r);
 	return NULL;
 }
 

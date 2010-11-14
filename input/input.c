@@ -659,8 +659,7 @@ void mp_input_rm_cmd_fd(struct input_ctx *ictx, int fd)
     return;
   if(cmd_fds[i].close_func)
     cmd_fds[i].close_func(cmd_fds[i].fd);
-  if(cmd_fds[i].buffer)
-    talloc_free(cmd_fds[i].buffer);
+  talloc_free(cmd_fds[i].buffer);
 
   if (i + 1 < ictx->num_cmd_fd)
       memmove(&cmd_fds[i], &cmd_fds[i+1],
@@ -1131,10 +1130,8 @@ static mp_cmd_t* interpret_key(struct input_ctx *ictx, int code)
     ictx->num_key_down--;
     ictx->last_key_down = 0;
     ictx->ar_state = -1;
-    if (ictx->ar_cmd) {
-      mp_cmd_free(ictx->ar_cmd);
-      ictx->ar_cmd = NULL;
-    }
+    mp_cmd_free(ictx->ar_cmd);
+    ictx->ar_cmd = NULL;
     return ret;
 }
 
@@ -1481,8 +1478,7 @@ static void bind_keys(struct input_ctx *ictx,
     memset(&bind_section->cmd_binds[i],0,2*sizeof(mp_cmd_bind_t));
     bind = &bind_section->cmd_binds[i];
   }
-  if(bind->cmd)
-      talloc_free(bind->cmd);
+  talloc_free(bind->cmd);
   bind->cmd = talloc_strdup(bind_section->cmd_binds, cmd);
   memcpy(bind->input,keys,(MP_MAX_KEY_DOWN+1)*sizeof(int));
 }
@@ -1652,8 +1648,7 @@ void mp_input_set_section(struct input_ctx *ictx, char *name)
 
     ictx->cmd_binds = NULL;
     ictx->cmd_binds_default = NULL;
-    if (ictx->section)
-        talloc_free(ictx->section);
+    talloc_free(ictx->section);
     if (name)
         ictx->section = talloc_strdup(ictx, name);
     else

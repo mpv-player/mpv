@@ -190,11 +190,8 @@ static void demux_close_fli(demuxer_t* demuxer) {
   if(!frames)
     return;
 
-  if(frames->filepos)
-    free(frames->filepos);
-  if(frames->frame_size)
-    free(frames->frame_size);
-
+  free(frames->filepos);
+  free(frames->frame_size);
   free(frames);
 
 }

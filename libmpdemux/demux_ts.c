@@ -1102,19 +1102,15 @@ static void demux_close_ts(demuxer_t * demuxer)
 
 	if(priv)
 	{
-		if(priv->pat.section.buffer)
-			free(priv->pat.section.buffer);
-		if(priv->pat.progs)
-			free(priv->pat.progs);
+		free(priv->pat.section.buffer);
+		free(priv->pat.progs);
 
 		if(priv->pmt)
 		{
 			for(i = 0; i < priv->pmt_cnt; i++)
 			{
-				if(priv->pmt[i].section.buffer)
-					free(priv->pmt[i].section.buffer);
-				if(priv->pmt[i].es)
-					free(priv->pmt[i].es);
+				free(priv->pmt[i].section.buffer);
+				free(priv->pmt[i].es);
 			}
 			free(priv->pmt);
 		}

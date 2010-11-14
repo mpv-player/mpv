@@ -227,7 +227,7 @@ static int realtime_samplecounter_available(char *dev)
 
 
 error:
-    if (silence != NULL) free(silence);
+    free(silence);
     if (fd >= 0) {
 	// remove the 0 bytes from the above measurement from the
 	// audio driver's STREAMS queue

@@ -246,7 +246,7 @@ static demuxer_t* demux_mpg_open(demuxer_t* demuxer) {
 
 static void demux_close_mpg(demuxer_t* demuxer) {
   mpg_demuxer_t* mpg_d = demuxer->priv;
-  if (mpg_d) free(mpg_d);
+  free(mpg_d);
 }
 
 

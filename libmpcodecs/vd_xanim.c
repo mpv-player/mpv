@@ -771,8 +771,7 @@ static void uninit(sh_video_t *sh)
 	    close_func();
 	}
     dlclose(priv->file_handler);
-    if (priv->decinfo != NULL)
-	free(priv->decinfo);
+    free(priv->decinfo);
     free(priv);
 }
 

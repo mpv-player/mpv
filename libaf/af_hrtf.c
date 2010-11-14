@@ -349,32 +349,19 @@ static void uninit(struct af_instance_s *af)
     if(af->setup) {
 	af_hrtf_t *s = af->setup;
 
-	if(s->lf)
-	    free(s->lf);
-	if(s->rf)
-	    free(s->rf);
-	if(s->lr)
-	    free(s->lr);
-	if(s->rr)
-	    free(s->rr);
-	if(s->cf)
-	    free(s->cf);
-	if(s->cr)
-	    free(s->cr);
-	if(s->ba_l)
-	    free(s->ba_l);
-	if(s->ba_r)
-	    free(s->ba_r);
-	if(s->ba_ir)
-	    free(s->ba_ir);
-	if(s->fwrbuf_l)
-	   free(s->fwrbuf_l);
-	if(s->fwrbuf_r)
-	   free(s->fwrbuf_r);
-	if(s->fwrbuf_lr)
-	   free(s->fwrbuf_lr);
-	if(s->fwrbuf_rr)
-	   free(s->fwrbuf_rr);
+	free(s->lf);
+	free(s->rf);
+	free(s->lr);
+	free(s->rr);
+	free(s->cf);
+	free(s->cr);
+	free(s->ba_l);
+	free(s->ba_r);
+	free(s->ba_ir);
+	free(s->fwrbuf_l);
+	free(s->fwrbuf_r);
+	free(s->fwrbuf_lr);
+	free(s->fwrbuf_rr);
 	free(af->setup);
     }
     if(af->data)

@@ -115,7 +115,7 @@ static int control(struct vf_instance *vf, int request, void* data){
 }
 
 static void uninit(struct vf_instance *vf) {
-    if (vf->priv) free(vf->priv);
+    free(vf->priv);
 }
 
 static int vf_open(vf_instance_t *vf, char *args){

@@ -362,11 +362,8 @@ static void uninit(void)
         return;
     vidix_term();
 
-    if (vidix_name)
-    {
-        free(vidix_name);
-        vidix_name = NULL;
-    }
+    free(vidix_name);
+    vidix_name = NULL;
 
     vo_x11_uninit();
 }

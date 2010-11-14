@@ -129,7 +129,7 @@ static void uninit(sh_video_t *sh){
     int i;
     vd_libmpeg2_ctx_t *context = sh->context;
     mpeg2dec_t * mpeg2dec = context->mpeg2dec;
-    if (mpeg2dec->pending_buffer) free(mpeg2dec->pending_buffer);
+    free(mpeg2dec->pending_buffer);
     mpeg2dec->decoder.convert=NULL;
     mpeg2dec->decoder.convert_id=NULL;
     mpeg2_close (mpeg2dec);

@@ -158,8 +158,7 @@ void free_registry(void)
     while (t)
     {
 	reg_handle_t* f = t;
-        if (t->name)
-	    free(t->name);
+	free(t->name);
 	t=t->prev;
         free(f);
     }
@@ -380,8 +379,7 @@ long __stdcall RegCloseKey(long key)
 	handle->prev->next=handle->next;
     if(handle->next)
 	handle->next->prev=handle->prev;
-    if(handle->name)
-	free(handle->name);
+    free(handle->name);
     if(handle==head)
 	head=head->prev;
     free(handle);

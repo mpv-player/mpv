@@ -624,8 +624,7 @@ int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
   mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Reallocating memory in module %s, "
 	 "old len = %i, new len = %i\n",af->info->name,af->data->len,len);
   // If there is a buffer free it
-  if(af->data->audio)
-    free(af->data->audio);
+  free(af->data->audio);
   // Create new buffer and check that it is OK
   af->data->audio = malloc(len);
   if(!af->data->audio){

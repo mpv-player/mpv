@@ -238,8 +238,7 @@ static int open_dir(menu_t* menu,char* args) {
 
   menu_list_init(menu);
 
-  if(mpriv->dir)
-    free(mpriv->dir);
+  free(mpriv->dir);
   mpriv->dir = strdup(args);
   if(mpriv->p.title && mpriv->p.title != mpriv->title && mpriv->p.title != cfg_dflt.p.title)
     free(mpriv->p.title);

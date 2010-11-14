@@ -457,8 +457,7 @@ static void demux_close_film(demuxer_t* demuxer) {
 
   if(!film_data)
     return;
-  if(film_data->chunks)
-    free(film_data->chunks);
+  free(film_data->chunks);
   free(film_data);
 
 }

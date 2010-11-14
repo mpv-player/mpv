@@ -179,8 +179,6 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
 static void demux_close_mf(demuxer_t* demuxer) {
   mf_t *mf = demuxer->priv;
 
-  if(!mf)
-    return;
   free(mf);
 }
 

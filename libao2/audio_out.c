@@ -143,10 +143,8 @@ const ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate
       while(ao_list[0][0]){
         char* ao=ao_list[0];
         int ao_len;
-        if (ao_subdevice) {
-            free(ao_subdevice);
-            ao_subdevice = NULL;
-        }
+        free(ao_subdevice);
+        ao_subdevice = NULL;
         ao_subdevice=strchr(ao,':');
         if(ao_subdevice){
             ao_len = ao_subdevice - ao;
@@ -175,10 +173,8 @@ const ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate
         ++ao_list;
         if(!(ao_list[0])) return NULL; // do NOT fallback to others
       }
-    if (ao_subdevice) {
-        free(ao_subdevice);
-        ao_subdevice = NULL;
-    }
+    free(ao_subdevice);
+    ao_subdevice = NULL;
 
     mp_tmsg(MSGT_AO, MSGL_V, "Trying every known audio driver...\n");
 

@@ -70,7 +70,7 @@ static unsigned char* parseH264ConfigStr( char const* configStr,
 
     psz += strlen(psz)+1;
     }
-    if( dup ) free( dup );
+    free( dup );
 
     return cfg;
 }

@@ -126,8 +126,7 @@ static void uninit(sh_audio_t *sh) {
   if (ctx) {
     speex_bits_destroy(&ctx->bits);
     speex_decoder_destroy(ctx->dec_context);
-    if (ctx->hdr)
-      free(ctx->hdr);
+    free(ctx->hdr);
     free(ctx);
   }
   ctx = NULL;

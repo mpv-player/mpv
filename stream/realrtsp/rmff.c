@@ -847,9 +847,9 @@ void rmff_free_header(rmff_header_t *h) {
 
   if (!h) return;
 
-  if (h->fileheader) free(h->fileheader);
-  if (h->prop) free(h->prop);
-  if (h->data) free(h->data);
+  free(h->fileheader);
+  free(h->prop);
+  free(h->data);
   if (h->cont)
   {
     free(h->cont->title);

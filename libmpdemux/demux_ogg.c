@@ -436,11 +436,10 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os,
                 sh_sub_t *sh;
 
                 // in case of malicious files with more than one lang per track:
-                if (ogg_d->text_langs[index])
-                    free(ogg_d->text_langs[index]);
+                free(ogg_d->text_langs[index]);
                 ogg_d->text_langs[index] = strdup(val);
                 sh = d->s_streams[index];
-                if (sh && sh->lang)
+                if (sh)
                     free(sh->lang);
                 if (sh)
                     sh->lang = strdup(val);
@@ -1606,13 +1605,11 @@ static void demux_close_ogg(demuxer_t *demuxer)
         }
         free(ogg_d->subs);
     }
-    if (ogg_d->syncpoints)
-        free(ogg_d->syncpoints);
-    if (ogg_d->text_ids)
-        free(ogg_d->text_ids);
+    free(ogg_d->syncpoints);
+    free(ogg_d->text_ids);
     if (ogg_d->text_langs) {
         for (i = 0; i < ogg_d->n_text; i++)
-            if (ogg_d->text_langs[i]) free(ogg_d->text_langs[i]);
+            free(ogg_d->text_langs[i]);
         free(ogg_d->text_langs);
     }
     free(ogg_d);

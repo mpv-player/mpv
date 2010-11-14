@@ -313,7 +313,7 @@ static inline void resize_demux_packet(demux_packet_t* dp, int len)
   }
   else
   {
-     if(dp->buffer) free(dp->buffer);
+     free(dp->buffer);
      dp->buffer=NULL;
   }
   dp->len=len;
@@ -338,7 +338,7 @@ static inline void free_demux_packet(demux_packet_t* dp){
   if (dp->master==NULL){  //dp is a master packet
     dp->refcount--;
     if (dp->refcount==0){
-      if (dp->buffer) free(dp->buffer);
+      free(dp->buffer);
       free(dp);
     }
     return;

@@ -291,7 +291,7 @@ static int rtsp_get_answers(rtsp_t *s) {
     if (!strncasecmp(answer,"Server:",7)) {
       char *buf = malloc(strlen(answer));
       sscanf(answer,"%*s %s",buf);
-      if (s->server) free(s->server);
+      free(s->server);
       s->server=strdup(buf);
       free(buf);
     }
@@ -612,7 +612,7 @@ char *rtsp_search_answers(rtsp_t *s, const char *tag) {
 
 void rtsp_set_session(rtsp_t *s, const char *id) {
 
-  if (s->session) free(s->session);
+  free(s->session);
 
   s->session=strdup(id);
 
@@ -686,7 +686,7 @@ void rtsp_unschedule_field(rtsp_t *s, const char *string) {
     else
       ptr++;
   }
-  if (*ptr) free(*ptr);
+  free(*ptr);
   ptr++;
   do {
     *(ptr-1)=*ptr;

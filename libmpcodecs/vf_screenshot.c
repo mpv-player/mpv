@@ -75,7 +75,7 @@ static int config(struct vf_instance *vf,
     vf->priv->dh = d_height;
     vf->priv->stride = (3*vf->priv->dw+15)&~15;
 
-    if (vf->priv->buffer) free(vf->priv->buffer); // probably reconfigured
+    free(vf->priv->buffer); // probably reconfigured
     vf->priv->buffer = NULL;
 
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
@@ -278,7 +278,7 @@ static void uninit(vf_instance_t *vf)
     avcodec_close(vf->priv->avctx);
     av_freep(&vf->priv->avctx);
     if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
-    if (vf->priv->buffer) av_free(vf->priv->buffer);
+    av_free(vf->priv->buffer);
     free(vf->priv->outbuffer);
     free(vf->priv);
 }

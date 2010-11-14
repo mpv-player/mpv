@@ -728,7 +728,7 @@ static int OpenSPDIF(void)
                     ao_msg(MSGT_AO, MSGL_WARN,
                            "Could not retrieve the original stream format: [%4.4s]\n",
                            (char *)&err);
-                    if (p_format_list) free(p_format_list);
+                    free(p_format_list);
                     continue;
                 }
                 ao->b_revert = 1;
@@ -755,9 +755,9 @@ static int OpenSPDIF(void)
                 ao->stream_format = p_format_list[i_current_rate_format];
             else ao->stream_format = p_format_list[i_backup_rate_format]; /* And if we have to, any digital format will be just fine (highest rate possible). */
         }
-        if (p_format_list) free(p_format_list);
+        free(p_format_list);
     }
-    if (p_streams) free(p_streams);
+    free(p_streams);
 
     if (ao->i_stream_index < 0)
     {

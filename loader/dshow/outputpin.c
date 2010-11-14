@@ -792,12 +792,9 @@ static void COutputPin_SetNewFormat(COutputPin* This, const AM_MEDIA_TYPE* amt)
  */
 static void COutputPin_Destroy(COutputPin* This)
 {
-    if (This->mempin->vt)
-	free(This->mempin->vt);
-    if (This->mempin)
-	free(This->mempin);
-    if (This->vt)
-	free(This->vt);
+    free(This->mempin->vt);
+    free(This->mempin);
+    free(This->vt);
     FreeMediaType(&(This->type));
     free(This);
 }

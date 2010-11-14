@@ -382,10 +382,8 @@ void ivtv_destroy(void)
 		close(yuvdev);
 	if(-1 != fbdev)
 		close(fbdev);
-	if(NULL != outbuf)
-		free(outbuf);
-	if(NULL != memBase)
-		free(memBase);
+	free(outbuf);
+	free(memBase);
 }
 
 int ivtv_get_caps(vidix_capability_t *to)

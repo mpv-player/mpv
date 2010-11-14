@@ -91,8 +91,7 @@ long itemsInList;
 				}
 			}
 
-			if(parm)
-				free(parm);
+			free(parm);
 
 			err=noErr;
 		}

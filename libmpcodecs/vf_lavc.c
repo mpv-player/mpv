@@ -68,7 +68,7 @@ static int config(struct vf_instance *vf,
 	}
     }
 
-    if(vf->priv->outbuf) free(vf->priv->outbuf);
+    free(vf->priv->outbuf);
 
     vf->priv->outbuf_size=10000+width*height;  // must be enough!
     vf->priv->outbuf = malloc(vf->priv->outbuf_size);

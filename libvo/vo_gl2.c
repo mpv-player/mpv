@@ -236,8 +236,7 @@ static int initTextures(void)
   texpercx = (GLfloat) texture_width / (GLfloat) image_width;
   texpercy = (GLfloat) texture_height / (GLfloat) image_height;
 
-  if (texgrid)
-    free(texgrid);
+  free(texgrid);
   texgrid = calloc (texnumx * texnumy, sizeof (struct TexSquare));
 
   raw_line_len = image_width * image_bytes;
@@ -826,10 +825,8 @@ static void
 uninit(void)
 {
   if ( !vo_config_count ) return;
-  if (texgrid) {
-    free(texgrid);
-    texgrid = NULL;
-  }
+  free(texgrid);
+  texgrid = NULL;
   uninit_mpglcontext(&glctx);
 }
 

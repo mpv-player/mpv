@@ -280,10 +280,8 @@ static int control(uint32_t request, void *data)
 
 static void uninit(void)
 {
-    if (md5sum_outfile) {
-        free(md5sum_outfile);
-        md5sum_outfile = NULL;
-    }
+    free(md5sum_outfile);
+    md5sum_outfile = NULL;
     if (md5sum_fd) fclose(md5sum_fd);
 }
 

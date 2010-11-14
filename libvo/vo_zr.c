@@ -265,10 +265,8 @@ int init_zoran(zr_info_t *zr, int stretchx, int stretchy) {
 }
 
 void uninit_zoran(zr_info_t *zr) {
-	if (zr->image) {
-		free(zr->image);
-		zr->image=NULL;
-	}
+	free(zr->image);
+	zr->image=NULL;
 	while (zr->queue > zr->synco + 1) {
 		if (ioctl(zr->vdes, MJPIOC_SYNC, &zr->zs) < 0)
 			mp_msg(MSGT_VO, MSGL_ERR, "zr: error waiting for buffers to become free\n");
@@ -796,8 +794,7 @@ void vo_zr_revertoption(const m_option_t* opt,const char* param) {
   zr_parsing = 0;
 
   if (!strcasecmp(param, "zrdev")) {
-    if(zr->device)
-      free(zr->device);
+    free(zr->device);
     zr->device=NULL;
   } else if (!strcasecmp(param, "zrbw"))
     zr->bw=0;

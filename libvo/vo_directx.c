@@ -1177,8 +1177,7 @@ static void flip_page(void)
 	        mp_msg(MSGT_VO,MSGL_WARN,"<vo_directx><WARN>stride changed !!!! disabling direct rendering\n");
 	        vo_directrendering=0;
 	    }
-	    if (tmp_image)
-		    free(tmp_image);
+	    free(tmp_image);
 	    tmp_image = NULL;
 	    dstride = ddsdsf.lPitch;
 	    image = ddsdsf.lpSurface;

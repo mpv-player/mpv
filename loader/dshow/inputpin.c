@@ -857,8 +857,7 @@ static IPin* CBaseFilter_GetUnusedPin(CBaseFilter* This)
  */
 static void CBaseFilter_Destroy(CBaseFilter* This)
 {
-    if (This->vt)
-	free(This->vt);
+    free(This->vt);
     if (This->pin)
 	This->pin->vt->Release((IUnknown*)This->pin);
     if (This->unused_pin)
@@ -1190,8 +1189,7 @@ static void CBaseFilter2_Destroy(CBaseFilter2* This)
     Debug printf("CBaseFilter2_Destroy(%p) called\n", This);
     if (This->pin)
 	This->pin->vt->Release((IUnknown*) This->pin);
-    if (This->vt)
-	free(This->vt);
+    free(This->vt);
     free(This);
 }
 

@@ -49,7 +49,7 @@ static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
 
-	if(vf->priv->Line) free(vf->priv->Line);
+	free(vf->priv->Line);
         vf->priv->Line = malloc(width);
 	vf->priv->pmpi=NULL;
 //        vf->default_caps &= !VFCAP_ACCEPT_STRIDE;

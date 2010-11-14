@@ -218,8 +218,7 @@ static void uninit(int immed){
         }
     }
     fclose(fp);
-    if (ao_outputfilename)
-        free(ao_outputfilename);
+    free(ao_outputfilename);
     ao_outputfilename = NULL;
 }
 

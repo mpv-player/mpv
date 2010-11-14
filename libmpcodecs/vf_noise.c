@@ -370,10 +370,10 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 static void uninit(struct vf_instance *vf){
 	if(!vf->priv) return;
 
-	if(vf->priv->chromaParam.noise) av_free(vf->priv->chromaParam.noise);
+	av_free(vf->priv->chromaParam.noise);
 	vf->priv->chromaParam.noise= NULL;
 
-	if(vf->priv->lumaParam.noise) av_free(vf->priv->lumaParam.noise);
+	av_free(vf->priv->lumaParam.noise);
 	vf->priv->lumaParam.noise= NULL;
 
 	free(vf->priv);

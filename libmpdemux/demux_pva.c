@@ -515,11 +515,8 @@ static void demux_seek_pva(demuxer_t * demuxer,float rel_seek_secs,float audio_d
 
 static void demux_close_pva(demuxer_t * demuxer)
 {
-	if(demuxer->priv)
-	{
-		free(demuxer->priv);
-		demuxer->priv=NULL;
-	}
+	free(demuxer->priv);
+	demuxer->priv = NULL;
 }
 
 

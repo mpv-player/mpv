@@ -230,12 +230,9 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	token = strtok(NULL, (char *)&("\x0d\x0a"));
     }
 
-    if (buf)
-	free(buf);
-    if (opt)
-	free(opt);
-    if (param)
-	free(param);
+    free(buf);
+    free(opt);
+    free(param);
 }
 
 static int vivo_check_file(demuxer_t* demuxer){
@@ -745,14 +742,10 @@ static void demux_close_vivo(demuxer_t *demuxer)
     vivo_priv_t* priv=demuxer->priv;
 
     if (priv) {
-	if (priv->title)
-	    free(priv->title);
-        if (priv->author)
-	    free(priv->author);
-	if (priv->copyright)
-	    free(priv->copyright);
-	if (priv->producer)
-	   free(priv->producer);
+	free(priv->title);
+	free(priv->author);
+	free(priv->copyright);
+	free(priv->producer);
 	free(priv);
     }
     return;

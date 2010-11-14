@@ -868,10 +868,8 @@ void PE_UnloadLibrary(WINE_MODREF *wm)
 {
     TRACE(" unloading %s\n", wm->filename);
 
-    if (wm->filename)
-	free(wm->filename);
-    if (wm->short_filename)
-	free(wm->short_filename);
+    free(wm->filename);
+    free(wm->short_filename);
     HeapFree( GetProcessHeap(), 0, wm->deps );
     VirtualFree( (LPVOID)wm->module, 0, MEM_RELEASE );
     HeapFree( GetProcessHeap(), 0, wm );

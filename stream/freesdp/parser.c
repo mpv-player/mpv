@@ -471,8 +471,7 @@ fsdp_parse (const char *text_description, fsdp_description_t * dsc)
       }
       else if (!strncmp (fsdp_buf[0], "range", 5))
       {
-        if (dsc->a_range)
-          free (dsc->a_range);
+        free (dsc->a_range);
         dsc->a_range = strdup (fsdp_buf[1]);
       }
       else
@@ -770,8 +769,7 @@ fsdp_parse (const char *text_description, fsdp_description_t * dsc)
           }
           else if (!strncmp (fsdp_buf[0], "range", 5))
           {
-            if (media->a_range)
-              free (media->a_range);
+            free (media->a_range);
             media->a_range = strdup (fsdp_buf[1]);
           }
           else if (!strncmp (fsdp_buf[0], "framerate", 9))

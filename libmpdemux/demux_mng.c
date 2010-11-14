@@ -475,8 +475,7 @@ static void demux_mng_close(demuxer_t* demuxer)
             mng_cleanup(&mng_priv->h_mng);
 
         // free private data
-        if (mng_priv->canvas)
-            free(mng_priv->canvas);
+        free(mng_priv->canvas);
 
         free(mng_priv);
     }

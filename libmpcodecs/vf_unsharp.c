@@ -212,12 +212,12 @@ static void uninit( struct vf_instance *vf ) {
 
     fp = &vf->priv->lumaParam;
     for( z=0; z<sizeof(fp->SC)/sizeof(fp->SC[0]); z++ ) {
-	if( fp->SC[z] ) av_free( fp->SC[z] );
+	av_free( fp->SC[z] );
 	fp->SC[z] = NULL;
     }
     fp = &vf->priv->chromaParam;
     for( z=0; z<sizeof(fp->SC)/sizeof(fp->SC[0]); z++ ) {
-	if( fp->SC[z] ) av_free( fp->SC[z] );
+	av_free( fp->SC[z] );
 	fp->SC[z] = NULL;
     }
 

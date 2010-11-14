@@ -308,14 +308,10 @@ static int query_format(uint32_t format)
 
 static void uninit(void)
 {
-    if (jpeg_subdirs) {
-        free(jpeg_subdirs);
-        jpeg_subdirs = NULL;
-    }
-    if (jpeg_outdir) {
-        free(jpeg_outdir);
-        jpeg_outdir = NULL;
-    }
+    free(jpeg_subdirs);
+    jpeg_subdirs = NULL;
+    free(jpeg_outdir);
+    jpeg_outdir = NULL;
 }
 
 /* ------------------------------------------------------------------------- */

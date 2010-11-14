@@ -709,7 +709,7 @@ return 1;
 len_err_out:
   mp_tmsg(MSGT_HEADER, MSGL_FATAL, "Invalid length in ASF header!\n");
 err_out:
-  if (hdr) free(hdr);
-  if (streams) free(streams);
+  free(hdr);
+  free(streams);
   return 0;
 }

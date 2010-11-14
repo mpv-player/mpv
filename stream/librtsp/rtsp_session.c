@@ -89,11 +89,11 @@ static void rtsp_close(rtsp_t *s) {
     closesocket (s->s);
   }
 
-  if (s->path) free(s->path);
-  if (s->host) free(s->host);
-  if (s->mrl) free(s->mrl);
-  if (s->session) free(s->session);
-  if (s->user_agent) free(s->user_agent);
+  free(s->path);
+  free(s->host);
+  free(s->mrl);
+  free(s->session);
+  free(s->user_agent);
   free(s->server);
   rtsp_free_answers(s);
   rtsp_unschedule_all(s);

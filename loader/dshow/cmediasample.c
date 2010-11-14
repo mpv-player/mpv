@@ -351,7 +351,7 @@ static HRESULT STDCALL CMediaSample_GetMediaType(IMediaSample* This,
     }
 
     t = &((CMediaSample*)This)->media_type;
-    //    if(t.pbFormat)free(t.pbFormat);
+    //    free(t.pbFormat);
     *ppMediaType=CreateMediaType(t);
     //    *ppMediaType=0; //media type was not changed
     return 0;
