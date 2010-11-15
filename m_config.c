@@ -595,8 +595,11 @@ m_config_set_profile(m_config_t* config, m_profile_t* p) {
     mp_tmsg(MSGT_CFGPARSER, MSGL_WARN, "WARNING: Profile inclusion too deep.\n");
     return;
   }
+  int prev_mode = config->mode;
+  config->mode = M_CONFIG_FILE;
   config->profile_depth++;
   for(i = 0 ; i < p->num_opts ; i++)
     m_config_set_option(config,p->opts[2*i],p->opts[2*i+1]);
   config->profile_depth--;
+  config->mode = prev_mode;
 }
