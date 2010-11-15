@@ -2507,7 +2507,7 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
     /* difference to the wanted timecode. */
     for (int i = 0; i < mkv_d->num_indexes; i++)
         if (seek_id < 0 || mkv_d->indexes[i].tnum == seek_id) {
-            uint64_t diff =
+            int64_t diff =
                 target_timecode -
                 (int64_t) (mkv_d->indexes[i].timecode *
                            mkv_d->tc_scale / 1000000.0 + 0.5);
