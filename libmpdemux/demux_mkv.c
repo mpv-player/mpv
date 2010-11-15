@@ -2191,7 +2191,8 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
                     use_this_block = 0;
             } else if (block_bref != 0)
                 use_this_block = 0;
-        } else if (mkv_d->v_skip_to_keyframe)
+        }
+        if (mkv_d->v_skip_to_keyframe)
             use_this_block = 0;
 
         if (track->fix_i_bps && use_this_block) {
