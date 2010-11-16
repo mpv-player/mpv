@@ -23,6 +23,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "path.h"
 
 #include "libmpcodecs/img_format.h"
 #include "libmpcodecs/mp_image.h"
@@ -36,8 +37,6 @@
 #include "playtree.h"
 #include "input/input.h"
 #include "access_mpcontext.h"
-
-#define mp_basename(s) (strrchr((s),'/')==NULL?(char*)(s):(strrchr((s),'/')+1))
 
 struct list_entry_s {
   struct list_entry p;
@@ -155,7 +154,7 @@ static int op(menu_t* menu, char* args) {
   for( ; i != NULL ; i = i->next ) {
     e = calloc(1,sizeof(list_entry_t));
     if(i->files)
-      e->p.txt = mp_basename(i->files[0]);
+      e->p.txt = (char *)mp_basename(i->files[0]);
     else
       e->p.txt = "Group ...";
     e->pt = i;
