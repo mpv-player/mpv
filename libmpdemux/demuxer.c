@@ -1604,14 +1604,14 @@ int demuxer_sub_track_by_lang_and_default(struct demuxer *d, char *lang)
         lang += strspn(lang, ",");
         int len = strcspn(lang, ",");
         int id = -1;
-        for (int i = 0; i < MAX_A_STREAMS; i++) {
-            struct sh_audio *sh = d->a_streams[i];
+        for (int i = 0; i < MAX_S_STREAMS; i++) {
+            struct sh_sub *sh = d->s_streams[i];
             if (sh && (!len || sh->lang && strlen(sh->lang) == len &&
                        !memcmp(lang, sh->lang, len))) {
                 if (sh->default_track)
-                    return sh->aid;
+                    return sh->sid;
                 if (id < 0)
-                    id = sh->aid;
+                    id = sh->sid;
             }
         }
         if (!len)
