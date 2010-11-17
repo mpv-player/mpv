@@ -248,8 +248,9 @@ static int lavf_check_preferred_file(demuxer_t *demuxer){
         for (p = preferred_internal; *p; p++)
             if (matches_avinputformat_name(priv, *p))
                 return 0;
+        return DEMUXER_TYPE_LAVF_PREFERRED;
     }
-    return DEMUXER_TYPE_LAVF_PREFERRED;
+    return 0;
 }
 
 static uint8_t char2int(char c) {
