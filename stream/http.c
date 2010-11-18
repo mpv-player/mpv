@@ -604,10 +604,11 @@ http_set_uri( HTTP_header_t *http_hdr, const char *uri ) {
 	strcpy( http_hdr->uri, uri );
 }
 
-int
-http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, const char *password ) {
+static int
+http_add_authentication( HTTP_header_t *http_hdr, const char *username, const char *password, const char *auth_str ) {
 	char *auth = NULL, *usr_pass = NULL, *b64_usr_pass = NULL;
 	int encoded_len, pass_len=0, out_len;
+	size_t auth_len;
 	int res = -1;
 	if( http_hdr==NULL || username==NULL ) return -1;
 
@@ -639,13 +640,14 @@ http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, co
 
 	b64_usr_pass[out_len]='\0';
 
-	auth = malloc(encoded_len+22);
+	auth_len = encoded_len + 100;
+	auth = malloc(auth_len);
 	if( auth==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		goto out;
 	}
 
-	sprintf( auth, "Authorization: Basic %s", b64_usr_pass);
+	snprintf(auth, auth_len, "%s: Basic %s", auth_str, b64_usr_pass);
 	http_set_field( http_hdr, auth );
 	res = 0;
 
@@ -655,6 +657,16 @@ out:
 	free( auth );
 
 	return res;
+}
+
+int
+http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, const char *password ) {
+	return http_add_authentication(http_hdr, username, password, "Authorization");
+}
+
+int
+http_add_basic_proxy_authentication( HTTP_header_t *http_hdr, const char *username, const char *password ) {
+	return http_add_authentication(http_hdr, username, password, "Proxy-Authorization");
 }
 
 void

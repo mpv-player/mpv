@@ -63,6 +63,7 @@ void		http_set_field( HTTP_header_t *http_hdr, const char *field_name );
 void		http_set_method( HTTP_header_t *http_hdr, const char *method );
 void		http_set_uri( HTTP_header_t *http_hdr, const char *uri );
 int		http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, const char *password );
+int		http_add_basic_proxy_authentication( HTTP_header_t *http_hdr, const char *username, const char *password );
 
 void		http_debug_hdr( HTTP_header_t *http_hdr );
 
