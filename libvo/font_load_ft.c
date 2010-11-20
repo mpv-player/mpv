@@ -70,7 +70,11 @@ int vo_image_height = 0;
 int force_load_font;
 
 int using_freetype = 0;
+#ifdef CONFIG_FONTCONFIG
 int font_fontconfig = 1;
+#else
+int font_fontconfig = -1;
+#endif
 
 //// constants
 static unsigned int const colors = 256;
