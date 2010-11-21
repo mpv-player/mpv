@@ -2127,54 +2127,58 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
     res = decode_audio(sh_audio, 1);
     if (res < 0)
         return res;
-    double ptsdiff = written_audio_pts(mpctx) - mpctx->sh_video->pts -
-        mpctx->delay - audio_delay;
-    int bytes = ptsdiff * ao_data.bps / mpctx->opts.playback_speed;
-    bytes -= bytes % (ao_data.channels * af_fmt2bits(ao_data.format) / 8);
 
-    if (fabs(ptsdiff) > 300) // pts reset or just broken?
-        bytes = 0;
+    int bytes;
+    while (1) {
+        double written_pts = written_audio_pts(mpctx);
+        double ptsdiff = written_pts - mpctx->sh_video->pts - mpctx->delay
+            - audio_delay;
+        bytes = ptsdiff * ao_data.bps / mpctx->opts.playback_speed;
+        bytes -= bytes % (ao_data.channels * af_fmt2bits(ao_data.format) / 8);
 
-    if (bytes <= 0) {
+        if (fabs(ptsdiff) > 300   // pts reset or just broken?
+            || written_pts <= 0)  // ogg demuxers give packets without timing
+            bytes = 0;
+
+        if (bytes > 0)
+            break;
+
         mpctx->syncing_audio = false;
-        while (1) {
-            int a = FFMIN(-bytes, FFMAX(playsize, 20000));
-            int res = decode_audio(sh_audio, a);
-            bytes += sh_audio->a_out_buffer_len;
-            if (bytes >= 0) {
-                memmove(sh_audio->a_out_buffer,
-                        sh_audio->a_out_buffer +
-                        sh_audio->a_out_buffer_len - bytes,
-                        bytes);
-                sh_audio->a_out_buffer_len = bytes;
-                if (res < 0)
-                    return res;
-                return decode_audio(sh_audio, playsize);
-            }
-            sh_audio->a_out_buffer_len = 0;
+        int a = FFMIN(-bytes, FFMAX(playsize, 20000));
+        int res = decode_audio(sh_audio, a);
+        bytes += sh_audio->a_out_buffer_len;
+        if (bytes >= 0) {
+            memmove(sh_audio->a_out_buffer,
+                    sh_audio->a_out_buffer +
+                    sh_audio->a_out_buffer_len - bytes,
+                    bytes);
+            sh_audio->a_out_buffer_len = bytes;
             if (res < 0)
                 return res;
+            return decode_audio(sh_audio, playsize);
         }
-    } else {
-        int fillbyte = 0;
-        if ((ao_data.format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
-            fillbyte = 0x80;
-        if (bytes >= playsize) {
-            /* This case could fall back to the one below with
-             * bytes = playsize, but then silence would keep accumulating
-             * in a_out_buffer if the AO accepts less data than it asks for
-             * in playsize. */
-            char *p = malloc(playsize);
-            memset(p, fillbyte, playsize);
-            playsize = mpctx->audio_out->play(p, playsize, 0);
-            free(p);
-            mpctx->delay += opts->playback_speed*playsize/(double)ao_data.bps;
-            return ASYNC_PLAY_DONE;
-        }
-        mpctx->syncing_audio = false;
-        decode_audio_prepend_bytes(sh_audio, bytes, fillbyte);
-        return decode_audio(sh_audio, playsize);
+        sh_audio->a_out_buffer_len = 0;
+        if (res < 0)
+            return res;
     }
+    int fillbyte = 0;
+    if ((ao_data.format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
+        fillbyte = 0x80;
+    if (bytes >= playsize) {
+        /* This case could fall back to the one below with
+         * bytes = playsize, but then silence would keep accumulating
+         * in a_out_buffer if the AO accepts less data than it asks for
+         * in playsize. */
+        char *p = malloc(playsize);
+        memset(p, fillbyte, playsize);
+        playsize = mpctx->audio_out->play(p, playsize, 0);
+        free(p);
+        mpctx->delay += opts->playback_speed*playsize/(double)ao_data.bps;
+        return ASYNC_PLAY_DONE;
+    }
+    mpctx->syncing_audio = false;
+    decode_audio_prepend_bytes(sh_audio, bytes, fillbyte);
+    return decode_audio(sh_audio, playsize);
 }
 
 static int fill_audio_out_buffers(struct MPContext *mpctx)
