@@ -42,6 +42,7 @@
 #define MATROSKA_ID_FLAGFORCED                   0x55aa
 #define MATROSKA_ID_FLAGLACING                   0x9c
 #define MATROSKA_ID_MINCACHE                     0x6de7
+#define MATROSKA_ID_MAXCACHE                     0x6df8
 #define MATROSKA_ID_DEFAULTDURATION              0x23e383
 #define MATROSKA_ID_TRACKTIMECODESCALE           0x23314f
 #define MATROSKA_ID_MAXBLOCKADDITIONID           0x55ee
@@ -56,9 +57,11 @@
 #define MATROSKA_ID_PIXELHEIGHT                  0xba
 #define MATROSKA_ID_DISPLAYWIDTH                 0x54b0
 #define MATROSKA_ID_DISPLAYHEIGHT                0x54ba
+#define MATROSKA_ID_DISPLAYUNIT                  0x54b2
 #define MATROSKA_ID_FRAMERATE                    0x2383e3
 #define MATROSKA_ID_AUDIO                        0xe1
 #define MATROSKA_ID_SAMPLINGFREQUENCY            0xb5
+#define MATROSKA_ID_OUTPUTSAMPLINGFREQUENCY      0x78b5
 #define MATROSKA_ID_CHANNELS                     0x9f
 #define MATROSKA_ID_BITDEPTH                     0x6264
 #define MATROSKA_ID_CONTENTENCODINGS             0x6d80
@@ -77,6 +80,7 @@
 #define MATROSKA_ID_CUECLUSTERPOSITION           0xf1
 #define MATROSKA_ID_ATTACHMENTS                  0x1941a469
 #define MATROSKA_ID_ATTACHEDFILE                 0x61a7
+#define MATROSKA_ID_FILEDESCRIPTION              0x467e
 #define MATROSKA_ID_FILENAME                     0x466e
 #define MATROSKA_ID_FILEMIMETYPE                 0x4660
 #define MATROSKA_ID_FILEDATA                     0x465c
@@ -98,6 +102,7 @@
 #define MATROSKA_ID_CHAPTERDISPLAY               0x80
 #define MATROSKA_ID_CHAPSTRING                   0x85
 #define MATROSKA_ID_CHAPLANGUAGE                 0x437c
+#define MATROSKA_ID_CHAPCOUNTRY                  0x437e
 #define MATROSKA_ID_TAGS                         0x1254c367
 #define MATROSKA_ID_TAG                          0x7373
 #define MATROSKA_ID_TARGETS                      0x63c0
@@ -153,9 +158,11 @@ struct ebml_tags {
 struct ebml_chapter_display {
     struct bstr   chap_string;
     struct bstr  *chap_language;
+    struct bstr  *chap_country;
 
     int  n_chap_string;
     int  n_chap_language;
+    int  n_chap_country;
 };
 
 struct ebml_chapter_atom {
@@ -199,11 +206,13 @@ struct ebml_chapters {
 };
 
 struct ebml_attached_file {
+    struct bstr   file_description;
     struct bstr   file_name;
     struct bstr   file_mime_type;
     struct bstr   file_data;
     uint64_t      file_uid;
 
+    int  n_file_description;
     int  n_file_name;
     int  n_file_mime_type;
     int  n_file_data;
@@ -266,10 +275,12 @@ struct ebml_content_encodings {
 
 struct ebml_audio {
     double     sampling_frequency;
+    double     output_sampling_frequency;
     uint64_t   channels;
     uint64_t   bit_depth;
 
     int  n_sampling_frequency;
+    int  n_output_sampling_frequency;
     int  n_channels;
     int  n_bit_depth;
 };
@@ -280,6 +291,7 @@ struct ebml_video {
     uint64_t   pixel_height;
     uint64_t   display_width;
     uint64_t   display_height;
+    uint64_t   display_unit;
     double     frame_rate;
 
     int  n_flag_interlaced;
@@ -287,6 +299,7 @@ struct ebml_video {
     int  n_pixel_height;
     int  n_display_width;
     int  n_display_height;
+    int  n_display_unit;
     int  n_frame_rate;
 };
 
@@ -299,6 +312,7 @@ struct ebml_track_entry {
     uint64_t                        flag_forced;
     uint64_t                        flag_lacing;
     uint64_t                        min_cache;
+    uint64_t                        max_cache;
     uint64_t                        default_duration;
     double                          track_timecode_scale;
     uint64_t                        max_block_addition_id;
@@ -319,6 +333,7 @@ struct ebml_track_entry {
     int  n_flag_forced;
     int  n_flag_lacing;
     int  n_min_cache;
+    int  n_max_cache;
     int  n_default_duration;
     int  n_track_timecode_scale;
     int  n_max_block_addition_id;
@@ -459,4 +474,4 @@ extern const struct ebml_elem_desc ebml_tag_desc;
 extern const struct ebml_elem_desc ebml_targets_desc;
 extern const struct ebml_elem_desc ebml_simple_tag_desc;
 
-#define MAX_EBML_SUBELEMENTS 19
+#define MAX_EBML_SUBELEMENTS 20

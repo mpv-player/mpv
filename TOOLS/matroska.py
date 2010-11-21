@@ -95,10 +95,12 @@ elements_matroska = (
                     'PixelHeight, ba, uint',
                     'DisplayWidth, 54b0, uint',
                     'DisplayHeight, 54ba, uint',
+                    'DisplayUnit, 54b2, uint',
                     'FrameRate, 2383e3, float',
                 ),
                 'Audio, e1, sub', (
                     'SamplingFrequency, b5, float',
+                    'OutputSamplingFrequency, 78b5, float',
                     'Channels, 9f, uint',
                     'BitDepth, 6264, uint',
                 ),
@@ -128,6 +130,7 @@ elements_matroska = (
 
         'Attachments, 1941a469, sub', (
             'AttachedFile*, 61a7, sub', (
+                'FileDescription, 467e, str',
                 'FileName, 466e, str',
                 'FileMimeType, 4660, str',
                 'FileData, 465c, binary',

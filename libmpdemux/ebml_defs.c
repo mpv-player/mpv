@@ -48,14 +48,17 @@ F(MATROSKA_ID_TAG, tag, 1)
 }};
 #undef N
 
+E("ChapCountry", chap_country, EBML_TYPE_STR)
+
 E("ChapLanguage", chap_language, EBML_TYPE_STR)
 
 E("ChapString", chap_string, EBML_TYPE_STR)
 
 #define N chapter_display
-E_S("ChapterDisplay", 2)
+E_S("ChapterDisplay", 3)
 F(MATROSKA_ID_CHAPSTRING, chap_string, 0)
 F(MATROSKA_ID_CHAPLANGUAGE, chap_language, 1)
+F(MATROSKA_ID_CHAPCOUNTRY, chap_country, 1)
 }};
 #undef N
 
@@ -118,8 +121,11 @@ E("FileMimeType", file_mime_type, EBML_TYPE_STR)
 
 E("FileName", file_name, EBML_TYPE_STR)
 
+E("FileDescription", file_description, EBML_TYPE_STR)
+
 #define N attached_file
-E_S("AttachedFile", 4)
+E_S("AttachedFile", 5)
+F(MATROSKA_ID_FILEDESCRIPTION, file_description, 0)
 F(MATROSKA_ID_FILENAME, file_name, 0)
 F(MATROSKA_ID_FILEMIMETYPE, file_mime_type, 0)
 F(MATROSKA_ID_FILEDATA, file_data, 0)
@@ -195,17 +201,22 @@ E("BitDepth", bit_depth, EBML_TYPE_UINT)
 
 E("Channels", channels, EBML_TYPE_UINT)
 
+E("OutputSamplingFrequency", output_sampling_frequency, EBML_TYPE_FLOAT)
+
 E("SamplingFrequency", sampling_frequency, EBML_TYPE_FLOAT)
 
 #define N audio
-E_S("Audio", 3)
+E_S("Audio", 4)
 F(MATROSKA_ID_SAMPLINGFREQUENCY, sampling_frequency, 0)
+F(MATROSKA_ID_OUTPUTSAMPLINGFREQUENCY, output_sampling_frequency, 0)
 F(MATROSKA_ID_CHANNELS, channels, 0)
 F(MATROSKA_ID_BITDEPTH, bit_depth, 0)
 }};
 #undef N
 
 E("FrameRate", frame_rate, EBML_TYPE_FLOAT)
+
+E("DisplayUnit", display_unit, EBML_TYPE_UINT)
 
 E("DisplayHeight", display_height, EBML_TYPE_UINT)
 
@@ -218,12 +229,13 @@ E("PixelWidth", pixel_width, EBML_TYPE_UINT)
 E("FlagInterlaced", flag_interlaced, EBML_TYPE_UINT)
 
 #define N video
-E_S("Video", 6)
+E_S("Video", 7)
 F(MATROSKA_ID_FLAGINTERLACED, flag_interlaced, 0)
 F(MATROSKA_ID_PIXELWIDTH, pixel_width, 0)
 F(MATROSKA_ID_PIXELHEIGHT, pixel_height, 0)
 F(MATROSKA_ID_DISPLAYWIDTH, display_width, 0)
 F(MATROSKA_ID_DISPLAYHEIGHT, display_height, 0)
+F(MATROSKA_ID_DISPLAYUNIT, display_unit, 0)
 F(MATROSKA_ID_FRAMERATE, frame_rate, 0)
 }};
 #undef N
@@ -244,6 +256,8 @@ E("TrackTimecodeScale", track_timecode_scale, EBML_TYPE_FLOAT)
 
 E("DefaultDuration", default_duration, EBML_TYPE_UINT)
 
+E("MaxCache", max_cache, EBML_TYPE_UINT)
+
 E("MinCache", min_cache, EBML_TYPE_UINT)
 
 E("FlagLacing", flag_lacing, EBML_TYPE_UINT)
@@ -261,7 +275,7 @@ E("TrackUID", track_uid, EBML_TYPE_UINT)
 E("TrackNumber", track_number, EBML_TYPE_UINT)
 
 #define N track_entry
-E_S("TrackEntry", 19)
+E_S("TrackEntry", 20)
 F(MATROSKA_ID_TRACKNUMBER, track_number, 0)
 F(MATROSKA_ID_TRACKUID, track_uid, 0)
 F(MATROSKA_ID_TRACKTYPE, track_type, 0)
@@ -270,6 +284,7 @@ F(MATROSKA_ID_FLAGDEFAULT, flag_default, 0)
 F(MATROSKA_ID_FLAGFORCED, flag_forced, 0)
 F(MATROSKA_ID_FLAGLACING, flag_lacing, 0)
 F(MATROSKA_ID_MINCACHE, min_cache, 0)
+F(MATROSKA_ID_MAXCACHE, max_cache, 0)
 F(MATROSKA_ID_DEFAULTDURATION, default_duration, 0)
 F(MATROSKA_ID_TRACKTIMECODESCALE, track_timecode_scale, 0)
 F(MATROSKA_ID_MAXBLOCKADDITIONID, max_block_addition_id, 0)
