@@ -107,6 +107,7 @@ typedef struct mkv_track {
     uint32_t a_formattag;
     uint32_t a_channels, a_bps;
     float a_sfreq;
+    float a_osfreq;
 
     double default_duration;
 
@@ -525,6 +526,12 @@ static void parse_trackaudio(struct demuxer *demuxer, struct mkv_track *track,
                "[mkv] |   + Sampling frequency: %f\n", track->a_sfreq);
     } else
         track->a_sfreq = 8000;
+    if (audio->n_output_sampling_frequency) {
+        track->a_osfreq = audio->output_sampling_frequency;
+        mp_msg(MSGT_DEMUX, MSGL_V,
+               "[mkv] |   + Output sampling frequency: %f\n", track->a_osfreq);
+    } else
+        track->a_osfreq = track->a_sfreq;
     if (audio->n_bit_depth) {
         track->a_bps = audio->bit_depth;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Bit depth: %u\n",
@@ -1410,6 +1417,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
     sh_a->channels = track->a_channels;
     sh_a->wf->nChannels = track->a_channels;
     sh_a->samplerate = (uint32_t) track->a_sfreq;
+    sh_a->container_out_samplerate = track->a_osfreq;
     sh_a->wf->nSamplesPerSec = (uint32_t) track->a_sfreq;
     if (track->a_bps == 0) {
         sh_a->samplesize = 2;

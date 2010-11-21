@@ -55,6 +55,7 @@ typedef struct sh_audio {
   // output format:
   int sample_format;
   int samplerate;
+  int container_out_samplerate;
   int samplesize;
   int channels;
   int o_bps; // == samplerate*samplesize*channels   (uncompr. bytes/sec)
