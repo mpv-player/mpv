@@ -210,7 +210,7 @@ http_send_request( URL_t *url, off_t pos ) {
 			mp_msg(MSGT_NETWORK, MSGL_ERR, "Invalid URL '%s' to proxify\n", url->file+1);
 			goto err_out;
 		}
-		http_set_uri( http_hdr, server_url->url );
+		http_set_uri( http_hdr, server_url->noauth_url );
 	} else {
 		server_url = url;
 		http_set_uri( http_hdr, server_url->file );

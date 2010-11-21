@@ -57,9 +57,19 @@ URL_t *url_redirect(URL_t **url, const char *redir) {
   return res;
 }
 
+static int make_noauth_url(URL_t *url, char *dst, int dst_size)
+{
+    if (url->port)
+        return snprintf(dst, dst_size, "%s://%s:%d%s", url->protocol,
+                        url->hostname, url->port, url->file);
+    else
+        return snprintf(dst, dst_size, "%s://%s%s", url->protocol,
+                        url->hostname, url->file);
+}
+
 URL_t*
 url_new(const char* url) {
-	int pos1, pos2,v6addr = 0;
+	int pos1, pos2,v6addr = 0, noauth_len;
 	URL_t* Curl = NULL;
         char *escfilename=NULL;
 	char *ptr1=NULL, *ptr2=NULL, *ptr3=NULL, *ptr4=NULL;
@@ -229,6 +239,17 @@ url_new(const char* url) {
 			goto err_out;
 		}
 		strcpy(Curl->file, "/");
+	}
+
+	noauth_len = make_noauth_url(Curl, NULL, 0);
+	if (noauth_len > 0) {
+		noauth_len++;
+		Curl->noauth_url = malloc(noauth_len);
+		if (!Curl->noauth_url) {
+			mp_msg(MSGT_NETWORK, MSGL_FATAL, "Memory allocation failed.\n");
+			goto err_out;
+		}
+		make_noauth_url(Curl, Curl->noauth_url, noauth_len);
 	}
 
         free(escfilename);

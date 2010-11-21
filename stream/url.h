@@ -27,6 +27,7 @@
 
 typedef struct {
 	char *url;
+	char *noauth_url;
 	char *protocol;
 	char *hostname;
 	char *file;
