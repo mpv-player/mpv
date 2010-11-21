@@ -415,7 +415,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
       stream_read(s,(char*)(w + 1),w->cbSize);
       l -= w->cbSize;
       if (w->wFormatTag == 0xfffe && w->cbSize >= 22)
-          sh_audio->format = av_le2ne16(((WAVEFORMATEXTENSIBLE *)w)->SubFormat);
+          sh_audio->format = le2me_16(((WAVEFORMATEXTENSIBLE *)w)->SubFormat);
     }
 
     if( mp_msg_test(MSGT_DEMUX,MSGL_V) ) print_wave_header(w, MSGL_V);
