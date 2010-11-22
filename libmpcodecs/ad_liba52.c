@@ -210,7 +210,7 @@ static int init(sh_audio_t *sh_audio)
   if (opts->drc_level < 0.001) {
 	  /* level == 0 --> no compression, init library without callback */
 	  a52_drc_action = DRC_NO_COMPRESSION;
-  } else if (opts->drc_level > 0.999 || opts->drc_level < 1.001) {
+  } else if (opts->drc_level > 0.999 && opts->drc_level < 1.001) {
 	  /* level == 1 --> full compression, do nothing at all (library default = full compression) */
 	  a52_drc_action = DRC_NO_ACTION;
   } else {
