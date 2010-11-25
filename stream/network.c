@@ -20,8 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-//#define DUMP2FILE
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -114,13 +112,11 @@ const mime_struct_t mime_type_table[] = {
 
 streaming_ctrl_t *
 streaming_ctrl_new(void) {
-	streaming_ctrl_t *streaming_ctrl;
-	streaming_ctrl = malloc(sizeof(streaming_ctrl_t));
+	streaming_ctrl_t *streaming_ctrl = calloc(1, sizeof(*streaming_ctrl));
 	if( streaming_ctrl==NULL ) {
 		mp_tmsg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed.\n");
 		return NULL;
 	}
-	memset( streaming_ctrl, 0, sizeof(streaming_ctrl_t) );
 	return streaming_ctrl;
 }
 
@@ -475,10 +471,6 @@ nop_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctr
 int
 nop_streaming_seek( int fd, off_t pos, streaming_ctrl_t *stream_ctrl ) {
 	return -1;
-	// To shut up gcc warning
-	fd++;
-	pos++;
-	stream_ctrl=NULL;
 }
 
 

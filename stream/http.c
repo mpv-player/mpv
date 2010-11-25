@@ -764,7 +764,6 @@ static void print_icy_metadata(HTTP_header_t *http_hdr) {
 //! If this function succeeds you must closesocket stream->fd
 static int http_streaming_start(stream_t *stream, int* file_format) {
 	HTTP_header_t *http_hdr = NULL;
-	unsigned int i;
 	int fd = stream->fd;
 	int res = STREAM_UNSUPPORTED;
 	int redirect = 0;
@@ -853,16 +852,16 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 				// Look if we can use the Content-Type
 				content_type = http_get_field( http_hdr, "Content-Type" );
 				if( content_type!=NULL ) {
+					unsigned int i;
+
 					mp_msg(MSGT_NETWORK,MSGL_V,"Content-Type: [%s]\n", content_type );
 					// Check in the mime type table for a demuxer type
-					i = 0;
-					while(mime_type_table[i].mime_type != NULL) {
+					for (i = 0; mime_type_table[i].mime_type != NULL; i++) {
 						if( !strcasecmp( content_type, mime_type_table[i].mime_type ) ) {
 							*file_format = mime_type_table[i].demuxer_type;
 							res = seekable;
 							goto out;
 						}
-						i++;
 					}
 				}
 				// Not found in the mime type table, don't fail,
