@@ -208,7 +208,6 @@ extern int file_filter;
 extern int forced_subs_only;
 
 struct ao_data;
-int build_afilter_chain(struct MPContext *mpctx, struct sh_audio *sh_audio, struct ao_data *ao_data);
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
 void reinit_audio_chain(struct MPContext *mpctx);
 void init_vo_spudec(struct MPContext *mpctx);

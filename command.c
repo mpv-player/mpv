@@ -263,14 +263,14 @@ static int mp_property_playback_speed(m_option_t *prop, int action,
             return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(float *) arg);
         opts->playback_speed = *(float *) arg;
-        build_afilter_chain(mpctx, mpctx->sh_audio, &ao_data);
+        reinit_audio_chain(mpctx);
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         opts->playback_speed += (arg ? *(float *) arg : 0.1) *
             (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
         M_PROPERTY_CLAMP(prop, opts->playback_speed);
-        build_afilter_chain(mpctx, mpctx->sh_audio, &ao_data);
+        reinit_audio_chain(mpctx);
         return M_PROPERTY_OK;
     }
     return m_property_float_range(prop, action, arg, &opts->playback_speed);
@@ -2821,7 +2821,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         case MP_CMD_SPEED_INCR:{
                 float v = cmd->args[0].v.f;
                 opts->playback_speed += v;
-                build_afilter_chain(mpctx, sh_audio, &ao_data);
+                reinit_audio_chain(mpctx);
                 set_osd_tmsg(OSD_MSG_SPEED, 1, osd_duration, "Speed: x %6.2f",
                              opts->playback_speed);
             } break;
@@ -2829,7 +2829,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         case MP_CMD_SPEED_MULT:{
                 float v = cmd->args[0].v.f;
                 opts->playback_speed *= v;
-                build_afilter_chain(mpctx, sh_audio, &ao_data);
+                reinit_audio_chain(mpctx);
                 set_osd_tmsg(OSD_MSG_SPEED, 1, osd_duration, "Speed: x %6.2f",
                              opts->playback_speed);
             } break;
@@ -2837,7 +2837,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         case MP_CMD_SPEED_SET:{
                 float v = cmd->args[0].v.f;
                 opts->playback_speed = v;
-                build_afilter_chain(mpctx, sh_audio, &ao_data);
+                reinit_audio_chain(mpctx);
                 set_osd_tmsg(OSD_MSG_SPEED, 1, osd_duration, "Speed: x %6.2f",
                              opts->playback_speed);
             } break;
@@ -3513,7 +3513,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 else
                     af_add(mpctx->mixer.afilter, af_command);
             }
-            build_afilter_chain(mpctx, sh_audio, &ao_data);
+            reinit_audio_chain(mpctx);
             free(af_args);
         }
         break;
@@ -3522,7 +3522,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             break;
         af_uninit(mpctx->mixer.afilter);
         af_init(mpctx->mixer.afilter);
-        build_afilter_chain(mpctx, sh_audio, &ao_data);
+        reinit_audio_chain(mpctx);
         break;
     case MP_CMD_AF_CMDLINE:
         if (sh_audio) {
