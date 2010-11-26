@@ -3100,7 +3100,9 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
 
 static void build_ordered_chapter_timeline(struct MPContext *mpctx)
 {
-    if (!mpctx->opts.ordered_chapters) {
+    struct MPOpts *opts = &mpctx->opts;
+
+    if (!opts->ordered_chapters) {
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "File uses ordered chapters, but "
                "you have disabled support for them. Ignoring.\n");
         return;
@@ -3162,21 +3164,31 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
         missing_time += c->end - c->start;
         continue;
     found2:;
-        chapters[num_chapters].start = starttime / 1000.;
-        chapters[num_chapters].name = talloc_strdup(chapters, c->name);
         /* Only add a separate part if the time or file actually changes.
          * Matroska files have chapter divisions that are redundant from
          * timeline point of view because the same chapter structure is used
          * both to specify the timeline and for normal chapter information.
-         * Removing a missing inserted external chapter can also cause this. */
-        if (part_count == 0 || c->start != starttime + prev_part_offset
+         * Removing a missing inserted external chapter can also cause this.
+         * We allow for a configurable fudge factor because of files which
+         * specify chapter end times that are one frame too early;
+         * we don't want to try seeking over a one frame gap. */
+        int64_t join_diff = c->start - starttime - prev_part_offset;
+        if (part_count == 0 || FFABS(join_diff) > opts->chapter_merge_threshold
             || sources + j != timeline[part_count - 1].source) {
             timeline[part_count].source = sources + j;
-            timeline[part_count].start = chapters[num_chapters].start;
+            timeline[part_count].start = starttime / 1000.;
             timeline[part_count].source_start = c->start / 1000.;
             prev_part_offset = c->start - starttime;
             part_count++;
+        } else if (part_count > 0 && join_diff) {
+            /* Chapter was merged at an inexact boundary;
+             * adjust timestamps to match. */
+            mp_msg(MSGT_CPLAYER, MSGL_V, "Merging timeline part %d with "
+                   "offset %d ms.\n", i, (int) join_diff);
+            starttime += join_diff;
         }
+        chapters[num_chapters].start = starttime / 1000.;
+        chapters[num_chapters].name = talloc_strdup(chapters, c->name);
         starttime += c->end - c->start;
         num_chapters++;
     }

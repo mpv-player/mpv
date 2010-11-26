@@ -305,6 +305,7 @@ const m_option_t mplayer_opts[]={
     {"playlist", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
     OPT_MAKE_FLAGS("ordered-chapters", ordered_chapters, 0),
+    OPT_INTRANGE("chapter-merge-threshold", chapter_merge_threshold, 0, 0, 10000),
 
     // a-v sync stuff:
     OPT_MAKE_FLAGS("correct-pts", user_correct_pts, 0),

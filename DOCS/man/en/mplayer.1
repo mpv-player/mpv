@@ -798,6 +798,17 @@ With this option MPlayer will also ignore frame duration when playing
 only video (you can think of that as infinite fps).
 .
 .TP
+.B \-chapter\-merge\-threshold <number>
+Threshold for merging almost consecutive ordered chapter parts
+in milliseconds (default: 100).
+Some Matroska files with ordered chapters have inaccurate chapter
+end timestamps, causing a small gap between the end of one chapter and
+the start of the next one when they should match.
+If the end of one playback part is less than the given threshold away
+from the start of the next one then keep playing video normally over the
+chapter change instead of doing a seek.
+.
+.TP
 .B \-colorkey <number>
 Changes the colorkey to an RGB value of your choice.
 0x000000 is black and 0xffffff is white.

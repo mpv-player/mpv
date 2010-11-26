@@ -37,6 +37,7 @@ typedef struct MPOpts {
     int capture_dump;
     int loop_times;
     int ordered_chapters;
+    int chapter_merge_threshold;
     int quiet;
     float stream_cache_min_percent;
     float stream_cache_seek_min_percent;

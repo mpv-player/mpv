@@ -23,6 +23,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .stream_dump_name = "stream.dump",
         .loop_times = -1,
         .ordered_chapters = 1,
+        .chapter_merge_threshold = 100,
         .stream_cache_min_percent = 20.0,
         .stream_cache_seek_min_percent = 50.0,
         .chapterrange = {-1, -1},
