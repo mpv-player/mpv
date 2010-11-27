@@ -407,7 +407,7 @@ mpeg_header_parser:
 return 1;
 }
 
-static void process_userdata(unsigned char* buf,int len){
+static void process_userdata(const unsigned char* buf,int len){
     int i;
     /* if the user data starts with "CC", assume it is a CC info packet */
     if(len>2 && buf[0]=='C' && buf[1]=='C'){

@@ -862,7 +862,7 @@ static int ty_XDSdecode( char b1, char b2 )
 // ===========================================================================
 // Callback from Video Display Processing to put up the OSD
 // ===========================================================================
-void ty_processuserdata( unsigned char* buf, int len )
+void ty_processuserdata( const unsigned char* buf, int len )
 {
 	int index;
 

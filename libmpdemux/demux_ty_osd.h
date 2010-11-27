@@ -20,6 +20,6 @@
 #define MPLAYER_DEMUX_TY_OSD_H
 
 void ty_ClearOSD(int start);
-void ty_processuserdata(unsigned char *buf, int len);
+void ty_processuserdata(const unsigned char *buf, int len);
 
 #endif /* MPLAYER_DEMUX_TY_OSD_H */

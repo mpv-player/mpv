@@ -182,8 +182,8 @@ static void cc_decode_EIA608(unsigned short int data)
 {
 
   static unsigned short int lastcode=0x0000;
-  unsigned char c1 = data & 0x7f;
-  unsigned char c2 = (data >> 8) & 0x7f;
+  uint8_t c1 = data & 0x7f;
+  uint8_t c2 = (data >> 8) & 0x7f;
 
   if (c1 & 0x60) {		/* normal character, 0x20 <= c1 <= 0x7f */
 	   if (channel != (selected_channel() & 1))
@@ -254,7 +254,7 @@ static void cc_decode_EIA608(unsigned short int data)
   lastcode=data;
 }
 
-static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
+static void subcc_decode(const uint8_t *inputbuffer, unsigned int inputlength)
 {
   /* The first number may denote a channel number. I don't have the
    * EIA-708 standard, so it is hard to say.
@@ -287,10 +287,10 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
    *
    * until end of packet
    */
-  unsigned char *current = inputbuffer;
+  const uint8_t *current = inputbuffer;
   unsigned int curbytes = 0;
-  unsigned char data1, data2;
-  unsigned char cc_code;
+  uint8_t data1, data2;
+  uint8_t cc_code;
   int odd_offset = 1;
 
   while (curbytes < inputlength) {
@@ -338,7 +338,7 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
 }
 
 
-void subcc_process_data(unsigned char *inputdata,unsigned int len)
+void subcc_process_data(const uint8_t *inputdata, unsigned int len)
 {
 	if(!subcc_enabled) return;
 	if(!initialized) subcc_init();
