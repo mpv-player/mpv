@@ -83,6 +83,8 @@ int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size,
             *endpts = *pts + sub.end_display_time / 1000.0;
         *pts += sub.start_display_time / 1000.0;
     }
+    if (got_sub && vo_spudec && sub.num_rects == 0)
+        spudec_set_paletted(vo_spudec, NULL, 0, NULL, 0, 0, 0, 0, *pts, *endpts);
     if (got_sub && sub.num_rects > 0) {
         switch (sub.rects[0]->type) {
         case SUBTITLE_BITMAP:
