@@ -2349,8 +2349,9 @@ static int parse_descriptors(struct pmt_es_t *es, uint8_t *ptr)
 				mp_msg(MSGT_DEMUX, MSGL_DBG2, "FORMAT %s\n", es->format_descriptor);
 			}
 		}
-		else if(ptr[j] == 0x1e)
+		else if(ptr[j] == 0x1e || ptr[j] == 0x1f)
 		{
+			// 0x1f is FMC, but currently it is easiest to handle them the same way
 			es->mp4_es_id = (ptr[j+2] << 8) | ptr[j+3];
 			mp_msg(MSGT_DEMUX, MSGL_V, "SL Descriptor: ES_ID: %d(%x), pid: %d\n", es->mp4_es_id, es->mp4_es_id, es->pid);
 		}
@@ -2402,6 +2403,7 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 	struct pmt_es_t *tmp_es;
 	ts_section_t *section;
 	ES_stream_t *tss;
+	int i;
 
 	idx = progid_idx_in_pmt(priv, progid);
 
@@ -2524,6 +2526,10 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 				break;
 			case 0x11:
 				pmt->es[idx].type = AUDIO_AAC_LATM;
+				for (i = 0; i < pmt->mp4es_cnt; i++)
+					if (pmt->mp4es[i].id == pmt->es[idx].mp4_es_id &&
+					    pmt->mp4es[i].decoder.object_type == AUDIO_AAC)
+						pmt->es[idx].type = AUDIO_AAC;
 				break;
 			case 0x1b:
 				pmt->es[idx].type = VIDEO_H264;
