@@ -77,6 +77,8 @@
 #define	I2C_DATA				0x0098
 #define	CONFIG_CNTL				0x00E0
 /* CONFIG_CNTL bit constants */
+#       define APER_0_BIG_ENDIAN_16BPP_SWAP     0x00000001
+#       define APER_0_BIG_ENDIAN_32BPP_SWAP     0x00000002
 #	define CFG_VGA_RAM_EN			0x00000100
 #ifdef RAGE128
 #define GEN_RESET_CNTL				0x00f0
