@@ -1630,7 +1630,7 @@ Alternativamente puoi usare uno modulo del kernel speciale, come questo:
 <step><para>
   Poi esegui di nuovo <filename>configure</filename> passando i parametri
   <option>--enable-svgalib_helper</option> e
-  <option>--with-extraincdir=<replaceable>/percorso/dei/sorgenti/di/svgalib_helper</replaceable>kernel/svgalib_helper</option>,
+  <option>--extra-cflags=<replaceable>/percorso/dei/sorgenti/di/svgalib_helper</replaceable>kernel/svgalib_helper</option>,
   dove <replaceable>/percorso/dei/sorgenti/di/svgalib_helper</replaceable> deve
   puntare al percorso dove hai estratto i sorgenti di svgalib_helper.
 </para></step>
@@ -1816,7 +1816,7 @@ Configure dovrebbe rilevare la tua scheda DVB. Se non lo fa, forzalo con
 <screen>./configure --enable-dvb</screen>
 Se hai gli header ost in un percorso non standard, imposta il percorso con
 <screen>
-./configure --with-extraincdir=<replaceable>directory sorgenti DVB</replaceable>/ost/include
+./configure --extra-cflags=<replaceable>directory sorgenti DVB</replaceable>/ost/include
 </screen>
 Poi compila ed installa come al solito.</para>
 

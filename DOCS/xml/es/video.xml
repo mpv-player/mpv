@@ -1823,7 +1823,7 @@ fuerce la detección con
 
 <para>Si tiene cabeceras ost en una ruta no estándar, establezca la ruta con</para>
 
-<para><screen>./configure --with-extraincdir=<replaceable>directorio de fuentes de DVB</replaceable>/ost/include
+<para><screen>./configure --extra-cflags=<replaceable>directorio de fuentes de DVB</replaceable>/ost/include
 </screen></para>
 
 <para>Y luego compile e instale del modo habitual.</para>

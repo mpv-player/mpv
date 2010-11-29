@@ -1274,7 +1274,7 @@ Alternatívaként használhatsz egy speciális kernel modult, így:
 <step><para>
   Ezután futtasd le a <filename>configure</filename>-t újra és add meg neki a
   <option>--enable-svgalib_helper</option> és a
-  <option>--with-extraincdir=<replaceable>/eleresi/ut/svgalib_helper/forrasahoz/</replaceable>kernel/svgalib_helper</option>
+  <option>--extra-cflags=<replaceable>/eleresi/ut/svgalib_helper/forrasahoz/</replaceable>kernel/svgalib_helper</option>
   paramétereket, ahol a <replaceable>/eleresi/ut/svgalib_helper/forrasahoz/</replaceable> könyvtárat
   az svgalib_helper kicsomagolt forrását tartalmazó könyvtárnak megfelelően kell beállítani.
 </para></step>

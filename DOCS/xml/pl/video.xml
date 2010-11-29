@@ -1762,7 +1762,7 @@ możesz wymusić obsługę DVB używając
 <para>Jeżeli Twoje nagłówki 'ost' znajdują się w niestandardowym miejscu,
 ustaw ścieżkę przy pomocy</para>
 
-<para><screen>./configure --with-extraincdir=<replaceable>katalog ze źródłami DVB</replaceable>/ost/include</screen></para>
+<para><screen>./configure --extra-cflags=<replaceable>katalog ze źródłami DVB</replaceable>/ost/include</screen></para>
 
 <para>Po czym skompiluj i zainstaluj jak zwykle.</para>
 

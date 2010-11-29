@@ -1753,7 +1753,7 @@ Configure by měl detekovat vaši DVB kartu. Pokud ne, vynuťte detekci pomocí
 <screen>./configure --enable-dvb</screen>
 Pokud máte ost hlavičky na nestandardním místě, nastavte cestu pomocí
 <screen>
-./configure --with-extraincdir=<replaceable>zdrojový adresář DVB</replaceable>/ost/include
+./configure --extra-cflags=<replaceable>zdrojový adresář DVB</replaceable>/ost/include
 </screen>
 Pak kompilujte a instalujte obvyklým způsobem.</para>
 

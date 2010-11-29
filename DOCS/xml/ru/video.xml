@@ -1766,7 +1766,7 @@ Ville Syrjala имеет
 <screen>./configure --enable-dvb</screen>
 Если заголовочные файлы ost находятся не в стандартных каталогах, укажите путь с
 <screen>
-./configure --with-extraincdir=<replaceable>каталог исходников DVB</replaceable>/ost/include
+./configure --extra-cflags=<replaceable>каталог исходников DVB</replaceable>/ost/include
 </screen>
 Затем компилируйте и устанавливайте как обычно.
 </para>

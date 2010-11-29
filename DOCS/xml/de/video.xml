@@ -1815,7 +1815,7 @@ make</screen>
 </para>
 
 <para>
-<screen>./configure --with-extraincdir=<replaceable>DVB-Source-Verzeichnis</replaceable>/ost/include
+<screen>./configure --extra-cflags=<replaceable>DVB-Source-Verzeichnis</replaceable>/ost/include
 </screen>
 </para>
 

@@ -1800,7 +1800,7 @@ téléchargé
 <step><para>
   Puis lancez de nouveau <filename>configure</filename> en passant les
   paramètres <option>--enable-svgalib_helper</option> et
-  <option>--with-extraincdir=/path/to/svgalib_helper/sources</option>,
+  <option>--extra-cflags=/path/to/svgalib_helper/sources</option>,
   ajustés à l'emplacement où vous avez décompressé les sources.
   </para></step>
 <step><para>
@@ -1996,7 +1996,7 @@ avec
 Si vous avez des entêtes ost dans un chemin non-standard, corrigez
 ce chemin avec
 <screen>
-./configure --with-extraincdir=
+./configure --extra-cflags=
 <replaceable>répertoire source DVB</replaceable>/ost/include
 </screen>
 Ensuite compilez et installez comme d'habitude.</para>

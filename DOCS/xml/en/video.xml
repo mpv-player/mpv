@@ -1274,7 +1274,7 @@ Alternatively, you can use a special kernel module, like this:
 <step><para>
   Then run <filename>configure</filename> again and pass the parameter
   <option>--enable-svgalib_helper</option> as well as
-  <option>--with-extraincdir=<replaceable>/path/to/svgalib_helper/sources/</replaceable>kernel/svgalib_helper</option>,
+  <option>--extra-cflags=<replaceable>/path/to/svgalib_helper/sources/</replaceable>kernel/svgalib_helper</option>,
   where <replaceable>/path/to/svgalib_helper/sources/</replaceable> has to be
   adjusted to wherever you extracted svgalib_helper sources.
 </para></step>
