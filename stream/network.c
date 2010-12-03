@@ -165,14 +165,14 @@ check4proxies( URL_t *url ) {
 #endif
 
 			mp_msg(MSGT_NETWORK,MSGL_V,"Using HTTP proxy: %s\n", proxy_url->url );
-			len = strlen( proxy_url->hostname ) + strlen( url->url ) + 20;	// 20 = http_proxy:// + port
-			new_url = malloc( len+1 );
+			len = make_http_proxy_url(proxy_url, url->url, NULL, 0) + 1;
+			new_url = malloc(len);
 			if( new_url==NULL ) {
 				mp_tmsg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed.\n");
 				url_free(proxy_url);
 				return url_out;
 			}
-			sprintf(new_url, "http_proxy://%s:%d/%s", proxy_url->hostname, proxy_url->port, url->url );
+			make_http_proxy_url(proxy_url, url->url, new_url, len);
 			tmp_url = url_new( new_url );
 			if( tmp_url==NULL ) {
 				free( new_url );

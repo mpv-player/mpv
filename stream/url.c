@@ -67,6 +67,19 @@ static int make_noauth_url(URL_t *url, char *dst, int dst_size)
                         url->hostname, url->file);
 }
 
+int make_http_proxy_url(URL_t *proxy, const char *host_url, char *dst,
+                        int dst_size)
+{
+    if (proxy->username)
+        return snprintf(dst, dst_size, "http_proxy://%s:%s@%s:%d/%s",
+                        proxy->username,
+                        proxy->password ? proxy->password : "",
+                        proxy->hostname, proxy->port, host_url);
+    else
+        return snprintf(dst, dst_size, "http_proxy://%s:%d/%s",
+                        proxy->hostname, proxy->port, host_url);
+}
+
 URL_t*
 url_new(const char* url) {
 	int pos1, pos2,v6addr = 0, noauth_len;
