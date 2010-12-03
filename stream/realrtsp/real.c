@@ -38,6 +38,7 @@
 #include "xbuffer.h"
 #include "libavutil/md5.h"
 #include "ffmpeg_files/intreadwrite.h"
+#include "libavutil/base64.h"
 #include "stream/http.h"
 #include "mp_msg.h"
 
@@ -491,18 +492,14 @@ rtsp_send_describe:
       mp_msg(MSGT_STREAM, MSGL_ERR, "realrtsp: authenticator not supported (%s)\n", authreq);
       goto autherr;
     }
-    authlen = strlen(username) + (password ? strlen(password) : 0) + 2;
-    authstr = malloc(authlen);
+    authlen = strlen(username) + 1 + (password ? strlen(password) : 0);
+    authstr = malloc(authlen + 1);
     sprintf(authstr, "%s:%s", username, password ? password : "");
-    authfield = malloc(authlen*2+22);
+    b64_authlen = AV_BASE64_SIZE(authlen);
+    authfield = malloc(21 + b64_authlen);
     strcpy(authfield, "Authorization: Basic ");
-    b64_authlen = base64_encode(authstr, authlen, authfield+21, authlen*2);
+    av_base64_encode(authfield + 21, b64_authlen, authstr, authlen);
     free(authstr);
-    if (b64_authlen < 0) {
-      mp_msg(MSGT_STREAM, MSGL_ERR, "realrtsp: base64 output overflow, this should never happen\n");
-      goto autherr;
-    }
-    authfield[b64_authlen+21] = 0;
     goto rtsp_send_describe;
   }
 autherr:

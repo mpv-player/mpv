@@ -67,5 +67,4 @@ int		http_add_basic_proxy_authentication( HTTP_header_t *http_hdr, const char *u
 
 void		http_debug_hdr( HTTP_header_t *http_hdr );
 
-int 		base64_encode(const void *enc, int encLen, char *out, int outMax);
 #endif /* MPLAYER_HTTP_H */

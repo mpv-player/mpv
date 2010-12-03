@@ -41,6 +41,7 @@
 #include "libmpdemux/demuxer.h"
 #include "network.h"
 
+#include "libavutil/base64.h"
 
 extern int stream_cache_size;
 extern int network_bandwidth;
@@ -607,8 +608,8 @@ http_set_uri( HTTP_header_t *http_hdr, const char *uri ) {
 static int
 http_add_authentication( HTTP_header_t *http_hdr, const char *username, const char *password, const char *auth_str ) {
 	char *auth = NULL, *usr_pass = NULL, *b64_usr_pass = NULL;
-	int encoded_len, pass_len=0, out_len;
-	size_t auth_len;
+	int encoded_len, pass_len=0;
+	size_t auth_len, usr_pass_len;
 	int res = -1;
 	if( http_hdr==NULL || username==NULL ) return -1;
 
@@ -616,7 +617,8 @@ http_add_authentication( HTTP_header_t *http_hdr, const char *username, const ch
 		pass_len = strlen(password);
 	}
 
-	usr_pass = malloc(strlen(username)+pass_len+2);
+	usr_pass_len = strlen(username) + 1 + pass_len;
+	usr_pass = malloc(usr_pass_len + 1);
 	if( usr_pass==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		goto out;
@@ -624,21 +626,13 @@ http_add_authentication( HTTP_header_t *http_hdr, const char *username, const ch
 
 	sprintf( usr_pass, "%s:%s", username, (password==NULL)?"":password );
 
-	// Base 64 encode with at least 33% more data than the original size
-	encoded_len = strlen(usr_pass)*2;
+	encoded_len = AV_BASE64_SIZE(usr_pass_len);
 	b64_usr_pass = malloc(encoded_len);
 	if( b64_usr_pass==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		goto out;
 	}
-
-	out_len = base64_encode( usr_pass, strlen(usr_pass), b64_usr_pass, encoded_len);
-	if( out_len<0 ) {
-		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Base64 out overflow\n");
-		goto out;
-	}
-
-	b64_usr_pass[out_len]='\0';
+	av_base64_encode(b64_usr_pass, encoded_len, usr_pass, usr_pass_len);
 
 	auth_len = encoded_len + 100;
 	auth = malloc(auth_len);
@@ -691,57 +685,6 @@ http_debug_hdr( HTTP_header_t *http_hdr ) {
 		field = field->next;
 	}
 	mp_msg(MSGT_NETWORK,MSGL_V,"--- HTTP DEBUG HEADER --- END ---\n");
-}
-
-int
-base64_encode(const void *enc, int encLen, char *out, int outMax) {
-	static const char	b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-	unsigned char		*encBuf;
-	int			outLen;
-	unsigned int		bits;
-	unsigned int		shift;
-
-	encBuf = (unsigned char*)enc;
-	outLen = 0;
-	bits = 0;
-	shift = 0;
-	outMax &= ~3;
-
-	while(1) {
-		if( encLen>0 ) {
-			// Shift in byte
-			bits <<= 8;
-			bits |= *encBuf;
-			shift += 8;
-			// Next byte
-			encBuf++;
-			encLen--;
-		} else if( shift>0 ) {
-			// Pad last bits to 6 bits - will end next loop
-			bits <<= 6 - shift;
-			shift = 6;
-		} else {
-			// As per RFC 2045, section 6.8,
-			// pad output as necessary: 0 to 2 '=' chars.
-			while( outLen & 3 ){
-				*out++ = '=';
-				outLen++;
-			}
-
-			return outLen;
-		}
-
-		// Encode 6 bit segments
-		while( shift>=6 ) {
-			if (outLen >= outMax)
-				return -1;
-			shift -= 6;
-			*out = b64[ (bits >> shift) & 0x3F ];
-			out++;
-			outLen++;
-		}
-	}
 }
 
 static void print_icy_metadata(HTTP_header_t *http_hdr) {
