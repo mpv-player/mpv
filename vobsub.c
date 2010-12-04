@@ -36,6 +36,7 @@
 #include "vobsub.h"
 #include "spudec.h"
 #include "mp_msg.h"
+#include "path.h"
 #include "unrar_exec.h"
 #include "libavutil/common.h"
 
@@ -96,11 +97,7 @@ static rar_stream_t *rar_open(const char *const filename,
             strcat(rar_filename, ".rar");
         }
         /* get rid of the path if there is any */
-        if ((p = strrchr(filename, '/')) == NULL) {
-            p = filename;
-        } else {
-            p++;
-        }
+        p = mp_basename(filename);
         rc = unrar_exec_get(&stream->data, &stream->size, p, rar_filename);
         if (!rc) {
             /* There is no matching filename in the archive. However, sometimes
