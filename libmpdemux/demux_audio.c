@@ -584,8 +584,7 @@ static int demux_audio_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
     l = 65535;
     dp = new_demux_packet(l);
     l = stream_read(s,dp->buffer,l);
-    /* FLAC is not a constant-bitrate codec. These values will be wrong. */
-    priv->next_pts += l/(double)sh_audio->i_bps;
+    priv->next_pts = MP_NOPTS_VALUE;
     break;
   }
   default:
