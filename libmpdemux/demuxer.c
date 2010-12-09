@@ -464,6 +464,9 @@ static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parse
     case 0x86:
         codec_id = CODEC_ID_DTS;
         break;
+    case MKTAG('f', 'L', 'a', 'C'):
+        codec_id = CODEC_ID_FLAC;
+        break;
     case MKTAG('M', 'L', 'P', ' '):
         codec_id = CODEC_ID_MLP;
         break;

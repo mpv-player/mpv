@@ -491,6 +491,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
 	    }
 	    if (sh_audio->i_bps < 1) // guess value to prevent crash
 	      sh_audio->i_bps = 64 * 1024;
+            sh_audio->needs_parsing = 1;
 //	    get_flac_metadata (demuxer);
 	    break;
   }

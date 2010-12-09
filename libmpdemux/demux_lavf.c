@@ -234,8 +234,12 @@ static const char * const preferred_internal[] = {
     /* lavf Matroska demuxer doesn't support ordered chapters and fails
      * for more files */
     "matroska",
-    /* seeking won't work in lavf FLAC demuxer until a parser is committed */
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(52, 99, 0)
+    /* Seeking doesn't work with lavf FLAC demuxer in FFmpeg versions
+     * without a FLAC parser. In principle this could use a runtime check to
+     * switch if a shared library is updated. */
     "flac",
+#endif
     /* lavf gives neither pts nor dts for some video frames in .rm */
     "rm",
     NULL
