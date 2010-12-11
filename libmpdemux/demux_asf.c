@@ -621,7 +621,6 @@ static int demux_asf_control(demuxer_t *demuxer,int cmd, void *arg){
 static demuxer_t* demux_open_asf(demuxer_t* demuxer)
 {
     struct asf_priv* asf = demuxer->priv;
-    sh_audio_t *sh_audio=NULL;
     sh_video_t *sh_video=NULL;
 
     //---- ASF header:
@@ -640,7 +639,7 @@ static demuxer_t* demux_open_asf(demuxer_t* demuxer)
             demuxer->video->sh=NULL;
             //printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
         } else {
-            sh_video=demuxer->video->sh;sh_video->ds=demuxer->video;
+            sh_video=demuxer->video->sh;
             sh_video->fps=1000.0f; sh_video->frametime=0.001f;
 
             if (asf->asf_is_dvr_ms) {
@@ -656,9 +655,6 @@ static demuxer_t* demux_open_asf(demuxer_t* demuxer)
             mp_msg(MSGT_DEMUXER, MSGL_INFO, "ASF: %s",
                    mp_gtext("No audio stream found -> no sound.\n"));
             demuxer->audio->sh=NULL;
-        } else {
-            sh_audio=demuxer->audio->sh;sh_audio->ds=demuxer->audio;
-            sh_audio->format=sh_audio->wf->wFormatTag;
         }
     }
     if(!demuxer->stream->seek)
