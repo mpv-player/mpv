@@ -2760,6 +2760,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 	TS_stream_info *si;
 
 
+	memset(es, 0, sizeof(*es));
 	while(1)
 	{
 		bad = ts_error = 0;
