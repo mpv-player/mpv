@@ -1116,6 +1116,17 @@ static void demux_close_ts(demuxer_t * demuxer)
 			}
 			free(priv->pmt);
 		}
+		for (i = 0; i < NB_PID_MAX; i++)
+		{
+			free(priv->ts.pids[i]);
+			priv->ts.pids[i] = NULL;
+		}
+		for (i = 0; i < 3; i++)
+		{
+			if (priv->fifo[i].pack)
+				free_demux_packet(priv->fifo[i].pack);
+			priv->fifo[i].pack = NULL;
+		}
 		free(priv);
 	}
 	demuxer->priv=NULL;
@@ -2680,7 +2691,12 @@ static int fill_packet(demuxer_t *demuxer, demux_stream_t *ds, demux_packet_t **
 {
 	int ret = 0;
 
-	if((*dp != NULL) && (*dp_offset > 0))
+	if(*dp && *dp_offset <= 0)
+	{
+		free_demux_packet(*dp);
+		*dp = NULL;
+	}
+	if(*dp)
 	{
 		ret = *dp_offset;
 		resize_demux_packet(*dp, ret);	//shrinked to the right size
