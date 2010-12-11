@@ -3182,7 +3182,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			}
 			else
 			{
-				memcpy(es->start, p, sz);
+				memmove(es->start, p, sz);
 
 				if(es->size)
 					return es->size;
