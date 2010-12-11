@@ -927,7 +927,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 		mp_msg(MSGT_DEMUXER, MSGL_INFO, "\n");
 
 
-	for(i=0; i<8192; i++)
+	for(i=0; i<NB_PID_MAX; i++)
 	{
 		if(priv->ts.pids[i] != NULL)
 		{
@@ -994,7 +994,7 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 		return NULL;
 	}
 
-	for(i=0; i < 8192; i++)
+	for(i=0; i < NB_PID_MAX; i++)
 	{
 	    priv->ts.pids[i] = NULL;
 	    priv->ts.streams[i].id = -3;
@@ -2186,10 +2186,9 @@ static ES_stream_t *new_pid(ts_priv_t *priv, int pid)
 {
 	ES_stream_t *tss;
 
-	tss = malloc(sizeof(ES_stream_t));
+	tss = calloc(sizeof(*tss), 1);
 	if(! tss)
 		return NULL;
-	memset(tss, 0, sizeof(ES_stream_t));
 	tss->pid = pid;
 	tss->last_cc = -1;
 	tss->type = UNKNOWN;
@@ -3263,7 +3262,7 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, float audio_d
   		newpos = demuxer->movi_start;	//begininng of stream
 
 	stream_seek(demuxer->stream, newpos);
-	for(i = 0; i < 8192; i++)
+	for(i = 0; i < NB_PID_MAX; i++)
 		if(priv->ts.pids[i] != NULL)
 			priv->ts.pids[i]->is_synced = 0;
 
