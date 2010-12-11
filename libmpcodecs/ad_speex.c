@@ -65,7 +65,7 @@ static int init(sh_audio_t *sh) {
   const SpeexStereoState st_st = SPEEX_STEREO_STATE_INIT; // hack
   if (!sh->wf || sh->wf->cbSize < 80) {
     mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Missing extradata!\n");
-    return 0;
+    goto err_out;
   }
   ctx->hdr = speex_packet_to_header((char *)&sh->wf[1], sh->wf->cbSize);
   if (!ctx->hdr && sh->wf->cbSize == 0x72 && hdr[0] == 1 && hdr[1] == 0) {
@@ -87,7 +87,7 @@ static int init(sh_audio_t *sh) {
   }
   if (!ctx->hdr) {
     mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Invalid extradata!\n");
-    return 0;
+    goto err_out;
   }
   if (ctx->hdr->nb_channels != 1 && ctx->hdr->nb_channels != 2) {
     mp_msg(MSGT_DECAUDIO, MSGL_WARN, "Invalid number of channels (%i), "
@@ -119,6 +119,12 @@ static int init(sh_audio_t *sh) {
   sh->sample_format = AF_FORMAT_S16_NE;
   sh->context = ctx;
   return 1;
+
+err_out:
+  if (ctx)
+    free(ctx->hdr);
+  free(ctx);
+  return 0;
 }
 
 static void uninit(sh_audio_t *sh) {
