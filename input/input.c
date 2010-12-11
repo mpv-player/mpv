@@ -438,6 +438,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { 'a', 0 }, "sub_alignment" },
   { { 'v', 0 }, "sub_visibility" },
   { { 'j', 0 }, "sub_select" },
+  { { 'J', 0 }, "sub_select -3" },
   { { 'F', 0 }, "forced_subs_only" },
   { { '#', 0 }, "switch_audio" },
   { { '_', 0 }, "step_property switch_video" },

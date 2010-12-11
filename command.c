@@ -2463,8 +2463,8 @@ static int show_property_osd(MPContext *mpctx, const char *pname)
  *
  * Toggle commands take 0 or 1 parameters. With no parameter
  * or a value less than the property minimum it just steps the
- * property to its next value. Otherwise it sets it to the given
- * value.
+ * property to its next or previous value respectively.
+ * Otherwise it sets it to the given value.
  *
  *@{
  */
@@ -2551,6 +2551,8 @@ static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
         // set to value
         if (cmd->nargs > 0 && cmd->args[0].v.i >= prop->min)
             r = mp_property_do(pname, M_PROPERTY_SET, &cmd->args[0].v.i, mpctx);
+        else if (cmd->nargs > 0)
+            r = mp_property_do(pname, M_PROPERTY_STEP_DOWN, NULL, mpctx);
         else
             r = mp_property_do(pname, M_PROPERTY_STEP_UP, NULL, mpctx);
     } else if (cmd->args[1].v.i)        //set
