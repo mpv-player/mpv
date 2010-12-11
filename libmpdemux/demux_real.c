@@ -43,6 +43,7 @@
 #include "mp_msg.h"
 #include "mpbswap.h"
 #include "libavutil/common.h"
+#include "libavutil/intreadwrite.h"
 #include "stream/stream.h"
 #include "aviprint.h"
 #include "demuxer.h"
@@ -878,7 +879,7 @@ got_video:
 	    while(len>2){
 		dp_hdr_t* dp_hdr;
 		unsigned char* dp_data;
-		uint32_t* extra;
+		uint8_t* extra;
 
 //		printf("xxx len=%d  \n",len);
 
@@ -945,7 +946,7 @@ got_video:
 		    dp=ds->asf_packet;
 		    dp_hdr=(dp_hdr_t*)dp->buffer;
 		    dp_data=dp->buffer+sizeof(dp_hdr_t);
-		    extra=(uint32_t*)(dp->buffer+dp_hdr->chunktab);
+		    extra=dp->buffer+dp_hdr->chunktab;
 		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "we have an incomplete packet (oldseq=%d new=%d)\n",ds->asf_seq,vpkg_seqnum);
 		    // we have an incomplete packet:
 		    if(ds->asf_seq!=vpkg_seqnum){
@@ -966,10 +967,10 @@ got_video:
 			    // re-calc pointers:
 			    dp_hdr=(dp_hdr_t*)dp->buffer;
 			    dp_data=dp->buffer+sizeof(dp_hdr_t);
-			    extra=(uint32_t*)(dp->buffer+dp_hdr->chunktab);
+			    extra=dp->buffer+dp_hdr->chunktab;
 			}
-			extra[2*dp_hdr->chunks+0]=le2me_32(1);
-			extra[2*dp_hdr->chunks+1]=le2me_32(dp_hdr->len);
+			AV_WL32(extra + 8*dp_hdr->chunks + 0, 1);
+			AV_WL32(extra + 8*dp_hdr->chunks + 4, dp_hdr->len);
 			if(0x80==(vpkg_header&0xc0)){
 			    // last fragment!
 			    if(dp_hdr->len!=vpkg_length-vpkg_offset)
@@ -1008,8 +1009,8 @@ got_video:
 		dp_hdr->timestamp=timestamp;
 		dp_hdr->chunktab=sizeof(dp_hdr_t)+vpkg_length;
 		dp_data=dp->buffer+sizeof(dp_hdr_t);
-		extra=(uint32_t*)(dp->buffer+dp_hdr->chunktab);
-		extra[0]=le2me_32(1); extra[1]=0; // offset of the first chunk
+		extra=dp->buffer+dp_hdr->chunktab;
+		AV_WL32(extra, 1); AV_WL32(extra + 4, 0); // offset of the first chunk
 		if(0x00==(vpkg_header&0xc0)){
 		    // first fragment:
 		    if (len > dp->len - sizeof(dp_hdr_t)) len = dp->len - sizeof(dp_hdr_t);
