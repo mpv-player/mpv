@@ -473,6 +473,7 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
         pix_fmt != ctx->pix_fmt ||
         !ctx->vo_initialized)
     {
+        ctx->vo_initialized = 0;
         mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
 
         // Do not overwrite s->aspect on the first call, so that a container
