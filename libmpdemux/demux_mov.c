@@ -246,7 +246,8 @@ static void mov_build_index(mov_track_t* trak,int timescale){
       mp_msg(MSGT_DEMUX, MSGL_WARN,
              "MOV: durmap or chunkmap bigger than sample count (%i vs %i)\n",
              s, trak->samples_size);
-      trak->samples = realloc_struct(trak->samples, s, sizeof(mov_sample_t));
+      free(trak->samples);
+      trak->samples = calloc(s, sizeof(mov_sample_t));
       trak->samples_size = trak->samples ? s : 0;
     }
 
@@ -1766,6 +1767,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       mp_msg(MSGT_DEMUX, MSGL_V,
              "MOV: %*sSample duration table! (%d blocks)\n", level, "",
              len);
+      free(trak->durmap);
       trak->durmap = calloc(len, sizeof(mov_durmap_t));
       trak->durmap_size = trak->durmap ? len : 0;
       for (i = 0; i < trak->durmap_size; i++) {
@@ -1788,6 +1790,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              "MOV: %*sSample->Chunk mapping table!  (%d blocks) (ver:%d,flags:%d)\n", level, "",
              len, ver, flags);
       // read data:
+      free(trak->chunkmap);
       trak->chunkmap = calloc(len, sizeof(mov_chunkmap_t));
       trak->chunkmap_size = trak->chunkmap ? len : 0;
       for (i = 0; i < trak->chunkmap_size; i++) {
@@ -1810,8 +1813,9 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       trak->samplesize = ss;
       if (!ss) {
         // variable samplesize
-        trak->samples = realloc_struct(trak->samples, entries, sizeof(mov_sample_t));
-        trak->samples_size = entries;
+        free(trak->samples);
+        trak->samples = calloc(entries, sizeof(mov_sample_t));
+        trak->samples_size = trak->samples ? entries : 0;
         for (i = 0; i < trak->samples_size; i++)
           trak->samples[i].size = stream_read_dword(demuxer->stream);
       }
@@ -1826,7 +1830,8 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              len);
       // extend array if needed:
       if (len > trak->chunks_size) {
-        trak->chunks = realloc_struct(trak->chunks, len, sizeof(mov_chunk_t));
+        free(trak->chunks);
+        trak->chunks = calloc(len, sizeof(mov_chunk_t));
         trak->chunks_size = trak->chunks ? len : 0;
       }
       // read elements:
@@ -1843,7 +1848,8 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              len);
       // extend array if needed:
       if (len > trak->chunks_size) {
-        trak->chunks = realloc_struct(trak->chunks, len, sizeof(mov_chunk_t));
+        free(trak->chunks);
+        trak->chunks = calloc(len, sizeof(mov_chunk_t));
         trak->chunks_size = trak->chunks ? len : 0;
       }
       // read elements:
@@ -1867,6 +1873,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       mp_msg(MSGT_DEMUX, MSGL_V,
              "MOV: %*sSyncing samples (keyframes) table! (%d entries) (ver:%d,flags:%d)\n", level, "",
              entries, ver, flags);
+      free(trak->keyframes);
       trak->keyframes = calloc(entries, sizeof(unsigned int));
       trak->keyframes_size = trak->keyframes ? entries : 0;
       for (i = 0; i < trak->keyframes_size; i++)
@@ -1903,6 +1910,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              "MOV: %*sEdit list table (%d entries) (ver:%d,flags:%d)\n", level, "",
              entries, ver, flags);
 #if 1
+      free(trak->editlist);
       trak->editlist = calloc(entries, sizeof(mov_editlist_t));
       trak->editlist_size = trak->editlist ? entries : 0;
       for (i = 0; i < trak->editlist_size; i++) {
