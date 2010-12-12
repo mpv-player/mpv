@@ -140,6 +140,7 @@ static void uninit(sh_audio_t *sh) {
 
 static int decode_audio(sh_audio_t *sh, unsigned char *buf,
                         int minlen, int maxlen) {
+  double pts;
   context_t *ctx = sh->context;
   int len, framelen, framesamples;
   char *packet;
@@ -150,8 +151,14 @@ static int decode_audio(sh_audio_t *sh, unsigned char *buf,
     mp_msg(MSGT_DECAUDIO, MSGL_V, "maxlen too small in decode_audio\n");
     return -1;
   }
-  len = ds_get_packet(sh->ds, (unsigned char **)&packet);
+  len = ds_get_packet_pts(sh->ds, (unsigned char **)&packet, &pts);
   if (len <= 0) return -1;
+  if (sh->pts == MP_NOPTS_VALUE)
+    sh->pts = 0;
+  if (pts != MP_NOPTS_VALUE) {
+    sh->pts = pts;
+    sh->pts_bytes = 0;
+  }
   speex_bits_read_from(&ctx->bits, packet, len);
   i = ctx->hdr->frames_per_packet;
   do {
@@ -162,6 +169,7 @@ static int decode_audio(sh_audio_t *sh, unsigned char *buf,
       speex_decode_stereo_int((short *)buf, framesamples, &ctx->stereo);
     buf = &buf[framelen];
   } while (--i > 0);
+  sh->pts_bytes += ctx->hdr->frames_per_packet * framelen;
   return ctx->hdr->frames_per_packet * framelen;
 }
 
