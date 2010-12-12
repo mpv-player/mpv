@@ -671,6 +671,7 @@ static void demux_close_asf(demuxer_t *demuxer) {
 
     free(asf->aud_repdata_sizes);
     free(asf->vid_repdata_sizes);
+    free(asf->packet);
     free(asf);
 }
 
