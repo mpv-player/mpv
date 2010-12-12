@@ -129,6 +129,11 @@ static int init(sh_audio_t *sh)
     faacDecSetConfiguration(faac_hdec, faac_conf);
 
     sh->a_in_buffer_len = demux_read_data(sh->ds, sh->a_in_buffer, sh->a_in_buffer_size);
+    if (!sh->a_in_buffer_len) {
+      // faad init will crash with 0 buffer length
+      mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Could not get audio data!\n");
+      return 0;
+    }
 #if CONFIG_FAAD_INTERNAL
     /* init the codec, look for LATM */
     faac_init = faacDecInit(faac_hdec, sh->a_in_buffer,
