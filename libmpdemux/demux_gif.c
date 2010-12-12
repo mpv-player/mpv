@@ -167,6 +167,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
   if (DGifGetLine(gif, buf, len) == GIF_ERROR) {
     PrintGifError();
+    free(buf);
     return 0; // oops
   }
 
@@ -259,6 +260,7 @@ static demuxer_t* demux_open_gif(demuxer_t* demuxer)
 #endif
   if (!gif) {
     PrintGifError();
+    free(priv);
     return NULL;
   }
 
