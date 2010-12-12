@@ -367,7 +367,7 @@ static int mov_check_file(demuxer_t* demuxer){
 	    goto skip_chunk;
 	}
 #endif
-	else if(len<8) break; // invalid chunk
+	if(len<8) break; // invalid chunk
 
 	switch(id){
 	case MOV_FOURCC('f','t','y','p'): {
