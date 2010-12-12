@@ -552,7 +552,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
             return avctx->get_buffer(avctx, pic);
         }
 
-        if(avctx->has_b_frames){
+        if(avctx->has_b_frames || ctx->b_count){
             type= MP_IMGTYPE_IPB;
         }else{
             type= MP_IMGTYPE_IP;
