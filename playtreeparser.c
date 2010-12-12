@@ -680,6 +680,116 @@ parse_textplain(play_tree_parser_t* p) {
   return entry;
 }
 
+/**
+ * \brief decode the base64 used in nsc files
+ * \param in input string, 0-terminated
+ * \param buf output buffer, must point to memory suitable for realloc,
+ *            will be NULL on failure.
+ * \return decoded length in bytes
+ */
+static int decode_nsc_base64(char *in, char **buf) {
+  int i, j, n;
+  if (in[0] != '0' || in[1] != '2')
+    goto err_out;
+  in += 2; // skip prefix
+  if (strlen(in) < 16) // error out if nothing to decode
+    goto err_out;
+  in += 12; // skip encoded string length
+  n = strlen(in) / 4;
+  *buf = realloc(*buf, n * 3);
+  for (i = 0; i < n; i++) {
+    uint8_t c[4];
+    for (j = 0; j < 4; j++) {
+      c[j] = in[4 * i + j];
+      if (c[j] >= '0' && c[j] <= '9') c[j] += 0 - '0';
+      else if (c[j] >= 'A' && c[j] <= 'Z') c[j] += 10 - 'A';
+      else if (c[j] >= 'a' && c[j] <= 'z') c[j] += 36 - 'a';
+      else if (c[j] == '{') c[j] = 62;
+      else if (c[j] == '}') c[j] = 63;
+      else {
+        mp_msg(MSGT_PLAYTREE, MSGL_ERR, "Invalid character %c (0x%02"PRIx8")\n", c[j], c[j]);
+        goto err_out;
+      }
+    }
+    (*buf)[3 * i] = (c[0] << 2) | (c[1] >> 4);
+    (*buf)[3 * i + 1] = (c[1] << 4) | (c[2] >> 2);
+    (*buf)[3 * i + 2] = (c[2] << 6) | c[3];
+  }
+  return 3 * n;
+err_out:
+  free(*buf);
+  *buf = NULL;
+  return 0;
+}
+
+/**
+ * \brief "converts" utf16 to ascii by just discarding every second byte
+ * \param buf buffer to convert
+ * \param len lenght of buffer, must be > 0
+ */
+static void utf16_to_ascii(char *buf, int len) {
+  int i;
+  if (len <= 0) return;
+  for (i = 0; i < len / 2; i++)
+    buf[i] = buf[i * 2];
+  buf[i] = 0; // just in case
+}
+
+static play_tree_t *parse_nsc(play_tree_parser_t* p) {
+  char *line, *addr = NULL, *url, *unicast_url = NULL;
+  int port = 0;
+  play_tree_t *entry = NULL;
+
+  mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying nsc playlist...\n");
+  while((line = play_tree_parser_get_line(p)) != NULL) {
+    strstrip(line);
+    if(!line[0]) // Ignore empties
+      continue;
+    if (strncasecmp(line,"[Address]", 9) == 0)
+      break; // nsc header found
+    else
+      return NULL;
+  }
+  mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected nsc playlist format\n");
+  play_tree_parser_stop_keeping(p);
+  while ((line = play_tree_parser_get_line(p)) != NULL) {
+    strstrip(line);
+    if (!line[0])
+      continue;
+    if (strncasecmp(line, "Unicast URL=", 12) == 0) {
+      int len = decode_nsc_base64(&line[12], &unicast_url);
+      if (len <= 0)
+        mp_msg(MSGT_PLAYTREE, MSGL_WARN, "[nsc] Unsupported Unicast URL encoding\n");
+      else
+        utf16_to_ascii(unicast_url, len);
+    } else if (strncasecmp(line, "IP Address=", 11) == 0) {
+      int len = decode_nsc_base64(&line[11], &addr);
+      if (len <= 0)
+        mp_msg(MSGT_PLAYTREE, MSGL_WARN, "[nsc] Unsupported IP Address encoding\n");
+      else
+        utf16_to_ascii(addr, len);
+    } else if (strncasecmp(line, "IP Port=", 8) == 0) {
+      port = strtol(&line[8], NULL, 0);
+    }
+  }
+
+  if (unicast_url)
+    url = strdup(unicast_url);
+  else if (addr && port) {
+    url = malloc(strlen(addr) + 7 + 20 + 1);
+    sprintf(url, "http://%s:%i", addr, port);
+  } else
+   goto out;
+
+  entry = play_tree_new();
+  play_tree_add_file(entry, url);
+  free(url);
+out:
+  free(addr);
+  free(unicast_url);
+  return entry;
+}
+
 play_tree_t*
 parse_playtree(stream_t *stream, struct m_config *mconfig, int forced) {
   play_tree_parser_t* p;
@@ -837,6 +947,10 @@ play_tree_parser_get_play_tree(play_tree_parser_t* p, int forced) {
     play_tree_parser_reset(p);
 
     tree = parse_smil(p);
+    if(tree) break;
+    play_tree_parser_reset(p);
+
+    tree = parse_nsc(p);
     if(tree) break;
     play_tree_parser_reset(p);
 
