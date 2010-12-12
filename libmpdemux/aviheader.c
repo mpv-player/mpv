@@ -377,13 +377,15 @@ while(1){
     if(demuxer->movi_end>stream_tell(demuxer->stream))
 	demuxer->movi_end=stream_tell(demuxer->stream); // fixup movi-end
     if(index_mode && !priv->isodml){
+      int read;
       int i;
       priv->idx_size=size2>>4;
       mp_tmsg(MSGT_HEADER,MSGL_V,"Reading INDEX block, %d chunks for %d frames (fpos=%"PRId64").\n",
         priv->idx_size,avih.dwTotalFrames, (int64_t)stream_tell(demuxer->stream));
       priv->idx=malloc(priv->idx_size<<4);
 //      printf("\nindex to %p !!!!! (priv=%p)\n",priv->idx,priv);
-      stream_read(demuxer->stream,(char*)priv->idx,priv->idx_size<<4);
+      read = stream_read(demuxer->stream,(char*)priv->idx,priv->idx_size<<4);
+      priv->idx_size = FFMAX(read, 0) >> 4;
       for (i = 0; i < priv->idx_size; i++) {	// swap index to machine endian
 	AVIINDEXENTRY *entry=(AVIINDEXENTRY*)priv->idx + i;
 	le2me_AVIINDEXENTRY(entry);
