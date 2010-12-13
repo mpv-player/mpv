@@ -1491,7 +1491,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
     else
         vc->top_field_first = 1;
 
-    add_new_video_surface(vo, rndr->surface, mpi, pts);
+    add_new_video_surface(vo, rndr->surface, reserved_mpi, pts);
 
     return;
 }
