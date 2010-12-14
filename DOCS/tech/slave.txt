@@ -272,11 +272,16 @@ radio_step_channel <-1|1>
 radio_step_freq <value>
     Tune frequency by the <value> (positive - up, negative - down).
 
-seek <value> [type]
+seek <value> [type] [hr-seek]
     Seek to some place in the movie.
-        0 is a relative seek of +/- <value> seconds (default).
-        1 is a seek to <value> % in the movie.
-        2 is a seek to an absolute position of <value> seconds.
+        type = 0 is a relative seek of +/- <value> seconds (default).
+        type = 1 is a seek to <value> % in the movie.
+        type = 2 is a seek to an absolute position of <value> seconds.
+    The hr-seek parameter controls whether to use precise seeks (not limited
+    to keyframe positions in video).
+        hr-seek = 0 means use default set with option -hr-seek (default).
+        hr-seek = 1 means force precise seek if possible.
+        hr-seek = -1 means force non-precise seek.
 
 seek_chapter <value> [type]
     Seek to the start of a chapter.
@@ -513,6 +518,7 @@ name               type      min     max     get set step comment
 osdlevel           int       0       3       X   X   X    as -osdlevel
 speed              float     0.01    100     X   X   X    as -speed
 loop               int       -1              X   X   X    as -loop
+hr_seek            string                    X   X   X    as -hr-seek
 pts_association_mode string                  X   X   X    as -pts-association-mode
 pause              flag      0       1       X            1 if paused, use with pausing_keep_force
 filename           string                    X            file playing wo path

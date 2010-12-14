@@ -129,6 +129,9 @@ typedef struct MPContext {
      * stream by cutting samples or adding silence at the beginning to make
      * audio playback position match video position. */
     bool syncing_audio;
+    bool hrseek_active;
+    bool hrseek_framedrop;
+    double hrseek_pts;
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
     // written to the ao, decreased when moving to the next frame.

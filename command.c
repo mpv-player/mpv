@@ -2219,6 +2219,8 @@ static const m_option_t mp_properties[] = {
      M_OPT_RANGE, 0, 1, NULL },
     { "pts_association_mode", mp_property_generic_option, &m_option_type_choice,
      0, 0, 0, "pts-association-mode" },
+    { "hr_seek", mp_property_generic_option, &m_option_type_choice,
+     0, 0, 0, "hr-seek" },
 
     // Audio
     { "volume", mp_property_volume, CONF_TYPE_FLOAT,
@@ -2393,6 +2395,7 @@ static struct property_osd_display {
     { "chapter", -1, -1, NULL },
     { "capturing", 0, -1, _("Capturing: %s") },
     { "pts_association_mode", 0, -1, "PTS association mode: %s" },
+    { "hr_seek", 0, -1, "hr-seek: %s" },
     // audio
     { "volume", OSD_VOLUME, -1, _("Volume") },
     { "mute", 0, -1, _("Mute: %s") },
@@ -2713,20 +2716,19 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     if (!set_property_command(mpctx, cmd))
         switch (cmd->id) {
         case MP_CMD_SEEK:{
-                float v;
-                int abs;
                 mpctx->add_osd_seek_info = true;
-                v = cmd->args[0].v.f;
-                abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
+                float v = cmd->args[0].v.f;
+                int abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
+                int exact = (cmd->nargs > 2) ? cmd->args[2].v.i : 0;
                 if (abs == 2) { /* Absolute seek to a specific timestamp in seconds */
-                    queue_seek(mpctx, MPSEEK_ABSOLUTE, v, 0);
+                    queue_seek(mpctx, MPSEEK_ABSOLUTE, v, exact);
                     mpctx->osd_function = v > get_current_time(mpctx) ?
                         OSD_FFW : OSD_REW;
                 } else if (abs) {       /* Absolute seek by percentage */
-                    queue_seek(mpctx, MPSEEK_FACTOR, v / 100.0, 0);
+                    queue_seek(mpctx, MPSEEK_FACTOR, v / 100.0, exact);
                     mpctx->osd_function = OSD_FFW;  // Direction isn't set correctly
                 } else {
-                    queue_seek(mpctx, MPSEEK_RELATIVE, v, 0);
+                    queue_seek(mpctx, MPSEEK_RELATIVE, v, exact);
                     mpctx->osd_function = (v > 0) ? OSD_FFW : OSD_REW;
                 }
             }

@@ -2558,7 +2558,8 @@ static double update_video(struct MPContext *mpctx)
 
     while (1) {
         current_module = "filter_video";
-        if (vo_get_buffered_frame(video_out, false) >= 0)
+        if (!mpctx->hrseek_active
+            && vo_get_buffered_frame(video_out, false) >= 0)
             break;
         // XXX Time used in this call is not counted in any performance
         // timer now
@@ -2578,7 +2579,10 @@ static double update_video(struct MPContext *mpctx)
         if (in_size > max_framesize)
             max_framesize = in_size;
         current_module = "decode video";
-        int framedrop_type = check_framedrop(mpctx, sh_video->frametime);
+        if (pts >= mpctx->hrseek_pts - .005)
+            mpctx->hrseek_framedrop = false;
+        int framedrop_type = mpctx->hrseek_framedrop ? 1 :
+            check_framedrop(mpctx, sh_video->frametime);
         void *decoded_frame = decode_video(sh_video, packet, in_size,
                                            framedrop_type, pts);
         if (decoded_frame) {
@@ -2603,6 +2607,9 @@ static double update_video(struct MPContext *mpctx)
         if (pts == MP_NOPTS_VALUE)
             pts = sh_video->last_pts;
     }
+    if (mpctx->hrseek_active && pts < mpctx->hrseek_pts - .005)
+        return 0;
+    mpctx->hrseek_active = false;
     sh_video->pts = pts;
     if (sh_video->last_pts == MP_NOPTS_VALUE)
         sh_video->last_pts = sh_video->pts;
@@ -2808,6 +2815,8 @@ static void seek_reset(struct MPContext *mpctx)
 
     edl_seek_reset(mpctx);
 
+    mpctx->hrseek_active = false;
+    mpctx->hrseek_framedrop = false;
     mpctx->total_avsync_change = 0;
     audio_time_usage = 0; video_time_usage = 0; vout_time_usage = 0;
     drop_frame_cnt = 0;
@@ -2854,9 +2863,15 @@ static double timeline_set_from_time(struct MPContext *mpctx, double pts,
 // return -1 if seek failed (non-seekable stream?), 0 otherwise
 static int seek(MPContext *mpctx, struct seek_params seek)
 {
+    struct MPOpts *opts = &mpctx->opts;
+
     current_module = "seek";
     if (mpctx->stop_play == AT_END_OF_FILE)
         mpctx->stop_play = KEEP_PLAYING;
+    bool hr_seek = mpctx->demuxer->accurate_seek && opts->correct_pts;
+    hr_seek &= seek.exact >= 0 && seek.type != MPSEEK_FACTOR;
+    hr_seek &= opts->hr_seek == 0 && seek.type == MPSEEK_ABSOLUTE
+        || opts->hr_seek > 0 || seek.exact > 0;
     if (seek.type == MPSEEK_FACTOR
         || seek.type == MPSEEK_ABSOLUTE
         && seek.amount < mpctx->last_chapter_pts
@@ -2899,7 +2914,7 @@ static int seek(MPContext *mpctx, struct seek_params seek)
     case MPSEEK_ABSOLUTE:
         demuxer_style |= SEEK_ABSOLUTE;
     }
-    if (seek.direction < 0)
+    if (hr_seek || seek.direction < 0)
         demuxer_style |= SEEK_BACKWARD;
     else if (seek.direction > 0)
         demuxer_style |= SEEK_FORWARD;
@@ -2917,6 +2932,12 @@ static int seek(MPContext *mpctx, struct seek_params seek)
      * seeks etc until a new video frame has been decoded */
     if (seek.type == MPSEEK_ABSOLUTE)
         mpctx->video_pts = seek.amount;
+
+    if (hr_seek) {
+        mpctx->hrseek_active = true;
+        mpctx->hrseek_framedrop = true;
+        mpctx->hrseek_pts = seek.amount;
+    }
 
     mpctx->start_timestamp = GetTimerMS();
 
@@ -3129,9 +3150,10 @@ static void run_playloop(struct MPContext *mpctx)
         vo_fps = mpctx->sh_video->fps;
 
         bool blit_frame = mpctx->video_out->frame_loaded;
-        if (!blit_frame) {
+        if (!blit_frame || mpctx->hrseek_active) {
             double frame_time = update_video(mpctx);
             blit_frame = mpctx->video_out->frame_loaded;
+            blit_frame &= !mpctx->hrseek_active;
             mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "*** ftime=%5.3f ***\n", frame_time);
             if (mpctx->sh_video->vf_initialized < 0) {
                 mp_tmsg(MSGT_CPLAYER, MSGL_FATAL,
@@ -4547,6 +4569,15 @@ if(play_n_frames==0){
   mpctx->stop_play=PT_NEXT_ENTRY; goto goto_next_file;
 }
 
+ mpctx->time_frame = 0;
+ mpctx->drop_message_shown = 0;
+ mpctx->restart_playback = true;
+ mpctx->video_pts = 0;
+ mpctx->hrseek_active = false;
+ mpctx->hrseek_framedrop = false;
+ mpctx->total_avsync_change = 0;
+ mpctx->last_chapter_seek = -1;
+
 // If there's a timeline force an absolute seek to initialize state
 if (seek_to_sec || mpctx->timeline) {
     queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_to_sec, 0);
@@ -4577,12 +4608,6 @@ if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
 
  mpctx->seek = (struct seek_params){0};
  get_relative_time(mpctx); // reset current delta
- mpctx->time_frame = 0;
- mpctx->drop_message_shown = 0;
- mpctx->restart_playback = true;
- mpctx->video_pts = 0;
- mpctx->total_avsync_change = 0;
- mpctx->last_chapter_seek = -1;
  // Make sure VO knows current pause state
  if (mpctx->sh_video)
      vo_control(mpctx->video_out, mpctx->paused ? VOCTRL_PAUSE : VOCTRL_RESUME,

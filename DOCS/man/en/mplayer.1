@@ -909,6 +909,27 @@ mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 .PD 1
 .
 .TP
+.B \-hr\-seek off|absolute|always
+Select when to use precise seeks that are not limited to keyframes.
+Such seeks require decoding video from the previous keyframe up to the target
+position and so can take some time depending on decoding performance.
+For some video formats precise seeks are disabled. This option selects the
+default choice to use for seeks; it's possible to explicitly override that
+default in the definition of key bindings and in slave mode commands.
+.PD 0
+.RSs
+.IPs off
+Never use precise seeks.
+.IPs absolute
+Use precise seeks if the seek is to an absolute position in the file,
+such as a chapter seek, but not for relative seeks like the default
+behavior of arrow keys (default).
+.IPs always
+Use precise seeks whenever possible.
+.RE
+.PD 1
+.
+.TP
 .B \-identify
 Shorthand for \-msglevel identify=4.
 Show file parameters in an easily parseable format.

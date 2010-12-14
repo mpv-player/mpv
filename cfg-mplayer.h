@@ -312,6 +312,8 @@ const m_option_t mplayer_opts[]={
     OPT_CHOICE("pts-association-mode", user_pts_assoc_mode, 0,
                ({"auto", 0}, {"decoder", 1}, {"sort", 2})),
     OPT_MAKE_FLAGS("initial-audio-sync", initial_audio_sync, 0),
+    OPT_CHOICE("hr-seek", hr_seek, 0,
+               ({"off", -1}, {"absolute", 0}, {"always", 1}, {"on", 1})),
     OPT_FLAG_CONSTANTS("noautosync", autosync, 0, 0, -1),
     OPT_INTRANGE("autosync", autosync, 0, 0, 10000),
 

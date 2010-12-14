@@ -47,6 +47,7 @@ typedef struct MPOpts {
     int user_correct_pts;
     int user_pts_assoc_mode;
     int initial_audio_sync;
+    int hr_seek;
     int autosync;
     int softsleep;
     int rtc;
