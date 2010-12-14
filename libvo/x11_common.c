@@ -1123,6 +1123,7 @@ final:
   x11->vo_gc = XCreateGC(mDisplay, x11->window, GCForeground, &xgcv);
   XSync(mDisplay, False);
   x11->vo_mouse_autohide = 1;
+  vo->event_fd = ConnectionNumber(x11->display);
 }
 
 void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,

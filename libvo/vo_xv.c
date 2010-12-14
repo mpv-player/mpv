@@ -61,9 +61,6 @@ Buffer allocation:
 
 #include "subopt-helper.h"
 
-#include "input/input.h"
-#include "mp_fifo.h"
-
 #include "libavutil/common.h"
 
 static const vo_info_t info = {
@@ -104,7 +101,6 @@ struct xvctx {
     struct vo_rect src_rect;
     struct vo_rect dst_rect;
     uint32_t max_width, max_height; // zero means: not set
-    int event_fd_registered; // for uninit called from preinit
     int mode_switched;
     int osd_objects_drawn;
     void (*draw_alpha_fnc)(void *ctx, int x0, int y0, int w, int h,
@@ -645,17 +641,8 @@ static void uninit(struct vo *vo)
     if (ctx->mode_switched)
         vo_vm_close(vo);
 #endif
-    if (ctx->event_fd_registered)
-        mp_input_rm_key_fd(vo->input_ctx, ConnectionNumber(vo->x11->display));
     // uninit() shouldn't get called unless initialization went past vo_init()
     vo_x11_uninit(vo);
-}
-
-static int x11_fd_callback(void *ctx, int fd)
-{
-    struct vo *vo = ctx;
-    check_events(vo);
-    return mplayer_get_key(vo->key_fifo, 0);
 }
 
 static int preinit(struct vo *vo, const char *arg)
@@ -780,9 +767,6 @@ static int preinit(struct vo *vo, const char *arg)
     ctx->fo = XvListImageFormats(x11->display, x11->xv_port,
                                  (int *) &ctx->formats);
 
-    mp_input_add_key_fd(vo->input_ctx, ConnectionNumber(x11->display), 1,
-                        x11_fd_callback, NULL, vo);
-    ctx->event_fd_registered = 1;
     return 0;
 
   error:
