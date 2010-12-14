@@ -1272,7 +1272,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
   if (mpctx->sh_audio && a_pos == MP_NOPTS_VALUE)
       a_pos = playing_audio_pts(mpctx);
   if (mpctx->sh_audio && sh_video && at_frame) {
-      mpctx->last_av_difference = a_pos - sh_video->pts - audio_delay;
+      mpctx->last_av_difference = a_pos - mpctx->video_pts - audio_delay;
       if (mpctx->time_frame > 0)
           mpctx->last_av_difference += mpctx->time_frame * opts->playback_speed;
       if (mpctx->last_av_difference > 0.5 && drop_frame_cnt > 50
@@ -1315,7 +1315,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 
   // Video time
   if (sh_video)
-    saddf(line, &pos, width, "V:%6.1f ", sh_video->pts);
+    saddf(line, &pos, width, "V:%6.1f ", mpctx->video_pts);
 
   // A-V sync
   if (mpctx->sh_audio && sh_video)
@@ -2131,7 +2131,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
     int bytes;
     while (1) {
         double written_pts = written_audio_pts(mpctx);
-        double ptsdiff = written_pts - mpctx->sh_video->pts - mpctx->delay
+        double ptsdiff = written_pts - mpctx->video_pts - mpctx->delay
             - audio_delay;
         bytes = ptsdiff * ao_data.bps / mpctx->opts.playback_speed;
         bytes -= bytes % (ao_data.channels * af_fmt2bits(ao_data.format) / 8);
@@ -2712,7 +2712,7 @@ static void edl_seek_reset(MPContext *mpctx)
     next_edl_record = edl_records;
 
     while (next_edl_record) {
-	if (next_edl_record->start_sec >= mpctx->sh_video->pts)
+	if (next_edl_record->start_sec >= get_current_time(mpctx))
 	    break;
 
 	if (next_edl_record->action == EDL_MUTE)
@@ -2738,7 +2738,7 @@ static void edl_update(MPContext *mpctx)
 	return;
     }
 
-    if (mpctx->sh_video->pts >= next_edl_record->start_sec) {
+    if (get_current_time(mpctx) >= next_edl_record->start_sec) {
 	if (next_edl_record->action == EDL_SKIP) {
 	    mpctx->osd_function = OSD_FFW;
 	    mpctx->abs_seek_pos = 0;
@@ -2782,6 +2782,7 @@ static void seek_reset(struct MPContext *mpctx)
 	// (which is used by at least vobsub and edl code below) may
 	// be completely wrong (probably 0).
 	mpctx->sh_video->pts = mpctx->d_video->pts + mpctx->video_offset;
+        mpctx->video_pts = mpctx->sh_video->pts;
 	update_subtitles(mpctx, &mpctx->opts, mpctx->sh_video,
                          mpctx->sh_video->pts, mpctx->video_offset,
                          mpctx->d_sub, 1);
@@ -2872,7 +2873,7 @@ static int seek(MPContext *mpctx, double amount, int style)
             style |= SEEK_FORWARD;
         else
             style |= SEEK_BACKWARD;
-        amount += mpctx->sh_video->pts;
+        amount += get_current_time(mpctx);
     }
 
     /* At least the liba52 decoder wants to read from the input stream
@@ -2939,7 +2940,7 @@ double get_current_time(struct MPContext *mpctx)
         return demuxer->stream_pts;
     struct sh_video *sh_video = demuxer->video->sh;
     if (sh_video)
-        return sh_video->pts;
+        return mpctx->video_pts;
     return playing_audio_pts(mpctx);
 }
 
@@ -3130,6 +3131,7 @@ static void run_playloop(struct MPContext *mpctx)
         current_module = "flip_page";
         if (!frame_time_remaining && blit_frame) {
             struct sh_video *sh_video = mpctx->sh_video;
+            mpctx->video_pts = sh_video->pts;
             update_subtitles(mpctx, &mpctx->opts, sh_video, sh_video->pts,
                              mpctx->video_offset, mpctx->d_sub, 0);
             update_teletext(sh_video, mpctx->demuxer, 0);
@@ -3154,7 +3156,7 @@ static void run_playloop(struct MPContext *mpctx)
             if (pts2 != MP_NOPTS_VALUE && opts->correct_pts
                 && !mpctx->restart_playback) {
                 // expected A/V sync correction is ignored
-                double diff = (pts2 - mpctx->sh_video->pts);
+                double diff = (pts2 - mpctx->video_pts);
                 diff /= opts->playback_speed;
                 if (mpctx->time_frame < 0)
                     diff += mpctx->time_frame;
@@ -4517,6 +4519,7 @@ if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
  mpctx->time_frame = 0;
  mpctx->drop_message_shown = 0;
  mpctx->restart_playback = true;
+ mpctx->video_pts = 0;
  mpctx->total_avsync_change = 0;
  mpctx->last_chapter_seek = -1;
  // Make sure VO knows current pause state

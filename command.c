@@ -2689,14 +2689,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
                 if (abs == 2) { /* Absolute seek to a specific timestamp in seconds */
                     mpctx->abs_seek_pos = SEEK_ABSOLUTE;
-                    if (sh_video)
-                        mpctx->osd_function =
-                            (v > sh_video->pts) ? OSD_FFW : OSD_REW;
+                    mpctx->osd_function = v > get_current_time(mpctx) ?
+                        OSD_FFW : OSD_REW;
                     mpctx->rel_seek_secs = v;
                 } else if (abs) {       /* Absolute seek by percentage */
                     mpctx->abs_seek_pos = SEEK_ABSOLUTE | SEEK_FACTOR;
-                    if (sh_video)
-                        mpctx->osd_function = OSD_FFW;  // Direction isn't set correctly
+                    mpctx->osd_function = OSD_FFW;  // Direction isn't set correctly
                     mpctx->rel_seek_secs = v / 100.0;
                 } else {
                     mpctx->rel_seek_secs += v;
@@ -2905,12 +2903,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         case MP_CMD_SUB_STEP:
             if (sh_video) {
                 int movement = cmd->args[0].v.i;
-                step_sub(subdata, sh_video->pts, movement);
+                step_sub(subdata, mpctx->video_pts, movement);
 #ifdef CONFIG_ASS
                 if (ass_track)
                     sub_delay +=
                         ass_step_sub(ass_track,
-                                     (sh_video->pts +
+                                     (mpctx->video_pts +
                                       sub_delay) * 1000 + .5, movement) / 1000.;
 #endif
                 set_osd_tmsg(OSD_MSG_SUB_DELAY, 1, osd_duration,

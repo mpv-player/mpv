@@ -148,6 +148,9 @@ typedef struct MPContext {
     // the same value if the status line is updated at a time where no new
     // video frame is shown.
     double last_av_difference;
+    /* timestamp of video frame currently visible on screen
+     * (or at least queued to be flipped by VO) */
+    double video_pts;
 
     // Timestamp from the last time some timing functions read the
     // current time, in (occasionally wrapping) microseconds. Used
