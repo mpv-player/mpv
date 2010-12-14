@@ -2280,11 +2280,11 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     return 1;
 }
 
-static int sleep_until_update(struct MPContext *mpctx, float *time_frame,
-                              float *aq_sleep_time)
+static int sleep_until_near_frame(struct MPContext *mpctx, float *time_frame,
+                                  float *aq_sleep_time)
 {
     struct MPOpts *opts = &mpctx->opts;
-    int frame_time_remaining = 0;
+    double audio_limit = 2;
     current_module="calc_sleep_time";
 
     *time_frame -= get_relative_time(mpctx); // reset timer
@@ -2309,17 +2309,11 @@ static int sleep_until_update(struct MPContext *mpctx, float *time_frame,
 	}
 
 	*time_frame = delay - mpctx->delay / opts->playback_speed;
-        *time_frame -= mpctx->video_out->flip_queue_offset;
 
 	// delay = amount of audio buffered in soundcard/driver
-	if (delay > 0.25) delay=0.25; else
-	if (delay < 0.10) delay=0.10;
-
-	if (*time_frame > delay*0.6) {
-	    // sleep time too big - may cause audio drops (buffer underrun)
-	    frame_time_remaining = 1;
-	    *time_frame = delay*0.5;
-	}
+        delay = FFMIN(delay, 0.5);
+        delay = FFMAX(delay, 0.1);
+        audio_limit = delay;
     } else {
 	// If we're lagging more than 200 ms behind the right playback rate,
 	// don't try to "catch up".
@@ -2327,19 +2321,19 @@ static int sleep_until_update(struct MPContext *mpctx, float *time_frame,
 	// without sleeping.
 	if (*time_frame < -0.2 || opts->benchmark)
 	    *time_frame = 0;
-        *time_frame -= mpctx->video_out->flip_queue_offset;
     }
 
-    *aq_sleep_time += *time_frame;
+    double t = *time_frame - mpctx->video_out->flip_queue_offset;
 
+    if (t <= 0.05)
+        return 0;
 
-    //============================== SLEEP: ===================================
-
-    // flag 256 means: libvo driver does its timing (dvb card)
-    if (*time_frame > 0.001 && !(mpctx->sh_video->output_flags&256))
-	*time_frame = timing_sleep(mpctx, *time_frame);
-    *time_frame += mpctx->video_out->flip_queue_offset;
-    return frame_time_remaining;
+    t -= 0.05;
+    if (t > audio_limit * 0.6)
+        t = audio_limit * 0.5;
+    *aq_sleep_time += t;
+    mp_input_get_cmd(mpctx->input, t * 1000 + 1, 1);
+    return 1;
 }
 
 int reinit_video_chain(struct MPContext *mpctx)
@@ -3089,17 +3083,6 @@ static void run_playloop(struct MPContext *mpctx)
                 mpctx->stop_play = PT_NEXT_ENTRY;
                 return;
             }
-            if (blit_frame) {
-                struct sh_video *sh_video = mpctx->sh_video;
-                update_subtitles(mpctx, &mpctx->opts, sh_video, sh_video->pts,
-                                 mpctx->video_offset, mpctx->d_sub, 0);
-                update_teletext(sh_video, mpctx->demuxer, 0);
-                update_osd_msg(mpctx);
-                struct vf_instance *vf = mpctx->sh_video->vfilter;
-                vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
-                vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
-                vo_osd_changed(0);
-            }
             if (frame_time < 0)
                 mpctx->stop_play = AT_END_OF_FILE;
             else if (!mpctx->restart_playback) {
@@ -3138,14 +3121,32 @@ static void run_playloop(struct MPContext *mpctx)
             }
         }
 
-        bool frame_time_remaining = sleep_until_update(mpctx,
-                                                       &mpctx->time_frame,
-                                                       &aq_sleep_time);
+        bool frame_time_remaining = sleep_until_near_frame(mpctx,
+                                                           &mpctx->time_frame,
+                                                           &aq_sleep_time);
 
 //====================== FLIP PAGE (VIDEO BLT): =========================
 
         current_module = "flip_page";
         if (!frame_time_remaining && blit_frame) {
+            struct sh_video *sh_video = mpctx->sh_video;
+            update_subtitles(mpctx, &mpctx->opts, sh_video, sh_video->pts,
+                             mpctx->video_offset, mpctx->d_sub, 0);
+            update_teletext(sh_video, mpctx->demuxer, 0);
+            update_osd_msg(mpctx);
+            struct vf_instance *vf = sh_video->vfilter;
+            vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
+            vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
+            vo_osd_changed(0);
+
+            mpctx->time_frame -= mpctx->video_out->flip_queue_offset;
+            aq_sleep_time += mpctx->time_frame;
+            // flag 256 means: libvo driver does its timing (dvb card)
+            if (mpctx->time_frame > 0.001
+                && !(mpctx->sh_video->output_flags&256))
+                mpctx->time_frame = timing_sleep(mpctx, mpctx->time_frame);
+            mpctx->time_frame += mpctx->video_out->flip_queue_offset;
+
             unsigned int t2 = GetTimer();
             unsigned int pts_us = mpctx->last_time + mpctx->time_frame * 1e6;
             int duration = -1;
