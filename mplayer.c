@@ -2866,7 +2866,7 @@ static int seek(MPContext *mpctx, double amount, int style)
         amount *= mpctx->timeline[mpctx->num_timeline_parts].start;
         style &= ~SEEK_FACTOR;
     }
-    if ((mpctx->demuxer->accurate_seek || mpctx->timeline) && mpctx->sh_video
+    if ((mpctx->demuxer->accurate_seek || mpctx->timeline)
         && !(style & (SEEK_ABSOLUTE | SEEK_FACTOR))) {
         style |= SEEK_ABSOLUTE;
         if (amount > 0)
