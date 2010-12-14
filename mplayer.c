@@ -2457,13 +2457,13 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
     struct sh_video *sh_video = mpctx->sh_video;
     double frame_time = 0;
     struct vo *video_out = mpctx->video_out;
-    while (!video_out->frame_loaded) {
+    while (1) {
         current_module = "filter_video";
         // In nocorrect-pts mode there is no way to properly time these frames
         if (vo_get_buffered_frame(video_out, 0) >= 0)
             break;
         if (vf_output_queued_frame(sh_video->vfilter))
-            continue;
+            break;
         unsigned char *packet = NULL;
         frame_time = sh_video->next_frame_time;
         if (mpctx->restart_playback)
@@ -2507,10 +2507,9 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
 #endif
         if (decoded_frame) {
             current_module = "filter video";
-            if (filter_video(sh_video, decoded_frame, sh_video->pts))
-                if (!video_out->config_ok)
-                    break;
+            filter_video(sh_video, decoded_frame, sh_video->pts);
         }
+        break;
     }
     return frame_time;
 }
@@ -2557,21 +2556,19 @@ static double update_video(struct MPContext *mpctx)
 
     double pts;
 
-    bool hit_eof = false;
-    while (!video_out->frame_loaded) {
+    while (1) {
         current_module = "filter_video";
-        if (vo_get_buffered_frame(video_out, hit_eof) >= 0)
+        if (vo_get_buffered_frame(video_out, false) >= 0)
             break;
         // XXX Time used in this call is not counted in any performance
-        // timer now, OSD time is not updated correctly for filter-added frames
+        // timer now
         if (vf_output_queued_frame(sh_video->vfilter))
-            continue;
-        if (hit_eof)
-            return -1;
+            break;
         unsigned char *packet = NULL;
         int in_size = ds_get_packet_pts(mpctx->d_video, &packet, &pts);
         if (pts != MP_NOPTS_VALUE)
             pts += mpctx->video_offset;
+        bool hit_eof = false;
         if (in_size < 0) {
             // try to extract last frames in case of decoder lag
             in_size = 0;
@@ -2587,11 +2584,16 @@ static double update_video(struct MPContext *mpctx)
         if (decoded_frame) {
             determine_frame_pts(mpctx);
             current_module = "filter video";
-            if (filter_video(sh_video, decoded_frame, sh_video->pts))
-                if (!video_out->config_ok)
-                    break; // We'd likely hang in this loop otherwise
+            filter_video(sh_video, decoded_frame, sh_video->pts);
+        } else if (hit_eof) {
+            if (vo_get_buffered_frame(video_out, true) < 0)
+                return -1;
         }
+        break;
     }
+
+    if (!video_out->frame_loaded)
+        return 0;
 
     pts = video_out->next_pts;
     if (pts == MP_NOPTS_VALUE) {
@@ -2880,9 +2882,10 @@ static int seek(MPContext *mpctx, double amount, int style)
      * during initialization, so reinit must be done after the demux_seek()
      * call that clears possible stream EOF. */
     bool need_reset = false;
+    double demuxer_amount = amount;
     if (mpctx->timeline) {
-        amount = timeline_set_from_time(mpctx, amount, &need_reset);
-        if (amount == -1) {
+        demuxer_amount = timeline_set_from_time(mpctx, amount, &need_reset);
+        if (demuxer_amount == -1) {
             mpctx->stop_play = AT_END_OF_FILE;
             // Clear audio from current position
             if (mpctx->sh_audio) {
@@ -2893,13 +2896,22 @@ static int seek(MPContext *mpctx, double amount, int style)
             return -1;
         }
     }
-    int seekresult = demux_seek(mpctx->demuxer, amount, audio_delay, style);
+    int seekresult = demux_seek(mpctx->demuxer, demuxer_amount, audio_delay,
+                                style);
     if (need_reset)
         reinit_decoders(mpctx);
     if (seekresult == 0)
 	return -1;
 
     seek_reset(mpctx);
+
+    /* Use the target time as "current position" for further relative
+     * seeks etc until a new video frame has been decoded */
+    if ((style & (SEEK_ABSOLUTE | SEEK_FACTOR)) == SEEK_ABSOLUTE)
+        mpctx->video_pts = amount;
+
+    mpctx->start_timestamp = GetTimerMS();
+
     return 0;
 }
 
@@ -3051,6 +3063,7 @@ static void run_playloop(struct MPContext *mpctx)
 
 
     if (!mpctx->sh_video) {
+        mpctx->restart_playback = false;
         // handle audio-only case:
         double a_pos = 0;
         // sh_audio can be NULL due to video stream switching
@@ -3253,21 +3266,25 @@ static void run_playloop(struct MPContext *mpctx)
 
     while (1) {
         mp_cmd_t *cmd;
-        while ((cmd = mp_input_get_cmd(mpctx->input, 0, 0)) != NULL) {
+        while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
+            /* Allow running consecutive seek commands to combine them,
+             * but execute the seek before running other commands.
+             * If the user seeks continuously (keeps arrow key down)
+             * try to finish showing a frame from one location before doing
+             * another seek (which could lead to unchanging display). */
+            if ((mpctx->rel_seek_secs || mpctx->abs_seek_pos)
+                && cmd->id != MP_CMD_SEEK
+                || mpctx->restart_playback && cmd->id == MP_CMD_SEEK
+                && GetTimerMS() - mpctx->start_timestamp < 300)
+                break;
+            cmd = mp_input_get_cmd(mpctx->input, 0, 0);
             run_command(mpctx, cmd);
             mp_cmd_free(cmd);
             if (mpctx->stop_play)
                 break;
-            if (mpctx->rel_seek_secs || mpctx->abs_seek_pos) {
-                cmd = mp_input_get_cmd(mpctx->input, 0, 1);
-                /* Allow seek commands to be combined, but execute the real seek
-                 * before processing other commands */
-                if (!cmd || cmd->id != MP_CMD_SEEK)
-                    break;
-            }
         }
         if (!mpctx->paused || mpctx->stop_play || mpctx->rel_seek_secs
-            || mpctx->abs_seek_pos)
+            || mpctx->abs_seek_pos || mpctx->restart_playback)
             break;
         if (mpctx->sh_video) {
             update_osd_msg(mpctx);

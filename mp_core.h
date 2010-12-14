@@ -152,6 +152,9 @@ typedef struct MPContext {
      * (or at least queued to be flipped by VO) */
     double video_pts;
 
+    // used to prevent hanging in some error cases
+    unsigned int start_timestamp;
+
     // Timestamp from the last time some timing functions read the
     // current time, in (occasionally wrapping) microseconds. Used
     // to turn a new time value to a delta from last time.
