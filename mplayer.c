@@ -2129,6 +2129,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
         return res;
 
     int bytes;
+    bool did_retry = false;
     while (1) {
         double written_pts = written_audio_pts(mpctx);
         double ptsdiff = written_pts - mpctx->video_pts - mpctx->delay
@@ -2136,8 +2137,20 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
         bytes = ptsdiff * ao_data.bps / mpctx->opts.playback_speed;
         bytes -= bytes % (ao_data.channels * af_fmt2bits(ao_data.format) / 8);
 
-        if (fabs(ptsdiff) > 300   // pts reset or just broken?
-            || written_pts <= 0)  // ogg demuxers give packets without timing
+        // ogg demuxers give packets without timing
+        if (written_pts <= 1 && sh_audio->pts == MP_NOPTS_VALUE) {
+            if (!did_retry) {
+                // Try to read more data to see packets that have pts
+                int res = decode_audio(sh_audio, ao_data.bps);
+                if (res < 0)
+                    return res;
+                did_retry = true;
+                continue;
+            }
+            bytes = 0;
+        }
+
+        if (fabs(ptsdiff) > 300)   // pts reset or just broken?
             bytes = 0;
 
         if (bytes > 0)
