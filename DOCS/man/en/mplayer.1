@@ -1076,16 +1076,17 @@ MPlayer will not load or search for video segments from other files,
 and will also ignore any chapter order specified for the main file.
 .
 .TP
-.B \-pts\-association\-mode <mode number>
+.B \-pts\-association\-mode auto|decode|sort
 Select the method used to determine which container packet timestamp
 corresponds to a particular output frame from the video decoder.
+Normally you shouldn't need to change this option.
 .PD 0
 .RSs
-.IPs 0
+.IPs auto
 Try to pick a working mode from the ones below automatically (default)
-.IPs 1
+.IPs decoder
 Use decoder reordering functionality.
-.IPs 2
+.IPs sort
 Maintain a buffer of unused pts values and use the lowest value for the frame.
 .RE
 .PD 1

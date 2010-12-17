@@ -309,7 +309,8 @@ const m_option_t mplayer_opts[]={
 
     // a-v sync stuff:
     OPT_MAKE_FLAGS("correct-pts", user_correct_pts, 0),
-    OPT_INTRANGE("pts-association-mode", user_pts_assoc_mode, 0, 0, 2),
+    OPT_CHOICE("pts-association-mode", user_pts_assoc_mode, 0,
+               ({"auto", 0}, {"decoder", 1}, {"sort", 2})),
     OPT_MAKE_FLAGS("initial-audio-sync", initial_audio_sync, 0),
     OPT_FLAG_CONSTANTS("noautosync", autosync, 0, 0, -1),
     OPT_INTRANGE("autosync", autosync, 0, 0, 10000),

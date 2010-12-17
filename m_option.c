@@ -267,6 +267,50 @@ const struct m_option_type m_option_type_intpair = {
     .set = copy_opt,
 };
 
+static int parse_choice(const struct m_option *opt, const char *name,
+                        const char *param, void *dst, int src)
+{
+    if (param == NULL)
+        return M_OPT_MISSING_PARAM;
+
+    struct m_opt_choice_alternatives *alt;
+    for (alt = opt->priv; alt->name; alt++)
+        if (!strcmp(param, alt->name))
+            break;
+    if (!alt->name) {
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Invalid value for option %s: %s\n",
+               name, param);
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Valid values are:");
+        for (alt = opt->priv; alt->name; alt++)
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR, " %s", alt->name);
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "\n");
+        return M_OPT_INVALID;
+    }
+    if (dst)
+        *(int *)dst = alt->value;
+
+    return 1;
+}
+
+static char *print_choice(const m_option_t *opt,  const void *val)
+{
+    int v = *(int *)val;
+    struct m_opt_choice_alternatives *alt;
+    for (alt = opt->priv; alt->name; alt++)
+        if (alt->value == v)
+            return strdup(alt->name);
+    abort();
+}
+
+const struct m_option_type m_option_type_choice = {
+    .name = "String",  // same as arbitrary strings in option list for now
+    .size = sizeof(int),
+    .parse = parse_choice,
+    .print = print_choice,
+    .save = copy_opt,
+    .set = copy_opt,
+};
+
 // Float
 
 #undef VAL
