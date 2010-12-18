@@ -20,6 +20,10 @@ Most slave mode commands are equivalent to command line options, though not
 necessarily under the same name. Detailed descriptions can be found in the
 man page.
 
+NOTE: the following paragraph is mostly obsolete; tricky pause handling
+was required in old MPlayer versions where all commands unpaused by default.
+Now running commands does not require leaving pause state any more, and
+the prefixes described here should not be required in normal use.
 All commands can be prefixed with one of "pausing ", "pausing_keep ", or
 "pausing_toggle ". "pausing " tells MPlayer to pause as soon as possible
 after processing the command. "pausing_keep " tells MPlayer to do so only if
@@ -36,11 +40,6 @@ since other values do not make much sense for them.
 
 Various tips and tricks (please help expand it!):
 
-- Try using something like
-    pausing_keep_force pt_step 1
-    get_property pause
-  to switch to the next file. It avoids audio playback starting to play
-  the old file for a short time before switching to the new one.
 - To ensure the user can't control MPlayer "behind your back" use
   something like -input nodefault-bindings -noconfig all
 
@@ -183,9 +182,6 @@ screenshot <value>
         0 Take a single screenshot.
         1 Start/stop taking screenshot of each frame.
 
-gui_[about|loadfile|loadsubtitle|play|playlist|preferences|skinbrowser|stop]
-    GUI actions
-
 key_down_event <value>
     Inject <value> key code event into MPlayer.
 
@@ -241,7 +237,8 @@ panscan <-1.0 - 1.0> | <0.0 - 1.0> <abs>
     absolute range.
 
 pause
-    Pause/unpause the playback.
+    Pause/unpause the playback (use "set_property pause X" to set a particular
+    value regardless of whether the player is already paused or not).
 
 frame_step
     Play one frame, then pause again.
@@ -518,7 +515,7 @@ name               type      min     max     get set step comment
 osdlevel           int       0       3       X   X   X    as -osdlevel
 speed              float     0.01    100     X   X   X    as -speed
 loop               int       -1              X   X   X    as -loop
-pause              flag      0       1       X            1 if paused, use with pausing_keep_force
+pause              flag      0       1       X            1 if paused
 filename           string                    X            file playing wo path
 path               string                    X            file playing
 demuxer            string                    X            demuxer used
