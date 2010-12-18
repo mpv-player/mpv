@@ -34,6 +34,7 @@
 #include "libvo/sub.h"
 #include "m_option.h"
 #include "m_property.h"
+#include "m_config.h"
 #include "metadata.h"
 #include "libmpcodecs/vf.h"
 #include "libmpcodecs/vd.h"
@@ -225,6 +226,39 @@ static void log_sub(struct MPContext *mpctx)
 /// \defgroup GeneralProperties General properties
 /// \ingroup Properties
 ///@{
+
+static int mp_property_generic_option(struct m_option *prop, int action,
+                                      void *arg, MPContext *mpctx)
+{
+    char *optname = prop->priv;
+    const struct m_option *opt = m_config_get_option(mpctx->mconfig, optname);
+    void *valptr = m_option_get_ptr(opt, &mpctx->opts);
+
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(const struct m_option **)arg = opt;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+        m_option_copy(opt, arg, valptr);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET:
+        m_option_copy(opt, valptr, arg);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_STEP_UP:
+        if (opt->type == &m_option_type_choice) {
+            int v = *(int *) valptr;
+            int best = v;
+            struct m_opt_choice_alternatives *alt;
+            for (alt = opt->priv; alt->name; alt++)
+                if ((unsigned) alt->value - v - 1 < (unsigned) best - v - 1)
+                    best = alt->value;
+            *(int *) valptr = best;
+            return M_PROPERTY_OK;
+        }
+        break;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
 
 /// OSD level (RW)
 static int mp_property_osdlevel(m_option_t *prop, int action, void *arg,
@@ -2189,6 +2223,8 @@ static const m_option_t mp_properties[] = {
      M_OPT_RANGE, 0, 1, NULL },
     { "capturing", mp_property_capture, CONF_TYPE_FLAG,
      M_OPT_RANGE, 0, 1, NULL },
+    { "pts_association_mode", mp_property_generic_option, &m_option_type_choice,
+     0, 0, 0, "pts-association-mode" },
 
     // Audio
     { "volume", mp_property_volume, CONF_TYPE_FLOAT,
@@ -2362,6 +2398,7 @@ static struct property_osd_display {
     { "loop", 0, -1, _("Loop: %s") },
     { "chapter", -1, -1, NULL },
     { "capturing", 0, -1, _("Capturing: %s") },
+    { "pts_association_mode", 0, -1, "PTS association mode: %s" },
     // audio
     { "volume", OSD_VOLUME, -1, _("Volume") },
     { "mute", 0, -1, _("Mute: %s") },

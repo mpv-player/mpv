@@ -513,6 +513,7 @@ name               type      min     max     get set step comment
 osdlevel           int       0       3       X   X   X    as -osdlevel
 speed              float     0.01    100     X   X   X    as -speed
 loop               int       -1              X   X   X    as -loop
+pts_association_mode string                  X   X   X    as -pts-association-mode
 pause              flag      0       1       X            1 if paused, use with pausing_keep_force
 filename           string                    X            file playing wo path
 path               string                    X            file playing

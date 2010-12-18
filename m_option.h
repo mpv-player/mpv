@@ -493,6 +493,12 @@ struct m_option {
  */
 const m_option_t* m_option_list_find(const m_option_t* list,const char* name);
 
+static inline void *m_option_get_ptr(const struct m_option *opt,
+                                     void *optstruct)
+{
+    return opt->new ? (char *) optstruct + opt->offset : opt->p;
+}
+
 /// Helper to parse options, see \ref m_option_type::parse.
 inline static int
 m_option_parse(const m_option_t* opt,const char *name, const char *param, void* dst, int src) {
