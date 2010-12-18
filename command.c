@@ -454,8 +454,7 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
         return m_property_int_ro(prop, action, arg, get_percent_pos(mpctx));
     }
 
-    mpctx->abs_seek_pos = SEEK_ABSOLUTE | SEEK_FACTOR;
-    mpctx->rel_seek_secs = pos / 100.0;
+    queue_seek(mpctx, MPSEEK_FACTOR, pos / 100.0, 0);
     return M_PROPERTY_OK;
 }
 
@@ -469,13 +468,12 @@ static int mp_property_time_pos(m_option_t *prop, int action,
     case M_PROPERTY_SET:
         if(!arg) return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(double*)arg);
-        mpctx->abs_seek_pos = SEEK_ABSOLUTE;
-        mpctx->rel_seek_secs = *(double*)arg;
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double*)arg, 0);
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-        mpctx->rel_seek_secs += (arg ? *(double*)arg : 10.0) *
-            (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
+        queue_seek(mpctx, MPSEEK_RELATIVE, (arg ? *(double*)arg : 10.0) *
+                   (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0), 0);
         return M_PROPERTY_OK;
     }
     return m_property_time_ro(prop, action, arg, get_current_time(mpctx));
@@ -531,20 +529,16 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     }
 
     double next_pts = 0;
+    queue_seek(mpctx, MPSEEK_NONE, 0, 0);
     chapter = seek_chapter(mpctx, chapter, &next_pts, &chapter_name);
-    mpctx->rel_seek_secs = 0;
-    mpctx->abs_seek_pos = 0;
     if (chapter >= 0) {
-        if (next_pts > -1.0) {
-            mpctx->abs_seek_pos = SEEK_ABSOLUTE;
-            mpctx->rel_seek_secs = next_pts;
-        }
+        if (next_pts > -1.0)
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, next_pts, 0);
         if (chapter_name)
             set_osd_tmsg(OSD_MSG_TEXT, 1, opts->osd_duration,
                          "Chapter: (%d) %s", chapter + 1, chapter_name);
-    }
-    else if (step_all > 0)
-        mpctx->rel_seek_secs = 1000000000.;
+    } else if (step_all > 0)
+        queue_seek(mpctx, MPSEEK_RELATIVE, 1000000000, 0);
     else
         set_osd_tmsg(OSD_MSG_TEXT, 1, opts->osd_duration,
                      "Chapter: (%d) %s", 0, mp_gtext("unknown"));
@@ -2725,16 +2719,14 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 v = cmd->args[0].v.f;
                 abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
                 if (abs == 2) { /* Absolute seek to a specific timestamp in seconds */
-                    mpctx->abs_seek_pos = SEEK_ABSOLUTE;
+                    queue_seek(mpctx, MPSEEK_ABSOLUTE, v, 0);
                     mpctx->osd_function = v > get_current_time(mpctx) ?
                         OSD_FFW : OSD_REW;
-                    mpctx->rel_seek_secs = v;
                 } else if (abs) {       /* Absolute seek by percentage */
-                    mpctx->abs_seek_pos = SEEK_ABSOLUTE | SEEK_FACTOR;
+                    queue_seek(mpctx, MPSEEK_FACTOR, v / 100.0, 0);
                     mpctx->osd_function = OSD_FFW;  // Direction isn't set correctly
-                    mpctx->rel_seek_secs = v / 100.0;
                 } else {
-                    mpctx->rel_seek_secs += v;
+                    queue_seek(mpctx, MPSEEK_RELATIVE, v, 0);
                     mpctx->osd_function = (v > 0) ? OSD_FFW : OSD_REW;
                 }
             }

@@ -2743,8 +2743,7 @@ static void edl_update(MPContext *mpctx)
     if (get_current_time(mpctx) >= next_edl_record->start_sec) {
 	if (next_edl_record->action == EDL_SKIP) {
 	    mpctx->osd_function = OSD_FFW;
-	    mpctx->abs_seek_pos = 0;
-	    mpctx->rel_seek_secs = next_edl_record->length_sec;
+            queue_seek(mpctx, MPSEEK_RELATIVE, next_edl_record->length_sec, 0);
 	    mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_SKIP: start [%f], stop "
 		   "[%f], length [%f]\n", next_edl_record->start_sec,
 		   next_edl_record->stop_sec, next_edl_record->length_sec);
@@ -2852,39 +2851,36 @@ static double timeline_set_from_time(struct MPContext *mpctx, double pts,
 }
 
 
-// style & SEEK_ABSOLUTE == 0 means seek relative to current position, == 1 means absolute
-// style & SEEK_FACTOR == 0 means amount in seconds, == 2 means fraction of file length
 // return -1 if seek failed (non-seekable stream?), 0 otherwise
-static int seek(MPContext *mpctx, double amount, int style)
+static int seek(MPContext *mpctx, struct seek_params seek)
 {
     current_module = "seek";
     if (mpctx->stop_play == AT_END_OF_FILE)
         mpctx->stop_play = KEEP_PLAYING;
-    if (style & SEEK_FACTOR
-        || style & SEEK_ABSOLUTE && amount < mpctx->last_chapter_pts
-        || amount < 0)
+    if (seek.type == MPSEEK_FACTOR
+        || seek.type == MPSEEK_ABSOLUTE
+        && seek.amount < mpctx->last_chapter_pts
+        || seek.amount < 0)
         mpctx->last_chapter_seek = -1;
-    if (mpctx->timeline && style & SEEK_FACTOR) {
-        amount *= mpctx->timeline[mpctx->num_timeline_parts].start;
-        style &= ~SEEK_FACTOR;
+    if (mpctx->timeline && seek.type == MPSEEK_FACTOR) {
+        seek.amount *= mpctx->timeline[mpctx->num_timeline_parts].start;
+        seek.type = MPSEEK_ABSOLUTE;
     }
     if ((mpctx->demuxer->accurate_seek || mpctx->timeline)
-        && !(style & (SEEK_ABSOLUTE | SEEK_FACTOR))) {
-        style |= SEEK_ABSOLUTE;
-        if (amount > 0)
-            style |= SEEK_FORWARD;
-        else
-            style |= SEEK_BACKWARD;
-        amount += get_current_time(mpctx);
+        && seek.type == MPSEEK_RELATIVE) {
+        seek.type = MPSEEK_ABSOLUTE;
+        seek.direction = seek.amount > 0 ? 1 : -1;
+        seek.amount += get_current_time(mpctx);
     }
 
     /* At least the liba52 decoder wants to read from the input stream
      * during initialization, so reinit must be done after the demux_seek()
      * call that clears possible stream EOF. */
     bool need_reset = false;
-    double demuxer_amount = amount;
+    double demuxer_amount = seek.amount;
     if (mpctx->timeline) {
-        demuxer_amount = timeline_set_from_time(mpctx, amount, &need_reset);
+        demuxer_amount = timeline_set_from_time(mpctx, seek.amount,
+                                                &need_reset);
         if (demuxer_amount == -1) {
             mpctx->stop_play = AT_END_OF_FILE;
             // Clear audio from current position
@@ -2896,8 +2892,20 @@ static int seek(MPContext *mpctx, double amount, int style)
             return -1;
         }
     }
+    int demuxer_style = 0;
+    switch (seek.type) {
+    case MPSEEK_FACTOR:
+        demuxer_style |= SEEK_FACTOR; // fallthrough
+    case MPSEEK_ABSOLUTE:
+        demuxer_style |= SEEK_ABSOLUTE;
+    }
+    if (seek.direction < 0)
+        demuxer_style |= SEEK_BACKWARD;
+    else if (seek.direction > 0)
+        demuxer_style |= SEEK_FORWARD;
+
     int seekresult = demux_seek(mpctx->demuxer, demuxer_amount, audio_delay,
-                                style);
+                                demuxer_style);
     if (need_reset)
         reinit_decoders(mpctx);
     if (seekresult == 0)
@@ -2907,12 +2915,47 @@ static int seek(MPContext *mpctx, double amount, int style)
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */
-    if ((style & (SEEK_ABSOLUTE | SEEK_FACTOR)) == SEEK_ABSOLUTE)
-        mpctx->video_pts = amount;
+    if (seek.type == MPSEEK_ABSOLUTE)
+        mpctx->video_pts = seek.amount;
 
     mpctx->start_timestamp = GetTimerMS();
 
     return 0;
+}
+
+void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
+                int exact)
+{
+    struct seek_params *seek = &mpctx->seek;
+    switch (type) {
+    case MPSEEK_RELATIVE:
+        if (seek->type == MPSEEK_FACTOR)
+            return; // Well... not common enough to bother doing better
+        seek->amount += amount;
+        seek->exact = FFMAX(seek->exact, exact);
+        if (seek->type == MPSEEK_NONE)
+            seek->exact = exact;
+        if (seek->type == MPSEEK_ABSOLUTE)
+            return;
+        if (seek->amount == 0) {
+            *seek = (struct seek_params){0};
+            return;
+        }
+        seek->type = MPSEEK_RELATIVE;
+        return;
+    case MPSEEK_ABSOLUTE:
+    case MPSEEK_FACTOR:
+        *seek = (struct seek_params) {
+            .type = type,
+            .amount = amount,
+            .exact = exact,
+        };
+        return;
+    case MPSEEK_NONE:
+        *seek = (struct seek_params){0};
+        return;
+    }
+    abort();
 }
 
 
@@ -3110,7 +3153,8 @@ static void run_playloop(struct MPContext *mpctx)
             if (mpctx->sh_video->pts >= next->start
                 || mpctx->stop_play == AT_END_OF_FILE
                 && mpctx->timeline_part + 1 < mpctx->num_timeline_parts) {
-                seek(mpctx, next->start, SEEK_ABSOLUTE);
+                seek(mpctx, (struct seek_params){ .type = MPSEEK_ABSOLUTE,
+                                                  .amount = next->start });
                 return;
             }
         }
@@ -3272,8 +3316,7 @@ static void run_playloop(struct MPContext *mpctx)
              * If the user seeks continuously (keeps arrow key down)
              * try to finish showing a frame from one location before doing
              * another seek (which could lead to unchanging display). */
-            if ((mpctx->rel_seek_secs || mpctx->abs_seek_pos)
-                && cmd->id != MP_CMD_SEEK
+            if (mpctx->seek.type && cmd->id != MP_CMD_SEEK
                 || mpctx->restart_playback && cmd->id == MP_CMD_SEEK
                 && GetTimerMS() - mpctx->start_timestamp < 300)
                 break;
@@ -3283,8 +3326,8 @@ static void run_playloop(struct MPContext *mpctx)
             if (mpctx->stop_play)
                 break;
         }
-        if (!mpctx->paused || mpctx->stop_play || mpctx->rel_seek_secs
-            || mpctx->abs_seek_pos || mpctx->restart_playback)
+        if (!mpctx->paused || mpctx->stop_play || mpctx->seek.type
+            || mpctx->restart_playback)
             break;
         if (mpctx->sh_video) {
             update_osd_msg(mpctx);
@@ -3304,7 +3347,7 @@ static void run_playloop(struct MPContext *mpctx)
 // handle -sstep
     if (step_sec > 0 && !mpctx->paused) {
         mpctx->osd_function = OSD_FFW;
-        mpctx->rel_seek_secs += step_sec;
+        queue_seek(mpctx, MPSEEK_RELATIVE, step_sec, 0);
     }
 
     edl_update(mpctx);
@@ -3319,15 +3362,12 @@ static void run_playloop(struct MPContext *mpctx)
             opts->loop_times = -1;
         play_n_frames = play_n_frames_mf;
         mpctx->stop_play = 0;
-        mpctx->abs_seek_pos = SEEK_ABSOLUTE;
-        mpctx->rel_seek_secs = seek_to_sec;
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, 0, 0);
     }
 
-    if (mpctx->rel_seek_secs || mpctx->abs_seek_pos) {
-        seek(mpctx, mpctx->rel_seek_secs, mpctx->abs_seek_pos);
-
-        mpctx->rel_seek_secs = 0;
-        mpctx->abs_seek_pos = 0;
+    if (mpctx->seek.type) {
+        seek(mpctx, mpctx->seek);
+        mpctx->seek = (struct seek_params){0};
     }
 }
 
@@ -4509,14 +4549,17 @@ if(play_n_frames==0){
 
 // If there's a timeline force an absolute seek to initialize state
 if (seek_to_sec || mpctx->timeline) {
-    seek(mpctx, seek_to_sec, SEEK_ABSOLUTE);
+    queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_to_sec, 0);
+    seek(mpctx, mpctx->seek);
     end_at.pos += seek_to_sec;
 }
 if (opts->chapterrange[0] > 0) {
     double pts;
     if (seek_chapter(mpctx, opts->chapterrange[0]-1, &pts, NULL) >= 0
-        && pts > -1.0)
-        seek(mpctx, pts, SEEK_ABSOLUTE);
+        && pts > -1.0) {
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, 0);
+        seek(mpctx, mpctx->seek);
+    }
 }
 
 if (end_at.type == END_AT_SIZE) {
@@ -4532,6 +4575,7 @@ if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
 }
 #endif
 
+ mpctx->seek = (struct seek_params){0};
  get_relative_time(mpctx); // reset current delta
  mpctx->time_frame = 0;
  mpctx->drop_message_shown = 0;
