@@ -45,6 +45,7 @@
 #include "path.h"
 #include "talloc.h"
 #include "options.h"
+#include "bstr.h"
 
 #include "joystick.h"
 
@@ -361,6 +362,16 @@ static const mp_key_name_t key_names[] = {
   { 0, NULL }
 };
 
+struct mp_key_name modifier_names[] = {
+    { KEY_MODIFIER_SHIFT, "Shift" },
+    { KEY_MODIFIER_CTRL,  "Ctrl" },
+    { KEY_MODIFIER_ALT,   "Alt" },
+    { KEY_MODIFIER_META,  "Meta" },
+    { 0 }
+};
+
+#define KEY_MODIFIER_MASK (KEY_MODIFIER_SHIFT | KEY_MODIFIER_CTRL | KEY_MODIFIER_ALT | KEY_MODIFIER_META)
+
 // This is the default binding. The content of input.conf overrides these.
 // The first arg is a null terminated array of key codes.
 // The second is the command
@@ -620,8 +631,27 @@ static const m_option_t mp_input_opts[] = {
 
 static int default_cmd_func(int fd,char* buf, int l);
 
-static char *get_key_name(int key, char buffer[12]);
+static char *get_key_name(int key)
+{
+    char *ret = talloc_strdup(NULL, "");
+    for (int i = 0; modifier_names[i].name; i++) {
+        if (modifier_names[i].key & key) {
+            ret = talloc_asprintf_append_buffer(ret, "%s+",
+                                                modifier_names[i].name);
+            key -= modifier_names[i].key;
+        }
+    }
+    for (int i = 0; key_names[i].name != NULL; i++) {
+        if (key_names[i].key == key)
+            return talloc_asprintf_append_buffer(ret, "%s", key_names[i].name);
+    }
 
+    if (isascii(key))
+        return talloc_asprintf_append_buffer(ret, "%c", key);
+
+    // Print the hex key code
+    return talloc_asprintf_append_buffer(ret, "%#-8x", key);
+}
 
 int mp_input_add_cmd_fd(struct input_ctx *ictx, int fd, int select,
                         mp_cmd_func_t read_func, mp_close_func_t close_func)
@@ -1034,7 +1064,6 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
 {
   char* cmd = NULL;
   mp_cmd_t* ret;
-  char key_buf[12];
 
   if (ictx->cmd_binds)
     cmd = find_bind_for_key(ictx->cmd_binds, n, keys);
@@ -1044,12 +1073,16 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
     cmd = find_bind_for_key(def_cmd_binds,n,keys);
 
   if(cmd == NULL) {
-      mp_tmsg(MSGT_INPUT,MSGL_WARN,"No bind found for key '%s'.", get_key_name(keys[0],
-                                                                  key_buf));
+      char *key_buf = get_key_name(keys[0]);
+      mp_tmsg(MSGT_INPUT,MSGL_WARN,"No bind found for key '%s'.", key_buf);
+      talloc_free(key_buf);
     if(n > 1) {
       int s;
-      for(s=1; s < n; s++)
-          mp_msg(MSGT_INPUT,MSGL_WARN,"-%s", get_key_name(keys[s], key_buf));
+      for(s=1; s < n; s++) {
+          key_buf = get_key_name(keys[s]);
+          mp_msg(MSGT_INPUT,MSGL_WARN,"-%s", key_buf);
+          talloc_free(key_buf);
+      }
     }
     mp_msg(MSGT_INPUT,MSGL_WARN,"                         \n");
     return NULL;
@@ -1057,13 +1090,16 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
   if (strcmp(cmd, "ignore") == 0) return NULL;
   ret =  mp_input_parse_cmd(cmd);
   if(!ret) {
-    mp_tmsg(MSGT_INPUT,MSGL_ERR,"Invalid command for bound key %s",
-           get_key_name(ictx->key_down[0], key_buf));
+    char *key_buf = get_key_name(ictx->key_down[0]);
+    mp_tmsg(MSGT_INPUT,MSGL_ERR,"Invalid command for bound key %s", key_buf);
+    talloc_free(key_buf);
     if (ictx->num_key_down > 1) {
       unsigned int s;
-      for(s=1; s < ictx->num_key_down; s++)
-          mp_msg(MSGT_INPUT,MSGL_ERR,"-%s", get_key_name(ictx->key_down[s],
-                                                         key_buf));
+      for(s=1; s < ictx->num_key_down; s++) {
+          char *key_buf = get_key_name(ictx->key_down[s]);
+          mp_msg(MSGT_INPUT,MSGL_ERR,"-%s", key_buf);
+          talloc_free(key_buf);
+      }
     }
     mp_msg(MSGT_INPUT,MSGL_ERR," : %s             \n",cmd);
   }
@@ -1075,6 +1111,14 @@ static mp_cmd_t* interpret_key(struct input_ctx *ictx, int code)
 {
   unsigned int j;
   mp_cmd_t* ret;
+
+    /* On normal keyboards shift changes the character code of non-special
+     * keys, so don't count the modifier separately for those. In other words
+     * we want to have "a" and "A" instead of "a" and "Shift+A"; but a separate
+     * shift modifier is still kept for special keys like arrow keys.
+     */
+    if ((code & ~KEY_MODIFIER_MASK) < 256)
+        code &= ~KEY_MODIFIER_SHIFT;
 
   if(mp_input_key_cb) {
       if (code & MP_KEY_DOWN)
@@ -1371,41 +1415,34 @@ mp_cmd_clone(mp_cmd_t* cmd) {
   return ret;
 }
 
-static char *get_key_name(int key, char buffer[12])
+int mp_input_get_key_from_name(const char *name)
 {
-  int i;
+    int modifiers = 0;
+    const char *p;
+    while (p = strchr(name, '+')) {
+        for (struct mp_key_name *m = modifier_names; m->name; m++)
+            if (!bstrcasecmp(BSTR(m->name), (struct bstr){name, p - name})) {
+                modifiers |= m->key;
+                goto found;
+            }
+        if (!strcmp(name, "+"))
+            return '+' + modifiers;
+        return -1;
+    found:
+        name = p + 1;
+    }
+    int len = strlen(name);
+    if (len == 1)   // Direct key code
+        return (unsigned char)name[0] + modifiers;
+    else if (len > 2 && strncasecmp("0x", name, 2) == 0)
+        return strtol(name, NULL, 16) + modifiers;
 
-  for(i = 0; key_names[i].name != NULL; i++) {
-    if(key_names[i].key == key)
-      return key_names[i].name;
-  }
+    for (int i = 0; key_names[i].name != NULL; i++) {
+        if (strcasecmp(key_names[i].name, name) == 0)
+            return key_names[i].key + modifiers;
+    }
 
-  if(isascii(key)) {
-    snprintf(buffer, 12, "%c",(char)key);
-    return buffer;
-  }
-
-  // Print the hex key code
-  snprintf(buffer, 12, "%#-8x",key);
-  return buffer;
-
-}
-
-int
-mp_input_get_key_from_name(const char *name) {
-  int i,ret = 0,len = strlen(name);
-  if(len == 1) { // Direct key code
-    ret = (unsigned char)name[0];
-    return ret;
-  } else if(len > 2 && strncasecmp("0x",name,2) == 0)
-    return strtol(name,NULL,16);
-
-  for(i = 0; key_names[i].name != NULL; i++) {
-    if(strcasecmp(key_names[i].name,name) == 0)
-      return key_names[i].key;
-  }
-
-  return -1;
+    return -1;
 }
 
 static int get_input_from_name(char* name,int* keys) {
@@ -1595,10 +1632,14 @@ static int parse_config(struct input_ctx *ictx, char *file)
       // Found new line
       if(iter[0] == '\n' || iter[0] == '\r') {
 	int i;
-        char key_buf[12];
-	mp_tmsg(MSGT_INPUT,MSGL_ERR,"No command found for key %s", get_key_name(keys[0], key_buf));
-	for(i = 1; keys[i] != 0 ; i++)
-            mp_msg(MSGT_INPUT,MSGL_ERR,"-%s", get_key_name(keys[i], key_buf));
+        char *key_buf  = get_key_name(keys[0]);
+	mp_tmsg(MSGT_INPUT,MSGL_ERR,"No command found for key %s", key_buf);
+        talloc_free(key_buf);
+	for(i = 1; keys[i] != 0 ; i++) {
+            char *key_buf  = get_key_name(keys[i]);
+            mp_msg(MSGT_INPUT,MSGL_ERR,"-%s", key_buf);
+            talloc_free(key_buf);
+        }
         mp_msg(MSGT_INPUT,MSGL_ERR,"\n");
 	keys[0] = 0;
 	if(iter > buffer) {
