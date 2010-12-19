@@ -300,9 +300,8 @@ HTTP_header_t *
 http_new_header(void) {
 	HTTP_header_t *http_hdr;
 
-	http_hdr = malloc(sizeof(HTTP_header_t));
+	http_hdr = calloc(1, sizeof(*http_hdr));
 	if( http_hdr==NULL ) return NULL;
-	memset( http_hdr, 0, sizeof(HTTP_header_t) );
 
 	return http_hdr;
 }
