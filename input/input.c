@@ -396,8 +396,12 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
 
   { { KEY_RIGHT, 0 }, "seek 10" },
   { {  KEY_LEFT, 0 }, "seek -10" },
+  { { KEY_MODIFIER_SHIFT + KEY_RIGHT, 0 }, "seek  1 0 1" },
+  { { KEY_MODIFIER_SHIFT + KEY_LEFT,  0 }, "seek -1 0 1" },
   { {  KEY_UP, 0 }, "seek 60" },
   { {  KEY_DOWN, 0 }, "seek -60" },
+  { { KEY_MODIFIER_SHIFT + KEY_UP,    0 }, "seek  5 0 1" },
+  { { KEY_MODIFIER_SHIFT + KEY_DOWN,  0 }, "seek -5 0 1" },
   { {  KEY_PAGE_UP, 0 }, "seek 600" },
   { { KEY_PAGE_DOWN, 0 }, "seek -600" },
   { { '+', 0 }, "audio_delay 0.100" },
