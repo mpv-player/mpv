@@ -3052,7 +3052,7 @@ echocheck "inet6"
 if test "$_inet6" = auto ; then
   cat > $TMPC << EOF
 #include <sys/types.h>
-#if !defined(_WIN32) || defined(__CYGWIN__)
+#if !defined(_WIN32)
 #include <sys/socket.h>
 #include <netinet/in.h>
 #else
@@ -6126,7 +6126,10 @@ echores "$_musepack"
 
 echocheck "FAAD2 support"
 if test "$_faad_internal" = auto ; then
-  if x86_32 && test cc_vendor=gnu; then
+  if cygwin ; then
+    _faad_internal=no
+    res_comment="does not compile on cygwin"
+  elif x86_32 && test cc_vendor=gnu; then
     case $cc_version in
       3.1*|3.2) # ICE/insn with these versions
         _faad_internal=no
