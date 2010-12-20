@@ -2211,8 +2211,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
         memmove(sh_audio->a_out_buffer, &sh_audio->a_out_buffer[playsize],
                 sh_audio->a_out_buffer_len);
         mpctx->delay += opts->playback_speed*playsize/(double)ao_data.bps;
-    }
-    else if (audio_eof && mpctx->audio_out->get_delay() < .04) {
+    } else if (audio_eof && mpctx->audio_out->get_delay() < .04) {
         // Sanity check to avoid hanging in case current ao doesn't output
         // partial chunks and doesn't check for AOPLAY_FINAL_CHUNK
         mp_msg(MSGT_CPLAYER, MSGL_WARN, "Audio output truncated at end.\n");

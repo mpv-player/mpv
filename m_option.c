@@ -1208,7 +1208,7 @@ static struct {
   {"ac3be", AF_FORMAT_AC3_BE},
   {"ac3ne", AF_FORMAT_AC3_NE},
   {"imaadpcm", AF_FORMAT_IMA_ADPCM},
-  // ORIDNARY
+  // ORDINARY
   {"u8", AF_FORMAT_U8},
   {"s8", AF_FORMAT_S8},
   {"u16le", AF_FORMAT_U16_LE},

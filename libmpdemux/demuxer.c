@@ -52,13 +52,6 @@
 #endif
 #endif
 
-// This is quite experimental, in particular it will mess up the pts values
-// in the queue - on the other hand it might fix some issues like generating
-// broken files with mencoder and stream copy.
-// Better leave it disabled for now, if we find no use for it this code should
-// just be removed again.
-#define PARSE_ON_ADD 0
-
 static void clear_parser(sh_common_t *sh);
 
 // Demuxer list
@@ -416,7 +409,7 @@ void free_demuxer(demuxer_t *demuxer)
 }
 
 
-static void ds_add_packet_internal(demux_stream_t *ds, demux_packet_t *dp)
+void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
 {
     // append packet to DS stream:
     ++ds->packs;
@@ -541,32 +534,6 @@ void ds_clear_parser(demux_stream_t *ds)
 }
 #endif
 
-void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
-{
-#if PARSE_ON_ADD && defined(CONFIG_FFMPEG)
-    int len = dp->len;
-    int pos = 0;
-    while (len > 0) {
-        uint8_t *parsed_start = dp->buffer + pos;
-        int parsed_len = len;
-        int consumed = ds_parse(ds->sh, &parsed_start, &parsed_len, dp->pts, dp->pos);
-        pos += consumed;
-        len -= consumed;
-        if (parsed_start == dp->buffer && parsed_len == dp->len) {
-            ds_add_packet_internal(ds, dp);
-        } else if (parsed_len) {
-            demux_packet_t *dp2 = new_demux_packet(parsed_len);
-            dp2->pos = dp->pos;
-            dp2->pts = dp->pts; // should be parser->pts but that works badly
-            memcpy(dp2->buffer, parsed_start, parsed_len);
-            ds_add_packet_internal(ds, dp2);
-        }
-    }
-#else
-    ds_add_packet_internal(ds, dp);
-#endif
-}
-
 void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len,
                     double pts, off_t pos, int flags)
 {
@@ -593,7 +560,6 @@ int demux_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 // return value:
 //     0 = EOF
 //     1 = successful
-#define MAX_ACUMULATED_PACKETS 64
 int ds_fill_buffer(demux_stream_t *ds)
 {
     demuxer_t *demux = ds->demuxer;
@@ -616,16 +582,6 @@ int ds_fill_buffer(demux_stream_t *ds)
     while (1) {
         if (ds->packs) {
             demux_packet_t *p = ds->first;
-#if 0
-            if (demux->reference_clock != MP_NOPTS_VALUE) {
-                if (   p->pts != MP_NOPTS_VALUE
-                    && p->pts >  demux->reference_clock
-                    && ds->packs < MAX_ACUMULATED_PACKETS) {
-                    if (demux_fill_buffer(demux, ds))
-                        continue;
-                }
-            }
-#endif
             // copy useful data:
             ds->buffer = p->buffer;
             ds->buffer_pos = 0;
@@ -677,18 +633,6 @@ int ds_fill_buffer(demux_stream_t *ds)
             break;
         }
         if (!demux_fill_buffer(demux, ds)) {
-#if PARSE_ON_ADD && defined(CONFIG_FFMPEG)
-            uint8_t *parsed_start = NULL;
-            int parsed_len = 0;
-            ds_parse(ds->sh, &parsed_start, &parsed_len, MP_NOPTS_VALUE, 0);
-            if (parsed_len) {
-                demux_packet_t *dp2 = new_demux_packet(parsed_len);
-                dp2->pts = MP_NOPTS_VALUE;
-                memcpy(dp2->buffer, parsed_start, parsed_len);
-                ds_add_packet_internal(ds, dp2);
-                continue;
-            }
-#endif
             mp_dbg(MSGT_DEMUXER, MSGL_DBG2,
                    "ds_fill_buffer()->demux_fill_buffer() failed\n");
             break; // EOF
@@ -1191,11 +1135,6 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
 
 void demux_flush(demuxer_t *demuxer)
 {
-#if PARSE_ON_ADD
-    ds_clear_parser(demuxer->video);
-    ds_clear_parser(demuxer->audio);
-    ds_clear_parser(demuxer->sub);
-#endif
     ds_free_packs(demuxer->video);
     ds_free_packs(demuxer->audio);
     ds_free_packs(demuxer->sub);

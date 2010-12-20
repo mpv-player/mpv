@@ -1484,13 +1484,6 @@ static void bind_keys(struct input_ctx *ictx,
   memcpy(bind->input,keys,(MP_MAX_KEY_DOWN+1)*sizeof(int));
 }
 
-static void add_binds(struct input_ctx *ictx, const mp_cmd_bind_t* list)
-{
-  int i;
-  for(i = 0 ; list[i].cmd ; i++)
-      bind_keys(ictx, list[i].input,list[i].cmd);
-}
-
 static int parse_config(struct input_ctx *ictx, char *file)
 {
   int fd;

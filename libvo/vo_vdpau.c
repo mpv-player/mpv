@@ -461,7 +461,7 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
         {0, -1}
     };
 
-    vdp_st = vdp_device_create_x11(x11->display, x11->screen,&vc->vdp_device,
+    vdp_st = vdp_device_create_x11(x11->display, x11->screen, &vc->vdp_device,
                                    &vc->vdp_get_proc_address);
     if (vdp_st != VDP_STATUS_OK) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error when calling "
@@ -747,7 +747,7 @@ static int create_vdp_decoder(struct vo *vo, int max_refs)
         break;
     default:
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Unknown image format!\n");
-            goto fail;
+        goto fail;
     }
     vdp_st = vdp->decoder_create(vc->vdp_device, vdp_decoder_profile,
                                  vc->vid_width, vc->vid_height, max_refs,
@@ -1099,7 +1099,7 @@ static int size_index(struct eosd_target *r)
  * free rectangle with corners (13, 20)-(w, 50) is filled recursively.
  */
 static int pack_rectangles(struct eosd_target *rects, int num_rects,
-                            int w, int h, int *scratch)
+                           int w, int h, int *scratch)
 {
     int bins[16 << HEIGHT_SORT_BITS];
     int sizes[16 << HEIGHT_SORT_BITS] = {};
@@ -1480,7 +1480,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
                                                 (const void *const*)destdata,
                                                 mpi->stride); // pitch
         CHECK_ST_WARNING("Error when calling "
-                       "vdp_video_surface_put_bits_y_cb_cr");
+                         "vdp_video_surface_put_bits_y_cb_cr");
     } else
         // We don't support slice callbacks so this shouldn't occur -
         // I think the flags test above in pointless, but I'm adding
@@ -1727,10 +1727,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     switch (request) {
     case VOCTRL_GET_DEINTERLACE:
-        *(int*)data = vc->deint;
+        *(int *)data = vc->deint;
         return VO_TRUE;
     case VOCTRL_SET_DEINTERLACE:
-        vc->deint = *(int*)data;
+        vc->deint = *(int *)data;
         if (vc->deint)
             vc->deint = vc->deint_type;
         if (vc->deint_type > 2) {
