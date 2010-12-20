@@ -3091,6 +3091,10 @@ static void run_playloop(struct MPContext *mpctx)
 
     if (!mpctx->sh_video) {
         mpctx->restart_playback = false;
+        if (mpctx->step_frames) {
+            mpctx->step_frames = 0;
+            pause_player(mpctx);
+        }
         // handle audio-only case:
         double a_pos = 0;
         // sh_audio can be NULL due to video stream switching
@@ -4533,6 +4537,7 @@ if(play_n_frames==0){
  mpctx->video_pts = 0;
  mpctx->hrseek_active = false;
  mpctx->hrseek_framedrop = false;
+ mpctx->step_frames = 0;
  mpctx->total_avsync_change = 0;
  mpctx->last_chapter_seek = -1;
 
