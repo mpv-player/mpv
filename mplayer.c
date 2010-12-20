@@ -453,88 +453,55 @@ static char *get_demuxer_info(struct MPContext *mpctx, char *tag) {
   int n;
 
   if (!info || !tag)
-    return NULL;
+      return talloc_strdup(NULL, "");
 
   for (n = 0; info[2*n] != NULL ; n++)
     if (!strcasecmp (info[2*n], tag))
       break;
 
-  return info[2*n+1] ? strdup (info[2*n+1]) : NULL;
+  return talloc_strdup(NULL, info[2*n+1] ? info[2*n+1] : "");
 }
 
 char *get_metadata(struct MPContext *mpctx, metadata_t type)
 {
-  char *meta = NULL;
-  sh_audio_t * const sh_audio = mpctx->sh_audio;
-  sh_video_t * const sh_video = mpctx->sh_video;
+    sh_audio_t * const sh_audio = mpctx->sh_audio;
+    sh_video_t * const sh_video = mpctx->sh_video;
 
-  if (!is_valid_metadata_type(mpctx, type))
-    return NULL;
+    if (!is_valid_metadata_type(mpctx, type))
+        return NULL;
 
-  switch (type)
-  {
-  case META_NAME:
-  {
-    return strdup(mp_basename(mpctx->filename));
-  }
-
-  case META_VIDEO_CODEC:
-  {
-    if (sh_video->format == 0x10000001)
-      meta = strdup ("mpeg1");
-    else if (sh_video->format == 0x10000002)
-      meta = strdup ("mpeg2");
-    else if (sh_video->format == 0x10000004)
-      meta = strdup ("mpeg4");
-    else if (sh_video->format == 0x10000005)
-      meta = strdup ("h264");
-    else if (sh_video->format >= 0x20202020)
-    {
-      meta = malloc (8);
-      sprintf (meta, "%.4s", (char *) &sh_video->format);
-    }
-    else
-    {
-      meta = malloc (8);
-      sprintf (meta, "0x%08X", sh_video->format);
-    }
-    return meta;
-  }
-
-  case META_VIDEO_BITRATE:
-  {
-    meta = malloc (16);
-    sprintf (meta, "%d kbps", (int) (sh_video->i_bps * 8 / 1024));
-    return meta;
-  }
-
-  case META_VIDEO_RESOLUTION:
-  {
-    meta = malloc (16);
-    sprintf (meta, "%d x %d", sh_video->disp_w, sh_video->disp_h);
-    return meta;
-  }
-
-  case META_AUDIO_CODEC:
-  {
-    if (sh_audio->codec && sh_audio->codec->name)
-      meta = strdup (sh_audio->codec->name);
-    return meta;
-  }
-
-  case META_AUDIO_BITRATE:
-  {
-    meta = malloc (16);
-    sprintf (meta, "%d kbps", (int) (sh_audio->i_bps * 8/1000));
-    return meta;
-  }
-
-  case META_AUDIO_SAMPLES:
-  {
-    meta = malloc (16);
-    sprintf (meta, "%d Hz, %d ch.", sh_audio->samplerate, sh_audio->channels);
-    return meta;
-  }
+    switch (type) {
+    case META_NAME:
+        return talloc_strdup(NULL, mp_basename(mpctx->filename));
+    case META_VIDEO_CODEC:
+        if (sh_video->format == 0x10000001)
+            return talloc_strdup(NULL, "mpeg1");
+        else if (sh_video->format == 0x10000002)
+            return talloc_strdup(NULL, "mpeg2");
+        else if (sh_video->format == 0x10000004)
+            return talloc_strdup(NULL, "mpeg4");
+        else if (sh_video->format == 0x10000005)
+            return talloc_strdup(NULL, "h264");
+        else if (sh_video->format >= 0x20202020)
+            return talloc_asprintf(NULL, "%.4s", (char *) &sh_video->format);
+        else
+            return talloc_asprintf(NULL, "0x%08X", sh_video->format);
+    case META_VIDEO_BITRATE:
+        return talloc_asprintf(NULL, "%d kbps",
+                               (int) (sh_video->i_bps * 8 / 1024));
+    case META_VIDEO_RESOLUTION:
+        return talloc_asprintf(NULL, "%d x %d", sh_video->disp_w,
+                               sh_video->disp_h);
+    case META_AUDIO_CODEC:
+        if (sh_audio->codec && sh_audio->codec->name)
+            return talloc_strdup(NULL, sh_audio->codec->name);
+        return talloc_strdup(NULL, "");
+    case META_AUDIO_BITRATE:
+        return talloc_asprintf(NULL, "%d kbps",
+                                (int) (sh_audio->i_bps * 8/1000));
+    case META_AUDIO_SAMPLES:
+        return talloc_asprintf(NULL, "%d Hz, %d ch.", sh_audio->samplerate,
+                               sh_audio->channels);
 
   /* check for valid demuxer */
   case META_INFO_TITLE:
@@ -562,7 +529,7 @@ char *get_metadata(struct MPContext *mpctx, metadata_t type)
     break;
   }
 
-  return meta;
+    return talloc_strdup(NULL, "");
 }
 
 static void print_file_properties(struct MPContext *mpctx, const char *filename)

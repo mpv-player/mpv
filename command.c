@@ -3278,126 +3278,100 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             break;
 
         case MP_CMD_GET_FILENAME:{
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_FILENAME='%s'\n",
-                       get_metadata(mpctx, META_NAME));
+            char *inf = get_metadata(mpctx, META_NAME);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_FILENAME='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
         case MP_CMD_GET_VIDEO_CODEC:{
-                char *inf = get_metadata(mpctx, META_VIDEO_CODEC);
-                if (!inf)
-                    inf = strdup("");
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_VIDEO_CODEC='%s'\n", inf);
-                free(inf);
+            char *inf = get_metadata(mpctx, META_VIDEO_CODEC);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_VIDEO_CODEC='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
         case MP_CMD_GET_VIDEO_BITRATE:{
-                char *inf = get_metadata(mpctx, META_VIDEO_BITRATE);
-                if (!inf)
-                    inf = strdup("");
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_VIDEO_BITRATE='%s'\n", inf);
-                free(inf);
+            char *inf = get_metadata(mpctx, META_VIDEO_BITRATE);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_VIDEO_BITRATE='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
         case MP_CMD_GET_VIDEO_RESOLUTION:{
-                char *inf = get_metadata(mpctx, META_VIDEO_RESOLUTION);
-                if (!inf)
-                    inf = strdup("");
-                mp_msg(MSGT_GLOBAL, MSGL_INFO,
-                       "ANS_VIDEO_RESOLUTION='%s'\n", inf);
-                free(inf);
+            char *inf = get_metadata(mpctx, META_VIDEO_RESOLUTION);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_VIDEO_RESOLUTION='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
         case MP_CMD_GET_AUDIO_CODEC:{
-                char *inf = get_metadata(mpctx, META_AUDIO_CODEC);
-                if (!inf)
-                    inf = strdup("");
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_AUDIO_CODEC='%s'\n", inf);
-                free(inf);
+            char *inf = get_metadata(mpctx, META_AUDIO_CODEC);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_AUDIO_CODEC='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
         case MP_CMD_GET_AUDIO_BITRATE:{
-                char *inf = get_metadata(mpctx, META_AUDIO_BITRATE);
-                if (!inf)
-                    inf = strdup("");
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_AUDIO_BITRATE='%s'\n", inf);
-                free(inf);
+            char *inf = get_metadata(mpctx, META_AUDIO_BITRATE);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_AUDIO_BITRATE='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
         case MP_CMD_GET_AUDIO_SAMPLES:{
-                char *inf = get_metadata(mpctx, META_AUDIO_SAMPLES);
-                if (!inf)
-                    inf = strdup("");
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_AUDIO_SAMPLES='%s'\n", inf);
-                free(inf);
+            char *inf = get_metadata(mpctx, META_AUDIO_SAMPLES);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_AUDIO_SAMPLES='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
         case MP_CMD_GET_META_TITLE:{
-                char *inf = get_metadata(mpctx, META_INFO_TITLE);
-                if (!inf)
-                    inf = strdup("");
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_TITLE='%s'\n", inf);
-                free(inf);
+            char *inf = get_metadata(mpctx, META_INFO_TITLE);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_TITLE='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
         case MP_CMD_GET_META_ARTIST:{
-                char *inf = get_metadata(mpctx, META_INFO_ARTIST);
-                if (!inf)
-                    inf = strdup("");
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_ARTIST='%s'\n", inf);
-                free(inf);
+            char *inf = get_metadata(mpctx, META_INFO_ARTIST);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_ARTIST='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
         case MP_CMD_GET_META_ALBUM:{
-                char *inf = get_metadata(mpctx, META_INFO_ALBUM);
-                if (!inf)
-                    inf = strdup("");
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_ALBUM='%s'\n", inf);
-                free(inf);
+            char *inf = get_metadata(mpctx, META_INFO_ALBUM);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_ALBUM='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
         case MP_CMD_GET_META_YEAR:{
-                char *inf = get_metadata(mpctx, META_INFO_YEAR);
-                if (!inf)
-                    inf = strdup("");
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_YEAR='%s'\n", inf);
-                free(inf);
+            char *inf = get_metadata(mpctx, META_INFO_YEAR);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_YEAR='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
         case MP_CMD_GET_META_COMMENT:{
-                char *inf = get_metadata(mpctx, META_INFO_COMMENT);
-                if (!inf)
-                    inf = strdup("");
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_COMMENT='%s'\n", inf);
-                free(inf);
+            char *inf = get_metadata(mpctx, META_INFO_COMMENT);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_COMMENT='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
         case MP_CMD_GET_META_TRACK:{
-                char *inf = get_metadata(mpctx, META_INFO_TRACK);
-                if (!inf)
-                    inf = strdup("");
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_TRACK='%s'\n", inf);
-                free(inf);
+            char *inf = get_metadata(mpctx, META_INFO_TRACK);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_TRACK='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
         case MP_CMD_GET_META_GENRE:{
-                char *inf = get_metadata(mpctx, META_INFO_GENRE);
-                if (!inf)
-                    inf = strdup("");
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_GENRE='%s'\n", inf);
-                free(inf);
+            char *inf = get_metadata(mpctx, META_INFO_GENRE);
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_GENRE='%s'\n", inf);
+            talloc_free(inf);
             }
             break;
 
