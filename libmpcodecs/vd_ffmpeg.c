@@ -37,6 +37,7 @@
 #include "img_format.h"
 #include "libmpdemux/stheader.h"
 #include "codec-cfg.h"
+#include "osdep/numcores.h"
 #include "vd_ffmpeg.h"
 
 static const vd_info_t info = {
@@ -105,7 +106,7 @@ const m_option_t lavc_decode_opts_conf[]={
     OPT_STRING("skiploopfilter", lavc_param.skip_loop_filter_str, 0),
     OPT_STRING("skipidct", lavc_param.skip_idct_str, 0),
     OPT_STRING("skipframe", lavc_param.skip_frame_str, 0),
-    OPT_INTRANGE("threads", lavc_param.threads, 0, 1, 8),
+    OPT_INTRANGE("threads", lavc_param.threads, 0, 0, 16),
     OPT_FLAG_CONSTANTS("bitexact", lavc_param.bitexact, 0, 0, CODEC_FLAG_BITEXACT),
     OPT_STRING("o", lavc_param.avopt, 0),
     {NULL, NULL, 0, 0, 0, 0, NULL}
@@ -222,11 +223,23 @@ static int init(sh_video_t *sh){
         avctx->slice_flags = SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
     }
 
+    if (lavc_param->threads == 0) {
+        int threads = default_thread_count();
+        if (threads < 1) {
+            mp_msg(MSGT_DECVIDEO, MSGL_WARN, "[VD_FFMPEG] Could not determine "
+                   "thread count to use, defaulting to 1.\n");
+            threads = 1;
+        }
+        threads = FFMIN(threads, 16);
+        lavc_param->threads = threads;
+    }
     /* Our get_buffer and draw_horiz_band callbacks are not safe to call
      * from other threads. */
     if (lavc_param->threads > 1) {
         ctx->do_dr1 = false;
         ctx->do_slices = false;
+        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Asking decoder to use "
+                "%d threads if supported.\n", lavc_param->threads);
     }
 
     if(ctx->do_dr1){

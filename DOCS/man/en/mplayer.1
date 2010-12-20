@@ -4909,8 +4909,12 @@ This degrades quality a lot of in almost all cases
 Skips decoding of frames completely.
 Big speedup, but jerky motion and sometimes bad artifacts
 (see skiploopfilter for available skip values).
-.IPs "threads=<1\-8> (MPEG-1/2 and H.264 only)"
-number of threads to use for decoding (default: 1)
+.IPs "threads=<0\-16>"
+Number of threads to use for decoding.
+Whether threading is actually supported depends on codec.
+0 means autodetect number of cores on the machine and use that, up to the
+maximum of 16.
+(default: 0)
 .IPs vismv=<value>
 Visualize motion vectors.
 .RSss
