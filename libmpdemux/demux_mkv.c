@@ -139,14 +139,6 @@ typedef struct mkv_track {
 
     int subtitle_type;
 
-    /* The timecodes of video frames might have to be reordered if they're
-       in display order (the timecodes, not the frames themselves!). In this
-       case demux packets have to be cached with the help of these variables. */
-    int reorder_timecodes;
-    demux_packet_t **cached_dps;
-    int num_cached_dps, num_allocated_dps;
-    double max_pts;
-
     /* generic content encoding support */
     mkv_content_encoding_t *encodings;
     int num_encodings;
@@ -280,32 +272,6 @@ static int aac_get_sample_rate_index(uint32_t sample_rate)
     while (sample_rate < srates[i])
         i++;
     return i;
-}
-
-/** \brief Free cached demux packets
- *
- * Reordering the timecodes requires caching of demux packets. This function
- * frees all these cached packets and the memory for the cached pointers
- * itself.
- *
- * \param demuxer The demuxer for which the cache is to be freed.
- */
-static void free_cached_dps(demuxer_t *demuxer)
-{
-    mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-    mkv_track_t *track;
-    int i, k;
-
-    for (k = 0; k < mkv_d->num_tracks; k++) {
-        track = mkv_d->tracks[k];
-        for (i = 0; i < track->num_cached_dps; i++)
-            free_demux_packet(track->cached_dps[i]);
-        free(track->cached_dps);
-        track->cached_dps = NULL;
-        track->num_cached_dps = 0;
-        track->num_allocated_dps = 0;
-        track->max_pts = 0;
-    }
 }
 
 static void demux_mkv_decode(mkv_track_t *track, uint8_t *src,
@@ -1174,7 +1140,6 @@ static const videocodec_info_t vinfo[] = {
 static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
                                 int vid)
 {
-    struct MPOpts *opts = demuxer->opts;
     BITMAPINFOHEADER *bih;
     void *ImageDesc = NULL;
     sh_video_t *sh_v;
@@ -1278,7 +1243,6 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
                 bih = realloc(bih, bih->biSize);
                 memcpy(bih + 1, track->private_data, track->private_size);
             }
-            track->reorder_timecodes = opts->user_correct_pts == 0;
             if (!vi->id) {
                 mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported "
                         "CodecID (%s) or missing/bad CodecPrivate\n"
@@ -1800,7 +1764,6 @@ static void demux_close_mkv(demuxer_t *demuxer)
 
     if (mkv_d) {
         int i;
-        free_cached_dps(demuxer);
         if (mkv_d->tracks) {
             for (i = 0; i < mkv_d->num_tracks; i++)
                 demux_mkv_free_trackentry(mkv_d->tracks[i]);
@@ -2057,96 +2020,6 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
     }
 }
 
-/** Reorder timecodes and add cached demux packets to the queues.
- *
- * Timecode reordering is needed if a video track contains B frames that
- * are timestamped in display order (e.g. MPEG-1, MPEG-2 or "native" MPEG-4).
- * MPlayer doesn't like timestamps in display order. This function adjusts
- * the timestamp of cached frames (which are exactly one I/P frame followed
- * by one or more B frames) so that they are in coding order again.
- *
- * Example: The track with 25 FPS contains four frames with the timecodes
- * I at 0ms, P at 120ms, B at 40ms and B at 80ms. As soon as the next I
- * or P frame arrives these timecodes can be changed to I at 0ms, P at 40ms,
- * B at 80ms and B at 120ms.
- *
- * This works for simple H.264 B-frame pyramids, but not for arbitrary orders.
- *
- * \param demuxer The Matroska demuxer struct for this instance.
- * \param track The track structure whose cache should be handled.
- */
-static void flush_cached_dps(demuxer_t *demuxer, mkv_track_t *track)
-{
-    int i, ok;
-
-    if (track->num_cached_dps == 0)
-        return;
-
-    do {
-        ok = 1;
-        for (i = 1; i < track->num_cached_dps; i++)
-            if (track->cached_dps[i - 1]->pts > track->cached_dps[i]->pts) {
-                double tmp_pts = track->cached_dps[i - 1]->pts;
-                track->cached_dps[i - 1]->pts = track->cached_dps[i]->pts;
-                track->cached_dps[i]->pts = tmp_pts;
-                ok = 0;
-            }
-    } while (!ok);
-
-    for (i = 0; i < track->num_cached_dps; i++)
-        ds_add_packet(demuxer->video, track->cached_dps[i]);
-    track->num_cached_dps = 0;
-}
-
-/** Cache video frames if timecodes have to be reordered.
- *
- * Timecode reordering is needed if a video track contains B frames that
- * are timestamped in display order (e.g. MPEG-1, MPEG-2 or "native" MPEG-4).
- * This function takes in a Matroska block read from the file, allocates a
- * demux packet for it, fills in its values, allocates space for storing
- * pointers to the cached demux packets and adds the packet to it. If
- * the packet contains an I or a P frame then ::flush_cached_dps is called
- * in order to send the old cached frames downstream.
- *
- * \param demuxer The Matroska demuxer struct for this instance.
- * \param track The packet is meant for this track.
- * \param buffer The actual frame contents.
- * \param size The frame size in bytes.
- * \param block_bref A relative timecode (backward reference). If it is \c 0
- *   then the frame is an I frame.
- * \param block_fref A relative timecode (forward reference). If it is \c 0
- *   then the frame is either an I frame or a P frame depending on the value
- *   of \a block_bref. Otherwise it's a B frame.
- */
-static void handle_video_bframes(demuxer_t *demuxer, mkv_track_t *track,
-                                 uint8_t *buffer, uint32_t size,
-                                 int block_bref, int block_fref)
-{
-    mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-    demux_packet_t *dp;
-
-    dp = new_demux_packet(size);
-    memcpy(dp->buffer, buffer, size);
-    dp->pos = demuxer->filepos;
-    dp->pts = mkv_d->last_pts;
-    if ((track->num_cached_dps > 0) && (dp->pts < track->max_pts))
-        block_fref = 1;
-    if (block_fref == 0)        /* I or P frame */
-        flush_cached_dps(demuxer, track);
-    if (block_bref != 0)        /* I frame, don't cache it */
-        dp->flags = 0x10;
-    if ((track->num_cached_dps + 1) > track->num_allocated_dps) {
-        track->cached_dps = (demux_packet_t **)
-            realloc(track->cached_dps,
-                    (track->num_cached_dps + 10) * sizeof(demux_packet_t *));
-        track->num_allocated_dps += 10;
-    }
-    track->cached_dps[track->num_cached_dps] = dp;
-    track->num_cached_dps++;
-    if (dp->pts > track->max_pts)
-        track->max_pts = dp->pts;
-}
-
 static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
                         uint64_t block_duration, int64_t block_bref,
                         int64_t block_fref, uint8_t simpleblock)
@@ -2254,9 +2127,6 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
             else if (ds == demuxer->audio && track->realmedia)
                 handle_realaudio(demuxer, track, block, lace_size[i],
                                  block_bref);
-            else if (ds == demuxer->video && track->reorder_timecodes)
-                handle_video_bframes(demuxer, track, block, lace_size[i],
-                                     block_bref, block_fref);
             else {
                 int size = lace_size[i];
                 demux_packet_t *dp;
@@ -2567,7 +2437,6 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
     // specifies a keyframe with high, but not perfect, precision.
     rel_seek_secs += flags & SEEK_FORWARD ? -0.005 : 0.005;
 
-    free_cached_dps(demuxer);
     if (!(flags & SEEK_FACTOR)) {       /* time in secs */
         mkv_index_t *index = NULL;
 
