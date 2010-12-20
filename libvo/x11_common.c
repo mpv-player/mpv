@@ -540,12 +540,12 @@ static const struct mp_keymap keysym_map[] = {
     {0, 0}
 };
 
-static void vo_x11_putkey_ext(struct vo *vo, int keysym)
+static void vo_x11_putkey_ext(struct vo *vo, int keysym, int modifiers)
 {
     struct mp_fifo *f = vo->key_fifo;
     int mpkey = lookup_keymap_table(keysym_map, keysym);
     if (mpkey)
-        mplayer_put_key(f, mpkey);
+        mplayer_put_key(f, mpkey + modifiers);
 }
 #endif
 
@@ -584,7 +584,7 @@ static const struct mp_keymap keymap[] = {
     {0, 0}
 };
 
-void vo_x11_putkey(struct vo *vo, int key)
+static void vo_x11_putkey(struct vo *vo, int key, int modifiers)
 {
     static const char *passthrough_keys = " -+*/<>`~!@#$%^&()_{}:;\"\',.?\\|=[]";
     int mpkey = 0;
@@ -598,7 +598,7 @@ void vo_x11_putkey(struct vo *vo, int key)
         mpkey = lookup_keymap_table(keymap, key);
 
     if (mpkey)
-        mplayer_put_key(vo->key_fifo, mpkey);
+        mplayer_put_key(vo->key_fifo, mpkey + modifiers);
 }
 
 
@@ -814,13 +814,22 @@ int vo_x11_check_events(struct vo *vo)
 
                     XLookupString(&Event.xkey, buf, sizeof(buf), &keySym,
                                   &x11->compose_status);
+                    int modifiers = 0;
+                    if (Event.xkey.state & ShiftMask)
+                        modifiers |= KEY_MODIFIER_SHIFT;
+                    if (Event.xkey.state & ControlMask)
+                        modifiers |= KEY_MODIFIER_CTRL;
+                    if (Event.xkey.state & Mod1Mask)
+                        modifiers |= KEY_MODIFIER_ALT;
+                    if (Event.xkey.state & Mod4Mask)
+                        modifiers |= KEY_MODIFIER_META;
 #ifdef XF86XK_AudioPause
-                    vo_x11_putkey_ext(vo, keySym);
+                    vo_x11_putkey_ext(vo, keySym, modifiers);
 #endif
                     key =
                         ((keySym & 0xff00) !=
                          0 ? ((keySym & 0x00ff) + 256) : (keySym));
-                    vo_x11_putkey(vo, key);
+                    vo_x11_putkey(vo, key, modifiers);
                     ret |= VO_EVENT_KEYPRESS;
                 }
                 break;
@@ -1123,6 +1132,7 @@ final:
   x11->vo_gc = XCreateGC(mDisplay, x11->window, GCForeground, &xgcv);
   XSync(mDisplay, False);
   x11->vo_mouse_autohide = 1;
+  vo->event_fd = ConnectionNumber(x11->display);
 }
 
 void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,

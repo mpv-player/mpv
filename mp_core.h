@@ -129,6 +129,9 @@ typedef struct MPContext {
      * stream by cutting samples or adding silence at the beginning to make
      * audio playback position match video position. */
     bool syncing_audio;
+    bool hrseek_active;
+    bool hrseek_framedrop;
+    double hrseek_pts;
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
     // written to the ao, decreased when moving to the next frame.
@@ -148,6 +151,12 @@ typedef struct MPContext {
     // the same value if the status line is updated at a time where no new
     // video frame is shown.
     double last_av_difference;
+    /* timestamp of video frame currently visible on screen
+     * (or at least queued to be flipped by VO) */
+    double video_pts;
+
+    // used to prevent hanging in some error cases
+    unsigned int start_timestamp;
 
     // Timestamp from the last time some timing functions read the
     // current time, in (occasionally wrapping) microseconds. Used
@@ -155,8 +164,15 @@ typedef struct MPContext {
     unsigned int last_time;
 
     // Used to communicate the parameters of a seek between parts
-    double rel_seek_secs;
-    int abs_seek_pos;
+    struct seek_params {
+        enum seek_type {
+            MPSEEK_NONE, MPSEEK_RELATIVE, MPSEEK_ABSOLUTE, MPSEEK_FACTOR
+        } type;
+        double amount;
+        int exact;  // -1 = disable, 0 = default, 1 = enable
+        // currently not set by commands, only used internally by seek()
+        int direction; // -1 = backward, 0 = default, 1 = forward
+    } seek;
 
     /* Heuristic for relative chapter seeks: keep track which chapter
      * the user wanted to go to, even if we aren't exactly within the
@@ -218,6 +234,8 @@ int reinit_video_chain(struct MPContext *mpctx);
 void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx);
+void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
+                int exact);
 int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
                  char **chapter_name);
 double get_time_length(struct MPContext *mpctx);

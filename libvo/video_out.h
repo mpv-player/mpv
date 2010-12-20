@@ -251,6 +251,8 @@ struct vo {
     struct vo_x11_state *x11;
     struct mp_fifo *key_fifo;
     struct input_ctx *input_ctx;
+    int event_fd;  // check_events() should be called when this has input
+    int registered_fd;  // set to event_fd when registered in input system
 
     // requested position/resolution
     int dx;

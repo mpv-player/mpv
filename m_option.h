@@ -53,6 +53,7 @@ extern const m_option_type_t m_option_type_string_list;
 extern const m_option_type_t m_option_type_position;
 extern const m_option_type_t m_option_type_time;
 extern const m_option_type_t m_option_type_time_size;
+extern const m_option_type_t m_option_type_choice;
 
 extern const m_option_type_t m_option_type_print;
 extern const m_option_type_t m_option_type_print_indirect;
@@ -168,6 +169,11 @@ typedef struct {
 } m_span_t;
 /// Ready made settings to parse a \ref m_span_t with a start-end syntax.
 extern const m_obj_params_t m_span_params_def;
+
+struct m_opt_choice_alternatives {
+    char *name;
+    int value;
+};
 
 
 // FIXME: backward compatibility
@@ -487,6 +493,12 @@ struct m_option {
  */
 const m_option_t* m_option_list_find(const m_option_t* list,const char* name);
 
+static inline void *m_option_get_ptr(const struct m_option *opt,
+                                     void *optstruct)
+{
+    return opt->new ? (char *) optstruct + opt->offset : opt->p;
+}
+
 /// Helper to parse options, see \ref m_option_type::parse.
 inline static int
 m_option_parse(const m_option_t* opt,const char *name, const char *param, void* dst, int src) {
@@ -543,5 +555,7 @@ int parse_timestring(const char *str, double *time, char endchar);
 #define OPT_STRING(optname, varname, flags) {optname, NULL, &m_option_type_string, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_SETTINGSLIST(optname, varname, flags, objlist) {optname, NULL, &m_option_type_obj_settings_list, flags, 0, 0, objlist, 1, offsetof(struct MPOpts, varname)}
 #define OPT_AUDIOFORMAT(optname, varname, flags) {optname, NULL, &m_option_type_afmt, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
+#define OPT_HELPER_REMOVEPAREN(...) __VA_ARGS__
+#define OPT_CHOICE(optname, varname, flags, choices) {optname, NULL, &m_option_type_choice, flags, 0, 0, &(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, 1, offsetof(struct MPOpts, varname)}
 
 #endif /* MPLAYER_M_OPTION_H */

@@ -206,8 +206,12 @@ See the \-input option for ways to customize it.
 .RS
 .IPs "<\- and \->"
 Seek backward/\:forward 10 seconds.
+Shift+arrow does a 1 second exact seek (see \-hr\-seek; currently modifier
+keys like shift only work if used in an X output window).
 .IPs "up and down"
 Seek forward/\:backward 1 minute.
+Shift+arrow does a 5 second exact seek (see \-hr\-seek; currently modifier
+keys like shift only work if used in an X output window).
 .IPs "pgup and pgdown"
 Seek forward/\:backward 10 minutes.
 .IPs "[ and ]"
@@ -909,6 +913,27 @@ mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 .PD 1
 .
 .TP
+.B \-hr\-seek off|absolute|always
+Select when to use precise seeks that are not limited to keyframes.
+Such seeks require decoding video from the previous keyframe up to the target
+position and so can take some time depending on decoding performance.
+For some video formats precise seeks are disabled. This option selects the
+default choice to use for seeks; it's possible to explicitly override that
+default in the definition of key bindings and in slave mode commands.
+.PD 0
+.RSs
+.IPs off
+Never use precise seeks.
+.IPs absolute
+Use precise seeks if the seek is to an absolute position in the file,
+such as a chapter seek, but not for relative seeks like the default
+behavior of arrow keys (default).
+.IPs always
+Use precise seeks whenever possible.
+.RE
+.PD 1
+.
+.TP
 .B \-identify
 Shorthand for \-msglevel identify=4.
 Show file parameters in an easily parseable format.
@@ -1076,16 +1101,17 @@ MPlayer will not load or search for video segments from other files,
 and will also ignore any chapter order specified for the main file.
 .
 .TP
-.B \-pts\-association\-mode <mode number>
+.B \-pts\-association\-mode auto|decode|sort
 Select the method used to determine which container packet timestamp
 corresponds to a particular output frame from the video decoder.
+Normally you shouldn't need to change this option.
 .PD 0
 .RSs
-.IPs 0
+.IPs auto
 Try to pick a working mode from the ones below automatically (default)
-.IPs 1
+.IPs decoder
 Use decoder reordering functionality.
-.IPs 2
+.IPs sort
 Maintain a buffer of unused pts values and use the lowest value for the frame.
 .RE
 .PD 1

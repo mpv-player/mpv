@@ -94,4 +94,10 @@
 #define KEY_INTERN (0x1000)
 #define KEY_CLOSE_WIN (KEY_INTERN+0)
 
+/* Modifiers added to individual keys */
+#define KEY_MODIFIER_SHIFT  0x2000
+#define KEY_MODIFIER_CTRL   0x4000
+#define KEY_MODIFIER_ALT    0x8000
+#define KEY_MODIFIER_META  0x10000
+
 #endif /* MPLAYER_KEYCODES_H */

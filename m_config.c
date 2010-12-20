@@ -150,7 +150,7 @@ static void m_option_save(const m_config_t *config, const m_option_t *opt,
                           void *dst)
 {
     if (opt->type->save) {
-        const void *src = opt->new ? (char*)config->optstruct + opt->offset : opt->p;
+        const void *src = m_option_get_ptr(opt, config->optstruct);
         opt->type->save(opt, dst, src);
     }
 }
@@ -159,7 +159,7 @@ static void m_option_set(const m_config_t *config, const m_option_t *opt,
 			 const void *src)
 {
     if (opt->type->set) {
-        void *dst = opt->new ? (char*)config->optstruct + opt->offset : opt->p;
+        void *dst = m_option_get_ptr(opt, config->optstruct);
         opt->type->set(opt, dst, src);
     }
 }

@@ -34,6 +34,7 @@
 #include "libvo/sub.h"
 #include "m_option.h"
 #include "m_property.h"
+#include "m_config.h"
 #include "metadata.h"
 #include "libmpcodecs/vf.h"
 #include "libmpcodecs/vd.h"
@@ -225,6 +226,39 @@ static void log_sub(struct MPContext *mpctx)
 /// \defgroup GeneralProperties General properties
 /// \ingroup Properties
 ///@{
+
+static int mp_property_generic_option(struct m_option *prop, int action,
+                                      void *arg, MPContext *mpctx)
+{
+    char *optname = prop->priv;
+    const struct m_option *opt = m_config_get_option(mpctx->mconfig, optname);
+    void *valptr = m_option_get_ptr(opt, &mpctx->opts);
+
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(const struct m_option **)arg = opt;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+        m_option_copy(opt, arg, valptr);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET:
+        m_option_copy(opt, valptr, arg);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_STEP_UP:
+        if (opt->type == &m_option_type_choice) {
+            int v = *(int *) valptr;
+            int best = v;
+            struct m_opt_choice_alternatives *alt;
+            for (alt = opt->priv; alt->name; alt++)
+                if ((unsigned) alt->value - v - 1 < (unsigned) best - v - 1)
+                    best = alt->value;
+            *(int *) valptr = best;
+            return M_PROPERTY_OK;
+        }
+        break;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
 
 /// OSD level (RW)
 static int mp_property_osdlevel(m_option_t *prop, int action, void *arg,
@@ -418,8 +452,7 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
         return m_property_int_ro(prop, action, arg, get_percent_pos(mpctx));
     }
 
-    mpctx->abs_seek_pos = SEEK_ABSOLUTE | SEEK_FACTOR;
-    mpctx->rel_seek_secs = pos / 100.0;
+    queue_seek(mpctx, MPSEEK_FACTOR, pos / 100.0, 0);
     return M_PROPERTY_OK;
 }
 
@@ -433,13 +466,12 @@ static int mp_property_time_pos(m_option_t *prop, int action,
     case M_PROPERTY_SET:
         if(!arg) return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(double*)arg);
-        mpctx->abs_seek_pos = SEEK_ABSOLUTE;
-        mpctx->rel_seek_secs = *(double*)arg;
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double*)arg, 0);
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-        mpctx->rel_seek_secs += (arg ? *(double*)arg : 10.0) *
-            (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
+        queue_seek(mpctx, MPSEEK_RELATIVE, (arg ? *(double*)arg : 10.0) *
+                   (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0), 0);
         return M_PROPERTY_OK;
     }
     return m_property_time_ro(prop, action, arg, get_current_time(mpctx));
@@ -495,20 +527,16 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     }
 
     double next_pts = 0;
+    queue_seek(mpctx, MPSEEK_NONE, 0, 0);
     chapter = seek_chapter(mpctx, chapter, &next_pts, &chapter_name);
-    mpctx->rel_seek_secs = 0;
-    mpctx->abs_seek_pos = 0;
     if (chapter >= 0) {
-        if (next_pts > -1.0) {
-            mpctx->abs_seek_pos = SEEK_ABSOLUTE;
-            mpctx->rel_seek_secs = next_pts;
-        }
+        if (next_pts > -1.0)
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, next_pts, 0);
         if (chapter_name)
             set_osd_tmsg(OSD_MSG_TEXT, 1, opts->osd_duration,
                          "Chapter: (%d) %s", chapter + 1, chapter_name);
-    }
-    else if (step_all > 0)
-        mpctx->rel_seek_secs = 1000000000.;
+    } else if (step_all > 0)
+        queue_seek(mpctx, MPSEEK_RELATIVE, 1000000000, 0);
     else
         set_osd_tmsg(OSD_MSG_TEXT, 1, opts->osd_duration,
                      "Chapter: (%d) %s", 0, mp_gtext("unknown"));
@@ -2184,6 +2212,10 @@ static const m_option_t mp_properties[] = {
      M_OPT_RANGE, 0, 1, NULL },
     { "capturing", mp_property_capture, CONF_TYPE_FLAG,
      M_OPT_RANGE, 0, 1, NULL },
+    { "pts_association_mode", mp_property_generic_option, &m_option_type_choice,
+     0, 0, 0, "pts-association-mode" },
+    { "hr_seek", mp_property_generic_option, &m_option_type_choice,
+     0, 0, 0, "hr-seek" },
 
     // Audio
     { "volume", mp_property_volume, CONF_TYPE_FLOAT,
@@ -2357,6 +2389,8 @@ static struct property_osd_display {
     { "loop", 0, -1, _("Loop: %s") },
     { "chapter", -1, -1, NULL },
     { "capturing", 0, -1, _("Capturing: %s") },
+    { "pts_association_mode", 0, -1, "PTS association mode: %s" },
+    { "hr_seek", 0, -1, "hr-seek: %s" },
     // audio
     { "volume", OSD_VOLUME, -1, _("Volume") },
     { "mute", 0, -1, _("Mute: %s") },
@@ -2679,24 +2713,19 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     if (!set_property_command(mpctx, cmd))
         switch (cmd->id) {
         case MP_CMD_SEEK:{
-                float v;
-                int abs;
                 mpctx->add_osd_seek_info = true;
-                v = cmd->args[0].v.f;
-                abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
+                float v = cmd->args[0].v.f;
+                int abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
+                int exact = (cmd->nargs > 2) ? cmd->args[2].v.i : 0;
                 if (abs == 2) { /* Absolute seek to a specific timestamp in seconds */
-                    mpctx->abs_seek_pos = SEEK_ABSOLUTE;
-                    if (sh_video)
-                        mpctx->osd_function =
-                            (v > sh_video->pts) ? OSD_FFW : OSD_REW;
-                    mpctx->rel_seek_secs = v;
+                    queue_seek(mpctx, MPSEEK_ABSOLUTE, v, exact);
+                    mpctx->osd_function = v > get_current_time(mpctx) ?
+                        OSD_FFW : OSD_REW;
                 } else if (abs) {       /* Absolute seek by percentage */
-                    mpctx->abs_seek_pos = SEEK_ABSOLUTE | SEEK_FACTOR;
-                    if (sh_video)
-                        mpctx->osd_function = OSD_FFW;  // Direction isn't set correctly
-                    mpctx->rel_seek_secs = v / 100.0;
+                    queue_seek(mpctx, MPSEEK_FACTOR, v / 100.0, exact);
+                    mpctx->osd_function = OSD_FFW;  // Direction isn't set correctly
                 } else {
-                    mpctx->rel_seek_secs += v;
+                    queue_seek(mpctx, MPSEEK_RELATIVE, v, exact);
                     mpctx->osd_function = (v > 0) ? OSD_FFW : OSD_REW;
                 }
             }
@@ -2902,12 +2931,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         case MP_CMD_SUB_STEP:
             if (sh_video) {
                 int movement = cmd->args[0].v.i;
-                step_sub(subdata, sh_video->pts, movement);
+                step_sub(subdata, mpctx->video_pts, movement);
 #ifdef CONFIG_ASS
                 if (ass_track)
                     sub_delay +=
                         ass_step_sub(ass_track,
-                                     (sh_video->pts +
+                                     (mpctx->video_pts +
                                       sub_delay) * 1000 + .5, movement) / 1000.;
 #endif
                 set_osd_tmsg(OSD_MSG_SUB_DELAY, 1, osd_duration,
