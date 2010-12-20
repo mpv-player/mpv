@@ -2509,34 +2509,31 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
                                         int64_t target_timecode, int flags)
 {
     struct mkv_demuxer *mkv_d = demuxer->priv;
-    int64_t min_diff = 0xFFFFFFFFFFFFFFF;
     struct mkv_index *index = NULL;
 
-    /* let's find the entry in the indexes with the smallest */
-    /* difference to the wanted timecode. */
+    /* Find the entry in the index closest to the target timecode in the
+     * give direction. If there are no such entries - we're trying to seek
+     * backward from a target time before the first entry or forward from a
+     * target time after the last entry - then still seek to the first/last
+     * entry if that's further in the direction wanted than mkv_d->last_pts.
+     */
+    int64_t min_diff = target_timecode - mkv_d->last_pts * 1000;
+    if (flags & SEEK_BACKWARD)
+        min_diff = -min_diff;
+    min_diff = FFMAX(min_diff, 1);
     for (int i = 0; i < mkv_d->num_indexes; i++)
         if (seek_id < 0 || mkv_d->indexes[i].tnum == seek_id) {
             int64_t diff =
                 target_timecode -
                 (int64_t) (mkv_d->indexes[i].timecode *
                            mkv_d->tc_scale / 1000000.0 + 0.5);
-
-            if (flags & SEEK_BACKWARD) {
-                // Seek backward: find the last index position
-                // before target time
-                if (diff < 0 || diff >= min_diff)
+            if (flags & SEEK_BACKWARD)
+                diff = -diff;
+            if (diff <= 0) {
+                if (min_diff <= 0 && diff <= min_diff)
                     continue;
-            } else {
-                // Seek forward: find the first index position
-                // after target time. If no such index exists, find last
-                // position between current position and target time.
-                if (diff <= 0) {
-                    if (min_diff <= 0 && diff <= min_diff)
-                        continue;
-                } else if (diff >=
-                           FFMIN(target_timecode - mkv_d->last_pts, min_diff))
-                    continue;
-            }
+            } else if (diff >= min_diff)
+                continue;
             min_diff = diff;
             index = mkv_d->indexes + i;
         }
