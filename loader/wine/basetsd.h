@@ -66,18 +66,6 @@ typedef unsigned __int64 __uint64;
 
 #endif /* __INTEL_COMPILER */
 
-#if defined(_WIN64)
-
-//typedef __uint32 __ptr32;
-//typedef void    *__ptr64;
-
-#else /* FIXME: defined(_WIN32) */
-
-typedef void    *__ptr32;
-typedef __uint64 __ptr64;
-
-#endif
-
 /* Always signed and 32 bit wide */
 
 typedef __int32 LONG32;
