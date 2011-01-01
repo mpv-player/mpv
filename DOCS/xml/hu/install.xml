@@ -434,39 +434,6 @@ az <application>MPlayer</application>be belekerüljön az
 
 <!-- ********** -->
 
-<sect2 id="aac">
-<title>AAC</title>
-
-<para>
-Egy FAAD2-nek hívott nyílt forráskódú AAC dekódoló elérhető itt:
-<ulink url="http://www.audiocoding.com/downloads.html"/>.
-Az <application>MPlayer</application> tartalmaz egy másolatot a forrásfájában.
-Ha inkább a külső függvénykönyvtárat használnád, telepítsd és add meg a
-<option>--enable-faad-external</option> kapcsolót a <filename>./configure</filename>-nak.
-</para>
-
-<para>
-FAAD2 binárisok nem tölthetőek le az audiocoding.com-ról, de (apt-)get-tel
-telepítheted <ulink url="http://www.debian-multimedia.org/">Christian Marillat</ulink> Debian csomagjait,
-vagy Mandrake/Mandriva RPM-et a <ulink url="http://plf.zarb.org">P.L.F</ulink>-ről,
-Fedora/CentOS/RHEL RPM-et pedig az <ulink url="http://rpmfusion.org/">RPMFusion</ulink>-ról.
-</para>
-<para>
-Ha úgy döntesz, hogy forrásból fordítasz, nem kell a teljes FAAD2 az AAC fájlok
-dekódolásához, elég a libfaad. Így készítsd el:
-<screen>
-cd faad2/
-sh bootstrap
-./configure
-cd libfaad
-make
-make install
-</screen>
-</para>
-</sect2>
-
-<!-- ********** -->
-
 <sect2 id="amr">
 <title>AMR</title>
 

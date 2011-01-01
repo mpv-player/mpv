@@ -21,14 +21,6 @@ License:    GNU Lesser General Public License, some parts GNU General Public
             License, GNU General Public License when combined
 
 
-Name:       FAAD2
-Version:    2.1 beta (20040915 CVS snapshot) + fixes and portability patches
-URL:        http://www.audiocoding.com
-Directory:  libfaad2
-Copyright:  2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
-License:    GNU General Public License
-
-
 Name:       libdvdcss
 Version:    Subversion r237 + local changes
 URL:        http://developers.videolan.org/libdvdcss/

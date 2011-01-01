@@ -472,43 +472,6 @@ make install</screen>
     </sect2>
 
 
-    <sect2 id="aac">
-      <title>AAC Codec</title>
-      <para>
-        AAC (Advanced Audio Coding) ist ein Audiocodec, der vorwiegend
-        in MOV- und MP4-Dateien vorkommt. Ein Open-Source-Decoder namens
-        FAAD ist auf <ulink url="http://www.audiocoding.com"/>
-        verfügbar. <application>MPlayer</application> enthält
-        eine CVS Version von libfaad 2.1 beta, so dass es nicht extra
-        installiert werden muss.
-      </para>
-
-      <para>
-        Um die externe FAAD-Bibliothek verwenden zu können (z.B. um mit gcc 3.2
-        compilieren zu können, der die interne Version nicht übersetzt), muss
-        die Bibliothek von der
-        <ulink url="http://www.audiocoding.com/modules/mydownloads/">Download Seite</ulink>
-        heruntergeladen und installiert werden. Anschließend muss die Option
-        <option>--enable-faad-external</option> an <filename>./configure</filename>
-        übergeben werden, damit die externe Bibliothek erkannt wird.
-        Es ist lediglich erforderlich, vorher libfaad zu installieren, und zwar so:
-        <screen>
-cd faad2/
-sh bootstrap
-./configure
-cd libfaad
-make
-make install<!--
-        --></screen>
-        Binärpakete sind auf audiocoding.com nicht erhältlich, Debian-Pakete
-        können aber mit (apt-)get von
-        <ulink url="http://www.debian-multimedia.org/">Christian Marillat's Homepage</ulink>, Mandrake/Mandriva RPMs von
-        <ulink url="http://plf.zarb.org">P.L.F</ulink> und RedHat RPMs
-        von <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>
-        heruntergeladen werden.
-      </para>
-    </sect2>
-
     <sect2 id="amr">
       <title>AMR Codecs</title>
       <para>

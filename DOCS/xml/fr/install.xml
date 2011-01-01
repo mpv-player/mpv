@@ -422,34 +422,6 @@ Now rerun <filename>./configure</filename> for
 <systemitem class="library">x264</systemitem> support.
 </para>
 </sect2>
-<!-- ********** -->
-
-<sect2 id="aac">
-<title>Codec AAC</title>
-<para>
-Un décodeur open source appelé FAAD est disponible sur
-<ulink url="http://www.audiocoding.com/downloads.html"/>.
-<application>MPlayer</application> inclus une copie, vous n'avez donc pas
-à l'obtenir séparemment.
-Si vous voulez utiliser une librairie externe, passez
-<option>--enable-faad-external</option> à <filename>./configure</filename>.
-Vous n'avez pas besoin de tout faad2 pour décoder les fichiers AAC, libfaad suffit.
-Construisez comme ceci&nbsp;:
-<screen>
-cd faad2/
-sh bootstrap
-./configure
-cd libfaad
-make
-make install
-</screen>
-Les binaires ne sont pas disponibles sur audiocoding.com, mais vous pouvez
-obtenir les paquets Debian sur la
-<ulink url="http://www.debian-multimedia.org/">page web de Christian Marillat</ulink>,
-les RPMs Mandrake/Mandriva sur le <ulink url="http://plf.zarb.org">P.L.F</ulink> et les RPMS
-Fedora sur <ulink url="http://rpm.livna.org/">Livna</ulink>.
-</para>
-</sect2>
 
 <!-- ********** -->
 

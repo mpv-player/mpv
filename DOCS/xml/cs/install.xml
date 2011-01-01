@@ -432,43 +432,6 @@ Now rerun <filename>./configure</filename> for
 
 <!-- ********** -->
 
-<sect2 id="aac">
-<title>Kodek AAC</title>
-
-<para>
-AAC (Advanced Audio Coding) je audio kodek, který lze občas nalézt v MOV a
-MP4 souborech. Open source dekodér jménem FAAD je k dispozici na
-<ulink url="http://www.audiocoding.com"/>.
-<application>MPlayer</application> obsahuje CVS obraz libfaad 2.1 beta,
-takže jej nemusíte stahovat dodatečně.
-</para>
-
-<para>
-Pokud používáte gcc 3.2 které nedokáže zkompilovat naši zabudovanou FAAD,
-nebo chcete použít externí knihovnu z jiných důvodů, stáhněte si ji z
-<ulink url="http://www.audiocoding.com/modules/mydownloads/">download stránky</ulink>
-a předejte volbu <option>--enable-faad-external</option> skriptu
-<filename>./configure</filename>.
-Pro dekódování AAC souborů nepotřebujete celou faad2, libfaad stačí.
-Zkompilujete ji takto:
-<screen>
-cd faad2/
-sh bootstrap
-./configure
-cd libfaad
-make
-make install
-</screen>
-Binárky na audiocoding.com nenajdete, ale můžete si je opatřit v balíčcích pro
-Debian z
-<ulink url="http://www.debian-multimedia.org/">domácí stránky Christiana Marillata</ulink>,
-Mandrake/Mandriva RPM z <ulink url="http://plf.zarb.org">P.L.F</ulink>
-a Fedora RPM ze stránek <ulink url="http://rpm.livna.org/">Livna</ulink>.
-</para>
-</sect2>
-
-<!-- ********** -->
-
 <sect2 id="amr">
 <title>AMR kodeky</title>
 

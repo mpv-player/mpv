@@ -648,41 +648,6 @@ tengan el mismo origen.
 </procedure>
 </sect2>
 
-<!-- ********** -->
-
-<sect2 id="aac">
-<title>AAC</title>
-<para>
-AAC (Codificación Avanzada de Audio) es un codec de audio que algunas veces
-se encuentra en archivos MOV y MP4. Un decodificador llamado FAAD de código
-abierto está disponible en
-<ulink url="http://www.audiocoding.com"/>.
-<application>MPlayer</application> incluye libfaad 2.0RC1, por lo que no
-necesita obtenerlo por separado.
-</para>
-
-<para>
-Si usa gcc 3.2 y falla al compilar nuestro FAAD interno o desea usar la
-biblioteca externa por alguna otra razón, descargue la biblioteca desde la
-<ulink url="http://www.audiocoding.com/download.php">página de descargas</ulink>
-y pase la opción <option>--enable-external-faad</option> a <filename>configure</filename>.
-No necesita todo el faad2 para decodificar archivos AAC, libfaad es suficiente.
-Constrúyalo como sigue:
-<screen>cd faad2/
-chmod +x bootstrap
-./bootstrap
-./configure
-cd libfaad
-make
-make install
-</screen>
-No hay binarios disponibles en audiocoding.com, pero puede apetegetear paquetes Debian
-desde <ulink url="http://marillat.free.fr">la página personal de Christian Marillat</ulink>,
-paquetes RPM para Mandrake desde la <ulink url="http://plf.zarb.org">P.L.F.</ulink> y RPMs
-para Red Hat en <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
-</para>
-</sect2>
-
 </sect1>
 
 

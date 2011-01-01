@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <faad.h>
 
 #include "config.h"
 #include "options.h"
@@ -39,12 +40,6 @@ static const ad_info_t info =
 };
 
 LIBAD_EXTERN(faad)
-
-#ifndef CONFIG_FAAD_INTERNAL
-#include <faad.h>
-#else
-#include "libfaad2/faad.h"
-#endif
 
 /* configure maximum supported channels, *
  * this is theoretically max. 64 chans   */
@@ -134,30 +129,9 @@ static int init(sh_audio_t *sh)
       mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Could not get audio data!\n");
       return 0;
     }
-#if CONFIG_FAAD_INTERNAL
-    /* init the codec, look for LATM */
-    faac_init = faacDecInit(faac_hdec, sh->a_in_buffer,
-                            sh->a_in_buffer_len, &faac_samplerate, &faac_channels,1);
-    if (faac_init < 0 && sh->a_in_buffer_len >= 3 && sh->format == mmioFOURCC('M', 'P', '4', 'L')) {
-        // working LATM not found at first try, look further on in stream
-        int i;
-
-        for (i = 0; i < 5; i++) {
-            pos = sh->a_in_buffer_len-3;
-            memmove(sh->a_in_buffer, &(sh->a_in_buffer[pos]), 3);
-            sh->a_in_buffer_len  = 3;
-            sh->a_in_buffer_len += demux_read_data(sh->ds,&sh->a_in_buffer[sh->a_in_buffer_len],
-                                                   sh->a_in_buffer_size - sh->a_in_buffer_len);
-            faac_init = faacDecInit(faac_hdec, sh->a_in_buffer,
-                                    sh->a_in_buffer_len, &faac_samplerate, &faac_channels,1);
-            if (faac_init >= 0) break;
-        }
-    }
-#else
     /* external faad does not have latm lookup support */
     faac_init = faacDecInit(faac_hdec, sh->a_in_buffer,
                             sh->a_in_buffer_len, &faac_samplerate, &faac_channels);
-#endif
 
     if (faac_init < 0) {
     pos = aac_probe(sh->a_in_buffer, sh->a_in_buffer_len);
@@ -171,13 +145,8 @@ static int init(sh_audio_t *sh)
     }
 
     /* init the codec */
-#if CONFIG_FAAD_INTERNAL
-    faac_init = faacDecInit(faac_hdec, sh->a_in_buffer,
-          sh->a_in_buffer_len, &faac_samplerate, &faac_channels,0);
-#else
     faac_init = faacDecInit(faac_hdec, sh->a_in_buffer,
           sh->a_in_buffer_len, &faac_samplerate, &faac_channels);
-#endif
     }
 
     sh->a_in_buffer_len -= (faac_init > 0)?faac_init:0; // how many bytes init consumed

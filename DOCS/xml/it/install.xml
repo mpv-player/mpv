@@ -435,40 +435,6 @@ Poi riesegui <filename>./configure</filename> affinché
 
 <!-- ********** -->
 
-<sect2 id="aac">
-<title>AAC</title>
-
-<para>
-E' disponibile da <ulink url="http://www.audiocoding.com/downloads.html"/> un
-decodificatore open source che si chiama FAAD2.
-<application>MPlayer</application> ne include una copia nei suoi sorgenti.
-Se vuoi usare la libreria esterna per qualche altra ragione, installala e passa
-<option>--enable-faad-external</option> a <filename>./configure</filename>.
-</para>
-
-<para>
-Gli eseguibili di FAAD2 non sono disponibili da audiocoding.com, ma puoi
-ottenere con apt(-get) i pacchetti Debian da
-<ulink url="http://www.debian-multimedia.org/">Christian Marillat</ulink>,
-gli RPM per Mandrake/Mandriva da <ulink url="http://plf.zarb.org">P.L.F</ulink>
-e quelli per Fedora da <ulink url="http://rpm.livna.org/">Livna</ulink>.
-</para>
-<para>
-Se decidi di compilarli dai sorgenti, non ti serve tutto di faad2 per
-decodificare i file AAC, ti basta libfaad. Compilala così:
-<screen>
-cd faad2/
-sh bootstrap
-./configure
-cd libfaad
-make
-make install
-</screen>
-</para>
-</sect2>
-
-<!-- ********** -->
-
 <sect2 id="amr">
 <title>AMR</title>
 
