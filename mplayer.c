@@ -2250,6 +2250,9 @@ static int sleep_until_near_frame(struct MPContext *mpctx, float *time_frame,
     double audio_limit = 2;
     current_module="calc_sleep_time";
 
+    if (mpctx->restart_playback)
+        return 0;
+
     *time_frame -= get_relative_time(mpctx); // reset timer
 
     if (mpctx->sh_audio && !mpctx->d_audio->eof) {
