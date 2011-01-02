@@ -417,7 +417,7 @@ Níže uvádíme řešení některých běžných problémů:
   </para>
   <para>
   Řešení: Použijte volbu extralibdir v configure
-  <option>--with-extralibdir="/usr/lib -lrt"</option>
+  <option>--extra-ldflags="/usr/lib -lrt"</option>
   </para>
 </listitem>
 

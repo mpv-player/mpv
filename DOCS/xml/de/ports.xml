@@ -391,7 +391,7 @@ ctl     <emphasis role="bold">1</emphasis>    8/16/5.7.0  sctl  CLAIMED DEVICE  
 
           <para>
             Lösung: Benutze die Option extralibdir von configure
-            <option>--with-extralibdir="/usr/lib -lrt"</option>
+            <option>--extra-ldflags="/usr/lib -lrt"</option>
           </para>
         </listitem>
 

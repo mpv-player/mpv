@@ -433,7 +433,7 @@ Plante à la lecture avec le message d'erreur suivant&nbsp;:
 
 <para>
 Solution&nbsp;: Utiliser l'option extralibdir lors de configure
-<option>--with-extralibdir="/usr/lib -lrt"</option>
+<option>--extra-ldflags="/usr/lib -lrt"</option>
 </para>
 </listitem>
 

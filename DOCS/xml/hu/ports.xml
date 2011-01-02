@@ -394,7 +394,7 @@ Itt van pár gyakori probléma megoldása:
   </para>
   <para>
   Megoldás: Használd a configure extralibdir opcióját
-  <option>--with-extralibdir="/usr/lib -lrt"</option>
+  <option>--extra-ldflags="/usr/lib -lrt"</option>
   </para>
 </listitem>
 

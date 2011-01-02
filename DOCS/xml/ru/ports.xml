@@ -410,7 +410,7 @@ ln -s /dev/rdsk/c<replaceable>&lt;SCSI bus instance&gt;</replaceable>t<replaceab
   </para>
   <para>
   Решение: Используйте опцию extralibdir программы configure
-  <option>--with-extralibdir="/usr/lib -lrt"</option>
+  <option>--extra-ldflags="/usr/lib -lrt"</option>
   </para>
 </listitem>
 

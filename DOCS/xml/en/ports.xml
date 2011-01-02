@@ -394,7 +394,7 @@ Below are solutions for some common problems:
   </para>
   <para>
   Solution: Use the extralibdir option of configure
-  <option>--with-extralibdir="/usr/lib -lrt"</option>
+  <option>--extra-ldflags="/usr/lib -lrt"</option>
   </para>
 </listitem>
 

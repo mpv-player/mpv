@@ -393,7 +393,7 @@ Wysypanie się programu przy odtwarzaniu z komunikatem:
 
 <para>
 Rozwiązanie: Skorzystaj z opcji extralibdir skryptu configure
-<option>--with-extralibdir="/usr/lib -lrt"</option>
+<option>--extra-ldflags="/usr/lib -lrt"</option>
 </para>
 </listitem>
 
