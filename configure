@@ -2360,8 +2360,8 @@ __attribute__((noinline)) static int foo3(int i1, int i2, int i3) { return i3; }
 int main(void) { return foo3(1, 2, 3) == 3 ? 0 : 1; }
 EOF
   cc_check -O2 -mstackrealign && tmp_run && cflags_stackrealign=-mstackrealign
-  test -z "$cflags_stackrealign" && cc_check -O2 -mstackrealign -fno-unit-at-a-time \
-    && tmp_run && cflags_stackrealign="-mstackrealign -fno-unit-at-a-time"
+  test -z "$cflags_stackrealign" && cc_check -O2 -mstackrealign -fno-unit-at-a-time &&
+    tmp_run && cflags_stackrealign="-mstackrealign -fno-unit-at-a-time"
   test -n "$cflags_stackrealign" && echores "yes" || echores "no"
 fi # if darwin && test "$cc_vendor" = "gnu" ; then
 
@@ -3103,12 +3103,8 @@ fi
 
 
 echocheck "int_fastXY_t in inttypes.h"
-cat > $TMPC << EOF
-#include <inttypes.h>
-int main(void) { volatile int_fast16_t v = 0; return v; }
-EOF
 _fast_inttypes=no
-cc_check && _fast_inttypes=yes
+statement_check "inttypes.h" 'volatile int_fast16_t v = 0' && _fast_inttypes=yes
 if test "$_fast_inttypes" = no ; then
   def_fast_inttypes='
     typedef signed char int_fast8_t;
@@ -3326,7 +3322,7 @@ int main(void) {
 EOF
   _iconv=no
   for _ld_tmp in "" "-liconv" "-liconv $_ld_dl" ; do
-    cc_check $_ld_lm $_ld_tmp && extra_ldflags="$extra_ldflags $_ld_tmp" && \
+    cc_check $_ld_lm $_ld_tmp && extra_ldflags="$extra_ldflags $_ld_tmp" &&
       _iconv=yes && break
   done
 fi
@@ -3568,8 +3564,8 @@ EOF
 _posix_select=no
 def_posix_select='#undef HAVE_POSIX_SELECT'
 #select() of kLIBC (OS/2) supports socket only
-! os2 && cc_check && _posix_select=yes \
-  && def_posix_select='#define HAVE_POSIX_SELECT 1'
+! os2 && cc_check && _posix_select=yes &&
+    def_posix_select='#define HAVE_POSIX_SELECT 1'
 echores "$_posix_select"
 
 
@@ -3972,13 +3968,8 @@ echores "$_x11"
 
 echocheck "Xss screensaver extensions"
 if test "$_xss" = auto ; then
-  cat > $TMPC << EOF
-#include <X11/Xlib.h>
-#include <X11/extensions/scrnsaver.h>
-int main(void) { XScreenSaverSuspend(NULL, True); return 0; }
-EOF
   _xss=no
-  cc_check -lXss && _xss=yes
+  statement_check "X11/extensions/scrnsaver.h" 'XScreenSaverSuspend(NULL, True)' -lXss && _xss=yes
 fi
 if test "$_xss" = yes ; then
   def_xss='#define CONFIG_XSS 1'
@@ -4411,7 +4402,7 @@ cat >$TMPC << EOF
 int main(void) {return 0;}
 EOF
   for _inc_tmp in "" "-I/usr/src/DVB/include" ; do
-    cc_check $_inc_tmp && _dvb=yes && \
+    cc_check $_inc_tmp && _dvb=yes &&
       extra_cflags="$extra_cflags $_inc_tmp" && break
   done
 fi
@@ -4977,6 +4968,7 @@ echores "$_dxr3"
 echocheck "IVTV TV-Out (pre linux-2.6.24)"
 if test "$_ivtv" = auto ; then
   cat > $TMPC << EOF
+#include <sys/time.h>
 #include <linux/videodev2.h>
 #include <linux/ivtv.h>
 #include <sys/ioctl.h>
@@ -5005,6 +4997,7 @@ echores "$_ivtv"
 echocheck "V4L2 MPEG Decoder"
 if test "$_v4l2" = auto ; then
   cat > $TMPC << EOF
+#include <sys/time.h>
 #include <linux/videodev2.h>
 #include <linux/version.h>
 int main(void) {
@@ -5491,10 +5484,10 @@ fi
 if test "$_dvdread_internal" = auto ; then
   _dvdread_internal=no
   _dvdread=no
-  if (linux || freebsd || netbsd || openbsd || dragonfly || sunos || hpux) \
-     && (test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || \
-         test "$_dvdio" = yes || test "$_bsdi_dvd" = yes) \
-     || darwin || win32 || os2; then
+  if (linux || freebsd || netbsd || openbsd || dragonfly || sunos || hpux) &&
+     (test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes ||
+      test "$_dvdio" = yes || test "$_bsdi_dvd" = yes) ||
+     darwin || win32 || os2; then
     _dvdread_internal=yes
     _dvdread=yes
     extra_cflags="-Ilibdvdread4 $extra_cflags"
@@ -5573,7 +5566,7 @@ int main(void) { void *test = cdda_verbose_set; return test == (void *)1; }
 EOF
     _cdparanoia=no
     for _inc_tmp in "" "-I/usr/include/cdda" "-I/usr/local/include/cdda" ; do
-      cc_check $_inc_tmp -lcdda_interface -lcdda_paranoia $_ld_lm && \
+      cc_check $_inc_tmp -lcdda_interface -lcdda_paranoia $_ld_lm &&
         _cdparanoia=yes && extra_cflags="$extra_cflags $_inc_tmp" && break
     done
 fi
@@ -5601,14 +5594,14 @@ EOF
         _libcdio=no
     for _ld_tmp in "" "-lwinmm" ; do
         _ld_tmp="-lcdio_cdda -lcdio -lcdio_paranoia $_ld_tmp"
-        cc_check $_ld_tmp $_ld_lm \
-          && _libcdio=yes && extra_ldflags="$extra_ldflags $_ld_tmp" && break
+        cc_check $_ld_tmp $_ld_lm && _libcdio=yes &&
+            extra_ldflags="$extra_ldflags $_ld_tmp" && break
     done
     if test "$_libcdio" = no && $_pkg_config --exists libcdio_paranoia ; then
       _inc_tmp=$($_pkg_config --cflags libcdio_paranoia)
       _ld_tmp=$($_pkg_config --libs libcdio_paranoia)
-      cc_check $_inc_tmp $_ld_tmp $_ld_lm && _libcdio=yes \
-        && extra_ldflags="$extra_ldflags $_ld_tmp" && extra_cflags="$extra_cflags $_inc_tmp"
+      cc_check $_inc_tmp $_ld_tmp $_ld_lm && _libcdio=yes &&
+        extra_ldflags="$extra_ldflags $_ld_tmp" && extra_cflags="$extra_cflags $_inc_tmp"
     fi
 fi
 if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
@@ -5719,8 +5712,8 @@ EOF
   if test "$_fontconfig" = no && $_pkg_config --exists fontconfig ; then
     _inc_tmp=$($_pkg_config --cflags fontconfig)
     _ld_tmp=$($_pkg_config --libs fontconfig)
-    cc_check $_inc_tmp $_ld_tmp && _fontconfig=yes \
-      && extra_ldflags="$extra_ldflags $_ld_tmp" && extra_cflags="$extra_cflags $_inc_tmp"
+    cc_check $_inc_tmp $_ld_tmp && _fontconfig=yes &&
+      extra_ldflags="$extra_ldflags $_ld_tmp" && extra_cflags="$extra_cflags $_inc_tmp"
   fi
 fi
 if test "$_fontconfig" = yes ; then
@@ -6319,8 +6312,8 @@ EOF
 
   _live=no
   for I in $extra_cflags "-I$_libdir/live" "-I/usr/lib/live" "-I/usr/lib64/live" "-I/usr/local/live" "-I/usr/local/lib/live" ; do
-    cxx_check $I/liveMedia/include $I/UsageEnvironment/include \
-      $I/groupsock/include && _livelibdir=$(echo $I| sed s/-I//) && \
+    cxx_check $I/liveMedia/include $I/UsageEnvironment/include $I/groupsock/include &&
+        _livelibdir=$(echo $I| sed s/-I//) &&
       extra_ldflags="$_livelibdir/liveMedia/libliveMedia.a \
                  $_livelibdir/groupsock/libgroupsock.a \
                  $_livelibdir/UsageEnvironment/libUsageEnvironment.a \
@@ -6329,7 +6322,7 @@ EOF
       extra_cxxflags="-I$_livelibdir/liveMedia/include \
                   -I$_livelibdir/UsageEnvironment/include \
                   -I$_livelibdir/BasicUsageEnvironment/include \
-                  -I$_livelibdir/groupsock/include" && \
+                  -I$_livelibdir/groupsock/include" &&
       _live=yes && break
   done
   if test "$_live" != yes ; then
@@ -6348,8 +6341,7 @@ elif test "$_live_dist" = yes && test "$networking" = yes; then
   _live="yes"
   def_live='#define CONFIG_LIVE555 1'
   extra_ldflags="$extra_ldflags $ld_tmp"
-  extra_cxxflags="-I/usr/include/liveMedia -I/usr/include/UsageEnvironment \
-             -I/usr/include/BasicUsageEnvironment -I/usr/include/groupsock"
+  extra_cxxflags="-I/usr/include/liveMedia -I/usr/include/UsageEnvironment -I/usr/include/BasicUsageEnvironment -I/usr/include/groupsock"
  inputmodules="live555 $inputmodules"
 else
   _live=no
@@ -6560,23 +6552,13 @@ EOF
 
   echocheck "*BSD ioctl_meteor.h"
   _ioctl_meteor_h=no
-  for file in "machine/ioctl_meteor.h" \
-            "dev/bktr/ioctl_meteor.h" \
-            "dev/video/bktr/ioctl_meteor.h" ; do
-    cat > $TMPC <<EOF
-#include <sys/types.h>
-#include <$file>
-int main(void) { ioctl(0, METEORSINPUT, 0); return 0; }
-EOF
-    if cc_check ; then
-     _ioctl_meteor_h=yes
-     _ioctl_meteor_h_name="$file"
-     break;
-    fi
+  for ioctl_meteor_h_path in "machine/ioctl_meteor.h" "dev/bktr/ioctl_meteor.h" "dev/video/bktr/ioctl_meteor.h" ; do
+    statement_check_broken "sys/types.h" "$ioctl_meteor_h_path" 'ioctl(0, METEORSINPUT, 0)' &&
+      _ioctl_meteor_h=yes && break
   done
   if test "$_ioctl_meteor_h" = yes ; then
-    def_ioctl_meteor_h_name="#define IOCTL_METEOR_H_NAME <$_ioctl_meteor_h_name>"
-    res_comment="using $_ioctl_meteor_h_name"
+    def_ioctl_meteor_h_name="#define IOCTL_METEOR_H_NAME <$ioctl_meteor_h_path>"
+    res_comment="using $ioctl_meteor_h_path"
   else
     def_ioctl_meteor_h_name="#undef IOCTL_METEOR_H_NAME"
   fi
@@ -6646,7 +6628,7 @@ echocheck "Video 4 Linux TV interface"
 if test "$_tv_v4l1" = auto ; then
   _tv_v4l1=no
   if test "$_tv" = yes && linux ; then
-    header_check linux/videodev.h && _tv_v4l1=yes
+    header_check_broken sys/time.h linux/videodev.h && _tv_v4l1=yes
   fi
 fi
 if test "$_tv_v4l1" = yes ; then
@@ -6666,7 +6648,7 @@ echocheck "Video 4 Linux 2 TV interface"
 if test "$_tv_v4l2" = auto ; then
   _tv_v4l2=no
   if test "$_tv" = yes && linux ; then
-    header_check linux/videodev2.h && _tv_v4l2=yes
+    header_check_broken sys/time.h linux/videodev2.h && _tv_v4l2=yes
   fi
 fi
 if test "$_tv_v4l2" = yes ; then
@@ -6733,8 +6715,8 @@ else
 fi
 echores "$_radio_v4l"
 
-if freebsd || netbsd || openbsd || dragonfly || bsdos \
-  && test "$_radio" = yes && test "$_radio_bsdbt848" = auto ; then
+if freebsd || netbsd || openbsd || dragonfly || bsdos &&
+  test "$_radio" = yes && test "$_radio_bsdbt848" = auto ; then
 echocheck "*BSD BrookTree 848 Radio interface"
    _radio_bsdbt848=no
     cat > $TMPC <<EOF
@@ -6755,7 +6737,7 @@ else
   def_radio_bsdbt848='#undef CONFIG_RADIO_BSDBT848'
 fi
 
-if test "$_radio_v4l" = no && test "$_radio_v4l2" = no && \
+if test "$_radio_v4l" = no && test "$_radio_v4l2" = no &&
    test "$_radio_bsdbt848" = no && test "$_radio" = yes ; then
     die "Radio driver requires BSD BT848,  V4L or V4L2!"
 fi
@@ -6765,6 +6747,7 @@ if test "$_pvr" = auto ; then
  _pvr=no
  if test "$_tv_v4l2" = yes && linux ; then
   cat > $TMPC <<EOF
+#include <sys/time.h>
 #include <linux/videodev2.h>
 int main(void) { struct v4l2_ext_controls ext; return ext.controls->value; }
 EOF
