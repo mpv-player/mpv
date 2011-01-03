@@ -70,8 +70,6 @@
 #include "mp_fifo.h"
 #include "libavutil/avstring.h"
 
-#define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
-
 extern int use_menu;
 
 static void rescale_input_coordinates(struct MPContext *mpctx, int ix, int iy,

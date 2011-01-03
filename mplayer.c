@@ -112,8 +112,6 @@ float start_volume = -1;
 
 char *heartbeat_cmd;
 
-#define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
-
 #ifdef HAVE_RTC
 #ifdef __linux__
 #include <linux/rtc.h>
