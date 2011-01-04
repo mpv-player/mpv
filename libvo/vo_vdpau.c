@@ -635,7 +635,7 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
         &vdp_chroma_type,
     };
     features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL;
-    if (vc->deint == 4)
+    if (vc->deint_type == 4)
         features[feature_count++] =
             VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL;
     if (vc->pullup)
@@ -669,6 +669,8 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
         feature_enables[i] = VDP_TRUE;
     if (vc->deint < 3)
         feature_enables[0] = VDP_FALSE;
+    if (vc->deint_type == 4 && vc->deint < 4)
+        feature_enables[1] = VDP_FALSE;
     if (feature_count) {
         vdp_st = vdp->video_mixer_set_feature_enables(vc->video_mixer,
                                                       feature_count, features,
@@ -1621,7 +1623,7 @@ static int preinit(struct vo *vo, const char *arg)
     vc->flip_offset_fs = 50;
     vc->num_output_surfaces = 3;
     const opt_t subopts[] = {
-        {"deint",   OPT_ARG_INT,   &vc->deint,   (opt_test_f)int_non_neg},
+        {"deint",   OPT_ARG_INT,   &vc->deint,   NULL},
         {"chroma-deint", OPT_ARG_BOOL,  &vc->chroma_deint,  NULL},
         {"pullup",  OPT_ARG_BOOL,  &vc->pullup,  NULL},
         {"denoise", OPT_ARG_FLOAT, &vc->denoise, NULL},
@@ -1655,7 +1657,9 @@ static int preinit(struct vo *vo, const char *arg)
         vc->num_output_surfaces = MAX_OUTPUT_SURFACES;
     }
     if (vc->deint)
-        vc->deint_type = vc->deint;
+        vc->deint_type = FFABS(vc->deint);
+    if (vc->deint < 0)
+        vc->deint = 0;
 
     if (!vo_init(vo))
         return -1;

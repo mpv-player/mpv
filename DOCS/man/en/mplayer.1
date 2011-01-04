@@ -3499,9 +3499,9 @@ Select the driver to use as source to overlay on top of X11.
 .PD 1
 .
 .TP
-.B vdpau (with \-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau, ffh264vdpau or ffodivxvdpau)
-Video output that uses VDPAU to decode video via hardware.
-Also supports displaying of software-decoded video.
+.B vdpau (X11 only)
+Uses the VDPAU interface to display and optionally also decode video.
+Hardware decoding is used with \-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau, ffh264vdpau or ffodivxvdpau.
 .PD 0
 .RSs
 .IPs sharpen=<\-1\-1>
@@ -3509,22 +3509,25 @@ For positive values, apply a sharpening algorithm to the video,
 for negative values a blurring algorithm (default: 0).
 .IPs denoise=<0\-1>
 Apply a noise reduction algorithm to the video (default: 0, no noise reduction).
-.IPs deint=<0\-4>
-Select the deinterlacer (default: 0).
-All modes > 0 respect \-field\-dominance.
+.IPs deint=<-4\-4>
+Select deinterlacing mode (default: -3).
+Positive values choose mode and enable deinterlacing.
+Corresponding negative values select the same deinterlacing mode,
+but do not enable deinterlacing on startup (useful in configuration files
+to specify what mode will be enabled by the "D" key).
+All modes respect \-field\-dominance.
 .RSss
 .IPs 0
-no deinterlacing
+same as -3
 .IPs 1
 Show only first field, similar to \-vf field.
 .IPs 2
 Bob deinterlacing, similar to \-vf tfields=1.
 .IPs 3
-motion adaptive temporal deinterlacing
+motion adaptive temporal deinterlacing.
 May lead to A/V desync with slow video hardware and/or high resolution.
-This is the default if "D" is used to enable deinterlacing.
 .IPs 4
-motion adaptive temporal deinterlacing with edge-guided spatial interpolation
+motion adaptive temporal deinterlacing with edge-guided spatial interpolation.
 Needs fast video hardware.
 .RE
 .IPs chroma\-deint
