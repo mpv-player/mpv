@@ -2922,7 +2922,7 @@ done
 
 echocheck "mkstemp"
 _mkstemp=no
-define_statement_check "_XOPEN_SOURCE 500" "stdlib.h" 'mkstemp("")' && _mkstemp=yes
+define_statement_check "_XOPEN_SOURCE 600" "stdlib.h" 'mkstemp("")' && _mkstemp=yes
 if test "$_mkstemp" = yes ; then
   def_mkstemp='#define HAVE_MKSTEMP 1'
 else
