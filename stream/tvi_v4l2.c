@@ -731,12 +731,7 @@ static int control(priv_t *priv, int cmd, void *arg)
         priv->immediate_mode = 1;
         return TVI_CONTROL_TRUE;
     case TVI_CONTROL_VID_GET_FPS:
-        if (!priv->standard.frameperiod.denominator || !priv->standard.frameperiod.numerator) {
-            mp_msg(MSGT_TV, MSGL_ERR, "%s: Cannot get fps\n", info.short_name);
-            return TVI_CONTROL_FALSE;
-        }
-        *(float *)arg = (float)priv->standard.frameperiod.denominator /
-            priv->standard.frameperiod.numerator;
+        *(float *)arg = getfps(priv);
         mp_msg(MSGT_TV, MSGL_V, "%s: get fps: %f\n", info.short_name,
                *(float *)arg);
         return TVI_CONTROL_TRUE;
@@ -1463,9 +1458,7 @@ static int start(priv_t *priv)
 
     /* setup video parameters */
     if (!priv->tv_param->noaudio) {
-        if (priv->video_buffer_size_max < (3*priv->standard.frameperiod.denominator) /
-                                               priv->standard.frameperiod.numerator
-            *priv->audio_secs_per_block) {
+        if (priv->video_buffer_size_max < 3*getfps(priv)*priv->audio_secs_per_block) {
             mp_msg(MSGT_TV, MSGL_ERR, "Video buffer shorter than 3 times audio frame duration.\n"
                    "You will probably experience heavy framedrops.\n");
         }
