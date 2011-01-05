@@ -1233,7 +1233,7 @@ from the current position, MPlayer will wait for the cache to be filled to
 this position rather than performing a stream seek (default: 50).
 .
 .TP
-.B \-capture (MPlayer only)
+.B \-capture
 Allows capturing the primary stream (not additional audio tracks or other
 kind of streams) into the file specified by \-dumpfile or \"stream.dump\"
 by default.
@@ -1320,7 +1320,7 @@ Specify which chapter to start playing at.
 Optionally specify which chapter to end playing at (default: 1).
 .
 .TP
-.B \-edition <edition ID> (Matroska, MPlayer only)
+.B \-edition <edition ID> (Matroska only)
 Specify the edition (set of chapters) to use, where 0 is the first. If set to
 -1 (the default), MPlayer will choose the first edition declared as a default,
 or if there is no default, the first edition defined.
@@ -1355,27 +1355,27 @@ For backward compatibility it also accepts the demuxer ID as defined in
 libmpdemux/\:demuxer.h.
 .
 .TP
-.B \-dumpaudio (MPlayer only)
+.B \-dumpaudio
 Dumps raw compressed audio stream to ./stream.dump (useful with MPEG/\:AC-3,
 in most other cases the resulting file will not be playable).
 If you give more than one of \-dumpaudio, \-dumpvideo, \-dumpstream
 on the command line only the last one will work.
 .
 .TP
-.B \-dumpfile <filename> (MPlayer only)
+.B \-dumpfile <filename>
 Specify which file MPlayer should dump to.
 Should be used together with \-dumpaudio / \-dumpvideo / \-dumpstream /
 \-capture.
 .
 .TP
-.B \-dumpstream (MPlayer only)
+.B \-dumpstream
 Dumps the raw stream to ./stream.dump.
 Useful when ripping from DVD or network.
 If you give more than one of \-dumpaudio, \-dumpvideo, \-dumpstream
 on the command line only the last one will work.
 .
 .TP
-.B \-dumpvideo (MPlayer only)
+.B \-dumpvideo
 Dump raw compressed video stream to ./stream.dump (not very usable).
 If you give more than one of \-dumpaudio, \-dumpvideo, \-dumpstream
 on the command line only the last one will work.
@@ -2033,7 +2033,7 @@ choppy video when using immediatemode=0.
 .RE
 .
 .TP
-.B \-tvscan <option1:option2:...> (TV and MPlayer only)
+.B \-tvscan <option1:option2:...> (TV only)
 Tune the TV channel scanner.
 MPlayer will also print value for "-tv channels=" option,
 including existing and just found channels.
@@ -2165,31 +2165,31 @@ Enables placing toptitles and subtitles in black borders when they
 are available.
 .
 .TP
-.B \-dumpjacosub (MPlayer only)
+.B \-dumpjacosub
 Convert the given subtitle (specified with the \-sub option) to the time-based
 JACOsub subtitle format.
 Creates a dumpsub.js file in the current directory.
 .
 .TP
-.B \-dumpmicrodvdsub (MPlayer only)
+.B \-dumpmicrodvdsub
 Convert the given subtitle (specified with the \-sub option) to the
 MicroDVD subtitle format.
 Creates a dumpsub.sub file in the current directory.
 .
 .TP
-.B \-dumpmpsub (MPlayer only)
+.B \-dumpmpsub
 Convert the given subtitle (specified with the \-sub option) to MPlayer's
 subtitle format, MPsub.
 Creates a dump.mpsub file in the current directory.
 .
 .TP
-.B \-dumpsami (MPlayer only)
+.B \-dumpsami
 Convert the given subtitle (specified with the \-sub option) to the time-based
 SAMI subtitle format.
 Creates a dumpsub.smi file in the current directory.
 .
 .TP
-.B \-dumpsrtsub (MPlayer only)
+.B \-dumpsrtsub
 Convert the given subtitle (specified with the \-sub option) to the time-based
 SubViewer (SRT) subtitle format.
 Creates a dumpsub.srt file in the current directory.
@@ -2202,7 +2202,7 @@ files through unix2dos or a similar program to replace Unix line
 endings with DOS/Windows line endings.
 .
 .TP
-.B \-dumpsub (MPlayer only) (BETA CODE)
+.B \-dumpsub (BETA CODE)
 Dumps the subtitle substream from VOB streams.
 Also see the \-dump*sub options.
 .
@@ -2295,7 +2295,7 @@ Turns off automatic subtitle file loading.
 Set the duration of the OSD messages in ms (default: 1000).
 .
 .TP
-.B \-osdlevel <0\-3> (MPlayer only)
+.B \-osdlevel <0\-3>
 Specifies which mode the OSD should start in.
 .PD 0
 .RSs
@@ -5026,7 +5026,7 @@ Try XAnim codecs first.
 .PD 1
 .
 .TP
-.B \-x <x> (also see \-zoom) (MPlayer only)
+.B \-x <x> (also see \-zoom)
 Scale image to width <x> (if software/\:hardware scaling is available).
 Disables aspect calculations.
 .
@@ -5078,7 +5078,7 @@ Set width to value and calculate height to keep correct aspect ratio.
 .PD 1
 .
 .TP
-.B \-y <y> (also see \-zoom) (MPlayer only)
+.B \-y <y> (also see \-zoom)
 Scale image to height <y> (if software/\:hardware scaling is available).
 Disables aspect calculations.
 .
