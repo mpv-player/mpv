@@ -83,6 +83,16 @@ EOF
   compile_check $TMPC $@
 }
 
+define_statement_check() {
+  cat > $TMPC << EOF
+#define $1
+#include <$2>
+int main(void) { $3; return 0; }
+EOF
+  shift 3
+  compile_check $TMPC $@
+}
+
 header_check() {
   cat > $TMPC << EOF
 #include <$1>
@@ -2911,13 +2921,8 @@ done
 
 
 echocheck "mkstemp"
-cat > $TMPC << EOF
-#define _XOPEN_SOURCE 500
-#include <stdlib.h>
-int main(void) { mkstemp(""); return 0; }
-EOF
 _mkstemp=no
-cc_check && _mkstemp=yes
+define_statement_check "_XOPEN_SOURCE 500" "stdlib.h" 'mkstemp("")' && _mkstemp=yes
 if test "$_mkstemp" = yes ; then
   def_mkstemp='#define HAVE_MKSTEMP 1'
 else
@@ -3148,12 +3153,8 @@ echores "$_memalign"
 echocheck "posix_memalign()"
 posix_memalign=no
 def_posix_memalign='#define HAVE_POSIX_MEMALIGN 0'
-cat > $TMPC << EOF
-#define _XOPEN_SOURCE 600
-#include <stdlib.h>
-int main(void) { posix_memalign(NULL, 0, 0); }
-EOF
-cc_check && posix_memalign=yes && def_posix_memalign='#define HAVE_POSIX_MEMALIGN 1'
+define_statement_check "_XOPEN_SOURCE 600" "stdlib.h" 'posix_memalign(NULL, 0, 0)' &&
+    posix_memalign=yes && def_posix_memalign='#define HAVE_POSIX_MEMALIGN 1'
 echores "$posix_memalign"
 
 
@@ -3483,12 +3484,8 @@ echores "$_termios"
 
 echocheck "shm"
 if test "$_shm" = auto ; then
-  cat > $TMPC << EOF
-#include <sys/shm.h>
-int main(void) { shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0); return 0; }
-EOF
   _shm=no
-  cc_check && _shm=yes
+  statement_check sys/shm.h 'shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0)' && _shm=yes
 fi
 if test "$_shm" = yes ; then
   def_shm='#define HAVE_SHM 1'
@@ -3499,12 +3496,8 @@ echores "$_shm"
 
 
 echocheck "strsep()"
-cat > $TMPC << EOF
-#include <string.h>
-int main(void) { char *s = "Hello, world!"; strsep(&s, ","); return 0; }
-EOF
 _strsep=no
-cc_check && _strsep=yes
+statement_check string.h 'char *s = "Hello, world!"; strsep(&s, ",")' && _strsep=yes
 if test "$_strsep" = yes ; then
   def_strsep='#define HAVE_STRSEP 1'
  _need_strsep=no
@@ -3535,13 +3528,8 @@ echores "$_vsscanf"
 
 
 echocheck "swab()"
-cat > $TMPC << EOF
-#define _XOPEN_SOURCE 600
-#include <unistd.h>
-int main(void) { int a, b; swab(&a, &b, 0); return 0; }
-EOF
 _swab=no
-cc_check && _swab=yes
+define_statement_check "_XOPEN_SOURCE 600" "unistd.h" 'int a, b; swab(&a, &b, 0)' && _swab=yes
 if test "$_swab" = yes ; then
   def_swab='#define HAVE_SWAB 1'
   _need_swab=no
@@ -3579,12 +3567,8 @@ echores "$_select"
 
 
 echocheck "gettimeofday()"
-cat > $TMPC << EOF
-#include <sys/time.h>
-int main(void) {struct timeval tv; struct timezone tz; gettimeofday(&tv, &tz); return 0; }
-EOF
 _gettimeofday=no
-cc_check && _gettimeofday=yes
+statement_check sys/time.h 'struct timeval tv; struct timezone tz; gettimeofday(&tv, &tz)' && _gettimeofday=yes
 if test "$_gettimeofday" = yes ; then
   def_gettimeofday='#define HAVE_GETTIMEOFDAY 1'
   _need_gettimeofday=no
@@ -3634,11 +3618,7 @@ _sysi86=no
 statement_check sys/sysi86.h 'sysi86(0)' && _sysi86=yes
 if test "$_sysi86" = yes ; then
   def_sysi86='#define HAVE_SYSI86 1'
-  cat > $TMPC << EOF
-#include <sys/sysi86.h>
-int main(void) { int sysi86(int, void*); sysi86(0); return 0; }
-EOF
-  cc_check && def_sysi86_iv='#define HAVE_SYSI86_iv 1'
+  statement_check sys/sysi86.h 'int sysi86(int, void*); sysi86(0)' && def_sysi86_iv='#define HAVE_SYSI86_iv 1'
 else
   def_sysi86='#undef HAVE_SYSI86'
 fi
@@ -3647,12 +3627,8 @@ fi #if sunos
 
 
 echocheck "sys/sysinfo.h"
-cat > $TMPC << EOF
-#include <sys/sysinfo.h>
-int main(void) { struct sysinfo s_info; sysinfo(&s_info); return 0; }
-EOF
 _sys_sysinfo=no
-cc_check && _sys_sysinfo=yes
+statement_check sys/sysinfo.h 'struct sysinfo s_info; sysinfo(&s_info)' && _sys_sysinfo=yes
 if test "$_sys_sysinfo" = yes ; then
   def_sys_sysinfo_h='#define HAVE_SYS_SYSINFO_H 1'
 else
@@ -3724,11 +3700,7 @@ if linux; then
 echocheck "Apple IR"
 if test "$_apple_ir" = auto ; then
   _apple_ir=no
-  cat > $TMPC <<EOF
-#include <linux/input.h>
-int main(void) { struct input_event ev; struct input_id id; return 0; }
-EOF
-  cc_check && _apple_ir=yes
+  statement_check linux/input.h 'struct input_event ev; struct input_id id' && _apple_ir=yes
 fi
 if test "$_apple_ir" = yes ; then
   def_apple_ir='#define CONFIG_APPLE_IR 1'
@@ -4428,17 +4400,8 @@ if darwin; then
 
 echocheck "QuickTime"
 if test "$quicktime" = auto ; then
-  cat > $TMPC <<EOF
-#include <QuickTime/QuickTime.h>
-int main(void) {
-    ImageDescription *desc;
-    EnterMovies();
-    ExitMovies();
-    return 0;
-}
-EOF
   quicktime=no
-  cc_check -framework QuickTime && quicktime=yes
+  statement_check QuickTime/QuickTime.h 'ImageDescription *desc; EnterMovies(); ExitMovies()' -framework QuickTime && quicktime=yes
 fi
 if test "$quicktime" = yes ; then
   extra_ldflags="$extra_ldflags -framework QuickTime"
@@ -6427,13 +6390,8 @@ echores "$_xvid"
 
 echocheck "libnut"
 if test "$_libnut" = auto ; then
-  cat > $TMPC << EOF
-#include <libnut.h>
-nut_context_tt * nut;
-int main(void) { nut_error(0); return 0; }
-EOF
   _libnut=no
-   cc_check -lnut && _libnut=yes
+   statement_check libnut.h 'nut_context_tt * nut; nut_error(0)' -lnut && _libnut=yes
 fi
 
 if test "$_libnut" = yes ; then
@@ -6602,15 +6560,7 @@ echocheck "DirectShow TV interface"
 if test "$_tv_dshow" = auto ; then
   _tv_dshow=no
   if test "$_tv" = yes && win32 ; then
-    cat > $TMPC <<EOF
-#include <ole2.h>
-int main(void) {
-    void* p;
-    CoCreateInstance((GUID*)&GUID_NULL, NULL, CLSCTX_INPROC_SERVER, &GUID_NULL, &p);
-    return 0;
-}
-EOF
-    cc_check -lole32 -luuid && _tv_dshow=yes
+    statement_check ole2.h 'void* p; CoCreateInstance((GUID*)&GUID_NULL, NULL, CLSCTX_INPROC_SERVER, &GUID_NULL, &p)' -lole32 -luuid && _tv_dshow=yes
   fi
 fi
 if test "$_tv_dshow" = yes ; then
