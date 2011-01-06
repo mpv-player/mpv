@@ -189,7 +189,11 @@ file.
 The "out" colorspace can be found in the codec source file in the PIX_FMT
 struct. Note that some codecs may have several pix_fmt structs.
 The pix_fmt can be converted to the codecs.conf "out" format by reading
-the fmt_conversion.c file.
+the fmt-conversion.c file.
+
+If there are BE and LE versions of a pix_fmt, ignore them and use the short
+native format instead. e.g. 422P16_LE becomes out 422P16. also to note that
+underscores cause parse errors, so 422P16_LE becomes out 422P16LE.
 
 libmpdemux/mp_taglists.c
 --------------
