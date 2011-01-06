@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <io.h>
+#include <unistd.h>
 #include <sys/types.h>
 
 #include "config.h"

@@ -18,6 +18,8 @@
 
 #include <Carbon/Carbon.h>
 #include <ApplicationServices/ApplicationServices.h>
+#include <stdio.h>
+
 #include "stream/url.h"
 #include "mp_msg.h"
 #include "m_option.h"
