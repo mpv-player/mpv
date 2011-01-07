@@ -68,6 +68,21 @@ LIBAO_EXTERN(coreaudio)
 /* Prefix for all mp_msg() calls */
 #define ao_msg(a, b, c...) mp_msg(a, b, "AO: [coreaudio] " c)
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= 1040
+/* AudioDeviceIOProcID does not exist in Mac OS X 10.4. We can emulate
+ * this by using AudioDeviceAddIOProc() and AudioDeviceRemoveIOProc(). */
+#define AudioDeviceIOProcID AudioDeviceIOProc
+#define AudioDeviceDestroyIOProcID AudioDeviceRemoveIOProc
+static OSStatus AudioDeviceCreateIOProcID(AudioDeviceID dev,
+                                          AudioDeviceIOProc proc,
+                                          void *data,
+                                          AudioDeviceIOProcID *procid)
+{
+  *procid = proc;
+  return AudioDeviceAddIOProc(dev, proc, data);
+}
+#endif
+
 typedef struct ao_coreaudio_s
 {
   AudioDeviceID i_selected_dev;             /* Keeps DeviceID of the selected device. */
