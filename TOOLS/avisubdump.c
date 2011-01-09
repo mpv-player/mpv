@@ -180,8 +180,12 @@ int main(int argc,char* argv[])
 		exit(1);
 	}
 
-	if (strcmp(argv[argc-1], "-") == 0) f=stdin;
-	else f=fopen(argv[argc-1],"rb");
+	if (strcmp(argv[argc-1], "-") == 0) {
+		dump(stdin);
+		return 0;
+	}
+
+	f=fopen(argv[argc-1],"rb");
 
 	if (!f) {
 		fprintf(stderr, "Could not open '%s': %s\n",
@@ -190,6 +194,7 @@ int main(int argc,char* argv[])
 	}
 
 	dump(f);
+	fclose(f);
 
 	return 0;
 }

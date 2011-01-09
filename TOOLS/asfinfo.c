@@ -155,7 +155,7 @@ static void print_video_header(BITMAPINFOHEADER *h){
   printf("  biHeight %ld\n", h->biHeight);
   printf("  biPlanes %d\n", h->biPlanes);
   printf("  biBitCount %d\n", h->biBitCount);
-  printf("  biCompression %ld='%.4s'\n", h->biCompression, &h->biCompression);
+  printf("  biCompression %ld='%.4s'\n", h->biCompression, (const char*)&h->biCompression);
   printf("  biSizeImage %ld\n", h->biSizeImage);
   printf("===========================\n");
 }
@@ -284,5 +284,6 @@ int main(int argc, char* argv[]){
     fseek(f, pos + objh.size - sizeof(objh), SEEK_SET);
   }
 
+  fclose(f);
   return 0;
 }
