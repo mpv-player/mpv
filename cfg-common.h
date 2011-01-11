@@ -381,7 +381,8 @@ const m_option_t common_opts[] = {
     {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
     {"codecpath", &codec_path, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"noconfig", (void *) noconfig_opts, CONF_TYPE_SUBCONFIG, CONF_GLOBAL|CONF_NOCFG|CONF_PRE_PARSE, 0, 0, NULL},
+    OPT_CHOICE("noconfig", noconfig, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE,
+               ({"off", 0}, {"user", 1}, {"system", 2}, {"all", 3})),
 
 // ------------------------- stream options --------------------
 

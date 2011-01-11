@@ -869,9 +869,10 @@ static int cfg_include(m_option_t *conf, char *filename)
 
 static void parse_cfgfiles(struct MPContext *mpctx, m_config_t* conf)
 {
+    struct MPOpts *opts = &mpctx->opts;
 char *conffile;
 int conffile_fd;
-if (!disable_system_conf &&
+ if (!(opts->noconfig & 2) &&
     m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mplayer.conf") < 0)
   exit_player(mpctx, EXIT_NONE);
 if ((conffile = get_path("")) == NULL) {
@@ -891,7 +892,7 @@ if ((conffile = get_path("")) == NULL) {
       write(conffile_fd, default_config, strlen(default_config));
       close(conffile_fd);
     }
-    if (!disable_user_conf &&
+    if (!(opts->noconfig & 1) &&
         m_config_parse_config_file(conf, conffile) < 0)
       exit_player(mpctx, EXIT_NONE);
     free(conffile);

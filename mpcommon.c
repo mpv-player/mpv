@@ -346,22 +346,3 @@ bool attachment_is_font(struct demux_attachment *att)
     }
     return false;
 }
-
-/* Parse -noconfig common to both programs */
-int disable_system_conf=0;
-int disable_user_conf=0;
-
-/* Disable all configuration files */
-static void noconfig_all(void)
-{
-    disable_system_conf = 1;
-    disable_user_conf = 1;
-}
-
-const m_option_t noconfig_opts[] = {
-    {"all", noconfig_all, CONF_TYPE_FUNC, CONF_GLOBAL|CONF_NOCFG|CONF_PRE_PARSE, 0, 0, NULL},
-    {"system", &disable_system_conf, CONF_TYPE_FLAG, CONF_GLOBAL|CONF_NOCFG|CONF_PRE_PARSE, 0, 1, NULL},
-    {"user", &disable_user_conf, CONF_TYPE_FLAG, CONF_GLOBAL|CONF_NOCFG|CONF_PRE_PARSE, 0, 1, NULL},
-    {NULL, NULL, 0, 0, 0, 0, NULL}
-};
-
