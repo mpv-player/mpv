@@ -19,6 +19,8 @@
 #ifndef MPLAYER_MPLAYER_H
 #define MPLAYER_MPLAYER_H
 
+#include <stdlib.h>
+
 #include "mp_msg.h"
 
 extern char* current_module;
@@ -57,5 +59,8 @@ static inline void exit_player_bad(const char *how)
 }
 
 struct MPContext;
+struct subtitle;
+
+void set_osd_subtitle(struct MPContext *mpctx, struct subtitle *subs);
 
 #endif /* MPLAYER_MPLAYER_H */

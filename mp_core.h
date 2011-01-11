@@ -246,5 +246,7 @@ double get_current_time(struct MPContext *mpctx);
 int get_percent_pos(struct MPContext *mpctx);
 int get_current_chapter(struct MPContext *mpctx);
 char *chapter_display_name(struct MPContext *mpctx, int chapter);
+void update_subtitles(struct MPContext *mpctx, double refpts,
+                      double sub_offset, bool reset);
 
 #endif /* MPLAYER_MP_CORE_H */

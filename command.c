@@ -1711,7 +1711,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
     }
 #endif
 
-    update_subtitles(mpctx, &mpctx->opts, mpctx->sh_video, 0, 0, d_sub, 1);
+    update_subtitles(mpctx, 0, 0, true);
 
     return M_PROPERTY_OK;
 }
