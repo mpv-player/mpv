@@ -40,8 +40,6 @@
 #include "ffmpeg_files/intreadwrite.h"
 #include "m_option.h"
 
-double sub_last_pts = -303;
-
 #ifdef CONFIG_ASS
 #include "ass_mp.h"
 ASS_Track *ass_track = 0; // current track to render
@@ -128,13 +126,9 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
     if (subdata) {
         if (sub_fps==0) sub_fps = sh_video ? sh_video->fps : 25;
         current_module = "find_sub";
-        if (refpts > sub_last_pts || refpts < sub_last_pts-1.0) {
-            find_sub(mpctx, subdata, curpts *
-                     (subdata->sub_uses_time ? 100. : sub_fps));
-            if (vo_sub) vo_sub_last = vo_sub;
-            // FIXME! frame counter...
-            sub_last_pts = refpts;
-        }
+        find_sub(mpctx, subdata, curpts *
+                 (subdata->sub_uses_time ? 100. : sub_fps));
+        if (vo_sub) vo_sub_last = vo_sub;
     }
 
     // DVD sub:

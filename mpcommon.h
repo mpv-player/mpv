@@ -23,7 +23,6 @@
 
 struct subtitle;
 
-extern double sub_last_pts;
 extern struct ass_track *ass_track;
 extern struct subtitle *vo_sub_last;
 
