@@ -4415,14 +4415,14 @@ if(vo_spudec==NULL &&
       mpctx->sub_counts[SUB_SOURCE_SUBS] = mpctx->set_of_sub_size;
 
 if (select_subtitle(mpctx)) {
-  if(subdata)
+  if(mpctx->subdata)
     switch (stream_dump_type) {
-        case 3: list_sub_file(subdata); break;
-        case 4: dump_mpsub(subdata, mpctx->sh_video->fps); break;
-        case 6: dump_srt(subdata, mpctx->sh_video->fps); break;
-        case 7: dump_microdvd(subdata, mpctx->sh_video->fps); break;
-        case 8: dump_jacosub(subdata, mpctx->sh_video->fps); break;
-        case 9: dump_sami(subdata, mpctx->sh_video->fps); break;
+        case 3: list_sub_file(mpctx->subdata); break;
+        case 4: dump_mpsub(mpctx->subdata, mpctx->sh_video->fps); break;
+        case 6: dump_srt(mpctx->subdata, mpctx->sh_video->fps); break;
+        case 7: dump_microdvd(mpctx->subdata, mpctx->sh_video->fps); break;
+        case 8: dump_jacosub(mpctx->subdata, mpctx->sh_video->fps); break;
+        case 9: dump_sami(mpctx->subdata, mpctx->sh_video->fps); break;
     }
 }
 
@@ -4645,8 +4645,8 @@ if(mpctx->set_of_sub_size > 0) {
     }
     mpctx->set_of_sub_size = 0;
 }
-vo_sub_last = vo_sub=NULL;
-subdata=NULL;
+mpctx->vo_sub_last = vo_sub=NULL;
+mpctx->subdata=NULL;
 #ifdef CONFIG_ASS
 ass_track = NULL;
 if(ass_library)

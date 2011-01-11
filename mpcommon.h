@@ -24,7 +24,6 @@
 struct subtitle;
 
 extern struct ass_track *ass_track;
-extern struct subtitle *vo_sub_last;
 
 extern const char *mencoder_version;
 extern const char *mplayer_version;

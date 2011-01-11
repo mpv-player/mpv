@@ -88,6 +88,9 @@ typedef struct MPContext {
     struct mp_fifo *key_fifo;
     struct input_ctx *input;
     struct osd_state *osd;
+    struct sub_data *subdata; // current sub_data style subtitles if any
+    // last sub_data style sub line if any, used by log_sub() only
+    struct subtitle *vo_sub_last;
 
     bool add_osd_seek_info;
     // if nonzero, hide current OSD contents when GetTimerMS() reaches this

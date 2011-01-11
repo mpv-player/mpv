@@ -193,15 +193,16 @@ static void log_sub(struct MPContext *mpctx)
     char *fname;
     FILE *f;
     int i;
+    struct subtitle *vo_sub_last = mpctx->vo_sub_last;
 
-    if (subdata == NULL || vo_sub_last == NULL)
+    if (mpctx->subdata == NULL || vo_sub_last == NULL)
         return;
     fname = get_path("subtitle_log");
     f = fopen(fname, "a");
     if (!f)
         return;
     fprintf(f, "----------------------------------------------------------\n");
-    if (subdata->sub_uses_time) {
+    if (mpctx->subdata->sub_uses_time) {
         fprintf(f,
                 "N: %s S: %02ld:%02ld:%02ld.%02ld E: %02ld:%02ld:%02ld.%02ld\n",
                 mpctx->filename, vo_sub_last->start / 360000,
@@ -1542,8 +1543,8 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
         *(char **) arg = malloc(64);
         (*(char **) arg)[63] = 0;
         sub_name = 0;
-        if (subdata)
-            sub_name = subdata->filename;
+        if (mpctx->subdata)
+            sub_name = mpctx->subdata->filename;
 #ifdef CONFIG_ASS
         if (ass_track && ass_track->name)
             sub_name = ass_track->name;
@@ -1644,7 +1645,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
            mpctx->global_sub_pos, source);
 
     mpctx->set_of_sub_pos = -1;
-    subdata = NULL;
+    mpctx->subdata = NULL;
 
     vobsub_id = -1;
     opts->sub_id = -1;
@@ -1667,7 +1668,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
         else
 #endif
         {
-            subdata = mpctx->set_of_subtitles[mpctx->set_of_sub_pos];
+            mpctx->subdata = mpctx->set_of_subtitles[mpctx->set_of_sub_pos];
             vo_osd_changed(OSDTYPE_SUBTITLE);
         }
     } else if (source == SUB_SOURCE_DEMUX) {
@@ -2692,7 +2693,7 @@ static void remove_subtitle_range(MPContext *mpctx, int start, int count)
 
     if (mpctx->set_of_sub_pos >= start && mpctx->set_of_sub_pos < end) {
         mpctx->global_sub_pos = -2;
-        subdata = NULL;
+        mpctx->subdata = NULL;
 #ifdef CONFIG_ASS
         ass_track = NULL;
 #endif
@@ -2931,7 +2932,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         case MP_CMD_SUB_STEP:
             if (sh_video) {
                 int movement = cmd->args[0].v.i;
-                step_sub(subdata, mpctx->video_pts, movement);
+                step_sub(mpctx->subdata, mpctx->video_pts, movement);
 #ifdef CONFIG_ASS
                 if (ass_track)
                     sub_delay +=

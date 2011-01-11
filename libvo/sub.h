@@ -73,7 +73,6 @@ struct osd_state {
 
 #include "subreader.h"
 
-extern sub_data* subdata; //currently used subtitles
 extern subtitle* vo_sub;
 
 extern void* vo_osd_teletext_page;

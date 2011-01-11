@@ -39,14 +39,12 @@
 #include "libmpcodecs/dec_teletext.h"
 #include "ffmpeg_files/intreadwrite.h"
 #include "m_option.h"
+#include "mp_core.h"
 
 #ifdef CONFIG_ASS
 #include "ass_mp.h"
 ASS_Track *ass_track = 0; // current track to render
 #endif
-
-sub_data* subdata = NULL;
-subtitle* vo_sub_last = NULL;
 
 const char *mencoder_version = "MEncoder " VERSION;
 const char *mplayer_version  = "MPlayer " VERSION;
@@ -123,12 +121,13 @@ void update_subtitles(struct MPContext *mpctx, struct MPOpts *opts,
         return;
     }
     // find sub
-    if (subdata) {
+    if (mpctx->subdata) {
         if (sub_fps==0) sub_fps = sh_video ? sh_video->fps : 25;
         current_module = "find_sub";
-        find_sub(mpctx, subdata, curpts *
-                 (subdata->sub_uses_time ? 100. : sub_fps));
-        if (vo_sub) vo_sub_last = vo_sub;
+        find_sub(mpctx, mpctx->subdata, curpts *
+                 (mpctx->subdata->sub_uses_time ? 100. : sub_fps));
+        if (vo_sub)
+            mpctx->vo_sub_last = vo_sub;
     }
 
     // DVD sub:
