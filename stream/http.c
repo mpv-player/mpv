@@ -742,8 +742,12 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 		    const char *server = http_get_field(http_hdr, "Server");
 		    if (accept_ranges)
 			seekable = strncmp(accept_ranges,"bytes",5)==0;
-		    else if (server && strcmp(server, "gvs 1.0") == 0)
-			seekable = 1; // HACK for youtube incorrectly claiming not to support seeking
+		    else if (server && (strcmp(server, "gvs 1.0") == 0 ||
+		                        strncmp(server, "MakeMKV", 7) == 0)) {
+			// HACK for youtube and MakeMKV incorrectly claiming not to support seeking
+			mp_msg(MSGT_NETWORK, MSGL_WARN, "Broken webserver, incorrectly claims to not support Accept-Ranges\n");
+			seekable = 1;
+		    }
 		}
 
 		print_icy_metadata(http_hdr);
