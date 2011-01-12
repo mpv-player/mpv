@@ -19,8 +19,6 @@
 #ifndef MPLAYER_MPCOMMON_H
 #define MPLAYER_MPCOMMON_H
 
-extern struct ass_track *ass_track;
-
 extern const char *mplayer_version;
 
 #endif /* MPLAYER_MPCOMMON_H */

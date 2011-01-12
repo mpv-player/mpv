@@ -107,8 +107,8 @@ typedef struct vf_seteq_s
 #define VFCTRL_DRAW_EOSD       16 /* Render EOSD */
 #define VFCTRL_SET_DEINTERLACE 18 /* Set deinterlacing status */
 #define VFCTRL_GET_DEINTERLACE 19 /* Get deinterlacing status */
-/* Hack to make the OSD state object available to vf_expand which accesses
- * the OSD state outside of normal OSD draw time. */
+/* Hack to make the OSD state object available to vf_expand and vf_ass which
+ * access OSD/subtitle state outside of normal OSD draw time. */
 #define VFCTRL_SET_OSD_OBJ 20
 #define VFCTRL_REDRAW_OSD  21 /* Change user-visible OSD immediately */
 #define VFCTRL_SET_YUV_COLORSPACE 22

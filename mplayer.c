@@ -335,9 +335,6 @@ int   subcc_enabled=0;
 int suboverlap_enabled = 1;
 
 #include "ass_mp.h"
-#ifdef CONFIG_ASS
-ASS_Track *ass_track = 0; // current track to render
-#endif
 
 char* current_module=NULL; // for debugging
 
@@ -1949,10 +1946,10 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
 #ifdef CONFIG_ASS
             if (opts->ass_enabled) {
                 sh_sub_t* sh = d_sub->sh;
-                ass_track = sh ? sh->ass_track : NULL;
-                if (!ass_track) continue;
+                mpctx->osd->ass_track = sh ? sh->ass_track : NULL;
+                if (!mpctx->osd->ass_track) continue;
                 if (type == 'a') { // ssa/ass subs with libass
-                    ass_process_chunk(ass_track, packet, len,
+                    ass_process_chunk(mpctx->osd->ass_track, packet, len,
                                       (long long)(subpts*1000 + 0.5),
                                       (long long)((endpts-subpts)*1000 + 0.5));
                 } else { // plaintext subs with libass
@@ -1962,7 +1959,7 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
                         sub_add_text(&tmp_subs, packet, len, endpts);
                         tmp_subs.start = subpts * 100;
                         tmp_subs.end = endpts * 100;
-                        ass_process_subtitle(ass_track, &tmp_subs);
+                        ass_process_subtitle(mpctx->osd->ass_track, &tmp_subs);
                         sub_clear_text(&tmp_subs, MP_NOPTS_VALUE);
                     }
                 }
@@ -3416,7 +3413,7 @@ static void run_playloop(struct MPContext *mpctx)
             update_teletext(sh_video, mpctx->demuxer, 0);
             update_osd_msg(mpctx);
             struct vf_instance *vf = sh_video->vfilter;
-            vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
+            vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
             vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
             vo_osd_changed(0);
 
@@ -4944,7 +4941,7 @@ if(mpctx->set_of_sub_size > 0) {
 mpctx->vo_sub_last = vo_sub=NULL;
 mpctx->subdata=NULL;
 #ifdef CONFIG_ASS
-ass_track = NULL;
+mpctx->osd->ass_track = NULL;
 if(ass_library)
     ass_clear_fonts(ass_library);
 #endif

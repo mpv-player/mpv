@@ -33,6 +33,7 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
+#include "libvo/sub.h"
 
 #include "libvo/fastmemcpy.h"
 
@@ -59,6 +60,7 @@ static const struct vf_priv_s {
     // 0 = insert always
     int auto_insert;
 
+    struct osd_state *osd;
     ASS_Renderer *ass_priv;
 
     unsigned char *planes[3];
@@ -68,9 +70,7 @@ static const struct vf_priv_s {
     } *line_limits;
 } vf_priv_dflt;
 
-extern ASS_Track *ass_track;
 extern float sub_delay;
-extern int sub_visibility;
 
 static int config(struct vf_instance *vf,
                   int width, int height, int d_width, int d_height,
@@ -351,9 +351,10 @@ static int render_frame(struct vf_instance *vf, mp_image_t *mpi,
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     ASS_Image *images = 0;
-    if (sub_visibility && vf->priv->ass_priv && ass_track
+    if (sub_visibility && vf->priv->ass_priv && vf->priv->osd->ass_track
 	&& (pts != MP_NOPTS_VALUE))
-        images = ass_mp_render_frame(vf->priv->ass_priv, ass_track,
+        images = ass_mp_render_frame(vf->priv->ass_priv,
+                                     vf->priv->osd->ass_track,
 				     (pts + sub_delay) * 1000 + .5, NULL);
 
     prepare_image(vf, mpi);
@@ -377,6 +378,9 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 static int control(vf_instance_t *vf, int request, void *data)
 {
     switch (request) {
+    case VFCTRL_SET_OSD_OBJ:
+        vf->priv->osd = data;
+        break;
     case VFCTRL_INIT_EOSD:
         vf->priv->ass_priv = ass_renderer_init((ASS_Library *)data);
         if (!vf->priv->ass_priv)

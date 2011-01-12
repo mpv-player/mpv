@@ -1523,7 +1523,6 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
     demux_stream_t *const d_sub = mpctx->d_sub;
     int source = -1, reset_spu = 0;
     int source_pos = -1;
-    char *sub_name;
 
     update_global_sub_size(mpctx);
     const int global_sub_size = mpctx->global_sub_size;
@@ -1542,13 +1541,15 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_ERROR;
         *(char **) arg = malloc(64);
         (*(char **) arg)[63] = 0;
-        sub_name = 0;
+        char *sub_name = NULL;
         if (mpctx->subdata)
             sub_name = mpctx->subdata->filename;
 #ifdef CONFIG_ASS
-        if (ass_track && ass_track->name)
-            sub_name = ass_track->name;
+        if (mpctx->osd->ass_track)
+            sub_name = mpctx->osd->ass_track->name;
 #endif
+        if (!sub_name && mpctx->subdata)
+            sub_name = mpctx->subdata->filename;
         if (sub_name) {
             const char *tmp = mp_basename(sub_name);
 
@@ -1654,9 +1655,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
             reset_spu = 1;
         d_sub->id = -2;
     }
-#ifdef CONFIG_ASS
-    ass_track = 0;
-#endif
+    mpctx->osd->ass_track = NULL;
 
     if (source == SUB_SOURCE_VOBSUB) {
         vobsub_id = vobsub_get_id_by_index(vo_vobsub, source_pos);
@@ -1664,7 +1663,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
         mpctx->set_of_sub_pos = source_pos;
 #ifdef CONFIG_ASS
         if (opts->ass_enabled && mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos])
-            ass_track = mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos];
+            mpctx->osd->ass_track = mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos];
         else
 #endif
         {
@@ -1693,7 +1692,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
                     init_vo_spudec(mpctx);
 #ifdef CONFIG_ASS
                 else if (opts->ass_enabled)
-                    ass_track = sh->ass_track;
+                    mpctx->osd->ass_track = sh->ass_track;
 #endif
             } else {
               d_sub->id = -2;
@@ -2694,9 +2693,7 @@ static void remove_subtitle_range(MPContext *mpctx, int start, int count)
     if (mpctx->set_of_sub_pos >= start && mpctx->set_of_sub_pos < end) {
         mpctx->global_sub_pos = -2;
         mpctx->subdata = NULL;
-#ifdef CONFIG_ASS
-        ass_track = NULL;
-#endif
+        mpctx->osd->ass_track = NULL;
         mp_input_queue_cmd(mpctx->input, mp_input_parse_cmd("sub_select"));
     } else if (mpctx->set_of_sub_pos >= end) {
         mpctx->set_of_sub_pos -= count;
@@ -2934,9 +2931,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 int movement = cmd->args[0].v.i;
                 step_sub(mpctx->subdata, mpctx->video_pts, movement);
 #ifdef CONFIG_ASS
-                if (ass_track)
+                if (mpctx->osd->ass_track)
                     sub_delay +=
-                        ass_step_sub(ass_track,
+                        ass_step_sub(mpctx->osd->ass_track,
                                      (mpctx->video_pts +
                                       sub_delay) * 1000 + .5, movement) / 1000.;
 #endif

@@ -29,14 +29,11 @@
 
 #include "libvo/video_out.h"
 
-#ifdef CONFIG_ASS
 #include "ass_mp.h"
-extern ASS_Track *ass_track;
-#endif
+#include "libvo/sub.h"
 
 //===========================================================================//
 
-extern int sub_visibility;
 extern float sub_delay;
 
 struct vf_priv_s {
@@ -141,10 +138,12 @@ static int control(struct vf_instance *vf, int request, void* data)
     }
     case VFCTRL_DRAW_EOSD:
     {
+        struct osd_state *osd = data;
         mp_eosd_images_t images = {NULL, 2};
         double pts = video_out->next_pts;
         if (!video_out->config_ok || !vf->priv->ass_priv) return CONTROL_FALSE;
-        if (sub_visibility && vf->priv->ass_priv && ass_track && (pts != MP_NOPTS_VALUE)) {
+        if (sub_visibility && vf->priv->ass_priv && osd->ass_track
+            && (pts != MP_NOPTS_VALUE)) {
             mp_eosd_res_t res;
             memset(&res, 0, sizeof(res));
             if (vo_control(video_out, VOCTRL_GET_EOSD_RES, &res) == VO_TRUE) {
@@ -153,7 +152,10 @@ static int control(struct vf_instance *vf, int request, void* data)
                 ass_set_aspect_ratio(vf->priv->ass_priv, vf->priv->scale_ratio, 1);
             }
 
-            images.imgs = ass_mp_render_frame(vf->priv->ass_priv, ass_track, (pts+sub_delay) * 1000 + .5, &images.changed);
+            images.imgs = ass_mp_render_frame(vf->priv->ass_priv,
+                                              osd->ass_track,
+                                              (pts+sub_delay) * 1000 + .5,
+                                              &images.changed);
             if (!vf->priv->prev_visibility)
                 images.changed = 2;
             vf->priv->prev_visibility = 1;
