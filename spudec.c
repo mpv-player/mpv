@@ -43,6 +43,7 @@
 #include "libavutil/avutil.h"
 #include "ffmpeg_files/intreadwrite.h"
 #include "libswscale/swscale.h"
+#include "mpcommon.h"
 
 /* Valid values for spu_aamode:
    0: none (fastest, most ugly)
@@ -1335,8 +1336,6 @@ void spudec_set_hw_spu(void *this, struct vo *hw_spu)
   spu->hw_spu = hw_spu;
   vo_control(hw_spu, VOCTRL_SET_SPU_PALETTE, spu->global_palette);
 }
-
-#define MP_NOPTS_VALUE (-1LL<<63) //both int64_t and double should be able to represent this exactly
 
 /**
  * palette must contain at least 256 32-bit entries, otherwise crashes

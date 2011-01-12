@@ -20,6 +20,7 @@
 #define MPLAYER_VF_H
 
 #include "mp_image.h"
+#include "mpcommon.h"
 
 struct MPOpts;
 struct vf_instance;
@@ -115,10 +116,6 @@ typedef struct vf_seteq_s
 #define VFCTRL_GET_YUV_COLORSPACE 23
 
 #include "vfcap.h"
-
-//FIXME this should be in a common header, but i dunno which
-#define MP_NOPTS_VALUE (-1LL<<63) //both int64_t and double should be able to represent this exactly
-
 
 // functions:
 void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h);

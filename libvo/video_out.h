@@ -26,11 +26,8 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-//#include "font_load.h"
 #include "libmpcodecs/img_format.h"
-//#include "vidix/vidix.h"
-
-#define MP_NOPTS_VALUE (-1LL<<63)
+#include "mpcommon.h"
 
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2

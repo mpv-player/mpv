@@ -32,6 +32,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "subreader.h"
+#include "mpcommon.h"
 #include "stream/stream.h"
 #include "libavutil/common.h"
 #include "libavutil/avstring.h"
@@ -2359,7 +2360,6 @@ void sub_add_text(subtitle *sub, const char *txt, int len, double endpts) {
 #endif
 }
 
-#define MP_NOPTS_VALUE (-1LL<<63)
 /**
  * \brief remove outdated subtitle lines.
  * \param sub subtitle struct to modify

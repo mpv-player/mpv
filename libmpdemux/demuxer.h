@@ -27,6 +27,7 @@
 
 #include "stream/stream.h"
 #include "bstr.h"
+#include "mpcommon.h"
 
 struct MPOpts;
 
@@ -95,9 +96,6 @@ struct MPOpts;
 #define DEMUXER_TYPE_DEMUXERS (1<<16)
 // A virtual demuxer type for the network code
 #define DEMUXER_TYPE_PLAYLIST (2<<16)
-
-
-#define MP_NOPTS_VALUE (-1LL<<63) //both int64_t and double should be able to represent this exactly
 
 enum timestamp_type {
     TIMESTAMP_TYPE_PTS,

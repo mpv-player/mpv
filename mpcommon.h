@@ -19,6 +19,9 @@
 #ifndef MPLAYER_MPCOMMON_H
 #define MPLAYER_MPCOMMON_H
 
+// both int64_t and double should be able to represent this exactly
+#define MP_NOPTS_VALUE (-1LL<<63)
+
 extern const char *mplayer_version;
 
 #endif /* MPLAYER_MPCOMMON_H */
