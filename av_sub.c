@@ -35,12 +35,11 @@ void reset_avsub(struct sh_sub *sh)
  * Decode a subtitle packet via libavcodec.
  * \return < 0 on error, > 0 if further processing is needed
  */
-int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size,
-                 double *pts, double *endpts)
+int decode_avsub(struct sh_sub *sh, uint8_t *data, int size,
+                 double pts, double endpts)
 {
     AVCodecContext *ctx = sh->context;
     enum CodecID cid = CODEC_ID_NONE;
-    int new_type = 0;
     int res;
     int got_sub;
     AVSubtitle sub;
@@ -56,11 +55,11 @@ int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size,
     }
 
     av_init_packet(&pkt);
-    pkt.data = *data;
-    pkt.size = *size;
-    pkt.pts = *pts * 1000;
-    if (*pts != MP_NOPTS_VALUE && *endpts != MP_NOPTS_VALUE)
-        pkt.convergence_duration = (*endpts - *pts) * 1000;
+    pkt.data = data;
+    pkt.size = size;
+    pkt.pts = pts * 1000;
+    if (pts != MP_NOPTS_VALUE && endpts != MP_NOPTS_VALUE)
+        pkt.convergence_duration = (endpts - pts) * 1000;
     if (!ctx) {
         AVCodec *sub_codec;
         avcodec_init();
@@ -78,13 +77,13 @@ int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size,
     res = avcodec_decode_subtitle2(ctx, &sub, &got_sub, &pkt);
     if (res < 0)
         return res;
-    if (*pts != MP_NOPTS_VALUE) {
+    if (pts != MP_NOPTS_VALUE) {
         if (sub.end_display_time > sub.start_display_time)
-            *endpts = *pts + sub.end_display_time / 1000.0;
-        *pts += sub.start_display_time / 1000.0;
+            endpts = pts + sub.end_display_time / 1000.0;
+        pts += sub.start_display_time / 1000.0;
     }
     if (got_sub && vo_spudec && sub.num_rects == 0)
-        spudec_set_paletted(vo_spudec, NULL, 0, NULL, 0, 0, 0, 0, *pts, *endpts);
+        spudec_set_paletted(vo_spudec, NULL, 0, NULL, 0, 0, 0, 0, pts, endpts);
     if (got_sub && sub.num_rects > 0) {
         switch (sub.rects[0]->type) {
         case SUBTITLE_BITMAP:
@@ -98,19 +97,14 @@ int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size,
                                 sub.rects[0]->y,
                                 sub.rects[0]->w,
                                 sub.rects[0]->h,
-                                *pts,
-                                *endpts);
+                                pts,
+                                endpts);
             vo_osd_changed(OSDTYPE_SPU);
             break;
-        case SUBTITLE_TEXT:
-            *data = strdup(sub.rects[0]->text);
-            *size = strlen(*data);
-            new_type = 't';
-            break;
-        case SUBTITLE_ASS:
-            *data = strdup(sub.rects[0]->ass);
-            *size = strlen(*data);
-            new_type = 'a';
+        default:
+            mp_msg(MSGT_SUBREADER, MSGL_ERR, "sd_avsub: unsupported subtitle "
+                   "type from libavcodec\n");
+            res = -1;
             break;
         }
     }
@@ -118,5 +112,5 @@ int decode_avsub(struct sh_sub *sh, uint8_t **data, int *size,
     if (got_sub)
         avsubtitle_free(&sub);
 #endif
-    return new_type;
+    return res;
 }

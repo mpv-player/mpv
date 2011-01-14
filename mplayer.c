@@ -1901,10 +1901,8 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
         if (d_sub->non_interleaved)
             ds_get_next_pts(d_sub);
 
-        int orig_type = type;
         while (d_sub->first) {
             double subpts = ds_get_next_pts(d_sub) + sub_offset;
-            type = orig_type;
             if (subpts > curpts) {
                 // Libass handled subs can be fed to it in advance
                 if (!opts->ass_enabled || !is_text_sub(type))
@@ -1917,10 +1915,9 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
             len = ds_get_packet_sub(d_sub, &packet);
             if (is_av_sub(type)) {
 #ifdef CONFIG_FFMPEG
-                type = decode_avsub(d_sub->sh, &packet, &len, &subpts, &endpts);
-                if (type <= 0)
+                decode_avsub(d_sub->sh, packet, len, subpts, endpts);
 #endif
-                    continue;
+                continue;
             }
             if (type == 'm') {
                 if (len < 2) continue;
