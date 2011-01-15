@@ -3871,7 +3871,8 @@ if (HAVE_CMOV)
  * file for some tools to link against. */
 #ifndef DISABLE_MAIN
 int main(int argc,char* argv[]){
-
+    if (argc > 1 && !strcmp(argv[1], "-leak-report"))
+        talloc_enable_leak_report();
 
 char * mem_ptr;
 
