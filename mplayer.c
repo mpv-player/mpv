@@ -72,6 +72,7 @@
 #include "libavutil/avstring.h"
 
 #include "subreader.h"
+#include "sub/dec_sub.h"
 
 #include "mp_osd.h"
 #include "libvo/video_out.h"
@@ -601,6 +602,15 @@ static void mp_dvdnav_context_free(MPContext *ctx){
 }
 #endif
 
+static void uninit_subs(struct demuxer *demuxer)
+{
+    for (int i = 0; i < MAX_S_STREAMS; i++) {
+        struct sh_sub *sh = demuxer->s_streams[i];
+        if (sh && sh->initialized)
+            sub_uninit(sh);
+    }
+}
+
 void uninit_player(struct MPContext *mpctx, unsigned int mask){
   mask &= mpctx->initialized_flags;
 
@@ -612,6 +622,12 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
     if(mpctx->sh_audio) uninit_audio(mpctx->sh_audio);
     mpctx->sh_audio=NULL;
     mpctx->mixer.afilter = NULL;
+  }
+
+  if (mask & INITIALIZED_SUB) {
+      mpctx->initialized_flags &= ~INITIALIZED_SUB;
+      if (mpctx->d_sub->sh)
+          sub_switchoff(mpctx->d_sub->sh, mpctx->osd);
   }
 
   if(mask&INITIALIZED_VCODEC){
@@ -630,6 +646,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
     if (mpctx->num_sources) {
         mpctx->demuxer = mpctx->sources[0].demuxer;
         for (int i = 1; i < mpctx->num_sources; i++) {
+            uninit_subs(mpctx->sources[i].demuxer);
             free_stream(mpctx->sources[i].stream);
             free_demuxer(mpctx->sources[i].demuxer);
         }
@@ -646,6 +663,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
     mpctx->video_offset = 0;
     if(mpctx->demuxer){
 	mpctx->stream=mpctx->demuxer->stream;
+        uninit_subs(mpctx->demuxer);
 	free_demuxer(mpctx->demuxer);
     }
     mpctx->demuxer=NULL;
@@ -1802,11 +1820,6 @@ double playing_audio_pts(struct MPContext *mpctx)
 	mpctx->audio_out->get_delay();
 }
 
-static bool is_text_sub(int type)
-{
-    return type == 't' || type == 'm' || type == 'a';
-}
-
 static bool is_av_sub(int type)
 {
     return type == 'b' || type == 'p' || type == 'x';
@@ -1821,9 +1834,12 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
     double curpts = refpts + sub_delay;
     unsigned char *packet=NULL;
     int len;
-    int type = d_sub->sh ? ((sh_sub_t *)d_sub->sh)->type : 'v';
+    struct sh_sub *sh_sub = d_sub->sh;
+    int type = sh_sub ? sh_sub->type : 'v';
     static subtitle subs;
     if (reset) {
+        if (sh_sub)
+            sub_reset(sh_sub, mpctx->osd);
         sub_clear_text(&subs, MP_NOPTS_VALUE);
         if (vo_sub)
             set_osd_subtitle(mpctx, NULL);
@@ -1833,7 +1849,7 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
         }
 #ifdef CONFIG_FFMPEG
         if (is_av_sub(type))
-            reset_avsub(d_sub->sh);
+            reset_avsub(sh_sub);
 #endif
         return;
     }
@@ -1915,7 +1931,7 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
             len = ds_get_packet_sub(d_sub, &packet);
             if (is_av_sub(type)) {
 #ifdef CONFIG_FFMPEG
-                decode_avsub(d_sub->sh, packet, len, subpts, endpts);
+                decode_avsub(sh_sub, packet, len, subpts, endpts);
 #endif
                 continue;
             }
@@ -1940,29 +1956,13 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
                 }
                 continue;
             }
-#ifdef CONFIG_ASS
-            if (opts->ass_enabled) {
-                sh_sub_t* sh = d_sub->sh;
-                mpctx->osd->ass_track = sh ? sh->ass_track : NULL;
-                if (!mpctx->osd->ass_track) continue;
-                if (type == 'a') { // ssa/ass subs with libass
-                    ass_process_chunk(mpctx->osd->ass_track, packet, len,
-                                      (long long)(subpts*1000 + 0.5),
-                                      (long long)((endpts-subpts)*1000 + 0.5));
-                } else { // plaintext subs with libass
-                    if (subpts != MP_NOPTS_VALUE) {
-                        subtitle tmp_subs = {0};
-                        if (endpts == MP_NOPTS_VALUE) endpts = subpts + 3;
-                        sub_add_text(&tmp_subs, packet, len, endpts);
-                        tmp_subs.start = subpts * 100;
-                        tmp_subs.end = endpts * 100;
-                        ass_process_subtitle(mpctx->osd->ass_track, &tmp_subs);
-                        sub_clear_text(&tmp_subs, MP_NOPTS_VALUE);
-                    }
-                }
+            if (sh_sub && sh_sub->active) {
+                double duration = -1;
+                if (endpts != MP_NOPTS_VALUE)
+                    duration = endpts - subpts;
+                sub_decode(sh_sub, mpctx->osd, packet, len, subpts, duration);
                 continue;
             }
-#endif
             if (subpts != MP_NOPTS_VALUE) {
                 if (endpts == MP_NOPTS_VALUE)
                     sub_clear_text(&subs, MP_NOPTS_VALUE);
@@ -3024,7 +3024,7 @@ static bool timeline_set_part(struct MPContext *mpctx, int i)
     mpctx->video_offset = n->start - n->source_start;
     if (n->source == p->source)
         return false;
-    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts.fixed_vo && mpctx->opts.video_id != -2 ? 0 : INITIALIZED_VO) | INITIALIZED_AO | INITIALIZED_ACODEC);
+    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts.fixed_vo && mpctx->opts.video_id != -2 ? 0 : INITIALIZED_VO) | INITIALIZED_AO | INITIALIZED_ACODEC | INITIALIZED_SUB);
     mpctx->demuxer = n->source->demuxer;
     mpctx->d_video = mpctx->demuxer->video;
     mpctx->d_audio = mpctx->demuxer->audio;

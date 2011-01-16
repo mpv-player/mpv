@@ -43,8 +43,6 @@
 #include "libmpcodecs/dec_teletext.h"
 #include "libmpcodecs/vd_ffmpeg.h"
 
-#include "ass_mp.h"
-
 #ifdef CONFIG_FFMPEG
 #include "libavcodec/avcodec.h"
 #if MP_INPUT_BUFFER_PADDING_SIZE < FF_INPUT_BUFFER_PADDING_SIZE
@@ -295,10 +293,6 @@ static void free_sh_sub(sh_sub_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);
     free(sh->extradata);
-#ifdef CONFIG_ASS
-    if (sh->ass_track)
-        ass_free_track(sh->ass_track);
-#endif
     free(sh->lang);
 #ifdef CONFIG_FFMPEG
     clear_parser((sh_common_t *)sh);
@@ -998,20 +992,6 @@ static struct demuxer *demux_open_stream(struct MPOpts *opts,
                sh_video->fps, sh_video->i_bps * 0.008f,
                sh_video->i_bps / 1024.0f);
     }
-#ifdef CONFIG_ASS
-    if (opts->ass_enabled && ass_library) {
-        for (int i = 0; i < MAX_S_STREAMS; ++i) {
-            sh_sub_t *sh = demuxer->s_streams[i];
-            if (sh && sh->type == 'a') {
-                sh->ass_track = ass_new_track(ass_library);
-                if (sh->ass_track && sh->extradata)
-                    ass_process_codec_private(sh->ass_track, sh->extradata,
-                                              sh->extradata_len);
-            } else if (sh && sh->type != 'v')
-                sh->ass_track = ass_default_track(ass_library);
-        }
-    }
-#endif
     return demuxer;
 }
 

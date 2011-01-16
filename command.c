@@ -32,6 +32,7 @@
 #include "codec-cfg.h"
 #include "mplayer.h"
 #include "libvo/sub.h"
+#include "sub/dec_sub.h"
 #include "m_option.h"
 #include "m_property.h"
 #include "m_config.h"
@@ -1656,6 +1657,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
         d_sub->id = -2;
     }
     mpctx->osd->ass_track = NULL;
+    uninit_player(mpctx, INITIALIZED_SUB);
 
     if (source == SUB_SOURCE_VOBSUB) {
         vobsub_id = vobsub_get_id_by_index(vo_vobsub, source_pos);
@@ -1690,10 +1692,10 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
                 sh_sub_t *sh = d_sub->sh;
                 if (sh->type == 'v')
                     init_vo_spudec(mpctx);
-#ifdef CONFIG_ASS
-                else if (opts->ass_enabled)
-                    mpctx->osd->ass_track = sh->ass_track;
-#endif
+                else {
+                    sub_init(sh, mpctx->osd);
+                    mpctx->initialized_flags |= INITIALIZED_SUB;
+                }
             } else {
               d_sub->id = -2;
               d_sub->sh = NULL;

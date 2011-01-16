@@ -132,6 +132,7 @@ SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
 SRCS_COMMON-$(LIBA52)                += libmpcodecs/ad_liba52.c
 SRCS_COMMON-$(LIBASS)                += ass_mp.c \
                                         libmpcodecs/vf_ass.c \
+                                        sub/sd_ass.c \
 
 SRCS_COMMON-$(LIBBLURAY)             += stream/stream_bluray.c
 SRCS_COMMON-$(LIBBS2B)               += libaf/af_bs2b.c
@@ -515,6 +516,7 @@ SRCS_COMMON = asxparser.c \
               stream/stream_mf.c \
               stream/stream_null.c \
               stream/url.c \
+              sub/dec_sub.c \
               $(SRCS_COMMON-yes)
 
 
@@ -687,6 +689,7 @@ DIRS =  . \
         stream/freesdp \
         stream/librtsp \
         stream/realrtsp \
+        sub \
         tremor \
         TOOLS \
         vidix \
