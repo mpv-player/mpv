@@ -2963,7 +2963,7 @@ static void reinit_decoders(struct MPContext *mpctx)
 {
     reinit_video_chain(mpctx);
     reinit_audio_chain(mpctx);
-    mp_property_do("sub", M_PROPERTY_SET, &mpctx->global_sub_pos, mpctx);
+    mp_property_do("sub", M_PROPERTY_SET, &(int){mpctx->global_sub_pos}, mpctx);
 }
 
 static void seek_reset(struct MPContext *mpctx)
