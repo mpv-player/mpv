@@ -1884,7 +1884,7 @@ static void handle_subtitles(demuxer_t *demuxer, mkv_track_t *track,
     dp = new_demux_packet(size);
     memcpy(dp->buffer, block, size);
     dp->pts = timecode / 1000.0;
-    dp->endpts = (timecode + block_duration) / 1000.0;
+    dp->duration = block_duration / 1000.0;
     ds_add_packet(demuxer->sub, dp);
 }
 

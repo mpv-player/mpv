@@ -36,7 +36,7 @@ void reset_avsub(struct sh_sub *sh)
  * \return < 0 on error, > 0 if further processing is needed
  */
 int decode_avsub(struct sh_sub *sh, uint8_t *data, int size,
-                 double pts, double endpts)
+                 double pts, double duration)
 {
     AVCodecContext *ctx = sh->context;
     enum CodecID cid = CODEC_ID_NONE;
@@ -58,8 +58,8 @@ int decode_avsub(struct sh_sub *sh, uint8_t *data, int size,
     pkt.data = data;
     pkt.size = size;
     pkt.pts = pts * 1000;
-    if (pts != MP_NOPTS_VALUE && endpts != MP_NOPTS_VALUE)
-        pkt.convergence_duration = (endpts - pts) * 1000;
+    if (duration >= 0)
+        pkt.convergence_duration = duration * 1000;
     if (!ctx) {
         AVCodec *sub_codec;
         avcodec_init();
@@ -79,9 +79,12 @@ int decode_avsub(struct sh_sub *sh, uint8_t *data, int size,
         return res;
     if (pts != MP_NOPTS_VALUE) {
         if (sub.end_display_time > sub.start_display_time)
-            endpts = pts + sub.end_display_time / 1000.0;
+            duration = (sub.end_display_time - sub.start_display_time) / 1000.0;
         pts += sub.start_display_time / 1000.0;
     }
+    double endpts = MP_NOPTS_VALUE;
+    if (pts != MP_NOPTS_VALUE && duration >= 0)
+        endpts = pts + duration;
     if (got_sub && vo_spudec && sub.num_rects == 0)
         spudec_set_paletted(vo_spudec, NULL, 0, NULL, 0, 0, 0, 0, pts, endpts);
     if (got_sub && sub.num_rects > 0) {

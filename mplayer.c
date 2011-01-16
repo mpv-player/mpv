@@ -1927,11 +1927,11 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
                 if (d_sub->non_interleaved && subpts > curpts + 1)
                     break;
             }
-            double endpts = d_sub->first->endpts + sub_offset;
+            double duration = d_sub->first->duration;
             len = ds_get_packet_sub(d_sub, &packet);
             if (is_av_sub(type)) {
 #ifdef CONFIG_FFMPEG
-                decode_avsub(sh_sub, packet, len, subpts, endpts);
+                decode_avsub(sh_sub, packet, len, subpts, duration);
 #endif
                 continue;
             }
@@ -1957,14 +1957,11 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
                 continue;
             }
             if (sh_sub && sh_sub->active) {
-                double duration = -1;
-                if (endpts != MP_NOPTS_VALUE)
-                    duration = endpts - subpts;
                 sub_decode(sh_sub, mpctx->osd, packet, len, subpts, duration);
                 continue;
             }
             if (subpts != MP_NOPTS_VALUE) {
-                if (endpts == MP_NOPTS_VALUE)
+                if (duration < 0)
                     sub_clear_text(&subs, MP_NOPTS_VALUE);
                 if (type == 'a') { // ssa/ass subs without libass => convert to plaintext
                     int i;
@@ -1977,6 +1974,9 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
                     len -= p - packet;
                     packet = p;
                 }
+                double endpts = MP_NOPTS_VALUE;
+                if (subpts != MP_NOPTS_VALUE && duration >= 0)
+                    endpts = subpts + duration;
                 sub_add_text(&subs, packet, len, endpts);
                 set_osd_subtitle(mpctx, &subs);
             }
