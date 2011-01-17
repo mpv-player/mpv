@@ -3194,7 +3194,7 @@ static void run_playloop(struct MPContext *mpctx)
             aq_sleep_time += mpctx->time_frame;
             // flag 256 means: libvo driver does its timing (dvb card)
             if (mpctx->time_frame > 0.001
-                && !(mpctx->sh_video->output_flags&256))
+                && !(mpctx->sh_video->output_flags & VFCAP_TIMER))
                 mpctx->time_frame = timing_sleep(mpctx, mpctx->time_frame);
             mpctx->time_frame += mpctx->video_out->flip_queue_offset;
 
@@ -4436,7 +4436,7 @@ if(!reinit_video_chain(mpctx)) {
   }
 }
 
-   if(mpctx->sh_video->output_flags & 0x08 && vo_spudec)
+   if(mpctx->sh_video->output_flags & VFCAP_SPU && vo_spudec)
       spudec_set_hw_spu(vo_spudec,mpctx->video_out);
 
 #ifdef CONFIG_FREETYPE
