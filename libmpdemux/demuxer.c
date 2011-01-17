@@ -177,6 +177,69 @@ const demuxer_desc_t *const demuxer_list[] = {
     NULL
 };
 
+struct demux_packet *new_demux_packet(int len)
+{
+    struct demux_packet *dp = malloc(sizeof(struct demux_packet));
+    dp->len = len;
+    dp->next = NULL;
+    dp->pts = MP_NOPTS_VALUE;
+    dp->endpts = MP_NOPTS_VALUE;
+    dp->stream_pts = MP_NOPTS_VALUE;
+    dp->pos = 0;
+    dp->flags = 0;
+    dp->refcount = 1;
+    dp->master = NULL;
+    dp->buffer = NULL;
+    if (len > 0 && (dp->buffer = malloc(len + MP_INPUT_BUFFER_PADDING_SIZE)))
+        memset(dp->buffer + len, 0, 8);
+    else
+        dp->len = 0;
+    return dp;
+}
+
+void resize_demux_packet(struct demux_packet *dp, int len)
+{
+    if (len > 0) {
+        dp->buffer = realloc(dp->buffer, len + 8);
+    } else {
+        free(dp->buffer);
+        dp->buffer = NULL;
+    }
+    dp->len = len;
+    if (dp->buffer)
+        memset(dp->buffer + len, 0, 8);
+    else
+        dp->len = 0;
+}
+
+struct demux_packet *clone_demux_packet(struct demux_packet *pack)
+{
+    struct demux_packet *dp = malloc(sizeof(struct demux_packet));
+    while (pack->master)
+        pack = pack->master;  // find the master
+    memcpy(dp, pack, sizeof(struct demux_packet));
+    dp->next = NULL;
+    dp->refcount = 0;
+    dp->master = pack;
+    pack->refcount++;
+    return dp;
+}
+
+void free_demux_packet(struct demux_packet *dp)
+{
+    if (dp->master == NULL) {  //dp is a master packet
+        dp->refcount--;
+        if (dp->refcount == 0) {
+            free(dp->buffer);
+            free(dp);
+        }
+        return;
+    }
+    // dp is a clone:
+    free_demux_packet(dp->master);
+    free(dp);
+}
+
 void free_demuxer_stream(demux_stream_t *ds)
 {
     ds_free_packs(ds);

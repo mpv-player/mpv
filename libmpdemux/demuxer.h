@@ -286,67 +286,10 @@ typedef struct {
   int aid, vid, sid; //audio, video and subtitle id
 } demux_program_t;
 
-static inline demux_packet_t* new_demux_packet(int len){
-  demux_packet_t* dp=(demux_packet_t*)malloc(sizeof(demux_packet_t));
-  dp->len=len;
-  dp->next=NULL;
-  dp->pts=MP_NOPTS_VALUE;
-  dp->endpts=MP_NOPTS_VALUE;
-  dp->stream_pts = MP_NOPTS_VALUE;
-  dp->pos=0;
-  dp->flags=0;
-  dp->refcount=1;
-  dp->master=NULL;
-  dp->buffer=NULL;
-  if (len > 0 && (dp->buffer = (unsigned char *)malloc(len + MP_INPUT_BUFFER_PADDING_SIZE)))
-    memset(dp->buffer + len, 0, 8);
-  else
-    dp->len = 0;
-  return dp;
-}
-
-static inline void resize_demux_packet(demux_packet_t* dp, int len)
-{
-  if(len > 0)
-  {
-     dp->buffer=(unsigned char *)realloc(dp->buffer,len+8);
-  }
-  else
-  {
-     free(dp->buffer);
-     dp->buffer=NULL;
-  }
-  dp->len=len;
-  if (dp->buffer)
-     memset(dp->buffer + len, 0, 8);
-  else
-     dp->len = 0;
-}
-
-static inline demux_packet_t* clone_demux_packet(demux_packet_t* pack){
-  demux_packet_t* dp=(demux_packet_t*)malloc(sizeof(demux_packet_t));
-  while(pack->master) pack=pack->master; // find the master
-  memcpy(dp,pack,sizeof(demux_packet_t));
-  dp->next=NULL;
-  dp->refcount=0;
-  dp->master=pack;
-  pack->refcount++;
-  return dp;
-}
-
-static inline void free_demux_packet(demux_packet_t* dp){
-  if (dp->master==NULL){  //dp is a master packet
-    dp->refcount--;
-    if (dp->refcount==0){
-      free(dp->buffer);
-      free(dp);
-    }
-    return;
-  }
-  // dp is a clone:
-  free_demux_packet(dp->master);
-  free(dp);
-}
+struct demux_packet *new_demux_packet(int len);
+void resize_demux_packet(struct demux_packet *dp, int len);
+struct demux_packet *clone_demux_packet(struct demux_packet *pack);
+void free_demux_packet(struct demux_packet *dp);
 
 #ifndef SIZE_MAX
 #define SIZE_MAX ((size_t)-1)
