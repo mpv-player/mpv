@@ -286,8 +286,8 @@ typedef struct {
   int aid, vid, sid; //audio, video and subtitle id
 } demux_program_t;
 
-struct demux_packet *new_demux_packet(int len);
-void resize_demux_packet(struct demux_packet *dp, int len);
+struct demux_packet *new_demux_packet(size_t len);
+void resize_demux_packet(struct demux_packet *dp, size_t len);
 struct demux_packet *clone_demux_packet(struct demux_packet *pack);
 void free_demux_packet(struct demux_packet *dp);
 

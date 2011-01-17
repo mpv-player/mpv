@@ -177,8 +177,13 @@ const demuxer_desc_t *const demuxer_list[] = {
     NULL
 };
 
-struct demux_packet *new_demux_packet(int len)
+struct demux_packet *new_demux_packet(size_t len)
 {
+    if (len > 1000000000) {
+        mp_msg(MSGT_DEMUXER, MSGL_FATAL, "Attempt to allocate demux packet "
+               "over 1 GB!\n");
+        abort();
+    }
     struct demux_packet *dp = malloc(sizeof(struct demux_packet));
     dp->len = len;
     dp->next = NULL;
@@ -190,26 +195,36 @@ struct demux_packet *new_demux_packet(int len)
     dp->refcount = 1;
     dp->master = NULL;
     dp->buffer = NULL;
-    if (len > 0 && (dp->buffer = malloc(len + MP_INPUT_BUFFER_PADDING_SIZE)))
+    if (len > 0) {
+        dp->buffer = malloc(len + MP_INPUT_BUFFER_PADDING_SIZE);
+        if (!dp->buffer) {
+            mp_msg(MSGT_DEMUXER, MSGL_FATAL, "Memory allocation failure!\n");
+            abort();
+        }
         memset(dp->buffer + len, 0, 8);
-    else
-        dp->len = 0;
+    }
     return dp;
 }
 
-void resize_demux_packet(struct demux_packet *dp, int len)
+void resize_demux_packet(struct demux_packet *dp, size_t len)
 {
+    if (len > 1000000000) {
+        mp_msg(MSGT_DEMUXER, MSGL_FATAL, "Attempt to realloc demux packet "
+               "over 1 GB!\n");
+        abort();
+    }
     if (len > 0) {
         dp->buffer = realloc(dp->buffer, len + 8);
+        if (!dp->buffer) {
+            mp_msg(MSGT_DEMUXER, MSGL_FATAL, "Memory allocation failure!\n");
+            abort();
+        }
+        memset(dp->buffer + len, 0, 8);
     } else {
         free(dp->buffer);
         dp->buffer = NULL;
     }
     dp->len = len;
-    if (dp->buffer)
-        memset(dp->buffer + len, 0, 8);
-    else
-        dp->len = 0;
 }
 
 struct demux_packet *clone_demux_packet(struct demux_packet *pack)
