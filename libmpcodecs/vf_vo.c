@@ -161,7 +161,6 @@ static int control(struct vf_instance *vf, int request, void* data)
             vf->priv->prev_visibility = 1;
         } else
             vf->priv->prev_visibility = 0;
-        vf->priv->prev_visibility = sub_visibility;
         return vo_control(video_out, VOCTRL_DRAW_EOSD, &images) == VO_TRUE;
     }
 #endif
