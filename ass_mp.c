@@ -154,7 +154,7 @@ static int check_duplicate_plaintext_event(ASS_Track *track)
  * note: assumes that subtitle is _not_ fps-based; caller must manually correct
  *   Start and Duration in other case.
  **/
-int ass_process_subtitle(ASS_Track *track, subtitle *sub)
+static int ass_process_subtitle(ASS_Track *track, subtitle *sub)
 {
     int eid;
     ASS_Event *event;

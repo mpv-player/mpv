@@ -44,7 +44,6 @@ extern char *ass_styles_file;
 extern int ass_hinting;
 
 ASS_Track *ass_default_track(ASS_Library *library);
-int ass_process_subtitle(ASS_Track *track, subtitle *sub);
 ASS_Track *ass_read_subdata(ASS_Library *library, sub_data *subdata,
                             double fps);
 ASS_Track *ass_read_stream(ASS_Library *library, const char *fname, char *charset);
