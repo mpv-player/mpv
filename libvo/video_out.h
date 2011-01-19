@@ -77,7 +77,7 @@ struct voctrl_get_equalizer_args {
 #define VOCTRL_BORDER 27
 #define VOCTRL_DRAW_EOSD 28
 #define VOCTRL_GET_EOSD_RES 29
-typedef struct {
+typedef struct mp_eosd_res {
   int w, h; // screen dimensions, including black borders
   int mt, mb, ml, mr; // borders (top, bottom, left, right)
 } mp_eosd_res_t;

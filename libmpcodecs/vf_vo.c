@@ -40,7 +40,7 @@ struct vf_priv_s {
     struct vo *vo;
 #ifdef CONFIG_ASS
     ASS_Renderer *ass_priv;
-    int prev_visibility;
+    bool prev_visibility;
     double scale_ratio;
 #endif
 };
@@ -84,7 +84,8 @@ static int config(struct vf_instance *vf,
     vf->priv->scale_ratio = (double) d_width / d_height * height / width;
 
     if (vf->priv->ass_priv)
-	ass_configure(vf->priv->ass_priv, width, height, !!(vf->default_caps & VFCAP_EOSD_UNSCALED));
+	ass_configure(vf->priv->ass_priv, width, height,
+                      vf->default_caps & VFCAP_EOSD_UNSCALED);
 #endif
 
     return 1;
@@ -133,7 +134,7 @@ static int control(struct vf_instance *vf, int request, void* data)
         vf->priv->ass_priv = ass_renderer_init((ASS_Library*)data);
         if (!vf->priv->ass_priv) return CONTROL_FALSE;
         ass_configure_fonts(vf->priv->ass_priv);
-        vf->priv->prev_visibility = 0;
+        vf->priv->prev_visibility = false;
         return CONTROL_TRUE;
     }
     case VFCTRL_DRAW_EOSD:
@@ -142,10 +143,8 @@ static int control(struct vf_instance *vf, int request, void* data)
         mp_eosd_images_t images = {NULL, 2};
         double pts = video_out->next_pts;
         if (!video_out->config_ok || !vf->priv->ass_priv) return CONTROL_FALSE;
-        if (sub_visibility && vf->priv->ass_priv && osd->ass_track
-            && (pts != MP_NOPTS_VALUE)) {
-            mp_eosd_res_t res;
-            memset(&res, 0, sizeof(res));
+        if (sub_visibility && osd->ass_track && (pts != MP_NOPTS_VALUE)) {
+            struct mp_eosd_res res = {0};
             if (vo_control(video_out, VOCTRL_GET_EOSD_RES, &res) == VO_TRUE) {
                 ass_set_frame_size(vf->priv->ass_priv, res.w, res.h);
                 ass_set_margins(vf->priv->ass_priv, res.mt, res.mb, res.ml, res.mr);
@@ -158,9 +157,9 @@ static int control(struct vf_instance *vf, int request, void* data)
                                               &images.changed);
             if (!vf->priv->prev_visibility)
                 images.changed = 2;
-            vf->priv->prev_visibility = 1;
+            vf->priv->prev_visibility = true;
         } else
-            vf->priv->prev_visibility = 0;
+            vf->priv->prev_visibility = false;
         return vo_control(video_out, VOCTRL_DRAW_EOSD, &images) == VO_TRUE;
     }
 #endif

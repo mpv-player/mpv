@@ -60,8 +60,6 @@ void set_default_mplayer_options(struct MPOpts *opts)
              .use_lircc = 1,
 #ifdef CONFIG_APPLE_REMOTE
              .use_ar = 1,
-#else
-             .use_ar = 0,
 #endif
              .default_bindings = 1,
          }

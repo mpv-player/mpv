@@ -1093,9 +1093,8 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
     sub_data *subd = NULL;
     struct ass_track *asst = NULL;
 
-    if (filename == NULL || mpctx->set_of_sub_size >= MAX_SUBTITLE_FILES) {
+    if (filename == NULL || mpctx->set_of_sub_size >= MAX_SUBTITLE_FILES)
 	return;
-    }
 
 #ifdef CONFIG_ASS
     if (opts->ass_enabled) {
@@ -1108,10 +1107,8 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
             subd = sub_read_file(filename, fps, &mpctx->opts);
             if (subd) {
                 asst = ass_read_subdata(ass_library, subd, fps);
-                if (asst) {
-                    sub_free(subd);
-                    subd = NULL;
-                }
+                sub_free(subd);
+                subd = NULL;
             }
         }
     } else

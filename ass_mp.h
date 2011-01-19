@@ -22,6 +22,7 @@
 #define MPLAYER_ASS_MP_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "config.h"
 #include "subreader.h"
@@ -46,9 +47,10 @@ extern int ass_hinting;
 ASS_Track *ass_default_track(ASS_Library *library);
 ASS_Track *ass_read_subdata(ASS_Library *library, sub_data *subdata,
                             double fps);
-ASS_Track *ass_read_stream(ASS_Library *library, const char *fname, char *charset);
+ASS_Track *ass_read_stream(ASS_Library *library, const char *fname,
+                           char *charset);
 
-void ass_configure(ASS_Renderer *priv, int w, int h, int hinting);
+void ass_configure(ASS_Renderer *priv, int w, int h, bool unscaled);
 void ass_configure_fonts(ASS_Renderer *priv);
 ASS_Library *ass_init(void);
 

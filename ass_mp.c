@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #include <ass/ass.h>
 #include <ass/ass_types.h>
@@ -280,7 +281,7 @@ ASS_Track *ass_read_stream(ASS_Library *library, const char *fname, char *charse
     return track;
 }
 
-void ass_configure(ASS_Renderer *priv, int w, int h, int unscaled)
+void ass_configure(ASS_Renderer *priv, int w, int h, bool unscaled)
 {
     int hinting;
     ass_set_frame_size(priv, w, h);

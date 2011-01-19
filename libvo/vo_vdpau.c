@@ -1803,7 +1803,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         draw_eosd(vo);
         return VO_TRUE;
     case VOCTRL_GET_EOSD_RES: {
-        mp_eosd_res_t *r = data;
+        struct mp_eosd_res *r = data;
         r->w = vo->dwidth;
         r->h = vo->dheight;
         r->ml = r->mr = vc->border_x;
