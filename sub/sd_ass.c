@@ -62,6 +62,8 @@ static void init(struct sh_sub *sh, struct osd_state *osd)
 
     assert(osd->ass_track == NULL);
     osd->ass_track = ctx->ass_track;
+    osd->vsfilter_aspect = sh->type == 'a';
+    osd->ass_track_changed = true;
 }
 
 static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,

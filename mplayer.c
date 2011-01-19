@@ -1092,6 +1092,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
     struct MPOpts *opts = &mpctx->opts;
     sub_data *subd = NULL;
     struct ass_track *asst = NULL;
+    bool is_native_ass = false;
 
     if (filename == NULL || mpctx->set_of_sub_size >= MAX_SUBTITLE_FILES)
 	return;
@@ -1103,6 +1104,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
 #else
         asst = ass_read_stream(ass_library, filename, 0);
 #endif
+        is_native_ass = asst;
         if (!asst) {
             subd = sub_read_file(filename, fps, &mpctx->opts);
             if (subd) {
@@ -1124,6 +1126,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
 
     mpctx->set_of_ass_tracks[mpctx->set_of_sub_size] = asst;
     mpctx->set_of_subtitles[mpctx->set_of_sub_size] = subd;
+    mpctx->track_was_native_ass[mpctx->set_of_sub_size] = is_native_ass;
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_ID=%d\n", mpctx->set_of_sub_size);
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_FILENAME=%s\n",
 	   filename_recode(filename));

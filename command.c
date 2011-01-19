@@ -1664,9 +1664,14 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
     } else if (source == SUB_SOURCE_SUBS) {
         mpctx->set_of_sub_pos = source_pos;
 #ifdef CONFIG_ASS
-        if (opts->ass_enabled && mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos])
-            mpctx->osd->ass_track = mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos];
-        else
+        if (opts->ass_enabled
+            && mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos]) {
+            mpctx->osd->ass_track =
+                mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos];
+            mpctx->osd->ass_track_changed = true;
+            mpctx->osd->vsfilter_aspect =
+                mpctx->track_was_native_ass[mpctx->set_of_sub_pos];
+        } else
 #endif
         {
             mpctx->subdata = mpctx->set_of_subtitles[mpctx->set_of_sub_pos];

@@ -39,7 +39,8 @@ extern float sub_delay;
 struct vf_priv_s {
     struct vo *vo;
 #ifdef CONFIG_ASS
-    ASS_Renderer *ass_priv;
+    ASS_Renderer *renderer_realaspect;
+    ASS_Renderer *renderer_vsfilter;
     bool prev_visibility;
     double scale_ratio;
 #endif
@@ -83,9 +84,12 @@ static int config(struct vf_instance *vf,
 #ifdef CONFIG_ASS
     vf->priv->scale_ratio = (double) d_width / d_height * height / width;
 
-    if (vf->priv->ass_priv)
-	ass_configure(vf->priv->ass_priv, width, height,
+    if (vf->priv->renderer_realaspect) {
+	ass_configure(vf->priv->renderer_realaspect, width, height,
                       vf->default_caps & VFCAP_EOSD_UNSCALED);
+	ass_configure(vf->priv->renderer_vsfilter, width, height,
+                      vf->default_caps & VFCAP_EOSD_UNSCALED);
+    }
 #endif
 
     return 1;
@@ -131,9 +135,16 @@ static int control(struct vf_instance *vf, int request, void* data)
 #ifdef CONFIG_ASS
     case VFCTRL_INIT_EOSD:
     {
-        vf->priv->ass_priv = ass_renderer_init((ASS_Library*)data);
-        if (!vf->priv->ass_priv) return CONTROL_FALSE;
-        ass_configure_fonts(vf->priv->ass_priv);
+        vf->priv->renderer_realaspect = ass_renderer_init(data);
+        if (!vf->priv->renderer_realaspect)
+            return CONTROL_FALSE;
+        vf->priv->renderer_vsfilter = ass_renderer_init(data);
+        if (!vf->priv->renderer_vsfilter) {
+            ass_renderer_done(vf->priv->renderer_realaspect);
+            return CONTROL_FALSE;
+        }
+        ass_configure_fonts(vf->priv->renderer_realaspect);
+        ass_configure_fonts(vf->priv->renderer_vsfilter);
         vf->priv->prev_visibility = false;
         return CONTROL_TRUE;
     }
@@ -142,16 +153,29 @@ static int control(struct vf_instance *vf, int request, void* data)
         struct osd_state *osd = data;
         mp_eosd_images_t images = {NULL, 2};
         double pts = video_out->next_pts;
-        if (!video_out->config_ok || !vf->priv->ass_priv) return CONTROL_FALSE;
+        ASS_Renderer *renderer;
+        double scale;
+        if (osd->vsfilter_aspect) {
+            renderer = vf->priv->renderer_vsfilter;
+            scale = vf->priv->scale_ratio;
+        } else {
+            renderer = vf->priv->renderer_realaspect;
+            scale = 1;
+        }
+        if (!video_out->config_ok || !renderer)
+            return CONTROL_FALSE;
+        if (osd->ass_track_changed)
+            vf->priv->prev_visibility = false;
+        osd->ass_track_changed = false;
         if (sub_visibility && osd->ass_track && (pts != MP_NOPTS_VALUE)) {
             struct mp_eosd_res res = {0};
             if (vo_control(video_out, VOCTRL_GET_EOSD_RES, &res) == VO_TRUE) {
-                ass_set_frame_size(vf->priv->ass_priv, res.w, res.h);
-                ass_set_margins(vf->priv->ass_priv, res.mt, res.mb, res.ml, res.mr);
-                ass_set_aspect_ratio(vf->priv->ass_priv, vf->priv->scale_ratio, 1);
+                ass_set_frame_size(renderer, res.w, res.h);
+                ass_set_margins(renderer, res.mt, res.mb, res.ml, res.mr);
+                ass_set_aspect_ratio(renderer, scale, 1);
             }
 
-            images.imgs = ass_mp_render_frame(vf->priv->ass_priv,
+            images.imgs = ass_mp_render_frame(renderer,
                                               osd->ass_track,
                                               (pts+sub_delay) * 1000 + .5,
                                               &images.changed);
@@ -223,8 +247,10 @@ static void uninit(struct vf_instance *vf)
          * to get rid of numbered-mpi references that will now be invalid. */
         vo_seek_reset(video_out);
 #ifdef CONFIG_ASS
-        if (vf->priv->ass_priv)
-            ass_renderer_done(vf->priv->ass_priv);
+        if (vf->priv->renderer_realaspect) {
+            ass_renderer_done(vf->priv->renderer_realaspect);
+            ass_renderer_done(vf->priv->renderer_vsfilter);
+        }
 #endif
         free(vf->priv);
     }

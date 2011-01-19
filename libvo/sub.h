@@ -19,6 +19,8 @@
 #ifndef MPLAYER_SUB_H
 #define MPLAYER_SUB_H
 
+#include <stdbool.h>
+
 typedef struct mp_osd_bbox_s {
     int x1,y1,x2,y2;
 } mp_osd_bbox_t;
@@ -70,6 +72,8 @@ struct osd_state {
     unsigned char osd_text[128];
     struct font_desc *sub_font;
     struct ass_track *ass_track;
+    bool ass_track_changed;
+    bool vsfilter_aspect;
 };
 
 #include "subreader.h"
