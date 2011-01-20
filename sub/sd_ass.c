@@ -57,7 +57,7 @@ static void init(struct sh_sub *sh, struct osd_state *osd)
                 ass_process_codec_private(ctx->ass_track, sh->extradata,
                                           sh->extradata_len);
         } else
-            ctx->ass_track = ass_default_track(ass_library);
+            ctx->ass_track = mp_ass_default_track(ass_library);
     }
 
     assert(osd->ass_track == NULL);

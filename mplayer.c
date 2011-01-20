@@ -1100,15 +1100,15 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
 #ifdef CONFIG_ASS
     if (opts->ass_enabled) {
 #ifdef CONFIG_ICONV
-        asst = ass_read_stream(ass_library, filename, sub_cp);
+        asst = mp_ass_read_stream(ass_library, filename, sub_cp);
 #else
-        asst = ass_read_stream(ass_library, filename, 0);
+        asst = mp_ass_read_stream(ass_library, filename, 0);
 #endif
         is_native_ass = asst;
         if (!asst) {
             subd = sub_read_file(filename, fps, &mpctx->opts);
             if (subd) {
-                asst = ass_read_subdata(ass_library, subd, fps);
+                asst = mp_ass_read_subdata(ass_library, subd, fps);
                 sub_free(subd);
                 subd = NULL;
             }
@@ -4091,7 +4091,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 #endif
 
 #ifdef CONFIG_ASS
-  ass_library = ass_init();
+  ass_library = mp_ass_init();
 #endif
 
 #ifdef HAVE_RTC

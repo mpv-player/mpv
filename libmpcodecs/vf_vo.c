@@ -85,10 +85,10 @@ static int config(struct vf_instance *vf,
     vf->priv->scale_ratio = (double) d_width / d_height * height / width;
 
     if (vf->priv->renderer_realaspect) {
-	ass_configure(vf->priv->renderer_realaspect, width, height,
-                      vf->default_caps & VFCAP_EOSD_UNSCALED);
-	ass_configure(vf->priv->renderer_vsfilter, width, height,
-                      vf->default_caps & VFCAP_EOSD_UNSCALED);
+	mp_ass_configure(vf->priv->renderer_realaspect, width, height,
+                         vf->default_caps & VFCAP_EOSD_UNSCALED);
+	mp_ass_configure(vf->priv->renderer_vsfilter, width, height,
+                         vf->default_caps & VFCAP_EOSD_UNSCALED);
     }
 #endif
 
@@ -143,8 +143,8 @@ static int control(struct vf_instance *vf, int request, void* data)
             ass_renderer_done(vf->priv->renderer_realaspect);
             return CONTROL_FALSE;
         }
-        ass_configure_fonts(vf->priv->renderer_realaspect);
-        ass_configure_fonts(vf->priv->renderer_vsfilter);
+        mp_ass_configure_fonts(vf->priv->renderer_realaspect);
+        mp_ass_configure_fonts(vf->priv->renderer_vsfilter);
         vf->priv->prev_visibility = false;
         return CONTROL_TRUE;
     }
@@ -175,7 +175,7 @@ static int control(struct vf_instance *vf, int request, void* data)
                 ass_set_aspect_ratio(renderer, scale, 1);
             }
 
-            images.imgs = ass_mp_render_frame(renderer,
+            images.imgs = mp_ass_render_frame(renderer,
                                               osd->ass_track,
                                               (pts+sub_delay) * 1000 + .5,
                                               &images.changed);

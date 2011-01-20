@@ -72,7 +72,7 @@ static char *sub_cp = 0;
 
 void process_force_style(ASS_Track *track);
 
-ASS_Track *ass_default_track(ASS_Library *library)
+ASS_Track *mp_ass_default_track(ASS_Library *library)
 {
     ASS_Track *track = ass_new_track(library);
 
@@ -211,13 +211,13 @@ static int ass_process_subtitle(ASS_Track *track, subtitle *sub)
  * \param fps video framerate
  * \return newly allocated ASS_Track, filled with subtitles from subdata
  */
-ASS_Track *ass_read_subdata(ASS_Library *library, sub_data *subdata,
-                            double fps)
+ASS_Track *mp_ass_read_subdata(ASS_Library *library, sub_data *subdata,
+                               double fps)
 {
     ASS_Track *track;
     int i;
 
-    track = ass_default_track(library);
+    track = mp_ass_default_track(library);
     track->name = subdata->filename ? strdup(subdata->filename) : 0;
 
     for (i = 0; i < subdata->sub_num; ++i) {
@@ -232,7 +232,8 @@ ASS_Track *ass_read_subdata(ASS_Library *library, sub_data *subdata,
     return track;
 }
 
-ASS_Track *ass_read_stream(ASS_Library *library, const char *fname, char *charset)
+ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
+                              char *charset)
 {
     int i;
     char *buf = NULL;
@@ -281,7 +282,7 @@ ASS_Track *ass_read_stream(ASS_Library *library, const char *fname, char *charse
     return track;
 }
 
-void ass_configure(ASS_Renderer *priv, int w, int h, bool unscaled)
+void mp_ass_configure(ASS_Renderer *priv, int w, int h, bool unscaled)
 {
     int hinting;
     ass_set_frame_size(priv, w, h);
@@ -296,7 +297,7 @@ void ass_configure(ASS_Renderer *priv, int w, int h, bool unscaled)
     ass_set_line_spacing(priv, ass_line_spacing);
 }
 
-void ass_configure_fonts(ASS_Renderer *priv)
+void mp_ass_configure_fonts(ASS_Renderer *priv)
 {
     char *dir, *path, *family;
     dir = get_path("fonts");
@@ -328,7 +329,7 @@ static void message_callback(int level, const char *format, va_list va, void *ct
     mp_msg(MSGT_ASS, level, "\n");
 }
 
-ASS_Library *ass_init(void)
+ASS_Library *mp_ass_init(void)
 {
     ASS_Library *priv;
     char *path = get_path("fonts");
@@ -343,7 +344,7 @@ ASS_Library *ass_init(void)
 
 int ass_force_reload = 0;       // flag set if global ass-related settings were changed
 
-ASS_Image *ass_mp_render_frame(ASS_Renderer *priv, ASS_Track *track,
+ASS_Image *mp_ass_render_frame(ASS_Renderer *priv, ASS_Track *track,
                                long long now, int *detect_change)
 {
     if (ass_force_reload) {

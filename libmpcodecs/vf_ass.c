@@ -94,10 +94,10 @@ static int config(struct vf_instance *vf,
     vf->priv->line_limits = malloc((vf->priv->outh + 1) / 2 * sizeof(*vf->priv->line_limits));
 
     if (vf->priv->renderer_realaspect) {
-        ass_configure(vf->priv->renderer_realaspect,
-                      vf->priv->outw, vf->priv->outh, 0);
-        ass_configure(vf->priv->renderer_vsfilter,
-                      vf->priv->outw, vf->priv->outh, 0);
+        mp_ass_configure(vf->priv->renderer_realaspect,
+                         vf->priv->outw, vf->priv->outh, 0);
+        mp_ass_configure(vf->priv->renderer_vsfilter,
+                         vf->priv->outw, vf->priv->outh, 0);
         ass_set_aspect_ratio(vf->priv->renderer_realaspect,
                              (double)width / height * d_height / d_width, 1);
         ass_set_aspect_ratio(vf->priv->renderer_vsfilter, 1, 1);
@@ -361,7 +361,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
         vf->priv->renderer_vsfilter : vf->priv->renderer_realaspect;
     if (sub_visibility && renderer && vf->priv->osd->ass_track
 	&& (pts != MP_NOPTS_VALUE))
-        images = ass_mp_render_frame(renderer,
+        images = mp_ass_render_frame(renderer,
                                      vf->priv->osd->ass_track,
 				     (pts + sub_delay) * 1000 + .5, NULL);
 
@@ -398,8 +398,8 @@ static int control(vf_instance_t *vf, int request, void *data)
             ass_renderer_done(vf->priv->renderer_realaspect);
             return CONTROL_FALSE;
         }
-        ass_configure_fonts(vf->priv->renderer_realaspect);
-        ass_configure_fonts(vf->priv->renderer_vsfilter);
+        mp_ass_configure_fonts(vf->priv->renderer_realaspect);
+        mp_ass_configure_fonts(vf->priv->renderer_vsfilter);
         return CONTROL_TRUE;
     case VFCTRL_DRAW_EOSD:
         if (vf->priv->renderer_realaspect)
