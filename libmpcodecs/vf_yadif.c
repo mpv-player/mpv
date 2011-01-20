@@ -411,8 +411,6 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
         return continue_buffered_image(vf);
 }
 
-extern const int under_mencoder;
-
 static int continue_buffered_image(struct vf_instance *vf)
 {
     mp_image_t *mpi = vf->priv->buffered_mpi;
@@ -431,11 +429,10 @@ static int continue_buffered_image(struct vf_instance *vf)
             mpi->width,mpi->height);
         vf_clone_mpi_attributes(dmpi, mpi);
         filter(vf->priv, dmpi->planes, dmpi->stride, mpi->w, mpi->h, i ^ tff ^ 1, tff);
-        if (i < (vf->priv->mode & 1) && !under_mencoder)
+        if (i < (vf->priv->mode & 1))
             vf_queue_frame(vf, continue_buffered_image);
         ret |= vf_next_put_image(vf, dmpi, pts /*FIXME*/);
-        if (!under_mencoder)
-            break;
+        break;
     }
     vf->priv->buffered_i = 1;
     return ret;

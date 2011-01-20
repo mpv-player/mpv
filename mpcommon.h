@@ -30,7 +30,6 @@ extern struct subtitle *vo_sub_last;
 extern int disable_system_conf;
 extern int disable_user_conf;
 
-extern const char *mencoder_version;
 extern const char *mplayer_version;
 
 struct MPContext;

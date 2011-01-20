@@ -888,7 +888,6 @@ static void demux_close_tv(demuxer_t *demuxer)
     demuxer->teletext=NULL;
 }
 
-/* utilities for mplayer (not mencoder!!) */
 int tv_set_color_options(tvi_handle_t *tvh, int opt, int value)
 {
     const tvi_functions_t *funcs = tvh->functions;

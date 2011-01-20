@@ -336,8 +336,6 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 	return continue_buffered_image(vf);
 }
 
-extern const int under_mencoder;
-
 static int continue_buffered_image(struct vf_instance *vf)
 {
 	int i=vf->priv->buffered_i;
@@ -390,8 +388,7 @@ static int continue_buffered_image(struct vf_instance *vf)
 				dmpi->stride[2] = 2*mpi->stride[2];
 			}
 			ret |= vf_next_put_image(vf, dmpi, pts);
-			if (!under_mencoder)
-				break;
+			break;
 		}
 		break;
 	case 1:
@@ -418,8 +415,7 @@ static int continue_buffered_image(struct vf_instance *vf)
 					mpi->chroma_width, mpi->chroma_height, (i^!tff));
 			}
 			ret |= vf_next_put_image(vf, dmpi, pts);
-			if (!under_mencoder)
-				break;
+			break;
 		}
 		break;
 	case 2:
@@ -442,8 +438,7 @@ static int continue_buffered_image(struct vf_instance *vf)
 					dmpi->stride[2], mpi->stride[2]*2, (i^!tff));
 			}
 			ret |= vf_next_put_image(vf, dmpi, pts);
-			if (!under_mencoder)
-				break;
+			break;
 		}
 		break;
 	}

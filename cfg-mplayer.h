@@ -260,7 +260,6 @@ const m_option_t mplayer_opts[]={
     {"menu", "OSD menu support was not compiled in.\n", CONF_TYPE_PRINT,0, 0, 0, NULL},
 #endif /* CONFIG_MENU */
 
-    // these should be moved to -common, and supported in MEncoder
     {"vobsub", &vobsub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 #ifdef CONFIG_UNRAR_EXEC
@@ -278,7 +277,6 @@ const m_option_t mplayer_opts[]={
     OPT_FLAG_ON("benchmark", benchmark, 0),
 
     // dump some stream out instead of playing the file
-    // this really should be in MEncoder instead of MPlayer... -> TODO
     OPT_STRING("dumpfile", stream_dump_name, 0),
     {"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"dumpvideo", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 2, NULL},

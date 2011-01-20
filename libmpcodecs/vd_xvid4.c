@@ -1,5 +1,5 @@
 /*
- * - XviD 1.x decoder module for mplayer/mencoder -
+ * - XviD 1.x decoder module for mplayer -
  *
  * Copyright(C) 2003      Marco Belli <elcabesa@inwind.it>
  *              2003-2004 Edouard Gomez <ed.gomez@free.fr>

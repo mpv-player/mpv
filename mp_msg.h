@@ -21,7 +21,7 @@
 
 #include <stdarg.h>
 
-// defined in mplayer.c and mencoder.c
+// defined in mplayer.c
 extern int verbose;
 
 /* No-op macro to mark translated strings in the sources */

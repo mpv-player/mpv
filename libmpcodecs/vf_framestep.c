@@ -14,9 +14,8 @@
  * if you call the filter with the i (lowercase)
  *    ... -vf framestep=i ...
  * then a I! followed by a cr is printed when a key frame (eg Intra frame) is
- * found, leaving the current line of mplayer/mencoder, where you got the
- * time, in seconds, and frame of the key. Use this information to split the
- * AVI.
+ * found, leaving the current line of mplayer, where you got the time, in
+ * seconds, and frame of the key. Use this information to split the AVI.
  *
  * After the i or alone you can put a positive number and only one frame every
  * x (the number you set) is passed on the filter chain, limiting the output

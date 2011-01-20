@@ -1229,7 +1229,7 @@ struct osd_state *osd_create(void)
 	draw_alpha_init_flag=1;
 	vo_draw_alpha_init();
     }
-    // temp hack, should be moved to mplayer/mencoder later
+    // temp hack, should be moved to mplayer later
     new_osd_obj(OSDTYPE_OSD);
     new_osd_obj(OSDTYPE_SUBTITLE);
     new_osd_obj(OSDTYPE_PROGBAR);

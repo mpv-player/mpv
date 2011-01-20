@@ -98,7 +98,6 @@
 
 #include "input/input.h"
 
-const int under_mencoder = 0;
 int slave_mode=0;
 int enable_mouse_movements=0;
 float start_volume = -1;
