@@ -73,6 +73,24 @@ EOF
   compile_check $TMPC $@
 }
 
+header_check() {
+  cat > $TMPC << EOF
+#include <$1>
+int main(void) { return 0; }
+EOF
+  shift
+  compile_check $TMPC $@
+}
+
+return_check() {
+  cat > $TMPC << EOF
+#include <$1>
+int main(void) { return $2; }
+EOF
+  shift 2
+  compile_check $TMPC $@
+}
+
 statement_check() {
   cat > $TMPC << EOF
 #include <$1>
@@ -93,12 +111,12 @@ EOF
   compile_check $TMPC $@
 }
 
-header_check() {
+return_statement_check() {
   cat > $TMPC << EOF
 #include <$1>
-int main(void) { return 0; }
+int main(void) { $2; return $3; }
 EOF
-  shift
+  shift 3
   compile_check $TMPC $@
 }
 
@@ -4030,13 +4048,7 @@ echocheck "VDPAU"
 if test "$_vdpau" = auto ; then
   _vdpau=no
   if test "$_dl" = yes ; then
-    cat > $TMPC <<EOF
-#include <vdpau/vdpau_x11.h>
-int main(void) {
-    vdp_device_create_x11(0, 0, 0, 0);
-    return VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1; }
-EOF
-    cc_check -lvdpau && _vdpau=yes
+    return_statement_check vdpau/vdpau_x11.h 'vdp_device_create_x11(0, 0, 0, 0)' VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 -lvdpau && _vdpau=yes
   fi
 fi
 if test "$_vdpau" = yes ; then
@@ -4090,11 +4102,7 @@ echores "$_vm"
 echocheck "XF86keysym"
 if test "$_xf86keysym" = auto; then
   _xf86keysym=no
-  cat > $TMPC <<EOF
-#include <X11/XF86keysym.h>
-int main(void) { return XF86XK_AudioPause; }
-EOF
-  cc_check && _xf86keysym=yes
+  return_check X11/XF86keysym.h XF86XK_AudioPause && _xf86keysym=yes
 fi
 if test "$_xf86keysym" = yes ; then
   def_xf86keysym='#define CONFIG_XF86XK 1'
@@ -4484,16 +4492,7 @@ fi
 echocheck "MNG support"
 if test "$_mng" = auto ; then
   _mng=no
-  cat > $TMPC << EOF
-#include <libmng.h>
-int main(void) {
-  const char * p_ver = mng_version_text();
-  return !p_ver || p_ver[0] == 0;
-}
-EOF
-  if cc_check -lmng -lz $_ld_lm ; then
-    _mng=yes
-  fi
+  return_statement_check libmng.h 'const char * p_ver = mng_version_text()' '!p_ver || p_ver[0] == 0' -lmng -lz $_ld_lm && _mng=yes
 fi
 echores "$_mng"
 if test "$_mng" = yes ; then
@@ -4995,12 +4994,8 @@ echores "$_v4l2"
 
 echocheck "OSS Audio"
 if test "$_ossaudio" = auto ; then
-  cat > $TMPC << EOF
-#include <$_soundcard_header>
-int main(void) { return SNDCTL_DSP_SETFRAGMENT; }
-EOF
   _ossaudio=no
-  cc_check && _ossaudio=yes
+  return_check $_soundcard_header SNDCTL_DSP_SETFRAGMENT && _ossaudio=yes
 fi
 if test "$_ossaudio" = yes ; then
   def_ossaudio='#define CONFIG_OSS_AUDIO 1'
