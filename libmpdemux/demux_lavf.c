@@ -201,7 +201,7 @@ static int lavf_check_file(demuxer_t *demuxer){
              read_size > 0 && probe_data_size < PROBE_BUF_SIZE);
     av_free(avpd.buf);
 
-    if(!priv->avif){
+    if (!priv->avif || score <= AVPROBE_SCORE_MAX / 4) {
         mp_msg(MSGT_HEADER,MSGL_V,"LAVF_check: no clue about this gibberish!\n");
         return 0;
     }else
