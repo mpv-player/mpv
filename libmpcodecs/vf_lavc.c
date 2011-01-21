@@ -74,12 +74,12 @@ static int config(struct vf_instance *vf,
     vf->priv->outbuf = malloc(vf->priv->outbuf_size);
 
     if (avcodec_open(&lavc_venc_context, vf->priv->codec) != 0) {
-	mp_tmsg(MSGT_MENCODER,MSGL_ERR,"Could not open codec.\n");
+	mp_tmsg(MSGT_VFILTER,MSGL_ERR,"Could not open codec.\n");
 	return 0;
     }
 
     if (lavc_venc_context.codec->encode == NULL) {
-	mp_msg(MSGT_MENCODER,MSGL_ERR,"avcodec init failed (ctx->codec->encode == NULL)!\n");
+	mp_msg(MSGT_VFILTER,MSGL_ERR,"avcodec init failed (ctx->codec->encode == NULL)!\n");
 	return 0;
     }
 
@@ -143,7 +143,7 @@ static int vf_open(vf_instance_t *vf, char *args){
 
     vf->priv->codec = (AVCodec *)avcodec_find_encoder_by_name("mpeg1video");
     if (!vf->priv->codec) {
-	mp_tmsg(MSGT_MENCODER,MSGL_ERR,"Cannot find codec '%s' in libavcodec...\n", "mpeg1video");
+	mp_tmsg(MSGT_VFILTER,MSGL_ERR,"Cannot find codec '%s' in libavcodec...\n", "mpeg1video");
 	return 0;
     }
 

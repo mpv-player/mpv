@@ -4114,7 +4114,7 @@ if(stream_dump_type==5){
       len=stream_read(mpctx->stream,buf,4096);
       if(len>0) {
         if(fwrite(buf,len,1,f) != 1) {
-          mp_tmsg(MSGT_MENCODER,MSGL_FATAL,"%s: Error writing file.\n",opts->stream_dump_name);
+          mp_tmsg(MSGT_GLOBAL,MSGL_FATAL,"%s: Error writing file.\n",opts->stream_dump_name);
           exit_player(mpctx, EXIT_ERROR);
         }
       }
@@ -4127,7 +4127,7 @@ if(stream_dump_type==5){
       }
   }
   if(fclose(f)) {
-    mp_tmsg(MSGT_MENCODER,MSGL_FATAL,"%s: Error writing file.\n",opts->stream_dump_name);
+    mp_tmsg(MSGT_GLOBAL,MSGL_FATAL,"%s: Error writing file.\n",opts->stream_dump_name);
     exit_player(mpctx, EXIT_ERROR);
   }
   mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Core dumped ;)\n");

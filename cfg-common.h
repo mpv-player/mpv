@@ -285,7 +285,6 @@ const m_option_t msgl_config[]={
     { "lirc", &mp_msg_levels[MSGT_LIRC], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "stream", &mp_msg_levels[MSGT_STREAM], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "cache", &mp_msg_levels[MSGT_CACHE], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
-    { "mencoder", &mp_msg_levels[MSGT_MENCODER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "xacodec", &mp_msg_levels[MSGT_XACODEC], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "tv", &mp_msg_levels[MSGT_TV], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "radio", &mp_msg_levels[MSGT_RADIO], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
@@ -331,7 +330,6 @@ const m_option_t msgl_config[]={
     "   lirc       - lirc_mp.c and input lirc driver\n"
     "   stream     - stream.c\n"
     "   cache      - cache2.c\n"
-    "   mencoder\n"
     "   xacodec    - XAnim codecs\n"
     "   tv         - TV input subsystem\n"
     "   osdep      - OS-dependent parts\n"
