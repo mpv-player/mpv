@@ -1,6 +1,7 @@
 /* avi-fix v0.1 (C) A'rpi
  * simple tool to fix chunk sizes in a RIFF AVI file
- * it doesn't check/fix index, use mencoder -forceidx -oac copy -ovc copy to fix index!
+ * it doesn't check/fix index. You can try to fix it with ffmpeg -i ... -acodec
+ * copy -vcodec copy
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

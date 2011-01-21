@@ -5,8 +5,7 @@ Preamble
 --------
 
 In this directory you can find some nice scripts and code that makes
-using MPlayer and MEncoder easier, for example scripts for DVD track
-encoding in three pass mode or creating SVCDs from a movie.
+using MPlayer easier.
 
 FIXME: Document the following tools:
 
@@ -84,93 +83,6 @@ Usage:        wma2ogg [options] <-f FILE1 | -f FILE2 ... | -a>
               -lame       I wanna use L.A.M.E. sure enough!
               -br         bitrate (kb/s) [default=from the WMA]
               -del        remove WMA file(s) after the transcoding
-
-
-
-MEncoder scripts in the TOOLS dir
----------------------------------
-
-divx2svcd.sh
-
-Author:       Miklos Vajna
-
-Description:  A simple utility that creates an SVCD from a video in an AVI
-              container.
-
-Usage:        divx2svcd.sh <input_avi> [options]
-              see 'divx2svcd.sh -h' for more info
-
-
-mencvcd.sh
-
-Author:       Jürgen Hammelmann
-
-Description:  Converts DVD (or anything else that MPlayer plays) to (S)VCD
-
-Usage:        mencvcd.sh <basename> [mencvcd.sh options] [mplayer options]
-              see 'mencvcd.sh -h' for more info
-
-Note:         Requires MPlayer, mjpegtools, VCDImager, cdrdao, and optionally
-              LAME, tooLAME and SoX.
-
-
-dvd2divxscript.pl
-
-Author:       Florian Schilhabel
-
-Description:  Yet another DVD to divx helper script.
-              This script encodes a DVD track in three pass mode to MPEG-4 with
-              libavcodec. Optionally it writes the resulting movie file to
-              CD-ROM the corresponding audio track to MP3. It can also shut
-              down the computer when it finishes. If you like, you can
-              watch the MEncoder output on /dev/tty8.
-
-Usage:        --help       show help
-              --abr        (AudioBitRate) Please enter the desired bitrate this
-                           can be either [96|128|192] kbit/sec (default: 128).
-              --lang       Specify the Language of the audio track this can be
-                           for example <en> or <de> (default: <de>).
-              --dvd        Specify the DVD track you want to encode.
-              --cdsize     Specify the size of your CD-ROM (default: 700MB).
-              --shutdown   Shutdown the system, when the encoding process has
-                           finished. Needs appropriate privileges.
-              --out        Specify the name of your encoded movie. The file
-                           extension will be appended automatically.
-              --writecd    Takes the newly created movie and writes it to a
-                           CD-ROM.
-              --writedev   cdrecord device identifier, for example 0,1,0
-              --speed      writing speed (default: 4)
-              --dvd-device device to pull the video off (default: /dev/dvd)
-
-
-aconvert.sh
-
-Author:       Jonas Jermann
-
-Description:  A hack to allow MEncoder to read respectively encode from audio
-              only files.
-
-Usage:        aconvert.sh <"input file"> <"output file"> <"options">
-              If no options are specified the following is assumed:
-              -oac lavc -lavcopts acodec=mp3:abitrate=192
-
-Note:         The script is probably bash dependent and it's just a quick
-              hack, feel free to improve it (or much better: fix MEncoder ;).
-
-
-
-qepdvcd.sh
-
-Author:       Reynaldo H. Verdejo Pinochet
-
-Description:  converter from any supported format to VCD/SVCD PAL/NTSC
-
-Usage:        qepdvcd.sh file <options>
-              Run with no arguments to see the list of options.
-
-Note:         You will need vcdimager/cdrecord to master/burn the resulting
-              files.
-
 
 
 Tech scripts in the TOOLS dir
@@ -302,8 +214,8 @@ Description:  A simple tool to fix chunk sizes in RIFF AVI files.
 
 Usage:        avi-fix [-fix] <badfile.avi>
 
-Note:         It does not check or fix the index, to do this use
-              'mencoder -forceidx -oac copy -ovc copy'.
+Note:         It does not check or fix the index. You can try to fix it with
+              ffmpeg -i ... -acodec copy -vcodec copy.
 
 
 checktree.sh
