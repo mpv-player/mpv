@@ -851,6 +851,7 @@ static void demux_close_ty( demuxer_t *demux )
 
 static int ty_check_file(demuxer_t* demuxer)
 {
+  demuxer->filepos = 0;
   TiVoInfo *tivo = calloc(1, sizeof(TiVoInfo));
   demuxer->priv = tivo;
   return ds_fill_buffer(demuxer->video) ? DEMUXER_TYPE_MPEG_TY : 0;
