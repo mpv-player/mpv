@@ -3734,11 +3734,12 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
          * specify chapter end times that are one frame too early;
          * we don't want to try seeking over a one frame gap. */
         int64_t join_diff = c->start - starttime - prev_part_offset;
-        if (part_count == 0 || FFABS(join_diff) > opts->chapter_merge_threshold
+        if (part_count == 0
+            || FFABS(join_diff) > opts->chapter_merge_threshold * 1000000
             || sources + j != timeline[part_count - 1].source) {
             timeline[part_count].source = sources + j;
-            timeline[part_count].start = starttime / 1000.;
-            timeline[part_count].source_start = c->start / 1000.;
+            timeline[part_count].start = starttime / 1e9;
+            timeline[part_count].source_start = c->start / 1e9;
             prev_part_offset = c->start - starttime;
             part_count++;
         } else if (part_count > 0 && join_diff) {
@@ -3748,12 +3749,12 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
                    "offset %d ms.\n", i, (int) join_diff);
             starttime += join_diff;
         }
-        chapters[num_chapters].start = starttime / 1000.;
+        chapters[num_chapters].start = starttime / 1e9;
         chapters[num_chapters].name = talloc_strdup(chapters, c->name);
         starttime += c->end - c->start;
         num_chapters++;
     }
-    timeline[part_count].start = starttime / 1000.;
+    timeline[part_count].start = starttime / 1e9;
 
     if (!part_count) {
         // None of the parts come from the file itself???
@@ -3768,7 +3769,7 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
            timeline[part_count].start);
     if (missing_time)
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "There are %.3f seconds missing "
-               "from the timeline!\n", missing_time / 1000.);
+               "from the timeline!\n", missing_time / 1e9);
     mp_msg(MSGT_CPLAYER, MSGL_V, "Source files:\n");
     for (int i = 0; i < num_sources; i++)
         mp_msg(MSGT_CPLAYER, MSGL_V, "%d: %s\n", i,

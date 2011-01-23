@@ -588,8 +588,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     for(i=0; i < avfc->nb_chapters; i++) {
         AVChapter *c = avfc->chapters[i];
-        uint64_t start = av_rescale_q(c->start, c->time_base, (AVRational){1,1000});
-        uint64_t end   = av_rescale_q(c->end, c->time_base, (AVRational){1,1000});
+        uint64_t start = av_rescale_q(c->start, c->time_base, (AVRational){1,1000000000});
+        uint64_t end   = av_rescale_q(c->end, c->time_base, (AVRational){1,1000000000});
         t = av_metadata_get(c->metadata, "title", NULL, 0);
         demuxer_add_chapter(demuxer, t ? BSTR(t->value) : BSTR(NULL), start, end);
     }
