@@ -1077,6 +1077,15 @@ Expand TEXT only if the property NAME is not available.
 Play files according to a playlist file (ASX, Winamp, SMIL, or
 one-file-per-line format).
 .br
+.I WARNING:
+The way MPlayer parses and uses playlist files is not safe against
+maliciously constructed files.
+Such files may trigger harmful actions.
+This has been the case for all MPlayer versions, but unfortunately this
+fact was not well documented earlier, and some people have even misguidedly
+recommended use of -playlist with untrusted sources.
+Do NOT use -playlist with random internet sources or files you don't trust!
+.br
 .I NOTE:
 This option is considered an entry so options found after it will apply
 only to the elements of this playlist.
