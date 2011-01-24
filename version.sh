@@ -3,9 +3,9 @@
 test "$1" && extra="-$1"
 
 # Extract revision number from file used by daily tarball snapshots
-# or from the places different Subversion versions have it.
+# or from "git describe" output
 git_revision=$(cat snapshot_version 2> /dev/null)
-test $git_revision || test -d .git && git_revision=`git describe --always`
+test $git_revision || test ! -d .git || git_revision=`git describe --always`
 test $git_revision && git_revision=git-$git_revision
 test $git_revision || git_revision=UNKNOWN
 
@@ -15,7 +15,7 @@ test $version || version=$git_revision
 
 NEW_REVISION="#define VERSION \"${version}${extra}\""
 OLD_REVISION=$(head -n 1 version.h 2> /dev/null)
-TITLE='#define MP_TITLE "%s "VERSION" (C) 2000-2010 MPlayer Team\n"'
+TITLE='#define MP_TITLE "%s "VERSION" (C) 2000-2011 MPlayer Team\n"'
 
 # Update version.h only on revision changes to avoid spurious rebuilds
 if test "$NEW_REVISION" != "$OLD_REVISION"; then
