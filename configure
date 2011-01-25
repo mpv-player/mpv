@@ -337,8 +337,7 @@ Codecs:
   --disable-real            disable RealPlayer codecs support [enabled]
   --disable-xvid            disable Xvid [autodetect]
   --disable-libnut          disable libnut [autodetect]
-  --disable-ffmpeg_a        disable static FFmpeg [autodetect]
-  --disable-ffmpeg_so       disable shared FFmpeg [autodetect]
+  --disable-ffmpeg          disable FFmpeg [autodetect]
   --disable-tremor-internal disable internal Tremor [enabled]
   --enable-tremor-low       enable lower accuracy internal Tremor [disabled]
   --enable-tremor           enable external Tremor [autodetect]
@@ -398,7 +397,6 @@ Video output:
   --enable-xshape          enable XShape support [autodetect]
   --disable-xss            disable screensaver support via xss [autodetect]
   --enable-fbdev           enable FBDev video output [autodetect]
-  --enable-mlib            enable mediaLib video output (Solaris) [disable]
   --enable-3dfx            enable obsolete /dev/3dfx video output [disable]
   --enable-tdfxfb          enable tdfxfb video output [disable]
   --enable-s3fb            enable s3fb (S3 ViRGE) video output [disable]
@@ -632,7 +630,6 @@ _mga=auto
 _xmga=auto
 _vm=auto
 _xf86keysym=auto
-_mlib=no #broken, thus disabled
 _sgiaudio=auto
 _sunaudio=auto
 _alsa=auto
@@ -1029,8 +1026,6 @@ for ac_option do
   --disable-vm)         _vm=no          ;;
   --enable-xf86keysym)  _xf86keysym=yes ;;
   --disable-xf86keysym) _xf86keysym=no  ;;
-  --enable-mlib)        _mlib=yes       ;;
-  --disable-mlib)       _mlib=no        ;;
   --enable-sunaudio)    _sunaudio=yes   ;;
   --disable-sunaudio)   _sunaudio=no    ;;
   --enable-sgiaudio)    _sgiaudio=yes   ;;
@@ -5355,18 +5350,6 @@ fi
 echores "$_sunaudio"
 
 
-def_mlib='#define CONFIG_MLIB 0'
-if sunos; then
-echocheck "Sun mediaLib"
-if test "$_mlib" = auto ; then
-  _mlib=no
-  cc_check mlib.h "mlib_VideoColorYUV2ABGR420(0, 0, 0, 0, 0, 0, 0, 0, 0)" -lmlib &&
-    _mlib=yes && def_mlib='#define CONFIG_MLIB 1'
-fi
-echores "$_mlib"
-fi #if sunos
-
-
 if darwin; then
 echocheck "CoreAudio"
 if test "$_coreaudio" = auto ; then
@@ -7336,19 +7319,7 @@ RANLIB     = $_ranlib
 YASM       = $_yasm
 YASMFLAGS  = $YASMFLAGS
 
-# Some FFmpeg codecs depend on these. Enable them unconditionally for now.
-CONFIG_AANDCT  = yes
-CONFIG_FFT     = yes
-CONFIG_GOLOMB  = yes
-CONFIG_H264DSP = yes
-CONFIG_LPC     = yes
-CONFIG_MDCT    = yes
-CONFIG_RDFT    = yes
-
 CONFIG_BZLIB    = $bzlib
-CONFIG_ENCODERS = yes
-CONFIG_GPL      = yes
-CONFIG_MLIB     = $_mlib
 CONFIG_VDPAU    = $_vdpau
 CONFIG_XVMC     = $_xvmc
 CONFIG_ZLIB     = $_zlib
@@ -7736,10 +7707,6 @@ $def_ffmpeg
 $def_ffmpeg_eval_api
 $def_ffmpeg_internals
 
-#define CONFIG_DECODERS 1
-#define CONFIG_ENCODERS 1
-#define CONFIG_DEMUXERS 1
-
 $def_arpa_inet_h
 $def_bswap
 $def_bzlib
@@ -7753,7 +7720,6 @@ $def_log2
 $def_log2f
 $def_lrint
 $def_memalign_hack
-$def_mlib
 $def_mkstemp
 $def_posix_memalign
 $def_pthreads
@@ -7765,35 +7731,7 @@ $def_truncf
 $def_xform_asm
 $def_yasm
 
-#define CONFIG_FASTDIV 0
-#define CONFIG_FFSERVER 0
-#define CONFIG_GPL 1
-#define CONFIG_GRAY 0
-#define CONFIG_HARDCODED_TABLES 0
-#define CONFIG_LIBVORBIS 0
-#define CONFIG_POWERPC_PERF 0
-#define CONFIG_SMALL 0
-#define CONFIG_SWSCALE_ALPHA 1
-
-#define HAVE_ATTRIBUTE_PACKED 1
-#define HAVE_GETHRTIME 0
 #define HAVE_INLINE_ASM 1
-#define HAVE_LDBRX 0
-#define HAVE_POLL_H 1
-#define HAVE_PPC4XX 0
-#define HAVE_VFP_ARGS 1
-#define HAVE_VIRTUALALLOC 0
-
-/* Some FFmpeg codecs depend on these. Enable them unconditionally for now. */
-#define CONFIG_AANDCT 1
-#define CONFIG_DCT 1
-#define CONFIG_DWT 1
-#define CONFIG_FFT 1
-#define CONFIG_GOLOMB 1
-#define CONFIG_H264DSP 1
-#define CONFIG_LPC 1
-#define CONFIG_MDCT 1
-#define CONFIG_RDFT 1
 
 /* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
 #ifndef MP_DEBUG
