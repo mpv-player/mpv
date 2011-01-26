@@ -38,7 +38,7 @@
 #include "subreader.h"
 
 #include "libvo/video_out.h"
-#include "libvo/sub.h"
+#include "sub.h"
 
 
 #define CC_MAX_LINE_LENGTH 64

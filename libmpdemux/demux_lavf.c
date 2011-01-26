@@ -36,7 +36,7 @@
 #include "demuxer.h"
 #include "stheader.h"
 #include "m_option.h"
-#include "libvo/sub.h"
+#include "sub/sub.h"
 
 #include "libavformat/avformat.h"
 #include "libavformat/avio.h"

@@ -35,7 +35,7 @@
 #include "talloc.h"
 #include "mplayer.h"
 #include "mp_msg.h"
-#include "video_out.h"
+#include "libvo/video_out.h"
 #include "font_load.h"
 #include "sub.h"
 #include "spudec.h"

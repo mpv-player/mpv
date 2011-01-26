@@ -25,7 +25,7 @@
 
 #include "mpcommon.h"
 #include "libmpdemux/stheader.h"
-#include "libvo/sub.h"
+#include "sub.h"
 #include "ass_mp.h"
 #include "sd.h"
 #include "subassconvert.h"

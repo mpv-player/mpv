@@ -42,7 +42,7 @@
 #include "video_out_internal.h"
 #include "aspect.h"
 #include "spuenc.h"
-#include "sub.h"
+#include "sub/sub.h"
 #ifdef CONFIG_X11
 #include "x11_common.h"
 #endif

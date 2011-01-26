@@ -33,14 +33,14 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-#include "libvo/sub.h"
+#include "sub/sub.h"
 
 #include "libvo/fastmemcpy.h"
 
 #include "m_option.h"
 #include "m_struct.h"
 
-#include "ass_mp.h"
+#include "sub/ass_mp.h"
 
 #define _r(c)  ((c)>>24)
 #define _g(c)  (((c)>>16)&0xFF)

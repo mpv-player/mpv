@@ -71,16 +71,16 @@
 
 #include "libavutil/avstring.h"
 
-#include "subreader.h"
+#include "sub/subreader.h"
 #include "sub/dec_sub.h"
 
 #include "mp_osd.h"
 #include "libvo/video_out.h"
 
-#include "libvo/font_load.h"
-#include "libvo/sub.h"
+#include "sub/font_load.h"
+#include "sub/sub.h"
 #include "ffmpeg_files/intreadwrite.h"
-#include "av_sub.h"
+#include "sub/av_sub.h"
 #include "libmpcodecs/dec_teletext.h"
 #include "cpudetect.h"
 #include "version.h"
@@ -95,8 +95,8 @@
 
 #include "edl.h"
 
-#include "spudec.h"
-#include "vobsub.h"
+#include "sub/spudec.h"
+#include "sub/vobsub.h"
 
 #include "osdep/getch2.h"
 #include "osdep/timer.h"
@@ -335,7 +335,7 @@ char *vobsub_name=NULL;
 int   subcc_enabled=0;
 int suboverlap_enabled = 1;
 
-#include "ass_mp.h"
+#include "sub/ass_mp.h"
 
 char* current_module=NULL; // for debugging
 

@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include "old_vo_wrapper.h"
 #include "video_out.h"
-#include "sub.h"
+#include "sub/sub.h"
 
 struct vo *global_vo;
 struct osd_state *global_osd;

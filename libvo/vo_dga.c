@@ -333,7 +333,7 @@ static void check_events(void)
 
 //---------------------------------------------------------
 
-#include "sub.h"
+#include "sub/sub.h"
 
 static void draw_osd(void)
 {

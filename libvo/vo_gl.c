@@ -31,13 +31,13 @@
 #include "subopt-helper.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "font_load.h"
-#include "sub.h"
+#include "sub/font_load.h"
+#include "sub/sub.h"
 
 #include "gl_common.h"
 #include "aspect.h"
 #include "fastmemcpy.h"
-#include "ass_mp.h"
+#include "sub/ass_mp.h"
 
 #ifdef CONFIG_GL_SDL
 #ifdef CONFIG_SDL_SDL_H

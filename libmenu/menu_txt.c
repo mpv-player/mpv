@@ -30,7 +30,7 @@
 #include "m_option.h"
 #include "menu.h"
 
-#include "libvo/font_load.h"
+#include "sub/font_load.h"
 #include "osdep/keycodes.h"
 
 struct menu_priv_s {

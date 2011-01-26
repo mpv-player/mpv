@@ -29,8 +29,8 @@
 
 #include "libvo/video_out.h"
 
-#include "ass_mp.h"
-#include "libvo/sub.h"
+#include "sub/ass_mp.h"
+#include "sub/sub.h"
 
 //===========================================================================//
 

@@ -23,7 +23,7 @@
 #include <stdio.h>
 
 #include "libvo/video_out.h"
-#include "libvo/sub.h"
+#include "sub.h"
 #include "subreader.h"
 
 #include "mp_msg.h"

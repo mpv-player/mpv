@@ -33,7 +33,7 @@
 #include "mp_msg.h"
 #include "subreader.h"
 #include "mpcommon.h"
-#include "sub/subassconvert.h"
+#include "subassconvert.h"
 #include "options.h"
 #include "stream/stream.h"
 #include "libavutil/common.h"

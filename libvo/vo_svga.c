@@ -59,7 +59,7 @@ TODO:
 #include "vosub_vidix.h"
 #endif
 
-#include "sub.h"
+#include "sub/sub.h"
 
 #include "mp_msg.h"
 //#include "mp_image.h"

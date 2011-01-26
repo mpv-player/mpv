@@ -51,7 +51,7 @@
 
 #include "mp_msg.h"
 
-#include "sub.h"
+#include "sub/sub.h"
 
 #include "fastmemcpy.h"
 #include "libavutil/rational.h"

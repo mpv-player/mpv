@@ -38,7 +38,7 @@
 #include "mpeg_hdr.h"
 
 /* sub_cc (closed captions)*/
-#include "sub_cc.h"
+#include "sub/sub_cc.h"
 
 /* biCompression constant */
 #define BI_RGB        0L

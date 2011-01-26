@@ -34,7 +34,7 @@
 #include "video_out_internal.h"
 #include "mp_msg.h"
 #include "m_option.h"
-#include "sub.h"
+#include "sub/sub.h"
 #include "path.h"
 #include "libmpdemux/mpeg_packetizer.h"
 #include "x11_common.h"

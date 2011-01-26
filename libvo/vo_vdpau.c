@@ -41,7 +41,7 @@
 #include "video_out.h"
 #include "x11_common.h"
 #include "aspect.h"
-#include "sub.h"
+#include "sub/sub.h"
 #include "subopt-helper.h"
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"
@@ -49,12 +49,12 @@
 
 #include "libavcodec/vdpau.h"
 
-#include "font_load.h"
+#include "sub/font_load.h"
 
 #include "libavutil/common.h"
 #include "libavutil/mathematics.h"
 
-#include "ass_mp.h"
+#include "sub/ass_mp.h"
 
 #define WRAP_ADD(x, a, m) ((a) < 0 \
                            ? ((x)+(a)+(m) < (m) ? (x)+(a)+(m) : (x)+(a)) \

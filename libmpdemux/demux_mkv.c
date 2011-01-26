@@ -41,11 +41,7 @@
 
 #include "mp_msg.h"
 
-#include "vobsub.h"
-#include "subreader.h"
-#include "libvo/sub.h"
-
-#include "ass_mp.h"
+#include "sub/sub.h"
 
 #include "libavutil/common.h"
 
