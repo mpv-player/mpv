@@ -294,6 +294,7 @@ const m_option_t mplayer_opts[]={
     {"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
 
+    {"leak-report", "", CONF_TYPE_PRINT, 0, 0, 0, (void*)1},
     // these should be removed when gmplayer is forgotten
     {"gui", "Internal GUI was removed. Use some other frontend instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
     {"nogui", "Internal GUI was removed, -nogui is no longer valid.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},

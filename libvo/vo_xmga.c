@@ -46,7 +46,7 @@
 #endif
 
 #include "x11_common.h"
-#include "sub.h"
+#include "sub/sub.h"
 #include "aspect.h"
 
 #ifdef SHOW_TIME

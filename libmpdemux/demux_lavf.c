@@ -36,7 +36,7 @@
 #include "demuxer.h"
 #include "stheader.h"
 #include "m_option.h"
-#include "libvo/sub.h"
+#include "sub/sub.h"
 
 #include "libavformat/avformat.h"
 #include "libavformat/avio.h"
@@ -588,8 +588,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     for(i=0; i < avfc->nb_chapters; i++) {
         AVChapter *c = avfc->chapters[i];
-        uint64_t start = av_rescale_q(c->start, c->time_base, (AVRational){1,1000});
-        uint64_t end   = av_rescale_q(c->end, c->time_base, (AVRational){1,1000});
+        uint64_t start = av_rescale_q(c->start, c->time_base, (AVRational){1,1000000000});
+        uint64_t end   = av_rescale_q(c->end, c->time_base, (AVRational){1,1000000000});
         t = av_metadata_get(c->metadata, "title", NULL, 0);
         demuxer_add_chapter(demuxer, t ? BSTR(t->value) : BSTR(NULL), start, end);
     }
@@ -756,11 +756,11 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
     if(ts != AV_NOPTS_VALUE){
         dp->pts = ts * av_q2d(priv->avfc->streams[id]->time_base);
         priv->last_pts= dp->pts * AV_TIME_BASE;
-        // always set endpts for subtitles, even if PKT_FLAG_KEY is not set,
+        // always set duration for subtitles, even if PKT_FLAG_KEY is not set,
         // otherwise they will stay on screen to long if e.g. ASS is demuxed from mkv
         if((ds == demux->sub || (pkt.flags & PKT_FLAG_KEY)) &&
            pkt.convergence_duration > 0)
-            dp->endpts = dp->pts + pkt.convergence_duration * av_q2d(priv->avfc->streams[id]->time_base);
+            dp->duration = pkt.convergence_duration * av_q2d(priv->avfc->streams[id]->time_base);
     }
     dp->pos=demux->filepos;
     dp->flags= !!(pkt.flags&PKT_FLAG_KEY);

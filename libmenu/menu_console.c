@@ -38,7 +38,7 @@
 #include "m_option.h"
 #include "menu.h"
 
-#include "libvo/font_load.h"
+#include "sub/font_load.h"
 #include "osdep/keycodes.h"
 #include "input/input.h"
 #include "osdep/timer.h"

@@ -27,6 +27,7 @@
 
 #include "stream/stream.h"
 #include "bstr.h"
+#include "mpcommon.h"
 
 struct MPOpts;
 
@@ -96,9 +97,6 @@ struct MPOpts;
 // A virtual demuxer type for the network code
 #define DEMUXER_TYPE_PLAYLIST (2<<16)
 
-
-#define MP_NOPTS_VALUE (-1LL<<63) //both int64_t and double should be able to represent this exactly
-
 enum timestamp_type {
     TIMESTAMP_TYPE_PTS,
     TIMESTAMP_TYPE_SORT,
@@ -129,7 +127,7 @@ enum timestamp_type {
 typedef struct demux_packet {
   int len;
   double pts;
-  double endpts;
+  double duration;
   double stream_pts;
   off_t pos;  // position in index (AVI) or file (MPG)
   unsigned char* buffer;

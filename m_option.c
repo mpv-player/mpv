@@ -970,7 +970,7 @@ static int parse_print(const m_option_t* opt,const char *name, const char *param
 
   if(opt->priv == NULL)
     return M_OPT_EXIT;
-  return 1;
+  return 0;
 }
 
 const m_option_type_t m_option_type_print = {

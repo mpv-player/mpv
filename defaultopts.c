@@ -46,6 +46,10 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .movie_aspect = -1.,
         .flip = -1,
         .vd_use_slices = 1,
+#ifdef CONFIG_ASS
+        .ass_enabled = 1,
+#endif
+
         .lavc_param = {
             .workaround_bugs = 1, // autodetect
             .error_resilience = 2,
@@ -60,8 +64,6 @@ void set_default_mplayer_options(struct MPOpts *opts)
              .use_lircc = 1,
 #ifdef CONFIG_APPLE_REMOTE
              .use_ar = 1,
-#else
-             .use_ar = 0,
 #endif
              .default_bindings = 1,
          }

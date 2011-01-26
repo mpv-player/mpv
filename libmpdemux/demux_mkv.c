@@ -41,11 +41,7 @@
 
 #include "mp_msg.h"
 
-#include "vobsub.h"
-#include "subreader.h"
-#include "libvo/sub.h"
-
-#include "ass_mp.h"
+#include "sub/sub.h"
 
 #include "libavutil/common.h"
 
@@ -184,7 +180,7 @@ typedef struct mkv_demuxer {
     } *cluster_positions;
     int num_cluster_pos;
 
-    int64_t skip_to_timecode;
+    uint64_t skip_to_timecode;
     int v_skip_to_keyframe, a_skip_to_keyframe;
 
     int num_audio_tracks;
@@ -786,8 +782,8 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
             if (!ca->n_chapter_time_start)
                 mp_msg(MSGT_DEMUX, warn_level,
                        "[mkv] Chapter lacks start time\n");
-            chapter.start = ca->chapter_time_start / 1000000;
-            chapter.end = ca->chapter_time_end / 1000000;
+            chapter.start = ca->chapter_time_start;
+            chapter.end = ca->chapter_time_end;
 
             if (ca->n_chapter_display) {
                 if (ca->n_chapter_display > 1)
@@ -824,14 +820,14 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
             mp_msg(MSGT_DEMUX, MSGL_V,
                    "[mkv] Chapter %u from %02d:%02d:%02d.%03d "
                    "to %02d:%02d:%02d.%03d, %.*s\n", i,
-                   (int) (chapter.start / 60 / 60 / 1000),
-                   (int) ((chapter.start / 60 / 1000) % 60),
-                   (int) ((chapter.start / 1000) % 60),
-                   (int) (chapter.start % 1000),
-                   (int) (chapter.end / 60 / 60 / 1000),
-                   (int) ((chapter.end / 60 / 1000) % 60),
-                   (int) ((chapter.end / 1000) % 60),
-                   (int) (chapter.end % 1000),
+                   (int) (chapter.start / 60 / 60 / 1000000000),
+                   (int) ((chapter.start / 60 / 1000000000) % 60),
+                   (int) ((chapter.start / 1000000000) % 60),
+                   (int) (chapter.start % 1000000000),
+                   (int) (chapter.end / 60 / 60 / 1000000000),
+                   (int) ((chapter.end / 60 / 1000000000) % 60),
+                   (int) ((chapter.end / 1000000000) % 60),
+                   (int) (chapter.end % 1000000000),
                    BSTR_P(name));
 
             if (idx == selected_edition){
@@ -1883,13 +1879,13 @@ static void handle_subtitles(demuxer_t *demuxer, mkv_track_t *track,
     sub_utf8 = 1;
     dp = new_demux_packet(size);
     memcpy(dp->buffer, block, size);
-    dp->pts = timecode / 1000.0;
-    dp->endpts = (timecode + block_duration) / 1000.0;
+    dp->pts = timecode / 1e9;
+    dp->duration = block_duration / 1e9;
     ds_add_packet(demuxer->sub, dp);
 }
 
 static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
-                             uint8_t *buffer, uint32_t size, int block_bref)
+                             uint8_t *buffer, uint32_t size, int64_t block_bref)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     demux_packet_t *dp;
@@ -1915,7 +1911,7 @@ static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
 }
 
 static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
-                             uint8_t *buffer, uint32_t size, int block_bref)
+                             uint8_t *buffer, uint32_t size, int64_t block_bref)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     int sps = track->sub_packet_size;
@@ -2028,7 +2024,7 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
     mkv_track_t *track = NULL;
     demux_stream_t *ds = NULL;
     uint64_t old_length;
-    int64_t tc;
+    uint64_t tc;
     uint32_t *lace_size;
     uint8_t laces, flags;
     int i, num, tmp, use_this_block = 1;
@@ -2048,10 +2044,8 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
         return 0;
     block += old_length - length;
 
-    tc = (time * mkv_d->tc_scale + mkv_d->cluster_tc) / 1000000.0 + 0.5;
-    if (tc < 0)
-        tc = 0;
-    current_pts = tc / 1000.0;
+    tc = time * mkv_d->tc_scale + mkv_d->cluster_tc;
+    current_pts = tc / 1e9;
 
     for (i = 0; i < mkv_d->num_tracks; i++)
         if (mkv_d->tracks[i]->tnum == num) {
@@ -2080,7 +2074,7 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
             sh_audio_t *sh = (sh_audio_t *) ds->sh;
 
             if (block_duration != 0) {
-                sh->i_bps = length * 1000 / block_duration;
+                sh->i_bps = length * 1e9 / block_duration;
                 track->fix_i_bps = 0;
             } else if (track->qt_last_a_pts == 0.0)
                 track->qt_last_a_pts = current_pts;
@@ -2186,8 +2180,7 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
                         free(block);
                         return 0;
                     }
-                    block_duration =
-                        block_duration * mkv_d->tc_scale / 1000000.0 + 0.5;
+                    block_duration *= mkv_d->tc_scale;
                     break;
 
                 case MATROSKA_ID_BLOCK:
@@ -2387,7 +2380,7 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
      * target time after the last entry - then still seek to the first/last
      * entry if that's further in the direction wanted than mkv_d->last_pts.
      */
-    int64_t min_diff = target_timecode - mkv_d->last_pts * 1000;
+    int64_t min_diff = target_timecode - (int64_t)(mkv_d->last_pts * 1e9 + 0.5);
     if (flags & SEEK_BACKWARD)
         min_diff = -min_diff;
     min_diff = FFMAX(min_diff, 1);
@@ -2395,8 +2388,7 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
         if (seek_id < 0 || mkv_d->indexes[i].tnum == seek_id) {
             int64_t diff =
                 target_timecode -
-                (int64_t) (mkv_d->indexes[i].timecode *
-                           mkv_d->tc_scale / 1000000.0 + 0.5);
+                (int64_t) (mkv_d->indexes[i].timecode * mkv_d->tc_scale);
             if (flags & SEEK_BACKWARD)
                 diff = -diff;
             if (diff <= 0) {
@@ -2442,9 +2434,8 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
 
         if (!(flags & SEEK_ABSOLUTE))   /* relative seek */
             rel_seek_secs += mkv_d->last_pts;
-        int64_t target_timecode = rel_seek_secs * 1000.0;
-        if (target_timecode < 0)
-            target_timecode = 0;
+        rel_seek_secs = FFMAX(rel_seek_secs, 0);
+        int64_t target_timecode = rel_seek_secs * 1e9 + 0.5;
 
         if (mkv_d->indexes == NULL) {   /* no index was found */
             if (seek_creating_index(demuxer, rel_seek_secs, flags) < 0)
@@ -2462,7 +2453,8 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
         if (flags & SEEK_FORWARD)
             mkv_d->skip_to_timecode = target_timecode;
         else
-            mkv_d->skip_to_timecode = index ? index->timecode : 0;
+            mkv_d->skip_to_timecode = index ? index->timecode * mkv_d->tc_scale
+                                            : 0;
         mkv_d->a_skip_to_keyframe = 1;
 
         demux_mkv_fill_buffer(demuxer, NULL);
@@ -2496,7 +2488,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
 
         if (demuxer->video->id >= 0)
             mkv_d->v_skip_to_keyframe = 1;
-        mkv_d->skip_to_timecode = index->timecode;
+        mkv_d->skip_to_timecode = index->timecode * mkv_d->tc_scale;
         mkv_d->a_skip_to_keyframe = 1;
 
         demux_mkv_fill_buffer(demuxer, NULL);

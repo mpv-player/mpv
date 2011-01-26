@@ -47,7 +47,7 @@
 #include "input/input.h"
 #include "input/mouse.h"
 #include "subopt-helper.h"
-#include "sub.h"
+#include "sub/sub.h"
 
 #include "cpudetect.h"
 #include "libswscale/swscale.h"

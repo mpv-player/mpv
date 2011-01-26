@@ -46,7 +46,7 @@ static int gXErrorFlag;
 static int CompletionType = -1;
 #endif
 
-#include "sub.h"
+#include "sub/sub.h"
 
 #include "libswscale/swscale.h"
 #include "libmpcodecs/vf_scale.h"

@@ -45,7 +45,7 @@
 #include "libavcodec/avcodec.h"
 #include "libavcodec/xvmc.h"
 
-#include "sub.h"
+#include "sub/sub.h"
 #include "aspect.h"
 
 #include "subopt-helper.h"

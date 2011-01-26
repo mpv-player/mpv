@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #include <ass/ass.h>
 #include <ass/ass_types.h>
@@ -69,9 +70,7 @@ extern char *sub_cp;
 static char *sub_cp = 0;
 #endif
 
-void process_force_style(ASS_Track *track);
-
-ASS_Track *ass_default_track(ASS_Library *library)
+ASS_Track *mp_ass_default_track(ASS_Library *library)
 {
     ASS_Track *track = ass_new_track(library);
 
@@ -84,13 +83,9 @@ ASS_Track *ass_default_track(ASS_Library *library)
         ass_read_styles(track, ass_styles_file, sub_cp);
 
     if (track->n_styles == 0) {
-        ASS_Style *style;
-        int sid;
-        double fs;
-        uint32_t c1, c2;
-
-        sid = ass_alloc_style(track);
-        style = track->styles + sid;
+        track->Kerning = true;
+        int sid = ass_alloc_style(track);
+        ASS_Style *style = track->styles + sid;
         style->Name = strdup("Default");
         style->FontName = (font_fontconfig >= 0
                            && sub_font_name) ? strdup(sub_font_name)
@@ -98,30 +93,34 @@ ASS_Track *ass_default_track(ASS_Library *library)
                && font_name) ? strdup(font_name) : strdup("Sans");
         style->treat_fontname_as_pattern = 1;
 
-        fs = track->PlayResY * text_font_scale_factor / 100.;
-        // approximate autoscale coefficients
+        double fs = track->PlayResY * text_font_scale_factor / 100.;
+        /* The font size is always proportional to video height only;
+         * real -subfont-autoscale behavior is not implemented.
+         * Apply a correction that corresponds to about 4:3 aspect ratio
+         * video to get a size somewhat closer to what non-libass rendering
+         * would produce with the same text_font_scale_factor
+         * and subtitle_autoscale.
+         */
         if (subtitle_autoscale == 2)
             fs *= 1.3;
         else if (subtitle_autoscale == 3)
-            fs *= 1.4;
-        style->FontSize = fs;
+            fs *= 1.7;
 
+        uint32_t c1 = 0xFFFFFF00;
+        uint32_t c2 = 0x00000000;
         if (ass_color)
             c1 = strtoll(ass_color, NULL, 16);
-        else
-            c1 = 0xFFFF0000;
         if (ass_border_color)
             c2 = strtoll(ass_border_color, NULL, 16);
-        else
-            c2 = 0x00000000;
 
+        style->FontSize = fs;
         style->PrimaryColour = c1;
         style->SecondaryColour = c1;
         style->OutlineColour = c2;
         style->BackColour = 0x00000000;
         style->BorderStyle = 1;
         style->Alignment = 2;
-        style->Outline = 2;
+        style->Outline = fs / 16;
         style->MarginL = 10;
         style->MarginR = 10;
         style->MarginV = 5;
@@ -154,7 +153,7 @@ static int check_duplicate_plaintext_event(ASS_Track *track)
  * note: assumes that subtitle is _not_ fps-based; caller must manually correct
  *   Start and Duration in other case.
  **/
-int ass_process_subtitle(ASS_Track *track, subtitle *sub)
+static int ass_process_subtitle(ASS_Track *track, subtitle *sub)
 {
     int eid;
     ASS_Event *event;
@@ -210,13 +209,13 @@ int ass_process_subtitle(ASS_Track *track, subtitle *sub)
  * \param fps video framerate
  * \return newly allocated ASS_Track, filled with subtitles from subdata
  */
-ASS_Track *ass_read_subdata(ASS_Library *library, sub_data *subdata,
-                            double fps)
+ASS_Track *mp_ass_read_subdata(ASS_Library *library, sub_data *subdata,
+                               double fps)
 {
     ASS_Track *track;
     int i;
 
-    track = ass_default_track(library);
+    track = mp_ass_default_track(library);
     track->name = subdata->filename ? strdup(subdata->filename) : 0;
 
     for (i = 0; i < subdata->sub_num; ++i) {
@@ -231,7 +230,8 @@ ASS_Track *ass_read_subdata(ASS_Library *library, sub_data *subdata,
     return track;
 }
 
-ASS_Track *ass_read_stream(ASS_Library *library, const char *fname, char *charset)
+ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
+                              char *charset)
 {
     int i;
     char *buf = NULL;
@@ -280,7 +280,7 @@ ASS_Track *ass_read_stream(ASS_Library *library, const char *fname, char *charse
     return track;
 }
 
-void ass_configure(ASS_Renderer *priv, int w, int h, int unscaled)
+void mp_ass_configure(ASS_Renderer *priv, int w, int h, bool unscaled)
 {
     int hinting;
     ass_set_frame_size(priv, w, h);
@@ -295,7 +295,7 @@ void ass_configure(ASS_Renderer *priv, int w, int h, int unscaled)
     ass_set_line_spacing(priv, ass_line_spacing);
 }
 
-void ass_configure_fonts(ASS_Renderer *priv)
+void mp_ass_configure_fonts(ASS_Renderer *priv)
 {
     char *dir, *path, *family;
     dir = get_path("fonts");
@@ -327,7 +327,7 @@ static void message_callback(int level, const char *format, va_list va, void *ct
     mp_msg(MSGT_ASS, level, "\n");
 }
 
-ASS_Library *ass_init(void)
+ASS_Library *mp_ass_init(void)
 {
     ASS_Library *priv;
     char *path = get_path("fonts");
@@ -342,7 +342,7 @@ ASS_Library *ass_init(void)
 
 int ass_force_reload = 0;       // flag set if global ass-related settings were changed
 
-ASS_Image *ass_mp_render_frame(ASS_Renderer *priv, ASS_Track *track,
+ASS_Image *mp_ass_render_frame(ASS_Renderer *priv, ASS_Track *track,
                                long long now, int *detect_change)
 {
     if (ass_force_reload) {

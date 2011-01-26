@@ -44,7 +44,7 @@
 #include "demux_ty_osd.h"
 #include "parse_es.h"
 #include "stheader.h"
-#include "sub_cc.h"
+#include "sub/sub_cc.h"
 #include "libavutil/avstring.h"
 #include "ffmpeg_files/intreadwrite.h"
 

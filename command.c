@@ -31,7 +31,8 @@
 #include "libmpdemux/stheader.h"
 #include "codec-cfg.h"
 #include "mplayer.h"
-#include "libvo/sub.h"
+#include "sub/sub.h"
+#include "sub/dec_sub.h"
 #include "m_option.h"
 #include "m_property.h"
 #include "m_config.h"
@@ -40,7 +41,7 @@
 #include "libmpcodecs/vd.h"
 #include "mp_osd.h"
 #include "libvo/video_out.h"
-#include "libvo/font_load.h"
+#include "sub/font_load.h"
 #include "playtree.h"
 #include "libao2/audio_out.h"
 #include "mpcommon.h"
@@ -48,10 +49,10 @@
 #include "libmpcodecs/dec_video.h"
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_teletext.h"
-#include "vobsub.h"
-#include "spudec.h"
+#include "sub/vobsub.h"
+#include "sub/spudec.h"
 #include "path.h"
-#include "ass_mp.h"
+#include "sub/ass_mp.h"
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
 #include "stream/pvr.h"
@@ -193,15 +194,16 @@ static void log_sub(struct MPContext *mpctx)
     char *fname;
     FILE *f;
     int i;
+    struct subtitle *vo_sub_last = mpctx->vo_sub_last;
 
-    if (subdata == NULL || vo_sub_last == NULL)
+    if (mpctx->subdata == NULL || vo_sub_last == NULL)
         return;
     fname = get_path("subtitle_log");
     f = fopen(fname, "a");
     if (!f)
         return;
     fprintf(f, "----------------------------------------------------------\n");
-    if (subdata->sub_uses_time) {
+    if (mpctx->subdata->sub_uses_time) {
         fprintf(f,
                 "N: %s S: %02ld:%02ld:%02ld.%02ld E: %02ld:%02ld:%02ld.%02ld\n",
                 mpctx->filename, vo_sub_last->start / 360000,
@@ -1522,7 +1524,6 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
     demux_stream_t *const d_sub = mpctx->d_sub;
     int source = -1, reset_spu = 0;
     int source_pos = -1;
-    char *sub_name;
 
     update_global_sub_size(mpctx);
     const int global_sub_size = mpctx->global_sub_size;
@@ -1541,13 +1542,15 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_ERROR;
         *(char **) arg = malloc(64);
         (*(char **) arg)[63] = 0;
-        sub_name = 0;
-        if (subdata)
-            sub_name = subdata->filename;
+        char *sub_name = NULL;
+        if (mpctx->subdata)
+            sub_name = mpctx->subdata->filename;
 #ifdef CONFIG_ASS
-        if (ass_track && ass_track->name)
-            sub_name = ass_track->name;
+        if (mpctx->osd->ass_track)
+            sub_name = mpctx->osd->ass_track->name;
 #endif
+        if (!sub_name && mpctx->subdata)
+            sub_name = mpctx->subdata->filename;
         if (sub_name) {
             const char *tmp = mp_basename(sub_name);
 
@@ -1644,7 +1647,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
            mpctx->global_sub_pos, source);
 
     mpctx->set_of_sub_pos = -1;
-    subdata = NULL;
+    mpctx->subdata = NULL;
 
     vobsub_id = -1;
     opts->sub_id = -1;
@@ -1653,21 +1656,25 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
             reset_spu = 1;
         d_sub->id = -2;
     }
-#ifdef CONFIG_ASS
-    ass_track = 0;
-#endif
+    mpctx->osd->ass_track = NULL;
+    uninit_player(mpctx, INITIALIZED_SUB);
 
     if (source == SUB_SOURCE_VOBSUB) {
         vobsub_id = vobsub_get_id_by_index(vo_vobsub, source_pos);
     } else if (source == SUB_SOURCE_SUBS) {
         mpctx->set_of_sub_pos = source_pos;
 #ifdef CONFIG_ASS
-        if (opts->ass_enabled && mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos])
-            ass_track = mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos];
-        else
+        if (opts->ass_enabled
+            && mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos]) {
+            mpctx->osd->ass_track =
+                mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos];
+            mpctx->osd->ass_track_changed = true;
+            mpctx->osd->vsfilter_aspect =
+                mpctx->track_was_native_ass[mpctx->set_of_sub_pos];
+        } else
 #endif
         {
-            subdata = mpctx->set_of_subtitles[mpctx->set_of_sub_pos];
+            mpctx->subdata = mpctx->set_of_subtitles[mpctx->set_of_sub_pos];
             vo_osd_changed(OSDTYPE_SUBTITLE);
         }
     } else if (source == SUB_SOURCE_DEMUX) {
@@ -1690,10 +1697,10 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
                 sh_sub_t *sh = d_sub->sh;
                 if (sh->type == 'v')
                     init_vo_spudec(mpctx);
-#ifdef CONFIG_ASS
-                else if (opts->ass_enabled)
-                    ass_track = sh->ass_track;
-#endif
+                else {
+                    sub_init(sh, mpctx->osd);
+                    mpctx->initialized_flags |= INITIALIZED_SUB;
+                }
             } else {
               d_sub->id = -2;
               d_sub->sh = NULL;
@@ -1710,7 +1717,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
     }
 #endif
 
-    update_subtitles(mpctx, &mpctx->opts, mpctx->sh_video, 0, 0, d_sub, 1);
+    update_subtitles(mpctx, 0, 0, true);
 
     return M_PROPERTY_OK;
 }
@@ -2692,10 +2699,8 @@ static void remove_subtitle_range(MPContext *mpctx, int start, int count)
 
     if (mpctx->set_of_sub_pos >= start && mpctx->set_of_sub_pos < end) {
         mpctx->global_sub_pos = -2;
-        subdata = NULL;
-#ifdef CONFIG_ASS
-        ass_track = NULL;
-#endif
+        mpctx->subdata = NULL;
+        mpctx->osd->ass_track = NULL;
         mp_input_queue_cmd(mpctx->input, mp_input_parse_cmd("sub_select"));
     } else if (mpctx->set_of_sub_pos >= end) {
         mpctx->set_of_sub_pos -= count;
@@ -2931,11 +2936,11 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         case MP_CMD_SUB_STEP:
             if (sh_video) {
                 int movement = cmd->args[0].v.i;
-                step_sub(subdata, mpctx->video_pts, movement);
+                step_sub(mpctx->subdata, mpctx->video_pts, movement);
 #ifdef CONFIG_ASS
-                if (ass_track)
+                if (mpctx->osd->ass_track)
                     sub_delay +=
-                        ass_step_sub(ass_track,
+                        ass_step_sub(mpctx->osd->ass_track,
                                      (mpctx->video_pts +
                                       sub_delay) * 1000 + .5, movement) / 1000.;
 #endif

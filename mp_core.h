@@ -23,7 +23,7 @@
 
 #include "options.h"
 #include "mixer.h"
-#include "subreader.h"
+#include "sub/subreader.h"
 
 // definitions used internally by the core player code
 
@@ -37,6 +37,7 @@
 #define INITIALIZED_DEMUXER 512
 #define INITIALIZED_ACODEC  1024
 #define INITIALIZED_VCODEC  2048
+#define INITIALIZED_SUB     4096
 #define INITIALIZED_ALL     0xFFFF
 
 
@@ -88,6 +89,9 @@ typedef struct MPContext {
     struct mp_fifo *key_fifo;
     struct input_ctx *input;
     struct osd_state *osd;
+    struct sub_data *subdata; // current sub_data style subtitles if any
+    // last sub_data style sub line if any, used by log_sub() only
+    struct subtitle *vo_sub_last;
 
     bool add_osd_seek_info;
     // if nonzero, hide current OSD contents when GetTimerMS() reaches this
@@ -194,6 +198,7 @@ typedef struct MPContext {
     // parsed by libass or NULL if format unsupported
     struct ass_track *set_of_ass_tracks[MAX_SUBTITLE_FILES];
     sub_data* set_of_subtitles[MAX_SUBTITLE_FILES];
+    bool track_was_native_ass[MAX_SUBTITLE_FILES];
 
     int file_format;
 
@@ -243,5 +248,7 @@ double get_current_time(struct MPContext *mpctx);
 int get_percent_pos(struct MPContext *mpctx);
 int get_current_chapter(struct MPContext *mpctx);
 char *chapter_display_name(struct MPContext *mpctx, int chapter);
+void update_subtitles(struct MPContext *mpctx, double refpts,
+                      double sub_offset, bool reset);
 
 #endif /* MPLAYER_MP_CORE_H */

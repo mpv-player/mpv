@@ -29,7 +29,7 @@
 #include "m_struct.h"
 #include "menu.h"
 
-#include "libvo/font_load.h"
+#include "sub/font_load.h"
 #include "osdep/keycodes.h"
 
 #define IMPL 1

@@ -35,7 +35,7 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "sub.h"
+#include "sub/sub.h"
 
 #include "osdep/keycodes.h"
 #include "mp_msg.h"

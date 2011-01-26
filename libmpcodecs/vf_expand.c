@@ -35,7 +35,7 @@
 #include "libavutil/avutil.h"
 
 #ifdef OSD_SUPPORT
-#include "libvo/sub.h"
+#include "sub/sub.h"
 #include "libvo/osd.h"
 #endif
 

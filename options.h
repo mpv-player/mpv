@@ -39,6 +39,7 @@ typedef struct MPOpts {
     int ordered_chapters;
     int chapter_merge_threshold;
     int quiet;
+    int noconfig;
     float stream_cache_min_percent;
     float stream_cache_seek_min_percent;
     int chapterrange[2];

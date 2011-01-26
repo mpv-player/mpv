@@ -64,7 +64,7 @@
 #include "libavutil/common.h"
 #include "ffmpeg_files/intreadwrite.h"
 
-#include "libvo/sub.h"
+#include "sub/sub.h"
 
 #include "demux_mov.h"
 #include "qtpalette.h"

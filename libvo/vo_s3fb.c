@@ -44,7 +44,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "aspect.h"
-#include "sub.h"
+#include "sub/sub.h"
 
 static const vo_info_t info =
   {

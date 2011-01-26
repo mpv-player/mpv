@@ -37,7 +37,7 @@
 #include "aspect.h"
 #include "geometry.h"
 #include "mp_fifo.h"
-#include "sub.h"
+#include "sub/sub.h"
 
 #ifndef WM_XBUTTONDOWN
 # define WM_XBUTTONDOWN    0x020B

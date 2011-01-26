@@ -48,7 +48,7 @@
 #include "m_option.h"
 #include "mp_fifo.h"
 #include "mpbswap.h"
-#include "sub.h"
+#include "sub/sub.h"
 
 #include "input/input.h"
 #include "input/mouse.h"

@@ -34,7 +34,7 @@
 #include <linux/fb.h>
 
 #include "drivers/mga_vid.h"
-#include "sub.h"
+#include "sub/sub.h"
 #include "aspect.h"
 
 static const vo_info_t info =

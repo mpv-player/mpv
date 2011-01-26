@@ -33,7 +33,7 @@
 #include "stream_dvdnav.h"
 #include "libvo/video_out.h"
 #include "libavutil/common.h"
-#include "spudec.h"
+#include "sub/spudec.h"
 #include "m_option.h"
 #include "m_struct.h"
 #include "stream_dvd_common.h"

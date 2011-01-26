@@ -20,6 +20,7 @@
 #define MPLAYER_VF_H
 
 #include "mp_image.h"
+#include "mpcommon.h"
 
 struct MPOpts;
 struct vf_instance;
@@ -107,18 +108,14 @@ typedef struct vf_seteq_s
 #define VFCTRL_DRAW_EOSD       16 /* Render EOSD */
 #define VFCTRL_SET_DEINTERLACE 18 /* Set deinterlacing status */
 #define VFCTRL_GET_DEINTERLACE 19 /* Get deinterlacing status */
-/* Hack to make the OSD state object available to vf_expand which accesses
- * the OSD state outside of normal OSD draw time. */
+/* Hack to make the OSD state object available to vf_expand and vf_ass which
+ * access OSD/subtitle state outside of normal OSD draw time. */
 #define VFCTRL_SET_OSD_OBJ 20
 #define VFCTRL_REDRAW_OSD  21 /* Change user-visible OSD immediately */
 #define VFCTRL_SET_YUV_COLORSPACE 22
 #define VFCTRL_GET_YUV_COLORSPACE 23
 
 #include "vfcap.h"
-
-//FIXME this should be in a common header, but i dunno which
-#define MP_NOPTS_VALUE (-1LL<<63) //both int64_t and double should be able to represent this exactly
-
 
 // functions:
 void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h);

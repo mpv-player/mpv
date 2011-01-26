@@ -33,13 +33,14 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
+#include "sub/sub.h"
 
 #include "libvo/fastmemcpy.h"
 
 #include "m_option.h"
 #include "m_struct.h"
 
-#include "ass_mp.h"
+#include "sub/ass_mp.h"
 
 #define _r(c)  ((c)>>24)
 #define _g(c)  (((c)>>16)&0xFF)
@@ -59,7 +60,9 @@ static const struct vf_priv_s {
     // 0 = insert always
     int auto_insert;
 
-    ASS_Renderer *ass_priv;
+    struct osd_state *osd;
+    ASS_Renderer *renderer_realaspect;
+    ASS_Renderer *renderer_vsfilter;
 
     unsigned char *planes[3];
     struct line_limits {
@@ -68,9 +71,7 @@ static const struct vf_priv_s {
     } *line_limits;
 } vf_priv_dflt;
 
-extern ASS_Track *ass_track;
 extern float sub_delay;
-extern int sub_visibility;
 
 static int config(struct vf_instance *vf,
                   int width, int height, int d_width, int d_height,
@@ -92,9 +93,14 @@ static int config(struct vf_instance *vf,
     vf->priv->planes[2]   = malloc(vf->priv->outw * vf->priv->outh);
     vf->priv->line_limits = malloc((vf->priv->outh + 1) / 2 * sizeof(*vf->priv->line_limits));
 
-    if (vf->priv->ass_priv) {
-        ass_configure(vf->priv->ass_priv, vf->priv->outw, vf->priv->outh, 0);
-        ass_set_aspect_ratio(vf->priv->ass_priv, 1, 1);
+    if (vf->priv->renderer_realaspect) {
+        mp_ass_configure(vf->priv->renderer_realaspect,
+                         vf->priv->outw, vf->priv->outh, 0);
+        mp_ass_configure(vf->priv->renderer_vsfilter,
+                         vf->priv->outw, vf->priv->outh, 0);
+        ass_set_aspect_ratio(vf->priv->renderer_realaspect,
+                             (double)width / height * d_height / d_width, 1);
+        ass_set_aspect_ratio(vf->priv->renderer_vsfilter, 1, 1);
     }
 
     return vf_next_config(vf, vf->priv->outw, vf->priv->outh, d_width,
@@ -351,9 +357,12 @@ static int render_frame(struct vf_instance *vf, mp_image_t *mpi,
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     ASS_Image *images = 0;
-    if (sub_visibility && vf->priv->ass_priv && ass_track
+    ASS_Renderer *renderer = vf->priv->osd->vsfilter_aspect ?
+        vf->priv->renderer_vsfilter : vf->priv->renderer_realaspect;
+    if (sub_visibility && renderer && vf->priv->osd->ass_track
 	&& (pts != MP_NOPTS_VALUE))
-        images = ass_mp_render_frame(vf->priv->ass_priv, ass_track,
+        images = mp_ass_render_frame(renderer,
+                                     vf->priv->osd->ass_track,
 				     (pts + sub_delay) * 1000 + .5, NULL);
 
     prepare_image(vf, mpi);
@@ -377,14 +386,23 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 static int control(vf_instance_t *vf, int request, void *data)
 {
     switch (request) {
+    case VFCTRL_SET_OSD_OBJ:
+        vf->priv->osd = data;
+        break;
     case VFCTRL_INIT_EOSD:
-        vf->priv->ass_priv = ass_renderer_init((ASS_Library *)data);
-        if (!vf->priv->ass_priv)
+        vf->priv->renderer_realaspect = ass_renderer_init((ASS_Library *)data);
+        if (!vf->priv->renderer_realaspect)
             return CONTROL_FALSE;
-        ass_configure_fonts(vf->priv->ass_priv);
+        vf->priv->renderer_vsfilter = ass_renderer_init((ASS_Library *)data);
+        if (!vf->priv->renderer_vsfilter) {
+            ass_renderer_done(vf->priv->renderer_realaspect);
+            return CONTROL_FALSE;
+        }
+        mp_ass_configure_fonts(vf->priv->renderer_realaspect);
+        mp_ass_configure_fonts(vf->priv->renderer_vsfilter);
         return CONTROL_TRUE;
     case VFCTRL_DRAW_EOSD:
-        if (vf->priv->ass_priv)
+        if (vf->priv->renderer_realaspect)
             return CONTROL_TRUE;
         break;
     }
@@ -393,8 +411,10 @@ static int control(vf_instance_t *vf, int request, void *data)
 
 static void uninit(struct vf_instance *vf)
 {
-    if (vf->priv->ass_priv)
-        ass_renderer_done(vf->priv->ass_priv);
+    if (vf->priv->renderer_realaspect) {
+        ass_renderer_done(vf->priv->renderer_realaspect);
+        ass_renderer_done(vf->priv->renderer_vsfilter);
+    }
     free(vf->priv->planes[1]);
     free(vf->priv->planes[2]);
     free(vf->priv->line_limits);

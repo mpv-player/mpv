@@ -33,7 +33,7 @@
 #include "menu.h"
 #include "menu_list.h"
 
-#include "libvo/font_load.h"
+#include "sub/font_load.h"
 
 #include "input/input.h"
 

@@ -41,7 +41,7 @@
 #include "fastmemcpy.h"
 #include "osd.h"
 #include "video_out.h"
-#include "sub.h"
+#include "sub/sub.h"
 #include "vosub_vidix.h"
 #include "old_vo_wrapper.h"
 
