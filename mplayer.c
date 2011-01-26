@@ -1323,7 +1323,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 #ifdef CONFIG_STREAM_CACHE
   // cache stats
   if (stream_cache_size > 0)
-    saddf(line, &pos, width, "%d%% ", cache_fill_status);
+    saddf(line, &pos, width, "%d%% ", cache_fill_status(mpctx->stream));
 #endif
 
   // other
@@ -2865,6 +2865,10 @@ static void pause_loop(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     mp_cmd_t* cmd;
+#ifdef CONFIG_STREAM_CACHE
+    int old_cache_fill = stream_cache_size > 0 ?
+        cache_fill_status(mpctx->stream) : 0;
+#endif
     if (!opts->quiet) {
 	if (opts->term_osd && !mpctx->sh_video) {
 	    set_osd_tmsg(OSD_MSG_PAUSE, 1, 0, "  =====  PAUSE  =====");
@@ -2895,6 +2899,23 @@ static void pause_loop(struct MPContext *mpctx)
       vo_osd_changed(hack);
       if (hack)
           break;
+#ifdef CONFIG_STREAM_CACHE
+        if (!opts->quiet && stream_cache_size > 0) {
+            int new_cache_fill = cache_fill_status(mpctx->stream);
+            if (new_cache_fill != old_cache_fill) {
+                if (opts->term_osd && !mpctx->sh_video) {
+                    set_osd_tmsg(OSD_MSG_PAUSE, 1, 0, "%s %d%%",
+                                 mp_gtext("  =====  PAUSE  ====="),
+                                 new_cache_fill);
+                    update_osd_msg(mpctx);
+                } else
+                    mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%s %d%%\r",
+                           mp_gtext("  =====  PAUSE  ====="),
+                           new_cache_fill);
+                old_cache_fill = new_cache_fill;
+            }
+        }
+#endif
     }
 }
 

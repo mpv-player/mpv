@@ -95,8 +95,6 @@ typedef struct {
 
 static int min_fill=0;
 
-int cache_fill_status=0;
-
 static void cache_wakeup(stream_t *s)
 {
 #if FORKED_CACHE
@@ -161,7 +159,6 @@ static int cache_read(cache_vars_t *s, unsigned char *buf, int size)
     total+=len;
 
   }
-  cache_fill_status=(s->max_filepos-s->read_filepos)/(s->buffer_size / 100);
   return total;
 }
 
@@ -509,6 +506,14 @@ int cache_stream_fill_buffer(stream_t *s){
     stream_capture_do(s);
   return len;
 
+}
+
+int cache_fill_status(stream_t *s) {
+  cache_vars_t *cv;
+  if (!s || !s->cache_data)
+    return -1;
+  cv = s->cache_data;
+  return (cv->max_filepos-cv->read_filepos)/(cv->buffer_size / 100);
 }
 
 int cache_stream_seek_long(stream_t *stream,off_t pos){
