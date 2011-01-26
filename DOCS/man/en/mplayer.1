@@ -2079,14 +2079,17 @@ FIXME: Document this.
 Also see \-vf expand.
 .
 .TP
-.B \-ass (FreeType only)
-Turn on SSA/ASS subtitle rendering.
-With this option, libass will be used for SSA/ASS
-external subtitles and Matroska tracks.
+.B \-ass, \-noass (FreeType only)
+Use libass to render all text subtitles.
+This enables support for the native styling of SSA/ASS subtitles,
+and also support for some styling features in other subtitle formats by
+conversion to ASS markup.
+Enabled by default if the player was compiled with libass support.
 .br
 .I NOTE:
-Unlike normal OSD, libass uses fontconfig by default. To disable it, use
-\-nofontconfig.
+Some of the other subtitle options were written for the old non-libass
+subtitle rendering system and may not work the same way or at all with
+libass rendering enabled.
 .
 .TP
 .B \-ass\-border\-color <value>
@@ -2263,13 +2266,8 @@ With Fontconfig, this option determines the Fontconfig font pattern.
 .PD 1
 .
 .TP
-.B \-fontconfig (fontconfig only)
-Enables the usage of fontconfig managed fonts.
-.br
-.I NOTE:
-By default fontconfig is used for libass-rendered subtitles and not used for
-OSD. With \-fontconfig it is used for both libass and OSD, with \-nofontconfig
-it is not used at all.
+.B \-fontconfig, \-nofontconfig (fontconfig only)
+Enables the use of fontconfig managed fonts. Enabled by default.
 .
 .TP
 .B \-forcedsubsonly
