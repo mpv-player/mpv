@@ -120,6 +120,7 @@ typedef struct demux_stream {
     int pack_no;           // serial number of packet
     bool keyframe;         // keyframe flag of current packet
 //---------------
+    int fill_count;        // number of unsuccessful tries to get a packet
     int packs;            // number of packets in buffer
     int bytes;            // total bytes of packets in buffer
     demux_packet_t *first; // read to current buffer from here
