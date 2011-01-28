@@ -378,7 +378,8 @@ Codecs:
   --enable-libdca           enable libdca support [autodetect]
   --disable-mp3lib          disable builtin mp3lib [autodetect]
   --disable-liba52          disable liba52 [autodetect]
-  --disable-musepack        disable musepack support [autodetect]
+  --enable-musepack         enable libmpcdec support (deprecated, libavcodec
+                            Musepack decoder is preferred) [disabled]
 
 Video output:
   --enable-gl              enable OpenGL video output [autodetect]
@@ -706,7 +707,7 @@ _enca=auto
 _inet6=auto
 _gethostbyname2=auto
 _ftp=auto
-_musepack=auto
+_musepack=no
 _vstream=auto
 _pthreads=auto
 _w32threads=auto
@@ -5794,7 +5795,7 @@ fi
 echores "$_libdca"
 
 echocheck "libmpcdec (musepack, version >= 1.2.1 required)"
-if test "$_musepack" = auto ; then
+if test "$_musepack" = yes ; then
   _musepack=no
   cat > $TMPC << EOF
 #include <stddef.h>
