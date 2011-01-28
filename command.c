@@ -2398,6 +2398,7 @@ static struct property_osd_display {
     { "capturing", 0, -1, _("Capturing: %s") },
     { "pts_association_mode", 0, -1, "PTS association mode: %s" },
     { "hr_seek", 0, -1, "hr-seek: %s" },
+    { "speed", 0, -1, _("Speed: x %6s") },
     // audio
     { "volume", OSD_VOLUME, -1, _("Volume") },
     { "mute", 0, -1, _("Mute: %s") },
@@ -2850,28 +2851,23 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             break;
 
         case MP_CMD_SPEED_INCR:{
-                float v = cmd->args[0].v.f;
-                opts->playback_speed += v;
-                reinit_audio_chain(mpctx);
-                set_osd_tmsg(OSD_MSG_SPEED, 1, osd_duration, "Speed: x %6.2f",
-                             opts->playback_speed);
-            } break;
+            float v = cmd->args[0].v.f;
+            mp_property_do("speed", M_PROPERTY_STEP_UP, &v, mpctx);
+            show_property_osd(mpctx, "speed");
+            break;
+        }
 
-        case MP_CMD_SPEED_MULT:{
-                float v = cmd->args[0].v.f;
-                opts->playback_speed *= v;
-                reinit_audio_chain(mpctx);
-                set_osd_tmsg(OSD_MSG_SPEED, 1, osd_duration, "Speed: x %6.2f",
-                             opts->playback_speed);
-            } break;
+        case MP_CMD_SPEED_MULT:
+            case_fallthrough_hack = true;
 
         case MP_CMD_SPEED_SET:{
-                float v = cmd->args[0].v.f;
-                opts->playback_speed = v;
-                reinit_audio_chain(mpctx);
-                set_osd_tmsg(OSD_MSG_SPEED, 1, osd_duration, "Speed: x %6.2f",
-                             opts->playback_speed);
-            } break;
+            float v = cmd->args[0].v.f;
+            if (case_fallthrough_hack)
+                v *= mpctx->opts.playback_speed;
+            mp_property_do("speed", M_PROPERTY_SET, &v, mpctx);
+            show_property_osd(mpctx, "speed");
+            break;
+        }
 
         case MP_CMD_FRAME_STEP:
             add_step_frame(mpctx);
