@@ -3422,7 +3422,11 @@ static void run_playloop(struct MPContext *mpctx)
             mpctx->time_frame += mpctx->video_out->flip_queue_offset;
 
             unsigned int t2 = GetTimer();
-            unsigned int pts_us = mpctx->last_time + mpctx->time_frame * 1e6;
+            /* Playing with playback speed it's possible to get pathological
+             * cases with mpctx->time_frame negative enough to cause an
+             * overflow in pts_us calculation, thus the FFMAX. */
+            double time_frame = FFMAX(mpctx->time_frame, -1);
+            unsigned int pts_us = mpctx->last_time + time_frame * 1e6;
             int duration = -1;
             double pts2 = mpctx->video_out->next_pts2;
             if (pts2 != MP_NOPTS_VALUE && opts->correct_pts
