@@ -2866,17 +2866,12 @@ static void pause_loop(struct MPContext *mpctx)
     struct MPOpts *opts = &mpctx->opts;
     mp_cmd_t* cmd;
     if (!opts->quiet) {
-        // Small hack to display the pause message on the OSD line.
-        // The pause string is: "\n == PAUSE == \r" so we need to
-        // take the first and the last char out
 	if (opts->term_osd && !mpctx->sh_video) {
-	    char msg[128] = _("\n  =====  PAUSE  =====\r");
-	    int mlen = strlen(msg);
-	    msg[mlen-1] = '\0';
-	    set_osd_msg(OSD_MSG_PAUSE, 1, 0, "%s", msg+1);
+	    set_osd_tmsg(OSD_MSG_PAUSE, 1, 0, "  =====  PAUSE  =====");
 	    update_osd_msg(mpctx);
 	} else
-	    mp_tmsg(MSGT_CPLAYER,MSGL_STATUS,"\n  =====  PAUSE  =====\r");
+	    mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%c%s%c",
+                   '\n', mp_gtext("  =====  PAUSE  ====="), '\r');
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
     }
 
