@@ -468,6 +468,10 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 	      rlen = read_varlen(&p, segtype, 0);
 
 //	      printf("### rlen=%d   \n",rlen);
+              if (rlen < 0 || rlen > p_end - p) {
+                mp_msg(MSGT_DEMUX, MSGL_V, "invalid rlen=%d\n", rlen);
+                break;
+              }
 
               switch(rlen){
               case 0x01: // 1 = special, means grouping
