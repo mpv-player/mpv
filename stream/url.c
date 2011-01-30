@@ -326,8 +326,7 @@ url_escape_string_part(char *outbuf, const char *inbuf) {
 
 		if(	(c >= 'A' && c <= 'Z') ||
 			(c >= 'a' && c <= 'z') ||
-			(c >= '0' && c <= '9') ||
-			(c >= 0x7f)) {
+			(c >= '0' && c <= '9')) {
 			*outbuf++ = c;
                 } else if ( c=='%' && ((c1 >= '0' && c1 <= '9') || (c1 >= 'A' && c1 <= 'F')) &&
                            ((c2 >= '0' && c2 <= '9') || (c2 >= 'A' && c2 <= 'F'))) {
