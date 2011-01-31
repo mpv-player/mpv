@@ -59,18 +59,6 @@ const m_option_t tvscan_conf[]={
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
-/*
- * CONF_TYPE_FUNC_FULL :
- * allows own implementations for passing the params
- *
- * the function receives parameter name and argument (if it does not start with - )
- * useful with a conf.name like 'aa*' to parse several parameters to a function
- * return 0 =ok, but we didn't need the param (could be the filename)
- * return 1 =ok, we accepted the param
- * negative values: see cfgparser.h, ERR_XXX
- *
- * by Folke
- */
 
 const m_option_t mplayer_opts[]={
     /* name, pointer, type, flags, min, max */

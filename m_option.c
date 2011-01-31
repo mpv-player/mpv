@@ -805,7 +805,7 @@ const m_option_type_t m_option_type_string_list = {
 
 ///////////////////  Func based options
 
-// A chained list to save the various calls for func_param and func_full
+// A chained list to save the various calls for func_param
 typedef struct m_func_save m_func_save_t;
 struct m_func_save {
   m_func_save_t* next;
@@ -833,7 +833,7 @@ static void free_func_pf(void* src) {
   VAL(src) = NULL;
 }
 
-// Parser for func_param and func_full
+// Parser for func_param
 static int parse_func_pf(const m_option_t* opt,const char *name, const char *param, void* dst, int src) {
   m_func_save_t *s,*p;
 
@@ -902,33 +902,6 @@ const m_option_type_t m_option_type_func_param = {
   NULL,
   NULL, // Nothing to do on save
   set_func_param,
-  copy_func_pf,
-  free_func_pf
-};
-
-/////////////////// Func_full
-
-static void set_func_full(const m_option_t* opt, void* dst, const void* src) {
-  m_func_save_t* s;
-
-  if(!src) return;
-
-  for(s = VAL(src) ; s ; s = s->next) {
-    // Revert if needed
-    if(opt->priv) ((m_opt_default_func_t)opt->priv)(opt,s->name);
-    ((m_opt_func_full_t) opt->p)(opt,s->name,s->param);
-  }
-}
-
-const m_option_type_t m_option_type_func_full = {
-  "Func full",
-  "",
-  sizeof(m_func_save_t*),
-  M_OPT_TYPE_ALLOW_WILDCARD|M_OPT_TYPE_INDIRECT,
-  parse_func_pf,
-  NULL,
-  NULL, // Nothing to do on save
-  set_func_full,
   copy_func_pf,
   free_func_pf
 };

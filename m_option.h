@@ -63,7 +63,6 @@ extern const m_option_type_t m_option_type_imgfmt;
 extern const m_option_type_t m_option_type_afmt;
 
 // Func-based types
-extern const m_option_type_t m_option_type_func_full;
 extern const m_option_type_t m_option_type_func_param;
 extern const m_option_type_t m_option_type_func;
 
@@ -188,7 +187,6 @@ struct m_opt_choice_alternatives {
 #define CONF_TYPE_PRINT		(&m_option_type_print)
 #define CONF_TYPE_PRINT_INDIRECT (&m_option_type_print_indirect)
 #define CONF_TYPE_PRINT_FUNC	(&m_option_type_print_func)
-#define CONF_TYPE_FUNC_FULL	(&m_option_type_func_full)
 #define CONF_TYPE_SUBCONFIG	(&m_option_type_subconfig)
 #define CONF_TYPE_STRING_LIST	(&m_option_type_string_list)
 #define CONF_TYPE_POSITION	(&m_option_type_position)
