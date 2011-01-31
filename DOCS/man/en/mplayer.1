@@ -3270,68 +3270,6 @@ currently.
 Supported by at least the direct3d, gl, gl2, x11, xv and corevideo video output
 drivers.
 .
-.TP
-.B \-zrbw (\-vo zr only)
-Display in black and white.
-For optimal performance, this can be combined with '\-lavdopts gray'.
-.
-.TP
-.B \-zrcrop <[width]x[height]+[x offset]+[y offset]> (\-vo zr only)
-Select a part of the input image to display, multiple occurrences
-of this option switch on cinerama mode.
-In cinerama mode the movie is distributed over more than one TV
-(or beamer) to create a larger image.
-Options appearing after the n-th \-zrcrop apply to the n-th MJPEG card, each
-card should at least have a \-zrdev in addition to the \-zrcrop.
-For examples, see the output of \-zrhelp and the Zr section of the
-documentation.
-.
-.TP
-.B \-zrdev <device> (\-vo zr only)
-Specify the device special file that belongs to your MJPEG card, by default
-the zr video output driver takes the first v4l device it can find.
-.
-.TP
-.B \-zrfd (\-vo zr only)
-Force decimation: Decimation, as specified by \-zrhdec and \-zrvdec, only
-happens if the hardware scaler can stretch the image to its original size.
-Use this option to force decimation.
-.
-.TP
-.B \-zrhdec <1|2|4> (\-vo zr only)
-Horizontal decimation: Ask the driver to send only every 2nd or 4th
-line/\:pixel of the input image to the MJPEG card and use the scaler
-of the MJPEG card to stretch the image to its original size.
-.
-.TP
-.B \-zrhelp (\-vo zr only)
-Display a list of all \-zr* options, their default values and a
-cinerama mode example.
-.
-.TP
-.B \-zrnorm <norm> (\-vo zr only)
-Specify the TV norm as PAL or NTSC (default: no change).
-.
-.TP
-.B \-zrquality <1\-20> (\-vo zr only)
-A number from 1 (best) to 20 (worst) representing the JPEG encoding quality.
-.
-.TP
-.B \-zrvdec <1|2|4> (\-vo zr only)
-Vertical decimation: Ask the driver to send only every 2nd or 4th
-line/\:pixel of the input image to the MJPEG card and use the scaler
-of the MJPEG card to stretch the image to its original size.
-.
-.TP
-.B \-zrxdoff <x display offset> (\-vo zr only)
-If the movie is smaller than the TV screen, this option specifies the x
-offset from the upper-left corner of the TV screen (default: centered).
-.
-.TP
-.B \-zrydoff <y display offset> (\-vo zr only)
-If the movie is smaller than the TV screen, this option specifies the y
-offset from the upper-left corner of the TV screen (default: centered).
-.
 .
 .
 .SH "VIDEO OUTPUT DRIVERS"
@@ -4215,25 +4153,6 @@ Specifies the device number to use if you have more than one DVB output card
 If not specified MPlayer will search the first usable card.
 .IPs <filename>
 output filename (default: ./grab.mpg)
-.RE
-.PD 1
-.
-.TP
-.B zr (also see \-zr* and \-zrhelp)
-Video output driver for a number of MJPEG capture/\:playback cards.
-.
-.TP
-.B zr2 (also see the zrmjpeg video filter)
-Video output driver for a number of MJPEG capture/\:playback cards,
-second generation.
-.PD 0
-.RSs
-.IPs dev=<device>
-Specifies the video device to use.
-.IPs norm=<PAL|NTSC|SECAM|auto>
-Specifies the video norm to use (default: auto).
-.IPs (no)prebuf
-(De)Activate prebuffering, not yet supported.
 .RE
 .PD 1
 .
@@ -7261,35 +7180,6 @@ algorithm to remove the logo.
 .RE
 .
 .TP
-.B zrmjpeg[=options]
-Software YV12 to MJPEG encoder for use with the zr2 video
-output device.
-.RSs
-.IPs maxheight=<h>|maxwidth=<w>
-These options set the maximum width and height the zr card
-can handle (the MPlayer filter layer currently cannot query those).
-.IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
-Use these options to set maxwidth and maxheight automatically to the
-values known for card/\:mode combo.
-For example, valid options are: dc10-PAL and buz-NTSC (default: dc10+PAL)
-.IPs color|bw
-Select color or black and white encoding.
-Black and white encoding is faster.
-Color is the default.
-.IPs hdec={1,2,4}
-Horizontal decimation 1, 2 or 4.
-.IPs vdec={1,2,4}
-Vertical decimation 1, 2 or 4.
-.IPs quality=1\-20
-Set JPEG compression quality [BEST] 1 \- 20 [VERY BAD].
-.IPs fd|nofd
-By default, decimation is only performed if the Zoran hardware
-can upscale the resulting MJPEG images to the original size.
-The option fd instructs the filter to always perform the requested
-decimation (ugly).
-.RE
-.
-.TP
 .B screenshot
 Allows acquiring screenshots of the movie using slave mode
 commands that can be bound to keypresses.
@@ -7858,18 +7748,6 @@ mplayer /dev/\:zero \-rawvideo pal:fps=xx \-demuxer rawvideo \-vc null \-vo null
 .B input from standard V4L:
 .nf
 mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420 \-vo xv
-.fi
-.
-.PP
-.B Playback on Zoran cards (old style, deprecated):
-.nf
-mplayer \-vo zr \-vf scale=352:288 file.avi
-.fi
-.
-.PP
-.B Playback on Zoran cards (new style):
-.nf
-mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .fi
 .
 .PP

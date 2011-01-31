@@ -55,7 +55,6 @@ extern const vf_info_t vf_info_rotate;
 extern const vf_info_t vf_info_mirror;
 extern const vf_info_t vf_info_palette;
 extern const vf_info_t vf_info_lavc;
-extern const vf_info_t vf_info_zrmjpeg;
 extern const vf_info_t vf_info_dvbscale;
 extern const vf_info_t vf_info_cropdetect;
 extern const vf_info_t vf_info_test;
@@ -143,9 +142,6 @@ static const vf_info_t* const filter_list[]={
     &vf_info_lavcdeint,
     &vf_info_screenshot,
     &vf_info_uspp,
-#endif
-#ifdef CONFIG_ZR
-    &vf_info_zrmjpeg,
 #endif
     &vf_info_dvbscale,
     &vf_info_cropdetect,

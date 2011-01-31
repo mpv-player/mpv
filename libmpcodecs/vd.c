@@ -52,7 +52,6 @@ extern const vd_functions_t mpcodecs_vd_mtga;
 extern const vd_functions_t mpcodecs_vd_sgi;
 extern const vd_functions_t mpcodecs_vd_libmpeg2;
 extern const vd_functions_t mpcodecs_vd_mpegpes;
-extern const vd_functions_t mpcodecs_vd_zrmjpeg;
 extern const vd_functions_t mpcodecs_vd_realvid;
 extern const vd_functions_t mpcodecs_vd_xvid;
 extern const vd_functions_t mpcodecs_vd_libdv;
@@ -95,9 +94,6 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
     &mpcodecs_vd_libmpeg2,
 #endif
     &mpcodecs_vd_mpegpes,
-#ifdef CONFIG_ZR
-    &mpcodecs_vd_zrmjpeg,
-#endif
 #ifdef CONFIG_REALCODECS
     &mpcodecs_vd_realvid,
 #endif

@@ -94,8 +94,6 @@ extern struct vo_driver video_out_tdfxfb;
 extern struct vo_driver video_out_s3fb;
 extern struct vo_driver video_out_wii;
 extern struct vo_driver video_out_null;
-extern struct vo_driver video_out_zr;
-extern struct vo_driver video_out_zr2;
 extern struct vo_driver video_out_bl;
 extern struct vo_driver video_out_fbdev;
 extern struct vo_driver video_out_fbdev2;
@@ -216,10 +214,6 @@ const struct vo_driver *video_out_drivers[] =
 #endif
 #ifdef CONFIG_V4L2_DECODER
         &video_out_v4l2,
-#endif
-#ifdef CONFIG_ZR
-        &video_out_zr,
-        &video_out_zr2,
 #endif
 #ifdef CONFIG_BL
         &video_out_bl,

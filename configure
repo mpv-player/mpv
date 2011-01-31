@@ -420,7 +420,6 @@ Video output:
   --enable-s3fb            enable s3fb (S3 ViRGE) video output [disable]
   --enable-wii             enable Nintendo Wii/GameCube video output [disable]
   --enable-directfb        enable DirectFB video output [autodetect]
-  --enable-zr              enable ZR360[56]7/ZR36060 video output [autodetect]
   --enable-bl              enable Blinkenlights video output [disable]
   --enable-tdfxvid         enable tdfx_vid video output [disable]
   --enable-xvr100          enable SUN XVR-100 video output [autodetect]
@@ -685,7 +684,6 @@ _tdfxvid=no
 _xvr100=auto
 _tga=yes
 _directfb=auto
-_zr=auto
 _bl=no
 _largefiles=yes
 #language=en
@@ -1110,8 +1108,6 @@ for ac_option do
   --enable-tga)         _tga=yes        ;;
   --enable-directfb)    _directfb=yes   ;;
   --disable-directfb)   _directfb=no    ;;
-  --enable-zr)          _zr=yes         ;;
-  --disable-zr)         _zr=no          ;;
   --enable-bl)          _bl=yes         ;;
   --disable-bl)         _bl=no          ;;
   --enable-mtrr)        _mtrr=yes       ;;
@@ -6293,31 +6289,6 @@ else
 fi
 echores "$_xmga"
 
-echocheck "zr"
-if test "$_zr" = auto ; then
-  #36067's seem to identify themselves as 36057PQC's, so the line
-  #below should work for 36067's and 36057's.
-  if grep -q -s -e "Multimedia video controller: Zoran Corporation ZR36057" /proc/pci ; then
-    _zr=yes
-  else
-    _zr=no
-  fi
-fi
-if test "$_zr" = yes ; then
-  if test "$ffmpeg_internals" = yes ; then
-    def_zr='#define CONFIG_ZR 1'
-    vomodules="zr zr2 $vomodules"
-  else
-    res_comment="FFmpeg internal headers are required by zr, sorry"
-    novomodules="zr $novomodules"
-    def_zr='#undef CONFIG_ZR'
-  fi
-else
-  def_zr='#undef CONFIG_ZR'
-  novomodules="zr zr2 $novomodules"
-fi
-echores "$_zr"
-
 
 echocheck "UnRAR executable"
 if test "$_unrar_exec" = auto ; then
@@ -7036,7 +7007,6 @@ XVID4 = $_xvid
 XVMC = $_xvmc
 XVR100 = $_xvr100
 YUV4MPEG = $_yuv4mpeg
-ZR = $_zr
 
 # FFmpeg
 FFMPEG     = $ffmpeg
@@ -7405,7 +7375,6 @@ $def_xv
 $def_xvmc
 $def_xvr100
 $def_yuv4mpeg
-$def_zr
 
 
 /* FFmpeg */

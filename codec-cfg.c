@@ -212,9 +212,6 @@ static const struct {
     {"BGR1",  IMGFMT_BGR1},
 
     {"MPES",  IMGFMT_MPEGPES},
-    {"ZRMJPEGNI", IMGFMT_ZRMJPEGNI},
-    {"ZRMJPEGIT", IMGFMT_ZRMJPEGIT},
-    {"ZRMJPEGIB", IMGFMT_ZRMJPEGIB},
 
     {"IDCT_MPEG2",IMGFMT_XVMC_IDCT_MPEG2},
     {"MOCO_MPEG2",IMGFMT_XVMC_MOCO_MPEG2},
@@ -295,74 +292,6 @@ err_out_parse_error:
     mp_tmsg(MSGT_CODECCFG,MSGL_ERR,"parse error");
     return 0;
 }
-
-#if 0
-static short get_driver(char *s,int audioflag)
-{
-    static char *audiodrv[] = {
-        "null",
-        "mp3lib",
-        "pcm",
-        "libac3",
-        "acm",
-        "alaw",
-        "msgsm",
-        "dshow",
-        "dvdpcm",
-        "hwac3",
-        "libvorbis",
-        "ffmpeg",
-        "libmad",
-        "msadpcm",
-        "liba52",
-        "g72x",
-        "imaadpcm",
-        "dk4adpcm",
-        "dk3adpcm",
-        "roqaudio",
-        "faad",
-        "realaud",
-        "libdv",
-        NULL
-    };
-    static char *videodrv[] = {
-        "null",
-        "libmpeg2",
-        "vfw",
-        "dshow",
-        "ffmpeg",
-        "vfwex",
-        "raw",
-        "msrle",
-        "xanim",
-        "msvidc",
-        "fli",
-        "cinepak",
-        "qtrle",
-        "nuv",
-        "cyuv",
-        "qtsmc",
-        "ducktm1",
-        "roqvideo",
-        "qtrpza",
-        "mpng",
-        "ijpg",
-        "zlib",
-        "mpegpes",
-        "zrmjpeg",
-        "realvid",
-        "xvid",
-        "libdv",
-        NULL
-    };
-    char **drv=audioflag?audiodrv:videodrv;
-    int i;
-
-    for(i=0;drv[i];i++) if(!strcmp(s,drv[i])) return i;
-
-    return -1;
-}
-#endif
 
 static int validate_codec(codecs_t *c, int type)
 {

@@ -26,7 +26,6 @@
 #include <stddef.h>
 
 #include "cfg-common.h"
-#include "libvo/vo_zr.h"
 #include "options.h"
 
 extern char *fb_mode_cfgfile;
@@ -214,11 +213,6 @@ const m_option_t mplayer_opts[]={
 #ifdef CONFIG_AA
     // -vo aa
     {"aa*", "-aa* has been removed. Use -vo aa:suboption instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif
-
-#ifdef CONFIG_ZR
-    // -vo zr
-    {"zr*", vo_zr_parseoption, CONF_TYPE_FUNC_FULL, 0, 0, 0, &vo_zr_revertoption },
 #endif
 
 
