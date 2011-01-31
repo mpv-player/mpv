@@ -55,9 +55,6 @@ TODO:
 #include "video_out_internal.h"
 #include "fastmemcpy.h"
 #include "osdep/getch2.h"
-#ifdef CONFIG_VIDIX
-#include "vosub_vidix.h"
-#endif
 
 #include "sub/sub.h"
 
@@ -112,11 +109,6 @@ static const vo_info_t info = {
     ""
 };
 
-#ifdef CONFIG_VIDIX
-static char vidix_name[32] = "";
-static vidix_grkey_t gr_key;
-#endif
-
 LIBVO_EXTERN(svga)
 
 
@@ -140,17 +132,6 @@ static int preinit(const char *arg)
     blackbar_osd=0;
 
     if(arg)while(*arg) {
-#ifdef CONFIG_VIDIX
-        if(memcmp(arg,"vidix",5)==0) {
-            i=6;
-            while(arg[i] && arg[i]!=':') i++;
-            strncpy(vidix_name, arg+6, i-6);
-            vidix_name[i-5]=0;
-            if(arg[i]==':')i++;
-            arg+=i;
-            vidix_preinit(vidix_name, video_out_svga.old_functions);
-        }
-#endif
         if(!strncmp(arg,"sq",2)) {
             squarepix=1;
             arg+=2;
@@ -365,11 +346,6 @@ static int control(uint32_t request, void *data)
             return get_image(data);
     }
 
-#ifdef CONFIG_VIDIX
-    if (vidix_name[0])
-        return vidix_control(request, data);
-#endif
-
     return VO_NOTIMPL;
 }
 
@@ -525,30 +501,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     x_pos &= ~(15); //align x offset position to 16 pixels
     mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_SVGA] Centering image. Starting at (%d,%d)\n",x_pos,y_pos);
 
-#ifdef CONFIG_VIDIX
-
-    if(vidix_name[0]){
-        vidix_init(width, height, x_pos, y_pos, modeinfo->width, modeinfo->height,
-                   format, mode_bpp, modeinfo->width,modeinfo->height);
-        mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_SVGA] Using VIDIX. w=%i h=%i  mw=%i mh=%i\n",width,height,
-               modeinfo->width,modeinfo->height);
-        vidix_start();
-        /*set colorkey*/
-        if(vidix_grkey_support()){
-            vidix_grkey_get(&gr_key);
-            gr_key.key_op = KEYS_PUT;
-            if (!(vo_colorkey & 0xFF000000)) {
-                gr_key.ckey.op = CKEY_TRUE;
-                gr_key.ckey.red = (vo_colorkey & 0x00FF0000) >> 16;
-                gr_key.ckey.green = (vo_colorkey & 0x0000FF00) >> 8;
-                gr_key.ckey.blue = vo_colorkey & 0x000000FF;
-            } else
-                gr_key.ckey.op = CKEY_FALSE;
-            vidix_grkey_set(&gr_key);
-        }
-    }
-#endif
-
     vga_setdisplaystart(0);
     return 0;
 }
@@ -608,10 +560,6 @@ static void check_events(void) {
 }
 
 static void uninit(void) {
-
-#ifdef CONFIG_VIDIX
-    if(vidix_name[0])vidix_term();
-#endif
     vga_setmode(TEXT);
 }
 

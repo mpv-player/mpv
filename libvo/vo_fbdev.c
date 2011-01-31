@@ -41,9 +41,6 @@
 #include "fastmemcpy.h"
 #include "sub/sub.h"
 #include "geometry.h"
-#ifdef CONFIG_VIDIX
-#include "vosub_vidix.h"
-#endif
 #include "aspect.h"
 #include "mp_msg.h"
 #include "libavutil/common.h"
@@ -57,11 +54,6 @@ static const vo_info_t info = {
 
 LIBVO_EXTERN(fbdev)
 
-#ifdef CONFIG_VIDIX
-/* Name of VIDIX driver */
-static const char *vidix_name = NULL;
-static vidix_grkey_t gr_key;
-#endif
 static signed int pre_init_err = -2;
 /******************************
  *       fb.modes support     *
@@ -926,51 +918,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         fb_page = 0;
     }
 
-#ifdef CONFIG_VIDIX
-    if (vidix_name) {
-        unsigned image_width, image_height, x_offset, y_offset;
-        if (zoom || fs) {
-            aspect_save_orig(width, height);
-            aspect_save_prescale(d_width, d_height);
-            aspect_save_screenres(fb_xres, fb_yres);
-            aspect(&image_width, &image_height, fs ? A_ZOOM : A_NOZOOM);
-        } else {
-            image_width  = width;
-            image_height = height;
-        }
-
-        if (fb_xres > image_width)
-            x_offset = (fb_xres - image_width) / 2;
-        else
-            x_offset = 0;
-        if (fb_yres > image_height)
-            y_offset = (fb_yres - image_height) / 2;
-        else
-            y_offset = 0;
-
-        if (vidix_init(width, height, x_offset, y_offset, image_width,
-                       image_height, format, fb_bpp, fb_xres, fb_yres) != 0) {
-            mp_msg(MSGT_VO, MSGL_ERR, "Can't initialize VIDIX driver\n");
-            vidix_name = NULL;
-            vidix_term();
-            return -1;
-        } else
-            mp_msg(MSGT_VO, MSGL_V, "Using VIDIX\n");
-        vidix_start();
-        if (vidix_grkey_support()) {
-            vidix_grkey_get(&gr_key);
-            gr_key.key_op = KEYS_PUT;
-            if (!(vo_colorkey & 0xff000000)) {
-                gr_key.ckey.op    = CKEY_TRUE;
-                gr_key.ckey.red   = (vo_colorkey & 0x00ff0000) >> 16;
-                gr_key.ckey.green = (vo_colorkey & 0x0000ff00) >> 8;
-                gr_key.ckey.blue  =  vo_colorkey & 0x000000ff;
-            } else
-                gr_key.ckey.op = CKEY_FALSE;
-            vidix_grkey_set(&gr_key);
-        }
-    } else
-#endif
     {
         int x_offset = 0, y_offset = 0;
         geometry(&x_offset, &y_offset, &out_width, &out_height, fb_xres, fb_yres);
@@ -1009,10 +956,6 @@ static int query_format(uint32_t format)
 {
     if (!fb_preinit(0))
         return 0;
-#ifdef CONFIG_VIDIX
-    if (vidix_name)
-        return vidix_query_fourcc(format);
-#endif
     if ((format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
         int bpp = format & 0xff;
 
@@ -1056,10 +999,6 @@ static void flip_page(void)
 {
     int next_page = !fb_page;
     int page_delta = next_page - fb_page;
-#ifdef CONFIG_VIDIX
-    if (vidix_name)
-        return;
-#endif
     if (!vo_doublebuffering)
         return;
 
@@ -1098,10 +1037,6 @@ static void uninit(void)
     if (frame_buffer)
         munmap(frame_buffer, fb_size);
     frame_buffer = NULL;
-#ifdef CONFIG_VIDIX
-    if (vidix_name)
-        vidix_term();
-#endif
     fb_preinit(1);
 }
 
@@ -1110,14 +1045,6 @@ static int preinit(const char *vo_subdevice)
     pre_init_err = 0;
 
     if (vo_subdevice) {
-#ifdef CONFIG_VIDIX
-        if (memcmp(vo_subdevice, "vidix", 5) == 0)
-            vidix_name = &vo_subdevice[5];
-        if (vidix_name)
-            pre_init_err = vidix_preinit(vidix_name,
-                                         video_out_fbdev.old_functions);
-        else
-#endif
         {
             free(fb_dev_name);
             fb_dev_name = strdup(vo_subdevice);
@@ -1154,16 +1081,6 @@ static int control(uint32_t request, void *data)
     case VOCTRL_QUERY_FORMAT:
         return query_format(*(uint32_t*)data);
     }
-
-#ifdef CONFIG_VIDIX
-    if (vidix_name) {
-        switch (request) {
-        case VOCTRL_SET_EQUALIZER:
-        case VOCTRL_GET_EQUALIZER:
-            return vidix_control(request, data);
-        }
-    }
-#endif
 
     return VO_NOTIMPL;
 }

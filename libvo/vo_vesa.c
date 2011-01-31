@@ -53,9 +53,6 @@
 #include "mpbswap.h"
 #include "aspect.h"
 #include "vesa_lvo.h"
-#ifdef CONFIG_VIDIX
-#include "vosub_vidix.h"
-#endif
 #include "mp_msg.h"
 
 #include "libswscale/swscale.h"
@@ -112,11 +109,6 @@ uint8_t   multi_idx=0; /* active buffer */
 /* Linux Video Overlay */
 static const char *lvo_name = NULL;
 static int lvo_opened = 0;
-#ifdef CONFIG_VIDIX
-static const char *vidix_name = NULL;
-static int vidix_opened = 0;
-static vidix_grkey_t gr_key;
-#endif
 
 /* Neomagic TV out */
 static int neomagic_tvout = 0;
@@ -154,9 +146,6 @@ static void vesa_term( void )
 {
   int err;
   if(lvo_opened) { vlvo_term();  lvo_opened = 0; }
-#ifdef CONFIG_VIDIX
-  else if(vidix_opened) { vidix_term();  vidix_opened = 0; }
-#endif
   if(init_state) if((err=vbeRestoreState(init_state)) != VBE_OK) PRINT_VBE_ERR("vbeRestoreState",err);
   init_state=NULL;
   if(init_mode) if((err=vbeSetMode(init_mode,NULL)) != VBE_OK) PRINT_VBE_ERR("vbeSetMode",err);
@@ -441,10 +430,6 @@ static uint32_t parseSubDevice(const char *sd)
    if(strcmp(sd,"neotv_ntsc") == 0)   { neomagic_tvout = 1; neomagic_tvnorm = NEO_NTSC; }
    else
    if(memcmp(sd,"lvo:",4) == 0) lvo_name = &sd[4]; /* lvo_name will be valid within init() */
-#ifdef CONFIG_VIDIX
-   else
-   if(memcmp(sd,"vidix",5) == 0) vidix_name = &sd[5]; /* vidix_name will be valid within init() */
-#endif
    else { mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_VESA] unknown subdevice: '%s'.\n", sd); return 0xFFFFFFFFUL; }
    return flags;
 }
@@ -453,9 +438,6 @@ static int query_format(uint32_t format)
 {
     if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
         mp_msg(MSGT_VO,MSGL_DBG3, "vo_vesa: query_format was called: %x (%s)\n",format,vo_format_name(format));
-#ifdef CONFIG_VIDIX
-    if(vidix_name) return vidix_query_fourcc(format);
-#endif
     if (format == IMGFMT_MPEGPES)
 	return 0;
     // FIXME: this is just broken...
@@ -788,9 +770,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		{
 		      /* software scale */
 		      if(use_scaler > 1
-#ifdef CONFIG_VIDIX
-				|| vidix_name
-#endif
 			  )
 		      {
 		        aspect_save_orig(width,height);
@@ -807,9 +786,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		      use_scaler = 1;
 		}
 		if(!lvo_name
-#ifdef CONFIG_VIDIX
-		&& !vidix_name
-#endif
 		)
 		{
 		    sws = sws_getContextFromCmdLine(srcW,srcH,srcFourcc,dstW,dstH,dstFourcc);
@@ -897,9 +873,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		{
 		  cpy_blk_fnc = vbeCopyBlock;
 		  if(!lvo_name
-#ifdef CONFIG_VIDIX
-		   && !vidix_name
-#endif
 		  )
 		  {
 		    if(!(dga_buffer = memalign(64,video_mode_info.XResolution*video_mode_info.YResolution*dstBpp)))
@@ -964,41 +937,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		  else mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_VESA] Using video overlay: %s.\n",lvo_name);
 		  lvo_opened = 1;
 		}
-#ifdef CONFIG_VIDIX
-		else
-		if(vidix_name)
-		{
-		  if(vidix_init(width,height,x_offset,y_offset,dstW,
-				dstH,format,dstBpp,
-				video_mode_info.XResolution,video_mode_info.YResolution) != 0)
-		  {
-		    mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_VESA] Can't initialize VIDIX driver.\n");
-		    vesa_term();
-		    return -1;
-		  }
-		  else mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_VESA] Using VIDIX.\n");
-		  vidix_start();
-
-		  /* set colorkey */
-		  if (vidix_grkey_support())
-		  {
-		    vidix_grkey_get(&gr_key);
-		    gr_key.key_op = KEYS_PUT;
-#if 0
-		    if (!(vo_colorkey & 0xFF000000))
-		    {
-			gr_key.ckey.op = CKEY_TRUE;
-			gr_key.ckey.red = (vo_colorkey & 0x00FF0000) >> 16;
-			gr_key.ckey.green = (vo_colorkey & 0x0000FF00) >> 8;
-			gr_key.ckey.blue = vo_colorkey & 0x000000FF;
-		    } else
-#endif
-			gr_key.ckey.op = CKEY_FALSE;
-		    vidix_grkey_set(&gr_key);
-		  }
-		  vidix_opened = 1;
-		}
-#endif
 	}
 	else
 	{
@@ -1066,15 +1004,8 @@ static int preinit(const char *arg)
         mp_msg(MSGT_VO,MSGL_DBG3, "vo_vesa: subdevice %s is being initialized\n",arg);
   subdev_flags = 0;
   lvo_name = NULL;
-#ifdef CONFIG_VIDIX
-  vidix_name = NULL;
-#endif
   if(arg) subdev_flags = parseSubDevice(arg);
   if(lvo_name) pre_init_err = vlvo_preinit(lvo_name);
-#ifdef CONFIG_VIDIX
-  else if(vidix_name) pre_init_err = vidix_preinit(vidix_name,
-                                                video_out_vesa.old_functions);
-#endif
   // check if we can open /dev/mem (it will be opened later in config(), but if we
   // detect now that we can't we can exit cleanly)
   fd = open("/dev/mem", O_RDWR);
@@ -1093,11 +1024,6 @@ static int control(uint32_t request, void *data)
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   }
-
-#ifdef CONFIG_VIDIX
-  if (vidix_name)
-    return vidix_control(request, data);
-#endif
 
   return VO_NOTIMPL;
 }

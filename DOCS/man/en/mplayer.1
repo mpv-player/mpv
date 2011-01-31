@@ -281,8 +281,8 @@ Change YUV colorspace.
 .PD 1
 .PP
 .RS
-(The following keys are valid only when using a hardware accelerated video
-output (xv, (x)vidix, (x)mga, etc), the software equalizer
+(The following keys are valid only when using a video output that supports
+the corresponding adjustment, the software equalizer
 (\-vf eq or \-vf eq2) or hue filter (\-vf hue).)
 .RE
 .PP
@@ -751,14 +751,14 @@ chapter change instead of doing a seek.
 .B \-colorkey <number>
 Changes the colorkey to an RGB value of your choice.
 0x000000 is black and 0xffffff is white.
-Only supported by the cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix,
+Only supported by the fbdev, svga, vesa, xmga,
 xover, xv (see \-vo xv:ck), xvmc (see \-vo xv:ck) and directx video output
 drivers.
 .
 .TP
 .B \-nocolorkey
 Disables colorkeying.
-Only supported by the cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix,
+Only supported by the fbdev, svga, vesa, xmga,
 xover, xv (see \-vo xv:ck), xvmc (see \-vo xv:ck) and directx video output
 drivers.
 .
@@ -797,14 +797,13 @@ later.
 See http://www.mplayerhq.hu/\:DOCS/\:HTML/\:en/\:edl.html for details.
 .
 .TP
-.B \-nofixed\-vo
+.B \-fixed\-vo, \-nofixed\-vo
 \-fixed\-vo enforces a fixed video system for multiple files (one
 (un)initialization for all files).
 Therefore only one window will be opened for all files.
 Now enabled by default, use \-nofixed\-vo to disable and create a new window
 whenever the video stream changes.
-Currently the following drivers are fixed-vo compliant: gl, gl2, mga, svga, x11,
-xmga, xv, xvidix and dfbmga.
+Some of the older drivers may not be fixed-vo compliant.
 .
 .TP
 .B \-framedrop (also see \-hardframedrop, experimental without \-nocorrect\-pts)
@@ -3169,8 +3168,7 @@ the video output drivers that fully support \-xineramascreen (direct3d, gl, gl2,
 vdpau, x11, xv, xvmc, corevideo).
 .br
 .I NOTE:
-This option is only supported by the x11, xmga, xv, xvmc, xvidix,
-gl, gl2, directx, fbdev, tdfxfb and corevideo video output drivers.
+May not be supported by some of the older VO drivers.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -3262,8 +3260,7 @@ as well as directx, corevideo, quartz, ggi and gl2.
 Enables pan-and-scan functionality (cropping the sides of e.g.\& a 16:9
 movie to make it fit a 4:3 display without black bands).
 The range controls how much of the image is cropped.
-Only works with the xv, xmga, mga, gl, gl2, quartz, corevideo and xvidix
-video output drivers.
+May not work with all video output drivers.
 .br
 .I NOTE:
 Values between \-1 and 0 are allowed as well, but highly experimental
@@ -3288,7 +3285,7 @@ Currently only supported by \-vo directx combined with the \-vm option.
 .B \-rootwin
 Play movie in the root window (desktop background).
 Desktop background images may cover the movie window, though.
-Only works with the x11, xv, xmga, xvidix, quartz, corevideo and directx video output drivers.
+May not work with all video output drivers.
 .
 .TP
 .B \-saturation <\-100\-100>
@@ -3674,52 +3671,6 @@ Use hardware accelerated scaler (default: hwaccel).
 .PD 1
 .
 .TP
-.B "vidix\ \ "
-VIDIX (VIDeo Interface for *niX) is an interface to the
-video acceleration features of different graphics cards.
-Very fast video output driver on cards that support it.
-.PD 0
-.RSs
-.IPs <subdevice>
-Explicitly choose the VIDIX subdevice driver to use.
-Available subdevice drivers are cyberblade, ivtv, mach64,
-mga_crtc2, mga, nvidia, pm2, pm3, radeon, rage128, s3, sh_veu,
-sis_vid and unichrome.
-.RE
-.PD 1
-.
-.TP
-.B xvidix (X11 only)
-X11 frontend for VIDIX
-.PD 0
-.RSs
-.IPs <subdevice>
-same as vidix
-.RE
-.PD 1
-.
-.TP
-.B "cvidix\ "
-Generic and platform independent VIDIX frontend, can even run in a
-text console with nVidia cards.
-.PD 0
-.RSs
-.IPs <subdevice>
-same as vidix
-.RE
-.PD 1
-.
-.TP
-.B winvidix (Windows only)
-Windows frontend for VIDIX
-.PD 0
-.RSs
-.IPs <subdevice>
-same as vidix
-.RE
-.PD 1
-.
-.TP
 .B direct3d (Windows only) (BETA CODE!)
 Video output driver that uses the Direct3D interface (useful for Vista).
 .
@@ -3789,9 +3740,7 @@ Uses the kernel framebuffer to play video.
 .PD 0
 .RSs
 .IPs <device>
-Explicitly choose the fbdev device name to use (e.g.\& /dev/\:fb0) or the
-name of the VIDIX subdevice if the device name starts with 'vidix'
-(e.g.\& 'vidixsis_vid' for the sis driver).
+Explicitly choose the fbdev device name to use (e.g.\& /dev/\:fb0).
 .RE
 .PD 1
 .
@@ -3818,8 +3767,6 @@ Turns DGA mode on or off (default: on).
 Activate the NeoMagic TV out and set it to PAL norm.
 .IPs neotv_ntsc
 Activate the NeoMagic TV out and set it to NTSC norm.
-.IPs vidix
-Use the VIDIX driver.
 .IPs "lvo:\ \ \ "
 Activate the Linux Video Overlay on top of VESA mode.
 .RE
@@ -3845,8 +3792,6 @@ Usable only with \-double.
 It has the same effect as the \-vsync option.
 .IPs "sq\ \ \ "
 Try to select a video mode with square pixels.
-.IPs vidix
-Use svga with VIDIX.
 .RE
 .PD 1
 .
@@ -7792,18 +7737,6 @@ Connect to NAS server instance 0 on localhost using unix domain sockets.
 .TP
 .B DISPLAY
 FIXME: Document this.
-.
-.SS vidix:
-.
-.TP
-.B VIDIX_CRT
-FIXME: Document this.
-.
-.TP
-.B VIDIXIVTVALPHA
-Set this to 'disable' in order to stop the VIDIX driver from controlling
-alphablending settings.
-You can then manipulate it yourself with 'ivtvfbctl'.
 .
 .SS osdep:
 .

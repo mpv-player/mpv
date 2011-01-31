@@ -386,13 +386,6 @@ Codecs:
   --disable-musepack        disable musepack support [autodetect]
 
 Video output:
-  --disable-vidix          disable VIDIX [for x86 *nix]
-  --with-vidix-drivers[=*] list of VIDIX drivers to be compiled in
-                           Available: cyberblade, ivtv, mach64, mga, mga_crtc2,
-                           nvidia, pm2, pm3, radeon, rage128, s3, sis, unichrome
-  --disable-vidix-pcidb    disable VIDIX PCI device name database
-  --enable-dhahelper       enable VIDIX dhahelper support
-  --enable-svgalib_helper  enable VIDIX svgalib_helper support
   --enable-gl              enable OpenGL video output [autodetect]
   --disable-matrixview     disable OpenGL MatrixView video output [autodetect]
   --enable-dga2            enable DGA 2 support [autodetect]
@@ -675,10 +668,6 @@ _pvr=auto
 networking=yes
 _winsock2_h=auto
 _smb=auto
-_vidix=auto
-_vidix_pcidb=yes
-_dhahelper=no
-_svgalib_helper=no
 _joystick=no
 _xvid=auto
 _libnut=auto
@@ -1082,16 +1071,6 @@ for ac_option do
   --disable-winsock2_h) _winsock2_h=no  ;;
   --enable-smb)         _smb=yes        ;;
   --disable-smb)        _smb=no ;;
-  --enable-vidix)       _vidix=yes      ;;
-  --disable-vidix)      _vidix=no       ;;
-  --with-vidix-drivers=*)
-    _vidix_drivers=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --disable-vidix-pcidb)  _vidix_pcidb=no         ;;
-  --enable-dhahelper)   _dhahelper=yes  ;;
-  --disable-dhahelper)  _dhahelper=no   ;;
-  --enable-svgalib_helper)      _svgalib_helper=yes     ;;
-  --disable-svgalib_helper)     _svgalib_helper=no      ;;
   --enable-joystick)    _joystick=yes   ;;
   --disable-joystick)   _joystick=no    ;;
   --enable-xvid)        _xvid=yes       ;;
@@ -4155,96 +4134,6 @@ fi
 echores "$_3dfx"
 
 
-echocheck "VIDIX"
-def_vidix='#undef CONFIG_VIDIX'
-def_vidix_drv_cyberblade='#undef CONFIG_VIDIX_DRV_CYBERBLADE'
-_vidix_drv_cyberblade=no
-def_vidix_drv_ivtv='#undef CONFIG_VIDIX_DRV_IVTV'
-_vidix_drv_ivtv=no
-def_vidix_drv_mach64='#undef CONFIG_VIDIX_DRV_MACH64'
-_vidix_drv_mach64=no
-def_vidix_drv_mga='#undef CONFIG_VIDIX_DRV_MGA'
-_vidix_drv_mga=no
-def_vidix_drv_mga_crtc2='#undef CONFIG_VIDIX_DRV_MGA_CRTC2'
-_vidix_drv_mga_crtc2=no
-def_vidix_drv_nvidia='#undef CONFIG_VIDIX_DRV_NVIDIA'
-_vidix_drv_nvidia=no
-def_vidix_drv_pm2='#undef CONFIG_VIDIX_DRV_PM2'
-_vidix_drv_pm2=no
-def_vidix_drv_pm3='#undef CONFIG_VIDIX_DRV_PM3'
-_vidix_drv_pm3=no
-def_vidix_drv_radeon='#undef CONFIG_VIDIX_DRV_RADEON'
-_vidix_drv_radeon=no
-def_vidix_drv_rage128='#undef CONFIG_VIDIX_DRV_RAGE128'
-_vidix_drv_rage128=no
-def_vidix_drv_s3='#undef CONFIG_VIDIX_DRV_S3'
-_vidix_drv_s3=no
-def_vidix_drv_sh_veu='#undef CONFIG_VIDIX_DRV_SH_VEU'
-_vidix_drv_sh_veu=no
-def_vidix_drv_sis='#undef CONFIG_VIDIX_DRV_SIS'
-_vidix_drv_sis=no
-def_vidix_drv_unichrome='#undef CONFIG_VIDIX_DRV_UNICHROME'
-_vidix_drv_unichrome=no
-if test "$_vidix" = auto ; then
-  _vidix=no
-  x86 && (linux || freebsd || netbsd || openbsd || dragonfly || sunos || win32) \
-    && _vidix=yes
-  x86_64 && ! linux && _vidix=no
-  (ppc || alpha) && linux && _vidix=yes
-fi
-echores "$_vidix"
-
-if test "$_vidix" = yes ; then
-  def_vidix='#define CONFIG_VIDIX 1'
-  vomodules="cvidix $vomodules"
-  # FIXME: ivtv driver temporarily disabled until we have a proper test
-  #test "$_vidix_drivers" || _vidix_drivers="cyberblade ivtv mach64 mga mga_crtc2 nvidia pm2 pm3 radeon rage128 s3 sh_veu sis unichrome"
-  test "$_vidix_drivers" || _vidix_drivers="cyberblade mach64 mga mga_crtc2 nvidia pm2 pm3 radeon rage128 s3 sh_veu sis unichrome"
-
-  # some vidix drivers are architecture and os specific, discard them elsewhere
-  x86 || _vidix_drivers=$(echo $_vidix_drivers | sed -e s/cyberblade// -e s/sis// -e s/unichrome// -e s/s3//)
-  (test $host_arch = "sh" && linux) || _vidix_drivers=$(echo $_vidix_drivers | sed s/sh_veu//)
-
-  for driver in $_vidix_drivers ; do
-    uc_driver=$(echo $driver | tr '[a-z]' '[A-Z]')
-    eval _vidix_drv_${driver}=yes
-    eval def_vidix_drv_${driver}=\"\#define CONFIG_VIDIX_DRV_${uc_driver} 1\"
-  done
-
-  echocheck "VIDIX PCI device name database"
-  echores "$_vidix_pcidb"
-  if test "$_vidix_pcidb" = yes ; then
-    _vidix_pcidb_val=1
-  else
-    _vidix_pcidb_val=0
-  fi
-
-  echocheck "VIDIX dhahelper support"
-  test "$_dhahelper" = yes && cflags_dhahelper=-DCONFIG_DHAHELPER
-  echores "$_dhahelper"
-
-  echocheck "VIDIX svgalib_helper support"
-  test "$_svgalib_helper" = yes && cflags_svgalib_helper=-DCONFIG_SVGAHELPER
-  echores "$_svgalib_helper"
-
-else
-  novomodules="cvidix $novomodules"
-fi
-
-if test "$_vidix" = yes && win32; then
-  winvidix=yes
-  vomodules="winvidix $vomodules"
-  libs_mplayer="$libs_mplayer -lgdi32"
-else
-  novomodules="winvidix $novomodules"
-fi
-if test "$_vidix" = yes && test "$_x11" = yes; then
-  xvidix=yes
-  vomodules="xvidix $vomodules"
-else
-  novomodules="xvidix $novomodules"
-fi
-
 echocheck "GGI"
 if test "$_ggi" = auto ; then
   _ggi=no
@@ -7008,13 +6897,11 @@ CFLAGS   = $WARNFLAGS $WARN_CFLAGS $CFLAGS $extra_cflags
 CXXFLAGS = $WARNFLAGS $CXXFLAGS $extra_cflags $extra_cxxflags
 DEPFLAGS = $DEPFLAGS
 
-CFLAGS_DHAHELPER         = $cflags_dhahelper
 CFLAGS_LIBDVDCSS         = $cflags_libdvdcss
 CFLAGS_LIBDVDCSS_DVDREAD = $cflags_libdvdcss_dvdread
 CFLAGS_LIBDVDNAV         = $cflags_libdvdnav
 CFLAGS_NO_OMIT_LEAF_FRAME_POINTER = $cflags_no_omit_leaf_frame_pointer
 CFLAGS_STACKREALIGN      = $cflags_stackrealign
-CFLAGS_SVGALIB_HELPER    = $cflags_svgalib_helper
 CFLAGS_TREMOR_LOW        = $cflags_tremor_low
 
 EXTRALIBS          = $extra_ldflags $_ld_static $_ld_lm $extra_libs
@@ -7158,36 +7045,18 @@ V4L2 = $_v4l2
 VCD = $_vcd
 VDPAU = $_vdpau
 VESA = $_vesa
-VIDIX = $_vidix
-VIDIX_PCIDB = $_vidix_pcidb_val
-VIDIX_CYBERBLADE=$_vidix_drv_cyberblade
-VIDIX_IVTV=$_vidix_drv_ivtv
-VIDIX_MACH64=$_vidix_drv_mach64
-VIDIX_MGA=$_vidix_drv_mga
-VIDIX_MGA_CRTC2=$_vidix_drv_mga_crtc2
-VIDIX_NVIDIA=$_vidix_drv_nvidia
-VIDIX_PM2=$_vidix_drv_pm2
-VIDIX_PM3=$_vidix_drv_pm3
-VIDIX_RADEON=$_vidix_drv_radeon
-VIDIX_RAGE128=$_vidix_drv_rage128
-VIDIX_S3=$_vidix_drv_s3
-VIDIX_SH_VEU=$_vidix_drv_sh_veu
-VIDIX_SIS=$_vidix_drv_sis
-VIDIX_UNICHROME=$_vidix_drv_unichrome
 VORBIS = $_vorbis
 VSTREAM = $_vstream
 WII = $_wii
 WIN32DLL = $_win32dll
 WIN32WAVEOUT = $_win32waveout
 WIN32_EMULATION = $_win32_emulation
-WINVIDIX = $winvidix
 X11 = $_x11
 XANIM_CODECS = $_xanim
 XMGA = $_xmga
 XMMS_PLUGINS = $_xmms
 XV = $_xv
 XVID4 = $_xvid
-XVIDIX = $xvidix
 XVMC = $_xvmc
 XVR100 = $_xvr100
 YUV4MPEG = $_yuv4mpeg
@@ -7549,21 +7418,6 @@ $def_tga
 $def_v4l2
 $def_vdpau
 $def_vesa
-$def_vidix
-$def_vidix_drv_cyberblade
-$def_vidix_drv_ivtv
-$def_vidix_drv_mach64
-$def_vidix_drv_mga
-$def_vidix_drv_mga_crtc2
-$def_vidix_drv_nvidia
-$def_vidix_drv_pm3
-$def_vidix_drv_radeon
-$def_vidix_drv_rage128
-$def_vidix_drv_s3
-$def_vidix_drv_sh_veu
-$def_vidix_drv_sis
-$def_vidix_drv_unichrome
-$def_vidix_pfx
 $def_vm
 $def_wii
 $def_x11

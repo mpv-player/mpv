@@ -118,9 +118,6 @@ extern struct vo_driver video_out_gif89a;
 extern struct vo_driver video_out_vesa;
 extern struct vo_driver video_out_directfb;
 extern struct vo_driver video_out_dfbmga;
-extern struct vo_driver video_out_xvidix;
-extern struct vo_driver video_out_winvidix;
-extern struct vo_driver video_out_cvidix;
 extern struct vo_driver video_out_tdfx_vid;
 extern struct vo_driver video_out_xvr100;
 extern struct vo_driver video_out_tga;
@@ -236,15 +233,6 @@ const struct vo_driver *video_out_drivers[] =
 #endif
 #ifdef CONFIG_DIRECTFB
         &video_out_dfbmga,
-#endif
-#ifdef CONFIG_VIDIX
-#ifdef CONFIG_X11
-        &video_out_xvidix,
-#endif
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-        &video_out_winvidix,
-#endif
-        &video_out_cvidix,
 #endif
         &video_out_null,
         // should not be auto-selected

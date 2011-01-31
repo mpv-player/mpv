@@ -553,38 +553,13 @@ SRCS_MPLAYER-$(V4L2)          += libvo/vo_v4l2.c
 SRCS_MPLAYER-$(V4L2)          += libao2/ao_v4l2.c
 SRCS_MPLAYER-$(VDPAU)         += libvo/vo_vdpau.c
 SRCS_MPLAYER-$(VESA)          += libvo/gtf.c libvo/vo_vesa.c libvo/vesa_lvo.c
-SRCS_MPLAYER-$(VIDIX)         += libvo/vo_cvidix.c \
-                                 libvo/vosub_vidix.c \
-                                 vidix/vidix.c \
-                                 vidix/drivers.c \
-                                 vidix/dha.c \
-                                 vidix/mtrr.c \
-                                 vidix/pci.c \
-                                 vidix/pci_names.c \
-                                 vidix/pci_dev_ids.c\
 
-SRCS_MPLAYER-$(VIDIX_CYBERBLADE)    += vidix/cyberblade_vid.c
-SRCS_MPLAYER-$(VIDIX_IVTV)          += vidix/ivtv_vid.c
-SRCS_MPLAYER-$(VIDIX_MACH64)        += vidix/mach64_vid.c
-SRCS_MPLAYER-$(VIDIX_MGA)           += vidix/mga_vid.c
-SRCS_MPLAYER-$(VIDIX_MGA_CRTC2)     += vidix/mga_crtc2_vid.c
-SRCS_MPLAYER-$(VIDIX_NVIDIA)        += vidix/nvidia_vid.c
-SRCS_MPLAYER-$(VIDIX_PM2)           += vidix/pm2_vid.c
-SRCS_MPLAYER-$(VIDIX_PM3)           += vidix/pm3_vid.c
-SRCS_MPLAYER-$(VIDIX_RADEON)        += vidix/radeon_vid.c
-SRCS_MPLAYER-$(VIDIX_RAGE128)       += vidix/rage128_vid.c
-SRCS_MPLAYER-$(VIDIX_S3)            += vidix/s3_vid.c
-SRCS_MPLAYER-$(VIDIX_SH_VEU)        += vidix/sh_veu_vid.c
-SRCS_MPLAYER-$(VIDIX_SIS)           += vidix/sis_vid.c vidix/sis_bridge.c
-SRCS_MPLAYER-$(VIDIX_UNICHROME)     += vidix/unichrome_vid.c
 SRCS_MPLAYER-$(WII)           += libvo/vo_wii.c
 SRCS_MPLAYER-$(WIN32WAVEOUT)  += libao2/ao_win32.c
-SRCS_MPLAYER-$(WINVIDIX)      += libvo/vo_winvidix.c
 SRCS_MPLAYER-$(X11)           += libvo/vo_x11.c libvo/vo_xover.c \
                                  libvo/x11_common.c
 SRCS_MPLAYER-$(XMGA)          += libvo/vo_xmga.c
 SRCS_MPLAYER-$(XV)            += libvo/vo_xv.c
-SRCS_MPLAYER-$(XVIDIX)        += libvo/vo_xvidix.c
 SRCS_MPLAYER-$(XVMC)          += libvo/vo_xvmc.c
 SRCS_MPLAYER-$(XVR100)        += libvo/vo_xvr100.c
 SRCS_MPLAYER-$(YUV4MPEG)      += libvo/vo_yuv4mpeg.c
@@ -653,7 +628,6 @@ DIRS =  . \
         sub \
         tremor \
         TOOLS \
-        vidix \
 
 MOFILES := $(MSG_LANGS:%=locale/%/LC_MESSAGES/mplayer.mo)
 
@@ -746,18 +720,6 @@ stream/stream_dvdnav%: CFLAGS := $(CFLAGS_LIBDVDNAV) $(CFLAGS)
 
 tremor/%: CFLAGS += $(CFLAGS_TREMOR_LOW)
 
-vidix/%: CFLAGS += $(CFLAGS_DHAHELPER) $(CFLAGS_SVGALIB_HELPER)
-
-VIDIX_PCI_FILES = vidix/pci_dev_ids.c vidix/pci_ids.h vidix/pci_names.c \
-                  vidix/pci_vendors.h
-
-$(VIDIX_PCI_FILES): vidix/pci_db2c.awk vidix/pci.db
-	awk -f $^ $(VIDIX_PCIDB)
-
-VIDIX_OBJS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.o))
-
-$(VIDIX_OBJS): $(VIDIX_PCI_FILES)
-
 
 
 ###### installation / clean / generic rules #######
@@ -808,12 +770,12 @@ clean:
 	-rm -f $(call ADD_ALL_EXESUFS,mplayer)
 	-rm -f $(MOFILES)
 
-distclean: clean testsclean toolsclean driversclean dhahelperclean
+distclean: clean testsclean toolsclean driversclean
 	-rm -rf DOCS/tech/doxygen
 	-rm -rf locale
 	-rm -f $(call ADD_ALL_DIRS,/*.d)
 	-rm -f config.log config.mak config.h codecs.conf.h \
-           version.h $(VIDIX_PCI_FILES) TAGS tags
+           version.h TAGS tags
 	-rm -f $(call ADD_ALL_EXESUFS,codec-cfg cpuinfo)
 
 doxygen:
@@ -931,48 +893,11 @@ install-drivers: $(DRIVER_OBJS)
 driversclean:
 	-rm -f $(DRIVER_OBJS) drivers/*~
 
-dhahelper: vidix/dhahelper/dhahelper.o vidix/dhahelper/test
-
-vidix/dhahelper/dhahelper.o vidix/dhahelper/test: CFLAGS = $(KERNEL_CFLAGS)
-vidix/dhahelper/dhahelper.o: vidix/dhahelper/dhahelper.c vidix/dhahelper/dhahelper.h
-
-install-dhahelper: vidix/dhahelper/dhahelper.o
-	-mkdir -p $(MODULES_DIR)
-	install -m 644 $< $(MODULES_DIR)
-	depmod -a
-	-mknod /dev/dhahelper c 180 0
-
-dhahelperwin: vidix/dhahelperwin/dhasetup.exe vidix/dhahelperwin/dhahelper.sys
-
-vidix/dhahelperwin/dhahelper-rc.o: vidix/dhahelperwin/common.ver vidix/dhahelperwin/ntverp.h
-
-vidix/dhahelperwin/base.tmp: vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
-	$(CC) -Wl,--base-file,$@ -Wl,--entry,_DriverEntry@8 -nostartfiles \
-            -nostdlib -o $(@D)/junk.tmp $^ -lntoskrnl
-	-rm -f $(@D)/junk.tmp
-
-vidix/dhahelperwin/temp.exp: vidix/dhahelperwin/base.tmp
-	dlltool --dllname $(@D)/dhahelper.sys --base-file $< --output-exp $@
-
-vidix/dhahelperwin/dhahelper.sys: vidix/dhahelperwin/temp.exp vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
-	$(CC) -Wl,--subsystem,native -Wl,--image-base,0x10000 \
-            -Wl,--file-alignment,0x1000 -Wl,--section-alignment,0x1000 \
-            -Wl,--entry,_DriverEntry@8 -Wl,$< -mdll -nostartfiles -nostdlib \
-            -o $@ $(@:.sys=.o) $(@:.sys=-rc.o) -lntoskrnl
-	strip $@
-
-install-dhahelperwin:
-	vidix/dhahelperwin/dhasetup.exe install
-
-dhahelperclean:
-	-rm -f vidix/dhahelper/*.o vidix/dhahelper/*~ vidix/dhahelper/test
-	-rm -f $(addprefix vidix/dhahelperwin/,*.o *~ dhahelper.sys dhasetup.exe base.tmp temp.exp)
-
 
 
 -include $(DEP_FILES)
 
-.PHONY: all doxygen locales *install* *tools drivers dhahelper*
+.PHONY: all doxygen locales *install* *tools drivers
 .PHONY: checkheaders *clean tests
 
 # Disable suffix rules.  Most of the builtin rules are suffix rules,
