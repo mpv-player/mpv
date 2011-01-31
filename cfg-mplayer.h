@@ -47,8 +47,6 @@ extern int menu_fribidi_flip_commas;
 
 extern char *unrar_executable;
 
-extern const m_option_t dxr2_opts[];
-
 const m_option_t vd_conf[]={
     {"help", "Use MPlayer with an appropriate video file instead of live partners to avoid vd.\n", CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
@@ -221,10 +219,6 @@ const m_option_t mplayer_opts[]={
 #ifdef CONFIG_ZR
     // -vo zr
     {"zr*", vo_zr_parseoption, CONF_TYPE_FUNC_FULL, 0, 0, 0, &vo_zr_revertoption },
-#endif
-
-#ifdef CONFIG_DXR2
-    {"dxr2", &dxr2_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 
 

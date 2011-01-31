@@ -400,7 +400,6 @@ Video output:
   --enable-ggiwmh          enable GGI libggiwmh extension [autodetect]
   --enable-direct3d        enable Direct3D video output [autodetect]
   --enable-directx         enable DirectX video output [autodetect]
-  --enable-dxr2            enable DXR2 video output [autodetect]
   --enable-dxr3            enable DXR3/H+ video output [autodetect]
   --enable-ivtv            enable IVTV TV-Out video output [autodetect]
   --enable-v4l2            enable V4L2 Decoder audio/video output [autodetect]
@@ -596,7 +595,6 @@ _svga=auto
 _vesa=auto
 _fbdev=auto
 _dvb=auto
-_dxr2=auto
 _dxr3=auto
 _ivtv=auto
 _v4l2=auto
@@ -935,8 +933,6 @@ for ac_option do
   --disable-fbdev)      _fbdev=no       ;;
   --enable-dvb)         _dvb=yes        ;;
   --disable-dvb)        _dvb=no         ;;
-  --enable-dxr2)        _dxr2=yes       ;;
-  --disable-dxr2)       _dxr2=no        ;;
   --enable-dxr3)        _dxr3=yes       ;;
   --disable-dxr3)       _dxr3=no        ;;
   --enable-ivtv)        _ivtv=yes       ;;
@@ -4782,25 +4778,6 @@ echores "$_directx"
 fi #if win32; then
 
 
-echocheck "DXR2"
-if test "$_dxr2" = auto; then
-  _dxr2=no
-  for _inc_tmp in "" -I/usr/local/include/dxr2 -I/usr/include/dxr2; do
-    header_check dxr2ioctl.h $_inc_tmp && _dxr2=yes &&
-      extra_cflags="$extra_cflags $_inc_tmp" && break
-  done
-fi
-if test "$_dxr2" = yes; then
-  def_dxr2='#define CONFIG_DXR2 1'
-  aomodules="dxr2 $aomodules"
-  vomodules="dxr2 $vomodules"
-else
-  def_dxr2='#undef CONFIG_DXR2'
-  noaomodules="dxr2 $noaomodules"
-  novomodules="dxr2 $novomodules"
-fi
-echores "$_dxr2"
-
 echocheck "DXR3/H+"
 if test "$_dxr3" = auto ; then
   _dxr3=no
@@ -6956,7 +6933,6 @@ DVDNAV = $_dvdnav
 DVDNAV_INTERNAL = $dvdnav_internal
 DVDREAD = $_dvdread
 DVDREAD_INTERNAL = $_dvdread_internal
-DXR2 = $_dxr2
 DXR3 = $_dxr3
 ESD = $_esd
 FAAD = $_faad
@@ -7386,7 +7362,6 @@ $def_directfb
 $def_directx
 $def_dvb
 $def_dvbin
-$def_dxr2
 $def_dxr3
 $def_fbdev
 $def_ggi

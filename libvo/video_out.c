@@ -109,7 +109,6 @@ extern struct vo_driver video_out_yuv4mpeg;
 extern struct vo_driver video_out_direct3d;
 extern struct vo_driver video_out_directx;
 extern struct vo_driver video_out_kva;
-extern struct vo_driver video_out_dxr2;
 extern struct vo_driver video_out_dxr3;
 extern struct vo_driver video_out_ivtv;
 extern struct vo_driver video_out_v4l2;
@@ -208,9 +207,6 @@ const struct vo_driver *video_out_drivers[] =
 #endif
 #ifdef CONFIG_CACA
         &video_out_caca,
-#endif
-#ifdef CONFIG_DXR2
-        &video_out_dxr2,
 #endif
 #ifdef CONFIG_DXR3
         &video_out_dxr3,

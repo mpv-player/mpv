@@ -147,7 +147,7 @@ It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
 Quartz, Mac OS X CoreVideo, but you can also use GGI, SDL (and all their drivers),
 VESA (on every VESA-compatible card, even without X11), some low-level
 card-specific drivers (for Matrox, 3dfx and ATI) and some hardware MPEG decoder
-boards, such as the Siemens DVB, Hauppauge PVR (IVTV), DXR2 and DXR3/\:Hollywood+.
+boards, such as the Siemens DVB, Hauppauge PVR (IVTV) and DXR3/\:Hollywood+.
 Most of them support software or hardware scaling, so you can enjoy movies in
 fullscreen mode.
 .PP
@@ -2889,10 +2889,6 @@ Set buffer size to <size> in samples (default: 2048).
 .PD 1
 .
 .TP
-.B dxr2 (also see \-dxr2) (DXR2 only)
-Creative DXR2 specific output driver
-.
-.TP
 .B ivtv (IVTV only)
 IVTV specific MPEG audio output driver.
 Works with \-ac hwmpa only.
@@ -2993,88 +2989,6 @@ Turns on direct rendering (not supported by all codecs and video outputs)
 .br
 .I WARNING:
 May cause OSD/SUB corruption!
-.
-.TP
-.B \-dxr2 <option1:option2:...>
-This option is used to control the dxr2 video output driver.
-.RSs
-.IPs ar-mode=<value>
-aspect ratio mode (0 = normal, 1 = pan-and-scan, 2 = letterbox (default))
-.IPs iec958-encoded
-Set iec958 output mode to encoded.
-.IPs iec958-decoded
-Set iec958 output mode to decoded (default).
-.IPs macrovision=<value>
-macrovision mode (0 = off (default), 1 = agc, 2 = agc 2 colorstripe,
-3 = agc 4 colorstripe)
-.IPs "mute\ "
-mute sound output
-.IPs unmute
-unmute sound output
-.IPs ucode=<value>
-path to the microcode
-.RE
-.RS
-.sp 1
-.I TV output
-.RE
-.RSs
-.IPs 75ire
-enable 7.5 IRE output mode
-.IPs no75ire
-disable 7.5 IRE output mode (default)
-.IPs "bw\ \ \ "
-b/w TV output
-.IPs color
-color TV output (default)
-.IPs interlaced
-interlaced TV output (default)
-.IPs nointerlaced
-disable interlaced TV output
-.IPs norm=<value>
-TV norm (ntsc (default), pal, pal60, palm, paln, palnc)
-.IPs square-pixel
-set pixel mode to square
-.IPs ccir601-pixel
-set pixel mode to ccir601
-.RE
-.RS
-.sp 1
-.I overlay
-.RE
-.RSs
-.IPs cr-left=<0\-500>
-Set the left cropping value (default: 50).
-.IPs cr-right=<0\-500>
-Set the right cropping value (default: 300).
-.IPs cr-top=<0\-500>
-Set the top cropping value (default: 0).
-.IPs cr-bottom=<0\-500>
-Set the bottom cropping value (default: 0).
-.IPs ck-[r|g|b]=<0\-255>
-Set the r(ed), g(reen) or b(lue) gain of the overlay color-key.
-.IPs ck-[r|g|b]min=<0\-255>
-minimum value for the respective color key
-.IPs ck-[r|g|b]max=<0\-255>
-maximum value for the respective color key
-.IPs ignore-cache
-Ignore cached overlay settings.
-.IPs update-cache
-Update cached overlay settings.
-.IPs ol-osd
-Enable overlay onscreen display.
-.IPs nool-osd
-Disable overlay onscreen display (default).
-.IPs ol[h|w|x|y]-cor=<\-20\-20>
-Adjust the overlay size (h,w) and position (x,y) in case it does not
-match the window perfectly (default: 0).
-.IPs overlay
-Activate overlay (default).
-.IPs nooverlay
-Activate TV-out.
-.IPs overlay-ratio=<1\-2500>
-Tune the overlay (default: 1000).
-.RE
 .
 .TP
 .B \-fbmode <modename> (\-vo fbdev only)
@@ -4225,16 +4139,6 @@ the tdfx_vid kernel module.
 .RSs
 .IPs <device>
 Explicitly choose the device name to use (default: /dev/\:tdfx_vid).
-.RE
-.PD 1
-.
-.TP
-.B dxr2 (also see \-dxr2) (DXR2 only)
-Creative DXR2 specific video output driver.
-.PD 0
-.RSs
-.IPs <vo_driver>
-Output video subdriver to use as overlay (x11, xv).
 .RE
 .PD 1
 .
