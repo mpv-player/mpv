@@ -158,10 +158,6 @@ fonts are supported along with 12 subtitle formats (MicroDVD, SubRip, OGM,
 SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS and our own: MPsub) and
 DVD subtitles (SPU streams, VOBsub and Closed Captions).
 .PP
-.B gmplayer
-is MPlayer with a graphical user interface.
-It has the same options as MPlayer.
-.PP
 Usage examples to get you started quickly can be found at the end
 of this man page.
 .PP
@@ -211,7 +207,7 @@ Pause (pressing again unpauses).
 .IPs ".\ \ \ \ "
 Step forward.
 Pressing once will pause movie, every consecutive press will play one frame
-and then go into pause mode again (any other key unpauses).
+and then go into pause mode again.
 .IPs "q / ESC"
 Stop playing and quit.
 .IPs "U\ \ \ \ "
@@ -763,10 +759,11 @@ xover, xv (see \-vo xv:ck), xvmc (see \-vo xv:ck) and directx video output
 drivers.
 .
 .TP
-.B \-correct\-pts
+.B \-correct\-pts, \-nocorrect\-pts
 Switches MPlayer to a mode where timestamps for video frames
 are calculated differently and video filters which add new frames or
 modify timestamps of existing ones are supported.
+Now enabled automatically for most common file formats.
 The more accurate timestamps can be visible for example when playing
 subtitles timed to scene changes with the \-ass option.
 Without \-correct\-pts the subtitle timing will typically be off by some frames.
@@ -7781,26 +7778,11 @@ mplayer \-vf geq='128+(p(X\\,Y)\-128)*(0.5\-gt(mod(X/SW\\,128)\\,64))*(0.5\-gt(m
 .\" Bugs, authors, standard disclaimer
 .\" --------------------------------------------------------------------------
 .
-.SH BUGS
-Don't panic.
-If you find one, report it to us, but please make sure you have read all
-of the documentation first.
-Also look out for smileys. :)
-Many bugs are the result of incorrect setup or parameter usage.
-The bug reporting section of the documentation
-(http://www.mplayerhq.hu/\:DOCS/\:HTML/\:en/\:bugreports.html)
-explains how to create useful bug reports.
-.
-.
-.
 .SH AUTHORS
 MPlayer was initially written by Arpad Gereoffy.
 See the AUTHORS file for a list of some of the many other contributors.
 .PP
-MPlayer is (C) 2000\-2009 The MPlayer Team
+MPlayer is (C) 2000\-2011 The MPlayer Team
 .PP
 This man page was written mainly by Gabucino, Jonas Jermann and Diego Biurrun.
-It is maintained by Diego Biurrun.
-Please send mails about it to the MPlayer-DOCS mailing list.
-Translation specific mails belong on the MPlayer-translations mailing list.
 .\" end of file
