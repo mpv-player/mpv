@@ -4420,7 +4420,7 @@ if(stream_dump_type==5){
     mp_tmsg(MSGT_GLOBAL,MSGL_FATAL,"%s: Error writing file.\n",opts->stream_dump_name);
     exit_player(mpctx, EXIT_ERROR);
   }
-  mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Core dumped ;)\n");
+  mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Stream dump complete.\n");
   exit_player_with_rc(mpctx, EXIT_EOF, 0);
 }
 
@@ -4615,7 +4615,7 @@ if((stream_dump_type)&&(stream_dump_type<4)){
     }
   }
   fclose(f);
-  mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Core dumped ;)\n");
+  mp_tmsg(MSGT_CPLAYER ,MSGL_INFO, "Stream dump complete.\n");
   exit_player_with_rc(mpctx, EXIT_EOF, 0);
 }
 
