@@ -38,14 +38,6 @@ Copyright:  1995-1999 by Michael Hipp
 License:    GNU General Public License
 
 
-Name:       Tremor
-Version:    1.0 + parts CVS from December 2004 + patches
-URL:        http://xiph.org/
-Directory:  tremor
-Copyright:  1994-2002, Xiph.org Foundation http://www.xiph.org/
-License:    BSD-like, see tremor/COPYING
-
-
 Name:       avifile DLL loader
 Version:    0.47 + patches + CVS updates
 URL:        http://avifile.sourceforge.net/

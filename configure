@@ -366,9 +366,7 @@ Codecs:
   --disable-xvid            disable Xvid [autodetect]
   --disable-libnut          disable libnut [autodetect]
   --disable-ffmpeg          disable FFmpeg [autodetect]
-  --disable-tremor-internal disable internal Tremor [enabled]
-  --enable-tremor-low       enable lower accuracy internal Tremor [disabled]
-  --enable-tremor           enable external Tremor [autodetect]
+  --disable-tremor          disable Tremor [autodetect]
   --disable-libvorbis       disable libvorbis support [autodetect]
   --disable-speex           disable Speex support [autodetect]
   --enable-theora           enable OggTheora libraries [autodetect]
@@ -611,8 +609,6 @@ _libcdio=auto
 _liblzo=auto
 _mad=auto
 _tremor=auto
-_tremor_internal=yes
-_tremor_low=no
 _libvorbis=auto
 _speex=auto
 _theora=auto
@@ -971,10 +967,6 @@ for ac_option do
   --disable-speex)      _speex=no       ;;
   --enable-tremor)      _tremor=yes     ;;
   --disable-tremor)     _tremor=no      ;;
-  --enable-tremor-internal)     _tremor_internal=yes    ;;
-  --disable-tremor-internal)    _tremor_internal=no     ;;
-  --enable-tremor-low)  _tremor_low=yes ;;
-  --disable-tremor-low) _tremor_low=no  ;;
   --enable-theora)      _theora=yes     ;;
   --disable-theora)     _theora=no      ;;
   --enable-mpg123)      _mpg123=yes     ;;
@@ -5669,9 +5661,7 @@ fi
 echores "$_mad"
 
 echocheck "OggVorbis support"
-if test "$_tremor_internal" = yes; then
-  _libvorbis=no
-elif test "$_tremor" = auto; then
+if test "$_tremor" = auto; then
   _tremor=no
   statement_check tremor/ivorbiscodec.h 'vorbis_packet_blocksize(0, 0)' -logg -lvorbisidec $_ld_lm && _tremor=yes && _libvorbis=no
 fi
@@ -5679,17 +5669,7 @@ if test "$_libvorbis" = auto; then
   _libvorbis=no
   statement_check vorbis/codec.h 'vorbis_packet_blocksize(0, 0)' -lvorbis -logg $_ld_lm && _libvorbis=yes
 fi
-if test "$_tremor_internal" = yes ; then
-  _vorbis=yes
-  def_vorbis='#define CONFIG_OGGVORBIS 1'
-  def_tremor='#define CONFIG_TREMOR 1'
-  codecmodules="tremor(internal) $codecmodules"
-  res_comment="internal Tremor"
-  if test "$_tremor_low" = yes ; then
-    cflags_tremor_low="-D_LOW_ACCURACY_"
-    res_comment="internal low accuracy Tremor"
-  fi
-elif test "$_tremor" = yes ; then
+if test "$_tremor" = yes ; then
   _vorbis=yes
   def_vorbis='#define CONFIG_OGGVORBIS 1'
   def_tremor='#define CONFIG_TREMOR 1'
@@ -5770,18 +5750,6 @@ EOF
   if test _theora = no; then
     _ld_theora="-ltheora -logg"
     cc_check $_ld_theora && extra_ldflags="$extra_ldflags $_ld_theora" && _theora=yes
-  fi
-  if test "$_theora" = no && test "$_tremor_internal" = yes; then
-    _ld_theora=$($_pkg_config --silence-errors --libs theora)
-    _inc_theora=$($_pkg_config --silence-errors --cflags theora)
-    cc_check tremor/bitwise.c $_inc_theora $_ld_theora &&
-      extra_ldflags="$extra_ldflags $_ld_theora" &&
-      extra_cflags="$extra_cflags $_inc_theora" && _theora=yes
-    if test _theora = no; then
-      _ld_theora="-ltheora -logg"
-      cc_check tremor/bitwise.c $_ld_theora &&
-        extra_ldflags="$extra_ldflags $_ld_theora" && _theora=yes
-    fi
   fi
 fi
 if test "$_theora" = yes ; then
@@ -6808,7 +6776,6 @@ CFLAGS_LIBDVDCSS_DVDREAD = $cflags_libdvdcss_dvdread
 CFLAGS_LIBDVDNAV         = $cflags_libdvdnav
 CFLAGS_NO_OMIT_LEAF_FRAME_POINTER = $cflags_no_omit_leaf_frame_pointer
 CFLAGS_STACKREALIGN      = $cflags_stackrealign
-CFLAGS_TREMOR_LOW        = $cflags_tremor_low
 
 EXTRALIBS          = $extra_ldflags $_ld_static $_ld_lm $extra_libs
 EXTRALIBS_MPLAYER  = $libs_mplayer
@@ -6937,7 +6904,6 @@ SVGA = $_svga
 TDFXFB = $_tdfxfb
 TDFXVID = $_tdfxvid
 TGA = $_tga
-TREMOR_INTERNAL = $_tremor_internal
 TV = $_tv
 TV_BSDBT848 = $_tv_bsdbt848
 TV_DSHOW = $_tv_dshow
