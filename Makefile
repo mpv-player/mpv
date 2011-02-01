@@ -109,26 +109,6 @@ SRCS_COMMON-$(LIBDVDCSS_INTERNAL)    += libdvdcss/css.c \
 
 SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
 
-SRCS_LIBMPEG2-$(ARCH_ALPHA)          += libmpeg2/idct_alpha.c \
-                                        libmpeg2/motion_comp_alpha.c
-SRCS_LIBMPEG2-$(ARCH_ARM)            += libmpeg2/motion_comp_arm.c \
-                                        libmpeg2/motion_comp_arm_s.S
-SRCS_LIBMPEG2-$(HAVE_ALTIVEC)        += libmpeg2/idct_altivec.c \
-                                        libmpeg2/motion_comp_altivec.c
-SRCS_LIBMPEG2-$(HAVE_MMX)            += libmpeg2/idct_mmx.c \
-                                        libmpeg2/motion_comp_mmx.c
-SRCS_LIBMPEG2-$(HAVE_VIS)            += libmpeg2/motion_comp_vis.c
-SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c \
-                                        libmpeg2/alloc.c \
-                                        libmpeg2/cpu_accel.c\
-                                        libmpeg2/cpu_state.c \
-                                        libmpeg2/decode.c \
-                                        libmpeg2/header.c \
-                                        libmpeg2/idct.c \
-                                        libmpeg2/motion_comp.c \
-                                        libmpeg2/slice.c \
-                                        $(SRCS_LIBMPEG2-yes)
-
 SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
                                         stream/stream_nemesi.c
 SRCS_COMMON-$(LIBNUT)                += libmpdemux/demux_nut.c
@@ -609,7 +589,6 @@ DIRS =  . \
         libmpcodecs \
         libmpcodecs/native \
         libmpdemux \
-        libmpeg2 \
         libvo \
         loader \
         loader/dshow \

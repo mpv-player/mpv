@@ -382,7 +382,6 @@ Codecs:
   --enable-libdca           enable libdca support [autodetect]
   --disable-mp3lib          disable builtin mp3lib [autodetect]
   --disable-liba52          disable liba52 [autodetect]
-  --disable-libmpeg2        disable builtin libmpeg2 [autodetect]
   --disable-musepack        disable musepack support [autodetect]
 
 Video output:
@@ -621,7 +620,6 @@ _mpg123=auto
 _mp3lib=auto
 _liba52=auto
 _libdca=auto
-_libmpeg2=auto
 _faad=auto
 _ladspa=auto
 _libbs2b=auto
@@ -987,8 +985,6 @@ for ac_option do
   --disable-liba52)     _liba52=no      ;;
   --enable-libdca)      _libdca=yes     ;;
   --disable-libdca)     _libdca=no      ;;
-  --enable-libmpeg2)    _libmpeg2=yes   ;;
-  --disable-libmpeg2)   _libmpeg2=no    ;;
   --enable-musepack)    _musepack=yes   ;;
   --disable-musepack)   _musepack=no    ;;
   --enable-faad)        _faad=yes       ;;
@@ -3094,23 +3090,6 @@ if test "$_inttypes" = no ; then
     die "Cannot find header either inttypes.h or bitypes.h. There is no chance for compilation to succeed."
   fi
 fi
-
-
-echocheck "int_fastXY_t in inttypes.h"
-_fast_inttypes=no
-statement_check "inttypes.h" 'volatile int_fast16_t v = 0' && _fast_inttypes=yes
-if test "$_fast_inttypes" = no ; then
-  def_fast_inttypes='
-    typedef signed char int_fast8_t;
-    typedef signed int  int_fast16_t;
-    typedef signed int  int_fast32_t;
-    typedef signed long long int_fast64_t;
-    typedef unsigned char uint_fast8_t;
-    typedef unsigned int  uint_fast16_t;
-    typedef unsigned int  uint_fast32_t;
-    typedef unsigned long long uint_fast64_t;'
-fi
-echores "$_fast_inttypes"
 
 
 echocheck "malloc.h"
@@ -5864,27 +5843,6 @@ else
 fi
 echores "$_liba52"
 
-echocheck "internal libmpeg2 support"
-if test "$_libmpeg2" = auto ; then
-  _libmpeg2=yes
-  if alpha && test cc_vendor=gnu; then
-    case $cc_version in
-      2*|3.0*|3.1*) # cannot compile MVI instructions
-        _libmpeg2=no
-        res_comment="broken gcc"
-        ;;
-    esac
-  fi
-fi
-if test "$_libmpeg2" = yes ; then
-  def_libmpeg2='#define CONFIG_LIBMPEG2 1'
-  codecmodules="libmpeg2(internal) $codecmodules"
-else
-  def_libmpeg2='#undef CONFIG_LIBMPEG2'
-  nocodecmodules="libmpeg2(internal) $nocodecmodules"
-fi
-echores "$_libmpeg2"
-
 echocheck "libdca support"
 if test "$_libdca" = auto ; then
   _libdca=no
@@ -6938,7 +6896,6 @@ LIBLZO = $_liblzo
 LIBMAD = $_mad
 LIBMENU = $_menu
 LIBMENU_DVBIN = $_menu_dvbin
-LIBMPEG2 = $_libmpeg2
 LIBNEMESI = $_nemesi
 LIBNUT = $_libnut
 LIBSMBCLIENT = $_smb
@@ -7072,10 +7029,6 @@ cat > $TMPH << EOF
 #undef FAST_OSD
 #undef FAST_OSD_TABLE
 
-/* Define this to enable MPEG-1/2 image postprocessing in libmpeg2 */
-#define MPEG12_POSTPROC 1
-#define ATTRIBUTE_ALIGNED_MAX 16
-
 
 
 #define CONFIGURATION "$configuration"
@@ -7089,8 +7042,6 @@ $def_translation
 
 /* definitions needed by included libraries */
 #define HAVE_INTTYPES_H 1
-/* libmpeg2 + FFmpeg */
-$def_fast_inttypes
 /* libdvdcss */
 #define HAVE_ERRNO_H 1
 /* libdvdcss + libdvdread */
@@ -7219,7 +7170,6 @@ $def_liba52
 $def_libdca
 $def_libdv
 $def_liblzo
-$def_libmpeg2
 $def_mad
 $def_mp3lib
 $def_mpg123
