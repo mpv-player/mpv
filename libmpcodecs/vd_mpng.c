@@ -74,7 +74,7 @@ static int    pngLength;
 
 static void pngReadFN( png_structp pngstr,png_bytep buffer,png_size_t size )
 {
- char * p = pngstr->io_ptr;
+ char * p = png_get_io_ptr(pngstr);
  if(size>pngLength-pngPointer && pngLength>=pngPointer) size=pngLength-pngPointer;
  fast_memcpy( buffer,(char *)&p[pngPointer],size );
  pngPointer+=size;
@@ -90,6 +90,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     png_uint_32     png_width=0,png_height=0;
     int             depth,color;
     png_uint_32     i;
+    png_byte        color_type;
     mp_image_t* mpi;
 
     int cols;
@@ -111,7 +112,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
  png_get_IHDR( png,info,&png_width,&png_height,&depth,&color,NULL,NULL,NULL );
  png_set_bgr( png );
 
- switch( info->color_type ) {
+ color_type=png_get_color_type(png, info);
+
+ switch( color_type ) {
    case PNG_COLOR_TYPE_GRAY_ALPHA:
       mp_msg( MSGT_DECVIDEO,MSGL_INFO,"Sorry gray scaled png with alpha channel not supported at moment.\n" );
       break;
@@ -128,7 +131,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
       out_fmt=IMGFMT_BGR24;
       break;
    default:
-      mp_msg( MSGT_DECVIDEO,MSGL_INFO,"Sorry, unsupported PNG colorspace: %d.\n" ,info->color_type);
+      mp_msg( MSGT_DECVIDEO,MSGL_INFO,"Sorry, unsupported PNG colorspace: %d.\n" ,color_type);
  }
 
  // (re)init libvo if image parameters changed (width/height/colorspace)
