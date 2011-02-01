@@ -366,8 +366,8 @@ Codecs:
   --disable-xvid            disable Xvid [autodetect]
   --disable-libnut          disable libnut [autodetect]
   --disable-ffmpeg          disable FFmpeg [autodetect]
-  --disable-tremor          disable Tremor [autodetect]
   --disable-libvorbis       disable libvorbis support [autodetect]
+  --disable-tremor          disable Tremor [autodetect if no libvorbis]
   --disable-speex           disable Speex support [autodetect]
   --enable-theora           enable OggTheora libraries [autodetect]
   --enable-faad             enable FAAD2 (AAC) [autodetect]
@@ -5661,13 +5661,13 @@ fi
 echores "$_mad"
 
 echocheck "OggVorbis support"
-if test "$_tremor" = auto; then
-  _tremor=no
-  statement_check tremor/ivorbiscodec.h 'vorbis_packet_blocksize(0, 0)' -logg -lvorbisidec $_ld_lm && _tremor=yes && _libvorbis=no
-fi
 if test "$_libvorbis" = auto; then
   _libvorbis=no
-  statement_check vorbis/codec.h 'vorbis_packet_blocksize(0, 0)' -lvorbis -logg $_ld_lm && _libvorbis=yes
+  statement_check vorbis/codec.h 'vorbis_packet_blocksize(0, 0)' -lvorbis -logg $_ld_lm && _libvorbis=yes && _tremor=no
+fi
+if test "$_tremor" = auto; then
+  _tremor=no
+  statement_check tremor/ivorbiscodec.h 'vorbis_packet_blocksize(0, 0)' -logg -lvorbisidec $_ld_lm && _tremor=yes
 fi
 if test "$_tremor" = yes ; then
   _vorbis=yes
