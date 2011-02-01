@@ -358,7 +358,6 @@ Codecs:
   --enable-mng              enable MNG input support [autodetect]
   --enable-jpeg             enable JPEG input/output support [autodetect]
   --enable-libcdio          enable libcdio support [autodetect]
-  --enable-liblzo           enable liblzo support [autodetect]
   --disable-win32dll        disable Win32 DLL support [autodetect]
   --disable-qtx             disable QuickTime codecs support [enabled]
   --disable-xanim           disable XAnim codecs support [enabled]
@@ -606,7 +605,6 @@ _kai=auto
 _dart=auto
 _openal=no
 _libcdio=auto
-_liblzo=auto
 _mad=auto
 _tremor=auto
 _libvorbis=auto
@@ -959,8 +957,6 @@ for ac_option do
   --disable-mad)        _mad=no         ;;
   --enable-libcdio)     _libcdio=yes    ;;
   --disable-libcdio)    _libcdio=no     ;;
-  --enable-liblzo)      _liblzo=yes     ;;
-  --disable-liblzo)     _liblzo=no      ;;
   --enable-libvorbis)   _libvorbis=yes  ;;
   --disable-libvorbis)  _libvorbis=no   ;;
   --enable-speex)       _speex=yes      ;;
@@ -5594,17 +5590,6 @@ fi
 echores "$_zlib"
 
 
-echocheck "bzlib"
-bzlib=no
-def_bzlib='#define CONFIG_BZLIB 0'
-statement_check bzlib.h 'BZ2_bzlibVersion()' -lbz2 && bzlib=yes
-if test "$bzlib" = yes ; then
-  def_bzlib='#define CONFIG_BZLIB 1'
-  extra_ldflags="$extra_ldflags -lbz2"
-fi
-echores "$bzlib"
-
-
 echocheck "RTC"
 if test "$_rtc" = auto ; then
   cat > $TMPC << EOF
@@ -5627,22 +5612,6 @@ else
   def_rtc='#undef HAVE_RTC'
 fi
 echores "$_rtc"
-
-
-echocheck "liblzo2 support"
-if test "$_liblzo" = auto ; then
-  _liblzo=no
-  statement_check lzo/lzo1x.h 'lzo_init()' -llzo2 && _liblzo=yes
-fi
-if test "$_liblzo" = yes ; then
-  def_liblzo='#define CONFIG_LIBLZO 1'
-  extra_ldflags="$extra_ldflags -llzo2"
-  codecmodules="liblzo $codecmodules"
-else
-  def_liblzo='#undef CONFIG_LIBLZO'
-  nocodecmodules="liblzo $nocodecmodules"
-fi
-echores "$_liblzo"
 
 
 echocheck "mad support"
@@ -6859,7 +6828,6 @@ LIBBS2B = $_libbs2b
 LIBDCA = $_libdca
 LIBDV = $_libdv
 LIBDVDCSS_INTERNAL = $_libdvdcss_internal
-LIBLZO = $_liblzo
 LIBMAD = $_mad
 LIBMENU = $_menu
 LIBMENU_DVBIN = $_menu_dvbin
@@ -6941,7 +6909,6 @@ RANLIB     = $_ranlib
 YASM       = $_yasm
 YASMFLAGS  = $YASMFLAGS
 
-CONFIG_BZLIB    = $bzlib
 CONFIG_VDPAU    = $_vdpau
 CONFIG_XVMC     = $_xvmc
 CONFIG_ZLIB     = $_zlib
@@ -7135,7 +7102,6 @@ $def_faad
 $def_liba52
 $def_libdca
 $def_libdv
-$def_liblzo
 $def_mad
 $def_mp3lib
 $def_mpg123
@@ -7300,7 +7266,6 @@ $def_ffmpeg_internals
 
 $def_arpa_inet_h
 $def_bswap
-$def_bzlib
 $def_dcbzl
 $def_exp2
 $def_exp2f
