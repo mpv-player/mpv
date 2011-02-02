@@ -1213,7 +1213,7 @@ for ac_option do
         _3dnow=no _3dnowext=no _mmx=no _mmxext=no ;;
 
   *)
-    echo "Unknown parameter: $ac_option"
+    echo "Unknown parameter: $ac_option" >&2
     exit 1
     ;;
 
