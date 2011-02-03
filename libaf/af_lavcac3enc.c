@@ -53,6 +53,7 @@ typedef struct af_ac3enc_s {
     int pending_len;
     int expect_len;
     int min_channel_num;
+    int in_sampleformat;
 } af_ac3enc_t;
 
 // Initialization and runtime control
@@ -69,7 +70,8 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
         if (AF_FORMAT_IS_AC3(data->format) || data->nch < s->min_channel_num)
             return AF_DETACH;
 
-        af->data->format = AF_FORMAT_S16_NE;
+        af->data->format = s->in_sampleformat;
+        af->data->bps = af_fmt2bits(s->in_sampleformat) / 8;
         if (data->rate == 48000 || data->rate == 44100 || data->rate == 32000)
             af->data->rate = data->rate;
         else
@@ -78,7 +80,6 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
             af->data->nch = AC3_MAX_CHANNELS;
         else
             af->data->nch = data->nch;
-        af->data->bps = 2;
         test_output_res = af_test_output(af, data);
 
         s->pending_len = 0;
@@ -117,6 +118,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
             return AF_ERROR;
         }
         af->data->format = AF_FORMAT_AC3_BE;
+        af->data->bps = 2;
         af->data->nch = 2;
         return test_output_res;
     case AF_CONTROL_COMMAND_LINE:
@@ -276,9 +278,6 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 static int af_open(af_instance_t* af){
 
     af_ac3enc_t *s = calloc(1,sizeof(af_ac3enc_t));
-    s->pending_data_size = 2 * AF_NCH * AC3_FRAME_SIZE;
-    s->pending_data = malloc(s->pending_data_size);
-
     af->control=control;
     af->uninit=uninit;
     af->play=play;
@@ -299,6 +298,28 @@ static int af_open(af_instance_t* af){
         mp_tmsg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, couldn't allocate context!\n");
         return AF_ERROR;
     }
+    const enum AVSampleFormat *fmts = s->lavc_acodec->sample_fmts;
+    for (int i = 0; ; i++) {
+        if (fmts[i] == AV_SAMPLE_FMT_NONE) {
+            mp_msg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, encoder doesn't "
+                   "support expected sample formats!\n");
+            return AF_ERROR;
+        } else if (fmts[i] == AV_SAMPLE_FMT_S16) {
+            s->in_sampleformat = AF_FORMAT_S16_NE;
+            s->lavc_actx->sample_fmt = fmts[i];
+            break;
+        } else if (fmts[i] == AV_SAMPLE_FMT_FLT) {
+            s->in_sampleformat = AF_FORMAT_FLOAT_NE;
+            s->lavc_actx->sample_fmt = fmts[i];
+            break;
+        }
+    }
+    char buf[100];
+    mp_msg(MSGT_AFILTER, MSGL_V, "[af_lavcac3enc]: in sample format: %s\n",
+           af_fmt2str(s->in_sampleformat, buf, 100));
+    s->pending_data_size = AF_NCH * AC3_FRAME_SIZE *
+        af_fmt2bits(s->in_sampleformat) / 8;
+    s->pending_data = malloc(s->pending_data_size);
 
     return AF_OK;
 }
