@@ -769,7 +769,7 @@ static int check_resize(struct vo *vo)
     int old_w = vo->dwidth, old_h = vo->dheight;
     int old_x = vo->dx, old_y = vo->dy;
     int rc = 0;
-    vo_x11_update_geometry(vo);
+    vo_x11_update_geometry(vo, true);
     if (vo->dwidth != old_w || vo->dheight != old_h)
         rc |= VO_EVENT_RESIZE;
     if (vo->dx     != old_x || vo->dy      != old_y)
@@ -1073,7 +1073,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
           StructureNotifyMask | KeyPressMask | PointerMotionMask |
           ButtonPressMask | ButtonReleaseMask | ExposureMask);
 
-    vo_x11_update_geometry(vo);
+    vo_x11_update_geometry(vo, true);
     goto final;
   }
   if (x11->window == None) {
@@ -1115,8 +1115,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
           ButtonPressMask | ButtonReleaseMask | ExposureMask);
   }
   if (opts->vo_ontop) vo_x11_setlayer(vo, x11->window, opts->vo_ontop);
-  if (!geometry_xy_changed)
-    vo_x11_update_geometry(vo);
+  vo_x11_update_geometry(vo, !geometry_xy_changed);
   vo_x11_nofs_sizepos(vo, vo->dx, vo->dy, width, height);
   if (!!vo_fs != !!(flags & VOFLAG_FULLSCREEN))
     vo_x11_fullscreen(vo);
@@ -1317,7 +1316,7 @@ static int vo_x11_get_fs_type(int supported)
  * \brief update vo->dx, vo->dy, vo->dwidth and vo->dheight with current values of vo->x11->window
  * \return returns current color depth of vo->x11->window
  */
-int vo_x11_update_geometry(struct vo *vo)
+int vo_x11_update_geometry(struct vo *vo, bool update_pos)
 {
     struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
@@ -1330,8 +1329,9 @@ int vo_x11_update_geometry(struct vo *vo)
         vo->dwidth = w;
         vo->dheight = h;
     }
-    XTranslateCoordinates(x11->display, x11->window, x11->rootwin, 0, 0,
-                          &vo->dx, &vo->dy, &dummy_win);
+    if (update_pos)
+        XTranslateCoordinates(x11->display, x11->window, x11->rootwin, 0, 0,
+                              &vo->dx, &vo->dy, &dummy_win);
     if (opts->vo_wintitle)
         XStoreName(x11->display, x11->window, opts->vo_wintitle);
 

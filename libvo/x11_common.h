@@ -126,7 +126,7 @@ void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max
 int vo_x11_check_events(struct vo *vo);
 void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask);
 void vo_x11_fullscreen(struct vo *vo);
-int vo_x11_update_geometry(struct vo *vo);
+int vo_x11_update_geometry(struct vo *vo, bool update_pos);
 void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer);
 void vo_x11_uninit(struct vo *vo);
 Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo);
@@ -186,7 +186,7 @@ void xscreensaver_heartbeat(struct vo_x11_state *x11);
 #ifdef IS_OLD_VO
 #define vo_x11_create_vo_window(...) vo_x11_create_vo_window(global_vo, __VA_ARGS__)
 #define vo_x11_fullscreen() vo_x11_fullscreen(global_vo)
-#define vo_x11_update_geometry() vo_x11_update_geometry(global_vo)
+#define vo_x11_update_geometry() vo_x11_update_geometry(global_vo, 1)
 #define vo_x11_ontop() vo_x11_ontop(global_vo)
 #define vo_init() vo_init(global_vo)
 #define vo_x11_ewmh_fullscreen(action) vo_x11_ewmh_fullscreen(global_vo->x11->display, action)
