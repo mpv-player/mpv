@@ -230,7 +230,6 @@ static const mp_key_name_t key_names[] = {
   { '#', "SHARP" },
   { KEY_ENTER, "ENTER" },
   { KEY_TAB, "TAB" },
-  { KEY_CTRL, "CTRL" },
   { KEY_BACKSPACE, "BS" },
   { KEY_DELETE, "DEL" },
   { KEY_INSERT, "INS" },
