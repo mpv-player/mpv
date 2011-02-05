@@ -1121,7 +1121,8 @@ static mp_cmd_t* interpret_key(struct input_ctx *ictx, int code)
      * we want to have "a" and "A" instead of "a" and "Shift+A"; but a separate
      * shift modifier is still kept for special keys like arrow keys.
      */
-    if ((code & ~KEY_MODIFIER_MASK) < 256)
+    int unmod = code & ~KEY_MODIFIER_MASK;
+    if (unmod < 256 && unmod != KEY_ENTER && unmod != KEY_TAB)
         code &= ~KEY_MODIFIER_SHIFT;
 
   if(mp_input_key_cb) {
