@@ -163,6 +163,7 @@ const struct mp_AVCodecTag mp_ff_codec_bmp_tags[] = {
     { CODEC_ID_RAWVIDEO,     MKTAG('u', 'y', 'v', '1') },
     { CODEC_ID_RAWVIDEO,     MKTAG('2', 'V', 'u', '1') },
     { CODEC_ID_RAWVIDEO,     MKTAG('2', 'v', 'u', 'y') },
+    { CODEC_ID_RAWVIDEO,     MKTAG('y', 'u', 'v', 's') },
     { CODEC_ID_RAWVIDEO,     MKTAG('P', '4', '2', '2') },
     { CODEC_ID_RAWVIDEO,     MKTAG('Y', 'V', '1', '2') },
     { CODEC_ID_RAWVIDEO,     MKTAG('U', 'Y', 'V', 'Y') },
@@ -259,6 +260,9 @@ const struct mp_AVCodecTag mp_ff_codec_bmp_tags[] = {
     { CODEC_ID_AURA2,        MKTAG('A', 'U', 'R', '2') },
     { CODEC_ID_DPX,          MKTAG('d', 'p', 'x', ' ') },
     { CODEC_ID_KGV1,         MKTAG('K', 'G', 'V', '1') },
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 108, 0)
+    { CODEC_ID_LAGARITH,     MKTAG('L', 'A', 'G', 'S') },
+#endif
     { CODEC_ID_NONE,         0 }
 };
 
@@ -295,9 +299,15 @@ const struct mp_AVCodecTag mp_ff_codec_wav_tags[] = {
     { CODEC_ID_WMALOSSLESS,     0x0163 },
     { CODEC_ID_ADPCM_CT,        0x0200 },
     { CODEC_ID_ATRAC3,          0x0270 },
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 88, 0)
+    { CODEC_ID_ADPCM_G722,      0x028F },
+#endif
     { CODEC_ID_IMC,             0x0401 },
     { CODEC_ID_GSM_MS,          0x1500 },
     { CODEC_ID_TRUESPEECH,      0x1501 },
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 94, 0)
+    { CODEC_ID_AAC_LATM,        0x1602 },
+#endif
     { CODEC_ID_AC3,             0x2000 },
     { CODEC_ID_DTS,             0x2001 },
     { CODEC_ID_SONIC,           0x2048 },
