@@ -186,7 +186,11 @@ static int preinit(sh_audio_t *sh){
     unsigned long InputBufferSize=0; //size of the input buffer
     unsigned long OutputBufferSize=0; //size of the output buffer
     unsigned long WantedBufferSize=0; //the size you want your buffers to be
+    void* codecdata = sh->codecdata;
 
+    if (!sh->codecdata_len && sh->wf && sh->wf->cbSize){
+        codecdata = sh->wf + 1;
+    }
 
 #ifdef CONFIG_QUICKTIME
     EnterMovies();
@@ -217,8 +221,8 @@ static int preinit(sh_audio_t *sh){
     mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"SoundConverterOpen:%i\n",error);
     if(error) return 0;
 
-    if(sh->codecdata){
-	error = SoundConverterSetInfo(myConverter,siDecompressionParams,sh->codecdata);
+    if(codecdata){
+	error = SoundConverterSetInfo(myConverter,siDecompressionParams,codecdata);
 	mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"SoundConverterSetInfo:%i\n",error);
 //	if(error) return 0;
     }
