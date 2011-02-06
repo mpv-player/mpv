@@ -1485,10 +1485,11 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 		}
 		/* SPU SUBS */
 		else if(type_from_pmt == SPU_DVB ||
-		(packet_len >= 1 && (p[0] == 0x20) && pes_is_aligned)) // && p[1] == 0x00))
+		(packet_len >= 2 && (p[0] == 0x20) && pes_is_aligned)) // && p[1] == 0x00))
 		{
-			es->start = p;
-			es->size  = packet_len;
+			// offset/length fiddling to make decoding with lavc possible
+			es->start = p + 2;
+			es->size  = packet_len - 2;
 			es->type  = SPU_DVB;
 			es->payload_size -= packet_len;
 
