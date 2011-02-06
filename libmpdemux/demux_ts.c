@@ -408,6 +408,8 @@ static void ts_add_stream(demuxer_t * demuxer, ES_stream_t *es)
 		sh_sub_t *sh = new_sh_sub_sid_lang(demuxer, priv->last_sid, es->pid, pid_lang_from_pmt(priv, es->pid));
  		if (sh) {
 			switch (es->type) {
+			case SPU_DVB:
+				sh->type = 'b'; break;
 			case SPU_DVD:
 				sh->type = 'v'; break;
 			case SPU_PGS:
