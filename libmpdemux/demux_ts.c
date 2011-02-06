@@ -2987,11 +2987,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			//IS IT TIME TO QUEUE DATA to the dp_packet?
 			if(is_start && (dp != NULL))
 			{
-				// subtitle packets _have_ to be submitted before video, otherwise
-				// they might get stuck "forever" and subtitles will be completely
-				// out of sync.
-				if (is_video)
-					fill_packet(demuxer, demuxer->sub, &priv->fifo[2].pack, &priv->fifo[2].offset, NULL);
 				retv = fill_packet(demuxer, ds, dp, dp_offset, si);
 			}
 
@@ -3132,6 +3127,9 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				(*dp)->flags = 0;
 				(*dp)->pos = stream_tell(demuxer->stream);
 				(*dp)->pts = es->pts;
+				// subtitle packets must be returned immediately if possible
+				if (is_sub && !tss->payload_size)
+					retv = fill_packet(demuxer, ds, dp, dp_offset, si);
 
 				if(retv > 0)
 					return retv;
@@ -3173,7 +3171,8 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			{
 				*dp_offset += sz;
 
-				if(*dp_offset >= MAX_PACK_BYTES)
+				// subtitle packets must be returned immediately if possible
+				if(*dp_offset >= MAX_PACK_BYTES || (is_sub && !tss->payload_size))
 				{
 					(*dp)->pts = tss->last_pts;
 					retv = fill_packet(demuxer, ds, dp, dp_offset, si);
