@@ -1928,7 +1928,10 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
             len = ds_get_packet_sub(d_sub, &packet);
             if (is_av_sub(type)) {
 #ifdef CONFIG_FFMPEG
-                decode_avsub(sh_sub, packet, len, subpts, duration);
+                int ret = decode_avsub(sh_sub, packet, len, subpts, duration);
+                if (ret < 0)
+                    mp_msg(MSGT_SPUDEC, MSGL_WARN, "lavc failed decoding "
+                           "subtitle\n");
 #endif
                 continue;
             }
