@@ -628,7 +628,7 @@ const m_option_t common_opts[] = {
     {"codecs-file", &codecs_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
 // ------------------------- subtitles options --------------------
 
-    {"sub", &sub_name, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
+    OPT_STRINGLIST("sub", sub_name, 0),
 #ifdef CONFIG_FRIBIDI
     {"fribidi-charset", &fribidi_charset, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"flip-hebrew", &flip_hebrew, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -647,8 +647,7 @@ const m_option_t common_opts[] = {
 #endif
     {"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
     {"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
-    {"autosub", &sub_auto, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"noautosub", &sub_auto, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    OPT_MAKE_FLAGS("autosub", sub_auto, 0),
     {"unicode", &sub_unicode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nounicode", &sub_unicode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"utf8", &sub_utf8, CONF_TYPE_FLAG, 0, 0, 1, NULL},

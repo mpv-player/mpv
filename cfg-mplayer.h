@@ -235,7 +235,7 @@ const m_option_t mplayer_opts[]={
     {"menu", "OSD menu support was not compiled in.\n", CONF_TYPE_PRINT,0, 0, 0, NULL},
 #endif /* CONFIG_MENU */
 
-    {"vobsub", &vobsub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    OPT_STRING("vobsub", vobsub_name, 0),
     {"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 #ifdef CONFIG_UNRAR_EXEC
     {"unrarexec", &unrar_executable, CONF_TYPE_STRING, 0, 0, 0, NULL},

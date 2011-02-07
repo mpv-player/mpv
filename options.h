@@ -31,6 +31,7 @@ typedef struct MPOpts {
 
     int osd_level;
     int osd_duration;
+    char *vobsub_name;
     int auto_quality;
     int benchmark;
     char *stream_dump_name;
@@ -86,6 +87,8 @@ typedef struct MPOpts {
     float screen_size_xy;
     int flip;
     int vd_use_slices;
+    char **sub_name;
+    int sub_auto;
     int ass_enabled;
     struct lavc_param {
         int workaround_bugs;

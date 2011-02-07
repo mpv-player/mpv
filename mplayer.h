@@ -38,10 +38,8 @@ extern char * sub_font_name;
 extern float  font_factor;
 extern double force_fps;
 
-//extern char **sub_name;
 extern float  sub_delay;
 extern float  sub_fps;
-extern int    sub_auto;
 
 extern int stream_cache_size;
 

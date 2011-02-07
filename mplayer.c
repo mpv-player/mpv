@@ -323,11 +323,8 @@ char *font_name=NULL;
 char *sub_font_name=NULL;
 extern int font_fontconfig;
 float font_factor=0.75;
-char **sub_name=NULL;
 float sub_delay=0;
 float sub_fps=0;
-int   sub_auto = 1;
-char *vobsub_name=NULL;
 int   subcc_enabled=0;
 int suboverlap_enabled = 1;
 
@@ -4170,12 +4167,12 @@ if (edl_output_filename) {
 //==================== Open VOB-Sub ============================
 
     current_module="vobsub";
-    if (vobsub_name){
-      vo_vobsub=vobsub_open(vobsub_name,spudec_ifo,1,&vo_spudec);
+    if (opts->vobsub_name){
+      vo_vobsub=vobsub_open(opts->vobsub_name,spudec_ifo,1,&vo_spudec);
       if(vo_vobsub==NULL)
         mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Cannot load subtitles: %s\n",
-		filename_recode(vobsub_name));
-    } else if (sub_auto && mpctx->filename){
+		filename_recode(opts->vobsub_name));
+    } else if (opts->sub_auto && mpctx->filename){
       /* try to autodetect vobsub from movie filename ::atmos */
       char *buf = strdup(mpctx->filename), *psub;
       char *pdot = strrchr(buf, '.');
@@ -4566,11 +4563,11 @@ if(vo_spudec==NULL &&
 // check .sub
   current_module="read_subtitles_file";
   double sub_fps = mpctx->sh_video ? mpctx->sh_video->fps : 25;
-  if(sub_name){
-    for (i = 0; sub_name[i] != NULL; ++i)
-        add_subtitles(mpctx, sub_name[i], sub_fps, 0);
+  if(opts->sub_name){
+    for (i = 0; opts->sub_name[i] != NULL; ++i)
+        add_subtitles(mpctx, opts->sub_name[i], sub_fps, 0);
   }
-  if(sub_auto) { // auto load sub file ...
+  if(opts->sub_auto) { // auto load sub file ...
     char *psub = get_path( "sub/" );
     char **tmp = sub_filenames((psub ? psub : ""), mpctx->filename);
     int i = 0;
