@@ -6077,9 +6077,11 @@ if test "$ffmpeg" = auto ; then
     extra_ldflags="$extra_ldflags $_ld_tmp"
     extra_cflags="$extra_cflags $inc_ffmpeg"
     ffmpeg=yes
-  elif header_check libavcore/avutil.h -lpostproc -lswscale -lavformat -lavcodec -lavutil $_ld_lm ; then
-    extra_ldflags="$extra_ldflags -lpostproc -lswscale -lavformat -lavcodec -lavutil -lavcore"
+  elif header_check libavutil/avutil.h -lpostproc -lswscale -lavformat -lavcodec -lavutil $_ld_lm ; then
+    extra_ldflags="$extra_ldflags -lpostproc -lswscale -lavformat -lavcodec -lavutil"
     ffmpeg=yes
+  else
+    die "Unable to find development files for some of the FFmpeg libraries above. Aborting. If you really mean to compile without FFmpeg support use --disable-ffmpeg."
   fi
 fi
 
