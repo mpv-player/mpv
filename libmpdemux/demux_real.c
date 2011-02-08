@@ -43,7 +43,7 @@
 #include "mp_msg.h"
 #include "mpbswap.h"
 #include "libavutil/common.h"
-#include "libavutil/intreadwrite.h"
+#include "ffmpeg_files/intreadwrite.h"
 #include "stream/stream.h"
 #include "aviprint.h"
 #include "demuxer.h"

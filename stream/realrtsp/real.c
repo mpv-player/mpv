@@ -39,6 +39,12 @@
 #include "libavutil/md5.h"
 #include "ffmpeg_files/intreadwrite.h"
 #include "libavutil/base64.h"
+
+#include <libavutil/avutil.h>
+#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(50, 17, 0)
+#define AV_BASE64_SIZE(x)  (((x)+2) / 3 * 4 + 1)
+#endif
+
 #include "stream/http.h"
 #include "mp_msg.h"
 

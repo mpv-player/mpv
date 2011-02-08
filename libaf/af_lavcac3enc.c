@@ -298,17 +298,18 @@ static int af_open(af_instance_t* af){
         mp_tmsg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, couldn't allocate context!\n");
         return AF_ERROR;
     }
-    const enum AVSampleFormat *fmts = s->lavc_acodec->sample_fmts;
+    // using deprecated SampleFormat/FMT, AV* versions only added in 2010-11
+    const enum SampleFormat *fmts = s->lavc_acodec->sample_fmts;
     for (int i = 0; ; i++) {
-        if (fmts[i] == AV_SAMPLE_FMT_NONE) {
+        if (fmts[i] == SAMPLE_FMT_NONE) {
             mp_msg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, encoder doesn't "
                    "support expected sample formats!\n");
             return AF_ERROR;
-        } else if (fmts[i] == AV_SAMPLE_FMT_S16) {
+        } else if (fmts[i] == SAMPLE_FMT_S16) {
             s->in_sampleformat = AF_FORMAT_S16_NE;
             s->lavc_actx->sample_fmt = fmts[i];
             break;
-        } else if (fmts[i] == AV_SAMPLE_FMT_FLT) {
+        } else if (fmts[i] == SAMPLE_FMT_FLT) {
             s->in_sampleformat = AF_FORMAT_FLOAT_NE;
             s->lavc_actx->sample_fmt = fmts[i];
             break;
