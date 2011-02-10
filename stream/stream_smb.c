@@ -100,8 +100,16 @@ static int fill_buffer(stream_t *s, char* buffer, int max_len){
 }
 
 static int write_buffer(stream_t *s, char* buffer, int len) {
-  int r = smbc_write(s->fd,buffer,len);
-  return (r <= 0) ? -1 : r;
+  int r;
+  int wr = 0;
+  while (wr < len) {
+    r = smbc_write(s->fd,buffer,len);
+    if (r <= 0)
+      return -1;
+    wr += r;
+    buffer += r;
+  }
+  return len;
 }
 
 static void close_f(stream_t *s){
