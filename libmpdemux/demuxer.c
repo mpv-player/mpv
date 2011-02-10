@@ -253,13 +253,13 @@ void free_demux_packet(struct demux_packet *dp)
     free(dp);
 }
 
-void free_demuxer_stream(demux_stream_t *ds)
+static void free_demuxer_stream(struct demux_stream *ds)
 {
     ds_free_packs(ds);
     free(ds);
 }
 
-demux_stream_t *new_demuxer_stream(struct demuxer *demuxer, int id)
+static struct demux_stream *new_demuxer_stream(struct demuxer *demuxer, int id)
 {
     demux_stream_t *ds = malloc(sizeof(demux_stream_t));
     *ds = (demux_stream_t){
@@ -906,7 +906,7 @@ void demuxer_help(void)
  *                        May be NULL.
  * @return                DEMUXER_TYPE_xxx, -1 if error or not found
  */
-int get_demuxer_type_from_name(char *demuxer_name, int *force)
+static int get_demuxer_type_from_name(char *demuxer_name, int *force)
 {
     int i;
     long type_int;

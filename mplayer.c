@@ -4371,14 +4371,9 @@ if (edl_output_filename) {
 
   mpctx->stream=NULL;
   mpctx->demuxer=NULL;
-  if (mpctx->d_audio) {
-    //free_demuxer_stream(mpctx->d_audio);
-    mpctx->d_audio=NULL;
-  }
-  if (mpctx->d_video) {
-    //free_demuxer_stream(d_video);
-    mpctx->d_video=NULL;
-  }
+  mpctx->d_audio=NULL;
+  mpctx->d_video=NULL;
+  mpctx->d_sub = NULL;
   mpctx->sh_audio=NULL;
   mpctx->sh_video=NULL;
 

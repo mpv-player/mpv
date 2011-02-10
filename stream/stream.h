@@ -341,6 +341,9 @@ stream_t *open_stream(const char *filename, struct MPOpts *options,
 stream_t *open_stream_full(const char *filename,int mode,
                            struct MPOpts *options, int *file_format);
 stream_t *open_output_stream(const char *filename, struct MPOpts *options);
+struct demux_stream;
+struct stream *new_ds_stream(struct demux_stream *ds);
+
 /// Set the callback to be used by libstream to check for user
 /// interruption during long blocking operations (cache filling, etc).
 struct input_ctx;

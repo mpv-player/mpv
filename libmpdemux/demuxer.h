@@ -311,11 +311,9 @@ static inline void *realloc_struct(void *ptr, size_t nmemb, size_t size)
     return realloc(ptr, nmemb * size);
 }
 
-struct demux_stream *new_demuxer_stream(struct demuxer *demuxer, int id);
 struct demuxer *new_demuxer(struct MPOpts *opts, struct stream *stream,
                             int type, int a_id, int v_id, int s_id,
                             char *filename);
-void free_demuxer_stream(struct demux_stream *ds);
 void free_demuxer(struct demuxer *demuxer);
 
 void ds_add_packet(struct demux_stream *ds, struct demux_packet *dp);
@@ -342,22 +340,9 @@ int demux_pattern_3(struct demux_stream *ds, unsigned char *mem, int maxlen,
 #define demux_peekc(ds) ( \
         (likely(ds->buffer_pos<ds->buffer_size)) ? ds->buffer[ds->buffer_pos] \
         : ((unlikely(!ds_fill_buffer(ds))) ? (-1) : ds->buffer[ds->buffer_pos]))
-#if 1
 #define demux_getc(ds) ( \
         (likely(ds->buffer_pos<ds->buffer_size)) ? ds->buffer[ds->buffer_pos++] \
         : ((unlikely(!ds_fill_buffer(ds))) ? (-1) : ds->buffer[ds->buffer_pos++]))
-#else
-static inline int demux_getc(demux_stream_t *ds){
-    if (ds->buffer_pos>=ds->buffer_size) {
-        if (!ds_fill_buffer(ds)) {
-//      printf("DEMUX_GETC: EOF reached!\n");
-            return -1; // EOF
-        }
-    }
-//  printf("[%02X]",ds->buffer[ds->buffer_pos]);
-    return ds->buffer[ds->buffer_pos++];
-}
-#endif
 
 void ds_free_packs(struct demux_stream *ds);
 int ds_get_packet(struct demux_stream *ds, unsigned char **start);
@@ -368,9 +353,6 @@ double ds_get_next_pts(struct demux_stream *ds);
 int ds_parse(struct demux_stream *sh, uint8_t **buffer, int *len, double pts,
              off_t pos);
 void ds_clear_parser(struct demux_stream *sh);
-
-// This is defined here because demux_stream_t ins't defined in stream.h
-stream_t *new_ds_stream(demux_stream_t *ds);
 
 static inline int avi_stream_id(unsigned int id)
 {
@@ -397,8 +379,6 @@ extern char *index_file_save, *index_file_load;
 extern int force_ni;
 extern int pts_from_bps;
 
-extern int extension_parsing;
-
 int demux_info_add(struct demuxer *demuxer, const char *opt, const char *param);
 int demux_info_add_bstr(struct demuxer *demuxer, struct bstr opt,
                         struct bstr param);
@@ -412,7 +392,6 @@ int demuxer_switch_video(struct demuxer *demuxer, int index);
 int demuxer_type_by_filename(char *filename);
 
 void demuxer_help(void);
-int get_demuxer_type_from_name(char *demuxer_name, int *force);
 
 int demuxer_add_attachment(struct demuxer *demuxer, struct bstr name,
                            struct bstr type, struct bstr data);
