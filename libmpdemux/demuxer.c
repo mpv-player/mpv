@@ -881,19 +881,18 @@ void demuxer_help(void)
     int i;
 
     mp_msg(MSGT_DEMUXER, MSGL_INFO, "Available demuxers:\n");
-    mp_msg(MSGT_DEMUXER, MSGL_INFO, " demuxer:  type  info:  (comment)\n");
+    mp_msg(MSGT_DEMUXER, MSGL_INFO, " demuxer:   info:  (comment)\n");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DEMUXERS\n");
     for (i = 0; demuxer_list[i]; i++) {
-        if (demuxer_list[i]->type > DEMUXER_TYPE_MAX)   // Don't display special demuxers
+        if (demuxer_list[i]->type >= DEMUXER_TYPE_END)  // internal type
             continue;
         if (demuxer_list[i]->comment && strlen(demuxer_list[i]->comment))
-            mp_msg(MSGT_DEMUXER, MSGL_INFO, "%10s  %2d   %s (%s)\n",
-                   demuxer_list[i]->name, demuxer_list[i]->type,
-                   demuxer_list[i]->info, demuxer_list[i]->comment);
+            mp_msg(MSGT_DEMUXER, MSGL_INFO, "%10s  %s (%s)\n",
+                   demuxer_list[i]->name, demuxer_list[i]->info,
+                   demuxer_list[i]->comment);
         else
-            mp_msg(MSGT_DEMUXER, MSGL_INFO, "%10s  %2d   %s\n",
-                   demuxer_list[i]->name, demuxer_list[i]->type,
-                   demuxer_list[i]->info);
+            mp_msg(MSGT_DEMUXER, MSGL_INFO, "%10s  %s\n",
+                   demuxer_list[i]->name, demuxer_list[i]->info);
     }
 }
 
@@ -908,29 +907,19 @@ void demuxer_help(void)
  */
 static int get_demuxer_type_from_name(char *demuxer_name, int *force)
 {
-    int i;
-    long type_int;
-    char *endptr;
-
     if (!demuxer_name || !demuxer_name[0])
         return DEMUXER_TYPE_UNKNOWN;
     if (force)
         *force = demuxer_name[0] == '+';
     if (demuxer_name[0] == '+')
         demuxer_name = &demuxer_name[1];
-    for (i = 0; demuxer_list[i]; i++) {
-        if (demuxer_list[i]->type > DEMUXER_TYPE_MAX)   // Can't select special demuxers from commandline
+    for (int i = 0; demuxer_list[i]; i++) {
+        if (demuxer_list[i]->type >= DEMUXER_TYPE_END)
+            // Can't select special demuxers from commandline
             continue;
         if (strcmp(demuxer_name, demuxer_list[i]->name) == 0)
             return demuxer_list[i]->type;
     }
-
-    // No match found, try to parse name as an integer (demuxer number)
-    type_int = strtol(demuxer_name, &endptr, 0);
-    if (*endptr)  // Conversion failed
-        return -1;
-    if ((type_int > 0) && (type_int <= DEMUXER_TYPE_MAX))
-        return (int) type_int;
 
     return -1;
 }

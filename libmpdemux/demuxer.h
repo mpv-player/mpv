@@ -42,60 +42,60 @@ struct MPOpts;
 #define MAX_PACKS 4096
 #define MAX_PACK_BYTES 0x8000000  // 128 MiB
 
-#define DEMUXER_TYPE_UNKNOWN 0
-#define DEMUXER_TYPE_MPEG_ES 1
-#define DEMUXER_TYPE_MPEG_PS 2
-#define DEMUXER_TYPE_AVI 3
-#define DEMUXER_TYPE_AVI_NI 4
-#define DEMUXER_TYPE_AVI_NINI 5
-#define DEMUXER_TYPE_ASF 6
-#define DEMUXER_TYPE_MOV 7
-#define DEMUXER_TYPE_VIVO 8
-#define DEMUXER_TYPE_TV 9
-#define DEMUXER_TYPE_FLI 10
-#define DEMUXER_TYPE_REAL 11
-#define DEMUXER_TYPE_Y4M 12
-#define DEMUXER_TYPE_FILM 14
-#define DEMUXER_TYPE_ROQ 15
-#define DEMUXER_TYPE_MF 16
-#define DEMUXER_TYPE_AUDIO 17
-#define DEMUXER_TYPE_OGG 18
-#define DEMUXER_TYPE_RAWAUDIO 20
-#define DEMUXER_TYPE_RTP 21
-#define DEMUXER_TYPE_RAWDV 22
-#define DEMUXER_TYPE_PVA 23
-#define DEMUXER_TYPE_SMJPEG 24
-#define DEMUXER_TYPE_XMMS 25
-#define DEMUXER_TYPE_RAWVIDEO 26
-#define DEMUXER_TYPE_MPEG4_ES 27
-#define DEMUXER_TYPE_GIF 28
-#define DEMUXER_TYPE_MPEG_TS 29
-#define DEMUXER_TYPE_H264_ES 30
-#define DEMUXER_TYPE_MATROSKA 31
-#define DEMUXER_TYPE_REALAUDIO 32
-#define DEMUXER_TYPE_MPEG_TY 33
-#define DEMUXER_TYPE_LMLM4 34
-#define DEMUXER_TYPE_LAVF 35
-#define DEMUXER_TYPE_NSV 36
-#define DEMUXER_TYPE_VQF 37
-#define DEMUXER_TYPE_AVS 38
-#define DEMUXER_TYPE_AAC 39
-#define DEMUXER_TYPE_MPC 40
-#define DEMUXER_TYPE_MPEG_PES 41
-#define DEMUXER_TYPE_MPEG_GXF 42
-#define DEMUXER_TYPE_NUT 43
-#define DEMUXER_TYPE_LAVF_PREFERRED 44
-#define DEMUXER_TYPE_RTP_NEMESI 45
-#define DEMUXER_TYPE_MNG 46
+enum demuxer_type {
+    DEMUXER_TYPE_UNKNOWN = 0,
+    DEMUXER_TYPE_MPEG_ES,
+    DEMUXER_TYPE_MPEG_PS,
+    DEMUXER_TYPE_AVI,
+    DEMUXER_TYPE_AVI_NI,
+    DEMUXER_TYPE_AVI_NINI,
+    DEMUXER_TYPE_ASF,
+    DEMUXER_TYPE_MOV,
+    DEMUXER_TYPE_VIVO,
+    DEMUXER_TYPE_TV,
+    DEMUXER_TYPE_FLI,
+    DEMUXER_TYPE_REAL,
+    DEMUXER_TYPE_Y4M,
+    DEMUXER_TYPE_FILM,
+    DEMUXER_TYPE_ROQ,
+    DEMUXER_TYPE_MF,
+    DEMUXER_TYPE_AUDIO,
+    DEMUXER_TYPE_OGG,
+    DEMUXER_TYPE_RAWAUDIO,
+    DEMUXER_TYPE_RTP,
+    DEMUXER_TYPE_RAWDV,
+    DEMUXER_TYPE_PVA,
+    DEMUXER_TYPE_SMJPEG,
+    DEMUXER_TYPE_XMMS,
+    DEMUXER_TYPE_RAWVIDEO,
+    DEMUXER_TYPE_MPEG4_ES,
+    DEMUXER_TYPE_GIF,
+    DEMUXER_TYPE_MPEG_TS,
+    DEMUXER_TYPE_H264_ES,
+    DEMUXER_TYPE_MATROSKA,
+    DEMUXER_TYPE_REALAUDIO,
+    DEMUXER_TYPE_MPEG_TY,
+    DEMUXER_TYPE_LMLM4,
+    DEMUXER_TYPE_LAVF,
+    DEMUXER_TYPE_NSV,
+    DEMUXER_TYPE_VQF,
+    DEMUXER_TYPE_AVS,
+    DEMUXER_TYPE_AAC,
+    DEMUXER_TYPE_MPC,
+    DEMUXER_TYPE_MPEG_PES,
+    DEMUXER_TYPE_MPEG_GXF,
+    DEMUXER_TYPE_NUT,
+    DEMUXER_TYPE_LAVF_PREFERRED,
+    DEMUXER_TYPE_RTP_NEMESI,
+    DEMUXER_TYPE_MNG,
 
-// This should always match the higest demuxer type number.
-// Unless you want to disallow users to force the demuxer to some types
-#define DEMUXER_TYPE_MIN 0
-#define DEMUXER_TYPE_MAX 46
+    /* Values after this are for internal use and can not be selected
+     * as demuxer type by the user (-demuxer option). */
+    DEMUXER_TYPE_END,
 
-#define DEMUXER_TYPE_DEMUXERS (1 << 16)
-// A virtual demuxer type for the network code
-#define DEMUXER_TYPE_PLAYLIST (2 << 16)
+    DEMUXER_TYPE_DEMUXERS,
+    DEMUXER_TYPE_PLAYLIST,
+};
 
 enum timestamp_type {
     TIMESTAMP_TYPE_PTS,
@@ -191,7 +191,7 @@ typedef struct demuxer_desc {
     const char *author;    // Demuxer author(s)
     const char *comment;   // Comment, printed with -demuxer help
 
-    int type; // DEMUXER_TYPE_xxx
+    enum demuxer_type type;
     // If 1 detection is safe and fast, do it before file extension check
     int safe_check;
 
@@ -249,14 +249,14 @@ typedef struct demuxer {
     double reference_clock;
     char *filename;  // Needed by avs_check_file
     int synced;      // stream synced (used by mpeg)
-    int type;        // DEMUXER_TYPE_xxx
+    enum demuxer_type type;
     /* Normally the file_format field is just a copy of the type field above.
      * There are 2 exceptions I noticed. Internal demux_avi may force
      * ->type to DEMUXER_TYPE_AVI_[NI|NINI] while leaving ->file_format at
      * DEMUXER_TYPE_AVI. Internal demux_mov may set ->type to
      * DEMUXER_TYPE_PLAYLIST and also return that from the check function
      * or not (looks potentially buggy). */
-    int file_format;
+    enum demuxer_type file_format;
     int seekable; // flag
     /* Set if using absolute seeks for small movements is OK (no pts resets
      * that would make pts ambigious, preferably supports back/forward flags */
