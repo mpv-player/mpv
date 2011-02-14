@@ -389,6 +389,7 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/demux_audio.c \
               libmpdemux/demux_avi.c \
               libmpdemux/demux_demuxers.c \
+              libmpdemux/demux_edl.c \
               libmpdemux/demux_film.c \
               libmpdemux/demux_fli.c \
               libmpdemux/demux_lmlm4.c \
@@ -441,6 +442,7 @@ SRCS_COMMON = asxparser.c \
               sub/subassconvert.c \
               sub/subreader.c \
               sub/vobsub.c \
+              timeline/tl_edl.c \
               timeline/tl_matroska.c \
               $(SRCS_COMMON-yes)
 

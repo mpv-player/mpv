@@ -259,31 +259,13 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
         return;
     }
 
-    mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline contains %d parts from %d "
-           "sources. Total length %.3f seconds.\n", part_count, num_sources,
-           timeline[part_count].start);
     if (missing_time)
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "There are %.3f seconds missing "
                "from the timeline!\n", missing_time / 1e9);
-    mp_msg(MSGT_CPLAYER, MSGL_V, "Source files:\n");
-    for (int i = 0; i < num_sources; i++)
-        mp_msg(MSGT_CPLAYER, MSGL_V, "%d: %s\n", i,
-               filename_recode(sources[i].demuxer->filename));
-    mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline parts: (number, start, "
-           "source_start, source):\n");
-    for (int i = 0; i < part_count; i++) {
-        struct timeline_part *p = timeline + i;
-        mp_msg(MSGT_CPLAYER, MSGL_V, "%3d %9.3f %9.3f %3td\n", i, p->start,
-               p->source_start, p->source - sources);
-    }
-    mp_msg(MSGT_CPLAYER, MSGL_V, "END %9.3f\n", timeline[part_count].start);
     mpctx->sources = sources;
     mpctx->num_sources = num_sources;
     mpctx->timeline = timeline;
     mpctx->num_timeline_parts = part_count;
     mpctx->num_chapters = num_chapters;
     mpctx->chapters = chapters;
-
-    mpctx->timeline_part = 0;
-    mpctx->demuxer = timeline[0].source->demuxer;
 }

@@ -88,6 +88,7 @@ enum demuxer_type {
     DEMUXER_TYPE_LAVF_PREFERRED,
     DEMUXER_TYPE_RTP_NEMESI,
     DEMUXER_TYPE_MNG,
+    DEMUXER_TYPE_EDL,
 
     /* Values after this are for internal use and can not be selected
      * as demuxer type by the user (-demuxer option). */
@@ -282,6 +283,8 @@ typedef struct demuxer {
     int num_attachments;
 
     struct matroska_data matroska_data;
+    // for trivial demuxers which just read the whole file for codec to use
+    struct bstr file_contents;
 
     void *priv;   // demuxer-specific internal data
     char **info;  // metadata

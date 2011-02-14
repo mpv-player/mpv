@@ -53,6 +53,7 @@
 static void clear_parser(sh_common_t *sh);
 
 // Demuxer list
+extern const struct demuxer_desc demuxer_desc_edl;
 extern const demuxer_desc_t demuxer_desc_rawaudio;
 extern const demuxer_desc_t demuxer_desc_rawvideo;
 extern const demuxer_desc_t demuxer_desc_tv;
@@ -101,6 +102,7 @@ extern const demuxer_desc_t demuxer_desc_mng;
  * libraries and demuxers requiring binary support. */
 
 const demuxer_desc_t *const demuxer_list[] = {
+    &demuxer_desc_edl,
     &demuxer_desc_rawaudio,
     &demuxer_desc_rawvideo,
 #ifdef CONFIG_TV

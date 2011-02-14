@@ -4349,6 +4349,32 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
  if (mpctx->demuxer->matroska_data.ordered_chapters)
      build_ordered_chapter_timeline(mpctx);
 
+ if (mpctx->demuxer->type == DEMUXER_TYPE_EDL)
+     build_edl_timeline(mpctx);
+
+ if (mpctx->timeline) {
+    mpctx->timeline_part = 0;
+    mpctx->demuxer = mpctx->timeline[0].source->demuxer;
+
+    int part_count = mpctx->num_timeline_parts;
+    mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline contains %d parts from %d "
+           "sources. Total length %.3f seconds.\n", part_count,
+           mpctx->num_sources, mpctx->timeline[part_count].start);
+    mp_msg(MSGT_CPLAYER, MSGL_V, "Source files:\n");
+    for (int i = 0; i < mpctx->num_sources; i++)
+        mp_msg(MSGT_CPLAYER, MSGL_V, "%d: %s\n", i,
+               filename_recode(mpctx->sources[i].demuxer->filename));
+    mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline parts: (number, start, "
+           "source_start, source):\n");
+    for (int i = 0; i < part_count; i++) {
+        struct timeline_part *p = mpctx->timeline + i;
+        mp_msg(MSGT_CPLAYER, MSGL_V, "%3d %9.3f %9.3f %3td\n", i, p->start,
+               p->source_start, p->source - mpctx->sources);
+    }
+    mp_msg(MSGT_CPLAYER, MSGL_V, "END %9.3f\n",
+           mpctx->timeline[part_count].start);
+ }
+
  if (!mpctx->sources) {
      mpctx->sources = talloc_ptrtype(NULL, mpctx->sources);
      *mpctx->sources = (struct content_source){.stream = mpctx->stream,
