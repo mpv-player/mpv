@@ -442,6 +442,7 @@ SRCS_COMMON = asxparser.c \
               sub/subassconvert.c \
               sub/subreader.c \
               sub/vobsub.c \
+              timeline/tl_matroska.c \
               $(SRCS_COMMON-yes)
 
 
@@ -586,6 +587,7 @@ DIRS =  . \
         stream/librtsp \
         stream/realrtsp \
         sub \
+        timeline \
         TOOLS \
 
 MOFILES := $(MSG_LANGS:%=locale/%/LC_MESSAGES/mplayer.mo)
