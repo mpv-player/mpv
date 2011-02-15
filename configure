@@ -2764,6 +2764,7 @@ echocheck "language"
 test -z "$language" && language=$LINGUAS
 test -z "$language_doc" && language_doc=$language
 test -z "$language_man" && language_man=$language
+test -z "$language_msg" && language_msg=$language
 test -z "$language_msg" && language_msg="all"
 language_doc=$(echo $language_doc | tr , " ")
 language_man=$(echo $language_man | tr , " ")
