@@ -3961,7 +3961,7 @@ int i;
     }
     mpctx->key_fifo = mp_fifo_create(opts);
 
-  print_version("MPlayer");
+  print_version("MPlayer2");
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 	{
