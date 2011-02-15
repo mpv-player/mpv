@@ -1,182 +1,27 @@
-Welcome to MPlayer, The Movie Player. MPlayer can play most standard video
-formats out of the box and almost all others with the help of external codecs.
-MPlayer currently works best from the command line, but visual feedback for
-many functions is available from its onscreen status display (OSD), which is
-also used for displaying subtitles.
 
-MEncoder is a command line video encoder for advanced users that can be built
-from the MPlayer source tree. Unofficial graphical frontends exist but are
-not included.
+Compiling with full features requires development files for several
+external libraries. Below is a list of some important requirements. For
+more information see the output of './configure --help' for a list of options,
+or look at the list of enabled and disabled features printed after running
+'./configure'. If you think you have support for some feature installed
+but configure fails to detect it, the file config.log may contain information
+about the reasons for the failure.
 
-This document is for getting you started in a few minutes. It cannot answer all
-of your questions. If you have problems, please read the documentation in
-DOCS/HTML/en/index.html, which should help you solve most of your problems.
-Also read the man page to learn how to use MPlayer.
+Libraries specific to particular video output methods
+(you'll want at least one of VDPAU, GL or Xv):
+ - libvdpau (for VDPAU output, best choice for NVIDIA cards)
+ - libGL (OpenGL output)
+ - libXv (XVideo output)
+general:
+ - libasound   (ALSA audio output)
+ - various general X development libraries
+ - libfreetype
+ - libfontconfig
+ - libass
+ - FFmpeg libraries (libavutil libavcodec libavformat libswscale libpostproc)
 
-
-Requirements:
-- POSIX system: You need a POSIX-compatible shell and POSIX-compatible system
-  tools like grep, sed, awk, etc. in your path.
-- You need a working development environment that can compile programs.
-  On popular Linux distributions, this means having the glibc development
-  package(s) installed.
-- To compile MPlayer with X11 support, you need to have the X Window System
-  development packages (like for XFree86 or X.Org) installed.
-
-
-Before you start...
-Make sure that your version of X has Xvideo support, without it even very
-fast machines may not be able to properly play high resolution videos in
-fullscreen mode. Consult DOCS/HTML/en/video.html for details. There you may
-also find out about special card-specific video output drivers that can yield
-optimal performance.
-
-
-______________________
-STEP0: Getting MPlayer
-~~~~~~~~~~~~~~~~~~~~~~
-
-Official releases and Subversion snapshots, as well as binary codec packages
-available from the download section of our homepage at
-
-  http://www.mplayerhq.hu/dload.html
-
-MPlayer has builtin support for the most common audio and video formats. For a
-few formats no native decoder exists and external binary codecs are required
-to handle them. Examples are newer RealVideo variants and a variety of rare
-formats. However, binary codecs are NOT required in this day and age, they are
-strictly optional.
-
-Please note that binary codecs only work on the processor architecture they
-were compiled for. Choose the correct package for your processor. No other
-package is necessary.
-
-Codec packages add support for some more video and audio formats. MPlayer does
-not come with any of these by default, you have to download and install them
-separately.
-
-You can also get MPlayer via Subversion. Issue the following commands to get
-the latest sources:
-
-  svn checkout svn://svn.mplayerhq.hu/mplayer/trunk mplayer
-
-A directory named 'mplayer' will be created. It will include all necessary
-FFmpeg libraries, you don't need to get them separately as was the case in
-the past. You can later update your sources by saying
-
-  svn update
-
-from within that directory.
-
-
-_______________________________
-STEP1: Installing Binary Codecs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Unpack the codecs archives and put the contents in a directory where MPlayer
-will find them. The default directory is /usr/local/lib/codecs/ (it used to be
-/usr/local/lib/win32 in the past, this also works) but you can change that to
-something else by passing the '--codecsdir' option to './configure'.
-
-
-__________________________
-STEP2: Configuring MPlayer
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-MPlayer can be adapted to all kinds of needs and hardware environments. Run
-
-  ./configure
-
-to configure MPlayer with the default options. If something does not work as
-expected, try
-
-  ./configure --help
-
-to see the available options and select what you need.
-
-The configure script prints a summary of enabled and disabled options. If you
-have something installed that configure fails to detect, check the file
-config.log for errors and reasons for the failure. Repeat this step until
-you are satisfied with the enabled feature set.
-
-
-________________________
-STEP3: Compiling MPlayer
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Now you can start the compilation by typing
-
-  make
-
-You can install MPlayer with
-
-  make install
-
-provided that you have write permission in the installation directory.
-
-If all went well, you can run MPlayer by typing 'mplayer'. A help screen with a
-summary of the most common options and keyboard shortcuts should be displayed.
-
-If you get 'unable to load shared library' or similar errors, run
-'ldd ./mplayer' to check which libraries fail and go back to STEP 3 to fix it.
-Sometimes running 'ldconfig' is enough to fix the problem.
-
-NOTE: If you run Debian you can configure, compile and build a proper Debian
-.deb package with only one command:
-
-  fakeroot debian/rules binary
-
-If you want to pass custom options to configure, you can set up the
-DEB_BUILD_OPTIONS environment variable. For instance, if you want OSD menu
-support you would use:
-
-  DEB_BUILD_OPTIONS="--enable-menu" fakeroot debian/rules binary
-
-You can also pass some variables to the Makefile. For example, if you want
-to compile with gcc 3.4 even if it's not the default compiler:
-
-  CC=gcc-3.4 DEB_BUILD_OPTIONS="--enable-menu" fakeroot debian/rules binary
-
-To clean up the source tree run the following command:
-
-  fakeroot debian/rules clean
-
-______________________________________
-STEP4: Choose an onscreen display font
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can use any TrueType font installed on your system. Just pass '-font
-/path/to/font.ttf' on the command line or add 'font=/path/to/font.ttf' to
-your configuration file. The manual page has more details. Alternatively
-you can create a symbolic link from either ~/.mplayer/subfont.ttf or
-/usr/local/share/mplayer/subfont.ttf to your TrueType font.
-
-
-__________________
-STEP5: Let's play!
-~~~~~~~~~~~~~~~~~~
-
-That's it for the moment. To start playing movies, open a command line and try
-
-  mplayer <moviefile>
-
-To play a VCD track or a DVD title, try:
-
-  mplayer vcd://2 -cdrom-device /dev/hdc
-  mplayer dvd://1 -alang en -slang hu -dvd-device /dev/hdd
-
-See 'mplayer -help' and 'man mplayer' for further options.
-
-'mplayer -vo help' will show you the available video output drivers. Experiment
-with the '-vo' switch to see which one gives you the best performance.
-If you get jerky playback or no sound, experiment with the '-ao' switch (see
-'-ao help') to choose between different audio drivers. Note that jerky playback
-is caused by buggy audio drivers or a slow processor and video card. With a
-good audio and video driver combination, one can play DVDs and 720x576 MPEG-4
-files smoothly on a Celeron 366. Slower systems may need the '-framedrop'
-option.
-
-Questions you may have are probably answered in the rest of the documentation.
-The places to start reading are the man page, DOCS/HTML/en/index.html and
-DOCS/HTML/en/faq.html. If you find a bug, please report it, but first read
-DOCS/HTML/en/bugreports.html.
+Most of the above libraries are available in suitable versions on normal
+Linux distributions. However FFmpeg is an exception (distro versions may be
+too old to work at all or work well). For that reason you may want to use
+the separately available build wrapper that first compiles FFmpeg libraries
+and libass, and then compiles the player statically linked against those.
