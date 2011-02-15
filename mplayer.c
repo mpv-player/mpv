@@ -2874,18 +2874,18 @@ static void pause_loop(struct MPContext *mpctx)
 	    set_osd_tmsg(OSD_MSG_PAUSE, 1, 0, "  =====  PAUSE  =====");
 	    update_osd_msg(mpctx);
 	} else
-	    mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%c%s%c",
-                   '\n', mp_gtext("  =====  PAUSE  ====="), '\r');
+	    mp_msg(MSGT_CPLAYER, MSGL_STATUS, "\n%s\r",
+                   mp_gtext("  =====  PAUSE  ====="));
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
     }
 
     while ( (cmd = mp_input_get_cmd(mpctx->input, 20, 1)) == NULL
             || cmd->id == MP_CMD_SET_MOUSE_POS || cmd->pausing == 4) {
 	if (cmd) {
-	  cmd = mp_input_get_cmd(mpctx->input, 0, 0);
-	  run_command(mpctx, cmd);
-	  mp_cmd_free(cmd);
-	  continue;
+            cmd = mp_input_get_cmd(mpctx->input, 0, 0);
+            run_command(mpctx, cmd);
+            mp_cmd_free(cmd);
+            continue;
 	}
 	if (mpctx->sh_video && mpctx->video_out)
 	    vo_check_events(mpctx->video_out);
@@ -2894,11 +2894,11 @@ static void pause_loop(struct MPContext *mpctx)
             vf_menu_pause_update(vf_menu);
 #endif
 	usec_sleep(20000);
-      update_osd_msg(mpctx);
-      int hack = vo_osd_changed(0);
-      vo_osd_changed(hack);
-      if (hack)
-          break;
+        update_osd_msg(mpctx);
+        int hack = vo_osd_changed(0);
+        vo_osd_changed(hack);
+        if (hack)
+            break;
 #ifdef CONFIG_STREAM_CACHE
         if (!opts->quiet && stream_cache_size > 0) {
             int new_cache_fill = cache_fill_status(mpctx->stream);
