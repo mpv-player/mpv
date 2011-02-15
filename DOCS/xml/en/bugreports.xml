@@ -41,13 +41,7 @@ send that one with another mail.
 <title>How to fix bugs</title>
 
 <para>
-If you feel have the necessary skills you are invited to have a go at fixing the
-bug yourself. Or maybe you already did that? Please read
-<ulink url="../../tech/patches.txt">this short document</ulink> to find out how
-to get your code included in <application>MPlayer</application>. The people on
-the
-<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
-mailing list will assist you if you have questions.
+OUTDATED CONTENT REMOVED
 </para>
 </sect1>
 
@@ -59,84 +53,7 @@ mailing list will assist you if you have questions.
 <title>How to do regression testing using Subversion</title>
 
 <para>
-A problem that can happen sometimes is 'it used to work before, now it
-doesn't anymore...'.
-Here is a step by step procedure to try to pinpoint when the problem
-occurred. This is <emphasis role="bold">not</emphasis> for casual users.
-</para>
-
-<para>
-First, you'd need to fetch MPlayer's source tree from Subversion.
-Instructions can be found in the
-<ulink url="http://www.mplayerhq.hu/design7/dload.html#svn">Subversion section of the download page</ulink>.
-</para>
-
-<para>
-You will have now in the mplayer/ directory an image of the Subversion tree, on
-the client side.
-Now update this image to the date you want:
-<screen>
-cd mplayer/
-svn update -r {"2004-08-23"}
-</screen>
-The date format is YYYY-MM-DD HH:MM:SS.
-Using this date format ensure that you will be able to extract patches
-according to the date at which they were committed, as in the
-<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-cvslog/">MPlayer-cvslog archive</ulink>.
-</para>
-
-<para>
-Now proceed as for a normal update:
-<screen>
-./configure
-make
-</screen>
-</para>
-
-<para>
-If any non-programmer reads this, the fastest method to get at the point
-where the problem occurred is to use a binary search &mdash; that is,
-search the date of the breakage by repeatedly dividing the search
-interval in half.
-For example, if the problem occurred in 2003, start at mid-year, then ask
-"Is the problem already here?".
-If yes, go back to the first of April; if not, go to the first of October,
-and so on.
-</para>
-
-<para>
-If you have lot of free hard disk space (a full compile currently takes
-100 MB, and around 300-350 MB if debugging symbols are enabled), copy the
-oldest known working version before updating it; this will save time if
-you need to go back.
-(It is usually necessary to run 'make distclean' before recompiling an
-earlier version, so if you do not make a backup copy of your original
-source tree, you will have to recompile everything in it when you come
-back to the present.)
-Alternatively you may use <ulink url="http://ccache.samba.org/">ccache</ulink>
-to speed up compilation.
-</para>
-
-<para>
-When you have found the day where the problem happened, continue the search
-using the mplayer-cvslog archive (sorted by date) and a more precise svn
-update including hour, minute and second:
-<screen>
-svn update -r {"2004-08-23 15:17:25"}
-</screen>
-This will allow you to easily find the exact patch that did it.
-</para>
-
-<para>
-If you find the patch that is the cause of the problem, you have almost won;
-report about it to the
-<ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink> or
-subscribe to
-<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
-and post it there.
-There is a chance that the author will jump in to suggest a fix.
-You may also look hard at the patch until it is coerced to reveal where
-the bug is :-).
+OUTDATED CONTENT REMOVED
 </para>
 </sect1>
 
@@ -148,49 +65,7 @@ the bug is :-).
 <title>How to report bugs</title>
 
 <para>
-First of all please try the latest Subversion version of
-<application>MPlayer</application>
-as your bug might already be fixed there. Development moves extremely fast,
-most problems in official releases are reported within days or even hours,
-so please use <emphasis role="bold">only Subversion</emphasis> to report bugs.
-This includes binary packages of <application>MPlayer</application>.
-Subversion instructions can be found at the bottom of
-<ulink url="http://www.mplayerhq.hu/dload.html">this page</ulink> or in
-the README. If this did not help please refer to the rest of the documentation.
-If your problem is not known or not solvable by our instructions,
-then please report the bug.
-</para>
-
-<para>
-Please do not send bug reports privately to individual developers. This is
-community work and thus there might be several people interested in it.
-Sometimes other users already experienced your troubles and know how to
-circumvent a problem even if it is a bug in <application>MPlayer</application>
-code.
-</para>
-
-<para>
-Please describe your problem in as much detail as possible. Do a little
-detective work to narrow down the circumstances under which the problem occurs.
-Does the bug only show up in certain situations? Is it specific to certain
-files or file types? Does it occur with only one codec or is it codec
-independent? Can you reproduce it with all output drivers? The more information
-you provide the better are our chances at fixing your problem. Please do not
-forget to also include the valuable information requested below, we will be
-unable to properly diagnose your problem otherwise.
-</para>
-
-<para>
-An excellent and well written guide to asking questions in public forums is
-<ulink url="http://www.catb.org/~esr/faqs/smart-questions.html">How To Ask Questions The Smart Way</ulink>
-by <ulink url="http://www.catb.org/~esr/">Eric S. Raymond</ulink>.
-There is another called
-<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report Bugs Effectively</ulink>
-by <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simon Tatham</ulink>.
-If you follow these guidelines you should be able to get help. But please
-understand that we all follow the mailing lists voluntarily in our free time. We
-are very busy and cannot guarantee that you will get a solution for your problem
-or even an answer.
+OUTDATED CONTENT REMOVED
 </para>
 </sect1>
 
@@ -202,15 +77,7 @@ or even an answer.
 <title>Where to report bugs</title>
 
 <para>
-Subscribe to the MPlayer-users mailing list:
-<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"/>
-and send your bug report to
-<ulink url="mailto:mplayer-users@mplayerhq.hu"/> where you can discuss it.
-</para>
-
-<para>
-If you prefer, you can use our brand-new
-<ulink url="http://bugzilla.mplayerhq.hu/">Bugzilla</ulink> instead.
+OUTDATED CONTENT REMOVED
 </para>
 
 <para>
@@ -235,12 +102,7 @@ to subscribe to actually receive your answer.
 <title>What to report</title>
 
 <para>
-You may need to include log, configuration or sample files in your bug report.
-If some of them are quite big then it is better to upload them to our
-<ulink url="ftp://upload.mplayerhq.hu/MPlayer/incoming/">FTP server</ulink> in a
-compressed format (gzip and bzip2 preferred) and include only the path and file
-name in your bug report. Our mailing lists have a message size limit of 80k, if
-you have something bigger you have to compress or upload it.
+OUTDATED CONTENT REMOVED
 </para>
 
 <!-- ********** -->
@@ -249,57 +111,7 @@ you have something bigger you have to compress or upload it.
 <title>System Information</title>
 
 <para>
-<itemizedlist>
-<listitem><para>
-  Your Linux distribution or operating system and version e.g.:
-  <itemizedlist>
-    <listitem><para>Red Hat 7.1</para></listitem>
-    <listitem><para>Slackware 7.0 + devel packs from 7.1 ...</para></listitem>
-  </itemizedlist>
-</para></listitem>
-<listitem><para>
-  kernel version:
-  <screen>uname -a</screen>
-</para></listitem>
-<listitem><para>
-  libc version:
-  <screen>ls -l /lib/libc[.-]*</screen>
-</para></listitem>
-<listitem><para>
-  gcc and ld versions:
-  <screen>
-gcc -v
-ld -v<!--
-  --></screen>
-</para></listitem>
-<listitem><para>
-  binutils version:
-  <screen>as --version</screen>
-</para></listitem>
-<listitem><para>
-  If you have problems with fullscreen mode:
-  <itemizedlist>
-    <listitem><para>Window manager type and version</para></listitem>
-  </itemizedlist>
-</para></listitem>
-<listitem><para>
-  If you have problems with XVIDIX:
-  <itemizedlist>
-  <listitem><para>
-    X colour depth:
-    <screen>xdpyinfo | grep "depth of root"</screen>
-  </para></listitem>
-  </itemizedlist>
-</para></listitem>
-<listitem><para>
-  If only the GUI is buggy:
-  <itemizedlist>
-    <listitem><para>GTK version</para></listitem>
-    <listitem><para>GLIB version</para></listitem>
-    <listitem><para>GUI situation in which the bug occurs</para></listitem>
-  </itemizedlist>
-</para></listitem>
-</itemizedlist>
+OUTDATED CONTENT REMOVED
 </para>
 </sect2>
 
@@ -309,39 +121,7 @@ ld -v<!--
 <title>Hardware and drivers</title>
 
 <para>
-<itemizedlist>
-<listitem><para>
-  CPU info (this works on Linux only):
-  <screen>cat /proc/cpuinfo</screen>
-</para></listitem>
-<listitem><para>
-  Video card manufacturer and model, e.g.:
-  <itemizedlist>
-    <listitem><para>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM</para></listitem>
-    <listitem><para>Matrox G400 DH 32MB SGRAM</para></listitem>
-  </itemizedlist>
-</para></listitem>
-<listitem><para>
-  Video driver type &amp; version, e.g.:
-  <itemizedlist>
-    <listitem><para>X built-in driver</para></listitem>
-    <listitem><para>nVidia 0.9.623</para></listitem>
-    <listitem><para>Utah-GLX CVS 2001-02-17</para></listitem>
-    <listitem><para>DRI from X 4.0.3</para></listitem>
-  </itemizedlist>
-</para></listitem>
-<listitem><para>
-  Sound card type &amp; driver, e.g.:
-  <itemizedlist>
-    <listitem><para>Creative SBLive! Gold with OSS driver from oss.creative.com</para></listitem>
-    <listitem><para>Creative SB16 with kernel OSS drivers</para></listitem>
-    <listitem><para>GUS PnP with ALSA OSS emulation</para></listitem>
-  </itemizedlist>
-</para></listitem>
-<listitem><para>
-  If in doubt include <command>lspci -vv</command> output on Linux systems.
-</para></listitem>
-</itemizedlist>
+OUTDATED CONTENT REMOVED
 </para>
 </sect2>
 
@@ -470,32 +250,6 @@ gdb mplayer --core=core -batch --command=command_file &gt; mplayer.bug
 </para>
 </sect3>
 </sect2>
-</sect1>
-
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
-<sect1 id="bugreports_advusers">
-<title>I know what I am doing...</title>
-
-<para>
-If you created a proper bug report following the steps above and you are
-confident it is a bug in <application>MPlayer</application>, not a compiler
-problem or broken file, you have already read the documentation and you could
-not find a solution, your sound drivers are OK, then you might want to
-subscribe to the MPlayer-advusers list and send your bug report there to get
-a better and faster answer.
-</para>
-
-<para>
-Please be advised that if you post newbie questions or questions answered in the
-manual there, you will be ignored or flamed instead of getting an appropriate
-answer. So do not flame us and subscribe to -advusers only if you really know
-what you are doing and feel like being an advanced
-<application>MPlayer</application> user or developer. If you meet these
-criteria it should not be difficult to find out how to subscribe...
-</para>
 </sect1>
 
 </appendix>

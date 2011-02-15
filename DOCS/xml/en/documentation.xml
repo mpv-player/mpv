@@ -3,7 +3,7 @@
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
-<subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
+<subtitle><ulink url="http://www.mplayer2.org/"></ulink></subtitle>
 <date>March 24, 2003</date>
 <copyright>
   <year>2000</year>
@@ -17,6 +17,7 @@
   <year>2008</year>
   <year>2009</year>
   <year>2010</year>
+  <year>2011</year>
   <holder>MPlayer team</holder>
 </copyright>
 <legalnotice>
@@ -45,115 +46,16 @@ If you are a first-time installer: be sure to read everything from here to
 the end of the Installation section, and follow the links you will find. If
 you have any other questions, return to the <link linkend="toc">Table of
 Contents</link> and search for the topic, read the <xref linkend="faq"/>,
-or try grepping through the files. Most questions should be answered somewhere
-here and the rest has probably already been asked on our
-<ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">mailing lists</ulink>.
-Check the
-<ulink url="https://lists.mplayerhq.hu/mailman/listinfo">archives</ulink>, there
-is a lot of valuable information to be found there.
+or try grepping through the files.
 </para>
 </preface>
 
 
 <chapter id="intro">
 <title>Introduction</title>
-
+OUTDATED CONTENT REMOVED
 <para>
-<application>MPlayer</application> is a movie player for Linux (runs on
-many other Unices, and non-x86 CPUs, see <xref linkend="ports"/>).
-It plays most MPEG, VOB, AVI, Ogg/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM,
-NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska files, supported by
-many native, XAnim, RealPlayer, and Win32 DLL codecs. You can watch
-Video CD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora,
-and MPEG-4 (DivX) movies, too. Another big
-feature of <application>MPlayer</application> is the wide range of
-supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
-fbdev, AAlib, libcaca, DirectFB, but you can use GGI and SDL (and this way all
-their drivers) and some low level card-specific drivers (for Matrox, 3Dfx and
-Radeon, Mach64, Permedia3) too! Most of them support software or hardware
-scaling, so you can enjoy movies in fullscreen.
-<application>MPlayer</application> supports displaying through some
-hardware MPEG decoder boards, such as the <link linkend="dvb">DVB</link> and
-<link linkend="dxr3">DXR3/Hollywood+</link>. And what about the nice big
-antialiased shaded subtitles (14 supported types)
-with European/ISO 8859-1,2 (Hungarian, English, Czech, etc), Cyrillic, Korean
-fonts, and the onscreen display (OSD)?
 </para>
-
-<para>
-The player is rock solid playing damaged MPEG files (useful for some VCDs),
-and it plays bad AVI files which are unplayable with the famous
-<application>Windows Media Player</application>.
-Even AVI files without index chunk are playable, and you can
-temporarily rebuild their indexes with the <option>-idx</option> option, or
-permanently with <application>MEncoder</application>, thus enabling
-seeking!  As you see, stability and quality are the most important things,
-but the speed is also amazing. There is also a powerful filter system for
-video and audio manipulation.
-</para>
-
-<para>
-<application>MEncoder</application> (<application>MPlayer</application>'s Movie
-Encoder) is a simple movie encoder, designed to encode
-<application>MPlayer</application>-playable movies
-AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA
-to other <application>MPlayer</application>-playable formats (see below).
-It can encode with various codecs, like MPEG-4 (DivX4)
-(one or two passes), <systemitem class="library">libavcodec</systemitem>,
-PCM/MP3/VBR MP3 audio.
-</para>
-
-<itemizedlist>
-<title><application>MEncoder</application> features</title>
-<listitem><para>
-  Encoding from the wide range of file formats and decoders of
-  <application>MPlayer</application>
-</para></listitem>
-<listitem><para>
-  Encoding to all the codecs of FFmpeg's
-  <systemitem class="library">libavcodec</systemitem>
-</para></listitem>
-<listitem><para>
-  Video encoding from V4L compatible TV tuners
-</para></listitem>
-<listitem><para>
-  Encoding/multiplexing to interleaved AVI files with proper index
-</para></listitem>
-<listitem><para>
-  Creating files from external audio stream
-</para></listitem>
-<listitem><para>
-  1, 2 or 3 pass encoding
-</para></listitem>
-<listitem><para>
-  VBR MP3 audio
-</para></listitem>
-<listitem><para>
-  PCM audio
-</para></listitem>
-<listitem><para>
-  Stream copying
-</para></listitem>
-<listitem><para>
-  Input A/V synchronizing (pts-based, can be disabled with
-  <option>-mc 0</option> option)
-</para></listitem>
-<listitem><para>
-  fps correction with <option>-ofps</option> option (useful when encoding
-  30000/1001 fps VOB to 24000/1001 fps AVI)
-</para></listitem>
-<listitem><para>
-  Using our very powerful filter system (crop, expand, flip, postprocess,
-  rotate, scale, RGB/YUV conversion)
-</para></listitem>
-<listitem><para>
-  Can encode DVD/VOBsub and text subtitles
-  into the output file
-</para></listitem>
-<listitem><para>
-  Can rip DVD subtitles to VOBsub format
-</para></listitem>
-</itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->
 <para>

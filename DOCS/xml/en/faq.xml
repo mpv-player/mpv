@@ -13,8 +13,7 @@
 How do I create a proper patch for <application>MPlayer</application>?
 </para></question>
 <answer><para>
-We made a <ulink url="../../tech/patches.txt">short document</ulink>
-describing all the necessary details. Please follow the instructions.
+OUTDATED CONTENT REMOVED
 </para></answer>
 </qandaentry>
 
@@ -23,10 +22,7 @@ describing all the necessary details. Please follow the instructions.
 How do I translate <application>MPlayer</application> to a new language?
 </para></question>
 <answer><para>
-Read the <ulink url="../../tech/translations.txt">translation HOWTO</ulink>,
-it should explain everything. You can get further help on the
-<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>
-mailing list.
+OUTDATED CONTENT REMOVED
 </para></answer>
 </qandaentry>
 
@@ -35,9 +31,7 @@ mailing list.
 How can I support <application>MPlayer</application> development?
 </para></question>
 <answer><para>
-We are more than happy to accept your hardware and software
-<ulink url="http://www.mplayerhq.hu/donations.html">donations</ulink>.
-They help us in continuously improving <application>MPlayer</application>.
+OUTDATED CONTENT REMOVED
 </para></answer>
 </qandaentry>
 
@@ -46,14 +40,7 @@ They help us in continuously improving <application>MPlayer</application>.
 How can I become an <application>MPlayer</application> developer?
 </para></question>
 <answer><para>
-We always welcome coders and documenters. Read the
-<ulink url="../../tech/">technical documentation</ulink>
-to get a first grasp. Then you should subscribe to the
-<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
-mailing list and start coding. If you want to help out with the documentation,
-join the
-<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>
-mailing list.
+OUTDATED CONTENT REMOVED
 </para></answer>
 </qandaentry>
 
@@ -99,8 +86,7 @@ stable, or upgrade frequently.
 Are there binary (RPM/Debian) packages of <application>MPlayer</application>?
 </para></question>
 <answer><para>
-See the <link linkend="debian">Debian</link> and <link linkend="rpm">RPM</link>
-section for details.
+OUTDATED CONTENT REMOVED
 </para></answer>
 </qandaentry>
 
@@ -109,31 +95,7 @@ section for details.
 How can I build a 32 bit <application>MPlayer</application> on a 64 bit Athlon?
 </para></question>
 <answer><para>
-Try the following configure options:
-<screen>
-./configure --target=i386-linux --cc="gcc -m32" --as="as --32" --with-extralibdir=/usr/lib
-</screen>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Configure ends with this text, and <application>MPlayer</application> won't compile!
-<screen>Your gcc does not support even i386 for '-march' and '-mcpu'</screen>
-</para></question>
-<answer><para>
-Your gcc isn't installed correctly, check the <filename>config.log</filename>
-file for details.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I have a Matrox G200/G400/G450/G550, how do I compile/use the
-<systemitem>mga_vid</systemitem> driver?
-</para></question>
-<answer><para>
-Read the <link linkend="mga_vid">mga_vid</link> section.
+OUTDATED CONTENT REMOVED
 </para></answer>
 </qandaentry>
 
@@ -153,52 +115,6 @@ It's called <filename>XFree86-devel*</filename> under Red Hat,
 </para></answer>
 </qandaentry>
 
-<qandaentry>
-<question><para>
-Building on Mac OS 10.3 leads to several link errors.
-</para></question>
-<answer>
-<para>
-The link error you're experiencing most likely looks like this:
-<screen>
-ld: Undefined symbols:
-_LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
-_LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be defined in ApplicationServices
-</screen>
-This problem is the result of Apple developers using 10.4 to compile
-their software and distributing the binaries to 10.3 users via
-Software Update.
-The undefined symbols are present in Mac OS 10.4,
-but not 10.3.
-One solution can be to downgrade to QuickTime 7.0.1.
-Here is a better solution.
-</para>
-<para>
-Get an
-<ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">older copy of the frameworks</ulink>.
-This will give you a compressed file that contains the QuickTime
-7.0.1 Framework and a 10.3.9 QuartzCore Framework.
-</para>
-<para>
-Uncompress the files somewhere that is not in your System folder.
-(i.e. do not install these frameworks into your
-<filename class="directory">/System/Library/Frameworks</filename>!
-Using this older copy is only meant to get around link errors!)
-<screen>gunzip &lt; CompatFrameworks.tgz | tar xvf -</screen>
-In config.mak, you should append
-<systemitem>-F/path/to/where/you/extracted</systemitem>
-to the <systemitem>OPTFLAGS</systemitem> variable.
-If you use <application>X-Code</application>, you can just select these
-frameworks instead of the system ones.
-</para>
-<para>
-The resulting <application>MPlayer</application> binary will actually
-use the framework that is installed on your system via dynamic links that
-are resolved at run-time.
-(You can verify this using <systemitem>otool -l</systemitem>).
-</para>
-</answer>
-</qandaentry>
 </qandadiv>
 
 <!-- ********** -->
@@ -211,9 +127,7 @@ are resolved at run-time.
 Are there any mailing lists on <application>MPlayer</application>?
 </para></question>
 <answer><para>
-Yes. Look at the
-<ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">mailing lists section</ulink>
-of our homepage.
+OUTDATED CONTENT REMOVED
 </para></answer>
 </qandaentry>
 
@@ -223,31 +137,7 @@ I've found a nasty bug when I tried to play my favorite video!
 Who should I inform?
 </para></question>
 <answer><para>
-Please read the <link linkend="bugreports">bug reporting guidelines</link>
-and follow the instructions.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I get a core dump when trying to dump streams, what's wrong?
-</para></question>
-<answer><para>
-Don't panic. Make sure you know where your towel is.</para>
-<para>
-Seriously, notice the smiley and start looking for files that end in
-<filename>.dump</filename>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-When I start playing, I get this message but everything seems fine:
-<screen>Linux RTC init: ioctl (rtc_pie_on): Permission denied</screen>
-</para></question>
-<answer><para>
-You need a specially set up kernel to use the RTC timing code.
-For details see the <link linkend="rtc">RTC</link> section of the documentation.
+OUTDATED CONTENT REMOVED
 </para></answer>
 </qandaentry>
 
@@ -352,8 +242,7 @@ There are error messages about file not found
 <filename>/usr/local/lib/codecs/</filename> ...
 </para></question>
 <answer><para>
-Download and install the binary codecs from our
-<ulink url="http://www.mplayerhq.hu/design7/dload.html">download page</ulink>.
+OUTDATED CONTENT REMOVED
 </para></answer>
 </qandaentry>
 
@@ -364,21 +253,8 @@ use for a particular file, e.g. <filename>movie.avi</filename>?
 </para></question>
 <answer><para>
 Create a file named <filename>movie.avi.conf</filename> with the file-specific
-options in it and put it in <filename class="directory">~/.mplayer</filename>
-or in the same directory as the file.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Subtitles are very nice, the most beautiful I've ever seen, but they
-slow down playing! I know it's unlikely ...
-</para></question>
-<answer><para>
-After running <filename>./configure</filename>,
-edit <filename>config.h</filename> and replace
-<systemitem>#undef FAST_OSD</systemitem> with
-<systemitem>#define FAST_OSD</systemitem>. Then recompile.
+options in it and put it in <filename class="directory">~/.mplayer</filename>.
+Also see the manpage about <option>-use-filedir-conf</option>.
 </para></answer>
 </qandaentry>
 
@@ -389,7 +265,7 @@ How can I run <application>MPlayer</application> in the background?
 <answer><para>
 Use:
 <screen>
-mplayer <replaceable>options</replaceable> <replaceable>filename</replaceable> &lt; /dev/null &amp;
+OUTDATED CONTENT REMOVED
 </screen>
 </para></answer>
 </qandaentry>
@@ -424,10 +300,7 @@ system, you should remove it now.
 How can I get subtitles to appear on the black margins around a movie?
 </para></question>
 <answer><para>
-Use the <systemitem>expand</systemitem> video filter to increase the
-area onto which the movie is rendered vertically and place the movie
-at the top border, for example:
-<screen>mplayer -vf expand=0:-100:0:0 -slang de dvd://1</screen>
+OUTDATED CONTENT REMOVED
 </para></answer>
 </qandaentry>
 
@@ -453,15 +326,6 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>filename</replaceable> | gre
 
 <qandaentry>
 <question><para>
-I'm trying to play a random stream off the internet but it fails.
-</para></question>
-<answer><para>
-Try playing the stream with the <option>-playlist</option> option.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 I downloaded a movie off a P2P network and it doesn't work!
 </para></question>
 <answer><para>
@@ -476,68 +340,7 @@ a friend, and he says it works, try comparing
 I'm having trouble getting my subtitles to display, help!!
 </para></question>
 <answer><para>
-Make sure you have installed fonts properly. Run through the steps in the
-<link linkend="fonts-osd">Fonts and OSD</link> part of the installation
-section again. If you are using TrueType fonts, verify that you have the
-<systemitem class="library">FreeType</systemitem> library installed.
-Other things include checking your subtitles in a text editor or with other
-players. Also try converting them to another format.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Why doesn't <application>MPlayer</application> work on Fedora Core?
-</para></question>
-<answer><para>
-There is a bad interaction on Fedora between exec-shield,
-prelink, and any applications which use Windows DLLs
-(such as <application>MPlayer</application>).
-</para>
-<para>
-The problem is that exec-shield randomizes the load addresses of all the
-system libraries. This randomization happens at prelink time (once every
-two weeks).
-</para>
-<para>
-When <application>MPlayer</application> tries to load a Windows DLL it
-wants to put it at a specific address (0x400000). If an important system
-library happens to be there already, <application>MPlayer</application>
-will crash.
-(A typical symptom would be a segmentation fault when trying
-to play Windows Media 9 files.)
-</para>
-<para>
-If you run into this problem you have two options:
-<itemizedlist>
-<listitem><para>
-  Wait two weeks. It might start working again.
-</para></listitem>
-<listitem><para>
-  Relink all the binaries on the system with different
-  prelink options. Here are step by step instructions:
-  </para>
-  <procedure>
-  <step><para>
-    Edit <filename>/etc/syconfig/prelink</filename> and change
-    <programlisting>PRELINK_OPTS=-mR</programlisting> to
-    <programlisting>PRELINK_OPTS="-mR --no-exec-shield"</programlisting>
-  </para></step>
-  <step><para>
-    <command>touch /var/lib/misc/prelink.force</command>
-  </para></step>
-  <step><para>
-    <command>/etc/cron.daily/prelink</command>
-    (This relinks all the applications, and it takes quite a while.)
-  </para></step>
-  <step><para>
-    <command>execstack -s <replaceable>/path/to/</replaceable>mplayer</command>
-    (This turns off exec-shield for the
-    <application>MPlayer</application> binary.)
-  </para></step>
-  </procedure>
-</listitem>
-</itemizedlist>
+OUTDATED CONTENT REMOVED
 </para></answer>
 </qandaentry>
 
@@ -549,7 +352,7 @@ If you run into this problem you have two options:
 <answer><para>
 Don't use <application>MPlayer</application> on a CPU different from the one
 it was compiled on or recompile with runtime CPU detection
-(<command>./configure --enable-runtime-cpudetection</command>).
+OUTDATED CONTENT REMOVED
 </para></answer>
 </qandaentry>
 
@@ -562,35 +365,6 @@ It's OK with other applications.
 Your card probably reports some colorspaces as supported when in fact
 it does not support them. Try with YUY2 instead of the
 default YV12 (see the <link linkend="tv-input">TV</link> section).
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I get very strange percentage values (way too big)
-while playing files on my notebook.
-</para></question>
-<answer><para>
-It's an effect of the power management / power saving system of your notebook
-(BIOS, not kernel). Plug the external power connector in
-<emphasis role="bold">before</emphasis> you power on your notebook. You can
-also try whether
-<ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq.html">cpufreq</ulink>
-(a SpeedStep interface for Linux) helps you.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-The audio/video gets totally out of sync when I run
-<application>MPlayer</application> as
-<systemitem class="username">root</systemitem> on my notebook.
-It works normal when i run it as a user.
-</para></question>
-<answer><para>
-This is again a power management effect (see above). Plug the external power
-connector in <emphasis role="bold">before</emphasis> you power on your notebook
-or make sure you do not use the <option>-rtc</option> option.
 </para></answer>
 </qandaentry>
 
@@ -662,18 +436,6 @@ Also try experimenting with the <option>-fstype</option> option.
 
 <qandaentry>
 <question><para>
-Audio goes out of sync playing an AVI file.
-</para></question>
-<answer><para>
-Try the <option>-bps</option> or <option>-nobps</option> option. If it does not
-improve, read the
-<link linkend="bugreports">bug reporting guidelines</link>
-and upload the file to FTP.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 How can I use <application>dmix</application> with
 <application>MPlayer</application>?
 </para></question>
@@ -730,41 +492,6 @@ Some of my AVIs play fine, but some play with double speed!
 You have a buggy sound card/driver. Most likely it's fixed at 44100Hz, and you
 try to play a file which has 22050Hz audio. Try the
 <systemitem>resample</systemitem> audio filter.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-When I play this movie I get video-audio desync and/or
-<application>MPlayer</application> crashes with the following message:
-<screen>
-Too many (945 in 8390980 bytes) video packets in the buffer!
-</screen>
-</para></question>
-<answer><para>
-This can have multiple reasons.
-<itemizedlist>
-<listitem><para>
-  Your CPU <emphasis>and/or</emphasis> video card <emphasis>and/or</emphasis>
-  bus is too slow. <application>MPlayer</application> displays a message if
-  this is the case (and the dropped frames counter goes up fast).
-</para></listitem>
-<listitem><para>
-  If it is an AVI, maybe it has bad interleaving, try the
-  <option>-ni</option> option to work around this.
-  Or it may have a bad header, in this case <option>-nobps</option>
-  and/or <option>-mc 0</option> can help.
-</para></listitem>
-<listitem><para>
-  Many FLV files will only play correctly with <option>-correct-pts</option>.
-  Unfortunately <application>MEncoder</application> does not have this option,
-  but you can try setting <option>-fps</option> to the correct value manually
-  if you know it.
-</para></listitem>
-<listitem><para>
-  Your sound driver is buggy.
-</para></listitem>
-</itemizedlist>
 </para></answer>
 </qandaentry>
 
@@ -872,25 +599,14 @@ mplayer dvd://1 -dvd-device <replaceable>/path/to/directory</replaceable>
 
 <qandaentry>
 <question><para>
-If <application>MPlayer</application> is paused and I try to seek or press any
-key at all, <application>MPlayer</application> ceases to be paused.
-I would like to be able to seek in the paused movie.
-</para></question>
-<answer><para>
-This is very tricky to implement without losing A/V synchronization.
-All attempts have failed so far, but patches are welcome.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 I'd like to seek +/- 1 frame instead of 10 seconds.
 </para></question>
 <answer><para>
 You can step forward one frame by pressing <keycap>.</keycap>.
 If the movie was not paused it will be paused afterwards
 (see the man page for details).
-Stepping backwards is unlikely to be implemented anytime soon.
+Stepping backwards is not currently implemented, but note that you can make
+small seeks using the <option>-hr-seek</option> functionality.
 </para></answer>
 </qandaentry>
 </qandadiv>
@@ -900,332 +616,9 @@ Stepping backwards is unlikely to be implemented anytime soon.
 <qandadiv id="faq-encoding">
 <title>Encoding</title>
 
-<qandaentry>
-<question><para>
-How can I encode?
-</para></question>
-<answer><para>
-Read the <link linkend="mencoder"><application>MEncoder</application></link>
-section.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-How can I dump a full DVD title into a file?
-</para></question>
-<answer><para>
-Once you have selected your title, and made sure it plays fine with
-<application>MPlayer</application>, use the option <option>-dumpstream</option>.
-For example:
-<screen>
-mplayer dvd://5 -dumpstream -dumpfile <replaceable>dvd_dump.vob</replaceable>
-</screen>
-will dump the 5th title of the DVD into the file
-<replaceable>dvd_dump.vob</replaceable>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-How can I create (S)VCDs automatically?
-</para></question>
-<answer><para>
-Try the <filename>mencvcd.sh</filename> script from the
-<filename class="directory">TOOLS</filename> subdirectory.
-With it you can encode DVDs or other movies to VCD or SVCD format
-and even burn them directly to CD.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-How can I create (S)VCDs?
-</para></question>
-<answer><para>
-Newer versions of <application>MEncoder</application> can directly
-generate MPEG-2 files that can be used as a base to create a VCD or SVCD and
-are likely to be playable out of the box on all platforms (for example,
-to share a video from a digital camcorder with your computer-illiterate
-friends).
-Please read
-<link linkend="menc-feat-vcd-dvd">Using MEncoder to create VCD/SVCD/DVD-compliant files</link>
-for more details.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-How can I join two video files?
-</para></question>
-<answer><para>
-MPEG files can be concatenated into a single file with luck.
-For AVI files, you can use <application>MEncoder</application>'s
-multiple file support like this:
-<screen>
-mencoder -ovc copy -oac copy -o <replaceable>out.avi</replaceable> <replaceable>file1.avi</replaceable> <replaceable>file2.avi</replaceable>
-</screen>
-This will only work if the files are of the same resolution
-and use the same codec.
-You can also try
-<ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> and
-<application>avimerge</application> (part of the
-<ulink url="http://www.transcoding.org/">transcode</ulink>
-tool set).
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-How can I fix AVI files with a broken index or bad interleaving?
-</para></question>
-<answer><para>
-To avoid having to use <option>-idx</option> to be able to seek in
-AVI files with a broken index or <option>-ni</option> to play AVI
-files with bad interleaving, use the command
-<screen>
-mencoder <replaceable>input.avi</replaceable> -idx -ovc copy -oac copy -o <replaceable>output.avi</replaceable>
-</screen>
-to copy the video and audio streams into a new AVI file while
-regenerating the index and correctly interleaving the data.
-Of course this cannot fix possible bugs in the video and/or audio streams.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-How can I fix the aspect ratio of an AVI file?
-</para></question>
-<answer><para>
-You can do such a thing thanks to <application>MEncoder</application>'s
-<option>-force-avi-aspect</option> option, which overrides the aspect
-stored in the AVI OpenDML vprp header option. For example:
-<screen>
-mencoder <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceable>output.avi</replaceable> -force-avi-aspect 4/3
-</screen>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-How can I backup and encode a VOB file with a broken beginning?
-</para></question>
-<answer><para>
-The main problem when you want to encode a VOB file which is corrupted
-<footnote id='fn-corrupted-files-or-copy-protection'><para>
-To some extent, some forms of copy protection used in DVDs can be
-assumed to be content corruption.
-</para></footnote>
-is that it will be hard to get an encode with perfect A/V sync.
-One workaround is to just shave off the corrupted part and encode just the
-clean part.
-First you need to find where the clean part starts:
-<screen>
-mplayer <replaceable>input.vob</replaceable> -sb <replaceable>nb_of_bytes_to_skip</replaceable>
-</screen>
-Then you can create a new file which contains just the clean part:
-<screen>
-dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</replaceable> skip=1 ibs=<replaceable>nb_of_bytes_to_skip</replaceable>
-</screen>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I can't encode DVD subtitles into the AVI!
-</para></question>
-<answer><para>
-You have to properly specify the <option>-sid</option> option.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-How can I encode only selected chapters from a DVD?
-</para></question>
-<answer><para>
-Use the <option>-chapter</option> option correctly,
-like: <option>-chapter 5-7</option>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I'm trying to work with 2GB+ files on a VFAT file system. Does it work?
-</para></question>
-<answer><para>
-No, VFAT doesn't support 2GB+ files.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-What is the meaning of the numbers on the status line
-during the encoding process?
-</para></question>
-<answer><para>
-Example:
-<screen>
-Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]
-</screen>
-<variablelist>
-  <varlistentry>
-  <term><systemitem>Pos: 264.5s</systemitem></term>
-  <listitem><para>time position in the encoded stream</para></listitem>
-</varlistentry>
-<varlistentry>
-  <term><systemitem>6612f</systemitem></term>
-  <listitem><para>number of video frames encoded</para></listitem>
-</varlistentry>
-<varlistentry>
-  <term><systemitem>( 2%)</systemitem></term>
-  <listitem><para>portion of the input stream encoded</para></listitem>
-</varlistentry>
-<varlistentry>
-  <term><systemitem>7.12fps</systemitem></term>
-  <listitem><para>encoding speed</para></listitem>
-</varlistentry>
-<varlistentry>
-  <term><systemitem>Trem: 576min</systemitem></term>
-  <listitem><para>estimated remaining encoding time</para></listitem>
-</varlistentry>
-<varlistentry>
-  <term><systemitem>2856mb</systemitem></term>
-  <listitem><para>estimated size of the final encode</para></listitem>
-</varlistentry>
-<varlistentry>
-  <term><systemitem>A-V:0.065</systemitem></term>
-  <listitem><para>current delay between audio and video streams</para></listitem>
-</varlistentry>
-<varlistentry>
-  <term><systemitem>[2126:192]</systemitem></term>
-  <listitem><para>
-  average video bitrate (in kb/s) and average audio bitrate (in kb/s)
-  </para></listitem>
-</varlistentry>
-</variablelist>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Why is the recommended bitrate printed by <application>MEncoder</application>
-negative?
-</para></question>
-<answer><para>
-Because the bitrate you encoded the audio with is too large to fit the
-movie on any CD. Check if you have libmp3lame installed properly.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I can't encode an ASF file to AVI/MPEG-4 (DivX) because it uses 1000 fps.
-</para></question>
-<answer><para>
-Since ASF uses variable framerate but AVI uses a fixed one, you
-have to set it by hand with the <option>-ofps</option> option.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-How can I put subtitles in the output file?
-</para></question>
-<answer><para>
-Just pass the <option>-sub &lt;filename&gt;</option> (or <option>-sid</option>,
-respectively) option to <application>MEncoder</application>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-How do I encode only sound from a music video?
-</para></question>
-<answer><para>
-It's not possible directly, but you can try this (note the
-<emphasis role="bold">&amp;</emphasis> at the end of
-<command>mplayer</command> command):
-<screen>
-mkfifo <replaceable>encode</replaceable>
-mplayer -ao pcm -aofile <replaceable>encode</replaceable> dvd://1 &amp;
-lame <replaceable>your_opts</replaceable> <replaceable>encode</replaceable> <replaceable>music.mp3</replaceable>
-rm <replaceable>encode</replaceable>
-</screen>
-This allows you to use any encoder, not only <application>LAME</application>,
-just replace <command>lame</command> with your favorite audio encoder in the
-above command.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Why do third-party players fail to play MPEG-4 movies encoded by
-<application>MEncoder</application> versions later than 1.0pre7?
-</para></question>
-<answer><para>
-<systemitem class="library">libavcodec</systemitem>, the native MPEG-4
-encoding library usually shipped with <application>MEncoder</application>,
-used to set the FourCC to 'DIVX' when encoding MPEG-4 videos
-(the FourCC is an AVI tag to identify the software used to encode and
-the intended software to use for decoding the video).
-This led many people to think that
-<systemitem class="library">libavcodec</systemitem>
-was a DivX encoding library, when in fact it is a completely different
-MPEG-4 encoding library which implements the MPEG-4 standard much
-better than DivX does.
-Therefore, the new default FourCC used by
-<systemitem class="library">libavcodec</systemitem> is 'FMP4', but you
-may override this behavior using <application>MEncoder</application>'s
-<option>-ffourcc</option> option.
-You may also change the FourCC of existing files in the same way:
-<screen>
-mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc XVID
-</screen>
-Note that this will set the FourCC to XVID rather than DIVX.
-This is recommended as DIVX FourCC means DivX4, which is a very basic
-MPEG-4 codec, whereas DX50 and XVID both mean full MPEG-4 (ASP).
-Therefore, if you change the FourCC to DIVX, some bad software or
-hardware players may choke on some advanced features that
-<systemitem class="library">libavcodec</systemitem> supports, but DivX
-doesn't; on the other hand <systemitem class="library">Xvid</systemitem>
-is closer to <systemitem class="library">libavcodec</systemitem> in
-terms of functionality, and is supported by all decent players.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-How can I encode an audio only file?
-</para></question>
-<answer><para>
-Use <filename>aconvert.sh</filename> from the
-<filename class="directory">TOOLS</filename>
-subdirectory in the MPlayer source tree.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-How can I play subtitles embedded in AVI?
-</para></question>
-<answer><para>
-Use <filename>avisubdump.c</filename> from the
-<filename class="directory">TOOLS</filename> subdirectory or read
-<ulink url="http://xlife.zuavra.net/curse/0012/">this document about extracting/demultiplexing subtitles embedded in OpenDML AVI files</ulink>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-MEncoder won't...
-</para></question>
-<answer><para>
-Have a look at the <filename class="directory">TOOLS</filename>
-subdirectory for a collection of random scripts and hacks.
-<filename>TOOLS/README</filename> contains documentation.
-</para></answer>
-</qandaentry>
+<para>
+OUTDATED CONTENT REMOVED
+</para>
 </qandadiv>
 
 </qandaset>
