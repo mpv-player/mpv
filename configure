@@ -339,7 +339,6 @@ Optional features:
   --disable-sortsub      disable subtitle sorting [enabled]
   --enable-fribidi       enable the FriBiDi libs [autodetect]
   --disable-enca         disable ENCA charset oracle library [autodetect]
-  --disable-maemo        disable maemo specific features [autodetect]
   --enable-macosx-finder enable Mac OS X Finder invocation parameter
                          parsing [disabled]
   --enable-macosx-bundle enable Mac OS X bundle file locations [autodetect]
@@ -694,7 +693,6 @@ _freetype=auto
 _fontconfig=auto
 _menu=no
 _qtx=auto
-_maemo=auto
 _coreaudio=auto
 _corevideo=auto
 _quartz=auto
@@ -1162,9 +1160,6 @@ for ac_option do
   --disable-macosx-finder) _macosx_finder=no ;;
   --enable-macosx-bundle) _macosx_bundle=yes ;;
   --disable-macosx-bundle) _macosx_bundle=no ;;
-
-  --enable-maemo) _maemo=yes ;;
-  --disable-maemo) _maemo=no ;;
 
   --enable-sortsub) _sortsub=yes ;;
   --disable-sortsub) _sortsub=no ;;
@@ -6609,24 +6604,6 @@ else
 fi
 echores "$_lircc"
 
-if arm; then
-# Detect maemo development platform libraries availability (http://www.maemo.org),
-# they are used when run on Nokia 770|8x0
-echocheck "maemo (Nokia 770|8x0)"
-if test "$_maemo" = auto ; then
-  _maemo=no
-  statement_check libosso.h 'osso_initialize('', '', 0, NULL)' $($_pkg_config --cflags --libs libosso 2>/dev/null) && _maemo=yes
-fi
-if test "$_maemo" = yes ; then
-  def_maemo='#define CONFIG_MAEMO 1'
-  extra_cflags="$extra_cflags $($_pkg_config --cflags libosso)"
-  extra_ldflags="$extra_ldflags $($_pkg_config --libs libosso) -lXsp"
-else
-  def_maemo='#undef CONFIG_MAEMO'
-fi
-echores "$_maemo"
-fi
-
 #############################################################################
 
 # On OS/2 nm supports only a.out. So the -Zomf compiler option to generate
@@ -7044,7 +7021,6 @@ $def_iconv
 $def_kstat
 $def_macosx_bundle
 $def_macosx_finder
-$def_maemo
 $def_named_asm_args
 $def_priority
 $def_quicktime
