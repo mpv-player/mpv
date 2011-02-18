@@ -1029,7 +1029,7 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 
 	if(demuxer->opts->audio_lang != NULL)
 	{
-		strncpy(params.alang, demuxer->opts->audio_lang, 3);
+		strncpy(params.alang, demuxer->opts->audio_lang[0], 3);
 		params.alang[3] = 0;
 	}
 	else

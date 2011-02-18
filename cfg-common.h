@@ -506,8 +506,8 @@ const m_option_t common_opts[] = {
     OPT_FLAG_CONSTANTS("novideo", video_id, 0, -1, -2),
     OPT_FLAG_CONSTANTS("sound", audio_id, 0, -2, -1),
     OPT_FLAG_CONSTANTS("nosound", audio_id, 0, -1, -2),
-    OPT_STRING("alang", audio_lang, 0),
-    OPT_STRING("slang", sub_lang, 0),
+    OPT_STRINGLIST("alang", audio_lang, 0),
+    OPT_STRINGLIST("slang", sub_lang, 0),
 
     OPT_MAKE_FLAGS("hr-mp3-seek", hr_mp3_seek, 0),
 

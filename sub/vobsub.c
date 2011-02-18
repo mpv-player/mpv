@@ -1109,20 +1109,22 @@ int vobsub_get_index_by_id(void *vobhandle, int id)
     return j;
 }
 
-int vobsub_set_from_lang(void *vobhandle, unsigned char * lang)
+int vobsub_set_from_lang(void *vobhandle, char **lang)
 {
     int i;
     vobsub_t *vob= vobhandle;
-    while (lang && strlen(lang) >= 2) {
+    if (!lang)
+        goto end;
+    for (int n = 0; lang[n]; n++) {
         for (i = 0; i < vob->spu_streams_size; i++)
             if (vob->spu_streams[i].id)
-                if ((strncmp(vob->spu_streams[i].id, lang, 2) == 0)) {
+                if ((strncmp(vob->spu_streams[i].id, lang[n], 2) == 0)) {
                     vobsub_id = i;
                     mp_msg(MSGT_VOBSUB, MSGL_INFO, "Selected VOBSUB language: %d language: %s\n", i, vob->spu_streams[i].id);
                     return 0;
                 }
-        lang+=2;while (lang[0]==',' || lang[0]==' ') ++lang;
     }
+end:
     mp_msg(MSGT_VOBSUB, MSGL_WARN, "No matching VOBSUB language found!\n");
     return -1;
 }

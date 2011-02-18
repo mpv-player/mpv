@@ -1561,18 +1561,15 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle)
     return angle;
 }
 
-int demuxer_audio_track_by_lang_and_default(struct demuxer *d, char *lang)
+int demuxer_audio_track_by_lang_and_default(struct demuxer *d, char **langt)
 {
-    if (!lang)
-        lang = "";
+    int n = 0;
     while (1) {
-        lang += strspn(lang, ",");
-        int len = strcspn(lang, ",");
+        char *lang = langt ? langt[n++] : NULL;
         int id = -1;
         for (int i = 0; i < MAX_A_STREAMS; i++) {
             struct sh_audio *sh = d->a_streams[i];
-            if (sh && (!len || sh->lang && strlen(sh->lang) == len &&
-                       !memcmp(lang, sh->lang, len))) {
+            if (sh && (!lang || sh->lang && !strcmp(lang, sh->lang))) {
                 if (sh->default_track)
                     return sh->aid;
                 if (id < 0)
@@ -1581,34 +1578,29 @@ int demuxer_audio_track_by_lang_and_default(struct demuxer *d, char *lang)
         }
         if (id >= 0)
             return id;
-        if (!len)
+        if (!lang)
             return -1;
-        lang += len;
     }
 }
 
-int demuxer_sub_track_by_lang_and_default(struct demuxer *d, char *lang)
+int demuxer_sub_track_by_lang_and_default(struct demuxer *d, char **langt)
 {
-    if (!lang)
-        lang = "";
+    int n = 0;
     while (1) {
-        lang += strspn(lang, ",");
-        int len = strcspn(lang, ",");
+        char *lang = langt ? langt[n++] : NULL;
         int id = -1;
         for (int i = 0; i < MAX_S_STREAMS; i++) {
             struct sh_sub *sh = d->s_streams[i];
-            if (sh && (!len || sh->lang && strlen(sh->lang) == len &&
-                       !memcmp(lang, sh->lang, len))) {
+            if (sh && (!lang || sh->lang && !strcmp(lang, sh->lang))) {
                 if (sh->default_track)
                     return sh->sid;
                 if (id < 0)
                     id = sh->sid;
             }
         }
-        if (!len)
+        if (!lang)
             return -1;
         if (id >= 0)
             return id;
-        lang += len;
     }
 }

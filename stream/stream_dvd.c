@@ -125,24 +125,21 @@ int dvd_lang_from_aid(stream_t *stream, int id) {
   return 0;
 }
 
-int dvd_aid_from_lang(stream_t *stream, const unsigned char* lang) {
+int dvd_aid_from_lang(stream_t *stream, char **lang) {
   dvd_priv_t *d=stream->priv;
   int code,i;
-  if(lang) {
-    while(strlen(lang)>=2) {
-      code=lang[1]|(lang[0]<<8);
+  for (int n = 0; lang[n]; n++) {
+      code = lang[n][1] | (lang[n][0] << 8);
       for(i=0;i<d->nr_of_channels;i++) {
         if(d->audio_streams[i].language==code) {
           mp_tmsg(MSGT_OPEN,MSGL_INFO,"Selected DVD audio channel: %d language: %c%c\n",
-          d->audio_streams[i].id, lang[0],lang[1]);
+          d->audio_streams[i].id, lang[n][0], lang[n][1]);
           return d->audio_streams[i].id;
         }
         //printf("%X != %X  (%c%c)\n",code,d->audio_streams[i].language,lang[0],lang[1]);
       }
-      lang+=2; while (lang[0]==',' || lang[0]==' ') ++lang;
-    }
-    mp_tmsg(MSGT_OPEN,MSGL_WARN,"No matching DVD audio language found!\n");
   }
+  mp_tmsg(MSGT_OPEN,MSGL_WARN,"No matching DVD audio language found!\n");
   return -1;
 }
 
@@ -169,19 +166,17 @@ int dvd_lang_from_sid(stream_t *stream, int id) {
   return 0;
 }
 
-int dvd_sid_from_lang(stream_t *stream, const unsigned char* lang) {
+int dvd_sid_from_lang(stream_t *stream, char **lang) {
   dvd_priv_t *d=stream->priv;
   int code,i;
-  while(lang && strlen(lang)>=2) {
-    code=lang[1]|(lang[0]<<8);
+  for (int n = 0; lang[n]; n++) {
+    code = lang[n][1] | (lang[n][0] << 8);
     for(i=0;i<d->nr_of_subtitles;i++) {
       if(d->subtitles[i].language==code) {
-        mp_tmsg(MSGT_OPEN,MSGL_INFO,"Selected DVD subtitle channel: %d language: %c%c\n", i, lang[0],lang[1]);
+        mp_tmsg(MSGT_OPEN,MSGL_INFO,"Selected DVD subtitle channel: %d language: %c%c\n", i, lang[n][0], lang[n][1]);
         return d->subtitles[i].id;
       }
     }
-    lang+=2;
-    while (lang[0]==',' || lang[0]==' ') ++lang;
   }
   mp_tmsg(MSGT_OPEN,MSGL_WARN,"No matching DVD subtitle language found!\n");
   return -1;

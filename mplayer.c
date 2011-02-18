@@ -3665,7 +3665,7 @@ static bool attachment_is_font(struct demux_attachment *att)
     return false;
 }
 
-static int select_audio(demuxer_t *demuxer, int audio_id, char *audio_lang)
+static int select_audio(demuxer_t *demuxer, int audio_id, char **audio_lang)
 {
     if (audio_id == -1)
         audio_id = demuxer_audio_track_by_lang_and_default(demuxer, audio_lang);

@@ -41,7 +41,7 @@ unsigned int vobsub_rgb_to_yuv(unsigned int rgb);
 void *vobsub_out_open(const char *basename, const unsigned int *palette, unsigned int orig_width, unsigned int orig_height, const char *id, unsigned int index);
 void vobsub_out_output(void *me, const unsigned char *packet, int len, double pts);
 void vobsub_out_close(void *me);
-int vobsub_set_from_lang(void *vobhandle, unsigned char * lang);
+int vobsub_set_from_lang(void *vobhandle, char **lang);
 void vobsub_seek(void * vobhandle, float pts);
 
 #endif /* MPLAYER_VOBSUB_H */

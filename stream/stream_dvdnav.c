@@ -733,14 +733,14 @@ static int mp_dvdnav_get_aid_from_format (stream_t *stream, int index, uint8_t l
  * \param lang: 2-characters language code[s], eventually separated by spaces of commas
  * \return -1 on error, current subtitle id if successful
  */
-int mp_dvdnav_aid_from_lang(stream_t *stream, const unsigned char *language) {
+int mp_dvdnav_aid_from_lang(stream_t *stream, char **language) {
   dvdnav_priv_t * priv = stream->priv;
   int k;
   uint8_t lg;
   uint16_t lang, lcode;
 
-  while(language && strlen(language)>=2) {
-    lcode = (language[0] << 8) | (language[1]);
+  for (int i = 0; language[i]; i++) {
+    lcode = (language[i][0] << 8) | (language[i][1]);
     for(k=0; k<32; k++) {
       lg = dvdnav_get_audio_logical_stream(priv->dvdnav, k);
       if(lg == 0xff) continue;
@@ -748,8 +748,6 @@ int mp_dvdnav_aid_from_lang(stream_t *stream, const unsigned char *language) {
       if(lang != 0xFFFF && lang == lcode)
         return mp_dvdnav_get_aid_from_format (stream, k, lg);
     }
-    language += 2;
-    while(language[0]==',' || language[0]==' ') ++language;
   }
   return -1;
 }
@@ -785,13 +783,13 @@ int mp_dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
  * \param lang: 2-characters language code[s], eventually separated by spaces of commas
  * \return -1 on error, current subtitle id if successful
  */
-int mp_dvdnav_sid_from_lang(stream_t *stream, const unsigned char *language) {
+int mp_dvdnav_sid_from_lang(stream_t *stream, char **language) {
   dvdnav_priv_t * priv = stream->priv;
   uint8_t lg, k;
   uint16_t lang, lcode;
 
-  while(language && strlen(language)>=2) {
-    lcode = (language[0] << 8) | (language[1]);
+  for (int i = 0; language[i]; i++) {
+    lcode = (language[i][0] << 8) | (language[i][1]);
     for(k=0; k<32; k++) {
       lg = dvdnav_get_spu_logical_stream(priv->dvdnav, k);
       if(lg == 0xff) continue;
@@ -800,8 +798,6 @@ int mp_dvdnav_sid_from_lang(stream_t *stream, const unsigned char *language) {
         return lg;
       }
     }
-    language += 2;
-    while(language[0]==',' || language[0]==' ') ++language;
   }
   return -1;
 }
