@@ -5630,6 +5630,8 @@ echocheck "OggVorbis support"
 if test "$_libvorbis" = auto; then
   _libvorbis=no
   statement_check vorbis/codec.h 'vorbis_packet_blocksize(0, 0)' -lvorbis -logg $_ld_lm && _libvorbis=yes && _tremor=no
+elif test "$_libvorbis" = yes ; then
+  _tremor=no
 fi
 if test "$_tremor" = auto; then
   _tremor=no
