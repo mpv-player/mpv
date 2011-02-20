@@ -524,7 +524,7 @@ static void identify(dvdnav_priv_t *priv, struct stream_priv_s *p)
   uint32_t titles=0, i;
   if(p->track <= 0) {
     dvdnav_get_number_of_titles(priv->dvdnav, &titles);
-    for(i=0; i<titles; i++)
+    for(i=1; i<=titles; i++)
       identify_chapters(priv->dvdnav, i);
   }
   else
