@@ -19,6 +19,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <inttypes.h>
+#include <assert.h>
+#include <dirent.h>
 #include <libavutil/common.h>
 
 #include "talloc.h"
@@ -26,7 +28,60 @@
 #include "mp_core.h"
 #include "mp_msg.h"
 #include "libmpdemux/demuxer.h"
-#include "osdep/findfiles.h"
+#include "path.h"
+#include "bstr.h"
+#include "mpcommon.h"
+
+static char **find_files(const char *original_file, const char *suffix)
+{
+    void *tmpmem = talloc_new(NULL);
+    char *basename = mp_basename(original_file);
+    struct bstr directory = mp_dirname(original_file);
+    char **results = talloc_size(NULL, 0);
+    char *dir_zero = bstrdup0(tmpmem, directory);
+    DIR *dp = opendir(dir_zero);
+    if (!dp) {
+        talloc_free(tmpmem);
+        return results;
+    }
+    struct dirent *ep;
+    char ***names_by_matchlen = talloc_zero_array(tmpmem, char **,
+                                                  strlen(basename) + 1);
+    int num_results = 0;
+    while ((ep = readdir(dp))) {
+        int suffix_offset = strlen(ep->d_name) - strlen(suffix);
+        // name must end with suffix
+        if (suffix_offset < 0 || strcmp(ep->d_name + suffix_offset, suffix))
+            continue;
+        // don't list the original name
+        if (!strcmp(ep->d_name, basename))
+            continue;
+
+        char *name = mp_path_join(results, directory, BSTR(ep->d_name));
+        char *s1 = ep->d_name;
+        char *s2 = basename;
+        int matchlen = 0;
+        while (*s1 && *s1++ == *s2++)
+            matchlen++;
+        int oldcount = MP_TALLOC_ELEMS(names_by_matchlen[matchlen]);
+        names_by_matchlen[matchlen] = talloc_realloc(names_by_matchlen,
+                                                  names_by_matchlen[matchlen],
+                                                  char *, oldcount + 1);
+        names_by_matchlen[matchlen][oldcount] = name;
+        num_results++;
+    }
+    closedir(dp);
+    results = talloc_realloc(NULL, results, char *, num_results);
+    char **resptr = results;
+    for (int i = strlen(basename); i >= 0; i--) {
+        char **p = names_by_matchlen[i];
+        for (int j = 0; j < talloc_get_size(p) / sizeof(char *); j++)
+            *resptr++ = p[j];
+    }
+    assert(resptr == results + num_results);
+    talloc_free(tmpmem);
+    return results;
+}
 
 static int find_ordered_chapter_sources(struct MPContext *mpctx,
                                         struct content_source *sources,
@@ -44,8 +99,8 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
         } else {
             mp_msg(MSGT_CPLAYER, MSGL_INFO, "Will scan other files in the "
                    "same directory to find referenced sources.\n");
-            filenames = find_files(mpctx->demuxer->filename, ".mkv",
-                                   &num_filenames);
+            filenames = find_files(mpctx->demuxer->filename, ".mkv");
+            num_filenames = MP_TALLOC_ELEMS(filenames);
         }
     }
 

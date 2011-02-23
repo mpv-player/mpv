@@ -24,6 +24,8 @@
 
 #define ROUND(x) ((int)((x) < 0 ? (x) - 0.5 : (x) + 0.5))
 
+#define MP_TALLOC_ELEMS(p) (talloc_get_size(p) / sizeof((p)[0]))
+
 extern const char *mplayer_version;
 
 #endif /* MPLAYER_MPCOMMON_H */

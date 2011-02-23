@@ -423,7 +423,6 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/yuv4mpeg.c \
               libmpdemux/yuv4mpeg_ratio.c \
               libvo/osd.c \
-              osdep/findfiles.c \
               osdep/numcores.c \
               osdep/$(GETCH) \
               osdep/$(TIMER) \
