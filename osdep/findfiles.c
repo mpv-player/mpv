@@ -22,38 +22,18 @@
 #include <assert.h>
 
 #include "talloc.h"
-
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-static const char dir_separators[] = "/\\:";
-#else
-static const char dir_separators[] = "/";
-#endif
+#include "path.h"
+#include "bstr.h"
 
 char **find_files(const char *original_file, const char *suffix,
                   int *num_results_ptr)
 {
     void *tmpmem = talloc_new(NULL);
-    char *fname = talloc_strdup(tmpmem, original_file);
-    char *basename = NULL;
-    char *next = fname;
-    while (1) {
-        next = strpbrk(next, dir_separators);
-        if (!next)
-            break;
-        basename = next++;
-    }
-    char *directory;
-    if (basename) {
-        directory = fname;
-        *basename++ = 0;
-    } else {
-        directory = ".";
-        basename = fname;
-    }
-
-
+    char *basename = mp_basename(original_file);
+    struct bstr directory = mp_dirname(original_file);
     char **results = talloc_size(NULL, 0);
-    DIR *dp = opendir(directory);
+    char *dir_zero = bstrdup0(tmpmem, directory);
+    DIR *dp = opendir(dir_zero);
     struct dirent *ep;
     char ***names_by_matchlen = talloc_array(tmpmem, char **,
                                              strlen(basename) + 1);
@@ -68,7 +48,7 @@ char **find_files(const char *original_file, const char *suffix,
         if (!strcmp(ep->d_name, basename))
             continue;
 
-        char *name = talloc_asprintf(results, "%s/%s", directory, ep->d_name);
+        char *name = mp_path_join(results, directory, BSTR(ep->d_name));
         char *s1 = ep->d_name;
         char *s2 = basename;
         int matchlen = 0;
