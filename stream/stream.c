@@ -29,6 +29,8 @@
 #include <fcntl.h>
 #include <strings.h>
 
+#include "talloc.h"
+
 #include "config.h"
 
 #if HAVE_WINSOCK2_H
@@ -657,4 +659,36 @@ unsigned char* stream_read_line(stream_t *s,unsigned char* mem, int max, int utf
   ptr[0] = 0;
   if(s->eof && ptr == mem) return NULL;
   return mem;
+}
+
+struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
+                                 int max_size, int padding_bytes)
+{
+    if (max_size > 1000000000)
+        abort();
+
+    int bufsize;
+    int total_read = 0;
+    int padding = FFMAX(padding_bytes, 1);
+    char *buf = NULL;
+    if (s->end_pos > max_size)
+        return (struct bstr){NULL, 0};
+    if (s->end_pos > 0)
+        bufsize = s->end_pos + padding;
+    else
+        bufsize = 1000;
+    while (1) {
+        buf = talloc_realloc_size(talloc_ctx, buf, bufsize);
+        int readsize = stream_read(s, buf + total_read, bufsize - total_read);
+        total_read += readsize;
+        if (total_read < bufsize)
+            break;
+        if (bufsize > max_size) {
+            talloc_free(buf);
+            return (struct bstr){NULL, 0};
+        }
+        bufsize = FFMIN(bufsize + (bufsize >> 1), max_size + padding);
+    }
+    buf = talloc_realloc_size(talloc_ctx, buf, total_read + padding);
+    return (struct bstr){buf, total_read};
 }
