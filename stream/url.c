@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <stdarg.h>
 #include <inttypes.h>
 
 #include "url.h"
@@ -32,6 +33,32 @@
 #ifndef SIZE_MAX
 #define SIZE_MAX ((size_t)-1)
 #endif
+
+static char *mp_asprintf(const char *fmt, ...)
+{
+    char *p = NULL;
+    va_list va, va_bak;
+    int len;
+
+    va_start(va, fmt);
+    va_copy(va_bak, va);
+
+    len = vsnprintf(NULL, 0, fmt, va);
+    if (len < 0)
+        goto end;
+
+    p = malloc(len + 1);
+    if (!p)
+        goto end;
+
+    len = vsnprintf(p, len + 1, fmt, va_bak);
+    if (len < 0)
+        free(p), p = NULL;
+
+end:
+    va_end(va);
+    return p;
+}
 
 URL_t *url_redirect(URL_t **url, const char *redir) {
   URL_t *u = *url;
@@ -57,32 +84,31 @@ URL_t *url_redirect(URL_t **url, const char *redir) {
   return res;
 }
 
-static int make_noauth_url(URL_t *url, char *dst, int dst_size)
+static char *get_noauth_url(const URL_t *url)
 {
     if (url->port)
-        return snprintf(dst, dst_size, "%s://%s:%d%s", url->protocol,
-                        url->hostname, url->port, url->file);
+        return mp_asprintf("%s://%s:%d%s",
+                           url->protocol, url->hostname, url->port, url->file);
     else
-        return snprintf(dst, dst_size, "%s://%s%s", url->protocol,
-                        url->hostname, url->file);
+        return mp_asprintf("%s://%s%s",
+                           url->protocol, url->hostname, url->file);
 }
 
-int make_http_proxy_url(URL_t *proxy, const char *host_url, char *dst,
-                        int dst_size)
+char *get_http_proxy_url(const URL_t *proxy, const char *host_url)
 {
     if (proxy->username)
-        return snprintf(dst, dst_size, "http_proxy://%s:%s@%s:%d/%s",
-                        proxy->username,
-                        proxy->password ? proxy->password : "",
-                        proxy->hostname, proxy->port, host_url);
+        return mp_asprintf("http_proxy://%s:%s@%s:%d/%s",
+                           proxy->username,
+                           proxy->password ? proxy->password : "",
+                           proxy->hostname, proxy->port, host_url);
     else
-        return snprintf(dst, dst_size, "http_proxy://%s:%d/%s",
-                        proxy->hostname, proxy->port, host_url);
+        return mp_asprintf("http_proxy://%s:%d/%s",
+                           proxy->hostname, proxy->port, host_url);
 }
 
 URL_t*
 url_new(const char* url) {
-	int pos1, pos2,v6addr = 0, noauth_len;
+	int pos1, pos2,v6addr = 0;
 	URL_t* Curl = NULL;
         char *escfilename=NULL;
 	char *ptr1=NULL, *ptr2=NULL, *ptr3=NULL, *ptr4=NULL;
@@ -251,16 +277,11 @@ url_new(const char* url) {
 		strcpy(Curl->file, "/");
 	}
 
-	noauth_len = make_noauth_url(Curl, NULL, 0);
-	if (noauth_len > 0) {
-		noauth_len++;
-		Curl->noauth_url = malloc(noauth_len);
+	Curl->noauth_url = get_noauth_url(Curl);
 		if (!Curl->noauth_url) {
 			mp_msg(MSGT_NETWORK, MSGL_FATAL, "Memory allocation failed.\n");
 			goto err_out;
 		}
-		make_noauth_url(Curl, Curl->noauth_url, noauth_len);
-	}
 
         free(escfilename);
 	return Curl;

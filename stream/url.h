@@ -38,7 +38,7 @@ typedef struct {
 
 URL_t *url_redirect(URL_t **url, const char *redir);
 
-int make_http_proxy_url(URL_t *proxy, const char *host_url, char *dst, int dst_size);
+char *get_http_proxy_url(const URL_t *proxy, const char *host_url);
 
 URL_t* url_new(const char* url);
 void   url_free(URL_t* url);
