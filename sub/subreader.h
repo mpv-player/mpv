@@ -48,8 +48,6 @@ extern int sub_match_fuzziness;
 // One of the SUB_* constant above
 extern int sub_format;
 
-#define MAX_SUBTITLE_FILES 128
-
 #define SUB_MAX_TEXT 12
 #define SUB_ALIGNMENT_BOTTOMLEFT       1
 #define SUB_ALIGNMENT_BOTTOMCENTER     2
@@ -97,7 +95,6 @@ void subcp_close (void); /* for demux_ogg.c */
 const char* guess_buffer_cp(unsigned char* buffer, int buflen, const char *preferred_language, const char *fallback);
 const char* guess_cp(struct stream *st, const char *preferred_language, const char *fallback);
 #endif
-char ** sub_filenames(const char *path, char *fname);
 void list_sub_file(sub_data* subd);
 void dump_srt(sub_data* subd, float fps);
 void dump_mpsub(sub_data* subd, float fps);

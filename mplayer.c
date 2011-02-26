@@ -72,6 +72,7 @@
 #include "libavutil/avstring.h"
 
 #include "sub/subreader.h"
+#include "sub/find_subfiles.h"
 #include "sub/dec_sub.h"
 
 #include "mp_osd.h"

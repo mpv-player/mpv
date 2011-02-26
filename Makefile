@@ -422,6 +422,7 @@ SRCS_COMMON = asxparser.c \
               sub/sub_cc.c \
               sub/dec_sub.c \
               sub/find_sub.c \
+              sub/find_subfiles.c \
               sub/spudec.c \
               sub/subassconvert.c \
               sub/subreader.c \

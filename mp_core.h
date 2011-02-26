@@ -24,6 +24,7 @@
 #include "options.h"
 #include "mixer.h"
 #include "sub/subreader.h"
+#include "sub/find_subfiles.h"
 
 // definitions used internally by the core player code
 
