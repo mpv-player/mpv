@@ -21,6 +21,6 @@
 
 #define MAX_SUBTITLE_FILES 128
 
-char **sub_filenames(const char *path, char *fname);
+char **find_text_subtitles(const char *fname);
 
 #endif /* MPLAYER_FINDFILES_H */

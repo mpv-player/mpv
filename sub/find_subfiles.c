@@ -4,6 +4,7 @@
 #include <ctype.h>
 
 #include "mp_msg.h"
+#include "path.h"
 #include "sub/find_subfiles.h"
 #include "sub/sub.h"
 
@@ -85,7 +86,7 @@ static int compare_sub_priority(const void *a, const void *b)
     }
 }
 
-char **sub_filenames(const char *path, char *fname)
+static char **sub_filenames(const char *path, const char *fname)
 {
     char *f_dir, *f_fname, *f_fname_noext, *f_fname_trim, *tmp, *tmp_sub_id;
     char *tmp_fname_noext, *tmp_fname_trim, *tmp_fname_ext, *tmpresult;
@@ -268,4 +269,12 @@ char **sub_filenames(const char *path, char *fname)
     free(result);
 
     return result2;
+}
+
+char **find_text_subtitles(const char *fname)
+{
+    char *psub = get_path("sub/");
+    char **tmp = sub_filenames(psub ? psub : "", fname);
+    free(psub);
+    return tmp;
 }

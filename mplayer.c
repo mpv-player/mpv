@@ -4569,15 +4569,12 @@ if(vo_spudec==NULL &&
         add_subtitles(mpctx, opts->sub_name[i], sub_fps, 0);
   }
   if(opts->sub_auto) { // auto load sub file ...
-    char *psub = get_path( "sub/" );
-    char **tmp = sub_filenames((psub ? psub : ""), mpctx->filename);
-    int i = 0;
-    free(psub); // release the buffer created by get_path() above
-    while (tmp[i]) {
-        add_subtitles(mpctx, tmp[i], sub_fps, 1);
-        free(tmp[i++]);
-    }
-    free(tmp);
+      char **tmp = find_text_subtitles(mpctx->filename);
+      for (int i = 0; tmp[i]; i++) {
+          add_subtitles(mpctx, tmp[i], sub_fps, 1);
+          free(tmp[i]);
+      }
+      free(tmp);
   }
   if (mpctx->set_of_sub_size > 0)
       mpctx->sub_counts[SUB_SOURCE_SUBS] = mpctx->set_of_sub_size;
