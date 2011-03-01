@@ -46,6 +46,9 @@ static const struct mp_AVCodecTag mp_wav_tags[] = {
     { CODEC_ID_MUSEPACK7,         MKTAG('M', 'P', 'C', ' ')},
     { CODEC_ID_MUSEPACK8,         MKTAG('M', 'P', 'C', '8')},
     { CODEC_ID_NELLYMOSER,        MKTAG('N', 'E', 'L', 'L')},
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 92, 0)
+    { CODEC_ID_PCM_LXF,           MKTAG('P', 'L', 'X', 'F')},
+#endif
     { CODEC_ID_QCELP,             MKTAG('Q', 'c', 'l', 'p')},
     { CODEC_ID_QDM2,              MKTAG('Q', 'D', 'M', '2')},
     { CODEC_ID_RA_144,            MKTAG('1', '4', '_', '4')},
@@ -71,6 +74,7 @@ static const struct mp_AVCodecTag mp_codecid_override_tags[] = {
     { CODEC_ID_AC3,               0x2000},
     { CODEC_ID_ADPCM_IMA_AMV,     MKTAG('A', 'M', 'V', 'A')},
     { CODEC_ID_DTS,               0x2001},
+    { CODEC_ID_DVVIDEO,           MKTAG('d', 'v', 's', 'd')},
     { CODEC_ID_EAC3,              MKTAG('E', 'A', 'C', '3')},
     { CODEC_ID_H264,              MKTAG('H', '2', '6', '4')},
     { CODEC_ID_MPEG4,             MKTAG('M', 'P', '4', 'V')},
