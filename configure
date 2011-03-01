@@ -499,7 +499,6 @@ Advanced options:
   --disable-sighandler      disable sighandler for crashes [enable]
   --enable-crash-debug      enable automatic gdb attach on crash [disable]
   --enable-dynamic-plugins  enable dynamic A/V plugins [disable]
-  --ffmpeg-source-dir=PATH  enable features requiring internal FFmpeg headers
 
 Use these options if autodetection fails:
   --extra-cflags=FLAGS        extra CFLAGS
