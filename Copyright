@@ -20,14 +20,6 @@ Copyright:  Many, see individual files for copyright notices.
 License:    GNU Lesser General Public License
 
 
-Name:       libdvdcss
-Version:    Subversion r237 + local changes
-URL:        http://developers.videolan.org/libdvdcss/
-Directory:  libdvdcss
-Copyright:  1998-2008 VideoLAN
-License:    GNU General Public License
-
-
 Name:       mpg123
 Version:    0.59s + significant changes
 URL:        http://www.mpg123.de/
