@@ -4556,11 +4556,10 @@ if(vo_spudec==NULL &&
   }
   if(opts->sub_auto) { // auto load sub file ...
       char **tmp = find_text_subtitles(mpctx->filename);
-      for (int i = 0; tmp[i]; i++) {
+      int nsub = MP_TALLOC_ELEMS(tmp);
+      for (int i = 0; i < nsub; i++)
           add_subtitles(mpctx, tmp[i], sub_fps, 1);
-          free(tmp[i]);
-      }
-      free(tmp);
+      talloc_free(tmp);
   }
   if (mpctx->set_of_sub_size > 0)
       mpctx->sub_counts[SUB_SOURCE_SUBS] = mpctx->set_of_sub_size;
