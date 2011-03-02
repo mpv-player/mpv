@@ -2615,7 +2615,7 @@ if arm ; then
     _armv6t2=no
     inline_asm_check '"movt r0, #0"' && _armv6t2=yes
   fi
-  echores "$_armv6"
+  echores "$_armv6t2"
 
   echocheck "ARM VFP"
   if test $_armvfp = "auto" ; then
