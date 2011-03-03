@@ -88,6 +88,7 @@ typedef struct MPOpts {
     int flip;
     int vd_use_slices;
     char **sub_name;
+    char **sub_paths;
     int sub_auto;
     int ass_enabled;
     struct lavc_param {

@@ -21,7 +21,9 @@
 
 #define MAX_SUBTITLE_FILES 128
 
-char **find_text_subtitles(const char *fname);
-char **find_vob_subtitles(const char *fname);
+struct MPOpts;
+
+char **find_text_subtitles(struct MPOpts *opts, const char *fname);
+char **find_vob_subtitles(struct MPOpts *opts, const char *fname);
 
 #endif /* MPLAYER_FINDFILES_H */

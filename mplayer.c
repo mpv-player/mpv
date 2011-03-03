@@ -4174,7 +4174,7 @@ if (edl_output_filename) {
         mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Cannot load subtitles: %s\n",
 		filename_recode(opts->vobsub_name));
     } else if (opts->sub_auto && mpctx->filename){
-        char **vob = find_vob_subtitles(mpctx->filename);
+        char **vob = find_vob_subtitles(opts, mpctx->filename);
         for (int i = 0; i < MP_TALLOC_ELEMS(vob); i++) {
             vo_vobsub = vobsub_open(vob[i], spudec_ifo, 0, &vo_spudec);
             if (vo_vobsub)
@@ -4555,7 +4555,7 @@ if(vo_spudec==NULL &&
         add_subtitles(mpctx, opts->sub_name[i], sub_fps, 0);
   }
   if(opts->sub_auto) { // auto load sub file ...
-      char **tmp = find_text_subtitles(mpctx->filename);
+      char **tmp = find_text_subtitles(opts, mpctx->filename);
       int nsub = MP_TALLOC_ELEMS(tmp);
       for (int i = 0; i < nsub; i++)
           add_subtitles(mpctx, tmp[i], sub_fps, 1);

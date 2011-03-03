@@ -2423,7 +2423,7 @@ exact match
 .IPs 1
 Load all subs containing movie name.
 .IPs 2
-Load all subs in the current directory.
+Load all subs in the current and \-sub\-paths directories.
 .RE
 .PD 1
 .
@@ -2486,6 +2486,31 @@ Guess the encoding, assuming the subtitles are Czech, fall back on
 latin 2, if the detection fails.
 .IPs "\-subcp enca:pl:cp1250"
 Guess the encoding for Polish, fall back on cp1250.
+.RE
+.PD 1
+.
+.TP
+.B \-sub\-paths <path1:path2:...>
+Specify extra directories where to search for subtitles matching the video.
+Multiple directories can be separated by ":" (";" on Windows).
+Paths can be relative or absolute.
+Relative paths are interpreted relative to video file directory.
+
+.sp 1
+.I EXAMPLE:
+Assuming that /path/\:to/\:movie/\:movie.avi is played and \-sub\-paths
+sub:subtitles:/tmp/subs is specified, MPlayer searches for subtitle files in
+these directories:
+.RSs
+/path/\:to/\:movie/
+.br
+/path/\:to/\:movie/\:sub/
+.br
+/path/\:to/\:movie/\:subtitles/
+.br
+/tmp/\:subs/
+.br
+~/.mplayer/\:sub/
 .RE
 .PD 1
 .
@@ -7632,14 +7657,6 @@ font directory (There must be a font.desc file and files with .RAW extension.)
 .TP
 ~/.mplayer/\:DVDkeys/
 cached CSS keys
-.
-.TP
-Assuming that /path/\:to/\:movie.avi is played, MPlayer searches for sub files
-in this order:
-.RS
-/path/\:to/\:movie.sub
-.br
-~/.mplayer/\:sub/\:movie.sub
 .RE
 .PD 1
 .

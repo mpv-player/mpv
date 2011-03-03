@@ -4,6 +4,7 @@
 #include <ctype.h>
 
 #include "mp_msg.h"
+#include "options.h"
 #include "path.h"
 #include "mpcommon.h"
 #include "sub/find_subfiles.h"
@@ -241,13 +242,23 @@ static void append_dir_subtitles(struct subfn **slist, int *nsub,
     free(tmpresult);
 }
 
-char **find_text_subtitles(const char *fname)
+char **find_text_subtitles(struct MPOpts *opts, const char *fname)
 {
+    char **subnames = NULL;
     struct subfn *slist = talloc_array_ptrtype(NULL, slist, 1);
     int n = 0;
 
     // Load subtitles from current media directory
     append_dir_subtitles(&slist, &n, mp_dirname(fname), fname, 0);
+
+    // Load subtitles in dirs specified by sub-paths option
+    if (opts->sub_paths) {
+        for (int i = 0; opts->sub_paths[i]; i++) {
+            char *path = mp_path_join(slist, mp_dirname(fname),
+                                      BSTR(opts->sub_paths[i]));
+            append_dir_subtitles(&slist, &n, BSTR(path), fname, 0);
+        }
+    }
 
     // Load subtitles in ~/.mplayer/sub limiting sub fuzziness
     char *mp_subdir = get_path("sub/");
@@ -258,7 +269,7 @@ char **find_text_subtitles(const char *fname)
     // Sort subs by priority and append them
     qsort(slist, n, sizeof(*slist), compare_sub_priority);
 
-    char **subnames = talloc_array_ptrtype(NULL, subnames, n);
+    subnames = talloc_array_ptrtype(NULL, subnames, n);
     for (int i = 0; i < n; i++)
         subnames[i] = talloc_strdup(subnames, slist[i].fname);
 
@@ -266,7 +277,7 @@ char **find_text_subtitles(const char *fname)
     return subnames;
 }
 
-char **find_vob_subtitles(const char *fname)
+char **find_vob_subtitles(struct MPOpts *opts, const char *fname)
 {
     char **vobs = talloc_array_ptrtype(NULL, vobs, 1);
     int n = 0;
@@ -277,6 +288,17 @@ char **find_vob_subtitles(const char *fname)
     if (pdot >= 0)
         bname.len = pdot;
     vobs[n++] = mp_path_join(vobs, mp_dirname(fname), bname);
+
+    // Potential vobsubs in directories specified by sub-paths option
+    if (opts->sub_paths) {
+        for (int i = 0; opts->sub_paths[i]; i++) {
+            char *path = mp_path_join(NULL, mp_dirname(fname),
+                                      BSTR(opts->sub_paths[i]));
+            MP_GROW_ARRAY(vobs, n);
+            vobs[n++] = mp_path_join(vobs, BSTR(path), bname);
+            talloc_free(path);
+        }
+    }
 
     // Potential vobsub in ~/.mplayer/sub
     char *mp_subdir = get_path("sub/");
