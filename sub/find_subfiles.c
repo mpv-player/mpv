@@ -62,20 +62,20 @@ static void strcpy_get_ext(char *d, char *s)
     }
 }
 
-typedef struct subfn {
+struct subfn {
     int priority;
     char *fname;
-} subfn;
+};
 
 static int compare_sub_priority(const void *a, const void *b)
 {
-    if (((const subfn*)a)->priority > ((const subfn*)b)->priority) {
+    const struct subfn *s1 = a;
+    const struct subfn *s2 = b;
+    if (s1->priority > s2->priority)
         return -1;
-    } else if (((const subfn*)a)->priority < ((const subfn*)b)->priority) {
+    if (s1->priority < s2->priority)
         return 1;
-    } else {
-        return strcoll(((const subfn*)a)->fname, ((const subfn*)b)->fname);
-    }
+    return strcoll(s1->fname, s2->fname);
 }
 
 static void guess_lang_from_filename(char *dstlang, const char *name)
@@ -123,26 +123,12 @@ static void append_dir_subtitles(struct MPOpts *opts,
                                  struct bstr path, const char *fname,
                                  int limit_fuzziness)
 {
-    char *f_fname, *f_fname_noext, *f_fname_trim;
-    char *tmp_fname_noext, *tmp_fname_trim, *tmp_fname_ext;
-
-    int len, found, i;
     char *sub_exts[] = {"utf", "utf8", "utf-8", "sub", "srt", "smi", "rt", "txt", "ssa", "aqt", "jss", "js", "ass", NULL};
     FILE *f;
-
-    DIR *d;
-    struct dirent *de;
-
-    len =   (strlen(fname) > 256 ? strlen(fname) : 256)
-          + (path.len      > 256 ? path.len      : 256) + 2;
-
-    f_fname       = mp_basename(fname);
-    f_fname_noext = malloc(len);
-    f_fname_trim  = malloc(len);
-
-    tmp_fname_noext = malloc(len);
-    tmp_fname_trim  = malloc(len);
-    tmp_fname_ext   = malloc(len);
+    char *f_fname = talloc_strdup(NULL, mp_basename(fname));
+    size_t len = strlen(f_fname) + 1;
+    char *f_fname_noext = talloc_size(f_fname, len);
+    char *f_fname_trim  = talloc_size(f_fname, len);
 
     strcpy_strip_ext(f_fname_noext, f_fname);
     strcpy_trim(f_fname_trim, f_fname_noext);
@@ -151,12 +137,17 @@ static void append_dir_subtitles(struct MPOpts *opts,
     // 1 = any subtitle file
     // 2 = any sub file containing movie name
     // 3 = sub file containing movie name and the lang extension
-    char *path0 = bstrdup0(NULL, path);
-    d = opendir(path0);
-    talloc_free(path0);
+    char *path0 = bstrdup0(f_fname, path);
+    DIR *d = opendir(path0);
     if (d) {
+        struct dirent *de;
         mp_msg(MSGT_SUBREADER, MSGL_INFO, "Load subtitles in %.*s\n", BSTR_P(path));
         while ((de = readdir(d))) {
+            len = strlen(de->d_name) + 1;
+            char *tmp_fname_noext = talloc_size(NULL, len);
+            char *tmp_fname_ext   = talloc_size(tmp_fname_noext, len);
+            char *tmp_fname_trim  = talloc_size(tmp_fname_noext, len);
+
             // retrieve various parts of the filename
             strcpy_strip_ext(tmp_fname_noext, de->d_name);
             strcpy_get_ext(tmp_fname_ext, de->d_name);
@@ -172,12 +163,12 @@ static void append_dir_subtitles(struct MPOpts *opts,
                 talloc_free(idxname.start);
                 if (f) {
                     fclose(f);
-                    continue;
+                    goto next_sub;
                 }
             }
 
             // does it end with a subtitle extension?
-            found = 0;
+            int i, found = 0;
 #ifdef CONFIG_ICONV
 #ifdef CONFIG_ENCA
             for (i = ((sub_cp && strncasecmp(sub_cp, "enca", 4) != 0) ? 3 : 0); sub_exts[i]; i++) {
@@ -246,16 +237,14 @@ static void append_dir_subtitles(struct MPOpts *opts,
                         talloc_free(subpath);
                 }
             }
+
+next_sub:
+            talloc_free(tmp_fname_noext);
         }
         closedir(d);
     }
 
-    free(f_fname_noext);
-    free(f_fname_trim);
-
-    free(tmp_fname_noext);
-    free(tmp_fname_trim);
-    free(tmp_fname_ext);
+    talloc_free(f_fname);
 }
 
 char **find_text_subtitles(struct MPOpts *opts, const char *fname)
