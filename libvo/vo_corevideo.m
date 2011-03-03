@@ -935,8 +935,17 @@ static int control(uint32_t request, void *data)
 - (void) keyDown: (NSEvent *) theEvent
 {
 	int key = convert_key([theEvent keyCode], *[[theEvent characters] UTF8String]);
-	if (key != -1)
-	mplayer_put_key(key);
+	if (key != -1) {
+		if([theEvent modifierFlags] & NSShiftKeyMask)
+			key |= KEY_MODIFIER_SHIFT;
+		if([theEvent modifierFlags] & NSControlKeyMask)
+			key |= KEY_MODIFIER_CTRL;
+		if([theEvent modifierFlags] & NSAlternateKeyMask)
+			key |= KEY_MODIFIER_ALT;
+		if([theEvent modifierFlags] & NSCommandKeyMask)
+			key |= KEY_MODIFIER_META;
+		mplayer_put_key(key);
+	}
 }
 
 /*
