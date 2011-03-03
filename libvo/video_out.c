@@ -298,6 +298,11 @@ int vo_get_buffered_frame(struct vo *vo, bool eof)
     return vo->frame_loaded ? 0 : -1;
 }
 
+void vo_skip_frame(struct vo *vo)
+{
+    vo->frame_loaded = false;
+}
+
 int vo_draw_frame(struct vo *vo, uint8_t *src[])
 {
     assert(!vo->driver->is_new);

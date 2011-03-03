@@ -2800,8 +2800,10 @@ static double update_video(struct MPContext *mpctx)
         if (pts == MP_NOPTS_VALUE)
             pts = sh_video->last_pts;
     }
-    if (mpctx->hrseek_active && pts < mpctx->hrseek_pts - .005)
+    if (mpctx->hrseek_active && pts < mpctx->hrseek_pts - .005) {
+        vo_skip_frame(video_out);
         return 0;
+    }
     mpctx->hrseek_active = false;
     sh_video->pts = pts;
     if (sh_video->last_pts == MP_NOPTS_VALUE)
@@ -3364,7 +3366,6 @@ static void run_playloop(struct MPContext *mpctx)
         if (!blit_frame || mpctx->hrseek_active) {
             double frame_time = update_video(mpctx);
             blit_frame = mpctx->video_out->frame_loaded;
-            blit_frame &= !mpctx->hrseek_active;
             mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "*** ftime=%5.3f ***\n", frame_time);
             if (mpctx->sh_video->vf_initialized < 0) {
                 mp_tmsg(MSGT_CPLAYER, MSGL_FATAL,

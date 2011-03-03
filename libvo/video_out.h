@@ -283,6 +283,7 @@ void list_video_out(void);
 int vo_control(struct vo *vo, uint32_t request, void *data);
 int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts);
 int vo_get_buffered_frame(struct vo *vo, bool eof);
+void vo_skip_frame(struct vo *vo);
 int vo_draw_frame(struct vo *vo, uint8_t *src[]);
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y);
 void vo_draw_osd(struct vo *vo, struct osd_state *osd);
