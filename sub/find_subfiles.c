@@ -62,16 +62,6 @@ static void strcpy_get_ext(char *d, char *s)
     }
 }
 
-static int whiteonly(char *s)
-{
-    while (*s) {
-        if (!isspace(*s))
-            return 0;
-        s++;
-    }
-    return 1;
-}
-
 typedef struct subfn {
     int priority;
     char *fname;
@@ -88,20 +78,53 @@ static int compare_sub_priority(const void *a, const void *b)
     }
 }
 
+static void guess_lang_from_filename(char *dstlang, const char *name)
+{
+    int n = 0, i = strlen(name);
+
+    if (i < 2)
+        goto err;
+    i--;
+    if (name[i] == ')' || name[i] == ']')
+        i--;
+    while (i >= 0 && isalpha(name[i])) {
+        n++;
+        if (n > 3)
+            goto err;
+        i--;
+    }
+    if (n < 2)
+        goto err;
+    memcpy(dstlang, &name[i + 1], n);
+    dstlang[n] = 0;
+    return;
+
+err:
+    dstlang[0] = 0;
+}
+
+struct sub_list {
+    struct subfn subs[MAX_SUBTITLE_FILES];
+    int sid;
+    void *ctx;
+};
+
 /**
  * @brief Append all the subtitles in the given path matching fname
+ * @param opts MPlayer options
  * @param slist pointer to the subtitles list tallocated
  * @param nsub pointer to the number of subtitles
  * @param path Look for subtitles in this directory
  * @param fname Subtitle filename (pattern)
  * @param limit_fuzziness Ignore flag when sub_fuziness == 2
  */
-static void append_dir_subtitles(struct subfn **slist, int *nsub,
+static void append_dir_subtitles(struct MPOpts *opts,
+                                 struct subfn **slist, int *nsub,
                                  struct bstr path, const char *fname,
                                  int limit_fuzziness)
 {
-    char *f_fname, *f_fname_noext, *f_fname_trim, *tmp, *tmp_sub_id;
-    char *tmp_fname_noext, *tmp_fname_trim, *tmp_fname_ext, *tmpresult;
+    char *f_fname, *f_fname_noext, *f_fname_trim;
+    char *tmp_fname_noext, *tmp_fname_trim, *tmp_fname_ext;
 
     int len, found, i;
     char *sub_exts[] = {"utf", "utf8", "utf-8", "sub", "srt", "smi", "rt", "txt", "ssa", "aqt", "jss", "js", "ass", NULL};
@@ -121,22 +144,8 @@ static void append_dir_subtitles(struct subfn **slist, int *nsub,
     tmp_fname_trim  = malloc(len);
     tmp_fname_ext   = malloc(len);
 
-    tmpresult = malloc(len);
-
     strcpy_strip_ext(f_fname_noext, f_fname);
     strcpy_trim(f_fname_trim, f_fname_noext);
-
-    /* The code using sub language here is broken - it assumes strict
-     * "videoname languagename" syntax for the subtitle file, which is
-     * very unlikely to match especially if language name uses "en,de"
-     * syntax... */
-    tmp_sub_id = NULL;
-#if 0
-    if (dvdsub_lang && !whiteonly(dvdsub_lang)) {
-        tmp_sub_id = malloc(strlen(dvdsub_lang) + 1);
-        strcpy_trim(tmp_sub_id, dvdsub_lang);
-    }
-#endif
 
     // 0 = nothing
     // 1 = any subtitle file
@@ -187,31 +196,28 @@ static void append_dir_subtitles(struct subfn **slist, int *nsub,
             // we have a (likely) subtitle file
             if (found) {
                 int prio = 0;
-                if (!prio && tmp_sub_id) {
-                    sprintf(tmpresult, "%s %s", f_fname_trim, tmp_sub_id);
-                    if (strcmp(tmp_fname_trim, tmpresult) == 0 && sub_match_fuzziness >= 1) {
-                        // matches the movie name + lang extension
-                        prio = 5;
+                if (opts->sub_lang) {
+                    char lang[4];
+
+                    if (!strncmp(tmp_fname_trim, f_fname_trim,
+                                 strlen(f_fname_trim))) {
+                        guess_lang_from_filename(lang, tmp_fname_trim);
+                        if (*lang) {
+                            for (int n = 0; opts->sub_lang[n]; n++) {
+                                if (!strncmp(lang, opts->sub_lang[n],
+                                            strlen(opts->sub_lang[n]))) {
+                                    prio = 4; // matches the movie name + lang extension
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
-                if (!prio && strcmp(tmp_fname_trim, f_fname_trim) == 0) {
-                    // matches the movie name
-                    prio = 4;
-                }
-                if (!prio && (tmp = strstr(tmp_fname_trim, f_fname_trim)) && sub_match_fuzziness >= 1) {
-                    // contains the movie name
-                    tmp += strlen(f_fname_trim);
-                    if (tmp_sub_id && strstr(tmp, tmp_sub_id)) {
-                        // with sub_id specified prefer localized subtitles
-                        prio = 3;
-                    } else if ((tmp_sub_id == NULL) && whiteonly(tmp)) {
-                        // without sub_id prefer "plain" name
-                        prio = 3;
-                    } else {
-                        // with no localized subs found, try any else instead
-                        prio = 2;
-                    }
-                }
+                if (!prio && strcmp(tmp_fname_trim, f_fname_trim) == 0)
+                    prio = 3; // matches the movie name
+                if (!prio && strstr(tmp_fname_trim, f_fname_trim)
+                    && sub_match_fuzziness >= 1)
+                    prio = 2; // contains the movie name
                 if (!prio) {
                     // doesn't contain the movie name
                     // don't try in the mplayer subtitle directory
@@ -244,16 +250,12 @@ static void append_dir_subtitles(struct subfn **slist, int *nsub,
         closedir(d);
     }
 
-    free(tmp_sub_id);
-
     free(f_fname_noext);
     free(f_fname_trim);
 
     free(tmp_fname_noext);
     free(tmp_fname_trim);
     free(tmp_fname_ext);
-
-    free(tmpresult);
 }
 
 char **find_text_subtitles(struct MPOpts *opts, const char *fname)
@@ -263,21 +265,21 @@ char **find_text_subtitles(struct MPOpts *opts, const char *fname)
     int n = 0;
 
     // Load subtitles from current media directory
-    append_dir_subtitles(&slist, &n, mp_dirname(fname), fname, 0);
+    append_dir_subtitles(opts, &slist, &n, mp_dirname(fname), fname, 0);
 
     // Load subtitles in dirs specified by sub-paths option
     if (opts->sub_paths) {
         for (int i = 0; opts->sub_paths[i]; i++) {
             char *path = mp_path_join(slist, mp_dirname(fname),
                                       BSTR(opts->sub_paths[i]));
-            append_dir_subtitles(&slist, &n, BSTR(path), fname, 0);
+            append_dir_subtitles(opts, &slist, &n, BSTR(path), fname, 0);
         }
     }
 
     // Load subtitles in ~/.mplayer/sub limiting sub fuzziness
     char *mp_subdir = get_path("sub/");
     if (mp_subdir)
-        append_dir_subtitles(&slist, &n, BSTR(mp_subdir), fname, 1);
+        append_dir_subtitles(opts, &slist, &n, BSTR(mp_subdir), fname, 1);
     free(mp_subdir);
 
     // Sort subs by priority and append them
