@@ -153,6 +153,20 @@ static void append_dir_subtitles(struct subfn **slist, int *nsub,
             strcpy_get_ext(tmp_fname_ext, de->d_name);
             strcpy_trim(tmp_fname_trim, tmp_fname_noext);
 
+            // If it's a .sub, check if there is a .idx with the same name. If
+            // there is one, it's certainly a vobsub so we skip it.
+            if (strcasecmp(tmp_fname_ext, "sub") == 0) {
+                struct bstr idxname = BSTR(talloc_strdup(NULL, de->d_name));
+                strcpy(idxname.start + idxname.len - sizeof("idx") + 1, "idx");
+                char *idx = mp_path_join(idxname.start, path, idxname);
+                f = fopen(idx, "rt");
+                talloc_free(idxname.start);
+                if (f) {
+                    fclose(f);
+                    continue;
+                }
+            }
+
             // does it end with a subtitle extension?
             found = 0;
 #ifdef CONFIG_ICONV
