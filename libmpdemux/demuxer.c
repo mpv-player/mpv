@@ -514,9 +514,12 @@ static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parse
     case 0x332D6361:
     case 0x332D4341:
     case 0x20736D:
-    case MKTAG('d', 'n', 'e', 't'):
     case MKTAG('s', 'a', 'c', '3'):
         codec_id = CODEC_ID_AC3;
+        break;
+    case MKTAG('d', 'n', 'e', 't'):
+        // DNET/byte-swapped AC-3 - there is no parser for that yet
+        //codec_id = CODEC_ID_DNET;
         break;
     case MKTAG('E', 'A', 'C', '3'):
         codec_id = CODEC_ID_EAC3;
