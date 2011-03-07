@@ -310,11 +310,11 @@ static int try_open_device(const char *device, int open_mode, int try_ac3)
     err = snd_pcm_open(&alsa_handler, ac3_device, SND_PCM_STREAM_PLAYBACK,
 		       open_mode);
     free(ac3_device);
+    if (!err)
+      return 0;
   }
-  if (!try_ac3 || err < 0)
-    err = snd_pcm_open(&alsa_handler, device, SND_PCM_STREAM_PLAYBACK,
-		       open_mode);
-  return err;
+  return snd_pcm_open(&alsa_handler, device, SND_PCM_STREAM_PLAYBACK,
+                      open_mode);
 }
 
 /*
