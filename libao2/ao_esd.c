@@ -161,7 +161,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     int bytes_per_sample;
     int fl;
     char *server = ao_subdevice;  /* NULL for localhost */
-    float lag_seconds, lag_net, lag_serv;
+    float lag_seconds, lag_net = 0., lag_serv;
     struct timeval proto_start, proto_end;
 
     if (esd_fd < 0) {

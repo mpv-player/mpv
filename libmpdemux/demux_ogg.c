@@ -1412,7 +1412,7 @@ static void demux_ogg_seek(demuxer_t *demuxer, float rel_seek_secs,
     demux_stream_t *ds;
     ogg_packet op;
     float rate;
-    int i, sp, first, precision = 1, do_seek = 1;
+    int i, sp, first = 1, precision = 1, do_seek = 1;
     vorbis_info *vi = NULL;
     int64_t gp = 0, old_gp;
     off_t pos, old_pos;

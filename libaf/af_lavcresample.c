@@ -119,7 +119,7 @@ static void uninit(struct af_instance_s* af)
 static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 {
   af_resample_t *s = af->setup;
-  int i, j, consumed, ret;
+  int i, j, consumed, ret = 0;
   int16_t *in = (int16_t*)data->audio;
   int16_t *out;
   int chans   = data->nch;

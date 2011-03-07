@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "av_log.h"
 #include "config.h"
 #include "mp_msg.h"
 #include <libavutil/log.h>

@@ -718,7 +718,7 @@ inline static void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj,i
 	    // reading the subtitle words from vo_sub->text[]
           while (*t) {
             if (sub_utf8)
-              c = utf8_get_char(&t);
+              c = utf8_get_char((const char **)&t);
             else if ((c = *t++) >= 0x80 && sub_unicode)
               c = (c<<8) + *t++;
 	      if (k==MAX_UCS){

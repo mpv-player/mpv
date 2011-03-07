@@ -503,7 +503,7 @@ static int pnm_get_headers(pnm_t *p, int *need_response) {
   uint8_t  *ptr=p->header;
   uint8_t  *prop_hdr=NULL;
   int      chunk_size,size=0;
-  int      nr;
+  int      nr = 0;
 /*  rmff_header_t *h; */
 
   *need_response=0;

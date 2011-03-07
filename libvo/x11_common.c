@@ -711,7 +711,7 @@ void vo_x11_classhint(struct vo *vo, Window window, const char *name)
     XClassHint wmClass;
     pid_t pid = getpid();
 
-    wmClass.res_name = opts->vo_winname ? opts->vo_winname : name;
+    wmClass.res_name = opts->vo_winname ? opts->vo_winname : (char *)name;
     wmClass.res_class = "MPlayer";
     XSetClassHint(x11->display, window, &wmClass);
     XChangeProperty(x11->display, window, x11->XA_NET_WM_PID, XA_CARDINAL,
@@ -1088,7 +1088,6 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     goto final;
   if (x11->window_state & VOFLAG_HIDDEN) {
     XSizeHints hint;
-    XEvent xev;
     x11->window_state &= ~VOFLAG_HIDDEN;
     vo_x11_classhint(vo, x11->window, classname);
     XStoreName(mDisplay, x11->window, title);
@@ -1832,7 +1831,7 @@ static int transform_color(float val,
     return (unsigned short) (s * 65535);
 }
 
-uint32_t vo_x11_set_equalizer(struct vo *vo, char *name, int value)
+uint32_t vo_x11_set_equalizer(struct vo *vo, const char *name, int value)
 {
     float gamma, brightness, contrast;
     float rf, gf, bf;
@@ -1883,7 +1882,7 @@ uint32_t vo_x11_set_equalizer(struct vo *vo, char *name, int value)
     return VO_TRUE;
 }
 
-uint32_t vo_x11_get_equalizer(char *name, int *value)
+uint32_t vo_x11_get_equalizer(const char *name, int *value)
 {
     if (cmap == None)
         return VO_NOTAVAIL;
@@ -1899,7 +1898,7 @@ uint32_t vo_x11_get_equalizer(char *name, int *value)
 }
 
 #ifdef CONFIG_XV
-int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, char *name, int value)
+int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, const char *name, int value)
 {
     XvAttribute *attributes;
     int i, howmany, xv_atom;
@@ -1973,7 +1972,7 @@ int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, char *name, int value)
     return VO_FALSE;
 }
 
-int vo_xv_get_eq(struct vo *vo, uint32_t xv_port, char *name, int *value)
+int vo_xv_get_eq(struct vo *vo, uint32_t xv_port, const char *name, int *value)
 {
 
     XvAttribute *attributes;

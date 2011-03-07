@@ -109,7 +109,6 @@ static void close_f(stream_t *s){
 }
 
 static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
-  struct stream_priv_s *p = (struct stream_priv_s*)opts;
   char *filename;
   mode_t m = 0;
   off_t len;

@@ -376,7 +376,7 @@ static int config(struct vf_instance *vf,
 
             vf->priv->stride[i]= w;
             for(j=0; j<3; j++)
-                vf->priv->ref[j][i]= malloc(w*h*sizeof(uint8_t))+3*w;
+                vf->priv->ref[j][i]= (char *)malloc(w*h*sizeof(uint8_t))+3*w;
         }
 
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);

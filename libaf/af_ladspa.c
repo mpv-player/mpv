@@ -510,6 +510,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
         return af_test_output(af, (af_data_t*)arg);
     case AF_CONTROL_COMMAND_LINE: {
         char *buf;
+        char *line = arg;
 
         mp_msg(MSGT_AFILTER, MSGL_V, "%s: parse suboptions\n", setup->myname);
 
@@ -517,46 +518,46 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
          * format is (ladspa=)file:label:controls....
          */
 
-        if (!arg) {
+        if (!line) {
             mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
                                             _("No suboptions specified."));
             return AF_ERROR;
         }
 
-        buf = malloc(strlen(arg)+1);
+        buf = malloc(strlen(line)+1);
         if (!buf) return af_ladspa_malloc_failed(setup->myname);
 
         /* file... */
         buf[0] = '\0';
-        sscanf(arg, "%[^:]", buf);
+        sscanf(line, "%[^:]", buf);
         if (buf[0] == '\0') {
             mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
                                                 _("No library file specified."));
             free(buf);
             return AF_ERROR;
         }
-        arg += strlen(buf);
+        line += strlen(buf);
         setup->file = strdup(buf);
         if (!setup->file) return af_ladspa_malloc_failed(setup->myname);
         mp_msg(MSGT_AFILTER, MSGL_V, "%s: file --> %s\n", setup->myname,
                                                         setup->file);
-        if (*(char*)arg != '\0') arg++; /* read ':' */
+        if (*line != '\0') line++; /* read ':' */
 
         /* label... */
         buf[0] = '\0';
-        sscanf(arg, "%[^:]", buf);
+        sscanf(line, "%[^:]", buf);
         if (buf[0] == '\0') {
             mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
                                                 _("No filter label specified."));
             free(buf);
             return AF_ERROR;
         }
-        arg += strlen(buf);
+        line += strlen(buf);
         setup->label = strdup(buf);
         if (!setup->label) return af_ladspa_malloc_failed(setup->myname);
         mp_msg(MSGT_AFILTER, MSGL_V, "%s: label --> %s\n", setup->myname,
                                                                 setup->label);
-/*        if (*(char*)arg != '0') arg++; */ /* read ':' */
+/*        if (*line != '0') line++; */ /* read ':' */
 
         free(buf); /* no longer needed */
 
@@ -581,20 +582,20 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
         /* ninputcontrols is set by now, read control values from arg */
 
         for(i=0; i<setup->ninputcontrols; i++) {
-            if (!arg || (*(char*)arg != ':') ) {
+            if (!line || *line != ':') {
                 mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
                                         _("Not enough controls specified on the command line."));
                 return AF_ERROR;
             }
-            arg++;
-            r = sscanf(arg, "%f", &val);
+            line++;
+            r = sscanf(line, "%f", &val);
             if (r!=1) {
                 mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
                                         _("Not enough controls specified on the command line."));
                 return AF_ERROR;
             }
             setup->inputcontrols[setup->inputcontrolsmap[i]] = val;
-            arg = strchr(arg, ':');
+            line = strchr(line, ':');
         }
 
         mp_msg(MSGT_AFILTER, MSGL_V, "%s: input controls: ", setup->myname);

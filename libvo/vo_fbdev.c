@@ -746,7 +746,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 {
     struct fb_cmap *cmap;
     int vm   = flags & VOFLAG_MODESWITCHING;
-    int zoom = flags & VOFLAG_SWSCALE;
 
     fs = flags & VOFLAG_FULLSCREEN;
 

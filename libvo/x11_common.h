@@ -130,8 +130,8 @@ int vo_x11_update_geometry(struct vo *vo, bool update_pos);
 void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer);
 void vo_x11_uninit(struct vo *vo);
 Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo);
-uint32_t vo_x11_set_equalizer(struct vo *vo, char *name, int value);
-uint32_t vo_x11_get_equalizer(char *name, int *value);
+uint32_t vo_x11_set_equalizer(struct vo *vo, const char *name, int value);
+uint32_t vo_x11_get_equalizer(const char *name, int *value);
 void fstype_help(void);
 void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
         int x, int y, unsigned int width, unsigned int height, int flags,
@@ -145,8 +145,8 @@ void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action);
 
 #endif
 
-int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, char * name, int value);
-int vo_xv_get_eq(struct vo *vo, uint32_t xv_port, char * name, int *value);
+int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, const char *name, int value);
+int vo_xv_get_eq(struct vo *vo, uint32_t xv_port, const char *name, int *value);
 
 int vo_xv_enable_vsync(struct vo *vo);
 
