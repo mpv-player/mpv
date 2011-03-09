@@ -35,7 +35,7 @@
 #include "mp_msg.h"
 
 #include <X11/Xlib.h>
-#include <X11/extensions/xf86dga.h>
+#include <X11/extensions/Xxf86dga.h>
 
 #ifdef CONFIG_XF86VM
 #include <X11/extensions/xf86vmode.h>

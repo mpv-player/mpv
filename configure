@@ -4036,11 +4036,11 @@ echores "$_xf86keysym"
 echocheck "DGA"
 if test "$_dga2" = auto && test "$_x11" = yes ; then
   _dga2=no
-  statement_check_broken X11/Xlib.h X11/extensions/xf86dga.h 'XDGASetViewport(0, 0, 0, 0, 0)' -lXxf86dga && _dga2=yes
+  statement_check_broken X11/Xlib.h X11/extensions/Xxf86dga.h 'XDGASetViewport(0, 0, 0, 0, 0)' -lXxf86dga && _dga2=yes
 fi
 if test "$_dga1" = auto && test "$_dga2" = no && test "$_vm" = yes ; then
   _dga1=no
-  statement_check_broken X11/Xlib.h X11/extensions/xf86dga.h 'XF86DGASetViewPort(0, 0, 0, 0)' -lXxf86dga -lXxf86vm && _dga1=yes
+  statement_check_broken X11/Xlib.h X11/extensions/Xxf86dga.h 'XF86DGASetViewPort(0, 0, 0, 0)' -lXxf86dga -lXxf86vm && _dga1=yes
 fi
 
 _dga=no

@@ -40,7 +40,7 @@
 #include <signal.h>
 
 #include <X11/Xlib.h>
-#include <X11/extensions/xf86dga.h>
+#include <X11/extensions/Xxf86dga.h>
 #include <X11/Xutil.h>
 
 //#define LOG(x) syslog(LOG_USER | LOG_DEBUG,x)
