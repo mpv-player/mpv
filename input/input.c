@@ -376,6 +376,8 @@ struct mp_key_name modifier_names[] = {
 
 static const mp_cmd_bind_t def_cmd_binds[] = {
 
+  { { MOUSE_BTN0_DBL, 0 }, "vo_fullscreen" },
+  { { MOUSE_BTN2, 0 }, "pause" },
   { {  MOUSE_BTN3, 0 }, "seek 10" },
   { {  MOUSE_BTN4, 0 }, "seek -10" },
   { {  MOUSE_BTN5, 0 }, "volume 1" },

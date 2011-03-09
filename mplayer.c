@@ -212,6 +212,8 @@ static const char help_text[]=_(
 " * or /           increase or decrease PCM volume\n"
 " x or z           adjust subtitle delay by +/- 0.1 second\n"
 " r or t           adjust subtitle position up/down, also see -vf expand\n"
+" double click     toggle fullscreen\n"
+" right click      pause (press again to continue)\n"
 "\n"
 " * * * SEE THE MAN PAGE FOR DETAILS, FURTHER (ADVANCED) OPTIONS AND KEYS * * *\n"
 "\n");
