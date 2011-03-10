@@ -67,8 +67,6 @@
 #include "access_mpcontext.h"
 #include "m_property.h"
 
-#include "cfg-mplayer-def.h"
-
 #include "libavutil/avstring.h"
 
 #include "sub/subreader.h"
@@ -879,6 +877,8 @@ static int cfg_include(m_option_t *conf, char *filename)
     return m_config_parse_config_file(conf->priv, filename);
 }
 
+#define DEF_CONFIG "# Write your default config options here!\n\n\n"
+
 static void parse_cfgfiles(struct MPContext *mpctx, m_config_t* conf)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -901,7 +901,7 @@ if ((conffile = get_path("")) == NULL) {
   } else {
     if ((conffile_fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY, 0666)) != -1) {
       mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"Creating config file: %s\n", conffile);
-      write(conffile_fd, default_config, strlen(default_config));
+      write(conffile_fd, DEF_CONFIG, sizeof(DEF_CONFIG) - 1);
       close(conffile_fd);
     }
     if (!(opts->noconfig & 1) &&
