@@ -548,7 +548,10 @@ static int control(uint32_t request, void *data)
 	NSMenu *menu, *aspectMenu;
 	NSMenuItem *menuItem;
 
-	[NSApp setMainMenu:[[NSMenu alloc] init]];
+	menu = [[NSMenu new] autorelease];
+	menuItem = [[NSMenuItem new] autorelease];
+	[menu addItem: menuItem];
+	[NSApp setMainMenu: menu];
 
 //Create Movie Menu
 	menu = [[NSMenu alloc] initWithTitle:@"Movie"];
