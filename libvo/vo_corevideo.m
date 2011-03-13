@@ -89,6 +89,9 @@ static int int_pause = 0;
 
 static BOOL isLeopardOrLater;
 
+#define NSLeftAlternateKeyMask  (0x000020 | NSAlternateKeyMask)
+#define NSRightAlternateKeyMask (0x000040 | NSAlternateKeyMask)
+
 static vo_info_t info =
 {
 	"Mac OS X Core Video",
@@ -943,7 +946,7 @@ static int control(uint32_t request, void *data)
 			key |= KEY_MODIFIER_SHIFT;
 		if([theEvent modifierFlags] & NSControlKeyMask)
 			key |= KEY_MODIFIER_CTRL;
-		if([theEvent modifierFlags] & NSAlternateKeyMask)
+		if(([theEvent modifierFlags] & NSLeftAlternateKeyMask) == NSLeftAlternateKeyMask)
 			key |= KEY_MODIFIER_ALT;
 		if([theEvent modifierFlags] & NSCommandKeyMask)
 			key |= KEY_MODIFIER_META;
