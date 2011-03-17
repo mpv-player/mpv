@@ -1485,6 +1485,35 @@ Can be slow especially when seeking backwards since it has to rewind
 to the beginning to find an exact frame position.
 .
 .TP
+.B \-http-header-fields <field1,field2>
+Set custom HTTP fields when accessing HTTP stream.
+.sp 1
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs
+mplayer \-http\-header\-fields 'Field1: value1','Field2: value2' http://localhost:1234
+.br
+Will generate HTTP request:
+.RSss
+.br
+GET / HTTP/1.0
+.br
+Host: localhost:1234
+.br
+User-Agent: MPlayer
+.br
+Icy-MetaData: 1
+.br
+Field1: value1
+.br
+Field2: value2
+.br
+Connection: close
+.REss
+.RE
+.
+.TP
 .B \-idx (also see \-forceidx)
 Rebuilds index of files if no index was found, allowing seeking.
 Useful with broken/\:incomplete downloads, or badly created files.

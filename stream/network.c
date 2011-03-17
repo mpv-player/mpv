@@ -58,6 +58,7 @@ int   network_bandwidth=0;
 int   network_cookies_enabled = 0;
 char *network_useragent=NULL;
 char *network_referrer=NULL;
+char **network_http_header_fields=NULL;
 
 /* IPv6 options */
 int   network_ipv4_only_proxy = 0;
@@ -249,6 +250,12 @@ http_send_request( URL_t *url, off_t pos ) {
 	}
 
 	if (network_cookies_enabled) cookies_set( http_hdr, server_url->hostname, server_url->url );
+
+	if (network_http_header_fields) {
+		int i=0;
+		while (network_http_header_fields[i])
+			http_set_field(http_hdr, network_http_header_fields[i++]);
+	}
 
 	http_set_field( http_hdr, "Connection: close");
 	if (proxy)

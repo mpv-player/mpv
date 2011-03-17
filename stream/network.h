@@ -61,6 +61,8 @@ typedef struct {
 
 extern const mime_struct_t mime_type_table[];
 
+extern char **network_http_header_fields;
+
 streaming_ctrl_t *streaming_ctrl_new(void);
 int streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size);
 
