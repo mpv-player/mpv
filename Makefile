@@ -406,7 +406,6 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/demux_smjpeg.c \
               libmpdemux/demux_ts.c \
               libmpdemux/demux_ty.c \
-              libmpdemux/demux_ty_osd.c \
               libmpdemux/demux_viv.c \
               libmpdemux/demux_vqf.c \
               libmpdemux/demux_y4m.c \

@@ -32,7 +32,9 @@
 
 #include "stream/stream.h"
 #include "demuxer.h"
+#ifdef DEMUX_TY_OSD
 #include "demux_ty_osd.h"
+#endif
 #include "stheader.h"
 #include "parse_es.h"
 #include "mpeg_hdr.h"
@@ -414,11 +416,13 @@ static void process_userdata(const unsigned char* buf,int len){
 //    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"video.c: process_userdata() detected Closed Captions!\n");
       subcc_process_data(buf+2,len-2);
     }
+#ifdef DEMUX_TY_OSD
     if( len > 2 && buf[ 0 ] == 'T' && buf[ 1 ] == 'Y' )
     {
        ty_processuserdata( buf + 2, len - 2 );
        return;
     }
+#endif
     if(verbose<2) return;
     fprintf(stderr, "user_data: len=%3d  %02X %02X %02X %02X '",
       len, buf[0], buf[1], buf[2], buf[3]);

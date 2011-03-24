@@ -41,7 +41,9 @@
 #include "libmpcodecs/dec_audio.h"
 #include "stream/stream.h"
 #include "demuxer.h"
+#ifdef DEMUX_TY_OSD
 #include "demux_ty_osd.h"
+#endif
 #include "parse_es.h"
 #include "stheader.h"
 #include "sub/sub_cc.h"
@@ -814,8 +816,10 @@ static void demux_seek_ty( demuxer_t *demuxer, float rel_seek_secs, float audio_
      if( i == 0x1B3 || i == 0x1B8 ) break; // found it!
      if( !i || !skip_video_packet( d_video ) ) break; // EOF?
    }
+#ifdef DEMUX_TY_OSD
    if ( subcc_enabled )
       ty_ClearOSD( 0 );
+#endif
 }
 
 static int demux_ty_control( demuxer_t *demuxer,int cmd, void *arg )
