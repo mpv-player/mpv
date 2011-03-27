@@ -3889,10 +3889,23 @@ if (HAVE_CMOV)
 #endif /* ARCH_X86 */
 }
 
+#ifdef PTW32_STATIC_LIB
+static void detach_ptw32(void)
+{
+    pthread_win32_thread_detach_np();
+    pthread_win32_process_detach_np();
+}
+#endif
+
 /* This preprocessor directive is a hack to generate a mplayer-nomain.o object
  * file for some tools to link against. */
 #ifndef DISABLE_MAIN
 int main(int argc,char* argv[]){
+#ifdef PTW32_STATIC_LIB
+    pthread_win32_process_attach_np();
+    pthread_win32_thread_attach_np();
+    atexit(detach_ptw32);
+#endif
     if (argc > 1 && !strcmp(argv[1], "-leak-report"))
         talloc_enable_leak_report();
 

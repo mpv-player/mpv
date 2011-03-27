@@ -3186,7 +3186,14 @@ if test "$_pthreads" = auto ; then
 cat > $TMPC << EOF
 #include <pthread.h>
 static void *func(void *arg) { return arg; }
-int main(void) { pthread_t tid; return pthread_create(&tid, 0, func, 0) == 0 ? 0 : 1; }
+int main(void) {
+ pthread_t tid;
+#ifdef PTW32_STATIC_LIB
+ pthread_win32_process_attach_np();
+ pthread_win32_thread_attach_np();
+#endif
+ return pthread_create (&tid, 0, func, 0) != 0;
+}
 EOF
 _pthreads=no
 if ! hpux ; then
@@ -3194,6 +3201,10 @@ if ! hpux ; then
     # for crosscompilation, we cannot execute the program, be happy if we can link statically
     cc_check $THREAD_CFLAGS $_ld_tmp && (tmp_run || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && break
   done
+  if test "$_pthreads" = no && mingw32 ; then
+    _ld_tmp="-lpthreadGC2 -lws2_32"
+    cc_check $_ld_tmp -DPTW32_STATIC_LIB && (tmp_run || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && CFLAGS="$CFLAGS -DPTW32_STATIC_LIB"
+  fi
 fi
 fi
 if test "$_pthreads" = yes ; then
