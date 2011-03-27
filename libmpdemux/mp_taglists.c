@@ -107,6 +107,9 @@ static const struct mp_AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_FLIC,              MKTAG('F', 'L', 'I', 'C')},
     { CODEC_ID_IDCIN,             MKTAG('I', 'D', 'C', 'I')},
     { CODEC_ID_INTERPLAY_VIDEO,   MKTAG('I', 'N', 'P', 'V')},
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 114, 0)
+    { CODEC_ID_JV,                MKTAG('F', 'F', 'J', 'V')},
+#endif
     { CODEC_ID_MDEC,              MKTAG('M', 'D', 'E', 'C')},
     { CODEC_ID_MOTIONPIXELS,      MKTAG('M', 'V', 'I', '1')},
     { CODEC_ID_NUV,               MKTAG('N', 'U', 'V', '1')},
