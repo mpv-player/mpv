@@ -19,7 +19,7 @@
 #include "fastmemcpy.h"
 #include "cpudetect.h"
 #include "libswscale/swscale.h"
-#include "libavcore/imgutils.h"
+#include <libavutil/imgutils.h>
 #include "libmpcodecs/vf_scale.h"
 #include "mp_msg.h"
 #include "old_vo_wrapper.h"
