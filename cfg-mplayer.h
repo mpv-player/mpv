@@ -278,7 +278,9 @@ const m_option_t mplayer_opts[]={
 
     OPT_FLAG_CONSTANTS("noloop", loop_times, 0, 0, -1),
     OPT_INTRANGE("loop", loop_times, 0, -1, 10000),
-    {"playlist", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG, 0, 0, NULL},
+    {"shuffle", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
+    {"noshuffle", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
 
     OPT_MAKE_FLAGS("ordered-chapters", ordered_chapters, 0),
     OPT_INTRANGE("chapter-merge-threshold", chapter_merge_threshold, 0, 0, 10000),
