@@ -865,22 +865,18 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 	        }
 	    }
 
-            if(id == -2) { // no sound
-                i = -1;
-            } else if(id == -1) { // next track
+            if (id == -1) {   // next track
                 i = (curridx + 2) % (nstreams + 1) - 1;
                 if (i >= 0)
                     newid = pstreams[i];
-	    }
-	    else // select track by id
-	    {
-	        if (id >= 0 && id < nstreams) {
-	            i = id;
-	            newid = pstreams[i];
-	        }
-	    }
+	    } else if (id >= 0 && id < nstreams) {   // select track by id
+                i = id;
+                newid = pstreams[i];
+	    } else   // no sound
+                i = -1;
+
 	    if (i == curridx) {
-                *(int *) arg = curridx;
+                *(int *) arg = curridx < 0 ? -2 : curridx;
                 return DEMUXER_CTRL_OK;
             } else {
 	        ds_free_packs(ds);
