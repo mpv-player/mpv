@@ -428,7 +428,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 int biClrUsed;
                 int biClrImportant;
             */
-            if(demuxer->video->id != i && demuxer->video->id != -1)
+            if(demuxer->video->id != priv->video_streams
+               && demuxer->video->id != -1)
                 st->discard= AVDISCARD_ALL;
             else{
                 demuxer->video->id = i;
