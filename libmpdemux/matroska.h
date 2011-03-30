@@ -35,6 +35,7 @@
 #define MKV_A_AAC        "A_AAC"
 #define MKV_A_AC3        "A_AC3"
 #define MKV_A_DTS        "A_DTS"
+#define MKV_A_EAC3       "A_EAC3"
 #define MKV_A_MP2        "A_MPEG/L2"
 #define MKV_A_MP3        "A_MPEG/L3"
 #define MKV_A_PCM        "A_PCM/INT/LIT"
