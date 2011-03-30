@@ -1351,11 +1351,15 @@ int demuxer_switch_audio(demuxer_t *demuxer, int index)
 int demuxer_switch_video(demuxer_t *demuxer, int index)
 {
     int res = demux_control(demuxer, DEMUXER_CTRL_SWITCH_VIDEO, &index);
-    if (res == DEMUXER_CTRL_NOTIMPL)
-        index = demuxer->video->id;
-    if (demuxer->video->id >= 0)
-        demuxer->video->sh = demuxer->v_streams[demuxer->video->id];
-    else
+    if (res == DEMUXER_CTRL_NOTIMPL) {
+        struct sh_video *sh_video = demuxer->video->sh;
+        return sh_video ? sh_video->vid : -2;
+    }
+    if (demuxer->video->id >= 0) {
+        struct sh_video *sh_video = demuxer->v_streams[demuxer->video->id];
+        demuxer->video->sh = sh_video;
+        index = sh_video->vid; // internal MPEG demuxers don't set it right
+    } else
         demuxer->video->sh = NULL;
     return index;
 }
