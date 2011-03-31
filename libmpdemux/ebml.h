@@ -76,12 +76,6 @@ struct ebml_parse_ctx {
 #define MATROSKA_TRACK_SUBTITLE 0x11 /* text-subtitles */
 #define MATROSKA_TRACK_CONTROL  0x20 /* control-codes for menu or other stuff*/
 
-/* matroska subtitle types */
-#define MATROSKA_SUBTYPE_UNKNOWN   0
-#define MATROSKA_SUBTYPE_TEXT      1
-#define MATROSKA_SUBTYPE_SSA       2
-#define MATROSKA_SUBTYPE_VOBSUB    3
-
 #ifndef UINT64_MAX
 #define UINT64_MAX 18446744073709551615ULL
 #endif

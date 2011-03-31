@@ -604,17 +604,15 @@ static void parse_trackentry(struct demuxer *demuxer,
             || !strcmp(track->codec_id, MKV_A_ACM))
             track->ms_compat = 1;
         else if (!strcmp(track->codec_id, MKV_S_VOBSUB))
-            track->subtitle_type = MATROSKA_SUBTYPE_VOBSUB;
+            track->subtitle_type = 'v';
         else if (!strcmp(track->codec_id, MKV_S_TEXTSSA)
                  || !strcmp(track->codec_id, MKV_S_TEXTASS)
                  || !strcmp(track->codec_id, MKV_S_SSA)
-                 || !strcmp(track->codec_id, MKV_S_ASS)) {
-            track->subtitle_type = MATROSKA_SUBTYPE_SSA;
-        } else if (!strcmp(track->codec_id, MKV_S_TEXTASCII))
-            track->subtitle_type = MATROSKA_SUBTYPE_TEXT;
-        if (!strcmp(track->codec_id, MKV_S_TEXTUTF8)) {
-            track->subtitle_type = MATROSKA_SUBTYPE_TEXT;
-        }
+                 || !strcmp(track->codec_id, MKV_S_ASS))
+            track->subtitle_type = 'a';
+        else if (!strcmp(track->codec_id, MKV_S_TEXTASCII)
+                   || !strcmp(track->codec_id, MKV_S_TEXTUTF8))
+            track->subtitle_type = 't';
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Codec ID: %s\n",
                track->codec_id);
     } else
@@ -1567,16 +1565,12 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
 static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track,
                               int sid)
 {
-    if (track->subtitle_type != MATROSKA_SUBTYPE_UNKNOWN) {
+    if (track->subtitle_type) {
         int size;
         uint8_t *buffer;
         sh_sub_t *sh = new_sh_sub(demuxer, sid);
         track->sh_sub = sh;
-        sh->type = 't';
-        if (track->subtitle_type == MATROSKA_SUBTYPE_VOBSUB)
-            sh->type = 'v';
-        if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
-            sh->type = 'a';
+        sh->type = track->subtitle_type;
         size = track->private_size;
         demux_mkv_decode(track, track->private_data, &buffer, &size, 2);
         if (buffer && buffer != track->private_data) {
