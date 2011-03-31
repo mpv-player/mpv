@@ -1867,26 +1867,6 @@ static int demux_mkv_read_block_lacing(uint8_t *buffer, uint64_t *size,
     return 1;
 }
 
-static void handle_subtitles(demuxer_t *demuxer, mkv_track_t *track,
-                             char *block, int64_t size,
-                             uint64_t block_duration, uint64_t timecode)
-{
-    demux_packet_t *dp;
-
-    if (block_duration == 0) {
-        mp_msg(MSGT_DEMUX, MSGL_WARN,
-               "[mkv] Warning: No BlockDuration for subtitle track found.\n");
-        return;
-    }
-
-    sub_utf8 = 1;
-    dp = new_demux_packet(size);
-    memcpy(dp->buffer, block, size);
-    dp->pts = timecode / 1e9;
-    dp->duration = block_duration / 1e9;
-    ds_add_packet(demuxer->sub, dp);
-}
-
 static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
                              uint8_t *buffer, uint32_t size, int64_t block_bref)
 {
@@ -2101,15 +2081,12 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
     } else if (track->type == MATROSKA_TRACK_SUBTITLE
                && track->id == demuxer->sub->id) {
         ds = demuxer->sub;
-        if (track->subtitle_type != MATROSKA_SUBTYPE_VOBSUB) {
-            uint8_t *buffer;
-            int size = length;
-            demux_mkv_decode(track, block, &buffer, &size, 1);
-            handle_subtitles(demuxer, track, buffer, size, block_duration, tc);
-            if (buffer != block)
-                talloc_free(buffer);
+        if (laces > 1) {
+            mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Subtitles use Matroska "
+                   "lacing. This is abnormal and not supported.\n");
             use_this_block = 0;
         }
+        sub_utf8 = 1; // XXX this variable should be eventually removed
     } else
         use_this_block = 0;
 
@@ -2142,6 +2119,7 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
                     if (i == 0 || track->default_duration)
                         dp->pts =
                             mkv_d->last_pts + i * track->default_duration;
+                    dp->duration = block_duration / 1e9;
                     ds_add_packet(ds, dp);
                 }
             }
