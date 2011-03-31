@@ -180,6 +180,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     char *buf, *src, *dest;
     int max_output_len;
     int frame_num = (data->len + s->pending_len) / s->expect_len;
+    int samplesize = af_fmt2bits(s->in_sampleformat) / 8;
 
     if (s->add_iec61937_header)
         max_output_len = AC3_FRAME_SIZE * 2 * 2 * frame_num;
@@ -230,7 +231,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
                                     AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
                                     AF_CHANNEL_LAYOUT_LAVC_DEFAULT,
                                     c->nch,
-                                    s->expect_len / 2, 2);
+                                    s->expect_len / samplesize, samplesize);
 
             len = avcodec_encode_audio(s->lavc_actx, dest, destsize,
                                        (void *)s->pending_data);
@@ -242,7 +243,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
                                     AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
                                     AF_CHANNEL_LAYOUT_LAVC_DEFAULT,
                                     c->nch,
-                                    s->expect_len / 2, 2);
+                                    s->expect_len / samplesize, samplesize);
             len = avcodec_encode_audio(s->lavc_actx,dest,destsize,(void *)src);
             src += s->expect_len;
             left -= s->expect_len;
