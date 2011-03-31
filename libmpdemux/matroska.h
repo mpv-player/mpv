@@ -78,6 +78,7 @@
 #define MKV_S_TEXTSSA    "S_TEXT/SSA"
 #define MKV_S_TEXTASS    "S_TEXT/ASS"
 #define MKV_S_VOBSUB     "S_VOBSUB"
+#define MKV_S_PGS        "S_HDMV/PGS"
 #define MKV_S_SSA        "S_SSA" // Deprecated
 #define MKV_S_ASS        "S_ASS" // Deprecated
 

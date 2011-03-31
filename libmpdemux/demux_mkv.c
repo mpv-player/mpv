@@ -613,6 +613,8 @@ static void parse_trackentry(struct demuxer *demuxer,
         else if (!strcmp(track->codec_id, MKV_S_TEXTASCII)
                    || !strcmp(track->codec_id, MKV_S_TEXTUTF8))
             track->subtitle_type = 't';
+        else if (!strcmp(track->codec_id, MKV_S_PGS))
+            track->subtitle_type = 'p';
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Codec ID: %s\n",
                track->codec_id);
     } else
