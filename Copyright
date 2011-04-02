@@ -21,16 +21,6 @@ Copyright:  Many, see individual files for copyright notices.
 License:    GNU Lesser General Public License
 
 
-Name:       mpg123
-Version:    0.59s + significant changes
-URL:        http://www.mpg123.de/
-Directory:  mp3lib
-Copyright:  1995-1999 by Michael Hipp
-            2004 Romain Dolbeau <romain@dolbeau.org>
-            2006 Zuxy Meng <zuxy.meng@gmail.com
-License:    GNU General Public License
-
-
 Name:       avifile DLL loader
 Version:    0.47 + patches + CVS updates
 URL:        http://avifile.sourceforge.net/

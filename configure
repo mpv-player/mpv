@@ -376,7 +376,6 @@ Codecs:
   --disable-mad             disable libmad (MPEG audio) support [autodetect]
   --enable-xmms             enable XMMS input plugin support [disabled]
   --enable-libdca           enable libdca support [autodetect]
-  --disable-mp3lib          disable builtin mp3lib [autodetect]
   --disable-liba52          disable liba52 [autodetect]
   --enable-musepack         enable libmpcdec support (deprecated, libavcodec
                             Musepack decoder is preferred) [disabled]
@@ -610,7 +609,6 @@ _libvorbis=auto
 _speex=auto
 _theora=auto
 _mpg123=auto
-_mp3lib=auto
 _liba52=auto
 _libdca=auto
 _faad=auto
@@ -965,8 +963,6 @@ for ac_option do
   --disable-theora)     _theora=no      ;;
   --enable-mpg123)      _mpg123=yes     ;;
   --disable-mpg123)     _mpg123=no      ;;
-  --enable-mp3lib)      _mp3lib=yes     ;;
-  --disable-mp3lib)     _mp3lib=no      ;;
   --enable-liba52)      _liba52=yes     ;;
   --disable-liba52)     _liba52=no      ;;
   --enable-libdca)      _libdca=yes     ;;
@@ -5742,19 +5738,6 @@ else
 fi
 echores "$_theora"
 
-echocheck "mp3lib support"
-if test "$_mp3lib" = auto ; then
-  test "$cc_vendor" = intel && test "$_cc_major" -le 10 -o "$_cc_major" -eq 11 -a "$_cc_minor" -eq 0 && _mp3lib=no || _mp3lib=yes
-fi
-if test "$_mp3lib" = yes ; then
-  def_mp3lib='#define CONFIG_MP3LIB 1'
-  codecmodules="mp3lib(internal) $codecmodules"
-else
-  def_mp3lib='#undef CONFIG_MP3LIB'
-  nocodecmodules="mp3lib(internal) $nocodecmodules"
-fi
-echores "$_mp3lib"
-
 # Any version of libmpg123 shall be fine.
 echocheck "mpg123 support"
 def_mpg123='#undef CONFIG_MPG123'
@@ -6834,7 +6817,6 @@ MACOSX_FINDER = $_macosx_finder
 MD5SUM = $_md5sum
 MGA = $_mga
 MNG = $_mng
-MP3LIB = $_mp3lib
 MPG123 = $_mpg123
 MUSEPACK = $_musepack
 NAS = $_nas
@@ -7095,7 +7077,6 @@ $def_liba52
 $def_libdca
 $def_libdv
 $def_mad
-$def_mp3lib
 $def_mpg123
 $def_musepack
 $def_speex
