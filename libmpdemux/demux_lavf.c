@@ -357,12 +357,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             if (st->disposition & AV_DISPOSITION_DEFAULT)
               sh_audio->default_track = 1;
             if(mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf, MSGL_V);
-            // select the first audio stream
-            if (!demuxer->audio->sh) {
-                demuxer->audio->id = i;
-                demuxer->audio->sh= demuxer->a_streams[i];
-            } else
-                st->discard= AVDISCARD_ALL;
+            st->discard= AVDISCARD_ALL;
             stream_id = priv->audio_streams++;
             break;
         }
@@ -611,8 +606,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     mp_msg(MSGT_HEADER,MSGL_V,"LAVF: %d audio and %d video streams found\n",priv->audio_streams,priv->video_streams);
     mp_msg(MSGT_HEADER,MSGL_V,"LAVF: build %d\n", LIBAVFORMAT_BUILD);
-    if(!priv->audio_streams) demuxer->audio->id=-2;  // nosound
-//    else if(best_audio > 0 && demuxer->audio->id == -1) demuxer->audio->id=best_audio;
+    demuxer->audio->id = -2;  // wait for higher-level code to select track
     if(!priv->video_streams){
         if(!priv->audio_streams){
 	    mp_msg(MSGT_HEADER,MSGL_ERR,"LAVF: no audio or video headers found - broken file?\n");
