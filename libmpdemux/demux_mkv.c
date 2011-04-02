@@ -867,7 +867,7 @@ static int demux_mkv_read_tags(demuxer_t *demuxer)
             tag.targets.target_chapter_uid || tag.targets.target_attachment_uid)
             continue;
 
-        for (int j; j < tag.n_simple_tag; j++)
+        for (int j = 0; j < tag.n_simple_tag; j++)
             demux_info_add_bstr(demuxer, tag.simple_tag[j].tag_name, tag.simple_tag[j].tag_string);
     }
 
