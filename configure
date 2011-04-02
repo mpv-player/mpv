@@ -507,8 +507,6 @@ Use these options if autodetection fails:
   --with-xvmclib=NAME         adapter-specific library name (e.g. XvMCNVIDIA)
 
   --with-freetype-config=PATH path to freetype-config
-  --with-glib-config=PATH     path to glib*-config
-  --with-gtk-config=PATH      path to gtk*-config
   --with-sdl-config=PATH      path to sdl*-config
   --with-dvdnav-config=PATH   path to dvdnav-config
   --with-dvdread-config=PATH  path to dvdread-config
@@ -661,8 +659,6 @@ _lirc=auto
 _lircc=auto
 _apple_remote=auto
 _apple_ir=auto
-_gui=no
-_gtk1=no
 _termcap=auto
 _termios=auto
 _3dfx=no
@@ -760,12 +756,6 @@ for ac_option do
     ;;
   --with-freetype-config=*)
     _freetypeconfig=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --with-gtk-config=*)
-    _gtkconfig=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --with-glib-config=*)
-    _glibconfig=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --with-dvdnav-config=*)
     _dvdnavconfig=$(echo $ac_option | cut -d '=' -f 2)
@@ -1062,10 +1052,6 @@ for ac_option do
   --disable-apple-remote) _apple_remote=no  ;;
   --enable-apple-ir)    _apple_ir=yes   ;;
   --disable-apple-ir)   _apple_ir=no    ;;
-  --enable-gui)         _gui=yes        ;;
-  --disable-gui)        _gui=no         ;;
-  --enable-gtk1)        _gtk1=yes       ;;
-  --disable-gtk1)       _gtk1=no        ;;
   --enable-termcap)     _termcap=yes    ;;
   --disable-termcap)    _termcap=no     ;;
   --enable-termios)     _termios=yes    ;;
@@ -1210,11 +1196,6 @@ for ac_option do
 
   esac
 done
-
-if test "$_gui" = yes ; then
-    die "Internal GUI was removed from MPlayer. Please use one of many available\n frontends\
- (http://www.mplayerhq.hu/design7/projects.html#mplayer_frontends)."
-fi
 
 # Atmos: moved this here, to be correct, if --prefix is specified
 test -z "$_bindir"  && _bindir="$_prefix/bin"
