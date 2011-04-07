@@ -2378,9 +2378,12 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     double tt;
     int playsize;
     int playflags=0;
-    int audio_eof=0;
+    bool audio_eof = false;
+    bool partial_fill = false;
     bool format_change = false;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
+    bool modifiable_audio_format = !(ao_data.format & AF_FORMAT_SPECIAL_MASK);
+    int unitsize = ao_data.channels * af_fmt2bits(ao_data.format) / 8;
 
     current_module="play_audio";
 
@@ -2406,7 +2409,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     current_module="decode_audio";
     t = GetTimer();
 
-    if (!opts->initial_audio_sync || (ao_data.format & AF_FORMAT_SPECIAL_MASK))
+    if (!opts->initial_audio_sync || !modifiable_audio_format)
         mpctx->syncing_audio = false;
 
     int res;
@@ -2418,23 +2421,33 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
         if (res == -2)
             format_change = true;
         else if (res == ASYNC_PLAY_DONE)
-            return 1;
-        else if (mpctx->d_audio->eof) {
-            audio_eof = 1;
-            int unitsize = ao_data.channels * af_fmt2bits(ao_data.format) / 8;
-            if (sh_audio->a_out_buffer_len < unitsize)
-                return 0;
-        }
+            return 0;
+        else if (mpctx->d_audio->eof)
+            audio_eof = true;
     }
     t = GetTimer() - t;
     tt = t*0.000001f; audio_time_usage+=tt;
+    if (mpctx->timeline && modifiable_audio_format) {
+        double endpts = mpctx->timeline[mpctx->timeline_part + 1].start;
+        double bytes = (endpts - written_audio_pts(mpctx) + audio_delay)
+            * ao_data.bps / opts->playback_speed;
+        if (playsize > bytes) {
+            playsize = FFMAX(bytes, 0);
+            playflags |= AOPLAY_FINAL_CHUNK;
+            audio_eof = true;
+            partial_fill = true;
+        }
+    }
+
     if (playsize > sh_audio->a_out_buffer_len) {
+        partial_fill = true;
         playsize = sh_audio->a_out_buffer_len;
         if (audio_eof)
             playflags |= AOPLAY_FINAL_CHUNK;
     }
+    playsize -= playsize % unitsize;
     if (!playsize)
-        return 1;
+        return partial_fill && audio_eof ? -2 : -partial_fill;
 
     // play audio:
     current_module="play_audio";
@@ -2464,13 +2477,14 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     if (format_change) {
         uninit_player(mpctx, INITIALIZED_AO);
         reinit_audio_chain(mpctx);
+        return -1;
     }
 
-    return 1;
+    return -partial_fill;
 }
 
 static int sleep_until_near_frame(struct MPContext *mpctx, float *time_frame,
-                                  float *aq_sleep_time)
+                                  bool sync_to_audio, float *aq_sleep_time)
 {
     struct MPOpts *opts = &mpctx->opts;
     double audio_limit = 2;
@@ -2481,7 +2495,7 @@ static int sleep_until_near_frame(struct MPContext *mpctx, float *time_frame,
 
     *time_frame -= get_relative_time(mpctx); // reset timer
 
-    if (mpctx->sh_audio && !mpctx->d_audio->eof) {
+    if (sync_to_audio) {
 	float delay = mpctx->audio_out->get_delay();
 	mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "delay=%f\n", delay);
 
@@ -3310,6 +3324,7 @@ static void run_playloop(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     float aq_sleep_time = 0;
+    bool full_audio_buffers = false;
 
     if (opts->chapterrange[1] > 0) {
         int cur_chapter = get_current_chapter(mpctx);
@@ -3326,11 +3341,14 @@ static void run_playloop(struct MPContext *mpctx)
 /*========================== PLAY AUDIO ============================*/
 
     if (mpctx->sh_audio && !mpctx->paused
-        && (!mpctx->restart_playback || !mpctx->sh_video))
-        if (!fill_audio_out_buffers(mpctx))
+        && (!mpctx->restart_playback || !mpctx->sh_video)) {
+        int status = fill_audio_out_buffers(mpctx);
+        full_audio_buffers = status >= 0;
+        if (status == -2)
             // at eof, all audio at least written to ao
             if (!mpctx->sh_video)
                 mpctx->stop_play = AT_END_OF_FILE;
+    }
 
 
     if (!mpctx->sh_video) {
@@ -3413,6 +3431,7 @@ static void run_playloop(struct MPContext *mpctx)
 
         bool frame_time_remaining = sleep_until_near_frame(mpctx,
                                                            &mpctx->time_frame,
+                                                           full_audio_buffers,
                                                            &aq_sleep_time);
 
 //====================== FLIP PAGE (VIDEO BLT): =========================
