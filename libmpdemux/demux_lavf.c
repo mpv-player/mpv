@@ -615,6 +615,9 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         demuxer->video->id=-2; // audio-only
     } //else if (best_video > 0 && demuxer->video->id == -1) demuxer->video->id = best_video;
 
+    // disabled because unreliable per-stream bitrate values returned
+    // by libavformat trigger this heuristic incorrectly and break things
+#if 0
     /* libavformat sets bitrate for mpeg based on pts at start and end
      * of file, which fails for files with pts resets. So calculate our
      * own bitrate estimate. */
@@ -630,6 +633,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         if (!priv->bitrate)
             priv->bitrate = 1440000;
     }
+#endif
     demuxer->accurate_seek = !priv->seek_by_bytes;
 
     return demuxer;
