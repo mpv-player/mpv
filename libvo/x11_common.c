@@ -1104,10 +1104,6 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     // map window
     XMapWindow(mDisplay, x11->window);
     vo_x11_clearwindow(vo, x11->window);
-    // wait for map
-    do {
-      XNextEvent(mDisplay, &xev);
-    } while (xev.type != MapNotify || xev.xmap.event != x11->window);
     XSelectInput(mDisplay, x11->window, NoEventMask);
     XSync(mDisplay, False);
     vo_x11_selectinput_witherr(mDisplay, x11->window,
