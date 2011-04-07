@@ -88,6 +88,7 @@ elements_matroska = (
                 'Language, 22b59c, str',
                 'CodecID, 86, str',
                 'CodecPrivate, 63a2, binary',
+                'CodecName, 258688, str',
                 'CodecDecodeAll, aa, uint',
                 'Video, e0, sub', (
                     'FlagInterlaced, 9a, uint',
