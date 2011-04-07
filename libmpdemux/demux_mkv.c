@@ -184,6 +184,7 @@ typedef struct mkv_demuxer {
     int v_skip_to_keyframe, a_skip_to_keyframe;
 
     int num_audio_tracks;
+    int num_video_tracks;
 } mkv_demuxer_t;
 
 #define REALHEADER_SIZE    16
@@ -1112,6 +1113,7 @@ static void display_create_tracks(demuxer_t *demuxer)
                     str);
     }
     mkv_d->num_audio_tracks = aid;
+    mkv_d->num_video_tracks = vid;
 }
 
 typedef struct {
@@ -2480,6 +2482,21 @@ static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)
         if (current_aid != new_aid)
             ds_free_packs(demuxer->audio);
         demuxer->audio->id = new_aid;
+        return DEMUXER_CTRL_OK;
+
+    case DEMUXER_CTRL_SWITCH_VIDEO:;
+        int new_vid = *(int *) arg;
+        int current_vid = demuxer->video->id;
+        if (current_vid < 0)
+            current_vid = -1;
+        if (new_vid == -1)  // cycle to next
+            new_vid = (current_vid + 2) % (mkv_d->num_video_tracks + 1) - 1;
+        if (new_vid < 0 || new_vid >= mkv_d->num_video_tracks)
+            new_vid = -2;
+        *(int *) arg = new_vid;
+        if (current_vid != new_vid)
+            ds_free_packs(demuxer->video);
+        demuxer->video->id = new_vid;
         return DEMUXER_CTRL_OK;
 
     default:
