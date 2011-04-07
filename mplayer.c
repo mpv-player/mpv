@@ -2387,23 +2387,11 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
 
     current_module="play_audio";
 
-    while (1) {
-	int sleep_time;
-	// all the current uses of ao_data.pts seem to be in aos that handle
-	// sync completely wrong; there should be no need to use ao_data.pts
-	// in get_space()
-	ao_data.pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
-	playsize = mpctx->audio_out->get_space();
-	if (mpctx->sh_video || playsize >= ao_data.outburst)
-	    break;
-
-	// handle audio-only case:
-	// this is where mplayer sleeps during audio-only playback
-	// to avoid 100% CPU use
-	sleep_time = (ao_data.outburst - playsize) * 1000 / ao_data.bps;
-	if (sleep_time < 10) sleep_time = 10; // limit to 100 wakeups per second
-	usec_sleep(sleep_time * 1000);
-    }
+    // all the current uses of ao_data.pts seem to be in aos that handle
+    // sync completely wrong; there should be no need to use ao_data.pts
+    // in get_space()
+    ao_data.pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
+    playsize = mpctx->audio_out->get_space();
 
     // Fill buffer if needed:
     current_module="decode_audio";
@@ -3366,10 +3354,14 @@ static void run_playloop(struct MPContext *mpctx)
 
         print_status(mpctx, a_pos, false);
 
-        if (end_at.type == END_AT_TIME && end_at.pos < a_pos)
-            mpctx->stop_play = PT_NEXT_ENTRY;
         update_subtitles(mpctx, a_pos, mpctx->video_offset, false);
         update_osd_msg(mpctx);
+        if (end_at.type == END_AT_TIME && end_at.pos < a_pos) {
+            mpctx->stop_play = AT_END_OF_FILE;
+        } else if (!mpctx->stop_play) {
+            int sleep_time = full_audio_buffers || !mpctx->sh_audio ? 100 : 20;
+            mp_input_get_cmd(mpctx->input, sleep_time, true);
+        }
     } else {
 
 /*========================== PLAY VIDEO ============================*/
