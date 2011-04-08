@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "config.h"
 #include "mp_msg.h"
 #include "path.h"
@@ -41,6 +42,8 @@
 #include <windows.h>
 #include <sys/cygwin.h>
 #endif
+
+#include "talloc.h"
 
 #include "osdep/osdep.h"
 
@@ -194,7 +197,7 @@ void set_codec_path(const char *path)
     needs_free = 1;
 }
 
-const char *mp_basename(const char *path)
+char *mp_basename(const char *path)
 {
     char *s;
 
@@ -207,5 +210,41 @@ const char *mp_basename(const char *path)
         path = s + 1;
 #endif
     s = strrchr(path, '/');
-    return s ? s + 1 : path;
+    return s ? s + 1 : (char *)path;
+}
+
+struct bstr mp_dirname(const char *path)
+{
+    struct bstr ret = {(uint8_t *)path, mp_basename(path) - path};
+    if (ret.len == 0)
+        return BSTR(".");
+    return ret;
+}
+
+char *mp_path_join(void *talloc_ctx, struct bstr p1, struct bstr p2)
+{
+    if (p1.len == 0)
+        return bstrdup0(talloc_ctx, p2);
+    if (p2.len == 0)
+        return bstrdup0(talloc_ctx, p1);
+
+#if HAVE_DOS_PATHS
+    if (p2.len >= 2 && p2.start[1] == ':'
+        || p2.start[0] == '\\' || p2.start[0] == '/')
+#else
+    if (p2.start[0] == '/')
+#endif
+        return bstrdup0(talloc_ctx, p2);   // absolute path
+
+    bool have_separator;
+    int endchar1 = p1.start[p1.len - 1];
+#if HAVE_DOS_PATHS
+    have_separator = endchar1 == '/' || endchar1 == '\\'
+        || p1.len == 2 && endchar1 == ':';     // "X:" only
+#else
+    have_separator = endchar1 == '/';
+#endif
+
+    return talloc_asprintf(talloc_ctx, "%.*s%s%.*s", BSTR_P(p1),
+                           have_separator ? "" : "/", BSTR_P(p2));
 }

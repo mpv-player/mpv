@@ -28,6 +28,8 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
+#include "bstr.h"
+
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
@@ -331,6 +333,14 @@ inline static int stream_skip(stream_t *s,off_t len){
 }
 
 struct MPOpts;
+/*
+ * Return allocated buffer for all data until EOF.
+ * If amount of data would be more than max_size return NULL as data ptr.
+ * Make the allocated buffer padding_bytes larger than the data read.
+ * Write number of bytes read at *amount_read.
+ */
+struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
+                                 int max_size, int padding_bytes);
 void stream_reset(stream_t *s);
 int stream_control(stream_t *s, int cmd, void *arg);
 stream_t* new_stream(int fd,int type);
@@ -341,6 +351,9 @@ stream_t *open_stream(const char *filename, struct MPOpts *options,
 stream_t *open_stream_full(const char *filename,int mode,
                            struct MPOpts *options, int *file_format);
 stream_t *open_output_stream(const char *filename, struct MPOpts *options);
+struct demux_stream;
+struct stream *new_ds_stream(struct demux_stream *ds);
+
 /// Set the callback to be used by libstream to check for user
 /// interruption during long blocking operations (cache filling, etc).
 struct input_ctx;

@@ -100,7 +100,6 @@
 
 #include "osdep/getch2.h"
 #include "osdep/timer.h"
-#include "osdep/findfiles.h"
 
 #include "input/input.h"
 
@@ -2379,35 +2378,26 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     double tt;
     int playsize;
     int playflags=0;
-    int audio_eof=0;
+    bool audio_eof = false;
+    bool partial_fill = false;
     bool format_change = false;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
+    bool modifiable_audio_format = !(ao_data.format & AF_FORMAT_SPECIAL_MASK);
+    int unitsize = ao_data.channels * af_fmt2bits(ao_data.format) / 8;
 
     current_module="play_audio";
 
-    while (1) {
-	int sleep_time;
-	// all the current uses of ao_data.pts seem to be in aos that handle
-	// sync completely wrong; there should be no need to use ao_data.pts
-	// in get_space()
-	ao_data.pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
-	playsize = mpctx->audio_out->get_space();
-	if (mpctx->sh_video || playsize >= ao_data.outburst)
-	    break;
-
-	// handle audio-only case:
-	// this is where mplayer sleeps during audio-only playback
-	// to avoid 100% CPU use
-	sleep_time = (ao_data.outburst - playsize) * 1000 / ao_data.bps;
-	if (sleep_time < 10) sleep_time = 10; // limit to 100 wakeups per second
-	usec_sleep(sleep_time * 1000);
-    }
+    // all the current uses of ao_data.pts seem to be in aos that handle
+    // sync completely wrong; there should be no need to use ao_data.pts
+    // in get_space()
+    ao_data.pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
+    playsize = mpctx->audio_out->get_space();
 
     // Fill buffer if needed:
     current_module="decode_audio";
     t = GetTimer();
 
-    if (!opts->initial_audio_sync || (ao_data.format & AF_FORMAT_SPECIAL_MASK))
+    if (!opts->initial_audio_sync || !modifiable_audio_format)
         mpctx->syncing_audio = false;
 
     int res;
@@ -2419,23 +2409,33 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
         if (res == -2)
             format_change = true;
         else if (res == ASYNC_PLAY_DONE)
-            return 1;
-        else if (mpctx->d_audio->eof) {
-            audio_eof = 1;
-            int unitsize = ao_data.channels * af_fmt2bits(ao_data.format) / 8;
-            if (sh_audio->a_out_buffer_len < unitsize)
-                return 0;
-        }
+            return 0;
+        else if (mpctx->d_audio->eof)
+            audio_eof = true;
     }
     t = GetTimer() - t;
     tt = t*0.000001f; audio_time_usage+=tt;
+    if (mpctx->timeline && modifiable_audio_format) {
+        double endpts = mpctx->timeline[mpctx->timeline_part + 1].start;
+        double bytes = (endpts - written_audio_pts(mpctx) + audio_delay)
+            * ao_data.bps / opts->playback_speed;
+        if (playsize > bytes) {
+            playsize = FFMAX(bytes, 0);
+            playflags |= AOPLAY_FINAL_CHUNK;
+            audio_eof = true;
+            partial_fill = true;
+        }
+    }
+
     if (playsize > sh_audio->a_out_buffer_len) {
+        partial_fill = true;
         playsize = sh_audio->a_out_buffer_len;
         if (audio_eof)
             playflags |= AOPLAY_FINAL_CHUNK;
     }
+    playsize -= playsize % unitsize;
     if (!playsize)
-        return 1;
+        return partial_fill && audio_eof ? -2 : -partial_fill;
 
     // play audio:
     current_module="play_audio";
@@ -2465,13 +2465,14 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     if (format_change) {
         uninit_player(mpctx, INITIALIZED_AO);
         reinit_audio_chain(mpctx);
+        return -1;
     }
 
-    return 1;
+    return -partial_fill;
 }
 
 static int sleep_until_near_frame(struct MPContext *mpctx, float *time_frame,
-                                  float *aq_sleep_time)
+                                  bool sync_to_audio, float *aq_sleep_time)
 {
     struct MPOpts *opts = &mpctx->opts;
     double audio_limit = 2;
@@ -2482,7 +2483,7 @@ static int sleep_until_near_frame(struct MPContext *mpctx, float *time_frame,
 
     *time_frame -= get_relative_time(mpctx); // reset timer
 
-    if (mpctx->sh_audio && !mpctx->d_audio->eof) {
+    if (sync_to_audio) {
 	float delay = mpctx->audio_out->get_delay();
 	mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "delay=%f\n", delay);
 
@@ -2533,6 +2534,8 @@ int reinit_video_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     sh_video_t * const sh_video = mpctx->sh_video;
+    if (!sh_video)
+        return 0;
     double ar=-1.0;
     //================== Init VIDEO (codec & libvo) ==========================
     if (!opts->fixed_vo || !(mpctx->initialized_flags & INITIALIZED_VO)) {
@@ -2984,7 +2987,7 @@ static void reinit_decoders(struct MPContext *mpctx)
     mp_property_do("sub", M_PROPERTY_SET, &(int){mpctx->global_sub_pos}, mpctx);
 }
 
-static void seek_reset(struct MPContext *mpctx)
+static void seek_reset(struct MPContext *mpctx, bool reset_ao)
 {
     if (mpctx->sh_video) {
 	current_module = "seek_video_reset";
@@ -3010,7 +3013,9 @@ static void seek_reset(struct MPContext *mpctx)
     if (mpctx->sh_audio) {
 	current_module = "seek_audio_reset";
         resync_audio_stream(mpctx->sh_audio);
-	mpctx->audio_out->reset(); // stop audio, throwing away buffered data
+        if (reset_ao)
+            // stop audio, throwing away buffered data
+            mpctx->audio_out->reset();
 	mpctx->sh_audio->a_buffer_len = 0;
 	mpctx->sh_audio->a_out_buffer_len = 0;
 	if (!mpctx->sh_video)
@@ -3042,7 +3047,11 @@ static bool timeline_set_part(struct MPContext *mpctx, int i)
     mpctx->video_offset = n->start - n->source_start;
     if (n->source == p->source)
         return false;
-    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts.fixed_vo && mpctx->opts.video_id != -2 ? 0 : INITIALIZED_VO) | INITIALIZED_AO | INITIALIZED_ACODEC | INITIALIZED_SUB);
+    enum stop_play_reason orig_stop_play = mpctx->stop_play;
+    if (!mpctx->sh_video && mpctx->stop_play == KEEP_PLAYING)
+        mpctx->stop_play = AT_END_OF_FILE;  // let audio uninit drain data
+    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts.fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts.gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_ACODEC | INITIALIZED_SUB);
+    mpctx->stop_play = orig_stop_play;
     mpctx->demuxer = n->source->demuxer;
     mpctx->d_video = mpctx->demuxer->video;
     mpctx->d_audio = mpctx->demuxer->audio;
@@ -3071,7 +3080,8 @@ static double timeline_set_from_time(struct MPContext *mpctx, double pts,
 
 
 // return -1 if seek failed (non-seekable stream?), 0 otherwise
-static int seek(MPContext *mpctx, struct seek_params seek)
+static int seek(MPContext *mpctx, struct seek_params seek,
+                bool timeline_fallthrough)
 {
     struct MPOpts *opts = &mpctx->opts;
 
@@ -3136,7 +3146,7 @@ static int seek(MPContext *mpctx, struct seek_params seek)
     if (seekresult == 0)
 	return -1;
 
-    seek_reset(mpctx);
+    seek_reset(mpctx, !timeline_fallthrough);
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */
@@ -3287,7 +3297,7 @@ int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
                                        chapter_name);
         if (res >= 0) {
             if (*seek_pts == -1)
-                seek_reset(mpctx);
+                seek_reset(mpctx, true);
             else {
                 mpctx->last_chapter_seek = res;
                 mpctx->last_chapter_pts = *seek_pts;
@@ -3313,6 +3323,7 @@ static void run_playloop(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     float aq_sleep_time = 0;
+    bool full_audio_buffers = false;
 
     if (opts->chapterrange[1] > 0) {
         int cur_chapter = get_current_chapter(mpctx);
@@ -3329,11 +3340,14 @@ static void run_playloop(struct MPContext *mpctx)
 /*========================== PLAY AUDIO ============================*/
 
     if (mpctx->sh_audio && !mpctx->paused
-        && (!mpctx->restart_playback || !mpctx->sh_video))
-        if (!fill_audio_out_buffers(mpctx))
+        && (!mpctx->restart_playback || !mpctx->sh_video)) {
+        int status = fill_audio_out_buffers(mpctx);
+        full_audio_buffers = status >= 0;
+        if (status == -2)
             // at eof, all audio at least written to ao
             if (!mpctx->sh_video)
                 mpctx->stop_play = AT_END_OF_FILE;
+    }
 
 
     if (!mpctx->sh_video) {
@@ -3351,10 +3365,28 @@ static void run_playloop(struct MPContext *mpctx)
 
         print_status(mpctx, a_pos, false);
 
-        if (end_at.type == END_AT_TIME && end_at.pos < a_pos)
-            mpctx->stop_play = PT_NEXT_ENTRY;
         update_subtitles(mpctx, a_pos, mpctx->video_offset, false);
         update_osd_msg(mpctx);
+        if (end_at.type == END_AT_TIME && end_at.pos < a_pos) {
+            mpctx->stop_play = AT_END_OF_FILE;
+        } else if (mpctx->timeline && mpctx->stop_play == AT_END_OF_FILE
+                   && mpctx->timeline_part + 1 < mpctx->num_timeline_parts
+                   && mpctx->sh_audio) {
+            struct timeline_part *p = mpctx->timeline + mpctx->timeline_part;
+            double delay = mpctx->audio_out->get_delay();
+            if (!opts->gapless_audio && p->source != (p+1)->source
+                && delay > 0.05) {
+                mpctx->stop_play = KEEP_PLAYING;
+                mp_input_get_cmd(mpctx->input, (delay-.05) * 1000, true);
+            } else {
+                seek(mpctx, (struct seek_params){ .type = MPSEEK_ABSOLUTE,
+                                                  .amount = (p+1)->start },
+                     true);
+            }
+        } else if (!mpctx->stop_play) {
+            int sleep_time = full_audio_buffers || !mpctx->sh_audio ? 100 : 20;
+            mp_input_get_cmd(mpctx->input, sleep_time, true);
+        }
     } else {
 
 /*========================== PLAY VIDEO ============================*/
@@ -3388,7 +3420,8 @@ static void run_playloop(struct MPContext *mpctx)
                 || mpctx->stop_play == AT_END_OF_FILE
                 && mpctx->timeline_part + 1 < mpctx->num_timeline_parts) {
                 seek(mpctx, (struct seek_params){ .type = MPSEEK_ABSOLUTE,
-                                                  .amount = next->start });
+                                                  .amount = next->start },
+                     true);
                 return;
             }
         }
@@ -3415,6 +3448,7 @@ static void run_playloop(struct MPContext *mpctx)
 
         bool frame_time_remaining = sleep_until_near_frame(mpctx,
                                                            &mpctx->time_frame,
+                                                           full_audio_buffers,
                                                            &aq_sleep_time);
 
 //====================== FLIP PAGE (VIDEO BLT): =========================
@@ -3603,215 +3637,9 @@ static void run_playloop(struct MPContext *mpctx)
     }
 
     if (mpctx->seek.type) {
-        seek(mpctx, mpctx->seek);
+        seek(mpctx, mpctx->seek, false);
         mpctx->seek = (struct seek_params){0};
     }
-}
-
-
-static int find_ordered_chapter_sources(struct MPContext *mpctx,
-                                        struct content_source *sources,
-                                        int num_sources,
-                                        unsigned char uid_map[][16])
-{
-    int num_filenames = 0;
-    char **filenames = NULL;
-    if (num_sources > 1) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "This file references data from "
-               "other sources.\n");
-        if (mpctx->stream->type != STREAMTYPE_FILE) {
-            mp_msg(MSGT_CPLAYER, MSGL_WARN, "Playback source is not a "
-                   "normal disk file. Will not search for related files.\n");
-        } else {
-            mp_msg(MSGT_CPLAYER, MSGL_INFO, "Will scan other files in the "
-                   "same directory to find referenced sources.\n");
-            filenames = find_files(mpctx->demuxer->filename, ".mkv",
-                                   &num_filenames);
-        }
-    }
-
-    int num_left = num_sources - 1;
-    for (int i = 0; i < num_filenames && num_left > 0; i++) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Checking file %s\n",
-               filename_recode(filenames[i]));
-        int format;
-        struct stream *s = open_stream(filenames[i], &mpctx->opts, &format);
-        if (!s)
-            continue;
-        struct demuxer *d = demux_open(&mpctx->opts, s, DEMUXER_TYPE_MATROSKA,
-                                       mpctx->opts.audio_id,
-                                       mpctx->opts.video_id,
-                                       mpctx->opts.sub_id, filenames[i]);
-        if (!d) {
-            free_stream(s);
-            continue;
-        }
-        if (d->file_format == DEMUXER_TYPE_MATROSKA) {
-            for (int i = 1; i < num_sources; i++) {
-                if (sources[i].demuxer)
-                    continue;
-                if (!memcmp(uid_map[i], d->matroska_data.segment_uid, 16)) {
-                    mp_msg(MSGT_CPLAYER, MSGL_INFO,"Match for source %d: %s\n",
-                           i, filename_recode(d->filename));
-                    sources[i].stream = s;
-                    sources[i].demuxer = d;
-                    num_left--;
-                    goto match;
-                }
-            }
-        }
-        free_demuxer(d);
-        free_stream(s);
-        continue;
-    match:
-        ;
-    }
-    talloc_free(filenames);
-    if (num_left) {
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, "Failed to find ordered chapter part!\n"
-               "There will be parts MISSING from the video!\n");
-        for (int i = 1, j = 1; i < num_sources; i++)
-            if (sources[i].demuxer) {
-                sources[j] = sources[i];
-                memcpy(uid_map[j], uid_map[i], 16);
-                j++;
-            }
-    }
-    return num_sources - num_left;
-}
-
-static void build_ordered_chapter_timeline(struct MPContext *mpctx)
-{
-    struct MPOpts *opts = &mpctx->opts;
-
-    if (!opts->ordered_chapters) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "File uses ordered chapters, but "
-               "you have disabled support for them. Ignoring.\n");
-        return;
-    }
-
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "File uses ordered chapters, will build "
-           "edit timeline.\n");
-
-    struct demuxer *demuxer = mpctx->demuxer;
-    struct matroska_data *m = &demuxer->matroska_data;
-
-    // +1 because sources/uid_map[0] is original file even if all chapters
-    // actually use other sources and need separate entries
-    struct content_source *sources = talloc_array_ptrtype(NULL, sources,
-                                                   m->num_ordered_chapters+1);
-    sources[0].stream = mpctx->stream;
-    sources[0].demuxer = mpctx->demuxer;
-    unsigned char uid_map[m->num_ordered_chapters+1][16];
-    int num_sources = 1;
-    memcpy(uid_map[0], m->segment_uid, 16);
-
-    for (int i = 0; i < m->num_ordered_chapters; i++) {
-        struct matroska_chapter *c = m->ordered_chapters + i;
-        if (!c->has_segment_uid)
-            memcpy(c->segment_uid, m->segment_uid, 16);
-
-        for (int j = 0; j < num_sources; j++)
-            if (!memcmp(c->segment_uid, uid_map[j], 16))
-                goto found1;
-        memcpy(uid_map[num_sources], c->segment_uid, 16);
-        sources[num_sources] = (struct content_source){};
-        num_sources++;
-    found1:
-        ;
-    }
-
-    num_sources = find_ordered_chapter_sources(mpctx, sources, num_sources,
-                                               uid_map);
-
-
-    // +1 for terminating chapter with start time marking end of last real one
-    struct timeline_part *timeline = talloc_array_ptrtype(NULL, timeline,
-                                                  m->num_ordered_chapters + 1);
-    struct chapter *chapters = talloc_array_ptrtype(NULL, chapters,
-                                                    m->num_ordered_chapters);
-    uint64_t starttime = 0;
-    uint64_t missing_time = 0;
-    int part_count = 0;
-    int num_chapters = 0;
-    uint64_t prev_part_offset = 0;
-    for (int i = 0; i < m->num_ordered_chapters; i++) {
-        struct matroska_chapter *c = m->ordered_chapters + i;
-
-        int j;
-        for (j = 0; j < num_sources; j++) {
-            if (!memcmp(c->segment_uid, uid_map[j], 16))
-                goto found2;
-        }
-        missing_time += c->end - c->start;
-        continue;
-    found2:;
-        /* Only add a separate part if the time or file actually changes.
-         * Matroska files have chapter divisions that are redundant from
-         * timeline point of view because the same chapter structure is used
-         * both to specify the timeline and for normal chapter information.
-         * Removing a missing inserted external chapter can also cause this.
-         * We allow for a configurable fudge factor because of files which
-         * specify chapter end times that are one frame too early;
-         * we don't want to try seeking over a one frame gap. */
-        int64_t join_diff = c->start - starttime - prev_part_offset;
-        if (part_count == 0
-            || FFABS(join_diff) > opts->chapter_merge_threshold * 1000000
-            || sources + j != timeline[part_count - 1].source) {
-            timeline[part_count].source = sources + j;
-            timeline[part_count].start = starttime / 1e9;
-            timeline[part_count].source_start = c->start / 1e9;
-            prev_part_offset = c->start - starttime;
-            part_count++;
-        } else if (part_count > 0 && join_diff) {
-            /* Chapter was merged at an inexact boundary;
-             * adjust timestamps to match. */
-            mp_msg(MSGT_CPLAYER, MSGL_V, "Merging timeline part %d with "
-                   "offset %d ms.\n", i, (int) join_diff);
-            starttime += join_diff;
-        }
-        chapters[num_chapters].start = starttime / 1e9;
-        chapters[num_chapters].name = talloc_strdup(chapters, c->name);
-        starttime += c->end - c->start;
-        num_chapters++;
-    }
-    timeline[part_count].start = starttime / 1e9;
-
-    if (!part_count) {
-        // None of the parts come from the file itself???
-        talloc_free(sources);
-        talloc_free(timeline);
-        talloc_free(chapters);
-        return;
-    }
-
-    mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline contains %d parts from %d "
-           "sources. Total length %.3f seconds.\n", part_count, num_sources,
-           timeline[part_count].start);
-    if (missing_time)
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, "There are %.3f seconds missing "
-               "from the timeline!\n", missing_time / 1e9);
-    mp_msg(MSGT_CPLAYER, MSGL_V, "Source files:\n");
-    for (int i = 0; i < num_sources; i++)
-        mp_msg(MSGT_CPLAYER, MSGL_V, "%d: %s\n", i,
-               filename_recode(sources[i].demuxer->filename));
-    mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline parts: (number, start, "
-           "source_start, source):\n");
-    for (int i = 0; i < part_count; i++) {
-        struct timeline_part *p = timeline + i;
-        mp_msg(MSGT_CPLAYER, MSGL_V, "%3d %9.3f %9.3f %3td\n", i, p->start,
-               p->source_start, p->source - sources);
-    }
-    mp_msg(MSGT_CPLAYER, MSGL_V, "END %9.3f\n", timeline[part_count].start);
-    mpctx->sources = sources;
-    mpctx->num_sources = num_sources;
-    mpctx->timeline = timeline;
-    mpctx->num_timeline_parts = part_count;
-    mpctx->num_chapters = num_chapters;
-    mpctx->chapters = chapters;
-
-    mpctx->timeline_part = 0;
-    mpctx->demuxer = timeline[0].source->demuxer;
 }
 
 
@@ -4385,14 +4213,9 @@ if (edl_output_filename) {
 
   mpctx->stream=NULL;
   mpctx->demuxer=NULL;
-  if (mpctx->d_audio) {
-    //free_demuxer_stream(mpctx->d_audio);
-    mpctx->d_audio=NULL;
-  }
-  if (mpctx->d_video) {
-    //free_demuxer_stream(d_video);
-    mpctx->d_video=NULL;
-  }
+  mpctx->d_audio=NULL;
+  mpctx->d_video=NULL;
+  mpctx->d_sub = NULL;
   mpctx->sh_audio=NULL;
   mpctx->sh_video=NULL;
 
@@ -4575,6 +4398,32 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
  if (mpctx->demuxer->matroska_data.ordered_chapters)
      build_ordered_chapter_timeline(mpctx);
 
+ if (mpctx->demuxer->type == DEMUXER_TYPE_EDL)
+     build_edl_timeline(mpctx);
+
+ if (mpctx->timeline) {
+    mpctx->timeline_part = 0;
+    mpctx->demuxer = mpctx->timeline[0].source->demuxer;
+
+    int part_count = mpctx->num_timeline_parts;
+    mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline contains %d parts from %d "
+           "sources. Total length %.3f seconds.\n", part_count,
+           mpctx->num_sources, mpctx->timeline[part_count].start);
+    mp_msg(MSGT_CPLAYER, MSGL_V, "Source files:\n");
+    for (int i = 0; i < mpctx->num_sources; i++)
+        mp_msg(MSGT_CPLAYER, MSGL_V, "%d: %s\n", i,
+               filename_recode(mpctx->sources[i].demuxer->filename));
+    mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline parts: (number, start, "
+           "source_start, source):\n");
+    for (int i = 0; i < part_count; i++) {
+        struct timeline_part *p = mpctx->timeline + i;
+        mp_msg(MSGT_CPLAYER, MSGL_V, "%3d %9.3f %9.3f %3td\n", i, p->start,
+               p->source_start, p->source - mpctx->sources);
+    }
+    mp_msg(MSGT_CPLAYER, MSGL_V, "END %9.3f\n",
+           mpctx->timeline[part_count].start);
+ }
+
  if (!mpctx->sources) {
      mpctx->sources = talloc_ptrtype(NULL, mpctx->sources);
      *mpctx->sources = (struct content_source){.stream = mpctx->stream,
@@ -4751,8 +4600,7 @@ if (select_subtitle(mpctx)) {
 
   print_file_properties(mpctx, mpctx->filename);
 
-  if (mpctx->sh_video)
-      reinit_video_chain(mpctx);
+  reinit_video_chain(mpctx);
   if (mpctx->sh_video) {
     if(mpctx->sh_video->output_flags & VFCAP_SPU && vo_spudec)
       spudec_set_hw_spu(vo_spudec,mpctx->video_out);
@@ -4865,7 +4713,7 @@ if(play_n_frames==0){
 // If there's a timeline force an absolute seek to initialize state
 if (seek_to_sec || mpctx->timeline) {
     queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_to_sec, 0);
-    seek(mpctx, mpctx->seek);
+    seek(mpctx, mpctx->seek, false);
     end_at.pos += seek_to_sec;
 }
 if (opts->chapterrange[0] > 0) {
@@ -4873,7 +4721,7 @@ if (opts->chapterrange[0] > 0) {
     if (seek_chapter(mpctx, opts->chapterrange[0]-1, &pts, NULL) >= 0
         && pts > -1.0) {
         queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, 0);
-        seek(mpctx, mpctx->seek);
+        seek(mpctx, mpctx->seek, false);
     }
 }
 

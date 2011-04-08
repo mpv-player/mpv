@@ -21,11 +21,27 @@
 #ifndef MPLAYER_PATH_H
 #define MPLAYER_PATH_H
 
+#include "bstr.h"
+
 extern char *codec_path;
 
 char *get_path(const char *filename);
 void set_path_env(void);
 void set_codec_path(const char *path);
-const char *mp_basename(const char *path);
+
+// Return pointer to filename part of path
+
+char *mp_basename(const char *path);
+
+/* Return struct bstr referencing directory part of path, or if that
+ * would be empty, ".".
+ */
+struct bstr mp_dirname(const char *path);
+
+/* Join two path components and return a newly allocated string
+ * for the result. '/' is inserted between the components if needed.
+ * If p2 is an absolute path then the value of p1 is ignored.
+ */
+char *mp_path_join(void *talloc_ctx, struct bstr p1, struct bstr p2);
 
 #endif /* MPLAYER_PATH_H */

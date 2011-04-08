@@ -251,4 +251,10 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter);
 void update_subtitles(struct MPContext *mpctx, double refpts,
                       double sub_offset, bool reset);
 
+
+// timeline/tl_matroska.c
+void build_ordered_chapter_timeline(struct MPContext *mpctx);
+// timeline/tl_edl.c
+void build_edl_timeline(struct MPContext *mpctx);
+
 #endif /* MPLAYER_MP_CORE_H */
