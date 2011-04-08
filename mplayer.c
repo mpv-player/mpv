@@ -2534,6 +2534,8 @@ int reinit_video_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     sh_video_t * const sh_video = mpctx->sh_video;
+    if (!sh_video)
+        return 0;
     double ar=-1.0;
     //================== Init VIDEO (codec & libvo) ==========================
     if (!opts->fixed_vo || !(mpctx->initialized_flags & INITIALIZED_VO)) {
@@ -2983,7 +2985,7 @@ static void reinit_decoders(struct MPContext *mpctx)
     mp_property_do("sub", M_PROPERTY_SET, &(int){mpctx->global_sub_pos}, mpctx);
 }
 
-static void seek_reset(struct MPContext *mpctx)
+static void seek_reset(struct MPContext *mpctx, bool reset_ao)
 {
     if (mpctx->sh_video) {
 	current_module = "seek_video_reset";
@@ -3009,7 +3011,9 @@ static void seek_reset(struct MPContext *mpctx)
     if (mpctx->sh_audio) {
 	current_module = "seek_audio_reset";
         resync_audio_stream(mpctx->sh_audio);
-	mpctx->audio_out->reset(); // stop audio, throwing away buffered data
+        if (reset_ao)
+            // stop audio, throwing away buffered data
+            mpctx->audio_out->reset();
 	mpctx->sh_audio->a_buffer_len = 0;
 	mpctx->sh_audio->a_out_buffer_len = 0;
 	if (!mpctx->sh_video)
@@ -3041,7 +3045,11 @@ static bool timeline_set_part(struct MPContext *mpctx, int i)
     mpctx->video_offset = n->start - n->source_start;
     if (n->source == p->source)
         return false;
-    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts.fixed_vo && mpctx->opts.video_id != -2 ? 0 : INITIALIZED_VO) | INITIALIZED_AO | INITIALIZED_ACODEC | INITIALIZED_SUB);
+    enum stop_play_reason orig_stop_play = mpctx->stop_play;
+    if (!mpctx->sh_video && mpctx->stop_play == KEEP_PLAYING)
+        mpctx->stop_play = AT_END_OF_FILE;  // let audio uninit drain data
+    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts.fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts.gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_ACODEC | INITIALIZED_SUB);
+    mpctx->stop_play = orig_stop_play;
     mpctx->demuxer = n->source->demuxer;
     mpctx->d_video = mpctx->demuxer->video;
     mpctx->d_audio = mpctx->demuxer->audio;
@@ -3070,7 +3078,8 @@ static double timeline_set_from_time(struct MPContext *mpctx, double pts,
 
 
 // return -1 if seek failed (non-seekable stream?), 0 otherwise
-static int seek(MPContext *mpctx, struct seek_params seek)
+static int seek(MPContext *mpctx, struct seek_params seek,
+                bool timeline_fallthrough)
 {
     struct MPOpts *opts = &mpctx->opts;
 
@@ -3135,7 +3144,7 @@ static int seek(MPContext *mpctx, struct seek_params seek)
     if (seekresult == 0)
 	return -1;
 
-    seek_reset(mpctx);
+    seek_reset(mpctx, !timeline_fallthrough);
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */
@@ -3286,7 +3295,7 @@ int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
                                        chapter_name);
         if (res >= 0) {
             if (*seek_pts == -1)
-                seek_reset(mpctx);
+                seek_reset(mpctx, true);
             else {
                 mpctx->last_chapter_seek = res;
                 mpctx->last_chapter_pts = *seek_pts;
@@ -3358,6 +3367,20 @@ static void run_playloop(struct MPContext *mpctx)
         update_osd_msg(mpctx);
         if (end_at.type == END_AT_TIME && end_at.pos < a_pos) {
             mpctx->stop_play = AT_END_OF_FILE;
+        } else if (mpctx->timeline && mpctx->stop_play == AT_END_OF_FILE
+                   && mpctx->timeline_part + 1 < mpctx->num_timeline_parts
+                   && mpctx->sh_audio) {
+            struct timeline_part *p = mpctx->timeline + mpctx->timeline_part;
+            double delay = mpctx->audio_out->get_delay();
+            if (!opts->gapless_audio && p->source != (p+1)->source
+                && delay > 0.05) {
+                mpctx->stop_play = KEEP_PLAYING;
+                mp_input_get_cmd(mpctx->input, (delay-.05) * 1000, true);
+            } else {
+                seek(mpctx, (struct seek_params){ .type = MPSEEK_ABSOLUTE,
+                                                  .amount = (p+1)->start },
+                     true);
+            }
         } else if (!mpctx->stop_play) {
             int sleep_time = full_audio_buffers || !mpctx->sh_audio ? 100 : 20;
             mp_input_get_cmd(mpctx->input, sleep_time, true);
@@ -3396,7 +3419,8 @@ static void run_playloop(struct MPContext *mpctx)
                 || mpctx->stop_play == AT_END_OF_FILE
                 && mpctx->timeline_part + 1 < mpctx->num_timeline_parts) {
                 seek(mpctx, (struct seek_params){ .type = MPSEEK_ABSOLUTE,
-                                                  .amount = next->start });
+                                                  .amount = next->start },
+                     true);
                 return;
             }
         }
@@ -3612,7 +3636,7 @@ static void run_playloop(struct MPContext *mpctx)
     }
 
     if (mpctx->seek.type) {
-        seek(mpctx, mpctx->seek);
+        seek(mpctx, mpctx->seek, false);
         mpctx->seek = (struct seek_params){0};
     }
 }
@@ -4565,8 +4589,7 @@ if (select_subtitle(mpctx)) {
 
   print_file_properties(mpctx, mpctx->filename);
 
-  if (mpctx->sh_video)
-      reinit_video_chain(mpctx);
+  reinit_video_chain(mpctx);
   if (mpctx->sh_video) {
     if(mpctx->sh_video->output_flags & VFCAP_SPU && vo_spudec)
       spudec_set_hw_spu(vo_spudec,mpctx->video_out);
@@ -4679,7 +4702,7 @@ if(play_n_frames==0){
 // If there's a timeline force an absolute seek to initialize state
 if (seek_to_sec || mpctx->timeline) {
     queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_to_sec, 0);
-    seek(mpctx, mpctx->seek);
+    seek(mpctx, mpctx->seek, false);
     end_at.pos += seek_to_sec;
 }
 if (opts->chapterrange[0] > 0) {
@@ -4687,7 +4710,7 @@ if (opts->chapterrange[0] > 0) {
     if (seek_chapter(mpctx, opts->chapterrange[0]-1, &pts, NULL) >= 0
         && pts > -1.0) {
         queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, 0);
-        seek(mpctx, mpctx->seek);
+        seek(mpctx, mpctx->seek, false);
     }
 }
 
