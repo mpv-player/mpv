@@ -4174,27 +4174,13 @@ if (edl_output_filename) {
         mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Cannot load subtitles: %s\n",
 		filename_recode(opts->vobsub_name));
     } else if (opts->sub_auto && mpctx->filename){
-      /* try to autodetect vobsub from movie filename ::atmos */
-      char *buf = strdup(mpctx->filename), *psub;
-      char *pdot = strrchr(buf, '.');
-      char *pslash = strrchr(buf, '/');
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-      if (!pslash) pslash = strrchr(buf, '\\');
-#endif
-      if (pdot && (!pslash || pdot > pslash))
-        *pdot = '\0';
-      vo_vobsub=vobsub_open(buf,spudec_ifo,0,&vo_spudec);
-      /* try from ~/.mplayer/sub */
-      if(!vo_vobsub && (psub = get_path( "sub/" ))) {
-          const char *bname = mp_basename(buf);
-          int l;
-          l = strlen(psub) + strlen(bname) + 1;
-          psub = realloc(psub,l);
-          strcat(psub,bname);
-          vo_vobsub=vobsub_open(psub,spudec_ifo,0,&vo_spudec);
-          free(psub);
-      }
-      free(buf);
+        char **vob = find_vob_subtitles(mpctx->filename);
+        for (int i = 0; i < MP_TALLOC_ELEMS(vob); i++) {
+            vo_vobsub = vobsub_open(vob[i], spudec_ifo, 0, &vo_spudec);
+            if (vo_vobsub)
+                break;
+        }
+        talloc_free(vob);
     }
     if(vo_vobsub){
       mpctx->initialized_flags|=INITIALIZED_VOBSUB;

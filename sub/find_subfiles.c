@@ -5,6 +5,7 @@
 
 #include "mp_msg.h"
 #include "path.h"
+#include "mpcommon.h"
 #include "sub/find_subfiles.h"
 #include "sub/sub.h"
 
@@ -277,4 +278,28 @@ char **find_text_subtitles(const char *fname)
     char **tmp = sub_filenames(psub ? psub : "", fname);
     free(psub);
     return tmp;
+}
+
+char **find_vob_subtitles(const char *fname)
+{
+    char **vobs = talloc_array_ptrtype(NULL, vobs, 1);
+    int n = 0;
+
+    // Potential vobsub in the media directory
+    struct bstr bname = BSTR(mp_basename(fname));
+    int pdot = bstrrchr(bname, '.');
+    if (pdot >= 0)
+        bname.len = pdot;
+    vobs[n++] = mp_path_join(vobs, mp_dirname(fname), bname);
+
+    // Potential vobsub in ~/.mplayer/sub
+    char *mp_subdir = get_path("sub/");
+    if (mp_subdir) {
+        MP_GROW_ARRAY(vobs, n);
+        vobs[n++] = mp_path_join(vobs, BSTR(mp_subdir), bname);
+    }
+
+    free(mp_subdir);
+    MP_RESIZE_ARRAY(NULL, vobs, n);
+    return vobs;
 }

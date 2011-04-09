@@ -62,6 +62,14 @@ int bstrchr(struct bstr str, int c)
     return -1;
 }
 
+int bstrrchr(struct bstr str, int c)
+{
+    for (int i = str.len - 1; i >= 0; i--)
+        if (str.start[i] == c)
+            return i;
+    return -1;
+}
+
 struct bstr bstr_strip(struct bstr str)
 {
     while (str.len && isspace(*str.start)) {
