@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "config.h"
 #include "audio_out.h"
@@ -26,7 +27,7 @@
 #include "mp_msg.h"
 
 // there are some globals:
-ao_data_t ao_data={0,0,0,0,OUTBURST,-1,0};
+struct ao ao_data;
 char *ao_subdevice = NULL;
 
 extern const ao_functions_t audio_out_oss;
@@ -132,54 +133,119 @@ void list_audio_out(void){
     mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
 
-const ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int channels,int format,int flags){
-    int i;
+struct ao *ao_create(void)
+{
+    ao_data = (struct ao){.outburst = OUTBURST, .buffersize = -1};
+    return &ao_data;
+}
+
+void ao_init(struct ao *ao, char **ao_list)
+{
+    struct ao backup = *ao;
+
+    if (!ao_list)
+        goto try_defaults;
+
     // first try the preferred drivers, with their optional subdevice param:
-    if(ao_list && ao_list[0])
-      while(ao_list[0][0]){
-        char* ao=ao_list[0];
+    while (*ao_list) {
+        char *ao_name = *ao_list;
+        if (!*ao_name)
+            goto try_defaults; // empty entry means try defaults
         int ao_len;
+        assert(!ao_subdevice);
+        ao_subdevice = strchr(ao_name, ':');
+        if (ao_subdevice) {
+            ao_len = ao_subdevice - ao_name;
+            ao_subdevice = strdup(ao_subdevice + 1);
+        } else
+            ao_len = strlen(ao_name);
+
+        mp_tmsg(MSGT_AO, MSGL_V,
+                "Trying preferred audio driver '%.*s', options '%s'\n",
+               ao_len, ao_name, ao_subdevice ? ao_subdevice : "[none]");
+
+        const ao_functions_t *audio_out = NULL;
+        for (int i = 0; audio_out_drivers[i]; i++) {
+            audio_out = audio_out_drivers[i];
+            if (!strncmp(audio_out->info->short_name, ao_name, ao_len))
+                break;
+            audio_out = NULL;
+        }
+        if (audio_out) {
+            // name matches, try it
+            if (audio_out->init(ao->samplerate, ao->channels, ao->format, 0)) {
+                ao->driver = audio_out;
+                ao->initialized = true;
+                return;
+            }
+            mp_tmsg(MSGT_AO, MSGL_WARN,
+                    "Failed to initialize audio driver '%s'\n", ao_name);
+            *ao = backup;
+        } else
+            mp_tmsg(MSGT_AO, MSGL_WARN, "No such audio driver '%.*s'\n",
+                    ao_len, ao_name);
         free(ao_subdevice);
         ao_subdevice = NULL;
-        ao_subdevice=strchr(ao,':');
-        if(ao_subdevice){
-            ao_len = ao_subdevice - ao;
-            ao_subdevice = strdup(&ao[ao_len + 1]);
-        }
-        else
-            ao_len = strlen(ao);
-
-        mp_tmsg(MSGT_AO, MSGL_V, "Trying preferred audio driver '%.*s', options '%s'\n",
-               ao_len, ao, ao_subdevice ? ao_subdevice : "[none]");
-
-        for(i=0;audio_out_drivers[i];i++){
-            const ao_functions_t* audio_out=audio_out_drivers[i];
-            if(!strncmp(audio_out->info->short_name,ao,ao_len)){
-                // name matches, try it
-                if(audio_out->init(rate,channels,format,flags))
-                    return audio_out; // success!
-                else
-                    mp_tmsg(MSGT_AO, MSGL_WARN, "Failed to initialize audio driver '%s'\n", ao);
-                break;
-            }
-        }
-	if (!audio_out_drivers[i]) // we searched through the entire list
-            mp_tmsg(MSGT_AO, MSGL_WARN, "No such audio driver '%.*s'\n", ao_len, ao);
-        // continue...
         ++ao_list;
-        if(!(ao_list[0])) return NULL; // do NOT fallback to others
-      }
-    free(ao_subdevice);
-    ao_subdevice = NULL;
+    }
+    return;
 
+ try_defaults:
     mp_tmsg(MSGT_AO, MSGL_V, "Trying every known audio driver...\n");
 
     // now try the rest...
-    for(i=0;audio_out_drivers[i];i++){
-        const ao_functions_t* audio_out=audio_out_drivers[i];
-//        if(audio_out->control(AOCONTROL_QUERY_FORMAT, (int)format) == CONTROL_TRUE)
-        if(audio_out->init(rate,channels,format,flags))
-            return audio_out; // success!
+    for (int i = 0; audio_out_drivers[i]; i++) {
+        const ao_functions_t *audio_out = audio_out_drivers[i];
+        if (audio_out->init(ao->samplerate, ao->channels, ao->format, 0)) {
+            ao->initialized = true;
+            ao->driver = audio_out;
+            return;
+        }
+        *ao = backup;
     }
-    return NULL;
+    return;
+}
+
+void ao_uninit(struct ao *ao, bool drain_audio)
+{
+    if (ao->initialized)
+        ao->driver->uninit(drain_audio);
+    ao->initialized = false;
+    free(ao_subdevice);
+    ao_subdevice = NULL;
+}
+
+int ao_play(struct ao *ao, void *data, int len, int flags)
+{
+    return ao->driver->play(data, len, flags);
+}
+
+int ao_control(struct ao *ao, int cmd, void *arg)
+{
+    return ao->driver->control(cmd, arg);
+}
+
+double ao_get_delay(struct ao *ao)
+{
+    return ao->driver->get_delay();
+}
+
+int ao_get_space(struct ao *ao)
+{
+    return ao->driver->get_space();
+}
+
+void ao_reset(struct ao *ao)
+{
+    ao->driver->reset();
+}
+
+void ao_pause(struct ao *ao)
+{
+    ao->driver->pause();
+}
+
+void ao_resume(struct ao *ao)
+{
+    ao->driver->resume();
 }

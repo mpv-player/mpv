@@ -459,7 +459,7 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
 /// Current position in seconds (RW)
 static int mp_property_time_pos(m_option_t *prop, int action,
                                 void *arg, MPContext *mpctx) {
-    if (!(mpctx->sh_video || (mpctx->sh_audio && mpctx->audio_out)))
+    if (!(mpctx->sh_video || mpctx->sh_audio))
         return M_PROPERTY_UNAVAILABLE;
 
     switch(action) {

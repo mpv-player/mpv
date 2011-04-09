@@ -19,6 +19,8 @@
 #ifndef MPLAYER_AUDIO_OUT_H
 #define MPLAYER_AUDIO_OUT_H
 
+#include <stdbool.h>
+
 typedef struct ao_info_s
 {
         /* driver name ("Matrox Millennium G200/G400" */
@@ -32,7 +34,7 @@ typedef struct ao_info_s
 } ao_info_t;
 
 /* interface towards mplayer and */
-typedef struct ao_functions_s
+typedef struct ao_functions
 {
 	const ao_info_t *info;
         int (*control)(int cmd,void *arg);
@@ -47,7 +49,7 @@ typedef struct ao_functions_s
 } ao_functions_t;
 
 /* global data used by mplayer and plugins */
-typedef struct ao_data {
+struct ao {
   int samplerate;
   int channels;
   int format;
@@ -55,13 +57,13 @@ typedef struct ao_data {
   int outburst;
   int buffersize;
   int pts;
-} ao_data_t;
+    bool initialized;
+    const struct ao_functions *driver;
+};
 
 extern char *ao_subdevice;
-extern ao_data_t ao_data;
 
 void list_audio_out(void);
-const ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int channels,int format,int flags);
 
 // NULL terminated array of all drivers
 extern const ao_functions_t* const audio_out_drivers[];
@@ -87,5 +89,16 @@ typedef struct ao_control_vol_s {
 	float left;
 	float right;
 } ao_control_vol_t;
+
+struct ao *ao_create(void);
+void ao_init(struct ao *ao, char **ao_list);
+void ao_uninit(struct ao *ao, bool drain_audio);
+int ao_play(struct ao *ao, void *data, int len, int flags);
+int ao_control(struct ao *ao, int cmd, void *arg);
+double ao_get_delay(struct ao *ao);
+int ao_get_space(struct ao *ao);
+void ao_reset(struct ao *ao);
+void ao_pause(struct ao *ao);
+void ao_resume(struct ao *ao);
 
 #endif /* MPLAYER_AUDIO_OUT_H */

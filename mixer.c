@@ -39,9 +39,9 @@ void mixer_getvolume(mixer_t *mixer, float *l, float *r)
 {
   ao_control_vol_t vol;
   *l=0; *r=0;
-  if(mixer->audio_out){
+  if (mixer->ao) {
     if(soft_vol ||
-        CONTROL_OK != mixer->audio_out->control(AOCONTROL_GET_VOLUME,&vol)) {
+       CONTROL_OK != ao_control(mixer->ao, AOCONTROL_GET_VOLUME, &vol)) {
       if (!mixer->afilter)
         return;
       else {
@@ -64,9 +64,9 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
 {
   ao_control_vol_t vol;
   vol.right=r; vol.left=l;
-  if(mixer->audio_out){
+  if (mixer->ao) {
     if(soft_vol ||
-        CONTROL_OK != mixer->audio_out->control(AOCONTROL_SET_VOLUME,&vol)) {
+       CONTROL_OK != ao_control(mixer->ao, AOCONTROL_SET_VOLUME, &vol)) {
       if (!mixer->afilter)
         return;
       else {

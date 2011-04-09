@@ -31,6 +31,8 @@ static float get_delay(void);
 static void audio_pause(void);
 static void audio_resume(void);
 
+extern struct ao ao_data;
+
 #define LIBAO_EXTERN(x) const ao_functions_t audio_out_##x =\
 {\
 	&info,\

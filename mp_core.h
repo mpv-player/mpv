@@ -99,7 +99,6 @@ typedef struct MPContext {
     unsigned int osd_visible;
 
     int osd_function;
-    const ao_functions_t *audio_out;
     struct play_tree *playtree;
     struct play_tree_iter *playtree_iter;
     char *filename; // currently playing file
@@ -124,6 +123,7 @@ typedef struct MPContext {
     struct demux_stream *d_video;
     struct demux_stream *d_sub;
     mixer_t mixer;
+    struct ao *ao;
     struct vo *video_out;
 
     /* We're starting playback from scratch or after a seek. Show first
@@ -228,7 +228,6 @@ extern int file_filter;
 // These appear in options list
 extern int forced_subs_only;
 
-struct ao_data;
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
 void reinit_audio_chain(struct MPContext *mpctx);
 void init_vo_spudec(struct MPContext *mpctx);
