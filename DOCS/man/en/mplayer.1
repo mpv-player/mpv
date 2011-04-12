@@ -2298,6 +2298,23 @@ Turns off automatic subtitle file loading.
 Set the duration of the OSD messages in ms (default: 1000).
 .
 .TP
+.B \-osd\-fractions <0\-2>
+Set how fractions of seconds of the current timestamp are printed on the OSD:
+.PD 0
+.RSs
+.IPs 0
+Do not display fractions (default).
+.IPs 1
+Show the first two decimals.
+.IPs 2
+Show approximate frame count within current second.
+This frame count is not accurate but only an approximation.
+For variable fps, the approximation is known to be far off the correct frame
+count.
+.RE
+.PD 1
+.
+.TP
 .B \-osdlevel <0\-3>
 Specifies which mode the OSD should start in.
 .PD 0

@@ -216,6 +216,7 @@ const m_option_t mplayer_opts[]={
 #endif
     OPT_INTRANGE("osdlevel", osd_level, 0, 0, 3),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
+    OPT_INTRANGE("osd-fractions", osd_fractions, 0, 0, 2),
 #ifdef CONFIG_MENU
     {"menu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
     {"nomenu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},

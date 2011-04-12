@@ -31,6 +31,7 @@ typedef struct MPOpts {
 
     int osd_level;
     int osd_duration;
+    int osd_fractions;
     int auto_quality;
     int benchmark;
     char *stream_dump_name;
