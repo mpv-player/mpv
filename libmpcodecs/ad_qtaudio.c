@@ -279,7 +279,7 @@ static void uninit(sh_audio_t *sh){
     unsigned long ConvertedFrames=0;
     unsigned long ConvertedBytes=0;
 
-#ifdef WIN32_LOADER
+#if defined(WIN32_LOADER) && !defined(CONFIG_QUICKTIME)
     Setup_FS_Segment();
 #endif
 
@@ -306,7 +306,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
     unsigned long ConvertedFrames=0;
     unsigned long ConvertedBytes=0;
 
-#ifdef WIN32_LOADER
+#if defined(WIN32_LOADER) && !defined(CONFIG_QUICKTIME)
     Setup_FS_Segment();
 #endif
 
