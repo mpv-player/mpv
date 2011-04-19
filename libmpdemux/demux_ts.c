@@ -901,7 +901,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 		audio_found = 0;
 		param->atype = UNKNOWN;
 		//WE DIDN'T MATCH ANY AUDIO STREAM, SO WE FORCE THE DEMUXER TO IGNORE AUDIO
-		mp_msg(MSGT_DEMUXER, MSGL_INFO, "NO AUDIO! ");
+		mp_msg(MSGT_DEMUXER, MSGL_INFO, "NO AUDIO! (try increasing -tsprobe)");
 	}
 
 	if(IS_SUB(param->stype))
