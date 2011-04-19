@@ -22,6 +22,8 @@
 #include <string.h>
 #include <stddef.h>
 
+#include "config.h"
+
 /// \defgroup Options
 /// m_option allows to parse, print and copy data of various types.
 /// It is the base of the \ref OptionsStruct, \ref Config and
@@ -536,11 +538,20 @@ m_option_free(const m_option_t* opt,void* dst) {
  */
 int parse_timestring(const char *str, double *time, char endchar);
 
+#define OPTION_LIST_SEPARATOR ','
+
+#if HAVE_DOS_PATHS
+#define OPTION_PATH_SEPARATOR ';'
+#else
+#define OPTION_PATH_SEPARATOR ':'
+#endif
+
 #define OPT_FLAG_ON(optname, varname, flags) {optname, NULL, &m_option_type_flag, flags, 0, 1, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_FLAG_OFF(optname, varname, flags) {optname, NULL, &m_option_type_flag, flags, 1, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_MAKE_FLAGS(optname, varname, flags) OPT_FLAG_ON(optname, varname, flags), OPT_FLAG_OFF("no" optname, varname, flags)
 #define OPT_FLAG_CONSTANTS(optname, varname, flags, offvalue, value) {optname, NULL, &m_option_type_flag, flags, offvalue, value, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_STRINGLIST(optname, varname, flags) {optname, NULL, &m_option_type_string_list, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
+#define OPT_PATHLIST(optname, varname, flags) {optname, NULL, &m_option_type_string_list, flags, 0, 0, (void *)&(const char){OPTION_PATH_SEPARATOR}, 1, offsetof(struct MPOpts, varname)}
 #define OPT_INT(optname, varname, flags) {optname, NULL, &m_option_type_int, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_INTRANGE(optname, varname, flags, min, max) {optname, NULL, &m_option_type_int, (flags)|CONF_RANGE, min, max, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_INTPAIR(optname, varname, flags) {optname, NULL, &m_option_type_intpair, (flags), 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
