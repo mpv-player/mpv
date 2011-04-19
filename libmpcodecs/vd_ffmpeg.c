@@ -208,7 +208,7 @@ static int init(sh_video_t *sh){
     ctx->avctx = avcodec_alloc_context();
     avctx = ctx->avctx;
     avctx->opaque = sh;
-    avctx->codec_type = CODEC_TYPE_VIDEO;
+    avctx->codec_type = AVMEDIA_TYPE_VIDEO;
     avctx->codec_id = lavc_codec->id;
 
     if (lavc_codec->capabilities & CODEC_CAP_HWACCEL   // XvMC
@@ -541,14 +541,12 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
             type = MP_IMGTYPE_STATIC;
             flags |= MP_IMGFLAG_PRESERVE;
         }
-        flags|=(!avctx->hurry_up && ctx->do_slices) ?
-                 MP_IMGFLAG_DRAW_CALLBACK:0;
+        flags |= ctx->do_slices ? MP_IMGFLAG_DRAW_CALLBACK : 0;
         mp_msg(MSGT_DECVIDEO, MSGL_DBG2, type == MP_IMGTYPE_STATIC ? "using STATIC\n" : "using TEMP\n");
     } else {
         if(!pic->reference){
             ctx->b_count++;
-            flags|=(!avctx->hurry_up && ctx->do_slices) ?
-                     MP_IMGFLAG_DRAW_CALLBACK:0;
+            flags |= ctx->do_slices ? MP_IMGFLAG_DRAW_CALLBACK:0;
         }else{
             ctx->ip_count++;
             flags|= MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE
@@ -787,7 +785,7 @@ static struct mp_image *decode(struct sh_video *sh, void *data, int len,
     pkt.data = data;
     pkt.size = len;
     // HACK: make PNGs decode normally instead of as CorePNG delta frames
-    pkt.flags = PKT_FLAG_KEY;
+    pkt.flags = AV_PKT_FLAG_KEY;
     // The avcodec opaque field stupidly supports only int64_t type
     *(double *)&avctx->reordered_opaque = *reordered_pts;
     ret = avcodec_decode_video2(avctx, pic, &got_picture, &pkt);

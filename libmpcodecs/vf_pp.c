@@ -37,7 +37,7 @@
 
 struct vf_priv_s {
     int pp;
-    pp_mode_t *ppMode[PP_QUALITY_MAX+1];
+    pp_mode *ppMode[PP_QUALITY_MAX+1];
     void *context;
     unsigned int outfmt;
 };

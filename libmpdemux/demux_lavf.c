@@ -289,7 +289,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
         codec->codec_tag = override_tag;
 
     switch(codec->codec_type){
-        case CODEC_TYPE_AUDIO:{
+        case AVMEDIA_TYPE_AUDIO:{
             WAVEFORMATEX *wf;
             sh_audio_t* sh_audio;
             sh_audio = new_sh_audio_aid(demuxer, i, priv->audio_streams);
@@ -361,7 +361,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             stream_id = priv->audio_streams++;
             break;
         }
-        case CODEC_TYPE_VIDEO:{
+        case AVMEDIA_TYPE_VIDEO:{
             sh_video_t* sh_video;
             BITMAPINFOHEADER *bih;
             sh_video=new_sh_video_vid(demuxer, i, priv->video_streams);
@@ -433,7 +433,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             stream_id = priv->video_streams++;
             break;
         }
-        case CODEC_TYPE_SUBTITLE:{
+        case AVMEDIA_TYPE_SUBTITLE:{
             sh_sub_t* sh_sub;
             char type;
             /* only support text subtitles for now */
@@ -476,9 +476,12 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             stream_id = priv->sub_streams++;
             break;
         }
-        case CODEC_TYPE_ATTACHMENT:{
+        case AVMEDIA_TYPE_ATTACHMENT:{
+            AVMetadataTag *ftag = av_metadata_get(st->metadata, "filename",
+                                                   NULL, 0);
+            char *filename = ftag ? ftag->value : NULL;
             if (st->codec->codec_id == CODEC_ID_TTF)
-                demuxer_add_attachment(demuxer, BSTR(st->filename),
+                demuxer_add_attachment(demuxer, BSTR(filename),
                                        BSTR("application/x-truetype-font"),
                                        (struct bstr){codec->extradata,
                                                      codec->extradata_size});
@@ -755,14 +758,14 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
     if(ts != AV_NOPTS_VALUE){
         dp->pts = ts * av_q2d(priv->avfc->streams[id]->time_base);
         priv->last_pts= dp->pts * AV_TIME_BASE;
-        // always set duration for subtitles, even if PKT_FLAG_KEY is not set,
+        // always set duration for subtitles, even if AV_PKT_FLAG_KEY isn't set,
         // otherwise they will stay on screen to long if e.g. ASS is demuxed from mkv
-        if((ds == demux->sub || (pkt.flags & PKT_FLAG_KEY)) &&
+        if ((ds == demux->sub || (pkt.flags & AV_PKT_FLAG_KEY)) &&
            pkt.convergence_duration > 0)
             dp->duration = pkt.convergence_duration * av_q2d(priv->avfc->streams[id]->time_base);
     }
     dp->pos=demux->filepos;
-    dp->flags= !!(pkt.flags&PKT_FLAG_KEY);
+    dp->flags = !!(pkt.flags & AV_PKT_FLAG_KEY);
     // append packet to DS stream:
     ds_add_packet(ds,dp);
     return 1;
@@ -922,15 +925,15 @@ redo:
             {
                 switch(priv->avfc->streams[program->stream_index[i]]->codec->codec_type)
                 {
-                    case CODEC_TYPE_VIDEO:
+                    case AVMEDIA_TYPE_VIDEO:
                         if(prog->vid == -2)
                             prog->vid = program->stream_index[i];
                         break;
-                    case CODEC_TYPE_AUDIO:
+                    case AVMEDIA_TYPE_AUDIO:
                         if(prog->aid == -2)
                             prog->aid = program->stream_index[i];
                         break;
-                    case CODEC_TYPE_SUBTITLE:
+                    case AVMEDIA_TYPE_SUBTITLE:
                         if(prog->sid == -2 && priv->avfc->streams[program->stream_index[i]]->codec->codec_id == CODEC_ID_TEXT)
                             prog->sid = program->stream_index[i];
                         break;
