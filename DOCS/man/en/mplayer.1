@@ -1499,6 +1499,43 @@ Skip the proxy for IPv6 addresses.
 It will still be used for IPv4 connections.
 .
 .TP
+.B \-lavfdopts <option1:option2:...>
+Specify parameters for libavformat demuxers (\-demuxer lavf).
+Separate multiple options with a colon.
+.sp
+.RS
+Available suboptions are:
+.RE
+.RSs
+.IPs analyzeduration=<value>
+Maximum length in seconds to analyze the stream properties.
+.IPs format=<value>
+Force a specific libavformat demuxer.
+.IPs o=<key>=<value>[,<key>=<value>[,...]]
+Pass AVOptions to libavformat demuxer.
+Note, a patch to make the o= unneeded and pass all unknown options through
+the AVOption system is welcome.
+A full list of AVOptions can be found in the FFmpeg manual.
+Note that some options may conflict with MPlayer options.
+.sp 1
+.RS
+.I EXAMPLE:
+.RE
+.RSs
+.PD 0
+.IPs o=fflags=+ignidx
+.PD 1
+.RE
+.IPs probesize=<value>
+Maximum amount of data to probe during the detection phase.
+In the case of MPEG-TS this value identifies the maximum number
+of TS packets to scan.
+.IPs cryptokey=<hexstring>
+Encryption key the demuxer should use.
+This is the raw binary data of the key converted to a hexadecimal string.
+.RE
+.
+.TP
 .B \-loadidx <index file>
 The file from which to read the video index data saved by \-saveidx.
 This index will be used for seeking, overriding any index data
