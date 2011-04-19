@@ -19,6 +19,7 @@
 #include <string.h>
 #include <libavutil/avutil.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include "talloc.h"
 
@@ -66,6 +67,14 @@ int bstrrchr(struct bstr str, int c)
 {
     for (int i = str.len - 1; i >= 0; i--)
         if (str.start[i] == c)
+            return i;
+    return -1;
+}
+
+int bstr_find(struct bstr haystack, struct bstr needle)
+{
+    for (int i = 0; i < haystack.len; i++)
+        if (bstr_startswith(bstr_splice(haystack, i, haystack.len), needle))
             return i;
     return -1;
 }
@@ -147,4 +156,10 @@ struct bstr *bstr_splitlines(void *talloc_ctx, struct bstr str)
     r[count - 1].start = p;
     r[count - 1].len = str.start + str.len - p;
     return r;
+}
+
+void bstr_lower(struct bstr str)
+{
+    for (int i = 0; i < str.len; i++)
+        str.start[i] = tolower(str.start[i]);
 }

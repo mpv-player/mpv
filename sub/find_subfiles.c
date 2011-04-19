@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include "mp_msg.h"
 #include "options.h"
@@ -10,56 +11,20 @@
 #include "sub/find_subfiles.h"
 #include "sub/sub.h"
 
-static void strcpy_trim(char *d, char *s)
+static struct bstr strip_ext(struct bstr str)
 {
-    // skip leading whitespace
-    while (*s && isspace(*s)) {
-        s++;
-    }
-    for (;;) {
-        // copy word
-        while (*s && !isspace(*s)) {
-            *d = tolower(*s);
-            s++; d++;
-        }
-        if (*s == 0)
-            break;
-        // trim excess whitespace
-        while (*s && isspace(*s)) {
-            s++;
-        }
-        if (*s == 0)
-            break;
-        *d++ = ' ';
-    }
-    *d = 0;
+    int dotpos = bstrrchr(str, '.');
+    if (dotpos < 0)
+        return str;
+    return (struct bstr){str.start, dotpos};
 }
 
-static void strcpy_strip_ext(char *d, char *s)
+static struct bstr get_ext(struct bstr s)
 {
-    char *tmp = strrchr(s, '.');
-    if (!tmp) {
-        strcpy(d, s);
-        return;
-    } else {
-        strncpy(d, s, tmp-s);
-        d[tmp-s] = 0;
-    }
-    while (*d) {
-        *d = tolower(*d);
-        d++;
-    }
-}
-
-static void strcpy_get_ext(char *d, char *s)
-{
-    char *tmp = strrchr(s, '.');
-    if (!tmp) {
-        strcpy(d, "");
-        return;
-    } else {
-        strcpy(d, tmp+1);
-    }
+    int dotpos = bstrrchr(s, '.');
+    if (dotpos < 0)
+        return (struct bstr){NULL, 0};
+    return bstr_splice(s, dotpos + 1, s.len);
 }
 
 struct subfn {
@@ -78,29 +43,25 @@ static int compare_sub_priority(const void *a, const void *b)
     return strcoll(s1->fname, s2->fname);
 }
 
-static void guess_lang_from_filename(char *dstlang, const char *name)
+static struct bstr guess_lang_from_filename(struct bstr name)
 {
-    int n = 0, i = strlen(name);
+    if (name.len < 2)
+        return (struct bstr){NULL, 0};
 
-    if (i < 2)
-        goto err;
-    i--;
-    if (name[i] == ')' || name[i] == ']')
+    int n = 0;
+    int i = name.len - 1;
+
+    if (name.start[i] == ')' || name.start[i] == ']')
         i--;
-    while (i >= 0 && isalpha(name[i])) {
+    while (i >= 0 && isalpha(name.start[i])) {
         n++;
         if (n > 3)
-            goto err;
+            return (struct bstr){NULL, 0};
         i--;
     }
     if (n < 2)
-        goto err;
-    memcpy(dstlang, &name[i + 1], n);
-    dstlang[n] = 0;
-    return;
-
-err:
-    dstlang[0] = 0;
+        return (struct bstr){NULL, 0};
+    return (struct bstr){name.start + i + 1, n};
 }
 
 struct sub_list {
@@ -124,127 +85,123 @@ static void append_dir_subtitles(struct MPOpts *opts,
                                  int limit_fuzziness)
 {
     char *sub_exts[] = {"utf", "utf8", "utf-8", "sub", "srt", "smi", "rt", "txt", "ssa", "aqt", "jss", "js", "ass", NULL};
+    void *tmpmem = talloc_new(NULL);
     FILE *f;
-    char *f_fname = talloc_strdup(NULL, mp_basename(fname));
-    size_t len = strlen(f_fname) + 1;
-    char *f_fname_noext = talloc_size(f_fname, len);
-    char *f_fname_trim  = talloc_size(f_fname, len);
+    assert(strlen(fname) < 1e6);
 
-    strcpy_strip_ext(f_fname_noext, f_fname);
-    strcpy_trim(f_fname_trim, f_fname_noext);
+    struct bstr f_fname = BSTR(mp_basename(fname));
+    struct bstr f_fname_noext = strip_ext(f_fname);
+    bstr_lower(f_fname_noext);
+    struct bstr f_fname_trim = bstr_strip(f_fname_noext);
 
     // 0 = nothing
     // 1 = any subtitle file
     // 2 = any sub file containing movie name
     // 3 = sub file containing movie name and the lang extension
-    char *path0 = bstrdup0(f_fname, path);
+    char *path0 = bstrdup0(tmpmem, path);
     DIR *d = opendir(path0);
-    if (d) {
-        struct dirent *de;
-        mp_msg(MSGT_SUBREADER, MSGL_INFO, "Load subtitles in %.*s\n", BSTR_P(path));
-        while ((de = readdir(d))) {
-            len = strlen(de->d_name) + 1;
-            char *tmp_fname_noext = talloc_size(NULL, len);
-            char *tmp_fname_ext   = talloc_size(tmp_fname_noext, len);
-            char *tmp_fname_trim  = talloc_size(tmp_fname_noext, len);
+    if (!d)
+        goto out;
+    mp_msg(MSGT_SUBREADER, MSGL_INFO, "Load subtitles in %.*s\n", BSTR_P(path));
+    struct dirent *de;
+    while ((de = readdir(d))) {
+        struct bstr dename = BSTR(de->d_name);
+        void *tmpmem2 = talloc_new(tmpmem);
 
-            // retrieve various parts of the filename
-            strcpy_strip_ext(tmp_fname_noext, de->d_name);
-            strcpy_get_ext(tmp_fname_ext, de->d_name);
-            strcpy_trim(tmp_fname_trim, tmp_fname_noext);
+        // retrieve various parts of the filename
+        struct bstr tmp_fname_noext = bstrdup(tmpmem2, strip_ext(dename));
+        bstr_lower(tmp_fname_noext);
+        struct bstr tmp_fname_ext = get_ext(dename);
+        struct bstr tmp_fname_trim = bstr_strip(tmp_fname_noext);
 
-            // If it's a .sub, check if there is a .idx with the same name. If
-            // there is one, it's certainly a vobsub so we skip it.
-            if (strcasecmp(tmp_fname_ext, "sub") == 0) {
-                struct bstr idxname = BSTR(talloc_strdup(NULL, de->d_name));
-                strcpy(idxname.start + idxname.len - sizeof("idx") + 1, "idx");
-                char *idx = mp_path_join(idxname.start, path, idxname);
-                f = fopen(idx, "rt");
-                talloc_free(idxname.start);
-                if (f) {
-                    fclose(f);
-                    goto next_sub;
-                }
+        // If it's a .sub, check if there is a .idx with the same name. If
+        // there is one, it's certainly a vobsub so we skip it.
+        if (bstrcasecmp(tmp_fname_ext, BSTR("sub")) == 0) {
+            char *idxname = talloc_asprintf(tmpmem2, "%.*s.idx",
+                                            (int)tmp_fname_noext.len,
+                                            de->d_name);
+            char *idx = mp_path_join(tmpmem2, path, BSTR(idxname));
+            f = fopen(idx, "rt");
+            if (f) {
+                fclose(f);
+                goto next_sub;
             }
+        }
 
-            // does it end with a subtitle extension?
-            int i, found = 0;
+        // does it end with a subtitle extension?
 #ifdef CONFIG_ICONV
 #ifdef CONFIG_ENCA
-            for (i = ((sub_cp && strncasecmp(sub_cp, "enca", 4) != 0) ? 3 : 0); sub_exts[i]; i++) {
+        int i = (sub_cp && strncasecmp(sub_cp, "enca", 4) != 0) ? 3 : 0;
 #else
-            for (i = (sub_cp ? 3 : 0); sub_exts[i]; i++) {
+        int i = sub_cp ? 3 : 0;
 #endif
 #else
-            for (i = 0; sub_exts[i]; i++) {
+        int i = 0;
 #endif
-                if (strcasecmp(sub_exts[i], tmp_fname_ext) == 0) {
-                    found = 1;
-                    break;
-                }
-            }
+        while (1) {
+            if (!sub_exts[i])
+                goto next_sub;
+            if (bstrcasecmp(BSTR(sub_exts[i]), tmp_fname_ext) == 0)
+                break;
+            i++;
+        }
 
-            // we have a (likely) subtitle file
-            if (found) {
-                int prio = 0;
-                if (opts->sub_lang) {
-                    char lang[4];
-
-                    if (!strncmp(tmp_fname_trim, f_fname_trim,
-                                 strlen(f_fname_trim))) {
-                        guess_lang_from_filename(lang, tmp_fname_trim);
-                        if (*lang) {
-                            for (int n = 0; opts->sub_lang[n]; n++) {
-                                if (!strncmp(lang, opts->sub_lang[n],
-                                            strlen(opts->sub_lang[n]))) {
-                                    prio = 4; // matches the movie name + lang extension
-                                    break;
-                                }
-                            }
+        // we have a (likely) subtitle file
+        int prio = 0;
+        if (opts->sub_lang) {
+            if (bstr_startswith(tmp_fname_trim, f_fname_trim)) {
+                struct bstr lang = guess_lang_from_filename(tmp_fname_trim);
+                if (lang.len) {
+                    for (int n = 0; opts->sub_lang[n]; n++) {
+                        if (bstr_startswith(lang,
+                                            BSTR(opts->sub_lang[n]))) {
+                            prio = 4; // matches the movie name + lang extension
+                            break;
                         }
                     }
                 }
-                if (!prio && strcmp(tmp_fname_trim, f_fname_trim) == 0)
-                    prio = 3; // matches the movie name
-                if (!prio && strstr(tmp_fname_trim, f_fname_trim)
-                    && sub_match_fuzziness >= 1)
-                    prio = 2; // contains the movie name
-                if (!prio) {
-                    // doesn't contain the movie name
-                    // don't try in the mplayer subtitle directory
-                    if (!limit_fuzziness && sub_match_fuzziness >= 2) {
-                        prio = 1;
-                    }
-                }
-
-                mp_msg(MSGT_SUBREADER, MSGL_DBG2, "Potential sub file: "
-                       "\"%s\"  Priority: %d\n", de->d_name, prio);
-                if (prio) {
-                    prio += prio;
-#ifdef CONFIG_ICONV
-                    if (i < 3) // prefer UTF-8 coded
-                        prio++;
-#endif
-                    char *subpath = mp_path_join(*slist, path, BSTR(de->d_name));
-                    if ((f = fopen(subpath, "rt"))) {
-                        MP_GROW_ARRAY(*slist, *nsub);
-                        struct subfn *sub = *slist + (*nsub)++;
-
-                        fclose(f);
-                        sub->priority = prio;
-                        sub->fname    = subpath;
-                    } else
-                        talloc_free(subpath);
-                }
             }
-
-next_sub:
-            talloc_free(tmp_fname_noext);
         }
-        closedir(d);
-    }
+        if (!prio && bstrcmp(tmp_fname_trim, f_fname_trim) == 0)
+            prio = 3; // matches the movie name
+        if (!prio && bstr_find(tmp_fname_trim, f_fname_trim) >= 0
+            && sub_match_fuzziness >= 1)
+            prio = 2; // contains the movie name
+        if (!prio) {
+            // doesn't contain the movie name
+            // don't try in the mplayer subtitle directory
+            if (!limit_fuzziness && sub_match_fuzziness >= 2) {
+                prio = 1;
+            }
+        }
 
-    talloc_free(f_fname);
+        mp_msg(MSGT_SUBREADER, MSGL_DBG2, "Potential sub file: "
+               "\"%s\"  Priority: %d\n", de->d_name, prio);
+        if (prio) {
+            prio += prio;
+#ifdef CONFIG_ICONV
+            if (i < 3) // prefer UTF-8 coded
+                prio++;
+#endif
+            char *subpath = mp_path_join(*slist, path, dename);
+            if ((f = fopen(subpath, "rt"))) {
+                MP_GROW_ARRAY(*slist, *nsub);
+                struct subfn *sub = *slist + (*nsub)++;
+
+                fclose(f);
+                sub->priority = prio;
+                sub->fname    = subpath;
+            } else
+                talloc_free(subpath);
+        }
+
+    next_sub:
+        talloc_free(tmpmem2);
+    }
+    closedir(d);
+
+ out:
+    talloc_free(tmpmem);
 }
 
 char **find_text_subtitles(struct MPOpts *opts, const char *fname)

@@ -38,11 +38,13 @@ int bstrcmp(struct bstr str1, struct bstr str2);
 int bstrcasecmp(struct bstr str1, struct bstr str2);
 int bstrchr(struct bstr str, int c);
 int bstrrchr(struct bstr str, int c);
+int bstr_find(struct bstr haystack, struct bstr needle);
 struct bstr *bstr_splitlines(void *talloc_ctx, struct bstr str);
 struct bstr bstr_strip(struct bstr str);
 struct bstr bstr_split(struct bstr str, char *sep, struct bstr *rest);
 struct bstr bstr_splice(struct bstr str, int start, int end);
 long long bstrtoll(struct bstr str, struct bstr *rest, int base);
+void bstr_lower(struct bstr str);
 
 static inline struct bstr bstr_cut(struct bstr str, int n)
 {
@@ -56,11 +58,19 @@ static inline bool bstr_startswith(struct bstr str, struct bstr prefix)
     return !memcmp(str.start, prefix.start, prefix.len);
 }
 
+// demux_rtp.cpp (live555) C++ compilation workaround
+#ifndef __cplusplus
 static inline char *bstrdup0(void *talloc_ctx, struct bstr str)
 {
-    // cast is live555 C++ compilation workaround
     return talloc_strndup(talloc_ctx, (char *)str.start, str.len);
 }
+
+static inline struct bstr bstrdup(void *talloc_ctx, struct bstr str)
+{
+    struct bstr r = { talloc_strndup(talloc_ctx, str.start, str.len), str.len };
+    return r;
+}
+#endif
 
 // Create bstr compound literal from null-terminated string
 #define BSTR(s) (struct bstr){(char *)(s), (s) ? strlen(s) : 0}
