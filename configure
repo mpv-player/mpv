@@ -3266,6 +3266,9 @@ EOF
     cc_check $_ld_lm $_ld_tmp && extra_ldflags="$extra_ldflags $_ld_tmp" &&
       _iconv=yes && break
   done
+  if test "$_iconv" != yes ; then
+    die "Unable to find iconv which should be part of standard compilation environment. Aborting. If you really mean to compile without iconv support use --disable-iconv."
+  fi
 fi
 if test "$_iconv" = yes ; then
   def_iconv='#define CONFIG_ICONV 1'
@@ -5444,6 +5447,9 @@ EOF
     else
         _freetype=no
     fi
+    if test "$_freetype" != yes ; then
+      die "Unable to find development files for libfreetype. Aborting. If you really mean to compile without FreeType support use --disable-freetype."
+    fi
 fi
 if test "$_freetype" = yes ; then
     def_freetype='#define CONFIG_FREETYPE 1'
@@ -5487,6 +5493,9 @@ EOF
     cc_check $_inc_tmp $_ld_tmp && _fontconfig=yes &&
       extra_ldflags="$extra_ldflags $_ld_tmp" && extra_cflags="$extra_cflags $_inc_tmp"
   fi
+  if test "$_fontconfig" != yes ; then
+    die "Unable to find development files for libfontconfig. Aborting. If you really mean to compile without fontconfig support use --disable-fontconfig."
+  fi
 fi
 if test "$_fontconfig" = yes ; then
     def_fontconfig='#define CONFIG_FONTCONFIG 1'
@@ -5504,8 +5513,7 @@ if test "$_ass" = auto -o "$_ass" = yes ; then
                 extra_ldflags="$extra_ldflags $($_pkg_config --libs libass)"
                 extra_cflags="$extra_cflags $($_pkg_config --cflags libass)"
         else
-                _ass=no
-                def_ass='#undef CONFIG_ASS'
+            die "Unable to find development files for libass. Aborting. If you really mean to compile without libass support use --disable-ass."
         fi
 else
     def_ass='#undef CONFIG_ASS'
