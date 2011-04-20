@@ -4071,6 +4071,7 @@ if test "$_3dfx" = yes && test "$_dga" = yes ; then
   def_3dfx='#define CONFIG_3DFX 1'
   vomodules="3dfx $vomodules"
 else
+  _3dfx=no
   def_3dfx='#undef CONFIG_3DFX'
   novomodules="3dfx $novomodules"
 fi
