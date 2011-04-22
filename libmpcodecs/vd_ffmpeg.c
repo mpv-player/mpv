@@ -559,6 +559,9 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     if(init_vo(sh, avctx->pix_fmt) < 0){
         avctx->release_buffer= avcodec_default_release_buffer;
         avctx->get_buffer= avcodec_default_get_buffer;
+        avctx->reget_buffer= avcodec_default_reget_buffer;
+        if (pic->data[0])
+            release_buffer(avctx, pic);
         return avctx->get_buffer(avctx, pic);
     }
 
@@ -571,6 +574,9 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
 
             ctx->do_dr1=0; //FIXME
             avctx->get_buffer= avcodec_default_get_buffer;
+            avctx->reget_buffer= avcodec_default_reget_buffer;
+            if (pic->data[0])
+                release_buffer(avctx, pic);
             return avctx->get_buffer(avctx, pic);
         }
 
