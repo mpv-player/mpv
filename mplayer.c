@@ -3353,11 +3353,14 @@ static void run_playloop(struct MPContext *mpctx)
             pause_player(mpctx);
         }
         // handle audio-only case:
-        double a_pos = 0;
+        double a_pos = 0, a_buf = 0;
         // sh_audio can be NULL due to video stream switching
         // TODO: handle this better
-        if (mpctx->sh_audio)
-            a_pos = playing_audio_pts(mpctx);
+        if (mpctx->sh_audio) {
+            a_buf = ao_get_delay(mpctx->ao);
+            a_pos = written_audio_pts(mpctx) - mpctx->opts.playback_speed *
+                a_buf;
+        }
 
         print_status(mpctx, a_pos, false);
 
@@ -3369,18 +3372,24 @@ static void run_playloop(struct MPContext *mpctx)
                    && mpctx->timeline_part + 1 < mpctx->num_timeline_parts
                    && mpctx->sh_audio) {
             struct timeline_part *p = mpctx->timeline + mpctx->timeline_part;
-            double delay = ao_get_delay(mpctx->ao);
             if (!opts->gapless_audio && p->source != (p+1)->source
-                && delay > 0.05) {
+                && a_buf > 0.05) {
                 mpctx->stop_play = KEEP_PLAYING;
-                mp_input_get_cmd(mpctx->input, (delay-.05) * 1000, true);
+                mp_input_get_cmd(mpctx->input, (a_buf-.05) * 1000, true);
             } else {
                 seek(mpctx, (struct seek_params){ .type = MPSEEK_ABSOLUTE,
                                                   .amount = (p+1)->start },
                      true);
             }
         } else if (!mpctx->stop_play) {
-            int sleep_time = full_audio_buffers || !mpctx->sh_audio ? 100 : 20;
+            int sleep_time = 100;
+            if (mpctx->sh_audio) {
+                if (full_audio_buffers)
+                    sleep_time = FFMAX(20, a_buf * 1000 - 50);
+                else
+                    sleep_time = 20;
+                sleep_time = FFMIN(sleep_time, 100);
+            }
             mp_input_get_cmd(mpctx->input, sleep_time, true);
         }
     } else {
