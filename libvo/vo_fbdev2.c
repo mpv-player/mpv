@@ -122,42 +122,25 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   bcols = 1 << var->blue.length;
 
   /* Make our palette the length of the deepest color */
-  cols = (rcols > gcols ? rcols : gcols);
-  cols = (cols > bcols ? cols : bcols);
+  cols = FFMAX3(rcols, gcols, bcols);
 
-  red = malloc(cols * sizeof(red[0]));
+  red = malloc(3 * cols * sizeof(red[0]));
   if(!red) {
 	  mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] Can't allocate red palette with %d entries.\n", cols);
 	  return NULL;
   }
-  for(i=0; i< rcols; i++)
-    red[i] = (65535/(rcols-1)) * i;
-
-  green = malloc(cols * sizeof(green[0]));
-  if(!green) {
-	  mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] Can't allocate green palette with %d entries.\n", cols);
-	  free(red);
-	  return NULL;
-  }
-  for(i=0; i< gcols; i++)
+  green = red   + cols;
+  blue  = green + cols;
+  for (i = 0; i < cols; i++) {
+    red[i]   = (65535/(rcols-1)) * i;
     green[i] = (65535/(gcols-1)) * i;
-
-  blue = malloc(cols * sizeof(blue[0]));
-  if(!blue) {
-	  mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] Can't allocate blue palette with %d entries.\n", cols);
-	  free(red);
-	  free(green);
-	  return NULL;
+    blue[i]  = (65535/(bcols-1)) * i;
   }
-  for(i=0; i< bcols; i++)
-    blue[i] = (65535/(bcols-1)) * i;
 
   cmap = malloc(sizeof(struct fb_cmap));
   if(!cmap) {
 	  mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] Can't allocate color map\n");
 	  free(red);
-	  free(green);
-	  free(blue);
 	  return NULL;
   }
   cmap->start = 0;
@@ -279,12 +262,12 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 					return 1;
 				if (ioctl(fb_dev_fd, FBIOPUTCMAP, cmap)) {
 					mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] can't put cmap: %s\n", strerror(errno));
+					free(cmap->red);
+					free(cmap);
 					return 1;
 				}
 				fb_cmap_changed = 1;
 				free(cmap->red);
-				free(cmap->green);
-				free(cmap->blue);
 				free(cmap);
 				break;
 			default:
@@ -375,13 +358,8 @@ static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 	uint8_t *dest = next_frame + (in_width * y + x) * fb_pixel_size;
 	int next = in_width * fb_pixel_size;
 #endif
-	int i;
 
-	for (i = 0; i < h; i++) {
-		fast_memcpy(dest, in, w * fb_pixel_size);
-		dest += next;
-		in += stride[0];
-	}
+	memcpy_pic(dest, in, w * fb_pixel_size, h, next, stride[0]);
 	return 0;
 }
 
@@ -392,14 +370,11 @@ static void check_events(void)
 static void flip_page(void)
 {
 #ifndef USE_CONVERT2FB
-	int i, out_offset = 0, in_offset = 0;
+	int out_offset = 0, in_offset = 0;
 
-	for (i = 0; i < in_height; i++) {
-		fast_memcpy(center + out_offset, next_frame + in_offset,
-				in_width * fb_pixel_size);
-		out_offset += fb_line_len;
-		in_offset += in_width * fb_pixel_size;
-	}
+	memcpy_pic(center + out_offset, next_frame + in_offset,
+	           in_width * fb_pixel_size, in_height,
+	           fb_line_len, in_width * fb_pixel_size);
 #endif
 }
 
