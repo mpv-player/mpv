@@ -480,7 +480,7 @@ static fb_mode_t *find_best_mode(int xres, int yres, range_t *hfreq,
     return best;
 }
 
-static void set_bpp(struct fb_var_screeninfo *p, int bpp)
+static void set_bpp(struct fb_var_screeninfo *p, int bpp, int rgb)
 {
     p->bits_per_pixel = FFALIGN(bpp, 2);
     p->red.msb_right  = p->green.msb_right = p->blue.msb_right = p->transp.msb_right = 0;
@@ -519,15 +519,19 @@ static void set_bpp(struct fb_var_screeninfo *p, int bpp)
         p->blue.length  = 4;
         break;
     }
+    if (rgb) {
+        p->blue.offset = p->red.offset;
+        p->red.offset = 0;
+    }
 }
 
-static void fb_mode2fb_vinfo(fb_mode_t *m, struct fb_var_screeninfo *v)
+static void fb_mode2fb_vinfo(fb_mode_t *m, struct fb_var_screeninfo *v, int rgb)
 {
     v->xres         = m->xres;
     v->yres         = m->yres;
     v->xres_virtual = m->vxres;
     v->yres_virtual = m->vyres;
-    set_bpp(v, m->depth);
+    set_bpp(v, m->depth, rgb);
     v->pixclock     = m->pixclock;
     v->left_margin  = m->left;
     v->right_margin = m->right;
@@ -563,6 +567,7 @@ static struct fb_var_screeninfo fb_vinfo;
 static unsigned short fb_ored[256], fb_ogreen[256], fb_oblue[256];
 static struct fb_cmap fb_oldcmap = { 0, 256, fb_ored, fb_ogreen, fb_oblue };
 static int fb_cmap_changed = 0;
+static int fb_rgb;
 static int fb_pixel_size;       // 32:  4  24:  3  16:  2  15:  2
 static int fb_bpp;              // 32: 32  24: 24  16: 16  15: 15
 static int fb_bpp_we_want;      // 32: 32  24: 24  16: 16  15: 15
@@ -687,6 +692,7 @@ static int fb_preinit(int reset)
         mp_msg(MSGT_VO, MSGL_ERR, "notice: Can't open /dev/tty: %s\n", strerror(errno));
     }
 
+    fb_rgb = !fb_vinfo.red.offset;
     fb_bpp = fb_vinfo.bits_per_pixel;
     if (fb_bpp == 16)
         fb_bpp = fb_vinfo.red.length  + fb_vinfo.green.length + fb_vinfo.blue.length;
@@ -780,7 +786,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
             mp_msg(MSGT_VO, MSGL_ERR, "can't find requested video mode\n");
             return 1;
         }
-        fb_mode2fb_vinfo(fb_mode, &fb_vinfo);
+        fb_mode2fb_vinfo(fb_mode, &fb_vinfo, fb_rgb);
     } else if (vm) {
         monitor_hfreq = str2range(monitor_hfreq_str);
         monitor_vfreq = str2range(monitor_vfreq_str);
@@ -797,10 +803,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         }
         mp_msg(MSGT_VO, MSGL_V, "using mode %dx%d @ %.1fHz\n", fb_mode->xres,
                fb_mode->yres, vsf(fb_mode));
-        fb_mode2fb_vinfo(fb_mode, &fb_vinfo);
+        fb_mode2fb_vinfo(fb_mode, &fb_vinfo, fb_rgb);
     }
     fb_bpp_we_want = fb_bpp;
-    set_bpp(&fb_vinfo, fb_bpp);
+    set_bpp(&fb_vinfo, fb_bpp, fb_rgb);
     fb_vinfo.xres_virtual = fb_vinfo.xres;
     fb_vinfo.yres_virtual = fb_vinfo.yres;
     fb_page = 0;
@@ -956,7 +962,7 @@ static int query_format(uint32_t format)
 {
     if (!fb_preinit(0))
         return 0;
-    if ((format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
+    if ((format & IMGFMT_BGR_MASK) == (fb_rgb ? IMGFMT_RGB : IMGFMT_BGR)) {
         int bpp = format & 0xff;
 
         if (bpp == fb_bpp)
