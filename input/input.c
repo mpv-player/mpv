@@ -1238,14 +1238,13 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time)
     fd_set fds;
     FD_ZERO(&fds);
     if (!got_cmd) {
-	int max_fd = 0, num_fd = 0;
+	int max_fd = 0;
 	for (i = 0; i < ictx->num_key_fd; i++) {
 	    if (key_fds[i].no_select)
 		continue;
 	    if (key_fds[i].fd > max_fd)
 		max_fd = key_fds[i].fd;
 	    FD_SET(key_fds[i].fd, &fds);
-	    num_fd++;
 	}
 	for (i = 0; i < ictx->num_cmd_fd; i++) {
 	    if (cmd_fds[i].no_select)
@@ -1253,24 +1252,20 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time)
 	    if (cmd_fds[i].fd > max_fd)
 		max_fd = cmd_fds[i].fd;
 	    FD_SET(cmd_fds[i].fd, &fds);
-	    num_fd++;
 	}
-	if (num_fd > 0) {
-	    struct timeval tv, *time_val;
-	    if (time >= 0) {
-		tv.tv_sec = time / 1000;
-		tv.tv_usec = (time % 1000) * 1000;
-		time_val = &tv;
-	    }
-	    else
-		time_val = NULL;
-	    if (select(max_fd + 1, &fds, NULL, NULL, time_val) < 0) {
-		if (errno != EINTR)
-		    mp_tmsg(MSGT_INPUT, MSGL_ERR, "Select error: %s\n",
-			    strerror(errno));
-		FD_ZERO(&fds);
-	    }
-	}
+        struct timeval tv, *time_val;
+        if (time >= 0) {
+            tv.tv_sec = time / 1000;
+            tv.tv_usec = (time % 1000) * 1000;
+            time_val = &tv;
+        } else
+            time_val = NULL;
+        if (select(max_fd + 1, &fds, NULL, NULL, time_val) < 0) {
+            if (errno != EINTR)
+                mp_tmsg(MSGT_INPUT, MSGL_ERR, "Select error: %s\n",
+                        strerror(errno));
+            FD_ZERO(&fds);
+        }
     }
 #else
     if (!got_cmd && time)
