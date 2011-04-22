@@ -36,6 +36,7 @@
 #include "fastmemcpy.h"
 #include "sub/sub.h"
 #include "mp_msg.h"
+#include "aspect.h"
 
 static const vo_info_t info = {
 	"Framebuffer Device",
@@ -108,8 +109,6 @@ static void (*draw_alpha_p)(int w, int h, unsigned char *src,
 static uint8_t *next_frame = NULL; // for double buffering
 static int in_width;
 static int in_height;
-static int out_width;
-static int out_height;
 
 static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
 {
@@ -233,19 +232,12 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	struct fb_cmap *cmap;
 	int fs = flags & VOFLAG_FULLSCREEN;
 
-	out_width = width;
-	out_height = height;
 	in_width = width;
 	in_height = height;
 
-	if (fs) {
-		out_width = fb_vinfo.xres;
-		out_height = fb_vinfo.yres;
-	}
-
-	if (out_width < in_width || out_height < in_height) {
+	if (fb_vinfo.xres < in_width || fb_vinfo.yres < in_height) {
 		mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] Screensize is smaller than video size (%dx%d < %dx%d)\n",
-		    out_width, out_height, in_width, in_height);
+		    fb_vinfo.xres, fb_vinfo.yres, in_width, in_height);
 		return 1;
 	}
 
@@ -304,8 +296,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	}
 
 	center = frame_buffer +
-	         ( (out_width - in_width) / 2 ) * fb_pixel_size +
-		 ( (out_height - in_height) / 2 ) * fb_line_len;
+	         vo_dx * fb_pixel_size +
+		 vo_dy * fb_line_len;
 
 #ifndef USE_CONVERT2FB
 	if (!(next_frame = realloc(next_frame, in_width * in_height * fb_pixel_size))) {
@@ -430,6 +422,11 @@ static int control(uint32_t request, void *data)
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_UPDATE_SCREENINFO:
+    vo_screenwidth  = fb_vinfo.xres;
+    vo_screenheight = fb_vinfo.yres;
+    aspect_save_screenres(vo_screenwidth, vo_screenheight);
+    return VO_TRUE;
   }
   return VO_NOTIMPL;
 }
