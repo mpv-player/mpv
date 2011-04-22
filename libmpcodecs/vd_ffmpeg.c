@@ -525,6 +525,9 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     int type= MP_IMGTYPE_IPB;
     int width= avctx->width;
     int height= avctx->height;
+    // special case to handle reget_buffer without buffer hints
+    if (pic->opaque && pic->data[0] && !pic->buffer_hints)
+        return 0;
     avcodec_align_dimensions(avctx, &width, &height);
 //printf("get_buffer %d %d %d\n", pic->reference, ctx->ip_count, ctx->b_count);
 
