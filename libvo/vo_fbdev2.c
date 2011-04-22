@@ -37,6 +37,7 @@
 #include "sub/sub.h"
 #include "mp_msg.h"
 #include "aspect.h"
+#include "libavutil/common.h"
 
 static const vo_info_t info = {
 	"Framebuffer Device",
@@ -231,6 +232,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 {
 	struct fb_cmap *cmap;
 	int fs = flags & VOFLAG_FULLSCREEN;
+	int x_offset = vo_dx + (d_width  - width ) / 2;
+	int y_offset = vo_dy + (d_height - height) / 2;
+	x_offset = av_clip(x_offset, 0, fb_vinfo.xres - width);
+	y_offset = av_clip(y_offset, 0, fb_vinfo.yres - height);
 
 	in_width = width;
 	in_height = height;
@@ -296,8 +301,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	}
 
 	center = frame_buffer +
-	         vo_dx * fb_pixel_size +
-		 vo_dy * fb_line_len;
+	         x_offset * fb_pixel_size +
+		 y_offset * fb_line_len;
 
 #ifndef USE_CONVERT2FB
 	if (!(next_frame = realloc(next_frame, in_width * in_height * fb_pixel_size))) {

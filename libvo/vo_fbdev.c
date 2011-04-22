@@ -34,6 +34,7 @@
 #include <sys/ioctl.h>
 #include <sys/kd.h>
 #include <linux/fb.h>
+#include <libavutil/common.h>
 
 #include "config.h"
 #include "video_out.h"
@@ -43,7 +44,6 @@
 #include "geometry.h"
 #include "aspect.h"
 #include "mp_msg.h"
-#include "libavutil/common.h"
 
 static const vo_info_t info = {
     "Framebuffer Device",
