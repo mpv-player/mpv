@@ -346,19 +346,13 @@ static unsigned char *demux_ogg_read_packet(ogg_stream_t *os, ogg_packet *pack,
 }
 
 // check if clang has substring from comma separated langlist
-static int demux_ogg_check_lang(const char *clang, const char *langlist)
+static int demux_ogg_check_lang(const char *clang, char **langlist)
 {
-    const char *c;
-
-    if (!langlist || !*langlist)
+    if (!langlist)
         return 0;
-    while ((c = strchr(langlist, ','))) {
-        if (!strncasecmp(clang, langlist, c - langlist))
+    for (int i = 0; langlist[i]; i++)
+        if (!strncasecmp(clang, langlist[i], strlen(langlist[i])))
             return 1;
-        langlist = &c[1];
-    }
-    if (!strncasecmp(clang, langlist, strlen(langlist)))
-        return 1;
     return 0;
 }
 
