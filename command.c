@@ -605,6 +605,8 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
         angle += step;
         if (angle < 1) //cycle
             angle = angles;
+        else if (angle > angles)
+            angle = 1;
         break;
     }
     default:
