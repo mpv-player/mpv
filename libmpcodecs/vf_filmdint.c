@@ -91,6 +91,7 @@ struct vf_priv_s {
     struct metrics thres;
     char chflag;
     double diff_time, merge_time, decode_time, vo_time, filter_time;
+    struct vf_detc_pts_buf ptsbuf;
 };
 
 #define PPZ { 2000, 2000, 0, 2000 }
@@ -1331,7 +1332,8 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 	       "" : " @@@@@@@@@@@@@@@@@");
 
     p->merge_time += get_time() - diff_time;
-    return show_fields ? vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE) : 0;
+    pts = vf_detc_adjust_pts(&p->ptsbuf, pts, 0, !show_fields);
+    return show_fields ? vf_next_put_image(vf, dmpi, pts) : 0;
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
@@ -1357,6 +1359,7 @@ static int config(struct vf_instance *vf,
     unsigned long cxm = 0;
     unsigned long cym = 0;
     struct vf_priv_s *p = vf->priv;
+    vf_detc_init_pts_buf(&p->ptsbuf);
     // rounding:
     if(!IMGFMT_IS_RGB(outfmt) && !IMGFMT_IS_BGR(outfmt)){
 	switch(outfmt){

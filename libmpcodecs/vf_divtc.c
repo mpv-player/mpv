@@ -45,6 +45,7 @@ struct vf_priv_s
    char *bdata;
    unsigned int *csdata;
    int *history;
+   struct vf_detc_pts_buf ptsbuf;
    };
 
 /*
@@ -358,6 +359,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
       {
       case 0:
 	 imgop(copyop, dmpi, mpi, 0);
+         vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 1);
 	 return 0;
 
       case 4:
@@ -372,12 +374,12 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 	    imgop(copyop, tmpi, mpi, 0);
 	    imgop(deghost_plane, tmpi, dmpi, p->deghost);
 	    imgop(copyop, dmpi, mpi, 0);
-	    return vf_next_put_image(vf, tmpi, MP_NOPTS_VALUE);
+	    return vf_next_put_image(vf, tmpi, vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 0));
 	    }
       }
 
    imgop(copyop, dmpi, mpi, 0);
-   return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
+   return vf_next_put_image(vf, dmpi, vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 0));
    }
 
 static int analyze(struct vf_priv_s *p)
@@ -706,6 +708,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 #endif
 
    free(args);
+   vf_detc_init_pts_buf(&p->ptsbuf);
    return 1;
    }
 

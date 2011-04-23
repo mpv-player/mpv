@@ -237,7 +237,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 	       &vf->priv->buf[2], mode);
       }
 
-   return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
+   return vf_next_put_image(vf, dmpi, pts);
    }
 
 static void uninit(struct vf_instance *vf)

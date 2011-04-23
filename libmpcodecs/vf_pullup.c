@@ -40,6 +40,7 @@ struct vf_priv_s {
 	int init;
 	int fakecount;
 	char *qbuf;
+	double lastpts;
 };
 
 static void init_pullup(struct vf_instance *vf, mp_image_t *mpi)
@@ -145,10 +146,35 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 
 	p = mpi->fields & MP_IMGFIELD_TOP_FIRST ? 0 :
 		(mpi->fields & MP_IMGFIELD_ORDERED ? 1 : 0);
-	pullup_submit_field(c, b, p);
-	pullup_submit_field(c, b, p^1);
-	if (mpi->fields & MP_IMGFIELD_REPEAT_FIRST)
-		pullup_submit_field(c, b, p);
+
+	if (pts == MP_NOPTS_VALUE) {
+		pullup_submit_field(c, b, p, MP_NOPTS_VALUE);
+		pullup_submit_field(c, b, p^1, MP_NOPTS_VALUE);
+		if (mpi->fields & MP_IMGFIELD_REPEAT_FIRST)
+			pullup_submit_field(c, b, p, MP_NOPTS_VALUE);
+	} else {
+		double delta;
+		if (vf->priv->lastpts == MP_NOPTS_VALUE)
+			delta = 1001.0/60000.0; // delta = field time distance
+		else
+			delta = (pts - vf->priv->lastpts) / 2;
+		if (delta <= 0.0 || delta >= 0.5) {
+			pullup_submit_field(c, b, p, pts);
+			pullup_submit_field(c, b, p^1, pts);
+			if (mpi->fields & MP_IMGFIELD_REPEAT_FIRST)
+				pullup_submit_field(c, b, p, pts);
+		} else {
+			vf->priv->lastpts = pts;
+			if (mpi->fields & MP_IMGFIELD_REPEAT_FIRST) {
+				pullup_submit_field(c, b, p, pts - delta);
+				pullup_submit_field(c, b, p^1, pts);
+				pullup_submit_field(c, b, p, pts + delta);
+			} else {
+				pullup_submit_field(c, b, p, pts - delta * 0.5);
+				pullup_submit_field(c, b, p^1, pts + delta * 0.5);
+			}
+		}
+	}
 
 	pullup_release_buffer(b, 2);
 
@@ -230,7 +256,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 			dmpi->qstride = mpi->qstride;
 			dmpi->qscale_type = mpi->qscale_type;
 		}
-		return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
+		return vf_next_put_image(vf, dmpi, f->pts);
 	}
 	dmpi = vf_get_image(vf->next, mpi->imgfmt,
 		MP_IMGTYPE_EXPORT, MP_IMGFLAG_ACCEPT_STRIDE,
@@ -249,7 +275,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 		dmpi->qstride = mpi->qstride;
 		dmpi->qscale_type = mpi->qscale_type;
 	}
-	ret = vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
+	ret = vf_next_put_image(vf, dmpi, f->pts);
 	pullup_release_frame(f);
 	return ret;
 }

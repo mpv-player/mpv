@@ -80,6 +80,7 @@ struct vf_priv_s {
 
     /* Work data */
     int  frame_cur;
+    double start_pts;
 };
 
 
@@ -147,6 +148,8 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 //        /* First frame, delete the background */
 //
 //    }
+    if (t == 0)
+        priv->start_pts = pts;
 
     /* Position of image */
     xi = priv->start + (mpi->w + priv->delta) * (t % priv->xtile);
@@ -183,7 +186,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
         /* Display the composition */
         dmpi->width  = xw;
         dmpi->height = yh;
-        return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
+        return vf_next_put_image(vf, dmpi, priv->start_pts);
     }
     else {
         /* Skip the frame */

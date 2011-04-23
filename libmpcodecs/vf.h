@@ -21,6 +21,7 @@
 
 #include "mp_image.h"
 #include "mpcommon.h"
+#include "stdbool.h"
 
 struct MPOpts;
 struct vf_instance;
@@ -168,5 +169,20 @@ static inline int norm_qscale(int qscale, int type)
     }
     return qscale;
 }
+
+struct vf_detc_pts_buf {
+    double inpts_prev, outpts_prev;
+    double lastdelta;
+};
+void vf_detc_init_pts_buf(struct vf_detc_pts_buf *p);
+/* Adjust pts when detelecining.
+ * skip_frame: do not render this frame
+ * reset_pattern: set to 1 if the telecine pattern has reset due to scene cut
+ */
+double vf_detc_adjust_pts(struct vf_detc_pts_buf *p, double pts,
+                          bool reset_pattern, bool skip_frame);
+double vf_softpulldown_adjust_pts(struct vf_detc_pts_buf *p, double pts,
+                                  bool reset_pattern, bool skip_frame,
+                                  int last_frame_duration);
 
 #endif /* MPLAYER_VF_H */

@@ -31,7 +31,30 @@
 
 struct vf_priv_s {
 	int frame;
+	double pts;
+	double lastpts;
+	mp_image_t *buffered_mpi;
 };
+
+static int continue_buffered_image_fullframe(struct vf_instance *vf)
+{
+	mp_image_t *mpi = vf->priv->buffered_mpi;
+	mp_image_t *dmpi = vf_get_image(vf->next, mpi->imgfmt,
+		MP_IMGTYPE_STATIC, MP_IMGFLAG_ACCEPT_STRIDE |
+		MP_IMGFLAG_PRESERVE, mpi->width, mpi->height);
+
+	memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h,
+			dmpi->stride[0], mpi->stride[0]);
+	if (mpi->flags & MP_IMGFLAG_PLANAR) {
+		memcpy_pic(dmpi->planes[1], mpi->planes[1],
+				mpi->chroma_width, mpi->chroma_height,
+				dmpi->stride[1], mpi->stride[1]);
+		memcpy_pic(dmpi->planes[2], mpi->planes[2],
+				mpi->chroma_width, mpi->chroma_height,
+				dmpi->stride[2], mpi->stride[2]);
+	}
+	return vf_next_put_image(vf, dmpi, vf->priv->pts);
+}
 
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
@@ -40,14 +63,26 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 
 	vf->priv->frame = (vf->priv->frame+1)%4;
 
-	dmpi = vf_get_image(vf->next, mpi->imgfmt,
-		MP_IMGTYPE_STATIC, MP_IMGFLAG_ACCEPT_STRIDE |
-		MP_IMGFLAG_PRESERVE, mpi->width, mpi->height);
+	if (pts != MP_NOPTS_VALUE) {
+		if (vf->priv->lastpts == MP_NOPTS_VALUE) {
+			vf->priv->pts = pts;
+			vf->priv->lastpts = pts;
+		} else {
+			// we only increase by 80% of input pts at each frame; in the case
+			// in which we render two frames, we jump back
+			// this turns 23.98fps perfectly into 29.97fps
+			vf->priv->pts += 0.8 * (pts - vf->priv->lastpts);
+			vf->priv->lastpts = pts;
+		}
+	}
 
 	ret = 0;
 	//    0/0  1/1  2/2  2/3  3/0
 	switch (vf->priv->frame) {
 	case 0:
+		dmpi = vf_get_image(vf->next, mpi->imgfmt,
+			MP_IMGTYPE_STATIC, MP_IMGFLAG_ACCEPT_STRIDE |
+			MP_IMGFLAG_PRESERVE, mpi->width, mpi->height);
 		my_memcpy_pic(dmpi->planes[0]+dmpi->stride[0],
 			mpi->planes[0]+mpi->stride[0], mpi->w, mpi->h/2,
 			dmpi->stride[0]*2, mpi->stride[0]*2);
@@ -61,21 +96,19 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 				mpi->chroma_width, mpi->chroma_height/2,
 				dmpi->stride[2]*2, mpi->stride[2]*2);
 		}
-		ret = vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
+		ret = vf_next_put_image(vf, dmpi, vf->priv->pts);
+		vf->priv->pts = pts;
+		vf->priv->buffered_mpi = mpi;
+		vf_queue_frame(vf, continue_buffered_image_fullframe);
+		return ret;
 	case 1:
 	case 2:
-		memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h,
-			dmpi->stride[0], mpi->stride[0]);
-		if (mpi->flags & MP_IMGFLAG_PLANAR) {
-			memcpy_pic(dmpi->planes[1], mpi->planes[1],
-				mpi->chroma_width, mpi->chroma_height,
-				dmpi->stride[1], mpi->stride[1]);
-			memcpy_pic(dmpi->planes[2], mpi->planes[2],
-				mpi->chroma_width, mpi->chroma_height,
-				dmpi->stride[2], mpi->stride[2]);
-		}
-		return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE) || ret;
+		vf->priv->buffered_mpi = mpi;
+		return continue_buffered_image_fullframe(vf);
 	case 3:
+		dmpi = vf_get_image(vf->next, mpi->imgfmt,
+			MP_IMGTYPE_STATIC, MP_IMGFLAG_ACCEPT_STRIDE |
+			MP_IMGFLAG_PRESERVE, mpi->width, mpi->height);
 		my_memcpy_pic(dmpi->planes[0]+dmpi->stride[0],
 			mpi->planes[0]+mpi->stride[0], mpi->w, mpi->h/2,
 			dmpi->stride[0]*2, mpi->stride[0]*2);
@@ -89,7 +122,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 				mpi->chroma_width, mpi->chroma_height/2,
 				dmpi->stride[2]*2, mpi->stride[2]*2);
 		}
-		ret = vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
+		ret = vf_next_put_image(vf, dmpi, vf->priv->pts);
 		my_memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h/2,
 			dmpi->stride[0]*2, mpi->stride[0]*2);
 		if (mpi->flags & MP_IMGFLAG_PLANAR) {
@@ -142,6 +175,8 @@ static int vf_open(vf_instance_t *vf, char *args)
 	vf->priv->frame = 1;
 	if (args) sscanf(args, "%d", &vf->priv->frame);
 	vf->priv->frame--;
+	vf->priv->pts = MP_NOPTS_VALUE;
+	vf->priv->lastpts = MP_NOPTS_VALUE;
 	return 1;
 }
 

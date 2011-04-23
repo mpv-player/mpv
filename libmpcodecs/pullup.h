@@ -40,6 +40,7 @@ struct pullup_buffer
 struct pullup_field
 {
 	int parity;
+	double pts;
 	struct pullup_buffer *buffer;
 	unsigned int flags;
 	int breaks;
@@ -55,6 +56,7 @@ struct pullup_frame
 	int lock;
 	int length;
 	int parity;
+	double pts;
 	struct pullup_buffer **ifields, *ofields[2];
 	struct pullup_buffer *buffer;
 };
@@ -87,7 +89,8 @@ struct pullup_buffer *pullup_lock_buffer(struct pullup_buffer *b, int parity);
 void pullup_release_buffer(struct pullup_buffer *b, int parity);
 struct pullup_buffer *pullup_get_buffer(struct pullup_context *c, int parity);
 
-void pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b, int parity);
+void pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b,
+                         int parity, double pts);
 void pullup_flush_fields(struct pullup_context *c);
 
 struct pullup_frame *pullup_get_frame(struct pullup_context *c);

@@ -45,6 +45,7 @@ struct vf_priv_s {
 	int mode;
 	int (*analyze)(struct vf_priv_s *, mp_image_t *, mp_image_t *);
 	int needread;
+	struct vf_detc_pts_buf ptsbuf;
 };
 
 #define COMPE(a,b,e) (abs((a)-(b)) < (((a)+(b))>>(e)))
@@ -285,7 +286,7 @@ static void copy_image(mp_image_t *dmpi, mp_image_t *mpi, int field)
 	}
 }
 
-static int do_put_image(struct vf_instance *vf, mp_image_t *dmpi)
+static int do_put_image(struct vf_instance *vf, mp_image_t *dmpi, double pts)
 {
 	struct vf_priv_s *p = vf->priv;
 	int dropflag;
@@ -306,11 +307,12 @@ static int do_put_image(struct vf_instance *vf, mp_image_t *dmpi)
 		mp_msg(MSGT_VFILTER, MSGL_V, "drop! [%d/%d=%g]\n",
 			p->outframes, p->inframes, (float)p->outframes/p->inframes);
 		p->lastdrop = 0;
+		vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 1);
 		return 0;
 	}
 
 	p->outframes++;
-	return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
+	return vf_next_put_image(vf, dmpi, vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 0));
 }
 
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
@@ -335,22 +337,24 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 		/* Don't copy anything unless we'll need to read it. */
 		if (p->needread) copy_image(dmpi, mpi, 2);
 		p->lastdrop = 0;
+		vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 1);
 		break;
 	case TC_PROG:
 		/* Copy and display the whole frame. */
 		copy_image(dmpi, mpi, 2);
-		ret = do_put_image(vf, dmpi);
+		ret = do_put_image(vf, dmpi, pts);
 		break;
 	case TC_IL1:
 		/* Only copy bottom field unless we need to read. */
 		if (p->needread) copy_image(dmpi, mpi, 2);
 		else copy_image(dmpi, mpi, 1);
 		p->lastdrop = 0;
+		vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 1);
 		break;
 	case TC_IL2:
 		/* Copy top field and show frame, then copy bottom if needed. */
 		copy_image(dmpi, mpi, 0);
-		ret = do_put_image(vf, dmpi);
+		ret = do_put_image(vf, dmpi, pts);
 		if (p->needread) copy_image(dmpi, mpi, 1);
 		break;
 	}
@@ -440,6 +444,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 	if (args) parse_args(p, args);
 	p->analyze = anal_funcs[p->mode].func;
 	p->needread = anal_funcs[p->mode].needread;
+	vf_detc_init_pts_buf(&p->ptsbuf);
 	return 1;
 }
 

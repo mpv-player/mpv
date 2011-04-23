@@ -49,6 +49,7 @@ struct vf_priv_s {
 	int first;
 	int drop, lastdrop, dropnext;
 	int inframes, outframes;
+	struct vf_detc_pts_buf ptsbuf;
 };
 
 enum {
@@ -426,7 +427,7 @@ static void copy_image(mp_image_t *dmpi, mp_image_t *mpi, int field)
 	}
 }
 
-static int do_put_image(struct vf_instance *vf, mp_image_t *dmpi)
+static int do_put_image(struct vf_instance *vf, mp_image_t *dmpi, double pts)
 {
 	struct vf_priv_s *p = vf->priv;
 	int dropflag=0;
@@ -448,11 +449,12 @@ static int do_put_image(struct vf_instance *vf, mp_image_t *dmpi)
 		//	p->outframes, p->inframes, (float)p->outframes/p->inframes);
 		mp_msg(MSGT_VFILTER, MSGL_V, "!");
 		p->lastdrop = 0;
+		vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 1);
 		return 0;
 	}
 
 	p->outframes++;
-	return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
+	return vf_next_put_image(vf, dmpi, vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 0));
 }
 
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
@@ -464,6 +466,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 
 	if (p->first) { /* hack */
 		p->first = 0;
+		vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 1);
 		return 1;
 	}
 
@@ -482,22 +485,23 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 		ret = 0;
 		p->lastdrop = 0;
 		mp_msg(MSGT_VFILTER, MSGL_V, "DROP\n");
+		vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 1);
 		break;
 	case F_MERGE:
 		copy_image(p->dmpi, mpi, 0);
-		ret = do_put_image(vf, p->dmpi);
+		ret = do_put_image(vf, p->dmpi, pts);
 		copy_image(p->dmpi, mpi, 1);
 		mp_msg(MSGT_VFILTER, MSGL_V, "MERGE\n");
 		p->dmpi = NULL;
 		break;
 	case F_NEXT:
 		copy_image(p->dmpi, mpi, 2);
-		ret = do_put_image(vf, p->dmpi);
+		ret = do_put_image(vf, p->dmpi, pts);
 		mp_msg(MSGT_VFILTER, MSGL_V, "NEXT\n");
 		p->dmpi = NULL;
 		break;
 	case F_SHOW:
-		ret = do_put_image(vf, p->dmpi);
+		ret = do_put_image(vf, p->dmpi, pts);
 		copy_image(p->dmpi, mpi, 2);
 		mp_msg(MSGT_VFILTER, MSGL_V, "OK\n");
 		p->dmpi = NULL;
@@ -537,6 +541,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 #if HAVE_MMX && HAVE_EBX_AVAILABLE
 	if(gCpuCaps.hasMMX) block_diffs = block_diffs_MMX;
 #endif
+	vf_detc_init_pts_buf(&p->ptsbuf);
 	return 1;
 }
 

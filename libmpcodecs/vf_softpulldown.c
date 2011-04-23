@@ -33,7 +33,21 @@ struct vf_priv_s {
 	int state;
 	long long in;
 	long long out;
+	struct vf_detc_pts_buf ptsbuf;
+	int last_frame_duration;
+	double buffered_pts;
+	mp_image_t *buffered_mpi;
+	int buffered_last_frame_duration;
 };
+
+static int continue_buffered_image(struct vf_instance *vf)
+{
+	double pts = vf->priv->buffered_pts;
+	mp_image_t *mpi = vf->priv->buffered_mpi;
+	vf->priv->out++;
+	vf->priv->state=0;
+	return vf_next_put_image(vf, mpi, vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, pts, 0, 0, vf->priv->buffered_last_frame_duration));
+}
 
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
@@ -61,7 +75,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 	}
 
 	if (state == 0) {
-		ret = vf_next_put_image(vf, mpi, MP_NOPTS_VALUE);
+		ret = vf_next_put_image(vf, mpi, vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, pts, 0, 0, vf->priv->last_frame_duration));
 		vf->priv->out++;
 		if (flags & MP_IMGFIELD_REPEAT_FIRST) {
 			my_memcpy_pic(dmpi->planes[0],
@@ -97,12 +111,13 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 			              mpi->chroma_width, mpi->chroma_height/2,
 			              dmpi->stride[2]*2, mpi->stride[2]*2);
 		}
-		ret = vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
+		ret = vf_next_put_image(vf, dmpi, vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, pts, 0, 0, vf->priv->last_frame_duration));
 		vf->priv->out++;
 		if (flags & MP_IMGFIELD_REPEAT_FIRST) {
-			ret |= vf_next_put_image(vf, mpi, MP_NOPTS_VALUE);
-			vf->priv->out++;
-			state=0;
+			vf->priv->buffered_mpi = mpi;
+			vf->priv->buffered_pts = pts;
+			vf->priv->buffered_last_frame_duration = vf->priv->last_frame_duration;
+			vf_queue_frame(vf, continue_buffered_image);
 		} else {
 			my_memcpy_pic(dmpi->planes[0],
 			              mpi->planes[0], mpi->w, mpi->h/2,
@@ -125,6 +140,10 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 	}
 
 	vf->priv->state = state;
+	if (flags & MP_IMGFIELD_REPEAT_FIRST)
+		vf->priv->last_frame_duration = 3;
+	else
+		vf->priv->last_frame_duration = 2;
 
 	return ret;
 }
@@ -151,6 +170,8 @@ static int vf_open(vf_instance_t *vf, char *args)
 	vf->default_reqs = VFCAP_ACCEPT_STRIDE;
 	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
 	vf->priv->state = 0;
+	vf->priv->last_frame_duration = 2;
+	vf_detc_init_pts_buf(&vf->priv->ptsbuf);
 	return 1;
 }
 

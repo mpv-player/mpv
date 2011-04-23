@@ -22,6 +22,7 @@
 #include "config.h"
 #include "pullup.h"
 #include "cpudetect.h"
+#include "mpcommon.h"
 
 
 
@@ -412,7 +413,8 @@ static void check_field_queue(struct pullup_context *c)
 	}
 }
 
-void pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b, int parity)
+void pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b,
+                         int parity, double pts)
 {
 	struct pullup_field *f;
 
@@ -428,6 +430,7 @@ void pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b, int 
 	f->flags = 0;
 	f->breaks = 0;
 	f->affinity = 0;
+	f->pts = pts;
 
 	compute_metric(c, f, parity, f->prev->prev, parity, c->diff, f->diffs);
 	compute_metric(c, parity?f->prev:f, 0, parity?f:f->prev, 1, c->comb, f->comb);
@@ -663,12 +666,19 @@ struct pullup_frame *pullup_get_frame(struct pullup_context *c)
 	fr->length = n;
 	fr->parity = c->first->parity;
 	fr->buffer = 0;
+	fr->pts = 0;
 	for (i = 0; i < n; i++) {
 		/* We cheat and steal the buffer without release+relock */
 		fr->ifields[i] = c->first->buffer;
 		c->first->buffer = 0;
+		if (c->first->pts == MP_NOPTS_VALUE || fr->pts == MP_NOPTS_VALUE)
+			fr->pts = MP_NOPTS_VALUE;
+		else
+			fr->pts += c->first->pts;
 		c->first = c->first->next;
 	}
+	if (fr->pts != MP_NOPTS_VALUE)
+		fr->pts /= n;
 
 	if (n == 1) {
 		fr->ofields[fr->parity] = fr->ifields[0];
