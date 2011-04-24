@@ -70,10 +70,14 @@ static inline struct bstr bstrdup(void *talloc_ctx, struct bstr str)
     struct bstr r = { talloc_strndup(talloc_ctx, str.start, str.len), str.len };
     return r;
 }
+
+static inline struct bstr BSTR(const unsigned char *s)
+{
+    return (struct bstr){(unsigned char *)s, s ? strlen(s) : 0};
+}
+
 #endif
 
-// Create bstr compound literal from null-terminated string
-#define BSTR(s) (struct bstr){(char *)(s), (s) ? strlen(s) : 0}
 // create a pair (not single value!) for "%.*s" printf syntax
 #define BSTR_P(bstr) (int)((bstr).len), (bstr).start
 
