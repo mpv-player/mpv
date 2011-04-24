@@ -1279,13 +1279,14 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time)
 	    continue;
 #endif
 
-	int code = key_fds[i].read_func.key(key_fds[i].ctx, key_fds[i].fd);
-	if (code >= 0) {
+        int code;
+        while ((code = key_fds[i].read_func.key(key_fds[i].ctx,
+                                                key_fds[i].fd)) >= 0) {
 	    mp_cmd_t *ret = interpret_key(ictx, code);
 	    if (ret)
 		return ret;
 	}
-	else if (code == MP_INPUT_ERROR)
+        if (code == MP_INPUT_ERROR)
 	    mp_tmsg(MSGT_INPUT, MSGL_ERR, "Error on key input file descriptor %d\n",
 		   key_fds[i].fd);
 	else if (code == MP_INPUT_DEAD) {
@@ -1305,14 +1306,14 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time)
 	    continue;
 #endif
 	char *cmd;
-	int r = read_cmd(&cmd_fds[i], &cmd);
-	if (r >= 0) {
+        int r;
+        while ((r = read_cmd(&cmd_fds[i], &cmd)) >= 0) {
 	    mp_cmd_t *ret = mp_input_parse_cmd(cmd);
 	    talloc_free(cmd);
 	    if (ret)
 		return ret;
 	}
-	else if (r == MP_INPUT_ERROR)
+        if (r == MP_INPUT_ERROR)
 	    mp_tmsg(MSGT_INPUT, MSGL_ERR, "Error on command file descriptor %d\n",
 		   cmd_fds[i].fd);
 	else if (r == MP_INPUT_DEAD)
