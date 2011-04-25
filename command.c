@@ -2668,9 +2668,16 @@ static void remove_subtitle_range(MPContext *mpctx, int start, int count)
     }
     for (idx = start; idx < end; idx++) {
         sub_data *subd = subs[idx];
+        char *filename = "";
+        if (subd)
+            filename = subd->filename;
+#ifdef CONFIG_ASS
+        if (!subd)
+            filename = ass_tracks[idx]->name;
+#endif
         mp_msg(MSGT_CPLAYER, MSGL_STATUS,
                "SUB: Removed subtitle file (%d): %s\n", idx + 1,
-               filename_recode(subd->filename));
+               filename_recode(filename));
         sub_free(subd);
         subs[idx] = NULL;
 #ifdef CONFIG_ASS
