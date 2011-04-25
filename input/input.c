@@ -802,9 +802,8 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
         str = &str[19];
     }
 
-    for (ptr = str; ptr[0] != '\0' && ptr[0] != '\t' && ptr[0] != ' '; ptr++)
-        /* NOTHING */;
-    if (ptr[0] != '\0')
+    ptr = str + strcspn(str, "\t ");
+    if (*ptr != 0)
         l = ptr - str;
     else
         l = strlen(str);
@@ -1521,8 +1520,7 @@ static void bind_keys(struct input_ctx *ictx,
         section = ++cmd;
         cmd = ++p;
         // Jump beginning space
-        for (; cmd[0] != '\0' && strchr(SPACE_CHAR, cmd[0]) != NULL; cmd++)
-            /* NOTHING */;
+        cmd += strspn(cmd, SPACE_CHAR);
     }
     bind_section = get_bind_section(ictx, section);
 
@@ -1597,9 +1595,8 @@ static int parse_config(struct input_ctx *ictx, char *file)
         iter = buffer;
 
         if (comments) {
-            for (; iter[0] != '\0' && iter[0] != '\n'; iter++)
-                /* NOTHING */;
-            if (iter[0] == '\0') { // Buffer was full of comment
+            iter += strcspn(iter, "\n");
+            if (*iter == 0) { // Buffer was full of comment
                 bs = 0;
                 continue;
             }
@@ -1614,9 +1611,8 @@ static int parse_config(struct input_ctx *ictx, char *file)
         // Find the wanted key
         if (keys[0] == 0) {
             // Jump beginning space
-            for (; iter[0] != '\0' && strchr(SPACE_CHAR, iter[0]) != NULL; iter++)
-                /* NOTHING */;
-            if (iter[0] == '\0') { // Buffer was full of space char
+            iter += strspn(iter, SPACE_CHAR);
+            if (*iter == 0) { // Buffer was full of space char
                 bs = 0;
                 continue;
             }
@@ -1625,9 +1621,8 @@ static int parse_config(struct input_ctx *ictx, char *file)
                 continue;
             }
             // Find the end of the key code name
-            for (end = iter; end[0] != '\0' && strchr(SPACE_CHAR, end[0]) == NULL; end++)
-                /*NOTHING */;
-            if (end[0] == '\0') { // Key name doesn't fit in the buffer
+            end = iter + strcspn(iter, SPACE_CHAR);
+            if (*end == 0) {   // Key name doesn't fit in the buffer
                 if (buffer == iter) {
                     if (eof && (buffer - iter) == bs)
                         mp_tmsg(MSGT_INPUT, MSGL_ERR,
@@ -1678,9 +1673,8 @@ static int parse_config(struct input_ctx *ictx, char *file)
                 }
                 continue;
             }
-            for (end = iter; end[0] != '\n' && end[0] != '\r' && end[0] != '\0'; end++)
-                /* NOTHING */;
-            if (end[0] == '\0' && !(eof && ((end + 1) - buffer) == bs)) {
+            end = iter + strcspn(iter, "\n\r");
+            if (*end == 0 && !(eof && ((end + 1) - buffer) == bs)) {
                 if (iter == buffer) {
                     mp_tmsg(MSGT_INPUT, MSGL_ERR, "Buffer is too small "
                             "for command %s\n", buffer);
