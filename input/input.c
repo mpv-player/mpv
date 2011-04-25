@@ -1184,6 +1184,15 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         if (ictx->key_down[j] == code)
             break;
     }
+    bool doubleclick = code >= MOUSE_BTN0_DBL && code < MOUSE_BTN_DBL_END;
+    if (doubleclick) {
+        int btn = code - MOUSE_BTN0_DBL + MOUSE_BTN0;
+        if (!ictx->num_key_down
+            || ictx->key_down[ictx->num_key_down - 1] != btn)
+            return NULL;
+        j = ictx->num_key_down - 1;
+        ictx->key_down[j] = code;
+    }
     if (j == ictx->num_key_down) {  // was not already down; add temporarily
         if (ictx->num_key_down > MP_MAX_KEY_DOWN) {
             mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many key down events "
@@ -1198,6 +1207,10 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
     ret = ictx->last_key_down ?
           get_cmd_from_keys(ictx, ictx->num_key_down, ictx->key_down)
           : NULL;
+    if (doubleclick) {
+        ictx->key_down[j] = code - MOUSE_BTN0_DBL + MOUSE_BTN0;
+        return ret;
+    }
     // Remove the key
     if (j + 1 < ictx->num_key_down)
         memmove(&ictx->key_down[j], &ictx->key_down[j + 1],

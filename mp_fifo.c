@@ -31,8 +31,8 @@ struct mp_fifo {
     int readpos;
     int writepos;
     int size;
-    unsigned last_key_time[2];
-    int last_key[2];
+    int last_key_down;
+    unsigned last_down_time;
 };
 
 struct mp_fifo *mp_fifo_create(struct MPOpts *opts)
@@ -86,16 +86,10 @@ void mplayer_put_key(struct mp_fifo *fifo, int code)
     mplayer_put_key_internal(fifo, code);
     if (code & MP_KEY_DOWN) {
         code &= ~MP_KEY_DOWN;
-        fifo->last_key[1] = fifo->last_key[0];
-        fifo->last_key[0] = code;
-        fifo->last_key_time[1] = fifo->last_key_time[0];
-        fifo->last_key_time[0] = now;
-        if (fifo->last_key[1] == code
-            && now - fifo->last_key_time[1] < doubleclick_time)
+        if (fifo->last_key_down == code
+            && now - fifo->last_down_time < doubleclick_time)
             put_double(fifo, code);
-        return;
+        fifo->last_key_down = code;
+        fifo->last_down_time = now;
     }
-    if (fifo->last_key[0] == code && fifo->last_key[1] == code
-        && now - fifo->last_key_time[1] < doubleclick_time)
-        put_double(fifo, code);
 }
