@@ -31,6 +31,7 @@
 
 #include "input.h"
 #include "ar.h"
+#include "keycodes.h"
 
 extern int slave_mode;
 

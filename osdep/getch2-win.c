@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <windows.h>
-#include "keycodes.h"
+#include "input/keycodes.h"
 #include "input/input.h"
 #include "mp_fifo.h"
 #include "getch2.h"

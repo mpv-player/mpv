@@ -31,12 +31,11 @@
 #include <ctype.h>
 
 #include "input.h"
-#include "mouse.h"
 #ifdef MP_DEBUG
 #include <assert.h>
 #endif
 #include "mp_fifo.h"
-#include "osdep/keycodes.h"
+#include "keycodes.h"
 #include "osdep/timer.h"
 #include "libavutil/avstring.h"
 #include "mp_msg.h"

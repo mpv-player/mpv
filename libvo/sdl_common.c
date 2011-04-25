@@ -22,9 +22,8 @@
 #include "old_vo_defines.h"
 #include "mp_msg.h"
 #include "mp_fifo.h"
-#include "osdep/keycodes.h"
+#include "input/keycodes.h"
 #include "input/input.h"
-#include "input/mouse.h"
 #include "video_out.h"
 
 static int old_w;

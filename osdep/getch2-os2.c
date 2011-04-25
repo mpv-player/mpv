@@ -29,7 +29,7 @@
 #include <string.h>
 
 #include "config.h"
-#include "keycodes.h"
+#include "input/keycodes.h"
 #include "input/input.h"
 #include "mp_fifo.h"
 #include "getch2.h"

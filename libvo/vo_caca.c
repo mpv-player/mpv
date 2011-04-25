@@ -37,7 +37,7 @@
 #include "video_out_internal.h"
 #include "sub/sub.h"
 
-#include "osdep/keycodes.h"
+#include "input/keycodes.h"
 #include "mp_msg.h"
 #include "mp_fifo.h"
 

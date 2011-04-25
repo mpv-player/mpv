@@ -39,7 +39,7 @@
 #include "menu.h"
 #include "menu_list.h"
 #include "input/input.h"
-#include "osdep/keycodes.h"
+#include "input/keycodes.h"
 
 #include "stream/dvbin.h"
 

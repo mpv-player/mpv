@@ -58,7 +58,7 @@
 #include <fcntl.h>
 
 #include "mp_fifo.h"
-#include "keycodes.h"
+#include "input/keycodes.h"
 #include "getch2.h"
 
 #ifdef HAVE_TERMIOS

@@ -43,9 +43,8 @@
 
 #include "fastmemcpy.h"
 #include "mp_fifo.h"
-#include "osdep/keycodes.h"
+#include "input/keycodes.h"
 #include "input/input.h"
-#include "input/mouse.h"
 #include "subopt-helper.h"
 #include "sub/sub.h"
 

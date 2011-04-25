@@ -31,7 +31,7 @@
 #include "menu.h"
 
 #include "sub/font_load.h"
-#include "osdep/keycodes.h"
+#include "input/keycodes.h"
 
 struct menu_priv_s {
   char** lines;

@@ -42,7 +42,7 @@
 #include "sub/font_load.h"
 #include "sub/sub.h"
 
-#include "osdep/keycodes.h"
+#include "input/keycodes.h"
 #include <aalib.h>
 #include "subopt-helper.h"
 #include "mp_msg.h"

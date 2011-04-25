@@ -51,7 +51,7 @@
 #include "sub/sub.h"
 
 #include "input/input.h"
-#include "input/mouse.h"
+#include "input/keycodes.h"
 
 #include "osx_common.h"
 
@@ -140,8 +140,6 @@ enum
     kAspectWideCmd   = 9,
     kPanScanCmd      = 10
 };
-
-#include "osdep/keycodes.h"
 
 //PROTOTYPE/////////////////////////////////////////////////////////////////
 static OSStatus KeyEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);

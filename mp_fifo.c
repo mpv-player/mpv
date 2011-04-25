@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include "osdep/timer.h"
 #include "input/input.h"
-#include "input/mouse.h"
+#include "input/keycodes.h"
 #include "mp_fifo.h"
 #include "talloc.h"
 #include "options.h"
@@ -70,7 +70,7 @@ int mplayer_get_key(void *ctx, int fd)
 
 static void put_double(struct mp_fifo *fifo, int code)
 {
-  if (code >= MOUSE_BTN0 && code <= MOUSE_BTN9)
+  if (code >= MOUSE_BTN0 && code < MOUSE_BTN_END)
       mplayer_put_key_internal(fifo, code - MOUSE_BTN0 + MOUSE_BTN0_DBL);
 }
 
@@ -81,7 +81,7 @@ void mplayer_put_key(struct mp_fifo *fifo, int code)
     // ignore system-doubleclick if we generate these events ourselves
     if (doubleclick_time
         && (code & ~MP_KEY_DOWN) >= MOUSE_BTN0_DBL
-        && (code & ~MP_KEY_DOWN) <= MOUSE_BTN9_DBL)
+        && (code & ~MP_KEY_DOWN) < MOUSE_BTN_DBL_END)
         return;
     mplayer_put_key_internal(fifo, code);
     if (code & MP_KEY_DOWN) {

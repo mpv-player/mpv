@@ -44,9 +44,7 @@
 #include "subopt-helper.h"
 
 #include "input/input.h"
-#include "input/mouse.h"
-
-#include "osdep/keycodes.h"
+#include "input/keycodes.h"
 #include "osx_common.h"
 
 //Cocoa

@@ -30,7 +30,7 @@
 #include "menu.h"
 
 #include "sub/font_load.h"
-#include "osdep/keycodes.h"
+#include "input/keycodes.h"
 
 #define IMPL 1
 #include "menu_list.h"

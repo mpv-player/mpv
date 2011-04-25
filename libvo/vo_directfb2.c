@@ -38,6 +38,7 @@
 #include "aspect.h"
 #include "subopt-helper.h"
 #include "mp_fifo.h"
+#include "input/keycodes.h"
 
 // triple buffering
 #define TRIPLE 1
@@ -847,8 +848,6 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 
 return 0;
 }
-
-#include "osdep/keycodes.h"
 
 static void check_events(void)
 {

@@ -41,7 +41,7 @@
 #include "menu.h"
 #include "menu_list.h"
 #include "input/input.h"
-#include "osdep/keycodes.h"
+#include "input/keycodes.h"
 
 #define MENU_KEEP_PATH "/tmp/mp_current_path"
 

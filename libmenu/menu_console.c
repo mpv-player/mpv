@@ -39,7 +39,7 @@
 #include "menu.h"
 
 #include "sub/font_load.h"
-#include "osdep/keycodes.h"
+#include "input/keycodes.h"
 #include "input/input.h"
 #include "osdep/timer.h"
 

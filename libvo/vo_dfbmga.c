@@ -35,6 +35,7 @@
 #include "mp_msg.h"
 #include "aspect.h"
 #include "mp_fifo.h"
+#include "input/keycodes.h"
 
 static const vo_info_t info = {
      "DirectFB / Matrox G200/G400/G450/G550",
@@ -1434,8 +1435,6 @@ control( uint32_t request, void *data)
 
      return VO_NOTIMPL;
 }
-
-#include "osdep/keycodes.h"
 
 static void
 check_events( void )

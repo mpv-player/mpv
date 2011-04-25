@@ -39,6 +39,10 @@
 
 #include "mp_msg.h"
 
+// keycodes.h defines would conflict with linux/input.h ones
+#define AR_DEFINES_ONLY
+#include "keycodes.h"
+
 #define EVDEV_MAX_EVENTS 32
 
 /* ripped from AppleIR driver */

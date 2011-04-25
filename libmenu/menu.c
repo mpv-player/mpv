@@ -28,7 +28,7 @@
 #include "libvo/osd.h"
 #include "sub/font_load.h"
 #include "sub/sub.h"
-#include "osdep/keycodes.h"
+#include "input/keycodes.h"
 #include "asxparser.h"
 #include "stream/stream.h"
 #include "input/input.h"

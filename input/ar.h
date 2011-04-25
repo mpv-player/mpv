@@ -23,18 +23,6 @@
 #ifndef MPLAYER_AR_H
 #define MPLAYER_AR_H
 
-#define AR_BASE      0x500
-#define AR_PLAY      (AR_BASE + 0)
-#define AR_PLAY_HOLD (AR_BASE + 1)
-#define AR_NEXT      (AR_BASE + 2)
-#define AR_NEXT_HOLD (AR_BASE + 3)
-#define AR_PREV      (AR_BASE + 4)
-#define AR_PREV_HOLD (AR_BASE + 5)
-#define AR_MENU      (AR_BASE + 6)
-#define AR_MENU_HOLD (AR_BASE + 7)
-#define AR_VUP       (AR_BASE + 8)
-#define AR_VDOWN     (AR_BASE + 9)
-
 /* MacOSX Driver */
 int mp_input_ar_init(void);
 int mp_input_ar_read(void *ctx, int fd);

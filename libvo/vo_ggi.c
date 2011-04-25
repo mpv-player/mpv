@@ -42,6 +42,7 @@
 #include "video_out_internal.h"
 
 #include "mp_fifo.h"
+#include "input/keycodes.h"
 
 #include <ggi/ggi.h>
 
@@ -485,9 +486,6 @@ static int control(uint32_t request, void *data)
     }
     return VO_NOTIMPL;
 }
-
-/* EVENT handling */
-#include "osdep/keycodes.h"
 
 static void check_events(void)
 {

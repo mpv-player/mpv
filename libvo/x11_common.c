@@ -74,7 +74,7 @@
 #endif
 
 #include "input/input.h"
-#include "input/mouse.h"
+#include "input/keycodes.h"
 
 #define WIN_LAYER_ONBOTTOM               2
 #define WIN_LAYER_NORMAL                 4
@@ -528,7 +528,6 @@ void vo_uninit(struct vo_x11_state *x11)
     talloc_free(x11);
 }
 
-#include "osdep/keycodes.h"
 #include "wskeys.h"
 
 #ifdef XF86XK_AudioPause

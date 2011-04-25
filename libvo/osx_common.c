@@ -23,7 +23,7 @@
 #include "osx_common.h"
 #include "old_vo_defines.h"
 #include "video_out.h"
-#include "osdep/keycodes.h"
+#include "input/keycodes.h"
 #include "input/input.h"
 
 /*
