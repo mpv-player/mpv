@@ -90,7 +90,7 @@ static void append_dir_subtitles(struct MPOpts *opts,
     assert(strlen(fname) < 1e6);
 
     struct bstr f_fname = BSTR(mp_basename(fname));
-    struct bstr f_fname_noext = strip_ext(f_fname);
+    struct bstr f_fname_noext = bstrdup(tmpmem, strip_ext(f_fname));
     bstr_lower(f_fname_noext);
     struct bstr f_fname_trim = bstr_strip(f_fname_noext);
 
