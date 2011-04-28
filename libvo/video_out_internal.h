@@ -40,7 +40,6 @@ static void draw_osd(void);
 static void flip_page(void);
 static void check_events(void);
 static void uninit(void);
-static int query_format(uint32_t format);
 static int preinit(const char *);
 
 #define LIBVO_EXTERN(x) struct vo_driver video_out_##x =\

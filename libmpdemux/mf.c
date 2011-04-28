@@ -126,7 +126,7 @@ mf_t* open_mf(char * filename){
    mf->nr_of_files=gg.gl_pathc;
    mf->names=calloc( gg.gl_pathc, sizeof( char* ) );
 
-   mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d (%d)\n",mf->nr_of_files, gg.gl_pathc * sizeof( char* ) );
+   mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d (%zd)\n",mf->nr_of_files, gg.gl_pathc * sizeof( char* ) );
 
    for( i=0;i < gg.gl_pathc;i++ )
     {

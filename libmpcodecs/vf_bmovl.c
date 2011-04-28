@@ -219,7 +219,6 @@ put_image(struct vf_instance *vf, mp_image_t* mpi, double pts){
 	int have, got, want;
 	int xpos=0, ypos=0, pos=0;
 	unsigned char red=0, green=0, blue=0;
-	int  alpha;
 	mp_image_t* dmpi;
 
     dmpi = vf_get_image(vf->next, mpi->imgfmt, MP_IMGTYPE_TEMP,
@@ -349,6 +348,8 @@ put_image(struct vf_instance *vf, mp_image_t* mpi, double pts){
 
 			for( buf_y=0 ; (buf_y < imgh) && (buf_y < (vf->priv->h-imgy)) ; buf_y++ ) {
 			    for( buf_x=0 ; (buf_x < (imgw*pxsz)) && (buf_x < ((vf->priv->w+imgx)*pxsz)) ; buf_x += pxsz ) {
+					int alpha = 0xff;
+
 					if(command & IS_RAWIMG) buf_pos = (buf_y * imgw * pxsz) + buf_x;
 					pos = ((buf_y+imgy) * vf->priv->w) + ((buf_x/pxsz)+imgx);
 
@@ -369,13 +370,11 @@ put_image(struct vf_instance *vf, mp_image_t* mpi, double pts){
 							red   = buffer[buf_pos+0];
 							green = buffer[buf_pos+1];
 							blue  = buffer[buf_pos+2];
-							alpha = 0xFF;
 		    				break;
 						case IMG_BGR24:
 							blue  = buffer[buf_pos+0];
 							green = buffer[buf_pos+1];
 							red   = buffer[buf_pos+2];
-							alpha = 0xFF;
 		    				break;
 						case CMD_ALPHA:
 							vf->priv->bitmap.a[pos] = INRANGE((vf->priv->bitmap.oa[pos]+imgalpha),0,255);
@@ -423,7 +422,7 @@ put_image(struct vf_instance *vf, mp_image_t* mpi, double pts){
 	        for ( xpos=vf->priv->x1 ; xpos < vf->priv->x2 ; xpos++ ) {
 				pos = (ypos * dmpi->stride[0]) + xpos;
 
-				alpha = vf->priv->bitmap.a[pos];
+				int alpha = vf->priv->bitmap.a[pos];
 
 				if (alpha == 0) continue; // Completly transparent pixel
 

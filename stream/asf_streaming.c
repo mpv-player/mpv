@@ -672,7 +672,7 @@ static int asf_http_parse_response(asf_http_streaming_ctrl_t *asf_http_ctrl, HTT
 				  len = (unsigned int)(end-pragma);
 				}
 				if(len > sizeof(features) - 1) {
-				  mp_tmsg(MSGT_NETWORK,MSGL_WARN,"ASF HTTP PARSE WARNING : Pragma %s cut from %zd bytes to %d\n",pragma,len,sizeof(features) - 1);
+				  mp_tmsg(MSGT_NETWORK,MSGL_WARN,"ASF HTTP PARSE WARNING : Pragma %s cut from %zd bytes to %zd\n",pragma,len,sizeof(features) - 1);
 				  len = sizeof(features) - 1;
 				}
 				strncpy( features, pragma, len );

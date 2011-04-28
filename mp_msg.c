@@ -311,7 +311,7 @@ char *mp_gtext(const char *string)
     string = gettext(string);
     setlocale(LC_MESSAGES, "C");
 #endif
-    return string;
+    return (char *)string;
 }
 
 void mp_tmsg(int mod, int lev, const char *format, ...)

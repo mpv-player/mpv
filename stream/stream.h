@@ -229,7 +229,8 @@ inline static unsigned int stream_read_word_le(stream_t *s){
   return (y<<8)|x;
 }
 
-inline static unsigned int stream_read_dword_le(stream_t *s){
+inline static uint32_t stream_read_dword_le(stream_t *s)
+{
   unsigned int y;
   y=stream_read_char(s);
   y|=stream_read_char(s)<<8;

@@ -62,7 +62,8 @@ static inline unsigned int vcd_get_msf(mp_vcd_priv_t* vcd){
          vcd->entry.cdte_addr.msf.minute*60)*75 - 150;
 }
 
-int vcd_seek_to_track(mp_vcd_priv_t* vcd,int track){
+static int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
+{
   vcd->entry.cdte_format = CDROM_MSF;
   vcd->entry.cdte_track  = track;
   if (ioctl(vcd->fd, CDROMREADTOCENTRY, &vcd->entry)) {

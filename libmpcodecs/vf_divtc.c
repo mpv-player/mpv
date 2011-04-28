@@ -156,7 +156,7 @@ static unsigned int checksum_plane(unsigned char *p, unsigned char *z,
 
    for(sum=0; h; h--, p+=s-w)
       {
-      for(shift=0, e=p+w; (int)p&(sizeof(wsum_t)-1) && p<e;)
+      for(shift=0, e=p+w; (size_t)p&(sizeof(wsum_t)-1) && p<e;)
 	 sum^=*p++<<(shift=(shift-8)&31);
 
       for(wsum=0, e2=e-sizeof(wsum_t)+1; p<e2; p+=sizeof(wsum_t))

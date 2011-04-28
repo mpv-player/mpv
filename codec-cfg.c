@@ -477,8 +477,10 @@ int parse_codec_cfg(const char *cfgfile)
 #ifdef CODECS2HTML
         return 0;
 #else
-        video_codecs = builtin_video_codecs;
-        audio_codecs = builtin_audio_codecs;
+        /* following casts are harmless since {video,audio}_codecs will stay
+         * untouched in this case */
+        video_codecs = (codecs_t *)builtin_video_codecs;
+        audio_codecs = (codecs_t *)builtin_audio_codecs;
         nr_vcodecs = sizeof(builtin_video_codecs)/sizeof(codecs_t);
         nr_acodecs = sizeof(builtin_audio_codecs)/sizeof(codecs_t);
         return 1;

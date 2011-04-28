@@ -108,7 +108,6 @@ int ai_alsa_setup(audio_in_t *ai)
     }
 
     snd_pcm_sw_params_current(ai->alsa.handle, swparams);
-    err = snd_pcm_sw_params_set_sleep_min(ai->alsa.handle, swparams,0);
     err = snd_pcm_sw_params_set_avail_min(ai->alsa.handle, swparams, ai->alsa.chunk_size);
 
     err = snd_pcm_sw_params_set_start_threshold(ai->alsa.handle, swparams, 0);

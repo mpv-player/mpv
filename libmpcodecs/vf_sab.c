@@ -63,33 +63,6 @@ struct vf_priv_s {
 
 /***************************************************************************/
 
-//FIXME stupid code duplication
-static void getSubSampleFactors(int *h, int *v, int format){
-	switch(format){
-	case IMGFMT_YV12:
-	case IMGFMT_I420:
-		*h=1;
-		*v=1;
-		break;
-	case IMGFMT_YVU9:
-		*h=2;
-		*v=2;
-		break;
-	case IMGFMT_444P:
-		*h=0;
-		*v=0;
-		break;
-	case IMGFMT_422P:
-		*h=1;
-		*v=0;
-		break;
-	case IMGFMT_411P:
-		*h=2;
-		*v=0;
-		break;
-	}
-}
-
 static int allocStuff(FilterParam *f, int width, int height){
 	int stride= (width+7)&~7;
 	SwsVector *vec;
@@ -143,7 +116,7 @@ static int config(struct vf_instance *vf,
 //__asm__ volatile("emms\n\t");
 	allocStuff(&vf->priv->luma, width, height);
 
-	getSubSampleFactors(&sw, &sh, outfmt);
+	mp_get_chroma_shift(outfmt, &sw, &sh);
 	allocStuff(&vf->priv->chroma, width>>sw, height>>sh);
 
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);

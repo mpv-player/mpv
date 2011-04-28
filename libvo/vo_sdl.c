@@ -66,6 +66,7 @@
 #include "sub/sub.h"
 #include "aspect.h"
 #include "libmpcodecs/vfcap.h"
+#include "ffmpeg_files/bswap.h"
 
 #ifdef CONFIG_X11
 #include <X11/Xlib.h>
@@ -1185,13 +1186,10 @@ static void erase_rectangle(int x, int y, int w, int h)
         case IMGFMT_YUY2:
         case IMGFMT_YVYU:
         {
-                /* yuy2 and yvyu represent black the same way */
-            uint8_t yuy2_black[] = {0, 128, 0, 128};
-
             SDL_OVR_LOCK((void) 0)
                 erase_area_4(x*2, w*2, h,
                              priv->overlay->pitches[0],
-                             *((uint32_t*) yuy2_black),
+                             be2me_32(0x00800080), /* yuy2 and yvyu represent black the same way */
                              priv->overlay->pixels[0] +
                              priv->overlay->pitches[0]*y);
             SDL_OVR_UNLOCK
@@ -1200,12 +1198,10 @@ static void erase_rectangle(int x, int y, int w, int h)
 
         case IMGFMT_UYVY:
         {
-            uint8_t uyvy_black[] = {128, 0, 128, 0};
-
             SDL_OVR_LOCK((void) 0)
                 erase_area_4(x*2, w*2, h,
                              priv->overlay->pitches[0],
-                             *((uint32_t*) uyvy_black),
+                             be2me_32(0x80008000),
                              priv->overlay->pixels[0] +
                              priv->overlay->pitches[0]*y);
             SDL_OVR_UNLOCK

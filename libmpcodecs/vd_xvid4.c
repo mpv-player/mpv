@@ -287,7 +287,7 @@ static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags)
 		}
 
 		/* Don't forget to update buffer position and buffer length */
-		dec.bitstream += consumed;
+		dec.bitstream = (char *)dec.bitstream + consumed;
 		dec.length -= consumed;
 	} while ((stats.type == XVID_TYPE_VOL || stats.type == XVID_TYPE_NOTHING) && dec.length > 0);
 

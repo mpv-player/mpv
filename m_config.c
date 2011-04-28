@@ -308,10 +308,10 @@ m_config_add_option(m_config_t *config, const m_option_t *arg, const char* prefi
   co->opt = arg;
 
   // Fill in the full name
-  if(prefix && strlen(prefix) > 0) {
+  if (prefix && *prefix)
       co->name = talloc_asprintf(co, "%s:%s", prefix, arg->name);
-  } else
-    co->name = arg->name;
+  else
+      co->name = (char *)arg->name;
 
   // Option with children -> add them
   if(arg->type->flags & M_OPT_TYPE_HAS_CHILD) {

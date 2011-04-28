@@ -343,7 +343,7 @@ static int continue_buffered_image(struct vf_instance *vf)
 	mp_image_t *mpi = vf->priv->buffered_mpi;
 	int ret=0;
 	mp_image_t *dmpi;
-	void (*qpel)(unsigned char *, unsigned char *, int, int, int, int, int);
+	void (*qpel)(unsigned char *, unsigned char *, int, int, int, int, int) = NULL;
 	int bpp=1;
 	int tff;
 
@@ -359,19 +359,6 @@ static int continue_buffered_image(struct vf_instance *vf)
 			tff = 1;
 	}
 	else tff = (vf->priv->parity&1)^1;
-
-	switch (vf->priv->mode) {
-	case 2:
-		qpel = qpel_li;
-		break;
-	case 3:
-		// TODO: add 3tap filter
-		qpel = qpel_4tap;
-		break;
-	case 4:
-		qpel = qpel_4tap;
-		break;
-	}
 
 	switch (vf->priv->mode) {
 	case 0:
@@ -419,8 +406,15 @@ static int continue_buffered_image(struct vf_instance *vf)
 		}
 		break;
 	case 2:
+		qpel = qpel_li;
 	case 3:
+		// TODO: add 3tap filter
+		if (!qpel)
+			qpel = qpel_4tap;
 	case 4:
+		if (!qpel)
+			qpel = qpel_4tap;
+
 		for (; i<2; i++) {
 			dmpi = vf_get_image(vf->next, mpi->imgfmt,
 				MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,

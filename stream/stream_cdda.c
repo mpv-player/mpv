@@ -355,7 +355,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   }
 
   cd_info = cd_info_new();
-  mp_tmsg(MSGT_OPEN,MSGL_INFO,"Found audio CD with %d tracks.\n",cdda_tracks(cdd));
+  mp_tmsg(MSGT_OPEN,MSGL_INFO,"Found audio CD with %ld tracks.\n",cdda_tracks(cdd));
   for(i=0;i<cdd->tracks;i++) {
 	  char track_name[80];
 	  long sec=cdda_track_firstsector(cdd,i+1);
