@@ -3437,7 +3437,8 @@ echores "$_vsscanf"
 
 echocheck "swab()"
 _swab=no
-define_statement_check "_XOPEN_SOURCE 600" "unistd.h" 'int a, b; swab(&a, &b, 0)' && _swab=yes
+define_statement_check "_XOPEN_SOURCE 600" "unistd.h" 'int a, b; swab(&a, &b, 0)' ||
+    statement_check "string.h" 'int a, b; swab(&a, &b, 0)' && _swab=yes
 if test "$_swab" = yes ; then
   def_swab='#define HAVE_SWAB 1'
   need_swab=no
