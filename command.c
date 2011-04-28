@@ -49,6 +49,7 @@
 #include "libmpcodecs/dec_video.h"
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_teletext.h"
+#include "osdep/strsep.h"
 #include "sub/vobsub.h"
 #include "sub/spudec.h"
 #include "path.h"
