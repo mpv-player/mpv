@@ -37,6 +37,7 @@
 #ifdef __MINGW32__
 // for GetFileType to detect pipes
 #include <windows.h>
+#include <io.h>
 #endif
 
 struct priv {
