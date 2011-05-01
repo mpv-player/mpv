@@ -124,7 +124,6 @@ mv DOCS/man/zh DOCS/man/zh_CN
     --codecsdir=%{codecsdir} \
     \
     --enable-gui \
-    --enable-largefiles \
     --disable-termcap \
     --disable-bitmap-font \
     --enable-lirc \
@@ -167,7 +166,6 @@ mv -f mplayer gmplayer
     --libdir=%{_libdir} \
     --codecsdir=%{codecsdir} \
     \
-    --enable-largefiles \
     --disable-termcap \
     --disable-bitmap-font \
     --enable-lirc \

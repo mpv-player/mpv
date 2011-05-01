@@ -920,6 +920,10 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	}
 	if (spu->scaled_image) {
 	  unsigned int x, y;
+	  // needs to be 0-initialized because draw_alpha draws always a
+	  // multiple of 8 pixels. TODO: optimize
+	  if (spu->scaled_width & 7)
+	    memset(spu->scaled_image, 0, 2 * spu->scaled_image_size);
 	  if (spu->scaled_width <= 1 || spu->scaled_height <= 1) {
 	    goto nothing_to_do;
 	  }

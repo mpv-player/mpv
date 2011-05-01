@@ -102,7 +102,7 @@ typedef struct sh_video {
   double i_pts;   // PTS for the _next_ I/P frame
   float next_frame_time;
   double last_pts;
-  double buffered_pts[20];
+  double buffered_pts[32];
   int num_buffered_pts;
   double codec_reordered_pts;
   double prev_codec_reordered_pts;

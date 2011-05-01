@@ -2408,6 +2408,24 @@ Deaktiviert das automatische Laden von Untertiteln.
 Setzt die Anzeigedauer der OSD-Meldungen in ms (Standard: 1000).
 .
 .TP
+.B \-osd\-fractions <0\-2>
+Setzt die Art der Anzeige von Nachkommastellen des aktuellen Zeitstempels im
+OSD:
+.PD 0
+.RSs
+.IPs 0
+Keine Anzeige der Nachkommastellen (Standard).
+.IPs 1
+Zeige die ersten beiden Nachkommastellen.
+.IPs 2
+Zeige genäherte Framezahl an.
+Die angezeigte Framezahl ist nicht exakt, sondern nur genähert.
+Für variable FPS ist die Näherung weit von der tatsächlichen Framezahl
+entfernt.
+.RE
+.PD 1
+.
+.TP
 .B \-osdlevel <0\-3> (nur bei MPlayer)
 Gibt den Modus an, in dem das OSD startet:
 .PD 0

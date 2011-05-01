@@ -34,6 +34,7 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
 
 static int write_buffer(stream_t *s, char *buffer, int len)
 {
+    /* url_write retries internally on short writes and EAGAIN */
     int r = url_write(s->priv, buffer, len);
     return (r <= 0) ? -1 : r;
 }

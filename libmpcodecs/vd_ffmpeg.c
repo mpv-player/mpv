@@ -521,10 +521,13 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     sh_video_t *sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
     mp_image_t *mpi=NULL;
-    int flags= MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE;
+    int flags= MP_IMGFLAG_ACCEPT_ALIGNED_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE;
     int type= MP_IMGTYPE_IPB;
     int width= avctx->width;
     int height= avctx->height;
+    // special case to handle reget_buffer without buffer hints
+    if (pic->opaque && pic->data[0] && !pic->buffer_hints)
+        return 0;
     avcodec_align_dimensions(avctx, &width, &height);
 //printf("get_buffer %d %d %d\n", pic->reference, ctx->ip_count, ctx->b_count);
 
@@ -557,6 +560,9 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     if(init_vo(sh, avctx->pix_fmt) < 0){
         avctx->release_buffer= avcodec_default_release_buffer;
         avctx->get_buffer= avcodec_default_get_buffer;
+        avctx->reget_buffer= avcodec_default_reget_buffer;
+        if (pic->data[0])
+            release_buffer(avctx, pic);
         return avctx->get_buffer(avctx, pic);
     }
 
@@ -569,6 +575,9 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
 
             ctx->do_dr1=0; //FIXME
             avctx->get_buffer= avcodec_default_get_buffer;
+            avctx->reget_buffer= avcodec_default_reget_buffer;
+            if (pic->data[0])
+                release_buffer(avctx, pic);
             return avctx->get_buffer(avctx, pic);
         }
 

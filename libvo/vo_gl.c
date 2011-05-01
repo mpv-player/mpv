@@ -1393,6 +1393,8 @@ static int control(uint32_t request, void *data)
       if (!(eq_map[i].supportmask & (1 << use_yuv)))
         break;
       *eq_map[i].value = args->value;
+      if (strcmp(args->name, "gamma") == 0)
+        eq_rgamma = eq_ggamma = eq_bgamma = args->value;
       update_yuvconv();
       return VO_TRUE;
     }

@@ -28,6 +28,7 @@
 #endif
 #include <fcntl.h>
 #include <strings.h>
+#include <assert.h>
 
 #include "talloc.h"
 
@@ -279,6 +280,7 @@ void stream_capture_do(stream_t *s)
 
 int stream_read_internal(stream_t *s, void *buf, int len)
 {
+  int orig_len = len;
   // we will retry even if we already reached EOF previously.
   switch(s->type){
   case STREAMTYPE_STREAM:
@@ -300,7 +302,26 @@ int stream_read_internal(stream_t *s, void *buf, int len)
   default:
     len= s->fill_buffer ? s->fill_buffer(s, buf, len) : 0;
   }
-  if(len<=0){ s->eof=1; return 0; }
+  if(len<=0){
+    // dvdnav has some horrible hacks to "suspend" reads,
+    // we need to skip this code or seeks will hang.
+    if (!s->eof && s->type != STREAMTYPE_DVDNAV) {
+      // just in case this is an error e.g. due to network
+      // timeout reset and retry
+      // Seeking is used as a hack to make network streams
+      // reopen the connection, ideally they would implement
+      // e.g. a STREAM_CTRL_RECONNECT to do this
+      off_t pos = s->pos;
+      s->eof=1;
+      stream_reset(s);
+      stream_seek_internal(s, pos);
+      // make sure EOF is set to ensure no endless loops
+      s->eof=1;
+      return stream_read_internal(s, buf, orig_len);
+    }
+    s->eof=1;
+    return 0;
+  }
   // When reading succeeded we are obviously not at eof.
   // This e.g. avoids issues with eof getting stuck when lavf seeks in MPEG-TS
   s->eof=0;
@@ -328,6 +349,7 @@ int stream_write_buffer(stream_t *s, unsigned char *buf, int len) {
   if(rd < 0)
     return -1;
   s->pos += rd;
+  assert(rd == len && "stream_write_buffer(): unexpected short write");
   return rd;
 }
 

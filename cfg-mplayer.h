@@ -442,6 +442,7 @@ const m_option_t common_opts[] = {
     {"user", &network_username, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"passwd", &network_password, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"bandwidth", &network_bandwidth, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+    {"http-header-fields", &network_http_header_fields, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
     {"user-agent", &network_useragent, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"referrer", &network_referrer, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"cookies", &network_cookies_enabled, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -868,6 +869,7 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("saturation", vo_gamma_saturation, 0, -100, 100),
     OPT_INTRANGE("contrast", vo_gamma_contrast, 0, -100, 100),
     OPT_INTRANGE("hue", vo_gamma_hue, 0, -100, 100),
+    OPT_INTRANGE("gamma", vo_gamma_gamma, 0, -100, 100),
     {"keepaspect", &vo_keepaspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nokeepaspect", &vo_keepaspect, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
@@ -895,6 +897,7 @@ const m_option_t mplayer_opts[]={
 #endif
     OPT_INTRANGE("osdlevel", osd_level, 0, 0, 3),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
+    OPT_INTRANGE("osd-fractions", osd_fractions, 0, 0, 2),
 #ifdef CONFIG_MENU
     {"menu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
     {"nomenu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
@@ -955,7 +958,9 @@ const m_option_t mplayer_opts[]={
 
     OPT_FLAG_CONSTANTS("noloop", loop_times, 0, 0, -1),
     OPT_INTRANGE("loop", loop_times, 0, -1, 10000),
-    {"playlist", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG, 0, 0, NULL},
+    {"shuffle", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
+    {"noshuffle", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
 
     OPT_MAKE_FLAGS("ordered-chapters", ordered_chapters, 0),
     OPT_INTRANGE("chapter-merge-threshold", chapter_merge_threshold, 0, 0, 10000),

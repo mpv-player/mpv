@@ -1632,7 +1632,9 @@ static void update_osd_msg(struct MPContext *mpctx)
             int len = get_time_length(mpctx);
             int percentage = -1;
             char percentage_text[10];
-            int pts = get_current_time(mpctx);
+            char fractions_text[4];
+            double fpts = get_current_time(mpctx);
+            int pts = fpts;
 
             if (mpctx->osd_show_percentage_until)
                 percentage = get_percent_pos(mpctx);
@@ -1642,15 +1644,41 @@ static void update_osd_msg(struct MPContext *mpctx)
             else
                 percentage_text[0] = 0;
 
+            if (opts->osd_fractions == 1) {
+                //print fractions as sub-second timestamp
+                snprintf(fractions_text, sizeof(fractions_text), ".%02d",
+                         (int)((fpts - pts) * 100));
+            } else if (opts->osd_fractions == 2) {
+                /* Print fractions by estimating the frame count within the
+                 * second.
+                 *
+                 * Rounding or cutting off numbers after the decimal point
+                 * causes problems because of float's precision and movies
+                 * whose first frame is not exactly at timestamp 0. Therefore,
+                 * we add 0.2 and cut off at the decimal point, which proved
+                 * to be good heuristic.
+                 */
+                double fps = mpctx->sh_video->fps;
+                if (fps <= 1 || fps > 99)
+                    strcpy(fractions_text, ".??");
+                else
+                    snprintf(fractions_text, sizeof(fractions_text), ".%02d",
+                             (int) ( (fpts - pts) * fps + 0.2 ) );
+            } else {
+                //do not print fractions
+                fractions_text[0] = 0;
+            }
+
             if (opts->osd_level == 3)
                 snprintf(osd_text_timer, 63,
-                         "%c %02d:%02d:%02d / %02d:%02d:%02d%s",
+                         "%c %02d:%02d:%02d%s / %02d:%02d:%02d%s",
                          mpctx->osd_function,pts/3600,(pts/60)%60,pts%60,
-                         len/3600,(len/60)%60,len%60,percentage_text);
+                         fractions_text, len/3600, (len/60)%60, len%60,
+                         percentage_text);
             else
-                snprintf(osd_text_timer, 63, "%c %02d:%02d:%02d%s",
+                snprintf(osd_text_timer, 63, "%c %02d:%02d:%02d%s%s",
                          mpctx->osd_function,pts/3600,(pts/60)%60,
-                         pts%60,percentage_text);
+                         pts%60, fractions_text, percentage_text);
         } else
             osd_text_timer[0]=0;
 

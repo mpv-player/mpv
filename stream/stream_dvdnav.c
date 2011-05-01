@@ -134,7 +134,7 @@ static dvdnav_priv_t * new_dvdnav_stream(char * filename) {
     mp_msg(MSGT_OPEN,MSGL_ERR,"stream_dvdnav, failed to set PGC positioning\n");
   /* report the title?! */
   if (dvdnav_get_title_string(priv->dvdnav,&title_str)==DVDNAV_STATUS_OK) {
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO,"Title: '%s'\n",title_str);
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DVD_VOLUME_ID=%s\n", title_str);
   }
 
   //dvdnav_event_clear(priv);
@@ -509,7 +509,9 @@ static void identify_chapters(dvdnav_t *nav, uint32_t title)
   if(parts) {
     t = duration / 90;
     mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_DVD_TITLE_%d_LENGTH=%d.%03d\n", title, t / 1000, t % 1000);
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DVD_TITLE_%d_CHAPTERS=%d\n", title, n);
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "TITLE %u, CHAPTERS: ", title);
+
     for(i=0; i<n; i++) {
       t = parts[i] /  90000;
       mp_msg(MSGT_IDENTIFY, MSGL_INFO, "%02d:%02d:%02d,", t/3600, (t/60)%60, t%60);
@@ -524,7 +526,7 @@ static void identify(dvdnav_priv_t *priv, struct stream_priv_s *p)
   uint32_t titles=0, i;
   if(p->track <= 0) {
     dvdnav_get_number_of_titles(priv->dvdnav, &titles);
-    for(i=0; i<titles; i++)
+    for(i=1; i<=titles; i++)
       identify_chapters(priv->dvdnav, i);
   }
   else
@@ -600,6 +602,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       mp_msg(MSGT_OPEN,MSGL_FATAL,"dvdnav_stream, couldn't select title %d, error '%s'\n", p->track, dvdnav_err_to_string(priv->dvdnav));
       return STREAM_UNSUPPORTED;
     }
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DVD_CURRENT_TITLE=%d\n", p->track);
   } else if (p->track == 0) {
     if(dvdnav_menu_call(priv->dvdnav, DVD_MENU_Root) != DVDNAV_STATUS_OK)
       dvdnav_menu_call(priv->dvdnav, DVD_MENU_Title);

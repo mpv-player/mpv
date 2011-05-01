@@ -81,11 +81,11 @@ while(1){
 	if(c<0) return -1; /* EOF*/
         sh_audio->a_in_buffer[sh_audio->a_in_buffer_len++]=c;
     }
-    if(sh_audio->format!=0x2000) swab(sh_audio->a_in_buffer,sh_audio->a_in_buffer,8);
+    if(sh_audio->format==MKTAG('d','n','e','t')) swab(sh_audio->a_in_buffer,sh_audio->a_in_buffer,8);
     length = a52_syncinfo (sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
     if(length>=7 && length<=3840) break; /* we're done.*/
     /* bad file => resync*/
-    if(sh_audio->format!=0x2000) swab(sh_audio->a_in_buffer,sh_audio->a_in_buffer,8);
+    if(sh_audio->format==MKTAG('d','n','e','t')) swab(sh_audio->a_in_buffer,sh_audio->a_in_buffer,8);
     memmove(sh_audio->a_in_buffer,sh_audio->a_in_buffer+1,7);
     --sh_audio->a_in_buffer_len;
 }
@@ -94,7 +94,7 @@ while(1){
     sh_audio->i_bps=bit_rate/8;
     sh_audio->samplesize=sh_audio->sample_format==AF_FORMAT_FLOAT_NE ? 4 : 2;
     demux_read_data(sh_audio->ds,sh_audio->a_in_buffer+8,length-8);
-    if(sh_audio->format!=0x2000)
+    if(sh_audio->format==MKTAG('d','n','e','t'))
 	swab(sh_audio->a_in_buffer+8,sh_audio->a_in_buffer+8,length-8);
 
 #ifdef CONFIG_LIBA52_INTERNAL

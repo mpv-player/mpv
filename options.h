@@ -31,6 +31,7 @@ typedef struct MPOpts {
 
     int osd_level;
     int osd_duration;
+    int osd_fractions;
     char *vobsub_name;
     int auto_quality;
     int benchmark;
