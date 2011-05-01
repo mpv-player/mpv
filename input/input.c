@@ -1318,8 +1318,17 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time)
 #endif
 
         int code;
-        while ((code = key_fds[i].read_func.key(key_fds[i].ctx,
-                                                key_fds[i].fd)) >= 0) {
+        while (1) {
+            code = key_fds[i].read_func.key(key_fds[i].ctx, key_fds[i].fd);
+            if (code < 0) {
+                if (code == MP_INPUT_RELEASE_ALL) {
+                    memset(ictx->key_down, 0, sizeof(ictx->key_down));
+                    ictx->num_key_down = 0;
+                    ictx->last_key_down = 0;
+                    continue;
+                }
+                break;
+            }
             mp_cmd_t *ret = interpret_key(ictx, code);
             if (ret)
                 return ret;

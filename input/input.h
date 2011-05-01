@@ -181,6 +181,9 @@ typedef enum {
 #define MP_INPUT_NOTHING -3
 //! Input will be available if you try again
 #define MP_INPUT_RETRY -4
+// Key FIFO was full - release events may be lost, zero button-down status
+#define MP_INPUT_RELEASE_ALL -5
+
 
 #ifndef MP_MAX_KEY_DOWN
 #define MP_MAX_KEY_DOWN 32

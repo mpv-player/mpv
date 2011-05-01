@@ -922,13 +922,10 @@ several 'echo "seek 10" > mp_pipe' and the pipe will stay valid.
 .TP
 .B \-key\-fifo\-size <2\-65000>
 Specify the size of the FIFO that buffers key events (default: 7).
-A FIFO of size n can buffer (n\-1) events.
-If it is too small some events may be lost
-(leading to "stuck mouse buttons" and similar effects).
-If it is too big, MPlayer may seem to hang while it
-processes the buffered events.
-To get the same behavior as before this option was introduced,
-set it to 2 for Linux or 1024 for Windows.
+If it is too small some events may be lost.
+The main disadvantage of setting it to a very large value is that if you
+hold down a key triggering some particularly slow command then the player
+may be unresponsive while it processes all the queued commands.
 .
 .TP
 .B \-lircconf <filename> (LIRC only)
