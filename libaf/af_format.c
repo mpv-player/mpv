@@ -478,19 +478,19 @@ static void float2int(float* in, void* out, int len, int bps)
   switch(bps){
   case(1):
     for(i=0;i<len;i++)
-      ((int8_t*)out)[i] = lrintf(127.0 * in[i]);
+      ((int8_t*)out)[i] = lrintf(127.0 * clamp(in[i], -1.0f, +1.0f));
     break;
   case(2):
     for(i=0;i<len;i++)
-      ((int16_t*)out)[i] = lrintf(32767.0 * in[i]);
+      ((int16_t*)out)[i] = lrintf(32767.0 * clamp(in[i], -1.0f, +1.0f));
     break;
   case(3):
     for(i=0;i<len;i++)
-      store24bit(out, i, lrintf(2147483647.0 * in[i]));
+      store24bit(out, i, lrintf(2147483647.0 * clamp(in[i], -1.0f, +1.0f)));
     break;
   case(4):
     for(i=0;i<len;i++)
-      ((int32_t*)out)[i] = lrintf(2147483647.0 * in[i]);
+      ((int32_t*)out)[i] = lrintf(2147483647.0 * clamp(in[i], -1.0f, +1.0f));
     break;
   }
 }
