@@ -54,81 +54,82 @@ extern const ao_functions_t audio_out_mpegpes;
 extern const ao_functions_t audio_out_pcm;
 extern const ao_functions_t audio_out_pss;
 
-const ao_functions_t* const audio_out_drivers[] =
-{
+static const ao_functions_t *const audio_out_drivers[] = {
 // native:
 #ifdef CONFIG_DIRECTX
-        &audio_out_dsound,
+    &audio_out_dsound,
 #endif
 #ifdef CONFIG_WIN32WAVEOUT
-        &audio_out_win32,
+    &audio_out_win32,
 #endif
 #ifdef CONFIG_KAI
-        &audio_out_kai,
+    &audio_out_kai,
 #endif
 #ifdef CONFIG_DART
-        &audio_out_dart,
+    &audio_out_dart,
 #endif
 #ifdef CONFIG_COREAUDIO
-        &audio_out_coreaudio,
+    &audio_out_coreaudio,
 #endif
 #ifdef CONFIG_OSS_AUDIO
-        &audio_out_oss,
+    &audio_out_oss,
 #endif
 #ifdef CONFIG_ALSA
-        &audio_out_alsa,
+    &audio_out_alsa,
 #endif
 #ifdef CONFIG_ALSA5
-        &audio_out_alsa5,
+    &audio_out_alsa5,
 #endif
 #ifdef CONFIG_SGI_AUDIO
-        &audio_out_sgi,
+    &audio_out_sgi,
 #endif
 #ifdef CONFIG_SUN_AUDIO
-        &audio_out_sun,
+    &audio_out_sun,
 #endif
-// wrappers:
+    // wrappers:
 #ifdef CONFIG_ARTS
-        &audio_out_arts,
+    &audio_out_arts,
 #endif
 #ifdef CONFIG_ESD
-        &audio_out_esd,
+    &audio_out_esd,
 #endif
 #ifdef CONFIG_PULSE
-        &audio_out_pulse,
+    &audio_out_pulse,
 #endif
 #ifdef CONFIG_JACK
-        &audio_out_jack,
+    &audio_out_jack,
 #endif
 #ifdef CONFIG_NAS
-        &audio_out_nas,
+    &audio_out_nas,
 #endif
 #ifdef CONFIG_SDL
-        &audio_out_sdl,
+    &audio_out_sdl,
 #endif
 #ifdef CONFIG_OPENAL
-        &audio_out_openal,
+    &audio_out_openal,
 #endif
-        &audio_out_mpegpes,
+    &audio_out_mpegpes,
 #ifdef CONFIG_IVTV
-        &audio_out_ivtv,
+    &audio_out_ivtv,
 #endif
 #ifdef CONFIG_V4L2_DECODER
-        &audio_out_v4l2,
+    &audio_out_v4l2,
 #endif
-        &audio_out_null,
-// should not be auto-selected:
-        &audio_out_pcm,
-        NULL
+    &audio_out_null,
+    // should not be auto-selected:
+    &audio_out_pcm,
+    NULL
 };
 
-void list_audio_out(void){
+void list_audio_out(void)
+{
     int i=0;
     mp_tmsg(MSGT_AO, MSGL_INFO, "Available audio output drivers:\n");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_OUTPUTS\n");
     while (audio_out_drivers[i]) {
         const ao_info_t *info = audio_out_drivers[i++]->info;
-        mp_msg(MSGT_GLOBAL, MSGL_INFO,"\t%s\t%s\n", info->short_name, info->name);
+        mp_msg(MSGT_GLOBAL, MSGL_INFO, "\t%s\t%s\n", info->short_name,
+               info->name);
     }
     mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
@@ -162,7 +163,7 @@ void ao_init(struct ao *ao, char **ao_list)
 
         mp_tmsg(MSGT_AO, MSGL_V,
                 "Trying preferred audio driver '%.*s', options '%s'\n",
-               ao_len, ao_name, ao_subdevice ? ao_subdevice : "[none]");
+                ao_len, ao_name, ao_subdevice ? ao_subdevice : "[none]");
 
         const ao_functions_t *audio_out = NULL;
         for (int i = 0; audio_out_drivers[i]; i++) {
