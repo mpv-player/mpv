@@ -228,7 +228,9 @@ static int init_audio(sh_audio_t *sh_audio, char *codecname, char *afm,
 	       mpadec->info->short_name, mpadec->info->name);
 	sh_audio->ad_driver = mpadec;
 	if (!init_audio_codec(sh_audio)) {
-	    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "ADecoder init failed :(\n");
+	    mp_tmsg(MSGT_DECAUDIO, MSGL_WARN,
+                    "Could not open audio decoder %s.\n",
+                    mpadec->info->short_name);
 	    continue;		// try next...
 	}
 	// Yeah! We got it!
