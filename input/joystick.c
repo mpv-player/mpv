@@ -31,6 +31,7 @@
 #include <errno.h>
 
 #include "mp_msg.h"
+#include "keycodes.h"
 
 #ifndef JOY_AXIS_DELTA
 #define JOY_AXIS_DELTA 500
