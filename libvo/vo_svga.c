@@ -63,7 +63,7 @@ TODO:
 
 #include <assert.h>
 
-
+static int query_format(uint32_t format);
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
                        unsigned char *srca, int stride);
 static uint32_t get_image(mp_image_t *mpi);
