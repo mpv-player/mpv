@@ -68,7 +68,14 @@ play_tree_free(play_tree_t* pt, int children) {
   for(iter = pt->child ; iter != NULL ; iter = iter->next)
     iter->parent = NULL;
 
-  //free(pt->params);
+  if (pt->params) {
+    int i;
+    for(i = 0 ; pt->params[i].name != NULL ; i++) {
+      free(pt->params[i].name);
+      free(pt->params[i].value);
+    }
+    free(pt->params);
+  }
   if(pt->files) {
     int i;
     for(i = 0 ; pt->files[i] != NULL ; i++)
