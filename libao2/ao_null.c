@@ -20,114 +20,110 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
+
+#include "talloc.h"
 
 #include "config.h"
+#include "osdep/timer.h"
 #include "libaf/af_format.h"
 #include "audio_out.h"
-#include "audio_out_internal.h"
 
-static const ao_info_t info =
-{
-	"Null audio output",
-	"null",
-	"Tobias Diedrich <ranma+mplayer@tdiedrich.de>",
-	""
+struct priv {
+    unsigned last_time;
+    float buffered_bytes;
 };
 
-LIBAO_EXTERN(null)
+static void drain(struct ao *ao)
+{
+    struct priv *priv = ao->priv;
 
-struct	timeval last_tv;
-int	buffer;
-
-static void drain(void){
-
-    struct timeval now_tv;
-    int temp, temp2;
-
-    gettimeofday(&now_tv, 0);
-    temp = now_tv.tv_sec - last_tv.tv_sec;
-    temp *= ao_data.bps;
-
-    temp2 = now_tv.tv_usec - last_tv.tv_usec;
-    temp2 /= 1000;
-    temp2 *= ao_data.bps;
-    temp2 /= 1000;
-    temp += temp2;
-
-    buffer-=temp;
-    if (buffer<0) buffer=0;
-
-    if(temp>0) last_tv = now_tv;//mplayer is fast
+    unsigned now = GetTimer();
+    priv->buffered_bytes -= (now - priv->last_time) / 1e6 * ao->bps;
+    if (priv->buffered_bytes < 0)
+        priv->buffered_bytes = 0;
+    priv->last_time = now;
 }
 
-// to set/get/query special features/parameters
-static int control(int cmd,void *arg){
-    return -1;
-}
-
-// open & setup audio device
-// return: 1=success 0=fail
-static int init(int rate,int channels,int format,int flags){
-
-    int samplesize = af_fmt2bits(format) / 8;
-    ao_data.outburst = 256 * channels * samplesize;
+static int init(struct ao *ao, char *params)
+{
+    struct priv *priv = talloc_zero(ao, struct priv);
+    ao->priv = priv;
+    int samplesize = af_fmt2bits(ao->format) / 8;
+    ao->outburst = 256 * ao->channels * samplesize;
     // A "buffer" for about 0.2 seconds of audio
-    ao_data.buffersize = (int)(rate * 0.2 / 256 + 1) * ao_data.outburst;
-    ao_data.channels=channels;
-    ao_data.samplerate=rate;
-    ao_data.format=format;
-    ao_data.bps=channels*rate*samplesize;
-    buffer=0;
-    gettimeofday(&last_tv, 0);
+    ao->buffersize = (int)(ao->samplerate * 0.2 / 256 + 1) * ao->outburst;
+    ao->bps = ao->channels * ao->samplerate * samplesize;
+    priv->last_time = GetTimer();
 
-    return 1;
+    return 0;
 }
 
 // close audio device
-static void uninit(int immed){
-
+static void uninit(struct ao *ao, bool cut_audio)
+{
 }
 
 // stop playing and empty buffers (for seeking/pause)
-static void reset(void){
-    buffer=0;
+static void reset(struct ao *ao)
+{
+    struct priv *priv = ao->priv;
+    priv->buffered_bytes = 0;
 }
 
 // stop playing, keep buffers (for pause)
-static void audio_pause(void)
+static void pause(struct ao *ao)
 {
     // for now, just call reset();
-    reset();
+    reset(ao);
 }
 
 // resume playing, after audio_pause()
-static void audio_resume(void)
+static void resume(struct ao *ao)
 {
 }
 
-// return: how many bytes can be played without blocking
-static int get_space(void){
+static int get_space(struct ao *ao)
+{
+    struct priv *priv = ao->priv;
 
-    drain();
-    return ao_data.buffersize - buffer;
+    drain(ao);
+    return ao->buffersize - priv->buffered_bytes;
 }
 
-// plays 'len' bytes of 'data'
-// it should round it down to outburst*n
-// return: number of bytes played
-static int play(void* data,int len,int flags){
+static int play(struct ao *ao, void *data, int len, int flags)
+{
+    struct priv *priv = ao->priv;
 
-    int maxbursts = (ao_data.buffersize - buffer) / ao_data.outburst;
-    int playbursts = len / ao_data.outburst;
+    int maxbursts = (ao->buffersize - priv->buffered_bytes) / ao->outburst;
+    int playbursts = len / ao->outburst;
     int bursts = playbursts > maxbursts ? maxbursts : playbursts;
-    buffer += bursts * ao_data.outburst;
-    return bursts * ao_data.outburst;
+    priv->buffered_bytes += bursts * ao->outburst;
+    return bursts * ao->outburst;
 }
 
-// return: delay in seconds between first and last sample in buffer
-static float get_delay(void){
+static float get_delay(struct ao *ao)
+{
+    struct priv *priv = ao->priv;
 
-    drain();
-    return (float) buffer / (float) ao_data.bps;
+    drain(ao);
+    return priv->buffered_bytes / ao->bps;
 }
+
+const struct ao_driver audio_out_null = {
+    .is_new = true,
+    .info = &(const struct ao_info) {
+        "Null audio output",
+        "null",
+        "Tobias Diedrich <ranma+mplayer@tdiedrich.de>",
+        "",
+    },
+    .init      = init,
+    .uninit    = uninit,
+    .reset     = reset,
+    .get_space = get_space,
+    .play      = play,
+    .get_delay = get_delay,
+    .pause     = pause,
+    .resume    = resume,
+};
+
