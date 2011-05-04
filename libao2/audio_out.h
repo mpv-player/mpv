@@ -33,8 +33,7 @@ typedef struct ao_info {
 } ao_info_t;
 
 /* interface towards mplayer and */
-typedef struct ao_functions {
-    const ao_info_t *info;
+typedef struct ao_old_functions {
     int (*control)(int cmd, void *arg);
     int (*init)(int rate, int channels, int format, int flags);
     void (*uninit)(int immed);
@@ -46,6 +45,23 @@ typedef struct ao_functions {
     void (*resume)(void);
 } ao_functions_t;
 
+struct ao;
+
+struct ao_driver {
+    bool is_new;
+    const struct ao_info *info;
+    const struct ao_old_functions *old_functions;
+    int (*control)(struct ao *ao, int cmd, void *arg);
+    int (*init)(struct ao *ao, char *params);
+    void (*uninit)(struct ao *ao, bool cut_audio);
+    void (*reset)(struct ao*ao);
+    int (*get_space)(struct ao *ao);
+    int (*play)(struct ao *ao, void *data, int len, int flags);
+    float (*get_delay)(struct ao *ao);
+    void (*pause)(struct ao *ao);
+    void (*resume)(struct ao *ao);
+};
+
 /* global data used by mplayer and plugins */
 struct ao {
     int samplerate;
@@ -56,7 +72,8 @@ struct ao {
     int buffersize;
     int pts;
     bool initialized;
-    const struct ao_functions *driver;
+    const struct ao_driver *driver;
+    void *priv;
 };
 
 extern char *ao_subdevice;
@@ -87,7 +104,7 @@ typedef struct ao_control_vol {
 
 struct ao *ao_create(void);
 void ao_init(struct ao *ao, char **ao_list);
-void ao_uninit(struct ao *ao, bool drain_audio);
+void ao_uninit(struct ao *ao, bool cut_audio);
 int ao_play(struct ao *ao, void *data, int len, int flags);
 int ao_control(struct ao *ao, int cmd, void *arg);
 double ao_get_delay(struct ao *ao);
@@ -95,5 +112,15 @@ int ao_get_space(struct ao *ao);
 void ao_reset(struct ao *ao);
 void ao_pause(struct ao *ao);
 void ao_resume(struct ao *ao);
+
+int old_ao_control(struct ao *ao, int cmd, void *arg);
+int old_ao_init(struct ao *ao, char *params);
+void old_ao_uninit(struct ao *ao, bool cut_audio);
+void old_ao_reset(struct ao*ao);
+int old_ao_get_space(struct ao *ao);
+int old_ao_play(struct ao *ao, void *data, int len, int flags);
+float old_ao_get_delay(struct ao *ao);
+void old_ao_pause(struct ao *ao);
+void old_ao_resume(struct ao *ao);
 
 #endif /* MPLAYER_AUDIO_OUT_H */

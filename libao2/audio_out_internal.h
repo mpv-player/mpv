@@ -31,20 +31,31 @@ static float get_delay(void);
 static void audio_pause(void);
 static void audio_resume(void);
 
-extern struct ao ao_data;
+extern struct ao *global_ao;
+#define ao_data (*global_ao)
 
-#define LIBAO_EXTERN(x) const ao_functions_t audio_out_##x =\
-{\
-	&info,\
-	control,\
-	init,\
-        uninit,\
-	reset,\
-	get_space,\
-	play,\
-	get_delay,\
-	audio_pause,\
-	audio_resume\
+#define LIBAO_EXTERN(x) const struct ao_driver audio_out_##x = { \
+    .info = &info,                                               \
+    .control   = old_ao_control,                                 \
+    .init      = old_ao_init,                                    \
+    .uninit    = old_ao_uninit,                                  \
+    .reset     = old_ao_reset,                                   \
+    .get_space = old_ao_get_space,                               \
+    .play      = old_ao_play,                                    \
+    .get_delay = old_ao_get_delay,                               \
+    .pause     = old_ao_pause,                                   \
+    .resume    = old_ao_resume,                                  \
+    .old_functions = &(const struct ao_old_functions) {          \
+        .control    = control,                                   \
+	.init       = init,                                      \
+        .uninit     = uninit,                                    \
+	.reset      = reset,                                     \
+	.get_space  = get_space,                                 \
+	.play       = play,                                      \
+	.get_delay  = get_delay,                                 \
+	.pause      = audio_pause,                               \
+	.resume     = audio_resume,                              \
+    },                                                           \
 };
 
 #endif /* MPLAYER_AUDIO_OUT_INTERNAL_H */
