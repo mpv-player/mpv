@@ -71,7 +71,7 @@ const char* filename_recode(const char* filename)
     filename_len = strlen(filename);
     max_path = MSGSIZE_MAX - 4;
     precoded = recoded_filename;
-    if (iconv(inv_msgiconv, &filename, &filename_len,
+    if (iconv(inv_msgiconv, (char **)&filename, &filename_len,
               &precoded, &max_path) == (size_t)(-1) && errno == E2BIG) {
         precoded[0] = precoded[1] = precoded[2] = '.';
         precoded += 3;

@@ -173,10 +173,9 @@ decode_rle_sgi(SGIInfo *info, unsigned char *data, mp_image_t *mpi)
 {
   unsigned char *rle_data, *dest_row;
   uint32_t *starttab;
-  int y, z, xsize, ysize, zsize, chan_offset;
+  int y, z, ysize, zsize, chan_offset;
   long start_offset;
 
-  xsize = info->xsize;
   ysize = info->ysize;
   zsize = info->zsize;
 

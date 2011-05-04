@@ -411,7 +411,7 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os,
     };
 
     while (*cmt) {
-        hdr = NULL;
+        hdr = val = NULL;
         if (!strncasecmp(*cmt, "LANGUAGE=", 9)) {
             val = *cmt + 9;
             if (ogg_d->subs[id].text)

@@ -31,6 +31,7 @@
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
+#include "libavutil/attributes.h"
 
 #define RoQ_INFO           0x1001
 #define RoQ_QUAD_CODEBOOK  0x1002
@@ -110,7 +111,7 @@ static demuxer_t* demux_open_roq(demuxer_t* demuxer)
   roq_data_t *roq_data = malloc(sizeof(roq_data_t));
   int chunk_id;
   int chunk_size;
-  int chunk_arg;
+  int chunk_arg av_unused;
   int last_chunk_id = 0;
   int largest_audio_chunk = 0;
   int fps;

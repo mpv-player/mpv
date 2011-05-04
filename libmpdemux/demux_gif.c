@@ -89,7 +89,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
   uint8_t *buf = NULL;
   int refmode = 0;
   int transparency = 0;
-  uint8_t transparent_col;
+  uint8_t transparent_col = 0;
 
   while (type != IMAGE_DESC_RECORD_TYPE) {
     if (DGifGetRecordType(gif, &type) == GIF_ERROR) {

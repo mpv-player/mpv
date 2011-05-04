@@ -796,9 +796,10 @@ static struct mp_image *decode(struct sh_video *sh, void *data, int len,
     // HACK: make PNGs decode normally instead of as CorePNG delta frames
     pkt.flags = AV_PKT_FLAG_KEY;
     // The avcodec opaque field stupidly supports only int64_t type
-    *(double *)&avctx->reordered_opaque = *reordered_pts;
+    union pts { int64_t i; double d; };
+    avctx->reordered_opaque = (union pts){.d = *reordered_pts}.i;
     ret = avcodec_decode_video2(avctx, pic, &got_picture, &pkt);
-    *reordered_pts = *(double *)&pic->reordered_opaque;
+    *reordered_pts = (union pts){.i = pic->reordered_opaque}.d;
 
     dr1= ctx->do_dr1;
     if(ret<0) mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Error while decoding frame!\n");

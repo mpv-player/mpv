@@ -20,6 +20,7 @@
 
 #include <stdint.h>
 #include "aac_hdr.h"
+#include "libavutil/attributes.h"
 
 /// \param srate (out) sample rate
 /// \param num (out) number of audio frames in this ADTS frame
@@ -27,7 +28,7 @@
 /// aac_parse_frames needs a buffer at least 8 bytes long
 int aac_parse_frame(uint8_t *buf, int *srate, int *num)
 {
-	int i = 0, sr, fl = 0, id;
+	int i = 0, sr, fl = 0, id av_unused;
 	static int srates[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 0, 0, 0};
 
 	if((buf[i] != 0xFF) || ((buf[i+1] & 0xF6) != 0xF0))

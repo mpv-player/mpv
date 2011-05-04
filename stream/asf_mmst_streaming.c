@@ -521,7 +521,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   char                 data[BUF_SIZE];
   uint8_t              asf_header[HDR_BUF_SIZE];
   int                  asf_header_len;
-  int                  len, i, packet_length;
+  int                  i, packet_length;
   char                *path, *unescpath;
   URL_t *url1 = stream->streaming_ctrl->url;
   int s = stream->fd;
@@ -574,7 +574,7 @@ int asf_mmst_streaming_start(stream_t *stream)
 // send_command(s, commandno ....)
   send_command (s, 1, 0, 0x0004000b, strlen(str)*2+2, data);
 
-  len = recv (s, data, BUF_SIZE, 0) ;
+  recv (s, data, BUF_SIZE, 0) ;
 
   /*This sends details of the local machine IP address to a Funnel system at the server.
   * Also, the TCP or UDP transport selection is sent.
@@ -588,7 +588,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   memset (data, 0, 8);
   send_command (s, 2, 0, 0, 24*2+10, data);
 
-  len = recv (s, data, BUF_SIZE, 0) ;
+  recv (s, data, BUF_SIZE, 0) ;
 
   /* This command sends file path (at server) and file name request to the server.
   * 0x5 */

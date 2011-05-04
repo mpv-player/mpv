@@ -198,7 +198,7 @@ static int pva_get_payload(demuxer_t *d, pva_payload_t *payload)
 {
 	uint8_t flags,pes_head_len;
 	uint16_t pack_size;
-	off_t next_offset,pva_payload_start;
+	off_t pva_payload_start;
 	unsigned char buffer[256];
 #ifndef PVA_NEW_PREBYTES_CODE
 	demux_packet_t * dp; 	//hack to deliver the preBytes (see PVA doc)
@@ -273,7 +273,6 @@ static int pva_get_payload(demuxer_t *d, pva_payload_t *payload)
 	pack_size=stream_read_word(d->stream);
 	mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_pva::pva_get_payload(): pack_size=%u field read at offset %"PRIu64"\n",pack_size,(int64_t)stream_tell(d->stream)-2);
 	pva_payload_start=stream_tell(d->stream);
-	next_offset=pva_payload_start+pack_size;
 
 
 	/*

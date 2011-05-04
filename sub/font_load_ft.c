@@ -131,8 +131,9 @@ static void paste_bitmap(unsigned char *bbuffer, FT_Bitmap *bitmap, int x, int y
 
 
 static int check_font(font_desc_t *desc, float ppem, int padding, int pic_idx,
-		      int charset_size, FT_ULong *charset, FT_ULong *charcodes,
-		      int unicode) {
+                      int charset_size, const FT_ULong *charset,
+                      const FT_ULong *charcodes, int unicode)
+{
     FT_Error	error;
     FT_Face face = desc->faces[pic_idx];
     int	const	load_flags = FT_LOAD_DEFAULT;
@@ -611,9 +612,10 @@ void render_one_glyph(font_desc_t *desc, int c)
 }
 
 
-static int prepare_font(font_desc_t *desc, FT_Face face, float ppem, int pic_idx,
-			int charset_size, FT_ULong *charset, FT_ULong *charcodes, int unicode,
-			double thickness, double radius)
+static int prepare_font(font_desc_t *desc, FT_Face face, float ppem,
+                        int pic_idx, int charset_size,
+                        const FT_ULong *charset, const FT_ULong *charcodes,
+                        int unicode, double thickness, double radius)
 {
     int i, err;
     int padding = ceil(radius) + ceil(thickness);

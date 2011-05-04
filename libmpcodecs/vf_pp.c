@@ -133,7 +133,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 
     if(vf->priv->pp || !(mpi->flags&MP_IMGFLAG_DIRECT)){
 	// do the postprocessing! (or copy if no DR)
-	pp_postprocess(mpi->planes           ,mpi->stride,
+	pp_postprocess((const uint8_t **)mpi->planes, mpi->stride,
 		    vf->dmpi->planes,vf->dmpi->stride,
 		    (mpi->w+7)&(~7),mpi->h,
 		    mpi->qscale, mpi->qstride,
@@ -162,9 +162,7 @@ static const unsigned int fmt_list[]={
 };
 
 static int vf_open(vf_instance_t *vf, char *args){
-    char *endptr, *name;
     int i;
-    int hex_mode=0;
 
     vf->query_format=query_format;
     vf->control=control;
@@ -180,15 +178,7 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_YV12);
     if(!vf->priv->outfmt) return 0; // no csp match :(
 
-    if(args){
-	hex_mode= strtol(args, &endptr, 0);
-	if(*endptr){
-            name= args;
-	}else
-            name= NULL;
-    }else{
-        name="de";
-    }
+    char *name = args ? args : "de";
 
 	for(i=0; i<=PP_QUALITY_MAX; i++){
             vf->priv->ppMode[i]= pp_get_mode_by_name_and_quality(name, i);

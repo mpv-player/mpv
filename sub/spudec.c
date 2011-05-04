@@ -872,7 +872,7 @@ static void sws_spu_image(unsigned char *d1, unsigned char *d2, int dw, int dh,
 	ctx=sws_getContext(sw, sh, PIX_FMT_GRAY8, dw, dh, PIX_FMT_GRAY8, SWS_GAUSS, &filter, NULL, NULL);
 	sws_scale(ctx,&s1,&ss,0,sh,&d1,&ds);
 	for (i=ss*sh-1; i>=0; i--) if (!s2[i]) s2[i] = 255; //else s2[i] = 1;
-	sws_scale(ctx,&s2,&ss,0,sh,&d2,&ds);
+	sws_scale(ctx,(const uint8_t **)&s2,&ss,0,sh,&d2,&ds);
 	for (i=ds*dh-1; i>=0; i--) if (d2[i]==0) d2[i] = 1; else if (d2[i]==255) d2[i] = 0;
 	sws_freeContext(ctx);
 }

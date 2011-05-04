@@ -1139,7 +1139,7 @@ find_breaks(struct vf_priv_s *p, struct frame_stats *s)
 
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
-    mp_image_t *dmpi;
+    mp_image_t *dmpi = NULL;
     struct vf_priv_s *p = vf->priv;
     unsigned char **planes, **old_planes;
     struct frame_stats *s  = &p->stats[p->inframes & 1];

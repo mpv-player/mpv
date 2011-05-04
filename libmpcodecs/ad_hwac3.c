@@ -283,9 +283,9 @@ static int dts_decode_header(uint8_t *indata_ptr, int *rate, int *nblks, int *sf
 {
   int ftype;
   int surp;
-  int unknown_bit;
+  int unknown_bit av_unused;
   int fsize;
-  int amode;
+  int amode av_unused;
 
   int word_mode;
   int le_mode;

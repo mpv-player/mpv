@@ -84,6 +84,10 @@ static int bufsz = 0;
 static int dll_type = 0; /* 0 = unix dlopen, 1 = win32 dll */
 #endif
 
+void *__builtin_vec_new(unsigned long size);
+void __builtin_vec_delete(void *mem);
+void __pure_virtual(void);
+
 void *__builtin_vec_new(unsigned long size) {
 	return malloc(size);
 }

@@ -27,6 +27,7 @@
 
 #include "font_load.h"
 #include "mp_msg.h"
+#include "libavutil/attributes.h"
 
 raw_file* load_raw(char *name,int verbose){
     int bpp;
@@ -76,7 +77,7 @@ char section[64];
 int i,j;
 int chardb=0;
 int fontdb=-1;
-int version=0;
+int version av_unused;
 int first=1;
 
 desc=malloc(sizeof(font_desc_t));if(!desc) goto fail_out;

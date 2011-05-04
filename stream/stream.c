@@ -165,7 +165,7 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     arg = m_struct_alloc(desc);
     if(sinfo->opts_url) {
       m_option_t url_opt =
-	{ "stream url", arg , CONF_TYPE_CUSTOM_URL, 0, 0 ,0, sinfo->opts };
+	{ "stream url", arg , CONF_TYPE_CUSTOM_URL, 0, 0 ,0, (void *)sinfo->opts };
       if(m_option_parse(&url_opt,"stream url",filename,arg,M_CONFIG_FILE) < 0) {
 	mp_msg(MSGT_OPEN,MSGL_ERR, "URL parsing failed on url %s\n",filename);
 	m_struct_free(desc,arg);

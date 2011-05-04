@@ -32,6 +32,7 @@
 
 #include "config.h"
 #include "libavutil/common.h"
+#include "libavutil/attributes.h"
 #include "real.h"
 #include "asmrp.h"
 #include "sdpplin.h"
@@ -316,7 +317,7 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer, int rdt_rawdata) {
   rmff_pheader_t ph;
   int size;
   int flags1, flags2;
-  int unknown1;
+  int unknown1 av_unused;
   uint32_t ts;
   static uint32_t prev_ts = -1;
   static int prev_stream_number = -1;

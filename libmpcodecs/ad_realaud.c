@@ -27,7 +27,7 @@
 #include <dlfcn.h>
 #endif
 #include "path.h"
-
+#include "libavutil/attributes.h"
 #include "ad_internal.h"
 #include "loader/wine/windef.h"
 
@@ -40,6 +40,9 @@ static const ad_info_t info = {
 };
 
 LIBAD_EXTERN(realaud)
+
+void *__builtin_new(unsigned long size);
+void __builtin_delete(void *ize);
 
 void *__builtin_new(unsigned long size) {
 	return malloc(size);
@@ -414,7 +417,7 @@ static void uninit(sh_audio_t *sh){
 }
 
 static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen){
-  int result;
+  int result av_unused;
   int len=-1;
 
   if(sh->a_in_buffer_len<=0){

@@ -25,7 +25,7 @@
 
 #include "config.h"
 #include "mpeg_hdr.h"
-
+#include "libavutil/attributes.h"
 #include "mp_msg.h"
 
 static float frameratecode2framerate[16] = {
@@ -45,7 +45,7 @@ static float frameratecode2framerate[16] = {
 
 int mp_header_process_sequence_header (mp_mpeg_header_t * picture, const unsigned char * buffer)
 {
-    int width, height;
+    int width av_unused, height;
 
     if ((buffer[6] & 0x20) != 0x20){
 	fprintf(stderr, "missing marker bit!\n");
@@ -209,7 +209,7 @@ static int read_timeinc(mp_mpeg_header_t * picture, unsigned char * buffer, int 
 
 int mp4_header_process_vol(mp_mpeg_header_t * picture, unsigned char * buffer)
 {
-    unsigned int n, aspect=0, aspectw=0, aspecth=0,  x=1, v;
+    unsigned int n, aspect=0, aspectw av_unused=0, aspecth av_unused=0,  x=1, v;
 
     //begins with 0x0000012x
     picture->fps = 0;

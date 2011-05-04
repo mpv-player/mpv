@@ -673,7 +673,6 @@ inline static void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj,i
    unsigned char *t;
    int c,i,j,l,x,y,font,prevc,counter;
    int k;
-   int lastStripPosition;
    int xsize;
    int xmin=dxs,xmax=0;
    int h,lasth;
@@ -693,12 +692,11 @@ inline static void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj,i
       // too long lines divide into a smaller ones
       i=k=lasth=0;
       h=sub_font->height;
-      lastStripPosition=-1;
       l=vo_sub->lines;
 
     {
 	struct osd_text_t *osl, *cp_ott, *tmp_ott, *tmp;
-	struct osd_text_p *otp_sub = NULL, *otp_sub_tmp,	// these are used to store the whole sub text osd
+	struct osd_text_p *otp_sub = NULL, *otp_sub_tmp = NULL, // these are used to store the whole sub text osd
 	                  *otp, *tmp_otp, *pmt;	// these are used to manage sub text osd coming from a single sub line
 	int *char_seq, char_position, xlimit = dxs * sub_width_p / 100, counter;
 

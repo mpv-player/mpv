@@ -139,7 +139,7 @@ static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, str
 {
   int pos=0;
   uint8_t *buffer = &buf[0];
-  uint64_t avg_ft;
+  uint64_t avg_ft av_unused;
   unsigned bitrate;
 
   while ((pos = find_asf_guid(buf, asf_ext_stream_header, pos, buf_len)) >= 0) {

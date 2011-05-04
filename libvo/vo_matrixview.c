@@ -188,7 +188,7 @@ static void flip_page(void)
 
 static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 {
-    sws_scale(sws, src, stride, y, h, map_image, map_stride);
+    sws_scale(sws, (const uint8_t **)src, stride, y, h, map_image, map_stride);
     return 0;
 }
 

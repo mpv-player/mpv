@@ -325,7 +325,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
 	fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
 	fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
 {
-  int res, hi_lo, dfd;
+  int res, hi_lo = 0, dfd;
   struct dvb_frontend_parameters feparams;
   struct dvb_frontend_info fe_info;
 

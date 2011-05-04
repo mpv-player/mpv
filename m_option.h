@@ -125,11 +125,11 @@ extern const m_option_type_t m_option_type_obj_settings_list;
 /// Extra definition needed for \ref m_option_type_obj_presets options.
 typedef struct {
   /// Description of the struct holding the presets.
-  struct m_struct_st* in_desc;
+  const struct m_struct_st *in_desc;
   /// Description of the struct that should be set by the presets.
-  struct m_struct_st* out_desc;
+  const struct m_struct_st *out_desc;
   /// Pointer to an array of structs defining the various presets.
-  void* presets;
+  const void *presets;
   /// Offset of the preset's name inside the in_struct.
   void* name_off;
 } m_obj_presets_t;

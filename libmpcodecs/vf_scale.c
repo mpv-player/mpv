@@ -377,7 +377,7 @@ static void start_slice(struct vf_instance *vf, mp_image_t *mpi){
 
 static void scale(struct SwsContext *sws1, struct SwsContext *sws2, uint8_t *src[MP_MAX_PLANES], int src_stride[MP_MAX_PLANES],
                   int y, int h,  uint8_t *dst[MP_MAX_PLANES], int dst_stride[MP_MAX_PLANES], int interlaced){
-    uint8_t *src2[MP_MAX_PLANES]={src[0], src[1], src[2], src[3]};
+    const uint8_t *src2[MP_MAX_PLANES]={src[0], src[1], src[2], src[3]};
 #if HAVE_BIGENDIAN
     uint32_t pal2[256];
     if (src[1] && !src[2]){
@@ -671,7 +671,7 @@ static const m_option_t vf_opts_fields[] = {
   {"param2", ST_OFF(param[1]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
   // Note that here the 2 field is NULL (ie 0)
   // As we want this option to act on the option struct itself
-  {"presize", 0, CONF_TYPE_OBJ_PRESETS, 0, 0, 0, &size_preset},
+  {"presize", 0, CONF_TYPE_OBJ_PRESETS, 0, 0, 0, (void *)&size_preset},
   {"noup", ST_OFF(noup), CONF_TYPE_INT, M_OPT_RANGE, 0, 2, NULL},
   {"arnd", ST_OFF(accurate_rnd), CONF_TYPE_FLAG, 0, 0, 1, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }

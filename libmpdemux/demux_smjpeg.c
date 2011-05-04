@@ -28,7 +28,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
-
+#include "libavutil/attributes.h"
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
@@ -103,7 +103,7 @@ static int demux_smjpeg_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 static demuxer_t* demux_open_smjpeg(demuxer_t* demuxer){
     sh_video_t* sh_video;
     sh_audio_t* sh_audio;
-    unsigned int htype = 0, hleng;
+    unsigned int htype = 0, hleng av_unused;
     int i = 0;
 
     /* file header */

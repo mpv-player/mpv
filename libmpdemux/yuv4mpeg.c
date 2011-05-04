@@ -31,6 +31,7 @@
 #include "yuv4mpeg.h"
 #include "yuv4mpeg_intern.h"
 #include "mp_msg.h"
+#include "libavutil/attributes.h"
 
 static int _y4mparam_allow_unknown_tags = 1;  /* default is forgiveness */
 
@@ -412,7 +413,7 @@ int y4m_parse_stream_tags(char *s, y4m_stream_info_t *i)
 
 static int y4m_parse_frame_tags(char *s, y4m_frame_info_t *i)
 {
-  char *token, *value;
+  char *token, *value av_unused;
   char tag;
   int err;
 

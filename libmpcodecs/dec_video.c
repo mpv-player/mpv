@@ -109,7 +109,7 @@ int set_video_colors(sh_video_t *sh_video, const char *item, int value)
     /* try software control */
     const struct vd_functions *vd = sh_video->vd_driver;
     if (vd &&
-        vd->control(sh_video, VDCTRL_SET_EQUALIZER, item, (int *) value)
+        vd->control(sh_video, VDCTRL_SET_EQUALIZER, (void *)item, value)
             == CONTROL_OK)
         return 1;
     mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Video attribute '%s' is not supported by selected vo & vd.\n",
@@ -135,7 +135,7 @@ int get_video_colors(sh_video_t *sh_video, const char *item, int *value)
     /* try software control */
     const struct vd_functions *vd = sh_video->vd_driver;
     if (vd)
-        return vd->control(sh_video, VDCTRL_GET_EQUALIZER, item, value);
+        return vd->control(sh_video, VDCTRL_GET_EQUALIZER, (void *)item, value);
     return 0;
 }
 

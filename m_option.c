@@ -1954,9 +1954,10 @@ const m_option_type_t m_option_type_obj_settings_list = {
 static int parse_obj_presets(const m_option_t* opt,const char *name,
 			    const char *param, void* dst, int src) {
   m_obj_presets_t* obj_p = (m_obj_presets_t*)opt->priv;
-  m_struct_t *in_desc,*out_desc;
+  const m_struct_t *in_desc;
+  const m_struct_t *out_desc;
   int s,i;
-  unsigned char* pre;
+  const unsigned char *pre;
   char* pre_name = NULL;
 
   if(!obj_p) {

@@ -28,6 +28,7 @@
 #include "mp_msg.h"
 #include "options.h"
 
+#include "libavutil/attributes.h"
 #include "libmpcodecs/dec_audio.h"
 #include "stream/stream.h"
 #include "demuxer.h"
@@ -286,12 +287,12 @@ static void new_audio_stream(demuxer_t *demux, int aid){
 }
 
 static int demux_mpg_read_packet(demuxer_t *demux,int id){
-  int d;
+  int d av_unused;
   int len;
   int set_pts=0; // !=0 iff pts has been set to a proper value
   unsigned char c=0;
   unsigned long long pts=0;
-  unsigned long long dts=0;
+  unsigned long long dts av_unused = 0;
   int l;
   int pes_ext2_subid=-1;
   double stream_pts = MP_NOPTS_VALUE;
@@ -671,7 +672,7 @@ static inline void update_stats(int head)
 }
 
 static int demux_mpg_probe(demuxer_t *demuxer) {
-  int pes=1;
+  int pes av_unused = 1;
   int tmp;
   off_t tmppos;
   int file_format = DEMUXER_TYPE_UNKNOWN;

@@ -349,7 +349,7 @@ draw_frame(uint8_t *src[]) {
     break;
   }
 
-  sws_scale(sws,src,stride,0,src_height,image,image_stride);
+  sws_scale(sws,(const uint8_t **)src,stride,0,src_height,image,image_stride);
 
    /* Now 'ASCIInate' the image */
   if (fast)
@@ -369,7 +369,7 @@ draw_slice(uint8_t *src[], int stride[],
   int dx2 = screen_x + ((x+w) * screen_w / src_width);
   int dy2 = screen_y + ((y+h) * screen_h / src_height);
 
-  sws_scale(sws,src,stride,y,h,image,image_stride);
+  sws_scale(sws,(const uint8_t **)src,stride,y,h,image,image_stride);
 
   /* Now 'ASCIInate' the image */
   if (fast)
@@ -668,7 +668,7 @@ static int preinit(const char *arg)
 {
     char * hidis = NULL;
     struct stat sbuf;
-    int fd, vt, major, minor;
+    int fd, vt;
     FILE * fp;
     char fname[12];
 
@@ -686,8 +686,7 @@ static int preinit(const char *arg)
 	/* check only, if no driver is explicit set */
 	fd = dup (fileno (stderr));
 	fstat (fd, &sbuf);
-	major = sbuf.st_rdev >> 8;
-	vt = minor = sbuf.st_rdev & 0xff;
+	vt = sbuf.st_rdev & 0xff; // hi: major, low: minor
 	close (fd);
 	sprintf (fname, "/dev/vcsa%2.2i", vt);
 	fp = fopen (fname, "w+");

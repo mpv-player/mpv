@@ -264,8 +264,10 @@ static int norm_from_string(tvi_handle_t *tvh, char* norm)
     str[sizeof(str)-1] = '\0';
     ret=funcs->control(tvh->priv, TVI_CONTROL_SPC_GET_NORMID, str);
 
-    if(ret==TVI_CONTROL_TRUE)
-        return *(int *)str;
+    if (ret == TVI_CONTROL_TRUE) {
+        int *v = (int *)str;
+        return *v;
+    }
 
     if(ret!=TVI_CONTROL_UNKNOWN)
     {

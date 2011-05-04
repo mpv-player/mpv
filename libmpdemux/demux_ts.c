@@ -661,7 +661,7 @@ static int a52_check(char *buf, int len)
 
 static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 {
-	int video_found = 0, audio_found = 0, sub_found = 0, i, num_packets = 0, req_apid, req_vpid, req_spid;
+	int video_found = 0, audio_found = 0, sub_found av_unused = 0, i, num_packets = 0, req_apid, req_vpid, req_spid;
 	int is_audio, is_video, is_sub, has_tables;
 	int32_t p, chosen_pid = 0;
 	off_t pos=0, ret = 0, init_pos, end_pos;
@@ -2764,7 +2764,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 {
 	ES_stream_t *tss;
 	int buf_size, is_start, pid, base;
-	int len, cc, cc_ok, afc, retv = 0, is_video, is_audio, is_sub;
+	int len, cc, cc_ok av_unused, afc, retv = 0, is_video, is_audio, is_sub;
 	ts_priv_t * priv = (ts_priv_t*) demuxer->priv;
 	stream_t *stream = demuxer->stream;
 	char *p;

@@ -527,7 +527,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 
     if (mpi->flags & MP_IMGFLAG_DIRECT)
         // direct rendering:
-        ctx->current_buf = (int) (mpi->priv);        // hack!
+        ctx->current_buf = (size_t)(mpi->priv);      // hack!
     else if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
         ; // done
     else if (mpi->flags & MP_IMGFLAG_PLANAR)
@@ -603,7 +603,7 @@ static uint32_t get_image(struct xvctx *ctx, mp_image_t *mpi)
             }
         }
         mpi->flags |= MP_IMGFLAG_DIRECT;
-        mpi->priv = (void *) ctx->current_buf;
+        mpi->priv = (void *)(size_t)ctx->current_buf;
         return VO_TRUE;
     }
     return VO_FALSE;

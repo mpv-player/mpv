@@ -95,9 +95,9 @@ static const m_option_t cdda_params_fields[] = {
   { "noskip", ST_OFF(no_skip), CONF_TYPE_FLAG, 0 , 0, 1, NULL },
   { "skip", ST_OFF(no_skip), CONF_TYPE_FLAG, 0 , 1, 0, NULL },
   { "device", ST_OFF(device), CONF_TYPE_STRING, 0, 0, 0, NULL },
-  { "span",  ST_OFF(span), CONF_TYPE_OBJ_PARAMS, 0, 0, 0, &m_span_params_def },
+  { "span",  ST_OFF(span), CONF_TYPE_OBJ_PARAMS, 0, 0, 0, (void *)&m_span_params_def },
   /// For url parsing
-  { "hostname", ST_OFF(span), CONF_TYPE_OBJ_PARAMS, 0, 0, 0, &m_span_params_def },
+  { "hostname", ST_OFF(span), CONF_TYPE_OBJ_PARAMS, 0, 0, 0, (void *)&m_span_params_def },
   { "port", ST_OFF(speed), CONF_TYPE_INT, M_OPT_RANGE,1,100, NULL },
   { "filename", ST_OFF(device), CONF_TYPE_STRING, 0, 0, 0, NULL },
   {NULL, NULL, 0, 0, 0, 0, NULL}
@@ -121,7 +121,7 @@ const m_option_t cdda_opts[] = {
   { "noskip", &cdda_dflts.no_skip, CONF_TYPE_FLAG, 0 , 0, 1, NULL },
   { "skip", &cdda_dflts.no_skip, CONF_TYPE_FLAG, 0 , 1, 0, NULL },
   { "device", &cdda_dflts.device, CONF_TYPE_STRING, 0, 0, 0, NULL },
-  { "span", &cdda_dflts.span, CONF_TYPE_OBJ_PARAMS, 0, 0, 0, &m_span_params_def },
+  { "span", &cdda_dflts.span, CONF_TYPE_OBJ_PARAMS, 0, 0, 0, (void *)&m_span_params_def },
   {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 

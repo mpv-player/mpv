@@ -577,7 +577,7 @@ static int demux_real_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 #endif
     int flags;
     int version;
-    int reserved;
+    int reserved av_unused;
     demux_packet_t *dp;
     int x, sps, cfs, sph, spc, w;
     int audioreorder_getnextpk = 0;
@@ -892,7 +892,7 @@ got_video:
 		if (0x40==(vpkg_header&0xc0)) {
 		    // seems to be a very short header
 	    	    // 2 bytes, purpose of the second byte yet unknown
-	    	    int bummer;
+		    int bummer av_unused;
 		    bummer=stream_read_char(demuxer->stream); --len;
  		    mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "%02X",bummer);
  	    	    vpkg_offset=0;
@@ -1267,7 +1267,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    int sub_packet_size;
 		    int sub_packet_h;
 		    int version;
-		    int flavor;
+		    int flavor av_unused;
 		    int coded_frame_size;
 		    int codecdata_length;
 		    int i;
@@ -1321,6 +1321,8 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
                     sh->samplesize = 16;
                     sh->samplerate = 8000;
                     frame_size = 240;
+                    sub_packet_h = 0;
+                    sub_packet_size = coded_frame_size = 0x14;
                     strcpy(buf, "14_4");
                    } else {
 		    stream_skip(demuxer->stream, 2); // 00 00
@@ -1387,7 +1389,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 //			    sh->format = 0x2000;
 			    break;
 			case MKTAG('1', '4', '_', '4'):
-                sh->wf->nBlockAlign = 0x14;
+			    sh->wf->nBlockAlign = coded_frame_size;
                             break;
 
 			case MKTAG('2', '8', '_', '8'):
@@ -1686,7 +1688,7 @@ header_end:
   } else {
         priv->audio_curpos = priv->str_data_offset[demuxer->audio->id] + 18;
         stream_seek(demuxer->stream, priv->str_data_offset[demuxer->audio->id]+10);
-        priv->a_num_of_packets=priv->a_num_of_packets = stream_read_dword(demuxer->stream);
+        priv->a_num_of_packets = stream_read_dword(demuxer->stream);
         priv->video_curpos = priv->str_data_offset[demuxer->video->id] + 18;
         stream_seek(demuxer->stream, priv->str_data_offset[demuxer->video->id]+10);
         priv->v_num_of_packets = stream_read_dword(demuxer->stream);

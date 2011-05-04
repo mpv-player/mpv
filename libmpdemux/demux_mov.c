@@ -622,7 +622,7 @@ static int gen_sh_audio(sh_audio_t* sh, mov_track_t* trak, int timescale) {
 		   // ([int32_t size,int32_t type,some data ],repeat)
 		} my_stdata;
 #endif
-		int version, adjust;
+		int version = -1, adjust;
 		int is_vorbis = 0;
 		sh->format=trak->fourcc;
 
