@@ -4030,8 +4030,14 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 current_module = "init_input";
  mpctx->input = mp_input_init(&opts->input);
  mp_input_add_key_fd(mpctx->input, -1,0,mplayer_get_key,NULL, mpctx->key_fifo);
-if(slave_mode)
-    mp_input_add_cmd_fd(mpctx->input, 0,USE_SELECT,MP_INPUT_SLAVE_CMD_FUNC,NULL);
+ if(slave_mode) {
+#if USE_FD0_CMD_SELECT
+    int flags = fcntl(0, F_GETFL);
+    if (flags != -1)
+        fcntl(0, F_SETFL, flags | O_NONBLOCK);
+#endif
+    mp_input_add_cmd_fd(mpctx->input, 0,USE_FD0_CMD_SELECT,MP_INPUT_SLAVE_CMD_FUNC,NULL);
+ }
 else if (opts->consolecontrols)
     mp_input_add_key_fd(mpctx->input, 0, 1, read_keys, NULL, mpctx->key_fifo);
 // Set the libstream interrupt callback
