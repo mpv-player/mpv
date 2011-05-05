@@ -747,11 +747,6 @@ void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
 
   current_module="exit_player";
 
-// free mplayer config
-  if(mpctx->mconfig)
-    m_config_free(mpctx->mconfig);
-  mpctx->mconfig = NULL;
-
   if(mpctx->playtree_iter)
     play_tree_iter_free(mpctx->playtree_iter);
   mpctx->playtree_iter = NULL;
@@ -780,6 +775,12 @@ void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_EXIT=NONE\n");
   }
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"max framesize was %d bytes\n",max_framesize);
+
+  // must be last since e.g. mp_msg uses option values
+  // that will be freed by this.
+  if (mpctx->mconfig)
+    m_config_free(mpctx->mconfig);
+  mpctx->mconfig = NULL;
 
   exit(rc);
 }
