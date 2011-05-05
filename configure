@@ -3842,8 +3842,6 @@ else
   def_x11='#undef CONFIG_X11'
   novomodules="x11 $novomodules"
   res_comment="check if the dev(el) packages are installed"
-  # disable stuff that depends on X
-  _xv=no ; _xinerama=no ; _vm=no ; _xf86keysym=no ; _vdpau=no
 fi
 echores "$_x11"
 
@@ -3891,7 +3889,7 @@ fi
 
 
 echocheck "Xv"
-if test "$_xv" = auto ; then
+if test "$_xv" = auto && test "$_x11" = yes ; then
   _xv=no
   statement_check_broken X11/Xlib.h X11/extensions/Xvlib.h 'XvGetPortAttribute(0, 0, 0, 0)' -lXv && _xv=yes
 fi
@@ -3908,7 +3906,7 @@ echores "$_xv"
 
 
 echocheck "VDPAU"
-if test "$_vdpau" = auto ; then
+if test "$_vdpau" = auto && test "$_x11" = yes ; then
   _vdpau=no
   if test "$_dl" = yes ; then
     return_statement_check vdpau/vdpau_x11.h 'vdp_device_create_x11(0, 0, 0, 0)' VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 -lvdpau && _vdpau=yes
@@ -3926,7 +3924,7 @@ echores "$_vdpau"
 
 
 echocheck "Xinerama"
-if test "$_xinerama" = auto ; then
+if test "$_xinerama" = auto && test "$_x11" = yes ; then
   _xinerama=no
   statement_check X11/extensions/Xinerama.h 'XineramaIsActive(0)' -lXinerama && _xinerama=yes
 fi
@@ -3946,7 +3944,7 @@ echores "$_xinerama"
 # This check may be useful for future mplayer versions (to change resolution)
 # If you run into problems, remove '-lXxf86vm'.
 echocheck "Xxf86vm"
-if test "$_vm" = auto ; then
+if test "$_vm" = auto && test "$_x11" = yes ; then
   _vm=no
   statement_check_broken X11/Xlib.h X11/extensions/xf86vmode.h 'XF86VidModeQueryExtension(0, 0, 0)' -lXxf86vm && _vm=yes
 fi
@@ -3963,7 +3961,7 @@ echores "$_vm"
 # has nothing to do with xf86vm and XFree 3.x has xf86vm but does NOT
 # have these new keycodes.
 echocheck "XF86keysym"
-if test "$_xf86keysym" = auto; then
+if test "$_xf86keysym" = auto && test "$_x11" = yes ; then
   _xf86keysym=no
   return_check X11/XF86keysym.h XF86XK_AudioPause && _xf86keysym=yes
 fi
