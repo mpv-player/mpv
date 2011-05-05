@@ -72,6 +72,7 @@ struct ao {
     int buffersize;
     int pts;
     bool initialized;
+    bool untimed;
     const struct ao_driver *driver;
     void *priv;
 };

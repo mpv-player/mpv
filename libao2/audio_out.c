@@ -236,6 +236,10 @@ int ao_control(struct ao *ao, int cmd, void *arg)
 
 double ao_get_delay(struct ao *ao)
 {
+    if (!ao->driver->get_delay) {
+        assert(ao->untimed);
+        return 0;
+    }
     return ao->driver->get_delay(ao);
 }
 
@@ -246,17 +250,20 @@ int ao_get_space(struct ao *ao)
 
 void ao_reset(struct ao *ao)
 {
-    ao->driver->reset(ao);
+    if (ao->driver->reset)
+        ao->driver->reset(ao);
 }
 
 void ao_pause(struct ao *ao)
 {
-    ao->driver->pause(ao);
+    if (ao->driver->pause)
+        ao->driver->pause(ao);
 }
 
 void ao_resume(struct ao *ao)
 {
-    ao->driver->resume(ao);
+    if (ao->driver->resume)
+        ao->driver->resume(ao);
 }
 
 

@@ -2048,7 +2048,7 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time) {
     struct MPOpts *opts = &mpctx->opts;
 	// check for frame-drop:
 	current_module = "check_framedrop";
-	if (mpctx->sh_audio && !mpctx->d_audio->eof) {
+	if (mpctx->sh_audio && !mpctx->ao->untimed && !mpctx->d_audio->eof) {
 	    static int dropped_frames;
 	    float delay = opts->playback_speed * ao_get_delay(mpctx->ao);
 	    float d = delay-mpctx->delay;
@@ -2410,6 +2410,9 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     int unitsize = ao->channels * af_fmt2bits(ao->format) / 8;
 
     current_module="play_audio";
+
+    if (ao->untimed && mpctx->sh_video && mpctx->delay > 0)
+        return 0;
 
     // all the current uses of ao->pts seem to be in aos that handle
     // sync completely wrong; there should be no need to use ao->pts
@@ -3366,7 +3369,7 @@ static void run_playloop(struct MPContext *mpctx)
     if (mpctx->sh_audio && !mpctx->paused
         && (!mpctx->restart_playback || !mpctx->sh_video)) {
         int status = fill_audio_out_buffers(mpctx);
-        full_audio_buffers = status >= 0;
+        full_audio_buffers = status >= 0 && !mpctx->ao->untimed;
         if (status == -2)
             // at eof, all audio at least written to ao
             if (!mpctx->sh_video)
@@ -3412,7 +3415,9 @@ static void run_playloop(struct MPContext *mpctx)
         } else if (!mpctx->stop_play) {
             int sleep_time = 100;
             if (mpctx->sh_audio) {
-                if (full_audio_buffers)
+                if (mpctx->ao->untimed)
+                    sleep_time = 0;
+                else if (full_audio_buffers)
                     sleep_time = FFMAX(20, a_buf * 1000 - 50);
                 else
                     sleep_time = 20;
