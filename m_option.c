@@ -682,7 +682,9 @@ static int parse_str_list(const m_option_t* opt,const char *name, const char *pa
   if (param == NULL || strlen(param) == 0)
       return M_OPT_MISSING_PARAM;
 
-  char separator = opt->priv ? *(char *)opt->priv : OPTION_LIST_SEPARATOR;
+  // custom type for "profile" calls this but uses ->priv for something else
+  char separator = opt->type == &m_option_type_string_list && opt->priv ?
+      *(char *)opt->priv : OPTION_LIST_SEPARATOR;
   while(ptr[0] != '\0') {
     ptr = get_nextsep(ptr, separator, 0);
     if(!ptr) {
