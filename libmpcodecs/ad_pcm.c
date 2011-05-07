@@ -160,14 +160,14 @@ static int control(sh_audio_t *sh, int cmd, void *arg, ...)
 static int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
                         int maxlen)
 {
-    int len = sh_audio->channels * sh_audio->samplesize;
-    minlen = (minlen + len - 1) / len * len;
+    int unitsize = sh_audio->channels * sh_audio->samplesize;
+    minlen = (minlen + unitsize - 1) / unitsize * unitsize;
     if (minlen > maxlen)
         // if someone needs hundreds of channels adjust audio_out_minsize
         // based on channels in preinit()
         return -1;
 
-    len = 0;
+    int len = 0;
     struct ad_pcm_context *ctx = sh_audio->context;
     while (len < minlen) {
         if (ctx->buffer_len - ctx->buffer_pos <= 0) {
@@ -196,6 +196,11 @@ static int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
         ctx->buffer_pos += from_stored;
         sh_audio->pts_bytes += from_stored;
         len += from_stored;
+    }
+    if (len % unitsize) {
+        mp_msg(MSGT_DECAUDIO, MSGL_WARN, "[ad_pcm] discarding partial sample "
+               "at end\n");
+        len -= len % unitsize;
     }
     if (len == 0)
         len = -1;               // The loop above only exits at error/EOF

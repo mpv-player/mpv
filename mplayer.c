@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
+#include <assert.h>
 
 #include "config.h"
 #include "talloc.h"
@@ -2454,6 +2455,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
         }
     }
 
+    assert(sh_audio->a_out_buffer_len % unitsize == 0);
     if (playsize > sh_audio->a_out_buffer_len) {
         partial_fill = true;
         playsize = sh_audio->a_out_buffer_len;
@@ -2472,6 +2474,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     // would not having access to this make them more broken?
     ao->pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
     playsize = ao_play(ao, sh_audio->a_out_buffer, playsize, playflags);
+    assert(playsize % unitsize == 0);
 
     if (playsize > 0) {
         sh_audio->a_out_buffer_len -= playsize;
