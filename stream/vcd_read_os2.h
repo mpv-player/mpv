@@ -57,7 +57,7 @@ static inline unsigned vcd_get_msf(mp_vcd_priv_t *vcd)
         (vcd->msfCurrent.bSecond + vcd->msfCurrent.bMinute * 60) * 75 - 150;
 }
 
-int vcd_seek_to_track(mp_vcd_priv_t *vcd, int track)
+static int vcd_seek_to_track(mp_vcd_priv_t *vcd, int track)
 {
     struct {
         UCHAR auchSign[4];

@@ -136,7 +136,7 @@ read_toc_entry(mp_vcd_priv_t *vcd, int nr)
   return 1;
 }
 
-int
+static int
 vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 {
   if (!read_toc_entry(vcd, track))

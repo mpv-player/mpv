@@ -53,7 +53,7 @@ static inline unsigned vcd_get_msf(mp_vcd_priv_t* vcd, int track){
 	 vcd->toc.TrackData[index].Address[1] * 60) * 75 - 150;
 }
 
-int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
+static int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 {
     unsigned sect;
     if (track < vcd->toc.FirstTrack || track > vcd->toc.LastTrack)
