@@ -661,7 +661,7 @@ static int a52_check(char *buf, int len)
 
 static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 {
-	int video_found = 0, audio_found = 0, sub_found av_unused = 0, i, num_packets = 0, req_apid, req_vpid, req_spid;
+	int video_found = 0, audio_found = 0, i, num_packets = 0, req_apid, req_vpid, req_spid;
 	int is_audio, is_video, is_sub, has_tables;
 	int32_t p, chosen_pid = 0;
 	off_t pos=0, ret = 0, init_pos, end_pos;
@@ -828,7 +828,6 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 				{
 					param->stype = es.type;
 					param->spid = es.pid;
-					sub_found = 1;
 				}
 			}
 

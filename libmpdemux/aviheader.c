@@ -258,7 +258,7 @@ while(1){
 	  s->aIndex[i].dwSize = stream_read_dword_le(demuxer->stream);
 	  s->aIndex[i].dwDuration = stream_read_dword_le(demuxer->stream);
 	  mp_msg (MSGT_HEADER, MSGL_V, "ODML (%.4s): [%d] 0x%016"PRIx64" 0x%04x %u\n",
-		  (s->dwChunkId), i,
+		  s->dwChunkId, i,
 		  (uint64_t)s->aIndex[i].qwOffset, s->aIndex[i].dwSize, s->aIndex[i].dwDuration);
       }
 
