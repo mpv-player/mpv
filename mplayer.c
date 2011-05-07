@@ -362,7 +362,7 @@ int use_filename_title;
 
 #include "metadata.h"
 
-const void *mpctx_get_video_out(MPContext *mpctx)
+void *mpctx_get_video_out(MPContext *mpctx)
 {
     return mpctx->video_out;
 }

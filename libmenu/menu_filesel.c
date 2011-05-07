@@ -230,7 +230,6 @@ static int open_dir(menu_t* menu,char* args) {
   struct stat st;
   int n;
   int path_fp;
-  char* p = NULL;
   list_entry_t* e;
   DIR* dirp;
   extern int file_filter;
@@ -242,7 +241,6 @@ static int open_dir(menu_t* menu,char* args) {
   mpriv->dir = strdup(args);
   if(mpriv->p.title && mpriv->p.title != mpriv->title && mpriv->p.title != cfg_dflt.p.title)
     free(mpriv->p.title);
-  p = strstr(mpriv->title,"%p");
 
   mpriv->p.title = replace_path(mpriv->title,mpriv->dir,0);
 

@@ -447,7 +447,11 @@ static char *menu_fribidi(char *txt)
   static size_t buffer_size = 1024;
   static char *outputstr;
 
+#if FRIBIDI_INTERFACE_VERSION < 3
   FriBidiCharType base;
+#else
+  FriBidiParType base;
+#endif
   fribidi_boolean log2vis;
   size_t len;
 
