@@ -54,10 +54,6 @@ static const vd_info_t info = {
 #error palette too large, adapt libmpcodecs/vf.c:vf_get_image
 #endif
 
-#if CONFIG_XVMC
-#include "libavcodec/xvmc.h"
-#endif
-
 int avcodec_initialized=0;
 
 typedef struct {
@@ -142,11 +138,6 @@ static int control(sh_video_t *sh, int cmd, void *arg, ...){
             if(ctx->best_csp == IMGFMT_YV12) return CONTROL_TRUE;// u/v swap
             if(ctx->best_csp == IMGFMT_422P && !ctx->do_dr1) return CONTROL_TRUE;// half stride
             break;
-#if CONFIG_XVMC
-        case IMGFMT_XVMC_IDCT_MPEG2:
-        case IMGFMT_XVMC_MOCO_MPEG2:
-            if(avctx->pix_fmt==PIX_FMT_XVMC_MPEG2_IDCT) return CONTROL_TRUE;
-#endif
         }
         return CONTROL_FALSE;
     }
@@ -604,28 +595,6 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     if(IMGFMT_IS_HWACCEL(mpi->imgfmt)) {
         avctx->draw_horiz_band= draw_slice;
     }
-#if CONFIG_XVMC
-    if(IMGFMT_IS_XVMC(mpi->imgfmt)) {
-        struct xvmc_pix_fmt *render = mpi->priv; //same as data[2]
-        if(!avctx->xvmc_acceleration) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] The mc_get_buffer should work only with XVMC acceleration!!");
-            assert(0);
-            exit(1);
-//            return -1;//!!fixme check error conditions in ffmpeg
-        }
-        if(!(mpi->flags & MP_IMGFLAG_DIRECT)) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "[VD_FFMPEG] Only buffers allocated by vo_xvmc allowed.\n");
-            assert(0);
-            exit(1);
-//            return -1;//!!fixme check error conditions in ffmpeg
-        }
-        if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
-            mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::get_buffer (xvmc render=%p)\n", render);
-        assert(render != 0);
-        assert(render->xvmc_id == AV_XVMC_ID);
-        render->state |= AV_XVMC_STATE_PREDICTION;
-    }
-#endif
 
     pic->data[0]= mpi->planes[0];
     pic->data[1]= mpi->planes[1];
@@ -710,16 +679,6 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
         // Palette support: free palette buffer allocated in get_buffer
         if (mpi->bpp == 8)
             av_freep(&mpi->planes[1]);
-#if CONFIG_XVMC
-        if (IMGFMT_IS_XVMC(mpi->imgfmt)) {
-            struct xvmc_pix_fmt *render = (struct xvmc_pix_fmt*)pic->data[2]; //same as mpi->priv
-            if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
-                mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::release_buffer (xvmc render=%p)\n", render);
-            assert(render!=NULL);
-            assert(render->xvmc_id == AV_XVMC_ID);
-            render->state&=~AV_XVMC_STATE_PREDICTION;
-        }
-#endif
         // release mpi (in case MPI_IMGTYPE_NUMBERED is used, e.g. for VDPAU)
         mpi->usage_count--;
     }

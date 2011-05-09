@@ -32,7 +32,6 @@ BuildRequires:  lame-devel
 BuildRequires:  libGL-devel
 BuildRequires:  libXinerama-devel
 BuildRequires:  libXv-devel
-BuildRequires:  libXvMC-devel
 BuildRequires:  libXxf86dga-devel
 BuildRequires:  libXxf86vm-devel
 BuildRequires:  libcaca-devel
@@ -138,7 +137,6 @@ mv DOCS/man/zh DOCS/man/zh_CN
     %{?_with_xmms:--enable-xmms} \
     \
     --disable-svga \
-    --enable-xvmc \
     --%{?_with_directfb:enable}%{!?_with_directfb:disable}-directfb \
     %{!?_with_svgalib:--disable-svga} \
     \
@@ -150,7 +148,7 @@ mv DOCS/man/zh DOCS/man/zh_CN
     --language=all \
     \
     %{?_with_xmms:--with-xmmslibdir=%{_libdir}} \
-    --with-xvmclib=XvMCW
+
 
 %{__make}
 
@@ -180,7 +178,6 @@ mv -f mplayer gmplayer
     %{?_with_xmms:--enable-xmms} \
     \
     --disable-svga \
-    --enable-xvmc \
     --%{?_with_directfb:enable}%{!?_with_directfb:disable}-directfb \
     %{!?_with_svgalib:--disable-svga} \
     \
@@ -192,7 +189,7 @@ mv -f mplayer gmplayer
     --language=all \
     \
     %{?_with_xmms:--with-xmmslibdir=%{_libdir}} \
-    --with-xvmclib=XvMCW
+
 
 %{__make}
 

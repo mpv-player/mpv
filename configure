@@ -401,7 +401,6 @@ Video output:
   --enable-mga             enable mga_vid video output [autodetect]
   --enable-xmga            enable mga_vid X11 video output [autodetect]
   --enable-xv              enable Xv video output [autodetect]
-  --enable-xvmc            enable XvMC acceleration [disable]
   --enable-vdpau           enable VDPAU acceleration [autodetect]
   --enable-vm              enable XF86VidMode support [autodetect]
   --enable-xinerama        enable Xinerama support [autodetect]
@@ -503,7 +502,6 @@ Use these options if autodetection fails:
   --extra-ldflags=FLAGS       extra LDFLAGS
   --extra-libs=FLAGS          extra linker flags
   --extra-libs-mplayer=FLAGS  extra linker flags for MPlayer
-  --with-xvmclib=NAME         adapter-specific library name (e.g. XvMCNVIDIA)
 
   --with-freetype-config=PATH path to freetype-config
   --with-sdl-config=PATH      path to sdl*-config
@@ -560,7 +558,6 @@ _xss=auto
 _dga1=auto
 _dga2=auto
 _xv=auto
-_xvmc=no  #auto when complete
 _vdpau=auto
 _sdl=auto
 _kva=auto
@@ -745,9 +742,6 @@ for ac_option do
   --with-install=*)
     _install=$(echo $ac_option | cut -d '=' -f 2 )
     ;;
-  --with-xvmclib=*)
-    _xvmclib=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
 
   --with-sdl-config=*)
     _sdlconfig=$(echo $ac_option | cut -d '=' -f 2)
@@ -857,8 +851,6 @@ for ac_option do
   --disable-xss)        _xss=no         ;;
   --enable-xv)          _xv=yes         ;;
   --disable-xv)         _xv=no          ;;
-  --enable-xvmc)        _xvmc=yes       ;;
-  --disable-xvmc)       _xvmc=no        ;;
   --enable-vdpau)       _vdpau=yes      ;;
   --disable-vdpau)      _vdpau=no       ;;
   --enable-sdl)         _sdl=yes        ;;
@@ -3873,7 +3865,7 @@ else
   novomodules="x11 $novomodules"
   res_comment="check if the dev(el) packages are installed"
   # disable stuff that depends on X
-  _xv=no ; _xvmc=no ; _xinerama=no ; _vm=no ; _xf86keysym=no ; _vdpau=no
+  _xv=no ; _xinerama=no ; _vm=no ; _xf86keysym=no ; _vdpau=no
 fi
 echores "$_x11"
 
@@ -3935,34 +3927,6 @@ else
   novomodules="xv $novomodules"
 fi
 echores "$_xv"
-
-
-echocheck "XvMC"
-if test "$_xv" = yes && test "$_xvmc" != no ; then
-  _xvmc=no
-  cat > $TMPC <<EOF
-#include <X11/Xlib.h>
-#include <X11/extensions/Xvlib.h>
-#include <X11/extensions/XvMClib.h>
-int main(void) {
-  XvMCQueryExtension(0, 0, 0);
-  XvMCCreateContext(0, 0, 0, 0, 0, 0, 0);
-  return 0; }
-EOF
-  for _ld_tmp in $_xvmclib XvMCNVIDIA XvMCW I810XvMC ; do
-    cc_check -lXvMC -l$_ld_tmp && _xvmc=yes && _xvmclib="$_ld_tmp" && break
-  done
-fi
-if test "$_xvmc" = yes ; then
-  def_xvmc='#define CONFIG_XVMC 1'
-  libs_mplayer="$libs_mplayer -lXvMC -l$_xvmclib"
-  vomodules="xvmc $vomodules"
-  res_comment="using $_xvmclib"
-else
-  def_xvmc='#define CONFIG_XVMC 0'
-  novomodules="xvmc $novomodules"
-fi
-echores "$_xvmc"
 
 
 echocheck "VDPAU"
@@ -6846,7 +6810,6 @@ XMGA = $_xmga
 XMMS_PLUGINS = $_xmms
 XV = $_xv
 XVID4 = $_xvid
-XVMC = $_xvmc
 XVR100 = $_xvr100
 YUV4MPEG = $_yuv4mpeg
 
@@ -6861,7 +6824,6 @@ YASM       = $_yasm
 YASMFLAGS  = $YASMFLAGS
 
 CONFIG_VDPAU    = $_vdpau
-CONFIG_XVMC     = $_xvmc
 CONFIG_ZLIB     = $_zlib
 
 HAVE_PTHREADS   = $_pthreads
@@ -7203,7 +7165,6 @@ $def_xinerama
 $def_xmga
 $def_xss
 $def_xv
-$def_xvmc
 $def_xvr100
 $def_yuv4mpeg
 

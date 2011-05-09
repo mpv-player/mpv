@@ -267,7 +267,7 @@ Show filename on the OSD.
 Show progression bar, elapsed time and total duration on the OSD.
 .IPs "! and @"
 Seek to the beginning of the previous/next chapter.
-.IPs "D (\-vo xvmc, \-vo vdpau, \-vf yadif, \-vf kerndeint only)"
+.IPs "D (\-vo vdpau, \-vf yadif, \-vf kerndeint only)"
 Activate/deactivate deinterlacer.
 .IPs "A\ \ \ \ "
 Cycle through the available DVD angles.
@@ -748,15 +748,13 @@ chapter change instead of doing a seek.
 Changes the colorkey to an RGB value of your choice.
 0x000000 is black and 0xffffff is white.
 Only supported by the fbdev, svga, vesa, xmga,
-xover, xv (see \-vo xv:ck), xvmc (see \-vo xv:ck) and directx video output
-drivers.
+xover, xv (see \-vo xv:ck) and directx video output drivers.
 .
 .TP
 .B \-nocolorkey
 Disables colorkeying.
 Only supported by the fbdev, svga, vesa, xmga,
-xover, xv (see \-vo xv:ck), xvmc (see \-vo xv:ck) and directx video output
-drivers.
+xover, xv (see \-vo xv:ck) and directx video output drivers.
 .
 .TP
 .B \-correct\-pts, \-nocorrect\-pts
@@ -978,7 +976,7 @@ Display the main menu at MPlayer startup.
 Permit MPlayer to receive pointer events reported by the video
 output driver.
 Necessary to select the buttons in DVD menus.
-Supported for X11-based VOs (x11, xv, xvmc, etc) and the gl, gl2, direct3d and
+Supported for X11-based VOs (x11, xv, etc) and the gl, gl2, direct3d and
 corevideo VOs.
 .
 .TP
@@ -3171,7 +3169,7 @@ y coordinates are relative to the top-left corner of the window rather
 than the screen.
 The coordinates are relative to the screen given with \-xineramascreen for
 the video output drivers that fully support \-xineramascreen (direct3d, gl, gl2,
-vdpau, x11, xv, xvmc, corevideo).
+vdpau, x11, xv, corevideo).
 .br
 .I NOTE:
 May not be supported by some of the older VO drivers.
@@ -3554,38 +3552,6 @@ and laggier display response to user commands (display changes only become
 visible some time after they're queued). The graphics driver implementation may
 also have limits on the length of maximum queuing time or number of queued
 surfaces that work well or at all.
-.RE
-.PD 1
-.
-.TP
-.B xvmc (X11 with \-vc ffmpeg12mc only)
-Video output driver that uses the XvMC (X Video Motion Compensation)
-extension of XFree86 4.x to speed up MPEG-1/2 and VCR2 decoding.
-.PD 0
-.RSs
-.IPs adaptor=<number>
-Select a specific XVideo adaptor (check xvinfo results).
-.IPs port=<number>
-Select a specific XVideo port.
-.IPs (no)benchmark
-Disables image display.
-Necessary for proper benchmarking of drivers that change
-image buffers on monitor retrace only (nVidia).
-Default is not to disable image display (nobenchmark).
-.IPs (no)bobdeint
-Very simple deinterlacer.
-Might not look better than \-vf tfields=1,
-but it is the only deinterlacer for xvmc (default: nobobdeint).
-.IPs (no)queue
-Queue frames for display to allow more parallel work of the video hardware.
-May add a small (not noticeable) constant A/V desync (default: noqueue).
-.IPs (no)sleep
-Use sleep function while waiting for rendering to finish
-(not recommended on Linux) (default: nosleep).
-.IPs ck=cur|use|set
-Same as \-vo xv:ck (see \-vo xv).
-.IPs ck-method=man|bg|auto
-Same as \-vo xv:ck-method (see \-vo xv).
 .RE
 .PD 1
 .
@@ -4516,7 +4482,7 @@ Disable automatic movie aspect ratio compensation.
 .B "\-field\-dominance <\-1\-1>"
 Set first field for interlaced content.
 Useful for deinterlacers that double the framerate: \-vf tfields=1,
-\-vf yadif=1, \-vo vdpau:deint and \-vo xvmc:bobdeint.
+\-vf yadif=1 and \-vo vdpau:deint.
 .PD 0
 .RSs
 .IPs \-1
