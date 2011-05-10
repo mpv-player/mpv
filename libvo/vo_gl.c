@@ -258,7 +258,7 @@ static void update_yuvconv(void) {
   gl_conversion_params_t params = {gl_target, yuvconvtype,
       {colorspace, levelconv, bri, cont, hue, sat, rgamma, ggamma, bgamma},
       texture_width, texture_height, 0, 0, filter_strength};
-  mp_get_chroma_shift(image_format, &xs, &ys);
+  mp_get_chroma_shift(image_format, &xs, &ys, NULL);
   params.chrom_texw = params.texw >> xs;
   params.chrom_texh = params.texh >> ys;
   glSetupYUVConversion(&params);
@@ -568,7 +568,7 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
     int i;
     int xs, ys;
     scale_type = get_scale_type(1);
-    mp_get_chroma_shift(image_format, &xs, &ys);
+    mp_get_chroma_shift(image_format, &xs, &ys, NULL);
     mpglGenTextures(21, default_texs);
     default_texs[21] = 0;
     for (i = 0; i < 7; i++) {
@@ -670,7 +670,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   image_height = height;
   image_width = width;
   image_format = format;
-  is_yuv = mp_get_chroma_shift(image_format, &xs, &ys) > 0;
+  is_yuv = mp_get_chroma_shift(image_format, &xs, &ys, NULL) > 0;
   is_yuv |= (xs << 8) | (ys << 16);
   glFindFormat(format, NULL, &gl_texfmt, &gl_format, &gl_type);
 
@@ -884,7 +884,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
               x, y, w, h, slice_height);
   if (is_yuv) {
     int xs, ys;
-    mp_get_chroma_shift(image_format, &xs, &ys);
+    mp_get_chroma_shift(image_format, &xs, &ys, NULL);
     mpglActiveTexture(GL_TEXTURE1);
     glUploadTex(gl_target, gl_format, gl_type, src[1], stride[1],
                 x >> xs, y >> ys, w >> xs, h >> ys, slice_height);
@@ -951,7 +951,7 @@ static uint32_t get_image(mp_image_t *mpi) {
   if (is_yuv) {
     // planar YUV
     int xs, ys;
-    mp_get_chroma_shift(image_format, &xs, &ys);
+    mp_get_chroma_shift(image_format, &xs, &ys, NULL);
     mpi->flags |= MP_IMGFLAG_COMMON_STRIDE | MP_IMGFLAG_COMMON_PLANE;
     mpi->stride[0] = mpi->width;
     mpi->planes[1] = mpi->planes[0] + mpi->stride[0] * mpi->height;
@@ -1009,7 +1009,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
   if (force_pbo && !(mpi->flags & MP_IMGFLAG_DIRECT) && !gl_bufferptr && get_image(&mpi2) == VO_TRUE) {
     int bpp = is_yuv ? 8 : mpi->bpp;
     int xs, ys;
-    mp_get_chroma_shift(image_format, &xs, &ys);
+    mp_get_chroma_shift(image_format, &xs, &ys, NULL);
     memcpy_pic(mpi2.planes[0], mpi->planes[0], mpi->w * bpp / 8, mpi->h, mpi2.stride[0], mpi->stride[0]);
     if (is_yuv) {
       memcpy_pic(mpi2.planes[1], mpi->planes[1], mpi->w >> xs, mpi->h >> ys, mpi2.stride[1], mpi->stride[1]);
@@ -1051,7 +1051,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
               mpi->x, mpi->y, w, h, slice);
   if (is_yuv) {
     int xs, ys;
-    mp_get_chroma_shift(image_format, &xs, &ys);
+    mp_get_chroma_shift(image_format, &xs, &ys, NULL);
     if ((mpi->flags & MP_IMGFLAG_DIRECT) && !(mpi->flags & MP_IMGFLAG_COMMON_PLANE)) {
       mpglBindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer_uv[0]);
       mpglUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
@@ -1088,6 +1088,7 @@ draw_frame(uint8_t *src[])
 static int
 query_format(uint32_t format)
 {
+    int depth;
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
                VFCAP_FLIP |
                VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
@@ -1095,7 +1096,8 @@ query_format(uint32_t format)
       caps |= VFCAP_OSD | VFCAP_EOSD | (scaled_osd ? 0 : VFCAP_EOSD_UNSCALED);
     if (format == IMGFMT_RGB24 || format == IMGFMT_RGBA)
         return caps;
-    if (use_yuv && mp_get_chroma_shift(format, NULL, NULL) &&
+    if (use_yuv && mp_get_chroma_shift(format, NULL, NULL, &depth) &&
+        (depth == 8 || depth == 16) &&
         (IMGFMT_IS_YUVP16_NE(format) || !IMGFMT_IS_YUVP16(format)))
         return caps;
     // HACK, otherwise we get only b&w with some filters (e.g. -vf eq)

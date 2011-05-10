@@ -19,6 +19,7 @@
 #include "config.h"
 #include "img_format.h"
 #include "stdio.h"
+#include "mpbswap.h"
 
 const char *vo_format_name(int format)
 {
@@ -117,20 +118,57 @@ const char *vo_format_name(int format)
     return unknown_format;
 }
 
-int mp_get_chroma_shift(int format, int *x_shift, int *y_shift)
+int mp_get_chroma_shift(int format, int *x_shift, int *y_shift, int *component_bits)
 {
     int xs = 0, ys = 0;
     int bpp;
-    int bpp_factor = 1;
     int err = 0;
-    switch (format) {
-    case IMGFMT_420P16_LE:
-    case IMGFMT_420P16_BE:
-    case IMGFMT_420P10_LE:
-    case IMGFMT_420P10_BE:
-    case IMGFMT_420P9_LE:
-    case IMGFMT_420P9_BE:
-        bpp_factor = 2;
+    int bits = 8;
+    if ((format & 0xff0000f0) == 0x34000050)
+        format = bswap_32(format);
+    if ((format & 0xf00000ff) == 0x50000034) {
+        switch (format >> 24) {
+        case 0x50:
+            break;
+        case 0x51:
+            bits = 16;
+            break;
+        case 0x52:
+            bits = 10;
+            break;
+        case 0x53:
+            bits = 9;
+            break;
+        default:
+            err = 1;
+            break;
+        }
+        switch (format & 0x00ffffff) {
+        case 0x00343434: // 444
+            xs = 0;
+            ys = 0;
+            break;
+        case 0x00323234: // 422
+            xs = 1;
+            ys = 0;
+            break;
+        case 0x00303234: // 420
+            xs = 1;
+            ys = 1;
+            break;
+        case 0x00313134: // 411
+            xs = 2;
+            ys = 0;
+            break;
+        case 0x00303434: // 440
+            xs = 0;
+            ys = 1;
+            break;
+        default:
+            err = 1;
+            break;
+        }
+    } else switch (format) {
     case IMGFMT_420A:
     case IMGFMT_I420:
     case IMGFMT_IYUV:
@@ -143,34 +181,6 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift)
         xs = 2;
         ys = 2;
         break;
-    case IMGFMT_444P16_LE:
-    case IMGFMT_444P16_BE:
-    case IMGFMT_444P10_LE:
-    case IMGFMT_444P10_BE:
-    case IMGFMT_444P9_LE:
-    case IMGFMT_444P9_BE:
-        bpp_factor = 2;
-    case IMGFMT_444P:
-        xs = 0;
-        ys = 0;
-        break;
-    case IMGFMT_422P16_LE:
-    case IMGFMT_422P16_BE:
-    case IMGFMT_422P10_LE:
-    case IMGFMT_422P10_BE:
-        bpp_factor = 2;
-    case IMGFMT_422P:
-        xs = 1;
-        ys = 0;
-        break;
-    case IMGFMT_411P:
-        xs = 2;
-        ys = 0;
-        break;
-    case IMGFMT_440P:
-        xs = 0;
-        ys = 1;
-        break;
     case IMGFMT_Y8:
     case IMGFMT_Y800:
         xs = 31;
@@ -182,9 +192,10 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift)
     }
     if (x_shift) *x_shift = xs;
     if (y_shift) *y_shift = ys;
+    if (component_bits) *component_bits = bits;
     bpp = 8 + ((16 >> xs) >> ys);
     if (format == IMGFMT_420A)
         bpp += 8;
-    bpp *= bpp_factor;
+    bpp *= (bits + 7) >> 3;
     return err ? 0 : bpp;
 }

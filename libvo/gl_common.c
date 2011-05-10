@@ -254,7 +254,7 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
   if (!gl_format) gl_format = &dummy2;
   if (!gl_type) gl_type = &dummy2;
 
-  if (mp_get_chroma_shift(fmt, NULL, NULL)) {
+  if (mp_get_chroma_shift(fmt, NULL, NULL, NULL)) {
     // reduce the possible cases a bit
     if (IMGFMT_IS_YUVP16_LE(fmt))
       fmt = IMGFMT_420P16_LE;

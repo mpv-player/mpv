@@ -274,7 +274,7 @@ static int initTextures(void)
       glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
       if (is_yuv) {
         int xs, ys;
-        mp_get_chroma_shift(image_format, &xs, &ys);
+        mp_get_chroma_shift(image_format, &xs, &ys, NULL);
         mpglActiveTexture(GL_TEXTURE1);
         glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, gl_bitmap_format,  gl_bitmap_type, GL_LINEAR,
                          texture_width >> xs, texture_height >> ys, 128);
@@ -580,7 +580,7 @@ static int initGl(uint32_t d_width, uint32_t d_height)
         mpglBindProgram(GL_FRAGMENT_PROGRAM, fragprog);
         break;
     }
-    mp_get_chroma_shift(image_format, &xs, &ys);
+    mp_get_chroma_shift(image_format, &xs, &ys, NULL);
     params.chrom_texw = params.texw >> xs;
     params.chrom_texh = params.texh >> ys;
     glSetupYUVConversion(&params);
@@ -616,7 +616,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   image_height = height;
   image_width = width;
   image_format = format;
-  is_yuv = mp_get_chroma_shift(image_format, &xs, &ys) > 0;
+  is_yuv = mp_get_chroma_shift(image_format, &xs, &ys, NULL) > 0;
   is_yuv |= (xs << 8) | (ys << 16);
 
 #ifdef CONFIG_GL_WIN32
@@ -741,7 +741,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
   struct TexSquare *texline = &texgrid[y / texture_height * texnumx];
   int subtex_y = y % texture_width;
   int xs, ys;
-  mp_get_chroma_shift(image_format, &xs, &ys);
+  mp_get_chroma_shift(image_format, &xs, &ys, NULL);
   while (rem_h > 0) {
     int rem_w = w;
     struct TexSquare *tsq = &texline[x / texture_width];
@@ -802,7 +802,9 @@ draw_frame(uint8_t *src[])
 static int
 query_format(uint32_t format)
 {
-  if (use_yuv && mp_get_chroma_shift(format, NULL, NULL) &&
+  int depth;
+  if (use_yuv && mp_get_chroma_shift(format, NULL, NULL, &depth) &&
+      (depth == 8 || depth == 16) &&
       (IMGFMT_IS_YUVP16_NE(format) || !IMGFMT_IS_YUVP16(format)))
     return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD |
            VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;

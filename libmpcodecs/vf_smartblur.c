@@ -76,7 +76,7 @@ static int config(struct vf_instance *vf,
 
 	allocStuff(&vf->priv->luma, width, height);
 
-	mp_get_chroma_shift(outfmt, &sw, &sh);
+	mp_get_chroma_shift(outfmt, &sw, &sh, NULL);
 	allocStuff(&vf->priv->chroma, width>>sw, height>>sh);
 
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
