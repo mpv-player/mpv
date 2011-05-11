@@ -183,7 +183,7 @@ static const struct gl_name_map_struct gl_name_map[] = {
   MAP(GL_R3_G3_B2), MAP(GL_RGB4), MAP(GL_RGB5), MAP(GL_RGB8),
   MAP(GL_RGB10), MAP(GL_RGB12), MAP(GL_RGB16), MAP(GL_RGBA2),
   MAP(GL_RGBA4), MAP(GL_RGB5_A1), MAP(GL_RGBA8), MAP(GL_RGB10_A2),
-  MAP(GL_RGBA12), MAP(GL_RGBA16), MAP(GL_LUMINANCE8),
+  MAP(GL_RGBA12), MAP(GL_RGBA16), MAP(GL_LUMINANCE8), MAP(GL_LUMINANCE16),
 
   // format
   MAP(GL_RGB), MAP(GL_RGBA), MAP(GL_RED), MAP(GL_GREEN), MAP(GL_BLUE),
@@ -282,7 +282,7 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
       break;
     case IMGFMT_420P16:
       supported = 0; // no native YUV support
-      *gl_texfmt = 1;
+      *gl_texfmt = GL_LUMINANCE16;
       *bpp = 16;
       *gl_format = GL_LUMINANCE;
       *gl_type = GL_UNSIGNED_SHORT;
