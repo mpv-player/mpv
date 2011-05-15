@@ -274,8 +274,10 @@ int old_ao_init(struct ao *ao, char *params)
     global_ao = ao;
     ao_subdevice = params ? talloc_strdup(ao, params) : NULL;
     if (ao->driver->old_functions->init(ao->samplerate, ao->channels,
-                                        ao->format, 0) == 0)
+                                        ao->format, 0) == 0) {
+        global_ao = NULL;
         return -1;
+    }
     return 0;
 }
 
