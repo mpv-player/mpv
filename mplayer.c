@@ -1338,6 +1338,50 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
   free(line);
 }
 
+struct stream_dump_progress {
+    uint64_t count;
+    unsigned start_time;
+    unsigned last_print_time;
+};
+
+static void stream_dump_progress_start(struct stream_dump_progress *p)
+{
+    p->start_time = p->last_print_time = GetTimerMS();
+    p->count = 0;
+}
+
+static void stream_dump_progress(struct stream_dump_progress *p,
+                                 uint64_t len, stream_t *stream)
+{
+    p->count += len;
+    unsigned t = GetTimerMS();
+    if (t - p->last_print_time < 1000)
+        return;
+
+    uint64_t start = stream->start_pos;
+    uint64_t end   = stream->end_pos;
+    uint64_t pos   = stream->pos;
+
+    p->last_print_time = t;
+    /* TODO: pretty print sizes; ETA */
+    if (end > start && pos >= start && pos <= end) {
+        mp_tmsg(MSGT_STATUSLINE, MSGL_STATUS,
+               "dump: %"PRIu64" bytes written (~%.1f%%)",
+               p->count, 100.0 * (pos - start) / (end - start));
+        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "\r");
+    } else {
+        mp_tmsg(MSGT_STATUSLINE, MSGL_STATUS,
+               "dump: %"PRIu64" bytes written", p->count);
+        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "\r");
+    }
+}
+
+static void stream_dump_progress_end(struct stream_dump_progress *p, char *name)
+{
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, "dump: %"PRIu64" bytes written to '%s'.\n",
+           p->count, name);
+}
+
 /**
  * \brief build a chain of audio filters that converts the input format
  * to the ao's format, taking into account the current playback_speed.
@@ -4287,6 +4331,8 @@ if(stream_dump_type==5){
     int chapter = opts->chapterrange[0] - 1;
     stream_control(mpctx->stream, STREAM_CTRL_SEEK_TO_CHAPTER, &chapter);
   }
+  struct stream_dump_progress info;
+  stream_dump_progress_start(&info);
   while(!mpctx->stream->eof && !async_quit_request){
       len=stream_read(mpctx->stream,buf,4096);
       if(len>0) {
@@ -4295,6 +4341,7 @@ if(stream_dump_type==5){
           exit_player(mpctx, EXIT_ERROR);
         }
       }
+      stream_dump_progress(&info, len, mpctx->stream);
       if (opts->chapterrange[1] > 0) {
         int chapter = -1;
         if (stream_control(mpctx->stream, STREAM_CTRL_GET_CURRENT_CHAPTER,
@@ -4307,6 +4354,7 @@ if(stream_dump_type==5){
     mp_tmsg(MSGT_GLOBAL,MSGL_FATAL,"%s: Error writing file.\n",opts->stream_dump_name);
     exit_player(mpctx, EXIT_ERROR);
   }
+  stream_dump_progress_end(&info, opts->stream_dump_name);
   mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Stream dump complete.\n");
   exit_player_with_rc(mpctx, EXIT_EOF, 0);
 }
@@ -4512,12 +4560,17 @@ if((stream_dump_type)&&(stream_dump_type<4)){
     mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"Cannot open dump file.\n");
     exit_player(mpctx, EXIT_ERROR);
   }
+  struct stream_dump_progress info;
+  stream_dump_progress_start(&info);
   while(!ds->eof){
     unsigned char* start;
     int in_size=ds_get_packet(ds,&start);
     if( (mpctx->demuxer->file_format==DEMUXER_TYPE_AVI || mpctx->demuxer->file_format==DEMUXER_TYPE_ASF || mpctx->demuxer->file_format==DEMUXER_TYPE_MOV)
 	&& stream_dump_type==2) fwrite(&in_size,1,4,f);
-    if(in_size>0) fwrite(start,in_size,1,f);
+    if(in_size>0) {
+        fwrite(start,in_size,1,f);
+        stream_dump_progress(&info, in_size, mpctx->stream);
+    }
     if (opts->chapterrange[1] > 0) {
       int cur_chapter = demuxer_get_current_chapter(mpctx->demuxer, 0);
       if(cur_chapter!=-1 && cur_chapter+1 > opts->chapterrange[1])
@@ -4525,6 +4578,7 @@ if((stream_dump_type)&&(stream_dump_type<4)){
     }
   }
   fclose(f);
+  stream_dump_progress_end(&info, opts->stream_dump_name);
   mp_tmsg(MSGT_CPLAYER ,MSGL_INFO, "Stream dump complete.\n");
   exit_player_with_rc(mpctx, EXIT_EOF, 0);
 }
