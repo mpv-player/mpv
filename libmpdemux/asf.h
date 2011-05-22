@@ -52,7 +52,7 @@ typedef struct __attribute__((packed)) {
   uint64_t num_packets;    //Number of packets UINT64 8
   uint64_t play_duration; //Timestamp of the end position UINT64 8
   uint64_t send_duration;  //Duration of the playback UINT64 8
-  uint64_t preroll; //Time to bufferize before playing UINT32 4
+  uint64_t preroll; //Time to bufferize before playing UINT64 8
   uint32_t flags; //Unknown, maybe flags ( usually contains 2 ) UINT32 4
   uint32_t min_packet_size; //Min size of the packet, in bytes UINT32 4
   uint32_t max_packet_size; //Max size of the packet  UINT32 4
