@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <limits.h>
+#include <errno.h>
 #include <math.h>
 
 #include "mp_msg.h"
@@ -41,13 +43,62 @@
 static struct vf_priv_s {
     unsigned int outfmt;
     int xoff, yoff, lw, lh, band, show;
+    const char *file;
+    struct timed_rectangle {
+        int ts, x, y, w, h, b;
+    } *timed_rect;
+    int n_timed_rect;
+    int cur_timed_rect;
 } const vf_priv_dflt = {
     0,
-    0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, 0,
+    NULL, NULL, 0, 0,
 };
 
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
+
+/**
+ * Adjust the coordinates to suit the band width
+ * Also print a notice in verbose mode
+ */
+static void fix_band(struct vf_priv_s *p)
+{
+    p->show = 0;
+    if (p->band < 0) {
+        p->band = 4;
+        p->show = 1;
+    }
+    p->lw += p->band*2;
+    p->lh += p->band*2;
+    p->xoff -= p->band;
+    p->yoff -= p->band;
+    mp_msg(MSGT_VFILTER, MSGL_V, "delogo: %d x %d, %d x %d, band = %d\n",
+           p->xoff, p->yoff, p->lw, p->lh, p->band);
+}
+
+static void update_sub(struct vf_priv_s *p, double pts)
+{
+    int ipts = pts * 1000;
+    int tr = p->cur_timed_rect;
+    while (tr < p->n_timed_rect - 1 && ipts >= p->timed_rect[tr + 1].ts)
+        tr++;
+    while (tr >= 0 && ipts < p->timed_rect[tr].ts)
+        tr--;
+    if (tr == p->cur_timed_rect)
+        return;
+    p->cur_timed_rect = tr;
+    if (tr >= 0) {
+        p->xoff = p->timed_rect[tr].x;
+        p->yoff = p->timed_rect[tr].y;
+        p->lw   = p->timed_rect[tr].w;
+        p->lh   = p->timed_rect[tr].h;
+        p->band = p->timed_rect[tr].b;
+    } else {
+        p->xoff = p->yoff = p->lw = p->lh = p->band = 0;
+    }
+    fix_band(p);
+}
 
 static void delogo(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int width, int height,
                    int logo_x, int logo_y, int logo_w, int logo_h, int band, int show, int direct) {
@@ -154,6 +205,8 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     }
     dmpi= vf->dmpi;
 
+    if (vf->priv->timed_rect)
+        update_sub(vf->priv, pts);
     delogo(dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h,
            vf->priv->xoff, vf->priv->yoff, vf->priv->lw, vf->priv->lh, vf->priv->band, vf->priv->show,
            mpi->flags&MP_IMGFLAG_DIRECT);
@@ -196,6 +249,74 @@ static const unsigned int fmt_list[]={
     0
 };
 
+static int load_timed_rectangles(struct vf_priv_s *delogo)
+{
+    FILE *f;
+    char line[2048];
+    int lineno = 0, p;
+    double ts, last_ts = 0;
+    struct timed_rectangle *rect = NULL, *nr;
+    int n_rect = 0, alloc_rect = 0;
+
+    f = fopen(delogo->file, "r");
+    if (!f) {
+        mp_msg(MSGT_VFILTER, MSGL_ERR, "delogo: unable to load %s: %s\n",
+               delogo->file, strerror(errno));
+        return -1;
+    }
+    while (fgets(line, sizeof(line), f)) {
+        lineno++;
+        if (*line == '#' || *line == '\n')
+            continue;
+        if (n_rect == alloc_rect) {
+            if (alloc_rect > INT_MAX / 2 / (int)sizeof(*rect)) {
+                mp_msg(MSGT_VFILTER, MSGL_WARN,
+                       "delogo: too many rectangles\n");
+                goto load_error;
+            }
+            alloc_rect = alloc_rect ? 2 * alloc_rect : 256;
+            nr = realloc(rect, alloc_rect * sizeof(*rect));
+            if (!nr) {
+                mp_msg(MSGT_VFILTER, MSGL_WARN, "delogo: out of memory\n");
+                goto load_error;
+            }
+            rect = nr;
+        }
+        nr = rect + n_rect;
+        memset(nr, 0, sizeof(*nr));
+        p = sscanf(line, "%lf %d:%d:%d:%d:%d",
+                   &ts, &nr->x, &nr->y, &nr->w, &nr->h, &nr->b);
+        if ((p == 2 && !nr->x) || p == 5 || p == 6) {
+            if (ts <= last_ts)
+                mp_msg(MSGT_VFILTER, MSGL_WARN, "delogo: %s:%d: wrong time\n",
+                       delogo->file, lineno);
+            nr->ts = 1000 * ts + 0.5;
+            n_rect++;
+        } else {
+            mp_msg(MSGT_VFILTER, MSGL_WARN, "delogo: %s:%d: syntax error\n",
+                   delogo->file, lineno);
+        }
+    }
+    fclose(f);
+    if (!n_rect) {
+        mp_msg(MSGT_VFILTER, MSGL_ERR, "delogo: %s: no rectangles found\n",
+               delogo->file);
+        free(rect);
+        return -1;
+    }
+    nr = realloc(rect, n_rect * sizeof(*rect));
+    if (nr)
+        rect = nr;
+    delogo->timed_rect   = rect;
+    delogo->n_timed_rect = n_rect;
+    return 0;
+
+load_error:
+    free(rect);
+    fclose(f);
+    return -1;
+}
+
 static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->put_image=put_image;
@@ -203,23 +324,14 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->query_format=query_format;
     vf->uninit=uninit;
 
-    mp_msg(MSGT_VFILTER, MSGL_V, "delogo: %d x %d, %d x %d, band = %d\n",
-           vf->priv->xoff, vf->priv->yoff,
-           vf->priv->lw, vf->priv->lh,
-           vf->priv->band);
-
-    vf->priv->show = 0;
-
-    if (vf->priv->band < 0) {
-        vf->priv->band = 4;
-        vf->priv->show = 1;
+    if (vf->priv->file) {
+        if (load_timed_rectangles(vf->priv))
+            return 0;
+        mp_msg(MSGT_VFILTER, MSGL_V, "delogo: %d from %s\n",
+               vf->priv->n_timed_rect, vf->priv->file);
+        vf->priv->cur_timed_rect = -1;
     }
-
-
-    vf->priv->lw += vf->priv->band*2;
-    vf->priv->lh += vf->priv->band*2;
-    vf->priv->xoff -= vf->priv->band;
-    vf->priv->yoff -= vf->priv->band;
+    fix_band(vf->priv);
 
     // check csp:
     vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_YV12);
@@ -240,6 +352,7 @@ static const m_option_t vf_opts_fields[] = {
     { "h", ST_OFF(lh), CONF_TYPE_INT, 0, 0, 0, NULL },
     { "t", ST_OFF(band), CONF_TYPE_INT, 0, 0, 0, NULL },
     { "band", ST_OFF(band), CONF_TYPE_INT, 0, 0, 0, NULL }, // alias
+    { "file", ST_OFF(file), CONF_TYPE_STRING, 0, 0, 0, NULL },
     { NULL, NULL, 0, 0, 0, 0, NULL }
 };
 
