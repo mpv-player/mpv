@@ -353,6 +353,20 @@ int loadGPUProgram(GLenum target, char *prog);
 #define SET_YUV_CONVERSION(c)   ((c) & YUV_CONVERSION_MASK)
 #define SET_YUV_LUM_SCALER(s)   (((s) & YUV_SCALER_MASK) << YUV_LUM_SCALER_SHIFT)
 #define SET_YUV_CHROM_SCALER(s) (((s) & YUV_SCALER_MASK) << YUV_CHROM_SCALER_SHIFT)
+//! returns whether the yuv conversion supports large brightness range etc.
+static inline int glYUVLargeRange(int conv)
+{
+  switch (conv)
+  {
+  case YUV_CONVERSION_NONE:
+  case YUV_CONVERSION_COMBINERS:
+  case YUV_CONVERSION_COMBINERS_ATI:
+  case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
+  case YUV_CONVERSION_TEXT_FRAGMENT:
+    return 0;
+  }
+  return 1;
+}
 /** \} */
 
 typedef struct {

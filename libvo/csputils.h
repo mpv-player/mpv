@@ -53,6 +53,7 @@ struct mp_csp_params {
   float rgamma;
   float ggamma;
   float bgamma;
+  int input_shift;
 };
 
 void mp_gen_gamma_map(unsigned char *map, int size, float gamma);

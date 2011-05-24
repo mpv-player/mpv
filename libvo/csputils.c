@@ -62,6 +62,9 @@ void mp_gen_gamma_map(uint8_t *map, int size, float gamma) {
  * not with e.g. MP_CSP_XYZ
  */
 void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float yuv2rgb[3][4]) {
+  float depth_multiplier = params->input_shift >= 0 ?
+                           (1 << params->input_shift) :
+                           (1.0 / (1 << -params->input_shift));
   float uvcos = params->saturation * cos(params->hue);
   float uvsin = params->saturation * sin(params->hue);
   int format = params->format;
@@ -128,6 +131,9 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float yuv2rgb[3][4]) {
     // this "centers" contrast control so that e.g. a contrast of 0
     // leads to a grey image, not a black one
     yuv2rgb[i][COL_C] += 0.5 - params->contrast / 2.0;
+    yuv2rgb[i][COL_Y] *= depth_multiplier;
+    yuv2rgb[i][COL_U] *= depth_multiplier;
+    yuv2rgb[i][COL_V] *= depth_multiplier;
   }
 }
 
