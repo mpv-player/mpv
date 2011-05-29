@@ -252,11 +252,12 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
             depth = 24;
         XMatchVisualInfo(x11->display, x11->screen, depth, TrueColor, &vinfo);
 
-        xswa.background_pixel = 0;
-        if (x11->xv_ck_info.method == CK_METHOD_BACKGROUND)
-            xswa.background_pixel = x11->xv_colorkey;
         xswa.border_pixel = 0;
-        xswamask = CWBackPixel | CWBorderPixel;
+        xswamask = CWBorderPixel;
+        if (x11->xv_ck_info.method == CK_METHOD_BACKGROUND) {
+            xswa.background_pixel = x11->xv_colorkey;
+            xswamask |= CWBackPixel;
+        }
 
         vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, vo->dwidth,
                                 vo->dheight, flags, CopyFromParent, "xv",
