@@ -85,6 +85,7 @@ ASS_Track *mp_ass_default_track(ASS_Library *library)
     if (track->n_styles == 0) {
         track->Kerning = true;
         int sid = ass_alloc_style(track);
+        track->default_style = sid;
         ASS_Style *style = track->styles + sid;
         style->Name = strdup("Default");
         style->FontName = (font_fontconfig >= 0
@@ -166,7 +167,7 @@ static int ass_process_subtitle(ASS_Track *track, subtitle *sub)
 
     event->Start = sub->start * 10;
     event->Duration = (sub->end - sub->start) * 10;
-    event->Style = 0;
+    event->Style = track->default_style;
 
     for (j = 0; j < sub->lines; ++j)
         len += sub->text[j] ? strlen(sub->text[j]) : 0;
