@@ -1449,6 +1449,10 @@ else
 fi # icc
 test "$cc_fail" = yes && die "unsupported compiler version"
 
+echocheck "working compiler"
+cflag_check "" || die "Compiler is not functioning correctly. Check your installation and custom CFLAGS $CFLAGS ."
+echo "yes"
+
 if test -z "$_target" && x86 ; then
   cat > $TMPC << EOF
 int main(void) {
