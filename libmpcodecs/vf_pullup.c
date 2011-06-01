@@ -158,21 +158,16 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 			delta = 1001.0/60000.0; // delta = field time distance
 		else
 			delta = (pts - vf->priv->lastpts) / 2;
-		if (delta <= 0.0 || delta >= 0.5) {
-			pullup_submit_field(c, b, p, pts);
+		if (delta <= 0.0 || delta >= 0.5)
+			delta = 0.0;
+		vf->priv->lastpts = pts;
+		if (mpi->fields & MP_IMGFIELD_REPEAT_FIRST) {
+			pullup_submit_field(c, b, p, pts - delta);
 			pullup_submit_field(c, b, p^1, pts);
-			if (mpi->fields & MP_IMGFIELD_REPEAT_FIRST)
-				pullup_submit_field(c, b, p, pts);
+			pullup_submit_field(c, b, p, pts + delta);
 		} else {
-			vf->priv->lastpts = pts;
-			if (mpi->fields & MP_IMGFIELD_REPEAT_FIRST) {
-				pullup_submit_field(c, b, p, pts - delta);
-				pullup_submit_field(c, b, p^1, pts);
-				pullup_submit_field(c, b, p, pts + delta);
-			} else {
-				pullup_submit_field(c, b, p, pts - delta * 0.5);
-				pullup_submit_field(c, b, p^1, pts + delta * 0.5);
-			}
+			pullup_submit_field(c, b, p, pts - delta * 0.5);
+			pullup_submit_field(c, b, p^1, pts + delta * 0.5);
 		}
 	}
 
