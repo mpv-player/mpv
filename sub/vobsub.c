@@ -1341,7 +1341,7 @@ void vobsub_out_output(void *me, const unsigned char *packet,
             m = s / 60;
             s -= m * 60;
             ms = (s - (unsigned int) s) * 1000;
-            if (ms >= 1000)     /* prevent overfolws or bad float stuff */
+            if (ms >= 1000)     /* prevent overflows or bad float stuff */
                 ms = 0;
             if (h != last_h || m != last_m || (unsigned int) s != last_s || ms != last_ms) {
                 fprintf(vob->fidx, "timestamp: %02u:%02u:%02u:%03u, filepos: %09lx\n",
@@ -1382,13 +1382,13 @@ void vobsub_out_output(void *me, const unsigned char *packet,
             datalen += 1;       /* AID */
             pad_len = 2048 - (p - buffer) - 4 /* MPEG ID */ - 2 /* payload len */ - datalen;
             /* XXX - Go figure what should go here!  In any case the
-               packet has to be completly filled.  If I can fill it
+               packet has to be completely filled.  If I can fill it
                with padding (0x000001be) latter I'll do that.  But if
                there is only room for 6 bytes then I can not write a
                padding packet.  So I add some padding in the PTS
                field.  This looks like a dirty kludge.  Oh well... */
             if (pad_len < 0) {
-                /* Packet is too big.  Let's try ommiting the PTS field */
+                /* Packet is too big.  Let's try omitting the PTS field */
                 datalen -= pts_len;
                 pts_len = 0;
                 pad_len = 0;
@@ -1439,7 +1439,7 @@ void vobsub_out_output(void *me, const unsigned char *packet,
                 perror("ERROR: vobsub blank padding write failed");
         } else if (remain < 0)
             fprintf(stderr,
-                    "\nERROR: wrong thing happenned...\n"
+                    "\nERROR: wrong thing happened...\n"
                     "  I wrote a %i data bytes spu packet and that's too long\n", len);
     }
 }
