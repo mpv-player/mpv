@@ -31,6 +31,12 @@
 #include "w32_common.h"
 #include "mp_fifo.h"
 
+#ifndef WM_XBUTTONDOWN
+# define WM_XBUTTONDOWN    0x020B
+# define WM_XBUTTONUP      0x020C
+# define WM_XBUTTONDBLCLK  0x020D
+#endif
+
 #ifndef MONITOR_DEFAULTTOPRIMARY
 #define MONITOR_DEFAULTTOPRIMARY 1
 #endif
@@ -170,8 +176,17 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                     mplayer_put_key(MOUSE_BTN3);
                 else
                     mplayer_put_key(MOUSE_BTN4);
-                break;
             }
+            break;
+        case WM_XBUTTONDOWN:
+            if (!vo_nomouse_input) {
+                int x = HIWORD(wParam);
+                if (x == 1)
+                    mplayer_put_key(MOUSE_BTN5);
+                else // if (x == 2)
+                    mplayer_put_key(MOUSE_BTN6);
+            }
+            break;
     }
 
     return DefWindowProc(hWnd, message, wParam, lParam);
