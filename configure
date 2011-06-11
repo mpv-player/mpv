@@ -3504,12 +3504,15 @@ echores "$_gettimeofday"
 echocheck "glob()"
 _glob=no
 statement_check glob.h 'glob("filename", 0, 0, 0)' && _glob=yes
+need_glob=no
 if test "$_glob" = yes ; then
   def_glob='#define HAVE_GLOB 1'
-  need_glob=no
 else
   def_glob='#undef HAVE_GLOB'
-  need_glob=yes
+  # HACK! need_glob currently enables compilation of a
+  # win32-specific glob()-replacement.
+  # Other OS neither need it nor can they use it (mf:// is disabled for them).
+  win32 && need_glob=yes
 fi
 echores "$_glob"
 
