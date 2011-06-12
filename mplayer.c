@@ -2272,7 +2272,7 @@ static mp_image_t *mp_dvdnav_restore_smpi(struct MPContext *mpctx,
     if (mpctx->stream->type != STREAMTYPE_DVDNAV)
         return decoded_frame;
 
-    /// a change occured in dvdnav stream
+    /// a change occurred in dvdnav stream
     if (mp_dvdnav_cell_has_changed(mpctx->stream,0)) {
         mp_dvdnav_read_wait(mpctx->stream, 1, 1);
         mp_dvdnav_context_free(mpctx);
@@ -2317,12 +2317,16 @@ static void mp_dvdnav_save_smpi(struct MPContext *mpctx, int in_size,
         return;
 
     free(mpctx->nav_buffer);
+    mpctx->nav_buffer  = NULL;
+    mpctx->nav_start   = NULL;
+    mpctx->nav_in_size = -1;
 
-    mpctx->nav_buffer = malloc(in_size);
-    mpctx->nav_start = start;
-    mpctx->nav_in_size = mpctx->nav_buffer ? in_size : -1;
-    if (mpctx->nav_buffer)
+    if (in_size > 0)
+        mpctx->nav_buffer = malloc(in_size);
+    if (mpctx->nav_buffer) {
+        mpctx->nav_start = start;
         memcpy(mpctx->nav_buffer,start,in_size);
+    }
 
     if (decoded_frame && mpctx->nav_smpi != decoded_frame)
         mpctx->nav_smpi = mp_dvdnav_copy_mpi(mpctx->nav_smpi,decoded_frame);
