@@ -581,11 +581,11 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
       s->control_uint_arg = *(unsigned *)arg;
       s->control = cmd;
       break;
-// the core might call these every frame, they are too slow for this...
     case STREAM_CTRL_GET_TIME_LENGTH:
-//    case STREAM_CTRL_GET_CURRENT_TIME:
       *(double *)arg = s->stream_time_length;
       return s->stream_time_length ? STREAM_OK : STREAM_UNSUPPORTED;
+// the core might call this every frame, but it is too slow for this...
+//    case STREAM_CTRL_GET_CURRENT_TIME:
     case STREAM_CTRL_GET_NUM_CHAPTERS:
     case STREAM_CTRL_GET_CURRENT_CHAPTER:
     case STREAM_CTRL_GET_ASPECT_RATIO:
