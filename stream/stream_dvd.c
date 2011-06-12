@@ -534,8 +534,8 @@ static double dvd_get_current_time(stream_t *stream, int cell)
     dvd_priv_t *d = stream->priv;
 
     tm=0;
-    if(!cell) cell=d->cur_cell;
-    for(i=0; i<d->cur_cell; i++) {
+    if(cell < 0) cell=d->cur_cell;
+    for(i=0; i<cell; i++) {
         if(d->cur_pgc->cell_playback[i].block_type == BLOCK_TYPE_ANGLE_BLOCK &&
            d->cur_pgc->cell_playback[i].block_mode != BLOCK_MODE_FIRST_CELL
         )
@@ -585,7 +585,7 @@ static int dvd_seek_to_time(stream_t *stream, ifo_handle_t *vts_file, double sec
       stream_skip(stream, 2048);
       t = mp_dvdtimetomsec(&d->dsi_pack.dsi_gi.c_eltm);
     } while(!t);
-    tm = dvd_get_current_time(stream, 0);
+    tm = dvd_get_current_time(stream, -1);
 
     pos = ((off_t)tmap_sector)<<11;
     stream_seek(stream, pos);
@@ -594,7 +594,7 @@ static int dvd_seek_to_time(stream_t *stream, ifo_handle_t *vts_file, double sec
     while(tm <= sec) {
         if(!stream_skip(stream, 2048))
           break;
-        tm = dvd_get_current_time(stream, 0);
+        tm = dvd_get_current_time(stream, -1);
     };
     tmap_sector = stream->pos >> 11;
 
@@ -645,7 +645,7 @@ static int control(stream_t *stream,int cmd,void* arg)
         case STREAM_CTRL_GET_CURRENT_TIME:
         {
             double tm;
-            tm = dvd_get_current_time(stream, 0);
+            tm = dvd_get_current_time(stream, -1);
             if(tm != -1) {
               *((double *)arg) = tm;
               return 1;
