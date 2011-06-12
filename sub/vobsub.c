@@ -694,72 +694,25 @@ static int vobsub_parse_id(vobsub_t *vob, const char *line)
 
 static int vobsub_parse_timestamp(vobsub_t *vob, const char *line)
 {
-    // timestamp: HH:MM:SS.mmm, filepos: 0nnnnnnnnn
-    const char *p;
     int h, m, s, ms;
     off_t filepos;
-    while (isspace(*line))
-        ++line;
-    p = line;
-    while (isdigit(*p))
-        ++p;
-    if (p - line != 2)
+    if (sscanf(line, " %02d:%02d:%02d:%03d, filepos: %09lx",
+               &h, &m, &s, &ms, &filepos) != 5)
         return -1;
-    h = atoi(line);
-    if (*p != ':')
-        return -1;
-    line = ++p;
-    while (isdigit(*p))
-        ++p;
-    if (p - line != 2)
-        return -1;
-    m = atoi(line);
-    if (*p != ':')
-        return -1;
-    line = ++p;
-    while (isdigit(*p))
-        ++p;
-    if (p - line != 2)
-        return -1;
-    s = atoi(line);
-    if (*p != ':')
-        return -1;
-    line = ++p;
-    while (isdigit(*p))
-        ++p;
-    if (p - line != 3)
-        return -1;
-    ms = atoi(line);
-    if (*p != ',')
-        return -1;
-    line = p + 1;
-    while (isspace(*line))
-        ++line;
-    if (strncmp("filepos:", line, 8))
-        return -1;
-    line += 8;
-    while (isspace(*line))
-        ++line;
-    if (! isxdigit(*line))
-        return -1;
-    filepos = strtol(line, NULL, 16);
     return vobsub_add_timestamp(vob, filepos, vob->delay + ms + 1000 * (s + 60 * (m + 60 * h)));
 }
 
 static int vobsub_parse_origin(vobsub_t *vob, const char *line)
 {
     // org: X,Y
-    char *p;
-    while (isspace(*line))
-        ++line;
-    if (!isdigit(*line))
-        return -1;
-    vob->origin_x = strtoul(line, &p, 10);
-    if (*p != ',')
-        return -1;
-    ++p;
-    vob->origin_y = strtoul(p, NULL, 10);
-    return 0;
+    unsigned x, y;
+
+    if (sscanf(line, " %u,%u", &x, &y) == 2) {
+        vob->origin_x = x;
+        vob->origin_y = y;
+        return 0;
+    }
+    return -1;
 }
 
 unsigned int vobsub_palette_to_yuv(unsigned int pal)
