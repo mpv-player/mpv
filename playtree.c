@@ -279,7 +279,7 @@ play_tree_set_parent(play_tree_t* pt, play_tree_t* parent) {
 
 
 void
-play_tree_add_file(play_tree_t* pt,char* file) {
+play_tree_add_file(play_tree_t* pt,const char* file) {
   int n = 0;
 
 #ifdef MP_DEBUG
@@ -310,7 +310,7 @@ play_tree_add_file(play_tree_t* pt,char* file) {
 }
 
 int
-play_tree_remove_file(play_tree_t* pt,char* file) {
+play_tree_remove_file(play_tree_t* pt,const char* file) {
   int n,f = -1;
 
 #ifdef MP_DEBUG
@@ -349,7 +349,7 @@ play_tree_remove_file(play_tree_t* pt,char* file) {
 }
 
 void
-play_tree_set_param(play_tree_t* pt, char* name, char* val) {
+play_tree_set_param(play_tree_t* pt, const char* name, const char* val) {
   int n = 0;
 
 #ifdef MP_DEBUG
@@ -373,7 +373,7 @@ play_tree_set_param(play_tree_t* pt, char* name, char* val) {
 }
 
 int
-play_tree_unset_param(play_tree_t* pt, char* name) {
+play_tree_unset_param(play_tree_t* pt, const char* name) {
   int n,ni = -1;
 
 #ifdef MP_DEBUG
@@ -473,7 +473,6 @@ play_tree_iter_push_params(play_tree_iter_t* iter) {
 
   if(!pt->child)
     iter->entry_pushed = 1;
-  return;
 }
 
 play_tree_iter_t*
@@ -934,7 +933,7 @@ void pt_iter_replace_entry(play_tree_iter_t* iter, play_tree_t* entry)
 }
 
 //Add a new file as a new entry
-void pt_add_file(play_tree_t** ppt, char* filename)
+void pt_add_file(play_tree_t** ppt, const char* filename)
 {
   play_tree_t *pt = *ppt, *entry = play_tree_new();
 #ifdef MP_DEBUG
