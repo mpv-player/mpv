@@ -550,7 +550,8 @@ static void vo_x11_putkey_ext(struct vo *vo, int keysym, int modifiers)
 
 static const struct mp_keymap keymap[] = {
     // special keys
-    {wsEscape, KEY_ESC}, {wsBackSpace, KEY_BS}, {wsTab, KEY_TAB}, {wsEnter, KEY_ENTER},
+    {wsPause, KEY_PAUSE}, {wsEscape, KEY_ESC}, {wsBackSpace, KEY_BS},
+    {wsTab, KEY_TAB}, {wsEnter, KEY_ENTER},
 
     // cursor keys
     {wsLeft, KEY_LEFT}, {wsRight, KEY_RIGHT}, {wsUp, KEY_UP}, {wsDown, KEY_DOWN},
