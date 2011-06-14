@@ -44,7 +44,7 @@
 #endif
 
 #ifndef AV_RB32
-#define AV_RB32(x)  ((((const uint8_t*)(x))[0] << 24) | \
+#define AV_RB32(x)  (((uint32_t)((const uint8_t*)(x))[0] << 24) |       \
                      (((const uint8_t*)(x))[1] << 16) | \
                      (((const uint8_t*)(x))[2] <<  8) | \
                       ((const uint8_t*)(x))[3])
@@ -58,7 +58,7 @@
 #endif
 
 #ifndef AV_RL32
-#define AV_RL32(x) ((((const uint8_t*)(x))[3] << 24) | \
+#define AV_RL32(x) (((uint32_t)((const uint8_t*)(x))[3] << 24) |        \
                     (((const uint8_t*)(x))[2] << 16) | \
                     (((const uint8_t*)(x))[1] <<  8) | \
                      ((const uint8_t*)(x))[0])
