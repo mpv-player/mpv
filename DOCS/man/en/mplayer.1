@@ -7384,6 +7384,14 @@ right eye)
 anaglyph yellow/blue colored (yellow filter on left eye, blue filter on right
 eye)
 .RE
+.B irl or interleave_rows_left_first
+.RS
+Interleaved rows (left eye has top row, right eye starts on next row)
+.RE
+.B irr or interleave_rows_right_first
+.RS
+Interleaved rows (right eye has top row, left eye starts on next row)
+.RE
 .B ml or mono_left
 .RS
 mono output (left eye only)
@@ -7393,6 +7401,13 @@ mono output (left eye only)
 mono output (right eye only)
 .RE
 .RE
+.I NOTE:
+To use either of the interleaved-rows output formats to display
+full-screen on a row-interleaved 3D display, you will need to scale the
+video to the correct height first using the "scale" filter, if it is not
+already the right height.  Typically, that is 1080 rows (so use e.g.
+"-vf scale=1440:1080,stereo3d=sbsl:irl" for a 720p side-by-side encoded
+movie).
 .RE
 .PD 1
 .
