@@ -30,24 +30,10 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "fastmemcpy.h"
-#include "input/input.h"
-#include "input/keycodes.h"
 #include "mp_msg.h"
 #include "aspect.h"
-#include "geometry.h"
-#include "mp_fifo.h"
 #include "sub/sub.h"
 #include "w32_common.h"
-
-#ifndef WM_XBUTTONDOWN
-# define WM_XBUTTONDOWN    0x020B
-# define WM_XBUTTONUP      0x020C
-# define WM_XBUTTONDBLCLK  0x020D
-#endif
-
-#define WNDCLASSNAME_WINDOWED	"MPlayer - The Movie Player"
-#define WNDCLASSNAME_FULLSCREEN	"MPlayer - Fullscreen"
-#define WNDSTYLE WS_OVERLAPPEDWINDOW|WS_SIZEBOX
 
 static LPDIRECTDRAWCOLORCONTROL	g_cc = NULL;		//color control interface
 static LPDIRECTDRAW7        g_lpdd = NULL;          //DirectDraw Object
@@ -61,10 +47,7 @@ static RECT                 rd;                     //rect of our stretched imag
 static RECT                 rs;                     //rect of our source image
 static HBRUSH               colorbrush = NULL;      // Handle to colorkey brush
 static HBRUSH               blackbrush = NULL;      // Handle to black brush
-static HICON                mplayericon = NULL;     // Handle to mplayer icon
-static HCURSOR              mplayercursor = NULL;   // Handle to mplayer cursor
 static uint32_t image_width, image_height;          //image width and height
-static uint32_t d_image_width, d_image_height;      //image width and height zoomed
 static uint8_t  *image=NULL;                        //image data
 static void* tmp_image = NULL;
 static uint32_t image_format=0;                       //image format
@@ -79,10 +62,6 @@ static COLORREF windowcolor = RGB(0,0,16);          //windowcolor == colorkey
 static int adapter_count=0;
 static GUID selected_guid;
 static GUID *selected_guid_ptr = NULL;
-static RECT monitor_rect;	                        //monitor coordinates
-static float window_aspect;
-static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO) = NULL;
-static RECT last_rect = {0xDEADC0DE, 0xDEADC0DE, 0xDEADC0DE, 0xDEADC0DE};
 
 /*****************************************************************************
  * DirectDraw GUIDs.
@@ -347,12 +326,6 @@ static void uninit(void)
 	if (g_lpddsPrimary != NULL) g_lpddsPrimary->lpVtbl->Release(g_lpddsPrimary);
     g_lpddsPrimary = NULL;
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>primary released\n");
-	UnregisterClass(WNDCLASSNAME_WINDOWED, GetModuleHandle(NULL));
-	UnregisterClass(WNDCLASSNAME_FULLSCREEN, GetModuleHandle(NULL));
-	if (mplayericon) DestroyIcon(mplayericon);
-	mplayericon = NULL;
-	if (mplayercursor) DestroyCursor(mplayercursor);
-	mplayercursor = NULL;
 	if (colorbrush) DeleteObject(colorbrush);
 	colorbrush = NULL;
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>GDI resources deleted\n");
@@ -370,19 +343,11 @@ static void uninit(void)
 
 static BOOL WINAPI EnumCallbackEx(GUID FAR *lpGUID, LPSTR lpDriverDescription, LPSTR lpDriverName, LPVOID lpContext, HMONITOR  hm)
 {
-    mp_msg(MSGT_VO, MSGL_INFO ,"<vo_directx> adapter %d: ", adapter_count);
-
     if (!lpGUID)
-    {
-        mp_msg(MSGT_VO, MSGL_INFO ,"%s", "Primary Display Adapter");
-    }
-    else
-    {
-        mp_msg(MSGT_VO, MSGL_INFO ,"%s", lpDriverDescription);
-    }
+        lpDriverDescription = "Primary Display Adapter";
+    mp_msg(MSGT_VO, MSGL_INFO ,"<vo_directx> adapter %d: %s", adapter_count, lpDriverDescription);
 
     if(adapter_count == vo_adapter_num){
-        MONITORINFO mi;
         if (!lpGUID)
             selected_guid_ptr = NULL;
         else
@@ -390,11 +355,7 @@ static BOOL WINAPI EnumCallbackEx(GUID FAR *lpGUID, LPSTR lpDriverDescription, L
             selected_guid = *lpGUID;
             selected_guid_ptr = &selected_guid;
         }
-        mi.cbSize = sizeof(mi);
 
-        if (myGetMonitorInfo(hm, &mi)) {
-			monitor_rect = mi.rcMonitor;
-        }
         mp_msg(MSGT_VO, MSGL_INFO ,"\t\t<--");
     }
     mp_msg(MSGT_VO, MSGL_INFO ,"\n");
@@ -409,16 +370,8 @@ static uint32_t Directx_InitDirectDraw(void)
 	HRESULT    (WINAPI *OurDirectDrawCreateEx)(GUID *,LPVOID *, REFIID,IUnknown FAR *);
 	DDSURFACEDESC2 ddsd;
 	LPDIRECTDRAWENUMERATEEX OurDirectDrawEnumerateEx;
-	HINSTANCE user32dll=LoadLibrary("user32.dll");
 
 	adapter_count = 0;
-	if(user32dll){
-		myGetMonitorInfo=GetProcAddress(user32dll,"GetMonitorInfoA");
-		if(!myGetMonitorInfo && vo_adapter_num){
-			mp_msg(MSGT_VO, MSGL_ERR, "<vo_directx> -adapter is not supported on Win95\n");
-			vo_adapter_num = 0;
-		}
-	}
 
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>Initing DirectDraw\n" );
 
@@ -429,8 +382,6 @@ static uint32_t Directx_InitDirectDraw(void)
         mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>failed loading ddraw.dll\n" );
 		return 1;
     }
-
-    last_rect.left = 0xDEADC0DE;   // reset window position cache
 
 	if(vo_adapter_num){ //display other than default
         OurDirectDrawEnumerateEx = (LPDIRECTDRAWENUMERATEEX) GetProcAddress(hddraw_dll,"DirectDrawEnumerateExA");
@@ -448,7 +399,6 @@ static uint32_t Directx_InitDirectDraw(void)
         if(vo_adapter_num >= adapter_count)
             mp_msg(MSGT_VO, MSGL_ERR,"Selected adapter (%d) doesn't exist: Default Display Adapter selected\n",vo_adapter_num);
     }
-    FreeLibrary(user32dll);
 
 	OurDirectDrawCreateEx = (void *)GetProcAddress(hddraw_dll, "DirectDrawCreateEx");
     if ( OurDirectDrawCreateEx == NULL )
@@ -509,22 +459,6 @@ static uint32_t Directx_InitDirectDraw(void)
     }
     mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>DirectDraw Initialized\n");
 	return 0;
-}
-
-static uint32_t Directx_ManageDisplay(void);
-
-static void check_events(void)
-{
-    int evt = vo_w32_check_events();
-    if (evt & (VO_EVENT_RESIZE | VO_EVENT_MOVE))
-        Directx_ManageDisplay();
-    if (evt & (VO_EVENT_RESIZE | VO_EVENT_MOVE | VO_EVENT_EXPOSE)) {
-        HDC dc = vo_w32_get_dc(vo_w32_window);
-        RECT r;
-        GetClientRect(vo_w32_window, &r);
-        FillRect(dc, &r, vo_fs || vidmode ? blackbrush : colorbrush);
-        vo_w32_release_dc(vo_w32_window, dc);
-    }
 }
 
 static uint32_t Directx_ManageDisplay(void)
@@ -695,6 +629,20 @@ static uint32_t Directx_ManageDisplay(void)
     return 0;
 }
 
+static void check_events(void)
+{
+    int evt = vo_w32_check_events();
+    if (evt & (VO_EVENT_RESIZE | VO_EVENT_MOVE))
+        Directx_ManageDisplay();
+    if (evt & (VO_EVENT_RESIZE | VO_EVENT_MOVE | VO_EVENT_EXPOSE)) {
+        HDC dc = vo_w32_get_dc(vo_w32_window);
+        RECT r;
+        GetClientRect(vo_w32_window, &r);
+        FillRect(dc, &r, vo_fs || vidmode ? blackbrush : colorbrush);
+        vo_w32_release_dc(vo_w32_window, dc);
+    }
+}
+
 //find out supported overlay pixelformats
 static uint32_t Directx_CheckOverlayPixelformats(void)
 {
@@ -827,8 +775,6 @@ static uint32_t Directx_CheckPrimaryPixelformat(void)
 
 static int preinit(const char *arg)
 {
-    HINSTANCE hInstance = GetModuleHandle(NULL);
-    char exedir[MAX_PATH];
 	if(arg)
 	{
 		if(strstr(arg,"noaccel"))
@@ -837,15 +783,6 @@ static int preinit(const char *arg)
 		    nooverlay = 1;
 		}
 	}
-	/*load icon from the main app*/
-    if(GetModuleFileName(NULL,exedir,MAX_PATH))
-    {
-        mplayericon = ExtractIcon( hInstance, exedir, 0 );
-  	}
-    if(!mplayericon)mplayericon=LoadIcon(NULL,IDI_APPLICATION);
-    mplayercursor = LoadCursor(NULL, IDC_ARROW);
-    monitor_rect.right=GetSystemMetrics(SM_CXSCREEN);
-    monitor_rect.bottom=GetSystemMetrics(SM_CYSCREEN);
 
     windowcolor = vo_colorkey;
     colorbrush = CreateSolidBrush(windowcolor);
@@ -1037,10 +974,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	image_format =  format;
 	image_width = width;
 	image_height = height;
-	d_image_width = d_width;
-	d_image_height = d_height;
     if(format != primary_image_format)nooverlay = 0;
-    window_aspect= (float)d_image_width / (float)d_image_height;
 
     /*release all directx objects*/
     if (g_cc != NULL)g_cc->lpVtbl->Release(g_cc);
@@ -1069,13 +1003,13 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	//create palette for 256 color mode
 	if(image_format==IMGFMT_BGR8){
 		LPDIRECTDRAWPALETTE ddpalette=NULL;
-		char* palette=malloc(4*256);
+		LPPALETTEENTRY palette=calloc(256, sizeof(*palette));
 		int i;
 		for(i=0; i<256; i++){
-			palette[4*i+0] = ((i >> 5) & 0x07) * 255 / 7;
-			palette[4*i+1] = ((i >> 2) & 0x07) * 255 / 7;
-			palette[4*i+2] = ((i >> 0) & 0x03) * 255 / 3;
-			palette[4*i+3] = PC_NOCOLLAPSE;
+			palette[i].peRed   = ((i >> 5) & 0x07) * 255 / 7;
+			palette[i].peGreen = ((i >> 2) & 0x07) * 255 / 7;
+			palette[i].peBlue  = ((i >> 0) & 0x03) * 255 / 3;
+			palette[i].peFlags = PC_NOCOLLAPSE;
 		}
 		g_lpdd->lpVtbl->CreatePalette(g_lpdd,DDPCAPS_8BIT|DDPCAPS_INITIALIZE,palette,&ddpalette,NULL);
 		g_lpddsPrimary->lpVtbl->SetPalette(g_lpddsPrimary,ddpalette);
@@ -1126,7 +1060,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 //  contrast	[0, 20000]
 //  hue		[-180, 180]
 //  saturation	[0, 20000]
-static uint32_t color_ctrl_set(char *what, int value)
+static uint32_t color_ctrl_set(const char *what, int value)
 {
 	uint32_t	r = VO_NOTIMPL;
 	DDCOLORCONTROL	dcc;
@@ -1163,7 +1097,7 @@ static uint32_t color_ctrl_set(char *what, int value)
 }
 
 //analoguous to color_ctrl_set
-static uint32_t color_ctrl_get(char *what, int *value)
+static uint32_t color_ctrl_get(const char *what, int *value)
 {
 	uint32_t	r = VO_NOTIMPL;
 	DDCOLORCONTROL	dcc;
@@ -1203,7 +1137,6 @@ static int control(uint32_t request, void *data)
 	case VOCTRL_GET_IMAGE:
       	return get_image(data);
     case VOCTRL_QUERY_FORMAT:
-        last_rect.left = 0xDEADC0DE;   // reset window position cache
         return query_format(*((uint32_t*)data));
 	case VOCTRL_DRAW_IMAGE:
         return put_image(data);
@@ -1224,7 +1157,6 @@ static int control(uint32_t request, void *data)
 			{
 				if(vo_rootwin) vo_rootwin = 0;
 				else vo_rootwin = 1;
-				last_rect.left = 0xDEADC0DE;   // reset window position cache
 				Directx_ManageDisplay();
 			}
 		return VO_TRUE;
@@ -1245,9 +1177,6 @@ static int control(uint32_t request, void *data)
     case VOCTRL_UPDATE_SCREENINFO:
         w32_update_xinerama_info();
         return VO_TRUE;
-    case VOCTRL_RESET:
-        last_rect.left = 0xDEADC0DE;   // reset window position cache
-        // fall-through intended
     };
     return VO_NOTIMPL;
 }
