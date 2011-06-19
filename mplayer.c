@@ -1130,6 +1130,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
 
 void init_vo_spudec(struct MPContext *mpctx)
 {
+  unsigned width, height;
   spudec_free(vo_spudec);
   mpctx->initialized_flags &= ~INITIALIZED_SPUDEC;
   vo_spudec = NULL;
@@ -1139,17 +1140,20 @@ void init_vo_spudec(struct MPContext *mpctx)
     return;
 
   if (spudec_ifo) {
-    unsigned int palette[16], width, height;
+    unsigned int palette[16];
     current_module="spudec_init_vobsub";
     if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, -1, NULL) >= 0)
       vo_spudec=spudec_new_scaled(palette, width, height, NULL, 0);
   }
 
+    width  = mpctx->sh_video->disp_w;
+    height = mpctx->sh_video->disp_h;
+
 #ifdef CONFIG_DVDREAD
   if (vo_spudec==NULL && mpctx->stream->type==STREAMTYPE_DVD) {
     current_module="spudec_init_dvdread";
     vo_spudec=spudec_new_scaled(((dvd_priv_t *)(mpctx->stream->priv))->cur_pgc->palette,
-                                mpctx->sh_video->disp_w, mpctx->sh_video->disp_h,
+                                width, height,
                                 NULL, 0);
   }
 #endif
@@ -1158,14 +1162,14 @@ void init_vo_spudec(struct MPContext *mpctx)
   if (vo_spudec==NULL && mpctx->stream->type==STREAMTYPE_DVDNAV) {
     unsigned int *palette = mp_dvdnav_get_spu_clut(mpctx->stream);
     current_module="spudec_init_dvdnav";
-    vo_spudec=spudec_new_scaled(palette, mpctx->sh_video->disp_w, mpctx->sh_video->disp_h, NULL, 0);
+    vo_spudec=spudec_new_scaled(palette, width, height, NULL, 0);
   }
 #endif
 
   if (vo_spudec==NULL) {
     sh_sub_t *sh = mpctx->d_sub->sh;
     current_module="spudec_init_normal";
-    vo_spudec=spudec_new_scaled(NULL, mpctx->sh_video->disp_w, mpctx->sh_video->disp_h, sh->extradata, sh->extradata_len);
+    vo_spudec=spudec_new_scaled(NULL, width, height, sh->extradata, sh->extradata_len);
     spudec_set_font_factor(vo_spudec,font_factor);
   }
 
