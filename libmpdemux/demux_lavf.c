@@ -516,8 +516,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
     if (stream_type) {
         AVCodec *avc = avcodec_find_decoder(codec->codec_id);
         const char *codec_name = avc ? avc->name : "unknown";
-        if (!avc && *stream_type == 's' && demuxer->s_streams[stream_id])
-            codec_name = sh_sub_type2str(((sh_sub_t *)demuxer->s_streams[stream_id])->type);
+        if (!avc && *stream_type == 's' && demuxer->s_streams[i])
+            codec_name = sh_sub_type2str(((sh_sub_t *)demuxer->s_streams[i])->type);
         mp_msg(MSGT_DEMUX, MSGL_INFO, "[lavf] stream %d: %s (%s), -%cid %d",
                i, stream_type, codec_name, *stream_type, stream_id);
         if (lang && lang->value && *stream_type != 'v')
