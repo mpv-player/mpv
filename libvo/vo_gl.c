@@ -1109,7 +1109,7 @@ query_format(uint32_t format)
     // ideally MPlayer should be fixed instead not to use Y800 when it has the choice
     if (!use_yuv && (format == IMGFMT_Y8 || format == IMGFMT_Y800))
         return 0;
-    if (!use_ycbcr && (format == IMGFMT_UYVY || format == IMGFMT_YUY2))
+    if (!use_ycbcr && (format == IMGFMT_UYVY || format == IMGFMT_YVYU))
         return 0;
     if (many_fmts &&
          glFindFormat(format, NULL, NULL, NULL, NULL))
