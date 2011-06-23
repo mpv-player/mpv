@@ -1538,13 +1538,12 @@ if x86 ; then
 
   pparam=$(echo $exts | sed -e s/k6_mtrr/mtrr/ -e s/cyrix_arr/mtrr/ -e s/centaur_mcr/mtrr/ \
                             -e s/xmm/sse/ -e s/kni/sse/)
+  # SSE implies MMX2, but not all SSE processors report the mmxext CPU flag.
+  pparam=$(echo $pparam | sed -e 's/sse/sse mmxext/')
 
   for ext in $pparam ; do
     eval test \"\$_$ext\" = auto 2>/dev/null && eval _$ext=kernel_check
   done
-
-  # SSE implies MMX2, but not all SSE processors report the mmxext CPU flag.
-  test $_sse = kernel_check && _mmxext=kernel_check
 
   echocheck "CPU vendor"
   echores "$pvendor ($pfamily:$pmodel:$pstepping)"
