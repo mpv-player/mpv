@@ -166,7 +166,6 @@ static int init(struct ao *ao, char *params)
     }
 
     ao->outburst = 65536;
-    ao->buffersize = 2 * 65536;
     ao->bps = ao->channels * ao->samplerate * (af_fmt2bits(ao->format) / 8);
 
     mp_tmsg(MSGT_AO, MSGL_INFO, "[AO PCM] File: %s (%s)\n"
