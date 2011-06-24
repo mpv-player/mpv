@@ -428,6 +428,7 @@ Audio output:
   --disable-ossaudio     disable OSS audio output [autodetect]
   --disable-arts         disable aRts audio output [autodetect]
   --disable-esd          disable esd audio output [autodetect]
+  --disable-rsound       disable RSound audio output [autodetect]
   --disable-pulse        disable Pulseaudio audio output [autodetect]
   --disable-jack         disable JACK audio output [autodetect]
   --enable-openal        enable OpenAL audio output [disable]
@@ -591,6 +592,7 @@ _rtc=auto
 _ossaudio=auto
 _arts=auto
 _esd=auto
+_rsound=auto
 _pulse=auto
 _jack=auto
 _kai=auto
@@ -919,6 +921,8 @@ for ac_option do
   --disable-arts)       _arts=no        ;;
   --enable-esd)         _esd=yes        ;;
   --disable-esd)        _esd=no         ;;
+  --enable-rsound)      _rsound=yes     ;;
+  --disable-rsound)     _rsound=no      ;;
   --enable-pulse)       _pulse=yes      ;;
   --disable-pulse)      _pulse=no       ;;
   --enable-jack)        _jack=yes       ;;
@@ -4859,6 +4863,22 @@ else
   noaomodules="esd $noaomodules"
 fi
 
+echocheck "RSound"
+if test "$_rsound" = auto ; then
+   _rsound=no
+   statement_check rsound.h 'rsd_init(NULL);' -lrsound && _rsound=yes
+fi
+echores "$_rsound"
+
+if test "$_rsound" = yes ; then
+   def_rsound='#define CONFIG_RSOUND 1'
+   aomodules="rsound $aomodules"
+   libs_mplayer="$libs_mplayer -lrsound"
+else
+   def_rsound='#undef CONFIG_RSOUND'
+   noaomodules="rsound $noaomodules"
+fi
+
 
 echocheck "NAS"
 if test "$_nas" = auto ; then
@@ -6777,6 +6797,7 @@ QUARTZ = $_quartz
 RADIO=$_radio
 RADIO_CAPTURE=$_radio_capture
 REAL_CODECS = $_real
+RSOUND = $_rsound
 S3FB = $_s3fb
 SDL = $_sdl
 SPEEX = $_speex
@@ -7058,6 +7079,7 @@ $def_ossaudio
 $def_ossaudio_devdsp
 $def_ossaudio_devmixer
 $def_pulse
+$def_rsound
 $def_sgiaudio
 $def_sunaudio
 $def_win32waveout

@@ -3022,6 +3022,21 @@ If nowaveheader is specified, the default is audiodump.pcm.
 .PD 1
 .
 .TP
+.B "rsound\ \ \ \ "
+audio output to an RSound daemon
+.PD 0
+.RSs
+.IPs host=<name/path>
+Set the address of the server (default: localhost).
+Can be either a network hostname for TCP connections or a Unix domain
+socket path starting with '/'.
+.IPs port=<number>
+Set the TCP port used for connecting to the server (default: 12345).
+Not used if connecting to a Unix domain socket.
+.RE
+.PD 1
+.
+.TP
 .B "plugin\ \ "
 plugin audio output driver
 .

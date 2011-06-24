@@ -35,6 +35,7 @@ char *ao_subdevice = NULL;
 extern const struct ao_driver audio_out_oss;
 extern const struct ao_driver audio_out_coreaudio;
 extern const struct ao_driver audio_out_arts;
+extern const struct ao_driver audio_out_rsound;
 extern const struct ao_driver audio_out_esd;
 extern const struct ao_driver audio_out_pulse;
 extern const struct ao_driver audio_out_jack;
@@ -120,6 +121,9 @@ static const struct ao_driver * const audio_out_drivers[] = {
     &audio_out_null,
     // should not be auto-selected:
     &audio_out_pcm,
+#ifdef CONFIG_RSOUND
+    &audio_out_rsound,
+#endif
     NULL
 };
 
