@@ -1427,8 +1427,7 @@ else
       echores "$cc_version"
       break
     fi
-    cc_name_tmp=$($_cc -v 2>&1 | head -n 1 | cut -d ' ' -f 1)
-    if test "$cc_name_tmp" = "clang"; then
+    if $_cc -v 2>&1 | grep -q "clang"; then
       echocheck "$_cc version"
       cc_vendor=clang
       cc_version=$($_cc -dumpversion 2>&1)
