@@ -18,6 +18,7 @@
 
 #include "mp_msg.h"
 #include "libavutil/avutil.h"
+#include <libavutil/pixdesc.h>
 #include "libmpcodecs/img_format.h"
 #include "fmt-conversion.h"
 
@@ -114,12 +115,18 @@ enum PixelFormat imgfmt2pixfmt(int fmt)
 int pixfmt2imgfmt(enum PixelFormat pix_fmt)
 {
     int i;
-    int fmt;
     for (i = 0; conversion_map[i].pix_fmt != PIX_FMT_NONE; i++)
         if (conversion_map[i].pix_fmt == pix_fmt)
             break;
-    fmt = conversion_map[i].fmt;
-    if (!fmt)
+    int fmt = conversion_map[i].fmt;
+    if (!fmt) {
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 2, 0)
+        const char *fmtname = av_get_pix_fmt_name(pix_fmt);
+        mp_msg(MSGT_GLOBAL, MSGL_ERR, "Unsupported PixelFormat %s (%d)\n",
+               fmtname ? fmtname : "INVALID", pix_fmt);
+#else
         mp_msg(MSGT_GLOBAL, MSGL_ERR, "Unsupported PixelFormat %i\n", pix_fmt);
+#endif
+    }
     return fmt;
 }
