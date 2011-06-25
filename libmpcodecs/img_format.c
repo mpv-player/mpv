@@ -59,10 +59,20 @@ const char *vo_format_name(int format)
 	case IMGFMT_Y8: return "Planar Y8";
 	case IMGFMT_420P16_LE: return "Planar 420P 16-bit little-endian";
 	case IMGFMT_420P16_BE: return "Planar 420P 16-bit big-endian";
+	case IMGFMT_420P10_LE: return "Planar 420P 10-bit little-endian";
+	case IMGFMT_420P10_BE: return "Planar 420P 10-bit big-endian";
+	case IMGFMT_420P9_LE: return "Planar 420P 9-bit little-endian";
+	case IMGFMT_420P9_BE: return "Planar 420P 9-bit big-endian";
 	case IMGFMT_422P16_LE: return "Planar 422P 16-bit little-endian";
 	case IMGFMT_422P16_BE: return "Planar 422P 16-bit big-endian";
+	case IMGFMT_422P10_LE: return "Planar 422P 10-bit little-endian";
+	case IMGFMT_422P10_BE: return "Planar 422P 10-bit big-endian";
 	case IMGFMT_444P16_LE: return "Planar 444P 16-bit little-endian";
 	case IMGFMT_444P16_BE: return "Planar 444P 16-bit big-endian";
+	case IMGFMT_444P10_LE: return "Planar 444P 10-bit little-endian";
+	case IMGFMT_444P10_BE: return "Planar 444P 10-bit big-endian";
+	case IMGFMT_444P9_LE: return "Planar 444P 9-bit little-endian";
+	case IMGFMT_444P9_BE: return "Planar 444P 9-bit big-endian";
 	case IMGFMT_420A: return "Planar 420P with alpha";
 	case IMGFMT_444P: return "Planar 444P";
 	case IMGFMT_422P: return "Planar 422P";
@@ -116,6 +126,10 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift)
     switch (format) {
     case IMGFMT_420P16_LE:
     case IMGFMT_420P16_BE:
+    case IMGFMT_420P10_LE:
+    case IMGFMT_420P10_BE:
+    case IMGFMT_420P9_LE:
+    case IMGFMT_420P9_BE:
         bpp_factor = 2;
     case IMGFMT_420A:
     case IMGFMT_I420:
@@ -131,6 +145,10 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift)
         break;
     case IMGFMT_444P16_LE:
     case IMGFMT_444P16_BE:
+    case IMGFMT_444P10_LE:
+    case IMGFMT_444P10_BE:
+    case IMGFMT_444P9_LE:
+    case IMGFMT_444P9_BE:
         bpp_factor = 2;
     case IMGFMT_444P:
         xs = 0;
@@ -138,6 +156,8 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift)
         break;
     case IMGFMT_422P16_LE:
     case IMGFMT_422P16_BE:
+    case IMGFMT_422P10_LE:
+    case IMGFMT_422P10_BE:
         bpp_factor = 2;
     case IMGFMT_422P:
         xs = 1;
