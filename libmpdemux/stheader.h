@@ -119,6 +119,7 @@ typedef struct sh_video {
   int i_bps;              // == bitrate  (compressed bytes/sec)
   int disp_w,disp_h;      // display size (filled by fileformat parser)
   // output driver/filters: (set by libmpcodecs core)
+  unsigned int outfmt;
   unsigned int outfmtidx;
   struct vf_instance *vfilter;          // the video filter chain, used for this video stream
   int output_flags;       // query_format() results for output filters+vo

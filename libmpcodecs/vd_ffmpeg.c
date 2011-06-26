@@ -501,7 +501,18 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
         sh->disp_h = height;
         ctx->pix_fmt = pix_fmt;
         ctx->best_csp = pixfmt2imgfmt(pix_fmt);
-        if (!mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, ctx->best_csp))
+        const unsigned int *supported_fmts;
+        if (ctx->best_csp == IMGFMT_YV12)
+            supported_fmts = (const unsigned int[])
+                {IMGFMT_YV12, IMGFMT_I420, IMGFMT_IYUV, 0xffffffff};
+        else if (ctx->best_csp == IMGFMT_422P)
+            supported_fmts = (const unsigned int[])
+                {IMGFMT_422P, IMGFMT_YV12, IMGFMT_I420, IMGFMT_IYUV,
+                 0xffffffff};
+        else
+            supported_fmts = (const unsigned int[]){ctx->best_csp, 0xffffffff};
+        if (!mpcodecs_config_vo2(sh, sh->disp_w, sh->disp_h, supported_fmts,
+                                 ctx->best_csp))
             return -1;
         ctx->vo_initialized = 1;
     }

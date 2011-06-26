@@ -35,6 +35,7 @@
 
 #include "vd.h"
 #include "vf.h"
+#include "libvo/video_out.h"
 
 extern const vd_functions_t mpcodecs_vd_null;
 extern const vd_functions_t mpcodecs_vd_ffmpeg;
@@ -108,13 +109,12 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
     NULL
 };
 
-#include "libvo/video_out.h"
-
-int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
-                       unsigned int preferred_outfmt)
+int mpcodecs_config_vo2(sh_video_t *sh, int w, int h,
+                        const unsigned int *outfmts,
+                        unsigned int preferred_outfmt)
 {
     struct MPOpts *opts = sh->opts;
-    int i, j;
+    int j;
     unsigned int out_fmt = 0;
     int screen_size_x = 0;
     int screen_size_y = 0;
@@ -138,6 +138,10 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
         // user wants postprocess but no pp filter yet:
         sh->vfilter = vf = vf_open_filter(opts, vf, "pp", NULL);
     }
+
+    if (!outfmts || sh->codec->outfmt[0] != 0xffffffff)
+        outfmts = sh->codec->outfmt;
+
     // check if libvo and codec has common outfmt (no conversion):
   csp_again:
 
@@ -150,11 +154,11 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
     }
 
     j = -1;
-    for (i = 0; i < CODECS_MAX_OUTFMT; i++) {
+    for (int i = 0; i < CODECS_MAX_OUTFMT; i++) {
         int flags;
-        out_fmt = sh->codec->outfmt[i];
+        out_fmt = outfmts[i];
         if (out_fmt == (unsigned int) 0xFFFFFFFF)
-            continue;
+            break;
         flags = vf->query_format(vf, out_fmt);
         mp_msg(MSGT_CPLAYER, MSGL_DBG2,
                "vo_debug: query(%s) returned 0x%X (i=%d) \n",
@@ -234,7 +238,8 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
         sh->vf_initialized = -1;
         return 0;               // failed
     }
-    out_fmt = sh->codec->outfmt[j];
+    out_fmt = outfmts[j];
+    sh->outfmt = out_fmt;
     mp_msg(MSGT_CPLAYER, MSGL_V, "VDec: using %s as output csp (no %d)\n",
            vo_format_name(out_fmt), j);
     sh->outfmtidx = j;
@@ -354,8 +359,7 @@ mp_image_t *mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag,
                                int w, int h)
 {
     mp_image_t *mpi =
-        vf_get_image(sh->vfilter, sh->codec->outfmt[sh->outfmtidx], mp_imgtype,
-                     mp_imgflag, w, h);
+        vf_get_image(sh->vfilter, sh->outfmt, mp_imgtype, mp_imgflag, w, h);
     if (mpi)
         mpi->x = mpi->y = 0;
     return mpi;

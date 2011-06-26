@@ -145,10 +145,20 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     case IMGFMT_440P:
     case IMGFMT_444P16_LE:
     case IMGFMT_444P16_BE:
+    case IMGFMT_444P10_LE:
+    case IMGFMT_444P10_BE:
+    case IMGFMT_444P9_LE:
+    case IMGFMT_444P9_BE:
     case IMGFMT_422P16_LE:
     case IMGFMT_422P16_BE:
+    case IMGFMT_422P10_LE:
+    case IMGFMT_422P10_BE:
     case IMGFMT_420P16_LE:
     case IMGFMT_420P16_BE:
+    case IMGFMT_420P10_LE:
+    case IMGFMT_420P10_BE:
+    case IMGFMT_420P9_LE:
+    case IMGFMT_420P9_BE:
 	return;
     case IMGFMT_Y800:
     case IMGFMT_Y8:

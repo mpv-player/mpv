@@ -18,6 +18,7 @@
 
 #include "mp_msg.h"
 #include "libavutil/avutil.h"
+#include <libavutil/pixdesc.h>
 #include "libmpcodecs/img_format.h"
 #include "fmt-conversion.h"
 
@@ -74,6 +75,20 @@ static const struct {
 
     {IMGFMT_420P16_LE,  PIX_FMT_YUV420P16LE},
     {IMGFMT_420P16_BE,  PIX_FMT_YUV420P16BE},
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 2, 0)
+    {IMGFMT_420P9_LE,   PIX_FMT_YUV420P9LE},
+    {IMGFMT_420P9_BE,   PIX_FMT_YUV420P9BE},
+    {IMGFMT_420P10_LE,  PIX_FMT_YUV420P10LE},
+    {IMGFMT_420P10_BE,  PIX_FMT_YUV420P10BE},
+    {IMGFMT_422P10_LE,  PIX_FMT_YUV422P10LE},
+    {IMGFMT_422P10_BE,  PIX_FMT_YUV422P10BE},
+#endif
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 7, 0)
+    {IMGFMT_444P9_BE ,  PIX_FMT_YUV444P9BE},
+    {IMGFMT_444P9_LE ,  PIX_FMT_YUV444P9LE},
+    {IMGFMT_444P10_BE,  PIX_FMT_YUV444P10BE},
+    {IMGFMT_444P10_LE,  PIX_FMT_YUV444P10LE},
+#endif
     {IMGFMT_422P16_LE,  PIX_FMT_YUV422P16LE},
     {IMGFMT_422P16_BE,  PIX_FMT_YUV422P16BE},
     {IMGFMT_444P16_LE,  PIX_FMT_YUV444P16LE},
@@ -114,12 +129,18 @@ enum PixelFormat imgfmt2pixfmt(int fmt)
 int pixfmt2imgfmt(enum PixelFormat pix_fmt)
 {
     int i;
-    int fmt;
     for (i = 0; conversion_map[i].pix_fmt != PIX_FMT_NONE; i++)
         if (conversion_map[i].pix_fmt == pix_fmt)
             break;
-    fmt = conversion_map[i].fmt;
-    if (!fmt)
+    int fmt = conversion_map[i].fmt;
+    if (!fmt) {
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 2, 0)
+        const char *fmtname = av_get_pix_fmt_name(pix_fmt);
+        mp_msg(MSGT_GLOBAL, MSGL_ERR, "Unsupported PixelFormat %s (%d)\n",
+               fmtname ? fmtname : "INVALID", pix_fmt);
+#else
         mp_msg(MSGT_GLOBAL, MSGL_ERR, "Unsupported PixelFormat %i\n", pix_fmt);
+#endif
+    }
     return fmt;
 }
