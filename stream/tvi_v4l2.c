@@ -1376,7 +1376,8 @@ static int init(priv_t *priv)
 
 static int get_capture_buffer_size(priv_t *priv)
 {
-    int bufsize, cnt;
+    uint64_t bufsize;
+    int cnt;
 
     if (priv->tv_param->buffer_size >= 0) {
         bufsize = priv->tv_param->buffer_size*1024*1024;
@@ -1385,14 +1386,10 @@ static int get_capture_buffer_size(priv_t *priv)
         struct sysinfo si;
 
         sysinfo(&si);
-        if (si.totalram<2*1024*1024) {
-            bufsize = 1024*1024;
-        } else {
-            bufsize = si.totalram/2;
-        }
-#else
-        bufsize = 16*1024*1024;
+        bufsize = (si.freeram/2)*si.mem_unit;
+        if ( bufsize < 16*1024*1024)
 #endif
+        bufsize = 16*1024*1024;
     }
 
     cnt = bufsize/priv->format.fmt.pix.sizeimage;
