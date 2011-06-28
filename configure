@@ -2283,17 +2283,6 @@ echocheck "assembler support of -pipe option"
 cflag_check -pipe -I. && _pipe="-pipe" && echores "yes" || echores "no"
 
 
-echocheck "compiler support of named assembler arguments"
-_named_asm_args=yes
-def_named_asm_args="#define NAMED_ASM_ARGS 1"
-if test "$cc_vendor" = "gnu" && test "$_cc_major" -lt 3 \
-     -o "$_cc_major" -eq 3 -a "$_cc_minor" = 0 ; then
-  _named_asm_args=no
-  def_named_asm_args="#undef NAMED_ASM_ARGS"
-fi
-echores $_named_asm_args
-
-
 if darwin && test "$cc_vendor" = "gnu" ; then
 echocheck "GCC support of -mstackrealign"
 # GCC 4.2 and some earlier Apple versions support this flag on x86. Since
@@ -2449,22 +2438,6 @@ else
 fi
 echores $_asmalign_pot
 
-
-echocheck "10 assembler operands"
-ten_operands=no
-def_ten_operands='#define HAVE_TEN_OPERANDS 0'
-cat > $TMPC << EOF
-int main(void) {
-    int x=0;
-    __asm__ volatile(
-        ""
-        :"+&rm"(x), "+&rm"(x), "+&rm"(x), "+&rm"(x), "+&rm"(x), "+&rm"(x)
-    );
-    return 0;
-}
-EOF
-cc_check && ten_operands=yes && def_ten_operands='#define HAVE_TEN_OPERANDS 1'
-echores $ten_operands
 
 echocheck "ebx availability"
 ebx_available=no
@@ -6975,7 +6948,6 @@ $def_iconv
 $def_kstat
 $def_macosx_bundle
 $def_macosx_finder
-$def_named_asm_args
 $def_priority
 $def_quicktime
 $def_restrict_keyword
@@ -7213,7 +7185,6 @@ $def_posix_memalign
 $def_pthreads
 $def_round
 $def_roundf
-$def_ten_operands
 $def_threads
 $def_truncf
 $def_xform_asm
