@@ -8,16 +8,16 @@
  *
  */
 
-// define for quicktime calls debugging and/or MacOS-level emulation:
-#ifndef __APPLE__
-#define EMU_QTX_API
-#endif /* __APPLE__ */
-
 // define for quicktime debugging (verbose logging):
 //#define DEBUG_QTX_API
 
 #include "config.h"
 #include "debug.h"
+
+// define for quicktime calls debugging and/or MacOS-level emulation:
+#if !defined(__APPLE__) && defined(CONFIG_QTX_CODECS)
+#define EMU_QTX_API
+#endif /* __APPLE__ */
 
 #include <assert.h>
 #include <errno.h>
