@@ -177,6 +177,8 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current,
 	    break;
 
 	case 3: /* get all text until '<' appears */
+	    if (p - text >= LINE_LEN)
+	        sami_add_line(current, text, &p);
 	    if (*s == '\0') break;
 	    else if (!strncasecmp (s, "<br>", 4)) {
                 sami_add_line(current, text, &p);

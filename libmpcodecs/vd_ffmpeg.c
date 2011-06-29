@@ -389,7 +389,7 @@ static void uninit(sh_video_t *sh){
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
 
-    if(sh->opts->lavc_param.vstats){
+    if (sh->opts->lavc_param.vstats && avctx->coded_frame) {
         int i;
         for(i=1; i<32; i++){
             mp_msg(MSGT_DECVIDEO, MSGL_INFO, "QP: %d, count: %d\n", i, ctx->qp_stat[i]);
@@ -783,6 +783,9 @@ static struct mp_image *decode(struct sh_video *sh, void *data, int len,
         static double all_frametime=0.0;
         AVFrame *pic= avctx->coded_frame;
         double quality=0.0;
+
+        if (!pic)
+            break;
 
         if(!fvstats) {
             time_t today2;

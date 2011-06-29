@@ -67,7 +67,7 @@ static inline unsigned int vcd_get_msf(mp_vcd_priv_t* vcd)
   return CDConvertMSFToLBA(vcd->msf);
 }
 
-int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
+static int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 {
 	struct CDTrackInfo entry;
 

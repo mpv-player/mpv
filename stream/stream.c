@@ -167,7 +167,7 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
       m_option_t url_opt =
 	{ "stream url", arg , CONF_TYPE_CUSTOM_URL, 0, 0 ,0, (void *)sinfo->opts };
       if(m_option_parse(&url_opt,"stream url",filename,arg,M_CONFIG_FILE) < 0) {
-	mp_msg(MSGT_OPEN,MSGL_ERR, "URL parsing failed on url %s\n",filename);
+	mp_tmsg(MSGT_OPEN,MSGL_ERR, "URL parsing failed on url %s\n",filename);
 	m_struct_free(desc,arg);
 	return NULL;
       }
@@ -251,7 +251,7 @@ stream_t *open_stream_full(const char *filename, int mode,
     }
   }
 
-  mp_msg(MSGT_OPEN,MSGL_ERR, "No stream found to handle url %s\n",filename);
+  mp_tmsg(MSGT_OPEN,MSGL_ERR, "No stream found to handle url %s\n", filename);
   return NULL;
 }
 
@@ -365,7 +365,7 @@ if(newpos==0 || newpos!=s->pos){
 #ifdef CONFIG_NETWORKING
     if(s->seek) { // new stream seek is much cleaner than streaming_ctrl one
       if(!s->seek(s,newpos)) {
-      	mp_msg(MSGT_STREAM,MSGL_ERR, "Seek failed\n");
+        mp_tmsg(MSGT_STREAM,MSGL_ERR, "Seek failed\n");
       	return 0;
       }
       break;
@@ -373,14 +373,15 @@ if(newpos==0 || newpos!=s->pos){
 
     if( s->streaming_ctrl!=NULL && s->streaming_ctrl->streaming_seek ) {
       if( s->streaming_ctrl->streaming_seek( s->fd, newpos, s->streaming_ctrl )<0 ) {
-        mp_msg(MSGT_STREAM,MSGL_INFO,"Stream not seekable!\n");
+        mp_tmsg(MSGT_STREAM,MSGL_INFO,"Stream not seekable!\n");
         return 1;
       }
       break;
     }
 #endif
     if(newpos<s->pos){
-      mp_msg(MSGT_STREAM,MSGL_INFO,"Cannot seek backward in linear streams!\n");
+      mp_tmsg(MSGT_STREAM, MSGL_INFO,
+              "Cannot seek backward in linear streams!\n");
       return 1;
     }
     break;
@@ -390,7 +391,7 @@ if(newpos==0 || newpos!=s->pos){
       return 0;
     // Now seek
     if(!s->seek(s,newpos)) {
-      mp_msg(MSGT_STREAM,MSGL_ERR, "Seek failed\n");
+      mp_tmsg(MSGT_STREAM,MSGL_ERR, "Seek failed\n");
       return 0;
     }
   }

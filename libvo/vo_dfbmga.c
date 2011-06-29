@@ -1335,7 +1335,7 @@ draw_image( mp_image_t *mpi )
 }
 
 static int
-set_equalizer( char *data, int value )
+set_equalizer( const char *data, int value )
 {
      DFBResult res;
      DFBColorAdjustment ca;
@@ -1375,7 +1375,7 @@ set_equalizer( char *data, int value )
 }
 
 static int
-get_equalizer( char *data, int *value )
+get_equalizer( const char *data, int *value )
 {
      DFBResult res;
      DFBColorAdjustment ca;

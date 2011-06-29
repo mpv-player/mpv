@@ -123,9 +123,9 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     }
     mpi->flags|=MP_IMGFLAG_YUV;
     mpi->num_planes=3;
-    if (mp_get_chroma_shift(out_fmt, NULL, NULL)) {
+    if (mp_get_chroma_shift(out_fmt, NULL, NULL, NULL)) {
         mpi->flags|=MP_IMGFLAG_PLANAR;
-        mpi->bpp = mp_get_chroma_shift(out_fmt, &mpi->chroma_x_shift, &mpi->chroma_y_shift);
+        mpi->bpp = mp_get_chroma_shift(out_fmt, &mpi->chroma_x_shift, &mpi->chroma_y_shift, NULL);
         mpi->chroma_width  = mpi->width  >> mpi->chroma_x_shift;
         mpi->chroma_height = mpi->height >> mpi->chroma_y_shift;
     }

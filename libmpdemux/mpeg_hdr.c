@@ -45,7 +45,7 @@ static float frameratecode2framerate[16] = {
 
 int mp_header_process_sequence_header (mp_mpeg_header_t * picture, const unsigned char * buffer)
 {
-    int width av_unused, height;
+    int height;
 
     if ((buffer[6] & 0x20) != 0x20){
 	fprintf(stderr, "missing marker bit!\n");
@@ -54,11 +54,8 @@ int mp_header_process_sequence_header (mp_mpeg_header_t * picture, const unsigne
 
     height = (buffer[0] << 16) | (buffer[1] << 8) | buffer[2];
 
-    picture->display_picture_width = (height >> 12);
-    picture->display_picture_height = (height & 0xfff);
-
-    width = ((height >> 12) + 15) & ~15;
-    height = ((height & 0xfff) + 15) & ~15;
+    picture->display_picture_width = height >> 12;
+    picture->display_picture_height = height & 0xfff;
 
     picture->aspect_ratio_information = buffer[3] >> 4;
     picture->frame_rate_code = buffer[3] & 15;

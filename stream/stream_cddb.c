@@ -38,6 +38,7 @@
 #include <limits.h>
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 #ifdef __MINGW32__
+#include <path.h>
 #define mkdir(a,b) mkdir(a)
 #endif
 #include <windows.h>
