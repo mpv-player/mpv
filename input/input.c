@@ -636,9 +636,8 @@ static const m_option_t mp_input_opts[] = {
 
 static int default_cmd_func(int fd, char *buf, int l);
 
-static char *get_key_name(int key)
+static char *get_key_name(int key, char *ret)
 {
-    char *ret = talloc_strdup(NULL, "");
     for (int i = 0; modifier_names[i].name; i++) {
         if (modifier_names[i].key & key) {
             ret = talloc_asprintf_append_buffer(ret, "%s+",
@@ -656,6 +655,19 @@ static char *get_key_name(int key)
 
     // Print the hex key code
     return talloc_asprintf_append_buffer(ret, "%#-8x", key);
+}
+
+static char *get_key_combo_name(int *keys, int max)
+{
+    char *ret = talloc_strdup(NULL, "");
+    while (1) {
+        ret = get_key_name(*keys, ret);
+        if (--max && *++keys)
+            talloc_asprintf_append_buffer(ret, "-");
+        else
+            break;
+    }
+    return ret;
 }
 
 int mp_input_add_cmd_fd(struct input_ctx *ictx, int fd, int select,
@@ -1104,36 +1116,20 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
         cmd = find_bind_for_key(def_cmd_binds, n, keys);
 
     if (cmd == NULL) {
-        char *key_buf = get_key_name(keys[0]);
-        mp_tmsg(MSGT_INPUT, MSGL_WARN, "No bind found for key '%s'.", key_buf);
+        char *key_buf = get_key_combo_name(keys, n);
+        mp_tmsg(MSGT_INPUT, MSGL_WARN,
+                "No bind found for key '%s'.\n", key_buf);
         talloc_free(key_buf);
-        if (n > 1) {
-            for (int s = 1; s < n; s++) {
-                key_buf = get_key_name(keys[s]);
-                mp_msg(MSGT_INPUT, MSGL_WARN, "-%s", key_buf);
-                talloc_free(key_buf);
-            }
-        }
-        mp_msg(MSGT_INPUT, MSGL_WARN, "                         \n");
         return NULL;
     }
     if (strcmp(cmd, "ignore") == 0)
         return NULL;
     ret =  mp_input_parse_cmd(cmd);
     if (!ret) {
-        char *key_buf = get_key_name(ictx->key_down[0]);
-        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Invalid command for bound key %s",
-                key_buf);
+        char *key_buf = get_key_combo_name(keys, n);
+        mp_tmsg(MSGT_INPUT, MSGL_ERR,
+                "Invalid command for bound key '%s': '%s'\n", key_buf, cmd);
         talloc_free(key_buf);
-        if (ictx->num_key_down > 1) {
-            unsigned int s;
-            for (s = 1; s < ictx->num_key_down; s++) {
-                char *key_buf = get_key_name(ictx->key_down[s]);
-                mp_msg(MSGT_INPUT, MSGL_ERR, "-%s", key_buf);
-                talloc_free(key_buf);
-            }
-        }
-        mp_msg(MSGT_INPUT, MSGL_ERR, " : %s             \n", cmd);
     }
     return ret;
 }
@@ -1679,17 +1675,10 @@ static int parse_config(struct input_ctx *ictx, char *file)
                 iter++;
             // Found new line
             if (iter[0] == '\n' || iter[0] == '\r') {
-                int i;
-                char *key_buf  = get_key_name(keys[0]);
-                mp_tmsg(MSGT_INPUT, MSGL_ERR, "No command found for key %s",
-                        key_buf);
+                char *key_buf  = get_key_combo_name(keys, MP_MAX_KEY_DOWN);
+                mp_tmsg(MSGT_INPUT, MSGL_ERR,
+                        "No command found for key '%s'.\n", key_buf);
                 talloc_free(key_buf);
-                for (i = 1; keys[i] != 0; i++) {
-                    char *key_buf  = get_key_name(keys[i]);
-                    mp_msg(MSGT_INPUT, MSGL_ERR, "-%s", key_buf);
-                    talloc_free(key_buf);
-                }
-                mp_msg(MSGT_INPUT, MSGL_ERR, "\n");
                 keys[0] = 0;
                 if (iter > buffer) {
                     memmove(buffer, iter, bs - (iter - buffer));
