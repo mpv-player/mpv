@@ -49,8 +49,12 @@ known issues:
 #ifdef HAVE_SYS_SYSINFO_H
 #include <sys/sysinfo.h>
 #endif
+#ifdef HAVE_SYS_VIDEOIO_H
+#include <sys/videoio.h>
+#else
 #include <linux/types.h>
 #include <linux/videodev2.h>
+#endif
 #include "mp_msg.h"
 #include "libmpcodecs/img_format.h"
 #include "libmpcodecs/dec_teletext.h"

@@ -3262,6 +3262,14 @@ fi
 echores "$_soundcard_h"
 
 
+echocheck "sys/videoio.h"
+sys_videoio_h=no
+def_sys_videoio_h='#undef HAVE_SYS_VIDEOIO_H'
+header_check sys/videoio.h && sys_videoio_h=yes &&
+    def_sys_videoio_h='#define HAVE_SYS_VIDEOIO_H 1'
+echores "$sys_videoio_h"
+
+
 echocheck "sys/dvdio.h"
 _dvdio=no
 # FreeBSD 8.1 has broken dvdio.h
@@ -6260,6 +6268,8 @@ if test "$_tv_v4l2" = auto ; then
   _tv_v4l2=no
   if test "$_tv" = yes && linux ; then
     header_check_broken sys/time.h linux/videodev2.h && _tv_v4l2=yes
+  elif test "$_tv" = yes && test "$sys_videoio_h" = "yes" ; then
+    _tv_v4l2=yes
   fi
 fi
 if test "$_tv_v4l2" = yes ; then
@@ -6909,6 +6919,7 @@ $def_soundcard_h
 $def_sys_asoundlib_h
 $def_sys_soundcard_h
 $def_sys_sysinfo_h
+$def_sys_videoio_h
 $def_termios_h
 $def_termios_sys_h
 $def_winsock2_h
