@@ -140,16 +140,21 @@ void mp_msg_va(int mod, int lev, const char *format, va_list va);
 #ifdef __GNUC__
 void mp_msg(int mod, int lev, const char *format, ... ) __attribute__ ((format (printf, 3, 4)));
 void mp_tmsg(int mod, int lev, const char *format, ... ) __attribute__ ((format (printf, 3, 4)));
+static inline void mp_dbg(int mod, int lev, const char *format, ...) __attribute__ ((format (printf, 3, 4)));
 #else // not GNU C
 void mp_msg(int mod, int lev, const char *format, ... );
 void mp_tmsg(int mod, int lev, const char *format, ...)
 #endif /* __GNUC__ */
 
+static inline void mp_dbg(int mod, int lev, const char *format, ...)
+{
 #ifdef MP_DEBUG
-#define mp_dbg(mod,lev, ... ) mp_msg(mod, lev, __VA_ARGS__)
-#else
-#define mp_dbg(mod,lev, ... ) /* only useful for developers */
+    va_list va;
+    va_start(va, format);
+    mp_msg_va(mod, lev, format, va);
+    va_end(va);
 #endif
+}
 
 const char* filename_recode(const char* filename);
 
