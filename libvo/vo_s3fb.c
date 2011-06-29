@@ -105,18 +105,21 @@ static void clear_screen(void);
 
 #define OUTREG(mmreg, value) *(unsigned int *)(&v->mmio[mmreg]) = value
 
-int readcrtc(int reg) {
+static int readcrtc(int reg)
+{
   outb(reg, 0x3d4);
   return inb(0x3d5);
 }
 
-void writecrtc(int reg, int value) {
+static void writecrtc(int reg, int value)
+{
   outb(reg, 0x3d4);
   outb(value, 0x3d5);
 }
 
 // enable S3 registers
-int enable(void) {
+static int enable(void)
+{
   int fd;
 
   if (v)
@@ -148,7 +151,8 @@ int enable(void) {
   return 0;
 }
 
-void disable(void) {
+static void disable(void)
+{
   if (v) {
     writecrtc(0x53, v->cr53);
     writecrtc(0x39, v->cr39);
@@ -160,7 +164,10 @@ void disable(void) {
   }
 }
 
-int yuv_on(int format, int src_w, int src_h, int dst_x, int dst_y, int dst_w, int dst_h, int crop, int xres, int yres, int line_length, int offset) {
+static int yuv_on(int format, int src_w, int src_h, int dst_x, int dst_y,
+                  int dst_w, int dst_h, int crop, int xres, int yres,
+                  int line_length, int offset)
+{
   int tmp, pitch, start, src_wc, src_hc, bpp;
 
   if (format == 0 || format == 7)
@@ -227,7 +234,8 @@ int yuv_on(int format, int src_w, int src_h, int dst_x, int dst_y, int dst_w, in
   return offset;
 }
 
-void yuv_off(void) {
+static void yuv_off(void)
+{
   writecrtc(0x67, readcrtc(0x67) & ~0xc);
   memset(v->mmio + 0x8180, 0, 0x80);
   OUTREG(0x81b8, 0x900);
