@@ -554,17 +554,17 @@ static void XA_YUV1611_Convert(unsigned char *image_p, unsigned int imagex, unsi
     int ystride=(yuv->y_w)?yuv->y_w:imagex;
     int uvstride=(yuv->uv_w)?yuv->uv_w:(imagex/4);
 
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUVTabs:  %d %p %p %p %p %p\n",yuv_tabs->Uskip_mask,
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUVTabs:  %ld %p %p %p %p %p\n",yuv_tabs->Uskip_mask,
 	yuv_tabs->YUV_Y_tab,
 	yuv_tabs->YUV_UB_tab,
 	yuv_tabs->YUV_VR_tab,
 	yuv_tabs->YUV_UG_tab,
 	yuv_tabs->YUV_VG_tab );
 
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV1611_Convert('image: %08x', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV1611_Convert('image: %p', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %p', 'yuv_tabs: %p', 'map_flag: %d', 'map: %p', 'chdr: %p')",
 	image_p, imagex, imagey, i_x, i_y, yuv, yuv_tabs, map_flag, map, chdr);
 
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUV: %p %p %p %X (%d) %dx%d %dx%d\n",
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUV: %p %p %p %p (%d) %dx%d %dx%d\n",
 	yuv->Ybuf,yuv->Ubuf,yuv->Vbuf,yuv->the_buf,yuv->the_buf_size,
 	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
 
@@ -638,7 +638,7 @@ static void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, un
 	image_p,imagex,imagey,i_x,i_y, sh->disp_w, sh->disp_h,
 	yuv,yuv_tabs,map_flag,map,chdr);
 
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUV: %p %p %p %X (%X) %Xx%X %Xx%X\n",
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUV: %p %p %p %p (%X) %Xx%X %Xx%X\n",
 	yuv->Ybuf,yuv->Ubuf,yuv->Vbuf,yuv->the_buf,yuv->the_buf_size,
 	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
 

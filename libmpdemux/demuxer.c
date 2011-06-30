@@ -632,19 +632,9 @@ int ds_fill_buffer(demux_stream_t *ds)
     if (ds->current)
         free_demux_packet(ds->current);
     ds->current = NULL;
-    if (mp_msg_test(MSGT_DEMUXER, MSGL_DBG3)) {
-        if (ds == demux->audio)
-            mp_dbg(MSGT_DEMUXER, MSGL_DBG3,
-                   "ds_fill_buffer(d_audio) called\n");
-        else if (ds == demux->video)
-            mp_dbg(MSGT_DEMUXER, MSGL_DBG3,
-                   "ds_fill_buffer(d_video) called\n");
-        else if (ds == demux->sub)
-            mp_dbg(MSGT_DEMUXER, MSGL_DBG3, "ds_fill_buffer(d_sub) called\n");
-        else
-            mp_dbg(MSGT_DEMUXER, MSGL_DBG3,
-                   "ds_fill_buffer(unknown 0x%X) called\n", (unsigned int) ds);
-    }
+    mp_dbg(MSGT_DEMUXER, MSGL_DBG3, "ds_fill_buffer (%s) called\n",
+           ds == demux->audio ? "d_audio" : ds == demux->video ? "d_video" :
+           ds == demux->sub   ? "d_sub"   : "unknown");
     while (1) {
         if (ds->packs) {
             demux_packet_t *p = ds->first;

@@ -126,7 +126,7 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 		token, (int64_t)stream_tell(demux->stream));
 	    break;
 	}
-	mp_dbg(MSGT_DEMUX, MSGL_DBG3, "token: '%s' (%d bytes/%d bytes left)\n",
+	mp_dbg(MSGT_DEMUX, MSGL_DBG3, "token: '%s' (%zd bytes/%d bytes left)\n",
 	    token, strlen(token), header_len);
 	mp_dbg(MSGT_DEMUX, MSGL_DBG3, "token => o: '%s', p: '%s'\n",
 	    opt, param);

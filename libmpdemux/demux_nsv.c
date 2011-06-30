@@ -74,7 +74,8 @@ static int demux_nsv_fill_buffer ( demuxer_t *demuxer, demux_stream_t *ds )
     // sometimes instead of 0xBEEF as described for the next audio/video chunk we get
     // a whole new header
 
-    mp_dbg(MSGT_DEMUX,MSGL_DBG2,"demux_nsv: %08X %08X\n",hdr[0]<<8|hdr[1],stream_tell(demuxer->stream));
+    mp_dbg(MSGT_DEMUX, MSGL_DBG2, "demux_nsv: %08X %08X\n",
+           hdr[0]<<8|hdr[1], (unsigned int)stream_tell(demuxer->stream));
     switch(hdr[0]<<8|hdr[1]) {
         case 0x4E53:
             if(hdr[2]==0x56 && hdr[3]==0x73){
