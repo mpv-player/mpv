@@ -583,6 +583,13 @@ ADDSUFFIXES     = $(foreach suf,$(1),$(addsuffix $(suf),$(2)))
 ADD_ALL_DIRS    = $(call ADDSUFFIXES,$(1),$(DIRS))
 ADD_ALL_EXESUFS = $(1) $(call ADDSUFFIXES,$(EXESUFS_ALL),$(1))
 
+###### brief build output #######
+
+ifndef V
+$(eval override CC = @printf "CC\t$$@\n"; $(CC))
+$(eval override RM = @$(RM))
+endif
+
 ###### generic rules #######
 
 all: $(ALL_PRG-yes) locales
