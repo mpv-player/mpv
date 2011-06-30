@@ -703,34 +703,33 @@ endef
 $(foreach lang,$(MSG_LANG_ALL),$(eval $(MPLAYER_MSG_RULE)))
 
 uninstall:
-	rm -f $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
-	rm -f $(prefix)/share/pixmaps/mplayer.xpm
-	rm -f $(prefix)/share/applications/mplayer.desktop
-	rm -f $(MANDIR)/man1/mplayer.1
-	rm -f $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1,$(MANDIR)/$(lang)/man1/$(man)))
-	rm -f $(foreach lang,$(MSG_LANGS),$(LOCALEDIR)/$(lang)/LC_MESSAGES/mplayer.1)
+	$(RM) $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
+	$(RM) $(prefix)/share/pixmaps/mplayer.xpm
+	$(RM) $(prefix)/share/applications/mplayer.desktop
+	$(RM) $(MANDIR)/man1/mplayer.1
+	$(RM) $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1,$(MANDIR)/$(lang)/man1/$(man)))
+	$(RM) $(foreach lang,$(MSG_LANGS),$(LOCALEDIR)/$(lang)/LC_MESSAGES/mplayer.1)
 
 clean:
-	-rm -f $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
-	-rm -f $(call ADD_ALL_EXESUFS,mplayer)
-	-rm -f $(MOFILES)
+	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
+	-$(RM) $(call ADD_ALL_EXESUFS,mplayer)
+	-$(RM) $(MOFILES)
 
 distclean: clean testsclean toolsclean driversclean
-	-rm -rf DOCS/tech/doxygen
-	-rm -rf locale
-	-rm -f $(call ADD_ALL_DIRS,/*.d)
-	-rm -f config.log config.mak config.h codecs.conf.h \
-           version.h TAGS tags
-	-rm -f $(call ADD_ALL_EXESUFS,codec-cfg cpuinfo)
+	-$(RM) -r DOCS/tech/doxygen
+	-$(RM) -r locale
+	-$(RM) $(call ADD_ALL_DIRS,/*.d)
+	-$(RM) config.log config.mak config.h codecs.conf.h version.h TAGS tags
+	-$(RM) $(call ADD_ALL_EXESUFS,codec-cfg cpuinfo)
 
 doxygen:
 	doxygen DOCS/tech/Doxyfile
 
 TAGS:
-	rm -f $@; find . -name '*.[chS]' -o -name '*.asm' | xargs etags -a
+	$(RM) $@; find . -name '*.[chS]' -o -name '*.asm' | xargs etags -a
 
 tags:
-	rm -f $@; find . -name '*.[chS]' -o -name '*.asm' | xargs ctags -a
+	$(RM) $@; find . -name '*.[chS]' -o -name '*.asm' | xargs ctags -a
 
 generated_ebml:
 	TOOLS/matroska.py --generate-header >libmpdemux/ebml_types.h
@@ -762,7 +761,7 @@ endif
 tests: $(addsuffix $(EXESUF),$(TESTS))
 
 testsclean:
-	-rm -f $(call ADD_ALL_EXESUFS,$(TESTS))
+	-$(RM) $(call ADD_ALL_EXESUFS,$(TESTS))
 
 TOOLS = $(addprefix TOOLS/,alaw-gen asfinfo avi-fix avisubdump compare dump_mp4 movinfo netstream subrip vivodump)
 
@@ -776,8 +775,8 @@ tools: $(addsuffix $(EXESUF),$(TOOLS))
 alltools: $(addsuffix $(EXESUF),$(ALLTOOLS))
 
 toolsclean:
-	-rm -f $(call ADD_ALL_EXESUFS,$(ALLTOOLS))
-	-rm -f TOOLS/realcodecs/*.so.6.0
+	-$(RM) $(call ADD_ALL_EXESUFS,$(ALLTOOLS))
+	-$(RM) TOOLS/realcodecs/*.so.6.0
 
 TOOLS/bmovl-test$(EXESUF): -lSDL_image
 
@@ -834,7 +833,7 @@ install-drivers: $(DRIVER_OBJS)
 	-ln -s /dev/radeon_vid /dev/rage128_vid
 
 driversclean:
-	-rm -f $(DRIVER_OBJS) drivers/*~
+	-$(RM) $(DRIVER_OBJS) drivers/*~
 
 
 
