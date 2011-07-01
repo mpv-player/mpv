@@ -3850,21 +3850,22 @@ Do not do any conversion.
 Select the scaling function to use for luminance scaling.
 Only valid for yuv modes 2, 3, 4 and 6.
 .RSss
-0: Use simple linear filtering (default).
-.br
-1: Use bicubic B-spline filtering (better quality).
+.IPs 0
+Use simple linear filtering (default).
+.IPs 1
+Use bicubic B-spline filtering (better quality).
 Needs one additional texture unit.
 Older cards will not be able to handle this for chroma at least in fullscreen mode.
-.br
-2: Use cubic filtering in horizontal, linear filtering in vertical direction.
+.IPs 2
+Use cubic filtering in horizontal, linear filtering in vertical direction.
 Works on a few more cards than method 1.
-.br
-3: Same as 1 but does not use a lookup texture.
+.IPs 3
+Same as 1 but does not use a lookup texture.
 Might be faster on some cards.
-.br
-4: Use experimental unsharp masking with 3x3 support and a default strength of 0.5 (see filter-strength).
-.br
-5: Use experimental unsharp masking with 5x5 support and a default strength of 0.5 (see filter-strength).
+.IPs 4
+Use experimental unsharp masking with 3x3 support and a default strength of 0.5 (see filter-strength).
+.IPs 5
+Use experimental unsharp masking with 5x5 support and a default strength of 0.5 (see filter-strength).
 .RE
 .IPs cscale=<n>
 Select the scaling function to use for chrominance scaling.
@@ -3873,16 +3874,17 @@ For details see lscale.
 Set the effect strength for the lscale/cscale filters that support it.
 .IPs stereo=<value>
 Select a method for stereo display.
-You may have to use -aspect to fix the aspect value.
+You may have to use \-aspect to fix the aspect value.
 Experimental, do not expect too much from it.
 .RSss
-0: Normal 2D display
-.br
-1: left-right split input to full-color red-cyan stereo.
-.br
-2: left-right split input to full-color red-cyan stereo.
-.br
-3: left-right split input to quadbuffered stereo.
+.IPs 0
+normal 2D display
+.IPs 1
+Convert side by side input to full-color red-cyan stereo.
+.IPs 2
+Convert side by side input to full-color green-magenta stereo.
+.IPs 3
+Convert side by side input to quadbuffered stereo.
 Only supported by very few OpenGL cards.
 .RE
 .RE
