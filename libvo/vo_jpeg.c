@@ -104,7 +104,7 @@ static int framenum = 0;
  *                  returns, everything went well.
  */
 
-static void jpeg_mkdir(char *buf, int verbose) {
+static void jpeg_mkdir(const char *buf, int verbose) {
     struct stat stat_p;
 
 #ifndef __MINGW32__
@@ -176,7 +176,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 /* ------------------------------------------------------------------------- */
 
-static uint32_t jpeg_write(uint8_t * name, uint8_t * buffer)
+static uint32_t jpeg_write(const char * name, uint8_t * buffer)
 {
     FILE *outfile;
     struct jpeg_compress_struct cinfo;
