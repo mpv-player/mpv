@@ -1748,6 +1748,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
             mp_tmsg(MSGT_CPLAYER,MSGL_ERR,"Could not open/initialize audio device -> no sound.\n");
             goto init_error;
         }
+        ao->buffer.start = talloc_new(ao);
         mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
                ao->driver->info->short_name,
                ao->samplerate, ao->channels,
@@ -1788,7 +1789,6 @@ static double written_audio_pts(struct MPContext *mpctx)
 {
     sh_audio_t *sh_audio = mpctx->sh_audio;
     demux_stream_t *d_audio = mpctx->d_audio;
-    double buffered_output;
     // first calculate the end pts of audio that has been output by decoder
     double a_pts = sh_audio->pts;
     if (a_pts != MP_NOPTS_VALUE)
@@ -1822,11 +1822,11 @@ static double written_audio_pts(struct MPContext *mpctx)
     a_pts -= sh_audio->a_buffer_len / (double)sh_audio->o_bps;
 
     // Data buffered in audio filters, measured in bytes of "missing" output
-    buffered_output = af_calc_delay(sh_audio->afilter);
+    double buffered_output = af_calc_delay(sh_audio->afilter);
 
     // Data that was ready for ao but was buffered because ao didn't fully
     // accept everything to internal buffers yet
-    buffered_output += sh_audio->a_out_buffer_len;
+    buffered_output += mpctx->ao->buffer.len;
 
     // Filters divide audio length by playback_speed, so multiply by it
     // to get the length in original units without speedup or slowdown
@@ -2328,7 +2328,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
     int res;
 
     // Timing info may not be set without
-    res = decode_audio(sh_audio, 1);
+    res = decode_audio(sh_audio, &ao->buffer, 1);
     if (res < 0)
         return res;
 
@@ -2345,7 +2345,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
         if (written_pts <= 1 && sh_audio->pts == MP_NOPTS_VALUE) {
             if (!did_retry) {
                 // Try to read more data to see packets that have pts
-                int res = decode_audio(sh_audio, ao->bps);
+                int res = decode_audio(sh_audio, &ao->buffer, ao->bps);
                 if (res < 0)
                     return res;
                 did_retry = true;
@@ -2362,19 +2362,17 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
 
         mpctx->syncing_audio = false;
         int a = FFMIN(-bytes, FFMAX(playsize, 20000));
-        int res = decode_audio(sh_audio, a);
-        bytes += sh_audio->a_out_buffer_len;
+        int res = decode_audio(sh_audio, &ao->buffer, a);
+        bytes += ao->buffer.len;
         if (bytes >= 0) {
-            memmove(sh_audio->a_out_buffer,
-                    sh_audio->a_out_buffer +
-                    sh_audio->a_out_buffer_len - bytes,
-                    bytes);
-            sh_audio->a_out_buffer_len = bytes;
+            memmove(ao->buffer.start,
+                    ao->buffer.start + ao->buffer.len - bytes, bytes);
+            ao->buffer.len = bytes;
             if (res < 0)
                 return res;
-            return decode_audio(sh_audio, playsize);
+            return decode_audio(sh_audio, &ao->buffer, playsize);
         }
-        sh_audio->a_out_buffer_len = 0;
+        ao->buffer.len = 0;
         if (res < 0)
             return res;
     }
@@ -2394,8 +2392,8 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
         return ASYNC_PLAY_DONE;
     }
     mpctx->syncing_audio = false;
-    decode_audio_prepend_bytes(sh_audio, bytes, fillbyte);
-    return decode_audio(sh_audio, playsize);
+    decode_audio_prepend_bytes(&ao->buffer, bytes, fillbyte);
+    return decode_audio(sh_audio, &ao->buffer, playsize);
 }
 
 static int fill_audio_out_buffers(struct MPContext *mpctx)
@@ -2408,7 +2406,6 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     int playflags=0;
     bool audio_eof = false;
     bool partial_fill = false;
-    bool format_change = false;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
     bool modifiable_audio_format = !(ao->format & AF_FORMAT_SPECIAL_MASK);
     int unitsize = ao->channels * af_fmt2bits(ao->format) / 8;
@@ -2435,11 +2432,17 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     if (mpctx->syncing_audio && mpctx->sh_video)
         res = audio_start_sync(mpctx, playsize);
     else
-        res = decode_audio(sh_audio, playsize);
+        res = decode_audio(sh_audio, &ao->buffer, playsize);
     if (res < 0) {  // EOF, error or format change
-        if (res == -2)
-            format_change = true;
-        else if (res == ASYNC_PLAY_DONE)
+        if (res == -2) {
+            /* The format change isn't handled too gracefully. A more precise
+             * implementation would require draining buffered old-format audio
+             * while displaying video, then doing the output format switch.
+             */
+            uninit_player(mpctx, INITIALIZED_AO);
+            reinit_audio_chain(mpctx);
+            return -1;
+        } else if (res == ASYNC_PLAY_DONE)
             return 0;
         else if (mpctx->d_audio->eof)
             audio_eof = true;
@@ -2458,10 +2461,10 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
         }
     }
 
-    assert(sh_audio->a_out_buffer_len % unitsize == 0);
-    if (playsize > sh_audio->a_out_buffer_len) {
+    assert(ao->buffer.len % unitsize == 0);
+    if (playsize > ao->buffer.len) {
         partial_fill = true;
-        playsize = sh_audio->a_out_buffer_len;
+        playsize = ao->buffer.len;
         if (audio_eof)
             playflags |= AOPLAY_FINAL_CHUNK;
     }
@@ -2476,29 +2479,18 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     // They're obviously badly broken in the way they handle av sync;
     // would not having access to this make them more broken?
     ao->pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
-    playsize = ao_play(ao, sh_audio->a_out_buffer, playsize, playflags);
-    assert(playsize % unitsize == 0);
+    int played = ao_play(ao, ao->buffer.start, playsize, playflags);
+    assert(played % unitsize == 0);
+    ao->buffer_playable_size = playsize - played;
 
-    if (playsize > 0) {
-        sh_audio->a_out_buffer_len -= playsize;
-        memmove(sh_audio->a_out_buffer, &sh_audio->a_out_buffer[playsize],
-                sh_audio->a_out_buffer_len);
-        mpctx->delay += opts->playback_speed*playsize/(double)ao->bps;
+    if (played > 0) {
+        ao->buffer.len -= played;
+        memmove(ao->buffer.start, ao->buffer.start + played, ao->buffer.len);
+        mpctx->delay += opts->playback_speed * played / ao->bps;
     } else if (audio_eof && ao_get_delay(ao) < .04) {
         // Sanity check to avoid hanging in case current ao doesn't output
         // partial chunks and doesn't check for AOPLAY_FINAL_CHUNK
-        mp_msg(MSGT_CPLAYER, MSGL_WARN, "Audio output truncated at end.\n");
-        sh_audio->a_out_buffer_len = 0;
-    }
-
-    /* The format change isn't handled too gracefully. A more precise
-     * implementation would require draining buffered old-format audio
-     * while displaying video, then doing the output format switch.
-     */
-    if (format_change) {
-        uninit_player(mpctx, INITIALIZED_AO);
-        reinit_audio_chain(mpctx);
-        return -1;
+        return -2;
     }
 
     return -partial_fill;
@@ -3047,10 +3039,9 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
 	current_module = "seek_audio_reset";
         resync_audio_stream(mpctx->sh_audio);
         if (reset_ao)
-            // stop audio, throwing away buffered data
             ao_reset(mpctx->ao);
+        mpctx->ao->buffer.len = mpctx->ao->buffer_playable_size;
 	mpctx->sh_audio->a_buffer_len = 0;
-	mpctx->sh_audio->a_out_buffer_len = 0;
 	if (!mpctx->sh_video)
 	    update_subtitles(mpctx, mpctx->sh_audio->pts,
                              mpctx->video_offset, true);
@@ -3155,7 +3146,6 @@ static int seek(MPContext *mpctx, struct seek_params seek,
             if (mpctx->sh_audio) {
                 ao_reset(mpctx->ao);
                 mpctx->sh_audio->a_buffer_len = 0;
-                mpctx->sh_audio->a_out_buffer_len = 0;
             }
             return -1;
         }

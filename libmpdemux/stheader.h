@@ -72,11 +72,6 @@ typedef struct sh_audio {
   char* a_buffer;
   int a_buffer_len;
   int a_buffer_size;
-  // output buffers:
-  char* a_out_buffer;
-  int a_out_buffer_len;
-  int a_out_buffer_size;
-//  void* audio_out;        // the audio_out handle, used for this audio stream
   struct af_stream *afilter;          // the audio filter stream
   const struct ad_functions *ad_driver;
 #ifdef CONFIG_DYNAMIC_PLUGINS

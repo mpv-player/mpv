@@ -23,6 +23,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "bstr.h"
 
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
@@ -133,10 +134,6 @@ static int init_audio_codec(sh_audio_t *sh_audio)
     mp_msg(MSGT_IDENTIFY, MSGL_INFO,
 	   "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
 	   sh_audio->i_bps * 8, sh_audio->samplerate, sh_audio->channels);
-
-    sh_audio->a_out_buffer_size = 0;
-    sh_audio->a_out_buffer = NULL;
-    sh_audio->a_out_buffer_len = 0;
 
     return 1;
 }
@@ -317,9 +314,6 @@ void uninit_audio(sh_audio_t *sh_audio)
 #endif
 	sh_audio->initialized = 0;
     }
-    free(sh_audio->a_out_buffer);
-    sh_audio->a_out_buffer = NULL;
-    sh_audio->a_out_buffer_size = 0;
     av_freep(&sh_audio->a_buffer);
     av_freep(&sh_audio->a_in_buffer);
 }
@@ -364,24 +358,23 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
     *out_channels = afs->output.nch;
     *out_format = afs->output.format;
 
-    sh_audio->a_out_buffer_len = 0;
-
     // ok!
     sh_audio->afilter = (void *) afs;
     return 1;
 }
 
-static void set_min_out_buffer_size(struct sh_audio *sh, int len)
+static void set_min_out_buffer_size(struct bstr *outbuf, int len)
 {
-    if (sh->a_out_buffer_size < len) {
+    size_t oldlen = talloc_get_size(outbuf->start);
+    if (oldlen < len) {
+        assert(outbuf->start);  // talloc context should be already set
 	mp_msg(MSGT_DECAUDIO, MSGL_V, "Increasing filtered audio buffer size "
-	       "from %d to %d\n", sh->a_out_buffer_size, len);
-	sh->a_out_buffer = realloc(sh->a_out_buffer, len);
-	sh->a_out_buffer_size = len;
+	       "from %zd to %d\n", oldlen, len);
+        outbuf->start = talloc_realloc_size(NULL, outbuf->start, len);
     }
 }
 
-static int filter_n_bytes(sh_audio_t *sh, int len)
+static int filter_n_bytes(sh_audio_t *sh, struct bstr *outbuf, int len)
 {
     assert(len-1 + sh->audio_out_minsize <= sh->a_buffer_size);
 
@@ -420,10 +413,10 @@ static int filter_n_bytes(sh_audio_t *sh, int len)
     af_data_t *filter_output = af_play(sh->afilter, &filter_input);
     if (!filter_output)
 	return -1;
-    set_min_out_buffer_size(sh, sh->a_out_buffer_len + filter_output->len);
-    memcpy(sh->a_out_buffer + sh->a_out_buffer_len, filter_output->audio,
-	   filter_output->len);
-    sh->a_out_buffer_len += filter_output->len;
+    set_min_out_buffer_size(outbuf, outbuf->len + filter_output->len);
+    memcpy(outbuf->start + outbuf->len, filter_output->audio,
+           filter_output->len);
+    outbuf->len += filter_output->len;
 
     // remove processed data from decoder buffer:
     sh->a_buffer_len -= len;
@@ -432,13 +425,14 @@ static int filter_n_bytes(sh_audio_t *sh, int len)
     return error;
 }
 
-/* Try to get at least minlen decoded+filtered bytes in sh_audio->a_out_buffer
+/* Try to get at least minlen decoded+filtered bytes in outbuf
  * (total length including possible existing data).
  * Return 0 on success, -1 on error/EOF (not distinguished).
- * In the former case sh_audio->a_out_buffer_len is always >= minlen
- * on return. In case of EOF/error it might or might not be.
- * Can reallocate sh_audio->a_out_buffer if needed to fit all filter output. */
-int decode_audio(sh_audio_t *sh_audio, int minlen)
+ * In the former case outbuf->len is always >= minlen on return.
+ * In case of EOF/error it might or might not be.
+ * Outbuf.start must be talloc-allocated, and will be reallocated
+ * if needed to fit all filter output. */
+int decode_audio(sh_audio_t *sh_audio, struct bstr *outbuf, int minlen)
 {
     // Indicates that a filter seems to be buffering large amounts of data
     int huge_filter_buffer = 0;
@@ -458,8 +452,8 @@ int decode_audio(sh_audio_t *sh_audio, int minlen)
     int max_decode_len = sh_audio->a_buffer_size - sh_audio->audio_out_minsize;
     max_decode_len -= max_decode_len % unitsize;
 
-    while (sh_audio->a_out_buffer_len < minlen) {
-	int declen = (minlen - sh_audio->a_out_buffer_len) / filter_multiplier
+    while (outbuf->len < minlen) {
+	int declen = (minlen - outbuf->len) / filter_multiplier
 	    + (unitsize << 5); // some extra for possible filter buffering
 	if (huge_filter_buffer)
 	/* Some filter must be doing significant buffering if the estimated
@@ -478,19 +472,19 @@ int decode_audio(sh_audio_t *sh_audio, int minlen)
 	    /* if this iteration does not fill buffer, we must have lots
 	     * of buffering in filters */
 	    huge_filter_buffer = 1;
-	int res = filter_n_bytes(sh_audio, declen);
+	int res = filter_n_bytes(sh_audio, outbuf, declen);
 	if (res < 0)
 	    return res;
     }
     return 0;
 }
 
-void decode_audio_prepend_bytes(struct sh_audio *sh, int count, int byte)
+void decode_audio_prepend_bytes(struct bstr *outbuf, int count, int byte)
 {
-    set_min_out_buffer_size(sh, sh->a_out_buffer_len + count);
-    memmove(sh->a_out_buffer + count, sh->a_out_buffer, sh->a_out_buffer_len);
-    memset(sh->a_out_buffer, byte, count);
-    sh->a_out_buffer_len += count;
+    set_min_out_buffer_size(outbuf, outbuf->len + count);
+    memmove(outbuf->start + count, outbuf->start, outbuf->len);
+    memset(outbuf->start, byte, count);
+    outbuf->len += count;
 }
 
 

@@ -221,8 +221,12 @@ void ao_init(struct ao *ao, char **ao_list)
 
 void ao_uninit(struct ao *ao, bool cut_audio)
 {
+    assert(ao->buffer.len >= ao->buffer_playable_size);
+    ao->buffer.len = ao->buffer_playable_size;
     if (ao->initialized)
         ao->driver->uninit(ao, cut_audio);
+    if (!cut_audio && ao->buffer.len)
+        mp_msg(MSGT_AO, MSGL_WARN, "Audio output truncated at end.\n");
     talloc_free(ao);
 }
 
@@ -254,6 +258,8 @@ int ao_get_space(struct ao *ao)
 
 void ao_reset(struct ao *ao)
 {
+    ao->buffer.len = 0;
+    ao->buffer_playable_size = 0;
     if (ao->driver->reset)
         ao->driver->reset(ao);
 }
