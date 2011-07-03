@@ -27,6 +27,7 @@
 
 #include "config.h"
 
+#include "talloc.h"
 #include "m_struct.h"
 #include "m_option.h"
 #include "input/input.h"
@@ -111,7 +112,9 @@ static int fill_menu (menu_t* menu)
       if ((e = calloc (1, sizeof (list_entry_t))) != NULL) {
         e->cid = cid + 1;
         e->p.next = NULL;
-        e->p.txt = demuxer_chapter_display_name(demuxer, cid);
+        char *str = demuxer_chapter_display_name(demuxer, cid);
+        e->p.txt = strdup(str);
+        talloc_free(str);
         start_time = demuxer_chapter_time(demuxer, cid, NULL);
         if (start_time >= 0) {
             char timestr[13];

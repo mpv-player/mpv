@@ -460,7 +460,7 @@ static inline char *m_option_print(const m_option_t *opt, const void *val_ptr)
     if (opt->type->print)
         return opt->type->print(opt, val_ptr);
     else
-        return (char *)-1;
+        return NULL;
 }
 
 // Helper around \ref m_option_type::copy.

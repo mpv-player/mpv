@@ -29,8 +29,8 @@
 #include <inttypes.h>
 #include <unistd.h>
 
+#include "talloc.h"
 #include "m_option.h"
-//#include "m_config.h"
 #include "mp_msg.h"
 #include "stream/url.h"
 #include "libavutil/avstring.h"
@@ -63,34 +63,6 @@ static void copy_opt(const m_option_t *opt, void *dst, const void *src)
     if (dst && src)
         memcpy(dst, src, opt->type->size);
 }
-
-// Helper for the print funcs (from man printf)
-static char *dup_printf(const char *fmt, ...)
-{
-    /* Guess we need no more than 50 bytes. */
-    int n, size = 50;
-    char *p;
-    va_list ap;
-    if ((p = malloc(size)) == NULL)
-        return NULL;
-    while (1) {
-        /* Try to print in the allocated space. */
-        va_start(ap, fmt);
-        n = vsnprintf(p, size, fmt, ap);
-        va_end(ap);
-        /* If that worked, return the string. */
-        if (n > -1 && n < size)
-            return p;
-        /* Else try again with more space. */
-        if (n > -1) /* glibc 2.1 */
-            size = n + 1;  /* precisely what is needed */
-        else       /* glibc 2.0 */
-            size *= 2;  /* twice the old size */
-        if ((p = realloc(p, size)) == NULL)
-            return NULL;
-    }
-}
-
 
 // Flag
 
@@ -144,9 +116,9 @@ static int parse_flag(const m_option_t *opt, const char *name,
 static char *print_flag(const m_option_t *opt, const void *val)
 {
     if (VAL(val) == opt->min)
-        return strdup("no");
+        return talloc_strdup(NULL, "no");
     else
-        return strdup("yes");
+        return talloc_strdup(NULL, "yes");
 }
 
 const m_option_type_t m_option_type_flag = {
@@ -210,8 +182,8 @@ static int parse_int(const m_option_t *opt, const char *name,
 static char *print_int(const m_option_t *opt, const void *val)
 {
     if (opt->type->size == sizeof(int64_t))
-        return dup_printf("%"PRId64, *(const int64_t *)val);
-    return dup_printf("%d", VAL(val));
+        return talloc_asprintf(NULL, "%"PRId64, *(const int64_t *)val);
+    return talloc_asprintf(NULL, "%d", VAL(val));
 }
 
 const m_option_type_t m_option_type_int = {
@@ -317,7 +289,7 @@ static char *print_choice(const m_option_t *opt, const void *val)
     struct m_opt_choice_alternatives *alt;
     for (alt = opt->priv; alt->name; alt++)
         if (alt->value == v)
-            return strdup(alt->name);
+            return talloc_strdup(NULL, alt->name);
     abort();
 }
 
@@ -395,7 +367,7 @@ static int parse_double(const m_option_t *opt, const char *name,
 static char *print_double(const m_option_t *opt, const void *val)
 {
     opt = NULL;
-    return dup_printf("%f", VAL(val));
+    return talloc_asprintf(NULL, "%f", VAL(val));
 }
 
 const m_option_type_t m_option_type_double = {
@@ -427,7 +399,7 @@ static int parse_float(const m_option_t *opt, const char *name,
 static char *print_float(const m_option_t *opt, const void *val)
 {
     opt = NULL;
-    return dup_printf("%f", VAL(val));
+    return talloc_asprintf(NULL, "%f", VAL(val));
 }
 
 const m_option_type_t m_option_type_float = {
@@ -485,7 +457,7 @@ static int parse_position(const m_option_t *opt, const char *name,
 
 static char *print_position(const m_option_t *opt, const void *val)
 {
-    return dup_printf("%"PRId64, (int64_t)VAL(val));
+    return talloc_asprintf(NULL, "%"PRId64, (int64_t)VAL(val));
 }
 
 const m_option_type_t m_option_type_position = {
@@ -538,7 +510,7 @@ static int parse_str(const m_option_t *opt, const char *name,
 
 static char *print_str(const m_option_t *opt, const void *val)
 {
-    return (val && VAL(val) && strlen(VAL(val)) > 0) ? strdup(VAL(val)) : NULL;
+    return (val && VAL(val)) ? talloc_strdup(NULL, VAL(val)) : NULL;
 }
 
 static void copy_str(const m_option_t *opt, void *dst, const void *src)
@@ -825,23 +797,17 @@ static void copy_str_list(const m_option_t *opt, void *dst, const void *src)
 static char *print_str_list(const m_option_t *opt, const void *src)
 {
     char **lst = NULL;
-    char *ret = NULL, *last = NULL;
-    int i;
+    char *ret = NULL;
 
     if (!(src && VAL(src)))
         return NULL;
     lst = VAL(src);
 
-    for (i = 0; lst[i]; i++) {
-        if (last) {
-            ret = dup_printf("%s,%s", last, lst[i]);
-            free(last);
-        } else
-            ret = strdup(lst[i]);
-        last = ret;
+    for (int i = 0; lst[i]; i++) {
+        if (ret)
+            ret = talloc_strdup_append_buffer(ret, ",");
+        ret = talloc_strdup_append_buffer(ret, lst[i]);
     }
-    if (last && last != ret)
-        free(last);
     return ret;
 }
 

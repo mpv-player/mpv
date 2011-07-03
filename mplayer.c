@@ -3308,7 +3308,7 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter)
 {
     if (!mpctx->chapters || !mpctx->sh_video)
         return demuxer_chapter_display_name(mpctx->demuxer, chapter);
-    return strdup(mpctx->chapters[chapter].name);
+    return talloc_strdup(NULL, mpctx->chapters[chapter].name);
 }
 
 int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,

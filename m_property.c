@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #include <unistd.h>
 
+#include "talloc.h"
 #include "m_option.h"
 #include "m_property.h"
 #include "mp_msg.h"
@@ -69,7 +70,6 @@ int m_property_do(const m_option_t *prop_list, const char *name,
 {
     const m_option_t *opt;
     void *val;
-    char *str;
     int r;
 
     switch (action) {
@@ -92,10 +92,10 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         }
         if (!arg)
             return M_PROPERTY_ERROR;
-        str = m_option_print(opt, val);
+        char *str = m_option_print(opt, val);
         free(val);
-        *(char **)arg = str == (char *)-1 ? NULL : str;
-        return str != (char *)-1;
+        *(char **)arg = str;
+        return str != NULL;
     case M_PROPERTY_PARSE:
         // try the property own parsing func
         if ((r = do_action(prop_list, name, M_PROPERTY_PARSE, arg, ctx)) !=
@@ -200,7 +200,7 @@ char *m_properties_expand_string(const m_option_t *prop_list, char *str,
         memcpy(ret + pos, p, l);
         pos += l;
         if (fr)
-            free(p), fr = 0;
+            talloc_free(p), fr = 0;
     }
 
     ret[pos] = 0;
@@ -290,7 +290,7 @@ int m_property_flag_ro(const m_option_t *prop, int action,
     case M_PROPERTY_PRINT:
         if (!arg)
             return 0;
-        *(char **)arg = strdup((var > prop->min) ?
+        *(char **)arg = talloc_strdup(NULL, (var > prop->min) ?
                                mp_gtext("enabled") : mp_gtext("disabled"));
         return 1;
     }
@@ -323,8 +323,7 @@ int m_property_float_ro(const m_option_t *prop, int action,
     case M_PROPERTY_PRINT:
         if (!arg)
             return 0;
-        *(char **)arg = malloc(20);
-        sprintf(*(char **)arg, "%.2f", var);
+        *(char **)arg = talloc_asprintf(NULL, "%.2f", var);
         return 1;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -357,8 +356,7 @@ int m_property_delay(const m_option_t *prop, int action,
     case M_PROPERTY_PRINT:
         if (!arg)
             return 0;
-        *(char **)arg = malloc(20);
-        sprintf(*(char **)arg, "%d ms", ROUND((*var) * 1000));
+        *(char **)arg = talloc_asprintf(NULL, "%d ms", ROUND((*var) * 1000));
         return 1;
     default:
         return m_property_float_range(prop, action, arg, var);
@@ -377,8 +375,7 @@ int m_property_double_ro(const m_option_t *prop, int action,
     case M_PROPERTY_PRINT:
         if (!arg)
             return 0;
-        *(char **)arg = malloc(20);
-        sprintf(*(char **)arg, "%.2f", var);
+        *(char **)arg = talloc_asprintf(NULL, "%.2f", var);
         return 1;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -397,13 +394,12 @@ int m_property_time_ro(const m_option_t *prop, int action,
             s -= h * 3600;
             m = s / 60;
             s -= m * 60;
-            *(char **) arg = malloc(20);
             if (h > 0)
-                sprintf(*(char **) arg, "%d:%02d:%02d", h, m, s);
+                *(char **)arg = talloc_asprintf(NULL, "%d:%02d:%02d", h, m, s);
             else if (m > 0)
-                sprintf(*(char **) arg, "%d:%02d", m, s);
+                *(char **)arg = talloc_asprintf(NULL, "%d:%02d", m, s);
             else
-                sprintf(*(char **) arg, "%d", s);
+                *(char **)arg = talloc_asprintf(NULL, "%d", s);
             return M_PROPERTY_OK;
         }
     }
@@ -422,7 +418,7 @@ int m_property_string_ro(const m_option_t *prop, int action, void *arg,
     case M_PROPERTY_PRINT:
         if (!arg)
             return 0;
-        *(char **)arg = str ? strdup(str) : NULL;
+        *(char **)arg = talloc_strdup(NULL, str);
         return 1;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -434,8 +430,7 @@ int m_property_bitrate(const m_option_t *prop, int action, void *arg, int rate)
     case M_PROPERTY_PRINT:
         if (!arg)
             return M_PROPERTY_ERROR;
-        *(char **)arg = malloc(16);
-        sprintf(*(char **)arg, "%d kbps", rate * 8 / 1000);
+        *(char **)arg = talloc_asprintf(NULL, "%d kbps", rate * 8 / 1000);
         return M_PROPERTY_OK;
     }
     return m_property_int_ro(prop, action, arg, rate);

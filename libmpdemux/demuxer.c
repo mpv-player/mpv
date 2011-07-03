@@ -1468,18 +1468,16 @@ char *demuxer_chapter_display_name(demuxer_t *demuxer, int chapter)
 {
     char *chapter_name = demuxer_chapter_name(demuxer, chapter);
     if (chapter_name) {
-        char *tmp = malloc(strlen(chapter_name) + 14);
-        snprintf(tmp, 63, "(%d) %s", chapter + 1, chapter_name);
+        char *tmp = talloc_asprintf(NULL, "(%d) %s", chapter + 1, chapter_name);
         free(chapter_name);
         return tmp;
     } else {
         int chapter_num = demuxer_chapter_count(demuxer);
-        char tmp[30];
         if (chapter_num <= 0)
-            sprintf(tmp, "(%d)", chapter + 1);
+            return talloc_asprintf(NULL, "(%d)", chapter + 1);
         else
-            sprintf(tmp, "(%d) of %d", chapter + 1, chapter_num);
-        return strdup(tmp);
+            return talloc_asprintf(NULL, "(%d) of %d", chapter + 1,
+                                   chapter_num);
     }
 }
 

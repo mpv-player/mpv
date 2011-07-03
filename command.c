@@ -277,9 +277,9 @@ static int mp_property_loop(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_PRINT:
         if (!arg) return M_PROPERTY_ERROR;
         if (opts->loop_times < 0)
-            *(char**)arg = strdup("off");
+            *(char**)arg = talloc_strdup(NULL, "off");
         else if (opts->loop_times == 0)
-            *(char**)arg = strdup("inf");
+            *(char**)arg = talloc_strdup(NULL, "inf");
         else
             break;
         return M_PROPERTY_OK;
@@ -563,7 +563,6 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
     struct MPOpts *opts = &mpctx->opts;
     int angle = -1;
     int angles;
-    char *angle_name = NULL;
 
     if (mpctx->demuxer)
         angle = demuxer_get_current_angle(mpctx->demuxer);
@@ -582,11 +581,7 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_PRINT: {
         if (!arg)
             return M_PROPERTY_ERROR;
-        angle_name = calloc(1, 64);
-        if (!angle_name)
-            return M_PROPERTY_UNAVAILABLE;
-        snprintf(angle_name, 64, "%d/%d", angle, angles);
-        *(char **) arg = angle_name;
+        *(char **) arg = talloc_asprintf(NULL, "%d/%d", angle, angles);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
@@ -626,7 +621,6 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
 
     set_osd_tmsg(OSD_MSG_TEXT, 1, opts->osd_duration,
                  "Angle: %d/%d", angle, angles);
-    free(angle_name);
     return M_PROPERTY_OK;
 }
 
@@ -783,7 +777,7 @@ static int mp_property_mute(m_option_t *prop, int action, void *arg,
         if (!arg)
             return M_PROPERTY_ERROR;
         if (mpctx->edl_muted) {
-            *(char **) arg = strdup(mp_gtext("enabled (EDL)"));
+            *(char **) arg = talloc_strdup(NULL, mp_gtext("enabled (EDL)"));
             return M_PROPERTY_OK;
         }
     default:
@@ -852,8 +846,8 @@ static int mp_property_samplerate(m_option_t *prop, int action, void *arg,
     switch(action) {
     case M_PROPERTY_PRINT:
         if(!arg) return M_PROPERTY_ERROR;
-        *(char**)arg = malloc(16);
-        sprintf(*(char**)arg,"%d kHz",mpctx->sh_audio->samplerate/1000);
+        *(char**)arg = talloc_asprintf(NULL, "%d kHz",
+                                       mpctx->sh_audio->samplerate/1000);
         return M_PROPERTY_OK;
     }
     return m_property_int_ro(prop, action, arg, mpctx->sh_audio->samplerate);
@@ -871,14 +865,14 @@ static int mp_property_channels(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_ERROR;
         switch (mpctx->sh_audio->channels) {
         case 1:
-            *(char **) arg = strdup("mono");
+            *(char **) arg = talloc_strdup(NULL, "mono");
             break;
         case 2:
-            *(char **) arg = strdup("stereo");
+            *(char **) arg = talloc_strdup(NULL, "stereo");
             break;
         default:
-            *(char **) arg = malloc(32);
-            sprintf(*(char **) arg, "%d channels", mpctx->sh_audio->channels);
+            *(char **) arg = talloc_asprintf(NULL, "%d channels",
+                                             mpctx->sh_audio->channels);
         }
         return M_PROPERTY_OK;
     }
@@ -906,15 +900,15 @@ static int mp_property_balance(m_option_t *prop, int action, void *arg,
                 return M_PROPERTY_ERROR;
             mixer_getbalance(&mpctx->mixer, &bal);
             if (bal == 0.f)
-                *str = strdup("center");
+                *str = talloc_strdup(NULL, "center");
             else if (bal == -1.f)
-                *str = strdup("left only");
+                *str = talloc_strdup(NULL, "left only");
             else if (bal == 1.f)
-                *str = strdup("right only");
+                *str = talloc_strdup(NULL, "right only");
             else {
                 unsigned right = (bal + 1.f) / 2.f * 100.f;
-                *str = malloc(sizeof("left xxx%, right xxx%"));
-                sprintf(*str, "left %d%%, right %d%%", 100 - right, right);
+                *str = talloc_asprintf(NULL, "left %d%%, right %d%%",
+                                       100 - right, right);
             }
             return M_PROPERTY_OK;
         }
@@ -956,7 +950,7 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_ERROR;
 
         if (current_id < 0)
-            *(char **) arg = strdup(mp_gtext("disabled"));
+            *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
         else {
             char lang[40];
             strncpy(lang, mp_gtext("unknown"), sizeof(lang));
@@ -978,8 +972,7 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
             else if (mpctx->stream->type == STREAMTYPE_DVDNAV)
                 mp_dvdnav_lang_from_aid(mpctx->stream, current_id, lang);
 #endif
-            *(char **) arg = malloc(64);
-            snprintf(*(char **) arg, 64, "(%d) %s", current_id, lang);
+            *(char **)arg = talloc_asprintf(NULL, "(%d) %s", current_id, lang);
         }
         return M_PROPERTY_OK;
 
@@ -1028,12 +1021,10 @@ static int mp_property_video(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_ERROR;
 
         if (current_id < 0)
-            *(char **) arg = strdup(mp_gtext("disabled"));
+            *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
         else {
-            char lang[40];
-            strncpy(lang, mp_gtext("unknown"), sizeof(lang));
-            *(char **) arg = malloc(64);
-            snprintf(*(char **) arg, 64, "(%d) %s", current_id, lang);
+            *(char **) arg = talloc_asprintf(NULL, "(%d) %s", current_id,
+                                             mp_gtext("unknown"));
         }
         return M_PROPERTY_OK;
 
@@ -1178,9 +1169,9 @@ static int mp_property_yuv_colorspace(m_option_t *prop, int action,
             return M_PROPERTY_UNAVAILABLE;
         char * const names[] = {"BT.601 (SD)", "BT.709 (HD)", "SMPTE-240M"};
         if (colorspace < 0 || colorspace >= sizeof(names) / sizeof(names[0]))
-            *(char **)arg = strdup("Unknown");
+            *(char **)arg = talloc_strdup(NULL, mp_gtext("unknown"));
         else
-            *(char**)arg = strdup(names[colorspace]);
+            *(char**)arg = talloc_strdup(NULL, names[colorspace]);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         if (!arg)
@@ -1327,7 +1318,8 @@ static int mp_property_framedropping(m_option_t *prop, int action,
     case M_PROPERTY_PRINT:
         if (!arg)
             return M_PROPERTY_ERROR;
-        *(char **) arg = strdup(frame_dropping == 1 ? mp_gtext("enabled") :
+        *(char **) arg = talloc_strdup(NULL,
+                                frame_dropping == 1 ? mp_gtext("enabled") :
                                 (frame_dropping == 2 ? mp_gtext("hard") :
                                  mp_gtext("disabled")));
         return M_PROPERTY_OK;
@@ -1414,20 +1406,19 @@ static int mp_property_video_format(m_option_t *prop, int action,
             return M_PROPERTY_ERROR;
         switch(mpctx->sh_video->format) {
         case 0x10000001:
-            meta = strdup ("mpeg1"); break;
+            meta = talloc_strdup(NULL, "mpeg1"); break;
         case 0x10000002:
-            meta = strdup ("mpeg2"); break;
+            meta = talloc_strdup(NULL, "mpeg2"); break;
         case 0x10000004:
-            meta = strdup ("mpeg4"); break;
+            meta = talloc_strdup(NULL, "mpeg4"); break;
         case 0x10000005:
-            meta = strdup ("h264"); break;
+            meta = talloc_strdup(NULL, "h264"); break;
         default:
             if(mpctx->sh_video->format >= 0x20202020) {
-                meta = malloc(5);
-                sprintf (meta, "%.4s", (char *) &mpctx->sh_video->format);
+                meta = talloc_asprintf(NULL, "%.4s",
+                                       (char *) &mpctx->sh_video->format);
             } else   {
-                meta = malloc(20);
-                sprintf (meta, "0x%08X", mpctx->sh_video->format);
+                meta = talloc_asprintf(NULL, "0x%08X", mpctx->sh_video->format);
             }
         }
         *(char**)arg = meta;
@@ -1537,8 +1528,6 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_PRINT:
         if (!arg)
             return M_PROPERTY_ERROR;
-        *(char **) arg = malloc(64);
-        (*(char **) arg)[63] = 0;
         char *sub_name = NULL;
         if (mpctx->subdata)
             sub_name = mpctx->subdata->filename;
@@ -1551,7 +1540,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
         if (sub_name) {
             const char *tmp = mp_basename(sub_name);
 
-            snprintf(*(char **) arg, 63, "(%d) %s%s",
+            *(char **) arg = talloc_asprintf(NULL, "(%d) %s%s",
                      mpctx->set_of_sub_pos + 1,
                      strlen(tmp) < 20 ? "" : "...",
                      strlen(tmp) < 20 ? tmp : tmp + strlen(tmp) - 19);
@@ -1562,7 +1551,8 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
             if (vo_spudec && opts->sub_id >= 0) {
                 unsigned char lang[3];
                 if (mp_dvdnav_lang_from_sid(mpctx->stream, opts->sub_id, lang)) {
-                    snprintf(*(char **) arg, 63, "(%d) %s", opts->sub_id, lang);
+                    *(char **) arg = talloc_asprintf(NULL, "(%d) %s",
+                                                     opts->sub_id, lang);
                     return M_PROPERTY_OK;
                 }
             }
@@ -1576,14 +1566,15 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
              && d_sub->sh && opts->sub_id >= 0) {
             const char* lang = ((sh_sub_t*)d_sub->sh)->lang;
             if (!lang) lang = mp_gtext("unknown");
-            snprintf(*(char **) arg, 63, "(%d) %s", opts->sub_id, lang);
+            *(char **) arg = talloc_asprintf(NULL, "(%d) %s",
+                                             opts->sub_id, lang);
             return M_PROPERTY_OK;
         }
 
         if (vo_vobsub && vobsub_id >= 0) {
             const char *language = mp_gtext("unknown");
             language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
-            snprintf(*(char **) arg, 63, "(%d) %s",
+            *(char **) arg = talloc_asprintf(NULL, "(%d) %s",
                      vobsub_id, language ? language : mp_gtext("unknown"));
             return M_PROPERTY_OK;
         }
@@ -1595,16 +1586,17 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
             lang[0] = code >> 8;
             lang[1] = code;
             lang[2] = 0;
-            snprintf(*(char **) arg, 63, "(%d) %s", opts->sub_id, lang);
+            *(char **) arg = talloc_asprintf(NULL, "(%d) %s",
+                                             opts->sub_id, lang);
             return M_PROPERTY_OK;
         }
 #endif
         if (opts->sub_id >= 0) {
-            snprintf(*(char **) arg, 63, "(%d) %s", opts->sub_id,
+            *(char **) arg = talloc_asprintf(NULL, "(%d) %s", opts->sub_id,
                      mp_gtext("unknown"));
             return M_PROPERTY_OK;
         }
-        snprintf(*(char **) arg, 63, mp_gtext("disabled"));
+        *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
         return M_PROPERTY_OK;
 
     case M_PROPERTY_SET:
@@ -1737,22 +1729,21 @@ static int mp_property_sub_source(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_PRINT:
         if (!arg)
             return M_PROPERTY_ERROR;
-        *(char **) arg = malloc(64);
-        (*(char **) arg)[63] = 0;
-        switch (sub_source(mpctx))
-        {
+        char *sourcename;
+        switch (sub_source(mpctx)) {
         case SUB_SOURCE_SUBS:
-            snprintf(*(char **) arg, 63, mp_gtext("file"));
+            sourcename = mp_gtext("file");
             break;
         case SUB_SOURCE_VOBSUB:
-            snprintf(*(char **) arg, 63, mp_gtext("vobsub"));
+            sourcename = mp_gtext("vobsub");
             break;
         case SUB_SOURCE_DEMUX:
-            snprintf(*(char **) arg, 63, mp_gtext("embedded"));
+            sourcename = mp_gtext("embedded");
             break;
         default:
-            snprintf(*(char **) arg, 63, mp_gtext("disabled"));
+            sourcename = mp_gtext("disabled");
         }
+        *(char **)arg = talloc_strdup(NULL, sourcename);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         if (!arg)
@@ -1840,9 +1831,7 @@ static int mp_property_sub_by_type(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_ERROR;
         if (is_cur_source)
             return mp_property_sub(prop, M_PROPERTY_PRINT, arg, mpctx);
-        *(char **) arg = malloc(64);
-        (*(char **) arg)[63] = 0;
-        snprintf(*(char **) arg, 63, mp_gtext("disabled"));
+        *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         if (!arg)
@@ -1923,7 +1912,7 @@ static int mp_property_sub_alignment(m_option_t *prop, int action,
         if (!arg)
             return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, sub_alignment);
-        *(char **) arg = strdup(mp_gtext(name[sub_alignment]));
+        *(char **) arg = talloc_strdup(NULL, mp_gtext(name[sub_alignment]));
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         if (!arg)
@@ -2482,7 +2471,7 @@ static int show_property_osd(MPContext *mpctx, const char *pname)
             int index = p - property_osd_display;
             set_osd_tmsg(p->osd_id >= 0 ? p->osd_id : OSD_MSG_PROPERTY + index,
                          1, opts->osd_duration, p->osd_msg, val);
-            free(val);
+            talloc_free(val);
         }
     }
     return 0;
@@ -2822,7 +2811,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 }
                 mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_%s=%s\n",
                        cmd->args[0].v.s, tmp);
-                free(tmp);
+                talloc_free(tmp);
             }
             break;
 
