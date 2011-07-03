@@ -338,7 +338,7 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
     if (demuxer->s_streams[id])
         mp_msg(MSGT_DEMUXER, MSGL_WARN, "Sub stream %i redefined\n", id);
     else {
-        sh_sub_t *sh = calloc(1, sizeof(sh_sub_t));
+        struct sh_sub *sh = talloc_zero(demuxer, struct sh_sub);
         demuxer->s_streams[id] = sh;
         sh->sid = sid;
         sh->opts = demuxer->opts;
@@ -352,7 +352,7 @@ struct sh_sub *new_sh_sub_sid_lang(struct demuxer *demuxer, int id, int sid,
 {
     struct sh_sub *sh = new_sh_sub_sid(demuxer, id, sid);
     if (lang && lang[0] && strcmp(lang, "und")) {
-        sh->lang = strdup(lang);
+        sh->lang = talloc_strdup(sh, lang);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", sid, lang);
     }
     return sh;
@@ -362,11 +362,10 @@ static void free_sh_sub(sh_sub_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);
     free(sh->extradata);
-    free(sh->lang);
 #ifdef CONFIG_FFMPEG
     clear_parser((sh_common_t *)sh);
 #endif
-    free(sh);
+    talloc_free(sh);
 }
 
 sh_audio_t *new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
@@ -381,7 +380,7 @@ sh_audio_t *new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
         mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "WARNING: Audio stream header %d redefined.\n", id);
     } else {
         mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found audio stream: %d\n", id);
-        sh_audio_t *sh = calloc(1, sizeof(sh_audio_t));
+        struct sh_audio *sh = talloc_zero(demuxer, struct sh_audio);
         demuxer->a_streams[id] = sh;
         sh->aid = aid;
         sh->ds = demuxer->audio;
@@ -401,11 +400,10 @@ void free_sh_audio(demuxer_t *demuxer, int id)
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_audio at %p\n", sh);
     free(sh->wf);
     free(sh->codecdata);
-    free(sh->lang);
 #ifdef CONFIG_FFMPEG
     clear_parser((sh_common_t *)sh);
 #endif
-    free(sh);
+    talloc_free(sh);
 }
 
 sh_video_t *new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
@@ -420,7 +418,7 @@ sh_video_t *new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
         mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "WARNING: Video stream header %d redefined.\n", id);
     else {
         mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found video stream: %d\n", id);
-        sh_video_t *sh = calloc(1, sizeof *sh);
+        struct sh_video *sh = talloc_zero(demuxer, struct sh_video);
         demuxer->v_streams[id] = sh;
         sh->vid = vid;
         sh->ds = demuxer->video;
@@ -437,7 +435,7 @@ void free_sh_video(sh_video_t *sh)
 #ifdef CONFIG_FFMPEG
     clear_parser((sh_common_t *)sh);
 #endif
-    free(sh);
+    talloc_free(sh);
 }
 
 void free_demuxer(demuxer_t *demuxer)

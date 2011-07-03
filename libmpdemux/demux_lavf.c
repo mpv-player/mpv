@@ -351,7 +351,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             if (title && title->value)
                 mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_NAME=%s\n", priv->audio_streams, title->value);
             if (lang && lang->value) {
-              sh_audio->lang = strdup(lang->value);
+              sh_audio->lang = talloc_strdup(sh_audio, lang->value);
               mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", priv->audio_streams, sh_audio->lang);
             }
             if (st->disposition & AV_DISPOSITION_DEFAULT)
@@ -468,7 +468,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             if (title && title->value)
                 mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_NAME=%s\n", priv->sub_streams, title->value);
             if (lang && lang->value) {
-              sh_sub->lang = strdup(lang->value);
+              sh_sub->lang = talloc_strdup(sh_sub, lang->value);
               mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", priv->sub_streams, sh_sub->lang);
             }
             if (st->disposition & AV_DISPOSITION_DEFAULT)

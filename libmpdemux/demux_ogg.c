@@ -27,6 +27,7 @@
 
 #include "options.h"
 #include "mp_msg.h"
+#include "talloc.h"
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
@@ -433,10 +434,10 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os,
                 free(ogg_d->text_langs[index]);
                 ogg_d->text_langs[index] = strdup(val);
                 sh = d->s_streams[index];
-                if (sh)
-                    free(sh->lang);
-                if (sh)
-                    sh->lang = strdup(val);
+                if (sh) {
+                    talloc_free(sh->lang);
+                    sh->lang = talloc_strdup(sh, val);
+                }
             }
             // check for -slang if subs are uninitialized yet
             if (os->text && d->sub->id < 0
