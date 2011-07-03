@@ -937,7 +937,8 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
     int current_id, tmp;
     if (!mpctx->demuxer || !mpctx->d_audio)
         return M_PROPERTY_UNAVAILABLE;
-    current_id = mpctx->sh_audio ? mpctx->sh_audio->aid : -2;
+    struct sh_audio *sh = mpctx->sh_audio;
+    current_id = sh ? sh->aid : -2;
 
     switch (action) {
     case M_PROPERTY_GET:
@@ -951,12 +952,18 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
 
         if (current_id < 0)
             *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
-        else {
+        else if (sh && (sh->lang || sh->title)) {
+            char *lang = sh->lang ? sh->lang : mp_gtext("unknown");
+            if (sh->title)
+                *(char **)arg = talloc_asprintf(NULL, "(%d) %s (\"%s\")",
+                                                current_id, lang, sh->title);
+            else
+                *(char **)arg = talloc_asprintf(NULL, "(%d) %s", current_id,
+                                                lang);
+        } else {
             char lang[40];
             strncpy(lang, mp_gtext("unknown"), sizeof(lang));
-            sh_audio_t* sh = mpctx->sh_audio;
-            if (sh && sh->lang)
-                av_strlcpy(lang, sh->lang, 40);
+            if (0);
 #ifdef CONFIG_DVDREAD
             else if (mpctx->stream->type == STREAMTYPE_DVD) {
                 int code = dvd_lang_from_aid(mpctx->stream, current_id);
@@ -1564,10 +1571,14 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
              || d_sub->demuxer->type == DEMUXER_TYPE_LAVF_PREFERRED
              || d_sub->demuxer->type == DEMUXER_TYPE_OGG)
              && d_sub->sh && opts->sub_id >= 0) {
-            const char* lang = ((sh_sub_t*)d_sub->sh)->lang;
-            if (!lang) lang = mp_gtext("unknown");
-            *(char **) arg = talloc_asprintf(NULL, "(%d) %s",
-                                             opts->sub_id, lang);
+            struct sh_sub *sh = d_sub->sh;
+            char *lang = sh->lang ? sh->lang : mp_gtext("unknown");
+            if (sh->title)
+                *(char **)arg = talloc_asprintf(NULL, "(%d) %s (\"%s\")",
+                                                opts->sub_id, lang, sh->title);
+            else
+                *(char **)arg = talloc_asprintf(NULL, "(%d) %s",
+                                                 opts->sub_id, lang);
             return M_PROPERTY_OK;
         }
 

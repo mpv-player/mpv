@@ -362,9 +362,11 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             sh_audio->format = 0x7;
             break;
         }
-        if (title && title->value)
+        if (title && title->value) {
+            sh_audio->title = talloc_strdup(sh_audio, title->value);
             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_NAME=%s\n",
                    priv->audio_streams, title->value);
+        }
         if (lang && lang->value) {
             sh_audio->lang = talloc_strdup(sh_audio, lang->value);
             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n",
@@ -425,9 +427,11 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             sh_video->aspect = codec->width  * codec->sample_aspect_ratio.num
                     / (float)(codec->height * codec->sample_aspect_ratio.den);
         sh_video->i_bps = codec->bit_rate / 8;
-        if (title && title->value)
+        if (title && title->value) {
+            sh_video->title = talloc_strdup(sh_video, title->value);
             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VID_%d_NAME=%s\n",
                    priv->video_streams, title->value);
+        }
         mp_msg(MSGT_DEMUX, MSGL_DBG2, "aspect= %d*%d/(%d*%d)\n",
                codec->width, codec->sample_aspect_ratio.num,
                codec->height, codec->sample_aspect_ratio.den);
@@ -480,9 +484,11 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             memcpy(sh_sub->extradata, codec->extradata, codec->extradata_size);
             sh_sub->extradata_len = codec->extradata_size;
         }
-        if (title && title->value)
+        if (title && title->value) {
+            sh_sub->title = talloc_strdup(sh_sub, title->value);
             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_NAME=%s\n",
                    priv->sub_streams, title->value);
+        }
         if (lang && lang->value) {
             sh_sub->lang = talloc_strdup(sh_sub, lang->value);
             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n",

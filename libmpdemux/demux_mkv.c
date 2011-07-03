@@ -1253,6 +1253,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
     }
 
     sh_v = new_sh_video(demuxer, vid);
+    sh_v->title = talloc_strdup(sh_v, track->name);
     sh_v->bih = bih;
     sh_v->format = sh_v->bih->biCompression;
     if (track->v_frate == 0.0)
@@ -1290,6 +1291,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
 
     if (track->language && (strcmp(track->language, "und") != 0))
         sh_a->lang = talloc_strdup(sh_a, track->language);
+    sh_a->title = talloc_strdup(sh_a, track->name);
     sh_a->default_track = track->default_track;
     sh_a->ds = demuxer->audio;
     sh_a->wf = malloc(sizeof(*sh_a->wf));
@@ -1588,6 +1590,7 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track,
         sh->extradata_len = track->private_size;
         if (track->language && (strcmp(track->language, "und") != 0))
             sh->lang = talloc_strdup(sh, track->language);
+        sh->title = talloc_strdup(sh, track->name);
         sh->default_track = track->default_track;
     } else {
         mp_tmsg(MSGT_DEMUX, MSGL_ERR,

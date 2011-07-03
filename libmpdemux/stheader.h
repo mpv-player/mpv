@@ -47,6 +47,7 @@ struct demuxer;
     /* decoder context */                                               \
     void *context;                                                      \
     char *lang;   /* track language */                                  \
+    char *title;  /* track title */                                     \
     bool default_track;                                                 \
 
 typedef struct sh_common {
