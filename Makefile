@@ -752,14 +752,12 @@ codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h $(TEST_OBJS)
 codecs2html$(EXESUF): codec-cfg.c $(TEST_OBJS)
 	$(CC) -I. -DCODECS2HTML -o $@ $^
 
-libvo/aspecttest$(EXESUF): libvo/aspect.o libvo/geometry.o $(TEST_OBJS)
-
 LOADER_TEST_OBJS = $(SRCS_WIN32_EMULATION:.c=.o) $(SRCS_QTX_EMULATION:.S=.o) libavutil/libavutil.a osdep/mmap_anon.o cpudetect.o path.o $(TEST_OBJS)
 
 loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): CFLAGS += -g
 loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): $(LOADER_TEST_OBJS)
 
-TESTS = codecs2html codec-cfg-test libvo/aspecttest
+TESTS = codecs2html codec-cfg-test
 
 ifdef ARCH_X86
 TESTS += loader/qtx/list loader/qtx/qtxload

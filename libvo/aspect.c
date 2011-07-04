@@ -20,42 +20,28 @@
 #include "aspect.h"
 #include "geometry.h"
 #include "video_out.h"
-//#ifndef ASPECT_TEST
 #include "mp_msg.h"
 #include "options.h"
-//#endif
-
-//#define ASPECT_DEBUG
-
-#if defined(ASPECT_DEBUG) || defined(ASPECT_TEST)
-#include <stdio.h>
-#endif
 
 #include "video_out.h"
 
 void aspect_save_orig(struct vo *vo, int orgw, int orgh)
 {
-#ifdef ASPECT_DEBUG
-  printf("aspect_save_orig %dx%d \n",orgw,orgh);
-#endif
+    mp_msg(MSGT_VO, MSGL_DBG2, "aspect_save_orig %dx%d\n", orgw, orgh);
     vo->aspdat.orgw = orgw;
     vo->aspdat.orgh = orgh;
 }
 
 void aspect_save_prescale(struct vo *vo, int prew, int preh)
 {
-#ifdef ASPECT_DEBUG
-  printf("aspect_save_prescale %dx%d \n",prew,preh);
-#endif
+    mp_msg(MSGT_VO, MSGL_DBG2, "aspect_save_prescale %dx%d\n", prew, preh);
     vo->aspdat.prew = prew;
     vo->aspdat.preh = preh;
 }
 
 void aspect_save_screenres(struct vo *vo, int scrw, int scrh)
 {
-#ifdef ASPECT_DEBUG
-  printf("aspect_save_screenres %dx%d \n",scrw,scrh);
-#endif
+    mp_msg(MSGT_VO, MSGL_DBG2, "aspect_save_screenres %dx%d\n", scrw, scrh);
     struct MPOpts *opts = vo->opts;
     if (scrw <= 0 && scrh <= 0)
         scrw = 1024;
@@ -78,65 +64,54 @@ void aspect_save_screenres(struct vo *vo, int scrw, int scrh)
 void aspect_fit(struct vo *vo, int *srcw, int *srch, int fitw, int fith)
 {
     struct aspect_data *aspdat = &vo->aspdat;
-  int tmpw;
+    float pixelaspect = vo->monitor_aspect * aspdat->scrh / aspdat->scrw;
 
-#ifdef ASPECT_DEBUG
-  printf("aspect(0) fitin: %dx%d screenaspect: %.2f\n",aspdat->scrw,aspdat->scrh,
-      monitor_aspect);
-  printf("aspect(1) wh: %dx%d (org: %dx%d)\n",*srcw,*srch,aspdat->prew,aspdat->preh);
-#endif
+    mp_msg(MSGT_VO, MSGL_DBG2, "aspect(0) fitin: %dx%d screenaspect: %.2f\n",
+           fitw, fith, vo->monitor_aspect);
     *srcw = fitw;
-    *srch = (int)(((float)fitw / (float)aspdat->prew * (float)aspdat->preh)
-               * ((float)aspdat->scrh / ((float)aspdat->scrw / vo->monitor_aspect)));
-  *srch+= *srch%2; // round
-#ifdef ASPECT_DEBUG
-  printf("aspect(2) wh: %dx%d (org: %dx%d)\n",*srcw,*srch,aspdat->prew,aspdat->preh);
-#endif
-  if(*srch>fith || *srch<aspdat->orgh){
-      tmpw = (int)(((float)fith / (float)aspdat->preh * (float)aspdat->prew)
-                * ((float)aspdat->scrw / ((float)aspdat->scrh / (1.0/vo->monitor_aspect))));
-    tmpw+= tmpw%2; // round
-    if(tmpw<=fitw /*&& tmpw>=aspdat->orgw*/){
-      *srch = fith;
-      *srcw = tmpw;
-    }else{
-#ifndef ASPECT_TEST
-      mp_tmsg(MSGT_VO,MSGL_WARN,"[ASPECT] Warning: No suitable new res found!\n");
-#else
-      mp_tmsg(MSGT_VO,MSGL_WARN,"[ASPECT] Error: No new size found that fits into res!\n");
-#endif
+    *srch = (float)fitw / aspdat->prew * aspdat->preh * pixelaspect;
+    *srch += *srch % 2; // round
+    mp_msg(MSGT_VO, MSGL_DBG2, "aspect(1) wh: %dx%d (org: %dx%d)\n",
+           *srcw, *srch, aspdat->prew, aspdat->preh);
+    if (*srch > fith || *srch < aspdat->orgh) {
+        int tmpw = (float)fith / aspdat->preh * aspdat->prew / pixelaspect;
+        tmpw += tmpw % 2; // round
+        if (tmpw <= fitw) {
+            *srch = fith;
+            *srcw = tmpw;
+        } else {
+            mp_tmsg(MSGT_VO, MSGL_WARN,
+                    "[ASPECT] Warning: No suitable new res found!\n");
+        }
     }
-  }
-  aspdat->asp=*srcw / (float)*srch;
-#ifdef ASPECT_DEBUG
-  printf("aspect(3) wh: %dx%d (org: %dx%d)\n",*srcw,*srch,aspdat->prew,aspdat->preh);
-#endif
+    aspdat->asp = *srcw / (float)*srch;
+    mp_msg(MSGT_VO, MSGL_DBG2, "aspect(2) wh: %dx%d (org: %dx%d)\n",
+           *srcw, *srch, aspdat->prew, aspdat->preh);
 }
 
 static void get_max_dims(struct vo *vo, int *w, int *h, int zoom)
 {
     struct aspect_data *aspdat = &vo->aspdat;
-  *w = zoom ? aspdat->scrw : aspdat->prew;
-  *h = zoom ? aspdat->scrh : aspdat->preh;
-  if (zoom && WinID >= 0) zoom = A_WINZOOM;
-  if (zoom == A_WINZOOM) {
-    *w = vo->dwidth;
-    *h = vo->dheight;
-  }
+    *w = zoom ? aspdat->scrw : aspdat->prew;
+    *h = zoom ? aspdat->scrh : aspdat->preh;
+    if (zoom && WinID >= 0)
+        zoom = A_WINZOOM;
+    if (zoom == A_WINZOOM) {
+        *w = vo->dwidth;
+        *h = vo->dheight;
+    }
 }
 
 void aspect(struct vo *vo, int *srcw, int *srch, int zoom)
 {
-  int fitw;
-  int fith;
-  get_max_dims(vo, &fitw, &fith, zoom);
-  if( !zoom && geometry_wh_changed ) {
-#ifdef ASPECT_DEBUG
-    printf("aspect(0) no aspect forced!\n");
-#endif
-    return; // the user doesn't want to fix aspect
-  }
-  aspect_fit(vo, srcw, srch, fitw, fith);
+    int fitw;
+    int fith;
+    get_max_dims(vo, &fitw, &fith, zoom);
+    if (!zoom && geometry_wh_changed) {
+        mp_msg(MSGT_VO, MSGL_DBG2, "aspect(0) no aspect forced!\n");
+        return; // the user doesn't want to fix aspect
+    }
+    aspect_fit(vo, srcw, srch, fitw, fith);
 }
 
 void panscan_init(struct vo *vo)
@@ -148,10 +123,10 @@ void panscan_init(struct vo *vo)
 
 static void panscan_calc_internal(struct vo *vo, int zoom)
 {
- int fwidth,fheight;
- int vo_panscan_area;
- int max_w, max_h;
- get_max_dims(vo, &max_w, &max_h, zoom);
+    int fwidth, fheight;
+    int vo_panscan_area;
+    int max_w, max_h;
+    get_max_dims(vo, &max_w, &max_h, zoom);
     struct MPOpts *opts = vo->opts;
 
     if (opts->vo_panscanrange > 0) {
