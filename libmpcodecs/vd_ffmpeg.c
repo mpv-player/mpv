@@ -758,7 +758,7 @@ static struct mp_image *decode(struct sh_video *sh, void *data, int len,
     else
         avctx->skip_frame = 0;
 
-    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "vd_ffmpeg data: %04x, %04x, %04x, %04x\n",
+    mp_msg(MSGT_DECVIDEO, MSGL_DBG3, "vd_ffmpeg data: %04x, %04x, %04x, %04x\n",
            ((int *)data)[0], ((int *)data)[1], ((int *)data)[2], ((int *)data)[3]);
     av_init_packet(&pkt);
     pkt.data = data;
