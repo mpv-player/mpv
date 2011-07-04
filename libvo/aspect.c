@@ -79,7 +79,7 @@ void aspect_fit(struct vo *vo, int *srcw, int *srch, int fitw, int fith)
         if (tmpw <= fitw) {
             *srch = fith;
             *srcw = tmpw;
-        } else {
+        } else if (*srch > fith) {
             mp_tmsg(MSGT_VO, MSGL_WARN,
                     "[ASPECT] Warning: No suitable new res found!\n");
         }
