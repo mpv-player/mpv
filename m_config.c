@@ -463,10 +463,10 @@ static int m_config_parse_option(const struct m_config *config, char *arg,
                             r = sr;
                     }
                 }
-                free(lst[2 * i]);
-                free(lst[2 * i + 1]);
+                talloc_free(lst[2 * i]);
+                talloc_free(lst[2 * i + 1]);
             }
-        free(lst);
+        talloc_free(lst);
     } else
         r = m_option_parse(co->opt, arg, param, set ? co->slots->data : NULL,
                            config->mode);
