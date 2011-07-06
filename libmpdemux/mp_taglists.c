@@ -34,8 +34,6 @@ static const struct mp_AVCodecTag mp_wav_tags[] = {
     { CODEC_ID_ADPCM_THP,         MKTAG('T', 'H', 'P', 'A')},
     { CODEC_ID_ADPCM_XA,          MKTAG('P', 'S', 'X', 'A')},
     { CODEC_ID_AMR_NB,            MKTAG('n', 'b',   0,   0)},
-    { CODEC_ID_BINKAUDIO_DCT,     MKTAG('B', 'A', 'U', '1')},
-    { CODEC_ID_BINKAUDIO_RDFT,    MKTAG('B', 'A', 'U', '2')},
     { CODEC_ID_COOK,              MKTAG('c', 'o', 'o', 'k')},
     { CODEC_ID_DSICINAUDIO,       MKTAG('D', 'C', 'I', 'A')},
     { CODEC_ID_EAC3,              MKTAG('E', 'A', 'C', '3')},
@@ -73,6 +71,8 @@ static const struct mp_AVCodecTag mp_codecid_override_tags[] = {
 #endif
     { CODEC_ID_AC3,               0x2000},
     { CODEC_ID_ADPCM_IMA_AMV,     MKTAG('A', 'M', 'V', 'A')},
+    { CODEC_ID_BINKAUDIO_DCT,     MKTAG('B', 'A', 'U', '1')},
+    { CODEC_ID_BINKAUDIO_RDFT,    MKTAG('B', 'A', 'U', '2')},
     { CODEC_ID_DTS,               0x2001},
     { CODEC_ID_DVVIDEO,           MKTAG('d', 'v', 's', 'd')},
     { CODEC_ID_EAC3,              MKTAG('E', 'A', 'C', '3')},
