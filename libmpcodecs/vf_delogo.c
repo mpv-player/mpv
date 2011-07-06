@@ -50,7 +50,7 @@ static struct vf_priv_s {
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 
 static void delogo(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int width, int height,
-		   int logo_x, int logo_y, int logo_w, int logo_h, int band, int show, int direct) {
+                   int logo_x, int logo_y, int logo_w, int logo_h, int band, int show, int direct) {
     int y, x;
     int interp, dist;
     uint8_t *xdst, *xsrc;
@@ -80,46 +80,46 @@ static void delogo(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int
 
     for(y = logo_y1+1; y < logo_y2-1; y++)
     {
-	for (x = logo_x1+1, xdst = dst+logo_x1+1, xsrc = src+logo_x1+1; x < logo_x2-1; x++, xdst++, xsrc++) {
-	    interp = ((topleft[srcStride*(y-logo_y-yclipt)]
-		       + topleft[srcStride*(y-logo_y-1-yclipt)]
-		       + topleft[srcStride*(y-logo_y+1-yclipt)])*(logo_w-(x-logo_x))/logo_w
-		      + (topright[srcStride*(y-logo_y-yclipt)]
-			 + topright[srcStride*(y-logo_y-1-yclipt)]
-			 + topright[srcStride*(y-logo_y+1-yclipt)])*(x-logo_x)/logo_w
-		      + (topleft[x-logo_x-xclipl]
-			 + topleft[x-logo_x-1-xclipl]
-			 + topleft[x-logo_x+1-xclipl])*(logo_h-(y-logo_y))/logo_h
-		      + (botleft[x-logo_x-xclipl]
-			 + botleft[x-logo_x-1-xclipl]
-			 + botleft[x-logo_x+1-xclipl])*(y-logo_y)/logo_h
-		)/6;
-/*		interp = (topleft[srcStride*(y-logo_y)]*(logo_w-(x-logo_x))/logo_w
-			  + topright[srcStride*(y-logo_y)]*(x-logo_x)/logo_w
-			  + topleft[x-logo_x]*(logo_h-(y-logo_y))/logo_h
-			  + botleft[x-logo_x]*(y-logo_y)/logo_h
-			  )/2;*/
-	    if (y >= logo_y+band && y < logo_y+logo_h-band && x >= logo_x+band && x < logo_x+logo_w-band) {
-		    *xdst = interp;
-	    } else {
-		dist = 0;
-		if (x < logo_x+band) dist = MAX(dist, logo_x-x+band);
-		else if (x >= logo_x+logo_w-band) dist = MAX(dist, x-(logo_x+logo_w-1-band));
-		if (y < logo_y+band) dist = MAX(dist, logo_y-y+band);
-		else if (y >= logo_y+logo_h-band) dist = MAX(dist, y-(logo_y+logo_h-1-band));
-		*xdst = (*xsrc*dist + interp*(band-dist))/band;
-		if (show && (dist == band-1)) *xdst = 0;
-	    }
-	}
+        for (x = logo_x1+1, xdst = dst+logo_x1+1, xsrc = src+logo_x1+1; x < logo_x2-1; x++, xdst++, xsrc++) {
+            interp = ((topleft[srcStride*(y-logo_y-yclipt)]
+                       + topleft[srcStride*(y-logo_y-1-yclipt)]
+                       + topleft[srcStride*(y-logo_y+1-yclipt)])*(logo_w-(x-logo_x))/logo_w
+                      + (topright[srcStride*(y-logo_y-yclipt)]
+                         + topright[srcStride*(y-logo_y-1-yclipt)]
+                         + topright[srcStride*(y-logo_y+1-yclipt)])*(x-logo_x)/logo_w
+                      + (topleft[x-logo_x-xclipl]
+                         + topleft[x-logo_x-1-xclipl]
+                         + topleft[x-logo_x+1-xclipl])*(logo_h-(y-logo_y))/logo_h
+                      + (botleft[x-logo_x-xclipl]
+                         + botleft[x-logo_x-1-xclipl]
+                         + botleft[x-logo_x+1-xclipl])*(y-logo_y)/logo_h
+                )/6;
+/*                interp = (topleft[srcStride*(y-logo_y)]*(logo_w-(x-logo_x))/logo_w
+                          + topright[srcStride*(y-logo_y)]*(x-logo_x)/logo_w
+                          + topleft[x-logo_x]*(logo_h-(y-logo_y))/logo_h
+                          + botleft[x-logo_x]*(y-logo_y)/logo_h
+                          )/2;*/
+            if (y >= logo_y+band && y < logo_y+logo_h-band && x >= logo_x+band && x < logo_x+logo_w-band) {
+                    *xdst = interp;
+            } else {
+                dist = 0;
+                if (x < logo_x+band) dist = MAX(dist, logo_x-x+band);
+                else if (x >= logo_x+logo_w-band) dist = MAX(dist, x-(logo_x+logo_w-1-band));
+                if (y < logo_y+band) dist = MAX(dist, logo_y-y+band);
+                else if (y >= logo_y+logo_h-band) dist = MAX(dist, y-(logo_y+logo_h-1-band));
+                *xdst = (*xsrc*dist + interp*(band-dist))/band;
+                if (show && (dist == band-1)) *xdst = 0;
+            }
+        }
 
-	dst+= dstStride;
-	src+= srcStride;
+        dst+= dstStride;
+        src+= srcStride;
     }
 }
 
 static int config(struct vf_instance *vf,
-		  int width, int height, int d_width, int d_height,
-		  unsigned int flags, unsigned int outfmt){
+                  int width, int height, int d_width, int d_height,
+                  unsigned int flags, unsigned int outfmt){
 
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
@@ -130,15 +130,15 @@ static void get_image(struct vf_instance *vf, mp_image_t *mpi){
     if(mpi->imgfmt!=vf->priv->outfmt) return; // colorspace differ
     // ok, we can do pp in-place (or pp disabled):
     vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-			  mpi->type, mpi->flags, mpi->w, mpi->h);
+                          mpi->type, mpi->flags, mpi->w, mpi->h);
     mpi->planes[0]=vf->dmpi->planes[0];
     mpi->stride[0]=vf->dmpi->stride[0];
     mpi->width=vf->dmpi->width;
     if(mpi->flags&MP_IMGFLAG_PLANAR){
         mpi->planes[1]=vf->dmpi->planes[1];
         mpi->planes[2]=vf->dmpi->planes[2];
-	mpi->stride[1]=vf->dmpi->stride[1];
-	mpi->stride[2]=vf->dmpi->stride[2];
+        mpi->stride[1]=vf->dmpi->stride[1];
+        mpi->stride[2]=vf->dmpi->stride[2];
     }
     mpi->flags|=MP_IMGFLAG_DIRECT;
 }
@@ -147,22 +147,22 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
 
     if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
-	// no DR, so get a new image! hope we'll get DR buffer:
-	vf->dmpi=vf_get_image(vf->next,vf->priv->outfmt,
-			      MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-			      mpi->w,mpi->h);
+        // no DR, so get a new image! hope we'll get DR buffer:
+        vf->dmpi=vf_get_image(vf->next,vf->priv->outfmt,
+                              MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+                              mpi->w,mpi->h);
     }
     dmpi= vf->dmpi;
 
     delogo(dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h,
-	   vf->priv->xoff, vf->priv->yoff, vf->priv->lw, vf->priv->lh, vf->priv->band, vf->priv->show,
-	   mpi->flags&MP_IMGFLAG_DIRECT);
+           vf->priv->xoff, vf->priv->yoff, vf->priv->lw, vf->priv->lh, vf->priv->band, vf->priv->show,
+           mpi->flags&MP_IMGFLAG_DIRECT);
     delogo(dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w/2, mpi->h/2,
-	   vf->priv->xoff/2, vf->priv->yoff/2, vf->priv->lw/2, vf->priv->lh/2, vf->priv->band/2, vf->priv->show,
-	   mpi->flags&MP_IMGFLAG_DIRECT);
+           vf->priv->xoff/2, vf->priv->yoff/2, vf->priv->lw/2, vf->priv->lh/2, vf->priv->band/2, vf->priv->show,
+           mpi->flags&MP_IMGFLAG_DIRECT);
     delogo(dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w/2, mpi->h/2,
-	   vf->priv->xoff/2, vf->priv->yoff/2, vf->priv->lw/2, vf->priv->lh/2, vf->priv->band/2, vf->priv->show,
-	   mpi->flags&MP_IMGFLAG_DIRECT);
+           vf->priv->xoff/2, vf->priv->yoff/2, vf->priv->lw/2, vf->priv->lh/2, vf->priv->band/2, vf->priv->show,
+           mpi->flags&MP_IMGFLAG_DIRECT);
 
     vf_clone_mpi_attributes(dmpi, mpi);
 
@@ -184,7 +184,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
     case IMGFMT_YV12:
     case IMGFMT_I420:
     case IMGFMT_IYUV:
-	return vf_next_query_format(vf,vf->priv->outfmt);
+        return vf_next_query_format(vf,vf->priv->outfmt);
     }
     return 0;
 }
@@ -204,15 +204,15 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->uninit=uninit;
 
     mp_msg(MSGT_VFILTER, MSGL_V, "delogo: %d x %d, %d x %d, band = %d\n",
-	   vf->priv->xoff, vf->priv->yoff,
-	   vf->priv->lw, vf->priv->lh,
-	   vf->priv->band);
+           vf->priv->xoff, vf->priv->yoff,
+           vf->priv->lw, vf->priv->lh,
+           vf->priv->band);
 
     vf->priv->show = 0;
 
     if (vf->priv->band < 0) {
-	vf->priv->band = 4;
-	vf->priv->show = 1;
+        vf->priv->band = 4;
+        vf->priv->show = 1;
     }
 
 
@@ -225,7 +225,7 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_YV12);
     if(!vf->priv->outfmt)
     {
-	uninit(vf);
+        uninit(vf);
         return 0; // no csp match :(
     }
 
