@@ -216,6 +216,11 @@ void m_config_free(struct m_config *config)
     for (copt = config->opts; copt; copt = copt->next) {
         if (copt->flags & M_CFG_OPT_ALIAS)
             continue;
+        if (copt->opt->type->flags & M_OPT_TYPE_DYNAMIC) {
+            void *ptr = m_option_get_ptr(copt->opt, config->optstruct);
+            if (ptr)
+                m_option_free(copt->opt, ptr);
+        }
         struct m_config_save_slot *sl;
         for (sl = copt->slots; sl; sl = sl->prev)
             m_option_free(copt->opt, sl->data);
