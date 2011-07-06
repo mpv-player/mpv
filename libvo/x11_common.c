@@ -1129,18 +1129,17 @@ final:
 }
 
 void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
-                             int img_width, int img_height, int use_fs)
+                             int img_width, int img_height)
 {
     struct vo_x11_state *x11 = vo->x11;
-    struct MPOpts *opts = vo->opts;
     Display *mDisplay = vo->x11->display;
     int u_dheight, u_dwidth, left_ov, left_ov2;
 
     if (x11->f_gc == None)
         return;
 
-    u_dheight = use_fs ? opts->vo_screenheight : vo->dheight;
-    u_dwidth = use_fs ? opts->vo_screenwidth : vo->dwidth;
+    u_dheight = vo->dheight;
+    u_dwidth = vo->dwidth;
     if ((u_dheight <= img_height) && (u_dwidth <= img_width))
         return;
 
@@ -2302,7 +2301,6 @@ int vo_xv_init_colorkey(struct vo *vo)
 void vo_xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
                          int32_t w, int32_t h)
 {
-    struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
   if( x11->xv_ck_info.method == CK_METHOD_MANUALFILL ||
       x11->xv_ck_info.method == CK_METHOD_BACKGROUND   )//less tearing than XClearWindow()
@@ -2311,30 +2309,6 @@ void vo_xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
     XFillRectangle(x11->display, x11->window, x11->vo_gc,
                     x, y,
                     w, h );
-  }
-
-  /* draw black bars if needed */
-  /* TODO! move this to vo_x11_clearwindow_part() */
-  if ( vo_fs )
-  {
-    XSetForeground(x11->display, x11->vo_gc, 0 );
-    /* making non-overlap fills, requires 8 checks instead of 4 */
-    if ( y > 0 )
-      XFillRectangle(x11->display, x11->window, x11->vo_gc,
-                      0, 0,
-                      opts->vo_screenwidth, y);
-    if (x > 0)
-      XFillRectangle(x11->display, x11->window, x11->vo_gc,
-                      0, 0,
-                      x, opts->vo_screenheight);
-    if (x + w < opts->vo_screenwidth)
-      XFillRectangle(x11->display, x11->window, x11->vo_gc,
-                      x + w, 0,
-                      opts->vo_screenwidth, opts->vo_screenheight);
-    if (y + h < opts->vo_screenheight)
-      XFillRectangle(x11->display, x11->window, x11->vo_gc,
-                      0, y + h,
-                      opts->vo_screenwidth, opts->vo_screenheight);
   }
 }
 

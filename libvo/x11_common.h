@@ -137,7 +137,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
         int x, int y, unsigned int width, unsigned int height, int flags,
 	Colormap col_map, const char *classname, const char *title);
 void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
-	int img_width, int img_height, int use_fs);
+	int img_width, int img_height);
 void vo_x11_clearwindow(struct vo *vo, Window vo_window);
 void vo_x11_ontop(struct vo *vo);
 void vo_x11_border(struct vo *vo);
