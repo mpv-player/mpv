@@ -3861,9 +3861,6 @@ int i;
     set_priority();
 #endif
 
-  if (codec_path)
-    set_codec_path(codec_path);
-
     if(opts->video_driver_list && strcmp(opts->video_driver_list[0],"help")==0){
       list_video_out();
       opt_exit = 1;
