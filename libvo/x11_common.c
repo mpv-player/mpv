@@ -1100,13 +1100,12 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     XSetStandardProperties(mDisplay, x11->window, title, title, None, NULL, 0, &hint);
     if (!vo_border) vo_x11_decoration(vo, 0);
     // map window
-    XMapWindow(mDisplay, x11->window);
-    vo_x11_clearwindow(vo, x11->window);
     XSelectInput(mDisplay, x11->window, NoEventMask);
-    XSync(mDisplay, False);
     vo_x11_selectinput_witherr(mDisplay, x11->window,
           StructureNotifyMask | KeyPressMask | PointerMotionMask |
           ButtonPressMask | ButtonReleaseMask | ExposureMask);
+    XMapWindow(mDisplay, x11->window);
+    vo_x11_clearwindow(vo, x11->window);
   }
   if (opts->vo_ontop) vo_x11_setlayer(vo, x11->window, opts->vo_ontop);
   vo_x11_update_geometry(vo, !geometry_xy_changed);
