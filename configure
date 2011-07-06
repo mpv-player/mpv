@@ -347,7 +347,7 @@ Optional features:
   --disable-vstream      disable TiVo vstream client support [autodetect]
   --disable-pthreads     disable Posix threads support [autodetect]
   --disable-w32threads   disable Win32 threads support [autodetect]
-  --disable-ass          disable internal SSA/ASS subtitle support [autodetect]
+  --disable-libass       disable subtitle rendering with libass [autodetect]
   --enable-rpath         enable runtime linker path for extra libs [disabled]
 
 Codecs:
@@ -1096,8 +1096,8 @@ for ac_option do
   --disable-pthreads)   _pthreads=no    ;;
   --enable-w32threads)  _w32threads=yes ;;
   --disable-w32threads) _w32threads=no  ;;
-  --enable-ass)         _ass=yes        ;;
-  --disable-ass)        _ass=no         ;;
+  --enable-libass)      _ass=yes        ;;
+  --disable-libass)     _ass=no         ;;
   --enable-rpath)       _rpath=yes      ;;
   --disable-rpath)      _rpath=no       ;;
 
@@ -5472,7 +5472,7 @@ if test "$_ass" = auto -o "$_ass" = yes ; then
                 extra_ldflags="$extra_ldflags $($_pkg_config --libs libass)"
                 extra_cflags="$extra_cflags $($_pkg_config --cflags libass)"
         else
-            die "Unable to find development files for libass. Aborting. If you really mean to compile without libass support use --disable-ass."
+            die "Unable to find development files for libass. Aborting. If you really mean to compile without libass support use --disable-libass."
         fi
 else
     def_ass='#undef CONFIG_ASS'
