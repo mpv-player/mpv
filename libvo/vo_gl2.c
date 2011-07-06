@@ -273,14 +273,18 @@ static int initTextures(void)
 
       glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
       if (is_yuv) {
-        int xs, ys;
-        mp_get_chroma_shift(image_format, &xs, &ys, NULL);
+        int xs, ys, depth;
+        int chroma_clear_val = 128;
+        mp_get_chroma_shift(image_format, &xs, &ys, &depth);
+        chroma_clear_val >>= -depth & 7;
         mpglActiveTexture(GL_TEXTURE1);
         glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, gl_bitmap_format,  gl_bitmap_type, GL_LINEAR,
-                         texture_width >> xs, texture_height >> ys, 128);
+                         texture_width >> xs, texture_height >> ys,
+                         chroma_clear_val);
         mpglActiveTexture(GL_TEXTURE2);
         glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, gl_bitmap_format,  gl_bitmap_type, GL_LINEAR,
-                         texture_width >> xs, texture_height >> ys, 128);
+                         texture_width >> xs, texture_height >> ys,
+                         chroma_clear_val);
         mpglActiveTexture(GL_TEXTURE0);
       }
 
@@ -559,7 +563,7 @@ static int initGl(uint32_t d_width, uint32_t d_height)
   glDisable(GL_CULL_FACE);
   glEnable (GL_TEXTURE_2D);
   if (is_yuv) {
-    int xs, ys;
+    int xs, ys, depth;
     gl_conversion_params_t params = {GL_TEXTURE_2D, use_yuv,
           {-1, -1, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0},
           texture_width, texture_height, 0, 0, 0};
@@ -580,9 +584,10 @@ static int initGl(uint32_t d_width, uint32_t d_height)
         mpglBindProgram(GL_FRAGMENT_PROGRAM, fragprog);
         break;
     }
-    mp_get_chroma_shift(image_format, &xs, &ys, NULL);
+    mp_get_chroma_shift(image_format, &xs, &ys, &depth);
     params.chrom_texw = params.texw >> xs;
     params.chrom_texh = params.texh >> ys;
+    params.csp_params.input_shift = -depth & 7;
     glSetupYUVConversion(&params);
   }
 
@@ -804,7 +809,7 @@ query_format(uint32_t format)
 {
   int depth;
   if (use_yuv && mp_get_chroma_shift(format, NULL, NULL, &depth) &&
-      (depth == 8 || depth == 16) &&
+      (depth == 8 || depth == 16 || glYUVLargeRange(use_yuv)) &&
       (IMGFMT_IS_YUVP16_NE(format) || !IMGFMT_IS_YUVP16(format)))
     return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD |
            VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;

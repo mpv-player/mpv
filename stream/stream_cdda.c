@@ -420,6 +420,9 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   if(p->no_skip)
     mode |= PARANOIA_MODE_NEVERSKIP;
 #ifndef CONFIG_LIBCDIO
+  // HACK against libcdparanoia's stupid caching model that
+  // queues up a huge number of requests leading to stuttering
+  paranoia_cachemodel_size(priv->cdp, 24);
   paranoia_modeset(cdd, mode);
 
   if(p->search_overlap >= 0)

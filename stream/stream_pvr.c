@@ -34,7 +34,7 @@
 #include <sys/time.h>
 #include <errno.h>
 #include <sys/ioctl.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <inttypes.h>
 #include <poll.h>
 #include <linux/types.h>

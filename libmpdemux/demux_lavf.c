@@ -517,8 +517,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
     if (stream_type) {
         AVCodec *avc = avcodec_find_decoder(codec->codec_id);
         const char *codec_name = avc ? avc->name : "unknown";
-        if (!avc && *stream_type == 's' && demuxer->s_streams[stream_id])
-            codec_name = sh_sub_type2str(((sh_sub_t *)demuxer->s_streams[stream_id])->type);
+        if (!avc && *stream_type == 's' && demuxer->s_streams[i])
+            codec_name = sh_sub_type2str(((sh_sub_t *)demuxer->s_streams[i])->type);
         mp_msg(MSGT_DEMUX, MSGL_INFO, "[lavf] stream %d: %s (%s), -%cid %d",
                i, stream_type, codec_name, *stream_type, stream_id);
         if (lang && lang->value && *stream_type != 'v')
@@ -596,11 +596,13 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
     } else
         av_strlcat(mp_filename, "foobar.dummy", sizeof(mp_filename));
 
-    priv->pb = av_alloc_put_byte(priv->buffer, BIO_BUFFER_SIZE, 0,
-                                 demuxer, mp_read, NULL, mp_seek);
-    priv->pb->read_seek = mp_read_seek;
-    priv->pb->is_streamed = !demuxer->stream->end_pos ||
-        (demuxer->stream->flags & MP_STREAM_SEEK) != MP_STREAM_SEEK;
+    if (!(priv->avif->flags & AVFMT_NOFILE)) {
+        priv->pb = av_alloc_put_byte(priv->buffer, BIO_BUFFER_SIZE, 0,
+                                     demuxer, mp_read, NULL, mp_seek);
+        priv->pb->read_seek = mp_read_seek;
+        priv->pb->is_streamed = !demuxer->stream->end_pos ||
+            (demuxer->stream->flags & MP_STREAM_SEEK) != MP_STREAM_SEEK;
+    }
 
     if (av_open_input_stream(&avfc, priv->pb, mp_filename, priv->avif,
                              &ap) < 0) {

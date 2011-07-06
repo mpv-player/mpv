@@ -694,72 +694,25 @@ static int vobsub_parse_id(vobsub_t *vob, const char *line)
 
 static int vobsub_parse_timestamp(vobsub_t *vob, const char *line)
 {
-    // timestamp: HH:MM:SS.mmm, filepos: 0nnnnnnnnn
-    const char *p;
     int h, m, s, ms;
     off_t filepos;
-    while (isspace(*line))
-        ++line;
-    p = line;
-    while (isdigit(*p))
-        ++p;
-    if (p - line != 2)
+    if (sscanf(line, " %02d:%02d:%02d:%03d, filepos: %09lx",
+               &h, &m, &s, &ms, &filepos) != 5)
         return -1;
-    h = atoi(line);
-    if (*p != ':')
-        return -1;
-    line = ++p;
-    while (isdigit(*p))
-        ++p;
-    if (p - line != 2)
-        return -1;
-    m = atoi(line);
-    if (*p != ':')
-        return -1;
-    line = ++p;
-    while (isdigit(*p))
-        ++p;
-    if (p - line != 2)
-        return -1;
-    s = atoi(line);
-    if (*p != ':')
-        return -1;
-    line = ++p;
-    while (isdigit(*p))
-        ++p;
-    if (p - line != 3)
-        return -1;
-    ms = atoi(line);
-    if (*p != ',')
-        return -1;
-    line = p + 1;
-    while (isspace(*line))
-        ++line;
-    if (strncmp("filepos:", line, 8))
-        return -1;
-    line += 8;
-    while (isspace(*line))
-        ++line;
-    if (! isxdigit(*line))
-        return -1;
-    filepos = strtol(line, NULL, 16);
     return vobsub_add_timestamp(vob, filepos, vob->delay + ms + 1000 * (s + 60 * (m + 60 * h)));
 }
 
 static int vobsub_parse_origin(vobsub_t *vob, const char *line)
 {
     // org: X,Y
-    char *p;
-    while (isspace(*line))
-        ++line;
-    if (!isdigit(*line))
-        return -1;
-    vob->origin_x = strtoul(line, &p, 10);
-    if (*p != ',')
-        return -1;
-    ++p;
-    vob->origin_y = strtoul(p, NULL, 10);
-    return 0;
+    unsigned x, y;
+
+    if (sscanf(line, " %u,%u", &x, &y) == 2) {
+        vob->origin_x = x;
+        vob->origin_y = y;
+        return 0;
+    }
+    return -1;
 }
 
 unsigned int vobsub_palette_to_yuv(unsigned int pal)
@@ -1341,7 +1294,7 @@ void vobsub_out_output(void *me, const unsigned char *packet,
             m = s / 60;
             s -= m * 60;
             ms = (s - (unsigned int) s) * 1000;
-            if (ms >= 1000)     /* prevent overfolws or bad float stuff */
+            if (ms >= 1000)     /* prevent overflows or bad float stuff */
                 ms = 0;
             if (h != last_h || m != last_m || (unsigned int) s != last_s || ms != last_ms) {
                 fprintf(vob->fidx, "timestamp: %02u:%02u:%02u:%03u, filepos: %09lx\n",
@@ -1382,13 +1335,13 @@ void vobsub_out_output(void *me, const unsigned char *packet,
             datalen += 1;       /* AID */
             pad_len = 2048 - (p - buffer) - 4 /* MPEG ID */ - 2 /* payload len */ - datalen;
             /* XXX - Go figure what should go here!  In any case the
-               packet has to be completly filled.  If I can fill it
+               packet has to be completely filled.  If I can fill it
                with padding (0x000001be) latter I'll do that.  But if
                there is only room for 6 bytes then I can not write a
                padding packet.  So I add some padding in the PTS
                field.  This looks like a dirty kludge.  Oh well... */
             if (pad_len < 0) {
-                /* Packet is too big.  Let's try ommiting the PTS field */
+                /* Packet is too big.  Let's try omitting the PTS field */
                 datalen -= pts_len;
                 pts_len = 0;
                 pad_len = 0;
@@ -1439,7 +1392,7 @@ void vobsub_out_output(void *me, const unsigned char *packet,
                 perror("ERROR: vobsub blank padding write failed");
         } else if (remain < 0)
             fprintf(stderr,
-                    "\nERROR: wrong thing happenned...\n"
+                    "\nERROR: wrong thing happened...\n"
                     "  I wrote a %i data bytes spu packet and that's too long\n", len);
     }
 }

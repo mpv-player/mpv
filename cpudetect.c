@@ -52,6 +52,7 @@ CpuCaps gCpuCaps;
  * team for SSE support detection and more cpu detect code.
  */
 
+#if CONFIG_RUNTIME_CPUDETECT
 /* I believe this code works.  However, it has only been used on a PII and PIII */
 
 #if defined(__linux__) && defined(_POSIX_SOURCE) && !ARCH_X86_64
@@ -221,6 +222,7 @@ static void check_os_katmai_support( void )
     gCpuCaps.hasSSE=0;
 #endif /* __linux__ */
 }
+#endif
 
 
 // return TRUE if cpuid supported
@@ -352,6 +354,7 @@ void GetCpuCaps( CpuCaps *caps)
            gCpuCaps.has3DNowExt);
 #endif
 
+#if CONFIG_RUNTIME_CPUDETECT
         /* FIXME: Does SSE2 need more OS support, too? */
         if (caps->hasSSE)
             check_os_katmai_support();
@@ -361,7 +364,7 @@ void GetCpuCaps( CpuCaps *caps)
 //          caps->hasMMX2 = 0;
 //          caps->hasMMX = 0;
 
-#if !CONFIG_RUNTIME_CPUDETECT
+#else
 #if !HAVE_MMX
         if(caps->hasMMX) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"MMX supported but disabled\n");
         caps->hasMMX=0;

@@ -979,8 +979,9 @@ static int draw_frame(uint8_t *src[])
  *         These values are then inverted again with
            the texture filter D3DBLEND_INVSRCALPHA
  */
-void vo_draw_alpha_l8a8(int w, int h, unsigned char* src, unsigned char *srca,
-                        int srcstride, unsigned char* dstbase, int dststride)
+static void vo_draw_alpha_l8a8(int w, int h, unsigned char* src,
+                               unsigned char *srca, int srcstride,
+                               unsigned char* dstbase, int dststride)
 {
     int y;
     for (y = 0; y < h; y++) {

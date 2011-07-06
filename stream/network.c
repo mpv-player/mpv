@@ -467,7 +467,9 @@ nop_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctr
 		ret = recv( fd, buffer+len, size-len, 0 );
 		if( ret<0 ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"nop_streaming_read error : %s\n",strerror(errno));
-		}
+			ret = 0;
+		} else if (ret == 0)
+			stream_ctrl->status = streaming_stopped_e;
 		len += ret;
 //printf("read %d bytes from network\n", len );
 	}

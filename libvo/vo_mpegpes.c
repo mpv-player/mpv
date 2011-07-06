@@ -232,7 +232,7 @@ static void
 uninit(void)
 {
     if(ao_mpegpes_fd >= 0 && ao_mpegpes_fd != vo_mpegpes_fd) close(ao_mpegpes_fd);
-    ao_mpegpes_fd =- 1;
+    ao_mpegpes_fd = -1;
     if(vo_mpegpes_fd>=0){ close(vo_mpegpes_fd);vo_mpegpes_fd=-1;}
 }
 

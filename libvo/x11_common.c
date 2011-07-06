@@ -550,7 +550,8 @@ static void vo_x11_putkey_ext(struct vo *vo, int keysym, int modifiers)
 
 static const struct mp_keymap keymap[] = {
     // special keys
-    {wsEscape, KEY_ESC}, {wsBackSpace, KEY_BS}, {wsTab, KEY_TAB}, {wsEnter, KEY_ENTER},
+    {wsPause, KEY_PAUSE}, {wsEscape, KEY_ESC}, {wsBackSpace, KEY_BS},
+    {wsTab, KEY_TAB}, {wsEnter, KEY_ENTER},
 
     // cursor keys
     {wsLeft, KEY_LEFT}, {wsRight, KEY_RIGHT}, {wsUp, KEY_UP}, {wsDown, KEY_DOWN},
@@ -732,7 +733,6 @@ void vo_x11_uninit(struct vo *vo)
     {
         if (x11->vo_gc != None)
         {
-            XSetBackground(vo->x11->display, x11->vo_gc, 0);
             XFreeGC(vo->x11->display, x11->vo_gc);
             x11->vo_gc = None;
         }
@@ -1050,7 +1050,6 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
   struct MPOpts *opts = vo->opts;
   struct vo_x11_state *x11 = vo->x11;
   Display *mDisplay = vo->x11->display;
-  XGCValues xgcv;
   if (WinID >= 0) {
     vo_fs = flags & VOFLAG_FULLSCREEN;
     x11->window = WinID ? (Window)WinID : x11->rootwin;
@@ -1121,7 +1120,8 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
 final:
   if (x11->vo_gc != None)
     XFreeGC(mDisplay, x11->vo_gc);
-  x11->vo_gc = XCreateGC(mDisplay, x11->window, GCForeground, &xgcv);
+  x11->vo_gc = XCreateGC(mDisplay, x11->window, 0, NULL);
+
   XSync(mDisplay, False);
   x11->vo_mouse_autohide = 1;
   vo->event_fd = ConnectionNumber(x11->display);

@@ -19,6 +19,7 @@
 #ifndef MPLAYER_WSKEYS_H
 #define MPLAYER_WSKEYS_H
 
+#define wsPause         0x13 + 256
 #define wsUp            0x52 + 256
 #define wsDown          0x54 + 256
 #define wsLeft          0x51 + 256

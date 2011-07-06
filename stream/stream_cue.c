@@ -105,7 +105,7 @@ static struct cue_track_pos {
 /* number of tracks on the cd */
 static int nTracks = 0;
 
-static int digits2int(char s[2], int errval) {
+static int digits2int(const char s[2], int errval) {
   uint8_t a = s[0] - '0';
   uint8_t b = s[1] - '0';
   if (a > 9 || b > 9)
@@ -169,47 +169,50 @@ static int cue_getTrackinfo(FILE *fd_cue, char *Line, tTrack *track)
  * on the arrays to have the same size, thus we need to make
  * sure the sizes are in sync.
  */
-static int cue_find_bin (char *firstline) {
+static int cue_find_bin (const char *firstline) {
+  struct stat filestat;
   const char *cur_name;
-  int i,j;
   char bin_filename[256];
   char s[256];
   char t[256];
   int fd_bin;
+  int i = 0;
 
   /* get the filename out of that */
   /*                      12345 6  */
   mp_msg (MSGT_OPEN,MSGL_INFO, "[bincue] cue_find_bin(%s)\n", firstline);
   if (strncmp(firstline, "FILE \"",6)==0)
   {
-    i = 0;
-    j = 0;
-    while ( firstline[6 + i] != '"')
+    firstline += 6;
+    while ( *firstline && *firstline != '"')
     {
-      bin_filename[j] = firstline[6 + i];
+      bin_filename[i] = *firstline++;
 
-      /* if I found a path info, than delete all bevor it */
-      switch (bin_filename[j])
+      /* if I found a path info, then delete all before it */
+      switch (bin_filename[i])
       {
         case '\\':
-          j = 0;
+          i = 0;
           break;
 
         case '/':
-          j = 0;
+          i = 0;
           break;
 
         default:
-          j++;
+          i++;
       }
-      i++;
     }
-    bin_filename[j+1] = '\0';
-
   }
+  bin_filename[i] = '\0';
 
   fd_bin = -1;
   for (i = 0; fd_bin == -1 && i < 6; i++) {
+    if (i <=1 && bin_filename[0] == '\0')
+      continue;
+    if (i > 1 && strlen(cue_filename) < 3)
+      break;
+
     switch (i) {
     case 0:
       /* now try to open that file, without path */
@@ -222,22 +225,19 @@ static int cue_find_bin (char *firstline) {
       break;
     case 2:
       /* now I would say the whole filename is shit, build our own */
-      strncpy(s, cue_filename, strlen(cue_filename) - 3 );
-      s[strlen(cue_filename) - 3] = '\0';
-      strcat(s, "bin");
+      av_strlcpy(s, cue_filename, strlen(cue_filename) - 3 );
+      strcat(s, ".bin");
       cur_name = s;
       break;
     case 3:
       /* ok try it with path */
       snprintf(t, sizeof( t ), "%s/%s", bincue_path, s);
-      fd_bin = open (t, O_RDONLY);
       cur_name = t;
       break;
     case 4:
       /* now I would say the whole filename is shit, build our own */
-      strncpy(s, cue_filename, strlen(cue_filename) - 3 );
-      s[strlen(cue_filename) - 3] = '\0';
-      strcat(s, "img");
+      av_strlcpy(s, cue_filename, strlen(cue_filename) - 3 );
+      strcat(s, ".img");
       cur_name = s;
       break;
     case 5:
@@ -247,6 +247,10 @@ static int cue_find_bin (char *firstline) {
       break;
     }
     fd_bin = open(cur_name, O_RDONLY);
+    if (fstat(fd_bin, &filestat) == -1 || !S_ISREG(filestat.st_mode)) {
+        close(fd_bin);
+        fd_bin = -1;
+    }
     if (fd_bin == -1) {
       mp_tmsg(MSGT_OPEN,MSGL_STATUS, "[bincue] bin filename tested: %s\n",
               cur_name);
@@ -303,7 +307,7 @@ static inline int cue_mode_2_sector_size(int mode)
 }
 
 
-static int cue_read_cue (char *in_cue_filename)
+static int cue_read_cue (const char *in_cue_filename)
 {
   struct stat filestat;
   char sLine[256];
@@ -319,7 +323,7 @@ static int cue_read_cue (char *in_cue_filename)
   /* split the filename into a path and filename part */
   s = strdup(in_cue_filename);
   t = strrchr(s, '/');
-  if (t == (char *)NULL)
+  if (!t)
      t = ".";
   else {
      *t = '\0';

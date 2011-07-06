@@ -297,7 +297,9 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
       *gl_type = GL_UNSIGNED_BYTE;
       break;
     case IMGFMT_UYVY:
-    case IMGFMT_YUY2:
+    // IMGFMT_YUY2 would be more logical for the _REV format,
+    // but gives clearly swapped colors.
+    case IMGFMT_YVYU:
       *gl_texfmt = GL_YCBCR_MESA;
       *bpp = 16;
       *gl_format = GL_YCBCR_MESA;

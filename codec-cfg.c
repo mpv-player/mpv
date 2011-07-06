@@ -54,6 +54,7 @@
 #endif
 
 
+#include <libavutil/avutil.h>
 #include "libmpcodecs/img_format.h"
 #include "codec-cfg.h"
 
@@ -96,12 +97,12 @@ static int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
         goto err_out_too_many;
 
     do {
-        tmp = mmioFOURCC(s[0], s[1], s[2], s[3]);
+        tmp = MKTAG(s[0], s[1], s[2], s[3]);
         for (j = 0; j < i; j++)
             if (tmp == fourcc[j])
                 goto err_out_duplicated;
         fourcc[i] = tmp;
-        map[i] = alias ? mmioFOURCC(alias[0], alias[1], alias[2], alias[3]) : tmp;
+        map[i] = alias ? MKTAG(alias[0], alias[1], alias[2], alias[3]) : tmp;
         s += 4;
         i++;
     } while ((*(s++) == ',') && --freeslots);

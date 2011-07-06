@@ -1130,6 +1130,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
 
 void init_vo_spudec(struct MPContext *mpctx)
 {
+  unsigned width, height;
   spudec_free(vo_spudec);
   mpctx->initialized_flags &= ~INITIALIZED_SPUDEC;
   vo_spudec = NULL;
@@ -1139,17 +1140,20 @@ void init_vo_spudec(struct MPContext *mpctx)
     return;
 
   if (spudec_ifo) {
-    unsigned int palette[16], width, height;
+    unsigned int palette[16];
     current_module="spudec_init_vobsub";
     if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, -1, NULL) >= 0)
       vo_spudec=spudec_new_scaled(palette, width, height, NULL, 0);
   }
 
+    width  = mpctx->sh_video->disp_w;
+    height = mpctx->sh_video->disp_h;
+
 #ifdef CONFIG_DVDREAD
   if (vo_spudec==NULL && mpctx->stream->type==STREAMTYPE_DVD) {
     current_module="spudec_init_dvdread";
     vo_spudec=spudec_new_scaled(((dvd_priv_t *)(mpctx->stream->priv))->cur_pgc->palette,
-                                mpctx->sh_video->disp_w, mpctx->sh_video->disp_h,
+                                width, height,
                                 NULL, 0);
   }
 #endif
@@ -1158,14 +1162,14 @@ void init_vo_spudec(struct MPContext *mpctx)
   if (vo_spudec==NULL && mpctx->stream->type==STREAMTYPE_DVDNAV) {
     unsigned int *palette = mp_dvdnav_get_spu_clut(mpctx->stream);
     current_module="spudec_init_dvdnav";
-    vo_spudec=spudec_new_scaled(palette, mpctx->sh_video->disp_w, mpctx->sh_video->disp_h, NULL, 0);
+    vo_spudec=spudec_new_scaled(palette, width, height, NULL, 0);
   }
 #endif
 
   if (vo_spudec==NULL) {
     sh_sub_t *sh = mpctx->d_sub->sh;
     current_module="spudec_init_normal";
-    vo_spudec=spudec_new_scaled(NULL, mpctx->sh_video->disp_w, mpctx->sh_video->disp_h, sh->extradata, sh->extradata_len);
+    vo_spudec=spudec_new_scaled(NULL, width, height, sh->extradata, sh->extradata_len);
     spudec_set_font_factor(vo_spudec,font_factor);
   }
 
@@ -1336,6 +1340,50 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
     mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "%s\r", line);
   }
   free(line);
+}
+
+struct stream_dump_progress {
+    uint64_t count;
+    unsigned start_time;
+    unsigned last_print_time;
+};
+
+static void stream_dump_progress_start(struct stream_dump_progress *p)
+{
+    p->start_time = p->last_print_time = GetTimerMS();
+    p->count = 0;
+}
+
+static void stream_dump_progress(struct stream_dump_progress *p,
+                                 uint64_t len, stream_t *stream)
+{
+    p->count += len;
+    unsigned t = GetTimerMS();
+    if (t - p->last_print_time < 1000)
+        return;
+
+    uint64_t start = stream->start_pos;
+    uint64_t end   = stream->end_pos;
+    uint64_t pos   = stream->pos;
+
+    p->last_print_time = t;
+    /* TODO: pretty print sizes; ETA */
+    if (end > start && pos >= start && pos <= end) {
+        mp_tmsg(MSGT_STATUSLINE, MSGL_STATUS,
+               "dump: %"PRIu64" bytes written (~%.1f%%)",
+               p->count, 100.0 * (pos - start) / (end - start));
+        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "\r");
+    } else {
+        mp_tmsg(MSGT_STATUSLINE, MSGL_STATUS,
+               "dump: %"PRIu64" bytes written", p->count);
+        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "\r");
+    }
+}
+
+static void stream_dump_progress_end(struct stream_dump_progress *p, char *name)
+{
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, "dump: %"PRIu64" bytes written to '%s'.\n",
+           p->count, name);
 }
 
 /**
@@ -2228,7 +2276,7 @@ static mp_image_t *mp_dvdnav_restore_smpi(struct MPContext *mpctx,
     if (mpctx->stream->type != STREAMTYPE_DVDNAV)
         return decoded_frame;
 
-    /// a change occured in dvdnav stream
+    /// a change occurred in dvdnav stream
     if (mp_dvdnav_cell_has_changed(mpctx->stream,0)) {
         mp_dvdnav_read_wait(mpctx->stream, 1, 1);
         mp_dvdnav_context_free(mpctx);
@@ -2273,12 +2321,16 @@ static void mp_dvdnav_save_smpi(struct MPContext *mpctx, int in_size,
         return;
 
     free(mpctx->nav_buffer);
+    mpctx->nav_buffer  = NULL;
+    mpctx->nav_start   = NULL;
+    mpctx->nav_in_size = -1;
 
-    mpctx->nav_buffer = malloc(in_size);
-    mpctx->nav_start = start;
-    mpctx->nav_in_size = mpctx->nav_buffer ? in_size : -1;
-    if (mpctx->nav_buffer)
+    if (in_size > 0)
+        mpctx->nav_buffer = malloc(in_size);
+    if (mpctx->nav_buffer) {
+        mpctx->nav_start = start;
         memcpy(mpctx->nav_buffer,start,in_size);
+    }
 
     if (decoded_frame && mpctx->nav_smpi != decoded_frame)
         mpctx->nav_smpi = mp_dvdnav_copy_mpi(mpctx->nav_smpi,decoded_frame);
@@ -4284,6 +4336,8 @@ if(stream_dump_type==5){
     int chapter = opts->chapterrange[0] - 1;
     stream_control(mpctx->stream, STREAM_CTRL_SEEK_TO_CHAPTER, &chapter);
   }
+  struct stream_dump_progress info;
+  stream_dump_progress_start(&info);
   while(!mpctx->stream->eof && !async_quit_request){
       len=stream_read(mpctx->stream,buf,4096);
       if(len>0) {
@@ -4292,6 +4346,7 @@ if(stream_dump_type==5){
           exit_player(mpctx, EXIT_ERROR);
         }
       }
+      stream_dump_progress(&info, len, mpctx->stream);
       if (opts->chapterrange[1] > 0) {
         int chapter = -1;
         if (stream_control(mpctx->stream, STREAM_CTRL_GET_CURRENT_CHAPTER,
@@ -4304,6 +4359,7 @@ if(stream_dump_type==5){
     mp_tmsg(MSGT_GLOBAL,MSGL_FATAL,"%s: Error writing file.\n",opts->stream_dump_name);
     exit_player(mpctx, EXIT_ERROR);
   }
+  stream_dump_progress_end(&info, opts->stream_dump_name);
   mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Stream dump complete.\n");
   exit_player_with_rc(mpctx, EXIT_EOF, 0);
 }
@@ -4509,12 +4565,17 @@ if((stream_dump_type)&&(stream_dump_type<4)){
     mp_tmsg(MSGT_CPLAYER,MSGL_FATAL,"Cannot open dump file.\n");
     exit_player(mpctx, EXIT_ERROR);
   }
+  struct stream_dump_progress info;
+  stream_dump_progress_start(&info);
   while(!ds->eof){
     unsigned char* start;
     int in_size=ds_get_packet(ds,&start);
     if( (mpctx->demuxer->file_format==DEMUXER_TYPE_AVI || mpctx->demuxer->file_format==DEMUXER_TYPE_ASF || mpctx->demuxer->file_format==DEMUXER_TYPE_MOV)
 	&& stream_dump_type==2) fwrite(&in_size,1,4,f);
-    if(in_size>0) fwrite(start,in_size,1,f);
+    if(in_size>0) {
+        fwrite(start,in_size,1,f);
+        stream_dump_progress(&info, in_size, mpctx->stream);
+    }
     if (opts->chapterrange[1] > 0) {
       int cur_chapter = demuxer_get_current_chapter(mpctx->demuxer, 0);
       if(cur_chapter!=-1 && cur_chapter+1 > opts->chapterrange[1])
@@ -4522,6 +4583,7 @@ if((stream_dump_type)&&(stream_dump_type<4)){
     }
   }
   fclose(f);
+  stream_dump_progress_end(&info, opts->stream_dump_name);
   mp_tmsg(MSGT_CPLAYER ,MSGL_INFO, "Stream dump complete.\n");
   exit_player_with_rc(mpctx, EXIT_EOF, 0);
 }
