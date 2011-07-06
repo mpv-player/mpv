@@ -42,6 +42,7 @@
 #include "libavformat/avio.h"
 #include "libavutil/avutil.h"
 #include "libavutil/avstring.h"
+#include <libavutil/mathematics.h>
 #include "libavcodec/opt.h"
 
 #include "mp_taglists.h"
