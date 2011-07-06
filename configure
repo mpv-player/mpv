@@ -2321,6 +2321,7 @@ elif test -z "$CFLAGS" ; then
   else
     CFLAGS="-O2 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
     WARNFLAGS="-Wall -Wno-switch -Wno-parentheses -Wpointer-arith -Wredundant-decls"
+    ERRORFLAGS="-Werror-implicit-function-declaration"
     extra_ldflags="$extra_ldflags -ffast-math"
   fi
 else
@@ -6654,8 +6655,8 @@ INSTALL = $_install
 INSTALLSTRIP = $_install_strip
 WINDRES = $_windres
 
-CFLAGS   = $WARNFLAGS $WARN_CFLAGS $CFLAGS $extra_cflags
-CXXFLAGS = $WARNFLAGS $CXXFLAGS $extra_cflags $extra_cxxflags
+CFLAGS   = $WARNFLAGS $ERRORFLAGS $WARN_CFLAGS $CFLAGS $extra_cflags
+CXXFLAGS = $WARNFLAGS $ERRORFLAGS $CXXFLAGS $extra_cflags $extra_cxxflags
 DEPFLAGS = $DEPFLAGS
 
 CFLAGS_LIBDVDCSS         = $cflags_libdvdcss
