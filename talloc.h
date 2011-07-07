@@ -29,6 +29,14 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+/* HACK: libsmbclient uses dynamically linked libtalloc.so which has
+ * identically named symbols. This name collision caused a crash under
+ * stream_smb when trying to play anything with smb://. This hack
+ * prevents the symbols declared here from being visible to outside
+ * shared libraries and fixes the crash.
+ */
+#pragma GCC visibility push(hidden)
+
 /* this is only needed for compatibility with the old talloc */
 typedef void TALLOC_CTX;
 
@@ -180,4 +188,6 @@ char *talloc_asprintf(const void *t, const char *fmt, ...) PRINTF_ATTRIBUTE(2,3)
 char *talloc_asprintf_append(char *s, const char *fmt, ...) PRINTF_ATTRIBUTE(2,3);
 char *talloc_asprintf_append_buffer(char *s, const char *fmt, ...) PRINTF_ATTRIBUTE(2,3);
 
+// end of visibility hack from above
+#pragma GCC visibility pop
 #endif
