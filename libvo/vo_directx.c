@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <libavutil/common.h>
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
