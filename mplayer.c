@@ -2248,7 +2248,7 @@ static void mp_dvdnav_reset_stream (MPContext *ctx) {
         /// free audio packets and reset
         ds_free_packs(ctx->d_audio);
         audio_delay -= ctx->sh_audio->stream_delay;
-        ctx->delay =- audio_delay;
+        ctx->delay = -audio_delay;
         ao_reset(ctx->ao);
         resync_audio_stream(ctx->sh_audio);
     }

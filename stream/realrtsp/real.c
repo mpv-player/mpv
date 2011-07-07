@@ -614,9 +614,10 @@ autherr:
       convert_timestamp(str, &e_ss, &e_ms);
       free(str);
     }
-    str = buf + sprintf(buf, s_ms ? "%s%d.%d-" : "%s%d-", "Range: npt=", s_ss, s_ms);
-    if (e_ss || e_ms)
-      sprintf(str, e_ms ? "%d.%d" : "%d", e_ss, e_ms);
+    if (s_ms) str = buf + sprintf(buf, "%s%d.%d-", "Range: npt=", s_ss, s_ms);
+    else      str = buf + sprintf(buf, "%s%d-"   , "Range: npt=", s_ss      );
+    if      (e_ms) sprintf(str, "%d.%d", e_ss, e_ms);
+    else if (e_ss) sprintf(str, "%d",    e_ss      );
   }
   rtsp_schedule_field(rtsp_session, buf);
   /* and finally send a play request */

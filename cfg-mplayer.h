@@ -529,11 +529,11 @@ const m_option_t common_opts[] = {
 
     OPT_MAKE_FLAGS("hr-mp3-seek", hr_mp3_seek, 0),
 
-    { "rawaudio", &demux_rawaudio_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-    { "rawvideo", &demux_rawvideo_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+    { "rawaudio", (void *)&demux_rawaudio_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+    { "rawvideo", (void *)&demux_rawvideo_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
 #ifdef CONFIG_CDDA
-    { "cdda", &cdda_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+    { "cdda", (void *)&cdda_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 
     // demuxer.c - select audio/sub file/demuxer

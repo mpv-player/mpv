@@ -515,6 +515,6 @@ int parse_timestring(const char *str, double *time, char endchar);
 #define OPT_SETTINGSLIST(optname, varname, flags, objlist) {optname, NULL, &m_option_type_obj_settings_list, flags, 0, 0, objlist, 1, offsetof(struct MPOpts, varname)}
 #define OPT_AUDIOFORMAT(optname, varname, flags) {optname, NULL, &m_option_type_afmt, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_HELPER_REMOVEPAREN(...) __VA_ARGS__
-#define OPT_CHOICE(optname, varname, flags, choices) {optname, NULL, &m_option_type_choice, flags, 0, 0, &(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, 1, offsetof(struct MPOpts, varname)}
+#define OPT_CHOICE(optname, varname, flags, choices) {optname, NULL, &m_option_type_choice, flags, 0, 0, (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, 1, offsetof(struct MPOpts, varname)}
 
 #endif /* MPLAYER_M_OPTION_H */

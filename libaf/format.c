@@ -123,7 +123,7 @@ char* af_fmt2str(int format, char* str, int size)
     case(AF_FORMAT_IMA_ADPCM):
       i+=snprintf(&str[i],size-i,"IMA-ADPCM "); break;
     default:
-      i+=snprintf(&str[i],size-i,mp_gtext("unknown format "));
+      i+=snprintf(&str[i],size-i,"%s",mp_gtext("unknown format "));
     }
   }
   else{

@@ -144,7 +144,7 @@ static void list_formats(void)
 {
     mp_msg(MSGT_DEMUX, MSGL_INFO, "Available lavf input formats:\n");
     AVInputFormat *fmt = NULL;
-    while (fmt = av_iformat_next(fmt))
+    while ((fmt = av_iformat_next(fmt)))
         mp_msg(MSGT_DEMUX, MSGL_INFO, "%15s : %s\n", fmt->name, fmt->long_name);
 }
 

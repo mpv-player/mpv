@@ -1549,7 +1549,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 			return 1;
 		}
 	}
-	else if(((stream_id >= 0xe0) && (stream_id <= 0xef)) || (stream_id == 0xfd && type_from_pmt != UNKNOWN))
+	else if((stream_id >= 0xe0 && stream_id <= 0xef) || (stream_id == 0xfd && type_from_pmt != UNKNOWN))
 	{
 		es->start   = p;
 		es->size    = packet_len;
@@ -1563,7 +1563,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 		mp_msg(MSGT_DEMUX, MSGL_DBG2, "pes_parse2: M2V size %d\n", es->size);
 		return 1;
 	}
-	else if ((stream_id == 0xfa))
+	else if (stream_id == 0xfa)
 	{
 		int l;
 
