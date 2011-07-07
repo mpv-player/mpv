@@ -2319,6 +2319,8 @@ elif test -z "$CFLAGS" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe -xc99 -xregs=frameptr"
   elif test "$cc_vendor" = "clang"; then
     CFLAGS="-O2 $_march $_pipe"
+    WARNFLAGS="-Wall -Wno-switch-enum -Wno-logical-op-parentheses -Wpointer-arith -Wundef -Wno-pointer-sign -Wmissing-prototypes"
+    ERRORFLAGS="-Werror=implicit-function-declaration"
   elif test "$cc_vendor" != "gnu" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe"
   else
