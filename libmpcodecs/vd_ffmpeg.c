@@ -72,7 +72,6 @@ typedef struct {
     int ip_count;
     int b_count;
     AVRational last_sample_aspect_ratio;
-    int lowres;
     enum AVDiscard skip_frame;
 } vd_ffmpeg_ctx;
 
@@ -167,7 +166,6 @@ static int init(sh_video_t *sh){
     AVCodecContext *avctx;
     vd_ffmpeg_ctx *ctx;
     AVCodec *lavc_codec;
-    int lowres_w=0;
     int do_vis_debug= lavc_param->vismv || (lavc_param->debug&(FF_DEBUG_VIS_MB_TYPE|FF_DEBUG_VIS_QP));
 
     init_avcodec();
@@ -268,10 +266,12 @@ static int init(sh_video_t *sh){
     avctx->skip_bottom= lavc_param->skip_bottom;
     if(lavc_param->lowres_str != NULL)
     {
-        sscanf(lavc_param->lowres_str, "%d,%d", &ctx->lowres, &lowres_w);
-        if(ctx->lowres < 1 || ctx->lowres > 16 || (lowres_w > 0 && avctx->width < lowres_w))
-            ctx->lowres = 0;
-        avctx->lowres = ctx->lowres;
+        int lowres, lowres_w;
+        sscanf(lavc_param->lowres_str, "%d,%d", &lowres, &lowres_w);
+        if (lowres < 1 || lowres > 16 ||
+                lowres_w > 0 && avctx->width < lowres_w)
+            lowres = 0;
+        avctx->lowres = lowres;
     }
     avctx->skip_loop_filter = str2AVDiscard(lavc_param->skip_loop_filter_str);
     avctx->skip_idct = str2AVDiscard(lavc_param->skip_idct_str);
@@ -428,7 +428,7 @@ static void draw_slice(struct AVCodecContext *s,
     int start=0, i;
     int width= s->width;
     vd_ffmpeg_ctx *ctx = sh->context;
-    int skip_stride= ((width << ctx->lowres)+15)>>4;
+    int skip_stride = ((width << s->lowres)+15) >> 4;
     uint8_t *skip= &s->coded_frame->mbskip_table[(y>>4)*skip_stride];
     int threshold= s->coded_frame->age;
     if(s->pict_type!=B_TYPE){
@@ -478,8 +478,8 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
     // if sh->ImageDesc is non-NULL, it means we decode QuickTime(tm) video.
     // use dimensions from BIH to avoid black borders at the right and bottom.
     if (sh->bih && sh->ImageDesc) {
-        width = sh->bih->biWidth >> ctx->lowres;
-        height = sh->bih->biHeight >> ctx->lowres;
+        width = sh->bih->biWidth >> avctx->lowres;
+        height = sh->bih->biHeight >> avctx->lowres;
     }
 
      // it is possible another vo buffers to be used after vo config()
@@ -810,8 +810,8 @@ static struct mp_image *decode(struct sh_video *sh, void *data, int len,
         // average MB quantizer
         {
             int x, y;
-            int w = ((avctx->width  << ctx->lowres)+15) >> 4;
-            int h = ((avctx->height << ctx->lowres)+15) >> 4;
+            int w = ((avctx->width  << avctx->lowres)+15) >> 4;
+            int h = ((avctx->height << avctx->lowres)+15) >> 4;
             int8_t *q = pic->qscale_table;
             for(y = 0; y < h; y++) {
                 for(x = 0; x < w; x++)
