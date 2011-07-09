@@ -73,6 +73,7 @@ typedef struct {
     int b_count;
     AVRational last_sample_aspect_ratio;
     int lowres;
+    enum AVDiscard skip_frame;
 } vd_ffmpeg_ctx;
 
 #include "m_option.h"
@@ -283,6 +284,9 @@ static int init(sh_video_t *sh){
             return 0;
         }
     }
+
+    // Do this after the above avopt handling in case it changes values
+    ctx->skip_frame = avctx->skip_frame;
 
     mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "libavcodec.size: %d x %d\n", avctx->width, avctx->height);
     switch (sh->format) {
@@ -756,7 +760,7 @@ static struct mp_image *decode(struct sh_video *sh, void *data, int len,
     else if (flags & 1)
         avctx->skip_frame = AVDISCARD_NONREF;
     else
-        avctx->skip_frame = 0;
+        avctx->skip_frame = ctx->skip_frame;
 
     mp_msg(MSGT_DECVIDEO, MSGL_DBG3, "vd_ffmpeg data: %04x, %04x, %04x, %04x\n",
            ((int *)data)[0], ((int *)data)[1], ((int *)data)[2], ((int *)data)[3]);
