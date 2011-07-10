@@ -4242,7 +4242,8 @@ while (opts->player_idle_mode && !mpctx->filename) {
 	mp_tmsg(MSGT_CPLAYER,MSGL_INFO,"\nPlaying %s.\n",
 		filename_recode(mpctx->filename));
         if(use_filename_title && opts->vo_wintitle == NULL)
-            opts->vo_wintitle = strdup(mp_basename(mpctx->filename));
+            opts->vo_wintitle = talloc_strdup(NULL,
+                                              mp_basename(mpctx->filename));
     }
 
 if (edl_filename) {
