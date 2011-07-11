@@ -52,6 +52,8 @@ typedef enum stereo_code {
     MONO_R,             //mono output for debugging (right eye only)
     SIDE_BY_SIDE_LR,    //side by side parallel (left eye left, right eye right)
     SIDE_BY_SIDE_RL,    //side by side crosseye (right eye left, left eye right)
+    SIDE_BY_SIDE_2_LR,  //side by side parallel with half width resolution
+    SIDE_BY_SIDE_2_RL,  //side by side crosseye with half width resolution
     ABOVE_BELOW_LR,     //above-below (left eye above, right eye below)
     ABOVE_BELOW_RL,     //above-below (right eye above, left eye below)
     ABOVE_BELOW_2_LR,   //above-below with half height resolution
@@ -150,10 +152,14 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
 
     //check input format
     switch (vf->priv->in.fmt) {
+    case SIDE_BY_SIDE_2_LR:
+        d_width                *= 2;
     case SIDE_BY_SIDE_LR:
         vf->priv->width         = width / 2;
         vf->priv->in.off_right  = vf->priv->width * 3;
         break;
+    case SIDE_BY_SIDE_2_RL:
+        d_width                *= 2;
     case SIDE_BY_SIDE_RL:
         vf->priv->width         = width / 2;
         vf->priv->in.off_left   = vf->priv->width * 3;
@@ -199,10 +205,14 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
         memcpy(vf->priv->ana_matrix, ana_coeff[vf->priv->out.fmt],
                sizeof(vf->priv->ana_matrix));
         break;
+    case SIDE_BY_SIDE_2_LR:
+        d_width                /= 2;
     case SIDE_BY_SIDE_LR:
         vf->priv->out.width     = vf->priv->width * 2;
         vf->priv->out.off_right = vf->priv->width * 3;
         break;
+    case SIDE_BY_SIDE_2_RL:
+        d_width                /= 2;
     case SIDE_BY_SIDE_RL:
         vf->priv->out.width     = vf->priv->width * 2;
         vf->priv->out.off_left  = vf->priv->width * 3;
@@ -276,6 +286,8 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
         switch (vf->priv->out.fmt) {
         case SIDE_BY_SIDE_LR:
         case SIDE_BY_SIDE_RL:
+        case SIDE_BY_SIDE_2_LR:
+        case SIDE_BY_SIDE_2_RL:
         case ABOVE_BELOW_LR:
         case ABOVE_BELOW_RL:
         case ABOVE_BELOW_2_LR:
@@ -409,6 +421,10 @@ static const struct format_preset {
     {"side_by_side_left_first",          SIDE_BY_SIDE_LR},
     {"sbsr",                             SIDE_BY_SIDE_RL},
     {"side_by_side_right_first",         SIDE_BY_SIDE_RL},
+    {"sbs2l",                              SIDE_BY_SIDE_2_LR},
+    {"side_by_side_half_width_left_first", SIDE_BY_SIDE_2_LR},
+    {"sbs2r",                              SIDE_BY_SIDE_2_RL},
+    {"side_by_side_half_width_right_first",SIDE_BY_SIDE_2_RL},
     {"abl",                              ABOVE_BELOW_LR},
     {"above_below_left_first",           ABOVE_BELOW_LR},
     {"abr",                              ABOVE_BELOW_RL},
