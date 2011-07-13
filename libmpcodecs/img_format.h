@@ -146,6 +146,7 @@
 #define IMGFMT_420P16 IMGFMT_420P16_BE
 #define IMGFMT_420P10 IMGFMT_420P10_BE
 #define IMGFMT_420P9 IMGFMT_420P9_BE
+#define IMGFMT_IS_YUVP16_NE(fmt) IMGFMT_IS_YUVP16_BE(fmt)
 #else
 #define IMGFMT_444P16 IMGFMT_444P16_LE
 #define IMGFMT_444P10 IMGFMT_444P10_LE
@@ -155,11 +156,12 @@
 #define IMGFMT_420P16 IMGFMT_420P16_LE
 #define IMGFMT_420P10 IMGFMT_420P10_LE
 #define IMGFMT_420P9 IMGFMT_420P9_LE
+#define IMGFMT_IS_YUVP16_NE(fmt) IMGFMT_IS_YUVP16_LE(fmt)
 #endif
 
+// These macros are misnamed - they actually match 9, 10 or 16 bits
 #define IMGFMT_IS_YUVP16_LE(fmt) (((fmt - 0x51000034) & 0xfc0000ff) == 0)
 #define IMGFMT_IS_YUVP16_BE(fmt) (((fmt - 0x34000051) & 0xff0000fc) == 0)
-#define IMGFMT_IS_YUVP16_NE(fmt) (((fmt  ^ IMGFMT_420P16   ) & 0xff0000ff) == 0)
 #define IMGFMT_IS_YUVP16(fmt)    (IMGFMT_IS_YUVP16_LE(fmt) || IMGFMT_IS_YUVP16_BE(fmt))
 
 /* Packed YUV Formats */
