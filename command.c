@@ -2610,7 +2610,7 @@ static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
 #ifdef CONFIG_DVDNAV
 static const struct {
   const char *name;
-  const mp_command_type cmd;
+  const enum mp_command_type cmd;
 } mp_dvdnav_bindings[] = {
   { "up",       MP_CMD_DVDNAV_UP              },
   { "down",     MP_CMD_DVDNAV_DOWN            },
@@ -3468,7 +3468,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         case MP_CMD_DVDNAV:{
                 int button = -1;
                 int i;
-                mp_command_type command = 0;
+                enum mp_command_type command = 0;
                 if (mpctx->stream->type != STREAMTYPE_DVDNAV)
                     break;
 

@@ -26,7 +26,7 @@
 /* MacOSX Driver */
 int mp_input_ar_init(void);
 int mp_input_ar_read(void *ctx, int fd);
-void mp_input_ar_close(int fd);
+int mp_input_ar_close(int fd);
 
 /* Linux Driver */
 int mp_input_appleir_init(char* dev);

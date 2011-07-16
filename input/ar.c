@@ -412,7 +412,7 @@ int mp_input_ar_read(void *ctx, int fd)
     return ret | down;
 }
 
-void mp_input_ar_close(int fd)
+int mp_input_ar_close(int fd)
 {
     if (initialized == 0)
         return;

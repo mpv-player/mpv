@@ -113,8 +113,8 @@ int mp_input_lirc_read(int fd,char* dest, int s) {
 
 }
 
-void
-mp_input_lirc_close(int fd) {
+int mp_input_lirc_close(int fd)
+{
   free(cmd_buf);
   cmd_buf = NULL;
   lirc_freeconfig(lirc_config);

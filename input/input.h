@@ -20,7 +20,7 @@
 #define MPLAYER_INPUT_H
 
 // All command IDs
-typedef enum {
+enum mp_command_type {
     MP_CMD_SEEK,
     MP_CMD_AUDIO_DELAY,
     MP_CMD_QUIT,
@@ -158,7 +158,7 @@ typedef enum {
     MP_CMD_AF_DEL,
     MP_CMD_AF_CLR,
     MP_CMD_AF_CMDLINE,
-} mp_command_type;
+};
 
 // The arg types
 #define MP_CMD_ARG_INT 0
@@ -184,42 +184,26 @@ typedef enum {
 #define MP_INPUT_RELEASE_ALL -5
 
 
-#ifndef MP_MAX_KEY_DOWN
-#define MP_MAX_KEY_DOWN 32
-#endif
-
 struct input_ctx;
 
-typedef union mp_cmd_arg_value {
-    int i;
-    float f;
-    char *s;
-    void *v;
-} mp_cmd_arg_value_t;
-
-typedef struct mp_cmd_arg {
+struct mp_cmd_arg {
     int type;
-    mp_cmd_arg_value_t v;
-} mp_cmd_arg_t;
+    union {
+        int i;
+        float f;
+        char *s;
+        void *v;
+    } v;
+};
 
 typedef struct mp_cmd {
     int id;
     char *name;
     int nargs;
-    mp_cmd_arg_t args[MP_CMD_MAX_ARGS];
+    struct mp_cmd_arg args[MP_CMD_MAX_ARGS];
     int pausing;
 } mp_cmd_t;
 
-
-// These typedefs are for the drivers. They are the functions used to retrieve
-// the next key code or command.
-
-// These functions should return the key code or one of the error codes
-typedef int (*mp_key_func_t)(void *ctx, int fd);
-// These functions should act like read but they must use our error code (if needed ;-)
-typedef int (*mp_cmd_func_t)(int fd, char *dest, int size);
-// These are used to close the driver
-typedef void (*mp_close_func_t)(int fd);
 
 // Set this to grab all incoming key codes
 extern int (*mp_input_key_cb)(int code);
@@ -231,21 +215,24 @@ typedef int (*mp_input_cmd_filter)(struct mp_cmd *cmd, void *ctx);
  * "select" tells whether to use select() on the fd to determine when to
  * try reading.
  * "read_func" is optional. If NULL a default function which reads data
- * directly from the fd will be used.
- * "close_func" will be called when closing. Can be NULL.
+ * directly from the fd will be used. It must return either text data
+ * or one of the MP_INPUT error codes above.
+ * "close_func" will be called when closing. Can be NULL. Its return value
+ * is ignored (it's only there to allow using standard close() as the func).
  */
 int mp_input_add_cmd_fd(struct input_ctx *ictx, int fd, int select,
-                        mp_cmd_func_t read_func, mp_close_func_t close_func);
+                        int read_func(int fd, char *dest, int size),
+                        int close_func(int fd));
 
 // This removes a cmd driver, you usually don't need to use it.
 void mp_input_rm_cmd_fd(struct input_ctx *ictx, int fd);
 
 /* The args are similar to the cmd version above, except you must give
- * a read_func.
+ * a read_func, and it should return key codes (ASCII plus keycodes.h).
  */
 int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
-                        mp_key_func_t read_func, mp_close_func_t close_func,
-                        void *ctx);
+                        int read_func(void *ctx, int fd),
+                        int close_func(int fd), void *ctx);
 
 // As for the cmd one you usually don't need this function.
 void mp_input_rm_key_fd(struct input_ctx *ictx, int fd);

@@ -31,9 +31,6 @@
 #include <ctype.h>
 
 #include "input.h"
-#ifdef MP_DEBUG
-#include <assert.h>
-#endif
 #include "mp_fifo.h"
 #include "keycodes.h"
 #include "osdep/timer.h"
@@ -58,15 +55,17 @@
 
 #include "ar.h"
 
-typedef struct mp_cmd_bind {
+#define MP_MAX_KEY_DOWN 32
+
+struct cmd_bind {
     int input[MP_MAX_KEY_DOWN + 1];
     char *cmd;
-} mp_cmd_bind_t;
+};
 
-typedef struct mp_key_name {
+struct key_name {
     int key;
     char *name;
-} mp_key_name_t;
+};
 
 /// This array defines all known commands.
 /// The first field is an id used to recognize the command without too many strcmp.
@@ -224,7 +223,7 @@ static const mp_cmd_t mp_cmds[] = {
 /// The names of the keys as used in input.conf
 /// If you add some new keys, you also need to add them here
 
-static const mp_key_name_t key_names[] = {
+static const struct key_name key_names[] = {
   { ' ', "SPACE" },
   { '#', "SHARP" },
   { KEY_ENTER, "ENTER" },
@@ -380,7 +379,7 @@ static const mp_key_name_t key_names[] = {
   { 0, NULL }
 };
 
-struct mp_key_name modifier_names[] = {
+struct key_name modifier_names[] = {
     { KEY_MODIFIER_SHIFT, "Shift" },
     { KEY_MODIFIER_CTRL,  "Ctrl" },
     { KEY_MODIFIER_ALT,   "Alt" },
@@ -394,7 +393,7 @@ struct mp_key_name modifier_names[] = {
 // The first arg is a null terminated array of key codes.
 // The second is the command
 
-static const mp_cmd_bind_t def_cmd_binds[] = {
+static const struct cmd_bind def_cmd_binds[] = {
 
   { { MOUSE_BTN0_DBL, 0 }, "vo_fullscreen" },
   { { MOUSE_BTN2, 0 }, "pause" },
@@ -553,13 +552,13 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
 
 #define CMD_QUEUE_SIZE 100
 
-typedef struct mp_input_fd {
+struct input_fd {
     int fd;
     union {
-        mp_key_func_t key;
-        mp_cmd_func_t cmd;
+        int (*key)(void *ctx, int fd);
+        int (*cmd)(int fd, char *dest, int size);
     } read_func;
-    mp_close_func_t close_func;
+    int (*close_func)(int fd);
     void *ctx;
     unsigned eof : 1;
     unsigned drop : 1;
@@ -569,22 +568,18 @@ typedef struct mp_input_fd {
     // These fields are for the cmd fds.
     char *buffer;
     int pos, size;
-} mp_input_fd_t;
-
-typedef struct mp_cmd_filter mp_cmd_filter_t;
-
-struct mp_cmd_filter {
-    mp_input_cmd_filter filter;
-    void *ctx;
-    mp_cmd_filter_t *next;
 };
 
-typedef struct mp_cmd_bind_section mp_cmd_bind_section_t;
+struct cmd_filter {
+    mp_input_cmd_filter filter;
+    void *ctx;
+    struct cmd_filter *next;
+};
 
-struct mp_cmd_bind_section {
-    mp_cmd_bind_t *cmd_binds;
+struct cmd_bind_section {
+    struct cmd_bind *cmd_binds;
     char *section;
-    mp_cmd_bind_section_t *next;
+    struct cmd_bind_section *next;
 };
 
 struct input_ctx {
@@ -603,17 +598,17 @@ struct input_ctx {
 
     bool default_bindings;
     // List of command binding sections
-    mp_cmd_bind_section_t *cmd_bind_sections;
+    struct cmd_bind_section *cmd_bind_sections;
     // Name of currently used command section
     char *section;
     // The command binds of current section
-    mp_cmd_bind_t *cmd_binds;
-    mp_cmd_bind_t *cmd_binds_default;
+    struct cmd_bind *cmd_binds;
+    struct cmd_bind *cmd_binds_default;
 
-    mp_input_fd_t key_fds[MP_MAX_KEY_FD];
+    struct input_fd key_fds[MP_MAX_KEY_FD];
     unsigned int num_key_fd;
 
-    mp_input_fd_t cmd_fds[MP_MAX_CMD_FD];
+    struct input_fd cmd_fds[MP_MAX_CMD_FD];
     unsigned int num_cmd_fd;
 
     mp_cmd_t *cmd_queue[CMD_QUEUE_SIZE];
@@ -621,7 +616,7 @@ struct input_ctx {
 };
 
 
-static mp_cmd_filter_t *cmd_filters = NULL;
+static struct cmd_filter *cmd_filters = NULL;
 
 // Callback to allow the menu filter to grab the incoming keys
 int (*mp_input_key_cb)(int code) = NULL;
@@ -691,7 +686,8 @@ static char *get_key_combo_name(int *keys, int max)
 }
 
 int mp_input_add_cmd_fd(struct input_ctx *ictx, int fd, int select,
-                        mp_cmd_func_t read_func, mp_close_func_t close_func)
+                        int read_func(int fd, char *dest, int size),
+                        int close_func(int fd))
 {
     if (ictx->num_cmd_fd == MP_MAX_CMD_FD) {
         mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many command file descriptors, "
@@ -704,7 +700,7 @@ int mp_input_add_cmd_fd(struct input_ctx *ictx, int fd, int select,
         return 0;
     }
 
-    ictx->cmd_fds[ictx->num_cmd_fd] = (struct mp_input_fd){
+    ictx->cmd_fds[ictx->num_cmd_fd] = (struct input_fd){
         .fd = fd,
         .read_func.cmd = read_func ? read_func : default_cmd_func,
         .close_func = close_func,
@@ -717,7 +713,7 @@ int mp_input_add_cmd_fd(struct input_ctx *ictx, int fd, int select,
 
 void mp_input_rm_cmd_fd(struct input_ctx *ictx, int fd)
 {
-    struct mp_input_fd *cmd_fds = ictx->cmd_fds;
+    struct input_fd *cmd_fds = ictx->cmd_fds;
     unsigned int i;
 
     for (i = 0; i < ictx->num_cmd_fd; i++) {
@@ -732,13 +728,13 @@ void mp_input_rm_cmd_fd(struct input_ctx *ictx, int fd)
 
     if (i + 1 < ictx->num_cmd_fd)
         memmove(&cmd_fds[i], &cmd_fds[i + 1],
-                (ictx->num_cmd_fd - i - 1) * sizeof(mp_input_fd_t));
+                (ictx->num_cmd_fd - i - 1) * sizeof(struct input_fd));
     ictx->num_cmd_fd--;
 }
 
 void mp_input_rm_key_fd(struct input_ctx *ictx, int fd)
 {
-    struct mp_input_fd *key_fds = ictx->key_fds;
+    struct input_fd *key_fds = ictx->key_fds;
     unsigned int i;
 
     for (i = 0; i < ictx->num_key_fd; i++) {
@@ -752,13 +748,13 @@ void mp_input_rm_key_fd(struct input_ctx *ictx, int fd)
 
     if (i + 1 < ictx->num_key_fd)
         memmove(&key_fds[i], &key_fds[i + 1],
-                (ictx->num_key_fd - i - 1) * sizeof(mp_input_fd_t));
+                (ictx->num_key_fd - i - 1) * sizeof(struct input_fd));
     ictx->num_key_fd--;
 }
 
 int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
-                        mp_key_func_t read_func, mp_close_func_t close_func,
-                        void *ctx)
+                        int read_func(void *ctx, int fd),
+                        int close_func(int fd), void *ctx)
 {
     if (ictx->num_key_fd == MP_MAX_KEY_FD) {
         mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many key file descriptors, "
@@ -771,7 +767,7 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
         return 0;
     }
 
-    ictx->key_fds[ictx->num_key_fd] = (struct mp_input_fd){
+    ictx->key_fds[ictx->num_key_fd] = (struct input_fd){
         .fd = fd,
         .read_func.key = read_func,
         .close_func = close_func,
@@ -813,10 +809,6 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
     int pausing = 0;
     char *ptr, *e;
     const mp_cmd_t *cmd_def;
-
-#ifdef MP_DEBUG
-    assert(str != NULL);
-#endif
 
     // Ignore heading spaces.
     while (str[0] == ' ' || str[0] == '\t')
@@ -950,7 +942,7 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
     }
 
     for (; i < MP_CMD_MAX_ARGS && cmd_def->args[i].type != -1; i++) {
-        memcpy(&cmd->args[i], &cmd_def->args[i], sizeof(mp_cmd_arg_t));
+        memcpy(&cmd->args[i], &cmd_def->args[i], sizeof(struct mp_cmd_arg));
         if (cmd_def->args[i].type == MP_CMD_ARG_STRING
             && cmd_def->args[i].v.s != NULL)
             cmd->args[i].v.s = talloc_strdup(cmd, cmd_def->args[i].v.s);
@@ -964,7 +956,7 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
 
 #define MP_CMD_MAX_SIZE 4096
 
-static int read_cmd(mp_input_fd_t *mp_fd, char **ret)
+static int read_cmd(struct input_fd *mp_fd, char **ret)
 {
     char *end;
     *ret = NULL;
@@ -1067,7 +1059,7 @@ static int default_cmd_func(int fd, char *buf, int l)
 
 void mp_input_add_cmd_filter(mp_input_cmd_filter func, void *ctx)
 {
-    mp_cmd_filter_t *filter = talloc_ptrtype(NULL, filter);
+    struct cmd_filter *filter = talloc_ptrtype(NULL, filter);
 
     filter->filter = func;
     filter->ctx = ctx;
@@ -1076,7 +1068,7 @@ void mp_input_add_cmd_filter(mp_input_cmd_filter func, void *ctx)
 }
 
 
-static char *find_bind_for_key(const mp_cmd_bind_t *binds, int n, int *keys)
+static char *find_bind_for_key(const struct cmd_bind *binds, int n, int *keys)
 {
     int j;
 
@@ -1096,10 +1088,10 @@ static char *find_bind_for_key(const mp_cmd_bind_t *binds, int n, int *keys)
     return binds[j].cmd;
 }
 
-static mp_cmd_bind_section_t *get_bind_section(struct input_ctx *ictx,
+static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
                                                char *section)
 {
-    mp_cmd_bind_section_t *bind_section = ictx->cmd_bind_sections;
+    struct cmd_bind_section *bind_section = ictx->cmd_bind_sections;
 
     if (section == NULL)
         section = "default";
@@ -1277,8 +1269,8 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time)
 {
     int i;
     int got_cmd = 0;
-    struct mp_input_fd *key_fds = ictx->key_fds;
-    struct mp_input_fd *cmd_fds = ictx->cmd_fds;
+    struct input_fd *key_fds = ictx->key_fds;
+    struct input_fd *cmd_fds = ictx->cmd_fds;
     for (i = 0; i < ictx->num_key_fd; i++)
         if (key_fds[i].dead) {
             mp_input_rm_key_fd(ictx, key_fds[i].fd);
@@ -1423,7 +1415,7 @@ static mp_cmd_t *get_queued_cmd(struct input_ctx *ictx, int peek_only)
 mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
 {
     mp_cmd_t *ret = NULL;
-    mp_cmd_filter_t *cf;
+    struct cmd_filter *cf;
     int from_queue;
 
     if (async_quit_request)
@@ -1460,18 +1452,15 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
     return ret;
 }
 
-void
-mp_cmd_free(mp_cmd_t *cmd) {
+void mp_cmd_free(mp_cmd_t *cmd)
+{
     talloc_free(cmd);
 }
 
-mp_cmd_t *
-mp_cmd_clone(mp_cmd_t *cmd) {
+mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
+{
     mp_cmd_t *ret;
     int i;
-#ifdef MP_DEBUG
-    assert(cmd != NULL);
-#endif
 
     ret = talloc_memdup(NULL, cmd, sizeof(mp_cmd_t));
     ret->name = talloc_strdup(ret, cmd->name);
@@ -1488,7 +1477,7 @@ int mp_input_get_key_from_name(const char *name)
     int modifiers = 0;
     const char *p;
     while ((p = strchr(name, '+'))) {
-        for (struct mp_key_name *m = modifier_names; m->name; m++)
+        for (struct key_name *m = modifier_names; m->name; m++)
             if (!bstrcasecmp(BSTR(m->name), (struct bstr){(char *)name, p - name})) {
                 modifiers |= m->key;
                 goto found;
@@ -1546,14 +1535,9 @@ static void bind_keys(struct input_ctx *ictx,
                       const int keys[MP_MAX_KEY_DOWN + 1], char *cmd)
 {
     int i = 0, j;
-    mp_cmd_bind_t *bind = NULL;
-    mp_cmd_bind_section_t *bind_section = NULL;
+    struct cmd_bind *bind = NULL;
+    struct cmd_bind_section *bind_section = NULL;
     char *section = NULL, *p;
-
-#ifdef MP_DEBUG
-    assert(keys != NULL);
-    assert(cmd != NULL);
-#endif
 
     if (*cmd == '{' && (p = strchr(cmd, '}'))) {
         *p = 0;
@@ -1578,8 +1562,8 @@ static void bind_keys(struct input_ctx *ictx,
     if (!bind) {
         bind_section->cmd_binds = talloc_realloc(bind_section,
                                                  bind_section->cmd_binds,
-                                                 mp_cmd_bind_t, i + 2);
-        memset(&bind_section->cmd_binds[i], 0, 2 * sizeof(mp_cmd_bind_t));
+                                                 struct cmd_bind, i + 2);
+        memset(&bind_section->cmd_binds[i], 0, 2 * sizeof(struct cmd_bind));
         bind = &bind_section->cmd_binds[i];
     }
     talloc_free(bind->cmd);
@@ -1742,7 +1726,7 @@ static int parse_config(struct input_ctx *ictx, char *file)
 
 void mp_input_set_section(struct input_ctx *ictx, char *name)
 {
-    mp_cmd_bind_section_t *bind_section = NULL;
+    struct cmd_bind_section *bind_section = NULL;
 
     ictx->cmd_binds = NULL;
     ictx->cmd_binds_default = NULL;
@@ -1803,7 +1787,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
             mp_tmsg(MSGT_INPUT, MSGL_ERR, "Can't init input joystick\n");
         else
             mp_input_add_key_fd(ictx, fd, 1, mp_input_joystick_read,
-                                (mp_close_func_t)close, NULL);
+                                close, NULL);
     }
 #endif
 
@@ -1820,8 +1804,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
     if (input_conf->use_lircc) {
         int fd = lircc_init("mplayer", NULL);
         if (fd >= 0)
-            mp_input_add_cmd_fd(ictx, fd, 1, NULL,
-                                (mp_close_func_t)lircc_cleanup);
+            mp_input_add_cmd_fd(ictx, fd, 1, NULL, lircc_cleanup);
     }
 #endif
 
@@ -1842,7 +1825,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
             mp_tmsg(MSGT_INPUT, MSGL_ERR, "Can't init Apple Remote.\n");
         else
             mp_input_add_key_fd(ictx, fd, 1, mp_input_appleir_read,
-                                (mp_close_func_t)close, NULL);
+                                close, NULL);
     }
 #endif
 
@@ -1856,8 +1839,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
             mode = O_RDWR | O_NONBLOCK;
         int in_file_fd = open(input_conf->in_file, mode);
         if (in_file_fd >= 0)
-            mp_input_add_cmd_fd(ictx, in_file_fd, 1, NULL,
-                                (mp_close_func_t)close);
+            mp_input_add_cmd_fd(ictx, in_file_fd, 1, NULL, close);
         else
             mp_tmsg(MSGT_INPUT, MSGL_ERR, "Can't open %s: %s\n",
                     input_conf->in_file, strerror(errno));
