@@ -21,144 +21,143 @@
 
 // All command IDs
 typedef enum {
-  MP_CMD_SEEK,
-  MP_CMD_AUDIO_DELAY,
-  MP_CMD_QUIT,
-  MP_CMD_PAUSE,
-  MP_CMD_GRAB_FRAMES, // deprecated: was a no-op command for years
-  MP_CMD_PLAY_TREE_STEP,
-  MP_CMD_PLAY_TREE_UP_STEP,
-  MP_CMD_PLAY_ALT_SRC_STEP,
-  MP_CMD_SUB_DELAY,
-  MP_CMD_OSD,
-  MP_CMD_VOLUME,
-  MP_CMD_MIXER_USEMASTER,
-  MP_CMD_CONTRAST,
-  MP_CMD_BRIGHTNESS,
-  MP_CMD_HUE,
-  MP_CMD_SATURATION,
-  MP_CMD_FRAMEDROPPING,
-  MP_CMD_TV_STEP_CHANNEL,
-  MP_CMD_TV_STEP_NORM,
-  MP_CMD_TV_STEP_CHANNEL_LIST,
-  MP_CMD_CAPTURING,
-  MP_CMD_VO_FULLSCREEN,
-  MP_CMD_SUB_POS,
-  MP_CMD_DVDNAV,
-  MP_CMD_SCREENSHOT,
-  MP_CMD_PANSCAN,
-  MP_CMD_MUTE,
-  MP_CMD_LOADFILE,
-  MP_CMD_LOADLIST,
-  MP_CMD_VF_CHANGE_RECTANGLE,
-  MP_CMD_GAMMA,
-  MP_CMD_SUB_VISIBILITY,
-  MP_CMD_VOBSUB_LANG, // deprecated: combined with SUB_SELECT
-  MP_CMD_MENU,
-  MP_CMD_SET_MENU,
-  MP_CMD_GET_TIME_LENGTH,
-  MP_CMD_GET_PERCENT_POS,
-  MP_CMD_SUB_STEP,
-  MP_CMD_TV_SET_CHANNEL,
-  MP_CMD_EDL_MARK,
-  MP_CMD_SUB_ALIGNMENT,
-  MP_CMD_TV_LAST_CHANNEL,
-  MP_CMD_OSD_SHOW_TEXT,
-  MP_CMD_TV_SET_FREQ,
-  MP_CMD_TV_SET_NORM,
-  MP_CMD_TV_SET_BRIGHTNESS,
-  MP_CMD_TV_SET_CONTRAST,
-  MP_CMD_TV_SET_HUE,
-  MP_CMD_TV_SET_SATURATION,
-  MP_CMD_GET_VO_FULLSCREEN,
-  MP_CMD_GET_SUB_VISIBILITY,
-  MP_CMD_SUB_FORCED_ONLY,
-  MP_CMD_VO_ONTOP,
-  MP_CMD_SUB_SELECT,
-  MP_CMD_VO_ROOTWIN,
-  MP_CMD_SWITCH_VSYNC,
-  MP_CMD_SWITCH_RATIO,
-  MP_CMD_FRAME_STEP,
-  MP_CMD_SPEED_INCR,
-  MP_CMD_SPEED_MULT,
-  MP_CMD_SPEED_SET,
-  MP_CMD_RUN,
-  MP_CMD_SUB_LOG,
-  MP_CMD_SWITCH_AUDIO,
-  MP_CMD_GET_TIME_POS,
-  MP_CMD_SUB_LOAD,
-  MP_CMD_SUB_REMOVE,
-  MP_CMD_KEYDOWN_EVENTS,
-  MP_CMD_VO_BORDER,
-  MP_CMD_SET_PROPERTY,
-  MP_CMD_SET_PROPERTY_OSD,
-  MP_CMD_GET_PROPERTY,
-  MP_CMD_OSD_SHOW_PROPERTY_TEXT,
-  MP_CMD_OSD_SHOW_PROGRESSION,
-  MP_CMD_SEEK_CHAPTER,
-  MP_CMD_FILE_FILTER,
-  MP_CMD_GET_FILENAME,
-  MP_CMD_GET_VIDEO_CODEC,
-  MP_CMD_GET_VIDEO_BITRATE,
-  MP_CMD_GET_VIDEO_RESOLUTION,
-  MP_CMD_GET_AUDIO_CODEC,
-  MP_CMD_GET_AUDIO_BITRATE,
-  MP_CMD_GET_AUDIO_SAMPLES,
-  MP_CMD_GET_META_TITLE,
-  MP_CMD_GET_META_ARTIST,
-  MP_CMD_GET_META_ALBUM,
-  MP_CMD_GET_META_YEAR,
-  MP_CMD_GET_META_COMMENT,
-  MP_CMD_GET_META_TRACK,
-  MP_CMD_GET_META_GENRE,
-  MP_CMD_RADIO_STEP_CHANNEL,
-  MP_CMD_RADIO_SET_CHANNEL,
-  MP_CMD_RADIO_SET_FREQ,
-  MP_CMD_SET_MOUSE_POS,
-  MP_CMD_STEP_PROPERTY,
-  MP_CMD_STEP_PROPERTY_OSD,
-  MP_CMD_RADIO_STEP_FREQ,
-  MP_CMD_TV_STEP_FREQ,
-  MP_CMD_LOOP,
-  MP_CMD_BALANCE,
-  MP_CMD_SUB_SCALE,
-  MP_CMD_TV_TELETEXT_ADD_DEC,
-  MP_CMD_TV_TELETEXT_GO_LINK,
-  MP_CMD_TV_START_SCAN,
-  MP_CMD_SUB_SOURCE,
-  MP_CMD_SUB_FILE,
-  MP_CMD_SUB_VOB,
-  MP_CMD_SUB_DEMUX,
-  MP_CMD_SWITCH_ANGLE,
-  MP_CMD_ASS_USE_MARGINS,
-  MP_CMD_SWITCH_TITLE,
-  MP_CMD_STOP,
+    MP_CMD_SEEK,
+    MP_CMD_AUDIO_DELAY,
+    MP_CMD_QUIT,
+    MP_CMD_PAUSE,
+    MP_CMD_GRAB_FRAMES, // deprecated: was a no-op command for years
+    MP_CMD_PLAY_TREE_STEP,
+    MP_CMD_PLAY_TREE_UP_STEP,
+    MP_CMD_PLAY_ALT_SRC_STEP,
+    MP_CMD_SUB_DELAY,
+    MP_CMD_OSD,
+    MP_CMD_VOLUME,
+    MP_CMD_MIXER_USEMASTER,
+    MP_CMD_CONTRAST,
+    MP_CMD_BRIGHTNESS,
+    MP_CMD_HUE,
+    MP_CMD_SATURATION,
+    MP_CMD_FRAMEDROPPING,
+    MP_CMD_TV_STEP_CHANNEL,
+    MP_CMD_TV_STEP_NORM,
+    MP_CMD_TV_STEP_CHANNEL_LIST,
+    MP_CMD_CAPTURING,
+    MP_CMD_VO_FULLSCREEN,
+    MP_CMD_SUB_POS,
+    MP_CMD_DVDNAV,
+    MP_CMD_SCREENSHOT,
+    MP_CMD_PANSCAN,
+    MP_CMD_MUTE,
+    MP_CMD_LOADFILE,
+    MP_CMD_LOADLIST,
+    MP_CMD_VF_CHANGE_RECTANGLE,
+    MP_CMD_GAMMA,
+    MP_CMD_SUB_VISIBILITY,
+    MP_CMD_VOBSUB_LANG, // deprecated: combined with SUB_SELECT
+    MP_CMD_MENU,
+    MP_CMD_SET_MENU,
+    MP_CMD_GET_TIME_LENGTH,
+    MP_CMD_GET_PERCENT_POS,
+    MP_CMD_SUB_STEP,
+    MP_CMD_TV_SET_CHANNEL,
+    MP_CMD_EDL_MARK,
+    MP_CMD_SUB_ALIGNMENT,
+    MP_CMD_TV_LAST_CHANNEL,
+    MP_CMD_OSD_SHOW_TEXT,
+    MP_CMD_TV_SET_FREQ,
+    MP_CMD_TV_SET_NORM,
+    MP_CMD_TV_SET_BRIGHTNESS,
+    MP_CMD_TV_SET_CONTRAST,
+    MP_CMD_TV_SET_HUE,
+    MP_CMD_TV_SET_SATURATION,
+    MP_CMD_GET_VO_FULLSCREEN,
+    MP_CMD_GET_SUB_VISIBILITY,
+    MP_CMD_SUB_FORCED_ONLY,
+    MP_CMD_VO_ONTOP,
+    MP_CMD_SUB_SELECT,
+    MP_CMD_VO_ROOTWIN,
+    MP_CMD_SWITCH_VSYNC,
+    MP_CMD_SWITCH_RATIO,
+    MP_CMD_FRAME_STEP,
+    MP_CMD_SPEED_INCR,
+    MP_CMD_SPEED_MULT,
+    MP_CMD_SPEED_SET,
+    MP_CMD_RUN,
+    MP_CMD_SUB_LOG,
+    MP_CMD_SWITCH_AUDIO,
+    MP_CMD_GET_TIME_POS,
+    MP_CMD_SUB_LOAD,
+    MP_CMD_SUB_REMOVE,
+    MP_CMD_KEYDOWN_EVENTS,
+    MP_CMD_VO_BORDER,
+    MP_CMD_SET_PROPERTY,
+    MP_CMD_SET_PROPERTY_OSD,
+    MP_CMD_GET_PROPERTY,
+    MP_CMD_OSD_SHOW_PROPERTY_TEXT,
+    MP_CMD_OSD_SHOW_PROGRESSION,
+    MP_CMD_SEEK_CHAPTER,
+    MP_CMD_FILE_FILTER,
+    MP_CMD_GET_FILENAME,
+    MP_CMD_GET_VIDEO_CODEC,
+    MP_CMD_GET_VIDEO_BITRATE,
+    MP_CMD_GET_VIDEO_RESOLUTION,
+    MP_CMD_GET_AUDIO_CODEC,
+    MP_CMD_GET_AUDIO_BITRATE,
+    MP_CMD_GET_AUDIO_SAMPLES,
+    MP_CMD_GET_META_TITLE,
+    MP_CMD_GET_META_ARTIST,
+    MP_CMD_GET_META_ALBUM,
+    MP_CMD_GET_META_YEAR,
+    MP_CMD_GET_META_COMMENT,
+    MP_CMD_GET_META_TRACK,
+    MP_CMD_GET_META_GENRE,
+    MP_CMD_RADIO_STEP_CHANNEL,
+    MP_CMD_RADIO_SET_CHANNEL,
+    MP_CMD_RADIO_SET_FREQ,
+    MP_CMD_SET_MOUSE_POS,
+    MP_CMD_STEP_PROPERTY,
+    MP_CMD_STEP_PROPERTY_OSD,
+    MP_CMD_RADIO_STEP_FREQ,
+    MP_CMD_TV_STEP_FREQ,
+    MP_CMD_LOOP,
+    MP_CMD_BALANCE,
+    MP_CMD_SUB_SCALE,
+    MP_CMD_TV_TELETEXT_ADD_DEC,
+    MP_CMD_TV_TELETEXT_GO_LINK,
+    MP_CMD_TV_START_SCAN,
+    MP_CMD_SUB_SOURCE,
+    MP_CMD_SUB_FILE,
+    MP_CMD_SUB_VOB,
+    MP_CMD_SUB_DEMUX,
+    MP_CMD_SWITCH_ANGLE,
+    MP_CMD_ASS_USE_MARGINS,
+    MP_CMD_SWITCH_TITLE,
+    MP_CMD_STOP,
 
-  /// DVDNAV commands
-  MP_CMD_DVDNAV_UP = 1000,
-  MP_CMD_DVDNAV_DOWN,
-  MP_CMD_DVDNAV_LEFT,
-  MP_CMD_DVDNAV_RIGHT,
-  MP_CMD_DVDNAV_MENU,
-  MP_CMD_DVDNAV_SELECT,
-  MP_CMD_DVDNAV_PREVMENU,
-  MP_CMD_DVDNAV_MOUSECLICK,
+    /// DVDNAV commands
+    MP_CMD_DVDNAV_UP = 1000,
+    MP_CMD_DVDNAV_DOWN,
+    MP_CMD_DVDNAV_LEFT,
+    MP_CMD_DVDNAV_RIGHT,
+    MP_CMD_DVDNAV_MENU,
+    MP_CMD_DVDNAV_SELECT,
+    MP_CMD_DVDNAV_PREVMENU,
+    MP_CMD_DVDNAV_MOUSECLICK,
 
-  /// DVB commands
-  MP_CMD_DVB_SET_CHANNEL = 5101,
+    /// DVB commands
+    MP_CMD_DVB_SET_CHANNEL = 5101,
 
-  /// Console commands
-  MP_CMD_CHELP = 7000,
-  MP_CMD_CEXIT,
-  MP_CMD_CHIDE,
+    /// Console commands
+    MP_CMD_CHELP = 7000,
+    MP_CMD_CEXIT,
+    MP_CMD_CHIDE,
 
-  /// Audio Filter commands
-  MP_CMD_AF_SWITCH,
-  MP_CMD_AF_ADD,
-  MP_CMD_AF_DEL,
-  MP_CMD_AF_CLR,
-  MP_CMD_AF_CMDLINE,
-
+    /// Audio Filter commands
+    MP_CMD_AF_SWITCH,
+    MP_CMD_AF_ADD,
+    MP_CMD_AF_DEL,
+    MP_CMD_AF_CLR,
+    MP_CMD_AF_CMDLINE,
 } mp_command_type;
 
 // The arg types
@@ -192,23 +191,23 @@ typedef enum {
 struct input_ctx;
 
 typedef union mp_cmd_arg_value {
-  int i;
-  float f;
-  char* s;
-  void* v;
+    int i;
+    float f;
+    char *s;
+    void *v;
 } mp_cmd_arg_value_t;
 
 typedef struct mp_cmd_arg {
-  int type;
-  mp_cmd_arg_value_t v;
+    int type;
+    mp_cmd_arg_value_t v;
 } mp_cmd_arg_t;
 
 typedef struct mp_cmd {
-  int id;
-  char* name;
-  int nargs;
-  mp_cmd_arg_t args[MP_CMD_MAX_ARGS];
-  int pausing;
+    int id;
+    char *name;
+    int nargs;
+    mp_cmd_arg_t args[MP_CMD_MAX_ARGS];
+    int pausing;
 } mp_cmd_t;
 
 
@@ -218,30 +217,32 @@ typedef struct mp_cmd {
 // These functions should return the key code or one of the error codes
 typedef int (*mp_key_func_t)(void *ctx, int fd);
 // These functions should act like read but they must use our error code (if needed ;-)
-typedef int (*mp_cmd_func_t)(int fd,char* dest,int size);
+typedef int (*mp_cmd_func_t)(int fd, char *dest, int size);
 // These are used to close the driver
 typedef void (*mp_close_func_t)(int fd);
 
 // Set this to grab all incoming key codes
 extern int (*mp_input_key_cb)(int code);
 // Should return 1 if the command was processed
-typedef int (*mp_input_cmd_filter)(mp_cmd_t *cmd, void *ctx);
+typedef int (*mp_input_cmd_filter)(struct mp_cmd *cmd, void *ctx);
 
-// This function adds a new key driver.
-// The first arg is a file descriptor (use a negative value if you don't use any fd)
-// The second arg tells if we use select on the fd to know if something is available.
-// The third arg is optional. If null a default function wich reads an int from the
-// fd will be used.
-// The last arg can be NULL if nothing is needed to close the driver. The close
-// function can be used
+/* Add a new command input source.
+ * "fd" is a file descriptor (use a negative value if you don't use any fd)
+ * "select" tells whether to use select() on the fd to determine when to
+ * try reading.
+ * "read_func" is optional. If NULL a default function which reads data
+ * directly from the fd will be used.
+ * "close_func" will be called when closing. Can be NULL.
+ */
 int mp_input_add_cmd_fd(struct input_ctx *ictx, int fd, int select,
                         mp_cmd_func_t read_func, mp_close_func_t close_func);
 
 // This removes a cmd driver, you usually don't need to use it.
 void mp_input_rm_cmd_fd(struct input_ctx *ictx, int fd);
 
-// The args are the same as for the key's drivers. If you don't use any valid fd you MUST
-// give a read_func.
+/* The args are similar to the cmd version above, except you must give
+ * a read_func.
+ */
 int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
                         mp_key_func_t read_func, mp_close_func_t close_func,
                         void *ctx);
@@ -249,41 +250,38 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
 // As for the cmd one you usually don't need this function.
 void mp_input_rm_key_fd(struct input_ctx *ictx, int fd);
 
-/// Get input key from its name.
+// Get input key from its name.
 int mp_input_get_key_from_name(const char *name);
 
-// This function can be used to put a command in the system again. It's used by libmpdemux
-// when it performs a blocking operation to resend the command it received to the main
-// loop.
-int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t* cmd);
+// Add a command to the command queue.
+int mp_input_queue_cmd(struct input_ctx *ictx, struct mp_cmd *cmd);
 
-// This function retrieves the next available command waiting no more than time msec.
-// If pause is true, the next input will always return a pause command.
-mp_cmd_t*
-mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only);
+/* Return next available command, or sleep up to "time" ms if none is
+ * available. If "peek_only" is true return a reference to the command
+ * but leave it queued.
+ */
+struct mp_cmd *mp_input_get_cmd(struct input_ctx *ictx, int time,
+                                int peek_only);
 
-mp_cmd_t*
-mp_input_parse_cmd(char* str);
+/* Parse text and return corresponding struct mp_cmd. */
+struct mp_cmd *mp_input_parse_cmd(char *str);
 
 /**
  * Parse and queue commands separated by '\n'.
- * @return count of commands new queued.
+ * Return number of commands queued.
  */
 int mp_input_parse_and_queue_cmds(struct input_ctx *ictx, const char *str);
 
-/// These filters allow you to process the command before MPlayer.
-/// If a filter returns a true value mp_input_get_cmd will return NULL.
-void
-mp_input_add_cmd_filter(mp_input_cmd_filter, void* ctx);
+// These filters allow you to process the command before MPlayer.
+// If a filter returns a true value mp_input_get_cmd will return NULL.
+void mp_input_add_cmd_filter(mp_input_cmd_filter, void *ctx);
 
 // After getting a command from mp_input_get_cmd you need to free it using this
 // function
-void
-mp_cmd_free(mp_cmd_t* cmd);
+void mp_cmd_free(struct mp_cmd *cmd);
 
 // This creates a copy of a command (used by the auto repeat stuff).
-mp_cmd_t*
-mp_cmd_clone(mp_cmd_t* cmd);
+struct mp_cmd *mp_cmd_clone(struct mp_cmd *cmd);
 
 // Set current input section
 void mp_input_set_section(struct input_ctx *ictx, char *name);
@@ -291,7 +289,7 @@ void mp_input_set_section(struct input_ctx *ictx, char *name);
 // Get current input section
 char *mp_input_get_section(struct input_ctx *ictx);
 
-// When you create a new driver you should add it in these 2 functions.
+// Initialize the input system
 struct input_conf;
 struct input_ctx *mp_input_init(struct input_conf *input_conf);
 
@@ -301,8 +299,7 @@ struct m_config;
 void mp_input_register_options(struct m_config *cfg);
 
 // Interruptible usleep:  (used by libmpdemux)
-int
-mp_input_check_interrupt(struct input_ctx *ictx, int time);
+int mp_input_check_interrupt(struct input_ctx *ictx, int time);
 
 extern int async_quit_request;
 
