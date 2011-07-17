@@ -6033,7 +6033,7 @@ def_ffmpeg_eval_api="#undef CONFIG_FFMPEG_EVAL_API"
 if test "$ffmpeg" = yes; then
   def_ffmpeg='#define CONFIG_FFMPEG 1'
   codecmodules="ffmpeg $codecmodules"
-  if $_pkg_config --atleast-version=50.18.0 libavutil ; then
+  if $_pkg_config --atleast-version=50.33.0 libavutil ; then
     ffmpeg_eval_api=yes
     def_ffmpeg_eval_api="#define CONFIG_FFMPEG_EVAL_API 1"
   fi
