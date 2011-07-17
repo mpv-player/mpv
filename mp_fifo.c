@@ -29,86 +29,23 @@
 
 struct mp_fifo {
     struct MPOpts *opts;
-    int *data;
-    int readpos;
-    int size;
-    int num_entries;
-    int max_up;
-    int num_up;
+    struct input_ctx *input;
     int last_key_down;
     unsigned last_down_time;
 };
 
-struct mp_fifo *mp_fifo_create(struct MPOpts *opts)
+struct mp_fifo *mp_fifo_create(struct input_ctx *input, struct MPOpts *opts)
 {
     struct mp_fifo *fifo = talloc_zero(NULL, struct mp_fifo);
+    fifo->input = input;
     fifo->opts = opts;
-    /* Typical mouse wheel use will generate a sequence repeating 3 events:
-     * down, doubleclick, up, down, doubleclick, up, ...
-     * Normally only one of those event types triggers a command,
-     * so allow opts->key_fifo_size such repeats.
-     */
-    fifo->max_up = opts->key_fifo_size;
-    fifo->size = opts->key_fifo_size * 3;
-    fifo->data = talloc_array_ptrtype(fifo, fifo->data, fifo->size);
     return fifo;
-}
-
-static bool is_up(int code)
-{
-    return code > 0 && !(code & MP_KEY_DOWN)
-        && !(code >= MOUSE_BTN0_DBL && code < MOUSE_BTN_DBL_END);
-}
-
-static int fifo_peek(struct mp_fifo *fifo, int offset)
-{
-    return fifo->data[(fifo->readpos + offset) % fifo->size];
-}
-
-static int fifo_read(struct mp_fifo *fifo)
-{
-    int code = fifo_peek(fifo, 0);
-    fifo->readpos += 1;
-    fifo->readpos %= fifo->size;
-    fifo->num_entries--;
-    fifo->num_up -= is_up(code);
-    assert(fifo->num_entries >= 0);
-    assert(fifo->num_up >= 0);
-    return code;
-}
-
-static void fifo_write(struct mp_fifo *fifo, int code)
-{
-    fifo->data[(fifo->readpos + fifo->num_entries) % fifo->size] = code;
-    fifo->num_entries++;
-    fifo->num_up += is_up(code);
-    assert(fifo->num_entries <= fifo->size);
-    assert(fifo->num_up <= fifo->max_up);
-}
-
-static void mplayer_put_key_internal(struct mp_fifo *fifo, int code)
-{
-    // Clear key-down state if we're forced to drop entries
-    if (fifo->num_entries >= fifo->size - 1
-        || fifo->num_up >= fifo->max_up) {
-        if (fifo_peek(fifo, fifo->num_entries - 1) != MP_INPUT_RELEASE_ALL)
-            fifo_write(fifo, MP_INPUT_RELEASE_ALL);
-    } else
-        fifo_write(fifo, code);
-}
-
-int mplayer_get_key(void *ctx, int fd)
-{
-    struct mp_fifo *fifo = ctx;
-    if (!fifo->num_entries)
-        return MP_INPUT_NOTHING;
-    return fifo_read(fifo);
 }
 
 static void put_double(struct mp_fifo *fifo, int code)
 {
   if (code >= MOUSE_BTN0 && code < MOUSE_BTN_END)
-      mplayer_put_key_internal(fifo, code - MOUSE_BTN0 + MOUSE_BTN0_DBL);
+      mp_input_feed_key(fifo->input, code - MOUSE_BTN0 + MOUSE_BTN0_DBL);
 }
 
 void mplayer_put_key(struct mp_fifo *fifo, int code)
@@ -120,7 +57,7 @@ void mplayer_put_key(struct mp_fifo *fifo, int code)
         && (code & ~MP_KEY_DOWN) >= MOUSE_BTN0_DBL
         && (code & ~MP_KEY_DOWN) < MOUSE_BTN_DBL_END)
         return;
-    mplayer_put_key_internal(fifo, code);
+    mp_input_feed_key(fifo->input, code);
     if (code & MP_KEY_DOWN) {
         code &= ~MP_KEY_DOWN;
         if (fifo->last_key_down == code

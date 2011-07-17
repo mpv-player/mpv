@@ -202,6 +202,8 @@ typedef struct mp_cmd {
     int nargs;
     struct mp_cmd_arg args[MP_CMD_MAX_ARGS];
     int pausing;
+    struct mp_cmd *queue_prev;
+    struct mp_cmd *queue_next;
 } mp_cmd_t;
 
 
@@ -233,6 +235,9 @@ void mp_input_rm_cmd_fd(struct input_ctx *ictx, int fd);
 int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
                         int read_func(void *ctx, int fd),
                         int close_func(int fd), void *ctx);
+
+// Feed a keypress (alternative to being returned from read_func above)
+void mp_input_feed_key(struct input_ctx *ictx, int code);
 
 // As for the cmd one you usually don't need this function.
 void mp_input_rm_key_fd(struct input_ctx *ictx, int fd);

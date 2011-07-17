@@ -20,11 +20,11 @@
 #define MPLAYER_MP_FIFO_H
 
 struct mp_fifo;
-int mplayer_get_key(void *ctx, int fd);
 void mplayer_put_key(struct mp_fifo *fifo, int code);
 // Can be freed with talloc_free()
+struct input_ctx;
 struct MPOpts;
-struct mp_fifo *mp_fifo_create(struct MPOpts *opts);
+struct mp_fifo *mp_fifo_create(struct input_ctx *input, struct MPOpts *opts);
 
 
 #ifdef IS_OLD_VO

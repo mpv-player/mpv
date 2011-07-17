@@ -32,7 +32,6 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .initial_audio_sync = 1,
         .term_osd = 1,
         .term_osd_esc = "\x1b[A\r\x1b[K",
-        .key_fifo_size = 7,
         .consolecontrols = 1,
         .doubleclick_time = 300,
         .audio_id = -1,
@@ -58,6 +57,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         },
         .input = {
              .config_file = "input.conf",
+             .key_fifo_size = 7,
              .ar_delay = 100,
              .ar_rate = 8,
              .use_joystick = 1,

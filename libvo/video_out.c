@@ -434,7 +434,7 @@ static int event_fd_callback(void *ctx, int fd)
 {
     struct vo *vo = ctx;
     vo_check_events(vo);
-    return mplayer_get_key(vo->key_fifo, 0);
+    return MP_INPUT_NOTHING;
 }
 
 int vo_config(struct vo *vo, uint32_t width, uint32_t height,
