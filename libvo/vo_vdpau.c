@@ -371,6 +371,10 @@ static void resize(struct vo *vo)
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
     int i;
+
+    if (!vo->config_ok || vc->is_preempted)
+        return;
+
     struct vo_rect src_rect;
     struct vo_rect dst_rect;
     struct vo_rect borders;
@@ -931,6 +935,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0)
         vo_fs = 1;
 
+    vo->config_ok = true;   // set temporarily as resize() checks it below
     if (initialize_vdpau_objects(vo) < 0)
         return -1;
 
