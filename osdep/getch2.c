@@ -282,11 +282,6 @@ struct termios tio_new;
     tio_new.c_cc[VTIME] = 0;
     tcsetattr(0,TCSANOW,&tio_new);
 #endif
-    /* Setting VMIN above should already make terminal non-blocking; but
-     * that won't work if stdin is not a real terminal. */
-    int flags = fcntl(0, F_GETFL);
-    if (flags != -1)
-        fcntl(0, F_SETFL, flags | O_NONBLOCK);
     getch2_status=1;
 }
 
