@@ -1487,25 +1487,24 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
     if (!queue->num_cmds)
         queue = &ictx->key_cmd_queue;
     if (!queue->num_cmds) {
-        queue = NULL;
         ret = check_autorepeat(ictx);
         if (!ret)
             return NULL;
+        queue_add(queue, ret, false);
     } else
         ret = queue->first;
 
     for (struct cmd_filter *cf = cmd_filters; cf; cf = cf->next) {
         if (cf->filter(ret, cf->ctx)) {
             // The filter ate the cmd, so remove it from the queue
-            if (queue)
-                queue_pop(queue);
+            queue_pop(queue);
             mp_cmd_free(ret);
             // Retry with next command
             return mp_input_get_cmd(ictx, 0, peek_only);
         }
     }
 
-    if (!peek_only && queue)
+    if (!peek_only)
         queue_pop(queue);
 
     return ret;
