@@ -38,7 +38,6 @@
 #include "libmpdemux/stheader.h"
 #include "codec-cfg.h"
 #include "osdep/numcores.h"
-#include "vd_ffmpeg.h"
 
 static const vd_info_t info = {
     "FFmpeg's libavcodec codec family",
@@ -53,8 +52,6 @@ static const vd_info_t info = {
 #if AVPALETTE_SIZE > 1024
 #error palette too large, adapt libmpcodecs/vf.c:vf_get_image
 #endif
-
-int avcodec_initialized=0;
 
 typedef struct {
     AVCodecContext *avctx;
@@ -151,15 +148,6 @@ static int control(sh_video_t *sh, int cmd, void *arg, ...){
     return CONTROL_UNKNOWN;
 }
 
-void init_avcodec(void)
-{
-    if (!avcodec_initialized) {
-        avcodec_init();
-        avcodec_register_all();
-        avcodec_initialized = 1;
-    }
-}
-
 // init driver
 static int init(sh_video_t *sh){
     struct lavc_param *lavc_param = &sh->opts->lavc_param;
@@ -167,8 +155,6 @@ static int init(sh_video_t *sh){
     vd_ffmpeg_ctx *ctx;
     AVCodec *lavc_codec;
     int do_vis_debug= lavc_param->vismv || (lavc_param->debug&(FF_DEBUG_VIS_MB_TYPE|FF_DEBUG_VIS_QP));
-
-    init_avcodec();
 
     ctx = sh->context = talloc_zero(NULL, vd_ffmpeg_ctx);
 

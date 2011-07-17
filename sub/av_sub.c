@@ -62,8 +62,6 @@ int decode_avsub(struct sh_sub *sh, uint8_t *data, int size,
         pkt.convergence_duration = duration * 1000;
     if (!ctx) {
         AVCodec *sub_codec;
-        avcodec_init();
-        avcodec_register_all();
         ctx = avcodec_alloc_context();
         sub_codec = avcodec_find_decoder(cid);
         if (!ctx || !sub_codec || avcodec_open(ctx, sub_codec) < 0) {

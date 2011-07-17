@@ -27,7 +27,6 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-#include "vd_ffmpeg.h"
 #include "libavcodec/avcodec.h"
 
 
@@ -170,11 +169,6 @@ vf_open(vf_instance_t *vf, char *args)
   vf->query_format = query_format;
   vf->priv         = malloc(sizeof(struct vf_priv_s));
   memset(vf->priv,0,sizeof(struct vf_priv_s));
-
-  /* This may not technically be necessary just for a deinterlace,
-   * but it seems like a good idea.
-   */
-  init_avcodec();
 
   return 1;
 }

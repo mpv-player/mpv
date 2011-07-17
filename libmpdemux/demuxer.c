@@ -41,7 +41,6 @@
 
 #include "libaf/af_format.h"
 #include "libmpcodecs/dec_teletext.h"
-#include "libmpcodecs/vd_ffmpeg.h"
 
 #ifdef CONFIG_FFMPEG
 #include "libavcodec/avcodec.h"
@@ -494,8 +493,6 @@ void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
 static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parser, unsigned format)
 {
     enum CodecID codec_id = CODEC_ID_NONE;
-
-    init_avcodec();
 
     switch (format) {
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 94, 0)

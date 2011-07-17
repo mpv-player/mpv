@@ -3845,7 +3845,7 @@ int i;
   srand(GetTimerMS());
 
   mp_msg_init();
-  set_av_log_callback();
+  init_libav();
 
 #ifdef CONFIG_X11
   mpctx->x11_state = vo_x11_init_state();

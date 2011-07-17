@@ -105,7 +105,13 @@ static void mp_msg_av_log_callback(void *ptr, int level, const char *fmt,
     mp_msg_va(type, mp_level, fmt, vl);
 }
 
-void set_av_log_callback(void)
+void init_libav(void)
 {
-  av_log_set_callback(mp_msg_av_log_callback);
+    av_log_set_callback(mp_msg_av_log_callback);
+#ifdef CONFIG_FFMPEG
+    avcodec_init();
+    avcodec_register_all();
+
+    av_register_all();
+#endif
 }

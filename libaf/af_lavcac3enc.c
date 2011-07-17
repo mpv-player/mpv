@@ -26,7 +26,6 @@
 #include <inttypes.h>
 #include <assert.h>
 
-#include "libmpcodecs/vd_ffmpeg.h"
 #include "config.h"
 #include "af.h"
 #include "reorder_ch.h"
@@ -285,8 +284,6 @@ static int af_open(af_instance_t* af){
     af->mul=1;
     af->data=calloc(1,sizeof(af_data_t));
     af->setup=s;
-
-    init_avcodec();
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");
     if (!s->lavc_acodec) {

@@ -88,7 +88,6 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     int64_t size;
     int dummy;
 
-    av_register_all();
     if (mode == STREAM_READ)
         flags = URL_RDONLY;
     else if (mode == STREAM_WRITE)

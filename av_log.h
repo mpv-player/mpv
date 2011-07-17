@@ -1,1 +1,1 @@
-void set_av_log_callback(void);
+void init_libav(void);

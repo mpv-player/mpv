@@ -165,7 +165,6 @@ static int preinit(const char *arg)
     if (subopt_parse(arg, subopts) != 0) {
         return -1;
     }
-    avcodec_register_all();
     avctx = avcodec_alloc_context();
     if (avcodec_open(avctx, avcodec_find_encoder(CODEC_ID_PNG)) < 0) {
         uninit();

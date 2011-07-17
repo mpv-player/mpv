@@ -25,7 +25,6 @@
 #include "options.h"
 
 #include "ad_internal.h"
-#include "vd_ffmpeg.h"
 #include "libaf/reorder_ch.h"
 
 #include "mpbswap.h"
@@ -102,7 +101,6 @@ static int init(sh_audio_t *sh_audio)
     AVCodec *lavc_codec;
 
     mp_msg(MSGT_DECAUDIO,MSGL_V,"FFmpeg's libavcodec audio codec\n");
-    init_avcodec();
 
     lavc_codec = avcodec_find_decoder_by_name(sh_audio->codec->dll);
     if(!lavc_codec){

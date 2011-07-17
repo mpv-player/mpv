@@ -162,8 +162,6 @@ static int lavf_check_file(demuxer_t *demuxer)
         demuxer->priv = calloc(sizeof(lavf_priv_t), 1);
     priv = demuxer->priv;
 
-    av_register_all();
-
     char *format = lavfdopts->format;
     if (!format)
         format = demuxer->stream->lavf_type;
