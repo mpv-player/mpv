@@ -75,12 +75,11 @@ SRCS_COMMON-$(FFMPEG)                += libmpcodecs/vf_pp.c \
 
 # Requires a new enough libavutil that installs eval.h
 SRCS_COMMON-$(FFMPEG_EVAL_API)          += libmpcodecs/vf_geq.c \
+                                           libmpcodecs/vf_qp.c \
 
 # These filters use private headers and do not work with shared libavcodec.
 SRCS_COMMON-$(FFMPEG_INTERNALS)      += libmpcodecs/vf_fspp.c \
-                                        libmpcodecs/vf_geq.c \
                                         libmpcodecs/vf_mcdeint.c \
-                                        libmpcodecs/vf_qp.c \
                                         libmpcodecs/vf_spp.c \
 
 SRCS_COMMON-$(FREETYPE)              += sub/font_load_ft.c
@@ -654,11 +653,8 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 codec-cfg.o: codecs.conf.h
 mpcommon.o osdep/mplayer-rc.o: version.h
 
-# Files that depend on libswscale internals
-libmpcodecs/vf_palette.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
-
 # Files that depend on libavcodec internals
-libmpcodecs/vf_fspp.o libmpcodecs/vf_geq.o libmpcodecs/vf_mcdeint.o libmpcodecs/vf_qp.o libmpcodecs/vf_spp.o libvo/jpeg_enc.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
+libmpcodecs/vf_fspp.o libmpcodecs/vf_mcdeint.o libmpcodecs/vf_spp.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
 
 osdep/mplayer-rc.o: osdep/mplayer.exe.manifest
 
