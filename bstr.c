@@ -79,12 +79,18 @@ int bstr_find(struct bstr haystack, struct bstr needle)
     return -1;
 }
 
-struct bstr bstr_strip(struct bstr str)
+struct bstr bstr_lstrip(struct bstr str)
 {
     while (str.len && isspace(*str.start)) {
         str.start++;
         str.len--;
     }
+    return str;
+}
+
+struct bstr bstr_strip(struct bstr str)
+{
+    str = bstr_lstrip(str);
     while (str.len && isspace(str.start[str.len - 1]))
         str.len--;
     return str;

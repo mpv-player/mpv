@@ -1586,7 +1586,6 @@ static int get_input_from_name(char *name, int *keys)
     return 1;
 }
 
-#define BS_MAX 256
 #define SPACE_CHAR " \n\r\t"
 
 static void bind_keys(struct input_ctx *ictx,
@@ -1631,13 +1630,7 @@ static void bind_keys(struct input_ctx *ictx,
 
 static int parse_config(struct input_ctx *ictx, char *file)
 {
-    int fd;
-    int bs = 0, r, eof = 0, comments = 0;
-    char *iter, *end;
-    char buffer[BS_MAX];
-    int n_binds = 0, keys[MP_MAX_KEY_DOWN + 1] = { 0 };
-
-    fd = open(file, O_RDONLY);
+    int fd = open(file, O_RDONLY);
 
     if (fd < 0) {
         mp_msg(MSGT_INPUT, MSGL_V, "Can't open input config file %s: %s\n",
@@ -1647,11 +1640,19 @@ static int parse_config(struct input_ctx *ictx, char *file)
 
     mp_msg(MSGT_INPUT, MSGL_V, "Parsing input config file %s\n", file);
 
+
+    unsigned char buffer[512];
+    struct bstr buf = { buffer, 0 };
+    bool eof = false, comments = false;
+    int n_binds = 0, keys[MP_MAX_KEY_DOWN + 1];
+
     while (1) {
-        if (!eof && bs < BS_MAX - 1) {
-            if (bs > 0)
-                bs--;
-            r = read(fd, buffer + bs, BS_MAX - 1 - bs);
+        if (buf.start != buffer) {
+            memmove(buffer, buf.start, buf.len);
+            buf.start = buffer;
+        }
+        if (!eof && buf.len < sizeof(buffer)) {
+            int r = read(fd, buffer + buf.len, sizeof(buffer) - buf.len);
             if (r < 0) {
                 if (errno == EINTR)
                     continue;
@@ -1660,126 +1661,69 @@ static int parse_config(struct input_ctx *ictx, char *file)
                 close(fd);
                 return 0;
             } else if (r == 0) {
-                eof = 1;
+                eof = true;
             } else {
-                bs += r + 1;
-                buffer[bs - 1] = '\0';
+                buf.len += r;
+                continue;
             }
         }
-        // Empty buffer : return
-        if (bs <= 1) {
+        if (buf.len == 0) {
             mp_msg(MSGT_INPUT, MSGL_V, "Input config file %s parsed: "
                    "%d binds\n", file, n_binds);
             close(fd);
             return 1;
         }
-
-        iter = buffer;
-
         if (comments) {
-            iter += strcspn(iter, "\n");
-            if (*iter == 0) { // Buffer was full of comment
-                bs = 0;
-                continue;
-            }
-            iter++;
-            r = strlen(iter);
-            memmove(buffer, iter, r + 1);
-            bs = r + 1;
-            comments = 0;
+            int idx = bstrchr(buf, '\n');
+            if (idx >= 0) {
+                buf = bstr_cut(buf, idx + 1);
+                comments = false;
+            } else
+                buf = bstr_cut(buf, buf.len);
             continue;
         }
-
-        // Find the wanted key
-        if (keys[0] == 0) {
-            // Jump beginning space
-            iter += strspn(iter, SPACE_CHAR);
-            if (*iter == 0) { // Buffer was full of space char
-                bs = 0;
-                continue;
-            }
-            if (iter[0] == '#') { // Comments
-                comments = 1;
-                continue;
-            }
-            // Find the end of the key code name
-            end = iter + strcspn(iter, SPACE_CHAR);
-            if (*end == 0) {   // Key name doesn't fit in the buffer
-                if (buffer == iter) {
-                    if (eof && (buffer - iter) == bs)
-                        mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                                "Unfinished binding %s\n", iter);
-                    else
-                        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Buffer is too small "
-                                "for this key name: %s\n", iter);
-                    return 0;
-                }
-                memmove(buffer, iter, end - iter);
-                bs = end - iter;
-                continue;
-            }
-            {
-                char name[end - iter + 1];
-                strncpy(name, iter, end - iter);
-                name[end - iter] = '\0';
-                if (!get_input_from_name(name, keys)) {
-                    mp_tmsg(MSGT_INPUT, MSGL_ERR, "Unknown key '%s'\n", name);
-                    close(fd);
-                    return 0;
-                }
-            }
-            if (bs > (end - buffer))
-                memmove(buffer, end, bs - (end - buffer));
-            bs -= end - buffer;
+        buf = bstr_lstrip(buf);
+        if (buf.start != buffer)
             continue;
-        } else { // Get the command
-            while (iter[0] == ' ' || iter[0] == '\t')
-                iter++;
-            // Found new line
-            if (iter[0] == '\n' || iter[0] == '\r') {
-                char *key_buf  = get_key_combo_name(keys, MP_MAX_KEY_DOWN);
+        if (buf.start[0] == '#') {
+            comments = true;
+            continue;
+        }
+        int eol = bstrchr(buf, '\n');
+        if (eol < 0) {
+            if (eof) {
+                eol = buf.len;
+            } else {
                 mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                        "No command found for key '%s'.\n", key_buf);
-                talloc_free(key_buf);
-                keys[0] = 0;
-                if (iter > buffer) {
-                    memmove(buffer, iter, bs - (iter - buffer));
-                    bs -= (iter - buffer);
-                }
+                        "Key binding is too long: %.*s\n", BSTR_P(buf));
+                comments = true;
                 continue;
             }
-            end = iter + strcspn(iter, "\n\r");
-            if (*end == 0 && !(eof && ((end + 1) - buffer) == bs)) {
-                if (iter == buffer) {
-                    mp_tmsg(MSGT_INPUT, MSGL_ERR, "Buffer is too small "
-                            "for command %s\n", buffer);
-                    close(fd);
-                    return 0;
-                }
-                memmove(buffer, iter, end - iter);
-                bs = end - iter;
-                continue;
-            }
-            {
-                char cmd[end - iter + 1];
-                strncpy(cmd, iter, end - iter);
-                cmd[end - iter] = '\0';
-                //printf("Set bind %d => %s\n",keys[0],cmd);
-                bind_keys(ictx, keys, cmd);
-                n_binds++;
-            }
-            keys[0] = 0;
-            end++;
-            if (bs > (end - buffer))
-                memmove(buffer, end, bs - (end - buffer));
-            bs -= (end - buffer);
+        }
+        struct bstr line = bstr_splice(buf, 0, eol);
+        buf = bstr_cut(buf, eol);
+        struct bstr command;
+        // Find the key name starting a line
+        struct bstr keyname = bstr_split(line, SPACE_CHAR, &command);
+        command = bstr_strip(command);
+        if (command.len == 0) {
+            mp_tmsg(MSGT_INPUT, MSGL_ERR,
+                    "Unfinished key binding: %.*s\n", BSTR_P(line));
             continue;
         }
+        char *name = bstrdup0(NULL, keyname);
+        if (!get_input_from_name(name, keys)) {
+            talloc_free(name);
+            mp_tmsg(MSGT_INPUT, MSGL_ERR,
+                    "Unknown key '%.*s'\n", BSTR_P(keyname));
+            continue;
+        }
+        talloc_free(name);
+        char *cmd = bstrdup0(NULL, command);
+        bind_keys(ictx, keys, cmd);
+        n_binds++;
+        talloc_free(cmd);
     }
-    mp_tmsg(MSGT_INPUT, MSGL_ERR, "What are we doing here?\n");
-    close(fd);
-    mp_input_set_section(ictx, NULL);
-    return 0;
 }
 
 void mp_input_set_section(struct input_ctx *ictx, char *name)

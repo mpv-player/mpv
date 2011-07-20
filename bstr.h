@@ -38,8 +38,10 @@ int bstrcmp(struct bstr str1, struct bstr str2);
 int bstrcasecmp(struct bstr str1, struct bstr str2);
 int bstrchr(struct bstr str, int c);
 int bstrrchr(struct bstr str, int c);
+
 int bstr_find(struct bstr haystack, struct bstr needle);
 struct bstr *bstr_splitlines(void *talloc_ctx, struct bstr str);
+struct bstr bstr_lstrip(struct bstr str);
 struct bstr bstr_strip(struct bstr str);
 struct bstr bstr_split(struct bstr str, char *sep, struct bstr *rest);
 struct bstr bstr_splice(struct bstr str, int start, int end);
