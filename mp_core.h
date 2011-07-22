@@ -200,6 +200,7 @@ typedef struct MPContext {
     struct ass_track *set_of_ass_tracks[MAX_SUBTITLE_FILES];
     sub_data* set_of_subtitles[MAX_SUBTITLE_FILES];
     bool track_was_native_ass[MAX_SUBTITLE_FILES];
+    struct ass_library *ass_library;
 
     int file_format;
 

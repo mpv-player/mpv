@@ -741,8 +741,8 @@ void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
   osd_free(mpctx->osd);
 
 #ifdef CONFIG_ASS
-  ass_library_done(ass_library);
-  ass_library = NULL;
+  ass_library_done(mpctx->ass_library);
+  mpctx->ass_library = NULL;
 #endif
 
   current_module="exit_player";
@@ -1093,15 +1093,15 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
 #ifdef CONFIG_ASS
     if (opts->ass_enabled) {
 #ifdef CONFIG_ICONV
-        asst = mp_ass_read_stream(ass_library, filename, sub_cp);
+        asst = mp_ass_read_stream(mpctx->ass_library, filename, sub_cp);
 #else
-        asst = mp_ass_read_stream(ass_library, filename, 0);
+        asst = mp_ass_read_stream(mpctx->ass_library, filename, 0);
 #endif
         is_native_ass = asst;
         if (!asst) {
             subd = sub_read_file(filename, fps, &mpctx->opts);
             if (subd) {
-                asst = mp_ass_read_subdata(ass_library, subd, fps);
+                asst = mp_ass_read_subdata(mpctx->ass_library, subd, fps);
                 sub_free(subd);
                 subd = NULL;
             }
@@ -2680,7 +2680,8 @@ int reinit_video_chain(struct MPContext *mpctx)
 
 #ifdef CONFIG_ASS
   if (opts->ass_enabled)
-    sh_video->vfilter->control(sh_video->vfilter, VFCTRL_INIT_EOSD, ass_library);
+    sh_video->vfilter->control(sh_video->vfilter, VFCTRL_INIT_EOSD,
+                               mpctx->ass_library);
 #endif
 
   current_module="init_video_codec";
@@ -4036,7 +4037,8 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 #endif
 
 #ifdef CONFIG_ASS
-  ass_library = mp_ass_init();
+  mpctx->ass_library = mp_ass_init();
+  mpctx->osd->ass_library = mpctx->ass_library;
 #endif
 
 #ifdef HAVE_RTC
@@ -4508,13 +4510,14 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
 mpctx->initialized_flags|=INITIALIZED_DEMUXER;
 
 #ifdef CONFIG_ASS
-if (opts->ass_enabled && ass_library) {
+if (opts->ass_enabled && mpctx->ass_library) {
     for (int j = 0; j < mpctx->num_sources; j++) {
         struct demuxer *d = mpctx->sources[j].demuxer;
         for (int i = 0; i < d->num_attachments; i++) {
             struct demux_attachment *att = d->attachments + i;
             if (use_embedded_fonts && attachment_is_font(att))
-                ass_add_font(ass_library, att->name, att->data, att->data_size);
+                ass_add_font(mpctx->ass_library, att->name, att->data,
+                             att->data_size);
         }
     }
 }
@@ -4890,8 +4893,8 @@ mpctx->vo_sub_last = vo_sub=NULL;
 mpctx->subdata=NULL;
 #ifdef CONFIG_ASS
 mpctx->osd->ass_track = NULL;
-if(ass_library)
-    ass_clear_fonts(ass_library);
+if (mpctx->ass_library)
+    ass_clear_fonts(mpctx->ass_library);
 #endif
 
  if (!mpctx->stop_play)  // In case some goto jumped here...

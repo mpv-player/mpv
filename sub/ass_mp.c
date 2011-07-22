@@ -41,7 +41,6 @@
 #endif
 
 // libass-related command line options
-ASS_Library *ass_library;
 float ass_font_scale = 1.;
 float ass_line_spacing = 0.;
 int ass_top_margin = 0;

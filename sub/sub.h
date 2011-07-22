@@ -69,6 +69,7 @@ typedef struct mp_osd_obj_s {
 } mp_osd_obj_t;
 
 struct osd_state {
+    struct ass_library *ass_library;
     unsigned char osd_text[128];
     struct font_desc *sub_font;
     struct ass_track *ass_track;
