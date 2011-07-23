@@ -91,6 +91,7 @@ typedef struct MPOpts {
     char **sub_paths;
     int sub_auto;
     int ass_enabled;
+    char **ass_force_style_list;
     struct lavc_param {
         int workaround_bugs;
         int error_resilience;

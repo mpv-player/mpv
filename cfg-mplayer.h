@@ -710,7 +710,7 @@ const m_option_t common_opts[] = {
     {"noass-use-margins", &ass_use_margins, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"embeddedfonts", &use_embedded_fonts, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"noembeddedfonts", &use_embedded_fonts, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-    {"ass-force-style", &ass_force_style_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
+    OPT_STRINGLIST("ass-force-style", ass_force_style_list, 0),
     {"ass-color", &ass_color, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"ass-border-color", &ass_border_color, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"ass-styles", &ass_styles_file, CONF_TYPE_STRING, 0, 0, 0, NULL},

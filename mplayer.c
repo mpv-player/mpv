@@ -4230,7 +4230,9 @@ while (opts->player_idle_mode && !mpctx->filename) {
     }
 }
 //---------------------------------------------------------------------------
-
+#ifdef CONFIG_ASS
+    ass_set_style_overrides(mpctx->ass_library, opts->ass_force_style_list);
+#endif
     if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
 	vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);
 
