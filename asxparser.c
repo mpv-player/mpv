@@ -388,29 +388,6 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
 }
 
 static void
-asx_parse_param(ASX_Parser_t* parser, char** attribs, play_tree_t* pt) {
-  char *name,*val;
-
-  name = asx_get_attrib("NAME",attribs);
-  if(!name) {
-    asx_warning_attrib_required(parser,"PARAM" ,"NAME" );
-    return;
-  }
-  val = asx_get_attrib("VALUE",attribs);
-  if(m_config_get_option(parser->mconfig,name) == NULL) {
-    mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Found unknown param in asx: %s",name);
-    if(val)
-      mp_msg(MSGT_PLAYTREE,MSGL_WARN,"=%s\n",val);
-    else
-      mp_msg(MSGT_PLAYTREE,MSGL_WARN,"\n");
-    return;
-  }
-  play_tree_set_param(pt,name,val);
-  free(name);
-  free(val);
-}
-
-static void
 asx_parse_ref(ASX_Parser_t* parser, char** attribs, play_tree_t* pt) {
   char *href;
 
@@ -561,8 +538,6 @@ asx_parse_repeat(ASX_Parser_t* parser,char* buffer,char** _attribs) {
          else play_tree_append_entry(list,entry);
          mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to repeat\n",element);
        }
-     } else if(strcasecmp(element,"PARAM") == 0) {
-       asx_parse_param(parser,attribs,repeat);
      } else
        mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Ignoring element %s\n",element);
      free(body);
