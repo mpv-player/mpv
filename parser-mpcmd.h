@@ -22,6 +22,8 @@
 #include "playtree.h"
 #include "m_config.h"
 
-play_tree_t* m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv);
+play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
+                                            char **argv);
+int m_config_preparse_command_line(m_config_t *config, int argc, char **argv);
 
 #endif /* MPLAYER_PARSER_MPCMD_H */

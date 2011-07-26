@@ -38,9 +38,6 @@ static int mode = 0;
 #define DROP_LOCAL 2
 
 #define dvd_range(a)  (a > 0 && a < 256)
-#define UNSET_GLOBAL (mode = LOCAL)
-// Use this 1 if you want to have only global option (no per file option)
-// #define UNSET_GLOBAL (mode = GLOBAL)
 
 
 static int is_entry_option(struct m_config *mconfig, char *opt, char *param,
@@ -100,7 +97,7 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
         //next:
         opt = argv[i];
         /* check for -- (no more options id.) except --help! */
-        if ((*opt == '-') && (*(opt + 1) == '-') && (*(opt + 2) == 0)) {
+        if (!strcmp(opt, "--")) {
             no_more_opts = 1;
             if (i + 1 >= argc) {
                 mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
@@ -112,7 +109,7 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
         }
         if ((opt[0] == '{') && (opt[1] == '\0')) {
             play_tree_t *entry = play_tree_new();
-            UNSET_GLOBAL;
+            mode = LOCAL;
             if (last_parent->flags & PLAY_TREE_RND)
                 entry->flags |= PLAY_TREE_RND;
             if (last_entry == NULL)
@@ -181,7 +178,7 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
                         if ((last_parent->flags & PLAY_TREE_RND)
                                 && entry->child)
                             entry->flags |= PLAY_TREE_RND;
-                        UNSET_GLOBAL;
+                        mode = LOCAL;
                     } else if (mode == LOCAL) // Drop params for empty entry
                         mode = DROP_LOCAL;
                 } else if (tmp == 0) { // 'normal' options
@@ -223,13 +220,14 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
             int is_dvdnav = strstr(argv[i], "dvdnav://") != NULL;
             play_tree_t *entry = play_tree_new();
             mp_msg(MSGT_CFGPARSER, MSGL_DBG2, "Adding file %s\n", argv[i]);
-            // if required expand DVD filename entries like dvd://1-3 into component titles
+            // expand DVD filename entries like dvd://1-3 into component titles
             if (strstr(argv[i], "dvd://") != NULL || is_dvdnav) {
                 int offset = is_dvdnav ? 9 : 6;
                 splitpos = strstr(argv[i] + offset, "-");
                 if (splitpos != NULL) {
                     start_title = strtol(argv[i] + offset, NULL, 10);
-                    if (start_title < 0) { //entries like dvd://-2 start title implied 1
+                    //entries like dvd://-2 imply start at title 1
+                    if (start_title < 0) {
                         end_title = abs(start_title);
                         start_title = 1;
                     } else
@@ -259,8 +257,7 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
             if (strcasecmp(argv[i], "-") == 0)
                 m_config_set_option(config, "noconsolecontrols", NULL);
             add_entry(&last_parent, &last_entry, entry);
-            UNSET_GLOBAL; // We start entry specific options
-
+            mode = LOCAL; // We start entry specific options
         }
     }
 
@@ -273,4 +270,49 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
 err_out:
     play_tree_free(root, 1);
     return NULL;
+}
+
+extern int mp_msg_levels[];
+
+/* Parse some command line options early before main parsing.
+ * --noconfig prevents reading configuration files (otherwise done before
+ * command line parsing), and --really-quiet suppresses messages printed
+ * during normal options parsing.
+ */
+int m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
+{
+    int ret = 0;
+
+    // Hack to shut up parser error messages
+    int msg_lvl_backup = mp_msg_levels[MSGT_CFGPARSER];
+    mp_msg_levels[MSGT_CFGPARSER] = -11;
+
+    config->mode = M_COMMAND_LINE_PRE_PARSE;
+
+    for (int i = 1 ; i < argc ; i++) {
+        const struct m_option *opt;
+        char *arg = argv[i];
+        // Ignore non option
+        if (arg[0] != '-' || arg[1] == 0) continue;
+        // No more options after --
+        if (!strcmp(arg, "--"))
+            break;
+        arg++;
+
+        opt = m_config_get_option(config, arg);
+        // Ignore invalid option
+        if (!opt)
+            continue;
+        // Set, non-pre-parse options will be ignored
+        int r = m_config_set_option(config, arg,
+                                    i+1 < argc ? argv[i+1] : NULL);
+        if (r < 0)
+            ret = r;
+        else
+            i += r;
+    }
+
+    mp_msg_levels[MSGT_CFGPARSER] = msg_lvl_backup;
+
+    return ret;
 }
