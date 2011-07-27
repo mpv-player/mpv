@@ -73,7 +73,7 @@ static inline struct bstr bstrdup(void *talloc_ctx, struct bstr str)
     return r;
 }
 
-static inline struct bstr BSTR(const unsigned char *s)
+static inline struct bstr bstr(const unsigned char *s)
 {
     return (struct bstr){(unsigned char *)s, s ? strlen(s) : 0};
 }

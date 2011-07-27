@@ -1536,7 +1536,8 @@ int mp_input_get_key_from_name(const char *name)
     const char *p;
     while ((p = strchr(name, '+'))) {
         for (struct key_name *m = modifier_names; m->name; m++)
-            if (!bstrcasecmp(BSTR(m->name), (struct bstr){(char *)name, p - name})) {
+            if (!bstrcasecmp(bstr(m->name),
+                             (struct bstr){(char *)name, p - name})) {
                 modifiers |= m->key;
                 goto found;
             }

@@ -57,7 +57,7 @@ static char **find_files(const char *original_file, const char *suffix)
         if (!strcmp(ep->d_name, basename))
             continue;
 
-        char *name = mp_path_join(results, directory, BSTR(ep->d_name));
+        char *name = mp_path_join(results, directory, bstr(ep->d_name));
         char *s1 = ep->d_name;
         char *s2 = basename;
         int matchlen = 0;
