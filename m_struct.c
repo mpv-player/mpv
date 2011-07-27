@@ -77,7 +77,7 @@ m_struct_set(const m_struct_t* st, void* obj, const char* field, const char* par
     return 0;
   }
 
-  if(f->type->parse(f,field,param,M_ST_MB_P(obj,f->p),M_CONFIG_FILE) < 0) {
+  if(f->type->parse(f, field, param, false, M_ST_MB_P(obj,f->p)) < 0) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Struct %s, field %s parsing error: %s\n",
 	   st->name,field,param);
     return 0;

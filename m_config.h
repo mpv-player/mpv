@@ -19,6 +19,9 @@
 #ifndef MPLAYER_M_CONFIG_H
 #define MPLAYER_M_CONFIG_H
 
+#include <stdbool.h>
+
+
 // m_config provides an API to manipulate the config variables in MPlayer.
 // It makes use of the Options API to provide a context stack that
 // allows saving and later restoring the state of all variables.
@@ -64,6 +67,15 @@ struct m_profile {
     char **opts;
 };
 
+enum option_source {
+    // Set when parsing from a config file.
+    M_CONFIG_FILE,
+    // Set when parsing command line arguments.
+    M_COMMAND_LINE,
+    // Set when pre-parsing the command line
+    M_COMMAND_LINE_PRE_PARSE,
+};
+
 // Config object
 /** \ingroup Config */
 typedef struct m_config {
@@ -73,8 +85,7 @@ typedef struct m_config {
     struct m_config_option *opts;
     // Current stack level.
     int lvl;
-    // \ref OptionParserModes
-    int mode;
+    enum option_source mode;
     // List of defined profiles.
     struct m_profile *profiles;
     // Depth when recursively including profiles.
@@ -120,18 +131,19 @@ int m_config_register_options(struct m_config *config,
  *  \param config The config object.
  *  \param arg The option's name.
  *  \param param The value of the option, can be NULL.
+ *  \param ambiguous_param: old style cmdline option, "param" may be a
+           parameter to this option or something entirely unrelated
  *  \return See \ref OptionParserReturn.
  */
-int m_config_set_option(struct m_config *config, char *arg, char *param);
+int m_config_set_option(struct m_config *config, char *arg,
+                        char *param, bool ambiguous_param);
 
 /*  Check if an option setting is valid.
- *  \param config The config object.
- *  \param arg The option's name.
- *  \param param The value of the option, can be NULL.
- *  \return See \ref OptionParserReturn.
+ *  Same as above m_config_set_option() but doesn't actually set anything.
  */
 int m_config_check_option(const struct m_config *config, char *arg,
-                          char *param);
+                          char *param, bool ambiguous_param);
+
 
 /*  Get the option matching the given name.
  *  \param config The config object.

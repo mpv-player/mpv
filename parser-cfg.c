@@ -237,7 +237,7 @@ int m_config_parse_config_file(m_config_t* config, const char *conffile)
 				tmp = m_config_set_profile_option(config,profile,
 								  opt,param);
 		} else
-			tmp = m_config_set_option(config, opt, param);
+			tmp = m_config_set_option(config, opt, param, false);
 		if (tmp < 0) {
 			PRINT_LINENUM;
 			if(tmp == M_OPT_UNKNOWN) {

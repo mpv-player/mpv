@@ -21,6 +21,7 @@
 
 #include <string.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #include "config.h"
 
@@ -209,13 +210,15 @@ struct m_option_type {
      *  \param opt The option that is parsed.
      *  \param name The full option name.
      *  \param param The parameter to parse.
+     *  \param ambiguous_param: "param" old cmdline style, "param" may or
+     *         may not be an argument meant for this option
      *  \param dst Pointer to the memory where the data should be written.
      *             If NULL the parameter validity should still be checked.
-     *  \param src Source of the option, see \ref OptionParserModes.
-     *  \return On error a negative value is returned, on success the number of arguments
-     *          consumed. For details see \ref OptionParserReturn.
+     *  \return On error a negative value is returned, on success the number
+     *          of arguments consumed. For details see \ref OptionParserReturn.
      */
-    int (*parse)(const m_option_t *opt, const char *name, const char *param, void *dst, int src);
+    int (*parse)(const m_option_t *opt, const char *name, const char *param,
+                 bool ambiguous_param, void *dst);
 
     // Print back a value in string form.
     /** \param opt The option to print.
@@ -383,17 +386,6 @@ struct m_option {
 
 ///////////////////////////// Parser flags /////////////////////////////////
 
-// Some parsers behave differently depending on the mode passed in the src
-// parameter of m_option_type::parse. For example the flag type doesn't take
-// an argument when parsing from the command line.
-
-// Set when parsing from a config file.
-#define M_CONFIG_FILE 0
-// Set when parsing command line arguments.
-#define M_COMMAND_LINE 1
-// Set when pre-parsing the command line
-#define M_COMMAND_LINE_PRE_PARSE 2
-
 // On success parsers return the number of arguments consumed: 0 or 1.
 //
 // To indicate that MPlayer should exit without playing anything,
@@ -449,9 +441,10 @@ static inline void *m_option_get_ptr(const struct m_option *opt,
 
 // Helper to parse options, see \ref m_option_type::parse.
 static inline int m_option_parse(const m_option_t *opt, const char *name,
-                                 const char *param, void *dst, int src)
+                                 const char *param, bool ambiguous_param,
+                                 void *dst)
 {
-    return opt->type->parse(opt, name, param, dst, src);
+    return opt->type->parse(opt, name, param, ambiguous_param, dst);
 }
 
 // Helper to print options, see \ref m_option_type::print.

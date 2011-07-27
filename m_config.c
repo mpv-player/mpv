@@ -25,8 +25,10 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
-#include "talloc.h"
 #include <assert.h>
+#include <stdbool.h>
+
+#include "talloc.h"
 
 #include "m_config.h"
 #include "m_option.h"
@@ -35,7 +37,7 @@
 #define MAX_PROFILE_DEPTH 20
 
 static int parse_profile(const struct m_option *opt, const char *name,
-                         const char *param, void *dst, int src)
+                         const char *param, bool ambiguous_param, void *dst)
 {
     struct m_config *config = opt->priv;
     char **list = NULL;
@@ -55,7 +57,7 @@ static int parse_profile(const struct m_option *opt, const char *name,
         return M_OPT_EXIT - 1;
     }
 
-    r = m_option_type_string_list.parse(opt, name, param, &list, src);
+    r = m_option_type_string_list.parse(opt, name, param, false, &list);
     if (r < 0)
         return r;
     if (!list || !list[0])
@@ -402,7 +404,7 @@ static struct m_config_option *m_config_get_co(const struct m_config *config,
 }
 
 static int m_config_parse_option(const struct m_config *config, char *arg,
-                                 char *param, int set)
+                                 char *param, bool ambiguous_param, bool set)
 {
     struct m_config_option *co;
     int r = 0;
@@ -443,7 +445,7 @@ static int m_config_parse_option(const struct m_config *config, char *arg,
         char **lst = NULL;
         int i, sr;
         // Parse the child options
-        r = m_option_parse(co->opt, arg, param, &lst, M_COMMAND_LINE);
+        r = m_option_parse(co->opt, arg, param, false, &lst);
         // Set them now
         if (r >= 0)
             for (i = 0; lst && lst[2 * i]; i++) {
@@ -452,7 +454,8 @@ static int m_config_parse_option(const struct m_config *config, char *arg,
                     // Build the full name
                     char n[l];
                     sprintf(n, "%s:%s", co->name, lst[2 * i]);
-                    sr = m_config_parse_option(config, n, lst[2 * i + 1], set);
+                    sr = m_config_parse_option(config, n, lst[2 * i + 1],
+                                               false, set);
                     if (sr < 0) {
                         if (sr == M_OPT_UNKNOWN) {
                             mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
@@ -473,8 +476,8 @@ static int m_config_parse_option(const struct m_config *config, char *arg,
             }
         talloc_free(lst);
     } else
-        r = m_option_parse(co->opt, arg, param, set ? co->slots->data : NULL,
-                           config->mode);
+        r = m_option_parse(co->opt, arg, param, ambiguous_param,
+                           set ? co->slots->data : NULL);
 
     // Parsing failed ?
     if (r < 0)
@@ -488,17 +491,19 @@ static int m_config_parse_option(const struct m_config *config, char *arg,
     return r;
 }
 
-int m_config_set_option(struct m_config *config, char *arg, char *param)
+int m_config_set_option(struct m_config *config, char *arg,
+                        char *param, bool ambiguous_param)
 {
     mp_msg(MSGT_CFGPARSER, MSGL_DBG2, "Setting %s=%s\n", arg, param);
-    return m_config_parse_option(config, arg, param, 1);
+    return m_config_parse_option(config, arg, param, ambiguous_param, 1);
 }
 
-int m_config_check_option(const struct m_config *config, char *arg, char *param)
+int m_config_check_option(const struct m_config *config, char *arg,
+                          char *param, bool ambiguous_param)
 {
     int r;
     mp_msg(MSGT_CFGPARSER, MSGL_DBG2, "Checking %s=%s\n", arg, param);
-    r = m_config_parse_option(config, arg, param, 0);
+    r = m_config_parse_option(config, arg, param, ambiguous_param, 0);
     if (r == M_OPT_MISSING_PARAM) {
         mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
                 "Error: option '%s' must have a parameter!\n", arg);
@@ -592,7 +597,7 @@ void m_profile_set_desc(struct m_profile *p, char *desc)
 int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
                                 char *name, char *val)
 {
-    int i = m_config_check_option(config, name, val);
+    int i = m_config_check_option(config, name, val, false);
     if (i < 0)
         return i;
     p->opts = talloc_realloc(p, p->opts, char *, 2 * (p->num_opts + 2));
@@ -615,7 +620,7 @@ void m_config_set_profile(struct m_config *config, struct m_profile *p)
     config->mode = M_CONFIG_FILE;
     config->profile_depth++;
     for (i = 0; i < p->num_opts; i++)
-        m_config_set_option(config, p->opts[2 * i], p->opts[2 * i + 1]);
+        m_config_set_option(config, p->opts[2 * i], p->opts[2 * i + 1], false);
     config->profile_depth--;
     config->mode = prev_mode;
 }
