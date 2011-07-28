@@ -20,6 +20,7 @@
 #include <libavutil/avutil.h>
 #include <assert.h>
 #include <ctype.h>
+#include <stdarg.h>
 
 #include "talloc.h"
 
@@ -71,6 +72,15 @@ int bstrrchr(struct bstr str, int c)
     return -1;
 }
 
+int bstrcspn(struct bstr str, const char *reject)
+{
+    int i;
+    for (i = 0; i < str.len; i++)
+        if (strchr(reject, str.start[i]))
+            break;
+    return i;
+}
+
 int bstr_find(struct bstr haystack, struct bstr needle)
 {
     for (int i = 0; i < haystack.len; i++)
@@ -96,21 +106,18 @@ struct bstr bstr_strip(struct bstr str)
     return str;
 }
 
-struct bstr bstr_split(struct bstr str, char *sep, struct bstr *rest)
+struct bstr bstr_split(struct bstr str, const char *sep, struct bstr *rest)
 {
-    int start, end;
+    int start;
     for (start = 0; start < str.len; start++)
         if (!strchr(sep, str.start[start]))
             break;
-    for (end = start; end < str.len; end++)
-        if (strchr(sep, str.start[end]))
-            break;
+    str = bstr_cut(str, start);
+    int end = bstrcspn(str, sep);
     if (rest) {
         *rest = bstr_cut(str, end);
     }
-    str.start += start;
-    str.len = end - start;
-    return str;
+    return bstr_splice(str, 0, end);
 }
 
 
@@ -131,12 +138,27 @@ struct bstr bstr_splice(struct bstr str, int start, int end)
 
 long long bstrtoll(struct bstr str, struct bstr *rest, int base)
 {
+    str = bstr_lstrip(str);
     char buf[51];
     int len = FFMIN(str.len, 50);
     memcpy(buf, str.start, len);
     buf[len] = 0;
     char *endptr;
     long long r = strtoll(buf, &endptr, base);
+    if (rest)
+        *rest = bstr_cut(str, endptr - buf);
+    return r;
+}
+
+double bstrtod(struct bstr str, struct bstr *rest)
+{
+    str = bstr_lstrip(str);
+    char buf[101];
+    int len = FFMIN(str.len, 100);
+    memcpy(buf, str.start, len);
+    buf[len] = 0;
+    char *endptr;
+    double r = strtod(buf, &endptr);
     if (rest)
         *rest = bstr_cut(str, endptr - buf);
     return r;
@@ -168,4 +190,15 @@ void bstr_lower(struct bstr str)
 {
     for (int i = 0; i < str.len; i++)
         str.start[i] = tolower(str.start[i]);
+}
+
+int bstr_sscanf(struct bstr str, const char *format, ...)
+{
+    char *ptr = bstrdup0(NULL, str);
+    va_list va;
+    va_start(va, format);
+    int ret = vsscanf(ptr, format, va);
+    va_end(va);
+    talloc_free(ptr);
+    return ret;
 }

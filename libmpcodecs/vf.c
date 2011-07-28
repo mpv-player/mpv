@@ -455,7 +455,7 @@ struct vf_instance *vf_open_plugin_noerr(struct MPOpts *opts,
       void* vf_priv = m_struct_alloc(st);
       int n;
       for(n = 0 ; args && args[2*n] ; n++)
-	m_struct_set(st,vf_priv,args[2*n],args[2*n+1]);
+          m_struct_set(st, vf_priv, args[2*n], bstr(args[2*n+1]));
       vf->priv = vf_priv;
       args = NULL;
     } else // Otherwise we should have the '_oldargs_'

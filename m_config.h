@@ -21,6 +21,7 @@
 
 #include <stdbool.h>
 
+#include "bstr.h"
 
 // m_config provides an API to manipulate the config variables in MPlayer.
 // It makes use of the Options API to provide a context stack that
@@ -129,28 +130,42 @@ int m_config_register_options(struct m_config *config,
 
 /*  Set an option.
  *  \param config The config object.
- *  \param arg The option's name.
+ *  \param name The option's name.
  *  \param param The value of the option, can be NULL.
  *  \param ambiguous_param: old style cmdline option, "param" may be a
            parameter to this option or something entirely unrelated
  *  \return See \ref OptionParserReturn.
  */
-int m_config_set_option(struct m_config *config, char *arg,
-                        char *param, bool ambiguous_param);
+int m_config_set_option(struct m_config *config, struct bstr name,
+                        struct bstr param, bool ambiguous_param);
+
+static inline int m_config_set_option0(struct m_config *config,
+                                       const char *name, const char *param,
+                                       bool ambiguous)
+{
+    return m_config_set_option(config, bstr(name), bstr(param), ambiguous);
+}
 
 /*  Check if an option setting is valid.
  *  Same as above m_config_set_option() but doesn't actually set anything.
  */
-int m_config_check_option(const struct m_config *config, char *arg,
-                          char *param, bool ambiguous_param);
+int m_config_check_option(const struct m_config *config, struct bstr name,
+                          struct bstr param, bool ambiguous_param);
+
+static inline int m_config_check_option0(struct m_config *config,
+                                         const char *name, const char *param,
+                                         bool ambiguous)
+{
+    return m_config_check_option(config, bstr(name), bstr(param), ambiguous);
+}
 
 
 /*  Get the option matching the given name.
  *  \param config The config object.
- *  \param arg The option's name.
+ *  \param name The option's name.
  */
 const struct m_option *m_config_get_option(const struct m_config *config,
-                                           char *arg);
+                                           struct bstr name);
 
 /*  Print a list of all registered options.
  *  \param config The config object.

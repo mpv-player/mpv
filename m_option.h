@@ -24,6 +24,7 @@
 #include <stdbool.h>
 
 #include "config.h"
+#include "bstr.h"
 
 // m_option allows to parse, print and copy data of various types.
 
@@ -217,7 +218,7 @@ struct m_option_type {
      *  \return On error a negative value is returned, on success the number
      *          of arguments consumed. For details see \ref OptionParserReturn.
      */
-    int (*parse)(const m_option_t *opt, const char *name, const char *param,
+    int (*parse)(const m_option_t *opt, struct bstr name, struct bstr param,
                  bool ambiguous_param, void *dst);
 
     // Print back a value in string form.
@@ -440,8 +441,8 @@ static inline void *m_option_get_ptr(const struct m_option *opt,
 }
 
 // Helper to parse options, see \ref m_option_type::parse.
-static inline int m_option_parse(const m_option_t *opt, const char *name,
-                                 const char *param, bool ambiguous_param,
+static inline int m_option_parse(const m_option_t *opt, struct bstr name,
+                                 struct bstr param, bool ambiguous_param,
                                  void *dst)
 {
     return opt->type->parse(opt, name, param, ambiguous_param, dst);
@@ -474,17 +475,6 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 }
 
 /*@}*/
-
-/**
- * Parse a string as a timestamp.
- *
- * @param[in]  str      the string to parse.
- * @param[out] time     parsed time.
- * @param[in]  endchar  return an error of the next character after the
- *                      timestamp is neither nul nor endchar.
- * @return              Number of chars in the timestamp.
- */
-int parse_timestring(const char *str, double *time, char endchar);
 
 #define OPTION_LIST_SEPARATOR ','
 

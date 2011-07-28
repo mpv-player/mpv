@@ -208,7 +208,8 @@ static int menu_parse_config(char* buffer, struct m_config *mconfig)
       // Setup the attribs
       for(i = 0 ; attribs[2*i] ; i++) {
 	if(strcasecmp(attribs[2*i],"name") == 0) continue;
-	if(!m_struct_set(&minfo->priv_st,menu_list[menu_count].cfg,attribs[2*i], attribs[2*i+1]))
+	if (!m_struct_set(&minfo->priv_st, menu_list[menu_count].cfg,
+                          attribs[2*i], bstr(attribs[2*i+1])))
 	  mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] bad attribute %s=%s in menu '%s' at line %d\n",attribs[2*i],attribs[2*i+1],
 		 name,parser->line);
       }

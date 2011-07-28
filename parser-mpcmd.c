@@ -183,15 +183,15 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
                     } else if (mode == LOCAL) // Drop params for empty entry
                         mode = DROP_LOCAL;
                 } else if (tmp == 0) { // 'normal' options
-                    mp_opt = m_config_get_option(config, opt);
+                    mp_opt = m_config_get_option(config, bstr(opt));
                     if (mp_opt != NULL) { // Option exist
                         if (mode == GLOBAL || (mp_opt->flags & M_OPT_GLOBAL))
                             tmp = (i + 1 < argc)
-                                ? m_config_set_option(config, opt, argv[i + 1],
+                                ? m_config_set_option0(config, opt, argv[i + 1],
                                                       true)
-                                : m_config_set_option(config, opt, NULL, false);
+                                : m_config_set_option0(config, opt, NULL, false);
                         else {
-                            tmp = m_config_check_option(config, opt,
+                            tmp = m_config_check_option0(config, opt,
                                     (i + 1 < argc) ? argv[i + 1] : NULL, true);
                             if (tmp >= 0 && mode != DROP_LOCAL) {
                                 play_tree_t *pt =
@@ -257,7 +257,7 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
 
             // Lock stdin if it will be used as input
             if (strcasecmp(argv[i], "-") == 0)
-                m_config_set_option(config, "consolecontrols", "no", false);
+                m_config_set_option0(config, "consolecontrols", "no", false);
             add_entry(&last_parent, &last_entry, entry);
             mode = LOCAL; // We start entry specific options
         }
@@ -301,13 +301,13 @@ int m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
             break;
         arg++;
 
-        opt = m_config_get_option(config, arg);
+        opt = m_config_get_option(config, bstr(arg));
         // Ignore invalid option
         if (!opt)
             continue;
         // Set, non-pre-parse options will be ignored
-        int r = m_config_set_option(config, arg, i+1 < argc ? argv[i+1] : NULL,
-                                    true);
+        int r = m_config_set_option0(config, arg, i+1 < argc ? argv[i+1] : NULL,
+                                     true);
         if (r < 0)
             ret = r;
         else

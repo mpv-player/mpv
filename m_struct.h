@@ -19,6 +19,8 @@
 #ifndef MPLAYER_M_STRUCT_H
 #define MPLAYER_M_STRUCT_H
 
+#include "bstr.h"
+
 /// \defgroup OptionsStruct Options struct
 /// \ingroup Options
 /// An API to manipulate structs using m_option.
@@ -87,8 +89,8 @@ m_struct_alloc(const m_struct_t* st);
  *  \param param New value of the field.
  *  \return 0 on error, 1 on success.
  */
-int
-m_struct_set(const m_struct_t* st, void* obj, const char* field, const char* param);
+int m_struct_set(const m_struct_t *st, void *obj, const char *field,
+                 struct bstr param);
 
 /// Reset a field (or all if field == NULL) to defaults.
 /** \param st Struct definition.

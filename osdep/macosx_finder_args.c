@@ -118,7 +118,7 @@ char myPsnStr[5+10+1+10+1];
 	myPsnStr[5+10+1+10]=0;
 
 	if((argc==2) && !strcmp(myPsnStr, argv[1])) {
-		m_config_set_option(config, "quiet", NULL, false);
+		m_config_set_option0(config, "quiet", NULL, false);
 		InitCursor();
 		AEInstallEventHandler(kCoreEventClass, kAEOpenDocuments, NewAEEventHandlerUPP(AppleEventHandlerProc), 0, FALSE);
 		RunApplicationEventLoop();

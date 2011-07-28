@@ -67,8 +67,9 @@ m_struct_alloc(const m_struct_t* st) {
   return r;
 }
 
-int
-m_struct_set(const m_struct_t* st, void* obj, const char* field, const char* param) {
+int m_struct_set(const m_struct_t *st, void *obj, const char *field,
+                 struct bstr param)
+{
   const m_option_t* f = m_struct_get_field(st,field);
 
   if(!f) {
@@ -77,9 +78,9 @@ m_struct_set(const m_struct_t* st, void* obj, const char* field, const char* par
     return 0;
   }
 
-  if(f->type->parse(f, field, param, false, M_ST_MB_P(obj,f->p)) < 0) {
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Struct %s, field %s parsing error: %s\n",
-	   st->name,field,param);
+  if(f->type->parse(f, bstr(field), param, false, M_ST_MB_P(obj,f->p)) < 0) {
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Struct %s, field %s parsing error: %.*s\n",
+	   st->name, field, BSTR_P(param));
     return 0;
   }
 
