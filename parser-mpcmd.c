@@ -76,7 +76,7 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
     int i, j, start_title = -1, end_title = -1;
     char *opt, *splitpos = NULL;
     char entbuf[15];
-    int no_more_opts = 0;
+    bool no_more_opts = false;
     int opt_exit = 0;   // whether mplayer should exit without playing anything
     play_tree_t *last_parent, *last_entry = NULL, *root;
 
@@ -99,13 +99,7 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
         opt = argv[i];
         /* check for -- (no more options id.) except --help! */
         if (!strcmp(opt, "--")) {
-            no_more_opts = 1;
-            if (i + 1 >= argc) {
-                mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                        "'--' indicates no more options, "
-                        "but no filename was given on the command line.\n");
-                goto err_out;
-            }
+            no_more_opts = true;
             continue;
         }
         if ((opt[0] == '{') && (opt[1] == '\0')) {
