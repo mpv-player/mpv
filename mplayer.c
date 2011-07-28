@@ -282,7 +282,6 @@ static int drop_frame_cnt=0; // total number of dropped frames
 static int output_quality=0;
 
 // seek:
-static double seek_to_sec;
 static off_t seek_to_byte=0;
 static off_t step_sec=0;
 
@@ -3711,7 +3710,8 @@ static void run_playloop(struct MPContext *mpctx)
     edl_update(mpctx);
 
     /* Looping. */
-    if (mpctx->stop_play==AT_END_OF_FILE && opts->loop_times>=0) {
+    if (opts->loop_times >= 0 && (mpctx->stop_play == AT_END_OF_FILE ||
+                                  mpctx->stop_play == PT_NEXT_ENTRY)) {
         mp_msg(MSGT_CPLAYER, MSGL_V, "loop_times = %d\n", opts->loop_times);
 
         if (opts->loop_times>1)
@@ -3720,7 +3720,7 @@ static void run_playloop(struct MPContext *mpctx)
             opts->loop_times = -1;
         play_n_frames = play_n_frames_mf;
         mpctx->stop_play = 0;
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, 0, 0);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->seek_to_sec, 0);
     }
 
     if (mpctx->seek.type) {
@@ -4792,10 +4792,10 @@ if(play_n_frames==0){
  mpctx->last_chapter_seek = -1;
 
 // If there's a timeline force an absolute seek to initialize state
-if (seek_to_sec || mpctx->timeline) {
-    queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_to_sec, 0);
+if (opts->seek_to_sec || mpctx->timeline) {
+    queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->seek_to_sec, 0);
     seek(mpctx, mpctx->seek, false);
-    end_at.pos += seek_to_sec;
+    end_at.pos += opts->seek_to_sec;
 }
 if (opts->chapterrange[0] > 0) {
     double pts;

@@ -62,6 +62,7 @@ typedef struct MPOpts {
     int consolecontrols;
     int doubleclick_time;
     int list_properties;
+    double seek_to_sec;
     int audio_id;
     int video_id;
     int sub_id;
