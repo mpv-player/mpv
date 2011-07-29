@@ -28,6 +28,9 @@
 #ifdef MP_DEBUG
 #include <assert.h>
 #endif
+
+#include "talloc.h"
+
 #include "m_config.h"
 #include "playtree.h"
 #include "mp_msg.h"
@@ -68,14 +71,8 @@ play_tree_free(play_tree_t* pt, int children) {
   for(iter = pt->child ; iter != NULL ; iter = iter->next)
     iter->parent = NULL;
 
-  if (pt->params) {
-    int i;
-    for(i = 0 ; pt->params[i].name != NULL ; i++) {
-      free(pt->params[i].name);
-      free(pt->params[i].value);
-    }
-    free(pt->params);
-  }
+  talloc_free(pt->params);
+
   if(pt->files) {
     int i;
     for(i = 0 ; pt->files[i] != NULL ; i++)
@@ -360,13 +357,9 @@ play_tree_set_param(play_tree_t* pt, const char* name, const char* val) {
   if(pt->params)
     for ( ; pt->params[n].name != NULL ; n++ ) { }
 
-  pt->params = realloc(pt->params, (n + 2) * sizeof(play_tree_param_t));
-  if(pt->params == NULL) {
-      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't realloc params (%d bytes of memory)\n",(n+2)*(int)sizeof(play_tree_param_t));
-      return;
-  }
-  pt->params[n].name = strdup(name);
-  pt->params[n].value = val != NULL ? strdup(val) : NULL;
+  pt->params = talloc_realloc(NULL, pt->params, struct play_tree_param, n + 2);
+  pt->params[n].name = talloc_strdup(pt->params, name);
+  pt->params[n].value = val != NULL ? talloc_strdup(pt->params, val) : NULL;
   memset(&pt->params[n+1],0,sizeof(play_tree_param_t));
 
   return;
@@ -390,18 +383,14 @@ play_tree_unset_param(play_tree_t* pt, const char* name) {
   if(ni < 0)
     return 0;
 
-  free(pt->params[ni].name);
-  free(pt->params[ni].value);
+  talloc_free(pt->params[ni].name);
+  talloc_free(pt->params[ni].value);
 
   if(n > 1) {
     memmove(&pt->params[ni],&pt->params[ni+1],(n-ni)*sizeof(play_tree_param_t));
-    pt->params = realloc(pt->params, n * sizeof(play_tree_param_t));
-    if(pt->params == NULL) {
-      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",n*(int)sizeof(play_tree_param_t));
-      return -1;
-    }
+    pt->params = talloc_realloc(NULL, pt->params, struct play_tree_param, n);
   } else {
-    free(pt->params);
+    talloc_free(pt->params);
     pt->params = NULL;
   }
 
