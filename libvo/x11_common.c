@@ -809,8 +809,6 @@ int vo_x11_check_events(struct vo *vo)
                 break;
             case KeyPress:
                 {
-                    int key;
-
                     XLookupString(&Event.xkey, buf, sizeof(buf), &keySym,
                                   &x11->compose_status);
                     int modifiers = 0;
@@ -825,10 +823,7 @@ int vo_x11_check_events(struct vo *vo)
 #ifdef XF86XK_AudioPause
                     vo_x11_putkey_ext(vo, keySym, modifiers);
 #endif
-                    key =
-                        ((keySym & 0xff00) !=
-                         0 ? ((keySym & 0x00ff) + 256) : (keySym));
-                    vo_x11_putkey(vo, key, modifiers);
+                    vo_x11_putkey(vo, keySym, modifiers);
                     ret |= VO_EVENT_KEYPRESS;
                 }
                 break;

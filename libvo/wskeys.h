@@ -19,67 +19,67 @@
 #ifndef MPLAYER_WSKEYS_H
 #define MPLAYER_WSKEYS_H
 
-#define wsPause         0x13 + 256
-#define wsUp            0x52 + 256
-#define wsDown          0x54 + 256
-#define wsLeft          0x51 + 256
-#define wsRight         0x53 + 256
-#define wsLeftCtrl      0xe3 + 256
-#define wsRightCtrl     0xe4 + 256
-#define wsLeftAlt       0xe9 + 256
-#define wsRightAlt      0x7e + 256
-#define wsLeftShift     0xe1 + 256
-#define wsRightShift    0xe2 + 256
-#define wsEnter         0x0d + 256
-#define wsBackSpace     0x08 + 256
-#define wsCapsLock      0xe5 + 256
-#define wsTab           0x09 + 256
-#define wsF1            0xbe + 256
-#define wsF2            0xbf + 256
-#define wsF3            0xc0 + 256
-#define wsF4            0xc1 + 256
-#define wsF5            0xc2 + 256
-#define wsF6            0xc3 + 256
-#define wsF7            0xc4 + 256
-#define wsF8            0xc5 + 256
-#define wsF9            0xc6 + 256
-#define wsF10           0xc7 + 256
-#define wsF11           0xc8 + 256
-#define wsF12           0xc9 + 256
-#define wsInsert        0x63 + 256
-#define wsDelete        0xff + 256
-#define wsHome          0x50 + 256
-#define wsEnd           0x57 + 256
-#define wsPageUp        0x55 + 256
-#define wsPageDown      0x56 + 256
-#define wsNumLock       0x7f + 256
-#define wsEscape        0x1b + 256
-#define wsGrayEnter     0x8d + 256
-#define wsGrayPlus      0xab + 256
-#define wsGrayMinus     0xad + 256
-#define wsGrayMul       0xaa + 256
-#define wsGrayDiv       0xaf + 256
-#define wsGrayDecimal   0xae + 256
-#define wsGray0         0xb0 + 256
-#define wsGray1         0xb1 + 256
-#define wsGray2         0xb2 + 256
-#define wsGray3         0xb3 + 256
-#define wsGray4         0xb4 + 256
-#define wsGray5         0xb5 + 256
-#define wsGray6         0xb6 + 256
-#define wsGray7         0xb7 + 256
-#define wsGray8         0xb8 + 256
-#define wsGray9         0xb9 + 256
-#define wsGrayHome      0x95 + 256
-#define wsGrayLeft      0x96 + 256
-#define wsGrayUp        0x97 + 256
-#define wsGrayRight     0x98 + 256
-#define wsGrayDown      0x99 + 256
-#define wsGrayPgUp      0x9a + 256
-#define wsGrayPgDn      0x9b + 256
-#define wsGrayEnd       0x9c + 256
-#define wsGray5Dup      0x9d + 256
-#define wsGrayInsert    0x9e + 256
-#define wsGrayDelete    0x9f + 256
+#define wsPause         0xff13
+#define wsUp            0xff52
+#define wsDown          0xff54
+#define wsLeft          0xff51
+#define wsRight         0xff53
+#define wsLeftCtrl      0xffe3
+#define wsRightCtrl     0xffe4
+#define wsLeftAlt       0xffe9
+#define wsRightAlt      0xff7e
+#define wsLeftShift     0xffe1
+#define wsRightShift    0xffe2
+#define wsEnter         0xff0d
+#define wsBackSpace     0xff08
+#define wsCapsLock      0xffe5
+#define wsTab           0xff09
+#define wsF1            0xffbe
+#define wsF2            0xffbf
+#define wsF3            0xffc0
+#define wsF4            0xffc1
+#define wsF5            0xffc2
+#define wsF6            0xffc3
+#define wsF7            0xffc4
+#define wsF8            0xffc5
+#define wsF9            0xffc6
+#define wsF10           0xffc7
+#define wsF11           0xffc8
+#define wsF12           0xffc9
+#define wsInsert        0xff63
+#define wsDelete        0xffff
+#define wsHome          0xff50
+#define wsEnd           0xff57
+#define wsPageUp        0xff55
+#define wsPageDown      0xff56
+#define wsNumLock       0xff7f
+#define wsEscape        0xff1b
+#define wsGrayEnter     0xff8d
+#define wsGrayPlus      0xffab
+#define wsGrayMinus     0xffad
+#define wsGrayMul       0xffaa
+#define wsGrayDiv       0xffaf
+#define wsGrayDecimal   0xffae
+#define wsGray0         0xffb0
+#define wsGray1         0xffb1
+#define wsGray2         0xffb2
+#define wsGray3         0xffb3
+#define wsGray4         0xffb4
+#define wsGray5         0xffb5
+#define wsGray6         0xffb6
+#define wsGray7         0xffb7
+#define wsGray8         0xffb8
+#define wsGray9         0xffb9
+#define wsGrayHome      0xff95
+#define wsGrayLeft      0xff96
+#define wsGrayUp        0xff97
+#define wsGrayRight     0xff98
+#define wsGrayDown      0xff99
+#define wsGrayPgUp      0xff9a
+#define wsGrayPgDn      0xff9b
+#define wsGrayEnd       0xff9c
+#define wsGray5Dup      0xff9d
+#define wsGrayInsert    0xff9e
+#define wsGrayDelete    0xff9f
 
 #endif /* MPLAYER_WSKEYS_H */
