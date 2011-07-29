@@ -423,6 +423,8 @@ struct m_option {
 #define ERR_OUT_OF_RANGE        M_OPT_OUT_OF_RANGE
 #define ERR_FUNC_ERR            M_OPT_PARSER_ERR
 
+char *m_option_strerror(int code);
+
 // Find the option matching the given name in the list.
 /** \ingroup Options
  *  This function takes the possible wildcards into account (see

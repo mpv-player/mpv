@@ -36,6 +36,24 @@
 #include "stream/url.h"
 #include "libavutil/avstring.h"
 
+char *m_option_strerror(int code)
+{
+    switch (code) {
+    case M_OPT_UNKNOWN:
+        return mp_gtext("Unrecognized option name");
+    case M_OPT_MISSING_PARAM:
+        return mp_gtext("Required parameter for option missing");
+    case M_OPT_INVALID:
+        return mp_gtext("Option parameter could not be parsed");
+    case M_OPT_OUT_OF_RANGE:
+        return mp_gtext("Parameter is outside values allowed for option");
+    case M_OPT_PARSER_ERR:
+        return mp_gtext("Parser error");
+    default:
+        return NULL;
+    }
+}
+
 static const struct m_option *m_option_list_findb(const struct m_option *list,
                                                   struct bstr name)
 {

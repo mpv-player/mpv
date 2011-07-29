@@ -192,8 +192,15 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
                 if (r <= M_OPT_EXIT) {
                     opt_exit = true;
                     r = M_OPT_EXIT - r;
-                } else if (r < 0)
-                    goto print_err;
+                } else if (r < 0) {
+                    char *msg = m_option_strerror(r);
+                    if (!msg)
+                        goto print_err;
+                    mp_tmsg(MSGT_CFGPARSER, MSGL_FATAL,
+                            "Error parsing commandline option \"%.*s\": %s\n",
+                            BSTR_P(orig_opt), msg);
+                    goto err_out;
+                }
                 if (old_syntax)
                     i += r;
             }
