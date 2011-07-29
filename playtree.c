@@ -346,7 +346,7 @@ play_tree_remove_file(play_tree_t* pt,const char* file) {
 }
 
 void
-play_tree_set_param(play_tree_t* pt, const char* name, const char* val) {
+play_tree_set_param(play_tree_t* pt, struct bstr name, struct bstr val) {
   int n = 0;
 
 #ifdef MP_DEBUG
@@ -358,8 +358,8 @@ play_tree_set_param(play_tree_t* pt, const char* name, const char* val) {
     for ( ; pt->params[n].name != NULL ; n++ ) { }
 
   pt->params = talloc_realloc(NULL, pt->params, struct play_tree_param, n + 2);
-  pt->params[n].name = talloc_strdup(pt->params, name);
-  pt->params[n].value = val != NULL ? talloc_strdup(pt->params, val) : NULL;
+  pt->params[n].name = bstrdup0(pt->params, name);
+  pt->params[n].value = bstrdup0(pt->params, val);
   memset(&pt->params[n+1],0,sizeof(play_tree_param_t));
 
   return;
@@ -410,7 +410,7 @@ play_tree_set_params_from(play_tree_t* dest,play_tree_t* src) {
     return;
 
   for(i = 0; src->params[i].name != NULL ; i++)
-    play_tree_set_param(dest,src->params[i].name,src->params[i].value);
+      play_tree_set_param(dest, bstr(src->params[i].name), bstr(src->params[i].value));
   if(src->flags & PLAY_TREE_RND) // pass the random flag too
     dest->flags |= PLAY_TREE_RND;
 

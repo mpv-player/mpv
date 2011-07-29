@@ -1052,7 +1052,7 @@ static int libmpdemux_was_interrupted(struct MPContext *mpctx, int stop_play)
 
 static int playtree_add_playlist(struct MPContext *mpctx, play_tree_t* entry)
 {
-  play_tree_add_bpf(entry,mpctx->filename);
+    play_tree_add_bpf(entry, bstr(mpctx->filename));
 
   {
   if(!entry) {
@@ -4191,7 +4191,7 @@ while (opts->player_idle_mode && !mpctx->filename) {
             // The entry is added to the main playtree after the switch().
             break;
         case MP_CMD_LOADLIST:
-            entry = parse_playlist_file(mpctx->mconfig, cmd->args[0].v.s);
+            entry = parse_playlist_file(mpctx->mconfig, bstr(cmd->args[0].v.s));
             break;
         case MP_CMD_QUIT:
             exit_player_with_rc(mpctx, EXIT_QUIT, (cmd->nargs > 0)? cmd->args[0].v.i : 0);

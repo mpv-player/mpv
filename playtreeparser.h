@@ -20,6 +20,7 @@
 #define MPLAYER_PLAYTREEPARSER_H
 
 #include "playtree.h"
+#include "bstr.h"
 
 /// \defgroup PlaytreeParser Playtree parser
 /// \ingroup Playtree
@@ -65,7 +66,7 @@ play_tree_parser_get_play_tree(play_tree_parser_t* p, int forced);
 
 /// Wrapper for play_tree_add_basepath (add base path from file).
 void
-play_tree_add_bpf(play_tree_t* pt, char* filename);
+play_tree_add_bpf(play_tree_t* pt, struct bstr filename);
 
 ///@}
 

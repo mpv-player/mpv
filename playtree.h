@@ -19,6 +19,8 @@
 #ifndef MPLAYER_PLAYTREE_H
 #define MPLAYER_PLAYTREE_H
 
+#include "bstr.h"
+
 /// \file
 /// \ingroup Playtree
 
@@ -188,7 +190,7 @@ play_tree_remove_file(play_tree_t* pt,const char* file);
 
 /// Add a config paramter to an item.
 void
-play_tree_set_param(play_tree_t* pt, const char* name, const char* val);
+play_tree_set_param(play_tree_t* pt, struct bstr name, struct bstr val);
 
 /// Remove a config parameter from an item.
 int
@@ -257,7 +259,7 @@ play_tree_cleanup(play_tree_t* pt);
 /** \ingroup PlaytreeParser
  */
 play_tree_t*
-parse_playlist_file(struct m_config *mconfig, char* file);
+parse_playlist_file(struct m_config *mconfig, struct bstr file);
 
 /// \defgroup PtAPI Playtree highlevel API
 /// \ingroup Playtree
