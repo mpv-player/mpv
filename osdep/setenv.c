@@ -22,9 +22,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#ifndef MP_DEBUG
-  #define NDEBUG
-#endif
 #include <assert.h>
 
 int setenv(const char *name, const char *val, int overwrite)

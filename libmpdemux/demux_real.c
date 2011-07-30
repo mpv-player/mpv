@@ -1249,10 +1249,6 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		codec_data_size = stream_read_dword(demuxer->stream);
 		codec_pos = stream_tell(demuxer->stream);
 
-#ifdef MP_DEBUG
-#define stream_skip(st,siz) { int i; for(i=0;i<siz;i++) mp_msg(MSGT_DEMUX,MSGL_V," %02X",stream_read_char(st)); mp_msg(MSGT_DEMUX,MSGL_V,"\n");}
-#endif
-
 	if (!strncmp(mimet,"audio/",6)) {
 	  if (strstr(mimet,"x-pn-realaudio") || strstr(mimet,"x-pn-multirate-realaudio")) {
 		tmp = stream_read_dword(demuxer->stream);

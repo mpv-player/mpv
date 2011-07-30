@@ -19,14 +19,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "config.h"
 #if HAVE_MALLOC_H
 #include <malloc.h>
-#endif
-
-#ifdef MP_DEBUG
-#include <assert.h>
 #endif
 
 #include "mp_msg.h"
@@ -270,12 +267,10 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
   int w2;
   int number = mp_imgtype >> 16;
 
-#ifdef MP_DEBUG
   assert(w == -1 || w >= vf->w);
   assert(h == -1 || h >= vf->h);
   assert(vf->w > 0);
   assert(vf->h > 0);
-#endif
 
 //  fprintf(stderr, "get_image: %d:%d, vf: %d:%d\n", w,h,vf->w,vf->h);
 

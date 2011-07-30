@@ -141,11 +141,6 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile)
             continue;
         }
 
-#ifdef MP_DEBUG
-        PRINT_LINENUM;
-        mp_msg(MSGT_CFGPARSER, MSGL_V, "option: %s\n", opt);
-#endif
-
         /* skip whitespaces */
         while (isspace(line[line_pos]))
             ++line_pos;
@@ -206,11 +201,6 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile)
             errors++;
             continue;
         }
-
-#ifdef MP_DEBUG
-        PRINT_LINENUM;
-        mp_msg(MSGT_CFGPARSER, MSGL_V, "parameter: %s\n", param);
-#endif
 
         /* now, check if we have some more chars on the line */
         /* whitespace... */

@@ -805,9 +805,7 @@ parse_playtree(stream_t *stream, struct m_config *mconfig, int forced) {
   play_tree_parser_t* p;
   play_tree_t* ret;
 
-#ifdef MP_DEBUG
   assert(stream != NULL);
-#endif
 
   p = play_tree_parser_new(stream, mconfig, 0);
   if(!p)
@@ -924,9 +922,7 @@ play_tree_parser_new(stream_t* stream, struct m_config *mconfig, int deep) {
 void
 play_tree_parser_free(play_tree_parser_t* p) {
 
-#ifdef MP_DEBUG
   assert(p != NULL);
-#endif
 
   free(p->buffer);
   free(p->line);
@@ -937,10 +933,7 @@ play_tree_t*
 play_tree_parser_get_play_tree(play_tree_parser_t* p, int forced) {
   play_tree_t* tree = NULL;
 
-#ifdef MP_DEBUG
   assert(p != NULL);
-#endif
-
 
   while(play_tree_parser_get_line(p) != NULL) {
     play_tree_parser_reset(p);
