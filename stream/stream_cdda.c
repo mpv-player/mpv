@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "talloc.h"
+
 #include "stream.h"
 #include "m_option.h"
 #include "m_struct.h"
@@ -302,9 +304,9 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
 
   if(!p->device) {
     if (cdrom_device)
-      p->device = strdup(cdrom_device);
+      p->device = talloc_strdup(NULL, cdrom_device);
     else
-      p->device = strdup(DEFAULT_CDROM_DEVICE);
+      p->device = talloc_strdup(NULL, DEFAULT_CDROM_DEVICE);
   }
 
 #ifdef CONFIG_CDDB
@@ -355,7 +357,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   }
 
   cd_info = cd_info_new();
-  mp_tmsg(MSGT_OPEN,MSGL_INFO,"Found audio CD with %ld tracks.\n",cdda_tracks(cdd));
+  mp_tmsg(MSGT_OPEN,MSGL_INFO,"Found audio CD with %d tracks.\n", (int)cdda_tracks(cdd));
   for(i=0;i<cdd->tracks;i++) {
 	  char track_name[80];
 	  long sec=cdda_track_firstsector(cdd,i+1);
