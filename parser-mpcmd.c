@@ -186,6 +186,8 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
                     r = m_config_check_option(config, opt, param, old_syntax);
                     if (r >= 0) {
                         play_tree_t *pt = last_entry ? last_entry : last_parent;
+                        if (r == 0)
+                            param = bstr(NULL);  // for old_syntax case
                         play_tree_set_param(pt, opt, param);
                     }
                 }
