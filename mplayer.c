@@ -1855,6 +1855,9 @@ static double written_audio_pts(struct MPContext *mpctx)
 	// but not accurately known in sh_audio->i_bps.
 
 	a_pts = d_audio->pts;
+        if (a_pts == MP_NOPTS_VALUE)
+            return a_pts;
+
 	// ds_tell_pts returns bytes read after last timestamp from
 	// demuxing layer, decoder might use sh_audio->a_in_buffer for bytes
 	// it has read but not decoded
@@ -1885,8 +1888,10 @@ static double written_audio_pts(struct MPContext *mpctx)
 // Return pts value corresponding to currently playing audio.
 double playing_audio_pts(struct MPContext *mpctx)
 {
-    return written_audio_pts(mpctx) - mpctx->opts.playback_speed *
-	ao_get_delay(mpctx->ao);
+    double pts = written_audio_pts(mpctx);
+    if (pts == MP_NOPTS_VALUE)
+        return pts;
+    return pts - mpctx->opts.playback_speed * ao_get_delay(mpctx->ao);
 }
 
 static bool is_av_sub(int type)

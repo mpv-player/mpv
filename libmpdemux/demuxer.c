@@ -779,7 +779,7 @@ void ds_free_packs(demux_stream_t *ds)
     ds->current = NULL;
     ds->buffer = NULL;
     ds->buffer_pos = ds->buffer_size;
-    ds->pts = 0;
+    ds->pts = MP_NOPTS_VALUE;
     ds->pts_bytes = 0;
 }
 
