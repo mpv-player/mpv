@@ -159,6 +159,7 @@ typedef struct MPContext {
     /* timestamp of video frame currently visible on screen
      * (or at least queued to be flipped by VO) */
     double video_pts;
+    double last_seek_pts;
 
     // used to prevent hanging in some error cases
     unsigned int start_timestamp;

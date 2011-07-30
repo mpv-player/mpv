@@ -1223,7 +1223,7 @@ static void sadd_hhmmssf(char *buf, unsigned *pos, int len, float time) {
   int ss = (tenths /  10) % 60;
   int mm = (tenths / 600) % 60;
   int hh = tenths / 36000;
-  if (time <= 0) {
+  if (time < 0) {
     saddf(buf, pos, len, "unknown");
     return;
   }
@@ -1254,6 +1254,8 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
   if (opts->quiet)
       return;
 
+  if (a_pos == MP_NOPTS_VALUE)
+      a_pos = -9;   // don't print a huge negative number
 
   int width;
   char *line;
@@ -2375,6 +2377,13 @@ static void adjust_sync(struct MPContext *mpctx, double frame_time)
     mpctx->total_avsync_change += change;
 }
 
+static int write_to_ao(struct MPContext *mpctx, void *data, int len, int flags)
+{
+    if (mpctx->paused)
+        return 0;
+    return ao_play(mpctx->ao, data, len, flags);
+}
+
 #define ASYNC_PLAY_DONE -3
 static int audio_start_sync(struct MPContext *mpctx, int playsize)
 {
@@ -2442,7 +2451,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
          * in playsize. */
         char *p = malloc(playsize);
         memset(p, fillbyte, playsize);
-        playsize = ao_play(ao, p, playsize, 0);
+        playsize = write_to_ao(mpctx, p, playsize, 0);
         free(p);
         mpctx->delay += opts->playback_speed*playsize/(double)ao->bps;
         return ASYNC_PLAY_DONE;
@@ -2475,7 +2484,10 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     // sync completely wrong; there should be no need to use ao->pts
     // in get_space()
     ao->pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
-    playsize = ao_get_space(ao);
+    if (mpctx->paused)
+        playsize = 1;   // just initialize things (audio pts at least)
+    else
+        playsize = ao_get_space(ao);
 
     // Fill buffer if needed:
     current_module="decode_audio";
@@ -2535,7 +2547,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     // They're obviously badly broken in the way they handle av sync;
     // would not having access to this make them more broken?
     ao->pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
-    int played = ao_play(ao, ao->buffer.start, playsize, playflags);
+    int played = write_to_ao(mpctx, ao->buffer.start, playsize, playflags);
     assert(played % unitsize == 0);
     ao->buffer_playable_size = playsize - played;
 
@@ -2543,7 +2555,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
         ao->buffer.len -= played;
         memmove(ao->buffer.start, ao->buffer.start + played, ao->buffer.len);
         mpctx->delay += opts->playback_speed * played / ao->bps;
-    } else if (audio_eof && ao_get_delay(ao) < .04) {
+    } else if (!mpctx->paused && audio_eof && ao_get_delay(ao) < .04) {
         // Sanity check to avoid hanging in case current ao doesn't output
         // partial chunks and doesn't check for AOPLAY_FINAL_CHUNK
         return -2;
@@ -3230,8 +3242,11 @@ static int seek(MPContext *mpctx, struct seek_params seek,
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */
-    if (seek.type == MPSEEK_ABSOLUTE)
+    if (seek.type == MPSEEK_ABSOLUTE) {
         mpctx->video_pts = seek.amount;
+        mpctx->last_seek_pts = seek.amount;
+    } else
+        mpctx->last_seek_pts = MP_NOPTS_VALUE;
 
     if (hr_seek) {
         mpctx->hrseek_active = true;
@@ -3317,7 +3332,10 @@ double get_current_time(struct MPContext *mpctx)
     struct sh_video *sh_video = demuxer->video->sh;
     if (sh_video)
         return mpctx->video_pts;
-    return playing_audio_pts(mpctx);
+    double apts = playing_audio_pts(mpctx);
+    if (apts != MP_NOPTS_VALUE)
+        return apts;
+    return mpctx->last_seek_pts;
 }
 
 int get_percent_pos(struct MPContext *mpctx)
@@ -3419,8 +3437,10 @@ static void run_playloop(struct MPContext *mpctx)
 
 /*========================== PLAY AUDIO ============================*/
 
-    if (mpctx->sh_audio && !mpctx->paused
-        && (!mpctx->restart_playback || !mpctx->sh_video)) {
+    if (!mpctx->sh_video)
+        mpctx->restart_playback = false;
+
+    if (mpctx->sh_audio && !mpctx->restart_playback) {
         int status = fill_audio_out_buffers(mpctx);
         full_audio_buffers = status >= 0 && !mpctx->ao->untimed;
         if (status == -2)
@@ -3431,7 +3451,6 @@ static void run_playloop(struct MPContext *mpctx)
 
 
     if (!mpctx->sh_video) {
-        mpctx->restart_playback = false;
         if (mpctx->step_frames) {
             mpctx->step_frames = 0;
             pause_player(mpctx);
@@ -3597,7 +3616,7 @@ static void run_playloop(struct MPContext *mpctx)
             }
             if (mpctx->restart_playback) {
                 mpctx->syncing_audio = true;
-                if (mpctx->sh_audio && !mpctx->paused)
+                if (mpctx->sh_audio)
                     fill_audio_out_buffers(mpctx);
                 mpctx->restart_playback = false;
                 mpctx->time_frame = 0;
@@ -4790,6 +4809,7 @@ if(play_n_frames==0){
  mpctx->drop_message_shown = 0;
  mpctx->restart_playback = true;
  mpctx->video_pts = 0;
+ mpctx->last_seek_pts = 0;
  mpctx->hrseek_active = false;
  mpctx->hrseek_framedrop = false;
  mpctx->step_frames = 0;
