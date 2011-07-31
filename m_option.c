@@ -1544,10 +1544,12 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
     if (!bstrcmp0(params, "help")) { // Help
         char min[50], max[50];
         if (!desc->fields) {
-            printf("%.*s doesn't have any options.\n\n", BSTR_P(name));
+            mp_msg(MSGT_CFGPARSER, MSGL_INFO,
+                   "%.*s doesn't have any options.\n\n", BSTR_P(name));
             return M_OPT_EXIT - 1;
         }
-        printf("\n Name                 Type            Min        Max\n\n");
+        mp_msg(MSGT_CFGPARSER, MSGL_INFO,
+               "\n Name                 Type            Min        Max\n\n");
         for (n = 0; desc->fields[n].name; n++) {
             const m_option_t *opt = &desc->fields[n];
             if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
@@ -1560,13 +1562,11 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
                 sprintf(max, "%-8.0f", opt->max);
             else
                 strcpy(max, "No");
-            printf(" %-20.20s %-15.15s %-10.10s %-10.10s\n",
-                   opt->name,
-                   opt->type->name,
-                   min,
-                   max);
+            mp_msg(MSGT_CFGPARSER, MSGL_INFO,
+                   " %-20.20s %-15.15s %-10.10s %-10.10s\n",
+                   opt->name, opt->type->name, min, max);
         }
-        printf("\n");
+        mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
         return M_OPT_EXIT - 1;
     }
 
@@ -1861,7 +1861,8 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
             char prefix[len];
             strncpy(prefix, opt->name, len - 1);
             prefix[len - 1] = '\0';
-            mp_msg(MSGT_VFILTER, MSGL_ERR, "Option %.*s: unknown postfix %.*s\n"
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+                   "Option %.*s: unknown postfix %.*s\n"
                    "Supported postfixes are:\n"
                    "  %s-add\n"
                    " Append the given list to the current list\n\n"
@@ -1904,19 +1905,18 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
             free_obj_settings_list(dst);
         break;
     default:
-        mp_msg(MSGT_VFILTER, MSGL_ERR, "Option %.*s: FIXME\n", BSTR_P(name));
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: FIXME\n", BSTR_P(name));
         return M_OPT_UNKNOWN;
     }
 
     if (!bstrcmp0(param, "help")) {
         m_obj_list_t *ol = opt->priv;
-        mp_msg(MSGT_VFILTER, MSGL_INFO, "Available video filters:\n");
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_FILTERS\n");
+        mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Available video filters:\n");
         for (int n = 0; ol->list[n]; n++)
-            mp_msg(MSGT_VFILTER, MSGL_INFO, "  %-15s: %s\n",
+            mp_msg(MSGT_CFGPARSER, MSGL_INFO, "  %-15s: %s\n",
                    M_ST_MB(char *, ol->list[n], ol->name_off),
                    M_ST_MB(char *, ol->list[n], ol->info_off));
-        mp_msg(MSGT_VFILTER, MSGL_INFO, "\n");
+        mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
         return M_OPT_EXIT - 1;
     }
 
