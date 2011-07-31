@@ -302,11 +302,11 @@ extern int vo_pts;
 
 // return: how many bytes can be played without blocking
 static int get_space(void){
-    float x=(float)(vo_pts-ao_data.pts)/90000.0;
+    float x=(float)(vo_pts-ao_data.brokenpts)/90000.0;
     int y;
     //FIXME: is it correct?
     if(vo_mpegpes_fd < 0) return 32000;	//not using -vo mpegpes
-//    printf("vo_pts: %5.3f  ao_pts: %5.3f\n",vo_pts/90000.0,ao_data.pts/90000.0);
+//    printf("vo_pts: %5.3f  ao_pts: %5.3f\n",vo_pts/90000.0,ao_data.brokenpts/90000.0);
     if(x<=0) return 0;
     y=freq*4*x;y/=ao_data.outburst;y*=ao_data.outburst;
     if(y>32000) y=32000;
@@ -320,11 +320,11 @@ static int get_space(void){
 static int play(void* data,int len,int flags){
 //    printf("\nao_mpegpes: play(%d) freq=%d\n",len,freq_id);
     if(ao_data.format==AF_FORMAT_MPEG2)
-	send_mpeg_pes_packet (data, len, 0x1C0, ao_data.pts, 1, my_ao_write);
+	send_mpeg_pes_packet (data, len, 0x1C0, ao_data.brokenpts, 1, my_ao_write);
     else {
 //	if(len>2000) len=2000;
 //	printf("ao_mpegpes: len=%d  \n",len);
-	send_mpeg_lpcm_packet(data, len, 0xA0, ao_data.pts, freq_id, my_ao_write);
+	send_mpeg_lpcm_packet(data, len, 0xA0, ao_data.brokenpts, freq_id, my_ao_write);
     }
     return len;
 }

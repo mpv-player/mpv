@@ -2377,11 +2377,25 @@ static void adjust_sync(struct MPContext *mpctx, double frame_time)
     mpctx->total_avsync_change += change;
 }
 
-static int write_to_ao(struct MPContext *mpctx, void *data, int len, int flags)
+static int write_to_ao(struct MPContext *mpctx, void *data, int len, int flags,
+                       double pts)
 {
     if (mpctx->paused)
         return 0;
-    return ao_play(mpctx->ao, data, len, flags);
+    struct ao *ao = mpctx->ao;
+    double bps = ao->bps / mpctx->opts.playback_speed;
+    ao->pts = pts;
+    // hack used by some mpeg-writing AOs
+    ao->brokenpts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)
+        *90000.0;
+    int played = ao_play(mpctx->ao, data, len, flags);
+    if (played > 0) {
+        mpctx->delay += played / bps;
+        // Keep correct pts for remaining data - could be used to flush
+        // remaining buffer when closing ao.
+        ao->pts += played / bps;
+    }
+    return played;
 }
 
 #define ASYNC_PLAY_DONE -3
@@ -2399,11 +2413,13 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
 
     int bytes;
     bool did_retry = false;
+    double written_pts;
+    double bps = ao->bps / opts->playback_speed;
     while (1) {
-        double written_pts = written_audio_pts(mpctx);
-        double ptsdiff = written_pts - mpctx->video_pts - mpctx->delay
+        written_pts = written_audio_pts(mpctx);
+        double ptsdiff = written_pts - mpctx->sh_video->pts - mpctx->delay
             - audio_delay;
-        bytes = ptsdiff * ao->bps / mpctx->opts.playback_speed;
+        bytes = ptsdiff * bps;
         bytes -= bytes % (ao->channels * af_fmt2bits(ao->format) / 8);
 
         // ogg demuxers give packets without timing
@@ -2451,9 +2467,8 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
          * in playsize. */
         char *p = malloc(playsize);
         memset(p, fillbyte, playsize);
-        playsize = write_to_ao(mpctx, p, playsize, 0);
+        write_to_ao(mpctx, p, playsize, 0, written_pts - bytes / bps);
         free(p);
-        mpctx->delay += opts->playback_speed*playsize/(double)ao->bps;
         return ASYNC_PLAY_DONE;
     }
     mpctx->syncing_audio = false;
@@ -2480,10 +2495,10 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     if (ao->untimed && mpctx->sh_video && mpctx->delay > 0)
         return 0;
 
-    // all the current uses of ao->pts seem to be in aos that handle
-    // sync completely wrong; there should be no need to use ao->pts
-    // in get_space()
-    ao->pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
+    // hack used by some mpeg-writing AOs
+    ao->brokenpts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)
+        *90000.0;
+
     if (mpctx->paused)
         playsize = 1;   // just initialize things (audio pts at least)
     else
@@ -2543,18 +2558,14 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     // play audio:
     current_module="play_audio";
 
-    // Is this pts value actually useful for the aos that access it?
-    // They're obviously badly broken in the way they handle av sync;
-    // would not having access to this make them more broken?
-    ao->pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
-    int played = write_to_ao(mpctx, ao->buffer.start, playsize, playflags);
+    int played = write_to_ao(mpctx, ao->buffer.start, playsize, playflags,
+                             written_audio_pts(mpctx));
     assert(played % unitsize == 0);
     ao->buffer_playable_size = playsize - played;
 
     if (played > 0) {
         ao->buffer.len -= played;
         memmove(ao->buffer.start, ao->buffer.start + played, ao->buffer.len);
-        mpctx->delay += opts->playback_speed * played / ao->bps;
     } else if (!mpctx->paused && audio_eof && ao_get_delay(ao) < .04) {
         // Sanity check to avoid hanging in case current ao doesn't output
         // partial chunks and doesn't check for AOPLAY_FINAL_CHUNK

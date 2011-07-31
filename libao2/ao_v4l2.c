@@ -75,7 +75,7 @@ init (int rate, int channels, int format, int flags)
   ao_data.format = AF_FORMAT_MPEG2;
   ao_data.buffersize = 2048;
   ao_data.bps = rate * 2 * 2;
-  ao_data.pts = 0;
+  ao_data.brokenpts = 0;
   freq = rate;
 
   /* check for supported audio rate */
@@ -124,7 +124,7 @@ get_space (void)
   float x;
   int y;
 
-  x = (float) (vo_pts - ao_data.pts) / 90000.0;
+  x = (float) (vo_pts - ao_data.brokenpts) / 90000.0;
   if (x <= 0)
     return 0;
 
@@ -145,7 +145,7 @@ play (void *data, int len, int flags)
   if (ao_data.format != AF_FORMAT_MPEG2)
     return 0;
 
-  send_mpeg_pes_packet (data, len, MPEG_AUDIO_ID, ao_data.pts, 2, v4l2_write);
+  send_mpeg_pes_packet (data, len, MPEG_AUDIO_ID, ao_data.brokenpts, 2, v4l2_write);
 
   return len;
 }
