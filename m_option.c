@@ -717,11 +717,13 @@ static int parse_str_list(const m_option_t *opt, struct bstr name,
     char *ptr = str.start;
     n = 0;
 
-    while (str.len) {
+    while (1) {
         struct bstr el = get_nextsep(&str, separator, 1);
         res[n] = bstrdup0(NULL, el);
-        str = bstr_cut(str, 1);
         n++;
+        if (!str.len)
+            break;
+        str = bstr_cut(str, 1);
     }
     res[n] = NULL;
     talloc_free(ptr);

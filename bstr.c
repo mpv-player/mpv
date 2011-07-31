@@ -129,8 +129,7 @@ struct bstr bstr_splice(struct bstr str, int start, int end)
         end += str.len;
     end = FFMIN(end, str.len);
     start = FFMAX(start, 0);
-    if (start >= end)
-        return (struct bstr){NULL, 0};
+    end = FFMAX(end, start);
     str.start += start;
     str.len = end - start;
     return str;
