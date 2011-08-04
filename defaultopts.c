@@ -49,6 +49,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
 #ifdef CONFIG_ASS
         .ass_enabled = 1,
 #endif
+        .ass_vsfilter_aspect_compat = 1,
 
         .lavc_param = {
             .workaround_bugs = 1, // autodetect

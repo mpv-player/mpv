@@ -472,6 +472,7 @@ static const struct cmd_bind def_cmd_binds[] = {
   { { 't', 0 }, "sub_pos +1" },
   { { 'a', 0 }, "sub_alignment" },
   { { 'v', 0 }, "sub_visibility" },
+  { { 'V', 0 }, "step_property_osd ass_vsfilter_aspect_compat" },
   { { 'j', 0 }, "sub_select" },
   { { 'J', 0 }, "sub_select -3" },
   { { 'F', 0 }, "forced_subs_only" },

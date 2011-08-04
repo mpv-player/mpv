@@ -23,6 +23,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "options.h"
 
 #include "mp_image.h"
 #include "vf.h"
@@ -155,7 +156,7 @@ static int control(struct vf_instance *vf, int request, void* data)
         double pts = video_out->next_pts;
         ASS_Renderer *renderer;
         double scale;
-        if (osd->vsfilter_aspect) {
+        if (osd->vsfilter_aspect && vf->opts->ass_vsfilter_aspect_compat) {
             renderer = vf->priv->renderer_vsfilter;
             scale = vf->priv->scale_ratio;
         } else {

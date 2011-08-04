@@ -251,6 +251,9 @@ Toggle displaying "forced subtitles".
 Toggle subtitle alignment: top / middle / bottom.
 .IPs "x and z"
 Adjust subtitle delay by +/\- 0.1 seconds.
+.IPs "V\ \ \ \ "
+Toggle subtitle VSFilter aspect compatibility mode.
+See -ass\-vsfilter\-aspect\-compat for more info.
 .IPs "C (\-capture only)"
 Start/stop capturing the primary stream.
 .IPs "r and t"
@@ -2224,6 +2227,25 @@ The SSA/ASS renderer can place toptitles there (with \-ass\-use\-margins).
 .B \-ass\-use\-margins
 Enables placing toptitles and subtitles in black borders when they
 are available.
+.
+.TP
+.B \-ass\-vsfilter\-aspect\-compat
+Stretch SSA/ASS subtitles when playing anamorphic videos for compatibility
+with traditional VSFilter behavior.
+This switch has no effect when the video is stored with square pixels.
+.sp 1
+The renderer historically most commonly used for the SSA/ASS subtitle formats,
+VSFilter, had questionable behavior that resulted in subtitles being
+stretched too if the video was stored in anamorphic format that required
+scaling for display.
+This behavior is usually undesirable and newer VSFilter versions may
+behave differently.
+However, many existing scripts compensate for the stretching by modifying
+things in the opposite direction.
+Thus if such scripts are displayed "correctly" they will not appear as intended.
+This switch enables emulation of the old VSFilter behavior (undesirable but
+expected by many existing scripts).
+Enabled by default.
 .
 .TP
 .B \-dumpjacosub

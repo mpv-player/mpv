@@ -1973,6 +1973,27 @@ static int mp_property_ass_use_margins(m_option_t *prop, int action,
         return m_property_flag(prop, action, arg, &ass_use_margins);
     }
 }
+
+static int mp_property_ass_vsfilter_aspect_compat(m_option_t *prop, int action,
+                                                  void *arg, MPContext *mpctx)
+{
+    if (!mpctx->sh_video)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_SET:
+        if (!arg)
+            return M_PROPERTY_ERROR;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        //has to re-render subs with new aspect ratio
+        mpctx->osd->ass_force_reload = 1;
+    default:
+        return m_property_flag(prop, action, arg,
+                               &mpctx->opts.ass_vsfilter_aspect_compat);
+    }
+}
+
 #endif
 
 /// Show only forced subtitles (RW)
@@ -2316,6 +2337,8 @@ static const m_option_t mp_properties[] = {
 #ifdef CONFIG_ASS
     { "ass_use_margins", mp_property_ass_use_margins, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
+    { "ass_vsfilter_aspect_compat", mp_property_ass_vsfilter_aspect_compat,
+      CONF_TYPE_FLAG, M_OPT_RANGE, 0, 1, NULL },
 #endif
 
 #ifdef CONFIG_TV
@@ -2427,6 +2450,8 @@ static struct property_osd_display {
 #ifdef CONFIG_FREETYPE
     { "sub_scale", 0, -1, _("Sub Scale: %s")},
 #endif
+    { "ass_vsfilter_aspect_compat", 0, -1,
+      _("Subtitle VSFilter aspect compat: %s")},
 #ifdef CONFIG_TV
     { "tv_brightness", OSD_BRIGHTNESS, -1, _("Brightness") },
     { "tv_hue", OSD_HUE, -1, _("Hue") },

@@ -585,6 +585,7 @@ sub_alignment      int       0       2       X   X   X    subtitle alignment
 sub_visibility     flag      0       1       X   X   X    show/hide subtitles
 sub_forced_only    flag      0       1       X   X   X
 sub_scale          float     0       100     X   X   X    subtitles font size
+ass_vsfilter_aspect_compat flag 0    1       X   X   X    SSA/ASS aspect ratio correction
 tv_brightness      int       -100    100     X   X   X
 tv_contrast        int       -100    100     X   X   X
 tv_saturation      int       -100    100     X   X   X

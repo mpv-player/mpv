@@ -358,8 +358,9 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     struct osd_state *osd = vf->priv->osd;
     ASS_Image *images = 0;
-    ASS_Renderer *renderer = osd->vsfilter_aspect ?
-        vf->priv->renderer_vsfilter : vf->priv->renderer_realaspect;
+    ASS_Renderer *renderer = osd->vsfilter_aspect
+            && vf->opts->ass_vsfilter_aspect_compat
+            ? vf->priv->renderer_vsfilter : vf->priv->renderer_realaspect;
     if (sub_visibility && renderer && osd->ass_track
             && (pts != MP_NOPTS_VALUE)) {
         if (osd->ass_force_reload) {
