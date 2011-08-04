@@ -3200,7 +3200,7 @@ static int seek(MPContext *mpctx, struct seek_params seek,
         || seek.type == MPSEEK_ABSOLUTE
         && seek.amount < mpctx->last_chapter_pts
         || seek.amount < 0)
-        mpctx->last_chapter_seek = -1;
+        mpctx->last_chapter_seek = -2;
     if (mpctx->timeline && seek.type == MPSEEK_FACTOR) {
         seek.amount *= mpctx->timeline[mpctx->num_timeline_parts].start;
         seek.type = MPSEEK_ABSOLUTE;
@@ -3400,7 +3400,7 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter)
 int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
                  char **chapter_name)
 {
-    mpctx->last_chapter_seek = -1;
+    mpctx->last_chapter_seek = -2;
     if (!mpctx->chapters || !mpctx->sh_video) {
         int res = demuxer_seek_chapter(mpctx->demuxer, chapter, seek_pts,
                                        chapter_name);
@@ -4825,7 +4825,7 @@ if(play_n_frames==0){
  mpctx->hrseek_framedrop = false;
  mpctx->step_frames = 0;
  mpctx->total_avsync_change = 0;
- mpctx->last_chapter_seek = -1;
+ mpctx->last_chapter_seek = -2;
 
 // If there's a timeline force an absolute seek to initialize state
 if (opts->seek_to_sec || mpctx->timeline) {
