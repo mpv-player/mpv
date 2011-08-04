@@ -374,6 +374,7 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
 {
     mkv_demuxer_t *mkv_d = demuxer->priv;
     stream_t *s = demuxer->stream;
+    int res = 0;
 
     mkv_d->tc_scale = 1000000;
     mkv_d->duration = 0;
@@ -381,7 +382,7 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
     struct ebml_info info = {};
     struct ebml_parse_ctx parse_ctx = {};
     if (ebml_read_element(s, &parse_ctx, &info, &ebml_info_desc) < 0)
-        return 1;
+        return -1;
     if (info.n_timecode_scale) {
         mkv_d->tc_scale = info.timecode_scale;
         mp_msg(MSGT_DEMUX, MSGL_V,
@@ -407,8 +408,22 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
             mp_msg(MSGT_DEMUX, MSGL_V, "\n");
         }
     }
+    if (demuxer->params && demuxer->params->matroska_wanted_uids) {
+        unsigned char (*uids)[16] = demuxer->params->matroska_wanted_uids;
+        if (!info.n_segment_uid)
+            uids = NULL;
+        for (int i = 0; i < MP_TALLOC_ELEMS(uids); i++) {
+            if (!memcmp(info.segment_uid.start, uids[i], 16))
+                goto out;
+        }
+        mp_tmsg(MSGT_DEMUX, MSGL_INFO,
+                "[mkv] This is not one of the wanted files. "
+                "Stopping attempt to open.\n");
+        res = -2;
+    }
+ out:
     talloc_free(parse_ctx.talloc_ctx);
-    return 0;
+    return res;
 }
 
 static void parse_trackencodings(struct demuxer *demuxer,
@@ -923,7 +938,7 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
     mp_msg(MSGT_DEMUX, MSGL_V,
            "[mkv] /---- [ parsing seek head ] ---------\n");
     if (ebml_read_element(s, &parse_ctx, &seekhead, &ebml_seek_head_desc) < 0) {
-        res = 1;
+        res = -1;
         goto out;
     }
     /* off now holds the position of the next element after the seek head. */
@@ -940,12 +955,16 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
                    "end of file - incomplete file?\n");
             continue;
         }
-        read_header_element(demuxer, seek->seek_id, pos);
+        int r = read_header_element(demuxer, seek->seek_id, pos);
+        if (r <= -2) {
+            res = r;
+            goto out;
+        }
     }
     if (!stream_seek(s, off)) {
         mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Couldn't seek back after "
                "SeekHead??\n");
-        res = 1;
+        res = -1;
     }
  out:
     mp_msg(MSGT_DEMUX, MSGL_V,
@@ -982,7 +1001,7 @@ static int read_header_element(struct demuxer *demuxer, uint32_t id,
             return -1;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |+ segment information...\n");
         mkv_d->parsed_info = true;
-        return demux_mkv_read_info(demuxer) ? -1 : 1;
+        return demux_mkv_read_info(demuxer);
 
     case MATROSKA_ID_TRACKS:
         if (mkv_d->parsed_tracks)
@@ -1013,7 +1032,7 @@ static int read_header_element(struct demuxer *demuxer, uint32_t id,
             break;
         if (at_filepos && !seek_pos_id(s, at_filepos, id))
             return -1;
-        return demux_mkv_read_seekhead(demuxer) ? -1 : 1;
+        return demux_mkv_read_seekhead(demuxer);
 
     case MATROSKA_ID_CHAPTERS:
         if (mkv_d->parsed_chapters)
@@ -1602,12 +1621,22 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track,
     return 0;
 }
 
+static void mkv_free(struct demuxer *demuxer)
+{
+    struct mkv_demuxer *mkv_d = demuxer->priv;
+    if (!mkv_d)
+        return;
+    for (int i = 0; i < mkv_d->num_tracks; i++)
+        demux_mkv_free_trackentry(mkv_d->tracks[i]);
+    free(mkv_d->indexes);
+    free(mkv_d->cluster_positions);
+}
+
 static int demux_mkv_open(demuxer_t *demuxer)
 {
     stream_t *s = demuxer->stream;
     mkv_demuxer_t *mkv_d;
     mkv_track_t *track;
-    int i, cont = 0;
 
     stream_seek(s, s->start_pos);
     if (ebml_read_id(s, NULL) != EBML_ID_EBML)
@@ -1660,7 +1689,7 @@ static int demux_mkv_open(demuxer_t *demuxer)
     mkv_d->tc_scale = 1000000;
     mkv_d->segment_start = stream_tell(s);
 
-    while (!cont) {
+    while (1) {
         uint32_t id = ebml_read_id(s, NULL);
         switch (id) {
         case MATROSKA_ID_CLUSTER:
@@ -1668,17 +1697,21 @@ static int demux_mkv_open(demuxer_t *demuxer)
                    "[mkv] |+ found cluster, headers are "
                    "parsed completely :)\n");
             stream_seek(s, stream_tell(s) - 4);
-            cont = 1;
-            break;
-
-        default:
-            cont = read_header_element(demuxer, id, 0) < 1;
+            goto headersdone;
+        default:;
+            int res = read_header_element(demuxer, id, 0);
+            if (res == -2) {
+                mkv_free(demuxer);
+                return 0;
+            } else if (res < 1)
+                goto headersdone;
             break;
         case EBML_ID_VOID:
             ebml_read_skip(s, NULL);
             break;
         }
     }
+ headersdone:
 
     display_create_tracks(demuxer);
 
@@ -1686,7 +1719,7 @@ static int demux_mkv_open(demuxer_t *demuxer)
     track = NULL;
     if (demuxer->video->id == -1) {     /* automatically select a video track */
         /* search for a video track that has the 'default' flag set */
-        for (i = 0; i < mkv_d->num_tracks; i++)
+        for (int i = 0; i < mkv_d->num_tracks; i++)
             if (mkv_d->tracks[i]->type == MATROSKA_TRACK_VIDEO
                 && mkv_d->tracks[i]->default_track) {
                 track = mkv_d->tracks[i];
@@ -1696,7 +1729,7 @@ static int demux_mkv_open(demuxer_t *demuxer)
         if (track == NULL)
             /* no track has the 'default' flag set */
             /* let's take the first video track */
-            for (i = 0; i < mkv_d->num_tracks; i++)
+            for (int i = 0; i < mkv_d->num_tracks; i++)
                 if (mkv_d->tracks[i]->type == MATROSKA_TRACK_VIDEO
                     && mkv_d->tracks[i]->id >= 0) {
                     track = mkv_d->tracks[i];
@@ -1729,21 +1762,6 @@ static int demux_mkv_open(demuxer_t *demuxer)
     demuxer->accurate_seek = true;
 
     return DEMUXER_TYPE_MATROSKA;
-}
-
-static void demux_close_mkv(demuxer_t *demuxer)
-{
-    mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-
-    if (mkv_d) {
-        int i;
-        if (mkv_d->tracks) {
-            for (i = 0; i < mkv_d->num_tracks; i++)
-                demux_mkv_free_trackentry(mkv_d->tracks[i]);
-        }
-        free(mkv_d->indexes);
-        free(mkv_d->cluster_positions);
-    }
 }
 
 static int demux_mkv_read_block_lacing(uint8_t *buffer, uint64_t *size,
@@ -2518,7 +2536,7 @@ const demuxer_desc_t demuxer_desc_matroska = {
     demux_mkv_open,
     demux_mkv_fill_buffer,
     NULL,
-    demux_close_mkv,
+    mkv_free,
     demux_mkv_seek,
     demux_mkv_control
 };

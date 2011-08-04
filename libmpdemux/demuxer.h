@@ -239,6 +239,10 @@ typedef struct demux_attachment
     unsigned int data_size;
 } demux_attachment_t;
 
+struct demuxer_params {
+    unsigned char (*matroska_wanted_uids)[16];
+};
+
 typedef struct demuxer {
     const demuxer_desc_t *desc; ///< Demuxer description structure
     const char *filetype; // format name when not identified by demuxer (libavformat)
@@ -289,6 +293,7 @@ typedef struct demuxer {
     void *priv;   // demuxer-specific internal data
     char **info;  // metadata
     struct MPOpts *opts;
+    struct demuxer_params *params;
 } demuxer_t;
 
 typedef struct {
@@ -370,6 +375,11 @@ static inline int avi_stream_id(unsigned int id)
 struct demuxer *demux_open(struct MPOpts *opts, struct stream *stream,
                            int file_format, int aid, int vid, int sid,
                            char *filename);
+
+struct demuxer *demux_open_withparams(struct MPOpts *opts,
+        struct stream *stream, int file_format, int aid, int vid, int sid,
+        char *filename, struct demuxer_params *params);
+
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, float rel_seek_secs, float audio_delay,
                int flags);

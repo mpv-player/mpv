@@ -112,10 +112,12 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
         struct stream *s = open_stream(filenames[i], &mpctx->opts, &format);
         if (!s)
             continue;
-        struct demuxer *d = demux_open(&mpctx->opts, s, DEMUXER_TYPE_MATROSKA,
-                                       mpctx->opts.audio_id,
-                                       mpctx->opts.video_id,
-                                       mpctx->opts.sub_id, filenames[i]);
+        struct demuxer *d = demux_open_withparams(&mpctx->opts, s,
+                DEMUXER_TYPE_MATROSKA, mpctx->opts.audio_id,
+                mpctx->opts.video_id, mpctx->opts.sub_id, filenames[i],
+                &(struct demuxer_params){.matroska_wanted_uids = uid_map});
+
+
         if (!d) {
             free_stream(s);
             continue;
@@ -176,7 +178,8 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
                                                    m->num_ordered_chapters+1);
     sources[0].stream = mpctx->stream;
     sources[0].demuxer = mpctx->demuxer;
-    unsigned char uid_map[m->num_ordered_chapters+1][16];
+    unsigned char (*uid_map)[16] = talloc_array_ptrtype(NULL, uid_map,
+                                                 m->num_ordered_chapters + 1);
     int num_sources = 1;
     memcpy(uid_map[0], m->segment_uid, 16);
 
@@ -241,7 +244,7 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
             /* Chapter was merged at an inexact boundary;
              * adjust timestamps to match. */
             mp_msg(MSGT_CPLAYER, MSGL_V, "Merging timeline part %d with "
-                   "offset %d ms.\n", i, (int) join_diff);
+                   "offset %g ms.\n", i, join_diff / 1e6);
             starttime += join_diff;
         }
         chapters[num_chapters].start = starttime / 1e9;
@@ -250,6 +253,7 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
         num_chapters++;
     }
     timeline[part_count].start = starttime / 1e9;
+    talloc_free(uid_map);
 
     if (!part_count) {
         // None of the parts come from the file itself???
