@@ -860,7 +860,7 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
 {
     int i, l;
     int pausing = 0;
-    char *ptr, *e;
+    char *ptr;
     const mp_cmd_t *cmd_def;
 
     // Ignore heading spaces.
@@ -926,7 +926,7 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
             if (errno != 0) {
                 mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
                         "isn't an integer.\n", cmd_def->name, i + 1);
-                ptr = NULL;
+                goto error;
             }
             break;
         case MP_CMD_ARG_FLOAT:
@@ -935,45 +935,31 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
             if (errno != 0) {
                 mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
                         "isn't a float.\n", cmd_def->name, i + 1);
-                ptr = NULL;
+                goto error;
             }
             break;
         case MP_CMD_ARG_STRING: {
-            char term;
-            char *ptr2 = ptr, *start;
-
-            if (ptr[0] == '\'' || ptr[0] == '"') {
-                term = ptr[0];
-                ptr2++;
-            } else
-                term = ' ';
-            start = ptr2;
+            int term = ' ';
+            if (*ptr == '\'' || *ptr == '"')
+                term = *ptr++;
+            char *argptr = talloc_size(cmd, strlen(ptr) + 1);
+            cmd->args[i].v.s = argptr;
             while (1) {
-                e = strchr(ptr2, term);
-                if (!e)
+                if (*ptr == 0) {
+                    if (term == ' ')
+                        break;
+                    mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d is "
+                            "unterminated.\n", cmd_def->name, i + 1);
+                    goto error;
+                }
+                if (*ptr == term)
                     break;
-                if (e <= ptr2 || *(e - 1) != '\\')
-                    break;
-                ptr2 = e + 1;
+                if (*ptr == '\\')
+                    ptr++;
+                if (*ptr != 0)
+                    *argptr++ = *ptr++;
             }
-
-            if (term != ' ' && (!e || e[0] == '\0')) {
-                mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d is "
-                        "unterminated.\n", cmd_def->name, i + 1);
-                ptr = NULL;
-                break;
-            } else if (!e)
-                e = ptr + strlen(ptr);
-            l = e - start;
-            ptr2 = start;
-            for (e = strchr(ptr2, '\\'); e && e < start + l; e = strchr(ptr2, '\\')) {
-                memmove(e, e + 1, strlen(e));
-                ptr2 = e + 1;
-                l--;
-            }
-            cmd->args[i].v.s = talloc_strndup(cmd, start, l);
-            if (term != ' ')
-                ptr += l + 2;
+            *argptr = 0;
             break;
         }
         case -1:
@@ -986,12 +972,10 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
     cmd->nargs = i;
 
     if (cmd_def->nargs > cmd->nargs) {
-/*      mp_msg(MSGT_INPUT, MSGL_ERR, "Got command '%s' but\n", str); */
         mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s requires at least %d "
                 "arguments, we found only %d so far.\n", cmd_def->name,
                 cmd_def->nargs, cmd->nargs);
-        mp_cmd_free(cmd);
-        return NULL;
+        goto error;
     }
 
     for (; i < MP_CMD_MAX_ARGS && cmd_def->args[i].type != -1; i++) {
@@ -1005,6 +989,10 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
         cmd->args[i].type = -1;
 
     return cmd;
+
+ error:
+    mp_cmd_free(cmd);
+    return NULL;
 }
 
 #define MP_CMD_MAX_SIZE 4096
