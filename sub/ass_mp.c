@@ -316,16 +316,13 @@ ASS_Library *mp_ass_init(void)
     return priv;
 }
 
-int ass_force_reload = 0;       // flag set if global ass-related settings were changed
-
-ASS_Image *mp_ass_render_frame(ASS_Renderer *priv, ASS_Track *track,
-                               long long now, int *detect_change)
+void mp_ass_reload_options(ASS_Renderer *priv, struct MPOpts *opts,
+                           bool *need_reload)
 {
-    if (ass_force_reload) {
-        ass_set_margins(priv, ass_top_margin, ass_bottom_margin, 0, 0);
-        ass_set_use_margins(priv, ass_use_margins);
-        ass_set_font_scale(priv, ass_font_scale);
-        ass_force_reload = 0;
-    }
-    return ass_render_frame(priv, track, now, detect_change);
+    if (!*need_reload)
+        return;
+    ass_set_margins(priv, ass_top_margin, ass_bottom_margin, 0, 0);
+    ass_set_use_margins(priv, ass_use_margins);
+    ass_set_font_scale(priv, ass_font_scale);
+    *need_reload = false;
 }

@@ -70,6 +70,8 @@ typedef struct mp_osd_obj_s {
 
 struct osd_state {
     struct ass_library *ass_library;
+    // flag to signal reinitialization due to ass-related option changes
+    bool ass_force_reload;
     unsigned char osd_text[128];
     struct font_desc *sub_font;
     struct ass_track *ass_track;

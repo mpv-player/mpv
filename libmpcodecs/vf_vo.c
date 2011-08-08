@@ -175,10 +175,10 @@ static int control(struct vf_instance *vf, int request, void* data)
                 ass_set_aspect_ratio(renderer, scale, 1);
             }
 
-            images.imgs = mp_ass_render_frame(renderer,
-                                              osd->ass_track,
-                                              (pts+sub_delay) * 1000 + .5,
-                                              &images.changed);
+            mp_ass_reload_options(renderer, vf->opts, &osd->ass_force_reload);
+            images.imgs = ass_render_frame(renderer, osd->ass_track,
+                                           (pts+sub_delay) * 1000 + .5,
+                                           &images.changed);
             if (!vf->priv->prev_visibility)
                 images.changed = 2;
             vf->priv->prev_visibility = true;

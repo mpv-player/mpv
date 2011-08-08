@@ -356,14 +356,16 @@ static int render_frame(struct vf_instance *vf, mp_image_t *mpi,
 
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
+    struct osd_state *osd = vf->priv->osd;
     ASS_Image *images = 0;
-    ASS_Renderer *renderer = vf->priv->osd->vsfilter_aspect ?
+    ASS_Renderer *renderer = osd->vsfilter_aspect ?
         vf->priv->renderer_vsfilter : vf->priv->renderer_realaspect;
-    if (sub_visibility && renderer && vf->priv->osd->ass_track
-	&& (pts != MP_NOPTS_VALUE))
-        images = mp_ass_render_frame(renderer,
-                                     vf->priv->osd->ass_track,
-				     (pts + sub_delay) * 1000 + .5, NULL);
+    if (sub_visibility && renderer && osd->ass_track
+            && (pts != MP_NOPTS_VALUE)) {
+        mp_ass_reload_options(renderer, vf->opts, &osd->ass_force_reload);
+        images = ass_render_frame(renderer, osd->ass_track,
+                                  (pts + sub_delay) * 1000 + .5, NULL);
+    }
 
     prepare_image(vf, mpi);
     if (images)
