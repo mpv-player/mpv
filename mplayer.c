@@ -3487,7 +3487,7 @@ int get_current_chapter(struct MPContext *mpctx)
 // currently returns a string allocated with malloc, not talloc
 char *chapter_display_name(struct MPContext *mpctx, int chapter)
 {
-    if (!mpctx->chapters || !mpctx->sh_video)
+    if (!mpctx->chapters)
         return demuxer_chapter_display_name(mpctx->demuxer, chapter);
     return talloc_strdup(NULL, mpctx->chapters[chapter].name);
 }
@@ -3496,7 +3496,7 @@ int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
                  char **chapter_name)
 {
     mpctx->last_chapter_seek = -2;
-    if (!mpctx->chapters || !mpctx->sh_video) {
+    if (!mpctx->chapters) {
         int res = demuxer_seek_chapter(mpctx->demuxer, chapter, seek_pts,
                                        chapter_name);
         if (res >= 0) {
