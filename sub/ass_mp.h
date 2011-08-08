@@ -52,8 +52,7 @@ void mp_ass_configure(ASS_Renderer *priv, int w, int h, bool unscaled);
 void mp_ass_configure_fonts(ASS_Renderer *priv);
 ASS_Library *mp_ass_init(void);
 
-void mp_ass_reload_options(ASS_Renderer *priv, struct MPOpts *opts,
-                           bool *need_reload);
+void mp_ass_reload_options(ASS_Renderer *priv, struct MPOpts *opts);
 
 #else /* CONFIG_ASS */
 

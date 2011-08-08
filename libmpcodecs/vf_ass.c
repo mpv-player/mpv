@@ -362,7 +362,11 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
         vf->priv->renderer_vsfilter : vf->priv->renderer_realaspect;
     if (sub_visibility && renderer && osd->ass_track
             && (pts != MP_NOPTS_VALUE)) {
-        mp_ass_reload_options(renderer, vf->opts, &osd->ass_force_reload);
+        if (osd->ass_force_reload) {
+            mp_ass_reload_options(vf->priv->renderer_realaspect, vf->opts);
+            mp_ass_reload_options(vf->priv->renderer_vsfilter, vf->opts);
+        }
+        osd->ass_force_reload = false;
         images = ass_render_frame(renderer, osd->ass_track,
                                   (pts + sub_delay) * 1000 + .5, NULL);
     }

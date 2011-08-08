@@ -175,12 +175,16 @@ static int control(struct vf_instance *vf, int request, void* data)
                 ass_set_aspect_ratio(renderer, scale, 1);
             }
 
-            mp_ass_reload_options(renderer, vf->opts, &osd->ass_force_reload);
+            if (osd->ass_force_reload) {
+                mp_ass_reload_options(vf->priv->renderer_realaspect, vf->opts);
+                mp_ass_reload_options(vf->priv->renderer_vsfilter, vf->opts);
+            }
             images.imgs = ass_render_frame(renderer, osd->ass_track,
                                            (pts+sub_delay) * 1000 + .5,
                                            &images.changed);
-            if (!vf->priv->prev_visibility)
+            if (!vf->priv->prev_visibility || osd->ass_force_reload)
                 images.changed = 2;
+            osd->ass_force_reload = false;
             vf->priv->prev_visibility = true;
         } else
             vf->priv->prev_visibility = false;
