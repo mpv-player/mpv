@@ -3951,7 +3951,8 @@ int main(int argc, char *argv[])
     pthread_win32_thread_attach_np();
     atexit(detach_ptw32);
 #endif
-    if (argc > 1 && !strcmp(argv[1], "-leak-report"))
+    if (argc > 1 && (!strcmp(argv[1], "-leak-report")
+                     || !strcmp(argv[1], "--leak-report")))
         talloc_enable_leak_report();
 
     char *mem_ptr;
