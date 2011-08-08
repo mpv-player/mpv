@@ -1239,7 +1239,16 @@ struct osd_state *osd_create(void)
 #ifdef CONFIG_FREETYPE
     force_load_font = 1;
 #endif
+    osd_set_text(osd, NULL);
     return osd;
+}
+
+void osd_set_text(struct osd_state *osd, const char *text) {
+    talloc_free(osd->osd_text);
+    //osd->text must never be NULL
+    if (!text)
+        text = "";
+    osd->osd_text = talloc_strdup(osd, text);
 }
 
 int vo_osd_changed_flag=0;

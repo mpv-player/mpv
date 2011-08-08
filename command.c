@@ -2981,7 +2981,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         set_osd_msg(OSD_MSG_TEXT, cmd->args[2].v.i,
                     (cmd->args[1].v.i <
                      0 ? osd_duration : cmd->args[1].v.i),
-                    "%-.63s", cmd->args[0].v.s);
+                    "%s", cmd->args[0].v.s);
         break;
 
     case MP_CMD_OSD_SHOW_PROPERTY_TEXT: {
@@ -2993,7 +2993,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             set_osd_msg(OSD_MSG_TEXT, cmd->args[2].v.i,
                         (cmd->args[1].v.i <
                          0 ? osd_duration : cmd->args[1].v.i),
-                        "%-.63s", txt);
+                        "%s", txt);
             free(txt);
         }
         break;

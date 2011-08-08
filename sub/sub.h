@@ -72,7 +72,7 @@ struct osd_state {
     struct ass_library *ass_library;
     // flag to signal reinitialization due to ass-related option changes
     bool ass_force_reload;
-    unsigned char osd_text[128];
+    char *osd_text;
     struct font_desc *sub_font;
     struct ass_track *ass_track;
     bool ass_track_changed;
@@ -148,6 +148,7 @@ void osd_remove_text(struct osd_state *osd, int dxs, int dys,
                      void (*remove)(int x0, int y0, int w, int h));
 
 struct osd_state *osd_create(void);
+void osd_set_text(struct osd_state *osd, const char *text);
 int osd_update(struct osd_state *osd, int dxs, int dys);
 int vo_osd_changed(int new_value);
 int vo_osd_check_range_update(int,int,int,int);
