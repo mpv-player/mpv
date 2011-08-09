@@ -113,7 +113,6 @@ const m_option_t radioopts_conf[]={
 
 #ifdef CONFIG_TV
 const m_option_t tvopts_conf[]={
-    {"on", "-tv on has been removed, use tv:// instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
     {"immediatemode", &stream_tv_defaults.immediate, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
     {"noaudio", &stream_tv_defaults.noaudio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"audiorate", &stream_tv_defaults.audiorate, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -261,7 +260,6 @@ extern char * mf_type;
 extern m_obj_list_t vf_obj_list;
 
 const m_option_t mfopts_conf[]={
-    {"on", "-mf on has been removed, use mf:// instead.\n", CONF_TYPE_PRINT, 0, 0, 1, NULL},
     {"w", &mf_w, CONF_TYPE_INT, 0, 0, 0, NULL},
     {"h", &mf_h, CONF_TYPE_INT, 0, 0, 0, NULL},
     {"fps", &mf_fps, CONF_TYPE_DOUBLE, 0, 0, 0, NULL},
@@ -409,13 +407,10 @@ const m_option_t common_opts[] = {
 #else
     {"cache", "MPlayer was compiled without cache2 support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif /* CONFIG_STREAM_CACHE */
-    {"vcd", "-vcd N has been removed, use vcd://N instead.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL},
-    {"cuefile", "-cuefile has been removed, use cue://filename:N where N is the track number.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
     {"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #ifdef CONFIG_DVDREAD
     {"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"dvd-speed", &dvd_speed, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"dvd", "-dvd N has been removed, use dvd://N instead.\n" , CONF_TYPE_PRINT, 0, 0, 0, NULL},
     {"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
 #else
     {"dvd-device", "MPlayer was compiled without libdvdread support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
@@ -466,7 +461,6 @@ const m_option_t common_opts[] = {
 #endif /* CONFIG_NETWORKING */
 
 #ifdef CONFIG_LIVE555
-    {"sdp", "-sdp has been removed, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
     {"rtsp-stream-over-http", &rtsp_transport_http, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #else
     {"rtsp-stream-over-http", "-rtsp-stream-over-http requires the \"LIVE555 Streaming Media\" library.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
@@ -601,8 +595,7 @@ const m_option_t common_opts[] = {
     {"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
     {"af-adv", (void *) audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
-    {"vop", "-vop has been removed, use -vf instead.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL},
-        OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
+    OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
     // select audio/video codec (by name) or codec family (by number):
     {"afm", &audio_fm_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
     {"vfm", &video_fm_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
@@ -625,8 +618,6 @@ const m_option_t common_opts[] = {
 
     OPT_FLAG_CONSTANTS("flip", flip, 0, -1, 1),
     OPT_FLAG_CONSTANTS("noflip", flip, 0, -1, 0),
-    {"tsfastparse", "-tsfastparse is no longer a valid option.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL
-},
     {"tsprog", &ts_prog, CONF_TYPE_INT, CONF_RANGE, 0, 65534, NULL},
     {"tsprobe", &ts_probe, CONF_TYPE_POSITION, 0, 0, TS_MAX_PROBE_SIZE, NULL},
     {"psprobe", &ps_probe, CONF_TYPE_POSITION, 0, 0, TS_MAX_PROBE_SIZE, NULL},
@@ -726,11 +717,6 @@ const m_option_t common_opts[] = {
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-const m_option_t vd_conf[]={
-    {"help", "Use MPlayer with an appropriate video file instead of live partners to avoid vd.\n", CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
-    {NULL, NULL, 0, 0, 0, 0, NULL}
-};
-
 #ifdef CONFIG_TV
 const m_option_t tvscan_conf[]={
     {"autostart", &stream_tv_defaults.scan, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -744,8 +730,6 @@ const m_option_t mplayer_opts[]={
     /* name, pointer, type, flags, min, max */
 
 //---------------------- libao/libvo options ------------------------
-    {"o", "Option -o has been renamed to -vo (video-out), use -vo.\n",
-     CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
     OPT_STRINGLIST("vo", video_driver_list, 0),
     OPT_STRINGLIST("ao", audio_driver_list, 0),
     OPT_MAKE_FLAGS("fixed-vo", fixed_vo, CONF_GLOBAL),
@@ -754,8 +738,6 @@ const m_option_t mplayer_opts[]={
     {"border", &vo_border, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"noborder", &vo_border, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
-    {"aop", "-aop has been removed, use -af instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-    {"dsp", "-dsp has been removed. Use -ao oss:dsp_path instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
     {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"mixer-channel", &mixer_channel, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"softvol", &soft_vol, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -764,42 +746,14 @@ const m_option_t mplayer_opts[]={
     {"volstep", &volstep, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
     {"volume", &start_volume, CONF_TYPE_FLOAT, CONF_RANGE, -1, 10000, NULL},
     OPT_MAKE_FLAGS("gapless-audio", gapless_audio, 0),
-    {"master", "Option -master has been removed, use -af volume instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
     // override audio buffer size (used only by -ao oss/win32, obsolete)
     OPT_INT("abs", ao_buffersize, 0),
 
-    // -ao pcm options:
-    {"aofile", "-aofile has been removed. Use -ao pcm:file=<filename> instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-    {"waveheader", "-waveheader has been removed. Use -ao pcm:waveheader instead.\n", CONF_TYPE_PRINT, 0, 0, 1, NULL},
-    {"nowaveheader", "-nowaveheader has been removed. Use -ao pcm:nowaveheader instead.\n", CONF_TYPE_PRINT, 0, 1, 0, NULL},
-
-    {"alsa", "-alsa has been removed. Remove it from your config file.\n",
-            CONF_TYPE_PRINT, 0, 0, 0, NULL},
-    {"noalsa", "-noalsa has been removed. Remove it from your config file.\n",
-            CONF_TYPE_PRINT, 0, 0, 0, NULL},
     {"edlout", &edl_output_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 #ifdef CONFIG_X11
     {"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
-
-    // -vo png only:
-#ifdef CONFIG_PNG
-    {"z", "-z has been removed. Use -vo png:z=<0-9> instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif
-    // -vo jpeg only:
-#ifdef CONFIG_JPEG
-    {"jpeg", "-jpeg has been removed. Use -vo jpeg:<options> instead.\n",
-     CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif
-    // -vo sdl only:
-    {"sdl", "Use -vo sdl:driver=<driver> instead of -vo sdl -sdl driver.\n",
-     CONF_TYPE_PRINT, 0, 0, 0, NULL},
-    {"noxv", "-noxv has been removed. Use -vo sdl:nohwaccel instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-    {"forcexv", "-forcexv has been removed. Use -vo sdl:forcexv instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-    // -ao sdl only:
-    {"sdla", "Use -ao sdl:driver instead of -ao sdl -sdla driver.\n",
-     CONF_TYPE_PRINT, 0, 0, 0, NULL},
 
 #if defined(CONFIG_FBDEV) || defined(CONFIG_VESA)
     {"monitor-hfreq", &monitor_hfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -832,7 +786,6 @@ const m_option_t mplayer_opts[]={
     // start in fullscreen mode:
     OPT_MAKE_FLAGS("fs", fullscreen, CONF_NOSAVE),
     // set fullscreen switch method (workaround for buggy WMs)
-    {"fsmode", "-fsmode is obsolete, avoid it and use -fstype instead.\nIf you really want it, try -fsmode-dontuse, but don't report bugs!\n", CONF_TYPE_PRINT, CONF_RANGE, 0, 31, NULL},
     {"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
     // set bpp (x11+vm, dga, fbdev, vesa, svga?)
     OPT_INTRANGE("bpp", vo_dbpp, 0, 0, 32),
@@ -853,10 +806,8 @@ const m_option_t mplayer_opts[]={
     {"refreshrate",&vo_refresh_rate,CONF_TYPE_INT,CONF_RANGE, 0,100, NULL},
     {"wid", &WinID, CONF_TYPE_INT64, 0, 0, 0, NULL},
 #ifdef CONFIG_X11
-    {"icelayer", "-icelayer has been removed. Use -fstype layer:<number> instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
     {"stop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nostop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-    {"stop_xscreensaver", "Use -stop-xscreensaver instead, options with _ have been obsoleted.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
     {"fstype", &vo_fstype_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 #endif
     {"heartbeat-cmd", &heartbeat_cmd, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -876,14 +827,6 @@ const m_option_t mplayer_opts[]={
     // direct rendering (decoding to video out buffer)
     {"dr", &vo_directrendering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nodr", &vo_directrendering, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-    {"vaa_dr", "-vaa_dr has been removed, use -dr.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-    {"vaa_nodr", "-vaa_nodr has been removed, use -nodr.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-
-#ifdef CONFIG_AA
-    // -vo aa
-    {"aa*", "-aa* has been removed. Use -vo aa:suboption instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif
-
 
 //---------------------- mplayer-only options ------------------------
 
@@ -987,7 +930,6 @@ const m_option_t mplayer_opts[]={
 
     {"slave", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
     OPT_MAKE_FLAGS("idle", player_idle_mode, CONF_GLOBAL),
-    {"use-stdin", "-use-stdin has been renamed to -noconsolecontrols, use that instead.", CONF_TYPE_PRINT, 0, 0, 0, NULL},
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
     OPT_MAKE_FLAGS("consolecontrols", consolecontrols, CONF_GLOBAL),
     {"mouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
@@ -1005,7 +947,6 @@ const m_option_t mplayer_opts[]={
     {"help", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
     {"h", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
 
-    {"vd", (void *) vd_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
