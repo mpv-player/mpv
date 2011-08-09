@@ -116,7 +116,7 @@ static int cache_read(cache_vars_t *s, unsigned char *buf, int size)
 	if(s->eof) break;
 	if (s->max_filepos == last_max) {
 	    if (sleep_count++ == 10)
-	        mp_msg(MSGT_CACHE, MSGL_WARN, "Cache not filling, consider increasing -cache and/or -cache-min!\n");
+	        mp_msg(MSGT_CACHE, MSGL_WARN, "Cache empty, consider increasing -cache and/or -cache-min. [performance issue]\n");
 	} else {
 	    last_max = s->max_filepos;
 	    sleep_count = 0;
@@ -603,7 +603,7 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
   cache_wakeup(stream);
   while (s->control != -1) {
     if (sleep_count++ == 1000)
-      mp_msg(MSGT_CACHE, MSGL_WARN, "Cache not responding!\n");
+      mp_msg(MSGT_CACHE, MSGL_WARN, "Cache not responding! [performance issue]\n");
     if (stream_check_interrupt(CONTROL_SLEEP_TIME)) {
       s->eof = 1;
       return STREAM_UNSUPPORTED;
