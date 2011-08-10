@@ -2407,6 +2407,7 @@ static void mp_dvdnav_save_smpi(struct MPContext *mpctx, int in_size,
         mpctx->nav_buffer = malloc(in_size);
     if (mpctx->nav_buffer) {
         mpctx->nav_start = start;
+        mpctx->nav_in_size = in_size;
         memcpy(mpctx->nav_buffer, start, in_size);
     }
 
