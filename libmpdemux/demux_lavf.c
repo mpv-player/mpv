@@ -294,8 +294,13 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
     int stream_id;
     AVMetadataTag *lang = av_metadata_get(st->metadata, "language", NULL, 0);
     AVMetadataTag *title = av_metadata_get(st->metadata, "title", NULL, 0);
-    int g, override_tag = mp_av_codec_get_tag(mp_codecid_override_taglists,
-                                              codec->codec_id);
+    // Don't use native MPEG codec tag values with our generic tag tables.
+    // May contain for example value 3 for MP3, which we'd map to PCM audio.
+    if (matches_avinputformat_name(priv, "mpeg") ||
+            matches_avinputformat_name(priv, "mpegts"))
+        codec->codec_tag = 0;
+    int override_tag = mp_av_codec_get_tag(mp_codecid_override_taglists,
+                                           codec->codec_id);
     // For some formats (like PCM) always trust CODEC_ID_* more than codec_tag
     if (override_tag)
         codec->codec_tag = override_tag;
@@ -334,7 +339,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             sh_audio->audio.dwScale = codec->block_align ? codec->block_align * 8 : 8;
             sh_audio->audio.dwRate = codec->bit_rate;
         }
-        g = av_gcd(sh_audio->audio.dwScale, sh_audio->audio.dwRate);
+        int g = av_gcd(sh_audio->audio.dwScale, sh_audio->audio.dwRate);
         sh_audio->audio.dwScale /= g;
         sh_audio->audio.dwRate  /= g;
 //          printf("sca:%d rat:%d fs:%d sr:%d ba:%d\n", sh_audio->audio.dwScale, sh_audio->audio.dwRate, codec->frame_size, codec->sample_rate, codec->block_align);
