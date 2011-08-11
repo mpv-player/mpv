@@ -127,7 +127,7 @@ static int init(struct ao *ao, char *params)
     struct priv *priv = talloc_zero(ao, struct priv);
     ao->priv = priv;
 
-    int fast;
+    int fast = 0;
     const opt_t subopts[] = {
         {"waveheader", OPT_ARG_BOOL,  &priv->waveheader, NULL},
         {"file",       OPT_ARG_MSTRZ, &priv->outputfilename, NULL},
