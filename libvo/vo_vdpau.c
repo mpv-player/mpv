@@ -371,10 +371,6 @@ static void resize(struct vo *vo)
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
     int i;
-
-    if (!vo->config_ok || vc->is_preempted)
-        return;
-
     struct vo_rect src_rect;
     struct vo_rect dst_rect;
     struct vo_rect borders;
@@ -935,7 +931,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0)
         vo_fs = 1;
 
-    vo->config_ok = true;   // set temporarily as resize() checks it below
     if (initialize_vdpau_objects(vo) < 0)
         return -1;
 
@@ -1707,6 +1702,13 @@ static int get_equalizer(struct vo *vo, const char *name, int *value)
     return VO_TRUE;
 }
 
+static bool status_ok(struct vo *vo)
+{
+    if (!vo->config_ok || handle_preemption(vo) < 0)
+        return false;
+    return true;
+}
+
 static int set_equalizer(struct vo *vo, const char *name, int value)
 {
     struct vdpctx *vc = vo->priv;
@@ -1722,8 +1724,16 @@ static int set_equalizer(struct vo *vo, const char *name, int value)
     else
         return VO_NOTIMPL;
 
-    update_csc_matrix(vo);
+    if (status_ok(vo))
+        update_csc_matrix(vo);
     return true;
+}
+
+static void checked_resize(struct vo *vo)
+{
+    if (!status_ok(vo))
+        return;
+    resize(vo);
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
@@ -1741,7 +1751,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         vc->deint = *(int *)data;
         if (vc->deint)
             vc->deint = vc->deint_type;
-        if (vc->deint_type > 2) {
+        if (vc->deint_type > 2 && status_ok(vo)) {
             VdpStatus vdp_st;
             VdpVideoMixerFeature features[1] =
                 {vc->deint_type == 3 ?
@@ -1768,16 +1778,16 @@ static int control(struct vo *vo, uint32_t request, void *data)
         abort(); // draw_image() should get called directly
     case VOCTRL_BORDER:
         vo_x11_border(vo);
-        resize(vo);
+        checked_resize(vo);
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
         vo_x11_fullscreen(vo);
-        resize(vo);
+        checked_resize(vo);
         return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
-        resize(vo);
+        checked_resize(vo);
         return VO_TRUE;
     case VOCTRL_SET_EQUALIZER: {
         struct voctrl_set_equalizer_args *args = data;
@@ -1789,7 +1799,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
     case VOCTRL_SET_YUV_COLORSPACE:
         vc->colorspace = *(int *)data % 3;
-        update_csc_matrix(vo);
+        if (status_ok(vo))
+            update_csc_matrix(vo);
         return true;
     case VOCTRL_GET_YUV_COLORSPACE:
         *(int *)data = vc->colorspace;
