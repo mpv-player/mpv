@@ -54,6 +54,12 @@ static int extract_msg_type_from_ctx(void *ptr)
         return MSGT_FIXME;
 
     AVClass *avc = *(AVClass **)ptr;
+    if (!avc) {
+        mp_msg(MSGT_FIXME, MSGL_WARN,
+               "av_log callback called with bad parameters (NULL AVClass).\n"
+               "This is a bug in one of Libav/FFmpeg libraries used.\n");
+        return MSGT_FIXME;
+    }
 
 #ifdef CONFIG_FFMPEG
     if (!strcmp(avc->class_name, "AVCodecContext")) {
@@ -71,9 +77,7 @@ static int extract_msg_type_from_ctx(void *ptr)
         }
         return MSGT_FIXME;
     }
-#endif
 
-#ifdef CONFIG_FFMPEG
     if (!strcmp(avc->class_name, "AVFormatContext")) {
         AVFormatContext *s = ptr;
         if (s->iformat)
