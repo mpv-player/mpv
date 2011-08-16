@@ -20,9 +20,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 #include <string.h>
 #include <inttypes.h>
 
@@ -30,15 +27,16 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "mp_msg.h"
+#include <libswscale/swscale.h>
+#include <libavcodec/avcodec.h>
 
+#include "mp_msg.h"
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 #include "vf_scale.h"
+#include "fmt-conversion.h"
 
-#include "libswscale/swscale.h"
-#include "libavcodec/avcodec.h"
 
 struct vf_priv_s {
     int frameno;
@@ -170,13 +168,9 @@ static void get_image(struct vf_instance *vf, mp_image_t *mpi)
     vf->dmpi= vf_get_image(vf->next, mpi->imgfmt,
                            mpi->type, mpi->flags/* | MP_IMGFLAG_READABLE*/, mpi->width, mpi->height);
 
-    mpi->planes[0]=vf->dmpi->planes[0];
-    mpi->stride[0]=vf->dmpi->stride[0];
-    if(mpi->flags&MP_IMGFLAG_PLANAR){
-        mpi->planes[1]=vf->dmpi->planes[1];
-        mpi->planes[2]=vf->dmpi->planes[2];
-        mpi->stride[1]=vf->dmpi->stride[1];
-        mpi->stride[2]=vf->dmpi->stride[2];
+    for (int i = 0; i < MP_MAX_PLANES; i++) {
+        mpi->planes[i]=vf->dmpi->planes[i];
+        mpi->stride[i]=vf->dmpi->stride[i];
     }
     mpi->width=vf->dmpi->width;
 
@@ -197,12 +191,10 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
                                     MP_IMGTYPE_EXPORT, 0,
                                     mpi->width, mpi->height);
         vf_clone_mpi_attributes(dmpi, mpi);
-        dmpi->planes[0]=mpi->planes[0];
-        dmpi->planes[1]=mpi->planes[1];
-        dmpi->planes[2]=mpi->planes[2];
-        dmpi->stride[0]=mpi->stride[0];
-        dmpi->stride[1]=mpi->stride[1];
-        dmpi->stride[2]=mpi->stride[2];
+        for (int i = 0; i < MP_MAX_PLANES; i++) {
+            dmpi->planes[i]=mpi->planes[i];
+            dmpi->stride[i]=mpi->stride[i];
+        }
         dmpi->width=mpi->width;
         dmpi->height=mpi->height;
     }
@@ -248,28 +240,10 @@ static int control (vf_instance_t *vf, int request, void *data)
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    switch(fmt){
-    case IMGFMT_YV12:
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
-    case IMGFMT_UYVY:
-    case IMGFMT_YUY2:
-    case IMGFMT_BGR32:
-    case IMGFMT_BGR24:
-    case IMGFMT_BGR16:
-    case IMGFMT_BGR15:
-    case IMGFMT_BGR12:
-    case IMGFMT_RGB32:
-    case IMGFMT_RGB24:
-    case IMGFMT_Y800:
-    case IMGFMT_Y8:
-    case IMGFMT_YVU9:
-    case IMGFMT_IF09:
-    case IMGFMT_444P:
-    case IMGFMT_422P:
-    case IMGFMT_411P:
+    enum PixelFormat av_format = imgfmt2pixfmt(fmt);
+
+    if (av_format != PIX_FMT_NONE && sws_isSupportedInput(av_format))
         return vf_next_query_format(vf, fmt);
-    }
     return 0;
 }
 
