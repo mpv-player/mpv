@@ -657,25 +657,32 @@ static int OpenSPDIF(void)
         goto err_out;
     }
 
+    property_address.mSelector = kAudioDevicePropertySupportsMixing;
+    property_address.mScope    = kAudioObjectPropertyScopeGlobal;
+    property_address.mElement  = kAudioObjectPropertyElementMaster;
+
     /* Set mixable to false if we are allowed to. */
-    err = IsAudioPropertySettable(ao->i_selected_dev,
-                                  kAudioDevicePropertySupportsMixing,
-                                  &b_writeable);
-    err = GetAudioProperty(ao->i_selected_dev,
-                           kAudioDevicePropertySupportsMixing,
-                           sizeof(UInt32), &b_mix);
-    if (err != noErr && b_writeable)
-    {
-        b_mix = 0;
-        err = SetAudioProperty(ao->i_selected_dev,
+    if (AudioObjectHasProperty(ao->i_selected_dev, &property_address)) {
+        /* Set mixable to false if we are allowed to. */
+        err = IsAudioPropertySettable(ao->i_selected_dev,
+                                      kAudioDevicePropertySupportsMixing,
+                                      &b_writeable);
+        err = GetAudioProperty(ao->i_selected_dev,
                                kAudioDevicePropertySupportsMixing,
                                sizeof(UInt32), &b_mix);
-        ao->b_changed_mixing = 1;
-    }
-    if (err != noErr)
-    {
-        ao_msg(MSGT_AO, MSGL_WARN, "failed to set mixmode: [%4.4s]\n", (char *)&err);
-        goto err_out;
+        if (err == noErr && b_writeable)
+        {
+            b_mix = 0;
+            err = SetAudioProperty(ao->i_selected_dev,
+                                   kAudioDevicePropertySupportsMixing,
+                                   sizeof(UInt32), &b_mix);
+            ao->b_changed_mixing = 1;
+        }
+        if (err != noErr)
+        {
+            ao_msg(MSGT_AO, MSGL_WARN, "failed to set mixmode: [%4.4s]\n", (char *)&err);
+            goto err_out;
+        }
     }
 
     /* Get a list of all the streams on this device. */
@@ -696,11 +703,11 @@ static int OpenSPDIF(void)
     for (i = 0; i < i_streams && ao->i_stream_index < 0; ++i)
     {
         /* Find a stream with a cac3 stream. */
-        AudioStreamBasicDescription *p_format_list = NULL;
+        AudioStreamRangedDescription *p_format_list = NULL;
         int i_formats = 0, j = 0, b_digital = 0;
 
         i_param_size = GetGlobalAudioPropertyArray(p_streams[i],
-                                                   kAudioStreamPropertyPhysicalFormats,
+                                                   kAudioStreamPropertyAvailablePhysicalFormats,
                                                    (void **)&p_format_list);
 
         if (!i_param_size) {
@@ -709,13 +716,15 @@ static int OpenSPDIF(void)
             continue;
         }
 
-        i_formats = i_param_size / sizeof(AudioStreamBasicDescription);
+        i_formats = i_param_size / sizeof(AudioStreamRangedDescription);
 
         /* Check if one of the supported formats is a digital format. */
         for (j = 0; j < i_formats; ++j)
         {
-            if (p_format_list[j].mFormatID == 'IAC3' ||
-                  p_format_list[j].mFormatID == kAudioFormat60958AC3)
+            if (p_format_list[j].mFormat.mFormatID == 'IAC3'               ||
+                p_format_list[j].mFormat.mFormatID == 'iac3'               ||
+                p_format_list[j].mFormat.mFormatID == kAudioFormat60958AC3 ||
+                p_format_list[j].mFormat.mFormatID == kAudioFormatAC3)
             {
                 b_digital = 1;
                 break;
@@ -750,25 +759,27 @@ static int OpenSPDIF(void)
             }
 
             for (j = 0; j < i_formats; ++j)
-                if (p_format_list[j].mFormatID == 'IAC3' ||
-                      p_format_list[j].mFormatID == kAudioFormat60958AC3)
+                if (p_format_list[j].mFormat.mFormatID == 'IAC3'               ||
+                    p_format_list[j].mFormat.mFormatID == 'iac3'               ||
+                    p_format_list[j].mFormat.mFormatID == kAudioFormat60958AC3 ||
+                    p_format_list[j].mFormat.mFormatID == kAudioFormatAC3)
                 {
-                    if (p_format_list[j].mSampleRate == ao->stream_format.mSampleRate)
+                   if (p_format_list[j].mFormat.mSampleRate == ao->stream_format.mSampleRate)
                     {
                         i_requested_rate_format = j;
                         break;
                     }
-                    if (p_format_list[j].mSampleRate == ao->sfmt_revert.mSampleRate)
+                    if (p_format_list[j].mFormat.mSampleRate == ao->sfmt_revert.mSampleRate)
                         i_current_rate_format = j;
-                    else if (i_backup_rate_format < 0 || p_format_list[j].mSampleRate > p_format_list[i_backup_rate_format].mSampleRate)
+                    else if (i_backup_rate_format < 0 || p_format_list[j].mFormat.mSampleRate > p_format_list[i_backup_rate_format].mFormat.mSampleRate)
                         i_backup_rate_format = j;
                 }
 
             if (i_requested_rate_format >= 0) /* We prefer to output at the samplerate of the original audio. */
-                ao->stream_format = p_format_list[i_requested_rate_format];
+                ao->stream_format = p_format_list[i_requested_rate_format].mFormat;
             else if (i_current_rate_format >= 0) /* If not possible, we will try to use the current samplerate of the device. */
-                ao->stream_format = p_format_list[i_current_rate_format];
-            else ao->stream_format = p_format_list[i_backup_rate_format]; /* And if we have to, any digital format will be just fine (highest rate possible). */
+                ao->stream_format = p_format_list[i_current_rate_format].mFormat;
+            else ao->stream_format = p_format_list[i_backup_rate_format].mFormat; /* And if we have to, any digital format will be just fine (highest rate possible). */
         }
         free(p_format_list);
     }
@@ -913,12 +924,12 @@ static int AudioDeviceSupportsDigital( AudioDeviceID i_dev_id )
 static int AudioStreamSupportsDigital( AudioStreamID i_stream_id )
 {
     UInt32 i_param_size;
-    AudioStreamBasicDescription *p_format_list = NULL;
+    AudioStreamRangedDescription *p_format_list = NULL;
     int i, i_formats, b_return = CONTROL_FALSE;
 
     /* Retrieve all the stream formats supported by each output stream. */
     i_param_size = GetGlobalAudioPropertyArray(i_stream_id,
-                                               kAudioStreamPropertyPhysicalFormats,
+                                               kAudioStreamPropertyAvailablePhysicalFormats,
                                                (void **)&p_format_list);
 
     if (!i_param_size) {
@@ -926,14 +937,16 @@ static int AudioStreamSupportsDigital( AudioStreamID i_stream_id )
         return CONTROL_FALSE;
     }
 
-    i_formats = i_param_size / sizeof(AudioStreamBasicDescription);
+    i_formats = i_param_size / sizeof(AudioStreamRangedDescription);
 
     for (i = 0; i < i_formats; ++i)
     {
-        print_format(MSGL_V, "supported format:", &p_format_list[i]);
+        print_format(MSGL_V, "supported format:", &(p_format_list[i].mFormat));
 
-        if (p_format_list[i].mFormatID == 'IAC3' ||
-                  p_format_list[i].mFormatID == kAudioFormat60958AC3)
+        if (p_format_list[i].mFormat.mFormatID == 'IAC3'               ||
+            p_format_list[i].mFormat.mFormatID == 'iac3'               ||
+            p_format_list[i].mFormat.mFormatID == kAudioFormat60958AC3 ||
+            p_format_list[i].mFormat.mFormatID == kAudioFormatAC3)
             b_return = CONTROL_OK;
     }
 
@@ -1143,7 +1156,7 @@ static void uninit(int immed)
       if (ao->b_changed_mixing && ao->sfmt_revert.mFormatID != kAudioFormat60958AC3)
       {
           UInt32 b_mix;
-          Boolean b_writeable;
+          Boolean b_writeable = 0;
           /* Revert mixable to true if we are allowed to. */
           err = IsAudioPropertySettable(ao->i_selected_dev,
                                         kAudioDevicePropertySupportsMixing,
@@ -1151,7 +1164,7 @@ static void uninit(int immed)
           err = GetAudioProperty(ao->i_selected_dev,
                                  kAudioDevicePropertySupportsMixing,
                                  sizeof(UInt32), &b_mix);
-          if (err != noErr && b_writeable)
+          if (err == noErr && b_writeable)
           {
               b_mix = 1;
               err = SetAudioProperty(ao->i_selected_dev,
