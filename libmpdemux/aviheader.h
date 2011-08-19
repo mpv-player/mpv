@@ -24,7 +24,6 @@
 #include "config.h"	/* get correct definition of HAVE_BIGENDIAN */
 #include "libavutil/common.h"
 #include "mpbswap.h"
-#include "demuxer.h"
 
 #ifndef mmioFOURCC
 #define mmioFOURCC( ch0, ch1, ch2, ch3 )				\
@@ -375,6 +374,7 @@ typedef struct {
 
 #define AVI_IDX_OFFSET(x) ((((uint64_t)(x)->dwFlags&0xffff0000)<<16)+(x)->dwChunkOffset)
 
-void read_avi_header(demuxer_t *demuxer, int index_mode);
+struct demuxer;
+void read_avi_header(struct demuxer *demuxer, int index_mode);
 
 #endif /* MPLAYER_AVIHEADER_H */
