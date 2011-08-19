@@ -432,8 +432,9 @@ int talloc_increase_ref_count(const void *ptr)
 
   this is referenced by a function pointer and should not be inline
 */
-static int talloc_reference_destructor(struct talloc_reference_handle *handle)
+static int talloc_reference_destructor(void *ptr)
 {
+	struct talloc_reference_handle *handle = ptr;
 	struct talloc_chunk *ptr_tc = talloc_chunk_from_ptr(handle->ptr);
 	_TLIST_REMOVE(ptr_tc->refs, handle);
 	return 0;

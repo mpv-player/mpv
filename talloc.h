@@ -70,20 +70,15 @@ typedef void TALLOC_CTX;
    if we have a recent gcc */
 #if (__GNUC__ >= 3)
 #define _TALLOC_TYPEOF(ptr) __typeof__(ptr)
-#define talloc_set_destructor(ptr, function)				      \
-	do {								      \
-		int (*_talloc_destructor_fn)(_TALLOC_TYPEOF(ptr)) = (function);	      \
-		_talloc_set_destructor((ptr), (int (*)(void *))_talloc_destructor_fn); \
-	} while(0)
 /* this extremely strange macro is to avoid some braindamaged warning
    stupidity in gcc 4.1.x */
 #define talloc_steal(ctx, ptr) ({ _TALLOC_TYPEOF(ptr) __talloc_steal_ret = (_TALLOC_TYPEOF(ptr))_talloc_steal((ctx),(ptr)); __talloc_steal_ret; })
 #else
-#define talloc_set_destructor(ptr, function) \
-	_talloc_set_destructor((ptr), (int (*)(void *))(function))
 #define _TALLOC_TYPEOF(ptr) void *
 #define talloc_steal(ctx, ptr) (_TALLOC_TYPEOF(ptr))_talloc_steal((ctx),(ptr))
 #endif
+#define talloc_set_destructor(ptr, function) \
+	_talloc_set_destructor((ptr), (function))
 
 #define talloc_reference(ctx, ptr) (_TALLOC_TYPEOF(ptr))_talloc_reference((ctx),(ptr))
 #define talloc_move(ctx, ptr) (_TALLOC_TYPEOF(*(ptr)))_talloc_move((ctx),(void *)(ptr))
