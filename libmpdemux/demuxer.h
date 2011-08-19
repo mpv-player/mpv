@@ -122,7 +122,8 @@ enum timestamp_type {
 #define SEEK_FORWARD  (1 << 2)
 #define SEEK_BACKWARD (1 << 3)
 
-#define MP_INPUT_BUFFER_PADDING_SIZE 64
+// demux_lavf can pass lavf buffers using FF_INPUT_BUFFER_PADDING_SIZE instead
+#define MP_INPUT_BUFFER_PADDING_SIZE 8
 
 // Holds one packet/frame/whatever
 typedef struct demux_packet {
@@ -136,6 +137,7 @@ typedef struct demux_packet {
     int refcount; // counter for the master packet, if 0, buffer can be free()d
     struct demux_packet *master; //in clones, pointer to the master packet
     struct demux_packet *next;
+    struct AVPacket *avpacket;   // original libavformat packet (demux_lavf)
 } demux_packet_t;
 
 typedef struct demux_stream {
@@ -302,6 +304,8 @@ typedef struct {
 } demux_program_t;
 
 struct demux_packet *new_demux_packet(size_t len);
+// data must already have suitable padding
+struct demux_packet *new_demux_packet_fromdata(void *data, size_t len);
 void resize_demux_packet(struct demux_packet *dp, size_t len);
 struct demux_packet *clone_demux_packet(struct demux_packet *pack);
 void free_demux_packet(struct demux_packet *dp);

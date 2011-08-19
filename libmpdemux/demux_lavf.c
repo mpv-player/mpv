@@ -743,10 +743,15 @@ static void check_internet_radio_hack(struct demuxer *demuxer)
     }
 }
 
+static int destroy_avpacket(void *pkt)
+{
+    av_free_packet(pkt);
+    return 0;
+}
+
 static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
 {
     lavf_priv_t *priv = demux->priv;
-    AVPacket pkt;
     demux_packet_t *dp;
     demux_stream_t *ds;
     int id;
@@ -754,8 +759,12 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
 
     demux->filepos = stream_tell(demux->stream);
 
-    if (av_read_frame(priv->avfc, &pkt) < 0)
+    AVPacket *pkt = talloc(NULL, AVPacket);
+    if (av_read_frame(priv->avfc, pkt) < 0) {
+        talloc_free(pkt);
         return 0;
+    }
+    talloc_set_destructor(pkt, destroy_avpacket);
 
     // handle any new streams that might have been added
     for (id = priv->nb_streams_last; id < priv->avfc->nb_streams; id++)
@@ -764,7 +773,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
 
     priv->nb_streams_last = priv->avfc->nb_streams;
 
-    id = pkt.stream_index;
+    id = pkt->stream_index;
 
     if (id == demux->audio->id || priv->internet_radio_hack) {
         // audio
@@ -787,39 +796,27 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
         ds = demux->sub;
         sub_utf8 = 1;
     } else {
-        av_free_packet(&pkt);
+        talloc_free(pkt);
         return 1;
     }
 
-    if (0 /*pkt.destruct == av_destruct_packet*/) {
-        //ok kids, dont try this at home :)
-        dp = malloc(sizeof(demux_packet_t));
-        dp->len = pkt.size;
-        dp->next = NULL;
-        dp->refcount = 1;
-        dp->master = NULL;
-        dp->buffer = pkt.data;
-        pkt.destruct = NULL;
-    } else {
-        dp = new_demux_packet(pkt.size);
-        memcpy(dp->buffer, pkt.data, pkt.size);
-        av_free_packet(&pkt);
-    }
+    dp = new_demux_packet_fromdata(pkt->data, pkt->size);
+    dp->avpacket = pkt;
 
-    int64_t ts = priv->use_dts ? pkt.dts : pkt.pts;
+    int64_t ts = priv->use_dts ? pkt->dts : pkt->pts;
     if (ts != AV_NOPTS_VALUE) {
         dp->pts = ts * av_q2d(priv->avfc->streams[id]->time_base);
         priv->last_pts = dp->pts * AV_TIME_BASE;
         // always set duration for subtitles, even if AV_PKT_FLAG_KEY isn't set,
         // otherwise they will stay on screen to long if e.g. ASS is demuxed
         // from mkv
-        if ((ds == demux->sub || (pkt.flags & AV_PKT_FLAG_KEY)) &&
-            pkt.convergence_duration > 0)
-            dp->duration = pkt.convergence_duration *
+        if ((ds == demux->sub || (pkt->flags & AV_PKT_FLAG_KEY)) &&
+            pkt->convergence_duration > 0)
+            dp->duration = pkt->convergence_duration *
                 av_q2d(priv->avfc->streams[id]->time_base);
     }
     dp->pos = demux->filepos;
-    dp->flags = !!(pkt.flags & AV_PKT_FLAG_KEY);
+    dp->flags = !!(pkt->flags & AV_PKT_FLAG_KEY);
     // append packet to DS stream:
     ds_add_packet(ds, dp);
     return 1;
