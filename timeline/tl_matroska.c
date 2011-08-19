@@ -31,6 +31,8 @@
 #include "path.h"
 #include "bstr.h"
 #include "mpcommon.h"
+#include "stream/stream.h"
+
 
 static char **find_files(const char *original_file, const char *suffix)
 {

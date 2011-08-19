@@ -25,8 +25,10 @@ extern "C" {
 #include <windows.h>  // windows.h, but not the other way around.
 #endif
 #include "demux_rtp.h"
+#include "stream/stream.h"
 #include "stheader.h"
 #include "options.h"
+#include "config.h"
 }
 #include "demux_rtp_internal.h"
 

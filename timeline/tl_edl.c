@@ -29,6 +29,7 @@
 #include "path.h"
 #include "bstr.h"
 #include "mpcommon.h"
+#include "stream/stream.h"
 
 
 struct edl_source {
