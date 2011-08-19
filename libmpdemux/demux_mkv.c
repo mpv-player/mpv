@@ -1701,7 +1701,6 @@ static int demux_mkv_open(demuxer_t *demuxer)
         default:;
             int res = read_header_element(demuxer, id, 0);
             if (res == -2) {
-                mkv_free(demuxer);
                 return 0;
             } else if (res < 1)
                 goto headersdone;
