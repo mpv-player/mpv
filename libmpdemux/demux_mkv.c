@@ -687,7 +687,7 @@ static int demux_mkv_read_tracks(demuxer_t *demuxer)
     struct ebml_tracks tracks = {};
     struct ebml_parse_ctx parse_ctx = {};
     if (ebml_read_element(s, &parse_ctx, &tracks, &ebml_tracks_desc) < 0)
-        return 1;
+        return -1;
 
     mkv_d->tracks = talloc_size(mkv_d,
                                 tracks.n_track_entry * sizeof(*mkv_d->tracks));
@@ -713,7 +713,7 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     struct ebml_cues cues = {};
     struct ebml_parse_ctx parse_ctx = {};
     if (ebml_read_element(s, &parse_ctx, &cues, &ebml_cues_desc) < 0)
-        goto out;
+        return -1;
     for (int i = 0; i < cues.n_cue_point; i++) {
         struct ebml_cue_point *cuepoint = &cues.cue_point[i];
         if (cuepoint->n_cue_time != 1 || !cuepoint->n_cue_track_positions) {
@@ -741,7 +741,6 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
         }
     }
 
- out:
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] \\---- [ parsing cues ] -----------\n");
     talloc_free(parse_ctx.talloc_ctx);
     return 0;
@@ -757,7 +756,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
     struct ebml_parse_ctx parse_ctx = {};
     if (ebml_read_element(s, &parse_ctx, &file_chapters,
                           &ebml_chapters_desc) < 0)
-        goto out;
+        return -1;
 
     int selected_edition = 0;
     int num_editions = file_chapters.n_edition_entry;
@@ -861,7 +860,6 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                "[mkv] Found %d editions, will play #%d (first is 0).\n",
                num_editions, selected_edition);
 
- out:
     talloc_free(parse_ctx.talloc_ctx);
     mp_msg(MSGT_DEMUX, MSGL_V,
            "[mkv] \\---- [ parsing chapters ] ---------\n");
@@ -875,7 +873,7 @@ static int demux_mkv_read_tags(demuxer_t *demuxer)
     struct ebml_parse_ctx parse_ctx = {};
     struct ebml_tags           tags = {};
     if (ebml_read_element(s, &parse_ctx, &tags, &ebml_tags_desc) < 0)
-        return 1;
+        return -1;
 
     for (int i = 0; i < tags.n_tag; i++) {
         struct ebml_tag tag = tags.tag[i];
@@ -901,7 +899,7 @@ static int demux_mkv_read_attachments(demuxer_t *demuxer)
     struct ebml_parse_ctx parse_ctx = {};
     if (ebml_read_element(s, &parse_ctx, &attachments,
                           &ebml_attachments_desc) < 0)
-        goto out;
+        return -1;
 
     for (int i = 0; i < attachments.n_attached_file; i++) {
         struct ebml_attached_file *attachment = &attachments.attached_file[i];
@@ -917,7 +915,6 @@ static int demux_mkv_read_attachments(demuxer_t *demuxer)
                BSTR_P(name), BSTR_P(mime), attachment->file_data.len);
     }
 
- out:
     talloc_free(parse_ctx.talloc_ctx);
     mp_msg(MSGT_DEMUX, MSGL_V,
            "[mkv] \\---- [ parsing attachments ] ---------\n");
@@ -992,6 +989,7 @@ static int read_header_element(struct demuxer *demuxer, uint32_t id,
     struct mkv_demuxer *mkv_d = demuxer->priv;
     stream_t *s = demuxer->stream;
     off_t pos = stream_tell(s) - 4;
+    int res = 1;
 
     switch(id) {
     case MATROSKA_ID_INFO:
@@ -1010,14 +1008,14 @@ static int read_header_element(struct demuxer *demuxer, uint32_t id,
             return -1;
         mkv_d->parsed_tracks = true;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |+ segment tracks...\n");
-        return demux_mkv_read_tracks(demuxer) ? -1 : 1;
+        return demux_mkv_read_tracks(demuxer);
 
     case MATROSKA_ID_CUES:
         if (is_parsed_header(mkv_d, pos))
             break;
         if (at_filepos && !seek_pos_id(s, at_filepos, id))
             return -1;
-        return demux_mkv_read_cues(demuxer) ? -1 : 1;
+        return demux_mkv_read_cues(demuxer);
 
     case MATROSKA_ID_TAGS:
         if (mkv_d->parsed_tags)
@@ -1025,7 +1023,7 @@ static int read_header_element(struct demuxer *demuxer, uint32_t id,
         if (at_filepos && !seek_pos_id(s, at_filepos, id))
             return -1;
         mkv_d->parsed_tags = true;
-        return demux_mkv_read_tags(demuxer) ? -1 : 1;
+        return demux_mkv_read_tags(demuxer);
 
     case MATROSKA_ID_SEEKHEAD:
         if (is_parsed_header(mkv_d, pos))
@@ -1040,7 +1038,7 @@ static int read_header_element(struct demuxer *demuxer, uint32_t id,
         if (at_filepos && !seek_pos_id(s, at_filepos, id))
             return -1;
         mkv_d->parsed_chapters = true;
-        return demux_mkv_read_chapters(demuxer) ? -1 : 1;
+        return demux_mkv_read_chapters(demuxer);
 
     case MATROSKA_ID_ATTACHMENTS:
         if (mkv_d->parsed_attachments)
@@ -1048,16 +1046,17 @@ static int read_header_element(struct demuxer *demuxer, uint32_t id,
         if (at_filepos && !seek_pos_id(s, at_filepos, id))
             return -1;
         mkv_d->parsed_attachments = true;
-        return demux_mkv_read_attachments(demuxer) ? -1 : 1;
+        return demux_mkv_read_attachments(demuxer);
+
+    case EBML_ID_VOID:
+        break;
 
     default:
-        if (!at_filepos)
-            ebml_read_skip(s, NULL);
-        return 0;
+        res = 2;
     }
     if (!at_filepos)
         ebml_read_skip(s, NULL);
-    return 1;
+    return res;
 }
 
 
@@ -1677,26 +1676,18 @@ static int demux_mkv_open(demuxer_t *demuxer)
 
     while (1) {
         uint32_t id = ebml_read_id(s, NULL);
-        switch (id) {
-        case MATROSKA_ID_CLUSTER:
-            mp_msg(MSGT_DEMUX, MSGL_V,
-                   "[mkv] |+ found cluster, headers are "
+        if (id == MATROSKA_ID_CLUSTER) {
+            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |+ found cluster, headers are "
                    "parsed completely :)\n");
             stream_seek(s, stream_tell(s) - 4);
-            goto headersdone;
-        default:;
-            int res = read_header_element(demuxer, id, 0);
-            if (res == -2) {
-                return 0;
-            } else if (res < 1)
-                goto headersdone;
-            break;
-        case EBML_ID_VOID:
-            ebml_read_skip(s, NULL);
             break;
         }
+        int res = read_header_element(demuxer, id, 0);
+        if (res <= -2)
+            return 0;
+        if (res < 0)
+            break;
     }
- headersdone:
 
     display_create_tracks(demuxer);
 
