@@ -393,7 +393,8 @@ int init_best_video_codec(sh_video_t *sh_video, char **video_codec_list,
     return 1;                   // success
 }
 
-void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
+void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
+                   unsigned char *start, int in_size,
                    int drop_frame, double pts)
 {
     mp_image_t *mpi = NULL;
@@ -433,7 +434,7 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
     }
 
     if (sh_video->vd_driver->decode2) {
-        mpi = sh_video->vd_driver->decode2(sh_video, start, in_size,
+        mpi = sh_video->vd_driver->decode2(sh_video, packet, start, in_size,
                                            drop_frame, &pts);
     } else {
         mpi = sh_video->vd_driver->decode(sh_video, start, in_size,

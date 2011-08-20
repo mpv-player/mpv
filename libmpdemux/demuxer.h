@@ -27,6 +27,7 @@
 
 #include "bstr.h"
 #include "mpcommon.h"
+#include "demux_packet.h"
 
 struct MPOpts;
 
@@ -123,21 +124,6 @@ enum timestamp_type {
 
 // demux_lavf can pass lavf buffers using FF_INPUT_BUFFER_PADDING_SIZE instead
 #define MP_INPUT_BUFFER_PADDING_SIZE 8
-
-// Holds one packet/frame/whatever
-typedef struct demux_packet {
-    int len;
-    double pts;
-    double duration;
-    double stream_pts;
-    off_t pos; // position in index (AVI) or file (MPG)
-    unsigned char *buffer;
-    int flags; // keyframe, etc
-    int refcount; // counter for the master packet, if 0, buffer can be free()d
-    struct demux_packet *master; //in clones, pointer to the master packet
-    struct demux_packet *next;
-    struct AVPacket *avpacket;   // original libavformat packet (demux_lavf)
-} demux_packet_t;
 
 typedef struct demux_stream {
     int buffer_pos;        // current buffer position
@@ -360,6 +346,7 @@ int ds_get_packet(struct demux_stream *ds, unsigned char **start);
 int ds_get_packet_pts(struct demux_stream *ds, unsigned char **start,
                       double *pts);
 int ds_get_packet_sub(struct demux_stream *ds, unsigned char **start);
+struct demux_packet *ds_get_packet2(struct demux_stream *ds);
 double ds_get_next_pts(struct demux_stream *ds);
 int ds_parse(struct demux_stream *sh, uint8_t **buffer, int *len, double pts,
              off_t pos);

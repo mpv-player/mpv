@@ -2892,8 +2892,8 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         decoded_frame = mp_dvdnav_restore_smpi(mpctx, &in_size, &packet, NULL);
         if (in_size >= 0 && !decoded_frame)
 #endif
-        decoded_frame = decode_video(sh_video, packet, in_size, framedrop_type,
-                                     sh_video->pts);
+        decoded_frame = decode_video(sh_video, NULL, packet, in_size,
+                                     framedrop_type, sh_video->pts);
 #ifdef CONFIG_DVDNAV
         // Save last still frame for future display
         mp_dvdnav_save_smpi(mpctx, in_size, packet, decoded_frame);
@@ -2958,17 +2958,17 @@ static double update_video(struct MPContext *mpctx)
         // timer now
         if (vf_output_queued_frame(sh_video->vfilter))
             break;
-        unsigned char *packet = NULL;
-        int in_size = ds_get_packet_pts(mpctx->d_video, &packet, &pts);
+        int in_size = 0;
+        unsigned char *buf = NULL;
+        pts = MP_NOPTS_VALUE;
+        struct demux_packet *pkt = ds_get_packet2(mpctx->d_video);
+        if (pkt) {
+            in_size = pkt->len;
+            buf = pkt->buffer;
+            pts = pkt->pts;
+        }
         if (pts != MP_NOPTS_VALUE)
             pts += mpctx->video_offset;
-        bool hit_eof = false;
-        if (in_size < 0) {
-            // try to extract last frames in case of decoder lag
-            in_size = 0;
-            pts = MP_NOPTS_VALUE;
-            hit_eof = true;
-        }
         if (in_size > max_framesize)
             max_framesize = in_size;
         current_module = "decode video";
@@ -2976,13 +2976,13 @@ static double update_video(struct MPContext *mpctx)
             mpctx->hrseek_framedrop = false;
         int framedrop_type = mpctx->hrseek_framedrop ? 1 :
                              check_framedrop(mpctx, sh_video->frametime);
-        void *decoded_frame = decode_video(sh_video, packet, in_size,
+        void *decoded_frame = decode_video(sh_video, pkt, buf, in_size,
                                            framedrop_type, pts);
         if (decoded_frame) {
             determine_frame_pts(mpctx);
             current_module = "filter video";
             filter_video(sh_video, decoded_frame, sh_video->pts);
-        } else if (hit_eof) {
+        } else if (!pkt) {
             if (vo_get_buffered_frame(video_out, true) < 0)
                 return -1;
         }

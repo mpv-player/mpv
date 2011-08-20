@@ -25,16 +25,19 @@
 
 typedef mp_codec_info_t vd_info_t;
 
+struct demux_packet;
+
 /* interface of video decoder drivers */
 typedef struct vd_functions
 {
-        const vd_info_t *info;
-        int (*init)(sh_video_t *sh);
-        void (*uninit)(sh_video_t *sh);
-        int (*control)(sh_video_t *sh,int cmd,void* arg, ...);
-        mp_image_t* (*decode)(sh_video_t *sh,void* data,int len,int flags);
-        struct mp_image *(*decode2)(struct sh_video *sh, void *data, int len,
-                                    int flags, double *reordered_pts);
+    const vd_info_t *info;
+    int (*init)(sh_video_t *sh);
+    void (*uninit)(sh_video_t *sh);
+    int (*control)(sh_video_t *sh,int cmd,void* arg, ...);
+    mp_image_t* (*decode)(sh_video_t *sh,void* data,int len,int flags);
+    struct mp_image *(*decode2)(struct sh_video *sh, struct demux_packet *pkt,
+                                void *data, int len, int flags,
+                                double *reordered_pts);
 } vd_functions_t;
 
 // NULL terminated array of all drivers

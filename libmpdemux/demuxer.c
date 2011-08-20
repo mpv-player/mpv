@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include <unistd.h>
 
 #include <sys/types.h>
@@ -844,6 +845,15 @@ int ds_get_packet_sub(demux_stream_t *ds, unsigned char **start)
     *start = &ds->buffer[ds->buffer_pos];
     ds->buffer_pos += len;
     return len;
+}
+
+struct demux_packet *ds_get_packet2(struct demux_stream *ds)
+{
+    // This shouldn't get used together with partial reads
+    assert(ds->buffer_pos >= ds->buffer_size);
+    ds_fill_buffer(ds);
+    ds->buffer_pos = ds->buffer_size;
+    return ds->current;
 }
 
 double ds_get_next_pts(demux_stream_t *ds)

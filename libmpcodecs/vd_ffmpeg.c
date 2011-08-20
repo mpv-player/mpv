@@ -36,6 +36,7 @@
 #include "vd.h"
 #include "img_format.h"
 #include "libmpdemux/stheader.h"
+#include "libmpdemux/demux_packet.h"
 #include "codec-cfg.h"
 #include "osdep/numcores.h"
 
@@ -713,8 +714,9 @@ static av_unused void swap_palette(void *pal)
 }
 
 // decode a frame
-static struct mp_image *decode(struct sh_video *sh, void *data, int len,
-                               int flags, double *reordered_pts)
+static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
+                               void *data, int len, int flags,
+                               double *reordered_pts)
 {
     int got_picture=0;
     int ret;
@@ -755,6 +757,12 @@ static struct mp_image *decode(struct sh_video *sh, void *data, int len,
     pkt.size = len;
     // HACK: make PNGs decode normally instead of as CorePNG delta frames
     pkt.flags = AV_PKT_FLAG_KEY;
+#if LIBAVCODEC_VERSION_MAJOR >= 53
+    if (packet && packet->avpacket) {
+        pkt.side_data = packet->avpacket->side_data;
+        pkt.side_data_elems = packet->avpacket->side_data_elems;
+    }
+#endif
     // The avcodec opaque field stupidly supports only int64_t type
     union pts { int64_t i; double d; };
     avctx->reordered_opaque = (union pts){.d = *reordered_pts}.i;
