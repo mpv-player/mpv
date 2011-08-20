@@ -362,7 +362,7 @@ Codecs:
   --disable-real            disable RealPlayer codecs support [enabled]
   --disable-xvid            disable Xvid [autodetect]
   --disable-libnut          disable libnut [autodetect]
-  --disable-ffmpeg          disable FFmpeg [autodetect]
+  --disable-libav           disable Libav [autodetect]
   --disable-libvorbis       disable libvorbis support [autodetect]
   --disable-tremor          disable Tremor [autodetect if no libvorbis]
   --disable-speex           disable Speex support [autodetect]
@@ -1033,8 +1033,8 @@ for ac_option do
   --disable-xvid)       _xvid=no        ;;
   --enable-libnut)      _libnut=yes     ;;
   --disable-libnut)     _libnut=no      ;;
-  --enable-ffmpeg)      ffmpeg=yes      ;;
-  --disable-ffmpeg)     ffmpeg=no       ;;
+  --enable-libav)       ffmpeg=yes      ;;
+  --disable-libav)      ffmpeg=no       ;;
   --ffmpeg-source-dir=*)
     _ffmpeg_source=$(echo $ac_option | cut -d '=' -f 2 ) ;;
 
@@ -6010,13 +6010,13 @@ echores "$_live"
 
 
 
-all_ffmpeg_libs="libavutil libavcodec libavformat libswscale libpostproc"
-echocheck "FFmpeg ($all_ffmpeg_libs)"
+all_libav_libs="libavutil libavcodec libavformat libswscale libpostproc"
+echocheck "Libav ($all_libav_libs)"
 if test "$ffmpeg" = auto ; then
   ffmpeg=no
-  if $_pkg_config --exists $all_ffmpeg_libs ; then
-    inc_ffmpeg=$($_pkg_config --cflags $all_ffmpeg_libs)
-    _ld_tmp=$($_pkg_config --libs $all_ffmpeg_libs)
+  if $_pkg_config --exists --print-errors $all_libav_libs ; then
+    inc_ffmpeg=$($_pkg_config --cflags $all_libav_libs)
+    _ld_tmp=$($_pkg_config --libs $all_libav_libs)
     extra_ldflags="$extra_ldflags $_ld_tmp"
     extra_cflags="$extra_cflags $inc_ffmpeg"
     ffmpeg=yes
@@ -6024,7 +6024,7 @@ if test "$ffmpeg" = auto ; then
     extra_ldflags="$extra_ldflags -lpostproc -lswscale -lavformat -lavcodec -lavutil"
     ffmpeg=yes
   else
-    die "Unable to find development files for some of the FFmpeg libraries above. Aborting. If you really mean to compile without FFmpeg support use --disable-ffmpeg."
+    die "Unable to find development files for some of the Libav libraries above. Aborting. If you really mean to compile without Libav support use --disable-libav."
   fi
 fi
 
