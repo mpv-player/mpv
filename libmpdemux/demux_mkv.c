@@ -1418,23 +1418,15 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
         sh_a->wf->nBlockAlign = 1486;
         track->fix_i_bps = 1;
         track->qt_last_a_pts = 0.0;
-        if (track->private_data != NULL) {
-            sh_a->codecdata = malloc(track->private_size);
-            memcpy(sh_a->codecdata, track->private_data, track->private_size);
-            sh_a->codecdata_len = track->private_size;
-        }
+        goto copy_private_data;
     } else if (track->a_formattag == mmioFOURCC('M', 'P', '4', 'A')) {
         int profile, srate_idx;
 
         sh_a->wf->nAvgBytesPerSec = 16000;
         sh_a->wf->nBlockAlign = 1024;
 
-        if (!strcmp(track->codec_id, MKV_A_AAC) && track->private_data) {
-            sh_a->codecdata = malloc(track->private_size);
-            memcpy(sh_a->codecdata, track->private_data, track->private_size);
-            sh_a->codecdata_len = track->private_size;
-            return 0;
-        }
+        if (!strcmp(track->codec_id, MKV_A_AAC) && track->private_data)
+            goto copy_private_data;
 
         /* Recreate the 'private data' */
         /* which faad2 uses in its initialization */
@@ -1559,7 +1551,14 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
             sh_a->codecdata_len = size;
             memcpy(sh_a->codecdata, ptr, size);
         }
-    } else if (track->a_formattag == mmioFOURCC('W', 'V', 'P', 'K') || track->a_formattag == mmioFOURCC('T', 'R', 'H', 'D')) {  /* do nothing, still works */
+    } else if (track->a_formattag == mmioFOURCC('W', 'V', 'P', 'K') ||
+               track->a_formattag == mmioFOURCC('T', 'R', 'H', 'D')) {
+    copy_private_data:
+        if (!track->ms_compat && track->private_size) {
+            sh_a->codecdata = malloc(track->private_size);
+            sh_a->codecdata_len = track->private_size;
+            memcpy(sh_a->codecdata, track->private_data, track->private_size);
+        }
     } else if (!track->ms_compat) {
         goto error;
     }
