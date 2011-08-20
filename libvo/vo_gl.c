@@ -813,7 +813,7 @@ static void do_render(struct vo *vo)
 //  Enable(GL_TEXTURE_2D);
 //  BindTexture(GL_TEXTURE_2D, texture_id);
 
-    gl->Color3f(1, 1, 1);
+    gl->Color4f(1, 1, 1, 1);
     if (p->is_yuv || p->custom_prog)
         glEnableYUVConversion(gl, p->target, p->yuvconvtype);
     if (p->stereo_mode) {
