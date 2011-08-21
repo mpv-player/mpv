@@ -19,8 +19,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #include <libavcodec/avcodec.h>
+
+#include "talloc.h"
 
 #include "config.h"
 #include "mp_msg.h"
@@ -41,6 +44,11 @@ static const ad_info_t info =
 };
 
 LIBAD_EXTERN(ffmpeg)
+
+struct priv {
+    AVCodecContext *avctx;
+    bool old_packet;
+};
 
 static int preinit(sh_audio_t *sh)
 {
@@ -108,8 +116,10 @@ static int init(sh_audio_t *sh_audio)
         return 0;
     }
 
+    struct priv *ctx = talloc_zero(NULL, struct priv);
+    sh_audio->context = ctx;
     lavc_context = avcodec_alloc_context();
-    sh_audio->context = lavc_context;
+    ctx->avctx = lavc_context;
 
     lavc_context->drc_scale = opts->drc_level;
     lavc_context->sample_rate = sh_audio->samplerate;
@@ -195,21 +205,24 @@ static int init(sh_audio_t *sh_audio)
 
 static void uninit(sh_audio_t *sh)
 {
-    AVCodecContext *lavc_context = sh->context;
+    struct priv *ctx = sh->context;
+    AVCodecContext *lavc_context = ctx->avctx;
 
     if (avcodec_close(lavc_context) < 0)
         mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not close codec.\n");
     av_freep(&lavc_context->extradata);
     av_freep(&lavc_context);
+    talloc_free(ctx);
 }
 
 static int control(sh_audio_t *sh, int cmd, void *arg, ...)
 {
-    AVCodecContext *lavc_context = sh->context;
+    struct priv *ctx = sh->context;
     switch (cmd) {
     case ADCTRL_RESYNC_STREAM:
-        avcodec_flush_buffers(lavc_context);
+        avcodec_flush_buffers(ctx->avctx);
         ds_clear_parser(sh->ds);
+        ctx->old_packet = false;
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
@@ -218,7 +231,8 @@ static int control(sh_audio_t *sh, int cmd, void *arg, ...)
 static int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
                         int maxlen)
 {
-    AVCodecContext *avctx = sh_audio->context;
+    struct priv *ctx = sh_audio->context;
+    AVCodecContext *avctx = ctx->avctx;
 
     unsigned char *start = NULL;
     int y, len = -1;
@@ -241,7 +255,7 @@ static int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
         av_init_packet(&pkt);
         pkt.data = start;
         pkt.size = x;
-        if (pts != MP_NOPTS_VALUE) {
+        if (pts != MP_NOPTS_VALUE && !ctx->old_packet) {
             sh_audio->pts = pts;
             sh_audio->pts_bytes = 0;
         }
@@ -253,8 +267,10 @@ static int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
             mp_msg(MSGT_DECAUDIO, MSGL_V, "lavc_audio: error\n");
             break;
         }
-        if (!sh_audio->parser && y < x)
+        if (!sh_audio->parser && y < x) {
             sh_audio->ds->buffer_pos += y - x;  // put back data (HACK!)
+            ctx->old_packet = true;
+        }
         if (len2 > 0) {
             if (avctx->channels >= 5) {
                 int samplesize = av_get_bits_per_sample_format(
