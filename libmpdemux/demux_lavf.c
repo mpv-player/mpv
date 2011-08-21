@@ -800,6 +800,11 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
         return 1;
     }
 
+    // If the packet has pointers to temporary fields that could be
+    // overwritten/freed by next av_read_frame(), copy them to persistent
+    // allocations so we can safely queue the packet for any length of time.
+    if (av_dup_packet(pkt) < 0)
+        abort();
     dp = new_demux_packet_fromdata(pkt->data, pkt->size);
     dp->avpacket = pkt;
 
