@@ -157,6 +157,7 @@ static int init(sh_audio_t *sh_audio)
     /* open it */
     if (avcodec_open(lavc_context, lavc_codec) < 0) {
         mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Could not open codec.\n");
+        uninit(sh_audio);
         return 0;
     }
     mp_msg(MSGT_DECAUDIO, MSGL_V, "INFO: libavcodec \"%s\" init OK!\n",
@@ -183,6 +184,7 @@ static int init(sh_audio_t *sh_audio)
         if (++tries >= 5) {
             mp_msg(MSGT_DECAUDIO, MSGL_ERR,
                    "ad_ffmpeg: initial decode failed\n");
+            uninit(sh_audio);
             return 0;
         }
     }
@@ -198,6 +200,7 @@ static int init(sh_audio_t *sh_audio)
     case SAMPLE_FMT_FLT:
         break;
     default:
+        uninit(sh_audio);
         return 0;
     }
     return 1;
@@ -206,13 +209,18 @@ static int init(sh_audio_t *sh_audio)
 static void uninit(sh_audio_t *sh)
 {
     struct priv *ctx = sh->context;
+    if (!ctx)
+        return;
     AVCodecContext *lavc_context = ctx->avctx;
 
-    if (avcodec_close(lavc_context) < 0)
-        mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not close codec.\n");
-    av_freep(&lavc_context->extradata);
-    av_freep(&lavc_context);
+    if (lavc_context) {
+        if (avcodec_close(lavc_context) < 0)
+            mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not close codec.\n");
+        av_freep(&lavc_context->extradata);
+        av_freep(&lavc_context);
+    }
     talloc_free(ctx);
+    sh->context = NULL;
 }
 
 static int control(sh_audio_t *sh, int cmd, void *arg, ...)
