@@ -35,72 +35,74 @@
 #define VO_EVENT_REINIT 8
 #define VO_EVENT_MOVE 16
 
-/* Obsolete: VOCTRL_QUERY_VAA 1 */
-/* does the device support the required format */
-#define VOCTRL_QUERY_FORMAT 2
-/* signal a device reset seek */
-#define VOCTRL_RESET 3
-/* used to switch to fullscreen */
-#define VOCTRL_FULLSCREEN 5
-/* signal a device pause */
-#define VOCTRL_PAUSE 7
-/* start/resume playback */
-#define VOCTRL_RESUME 8
-/* libmpcodecs direct rendering: */
-#define VOCTRL_GET_IMAGE 9
-#define VOCTRL_DRAW_IMAGE 13
-#define VOCTRL_SET_SPU_PALETTE 14
-/* decoding ahead: */
-#define VOCTRL_GET_NUM_FRAMES 10
-#define VOCTRL_GET_FRAME_NUM  11
-#define VOCTRL_SET_FRAME_NUM  12
-#define VOCTRL_GET_PANSCAN 15
-#define VOCTRL_SET_PANSCAN 16
-/* equalizer controls */
-#define VOCTRL_SET_EQUALIZER 17
+enum mp_voctrl {
+    /* does the device support the required format */
+    VOCTRL_QUERY_FORMAT = 1,
+    /* signal a device reset seek */
+    VOCTRL_RESET,
+    /* used to switch to fullscreen */
+    VOCTRL_FULLSCREEN,
+    /* signal a device pause */
+    VOCTRL_PAUSE,
+    /* start/resume playback */
+    VOCTRL_RESUME,
+    /* libmpcodecs direct rendering */
+    VOCTRL_GET_IMAGE,
+    VOCTRL_DRAW_IMAGE,
+    VOCTRL_SET_SPU_PALETTE,
+    VOCTRL_GET_PANSCAN,
+    VOCTRL_SET_PANSCAN,
+    VOCTRL_SET_EQUALIZER,               // struct voctrl_set_equalizer_args
+    VOCTRL_GET_EQUALIZER,               // struct voctrl_get_equalizer_args
+    VOCTRL_DUPLICATE_FRAME,
+
+    VOCTRL_START_SLICE,
+
+    // Vo can be used by xover
+    VOCTRL_XOVERLAY_SUPPORT,
+    VOCTRL_XOVERLAY_SET_COLORKEY,       // mp_colorkey_t
+    VOCTRL_XOVERLAY_SET_WIN,
+
+    VOCTRL_REDRAW_OSD,
+
+    VOCTRL_ONTOP,
+    VOCTRL_ROOTWIN,
+    VOCTRL_BORDER,
+    VOCTRL_DRAW_EOSD,
+    VOCTRL_GET_EOSD_RES,                // struct mp_eosd_res
+
+    VOCTRL_SET_DEINTERLACE,
+    VOCTRL_GET_DEINTERLACE,
+
+    VOCTRL_UPDATE_SCREENINFO,
+
+    VOCTRL_SET_YUV_COLORSPACE,
+    VOCTRL_GET_YUV_COLORSPACE,
+};
+
+// VOCTRL_SET_EQUALIZER
 struct voctrl_set_equalizer_args {
     const char *name;
     int value;
 };
-#define VOCTRL_GET_EQUALIZER 18
+
+// VOCTRL_GET_EQUALIZER
 struct voctrl_get_equalizer_args {
     const char *name;
     int *valueptr;
 };
-/* Frame duplication */
-#define VOCTRL_DUPLICATE_FRAME 20
-// ... 21
-#define VOCTRL_START_SLICE 21
 
-#define VOCTRL_ONTOP 25
-#define VOCTRL_ROOTWIN 26
-#define VOCTRL_BORDER 27
-#define VOCTRL_DRAW_EOSD 28
-#define VOCTRL_GET_EOSD_RES 29
-typedef struct mp_eosd_res {
-  int w, h; // screen dimensions, including black borders
-  int mt, mb, ml, mr; // borders (top, bottom, left, right)
-} mp_eosd_res_t;
-
-#define VOCTRL_SET_DEINTERLACE 30
-#define VOCTRL_GET_DEINTERLACE 31
-
-#define VOCTRL_UPDATE_SCREENINFO 32
-
-#define VOCTRL_SET_YUV_COLORSPACE 33
-#define VOCTRL_GET_YUV_COLORSPACE 34
-
-// Vo can be used by xover
-#define VOCTRL_XOVERLAY_SUPPORT 22
-
-#define VOCTRL_XOVERLAY_SET_COLORKEY 24
+// VOCTRL_XOVERLAY_SET_COLORKEY
 typedef struct {
-  uint32_t x11; // The raw x11 color
-  uint16_t r,g,b;
+    uint32_t x11; // The raw x11 color
+    uint16_t r,g,b;
 } mp_colorkey_t;
 
-#define VOCTRL_XOVERLAY_SET_WIN 23
-#define VOCTRL_REDRAW_OSD 24
+//VOCTRL_GET_EOSD_RES
+typedef struct mp_eosd_res {
+    int w, h; // screen dimensions, including black borders
+    int mt, mb, ml, mr; // borders (top, bottom, left, right)
+} mp_eosd_res_t;
 
 typedef struct {
   int x,y;
