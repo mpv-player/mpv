@@ -4777,7 +4777,6 @@ goto_enable_cache:
     mpctx->sh_video = mpctx->d_video->sh;
 
     if (mpctx->sh_video) {
-
         current_module = "video_read_properties";
         if (!video_read_properties(mpctx->sh_video)) {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Video: Cannot read properties.\n");
@@ -4787,20 +4786,16 @@ goto_enable_cache:
                     "size:%dx%d  fps:%5.3f  ftime:=%6.4f\n",
                     mpctx->demuxer->file_format, mpctx->sh_video->format,
                     mpctx->sh_video->disp_w, mpctx->sh_video->disp_h,
-                    mpctx->sh_video->fps, mpctx->sh_video->frametime
-                    );
-
-            /* need to set fps here for output encoders to pick it up in their init */
+                    mpctx->sh_video->fps, mpctx->sh_video->frametime);
             if (force_fps) {
                 mpctx->sh_video->fps = force_fps;
                 mpctx->sh_video->frametime = 1.0f / mpctx->sh_video->fps;
             }
             vo_fps = mpctx->sh_video->fps;
 
-            if (!mpctx->sh_video->fps && !force_fps) {
+            if (!mpctx->sh_video->fps && !force_fps && !opts->correct_pts) {
                 mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "FPS not specified in the "
                         "header or invalid, use the -fps option.\n");
-                mpctx->opts.correct_pts = 1;
             }
         }
 
