@@ -93,6 +93,7 @@ struct gl_priv {
     int lscale;
     int cscale;
     float filter_strength;
+    float noise_strength;
     int yuvconvtype;
     int use_rectangle;
     int err_shown;
@@ -214,7 +215,8 @@ static void update_yuvconv(struct vo *vo)
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
     gl_conversion_params_t params = {
         p->target, p->yuvconvtype, cparams,
-        p->texture_width, p->texture_height, 0, 0, p->filter_strength
+        p->texture_width, p->texture_height, 0, 0, p->filter_strength,
+        p->noise_strength
     };
     mp_get_chroma_shift(p->image_format, &xs, &ys, &depth);
     params.chrom_texw = params.texw >> xs;
@@ -1221,6 +1223,7 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw,
         {"lscale",       OPT_ARG_INT,  &p->lscale,       int_non_neg},
         {"cscale",       OPT_ARG_INT,  &p->cscale,       int_non_neg},
         {"filter-strength", OPT_ARG_FLOAT, &p->filter_strength, NULL},
+        {"noise-strength", OPT_ARG_FLOAT, &p->noise_strength, NULL},
         {"ati-hack",     OPT_ARG_BOOL, &p->ati_hack,     NULL},
         {"force-pbo",    OPT_ARG_BOOL, &p->force_pbo,    NULL},
         {"glfinish",     OPT_ARG_BOOL, &p->use_glFinish, NULL},
@@ -1288,6 +1291,8 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw,
                "    as lscale but for chroma (2x slower with little visible effect).\n"
                "  filter-strength=<value>\n"
                "    set the effect strength for some lscale/cscale filters\n"
+               "  noise-strength=<value>\n"
+               "    set how much noise to add. 1.0 is suitable for dithering to 6 bit.\n"
                "  customprog=<filename>\n"
                "    use a custom YUV conversion program\n"
                "  customtex=<filename>\n"

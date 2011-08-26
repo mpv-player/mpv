@@ -335,6 +335,7 @@ typedef struct {
     int chrom_texw;
     int chrom_texh;
     float filter_strength;
+    float noise_strength;
 } gl_conversion_params_t;
 
 int glAutodetectYUVConversion(GL *gl);
