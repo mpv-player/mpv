@@ -27,33 +27,33 @@
 #include <stdint.h>
 
 enum mp_csp_standard {
-  MP_CSP_DEFAULT,
-  MP_CSP_BT_601,
-  MP_CSP_BT_709,
-  MP_CSP_SMPTE_240M,
-  MP_CSP_EBU,
-  MP_CSP_XYZ,
-  MP_CSP_COUNT
+    MP_CSP_DEFAULT,
+    MP_CSP_BT_601,
+    MP_CSP_BT_709,
+    MP_CSP_SMPTE_240M,
+    MP_CSP_EBU,
+    MP_CSP_XYZ,
+    MP_CSP_COUNT
 };
 
 enum mp_csp_levelconv {
-  MP_CSP_LEVELCONV_TV_TO_PC,
-  MP_CSP_LEVELCONV_PC_TO_TV,
-  MP_CSP_LEVELCONV_NONE,
-  MP_CSP_LEVELCONV_COUNT
+    MP_CSP_LEVELCONV_TV_TO_PC,
+    MP_CSP_LEVELCONV_PC_TO_TV,
+    MP_CSP_LEVELCONV_NONE,
+    MP_CSP_LEVELCONV_COUNT
 };
 
 struct mp_csp_params {
-  enum mp_csp_standard format;
-  enum mp_csp_levelconv levelconv;
-  float brightness;
-  float contrast;
-  float hue;
-  float saturation;
-  float rgamma;
-  float ggamma;
-  float bgamma;
-  int input_shift;
+    enum mp_csp_standard format;
+    enum mp_csp_levelconv levelconv;
+    float brightness;
+    float contrast;
+    float hue;
+    float saturation;
+    float rgamma;
+    float ggamma;
+    float bgamma;
+    int input_shift;
 };
 
 void mp_gen_gamma_map(unsigned char *map, int size, float gamma);
