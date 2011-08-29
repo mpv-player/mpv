@@ -31,15 +31,13 @@ enum mp_csp_standard {
     MP_CSP_BT_601,
     MP_CSP_BT_709,
     MP_CSP_SMPTE_240M,
-    MP_CSP_EBU,
-    MP_CSP_XYZ,
     MP_CSP_COUNT
 };
 
 enum mp_csp_levelconv {
     MP_CSP_LEVELCONV_TV_TO_PC,
     MP_CSP_LEVELCONV_PC_TO_TV,
-    MP_CSP_LEVELCONV_NONE,
+    MP_CSP_LEVELCONV_TV_TO_TV,
     MP_CSP_LEVELCONV_COUNT
 };
 
