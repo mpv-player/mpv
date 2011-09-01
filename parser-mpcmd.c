@@ -68,6 +68,29 @@ static bool split_opt(struct bstr *opt, struct bstr *param, bool *old_syntax)
     return true;
 }
 
+static int map_to_option(struct m_config *config, bool old_syntax,
+                         const struct m_option **mp_opt,
+                         struct bstr *optname, struct bstr *param)
+{
+    if (!mp_opt)
+        mp_opt = &(const struct m_option *){0};
+    *mp_opt = m_config_get_option(config, *optname);
+    if (*mp_opt)
+        return 0;
+    if (!bstr_startswith0(*optname, "no-"))
+        return -1;
+    struct bstr s = bstr_cut(*optname, 3);
+    *mp_opt = m_config_get_option(config, s);
+    if (!*mp_opt || (*mp_opt)->type != &m_option_type_flag)
+        return -1;
+    if (param->len)
+        return -2;
+    if (old_syntax)
+        return -3;
+    *optname = s;
+    *param = bstr("no");
+    return 0;
+}
 
 // Parse command line to set up config and playtree
 play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
@@ -172,11 +195,21 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
             } else {
                 // "normal" options
                 const struct m_option *mp_opt;
-                mp_opt = m_config_get_option(config, opt);
-                if (!mp_opt) {
-                    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                            "Unknown option on the command line: --%.*s\n",
-                            BSTR_P(opt));
+                int ok = map_to_option(config, old_syntax, &mp_opt, &opt,
+                                       &param);
+                if (ok < 0) {
+                    if (ok == -3)
+                        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                                "Option --%.*s can't be used with single-dash "
+                                "syntax\n", BSTR_P(opt));
+                    else if (ok == -2)
+                        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                                "A --no-* option can't take parameters: "
+                                "--%.*s=%.*s\n", BSTR_P(opt), BSTR_P(param));
+                    else
+                        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                                "Unknown option on the command line: --%.*s\n",
+                                BSTR_P(opt));
                     goto print_err;
                 }
                 int r;
@@ -295,7 +328,7 @@ int m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
         if (!split_opt(&opt, &param, &old_syntax))
             continue;   // Ignore non-option arguments
         // Ignore invalid options
-        if (!m_config_get_option(config, opt))
+        if (map_to_option(config, old_syntax, NULL, &opt, &param) < 0)
             continue;
         // Set, non-pre-parse options will be ignored
         int r = m_config_set_option(config, opt, param, old_syntax);
