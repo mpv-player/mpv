@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "talloc.h"
 #include "config.h"
 #include "mp_msg.h"
 
@@ -123,7 +124,7 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
       mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] file type was not set! (try -mf type=xxx)\n" );
       free( mf ); return NULL;
     }
-    mf_type=strdup(p+1);
+    mf_type = talloc_strdup(NULL, p+1);
     mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] file type was not set! trying 'type=%s'...\n", mf_type);
   }
 
