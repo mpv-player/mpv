@@ -35,22 +35,7 @@
 #include "ass_mp.h"
 #include "subreader.h"
 #include "stream/stream.h"
-
-#ifdef CONFIG_FONTCONFIG
-#include <fontconfig/fontconfig.h>
-#endif
-
-// libass-related command line options
-float ass_font_scale = 1.;
-float ass_line_spacing = 0.;
-int ass_top_margin = 0;
-int ass_bottom_margin = 0;
-int use_embedded_fonts = 1;
-int ass_use_margins = 0;
-char *ass_color = NULL;
-char *ass_border_color = NULL;
-char *ass_styles_file = NULL;
-int ass_hinting = ASS_HINTING_LIGHT + 4;       // light hinting for unscaled osd
+#include "options.h"
 
 #ifdef CONFIG_FONTCONFIG
 extern int font_fontconfig;
@@ -68,7 +53,7 @@ extern char *sub_cp;
 static char *sub_cp = 0;
 #endif
 
-ASS_Track *mp_ass_default_track(ASS_Library *library)
+ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
 {
     ASS_Track *track = ass_new_track(library);
 
@@ -77,8 +62,8 @@ ASS_Track *mp_ass_default_track(ASS_Library *library)
     track->PlayResY = 288;
     track->WrapStyle = 0;
 
-    if (ass_styles_file)
-        ass_read_styles(track, ass_styles_file, sub_cp);
+    if (opts->ass_styles_file)
+        ass_read_styles(track, opts->ass_styles_file, sub_cp);
 
     if (track->n_styles == 0) {
         track->Kerning = true;
@@ -107,10 +92,10 @@ ASS_Track *mp_ass_default_track(ASS_Library *library)
 
         uint32_t c1 = 0xFFFFFF00;
         uint32_t c2 = 0x00000000;
-        if (ass_color)
-            c1 = strtoll(ass_color, NULL, 16);
-        if (ass_border_color)
-            c2 = strtoll(ass_border_color, NULL, 16);
+        if (opts->ass_color)
+            c1 = strtoll(opts->ass_color, NULL, 16);
+        if (opts->ass_border_color)
+            c2 = strtoll(opts->ass_border_color, NULL, 16);
 
         style->FontSize = fs;
         style->PrimaryColour = c1;
@@ -208,13 +193,13 @@ static int ass_process_subtitle(ASS_Track *track, subtitle *sub)
  * \param fps video framerate
  * \return newly allocated ASS_Track, filled with subtitles from subdata
  */
-ASS_Track *mp_ass_read_subdata(ASS_Library *library, sub_data *subdata,
-                               double fps)
+ASS_Track *mp_ass_read_subdata(ASS_Library *library, struct MPOpts *opts,
+                               sub_data *subdata, double fps)
 {
     ASS_Track *track;
     int i;
 
-    track = mp_ass_default_track(library);
+    track = mp_ass_default_track(library, opts);
     track->name = subdata->filename ? strdup(subdata->filename) : 0;
 
     for (i = 0; i < subdata->sub_num; ++i) {
@@ -257,19 +242,20 @@ ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
     return track;
 }
 
-void mp_ass_configure(ASS_Renderer *priv, int w, int h, bool unscaled)
+void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts, int w, int h,
+                      bool unscaled)
 {
     int hinting;
     ass_set_frame_size(priv, w, h);
-    ass_set_margins(priv, ass_top_margin, ass_bottom_margin, 0, 0);
-    ass_set_use_margins(priv, ass_use_margins);
-    ass_set_font_scale(priv, ass_font_scale);
-    if (!unscaled && (ass_hinting & 4))
+    ass_set_margins(priv, opts->ass_top_margin, opts->ass_bottom_margin, 0, 0);
+    ass_set_use_margins(priv, opts->ass_use_margins);
+    ass_set_font_scale(priv, opts->ass_font_scale);
+    if (!unscaled && (opts->ass_hinting & 4))
         hinting = 0;
     else
-        hinting = ass_hinting & 3;
+        hinting = opts->ass_hinting & 3;
     ass_set_hinting(priv, hinting);
-    ass_set_line_spacing(priv, ass_line_spacing);
+    ass_set_line_spacing(priv, opts->ass_line_spacing);
 }
 
 void mp_ass_configure_fonts(ASS_Renderer *priv)
@@ -304,14 +290,14 @@ static void message_callback(int level, const char *format, va_list va, void *ct
     mp_msg(MSGT_ASS, level, "\n");
 }
 
-ASS_Library *mp_ass_init(void)
+ASS_Library *mp_ass_init(struct MPOpts *opts)
 {
     ASS_Library *priv;
     char *path = get_path("fonts");
     priv = ass_library_init();
     ass_set_message_cb(priv, message_callback, NULL);
     ass_set_fonts_dir(priv, path);
-    ass_set_extract_fonts(priv, use_embedded_fonts);
+    ass_set_extract_fonts(priv, opts->use_embedded_fonts);
     free(path);
     return priv;
 }
@@ -320,8 +306,9 @@ void mp_ass_reload_options(ASS_Renderer *priv, struct MPOpts *opts)
 {
     /* This could be needed for vf_ass case if the margins were actually
      * runtime configurable, but would be wrong with EOSD:
-     * ass_set_margins(priv, ass_top_margin, ass_bottom_margin, 0, 0);
+     * ass_set_margins(priv, opts->ass_top_margin, opts->ass_bottom_margin,
+     *                 0, 0);
      */
-    ass_set_use_margins(priv, ass_use_margins);
-    ass_set_font_scale(priv, ass_font_scale);
+    ass_set_use_margins(priv, opts->ass_use_margins);
+    ass_set_font_scale(priv, opts->ass_font_scale);
 }

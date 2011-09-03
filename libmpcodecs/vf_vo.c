@@ -86,9 +86,9 @@ static int config(struct vf_instance *vf,
     vf->priv->scale_ratio = (double) d_width / d_height * height / width;
 
     if (vf->priv->renderer_realaspect) {
-	mp_ass_configure(vf->priv->renderer_realaspect, width, height,
+	mp_ass_configure(vf->priv->renderer_realaspect, vf->opts, width, height,
                          vf->default_caps & VFCAP_EOSD_UNSCALED);
-	mp_ass_configure(vf->priv->renderer_vsfilter, width, height,
+	mp_ass_configure(vf->priv->renderer_vsfilter, vf->opts, width, height,
                          vf->default_caps & VFCAP_EOSD_UNSCALED);
     }
 #endif

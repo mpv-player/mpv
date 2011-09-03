@@ -31,26 +31,17 @@
 #include <ass/ass.h>
 #include <ass/ass_types.h>
 
-extern float ass_font_scale;
-extern float ass_line_spacing;
-extern int ass_top_margin;
-extern int ass_bottom_margin;
-extern int use_embedded_fonts;
-extern int ass_use_margins;
-extern char *ass_color;
-extern char *ass_border_color;
-extern char *ass_styles_file;
-extern int ass_hinting;
-
-ASS_Track *mp_ass_default_track(ASS_Library *library);
-ASS_Track *mp_ass_read_subdata(ASS_Library *library, sub_data *subdata,
-                               double fps);
+ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts);
+ASS_Track *mp_ass_read_subdata(ASS_Library *library, struct MPOpts *opts,
+                               sub_data *subdata, double fps);
 ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
                               char *charset);
 
-void mp_ass_configure(ASS_Renderer *priv, int w, int h, bool unscaled);
+struct MPOpts;
+void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts, int w, int h,
+                      bool unscaled);
 void mp_ass_configure_fonts(ASS_Renderer *priv);
-ASS_Library *mp_ass_init(void);
+ASS_Library *mp_ass_init(struct MPOpts *opts);
 
 void mp_ass_reload_options(ASS_Renderer *priv, struct MPOpts *opts);
 

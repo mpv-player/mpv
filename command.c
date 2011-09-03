@@ -1959,6 +1959,7 @@ static int mp_property_sub_visibility(m_option_t *prop, int action,
 static int mp_property_ass_use_margins(m_option_t *prop, int action,
                                        void *arg, MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -1970,7 +1971,7 @@ static int mp_property_ass_use_margins(m_option_t *prop, int action,
     case M_PROPERTY_STEP_DOWN:
         mpctx->osd->ass_force_reload = true;
     default:
-        return m_property_flag(prop, action, arg, &ass_use_margins);
+        return m_property_flag(prop, action, arg, &opts->ass_use_margins);
     }
 }
 
@@ -2032,7 +2033,7 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
         M_PROPERTY_CLAMP(prop, *(float *) arg);
 #ifdef CONFIG_ASS
         if (opts->ass_enabled) {
-            ass_font_scale = *(float *) arg;
+            opts->ass_font_scale = *(float *) arg;
             mpctx->osd->ass_force_reload = true;
         }
 #endif
@@ -2044,9 +2045,9 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_STEP_DOWN:
 #ifdef CONFIG_ASS
         if (opts->ass_enabled) {
-            ass_font_scale += (arg ? *(float *) arg : 0.1) *
+            opts->ass_font_scale += (arg ? *(float *) arg : 0.1) *
                               (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
-            M_PROPERTY_CLAMP(prop, ass_font_scale);
+            M_PROPERTY_CLAMP(prop, opts->ass_font_scale);
             mpctx->osd->ass_force_reload = true;
         }
 #endif
@@ -2059,7 +2060,7 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
     default:
 #ifdef CONFIG_ASS
         if (opts->ass_enabled)
-            return m_property_float_ro(prop, action, arg, ass_font_scale);
+            return m_property_float_ro(prop, action, arg, opts->ass_font_scale);
         else
 #endif
         return m_property_float_ro(prop, action, arg, text_font_scale_factor);

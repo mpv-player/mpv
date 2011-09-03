@@ -1134,7 +1134,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps,
         if (!asst) {
             subd = sub_read_file(filename, fps, &mpctx->opts);
             if (subd) {
-                asst = mp_ass_read_subdata(mpctx->ass_library, subd, fps);
+                asst = mp_ass_read_subdata(mpctx->ass_library, opts, subd, fps);
                 sub_free(subd);
                 subd = NULL;
             }
@@ -4178,7 +4178,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef CONFIG_ASS
-    mpctx->ass_library = mp_ass_init();
+    mpctx->ass_library = mp_ass_init(opts);
     mpctx->osd->ass_library = mpctx->ass_library;
 #endif
 
@@ -4688,7 +4688,7 @@ goto_enable_cache:
             struct demuxer *d = mpctx->sources[j].demuxer;
             for (int i = 0; i < d->num_attachments; i++) {
                 struct demux_attachment *att = d->attachments + i;
-                if (use_embedded_fonts && attachment_is_font(att))
+                if (opts->use_embedded_fonts && attachment_is_font(att))
                     ass_add_font(mpctx->ass_library, att->name, att->data,
                                  att->data_size);
             }

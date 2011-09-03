@@ -81,7 +81,7 @@ static int config(struct vf_instance *vf,
     if (outfmt == IMGFMT_IF09)
         return 0;
 
-    vf->priv->outh = height + ass_top_margin + ass_bottom_margin;
+    vf->priv->outh = height + opts->ass_top_margin + opts->ass_bottom_margin;
     vf->priv->outw = width;
 
     if (!opts->screen_size_x && !opts->screen_size_y) {
@@ -94,9 +94,9 @@ static int config(struct vf_instance *vf,
     vf->priv->line_limits = malloc((vf->priv->outh + 1) / 2 * sizeof(*vf->priv->line_limits));
 
     if (vf->priv->renderer_realaspect) {
-        mp_ass_configure(vf->priv->renderer_realaspect,
+        mp_ass_configure(vf->priv->renderer_realaspect, opts,
                          vf->priv->outw, vf->priv->outh, 0);
-        mp_ass_configure(vf->priv->renderer_vsfilter,
+        mp_ass_configure(vf->priv->renderer_vsfilter, opts,
                          vf->priv->outw, vf->priv->outh, 0);
         ass_set_aspect_ratio(vf->priv->renderer_realaspect,
                              (double)width / height * d_height / d_width, 1);
@@ -127,15 +127,16 @@ static void get_image(struct vf_instance *vf, mp_image_t *mpi)
         return;
     }
 
+    int tmargin = vf->opts->ass_top_margin;
     // set up mpi as a cropped-down image of dmpi:
     if (mpi->flags & MP_IMGFLAG_PLANAR) {
-        mpi->planes[0] = vf->dmpi->planes[0] +  ass_top_margin * vf->dmpi->stride[0];
-        mpi->planes[1] = vf->dmpi->planes[1] + (ass_top_margin >> mpi->chroma_y_shift) * vf->dmpi->stride[1];
-        mpi->planes[2] = vf->dmpi->planes[2] + (ass_top_margin >> mpi->chroma_y_shift) * vf->dmpi->stride[2];
+        mpi->planes[0] = vf->dmpi->planes[0] +  tmargin * vf->dmpi->stride[0];
+        mpi->planes[1] = vf->dmpi->planes[1] + (tmargin >> mpi->chroma_y_shift) * vf->dmpi->stride[1];
+        mpi->planes[2] = vf->dmpi->planes[2] + (tmargin >> mpi->chroma_y_shift) * vf->dmpi->stride[2];
         mpi->stride[1] = vf->dmpi->stride[1];
         mpi->stride[2] = vf->dmpi->stride[2];
     } else {
-        mpi->planes[0] = vf->dmpi->planes[0] + ass_top_margin * vf->dmpi->stride[0];
+        mpi->planes[0] = vf->dmpi->planes[0] + tmargin * vf->dmpi->stride[0];
     }
     mpi->stride[0] = vf->dmpi->stride[0];
     mpi->width = vf->dmpi->width;
@@ -170,6 +171,8 @@ static void blank(mp_image_t *mpi, int y1, int y2)
 
 static int prepare_image(struct vf_instance *vf, mp_image_t *mpi)
 {
+    struct MPOpts *opts = vf->opts;
+    int tmargin = opts->ass_top_margin;
     if (mpi->flags & MP_IMGFLAG_DIRECT
 	|| mpi->flags & MP_IMGFLAG_DRAW_CALLBACK) {
         vf->dmpi = mpi->priv;
@@ -179,10 +182,11 @@ static int prepare_image(struct vf_instance *vf, mp_image_t *mpi)
         }
         mpi->priv = NULL;
         // we've used DR, so we're ready...
-        if (ass_top_margin)
-            blank(vf->dmpi, 0, ass_top_margin);
-        if (ass_bottom_margin)
-            blank(vf->dmpi, vf->priv->outh - ass_bottom_margin, vf->priv->outh);
+        if (tmargin)
+            blank(vf->dmpi, 0, tmargin);
+        if (opts->ass_bottom_margin)
+            blank(vf->dmpi, vf->priv->outh - opts->ass_bottom_margin,
+                  vf->priv->outh);
         if (!(mpi->flags & MP_IMGFLAG_PLANAR))
             vf->dmpi->planes[1] = mpi->planes[1];             // passthrough rgb8 palette
         return 0;
@@ -195,26 +199,26 @@ static int prepare_image(struct vf_instance *vf, mp_image_t *mpi)
 
     // copy mpi->dmpi...
     if (mpi->flags & MP_IMGFLAG_PLANAR) {
-        memcpy_pic(vf->dmpi->planes[0] + ass_top_margin * vf->dmpi->stride[0],
+        memcpy_pic(vf->dmpi->planes[0] + tmargin * vf->dmpi->stride[0],
                    mpi->planes[0],
 		   mpi->w,
 		   mpi->h,
                    vf->dmpi->stride[0],
 		   mpi->stride[0]);
-        memcpy_pic(vf->dmpi->planes[1] + (ass_top_margin >> mpi->chroma_y_shift) * vf->dmpi->stride[1],
+        memcpy_pic(vf->dmpi->planes[1] + (tmargin >> mpi->chroma_y_shift) * vf->dmpi->stride[1],
                    mpi->planes[1],
 		   mpi->w >> mpi->chroma_x_shift,
 		   mpi->h >> mpi->chroma_y_shift,
                    vf->dmpi->stride[1],
 		   mpi->stride[1]);
-        memcpy_pic(vf->dmpi->planes[2] + (ass_top_margin >> mpi->chroma_y_shift) * vf->dmpi->stride[2],
+        memcpy_pic(vf->dmpi->planes[2] + (tmargin >> mpi->chroma_y_shift) * vf->dmpi->stride[2],
                    mpi->planes[2],
 		   mpi->w >> mpi->chroma_x_shift,
 		   mpi->h >> mpi->chroma_y_shift,
                    vf->dmpi->stride[2],
 		   mpi->stride[2]);
     } else {
-        memcpy_pic(vf->dmpi->planes[0] + ass_top_margin * vf->dmpi->stride[0],
+        memcpy_pic(vf->dmpi->planes[0] + tmargin * vf->dmpi->stride[0],
                    mpi->planes[0],
 		   mpi->w * (vf->dmpi->bpp / 8),
 		   mpi->h,
@@ -222,10 +226,11 @@ static int prepare_image(struct vf_instance *vf, mp_image_t *mpi)
 		   mpi->stride[0]);
         vf->dmpi->planes[1] = mpi->planes[1];   // passthrough rgb8 palette
     }
-    if (ass_top_margin)
-        blank(vf->dmpi, 0, ass_top_margin);
-    if (ass_bottom_margin)
-        blank(vf->dmpi, vf->priv->outh - ass_bottom_margin, vf->priv->outh);
+    if (tmargin)
+        blank(vf->dmpi, 0, tmargin);
+    if (opts->ass_bottom_margin)
+        blank(vf->dmpi, vf->priv->outh - opts->ass_bottom_margin,
+              vf->priv->outh);
     return 0;
 }
 

@@ -92,8 +92,18 @@ typedef struct MPOpts {
     char **sub_paths;
     int sub_auto;
     int ass_enabled;
+    float ass_font_scale;
+    float ass_line_spacing;
+    int ass_top_margin;
+    int ass_bottom_margin;
+    int ass_use_margins;
     int ass_vsfilter_aspect_compat;
+    int use_embedded_fonts;
     char **ass_force_style_list;
+    char *ass_color;
+    char *ass_border_color;
+    char *ass_styles_file;
+    int ass_hinting;
     struct lavc_param {
         int workaround_bugs;
         int error_resilience;
