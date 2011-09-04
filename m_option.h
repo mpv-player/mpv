@@ -486,6 +486,11 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPTION_PATH_SEPARATOR ':'
 #endif
 
+// The code will interpret arguments different from 1 as disabled, thus
+// CONFIG_FOO etc mean disabled if no such macro is defined.
+#define OPT_START_CONDITIONAL(enable, featurename) OPT_START_CONDITIONAL_AFTERMACROEVAL(enable, featurename)
+#define OPT_START_CONDITIONAL_AFTERMACROEVAL(enable, featurename) {"conditional functionality: " #enable, .p = featurename}
+
 #define OPT_FLAG_ON(optname, varname, flags) {optname, NULL, &m_option_type_flag, flags, 0, 1, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_FLAG_OFF(optname, varname, flags) {optname, NULL, &m_option_type_flag, flags, 1, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_MAKE_FLAGS(optname, varname, flags) OPT_FLAG_ON(optname, varname, flags), OPT_FLAG_OFF("no" optname, varname, flags)

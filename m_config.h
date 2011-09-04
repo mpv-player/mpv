@@ -47,6 +47,8 @@ struct m_config_option {
     struct m_config_option *next;
     // Full name (ie option:subopt).
     char *name;
+    // Compiled without support for this option? If so set to name of feature
+    char *disabled_feature;
     // Option description.
     const struct m_option *opt;
     // Save slot stack.

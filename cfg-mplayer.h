@@ -691,7 +691,7 @@ const m_option_t common_opts[] = {
     {"subfont-outline", &subtitle_font_thickness, CONF_TYPE_FLOAT, CONF_RANGE, 0, 8, NULL},
     {"subfont-autoscale", &subtitle_autoscale, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
 #endif
-#ifdef CONFIG_ASS
+    OPT_START_CONDITIONAL(CONFIG_ASS, "libass"),
     OPT_MAKE_FLAGS("ass", ass_enabled, 0),
     OPT_FLOATRANGE("ass-font-scale", ass_font_scale, 0, 0, 100),
     OPT_FLOATRANGE("ass-line-spacing", ass_line_spacing, 0, -1000, 1000),
@@ -705,7 +705,7 @@ const m_option_t common_opts[] = {
     OPT_STRING("ass-border-color", ass_border_color, 0),
     OPT_STRING("ass-styles", ass_styles_file, 0),
     OPT_INTRANGE("ass-hinting", ass_hinting, 0, 0, 7),
-#endif
+    OPT_START_CONDITIONAL(1, ""),
 #ifdef CONFIG_FONTCONFIG
     {"fontconfig", &font_fontconfig, CONF_TYPE_FLAG, 0, -1, 1, NULL},
     {"nofontconfig", &font_fontconfig, CONF_TYPE_FLAG, 0, 1, -1, NULL},

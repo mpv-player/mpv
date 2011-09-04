@@ -169,7 +169,7 @@ static void m_option_set(const struct m_config *config,
 
 static void m_config_add_option(struct m_config *config,
                                 const struct m_option *arg,
-                                const char *prefix);
+                                const char *prefix, char *disabled_feature);
 
 struct m_config *m_config_new(void *optstruct,
                               int includefunc(struct m_option *conf,
@@ -205,7 +205,7 @@ struct m_config *m_config_new(void *optstruct,
             "include", includefunc, CONF_TYPE_FUNC_PARAM,
             CONF_NOSAVE, 0, 0, config
         };
-        m_config_add_option(config, p, NULL);
+        m_config_add_option(config, p, NULL, NULL);
     }
     config->optstruct = optstruct;
 
@@ -302,8 +302,30 @@ void m_config_pop(struct m_config *config)
     mp_msg(MSGT_CFGPARSER, MSGL_DBG2, "Config poped level=%d\n", config->lvl);
 }
 
+static void add_options(struct m_config *config, const struct m_option *defs,
+                        const char *prefix, char *disabled_feature)
+{
+    char *dis = disabled_feature;
+    const char marker[] = "conditional functionality: ";
+    for (int i = 0; defs[i].name; i++) {
+        if (!strncmp(defs[i].name, marker, strlen(marker))) {
+            // If a subconfig entry itself is disabled, everything
+            // under it is already disabled for the same reason.
+            if (!disabled_feature) {
+                if (!strcmp(defs[i].name + strlen(marker), "1"))
+                    dis = NULL;
+                else
+                    dis = defs[i].p;
+            }
+            continue;
+        }
+        m_config_add_option(config, defs + i, prefix, dis);
+    }
+}
+
 static void m_config_add_option(struct m_config *config,
-                                const struct m_option *arg, const char *prefix)
+                                const struct m_option *arg, const char *prefix,
+                                char *disabled_feature)
 {
     struct m_config_option *co;
     struct m_config_save_slot *sl;
@@ -316,6 +338,7 @@ static void m_config_add_option(struct m_config *config,
     co = talloc_zero_size(config,
                           sizeof(struct m_config_option) + arg->type->size);
     co->opt = arg;
+    co->disabled_feature = disabled_feature;
 
     // Fill in the full name
     if (prefix && *prefix)
@@ -325,11 +348,7 @@ static void m_config_add_option(struct m_config *config,
 
     // Option with children -> add them
     if (arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
-        const struct m_option *ol = arg->p;
-        int i;
-        co->slots = NULL;
-        for (i = 0; ol[i].name != NULL; i++)
-            m_config_add_option(config, &ol[i], co->name);
+        add_options(config, arg->p, co->name, disabled_feature);
     } else {
         struct m_config_option *i;
         // Check if there is already an option pointing to this address
@@ -374,14 +393,11 @@ static void m_config_add_option(struct m_config *config,
 int m_config_register_options(struct m_config *config,
                               const struct m_option *args)
 {
-    int i;
-
     assert(config != NULL);
     assert(config->lvl > 0);
     assert(args != NULL);
 
-    for (i = 0; args[i].name != NULL; i++)
-        m_config_add_option(config, &args[i], NULL);
+    add_options(config, args, NULL, NULL);
 
     return 1;
 }
@@ -418,6 +434,13 @@ static int m_config_parse_option(const struct m_config *config,
     co = m_config_get_co(config, name);
     if (!co)
         return M_OPT_UNKNOWN;
+    if (co->disabled_feature) {
+        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                "Option \"%.*s\" is not available in this version of mplayer2, "
+                "because it has been compiled with feature \"%s\" disabled.\n",
+                BSTR_P(name), co->disabled_feature);
+        return M_OPT_UNKNOWN;
+    }
 
     // This is the only mandatory function
     assert(co->opt->type->parse);
