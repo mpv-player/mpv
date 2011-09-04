@@ -3817,7 +3817,7 @@ static void run_playloop(struct MPContext *mpctx)
     }
 
     // handle -sstep
-    if (step_sec > 0 && !mpctx->paused) {
+    if (step_sec > 0 && !mpctx->paused && !mpctx->restart_playback) {
         mpctx->osd_function = OSD_FFW;
         queue_seek(mpctx, MPSEEK_RELATIVE, step_sec, 0);
     }
