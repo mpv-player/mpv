@@ -119,4 +119,5 @@ int mp_input_lirc_close(int fd)
   cmd_buf = NULL;
   lirc_freeconfig(lirc_config);
   lirc_deinit();
+  return 0;
 }

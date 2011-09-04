@@ -415,7 +415,7 @@ int mp_input_ar_read(void *ctx, int fd)
 int mp_input_ar_close(int fd)
 {
     if (initialized == 0)
-        return;
+        return 0;
 
     // Close the device.
     (*hidDeviceInterface)->close(hidDeviceInterface);
@@ -431,6 +431,7 @@ int mp_input_ar_close(int fd)
     (*hidDeviceInterface)->Release(hidDeviceInterface);
 
     initialized = 0;
+    return 0;
 }
 
 #ifdef TEST
