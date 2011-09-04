@@ -16,9 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/// \file
-/// \ingroup Properties Command2Property OSDMsgStack
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -1798,9 +1795,6 @@ static void update_osd_msg(struct MPContext *mpctx)
     }
 }
 
-///@}
-// OSDMsgStack
-
 
 void reinit_audio_chain(struct MPContext *mpctx)
 {
@@ -1877,10 +1871,6 @@ init_error:
     mpctx->sh_audio = mpctx->d_audio->sh = NULL; // -> nosound
     mpctx->d_audio->id = -2;
 }
-
-
-///@}
-// Command2Property
 
 
 // Return pts value corresponding to the end point of audio written to the
@@ -3540,7 +3530,7 @@ static void run_playloop(struct MPContext *mpctx)
         reinit_audio_chain(mpctx);
     }
 
-/*========================== PLAY AUDIO ============================*/
+    /*========================== PLAY AUDIO ============================*/
 
     if (!mpctx->sh_video)
         mpctx->restart_playback = false;
@@ -3604,7 +3594,7 @@ static void run_playloop(struct MPContext *mpctx)
         }
     } else {
 
-/*========================== PLAY VIDEO ============================*/
+        /*========================== PLAY VIDEO ============================*/
 
         vo_pts = mpctx->sh_video->timer * 90000.0;
         vo_fps = mpctx->sh_video->fps;
@@ -3641,7 +3631,7 @@ static void run_playloop(struct MPContext *mpctx)
             }
         }
 
-// ==========================================================================
+        // ================================================================
 
         current_module = "vo_check_events";
         vo_check_events(mpctx->video_out);
@@ -3666,7 +3656,7 @@ static void run_playloop(struct MPContext *mpctx)
                                                            full_audio_buffers,
                                                            &aq_sleep_time);
 
-//====================== FLIP PAGE (VIDEO BLT): =========================
+        //=================== FLIP PAGE (VIDEO BLT): ======================
 
         current_module = "flip_page";
         if (!frame_time_remaining && blit_frame) {
@@ -3731,9 +3721,6 @@ static void run_playloop(struct MPContext *mpctx)
         } else
             print_status(mpctx, MP_NOPTS_VALUE, false);
 
-//============================ Auto QUALITY ============================
-
-/*Output quality adjustments:*/
         if (opts->auto_quality > 0) {
             current_module = "autoq";
             if (output_quality < opts->auto_quality && aq_sleep_time > 0)
@@ -3758,7 +3745,7 @@ static void run_playloop(struct MPContext *mpctx)
             }
         }
 
-// FIXME: add size based support for -endpos
+        // FIXME: add size based support for -endpos
         if (end_at.type == END_AT_TIME &&
             !frame_time_remaining && end_at.pos <= mpctx->sh_video->pts)
             mpctx->stop_play = PT_NEXT_ENTRY;
@@ -3789,7 +3776,7 @@ static void run_playloop(struct MPContext *mpctx)
     }
 #endif
 
-//================= Keyboard events, SEEKing ====================
+    //================= Keyboard events, SEEKing ====================
 
     current_module = "key_events";
 
@@ -3829,7 +3816,7 @@ static void run_playloop(struct MPContext *mpctx)
         pause_loop(mpctx);
     }
 
-// handle -sstep
+    // handle -sstep
     if (step_sec > 0 && !mpctx->paused) {
         mpctx->osd_function = OSD_FFW;
         queue_seek(mpctx, MPSEEK_RELATIVE, step_sec, 0);
@@ -4384,7 +4371,7 @@ play_next_file:
             mpctx->filename = play_tree_iter_get_file(mpctx->playtree_iter, 1);
         }
     }
-//---------------------------------------------------------------------------
+
 #ifdef CONFIG_ASS
     ass_set_style_overrides(mpctx->ass_library, opts->ass_force_style_list);
 #endif
