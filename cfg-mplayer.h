@@ -605,7 +605,7 @@ const m_option_t common_opts[] = {
     // postprocessing:
 #ifdef CONFIG_FFMPEG
     {"pp", &divx_quality, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"pphelp", &pp_help, CONF_TYPE_PRINT_INDIRECT, CONF_NOCFG, 0, 0, NULL},
+    {"pphelp", &pp_help, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 
     // scaling:
