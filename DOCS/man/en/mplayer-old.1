@@ -3345,8 +3345,9 @@ Specify the screen width for video output drivers which
 do not know the screen resolution like fbdev, x11 and TV-out.
 .
 .TP
-.B \-stop\-xscreensaver (X11 only)
-Turns off xscreensaver at startup and turns it on again on exit.
+.B \-(no)stop\-xscreensaver (X11 only)
+Turns off xscreensaver at startup and turns it on again on exit
+(default: enabled).
 If your screensaver supports neither the XSS nor XResetScreenSaver
 API please use \-heartbeat\-cmd instead.
 .

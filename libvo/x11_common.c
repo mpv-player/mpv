@@ -85,7 +85,7 @@
 
 int fs_layer = WIN_LAYER_ABOVE_DOCK;
 
-int stop_xscreensaver = 0;
+int stop_xscreensaver = 1;
 
 static int dpms_disabled = 0;
 
