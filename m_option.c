@@ -286,7 +286,7 @@ static int parse_choice(const struct m_option *opt, struct bstr name,
 
     struct m_opt_choice_alternatives *alt;
     for (alt = opt->priv; alt->name; alt++)
-        if (!bstrcmp0(param, alt->name))
+        if (!bstrcasecmp0(param, alt->name))
             break;
     if (!alt->name) {
         mp_msg(MSGT_CFGPARSER, MSGL_ERR,
