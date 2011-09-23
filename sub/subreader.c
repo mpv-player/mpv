@@ -1558,7 +1558,10 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
 	if ((sub!=ERR) && sub_utf8 == 2) sub=subcp_recode(sub);
 #endif
 #ifdef CONFIG_FRIBIDI
-	if (sub!=ERR) sub=sub_fribidi(sub,sub_utf8,0);
+        /* Libass has its own BiDi handling now, and running this before
+         * giving the subtitle to libass would only break things. */
+	if (sub != ERR && !opts->ass_enabled)
+            sub = sub_fribidi(sub, sub_utf8, 0);
 #endif
 	if ( sub == ERR )
 	 {
