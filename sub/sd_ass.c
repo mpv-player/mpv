@@ -121,6 +121,7 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
     ASS_Event *event = track->events + eid;
     event->Start = ipts;
     event->Duration = iduration;
+    event->Style = track->default_style;
     event->Text = strdup(buf);
 }
 
