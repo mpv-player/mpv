@@ -1270,12 +1270,11 @@ static void uninit(struct vo *vo)
     p->gl = NULL;
 }
 
-static int preinit_internal(struct vo *vo, const char *arg, int allow_sw)
+static int preinit_internal(struct vo *vo, const char *arg, int allow_sw,
+                            enum MPGLType gltype)
 {
     struct gl_priv *p = talloc_zero(vo, struct gl_priv);
     vo->priv = p;
-
-    enum MPGLType gltype = GLTYPE_AUTO;
 
     *p = (struct gl_priv) {
         .many_fmts = 1,
@@ -1412,6 +1411,14 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw)
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;
+
+    if (p->glctx->type == GLTYPE_SDL && p->use_yuv == -1) {
+        // Apparently it's not possible to implement VOFLAG_HIDDEN on SDL 1.2,
+        // so don't do autodetection. Use a sufficiently useful and safe YUV
+        // conversion mode.
+        p->use_yuv = YUV_CONVERSION_FRAGMENT;
+    }
+
     if (p->use_yuv == -1 || !allow_sw) {
         if (create_window(vo, 320, 200, VOFLAG_HIDDEN, NULL) < 0)
             goto err_out;
@@ -1444,12 +1451,7 @@ err_out:
 
 static int preinit(struct vo *vo, const char *arg)
 {
-    return preinit_internal(vo, arg, 1);
-}
-
-static int preinit_nosw(struct vo *vo, const char *arg)
-{
-    return preinit_internal(vo, arg, 0);
+    return preinit_internal(vo, arg, 1, GLTYPE_AUTO);
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
@@ -1564,6 +1566,11 @@ const struct vo_driver video_out_gl = {
     .uninit = uninit,
 };
 
+static int preinit_nosw(struct vo *vo, const char *arg)
+{
+    return preinit_internal(vo, arg, 0, GLTYPE_AUTO);
+}
+
 const struct vo_driver video_out_gl_nosw =
 {
     .is_new = true,
@@ -1582,3 +1589,28 @@ const struct vo_driver video_out_gl_nosw =
     .check_events = check_events,
     .uninit = uninit,
 };
+
+#ifdef CONFIG_GL_SDL
+static int preinit_sdl(struct vo *vo, const char *arg)
+{
+    return preinit_internal(vo, arg, 1, GLTYPE_SDL);
+}
+
+const struct vo_driver video_out_gl_sdl = {
+    .is_new = true,
+    .info = &(const vo_info_t) {
+        "OpenGL with SDL",
+        "gl_sdl",
+        "Reimar Doeffinger <Reimar.Doeffinger@gmx.de>",
+        ""
+    },
+    .preinit = preinit_sdl,
+    .config = config,
+    .control = control,
+    .draw_slice = draw_slice,
+    .draw_osd = draw_osd,
+    .flip_page = flip_page,
+    .check_events = check_events,
+    .uninit = uninit,
+};
+#endif

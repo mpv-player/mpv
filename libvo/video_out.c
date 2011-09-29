@@ -84,6 +84,7 @@ extern struct vo_driver video_out_vdpau;
 extern struct vo_driver video_out_xv;
 extern struct vo_driver video_out_gl_nosw;
 extern struct vo_driver video_out_gl;
+extern struct vo_driver video_out_gl_sdl;
 extern struct vo_driver video_out_dga;
 extern struct vo_driver video_out_sdl;
 extern struct vo_driver video_out_3dfx;
@@ -179,6 +180,9 @@ const struct vo_driver *video_out_drivers[] =
 #endif
 #ifdef CONFIG_GL
         &video_out_gl,
+#endif
+#ifdef CONFIG_GL_SDL
+        &video_out_gl_sdl,
 #endif
 #ifdef CONFIG_DGA
         &video_out_dga,
