@@ -100,7 +100,6 @@ struct gl_priv {
     int eosdtexCnt;
     int osd_color;
 
-    int use_aspect;
     int use_ycbcr;
     int use_yuv;
     struct mp_csp_details colorspace;
@@ -175,7 +174,7 @@ static void resize(struct vo *vo, int x, int y)
     gl->MatrixMode(GL_PROJECTION);
     gl->LoadIdentity();
     p->ass_border_x = p->ass_border_y = 0;
-    if (aspect_scaling() && p->use_aspect) {
+    if (aspect_scaling()) {
         int new_w, new_h;
         GLdouble scale_x, scale_y;
         aspect(vo, &new_w, &new_h, A_WINZOOM);
@@ -954,7 +953,7 @@ static void flip_page(struct vo *vo)
         if (p->use_glFinish)
             gl->Finish();
         p->glctx->swapGlBuffers(p->glctx);
-        if (aspect_scaling() && p->use_aspect)
+        if (aspect_scaling())
             gl->Clear(GL_COLOR_BUFFER_BIT);
     } else {
         do_render(vo);
@@ -1281,7 +1280,6 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw)
     *p = (struct gl_priv) {
         .many_fmts = 1,
         .use_osd = -1,
-        .use_aspect = 1,
         .use_yuv = -1,
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
         .filter_strength = 0.5,
@@ -1298,18 +1296,16 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw)
     //essentially unused; for legacy warnings only
     int user_colorspace = 0;
     int levelconv = -1;
+    int aspect = -1;
 
     const opt_t subopts[] = {
         {"manyfmts",     OPT_ARG_BOOL, &p->many_fmts,    NULL},
         {"osd",          OPT_ARG_BOOL, &p->use_osd,      NULL},
         {"scaled-osd",   OPT_ARG_BOOL, &p->scaled_osd,   NULL},
-        {"aspect",       OPT_ARG_BOOL, &p->use_aspect,   NULL},
         {"ycbcr",        OPT_ARG_BOOL, &p->use_ycbcr,    NULL},
         {"slice-height", OPT_ARG_INT,  &p->slice_height, int_non_neg},
         {"rectangle",    OPT_ARG_INT,  &p->use_rectangle,int_non_neg},
         {"yuv",          OPT_ARG_INT,  &p->use_yuv,      int_non_neg},
-        {"colorspace",   OPT_ARG_INT,  &user_colorspace, NULL},
-        {"levelconv",    OPT_ARG_INT,  &levelconv,       NULL},
         {"lscale",       OPT_ARG_INT,  &p->lscale,       int_non_neg},
         {"cscale",       OPT_ARG_INT,  &p->cscale,       int_non_neg},
         {"filter-strength", OPT_ARG_FLOAT, &p->filter_strength, NULL},
@@ -1325,6 +1321,11 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw)
         {"mipmapgen",    OPT_ARG_BOOL, &p->mipmap_gen,   NULL},
         {"osdcolor",     OPT_ARG_INT,  &p->osd_color,    NULL},
         {"stereo",       OPT_ARG_INT,  &p->stereo_mode,  NULL},
+        // Removed options.
+        // They are only parsed to notify the user about the replacements.
+        {"aspect",       OPT_ARG_BOOL, &aspect,          NULL},
+        {"colorspace",   OPT_ARG_INT,  &user_colorspace, NULL},
+        {"levelconv",    OPT_ARG_INT,  &levelconv,       NULL},
         {NULL}
     };
 
@@ -1341,8 +1342,6 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw)
                "    Do not use OpenGL OSD code\n"
                "  scaled-osd\n"
                "    Render OSD at movie resolution and scale it\n"
-               "  noaspect\n"
-               "    Do not do aspect scaling\n"
                "  rectangle=<0,1,2>\n"
                "    0: use power-of-two textures\n"
                "    1: use texture_rectangle\n"
@@ -1402,6 +1401,11 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw)
         mp_msg(MSGT_VO, MSGL_ERR, "[gl] \"colorspace\" and \"levelconv\" "
                "suboptions have been removed. Use options --colormatrix and"
                " --colormatrix-input-range/--colormatrix-output-range instead.\n");
+        return -1;
+    }
+    if (aspect != -1) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[gl] \"noaspect\" suboption has been "
+               "removed. Use --noaspect instead.\n");
         return -1;
     }
     p->glctx = init_mpglcontext(gltype, vo);
@@ -1496,12 +1500,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         resize(vo, vo->dwidth, vo->dheight);
         return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
-        if (!p->use_aspect)
-            return VO_NOTIMPL;
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
-        if (!p->use_aspect)
-            return VO_NOTIMPL;
         resize(vo, vo->dwidth, vo->dheight);
         return VO_TRUE;
     case VOCTRL_GET_EQUALIZER:
