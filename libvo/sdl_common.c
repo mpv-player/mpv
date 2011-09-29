@@ -25,11 +25,13 @@
 #include "input/keycodes.h"
 #include "input/input.h"
 #include "video_out.h"
+#include "aspect.h"
 
 static int old_w;
 static int old_h;
 static int mode_flags;
 static int reinit;
+static int screen_w, screen_h;
 
 int vo_sdl_init(void)
 {
@@ -38,6 +40,12 @@ int vo_sdl_init(void)
     if (!SDL_WasInit(SDL_INIT_VIDEO) &&
         SDL_Init(SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE) < 0)
         return 0;
+
+    if (screen_w == 0) {
+        const SDL_VideoInfo *vi = SDL_GetVideoInfo();
+        screen_w = vi->current_w;
+        screen_h = vi->current_h;
+    }
 
     // Setup Keyrepeats (500/30 are defaults)
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, 100 /*SDL_DEFAULT_REPEAT_INTERVAL*/);
@@ -57,6 +65,15 @@ void vo_sdl_uninit(void)
 {
     if (SDL_WasInit(SDL_INIT_VIDEO))
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
+}
+
+void sdl_update_xinerama_info(void)
+{
+    if (vo_screenwidth <= 0 || vo_screenheight <= 0) {
+        vo_screenwidth  = screen_w;
+        vo_screenheight = screen_h;
+    }
+    aspect_save_screenres(vo_screenwidth, vo_screenheight);
 }
 
 void vo_sdl_fullscreen(void)

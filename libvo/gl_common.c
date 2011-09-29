@@ -1961,6 +1961,7 @@ static int sdl_check_events(struct vo *vo)
     return res;
 }
 
+static void new_sdl_update_xinerama_info(struct vo *vo) { sdl_update_xinerama_info(); }
 static void new_vo_sdl_fullscreen(struct vo *vo) { vo_sdl_fullscreen(); }
 
 #endif
@@ -2048,6 +2049,7 @@ MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
         SDL_Init(SDL_INIT_VIDEO);
         ctx->setGlWindow = setGlWindow_sdl;
         ctx->swapGlBuffers = swapGlBuffers_sdl;
+        ctx->update_xinerama_info = new_sdl_update_xinerama_info;
         ctx->check_events = sdl_check_events;
         ctx->fullscreen = new_vo_sdl_fullscreen;
         //the SDL code is hardcoded to use the deprecated vo API

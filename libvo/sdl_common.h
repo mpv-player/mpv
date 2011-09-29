@@ -30,6 +30,7 @@
 
 int vo_sdl_init(void);
 void vo_sdl_uninit(void);
+void sdl_update_xinerama_info(void);
 void vo_sdl_fullscreen(void);
 int sdl_set_mode(int bpp, uint32_t flags);
 int sdl_default_handle_event(SDL_Event *event);
