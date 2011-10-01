@@ -26,11 +26,14 @@
 #include "av_log.h"
 #include "config.h"
 #include "mp_msg.h"
+#include <libavutil/avutil.h>
 #include <libavutil/log.h>
 
 #ifdef CONFIG_FFMPEG
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
+#include <libpostproc/postprocess.h>
 #endif
 
 static int av_log_level_to_mp_level(int av_level)
@@ -117,5 +120,29 @@ void init_libav(void)
     avcodec_register_all();
 
     av_register_all();
+#endif
+}
+
+#define V(x) (x)>>16, (x)>>8 & 255, (x) & 255
+static void print_version(char *name, unsigned buildv, unsigned runv)
+{
+
+    if (buildv == runv)
+        mp_msg(MSGT_CPLAYER, MSGL_V, "Compiled against %s version %d.%d.%d\n",
+               name, V(buildv));
+    else
+        mp_msg(MSGT_CPLAYER, MSGL_V, "Compiled against %s version %d.%d.%d "
+               "(runtime %d.%d.%d)\n", name, V(buildv), V(runv));
+}
+#undef V
+
+void print_libav_versions(void)
+{
+    print_version("libavutil", LIBAVUTIL_VERSION_INT, avutil_version());
+#ifdef CONFIG_FFMPEG
+    print_version("libavcodec", LIBAVCODEC_VERSION_INT, avcodec_version());
+    print_version("libavformat", LIBAVFORMAT_VERSION_INT, avformat_version());
+    print_version("libswscale", LIBSWSCALE_VERSION_INT, swscale_version());
+    print_version("libpostproc", LIBPOSTPROC_VERSION_INT, postproc_version());
 #endif
 }

@@ -3917,6 +3917,7 @@ static void print_version(const char *name)
     mp_msg(MSGT_CPLAYER, MSGL_V, "\n");
 #endif /* CONFIG_RUNTIME_CPUDETECT */
 #endif /* ARCH_X86 */
+    print_libav_versions();
 }
 
 #ifdef PTW32_STATIC_LIB
