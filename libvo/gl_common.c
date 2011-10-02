@@ -1664,6 +1664,16 @@ void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
 
 #ifdef CONFIG_GL_WIN32
 #include "w32_common.h"
+
+static int create_window_w32(struct MPGLContext *ctx, uint32_t d_width,
+                             uint32_t d_height, uint32_t flags,
+                             const char *title)
+{
+    if (!vo_w32_config(d_width, d_height, flags))
+        return -1;
+    return 0;
+}
+
 /**
  * \brief little helper since wglGetProcAddress definition does not fit our
  *        getProcAddress
@@ -1771,6 +1781,46 @@ static void new_w32_update_xinerama_info(struct vo *vo) { w32_update_xinerama_in
 #endif
 #ifdef CONFIG_GL_X11
 #include "x11_common.h"
+
+static int create_window_x11(struct MPGLContext *ctx, uint32_t d_width,
+                             uint32_t d_height, uint32_t flags,
+                             const char *title)
+{
+    struct vo *vo = ctx->vo;
+
+    static int default_glx_attribs[] = {
+        GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1,
+        GLX_DOUBLEBUFFER, None
+    };
+    static int stereo_glx_attribs[]  = {
+        GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1,
+        GLX_DOUBLEBUFFER, GLX_STEREO, None
+    };
+    XVisualInfo *vinfo = NULL;
+    if (flags & VOFLAG_STEREO) {
+        vinfo = glXChooseVisual(vo->x11->display, vo->x11->screen,
+                                stereo_glx_attribs);
+        if (!vinfo)
+            mp_msg(MSGT_VO, MSGL_ERR, "[gl] Could not find a stereo visual,"
+                    " 3D will probably not work!\n");
+    }
+    if (!vinfo)
+        vinfo = glXChooseVisual(vo->x11->display, vo->x11->screen,
+                                default_glx_attribs);
+    if (!vinfo) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
+        return -1;
+    }
+    mp_msg(MSGT_VO, MSGL_V, "[gl] GLX chose visual with ID 0x%x\n",
+            (int)vinfo->visualid);
+
+    Colormap colormap = XCreateColormap(vo->x11->display, vo->x11->rootwin,
+                                        vinfo->visual, AllocNone);
+    vo_x11_create_vo_window(vo, vinfo, vo->dx, vo->dy, d_width, d_height,
+                            flags, colormap, "gl", title);
+
+    return 0;
+}
 
 /**
  * \brief Returns the XVisualInfo associated with Window win.
@@ -1929,6 +1979,16 @@ static void swapGlBuffers_x11(MPGLContext *ctx)
 #ifdef CONFIG_GL_SDL
 #include "sdl_common.h"
 
+static int create_window_sdl(struct MPGLContext *ctx, uint32_t d_width,
+                             uint32_t d_height, uint32_t flags,
+                             const char *title)
+{
+    SDL_WM_SetCaption(title, NULL);
+    ctx->vo->dwidth  = d_width;
+    ctx->vo->dheight = d_height;
+    return 0;
+}
+
 static void swapGlBuffers_sdl(MPGLContext *ctx)
 {
     SDL_GL_SwapBuffers();
@@ -1946,6 +2006,10 @@ static int setGlWindow_sdl(MPGLContext *ctx)
     SDL_GL_LoadLibrary(NULL);
     getFunctions(ctx->gl, sdlgpa, NULL);
     return SET_WINDOW_OK;
+}
+
+static void releaseGlContext_sdl(MPGLContext *ctx)
+{
 }
 
 static int sdl_check_events(struct vo *vo)
@@ -1966,33 +2030,6 @@ static void new_vo_sdl_fullscreen(struct vo *vo) { vo_sdl_fullscreen(); }
 
 #endif
 
-static int setGlWindow_dummy(MPGLContext *ctx)
-{
-    getFunctions(ctx->gl, NULL, NULL);
-    return SET_WINDOW_OK;
-}
-
-static void releaseGlContext_dummy(MPGLContext *ctx)
-{
-}
-
-static int dummy_check_events(struct vo *vo)
-{
-    return 0;
-}
-
-static void dummy_update_xinerama_info(struct vo *vo)
-{
-    struct MPOpts *opts = vo->opts;
-    if (opts->vo_screenwidth <= 0 || opts->vo_screenheight <= 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "You must specify the screen dimensions "
-               "with -screenw and -screenh\n");
-        opts->vo_screenwidth  = 1280;
-        opts->vo_screenheight = 768;
-    }
-    aspect_save_screenres(vo, opts->vo_screenwidth, opts->vo_screenheight);
-}
-
 MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
 {
     MPGLContext *ctx;
@@ -2007,15 +2044,12 @@ MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
     }
     ctx = talloc_zero(NULL, MPGLContext);
     ctx->gl = talloc_zero(ctx, GL);
-    ctx->setGlWindow = setGlWindow_dummy;
-    ctx->releaseGlContext = releaseGlContext_dummy;
-    ctx->update_xinerama_info = dummy_update_xinerama_info;
-    ctx->check_events = dummy_check_events;
     ctx->type = type;
     ctx->vo = vo;
     switch (ctx->type) {
 #ifdef CONFIG_GL_WIN32
     case GLTYPE_W32:
+        ctx->create_window = create_window_w32;
         ctx->setGlWindow = setGlWindow_w32;
         ctx->releaseGlContext = releaseGlContext_w32;
         ctx->swapGlBuffers = swapGlBuffers_w32;
@@ -2032,6 +2066,7 @@ MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
 #endif
 #ifdef CONFIG_GL_X11
     case GLTYPE_X11:
+        ctx->create_window = create_window_x11;
         ctx->setGlWindow = setGlWindow_x11;
         ctx->releaseGlContext = releaseGlContext_x11;
         ctx->swapGlBuffers = swapGlBuffers_x11;
@@ -2046,8 +2081,9 @@ MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
 #endif
 #ifdef CONFIG_GL_SDL
     case GLTYPE_SDL:
-        SDL_Init(SDL_INIT_VIDEO);
+        ctx->create_window = create_window_sdl;
         ctx->setGlWindow = setGlWindow_sdl;
+        ctx->releaseGlContext = releaseGlContext_sdl;
         ctx->swapGlBuffers = swapGlBuffers_sdl;
         ctx->update_xinerama_info = new_sdl_update_xinerama_info;
         ctx->check_events = sdl_check_events;

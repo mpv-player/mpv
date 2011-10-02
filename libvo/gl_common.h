@@ -431,6 +431,8 @@ typedef struct MPGLContext {
         GLXContext x11;
 #endif
     } context;
+    int (*create_window)(struct MPGLContext *ctx, uint32_t d_width,
+                         uint32_t d_height, uint32_t flags, const char *title);
     int (*setGlWindow)(struct MPGLContext *);
     void (*releaseGlContext)(struct MPGLContext *);
     void (*swapGlBuffers)(struct MPGLContext *);

@@ -39,23 +39,10 @@
 #include "sub/font_load.h"
 #include "sub/sub.h"
 
-#ifdef CONFIG_GL_X11
-#include "x11_common.h"
-#endif
-
 #include "gl_common.h"
 #include "aspect.h"
 #include "fastmemcpy.h"
 #include "sub/ass_mp.h"
-
-#ifdef CONFIG_GL_SDL
-#ifdef CONFIG_SDL_SDL_H
-#include <SDL/SDL.h>
-#else
-#include <SDL.h>
-#endif
-#endif
-
 
 static int preinit_nosw(struct vo *vo, const char *arg);
 
@@ -670,52 +657,8 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
 
     if (p->stereo_mode == GL_3D_QUADBUFFER)
         flags |= VOFLAG_STEREO;
-#ifdef CONFIG_GL_WIN32
-    if (p->glctx->type == GLTYPE_W32 && !vo_w32_config(d_width, d_height, flags))
-        return -1;
-#endif
-#ifdef CONFIG_GL_X11
-    if (p->glctx->type == GLTYPE_X11) {
-        static int default_glx_attribs[] = {
-            GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1,
-            GLX_DOUBLEBUFFER, None
-        };
-        static int stereo_glx_attribs[]  = {
-            GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1,
-            GLX_DOUBLEBUFFER, GLX_STEREO, None
-        };
-        XVisualInfo *vinfo = NULL;
-        if (p->stereo_mode == GL_3D_QUADBUFFER) {
-            vinfo = glXChooseVisual(vo->x11->display, vo->x11->screen,
-                                    stereo_glx_attribs);
-            if (!vinfo)
-                mp_msg(MSGT_VO, MSGL_ERR, "[gl] Could not find a stereo visual,"
-                       " 3D will probably not work!\n");
-        }
-        if (!vinfo)
-            vinfo = glXChooseVisual(vo->x11->display, vo->x11->screen,
-                                    default_glx_attribs);
-        if (!vinfo) {
-            mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
-            return -1;
-        }
-        mp_msg(MSGT_VO, MSGL_V, "[gl] GLX chose visual with ID 0x%x\n",
-               (int)vinfo->visualid);
 
-        Colormap colormap = XCreateColormap(vo->x11->display, vo->x11->rootwin,
-                                            vinfo->visual, AllocNone);
-        vo_x11_create_vo_window(vo, vinfo, vo->dx, vo->dy, d_width, d_height,
-                                flags, colormap, "gl", title);
-    }
-#endif
-#ifdef CONFIG_GL_SDL
-    if (p->glctx->type == GLTYPE_SDL) {
-        SDL_WM_SetCaption(title, NULL);
-        vo->dwidth  = d_width;
-        vo->dheight = d_height;
-    }
-#endif
-    return 0;
+    return p->glctx->create_window(p->glctx, d_width, d_height, flags, title);
 }
 
 static int config(struct vo *vo, uint32_t width, uint32_t height,
