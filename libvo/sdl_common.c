@@ -128,8 +128,26 @@ static const struct mp_keymap keysym_map[] = {
     {SDLK_KP6, KEY_KP6}, {SDLK_KP7, KEY_KP7}, {SDLK_KP8, KEY_KP8},
     {SDLK_KP9, KEY_KP9},
     {SDLK_KP_PERIOD, KEY_KPDEC}, {SDLK_KP_ENTER, KEY_KPENTER},
+    {SDLK_BACKSPACE, KEY_BACKSPACE},
+    {SDLK_INSERT, KEY_INSERT}, {SDLK_DELETE, KEY_DEL},
+    {SDLK_HOME, KEY_HOME}, {SDLK_END, KEY_END},
     {0, 0}
 };
+
+static int get_mod_state(void)
+{
+    SDLMod mod = SDL_GetModState();
+    int modifiers = 0;
+    if (mod & KMOD_SHIFT)
+        modifiers |= KEY_MODIFIER_SHIFT;
+    if (mod & KMOD_CTRL)
+        modifiers |= KEY_MODIFIER_CTRL;
+    if (mod & KMOD_ALT)
+        modifiers |= KEY_MODIFIER_ALT;
+    if (mod & KMOD_META)
+        modifiers |= KEY_MODIFIER_META;
+    return modifiers;
+}
 
 int sdl_default_handle_event(SDL_Event *event)
 {
@@ -154,23 +172,39 @@ int sdl_default_handle_event(SDL_Event *event)
 
     case SDL_MOUSEBUTTONDOWN:
         if (!vo_nomouse_input)
-            mplayer_put_key((MOUSE_BTN0 + event->button.button - 1) | MP_KEY_DOWN);
+            mplayer_put_key((MOUSE_BTN0 + event->button.button - 1)
+                            | MP_KEY_DOWN | get_mod_state());
         break;
 
     case SDL_MOUSEBUTTONUP:
         if (!vo_nomouse_input)
-            mplayer_put_key(MOUSE_BTN0 + event->button.button - 1);
+            mplayer_put_key((MOUSE_BTN0 + event->button.button - 1)
+                            | get_mod_state());
         break;
 
-    case SDL_KEYDOWN:
-        mpkey = lookup_keymap_table(keysym_map, event->key.keysym.sym);
-        if (!mpkey &&
-            event->key.keysym.unicode > 0 &&
-            event->key.keysym.unicode < 128)
-            mpkey = event->key.keysym.unicode;
+    case SDL_KEYDOWN: {
+        int mods = get_mod_state();
+        int sym = event->key.keysym.sym;
+        mpkey = lookup_keymap_table(keysym_map, sym);
+        if (!mpkey) {
+            int unicode = event->key.keysym.unicode;
+            if (unicode >= 32 && unicode < 128) {
+                mpkey = unicode;
+            } else {
+                // SDL translates CTRL+letter to a control code < 32
+                // Compensate for "unexpected" SDL behavior.
+                // Note that CTRL combined with any non-letter key works fine.
+                if (sym >= SDLK_a && sym <= SDLK_z) {
+                    mpkey = sym - SDLK_a + 'a';
+                    if (mods & KEY_MODIFIER_SHIFT)
+                        mpkey += 'A' - 'a';
+                }
+            }
+        }
         if (mpkey)
-            mplayer_put_key(mpkey);
+            mplayer_put_key(mpkey | mods);
         break;
+    }
 
     case SDL_QUIT:
         mplayer_put_key(KEY_CLOSE_WIN);
