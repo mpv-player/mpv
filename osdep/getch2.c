@@ -65,7 +65,7 @@
 static struct termios tio_orig;
 #endif
 static int getch2_len=0;
-static char getch2_buf[BUF_LEN];
+static unsigned char getch2_buf[BUF_LEN];
 
 int screen_width=80;
 int screen_height=24;
