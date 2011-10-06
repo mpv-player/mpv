@@ -66,6 +66,7 @@
 #endif
 #include "stream/stream_dvdnav.h"
 #include "m_struct.h"
+#include "screenshot.h"
 
 #include "mp_core.h"
 #include "mp_fifo.h"
@@ -3380,15 +3381,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_SCREENSHOT:
-        if (mpctx->video_out && mpctx->video_out->config_ok) {
-            mp_msg(MSGT_CPLAYER, MSGL_INFO, "sending VFCTRL_SCREENSHOT!\n");
-            if (CONTROL_OK !=
-                ((vf_instance_t *) sh_video->vfilter)->
-                control(sh_video->vfilter, VFCTRL_SCREENSHOT,
-                        &cmd->args[0].v.i))
-                mp_msg(MSGT_CPLAYER, MSGL_INFO,
-                       "failed (forgot -vf screenshot?)\n");
-        }
+        screenshot_request(mpctx, cmd->args[0].v.i);
         break;
 
     case MP_CMD_VF_CHANGE_RECTANGLE:

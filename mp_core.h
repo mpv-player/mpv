@@ -216,6 +216,8 @@ typedef struct MPContext {
     // playback rate. Used to avoid showing it multiple times.
     bool drop_message_shown;
 
+    struct screenshot_ctx *screenshot_ctx;
+
 #ifdef CONFIG_DVDNAV
     struct mp_image *nav_smpi; ///< last decoded dvdnav video image
     unsigned char *nav_buffer;   ///< last read dvdnav video frame
