@@ -955,14 +955,15 @@ static uint32_t get_image(mp_image_t *mpi) {
   }
   if (is_yuv) {
     // planar YUV
-    int xs, ys;
-    mp_get_chroma_shift(image_format, &xs, &ys, NULL);
+    int xs, ys, component_bits;
+    mp_get_chroma_shift(image_format, &xs, &ys, &component_bits);
+    int bp = (component_bits + 7) / 8;
     mpi->flags |= MP_IMGFLAG_COMMON_STRIDE | MP_IMGFLAG_COMMON_PLANE;
-    mpi->stride[0] = mpi->width;
+    mpi->stride[0] = mpi->width * bp;
     mpi->planes[1] = mpi->planes[0] + mpi->stride[0] * mpi->height;
-    mpi->stride[1] = mpi->width >> xs;
+    mpi->stride[1] = (mpi->width >> xs) * bp;
     mpi->planes[2] = mpi->planes[1] + mpi->stride[1] * (mpi->height >> ys);
-    mpi->stride[2] = mpi->width >> xs;
+    mpi->stride[2] = (mpi->width >> xs) * bp;
     if (ati_hack && !mesa_buffer) {
       mpi->flags &= ~MP_IMGFLAG_COMMON_PLANE;
       if (!gl_buffer_uv[0]) mpglGenBuffers(2, gl_buffer_uv);
@@ -1012,13 +1013,16 @@ static uint32_t draw_image(mp_image_t *mpi) {
   mpi2.flags = 0; mpi2.type = MP_IMGTYPE_TEMP;
   mpi2.width = mpi2.w; mpi2.height = mpi2.h;
   if (force_pbo && !(mpi->flags & MP_IMGFLAG_DIRECT) && !gl_bufferptr && get_image(&mpi2) == VO_TRUE) {
-    int bpp = is_yuv ? 8 : mpi->bpp;
-    int xs, ys;
-    mp_get_chroma_shift(image_format, &xs, &ys, NULL);
+    int bpp = mpi->bpp;
+    int xs, ys, component_bits;
+    mp_get_chroma_shift(image_format, &xs, &ys, &component_bits);
+    if (is_yuv)
+      bpp = component_bits + 7;
     memcpy_pic(mpi2.planes[0], mpi->planes[0], mpi->w * bpp / 8, mpi->h, mpi2.stride[0], mpi->stride[0]);
     if (is_yuv) {
-      memcpy_pic(mpi2.planes[1], mpi->planes[1], mpi->w >> xs, mpi->h >> ys, mpi2.stride[1], mpi->stride[1]);
-      memcpy_pic(mpi2.planes[2], mpi->planes[2], mpi->w >> xs, mpi->h >> ys, mpi2.stride[2], mpi->stride[2]);
+      int bp = (component_bits + 7) / 8;
+      memcpy_pic(mpi2.planes[1], mpi->planes[1], (mpi->w >> xs) * bp, mpi->h >> ys, mpi2.stride[1], mpi->stride[1]);
+      memcpy_pic(mpi2.planes[2], mpi->planes[2], (mpi->w >> xs) * bp, mpi->h >> ys, mpi2.stride[2], mpi->stride[2]);
     }
     if (ati_hack) { // since we have to do a full upload we need to clear the borders
       clear_border(mpi2.planes[0], mpi->w * bpp / 8, mpi2.stride[0], mpi->h, mpi2.height, 0);
