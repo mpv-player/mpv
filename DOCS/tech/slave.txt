@@ -177,10 +177,17 @@ get_video_codec
 get_video_resolution
     Print out the video resolution of the current file.
 
-screenshot <value>
+screenshot <each_frame> <full_window>
     Take a screenshot. Requires the screenshot filter to be loaded.
-        0 Take a single screenshot.
+    each_frame:
+        0 Take a single screenshot. (Default.)
         1 Start/stop taking screenshot of each frame.
+    full_window:
+        0 Save the video image, in its original resolution. Typically without
+          OSD or subtitles. (Default.)
+        1 Save the contents of the mplayer window. Typically with OSD and
+          subtitles. If not available (no VO support), this may act as if 0 was
+          passed.
 
 key_down_event <value>
     Inject <value> key code event into MPlayer.

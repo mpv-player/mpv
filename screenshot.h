@@ -25,9 +25,11 @@ struct MPContext;
 struct mp_image;
 
 // Request a taking & saving a screenshot of the currently displayed frame.
-// If each_frame is set, this toggles per-frame screenshots, exactly like the
-// screenshot slave command (MP_CMD_SCREENSHOT).
-void screenshot_request(struct MPContext *mpctx, bool each_frame);
+// each_frame: If set, this toggles per-frame screenshots, exactly like the
+//             screenshot slave command (MP_CMD_SCREENSHOT).
+// full_window: If set, save the actual output window contents.
+void screenshot_request(struct MPContext *mpctx, bool each_frame,
+                        bool full_window);
 
 // Save the screenshot contained in the image to disk.
 // The image can be in any format supported by libswscale.

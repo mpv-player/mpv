@@ -46,6 +46,7 @@
 #include "libvo/csputils.h"
 
 typedef struct screenshot_ctx {
+    int full_window;
     int each_frame;
     int using_vf_screenshot;
 
@@ -175,10 +176,11 @@ static void vf_screenshot_callback(void *pctx, struct mp_image *image)
     screenshot_ctx *ctx = screenshot_get_ctx(mpctx);
     screenshot_save(mpctx, image);
     if (ctx->each_frame)
-        screenshot_request(mpctx, 0);
+        screenshot_request(mpctx, 0, ctx->full_window);
 }
 
-void screenshot_request(struct MPContext *mpctx, bool each_frame)
+void screenshot_request(struct MPContext *mpctx, bool each_frame,
+                        bool full_window)
 {
     if (mpctx->video_out && mpctx->video_out->config_ok) {
         screenshot_ctx *ctx = screenshot_get_ctx(mpctx);
@@ -187,11 +189,12 @@ void screenshot_request(struct MPContext *mpctx, bool each_frame)
 
         if (each_frame) {
             ctx->each_frame = !ctx->each_frame;
+            ctx->full_window = full_window;
             if (!ctx->each_frame)
                 return;
         }
 
-        struct voctrl_screenshot_args args;
+        struct voctrl_screenshot_args args = { .full_window = full_window };
         if (vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &args) == true) {
             screenshot_save(mpctx, args.out_image);
             free_mp_image(args.out_image);
@@ -226,5 +229,5 @@ void screenshot_flip(struct MPContext *mpctx)
     if (ctx->using_vf_screenshot)
         return;
 
-    screenshot_request(mpctx, 0);
+    screenshot_request(mpctx, 0, ctx->full_window);
 }
