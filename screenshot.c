@@ -106,7 +106,7 @@ static int write_png(screenshot_ctx *ctx, struct mp_image *image)
     avctx->width = image->width;
     avctx->height = image->height;
     avctx->pix_fmt = PIX_FMT_RGB24;
-    avctx->compression_level = 0;
+    avctx->compression_level = ctx->mpctx->opts.screenshot_png_compression;
 
     size_t outbuffer_size = image->width * image->height * 3 * 2;
     outbuffer = malloc(outbuffer_size);

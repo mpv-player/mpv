@@ -933,6 +933,7 @@ const m_option_t mplayer_opts[]={
 #endif /* CONFIG_TV */
 
     OPT_INTRANGE("screenshot-jpeg-quality", screenshot_jpeg_quality, 0, 0, 100),
+    OPT_INTRANGE("screenshot-png-compression", screenshot_png_compression, 0, 0, 9),
     OPT_STRING("screenshot-filetype", screenshot_filetype, 0),
 
     OPT_FLAG_ON("list-properties", list_properties, CONF_GLOBAL),

@@ -39,6 +39,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .sub_id = -1,
         .extension_parsing = 1,
         .screenshot_jpeg_quality = 85,
+        .screenshot_png_compression = 7,
         .audio_output_channels = 2,
         .audio_output_format = -1,  // AF_FORMAT_UNKNOWN
         .playback_speed = 1.,

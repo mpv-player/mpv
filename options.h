@@ -83,6 +83,7 @@ typedef struct MPOpts {
     int extension_parsing;
 
     int screenshot_jpeg_quality;
+    int screenshot_png_compression;
     char *screenshot_filetype;
 
     int audio_output_channels;
