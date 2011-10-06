@@ -71,6 +71,7 @@ void glAdjustAlignment(GL *gl, int stride)
     else
         gl_alignment = 1;
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, gl_alignment);
+    gl->PixelStorei(GL_PACK_ALIGNMENT, gl_alignment);
 }
 
 struct gl_name_map_struct {
@@ -632,6 +633,24 @@ void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
     }
     if (y < y_max)
         gl->TexSubImage2D(target, 0, x, y, w, y_max - y, format, type, data);
+}
+
+/**
+ * \brief download a texture, handling things like stride and slices
+ * \param target texture target, usually GL_TEXTURE_2D
+ * \param format OpenGL format of data
+ * \param type OpenGL type of data
+ * \param dataptr destination memory for download
+ * \param stride data stride (must be positive)
+ * \ingroup gltexture
+ */
+void glDownloadTex(GL *gl, GLenum target, GLenum format, GLenum type,
+                   void *dataptr, int stride)
+{
+    // this is not always correct, but should work for MPlayer
+    glAdjustAlignment(gl, stride);
+    gl->PixelStorei(GL_PACK_ROW_LENGTH, stride / glFmt2bpp(format, type));
+    gl->GetTexImage(target, 0, format, type, dataptr);
 }
 
 /**
