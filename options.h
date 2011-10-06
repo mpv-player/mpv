@@ -82,6 +82,9 @@ typedef struct MPOpts {
     char *sub_demuxer_name;
     int extension_parsing;
 
+    int screenshot_jpeg_quality;
+    char *screenshot_filetype;
+
     int audio_output_channels;
     int audio_output_format;
     float playback_speed;

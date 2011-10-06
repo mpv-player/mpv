@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <setjmp.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -29,6 +30,11 @@
 #include <libavcodec/avcodec.h>
 
 #include "config.h"
+
+#ifdef CONFIG_JPEG
+#include <jpeglib.h>
+#endif
+
 #include "talloc.h"
 #include "screenshot.h"
 #include "mp_core.h"
@@ -46,6 +52,8 @@
 #include "libvo/csputils.h"
 
 typedef struct screenshot_ctx {
+    struct MPContext *mpctx;
+
     int full_window;
     int each_frame;
     int using_vf_screenshot;
@@ -54,11 +62,28 @@ typedef struct screenshot_ctx {
     char fname[102];
 } screenshot_ctx;
 
+struct img_writer {
+    const char *file_ext;
+    int (*write)(screenshot_ctx *ctx, mp_image_t *image);
+};
+
 static screenshot_ctx *screenshot_get_ctx(MPContext *mpctx)
 {
-    if (!mpctx->screenshot_ctx)
-        mpctx->screenshot_ctx = talloc_zero(mpctx, screenshot_ctx);
+    if (!mpctx->screenshot_ctx) {
+        mpctx->screenshot_ctx = talloc(mpctx, screenshot_ctx);
+        *mpctx->screenshot_ctx = (screenshot_ctx) {
+            .mpctx = mpctx,
+        };
+    }
     return mpctx->screenshot_ctx;
+}
+
+static FILE *open_file(screenshot_ctx *ctx, char *fname) {
+    FILE *fp = fopen(fname, "wb");
+    if (fp == NULL)
+        mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nPNG Error opening %s for writing!\n",
+               fname);
+    return fp;
 }
 
 static int write_png(screenshot_ctx *ctx, struct mp_image *image)
@@ -95,13 +120,9 @@ static int write_png(screenshot_ctx *ctx, struct mp_image *image)
     if (size < 1)
         goto error_exit;
 
-    fp = fopen(fname, "wb");
-    if (fp == NULL) {
-        avcodec_close(avctx);
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nPNG Error opening %s for writing!\n",
-               fname);
+    fp = open_file(ctx, fname);
+    if (fp == NULL)
         goto error_exit;
-    }
 
     fwrite(outbuffer, size, 1, fp);
     fflush(fp);
@@ -119,6 +140,87 @@ error_exit:
     return success;
 }
 
+#ifdef CONFIG_JPEG
+
+static void write_jpeg_error_exit(j_common_ptr cinfo)
+{
+  // NOTE: do not write error message, too much effort to connect the libjpeg
+  //       log callbacks with mplayer's log function mp_msp()
+
+  // Return control to the setjmp point
+  longjmp(*(jmp_buf*)cinfo->client_data, 1);
+}
+
+static int write_jpeg(screenshot_ctx *ctx, mp_image_t *image)
+{
+    struct jpeg_compress_struct cinfo;
+    struct jpeg_error_mgr jerr;
+    FILE *outfile = open_file(ctx, ctx->fname);
+
+    if (!outfile)
+        return 0;
+
+    cinfo.err = jpeg_std_error(&jerr);
+    jerr.error_exit = write_jpeg_error_exit;
+
+    jmp_buf error_return_jmpbuf;
+    cinfo.client_data = &error_return_jmpbuf;
+    if (setjmp(cinfo.client_data)) {
+        jpeg_destroy_compress(&cinfo);
+        fclose(outfile);
+        return 0;
+    }
+
+    jpeg_create_compress(&cinfo);
+    jpeg_stdio_dest(&cinfo, outfile);
+
+    cinfo.image_width = image->width;
+    cinfo.image_height = image->height;
+    cinfo.input_components = 3;
+    cinfo.in_color_space = JCS_RGB;
+
+    jpeg_set_defaults(&cinfo);
+    jpeg_set_quality(&cinfo, ctx->mpctx->opts.screenshot_jpeg_quality, 1);
+
+    jpeg_start_compress(&cinfo, TRUE);
+
+    while (cinfo.next_scanline < cinfo.image_height) {
+        JSAMPROW row_pointer[1];
+        row_pointer[0] = image->planes[0] + cinfo.next_scanline * image->stride[0];
+        jpeg_write_scanlines(&cinfo, row_pointer,1);
+    }
+
+    jpeg_finish_compress(&cinfo);
+
+    jpeg_destroy_compress(&cinfo);
+    fclose(outfile);
+
+    return 1;
+}
+
+#endif
+
+static const struct img_writer img_writers[] = {
+    { "png", write_png },
+#ifdef CONFIG_JPEG
+    { "jpg", write_jpeg },
+    { "jpeg", write_jpeg },
+#endif
+};
+
+static const struct img_writer *get_writer(screenshot_ctx *ctx)
+{
+    const char *type = ctx->mpctx->opts.screenshot_filetype;
+
+    for (size_t n = 0; n < sizeof(img_writers) / sizeof(img_writers[0]); n++) {
+        const struct img_writer *writer = &img_writers[n];
+        if (type && strcmp(type, writer->file_ext) == 0)
+            return writer;
+    }
+
+    return &img_writers[0];
+}
+
 static int fexists(char *fname)
 {
     struct stat dummy;
@@ -128,10 +230,10 @@ static int fexists(char *fname)
         return 0;
 }
 
-static void gen_fname(screenshot_ctx *ctx)
+static void gen_fname(screenshot_ctx *ctx, const char *ext)
 {
     do {
-        snprintf(ctx->fname, 100, "shot%04d.png", ++ctx->frameno);
+        snprintf(ctx->fname, 100, "shot%04d.%s", ++ctx->frameno, ext);
     } while (fexists(ctx->fname) && ctx->frameno < 100000);
     if (fexists(ctx->fname)) {
         ctx->fname[0] = '\0';
@@ -145,6 +247,7 @@ static void gen_fname(screenshot_ctx *ctx)
 void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
 {
     screenshot_ctx *ctx = screenshot_get_ctx(mpctx);
+    const struct img_writer *writer = get_writer(ctx);
     struct mp_image *dst = alloc_mpi(image->w, image->h, IMGFMT_RGB24);
 
     struct SwsContext *sws = sws_getContextFromCmdLine_hq(image->width,
@@ -163,8 +266,8 @@ void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
     sws_scale(sws, (const uint8_t **)image->planes, image->stride, 0,
               image->height, dst->planes, dst->stride);
 
-    gen_fname(ctx);
-    write_png(ctx, dst);
+    gen_fname(ctx, writer->file_ext);
+    writer->write(ctx, dst);
 
     sws_freeContext(sws);
     free_mp_image(dst);
