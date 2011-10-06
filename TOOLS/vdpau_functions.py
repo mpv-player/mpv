@@ -16,6 +16,7 @@ device_destroy
 generate_csc_matrix GenerateCSCMatrix  # CSC completely capitalized
 output_surface_create
 output_surface_destroy
+output_surface_get_bits_native
 output_surface_put_bits_indexed
 output_surface_put_bits_native
 output_surface_render_bitmap_surface
