@@ -75,6 +75,8 @@ char* af_fmt2str(int format, char* str, int size)
       i+=snprintf(&str[i],size-i,"MPEG-2 "); break;
     case(AF_FORMAT_AC3):
       i+=snprintf(&str[i],size-i,"AC3 "); break;
+    case(AF_FORMAT_IEC61937):
+      i+=snprintf(&str[i],size-i,"IEC61937 "); break;
     case(AF_FORMAT_IMA_ADPCM):
       i+=snprintf(&str[i],size-i,"IMA-ADPCM "); break;
     default:
@@ -115,6 +117,9 @@ static struct {
     { "ac3le", AF_FORMAT_AC3_LE },
     { "ac3be", AF_FORMAT_AC3_BE },
     { "ac3ne", AF_FORMAT_AC3_NE },
+    { "iec61937le", AF_FORMAT_IEC61937_LE },
+    { "iec61937be", AF_FORMAT_IEC61937_BE },
+    { "iec61937ne", AF_FORMAT_IEC61937_NE },
     { "imaadpcm", AF_FORMAT_IMA_ADPCM },
 
     { "u8", AF_FORMAT_U8 },
