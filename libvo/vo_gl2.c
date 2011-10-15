@@ -565,7 +565,7 @@ static int initGl(uint32_t d_width, uint32_t d_height)
   if (is_yuv) {
     int xs, ys, depth;
     gl_conversion_params_t params = {GL_TEXTURE_2D, use_yuv,
-          {-1, -1, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0},
+          { { -1 }, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0},
           texture_width, texture_height, 0, 0, 0};
     switch (use_yuv) {
       case YUV_CONVERSION_FRAGMENT_LOOKUP:

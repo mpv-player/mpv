@@ -41,6 +41,7 @@
 #include "video_out.h"
 #include "x11_common.h"
 #include "aspect.h"
+#include "csputils.h"
 #include "sub/sub.h"
 #include "subopt-helper.h"
 #include "libmpcodecs/vfcap.h"
@@ -124,9 +125,7 @@ struct vdpctx {
     int                                output_surface_width, output_surface_height;
 
     VdpVideoMixer                      video_mixer;
-    int                                user_colorspace;
-    int                                colorspace;
-    int                                studio_levels;
+    struct mp_csp_details              colorspace;
     int                                deint;
     int                                deint_type;
     int                                deint_counter;
@@ -190,7 +189,7 @@ struct vdpctx {
     int eosd_render_count;
 
     // Video equalizer
-    VdpProcamp procamp;
+    struct mp_csp_equalizer video_eq;
 
     int num_shown_frames;
     bool paused;
@@ -574,33 +573,16 @@ static int set_video_attribute(struct vdpctx *vc, VdpVideoMixerAttribute attr,
 static void update_csc_matrix(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
-    struct vdp_functions *vdp = vc->vdp;
-    VdpStatus vdp_st;
 
-    const VdpColorStandard vdp_colors[] = {VDP_COLOR_STANDARD_ITUR_BT_601,
-                                           VDP_COLOR_STANDARD_ITUR_BT_709,
-                                           VDP_COLOR_STANDARD_SMPTE_240M};
-    char * const vdp_names[] = {"BT.601", "BT.709", "SMPTE-240M"};
-    int csp = vc->colorspace;
-    mp_msg(MSGT_VO, MSGL_V, "[vdpau] Updating CSC matrix for %s\n",
-           vdp_names[csp]);
+    mp_msg(MSGT_VO, MSGL_V, "[vdpau] Updating CSC matrix\n");
 
+    // VdpCSCMatrix happens to be compatible with mplayer's CSC matrix type
+    // both are float[3][4]
     VdpCSCMatrix matrix;
-    vdp_st = vdp->generate_csc_matrix(&vc->procamp, vdp_colors[csp], &matrix);
-    CHECK_ST_WARNING("Error when generating CSC matrix");
 
-    if (vc->studio_levels) {
-        /* Modify matrix to change output range from 0..255 to 16..235.
-         * Clipping limits can't be changed, so out-of-range results that
-         * would have been clipped to 0 or 255 before can still go below
-         * 16 or above 235.
-         */
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 4; j++)
-                matrix[i][j] *= 220. / 256;
-            matrix[i][3] += 16. / 256;
-        }
-    }
+    struct mp_csp_params cparams = { .colorspace = vc->colorspace };
+    mp_csp_copy_equalizer_values(&cparams, &vc->video_eq);
+    mp_get_yuv2rgb_coeffs(&cparams, matrix);
 
     set_video_attribute(vc, VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX,
                         &matrix, "CSC matrix");
@@ -886,10 +868,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     vc->image_format = format;
     vc->vid_width    = width;
     vc->vid_height   = height;
-    if (vc->user_colorspace == 0)
-        vc->colorspace = width >= 1280 || height > 576 ? 1 : 0;
-    else
-        vc->colorspace = vc->user_colorspace - 1;
     free_video_specific(vo);
     if (IMGFMT_IS_VDPAU(vc->image_format) && !create_vdp_decoder(vo, 2))
         return -1;
@@ -1607,6 +1585,8 @@ static void uninit(struct vo *vo)
 static int preinit(struct vo *vo, const char *arg)
 {
     int i;
+    int user_colorspace = 0;
+    int studio_levels = 0;
 
     struct vdpctx *vc = talloc_zero(vo, struct vdpctx);
     vo->priv = vc;
@@ -1615,20 +1595,21 @@ static int preinit(struct vo *vo, const char *arg)
     // allocated
     mark_vdpau_objects_uninitialized(vo);
 
+    vc->colorspace = (struct mp_csp_details) MP_CSP_DETAILS_DEFAULTS;
     vc->deint_type = 3;
     vc->chroma_deint = 1;
-    vc->user_colorspace = 1;
     vc->flip_offset_window = 50;
     vc->flip_offset_fs = 50;
     vc->num_output_surfaces = 3;
+    vc->video_eq.capabilities = MP_CSP_EQ_CAPS_COLORMATRIX;
     const opt_t subopts[] = {
         {"deint",   OPT_ARG_INT,   &vc->deint,   NULL},
         {"chroma-deint", OPT_ARG_BOOL,  &vc->chroma_deint,  NULL},
         {"pullup",  OPT_ARG_BOOL,  &vc->pullup,  NULL},
         {"denoise", OPT_ARG_FLOAT, &vc->denoise, NULL},
         {"sharpen", OPT_ARG_FLOAT, &vc->sharpen, NULL},
-        {"colorspace", OPT_ARG_INT, &vc->user_colorspace, NULL},
-        {"studio", OPT_ARG_BOOL, &vc->studio_levels, NULL},
+        {"colorspace", OPT_ARG_INT, &user_colorspace, NULL},
+        {"studio", OPT_ARG_BOOL, &studio_levels, NULL},
         {"hqscaling", OPT_ARG_INT, &vc->hqscaling, NULL},
         {"fps",     OPT_ARG_FLOAT, &vc->user_fps, NULL},
         {"queuetime_windowed", OPT_ARG_INT, &vc->flip_offset_window, NULL},
@@ -1648,6 +1629,12 @@ static int preinit(struct vo *vo, const char *arg)
     if (vc->num_output_surfaces < 2) {
         mp_msg(MSGT_VO, MSGL_FATAL, "[vdpau] Invalid suboption "
                "output_surfaces: can't use less than 2 surfaces\n");
+        return -1;
+    }
+    if (user_colorspace != 0 || studio_levels != 0) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] \"colorspace\" and \"studio\""
+               " suboptions have been removed. Use options --colormatrix and"
+               " --colormatrix-output-range=limited instead.\n");
         return -1;
     }
     if (vc->num_output_surfaces > MAX_OUTPUT_SURFACES) {
@@ -1676,30 +1663,14 @@ static int preinit(struct vo *vo, const char *arg)
     for (i = 0; i < PALETTE_SIZE; ++i)
         vc->palette[i] = (i << 16) | (i << 8) | i;
 
-    vc->procamp.struct_version = VDP_PROCAMP_VERSION;
-    vc->procamp.brightness = 0.0;
-    vc->procamp.contrast   = 1.0;
-    vc->procamp.saturation = 1.0;
-    vc->procamp.hue        = 0.0;
-
     return 0;
 }
 
 static int get_equalizer(struct vo *vo, const char *name, int *value)
 {
     struct vdpctx *vc = vo->priv;
-
-    if (!strcasecmp(name, "brightness"))
-        *value = vc->procamp.brightness * 100;
-    else if (!strcasecmp(name, "contrast"))
-        *value = (vc->procamp.contrast - 1.0) * 100;
-    else if (!strcasecmp(name, "saturation"))
-        *value = (vc->procamp.saturation - 1.0) * 100;
-    else if (!strcasecmp(name, "hue"))
-        *value = vc->procamp.hue * 100 / M_PI;
-    else
-        return VO_NOTIMPL;
-    return VO_TRUE;
+    return mp_csp_equalizer_get(&vc->video_eq, name, value) >= 0 ?
+           VO_TRUE : VO_NOTIMPL;
 }
 
 static bool status_ok(struct vo *vo)
@@ -1713,15 +1684,7 @@ static int set_equalizer(struct vo *vo, const char *name, int value)
 {
     struct vdpctx *vc = vo->priv;
 
-    if (!strcasecmp(name, "brightness"))
-        vc->procamp.brightness = value / 100.0;
-    else if (!strcasecmp(name, "contrast"))
-        vc->procamp.contrast = value / 100.0 + 1.0;
-    else if (!strcasecmp(name, "saturation"))
-        vc->procamp.saturation = value / 100.0 + 1.0;
-    else if (!strcasecmp(name, "hue"))
-        vc->procamp.hue = value / 100.0 * M_PI;
-    else
+    if (mp_csp_equalizer_set(&vc->video_eq, name, value) < 0)
         return VO_NOTIMPL;
 
     if (status_ok(vo))
@@ -1798,12 +1761,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return get_equalizer(vo, args->name, args->valueptr);
     }
     case VOCTRL_SET_YUV_COLORSPACE:
-        vc->colorspace = *(int *)data % 3;
+        vc->colorspace = *(struct mp_csp_details *)data;
         if (status_ok(vo))
             update_csc_matrix(vo);
         return true;
     case VOCTRL_GET_YUV_COLORSPACE:
-        *(int *)data = vc->colorspace;
+        *(struct mp_csp_details *)data = vc->colorspace;
         return true;
     case VOCTRL_ONTOP:
         vo_x11_ontop(vo);

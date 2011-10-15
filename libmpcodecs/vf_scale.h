@@ -22,4 +22,7 @@
 int get_sws_cpuflags(void);
 struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat, int dstW, int dstH, int dstFormat);
 
+struct mp_csp_details;
+int mp_sws_set_colorspace(struct SwsContext *sws, struct mp_csp_details *csp);
+
 #endif /* MPLAYER_VF_SCALE_H */

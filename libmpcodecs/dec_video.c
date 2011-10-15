@@ -36,6 +36,7 @@
 #include "codec-cfg.h"
 
 #include "libvo/video_out.h"
+#include "libvo/csputils.h"
 
 #include "libmpdemux/stheader.h"
 #include "vd.h"
@@ -137,6 +138,51 @@ int get_video_colors(sh_video_t *sh_video, const char *item, int *value)
     if (vd)
         return vd->control(sh_video, VDCTRL_GET_EQUALIZER, (void *)item, value);
     return 0;
+}
+
+void get_detected_video_colorspace(struct sh_video *sh, struct mp_csp_details *csp)
+{
+    struct MPOpts *opts = sh->opts;
+    struct vf_instance *vf = sh->vfilter;
+
+    csp->format = opts->requested_colorspace;
+    csp->levels_in = opts->requested_input_range;
+    csp->levels_out = opts->requested_output_range;
+
+    if (csp->format == MP_CSP_AUTO)
+        csp->format = mp_csp_guess_colorspace(vf->w, vf->h);
+    if (csp->levels_in == MP_CSP_LEVELS_AUTO)
+        csp->levels_in = MP_CSP_LEVELS_TV;
+    if (csp->levels_out == MP_CSP_LEVELS_AUTO)
+        csp->levels_out = MP_CSP_LEVELS_PC;
+}
+
+void set_video_colorspace(struct sh_video *sh)
+{
+    struct vf_instance *vf = sh->vfilter;
+
+    struct mp_csp_details requested;
+    get_detected_video_colorspace(sh, &requested);
+    vf->control(vf, VFCTRL_SET_YUV_COLORSPACE, &requested);
+
+    struct mp_csp_details actual = MP_CSP_DETAILS_DEFAULTS;
+    vf->control(vf, VFCTRL_GET_YUV_COLORSPACE, &actual);
+
+    int success = actual.format == requested.format
+               && actual.levels_in == requested.levels_in
+               && actual.levels_out == requested.levels_out;
+
+    if (!success)
+        mp_tmsg(MSGT_DECVIDEO, MSGL_WARN,
+                "Colorspace details not fully supported by selected vo.\n");
+
+    if (actual.format != requested.format
+            && requested.format == MP_CSP_SMPTE_240M) {
+        // BT.709 is pretty close, much better than BT.601
+        requested.format = MP_CSP_BT_709;
+        vf->control(vf, VFCTRL_SET_YUV_COLORSPACE, &requested);
+    }
+
 }
 
 int set_rectangle(sh_video_t *sh_video, int param, int value)

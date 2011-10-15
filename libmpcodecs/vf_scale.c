@@ -35,6 +35,8 @@
 #include "libswscale/swscale.h"
 #include "vf_scale.h"
 
+#include "libvo/csputils.h"
+
 #include "m_option.h"
 #include "m_struct.h"
 
@@ -49,6 +51,7 @@ static struct vf_priv_s {
     int interlaced;
     int noup;
     int accurate_rnd;
+    struct mp_csp_details colorspace;
 } const vf_priv_dflt = {
   -1,-1,
   0,
@@ -186,6 +189,8 @@ static int config(struct vf_instance *vf,
     int i;
     SwsFilter *srcFilter, *dstFilter;
     enum PixelFormat dfmt, sfmt;
+
+    vf->priv->colorspace = (struct mp_csp_details) {0};
 
     if(!best){
 	mp_msg(MSGT_VFILTER,MSGL_WARN,"SwScale: no supported outfmt found :(\n");
@@ -505,11 +510,85 @@ static int control(struct vf_instance *vf, int request, void* data){
         }
 
 	return CONTROL_TRUE;
+    case VFCTRL_SET_YUV_COLORSPACE: {
+        struct mp_csp_details colorspace = *(struct mp_csp_details *)data;
+        if (mp_sws_set_colorspace(vf->priv->ctx, &colorspace) >= 0) {
+            if (vf->priv->ctx2)
+                mp_sws_set_colorspace(vf->priv->ctx2, &colorspace);
+            vf->priv->colorspace = colorspace;
+            return 1;
+        }
+        break;
+    }
+    case VFCTRL_GET_YUV_COLORSPACE: {
+        /* This scale filter should never react to colorspace commands if it
+         * doesn't do YUV->RGB conversion. But because finding out whether this
+         * is really YUV->RGB (and not YUV->YUV or anything else) is hard,
+         * react only if the colorspace has been set explicitly before. The
+         * trick is that mp_sws_set_colorspace does not succeed for YUV->YUV
+         * and RGB->YUV conversions, which makes this code correct in "most"
+         * cases. (This would be trivial to do correctly if libswscale exposed
+         * functionality like isYUV()).
+         */
+        if (vf->priv->colorspace.format) {
+            *(struct mp_csp_details *)data = vf->priv->colorspace;
+            return CONTROL_TRUE;
+        }
+        break;
+    }
     default:
 	break;
     }
 
     return vf_next_control(vf,request,data);
+}
+
+static const int mp_csp_to_swscale[MP_CSP_COUNT] = {
+    [MP_CSP_BT_601] = SWS_CS_ITU601,
+    [MP_CSP_BT_709] = SWS_CS_ITU709,
+    [MP_CSP_SMPTE_240M] = SWS_CS_SMPTE240M,
+};
+
+// Adjust the colorspace used for YUV->RGB conversion. On other conversions,
+// do nothing or return an error.
+// The csp argument is set to the supported values.
+// Return 0 on success and -1 on error.
+int mp_sws_set_colorspace(struct SwsContext *sws, struct mp_csp_details *csp)
+{
+    int *table, *inv_table;
+    int brightness, contrast, saturation, srcRange, dstRange;
+
+    csp->levels_out = MP_CSP_LEVELS_PC;
+
+    // NOTE: returns an error if the destination format is YUV
+    if (sws_getColorspaceDetails(sws, &inv_table, &srcRange, &table, &dstRange,
+                                 &brightness, &contrast, &saturation) == -1)
+        goto error_out;
+
+    int sws_csp = mp_csp_to_swscale[csp->format];
+    if (sws_csp == 0) {
+        // colorspace not supported, go with a reasonable default
+        csp->format = SWS_CS_ITU601;
+        sws_csp = MP_CSP_BT_601;
+    }
+
+    /* The swscale API for these is hardly documented.
+     * Apparently table/range only apply to YUV. Thus dstRange has no effect
+     * for YUV->RGB conversions, and conversions to limited-range RGB are
+     * not supported.
+     */
+    srcRange = csp->levels_in == MP_CSP_LEVELS_PC;
+    const int *new_inv_table = sws_getCoefficients(sws_csp);
+
+    if (sws_setColorspaceDetails(sws, new_inv_table, srcRange, table, dstRange,
+        brightness, contrast, saturation) == -1)
+        goto error_out;
+
+    return 0;
+
+error_out:
+    *csp = (struct mp_csp_details){0};
+    return -1;
 }
 
 //===========================================================================//

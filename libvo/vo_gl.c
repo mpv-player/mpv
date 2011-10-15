@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdbool.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -129,8 +130,9 @@ static int use_ycbcr;
 #define MASK_NOT_COMBINERS (~((1 << YUV_CONVERSION_NONE) | (1 << YUV_CONVERSION_COMBINERS)))
 #define MASK_GAMMA_SUPPORT (MASK_NOT_COMBINERS & ~(1 << YUV_CONVERSION_FRAGMENT))
 static int use_yuv;
-static int colorspace;
-static int levelconv;
+static struct mp_csp_details colorspace = MP_CSP_DETAILS_DEFAULTS;
+static int user_colorspace; //essentially unused; legacy warning
+static int levelconv; //essentially unused; legacy warning
 static int is_yuv;
 static int lscale;
 static int cscale;
@@ -169,13 +171,8 @@ static int mipmap_gen;
 static int stereo_mode;
 
 static int int_pause;
-static int eq_bri = 0;
-static int eq_cont = 0;
-static int eq_sat = 0;
-static int eq_hue = 0;
-static int eq_rgamma = 0;
-static int eq_ggamma = 0;
-static int eq_bgamma = 0;
+
+static struct mp_csp_equalizer video_eq;
 
 static int texture_width;
 static int texture_height;
@@ -248,15 +245,9 @@ static void texSize(int w, int h, int *texw, int *texh) {
 #define MAX_CUSTOM_PROG_SIZE (1024 * 1024)
 static void update_yuvconv(void) {
   int xs, ys, depth;
-  float bri = eq_bri / 100.0;
-  float cont = (eq_cont + 100) / 100.0;
-  float hue = eq_hue / 100.0 * 3.1415927;
-  float sat = (eq_sat + 100) / 100.0;
-  float rgamma = exp(log(8.0) * eq_rgamma / 100.0);
-  float ggamma = exp(log(8.0) * eq_ggamma / 100.0);
-  float bgamma = exp(log(8.0) * eq_bgamma / 100.0);
-  gl_conversion_params_t params = {gl_target, yuvconvtype,
-      {colorspace, levelconv, bri, cont, hue, sat, rgamma, ggamma, bgamma, 0},
+  struct mp_csp_params cparams = { .colorspace = colorspace };
+  mp_csp_copy_equalizer_values(&cparams, &video_eq);
+  gl_conversion_params_t params = {gl_target, yuvconvtype, cparams,
       texture_width, texture_height, 0, 0, filter_strength};
   mp_get_chroma_shift(image_format, &xs, &ys, &depth);
   params.chrom_texw = params.texw >> xs;
@@ -521,6 +512,19 @@ static void autodetectGlExtensions(void) {
     use_osd = mpglBindTexture != NULL;
   if (use_yuv == -1)
     use_yuv = glAutodetectYUVConversion();
+
+  int eq_caps = 0;
+  int yuv_mask = (1 << use_yuv);
+  if (!(yuv_mask & MASK_NOT_COMBINERS)) {
+    // combiners
+    eq_caps = (1 << MP_CSP_EQ_HUE) | (1 << MP_CSP_EQ_SATURATION);
+  } else if (yuv_mask & MASK_ALL_YUV) {
+    eq_caps = MP_CSP_EQ_CAPS_COLORMATRIX;
+    if (yuv_mask & MASK_GAMMA_SUPPORT)
+      eq_caps |= MP_CSP_EQ_CAPS_GAMMA;
+  }
+  video_eq.capabilities = eq_caps;
+
   if (is_ati && (lscale == 1 || lscale == 2 || cscale == 1 || cscale == 2))
     mp_msg(MSGT_VO, MSGL_WARN, "[gl] Selected scaling mode may be broken on ATI cards.\n"
              "Tell _them_ to fix GL_REPEAT if you have issues.\n");
@@ -1133,18 +1137,6 @@ uninit(void)
   uninit_mpglcontext(&glctx);
 }
 
-static int valid_csp(void *p)
-{
-  int *csp = p;
-  return *csp >= -1 && *csp < MP_CSP_COUNT;
-}
-
-static int valid_csp_lvl(void *p)
-{
-  int *lvl = p;
-  return *lvl >= -1 && *lvl < MP_CSP_LEVELCONV_COUNT;
-}
-
 static const opt_t subopts[] = {
   {"manyfmts",     OPT_ARG_BOOL, &many_fmts,    NULL},
   {"osd",          OPT_ARG_BOOL, &use_osd,      NULL},
@@ -1154,8 +1146,8 @@ static const opt_t subopts[] = {
   {"slice-height", OPT_ARG_INT,  &slice_height, int_non_neg},
   {"rectangle",    OPT_ARG_INT,  &use_rectangle,int_non_neg},
   {"yuv",          OPT_ARG_INT,  &use_yuv,      int_non_neg},
-  {"colorspace",   OPT_ARG_INT,  &colorspace,   valid_csp},
-  {"levelconv",    OPT_ARG_INT,  &levelconv,    valid_csp_lvl},
+  {"colorspace",   OPT_ARG_INT,  &user_colorspace, NULL},
+  {"levelconv",    OPT_ARG_INT,  &levelconv,    NULL},
   {"lscale",       OPT_ARG_INT,  &lscale,       int_non_neg},
   {"cscale",       OPT_ARG_INT,  &cscale,       int_non_neg},
   {"filter-strength", OPT_ARG_FLOAT, &filter_strength, NULL},
@@ -1184,7 +1176,7 @@ static int preinit_internal(const char *arg, int allow_sw)
     use_aspect = 1;
     use_ycbcr = 0;
     use_yuv = -1;
-    colorspace = -1;
+    user_colorspace = 0;
     levelconv = -1;
     lscale = 0;
     cscale = 0;
@@ -1242,17 +1234,6 @@ static int preinit_internal(const char *arg, int allow_sw)
               "    4: use fragment program with gamma correction via lookup.\n"
               "    5: use ATI-specific method (for older cards).\n"
               "    6: use lookup via 3D texture.\n"
-	      "  colorspace=<n>\n"
-              "    0: MPlayer's default YUV to RGB conversion\n"
-              "    1: YUV to RGB according to BT.601\n"
-              "    2: YUV to RGB according to BT.709\n"
-              "    3: YUV to RGB according to SMPT-240M\n"
-              "    4: YUV to RGB according to EBU\n"
-              "    5: XYZ to RGB\n"
-              "  levelconv=<n>\n"
-              "    0: YUV to RGB converting TV to PC levels\n"
-              "    1: YUV to RGB converting PC to TV levels\n"
-              "    2: YUV to RGB without converting levels\n"
               "  lscale=<n>\n"
               "    0: use standard bilinear scaling for luma.\n"
               "    1: use improved bicubic scaling for luma.\n"
@@ -1282,6 +1263,12 @@ static int preinit_internal(const char *arg, int allow_sw)
               "    2: side-by-side to green-magenta stereo\n"
               "    3: side-by-side to quadbuffer stereo\n"
               "\n" );
+      return -1;
+    }
+    if (user_colorspace != 0 || levelconv != -1) {
+      mp_msg(MSGT_VO, MSGL_ERR, "[gl] \"colorspace\" and \"levelconv\" "
+        "suboptions have been removed. Use options --colormatrix and"
+        " --colormatrix-input-range/--colormatrix-output-range instead.\n");
       return -1;
     }
     if (!init_mpglcontext(&glctx, gltype))
@@ -1317,22 +1304,6 @@ static int preinit_nosw(const char *arg)
 {
     return preinit_internal(arg, 0);
 }
-
-static const struct {
-  const char *name;
-  int *value;
-  int supportmask;
-} eq_map[] = {
-  {"brightness",  &eq_bri,    MASK_NOT_COMBINERS},
-  {"contrast",    &eq_cont,   MASK_NOT_COMBINERS},
-  {"saturation",  &eq_sat,    MASK_ALL_YUV      },
-  {"hue",         &eq_hue,    MASK_ALL_YUV      },
-  {"gamma",       &eq_rgamma, MASK_GAMMA_SUPPORT},
-  {"red_gamma",   &eq_rgamma, MASK_GAMMA_SUPPORT},
-  {"green_gamma", &eq_ggamma, MASK_GAMMA_SUPPORT},
-  {"blue_gamma",  &eq_bgamma, MASK_GAMMA_SUPPORT},
-  {NULL,          NULL,       0                 }
-};
 
 static int control(uint32_t request, void *data)
 {
@@ -1386,30 +1357,30 @@ static int control(uint32_t request, void *data)
   case VOCTRL_GET_EQUALIZER:
     if (is_yuv) {
       struct voctrl_get_equalizer_args *args = data;
-      int i;
-      for (i = 0; eq_map[i].name; i++)
-        if (strcmp(args->name, eq_map[i].name) == 0) break;
-      if (!(eq_map[i].supportmask & (1 << use_yuv)))
-        break;
-      *args->valueptr = *eq_map[i].value;
-      return VO_TRUE;
+      return mp_csp_equalizer_get(&video_eq, args->name, args->valueptr) >= 0 ?
+             VO_TRUE : VO_NOTIMPL;
     }
     break;
   case VOCTRL_SET_EQUALIZER:
     if (is_yuv) {
       struct voctrl_set_equalizer_args *args = data;
-      int i;
-      for (i = 0; eq_map[i].name; i++)
-        if (strcmp(args->name, eq_map[i].name) == 0) break;
-      if (!(eq_map[i].supportmask & (1 << use_yuv)))
-        break;
-      *eq_map[i].value = args->value;
-      if (strcmp(args->name, "gamma") == 0)
-        eq_rgamma = eq_ggamma = eq_bgamma = args->value;
+      if (mp_csp_equalizer_set(&video_eq, args->name, args->value) < 0)
+        return VO_NOTIMPL;
       update_yuvconv();
       return VO_TRUE;
     }
     break;
+  case VOCTRL_SET_YUV_COLORSPACE: {
+      bool supports_csp = (1 << use_yuv) & MASK_NOT_COMBINERS;
+      if (vo_config_count && supports_csp) {
+        colorspace = *(struct mp_csp_details *)data;
+        update_yuvconv();
+      }
+      return VO_TRUE;
+    }
+  case VOCTRL_GET_YUV_COLORSPACE:
+    *(struct mp_csp_details *)data = colorspace;
+    return VO_TRUE;
   case VOCTRL_UPDATE_SCREENINFO:
     glctx.update_xinerama_info();
     return VO_TRUE;

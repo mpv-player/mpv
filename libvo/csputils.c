@@ -32,6 +32,27 @@
 
 #include "csputils.h"
 
+char * const mp_csp_names[MP_CSP_COUNT] = {
+    "Autoselect",
+    "BT.601 (SD)",
+    "BT.709 (HD)",
+    "SMPTE-240M",
+};
+
+char * const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
+    "brightness",
+    "contrast",
+    "hue",
+    "saturation",
+    "gamma",
+};
+
+
+enum mp_csp mp_csp_guess_colorspace(int width, int height)
+{
+    return width >= 1280 || height > 576 ? MP_CSP_BT_709 : MP_CSP_BT_601;
+}
+
 /**
  * \brief little helper function to create a lookup table for gamma
  * \param map buffer to create map into
@@ -98,8 +119,8 @@ static void luma_coeffs(float m[3][4], float lr, float lg, float lb)
  */
 void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
 {
-    int format = params->format;
-    if (format <= MP_CSP_DEFAULT || format >= MP_CSP_COUNT)
+    int format = params->colorspace.format;
+    if (format <= MP_CSP_AUTO || format >= MP_CSP_COUNT)
         format = MP_CSP_BT_601;
     switch (format) {
     case MP_CSP_BT_601:     luma_coeffs(m, 0.299,  0.587,  0.114 ); break;
@@ -119,25 +140,35 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
         m[i][COL_V] = huesin * u + huecos * m[i][COL_V];
     }
 
-    int levelconv = params->levelconv;
-    if (levelconv < 0 || levelconv >= MP_CSP_LEVELCONV_COUNT)
-        levelconv = MP_CSP_LEVELCONV_TV_TO_PC;
+    int levels_in = params->colorspace.levels_in;
+    if (levels_in <= MP_CSP_LEVELS_AUTO || levels_in >= MP_CSP_LEVELS_COUNT)
+        levels_in = MP_CSP_LEVELS_TV;
     // The values below are written in 0-255 scale
     struct yuvlevels { double ymin, ymax, cmin, cmid; }
         yuvlim =  { 16, 235, 16, 128 },
-        yuvfull = { 16, 235,  1, 128 },  // '1' to make it symmetric around 128
+        yuvfull = {  0, 255,  1, 128 },  // '1' to make it symmetric around 128
         yuvlev;
+    switch (levels_in) {
+    case MP_CSP_LEVELS_TV: yuvlev = yuvlim; break;
+    case MP_CSP_LEVELS_PC: yuvlev = yuvfull; break;
+    default:
+        abort();
+    }
+
+    int levels_out = params->colorspace.levels_out;
+    if (levels_out <= MP_CSP_LEVELS_AUTO || levels_out >= MP_CSP_LEVELS_COUNT)
+        levels_out = MP_CSP_LEVELS_PC;
     struct rgblevels { double min, max; }
         rgblim =  { 16, 235 },
         rgbfull = {  0, 255 },
         rgblev;
-    switch (levelconv) {
-    case MP_CSP_LEVELCONV_TV_TO_PC: yuvlev = yuvlim; rgblev = rgbfull; break;
-    case MP_CSP_LEVELCONV_PC_TO_TV: yuvlev = yuvfull; rgblev = rgblim; break;
-    case MP_CSP_LEVELCONV_TV_TO_TV: yuvlev = yuvlim; rgblev = rgblim; break;
+    switch (levels_out) {
+    case MP_CSP_LEVELS_TV: rgblev = rgblim; break;
+    case MP_CSP_LEVELS_PC: rgblev = rgbfull; break;
     default:
         abort();
     }
+
     double ymul = (rgblev.max - rgblev.min) / (yuvlev.ymax - yuvlev.ymin);
     double cmul = (rgblev.max - rgblev.min) / (yuvlev.cmid - yuvlev.cmin) / 2;
     for (int i = 0; i < 3; i++) {
@@ -204,4 +235,51 @@ void mp_gen_yuv2rgb_map(struct mp_csp_params *params, unsigned char *map, int si
         }
         v += (i == -1 || i == size - 1) ? step / 2 : step;
     }
+}
+
+// Copy settings from eq into params.
+void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
+                                  const struct mp_csp_equalizer *eq)
+{
+    params->brightness = eq->values[MP_CSP_EQ_BRIGHTNESS] / 100.0;
+    params->contrast = (eq->values[MP_CSP_EQ_CONTRAST] + 100) / 100.0;
+    params->hue = eq->values[MP_CSP_EQ_HUE] / 100.0 * 3.1415927;
+    params->saturation = (eq->values[MP_CSP_EQ_SATURATION] + 100) / 100.0;
+    float gamma = exp(log(8.0) * eq->values[MP_CSP_EQ_GAMMA] / 100.0);
+    params->rgamma = gamma;
+    params->ggamma = gamma;
+    params->bgamma = gamma;
+}
+
+static int find_eq(int capabilities, const char *name)
+{
+    for (int i = 0; i < MP_CSP_EQ_COUNT; i++) {
+        if (strcmp(name, mp_csp_equalizer_names[i]) == 0)
+            return ((1 << i) & capabilities) ? i : -1;
+    }
+    return -1;
+}
+
+int mp_csp_equalizer_get(struct mp_csp_equalizer *eq, const char *property,
+                         int *out_value)
+{
+    int index = find_eq(eq->capabilities, property);
+    if (index < 0)
+        return -1;
+
+    *out_value = eq->values[index];
+
+    return 0;
+}
+
+int mp_csp_equalizer_set(struct mp_csp_equalizer *eq, const char *property,
+                         int value)
+{
+    int index = find_eq(eq->capabilities, property);
+    if (index < 0)
+        return 0;
+
+    eq->values[index] = value;
+
+    return 1;
 }

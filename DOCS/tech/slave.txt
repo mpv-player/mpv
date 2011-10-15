@@ -565,6 +565,9 @@ saturation         int       -100    100     X   X   X
 hue                int       -100    100     X   X   X
 panscan            float     0       1       X   X   X
 vsync              flag      0       1       X   X   X
+colormatrix        choice                    X   X   X    as --colormatrix
+colormatrix_input_range choice               X   X   X    as --colormatrix-input-range
+colormatrix_output_range choice              X   X   X    as --colormatrix-output-range
 video_format       int                       X
 video_codec        string                    X
 video_bitrate      int                       X

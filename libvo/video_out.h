@@ -76,8 +76,8 @@ enum mp_voctrl {
 
     VOCTRL_UPDATE_SCREENINFO,
 
-    VOCTRL_SET_YUV_COLORSPACE,
-    VOCTRL_GET_YUV_COLORSPACE,
+    VOCTRL_SET_YUV_COLORSPACE,          // struct mp_csp_details
+    VOCTRL_GET_YUV_COLORSPACE,          // struct mp_csp_details
 };
 
 // VOCTRL_SET_EQUALIZER
@@ -98,7 +98,7 @@ typedef struct {
     uint16_t r,g,b;
 } mp_colorkey_t;
 
-//VOCTRL_GET_EOSD_RES
+// VOCTRL_GET_EOSD_RES
 typedef struct mp_eosd_res {
     int w, h; // screen dimensions, including black borders
     int mt, mb, ml, mr; // borders (top, bottom, left, right)

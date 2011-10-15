@@ -467,7 +467,7 @@ static const struct cmd_bind def_cmd_binds[] = {
   { { '8', 0 }, "saturation 1" },
   { { 'd', 0 }, "frame_drop" },
   { { 'D', 0 }, "step_property_osd deinterlace" },
-  { { 'c', 0 }, "step_property_osd yuv_colorspace" },
+  { { 'c', 0 }, "step_property_osd colormatrix" },
   { { 'r', 0 }, "sub_pos -1" },
   { { 't', 0 }, "sub_pos +1" },
   { { 'a', 0 }, "sub_alignment" },

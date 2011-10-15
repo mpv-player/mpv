@@ -58,6 +58,7 @@ Buffer allocation:
 #include "fastmemcpy.h"
 #include "sub/sub.h"
 #include "aspect.h"
+#include "csputils.h"
 
 #include "subopt-helper.h"
 
@@ -809,13 +810,16 @@ static int control(struct vo *vo, uint32_t request, void *data)
             return vo_xv_get_eq(vo, x11->xv_port, args->name, args->valueptr);
         }
     case VOCTRL_SET_YUV_COLORSPACE:;
-        int given_cspc = *(int *)data % 2;
-        return vo_xv_set_eq(vo, x11->xv_port, "bt_709", given_cspc * 200 - 100);
+        struct mp_csp_details* given_cspc = data;
+        int is_709 = given_cspc->format == MP_CSP_BT_709;
+        vo_xv_set_eq(vo, x11->xv_port, "bt_709", is_709 * 200 - 100);
+        return true;
     case VOCTRL_GET_YUV_COLORSPACE:;
+        struct mp_csp_details* cspc = data;
+        *cspc = (struct mp_csp_details) MP_CSP_DETAILS_DEFAULTS;
         int bt709_enabled;
-        if (!vo_xv_get_eq(vo, x11->xv_port, "bt_709", &bt709_enabled))
-            return false;
-        *(int *)data = bt709_enabled == 100;
+        if (vo_xv_get_eq(vo, x11->xv_port, "bt_709", &bt709_enabled))
+            cspc->format = bt709_enabled == 100 ? MP_CSP_BT_709 : MP_CSP_BT_601;
         return true;
     case VOCTRL_ONTOP:
         vo_x11_ontop(vo);

@@ -327,6 +327,7 @@ int mpcodecs_config_vo2(sh_video_t *sh, int w, int h,
 
     vf->w = sh->disp_w;
     vf->h = sh->disp_h;
+
     if (vf_config_wrapper
         (vf, sh->disp_w, sh->disp_h, screen_size_x, screen_size_y, vocfg_flags,
          out_fmt) == 0) {
@@ -336,6 +337,8 @@ int mpcodecs_config_vo2(sh_video_t *sh, int w, int h,
     }
 
     sh->vf_initialized = 1;
+
+    set_video_colorspace(sh);
 
     if (opts->vo_gamma_gamma != 1000)
         set_video_colors(sh, "gamma", opts->vo_gamma_gamma);

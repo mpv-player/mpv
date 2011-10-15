@@ -33,6 +33,7 @@
 #include "libmpdemux/demux_ts.h"
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
+#include "libvo/csputils.h"
 
 extern char *fb_mode_cfgfile;
 extern char *fb_mode_name;
@@ -797,6 +798,19 @@ const m_option_t mplayer_opts[]={
     {"novsync", &vo_vsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
     OPT_FLOATRANGE("panscanrange", vo_panscanrange, 0, -19.0, 99.0),
+    OPT_CHOICE("colormatrix", requested_colorspace, 0,
+               ({"auto", MP_CSP_AUTO}, {"0", MP_CSP_AUTO},
+                {"BT.601", MP_CSP_BT_601}, {"sd", MP_CSP_BT_601}, {"1", MP_CSP_BT_601},
+                {"BT.709", MP_CSP_BT_709}, {"hd", MP_CSP_BT_709}, {"2", MP_CSP_BT_709},
+                {"SMPTE-240M", MP_CSP_SMPTE_240M}, {"3", MP_CSP_SMPTE_240M})),
+    OPT_CHOICE("colormatrix-input-range", requested_input_range, 0,
+               ({"auto", MP_CSP_LEVELS_AUTO},
+                {"limited", MP_CSP_LEVELS_TV},
+                {"full", MP_CSP_LEVELS_PC})),
+    OPT_CHOICE("colormatrix-output-range", requested_output_range, 0,
+               ({"auto", MP_CSP_LEVELS_AUTO},
+                {"limited", MP_CSP_LEVELS_TV},
+                {"full", MP_CSP_LEVELS_PC})),
 
     {"grabpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nograbpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 1, 0, NULL},
