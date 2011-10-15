@@ -362,6 +362,7 @@ void glDisable3D(GL *gl, int type);
 
 enum MPGLType {
     GLTYPE_AUTO,
+    GLTYPE_COCOA,
     GLTYPE_W32,
     GLTYPE_X11,
     GLTYPE_SDL,

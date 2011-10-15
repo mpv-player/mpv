@@ -1610,6 +1610,46 @@ void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
     gl->End();
 }
 
+#ifdef CONFIG_GL_COCOA
+#include "cocoa_common.h"
+static int create_window_cocoa(struct MPGLContext *ctx, uint32_t d_width,
+                               uint32_t d_height, uint32_t flags,
+                               const char *title)
+{
+    return vo_cocoa_create_window(ctx, d_width, d_height, flags, title);
+}
+static int setGlWindow_cocoa(MPGLContext *ctx)
+{
+    vo_cocoa_change_attributes(ctx);
+    getFunctions(ctx->gl, (void *)getdladdr, NULL);
+    return SET_WINDOW_OK;
+}
+
+static void releaseGlContext_cocoa(MPGLContext *ctx)
+{
+}
+
+static void swapGlBuffers_cocoa(MPGLContext *ctx)
+{
+    vo_cocoa_swap_buffers();
+}
+
+static int cocoa_check_events(struct vo *vo)
+{
+    return vo_cocoa_check_events(vo);
+}
+
+static void cocoa_update_xinerama_info(struct vo *vo)
+{
+    vo_cocoa_update_xinerama_info(vo);
+}
+
+static void cocoa_fullscreen(struct vo *vo)
+{
+    vo_cocoa_fullscreen(vo);
+}
+#endif
+
 #ifdef CONFIG_GL_WIN32
 #include "w32_common.h"
 
@@ -1982,6 +2022,9 @@ MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
 {
     MPGLContext *ctx;
     if (type == GLTYPE_AUTO) {
+        ctx = init_mpglcontext(GLTYPE_COCOA, vo);
+        if (ctx)
+            return ctx;
         ctx = init_mpglcontext(GLTYPE_W32, vo);
         if (ctx)
             return ctx;
@@ -1995,6 +2038,19 @@ MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
     ctx->type = type;
     ctx->vo = vo;
     switch (ctx->type) {
+#ifdef CONFIG_GL_COCOA
+    case GLTYPE_COCOA:
+        ctx->create_window = create_window_cocoa;
+        ctx->setGlWindow = setGlWindow_cocoa;
+        ctx->releaseGlContext = releaseGlContext_cocoa;
+        ctx->swapGlBuffers = swapGlBuffers_cocoa;
+        ctx->check_events = cocoa_check_events;
+        ctx->update_xinerama_info = cocoa_update_xinerama_info;
+        ctx->fullscreen = cocoa_fullscreen;
+        if (vo_cocoa_init(vo))
+            return ctx;
+        break;
+#endif
 #ifdef CONFIG_GL_WIN32
     case GLTYPE_W32:
         ctx->create_window = create_window_w32;
@@ -2053,6 +2109,11 @@ void uninit_mpglcontext(MPGLContext *ctx)
         return;
     ctx->releaseGlContext(ctx);
     switch (ctx->type) {
+#ifdef CONFIG_GL_COCOA
+    case GLTYPE_COCOA:
+        vo_cocoa_uninit(ctx->vo);
+        break;
+#endif
 #ifdef CONFIG_GL_WIN32
     case GLTYPE_W32:
         vo_w32_uninit();

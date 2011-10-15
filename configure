@@ -419,6 +419,7 @@ Video output:
   --disable-md5sum         disable md5sum video output [enable]
   --disable-yuv4mpeg       disable yuv4mpeg video output [enable]
   --disable-corevideo      disable CoreVideo video output [autodetect]
+  --disable-cocoa          disable Cocoa OpenGL backend [autodetect]
   --disable-quartz         disable Quartz video output [autodetect]
 
 Audio output:
@@ -680,6 +681,7 @@ _fontconfig=auto
 _qtx=auto
 _coreaudio=auto
 _corevideo=auto
+_cocoa=auto
 _quartz=auto
 quicktime=auto
 _macosx_finder=no
@@ -1115,6 +1117,8 @@ for ac_option do
   --disable-coreaudio) _coreaudio=no ;;
   --enable-corevideo) _corevideo=yes ;;
   --disable-corevideo) _corevideo=no ;;
+  --enable-cocoa) _cocoa=yes ;;
+  --disable-cocoa) _cocoa=no ;;
   --enable-quartz) _quartz=yes ;;
   --disable-quartz) _quartz=no ;;
   --enable-macosx-finder) _macosx_finder=yes ;;
@@ -4215,6 +4219,26 @@ else
 fi
 echores "$_corevideo"
 
+echocheck "Cocoa"
+if test "$_gl" = no ; then
+  # if _gl is not enabled there is no point to add potentially unused linker flags
+  _cocoa=no
+fi
+if test "$_cocoa" = auto ; then
+  cat > $TMPC <<EOF
+#include <CoreServices/CoreServices.h>
+#include <OpenGL/OpenGL.h>
+#include <QuartzCore/CoreVideo.h>
+int main(void) { return 0; }
+EOF
+  _cocoa=no
+  cc_check -framework Cocoa -framework QuartzCore -framework OpenGL && _cocoa=yes
+fi
+if test "$_cocoa" = yes ; then
+  libs_mplayer="$libs_mplayer -framework Cocoa -framework QuartzCore -framework OpenGL"
+fi
+echores "$_cocoa"
+
 fi #if darwin
 
 
@@ -4473,7 +4497,7 @@ echores "$_sdl"
 # conflicts between -lGL and -framework OpenGL
 echocheck "OpenGL"
 #Note: this test is run even with --enable-gl since we autodetect linker flags
-if (test "$_x11" = yes || test "$_sdl" = yes || win32) && test "$_gl" != no ; then
+if (test "$_x11" = yes || test "$_sdl" = yes || test "$_cocoa" = yes || win32) && test "$_gl" != no ; then
   cat > $TMPC << EOF
 #ifdef GL_WIN32
 #include <windows.h>
@@ -4521,6 +4545,10 @@ EOF
     _gl_win32=yes
     libs_mplayer="$libs_mplayer -lopengl32 -lgdi32"
   fi
+  if test "$_cocoa" = yes ; then
+    _gl=yes
+    _gl_cocoa=yes
+  fi
   # last so it can reuse any linker etc. flags detected before
   if test "$_sdl" = yes ; then
     if cc_check -DGL_SDL ||
@@ -4540,6 +4568,10 @@ fi
 if test "$_gl" = yes ; then
   def_gl='#define CONFIG_GL 1'
   res_comment="backends:"
+  if test "$_gl_cocoa" = yes ; then
+    def_gl_cocoa='#define CONFIG_GL_COCOA 1'
+    res_comment="$res_comment cocoa"
+  fi
   if test "$_gl_win32" = yes ; then
     def_gl_win32='#define CONFIG_GL_WIN32 1'
     res_comment="$res_comment win32"
@@ -4555,6 +4587,7 @@ if test "$_gl" = yes ; then
   vomodules="opengl $vomodules"
 else
   def_gl='#undef CONFIG_GL'
+  def_gl_cocoa='#undef CONFIG_GL_COCOA'
   def_gl_win32='#undef CONFIG_GL_WIN32'
   def_gl_x11='#undef CONFIG_GL_X11'
   def_gl_sdl='#undef CONFIG_GL_SDL'
@@ -6680,6 +6713,7 @@ FTP = $_ftp
 GIF = $_gif
 GGI = $_ggi
 GL = $_gl
+GL_COCOA = $_gl_cocoa
 GL_WIN32 = $_gl_win32
 GL_X11 = $_gl_x11
 GL_SDL = $_gl_sdl
@@ -7085,6 +7119,7 @@ $def_gif
 $def_gif_4
 $def_gif_tvt_hack
 $def_gl
+$def_gl_cocoa
 $def_gl_win32
 $def_gl_x11
 $def_gl_sdl

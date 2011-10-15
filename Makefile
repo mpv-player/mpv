@@ -456,6 +456,7 @@ SRCS_MPLAYER-$(GGI)          += libvo/vo_ggi.c
 SRCS_MPLAYER-$(GIF)          += libvo/vo_gif89a.c
 SRCS_MPLAYER-$(GL)           += libvo/gl_common.c libvo/vo_gl.c \
                                 pnm_loader.c
+SRCS_MPLAYER-$(GL_COCOA)     += libvo/cocoa_common.m
 SRCS_MPLAYER-$(GL_SDL)       += libvo/sdl_common.c
 SRCS_MPLAYER-$(GL_WIN32)     += libvo/w32_common.c
 SRCS_MPLAYER-$(GL_X11)       += libvo/x11_common.c
