@@ -401,6 +401,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             case PIX_FMT_BGR24:
                 codec->codec_tag = MKTAG(24, 'R', 'G', 'B');
             }
+            if (!codec->codec_tag)
+                codec->codec_tag = avcodec_pix_fmt_to_codec_tag(codec->pix_fmt);
         }
         if (!codec->codec_tag)
             codec->codec_tag = mp_av_codec_get_tag(mp_bmp_taglists,
