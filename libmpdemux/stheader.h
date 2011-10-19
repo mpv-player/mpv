@@ -77,9 +77,6 @@ typedef struct sh_audio {
     int a_buffer_size;
     struct af_stream *afilter;          // the audio filter stream
     const struct ad_functions *ad_driver;
-#ifdef CONFIG_DYNAMIC_PLUGINS
-    void *dec_handle;
-#endif
     // win32-compatible codec parameters:
     AVIStreamHeader audio;
     WAVEFORMATEX *wf;
@@ -122,9 +119,6 @@ typedef struct sh_video {
     int output_flags;       // query_format() results for output filters+vo
     const struct vd_functions *vd_driver;
     int vf_initialized;   // -1 failed, 0 not done, 1 done
-#ifdef CONFIG_DYNAMIC_PLUGINS
-    void *dec_handle;
-#endif
     // win32-compatible codec parameters:
     AVIStreamHeader video;
     BITMAPINFOHEADER *bih;

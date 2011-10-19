@@ -37,10 +37,6 @@
 
 #include "libaf/af.h"
 
-#ifdef CONFIG_DYNAMIC_PLUGINS
-#include <dlfcn.h>
-#endif
-
 #ifdef CONFIG_FAKE_MONO
 int fakemono = 0;
 #endif
@@ -177,42 +173,6 @@ static int init_audio(sh_audio_t *sh_audio, char *codecname, char *afm,
 		 sh_audio->codec->drv))
 		break;
 	mpadec = mpcodecs_ad_drivers[i];
-#ifdef CONFIG_DYNAMIC_PLUGINS
-	if (!mpadec) {
-	    /* try to open shared decoder plugin */
-	    int buf_len;
-	    char *buf;
-	    ad_functions_t *funcs_sym;
-	    ad_info_t *info_sym;
-
-	    buf_len =
-		strlen(MPLAYER_LIBDIR) + strlen(sh_audio->codec->drv) + 16;
-	    buf = malloc(buf_len);
-	    if (!buf)
-		break;
-	    snprintf(buf, buf_len, "%s/mplayer/ad_%s.so", MPLAYER_LIBDIR,
-		     sh_audio->codec->drv);
-	    mp_msg(MSGT_DECAUDIO, MSGL_DBG2,
-		   "Trying to open external plugin: %s\n", buf);
-	    sh_audio->dec_handle = dlopen(buf, RTLD_LAZY);
-	    if (!sh_audio->dec_handle)
-		break;
-	    snprintf(buf, buf_len, "mpcodecs_ad_%s", sh_audio->codec->drv);
-	    funcs_sym = dlsym(sh_audio->dec_handle, buf);
-	    if (!funcs_sym || !funcs_sym->info || !funcs_sym->preinit
-		|| !funcs_sym->init || !funcs_sym->uninit
-		|| !funcs_sym->control || !funcs_sym->decode_audio)
-		break;
-	    info_sym = funcs_sym->info;
-	    if (strcmp(info_sym->short_name, sh_audio->codec->drv))
-		break;
-	    free(buf);
-	    mpadec = funcs_sym;
-	    mp_msg(MSGT_DECAUDIO, MSGL_V,
-		   "Using external decoder plugin (%s/mplayer/ad_%s.so)!\n",
-		   MPLAYER_LIBDIR, sh_audio->codec->drv);
-	}
-#endif
 	if (!mpadec) {		// driver not available (==compiled in)
 	    mp_tmsg(MSGT_DECAUDIO, MSGL_ERR,
 		   "Requested audio codec family [%s] (afm=%s) not available.\nEnable it at compilation.\n",
@@ -308,10 +268,6 @@ void uninit_audio(sh_audio_t *sh_audio)
 	mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Uninit audio: %s\n",
 	       sh_audio->codec->drv);
 	sh_audio->ad_driver->uninit(sh_audio);
-#ifdef CONFIG_DYNAMIC_PLUGINS
-	if (sh_audio->dec_handle)
-	    dlclose(sh_audio->dec_handle);
-#endif
 	sh_audio->initialized = 0;
     }
     av_freep(&sh_audio->a_buffer);

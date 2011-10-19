@@ -44,10 +44,6 @@
 
 #include "dec_video.h"
 
-#ifdef CONFIG_DYNAMIC_PLUGINS
-#include <dlfcn.h>
-#endif
-
 // ===================================================================
 
 extern double video_time_usage;
@@ -233,10 +229,6 @@ void uninit_video(sh_video_t *sh_video)
         return;
     mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Uninit video: %s\n", sh_video->codec->drv);
     sh_video->vd_driver->uninit(sh_video);
-#ifdef CONFIG_DYNAMIC_PLUGINS
-    if (sh_video->dec_handle)
-        dlclose(sh_video->dec_handle);
-#endif
     vf_uninit_filter_chain(sh_video->vfilter);
     sh_video->initialized = 0;
 }
@@ -296,42 +288,6 @@ static int init_video(sh_video_t *sh_video, char *codecname, char *vfm,
                         sh_video->codec->drv))
                 break;
         sh_video->vd_driver = mpcodecs_vd_drivers[i];
-#ifdef CONFIG_DYNAMIC_PLUGINS
-        if (!sh_video->vd_driver) {
-            /* try to open shared decoder plugin */
-            int buf_len;
-            char *buf;
-            vd_functions_t *funcs_sym;
-            vd_info_t *info_sym;
-
-            buf_len =
-                strlen(MPLAYER_LIBDIR) + strlen(sh_video->codec->drv) + 16;
-            buf = malloc(buf_len);
-            if (!buf)
-                break;
-            snprintf(buf, buf_len, "%s/mplayer/vd_%s.so", MPLAYER_LIBDIR,
-                     sh_video->codec->drv);
-            mp_msg(MSGT_DECVIDEO, MSGL_DBG2,
-                   "Trying to open external plugin: %s\n", buf);
-            sh_video->dec_handle = dlopen(buf, RTLD_LAZY);
-            if (!sh_video->dec_handle)
-                break;
-            snprintf(buf, buf_len, "mpcodecs_vd_%s", sh_video->codec->drv);
-            funcs_sym = dlsym(sh_video->dec_handle, buf);
-            if (!funcs_sym || !funcs_sym->info || !funcs_sym->init
-                || !funcs_sym->uninit || !funcs_sym->control
-                || !funcs_sym->decode)
-                break;
-            info_sym = funcs_sym->info;
-            if (strcmp(info_sym->short_name, sh_video->codec->drv))
-                break;
-            free(buf);
-            sh_video->vd_driver = funcs_sym;
-            mp_msg(MSGT_DECVIDEO, MSGL_V,
-                   "Using external decoder plugin (%s/mplayer/vd_%s.so)!\n",
-                   MPLAYER_LIBDIR, sh_video->codec->drv);
-        }
-#endif
         if (!sh_video->vd_driver) {    // driver not available (==compiled in)
             mp_tmsg(MSGT_DECVIDEO, MSGL_WARN,
                    _("Requested video codec family [%s] (vfm=%s) not available.\nEnable it at compilation.\n"),

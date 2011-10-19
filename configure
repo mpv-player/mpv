@@ -496,7 +496,6 @@ Advanced options:
   --enable-profile          compile-in profiling information [disable]
   --disable-sighandler      disable sighandler for crashes [enable]
   --enable-crash-debug      enable automatic gdb attach on crash [disable]
-  --enable-dynamic-plugins  enable dynamic A/V plugins [disable]
 
 Use these options if autodetection fails:
   --extra-cflags=FLAGS        extra CFLAGS
@@ -672,7 +671,6 @@ _bl=no
 _shm=auto
 _translation=no
 _charset="UTF-8"
-_dynamic_plugins=no
 _crash_debug=no
 _sighandler=yes
 _libdv=auto
@@ -843,8 +841,6 @@ for ac_option do
   --disable-cross-compile)          _cross_compile=no           ;;
   --enable-mplayer)     _mplayer=yes    ;;
   --disable-mplayer)    _mplayer=no     ;;
-  --enable-dynamic-plugins) _dynamic_plugins=yes ;;
-  --disable-dynamic-plugins) _dynamic_plugins=no ;;
   --enable-x11)         _x11=yes        ;;
   --disable-x11)        _x11=no         ;;
   --enable-xshape)      _xshape=yes     ;;
@@ -3102,18 +3098,6 @@ else
   def_dl='#undef HAVE_LIBDL'
 fi
 echores "$_dl"
-
-
-echocheck "dynamic a/v plugins support"
-if test "$_dl" = no ; then
-  _dynamic_plugins=no
-fi
-if test "$_dynamic_plugins" = yes ; then
-  def_dynamic_plugins='#define CONFIG_DYNAMIC_PLUGINS 1'
-else
-  def_dynamic_plugins='#undef CONFIG_DYNAMIC_PLUGINS'
-fi
-echores "$_dynamic_plugins"
 
 
 def_threads='#define HAVE_THREADS 0'
@@ -6888,7 +6872,6 @@ cat > $TMPH << EOF
 
 #define MPLAYER_DATADIR "$_datadir"
 #define MPLAYER_CONFDIR "$_confdir"
-#define MPLAYER_LIBDIR "$_libdir"
 #define MPLAYER_LOCALEDIR "$_localedir"
 
 $def_translation
@@ -6973,7 +6956,6 @@ $def_unrar_exec
 $def_charset
 $def_crash_debug
 $def_debug
-$def_dynamic_plugins
 $def_fastmemcpy
 $def_menu
 $def_runtime_cpudetection
