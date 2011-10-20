@@ -294,7 +294,7 @@ inline static off_t stream_tell(stream_t *s){
 
 inline static int stream_seek(stream_t *s,off_t pos){
 
-  mp_dbg(MSGT_DEMUX, MSGL_DBG3, "seek to 0x%qX\n",(long long)pos);
+  mp_dbg(MSGT_DEMUX, MSGL_DBG3, "seek to 0x%llX\n", (long long)pos);
 
   if (pos < 0) {
     mp_msg(MSGT_DEMUX, MSGL_ERR, "Invalid seek to negative position %llx!\n",
