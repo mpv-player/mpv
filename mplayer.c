@@ -28,7 +28,6 @@
 #include "talloc.h"
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
-#define _UWIN 1  /*disable Non-underscored versions of non-ANSI functions as otherwise int eof would conflict with eof()*/
 #include <windows.h>
 #endif
 #include <string.h>
