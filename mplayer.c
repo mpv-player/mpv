@@ -2701,8 +2701,11 @@ int reinit_video_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     sh_video_t * const sh_video = mpctx->sh_video;
-    if (!sh_video)
+    if (!sh_video){
+        uninit_player(mpctx, INITIALIZED_VO);
         return 0;
+    }
+
     double ar = -1.0;
     //================== Init VIDEO (codec & libvo) ==========================
     if (!opts->fixed_vo || !(mpctx->initialized_flags & INITIALIZED_VO)) {
