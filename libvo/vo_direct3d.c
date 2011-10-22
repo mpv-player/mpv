@@ -609,12 +609,7 @@ skip_upload:
     return VO_TRUE;
 }
 
-
-/** @brief Query if movie colorspace is supported by the HW.
- *  @return 0 on failure, device capabilities (not probed
- *          currently) on success.
- */
-static int query_format(uint32_t movie_fmt)
+static const struct_fmt_table *check_format(uint32_t movie_fmt)
 {
     int i;
     for (i = 0; i < DISPLAY_FORMAT_TABLE_ENTRIES; i++) {
@@ -628,19 +623,31 @@ static int query_format(uint32_t movie_fmt)
                                                               priv->desktop_fmt))) {
                 mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Rejected image format: %s\n",
                        vo_format_name(fmt_table[i].mplayer_fmt));
-                return 0;
+                return NULL;
             }
 
-            priv->movie_src_fmt = fmt_table[i].fourcc;
             mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Accepted image format: %s\n",
                    vo_format_name(fmt_table[i].mplayer_fmt));
-            return (VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
-                    | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN);
 
+            return &fmt_table[i];
         }
     }
 
     return 0;
+}
+
+
+/** @brief Query if movie colorspace is supported by the HW.
+ *  @return 0 on failure, device capabilities (not probed
+ *          currently) on success.
+ */
+static int query_format(uint32_t movie_fmt)
+{
+    if (!check_format(movie_fmt))
+        return 0;
+
+    return (VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
+            | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN);
 }
 
 /****************************************************************************
@@ -824,6 +831,12 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     priv->src_width  = width;
     priv->src_height = height;
+
+    const struct_fmt_table *fmt_entry = check_format(format);
+    if (!fmt_entry)
+        return VO_ERROR;
+
+    priv->movie_src_fmt = fmt_entry->fourcc;
 
     /* w32_common framework call. Creates window on the screen with
      * the given coordinates.
