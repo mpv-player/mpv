@@ -1409,13 +1409,6 @@ int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
         talloc_strndup(demuxer->chapters, name.start, name.len) :
         talloc_strdup(demuxer->chapters, mp_gtext("unknown"));
 
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_ID=%d\n", demuxer->num_chapters);
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_START=%"PRIu64"\n", demuxer->num_chapters, start / 1000000);
-    if (end)
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_END=%"PRIu64"\n", demuxer->num_chapters, end / 1000000);
-    if (name.start)
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_NAME=%.*s\n", demuxer->num_chapters, BSTR_P(name));
-
     return demuxer->num_chapters++;
 }
 
@@ -1425,12 +1418,10 @@ int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
  *        or asking help to the stream layer (e.g. dvd)
  * \param chapter - chapter number wished - 0-based
  * \param seek_pts set by the function to the pts to seek to (if demuxer->chapters is set)
- * \param chapter_name name of chapter found (set by this function is param is not null)
  * \return -1 on error, current chapter if successful
  */
 
-int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, double *seek_pts,
-                         char **chapter_name)
+int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, double *seek_pts)
 {
     int ris;
 
@@ -1446,18 +1437,6 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, double *seek_pts,
         // (because e.g. dvds depend on sectors, not on pts)
         *seek_pts = -1.0;
 
-        if (chapter_name) {
-            *chapter_name = NULL;
-            int num_chapters;
-            if (stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS,
-                               &num_chapters) == STREAM_UNSUPPORTED)
-                num_chapters = 0;
-            if (num_chapters) {
-                *chapter_name = talloc_size(NULL, 16);
-                sprintf(*chapter_name, " of %3d", num_chapters);
-            }
-        }
-
         return ris != STREAM_UNSUPPORTED ? chapter : -1;
     } else {  // chapters structure is set in the demuxer
         if (chapter >= demuxer->num_chapters)
@@ -1466,9 +1445,6 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, double *seek_pts,
             chapter = 0;
 
         *seek_pts = demuxer->chapters[chapter].start / 1e9;
-
-        if (chapter_name)
-            *chapter_name = talloc_strdup(NULL, demuxer->chapters[chapter].name);
 
         return chapter;
     }
@@ -1496,26 +1472,9 @@ char *demuxer_chapter_name(demuxer_t *demuxer, int chapter)
     if (demuxer->num_chapters && demuxer->chapters) {
         if (chapter >= 0 && chapter < demuxer->num_chapters
             && demuxer->chapters[chapter].name)
-            return strdup(demuxer->chapters[chapter].name);
+            return talloc_strdup(NULL, demuxer->chapters[chapter].name);
     }
     return NULL;
-}
-
-char *demuxer_chapter_display_name(demuxer_t *demuxer, int chapter)
-{
-    char *chapter_name = demuxer_chapter_name(demuxer, chapter);
-    if (chapter_name) {
-        char *tmp = talloc_asprintf(NULL, "(%d) %s", chapter + 1, chapter_name);
-        free(chapter_name);
-        return tmp;
-    } else {
-        int chapter_num = demuxer_chapter_count(demuxer);
-        if (chapter_num <= 0)
-            return talloc_asprintf(NULL, "(%d)", chapter + 1);
-        else
-            return talloc_asprintf(NULL, "(%d) of %d", chapter + 1,
-                                   chapter_num);
-    }
 }
 
 float demuxer_chapter_time(demuxer_t *demuxer, int chapter, float *end)

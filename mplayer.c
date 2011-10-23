@@ -567,12 +567,20 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
            mpctx->stream->seek
            && (!mpctx->demuxer || mpctx->demuxer->seekable));
     if (mpctx->demuxer) {
-        if (mpctx->demuxer->num_chapters == 0)
-            stream_control(mpctx->demuxer->stream,
-                           STREAM_CTRL_GET_NUM_CHAPTERS,
-                           &mpctx->demuxer->num_chapters);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_CHAPTERS=%d\n", mpctx->demuxer->num_chapters);
+        int chapter_count = get_chapter_count(mpctx);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTERS=%d\n", chapter_count);
+        for (int i = 0; i < chapter_count; i++) {
+            mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_ID=%d\n", i);
+            // in milliseconds
+            mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_START=%"PRIu64"\n",
+                   i, (int64_t)(chapter_start_time(mpctx, i) * 1000.0));
+            char *name = chapter_name(mpctx, i);
+            if (name) {
+                mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_NAME=%s\n", i,
+                       name);
+                talloc_free(name);
+            }
+        }
     }
 }
 
@@ -3431,21 +3439,50 @@ int get_current_chapter(struct MPContext *mpctx)
     return FFMAX(mpctx->last_chapter_seek, i - 1);
 }
 
-// currently returns a string allocated with malloc, not talloc
 char *chapter_display_name(struct MPContext *mpctx, int chapter)
 {
+    char *name = chapter_name(mpctx, chapter);
+    if (name) {
+        name = talloc_asprintf(name, "(%d) %s", chapter + 1, name);
+    } else {
+        int chapter_count = get_chapter_count(mpctx);
+        if (chapter_count <= 0)
+            name = talloc_asprintf(NULL, "(%d)", chapter + 1);
+        else
+            name = talloc_asprintf(NULL, "(%d) of %d", chapter + 1,
+                                   chapter_count);
+    }
+    return name;
+}
+
+// returns NULL if chapter name unavailable
+char *chapter_name(struct MPContext *mpctx, int chapter)
+{
     if (!mpctx->chapters)
-        return demuxer_chapter_display_name(mpctx->demuxer, chapter);
+        return demuxer_chapter_name(mpctx->demuxer, chapter);
     return talloc_strdup(NULL, mpctx->chapters[chapter].name);
 }
 
-int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
-                 char **chapter_name)
+// returns the start of the chapter in seconds
+double chapter_start_time(struct MPContext *mpctx, int chapter)
+{
+    if (!mpctx->chapters)
+        return demuxer_chapter_time(mpctx->demuxer, chapter, NULL);
+    return mpctx->chapters[chapter].start;
+}
+
+int get_chapter_count(struct MPContext *mpctx)
+{
+    if (!mpctx->chapters)
+        return demuxer_chapter_count(mpctx->demuxer);
+    return mpctx->num_chapters;
+}
+
+int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts)
 {
     mpctx->last_chapter_seek = -2;
     if (!mpctx->chapters) {
-        int res = demuxer_seek_chapter(mpctx->demuxer, chapter, seek_pts,
-                                       chapter_name);
+        int res = demuxer_seek_chapter(mpctx->demuxer, chapter, seek_pts);
         if (res >= 0) {
             if (*seek_pts == -1)
                 seek_reset(mpctx, true);
@@ -3464,8 +3501,6 @@ int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
     *seek_pts = mpctx->chapters[chapter].start;
     mpctx->last_chapter_seek = chapter;
     mpctx->last_chapter_pts = *seek_pts;
-    if (chapter_name)
-        *chapter_name = talloc_strdup(NULL, mpctx->chapters[chapter].name);
     return chapter;
 }
 
@@ -4919,7 +4954,7 @@ goto_enable_cache:
     }
     if (opts->chapterrange[0] > 0) {
         double pts;
-        if (seek_chapter(mpctx, opts->chapterrange[0] - 1, &pts, NULL) >= 0
+        if (seek_chapter(mpctx, opts->chapterrange[0] - 1, &pts) >= 0
             && pts > -1.0) {
             queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, 0);
             seek(mpctx, mpctx->seek, false);

@@ -242,13 +242,15 @@ void unpause_player(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx);
 void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
                 int exact);
-int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
-                 char **chapter_name);
+int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts);
 double get_time_length(struct MPContext *mpctx);
 double get_current_time(struct MPContext *mpctx);
 int get_percent_pos(struct MPContext *mpctx);
 int get_current_chapter(struct MPContext *mpctx);
 char *chapter_display_name(struct MPContext *mpctx, int chapter);
+char *chapter_name(struct MPContext *mpctx, int chapter);
+double chapter_start_time(struct MPContext *mpctx, int chapter);
+int get_chapter_count(struct MPContext *mpctx);
 void update_subtitles(struct MPContext *mpctx, double refpts,
                       double sub_offset, bool reset);
 

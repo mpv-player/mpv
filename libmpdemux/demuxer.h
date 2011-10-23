@@ -400,15 +400,13 @@ int demuxer_add_attachment(struct demuxer *demuxer, struct bstr name,
                            struct bstr type, struct bstr data);
 int demuxer_add_chapter(struct demuxer *demuxer, struct bstr name,
                         uint64_t start, uint64_t end);
-int demuxer_seek_chapter(struct demuxer *demuxer, int chapter, double *seek_pts,
-                         char **chapter_name);
+int demuxer_seek_chapter(struct demuxer *demuxer, int chapter,
+                         double *seek_pts);
 
 /// Get current chapter index if available.
 int demuxer_get_current_chapter(struct demuxer *demuxer, double time_now);
 /// Get chapter name by index if available.
 char *demuxer_chapter_name(struct demuxer *demuxer, int chapter);
-/// Get chapter display name by index.
-char *demuxer_chapter_display_name(struct demuxer *demuxer, int chapter);
 /// Get chapter start time and end time by index if available.
 float demuxer_chapter_time(struct demuxer *demuxer, int chapter, float *end);
 /// Get total chapter number.

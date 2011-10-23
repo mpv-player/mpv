@@ -527,13 +527,13 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
 
     double next_pts = 0;
     queue_seek(mpctx, MPSEEK_NONE, 0, 0);
-    chapter = seek_chapter(mpctx, chapter, &next_pts, &chapter_name);
+    chapter = seek_chapter(mpctx, chapter, &next_pts);
     if (chapter >= 0) {
         if (next_pts > -1.0)
             queue_seek(mpctx, MPSEEK_ABSOLUTE, next_pts, 0);
-        if (chapter_name)
-            set_osd_tmsg(OSD_MSG_TEXT, 1, opts->osd_duration,
-                         "Chapter: (%d) %s", chapter + 1, chapter_name);
+        chapter_name = chapter_display_name(mpctx, chapter);
+        set_osd_tmsg(OSD_MSG_TEXT, 1, opts->osd_duration,
+                     "Chapter: %s", chapter_name);
     } else if (step_all > 0)
         queue_seek(mpctx, MPSEEK_RELATIVE, 1000000000, 0);
     else
@@ -549,10 +549,8 @@ static int mp_property_chapters(m_option_t *prop, int action, void *arg,
 {
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
-    if (mpctx->demuxer->num_chapters == 0)
-        stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS,
-                       &mpctx->demuxer->num_chapters);
-    return m_property_int_ro(prop, action, arg, mpctx->demuxer->num_chapters);
+    int count = get_chapter_count(mpctx);
+    return m_property_int_ro(prop, action, arg, count);
 }
 
 /// Current dvd angle (RW)
