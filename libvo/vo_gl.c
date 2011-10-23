@@ -1264,7 +1264,7 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw,
                "    also try to use the GL_MESA_ycbcr_texture extension\n"
                "  yuv=<n>\n"
                "    0: use software YUV to RGB conversion.\n"
-               "    1: use register combiners (nVidia only, for older cards).\n"
+               "    1: deprecated, will use yuv=2 (used to be nVidia register combiners).\n"
                "    2: use fragment program.\n"
                "    3: use fragment program with gamma correction.\n"
                "    4: use fragment program with gamma correction via lookup.\n"
@@ -1311,6 +1311,11 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw,
         mp_msg(MSGT_VO, MSGL_ERR, "[gl] \"noaspect\" suboption has been "
                "removed. Use --noaspect instead.\n");
         return -1;
+    }
+    if (p->use_yuv == 1) {
+        mp_msg(MSGT_VO, MSGL_WARN, "[gl] yuv=1 (nVidia register combiners) have"
+               " been removed, using yuv=2 instead.\n");
+        p->use_yuv = 2;
     }
     p->glctx = init_mpglcontext(gltype, vo);
     if (!p->glctx)

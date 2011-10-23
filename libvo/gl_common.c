@@ -371,14 +371,6 @@ static const extfunc_desc_t extfuncs[] = {
                  ("glUnmapBuffer", "glUnmapBufferARB")),
     DEF_EXT_DESC(BufferData, NULL,
                  ("glBufferData", "glBufferDataARB")),
-    DEF_EXT_DESC(CombinerParameterfv, "NV_register_combiners",
-                 ("glCombinerParameterfv", "glCombinerParameterfvNV")),
-    DEF_EXT_DESC(CombinerParameteri, "NV_register_combiners",
-                 ("glCombinerParameteri", "glCombinerParameteriNV")),
-    DEF_EXT_DESC(CombinerInput, "NV_register_combiners",
-                 ("glCombinerInput", "glCombinerInputNV")),
-    DEF_EXT_DESC(CombinerOutput, "NV_register_combiners",
-                 ("glCombinerOutput", "glCombinerOutputNV")),
     DEF_EXT_DESC(BeginFragmentShader, "ATI_fragment_shader",
                  ("glBeginFragmentShaderATI")),
     DEF_EXT_DESC(EndFragmentShader, "ATI_fragment_shader",
@@ -640,86 +632,6 @@ void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
     }
     if (y < y_max)
         gl->TexSubImage2D(target, 0, x, y, w, y_max - y, format, type, data);
-}
-
-static void fillUVcoeff(GLfloat *ucoef, GLfloat *vcoef,
-                        float uvcos, float uvsin)
-{
-    int i;
-    ucoef[0] = 0 * uvcos + 1.403 * uvsin;
-    vcoef[0] = 0 * uvsin + 1.403 * uvcos;
-    ucoef[1] = -0.344 * uvcos + -0.714 * uvsin;
-    vcoef[1] = -0.344 * uvsin + -0.714 * uvcos;
-    ucoef[2] = 1.770 * uvcos + 0 * uvsin;
-    vcoef[2] = 1.770 * uvsin + 0 * uvcos;
-    ucoef[3] = 0;
-    vcoef[3] = 0;
-    // Coefficients (probably) must be in [0, 1] range, whereas they originally
-    // are in [-2, 2] range, so here comes the trick:
-    // First put them in the [-0.5, 0.5] range, then add 0.5.
-    // This can be undone with the HALF_BIAS and SCALE_BY_FOUR arguments
-    // for CombinerInput and CombinerOutput (or the respective ATI variants)
-    for (i = 0; i < 4; i++) {
-        ucoef[i] = ucoef[i] * 0.25 + 0.5;
-        vcoef[i] = vcoef[i] * 0.25 + 0.5;
-    }
-}
-
-/**
- * \brief Setup register combiners for YUV to RGB conversion.
- * \param uvcos used for saturation and hue adjustment
- * \param uvsin used for saturation and hue adjustment
- */
-static void glSetupYUVCombiners(GL *gl, float uvcos, float uvsin)
-{
-    GLfloat ucoef[4];
-    GLfloat vcoef[4];
-    GLint i;
-    if (!gl->CombinerInput || !gl->CombinerOutput ||
-        !gl->CombinerParameterfv || !gl->CombinerParameteri) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Combiner functions missing!\n");
-        return;
-    }
-    gl->GetIntegerv(GL_MAX_GENERAL_COMBINERS_NV, &i);
-    if (i < 2)
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "[gl] 2 general combiners needed for YUV combiner support (found %i)\n", i);
-    gl->GetIntegerv(GL_MAX_TEXTURE_UNITS, &i);
-    if (i < 3)
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "[gl] 3 texture units needed for YUV combiner support (found %i)\n", i);
-    fillUVcoeff(ucoef, vcoef, uvcos, uvsin);
-    gl->CombinerParameterfv(GL_CONSTANT_COLOR0_NV, ucoef);
-    gl->CombinerParameterfv(GL_CONSTANT_COLOR1_NV, vcoef);
-
-    // UV first, like this green component cannot overflow
-    gl->CombinerInput(GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV,
-                      GL_TEXTURE1, GL_HALF_BIAS_NORMAL_NV, GL_RGB);
-    gl->CombinerInput(GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV,
-                      GL_CONSTANT_COLOR0_NV, GL_HALF_BIAS_NORMAL_NV, GL_RGB);
-    gl->CombinerInput(GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_C_NV,
-                      GL_TEXTURE2, GL_HALF_BIAS_NORMAL_NV, GL_RGB);
-    gl->CombinerInput(GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV,
-                      GL_CONSTANT_COLOR1_NV, GL_HALF_BIAS_NORMAL_NV, GL_RGB);
-    gl->CombinerOutput(GL_COMBINER0_NV, GL_RGB, GL_DISCARD_NV, GL_DISCARD_NV,
-                       GL_SPARE0_NV, GL_SCALE_BY_FOUR_NV, GL_NONE, GL_FALSE,
-                       GL_FALSE, GL_FALSE);
-
-    // stage 2
-    gl->CombinerInput(GL_COMBINER1_NV, GL_RGB, GL_VARIABLE_A_NV, GL_SPARE0_NV,
-                      GL_SIGNED_IDENTITY_NV, GL_RGB);
-    gl->CombinerInput(GL_COMBINER1_NV, GL_RGB, GL_VARIABLE_B_NV, GL_ZERO,
-                      GL_UNSIGNED_INVERT_NV, GL_RGB);
-    gl->CombinerInput(GL_COMBINER1_NV, GL_RGB, GL_VARIABLE_C_NV,
-                      GL_TEXTURE0, GL_SIGNED_IDENTITY_NV, GL_RGB);
-    gl->CombinerInput(GL_COMBINER1_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO,
-                      GL_UNSIGNED_INVERT_NV, GL_RGB);
-    gl->CombinerOutput(GL_COMBINER1_NV, GL_RGB, GL_DISCARD_NV, GL_DISCARD_NV,
-                       GL_SPARE0_NV, GL_NONE, GL_NONE, GL_FALSE,
-                       GL_FALSE, GL_FALSE);
-
-    // leave final combiner stage in default mode
-    gl->CombinerParameteri(GL_NUM_GENERAL_COMBINERS_NV, 2);
 }
 
 /**
@@ -1386,16 +1298,11 @@ int glAutodetectYUVConversion(GL *gl)
  */
 void glSetupYUVConversion(GL *gl, gl_conversion_params_t *params)
 {
-    float uvcos = params->csp_params.saturation * cos(params->csp_params.hue);
-    float uvsin = params->csp_params.saturation * sin(params->csp_params.hue);
     if (params->chrom_texw == 0)
         params->chrom_texw = 1;
     if (params->chrom_texh == 0)
         params->chrom_texh = 1;
     switch (YUV_CONVERSION(params->type)) {
-    case YUV_CONVERSION_COMBINERS:
-        glSetupYUVCombiners(gl, uvcos, uvsin);
-        break;
     case YUV_CONVERSION_COMBINERS_ATI:
         glSetupYUVFragmentATI(gl, &params->csp_params, 0);
         break;
@@ -1425,14 +1332,6 @@ void glSetupYUVConversion(GL *gl, gl_conversion_params_t *params)
 void glEnableYUVConversion(GL *gl, GLenum target, int type)
 {
     switch (YUV_CONVERSION(type)) {
-    case YUV_CONVERSION_COMBINERS:
-        gl->ActiveTexture(GL_TEXTURE1);
-        gl->Enable(target);
-        gl->ActiveTexture(GL_TEXTURE2);
-        gl->Enable(target);
-        gl->ActiveTexture(GL_TEXTURE0);
-        gl->Enable(GL_REGISTER_COMBINERS_NV);
-        break;
     case YUV_CONVERSION_COMBINERS_ATI:
         gl->ActiveTexture(GL_TEXTURE1);
         gl->Enable(target);
@@ -1468,14 +1367,6 @@ void glEnableYUVConversion(GL *gl, GLenum target, int type)
 void glDisableYUVConversion(GL *gl, GLenum target, int type)
 {
     switch (YUV_CONVERSION(type)) {
-    case YUV_CONVERSION_COMBINERS:
-        gl->ActiveTexture(GL_TEXTURE1);
-        gl->Disable(target);
-        gl->ActiveTexture(GL_TEXTURE2);
-        gl->Disable(target);
-        gl->ActiveTexture(GL_TEXTURE0);
-        gl->Disable(GL_REGISTER_COMBINERS_NV);
-        break;
     case YUV_CONVERSION_COMBINERS_ATI:
         gl->ActiveTexture(GL_TEXTURE1);
         gl->Disable(target);

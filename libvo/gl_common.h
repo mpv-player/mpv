@@ -80,57 +80,6 @@
 #ifndef GL_TEXT_FRAGMENT_SHADER_ATI
 #define GL_TEXT_FRAGMENT_SHADER_ATI 0x8200
 #endif
-#ifndef GL_REGISTER_COMBINERS_NV
-#define GL_REGISTER_COMBINERS_NV 0x8522
-#endif
-#ifndef GL_MAX_GENERAL_COMBINERS_NV
-#define GL_MAX_GENERAL_COMBINERS_NV 0x854D
-#endif
-#ifndef GL_NUM_GENERAL_COMBINERS_NV
-#define GL_NUM_GENERAL_COMBINERS_NV 0x854E
-#endif
-#ifndef GL_CONSTANT_COLOR0_NV
-#define GL_CONSTANT_COLOR0_NV 0x852A
-#endif
-#ifndef GL_CONSTANT_COLOR1_NV
-#define GL_CONSTANT_COLOR1_NV 0x852B
-#endif
-#ifndef GL_COMBINER0_NV
-#define GL_COMBINER0_NV 0x8550
-#endif
-#ifndef GL_COMBINER1_NV
-#define GL_COMBINER1_NV 0x8551
-#endif
-#ifndef GL_VARIABLE_A_NV
-#define GL_VARIABLE_A_NV 0x8523
-#endif
-#ifndef GL_VARIABLE_B_NV
-#define GL_VARIABLE_B_NV 0x8524
-#endif
-#ifndef GL_VARIABLE_C_NV
-#define GL_VARIABLE_C_NV 0x8525
-#endif
-#ifndef GL_VARIABLE_D_NV
-#define GL_VARIABLE_D_NV 0x8526
-#endif
-#ifndef GL_UNSIGNED_INVERT_NV
-#define GL_UNSIGNED_INVERT_NV 0x8537
-#endif
-#ifndef GL_HALF_BIAS_NORMAL_NV
-#define GL_HALF_BIAS_NORMAL_NV 0x853A
-#endif
-#ifndef GL_SIGNED_IDENTITY_NV
-#define GL_SIGNED_IDENTITY_NV 0x853C
-#endif
-#ifndef GL_SCALE_BY_FOUR_NV
-#define GL_SCALE_BY_FOUR_NV 0x853F
-#endif
-#ifndef GL_DISCARD_NV
-#define GL_DISCARD_NV 0x8530
-#endif
-#ifndef GL_SPARE0_NV
-#define GL_SPARE0_NV 0x852E
-#endif
 #ifndef GL_FRAGMENT_SHADER_ATI
 #define GL_FRAGMENT_SHADER_ATI 0x8920
 #endif
@@ -317,6 +266,7 @@ int loadGPUProgram(GL *gl, GLenum target, char *prog);
 //! do not use YUV conversion, this should always stay 0
 #define YUV_CONVERSION_NONE 0
 //! use nVidia specific register combiners for YUV conversion
+//! implementation has been removed
 #define YUV_CONVERSION_COMBINERS 1
 //! use a fragment program for YUV conversion
 #define YUV_CONVERSION_FRAGMENT 2
@@ -362,7 +312,6 @@ static inline int glYUVLargeRange(int conv)
 {
     switch (conv) {
     case YUV_CONVERSION_NONE:
-    case YUV_CONVERSION_COMBINERS:
     case YUV_CONVERSION_COMBINERS_ATI:
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_TEXT_FRAGMENT:
@@ -516,13 +465,6 @@ struct GL {
     GLvoid * (GLAPIENTRY * MapBuffer)(GLenum, GLenum);
     GLboolean (GLAPIENTRY *UnmapBuffer)(GLenum);
     void (GLAPIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
-    void (GLAPIENTRY *CombinerParameterfv)(GLenum, const GLfloat *);
-    void (GLAPIENTRY *CombinerParameteri)(GLenum, GLint);
-    void (GLAPIENTRY *CombinerInput)(GLenum, GLenum, GLenum, GLenum, GLenum,
-                                     GLenum);
-    void (GLAPIENTRY *CombinerOutput)(GLenum, GLenum, GLenum, GLenum, GLenum,
-                                      GLenum, GLenum, GLboolean, GLboolean,
-                                      GLboolean);
     void (GLAPIENTRY *BeginFragmentShader)(void);
     void (GLAPIENTRY *EndFragmentShader)(void);
     void (GLAPIENTRY *SampleMap)(GLuint, GLuint, GLenum);
