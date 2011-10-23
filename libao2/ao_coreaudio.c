@@ -133,7 +133,10 @@ static int write_buffer(unsigned char* data, int len){
 static int read_buffer(unsigned char* data,int len){
   int buffered = av_fifo_size(ao->buffer);
   if (len > buffered) len = buffered;
-  av_fifo_generic_read(ao->buffer, data, len, NULL);
+  if (data)
+    av_fifo_generic_read(ao->buffer, data, len, NULL);
+  else
+    av_fifo_drain(ao->buffer, len);
   return len;
 }
 
