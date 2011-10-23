@@ -50,6 +50,7 @@ const char *vo_format_name(int format)
 	case IMGFMT_BGRA: return "BGRA";
 	case IMGFMT_ARGB: return "ARGB";
 	case IMGFMT_RGBA: return "RGBA";
+        case IMGFMT_GBR24P: return "Planar GBR 24-bit";
 	case IMGFMT_YVU9: return "Planar YVU9";
 	case IMGFMT_IF09: return "Planar IF09";
 	case IMGFMT_YV12: return "Planar YV12";
