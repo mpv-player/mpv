@@ -190,43 +190,79 @@ no_utf8:
   return c;
 }
 
+//if obj is NULL, don't render, and just return the metrics
+//sw, sh: screen width/height
+//out_w/out_h: return width/height of the text box (write-only)
+static void vo_update_text_osd_render(const char *cp, mp_osd_obj_t *obj,
+                                      int sw, int sh, int *out_w, int *out_h)
+{
+    int x = 0;
+    int y = 0;
+    int line_height = get_height('t', 0);
+    int w = 0;
+    int h = line_height;
+    int font;
+
+    while (*cp && h < sh && line_height > 0) {
+        const char* prev = cp;
+        uint16_t c = utf8_get_char(&cp);
+        int lf = (c == '\n');
+        int newx;
+        render_one_glyph(vo_font, c);
+        newx = x + vo_font->width[c];
+        if (lf || (newx > sw)) {
+            if (!lf)
+                cp = prev;
+            //can't put at least one char per line?
+            //rare but nasty corner case... simply exit and avoid endless loop
+            if (!lf && x == 0)
+                break;
+            y += h;
+            h = line_height;
+            w = FFMAX(x, w);
+            x = 0;
+            continue;
+        }
+        if (obj && (font = vo_font->font[c]) >= 0)
+            draw_alpha_buf(obj, obj->x + x, obj->y + y,
+                           vo_font->width[c],
+                           vo_font->pic_a[font]->h,
+                           vo_font->pic_b[font]->bmp + vo_font->start[c],
+                           vo_font->pic_a[font]->bmp + vo_font->start[c],
+                           vo_font->pic_a[font]->w);
+        x = newx + vo_font->charspace;
+        h = get_height(c, h);
+    }
+
+    y += h;
+    w = FFMAX(x, w) - vo_font->charspace;
+
+    *out_w = FFMAX(w, 0);
+    *out_h = y;
+}
+
 inline static void vo_update_text_osd(struct osd_state *osd, mp_osd_obj_t* obj,
                                       int dxs, int dys)
 {
 	const char *cp = osd->osd_text;
-	int x=20;
-	int h=0;
-	int font;
+    int w, h, sw, sh;
 
-        obj->bbox.x1=obj->x=x;
-        obj->bbox.y1=obj->y=10;
+    obj->bbox.x1 = obj->x = 20;
+    obj->bbox.y1 = obj->y = 10;
+    sw = dxs - obj->x;
+    sh = dys - obj->y;
 
-        while (*cp){
-          uint16_t c=utf8_get_char(&cp);
-	  render_one_glyph(vo_font, c);
-	  x+=vo_font->width[c]+vo_font->charspace;
-	  h=get_height(c,h);
-        }
+    //first pass: calculate obj bounding box
+    vo_update_text_osd_render(cp, NULL, sw, sh, &w, &h);
 
-	obj->bbox.x2=x-vo_font->charspace;
-	obj->bbox.y2=obj->bbox.y1+h;
-	obj->flags|=OSDFLAG_BBOX;
+    obj->bbox.x2 = obj->bbox.x1 + w;
+    obj->bbox.y2 = obj->bbox.y1 + h;
+    obj->flags |= OSDFLAG_BBOX;
 
-	alloc_buf(obj);
+    alloc_buf(obj);
 
-	cp = osd->osd_text;
-	x = obj->x;
-        while (*cp){
-          uint16_t c=utf8_get_char(&cp);
-          if ((font=vo_font->font[c])>=0)
-            draw_alpha_buf(obj,x,obj->y,
-			   vo_font->width[c],
-			   vo_font->pic_a[font]->h,
-			   vo_font->pic_b[font]->bmp+vo_font->start[c],
-			   vo_font->pic_a[font]->bmp+vo_font->start[c],
-			   vo_font->pic_a[font]->w);
-          x+=vo_font->width[c]+vo_font->charspace;
-        }
+    //second pass: actually draw the text
+    vo_update_text_osd_render(cp, obj, sw, sh, &w, &h);
 }
 
 #ifdef CONFIG_DVDNAV
