@@ -153,6 +153,8 @@ enum mp_command_type {
     MP_CMD_AF_DEL,
     MP_CMD_AF_CLR,
     MP_CMD_AF_CMDLINE,
+
+    MP_CMD_SHOW_CHAPTERS,
 };
 
 // The arg types

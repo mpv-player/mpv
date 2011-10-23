@@ -2806,6 +2806,44 @@ static void clear_play_tree(MPContext *mpctx)
     do_clear_pt(mpctx->playtree, exclude);
 }
 
+static char *format_time(double time)
+{
+    int h, m, s = time;
+    h = s / 3600;
+    s -= h * 3600;
+    m = s / 60;
+    s -= m * 60;
+    return talloc_asprintf(NULL, "%02d:%02d:%02d", h, m, s);
+}
+
+static void show_chapters_on_osd(MPContext *mpctx)
+{
+    int count = get_chapter_count(mpctx);
+    int cur = mpctx->demuxer ? get_current_chapter(mpctx) : -1;
+    char *res = NULL;
+    int n;
+
+    if (count < 1) {
+        res = talloc_asprintf_append(res, "No chapters.");
+    }
+
+    for (n = 0; n < count; n++) {
+        char *name = chapter_display_name(mpctx, n);
+        double t = chapter_start_time(mpctx, n);
+        char* time = format_time(t);
+        res = talloc_asprintf_append(res, "%s", time);
+        talloc_free(time);
+        char *m1 = "> ", *m2 = " <";
+        if (n != cur)
+            m1 = m2 = "";
+        res = talloc_asprintf_append(res, "   %s%s%s\n", m1, name, m2);
+        talloc_free(name);
+    }
+
+    set_osd_msg(OSD_MSG_TEXT, 1, mpctx->opts.osd_duration, "%s", res);
+    talloc_free(res);
+}
+
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -3621,6 +3659,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             af->control(af, AF_CONTROL_COMMAND_LINE, cmd->args[1].v.s);
             af_reinit(sh_audio->afilter, af);
         }
+        break;
+    case MP_CMD_SHOW_CHAPTERS:
+        show_chapters_on_osd(mpctx);
         break;
 
     default:

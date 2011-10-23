@@ -493,6 +493,8 @@ vo_rootwin [value]
 volume <value> [abs]
     Increase/decrease volume or set it to <value> if [abs] is nonzero.
 
+show_chapters_osd
+    Show the list of chapters in the currently played file on the OSD.
 
 Available properties:
 
