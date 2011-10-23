@@ -548,6 +548,12 @@ static GLint get_scale_type(struct vo *vo, int chroma)
     return p->mipmap_gen ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR;
 }
 
+// Return the high byte of the value that represents white in chroma (U/V)
+static int get_chroma_clear_val(int bit_depth)
+{
+    return 1 << (bit_depth - 1 & 7);
+}
+
 /**
  * \brief Initialize a (new or reused) OpenGL context.
  * set global gl-related variables to their default values
@@ -588,10 +594,9 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     if (p->is_yuv) {
         int i;
         int xs, ys, depth;
-        int chroma_clear_val = 128;
         scale_type = get_scale_type(vo, 1);
         mp_get_chroma_shift(p->image_format, &xs, &ys, &depth);
-        chroma_clear_val >>= -depth & 7;
+        int clear = get_chroma_clear_val(depth);
         gl->GenTextures(21, p->default_texs);
         p->default_texs[21] = 0;
         for (i = 0; i < 7; i++) {
@@ -604,14 +609,14 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
         glCreateClearTex(gl, p->target, p->texfmt, p->gl_format,
                          p->gl_type, scale_type,
                          p->texture_width >> xs, p->texture_height >> ys,
-                         chroma_clear_val);
+                         clear);
         if (p->mipmap_gen)
             gl->TexParameteri(p->target, GL_GENERATE_MIPMAP, GL_TRUE);
         gl->ActiveTexture(GL_TEXTURE2);
         glCreateClearTex(gl, p->target, p->texfmt, p->gl_format,
                          p->gl_type, scale_type,
                          p->texture_width >> xs, p->texture_height >> ys,
-                         chroma_clear_val);
+                         clear);
         if (p->mipmap_gen)
             gl->TexParameteri(p->target, GL_GENERATE_MIPMAP, GL_TRUE);
         gl->ActiveTexture(GL_TEXTURE0);
@@ -982,24 +987,23 @@ static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
             mpi->flags &= ~MP_IMGFLAG_COMMON_PLANE;
             if (!p->buffer_uv[0])
                 gl->GenBuffers(2, p->buffer_uv);
-            if (mpi->stride[1] * mpi->height > p->buffersize_uv) {
+            int buffer_size = mpi->stride[1] * mpi->height;
+            if (buffer_size > p->buffersize_uv) {
                 gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer_uv[0]);
-                gl->BufferData(GL_PIXEL_UNPACK_BUFFER,
-                               mpi->stride[1] * mpi->height,
-                               NULL, GL_DYNAMIC_DRAW);
+                gl->BufferData(GL_PIXEL_UNPACK_BUFFER, buffer_size, NULL,
+                               GL_DYNAMIC_DRAW);
                 gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer_uv[1]);
-                gl->BufferData(GL_PIXEL_UNPACK_BUFFER,
-                               mpi->stride[1] * mpi->height,
-                               NULL, GL_DYNAMIC_DRAW);
-                p->buffersize_uv = mpi->stride[1] * mpi->height;
+                gl->BufferData(GL_PIXEL_UNPACK_BUFFER, buffer_size, NULL,
+                               GL_DYNAMIC_DRAW);
+                p->buffersize_uv = buffer_size;
             }
             if (!p->bufferptr_uv[0]) {
                 gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer_uv[0]);
                 p->bufferptr_uv[0] = gl->MapBuffer(GL_PIXEL_UNPACK_BUFFER,
-                                                         GL_WRITE_ONLY);
+                                                   GL_WRITE_ONLY);
                 gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer_uv[1]);
                 p->bufferptr_uv[1] = gl->MapBuffer(GL_PIXEL_UNPACK_BUFFER,
-                                                         GL_WRITE_ONLY);
+                                                   GL_WRITE_ONLY);
             }
             mpi->planes[1] = p->bufferptr_uv[0];
             mpi->planes[2] = p->bufferptr_uv[1];
@@ -1015,7 +1019,8 @@ static void clear_border(struct vo *vo, uint8_t *dst, int start, int stride,
     int right_border = stride - start;
     int bottom_border = full_height - height;
     while (height > 0) {
-        memset(dst + start, value, right_border);
+        if (right_border > 0)
+            memset(dst + start, value, right_border);
         dst += stride;
         height--;
     }
@@ -1042,29 +1047,30 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
     if (p->force_pbo && !(mpi->flags & MP_IMGFLAG_DIRECT) && !p->bufferptr
         && get_image(vo, &mpi2) == VO_TRUE)
     {
-        int bpp = mpi->bpp;
+        int bp = mpi->bpp / 8;
         int xs, ys, component_bits;
         mp_get_chroma_shift(p->image_format, &xs, &ys, &component_bits);
         if (p->is_yuv)
-            bpp = component_bits + 7;
-        memcpy_pic(mpi2.planes[0], mpi->planes[0], mpi->w * bpp / 8, mpi->h,
+            bp = (component_bits + 7) / 8;
+        memcpy_pic(mpi2.planes[0], mpi->planes[0], mpi->w * bp, mpi->h,
                    mpi2.stride[0], mpi->stride[0]);
+        int uv_bytes = (mpi->w >> xs) * bp;
         if (p->is_yuv) {
-            int bp = (component_bits + 7) / 8;
-            memcpy_pic(mpi2.planes[1], mpi->planes[1], (mpi->w >> xs) * bp,
-                       mpi->h >> ys, mpi2.stride[1], mpi->stride[1]);
-            memcpy_pic(mpi2.planes[2], mpi->planes[2], (mpi->w >> xs) * bp,
-                       mpi->h >> ys, mpi2.stride[2], mpi->stride[2]);
+            memcpy_pic(mpi2.planes[1], mpi->planes[1], uv_bytes, mpi->h >> ys,
+                       mpi2.stride[1], mpi->stride[1]);
+            memcpy_pic(mpi2.planes[2], mpi->planes[2], uv_bytes, mpi->h >> ys,
+                       mpi2.stride[2], mpi->stride[2]);
         }
         if (p->ati_hack) {
             // since we have to do a full upload we need to clear the borders
-            clear_border(vo, mpi2.planes[0], mpi->w * bpp / 8, mpi2.stride[0],
+            clear_border(vo, mpi2.planes[0], mpi->w * bp, mpi2.stride[0],
                          mpi->h, mpi2.height, 0);
             if (p->is_yuv) {
-                clear_border(vo, mpi2.planes[1], mpi->w >> xs, mpi2.stride[1],
-                             mpi->h >> ys, mpi2.height >> ys, 128);
-                clear_border(vo, mpi2.planes[2], mpi->w >> xs, mpi2.stride[2],
-                             mpi->h >> ys, mpi2.height >> ys, 128);
+                int clear = get_chroma_clear_val(component_bits);
+                clear_border(vo, mpi2.planes[1], uv_bytes, mpi2.stride[1],
+                             mpi->h >> ys, mpi2.height >> ys, clear);
+                clear_border(vo, mpi2.planes[2], uv_bytes, mpi2.stride[2],
+                             mpi->h >> ys, mpi2.height >> ys, clear);
             }
         }
         mpi = &mpi2;
