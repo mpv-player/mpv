@@ -414,10 +414,6 @@ static const extfunc_desc_t extfuncs[] = {
                   "wglSwapInterval", "wglSwapIntervalEXT")),
     DEF_EXT_DESC(TexImage3D, NULL,
                  ("glTexImage3D")),
-    DEF_EXT_DESC(AllocateMemoryMESA, "GLX_MESA_allocate_memory",
-                 ("glXAllocateMemoryMESA")),
-    DEF_EXT_DESC(FreeMemoryMESA, "GLX_MESA_allocate_memory",
-                 ("glXFreeMemoryMESA")),
     {-1}
 };
 

@@ -105,7 +105,6 @@ struct gl_priv {
     int many_fmts;
     int ati_hack;
     int force_pbo;
-    int mesa_buffer;
     int use_glFinish;
     int swap_interval;
     GLenum target;
@@ -118,8 +117,6 @@ struct gl_priv {
     int buffersize_uv;
     void *bufferptr;
     void *bufferptr_uv[2];
-    int mesa_buffersize;
-    void *mesa_bufferptr;
     GLuint fragprog;
     GLuint default_texs[22];
     char *custom_prog;
@@ -205,9 +202,7 @@ static void texSize(struct vo *vo, int w, int h, int *texw, int *texh)
         while (*texh < h)
             *texh *= 2;
     }
-    if (p->mesa_buffer)
-        *texw = (*texw + 63) & ~63;
-    else if (p->ati_hack)
+    if (p->ati_hack)
         *texw = (*texw + 511) & ~511;
 }
 
@@ -472,12 +467,6 @@ static void uninitGl(struct vo *vo)
     p->buffer_uv[0] = p->buffer_uv[1] = 0;
     p->buffersize_uv = 0;
     p->bufferptr_uv[0] = p->bufferptr_uv[1] = 0;
-#ifdef CONFIG_GL_X11
-    if (p->mesa_bufferptr)
-        gl->FreeMemoryMESA(vo->x11->display, vo->x11->screen,
-                           p->mesa_bufferptr);
-#endif
-    p->mesa_bufferptr = NULL;
     p->err_shown = 0;
 }
 
@@ -686,11 +675,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         uninitGl(vo);
     if (p->glctx->setGlWindow(p->glctx) == SET_WINDOW_FAILED)
         return -1;
-    if (p->mesa_buffer && !p->gl->AllocateMemoryMESA) {
-        mp_msg(MSGT_VO, MSGL_ERR, "Can not enable mesa-buffer because "
-               "AllocateMemoryMESA was not found\n");
-        p->mesa_buffer = 0;
-    }
     initGl(vo, vo->dwidth, vo->dheight);
 
     return 0;
@@ -958,43 +942,24 @@ static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
     if (mpi->type != MP_IMGTYPE_STATIC && mpi->type != MP_IMGTYPE_TEMP &&
         (mpi->type != MP_IMGTYPE_NUMBERED || mpi->number))
         return VO_FALSE;
-    if (p->mesa_buffer)
-        mpi->width = p->texture_width;
-    else if (p->ati_hack) {
+    if (p->ati_hack) {
         mpi->width = p->texture_width;
         mpi->height = p->texture_height;
     }
     mpi->stride[0] = mpi->width * mpi->bpp / 8;
     needed_size = mpi->stride[0] * mpi->height;
-    if (p->mesa_buffer) {
-#ifdef CONFIG_GL_X11
-        if (p->mesa_bufferptr && needed_size > p->mesa_buffersize) {
-            gl->FreeMemoryMESA(vo->x11->display, vo->x11->screen,
-                               p->mesa_bufferptr);
-            p->mesa_bufferptr = NULL;
-        }
-        if (!p->mesa_bufferptr)
-            p->mesa_bufferptr = gl->AllocateMemoryMESA(vo->x11->display,
-                                                       vo->x11->screen,
-                                                       needed_size, 0, 1.0,
-                                                       1.0);
-        p->mesa_buffersize = needed_size;
-#endif
-        mpi->planes[0] = p->mesa_bufferptr;
-    } else {
-        if (!p->buffer)
-            gl->GenBuffers(1, &p->buffer);
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer);
-        if (needed_size > p->buffersize) {
-            p->buffersize = needed_size;
-            gl->BufferData(GL_PIXEL_UNPACK_BUFFER, p->buffersize,
-                           NULL, GL_DYNAMIC_DRAW);
-        }
-        if (!p->bufferptr)
-            p->bufferptr = gl->MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-        mpi->planes[0] = p->bufferptr;
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    if (!p->buffer)
+        gl->GenBuffers(1, &p->buffer);
+    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer);
+    if (needed_size > p->buffersize) {
+        p->buffersize = needed_size;
+        gl->BufferData(GL_PIXEL_UNPACK_BUFFER, p->buffersize,
+                        NULL, GL_DYNAMIC_DRAW);
     }
+    if (!p->bufferptr)
+        p->bufferptr = gl->MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+    mpi->planes[0] = p->bufferptr;
+    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     if (!mpi->planes[0]) {
         if (!p->err_shown)
             mp_msg(MSGT_VO, MSGL_ERR, "[gl] could not acquire buffer for dr\n"
@@ -1013,7 +978,7 @@ static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
         mpi->stride[1] = (mpi->width >> xs) * bp;
         mpi->planes[2] = mpi->planes[1] + mpi->stride[1] * (mpi->height >> ys);
         mpi->stride[2] = (mpi->width >> xs) * bp;
-        if (p->ati_hack && !p->mesa_buffer) {
+        if (p->ati_hack) {
             mpi->flags &= ~MP_IMGFLAG_COMMON_PLANE;
             if (!p->buffer_uv[0])
                 gl->GenBuffers(2, p->buffer_uv);
@@ -1112,26 +1077,21 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
     planes[2] = mpi->planes[2];
     p->mpi_flipped = stride[0] < 0;
     if (mpi->flags & MP_IMGFLAG_DIRECT) {
-        if (p->mesa_buffer) {
-            gl->PixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, 1);
+        intptr_t base = (intptr_t)planes[0];
+        if (p->ati_hack) {
             w = p->texture_width;
-        } else {
-            intptr_t base = (intptr_t)planes[0];
-            if (p->ati_hack) {
-                w = p->texture_width;
-                h = p->texture_height;
-            }
-            if (p->mpi_flipped)
-                base += (mpi->h - 1) * stride[0];
-            planes[0] -= base;
-            planes[1] -= base;
-            planes[2] -= base;
-            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer);
-            gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-            p->bufferptr = NULL;
-            if (!(mpi->flags & MP_IMGFLAG_COMMON_PLANE))
-                planes[0] = planes[1] = planes[2] = NULL;
+            h = p->texture_height;
         }
+        if (p->mpi_flipped)
+            base += (mpi->h - 1) * stride[0];
+        planes[0] -= base;
+        planes[1] -= base;
+        planes[2] -= base;
+        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer);
+        gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+        p->bufferptr = NULL;
+        if (!(mpi->flags & MP_IMGFLAG_COMMON_PLANE))
+            planes[0] = planes[1] = planes[2] = NULL;
         slice = 0; // always "upload" full texture
     }
     glUploadTex(gl, p->target, p->gl_format, p->gl_type, planes[0],
@@ -1160,10 +1120,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
         gl->ActiveTexture(GL_TEXTURE0);
     }
     if (mpi->flags & MP_IMGFLAG_DIRECT) {
-        if (p->mesa_buffer)
-            gl->PixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, 0);
-        else
-            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     }
 skip_upload:
     if (vo_doublebuffering)
@@ -1253,7 +1210,6 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw,
         {"filter-strength", OPT_ARG_FLOAT, &p->filter_strength, NULL},
         {"ati-hack",     OPT_ARG_BOOL, &p->ati_hack,     NULL},
         {"force-pbo",    OPT_ARG_BOOL, &p->force_pbo,    NULL},
-        {"mesa-buffer",  OPT_ARG_BOOL, &p->mesa_buffer,  NULL},
         {"glfinish",     OPT_ARG_BOOL, &p->use_glFinish, NULL},
         {"swapinterval", OPT_ARG_INT,  &p->swap_interval,NULL},
         {"customprog",   OPT_ARG_MSTRZ,&p->custom_prog,  NULL},

@@ -546,9 +546,6 @@ struct GL {
     void (GLAPIENTRY *TexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei,
                                   GLsizei, GLint, GLenum, GLenum,
                                   const GLvoid *);
-    void * (GLAPIENTRY * AllocateMemoryMESA)(void *, int, size_t, float, float,
-                                             float);
-    void (GLAPIENTRY *FreeMemoryMESA)(void *, int, void *);
 };
 
 #endif /* MPLAYER_GL_COMMON_H */
