@@ -194,7 +194,6 @@ typedef struct mp_cmd {
     int nargs;
     struct mp_cmd_arg args[MP_CMD_MAX_ARGS];
     int pausing;
-    struct mp_cmd *queue_prev;
     struct mp_cmd *queue_next;
 } mp_cmd_t;
 

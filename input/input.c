@@ -571,7 +571,6 @@ struct cmd_bind_section {
 
 struct cmd_queue {
     struct mp_cmd *first;
-    struct mp_cmd *last;
     int num_cmds;
     int num_abort_cmds;
 };
@@ -693,32 +692,50 @@ static bool is_abort_cmd(int cmd_id)
     return false;
 }
 
+// members updated by this should be replaced by functions
+static void queue_internal_update(struct cmd_queue *queue)
+{
+    queue->num_cmds = 0;
+    queue->num_abort_cmds = 0;
+    struct mp_cmd *cmd = queue->first;
+    while (cmd) {
+        queue->num_cmds++;
+        queue->num_abort_cmds += is_abort_cmd(cmd->id);
+        cmd = cmd->queue_next;
+    }
+}
+
+static void queue_remove(struct cmd_queue *queue, struct mp_cmd *cmd)
+{
+    struct mp_cmd **p_prev = &queue->first;
+    while (*p_prev != cmd) {
+        p_prev = &(*p_prev)->queue_next;
+    }
+    // if this fails, cmd was not in the queue
+    assert(*p_prev == cmd);
+    *p_prev = cmd->queue_next;
+    queue_internal_update(queue);
+}
+
 static void queue_pop(struct cmd_queue *queue)
 {
-    assert(queue->num_cmds > 0);
-    struct mp_cmd *cmd = queue->first;
-    queue->first = cmd->queue_next;
-    queue->num_cmds--;
-    queue->num_abort_cmds -= is_abort_cmd(cmd->id);
+    queue_remove(queue, queue->first);
 }
 
 static void queue_add(struct cmd_queue *queue, struct mp_cmd *cmd,
                       bool at_head)
 {
-    if (!queue->num_cmds) {
-        queue->first = cmd;
-        queue->last = cmd;
-    } else if (at_head) {
-        queue->first->queue_prev = cmd;
+    if (at_head) {
         cmd->queue_next = queue->first;
         queue->first = cmd;
     } else {
-        queue->last->queue_next = cmd;
-        cmd->queue_prev = queue->last;
-        queue->last = cmd;
+        struct mp_cmd **p_prev = &queue->first;
+        while (*p_prev)
+            p_prev = &(*p_prev)->queue_next;
+        *p_prev = cmd;
+        cmd->queue_next = NULL;
     }
-    queue->num_cmds++;
-    queue->num_abort_cmds += is_abort_cmd(cmd->id);
+    queue_internal_update(queue);
 }
 
 int mp_input_add_cmd_fd(struct input_ctx *ictx, int fd, int select,
