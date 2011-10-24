@@ -496,6 +496,9 @@ volume <value> [abs]
 show_chapters_osd
     Show the list of chapters in the currently played file on the OSD.
 
+show_tracks_osd
+    Show the list audio and subtitle tracks in the currently played file on the OSD.
+
 Available properties:
 
 name               type      min     max     get set step comment

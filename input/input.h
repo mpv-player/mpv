@@ -155,6 +155,7 @@ enum mp_command_type {
     MP_CMD_AF_CMDLINE,
 
     MP_CMD_SHOW_CHAPTERS,
+    MP_CMD_SHOW_TRACKS,
 };
 
 // The arg types

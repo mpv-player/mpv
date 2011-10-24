@@ -2844,6 +2844,85 @@ static void show_chapters_on_osd(MPContext *mpctx)
     talloc_free(res);
 }
 
+static void show_tracks_on_osd(MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    char *res = NULL;
+    const char *IND = "";
+    int n;
+    int cnt = 0;
+    struct sh_audio *cur_a;
+    struct sh_sub *cur_s;
+    demux_stream_t *d_sub;
+    demuxer_t *demuxer = mpctx->demuxer;
+
+    if (!demuxer)
+        return;
+
+    cur_a = mpctx->sh_audio;
+    d_sub = mpctx->d_sub;
+    cur_s = d_sub && opts->sub_id >= 0 ? d_sub->sh : NULL;
+
+    for (n = 0; n < MAX_V_STREAMS; n++) {
+        struct sh_video *v = demuxer->v_streams[n];
+        if (v) {
+            cnt++;
+        }
+    }
+    if (cnt > 1)
+        res = talloc_asprintf_append(res, "(Warning: more than one video stream.)\n");
+
+#define STD_TRACK_HDR(st, id)                                   \
+    res = talloc_asprintf_append(res, "%s(%d) ", IND, st->id);  \
+    if (st->title) {                                            \
+        res = talloc_asprintf_append(res, "'%s' ", st->title);  \
+    }                                                           \
+    if (st->lang) {                                             \
+        res = talloc_asprintf_append(res, "(%s) ", st->lang);   \
+    }
+
+    for (n = 0; n < MAX_A_STREAMS; n++) {
+        struct sh_audio *a = demuxer->a_streams[n];
+        if (a) {
+            cnt++;
+            if (a == cur_a)
+                res = talloc_asprintf_append(res, "> ");
+            STD_TRACK_HDR(a, aid)
+            if (a == cur_a)
+                res = talloc_asprintf_append(res, "<");
+            res = talloc_asprintf_append(res, "\n");
+        }
+    }
+
+    res = talloc_asprintf_append(res, "\n");
+
+    for (n = 0; n < MAX_S_STREAMS; n++) {
+        struct sh_sub *s = demuxer->s_streams[n];
+        if (s) {
+            cnt++;
+            if (s == cur_s)
+                res = talloc_asprintf_append(res, "> ");
+            STD_TRACK_HDR(s, sid)
+            char *type = "?";
+            switch (s->type) {
+            case 't': type = "SRT"; break;
+            case 'v': type = "VOB"; break;
+            case 'a': type = NULL; break; //"ASS/SSA";
+            }
+            if (type)
+                res = talloc_asprintf_append(res, " [%s]", type);
+            if (s == cur_s)
+                res = talloc_asprintf_append(res, "<");
+            res = talloc_asprintf_append(res, "\n");
+        }
+    }
+
+#undef STD_TRACK_HDR
+
+    set_osd_msg(OSD_MSG_TEXT, 1, opts->osd_duration, "%s", res);
+    talloc_free(res);
+}
+
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -3662,6 +3741,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     case MP_CMD_SHOW_CHAPTERS:
         show_chapters_on_osd(mpctx);
+        break;
+    case MP_CMD_SHOW_TRACKS:
+        show_tracks_on_osd(mpctx);
         break;
 
     default:
