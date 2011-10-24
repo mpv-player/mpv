@@ -1401,6 +1401,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     }
     case VOCTRL_ONTOP:
+        if (!p->glctx->ontop)
+            break;
         p->glctx->ontop(vo);
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
@@ -1408,6 +1410,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         resize(vo, vo->dwidth, vo->dheight);
         return VO_TRUE;
     case VOCTRL_BORDER:
+        if (!p->glctx->border)
+            break;
         p->glctx->border(vo);
         resize(vo, vo->dwidth, vo->dheight);
         return VO_TRUE;
@@ -1444,6 +1448,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         *(struct mp_csp_details *)data = p->colorspace;
         return VO_TRUE;
     case VOCTRL_UPDATE_SCREENINFO:
+        if (!p->glctx->update_xinerama_info)
+            break;
         p->glctx->update_xinerama_info(vo);
         return VO_TRUE;
     case VOCTRL_REDRAW_OSD:
