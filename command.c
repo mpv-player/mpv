@@ -66,13 +66,10 @@
 #endif
 #include "stream/stream_dvdnav.h"
 #include "m_struct.h"
-#include "libmenu/menu.h"
 
 #include "mp_core.h"
 #include "mp_fifo.h"
 #include "libavutil/avstring.h"
-
-extern int use_menu;
 
 static void rescale_input_coordinates(struct MPContext *mpctx, int ix, int iy,
                                       double *dx, double *dy)
@@ -2979,10 +2976,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         add_step_frame(mpctx);
         break;
 
-    case MP_CMD_FILE_FILTER:
-        file_filter = cmd->args[0].v.i;
-        break;
-
     case MP_CMD_QUIT:
         exit_player_with_rc(mpctx, EXIT_QUIT,
                             (cmd->nargs > 0) ? cmd->args[0].v.i : 0);
@@ -3556,10 +3549,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
                             "Selected button number %d", button);
         }
-#endif
-#ifdef CONFIG_MENU
-        if (use_menu && dx >= 0.0 && dy >= 0.0)
-            menu_update_mouse_pos(dx, dy);
 #endif
         break;
     }

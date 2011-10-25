@@ -54,8 +54,6 @@ enum mp_command_type {
     MP_CMD_GAMMA,
     MP_CMD_SUB_VISIBILITY,
     MP_CMD_VOBSUB_LANG, // deprecated: combined with SUB_SELECT
-    MP_CMD_MENU,
-    MP_CMD_SET_MENU,
     MP_CMD_GET_TIME_LENGTH,
     MP_CMD_GET_PERCENT_POS,
     MP_CMD_SUB_STEP,
@@ -96,7 +94,6 @@ enum mp_command_type {
     MP_CMD_OSD_SHOW_PROPERTY_TEXT,
     MP_CMD_OSD_SHOW_PROGRESSION,
     MP_CMD_SEEK_CHAPTER,
-    MP_CMD_FILE_FILTER,
     MP_CMD_GET_FILENAME,
     MP_CMD_GET_VIDEO_CODEC,
     MP_CMD_GET_VIDEO_BITRATE,
@@ -146,11 +143,6 @@ enum mp_command_type {
 
     /// DVB commands
     MP_CMD_DVB_SET_CHANNEL = 5101,
-
-    /// Console commands
-    MP_CMD_CHELP = 7000,
-    MP_CMD_CEXIT,
-    MP_CMD_CHIDE,
 
     /// Audio Filter commands
     MP_CMD_AF_SWITCH,
@@ -207,11 +199,6 @@ typedef struct mp_cmd {
 } mp_cmd_t;
 
 
-// Set this to grab all incoming key codes
-extern int (*mp_input_key_cb)(int code);
-// Should return 1 if the command was processed
-typedef int (*mp_input_cmd_filter)(struct mp_cmd *cmd, void *ctx);
-
 /* Add a new command input source.
  * "fd" is a file descriptor (use a negative value if you don't use any fd)
  * "select" tells whether to use select() on the fd to determine when to
@@ -263,10 +250,6 @@ struct mp_cmd *mp_input_parse_cmd(char *str);
  * Return number of commands queued.
  */
 int mp_input_parse_and_queue_cmds(struct input_ctx *ictx, const char *str);
-
-// These filters allow you to process the command before MPlayer.
-// If a filter returns a true value mp_input_get_cmd will return NULL.
-void mp_input_add_cmd_filter(mp_input_cmd_filter, void *ctx);
 
 // After getting a command from mp_input_get_cmd you need to free it using this
 // function

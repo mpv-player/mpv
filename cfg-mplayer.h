@@ -44,13 +44,6 @@ extern char *lirc_configfile;
 extern char *vo_geometry;
 extern int stop_xscreensaver;
 
-extern int menu_startup;
-extern int menu_keepdir;
-extern char *menu_chroot;
-extern char *menu_fribidi_charset;
-extern int menu_flip_hebrew;
-extern int menu_fribidi_flip_commas;
-
 extern char *unrar_executable;
 
 extern char *mp_msg_charset;
@@ -321,7 +314,6 @@ const m_option_t msgl_config[]={
     { "afilter", &mp_msg_levels[MSGT_AFILTER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "netst", &mp_msg_levels[MSGT_NETST], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "muxer", &mp_msg_levels[MSGT_MUXER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
-    { "osd-menu", &mp_msg_levels[MSGT_OSD_MENU], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "ass", &mp_msg_levels[MSGT_ASS], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "statusline", &mp_msg_levels[MSGT_STATUSLINE], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
@@ -362,7 +354,6 @@ const m_option_t msgl_config[]={
     "   sws\n"
     "   vobsub\n"
     "   subreader\n"
-    "   osd-menu   - OSD menu messages\n"
     "   afilter    - Audio filter messages\n"
     "   netst      - Netstream\n"
     "   muxer      - muxer layer\n"
@@ -854,24 +845,6 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("osdlevel", osd_level, 0, 0, 3),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
     OPT_INTRANGE("osd-fractions", osd_fractions, 0, 0, 2),
-#ifdef CONFIG_MENU
-    {"menu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-    {"nomenu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
-    {"menu-root", &menu_root, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
-    {"menu-cfg", &menu_cfg, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
-    {"menu-startup", &menu_startup, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-    {"menu-keepdir", &menu_keepdir, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-    {"menu-chroot", &menu_chroot, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#ifdef CONFIG_FRIBIDI
-    {"menu-fribidi-charset", &menu_fribidi_charset, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"menu-flip-hebrew", &menu_flip_hebrew, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"menu-noflip-hebrew", &menu_flip_hebrew, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-    {"menu-flip-hebrew-commas", &menu_fribidi_flip_commas, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-    {"menu-noflip-hebrew-commas", &menu_fribidi_flip_commas, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#endif /* CONFIG_FRIBIDI */
-#else
-    {"menu", "OSD menu support was not compiled in.\n", CONF_TYPE_PRINT,0, 0, 0, NULL},
-#endif /* CONFIG_MENU */
 
     OPT_STRING("vobsub", vobsub_name, 0),
     {"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},

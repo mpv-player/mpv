@@ -466,18 +466,6 @@ SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
 SRCS_MPLAYER-$(JPEG)         += libvo/vo_jpeg.c
 SRCS_MPLAYER-$(KAI)          += libao2/ao_kai.c
 SRCS_MPLAYER-$(KVA)          += libvo/vo_kva.c
-SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
-                                libmenu/menu_chapsel.c \
-                                libmenu/menu_cmdlist.c  \
-                                libmenu/menu_console.c \
-                                libmenu/menu_filesel.c \
-                                libmenu/menu_list.c  \
-                                libmenu/menu_param.c \
-                                libmenu/menu_pt.c \
-                                libmenu/menu_txt.c \
-                                libmenu/vf_menu.c \
-
-SRCS_MPLAYER-$(LIBMENU_DVBIN) += libmenu/menu_dvbin.c
 SRCS_MPLAYER-$(LIRC)          += input/lirc.c
 SRCS_MPLAYER-$(MD5SUM)        += libvo/vo_md5sum.c
 SRCS_MPLAYER-$(MGA)           += libvo/vo_mga.c
@@ -555,7 +543,6 @@ DIRS =  . \
         libdvdnav \
         libdvdnav/vm \
         libdvdread4 \
-        libmenu \
         libmpcodecs \
         libmpcodecs/native \
         libmpdemux \

@@ -112,8 +112,6 @@ extern int verbose;
 
 #define MSGT_MUXER 39 // muxer layer
 
-#define MSGT_OSD_MENU 40
-
 #define MSGT_IDENTIFY 41  // -identify output
 
 #define MSGT_RADIO 42

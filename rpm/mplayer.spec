@@ -130,7 +130,6 @@ mv DOCS/man/zh DOCS/man/zh_CN
     %{!?_with_samba:--disable-smb} \
     --disable-dvdread-internal \
     --disable-libdvdcss-internal \
-    --enable-menu \
     \
     %{!?_with_amr:--disable-libamr_nb --disable-libamr_wb} \
     %{!?_with_libmad:--disable-mad} \
@@ -171,7 +170,6 @@ mv -f mplayer gmplayer
     %{!?_with_samba:--disable-smb} \
     --disable-dvdread-internal \
     --disable-libdvdcss-internal \
-    --enable-menu \
     \
     %{!?_with_amr:--disable-libamr_nb --disable-libamr_wb} \
     %{!?_with_libmad:--disable-mad} \
@@ -218,8 +216,6 @@ install -Dpm 644 etc/example.conf \
 echo "fontconfig=yes" >>$RPM_BUILD_ROOT%{_sysconfdir}/mplayer/mplayer.conf
 echo "font=\"Sans\"" >>$RPM_BUILD_ROOT%{_sysconfdir}/mplayer/mplayer.conf
 
-install -pm 644 etc/{input,menu}.conf $RPM_BUILD_ROOT%{_sysconfdir}/mplayer/
-
 # GUI mplayer
 install -pm 755 g%{name} $RPM_BUILD_ROOT%{_bindir}/
 
@@ -262,7 +258,6 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_sysconfdir}/mplayer
 %config(noreplace) %{_sysconfdir}/mplayer/mplayer.conf
 %config(noreplace) %{_sysconfdir}/mplayer/input.conf
-%config(noreplace) %{_sysconfdir}/mplayer/menu.conf
 %{_bindir}/midentify.sh
 %{_bindir}/mplayer
 %dir %{codecsdir}/

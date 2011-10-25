@@ -174,7 +174,6 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SWITCH_RATIO, "switch_ratio", 0, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
   { MP_CMD_VO_FULLSCREEN, "vo_fullscreen", 0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
   { MP_CMD_VO_ONTOP, "vo_ontop", 0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
-  { MP_CMD_FILE_FILTER, "file_filter", 1, { { MP_CMD_ARG_INT, {0}}, {-1,{0}}}},
   { MP_CMD_VO_ROOTWIN, "vo_rootwin", 0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
   { MP_CMD_VO_BORDER, "vo_border", 0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
   { MP_CMD_SCREENSHOT, "screenshot", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
@@ -190,14 +189,6 @@ static const mp_cmd_t mp_cmds[] = {
 
 #ifdef CONFIG_DVDNAV
   { MP_CMD_DVDNAV, "dvdnav", 1, { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
-#endif
-
-#ifdef CONFIG_MENU
-  { MP_CMD_MENU, "menu",1,  { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
-  { MP_CMD_SET_MENU, "set_menu",1,  { {MP_CMD_ARG_STRING, {0}},  {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
-  { MP_CMD_CHELP, "help", 0, { {-1,{0}} } },
-  { MP_CMD_CEXIT, "exit", 0, { {-1,{0}} } },
-  { MP_CMD_CHIDE, "hide", 0, { {MP_CMD_ARG_INT,{3000}}, {-1,{0}} } },
 #endif
 
   { MP_CMD_GET_VO_FULLSCREEN, "get_vo_fullscreen", 0, { {-1,{0}} } },
@@ -570,12 +561,6 @@ struct input_fd {
     int pos, size;
 };
 
-struct cmd_filter {
-    mp_input_cmd_filter filter;
-    void *ctx;
-    struct cmd_filter *next;
-};
-
 struct cmd_bind_section {
     struct cmd_bind *cmd_binds;
     char *section;
@@ -629,11 +614,6 @@ struct input_ctx {
     struct cmd_queue control_cmd_queue;
 };
 
-
-static struct cmd_filter *cmd_filters = NULL;
-
-// Callback to allow the menu filter to grab the incoming keys
-int (*mp_input_key_cb)(int code) = NULL;
 
 int async_quit_request;
 
@@ -1099,17 +1079,6 @@ static int default_cmd_func(int fd, char *buf, int l)
 }
 
 
-void mp_input_add_cmd_filter(mp_input_cmd_filter func, void *ctx)
-{
-    struct cmd_filter *filter = talloc_ptrtype(NULL, filter);
-
-    filter->filter = func;
-    filter->ctx = ctx;
-    filter->next = cmd_filters;
-    cmd_filters = filter;
-}
-
-
 static char *find_bind_for_key(const struct cmd_bind *binds, int n, int *keys)
 {
     int j;
@@ -1202,14 +1171,6 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
     int unmod = code & ~KEY_MODIFIER_MASK;
     if (unmod < 256 && unmod != KEY_ENTER && unmod != KEY_TAB)
         code &= ~KEY_MODIFIER_SHIFT;
-
-    if (mp_input_key_cb) {
-        if (code & MP_KEY_DOWN)
-            return NULL;
-        code &= ~(MP_KEY_DOWN | MP_NO_REPEAT_KEY);
-        if (mp_input_key_cb(code))
-            return NULL;
-    }
 
     if (code & MP_KEY_DOWN) {
         if (ictx->num_key_down > MP_MAX_KEY_DOWN) {
@@ -1482,16 +1443,6 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
         queue_add(queue, ret, false);
     } else
         ret = queue->first;
-
-    for (struct cmd_filter *cf = cmd_filters; cf; cf = cf->next) {
-        if (cf->filter(ret, cf->ctx)) {
-            // The filter ate the cmd, so remove it from the queue
-            queue_pop(queue);
-            mp_cmd_free(ret);
-            // Retry with next command
-            return mp_input_get_cmd(ictx, 0, peek_only);
-        }
-    }
 
     if (!peek_only)
         queue_pop(queue);
