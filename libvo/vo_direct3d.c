@@ -21,8 +21,11 @@
 #include <windows.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
 #include <d3d9.h>
 #include "config.h"
+#include "talloc.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "fastmemcpy.h"
@@ -32,6 +35,7 @@
 #include "libavutil/common.h"
 #include "sub/font_load.h"
 #include "sub/sub.h"
+#include "eosd_packer.h"
 
 static const vo_info_t info =
 {
@@ -41,6 +45,11 @@ static const vo_info_t info =
     ""
 };
 
+// texture format for EOSD
+// 0: use D3DFMT_A8L8
+// 1: use D3DFMT_A8 (doesn't work with wine)
+#define USE_A8 0
+
 /*
  * Link essential libvo functions: preinit, config, control, draw_frame,
  * draw_slice, draw_osd, flip_page, check_events, uninit and
@@ -48,6 +57,20 @@ static const vo_info_t info =
  */
 const LIBVO_EXTERN(direct3d)
 
+#define D3DFVF_OSD_VERTEX (D3DFVF_XYZ | D3DFVF_TEX1)
+
+typedef struct {
+    float x, y, z;      /* Position of vertex in 3D space */
+    float tu, tv;       /* Texture coordinates */
+} vertex_osd;
+
+#define D3DFVF_EOSD_VERTEX (D3DFVF_XYZ | D3DFVF_TEX1 | D3DFVF_DIFFUSE)
+
+typedef struct {
+    float x, y, z;
+    D3DCOLOR color;
+    float tu, tv;
+} vertex_eosd;
 
 /* Global variables "priv" structure. I try to keep their count low.
  */
@@ -84,6 +107,7 @@ static struct global_priv {
                                     cannot lock a normal texture. Uses RGBA */
     IDirect3DSurface9 *d3d_backbuf; /**< Video card's back buffer (used to
                                     display next frame) */
+    IDirect3DTexture9 *d3d_texture_eosd; /**< Direct3D Texture. Uses A8L8 */
     int cur_backbuf_width;          /**< Current backbuffer width */
     int cur_backbuf_height;         /**< Current backbuffer height */
     int is_osd_populated;           /**< 1 = OSD texture has something to display,
@@ -100,6 +124,11 @@ static struct global_priv {
     int osd_height;                 /**< current height of the OSD */
     int osd_texture_width;          /**< current width of the OSD texture */
     int osd_texture_height;         /**< current height of the OSD texture */
+    int eosd_texture_width;
+    int eosd_texture_height;
+
+    struct eosd_packer *eosd;       /**< EOSD packer (image positions etc.) */
+    vertex_eosd *eosd_vb;           /**< temporary memory for D3D when rendering EOSD */
 } *priv;
 
 typedef struct {
@@ -127,17 +156,15 @@ static const struct_fmt_table fmt_table[] = {
 
 #define DISPLAY_FORMAT_TABLE_ENTRIES (sizeof(fmt_table) / sizeof(fmt_table[0]))
 
-#define D3DFVF_MY_VERTEX (D3DFVF_XYZ | D3DFVF_TEX1)
-
-typedef struct {
-    float x, y, z;      /* Position of vertex in 3D space */
-    float tu, tv;       /* Texture coordinates */
-} struct_vertex;
-
 typedef enum back_buffer_action {
     BACKBUFFER_CREATE,
     BACKBUFFER_RESET
 } back_buffer_action_e;
+
+static void generate_eosd(mp_eosd_images_t *);
+static void draw_eosd(void);
+
+
 /****************************************************************************
  *                                                                          *
  *                                                                          *
@@ -208,6 +235,41 @@ static void destroy_d3d_surfaces(void)
     if (priv->d3d_backbuf)
         IDirect3DSurface9_Release(priv->d3d_backbuf);
     priv->d3d_backbuf = NULL;
+
+    if (priv->d3d_texture_eosd)
+        IDirect3DSurface9_Release(priv->d3d_texture_eosd);
+    priv->d3d_texture_eosd = NULL;
+    priv->eosd_texture_width = priv->eosd_texture_height = 0;
+
+    if (priv->eosd)
+        eosd_packer_reinit(priv->eosd, 0, 0);
+}
+
+// Adjust the texture size *width/*height to fit the requirements of the D3D
+// device. The texture size is only increased.
+// xxx make clear what happens when exceeding max_texture_width/height,
+//     see create_d3d_surfaces(), not sure why that does what it does
+static void d3d_fix_texture_size(int *width, int *height)
+{
+    int tex_width = *width;
+    int tex_height = *height;
+
+    if (priv->device_caps_power2_only) {
+        tex_width  = 1;
+        tex_height = 1;
+        while (tex_width  < *width) tex_width  <<= 1;
+        while (tex_height < *height) tex_height <<= 1;
+    }
+    if (priv->device_caps_square_only)
+        /* device only supports square textures */
+        tex_width = tex_height = tex_width > tex_height ? tex_width : tex_height;
+    // better round up to a multiple of 16
+    // (xxx: why???)
+    tex_width  = (tex_width  + 15) & ~15;
+    tex_height = (tex_height + 15) & ~15;
+
+    *width = tex_width;
+    *height = tex_height;
 }
 
 /** @brief Create D3D Offscreen and Backbuffer surfaces. Each
@@ -237,19 +299,7 @@ static int create_d3d_surfaces(void)
         return 0;
     }
 
-    /* calculate the best size for the OSD depending on the factors from the device */
-    if (priv->device_caps_power2_only) {
-        tex_width  = 1;
-        tex_height = 1;
-        while (tex_width  < osd_width ) tex_width  <<= 1;
-        while (tex_height < osd_height) tex_height <<= 1;
-    }
-    if (priv->device_caps_square_only)
-        /* device only supports square textures */
-        tex_width = tex_height = tex_width > tex_height ? tex_width : tex_height;
-    // better round up to a multiple of 16
-    tex_width  = (tex_width  + 15) & ~15;
-    tex_height = (tex_height + 15) & ~15;
+    d3d_fix_texture_size(&tex_width, &tex_height);
 
     // make sure we respect the size limits without breaking aspect or pow2-requirements
     while (tex_width > priv->max_texture_width || tex_height > priv->max_texture_height) {
@@ -309,6 +359,10 @@ static int create_d3d_surfaces(void)
     IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_LIGHTING, FALSE);
     IDirect3DDevice9_SetSamplerState(priv->d3d_device, 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
     IDirect3DDevice9_SetSamplerState(priv->d3d_device, 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+
+    if (priv->eosd)
+        eosd_packer_reinit(priv->eosd, priv->max_texture_width,
+                           priv->max_texture_height);
 
     return 1;
 }
@@ -646,8 +700,11 @@ static int query_format(uint32_t movie_fmt)
     if (!check_format(movie_fmt))
         return 0;
 
-    return (VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
-            | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN);
+    int eosd_caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
+                    | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
+    if (priv->eosd)
+        eosd_caps |= VFCAP_EOSD | VFCAP_EOSD_UNSCALED;
+    return eosd_caps;
 }
 
 /****************************************************************************
@@ -678,16 +735,13 @@ static int preinit(const char *arg)
     DWORD dev_caps;
 
     /* Set to zero all global variables. */
-    priv = calloc(1, sizeof(struct global_priv));
-    if (!priv) {
-        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Allocating private memory failed.\n");
-        goto err_out;
-    }
+    priv = talloc_zero(NULL, struct global_priv);
 
-    /* FIXME
-       > Please use subopt-helper.h for this, see vo_gl.c:preinit for
-       > an example of how to use it.
-    */
+    //xxx make it possible to disable eosd by command line
+    bool enable_eosd = true;
+
+    if (enable_eosd)
+        priv->eosd = eosd_packer_create(priv);
 
     priv->d3d9_dll = LoadLibraryA("d3d9.dll");
     if (!priv->d3d9_dll) {
@@ -809,6 +863,22 @@ static int control(uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
+    case VOCTRL_DRAW_EOSD:
+        if (!data)
+            return VO_FALSE;
+        assert(priv->eosd);
+        generate_eosd(data);
+        draw_eosd();
+        return VO_TRUE;
+    case VOCTRL_GET_EOSD_RES: {
+        assert(priv->eosd);
+        struct mp_eosd_res *r = data;
+        r->w = vo_dwidth;
+        r->h = vo_dheight;
+        r->ml = r->mr = priv->border_x;
+        r->mt = r->mb = priv->border_y;
+        return VO_TRUE;
+    }
     }
     return VO_FALSE;
 }
@@ -850,7 +920,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
      * call, we should destroy Direct3D adapter and surfaces before
      * calling configure_d3d, which will create them again.
      */
-
     destroy_d3d_surfaces();
 
     /* Destroy the D3D Device */
@@ -895,7 +964,7 @@ static void uninit(void)
     if (priv->d3d9_dll)
         FreeLibrary(priv->d3d9_dll);
     priv->d3d9_dll = NULL;
-    free(priv);
+    talloc_free(priv);
     priv = NULL;
 }
 
@@ -1086,7 +1155,7 @@ static void draw_osd(void)
 
     if (priv->is_osd_populated) {
 
-        struct_vertex osd_quad_vb[] = {
+        vertex_osd osd_quad_vb[] = {
             {-1.0f, 1.0f, 0.0f,  0, 0 },
             { 1.0f, 1.0f, 0.0f,  1, 0 },
             {-1.0f,-1.0f, 0.0f,  0, 1 },
@@ -1113,8 +1182,8 @@ static void draw_osd(void)
             (IDirect3DBaseTexture9 *)(priv->device_texture_sys
             ? priv->d3d_texture_system : priv->d3d_texture_osd));
 
-        IDirect3DDevice9_SetFVF(priv->d3d_device, D3DFVF_MY_VERTEX);
-        IDirect3DDevice9_DrawPrimitiveUP(priv->d3d_device, D3DPT_TRIANGLESTRIP, 2, osd_quad_vb, sizeof(struct_vertex));
+        IDirect3DDevice9_SetFVF(priv->d3d_device, D3DFVF_OSD_VERTEX);
+        IDirect3DDevice9_DrawPrimitiveUP(priv->d3d_device, D3DPT_TRIANGLESTRIP, 2, osd_quad_vb, sizeof(vertex_osd));
 
         /* turn off alpha test */
         IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHATESTENABLE, FALSE);
@@ -1125,4 +1194,234 @@ static void draw_osd(void)
             return;
         }
     }
+}
+
+static void d3d_realloc_eosd_texture(void)
+{
+    int new_w = priv->eosd->surface.w;
+    int new_h = priv->eosd->surface.h;
+
+    d3d_fix_texture_size(&new_w, &new_h);
+
+    if (new_w == priv->eosd_texture_width && new_h == priv->eosd_texture_height)
+        return;
+
+    // fortunately, we don't need to keep the old image data
+    // we can always free it
+    if (priv->d3d_texture_eosd)
+        IDirect3DTexture9_Release(priv->d3d_texture_eosd);
+    priv->d3d_texture_eosd = NULL;
+
+    priv->eosd_texture_width = new_w;
+    priv->eosd_texture_height = new_h;
+
+    mp_msg(MSGT_VO, MSGL_DBG2, "<vo_direct3d>reallocate EOSD surface.\n");
+
+    if (FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device,
+                                              priv->eosd_texture_width,
+                                              priv->eosd_texture_height,
+                                              1,
+                                              D3DUSAGE_DYNAMIC,
+#if USE_A8
+                                              D3DFMT_A8,
+#else
+                                              D3DFMT_A8L8,
+#endif
+                                              D3DPOOL_DEFAULT,
+                                              &priv->d3d_texture_eosd,
+                                              NULL))) {
+        mp_msg(MSGT_VO,MSGL_ERR,
+               "<vo_direct3d>Allocating EOSD texture failed.\n");
+        priv->eosd_texture_width = 0;
+        priv->eosd_texture_height = 0;
+        return;
+    }
+}
+
+static D3DCOLOR ass_to_d3d_color(uint32_t color)
+{
+    uint32_t r = (color >> 24) & 0xff;
+    uint32_t g = (color >> 16) & 0xff;
+    uint32_t b = (color >> 8) & 0xff;
+    uint32_t a = 0xff - (color & 0xff);
+    return D3DCOLOR_ARGB(a, r, g, b);
+}
+
+static void generate_eosd(mp_eosd_images_t *imgs)
+{
+    bool need_reposition, need_upload, need_resize;
+    eosd_packer_generate(priv->eosd, imgs, &need_reposition, &need_upload,
+                         &need_resize);
+    if (!need_upload)
+        return;
+    // even if the texture size is unchanged, the texture might have been free'd
+    d3d_realloc_eosd_texture();
+    if (!priv->d3d_texture_eosd)
+        return; // failed to allocate
+
+    // reupload all EOSD images
+
+    // we need 2 primitives per quad which makes 6 vertices (we could reduce the
+    // number of vertices by using an indexed vertex array, but it's probably
+    // not worth doing)
+    priv->eosd_vb = talloc_realloc_size(priv->eosd, priv->eosd_vb,
+                                        priv->eosd->targets_count
+                                            * sizeof(vertex_eosd) * 6);
+
+    struct eosd_rect rc;
+    eosd_packer_calculate_source_bb(priv->eosd, &rc);
+    RECT dirty_rc = { rc.x0, rc.y0, rc.x1, rc.y1 };
+
+    D3DLOCKED_RECT  locked_rect;
+
+    if (FAILED(IDirect3DTexture9_LockRect(priv->d3d_texture_eosd, 0,
+                                          &locked_rect, &dirty_rc, 0)))
+    {
+        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>EOSD texture lock failed.\n");
+        return;
+    }
+
+    //memset(locked_rect.pBits, 0, locked_rect.Pitch * priv->eosd_texture_height);
+
+    float eosd_w = priv->eosd_texture_width;
+    float eosd_h = priv->eosd_texture_height;
+
+    for (int i = 0; i < priv->eosd->targets_count; i++) {
+        struct eosd_target *target = &priv->eosd->targets[i];
+        ASS_Image *img = target->ass_img;
+        char *src = img->bitmap;
+#if USE_A8
+        char *dst = (char*)locked_rect.pBits + target->source.x0
+                    + locked_rect.Pitch * target->source.y0;
+#else
+        char *dst = (char*)locked_rect.pBits + target->source.x0*2
+                    + locked_rect.Pitch * target->source.y0;
+#endif
+        for (int y = 0; y < img->h; y++) {
+#if USE_A8
+            memcpy(dst, src, img->w);
+#else
+            for (int x = 0; x < img->w; x++) {
+                dst[x*2+0] = 255;
+                dst[x*2+1] = src[x];
+            }
+#endif
+            src += img->stride;
+            dst += locked_rect.Pitch;
+        }
+
+        D3DCOLOR color = ass_to_d3d_color(img->color);
+
+        float x0 = target->dest.x0;
+        float y0 = target->dest.y0;
+        float x1 = target->dest.x1;
+        float y1 = target->dest.y1;
+        float tx0 = target->source.x0 / eosd_w;
+        float ty0 = target->source.y0 / eosd_h;
+        float tx1 = target->source.x1 / eosd_w;
+        float ty1 = target->source.y1 / eosd_h;
+
+        vertex_eosd *v = &priv->eosd_vb[i*6];
+        v[0] = (vertex_eosd) { x0, y0, 0, color, tx0, ty0 };
+        v[1] = (vertex_eosd) { x1, y0, 0, color, tx1, ty0 };
+        v[2] = (vertex_eosd) { x0, y1, 0, color, tx0, ty1 };
+        v[3] = (vertex_eosd) { x1, y1, 0, color, tx1, ty1 };
+        v[4] = v[2];
+        v[5] = v[1];
+    }
+
+    if (FAILED(IDirect3DTexture9_UnlockRect(priv->d3d_texture_eosd, 0))) {
+        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>EOSD texture unlock failed.\n");
+        return;
+    }
+}
+
+// unfortunately we can't use the D3DX library
+
+static void d3d_matrix_identity(D3DMATRIX *m)
+{
+    memset(m, 0, sizeof(D3DMATRIX));
+    m->_11 = m->_22 = m->_33 = m->_44 = 1.0f;
+}
+
+static void d3d_matrix_ortho(D3DMATRIX *m, float left, float right,
+                             float bottom, float top)
+{
+    d3d_matrix_identity(m);
+    m->_11 = 2.0f / (right - left);
+    m->_22 = 2.0f / (top - bottom);
+    m->_33 = 1.0f;
+    m->_41 = -(right + left) / (right - left);
+    m->_42 = -(top + bottom) / (top - bottom);
+    m->_43 = 0;
+    m->_44 = 1.0f;
+}
+
+static void draw_eosd(void)
+{
+    // we can not render OSD if we lost the device e.g. because it was uncooperative
+    if (!priv->d3d_device)
+        return;
+
+    if (!priv->eosd->targets_count)
+        return;
+
+    //xxx need to set up a transform for EOSD rendering when drawing it
+    if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
+        mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>BeginScene failed (EOSD).\n");
+        return;
+    }
+
+    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHABLENDENABLE, TRUE);
+    //IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHATESTENABLE, TRUE);
+
+    D3DMATRIX m;
+    // so that screen coordinates map to D3D ones
+    D3DVIEWPORT9 p;
+    IDirect3DDevice9_GetViewport(priv->d3d_device, &p);
+    d3d_matrix_ortho(&m, 0.5f, p.Width + 0.5f, p.Height + 0.5f, 0.5f);
+    IDirect3DDevice9_SetTransform(priv->d3d_device, D3DTS_VIEW, &m);
+
+    IDirect3DDevice9_SetTexture(priv->d3d_device, 0,
+                                (IDirect3DBaseTexture9*)priv->d3d_texture_eosd);
+
+    IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                    D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+    IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                    D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+#if USE_A8
+    // do not use the color value from the A8 texture, because that is black
+    // we need either white, or no blending with the texture color at all
+    // use the value in D3DTSS_CONSTANT instead (0xffffffff=white by default)
+    // xxx wine doesn't like this (fails to compile the generated GL shader)
+    //     and D3DTA_SPECULAR leaves the images black
+    IDirect3DDevice9_SetTextureStageState(priv->d3d_device, 0,
+                                          D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    IDirect3DDevice9_SetTextureStageState(priv->d3d_device,0,
+                                          D3DTSS_COLORARG1, D3DTA_CONSTANT);
+#endif
+
+    IDirect3DDevice9_SetTextureStageState(priv->d3d_device, 0,
+                                          D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+
+    IDirect3DDevice9_SetFVF(priv->d3d_device, D3DFVF_EOSD_VERTEX);
+    IDirect3DDevice9_DrawPrimitiveUP(priv->d3d_device, D3DPT_TRIANGLELIST,
+                                     priv->eosd->targets_count * 2,
+                                     priv->eosd_vb, sizeof(vertex_eosd));
+
+    d3d_matrix_identity(&m);
+    IDirect3DDevice9_SetTransform(priv->d3d_device, D3DTS_VIEW, &m);
+
+    IDirect3DDevice9_SetTextureStageState(priv->d3d_device, 0,
+                                          D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+
+    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHABLENDENABLE, FALSE);
+    //IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHATESTENABLE, FALSE);
+
+    if (FAILED(IDirect3DDevice9_EndScene(priv->d3d_device))) {
+        mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>EndScene failed (EOSD).\n");
+        return;
+    }
+
 }
