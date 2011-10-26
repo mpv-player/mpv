@@ -590,11 +590,13 @@ static void uninit_d3d(void)
     priv->d3d_handle = NULL;
 }
 
+static uint32_t d3d_draw_frame(void);
+
 /** @brief Render a frame on the screen.
  *  @param mpi mpi structure with the decoded frame inside
  *  @return VO_TRUE on success, VO_ERROR on failure
  */
-static uint32_t render_d3d_frame(mp_image_t *mpi)
+static uint32_t d3d_upload_and_render_frame(mp_image_t *mpi)
 {
     /* Uncomment when direct rendering is implemented.
      * if (mpi->flags & MP_IMGFLAG_DIRECT) ...
@@ -626,13 +628,18 @@ static uint32_t render_d3d_frame(mp_image_t *mpi)
                mpi->height, priv->locked_rect.Pitch, mpi->stride[0]);
 
 skip_upload:
-    /* This unlock is used for both slice_draw path and render_d3d_frame path. */
+    /* This unlock is used for both slice_draw path and DRAW_IMAGE path. */
     if (FAILED(IDirect3DSurface9_UnlockRect(priv->d3d_surface))) {
         mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Surface unlock failed.\n");
         return VO_ERROR;
     }
     priv->locked_rect.pBits = NULL;
 
+    return d3d_draw_frame();
+}
+
+static uint32_t d3d_draw_frame(void)
+{
     if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>BeginScene failed.\n");
         return VO_ERROR;
@@ -816,7 +823,14 @@ err_out:
     return -1;
 }
 
-
+static void full_redraw(void)
+{
+    priv->is_clear_needed = 1;
+    d3d_draw_frame();
+    draw_osd();
+    draw_eosd();
+    flip_page();
+}
 
 /** @brief libvo Callback: Handle control requests.
  *  @return VO_TRUE on success, VO_NOTIMPL when not implemented
@@ -831,10 +845,11 @@ static int control(uint32_t request, void *data)
                "<vo_direct3d>Direct Rendering request. Not implemented yet.\n");
         return VO_NOTIMPL;
     case VOCTRL_DRAW_IMAGE:
-        return render_d3d_frame(data);
+        return d3d_upload_and_render_frame(data);
     case VOCTRL_FULLSCREEN:
         vo_w32_fullscreen();
         resize_d3d();
+        full_redraw();
         return VO_TRUE;
     case VOCTRL_RESET:
         return VO_NOTIMPL;
@@ -843,6 +858,10 @@ static int control(uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_RESUME:
         priv->is_paused = 0;
+        return VO_TRUE;
+    case VOCTRL_REDRAW_FRAME:
+        priv->is_clear_needed = 1;
+        d3d_draw_frame();
         return VO_TRUE;
     case VOCTRL_SET_EQUALIZER:
         return VO_NOTIMPL;
