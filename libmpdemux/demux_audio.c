@@ -329,6 +329,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
   case MP3:
     sh_audio->format = (mp3_found->mpa_layer < 3 ? 0x50 : 0x55);
     demuxer->movi_start = mp3_found->frame_pos;
+    demuxer->movi_end = s->end_pos;
     next_frame_pos = mp3_found->next_frame_pos;
     sh_audio->audio.dwSampleSize= 0;
     sh_audio->audio.dwScale = mp3_found->mpa_spf;
@@ -349,9 +350,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
       stream_seek(s,s->end_pos-128);
       stream_read(s,tag,3);
       tag[3] = '\0';
-      if(strcmp(tag,"TAG"))
-	demuxer->movi_end = s->end_pos;
-      else {
+      if(!strcmp(tag,"TAG")) {
 	char buf[31];
 	uint8_t g;
 	demuxer->movi_end = stream_tell(s)-3;
