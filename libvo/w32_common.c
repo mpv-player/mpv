@@ -102,6 +102,38 @@ static const struct mp_keymap vk_map[] = {
     {0, 0}
 };
 
+static void vo_rect_add_window_borders(RECT *rc)
+{
+    AdjustWindowRect(rc, GetWindowLong(vo_window, GWL_STYLE), 0);
+}
+
+// basically a reverse AdjustWindowRect (win32 doesn't appear to have this)
+static void subtract_window_borders(RECT *rc)
+{
+    RECT b = { 0, 0, 0, 0 };
+    vo_rect_add_window_borders(&b);
+    rc->left -= b.left;
+    rc->top -= b.top;
+    rc->right -= b.right;
+    rc->bottom -= b.bottom;
+}
+
+// turn a WMSZ_* input value in v into the border that should be resized
+// returns: 0=left, 1=top, 2=right, 3=bottom, -1=undefined
+static int get_resize_border(int v) {
+    switch (v) {
+    case WMSZ_LEFT: return 3;
+    case WMSZ_TOP: return 2;
+    case WMSZ_RIGHT: return 3;
+    case WMSZ_BOTTOM: return 2;
+    case WMSZ_TOPLEFT: return 1;
+    case WMSZ_TOPRIGHT: return 1;
+    case WMSZ_BOTTOMLEFT: return 3;
+    case WMSZ_BOTTOMRIGHT: return 3;
+    default: return -1;
+    }
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     RECT r;
     POINT p;
@@ -130,21 +162,26 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             mp_msg(MSGT_VO, MSGL_V, "[vo] resize window: %d:%d\n",
                    vo_dwidth, vo_dheight);
             break;
-        case WM_WINDOWPOSCHANGING:
+        case WM_SIZING:
             if (vo_keepaspect && !vo_fs && WinID < 0) {
-                WINDOWPOS *wpos = (WINDOWPOS*)lParam;
-                int xborder, yborder;
-                r.left = r.top = 0;
-                r.right = wpos->cx;
-                r.bottom = wpos->cy;
-                AdjustWindowRect(&r, GetWindowLong(vo_window, GWL_STYLE), 0);
-                xborder = (r.right - r.left) - wpos->cx;
-                yborder = (r.bottom - r.top) - wpos->cy;
-                wpos->cx -= xborder; wpos->cy -= yborder;
-                aspect_fit(global_vo, &wpos->cx, &wpos->cy, wpos->cx, wpos->cy);
-                wpos->cx += xborder; wpos->cy += yborder;
+                RECT *rc = (RECT*)lParam;
+                // get client area of the windows if it had the rect rc
+                // (subtracting the window borders)
+                r = *rc;
+                subtract_window_borders(&r);
+                int c_w = r.right - r.left, c_h = r.bottom - r.top;
+                float aspect = global_vo->aspdat.asp;
+                int d_w = c_h * aspect - c_w;
+                int d_h = c_w / aspect - c_h;
+                int d_corners[4] = { d_w, d_h, -d_w, -d_h };
+                int corners[4] = { rc->left, rc->top, rc->right, rc->bottom };
+                int corner = get_resize_border(wParam);
+                if (corner >= 0)
+                    corners[corner] -= d_corners[corner];
+                *rc = (RECT) { corners[0], corners[1], corners[2], corners[3] };
+                return TRUE;
             }
-            return 0;
+            break;
         case WM_CLOSE:
             mplayer_put_key(KEY_CLOSE_WIN);
             break;
@@ -421,16 +458,17 @@ static int reinit_window_state(void) {
         }
     }
 
+    SetWindowLong(vo_window, GWL_STYLE, style);
+
     r.left = window_x;
     r.right = r.left + vo_dwidth;
     r.top = window_y;
     r.bottom = r.top + vo_dheight;
-    AdjustWindowRect(&r, style, 0);
+    vo_rect_add_window_borders(&r);
 
     mp_msg(MSGT_VO, MSGL_V, "[vo] reset window bounds: %ld:%ld:%ld:%ld\n",
            r.left, r.top, r.right - r.left, r.bottom - r.top);
 
-    SetWindowLong(vo_window, GWL_STYLE, style);
     SetWindowPos(vo_window, layer, r.left, r.top, r.right - r.left,
                  r.bottom - r.top, SWP_FRAMECHANGED);
     // For some reason, moving SWP_SHOWWINDOW to a second call works better
