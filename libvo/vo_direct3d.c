@@ -299,6 +299,8 @@ static int create_d3d_surfaces(void)
         return 0;
     }
 
+    /* create OSD */
+
     d3d_fix_texture_size(&tex_width, &tex_height);
 
     // make sure we respect the size limits without breaking aspect or pow2-requirements
@@ -311,13 +313,25 @@ static int create_d3d_surfaces(void)
 
     priv->osd_width  = osd_width;
     priv->osd_height = osd_height;
-    priv->osd_texture_width  = tex_width;
-    priv->osd_texture_height = tex_height;
 
-    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>OSD texture size (%dx%d), requested (%dx%d).\n",
-           vo_dwidth, vo_dheight, priv->osd_texture_width, priv->osd_texture_height);
+    if (priv->osd_texture_width < tex_width
+        || priv->osd_texture_height < tex_height)
+    {
+        if (priv->d3d_texture_osd)
+            IDirect3DTexture9_Release(priv->d3d_texture_osd);
+        priv->d3d_texture_osd = NULL;
 
-    /* create OSD */
+        if (priv->d3d_texture_system)
+            IDirect3DTexture9_Release(priv->d3d_texture_system);
+        priv->d3d_texture_system = NULL;
+
+        priv->osd_texture_width  = tex_width;
+        priv->osd_texture_height = tex_height;
+
+        mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>OSD texture size (%dx%d), requested (%dx%d).\n",
+            vo_dwidth, vo_dheight, priv->osd_texture_width, priv->osd_texture_height);
+    }
+
     if (!priv->d3d_texture_system &&
         FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device,
                                               priv->osd_texture_width,
@@ -360,7 +374,7 @@ static int create_d3d_surfaces(void)
     IDirect3DDevice9_SetSamplerState(priv->d3d_device, 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
     IDirect3DDevice9_SetSamplerState(priv->d3d_device, 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
-    if (priv->eosd)
+    if (priv->eosd && !priv->d3d_texture_eosd)
         eosd_packer_reinit(priv->eosd, priv->max_texture_width,
                            priv->max_texture_height);
 
@@ -529,19 +543,6 @@ static int resize_d3d(void)
         if (!change_d3d_backbuffer(BACKBUFFER_RESET))
             return 0;
     }
-
-    /* Destroy the OSD textures. They should always match the new dimensions
-     * of the onscreen window, so on each resize we need new OSD dimensions.
-     */
-
-    if (priv->d3d_texture_osd)
-        IDirect3DTexture9_Release(priv->d3d_texture_osd);
-    priv->d3d_texture_osd = NULL;
-
-    if (priv->d3d_texture_system)
-        IDirect3DTexture9_Release(priv->d3d_texture_system);
-    priv->d3d_texture_system = NULL;
-
 
     /* Recreate the OSD. The function will observe that the offscreen plain
      * surface and the backbuffer are not destroyed and will skip their creation,
@@ -917,15 +918,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                   uint32_t d_height, uint32_t options, char *title,
                   uint32_t format)
 {
-
-    priv->src_width  = width;
-    priv->src_height = height;
-
     const struct_fmt_table *fmt_entry = check_format(format);
     if (!fmt_entry)
         return VO_ERROR;
-
-    priv->movie_src_fmt = fmt_entry->fourcc;
 
     /* w32_common framework call. Creates window on the screen with
      * the given coordinates.
@@ -935,19 +930,26 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         return VO_ERROR;
     }
 
-    /* "config" may be called several times, so if this is not the first
-     * call, we should destroy Direct3D adapter and surfaces before
-     * calling configure_d3d, which will create them again.
-     */
-    destroy_d3d_surfaces();
+    if ((priv->movie_src_fmt != fmt_entry->fourcc)
+        || (priv->src_width != width)
+        || (priv->src_height != height))
+    {
+        priv->movie_src_fmt = fmt_entry->fourcc;
+        priv->src_width = width;
+        priv->src_height = height;
 
-    /* Destroy the D3D Device */
-    if (priv->d3d_device)
-        IDirect3DDevice9_Release(priv->d3d_device);
-    priv->d3d_device = NULL;
+        if (priv->d3d_surface)
+            IDirect3DSurface9_Release(priv->d3d_surface);
+        priv->d3d_surface = NULL;
+    }
 
-    if (!configure_d3d())
-        return VO_ERROR;
+    if (!priv->d3d_device) {
+        if (!configure_d3d())
+            return VO_ERROR;
+    } else {
+        if (!resize_d3d())
+            return VO_ERROR;
+    }
 
     return 0; /* Success */
 }
