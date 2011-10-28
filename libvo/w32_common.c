@@ -117,9 +117,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             p.x = 0;
             p.y = 0;
             ClientToScreen(vo_window, &p);
-            vo_dx = window_x = p.x;
-            vo_dy = window_y = p.y;
-            mp_msg(MSGT_VO, MSGL_V, "[vo] move window: %d:%d\n", vo_dx, vo_dy);
+            window_x = p.x;
+            window_y = p.y;
+            mp_msg(MSGT_VO, MSGL_V, "[vo] move window: %d:%d\n",
+                   window_x, window_y);
             break;
         case WM_SIZE:
             event_flags |= VO_EVENT_RESIZE;
@@ -493,10 +494,6 @@ int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
             GetClientRect(vo_window, &r);
             vo_dwidth = r.right;
             vo_dheight = r.bottom;
-            // restore these as well, xxx change vo_directx instead to query
-            // the window bounds instead of using this
-            vo_dx = window_x;
-            vo_dy = window_y;
         } else {
             // first vo_config call; vo_config() will always set vo_dx/dy so
             // that the window is centered on the screen, and this is the only

@@ -458,8 +458,11 @@ static uint32_t Directx_ManageDisplay(void)
     DWORD dwUpdateFlags = 0;
     int width, height;
 
-    rd.left = vo_dx - xinerama_x;
-    rd.top  = vo_dy - xinerama_y;
+    POINT origin = { 0, 0 };
+    ClientToScreen(vo_w32_window, &origin);
+
+    rd.left = origin.x - xinerama_x;
+    rd.top  = origin.y - xinerama_y;
     width   = vo_dwidth;
     height  = vo_dheight;
 
