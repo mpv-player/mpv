@@ -470,9 +470,7 @@ static uint32_t Directx_ManageDisplay(void)
     panscan_calc_windowed();
     width   += vo_panscan_x;
     height  += vo_panscan_y;
-    width    = FFMIN(width, vo_screenwidth);
-    height   = FFMIN(height, vo_screenheight);
-    rd.left += (vo_dwidth - width) / 2;
+    rd.left += (vo_dwidth  - width ) / 2;
     rd.top  += (vo_dheight - height) / 2;
 
     rd.right  = rd.left + width;
