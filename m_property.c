@@ -381,6 +381,16 @@ int m_property_double_ro(const m_option_t *prop, int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static char *format_time(double time)
+{
+    int h, m, s = time;
+    h = s / 3600;
+    s -= h * 3600;
+    m = s / 60;
+    s -= m * 60;
+    return talloc_asprintf(NULL, "%02d:%02d:%02d", h, m, s);
+}
+
 int m_property_time_ro(const m_option_t *prop, int action,
                        void *arg, double var)
 {
@@ -389,17 +399,7 @@ int m_property_time_ro(const m_option_t *prop, int action,
         if (!arg)
             return M_PROPERTY_ERROR;
         else {
-            int h, m, s = var;
-            h = s / 3600;
-            s -= h * 3600;
-            m = s / 60;
-            s -= m * 60;
-            if (h > 0)
-                *(char **)arg = talloc_asprintf(NULL, "%d:%02d:%02d", h, m, s);
-            else if (m > 0)
-                *(char **)arg = talloc_asprintf(NULL, "%d:%02d", m, s);
-            else
-                *(char **)arg = talloc_asprintf(NULL, "%d", s);
+            *(char **)arg = format_time(var);
             return M_PROPERTY_OK;
         }
     }
