@@ -463,6 +463,13 @@ struct GL {
     void (GLAPIENTRY *ReadPixels)(GLint, GLint, GLsizei, GLsizei, GLenum,
                                   GLenum, GLvoid *);
     void (GLAPIENTRY *ReadBuffer)(GLenum);
+    void (GLAPIENTRY *VertexPointer)(GLint, GLenum, GLsizei, const GLvoid *);
+    void (GLAPIENTRY *ColorPointer)(GLint, GLenum, GLsizei, const GLvoid *);
+    void (GLAPIENTRY *TexCoordPointer)(GLint, GLenum, GLsizei, const GLvoid *);
+    void (GLAPIENTRY *DrawArrays)(GLenum, GLint, GLsizei);
+    void (GLAPIENTRY *EnableClientState)(GLenum);
+    void (GLAPIENTRY *DisableClientState)(GLenum);
+
 
     // OpenGL extension functions
     void (GLAPIENTRY *GenBuffers)(GLsizei, GLuint *);
