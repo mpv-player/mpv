@@ -1138,28 +1138,20 @@ static void vo_draw_alpha_l8a8(int w, int h, unsigned char* src,
     }
 }
 
+struct draw_osd_closure {
+    D3DLOCKED_RECT  locked_rect;
+};
+
 /** @brief Callback function to render the OSD to the texture
  */
-static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
-                       unsigned char *srca, int stride)
+static void draw_alpha(void *pctx, int x0, int y0, int w, int h,
+                       unsigned char *src, unsigned char *srca, int stride)
 {
-    D3DLOCKED_RECT  locked_rect;   /**< Offscreen surface we lock in order
-                                   to copy MPlayer's frame inside it.*/
-
-    if (FAILED(IDirect3DTexture9_LockRect(priv->texture_osd.system, 0,
-                                          &locked_rect, NULL, 0))) {
-        mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>OSD texture lock failed.\n");
-        return;
-    }
+    struct draw_osd_closure *ctx = pctx;
+    D3DLOCKED_RECT  locked_rect = ctx->locked_rect;
 
     vo_draw_alpha_l8a8(w, h, src, srca, stride,
         (unsigned char *)locked_rect.pBits + locked_rect.Pitch*y0 + 2*x0, locked_rect.Pitch);
-
-    /* this unlock is used for both slice_draw path and D3DRenderFrame path */
-    if (FAILED(IDirect3DTexture9_UnlockRect(priv->texture_osd.system, 0))) {
-        mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>OSD texture unlock failed.\n");
-        return;
-    }
 
     priv->is_osd_populated = 1;
 }
@@ -1173,32 +1165,32 @@ static void draw_osd(void)
         return;
 
     if (vo_osd_changed(0)) {
-        D3DLOCKED_RECT  locked_rect;   /**< Offscreen surface we lock in order
-                                         to copy MPlayer's frame inside it.*/
+        struct draw_osd_closure ctx;
 
         /* clear the OSD */
         if (FAILED(IDirect3DTexture9_LockRect(priv->texture_osd.system, 0,
-                                              &locked_rect, NULL, 0))) {
+                                              &ctx.locked_rect, NULL, 0))) {
             mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>OSD texture lock failed.\n");
             return;
         }
 
         /* clear the whole texture to avoid issues due to interpolation */
-        memset(locked_rect.pBits, 0, locked_rect.Pitch * priv->texture_osd.tex_h);
-
-        if (FAILED(IDirect3DTexture9_UnlockRect(priv->texture_osd.system, 0))) {
-            mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>OSD texture unlock failed.\n");
-            return;
-        }
+        memset(ctx.locked_rect.pBits, 0,
+               ctx.locked_rect.Pitch * priv->texture_osd.tex_h);
 
         priv->is_osd_populated = 0;
         /* required for if subs are in the boarder region */
         priv->is_clear_needed = 1;
 
-        vo_draw_text_ext(priv->texture_osd.w, priv->texture_osd.h,
-                         priv->border_x, priv->border_y,
-                         priv->border_x, priv->border_y,
-                         priv->src_width, priv->src_height, draw_alpha);
+        osd_draw_text_ext(global_osd, priv->texture_osd.w, priv->texture_osd.h,
+                          priv->border_x, priv->border_y,
+                          priv->border_x, priv->border_y,
+                          priv->src_width, priv->src_height, draw_alpha, &ctx);
+
+        if (FAILED(IDirect3DTexture9_UnlockRect(priv->texture_osd.system, 0))) {
+            mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>OSD texture unlock failed.\n");
+            return;
+        }
 
         d3dtex_update(&priv->texture_osd);
     }
