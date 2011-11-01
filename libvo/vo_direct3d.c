@@ -22,6 +22,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <d3d9.h>
 #include "config.h"
@@ -72,6 +74,23 @@ typedef struct {
     float tu, tv;
 } vertex_eosd;
 
+struct d3dtex {
+    // user-requested size
+    int w, h;
+    // allocated texture size
+    int tex_w, tex_h;
+    // D3DPOOL_SYSTEMMEM texture:
+    // - can be locked in order to write (and even read) data
+    // - can _not_ (probably) be used as texture for rendering
+    // This is always non-NULL if d3dtex_allocate succeeds.
+    IDirect3DTexture9 *system;
+    // D3DPOOL_DEFAULT texture:
+    // - can't be locked (Probably.)
+    // - must be used for rendering
+    // This will be NULL on systems with device_texture_sys != 0.
+    IDirect3DTexture9 *device;
+};
+
 /* Global variables "priv" structure. I try to keep their count low.
  */
 static struct global_priv {
@@ -102,12 +121,10 @@ static struct global_priv {
     IDirect3DSurface9 *d3d_surface; /**< Offscreen Direct3D Surface. MPlayer
                                     renders inside it. Uses colorspace
                                     priv->movie_src_fmt */
-    IDirect3DTexture9 *d3d_texture_osd; /**< Direct3D Texture. Uses RGBA */
-    IDirect3DTexture9 *d3d_texture_system; /**< Direct3D Texture. System memory
-                                    cannot lock a normal texture. Uses RGBA */
+    struct d3dtex texture_osd;      /**< RGBA */
     IDirect3DSurface9 *d3d_backbuf; /**< Video card's back buffer (used to
                                     display next frame) */
-    IDirect3DTexture9 *d3d_texture_eosd; /**< Direct3D Texture. Uses A8L8 */
+    struct d3dtex texture_eosd;     /**< A8 or A8L8 (see USE_A8) */
     int cur_backbuf_width;          /**< Current backbuffer width */
     int cur_backbuf_height;         /**< Current backbuffer height */
     int is_osd_populated;           /**< 1 = OSD texture has something to display,
@@ -120,12 +137,6 @@ static struct global_priv {
                                     0 = device requires shadow */
     int max_texture_width;          /**< from the device capabilities */
     int max_texture_height;         /**< from the device capabilities */
-    int osd_width;                  /**< current width of the OSD */
-    int osd_height;                 /**< current height of the OSD */
-    int osd_texture_width;          /**< current width of the OSD texture */
-    int osd_texture_height;         /**< current height of the OSD texture */
-    int eosd_texture_width;
-    int eosd_texture_height;
 
     struct eosd_packer *eosd;       /**< EOSD packer (image positions etc.) */
     vertex_eosd *eosd_vb;           /**< temporary memory for D3D when rendering EOSD */
@@ -208,51 +219,17 @@ static void calc_fs_rect(void)
     priv->is_clear_needed = 1;
 }
 
-/** @brief Destroy D3D Offscreen and Backbuffer surfaces.
- */
-static void destroy_d3d_surfaces(void)
-{
-    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>destroy_d3d_surfaces called.\n");
-    /* Let's destroy the old (if any) D3D Surfaces */
-
-    if (priv->locked_rect.pBits)
-        IDirect3DSurface9_UnlockRect(priv->d3d_surface);
-    priv->locked_rect.pBits = NULL;
-
-    if (priv->d3d_surface)
-        IDirect3DSurface9_Release(priv->d3d_surface);
-    priv->d3d_surface = NULL;
-
-    /* kill the OSD texture and its shadow copy */
-    if (priv->d3d_texture_osd)
-        IDirect3DTexture9_Release(priv->d3d_texture_osd);
-    priv->d3d_texture_osd = NULL;
-
-    if (priv->d3d_texture_system)
-        IDirect3DTexture9_Release(priv->d3d_texture_system);
-    priv->d3d_texture_system = NULL;
-
-    if (priv->d3d_backbuf)
-        IDirect3DSurface9_Release(priv->d3d_backbuf);
-    priv->d3d_backbuf = NULL;
-
-    if (priv->d3d_texture_eosd)
-        IDirect3DSurface9_Release(priv->d3d_texture_eosd);
-    priv->d3d_texture_eosd = NULL;
-    priv->eosd_texture_width = priv->eosd_texture_height = 0;
-
-    if (priv->eosd)
-        eosd_packer_reinit(priv->eosd, 0, 0);
-}
-
 // Adjust the texture size *width/*height to fit the requirements of the D3D
 // device. The texture size is only increased.
-// xxx make clear what happens when exceeding max_texture_width/height,
-//     see create_d3d_surfaces(), not sure why that does what it does
+// xxx make clear what happens when exceeding max_texture_width/height
 static void d3d_fix_texture_size(int *width, int *height)
 {
     int tex_width = *width;
     int tex_height = *height;
+
+    // avoid nasty special cases with 0-sized textures and texture sizes
+    tex_width = FFMAX(tex_width, 1);
+    tex_height = FFMAX(tex_height, 1);
 
     if (priv->device_caps_power2_only) {
         tex_width  = 1;
@@ -270,6 +247,102 @@ static void d3d_fix_texture_size(int *width, int *height)
 
     *width = tex_width;
     *height = tex_height;
+}
+
+static void d3dtex_release(struct d3dtex *tex)
+{
+    if (tex->system)
+        IDirect3DTexture9_Release(tex->system);
+    tex->system = NULL;
+
+    if (tex->device)
+        IDirect3DTexture9_Release(tex->device);
+    tex->device = NULL;
+
+    tex->tex_w = tex->tex_h = 0;
+}
+
+static bool d3dtex_allocate(struct d3dtex *tex, D3DFORMAT fmt, int w, int h)
+{
+    d3dtex_release(tex);
+
+    tex->w = w;
+    tex->h = h;
+
+    int tw = w, th = h;
+    d3d_fix_texture_size(&tw, &th);
+
+    if (FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device, tw, th, 1,
+        D3DUSAGE_DYNAMIC, fmt, D3DPOOL_SYSTEMMEM, &tex->system, NULL)))
+    {
+        mp_msg(MSGT_VO, MSGL_ERR,
+               "<vo_direct3d>Allocating %dx%d texture in system RAM failed.\n",
+               w, h);
+        goto error_exit;
+    }
+
+    if (!priv->device_texture_sys) {
+        if (FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device, tw, th, 1,
+            D3DUSAGE_DYNAMIC, fmt, D3DPOOL_DEFAULT, &tex->device, NULL)))
+        {
+            mp_msg(MSGT_VO, MSGL_ERR,
+               "<vo_direct3d>Allocating %dx%d texture in video RAM failed.\n",
+               w, h);
+            goto error_exit;
+        }
+    }
+
+    tex->tex_w = tw;
+    tex->tex_h = th;
+
+    return true;
+
+error_exit:
+    d3dtex_release(tex);
+    return false;
+}
+
+static IDirect3DBaseTexture9 *d3dtex_get_render_texture(struct d3dtex *tex)
+{
+    return (IDirect3DBaseTexture9 *)
+                (priv->device_texture_sys ? tex->system : tex->device);
+}
+
+// Copy system texture contents to device texture.
+static bool d3dtex_update(struct d3dtex *tex)
+{
+    if (priv->device_texture_sys)
+        return true;
+    return !FAILED(IDirect3DDevice9_UpdateTexture(priv->d3d_device,
+                   (IDirect3DBaseTexture9 *)tex->system,
+                   (IDirect3DBaseTexture9 *)tex->device));
+}
+
+/** @brief Destroy D3D Offscreen and Backbuffer surfaces.
+ */
+static void destroy_d3d_surfaces(void)
+{
+    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>destroy_d3d_surfaces called.\n");
+    /* Let's destroy the old (if any) D3D Surfaces */
+
+    if (priv->locked_rect.pBits)
+        IDirect3DSurface9_UnlockRect(priv->d3d_surface);
+    priv->locked_rect.pBits = NULL;
+
+    if (priv->d3d_surface)
+        IDirect3DSurface9_Release(priv->d3d_surface);
+    priv->d3d_surface = NULL;
+
+    d3dtex_release(&priv->texture_osd);
+
+    if (priv->d3d_backbuf)
+        IDirect3DSurface9_Release(priv->d3d_backbuf);
+    priv->d3d_backbuf = NULL;
+
+    d3dtex_release(&priv->texture_eosd);
+
+    if (priv->eosd)
+        eosd_packer_reinit(priv->eosd, 0, 0);
 }
 
 /** @brief Create D3D Offscreen and Backbuffer surfaces. Each
@@ -311,59 +384,25 @@ static int create_d3d_surfaces(void)
         tex_height >>= 1;
     }
 
-    priv->osd_width  = osd_width;
-    priv->osd_height = osd_height;
-
-    if (priv->osd_texture_width < tex_width
-        || priv->osd_texture_height < tex_height)
+    if (priv->texture_osd.tex_w < tex_width
+        || priv->texture_osd.tex_h < tex_height)
     {
-        if (priv->d3d_texture_osd)
-            IDirect3DTexture9_Release(priv->d3d_texture_osd);
-        priv->d3d_texture_osd = NULL;
-
-        if (priv->d3d_texture_system)
-            IDirect3DTexture9_Release(priv->d3d_texture_system);
-        priv->d3d_texture_system = NULL;
-
-        priv->osd_texture_width  = tex_width;
-        priv->osd_texture_height = tex_height;
+        d3dtex_release(&priv->texture_osd);
 
         mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>OSD texture size (%dx%d), requested (%dx%d).\n",
-            vo_dwidth, vo_dheight, priv->osd_texture_width, priv->osd_texture_height);
-    }
+               vo_dwidth, vo_dheight, tex_width, tex_height);
 
-    if (!priv->d3d_texture_system &&
-        FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device,
-                                              priv->osd_texture_width,
-                                              priv->osd_texture_height,
-                                              1,
-                                              D3DUSAGE_DYNAMIC,
-                                              D3DFMT_A8L8,
-                                              D3DPOOL_SYSTEMMEM,
-                                              &priv->d3d_texture_system,
-                                              NULL))) {
-        mp_msg(MSGT_VO,MSGL_ERR,
-               "<vo_direct3d>Allocating OSD texture in system RAM failed.\n");
-        return 0;
-    }
-
-    if (!priv->device_texture_sys) {
-        /* only create if we need a shadow version on the external device */
-        if (!priv->d3d_texture_osd &&
-            FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device,
-                                                  priv->osd_texture_width,
-                                                  priv->osd_texture_height,
-                                                  1,
-                                                  D3DUSAGE_DYNAMIC,
-                                                  D3DFMT_A8L8,
-                                                  D3DPOOL_DEFAULT,
-                                                  &priv->d3d_texture_osd,
-                                                  NULL))) {
-            mp_msg(MSGT_VO,MSGL_ERR,
-                   "<vo_direct3d>Allocating OSD texture in video RAM failed.\n");
+        if (!d3dtex_allocate(&priv->texture_osd, D3DFMT_A8L8, tex_width,
+                             tex_height))
+        {
+            mp_msg(MSGT_VO, MSGL_ERR,
+                "<vo_direct3d>Allocating OSD texture failed.\n");
             return 0;
         }
     }
+
+    priv->texture_osd.w = osd_width;
+    priv->texture_osd.h = osd_height;
 
     /* setup default renderstate */
     IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_SRCBLEND, D3DBLEND_ONE);
@@ -374,7 +413,7 @@ static int create_d3d_surfaces(void)
     IDirect3DDevice9_SetSamplerState(priv->d3d_device, 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
     IDirect3DDevice9_SetSamplerState(priv->d3d_device, 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
-    if (priv->eosd && !priv->d3d_texture_eosd)
+    if (priv->eosd && !priv->texture_eosd.system)
         eosd_packer_reinit(priv->eosd, priv->max_texture_width,
                            priv->max_texture_height);
 
@@ -1107,7 +1146,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
     D3DLOCKED_RECT  locked_rect;   /**< Offscreen surface we lock in order
                                    to copy MPlayer's frame inside it.*/
 
-    if (FAILED(IDirect3DTexture9_LockRect(priv->d3d_texture_system, 0,
+    if (FAILED(IDirect3DTexture9_LockRect(priv->texture_osd.system, 0,
                                           &locked_rect, NULL, 0))) {
         mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>OSD texture lock failed.\n");
         return;
@@ -1117,7 +1156,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
         (unsigned char *)locked_rect.pBits + locked_rect.Pitch*y0 + 2*x0, locked_rect.Pitch);
 
     /* this unlock is used for both slice_draw path and D3DRenderFrame path */
-    if (FAILED(IDirect3DTexture9_UnlockRect(priv->d3d_texture_system, 0))) {
+    if (FAILED(IDirect3DTexture9_UnlockRect(priv->texture_osd.system, 0))) {
         mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>OSD texture unlock failed.\n");
         return;
     }
@@ -1138,17 +1177,16 @@ static void draw_osd(void)
                                          to copy MPlayer's frame inside it.*/
 
         /* clear the OSD */
-        if (FAILED(IDirect3DTexture9_LockRect(priv->d3d_texture_system, 0,
+        if (FAILED(IDirect3DTexture9_LockRect(priv->texture_osd.system, 0,
                                               &locked_rect, NULL, 0))) {
             mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>OSD texture lock failed.\n");
             return;
         }
 
         /* clear the whole texture to avoid issues due to interpolation */
-        memset(locked_rect.pBits, 0, locked_rect.Pitch * priv->osd_texture_height);
+        memset(locked_rect.pBits, 0, locked_rect.Pitch * priv->texture_osd.tex_h);
 
-        /* this unlock is used for both slice_draw path and D3DRenderFrame path */
-        if (FAILED(IDirect3DTexture9_UnlockRect(priv->d3d_texture_system, 0))) {
+        if (FAILED(IDirect3DTexture9_UnlockRect(priv->texture_osd.system, 0))) {
             mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>OSD texture unlock failed.\n");
             return;
         }
@@ -1157,19 +1195,12 @@ static void draw_osd(void)
         /* required for if subs are in the boarder region */
         priv->is_clear_needed = 1;
 
-        vo_draw_text_ext(priv->osd_width, priv->osd_height, priv->border_x, priv->border_y,
-                         priv->border_x, priv->border_y, priv->src_width, priv->src_height, draw_alpha);
+        vo_draw_text_ext(priv->texture_osd.w, priv->texture_osd.h,
+                         priv->border_x, priv->border_y,
+                         priv->border_x, priv->border_y,
+                         priv->src_width, priv->src_height, draw_alpha);
 
-        if (!priv->device_texture_sys)
-        {
-            /* only DMA to the shadow if its required */
-            if (FAILED(IDirect3DDevice9_UpdateTexture(priv->d3d_device,
-                                                      (IDirect3DBaseTexture9 *)priv->d3d_texture_system,
-                                                      (IDirect3DBaseTexture9 *)priv->d3d_texture_osd))) {
-                mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>OSD texture transfer failed.\n");
-                return;
-            }
-        }
+        d3dtex_update(&priv->texture_osd);
     }
 
     /* update OSD */
@@ -1185,9 +1216,9 @@ static void draw_osd(void)
 
         /* calculate the texture coordinates */
         osd_quad_vb[1].tu =
-            osd_quad_vb[3].tu = (float)priv->osd_width  / priv->osd_texture_width;
+            osd_quad_vb[3].tu = (float)priv->texture_osd.w  / priv->texture_osd.tex_w;
         osd_quad_vb[2].tv =
-            osd_quad_vb[3].tv = (float)priv->osd_height / priv->osd_texture_height;
+            osd_quad_vb[3].tv = (float)priv->texture_osd.h  / priv->texture_osd.tex_h;
 
         if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
             mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>BeginScene failed.\n");
@@ -1200,8 +1231,7 @@ static void draw_osd(void)
 
         /* need to use a texture here (done here as we may be able to texture from system memory) */
         IDirect3DDevice9_SetTexture(priv->d3d_device, 0,
-            (IDirect3DBaseTexture9 *)(priv->device_texture_sys
-            ? priv->d3d_texture_system : priv->d3d_texture_osd));
+                                    d3dtex_get_render_texture(&priv->texture_osd));
 
         IDirect3DDevice9_SetFVF(priv->d3d_device, D3DFVF_OSD_VERTEX);
         IDirect3DDevice9_DrawPrimitiveUP(priv->d3d_device, D3DPT_TRIANGLESTRIP, 2, osd_quad_vb, sizeof(vertex_osd));
@@ -1224,39 +1254,21 @@ static void d3d_realloc_eosd_texture(void)
 
     d3d_fix_texture_size(&new_w, &new_h);
 
-    if (new_w == priv->eosd_texture_width && new_h == priv->eosd_texture_height)
+    if (new_w == priv->texture_eosd.tex_w && new_h == priv->texture_eosd.tex_h)
         return;
-
-    // fortunately, we don't need to keep the old image data
-    // we can always free it
-    if (priv->d3d_texture_eosd)
-        IDirect3DTexture9_Release(priv->d3d_texture_eosd);
-    priv->d3d_texture_eosd = NULL;
-
-    priv->eosd_texture_width = new_w;
-    priv->eosd_texture_height = new_h;
 
     mp_msg(MSGT_VO, MSGL_DBG2, "<vo_direct3d>reallocate EOSD surface.\n");
 
-    if (FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device,
-                                              priv->eosd_texture_width,
-                                              priv->eosd_texture_height,
-                                              1,
-                                              D3DUSAGE_DYNAMIC,
-#if USE_A8
-                                              D3DFMT_A8,
-#else
-                                              D3DFMT_A8L8,
+    // fortunately, we don't need to keep the old image data
+    // we can always free it
+    d3dtex_release(&priv->texture_eosd);
+
+    D3DFORMAT fmt = D3DFMT_A8;
+#if !USE_A8
+    fmt = D3DFMT_A8L8;
 #endif
-                                              D3DPOOL_DEFAULT,
-                                              &priv->d3d_texture_eosd,
-                                              NULL))) {
-        mp_msg(MSGT_VO,MSGL_ERR,
-               "<vo_direct3d>Allocating EOSD texture failed.\n");
-        priv->eosd_texture_width = 0;
-        priv->eosd_texture_height = 0;
-        return;
-    }
+
+    d3dtex_allocate(&priv->texture_eosd, fmt, new_w, new_h);
 }
 
 static D3DCOLOR ass_to_d3d_color(uint32_t color)
@@ -1277,7 +1289,7 @@ static void generate_eosd(mp_eosd_images_t *imgs)
         return;
     // even if the texture size is unchanged, the texture might have been free'd
     d3d_realloc_eosd_texture();
-    if (!priv->d3d_texture_eosd)
+    if (!priv->texture_eosd.system)
         return; // failed to allocate
 
     // reupload all EOSD images
@@ -1295,17 +1307,17 @@ static void generate_eosd(mp_eosd_images_t *imgs)
 
     D3DLOCKED_RECT  locked_rect;
 
-    if (FAILED(IDirect3DTexture9_LockRect(priv->d3d_texture_eosd, 0,
+    if (FAILED(IDirect3DTexture9_LockRect(priv->texture_eosd.system, 0,
                                           &locked_rect, &dirty_rc, 0)))
     {
         mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>EOSD texture lock failed.\n");
         return;
     }
 
-    //memset(locked_rect.pBits, 0, locked_rect.Pitch * priv->eosd_texture_height);
+    //memset(locked_rect.pBits, 0, locked_rect.Pitch * priv->texture_eosd.tex_h);
 
-    float eosd_w = priv->eosd_texture_width;
-    float eosd_h = priv->eosd_texture_height;
+    float eosd_w = priv->texture_eosd.tex_w;
+    float eosd_h = priv->texture_eosd.tex_h;
 
     for (int i = 0; i < priv->eosd->targets_count; i++) {
         struct eosd_target *target = &priv->eosd->targets[i];
@@ -1351,10 +1363,12 @@ static void generate_eosd(mp_eosd_images_t *imgs)
         v[5] = v[1];
     }
 
-    if (FAILED(IDirect3DTexture9_UnlockRect(priv->d3d_texture_eosd, 0))) {
+    if (FAILED(IDirect3DTexture9_UnlockRect(priv->texture_eosd.system, 0))) {
         mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>EOSD texture unlock failed.\n");
         return;
     }
+
+    d3dtex_update(&priv->texture_eosd);
 }
 
 // unfortunately we can't use the D3DX library
@@ -1404,7 +1418,7 @@ static void draw_eosd(void)
     IDirect3DDevice9_SetTransform(priv->d3d_device, D3DTS_VIEW, &m);
 
     IDirect3DDevice9_SetTexture(priv->d3d_device, 0,
-                                (IDirect3DBaseTexture9*)priv->d3d_texture_eosd);
+                                d3dtex_get_render_texture(&priv->texture_eosd));
 
     IDirect3DDevice9_SetRenderState(priv->d3d_device,
                                     D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
