@@ -23,7 +23,7 @@
 #include "mpc_info.h"
 #include "libmpdemux/stheader.h"
 
-typedef mp_codec_info_t vd_info_t;
+typedef struct mp_codec_info vd_info_t;
 
 struct demux_packet;
 
@@ -33,37 +33,38 @@ typedef struct vd_functions
     const vd_info_t *info;
     int (*init)(sh_video_t *sh);
     void (*uninit)(sh_video_t *sh);
-    int (*control)(sh_video_t *sh,int cmd,void* arg, ...);
-    mp_image_t* (*decode)(sh_video_t *sh,void* data,int len,int flags);
+    int (*control)(sh_video_t *sh, int cmd, void *arg, ...);
+    mp_image_t * (*decode)(sh_video_t * sh, void *data, int len, int flags);
     struct mp_image *(*decode2)(struct sh_video *sh, struct demux_packet *pkt,
                                 void *data, int len, int flags,
                                 double *reordered_pts);
 } vd_functions_t;
 
 // NULL terminated array of all drivers
-extern const vd_functions_t * const mpcodecs_vd_drivers[];
+extern const vd_functions_t *const mpcodecs_vd_drivers[];
 
-#define VDCTRL_QUERY_FORMAT 3 /* test for availabilty of a format */
-#define VDCTRL_QUERY_MAX_PP_LEVEL 4 /* test for postprocessing support (max level) */
-#define VDCTRL_SET_PP_LEVEL 5 /* set postprocessing level */
-#define VDCTRL_SET_EQUALIZER 6 /* set color options (brightness,contrast etc) */
-#define VDCTRL_GET_EQUALIZER 7 /* get color options (brightness,contrast etc) */
-#define VDCTRL_RESYNC_STREAM 8 /* seeking */
-#define VDCTRL_QUERY_UNSEEN_FRAMES 9 /* current decoder lag */
+#define VDCTRL_QUERY_FORMAT 3       // test for availabilty of a format
+#define VDCTRL_QUERY_MAX_PP_LEVEL 4 // query max postprocessing level (if any)
+#define VDCTRL_SET_PP_LEVEL 5       // set postprocessing level
+#define VDCTRL_SET_EQUALIZER 6 // set color options (brightness,contrast etc)
+#define VDCTRL_GET_EQUALIZER 7 // get color options (brightness,contrast etc)
+#define VDCTRL_RESYNC_STREAM 8 // reset decode state after seeking
+#define VDCTRL_QUERY_UNSEEN_FRAMES 9 // current decoder lag
 
 // callbacks:
 int mpcodecs_config_vo2(sh_video_t *sh, int w, int h,
                         const unsigned int *outfmts,
                         unsigned int preferred_outfmt);
+
 static inline int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
                                      unsigned int preferred_outfmt)
 {
     return mpcodecs_config_vo2(sh, w, h, NULL, preferred_outfmt);
 }
 
-mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
-void mpcodecs_draw_slice(sh_video_t *sh, unsigned char** src, int* stride, int w,int h, int x, int y);
-
-#define VDFLAGS_DROPFRAME 3
+mp_image_t *mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag,
+                               int w, int h);
+void mpcodecs_draw_slice(sh_video_t *sh, unsigned char **src, int *stride,
+                         int w, int h, int x, int y);
 
 #endif /* MPLAYER_VD_H */
