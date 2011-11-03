@@ -36,6 +36,8 @@
 #include "vf_scale.h"
 
 #include "libvo/csputils.h"
+// VOFLAG_SWSCALE
+#include "libvo/video_out.h"
 
 #include "m_option.h"
 #include "m_struct.h"
@@ -207,7 +209,7 @@ static int config(struct vf_instance *vf,
     // - no other sw/hw up/down scaling avail.
     // - we're after postproc
     // - user didn't set w:h
-    if(!(vo_flags&VFCAP_POSTPROC) && (flags&4) &&
+    if(!(vo_flags&VFCAP_POSTPROC) && (flags&VOFLAG_SWSCALE) &&
 	    vf->priv->w<0 && vf->priv->h<0){	// -zoom
 	int x=(vo_flags&VFCAP_SWSCALE) ? 0 : 1;
 	if(d_width<width || d_height<height){

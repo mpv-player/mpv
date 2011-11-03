@@ -404,7 +404,8 @@ mp_image_t *vf_get_image(vf_instance_t *vf, unsigned int outfmt,
                         // we have to change width... check if we CAN co it:
                         int flags = vf->query_format(vf, outfmt);
                         // should not fail
-                        if (!(flags & 3))
+                        if (!(flags & (VFCAP_CSP_SUPPORTED |
+                                       VFCAP_CSP_SUPPORTED_BY_HW)))
                             mp_msg(MSGT_DECVIDEO, MSGL_WARN,
                                    "??? vf_get_image{vf->query_format(outfmt)} "
                                    "failed!\n");
@@ -583,14 +584,14 @@ unsigned int vf_match_csp(vf_instance_t **vfp, const unsigned int *list,
     if ((p = list))
         while (*p) {
             ret = vf->query_format(vf, *p);
-            mp_msg(MSGT_VFILTER, MSGL_V, "[%s] query(%s) -> %d\n",
-                   vf->info->name, vo_format_name(*p), ret & 3);
-            if (ret & 2) {
+            mp_msg(MSGT_VFILTER, MSGL_V, "[%s] query(%s) -> %x\n",
+                   vf->info->name, vo_format_name(*p), ret);
+            if (ret & VFCAP_CSP_SUPPORTED_BY_HW) {
                 best = *p;
                 break;
-            }                       // no conversion -> bingo!
-            if (ret & 1 && !best)
-                best = *p;          // best with conversion
+            }
+            if (ret & VFCAP_CSP_SUPPORTED && !best)
+                best = *p;
             ++p;
         }
     if (best)
@@ -609,14 +610,14 @@ unsigned int vf_match_csp(vf_instance_t **vfp, const unsigned int *list,
         if ((p = list))
             while (*p) {
                 ret = vf->query_format(vf, *p);
-                mp_msg(MSGT_VFILTER, MSGL_V, "[%s] query(%s) -> %d\n",
-                       vf->info->name, vo_format_name(*p), ret & 3);
-                if (ret & 2) {  // no conversion -> bingo!
+                mp_msg(MSGT_VFILTER, MSGL_V, "[%s] query(%s) -> %x\n",
+                       vf->info->name, vo_format_name(*p), ret);
+                if (ret & VFCAP_CSP_SUPPORTED_BY_HW) {
                     best = *p;
                     break;
                 }
-                if (ret & 1 && !best)
-                    best = *p;          // best with conversion
+                if (ret & VFCAP_CSP_SUPPORTED && !best)
+                    best = *p;
             ++p;
         }
     if (best)
