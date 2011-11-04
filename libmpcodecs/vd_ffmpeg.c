@@ -684,15 +684,6 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
 
     if (!dr1)
         avctx->draw_horiz_band = NULL;
-    if (ctx->vo_initialized && !(flags & 3) && !dr1) {
-        mpi = mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE |
-                                 (ctx->do_slices ? MP_IMGFLAG_DRAW_CALLBACK : 0),
-                                 sh->disp_w, sh->disp_h);
-        if (mpi && mpi->flags & MP_IMGFLAG_DRAW_CALLBACK) {
-            // vd core likes slices!
-            avctx->draw_horiz_band = draw_slice;
-        }
-    }
 
     if (flags & 2)
         avctx->skip_frame = AVDISCARD_ALL;
