@@ -90,7 +90,7 @@ struct d3dtex {
     int w, h;
     // allocated texture size
     int tex_w, tex_h;
-    // D3DPOOL_SYSTEMMEM texture:
+    // D3DPOOL_SYSTEMMEM (or others) texture:
     // - can be locked in order to write (and even read) data
     // - can _not_ (probably) be used as texture for rendering
     // This is always non-NULL if d3dtex_allocate succeeds.
@@ -127,7 +127,11 @@ typedef struct d3d_priv {
     int opt_only_8bit;
     int opt_disable_eosd;
     int opt_disable_texture_align;
+    // debugging
     int opt_force_power_of_2;
+    int opt_texture_memory;
+    int opt_swap_discard;
+    int opt_exact_backbuffer;
 
     struct vo *vo;
 
@@ -366,8 +370,14 @@ static bool d3dtex_allocate(d3d_priv *priv, struct d3dtex *tex, D3DFORMAT fmt,
     int tw = w, th = h;
     d3d_fix_texture_size(priv, &tw, &th);
 
+    int memtype = D3DPOOL_SYSTEMMEM;
+    switch (priv->opt_texture_memory) {
+    case 1: memtype = D3DPOOL_MANAGED; break;
+    case 2: memtype = D3DPOOL_DEFAULT; break;
+    }
+
     if (FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device, tw, th, 1,
-        D3DUSAGE_DYNAMIC, fmt, D3DPOOL_SYSTEMMEM, &tex->system, NULL)))
+        D3DUSAGE_DYNAMIC, fmt, memtype, &tex->system, NULL)))
     {
         mp_msg(MSGT_VO, MSGL_ERR,
                "<vo_direct3d>Allocating %dx%d texture in system RAM failed.\n",
@@ -375,7 +385,7 @@ static bool d3dtex_allocate(d3d_priv *priv, struct d3dtex *tex, D3DFORMAT fmt,
         goto error_exit;
     }
 
-    if (!priv->device_texture_sys) {
+    if (!priv->device_texture_sys && !priv->opt_texture_memory) {
         if (FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device, tw, th, 1,
             D3DUSAGE_DYNAMIC, fmt, D3DPOOL_DEFAULT, &tex->device, NULL)))
         {
@@ -733,7 +743,8 @@ static void fill_d3d_presentparams(d3d_priv *priv,
     /* Prepare Direct3D initialization parameters. */
     memset(present_params, 0, sizeof(D3DPRESENT_PARAMETERS));
     present_params->Windowed               = TRUE;
-    present_params->SwapEffect             = D3DSWAPEFFECT_COPY;
+    present_params->SwapEffect             =
+        priv->opt_swap_discard ? D3DSWAPEFFECT_DISCARD : D3DSWAPEFFECT_COPY;
     present_params->Flags                  = D3DPRESENTFLAG_VIDEO;
     present_params->hDeviceWindow          = vo_w32_window; /* w32_common var */
     present_params->BackBufferWidth        = priv->cur_backbuf_width;
@@ -760,6 +771,11 @@ static bool change_d3d_backbuffer(d3d_priv *priv)
 
     if (window_h > priv->cur_backbuf_height)
         priv->cur_backbuf_height = window_h;
+
+    if (priv->opt_exact_backbuffer) {
+        priv->cur_backbuf_width = window_w;
+        priv->cur_backbuf_height = window_h;
+    }
 
     /* The grown backbuffer dimensions are ready and fill_d3d_presentparams
      * will use them, so we can reset the device.
@@ -833,9 +849,15 @@ static bool resize_d3d(d3d_priv *priv)
     /* Make sure that backbuffer is large enough to accomodate the new
        viewport dimensions. Grow it if necessary. */
 
-    if (priv->vo->dwidth > priv->cur_backbuf_width ||
-        priv->vo->dheight > priv->cur_backbuf_height ||
-        !priv->d3d_device)
+    bool backbuf_resize = priv->vo->dwidth > priv->cur_backbuf_width ||
+                          priv->vo->dheight > priv->cur_backbuf_height;
+
+    if (priv->opt_exact_backbuffer) {
+        backbuf_resize = priv->vo->dwidth != priv->cur_backbuf_width ||
+                         priv->vo->dheight != priv->cur_backbuf_height;
+    }
+
+    if (backbuf_resize || !priv->d3d_device)
     {
         destroy_d3d_surfaces(priv);
         if (!change_d3d_backbuffer(priv))
@@ -945,7 +967,7 @@ static uint32_t d3d_draw_frame(d3d_priv *priv)
     if (!d3d_begin_scene(priv))
         return VO_ERROR;
 
-    if (priv->is_clear_needed) {
+    if (priv->is_clear_needed || priv->opt_swap_discard) {
         IDirect3DDevice9_Clear(priv->d3d_device, 0, NULL,
                                D3DCLEAR_TARGET, 0, 0, 0);
         priv->is_clear_needed = 0;
@@ -1270,13 +1292,29 @@ const char *options_help_text = "-vo direct3d command line help:\n"
 "        Disable EOSD rendering for subtitles.\n"
 "        (Using this flag might force the insertion of the 'ass' video filter,\n"
 "         which will render the subtitles in software.)\n"
-"    force-power-of-2\n"
-"        Always force textures to power of 2, even if the device reports\n"
-"        non-power-of-2 texture sizes as supported.\n"
 "    disable-texture-align\n"
 "        Normally texture sizes are always aligned to 16. With this option\n"
 "        enabled, the video texture will always have exactly the same size as\n"
-"        the video itself.\n";
+"        the video itself.\n"
+"Debug options. These might be incorrect, might be removed in the future, might\n"
+"crash, might cause slow downs, etc. Contact the developers if you actually need\n"
+"any of these for performance or proper operation.\n"
+"    force-power-of-2\n"
+"        Always force textures to power of 2, even if the device reports\n"
+"        non-power-of-2 texture sizes as supported.\n"
+"    texture-memory=N\n"
+"        Only affects operation with shaders/texturing enabled, and (E)OSD.\n"
+"        Values for N:\n"
+"           0 default, will often use an additional shadow texture + copy\n"
+"           1 use D3DPOOL_MANAGED\n"
+"           2 use D3DPOOL_DEFAULT\n"
+"           3 use D3DPOOL_SYSTEMMEM, but without shadow texture\n"
+"    swap-discard\n"
+"        Use D3DSWAPEFFECT_DISCARD, which might be faster.\n"
+"        Might be slower too, as it must (?) clear every frame.\n"
+"    exact-backbuffer\n"
+"        Always resize the backbuffer to window size.\n"
+"";
 
 /** @brief libvo Callback: Preinitialize the video card.
  *  Preinit the hardware just enough to be queried about
@@ -1310,6 +1348,9 @@ static int preinit_internal(struct vo *vo, const char *arg, bool allow_shaders)
         {"disable-eosd", OPT_ARG_BOOL, &priv->opt_disable_eosd},
         {"force-power-of-2", OPT_ARG_BOOL, &priv->opt_force_power_of_2},
         {"disable-texture-align", OPT_ARG_BOOL, &priv->opt_disable_texture_align},
+        {"texture-memory", OPT_ARG_INT, &priv->opt_texture_memory},
+        {"swap-discard", OPT_ARG_BOOL, &priv->opt_swap_discard},
+        {"exact-backbuffer", OPT_ARG_BOOL, &priv->opt_exact_backbuffer},
         {NULL}
     };
     if (subopt_parse(arg, subopts) != 0) {
