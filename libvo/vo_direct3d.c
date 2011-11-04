@@ -31,8 +31,11 @@
 #include "subopt-helper.h"
 #include "talloc.h"
 #include "video_out.h"
-#include "video_out_internal.h"
+#include "libmpcodecs/vfcap.h"
+// for global_vo
+#include "old_vo_wrapper.h"
 #include "csputils.h"
+#include "libmpcodecs/mp_image.h"
 #include "libmpcodecs/img_format.h"
 #include "fastmemcpy.h"
 #include "mp_msg.h"
@@ -64,12 +67,6 @@ static const vo_info_t info =
 #define DEVTYPE D3DDEVTYPE_HAL
 //#define DEVTYPE D3DDEVTYPE_REF
 
-/*
- * Link essential libvo functions: preinit, config, control, draw_frame,
- * draw_slice, draw_osd, flip_page, check_events, uninit and
- * the structure info.
- */
-const LIBVO_EXTERN(direct3d)
 
 #define D3DFVF_OSD_VERTEX (D3DFVF_XYZ | D3DFVF_TEX1)
 
@@ -93,6 +90,7 @@ typedef struct {
     // pairs of texture coordinates for up to 3 planes
     float t[3][2];
 } vertex_video;
+
 
 struct d3dtex {
     // user-requested size
@@ -128,7 +126,7 @@ struct texplane {
 
 /* Global variables "priv" structure. I try to keep their count low.
  */
-static struct global_priv {
+typedef struct d3d_priv {
     int opt_prefer_stretchrect;
     int opt_disable_textures;
     int opt_disable_stretchrect;
@@ -137,8 +135,8 @@ static struct global_priv {
     int opt_disable_eosd;
     int opt_disable_texture_align;
 
-    int is_paused;              /**< 1 = Movie is paused,
-                                0 = Movie is not paused */
+    struct vo *vo;
+
     int is_clear_needed;        /**< 1 = Clear the backbuffer before StretchRect
                                 0 = (default) Don't clear it */
     D3DLOCKED_RECT locked_rect; /**< The locked offscreen surface */
@@ -199,7 +197,7 @@ static struct global_priv {
 
     struct eosd_packer *eosd;       /**< EOSD packer (image positions etc.) */
     vertex_eosd *eosd_vb;           /**< temporary memory for D3D when rendering EOSD */
-} *priv;
+} d3d_priv;
 
 struct fmt_entry {
     const unsigned int  mplayer_fmt;   /**< Given by MPlayer */
@@ -237,11 +235,18 @@ typedef enum back_buffer_action {
     BACKBUFFER_RESET
 } back_buffer_action_e;
 
-static void generate_eosd(mp_eosd_images_t *);
-static void draw_eosd(void);
-static void update_colorspace(void);
-static void d3d_clear_video_textures(void);
-static int resize_d3d(void);
+static void generate_eosd(d3d_priv *priv, mp_eosd_images_t *);
+static void draw_eosd(d3d_priv *priv);
+static void update_colorspace(d3d_priv *priv);
+static void d3d_clear_video_textures(d3d_priv *priv);
+static int resize_d3d(d3d_priv *priv);
+static uint32_t d3d_draw_frame(d3d_priv *priv);
+static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
+                      int x, int y);
+static void uninit(struct vo *vo);
+static void draw_osd(struct vo *vo, struct osd_state *osd);
+static void flip_page(struct vo *vo);
+
 
 static void d3d_matrix_identity(D3DMATRIX *m)
 {
@@ -272,7 +277,7 @@ static void d3d_matrix_ortho(D3DMATRIX *m, float left, float right,
  *                                                                          *
  ****************************************************************************/
 
-static bool d3d_begin_scene(void)
+static bool d3d_begin_scene(d3d_priv *priv)
 {
     if (!priv->d3d_in_scene) {
         if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
@@ -287,12 +292,13 @@ static bool d3d_begin_scene(void)
 /** @brief Calculate scaled fullscreen movie rectangle with
  *  preserved aspect ratio.
  */
-static void calc_fs_rect(void)
+static void calc_fs_rect(d3d_priv *priv)
 {
     struct vo_rect src_rect;
     struct vo_rect dst_rect;
     struct vo_rect borders;
-    calc_src_dst_rects(priv->src_width, priv->src_height, &src_rect, &dst_rect, &borders, NULL);
+    calc_src_dst_rects(priv->vo, priv->src_width, priv->src_height, &src_rect,
+                       &dst_rect, &borders, NULL);
 
     priv->fs_movie_rect.left     = dst_rect.left;
     priv->fs_movie_rect.right    = dst_rect.right;
@@ -306,7 +312,7 @@ static void calc_fs_rect(void)
     priv->border_y               = borders.top;
 
     mp_msg(MSGT_VO, MSGL_V,
-           "<vo_direct3d>Fullscreen movie rectangle: t: %ld, l: %ld, r: %ld, b:%ld\n",
+           "<vo_direct3d>Video rectangle: t: %ld, l: %ld, r: %ld, b:%ld\n",
            priv->fs_movie_rect.top,   priv->fs_movie_rect.left,
            priv->fs_movie_rect.right, priv->fs_movie_rect.bottom);
 
@@ -319,8 +325,7 @@ static void calc_fs_rect(void)
 
 // Adjust the texture size *width/*height to fit the requirements of the D3D
 // device. The texture size is only increased.
-// xxx make clear what happens when exceeding max_texture_width/height
-static void d3d_fix_texture_size(int *width, int *height)
+static void d3d_fix_texture_size(d3d_priv *priv, int *width, int *height)
 {
     int tex_width = *width;
     int tex_height = *height;
@@ -337,7 +342,7 @@ static void d3d_fix_texture_size(int *width, int *height)
     }
     if (priv->device_caps_square_only)
         /* device only supports square textures */
-        tex_width = tex_height = tex_width > tex_height ? tex_width : tex_height;
+        tex_width = tex_height = FFMAX(tex_width, tex_height);
     // better round up to a multiple of 16
     if (!priv->opt_disable_texture_align) {
         tex_width  = (tex_width  + 15) & ~15;
@@ -348,7 +353,7 @@ static void d3d_fix_texture_size(int *width, int *height)
     *height = tex_height;
 }
 
-static void d3dtex_release(struct d3dtex *tex)
+static void d3dtex_release(d3d_priv *priv, struct d3dtex *tex)
 {
     if (tex->system)
         IDirect3DTexture9_Release(tex->system);
@@ -361,15 +366,16 @@ static void d3dtex_release(struct d3dtex *tex)
     tex->tex_w = tex->tex_h = 0;
 }
 
-static bool d3dtex_allocate(struct d3dtex *tex, D3DFORMAT fmt, int w, int h)
+static bool d3dtex_allocate(d3d_priv *priv, struct d3dtex *tex, D3DFORMAT fmt,
+                            int w, int h)
 {
-    d3dtex_release(tex);
+    d3dtex_release(priv, tex);
 
     tex->w = w;
     tex->h = h;
 
     int tw = w, th = h;
-    d3d_fix_texture_size(&tw, &th);
+    d3d_fix_texture_size(priv, &tw, &th);
 
     if (FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device, tw, th, 1,
         D3DUSAGE_DYNAMIC, fmt, D3DPOOL_SYSTEMMEM, &tex->system, NULL)))
@@ -397,17 +403,18 @@ static bool d3dtex_allocate(struct d3dtex *tex, D3DFORMAT fmt, int w, int h)
     return true;
 
 error_exit:
-    d3dtex_release(tex);
+    d3dtex_release(priv, tex);
     return false;
 }
 
-static IDirect3DBaseTexture9 *d3dtex_get_render_texture(struct d3dtex *tex)
+static IDirect3DBaseTexture9 *d3dtex_get_render_texture(d3d_priv *priv,
+                                                        struct d3dtex *tex)
 {
     return (IDirect3DBaseTexture9 *)(tex->device ? tex->device : tex->system);
 }
 
 // Copy system texture contents to device texture.
-static bool d3dtex_update(struct d3dtex *tex)
+static bool d3dtex_update(d3d_priv *priv, struct d3dtex *tex)
 {
     if (!tex->device)
         return true;
@@ -416,7 +423,7 @@ static bool d3dtex_update(struct d3dtex *tex)
                    (IDirect3DBaseTexture9 *)tex->device));
 }
 
-static void d3d_unlock_video_objects(void)
+static void d3d_unlock_video_objects(d3d_priv *priv)
 {
     bool any_failed = false;
 
@@ -435,21 +442,23 @@ static void d3d_unlock_video_objects(void)
         plane->locked_rect.pBits = NULL;
     }
 
-    if (any_failed)
-        mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Unlocking video objects failed.\n");
+    if (any_failed) {
+        mp_msg(MSGT_VO, MSGL_V,
+               "<vo_direct3d>Unlocking video objects failed.\n");
+    }
 }
 
 // Free video surface/textures, shaders, etc.
-static void d3d_destroy_video_objects(void)
+static void d3d_destroy_video_objects(d3d_priv *priv)
 {
-    d3d_unlock_video_objects();
+    d3d_unlock_video_objects(priv);
 
     if (priv->d3d_surface)
         IDirect3DSurface9_Release(priv->d3d_surface);
     priv->d3d_surface = NULL;
 
     for (int n = 0; n < priv->plane_count; n++) {
-        d3dtex_release(&priv->planes[n].texture);
+        d3dtex_release(priv, &priv->planes[n].texture);
     }
 
     if (priv->pixel_shader)
@@ -459,27 +468,26 @@ static void d3d_destroy_video_objects(void)
 
 /** @brief Destroy D3D Offscreen and Backbuffer surfaces.
  */
-static void destroy_d3d_surfaces(void)
+static void destroy_d3d_surfaces(d3d_priv *priv)
 {
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>destroy_d3d_surfaces called.\n");
-    /* Let's destroy the old (if any) D3D Surfaces */
 
-    d3d_destroy_video_objects();
+    d3d_destroy_video_objects(priv);
 
-    d3dtex_release(&priv->texture_osd);
+    d3dtex_release(priv, &priv->texture_osd);
 
     if (priv->d3d_backbuf)
         IDirect3DSurface9_Release(priv->d3d_backbuf);
     priv->d3d_backbuf = NULL;
 
-    d3dtex_release(&priv->texture_eosd);
+    d3dtex_release(priv, &priv->texture_eosd);
 
     if (priv->eosd)
         eosd_packer_reinit(priv->eosd, 0, 0);
 }
 
 // Allocate video surface or textures, and create shaders if needed.
-static bool d3d_configure_video_objects(void)
+static bool d3d_configure_video_objects(d3d_priv *priv)
 {
     int n;
     bool need_clear = false;
@@ -491,7 +499,8 @@ static bool d3d_configure_video_objects(void)
             struct texplane *plane = &priv->planes[n];
 
             if (!plane->texture.system) {
-                if (!d3dtex_allocate(&plane->texture,
+                if (!d3dtex_allocate(priv,
+                                     &plane->texture,
                                      plane->d3d_format,
                                      priv->src_width >> plane->shift_x,
                                      priv->src_height >> plane->shift_y))
@@ -513,7 +522,7 @@ static bool d3d_configure_video_objects(void)
         }
 
         if (need_clear)
-            d3d_clear_video_textures();
+            d3d_clear_video_textures(priv);
 
         if (priv->pixel_shader_data) {
             if (!priv->pixel_shader &&
@@ -531,7 +540,8 @@ static bool d3d_configure_video_objects(void)
         if (!priv->d3d_surface &&
             FAILED(IDirect3DDevice9_CreateOffscreenPlainSurface(
                 priv->d3d_device, priv->src_width, priv->src_height,
-                priv->movie_src_fmt, D3DPOOL_DEFAULT, &priv->d3d_surface, NULL))) {
+                priv->movie_src_fmt, D3DPOOL_DEFAULT, &priv->d3d_surface, NULL)))
+        {
             mp_msg(MSGT_VO, MSGL_ERR,
                 "<vo_direct3d>Allocating offscreen surface failed.\n");
             return false;
@@ -541,7 +551,7 @@ static bool d3d_configure_video_objects(void)
     return true;
 }
 
-static bool d3d_lock_video_textures(void)
+static bool d3d_lock_video_textures(d3d_priv *priv)
 {
     for (int n = 0; n < priv->plane_count; n++) {
         struct texplane *plane = &priv->planes[n];
@@ -551,7 +561,7 @@ static bool d3d_lock_video_textures(void)
                                                   &plane->locked_rect, NULL, 0)))
             {
                 mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Texture lock failure.\n");
-                d3d_unlock_video_objects();
+                d3d_unlock_video_objects(priv);
                 return false;
             }
         }
@@ -560,9 +570,9 @@ static bool d3d_lock_video_textures(void)
     return true;
 }
 
-static void d3d_clear_video_textures(void)
+static void d3d_clear_video_textures(d3d_priv *priv)
 {
-    if (!d3d_lock_video_textures())
+    if (!d3d_lock_video_textures(priv))
         return;
 
     for (int n = 0; n < priv->plane_count; n++) {
@@ -571,16 +581,16 @@ static void d3d_clear_video_textures(void)
                plane->locked_rect.Pitch * plane->texture.tex_h);
     }
 
-    d3d_unlock_video_objects();
+    d3d_unlock_video_objects(priv);
 }
 
 /** @brief Create D3D Offscreen and Backbuffer surfaces. Each
  *         surface is created only if it's not already present.
  *  @return 1 on success, 0 on failure
  */
-static int create_d3d_surfaces(void)
+static int create_d3d_surfaces(d3d_priv *priv)
 {
-    int osd_width = vo_dwidth, osd_height = vo_dheight;
+    int osd_width = priv->vo->dwidth, osd_height = priv->vo->dheight;
     int tex_width = osd_width, tex_height = osd_height;
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>create_d3d_surfaces called.\n");
 
@@ -592,15 +602,16 @@ static int create_d3d_surfaces(void)
         return 0;
     }
 
-    if (!d3d_configure_video_objects())
+    if (!d3d_configure_video_objects(priv))
         return 0;
 
     /* create OSD */
 
-    d3d_fix_texture_size(&tex_width, &tex_height);
+    d3d_fix_texture_size(priv, &tex_width, &tex_height);
 
-    // make sure we respect the size limits without breaking aspect or pow2-requirements
-    while (tex_width > priv->max_texture_width || tex_height > priv->max_texture_height) {
+    while (tex_width > priv->max_texture_width
+           || tex_height > priv->max_texture_height)
+    {
         osd_width  >>= 1;
         osd_height >>= 1;
         tex_width  >>= 1;
@@ -610,12 +621,13 @@ static int create_d3d_surfaces(void)
     if (priv->texture_osd.tex_w < tex_width
         || priv->texture_osd.tex_h < tex_height)
     {
-        d3dtex_release(&priv->texture_osd);
+        d3dtex_release(priv, &priv->texture_osd);
 
-        mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>OSD texture size (%dx%d), requested (%dx%d).\n",
-               vo_dwidth, vo_dheight, tex_width, tex_height);
+        mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>OSD texture size (%dx%d),"
+               " requested (%dx%d).\n", osd_width, osd_height, tex_width,
+               tex_height);
 
-        if (!d3dtex_allocate(&priv->texture_osd, D3DFMT_A8L8, tex_width,
+        if (!d3dtex_allocate(priv, &priv->texture_osd, D3DFMT_A8L8, tex_width,
                              tex_height))
         {
             mp_msg(MSGT_VO, MSGL_ERR,
@@ -628,11 +640,16 @@ static int create_d3d_surfaces(void)
     priv->texture_osd.h = osd_height;
 
     /* setup default renderstate */
-    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHAFUNC, D3DCMP_GREATER);
-    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHAREF, (DWORD)0x0);
-    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_LIGHTING, FALSE);
+    IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                    D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+    IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                    D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+    IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                    D3DRS_ALPHAFUNC, D3DCMP_GREATER);
+    IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                    D3DRS_ALPHAREF, (DWORD)0x0);
+    IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                    D3DRS_LIGHTING, FALSE);
 
     // we use up to 3 samplers for up to 3 YUV planes
     for (int n = 0; n < 3; n++) {
@@ -655,7 +672,8 @@ static int create_d3d_surfaces(void)
 
 /** @brief Fill D3D Presentation parameters
  */
-static void fill_d3d_presentparams(D3DPRESENT_PARAMETERS *present_params)
+static void fill_d3d_presentparams(d3d_priv *priv,
+                                   D3DPRESENT_PARAMETERS *present_params)
 {
     /* Prepare Direct3D initialization parameters. */
     memset(present_params, 0, sizeof(D3DPRESENT_PARAMETERS));
@@ -677,23 +695,26 @@ static void fill_d3d_presentparams(D3DPRESENT_PARAMETERS *present_params)
  *         device.
  *  @return 1 on success, 0 on failure
  */
-static int change_d3d_backbuffer(back_buffer_action_e action)
+static int change_d3d_backbuffer(d3d_priv *priv, back_buffer_action_e action)
 {
     D3DPRESENT_PARAMETERS present_params;
 
-    destroy_d3d_surfaces();
+    destroy_d3d_surfaces(priv);
+
+    int window_w = priv->vo->dwidth;
+    int window_h = priv->vo->dheight;
 
     /* Grow the backbuffer in the required dimension. */
-    if (vo_dwidth > priv->cur_backbuf_width)
-        priv->cur_backbuf_width = vo_dwidth;
+    if (window_w > priv->cur_backbuf_width)
+        priv->cur_backbuf_width = window_w;
 
-    if (vo_dheight > priv->cur_backbuf_height)
-        priv->cur_backbuf_height = vo_dheight;
+    if (window_h > priv->cur_backbuf_height)
+        priv->cur_backbuf_height = window_h;
 
     /* The grown backbuffer dimensions are ready and fill_d3d_presentparams
      * will use them, so we can reset the device.
      */
-    fill_d3d_presentparams(&present_params);
+    fill_d3d_presentparams(priv, &present_params);
 
     /* vo_w32_window is w32_common variable. It's a handle to the window. */
     if (action == BACKBUFFER_CREATE &&
@@ -717,7 +738,7 @@ static int change_d3d_backbuffer(back_buffer_action_e action)
     mp_msg(MSGT_VO, MSGL_V,
            "<vo_direct3d>New backbuffer (%dx%d), VO (%dx%d)\n",
            present_params.BackBufferWidth, present_params.BackBufferHeight,
-           vo_dwidth, vo_dheight);
+           window_w, window_h);
 
     return 1;
 }
@@ -726,13 +747,13 @@ static int change_d3d_backbuffer(back_buffer_action_e action)
  *  function called to initialize the D3D context.
  *  @return 1 on success, 0 on failure
  */
-static int configure_d3d(void)
+static int configure_d3d(d3d_priv *priv)
 {
     D3DDISPLAYMODE disp_mode;
 
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>configure_d3d called.\n");
 
-    destroy_d3d_surfaces();
+    destroy_d3d_surfaces(priv);
 
     /* Get the current desktop display mode, so we can set up a back buffer
      * of the same format. */
@@ -744,16 +765,15 @@ static int configure_d3d(void)
         return 0;
     }
 
-    /* Write current Desktop's colorspace format in the global storage. */
     priv->desktop_fmt = disp_mode.Format;
 
-    if (!change_d3d_backbuffer(BACKBUFFER_CREATE))
+    if (!change_d3d_backbuffer(priv, BACKBUFFER_CREATE))
         return 0;
 
-    if (!create_d3d_surfaces())
+    if (!create_d3d_surfaces(priv))
         return 0;
 
-    resize_d3d();
+    resize_d3d(priv);
 
     return 1;
 }
@@ -762,30 +782,25 @@ static int configure_d3d(void)
  *  when the video adapter becomes uncooperative.
  *  @return 1 on success, 0 on failure
  */
-static int reconfigure_d3d(void)
+static int reconfigure_d3d(d3d_priv *priv)
 {
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>reconfigure_d3d called.\n");
 
-    /* Destroy the offscreen, OSD and backbuffer surfaces */
-    destroy_d3d_surfaces();
+    destroy_d3d_surfaces(priv);
 
-    /* Destroy the D3D Device */
     if (priv->d3d_device)
         IDirect3DDevice9_Release(priv->d3d_device);
     priv->d3d_device = NULL;
 
-    /* Stop the whole Direct3D */
     IDirect3D9_Release(priv->d3d_handle);
 
-    /* Initialize Direct3D from the beginning */
     priv->d3d_handle = priv->pDirect3DCreate9(D3D_SDK_VERSION);
     if (!priv->d3d_handle) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Initializing Direct3D failed.\n");
         return 0;
     }
 
-    /* Configure Direct3D */
-    if (!configure_d3d())
+    if (!configure_d3d(priv))
         return 0;
 
     return 1;
@@ -794,18 +809,19 @@ static int reconfigure_d3d(void)
 /** @brief Resize Direct3D context on window resize.
  *  @return 1 on success, 0 on failure
  */
-static int resize_d3d(void)
+static int resize_d3d(d3d_priv *priv)
 {
-    D3DVIEWPORT9 vp = {0, 0, vo_dwidth, vo_dheight, 0, 1};
+    D3DVIEWPORT9 vp = {0, 0, priv->vo->dwidth, priv->vo->dheight, 0, 1};
 
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>resize_d3d called.\n");
 
     /* Make sure that backbuffer is large enough to accomodate the new
        viewport dimensions. Grow it if necessary. */
 
-    if (vo_dwidth > priv->cur_backbuf_width ||
-        vo_dheight > priv->cur_backbuf_height) {
-        if (!change_d3d_backbuffer(BACKBUFFER_RESET))
+    if (priv->vo->dwidth > priv->cur_backbuf_width ||
+        priv->vo->dheight > priv->cur_backbuf_height)
+    {
+        if (!change_d3d_backbuffer(priv, BACKBUFFER_RESET))
             return 0;
     }
 
@@ -814,11 +830,10 @@ static int resize_d3d(void)
      * effectively recreating only the OSD.
      */
 
-    if (!create_d3d_surfaces())
+    if (!create_d3d_surfaces(priv))
         return 0;
 
-    if (FAILED(IDirect3DDevice9_SetViewport(priv->d3d_device,
-                                            &vp))) {
+    if (FAILED(IDirect3DDevice9_SetViewport(priv->d3d_device, &vp))) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Setting viewport failed.\n");
         return 0;
     }
@@ -828,7 +843,7 @@ static int resize_d3d(void)
     d3d_matrix_ortho(&view, 0.5f, vp.Width + 0.5f, vp.Height + 0.5f, 0.5f);
     IDirect3DDevice9_SetTransform(priv->d3d_device, D3DTS_VIEW, &view);
 
-    calc_fs_rect();
+    calc_fs_rect(priv);
 
 #ifdef CONFIG_FREETYPE
     // font needs to be adjusted
@@ -837,23 +852,23 @@ static int resize_d3d(void)
     // OSD needs to be drawn fresh for new size
     vo_osd_changed(OSDTYPE_OSD);
 
+    priv->vo->want_redraw = true;
+
     return 1;
 }
 
 /** @brief Uninitialize Direct3D and close the window.
  */
-static void uninit_d3d(void)
+static void uninit_d3d(d3d_priv *priv)
 {
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>uninit_d3d called.\n");
 
-    destroy_d3d_surfaces();
+    destroy_d3d_surfaces(priv);
 
-    /* Destroy the D3D Device */
     if (priv->d3d_device)
         IDirect3DDevice9_Release(priv->d3d_device);
     priv->d3d_device = NULL;
 
-    /* Stop the whole D3D. */
     if (priv->d3d_handle) {
         mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Stopping Direct3D.\n");
         IDirect3D9_Release(priv->d3d_handle);
@@ -861,45 +876,40 @@ static void uninit_d3d(void)
     priv->d3d_handle = NULL;
 }
 
-static uint32_t d3d_draw_frame(void);
-
-static uint32_t d3d_upload_and_render_frame_texture(mp_image_t *mpi)
+static uint32_t d3d_upload_and_render_frame_texture(d3d_priv *priv,
+                                                    mp_image_t *mpi)
 {
     if (!(mpi->flags & MP_IMGFLAG_DRAW_CALLBACK))
-        draw_slice(mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
+        draw_slice(priv->vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
 
-    d3d_unlock_video_objects();
+    d3d_unlock_video_objects(priv);
 
     for (int n = 0; n < priv->plane_count; n++) {
-        d3dtex_update(&priv->planes[n].texture);
+        d3dtex_update(priv, &priv->planes[n].texture);
     }
 
-    return d3d_draw_frame();
+    return d3d_draw_frame(priv);
 }
 
 /** @brief Render a frame on the screen.
  *  @param mpi mpi structure with the decoded frame inside
  *  @return VO_TRUE on success, VO_ERROR on failure
  */
-static uint32_t d3d_upload_and_render_frame(mp_image_t *mpi)
+static uint32_t d3d_upload_and_render_frame(d3d_priv *priv, mp_image_t *mpi)
 {
-    /* Uncomment when direct rendering is implemented.
-     * if (mpi->flags & MP_IMGFLAG_DIRECT) ...
-     */
-
     /* If the D3D device is uncooperative (not initialized), return success.
        The device will be probed for reinitialization in the next flip_page() */
     if (!priv->d3d_device)
         return VO_TRUE;
 
     if (priv->use_textures)
-        return d3d_upload_and_render_frame_texture(mpi);
+        return d3d_upload_and_render_frame_texture(priv, mpi);
 
     if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
         goto skip_upload;
 
     if (mpi->flags & MP_IMGFLAG_PLANAR) { /* Copy a planar frame. */
-        draw_slice(mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
+        draw_slice(priv->vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
         goto skip_upload;
     }
 
@@ -916,16 +926,16 @@ static uint32_t d3d_upload_and_render_frame(mp_image_t *mpi)
                mpi->height, priv->locked_rect.Pitch, mpi->stride[0]);
 
 skip_upload:
-    d3d_unlock_video_objects();
+    d3d_unlock_video_objects(priv);
 
-    return d3d_draw_frame();
+    return d3d_draw_frame(priv);
 }
 
-static uint32_t d3d_draw_frame(void)
+static uint32_t d3d_draw_frame(d3d_priv *priv)
 {
     int n;
 
-    if (!d3d_begin_scene())
+    if (!d3d_begin_scene(priv))
         return VO_ERROR;
 
     if (priv->is_clear_needed) {
@@ -938,7 +948,7 @@ static uint32_t d3d_draw_frame(void)
 
         for (n = 0; n < priv->plane_count; n++) {
             IDirect3DDevice9_SetTexture(priv->d3d_device, n,
-                d3dtex_get_render_texture(&priv->planes[n].texture));
+                d3dtex_get_render_texture(priv, &priv->planes[n].texture));
         }
 
         RECT rm = priv->fs_movie_rect;
@@ -1010,7 +1020,8 @@ static int get_chroma_clear_val(int bit_depth)
 
 // this macro is supposed to work on all formats supported by 3D rendering, and
 // that produce "reasonable" output (i.e. no mixed up colors)
-#define IMGFMT_IS_ANY_RND(x) (IMGFMT_IS_BGR(x) || IMGFMT_IS_RGB(x) || IMGFMT_IS_Y(x))
+#define IMGFMT_IS_ANY_RND(x) \
+    (IMGFMT_IS_BGR(x) || IMGFMT_IS_RGB(x) || IMGFMT_IS_Y(x))
 
 // pixel size in bit for any IMGFMT_IS_ANY_RND(x)==true
 // we assume that the actual pixel strides are always aligned on bytes
@@ -1026,7 +1037,8 @@ static int imgfmt_any_rnd_depth(int fmt)
     return 0;
 }
 
-static D3DFORMAT check_format(uint32_t movie_fmt, bool as_texture)
+static D3DFORMAT check_format(d3d_priv *priv, uint32_t movie_fmt,
+                              bool as_texture)
 {
     const char *type = as_texture ? "texture rendering" : "StretchRect";
     const struct fmt_entry *cur = &fmt_table[0];
@@ -1077,7 +1089,7 @@ static D3DFORMAT check_format(uint32_t movie_fmt, bool as_texture)
 
 // Check whether YUV conversion with shaders can be done.
 // Returns the format the individual planes should use (or 0 on failure)
-static D3DFORMAT check_shader_conversion(uint32_t fmt)
+static D3DFORMAT check_shader_conversion(d3d_priv *priv, uint32_t fmt)
 {
     if (priv->opt_disable_shaders)
         return 0;
@@ -1089,19 +1101,19 @@ static D3DFORMAT check_shader_conversion(uint32_t fmt)
     bool is_8bit = component_bits == 8;
     if (!is_8bit && priv->opt_only_8bit)
         return 0;
-    return check_format(is_8bit ? IMGFMT_Y8 : IMGFMT_Y16, true);
+    return check_format(priv, is_8bit ? IMGFMT_Y8 : IMGFMT_Y16, true);
 }
 
 // Return if the image format can be used. If it can, decide which rendering
 // and conversion mode to use.
 // If initialize is true, actually setup all variables to use the picked
 // rendering mode.
-static bool init_rendering_mode(uint32_t fmt, bool initialize)
+static bool init_rendering_mode(d3d_priv *priv, uint32_t fmt, bool initialize)
 {
     int n;
-    int blit_d3dfmt = check_format(fmt, false);
-    int texture_d3dfmt = check_format(fmt, true);
-    int shader_d3dfmt = check_shader_conversion(fmt);
+    int blit_d3dfmt = check_format(priv, fmt, false);
+    int texture_d3dfmt = check_format(priv, fmt, true);
+    int shader_d3dfmt = check_shader_conversion(priv, fmt);
 
     if (priv->opt_disable_textures)
         texture_d3dfmt = 0;
@@ -1181,7 +1193,7 @@ static bool init_rendering_mode(uint32_t fmt, bool initialize)
         priv->movie_src_fmt = blit_d3dfmt;
     }
 
-    update_colorspace();
+    update_colorspace(priv);
 
     return true;
 }
@@ -1190,9 +1202,9 @@ static bool init_rendering_mode(uint32_t fmt, bool initialize)
  *  @return 0 on failure, device capabilities (not probed
  *          currently) on success.
  */
-static int query_format(uint32_t movie_fmt)
+static int query_format(d3d_priv *priv, uint32_t movie_fmt)
 {
-    if (!init_rendering_mode(movie_fmt, false))
+    if (!init_rendering_mode(priv, movie_fmt, false))
         return 0;
 
     int eosd_caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
@@ -1212,7 +1224,7 @@ static int query_format(uint32_t movie_fmt)
  *                                                                          *
  ****************************************************************************/
 
-static void update_colorspace(void)
+static void update_colorspace(d3d_priv *priv)
 {
     float coeff[3][4];
     struct mp_csp_params csp = { .colorspace = priv->colorspace };
@@ -1266,16 +1278,19 @@ const char *options_help_text = "-vo direct3d command line help:\n"
  *  @return 0 on success, -1 on failure
  */
 
-static int preinit(const char *arg)
+static int preinit(struct vo *vo, const char *arg)
 {
     D3DDISPLAYMODE disp_mode;
     D3DCAPS9 disp_caps;
     DWORD texture_caps;
     DWORD dev_caps;
 
-    /* Set to zero all global variables. */
-    priv = talloc_zero(NULL, struct global_priv);
-    *priv = (struct global_priv) {
+    d3d_priv *priv = talloc_zero(vo, d3d_priv);
+    vo->priv = priv;
+
+    *priv = (d3d_priv) {
+        .vo = vo,
+
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
         .video_eq = { MP_CSP_EQ_CAPS_COLORMATRIX },
     };
@@ -1283,14 +1298,14 @@ static int preinit(const char *arg)
     int opt_force_power_of_2 = false;
 
     const opt_t subopts[] = {
-        {"prefer-stretchrect", OPT_ARG_BOOL, &priv->opt_prefer_stretchrect, NULL},
-        {"disable-textures", OPT_ARG_BOOL, &priv->opt_disable_textures, NULL},
-        {"disable-stretchrect", OPT_ARG_BOOL, &priv->opt_disable_stretchrect, NULL},
-        {"disable-shaders", OPT_ARG_BOOL, &priv->opt_disable_shaders, NULL},
-        {"only-8bit", OPT_ARG_BOOL, &priv->opt_only_8bit, NULL},
-        {"disable-eosd", OPT_ARG_BOOL, &priv->opt_disable_eosd, NULL},
-        {"force-power-of-2", OPT_ARG_BOOL, &opt_force_power_of_2, NULL},
-        {"disable-texture-align", OPT_ARG_BOOL, &priv->opt_disable_texture_align, NULL},
+        {"prefer-stretchrect", OPT_ARG_BOOL, &priv->opt_prefer_stretchrect},
+        {"disable-textures", OPT_ARG_BOOL, &priv->opt_disable_textures},
+        {"disable-stretchrect", OPT_ARG_BOOL, &priv->opt_disable_stretchrect},
+        {"disable-shaders", OPT_ARG_BOOL, &priv->opt_disable_shaders},
+        {"only-8bit", OPT_ARG_BOOL, &priv->opt_only_8bit},
+        {"disable-eosd", OPT_ARG_BOOL, &priv->opt_disable_eosd},
+        {"force-power-of-2", OPT_ARG_BOOL, &opt_force_power_of_2},
+        {"disable-texture-align", OPT_ARG_BOOL, &priv->opt_disable_texture_align},
         {NULL}
     };
     if (subopt_parse(arg, subopts) != 0) {
@@ -1303,42 +1318,49 @@ static int preinit(const char *arg)
 
     priv->d3d9_dll = LoadLibraryA("d3d9.dll");
     if (!priv->d3d9_dll) {
-        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Unable to dynamically load d3d9.dll\n");
+        mp_msg(MSGT_VO, MSGL_ERR,
+               "<vo_direct3d>Unable to dynamically load d3d9.dll\n");
         goto err_out;
     }
 
-    priv->pDirect3DCreate9 = (void *)GetProcAddress(priv->d3d9_dll, "Direct3DCreate9");
+    priv->pDirect3DCreate9 = (void *)GetProcAddress(priv->d3d9_dll,
+                                                    "Direct3DCreate9");
     if (!priv->pDirect3DCreate9) {
-        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Unable to find entry point of Direct3DCreate9\n");
+        mp_msg(MSGT_VO, MSGL_ERR,
+               "<vo_direct3d>Unable to find entry point of Direct3DCreate9\n");
         goto err_out;
     }
 
     priv->d3d_handle = priv->pDirect3DCreate9(D3D_SDK_VERSION);
     if (!priv->d3d_handle) {
-        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Initializing Direct3D failed.\n");
+        mp_msg(MSGT_VO, MSGL_ERR,
+               "<vo_direct3d>Initializing Direct3D failed.\n");
         goto err_out;
     }
 
     if (FAILED(IDirect3D9_GetAdapterDisplayMode(priv->d3d_handle,
                                                 D3DADAPTER_DEFAULT,
                                                 &disp_mode))) {
-        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Reading display mode failed.\n");
+        mp_msg(MSGT_VO, MSGL_ERR,
+               "<vo_direct3d>Reading display mode failed.\n");
         goto err_out;
     }
 
-    /* Store in priv->desktop_fmt the user desktop's colorspace. Usually XRGB. */
     priv->desktop_fmt = disp_mode.Format;
     priv->cur_backbuf_width = disp_mode.Width;
     priv->cur_backbuf_height = disp_mode.Height;
 
-    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Setting backbuffer dimensions to (%dx%d).\n",
+    mp_msg(MSGT_VO, MSGL_V,
+           "<vo_direct3d>Setting backbuffer dimensions to (%dx%d).\n",
            disp_mode.Width, disp_mode.Height);
 
     if (FAILED(IDirect3D9_GetDeviceCaps(priv->d3d_handle,
                                         D3DADAPTER_DEFAULT,
                                         DEVTYPE,
-                                        &disp_caps))) {
-        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Reading display capabilities failed.\n");
+                                        &disp_caps)))
+    {
+        mp_msg(MSGT_VO, MSGL_ERR,
+               "<vo_direct3d>Reading display capabilities failed.\n");
         goto err_out;
     }
 
@@ -1346,7 +1368,7 @@ static int preinit(const char *arg)
     texture_caps                  = disp_caps.TextureCaps;
     dev_caps                      = disp_caps.DevCaps;
     priv->device_caps_power2_only =  (texture_caps & D3DPTEXTURECAPS_POW2) &&
-                                    !(texture_caps & D3DPTEXTURECAPS_NONPOW2CONDITIONAL);
+                        !(texture_caps & D3DPTEXTURECAPS_NONPOW2CONDITIONAL);
     priv->device_caps_square_only = texture_caps & D3DPTEXTURECAPS_SQUAREONLY;
     priv->device_texture_sys      = dev_caps & D3DDEVCAPS_TEXTURESYSTEMMEMORY;
     priv->max_texture_width       = disp_caps.MaxTextureWidth;
@@ -1355,9 +1377,10 @@ static int preinit(const char *arg)
     if (opt_force_power_of_2)
         priv->device_caps_power2_only = 1;
 
-    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>device_caps_power2_only %d, device_caps_square_only %d\n"
-                            "<vo_direct3d>device_texture_sys %d\n"
-                            "<vo_direct3d>max_texture_width %d, max_texture_height %d\n",
+    mp_msg(MSGT_VO, MSGL_V,
+           "<vo_direct3d>device_caps_power2_only %d, device_caps_square_only %d\n"
+           "<vo_direct3d>device_texture_sys %d\n"
+           "<vo_direct3d>max_texture_width %d, max_texture_height %d\n",
            priv->device_caps_power2_only, priv->device_caps_square_only,
            priv->device_texture_sys, priv->max_texture_width,
            priv->max_texture_height);
@@ -1365,61 +1388,50 @@ static int preinit(const char *arg)
     /* w32_common framework call. Configures window on the screen, gets
      * fullscreen dimensions and does other useful stuff.
      */
+    global_vo = vo;
     if (!vo_w32_init()) {
-        mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Configuring onscreen window failed.\n");
+        mp_msg(MSGT_VO, MSGL_V,
+               "<vo_direct3d>Configuring onscreen window failed.\n");
         goto err_out;
     }
 
     return 0;
 
 err_out:
-    uninit();
+    uninit(vo);
     return -1;
-}
-
-static void full_redraw(void)
-{
-    priv->is_clear_needed = 1;
-    d3d_draw_frame();
-    draw_osd();
-    draw_eosd();
-    flip_page();
 }
 
 /** @brief libvo Callback: Handle control requests.
  *  @return VO_TRUE on success, VO_NOTIMPL when not implemented
  */
-static int control(uint32_t request, void *data)
+static int control(struct vo *vo, uint32_t request, void *data)
 {
+    d3d_priv *priv = vo->priv;
+
     switch (request) {
     case VOCTRL_QUERY_FORMAT:
-        return query_format(*(uint32_t*) data);
-    case VOCTRL_GET_IMAGE: /* Direct Rendering. Not implemented yet. */
+        return query_format(priv, *(uint32_t*) data);
+    case VOCTRL_GET_IMAGE:
         mp_msg(MSGT_VO, MSGL_V,
                "<vo_direct3d>Direct Rendering request. Not implemented yet.\n");
         return VO_NOTIMPL;
     case VOCTRL_DRAW_IMAGE:
-        return d3d_upload_and_render_frame(data);
+        return d3d_upload_and_render_frame(priv, data);
     case VOCTRL_FULLSCREEN:
         vo_w32_fullscreen();
-        resize_d3d();
-        full_redraw();
+        resize_d3d(priv);
         return VO_TRUE;
     case VOCTRL_RESET:
         return VO_NOTIMPL;
-    case VOCTRL_PAUSE:
-        priv->is_paused = 1;
-        return VO_TRUE;
-    case VOCTRL_RESUME:
-        priv->is_paused = 0;
-        return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
         priv->is_clear_needed = 1;
-        d3d_draw_frame();
+        d3d_draw_frame(priv);
         return VO_TRUE;
     case VOCTRL_SET_YUV_COLORSPACE:
         priv->colorspace = *(struct mp_csp_details *)data;
-        update_colorspace();
+        update_colorspace(priv);
+        vo->want_redraw = true;
         return VO_TRUE;
     case VOCTRL_GET_YUV_COLORSPACE:
         if (!priv->use_shaders)
@@ -1432,7 +1444,8 @@ static int control(uint32_t request, void *data)
         struct voctrl_set_equalizer_args *args = data;
         if (mp_csp_equalizer_set(&priv->video_eq, args->name, args->value) < 0)
             return VO_NOTIMPL;
-        update_colorspace();
+        update_colorspace(priv);
+        vo->want_redraw = true;
         return VO_TRUE;
     }
     case VOCTRL_GET_EQUALIZER: {
@@ -1447,13 +1460,13 @@ static int control(uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_BORDER:
         vo_w32_border();
-        resize_d3d();
+        resize_d3d(priv);
         return VO_TRUE;
     case VOCTRL_UPDATE_SCREENINFO:
         w32_update_xinerama_info();
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
-        resize_d3d();
+        resize_d3d(priv);
         return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
@@ -1461,14 +1474,14 @@ static int control(uint32_t request, void *data)
         if (!data)
             return VO_FALSE;
         assert(priv->eosd);
-        generate_eosd(data);
-        draw_eosd();
+        generate_eosd(priv, data);
+        draw_eosd(priv);
         return VO_TRUE;
     case VOCTRL_GET_EOSD_RES: {
         assert(priv->eosd);
         struct mp_eosd_res *r = data;
-        r->w = vo_dwidth;
-        r->h = vo_dheight;
+        r->w = vo->dwidth;
+        r->h = vo->dheight;
         r->ml = r->mr = priv->border_x;
         r->mt = r->mb = priv->border_y;
         return VO_TRUE;
@@ -1483,20 +1496,21 @@ static int control(uint32_t request, void *data)
  *  @param d_width  Screen (destination) width
  *  @param d_height Screen (destination) height
  *  @param options  Options bitmap
- *  @param title    Window title
  *  @param format   Movie colorspace format (using MPlayer's
  *                  defines, e.g. IMGFMT_YUY2)
  *  @return 0 on success, VO_ERROR on failure
  */
-static int config(uint32_t width, uint32_t height, uint32_t d_width,
-                  uint32_t d_height, uint32_t options, char *title,
+static int config(struct vo *vo, uint32_t width, uint32_t height,
+                  uint32_t d_width, uint32_t d_height, uint32_t options,
                   uint32_t format)
 {
+    d3d_priv *priv = vo->priv;
+
     /* w32_common framework call. Creates window on the screen with
      * the given coordinates.
      */
     if (!vo_w32_config(d_width, d_height, options)) {
-        mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Creating onscreen window failed.\n");
+        mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Creating window failed.\n");
         return VO_ERROR;
     }
 
@@ -1504,18 +1518,18 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         || (priv->src_width != width)
         || (priv->src_height != height))
     {
-        d3d_destroy_video_objects();
+        d3d_destroy_video_objects(priv);
 
         priv->src_width = width;
         priv->src_height = height;
-        init_rendering_mode(format, true);
+        init_rendering_mode(priv, format, true);
     }
 
     if (!priv->d3d_device) {
-        if (!configure_d3d())
+        if (!configure_d3d(priv))
             return VO_ERROR;
     } else {
-        if (!resize_d3d())
+        if (!resize_d3d(priv))
             return VO_ERROR;
     }
 
@@ -1525,8 +1539,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 /** @brief libvo Callback: Flip next already drawn frame on the
  *         screen.
  */
-static void flip_page(void)
+static void flip_page(struct vo *vo)
 {
+    d3d_priv *priv = vo->priv;
+
     if (priv->d3d_in_scene) {
         if (FAILED(IDirect3DDevice9_EndScene(priv->d3d_device))) {
             mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>EndScene failed.\n");
@@ -1534,40 +1550,43 @@ static void flip_page(void)
         priv->d3d_in_scene = false;
     }
 
-    RECT rect = {0, 0, vo_dwidth, vo_dheight};
+    RECT rect = {0, 0, vo->dwidth, vo->dheight};
     if (!priv->d3d_device ||
         FAILED(IDirect3DDevice9_Present(priv->d3d_device, &rect, 0, 0, 0))) {
         mp_msg(MSGT_VO, MSGL_V,
                "<vo_direct3d>Trying to reinitialize uncooperative video adapter.\n");
-        if (!reconfigure_d3d()) {
+        if (!reconfigure_d3d(priv)) {
             mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization failed.\n");
             return;
+        } else {
+            mp_msg(MSGT_VO, MSGL_V,
+                   "<vo_direct3d>Video adapter reinitialized.\n");
         }
-        else
-            mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Video adapter reinitialized.\n");
     }
 }
 
 /** @brief libvo Callback: Uninitializes all pointers and closes
  *         all D3D related stuff,
  */
-static void uninit(void)
+static void uninit(struct vo *vo)
 {
+    d3d_priv *priv = vo->priv;
+
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>uninit called.\n");
 
-    uninit_d3d();
+    uninit_d3d(priv);
     vo_w32_uninit(); /* w32_common framework call */
     if (priv->d3d9_dll)
         FreeLibrary(priv->d3d9_dll);
     priv->d3d9_dll = NULL;
-    talloc_free(priv);
-    priv = NULL;
 }
 
 /** @brief libvo Callback: Handles video window events.
  */
-static void check_events(void)
+static void check_events(struct vo *vo)
 {
+    d3d_priv *priv = vo->priv;
+
     int flags;
     /* w32_common framework call. Handles video window events.
      * Updates global libvo's vo_dwidth/vo_dheight upon resize
@@ -1575,15 +1594,16 @@ static void check_events(void)
      */
     flags = vo_w32_check_events();
     if (flags & VO_EVENT_RESIZE)
-        resize_d3d();
+        resize_d3d(priv);
 
-    if ((flags & VO_EVENT_EXPOSE) && priv->is_paused)
-        flip_page();
+    if (flags & VO_EVENT_EXPOSE)
+        vo->want_redraw = true;
 }
 
-static int draw_slice_textures(uint8_t *src[], int stride[], int w,int h,int x,int y )
+static int draw_slice_textures(d3d_priv *priv, uint8_t *src[], int stride[],
+                               int w, int h, int x, int y)
 {
-    if (!d3d_lock_video_textures())
+    if (!d3d_lock_video_textures(priv))
         return VO_FALSE;
 
     for (int n = 0; n < priv->plane_count; n++) {
@@ -1604,8 +1624,11 @@ static int draw_slice_textures(uint8_t *src[], int stride[], int w,int h,int x,i
 /** @brief libvo Callback: Draw slice
  *  @return 0 on success
  */
-static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
+static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
+                      int x, int y)
 {
+    d3d_priv *priv = vo->priv;
+
     char *my_src;   /**< Pointer to the source image */
     char *dst;      /**< Pointer to the destination image */
     int  uv_stride; /**< Stride of the U/V planes */
@@ -1616,7 +1639,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
         return 0;
 
     if (priv->use_textures)
-        return draw_slice_textures(src, stride, w, h, x, y);
+        return draw_slice_textures(priv, src, stride, w, h, x, y);
 
     /* Lock the offscreen surface if it's not already locked. */
     if (!priv->locked_rect.pBits) {
@@ -1665,14 +1688,6 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
     return 0; /* Success */
 }
 
-/** @brief libvo Callback: Unused function
- */
-static int draw_frame(uint8_t *src[])
-{
-    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>draw_frame called.\n");
-    return VO_FALSE;
-}
-
 /** @brief Maps MPlayer alpha to D3D
  *         0x0 -> transparent and discarded by alpha test
  *         0x1 -> 0xFF to become opaque
@@ -1698,7 +1713,8 @@ static void vo_draw_alpha_l8a8(int w, int h, unsigned char* src,
 }
 
 struct draw_osd_closure {
-    D3DLOCKED_RECT  locked_rect;
+    d3d_priv *priv;
+    D3DLOCKED_RECT locked_rect;
 };
 
 /** @brief Callback function to render the OSD to the texture
@@ -1707,24 +1723,27 @@ static void draw_alpha(void *pctx, int x0, int y0, int w, int h,
                        unsigned char *src, unsigned char *srca, int stride)
 {
     struct draw_osd_closure *ctx = pctx;
-    D3DLOCKED_RECT  locked_rect = ctx->locked_rect;
+    D3DLOCKED_RECT locked_rect = ctx->locked_rect;
 
     vo_draw_alpha_l8a8(w, h, src, srca, stride,
-        (unsigned char *)locked_rect.pBits + locked_rect.Pitch*y0 + 2*x0, locked_rect.Pitch);
+        (unsigned char *)locked_rect.pBits + locked_rect.Pitch * y0 + 2 * x0,
+        locked_rect.Pitch);
 
-    priv->is_osd_populated = 1;
+    ctx->priv->is_osd_populated = 1;
 }
 
 /** @brief libvo Callback: Draw OSD/Subtitles,
  */
-static void draw_osd(void)
+static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
+    d3d_priv *priv = vo->priv;
+
     // we can not render OSD if we lost the device e.g. because it was uncooperative
     if (!priv->d3d_device)
         return;
 
     if (vo_osd_changed(0)) {
-        struct draw_osd_closure ctx;
+        struct draw_osd_closure ctx = { priv };
 
         /* clear the OSD */
         if (FAILED(IDirect3DTexture9_LockRect(priv->texture_osd.system, 0,
@@ -1741,63 +1760,60 @@ static void draw_osd(void)
         /* required for if subs are in the boarder region */
         priv->is_clear_needed = 1;
 
-        osd_draw_text_ext(global_osd, priv->texture_osd.w, priv->texture_osd.h,
+        osd_draw_text_ext(osd, priv->texture_osd.w, priv->texture_osd.h,
                           priv->border_x, priv->border_y,
                           priv->border_x, priv->border_y,
                           priv->src_width, priv->src_height, draw_alpha, &ctx);
 
         if (FAILED(IDirect3DTexture9_UnlockRect(priv->texture_osd.system, 0))) {
-            mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>OSD texture unlock failed.\n");
+            mp_msg(MSGT_VO,MSGL_ERR,
+                   "<vo_direct3d>OSD texture unlock failed.\n");
             return;
         }
 
-        d3dtex_update(&priv->texture_osd);
+        d3dtex_update(priv, &priv->texture_osd);
     }
 
-    /* update OSD */
-
     if (priv->is_osd_populated) {
+        float tw = (float)priv->texture_osd.w  / priv->texture_osd.tex_w;
+        float th = (float)priv->texture_osd.h  / priv->texture_osd.tex_h;
 
         vertex_osd osd_quad_vb[] = {
-            { 0,         0,          0.0f, 0, 0 },
-            { vo_dwidth, 0,          0.0f, 1, 0 },
-            { 0,         vo_dheight, 0.0f, 0, 1 },
-            { vo_dwidth, vo_dheight, 0.0f, 1, 1 }
+            { 0,          0,           0.0f, 0,  0  },
+            { vo->dwidth, 0,           0.0f, tw, 0  },
+            { 0,          vo->dheight, 0.0f, 0,  th },
+            { vo->dwidth, vo->dheight, 0.0f, tw, th }
         };
 
-        /* calculate the texture coordinates */
-        osd_quad_vb[1].tu =
-            osd_quad_vb[3].tu = (float)priv->texture_osd.w  / priv->texture_osd.tex_w;
-        osd_quad_vb[2].tv =
-            osd_quad_vb[3].tv = (float)priv->texture_osd.h  / priv->texture_osd.tex_h;
+        d3d_begin_scene(priv);
 
-        d3d_begin_scene();
+        IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                        D3DRS_ALPHABLENDENABLE, TRUE);
+        IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                        D3DRS_ALPHATESTENABLE, TRUE);
 
-        /* turn on alpha test */
-        IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHABLENDENABLE, TRUE);
-        IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHATESTENABLE, TRUE);
-
-        /* need to use a texture here (done here as we may be able to texture from system memory) */
         IDirect3DDevice9_SetTexture(priv->d3d_device, 0,
-                                    d3dtex_get_render_texture(&priv->texture_osd));
+                        d3dtex_get_render_texture(priv, &priv->texture_osd));
 
         IDirect3DDevice9_SetFVF(priv->d3d_device, D3DFVF_OSD_VERTEX);
-        IDirect3DDevice9_DrawPrimitiveUP(priv->d3d_device, D3DPT_TRIANGLESTRIP, 2, osd_quad_vb, sizeof(vertex_osd));
+        IDirect3DDevice9_DrawPrimitiveUP(priv->d3d_device, D3DPT_TRIANGLESTRIP,
+                                         2, osd_quad_vb, sizeof(vertex_osd));
 
         IDirect3DDevice9_SetTexture(priv->d3d_device, 0, NULL);
 
-        /* turn off alpha test */
-        IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHATESTENABLE, FALSE);
-        IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHABLENDENABLE, FALSE);
+        IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                        D3DRS_ALPHATESTENABLE, FALSE);
+        IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                        D3DRS_ALPHABLENDENABLE, FALSE);
     }
 }
 
-static void d3d_realloc_eosd_texture(void)
+static void d3d_realloc_eosd_texture(d3d_priv *priv)
 {
     int new_w = priv->eosd->surface.w;
     int new_h = priv->eosd->surface.h;
 
-    d3d_fix_texture_size(&new_w, &new_h);
+    d3d_fix_texture_size(priv, &new_w, &new_h);
 
     if (new_w == priv->texture_eosd.tex_w && new_h == priv->texture_eosd.tex_h)
         return;
@@ -1806,9 +1822,9 @@ static void d3d_realloc_eosd_texture(void)
 
     // fortunately, we don't need to keep the old image data
     // we can always free it
-    d3dtex_release(&priv->texture_eosd);
+    d3dtex_release(priv, &priv->texture_eosd);
 
-    d3dtex_allocate(&priv->texture_eosd, D3DFMT_A8, new_w, new_h);
+    d3dtex_allocate(priv, &priv->texture_eosd, D3DFMT_A8, new_w, new_h);
 }
 
 static D3DCOLOR ass_to_d3d_color(uint32_t color)
@@ -1820,7 +1836,7 @@ static D3DCOLOR ass_to_d3d_color(uint32_t color)
     return D3DCOLOR_ARGB(a, r, g, b);
 }
 
-static void generate_eosd(mp_eosd_images_t *imgs)
+static void generate_eosd(d3d_priv *priv, mp_eosd_images_t *imgs)
 {
     bool need_reposition, need_upload, need_resize;
     eosd_packer_generate(priv->eosd, imgs, &need_reposition, &need_upload,
@@ -1828,7 +1844,7 @@ static void generate_eosd(mp_eosd_images_t *imgs)
     if (!need_upload)
         return;
     // even if the texture size is unchanged, the texture might have been free'd
-    d3d_realloc_eosd_texture();
+    d3d_realloc_eosd_texture(priv);
     if (!priv->texture_eosd.system)
         return; // failed to allocate
 
@@ -1839,13 +1855,13 @@ static void generate_eosd(mp_eosd_images_t *imgs)
     // not worth doing)
     priv->eosd_vb = talloc_realloc_size(priv->eosd, priv->eosd_vb,
                                         priv->eosd->targets_count
-                                            * sizeof(vertex_eosd) * 6);
+                                        * sizeof(vertex_eosd) * 6);
 
     struct eosd_rect rc;
     eosd_packer_calculate_source_bb(priv->eosd, &rc);
     RECT dirty_rc = { rc.x0, rc.y0, rc.x1, rc.y1 };
 
-    D3DLOCKED_RECT  locked_rect;
+    D3DLOCKED_RECT locked_rect;
 
     if (FAILED(IDirect3DTexture9_LockRect(priv->texture_eosd.system, 0,
                                           &locked_rect, &dirty_rc, 0)))
@@ -1896,10 +1912,10 @@ static void generate_eosd(mp_eosd_images_t *imgs)
         return;
     }
 
-    d3dtex_update(&priv->texture_eosd);
+    d3dtex_update(priv, &priv->texture_eosd);
 }
 
-static void draw_eosd(void)
+static void draw_eosd(d3d_priv *priv)
 {
     // we can not render OSD if we lost the device e.g. because it was uncooperative
     if (!priv->d3d_device)
@@ -1908,13 +1924,13 @@ static void draw_eosd(void)
     if (!priv->eosd->targets_count)
         return;
 
-    d3d_begin_scene();
+    d3d_begin_scene(priv);
 
-    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHABLENDENABLE, TRUE);
-    //IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHATESTENABLE, TRUE);
+    IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                    D3DRS_ALPHABLENDENABLE, TRUE);
 
     IDirect3DDevice9_SetTexture(priv->d3d_device, 0,
-                                d3dtex_get_render_texture(&priv->texture_eosd));
+                        d3dtex_get_render_texture(priv, &priv->texture_eosd));
 
     // do not use the color value from the A8 texture, because that is black
     IDirect3DDevice9_SetRenderState(priv->d3d_device,D3DRS_TEXTUREFACTOR,
@@ -1937,6 +1953,19 @@ static void draw_eosd(void)
 
     IDirect3DDevice9_SetTexture(priv->d3d_device, 0, NULL);
 
-    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHABLENDENABLE, FALSE);
-    //IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHATESTENABLE, FALSE);
+    IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                    D3DRS_ALPHABLENDENABLE, FALSE);
 }
+
+const struct vo_driver video_out_direct3d = {
+    .is_new = true,
+    .info = &info,
+    .preinit = preinit,
+    .config = config,
+    .control = control,
+    .draw_slice = draw_slice,
+    .draw_osd = draw_osd,
+    .flip_page = flip_page,
+    .check_events = check_events,
+    .uninit = uninit,
+};
