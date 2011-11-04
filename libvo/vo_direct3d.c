@@ -127,6 +127,7 @@ typedef struct d3d_priv {
     int opt_only_8bit;
     int opt_disable_eosd;
     int opt_disable_texture_align;
+    int opt_force_power_of_2;
 
     struct vo *vo;
 
@@ -223,16 +224,11 @@ static const struct fmt_entry fmt_table[] = {
 };
 
 
-typedef enum back_buffer_action {
-    BACKBUFFER_CREATE,
-    BACKBUFFER_RESET
-} back_buffer_action_e;
-
 static void generate_eosd(d3d_priv *priv, mp_eosd_images_t *);
 static void draw_eosd(d3d_priv *priv);
 static void update_colorspace(d3d_priv *priv);
 static void d3d_clear_video_textures(d3d_priv *priv);
-static int resize_d3d(d3d_priv *priv);
+static bool resize_d3d(d3d_priv *priv);
 static uint32_t d3d_draw_frame(d3d_priv *priv);
 static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
                       int x, int y);
@@ -477,6 +473,8 @@ static void destroy_d3d_surfaces(d3d_priv *priv)
 
     if (priv->eosd)
         eosd_packer_reinit(priv->eosd, 0, 0);
+
+    priv->d3d_in_scene = false;
 }
 
 // Allocate video surface or textures, and create shaders if needed.
@@ -577,11 +575,11 @@ static void d3d_clear_video_textures(d3d_priv *priv)
     d3d_unlock_video_objects(priv);
 }
 
-/** @brief Create D3D Offscreen and Backbuffer surfaces. Each
- *         surface is created only if it's not already present.
- *  @return 1 on success, 0 on failure
- */
-static int create_d3d_surfaces(d3d_priv *priv)
+// Recreate and initialize D3D objects if necessary. The amount of work that
+// needs to be done can be quite different: it could be that full initialization
+// is required, or that some objects need to be created, or that nothing is
+// done.
+static bool create_d3d_surfaces(d3d_priv *priv)
 {
     int osd_width = priv->vo->dwidth, osd_height = priv->vo->dheight;
     int tex_width = osd_width, tex_height = osd_height;
@@ -663,6 +661,70 @@ static int create_d3d_surfaces(d3d_priv *priv)
     return 1;
 }
 
+static bool init_d3d(d3d_priv *priv)
+{
+    D3DDISPLAYMODE disp_mode;
+    D3DCAPS9 disp_caps;
+    DWORD texture_caps;
+    DWORD dev_caps;
+
+    priv->d3d_handle = priv->pDirect3DCreate9(D3D_SDK_VERSION);
+    if (!priv->d3d_handle) {
+        mp_msg(MSGT_VO, MSGL_ERR,
+               "<vo_direct3d>Initializing Direct3D failed.\n");
+        return false;
+    }
+
+    if (FAILED(IDirect3D9_GetAdapterDisplayMode(priv->d3d_handle,
+                                                D3DADAPTER_DEFAULT,
+                                                &disp_mode))) {
+        mp_msg(MSGT_VO, MSGL_ERR,
+               "<vo_direct3d>Reading display mode failed.\n");
+        return false;
+    }
+
+    priv->desktop_fmt = disp_mode.Format;
+    priv->cur_backbuf_width = disp_mode.Width;
+    priv->cur_backbuf_height = disp_mode.Height;
+
+    mp_msg(MSGT_VO, MSGL_V,
+           "<vo_direct3d>Setting backbuffer dimensions to (%dx%d).\n",
+           disp_mode.Width, disp_mode.Height);
+
+    if (FAILED(IDirect3D9_GetDeviceCaps(priv->d3d_handle,
+                                        D3DADAPTER_DEFAULT,
+                                        DEVTYPE,
+                                        &disp_caps)))
+    {
+        mp_msg(MSGT_VO, MSGL_ERR,
+               "<vo_direct3d>Reading display capabilities failed.\n");
+        return false;
+    }
+
+    /* Store relevant information reguarding caps of device */
+    texture_caps                  = disp_caps.TextureCaps;
+    dev_caps                      = disp_caps.DevCaps;
+    priv->device_caps_power2_only =  (texture_caps & D3DPTEXTURECAPS_POW2) &&
+                        !(texture_caps & D3DPTEXTURECAPS_NONPOW2CONDITIONAL);
+    priv->device_caps_square_only = texture_caps & D3DPTEXTURECAPS_SQUAREONLY;
+    priv->device_texture_sys      = dev_caps & D3DDEVCAPS_TEXTURESYSTEMMEMORY;
+    priv->max_texture_width       = disp_caps.MaxTextureWidth;
+    priv->max_texture_height      = disp_caps.MaxTextureHeight;
+
+    if (priv->opt_force_power_of_2)
+        priv->device_caps_power2_only = 1;
+
+    mp_msg(MSGT_VO, MSGL_V,
+           "<vo_direct3d>device_caps_power2_only %d, device_caps_square_only %d\n"
+           "<vo_direct3d>device_texture_sys %d\n"
+           "<vo_direct3d>max_texture_width %d, max_texture_height %d\n",
+           priv->device_caps_power2_only, priv->device_caps_square_only,
+           priv->device_texture_sys, priv->max_texture_width,
+           priv->max_texture_height);
+
+    return true;
+}
+
 /** @brief Fill D3D Presentation parameters
  */
 static void fill_d3d_presentparams(d3d_priv *priv,
@@ -684,15 +746,10 @@ static void fill_d3d_presentparams(d3d_priv *priv,
 }
 
 
-/** @brief Create a new backbuffer. Create or Reset the D3D
- *         device.
- *  @return 1 on success, 0 on failure
- */
-static int change_d3d_backbuffer(d3d_priv *priv, back_buffer_action_e action)
+// Create a new backbuffer. Create or Reset the D3D device.
+static bool change_d3d_backbuffer(d3d_priv *priv)
 {
     D3DPRESENT_PARAMETERS present_params;
-
-    destroy_d3d_surfaces(priv);
 
     int window_w = priv->vo->dwidth;
     int window_h = priv->vo->dheight;
@@ -709,23 +766,23 @@ static int change_d3d_backbuffer(d3d_priv *priv, back_buffer_action_e action)
      */
     fill_d3d_presentparams(priv, &present_params);
 
-    /* vo_w32_window is w32_common variable. It's a handle to the window. */
-    if (action == BACKBUFFER_CREATE &&
-        FAILED(IDirect3D9_CreateDevice(priv->d3d_handle,
-                                       D3DADAPTER_DEFAULT,
-                                       DEVTYPE, vo_w32_window,
-                                       D3DCREATE_SOFTWARE_VERTEXPROCESSING,
-                                       &present_params, &priv->d3d_device))) {
+    if (!priv->d3d_device) {
+        if (FAILED(IDirect3D9_CreateDevice(priv->d3d_handle,
+                                           D3DADAPTER_DEFAULT,
+                                           DEVTYPE, vo_w32_window,
+                                           D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+                                           &present_params, &priv->d3d_device)))
+        {
             mp_msg(MSGT_VO, MSGL_V,
                    "<vo_direct3d>Creating Direct3D device failed.\n");
-        return 0;
-    }
-
-    if (action == BACKBUFFER_RESET &&
-        FAILED(IDirect3DDevice9_Reset(priv->d3d_device, &present_params))) {
+            return 0;
+        }
+    } else {
+        if (FAILED(IDirect3DDevice9_Reset(priv->d3d_device, &present_params))) {
             mp_msg(MSGT_VO, MSGL_ERR,
                    "<vo_direct3d>Reseting Direct3D device failed.\n");
-        return 0;
+            return 0;
+        }
     }
 
     mp_msg(MSGT_VO, MSGL_V,
@@ -736,43 +793,8 @@ static int change_d3d_backbuffer(d3d_priv *priv, back_buffer_action_e action)
     return 1;
 }
 
-/** @brief Configure initial Direct3D context. The first
- *  function called to initialize the D3D context.
- *  @return 1 on success, 0 on failure
- */
-static int configure_d3d(d3d_priv *priv)
-{
-    D3DDISPLAYMODE disp_mode;
-
-    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>configure_d3d called.\n");
-
-    destroy_d3d_surfaces(priv);
-
-    /* Get the current desktop display mode, so we can set up a back buffer
-     * of the same format. */
-    if (FAILED(IDirect3D9_GetAdapterDisplayMode(priv->d3d_handle,
-                                                D3DADAPTER_DEFAULT,
-                                                &disp_mode))) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "<vo_direct3d>Reading adapter display mode failed.\n");
-        return 0;
-    }
-
-    priv->desktop_fmt = disp_mode.Format;
-
-    if (!change_d3d_backbuffer(priv, BACKBUFFER_CREATE))
-        return 0;
-
-    if (!create_d3d_surfaces(priv))
-        return 0;
-
-    resize_d3d(priv);
-
-    return 1;
-}
-
 /** @brief Reconfigure the whole Direct3D. Called only
- *  when the video adapter becomes uncooperative.
+ *  when the video adapter becomes uncooperative. ("Lost" devices)
  *  @return 1 on success, 0 on failure
  */
 static int reconfigure_d3d(d3d_priv *priv)
@@ -781,28 +803,28 @@ static int reconfigure_d3d(d3d_priv *priv)
 
     destroy_d3d_surfaces(priv);
 
-    if (priv->d3d_device)
-        IDirect3DDevice9_Release(priv->d3d_device);
+    IDirect3DDevice9_Release(priv->d3d_device);
     priv->d3d_device = NULL;
 
+    // Force complete destruction of the D3D state.
+    // Note: this step could be omitted. The resize_d3d call below would detect
+    // that d3d_device is NULL, and would properly recreate it. I'm not sure why
+    // the following code to release and recreate the d3d_handle exists.
     IDirect3D9_Release(priv->d3d_handle);
-
-    priv->d3d_handle = priv->pDirect3DCreate9(D3D_SDK_VERSION);
-    if (!priv->d3d_handle) {
-        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Initializing Direct3D failed.\n");
+    priv->d3d_handle = NULL;
+    if (!init_d3d(priv))
         return 0;
-    }
 
-    if (!configure_d3d(priv))
+    // Proper re-initialization.
+    if (!resize_d3d(priv))
         return 0;
 
     return 1;
 }
 
-/** @brief Resize Direct3D context on window resize.
- *  @return 1 on success, 0 on failure
- */
-static int resize_d3d(d3d_priv *priv)
+// Resize Direct3D context on window resize.
+// This function also is called when major initializations need to be done.
+static bool resize_d3d(d3d_priv *priv)
 {
     D3DVIEWPORT9 vp = {0, 0, priv->vo->dwidth, priv->vo->dheight, 0, 1};
 
@@ -812,16 +834,13 @@ static int resize_d3d(d3d_priv *priv)
        viewport dimensions. Grow it if necessary. */
 
     if (priv->vo->dwidth > priv->cur_backbuf_width ||
-        priv->vo->dheight > priv->cur_backbuf_height)
+        priv->vo->dheight > priv->cur_backbuf_height ||
+        !priv->d3d_device)
     {
-        if (!change_d3d_backbuffer(priv, BACKBUFFER_RESET))
+        destroy_d3d_surfaces(priv);
+        if (!change_d3d_backbuffer(priv))
             return 0;
     }
-
-    /* Recreate the OSD. The function will observe that the offscreen plain
-     * surface and the backbuffer are not destroyed and will skip their creation,
-     * effectively recreating only the OSD.
-     */
 
     if (!create_d3d_surfaces(priv))
         return 0;
@@ -890,11 +909,6 @@ static uint32_t d3d_upload_and_render_frame_texture(d3d_priv *priv,
  */
 static uint32_t d3d_upload_and_render_frame(d3d_priv *priv, mp_image_t *mpi)
 {
-    /* If the D3D device is uncooperative (not initialized), return success.
-       The device will be probed for reinitialization in the next flip_page() */
-    if (!priv->d3d_device)
-        return VO_TRUE;
-
     if (priv->use_textures)
         return d3d_upload_and_render_frame_texture(priv, mpi);
 
@@ -1273,11 +1287,6 @@ const char *options_help_text = "-vo direct3d command line help:\n"
 
 static int preinit_internal(struct vo *vo, const char *arg, bool allow_shaders)
 {
-    D3DDISPLAYMODE disp_mode;
-    D3DCAPS9 disp_caps;
-    DWORD texture_caps;
-    DWORD dev_caps;
-
     d3d_priv *priv = talloc_zero(vo, d3d_priv);
     vo->priv = priv;
 
@@ -1292,8 +1301,6 @@ static int preinit_internal(struct vo *vo, const char *arg, bool allow_shaders)
         priv->opt_disable_shaders = priv->opt_disable_textures = true;
     }
 
-    int opt_force_power_of_2 = false;
-
     const opt_t subopts[] = {
         {"prefer-stretchrect", OPT_ARG_BOOL, &priv->opt_prefer_stretchrect},
         {"disable-textures", OPT_ARG_BOOL, &priv->opt_disable_textures},
@@ -1301,7 +1308,7 @@ static int preinit_internal(struct vo *vo, const char *arg, bool allow_shaders)
         {"disable-shaders", OPT_ARG_BOOL, &priv->opt_disable_shaders},
         {"only-8bit", OPT_ARG_BOOL, &priv->opt_only_8bit},
         {"disable-eosd", OPT_ARG_BOOL, &priv->opt_disable_eosd},
-        {"force-power-of-2", OPT_ARG_BOOL, &opt_force_power_of_2},
+        {"force-power-of-2", OPT_ARG_BOOL, &priv->opt_force_power_of_2},
         {"disable-texture-align", OPT_ARG_BOOL, &priv->opt_disable_texture_align},
         {NULL}
     };
@@ -1328,59 +1335,8 @@ static int preinit_internal(struct vo *vo, const char *arg, bool allow_shaders)
         goto err_out;
     }
 
-    priv->d3d_handle = priv->pDirect3DCreate9(D3D_SDK_VERSION);
-    if (!priv->d3d_handle) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "<vo_direct3d>Initializing Direct3D failed.\n");
+    if (!init_d3d(priv))
         goto err_out;
-    }
-
-    if (FAILED(IDirect3D9_GetAdapterDisplayMode(priv->d3d_handle,
-                                                D3DADAPTER_DEFAULT,
-                                                &disp_mode))) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "<vo_direct3d>Reading display mode failed.\n");
-        goto err_out;
-    }
-
-    priv->desktop_fmt = disp_mode.Format;
-    priv->cur_backbuf_width = disp_mode.Width;
-    priv->cur_backbuf_height = disp_mode.Height;
-
-    mp_msg(MSGT_VO, MSGL_V,
-           "<vo_direct3d>Setting backbuffer dimensions to (%dx%d).\n",
-           disp_mode.Width, disp_mode.Height);
-
-    if (FAILED(IDirect3D9_GetDeviceCaps(priv->d3d_handle,
-                                        D3DADAPTER_DEFAULT,
-                                        DEVTYPE,
-                                        &disp_caps)))
-    {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "<vo_direct3d>Reading display capabilities failed.\n");
-        goto err_out;
-    }
-
-    /* Store relevant information reguarding caps of device */
-    texture_caps                  = disp_caps.TextureCaps;
-    dev_caps                      = disp_caps.DevCaps;
-    priv->device_caps_power2_only =  (texture_caps & D3DPTEXTURECAPS_POW2) &&
-                        !(texture_caps & D3DPTEXTURECAPS_NONPOW2CONDITIONAL);
-    priv->device_caps_square_only = texture_caps & D3DPTEXTURECAPS_SQUAREONLY;
-    priv->device_texture_sys      = dev_caps & D3DDEVCAPS_TEXTURESYSTEMMEMORY;
-    priv->max_texture_width       = disp_caps.MaxTextureWidth;
-    priv->max_texture_height      = disp_caps.MaxTextureHeight;
-
-    if (opt_force_power_of_2)
-        priv->device_caps_power2_only = 1;
-
-    mp_msg(MSGT_VO, MSGL_V,
-           "<vo_direct3d>device_caps_power2_only %d, device_caps_square_only %d\n"
-           "<vo_direct3d>device_texture_sys %d\n"
-           "<vo_direct3d>max_texture_width %d, max_texture_height %d\n",
-           priv->device_caps_power2_only, priv->device_caps_square_only,
-           priv->device_texture_sys, priv->max_texture_width,
-           priv->max_texture_height);
 
     /* w32_common framework call. Configures window on the screen, gets
      * fullscreen dimensions and does other useful stuff.
@@ -1532,13 +1488,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         init_rendering_mode(priv, format, true);
     }
 
-    if (!priv->d3d_device) {
-        if (!configure_d3d(priv))
-            return VO_ERROR;
-    } else {
-        if (!resize_d3d(priv))
-            return VO_ERROR;
-    }
+    if (!resize_d3d(priv))
+        return VO_ERROR;
 
     return 0; /* Success */
 }
@@ -1564,6 +1515,8 @@ static void flip_page(struct vo *vo)
                "<vo_direct3d>Trying to reinitialize uncooperative video adapter.\n");
         if (!reconfigure_d3d(priv)) {
             mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization failed.\n");
+            // device recreation failed; we can't deal with this
+            assert(priv->d3d_device);
             return;
         } else {
             mp_msg(MSGT_VO, MSGL_V,
@@ -1639,11 +1592,6 @@ static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
     char *my_src;   /**< Pointer to the source image */
     char *dst;      /**< Pointer to the destination image */
     int  uv_stride; /**< Stride of the U/V planes */
-
-    /* If the D3D device is uncooperative (not initialized), return success.
-       The device will be probed for reinitialization in the next flip_page() */
-    if (!priv->d3d_device)
-        return 0;
 
     if (priv->use_textures)
         return draw_slice_textures(priv, src, stride, w, h, x, y);
@@ -1744,10 +1692,6 @@ static void draw_alpha(void *pctx, int x0, int y0, int w, int h,
 static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     d3d_priv *priv = vo->priv;
-
-    // we can not render OSD if we lost the device e.g. because it was uncooperative
-    if (!priv->d3d_device)
-        return;
 
     if (vo_osd_changed(0)) {
         struct draw_osd_closure ctx = { priv };
@@ -1924,10 +1868,6 @@ static void generate_eosd(d3d_priv *priv, mp_eosd_images_t *imgs)
 
 static void draw_eosd(d3d_priv *priv)
 {
-    // we can not render OSD if we lost the device e.g. because it was uncooperative
-    if (!priv->d3d_device)
-        return;
-
     if (!priv->eosd->targets_count)
         return;
 
