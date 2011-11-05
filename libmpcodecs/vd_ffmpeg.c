@@ -583,9 +583,6 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic)
     }
 
     if (mpi) {
-        // Palette support: free palette buffer allocated in get_buffer
-        if (mpi->bpp == 8)
-            av_freep(&mpi->planes[1]);
         // release mpi (in case MPI_IMGTYPE_NUMBERED is used, e.g. for VDPAU)
         mpi->usage_count--;
     }
