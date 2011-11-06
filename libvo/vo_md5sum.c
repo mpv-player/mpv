@@ -137,6 +137,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         return 0;
     }
 
+    if (strcmp(md5sum_outfile, "-") == 0)
+        md5sum_fd = stdout;
+    else
     if ( (md5sum_fd = fopen(md5sum_outfile, "w") ) == NULL ) {
         mp_msg(MSGT_VO, MSGL_ERR, "\n%s: %s\n", info.short_name,
                _("Unable to create output file."));
@@ -273,7 +276,7 @@ static void uninit(void)
 {
     free(md5sum_outfile);
     md5sum_outfile = NULL;
-    if (md5sum_fd) fclose(md5sum_fd);
+    if (md5sum_fd && md5sum_fd != stdout) fclose(md5sum_fd);
 }
 
 /* ------------------------------------------------------------------------- */
