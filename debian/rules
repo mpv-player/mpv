@@ -69,7 +69,7 @@ binary-arch: build
 
 	install -D -m 644 etc/example.conf $(prefix)/etc/mplayer/mplayer.conf
 	dh_installdocs -X.svn -Xmplayer.1 DOCS/*
-	dh_installexamples etc/example.conf etc/dvb-menu.conf etc/input.conf etc/menu.conf
+	dh_installexamples etc/example.conf etc/input.conf
 	dh_installmime
 	dh_installinfo
 	dh_installchangelogs
