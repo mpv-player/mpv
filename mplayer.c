@@ -3306,6 +3306,8 @@ static int seek(MPContext *mpctx, struct seek_params seek,
     else if (seek.direction > 0)
         demuxer_style |= SEEK_FORWARD;
 
+    if (hr_seek)
+        demuxer_amount -= opts->hr_seek_demuxer_offset;
     int seekresult = demux_seek(mpctx->demuxer, demuxer_amount, audio_delay,
                                 demuxer_style);
     if (need_reset)

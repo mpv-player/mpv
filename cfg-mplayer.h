@@ -901,6 +901,7 @@ const m_option_t mplayer_opts[]={
     OPT_MAKE_FLAGS("initial-audio-sync", initial_audio_sync, 0),
     OPT_CHOICE("hr-seek", hr_seek, 0,
                ({"off", -1}, {"absolute", 0}, {"always", 1}, {"on", 1})),
+    OPT_FLOATRANGE("hr-seek-demuxer-offset", hr_seek_demuxer_offset, 0, -9, 99),
     OPT_FLAG_CONSTANTS("noautosync", autosync, 0, 0, -1),
     OPT_INTRANGE("autosync", autosync, 0, 0, 10000),
 
