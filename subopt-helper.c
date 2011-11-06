@@ -260,23 +260,24 @@ int subopt_parse( char const * const str, const opt_t * opts )
             parse_pos = last - str;
           }
         }
-}
-else if ( substr_len == opt_len+2 )
-{
-             if ( opts[idx].type == OPT_ARG_BOOL && // check for no<opt>
-                  strncmp( &str[parse_pos], "no", 2 ) == 0 &&
-                  strncmp( &str[parse_pos+2], opts[idx].name, opt_len ) == 0 )
-        {
-          /* option was found but negated */
-          next = 1;
+ }
+        else if (opts[idx].type == OPT_ARG_BOOL) {
+            // check for no-<opt>
+            for (char **p = (char *[]){"no-", "no", NULL}; *p; p++) {
+                if (substr_len == opt_len + strlen(*p) &&
+                    !strncmp(str + parse_pos, *p, strlen(*p)) &&
+                    !strncmp(str + parse_pos + strlen(*p), opts[idx].name, opt_len)) {
+                    /* option was found but negated */
+                    next = 1;
 
-          /* set arg to false */
-          *((int *)(opts[idx].valp)) = 0;
+                    /* set arg to false */
+                    *((int *)(opts[idx].valp)) = 0;
 
-          /* increment position */
-          parse_pos += opt_len+2;
+                    parse_pos += opt_len + strlen(*p);
+                    break;
+                }
+            }
         }
-}
 
         ++idx; // test against next option
 
