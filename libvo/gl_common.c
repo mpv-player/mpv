@@ -751,6 +751,58 @@ static void glSetupYUVFragmentATI(GL *gl, struct mp_csp_params *csp_params,
     }
 }
 
+// Replace all occurances of variables named "$"+name (e.g. $foo) in *text with
+// replace, and return the result. *text must have been allocated with talloc.
+static void replace_var_str(char **text, const char *name, const char *replace)
+{
+    size_t namelen = strlen(name);
+    char *nextvar = *text;
+    void *parent = talloc_parent(*text);
+    for (;;) {
+        nextvar = strchr(nextvar, '$');
+        if (!nextvar)
+            break;
+        char *until = nextvar;
+        nextvar++;
+        if (strncmp(nextvar, name, namelen) != 0)
+            continue;
+        nextvar += namelen;
+        // try not to replace prefixes of other vars (e.g. $foo vs. $foo_bar)
+        char term = nextvar[0];
+        if (isalnum(term) || term == '_')
+            continue;
+        int prelength = until - *text;
+        int postlength = nextvar - *text;
+        char *n = talloc_asprintf(parent, "%.*s%s%s", prelength, *text, replace,
+                                  nextvar);
+        talloc_free(*text);
+        *text = n;
+        nextvar = *text + postlength;
+    }
+}
+
+static void replace_var_float(char **text, const char *name, float replace)
+{
+    char *s = talloc_asprintf(NULL, "%e", replace);
+    replace_var_str(text, name, s);
+    talloc_free(s);
+}
+
+static void replace_var_char(char **text, const char *name, char replace)
+{
+    char s[2] = { replace, '\0' };
+    replace_var_str(text, name, s);
+}
+
+// Append template to *text. Possibly initialize *text if it's NULL.
+static void append_template(char **text, const char* template)
+{
+    if (!text)
+        *text = talloc_strdup(NULL, template);
+    else
+        *text = talloc_strdup_append(*text, template);
+}
+
 /**
  * \brief helper function for gen_spline_lookup_tex
  * \param x subpixel-position ((0,1) range) to calculate weights for
@@ -800,38 +852,41 @@ static void gen_spline_lookup_tex(GL *gl, GLenum unit)
     free(tex);
 }
 
-static const char *bilin_filt_template =
-    "TEX yuv.%c, fragment.texcoord[%c], texture[%c], %s;\n";
+#define SAMPLE(dest, coord, texture) \
+    "TEX dest, " coord ", " texture ", $tex_type;\n"
 
-#define BICUB_FILT_MAIN(textype) \
+static const char *bilin_filt_template =
+    SAMPLE("yuv.$out_comp","fragment.texcoord[$in_tex]","texture[$in_tex]");
+
+#define BICUB_FILT_MAIN \
     /* first y-interpolation */ \
-    "ADD coord, fragment.texcoord[%c].xyxy, cdelta.xyxw;\n" \
-    "ADD coord2, fragment.texcoord[%c].xyxy, cdelta.zyzw;\n" \
-    "TEX a.r, coord.xyxy, texture[%c], "textype ";\n" \
-    "TEX a.g, coord.zwzw, texture[%c], "textype ";\n" \
+    "ADD coord, fragment.texcoord[$in_tex].xyxy, cdelta.xyxw;\n" \
+    "ADD coord2, fragment.texcoord[$in_tex].xyxy, cdelta.zyzw;\n" \
+    SAMPLE("a.r","coord.xyxy","texture[$in_tex]") \
+    SAMPLE("a.g","coord.zwzw","texture[$in_tex]") \
     /* second y-interpolation */ \
-    "TEX b.r, coord2.xyxy, texture[%c], "textype ";\n" \
-    "TEX b.g, coord2.zwzw, texture[%c], "textype ";\n" \
+    SAMPLE("b.r","coord2.xyxy","texture[$in_tex]") \
+    SAMPLE("b.g","coord2.zwzw","texture[$in_tex]") \
     "LRP a.b, parmy.b, a.rrrr, a.gggg;\n" \
     "LRP a.a, parmy.b, b.rrrr, b.gggg;\n" \
     /* x-interpolation */ \
-    "LRP yuv.%c, parmx.b, a.bbbb, a.aaaa;\n"
+    "LRP yuv.$out_comp, parmx.b, a.bbbb, a.aaaa;\n"
 
 static const char *bicub_filt_template_2D =
-    "MAD coord.xy, fragment.texcoord[%c], {%e, %e}, {0.5, 0.5};\n"
-    "TEX parmx, coord.x, texture[%c], 1D;\n"
-    "MUL cdelta.xz, parmx.rrgg, {-%e, 0, %e, 0};\n"
-    "TEX parmy, coord.y, texture[%c], 1D;\n"
-    "MUL cdelta.yw, parmy.rrgg, {0, -%e, 0, %e};\n"
-    BICUB_FILT_MAIN("2D");
+    "MAD coord.xy, fragment.texcoord[$in_tex], {$texw, $texh}, {0.5, 0.5};\n"
+    "TEX parmx, coord.x, texture[$texs], 1D;\n"
+    "MUL cdelta.xz, parmx.rrgg, {-$ptw, 0, $ptw, 0};\n"
+    "TEX parmy, coord.y, texture[$texs], 1D;\n"
+    "MUL cdelta.yw, parmy.rrgg, {0, -$pth, 0, $pth};\n"
+    BICUB_FILT_MAIN;
 
 static const char *bicub_filt_template_RECT =
-    "ADD coord, fragment.texcoord[%c], {0.5, 0.5};\n"
-    "TEX parmx, coord.x, texture[%c], 1D;\n"
+    "ADD coord, fragment.texcoord[$in_tex], {0.5, 0.5};\n"
+    "TEX parmx, coord.x, texture[$texs], 1D;\n"
     "MUL cdelta.xz, parmx.rrgg, {-1, 0, 1, 0};\n"
-    "TEX parmy, coord.y, texture[%c], 1D;\n"
+    "TEX parmy, coord.y, texture[$texs], 1D;\n"
     "MUL cdelta.yw, parmy.rrgg, {0, -1, 0, 1};\n"
-    BICUB_FILT_MAIN("RECT");
+    BICUB_FILT_MAIN;
 
 #define CALCWEIGHTS(t, s) \
     "MAD "t ", {-0.5, 0.1666, 0.3333, -0.3333}, "s ", {1, 0, -0.5, 0.5};\n" \
@@ -844,86 +899,86 @@ static const char *bicub_filt_template_RECT =
     "SUB "t ".y, "t ".yyyy, "s ";\n"
 
 static const char *bicub_notex_filt_template_2D =
-    "MAD coord.xy, fragment.texcoord[%c], {%e, %e}, {0.5, 0.5};\n"
+    "MAD coord.xy, fragment.texcoord[$in_tex], {$texw, $texh}, {0.5, 0.5};\n"
     "FRC coord.xy, coord.xyxy;\n"
     CALCWEIGHTS("parmx", "coord.xxxx")
-    "MUL cdelta.xz, parmx.rrgg, {-%e, 0, %e, 0};\n"
+    "MUL cdelta.xz, parmx.rrgg, {-$ptw, 0, $ptw, 0};\n"
     CALCWEIGHTS("parmy", "coord.yyyy")
-    "MUL cdelta.yw, parmy.rrgg, {0, -%e, 0, %e};\n"
-    BICUB_FILT_MAIN("2D");
+    "MUL cdelta.yw, parmy.rrgg, {0, -$pth, 0, $pth};\n"
+    BICUB_FILT_MAIN;
 
 static const char *bicub_notex_filt_template_RECT =
-    "ADD coord, fragment.texcoord[%c], {0.5, 0.5};\n"
+    "ADD coord, fragment.texcoord[$in_tex], {0.5, 0.5};\n"
     "FRC coord.xy, coord.xyxy;\n"
     CALCWEIGHTS("parmx", "coord.xxxx")
     "MUL cdelta.xz, parmx.rrgg, {-1, 0, 1, 0};\n"
     CALCWEIGHTS("parmy", "coord.yyyy")
     "MUL cdelta.yw, parmy.rrgg, {0, -1, 0, 1};\n"
-    BICUB_FILT_MAIN("RECT");
+    BICUB_FILT_MAIN;
 
-#define BICUB_X_FILT_MAIN(textype) \
-    "ADD coord.xy, fragment.texcoord[%c].xyxy, cdelta.xyxy;\n" \
-    "ADD coord2.xy, fragment.texcoord[%c].xyxy, cdelta.zyzy;\n" \
-    "TEX a.r, coord, texture[%c], "textype ";\n" \
-    "TEX b.r, coord2, texture[%c], "textype ";\n" \
+#define BICUB_X_FILT_MAIN \
+    "ADD coord.xy, fragment.texcoord[$in_tex].xyxy, cdelta.xyxy;\n" \
+    "ADD coord2.xy, fragment.texcoord[$in_tex].xyxy, cdelta.zyzy;\n" \
+    SAMPLE("a.r","coord","texture[$in_tex]") \
+    SAMPLE("b.r","coord2","texture[$in_tex]") \
     /* x-interpolation */ \
-    "LRP yuv.%c, parmx.b, a.rrrr, b.rrrr;\n"
+    "LRP yuv.$out_comp, parmx.b, a.rrrr, b.rrrr;\n"
 
 static const char *bicub_x_filt_template_2D =
-    "MAD coord.x, fragment.texcoord[%c], {%e}, {0.5};\n"
-    "TEX parmx, coord, texture[%c], 1D;\n"
-    "MUL cdelta.xyz, parmx.rrgg, {-%e, 0, %e};\n"
-    BICUB_X_FILT_MAIN("2D");
+    "MAD coord.x, fragment.texcoord[$in_tex], {$texw}, {0.5};\n"
+    "TEX parmx, coord, texture[$texs], 1D;\n"
+    "MUL cdelta.xyz, parmx.rrgg, {-$ptw, 0, $ptw};\n"
+    BICUB_X_FILT_MAIN;
 
 static const char *bicub_x_filt_template_RECT =
-    "ADD coord.x, fragment.texcoord[%c], {0.5};\n"
-    "TEX parmx, coord, texture[%c], 1D;\n"
+    "ADD coord.x, fragment.texcoord[$in_tex], {0.5};\n"
+    "TEX parmx, coord, texture[$texs], 1D;\n"
     "MUL cdelta.xyz, parmx.rrgg, {-1, 0, 1};\n"
-    BICUB_X_FILT_MAIN("RECT");
+    BICUB_X_FILT_MAIN;
 
 static const char *unsharp_filt_template =
-    "PARAM dcoord%c = {%e, %e, %e, %e};\n"
-    "ADD coord, fragment.texcoord[%c].xyxy, dcoord%c;\n"
-    "SUB coord2, fragment.texcoord[%c].xyxy, dcoord%c;\n"
-    "TEX a.r, fragment.texcoord[%c], texture[%c], %s;\n"
-    "TEX b.r, coord.xyxy, texture[%c], %s;\n"
-    "TEX b.g, coord.zwzw, texture[%c], %s;\n"
+    "PARAM dcoord$out_comp = {$ptw_05, $pth_05, $ptw_05, -$pth_05};\n"
+    "ADD coord, fragment.texcoord[$in_tex].xyxy, dcoord$out_comp;\n"
+    "SUB coord2, fragment.texcoord[$in_tex].xyxy, dcoord$out_comp;\n"
+    SAMPLE("a.r","fragment.texcoord[$in_tex]","texture[$in_tex]")
+    SAMPLE("b.r","coord.xyxy","texture[$in_tex]")
+    SAMPLE("b.g","coord.zwzw","texture[$in_tex]")
     "ADD b.r, b.r, b.g;\n"
-    "TEX b.b, coord2.xyxy, texture[%c], %s;\n"
-    "TEX b.g, coord2.zwzw, texture[%c], %s;\n"
+    SAMPLE("b.b","coord2.xyxy","texture[$in_tex]")
+    SAMPLE("b.g","coord2.zwzw","texture[$in_tex]")
     "DP3 b, b, {0.25, 0.25, 0.25};\n"
     "SUB b.r, a.r, b.r;\n"
-    "MAD yuv.%c, b.r, {%e}, a.r;\n";
+    "MAD yuv.$out_comp, b.r, {$strength}, a.r;\n";
 
 static const char *unsharp_filt_template2 =
-    "PARAM dcoord%c = {%e, %e, %e, %e};\n"
-    "PARAM dcoord2%c = {%e, 0, 0, %e};\n"
-    "ADD coord, fragment.texcoord[%c].xyxy, dcoord%c;\n"
-    "SUB coord2, fragment.texcoord[%c].xyxy, dcoord%c;\n"
-    "TEX a.r, fragment.texcoord[%c], texture[%c], %s;\n"
-    "TEX b.r, coord.xyxy, texture[%c], %s;\n"
-    "TEX b.g, coord.zwzw, texture[%c], %s;\n"
+    "PARAM dcoord$out_comp = {$ptw_12, $pth_12, $ptw_12, -$pth_12};\n"
+    "PARAM dcoord2$out_comp = {$ptw_15, 0, 0, $pth_15};\n"
+    "ADD coord, fragment.texcoord[$in_tex].xyxy, dcoord$out_comp;\n"
+    "SUB coord2, fragment.texcoord[$in_tex].xyxy, dcoord$out_comp;\n"
+    SAMPLE("a.r","fragment.texcoord[$in_tex]","texture[$in_tex]")
+    SAMPLE("b.r","coord.xyxy","texture[$in_tex]")
+    SAMPLE("b.g","coord.zwzw","texture[$in_tex]")
     "ADD b.r, b.r, b.g;\n"
-    "TEX b.b, coord2.xyxy, texture[%c], %s;\n"
-    "TEX b.g, coord2.zwzw, texture[%c], %s;\n"
+    SAMPLE("b.b","coord2.xyxy","texture[$in_tex]")
+    SAMPLE("b.g","coord2.zwzw","texture[$in_tex]")
     "ADD b.r, b.r, b.b;\n"
     "ADD b.a, b.r, b.g;\n"
-    "ADD coord, fragment.texcoord[%c].xyxy, dcoord2%c;\n"
-    "SUB coord2, fragment.texcoord[%c].xyxy, dcoord2%c;\n"
-    "TEX b.r, coord.xyxy, texture[%c], %s;\n"
-    "TEX b.g, coord.zwzw, texture[%c], %s;\n"
+    "ADD coord, fragment.texcoord[$in_tex].xyxy, dcoord2$out_comp;\n"
+    "SUB coord2, fragment.texcoord[$in_tex].xyxy, dcoord2$out_comp;\n"
+    SAMPLE("b.r","coord.xyxy","texture[$in_tex]")
+    SAMPLE("b.g","coord.zwzw","texture[$in_tex]")
     "ADD b.r, b.r, b.g;\n"
-    "TEX b.b, coord2.xyxy, texture[%c], %s;\n"
-    "TEX b.g, coord2.zwzw, texture[%c], %s;\n"
+    SAMPLE("b.b","coord2.xyxy","texture[$in_tex]")
+    SAMPLE("b.g","coord2.zwzw","texture[$in_tex]")
     "DP4 b.r, b, {-0.1171875, -0.1171875, -0.1171875, -0.09765625};\n"
     "MAD b.r, a.r, {0.859375}, b.r;\n"
-    "MAD yuv.%c, b.r, {%e}, a.r;\n";
+    "MAD yuv.$out_comp, b.r, {$strength}, a.r;\n";
 
 static const char *yuv_prog_template =
-    "PARAM ycoef = {%e, %e, %e};\n"
-    "PARAM ucoef = {%e, %e, %e};\n"
-    "PARAM vcoef = {%e, %e, %e};\n"
-    "PARAM offsets = {%e, %e, %e};\n"
+    "PARAM ycoef = {$cm11, $cm21, $cm31};\n"
+    "PARAM ucoef = {$cm12, $cm22, $cm32};\n"
+    "PARAM vcoef = {$cm13, $cm23, $cm33};\n"
+    "PARAM offsets = {$cm14, $cm24, $cm34};\n"
     "TEMP res;\n"
     "MAD res.rgb, yuv.rrrr, ycoef, offsets;\n"
     "MAD res.rgb, yuv.gggg, ucoef, res;\n"
@@ -931,11 +986,11 @@ static const char *yuv_prog_template =
     "END";
 
 static const char *yuv_pow_prog_template =
-    "PARAM ycoef = {%e, %e, %e};\n"
-    "PARAM ucoef = {%e, %e, %e};\n"
-    "PARAM vcoef = {%e, %e, %e};\n"
-    "PARAM offsets = {%e, %e, %e};\n"
-    "PARAM gamma = {%e, %e, %e};\n"
+    "PARAM ycoef = {$cm11, $cm21, $cm31};\n"
+    "PARAM ucoef = {$cm12, $cm22, $cm32};\n"
+    "PARAM vcoef = {$cm13, $cm23, $cm33};\n"
+    "PARAM offsets = {$cm14, $cm24, $cm34};\n"
+    "PARAM gamma = {$gamma_r, $gamma_g, $gamma_b};\n"
     "TEMP res;\n"
     "MAD res.rgb, yuv.rrrr, ycoef, offsets;\n"
     "MAD res.rgb, yuv.gggg, ucoef, res;\n"
@@ -946,23 +1001,23 @@ static const char *yuv_pow_prog_template =
     "END";
 
 static const char *yuv_lookup_prog_template =
-    "PARAM ycoef = {%e, %e, %e, 0};\n"
-    "PARAM ucoef = {%e, %e, %e, 0};\n"
-    "PARAM vcoef = {%e, %e, %e, 0};\n"
-    "PARAM offsets = {%e, %e, %e, 0.125};\n"
+    "PARAM ycoef = {$cm11, $cm21, $cm31, 0};\n"
+    "PARAM ucoef = {$cm12, $cm22, $cm32, 0};\n"
+    "PARAM vcoef = {$cm13, $cm23, $cm33, 0};\n"
+    "PARAM offsets = {$cm14, $cm24, $cm34, 0.125};\n"
     "TEMP res;\n"
     "MAD res, yuv.rrrr, ycoef, offsets;\n"
     "MAD res.rgb, yuv.gggg, ucoef, res;\n"
     "MAD res.rgb, yuv.bbbb, vcoef, res;\n"
-    "TEX result.color.r, res.raaa, texture[%c], 2D;\n"
+    "TEX result.color.r, res.raaa, texture[$conv_tex0], 2D;\n"
     "ADD res.a, res.a, 0.25;\n"
-    "TEX result.color.g, res.gaaa, texture[%c], 2D;\n"
+    "TEX result.color.g, res.gaaa, texture[$conv_tex0], 2D;\n"
     "ADD res.a, res.a, 0.25;\n"
-    "TEX result.color.b, res.baaa, texture[%c], 2D;\n"
+    "TEX result.color.b, res.baaa, texture[$conv_tex0], 2D;\n"
     "END";
 
 static const char *yuv_lookup3d_prog_template =
-    "TEX result.color, yuv, texture[%c], 3D;\n"
+    "TEX result.color, yuv, texture[$conv_tex0], 3D;\n"
     "END";
 
 /**
@@ -1059,8 +1114,7 @@ static void create_conv_textures(GL *gl, gl_conversion_params_t *params,
 /**
  * \brief adds a scaling texture read at the current fragment program position
  * \param scaler type of scaler to insert
- * \param prog_pos current position in fragment program
- * \param remain how many bytes remain in the buffer given by prog_pos
+ * \param prog pointer to fragment program so far
  * \param texs array containing the texture unit identifiers for this scaler
  * \param in_tex texture unit the scaler should read from
  * \param out_comp component of the yuv variable the scaler stores the result in
@@ -1069,7 +1123,7 @@ static void create_conv_textures(GL *gl, gl_conversion_params_t *params,
  * \param texh height of the in_tex texture
  * \param strength strength of filter effect if the scaler does some kind of filtering
  */
-static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
+static void add_scaler(int scaler, char **prog, char *texs,
                        char in_tex, char out_comp, int rect, int texw, int texh,
                        double strength)
 {
@@ -1078,61 +1132,52 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
     const float pth = rect ? 1.0 : 1.0 / texh;
     switch (scaler) {
     case YUV_SCALER_BILIN:
-        snprintf(*prog_pos, *remain, bilin_filt_template, out_comp, in_tex,
-                 in_tex, ttype);
+        append_template(prog, bilin_filt_template);
         break;
     case YUV_SCALER_BICUB:
         if (rect)
-            snprintf(*prog_pos, *remain, bicub_filt_template_RECT,
-                     in_tex, texs[0], texs[0],
-                     in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp);
+            append_template(prog, bicub_filt_template_RECT);
         else
-            snprintf(*prog_pos, *remain, bicub_filt_template_2D,
-                     in_tex, (float)texw, (float)texh,
-                     texs[0], ptw, ptw, texs[0], pth, pth,
-                     in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp);
+            append_template(prog, bicub_filt_template_2D);
         break;
     case YUV_SCALER_BICUB_X:
         if (rect)
-            snprintf(*prog_pos, *remain, bicub_x_filt_template_RECT,
-                     in_tex, texs[0],
-                     in_tex, in_tex, in_tex, in_tex, out_comp);
+            append_template(prog, bicub_x_filt_template_RECT);
         else
-            snprintf(*prog_pos, *remain, bicub_x_filt_template_2D,
-                     in_tex, (float)texw,
-                     texs[0], ptw, ptw,
-                     in_tex, in_tex, in_tex, in_tex, out_comp);
+            append_template(prog, bicub_x_filt_template_2D);
         break;
     case YUV_SCALER_BICUB_NOTEX:
         if (rect)
-            snprintf(*prog_pos, *remain, bicub_notex_filt_template_RECT,
-                     in_tex,
-                     in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp);
+            append_template(prog, bicub_notex_filt_template_RECT);
         else
-            snprintf(*prog_pos, *remain, bicub_notex_filt_template_2D,
-                     in_tex, (float)texw, (float)texh, ptw, ptw, pth, pth,
-                     in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp);
+            append_template(prog, bicub_notex_filt_template_2D);
         break;
     case YUV_SCALER_UNSHARP:
-        snprintf(*prog_pos, *remain, unsharp_filt_template,
-                 out_comp, 0.5 * ptw, 0.5 * pth, 0.5 * ptw, -0.5 * pth,
-                 in_tex, out_comp, in_tex, out_comp, in_tex,
-                 in_tex, ttype, in_tex, ttype, in_tex, ttype, in_tex, ttype,
-                 in_tex, ttype, out_comp, strength);
+        append_template(prog, unsharp_filt_template);
         break;
     case YUV_SCALER_UNSHARP2:
-        snprintf(*prog_pos, *remain, unsharp_filt_template2,
-                 out_comp, 1.2 * ptw, 1.2 * pth, 1.2 * ptw, -1.2 * pth,
-                 out_comp, 1.5 * ptw, 1.5 * pth,
-                 in_tex, out_comp, in_tex, out_comp, in_tex,
-                 in_tex, ttype, in_tex, ttype, in_tex, ttype, in_tex, ttype,
-                 in_tex, ttype, in_tex, out_comp, in_tex, out_comp,
-                 in_tex, ttype, in_tex, ttype, in_tex, ttype,
-                 in_tex, ttype, out_comp, strength);
+        append_template(prog, unsharp_filt_template2);
         break;
     }
-    *remain -= strlen(*prog_pos);
-    *prog_pos += strlen(*prog_pos);
+
+    replace_var_char(prog, "texs", texs[0]);
+    replace_var_char(prog, "in_tex", in_tex);
+    replace_var_char(prog, "out_comp", out_comp);
+    replace_var_str(prog, "tex_type", ttype);
+    replace_var_float(prog, "texw", texw);
+    replace_var_float(prog, "texh", texh);
+    replace_var_float(prog, "ptw", ptw);
+    replace_var_float(prog, "pth", pth);
+
+    // this is silly, not sure if that couldn't be in the shader source instead
+    replace_var_float(prog, "ptw_05", ptw * 0.5);
+    replace_var_float(prog, "pth_05", pth * 0.5);
+    replace_var_float(prog, "ptw_15", ptw * 1.5);
+    replace_var_float(prog, "pth_15", pth * 1.5);
+    replace_var_float(prog, "ptw_12", ptw * 1.2);
+    replace_var_float(prog, "pth_12", pth * 1.2);
+
+    replace_var_float(prog, "strength", strength);
 }
 
 static const struct {
@@ -1211,9 +1256,9 @@ static void glSetupYUVFragprog(GL *gl, gl_conversion_params_t *params)
         "OPTION ARB_precision_hint_fastest;\n"
         // all scaler variables must go here so they aren't defined
         // multiple times when the same scaler is used more than once
-        "TEMP coord, coord2, cdelta, parmx, parmy, a, b, yuv;\n";
-    int prog_remain;
-    char *yuv_prog, *prog_pos;
+        "TEMP coord, coord2, cdelta, parmx, parmy, a, b, yuv, textemp;\n";
+    char *yuv_prog = NULL;
+    char **prog = &yuv_prog;
     int cur_texu = 3;
     char lum_scale_texs[1];
     char chrom_scale_texs[1];
@@ -1238,58 +1283,49 @@ static void glSetupYUVFragprog(GL *gl, gl_conversion_params_t *params)
         mp_msg(MSGT_VO, MSGL_FATAL, "[gl] ProgramString function missing!\n");
         return;
     }
-    yuv_prog = malloc(MAX_PROGSZ);
-    strcpy(yuv_prog, prog_hdr);
-    prog_pos    = yuv_prog + sizeof(prog_hdr) - 1;
-    prog_remain = MAX_PROGSZ - sizeof(prog_hdr);
-    add_scaler(YUV_LUM_SCALER(type), &prog_pos, &prog_remain, lum_scale_texs,
+    append_template(prog, prog_hdr);
+    add_scaler(YUV_LUM_SCALER(type), prog, lum_scale_texs,
                '0', 'r', rect, texw, texh, params->filter_strength);
-    add_scaler(YUV_CHROM_SCALER(type), &prog_pos, &prog_remain,
+    add_scaler(YUV_CHROM_SCALER(type), prog,
                chrom_scale_texs, '1', 'g', rect, params->chrom_texw,
                params->chrom_texh, params->filter_strength);
-    add_scaler(YUV_CHROM_SCALER(type), &prog_pos, &prog_remain,
+    add_scaler(YUV_CHROM_SCALER(type), prog,
                chrom_scale_texs, '2', 'b', rect, params->chrom_texw,
                params->chrom_texh, params->filter_strength);
     mp_get_yuv2rgb_coeffs(&params->csp_params, yuv2rgb);
     switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_FRAGMENT:
-        snprintf(prog_pos, prog_remain, yuv_prog_template,
-                 yuv2rgb[ROW_R][COL_Y], yuv2rgb[ROW_G][COL_Y], yuv2rgb[ROW_B][COL_Y],
-                 yuv2rgb[ROW_R][COL_U], yuv2rgb[ROW_G][COL_U], yuv2rgb[ROW_B][COL_U],
-                 yuv2rgb[ROW_R][COL_V], yuv2rgb[ROW_G][COL_V], yuv2rgb[ROW_B][COL_V],
-                 yuv2rgb[ROW_R][COL_C], yuv2rgb[ROW_G][COL_C], yuv2rgb[ROW_B][COL_C]);
+        append_template(prog, yuv_prog_template);
         break;
     case YUV_CONVERSION_FRAGMENT_POW:
-        snprintf(prog_pos, prog_remain, yuv_pow_prog_template,
-                 yuv2rgb[ROW_R][COL_Y], yuv2rgb[ROW_G][COL_Y], yuv2rgb[ROW_B][COL_Y],
-                 yuv2rgb[ROW_R][COL_U], yuv2rgb[ROW_G][COL_U], yuv2rgb[ROW_B][COL_U],
-                 yuv2rgb[ROW_R][COL_V], yuv2rgb[ROW_G][COL_V], yuv2rgb[ROW_B][COL_V],
-                 yuv2rgb[ROW_R][COL_C], yuv2rgb[ROW_G][COL_C], yuv2rgb[ROW_B][COL_C],
-                 (float)1.0 / params->csp_params.rgamma,
-                 (float)1.0 / params->csp_params.bgamma,
-                 (float)1.0 / params->csp_params.bgamma);
+        append_template(prog, yuv_pow_prog_template);
         break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
-        snprintf(prog_pos, prog_remain, yuv_lookup_prog_template,
-                 yuv2rgb[ROW_R][COL_Y], yuv2rgb[ROW_G][COL_Y], yuv2rgb[ROW_B][COL_Y],
-                 yuv2rgb[ROW_R][COL_U], yuv2rgb[ROW_G][COL_U], yuv2rgb[ROW_B][COL_U],
-                 yuv2rgb[ROW_R][COL_V], yuv2rgb[ROW_G][COL_V], yuv2rgb[ROW_B][COL_V],
-                 yuv2rgb[ROW_R][COL_C], yuv2rgb[ROW_G][COL_C], yuv2rgb[ROW_B][COL_C],
-                 conv_texs[0], conv_texs[0], conv_texs[0]);
+        append_template(prog, yuv_lookup_prog_template);
         break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
-        snprintf(prog_pos, prog_remain, yuv_lookup3d_prog_template,
-                 conv_texs[0]);
+        append_template(prog, yuv_lookup3d_prog_template);
         break;
     default:
         mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown conversion type %i\n",
                YUV_CONVERSION(type));
         break;
     }
+    for (int r = 0; r < 3; r++) {
+        for (int c = 0; c < 4; c++) {
+            // "cmRC"
+            char var[] = { 'c', 'm', '1' + r, '1' + c, '\0' };
+            replace_var_float(prog, var, yuv2rgb[r][c]);
+        }
+    }
+    replace_var_float(prog, "gamma_r", (float)1.0 / params->csp_params.rgamma);
+    replace_var_float(prog, "gamma_g", (float)1.0 / params->csp_params.ggamma);
+    replace_var_float(prog, "gamma_b", (float)1.0 / params->csp_params.bgamma);
+    replace_var_char(prog, "conv_tex0", conv_texs[0]);
     mp_msg(MSGT_VO, MSGL_DBG2, "[gl] generated fragment program:\n%s\n",
            yuv_prog);
     loadGPUProgram(gl, GL_FRAGMENT_PROGRAM, yuv_prog);
-    free(yuv_prog);
+    talloc_free(yuv_prog);
 }
 
 /**
