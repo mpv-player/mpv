@@ -88,6 +88,7 @@ static const struct gl_name_map_struct gl_name_map[] = {
     MAP(GL_RGB10), MAP(GL_RGB12), MAP(GL_RGB16), MAP(GL_RGBA2),
     MAP(GL_RGBA4), MAP(GL_RGB5_A1), MAP(GL_RGBA8), MAP(GL_RGB10_A2),
     MAP(GL_RGBA12), MAP(GL_RGBA16), MAP(GL_LUMINANCE8), MAP(GL_LUMINANCE16),
+    MAP(GL_R16),
 
     // format
     MAP(GL_RGB), MAP(GL_RGBA), MAP(GL_RED), MAP(GL_GREEN), MAP(GL_BLUE),
@@ -146,7 +147,7 @@ const char *glValName(GLint value)
  * \return 1 if format is supported by OpenGL, 0 if not.
  * \ingroup gltexture
  */
-int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
+int glFindFormat(uint32_t fmt, int have_texture_rg, int *bpp, GLint *gl_texfmt,
                  GLenum *gl_format, GLenum *gl_type)
 {
     int supported = 1;
@@ -190,9 +191,9 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
         break;
     case IMGFMT_420P16:
         supported = 0; // no native YUV support
-        *gl_texfmt = GL_LUMINANCE16;
+        *gl_texfmt = have_texture_rg ? GL_R16 : GL_LUMINANCE16;
         *bpp = 16;
-        *gl_format = GL_LUMINANCE;
+        *gl_format = have_texture_rg ? GL_RED : GL_LUMINANCE;
         *gl_type = GL_UNSIGNED_SHORT;
         break;
     case IMGFMT_YV12:
@@ -592,6 +593,8 @@ int glFmt2bpp(GLenum format, GLenum type)
     case GL_RGBA:
     case GL_BGRA:
         return 4 * component_size;
+    case GL_RED:
+        return component_size;
     }
     return 0; // unknown
 }
@@ -853,7 +856,8 @@ static void gen_spline_lookup_tex(GL *gl, GLenum unit)
 }
 
 #define SAMPLE(dest, coord, texture) \
-    "TEX dest, " coord ", " texture ", $tex_type;\n"
+    "TEX textemp, " coord ", " texture ", $tex_type;\n" \
+    "MOV " dest ", textemp.r;\n"
 
 static const char *bilin_filt_template =
     SAMPLE("yuv.$out_comp","fragment.texcoord[$in_tex]","texture[$in_tex]");

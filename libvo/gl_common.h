@@ -218,6 +218,9 @@
 #ifndef GL_LUMINANCE16
 #define GL_LUMINANCE16 0x8042
 #endif
+#ifndef GL_R16
+#define GL_R16 0x822A
+#endif
 #ifndef GL_UNPACK_CLIENT_STORAGE_APPLE
 #define GL_UNPACK_CLIENT_STORAGE_APPLE 0x85B2
 #endif
@@ -245,8 +248,8 @@ void glAdjustAlignment(GL *gl, int stride);
 
 const char *glValName(GLint value);
 
-int glFindFormat(uint32_t format, int *bpp, GLint *gl_texfmt,
-                 GLenum *gl_format, GLenum *gl_type);
+int glFindFormat(uint32_t format, int have_texture_rg, int *bpp,
+                 GLint *gl_texfmt, GLenum *gl_format, GLenum *gl_type);
 int glFmt2bpp(GLenum format, GLenum type);
 void glCreateClearTex(GL *gl, GLenum target, GLenum fmt, GLenum format,
                       GLenum type, GLint filter, int w, int h,

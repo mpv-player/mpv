@@ -103,6 +103,7 @@ struct gl_priv {
     uint32_t image_d_width;
     uint32_t image_d_height;
     int many_fmts;
+    int have_texture_rg;
     int ati_hack;
     int force_pbo;
     int use_glFinish;
@@ -503,6 +504,7 @@ static void autodetectGlExtensions(struct vo *vo)
         if (extensions && strstr(extensions, "_pixel_buffer_object"))
             p->force_pbo = is_ati;
     }
+    p->have_texture_rg = extensions && strstr(extensions, "GL_ARB_texture_rg");
     if (p->use_rectangle == -1) {
         p->use_rectangle = 0;
         if (extensions) {
@@ -669,7 +671,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     p->image_d_height = d_height;
     p->is_yuv = mp_get_chroma_shift(p->image_format, &xs, &ys, NULL) > 0;
     p->is_yuv |= (xs << 8) | (ys << 16);
-    glFindFormat(format, NULL, &p->texfmt, &p->gl_format, &p->gl_type);
+    glFindFormat(format, p->have_texture_rg, NULL, &p->texfmt, &p->gl_format,
+                 &p->gl_type);
 
     p->vo_flipped = !!(flags & VOFLAG_FLIPPING);
 
@@ -1207,7 +1210,7 @@ static int query_format(struct vo *vo, uint32_t format)
     if (!p->use_ycbcr && (format == IMGFMT_UYVY || format == IMGFMT_YVYU))
         return 0;
     if (p->many_fmts &&
-        glFindFormat(format, NULL, NULL, NULL, NULL))
+        glFindFormat(format, p->have_texture_rg, NULL, NULL, NULL, NULL))
         return caps;
     return 0;
 }
