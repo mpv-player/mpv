@@ -330,6 +330,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
   mp3_hdr_t *mp3_hdrs = NULL, *mp3_found = NULL;
   da_priv_t* priv;
   double duration;
+  int found_WAVE = 0;
 
   s = demuxer->stream;
 
@@ -359,7 +360,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
       len = (hdr[0]<<21) | (hdr[1]<<14) | (hdr[2]<<7) | hdr[3];
       stream_skip(s,len);
       step = 4;
-    } else if( hdr[0] == 'f' && hdr[1] == 'm' && hdr[2] == 't' && hdr[3] == ' ' ) {
+    } else if( found_WAVE && hdr[0] == 'f' && hdr[1] == 'm' && hdr[2] == 't' && hdr[3] == ' ' ) {
       frmt = WAV;
       break;
     } else if((mp3_flen = mp_get_mp3_header(hdr, &mp3_chans, &mp3_freq,
@@ -375,6 +376,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
       if (!mp3_hdrs || mp3_hdrs->cons_hdrs < 3)
         break;
     }
+    found_WAVE = hdr[0] == 'W' && hdr[1] == 'A' && hdr[2] == 'V' && hdr[3] == 'E';
     // Add here some other audio format detection
     if(step < HDR_SIZE)
       memmove(hdr,&hdr[step],HDR_SIZE-step);
