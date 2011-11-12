@@ -870,6 +870,9 @@ static bool resize_d3d(d3d_priv *priv)
             return 0;
     }
 
+    if (!priv->d3d_device)
+        return 1;
+
     if (!create_d3d_surfaces(priv))
         return 0;
 
@@ -937,6 +940,9 @@ static uint32_t d3d_upload_and_render_frame_texture(d3d_priv *priv,
  */
 static uint32_t d3d_upload_and_render_frame(d3d_priv *priv, mp_image_t *mpi)
 {
+    if (!priv->d3d_device)
+        return VO_TRUE;
+
     if (priv->use_textures)
         return d3d_upload_and_render_frame_texture(priv, mpi);
 
@@ -969,6 +975,9 @@ skip_upload:
 static uint32_t d3d_draw_frame(d3d_priv *priv)
 {
     int n;
+
+    if (!priv->d3d_device)
+        return VO_TRUE;
 
     if (!d3d_begin_scene(priv))
         return VO_ERROR;
@@ -1534,13 +1543,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_BORDER:
         vo_w32_border();
-        resize_d3d(priv);
         return VO_TRUE;
     case VOCTRL_UPDATE_SCREENINFO:
         w32_update_xinerama_info();
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
-        resize_d3d(priv);
+        calc_fs_rect(priv);
         return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
@@ -1612,12 +1620,12 @@ static void flip_page(struct vo *vo)
 {
     d3d_priv *priv = vo->priv;
 
-    if (priv->d3d_in_scene) {
+    if (priv->d3d_device && priv->d3d_in_scene) {
         if (FAILED(IDirect3DDevice9_EndScene(priv->d3d_device))) {
             mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>EndScene failed.\n");
         }
-        priv->d3d_in_scene = false;
     }
+    priv->d3d_in_scene = false;
 
     RECT rect = {0, 0, vo->dwidth, vo->dheight};
     if (!priv->d3d_device ||
@@ -1626,8 +1634,6 @@ static void flip_page(struct vo *vo)
                "<vo_direct3d>Trying to reinitialize uncooperative video adapter.\n");
         if (!reconfigure_d3d(priv)) {
             mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization failed.\n");
-            // device recreation failed; we can't deal with this
-            assert(priv->d3d_device);
             return;
         } else {
             mp_msg(MSGT_VO, MSGL_V,
@@ -1699,6 +1705,9 @@ static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
                       int x, int y)
 {
     d3d_priv *priv = vo->priv;
+
+    if (!priv->d3d_device)
+        return 0;
 
     char *my_src;   /**< Pointer to the source image */
     char *dst;      /**< Pointer to the destination image */
@@ -1804,6 +1813,9 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     d3d_priv *priv = vo->priv;
 
+    if (!priv->d3d_device)
+        return;
+
     if (vo_osd_changed(0)) {
         struct draw_osd_closure ctx = { priv };
 
@@ -1900,9 +1912,13 @@ static D3DCOLOR ass_to_d3d_color(uint32_t color)
 
 static void generate_eosd(d3d_priv *priv, mp_eosd_images_t *imgs)
 {
+    if (!priv->d3d_device)
+        return;
+
     bool need_reposition, need_upload, need_resize;
     eosd_packer_generate(priv->eosd, imgs, &need_reposition, &need_upload,
                          &need_resize);
+
     if (!need_upload)
         return;
     // even if the texture size is unchanged, the texture might have been free'd
@@ -1979,6 +1995,9 @@ static void generate_eosd(d3d_priv *priv, mp_eosd_images_t *imgs)
 
 static void draw_eosd(d3d_priv *priv)
 {
+    if (!priv->d3d_device)
+        return;
+
     if (!priv->eosd->targets_count)
         return;
 
