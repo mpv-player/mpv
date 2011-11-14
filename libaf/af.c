@@ -346,7 +346,7 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
 	}
 	if(!new){ // Should _never_ happen
 	  mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Unable to correct audio format. "
-		 "This error should never uccur, please send bugreport.\n");
+		 "This error should never occur, please send a bug report.\n");
 	  return AF_ERROR;
 	}
 	af=new->next;
@@ -560,7 +560,7 @@ int af_init(af_stream_t* s)
     if (AF_OK != fixup_output_format(s)) {
       // Something is stuffed audio out will not work
       mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Unable to setup filter system can not"
-	     " meet sound-card demands, please send bugreport. \n");
+	     " meet sound-card demands, please send a bug report. \n");
       af_uninit(s);
       return -1;
     }
@@ -577,7 +577,7 @@ af_instance_t* af_add(af_stream_t* s, char* name){
   // Sanity check
   if(!s || !s->first || !name)
     return NULL;
-  // Insert the filter somwhere nice
+  // Insert the filter somewhere nice
   if(!strcmp(s->first->info->name,"format"))
     new = af_append(s, s->first, name);
   else
