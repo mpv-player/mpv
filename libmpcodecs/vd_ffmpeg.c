@@ -119,40 +119,6 @@ static enum AVDiscard str2AVDiscard(char *str)
     return AVDISCARD_DEFAULT;
 }
 
-static int control(sh_video_t *sh, int cmd, void *arg, ...)
-{
-    vd_ffmpeg_ctx *ctx = sh->context;
-    AVCodecContext *avctx = ctx->avctx;
-    switch (cmd) {
-    case VDCTRL_QUERY_FORMAT:
-    {
-        int format = (*((int *)arg));
-        if (format == ctx->best_csp)
-            return CONTROL_TRUE;
-        // possible conversions:
-        switch (format) {
-        case IMGFMT_YV12:
-        case IMGFMT_IYUV:
-        case IMGFMT_I420:
-            // "converted" using pointer/stride modification
-            if (ctx->best_csp == IMGFMT_YV12)
-                return CONTROL_TRUE;   // u/v swap
-            if (ctx->best_csp == IMGFMT_422P && !ctx->do_dr1)
-                return CONTROL_TRUE;   // half stride
-            break;
-        }
-        return CONTROL_FALSE;
-    }
-    case VDCTRL_RESYNC_STREAM:
-        avcodec_flush_buffers(avctx);
-        return CONTROL_TRUE;
-    case VDCTRL_QUERY_UNSEEN_FRAMES:;
-        int delay = avctx->has_b_frames;
-        return delay + 10;
-    }
-    return CONTROL_UNKNOWN;
-}
-
 static int init(sh_video_t *sh)
 {
     struct lavc_param *lavc_param = &sh->opts->lavc_param;
@@ -862,6 +828,44 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
             break;
     }
     return fmt[i];
+}
+
+static int control(sh_video_t *sh, int cmd, void *arg, ...)
+{
+    vd_ffmpeg_ctx *ctx = sh->context;
+    AVCodecContext *avctx = ctx->avctx;
+    switch (cmd) {
+    case VDCTRL_QUERY_FORMAT: {
+        int format = (*((int *)arg));
+        if (format == ctx->best_csp)
+            return CONTROL_TRUE;
+        // possible conversions:
+        switch (format) {
+        case IMGFMT_YV12:
+        case IMGFMT_IYUV:
+        case IMGFMT_I420:
+            // "converted" using pointer/stride modification
+            if (ctx->best_csp == IMGFMT_YV12)
+                return CONTROL_TRUE;   // u/v swap
+            if (ctx->best_csp == IMGFMT_422P && !ctx->do_dr1)
+                return CONTROL_TRUE;   // half stride
+            break;
+        }
+        return CONTROL_FALSE;
+    }
+    case VDCTRL_RESYNC_STREAM:
+        avcodec_flush_buffers(avctx);
+        return CONTROL_TRUE;
+    case VDCTRL_QUERY_UNSEEN_FRAMES:;
+        int delay = avctx->has_b_frames;
+        return delay + 10;
+    case VDCTRL_RESET_ASPECT:
+        if (ctx->vo_initialized)
+            ctx->vo_initialized = false;
+        init_vo(sh, avctx->pix_fmt);
+        return true;
+    }
+    return CONTROL_UNKNOWN;
 }
 
 const struct vd_functions mpcodecs_vd_ffmpeg = {

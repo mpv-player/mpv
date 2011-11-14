@@ -2948,7 +2948,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             opts->movie_aspect = (float) sh_video->disp_w / sh_video->disp_h;
         else
             opts->movie_aspect = cmd->args[0].v.f;
-        mpcodecs_config_vo(sh_video, sh_video->disp_w, sh_video->disp_h, 0);
+        video_reset_aspect(sh_video);
         break;
 
     case MP_CMD_SPEED_INCR: {

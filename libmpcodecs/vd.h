@@ -50,6 +50,7 @@ extern const vd_functions_t *const mpcodecs_vd_drivers[];
 #define VDCTRL_GET_EQUALIZER 7 // get color options (brightness,contrast etc)
 #define VDCTRL_RESYNC_STREAM 8 // reset decode state after seeking
 #define VDCTRL_QUERY_UNSEEN_FRAMES 9 // current decoder lag
+#define VDCTRL_RESET_ASPECT 10 // reinit filter/VO chain for new aspect ratio
 
 // callbacks:
 int mpcodecs_config_vo2(sh_video_t *sh, int w, int h,
