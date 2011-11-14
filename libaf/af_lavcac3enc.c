@@ -59,8 +59,8 @@ typedef struct af_ac3enc_s {
 // Initialization and runtime control
 static int control(struct af_instance_s *af, int cmd, void *arg)
 {
-    af_ac3enc_t *s  = (af_ac3enc_t *)af->setup;
-    af_data_t *data = (af_data_t *)arg;
+    af_ac3enc_t *s  = af->setup;
+    af_data_t *data = arg;
     int i, bit_rate, test_output_res;
     static const int default_bit_rate[AC3_MAX_CHANNELS+1] = \
         {0, 96000, 192000, 256000, 384000, 448000, 448000};
@@ -125,7 +125,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
         s->bit_rate = 0;
         s->min_channel_num = 0;
         s->add_iec61937_header = 0;
-        sscanf((char*)arg,"%d:%d:%d", &s->add_iec61937_header, &s->bit_rate,
+        sscanf(arg,"%d:%d:%d", &s->add_iec61937_header, &s->bit_rate,
                &s->min_channel_num);
         if (s->bit_rate < 1000)
             s->bit_rate *= 1000;
@@ -199,8 +199,8 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     }
 
     l = af->data;           // Local data
-    buf = (char *)l->audio;
-    src = (char *)c->audio;
+    buf = l->audio;
+    src = c->audio;
     left = c->len;
 
 
