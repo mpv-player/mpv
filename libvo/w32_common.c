@@ -458,12 +458,12 @@ static int reinit_window_state(void) {
         }
     }
 
-    SetWindowLong(vo_window, GWL_STYLE, style);
-
     r.left = window_x;
     r.right = r.left + vo_dwidth;
     r.top = window_y;
     r.bottom = r.top + vo_dheight;
+
+    SetWindowLong(vo_window, GWL_STYLE, style);
     vo_rect_add_window_borders(&r);
 
     mp_msg(MSGT_VO, MSGL_V, "[vo] reset window bounds: %ld:%ld:%ld:%ld\n",
