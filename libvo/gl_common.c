@@ -952,7 +952,8 @@ static const char *unsharp_filt_template =
     SAMPLE("b.g","coord2.zwzw","texture[$in_tex]")
     "DP3 b, b, {0.25, 0.25, 0.25};\n"
     "SUB b.r, a.r, b.r;\n"
-    "MAD yuv.$out_comp, b.r, {$strength}, a.r;\n";
+    "MAD textemp.r, b.r, {$strength}, a.r;\n"
+    "MOV yuv.$out_comp, textemp.r;\n";
 
 static const char *unsharp_filt_template2 =
     "PARAM dcoord$out_comp = {$ptw_12, $pth_12, $ptw_12, -$pth_12};\n"
@@ -976,7 +977,8 @@ static const char *unsharp_filt_template2 =
     SAMPLE("b.g","coord2.zwzw","texture[$in_tex]")
     "DP4 b.r, b, {-0.1171875, -0.1171875, -0.1171875, -0.09765625};\n"
     "MAD b.r, a.r, {0.859375}, b.r;\n"
-    "MAD yuv.$out_comp, b.r, {$strength}, a.r;\n";
+    "MAD textemp.r, b.r, {$strength}, a.r;\n"
+    "MOV yuv.$out_comp, textemp.r;\n";
 
 static const char *yuv_prog_template =
     "PARAM ycoef = {$cm11, $cm21, $cm31};\n"
