@@ -22,9 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
+#include "talloc.h"
 
 #include "libmpcodecs/img_format.h"
 #include "libmpcodecs/mp_image.h"
@@ -39,6 +37,8 @@ void mp_image_alloc_planes(mp_image_t *mpi) {
                             mpi->chroma_width*mpi->chroma_height);
   } else
     mpi->planes[0]=av_malloc(mpi->bpp*mpi->width*(mpi->height+2)/8);
+  if (!mpi->planes[0])
+    abort(); //out of memory
   if (mpi->flags&MP_IMGFLAG_PLANAR) {
     int bpp = IMGFMT_IS_YUVP16(mpi->imgfmt)? 2 : 1;
     // YV12/I420/YVU9/IF09. feel free to add other planar formats here...
@@ -188,23 +188,29 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     mpi->bpp=0;
 }
 
+static int mp_image_destructor(void *ptr)
+{
+    mp_image_t *mpi = ptr;
+
+    if(mpi->flags&MP_IMGFLAG_ALLOCATED){
+        /* because we allocate the whole image at once */
+        av_free(mpi->planes[0]);
+        if (mpi->flags & MP_IMGFLAG_RGB_PALETTE)
+            av_free(mpi->planes[1]);
+    }
+
+    return 0;
+}
+
 mp_image_t* new_mp_image(int w,int h){
-    mp_image_t* mpi = malloc(sizeof(mp_image_t));
-    if(!mpi) return NULL; // error!
-    memset(mpi,0,sizeof(mp_image_t));
+    mp_image_t* mpi = talloc_zero(NULL, mp_image_t);
+    talloc_set_destructor(mpi, mp_image_destructor);
     mpi->width=mpi->w=w;
     mpi->height=mpi->h=h;
     return mpi;
 }
 
 void free_mp_image(mp_image_t* mpi){
-    if(!mpi) return;
-    if(mpi->flags&MP_IMGFLAG_ALLOCATED){
-	/* becouse we allocate the whole image in once */
-	av_free(mpi->planes[0]);
-	if (mpi->flags & MP_IMGFLAG_RGB_PALETTE)
-	    av_free(mpi->planes[1]);
-    }
-    free(mpi);
+    talloc_free(mpi);
 }
 

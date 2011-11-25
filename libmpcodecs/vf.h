@@ -89,6 +89,12 @@ typedef struct vf_seteq {
     int value;
 } vf_equalizer_t;
 
+struct vf_ctrl_screenshot {
+    // When the screenshot is complete, pass it to this callback.
+    void (*image_callback)(void *, mp_image_t *);
+    void *image_callback_ctx;
+};
+
 #define VFCTRL_QUERY_MAX_PP_LEVEL 4 // query max postprocessing level (if any)
 #define VFCTRL_SET_PP_LEVEL 5       // set postprocessing level
 #define VFCTRL_SET_EQUALIZER 6 // set color options (brightness,contrast etc)
@@ -98,7 +104,7 @@ typedef struct vf_seteq {
 #define VFCTRL_DUPLICATE_FRAME 11  // For encoding - encode zero-change frame
 #define VFCTRL_SKIP_NEXT_FRAME 12  // For encoding - drop the next frame that passes thru
 #define VFCTRL_FLUSH_FRAMES    13  // For encoding - flush delayed frames
-#define VFCTRL_SCREENSHOT      14  // Make a screenshot
+#define VFCTRL_SCREENSHOT      14  // Take screenshot, arg is vf_ctrl_screenshot
 #define VFCTRL_INIT_EOSD       15  // Select EOSD renderer
 #define VFCTRL_DRAW_EOSD       16  // Render EOSD */
 #define VFCTRL_SET_DEINTERLACE 18  // Set deinterlacing status

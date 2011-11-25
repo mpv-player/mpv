@@ -256,6 +256,8 @@ int glCreatePPMTex(GL *gl, GLenum target, GLenum fmt, GLint filter,
 void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
                  const void *dataptr, int stride,
                  int x, int y, int w, int h, int slice);
+void glDownloadTex(GL *gl, GLenum target, GLenum format, GLenum type,
+                   void *dataptr, int stride);
 void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
                int sx, int sy, int rect_tex, int is_yv12, int flip);

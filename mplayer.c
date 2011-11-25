@@ -73,6 +73,7 @@
 
 #include "mp_osd.h"
 #include "libvo/video_out.h"
+#include "screenshot.h"
 
 #include "sub/font_load.h"
 #include "sub/sub.h"
@@ -790,6 +791,8 @@ void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
     if (mpctx->mconfig)
         m_config_free(mpctx->mconfig);
     mpctx->mconfig = NULL;
+
+    talloc_free(mpctx);
 
     exit(rc);
 }
@@ -3727,6 +3730,7 @@ static void run_playloop(struct MPContext *mpctx)
                 get_relative_time(mpctx);
             }
             print_status(mpctx, MP_NOPTS_VALUE, true);
+            screenshot_flip(mpctx);
         } else
             print_status(mpctx, MP_NOPTS_VALUE, false);
 
@@ -3959,7 +3963,8 @@ int main(int argc, char *argv[])
     int opt_exit = 0;
     int i;
 
-    struct MPContext *mpctx = &(struct MPContext){
+    struct MPContext *mpctx = talloc(NULL, MPContext);
+    *mpctx = (struct MPContext){
         .osd_function = OSD_PLAY,
         .begin_skip = MP_NOPTS_VALUE,
         .play_tree_step = 1,

@@ -78,6 +78,8 @@ enum mp_voctrl {
 
     VOCTRL_SET_YUV_COLORSPACE,          // struct mp_csp_details
     VOCTRL_GET_YUV_COLORSPACE,          // struct mp_csp_details
+
+    VOCTRL_SCREENSHOT,                  // struct voctrl_screenshot_args
 };
 
 // VOCTRL_SET_EQUALIZER
@@ -103,6 +105,23 @@ typedef struct mp_eosd_res {
     int w, h; // screen dimensions, including black borders
     int mt, mb, ml, mr; // borders (top, bottom, left, right)
 } mp_eosd_res_t;
+
+// VOCTRL_SCREENSHOT
+struct voctrl_screenshot_args {
+    // 0: Save image of the currently displayed video frame, in original
+    //    resolution.
+    // 1: Save full screenshot of the window. Should contain OSD, EOSD, and the
+    //    scaled video.
+    // The value of this variable can be ignored if only a single method is
+    // implemented.
+    int full_window;
+    // Will be set to a newly allocated image, that contains the screenshot.
+    // The caller has to free the pointer with free_mp_image().
+    // It is not specified whether the image data is a copy or references the
+    // image data directly.
+    // Is never NULL. (Failure has to be indicated by returning VO_FALSE.)
+    struct mp_image *out_image;
+};
 
 typedef struct {
   int x,y;

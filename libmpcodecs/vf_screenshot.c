@@ -23,35 +23,21 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
-#include <libswscale/swscale.h>
-#include <libavcodec/avcodec.h>
-
 #include "mp_msg.h"
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 #include "vf_scale.h"
 #include "fmt-conversion.h"
+#include "libvo/fastmemcpy.h"
 
+#include <libswscale/swscale.h>
 
 struct vf_priv_s {
-    int frameno;
-    char fname[102];
-    /// shot stores current screenshot mode:
-    /// 0: don't take screenshots
-    /// 1: take single screenshot, reset to 0 afterwards
-    /// 2: take screenshots of each frame
+    mp_image_t *image;
+    void (*image_callback)(void *, mp_image_t *);
+    void *image_callback_ctx;
     int shot, store_slices;
-    int dw, dh, stride;
-    uint8_t *buffer;
-    struct SwsContext *ctx;
-    AVCodecContext *avctx;
-    uint8_t *outbuffer;
-    int outbuffer_size;
 };
 
 //===========================================================================//
@@ -60,79 +46,12 @@ static int config(struct vf_instance *vf,
                   int width, int height, int d_width, int d_height,
                   unsigned int flags, unsigned int outfmt)
 {
-    vf->priv->ctx=sws_getContextFromCmdLine(width, height, outfmt,
-                                 d_width, d_height, IMGFMT_RGB24);
-
-    vf->priv->outbuffer_size = d_width * d_height * 3 * 2;
-    vf->priv->outbuffer = realloc(vf->priv->outbuffer, vf->priv->outbuffer_size);
-    vf->priv->avctx->width = d_width;
-    vf->priv->avctx->height = d_height;
-    vf->priv->avctx->pix_fmt = PIX_FMT_RGB24;
-    vf->priv->avctx->compression_level = 0;
-    vf->priv->dw = d_width;
-    vf->priv->dh = d_height;
-    vf->priv->stride = (3*vf->priv->dw+15)&~15;
-
-    free(vf->priv->buffer); // probably reconfigured
-    vf->priv->buffer = NULL;
-
+    free_mp_image(vf->priv->image);
+    vf->priv->image = new_mp_image(width, height);
+    mp_image_setfmt(vf->priv->image, outfmt);
+    vf->priv->image->w = d_width;
+    vf->priv->image->h = d_height;
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
-}
-
-static void write_png(struct vf_priv_s *priv)
-{
-    char *fname = priv->fname;
-    FILE * fp;
-    AVFrame pic;
-    int size;
-
-    fp = fopen (fname, "wb");
-    if (fp == NULL) {
-        mp_msg(MSGT_VFILTER,MSGL_ERR,"\nPNG Error opening %s for writing!\n", fname);
-        return;
-    }
-
-    pic.data[0] = priv->buffer;
-    pic.linesize[0] = priv->stride;
-    size = avcodec_encode_video(priv->avctx, priv->outbuffer, priv->outbuffer_size, &pic);
-    if (size > 0)
-        fwrite(priv->outbuffer, size, 1, fp);
-
-    fclose (fp);
-}
-
-static int fexists(char *fname)
-{
-    struct stat dummy;
-    if (stat(fname, &dummy) == 0) return 1;
-    else return 0;
-}
-
-static void gen_fname(struct vf_priv_s* priv)
-{
-    do {
-        snprintf (priv->fname, 100, "shot%04d.png", ++priv->frameno);
-    } while (fexists(priv->fname) && priv->frameno < 100000);
-    if (fexists(priv->fname)) {
-        priv->fname[0] = '\0';
-        return;
-    }
-
-    mp_msg(MSGT_VFILTER,MSGL_INFO,"*** screenshot '%s' ***\n",priv->fname);
-
-}
-
-static void scale_image(struct vf_priv_s* priv, mp_image_t *mpi)
-{
-    uint8_t *dst[MP_MAX_PLANES] = {NULL};
-    int dst_stride[MP_MAX_PLANES] = {0};
-
-    dst_stride[0] = priv->stride;
-    if (!priv->buffer)
-        priv->buffer = av_malloc(dst_stride[0]*priv->dh);
-
-    dst[0] = priv->buffer;
-    sws_scale(priv->ctx, (const uint8_t **)mpi->planes, mpi->stride, 0, priv->dh, dst, dst_stride);
 }
 
 static void start_slice(struct vf_instance *vf, mp_image_t *mpi)
@@ -141,21 +60,37 @@ static void start_slice(struct vf_instance *vf, mp_image_t *mpi)
         mpi->type, mpi->flags, mpi->width, mpi->height);
     if (vf->priv->shot) {
         vf->priv->store_slices = 1;
-        if (!vf->priv->buffer)
-            vf->priv->buffer = av_malloc(vf->priv->stride*vf->priv->dh);
+        if (!(vf->priv->image->flags & MP_IMGFLAG_ALLOCATED))
+            mp_image_alloc_planes(vf->priv->image);
     }
 
+}
+
+static void memcpy_pic_slice(unsigned char *dst, unsigned char *src,
+                             int bytesPerLine, int y, int h,
+                             int dstStride, int srcStride)
+{
+    memcpy_pic(dst + h * dstStride, src + h * srcStride, bytesPerLine,
+               h, dstStride, srcStride);
 }
 
 static void draw_slice(struct vf_instance *vf, unsigned char** src,
                        int* stride, int w,int h, int x, int y)
 {
     if (vf->priv->store_slices) {
-        uint8_t *dst[MP_MAX_PLANES] = {NULL};
-        int dst_stride[MP_MAX_PLANES] = {0};
-        dst_stride[0] = vf->priv->stride;
-        dst[0] = vf->priv->buffer;
-        sws_scale(vf->priv->ctx, (const uint8_t **)src, stride, y, h, dst, dst_stride);
+        mp_image_t *dst = vf->priv->image;
+        int bp = (dst->bpp + 7) / 8;
+
+        if (dst->flags & MP_IMGFLAG_PLANAR) {
+            int bytes_per_line[3] = { w * bp, dst->chroma_width, dst->chroma_width };
+            for (int n = 0; n < 3; n++) {
+                memcpy_pic_slice(dst->planes[n], src[n], bytes_per_line[n],
+                                 y, h, dst->stride[n], stride[n]);
+            }
+        } else {
+            memcpy_pic_slice(dst->planes[0], src[0], dst->w*bp, y, dst->h,
+                             dst->stride[0], stride[0]);
+        }
     }
     vf_next_draw_slice(vf,src,stride,w,h,x,y);
 }
@@ -200,14 +135,15 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
     }
 
     if(vf->priv->shot) {
-        if (vf->priv->shot==1)
-            vf->priv->shot=0;
-        gen_fname(vf->priv);
-        if (vf->priv->fname[0]) {
-            if (!vf->priv->store_slices)
-              scale_image(vf->priv, dmpi);
-            write_png(vf->priv);
-        }
+        vf->priv->shot=0;
+        mp_image_t image;
+        if (!vf->priv->store_slices)
+            image = *dmpi;
+        else
+            image = *vf->priv->image;
+        image.w = vf->priv->image->w;
+        image.h = vf->priv->image->h;
+        vf->priv->image_callback(vf->priv->image_callback_ctx, &image);
         vf->priv->store_slices = 0;
     }
 
@@ -216,20 +152,11 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 
 static int control (vf_instance_t *vf, int request, void *data)
 {
-    /** data contains an integer argument
-     * 0: take screenshot with the next frame
-     * 1: take screenshots with each frame until the same command is given once again
-     **/
     if(request==VFCTRL_SCREENSHOT) {
-        if (data && *(int*)data) { // repeated screenshot mode
-            if (vf->priv->shot==2)
-                vf->priv->shot=0;
-            else
-                vf->priv->shot=2;
-        } else { // single screenshot
-            if (!vf->priv->shot)
-                vf->priv->shot=1;
-        }
+        struct vf_ctrl_screenshot *cmd = (struct vf_ctrl_screenshot *)data;
+        vf->priv->image_callback = cmd->image_callback;
+        vf->priv->image_callback_ctx = cmd->image_callback_ctx;
+        vf->priv->shot=1;
         return CONTROL_TRUE;
     }
     return vf_next_control (vf, request, data);
@@ -249,11 +176,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 
 static void uninit(vf_instance_t *vf)
 {
-    avcodec_close(vf->priv->avctx);
-    av_freep(&vf->priv->avctx);
-    if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
-    av_free(vf->priv->buffer);
-    free(vf->priv->outbuffer);
+    free_mp_image(vf->priv->image);
     free(vf->priv);
 }
 
@@ -268,17 +191,9 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->get_image=get_image;
     vf->uninit=uninit;
     vf->priv=malloc(sizeof(struct vf_priv_s));
-    vf->priv->frameno=0;
     vf->priv->shot=0;
     vf->priv->store_slices=0;
-    vf->priv->buffer=0;
-    vf->priv->outbuffer=0;
-    vf->priv->ctx=0;
-    vf->priv->avctx = avcodec_alloc_context();
-    if (avcodec_open(vf->priv->avctx, avcodec_find_encoder(CODEC_ID_PNG))) {
-        mp_msg(MSGT_VFILTER, MSGL_FATAL, "Could not open libavcodec PNG encoder\n");
-        return 0;
-    }
+    vf->priv->image=NULL;
     return 1;
 }
 

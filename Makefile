@@ -504,6 +504,7 @@ SRCS_MPLAYER = command.c \
                mp_fifo.c \
                mplayer.c \
                parser-mpcmd.c \
+               screenshot.c \
                input/input.c \
                libao2/ao_mpegpes.c \
                libao2/ao_null.c \
