@@ -938,8 +938,15 @@ static int control(uint32_t request, void *data)
 */
 - (void) keyDown: (NSEvent *) theEvent
 {
-	int key = convert_key([theEvent keyCode], *[[theEvent characters] UTF8String]);
-	if (key != -1) {
+	unsigned char charcode;
+	if (([theEvent modifierFlags] & NSRightAlternateKeyMask) == NSRightAlternateKeyMask)
+		charcode = *[[theEvent characters] UTF8String];
+	else
+		charcode = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
+
+	int key = convert_key([theEvent keyCode], charcode);
+
+	if (key > -1) {
 		if([theEvent modifierFlags] & NSShiftKeyMask)
 			key |= KEY_MODIFIER_SHIFT;
 		if([theEvent modifierFlags] & NSControlKeyMask)
