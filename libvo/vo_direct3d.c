@@ -147,6 +147,8 @@ typedef struct d3d_priv {
                                 fullscreen */
     int src_width;              /**< Source (movie) width */
     int src_height;             /**< Source (movie) heigth */
+    int src_d_width;            /**< Source (movie) aspect corrected width */
+    int src_d_height;           /**< Source (movie) aspect corrected heigth */
     int border_x;               /**< horizontal border value for OSD */
     int border_y;               /**< vertical border value for OSD */
     int image_format;           /**< mplayer image format */
@@ -245,6 +247,8 @@ static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
 static void uninit(struct vo *vo);
 static void draw_osd(struct vo *vo, struct osd_state *osd);
 static void flip_page(struct vo *vo);
+static mp_image_t *get_screenshot(d3d_priv *priv);
+static mp_image_t *get_window_screenshot(d3d_priv *priv);
 
 
 static void d3d_matrix_identity(D3DMATRIX *m)
@@ -1568,6 +1572,14 @@ static int control(struct vo *vo, uint32_t request, void *data)
         r->mt = r->mb = priv->border_y;
         return VO_TRUE;
     }
+    case VOCTRL_SCREENSHOT: {
+        struct voctrl_screenshot_args *args = data;
+        if (args->full_window)
+            args->out_image = get_window_screenshot(priv);
+        else
+            args->out_image = get_screenshot(priv);
+        return !!args->out_image;
+    }
     }
     return VO_NOTIMPL;
 }
@@ -1595,6 +1607,9 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Creating window failed.\n");
         return VO_ERROR;
     }
+
+    priv->src_d_width = d_width;
+    priv->src_d_height = d_height;
 
     if ((priv->image_format != format)
         || (priv->src_width != width)
@@ -1761,6 +1776,177 @@ static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
     memcpy_pic(dst, my_src, w, h, uv_stride, stride[2]);
 
     return 0; /* Success */
+}
+
+static bool get_screenshot_from_surface(d3d_priv *priv, mp_image_t *image)
+{
+    if (!priv->locked_rect.pBits) {
+        if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
+                                              &priv->locked_rect, NULL, 0))) {
+            mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Surface lock failed.\n");
+            return false;
+        }
+    }
+
+    if (image->flags & MP_IMGFLAG_PLANAR) {
+        char *src;
+        int w = priv->src_width;
+        int h = priv->src_height;
+        int swapped = priv->movie_src_fmt == MAKEFOURCC('Y','V','1','2');
+        int plane1 = swapped ? 2 : 1;
+        int plane2 = swapped ? 1 : 2;
+
+        int uv_stride = priv->locked_rect.Pitch / 2;
+
+        /* Copy Y */
+        src = priv->locked_rect.pBits;
+        memcpy_pic(image->planes[0], src, w, h, priv->locked_rect.Pitch,
+                   image->stride[0]);
+
+        w /= 2;
+        h /= 2;
+
+        /* Copy U */
+        src = priv->locked_rect.pBits;
+        src = src + priv->locked_rect.Pitch * priv->src_height;
+
+        memcpy_pic(image->planes[plane1], src, w, h, uv_stride,
+                   image->stride[1]);
+
+        /* Copy V */
+        src = priv->locked_rect.pBits;
+        src = src + priv->locked_rect.Pitch * priv->src_height
+            + uv_stride * (priv->src_height / 2);
+
+        memcpy_pic(image->planes[plane2], src, w, h, uv_stride,
+                   image->stride[2]);
+    } else {
+        // packed YUV or RGB
+        memcpy_pic(image->planes[0], priv->locked_rect.pBits, image->stride[0],
+                   image->height, priv->locked_rect.Pitch, image->stride[0]);
+    }
+
+    d3d_unlock_video_objects(priv);
+    return true;
+}
+
+static bool get_screenshot_from_texture(d3d_priv *priv, mp_image_t *image)
+{
+    if (!d3d_lock_video_textures(priv)) {
+        d3d_unlock_video_objects(priv);
+        return false;
+    }
+
+    assert(image->num_planes == priv->plane_count);
+
+    for (int n = 0; n < priv->plane_count; n++) {
+        struct texplane *plane = &priv->planes[n];
+
+        int width = priv->src_width >> plane->shift_x;
+        int height = priv->src_height >> plane->shift_x;
+
+        memcpy_pic(image->planes[n], plane->locked_rect.pBits,
+                   width * plane->bytes_per_pixel, height,
+                   image->stride[n], plane->locked_rect.Pitch);
+    }
+
+    return true;
+}
+
+static mp_image_t *get_screenshot(d3d_priv *priv)
+{
+    if (!priv->d3d_device)
+        return NULL;
+
+    mp_image_t *image = alloc_mpi(priv->src_width, priv->src_height,
+                                  priv->image_format);
+
+    bool res;
+
+    if (priv->use_textures)
+        res = get_screenshot_from_texture(priv, image);
+    else
+        res = get_screenshot_from_surface(priv, image);
+
+    if (!res) {
+        free_mp_image(image);
+        return NULL;
+    }
+
+    image->w = priv->src_d_width;
+    image->h = priv->src_d_height;
+
+    return image;
+}
+
+static mp_image_t *get_window_screenshot(d3d_priv *priv)
+{
+    D3DDISPLAYMODE mode;
+    mp_image_t *image = NULL;
+    RECT window_rc;
+    RECT screen_rc;
+    RECT visible;
+    POINT pt;
+    D3DLOCKED_RECT locked_rect;
+    int width, height;
+
+    if (FAILED(IDirect3DDevice9_GetDisplayMode(priv->d3d_device, 0, &mode))) {
+        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>GetDisplayMode failed.\n");
+        goto error_exit;
+    }
+
+    IDirect3DSurface9 *surface = NULL;
+    if (FAILED(IDirect3DDevice9_CreateOffscreenPlainSurface(priv->d3d_device,
+        mode.Width, mode.Height, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &surface,
+        NULL)))
+    {
+        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>Couldn't create surface.\n");
+        goto error_exit;
+    }
+
+    if (FAILED(IDirect3DDevice9_GetFrontBufferData(priv->d3d_device, 0,
+        surface)))
+    {
+        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>Couldn't copy frontbuffer.\n");
+        goto error_exit;
+    }
+
+    GetClientRect(vo_w32_window, &window_rc);
+    pt = (POINT) { 0, 0 };
+    ClientToScreen(vo_w32_window, &pt);
+    window_rc.left = pt.x;
+    window_rc.top = pt.y;
+    window_rc.right += window_rc.left;
+    window_rc.bottom += window_rc.top;
+
+    screen_rc = (RECT) { 0, 0, mode.Width, mode.Height };
+
+    if (!IntersectRect(&visible, &screen_rc, &window_rc))
+        goto error_exit;
+    width = visible.right - visible.left;
+    height = visible.bottom - visible.top;
+    if (width < 1 || height < 1)
+        goto error_exit;
+
+    image = alloc_mpi(width, height, IMGFMT_BGR32);
+
+    IDirect3DSurface9_LockRect(surface, &locked_rect, NULL, 0);
+
+    memcpy_pic(image->planes[0], (char*)locked_rect.pBits + visible.top *
+               locked_rect.Pitch + visible.left * 4, width * 4, height,
+               image->stride[0], locked_rect.Pitch);
+
+    IDirect3DSurface9_UnlockRect(surface);
+    IDirect3DSurface9_Release(surface);
+
+    return image;
+
+error_exit:
+    if (image)
+        free_mp_image(image);
+    if (surface)
+        IDirect3DSurface9_Release(surface);
+    return NULL;
 }
 
 /** @brief Maps MPlayer alpha to D3D
