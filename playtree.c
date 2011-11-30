@@ -411,6 +411,58 @@ play_tree_iter_push_params(play_tree_iter_t* iter) {
     iter->entry_pushed = 1;
 }
 
+// Shuffle the tree if the PLAY_TREE_RND flag is set, and unset it.
+// This is done recursively, but only the siblings with the same parent are
+// shuffled with each other.
+static void shuffle_tree(play_tree_t *pt) {
+    if (!pt)
+        return;
+
+    int count = 0;
+    play_tree_t *child = pt->child;
+    while (child) {
+        // possibly shuffle children
+        shuffle_tree(child);
+        child = child->next;
+        count++;
+    }
+
+    if (pt->flags & PLAY_TREE_RND) {
+        // Move a random element to the front and go to the next, until no
+        // elements are left.
+        // prev = pointer to next-link to the first yet-unshuffled entry
+        play_tree_t** prev = &pt->child;
+        while (count > 1) {
+            int n = (int)((double)(count) * rand() / (RAND_MAX + 1.0));
+            // move = element that is moved to front (inserted after prev)
+            play_tree_t **before_move = prev;
+            play_tree_t *move = *before_move;
+            while (n > 0) {
+                before_move = &move->next;
+                move = *before_move;
+                n--;
+            }
+            // unlink from old list
+            *before_move = move->next;
+            // insert between prev and the following element
+            // note that move could be the first unshuffled element
+            move->next = (*prev == move) ? move->next : *prev;
+            *prev = move;
+            prev = &move->next;
+            count--;
+        }
+        // reconstruct prev links
+        child = pt->child;
+        play_tree_t *prev_child = NULL;
+        while (child) {
+            child->prev = prev_child;
+            prev_child = child;
+            child = child->next;
+        }
+        pt->flags = pt->flags & ~PLAY_TREE_RND;
+    }
+}
+
 play_tree_iter_t*
 play_tree_iter_new(play_tree_t* pt,m_config_t* config) {
   play_tree_iter_t* iter;
@@ -429,6 +481,8 @@ play_tree_iter_new(play_tree_t* pt,m_config_t* config) {
   iter->root = pt;
   iter->tree = NULL;
   iter->config = config;
+
+  shuffle_tree(pt);
 
   if(pt->parent)
     iter->loop = pt->parent->loop;
