@@ -70,6 +70,9 @@ typedef struct {
   int back_size;   // we should keep back_size amount of old bytes for backward seek
   int fill_limit;  // we should fill buffer only if space>=fill_limit
   int seek_limit;  // keep filling cache if distance is less that seek limit
+#if FORKED_CACHE
+  pid_t ppid; // parent PID to detect killed parent
+#endif
   // filler's pointers:
   int eof;
   off_t min_filepos; // buffer contain only a part of the file, from min-max pos
@@ -274,6 +277,13 @@ static int cache_execute_control(cache_vars_t *s) {
       s->stream_time_pos = pos;
     else
       s->stream_time_pos = MP_NOPTS_VALUE;
+#if FORKED_CACHE
+    // if parent PID changed, main process was killed -> exit
+    if (s->ppid != getppid()) {
+      mp_msg(MSGT_CACHE, MSGL_WARN, "Parent process disappeared, exiting cache process.\n");
+      return 0;
+    }
+#endif
     last = GetTimerMS();
   }
   if (s->control == -1) return 1;
@@ -341,6 +351,9 @@ static cache_vars_t* cache_init(int size,int sector){
 
   s->fill_limit=8*sector;
   s->back_size=s->buffer_size/2;
+#if FORKED_CACHE
+  s->ppid = getpid();
+#endif
   return s;
 }
 
