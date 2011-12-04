@@ -3672,6 +3672,7 @@ static void run_playloop(struct MPContext *mpctx)
 
         current_module = "flip_page";
         if (!frame_time_remaining && blit_frame) {
+            vo_new_frame_imminent(mpctx->video_out);
             struct sh_video *sh_video = mpctx->sh_video;
             mpctx->video_pts = sh_video->pts;
             update_subtitles(mpctx, sh_video->pts, mpctx->video_offset, false);

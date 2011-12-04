@@ -275,6 +275,11 @@ int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts)
     }
     vo->frame_loaded = true;
     vo->next_pts = pts;
+    // Guaranteed to support at least DRAW_IMAGE later
+    if (vo->driver->is_new) {
+        vo->waiting_mpi = mpi;
+        return 0;
+    }
     if (vo_control(vo, VOCTRL_DRAW_IMAGE, mpi) == VO_NOTIMPL)
         return -1;
     return 0;
@@ -294,6 +299,7 @@ int vo_get_buffered_frame(struct vo *vo, bool eof)
 
 void vo_skip_frame(struct vo *vo)
 {
+    vo_control(vo, VOCTRL_SKIPFRAME, NULL);
     vo->frame_loaded = false;
 }
 
@@ -308,6 +314,18 @@ int vo_draw_frame(struct vo *vo, uint8_t *src[])
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y)
 {
     return vo->driver->draw_slice(vo, src, stride, w, h, x, y);
+}
+
+void vo_new_frame_imminent(struct vo *vo)
+{
+    if (!vo->driver->is_new)
+        return;
+    if (vo->driver->buffer_frames)
+        vo_control(vo, VOCTRL_NEWFRAME, NULL);
+    else {
+        vo_control(vo, VOCTRL_DRAW_IMAGE, vo->waiting_mpi);
+        vo->waiting_mpi = NULL;
+    }
 }
 
 void vo_draw_osd(struct vo *vo, struct osd_state *osd)
@@ -466,6 +484,8 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
                             NULL, vo);
         vo->registered_fd = vo->event_fd;
     }
+    vo->frame_loaded = false;
+    vo->waiting_mpi = NULL;
     return ret;
 }
 

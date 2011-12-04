@@ -80,7 +80,7 @@
 /* number of video and output surfaces */
 #define MAX_OUTPUT_SURFACES                15
 #define MAX_VIDEO_SURFACES                 50
-#define NUM_BUFFERED_VIDEO                 4
+#define NUM_BUFFERED_VIDEO                 5
 
 /* number of palette entries */
 #define PALETTE_SIZE 256
@@ -295,7 +295,7 @@ static int video_to_output_surface(struct vo *vo)
                                           &vc->out_rect_vid);
 }
 
-static void get_buffered_frame(struct vo *vo, bool eof)
+static int next_deint_queue_pos(struct vo *vo, bool eof)
 {
     struct vdpctx *vc = vo->priv;
 
@@ -305,15 +305,23 @@ static void get_buffered_frame(struct vo *vo, bool eof)
     else
         dqp = vc->deint >= 2 ? dqp - 1 : dqp - 2 | 1;
     if (dqp < (eof ? 0 : 3))
-        return;
+        return -1;
+    return dqp;
+}
 
-    dqp = FFMIN(dqp, 4);
-    vc->deint_queue_pos = dqp;
+static void set_next_frame_info(struct vo *vo, bool eof)
+{
+    struct vdpctx *vc = vo->priv;
+
+    vo->frame_loaded = false;
+    int dqp = next_deint_queue_pos(vo, eof);
+    if (dqp < 0)
+        return;
     vo->frame_loaded = true;
 
     // Set pts values
     struct buffered_video_surface *bv = vc->buffered_video;
-    int idx = vc->deint_queue_pos >> 1;
+    int idx = dqp >> 1;
     if (idx == 0) {  // no future frame/pts available
         vo->next_pts = bv[0].pts;
         vo->next_pts2 = MP_NOPTS_VALUE;
@@ -327,7 +335,7 @@ static void get_buffered_frame(struct vo *vo, bool eof)
             intermediate_pts = (bv[idx].pts + bv[idx - 1].pts) / 2;
         else
             intermediate_pts =  bv[idx].pts;
-        if (vc->deint_queue_pos & 1) { // first field
+        if (dqp & 1) { // first field
             vo->next_pts = bv[idx].pts;
             vo->next_pts2 = intermediate_pts;
         } else {
@@ -335,8 +343,6 @@ static void get_buffered_frame(struct vo *vo, bool eof)
             vo->next_pts2 = bv[idx - 1].pts;
         }
     }
-
-    video_to_output_surface(vo);
 }
 
 static void add_new_video_surface(struct vo *vo, VdpVideoSurface surface,
@@ -358,8 +364,9 @@ static void add_new_video_surface(struct vo *vo, VdpVideoSurface surface,
         .pts = pts,
     };
 
-    vc->deint_queue_pos += 2;
-    get_buffered_frame(vo, false);
+    vc->deint_queue_pos = FFMIN(vc->deint_queue_pos + 2,
+                                NUM_BUFFERED_VIDEO * 2 - 3);
+    set_next_frame_info(vo, false);
 }
 
 static void forget_frames(struct vo *vo)
@@ -1858,6 +1865,13 @@ static int control(struct vo *vo, uint32_t request, void *data)
         r->mt = r->mb = vc->border_y;
         return VO_TRUE;
     }
+    case VOCTRL_NEWFRAME:
+        vc->deint_queue_pos = next_deint_queue_pos(vo, true);
+        video_to_output_surface(vo);
+        return true;
+    case VOCTRL_SKIPFRAME:
+        vc->deint_queue_pos = next_deint_queue_pos(vo, true);
+        return true;
     case VOCTRL_REDRAW_OSD:
         video_to_output_surface(vo);
         draw_eosd(vo);
@@ -1892,7 +1906,7 @@ const struct vo_driver video_out_vdpau = {
     .config = config,
     .control = control,
     .draw_image = draw_image,
-    .get_buffered_frame = get_buffered_frame,
+    .get_buffered_frame = set_next_frame_info,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page_timed = flip_page_timed,

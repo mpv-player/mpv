@@ -63,6 +63,8 @@ enum mp_voctrl {
     VOCTRL_XOVERLAY_SET_COLORKEY,       // mp_colorkey_t
     VOCTRL_XOVERLAY_SET_WIN,
 
+    VOCTRL_NEWFRAME,
+    VOCTRL_SKIPFRAME,
     VOCTRL_REDRAW_OSD,
 
     VOCTRL_ONTOP,
@@ -258,6 +260,7 @@ struct vo {
     int config_count;  // Total number of successful config calls
 
     bool frame_loaded;  // Is there a next frame the VO could flip to?
+    struct mp_image *waiting_mpi;
     double next_pts;    // pts value of the next frame if any
     double next_pts2;   // optional pts of frame after that
 
@@ -307,6 +310,7 @@ int vo_get_buffered_frame(struct vo *vo, bool eof);
 void vo_skip_frame(struct vo *vo);
 int vo_draw_frame(struct vo *vo, uint8_t *src[]);
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y);
+void vo_new_frame_imminent(struct vo *vo);
 void vo_draw_osd(struct vo *vo, struct osd_state *osd);
 void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration);
 void vo_check_events(struct vo *vo);
