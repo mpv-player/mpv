@@ -1625,6 +1625,8 @@ static int setGlWindow_cocoa(MPGLContext *ctx)
 {
     vo_cocoa_change_attributes(ctx->vo);
     getFunctions(ctx->gl, (void *)getdladdr, NULL);
+    if (!ctx->gl->SwapInterval)
+        ctx->gl->SwapInterval = vo_cocoa_swap_interval;
     return SET_WINDOW_OK;
 }
 

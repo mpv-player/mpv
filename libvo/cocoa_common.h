@@ -16,4 +16,7 @@ void vo_cocoa_swap_buffers(void);
 int vo_cocoa_check_events(struct vo *vo);
 void vo_cocoa_fullscreen(struct vo *vo);
 
+// returns an int to conform to the gl extensions from other platforms
+int vo_cocoa_swap_interval(int enabled);
+
 #endif /* MPLAYER_COCOA_COMMON_H */

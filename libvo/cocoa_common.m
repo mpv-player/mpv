@@ -262,6 +262,12 @@ void vo_cocoa_fullscreen(struct vo *vo)
     resize_window(vo);
 }
 
+int vo_cocoa_swap_interval(int enabled)
+{
+    [s->glContext setValues:&enabled forParameter:NSOpenGLCPSwapInterval];
+    return 0;
+}
+
 void create_menu()
 {
     NSMenu *menu;
