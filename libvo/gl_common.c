@@ -1615,11 +1615,15 @@ void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
 static int create_window_cocoa(struct MPGLContext *ctx, uint32_t d_width,
                                uint32_t d_height, uint32_t flags)
 {
-    return vo_cocoa_create_window(ctx, d_width, d_height, flags);
+    if (vo_cocoa_create_window(ctx->vo, d_width, d_height, flags) == 0) {
+        return SET_WINDOW_OK;
+    } else {
+        return SET_WINDOW_FAILED;
+    }
 }
 static int setGlWindow_cocoa(MPGLContext *ctx)
 {
-    vo_cocoa_change_attributes(ctx);
+    vo_cocoa_change_attributes(ctx->vo);
     getFunctions(ctx->gl, (void *)getdladdr, NULL);
     return SET_WINDOW_OK;
 }

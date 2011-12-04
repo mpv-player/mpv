@@ -3,7 +3,6 @@
 #import <QuartzCore/QuartzCore.h>
 #import <CoreServices/CoreServices.h> // for CGDisplayHideCursor
 #include "cocoa_common.h"
-#include "gl_common.h"
 
 #include "options.h"
 #include "video_out.h"
@@ -130,9 +129,9 @@ void vo_cocoa_update_xinerama_info(struct vo *vo)
     aspect_save_screenres(vo, s->screen_frame.size.width, s->screen_frame.size.height);
 }
 
-int vo_cocoa_change_attributes(struct MPGLContext *ctx)
+int vo_cocoa_change_attributes(struct vo *vo)
 {
-    return SET_WINDOW_OK;
+    return 0;
 }
 
 void resize_window(struct vo *vo)
@@ -142,7 +141,7 @@ void resize_window(struct vo *vo)
     [s->glContext update];
 }
 
-int vo_cocoa_create_window(struct MPGLContext *ctx, uint32_t d_width,
+int vo_cocoa_create_window(struct vo *vo, uint32_t d_width,
                            uint32_t d_height, uint32_t flags)
 {
     if (s->current_video_size.width > 0 || s->current_video_size.height > 0)
@@ -187,7 +186,7 @@ int vo_cocoa_create_window(struct MPGLContext *ctx, uint32_t d_width,
         }
 
         if (flags & VOFLAG_FULLSCREEN)
-            vo_cocoa_fullscreen(ctx->vo);
+            vo_cocoa_fullscreen(vo);
     } else {
         if (s->current_video_size.width  != s->previous_video_size.width ||
             s->current_video_size.height != s->previous_video_size.height) {
@@ -203,15 +202,15 @@ int vo_cocoa_create_window(struct MPGLContext *ctx, uint32_t d_width,
         }
     }
 
-    resize_window(ctx->vo);
+    resize_window(vo);
 
     if (s->window_title)
         [s->window_title release];
 
-    s->window_title = [[NSString alloc] initWithUTF8String:vo_get_window_title(ctx->vo)];
+    s->window_title = [[NSString alloc] initWithUTF8String:vo_get_window_title(vo)];
     [s->window setTitle: s->window_title];
 
-    return SET_WINDOW_OK;
+    return 0;
 }
 
 void vo_cocoa_swap_buffers()
