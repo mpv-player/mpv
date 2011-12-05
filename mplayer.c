@@ -3035,6 +3035,22 @@ void unpause_player(struct MPContext *mpctx)
     (void)get_relative_time(mpctx);     // ignore time that passed during pause
 }
 
+static int redraw_osd(struct MPContext *mpctx)
+{
+    struct sh_video *sh_video = mpctx->sh_video;
+    struct vf_instance *vf = sh_video->vfilter;
+    if (sh_video->output_flags & VFCAP_OSD_FILTER)
+        return -1;
+    if (vo_redraw_frame(mpctx->video_out) < 0)
+        return -1;
+    mpctx->osd->pts = mpctx->video_pts;
+    if (!(sh_video->output_flags & VFCAP_EOSD_FILTER))
+        vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
+    vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
+    vo_flip_page(mpctx->video_out, 0, -1);
+    return 0;
+}
+
 void add_step_frame(struct MPContext *mpctx)
 {
     mpctx->step_frames++;
@@ -3679,6 +3695,7 @@ static void run_playloop(struct MPContext *mpctx)
             update_teletext(sh_video, mpctx->demuxer, 0);
             update_osd_msg(mpctx);
             struct vf_instance *vf = sh_video->vfilter;
+            mpctx->osd->pts = mpctx->video_pts;
             vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
             vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
             vo_osd_changed(0);
@@ -3820,7 +3837,7 @@ static void run_playloop(struct MPContext *mpctx)
             int hack = vo_osd_changed(0);
             vo_osd_changed(hack);
             if (hack) {
-                if (redraw_osd(mpctx->sh_video, mpctx->osd) < 0) {
+                if (redraw_osd(mpctx) < 0) {
                     add_step_frame(mpctx);
                     break;
                 } else

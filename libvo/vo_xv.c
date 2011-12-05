@@ -89,10 +89,8 @@ struct xvctx {
     int current_ip_buf;
     int num_buffers;
     int total_buffers;
-    int have_visible_image_copy;
-    int have_next_image_copy;
-    int unchanged_visible_image;
-    int unchanged_next_image;
+    bool have_image_copy;
+    bool unchanged_image;
     int visible_buf;
     XvImage *xvimage[NUM_BUFFERS + 1];
     uint32_t image_width;
@@ -227,8 +225,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     }
 
     ctx->visible_buf = -1;
-    ctx->have_visible_image_copy = false;
-    ctx->have_next_image_copy = false;
+    ctx->have_image_copy = false;
 
     /* check image formats */
     ctx->xv_format = 0;
@@ -447,26 +444,21 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
                                                       vo->panscan_x),
                   ctx->image_height, ctx->draw_alpha_fnc, vo);
     if (ctx->osd_objects_drawn)
-        ctx->unchanged_next_image = false;
+        ctx->unchanged_image = false;
 }
 
-static int redraw_osd(struct vo *vo, struct osd_state *osd)
+static int redraw_frame(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
 
-    if (ctx->have_visible_image_copy)
+    if (ctx->have_image_copy)
         copy_backup_image(vo, ctx->visible_buf, ctx->num_buffers);
-    else if (ctx->unchanged_visible_image) {
+    else if (ctx->unchanged_image) {
         copy_backup_image(vo, ctx->num_buffers, ctx->visible_buf);
-        ctx->have_visible_image_copy = true;
-    }
-    else
+        ctx->have_image_copy = true;
+    }  else
         return false;
-    int temp = ctx->current_buf;
     ctx->current_buf = ctx->visible_buf;
-    draw_osd(vo, osd);
-    ctx->current_buf = temp;
-    put_xvimage(vo, ctx->xvimage[ctx->visible_buf]);
     return true;
 }
 
@@ -477,11 +469,6 @@ static void flip_page(struct vo *vo)
 
     /* remember the currently visible buffer */
     ctx->visible_buf = ctx->current_buf;
-
-    ctx->have_visible_image_copy = ctx->have_next_image_copy;
-    ctx->have_next_image_copy = false;
-    ctx->unchanged_visible_image = ctx->unchanged_next_image;
-    ctx->unchanged_next_image = false;
 
     if (ctx->num_buffers > 1) {
         ctx->current_buf = vo_directrendering ? 0 : ((ctx->current_buf + 1) %
@@ -525,11 +512,12 @@ static int draw_slice(struct vo *vo, uint8_t *image[], int stride[], int w,
     return 0;
 }
 
-static mp_image_t *get_screenshot(struct vo *vo) {
+static mp_image_t *get_screenshot(struct vo *vo)
+{
     struct xvctx *ctx = vo->priv;
 
     // try to get an image without OSD
-    if (ctx->have_visible_image_copy)
+    if (ctx->have_image_copy)
         copy_backup_image(vo, ctx->visible_buf, ctx->num_buffers);
 
     XvImage *xv_image = ctx->xvimage[ctx->visible_buf];
@@ -571,7 +559,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct xvctx *ctx = vo->priv;
 
-    ctx->have_next_image_copy = false;
+    ctx->have_image_copy = false;
 
     if (mpi->flags & MP_IMGFLAG_DIRECT)
         // direct rendering:
@@ -591,9 +579,9 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 
     if (ctx->is_paused) {
         copy_backup_image(vo, ctx->num_buffers, ctx->current_buf);
-        ctx->have_next_image_copy = true;
+        ctx->have_image_copy = true;
     }
-    ctx->unchanged_next_image = true;
+    ctx->unchanged_image = true;
     return true;
 }
 
@@ -873,8 +861,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_UPDATE_SCREENINFO:
         update_xinerama_info(vo);
         return VO_TRUE;
-    case VOCTRL_REDRAW_OSD:
-        return redraw_osd(vo, data);
+    case VOCTRL_REDRAW_FRAME:
+        return redraw_frame(vo);
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         args->out_image = get_screenshot(vo);

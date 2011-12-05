@@ -452,10 +452,6 @@ static int control(struct vf_instance *vf, int request, void* data){
     case VFCTRL_DRAW_OSD:
 	if(vf->priv->osd_enabled) return CONTROL_TRUE;
         break;
-    case VFCTRL_REDRAW_OSD:
-        if (vf->priv->osd_enabled)
-            return false;
-        break;
     }
 #endif
     return vf_next_control(vf,request,data);
@@ -481,6 +477,8 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->priv->osd_enabled,
     vf->priv->aspect,
     vf->priv->round);
+    if (vf->priv->osd_enabled)
+        vf->default_caps = VFCAP_OSD_FILTER;
     return 1;
 }
 

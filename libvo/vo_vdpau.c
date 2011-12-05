@@ -1872,11 +1872,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SKIPFRAME:
         vc->deint_queue_pos = next_deint_queue_pos(vo, true);
         return true;
-    case VOCTRL_REDRAW_OSD:
+    case VOCTRL_REDRAW_FRAME:
         video_to_output_surface(vo);
-        draw_eosd(vo);
-        draw_osd(vo, data);
-        flip_page_timed(vo, 0, -1);
         return true;
     case VOCTRL_RESET:
         forget_frames(vo);

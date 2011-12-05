@@ -112,7 +112,6 @@ struct vf_ctrl_screenshot {
 /* Hack to make the OSD state object available to vf_expand and vf_ass which
  * access OSD/subtitle state outside of normal OSD draw time. */
 #define VFCTRL_SET_OSD_OBJ 20
-#define VFCTRL_REDRAW_OSD  21 // Change user-visible OSD immediately
 #define VFCTRL_SET_YUV_COLORSPACE 22 // arg is struct mp_csp_details*
 #define VFCTRL_GET_YUV_COLORSPACE 23 // arg is struct mp_csp_details*
 

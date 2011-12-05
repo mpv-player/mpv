@@ -117,8 +117,6 @@ static int control(struct vf_instance *vf, int request, void* data)
 	if(!video_out->config_ok) return CONTROL_FALSE; // vo not configured?
 	vo_draw_osd(video_out, data);
 	return CONTROL_TRUE;
-    case VFCTRL_REDRAW_OSD:
-        return vo_control(video_out, VOCTRL_REDRAW_OSD, data) == true;
     case VFCTRL_SET_EQUALIZER:
     {
 	vf_equalizer_t *eq=data;
@@ -153,7 +151,6 @@ static int control(struct vf_instance *vf, int request, void* data)
     {
         struct osd_state *osd = data;
         mp_eosd_images_t images = {NULL, 2};
-        double pts = video_out->next_pts;
         ASS_Renderer *renderer;
         double scale;
         if (osd->vsfilter_aspect && vf->opts->ass_vsfilter_aspect_compat) {
@@ -168,7 +165,7 @@ static int control(struct vf_instance *vf, int request, void* data)
         if (osd->ass_track_changed)
             vf->priv->prev_visibility = false;
         osd->ass_track_changed = false;
-        if (sub_visibility && osd->ass_track && (pts != MP_NOPTS_VALUE)) {
+        if (sub_visibility && osd->ass_track && (osd->pts != MP_NOPTS_VALUE)) {
             struct mp_eosd_res res = {0};
             if (vo_control(video_out, VOCTRL_GET_EOSD_RES, &res) == VO_TRUE) {
                 ass_set_frame_size(renderer, res.w, res.h);
@@ -181,7 +178,7 @@ static int control(struct vf_instance *vf, int request, void* data)
                 mp_ass_reload_options(vf->priv->renderer_vsfilter, vf->opts);
             }
             images.imgs = ass_render_frame(renderer, osd->ass_track,
-                                           (pts+sub_delay) * 1000 + .5,
+                                           (osd->pts+sub_delay) * 1000 + .5,
                                            &images.changed);
             if (!vf->priv->prev_visibility || osd->ass_force_reload)
                 images.changed = 2;

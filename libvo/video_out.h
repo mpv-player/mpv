@@ -65,7 +65,7 @@ enum mp_voctrl {
 
     VOCTRL_NEWFRAME,
     VOCTRL_SKIPFRAME,
-    VOCTRL_REDRAW_OSD,
+    VOCTRL_REDRAW_FRAME,
 
     VOCTRL_ONTOP,
     VOCTRL_ROOTWIN,
@@ -263,6 +263,7 @@ struct vo {
     struct mp_image *waiting_mpi;
     double next_pts;    // pts value of the next frame if any
     double next_pts2;   // optional pts of frame after that
+    bool redrawing;     // between redrawing frame and flipping it
 
     double flip_queue_offset; // queue flip events at most this much in advance
 
@@ -306,6 +307,7 @@ void list_video_out(void);
 
 int vo_control(struct vo *vo, uint32_t request, void *data);
 int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts);
+int vo_redraw_frame(struct vo *vo);
 int vo_get_buffered_frame(struct vo *vo, bool eof);
 void vo_skip_frame(struct vo *vo);
 int vo_draw_frame(struct vo *vo, uint8_t *src[]);

@@ -1506,14 +1506,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
             break;
         p->glctx->update_xinerama_info(vo);
         return VO_TRUE;
-    case VOCTRL_REDRAW_OSD:
+    case VOCTRL_REDRAW_FRAME:
         if (vo_doublebuffering)
             do_render(vo);
-        draw_osd(vo, data);
-        if (vo_doublebuffering)
-            do_render_osd(vo, 2);
-        flip_page(vo);
-        return VO_TRUE;
+        return true;
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         if (args->full_window)

@@ -463,7 +463,7 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->control   = control;
     vf->get_image = get_image;
     vf->put_image = put_image;
-    vf->default_caps = VFCAP_EOSD;
+    vf->default_caps = VFCAP_EOSD | VFCAP_EOSD_FILTER;
     return 1;
 }
 

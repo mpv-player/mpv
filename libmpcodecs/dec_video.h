@@ -44,7 +44,6 @@ struct mp_csp_details;
 void get_detected_video_colorspace(struct sh_video *sh, struct mp_csp_details *csp);
 void set_video_colorspace(struct sh_video *sh);
 int set_rectangle(sh_video_t *sh_video, int param, int value);
-int redraw_osd(struct sh_video *sh_video, struct osd_state *osd);
 void resync_video_stream(sh_video_t *sh_video);
 void video_reset_aspect(struct sh_video *sh_video);
 int get_current_video_decoder_lag(sh_video_t *sh_video);
