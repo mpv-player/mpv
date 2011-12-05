@@ -418,18 +418,11 @@ static void copy_backup_image(struct vo *vo, int dest, int src)
 
 static void check_events(struct vo *vo)
 {
-    struct xvctx *ctx = vo->priv;
     int e = vo_x11_check_events(vo);
 
-    if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE)
+    if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) {
         resize(vo);
-
-    if ((e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) && ctx->is_paused) {
-        /* did we already draw a buffer */
-        if (ctx->visible_buf != -1) {
-            /* redraw the last visible buffer */
-            put_xvimage(vo, ctx->xvimage[ctx->visible_buf]);
-        }
+        vo->want_redraw = true;
     }
 }
 
@@ -833,20 +826,20 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_PANSCAN:
         resize(vo);
         return VO_TRUE;
-    case VOCTRL_SET_EQUALIZER:
-        {
-            struct voctrl_set_equalizer_args *args = data;
-            return vo_xv_set_eq(vo, x11->xv_port, args->name, args->value);
-        }
-    case VOCTRL_GET_EQUALIZER:
-        {
-            struct voctrl_get_equalizer_args *args = data;
-            return vo_xv_get_eq(vo, x11->xv_port, args->name, args->valueptr);
-        }
+    case VOCTRL_SET_EQUALIZER: {
+        vo->want_redraw = true;
+        struct voctrl_set_equalizer_args *args = data;
+        return vo_xv_set_eq(vo, x11->xv_port, args->name, args->value);
+    }
+    case VOCTRL_GET_EQUALIZER: {
+        struct voctrl_get_equalizer_args *args = data;
+        return vo_xv_get_eq(vo, x11->xv_port, args->name, args->valueptr);
+    }
     case VOCTRL_SET_YUV_COLORSPACE:;
         struct mp_csp_details* given_cspc = data;
         int is_709 = given_cspc->format == MP_CSP_BT_709;
         vo_xv_set_eq(vo, x11->xv_port, "bt_709", is_709 * 200 - 100);
+        vo->want_redraw = true;
         return true;
     case VOCTRL_GET_YUV_COLORSPACE:;
         struct mp_csp_details* cspc = data;

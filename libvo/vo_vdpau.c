@@ -195,9 +195,6 @@ struct vdpctx {
     // Video equalizer
     struct mp_csp_equalizer video_eq;
 
-    int num_shown_frames;
-    bool paused;
-
     // These tell what's been initialized and uninit() should free/uninitialize
     bool mode_switched;
 };
@@ -417,7 +414,6 @@ static void resize(struct vo *vo)
     int min_output_width = FFMAX(vo->dwidth, vc->vid_width);
     int min_output_height = FFMAX(vo->dheight, vc->vid_height);
 
-    bool had_frames = vc->num_shown_frames;
     if (vc->output_surface_width < min_output_width
         || vc->output_surface_height < min_output_height) {
         if (vc->output_surface_width < min_output_width) {
@@ -446,11 +442,8 @@ static void resize(struct vo *vo)
             mp_msg(MSGT_VO, MSGL_DBG2, "vdpau out create: %u\n",
                    vc->output_surfaces[i]);
         }
-        vc->num_shown_frames = 0;
     }
-    if (vc->paused && had_frames)
-        if (video_to_output_surface(vo) >= 0)
-            flip_page_timed(vo, 0, -1);
+    vo->want_redraw = true;
 }
 
 static void preemption_callback(VdpDevice device, void *context)
@@ -832,7 +825,6 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
     };
     vc->output_surface_width = vc->output_surface_height = -1;
     vc->eosd_render_count = 0;
-    vc->num_shown_frames = 0;
 }
 
 static int handle_preemption(struct vo *vo)
@@ -944,9 +936,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
 static void check_events(struct vo *vo)
 {
-    struct vdpctx *vc = vo->priv;
-    struct vdp_functions *vdp = vc->vdp;
-
     if (handle_preemption(vo) < 0)
         return;
 
@@ -954,19 +943,8 @@ static void check_events(struct vo *vo)
 
     if (e & VO_EVENT_RESIZE)
         resize(vo);
-    else if (e & VO_EVENT_EXPOSE && vc->paused) {
-        /* did we already draw a buffer */
-        if (vc->num_shown_frames) {
-            /* redraw the last visible buffer */
-            VdpStatus vdp_st;
-            int last_surface = WRAP_ADD(vc->surface_num, -1,
-                                        vc->num_output_surfaces);
-            vdp_st = vdp->presentation_queue_display(vc->flip_queue,
-                                         vc->output_surfaces[last_surface],
-                                         vo->dwidth, vo->dheight, 0);
-            CHECK_ST_WARNING("Error when calling "
-                             "vdp_presentation_queue_display");
-        }
+    else if (e & VO_EVENT_EXPOSE) {
+        vo->want_redraw = true;
     }
 }
 
@@ -1407,7 +1385,6 @@ static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration)
     vc->last_ideal_time = ideal_pts;
     vc->dropped_frame = false;
     vc->surface_num = WRAP_ADD(vc->surface_num, 1, vc->num_output_surfaces);
-    vc->num_shown_frames = FFMIN(vc->num_shown_frames + 1, 1000);
 }
 
 static int draw_slice(struct vo *vo, uint8_t *image[], int stride[], int w,
@@ -1803,13 +1780,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
                                                           feature_enables);
             CHECK_ST_WARNING("Error changing deinterlacing settings");
         }
+        vo->want_redraw = true;
         return VO_TRUE;
     case VOCTRL_PAUSE:
         if (vc->dropped_frame)
             flip_page_timed(vo, 0, -1);
-        return (vc->paused = true);
-    case VOCTRL_RESUME:
-        return (vc->paused = false);
+        return true;
     case VOCTRL_QUERY_FORMAT:
         return query_format(*(uint32_t *)data);
     case VOCTRL_GET_IMAGE:
@@ -1830,6 +1806,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         checked_resize(vo);
         return VO_TRUE;
     case VOCTRL_SET_EQUALIZER: {
+        vo->want_redraw = true;
         struct voctrl_set_equalizer_args *args = data;
         return set_equalizer(vo, args->name, args->value);
     }
@@ -1841,6 +1818,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         vc->colorspace = *(struct mp_csp_details *)data;
         if (status_ok(vo))
             update_csc_matrix(vo);
+        vo->want_redraw = true;
         return true;
     case VOCTRL_GET_YUV_COLORSPACE:
         *(struct mp_csp_details *)data = vc->colorspace;

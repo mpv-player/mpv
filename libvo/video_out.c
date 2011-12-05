@@ -354,6 +354,7 @@ void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration)
         vo->frame_loaded = false;
         vo->next_pts = MP_NOPTS_VALUE;
     }
+    vo->want_redraw = false;
     vo->redrawing = false;
     if (vo->driver->flip_page_timed)
         vo->driver->flip_page_timed(vo, pts_us, duration);

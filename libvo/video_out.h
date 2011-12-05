@@ -263,6 +263,7 @@ struct vo {
     struct mp_image *waiting_mpi;
     double next_pts;    // pts value of the next frame if any
     double next_pts2;   // optional pts of frame after that
+    bool want_redraw;   // visible frame wrong (window resize), needs refresh
     bool redrawing;     // between redrawing frame and flipping it
 
     double flip_queue_offset; // queue flip events at most this much in advance

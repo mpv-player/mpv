@@ -3087,11 +3087,10 @@ static void pause_loop(struct MPContext *mpctx)
         }
         if (mpctx->sh_video && mpctx->video_out)
             vo_check_events(mpctx->video_out);
-        usec_sleep(20000);
         update_osd_msg(mpctx);
         int hack = vo_osd_changed(0);
         vo_osd_changed(hack);
-        if (hack)
+        if (hack || mpctx->sh_video && mpctx->video_out->want_redraw)
             break;
 #ifdef CONFIG_STREAM_CACHE
         if (!opts->quiet && stream_cache_size > 0) {
@@ -3829,21 +3828,25 @@ static void run_playloop(struct MPContext *mpctx)
             if (mpctx->stop_play)
                 break;
         }
-        if (!mpctx->paused || mpctx->stop_play || mpctx->seek.type
-            || mpctx->restart_playback)
+        bool slow_video = mpctx->sh_video && mpctx->video_out->frame_loaded;
+        if (!(mpctx->paused || slow_video) || mpctx->stop_play
+                || mpctx->seek.type || mpctx->restart_playback)
             break;
         if (mpctx->sh_video) {
             update_osd_msg(mpctx);
             int hack = vo_osd_changed(0);
             vo_osd_changed(hack);
-            if (hack) {
+            if (hack || mpctx->video_out->want_redraw) {
                 if (redraw_osd(mpctx) < 0) {
-                    add_step_frame(mpctx);
+                    if (mpctx->paused)
+                        add_step_frame(mpctx);
                     break;
                 } else
                     vo_osd_changed(0);
             }
         }
+        if (!mpctx->paused)
+            break;
         pause_loop(mpctx);
     }
 
