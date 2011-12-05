@@ -560,7 +560,7 @@ const char *vo_get_window_title(struct vo *vo)
     if (vo->opts->vo_wintitle) {
         return vo->opts->vo_wintitle;
     } else {
-        return "MPlayer";
+        return "mplayer2";
     }
 }
 
