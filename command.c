@@ -287,19 +287,21 @@ static int mp_property_playback_speed(m_option_t *prop, int action,
                                       void *arg, MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
+    double orig_speed = opts->playback_speed;
     switch (action) {
     case M_PROPERTY_SET:
         if (!arg)
             return M_PROPERTY_ERROR;
-        M_PROPERTY_CLAMP(prop, *(float *) arg);
         opts->playback_speed = *(float *) arg;
-        reinit_audio_chain(mpctx);
-        return M_PROPERTY_OK;
+        goto set;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         opts->playback_speed += (arg ? *(float *) arg : 0.1) *
                                 (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
+    set:
         M_PROPERTY_CLAMP(prop, opts->playback_speed);
+        // Adjust time until next frame flip for nosound mode
+        mpctx->time_frame *= orig_speed / opts->playback_speed;
         reinit_audio_chain(mpctx);
         return M_PROPERTY_OK;
     }
