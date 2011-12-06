@@ -52,7 +52,6 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .ass_font_scale = 1,
         .ass_vsfilter_aspect_compat = 1,
         .use_embedded_fonts = 1,
-        .ass_hinting = 5,   // light hinting for unscaled osd
 
         .lavc_param = {
             .workaround_bugs = 1, // autodetect
