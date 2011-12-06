@@ -863,7 +863,7 @@ static int handle_preemption(struct vo *vo)
  */
 static int config(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  char *title, uint32_t format)
+                  uint32_t format)
 {
     struct vdpctx *vc = vo->priv;
     struct vo_x11_state *x11 = vo->x11;
@@ -911,7 +911,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     xswamask = CWBorderPixel;
 
     vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, d_width, d_height,
-                            flags, CopyFromParent, "vdpau", title);
+                            flags, CopyFromParent, "vdpau");
     XChangeWindowAttributes(x11->display, x11->window, xswamask, &xswa);
 
 #ifdef CONFIG_XF86VM

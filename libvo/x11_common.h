@@ -85,11 +85,14 @@ struct vo_x11_state {
     Atom XA_NET_WM_STATE_STAYS_ON_TOP;
     Atom XA_NET_WM_STATE_BELOW;
     Atom XA_NET_WM_PID;
+    Atom XA_NET_WM_NAME;
+    Atom XA_NET_WM_ICON_NAME;
     Atom XA_WIN_PROTOCOLS;
     Atom XA_WIN_LAYER;
     Atom XA_WIN_HINTS;
     Atom XAWM_PROTOCOLS;
     Atom XAWM_DELETE_WINDOW;
+    Atom XAUTF8_STRING;
 };
 
 #if defined(CONFIG_GL) || defined(CONFIG_X11) || defined(CONFIG_XV)
@@ -135,7 +138,7 @@ uint32_t vo_x11_get_equalizer(const char *name, int *value);
 void fstype_help(void);
 void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
         int x, int y, unsigned int width, unsigned int height, int flags,
-	Colormap col_map, const char *classname, const char *title);
+	Colormap col_map, const char *classname);
 void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
 	int img_width, int img_height);
 void vo_x11_clearwindow(struct vo *vo, Window vo_window);
@@ -184,7 +187,8 @@ void xscreensaver_heartbeat(struct vo_x11_state *x11);
 // Old VOs use incompatible function calls, translate them to new
 // prototypes
 #ifdef IS_OLD_VO
-#define vo_x11_create_vo_window(...) vo_x11_create_vo_window(global_vo, __VA_ARGS__)
+#define vo_x11_create_vo_window(vis, x, y, width, height, flags, col_map, classname, title) \
+        vo_x11_create_vo_window(global_vo, vis, x, y, width, height, flags, col_map, classname)
 #define vo_x11_fullscreen() vo_x11_fullscreen(global_vo)
 #define vo_x11_update_geometry() vo_x11_update_geometry(global_vo, 1)
 #define vo_x11_ontop() vo_x11_ontop(global_vo)

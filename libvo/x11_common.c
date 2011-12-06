@@ -327,11 +327,14 @@ static void init_atoms(struct vo_x11_state *x11)
     XA_INIT(_NET_WM_STATE_STAYS_ON_TOP);
     XA_INIT(_NET_WM_STATE_BELOW);
     XA_INIT(_NET_WM_PID);
+    XA_INIT(_NET_WM_NAME);
+    XA_INIT(_NET_WM_ICON_NAME);
     XA_INIT(_WIN_PROTOCOLS);
     XA_INIT(_WIN_LAYER);
     XA_INIT(_WIN_HINTS);
     XA_INIT(WM_PROTOCOLS);
     XA_INIT(WM_DELETE_WINDOW);
+    XA_INIT(UTF8_STRING);
 }
 
 void update_xinerama_info(struct vo *vo) {
@@ -712,7 +715,7 @@ void vo_x11_classhint(struct vo *vo, Window window, const char *name)
     pid_t pid = getpid();
 
     wmClass.res_name = opts->vo_winname ? opts->vo_winname : (char *)name;
-    wmClass.res_class = "MPlayer";
+    wmClass.res_class = "mplayer2";
     XSetClassHint(x11->display, window, &wmClass);
     XChangeProperty(x11->display, window, x11->XA_NET_WM_PID, XA_CARDINAL,
                     32, PropModeReplace, (unsigned char *) &pid, 1);
@@ -990,6 +993,56 @@ static int vo_x11_get_gnome_layer(struct vo_x11_state *x11, Window win)
     return WIN_LAYER_NORMAL;
 }
 
+// set a X text property that expects a STRING type
+static void vo_x11_set_property_string(struct vo *vo, Atom name, const char *t)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    XTextProperty prop = {0};
+    int success;
+
+    success = Xutf8TextListToTextProperty(x11->display, (char **)&t, 1,
+                                          XStringStyle, &prop);
+
+    // The call can fail if the string uses characters not in the STRING
+    // encoding (which is latin-1 as far as I can tell). Try COMPOUND_TEXT
+    // instead. (It is possible that COMPOUND_TEXT always works, but since the
+    // difference in the type used for the property is visible to the Window
+    // manager and the ICCCM seems to specify STRING, we're trying to be careful
+    // and try STRING first.)
+    // GTK seems to follow about the same fallback mechanism.
+    if (success != Success) {
+        XFree(prop.value);
+        prop.value = NULL;
+        success = Xutf8TextListToTextProperty(x11->display, (char **)&t, 1,
+                                              XCompoundTextStyle, &prop);
+    }
+
+    if (success == Success)
+        XSetTextProperty(x11->display, x11->window, &prop, name);
+
+    XFree(prop.value);
+}
+
+// set a X text property that expects a UTF8_STRING type
+static void vo_x11_set_property_utf8(struct vo *vo, Atom name, const char *t)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    XChangeProperty(x11->display, x11->window, name, x11->XAUTF8_STRING, 8,
+                    PropModeReplace, t, strlen(t));
+}
+
+static void vo_x11_update_window_title(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    const char *title = vo_get_window_title(vo);
+    vo_x11_set_property_string(vo, XA_WM_NAME, title);
+    vo_x11_set_property_string(vo, XA_WM_ICON_NAME, title);
+    vo_x11_set_property_utf8(vo, x11->XA_NET_WM_NAME, title);
+    vo_x11_set_property_utf8(vo, x11->XA_NET_WM_ICON_NAME, title);
+}
+
 //
 static Window vo_x11_create_smooth_window(struct vo_x11_state *x11, Window mRoot,
                                    Visual * vis, int x, int y,
@@ -1032,15 +1085,13 @@ static Window vo_x11_create_smooth_window(struct vo_x11_state *x11, Window mRoot
  *              Only VOFLAG_FULLSCREEN is supported so far.
  * \param col_map Colourmap for window or CopyFromParent if a specific colormap isn't needed
  * \param classname name to use for the classhint
- * \param title title for the window
  *
  * This also does the grunt-work like setting Window Manager hints etc.
  * If vo_window is already set it just moves and resizes it.
  */
 void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
                              unsigned int width, unsigned int height, int flags,
-                             Colormap col_map,
-                             const char *classname, const char *title)
+                             Colormap col_map, const char *classname)
 {
   struct MPOpts *opts = vo->opts;
   struct vo_x11_state *x11 = vo->x11;
@@ -1083,7 +1134,6 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     XSizeHints hint;
     x11->window_state &= ~VOFLAG_HIDDEN;
     vo_x11_classhint(vo, x11->window, classname);
-    XStoreName(mDisplay, x11->window, title);
     vo_hidecursor(mDisplay, x11->window);
     XSelectInput(mDisplay, x11->window, StructureNotifyMask);
     hint.x = x; hint.y = y;
@@ -1091,7 +1141,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     hint.flags = PSize;
     if (geometry_xy_changed)
       hint.flags |= PPosition;
-    XSetStandardProperties(mDisplay, x11->window, title, title, None, NULL, 0, &hint);
+    XSetWMNormalHints(mDisplay, x11->window, &hint);
     if (!vo_border) vo_x11_decoration(vo, 0);
     // map window
     XSelectInput(mDisplay, x11->window, NoEventMask);
@@ -1101,6 +1151,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     XMapWindow(mDisplay, x11->window);
     vo_x11_clearwindow(vo, x11->window);
   }
+  vo_x11_update_window_title(vo);
   if (opts->vo_ontop) vo_x11_setlayer(vo, x11->window, opts->vo_ontop);
   vo_x11_update_geometry(vo, !geometry_xy_changed);
   vo_x11_nofs_sizepos(vo, vo->dx, vo->dy, width, height);
@@ -1305,7 +1356,6 @@ static int vo_x11_get_fs_type(int supported)
  */
 int vo_x11_update_geometry(struct vo *vo, bool update_pos)
 {
-    struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
     unsigned depth, w, h;
     int dummy_int;
@@ -1319,8 +1369,6 @@ int vo_x11_update_geometry(struct vo *vo, bool update_pos)
     if (update_pos)
         XTranslateCoordinates(x11->display, x11->window, x11->rootwin, 0, 0,
                               &vo->dx, &vo->dy, &dummy_win);
-    if (opts->vo_wintitle)
-        XStoreName(x11->display, x11->window, opts->vo_wintitle);
 
     return depth <= INT_MAX ? depth : 0;
 }

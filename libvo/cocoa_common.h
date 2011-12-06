@@ -10,8 +10,7 @@ void vo_cocoa_update_xinerama_info(struct vo *vo);
 
 int vo_cocoa_change_attributes(struct MPGLContext *ctx);
 int vo_cocoa_create_window(struct MPGLContext *ctx, uint32_t d_width,
-                           uint32_t d_height, uint32_t flags,
-                           const char *title);
+                           uint32_t d_height, uint32_t flags);
 
 void vo_cocoa_swap_buffers(void);
 int vo_cocoa_check_events(struct vo *vo);

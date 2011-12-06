@@ -10,7 +10,7 @@ extern struct osd_state *global_osd;
 int old_vo_preinit(struct vo *vo, const char *);
 int old_vo_config(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t d_width, uint32_t d_height,
-                  uint32_t flags, char *title, uint32_t format);
+                  uint32_t flags, uint32_t format);
 int old_vo_control(struct vo *vo, uint32_t request, void *data);
 int old_vo_draw_frame(struct vo *vo, uint8_t *src[]);
 int old_vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[],
