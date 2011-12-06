@@ -214,7 +214,7 @@ static void uninit(sh_audio_t *sh)
     AVCodecContext *lavc_context = ctx->avctx;
 
     if (lavc_context) {
-        if (avcodec_close(lavc_context) < 0)
+        if (lavc_context->codec && avcodec_close(lavc_context) < 0)
             mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not close codec.\n");
         av_freep(&lavc_context->extradata);
         av_freep(&lavc_context);
