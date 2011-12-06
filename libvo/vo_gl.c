@@ -647,19 +647,19 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
 }
 
 static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
-                         uint32_t flags, const char *title)
+                         uint32_t flags)
 {
     struct gl_priv *p = vo->priv;
 
     if (p->stereo_mode == GL_3D_QUADBUFFER)
         flags |= VOFLAG_STEREO;
 
-    return p->glctx->create_window(p->glctx, d_width, d_height, flags, title);
+    return p->glctx->create_window(p->glctx, d_width, d_height, flags);
 }
 
 static int config(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  char *title, uint32_t format)
+                  uint32_t format)
 {
     struct gl_priv *p = vo->priv;
 
@@ -676,7 +676,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     p->vo_flipped = !!(flags & VOFLAG_FLIPPING);
 
-    if (create_window(vo, d_width, d_height, flags, title) < 0)
+    if (create_window(vo, d_width, d_height, flags) < 0)
         return -1;
 
     if (vo->config_count)
@@ -1384,7 +1384,7 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw,
     }
 
     if (p->use_yuv == -1 || !allow_sw) {
-        if (create_window(vo, 320, 200, VOFLAG_HIDDEN, NULL) < 0)
+        if (create_window(vo, 320, 200, VOFLAG_HIDDEN) < 0)
             goto err_out;
         if (p->glctx->setGlWindow(p->glctx) == SET_WINDOW_FAILED)
             goto err_out;

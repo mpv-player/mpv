@@ -1613,10 +1613,9 @@ void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
 #ifdef CONFIG_GL_COCOA
 #include "cocoa_common.h"
 static int create_window_cocoa(struct MPGLContext *ctx, uint32_t d_width,
-                               uint32_t d_height, uint32_t flags,
-                               const char *title)
+                               uint32_t d_height, uint32_t flags)
 {
-    return vo_cocoa_create_window(ctx, d_width, d_height, flags, title);
+    return vo_cocoa_create_window(ctx, d_width, d_height, flags);
 }
 static int setGlWindow_cocoa(MPGLContext *ctx)
 {
@@ -1654,8 +1653,7 @@ static void cocoa_fullscreen(struct vo *vo)
 #include "w32_common.h"
 
 static int create_window_w32(struct MPGLContext *ctx, uint32_t d_width,
-                             uint32_t d_height, uint32_t flags,
-                             const char *title)
+                             uint32_t d_height, uint32_t flags)
 {
     if (!vo_w32_config(d_width, d_height, flags))
         return -1;
@@ -1771,8 +1769,7 @@ static void new_w32_update_xinerama_info(struct vo *vo) { w32_update_xinerama_in
 #include "x11_common.h"
 
 static int create_window_x11(struct MPGLContext *ctx, uint32_t d_width,
-                             uint32_t d_height, uint32_t flags,
-                             const char *title)
+                             uint32_t d_height, uint32_t flags)
 {
     struct vo *vo = ctx->vo;
 
@@ -1805,7 +1802,7 @@ static int create_window_x11(struct MPGLContext *ctx, uint32_t d_width,
     Colormap colormap = XCreateColormap(vo->x11->display, vo->x11->rootwin,
                                         vinfo->visual, AllocNone);
     vo_x11_create_vo_window(vo, vinfo, vo->dx, vo->dy, d_width, d_height,
-                            flags, colormap, "gl", title);
+                            flags, colormap, "gl");
 
     return 0;
 }
@@ -1968,10 +1965,9 @@ static void swapGlBuffers_x11(MPGLContext *ctx)
 #include "sdl_common.h"
 
 static int create_window_sdl(struct MPGLContext *ctx, uint32_t d_width,
-                             uint32_t d_height, uint32_t flags,
-                             const char *title)
+                             uint32_t d_height, uint32_t flags)
 {
-    SDL_WM_SetCaption(title, NULL);
+    SDL_WM_SetCaption(vo_get_window_title(ctx->vo), NULL);
     ctx->vo->dwidth  = d_width;
     ctx->vo->dheight = d_height;
     return 0;

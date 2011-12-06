@@ -1032,15 +1032,13 @@ static Window vo_x11_create_smooth_window(struct vo_x11_state *x11, Window mRoot
  *              Only VOFLAG_FULLSCREEN is supported so far.
  * \param col_map Colourmap for window or CopyFromParent if a specific colormap isn't needed
  * \param classname name to use for the classhint
- * \param title title for the window
  *
  * This also does the grunt-work like setting Window Manager hints etc.
  * If vo_window is already set it just moves and resizes it.
  */
 void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
                              unsigned int width, unsigned int height, int flags,
-                             Colormap col_map,
-                             const char *classname, const char *title)
+                             Colormap col_map, const char *classname)
 {
   struct MPOpts *opts = vo->opts;
   struct vo_x11_state *x11 = vo->x11;
@@ -1083,7 +1081,6 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     XSizeHints hint;
     x11->window_state &= ~VOFLAG_HIDDEN;
     vo_x11_classhint(vo, x11->window, classname);
-    XStoreName(mDisplay, x11->window, title);
     vo_hidecursor(mDisplay, x11->window);
     XSelectInput(mDisplay, x11->window, StructureNotifyMask);
     hint.x = x; hint.y = y;
@@ -1091,6 +1088,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     hint.flags = PSize;
     if (geometry_xy_changed)
       hint.flags |= PPosition;
+    const char *title = "MPlayer";
     XSetStandardProperties(mDisplay, x11->window, title, title, None, NULL, 0, &hint);
     if (!vo_border) vo_x11_decoration(vo, 0);
     // map window
@@ -1305,7 +1303,6 @@ static int vo_x11_get_fs_type(int supported)
  */
 int vo_x11_update_geometry(struct vo *vo, bool update_pos)
 {
-    struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
     unsigned depth, w, h;
     int dummy_int;
@@ -1319,8 +1316,7 @@ int vo_x11_update_geometry(struct vo *vo, bool update_pos)
     if (update_pos)
         XTranslateCoordinates(x11->display, x11->window, x11->rootwin, 0, 0,
                               &vo->dx, &vo->dy, &dummy_win);
-    if (opts->vo_wintitle)
-        XStoreName(x11->display, x11->window, opts->vo_wintitle);
+    XStoreName(x11->display, x11->window, vo_get_window_title(vo));
 
     return depth <= INT_MAX ? depth : 0;
 }

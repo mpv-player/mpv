@@ -200,7 +200,7 @@ static void resize(struct vo *vo)
  */
 static int config(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  char *title, uint32_t format)
+                  uint32_t format)
 {
     struct vo_x11_state *x11 = vo->x11;
     XVisualInfo vinfo;
@@ -265,8 +265,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         }
 
         vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, vo->dwidth,
-                                vo->dheight, flags, CopyFromParent, "xv",
-                                title);
+                                vo->dheight, flags, CopyFromParent, "xv");
         XChangeWindowAttributes(x11->display, x11->window, xswamask, &xswa);
 
 #ifdef CONFIG_XF86VM

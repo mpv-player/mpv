@@ -34,10 +34,11 @@ int old_vo_preinit(struct vo *vo, const char *arg)
 
 int old_vo_config(struct vo *vo, uint32_t width, uint32_t height,
                          uint32_t d_width, uint32_t d_height,
-                         uint32_t flags, char *title, uint32_t format)
+                         uint32_t flags, uint32_t format)
 {
     return vo->driver->old_functions->config(width, height, d_width,
-                                             d_height, flags, title, format);
+                                             d_height, flags, "MPlayer",
+                                             format);
 }
 
 

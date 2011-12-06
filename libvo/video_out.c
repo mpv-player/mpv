@@ -437,7 +437,7 @@ static int event_fd_callback(void *ctx, int fd)
 
 int vo_config(struct vo *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
-                     char *title, uint32_t format)
+                     uint32_t format)
 {
     struct MPOpts *opts = vo->opts;
     panscan_init(vo);
@@ -458,7 +458,7 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
     }
 
     int ret = vo->driver->config(vo, width, height, d_width, d_height, flags,
-                                 title, format);
+                                 format);
     vo->config_ok = (ret == 0);
     vo->config_count += vo->config_ok;
     if (vo->registered_fd == -1 && vo->event_fd != -1 && vo->config_ok) {
@@ -550,6 +550,18 @@ void calc_src_dst_rects(struct vo *vo, int src_width, int src_height,
   src->height = src->bottom - src->top;
   dst->width  = dst->right  - dst->left;
   dst->height = dst->bottom - dst->top;
+}
+
+// Return the window title the VO should set. Always returns a null terminated
+// string. The string is valid until frontend code is invoked again. Copy it if
+// you need to keep the string for an extended period of time.
+const char *vo_get_window_title(struct vo *vo)
+{
+    if (vo->opts->vo_wintitle) {
+        return vo->opts->vo_wintitle;
+    } else {
+        return "MPlayer";
+    }
 }
 
 /**

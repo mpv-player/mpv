@@ -79,7 +79,7 @@ static int config(struct vf_instance *vf,
     vf->default_caps=query_format(vf,outfmt);
     vf->draw_slice = (vf->default_caps & VOCAP_NOSLICES) ? NULL : draw_slice;
 
-    if (vo_config(video_out, width, height, d_width, d_height, flags, "MPlayer", outfmt))
+    if (vo_config(video_out, width, height, d_width, d_height, flags, outfmt))
 	return 0;
 
 #ifdef CONFIG_ASS

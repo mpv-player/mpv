@@ -188,7 +188,7 @@ struct vo_driver {
      */
     int (*config)(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t d_width, uint32_t d_height, uint32_t fullscreen,
-                  char *title, uint32_t format);
+                  uint32_t format);
 
     /*
      * Control interface
@@ -298,7 +298,7 @@ struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11,
                                struct input_ctx *input_ctx);
 int vo_config(struct vo *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
-                     char *title, uint32_t format);
+                     uint32_t format);
 void list_video_out(void);
 
 int vo_control(struct vo *vo, uint32_t request, void *data);
@@ -313,6 +313,7 @@ void vo_check_events(struct vo *vo);
 void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);
 
+const char *vo_get_window_title(struct vo *vo);
 
 // NULL terminated array of all drivers
 extern const struct vo_driver *video_out_drivers[];
