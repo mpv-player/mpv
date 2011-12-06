@@ -85,11 +85,14 @@ struct vo_x11_state {
     Atom XA_NET_WM_STATE_STAYS_ON_TOP;
     Atom XA_NET_WM_STATE_BELOW;
     Atom XA_NET_WM_PID;
+    Atom XA_NET_WM_NAME;
+    Atom XA_NET_WM_ICON_NAME;
     Atom XA_WIN_PROTOCOLS;
     Atom XA_WIN_LAYER;
     Atom XA_WIN_HINTS;
     Atom XAWM_PROTOCOLS;
     Atom XAWM_DELETE_WINDOW;
+    Atom XAUTF8_STRING;
 };
 
 #if defined(CONFIG_GL) || defined(CONFIG_X11) || defined(CONFIG_XV)
