@@ -2928,8 +2928,7 @@ static double update_video(struct MPContext *mpctx)
 
     while (1) {
         current_module = "filter_video";
-        if (!mpctx->hrseek_active
-            && vo_get_buffered_frame(video_out, false) >= 0)
+        if (vo_get_buffered_frame(video_out, false) >= 0)
             break;
         // XXX Time used in this call is not counted in any performance
         // timer now
@@ -3627,7 +3626,7 @@ static void run_playloop(struct MPContext *mpctx)
         vo_fps = mpctx->sh_video->fps;
 
         bool blit_frame = mpctx->video_out->frame_loaded;
-        if (!blit_frame || mpctx->hrseek_active) {
+        if (!blit_frame) {
             double frame_time = update_video(mpctx);
             blit_frame = mpctx->video_out->frame_loaded;
             mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "*** ftime=%5.3f ***\n", frame_time);
