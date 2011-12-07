@@ -31,6 +31,8 @@
 #include "aspect.h"
 #include "w32_common.h"
 #include "mp_fifo.h"
+#include "osdep/io.h"
+#include "talloc.h"
 
 #ifndef WM_XBUTTONDOWN
 # define WM_XBUTTONDOWN    0x020B
@@ -44,7 +46,7 @@
 
 #define WIN_ID_TO_HWND(x) ((HWND)(uint32_t)(x))
 
-static const char classname[] = "MPlayer - The Movie Player";
+static const char classname[] = "mplayer2";
 int vo_vm = 0;
 
 static int depthonscreen;
@@ -402,7 +404,7 @@ static void resetMode(void) {
         ChangeDisplaySettings(0, 0);
 }
 
-// Update the window position, size, and border style from vo_* values.
+// Update the window title, position, size, and border style from vo_* values.
 static int reinit_window_state(void) {
     const LONG NO_FRAME = WS_POPUP;
     const LONG FRAME = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
@@ -411,6 +413,10 @@ static int reinit_window_state(void) {
 
     if (WinID >= 0)
         return 1;
+
+    wchar_t *title = mp_from_utf8(NULL, vo_get_window_title(global_vo));
+    SetWindowTextW(vo_window, title);
+    talloc_free(title);
 
     bool toggle_fs = current_fs != vo_fs;
     current_fs = vo_fs;

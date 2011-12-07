@@ -959,9 +959,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
     if (!vo_w32_config(d_width, d_height, options))
         return 1;
 
-    if (WinID == -1)
-        SetWindowText(vo_w32_window, title);
-
     /*create the surfaces*/
     if (Directx_CreatePrimarySurface())
         return 1;
