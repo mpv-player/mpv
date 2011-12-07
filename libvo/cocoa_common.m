@@ -50,6 +50,9 @@ struct vo_cocoa_state {
 
     NSString *window_title;
 
+    NSInteger windowed_window_level;
+    NSInteger fullscreen_window_level;
+
     int last_screensaver_update;
 
     bool did_resize;
@@ -62,6 +65,7 @@ struct vo *l_vo;
 
 // local function definitions
 struct vo_cocoa_state *vo_cocoa_init_state(void);
+void vo_set_level(int ontop);
 void update_screen_info(void);
 void resize_window(struct vo *vo);
 void create_menu(void);
@@ -75,6 +79,7 @@ struct vo_cocoa_state *vo_cocoa_init_state(void)
         .previous_video_size = {0,0},
         .windowed_mask = NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask,
         .fullscreen_mask = NSBorderlessWindowMask,
+        .fullscreen_window_level = NSNormalWindowLevel + 1,
         .windowed_frame = {{0,0},{0,0}},
         .out_fs_resize = NO,
     };
@@ -141,9 +146,29 @@ void resize_window(struct vo *vo)
     [s->glContext update];
 }
 
+void vo_set_level(int ontop)
+{
+    if (ontop) {
+        s->windowed_window_level = NSNormalWindowLevel + 1;
+    } else {
+        s->windowed_window_level = NSNormalWindowLevel;
+    }
+
+    if (!vo_fs)
+        [s->window setLevel:s->windowed_window_level];
+}
+
+void vo_cocoa_ontop(struct vo *vo)
+{
+    struct MPOpts *opts = vo->opts;
+    opts->vo_ontop = !opts->vo_ontop;
+    vo_set_level(opts->vo_ontop);
+}
+
 int vo_cocoa_create_window(struct vo *vo, uint32_t d_width,
                            uint32_t d_height, uint32_t flags)
 {
+    struct MPOpts *opts = vo->opts;
     if (s->current_video_size.width > 0 || s->current_video_size.height > 0)
         s->previous_video_size = s->current_video_size;
     s->current_video_size = NSMakeSize(d_width, d_height);
@@ -187,6 +212,8 @@ int vo_cocoa_create_window(struct vo *vo, uint32_t d_width,
 
         if (flags & VOFLAG_FULLSCREEN)
             vo_cocoa_fullscreen(vo);
+
+        vo_set_level(opts->vo_ontop);
     } else {
         if (s->current_video_size.width  != s->previous_video_size.width ||
             s->current_video_size.height != s->previous_video_size.height) {
@@ -307,7 +334,7 @@ void create_menu()
         [self setHasShadow:NO];
         [self setStyleMask:s->fullscreen_mask];
         [self setFrame:s->screen_frame display:YES animate:NO];
-        [self setLevel:NSNormalWindowLevel + 1];
+        [self setLevel:s->fullscreen_window_level];
         CGDisplayHideCursor(kCGDirectMainDisplay);
         vo_fs = VO_TRUE;
     } else {
@@ -321,7 +348,7 @@ void create_menu()
             s->out_fs_resize = NO;
         }
         [self setContentAspectRatio:s->current_video_size];
-        [self setLevel:NSNormalWindowLevel];
+        [self setLevel:s->windowed_window_level];
         CGDisplayShowCursor(kCGDirectMainDisplay);
         vo_fs = VO_FALSE;
     }
@@ -442,7 +469,7 @@ void create_menu()
 - (void) applicationWillBecomeActive:(NSNotification *)aNotification
 {
     if (vo_fs) {
-        [s->window setLevel:NSNormalWindowLevel + 1];
+        [s->window setLevel:s->fullscreen_window_level];
         [NSApp setPresentationOptions:NSApplicationPresentationHideDock|NSApplicationPresentationHideMenuBar];
         [s->window makeKeyAndOrderFront:nil];
         [NSApp activateIgnoringOtherApps: YES];
@@ -452,7 +479,7 @@ void create_menu()
 - (void) applicationWillResignActive:(NSNotification *)aNotification
 {
     if (vo_fs) {
-        [s->window setLevel:NSNormalWindowLevel];
+        [s->window setLevel:s->windowed_window_level];
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
     }
 }
