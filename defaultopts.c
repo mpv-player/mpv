@@ -14,6 +14,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .ao_buffersize = -1,
         .monitor_pixel_aspect = 1.0,
         .vo_panscanrange = 1.0,
+        .cursor_autohide_delay = 1000,
         .vo_gamma_gamma = 1000,
         .vo_gamma_brightness = 1000,
         .vo_gamma_contrast = 1000,

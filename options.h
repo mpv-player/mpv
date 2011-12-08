@@ -28,6 +28,7 @@ typedef struct MPOpts {
     int requested_colorspace;
     int requested_input_range;
     int requested_output_range;
+    int cursor_autohide_delay;
 
     // ranges -100 - 100, 1000 if the vo default should be used
     int vo_gamma_gamma;

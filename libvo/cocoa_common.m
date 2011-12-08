@@ -55,6 +55,10 @@ struct vo_cocoa_state {
 
     int last_screensaver_update;
 
+    int display_cursor;
+    int cursor_timer;
+    int cursor_autohide_delay;
+
     bool did_resize;
     bool out_fs_resize;
 };
@@ -68,6 +72,7 @@ struct vo_cocoa_state *vo_cocoa_init_state(void);
 void vo_set_level(int ontop);
 void update_screen_info(void);
 void resize_window(struct vo *vo);
+void vo_cocoa_display_cursor(int requested_state);
 void create_menu(void);
 
 struct vo_cocoa_state *vo_cocoa_init_state(void)
@@ -82,6 +87,7 @@ struct vo_cocoa_state *vo_cocoa_init_state(void)
         .fullscreen_window_level = NSNormalWindowLevel + 1,
         .windowed_frame = {{0,0},{0,0}},
         .out_fs_resize = NO,
+        .display_cursor = 1,
     };
     return s;
 }
@@ -90,6 +96,7 @@ int vo_cocoa_init(struct vo *vo)
 {
     s = vo_cocoa_init_state();
     s->pool = [[NSAutoreleasePool alloc] init];
+    s->cursor_autohide_delay = vo->opts->cursor_autohide_delay;
     NSApplicationLoad();
     NSApp = [NSApplication sharedApplication];
     [NSApp setActivationPolicy: NSApplicationActivationPolicyRegular];
@@ -245,18 +252,42 @@ void vo_cocoa_swap_buffers()
     [s->glContext flushBuffer];
 }
 
+void vo_cocoa_display_cursor(int requested_state)
+{
+    if (requested_state) {
+        if (!vo_fs || s->cursor_autohide_delay > -2) {
+            s->display_cursor = requested_state;
+            CGDisplayShowCursor(kCGDirectMainDisplay);
+        }
+    } else {
+        if (s->cursor_autohide_delay != -1) {
+            s->display_cursor = requested_state;
+            CGDisplayHideCursor(kCGDirectMainDisplay);
+        }
+    }
+}
+
 int vo_cocoa_check_events(struct vo *vo)
 {
-    //update activity every 30 seconds to prevent
-    //screensaver from starting up.
-    int curTime = TickCount()/60;
-    if (curTime - s->last_screensaver_update >= 30 || s->last_screensaver_update == 0)
-    {
-        UpdateSystemActivity(UsrActivity);
-        s->last_screensaver_update = curTime;
+    NSEvent *event;
+    float curTime = TickCount()/60;
+    int msCurTime = (int) (curTime * 1000);
+
+    // automatically hide mouse cursor
+    if (vo_fs && s->display_cursor &&
+        (msCurTime - s->cursor_timer >= s->cursor_autohide_delay)) {
+        vo_cocoa_display_cursor(0);
+        s->cursor_timer = msCurTime;
     }
 
-    NSEvent *event;
+    //update activity every 30 seconds to prevent
+    //screensaver from starting up.
+    if ((int)curTime - s->last_screensaver_update >= 30 || s->last_screensaver_update == 0)
+    {
+        UpdateSystemActivity(UsrActivity);
+        s->last_screensaver_update = (int)curTime;
+    }
+
     event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil
                    inMode:NSEventTrackingRunLoopMode dequeue:YES];
     if (event == nil)
@@ -335,8 +366,8 @@ void create_menu()
         [self setStyleMask:s->fullscreen_mask];
         [self setFrame:s->screen_frame display:YES animate:NO];
         [self setLevel:s->fullscreen_window_level];
-        CGDisplayHideCursor(kCGDirectMainDisplay);
         vo_fs = VO_TRUE;
+        vo_cocoa_display_cursor(0);
     } else {
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
         [self setHasShadow:YES];
@@ -349,8 +380,8 @@ void create_menu()
         }
         [self setContentAspectRatio:s->current_video_size];
         [self setLevel:s->windowed_window_level];
-        CGDisplayShowCursor(kCGDirectMainDisplay);
         vo_fs = VO_FALSE;
+        vo_cocoa_display_cursor(1);
     }
 }
 
@@ -394,6 +425,12 @@ void create_menu()
             key |= KEY_MODIFIER_META;
         mplayer_put_key(l_vo->key_fifo, key);
     }
+}
+
+- (void) mouseMoved: (NSEvent *) theEvent
+{
+    if (vo_fs)
+        vo_cocoa_display_cursor(1);
 }
 
 - (void) mouseDragged:(NSEvent *)theEvent
