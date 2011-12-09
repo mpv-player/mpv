@@ -1769,12 +1769,22 @@ void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
 static int create_window_cocoa(struct MPGLContext *ctx, uint32_t d_width,
                                uint32_t d_height, uint32_t flags)
 {
-    if (vo_cocoa_create_window(ctx->vo, d_width, d_height, flags) == 0) {
+    if (vo_cocoa_create_window(ctx->vo, d_width, d_height, flags, 0) == 0) {
         return SET_WINDOW_OK;
     } else {
         return SET_WINDOW_FAILED;
     }
 }
+
+static int create_window_cocoa_gl3(struct MPGLContext *ctx, int gl_flags,
+                                 int gl_version, uint32_t d_width,
+                                 uint32_t d_height, uint32_t flags)
+{
+    int rv = vo_cocoa_create_window(ctx->vo, d_width, d_height, flags, 1);
+    getFunctions(ctx->gl, (void *)getdladdr, NULL, true);
+    return rv;
+}
+
 static int setGlWindow_cocoa(MPGLContext *ctx)
 {
     vo_cocoa_change_attributes(ctx->vo);
@@ -2465,6 +2475,7 @@ MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
 #ifdef CONFIG_GL_COCOA
     case GLTYPE_COCOA:
         ctx->create_window = create_window_cocoa;
+        ctx->create_window_gl3 = create_window_cocoa_gl3;
         ctx->setGlWindow = setGlWindow_cocoa;
         ctx->releaseGlContext = releaseGlContext_cocoa;
         ctx->swapGlBuffers = swapGlBuffers_cocoa;
