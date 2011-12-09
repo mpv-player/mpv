@@ -2105,7 +2105,7 @@ static void generate_eosd(d3d_priv *priv, mp_eosd_images_t *imgs)
     eosd_packer_generate(priv->eosd, imgs, &need_reposition, &need_upload,
                          &need_resize);
 
-    if (!need_upload)
+    if (!need_reposition)
         return;
     // even if the texture size is unchanged, the texture might have been free'd
     d3d_realloc_eosd_texture(priv);
@@ -2121,37 +2121,50 @@ static void generate_eosd(d3d_priv *priv, mp_eosd_images_t *imgs)
                                         priv->eosd->targets_count
                                         * sizeof(vertex_eosd) * 6);
 
-    struct eosd_rect rc;
-    eosd_packer_calculate_source_bb(priv->eosd, &rc);
-    RECT dirty_rc = { rc.x0, rc.y0, rc.x1, rc.y1 };
+    if (need_upload) {
+        struct eosd_rect rc;
+        eosd_packer_calculate_source_bb(priv->eosd, &rc);
+        RECT dirty_rc = { rc.x0, rc.y0, rc.x1, rc.y1 };
 
-    D3DLOCKED_RECT locked_rect;
+        D3DLOCKED_RECT locked_rect;
 
-    if (FAILED(IDirect3DTexture9_LockRect(priv->texture_eosd.system, 0,
-                                          &locked_rect, &dirty_rc, 0)))
-    {
-        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>EOSD texture lock failed.\n");
-        return;
+        if (FAILED(IDirect3DTexture9_LockRect(priv->texture_eosd.system, 0,
+                                            &locked_rect, &dirty_rc, 0)))
+        {
+            mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>EOSD texture lock failed.\n");
+            return;
+        }
+
+        //memset(locked_rect.pBits, 0, locked_rect.Pitch * priv->texture_eosd.tex_h);
+
+        for (int i = 0; i < priv->eosd->targets_count; i++) {
+            struct eosd_target *target = &priv->eosd->targets[i];
+            ASS_Image *img = target->ass_img;
+            char *src = img->bitmap;
+            char *dst = (char*)locked_rect.pBits + target->source.x0
+                        + locked_rect.Pitch * target->source.y0;
+            for (int y = 0; y < img->h; y++) {
+                memcpy(dst, src, img->w);
+                src += img->stride;
+                dst += locked_rect.Pitch;
+            }
+        }
+
+        if (FAILED(IDirect3DTexture9_UnlockRect(priv->texture_eosd.system, 0))) {
+            mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>EOSD texture unlock failed.\n");
+            return;
+        }
+
+        d3dtex_update(priv, &priv->texture_eosd);
     }
-
-    //memset(locked_rect.pBits, 0, locked_rect.Pitch * priv->texture_eosd.tex_h);
 
     float eosd_w = priv->texture_eosd.tex_w;
     float eosd_h = priv->texture_eosd.tex_h;
 
     for (int i = 0; i < priv->eosd->targets_count; i++) {
         struct eosd_target *target = &priv->eosd->targets[i];
-        ASS_Image *img = target->ass_img;
-        char *src = img->bitmap;
-        char *dst = (char*)locked_rect.pBits + target->source.x0
-                    + locked_rect.Pitch * target->source.y0;
-        for (int y = 0; y < img->h; y++) {
-            memcpy(dst, src, img->w);
-            src += img->stride;
-            dst += locked_rect.Pitch;
-        }
 
-        D3DCOLOR color = ass_to_d3d_color(img->color);
+        D3DCOLOR color = ass_to_d3d_color(target->ass_img->color);
 
         float x0 = target->dest.x0;
         float y0 = target->dest.y0;
@@ -2170,13 +2183,6 @@ static void generate_eosd(d3d_priv *priv, mp_eosd_images_t *imgs)
         v[4] = v[2];
         v[5] = v[1];
     }
-
-    if (FAILED(IDirect3DTexture9_UnlockRect(priv->texture_eosd.system, 0))) {
-        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>EOSD texture unlock failed.\n");
-        return;
-    }
-
-    d3dtex_update(priv, &priv->texture_eosd);
 }
 
 static void draw_eosd(d3d_priv *priv)
