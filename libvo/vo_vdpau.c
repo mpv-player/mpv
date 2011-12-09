@@ -241,8 +241,6 @@ static uint64_t convert_to_vdptime(struct vo *vo, unsigned int t)
     return (int)(t - vc->last_sync_update) * 1000LL + vc->last_vdp_time;
 }
 
-static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration);
-
 static int render_video_to_output_surface(struct vo *vo,
                                           VdpOutputSurface output_surface,
                                           VdpRect *output_rect)
@@ -1784,7 +1782,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_PAUSE:
         if (vc->dropped_frame)
-            flip_page_timed(vo, 0, -1);
+            vo->want_redraw = true;
         return true;
     case VOCTRL_QUERY_FORMAT:
         return query_format(*(uint32_t *)data);
