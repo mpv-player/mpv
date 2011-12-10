@@ -378,7 +378,6 @@ struct vo_rect {
 void calc_src_dst_rects(struct vo *vo, int src_width, int src_height,
                         struct vo_rect *src, struct vo_rect *dst,
                         struct vo_rect *borders, const struct vo_rect *crop);
-struct input_ctx;
 void vo_mouse_movement(struct vo *vo, int posx, int posy);
 
 static inline int aspect_scaling(void)
