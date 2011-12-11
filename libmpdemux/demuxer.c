@@ -43,11 +43,9 @@
 #include "libaf/af_format.h"
 #include "libmpcodecs/dec_teletext.h"
 
-#ifdef CONFIG_FFMPEG
 #include "libavcodec/avcodec.h"
 #if MP_INPUT_BUFFER_PADDING_SIZE < FF_INPUT_BUFFER_PADDING_SIZE
 #error MP_INPUT_BUFFER_PADDING_SIZE is too small!
-#endif
 #endif
 
 static void clear_parser(sh_common_t *sh);
@@ -109,9 +107,7 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_tv,
 #endif
     &demuxer_desc_mf,
-#ifdef CONFIG_FFMPEG
     &demuxer_desc_lavf_preferred,
-#endif
     &demuxer_desc_avi,
     &demuxer_desc_y4m,
     &demuxer_desc_asf,
@@ -152,9 +148,7 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef CONFIG_LIBNEMESI
     &demuxer_desc_rtp_nemesi,
 #endif
-#ifdef CONFIG_FFMPEG
     &demuxer_desc_lavf,
-#endif
 #ifdef CONFIG_MUSEPACK
     &demuxer_desc_mpc,
 #endif
@@ -380,9 +374,7 @@ static void free_sh_sub(sh_sub_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);
     free(sh->extradata);
-#ifdef CONFIG_FFMPEG
     clear_parser((sh_common_t *)sh);
-#endif
     talloc_free(sh);
 }
 
@@ -418,9 +410,7 @@ void free_sh_audio(demuxer_t *demuxer, int id)
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_audio at %p\n", sh);
     free(sh->wf);
     free(sh->codecdata);
-#ifdef CONFIG_FFMPEG
     clear_parser((sh_common_t *)sh);
-#endif
     talloc_free(sh);
 }
 
@@ -450,9 +440,7 @@ void free_sh_video(sh_video_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_video at %p\n", sh);
     free(sh->bih);
-#ifdef CONFIG_FFMPEG
     clear_parser((sh_common_t *)sh);
-#endif
     talloc_free(sh);
 }
 
@@ -508,7 +496,6 @@ void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
            ds->demuxer->video->packs);
 }
 
-#ifdef CONFIG_FFMPEG
 static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parser, unsigned format)
 {
     enum CodecID codec_id = CODEC_ID_NONE;
@@ -612,7 +599,6 @@ void ds_clear_parser(demux_stream_t *ds)
         return;
     clear_parser(ds->sh);
 }
-#endif
 
 void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len,
                     double pts, off_t pos, int flags)

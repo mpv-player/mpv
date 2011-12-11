@@ -595,10 +595,8 @@ const m_option_t common_opts[] = {
     {"vc", &video_codec_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
     // postprocessing:
-#ifdef CONFIG_FFMPEG
     {"pp", &divx_quality, CONF_TYPE_INT, 0, 0, 0, NULL},
     {"pphelp", &pp_help, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
 
     // scaling:
     {"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},
@@ -619,10 +617,8 @@ const m_option_t common_opts[] = {
     OPT_MAKE_FLAGS("slices", vd_use_slices, 0),
     {"field-dominance", &field_dominance, CONF_TYPE_INT, CONF_RANGE, -1, 1, NULL},
 
-#ifdef CONFIG_FFMPEG
     {"lavdopts", (void *) lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     {"lavfdopts", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-#endif
 #ifdef CONFIG_XVID4
     {"xvidopts", (void *)xvid_dec_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif

@@ -122,9 +122,7 @@ int rtsp_transport_http = 0;
 #endif
 
 extern int rtsp_port;
-#ifdef CONFIG_FFMPEG
 extern AVCodecContext *avcctx;
-#endif
 
 extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
   struct MPOpts *opts = demuxer->opts;
@@ -401,9 +399,7 @@ extern "C" void demux_close_rtp(demuxer_t* demuxer) {
   delete rtpState->videoBufferQueue;
   delete[] rtpState->sdpDescription;
   delete rtpState;
-#ifdef CONFIG_FFMPEG
   av_freep(&avcctx);
-#endif
 
   env->reclaim(); delete scheduler;
 }
@@ -560,7 +556,6 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   if (dp == NULL) return NULL;
     }
 
-#ifdef CONFIG_FFMPEG
   extern AVCodecParserContext * h264parserctx;
   int consumed, poutbuf_size = 1;
   const uint8_t *poutbuf = NULL;
@@ -568,7 +563,6 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
 
   do {
     if (!bufferQueue->nextpacket) {
-#endif
   // Schedule the read operation:
   bufferQueue->blockingFlag = 0;
   bufferQueue->readSource()->getNextFrame(&dp->buffer[headersize], MAX_RTP_FRAME_SIZE - headersize,
@@ -595,7 +589,6 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   if (headersize == 1) // amr
     dp->buffer[0] =
         ((AMRAudioSource*)bufferQueue->readSource())->lastFrameHeader();
-#ifdef CONFIG_FFMPEG
     } else {
       bufferQueue->dp = dp = bufferQueue->nextpacket;
       bufferQueue->nextpacket = NULL;
@@ -621,7 +614,6 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
       }
     }
   } while (!poutbuf_size);
-#endif
 
   // Set the "ptsBehind" result parameter:
   if (bufferQueue->prevPacketPTS != 0.0

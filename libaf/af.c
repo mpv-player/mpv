@@ -70,10 +70,8 @@ static af_info_t* filter_list[]={
 #endif
    &af_info_volnorm,
    &af_info_extrastereo,
-#ifdef CONFIG_FFMPEG
    &af_info_lavcac3enc,
    &af_info_lavcresample,
-#endif
    &af_info_sweep,
    &af_info_hrtf,
 #ifdef CONFIG_LADSPA
@@ -491,10 +489,8 @@ int af_init(af_stream_t* s)
                &(s->output.rate));
       if (!af) {
         char *resampler = "resample";
-#ifdef CONFIG_FFMPEG
         if ((AF_INIT_TYPE_MASK & s->cfg.force) == AF_INIT_SLOW)
           resampler = "lavcresample";
-#endif
 	if((AF_INIT_TYPE_MASK & s->cfg.force) == AF_INIT_SLOW){
 	  if(!strcmp(s->first->info->name,"format"))
 	    af = af_append(s,s->first,resampler);
@@ -515,12 +511,10 @@ int af_init(af_stream_t* s)
       if ((AF_INIT_TYPE_MASK & s->cfg.force) == AF_INIT_FAST) {
         char args[32];
 	sprintf(args, "%d", s->output.rate);
-#ifdef CONFIG_FFMPEG
 	if (strcmp(resampler, "lavcresample") == 0)
 	  strcat(args, ":1");
 	else
-#endif
-	strcat(args, ":0:0");
+            strcat(args, ":0:0");
 	af->control(af, AF_CONTROL_COMMAND_LINE, args);
       }
       }

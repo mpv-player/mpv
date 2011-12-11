@@ -24,9 +24,7 @@
 extern "C" {
 #include "demuxer.h"
 #include "config.h"
-#ifdef CONFIG_FFMPEG
 #include "libavcodec/avcodec.h"
-#endif
 }
 
 #ifndef _LIVEMEDIA_HH

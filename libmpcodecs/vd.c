@@ -64,9 +64,7 @@ extern const vd_functions_t mpcodecs_vd_qtvideo;
 
 const vd_functions_t * const mpcodecs_vd_drivers[] = {
     &mpcodecs_vd_null,
-#ifdef CONFIG_FFMPEG
     &mpcodecs_vd_ffmpeg,
-#endif
 #ifdef CONFIG_OGGTHEORA
     &mpcodecs_vd_theora,
 #endif

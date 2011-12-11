@@ -65,7 +65,6 @@ int   network_ipv4_only_proxy = 0;
 
 
 const mime_struct_t mime_type_table[] = {
-#ifdef CONFIG_FFMPEG
 	// Flash Video
 	{ "video/x-flv", DEMUXER_TYPE_LAVF_PREFERRED},
 	// do not force any demuxer in this case!
@@ -73,7 +72,6 @@ const mime_struct_t mime_type_table[] = {
 	// but for mov reference files to work we must also try
 	// the native demuxer if lavf fails.
 	{ "video/quicktime", 0 },
-#endif
 	// MP3 streaming, some MP3 streaming server answer with audio/mpeg
 	{ "audio/mpeg", DEMUXER_TYPE_AUDIO },
 	// MPEG streaming

@@ -133,13 +133,13 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_mirror,
     &vf_info_palette,
     &vf_info_pp7,
-#ifdef CONFIG_FFMPEG
+
     &vf_info_pp,
     &vf_info_lavc,
     &vf_info_lavcdeint,
     &vf_info_screenshot,
     &vf_info_uspp,
-#endif
+
     &vf_info_dvbscale,
     &vf_info_cropdetect,
     &vf_info_test,

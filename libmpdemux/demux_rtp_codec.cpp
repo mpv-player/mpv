@@ -27,10 +27,8 @@ extern "C" {
 #include "libavutil/base64.h"
 }
 
-#ifdef CONFIG_FFMPEG
 AVCodecParserContext * h264parserctx;
 AVCodecContext *avcctx;
-#endif
 
 // Copied from vlc
 static unsigned char* parseH264ConfigStr( char const* configStr,
@@ -134,7 +132,6 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
     unsigned char* configData
       = parseH264ConfigStr(subsession->fmtp_spropparametersets(), configLen);
     sh_video->bih = bih = insertVideoExtradata(bih, configData, configLen);
-#ifdef CONFIG_FFMPEG
     int fooLen;
     const uint8_t* fooData;
     h264parserctx = av_parser_init(CODEC_ID_H264);
@@ -142,7 +139,6 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
     // Pass the config to the parser
     h264parserctx->parser->parser_parse(h264parserctx, avcctx,
                   &fooData, &fooLen, configData, configLen);
-#endif
     delete[] configData;
     needVideoFrameRate(demuxer, subsession);
   } else if (strcmp(subsession->codecName(), "H261") == 0) {

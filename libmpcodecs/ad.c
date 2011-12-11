@@ -67,9 +67,7 @@ const ad_functions_t * const mpcodecs_ad_drivers[] =
 #endif
   &mpcodecs_ad_hwac3,
   &mpcodecs_ad_hwmpa,
-#ifdef CONFIG_FFMPEG
   &mpcodecs_ad_ffmpeg,
-#endif
   &mpcodecs_ad_pcm,
   &mpcodecs_ad_dvdpcm,
   &mpcodecs_ad_alaw,

@@ -361,7 +361,7 @@ Codecs:
   --disable-real            disable RealPlayer codecs support [enabled]
   --disable-xvid            disable Xvid [autodetect]
   --disable-libnut          disable libnut [autodetect]
-  --disable-libav           disable Libav [autodetect]
+  --enable-libav            skip Libav autodetection [autodetect]
   --disable-libvorbis       disable libvorbis support [autodetect]
   --disable-tremor          disable Tremor [autodetect if no libvorbis]
   --disable-speex           disable Speex support [autodetect]
@@ -1026,7 +1026,6 @@ for ac_option do
   --enable-libnut)      _libnut=yes     ;;
   --disable-libnut)     _libnut=no      ;;
   --enable-libav)       ffmpeg=yes      ;;
-  --disable-libav)      ffmpeg=no       ;;
   --ffmpeg-source-dir=*)
     _ffmpeg_source=$(echo $ac_option | cut -d '=' -f 2 ) ;;
 
@@ -6007,39 +6006,28 @@ echores "$_live"
 all_libav_libs="libavutil libavcodec libavformat libswscale libpostproc"
 echocheck "Libav ($all_libav_libs)"
 if test "$ffmpeg" = auto ; then
-  ffmpeg=no
   if $_pkg_config --exists --print-errors $all_libav_libs ; then
     inc_ffmpeg=$($_pkg_config --cflags $all_libav_libs)
     _ld_tmp=$($_pkg_config --libs $all_libav_libs)
     extra_ldflags="$extra_ldflags $_ld_tmp"
     extra_cflags="$extra_cflags $inc_ffmpeg"
-    ffmpeg=yes
   elif header_check libavutil/avutil.h -lpostproc -lswscale -lavformat -lavcodec -lavutil $_ld_lm ; then
     extra_ldflags="$extra_ldflags -lpostproc -lswscale -lavformat -lavcodec -lavutil"
-    ffmpeg=yes
   else
-    die "Unable to find development files for some of the Libav libraries above. Aborting. If you really mean to compile without Libav support use --disable-libav."
+    die "Unable to find development files for some of the required Libav libraries above. Aborting."
   fi
 fi
 
 ffmpeg_eval_api=no
 def_ffmpeg_eval_api="#undef CONFIG_FFMPEG_EVAL_API"
-if test "$ffmpeg" = yes; then
-  def_ffmpeg='#define CONFIG_FFMPEG 1'
-  codecmodules="ffmpeg $codecmodules"
-  if $_pkg_config --atleast-version=50.33.0 libavutil ; then
-    ffmpeg_eval_api=yes
-    def_ffmpeg_eval_api="#define CONFIG_FFMPEG_EVAL_API 1"
-  fi
-else
-  def_ffmpeg='#undef CONFIG_FFMPEG'
-  nocodecmodules="ffmpeg $nocodecmodules"
+if $_pkg_config --atleast-version=50.33.0 libavutil ; then
+  ffmpeg_eval_api=yes
+  def_ffmpeg_eval_api="#define CONFIG_FFMPEG_EVAL_API 1"
 fi
-echores "$ffmpeg"
 
 def_ffmpeg_internals="#undef CONFIG_FFMPEG_INTERNALS"
 if ! test -z "$_ffmpeg_source" ; then
-  test "$ffmpeg" = yes && def_ffmpeg_internals="#define CONFIG_FFMPEG_INTERNALS 1" && ffmpeg_internals=yes
+  def_ffmpeg_internals="#define CONFIG_FFMPEG_INTERNALS 1" && ffmpeg_internals=yes
 fi
 
 
@@ -6802,7 +6790,6 @@ XVR100 = $_xvr100
 YUV4MPEG = $_yuv4mpeg
 
 # FFmpeg
-FFMPEG     = $ffmpeg
 FFMPEG_EVAL_API = $ffmpeg_eval_api
 FFMPEG_INTERNALS = $ffmpeg_internals
 FFMPEG_SOURCE_PATH = $_ffmpeg_source
@@ -7156,7 +7143,6 @@ $def_yuv4mpeg
 
 
 /* FFmpeg */
-$def_ffmpeg
 $def_ffmpeg_eval_api
 $def_ffmpeg_internals
 
