@@ -4187,47 +4187,41 @@ else
 fi
 echores $quicktime
 
-echocheck "CoreVideo"
-if test "$_corevideo" = auto ; then
+echocheck "Cocoa"
+if test "$_cocoa" = auto ; then
   cat > $TMPC <<EOF
-#include <Carbon/Carbon.h>
 #include <CoreServices/CoreServices.h>
 #include <OpenGL/OpenGL.h>
+int main(void) {
+  NSApplicationLoad();
+}
+EOF
+  _cocoa=no
+  cc_check -framework Cocoa -framework OpenGL && _cocoa=yes
+fi
+if test "$_cocoa" = yes ; then
+  libs_mplayer="$libs_mplayer -framework Cocoa -framework OpenGL"
+fi
+echores "$_cocoa"
+
+echocheck "CoreVideo"
+if test "$_cocoa" = yes && test "$_corevideo" = auto ; then
+  cat > $TMPC <<EOF
 #include <QuartzCore/CoreVideo.h>
 int main(void) { return 0; }
 EOF
   _corevideo=no
-  cc_check -framework Carbon -framework Cocoa -framework QuartzCore -framework OpenGL && _corevideo=yes
+  cc_check -framework Cocoa -framework QuartzCore -framework OpenGL && _corevideo=yes
 fi
 if test "$_corevideo" = yes ; then
   vomodules="corevideo $vomodules"
-  libs_mplayer="$libs_mplayer -framework Carbon -framework Cocoa -framework QuartzCore -framework OpenGL"
+  libs_mplayer="$libs_mplayer -framework QuartzCore"
   def_corevideo='#define CONFIG_COREVIDEO 1'
 else
   novomodules="corevideo $novomodules"
   def_corevideo='#undef CONFIG_COREVIDEO'
 fi
 echores "$_corevideo"
-
-echocheck "Cocoa"
-if test "$_gl" = no ; then
-  # if _gl is not enabled there is no point to add potentially unused linker flags
-  _cocoa=no
-fi
-if test "$_cocoa" = auto ; then
-  cat > $TMPC <<EOF
-#include <CoreServices/CoreServices.h>
-#include <OpenGL/OpenGL.h>
-#include <QuartzCore/CoreVideo.h>
-int main(void) { return 0; }
-EOF
-  _cocoa=no
-  cc_check -framework Cocoa -framework QuartzCore -framework OpenGL && _cocoa=yes
-fi
-if test "$_cocoa" = yes ; then
-  libs_mplayer="$libs_mplayer -framework Cocoa -framework QuartzCore -framework OpenGL"
-fi
-echores "$_cocoa"
 
 fi #if darwin
 
