@@ -84,6 +84,9 @@ static unsigned my_read(int fd, char *buffer, int len, streaming_ctrl_t *sc) {
  * \param fd file descriptor to read from
  * \param sc streaming_ctrl_t whose buffer is consumed before reading from fd
  * \return number of real data before next metadata block starts or 0 on error
+ *
+ * You can use unsv://samples.mplayerhq.hu/V-codecs/VP5/vp5_artefacts.nsv to
+ * test.
  */
 static unsigned uvox_meta_read(int fd, streaming_ctrl_t *sc) {
   unsigned metaint;
