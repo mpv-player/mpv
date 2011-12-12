@@ -44,6 +44,7 @@
 
 static struct vf_priv_s {
     int w,h;
+    int cfg_w, cfg_h;
     int v_chr_drop;
     double param[2];
     unsigned int fmt;
@@ -55,6 +56,7 @@ static struct vf_priv_s {
     int accurate_rnd;
     struct mp_csp_details colorspace;
 } const vf_priv_dflt = {
+  0, 0,
   -1,-1,
   0,
   {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
@@ -203,6 +205,9 @@ static int config(struct vf_instance *vf,
     dfmt = imgfmt2pixfmt(best);
 
     vo_flags=vf->next->query_format(vf->next,best);
+
+    vf->priv->w = vf->priv->cfg_w;
+    vf->priv->h = vf->priv->cfg_h;
 
     // scaling to dwidth*d_height, if all these TRUE:
     // - option -zoom
@@ -628,8 +633,8 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->control= control;
     vf->uninit=uninit;
     mp_msg(MSGT_VFILTER,MSGL_V,"SwScale params: %d x %d (-1=no scaling)\n",
-    vf->priv->w,
-    vf->priv->h);
+    vf->priv->cfg_w,
+    vf->priv->cfg_h);
 
     return 1;
 }
@@ -754,8 +759,8 @@ static const m_obj_presets_t size_preset = {
 #undef ST_OFF
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
 static const m_option_t vf_opts_fields[] = {
-  {"w", ST_OFF(w), CONF_TYPE_INT, M_OPT_MIN,-11,0, NULL},
-  {"h", ST_OFF(h), CONF_TYPE_INT, M_OPT_MIN,-11,0, NULL},
+  {"w", ST_OFF(cfg_w), CONF_TYPE_INT, M_OPT_MIN,-11,0, NULL},
+  {"h", ST_OFF(cfg_h), CONF_TYPE_INT, M_OPT_MIN,-11,0, NULL},
   {"interlaced", ST_OFF(interlaced), CONF_TYPE_INT, M_OPT_RANGE, 0, 1, NULL},
   {"chr-drop", ST_OFF(v_chr_drop), CONF_TYPE_INT, M_OPT_RANGE, 0, 3, NULL},
   {"param" , ST_OFF(param[0]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
