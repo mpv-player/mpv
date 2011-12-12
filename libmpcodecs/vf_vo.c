@@ -91,6 +91,9 @@ static int config(struct vf_instance *vf,
 	mp_ass_configure(vf->priv->renderer_vsfilter, vf->opts, width, height,
                          vf->default_caps & VFCAP_EOSD_UNSCALED);
     }
+
+    // force EOSD change detection reset
+    vf->priv->prev_visibility = false;
 #endif
 
     return 1;
