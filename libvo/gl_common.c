@@ -350,6 +350,7 @@ static const extfunc_desc_t extfuncs[] = {
     DEF_FUNC_DESC(TexParameterf),
     DEF_FUNC_DESC(TexParameterfv),
     DEF_FUNC_DESC(TexCoord2f),
+    DEF_FUNC_DESC(TexCoord2fv),
     DEF_FUNC_DESC(Vertex2f),
     DEF_FUNC_DESC(Vertex3f),
     DEF_FUNC_DESC(Normal3f),
@@ -595,6 +596,9 @@ int glFmt2bpp(GLenum format, GLenum type)
         return 4 * component_size;
     case GL_RED:
         return component_size;
+    case GL_RG:
+    case GL_LUMINANCE_ALPHA:
+        return 2 * component_size;
     }
     return 0; // unknown
 }

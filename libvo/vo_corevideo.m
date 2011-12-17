@@ -20,444 +20,448 @@
  */
 
 #import "vo_corevideo.h"
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/mman.h>
-#include <unistd.h>
-#include <CoreServices/CoreServices.h>
 
-//MPLAYER
-#include "config.h"
-#include "fastmemcpy.h"
-#include "video_out.h"
-#include "video_out_internal.h"
-#include "aspect.h"
-#include "mp_msg.h"
-#include "m_option.h"
-#include "mp_fifo.h"
-#include "sub/sub.h"
-#include "subopt-helper.h"
+// mplayer includes
+#import "fastmemcpy.h"
+#import "talloc.h"
+#import "video_out.h"
+#import "aspect.h"
+#import "sub/font_load.h"
+#import "sub/sub.h"
+#import "subopt-helper.h"
 
-#include "input/input.h"
-#include "input/keycodes.h"
+#import "csputils.h"
+#import "libmpcodecs/vfcap.h"
+#import "libmpcodecs/mp_image.h"
+#import "osd.h"
 
+#import "gl_common.h"
 #import "cocoa_common.h"
 
-//Cocoa
-NSDistantObject *mplayerosxProxy;
-id <MPlayerOSXVOProto> mplayerosxProto;
-NSAutoreleasePool *autoreleasepool;
-OSType pixelFormat;
-
-//shared memory
-BOOL shared_buffer = false;
-#define DEFAULT_BUFFER_NAME "mplayerosx"
-static char *buffer_name;
-
-int screen_id;
-
-//CoreVideo
-CVPixelBufferRef frameBuffers[2];
-CVOpenGLTextureCacheRef textureCache;
-CVOpenGLTextureRef texture;
-NSRect textureFrame;
-
-GLfloat lowerLeft[2];
-GLfloat lowerRight[2];
-GLfloat upperRight[2];
-GLfloat upperLeft[2];
-
-//image
-unsigned char *image_data;
-// For double buffering
-static uint8_t image_page = 0;
-static unsigned char *image_datas[2];
-
-static uint32_t image_width;
-static uint32_t image_height;
-static uint32_t image_depth;
-static uint32_t image_bytes;
-static uint32_t image_format;
-
-static vo_info_t info =
-{
-    "Mac OS X Core Video",
-    "corevideo",
-    "Nicolas Plourde <nicolas.plourde@gmail.com> and others",
-    ""
+struct quad {
+    GLfloat lowerLeft[2];
+    GLfloat lowerRight[2];
+    GLfloat upperRight[2];
+    GLfloat upperLeft[2];
 };
 
-LIBVO_EXTERN(corevideo)
+#define CV_VERTICES_PER_QUAD 6
+#define CV_MAX_OSD_PARTS 20
 
-static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride)
+struct osd_p {
+    GLuint tex[CV_MAX_OSD_PARTS];
+    NSRect tex_rect[CV_MAX_OSD_PARTS];
+    int tex_cnt;
+};
+
+struct priv {
+    MPGLContext *mpglctx;
+    OSType pixelFormat;
+    unsigned int image_width;
+    unsigned int image_height;
+    struct mp_csp_details colorspace;
+
+    CVPixelBufferRef pixelBuffer;
+    CVOpenGLTextureCacheRef textureCache;
+    CVOpenGLTextureRef texture;
+    struct quad *quad;
+
+    struct osd_p *osd;
+};
+
+static struct priv *p;
+
+static void resize(struct vo *vo, int width, int height)
 {
-    switch (image_format)
-    {
-        case IMGFMT_RGB24:
-            vo_draw_alpha_rgb24(w,h,src,srca,stride,image_data+3*(y0*image_width+x0),3*image_width);
-            break;
-        case IMGFMT_ARGB:
-        case IMGFMT_BGRA:
-            vo_draw_alpha_rgb32(w,h,src,srca,stride,image_data+4*(y0*image_width+x0),4*image_width);
-            break;
-        case IMGFMT_YUY2:
-            vo_draw_alpha_yuy2(w,h,src,srca,stride,image_data + (x0 + y0 * image_width) * 2,image_width*2);
-            break;
-    }
-}
+    GL *gl = p->mpglctx->gl;
+    p->image_width = width;
+    p->image_height = height;
 
-static void free_file_specific(void)
-{
-    if(shared_buffer)
-    {
-        [mplayerosxProto stop];
-        mplayerosxProto = nil;
-        [mplayerosxProxy release];
-        mplayerosxProxy = nil;
+    mp_msg(MSGT_VO, MSGL_V, "[vo_corevideo] New OpenGL Viewport (0, 0, %d, "
+                            "%d)\n", p->image_width, p->image_height);
 
-        if (munmap(image_data, image_width*image_height*image_bytes) == -1)
-            mp_msg(MSGT_VO, MSGL_FATAL, "[vo_corevideo] uninit: munmap failed. Error: %s\n", strerror(errno));
+    gl->Viewport(0, 0, p->image_width, p->image_height);
+    gl->MatrixMode(GL_PROJECTION);
+    gl->LoadIdentity();
 
-        if (shm_unlink(buffer_name) == -1)
-            mp_msg(MSGT_VO, MSGL_FATAL, "[vo_corevideo] uninit: shm_unlink failed. Error: %s\n", strerror(errno));
-    } else {
-        free(image_datas[0]);
-        if (vo_doublebuffering)
-            free(image_datas[1]);
-        image_datas[0] = NULL;
-        image_datas[1] = NULL;
-        image_data = NULL;
-    }
-}
+    if (aspect_scaling()) {
+        int new_w, new_h;
+        GLdouble scale_x, scale_y;
 
-static void resize(int width, int height)
-{
-    int d_width, d_height;
-
-    mp_msg(MSGT_VO, MSGL_V, "[vo_corevideo] New OpenGL Viewport (0, 0, %d, %d)\n", width, height);
-
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, height, 0, -1.0, 1.0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    aspect(&d_width, &d_height, A_WINZOOM);
-    textureFrame = NSMakeRect((vo_dwidth - d_width) / 2, (vo_dheight - d_height) / 2, d_width, d_height);
-}
-
-static void prepare_opengl(void)
-{
-    glEnable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
-    glDisable(GL_CULL_FACE);
-    resize(global_vo->dwidth, global_vo->dheight);
-}
-
-static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
-{
-    free_file_specific();
-
-    //misc mplayer setup
-    image_width = width;
-    image_height = height;
-    switch (image_format) {
-        case IMGFMT_RGB24:
-            image_depth = 24;
-            break;
-        case IMGFMT_ARGB:
-        case IMGFMT_BGRA:
-            image_depth = 32;
-            break;
-        case IMGFMT_YUY2:
-            image_depth = 16;
-            break;
+        aspect(vo, &new_w, &new_h, A_WINZOOM);
+        panscan_calc_windowed(vo);
+        new_w += vo->panscan_x;
+        new_h += vo->panscan_y;
+        scale_x = (GLdouble)new_w / (GLdouble)p->image_width;
+        scale_y = (GLdouble)new_h / (GLdouble)p->image_height;
+        gl->Scaled(scale_x, scale_y, 1);
     }
 
-    image_bytes = (image_depth ? image_depth : 16 + 7) / 8;
+    gl->Ortho(0, p->image_width, p->image_height, 0, -1.0, 1.0);
+    gl->MatrixMode(GL_MODELVIEW);
+    gl->LoadIdentity();
 
-    if (!shared_buffer) {
-        CVReturn error;
+    force_load_font = 1;
+    vo_osd_changed(OSDTYPE_OSD);
 
-        image_data = malloc(image_width*image_height*image_bytes);
-        image_datas[0] = image_data;
-        if (vo_doublebuffering)
-            image_datas[1] = malloc(image_width*image_height*image_bytes);
-        image_page = 0;
+    gl->Clear(GL_COLOR_BUFFER_BIT);
+    vo->want_redraw = true;
+}
 
-        CVPixelBufferRelease(frameBuffers[0]);
-        frameBuffers[0] = NULL;
-        CVPixelBufferRelease(frameBuffers[1]);
-        frameBuffers[1] = NULL;
-        CVOpenGLTextureRelease(texture);
-        texture = NULL;
+static int init_gl(struct vo *vo, uint32_t d_width, uint32_t d_height)
+{
+    GL *gl = p->mpglctx->gl;
 
-        vo_cocoa_create_window(global_vo, d_width, d_height, flags);
-        prepare_opengl();
-        vo_cocoa_swap_interval(1);
+    const char *vendor     = gl->GetString(GL_VENDOR);
+    const char *version    = gl->GetString(GL_VERSION);
+    const char *renderer   = gl->GetString(GL_RENDERER);
 
-        error = CVOpenGLTextureCacheCreate(NULL, 0, vo_cocoa_cgl_context(), vo_cocoa_cgl_pixel_format(), 0, &textureCache);
-        if(error != kCVReturnSuccess)
-            mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL texture Cache(%d)\n", error);
+    mp_msg(MSGT_VO, MSGL_V, "[vo_corevideo] Running on OpenGL '%s' by '%s',"
+           " version '%s'\n", renderer, vendor, version);
 
-        error = CVPixelBufferCreateWithBytes(NULL, image_width, image_height, pixelFormat,
-                                             image_datas[0], image_width*image_bytes, NULL, NULL, NULL, &frameBuffers[0]);
-        if(error != kCVReturnSuccess)
-            mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create Pixel Buffer(%d)\n", error);
+    gl->Disable(GL_BLEND);
+    gl->Disable(GL_DEPTH_TEST);
+    gl->DepthMask(GL_FALSE);
+    gl->Disable(GL_CULL_FACE);
+    gl->Enable(GL_TEXTURE_2D);
+    gl->DrawBuffer(GL_BACK);
+    gl->TexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-        if (vo_doublebuffering) {
-            error = CVPixelBufferCreateWithBytes(NULL, image_width, image_height, pixelFormat,
-                                                 image_datas[1], image_width*image_bytes, NULL, NULL, NULL, &frameBuffers[1]);
-            if(error != kCVReturnSuccess)
-                mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create Pixel Double Buffer(%d)\n", error);
-        }
+    resize(vo, d_width, d_height);
 
-        error = CVOpenGLTextureCacheCreateTextureFromImage(NULL, textureCache, frameBuffers[image_page], 0, &texture);
-        if(error != kCVReturnSuccess)
-            mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL texture(%d)\n", error);
-    } else {
-        int shm_fd;
-        mp_msg(MSGT_VO, MSGL_INFO, "[vo_corevideo] writing output to a shared buffer "
-                "named \"%s\"\n",buffer_name);
+    gl->ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    gl->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (gl->SwapInterval)
+        gl->SwapInterval(1);
+    return 1;
+}
 
-        // create shared memory
-        shm_fd = shm_open(buffer_name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-        if (shm_fd == -1) {
-            mp_msg(MSGT_VO, MSGL_FATAL,
-                   "[vo_corevideo] failed to open shared memory. Error: %s\n", strerror(errno));
-            return 1;
-        }
+static void release_cv_entities(void) {
+    CVPixelBufferRelease(p->pixelBuffer);
+    p->pixelBuffer = NULL;
+    CVOpenGLTextureRelease(p->texture);
+    p->texture = NULL;
+    CVOpenGLTextureCacheRelease(p->textureCache);
+    p->textureCache = NULL;
 
-        if (ftruncate(shm_fd, image_width*image_height*image_bytes) == -1) {
-            mp_msg(MSGT_VO, MSGL_FATAL,
-                   "[vo_corevideo] failed to size shared memory, possibly already in use. Error: %s\n", strerror(errno));
-            close(shm_fd);
-            shm_unlink(buffer_name);
-            return 1;
-        }
+}
 
-        image_data = mmap(NULL, image_width*image_height*image_bytes,
-                    PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
-        close(shm_fd);
+static int config(struct vo *vo, uint32_t width, uint32_t height,
+                  uint32_t d_width, uint32_t d_height, uint32_t flags,
+                  uint32_t format)
+{
+    release_cv_entities();
+    p->image_width = width;
+    p->image_height = height;
 
-        if (image_data == MAP_FAILED) {
-            mp_msg(MSGT_VO, MSGL_FATAL,
-                   "[vo_corevideo] failed to map shared memory. Error: %s\n", strerror(errno));
-            shm_unlink(buffer_name);
-            return 1;
-        }
+    if (p->mpglctx->create_window(p->mpglctx, d_width, d_height, flags) < 0)
+        return -1;
+    if (p->mpglctx->setGlWindow(p->mpglctx) == SET_WINDOW_FAILED)
+        return -1;
 
-        //connect to mplayerosx
-        mplayerosxProxy=[NSConnection rootProxyForConnectionWithRegisteredName:[NSString stringWithUTF8String:buffer_name] host:nil];
-        if ([mplayerosxProxy conformsToProtocol:@protocol(MPlayerOSXVOProto)]) {
-            [mplayerosxProxy setProtocolForProxy:@protocol(MPlayerOSXVOProto)];
-            mplayerosxProto = (id <MPlayerOSXVOProto>)mplayerosxProxy;
-            [mplayerosxProto startWithWidth: image_width withHeight: image_height withBytes: image_bytes withAspect:d_width*100/d_height];
-        } else {
-            [mplayerosxProxy release];
-            mplayerosxProxy = nil;
-            mplayerosxProto = nil;
-        }
-    }
+    init_gl(vo, vo->dwidth, vo->dheight);
+
     return 0;
 }
 
-static void check_events(void)
+static void check_events(struct vo *vo)
 {
-    if (!shared_buffer) {
-        int e = vo_cocoa_check_events(global_vo);
-        if (e & VO_EVENT_RESIZE)
-            resize(global_vo->dwidth, global_vo->dheight);
-    }
+    int e = p->mpglctx->check_events(vo);
+    if (e & VO_EVENT_RESIZE)
+        resize(vo, vo->dwidth, vo->dheight);
 }
 
-static void draw_osd(void)
+static void create_osd_texture(void *ctx, int x0, int y0, int w, int h,
+                               unsigned char *src, unsigned char *srca,
+                               int stride)
 {
-    vo_draw_text(image_width, image_height, draw_alpha);
+    struct osd_p *osd = p->osd;
+    GL *gl = p->mpglctx->gl;
+
+    if (w <= 0 || h <= 0 || stride < w) {
+        mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
+        return;
+    }
+
+    if (osd->tex_cnt >= CV_MAX_OSD_PARTS) {
+        mp_msg(MSGT_VO, MSGL_ERR, "Too many OSD parts, contact the"
+                                  " developers!\n");
+        return;
+    }
+
+    gl->GenTextures(1, &osd->tex[osd->tex_cnt]);
+    gl->BindTexture(GL_TEXTURE_2D, osd->tex[osd->tex_cnt]);
+    glCreateClearTex(gl, GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, GL_LUMINANCE_ALPHA,
+                     GL_UNSIGNED_BYTE, GL_LINEAR, w, h, 0);
+    {
+        int i;
+        unsigned char *tmp = malloc(stride * h * 2);
+        // convert alpha from weird MPlayer scale.
+        for (i = 0; i < h * stride; i++) {
+            tmp[i*2+0] = src[i];
+            tmp[i*2+1] = -srca[i];
+        }
+        glUploadTex(gl, GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE,
+                    tmp, stride * 2, 0, 0, w, h, 0);
+        free(tmp);
+    }
+
+    osd->tex_rect[osd->tex_cnt] = NSMakeRect(x0, y0, w, h);
+
+    gl->BindTexture(GL_TEXTURE_2D, 0);
+    osd->tex_cnt++;
+}
+
+static void clearOSD(struct vo *vo)
+{
+    struct osd_p *osd = p->osd;
+    GL *gl = p->mpglctx->gl;
+
+    if (!osd->tex_cnt)
+        return;
+    gl->DeleteTextures(osd->tex_cnt, osd->tex);
+    osd->tex_cnt = 0;
+}
+
+static void draw_osd(struct vo *vo, struct osd_state *osd_s)
+{
+    struct osd_p *osd = p->osd;
+    GL *gl = p->mpglctx->gl;
+
+    if (vo_osd_changed(0)) {
+        clearOSD(vo);
+        osd_draw_text_ext(osd_s, vo->dwidth, vo->dheight, 0, 0, 0, 0,
+                          p->image_width, p->image_height, create_osd_texture,
+                          vo);
+    }
+
+    if (osd->tex_cnt > 0) {
+        gl->Enable(GL_BLEND);
+        gl->BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+        for (int n = 0; n < osd->tex_cnt; n++) {
+            NSRect tr = osd->tex_rect[n];
+            gl->BindTexture(GL_TEXTURE_2D, osd->tex[n]);
+            glDrawTex(gl, tr.origin.x, tr.origin.y,
+                      tr.size.width, tr.size.height,
+                      0, 0, 1.0, 1.0, 1, 1, 0, 0, 0);
+        }
+
+        gl->Disable(GL_BLEND);
+        gl->BindTexture(GL_TEXTURE_2D, 0);
+    }
 }
 
 static void prepare_texture(void)
 {
     CVReturn error;
-    CVOpenGLTextureRelease(texture);
-    error = CVOpenGLTextureCacheCreateTextureFromImage(NULL, textureCache, frameBuffers[image_page], 0, &texture);
+    struct quad *q = p->quad;
+
+    CVOpenGLTextureRelease(p->texture);
+    error = CVOpenGLTextureCacheCreateTextureFromImage(NULL,
+                p->textureCache, p->pixelBuffer, 0, &p->texture);
     if(error != kCVReturnSuccess)
-        mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL texture(%d)\n", error);
+        mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL"
+                                 " texture(%d)\n", error);
 
-    CVOpenGLTextureGetCleanTexCoords(texture, lowerLeft, lowerRight, upperRight, upperLeft);
+    CVOpenGLTextureGetCleanTexCoords(p->texture, q->lowerLeft, q->lowerRight,
+                                                 q->upperRight, q->upperLeft);
 }
 
-static void do_render(void)
+static void do_render(struct vo *vo)
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    struct quad *q = p->quad;
+    GL *gl = p->mpglctx->gl;
+    prepare_texture();
 
-    glEnable(CVOpenGLTextureGetTarget(texture));
-    glBindTexture(CVOpenGLTextureGetTarget(texture), CVOpenGLTextureGetName(texture));
+    float x0 = 0;
+    float y0 = 0;
+    float  w = p->image_width;
+    float  h = p->image_height;
 
-    glColor3f(1,1,1);
-    glBegin(GL_QUADS);
-    glTexCoord2f(upperLeft[0], upperLeft[1]); glVertex2i(textureFrame.origin.x-(vo_panscan_x >> 1), textureFrame.origin.y-(vo_panscan_y >> 1));
-    glTexCoord2f(lowerLeft[0], lowerLeft[1]); glVertex2i(textureFrame.origin.x-(vo_panscan_x >> 1), NSMaxY(textureFrame)+(vo_panscan_y >> 1));
-    glTexCoord2f(lowerRight[0], lowerRight[1]); glVertex2i(NSMaxX(textureFrame)+(vo_panscan_x >> 1), NSMaxY(textureFrame)+(vo_panscan_y >> 1));
-    glTexCoord2f(upperRight[0], upperRight[1]); glVertex2i(NSMaxX(textureFrame)+(vo_panscan_x >> 1), textureFrame.origin.y-(vo_panscan_y >> 1));
-    glEnd();
-    glDisable(CVOpenGLTextureGetTarget(texture));
+    // vertically flips the image
+    y0 += h;
+    h = -h;
+
+    float xm = x0 + w;
+    float ym = y0 + h;
+
+    gl->Enable(CVOpenGLTextureGetTarget(p->texture));
+    gl->BindTexture(
+            CVOpenGLTextureGetTarget(p->texture),
+            CVOpenGLTextureGetName(p->texture));
+
+    gl->Begin(GL_QUADS);
+    gl->TexCoord2fv(q->lowerLeft);  gl->Vertex2f(x0, y0);
+    gl->TexCoord2fv(q->upperLeft);  gl->Vertex2f(x0, ym);
+    gl->TexCoord2fv(q->upperRight); gl->Vertex2f(xm, ym);
+    gl->TexCoord2fv(q->lowerRight); gl->Vertex2f(xm, y0);
+    gl->End();
+
+    gl->Disable(CVOpenGLTextureGetTarget(p->texture));
 }
 
-static void flip_page(void)
+static void flip_page(struct vo *vo)
 {
-    if(shared_buffer) {
-        NSAutoreleasePool *pool = [NSAutoreleasePool new];
-        [mplayerosxProto render];
-        [pool release];
-    } else {
-        prepare_texture();
-        do_render();
-        if (vo_doublebuffering) {
-            image_page = 1 - image_page;
-            image_data = image_datas[image_page];
-        }
-        vo_cocoa_swap_buffers();
+    p->mpglctx->swapGlBuffers(p->mpglctx);
+    p->mpglctx->gl->Clear(GL_COLOR_BUFFER_BIT);
+}
+
+static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
+{
+    CVReturn error;
+
+    if (!p->textureCache || !p->pixelBuffer) {
+        error = CVOpenGLTextureCacheCreate(NULL, 0, vo_cocoa_cgl_context(),
+                    vo_cocoa_cgl_pixel_format(), 0, &p->textureCache);
+        if(error != kCVReturnSuccess)
+            mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL"
+                                     " texture Cache(%d)\n", error);
+
+        error = CVPixelBufferCreateWithBytes(NULL, mpi->width, mpi->height,
+                    p->pixelFormat, mpi->planes[0], mpi->width * mpi->bpp / 8,
+                    NULL, NULL, NULL, &p->pixelBuffer);
+        if(error != kCVReturnSuccess)
+            mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create Pixel"
+                                     "Buffer(%d)\n", error);
     }
-}
 
-static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
-{
-    return 0;
-}
-
-
-static int draw_frame(uint8_t *src[])
-{
-    return 0;
-}
-
-static uint32_t draw_image(mp_image_t *mpi)
-{
-    memcpy_pic(image_data, mpi->planes[0], image_width*image_bytes, image_height, image_width*image_bytes, mpi->stride[0]);
-
-    return 0;
+    do_render(vo);
+    return VO_TRUE;
 }
 
 static int query_format(uint32_t format)
 {
-    const int supportflags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
-    image_format = format;
-
-    switch(format)
-    {
+    const int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
+                      VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN |
+                      VOCAP_NOSLICES;
+    switch (format) {
         case IMGFMT_YUY2:
-            pixelFormat = kYUVSPixelFormat;
-            return supportflags;
+            p->pixelFormat = kYUVSPixelFormat;
+            return flags;
 
         case IMGFMT_RGB24:
-            pixelFormat = k24RGBPixelFormat;
-            return supportflags;
+            p->pixelFormat = k24RGBPixelFormat;
+            return flags;
 
         case IMGFMT_ARGB:
-            pixelFormat = k32ARGBPixelFormat;
-            return supportflags;
+            p->pixelFormat = k32ARGBPixelFormat;
+            return flags;
 
         case IMGFMT_BGRA:
-            pixelFormat = k32BGRAPixelFormat;
-            return supportflags;
+            p->pixelFormat = k32BGRAPixelFormat;
+            return flags;
     }
     return 0;
 }
 
-static void uninit(void)
+static void uninit(struct vo *vo)
 {
-    SetSystemUIMode(kUIModeNormal, 0);
-    CGDisplayShowCursor(kCGDirectMainDisplay);
-
-    free_file_specific();
-
-    if (!shared_buffer)
-        vo_cocoa_uninit(global_vo);
-
-    free(buffer_name);
-    buffer_name = NULL;
+    uninit_mpglcontext(p->mpglctx);
+    release_cv_entities();
+    talloc_free(p);
 }
 
-static const opt_t subopts[] = {
-{"device_id",     OPT_ARG_INT,  &screen_id,     NULL},
-{"shared_buffer", OPT_ARG_BOOL, &shared_buffer, NULL},
-{"buffer_name",   OPT_ARG_MSTRZ,&buffer_name,   NULL},
-{NULL}
-};
 
-static int preinit(const char *arg)
+static int preinit(struct vo *vo, const char *arg)
 {
-    // set defaults
-    screen_id = -1;
-    shared_buffer = false;
-    buffer_name = NULL;
+    const opt_t subopts[] = {
+        {NULL}
+    };
 
     if (subopt_parse(arg, subopts) != 0) {
         mp_msg(MSGT_VO, MSGL_FATAL,
                 "\n-vo corevideo command line help:\n"
-                "Example: mplayer -vo corevideo:device_id=1:shared_buffer:buffer_name=mybuff\n"
-                "\nOptions:\n"
-                "  device_id=<0-...>\n"
-                "    Set screen device ID for fullscreen.\n"
-                "  shared_buffer\n"
-                "    Write output to a shared memory buffer instead of displaying it.\n"
-                "  buffer_name=<name>\n"
-                "    Name of the shared buffer created with shm_open() as well as\n"
-                "    the name of the NSConnection MPlayer will try to open.\n"
-                "    Setting buffer_name implicitly enables shared_buffer.\n"
+                "Example: mplayer -vo corevideo\n"
                 "\n" );
         return -1;
     }
 
-    autoreleasepool = [[NSAutoreleasePool alloc] init];
+    p = talloc_ptrtype(NULL, p);
+    *p = (struct priv) {
+        .mpglctx = init_mpglcontext(GLTYPE_COCOA, vo),
+        .colorspace = MP_CSP_DETAILS_DEFAULTS,
+        .quad = talloc_ptrtype(p, p->quad),
+        .osd = talloc_ptrtype(p, p->osd),
+    };
 
-    if (!buffer_name)
-        buffer_name = strdup(DEFAULT_BUFFER_NAME);
-    else
-        shared_buffer = true;
-
-    if (!shared_buffer)
-        vo_cocoa_init(global_vo);
+    *p->osd = (struct osd_p) {
+        .tex_cnt = 0,
+    };
 
     return 0;
 }
 
-static int control(uint32_t request, void *data)
+static CFStringRef get_cv_csp_matrix(void)
+{
+    switch (p->colorspace.format) {
+        case MP_CSP_BT_601:
+            return kCVImageBufferYCbCrMatrix_ITU_R_601_4;
+        case MP_CSP_BT_709:
+            return kCVImageBufferYCbCrMatrix_ITU_R_709_2;
+        case MP_CSP_SMPTE_240M:
+            return kCVImageBufferYCbCrMatrix_SMPTE_240M_1995;
+    }
+    return kCVImageBufferYCbCrMatrix_ITU_R_601_4;
+}
+
+static void set_yuv_colorspace(struct vo *vo)
+{
+    CVBufferSetAttachment(p->pixelBuffer,
+                          kCVImageBufferYCbCrMatrixKey, get_cv_csp_matrix(),
+                          kCVAttachmentMode_ShouldPropagate);
+    vo->want_redraw = true;
+}
+
+static int control(struct vo *vo, uint32_t request, void *data)
 {
     switch (request) {
-        case VOCTRL_DRAW_IMAGE: return draw_image(data);
-        case VOCTRL_QUERY_FORMAT: return query_format(*(uint32_t*)data);
+        case VOCTRL_DRAW_IMAGE:
+            return draw_image(vo, data);
+        case VOCTRL_QUERY_FORMAT:
+            return query_format(*(uint32_t*)data);
         case VOCTRL_ONTOP:
-            if (!shared_buffer) {
-                vo_cocoa_ontop(global_vo);
-            } else {
-                vo_ontop = !vo_ontop;
-                [mplayerosxProto ontop];
-            }
+            p->mpglctx->ontop(vo);
             return VO_TRUE;
         case VOCTRL_FULLSCREEN:
-            if (!shared_buffer) {
-                vo_cocoa_fullscreen(global_vo);
-                resize(global_vo->dwidth, global_vo->dheight);
-            } else {
-                [mplayerosxProto toggleFullscreen];
-            }
+            p->mpglctx->fullscreen(vo);
+            resize(vo, vo->dwidth, vo->dheight);
             return VO_TRUE;
         case VOCTRL_GET_PANSCAN:
             return VO_TRUE;
         case VOCTRL_SET_PANSCAN:
-            panscan_calc_windowed();
+            resize(vo, vo->dwidth, vo->dheight);
             return VO_TRUE;
         case VOCTRL_UPDATE_SCREENINFO:
-            if (!shared_buffer) {
-                vo_cocoa_update_xinerama_info(global_vo);
-                return VO_TRUE;
-            } else {
-                return VO_NOTIMPL;
-            }
+            p->mpglctx->update_xinerama_info(vo);
+            return VO_TRUE;
+        case VOCTRL_REDRAW_FRAME:
+            do_render(vo);
+            return VO_TRUE;
+        case VOCTRL_SET_YUV_COLORSPACE:
+            p->colorspace.format = ((struct mp_csp_details *)data)->format;
+            set_yuv_colorspace(vo);
+            return VO_TRUE;
+        case VOCTRL_GET_YUV_COLORSPACE:
+            *(struct mp_csp_details *)data = p->colorspace;
+            return VO_TRUE;
     }
     return VO_NOTIMPL;
 }
+
+const struct vo_driver video_out_corevideo = {
+    .is_new = true,
+    .info = &(const vo_info_t) {
+        "Mac OS X Core Video",
+        "corevideo",
+        "Nicolas Plourde <nicolas.plourde@gmail.com> and others",
+        ""
+    },
+    .preinit = preinit,
+    .config = config,
+    .control = control,
+    .draw_osd = draw_osd,
+    .flip_page = flip_page,
+    .check_events = check_events,
+    .uninit = uninit,
+};

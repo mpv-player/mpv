@@ -127,6 +127,8 @@ int vo_cocoa_init(struct vo *vo)
 void vo_cocoa_uninit(struct vo *vo)
 {
     CGDisplayShowCursor(kCGDirectMainDisplay);
+    [NSApp setPresentationOptions:NSApplicationPresentationDefault];
+
     [s->window release];
     s->window = nil;
     [s->glContext release];

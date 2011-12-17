@@ -452,6 +452,7 @@ struct GL {
     void (GLAPIENTRY *TexParameterf)(GLenum, GLenum, GLfloat);
     void (GLAPIENTRY *TexParameterfv)(GLenum, GLenum, const GLfloat *);
     void (GLAPIENTRY *TexCoord2f)(GLfloat, GLfloat);
+    void (GLAPIENTRY *TexCoord2fv)(const GLfloat *);
     void (GLAPIENTRY *Vertex2f)(GLfloat, GLfloat);
     void (GLAPIENTRY *Vertex3f)(GLfloat, GLfloat, GLfloat);
     void (GLAPIENTRY *Normal3f)(GLfloat, GLfloat, GLfloat);

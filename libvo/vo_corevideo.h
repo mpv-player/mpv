@@ -23,20 +23,6 @@
 #ifndef MPLAYER_VO_COREVIDEO_H
 #define MPLAYER_VO_COREVIDEO_H
 
-#import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
-#import <Carbon/Carbon.h>
-
-// MPlayer OS X VO Protocol
-@protocol MPlayerOSXVOProto
-- (int) startWithWidth: (bycopy int)width
-            withHeight: (bycopy int)height
-             withBytes: (bycopy int)bytes
-            withAspect: (bycopy int)aspect;
-- (void) stop;
-- (void) render;
-- (void) toggleFullscreen;
-- (void) ontop;
-@end
 
 #endif /* MPLAYER_VO_COREVIDEO_H */
