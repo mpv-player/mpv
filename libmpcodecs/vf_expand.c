@@ -55,7 +55,6 @@ static struct vf_priv_s {
     int osd_enabled;
     double aspect;
     int round;
-    unsigned char* fb_ptr;
     int passthrough;
     int first_slice;
     struct osd_state *osd;
@@ -67,7 +66,6 @@ static struct vf_priv_s {
   0,
   0.,
   1,
-  NULL,
   0,
   0
 };
@@ -75,72 +73,9 @@ static struct vf_priv_s {
 //===========================================================================//
 #ifdef OSD_SUPPORT
 
-static struct vf_instance *vf=NULL; // fixme (needs sub.c changes)
-static int orig_w,orig_h;
-
-static void remove_func_2(int x0,int y0, int w,int h){
-    // TODO: let's cleanup the place
-    //printf("OSD clear: %d;%d %dx%d  \n",x0,y0,w,h);
-    vf_mpi_clear(vf->dmpi,x0,y0,w,h);
-}
-
-static void remove_func(int x0,int y0, int w,int h){
-    if(!vo_osd_changed_flag) return;
-    // split it to 4 parts:
-    if(y0<vf->priv->exp_y){
-	// it has parts above the image:
-	int y=y0+h;
-	if(y>vf->priv->exp_y) y=vf->priv->exp_y;
-	remove_func_2(x0,y0,w,y-y0);
-	if(y0+h<=vf->priv->exp_y) return;
-	h-=y-y0;y0=y;
-    }
-    if(y0+h>vf->priv->exp_y+orig_h){
-	// it has parts under the image:
-	int y=y0;
-	if(y<vf->priv->exp_y+orig_h) y=vf->priv->exp_y+orig_h;
-	remove_func_2(x0,y,w,y0+h-y);
-	if(y0>=vf->priv->exp_y+orig_h) return;
-	h=y-y0;
-    }
-    if(x0<vf->priv->exp_x){
-	// it has parts on the left side of the image:
-	int x=x0+w;
-	if(x>vf->priv->exp_x) x=vf->priv->exp_x;
-	remove_func_2(x0,y0,x-x0,h);
-	if(x0+w<=vf->priv->exp_x) return;
-	w-=x-x0;x0=x;
-    }
-    if(x0+w>vf->priv->exp_x+orig_w){
-	// it has parts on the right side of the image:
-	int x=x0;
-	if(x<vf->priv->exp_x+orig_w) x=vf->priv->exp_x+orig_w;
-	remove_func_2(x,y0,x0+w-x,h);
-	if(x0>=vf->priv->exp_x+orig_w) return;
-	w=x-x0;
-    }
-}
-
 static void draw_func(void *ctx, int x0,int y0, int w,int h,unsigned char* src, unsigned char *srca, int stride){
+    struct vf_instance *vf = ctx;
     unsigned char* dst;
-    if(!vo_osd_changed_flag && vf->dmpi->planes[0]==vf->priv->fb_ptr){
-	// ok, enough to update the area inside the video, leave the black bands
-	// untouched!
-	if(x0<vf->priv->exp_x){
-	    int tmp=vf->priv->exp_x-x0;
-	    w-=tmp; src+=tmp; srca+=tmp; x0+=tmp;
-	}
-	if(y0<vf->priv->exp_y){
-	    int tmp=vf->priv->exp_y-y0;
-	    h-=tmp; src+=tmp*stride; srca+=tmp*stride; y0+=tmp;
-	}
-	if(x0+w>vf->priv->exp_x+orig_w){
-	    w=vf->priv->exp_x+orig_w-x0;
-	}
-	if(y0+h>vf->priv->exp_y+orig_h){
-	    h=vf->priv->exp_y+orig_h-y0;
-	}
-    }
     if(w<=0 || h<=0) return; // nothing to do...
 //    printf("OSD redraw: %d;%d %dx%d  \n",x0,y0,w,h);
     dst=vf->dmpi->planes[0]+
@@ -185,32 +120,8 @@ static void draw_func(void *ctx, int x0,int y0, int w,int h,unsigned char* src, 
     }
 }
 
-static void draw_osd(struct vf_instance *vf_,int w,int h){
-    vf=vf_;orig_w=w;orig_h=h;
-//    printf("======================================\n");
-    if(vf->priv->exp_w!=w || vf->priv->exp_h!=h ||
-	vf->priv->exp_x || vf->priv->exp_y){
-	// yep, we're expanding image, not just copy.
-	if(vf->dmpi->planes[0]!=vf->priv->fb_ptr){
-	    // double buffering, so we need full clear :(
-	    if (vf->priv->exp_y > 0)
-		remove_func_2(0,0,vf->priv->exp_w,vf->priv->exp_y);
-	    if (vf->priv->exp_y+h < vf->priv->exp_h)
-		remove_func_2(0,vf->priv->exp_y+h,vf->priv->exp_w,vf->priv->exp_h-h-vf->priv->exp_y);
-	    if (vf->priv->exp_x > 0)
-		remove_func_2(0,vf->priv->exp_y,vf->priv->exp_x,h);
-	    if (vf->priv->exp_x+w < vf->priv->exp_w)
-		remove_func_2(vf->priv->exp_x+w,vf->priv->exp_y,vf->priv->exp_w-w-vf->priv->exp_x,h);
-	} else {
-	    // partial clear:
-	    osd_remove_text(vf->priv->osd, vf->priv->exp_w,vf->priv->exp_h,remove_func);
-	}
-    }
-    osd_draw_text(vf->priv->osd, vf->priv->exp_w,vf->priv->exp_h,draw_func, NULL);
-    // save buffer pointer for double buffering detection - yes, i know it's
-    // ugly method, but note that codecs with DR support does the same...
-    if(vf->dmpi)
-      vf->priv->fb_ptr=vf->dmpi->planes[0];
+static void draw_osd(struct vf_instance *vf,int w,int h){
+    osd_draw_text(vf->priv->osd, vf->priv->exp_w,vf->priv->exp_h,draw_func,vf);
 }
 
 #endif
@@ -258,7 +169,6 @@ static int config(struct vf_instance *vf,
 
     if(vf->priv->exp_x<0 || vf->priv->exp_x+width>vf->priv->exp_w) vf->priv->exp_x=(vf->priv->exp_w-width)/2;
     if(vf->priv->exp_y<0 || vf->priv->exp_y+height>vf->priv->exp_h) vf->priv->exp_y=(vf->priv->exp_h-height)/2;
-    vf->priv->fb_ptr=NULL;
 
     if(!opts->screen_size_x && !opts->screen_size_y){
 	d_width=d_width*vf->priv->exp_w/width;
@@ -388,6 +298,21 @@ static void draw_slice(struct vf_instance *vf,
     vf->priv->first_slice = 0;
 }
 
+// w, h = width and height of the actual video frame (located at exp_x/exp_y)
+static void clear_borders(struct vf_instance *vf, int w, int h)
+{
+    // upper border (over the full width)
+    vf_mpi_clear(vf->dmpi, 0, 0, vf->priv->exp_w, vf->priv->exp_y);
+    // lower border
+    vf_mpi_clear(vf->dmpi, 0, vf->priv->exp_y + h, vf->priv->exp_w,
+                 vf->priv->exp_h - (vf->priv->exp_y + h));
+    // left
+    vf_mpi_clear(vf->dmpi, 0, vf->priv->exp_y, vf->priv->exp_x, h);
+    // right
+    vf_mpi_clear(vf->dmpi, vf->priv->exp_x + w, vf->priv->exp_y,
+                 vf->priv->exp_w - (vf->priv->exp_x + w), h);
+}
+
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     if (vf->priv->passthrough) {
       mp_image_t *dmpi = vf_get_image(vf->next, IMGFMT_MPEGPES,
@@ -400,6 +325,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	vf->dmpi=mpi->priv;
 	if(!vf->dmpi) { mp_tmsg(MSGT_VFILTER, MSGL_WARN, "Why do we get NULL??\n"); return 0; }
 	mpi->priv=NULL;
+        clear_borders(vf,mpi->w,mpi->h);
 #ifdef OSD_SUPPORT
 	if(vf->priv->osd_enabled) draw_osd(vf,mpi->w,mpi->h);
 #endif
@@ -435,6 +361,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 		vf->dmpi->stride[0],mpi->stride[0]);
 	vf->dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
     }
+    clear_borders(vf,mpi->w,mpi->h);
 #ifdef OSD_SUPPORT
     if(vf->priv->osd_enabled) draw_osd(vf,mpi->w,mpi->h);
 #endif
