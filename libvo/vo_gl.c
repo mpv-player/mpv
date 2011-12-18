@@ -1183,8 +1183,12 @@ static void uninit(struct vo *vo)
     p->gl = NULL;
 }
 
-static int preinit_internal(struct vo *vo, const char *arg, int allow_sw,
-                            enum MPGLType gltype)
+static int backend_valid(void *arg)
+{
+    return mpgl_find_backend(*(const char **)arg) >= 0;
+}
+
+static int preinit_internal(struct vo *vo, const char *arg, int allow_sw)
 {
     struct gl_priv *p = talloc_zero(vo, struct gl_priv);
     vo->priv = p;
@@ -1211,6 +1215,7 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw,
     int user_colorspace = 0;
     int levelconv = -1;
     int aspect = -1;
+    char *backend_arg = NULL;
 
     const opt_t subopts[] = {
         {"manyfmts",     OPT_ARG_BOOL, &p->many_fmts,    NULL},
@@ -1235,6 +1240,7 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw,
         {"mipmapgen",    OPT_ARG_BOOL, &p->mipmap_gen,   NULL},
         {"osdcolor",     OPT_ARG_INT,  &p->osd_color,    NULL},
         {"stereo",       OPT_ARG_INT,  &p->stereo_mode,  NULL},
+        {"backend",      OPT_ARG_MSTRZ,&backend_arg,     backend_valid},
         // Removed options.
         // They are only parsed to notify the user about the replacements.
         {"aspect",       OPT_ARG_BOOL, &aspect,          NULL},
@@ -1310,6 +1316,12 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw,
                "    1: side-by-side to red-cyan stereo\n"
                "    2: side-by-side to green-magenta stereo\n"
                "    3: side-by-side to quadbuffer stereo\n"
+               "  backend=<sys>\n"
+               "    auto: auto-select (default)\n"
+               "    cocoa: Cocoa/OSX\n"
+               "    win: Win32/WGL\n"
+               "    x11: X11/GLX\n"
+               "    sdl: SDL\n"
                "\n");
         return -1;
     }
@@ -1329,7 +1341,11 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw,
                " been removed, using yuv=2 instead.\n");
         p->use_yuv = 2;
     }
-    p->glctx = init_mpglcontext(gltype, vo);
+
+    int backend = backend_arg ? mpgl_find_backend(backend_arg) : GLTYPE_AUTO;
+    free(backend_arg);
+
+    p->glctx = init_mpglcontext(backend, vo);
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;
@@ -1353,7 +1369,7 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw,
         // acceleration and so on. Destroy that window to make sure all state
         // associated with it is lost.
         uninit(vo);
-        p->glctx = init_mpglcontext(gltype, vo);
+        p->glctx = init_mpglcontext(backend, vo);
         if (!p->glctx)
             goto err_out;
         p->gl = p->glctx->gl;
@@ -1373,7 +1389,7 @@ err_out:
 
 static int preinit(struct vo *vo, const char *arg)
 {
-    return preinit_internal(vo, arg, 1, GLTYPE_AUTO);
+    return preinit_internal(vo, arg, 1);
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
@@ -1498,7 +1514,7 @@ const struct vo_driver video_out_gl = {
 
 static int preinit_nosw(struct vo *vo, const char *arg)
 {
-    return preinit_internal(vo, arg, 0, GLTYPE_AUTO);
+    return preinit_internal(vo, arg, 0);
 }
 
 const struct vo_driver video_out_gl_nosw =
@@ -1519,28 +1535,3 @@ const struct vo_driver video_out_gl_nosw =
     .check_events = check_events,
     .uninit = uninit,
 };
-
-#ifdef CONFIG_GL_SDL
-static int preinit_sdl(struct vo *vo, const char *arg)
-{
-    return preinit_internal(vo, arg, 1, GLTYPE_SDL);
-}
-
-const struct vo_driver video_out_gl_sdl = {
-    .is_new = true,
-    .info = &(const vo_info_t) {
-        "OpenGL with SDL",
-        "gl_sdl",
-        "Reimar Doeffinger <Reimar.Doeffinger@gmx.de>",
-        ""
-    },
-    .preinit = preinit_sdl,
-    .config = config,
-    .control = control,
-    .draw_slice = draw_slice,
-    .draw_osd = draw_osd,
-    .flip_page = flip_page,
-    .check_events = check_events,
-    .uninit = uninit,
-};
-#endif

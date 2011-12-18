@@ -2087,6 +2087,36 @@ static void new_vo_sdl_fullscreen(struct vo *vo) { vo_sdl_fullscreen(); }
 
 #endif
 
+struct backend {
+    const char *name;
+    enum MPGLType type;
+};
+
+static struct backend backends[] = {
+    {"auto", GLTYPE_AUTO},
+    {"cocoa", GLTYPE_COCOA},
+    {"win", GLTYPE_W32},
+    {"x11", GLTYPE_X11},
+    {"sdl", GLTYPE_SDL},
+    // mplayer-svn aliases (note that mplayer-svn couples these with the numeric
+    // values of the internal GLTYPE_* constants)
+    {"-1", GLTYPE_AUTO},
+    { "0", GLTYPE_W32},
+    { "1", GLTYPE_X11},
+    { "2", GLTYPE_SDL},
+
+    {0}
+};
+
+int mpgl_find_backend(const char *name)
+{
+    for (const struct backend *entry = backends; entry->name; entry++) {
+        if (strcmp(entry->name, name) == 0)
+            return entry->type;
+    }
+    return -1;
+}
+
 MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
 {
     MPGLContext *ctx;

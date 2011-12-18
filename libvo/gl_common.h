@@ -399,6 +399,8 @@ typedef struct MPGLContext {
     void (*ontop)(struct vo *vo);
 } MPGLContext;
 
+int mpgl_find_backend(const char *name);
+
 MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo);
 void uninit_mpglcontext(MPGLContext *ctx);
 
