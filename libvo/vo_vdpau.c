@@ -478,8 +478,12 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
     vdp_st = vdp_device_create_x11(x11->display, x11->screen, &vc->vdp_device,
                                    &vc->vdp_get_proc_address);
     if (vdp_st != VDP_STATUS_OK) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error when calling "
-               "vdp_device_create_x11: %i\n", vdp_st);
+        if (vc->is_preempted)
+            mp_msg(MSGT_VO, MSGL_DBG2, "[vdpau] Error calling "
+                   "vdp_device_create_x11 while preempted: %d\n", vdp_st);
+        else
+            mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error when calling "
+                   "vdp_device_create_x11: %d\n", vdp_st);
         return -1;
     }
 
@@ -1026,9 +1030,6 @@ static void draw_eosd(struct vo *vo)
     VdpOutputSurface output_surface = vc->output_surfaces[vc->surface_num];
     int i;
 
-    if (handle_preemption(vo) < 0)
-        return;
-
     VdpOutputSurfaceRenderBlendState blend_state = {
         .struct_version = VDP_OUTPUT_SURFACE_RENDER_BLEND_STATE_VERSION,
         .blend_factor_source_color =
@@ -1440,28 +1441,23 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
     struct mp_image *reserved_mpi = NULL;
     struct vdpau_render_state *rndr;
 
-    if (vc->is_preempted) {
-        vo->frame_loaded = true;
-        return;
-    }
-
     if (IMGFMT_IS_VDPAU(vc->image_format)) {
         rndr = mpi->priv;
         reserved_mpi = mpi;
     } else if (!(mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)) {
-        VdpStatus vdp_st;
-        void *destdata[3] = {mpi->planes[0], mpi->planes[2], mpi->planes[1]};
         rndr = get_surface(vo, vc->deint_counter);
         vc->deint_counter = WRAP_ADD(vc->deint_counter, 1, NUM_BUFFERED_VIDEO);
-        if (vc->image_format == IMGFMT_NV12)
-            destdata[1] = destdata[2];
-        vdp_st =
-            vdp->video_surface_put_bits_y_cb_cr(rndr->surface,
-                                                vc->vdp_pixel_format,
-                                                (const void *const*)destdata,
-                                                mpi->stride); // pitch
-        CHECK_ST_WARNING("Error when calling "
-                         "vdp_video_surface_put_bits_y_cb_cr");
+        if (handle_preemption(vo) >= 0) {
+            VdpStatus vdp_st;
+            const void *destdata[3] = {mpi->planes[0], mpi->planes[2],
+                                       mpi->planes[1]};
+            if (vc->image_format == IMGFMT_NV12)
+                destdata[1] = destdata[2];
+            vdp_st = vdp->video_surface_put_bits_y_cb_cr(rndr->surface,
+                    vc->vdp_pixel_format, destdata, mpi->stride);
+            CHECK_ST_WARNING("Error when calling "
+                             "vdp_video_surface_put_bits_y_cb_cr");
+        }
     } else
         // We don't support slice callbacks so this shouldn't occur -
         // I think the flags test above in pointless, but I'm adding
@@ -1830,8 +1826,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_DRAW_EOSD:
         if (!data)
             return VO_FALSE;
-        generate_eosd(vo, data);
-        draw_eosd(vo);
+        if (status_ok(vo)) {
+            generate_eosd(vo, data);
+            draw_eosd(vo);
+        }
         return VO_TRUE;
     case VOCTRL_GET_EOSD_RES: {
         struct mp_eosd_res *r = data;
@@ -1843,18 +1841,22 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
     case VOCTRL_NEWFRAME:
         vc->deint_queue_pos = next_deint_queue_pos(vo, true);
-        video_to_output_surface(vo);
+        if (status_ok(vo))
+            video_to_output_surface(vo);
         return true;
     case VOCTRL_SKIPFRAME:
         vc->deint_queue_pos = next_deint_queue_pos(vo, true);
         return true;
     case VOCTRL_REDRAW_FRAME:
-        video_to_output_surface(vo);
+        if (status_ok(vo))
+            video_to_output_surface(vo);
         return true;
     case VOCTRL_RESET:
         forget_frames(vo);
         return true;
     case VOCTRL_SCREENSHOT: {
+        if (!status_ok(vo))
+            return false;
         struct voctrl_screenshot_args *args = data;
         if (args->full_window)
             args->out_image = get_window_screenshot(vo);
