@@ -44,9 +44,7 @@ static const struct mp_AVCodecTag mp_wav_tags[] = {
     { CODEC_ID_MUSEPACK7,         MKTAG('M', 'P', 'C', ' ')},
     { CODEC_ID_MUSEPACK8,         MKTAG('M', 'P', 'C', '8')},
     { CODEC_ID_NELLYMOSER,        MKTAG('N', 'E', 'L', 'L')},
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 92, 0)
     { CODEC_ID_PCM_LXF,           MKTAG('P', 'L', 'X', 'F')},
-#endif
     { CODEC_ID_QCELP,             MKTAG('Q', 'c', 'l', 'p')},
     { CODEC_ID_QDM2,              MKTAG('Q', 'D', 'M', '2')},
     { CODEC_ID_RA_144,            MKTAG('1', '4', '_', '4')},
@@ -66,9 +64,7 @@ const struct mp_AVCodecTag * const mp_wav_taglists[] = {mp_ff_codec_wav_tags, mp
 
 static const struct mp_AVCodecTag mp_codecid_override_tags[] = {
     { CODEC_ID_AAC,               MKTAG('M', 'P', '4', 'A')},
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 94, 0)
     { CODEC_ID_AAC_LATM,          MKTAG('M', 'P', '4', 'L')},
-#endif
     { CODEC_ID_AC3,               0x2000},
     { CODEC_ID_ADPCM_IMA_AMV,     MKTAG('A', 'M', 'V', 'A')},
     { CODEC_ID_BINKAUDIO_DCT,     MKTAG('B', 'A', 'U', '1')},
@@ -109,9 +105,7 @@ static const struct mp_AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_FLIC,              MKTAG('F', 'L', 'I', 'C')},
     { CODEC_ID_IDCIN,             MKTAG('I', 'D', 'C', 'I')},
     { CODEC_ID_INTERPLAY_VIDEO,   MKTAG('I', 'N', 'P', 'V')},
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 114, 0)
     { CODEC_ID_JV,                MKTAG('F', 'F', 'J', 'V')},
-#endif
     { CODEC_ID_MDEC,              MKTAG('M', 'D', 'E', 'C')},
     { CODEC_ID_MOTIONPIXELS,      MKTAG('M', 'V', 'I', '1')},
     { CODEC_ID_NUV,               MKTAG('N', 'U', 'V', '1')},

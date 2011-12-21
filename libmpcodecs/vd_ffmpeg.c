@@ -147,10 +147,7 @@ static int init(sh_video_t *sh)
             && lavc_codec->id != CODEC_ID_H264
             && lavc_codec->id != CODEC_ID_INTERPLAY_VIDEO
             && lavc_codec->id != CODEC_ID_ROQ && lavc_codec->id != CODEC_ID_VP8
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 108, 0)
-            && lavc_codec->id != CODEC_ID_LAGARITH
-#endif
-        )
+            && lavc_codec->id != CODEC_ID_LAGARITH)
         ctx->do_dr1 = 1;
     ctx->b_age = ctx->ip_age[0] = ctx->ip_age[1] = 256 * 256 * 256 * 64;
     ctx->ip_count = ctx->b_count = 0;
@@ -663,12 +660,10 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     pkt.size = len;
     // HACK: make PNGs decode normally instead of as CorePNG delta frames
     pkt.flags = AV_PKT_FLAG_KEY;
-#if LIBAVCODEC_VERSION_MAJOR >= 53
     if (packet && packet->avpacket) {
         pkt.side_data = packet->avpacket->side_data;
         pkt.side_data_elems = packet->avpacket->side_data_elems;
     }
-#endif
     // The avcodec opaque field stupidly supports only int64_t type
     union pts { int64_t i; double d; };
     avctx->reordered_opaque = (union pts){.d = *reordered_pts}.i;

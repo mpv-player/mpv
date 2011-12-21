@@ -242,12 +242,6 @@ static const char * const preferred_internal[] = {
     /* lavf Matroska demuxer doesn't support ordered chapters and fails
      * for more files */
     "matroska",
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(52, 99, 0)
-    /* Seeking doesn't work with lavf FLAC demuxer in FFmpeg versions
-     * without a FLAC parser. In principle this could use a runtime check to
-     * switch if a shared library is updated. */
-    "flac",
-#endif
     /* lavf gives neither pts nor dts for some video frames in .rm */
     "rm",
     NULL
@@ -712,23 +706,7 @@ static void check_internet_radio_hack(struct demuxer *demuxer)
         if (!priv->internet_radio_hack) {
             mp_msg(MSGT_DEMUX, MSGL_V,
                    "[lavf] enabling internet ogg radio hack\n");
-#if LIBAVFORMAT_VERSION_MAJOR < 53
-            mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[lavf] This looks like an "
-                    "internet radio ogg stream with track changes.\n"
-                    "Playback will likely fail after %d track changes "
-                    "due to libavformat limitations.\n"
-                    "You may be able to work around that limitation by "
-                    "using -demuxer ogg.\n", MAX_STREAMS);
-#endif
         }
-#if LIBAVFORMAT_VERSION_MAJOR < 53
-        if (avfc->nb_streams == MAX_STREAMS) {
-            mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[lavf] This is the %dth "
-                    "track.\nPlayback will likely fail at the next change.\n"
-                    "You may be able to work around this limitation by "
-                    "using -demuxer ogg.\n", MAX_STREAMS);
-        }
-#endif
         priv->internet_radio_hack = true;
         // use new per-track metadata as global metadata
         AVMetadataTag *t = NULL;

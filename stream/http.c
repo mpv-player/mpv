@@ -44,9 +44,6 @@
 #include "libavutil/base64.h"
 
 #include <libavutil/avutil.h>
-#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(50, 17, 0)
-#define AV_BASE64_SIZE(x)  (((x)+2) / 3 * 4 + 1)
-#endif
 
 extern int stream_cache_size;
 extern int network_bandwidth;

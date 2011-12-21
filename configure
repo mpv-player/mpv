@@ -6003,27 +6003,21 @@ echores "$_live"
 
 
 
-all_libav_libs="libavutil libavcodec libavformat libswscale libpostproc"
+all_libav_libs="libavutil >= 51.7.0:libavcodec >= 53.5.0:libavformat >= 53.2.0:libswscale >= 2.0.0:libpostproc >= 52.0.0"
 echocheck "Libav ($all_libav_libs)"
 if test "$ffmpeg" = auto ; then
+  IFS=":"   # shell should not be used for programming
   if $_pkg_config --exists --print-errors $all_libav_libs ; then
     inc_ffmpeg=$($_pkg_config --cflags $all_libav_libs)
     _ld_tmp=$($_pkg_config --libs $all_libav_libs)
     extra_ldflags="$extra_ldflags $_ld_tmp"
     extra_cflags="$extra_cflags $inc_ffmpeg"
-  elif header_check libavutil/avutil.h -lpostproc -lswscale -lavformat -lavcodec -lavutil $_ld_lm ; then
-    extra_ldflags="$extra_ldflags -lpostproc -lswscale -lavformat -lavcodec -lavutil"
+    unset IFS
   else
     die "Unable to find development files for some of the required Libav libraries above. Aborting."
   fi
 fi
-
-ffmpeg_eval_api=no
-def_ffmpeg_eval_api="#undef CONFIG_FFMPEG_EVAL_API"
-if $_pkg_config --atleast-version=50.33.0 libavutil ; then
-  ffmpeg_eval_api=yes
-  def_ffmpeg_eval_api="#define CONFIG_FFMPEG_EVAL_API 1"
-fi
+echores "yes"
 
 def_ffmpeg_internals="#undef CONFIG_FFMPEG_INTERNALS"
 if ! test -z "$_ffmpeg_source" ; then
@@ -6790,7 +6784,6 @@ XVR100 = $_xvr100
 YUV4MPEG = $_yuv4mpeg
 
 # FFmpeg
-FFMPEG_EVAL_API = $ffmpeg_eval_api
 FFMPEG_INTERNALS = $ffmpeg_internals
 FFMPEG_SOURCE_PATH = $_ffmpeg_source
 
@@ -7143,7 +7136,6 @@ $def_yuv4mpeg
 
 
 /* FFmpeg */
-$def_ffmpeg_eval_api
 $def_ffmpeg_internals
 
 $def_arpa_inet_h
