@@ -311,27 +311,13 @@ static int init(sh_video_t *sh)
         memcpy(avctx->extradata, sh->bih + 1, avctx->extradata_size);
         break;
     }
-    /* Pass palette to codec */
-    if (sh->bih && (sh->bih->biBitCount <= 8)) {
-        avctx->palctrl = calloc(1, sizeof(AVPaletteControl));
-        avctx->palctrl->palette_changed = 1;
-        if (sh->bih->biSize - sizeof(*sh->bih))
-            /* Palette size in biSize */
-            memcpy(avctx->palctrl->palette, sh->bih + 1,
-                   FFMIN(sh->bih->biSize - sizeof(*sh->bih), AVPALETTE_SIZE));
-        else
-            /* Palette size in biClrUsed */
-            memcpy(avctx->palctrl->palette, sh->bih + 1,
-                   FFMIN(sh->bih->biClrUsed * 4, AVPALETTE_SIZE));
-    }
 
     if (sh->bih)
         avctx->bits_per_coded_sample = sh->bih->biBitCount;
 
-    if (lavc_param->threads > 1) {
+    if (lavc_param->threads > 1)
         avctx->thread_count = lavc_param->threads;
-        avcodec_thread_init(avctx, lavc_param->threads);
-    }
+
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
         mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not open codec.\n");
@@ -362,7 +348,6 @@ static void uninit(sh_video_t *sh)
             mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not close codec.\n");
 
         av_freep(&avctx->extradata);
-        free(avctx->palctrl);
         av_freep(&avctx->slice_offset);
     }
 

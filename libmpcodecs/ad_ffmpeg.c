@@ -281,8 +281,7 @@ static int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
         }
         if (len2 > 0) {
             if (avctx->channels >= 5) {
-                int samplesize = av_get_bits_per_sample_format(
-                                                    avctx->sample_fmt) / 8;
+                int samplesize = av_get_bytes_per_sample(avctx->sample_fmt);
                 reorder_channel_nch(buf, AF_CHANNEL_LAYOUT_LAVC_DEFAULT,
                                     AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
                                     avctx->channels,
