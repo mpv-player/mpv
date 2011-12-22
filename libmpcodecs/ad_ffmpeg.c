@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include <libavcodec/avcodec.h>
 
@@ -47,7 +48,7 @@ LIBAD_EXTERN(ffmpeg)
 
 struct priv {
     AVCodecContext *avctx;
-    bool old_packet;
+    int previous_data_left;
 };
 
 static int preinit(sh_audio_t *sh)
@@ -230,7 +231,7 @@ static int control(sh_audio_t *sh, int cmd, void *arg, ...)
     case ADCTRL_RESYNC_STREAM:
         avcodec_flush_buffers(ctx->avctx);
         ds_clear_parser(sh->ds);
-        ctx->old_packet = false;
+        ctx->previous_data_left = 0;
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
@@ -247,23 +248,37 @@ static int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
     while (len < minlen) {
         AVPacket pkt;
         int len2 = maxlen;
-        double pts;
-        int x = ds_get_packet_pts(sh_audio->ds, &start, &pts);
-        if (x <= 0) {
+        double pts = MP_NOPTS_VALUE;
+        int x;
+        bool packet_already_used = ctx->previous_data_left;
+        struct demux_packet *mpkt = ds_get_packet2(sh_audio->ds,
+                                                   ctx->previous_data_left);
+        if (!mpkt) {
+            assert(!ctx->previous_data_left);
             start = NULL;
             x = 0;
-            ds_parse(sh_audio->ds, &start, &x, MP_NOPTS_VALUE, 0);
+            ds_parse(sh_audio->ds, &start, &x, pts, 0);
             if (x <= 0)
                 break;  // error
         } else {
-            int in_size = x;
+            assert(mpkt->len >= ctx->previous_data_left);
+            if (!ctx->previous_data_left) {
+                ctx->previous_data_left = mpkt->len;
+                pts = mpkt->pts;
+            }
+            x = ctx->previous_data_left;
+            start = mpkt->buffer + mpkt->len - ctx->previous_data_left;
             int consumed = ds_parse(sh_audio->ds, &start, &x, pts, 0);
-            sh_audio->ds->buffer_pos -= in_size - consumed;
+            ctx->previous_data_left -= consumed;
         }
         av_init_packet(&pkt);
         pkt.data = start;
         pkt.size = x;
-        if (pts != MP_NOPTS_VALUE && !ctx->old_packet) {
+        if (mpkt && mpkt->avpacket) {
+            pkt.side_data = mpkt->avpacket->side_data;
+            pkt.side_data_elems = mpkt->avpacket->side_data_elems;
+        }
+        if (pts != MP_NOPTS_VALUE && !packet_already_used) {
             sh_audio->pts = pts;
             sh_audio->pts_bytes = 0;
         }
@@ -275,10 +290,8 @@ static int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
             mp_msg(MSGT_DECAUDIO, MSGL_V, "lavc_audio: error\n");
             break;
         }
-        if (!sh_audio->parser && y < x) {
-            sh_audio->ds->buffer_pos += y - x;  // put back data (HACK!)
-            ctx->old_packet = true;
-        }
+        if (!sh_audio->parser)
+            ctx->previous_data_left += x - y;
         if (len2 > 0) {
             if (avctx->channels >= 5) {
                 int samplesize = av_get_bytes_per_sample(avctx->sample_fmt);

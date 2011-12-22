@@ -346,7 +346,7 @@ int ds_get_packet(struct demux_stream *ds, unsigned char **start);
 int ds_get_packet_pts(struct demux_stream *ds, unsigned char **start,
                       double *pts);
 int ds_get_packet_sub(struct demux_stream *ds, unsigned char **start);
-struct demux_packet *ds_get_packet2(struct demux_stream *ds);
+struct demux_packet *ds_get_packet2(struct demux_stream *ds, bool repeat_last);
 double ds_get_next_pts(struct demux_stream *ds);
 int ds_parse(struct demux_stream *sh, uint8_t **buffer, int *len, double pts,
              off_t pos);

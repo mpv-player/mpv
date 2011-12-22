@@ -2933,7 +2933,7 @@ static double update_video(struct MPContext *mpctx)
         int in_size = 0;
         unsigned char *buf = NULL;
         pts = MP_NOPTS_VALUE;
-        struct demux_packet *pkt = ds_get_packet2(mpctx->d_video);
+        struct demux_packet *pkt = ds_get_packet2(mpctx->d_video, false);
         if (pkt) {
             in_size = pkt->len;
             buf = pkt->buffer;
