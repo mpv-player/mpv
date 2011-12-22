@@ -43,6 +43,9 @@ void mixer_reinit(mixer_t *mixer)
         mixer_setvolume(mixer, mixer->softvol_l, mixer->softvol_r);
         mixer->muted = muted;
     }
+    if (mixer->balance != 0) {
+        mixer_setbalance(mixer, mixer->balance);
+    }
 }
 
 void mixer_getvolume(mixer_t *mixer, float *l, float *r)
@@ -176,6 +179,9 @@ void mixer_setbalance(mixer_t *mixer, float val)
 
     if (!mixer->afilter)
         return;
+
+    mixer->balance = val;
+
     if (af_control_any_rev(mixer->afilter,
                            AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val))
         return;
@@ -183,6 +189,7 @@ void mixer_setbalance(mixer_t *mixer, float val)
     if (!(af_pan_balance = af_add(mixer->afilter, "pan"))) {
         mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
                 "[Mixer] No balance control available.\n");
+        mixer->balance = 0;
         return;
     }
 

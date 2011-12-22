@@ -35,6 +35,7 @@ typedef struct mixer_s {
     float last_l, last_r;
     float softvol_l, softvol_r;
     int restore_softvol;
+    float balance;
 } mixer_t;
 
 void mixer_reinit(mixer_t *mixer);
