@@ -35,6 +35,16 @@ char *mixer_channel = NULL;
 int soft_vol = 0;
 float soft_vol_max = 110.0;
 
+// Called after the audio filter chain is built or rebuilt.
+void mixer_reinit(mixer_t *mixer)
+{
+    if (mixer->restore_softvol) {
+        int muted = mixer->muted;
+        mixer_setvolume(mixer, mixer->softvol_l, mixer->softvol_r);
+        mixer->muted = muted;
+    }
+}
+
 void mixer_getvolume(mixer_t *mixer, float *l, float *r)
 {
     ao_control_vol_t vol;
@@ -76,6 +86,9 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
             // af_volume uses values in dB
             float db_vals[AF_NCH];
             int i;
+            mixer->softvol_l = l;
+            mixer->softvol_r = r;
+            mixer->restore_softvol = 1;
             db_vals[0] = (l / 100.0) * (soft_vol_max / 100.0);
             db_vals[1] = (r / 100.0) * (soft_vol_max / 100.0);
             for (i = 2; i < AF_NCH; i++)

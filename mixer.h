@@ -33,8 +33,11 @@ typedef struct mixer_s {
     int volstep;
     int muted;
     float last_l, last_r;
+    float softvol_l, softvol_r;
+    int restore_softvol;
 } mixer_t;
 
+void mixer_reinit(mixer_t *mixer);
 void mixer_getvolume(mixer_t *mixer, float *l, float *r);
 void mixer_setvolume(mixer_t *mixer, float l, float r);
 void mixer_incvolume(mixer_t *mixer);
