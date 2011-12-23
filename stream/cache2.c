@@ -89,7 +89,6 @@ typedef struct {
   volatile unsigned control_uint_arg;
   volatile double control_double_arg;
   volatile int control_res;
-  volatile off_t control_new_pos;
   volatile double stream_time_length;
   volatile double stream_time_pos;
 } cache_vars_t;
@@ -102,6 +101,12 @@ static void cache_wakeup(stream_t *s)
   // signal process to wake up immediately
   kill(s->cache_pid, SIGUSR1);
 #endif
+}
+
+static void cache_flush(cache_vars_t *s)
+{
+  s->offset= // FIXME!?
+  s->min_filepos=s->max_filepos=s->read_filepos; // drop cache content :(
 }
 
 static int cache_read(cache_vars_t *s, unsigned char *buf, int size)
@@ -179,8 +184,7 @@ static int cache_fill(cache_vars_t *s)
       // issues with e.g. mov or badly interleaved files
       if(read<s->min_filepos || read>=s->max_filepos+s->seek_limit)
       {
-        s->offset= // FIXME!?
-        s->min_filepos=s->max_filepos=read; // drop cache content :(
+        cache_flush(s);
         if(s->stream->eof) stream_reset(s->stream);
         stream_seek_internal(s->stream,read);
         mp_msg(MSGT_CACHE,MSGL_DBG2,"Seek done. new pos: 0x%"PRIX64"  \n",(int64_t)stream_tell(s->stream));
@@ -257,12 +261,14 @@ static int cache_fill(cache_vars_t *s)
 static int cache_execute_control(cache_vars_t *s) {
   double double_res;
   unsigned uint_res;
+  int needs_flush = 0;
   static unsigned last;
   int quit = s->control == -2;
+  uint64_t old_pos = s->stream->pos;
+  int old_eof = s->stream->eof;
   if (quit || !s->stream->control) {
     s->stream_time_length = 0;
     s->stream_time_pos = MP_NOPTS_VALUE;
-    s->control_new_pos = 0;
     s->control_res = STREAM_UNSUPPORTED;
     s->control = -1;
     return !quit;
@@ -289,6 +295,7 @@ static int cache_execute_control(cache_vars_t *s) {
   if (s->control == -1) return 1;
   switch (s->control) {
     case STREAM_CTRL_SEEK_TO_TIME:
+      needs_flush = 1;
       double_res = s->control_double_arg;
     case STREAM_CTRL_GET_CURRENT_TIME:
     case STREAM_CTRL_GET_ASPECT_RATIO:
@@ -297,6 +304,7 @@ static int cache_execute_control(cache_vars_t *s) {
       break;
     case STREAM_CTRL_SEEK_TO_CHAPTER:
     case STREAM_CTRL_SET_ANGLE:
+      needs_flush = 1;
       uint_res = s->control_uint_arg;
     case STREAM_CTRL_GET_NUM_CHAPTERS:
     case STREAM_CTRL_GET_CURRENT_CHAPTER:
@@ -309,7 +317,13 @@ static int cache_execute_control(cache_vars_t *s) {
       s->control_res = STREAM_UNSUPPORTED;
       break;
   }
-  s->control_new_pos = s->stream->pos;
+  if (s->control_res == STREAM_OK && needs_flush) {
+    s->read_filepos = s->stream->pos;
+    s->eof = s->stream->eof;
+    cache_flush(s);
+  } else if (needs_flush &&
+             (old_pos != s->stream->pos || old_eof != s->stream->eof))
+    mp_msg(MSGT_STREAM, MSGL_ERR, "STREAM_CTRL changed stream pos but returned error, this is not allowed!\n");
   s->control = -1;
   return 1;
 }
@@ -584,16 +598,19 @@ int cache_stream_seek_long(stream_t *stream,off_t pos){
 
 int cache_do_control(stream_t *stream, int cmd, void *arg) {
   int sleep_count = 0;
+  int pos_change = 0;
   cache_vars_t* s = stream->cache_data;
   switch (cmd) {
     case STREAM_CTRL_SEEK_TO_TIME:
       s->control_double_arg = *(double *)arg;
       s->control = cmd;
+      pos_change = 1;
       break;
     case STREAM_CTRL_SEEK_TO_CHAPTER:
     case STREAM_CTRL_SET_ANGLE:
       s->control_uint_arg = *(unsigned *)arg;
       s->control = cmd;
+      pos_change = 1;
       break;
     // the core might call these every frame, so cache them...
     case STREAM_CTRL_GET_TIME_LENGTH:
@@ -624,6 +641,17 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
   }
   if (s->control_res != STREAM_OK)
     return s->control_res;
+  // We cannot do this on failure, since this would cause the
+  // stream position to jump when e.g. STREAM_CTRL_SEEK_TO_TIME
+  // is unsupported - but in that case we need the old value
+  // to do the fallback seek.
+  // This unfortunately can lead to slightly different behaviour
+  // with and without cache if the protocol changes pos even
+  // when an error happened.
+  if (pos_change) {
+    stream->pos = s->read_filepos;
+    stream->eof = s->eof;
+  }
   switch (cmd) {
     case STREAM_CTRL_GET_TIME_LENGTH:
     case STREAM_CTRL_GET_CURRENT_TIME:
@@ -635,11 +663,6 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
     case STREAM_CTRL_GET_NUM_ANGLES:
     case STREAM_CTRL_GET_ANGLE:
       *(unsigned *)arg = s->control_uint_arg;
-      break;
-    case STREAM_CTRL_SEEK_TO_CHAPTER:
-    case STREAM_CTRL_SEEK_TO_TIME:
-    case STREAM_CTRL_SET_ANGLE:
-      stream->pos = s->read_filepos = s->control_new_pos;
       break;
   }
   return s->control_res;
