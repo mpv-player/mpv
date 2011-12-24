@@ -28,21 +28,26 @@
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
-    int r = url_read_complete(s->priv, buffer, max_len);
+    AVIOContext *avio = s->priv;
+    int r = avio_read(avio, buffer, max_len);
     return (r <= 0) ? -1 : r;
 }
 
 static int write_buffer(stream_t *s, char *buffer, int len)
 {
-    /* url_write retries internally on short writes and EAGAIN */
-    int r = url_write(s->priv, buffer, len);
-    return (r <= 0) ? -1 : r;
+    AVIOContext *avio = s->priv;
+    avio_write(avio, buffer, len);
+    avio_flush(avio);
+    if (avio->error)
+        return -1;
+    return len;
 }
 
 static int seek(stream_t *s, off_t newpos)
 {
+    AVIOContext *avio = s->priv;
     s->pos = newpos;
-    if (url_seek(s->priv, s->pos, SEEK_SET) < 0) {
+    if (avio_seek(avio, s->pos, SEEK_SET) < 0) {
         s->eof = 1;
         return 0;
     }
@@ -51,11 +56,12 @@ static int seek(stream_t *s, off_t newpos)
 
 static int control(stream_t *s, int cmd, void *arg)
 {
+    AVIOContext *avio = avio;
     int64_t size, ts;
     double pts;
     switch(cmd) {
     case STREAM_CTRL_GET_SIZE:
-        size = url_filesize(s->priv);
+        size = avio_size(avio);
         if(size >= 0) {
             *(off_t *)arg = size;
             return 1;
@@ -64,7 +70,7 @@ static int control(stream_t *s, int cmd, void *arg)
     case STREAM_CTRL_SEEK_TO_TIME:
         pts = *(double *)arg;
         ts = pts * AV_TIME_BASE;
-        ts = av_url_read_seek(s->priv, -1, ts, 0);
+        ts = avio_seek_time(avio, -1, ts, 0);
         if (ts >= 0)
             return 1;
         break;
@@ -74,7 +80,13 @@ static int control(stream_t *s, int cmd, void *arg)
 
 static void close_f(stream_t *stream)
 {
-    url_close(stream->priv);
+    AVIOContext *avio = stream->priv;
+    /* NOTE: As of 2011 write streams must be manually flushed before close.
+     * Currently write_buffer() always flushes them after writing.
+     * avio_close() could return an error, but we have no way to return that
+     * with the current stream API.
+     */
+    avio_close(avio);
 }
 
 static const char prefix[] = "ffmpeg://";
@@ -83,7 +95,7 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
 {
     int flags = 0;
     const char *filename;
-    URLContext *ctx = NULL;
+    AVIOContext *avio = NULL;
     int res = STREAM_ERROR;
     int64_t size;
     int dummy;
@@ -109,22 +121,22 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     dummy = !strncmp(filename, "rtsp:", 5);
     mp_msg(MSGT_OPEN, MSGL_V, "[ffmpeg] Opening %s\n", filename);
 
-    if (!dummy && url_open(&ctx, filename, flags) < 0)
+    if (!dummy && avio_open(&avio, filename, flags) < 0)
         goto out;
 
-    mp_msg(MSGT_OPEN, MSGL_V, "[ffmpeg] libavformat URL type: %s\n",
-           ctx->prot->name);
-    if (!strncmp("rtmp", ctx->prot->name, 4)) {
-        *file_format = DEMUXER_TYPE_LAVF;
-        stream->lavf_type = "flv";
-    }
-    stream->priv = ctx;
-    size = dummy ? 0 : url_filesize(ctx);
+    char *rtmp[] = {"rtmp:", "rtmpt:", "rtmpe:", "rtmpte:", "rtmps:"};
+    for (int i = 0; i < FF_ARRAY_ELEMS(rtmp); i++)
+        if (!strncmp(filename, rtmp[i], strlen(rtmp[i]))) {
+            *file_format = DEMUXER_TYPE_LAVF;
+            stream->lavf_type = "flv";
+        }
+    stream->priv = avio;
+    size = dummy ? 0 : avio_size(avio);
     if (size >= 0)
         stream->end_pos = size;
     stream->type = STREAMTYPE_FILE;
     stream->seek = seek;
-    if (dummy || ctx->is_streamed) {
+    if (dummy || !avio->seekable) {
         stream->type = STREAMTYPE_STREAM;
         stream->seek = NULL;
     }
