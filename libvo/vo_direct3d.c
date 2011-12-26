@@ -796,7 +796,8 @@ static bool change_d3d_backbuffer(d3d_priv *priv)
         if (FAILED(IDirect3D9_CreateDevice(priv->d3d_handle,
                                            D3DADAPTER_DEFAULT,
                                            DEVTYPE, vo_w32_window,
-                                           D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+                                           D3DCREATE_SOFTWARE_VERTEXPROCESSING
+                                           | D3DCREATE_FPU_PRESERVE,
                                            &present_params, &priv->d3d_device)))
         {
             mp_msg(MSGT_VO, MSGL_V,
