@@ -30,150 +30,161 @@
 #include "mixer.h"
 
 
-char * mixer_device=NULL;
-char * mixer_channel=NULL;
+char *mixer_device = NULL;
+char *mixer_channel = NULL;
 int soft_vol = 0;
 float soft_vol_max = 110.0;
 
 void mixer_getvolume(mixer_t *mixer, float *l, float *r)
 {
-  ao_control_vol_t vol;
-  *l=0; *r=0;
-  if (mixer->ao) {
-    if(soft_vol ||
-       CONTROL_OK != ao_control(mixer->ao, AOCONTROL_GET_VOLUME, &vol)) {
-      if (!mixer->afilter)
-        return;
-      else {
-        float db_vals[AF_NCH];
-        if (!af_control_any_rev(mixer->afilter,
-               AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET, db_vals))
-          db_vals[0] = db_vals[1] = 1.0;
-        else
-        af_from_dB (2, db_vals, db_vals, 20.0, -200.0, 60.0);
-        vol.left = (db_vals[0] / (soft_vol_max / 100.0)) * 100.0;
-        vol.right = (db_vals[1] / (soft_vol_max / 100.0)) * 100.0;
-      }
+    ao_control_vol_t vol;
+    *l = 0;
+    *r = 0;
+    if (mixer->ao) {
+        if (soft_vol ||
+            CONTROL_OK != ao_control(mixer->ao, AOCONTROL_GET_VOLUME, &vol))
+        {
+            if (!mixer->afilter)
+                return;
+            float db_vals[AF_NCH];
+            if (!af_control_any_rev(mixer->afilter,
+                        AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET, db_vals))
+            {
+                db_vals[0] = db_vals[1] = 1.0;
+            } else {
+                af_from_dB(2, db_vals, db_vals, 20.0, -200.0, 60.0);
+            }
+            vol.left = (db_vals[0] / (soft_vol_max / 100.0)) * 100.0;
+            vol.right = (db_vals[1] / (soft_vol_max / 100.0)) * 100.0;
+        }
+        *r = vol.right;
+        *l = vol.left;
     }
-    *r=vol.right;
-    *l=vol.left;
-  }
 }
 
 void mixer_setvolume(mixer_t *mixer, float l, float r)
 {
-  ao_control_vol_t vol;
-  vol.right=r; vol.left=l;
-  if (mixer->ao) {
-    if(soft_vol ||
-       CONTROL_OK != ao_control(mixer->ao, AOCONTROL_SET_VOLUME, &vol)) {
-      if (!mixer->afilter)
-        return;
-      else {
-        // af_volume uses values in dB
-        float db_vals[AF_NCH];
-        int i;
-        db_vals[0] = (l / 100.0) * (soft_vol_max / 100.0);
-        db_vals[1] = (r / 100.0) * (soft_vol_max / 100.0);
-        for (i = 2; i < AF_NCH; i++) {
-          db_vals[i] = ((l + r) / 100.0) * (soft_vol_max / 100.0) / 2.0;
-        }
-        af_to_dB (AF_NCH, db_vals, db_vals, 20.0);
-        if (!af_control_any_rev(mixer->afilter,
-               AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, db_vals)) {
-          mp_tmsg(MSGT_GLOBAL, MSGL_INFO, "[Mixer] No hardware mixing, inserting volume filter.\n");
-          if (af_add(mixer->afilter, "volume")) {
+    ao_control_vol_t vol;
+    vol.right = r;
+    vol.left = l;
+    if (mixer->ao) {
+        if (soft_vol ||
+            CONTROL_OK != ao_control(mixer->ao, AOCONTROL_SET_VOLUME, &vol))
+        {
+            if (!mixer->afilter)
+                return;
+            // af_volume uses values in dB
+            float db_vals[AF_NCH];
+            int i;
+            db_vals[0] = (l / 100.0) * (soft_vol_max / 100.0);
+            db_vals[1] = (r / 100.0) * (soft_vol_max / 100.0);
+            for (i = 2; i < AF_NCH; i++)
+                db_vals[i] = ((l + r) / 100.0) * (soft_vol_max / 100.0) / 2.0;
+            af_to_dB(AF_NCH, db_vals, db_vals, 20.0);
             if (!af_control_any_rev(mixer->afilter,
-                   AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, db_vals)) {
-              mp_tmsg(MSGT_GLOBAL, MSGL_ERR, "[Mixer] No volume control available.\n");
-              return;
+                            AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, db_vals))
+            {
+                mp_tmsg(MSGT_GLOBAL, MSGL_INFO,
+                    "[Mixer] No hardware mixing, inserting volume filter.\n");
+                if (af_add(mixer->afilter, "volume")) {
+                    if (!af_control_any_rev(mixer->afilter,
+                            AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, db_vals))
+                    {
+                        mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
+                                "[Mixer] No volume control available.\n");
+                        return;
+                    }
+                }
             }
-          }
-	}
-      }
+        }
     }
-  }
- mixer->muted=0;
+    mixer->muted = 0;
 }
 
 void mixer_incvolume(mixer_t *mixer)
 {
- float mixer_l, mixer_r;
- mixer_getvolume(mixer, &mixer_l, &mixer_r);
- mixer_l += mixer->volstep;
- if ( mixer_l > 100 ) mixer_l = 100;
- mixer_r += mixer->volstep;
- if ( mixer_r > 100 ) mixer_r = 100;
- mixer_setvolume(mixer, mixer_l, mixer_r);
+    float mixer_l, mixer_r;
+    mixer_getvolume(mixer, &mixer_l, &mixer_r);
+    mixer_l += mixer->volstep;
+    if (mixer_l > 100)
+        mixer_l = 100;
+    mixer_r += mixer->volstep;
+    if (mixer_r > 100)
+        mixer_r = 100;
+    mixer_setvolume(mixer, mixer_l, mixer_r);
 }
 
 void mixer_decvolume(mixer_t *mixer)
 {
- float mixer_l, mixer_r;
- mixer_getvolume(mixer, &mixer_l, &mixer_r);
- mixer_l -= mixer->volstep;
- if ( mixer_l < 0 ) mixer_l = 0;
- mixer_r -= mixer->volstep;
- if ( mixer_r < 0 ) mixer_r = 0;
- mixer_setvolume(mixer, mixer_l, mixer_r);
+    float mixer_l, mixer_r;
+    mixer_getvolume(mixer, &mixer_l, &mixer_r);
+    mixer_l -= mixer->volstep;
+    if (mixer_l < 0)
+        mixer_l = 0;
+    mixer_r -= mixer->volstep;
+    if (mixer_r < 0)
+        mixer_r = 0;
+    mixer_setvolume(mixer, mixer_l, mixer_r);
 }
 
 void mixer_getbothvolume(mixer_t *mixer, float *b)
 {
- float mixer_l, mixer_r;
- mixer_getvolume(mixer, &mixer_l, &mixer_r);
- *b = ( mixer_l + mixer_r ) / 2;
+    float mixer_l, mixer_r;
+    mixer_getvolume(mixer, &mixer_l, &mixer_r);
+    *b = (mixer_l + mixer_r) / 2;
 }
 
 void mixer_mute(mixer_t *mixer)
 {
- if (mixer->muted) mixer_setvolume(mixer, mixer->last_l, mixer->last_r);
-  else
-   {
-    mixer_getvolume(mixer, &mixer->last_l, &mixer->last_r);
-    mixer_setvolume(mixer, 0, 0);
-    mixer->muted=1;
-   }
+    if (mixer->muted) {
+        mixer_setvolume(mixer, mixer->last_l, mixer->last_r);
+    } else {
+        mixer_getvolume(mixer, &mixer->last_l, &mixer->last_r);
+        mixer_setvolume(mixer, 0, 0);
+        mixer->muted = 1;
+    }
 }
 
 void mixer_getbalance(mixer_t *mixer, float *val)
 {
-  *val = 0.f;
-  if(!mixer->afilter)
-    return;
-  af_control_any_rev(mixer->afilter,
-      AF_CONTROL_PAN_BALANCE | AF_CONTROL_GET, val);
+    *val = 0.f;
+    if (!mixer->afilter)
+        return;
+    af_control_any_rev(mixer->afilter, AF_CONTROL_PAN_BALANCE | AF_CONTROL_GET,
+                       val);
 }
 
 void mixer_setbalance(mixer_t *mixer, float val)
 {
-  float level[AF_NCH];
-  int i;
-  af_control_ext_t arg_ext = { .arg = level };
-  af_instance_t* af_pan_balance;
+    float level[AF_NCH];
+    int i;
+    af_control_ext_t arg_ext = { .arg = level };
+    af_instance_t *af_pan_balance;
 
-  if(!mixer->afilter)
-    return;
-  if (af_control_any_rev(mixer->afilter,
-	AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val))
-    return;
+    if (!mixer->afilter)
+        return;
+    if (af_control_any_rev(mixer->afilter,
+                           AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val))
+        return;
 
-  if (!(af_pan_balance = af_add(mixer->afilter, "pan"))) {
-    mp_tmsg(MSGT_GLOBAL, MSGL_ERR, "[Mixer] No balance control available.\n");
-    return;
-  }
+    if (!(af_pan_balance = af_add(mixer->afilter, "pan"))) {
+        mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
+                "[Mixer] No balance control available.\n");
+        return;
+    }
 
-  af_init(mixer->afilter);
-  /* make all other channels pass thru since by default pan blocks all */
-  memset(level, 0, sizeof(level));
-  for (i = 2; i < AF_NCH; i++) {
-    arg_ext.ch = i;
-    level[i] = 1.f;
+    af_init(mixer->afilter);
+    /* make all other channels pass thru since by default pan blocks all */
+    memset(level, 0, sizeof(level));
+    for (i = 2; i < AF_NCH; i++) {
+        arg_ext.ch = i;
+        level[i] = 1.f;
+        af_pan_balance->control(af_pan_balance,
+                                AF_CONTROL_PAN_LEVEL | AF_CONTROL_SET,
+                                &arg_ext);
+        level[i] = 0.f;
+    }
+
     af_pan_balance->control(af_pan_balance,
-	AF_CONTROL_PAN_LEVEL | AF_CONTROL_SET, &arg_ext);
-    level[i] = 0.f;
-  }
-
-  af_pan_balance->control(af_pan_balance,
-      AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val);
+                            AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val);
 }
