@@ -27,7 +27,7 @@ extern char * mixer_channel;
 extern int soft_vol;
 extern float soft_vol_max;
 
-typedef struct mixer_s {
+typedef struct mixer {
     struct ao *ao;
     af_stream_t *afilter;
     int volstep;
@@ -43,8 +43,5 @@ void mixer_getbothvolume(mixer_t *mixer, float *b);
 void mixer_mute(mixer_t *mixer);
 void mixer_getbalance(mixer_t *mixer, float *bal);
 void mixer_setbalance(mixer_t *mixer, float bal);
-
-//void mixer_setbothvolume(int v);
-#define mixer_setbothvolume(m, v) mixer_setvolume(m, v, v)
 
 #endif /* MPLAYER_MIXER_H */
