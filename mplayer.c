@@ -1449,7 +1449,6 @@ static int build_afilter_chain(struct MPContext *mpctx)
     result =  init_audio_filters(sh_audio, new_srate,
                                  &ao->samplerate, &ao->channels, &ao->format);
     mpctx->mixer.afilter = sh_audio->afilter;
-    mixer_reinit(&mpctx->mixer);
     return result;
 }
 
@@ -1854,6 +1853,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     }
     mpctx->mixer.ao = ao;
     mpctx->mixer.volstep = volstep;
+    mixer_reinit(&mpctx->mixer);
     mpctx->syncing_audio = true;
     return;
 
