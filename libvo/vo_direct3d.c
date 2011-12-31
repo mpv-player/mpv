@@ -1846,7 +1846,7 @@ static bool get_screenshot_from_texture(d3d_priv *priv, mp_image_t *image)
         struct texplane *plane = &priv->planes[n];
 
         int width = priv->src_width >> plane->shift_x;
-        int height = priv->src_height >> plane->shift_x;
+        int height = priv->src_height >> plane->shift_y;
 
         memcpy_pic(image->planes[n], plane->locked_rect.pBits,
                    width * plane->bytes_per_pixel, height,
