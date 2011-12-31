@@ -38,6 +38,10 @@
 #include <inttypes.h>
 #include <math.h>
 
+#include <libavutil/intreadwrite.h>
+#include <libavutil/mem.h>
+#include <libavcodec/avcodec.h>
+
 #include "config.h"
 
 #include "mp_msg.h"
@@ -46,15 +50,9 @@
 #include "mp_image.h"
 #include "vf.h"
 #include "libvo/fastmemcpy.h"
+#include "mangle.h"
 
-#include "libavutil/internal.h"
-#include "libavutil/intreadwrite.h"
-#include "libavutil/mem.h"
-#include "libavcodec/avcodec.h"
-#include "libavcodec/dsputil.h"
-
-#undef free
-#undef malloc
+typedef short DCTELEM;
 
 //===========================================================================//
 #define BLOCKSZ 12

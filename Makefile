@@ -61,8 +61,7 @@ SRCS_COMMON-$(FAAD)                  += libmpcodecs/ad_faad.c
 SRCS_COMMON-$(FASTMEMCPY)            += libvo/aclib.c
 
 # These filters use private headers and do not work with shared libavcodec.
-SRCS_COMMON-$(FFMPEG_INTERNALS)      += libmpcodecs/vf_fspp.c \
-                                        libmpcodecs/vf_mcdeint.c \
+SRCS_COMMON-$(FFMPEG_INTERNALS)      += libmpcodecs/vf_mcdeint.c \
                                         libmpcodecs/vf_spp.c \
 
 SRCS_COMMON-$(FREETYPE)              += sub/font_load_ft.c
@@ -312,6 +311,7 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_flip.c \
               libmpcodecs/vf_format.c \
               libmpcodecs/vf_framestep.c \
+              libmpcodecs/vf_fspp.c \
               libmpcodecs/vf_geq.c \
               libmpcodecs/vf_gradfun.c \
               libmpcodecs/vf_halfpack.c \
