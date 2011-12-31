@@ -830,14 +830,16 @@ static int reconfigure_d3d(d3d_priv *priv)
 
     destroy_d3d_surfaces(priv);
 
-    IDirect3DDevice9_Release(priv->d3d_device);
+    if (priv->d3d_device)
+        IDirect3DDevice9_Release(priv->d3d_device);
     priv->d3d_device = NULL;
 
     // Force complete destruction of the D3D state.
     // Note: this step could be omitted. The resize_d3d call below would detect
     // that d3d_device is NULL, and would properly recreate it. I'm not sure why
     // the following code to release and recreate the d3d_handle exists.
-    IDirect3D9_Release(priv->d3d_handle);
+    if (priv->d3d_handle)
+        IDirect3D9_Release(priv->d3d_handle);
     priv->d3d_handle = NULL;
     if (!init_d3d(priv))
         return 0;
