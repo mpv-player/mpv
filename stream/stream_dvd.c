@@ -621,6 +621,11 @@ static int control(stream_t *stream,int cmd,void* arg)
             *((double *)arg) = (double) mp_get_titleset_length(d->vts_file, d->tt_srpt, d->cur_title-1)/1000.0;
             return 1;
         }
+        case STREAM_CTRL_GET_NUM_TITLES:
+        {
+            *((unsigned int *)arg) = d->vmg_file->tt_srpt->nr_of_srpts;
+            return 1;
+        }
         case STREAM_CTRL_GET_NUM_CHAPTERS:
         {
             int r;

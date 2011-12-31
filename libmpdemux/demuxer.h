@@ -248,6 +248,8 @@ typedef struct demuxer {
     struct sh_video *v_streams[MAX_V_STREAMS];
     struct sh_sub   *s_streams[MAX_S_STREAMS];
 
+    int num_titles;
+
     struct demux_chapter *chapters;
     int num_chapters;
 

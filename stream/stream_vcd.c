@@ -91,6 +91,7 @@ static int seek(stream_t *s,off_t newpos) {
 static int control(stream_t *stream, int cmd, void *arg) {
   struct stream_priv_s *p = stream->priv;
   switch(cmd) {
+    case STREAM_CTRL_GET_NUM_TITLES:
     case STREAM_CTRL_GET_NUM_CHAPTERS:
     {
       mp_vcd_priv_t *vcd = vcd_read_toc(stream->fd);

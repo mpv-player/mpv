@@ -518,6 +518,7 @@ stream_start       pos       0               X            start pos in stream
 stream_end         pos       0               X            end pos in stream
 stream_length      pos       0               X            (end - start)
 stream_time_pos    time      0               X            present position in stream (in seconds)
+titles             int                       X            number of titles
 chapter            int       0               X   X   X    select chapter
 chapters           int                       X            number of chapters
 angle              int       0               X   X   X    select angle
