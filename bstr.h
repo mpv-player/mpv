@@ -82,8 +82,25 @@ int bstr_decode_utf8(struct bstr str, struct bstr *out_next);
 // On error, -1 is returned. On success, it returns a value in the range [1, 4].
 int bstr_parse_utf8_code_length(unsigned char b);
 
+// Return the text before the next line break, and return it. Change *rest to
+// point to the text following this line break. (rest can be NULL.)
+// Unlike bstr_splitlines, possible \r characters coming from files with CR+LF
+// line breaks are stripped.
+struct bstr bstr_getline(struct bstr str, struct bstr *rest);
+
+bool bstr_case_startswith(struct bstr s, struct bstr prefix);
+bool bstr_case_endswith(struct bstr s, struct bstr suffix);
+struct bstr bstr_strip_ext(struct bstr str);
+struct bstr bstr_get_ext(struct bstr s);
+
+
 static inline struct bstr bstr_cut(struct bstr str, int n)
 {
+    if (n < 0) {
+        n += str.len;
+        if (n < 0)
+            n = 0;
+    }
     if (n > str.len)
         n = str.len;
     return (struct bstr){str.start + n, str.len - n};

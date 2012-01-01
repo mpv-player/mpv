@@ -185,6 +185,19 @@ struct bstr *bstr_splitlines(void *talloc_ctx, struct bstr str)
     return r;
 }
 
+struct bstr bstr_getline(struct bstr str, struct bstr *rest)
+{
+    int pos = bstrchr(str, '\n');
+    if (pos < 0)
+        pos = str.len;
+    if (rest)
+        *rest = bstr_cut(str, pos + 1);
+    str.len = pos;
+    if (str.len > 0 && str.start[str.len - 1] == '\r')
+        str.len -= 1;
+    return str;
+}
+
 void bstr_lower(struct bstr str)
 {
     for (int i = 0; i < str.len; i++)
@@ -232,4 +245,32 @@ int bstr_decode_utf8(struct bstr s, struct bstr *out_next)
     if (out_next)
         *out_next = s;
     return codepoint;
+}
+
+bool bstr_case_startswith(struct bstr s, struct bstr prefix)
+{
+    struct bstr start = bstr_splice(s, 0, prefix.len);
+    return start.len == prefix.len && bstrcasecmp(start, prefix) == 0;
+}
+
+bool bstr_case_endswith(struct bstr s, struct bstr suffix)
+{
+    struct bstr end = bstr_cut(s, -suffix.len);
+    return end.len == suffix.len && bstrcasecmp(end, suffix) == 0;
+}
+
+struct bstr bstr_strip_ext(struct bstr str)
+{
+    int dotpos = bstrrchr(str, '.');
+    if (dotpos < 0)
+        return str;
+    return (struct bstr){str.start, dotpos};
+}
+
+struct bstr bstr_get_ext(struct bstr s)
+{
+    int dotpos = bstrrchr(s, '.');
+    if (dotpos < 0)
+        return (struct bstr){NULL, 0};
+    return bstr_splice(s, dotpos + 1, s.len);
 }
