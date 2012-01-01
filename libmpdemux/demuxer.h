@@ -89,6 +89,7 @@ enum demuxer_type {
     DEMUXER_TYPE_RTP_NEMESI,
     DEMUXER_TYPE_MNG,
     DEMUXER_TYPE_EDL,
+    DEMUXER_TYPE_CUE,
 
     /* Values after this are for internal use and can not be selected
      * as demuxer type by the user (-demuxer option). */

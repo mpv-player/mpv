@@ -261,5 +261,7 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
 void build_ordered_chapter_timeline(struct MPContext *mpctx);
 // timeline/tl_edl.c
 void build_edl_timeline(struct MPContext *mpctx);
+// timeline/tl_cue.c
+void build_cue_timeline(struct MPContext *mpctx);
 
 #endif /* MPLAYER_MP_CORE_H */

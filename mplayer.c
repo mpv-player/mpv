@@ -4619,6 +4619,9 @@ goto_enable_cache:
     if (mpctx->demuxer->type == DEMUXER_TYPE_EDL)
         build_edl_timeline(mpctx);
 
+    if (mpctx->demuxer->type == DEMUXER_TYPE_CUE)
+        build_cue_timeline(mpctx);
+
     if (mpctx->timeline) {
         mpctx->timeline_part = 0;
         mpctx->demuxer = mpctx->timeline[0].source->demuxer;
