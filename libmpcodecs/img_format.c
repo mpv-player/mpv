@@ -69,6 +69,8 @@ const char *vo_format_name(int format)
 	case IMGFMT_422P16_BE: return "Planar 422P 16-bit big-endian";
 	case IMGFMT_422P10_LE: return "Planar 422P 10-bit little-endian";
 	case IMGFMT_422P10_BE: return "Planar 422P 10-bit big-endian";
+        case IMGFMT_422P9_LE:  return "Planar 422P 9-bit little-endian";
+        case IMGFMT_422P9_BE:  return "Planar 422P 9-bit big-endian";
 	case IMGFMT_444P16_LE: return "Planar 444P 16-bit little-endian";
 	case IMGFMT_444P16_BE: return "Planar 444P 16-bit big-endian";
 	case IMGFMT_444P10_LE: return "Planar 444P 10-bit little-endian";

@@ -937,6 +937,8 @@ static struct {
     {"422p16be", IMGFMT_422P16_BE},
     {"422p10le", IMGFMT_422P10_LE},
     {"422p10be", IMGFMT_422P10_BE},
+    {"422p9le",  IMGFMT_422P9_LE},
+    {"422p9be",  IMGFMT_422P9_BE},
     {"420p16le", IMGFMT_420P16_LE},
     {"420p16be", IMGFMT_420P16_BE},
     {"420p10le", IMGFMT_420P10_LE},
