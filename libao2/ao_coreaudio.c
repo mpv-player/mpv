@@ -450,6 +450,8 @@ int device_id, display_help = 0;
     ao->b_revert = 0;
     ao->b_changed_mixing = 0;
 
+    global_ao->no_persistent_volume = true;
+
     if (device_id == 0) {
         /* Find the ID of the default Device. */
         err = GetAudioProperty(kAudioObjectSystemObject,
