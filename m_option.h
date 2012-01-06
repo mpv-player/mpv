@@ -338,6 +338,11 @@ struct m_option {
 // The option should be set during command line pre-parsing
 #define M_OPT_PRE_PARSE         (1 << 6)
 
+// Accept an option without parameter, even if the option type normally requires
+// a parameter. The option value will be set to a default value.
+// For m_option_type_choice, the first listed choice will be used.
+#define M_OPT_IMPLICIT_DEFAULT  (1 << 7)
+
 // These are kept for compatibility with older code.
 #define CONF_MIN                M_OPT_MIN
 #define CONF_MAX                M_OPT_MAX
