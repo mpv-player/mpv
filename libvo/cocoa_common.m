@@ -368,6 +368,7 @@ void create_menu()
         [self setLevel:s->fullscreen_window_level];
         vo_fs = VO_TRUE;
         vo_cocoa_display_cursor(0);
+        [self setMovableByWindowBackground: NO];
     } else {
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
         [self setHasShadow:YES];
@@ -382,6 +383,7 @@ void create_menu()
         [self setLevel:s->windowed_window_level];
         vo_fs = VO_FALSE;
         vo_cocoa_display_cursor(1);
+        [self setMovableByWindowBackground: YES];
     }
 }
 
@@ -397,6 +399,12 @@ void create_menu()
     // otherwise we are in trouble if the
     // KEY_CLOSE_WIN handler is disabled
     return NO;
+}
+
+- (BOOL) isMovableByWindowBackground
+{
+    // this is only valid as a starting value. it will be rewritten in the -fullscreen method.
+    return !vo_fs;
 }
 
 - (void) handleQuitEvent:(NSAppleEventDescriptor*)e withReplyEvent:(NSAppleEventDescriptor*)r
