@@ -1336,6 +1336,8 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
         mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "%s\r", line);
     }
     free(line);
+
+    mpctx->status_printed = true;
 }
 
 struct stream_dump_progress {
@@ -2970,6 +2972,48 @@ static double update_video(struct MPContext *mpctx)
     return frame_time;
 }
 
+static int get_cache_fill(struct MPContext *mpctx)
+{
+#ifdef CONFIG_STREAM_CACHE
+    if (stream_cache_size > 0)
+        return cache_fill_status(mpctx->stream);
+#endif
+    return -1;
+}
+
+static void update_pause_message(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+
+    if (opts->quiet)
+        return;
+
+    int cache_fill = get_cache_fill(mpctx);
+    bool cache_changed = cache_fill != mpctx->paused_cache_fill;
+
+    if (!mpctx->status_printed && !cache_changed)
+        return;
+
+    char *msg = mp_gtext("  =====  PAUSE  =====");
+    char *tmpmem = NULL;
+    if (cache_fill >= 0)
+        msg = tmpmem = talloc_asprintf(NULL, "%s %d%%", msg, cache_fill);
+
+    if (opts->term_osd && !mpctx->sh_video) {
+        set_osd_msg(OSD_MSG_PAUSE, 1, 0, "%s", msg);
+        update_osd_msg(mpctx);
+    } else {
+        if (mpctx->status_printed)
+            mp_msg(MSGT_CPLAYER, MSGL_STATUS, "\n");
+        mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%s\r", msg);
+    }
+
+    mpctx->paused_cache_fill = cache_fill;
+    mpctx->status_printed = false;
+
+    talloc_free(tmpmem);
+}
+
 void pause_player(struct MPContext *mpctx)
 {
     if (mpctx->paused)
@@ -2984,6 +3028,13 @@ void pause_player(struct MPContext *mpctx)
 
     if (mpctx->ao && mpctx->sh_audio)
         ao_pause(mpctx->ao);    // pause audio, keep data if possible
+
+    mpctx->paused_cache_fill = get_cache_fill(mpctx);
+    mpctx->status_printed = true;
+    update_pause_message(mpctx);
+
+    if (!mpctx->opts.quiet)
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
 }
 
 void unpause_player(struct MPContext *mpctx)
@@ -3028,21 +3079,9 @@ void add_step_frame(struct MPContext *mpctx)
 
 static void pause_loop(struct MPContext *mpctx)
 {
-    struct MPOpts *opts = &mpctx->opts;
     mp_cmd_t *cmd;
-#ifdef CONFIG_STREAM_CACHE
-    int old_cache_fill = stream_cache_size > 0 ?
-                         cache_fill_status(mpctx->stream) : 0;
-#endif
-    if (!opts->quiet) {
-        if (opts->term_osd && !mpctx->sh_video) {
-            set_osd_tmsg(OSD_MSG_PAUSE, 1, 0, "  =====  PAUSE  =====");
-            update_osd_msg(mpctx);
-        } else
-            mp_msg(MSGT_CPLAYER, MSGL_STATUS, "\n%s\r",
-                   mp_gtext("  =====  PAUSE  ====="));
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
-    }
+
+    update_pause_message(mpctx);
 
     while ((cmd = mp_input_get_cmd(mpctx->input, 20, 1)) == NULL
            || cmd->id == MP_CMD_SET_MOUSE_POS || cmd->pausing == 4) {
@@ -3059,23 +3098,7 @@ static void pause_loop(struct MPContext *mpctx)
         vo_osd_changed(hack);
         if (hack || mpctx->sh_video && mpctx->video_out->want_redraw)
             break;
-#ifdef CONFIG_STREAM_CACHE
-        if (!opts->quiet && stream_cache_size > 0) {
-            int new_cache_fill = cache_fill_status(mpctx->stream);
-            if (new_cache_fill != old_cache_fill) {
-                if (opts->term_osd && !mpctx->sh_video) {
-                    set_osd_tmsg(OSD_MSG_PAUSE, 1, 0, "%s %d%%",
-                                 mp_gtext("  =====  PAUSE  ====="),
-                                 new_cache_fill);
-                    update_osd_msg(mpctx);
-                } else
-                    mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%s %d%%\r",
-                           mp_gtext("  =====  PAUSE  ====="),
-                           new_cache_fill);
-                old_cache_fill = new_cache_fill;
-            }
-        }
-#endif
+        update_pause_message(mpctx);
     }
 }
 
@@ -3960,6 +3983,7 @@ int main(int argc, char *argv[])
         .set_of_sub_pos = -1,
         .file_format = DEMUXER_TYPE_UNKNOWN,
         .last_dvb_step = 1,
+        .paused_cache_fill = -1,
     };
 
     InitTimer();
