@@ -38,12 +38,14 @@ float soft_vol_max = 110.0;
 // Called after the audio filter chain is built or rebuilt.
 void mixer_reinit(mixer_t *mixer)
 {
-    if (mixer->restore_softvol) {
+    if (!mixer->ao)
+        return;
+    if (mixer->restore_volume) {
         int muted = mixer->muted;
-        mixer_setvolume(mixer, mixer->softvol_l, mixer->softvol_r);
+        mixer_setvolume(mixer, mixer->restore_vol_l, mixer->restore_vol_r);
         mixer->muted = muted;
     }
-    if (mixer->balance != 0) {
+    if (mixer->restore_balance) {
         mixer_setbalance(mixer, mixer->balance);
     }
 }
@@ -81,17 +83,21 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
     vol.right = r;
     vol.left = l;
     if (mixer->ao) {
-        if (soft_vol ||
-            CONTROL_OK != ao_control(mixer->ao, AOCONTROL_SET_VOLUME, &vol))
-        {
+        bool use_softvol = soft_vol;
+        if (!use_softvol) {
+            if (CONTROL_OK != ao_control(mixer->ao, AOCONTROL_SET_VOLUME, &vol))
+            {
+                use_softvol = true;
+            } else {
+                mixer->restore_volume = mixer->ao->no_persistent_volume;
+            }
+        }
+        if (use_softvol) {
             if (!mixer->afilter)
                 return;
             // af_volume uses values in dB
             float db_vals[AF_NCH];
             int i;
-            mixer->softvol_l = l;
-            mixer->softvol_r = r;
-            mixer->restore_softvol = 1;
             db_vals[0] = (l / 100.0) * (soft_vol_max / 100.0);
             db_vals[1] = (r / 100.0) * (soft_vol_max / 100.0);
             for (i = 2; i < AF_NCH; i++)
@@ -102,16 +108,20 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
             {
                 mp_tmsg(MSGT_GLOBAL, MSGL_INFO,
                     "[Mixer] No hardware mixing, inserting volume filter.\n");
-                if (af_add(mixer->afilter, "volume")) {
-                    if (!af_control_any_rev(mixer->afilter,
-                            AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, db_vals))
-                    {
-                        mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
-                                "[Mixer] No volume control available.\n");
-                        return;
-                    }
+                if (!(af_add(mixer->afilter, "volume")
+                      && af_control_any_rev(mixer->afilter,
+                            AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, db_vals)))
+                {
+                    mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
+                            "[Mixer] No volume control available.\n");
+                    return;
                 }
             }
+            mixer->restore_volume = true;
+        }
+        if (mixer->restore_volume) {
+            mixer->restore_vol_l = l;
+            mixer->restore_vol_r = r;
         }
     }
     mixer->muted = 0;
@@ -181,6 +191,7 @@ void mixer_setbalance(mixer_t *mixer, float val)
         return;
 
     mixer->balance = val;
+    mixer->restore_balance = true;
 
     if (af_control_any_rev(mixer->afilter,
                            AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val))
@@ -189,7 +200,7 @@ void mixer_setbalance(mixer_t *mixer, float val)
     if (!(af_pan_balance = af_add(mixer->afilter, "pan"))) {
         mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
                 "[Mixer] No balance control available.\n");
-        mixer->balance = 0;
+        mixer->restore_balance = false;
         return;
     }
 

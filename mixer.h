@@ -19,6 +19,8 @@
 #ifndef MPLAYER_MIXER_H
 #define MPLAYER_MIXER_H
 
+#include <stdbool.h>
+
 #include "libaf/af.h"
 #include "libao2/audio_out.h"
 
@@ -33,9 +35,10 @@ typedef struct mixer_s {
     int volstep;
     int muted;
     float last_l, last_r;
-    float softvol_l, softvol_r;
-    int restore_softvol;
+    float restore_vol_l, restore_vol_r;
+    bool restore_volume;
     float balance;
+    bool restore_balance;
 } mixer_t;
 
 void mixer_reinit(mixer_t *mixer);
