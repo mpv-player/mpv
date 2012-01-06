@@ -680,10 +680,8 @@ static int mp_property_pause(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_STEP_DOWN:
         if (mpctx->paused) {
             unpause_player(mpctx);
-            mpctx->osd_function = OSD_PLAY;
         } else {
             pause_player(mpctx);
-            mpctx->osd_function = OSD_PAUSE;
         }
         return M_PROPERTY_OK;
     default:
