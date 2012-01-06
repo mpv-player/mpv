@@ -907,7 +907,15 @@ const m_option_t mplayer_opts[]={
     OPT_STRING("rtc-device", rtc_device, 0),
 #endif
 
-    OPT_MAKE_FLAGS("term-osd", term_osd, 0),
+    OPT_CHOICE("term-osd", term_osd, M_OPT_IMPLICIT_DEFAULT,
+               ({"force", 1},
+                {"auto", 2},
+                {"off", 0})),
+
+    // set term_osd to 0
+    // this is for compatibility
+    {"noterm-osd", NULL, &m_option_type_flag, 0, 1, 0, NULL, 1, offsetof(struct MPOpts, term_osd)},
+
     OPT_STRING("term-osd-esc", term_osd_esc, 0),
     OPT_STRING("playing-msg", playing_msg, 0),
 

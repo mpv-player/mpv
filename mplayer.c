@@ -1610,7 +1610,7 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char *name,
     if (opts->osd_level < 1)
         return;
 
-    if (mpctx->sh_video) {
+    if (mpctx->sh_video && opts->term_osd != 1) {
         mpctx->osd_visible = (GetTimerMS() + 1000) | 1;
         vo_osd_progbar_type = type;
         vo_osd_progbar_value = 256 * (val - min) / (max - min);
@@ -1665,25 +1665,30 @@ static void update_osd_msg(struct MPContext *mpctx)
     if (mpctx->add_osd_seek_info) {
         double percentage = get_percent_pos(mpctx);
         set_osd_bar(mpctx, 0, "Position", 0, 100, percentage);
-        if (mpctx->sh_video)
+        if (mpctx->sh_video && opts->term_osd != 1)
             mpctx->osd_show_percentage_until = (GetTimerMS() + 1000) | 1;
         mpctx->add_osd_seek_info = false;
     }
 
     // Look if we have a msg
     if ((msg = get_osd_msg(mpctx))) {
-        if (strcmp(osd->osd_text, msg->msg)) {
-            osd_set_text(osd, msg->msg);
-            if (mpctx->sh_video)
+        if (mpctx->sh_video && opts->term_osd != 1) {
+            if (strcmp(osd->osd_text, msg->msg)) {
+                osd_set_text(osd, msg->msg);
                 vo_osd_changed(OSDTYPE_OSD);
-            else if (opts->term_osd)
+            }
+        } else if (opts->term_osd) {
+            if (strcmp(mpctx->terminal_osd_text, msg->msg)) {
+                talloc_free(mpctx->terminal_osd_text);
+                mpctx->terminal_osd_text = talloc_strdup(mpctx, msg->msg);
                 mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%s%s\n", opts->term_osd_esc,
-                       msg->msg);
+                       mpctx->terminal_osd_text);
+            }
         }
         return;
     }
 
-    if (mpctx->sh_video) {
+    if (mpctx->sh_video && opts->term_osd != 1) {
         // fallback on the timer
         if (opts->osd_level >= 2) {
             int len = get_time_length(mpctx);
@@ -1748,8 +1753,8 @@ static void update_osd_msg(struct MPContext *mpctx)
     }
 
     // Clear the term osd line
-    if (opts->term_osd && osd->osd_text[0]) {
-        osd->osd_text[0] = 0;
+    if (opts->term_osd && mpctx->terminal_osd_text[0]) {
+        mpctx->terminal_osd_text[0] = '\0';
         printf("%s\n", opts->term_osd_esc);
     }
 }
@@ -3962,6 +3967,7 @@ int main(int argc, char *argv[])
         .file_format = DEMUXER_TYPE_UNKNOWN,
         .last_dvb_step = 1,
         .paused_cache_fill = -1,
+        .terminal_osd_text = talloc_strdup(mpctx, ""),
     };
 
     InitTimer();

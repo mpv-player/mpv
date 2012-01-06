@@ -30,7 +30,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .edition_id = -1,
         .user_correct_pts = -1,
         .initial_audio_sync = 1,
-        .term_osd = 1,
+        .term_osd = 2,
         .term_osd_esc = "\x1b[A\r\x1b[K",
         .consolecontrols = 1,
         .doubleclick_time = 300,
