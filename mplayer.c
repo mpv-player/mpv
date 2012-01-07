@@ -3107,25 +3107,6 @@ static void pause_loop(struct MPContext *mpctx)
     }
 }
 
-
-// Find the right mute status and record position for new file position
-static void edl_seek_reset(MPContext *mpctx)
-{
-    mpctx->edl_muted = 0;
-    next_edl_record = edl_records;
-
-    while (next_edl_record) {
-        if (next_edl_record->start_sec >= get_current_time(mpctx))
-            break;
-
-        if (next_edl_record->action == EDL_MUTE)
-            mpctx->edl_muted = !mpctx->edl_muted;
-        next_edl_record = next_edl_record->next;
-    }
-    mixer_setmuted(&mpctx->mixer, mpctx->edl_muted || mpctx->user_muted);
-}
-
-
 // Execute EDL command for the current position if one exists
 static void edl_update(MPContext *mpctx)
 {
@@ -3149,9 +3130,7 @@ static void edl_update(MPContext *mpctx)
                    "[%f], length [%f]\n", next_edl_record->start_sec,
                    next_edl_record->stop_sec, next_edl_record->length_sec);
         } else if (next_edl_record->action == EDL_MUTE) {
-            mpctx->edl_muted = !mpctx->edl_muted;
-            mixer_setmuted(&mpctx->mixer, mpctx->edl_muted || mpctx->user_muted);
-            mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_MUTE: [%f]\n",
+            mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_MUTE: [%f] ignored\n",
                    next_edl_record->start_sec);
         }
         next_edl_record = next_edl_record->next;
@@ -3204,8 +3183,6 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
         current_module = "seek_vobsub_reset";
         vobsub_seek(vo_vobsub, mpctx->sh_video->pts);
     }
-
-    edl_seek_reset(mpctx);
 
     mpctx->hrseek_active = false;
     mpctx->hrseek_framedrop = false;
