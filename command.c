@@ -763,14 +763,14 @@ static int mp_property_mute(m_option_t *prop, int action, void *arg,
         if (!arg)
             return M_PROPERTY_ERROR;
         mixer_setmuted(&mpctx->mixer, *(int *) arg);
-        mpctx->user_muted = mpctx->mixer.muted;
+        mpctx->user_muted = mixer_getmuted(&mpctx->mixer);
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         if (mpctx->edl_muted)
             return M_PROPERTY_DISABLED;
         mixer_mute(&mpctx->mixer);
-        mpctx->user_muted = mpctx->mixer.muted;
+        mpctx->user_muted = mixer_getmuted(&mpctx->mixer);
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
         if (!arg)
@@ -780,7 +780,8 @@ static int mp_property_mute(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_OK;
         }
     default:
-        return m_property_flag(prop, action, arg, &mpctx->mixer.muted);
+        return m_property_flag_ro(prop, action, arg,
+                                  mixer_getmuted(&mpctx->mixer));
 
     }
 }

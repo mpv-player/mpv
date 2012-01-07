@@ -67,7 +67,7 @@ void mixer_uninit(mixer_t *mixer)
     // One complication is that the mute state should survive audio
     // reinitialization (e.g. when switching to a new file), so we have to be
     // sure mixer_reinit() will restore the mute state.
-    if (mixer->muted) {
+    if (mixer_getmuted(mixer)) {
         // avoid playing the rest of the audio buffer at restored volume
         ao_reset(mixer->ao);
         mixer_setmuted(mixer, false);
@@ -164,11 +164,17 @@ void mixer_getvolume(mixer_t *mixer, float *l, float *r)
     *l = 0;
     *r = 0;
     if (mixer->ao) {
+        float real_l, real_r;
+        internal_getvolume(mixer, &real_l, &real_r);
+        // consider the case when the system mixer volumes change independently
+        if (real_l != 0 || real_r != 0)
+            mixer->muted = false;
         if (mixer->muted) {
             *l = mixer->last_l;
             *r = mixer->last_r;
         } else {
-            internal_getvolume(mixer, l, r);
+            *l = real_l;
+            *r = real_r;
         }
     }
 }
@@ -199,14 +205,23 @@ void mixer_getbothvolume(mixer_t *mixer, float *b)
 
 void mixer_mute(mixer_t *mixer)
 {
-    mixer_setmuted(mixer, !mixer->muted);
+    mixer_setmuted(mixer, !mixer_getmuted(mixer));
+}
+
+bool mixer_getmuted(mixer_t *mixer)
+{
+    // this call will also check whether mute is still active, and "fix" it
+    float l, r;
+    mixer_getvolume(mixer, &l, &r);
+    return mixer->muted;
 }
 
 void mixer_setmuted(mixer_t *mixer, bool mute)
 {
-    if (mute == mixer->muted)
+    bool muted = mixer_getmuted(mixer);
+    if (mute == muted)
         return;
-    if (mixer->muted) {
+    if (muted) {
         mixer_setvolume(mixer, mixer->last_l, mixer->last_r);
     } else {
         mixer_getvolume(mixer, &mixer->last_l, &mixer->last_r);

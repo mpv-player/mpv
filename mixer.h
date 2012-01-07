@@ -33,7 +33,7 @@ typedef struct mixer_s {
     struct ao *ao;
     af_stream_t *afilter;
     int volstep;
-    int muted;
+    bool muted;
     float last_l, last_r;
     float restore_vol_l, restore_vol_r;
     bool restore_volume;
@@ -49,6 +49,7 @@ void mixer_incvolume(mixer_t *mixer);
 void mixer_decvolume(mixer_t *mixer);
 void mixer_getbothvolume(mixer_t *mixer, float *b);
 void mixer_mute(mixer_t *mixer);
+bool mixer_getmuted(mixer_t *mixer);
 void mixer_setmuted(mixer_t *mixer, bool mute);
 void mixer_getbalance(mixer_t *mixer, float *bal);
 void mixer_setbalance(mixer_t *mixer, float bal);
