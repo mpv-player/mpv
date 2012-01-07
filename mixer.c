@@ -45,8 +45,33 @@ void mixer_reinit(mixer_t *mixer)
         mixer_setvolume(mixer, mixer->restore_vol_l, mixer->restore_vol_r);
         mixer->muted = muted;
     }
+    if (mixer->muted) {
+        // undo mixer_uninit()
+        mixer_setvolume(mixer, 0, 0);
+        mixer->muted = true;
+    }
     if (mixer->restore_balance) {
         mixer_setbalance(mixer, mixer->balance);
+    }
+}
+
+// Called before the audio output is uninitialized.
+// Note that this doesn't necessarily terminate the mixer_t instance, and it's
+// possible that mixer_reinit() will be called later.
+void mixer_uninit(mixer_t *mixer)
+{
+    if (!mixer->ao)
+        return;
+    // The player is supposed to turn off the mute state when the player
+    // terminates. No other attempts at restoring the volume are done.
+    // One complication is that the mute state should survive audio
+    // reinitialization (e.g. when switching to a new file), so we have to be
+    // sure mixer_reinit() will restore the mute state.
+    if (mixer->muted) {
+        // avoid playing the rest of the audio buffer at restored volume
+        ao_reset(mixer->ao);
+        mixer_setmuted(mixer, false);
+        mixer->muted = true;
     }
 }
 
@@ -124,7 +149,7 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
             mixer->restore_vol_r = r;
         }
     }
-    mixer->muted = 0;
+    mixer->muted = false;
 }
 
 void mixer_incvolume(mixer_t *mixer)
@@ -162,12 +187,19 @@ void mixer_getbothvolume(mixer_t *mixer, float *b)
 
 void mixer_mute(mixer_t *mixer)
 {
+    mixer_setmuted(mixer, !mixer->muted);
+}
+
+void mixer_setmuted(mixer_t *mixer, bool mute)
+{
+    if (mute == mixer->muted)
+        return;
     if (mixer->muted) {
         mixer_setvolume(mixer, mixer->last_l, mixer->last_r);
     } else {
         mixer_getvolume(mixer, &mixer->last_l, &mixer->last_r);
         mixer_setvolume(mixer, 0, 0);
-        mixer->muted = 1;
+        mixer->muted = true;
     }
 }
 

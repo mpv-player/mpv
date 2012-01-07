@@ -42,12 +42,14 @@ typedef struct mixer_s {
 } mixer_t;
 
 void mixer_reinit(mixer_t *mixer);
+void mixer_uninit(mixer_t *mixer);
 void mixer_getvolume(mixer_t *mixer, float *l, float *r);
 void mixer_setvolume(mixer_t *mixer, float l, float r);
 void mixer_incvolume(mixer_t *mixer);
 void mixer_decvolume(mixer_t *mixer);
 void mixer_getbothvolume(mixer_t *mixer, float *b);
 void mixer_mute(mixer_t *mixer);
+void mixer_setmuted(mixer_t *mixer, bool mute);
 void mixer_getbalance(mixer_t *mixer, float *bal);
 void mixer_setbalance(mixer_t *mixer, float bal);
 

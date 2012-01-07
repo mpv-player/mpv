@@ -762,8 +762,7 @@ static int mp_property_mute(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_DISABLED;
         if (!arg)
             return M_PROPERTY_ERROR;
-        if ((!!*(int *) arg) != mpctx->mixer.muted)
-            mixer_mute(&mpctx->mixer);
+        mixer_setmuted(&mpctx->mixer, *(int *) arg);
         mpctx->user_muted = mpctx->mixer.muted;
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
