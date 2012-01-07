@@ -75,7 +75,7 @@ void mixer_uninit(mixer_t *mixer)
     }
 }
 
-void mixer_getvolume(mixer_t *mixer, float *l, float *r)
+static void internal_getvolume(mixer_t *mixer, float *l, float *r)
 {
     ao_control_vol_t vol;
     *l = 0;
@@ -102,8 +102,15 @@ void mixer_getvolume(mixer_t *mixer, float *l, float *r)
     }
 }
 
+static float clip_vol(float v)
+{
+    return v > 100 ? 100 : (v < 0 ? 0 : v);
+}
+
 void mixer_setvolume(mixer_t *mixer, float l, float r)
 {
+    l = clip_vol(l);
+    r = clip_vol(r);
     ao_control_vol_t vol;
     vol.right = r;
     vol.left = l;
@@ -152,30 +159,35 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
     mixer->muted = false;
 }
 
-void mixer_incvolume(mixer_t *mixer)
+void mixer_getvolume(mixer_t *mixer, float *l, float *r)
+{
+    *l = 0;
+    *r = 0;
+    if (mixer->ao) {
+        if (mixer->muted) {
+            *l = mixer->last_l;
+            *r = mixer->last_r;
+        } else {
+            internal_getvolume(mixer, l, r);
+        }
+    }
+}
+
+static void mixer_addvolume(mixer_t *mixer, float d)
 {
     float mixer_l, mixer_r;
     mixer_getvolume(mixer, &mixer_l, &mixer_r);
-    mixer_l += mixer->volstep;
-    if (mixer_l > 100)
-        mixer_l = 100;
-    mixer_r += mixer->volstep;
-    if (mixer_r > 100)
-        mixer_r = 100;
-    mixer_setvolume(mixer, mixer_l, mixer_r);
+    mixer_setvolume(mixer, mixer_l + d, mixer_r + d);
+}
+
+void mixer_incvolume(mixer_t *mixer)
+{
+    mixer_addvolume(mixer, +mixer->volstep);
 }
 
 void mixer_decvolume(mixer_t *mixer)
 {
-    float mixer_l, mixer_r;
-    mixer_getvolume(mixer, &mixer_l, &mixer_r);
-    mixer_l -= mixer->volstep;
-    if (mixer_l < 0)
-        mixer_l = 0;
-    mixer_r -= mixer->volstep;
-    if (mixer_r < 0)
-        mixer_r = 0;
-    mixer_setvolume(mixer, mixer_l, mixer_r);
+    mixer_addvolume(mixer, -mixer->volstep);
 }
 
 void mixer_getbothvolume(mixer_t *mixer, float *b)
