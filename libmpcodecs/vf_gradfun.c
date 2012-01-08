@@ -41,7 +41,12 @@
 #include "libavutil/avutil.h"
 #include "ffmpeg_files/x86_cpu.h"
 
+#include "m_option.h"
+#include "m_struct.h"
+
 struct vf_priv_s {
+    float cfg_thresh;
+    int cfg_radius;
     int thresh;
     int radius;
     uint16_t *buf;
@@ -49,6 +54,9 @@ struct vf_priv_s {
                         int width, int thresh, const uint16_t *dithers);
     void (*blur_line)(uint16_t *dc, uint16_t *buf, uint16_t *buf1,
                       uint8_t *src, int sstride, int width);
+} const vf_priv_dflt = {
+  .cfg_thresh = 1.2,
+  .cfg_radius = 16,
 };
 
 static const uint16_t __attribute__((aligned(16))) pw_7f[8] = {127,127,127,127,127,127,127,127};
@@ -368,20 +376,14 @@ static void uninit(struct vf_instance *vf)
 
 static int vf_open(vf_instance_t *vf, char *args)
 {
-    float thresh = 1.2;
-    int radius = 16;
-
     vf->get_image=get_image;
     vf->put_image=put_image;
     vf->query_format=query_format;
     vf->config=config;
     vf->uninit=uninit;
-    vf->priv=malloc(sizeof(struct vf_priv_s));
-    memset(vf->priv, 0, sizeof(struct vf_priv_s));
 
-    if (args) sscanf(args, "%f:%d", &thresh, &radius);
-    vf->priv->thresh = (1<<15)/av_clipf(thresh,0.51,255);
-    vf->priv->radius = av_clip((radius+1)&~1,4,32);
+    vf->priv->thresh = (1<<15)/av_clipf(vf->priv->cfg_thresh,0.51,255);
+    vf->priv->radius = av_clip((vf->priv->cfg_radius+1)&~1,4,32);
 
     vf->priv->blur_line = blur_line_c;
     vf->priv->filter_line = filter_line_c;
@@ -401,11 +403,26 @@ static int vf_open(vf_instance_t *vf, char *args)
     return 1;
 }
 
+#undef ST_OFF
+#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+static const m_option_t vf_opts_fields[] = {
+    {"strength", ST_OFF(cfg_thresh), CONF_TYPE_FLOAT, M_OPT_RANGE, 0.51, 255, NULL},
+    {"radius", ST_OFF(cfg_radius), CONF_TYPE_INT, M_OPT_RANGE, 4, 32, NULL},
+    { NULL, NULL, 0, 0, 0, 0,  NULL }
+};
+
+static const m_struct_t vf_opts = {
+    "gradfun",
+    sizeof(struct vf_priv_s),
+    &vf_priv_dflt,
+    vf_opts_fields
+};
+
 const vf_info_t vf_info_gradfun = {
     "gradient deband",
     "gradfun",
     "Loren Merritt",
     "",
     vf_open,
-    NULL
+    &vf_opts
 };
