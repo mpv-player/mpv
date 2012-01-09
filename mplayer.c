@@ -62,7 +62,6 @@
 #include "m_option.h"
 #include "m_config.h"
 #include "mplayer.h"
-#include "access_mpcontext.h"
 #include "m_property.h"
 
 #include "libavutil/avstring.h"
@@ -347,36 +346,6 @@ int use_filename_title;
 #include "command.h"
 
 #include "metadata.h"
-
-void *mpctx_get_video_out(MPContext *mpctx)
-{
-    return mpctx->video_out;
-}
-
-void *mpctx_get_demuxer(MPContext *mpctx)
-{
-    return mpctx->demuxer;
-}
-
-void *mpctx_get_playtree_iter(MPContext *mpctx)
-{
-    return mpctx->playtree_iter;
-}
-
-void *mpctx_get_mixer(MPContext *mpctx)
-{
-    return &mpctx->mixer;
-}
-
-int mpctx_get_global_sub_size(MPContext *mpctx)
-{
-    return mpctx->global_sub_size;
-}
-
-int mpctx_get_osd_function(MPContext *mpctx)
-{
-    return mpctx->osd_function;
-}
 
 static float get_relative_time(struct MPContext *mpctx)
 {
