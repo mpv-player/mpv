@@ -57,7 +57,7 @@ struct vf_priv_s {
     void (*blur_line)(uint16_t *dc, uint16_t *buf, uint16_t *buf1,
                       uint8_t *src, int sstride, int width);
 } const vf_priv_dflt = {
-  .cfg_thresh = 1.2,
+  .cfg_thresh = 1.5,
   .cfg_radius = -1,
   .cfg_size = -1,
 };
@@ -401,7 +401,7 @@ static int vf_open(vf_instance_t *vf, char *args)
     }
 
     if (!have_radius && !have_size)
-        vf->priv->cfg_radius = 16;
+        vf->priv->cfg_size = 1.0;
 
     vf->priv->thresh = (1<<15)/av_clipf(vf->priv->cfg_thresh,0.51,255);
 
