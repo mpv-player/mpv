@@ -99,7 +99,7 @@ SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
 SRCS_COMMON-$(LIVE555)               += libmpdemux/demux_rtp.cpp \
                                         libmpdemux/demux_rtp_codec.cpp \
                                         stream/stream_live555.c
-SRCS_COMMON-$(MACOSX_FINDER)         += osdep/macosx_finder_args.c
+SRCS_COMMON-$(MACOSX_FINDER)         += osdep/macosx_finder_args.m
 SRCS_COMMON-$(MNG)                   += libmpdemux/demux_mng.c
 SRCS_COMMON-$(MPG123)                += libmpcodecs/ad_mpg123.c
 
@@ -524,7 +524,7 @@ OBJS_MPLAYER-$(PE_EXECUTABLE) += osdep/mplayer-rc.o
 OBJS_MPLAYER   += $(OBJS_MPLAYER-yes)
 
 MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
-DEP_FILES = $(patsubst %.S,%.d,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d))))
+DEP_FILES = $(patsubst %.S,%.d,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON:.m=.d) $(SRCS_MPLAYER:.m=.d))))
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 

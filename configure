@@ -3579,7 +3579,7 @@ echocheck "Mac OS X Finder Support"
 def_macosx_finder='#undef CONFIG_MACOSX_FINDER'
 if test "$_macosx_finder" = yes ; then
   def_macosx_finder='#define CONFIG_MACOSX_FINDER 1'
-  extra_ldflags="$extra_ldflags -framework Carbon"
+  extra_ldflags="$extra_ldflags -framework Cocoa"
 fi
 echores "$_macosx_finder"
 
@@ -3588,7 +3588,6 @@ def_macosx_bundle='#undef CONFIG_MACOSX_BUNDLE'
 test "$_macosx_bundle" = auto && _macosx_bundle=$_macosx_finder
 if test "$_macosx_bundle" = yes ; then
   def_macosx_bundle='#define CONFIG_MACOSX_BUNDLE 1'
-  extra_ldflags="$extra_ldflags -framework Carbon"
 fi
 echores "$_macosx_bundle"
 
