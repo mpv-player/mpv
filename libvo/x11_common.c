@@ -46,6 +46,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <X11/keysym.h>
 
 #ifdef CONFIG_XSS
 #include <X11/extensions/scrnsaver.h>
@@ -536,42 +537,40 @@ void vo_uninit(struct vo_x11_state *x11)
     talloc_free(x11);
 }
 
-#include "wskeys.h"
-
 static const struct mp_keymap keymap[] = {
     // special keys
-    {wsPause, KEY_PAUSE}, {wsEscape, KEY_ESC}, {wsBackSpace, KEY_BS},
-    {wsTab, KEY_TAB}, {wsEnter, KEY_ENTER},
+    {XK_Pause, KEY_PAUSE}, {XK_Escape, KEY_ESC}, {XK_BackSpace, KEY_BS},
+    {XK_Tab, KEY_TAB}, {XK_Return, KEY_ENTER},
     {XK_Menu, KEY_MENU}, {XK_Print, KEY_PRINT},
 
     // cursor keys
-    {wsLeft, KEY_LEFT}, {wsRight, KEY_RIGHT}, {wsUp, KEY_UP}, {wsDown, KEY_DOWN},
+    {XK_Left, KEY_LEFT}, {XK_Right, KEY_RIGHT}, {XK_Up, KEY_UP}, {XK_Down, KEY_DOWN},
 
     // navigation block
-    {wsInsert, KEY_INSERT}, {wsDelete, KEY_DELETE}, {wsHome, KEY_HOME}, {wsEnd, KEY_END},
-    {wsPageUp, KEY_PAGE_UP}, {wsPageDown, KEY_PAGE_DOWN},
+    {XK_Insert, KEY_INSERT}, {XK_Delete, KEY_DELETE}, {XK_Home, KEY_HOME}, {XK_End, KEY_END},
+    {XK_Page_Up, KEY_PAGE_UP}, {XK_Page_Down, KEY_PAGE_DOWN},
 
     // F-keys
-    {wsF1, KEY_F+1}, {wsF2, KEY_F+2}, {wsF3, KEY_F+3}, {wsF4, KEY_F+4},
-    {wsF5, KEY_F+5}, {wsF6, KEY_F+6}, {wsF7, KEY_F+7}, {wsF8, KEY_F+8},
-    {wsF9, KEY_F+9}, {wsF10, KEY_F+10}, {wsF11, KEY_F+11}, {wsF12, KEY_F+12},
+    {XK_F1, KEY_F+1}, {XK_F2, KEY_F+2}, {XK_F3, KEY_F+3}, {XK_F4, KEY_F+4},
+    {XK_F5, KEY_F+5}, {XK_F6, KEY_F+6}, {XK_F7, KEY_F+7}, {XK_F8, KEY_F+8},
+    {XK_F9, KEY_F+9}, {XK_F10, KEY_F+10}, {XK_F11, KEY_F+11}, {XK_F12, KEY_F+12},
 
     // numpad independent of numlock
-    {wsGrayMinus, '-'}, {wsGrayPlus, '+'}, {wsGrayMul, '*'}, {wsGrayDiv, '/'},
-    {wsGrayEnter, KEY_KPENTER},
+    {XK_KP_Subtract, '-'}, {XK_KP_Add, '+'}, {XK_KP_Multiply, '*'}, {XK_KP_Divide, '/'},
+    {XK_KP_Enter, KEY_KPENTER},
 
     // numpad with numlock
-    {wsGray0, KEY_KP0}, {wsGray1, KEY_KP1}, {wsGray2, KEY_KP2},
-    {wsGray3, KEY_KP3}, {wsGray4, KEY_KP4}, {wsGray5, KEY_KP5},
-    {wsGray6, KEY_KP6}, {wsGray7, KEY_KP7}, {wsGray8, KEY_KP8},
-    {wsGray9, KEY_KP9}, {wsGrayDecimal, KEY_KPDEC},
-    {wsGraySeparator, KEY_KPDEC},
+    {XK_KP_0, KEY_KP0}, {XK_KP_1, KEY_KP1}, {XK_KP_2, KEY_KP2},
+    {XK_KP_3, KEY_KP3}, {XK_KP_4, KEY_KP4}, {XK_KP_5, KEY_KP5},
+    {XK_KP_6, KEY_KP6}, {XK_KP_7, KEY_KP7}, {XK_KP_8, KEY_KP8},
+    {XK_KP_9, KEY_KP9}, {XK_KP_Decimal, KEY_KPDEC},
+    {XK_KP_Separator, KEY_KPDEC},
 
     // numpad without numlock
-    {wsGrayInsert, KEY_KPINS}, {wsGrayEnd, KEY_KP1}, {wsGrayDown, KEY_KP2},
-    {wsGrayPgDn, KEY_KP3}, {wsGrayLeft, KEY_KP4}, {wsGray5Dup, KEY_KP5},
-    {wsGrayRight, KEY_KP6}, {wsGrayHome, KEY_KP7}, {wsGrayUp, KEY_KP8},
-    {wsGrayPgUp, KEY_KP9}, {wsGrayDelete, KEY_KPDEL},
+    {XK_KP_Insert, KEY_KPINS}, {XK_KP_End, KEY_KP1}, {XK_KP_Down, KEY_KP2},
+    {XK_KP_Page_Down, KEY_KP3}, {XK_KP_Left, KEY_KP4}, {XK_KP_Begin, KEY_KP5},
+    {XK_KP_Right, KEY_KP6}, {XK_KP_Home, KEY_KP7}, {XK_KP_Up, KEY_KP8},
+    {XK_KP_Page_Up, KEY_KP9}, {XK_KP_Delete, KEY_KPDEL},
 
 #ifdef XF86XK_AudioPause
     {XF86XK_MenuKB, KEY_MENU},
