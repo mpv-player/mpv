@@ -201,3 +201,35 @@ int bstr_sscanf(struct bstr str, const char *format, ...)
     talloc_free(ptr);
     return ret;
 }
+
+int bstr_parse_utf8_code_length(unsigned char b)
+{
+    if (b < 128)
+        return 1;
+    int bytes = 7 - av_log2(b ^ 255);
+    return (bytes >= 2 && bytes <= 4) ? bytes : -1;
+}
+
+int bstr_decode_utf8(struct bstr s, struct bstr *out_next)
+{
+    if (s.len == 0)
+        return -1;
+    unsigned int codepoint = s.start[0];
+    s.start++; s.len--;
+    if (codepoint >= 128) {
+        int bytes = bstr_parse_utf8_code_length(codepoint);
+        if (bytes < 0 || s.len < bytes - 1)
+            return -1;
+        codepoint &= 127 >> bytes;
+        for (int n = 1; n < bytes; n++) {
+            int tmp = s.start[0];
+            if ((tmp & 0xC0) != 0x80)
+                return -1;
+            codepoint = (codepoint << 6) | (tmp & ~0xC0);
+            s.start++; s.len--;
+        }
+    }
+    if (out_next)
+        *out_next = s;
+    return codepoint;
+}
