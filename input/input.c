@@ -229,6 +229,7 @@ static const struct key_name key_names[] = {
   { KEY_PAGE_UP, "PGUP" },
   { KEY_PAGE_DOWN, "PGDWN" },
   { KEY_ESC, "ESC" },
+  { KEY_PRINT, "PRINT" },
   { KEY_RIGHT, "RIGHT" },
   { KEY_LEFT, "LEFT" },
   { KEY_DOWN, "DOWN" },
