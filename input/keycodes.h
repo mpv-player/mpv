@@ -39,6 +39,7 @@
 #define KEY_PAGE_UP (KEY_CTRL+5)
 #define KEY_PAGE_DOWN (KEY_CTRL+6)
 #define KEY_ESC (KEY_CTRL+7)
+#define KEY_PRINT (KEY_CTRL+8)
 
 /* Control keys short name */
 #define KEY_BS KEY_BACKSPACE
