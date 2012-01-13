@@ -56,6 +56,7 @@
 #define wsEscape        0xff1b
 #define wsGrayEnter     0xff8d
 #define wsGrayPlus      0xffab
+#define wsGraySeparator 0xffac
 #define wsGrayMinus     0xffad
 #define wsGrayMul       0xffaa
 #define wsGrayDiv       0xffaf
