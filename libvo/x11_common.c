@@ -564,6 +564,7 @@ static const struct mp_keymap keymap[] = {
     {wsGray3, KEY_KP3}, {wsGray4, KEY_KP4}, {wsGray5, KEY_KP5},
     {wsGray6, KEY_KP6}, {wsGray7, KEY_KP7}, {wsGray8, KEY_KP8},
     {wsGray9, KEY_KP9}, {wsGrayDecimal, KEY_KPDEC},
+    {wsGraySeparator, KEY_KPDEC},
 
     // numpad without numlock
     {wsGrayInsert, KEY_KPINS}, {wsGrayEnd, KEY_KP1}, {wsGrayDown, KEY_KP2},
