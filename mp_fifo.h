@@ -19,8 +19,11 @@
 #ifndef MPLAYER_MP_FIFO_H
 #define MPLAYER_MP_FIFO_H
 
+#include "bstr.h"
+
 struct mp_fifo;
 void mplayer_put_key(struct mp_fifo *fifo, int code);
+void mplayer_put_key_utf8(struct mp_fifo *fifo, int mods, struct bstr code);
 // Can be freed with talloc_free()
 struct input_ctx;
 struct MPOpts;

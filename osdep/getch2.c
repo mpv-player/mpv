@@ -225,7 +225,7 @@ void getch2(struct mp_fifo *fifo)
             }
             if ((c == '[' || c == 'O') && getch2_len >= 3) {
                 int c = getch2_buf[2];
-                const short ctable[] = {
+                const int ctable[] = {
                     KEY_UP, KEY_DOWN, KEY_RIGHT, KEY_LEFT, 0,
                     KEY_END, KEY_PGDWN, KEY_HOME, KEY_PGUP, 0, 0, KEY_INS, 0, 0, 0,
                     KEY_F+1, KEY_F+2, KEY_F+3, KEY_F+4};

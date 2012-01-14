@@ -67,3 +67,13 @@ void mplayer_put_key(struct mp_fifo *fifo, int code)
         fifo->last_down_time = now;
     }
 }
+
+void mplayer_put_key_utf8(struct mp_fifo *fifo, int mods, struct bstr t)
+{
+    while (t.len) {
+        int code = bstr_decode_utf8(t, &t);
+        if (code < 0)
+            break;
+        mplayer_put_key(fifo, code | mods);
+    }
+}
