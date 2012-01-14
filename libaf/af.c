@@ -278,6 +278,11 @@ static void af_print_filter_chain(af_stream_t* s)
     mp_msg(MSGT_AFILTER, MSGL_V, "\n");
 }
 
+// Warning:
+// A failed af_reinit() leaves the audio chain behind in a useless, broken
+// state (for example, format filters that were tentatively inserted stay
+// inserted).
+// In that case, you should always rebuild the filter chain, or abort.
 int af_reinit(af_stream_t* s, af_instance_t* af)
 {
   do{
@@ -587,7 +592,9 @@ af_instance_t* af_add(af_stream_t* s, char* name){
   // Reinitalize the filter list
   if(AF_OK != af_reinit(s, s->first) ||
      AF_OK != fixup_output_format(s)){
-    free(new);
+    while (s->first)
+      af_remove(s, s->first);
+    af_init(s);
     return NULL;
   }
   return new;
