@@ -36,6 +36,9 @@ struct vo_x11_state {
     int display_is_local;
     int depthonscreen;
 
+    XIM xim;
+    XIC xic;
+
     GC vo_gc;
 
     struct xv_ck_info_s {
