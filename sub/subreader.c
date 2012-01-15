@@ -1838,6 +1838,16 @@ void sub_add_text(subtitle *sub, const char *txt, int len, double endpts) {
   if (sub->lines < SUB_MAX_TEXT &&
       strlen(sub->text[sub->lines]))
     sub->lines++;
+  if (sub->lines > 1 &&
+      strcmp(sub->text[sub->lines-1], sub->text[sub->lines-2]) == 0) {
+    // remove duplicate lines. These can happen with some
+    // "clever" ASS effects.
+    sub->lines--;
+    sub->endpts[sub->lines-1] =
+      FFMAX(sub->endpts[sub->lines-1],
+            sub->endpts[sub->lines]);
+    free(sub->text[sub->lines]);
+  }
 }
 
 /**
