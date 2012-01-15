@@ -108,6 +108,7 @@ static int init(int rate, int channels, int format, int flags) {
   const opt_t subopts[] = {
     {NULL}
   };
+  global_ao->no_persistent_volume = true;
   if (subopt_parse(ao_subdevice, subopts) != 0) {
     print_help();
     return 0;
