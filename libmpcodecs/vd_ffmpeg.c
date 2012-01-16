@@ -315,8 +315,7 @@ static int init(sh_video_t *sh)
     if (sh->bih)
         avctx->bits_per_coded_sample = sh->bih->biBitCount;
 
-    if (lavc_param->threads > 1)
-        avctx->thread_count = lavc_param->threads;
+    avctx->thread_count = lavc_param->threads;
 
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
