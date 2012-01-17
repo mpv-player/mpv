@@ -97,11 +97,11 @@ static void alsa_error_handler(const char *file, int line, const char *function,
 static int control(int cmd, void *arg)
 {
   switch(cmd) {
+  case AOCONTROL_GET_MUTE:
+  case AOCONTROL_SET_MUTE:
   case AOCONTROL_GET_VOLUME:
   case AOCONTROL_SET_VOLUME:
     {
-      ao_control_vol_t *vol = (ao_control_vol_t *)arg;
-
       int err;
       snd_mixer_t *handle;
       snd_mixer_elem_t *elem;
@@ -183,16 +183,16 @@ static int control(int cmd, void *arg)
       snd_mixer_selem_get_playback_volume_range(elem,&pmin,&pmax);
       f_multi = (100 / (float)(pmax - pmin));
 
-      if (cmd == AOCONTROL_SET_VOLUME) {
-
+      switch (cmd) {
+      case AOCONTROL_SET_VOLUME: {
+        ao_control_vol_t *vol = arg;
 	set_vol = vol->left / f_multi + pmin + 0.5;
 
 	//setting channels
 	if ((err = snd_mixer_selem_set_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, set_vol)) < 0) {
 	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Error setting left channel, %s\n",
 		 snd_strerror(err));
-	  snd_mixer_close(handle);
-	  return CONTROL_ERROR;
+	  goto mixer_error;
 	}
 	mp_msg(MSGT_AO,MSGL_DBG2,"left=%li, ", set_vol);
 
@@ -201,33 +201,54 @@ static int control(int cmd, void *arg)
 	if ((err = snd_mixer_selem_set_playback_volume(elem, SND_MIXER_SCHN_FRONT_RIGHT, set_vol)) < 0) {
 	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Error setting right channel, %s\n",
 		 snd_strerror(err));
-	  snd_mixer_close(handle);
-	  return CONTROL_ERROR;
+	  goto mixer_error;
 	}
 	mp_msg(MSGT_AO,MSGL_DBG2,"right=%li, pmin=%li, pmax=%li, mult=%f\n",
 	       set_vol, pmin, pmax, f_multi);
-
-	if (snd_mixer_selem_has_playback_switch(elem)) {
-	  int lmute = (vol->left == 0.0);
-	  int rmute = (vol->right == 0.0);
-	  if (snd_mixer_selem_has_playback_switch_joined(elem)) {
-	    lmute = rmute = lmute && rmute;
-	  } else {
-	    snd_mixer_selem_set_playback_switch(elem, SND_MIXER_SCHN_FRONT_RIGHT, !rmute);
-	  }
-	  snd_mixer_selem_set_playback_switch(elem, SND_MIXER_SCHN_FRONT_LEFT, !lmute);
-	}
+        break;
       }
-      else {
-	snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, &get_vol);
-	vol->left = (get_vol - pmin) * f_multi;
-	snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_RIGHT, &get_vol);
-	vol->right = (get_vol - pmin) * f_multi;
-
-	mp_msg(MSGT_AO,MSGL_DBG2,"left=%f, right=%f\n",vol->left,vol->right);
+      case AOCONTROL_GET_VOLUME: {
+        ao_control_vol_t *vol = arg;
+        snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, &get_vol);
+        vol->left = (get_vol - pmin) * f_multi;
+        snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_RIGHT, &get_vol);
+        vol->right = (get_vol - pmin) * f_multi;
+        mp_msg(MSGT_AO,MSGL_DBG2,"left=%f, right=%f\n",vol->left,vol->right);
+        break;
+      }
+      case AOCONTROL_SET_MUTE: {
+        bool *mute = arg;
+	if (!snd_mixer_selem_has_playback_switch(elem))
+          goto mixer_error;
+        if (!snd_mixer_selem_has_playback_switch_joined(elem)) {
+            snd_mixer_selem_set_playback_switch(
+                elem, SND_MIXER_SCHN_FRONT_RIGHT, !*mute);
+	}
+	snd_mixer_selem_set_playback_switch(elem, SND_MIXER_SCHN_FRONT_LEFT,
+                                            !*mute);
+	break;
+      }
+      case AOCONTROL_GET_MUTE: {
+        bool *mute = arg;
+        if (!snd_mixer_selem_has_playback_switch(elem))
+          goto mixer_error;
+        int tmp = 1;
+        snd_mixer_selem_get_playback_switch(elem, SND_MIXER_SCHN_FRONT_LEFT,
+                                            &tmp);
+        *mute = !tmp;
+        if (!snd_mixer_selem_has_playback_switch_joined(elem)) {
+            snd_mixer_selem_get_playback_switch(
+                elem, SND_MIXER_SCHN_FRONT_RIGHT, &tmp);
+            *mute &= !tmp;
+        }
+        break;
+      }
       }
       snd_mixer_close(handle);
       return CONTROL_OK;
+    mixer_error:
+      snd_mixer_close(handle);
+      return CONTROL_ERROR;
     }
 
   } //end switch
