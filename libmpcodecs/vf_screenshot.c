@@ -197,10 +197,20 @@ static int vf_open(vf_instance_t *vf, char *args)
     return 1;
 }
 
-
 const vf_info_t vf_info_screenshot = {
     "screenshot to file",
     "screenshot",
+    "A'rpi, Jindrich Makovicka",
+    "",
+    vf_open,
+    NULL
+};
+
+// screenshot.c will look for a filter named "screenshot_force", and not use
+// the VO based screenshot code if it's in the filter chain.
+const vf_info_t vf_info_screenshot_force = {
+    "screenshot to file (override VO based screenshot code)",
+    "screenshot_force",
     "A'rpi, Jindrich Makovicka",
     "",
     vf_open,

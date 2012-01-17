@@ -282,6 +282,19 @@ static void vf_screenshot_callback(void *pctx, struct mp_image *image)
         screenshot_request(mpctx, 0, ctx->full_window);
 }
 
+static bool force_vf(struct MPContext *mpctx)
+{
+    if (mpctx->sh_video) {
+        struct vf_instance *vf = mpctx->sh_video->vfilter;
+        while (vf) {
+            if (strcmp(vf->info->name, "screenshot_force") == 0)
+                return true;
+            vf = vf->next;
+        }
+    }
+    return false;
+}
+
 void screenshot_request(struct MPContext *mpctx, bool each_frame,
                         bool full_window)
 {
@@ -298,7 +311,9 @@ void screenshot_request(struct MPContext *mpctx, bool each_frame,
         }
 
         struct voctrl_screenshot_args args = { .full_window = full_window };
-        if (vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &args) == true) {
+        if (!force_vf(mpctx)
+            && vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &args) == true)
+        {
             screenshot_save(mpctx, args.out_image);
             free_mp_image(args.out_image);
         } else {
