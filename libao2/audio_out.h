@@ -97,10 +97,19 @@ void list_audio_out(void);
 #define AOCONTROL_SET_DEVICE 1
 #define AOCONTROL_GET_DEVICE 2
 #define AOCONTROL_QUERY_FORMAT 3 /* test for availabilty of a format */
+// Uses ao_control_vol_t* as arg.
+// If the volume controls are joint, the average of both volumes should be used.
 #define AOCONTROL_GET_VOLUME 4
 #define AOCONTROL_SET_VOLUME 5
-#define AOCONTROL_SET_PLUGIN_DRIVER 6
-#define AOCONTROL_SET_PLUGIN_LIST 7
+// Uses ao_control_vol_t* as arg.
+// left==0.0f means muted, left==1.0f means not muted (right likewise)
+// Other values between are invalid.
+// If the mtue controls are joint, the output should be muted if either of the
+// two channels are muted.
+#define AOCONTROL_GET_MUTE 6
+#define AOCONTROL_SET_MUTE 7
+#define AOCONTROL_SET_PLUGIN_DRIVER 8
+#define AOCONTROL_SET_PLUGIN_LIST 9
 
 #define AOPLAY_FINAL_CHUNK 1
 

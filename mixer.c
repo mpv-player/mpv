@@ -35,22 +35,31 @@ char *mixer_channel = NULL;
 int soft_vol = 0;
 float soft_vol_max = 110.0;
 
+static void internal_setvolume(mixer_t *mixer, float l, float r);
+
+
 // Called after the audio filter chain is built or rebuilt.
 void mixer_reinit(mixer_t *mixer)
 {
     if (!mixer->ao)
         return;
+    // Some of this might be incorrect when the AO behavior changes (e.g.
+    // different AO due to file specific -ao options), but we assume this
+    // doesn't happen. We could attempt to handle this by trying to detect
+    // whether a system mixer or mute is supported, but it would probably add
+    // even more bugs to the code.
     if (mixer->restore_volume) {
-        int muted = mixer->muted;
-        mixer_setvolume(mixer, mixer->restore_vol_l, mixer->restore_vol_r);
-        mixer->muted = muted;
+        // restore previous volume (softvol, or no persistent AO volume)
+        internal_setvolume(mixer, mixer->restore_vol_l, mixer->restore_vol_r);
     }
-    if (mixer->muted) {
-        // undo mixer_uninit()
-        mixer_setvolume(mixer, 0, 0);
-        mixer->muted = true;
+    if (mixer->muted &&
+        (mixer->mute_emulation || mixer->ao->no_persistent_volume))
+    {
+        // undo mixer_uninit(), or restore mute state
+        mixer_setmuted(mixer, true);
     }
     if (mixer->restore_balance) {
+        // balance control always uses af_pan, it always needs to be restored
         mixer_setbalance(mixer, mixer->balance);
     }
 }
@@ -62,12 +71,14 @@ void mixer_uninit(mixer_t *mixer)
 {
     if (!mixer->ao)
         return;
-    // The player is supposed to turn off the mute state when the player
-    // terminates. No other attempts at restoring the volume are done.
+    // The player is supposed to restore the volume, when mute was enabled, and
+    // the player terminates. No other attempts at restoring anything are done.
     // One complication is that the mute state should survive audio
     // reinitialization (e.g. when switching to a new file), so we have to be
     // sure mixer_reinit() will restore the mute state.
-    if (mixer_getmuted(mixer)) {
+    // This is only needed when a global system mixer without mute control is
+    // used, i.e. we emulate mute by setting the volume to 0.
+    if (mixer->mute_emulation && mixer_getmuted(mixer)) {
         // avoid playing the rest of the audio buffer at restored volume
         ao_reset(mixer->ao);
         mixer_setmuted(mixer, false);
@@ -107,7 +118,7 @@ static float clip_vol(float v)
     return v > 100 ? 100 : (v < 0 ? 0 : v);
 }
 
-void mixer_setvolume(mixer_t *mixer, float l, float r)
+static void internal_setvolume(mixer_t *mixer, float l, float r)
 {
     l = clip_vol(l);
     r = clip_vol(r);
@@ -156,7 +167,15 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
             mixer->restore_vol_r = r;
         }
     }
-    mixer->muted = false;
+}
+
+void mixer_setvolume(mixer_t *mixer, float l, float r)
+{
+    internal_setvolume(mixer, l, r);
+    // Changing the volume clears mute; these are mplayer semantics. (If this
+    // is not desired, this would be removed, and code for restoring the softvol
+    // volume had to be added.)
+    mixer_setmuted(mixer, false);
 }
 
 void mixer_getvolume(mixer_t *mixer, float *l, float *r)
@@ -210,9 +229,15 @@ void mixer_mute(mixer_t *mixer)
 
 bool mixer_getmuted(mixer_t *mixer)
 {
-    // this call will also check whether mute is still active, and "fix" it
-    float l, r;
-    mixer_getvolume(mixer, &l, &r);
+    ao_control_vol_t vol = {0};
+    if (!soft_vol &&
+        CONTROL_OK == ao_control(mixer->ao, AOCONTROL_GET_MUTE, &vol))
+    {
+        mixer->muted = vol.left == 0.0f || vol.right == 0.0f;
+    } else {
+        float l, r;
+        mixer_getvolume(mixer, &l, &r);     // updates mixer->muted
+    }
     return mixer->muted;
 }
 
@@ -221,13 +246,20 @@ void mixer_setmuted(mixer_t *mixer, bool mute)
     bool muted = mixer_getmuted(mixer);
     if (mute == muted)
         return;
-    if (muted) {
-        mixer_setvolume(mixer, mixer->last_l, mixer->last_r);
-    } else {
-        mixer_getvolume(mixer, &mixer->last_l, &mixer->last_r);
-        mixer_setvolume(mixer, 0, 0);
-        mixer->muted = true;
+    ao_control_vol_t vol;
+    vol.left = vol.right = mute ? 0.0f : 1.0f;
+    mixer->mute_emulation = soft_vol ||
+        CONTROL_OK != ao_control(mixer->ao, AOCONTROL_SET_MUTE, &vol);
+    if (mixer->mute_emulation) {
+        // mute is emulated by setting volume to 0
+        if (!mute) {
+            internal_setvolume(mixer, mixer->last_l, mixer->last_r);
+        } else {
+            mixer_getvolume(mixer, &mixer->last_l, &mixer->last_r);
+            internal_setvolume(mixer, 0, 0);
+        }
     }
+    mixer->muted = mute;
 }
 
 void mixer_getbalance(mixer_t *mixer, float *val)

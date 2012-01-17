@@ -34,6 +34,7 @@ typedef struct mixer_s {
     af_stream_t *afilter;
     int volstep;
     bool muted;
+    bool mute_emulation;
     float last_l, last_r;
     float restore_vol_l, restore_vol_r;
     bool restore_volume;
