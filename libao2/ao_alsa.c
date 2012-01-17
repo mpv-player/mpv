@@ -109,7 +109,7 @@ static int control(int cmd, void *arg)
       snd_mixer_elem_t *elem;
       snd_mixer_selem_id_t *sid;
 
-      char *mix_name = "PCM";
+      char *mix_name = "Master";
       char *card = "default";
       int mix_index = 0;
 
