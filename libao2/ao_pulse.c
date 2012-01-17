@@ -45,7 +45,8 @@ struct priv {
     // Main event loop object
     struct pa_threaded_mainloop *mainloop;
 
-    struct pa_cvolume volume;
+    // temporary during control()
+    struct pa_sink_input_info pi;
 
     bool broken_pause;
     int retval;
@@ -416,7 +417,7 @@ static void info_func(struct pa_context *c, const struct pa_sink_input_info *i,
     }
     if (!i)
         return;
-    priv->volume = i->volume;
+    priv->pi = *i;
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
@@ -424,8 +425,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct priv *priv = ao->priv;
     switch (cmd) {
+    case AOCONTROL_GET_MUTE:
     case AOCONTROL_GET_VOLUME: {
-        ao_control_vol_t *vol = arg;
         uint32_t devidx = pa_stream_get_index(priv->stream);
         pa_threaded_mainloop_lock(priv->mainloop);
         if (!waitop(priv, pa_context_get_sink_input_info(priv->context, devidx,
@@ -434,38 +435,63 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
                             "pa_stream_get_sink_input_info() failed");
             return CONTROL_ERROR;
         }
-        if (priv->volume.channels != 2)
-            vol->left = vol->right =
-                pa_cvolume_avg(&priv->volume) * 100 / PA_VOLUME_NORM;
-        else {
-            vol->left = priv->volume.values[0] * 100 / PA_VOLUME_NORM;
-            vol->right = priv->volume.values[1] * 100 / PA_VOLUME_NORM;
+        // Warning: some information in pi might be unaccessible, because
+        // we naively copied the struct, without updating pointers etc.
+        // Pointers might point to invalid data, accessors might fail.
+        if (cmd == AOCONTROL_GET_VOLUME) {
+            ao_control_vol_t *vol = arg;
+            if (priv->pi.volume.channels != 2)
+                vol->left = vol->right =
+                    pa_cvolume_avg(&priv->pi.volume) * 100 / PA_VOLUME_NORM;
+            else {
+                vol->left = priv->pi.volume.values[0] * 100 / PA_VOLUME_NORM;
+                vol->right = priv->pi.volume.values[1] * 100 / PA_VOLUME_NORM;
+            }
+        } else if (cmd == AOCONTROL_GET_MUTE) {
+            bool *mute = arg;
+            *mute = priv->pi.mute;
         }
         return CONTROL_OK;
     }
-    case AOCONTROL_SET_VOLUME: {
-        const ao_control_vol_t *vol = arg;
-        pa_operation *o;
-        struct pa_cvolume volume;
 
-        pa_cvolume_reset(&volume, ao->channels);
-        if (volume.channels != 2)
-            pa_cvolume_set(&volume, volume.channels,
-                           (pa_volume_t)vol->left*PA_VOLUME_NORM/100);
-        else {
-            volume.values[0] = vol->left * PA_VOLUME_NORM / 100;
-            volume.values[1] = vol->right * PA_VOLUME_NORM / 100;
-        }
+    case AOCONTROL_SET_MUTE:
+    case AOCONTROL_SET_VOLUME: {
+        pa_operation *o;
+
         pa_threaded_mainloop_lock(priv->mainloop);
-        o = pa_context_set_sink_input_volume(priv->context,
-                                             pa_stream_get_index(priv->stream),
-                                             &volume, NULL, NULL);
-        if (!o) {
-            pa_threaded_mainloop_unlock(priv->mainloop);
-            GENERIC_ERR_MSG(priv->context,
-                            "pa_context_set_sink_input_volume() failed");
-            return CONTROL_ERROR;
-        }
+        uint32_t stream_index = pa_stream_get_index(priv->stream);
+        if (cmd == AOCONTROL_SET_VOLUME) {
+            const ao_control_vol_t *vol = arg;
+            struct pa_cvolume volume;
+
+            pa_cvolume_reset(&volume, ao->channels);
+            if (volume.channels != 2)
+                pa_cvolume_set(&volume, volume.channels,
+                               vol->left * PA_VOLUME_NORM / 100);
+            else {
+                volume.values[0] = vol->left * PA_VOLUME_NORM / 100;
+                volume.values[1] = vol->right * PA_VOLUME_NORM / 100;
+            }
+            o = pa_context_set_sink_input_volume(priv->context, stream_index,
+                                                 &volume, NULL, NULL);
+            if (!o) {
+                pa_threaded_mainloop_unlock(priv->mainloop);
+                GENERIC_ERR_MSG(priv->context,
+                                "pa_context_set_sink_input_volume() failed");
+                return CONTROL_ERROR;
+            }
+        } else if (cmd == AOCONTROL_SET_MUTE) {
+            const bool *mute = arg;
+            o = pa_context_set_sink_input_mute(priv->context, stream_index,
+                                               *mute, NULL, NULL);
+            if (!o) {
+                pa_threaded_mainloop_unlock(priv->mainloop);
+                GENERIC_ERR_MSG(priv->context,
+                                "pa_context_set_sink_input_mute() failed");
+                return CONTROL_ERROR;
+            }
+        } else
+            abort();
         /* We don't wait for completion here */
         pa_operation_unref(o);
         pa_threaded_mainloop_unlock(priv->mainloop);
