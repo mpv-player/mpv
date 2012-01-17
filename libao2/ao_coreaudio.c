@@ -169,7 +169,11 @@ Float32 vol;
 		control_vol = (ao_control_vol_t*)arg;
 		if (ao->b_digital) {
 			// Digital output has no volume adjust.
-			return CONTROL_FALSE;
+			int vol = ao->b_muted ? 0 : 100;
+			*control_vol = (ao_control_vol_t) {
+                            .left = vol, .right = vol,
+                        };
+			return CONTROL_TRUE;
 		}
 		err = AudioUnitGetParameter(ao->theOutputUnit, kHALOutputParam_Volume, kAudioUnitScope_Global, 0, &vol);
 
