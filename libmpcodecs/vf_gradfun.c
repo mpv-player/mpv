@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <math.h>
 
 #include "config.h"
 #include "cpudetect.h"
@@ -41,7 +42,13 @@
 #include "libavutil/avutil.h"
 #include "ffmpeg_files/x86_cpu.h"
 
+#include "m_option.h"
+#include "m_struct.h"
+
 struct vf_priv_s {
+    float cfg_thresh;
+    int cfg_radius;
+    float cfg_size;
     int thresh;
     int radius;
     uint16_t *buf;
@@ -49,6 +56,10 @@ struct vf_priv_s {
                         int width, int thresh, const uint16_t *dithers);
     void (*blur_line)(uint16_t *dc, uint16_t *buf, uint16_t *buf1,
                       uint8_t *src, int sstride, int width);
+} const vf_priv_dflt = {
+  .cfg_thresh = 1.5,
+  .cfg_radius = -1,
+  .cfg_size = -1,
 };
 
 static const uint16_t __attribute__((aligned(16))) pw_7f[8] = {127,127,127,127,127,127,127,127};
@@ -354,6 +365,12 @@ static int config(struct vf_instance *vf,
                   unsigned int flags, unsigned int outfmt)
 {
     free(vf->priv->buf);
+    vf->priv->radius = vf->priv->cfg_radius;
+    if (vf->priv->cfg_size > -1) {
+        vf->priv->radius = (vf->priv->cfg_size / 100.0f)
+                           * sqrtf(width * width + height * height);
+    }
+    vf->priv->radius = av_clip((vf->priv->radius+1)&~1, 4, 32);
     vf->priv->buf = av_mallocz((((width+15)&~15)*(vf->priv->radius+1)/2+32)*sizeof(uint16_t));
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
@@ -368,20 +385,25 @@ static void uninit(struct vf_instance *vf)
 
 static int vf_open(vf_instance_t *vf, char *args)
 {
-    float thresh = 1.2;
-    int radius = 16;
-
     vf->get_image=get_image;
     vf->put_image=put_image;
     vf->query_format=query_format;
     vf->config=config;
     vf->uninit=uninit;
-    vf->priv=malloc(sizeof(struct vf_priv_s));
-    memset(vf->priv, 0, sizeof(struct vf_priv_s));
 
-    if (args) sscanf(args, "%f:%d", &thresh, &radius);
-    vf->priv->thresh = (1<<15)/av_clipf(thresh,0.51,255);
-    vf->priv->radius = av_clip((radius+1)&~1,4,32);
+    bool have_radius = vf->priv->cfg_radius > -1;
+    bool have_size = vf->priv->cfg_size > -1;
+
+    if (have_radius && have_size) {
+        mp_msg(MSGT_VFILTER, MSGL_ERR, "scale: gradfun: only one of "
+              "radius/size parameters allowed at the same time!\n");
+        return 0;
+    }
+
+    if (!have_radius && !have_size)
+        vf->priv->cfg_size = 1.0;
+
+    vf->priv->thresh = (1<<15)/av_clipf(vf->priv->cfg_thresh,0.51,255);
 
     vf->priv->blur_line = blur_line_c;
     vf->priv->filter_line = filter_line_c;
@@ -401,11 +423,27 @@ static int vf_open(vf_instance_t *vf, char *args)
     return 1;
 }
 
+#undef ST_OFF
+#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+static const m_option_t vf_opts_fields[] = {
+    {"strength", ST_OFF(cfg_thresh), CONF_TYPE_FLOAT, M_OPT_RANGE, 0.51, 255, NULL},
+    {"radius", ST_OFF(cfg_radius), CONF_TYPE_INT, M_OPT_RANGE, 4, 32, NULL},
+    {"size", ST_OFF(cfg_size), CONF_TYPE_FLOAT, M_OPT_RANGE, 0.1, 5.0, NULL},
+    { NULL, NULL, 0, 0, 0, 0,  NULL }
+};
+
+static const m_struct_t vf_opts = {
+    "gradfun",
+    sizeof(struct vf_priv_s),
+    &vf_priv_dflt,
+    vf_opts_fields
+};
+
 const vf_info_t vf_info_gradfun = {
     "gradient deband",
     "gradfun",
     "Loren Merritt",
     "",
     vf_open,
-    NULL
+    &vf_opts
 };
