@@ -57,6 +57,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include "bstr.h"
 #include "mp_fifo.h"
 #include "input/keycodes.h"
 #include "getch2.h"
@@ -202,6 +203,15 @@ void getch2(struct mp_fifo *fifo)
                 }
                 code = KEY_ENTER;
             }
+            int utf8len = bstr_parse_utf8_code_length(code);
+            if (utf8len > 0 && utf8len <= getch2_len) {
+                struct bstr s = { getch2_buf, utf8len };
+                int unicode = bstr_decode_utf8(s, NULL);
+                if (unicode > 0) {
+                    len = utf8len;
+                    code = unicode;
+                }
+            }
         }
         else if (getch2_len > 1) {
             int c = getch2_buf[1];
@@ -225,7 +235,7 @@ void getch2(struct mp_fifo *fifo)
             }
             if ((c == '[' || c == 'O') && getch2_len >= 3) {
                 int c = getch2_buf[2];
-                const short ctable[] = {
+                const int ctable[] = {
                     KEY_UP, KEY_DOWN, KEY_RIGHT, KEY_LEFT, 0,
                     KEY_END, KEY_PGDWN, KEY_HOME, KEY_PGUP, 0, 0, KEY_INS, 0, 0, 0,
                     KEY_F+1, KEY_F+2, KEY_F+3, KEY_F+4};

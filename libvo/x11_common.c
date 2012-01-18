@@ -23,6 +23,7 @@
 #include <limits.h>
 
 #include "config.h"
+#include "bstr.h"
 #include "options.h"
 #include "mp_msg.h"
 #include "mp_fifo.h"
@@ -45,6 +46,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <X11/keysymdef.h>
 
 #ifdef CONFIG_XSS
 #include <X11/extensions/scrnsaver.h>
@@ -422,6 +424,8 @@ int vo_init(struct vo *vo)
     x11->screen = DefaultScreen(x11->display);  // screen ID
     x11->rootwin = RootWindow(x11->display, x11->screen);   // root window ID
 
+    x11->xim = XOpenIM(x11->display, NULL, NULL, NULL);
+
     init_atoms(vo->x11);
 
 #ifdef CONFIG_XF86VM
@@ -523,6 +527,8 @@ void vo_uninit(struct vo_x11_state *x11)
                "vo: x11 uninit called but X11 not initialized..\n");
     } else {
         mp_msg(MSGT_VO, MSGL_V, "vo: uninit ...\n");
+        if (x11->xim)
+            XCloseIM(x11->xim);
         XSetErrorHandler(NULL);
         XCloseDisplay(x11->display);
         x11->depthonscreen = 0;
@@ -531,63 +537,52 @@ void vo_uninit(struct vo_x11_state *x11)
     talloc_free(x11);
 }
 
-#include "wskeys.h"
+static const struct mp_keymap keymap[] = {
+    // special keys
+    {XK_Pause, KEY_PAUSE}, {XK_Escape, KEY_ESC}, {XK_BackSpace, KEY_BS},
+    {XK_Tab, KEY_TAB}, {XK_Return, KEY_ENTER},
+    {XK_Menu, KEY_MENU}, {XK_Print, KEY_PRINT},
+
+    // cursor keys
+    {XK_Left, KEY_LEFT}, {XK_Right, KEY_RIGHT}, {XK_Up, KEY_UP}, {XK_Down, KEY_DOWN},
+
+    // navigation block
+    {XK_Insert, KEY_INSERT}, {XK_Delete, KEY_DELETE}, {XK_Home, KEY_HOME}, {XK_End, KEY_END},
+    {XK_Page_Up, KEY_PAGE_UP}, {XK_Page_Down, KEY_PAGE_DOWN},
+
+    // F-keys
+    {XK_F1, KEY_F+1}, {XK_F2, KEY_F+2}, {XK_F3, KEY_F+3}, {XK_F4, KEY_F+4},
+    {XK_F5, KEY_F+5}, {XK_F6, KEY_F+6}, {XK_F7, KEY_F+7}, {XK_F8, KEY_F+8},
+    {XK_F9, KEY_F+9}, {XK_F10, KEY_F+10}, {XK_F11, KEY_F+11}, {XK_F12, KEY_F+12},
+
+    // numpad independent of numlock
+    {XK_KP_Subtract, '-'}, {XK_KP_Add, '+'}, {XK_KP_Multiply, '*'}, {XK_KP_Divide, '/'},
+    {XK_KP_Enter, KEY_KPENTER},
+
+    // numpad with numlock
+    {XK_KP_0, KEY_KP0}, {XK_KP_1, KEY_KP1}, {XK_KP_2, KEY_KP2},
+    {XK_KP_3, KEY_KP3}, {XK_KP_4, KEY_KP4}, {XK_KP_5, KEY_KP5},
+    {XK_KP_6, KEY_KP6}, {XK_KP_7, KEY_KP7}, {XK_KP_8, KEY_KP8},
+    {XK_KP_9, KEY_KP9}, {XK_KP_Decimal, KEY_KPDEC},
+    {XK_KP_Separator, KEY_KPDEC},
+
+    // numpad without numlock
+    {XK_KP_Insert, KEY_KPINS}, {XK_KP_End, KEY_KP1}, {XK_KP_Down, KEY_KP2},
+    {XK_KP_Page_Down, KEY_KP3}, {XK_KP_Left, KEY_KP4}, {XK_KP_Begin, KEY_KP5},
+    {XK_KP_Right, KEY_KP6}, {XK_KP_Home, KEY_KP7}, {XK_KP_Up, KEY_KP8},
+    {XK_KP_Page_Up, KEY_KP9}, {XK_KP_Delete, KEY_KPDEL},
 
 #ifdef XF86XK_AudioPause
-static const struct mp_keymap keysym_map[] = {
     {XF86XK_MenuKB, KEY_MENU},
     {XF86XK_AudioPlay, KEY_PLAY}, {XF86XK_AudioPause, KEY_PAUSE}, {XF86XK_AudioStop, KEY_STOP},
     {XF86XK_AudioPrev, KEY_PREV}, {XF86XK_AudioNext, KEY_NEXT},
     {XF86XK_AudioMute, KEY_MUTE}, {XF86XK_AudioLowerVolume, KEY_VOLUME_DOWN}, {XF86XK_AudioRaiseVolume, KEY_VOLUME_UP},
-    {0, 0}
-};
-
-static void vo_x11_putkey_ext(struct vo *vo, int keysym, int modifiers)
-{
-    struct mp_fifo *f = vo->key_fifo;
-    int mpkey = lookup_keymap_table(keysym_map, keysym);
-    if (mpkey)
-        mplayer_put_key(f, mpkey + modifiers);
-}
 #endif
 
-static const struct mp_keymap keymap[] = {
-    // special keys
-    {wsPause, KEY_PAUSE}, {wsEscape, KEY_ESC}, {wsBackSpace, KEY_BS},
-    {wsTab, KEY_TAB}, {wsEnter, KEY_ENTER},
-
-    // cursor keys
-    {wsLeft, KEY_LEFT}, {wsRight, KEY_RIGHT}, {wsUp, KEY_UP}, {wsDown, KEY_DOWN},
-
-    // navigation block
-    {wsInsert, KEY_INSERT}, {wsDelete, KEY_DELETE}, {wsHome, KEY_HOME}, {wsEnd, KEY_END},
-    {wsPageUp, KEY_PAGE_UP}, {wsPageDown, KEY_PAGE_DOWN},
-
-    // F-keys
-    {wsF1, KEY_F+1}, {wsF2, KEY_F+2}, {wsF3, KEY_F+3}, {wsF4, KEY_F+4},
-    {wsF5, KEY_F+5}, {wsF6, KEY_F+6}, {wsF7, KEY_F+7}, {wsF8, KEY_F+8},
-    {wsF9, KEY_F+9}, {wsF10, KEY_F+10}, {wsF11, KEY_F+11}, {wsF12, KEY_F+12},
-
-    // numpad independent of numlock
-    {wsGrayMinus, '-'}, {wsGrayPlus, '+'}, {wsGrayMul, '*'}, {wsGrayDiv, '/'},
-    {wsGrayEnter, KEY_KPENTER},
-
-    // numpad with numlock
-    {wsGray0, KEY_KP0}, {wsGray1, KEY_KP1}, {wsGray2, KEY_KP2},
-    {wsGray3, KEY_KP3}, {wsGray4, KEY_KP4}, {wsGray5, KEY_KP5},
-    {wsGray6, KEY_KP6}, {wsGray7, KEY_KP7}, {wsGray8, KEY_KP8},
-    {wsGray9, KEY_KP9}, {wsGrayDecimal, KEY_KPDEC},
-
-    // numpad without numlock
-    {wsGrayInsert, KEY_KPINS}, {wsGrayEnd, KEY_KP1}, {wsGrayDown, KEY_KP2},
-    {wsGrayPgDn, KEY_KP3}, {wsGrayLeft, KEY_KP4}, {wsGray5Dup, KEY_KP5},
-    {wsGrayRight, KEY_KP6}, {wsGrayHome, KEY_KP7}, {wsGrayUp, KEY_KP8},
-    {wsGrayPgUp, KEY_KP9}, {wsGrayDelete, KEY_KPDEL},
-
     {0, 0}
 };
 
-static void vo_x11_putkey(struct vo *vo, int key, int modifiers)
+static int vo_x11_lookupkey(int key)
 {
     static const char *passthrough_keys = " -+*/<>`~!@#$%^&()_{}:;\"\',.?\\|=[]";
     int mpkey = 0;
@@ -600,8 +595,7 @@ static void vo_x11_putkey(struct vo *vo, int key, int modifiers)
     if (!mpkey)
         mpkey = lookup_keymap_table(keymap, key);
 
-    if (mpkey)
-        mplayer_put_key(vo->key_fifo, mpkey + modifiers);
+    return mpkey;
 }
 
 
@@ -746,6 +740,9 @@ void vo_x11_uninit(struct vo *vo)
             {
                 XEvent xev;
 
+                if (x11->xic)
+                    XDestroyIC(x11->xic);
+
                 XUnmapWindow(x11->display, x11->window);
                 XSelectInput(x11->display, x11->window, StructureNotifyMask);
                 XDestroyWindow(x11->display, x11->window);
@@ -785,8 +782,6 @@ int vo_x11_check_events(struct vo *vo)
     Display *display = vo->x11->display;
     int ret = 0;
     XEvent Event;
-    char buf[100];
-    KeySym keySym;
 
     if (x11->vo_mouse_autohide && x11->mouse_waiting_hide &&
                                  (GetTimerMS() - x11->mouse_timer >= 1000)) {
@@ -812,8 +807,8 @@ int vo_x11_check_events(struct vo *vo)
                 break;
             case KeyPress:
                 {
-                    XLookupString(&Event.xkey, buf, sizeof(buf), &keySym,
-                                  &x11->compose_status);
+                    char buf[100];
+                    KeySym keySym = 0;
                     int modifiers = 0;
                     if (Event.xkey.state & ShiftMask)
                         modifiers |= KEY_MODIFIER_SHIFT;
@@ -823,10 +818,27 @@ int vo_x11_check_events(struct vo *vo)
                         modifiers |= KEY_MODIFIER_ALT;
                     if (Event.xkey.state & Mod4Mask)
                         modifiers |= KEY_MODIFIER_META;
-#ifdef XF86XK_AudioPause
-                    vo_x11_putkey_ext(vo, keySym, modifiers);
-#endif
-                    vo_x11_putkey(vo, keySym, modifiers);
+                    if (x11->xic) {
+                        Status status;
+                        int len = Xutf8LookupString(x11->xic, &Event.xkey, buf,
+                                                    sizeof(buf), &keySym,
+                                                    &status);
+                        int mpkey = vo_x11_lookupkey(keySym);
+                        if (mpkey) {
+                            mplayer_put_key(vo->key_fifo, mpkey | modifiers);
+                        } else if (status == XLookupChars
+                                   || status == XLookupBoth)
+                        {
+                            struct bstr t = { buf, len };
+                            mplayer_put_key_utf8(vo->key_fifo, modifiers, t);
+                        }
+                    } else {
+                        XLookupString(&Event.xkey, buf, sizeof(buf), &keySym,
+                                      &x11->compose_status);
+                        int mpkey = vo_x11_lookupkey(keySym);
+                        if (mpkey)
+                            mplayer_put_key(vo->key_fifo, mpkey | modifiers);
+                    }
                     ret |= VO_EVENT_KEYPRESS;
                 }
                 break;
@@ -1128,6 +1140,11 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     XSetWMNormalHints(mDisplay, x11->window, &hint);
     if (!vo_border) vo_x11_decoration(vo, 0);
     // map window
+    x11->xic = XCreateIC(x11->xim,
+                         XNInputStyle, XIMPreeditNone | XIMStatusNone,
+                         XNClientWindow, x11->window,
+                         XNFocusWindow, x11->window,
+                         NULL);
     XSelectInput(mDisplay, x11->window, NoEventMask);
     vo_x11_selectinput_witherr(mDisplay, x11->window,
           StructureNotifyMask | KeyPressMask | PointerMotionMask |

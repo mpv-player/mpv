@@ -21,19 +21,16 @@
 #ifndef MPLAYER_KEYCODES_H
 #define MPLAYER_KEYCODES_H
 
+#define MP_KEY_BASE (1<<21)
+
 // For appleir.c which includes another header with KEY_ENTER etc defines
 #ifndef AR_DEFINES_ONLY
 
 #define KEY_ENTER 13
 #define KEY_TAB 9
 
-#define KEY_BASE 0x100
-
-/*  Function keys  */
-#define KEY_F (KEY_BASE+64)
-
 /* Control keys */
-#define KEY_CTRL (KEY_BASE)
+#define KEY_CTRL (MP_KEY_BASE)
 #define KEY_BACKSPACE (KEY_CTRL+0)
 #define KEY_DELETE (KEY_CTRL+1)
 #define KEY_INSERT (KEY_CTRL+2)
@@ -42,6 +39,7 @@
 #define KEY_PAGE_UP (KEY_CTRL+5)
 #define KEY_PAGE_DOWN (KEY_CTRL+6)
 #define KEY_ESC (KEY_CTRL+7)
+#define KEY_PRINT (KEY_CTRL+8)
 
 /* Control keys short name */
 #define KEY_BS KEY_BACKSPACE
@@ -52,14 +50,14 @@
 #define KEY_PGDWN KEY_PAGE_DOWN
 
 /* Cursor movement */
-#define KEY_CRSR (KEY_BASE+16)
+#define KEY_CRSR (MP_KEY_BASE+0x10)
 #define KEY_RIGHT (KEY_CRSR+0)
 #define KEY_LEFT (KEY_CRSR+1)
 #define KEY_DOWN (KEY_CRSR+2)
 #define KEY_UP (KEY_CRSR+3)
 
 /* Multimedia keyboard/remote keys */
-#define KEY_MM_BASE (0x100+384)
+#define KEY_MM_BASE (MP_KEY_BASE+0x20)
 #define KEY_POWER (KEY_MM_BASE+0)
 #define KEY_MENU (KEY_MM_BASE+1)
 #define KEY_PLAY (KEY_MM_BASE+2)
@@ -74,8 +72,11 @@
 #define KEY_VOLUME_DOWN (KEY_MM_BASE+11)
 #define KEY_MUTE (KEY_MM_BASE+12)
 
+/*  Function keys  */
+#define KEY_F (MP_KEY_BASE+0x40)
+
 /* Keypad keys */
-#define KEY_KEYPAD (KEY_BASE+32)
+#define KEY_KEYPAD (MP_KEY_BASE+0x60)
 #define KEY_KP0 (KEY_KEYPAD+0)
 #define KEY_KP1 (KEY_KEYPAD+1)
 #define KEY_KP2 (KEY_KEYPAD+2)
@@ -93,7 +94,7 @@
 
 
 // Joystick input module
-#define JOY_BASE   (0x100+128)
+#define JOY_BASE   (MP_KEY_BASE+0x70)
 #define JOY_AXIS0_PLUS (JOY_BASE+0)
 #define JOY_AXIS0_MINUS (JOY_BASE+1)
 #define JOY_AXIS1_PLUS (JOY_BASE+2)
@@ -115,7 +116,7 @@
 #define JOY_AXIS9_PLUS (JOY_BASE+18)
 #define JOY_AXIS9_MINUS (JOY_BASE+19)
 
-#define JOY_BTN_BASE ((0x100+148)|MP_NO_REPEAT_KEY)
+#define JOY_BTN_BASE ((MP_KEY_BASE+0x90)|MP_NO_REPEAT_KEY)
 #define JOY_BTN0 (JOY_BTN_BASE+0)
 #define JOY_BTN1 (JOY_BTN_BASE+1)
 #define JOY_BTN2 (JOY_BTN_BASE+2)
@@ -129,7 +130,7 @@
 
 
 // Mouse events from VOs
-#define MOUSE_BASE ((0x100+256)|MP_NO_REPEAT_KEY)
+#define MOUSE_BASE ((MP_KEY_BASE+0xA0)|MP_NO_REPEAT_KEY)
 #define MOUSE_BTN0 (MOUSE_BASE+0)
 #define MOUSE_BTN1 (MOUSE_BASE+1)
 #define MOUSE_BTN2 (MOUSE_BASE+2)
@@ -152,7 +153,7 @@
 #define MOUSE_BTN19 (MOUSE_BASE+19)
 #define MOUSE_BTN_END (MOUSE_BASE+20)
 
-#define MOUSE_BASE_DBL (0x300|MP_NO_REPEAT_KEY)
+#define MOUSE_BASE_DBL ((MP_KEY_BASE+0xC0)|MP_NO_REPEAT_KEY)
 #define MOUSE_BTN0_DBL (MOUSE_BASE_DBL+0)
 #define MOUSE_BTN1_DBL (MOUSE_BASE_DBL+1)
 #define MOUSE_BTN2_DBL (MOUSE_BASE_DBL+2)
@@ -179,7 +180,7 @@
 #endif // AR_DEFINES_ONLY
 
 // Apple Remote input module
-#define AR_BASE      0x500
+#define AR_BASE      (MP_KEY_BASE+0xE0)
 #define AR_PLAY      (AR_BASE + 0)
 #define AR_PLAY_HOLD (AR_BASE + 1)
 #define AR_NEXT      (AR_BASE + 2)
@@ -195,14 +196,14 @@
 
 
 /* Special keys */
-#define KEY_INTERN (0x1000)
+#define KEY_INTERN (MP_KEY_BASE+0x1000)
 #define KEY_CLOSE_WIN (KEY_INTERN+0)
 
 /* Modifiers added to individual keys */
-#define KEY_MODIFIER_SHIFT  0x2000
-#define KEY_MODIFIER_CTRL   0x4000
-#define KEY_MODIFIER_ALT    0x8000
-#define KEY_MODIFIER_META  0x10000
+#define KEY_MODIFIER_SHIFT  (1<<22)
+#define KEY_MODIFIER_CTRL   (1<<23)
+#define KEY_MODIFIER_ALT    (1<<24)
+#define KEY_MODIFIER_META   (1<<25)
 
 #endif // AR_DEFINES_ONLY
 
