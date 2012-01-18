@@ -704,7 +704,7 @@ void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, Sw
 }
 
 // will use sws_flags & src_filter (from cmd line)
-struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat, int dstW, int dstH, int dstFormat)
+static struct SwsContext *sws_getContextFromCmdLine2(int srcW, int srcH, int srcFormat, int dstW, int dstH, int dstFormat, int extraflags)
 {
 	int flags;
 	SwsFilter *dstFilterParam, *srcFilterParam;
@@ -716,6 +716,17 @@ struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat, 
 	sws_getFlagsAndFilterFromCmdLine(&flags, &srcFilterParam, &dstFilterParam);
 
 	return sws_getContext(srcW, srcH, sfmt, dstW, dstH, dfmt, flags | get_sws_cpuflags(), srcFilterParam, dstFilterParam, NULL);
+}
+
+struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat, int dstW, int dstH, int dstFormat)
+{
+    return sws_getContextFromCmdLine2(srcW, srcH, srcFormat, dstW, dstH, dstFormat, 0);
+}
+
+struct SwsContext *sws_getContextFromCmdLine_hq(int srcW, int srcH, int srcFormat, int dstW, int dstH, int dstFormat)
+{
+    return sws_getContextFromCmdLine2(srcW, srcH, srcFormat, dstW, dstH, dstFormat,
+        SWS_FULL_CHR_H_INT | SWS_FULL_CHR_H_INP | SWS_ACCURATE_RND | SWS_BITEXACT);
 }
 
 /// An example of presets usage

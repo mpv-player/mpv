@@ -41,7 +41,7 @@
 
 #include "fmt-conversion.h"
 
-//for sws_getContextFromCmdLine and mp_sws_set_colorspace
+//for sws_getContextFromCmdLine_hq and mp_sws_set_colorspace
 #include "libmpcodecs/vf_scale.h"
 #include "libvo/csputils.h"
 
@@ -147,12 +147,12 @@ void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
     screenshot_ctx *ctx = screenshot_get_ctx(mpctx);
     struct mp_image *dst = alloc_mpi(image->w, image->h, IMGFMT_RGB24);
 
-    struct SwsContext *sws = sws_getContextFromCmdLine(image->width,
-                                                       image->height,
-                                                       image->imgfmt,
-                                                       dst->width,
-                                                       dst->height,
-                                                       dst->imgfmt);
+    struct SwsContext *sws = sws_getContextFromCmdLine_hq(image->width,
+                                                          image->height,
+                                                          image->imgfmt,
+                                                          dst->width,
+                                                          dst->height,
+                                                          dst->imgfmt);
 
     struct mp_csp_details colorspace;
     get_detected_video_colorspace(mpctx->sh_video, &colorspace);
