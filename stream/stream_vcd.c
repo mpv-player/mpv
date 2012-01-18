@@ -37,6 +37,8 @@
 #endif
 #include <errno.h>
 
+#include "talloc.h"
+
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include "vcd_read_fbsd.h"
 #elif defined(__APPLE__)
@@ -157,9 +159,9 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
   if (!p->device) {
     if(cdrom_device)
-      p->device = strdup(cdrom_device);
+      p->device = talloc_strdup(NULL, cdrom_device);
     else
-      p->device = strdup(DEFAULT_CDROM_DEVICE);
+      p->device = talloc_strdup(NULL, DEFAULT_CDROM_DEVICE);
   }
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)

@@ -110,9 +110,7 @@ int decode_avsub(struct sh_sub *sh, uint8_t *data, int size,
             break;
         }
     }
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 82, 0)
     if (got_sub)
         avsubtitle_free(&sub);
-#endif
     return res;
 }

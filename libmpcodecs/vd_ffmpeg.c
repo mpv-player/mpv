@@ -147,10 +147,7 @@ static int init(sh_video_t *sh)
             && lavc_codec->id != CODEC_ID_H264
             && lavc_codec->id != CODEC_ID_INTERPLAY_VIDEO
             && lavc_codec->id != CODEC_ID_ROQ && lavc_codec->id != CODEC_ID_VP8
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 108, 0)
-            && lavc_codec->id != CODEC_ID_LAGARITH
-#endif
-        )
+            && lavc_codec->id != CODEC_ID_LAGARITH)
         ctx->do_dr1 = 1;
     ctx->b_age = ctx->ip_age[0] = ctx->ip_age[1] = 256 * 256 * 256 * 64;
     ctx->ip_count = ctx->b_count = 0;
@@ -314,27 +311,12 @@ static int init(sh_video_t *sh)
         memcpy(avctx->extradata, sh->bih + 1, avctx->extradata_size);
         break;
     }
-    /* Pass palette to codec */
-    if (sh->bih && (sh->bih->biBitCount <= 8)) {
-        avctx->palctrl = calloc(1, sizeof(AVPaletteControl));
-        avctx->palctrl->palette_changed = 1;
-        if (sh->bih->biSize - sizeof(*sh->bih))
-            /* Palette size in biSize */
-            memcpy(avctx->palctrl->palette, sh->bih + 1,
-                   FFMIN(sh->bih->biSize - sizeof(*sh->bih), AVPALETTE_SIZE));
-        else
-            /* Palette size in biClrUsed */
-            memcpy(avctx->palctrl->palette, sh->bih + 1,
-                   FFMIN(sh->bih->biClrUsed * 4, AVPALETTE_SIZE));
-    }
 
     if (sh->bih)
         avctx->bits_per_coded_sample = sh->bih->biBitCount;
 
-    if (lavc_param->threads > 1) {
-        avctx->thread_count = lavc_param->threads;
-        avcodec_thread_init(avctx, lavc_param->threads);
-    }
+    avctx->thread_count = lavc_param->threads;
+
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
         mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not open codec.\n");
@@ -365,7 +347,6 @@ static void uninit(sh_video_t *sh)
             mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not close codec.\n");
 
         av_freep(&avctx->extradata);
-        free(avctx->palctrl);
         av_freep(&avctx->slice_offset);
     }
 
@@ -663,12 +644,10 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     pkt.size = len;
     // HACK: make PNGs decode normally instead of as CorePNG delta frames
     pkt.flags = AV_PKT_FLAG_KEY;
-#if LIBAVCODEC_VERSION_MAJOR >= 53
     if (packet && packet->avpacket) {
         pkt.side_data = packet->avpacket->side_data;
         pkt.side_data_elems = packet->avpacket->side_data_elems;
     }
-#endif
     // The avcodec opaque field stupidly supports only int64_t type
     union pts { int64_t i; double d; };
     avctx->reordered_opaque = (union pts){.d = *reordered_pts}.i;

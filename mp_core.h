@@ -212,6 +212,9 @@ typedef struct MPContext {
     // step this many frames, then pause
     int step_frames;
 
+    bool status_printed;
+    int paused_cache_fill;
+
     // Set after showing warning about decoding being too slow for realtime
     // playback rate. Used to avoid showing it multiple times.
     bool drop_message_shown;

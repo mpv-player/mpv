@@ -501,11 +501,9 @@ static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parse
     enum CodecID codec_id = CODEC_ID_NONE;
 
     switch (format) {
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 94, 0)
     case MKTAG('M', 'P', '4', 'L'):
         codec_id = CODEC_ID_AAC_LATM;
         break;
-#endif
     case 0x2000:
     case 0x332D6361:
     case 0x332D4341:
@@ -833,11 +831,12 @@ int ds_get_packet_sub(demux_stream_t *ds, unsigned char **start)
     return len;
 }
 
-struct demux_packet *ds_get_packet2(struct demux_stream *ds)
+struct demux_packet *ds_get_packet2(struct demux_stream *ds, bool repeat_last)
 {
     // This shouldn't get used together with partial reads
-    assert(ds->buffer_pos >= ds->buffer_size);
-    ds_fill_buffer(ds);
+    assert(ds->buffer_pos == 0 || ds->buffer_pos >= ds->buffer_size);
+    if (!repeat_last)
+        ds_fill_buffer(ds);
     ds->buffer_pos = ds->buffer_size;
     return ds->current;
 }

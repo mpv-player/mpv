@@ -65,7 +65,7 @@ const m_option_t lavfdopts_conf[] = {
 typedef struct lavf_priv {
     AVInputFormat *avif;
     AVFormatContext *avfc;
-    ByteIOContext *pb;
+    AVIOContext *pb;
     uint8_t buffer[BIO_BUFFER_SIZE];
     int audio_streams;
     int video_streams;
@@ -242,12 +242,6 @@ static const char * const preferred_internal[] = {
     /* lavf Matroska demuxer doesn't support ordered chapters and fails
      * for more files */
     "matroska",
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(52, 99, 0)
-    /* Seeking doesn't work with lavf FLAC demuxer in FFmpeg versions
-     * without a FLAC parser. In principle this could use a runtime check to
-     * switch if a shared library is updated. */
-    "flac",
-#endif
     /* lavf gives neither pts nor dts for some video frames in .rm */
     "rm",
     NULL
@@ -292,8 +286,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
     AVCodecContext *codec = st->codec;
     char *stream_type = NULL;
     int stream_id;
-    AVMetadataTag *lang = av_metadata_get(st->metadata, "language", NULL, 0);
-    AVMetadataTag *title = av_metadata_get(st->metadata, "title", NULL, 0);
+    AVDictionaryEntry *lang = av_dict_get(st->metadata, "language", NULL, 0);
+    AVDictionaryEntry *title = av_dict_get(st->metadata, "title", NULL, 0);
     // Don't use native MPEG codec tag values with our generic tag tables.
     // May contain for example value 3 for MP3, which we'd map to PCM audio.
     if (matches_avinputformat_name(priv, "mpeg") ||
@@ -506,7 +500,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         break;
     }
     case AVMEDIA_TYPE_ATTACHMENT: {
-        AVMetadataTag *ftag = av_metadata_get(st->metadata, "filename",
+        AVDictionaryEntry *ftag = av_dict_get(st->metadata, "filename",
                                               NULL, 0);
         char *filename = ftag ? ftag->value : NULL;
         if (st->codec->codec_id == CODEC_ID_TTF)
@@ -540,14 +534,11 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
     struct MPOpts *opts = demuxer->opts;
     struct lavfdopts *lavfdopts = &opts->lavfdopts;
     AVFormatContext *avfc;
-    AVFormatParameters ap;
     const AVOption *opt;
-    AVMetadataTag *t = NULL;
+    AVDictionaryEntry *t = NULL;
     lavf_priv_t *priv = demuxer->priv;
     int i;
     char mp_filename[256] = "mp:";
-
-    memset(&ap, 0, sizeof(AVFormatParameters));
 
     stream_seek(demuxer->stream, 0);
 
@@ -567,7 +558,6 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
     if (index_mode == 0)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
 
-    ap.prealloced_context = 1;
     if (lavfdopts->probesize) {
         opt = av_set_int(avfc, "probesize", lavfdopts->probesize);
         if (!opt)
@@ -602,17 +592,18 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
         av_strlcat(mp_filename, "foobar.dummy", sizeof(mp_filename));
 
     if (!(priv->avif->flags & AVFMT_NOFILE)) {
-        priv->pb = av_alloc_put_byte(priv->buffer, BIO_BUFFER_SIZE, 0,
-                                     demuxer, mp_read, NULL, mp_seek);
+        priv->pb = avio_alloc_context(priv->buffer, BIO_BUFFER_SIZE, 0,
+                                      demuxer, mp_read, NULL, mp_seek);
         priv->pb->read_seek = mp_read_seek;
-        priv->pb->is_streamed = !demuxer->stream->end_pos ||
-            (demuxer->stream->flags & MP_STREAM_SEEK) != MP_STREAM_SEEK;
+        priv->pb->seekable = demuxer->stream->end_pos
+                 && (demuxer->stream->flags & MP_STREAM_SEEK) == MP_STREAM_SEEK
+                ? AVIO_SEEKABLE_NORMAL : 0;
+        avfc->pb = priv->pb;
     }
 
-    if (av_open_input_stream(&avfc, priv->pb, mp_filename, priv->avif,
-                             &ap) < 0) {
+    if (avformat_open_input(&avfc, mp_filename, priv->avif, NULL) < 0) {
         mp_msg(MSGT_HEADER, MSGL_ERR,
-               "LAVF_header: av_open_input_stream() failed\n");
+               "LAVF_header: avformat_open_input() failed\n");
         return NULL;
     }
 
@@ -625,8 +616,7 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
     }
 
     /* Add metadata. */
-    av_metadata_conv(avfc, NULL, avfc->iformat->metadata_conv);
-    while ((t = av_metadata_get(avfc->metadata, "", t,
+    while ((t = av_dict_get(avfc->metadata, "", t,
                                 AV_METADATA_IGNORE_SUFFIX)))
         demux_info_add(demuxer, t->key, t->value);
 
@@ -636,7 +626,7 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
                                       (AVRational){1, 1000000000});
         uint64_t end   = av_rescale_q(c->end, c->time_base,
                                       (AVRational){1, 1000000000});
-        t = av_metadata_get(c->metadata, "title", NULL, 0);
+        t = av_dict_get(c->metadata, "title", NULL, 0);
         demuxer_add_chapter(demuxer, t ? bstr(t->value) : bstr(NULL),
                             start, end);
     }
@@ -649,7 +639,7 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
         int p;
         for (p = 0; p < avfc->nb_programs; p++) {
             AVProgram *program = avfc->programs[p];
-            t = av_metadata_get(program->metadata, "title", NULL, 0);
+            t = av_dict_get(program->metadata, "title", NULL, 0);
             mp_msg(MSGT_HEADER, MSGL_INFO, "LAVF: Program %d %s\n",
                    program->id, t ? t->value : "");
             mp_msg(MSGT_IDENTIFY, MSGL_V, "PROGRAM_ID=%d\n", program->id);
@@ -712,28 +702,12 @@ static void check_internet_radio_hack(struct demuxer *demuxer)
         if (!priv->internet_radio_hack) {
             mp_msg(MSGT_DEMUX, MSGL_V,
                    "[lavf] enabling internet ogg radio hack\n");
-#if LIBAVFORMAT_VERSION_MAJOR < 53
-            mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[lavf] This looks like an "
-                    "internet radio ogg stream with track changes.\n"
-                    "Playback will likely fail after %d track changes "
-                    "due to libavformat limitations.\n"
-                    "You may be able to work around that limitation by "
-                    "using -demuxer ogg.\n", MAX_STREAMS);
-#endif
         }
-#if LIBAVFORMAT_VERSION_MAJOR < 53
-        if (avfc->nb_streams == MAX_STREAMS) {
-            mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[lavf] This is the %dth "
-                    "track.\nPlayback will likely fail at the next change.\n"
-                    "You may be able to work around this limitation by "
-                    "using -demuxer ogg.\n", MAX_STREAMS);
-        }
-#endif
         priv->internet_radio_hack = true;
         // use new per-track metadata as global metadata
-        AVMetadataTag *t = NULL;
+        AVDictionaryEntry *t = NULL;
         AVStream *stream = avfc->streams[avfc->nb_streams - 1];
-        while ((t = av_metadata_get(stream->metadata, "", t,
+        while ((t = av_dict_get(stream->metadata, "", t,
                                     AV_METADATA_IGNORE_SUFFIX)))
             demux_info_add(demuxer, t->key, t->value);
     } else {
@@ -1021,7 +995,7 @@ static void demux_close_lavf(demuxer_t *demuxer)
     if (priv) {
         if (priv->avfc) {
             av_freep(&priv->avfc->key);
-            av_close_input_stream(priv->avfc);
+            av_close_input_file(priv->avfc);
         }
         av_freep(&priv->pb);
         free(priv);

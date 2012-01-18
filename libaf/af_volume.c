@@ -142,7 +142,6 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 {
   af_data_t*    c   = data;			// Current working data
   af_volume_t*  s   = (af_volume_t*)af->setup; 	// Setup for this instance
-  int           ch  = 0;			// Channel counter
   register int	nch = c->nch;			// Number of channels
   register int  i   = 0;
 
@@ -150,9 +149,9 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   if(af->data->format == (AF_FORMAT_S16_NE)){
     int16_t*    a   = (int16_t*)c->audio;	// Audio data
     int         len = c->len/2;			// Number of samples
-    for(ch = 0; ch < nch ; ch++){
-      if(s->enable[ch]){
-	register int vol = (int)(255.0 * s->level[ch]);
+    for (int ch = 0; ch < nch; ch++) {
+      int vol = 256.0 * s->level[ch];
+      if (s->enable[ch] && vol != 256) {
 	for(i=ch;i<len;i+=nch){
 	  register int x = (a[i] * vol) >> 8;
 	  a[i]=clamp(x,SHRT_MIN,SHRT_MAX);
@@ -164,7 +163,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   else if(af->data->format == (AF_FORMAT_FLOAT_NE)){
     float*   	a   	= (float*)c->audio;	// Audio data
     int       	len 	= c->len/4;		// Number of samples
-    for(ch = 0; ch < nch ; ch++){
+    for (int ch = 0; ch < nch; ch++) {
       // Volume control (fader)
       if(s->enable[ch]){
 	float	t   = 1.0 - s->time;
