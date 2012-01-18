@@ -246,6 +246,43 @@ void af_remove(af_stream_t* s, af_instance_t* af)
   free(af);
 }
 
+static void print_fmt(af_data_t *d)
+{
+    if (d) {
+        mp_msg(MSGT_AFILTER, MSGL_V, "%dHz/%dch/%s", d->rate, d->nch,
+               af_fmt2str_short(d->format));
+    } else {
+        mp_msg(MSGT_AFILTER, MSGL_V, "(?)");
+    }
+}
+
+static void af_print_filter_chain(af_stream_t* s)
+{
+    mp_msg(MSGT_AFILTER, MSGL_V, "Audio filter chain:\n");
+
+    mp_msg(MSGT_AFILTER, MSGL_V, "  [in] ");
+    print_fmt(&s->input);
+    mp_msg(MSGT_AFILTER, MSGL_V, "\n");
+
+    af_instance_t *af = s->first;
+    while (af) {
+        mp_msg(MSGT_AFILTER, MSGL_V, "  [%s] ", af->info->name);
+        print_fmt(af->data);
+        mp_msg(MSGT_AFILTER, MSGL_V, "\n");
+
+        af = af->next;
+    }
+
+    mp_msg(MSGT_AFILTER, MSGL_V, "  [out] ");
+    print_fmt(&s->output);
+    mp_msg(MSGT_AFILTER, MSGL_V, "\n");
+}
+
+// Warning:
+// A failed af_reinit() leaves the audio chain behind in a useless, broken
+// state (for example, format filters that were tentatively inserted stay
+// inserted).
+// In that case, you should always rebuild the filter chain, or abort.
 int af_reinit(af_stream_t* s, af_instance_t* af)
 {
   do{
@@ -343,6 +380,9 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
       return AF_ERROR;
     }
   }while(af);
+
+  af_print_filter_chain(s);
+
   return AF_OK;
 }
 
@@ -552,7 +592,9 @@ af_instance_t* af_add(af_stream_t* s, char* name){
   // Reinitalize the filter list
   if(AF_OK != af_reinit(s, s->first) ||
      AF_OK != fixup_output_format(s)){
-    free(new);
+    while (s->first)
+      af_remove(s, s->first);
+    af_init(s);
     return NULL;
   }
   return new;

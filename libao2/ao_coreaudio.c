@@ -169,7 +169,11 @@ Float32 vol;
 		control_vol = (ao_control_vol_t*)arg;
 		if (ao->b_digital) {
 			// Digital output has no volume adjust.
-			return CONTROL_FALSE;
+			int vol = ao->b_muted ? 0 : 100;
+			*control_vol = (ao_control_vol_t) {
+                            .left = vol, .right = vol,
+                        };
+			return CONTROL_TRUE;
 		}
 		err = AudioUnitGetParameter(ao->theOutputUnit, kHALOutputParam_Volume, kAudioUnitScope_Global, 0, &vol);
 
@@ -449,6 +453,8 @@ int device_id, display_help = 0;
     ao->i_stream_index = -1;
     ao->b_revert = 0;
     ao->b_changed_mixing = 0;
+
+    global_ao->no_persistent_volume = true;
 
     if (device_id == 0) {
         /* Find the ID of the default Device. */

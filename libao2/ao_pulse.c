@@ -21,6 +21,7 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 
 #include <pulse/pulseaudio.h>
 
@@ -342,42 +343,49 @@ static float get_delay(void) {
 }
 
 /** A callback function that is called when the
- * pa_context_get_sink_input_info() operation completes. Saves the
- * volume field of the specified structure to the global variable volume. */
+ * pa_context_get_sink_input_info() operation completes. */
 static void info_func(struct pa_context *c, const struct pa_sink_input_info *i, int is_last, void *userdata) {
-    struct pa_cvolume *volume = userdata;
+    struct pa_sink_input_info *pi = userdata;
     if (is_last < 0) {
         GENERIC_ERR_MSG(context, "Failed to get sink input info");
         return;
     }
     if (!i)
         return;
-    *volume = i->volume;
+    *pi = *i;
     pa_threaded_mainloop_signal(mainloop, 0);
 }
 
 static int control(int cmd, void *arg) {
     switch (cmd) {
+        case AOCONTROL_GET_MUTE: // fallthrough
         case AOCONTROL_GET_VOLUME: {
+            struct pa_sink_input_info pi;
             ao_control_vol_t *vol = arg;
             uint32_t devidx = pa_stream_get_index(stream);
-            struct pa_cvolume volume;
             pa_threaded_mainloop_lock(mainloop);
-            if (!waitop(pa_context_get_sink_input_info(context, devidx, info_func, &volume))) {
+            if (!waitop(pa_context_get_sink_input_info(context, devidx, info_func, &pi))) {
                 GENERIC_ERR_MSG(context, "pa_stream_get_sink_input_info() failed");
                 return CONTROL_ERROR;
             }
-
-            if (volume.channels != 2)
-                vol->left = vol->right = pa_cvolume_avg(&volume)*100/PA_VOLUME_NORM;
-            else {
-                vol->left = volume.values[0]*100/PA_VOLUME_NORM;
-                vol->right = volume.values[1]*100/PA_VOLUME_NORM;
+            // Warning: some information in pi might be unaccessible, because
+            // we naively copied the struct, without updating pointers etc.
+            // Pointers might point to invalid data, accessors might fail.
+            if (cmd == AOCONTROL_GET_VOLUME) {
+                if (pi.volume.channels != 2)
+                    vol->left = vol->right = pa_cvolume_avg(&pi.volume)*100/PA_VOLUME_NORM;
+                else {
+                    vol->left = pi.volume.values[0]*100/PA_VOLUME_NORM;
+                    vol->right = pi.volume.values[1]*100/PA_VOLUME_NORM;
+                }
+            } else if (cmd == AOCONTROL_GET_MUTE) {
+                vol->left = vol->right = pi.mute ? 0.0f : 1.0f;
             }
 
             return CONTROL_OK;
         }
 
+        case AOCONTROL_SET_MUTE: // fallthrough
         case AOCONTROL_SET_VOLUME: {
             const ao_control_vol_t *vol = arg;
             pa_operation *o;
@@ -392,12 +400,23 @@ static int control(int cmd, void *arg) {
             }
 
             pa_threaded_mainloop_lock(mainloop);
-            o = pa_context_set_sink_input_volume(context, pa_stream_get_index(stream), &volume, NULL, NULL);
-            if (!o) {
-                pa_threaded_mainloop_unlock(mainloop);
-                GENERIC_ERR_MSG(context, "pa_context_set_sink_input_volume() failed");
-                return CONTROL_ERROR;
-            }
+            if (cmd == AOCONTROL_SET_VOLUME) {
+                o = pa_context_set_sink_input_volume(context, pa_stream_get_index(stream), &volume, NULL, NULL);
+                if (!o) {
+                    pa_threaded_mainloop_unlock(mainloop);
+                    GENERIC_ERR_MSG(context, "pa_context_set_sink_input_volume() failed");
+                    return CONTROL_ERROR;
+                }
+            } else if (cmd == AOCONTROL_SET_MUTE) {
+                int mute = vol->left == 0.0f || vol->right == 0.0f;
+                o = pa_context_set_sink_input_mute(context, pa_stream_get_index(stream), mute, NULL, NULL);
+                if (!o) {
+                    pa_threaded_mainloop_unlock(mainloop);
+                    GENERIC_ERR_MSG(context, "pa_context_set_sink_input_mute() failed");
+                    return CONTROL_ERROR;
+                }
+            } else
+                abort();
             /* We don't wait for completion here */
             pa_operation_unref(o);
             pa_threaded_mainloop_unlock(mainloop);

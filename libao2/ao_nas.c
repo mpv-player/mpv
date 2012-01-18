@@ -424,6 +424,8 @@ static int init(int rate,int channels,int format,int flags)
 
 	(void)flags; /* shut up 'unused parameter' warning */
 
+	global_ao->no_persistent_volume = true;
+
 	nas_data=malloc(sizeof(struct ao_nas_data));
 	memset(nas_data, 0, sizeof(struct ao_nas_data));
 

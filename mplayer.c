@@ -683,11 +683,12 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
     if (mask & INITIALIZED_AO) {
         mpctx->initialized_flags &= ~INITIALIZED_AO;
         current_module = "uninit_ao";
-        if (mpctx->edl_muted)
-            mixer_mute(&mpctx->mixer);
-        if (mpctx->ao)
+        if (mpctx->ao) {
+            mixer_uninit(&mpctx->mixer);
             ao_uninit(mpctx->ao, mpctx->stop_play != AT_END_OF_FILE);
+        }
         mpctx->ao = NULL;
+        mpctx->mixer.ao = NULL;
     }
 
     current_module = NULL;
@@ -695,8 +696,6 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
 void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
 {
-    if (mpctx->user_muted && !mpctx->edl_muted)
-        mixer_mute(&mpctx->mixer);
     uninit_player(mpctx, INITIALIZED_ALL);
 #if defined(__MINGW32__) || defined(__CYGWIN__)
     timeEndPeriod(1);
@@ -1823,6 +1822,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     }
     mpctx->mixer.ao = ao;
     mpctx->mixer.volstep = volstep;
+    mixer_reinit(&mpctx->mixer);
     mpctx->syncing_audio = true;
     return;
 
@@ -3105,26 +3105,6 @@ static void pause_loop(struct MPContext *mpctx)
     }
 }
 
-
-// Find the right mute status and record position for new file position
-static void edl_seek_reset(MPContext *mpctx)
-{
-    mpctx->edl_muted = 0;
-    next_edl_record = edl_records;
-
-    while (next_edl_record) {
-        if (next_edl_record->start_sec >= get_current_time(mpctx))
-            break;
-
-        if (next_edl_record->action == EDL_MUTE)
-            mpctx->edl_muted = !mpctx->edl_muted;
-        next_edl_record = next_edl_record->next;
-    }
-    if ((mpctx->user_muted | mpctx->edl_muted) != mpctx->mixer.muted)
-        mixer_mute(&mpctx->mixer);
-}
-
-
 // Execute EDL command for the current position if one exists
 static void edl_update(MPContext *mpctx)
 {
@@ -3148,10 +3128,7 @@ static void edl_update(MPContext *mpctx)
                    "[%f], length [%f]\n", next_edl_record->start_sec,
                    next_edl_record->stop_sec, next_edl_record->length_sec);
         } else if (next_edl_record->action == EDL_MUTE) {
-            mpctx->edl_muted = !mpctx->edl_muted;
-            if ((mpctx->user_muted | mpctx->edl_muted) != mpctx->mixer.muted)
-                mixer_mute(&mpctx->mixer);
-            mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_MUTE: [%f]\n",
+            mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_MUTE: [%f] ignored\n",
                    next_edl_record->start_sec);
         }
         next_edl_record = next_edl_record->next;
@@ -3204,8 +3181,6 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
         current_module = "seek_vobsub_reset";
         vobsub_seek(vo_vobsub, mpctx->sh_video->pts);
     }
-
-    edl_seek_reset(mpctx);
 
     mpctx->hrseek_active = false;
     mpctx->hrseek_framedrop = false;
