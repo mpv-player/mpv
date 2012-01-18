@@ -360,6 +360,12 @@ static const extfunc_desc_t extfuncs[] = {
     DEF_FUNC_DESC(ColorMask),
     DEF_FUNC_DESC(ReadPixels),
     DEF_FUNC_DESC(ReadBuffer),
+    DEF_FUNC_DESC(VertexPointer),
+    DEF_FUNC_DESC(ColorPointer),
+    DEF_FUNC_DESC(TexCoordPointer),
+    DEF_FUNC_DESC(DrawArrays),
+    DEF_FUNC_DESC(EnableClientState),
+    DEF_FUNC_DESC(DisableClientState),
 
     DEF_EXT_DESC(GenBuffers, NULL,
                  ("glGenBuffers", "glGenBuffersARB")),
