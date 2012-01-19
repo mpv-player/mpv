@@ -719,8 +719,6 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
 
-    if (mpctx->edl_muted)
-        return M_PROPERTY_DISABLED;
     mpctx->user_muted = 0;
 
     switch (action) {
@@ -756,8 +754,6 @@ static int mp_property_mute(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (mpctx->edl_muted)
-            return M_PROPERTY_DISABLED;
         if (!arg)
             return M_PROPERTY_ERROR;
         if ((!!*(int *) arg) != mpctx->mixer.muted)
@@ -766,18 +762,9 @@ static int mp_property_mute(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-        if (mpctx->edl_muted)
-            return M_PROPERTY_DISABLED;
         mixer_mute(&mpctx->mixer);
         mpctx->user_muted = mpctx->mixer.muted;
         return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        if (mpctx->edl_muted) {
-            *(char **) arg = talloc_strdup(NULL, mp_gtext("enabled (EDL)"));
-            return M_PROPERTY_OK;
-        }
     default:
         return m_property_flag(prop, action, arg, &mpctx->mixer.muted);
 

@@ -187,8 +187,7 @@ typedef struct MPContext {
     double last_chapter_pts;
 
     float begin_skip; ///< start time of the current skip while on edlout mode
-    // audio is muted if either EDL or user activates mute
-    short edl_muted; ///< Stores whether EDL is currently in muted mode.
+
     short user_muted; ///< Stores whether user wanted muted mode.
 
     int global_sub_size; // this encompasses all subtitle sources

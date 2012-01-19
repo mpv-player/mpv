@@ -507,5 +507,6 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_HELPER_REMOVEPAREN(...) __VA_ARGS__
 #define OPT_CHOICE(optname, varname, flags, choices) {optname, NULL, &m_option_type_choice, flags, 0, 0, (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, 1, offsetof(struct MPOpts, varname)}
 #define OPT_TIME(optname, varname, flags) {optname, NULL, &m_option_type_time, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
+#define OPT_ERRORMESSAGE(optname, message) {optname, message, CONF_TYPE_PRINT}
 
 #endif /* MPLAYER_M_OPTION_H */

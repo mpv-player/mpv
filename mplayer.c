@@ -90,8 +90,6 @@
 
 #include "codec-cfg.h"
 
-#include "edl.h"
-
 #include "sub/spudec.h"
 #include "sub/vobsub.h"
 
@@ -336,9 +334,9 @@ char *current_module; // for debugging
 
 // ---
 
-edl_record_ptr edl_records = NULL; ///< EDL entries memory area
-edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_records
 FILE *edl_fd;  // file to write to when in -edlout mode.
+char *edl_output_filename; // file to put EDL entries in (-edlout)
+
 int use_filedir_conf;
 int use_filename_title;
 
@@ -683,8 +681,6 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
     if (mask & INITIALIZED_AO) {
         mpctx->initialized_flags &= ~INITIALIZED_AO;
         current_module = "uninit_ao";
-        if (mpctx->edl_muted)
-            mixer_mute(&mpctx->mixer);
         if (mpctx->ao)
             ao_uninit(mpctx->ao, mpctx->stop_play != AT_END_OF_FILE);
         mpctx->ao = NULL;
@@ -695,7 +691,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
 void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
 {
-    if (mpctx->user_muted && !mpctx->edl_muted)
+    if (mpctx->user_muted)
         mixer_mute(&mpctx->mixer);
     uninit_player(mpctx, INITIALIZED_ALL);
 #if defined(__MINGW32__) || defined(__CYGWIN__)
@@ -734,8 +730,6 @@ void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
 
     talloc_free(mpctx->key_fifo);
 
-    free(edl_records); // free mem allocated for EDL
-    edl_records = NULL;
     switch (how) {
     case EXIT_QUIT:
         mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "\nExiting... (%s)\n", "Quit");
@@ -3107,59 +3101,6 @@ static void pause_loop(struct MPContext *mpctx)
     }
 }
 
-
-// Find the right mute status and record position for new file position
-static void edl_seek_reset(MPContext *mpctx)
-{
-    mpctx->edl_muted = 0;
-    next_edl_record = edl_records;
-
-    while (next_edl_record) {
-        if (next_edl_record->start_sec >= get_current_time(mpctx))
-            break;
-
-        if (next_edl_record->action == EDL_MUTE)
-            mpctx->edl_muted = !mpctx->edl_muted;
-        next_edl_record = next_edl_record->next;
-    }
-    if ((mpctx->user_muted | mpctx->edl_muted) != mpctx->mixer.muted)
-        mixer_mute(&mpctx->mixer);
-}
-
-
-// Execute EDL command for the current position if one exists
-static void edl_update(MPContext *mpctx)
-{
-    if (!next_edl_record)
-        return;
-
-    if (!mpctx->sh_video) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
-                "Cannot use EDL without video, disabling.\n");
-        free_edl(edl_records);
-        next_edl_record = NULL;
-        edl_records = NULL;
-        return;
-    }
-
-    if (get_current_time(mpctx) >= next_edl_record->start_sec) {
-        if (next_edl_record->action == EDL_SKIP) {
-            mpctx->osd_function = OSD_FFW;
-            queue_seek(mpctx, MPSEEK_RELATIVE, next_edl_record->length_sec, 0);
-            mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_SKIP: start [%f], stop "
-                   "[%f], length [%f]\n", next_edl_record->start_sec,
-                   next_edl_record->stop_sec, next_edl_record->length_sec);
-        } else if (next_edl_record->action == EDL_MUTE) {
-            mpctx->edl_muted = !mpctx->edl_muted;
-            if ((mpctx->user_muted | mpctx->edl_muted) != mpctx->mixer.muted)
-                mixer_mute(&mpctx->mixer);
-            mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_MUTE: [%f]\n",
-                   next_edl_record->start_sec);
-        }
-        next_edl_record = next_edl_record->next;
-    }
-}
-
 static void reinit_decoders(struct MPContext *mpctx)
 {
     reinit_video_chain(mpctx);
@@ -3181,8 +3122,8 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
         mpctx->time_frame = 0;
         mpctx->restart_playback = true;
         // Not all demuxers set d_video->pts during seek, so this value
-        // (which is used by at least vobsub and edl code below) may
-        // be completely wrong (probably 0).
+        // (which is used by at least vobsub code below) may be completely
+        // wrong (probably 0).
         mpctx->sh_video->pts = mpctx->d_video->pts + mpctx->video_offset;
         mpctx->video_pts = mpctx->sh_video->pts;
         update_subtitles(mpctx, mpctx->sh_video->pts, mpctx->video_offset,
@@ -3206,8 +3147,6 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
         current_module = "seek_vobsub_reset";
         vobsub_seek(vo_vobsub, mpctx->sh_video->pts);
     }
-
-    edl_seek_reset(mpctx);
 
     mpctx->hrseek_active = false;
     mpctx->hrseek_framedrop = false;
@@ -3851,8 +3790,6 @@ static void run_playloop(struct MPContext *mpctx)
         queue_seek(mpctx, MPSEEK_RELATIVE, step_sec, 0);
     }
 
-    edl_update(mpctx);
-
     /* Looping. */
     if (opts->loop_times >= 0 && (mpctx->stop_play == AT_END_OF_FILE ||
                                   mpctx->stop_play == PT_NEXT_ENTRY)) {
@@ -4401,11 +4338,6 @@ play_next_file:
                                               mp_basename(mpctx->filename));
     }
 
-    if (edl_filename) {
-        if (edl_records)
-            free_edl(edl_records);
-        next_edl_record = edl_records = edl_parse_file();
-    }
     if (edl_output_filename) {
         if (edl_fd)
             fclose(edl_fd);

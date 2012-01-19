@@ -218,7 +218,6 @@ SRCS_COMMON = asxparser.c \
               codec-cfg.c \
               cpudetect.c \
               defaultopts.c \
-              edl.c \
               fmt-conversion.c \
               m_config.c \
               m_option.c \
