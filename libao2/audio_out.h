@@ -80,6 +80,7 @@ struct ao {
     bool untimed;
     const struct ao_driver *driver;
     void *priv;
+    struct MPOpts *opts;
 };
 
 extern char *ao_subdevice;

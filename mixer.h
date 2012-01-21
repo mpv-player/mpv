@@ -19,18 +19,17 @@
 #ifndef MPLAYER_MIXER_H
 #define MPLAYER_MIXER_H
 
+#include <stdbool.h>
+
 #include "libaf/af.h"
 #include "libao2/audio_out.h"
-
-extern char * mixer_device;
-extern char * mixer_channel;
-extern int soft_vol;
-extern float soft_vol_max;
 
 typedef struct mixer {
     struct ao *ao;
     af_stream_t *afilter;
     int volstep;
+    bool softvol;
+    float softvol_max;
     int muted;
     float last_l, last_r;
 } mixer_t;

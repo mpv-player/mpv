@@ -1776,6 +1776,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     if (!(mpctx->initialized_flags & INITIALIZED_AO)) {
         mpctx->initialized_flags |= INITIALIZED_AO;
         mpctx->ao = ao_create();
+        mpctx->ao->opts = opts;
         mpctx->ao->samplerate = force_srate;
         mpctx->ao->format = opts->audio_output_format;
     }
@@ -1823,6 +1824,8 @@ void reinit_audio_chain(struct MPContext *mpctx)
     }
     mpctx->mixer.ao = ao;
     mpctx->mixer.volstep = volstep;
+    mpctx->mixer.softvol = opts->softvol;
+    mpctx->mixer.softvol_max = opts->softvol_max;
     mpctx->syncing_audio = true;
     return;
 

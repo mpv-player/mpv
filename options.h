@@ -6,6 +6,10 @@ typedef struct MPOpts {
     char **audio_driver_list;
     int fixed_vo;
     int vo_ontop;
+    char *mixer_device;
+    char *mixer_channel;
+    int softvol;
+    float softvol_max;
     int gapless_audio;
     int ao_buffersize;
     int screen_size_x;
