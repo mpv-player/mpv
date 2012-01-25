@@ -1005,6 +1005,15 @@ static int vo_x11_get_gnome_layer(struct vo_x11_state *x11, Window win)
     return WIN_LAYER_NORMAL;
 }
 
+// set a X text property that expects a UTF8_STRING type
+static void vo_x11_set_property_utf8(struct vo *vo, Atom name, const char *t)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    XChangeProperty(x11->display, x11->window, name, x11->XAUTF8_STRING, 8,
+                    PropModeReplace, t, strlen(t));
+}
+
 // set a X text property that expects a STRING or COMPOUND_TEXT type
 static void vo_x11_set_property_string(struct vo *vo, Atom name, const char *t)
 {
@@ -1015,17 +1024,14 @@ static void vo_x11_set_property_string(struct vo *vo, Atom name, const char *t)
                                     XStdICCTextStyle, &prop) == Success)
     {
         XSetTextProperty(x11->display, x11->window, &prop, name);
-        XFree(prop.value);
+    } else {
+        // Strictly speaking this violates the ICCCM, but there's no way we
+        // can do this correctly.
+        vo_x11_set_property_utf8(vo, name, t);
     }
-}
 
-// set a X text property that expects a UTF8_STRING type
-static void vo_x11_set_property_utf8(struct vo *vo, Atom name, const char *t)
-{
-    struct vo_x11_state *x11 = vo->x11;
-
-    XChangeProperty(x11->display, x11->window, name, x11->XAUTF8_STRING, 8,
-                    PropModeReplace, t, strlen(t));
+    if (prop.value)
+        XFree(prop.value);
 }
 
 static void vo_x11_update_window_title(struct vo *vo)
