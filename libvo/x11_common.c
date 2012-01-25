@@ -993,36 +993,6 @@ static int vo_x11_get_gnome_layer(struct vo_x11_state *x11, Window win)
     return WIN_LAYER_NORMAL;
 }
 
-// set a X text property that expects a STRING type
-static void vo_x11_set_property_string(struct vo *vo, Atom name, const char *t)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    XTextProperty prop = {0};
-    int success;
-
-    success = Xutf8TextListToTextProperty(x11->display, (char **)&t, 1,
-                                          XStringStyle, &prop);
-
-    // The call can fail if the string uses characters not in the STRING
-    // encoding (which is latin-1 as far as I can tell). Try COMPOUND_TEXT
-    // instead. (It is possible that COMPOUND_TEXT always works, but since the
-    // difference in the type used for the property is visible to the Window
-    // manager and the ICCCM seems to specify STRING, we're trying to be careful
-    // and try STRING first.)
-    // GTK seems to follow about the same fallback mechanism.
-    if (success != Success) {
-        XFree(prop.value);
-        prop.value = NULL;
-        success = Xutf8TextListToTextProperty(x11->display, (char **)&t, 1,
-                                              XCompoundTextStyle, &prop);
-    }
-
-    if (success == Success)
-        XSetTextProperty(x11->display, x11->window, &prop, name);
-
-    XFree(prop.value);
-}
-
 // set a X text property that expects a UTF8_STRING type
 static void vo_x11_set_property_utf8(struct vo *vo, Atom name, const char *t)
 {
@@ -1030,6 +1000,25 @@ static void vo_x11_set_property_utf8(struct vo *vo, Atom name, const char *t)
 
     XChangeProperty(x11->display, x11->window, name, x11->XAUTF8_STRING, 8,
                     PropModeReplace, t, strlen(t));
+}
+
+// set a X text property that expects a STRING or COMPOUND_TEXT type
+static void vo_x11_set_property_string(struct vo *vo, Atom name, const char *t)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    XTextProperty prop = {0};
+
+    if (Xutf8TextListToTextProperty(x11->display, (char **)&t, 1,
+                                    XStdICCTextStyle, &prop) == Success) {
+        XSetTextProperty(x11->display, x11->window, &prop, name);
+    } else {
+        // Strictly speaking this violates the ICCCM, but there's no way we
+        // can do this correctly.
+        vo_x11_set_property_utf8(vo, name, t);
+    }
+
+    if (prop.value)
+        XFree(prop.value);
 }
 
 static void vo_x11_update_window_title(struct vo *vo)
