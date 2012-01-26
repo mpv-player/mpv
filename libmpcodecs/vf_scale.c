@@ -715,7 +715,7 @@ static struct SwsContext *sws_getContextFromCmdLine2(int srcW, int srcH, int src
 	if (srcFormat == IMGFMT_RGB8 || srcFormat == IMGFMT_BGR8) sfmt = PIX_FMT_PAL8;
 	sws_getFlagsAndFilterFromCmdLine(&flags, &srcFilterParam, &dstFilterParam);
 
-	return sws_getContext(srcW, srcH, sfmt, dstW, dstH, dfmt, flags | get_sws_cpuflags(), srcFilterParam, dstFilterParam, NULL);
+	return sws_getContext(srcW, srcH, sfmt, dstW, dstH, dfmt, flags | extraflags | get_sws_cpuflags(), srcFilterParam, dstFilterParam, NULL);
 }
 
 struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat, int dstW, int dstH, int dstFormat)
