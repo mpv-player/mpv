@@ -487,6 +487,11 @@ static const extfunc_desc_t extfuncs[] = {
     DEF_GL3_DESC(UniformMatrix3fv),
     DEF_GL3_DESC(UniformMatrix4x3fv),
 
+#ifdef CONFIG_GL_WIN32
+    DEF_EXT_DESC(wglCreateContextAttribsARB, NULL,
+                 ("wglCreateContextAttribsARB")),
+#endif
+
     {-1}
 };
 
@@ -1812,6 +1817,7 @@ static void cocoa_fullscreen(struct vo *vo)
 #ifdef CONFIG_GL_WIN32
 #include "w32_common.h"
 
+
 static int create_window_w32(struct MPGLContext *ctx, uint32_t d_width,
                              uint32_t d_height, uint32_t flags)
 {
@@ -1834,6 +1840,83 @@ static void *w32gpa(const GLubyte *procName)
         return res;
     oglmod = GetModuleHandle("opengl32.dll");
     return GetProcAddress(oglmod, procName);
+}
+
+static int create_window_w32_gl3(struct MPGLContext *ctx, int gl_flags,
+                                 int gl_version, uint32_t d_width,
+                                 uint32_t d_height, uint32_t flags) {
+    if (!vo_w32_config(d_width, d_height, flags))
+        return -1;
+
+    HGLRC *context = &ctx->context.w32;
+
+    if (*context) // reuse existing context
+        return 0; // not reusing it breaks gl3!
+
+    HWND win = vo_w32_window;
+    HDC windc = vo_w32_get_dc(win);
+    HGLRC new_context = 0;
+    GL *gl = ctx->gl;
+
+    new_context = wglCreateContext(windc);
+    if (!new_context) {
+        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GL context!\n");
+        return -1;
+    }
+
+    // set context
+    if (!wglMakeCurrent(windc, new_context)) {
+        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GL context!\n");
+        goto out;
+    }
+
+    getFunctions(ctx->gl, w32gpa, NULL, true);
+
+    if (!gl->wglCreateContextAttribsARB) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[gl] The current OpenGL implementation does"
+                                  " not support OpenGL 3.x \n");
+        goto out;
+    }
+
+    int attribs[] = {
+        WGL_CONTEXT_MAJOR_VERSION_ARB, MPGL_VER_GET_MAJOR(gl_version),
+        WGL_CONTEXT_MINOR_VERSION_ARB, MPGL_VER_GET_MINOR(gl_version),
+        WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+        WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+        0
+    };
+
+    *context = gl->wglCreateContextAttribsARB(windc, 0, attribs);
+    if (! *context) {
+        // NVidia, instead of ignoring WGL_CONTEXT_FLAGS_ARB, will error out if
+        // it's present on pre-3.2 contexts.
+        // Remove it from attribs and retry the context creation.
+        attribs[6] = attribs[7] = 0;
+        *context = gl->wglCreateContextAttribsARB(windc, 0, attribs);
+    }
+    if (! *context) {
+        int err = GetLastError();
+        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create an OpenGL 3.x"
+                                    " context: error 0x%x\n", err);
+        goto out;
+    }
+
+    wglMakeCurrent(NULL, NULL);
+    wglDeleteContext(new_context);
+
+    if (!wglMakeCurrent(windc, *context)) {
+        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GL3 context!\n");
+        wglDeleteContext(*context);
+        return -1;
+    }
+
+    /* update function pointers */
+    getFunctions(ctx->gl, w32gpa, NULL, true);
+
+    return 0;
+out:
+    wglDeleteContext(new_context);
+    return -1;
 }
 
 static int setGlWindow_w32(MPGLContext *ctx)
@@ -1887,6 +1970,7 @@ static int setGlWindow_w32(MPGLContext *ctx)
             wglDeleteContext(*context);
         *context = new_context;
         *vinfo = new_vinfo;
+
         getFunctions(ctx->gl, w32gpa, NULL, false);
 
         // and inform that reinit is neccessary
@@ -2379,6 +2463,7 @@ MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
 #ifdef CONFIG_GL_WIN32
     case GLTYPE_W32:
         ctx->create_window = create_window_w32;
+        ctx->create_window_gl3 = create_window_w32_gl3;
         ctx->setGlWindow = setGlWindow_w32;
         ctx->releaseGlContext = releaseGlContext_w32;
         ctx->swapGlBuffers = swapGlBuffers_w32;

@@ -46,6 +46,10 @@
 #endif
 #include <GL/gl.h>
 
+#ifdef CONFIG_GL_WIN32
+#include <GL/glext.h>
+#endif
+
 // workaround for some gl.h headers
 #ifndef GLAPIENTRY
 #ifdef APIENTRY
@@ -563,7 +567,24 @@ struct GL {
                                         const GLfloat *);
     void (GLAPIENTRY *UniformMatrix4x3fv)(GLint, GLsizei, GLboolean,
                                           const GLfloat *);
-
+#ifdef CONFIG_GL_WIN32
+    HGLRC (GLAPIENTRY *wglCreateContextAttribsARB)(HDC hDC, HGLRC hShareContext,
+                                                   const int *attribList);
+#endif
 };
+
+
+#if defined(CONFIG_GL_WIN32) && !defined(WGL_CONTEXT_MAJOR_VERSION_ARB)
+/* these are supposed to be defined in wingdi.h but mingw's is too old */
+/* only the bits actually used by mplayer are defined */
+/* reference: http://www.opengl.org/registry/specs/ARB/wgl_create_context.txt */
+
+#define WGL_CONTEXT_MAJOR_VERSION_ARB          0x2091
+#define WGL_CONTEXT_MINOR_VERSION_ARB          0x2092
+#define WGL_CONTEXT_FLAGS_ARB                  0x2094
+#define WGL_CONTEXT_PROFILE_MASK_ARB           0x9126
+#define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x0002
+#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB   0x00000001
+#endif
 
 #endif /* MPLAYER_GL_COMMON_H */
