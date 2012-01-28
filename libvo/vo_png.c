@@ -165,13 +165,20 @@ static int preinit(const char *arg)
     if (subopt_parse(arg, subopts) != 0) {
         return -1;
     }
-    avctx = avcodec_alloc_context();
-    if (avcodec_open(avctx, avcodec_find_encoder(CODEC_ID_PNG)) < 0) {
-        uninit();
-        return -1;
-    }
+    struct AVCodec *png_codec = avcodec_find_encoder(CODEC_ID_PNG);
+    if (!png_codec)
+        goto error;
+    avctx = avcodec_alloc_context3(png_codec);
+    if (!avctx)
+        goto error;
+    if (avcodec_open2(avctx, png_codec, NULL) < 0)
+        goto error;
     avctx->compression_level = z_compression;
     return 0;
+
+ error:
+    uninit();
+    return -1;
 }
 
 static int control(uint32_t request, void *data)

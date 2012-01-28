@@ -29,7 +29,7 @@
 #include <stddef.h>
 #include <assert.h>
 
-#include <libavutil/intfloat_readwrite.h>
+#include <libavutil/intfloat.h>
 #include <libavutil/common.h>
 #include "talloc.h"
 #include "ebml.h"
@@ -191,11 +191,11 @@ double ebml_read_float(stream_t *s, uint64_t *length)
     len = ebml_read_length(s, &l);
     switch (len) {
     case 4:
-        value = av_int2flt(stream_read_dword(s));
+        value = av_int2float(stream_read_dword(s));
         break;
 
     case 8:
-        value = av_int2dbl(stream_read_qword(s));
+        value = av_int2double(stream_read_qword(s));
         break;
 
     default:
@@ -382,9 +382,9 @@ static double ebml_parse_float(uint8_t *data, int length)
     assert(length == 4 || length == 8);
     uint64_t i = ebml_parse_uint(data, length);
     if (length == 4)
-        return av_int2flt(i);
+        return av_int2float(i);
     else
-        return av_int2dbl(i);
+        return av_int2double(i);
 }
 
 

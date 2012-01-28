@@ -25,6 +25,13 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <libavformat/avformat.h>
+#include <libavformat/avio.h>
+#include <libavutil/avutil.h>
+#include <libavutil/avstring.h>
+#include <libavutil/mathematics.h>
+#include <libavutil/opt.h>
+
 #include "config.h"
 #include "options.h"
 #include "mp_msg.h"
@@ -37,13 +44,6 @@
 #include "stheader.h"
 #include "m_option.h"
 #include "sub/sub.h"
-
-#include "libavformat/avformat.h"
-#include "libavformat/avio.h"
-#include "libavutil/avutil.h"
-#include "libavutil/avstring.h"
-#include <libavutil/mathematics.h>
-#include "libavcodec/opt.h"
 
 #include "mp_taglists.h"
 
@@ -534,7 +534,6 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
     struct MPOpts *opts = demuxer->opts;
     struct lavfdopts *lavfdopts = &opts->lavfdopts;
     AVFormatContext *avfc;
-    const AVOption *opt;
     AVDictionaryEntry *t = NULL;
     lavf_priv_t *priv = demuxer->priv;
     int i;
@@ -559,16 +558,14 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
 
     if (lavfdopts->probesize) {
-        opt = av_set_int(avfc, "probesize", lavfdopts->probesize);
-        if (!opt)
+        if (av_opt_set_int(avfc, "probesize", lavfdopts->probesize, 0) < 0)
             mp_msg(MSGT_HEADER, MSGL_ERR,
                    "demux_lavf, couldn't set option probesize to %u\n",
                    lavfdopts->probesize);
     }
     if (lavfdopts->analyzeduration) {
-        opt = av_set_int(avfc, "analyzeduration",
-                         lavfdopts->analyzeduration * AV_TIME_BASE);
-        if (!opt)
+        if (av_opt_set_int(avfc, "analyzeduration",
+                           lavfdopts->analyzeduration * AV_TIME_BASE, 0) < 0)
             mp_msg(MSGT_HEADER, MSGL_ERR, "demux_lavf, couldn't set option "
                    "analyzeduration to %u\n", lavfdopts->analyzeduration);
     }
@@ -609,7 +606,7 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
 
     priv->avfc = avfc;
 
-    if (av_find_stream_info(avfc) < 0) {
+    if (avformat_find_stream_info(avfc, NULL) < 0) {
         mp_msg(MSGT_HEADER, MSGL_ERR,
                "LAVF_header: av_find_stream_info() failed\n");
         return NULL;
@@ -617,7 +614,7 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
 
     /* Add metadata. */
     while ((t = av_dict_get(avfc->metadata, "", t,
-                                AV_METADATA_IGNORE_SUFFIX)))
+                            AV_DICT_IGNORE_SUFFIX)))
         demux_info_add(demuxer, t->key, t->value);
 
     for (i = 0; i < avfc->nb_chapters; i++) {
@@ -708,7 +705,7 @@ static void check_internet_radio_hack(struct demuxer *demuxer)
         AVDictionaryEntry *t = NULL;
         AVStream *stream = avfc->streams[avfc->nb_streams - 1];
         while ((t = av_dict_get(stream->metadata, "", t,
-                                    AV_METADATA_IGNORE_SUFFIX)))
+                                AV_DICT_IGNORE_SUFFIX)))
             demux_info_add(demuxer, t->key, t->value);
     } else {
         if (priv->internet_radio_hack)
@@ -995,7 +992,7 @@ static void demux_close_lavf(demuxer_t *demuxer)
     if (priv) {
         if (priv->avfc) {
             av_freep(&priv->avfc->key);
-            av_close_input_file(priv->avfc);
+            avformat_close_input(&priv->avfc);
         }
         av_freep(&priv->pb);
         free(priv);

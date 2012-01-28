@@ -547,7 +547,7 @@ static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parse
         break;
     }
     if (codec_id != CODEC_ID_NONE) {
-        *avctx = avcodec_alloc_context();
+        *avctx = avcodec_alloc_context3(NULL);
         if (!*avctx)
             return;
         *parser = av_parser_init(codec_id);

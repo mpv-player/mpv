@@ -68,11 +68,15 @@ static int write_png(screenshot_ctx *ctx, struct mp_image *image)
     void *outbuffer = NULL;
     int success = 0;
 
-    AVCodecContext *avctx = avcodec_alloc_context();
+    struct AVCodec *png_codec = avcodec_find_encoder(CODEC_ID_PNG);
+    AVCodecContext *avctx = NULL;
+    if (!png_codec)
+        goto print_open_fail;
+    avctx = avcodec_alloc_context3(png_codec);
     if (!avctx)
-        goto error_exit;
-
-    if (avcodec_open(avctx, avcodec_find_encoder(CODEC_ID_PNG))) {
+        goto print_open_fail;
+    if (avcodec_open2(avctx, png_codec, NULL) < 0) {
+     print_open_fail:
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "Could not open libavcodec PNG encoder"
                " for saving screenshot\n");
         goto error_exit;

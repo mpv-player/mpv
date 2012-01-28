@@ -63,9 +63,14 @@ int decode_avsub(struct sh_sub *sh, uint8_t *data, int size,
         pkt.convergence_duration = duration * 1000;
     if (!ctx) {
         AVCodec *sub_codec;
-        ctx = avcodec_alloc_context();
         sub_codec = avcodec_find_decoder(cid);
-        if (!ctx || !sub_codec || avcodec_open(ctx, sub_codec) < 0) {
+        if (!sub_codec)
+            goto error;
+        ctx = avcodec_alloc_context3(sub_codec);
+        if (!ctx)
+            goto error;
+        if (avcodec_open2(ctx, sub_codec, NULL) < 0) {
+         error:
             mp_msg(MSGT_SUBREADER, MSGL_FATAL,
                    "Could not open subtitle decoder\n");
             av_freep(&ctx);

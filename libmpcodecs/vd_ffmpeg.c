@@ -22,13 +22,15 @@
 #include <time.h>
 #include <stdbool.h>
 
+#include <libavutil/common.h>
+#include <libavutil/opt.h>
+
 #include "talloc.h"
 #include "config.h"
 #include "mp_msg.h"
 #include "options.h"
 #include "av_opts.h"
 
-#include "libavutil/common.h"
 #include "ffmpeg_files/intreadwrite.h"
 #include "mpbswap.h"
 #include "fmt-conversion.h"
@@ -62,8 +64,6 @@ typedef struct {
     int do_dr1;
     int vo_initialized;
     int best_csp;
-    int b_age;
-    int ip_age[2];
     int qp_stat[32];
     double qp_sum;
     double inv_qp_sum;
@@ -86,7 +86,6 @@ static void uninit(struct sh_video *sh);
 
 const m_option_t lavc_decode_opts_conf[] = {
     OPT_INTRANGE("bug", lavc_param.workaround_bugs, 0, -1, 999999),
-    OPT_INTRANGE("er", lavc_param.error_resilience, 0, 0, 99),
     OPT_FLAG_ON("gray", lavc_param.gray, 0),
     OPT_INTRANGE("idct", lavc_param.idct_algo, 0, 0, 99),
     OPT_INTRANGE("ec", lavc_param.error_concealment, 0, 0, 99),
@@ -149,11 +148,10 @@ static int init(sh_video_t *sh)
             && lavc_codec->id != CODEC_ID_ROQ && lavc_codec->id != CODEC_ID_VP8
             && lavc_codec->id != CODEC_ID_LAGARITH)
         ctx->do_dr1 = 1;
-    ctx->b_age = ctx->ip_age[0] = ctx->ip_age[1] = 256 * 256 * 256 * 64;
     ctx->ip_count = ctx->b_count = 0;
 
     ctx->pic = avcodec_alloc_frame();
-    ctx->avctx = avcodec_alloc_context();
+    ctx->avctx = avcodec_alloc_context3(lavc_codec);
     avctx = ctx->avctx;
     avctx->opaque = sh;
     avctx->codec_type = AVMEDIA_TYPE_VIDEO;
@@ -209,7 +207,6 @@ static int init(sh_video_t *sh)
     avctx->coded_width = sh->disp_w;
     avctx->coded_height = sh->disp_h;
     avctx->workaround_bugs = lavc_param->workaround_bugs;
-    avctx->error_recognition = lavc_param->error_resilience;
     if (lavc_param->gray)
         avctx->flags |= CODEC_FLAG_GRAY;
     avctx->flags2 |= lavc_param->fast;
@@ -272,7 +269,7 @@ static int init(sh_video_t *sh)
          * MJPG fourcc :( */
         if (!sh->bih || sh->bih->biSize <= sizeof(*sh->bih))
             break;
-        avctx->flags |= CODEC_FLAG_EXTERN_HUFF;
+        av_opt_set_int(avctx, "extern_huff", 1, AV_OPT_SEARCH_CHILDREN);
         avctx->extradata_size = sh->bih->biSize - sizeof(*sh->bih);
         avctx->extradata = av_mallocz(avctx->extradata_size +
                                       FF_INPUT_BUFFER_PADDING_SIZE);
@@ -318,7 +315,7 @@ static int init(sh_video_t *sh)
     avctx->thread_count = lavc_param->threads;
 
     /* open it */
-    if (avcodec_open(avctx, lavc_codec) < 0) {
+    if (avcodec_open2(avctx, lavc_codec, NULL) < 0) {
         mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not open codec.\n");
         uninit(sh);
         return 0;
@@ -550,19 +547,6 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic)
 
     pic->opaque = mpi;
 
-    if (pic->reference) {
-        pic->age = ctx->ip_age[0];
-
-        ctx->ip_age[0] = ctx->ip_age[1] + 1;
-        ctx->ip_age[1] = 1;
-        ctx->b_age++;
-    } else {
-        pic->age = ctx->b_age;
-
-        ctx->ip_age[0]++;
-        ctx->ip_age[1]++;
-        ctx->b_age = 1;
-    }
     pic->type = FF_BUFFER_TYPE_USER;
 
     /* The libavcodec reordered_opaque functionality is implemented by
@@ -708,16 +692,16 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
                 all_frametime, (double)(len * 8) / sh->frametime / 1000.0,
                 (double)(all_len * 8) / all_frametime / 1000.0);
         switch (pic->pict_type) {
-        case FF_I_TYPE:
+        case AV_PICTURE_TYPE_I:
             fprintf(fvstats, "type= I\n");
             break;
-        case FF_P_TYPE:
+        case AV_PICTURE_TYPE_P:
             fprintf(fvstats, "type= P\n");
             break;
-        case FF_S_TYPE:
+        case AV_PICTURE_TYPE_S:
             fprintf(fvstats, "type= S\n");
             break;
-        case FF_B_TYPE:
+        case AV_PICTURE_TYPE_B:
             fprintf(fvstats, "type= B\n");
             break;
         default:

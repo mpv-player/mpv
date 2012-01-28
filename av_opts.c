@@ -21,8 +21,10 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+#include <libavutil/opt.h>
+
 #include "av_opts.h"
-#include "libavcodec/opt.h"
 
 int parse_avopts(void *v, char *str){
     char *start;
@@ -37,7 +39,7 @@ int parse_avopts(void *v, char *str){
         arg     = strchr(str, '=');
         if(arg)      *arg++= 0;
 
-        if (av_set_string3(v, str, arg, 0, NULL) < 0) {
+        if (av_opt_set(v, str, arg, AV_OPT_SEARCH_CHILDREN) < 0) {
             free(start);
             return -1;
         }

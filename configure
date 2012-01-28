@@ -6003,7 +6003,9 @@ echores "$_live"
 
 
 
-all_libav_libs="libavutil >= 51.7.0:libavcodec >= 53.5.0:libavformat >= 53.2.0:libswscale >= 2.0.0:libpostproc >= 52.0.0"
+# Test with > against Libav 0.8 versions which will NOT work rather than
+# specify minimum version, to allow (future) point releases to possibly work.
+all_libav_libs="libavutil > 51.21.0:libavcodec > 53.34.0:libavformat > 53.20.0:libswscale >= 2.0.0:libpostproc >= 52.0.0"
 echocheck "Libav ($all_libav_libs)"
 if test "$ffmpeg" = auto ; then
   IFS=":"   # shell should not be used for programming
