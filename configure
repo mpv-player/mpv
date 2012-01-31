@@ -1397,6 +1397,7 @@ fi
 if mingw32 ; then
   _getch=getch2-win.c
   need_shmem=no
+  extra_cflags="$extra_cflags -D__USE_MINGW_ANSI_STDIO=1"
 fi
 
 if amigaos ; then
