@@ -483,6 +483,7 @@ Miscellaneous options:
   --nm=NM                nm tool to build MPlayer [nm]
   --yasm=YASM            Yasm assembler to build MPlayer [yasm]
   --ar=AR                librarian to build MPlayer [ar]
+  --pkg-config=PKGCONFIG pkg-config to find some libraries [pkg-config]
   --ranlib=RANLIB        ranlib to build MPlayer [ranlib]
   --windres=WINDRES      windres to build MPlayer [windres]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
@@ -799,6 +800,9 @@ for ac_option do
     ;;
   --ar=*)
     _ar=$(echo $ac_option | cut -d '=' -f 2)
+    ;;
+  --pkg-config=*)
+    _pkg_config=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --ranlib=*)
     _ranlib=$(echo $ac_option | cut -d '=' -f 2)
