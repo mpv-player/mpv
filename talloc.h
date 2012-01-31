@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "mpcommon.h"
+
 /* HACK: libsmbclient uses dynamically linked libtalloc.so which has
  * identically named symbols. This name collision caused a crash under
  * stream_smb when trying to play anything with smb://. This hack
@@ -52,18 +54,6 @@ typedef void TALLOC_CTX;
 
 #ifndef TALLOC_DEPRECATED
 #define TALLOC_DEPRECATED 0
-#endif
-
-#ifndef PRINTF_ATTRIBUTE
-#if (__GNUC__ >= 3)
-/** Use gcc attribute to check printf fns.  a1 is the 1-based index of
- * the parameter containing the format, and a2 the index of the first
- * argument. Note that some gcc 2.x versions don't handle this
- * properly **/
-#define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format (__printf__, a1, a2)))
-#else
-#define PRINTF_ATTRIBUTE(a1, a2)
-#endif
 #endif
 
 /* try to make talloc_set_destructor() and talloc_steal() type safe,

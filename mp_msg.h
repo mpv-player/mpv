@@ -130,19 +130,15 @@ void mp_msg_init(void);
 int mp_msg_test(int mod, int lev);
 
 #include "config.h"
+#include "mpcommon.h"
 
 char *mp_gtext(const char *string);
 
 void mp_msg_va(int mod, int lev, const char *format, va_list va);
 
-#ifdef __GNUC__
-void mp_msg(int mod, int lev, const char *format, ... ) __attribute__ ((format (printf, 3, 4)));
-void mp_tmsg(int mod, int lev, const char *format, ... ) __attribute__ ((format (printf, 3, 4)));
-static inline void mp_dbg(int mod, int lev, const char *format, ...) __attribute__ ((format (printf, 3, 4)));
-#else // not GNU C
-void mp_msg(int mod, int lev, const char *format, ... );
-void mp_tmsg(int mod, int lev, const char *format, ...)
-#endif /* __GNUC__ */
+void mp_msg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
+void mp_tmsg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
+static inline void mp_dbg(int mod, int lev, const char *format, ...) PRINTF_ATTRIBUTE(3, 4);
 
 static inline void mp_dbg(int mod, int lev, const char *format, ...)
 {
