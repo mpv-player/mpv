@@ -476,7 +476,7 @@ Available values for --language-msg are: all $msg_lang_all
 
 Miscellaneous options:
   --enable-runtime-cpudetection    enable runtime CPU detection [disable]
-  --enable-cross-compile enable cross-compilation [autodetect]
+  --enable-cross-compile enable cross-compilation [disable]
   --cc=COMPILER          C compiler to build MPlayer [gcc]
   --host-cc=COMPILER     C compiler for tools needed while building [gcc]
   --as=ASSEMBLER         assembler to build MPlayer [as]
@@ -560,7 +560,7 @@ _as=auto
 _nm=auto
 _yasm=yasm
 _runtime_cpudetection=no
-_cross_compile=auto
+_cross_compile=no
 _prefix="/usr/local"
 ffmpeg=auto
 ffmpeg_internals=no
@@ -1478,9 +1478,10 @@ echo "Detected operating system: $system_name"
 echo "Detected host architecture: $host_arch"
 
 echocheck "cross compilation"
-if test $_cross_compile = auto ; then
+if test $_cross_compile = yes ; then
   _cross_compile=yes
-  cflag_check "" && "$TMPEXE" && _cross_compile=no
+else
+  _cross_compile=no
 fi
 echores $_cross_compile
 
