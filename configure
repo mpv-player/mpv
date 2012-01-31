@@ -551,14 +551,15 @@ neon=auto
 _iwmmxt=auto
 _altivec=auto
 _install=install
-_ranlib=ranlib
-_windres=windres
-_cc=cc
-_ar=ar
+_pkg_config=auto
+_ranlib=auto
+_windres=auto
+_cc=auto
+_ar=auto
 test "$CC" && _cc="$CC"
 _as=auto
 _nm=auto
-_yasm=yasm
+_yasm=auto
 _runtime_cpudetection=no
 _cross_compile=no
 _prefix="/usr/local"
@@ -1198,6 +1199,58 @@ test -z "$_confdir" && _confdir="$_prefix/etc/mplayer"
 test -z "$_libdir"  && _libdir="$_prefix/lib"
 test -z "$_localedir"  && _localedir="$_prefix/share/locale"
 
+for tmpdir in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
+  test "$tmpdir" && break
+done
+
+mplayer_tmpdir="$tmpdir/mplayer-configure-$RANDOM-$$"
+mkdir $mplayer_tmpdir || die "Unable to create tmpdir."
+
+TMPLOG="config.log"
+
+rm -f "$TMPLOG"
+echo Parameters configure was run with: > "$TMPLOG"
+if test -n "$CFLAGS" ; then
+    echo ${_echo_n} CFLAGS="'$CFLAGS' ${_echo_c}" >> "$TMPLOG"
+fi
+if test -n "$PKG_CONFIG_PATH" ; then
+    echo ${_echo_n} PKG_CONFIG_PATH="'$PKG_CONFIG_PATH' ${_echo_c}" >> "$TMPLOG"
+fi
+echo ./configure $configuration >> "$TMPLOG"
+echo >> "$TMPLOG"
+
+
+echocheck "cross compilation"
+echores $_cross_compile
+
+if test $_cross_compile = yes; then
+  tmp_run() {
+    return 0
+  }
+  test "$_host_cc" || _host_cc=cc
+fi
+
+tool_prefix=""
+
+if test $_cross_compile = yes ; then
+    # Usually cross-compiler prefixes match with the target triplet
+    test -n "$_target" && tool_prefix="$_target"-
+fi
+
+test "$_ranlib" = auto && _ranlib="$tool_prefix"ranlib
+test "$_windres" = auto && _windres="$tool_prefix"windres
+test "$_ar" = auto && _ar="$tool_prefix"ar
+test "$_yasm" = auto && _yasm="$tool_prefix"yasm
+test "$_pkg_config" = auto && _pkg_config="$tool_prefix"pkg-config
+
+if test "$_cc" = auto ; then
+    if test -n "$tool_prefix" ; then
+        _cc="$tool_prefix"gcc
+    else
+        _cc=cc
+    fi
+fi
+
 # Determine our OS name and CPU architecture
 if test -z "$_target" ; then
   # OS name
@@ -1363,31 +1416,11 @@ if os2 ; then
   def_priority="#define CONFIG_PRIORITY 1"
 fi
 
-for tmpdir in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
-  test "$tmpdir" && break
-done
-
-mplayer_tmpdir="$tmpdir/mplayer-configure-$RANDOM-$$"
-mkdir $mplayer_tmpdir || die "Unable to create tmpdir."
-
-TMPLOG="config.log"
 TMPC="$mplayer_tmpdir/tmp.c"
 TMPCPP="$mplayer_tmpdir/tmp.cpp"
 TMPEXE="$mplayer_tmpdir/tmp$_exesuf"
 TMPH="$mplayer_tmpdir/tmp.h"
 TMPS="$mplayer_tmpdir/tmp.S"
-
-rm -f "$TMPLOG"
-echo Parameters configure was run with: > "$TMPLOG"
-if test -n "$CFLAGS" ; then
-    echo ${_echo_n} CFLAGS="'$CFLAGS' ${_echo_c}" >> "$TMPLOG"
-fi
-if test -n "$PKG_CONFIG_PATH" ; then
-    echo ${_echo_n} PKG_CONFIG_PATH="'$PKG_CONFIG_PATH' ${_echo_c}" >> "$TMPLOG"
-fi
-echo ./configure $configuration >> "$TMPLOG"
-echo >> "$TMPLOG"
-
 
 if test "$_runtime_cpudetection" = yes && ! x86 && ! ppc; then
   die "Runtime CPU detection only works for x86, x86-64 and PPC!"
@@ -1474,27 +1507,12 @@ EOF
   cc_check && host_arch=x86_64 || host_arch=i386
 fi
 
-echo "Detected operating system: $system_name"
-echo "Detected host architecture: $host_arch"
-
-echocheck "cross compilation"
-if test $_cross_compile = yes ; then
-  _cross_compile=yes
-else
-  _cross_compile=no
-fi
-echores $_cross_compile
-
-if test $_cross_compile = yes; then
-  tmp_run() {
-    return 0
-  }
-  test "$_host_cc" || _host_cc=cc
-fi
-
 echocheck "host cc"
 test "$_host_cc" || _host_cc=$_cc
 echores $_host_cc
+
+echo "Detected operating system: $system_name"
+echo "Detected host architecture: $host_arch"
 
 # ---
 
@@ -3623,7 +3641,6 @@ echores "$_apple_ir"
 fi #if linux
 
 echocheck "pkg-config"
-_pkg_config=pkg-config
 if $($_pkg_config --version > /dev/null 2>&1); then
   if test "$_ld_static"; then
     _pkg_config="$_pkg_config --static"
