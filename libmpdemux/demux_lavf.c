@@ -293,8 +293,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
     if (matches_avinputformat_name(priv, "mpeg") ||
             matches_avinputformat_name(priv, "mpegts"))
         codec->codec_tag = 0;
-    int override_tag = mp_av_codec_get_tag(mp_codecid_override_taglists,
-                                           codec->codec_id);
+    int override_tag = mp_taglist_override(codec->codec_id);
     // For some formats (like PCM) always trust CODEC_ID_* more than codec_tag
     if (override_tag)
         codec->codec_tag = override_tag;
@@ -313,8 +312,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         if (codec->codec_tag == MKTAG('m', 'p', '4', 'a'))
             codec->codec_tag = 0;
         if (!codec->codec_tag)
-            codec->codec_tag = mp_av_codec_get_tag(mp_wav_taglists,
-                                                   codec->codec_id);
+            codec->codec_tag = mp_taglist_audio(codec->codec_id);
         wf->wFormatTag = codec->codec_tag;
         wf->nChannels = codec->channels;
         wf->nSamplesPerSec = codec->sample_rate;
@@ -399,8 +397,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
                 codec->codec_tag = avcodec_pix_fmt_to_codec_tag(codec->pix_fmt);
         }
         if (!codec->codec_tag)
-            codec->codec_tag = mp_av_codec_get_tag(mp_bmp_taglists,
-                                                   codec->codec_id);
+            codec->codec_tag = mp_taglist_video(codec->codec_id);
         bih->biSize = sizeof(*bih) + codec->extradata_size;
         bih->biWidth = codec->width;
         bih->biHeight = codec->height;
