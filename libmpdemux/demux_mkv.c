@@ -21,13 +21,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "config.h"
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <inttypes.h>
 #include <stdbool.h>
+
+#include <libavutil/common.h>
+#include <libavutil/lzo.h>
+#include <libavutil/intreadwrite.h>
+#include <libavutil/avstring.h>
+
+#include "config.h"
+
+#if CONFIG_ZLIB
+#include <zlib.h>
+#endif
 
 #include "talloc.h"
 #include "options.h"
@@ -43,19 +52,10 @@
 
 #include "sub/sub.h"
 
-#include "libavutil/common.h"
 
 #ifdef CONFIG_QTX_CODECS
 #include "loader/qtx/qtxsdk/components.h"
 #endif
-
-#if CONFIG_ZLIB
-#include <zlib.h>
-#endif
-
-#include "libavutil/lzo.h"
-#include "ffmpeg_files/intreadwrite.h"
-#include "libavutil/avstring.h"
 
 static const unsigned char sipr_swaps[38][2] = {
     {0,63},{1,22},{2,44},{3,90},{5,81},{7,31},{8,86},{9,58},{10,36},{12,68},

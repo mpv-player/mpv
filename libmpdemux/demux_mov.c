@@ -44,6 +44,9 @@
 #include <unistd.h>
 #include <inttypes.h>
 
+#include <libavutil/common.h>
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
 
 #ifdef CONFIG_QUICKTIME
@@ -54,22 +57,6 @@
 #include "loader/qtx/qtxsdk/components.h"
 #endif
 
-#include "mp_msg.h"
-
-#include "stream/stream.h"
-#include "demuxer.h"
-#include "stheader.h"
-
-#include "libmpcodecs/img_format.h"
-#include "libavutil/common.h"
-#include "ffmpeg_files/intreadwrite.h"
-
-#include "sub/sub.h"
-
-#include "demux_mov.h"
-#include "qtpalette.h"
-#include "parse_mp4.h" // .MP4 specific stuff
-
 #if CONFIG_ZLIB
 #include <zlib.h>
 #endif
@@ -77,6 +64,20 @@
 #ifndef _FCNTL_H
 #include <fcntl.h>
 #endif
+
+#include "mp_msg.h"
+
+#include "stream/stream.h"
+#include "demuxer.h"
+#include "stheader.h"
+
+#include "libmpcodecs/img_format.h"
+
+#include "sub/sub.h"
+
+#include "demux_mov.h"
+#include "qtpalette.h"
+#include "parse_mp4.h" // .MP4 specific stuff
 
 #define char2short(x,y)	AV_RB16(&(x)[(y)])
 #define char2int(x,y) 	AV_RB32(&(x)[(y)])

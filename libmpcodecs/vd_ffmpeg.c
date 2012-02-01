@@ -24,6 +24,7 @@
 
 #include <libavutil/common.h>
 #include <libavutil/opt.h>
+#include <libavutil/intreadwrite.h>
 
 #include "talloc.h"
 #include "config.h"
@@ -31,7 +32,6 @@
 #include "options.h"
 #include "av_opts.h"
 
-#include "ffmpeg_files/intreadwrite.h"
 #include "mpbswap.h"
 #include "fmt-conversion.h"
 

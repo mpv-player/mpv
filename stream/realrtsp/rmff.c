@@ -26,10 +26,11 @@
  * adopted from joschkas real tools
  */
 
+#include <libavutil/intreadwrite.h>
+
 #include "rmff.h"
 #include "xbuffer.h"
 #include "mp_msg.h"
-#include "ffmpeg_files/intreadwrite.h"
 
 /*
 #define LOG

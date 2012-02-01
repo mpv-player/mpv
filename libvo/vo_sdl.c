@@ -66,7 +66,7 @@
 #include "sub/sub.h"
 #include "aspect.h"
 #include "libmpcodecs/vfcap.h"
-#include "ffmpeg_files/bswap.h"
+#include "mpbswap.h"
 
 #ifdef CONFIG_X11
 #include <X11/Xlib.h>

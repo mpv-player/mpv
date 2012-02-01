@@ -21,12 +21,13 @@
 #include <stdarg.h>
 #include <assert.h>
 
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
 #include "mp_msg.h"
 
 #include "vd_internal.h"
 
-#include "ffmpeg_files/intreadwrite.h"
 
 static const vd_info_t info = {
    "Theora/VP3",

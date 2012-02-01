@@ -32,8 +32,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
-#include "ffmpeg_files/intreadwrite.h"
 #include "ad_internal.h"
 
 static const ad_info_t info =

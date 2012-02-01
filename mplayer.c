@@ -22,6 +22,8 @@
 #include <math.h>
 #include <assert.h>
 
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
 #include "talloc.h"
 
@@ -64,8 +66,6 @@
 #include "mplayer.h"
 #include "m_property.h"
 
-#include "libavutil/avstring.h"
-
 #include "sub/subreader.h"
 #include "sub/find_subfiles.h"
 #include "sub/dec_sub.h"
@@ -76,7 +76,6 @@
 
 #include "sub/font_load.h"
 #include "sub/sub.h"
-#include "ffmpeg_files/intreadwrite.h"
 #include "sub/av_sub.h"
 #include "libmpcodecs/dec_teletext.h"
 #include "cpudetect.h"

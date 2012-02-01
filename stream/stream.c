@@ -30,6 +30,9 @@
 #include <strings.h>
 #include <assert.h>
 
+#include <libavutil/intreadwrite.h>
+#include <libavutil/common.h>
+
 #include "talloc.h"
 
 #include "config.h"
@@ -38,15 +41,12 @@
 #include <winsock2.h>
 #endif
 
-#include <libavutil/common.h>
-
 #include "mp_msg.h"
 #include "osdep/shmem.h"
 #include "osdep/timer.h"
 #include "network.h"
 #include "stream.h"
 #include "libmpdemux/demuxer.h"
-#include "ffmpeg_files/intreadwrite.h"
 
 #include "m_option.h"
 #include "m_struct.h"

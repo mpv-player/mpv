@@ -25,13 +25,14 @@
 #include <math.h>
 #include <inttypes.h>
 
+#include <libavutil/intreadwrite.h>
+
 #include "options.h"
 #include "mp_msg.h"
 #include "talloc.h"
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
-#include "ffmpeg_files/intreadwrite.h"
 #include "aviprint.h"
 #include "demux_mov.h"
 #include "demux_ogg.h"

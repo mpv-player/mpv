@@ -26,10 +26,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
 #include "mp_msg.h"
 
-#include "ffmpeg_files/intreadwrite.h"
 #include "libvo/fastmemcpy.h"
 
 #include "vd_internal.h"

@@ -30,18 +30,18 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <libavutil/common.h>
+#include <libavutil/attributes.h>
+#include <libavutil/md5.h>
+#include <libavutil/intreadwrite.h>
+#include <libavutil/base64.h>
+#include <libavutil/avutil.h>
+
 #include "config.h"
-#include "libavutil/common.h"
-#include "libavutil/attributes.h"
 #include "real.h"
 #include "asmrp.h"
 #include "sdpplin.h"
 #include "xbuffer.h"
-#include "libavutil/md5.h"
-#include "ffmpeg_files/intreadwrite.h"
-#include "libavutil/base64.h"
-
-#include <libavutil/avutil.h>
 
 #include "stream/http.h"
 #include "mp_msg.h"

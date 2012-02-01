@@ -23,8 +23,6 @@
  * based upon code from joschka
  */
 
-#include "config.h"
-
 #include <unistd.h>
 #include <stdio.h>
 #include <assert.h>
@@ -35,6 +33,10 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <inttypes.h>
+
+#include <libavutil/intreadwrite.h>
+
+#include "config.h"
 #if !HAVE_WINSOCK2_H
 #include <sys/socket.h>
 //#include <netinet/in.h>
@@ -42,8 +44,6 @@
 #else
 #include <winsock2.h>
 #endif
-
-#include "ffmpeg_files/intreadwrite.h"
 
 #include "stream.h"
 #include "libmpdemux/demuxer.h"

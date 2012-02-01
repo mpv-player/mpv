@@ -26,12 +26,13 @@
 #include <inttypes.h>
 #include <assert.h>
 
+#include <libavcodec/avcodec.h>
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
 #include "af.h"
 #include "reorder_ch.h"
 
-#include "libavcodec/avcodec.h"
-#include "ffmpeg_files/intreadwrite.h"
 
 #define AC3_MAX_CHANNELS 6
 #define AC3_MAX_CODED_FRAME_SIZE 3840
