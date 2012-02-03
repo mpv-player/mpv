@@ -486,23 +486,23 @@ void create_menu()
 
 - (void) mouseEvent:(NSEvent *)theEvent
 {
-    if ( [theEvent buttonNumber] >= 0 && [theEvent buttonNumber] <= 9 )
-    {
+    if ([theEvent buttonNumber] >= 0 && [theEvent buttonNumber] <= 9) {
         int buttonNumber = [theEvent buttonNumber];
         // Fix to mplayer defined button order: left, middle, right
-        if (buttonNumber == 1)
-            buttonNumber = 2;
-        else if (buttonNumber == 2)
-            buttonNumber = 1;
+        if (buttonNumber == 1)  buttonNumber = 2;
+        else if (buttonNumber == 2) buttonNumber = 1;
         switch ([theEvent type]) {
             case NSLeftMouseDown:
-                break;
             case NSRightMouseDown:
             case NSOtherMouseDown:
                 mplayer_put_key(l_vo->key_fifo, (MOUSE_BTN0 + buttonNumber) | MP_KEY_DOWN);
+                // Looks like Cocoa doesn't create MouseUp events when we are
+                // doing the second click in a double click. Put in the key_fifo
+                // the key that would be put from the MouseUp handling code.
+                if([theEvent clickCount] == 2)
+                   mplayer_put_key(l_vo->key_fifo, MOUSE_BTN0 + buttonNumber);
                 break;
             case NSLeftMouseUp:
-                break;
             case NSRightMouseUp:
             case NSOtherMouseUp:
                 mplayer_put_key(l_vo->key_fifo, MOUSE_BTN0 + buttonNumber);
