@@ -610,9 +610,6 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     int dr1 = ctx->do_dr1;
     AVPacket pkt;
 
-    if (len <= 0)
-        return NULL;        // skipped frame
-
     if (!dr1)
         avctx->draw_horiz_band = NULL;
 
