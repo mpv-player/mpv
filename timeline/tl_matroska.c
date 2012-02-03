@@ -23,6 +23,8 @@
 #include <dirent.h>
 #include <libavutil/common.h>
 
+#include "osdep/io.h"
+
 #include "talloc.h"
 
 #include "mp_core.h"

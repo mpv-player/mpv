@@ -27,14 +27,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include "config.h"
 #include "mp_msg.h"
 #include "path.h"
 
 #ifdef CONFIG_MACOSX_BUNDLE
 #include <CoreFoundation/CoreFoundation.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
 #elif defined(__MINGW32__)
 #include <windows.h>
@@ -46,6 +47,7 @@
 #include "talloc.h"
 
 #include "osdep/osdep.h"
+#include "osdep/io.h"
 
 char *get_path(const char *filename){
 	char *homedir;
@@ -231,4 +233,16 @@ char *mp_path_join(void *talloc_ctx, struct bstr p1, struct bstr p2)
 
     return talloc_asprintf(talloc_ctx, "%.*s%s%.*s", BSTR_P(p1),
                            have_separator ? "" : "/", BSTR_P(p2));
+}
+
+bool mp_path_exists(const char *path)
+{
+    struct stat st;
+    return mp_stat(path, &st) == 0;
+}
+
+bool mp_path_isdir(const char *path)
+{
+    struct stat st;
+    return mp_stat(path, &st) == 0 && S_ISDIR(st.st_mode);
 }

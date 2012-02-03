@@ -40,6 +40,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "mplayer.h"			/* for exit_player_bad() */
+#include "osdep/io.h"
 
 /* ------------------------------------------------------------------------- */
 
@@ -199,16 +200,11 @@ static int preinit(const char *arg)
 static void pnm_mkdir(char *buf, int verbose) {
     struct stat stat_p;
 
-/* Silly MING32 bug workaround */
-#ifndef __MINGW32__
     if ( mkdir(buf, 0755) < 0 ) {
-#else
-    if ( mkdir(buf) < 0 ) {
-#endif
         switch (errno) { /* use switch in case other errors need to be caught
                             and handled in the future */
             case EEXIST:
-                if ( stat(buf, &stat_p ) < 0 ) {
+                if ( mp_stat(buf, &stat_p ) < 0 ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name,
                            _("This error has occurred"), strerror(errno) );
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,

@@ -21,10 +21,6 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
 #include <libswscale/swscale.h>
 #include <libavcodec/avcodec.h>
 
@@ -33,6 +29,7 @@
 #include "screenshot.h"
 #include "mp_core.h"
 #include "mp_msg.h"
+#include "path.h"
 #include "libmpcodecs/img_format.h"
 #include "libmpcodecs/mp_image.h"
 #include "libmpcodecs/dec_video.h"
@@ -130,11 +127,7 @@ error_exit:
 
 static int fexists(char *fname)
 {
-    struct stat dummy;
-    if (stat(fname, &dummy) == 0)
-        return 1;
-    else
-        return 0;
+    return mp_path_exists(fname);
 }
 
 static void gen_fname(screenshot_ctx *ctx)

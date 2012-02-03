@@ -86,6 +86,8 @@
 #include <ctype.h>
 #include <inttypes.h>
 
+#include "osdep/io.h"
+
 #include "config.h"
 #include "mp_msg.h"
 #include "libvo/fastmemcpy.h"

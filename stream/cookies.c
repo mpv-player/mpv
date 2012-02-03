@@ -31,6 +31,8 @@
 #include <inttypes.h>
 #include <limits.h>
 
+#include "osdep/io.h"
+
 #include "cookies.h"
 #include "http.h"
 #include "mp_msg.h"

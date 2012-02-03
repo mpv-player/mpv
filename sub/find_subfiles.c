@@ -4,6 +4,8 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include "osdep/io.h"
+
 #include "mp_msg.h"
 #include "options.h"
 #include "path.h"

@@ -31,6 +31,8 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include "osdep/io.h"
+
 #include "input.h"
 #include "mp_fifo.h"
 #include "keycodes.h"
@@ -1776,13 +1778,16 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
 #endif
 
     if (input_conf->in_file) {
-        struct stat st;
-        int mode = O_RDONLY | O_NONBLOCK;
+        int mode = O_RDONLY;
+#ifndef __MINGW32__
         // Use RDWR for FIFOs to ensure they stay open over multiple accesses.
-        // Note that on Windows stat may fail for named pipes,
-        // but due to how the API works, using RDONLY should be ok.
+        // Note that on Windows due to how the API works, using RDONLY should
+        // be ok.
+        struct stat st;
         if (stat(input_conf->in_file, &st) == 0 && S_ISFIFO(st.st_mode))
-            mode = O_RDWR | O_NONBLOCK;
+            mode = O_RDWR;
+        mode |= O_NONBLOCK;
+#endif
         int in_file_fd = open(input_conf->in_file, mode);
         if (in_file_fd >= 0)
             mp_input_add_cmd_fd(ictx, in_file_fd, 1, NULL, close);

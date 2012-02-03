@@ -21,9 +21,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+
+#include "osdep/io.h"
 
 #include "font_load.h"
 #include "mp_msg.h"
@@ -72,7 +71,6 @@ unsigned char sor2[1024];
 font_desc_t *desc;
 FILE *f = NULL;
 char *dn;
-//struct stat fstate;
 char section[64];
 int i,j;
 int chardb=0;
@@ -92,10 +90,6 @@ if ((dn = malloc(i+1))){
 }
 
 desc->fpath = dn; // search in the same dir as fonts.desc
-
-// desc->fpath=get_path("font/");
-// if (stat(desc->fpath, &fstate)!=0) desc->fpath=DATADIR"/font";
-
 
 
 
