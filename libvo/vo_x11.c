@@ -429,8 +429,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     }
     out_offset = 0;
     // We can easily "emulate" non-native RGB32 and BGR32
-    if (out_format == (IMGFMT_BGR32 | 64) || out_format == (IMGFMT_RGB32 | 64)) {
-      out_format &= ~64;
+    if (out_format == (IMGFMT_BGR32 | 128) || out_format == (IMGFMT_RGB32 | 128)) {
+      out_format &= ~128;
 #if BYTE_ORDER == BIG_ENDIAN
       out_offset = 1;
 #else
