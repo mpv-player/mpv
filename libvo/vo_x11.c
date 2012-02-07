@@ -428,9 +428,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
             draw_alpha_fnc = draw_alpha_null;
     }
     out_offset = 0;
-    // for these formats conversion is currently not support and
-    // we can easily "emulate" them.
-    if (out_format & 64 && (IMGFMT_IS_RGB(out_format) || IMGFMT_IS_BGR(out_format))) {
+    // We can easily "emulate" non-native RGB32 and BGR32
+    if (out_format == (IMGFMT_BGR32 | 64) || out_format == (IMGFMT_RGB32 | 64)) {
       out_format &= ~64;
 #if BYTE_ORDER == BIG_ENDIAN
       out_offset = 1;
