@@ -198,6 +198,14 @@ struct bstr bstr_getline(struct bstr str, struct bstr *rest)
     return str;
 }
 
+bool bstr_eatstart(struct bstr *s, struct bstr prefix)
+{
+    if (!bstr_startswith(*s, prefix))
+        return false;
+    *s = bstr_cut(*s, prefix.len);
+    return true;
+}
+
 void bstr_lower(struct bstr str)
 {
     for (int i = 0; i < str.len; i++)

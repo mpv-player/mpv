@@ -88,6 +88,9 @@ int bstr_parse_utf8_code_length(unsigned char b);
 // line breaks are stripped.
 struct bstr bstr_getline(struct bstr str, struct bstr *rest);
 
+// If s starts with prefix, return true and return the rest of the string in s.
+bool bstr_eatstart(struct bstr *s, struct bstr prefix);
+
 bool bstr_case_startswith(struct bstr s, struct bstr prefix);
 bool bstr_case_endswith(struct bstr s, struct bstr suffix);
 struct bstr bstr_strip_ext(struct bstr str);
