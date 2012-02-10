@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "config.h"
 #include "talloc.h"
@@ -2787,6 +2788,28 @@ static void remove_subtitle_range(MPContext *mpctx, int start, int count)
     }
 }
 
+static void do_clear_pt(struct play_tree *node, struct play_tree *exclude)
+{
+    while (node) {
+        do_clear_pt(node->child, exclude);
+        struct play_tree *next = node->next;
+        // do not delete root node, or nodes that could lead to "exclude" node
+        if (node->parent && !node->child && node != exclude)
+            play_tree_remove(node, 1, 1);
+        node = next;
+    }
+}
+
+static void clear_play_tree(MPContext *mpctx)
+{
+    struct play_tree *exclude = NULL;
+    if (mpctx->playtree_iter) {
+        assert(mpctx->playtree == mpctx->playtree_iter->root);
+        exclude = mpctx->playtree_iter->tree;
+    }
+    do_clear_pt(mpctx->playtree, exclude);
+}
+
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -3115,6 +3138,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         }
         break;
     }
+
+    case MP_CMD_PLAY_TREE_CLEAR:
+        clear_play_tree(mpctx);
+        break;
 
     case MP_CMD_STOP:
         // Go back to the starting point.
