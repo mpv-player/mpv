@@ -105,7 +105,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_LOOP, "loop", 1, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} } },
   { MP_CMD_SUB_DELAY, "sub_delay", 1, { {MP_CMD_ARG_FLOAT}, {MP_CMD_ARG_INT} } },
   { MP_CMD_SUB_STEP, "sub_step", 1, { { MP_CMD_ARG_INT }, {MP_CMD_ARG_INT} } },
-  { MP_CMD_OSD, "osd", 0, { {MP_CMD_ARG_INT} } },
+  { MP_CMD_OSD, "osd", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
   { MP_CMD_OSD_SHOW_TEXT, "osd_show_text", 1, { {MP_CMD_ARG_STRING}, {MP_CMD_ARG_INT, {.i = -1}}, {MP_CMD_ARG_INT} } },
   { MP_CMD_OSD_SHOW_PROPERTY_TEXT, "osd_show_property_text",1, { {MP_CMD_ARG_STRING}, {MP_CMD_ARG_INT, {.i = -1}}, {MP_CMD_ARG_INT} } },
   { MP_CMD_OSD_SHOW_PROGRESSION, "osd_show_progression", 0 },
