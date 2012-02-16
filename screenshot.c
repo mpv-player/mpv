@@ -75,6 +75,13 @@ static int write_png(screenshot_ctx *ctx, struct mp_image *image)
     avctx = avcodec_alloc_context3(png_codec);
     if (!avctx)
         goto print_open_fail;
+
+    avctx->time_base = AV_TIME_BASE_Q;
+    avctx->width = image->width;
+    avctx->height = image->height;
+    avctx->pix_fmt = PIX_FMT_RGB24;
+    avctx->compression_level = 0;
+
     if (avcodec_open2(avctx, png_codec, NULL) < 0) {
      print_open_fail:
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "Could not open libavcodec PNG encoder"
@@ -82,26 +89,23 @@ static int write_png(screenshot_ctx *ctx, struct mp_image *image)
         goto error_exit;
     }
 
-    avctx->width = image->width;
-    avctx->height = image->height;
-    avctx->pix_fmt = PIX_FMT_RGB24;
-    avctx->compression_level = 0;
-
     size_t outbuffer_size = image->width * image->height * 3 * 2;
     outbuffer = malloc(outbuffer_size);
     if (!outbuffer)
         goto error_exit;
 
     AVFrame pic;
-    pic.data[0] = image->planes[0];
-    pic.linesize[0] = image->stride[0];
+    avcodec_get_frame_defaults(&pic);
+    for (int n = 0; n < 4; n++) {
+        pic.data[n] = image->planes[n];
+        pic.linesize[n] = image->stride[n];
+    }
     int size = avcodec_encode_video(avctx, outbuffer, outbuffer_size, &pic);
     if (size < 1)
         goto error_exit;
 
     fp = fopen(fname, "wb");
     if (fp == NULL) {
-        avcodec_close(avctx);
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nPNG Error opening %s for writing!\n",
                fname);
         goto error_exit;
@@ -117,6 +121,7 @@ static int write_png(screenshot_ctx *ctx, struct mp_image *image)
 error_exit:
     if (avctx)
         avcodec_close(avctx);
+    av_free(avctx);
     if (fp)
         fclose(fp);
     free(outbuffer);
