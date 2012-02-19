@@ -181,7 +181,6 @@ static int lmlm4_check_file(demuxer_t* demuxer)
     mp_msg(MSGT_DEMUX, MSGL_V, "Checking for LMLM4 Stream Format\n");
 
     if(getFrame(demuxer, &frameInfo)!=1){
-	stream_skip(demuxer->stream,-8);
         mp_msg(MSGT_DEMUX, MSGL_V, "LMLM4 Stream Format not found\n");
         return 0;
     }
