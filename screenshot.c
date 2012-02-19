@@ -81,7 +81,7 @@ static screenshot_ctx *screenshot_get_ctx(MPContext *mpctx)
 static FILE *open_file(screenshot_ctx *ctx, char *fname) {
     FILE *fp = fopen(fname, "wb");
     if (fp == NULL)
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nPNG Error opening %s for writing!\n",
+        mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nError opening %s for writing!\n",
                fname);
     return fp;
 }
