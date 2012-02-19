@@ -402,6 +402,9 @@ static int fill_buffer(stream_t *s, char *but, int len)
   return len;
 }
 
+static int mp_dvdnav_lang_from_sid(stream_t *stream, int sid);
+static int mp_dvdnav_lang_from_aid(stream_t *stream, int sid);
+
 static int control(stream_t *stream, int cmd, void* arg) {
   dvdnav_priv_t* priv=stream->priv;
   int tit, part;
@@ -495,6 +498,23 @@ static int control(stream_t *stream, int cmd, void* arg) {
             break;
         if(dvdnav_angle_change(priv->dvdnav, new_angle) != DVDNAV_STATUS_OK)
         return 1;
+    }
+    case STREAM_CTRL_GET_LANG:
+    {
+        struct stream_lang_req *req = arg;
+        int lang = 0;
+        switch(req->type) {
+        case stream_ctrl_audio:
+            lang = mp_dvdnav_lang_from_aid(stream, req->id);
+            break;
+        case stream_ctrl_sub:
+            lang = mp_dvdnav_lang_from_sid(stream, req->id);
+            break;
+        }
+        if (!lang)
+            break;
+        req->name = talloc_strdup(NULL, (char[]) {lang >> 8, lang, 0});
+        return STREAM_OK;
     }
   }
 
@@ -756,13 +776,12 @@ int mp_dvdnav_aid_from_lang(stream_t *stream, char **language) {
 }
 
 /**
- * \brief mp_dvdnav_lang_from_aid() assigns to buf the language corresponding to audio id 'aid'
+ * \brief mp_dvdnav_lang_from_aid() returns the language corresponding to audio id 'aid'
  * \param stream: - stream pointer
  * \param sid: physical subtitle id
- * \param buf: buffer to contain the 2-chars language string
- * \return 0 on error, 1 if successful
+ * \return 0 on error, otherwise language id
  */
-int mp_dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
+static int mp_dvdnav_lang_from_aid(stream_t *stream, int aid) {
   uint8_t lg;
   uint16_t lang;
   dvdnav_priv_t * priv = stream->priv;
@@ -773,10 +792,7 @@ int mp_dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
   if(lg == 0xff) return 0;
   lang = dvdnav_audio_stream_to_lang(priv->dvdnav, lg);
   if(lang == 0xffff) return 0;
-  buf[0] = lang >> 8;
-  buf[1] = lang & 0xFF;
-  buf[2] = 0;
-  return 1;
+  return lang;
 }
 
 
@@ -806,13 +822,12 @@ int mp_dvdnav_sid_from_lang(stream_t *stream, char **language) {
 }
 
 /**
- * \brief mp_dvdnav_lang_from_sid() assigns to buf the language corresponding to subtitle id 'sid'
+ * \brief mp_dvdnav_lang_from_sid() returns the language corresponding to subtitle id 'sid'
  * \param stream: - stream pointer
  * \param sid: physical subtitle id
- * \param buf: buffer to contain the 2-chars language string
- * \return 0 on error, 1 if successful
+ * \return 0 on error, otherwise language id
  */
-int mp_dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
+static int mp_dvdnav_lang_from_sid(stream_t *stream, int sid) {
     uint8_t k;
     uint16_t lang;
     dvdnav_priv_t *priv = stream->priv;
@@ -824,10 +839,7 @@ int mp_dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
         return 0;
     lang = dvdnav_spu_stream_to_lang(priv->dvdnav, k);
     if(lang == 0xffff) return 0;
-    buf[0] = lang >> 8;
-    buf[1] = lang & 0xFF;
-    buf[2] = 0;
-    return 1;
+    return lang;
 }
 
 /**

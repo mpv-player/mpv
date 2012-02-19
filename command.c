@@ -941,36 +941,21 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
         if (!arg)
             return M_PROPERTY_ERROR;
 
-        if (current_id < 0)
+        if (!sh || current_id < 0)
             *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
-        else if (sh && (sh->lang || sh->title)) {
-            char *lang = sh->lang ? sh->lang : mp_gtext("unknown");
+        else {
+            char *lang = demuxer_audio_lang(mpctx->demuxer, current_id);
+            if (!lang)
+                lang = talloc_strdup(NULL, mp_gtext("unknown"));
+
             if (sh->title)
                 *(char **)arg = talloc_asprintf(NULL, "(%d) %s (\"%s\")",
                                                 current_id, lang, sh->title);
             else
                 *(char **)arg = talloc_asprintf(NULL, "(%d) %s", current_id,
                                                 lang);
-        } else {
-            char lang[40];
-            strncpy(lang, mp_gtext("unknown"), sizeof(lang));
-            if (0) ;
-#ifdef CONFIG_DVDREAD
-            else if (mpctx->stream->type == STREAMTYPE_DVD) {
-                int code = dvd_lang_from_aid(mpctx->stream, current_id);
-                if (code) {
-                    lang[0] = code >> 8;
-                    lang[1] = code;
-                    lang[2] = 0;
-                }
-            }
-#endif
 
-#ifdef CONFIG_DVDNAV
-            else if (mpctx->stream->type == STREAMTYPE_DVDNAV)
-                mp_dvdnav_lang_from_aid(mpctx->stream, current_id, lang);
-#endif
-            *(char **)arg = talloc_asprintf(NULL, "(%d) %s", current_id, lang);
+            talloc_free(lang);
         }
         return M_PROPERTY_OK;
 
@@ -1572,34 +1557,6 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
                                              strlen(tmp) < 20 ? tmp : tmp + strlen(tmp) - 19);
             return M_PROPERTY_OK;
         }
-#ifdef CONFIG_DVDNAV
-        if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
-            if (vo_spudec && opts->sub_id >= 0) {
-                unsigned char lang[3];
-                if (mp_dvdnav_lang_from_sid(mpctx->stream, opts->sub_id,
-                                            lang)) {
-                    *(char **) arg = talloc_asprintf(NULL, "(%d) %s",
-                                                     opts->sub_id, lang);
-                    return M_PROPERTY_OK;
-                }
-            }
-        }
-#endif
-
-        if ((d_sub->demuxer->type == DEMUXER_TYPE_MATROSKA
-             || d_sub->demuxer->type == DEMUXER_TYPE_LAVF
-             || d_sub->demuxer->type == DEMUXER_TYPE_LAVF_PREFERRED)
-            && d_sub->sh && opts->sub_id >= 0) {
-            struct sh_sub *sh = d_sub->sh;
-            char *lang = sh->lang ? sh->lang : mp_gtext("unknown");
-            if (sh->title)
-                *(char **)arg = talloc_asprintf(NULL, "(%d) %s (\"%s\")",
-                                                opts->sub_id, lang, sh->title);
-            else
-                *(char **)arg = talloc_asprintf(NULL, "(%d) %s",
-                                                opts->sub_id, lang);
-            return M_PROPERTY_OK;
-        }
 
         if (vo_vobsub && vobsub_id >= 0) {
             const char *language = mp_gtext("unknown");
@@ -1608,22 +1565,13 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
                                              vobsub_id, language ? language : mp_gtext("unknown"));
             return M_PROPERTY_OK;
         }
-#ifdef CONFIG_DVDREAD
-        if (vo_spudec && mpctx->stream->type == STREAMTYPE_DVD
-            && opts->sub_id >= 0) {
-            char lang[3];
-            int code = dvd_lang_from_sid(mpctx->stream, opts->sub_id);
-            lang[0] = code >> 8;
-            lang[1] = code;
-            lang[2] = 0;
-            *(char **) arg = talloc_asprintf(NULL, "(%d) %s",
-                                             opts->sub_id, lang);
-            return M_PROPERTY_OK;
-        }
-#endif
         if (opts->sub_id >= 0) {
+            char *lang = demuxer_sub_lang(mpctx->demuxer, opts->sub_id);
+            if (!lang)
+                lang = talloc_strdup(NULL, mp_gtext("unknown"));
             *(char **) arg = talloc_asprintf(NULL, "(%d) %s", opts->sub_id,
-                                             mp_gtext("unknown"));
+                                             lang);
+            talloc_free(lang);
             return M_PROPERTY_OK;
         }
         *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));

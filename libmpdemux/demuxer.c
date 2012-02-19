@@ -1452,6 +1452,42 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle)
     return angle;
 }
 
+char *demuxer_audio_lang(demuxer_t *d, int id)
+{
+    struct stream_lang_req req;
+    sh_audio_t *sh;
+    if (id < 0 || id >= MAX_A_STREAMS)
+        return NULL;
+    sh = d->a_streams[id];
+    if (!sh)
+        return NULL;
+    if (sh->lang)
+        return talloc_strdup(NULL, sh->lang);
+    req.type = stream_ctrl_audio;
+    req.id = sh->aid;
+    if (stream_control(d->stream, STREAM_CTRL_GET_LANG, &req) == STREAM_OK)
+        return req.name;
+    return NULL;
+}
+
+char *demuxer_sub_lang(demuxer_t *d, int id)
+{
+    struct stream_lang_req req;
+    sh_sub_t *sh;
+    if (id < 0 || id >= MAX_S_STREAMS)
+        return NULL;
+    sh = d->s_streams[id];
+    if (sh && sh->lang)
+        return talloc_strdup(NULL, sh->lang);
+    req.type = stream_ctrl_sub;
+    // assume 1:1 mapping so we can show the language of
+    // DVD subs even when we have not yet created the stream.
+    req.id = sh ? sh->sid : id;
+    if (stream_control(d->stream, STREAM_CTRL_GET_LANG, &req) == STREAM_OK)
+        return req.name;
+    return NULL;
+}
+
 int demuxer_audio_track_by_lang_and_default(struct demuxer *d, char **langt)
 {
     int n = 0;

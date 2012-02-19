@@ -415,4 +415,7 @@ int demuxer_angles_count(struct demuxer *demuxer);
 int demuxer_audio_track_by_lang_and_default(struct demuxer *d, char **langt);
 int demuxer_sub_track_by_lang_and_default(struct demuxer *d, char **langt);
 
+char *demuxer_audio_lang(demuxer_t *d, int id);
+char *demuxer_sub_lang(demuxer_t *d, int id);
+
 #endif /* MPLAYER_DEMUXER_H */

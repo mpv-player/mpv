@@ -34,6 +34,7 @@
 #include "config.h"
 #include "libavutil/common.h"
 #include "libmpdemux/demuxer.h"
+#include "talloc.h"
 #include "mp_msg.h"
 #include "m_struct.h"
 #include "m_option.h"
@@ -189,6 +190,35 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         bd_free_title_info(ti);
 
         return 1;
+    }
+
+    case STREAM_CTRL_GET_LANG: {
+        struct stream_lang_req *req = arg;
+        BLURAY_TITLE_INFO *ti = bd_get_title_info(b->bd, b->current_title, b->current_angle);
+        if (ti->clip_count) {
+            BLURAY_STREAM_INFO *si = NULL;
+            int count = 0;
+            switch (req->type) {
+            case stream_ctrl_audio:
+                count = ti->clips[0].audio_stream_count;
+                si = ti->clips[0].audio_streams;
+                break;
+            case stream_ctrl_sub:
+                count = ti->clips[0].pg_stream_count;
+                si = ti->clips[0].pg_streams;
+                break;
+            }
+            while (count-- > 0) {
+                if (si->pid == req->id) {
+                    req->name = talloc_strndup(NULL, si->lang, 4);
+                    bd_free_title_info(ti);
+                    return STREAM_OK;
+                }
+                si++;
+            }
+        }
+        bd_free_title_info(ti);
+        return STREAM_ERROR;
     }
 
     default:

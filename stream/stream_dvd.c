@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "talloc.h"
 #include "mp_msg.h"
 
 #include <libgen.h>
@@ -112,7 +113,7 @@ int dvd_chapter_from_cell(dvd_priv_t* dvd,int title,int cell)
   return chapter;
 }
 
-int dvd_lang_from_aid(stream_t *stream, int id) {
+static int dvd_lang_from_aid(stream_t *stream, int id) {
   dvd_priv_t *d;
   int i;
   if (!stream) return 0;
@@ -155,7 +156,7 @@ int dvd_number_of_subs(stream_t *stream) {
   return maxid + 1;
 }
 
-int dvd_lang_from_sid(stream_t *stream, int id) {
+static int dvd_lang_from_sid(stream_t *stream, int id) {
   int i;
   dvd_priv_t *d;
   if (!stream) return 0;
@@ -686,6 +687,23 @@ static int control(stream_t *stream,int cmd,void* arg)
             dvd_angle = ang - 1;
             d->angle_seek = 1;
             return 1;
+        }
+        case STREAM_CTRL_GET_LANG:
+        {
+            struct stream_lang_req *req = arg;
+            int lang = 0;
+            switch(req->type) {
+            case stream_ctrl_audio:
+                lang = dvd_lang_from_aid(stream, req->id);
+                break;
+            case stream_ctrl_sub:
+                lang = dvd_lang_from_sid(stream, req->id);
+                break;
+            }
+            if (!lang)
+                break;
+            req->name = talloc_strdup(NULL, (char[]) {lang >> 8, lang, 0});
+            return STREAM_OK;
         }
     }
     return STREAM_UNSUPPORTED;
