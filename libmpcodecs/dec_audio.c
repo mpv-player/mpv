@@ -409,6 +409,8 @@ int decode_audio(sh_audio_t *sh_audio, struct bstr *outbuf, int minlen)
      * more space in the output buffer than the minimum length we try to
      * decode. */
     int max_decode_len = sh_audio->a_buffer_size - sh_audio->audio_out_minsize;
+    if (!unitsize)
+        return -1;
     max_decode_len -= max_decode_len % unitsize;
 
     while (outbuf->len < minlen) {
