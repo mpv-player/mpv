@@ -171,6 +171,15 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
       m_struct_free(&stream_opts,opts);
       return STREAM_ERROR;
     }
+#ifndef __MINGW32__
+    struct stat st;
+    if (fstat(f, &st) == 0 && S_ISDIR(st.st_mode)) {
+      mp_tmsg(MSGT_OPEN,MSGL_ERR,"File is a directory: '%s'\n",filename);
+      close(f);
+      m_struct_free(&stream_opts,opts);
+      return STREAM_ERROR;
+    }
+#endif
   }
 
   len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
