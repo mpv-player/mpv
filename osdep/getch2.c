@@ -202,14 +202,15 @@ void getch2(struct mp_fifo *fifo)
                         len = 2;
                 }
                 code = KEY_ENTER;
-            }
-            int utf8len = bstr_parse_utf8_code_length(code);
-            if (utf8len > 0 && utf8len <= getch2_len) {
-                struct bstr s = { getch2_buf, utf8len };
-                int unicode = bstr_decode_utf8(s, NULL);
-                if (unicode > 0) {
-                    len = utf8len;
-                    code = unicode;
+            } else {
+                int utf8len = bstr_parse_utf8_code_length(code);
+                if (utf8len > 0 && utf8len <= getch2_len) {
+                    struct bstr s = { getch2_buf, utf8len };
+                    int unicode = bstr_decode_utf8(s, NULL);
+                    if (unicode > 0) {
+                        len = utf8len;
+                        code = unicode;
+                    }
                 }
             }
         }
