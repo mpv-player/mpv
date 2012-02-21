@@ -292,8 +292,7 @@ mp_image_t *vf_get_image(vf_instance_t *vf, unsigned int outfmt,
     if (h == -1)
         h = vf->h;
 
-    w2 = (mp_imgflag & MP_IMGFLAG_ACCEPT_ALIGNED_STRIDE) ?
-            ((w + 15) & (~15)) : w;
+    w2 = (mp_imgflag & MP_IMGFLAG_ACCEPT_ALIGNED_STRIDE) ? FFALIGN(w, 32) : w;
 
     if (vf->put_image == vf_next_put_image) {
         // passthru mode, if the filter uses the fallback/default put_image()
@@ -398,8 +397,8 @@ mp_image_t *vf_get_image(vf_instance_t *vf, unsigned int outfmt,
                 if (mp_imgflag & MP_IMGFLAG_PREFER_ALIGNED_STRIDE) {
                     int align = (mpi->flags & MP_IMGFLAG_PLANAR &&
                                  mpi->flags & MP_IMGFLAG_YUV) ?
-                                (8 << mpi->chroma_x_shift) - 1 : 15; // OK?
-                    w2 = ((w + align) & (~align));
+                                (16 << mpi->chroma_x_shift) - 1 : 32; // OK?
+                    w2 = FFALIGN(w, align);
                     if (mpi->width != w2) {
                         // we have to change width... check if we CAN co it:
                         int flags = vf->query_format(vf, outfmt);
