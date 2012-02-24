@@ -742,6 +742,7 @@ void vo_x11_uninit(struct vo *vo)
 
                 if (x11->xic)
                     XDestroyIC(x11->xic);
+                x11->xic = NULL;
 
                 XUnmapWindow(x11->display, x11->window);
                 XSelectInput(x11->display, x11->window, StructureNotifyMask);
