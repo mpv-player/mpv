@@ -820,7 +820,7 @@ static uint32_t draw_image(mp_image_t *mpi)
     if (mpi->flags & (MP_IMGFLAG_DIRECT | MP_IMGFLAG_DRAW_CALLBACK))
         return VO_TRUE;
 
-    draw_slice(mpi->planes, mpi->stride, mpi->w, mpi->h, mpi->x, mpi->y);
+    draw_slice(mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
 
     return VO_TRUE;
 }

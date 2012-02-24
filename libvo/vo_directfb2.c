@@ -1279,7 +1279,7 @@ static uint32_t put_image(mp_image_t *mpi){
 
 	p = FFMIN(mpi->w, pitch);
 
-	src = mpi->planes[0]+mpi->y*mpi->stride[0]+mpi->x;
+	src = mpi->planes[0];
 
 	for (i=0;i<mpi->h;i++) {
             fast_memcpy(dst+i*pitch,src+i*mpi->stride[0],p);
@@ -1290,14 +1290,14 @@ static uint32_t put_image(mp_image_t *mpi){
 
             dst += pitch*height;
     	    p = p/2;
-	    src = mpi->planes[2]+mpi->y*mpi->stride[2]+mpi->x/2;
+	    src = mpi->planes[2];
 
             for (i=0;i<mpi->h/2;i++) {
 	        fast_memcpy(dst+i*pitch/2,src+i*mpi->stride[2],p);
     	    }
 
     	    dst += pitch*height/4;
-	    src = mpi->planes[1]+mpi->y*mpi->stride[1]+mpi->x/2;
+	    src = mpi->planes[1];
 
     	    for (i=0;i<mpi->h/2;i++) {
         	fast_memcpy(dst+i*pitch/2,src+i*mpi->stride[1],p);
@@ -1307,14 +1307,14 @@ static uint32_t put_image(mp_image_t *mpi){
 
     	    dst += pitch*height;
 	    p = p/2;
-	    src = mpi->planes[1]+mpi->y*mpi->stride[1]+mpi->x/2;
+	    src = mpi->planes[1];
 
     	    for (i=0;i<mpi->h/2;i++) {
         	fast_memcpy(dst+i*pitch/2,src+i*mpi->stride[1],p);
     	    }
 
     	    dst += pitch*height/4;
-	    src = mpi->planes[2]+mpi->y*mpi->stride[2]+mpi->x/2;
+	    src = mpi->planes[2];
 
     	    for (i=0;i<mpi->h/2;i++) {
         	fast_memcpy(dst+i*pitch/2,src+i*mpi->stride[2],p);
@@ -1356,11 +1356,11 @@ static uint32_t put_image(mp_image_t *mpi){
 	if (frame) {
 		DFBCHECK (frame->Lock(frame,DSLF_WRITE,(void *)&dst,&pitch));
 		framelocked = 1;
-		mem2agpcpy_pic(dst,mpi->planes[0] + mpi->y * mpi->stride[0] + mpi->x * (mpi->bpp >> 3)  ,mpi->w * (mpi->bpp >> 3),mpi->h,pitch,mpi->stride[0]);
+		mem2agpcpy_pic(dst,mpi->planes[0] ,mpi->w * (mpi->bpp >> 3),mpi->h,pitch,mpi->stride[0]);
         } else {
 		DFBCHECK (primary->Lock(primary,DSLF_WRITE,(void *)&dst,&pitch));
 		primarylocked = 1;
-		mem2agpcpy_pic(dst + yoffset * pitch + xoffset * (mpi->bpp >> 3),mpi->planes[0] + mpi->y * mpi->stride[0] + mpi->x * (mpi->bpp >> 3)  ,mpi->w * (mpi->bpp >> 3),mpi->h,pitch,mpi->stride[0]);
+		mem2agpcpy_pic(dst + yoffset * pitch + xoffset * (mpi->bpp >> 3),mpi->planes[0] ,mpi->w * (mpi->bpp >> 3),mpi->h,pitch,mpi->stride[0]);
         };
 	unlock();
 

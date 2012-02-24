@@ -103,7 +103,7 @@ typedef struct mp_image {
     unsigned char bpp;  // bits/pixel. NOT depth! for RGB it will be n*8
     unsigned int imgfmt;
     int width,height;  // stored dimensions
-    int x,y,w,h;  // visible dimensions
+    int w,h;  // visible dimensions
     unsigned char* planes[MP_MAX_PLANES];
     int stride[MP_MAX_PLANES];
     char * qscale;

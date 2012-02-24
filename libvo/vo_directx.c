@@ -930,8 +930,8 @@ static uint32_t put_image(mp_image_t *mpi){
 
     uint8_t   *d;
 	uint8_t   *s;
-    uint32_t x = mpi->x;
-	uint32_t y = mpi->y;
+    uint32_t x = 0;
+	uint32_t y = 0;
 	uint32_t w = mpi->w;
 	uint32_t h = mpi->h;
 

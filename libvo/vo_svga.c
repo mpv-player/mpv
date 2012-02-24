@@ -237,8 +237,8 @@ static uint32_t svga_draw_image(mp_image_t *mpi){
     PageStore[cpage].locks=PAGE_BUSY;
 
 // these variables are used in loops
-    x = mpi->x;
-    y = mpi->y;
+    x = 0;
+    y = 0;
     w = mpi->w;
     h = mpi->h;
     stride = mpi->stride[0];

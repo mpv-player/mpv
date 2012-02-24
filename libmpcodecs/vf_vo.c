@@ -213,7 +213,7 @@ static int put_image(struct vf_instance *vf,
     // blit frame:
 //    if(mpi->flags&MP_IMGFLAG_PLANAR)
     if(vf->default_caps&VFCAP_ACCEPT_STRIDE)
-        vo_draw_slice(video_out, mpi->planes,mpi->stride,mpi->w,mpi->h,mpi->x,mpi->y);
+        vo_draw_slice(video_out, mpi->planes,mpi->stride,mpi->w,mpi->h,0,0);
     else
         vo_draw_frame(video_out, mpi->planes);
   }

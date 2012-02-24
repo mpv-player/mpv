@@ -1057,7 +1057,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
         slice = 0; // always "upload" full texture
     }
     glUploadTex(gl, p->target, p->gl_format, p->gl_type, planes[0],
-                stride[0], mpi->x, mpi->y, w, h, slice);
+                stride[0], 0, 0, w, h, slice);
     if (p->is_yuv) {
         int xs, ys;
         mp_get_chroma_shift(p->image_format, &xs, &ys, NULL);
@@ -1068,8 +1068,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
         }
         gl->ActiveTexture(GL_TEXTURE1);
         glUploadTex(gl, p->target, p->gl_format, p->gl_type, planes[1],
-                    stride[1], mpi->x >> xs, mpi->y >> ys, w >> xs, h >> ys,
-                    slice);
+                    stride[1], 0, 0, w >> xs, h >> ys, slice);
         if ((mpi->flags & MP_IMGFLAG_DIRECT) && !(mpi->flags & MP_IMGFLAG_COMMON_PLANE)) {
             gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer_uv[1]);
             gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
@@ -1077,8 +1076,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
         }
         gl->ActiveTexture(GL_TEXTURE2);
         glUploadTex(gl, p->target, p->gl_format, p->gl_type, planes[2],
-                    stride[2], mpi->x >> xs, mpi->y >> ys, w >> xs, h >> ys,
-                    slice);
+                    stride[2], 0, 0, w >> xs, h >> ys, slice);
         gl->ActiveTexture(GL_TEXTURE0);
     }
     if (mpi->flags & MP_IMGFLAG_DIRECT) {

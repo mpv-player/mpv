@@ -358,11 +358,7 @@ int mpcodecs_config_vo2(sh_video_t *sh, int w, int h,
 mp_image_t *mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag,
                                int w, int h)
 {
-    mp_image_t *mpi =
-        vf_get_image(sh->vfilter, sh->outfmt, mp_imgtype, mp_imgflag, w, h);
-    if (mpi)
-        mpi->x = mpi->y = 0;
-    return mpi;
+    return vf_get_image(sh->vfilter, sh->outfmt, mp_imgtype, mp_imgflag, w, h);
 }
 
 void mpcodecs_draw_slice(sh_video_t *sh, unsigned char **src, int *stride,
