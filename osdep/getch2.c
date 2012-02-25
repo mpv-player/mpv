@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #ifdef CONFIG_IOCTL
@@ -281,27 +282,41 @@ void getch2(struct mp_fifo *fifo)
     }
 }
 
-static int getch2_status=0;
+static volatile int getch2_status=0;
 
-void getch2_enable(void){
+static void do_enable_getch2(void)
+{
 #ifdef HAVE_TERMIOS
-struct termios tio_new;
-    tcgetattr(0,&tio_orig);
-    tio_new=tio_orig;
+    struct termios tio_new;
+    tcgetattr(0,&tio_new);
     tio_new.c_lflag &= ~(ICANON|ECHO); /* Clear ICANON and ECHO. */
     tio_new.c_cc[VMIN] = 0;
     tio_new.c_cc[VTIME] = 0;
     tcsetattr(0,TCSANOW,&tio_new);
 #endif
+}
+
+static void continue_sighandler(int signum)
+{
+    if (getch2_status)
+        do_enable_getch2();
+}
+
+void getch2_enable(void){
+#ifdef HAVE_TERMIOS
+    tcgetattr(0,&tio_orig);
+    do_enable_getch2();
+#endif
     getch2_status=1;
+    signal(SIGCONT,continue_sighandler);
 }
 
 void getch2_disable(void){
     if(!getch2_status) return; // already disabled / never enabled
+    getch2_status=0;
 #ifdef HAVE_TERMIOS
     tcsetattr(0,TCSANOW,&tio_orig);
 #endif
-    getch2_status=0;
 }
 
 #ifdef CONFIG_ICONV
