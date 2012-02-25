@@ -1755,7 +1755,7 @@ static void update_osd_msg(struct MPContext *mpctx)
     // Clear the term osd line
     if (opts->term_osd && mpctx->terminal_osd_text[0]) {
         mpctx->terminal_osd_text[0] = '\0';
-        printf("%s\n", opts->term_osd_esc);
+        mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%s\n", opts->term_osd_esc);
     }
 }
 
