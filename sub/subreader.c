@@ -1505,7 +1505,11 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
     utf16--;
 
     mpsub_multiplier = (uses_time ? 100.0 : 1.0);
-    if (sub_format==SUB_INVALID) {mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: Could not determine file format\n");return NULL;}
+    if (sub_format==SUB_INVALID) {
+        mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: Could not determine file format\n");
+        free_stream(fd);
+        return NULL;
+    }
     srp=sr+sub_format;
     mp_msg(MSGT_SUBREADER, MSGL_V, "SUB: Detected subtitle file format: %s\n", srp->name);
 
@@ -1533,7 +1537,8 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
 	  subcp_close();
           sub_utf8=sub_utf8_prev;
 #endif
-	    return NULL;
+          free_stream(fd);
+	  return NULL;
     }
 
 #ifdef CONFIG_SORTSUB
@@ -1570,6 +1575,7 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
 #endif
 	  free(first);
 	  free(alloced_sub);
+          free_stream(fd);
 	  return NULL;
 	 }
         // Apply any post processing that needs recoding first
