@@ -204,6 +204,20 @@ static bool try_open(struct MPContext *mpctx, char *filename)
                                     mpctx->opts.video_id,
                                     mpctx->opts.sub_id,
                                     filename);
+    // Since .bin files are raw PCM data with no headers, we have to explicitly
+    // open them. Also, try to avoid to open files that are most likely not .bin
+    // files, as that would only play noise. Checking the file extension is
+    // fragile, but it's about the only way we have.
+    // TODO: maybe also could check if the .bin file is a multiple of the Audio
+    //       CD sector size (2352 bytes)
+    if (!d && bstr_case_endswith(bfilename, bstr(".bin"))) {
+        mp_msg(MSGT_CPLAYER, MSGL_WARN, "CUE: Opening as BIN file!\n");
+        d = demux_open(&mpctx->opts, s, DEMUXER_TYPE_RAWAUDIO,
+                       mpctx->opts.audio_id,
+                       mpctx->opts.video_id,
+                       mpctx->opts.sub_id,
+                       filename);
+    }
     if (d) {
         add_source(mpctx, s, d);
         return true;
