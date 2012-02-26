@@ -1382,6 +1382,24 @@ int demuxer_add_attachment(demuxer_t *demuxer, struct bstr name,
     return demuxer->num_attachments++;
 }
 
+static int chapter_compare(const void *p1, const void *p2)
+{
+    struct demux_chapter *c1 = (void *)p1;
+    struct demux_chapter *c2 = (void *)p2;
+
+    if (c1->start > c2->start)
+        return 1;
+    else if (c1->start < c2->start)
+        return -1;
+    return 0;
+}
+
+static void demuxer_sort_chapters(demuxer_t *demuxer)
+{
+    qsort(demuxer->chapters, demuxer->num_chapters,
+          sizeof(struct demux_chapter), chapter_compare);
+}
+
 int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
                         uint64_t start, uint64_t end)
 {
@@ -1396,7 +1414,14 @@ int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
         talloc_strndup(demuxer->chapters, name.start, name.len) :
         talloc_strdup(demuxer->chapters, mp_gtext("unknown"));
 
-    return demuxer->num_chapters++;
+    demuxer->num_chapters++;
+
+    if (demuxer->num_chapters > 1
+        && demuxer->chapters[demuxer->num_chapters - 2].start
+           < demuxer->chapters[demuxer->num_chapters - 1].start)
+            demuxer_sort_chapters(demuxer);
+
+    return 0;
 }
 
 /**
