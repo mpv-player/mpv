@@ -43,14 +43,7 @@
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #define ALSA_PCM_NEW_SW_PARAMS_API
 
-#ifdef HAVE_SYS_ASOUNDLIB_H
-#include <sys/asoundlib.h>
-#elif defined(HAVE_ALSA_ASOUNDLIB_H)
 #include <alsa/asoundlib.h>
-#else
-#error "asoundlib.h is not in sys/ or alsa/ - please bugreport"
-#endif
-
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
@@ -342,11 +335,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: requested format: %d Hz, %d channels, %x\n", rate_hz,
 	channels, format);
     alsa_handler = NULL;
-#if SND_LIB_VERSION >= 0x010005
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: using ALSA %s\n", snd_asoundlib_version());
-#else
-    mp_msg(MSGT_AO,MSGL_V,"alsa-init: compiled for ALSA-%s\n", SND_LIB_VERSION_STR);
-#endif
 
     prepause_frames = 0;
 
@@ -554,7 +543,6 @@ static int init(int rate_hz, int channels, int format, int flags)
       /* workaround for buggy rate plugin (should be fixed in ALSA 1.0.11)
          prefer our own resampler, since that allows users to choose the resampler,
          even per file if desired */
-#if SND_LIB_VERSION >= 0x010009
       if ((err = snd_pcm_hw_params_set_rate_resample(alsa_handler, alsa_hwparams,
 						     0)) < 0)
 	{
@@ -562,7 +550,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 		 snd_strerror(err));
 	  return 0;
 	}
-#endif
 
       if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams,
 						 &ao_data.samplerate, NULL)) < 0)
@@ -626,15 +613,11 @@ static int init(int rate_hz, int channels, int format, int flags)
 	       snd_strerror(err));
 	return 0;
       }
-#if SND_LIB_VERSION >= 0x000901
       if ((err = snd_pcm_sw_params_get_boundary(alsa_swparams, &boundary)) < 0) {
 	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Unable to get boundary: %s\n",
 	       snd_strerror(err));
 	return 0;
       }
-#else
-      boundary = 0x7fffffff;
-#endif
       /* start playing when one period has been written */
       if ((err = snd_pcm_sw_params_set_start_threshold(alsa_handler, alsa_swparams, chunk_size)) < 0) {
 	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Unable to set start threshold: %s\n",
@@ -647,14 +630,12 @@ static int init(int rate_hz, int channels, int format, int flags)
 	       snd_strerror(err));
 	return 0;
       }
-#if SND_LIB_VERSION >= 0x000901
       /* play silence when there is an underrun */
       if ((err = snd_pcm_sw_params_set_silence_size(alsa_handler, alsa_swparams, boundary)) < 0) {
 	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Unable to set silence size: %s\n",
 	       snd_strerror(err));
 	return 0;
       }
-#endif
       if ((err = snd_pcm_sw_params(alsa_handler, alsa_swparams)) < 0) {
 	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Unable to get sw-parameters: %s\n",
 	       snd_strerror(err));
@@ -851,9 +832,7 @@ static float get_delay(void)
 
     if (delay < 0) {
       /* underrun - move the application pointer forward to catch up */
-#if SND_LIB_VERSION >= 0x000901 /* snd_pcm_forward() exists since 0.9.0rc8 */
       snd_pcm_forward(alsa_handler, -delay);
-#endif
       delay = 0;
     }
     return (float)delay / (float)ao_data.samplerate;

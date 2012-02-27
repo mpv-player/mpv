@@ -41,7 +41,6 @@ extern const struct ao_driver audio_out_pulse;
 extern const struct ao_driver audio_out_jack;
 extern const struct ao_driver audio_out_openal;
 extern const struct ao_driver audio_out_null;
-extern const struct ao_driver audio_out_alsa5;
 extern const struct ao_driver audio_out_alsa;
 extern const struct ao_driver audio_out_nas;
 extern const struct ao_driver audio_out_sdl;
@@ -82,9 +81,6 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #endif
 #ifdef CONFIG_OSS_AUDIO
     &audio_out_oss,
-#endif
-#ifdef CONFIG_ALSA5
-    &audio_out_alsa5,
 #endif
 #ifdef CONFIG_SGI_AUDIO
     &audio_out_sgi,

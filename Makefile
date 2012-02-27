@@ -23,8 +23,7 @@ include config.mak
 
 ###### variable declarations #######
 
-SRCS_AUDIO_INPUT-$(ALSA1X)           += stream/ai_alsa1x.c
-SRCS_AUDIO_INPUT-$(ALSA9)            += stream/ai_alsa.c
+SRCS_AUDIO_INPUT-$(ALSA)             += stream/ai_alsa1x.c
 SRCS_AUDIO_INPUT-$(OSS)              += stream/ai_oss.c
 SRCS_COMMON-$(AUDIO_INPUT)           += $(SRCS_AUDIO_INPUT-yes)
 SRCS_COMMON-$(BITMAP_FONT)           += sub/font_load.c
@@ -431,9 +430,7 @@ SRCS_COMMON = asxparser.c \
 
 SRCS_MPLAYER-$(3DFX)         += libvo/vo_3dfx.c
 SRCS_MPLAYER-$(AA)           += libvo/vo_aa.c
-SRCS_MPLAYER-$(ALSA1X)       += libao2/ao_alsa.c
-SRCS_MPLAYER-$(ALSA5)        += libao2/ao_alsa5.c
-SRCS_MPLAYER-$(ALSA9)        += libao2/ao_alsa.c
+SRCS_MPLAYER-$(ALSA)         += libao2/ao_alsa.c
 SRCS_MPLAYER-$(APPLE_IR)     += input/appleir.c
 SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
 SRCS_MPLAYER-$(ARTS)         += libao2/ao_arts.c
