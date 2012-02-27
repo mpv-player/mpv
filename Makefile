@@ -92,6 +92,7 @@ SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
 SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
                                         stream/stream_nemesi.c
 SRCS_COMMON-$(LIBNUT)                += libmpdemux/demux_nut.c
+SRCS_COMMON-$(LIBPOSTPROC)           += libmpcodecs/vf_pp.c
 SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
 
 SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
@@ -330,7 +331,6 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_palette.c \
               libmpcodecs/vf_perspective.c \
               libmpcodecs/vf_phase.c \
-              libmpcodecs/vf_pp.c \
               libmpcodecs/vf_pp7.c \
               libmpcodecs/vf_pullup.c \
               libmpcodecs/vf_qp.c \

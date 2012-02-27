@@ -32,7 +32,6 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
-#include <libpostproc/postprocess.h>
 
 static int av_log_level_to_mp_level(int av_level)
 {
@@ -134,5 +133,4 @@ void print_libav_versions(void)
     print_version("libavcodec", LIBAVCODEC_VERSION_INT, avcodec_version());
     print_version("libavformat", LIBAVFORMAT_VERSION_INT, avformat_version());
     print_version("libswscale", LIBSWSCALE_VERSION_INT, swscale_version());
-    print_version("libpostproc", LIBPOSTPROC_VERSION_INT, postproc_version());
 }

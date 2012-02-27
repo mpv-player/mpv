@@ -134,7 +134,9 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_palette,
     &vf_info_pp7,
 
+#ifdef CONFIG_LIBPOSTPROC
     &vf_info_pp,
+#endif
     &vf_info_lavc,
     &vf_info_lavcdeint,
     &vf_info_screenshot,

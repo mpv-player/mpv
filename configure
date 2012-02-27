@@ -363,6 +363,7 @@ Optional features:
   --disable-w32threads   disable Win32 threads support [autodetect]
   --disable-libass       disable subtitle rendering with libass [autodetect]
   --enable-rpath         enable runtime linker path for extra libs [disabled]
+  --disable-libpostproc  disable postprocess filter (vf_pp) [autodetect]
 
 Codecs:
   --enable-gif              enable GIF support [autodetect]
@@ -712,6 +713,7 @@ _pthreads=auto
 _w32threads=auto
 _ass=auto
 _rpath=no
+libpostproc=auto
 _asmalign_pot=auto
 _stream_cache=yes
 _priority=no
@@ -1101,6 +1103,8 @@ for ac_option do
   --disable-libass)     _ass=no         ;;
   --enable-rpath)       _rpath=yes      ;;
   --disable-rpath)      _rpath=no       ;;
+  --enable-libpostproc) libpostproc=yes ;;
+  --disable-libpostproc) libpostproc=no ;;
 
   --enable-fribidi)     _fribidi=yes    ;;
   --disable-fribidi)    _fribidi=no     ;;
@@ -5772,7 +5776,7 @@ echores "$_live"
 
 # Test with > against Libav 0.8 versions which will NOT work rather than
 # specify minimum version, to allow (future) point releases to possibly work.
-all_libav_libs="libavutil > 51.21.0:libavcodec > 53.34.0:libavformat > 53.20.0:libswscale >= 2.0.0:libpostproc >= 52.0.0"
+all_libav_libs="libavutil > 51.21.0:libavcodec > 53.34.0:libavformat > 53.20.0:libswscale >= 2.0.0"
 echocheck "Libav ($all_libav_libs)"
 if test "$ffmpeg" = auto ; then
   IFS=":"   # shell should not be used for programming
@@ -5789,6 +5793,19 @@ if ! test -z "$_ffmpeg_source" ; then
   def_ffmpeg_internals="#define CONFIG_FFMPEG_INTERNALS 1" && ffmpeg_internals=yes
 fi
 
+echocheck "libpostproc >= 52.0.0"
+if test "$libpostproc" = auto ; then
+    libpostproc=no
+    if pkg_config_add "libpostproc >= 52.0.0" ; then
+        libpostproc=yes
+    fi
+fi
+if test "$libpostproc" = yes ; then
+    def_libpostproc='#define CONFIG_LIBPOSTPROC 1'
+else
+    def_libpostproc='#undef CONFIG_LIBPOSTPROC'
+fi
+echores "$libpostproc"
 
 
 echocheck "libdv-0.9.5+"
@@ -6481,6 +6498,7 @@ LIBDVDCSS_INTERNAL = $_libdvdcss_internal
 LIBMAD = $_mad
 LIBNEMESI = $_nemesi
 LIBNUT = $_libnut
+LIBPOSTPROC = $libpostproc
 LIBSMBCLIENT = $_smb
 LIBTHEORA = $_theora
 LIRC = $_lirc
@@ -6750,6 +6768,7 @@ $def_vorbis
 $def_xvid
 $def_zlib
 
+$def_libpostproc
 $def_libnut
 
 
