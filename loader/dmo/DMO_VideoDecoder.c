@@ -361,7 +361,7 @@ int DMO_VideoDecoder_DecodeInternal(DMO_VideoDecoder *this, const void* src, int
 int DMO_VideoDecoder_SetDestFmt(DMO_VideoDecoder *this, int bits, unsigned int csp)
 {
     HRESULT result;
-    int should_test=1;
+    //int should_test=1;
 
     Debug printf("DMO_VideoDecoder_SetDestFmt (%p, %d, %d)\n",this,bits,(int)csp);
 
@@ -467,7 +467,7 @@ int DMO_VideoDecoder_SetDestFmt(DMO_VideoDecoder *this, int bits, unsigned int c
     else
         this->m_sDestType.cbFormat = sizeof(VIDEOINFOHEADER);
 
-
+#if 0
     switch(csp)
     {
     case fccYUY2:
@@ -499,6 +499,7 @@ int DMO_VideoDecoder_SetDestFmt(DMO_VideoDecoder *this, int bits, unsigned int c
 	    should_test=false;
 	break;
     }
+#endif
 
 #ifdef WIN32_LOADER
     Setup_FS_Segment();

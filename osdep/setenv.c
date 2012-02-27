@@ -24,6 +24,8 @@
 #include <string.h>
 #include <assert.h>
 
+int setenv(const char *name, const char *val, int overwrite);
+
 int setenv(const char *name, const char *val, int overwrite)
 {
   int len  = strlen(name) + strlen(val) + 2;

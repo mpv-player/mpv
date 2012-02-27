@@ -54,8 +54,8 @@ static void (*TvqUpdateVectorInfo)(int varbits, int *ndiv, int bits0[], int bits
 
 static int   (*TvqCheckVersion)(char *versionID);
 static void  (*TvqGetConfInfo)(tvqConfInfo *cf);
-static int   (*TvqGetFrameSize)();
-static int   (*TvqGetNumFixedBitsPerFrame)();
+static int   (*TvqGetFrameSize)(void);
+static int   (*TvqGetNumFixedBitsPerFrame)(void);
 
 #define BYTE_BIT    8
 #define BBUFSIZ     1024        /* Bit buffer size (bytes) */

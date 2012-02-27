@@ -695,8 +695,8 @@ static int vobsub_parse_id(vobsub_t *vob, const char *line)
 static int vobsub_parse_timestamp(vobsub_t *vob, const char *line)
 {
     int h, m, s, ms;
-    off_t filepos;
-    if (sscanf(line, " %02d:%02d:%02d:%03d, filepos: %09lx",
+    int64_t filepos;
+    if (sscanf(line, " %02d:%02d:%02d:%03d, filepos: %09"SCNx64,
                &h, &m, &s, &ms, &filepos) != 5)
         return -1;
     return vobsub_add_timestamp(vob, filepos, vob->delay + ms + 1000 * (s + 60 * (m + 60 * h)));

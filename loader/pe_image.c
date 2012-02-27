@@ -73,7 +73,7 @@ static void dump_exports( HMODULE hModule )
   char		*Module;
   unsigned int i, j;
   unsigned short	*ordinal;
-  unsigned long	*function,*functions;
+  unsigned long	*function;
   unsigned char	**name;
   unsigned int load_addr = hModule;
 
@@ -84,13 +84,16 @@ static void dump_exports( HMODULE hModule )
   IMAGE_EXPORT_DIRECTORY *pe_exports = (IMAGE_EXPORT_DIRECTORY*)RVA(rva_start);
 
   Module = (char*)RVA(pe_exports->Name);
+  (void)Module; //silence compiler warning
   TRACE("*******EXPORT DATA*******\n");
   TRACE("Module name is %s, %ld functions, %ld names\n",
         Module, pe_exports->NumberOfFunctions, pe_exports->NumberOfNames);
 
   ordinal=(unsigned short*) RVA(pe_exports->AddressOfNameOrdinals);
-  functions=function=(unsigned long*) RVA(pe_exports->AddressOfFunctions);
+  function=(unsigned long*) RVA(pe_exports->AddressOfFunctions);
   name=(unsigned char**) RVA(pe_exports->AddressOfNames);
+
+  (void)name; //silence compiler warning
 
   TRACE(" Ord    RVA     Addr   Name\n" );
   for (i=0;i<pe_exports->NumberOfFunctions;i++, function++)
@@ -135,7 +138,6 @@ FARPROC PE_FindExportedFunction(
 	IMAGE_EXPORT_DIRECTORY 		*exports = pem->pe_export;
 	unsigned int			load_addr = wm->module;
 	unsigned long			rva_start, rva_end, addr;
-	char				* forward;
 
 	if (HIWORD(funcName))
 		TRACE("(%s)\n",funcName);
@@ -152,7 +154,6 @@ FARPROC PE_FindExportedFunction(
 	ordinals= (unsigned short*)  RVA(exports->AddressOfNameOrdinals);
 	function= (unsigned long*)   RVA(exports->AddressOfFunctions);
 	name	= (unsigned char **) RVA(exports->AddressOfNames);
-	forward = NULL;
 	rva_start = PE_HEADER(wm->module)->OptionalHeader
 		.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
 	rva_end = rva_start + PE_HEADER(wm->module)->OptionalHeader
@@ -247,14 +248,9 @@ static DWORD fixup_imports( WINE_MODREF *wm )
     PE_MODREF			*pem;
     unsigned int load_addr	= wm->module;
     int				i,characteristics_detection=1;
-    char			*modname;
 
     assert(wm->type==MODULE32_PE);
     pem = &(wm->binfmt.pe);
-    if (pem->pe_export)
-    	modname = (char*) RVA(pem->pe_export->Name);
-    else
-        modname = "<unknown>";
 
 
     TRACE("Dumping imports list\n");

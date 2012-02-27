@@ -34,6 +34,7 @@
 // Used for knowing when to register and unregister the class in COM.
 static int GraphKeeper = 0;
 
+#ifdef WIN32_LOADER
 static long FilterGraph_CreateGraph(GUID* clsid, const GUID* iid, void** ppv)
 {
     IUnknown* p;
@@ -50,6 +51,7 @@ static long FilterGraph_CreateGraph(GUID* clsid, const GUID* iid, void** ppv)
 
     return result;
 }
+#endif
 
 static void FilterGraph_Destroy(FilterGraph* This)
 {
@@ -62,56 +64,56 @@ static void FilterGraph_Destroy(FilterGraph* This)
     free(This);
 }
 
-HRESULT STDCALL FilterGraph_AddFilter(FilterGraph* This,
-                                      IBaseFilter* pFilter,
-                                      unsigned short* pName)
+static HRESULT STDCALL FilterGraph_AddFilter(IFilterGraph* This,
+                                             IBaseFilter* pFilter,
+                                             unsigned short* pName)
 {
     Debug printf("FilterGraph_AddFilter(%p) called\n", This);
     return E_NOTIMPL;
 }
 
-HRESULT STDCALL FilterGraph_RemoveFilter(FilterGraph* This, IBaseFilter* pFilter)
+static HRESULT STDCALL FilterGraph_RemoveFilter(IFilterGraph* This, IBaseFilter* pFilter)
 {
     Debug printf("FilterGraph_RemoveFilter(%p) called\n", This);
     return E_NOTIMPL;
 }
 
-HRESULT STDCALL FilterGraph_EnumFilters(FilterGraph* This, IEnumFilters** ppEnum)
+static HRESULT STDCALL FilterGraph_EnumFilters(IFilterGraph* This, IEnumFilters** ppEnum)
 {
     Debug printf("FilterGraph_EnumFilters(%p) called\n", This);
     return E_NOTIMPL;
 }
 
-HRESULT STDCALL FilterGraph_FindFilterByName(FilterGraph* This,
-                                             unsigned short* pName,
-                                             IBaseFilter** ppFilter)
+static HRESULT STDCALL FilterGraph_FindFilterByName(IFilterGraph* This,
+                                                    unsigned short* pName,
+                                                    IBaseFilter** ppFilter)
 {
     Debug printf("FilterGraph_FindFilterByName(%p) called\n", This);
     return E_NOTIMPL;
 }
 
-HRESULT STDCALL FilterGraph_ConnectDirect(FilterGraph* This,
-                                          IPin* ppinOut,
-                                          IPin* ppinIn,
-                                          const AM_MEDIA_TYPE* pmt)
+static HRESULT STDCALL FilterGraph_ConnectDirect(IFilterGraph* This,
+                                                 IPin* ppinOut,
+                                                 IPin* ppinIn,
+                                                 const AM_MEDIA_TYPE* pmt)
 {
     Debug printf("FilterGraph_ConnectDirect(%p) called\n", This);
     return E_NOTIMPL;
 }
 
-HRESULT STDCALL FilterGraph_Reconnect(FilterGraph* This, IPin* ppin)
+static HRESULT STDCALL FilterGraph_Reconnect(IFilterGraph* This, IPin* ppin)
 {
     Debug printf("FilterGraph_Reconnect(%p) called\n", This);
     return E_NOTIMPL;
 }
 
-HRESULT STDCALL FilterGraph_Disconnect(FilterGraph* This, IPin* ppin)
+static HRESULT STDCALL FilterGraph_Disconnect(IFilterGraph* This, IPin* ppin)
 {
     Debug printf("FilterGraph_Disconnect(%p) called\n", This);
     return E_NOTIMPL;
 }
 
-HRESULT STDCALL FilterGraph_SetDefaultSyncSource(FilterGraph* This)
+static HRESULT STDCALL FilterGraph_SetDefaultSyncSource(IFilterGraph* This)
 {
     Debug printf("FilterGraph_SetDefaultSyncSource(%p) called\n", This);
     return E_NOTIMPL;

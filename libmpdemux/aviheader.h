@@ -128,8 +128,10 @@ typedef struct {
 #define AVIIF_NOTIME	    0x00000100L // this frame doesn't take any time
 #define AVIIF_COMPUSE       0x0FFF0000L // these bits are for compressor use
 
+#ifndef FOURCC_RIFF
 #define FOURCC_RIFF     mmioFOURCC('R', 'I', 'F', 'F')
 #define FOURCC_LIST     mmioFOURCC('L', 'I', 'S', 'T')
+#endif
 
 typedef struct
 {

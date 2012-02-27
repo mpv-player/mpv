@@ -339,7 +339,6 @@ long __stdcall RegOpenKeyExA(long key, const char* subkey, long reserved, long a
 {
     char* full_name;
     reg_handle_t* t;
-    struct reg_value* v;
     TRACE("Opening key %s\n", subkey);
 
     if(!regs)
@@ -357,7 +356,7 @@ long __stdcall RegOpenKeyExA(long key, const char* subkey, long reserved, long a
     if(!full_name)
         return -1;
     TRACE("Opening key Fullname %s\n", full_name);
-    v=find_value_by_name(full_name);
+    find_value_by_name(full_name);
 
     t=insert_handle(generate_handle(), full_name);
     *newkey=t->handle;

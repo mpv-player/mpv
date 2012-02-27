@@ -440,7 +440,7 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 	    int i;
 
 	  // sse hack moved from patch dll into runtime patching
-          if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x1000)) {
+          if ((char*)PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x1000)) {
 	    fprintf(stderr, "VP3 DLL found\n");
 	    for (i=0;i<18;i++) RVA(0x4bd6)[i]=0x90;
 	  }
@@ -450,7 +450,7 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
         if (strstr(libname,"vp5vfw.dll") && wm)
         {
           int i;
-          if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x3930)) {
+          if ((char*)PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x3930)) {
             for (i=0;i<3;i++) RVA(0x4e86)[i]=0x90;
             for (i=0;i<3;i++) RVA(0x5a23)[i]=0x90;
             for (i=0;i<3;i++) RVA(0x5bff)[i]=0x90;
@@ -463,12 +463,12 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
         if (strstr(libname,"vp6vfw.dll") && wm)
         {
           int i;
-          if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x3ef0)) {
+          if ((char*)PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x3ef0)) {
             // looks like VP 6.1.0.2
             for (i=0;i<6;i++) RVA(0x7268)[i]=0x90;
             for (i=0;i<6;i++) RVA(0x7e83)[i]=0x90;
             for (i=0;i<6;i++) RVA(0x806a)[i]=0x90;
-          } else if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x4120)) {
+          } else if ((char*)PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x4120)) {
             // looks like VP 6.2.0.10
             for (i=0;i<6;i++) RVA(0x7688)[i]=0x90;
             for (i=0;i<6;i++) RVA(0x82c3)[i]=0x90;
@@ -476,7 +476,7 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
             for (i=0;i<6;i++) RVA(0x1d2cc)[i]=0x90;
             for (i=0;i<6;i++) RVA(0x2179d)[i]=0x90;
             for (i=0;i<6;i++) RVA(0x1977f)[i]=0x90;
-          } else if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x3e70)) {
+          } else if ((char*)PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x3e70)) {
             // looks like VP 6.0.7.3
             for (i=0;i<6;i++) RVA(0x7559)[i]=0x90;
             for (i=0;i<6;i++) RVA(0x81c3)[i]=0x90;
@@ -492,7 +492,7 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
         {
           // The codec calls IsRectEmpty with coords 0,0,0,0 => result is 0
           // but it really wants the rectangle to be not empty
-          if (PE_FindExportedFunction(wm, "CreateInstance", TRUE)==RVA(0xb812)) {
+          if ((char*)PE_FindExportedFunction(wm, "CreateInstance", TRUE)==RVA(0xb812)) {
             // Dll version is 10.0.0.3645
             *RVA(0x8b0f)=0xeb; // Jump always, ignoring IsRectEmpty result
           } else {
@@ -509,7 +509,7 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 
 //	    dispatch_addr = GetProcAddress(wm->module, "theQuickTimeDispatcher", TRUE);
 	    dispatch_addr = PE_FindExportedFunction(wm, "theQuickTimeDispatcher", TRUE);
-	    if (dispatch_addr == RVA(0x124c30))
+	    if ((char*)dispatch_addr == RVA(0x124c30))
 	    {
 	        fprintf(stderr, "QuickTime5 DLLs found\n");
 		ptr = (void **)RVA(0x375ca4); // dispatch_ptr
@@ -537,7 +537,7 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 		RVA(0x08e0ae)[0] = 0xc3; // font/dc remover
 		for (i=0;i<24;i++) RVA(0x07a1ad)[i]=0x90; // destroy window
 #endif
-	    } else if (dispatch_addr == RVA(0x13b330))
+	    } else if ((char*)dispatch_addr == RVA(0x13b330))
 	    {
     		fprintf(stderr, "QuickTime6 DLLs found\n");
 		ptr = (void **)RVA(0x3b9524); // dispatcher_ptr
@@ -546,7 +546,7 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 		for (i=0;i<5;i++)  RVA(0x273122)[i]=0x90; // jmp_to_call_loadbitmap
 		for (i=0;i<9;i++)  RVA(0x273131)[i]=0x90; // call__calls_OLE_shit
 		for (i=0;i<96;i++) RVA(0x2ac852)[i]=0x90; // disable threads
-	    } else if (dispatch_addr == RVA(0x13c3e0))
+	    } else if ((char*)dispatch_addr == RVA(0x13c3e0))
 	    {
     		fprintf(stderr, "QuickTime6.3 DLLs found\n");
 		ptr = (void **)RVA(0x3ca01c); // dispatcher_ptr
@@ -825,7 +825,7 @@ static int report_func(void *stack_base, int stack_size, reg386_t *reg, uint32_t
   // memory management:
   case 0x150011: //NewPtrClear
   case 0x150012: //NewPtrSysClear
-      reg->eax = malloc(((uint32_t *)stack_base)[1]);
+      reg->eax = (uint32_t)malloc(((uint32_t *)stack_base)[1]);
       memset((void *)reg->eax,0,((uint32_t *)stack_base)[1]);
 #ifdef DEBUG_QTX_API
       printf("%*sLEAVE(%d): EMULATED! 0x%X\n",ret_i*2,"",ret_i, reg->eax);
@@ -833,7 +833,7 @@ static int report_func(void *stack_base, int stack_size, reg386_t *reg, uint32_t
       return 1;
   case 0x15000F: //NewPtr
   case 0x150010: //NewPtrSys
-      reg->eax = malloc(((uint32_t *)stack_base)[1]);
+      reg->eax = (uint32_t)malloc(((uint32_t *)stack_base)[1]);
 #ifdef DEBUG_QTX_API
       printf("%*sLEAVE(%d): EMULATED! 0x%X\n",ret_i*2,"",ret_i, reg->eax);
 #endif

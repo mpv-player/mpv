@@ -600,8 +600,8 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, unsigned int csp
     }
 
     if(this->m_pDS_Filter->m_pAll)
-        this->m_pDS_Filter->m_pAll->vt->Release(this->m_pDS_Filter->m_pAll);
-    this->m_pDS_Filter->m_pAll=MemAllocatorCreate();
+        this->m_pDS_Filter->m_pAll->vt->Release((IUnknown*)this->m_pDS_Filter->m_pAll);
+    this->m_pDS_Filter->m_pAll=(IMemAllocator*)MemAllocatorCreate();
     if (!this->m_pDS_Filter->m_pAll)
     {
         printf("Call to MemAllocatorCreate failed\n");

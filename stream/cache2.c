@@ -367,6 +367,7 @@ void cache_uninit(stream_t *s) {
   s->cache_data = NULL;
 }
 
+#if FORKED_CACHE
 static void exit_sighandler(int x){
   // close stream
   exit(0);
@@ -374,6 +375,7 @@ static void exit_sighandler(int x){
 
 static void dummy_sighandler(int x) {
 }
+#endif
 
 /**
  * Main loop of the cache process or thread.

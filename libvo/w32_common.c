@@ -41,6 +41,8 @@
 #define MONITOR_DEFAULTTOPRIMARY 1
 #endif
 
+#define WIN_ID_TO_HWND(x) ((HWND)(uint32_t)(x))
+
 static const char classname[] = "MPlayer - The Movie Player";
 int vo_vm = 0;
 
@@ -116,7 +118,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             break;
         case WM_WINDOWPOSCHANGING:
             if (vo_keepaspect && !vo_fs && WinID < 0) {
-                WINDOWPOS *wpos = lParam;
+                WINDOWPOS *wpos = (WINDOWPOS*)lParam;
                 int xborder, yborder;
                 r.left = r.top = 0;
                 r.right = wpos->cx;
@@ -232,10 +234,10 @@ int vo_w32_check_events(void) {
             vo_dx = p.x; vo_dy = p.y;
             event_flags |= VO_EVENT_MOVE;
         }
-        res = GetClientRect(WinID, &r);
+        res = GetClientRect(WIN_ID_TO_HWND(WinID), &r);
         if (res && (r.right != vo_dwidth || r.bottom != vo_dheight))
             MoveWindow(vo_window, 0, 0, r.right, r.bottom, FALSE);
-        if (!IsWindow(WinID))
+        if (!IsWindow(WIN_ID_TO_HWND(WinID)))
             // Window has probably been closed, e.g. due to program crash
             mplayer_put_key(KEY_CLOSE_WIN);
     }
@@ -514,11 +516,11 @@ int vo_w32_init(void) {
     if (WinID >= 0)
     {
         RECT r;
-        GetClientRect(WinID, &r);
+        GetClientRect(WIN_ID_TO_HWND(WinID), &r);
         vo_dwidth = r.right; vo_dheight = r.bottom;
         vo_window = CreateWindowEx(WS_EX_NOPARENTNOTIFY, classname, classname,
-                     WS_CHILD | WS_VISIBLE,
-                     0, 0, vo_dwidth, vo_dheight, WinID, 0, hInstance, 0);
+                     WS_CHILD | WS_VISIBLE, 0, 0, vo_dwidth, vo_dheight,
+                     WIN_ID_TO_HWND(WinID), 0, hInstance, 0);
         EnableWindow(vo_window, 0);
     } else
         vo_window = CreateWindowEx(0, classname, classname,

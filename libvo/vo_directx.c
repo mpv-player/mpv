@@ -276,7 +276,7 @@ static uint32_t Directx_CreateOverlay(uint32_t imgfmt)
 		  case DDERR_OUTOFVIDEOMEMORY:
 			 {mp_msg(MSGT_VO, MSGL_ERR,"not enough video memory\n");break;}
           default:
-             mp_msg(MSGT_VO, MSGL_ERR,"create surface failed with 0x%x\n",ddrval);
+             mp_msg(MSGT_VO, MSGL_ERR,"create surface failed with 0x%xu\n",(unsigned)ddrval);
 	   }
 	   return 1;
 	}
@@ -588,7 +588,7 @@ static uint32_t Directx_ManageDisplay(void)
         // we should try upping the destination size a bit, or
         // perhaps shrinking the source size
 	   	mp_msg(MSGT_VO, MSGL_ERR ,"<vo_directx><ERROR>UpdateOverlay failed\n" );
-	  	mp_msg(MSGT_VO, MSGL_ERR ,"<vo_directx><ERROR>Overlay:x1:%i,y1:%i,x2:%i,y2:%i,w:%i,h:%i\n",rd.left,rd.top,rd.right,rd.bottom,rd.right - rd.left,rd.bottom - rd.top );
+	  	mp_msg(MSGT_VO, MSGL_ERR ,"<vo_directx><ERROR>Overlay:x1:%li,y1:%li,x2:%li,y2:%li,w:%li,h:%li\n",rd.left,rd.top,rd.right,rd.bottom,rd.right - rd.left,rd.bottom - rd.top );
 	  	mp_msg(MSGT_VO, MSGL_ERR ,"<vo_directx><ERROR>");
 		switch (ddrval)
 		{
@@ -618,7 +618,7 @@ static uint32_t Directx_ManageDisplay(void)
 					break;
 				}
             default:
-                mp_msg(MSGT_VO, MSGL_ERR ," 0x%x\n",ddrval);
+                mp_msg(MSGT_VO, MSGL_ERR ," 0x%xu\n",(unsigned)ddrval);
 		}
 	    /*ok we can't do anything about it -> hide overlay*/
 		if(ddrval != DD_OK)
