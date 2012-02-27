@@ -165,6 +165,21 @@ yasm_check() {
   return "$TMPRES"
 }
 
+pkg_config_add() {
+  echo >> "$TMPLOG"
+  echo "$_pkg_config --cflags $@" >> "$TMPLOG"
+  ctmp=$($_pkg_config --cflags "$@" 2>> "$TMPLOG") || return $?
+  echo >> "$TMPLOG"
+  echo "$_pkg_config --libs $@" >> "$TMPLOG"
+  ltmp=$($_pkg_config --libs "$@" 2>> "$TMPLOG") || return $?
+  echo >> "$TMPLOG"
+  echo "cflags: $ctmp" >> "$TMPLOG"
+  echo "libs: $ltmp" >> "$TMPLOG"
+  echo >> "$TMPLOG"
+  extra_cflags="$extra_cflags $ctmp"
+  extra_ldflags="$extra_ldflags $ltmp"
+}
+
 tmp_run() {
   "$TMPEXE" >> "$TMPLOG" 2>&1
 }
@@ -502,7 +517,6 @@ Use these options if autodetection fails:
   --extra-libs=FLAGS          extra linker flags
   --extra-libs-mplayer=FLAGS  extra linker flags for MPlayer
 
-  --with-freetype-config=PATH path to freetype-config
   --with-sdl-config=PATH      path to sdl*-config
   --with-dvdnav-config=PATH   path to dvdnav-config
   --with-dvdread-config=PATH  path to dvdread-config
@@ -687,7 +701,6 @@ quicktime=auto
 _macosx_finder=no
 _macosx_bundle=auto
 _sortsub=yes
-_freetypeconfig='freetype-config'
 _fribidi=auto
 _enca=auto
 _inet6=auto
@@ -743,9 +756,6 @@ for ac_option do
 
   --with-sdl-config=*)
     _sdlconfig=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --with-freetype-config=*)
-    _freetypeconfig=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --with-dvdnav-config=*)
     _dvdnavconfig=$(echo $ac_option | cut -d '=' -f 2)
@@ -4875,8 +4885,7 @@ echores "$_nas"
 echocheck "pulse"
 if test "$_pulse" = auto ; then
   _pulse=no
-  if $_pkg_config --exists 'libpulse >= 0.9' ; then
-    header_check pulse/pulseaudio.h $($_pkg_config --libs --cflags libpulse) &&
+  if pkg_config_add 'libpulse >= 0.9' ; then
       _pulse=yes
   fi
 fi
@@ -4885,8 +4894,6 @@ echores "$_pulse"
 if test "$_pulse" = yes ; then
   def_pulse='#define CONFIG_PULSE 1'
   aomodules="pulse $aomodules"
-  libs_mplayer="$libs_mplayer $($_pkg_config --libs libpulse)"
-  extra_cflags="$extra_cflags $($_pkg_config --cflags libpulse)"
 else
   def_pulse='#undef CONFIG_PULSE'
   noaomodules="pulse $noaomodules"
@@ -4895,14 +4902,9 @@ fi
 
 echocheck "JACK"
 if test "$_jack" = auto ; then
-  _jack=yes
-  if statement_check jack/jack.h 'jack_client_open("test", JackUseExactName, NULL)' -ljack ; then
-    libs_mplayer="$libs_mplayer -ljack"
-  elif statement_check jack/jack.h 'jack_client_open("test", JackUseExactName, NULL)' $($_pkg_config --libs --cflags --silence-errors jack) ; then
-    libs_mplayer="$libs_mplayer $($_pkg_config --libs jack)"
-    extra_cflags="$extra_cflags "$($_pkg_config --cflags jack)""
-  else
-    _jack=no
+  _jack=no
+  if pkg_config_add jack ; then
+      _jack=yes
   fi
 fi
 
@@ -5308,28 +5310,9 @@ echores "$_cdparanoia"
 
 echocheck "libcdio"
 if test "$_libcdio" = auto && test "$_cdparanoia" = no ; then
-        cat > $TMPC << EOF
-#include <stdio.h>
-#include <cdio/version.h>
-#include <cdio/cdda.h>
-#include <cdio/paranoia.h>
-int main(void) {
-    void *test = cdda_verbose_set;
-    printf("%s\n", CDIO_VERSION);
-    return test == (void *)1;
-}
-EOF
-        _libcdio=no
-    for _ld_tmp in "" "-lwinmm" ; do
-        _ld_tmp="-lcdio_cdda -lcdio -lcdio_paranoia $_ld_tmp"
-        cc_check $_ld_tmp $_ld_lm && _libcdio=yes &&
-            extra_ldflags="$extra_ldflags $_ld_tmp" && break
-    done
-    if test "$_libcdio" = no && $_pkg_config --exists libcdio_paranoia ; then
-      _inc_tmp=$($_pkg_config --cflags libcdio_paranoia)
-      _ld_tmp=$($_pkg_config --libs libcdio_paranoia)
-      cc_check $_inc_tmp $_ld_tmp $_ld_lm && _libcdio=yes &&
-        extra_ldflags="$extra_ldflags $_ld_tmp" && extra_cflags="$extra_cflags $_inc_tmp"
+    _libcdio=no
+    if pkg_config_add libcdio_paranoia ; then
+        _libcdio=yes
     fi
 fi
 if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
@@ -5382,33 +5365,14 @@ if test "$_iconv" = no ; then
 fi
 
 if test "$_freetype" = auto ; then
-    if ( $_freetypeconfig --version ) >/dev/null 2>&1 ; then
-        cat > $TMPC << EOF
-#include <stdio.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#if ((FREETYPE_MAJOR < 2) || ((FREETYPE_MINOR == 0) && (FREETYPE_PATCH < 9)))
-#error "Need FreeType 2.0.9 or newer"
-#endif
-int main(void) {
-    FT_Library library;
-    FT_Init_FreeType(&library);
-    return 0;
-}
-EOF
-        _freetype=no
-        cc_check $($_freetypeconfig --cflags) $($_freetypeconfig --libs) && _freetype=yes
+    if pkg_config_add freetype2 ; then
+        _freetype=yes
     else
-        _freetype=no
-    fi
-    if test "$_freetype" != yes ; then
-      die "Unable to find development files for libfreetype. Aborting. If you really mean to compile without FreeType support use --disable-freetype."
+        die "Unable to find development files for libfreetype. Aborting. If you really mean to compile without FreeType support use --disable-freetype."
     fi
 fi
 if test "$_freetype" = yes ; then
     def_freetype='#define CONFIG_FREETYPE 1'
-    extra_cflags="$extra_cflags $($_freetypeconfig --cflags)"
-    extra_ldflags="$extra_ldflags $($_freetypeconfig --libs)"
 else
     def_freetype='#undef CONFIG_FREETYPE'
 fi
@@ -5420,36 +5384,11 @@ if test "$_freetype" = no ; then
 fi
 echocheck "fontconfig"
 if test "$_fontconfig" = auto ; then
-        cat > $TMPC << EOF
-#include <stdio.h>
-#include <stdlib.h>
-#include <fontconfig/fontconfig.h>
-#if FC_VERSION < 20402
-#error At least version 2.4.2 of fontconfig required
-#endif
-int main(void) {
-    int err = FcInit();
-    if (err == FcFalse) {
-        printf("Couldn't initialize fontconfig lib\n");
-        exit(err);
-    }
-    return 0;
-}
-EOF
-  _fontconfig=no
-  for _ld_tmp in "" "-lexpat -lfreetype" "-lexpat -lfreetype -lz" "-lexpat -lfreetype -lz -liconv" ; do
-    _ld_tmp="-lfontconfig $_ld_tmp"
-    cc_check $_ld_tmp && _fontconfig=yes && extra_ldflags="$extra_ldflags $_ld_tmp" && break
-  done
-  if test "$_fontconfig" = no && $_pkg_config --exists fontconfig ; then
-    _inc_tmp=$($_pkg_config --cflags fontconfig)
-    _ld_tmp=$($_pkg_config --libs fontconfig)
-    cc_check $_inc_tmp $_ld_tmp && _fontconfig=yes &&
-      extra_ldflags="$extra_ldflags $_ld_tmp" && extra_cflags="$extra_cflags $_inc_tmp"
-  fi
-  if test "$_fontconfig" != yes ; then
-    die "Unable to find development files for libfontconfig. Aborting. If you really mean to compile without fontconfig support use --disable-fontconfig."
-  fi
+    if pkg_config_add 'fontconfig >= 2.4.2' ; then
+        _fontconfig=yes
+    else
+        die "Unable to find development files for libfontconfig. Aborting. If you really mean to compile without fontconfig support use --disable-fontconfig."
+    fi
 fi
 if test "$_fontconfig" = yes ; then
     def_fontconfig='#define CONFIG_FONTCONFIG 1'
@@ -5460,15 +5399,13 @@ echores "$_fontconfig"
 
 
 echocheck "SSA/ASS support"
-if test "$_ass" = auto -o "$_ass" = yes ; then
-        if $_pkg_config libass; then
-                _ass=yes
-                def_ass='#define CONFIG_ASS 1'
-                extra_ldflags="$extra_ldflags $($_pkg_config --libs libass)"
-                extra_cflags="$extra_cflags $($_pkg_config --cflags libass)"
-        else
-            die "Unable to find development files for libass. Aborting. If you really mean to compile without libass support use --disable-libass."
-        fi
+if test "$_ass" = auto ; then
+    if pkg_config_add libass ; then
+        _ass=yes
+        def_ass='#define CONFIG_ASS 1'
+    else
+        die "Unable to find development files for libass. Aborting. If you really mean to compile without libass support use --disable-libass."
+    fi
 else
     def_ass='#undef CONFIG_ASS'
 fi
@@ -5476,35 +5413,14 @@ echores "$_ass"
 
 
 echocheck "fribidi with charsets"
-_inc_tmp=""
-_ld_tmp=""
 if test "$_fribidi" = auto ; then
-    cat > $TMPC << EOF
-#include <stdlib.h>
-/* workaround for fribidi 0.10.4 and below */
-#define FRIBIDI_CHARSET_UTF8 FRIBIDI_CHAR_SET_UTF8
-#include <fribidi/fribidi.h>
-int main(void) {
-    if (fribidi_parse_charset("UTF-8") != FRIBIDI_CHAR_SET_UTF8)
-       exit(1);
-    return 0;
-}
-EOF
     _fribidi=no
-    _inc_tmp=""
-    _ld_tmp="-lfribidi"
-    cc_check $_inc_tmp $_ld_tmp && _fribidi=yes
-    if $_pkg_config --exists fribidi > /dev/null 2>&1 &&
-       test "$_fribidi" = no ; then
-        _inc_tmp="$($_pkg_config --cflags)"
-        _ld_tmp="$($_pkg_config --libs)"
-        cc_check $_inc_tmp $_ld_tmp && _fribidi=yes
+    if pkg_config_add fribidi ; then
+        _fribidi=yes
     fi
 fi
 if test "$_fribidi" = yes ; then
     def_fribidi='#define CONFIG_FRIBIDI 1'
-    extra_cflags="$extra_cflags $_inc_tmp"
-    extra_ldflags="$extra_ldflags $_ld_tmp"
 else
     def_fribidi='#undef CONFIG_FRIBIDI'
 fi
@@ -5629,53 +5545,13 @@ echores "$_speex"
 echocheck "OggTheora support"
 if test "$_theora" = auto ; then
   _theora=no
-    cat > $TMPC << EOF
-#include <theora/theora.h>
-#include <string.h>
-int main(void) {
-  /* Theora is in flux, make sure that all interface routines and datatypes
-   * exist and work the way we expect it, so we don't break MPlayer. */
-  ogg_packet op;
-  theora_comment tc;
-  theora_info inf;
-  theora_state st;
-  yuv_buffer yuv;
-  int r;
-  double t;
-
-  theora_info_init(&inf);
-  theora_comment_init(&tc);
-
-  return 0;
-
-  /* we don't want to execute this kind of nonsense; just for making sure
-   * that compilation works... */
-  memset(&op, 0, sizeof(op));
-  r = theora_decode_header(&inf, &tc, &op);
-  r = theora_decode_init(&st, &inf);
-  t = theora_granule_time(&st, op.granulepos);
-  r = theora_decode_packetin(&st, &op);
-  r = theora_decode_YUVout(&st, &yuv);
-  theora_clear(&st);
-
-  return 0;
-}
-EOF
-  _ld_theora=$($_pkg_config --silence-errors --libs theora)
-  _inc_theora=$($_pkg_config --silence-errors --cflags theora)
-  cc_check $_inc_theora $_ld_theora && extra_ldflags="$extra_ldflags $_ld_theora" &&
-    extra_cflags="$extra_cflags $_inc_theora" && _theora=yes
-  if test _theora = no; then
-    _ld_theora="-ltheora -logg"
-    cc_check $_ld_theora && extra_ldflags="$extra_ldflags $_ld_theora" && _theora=yes
+  if pkg_config_add theora ; then
+      _theora=yes
   fi
 fi
 if test "$_theora" = yes ; then
   def_theora='#define CONFIG_OGGTHEORA 1'
   codecmodules="libtheora $codecmodules"
-  # when --enable-theora is forced, we'd better provide a probably sane
-  # $_ld_theora than nothing
-  test -z "$_ld_theora" && extra_ldflags="$extra_ldflags -ltheora -logg"
 else
   def_theora='#undef CONFIG_OGGTHEORA'
   nocodecmodules="libtheora $nocodecmodules"
@@ -5800,35 +5676,10 @@ echores "$_ladspa"
 
 echocheck "libbs2b audio filter support"
 if test "$_libbs2b" = auto ; then
-  cat > $TMPC <<EOF
-#include <bs2b.h>
-#if BS2B_VERSION_MAJOR < 3
-#error Please use libbs2b >= 3.0.0, older versions are not supported.
-#endif
-int main(void) {
-    t_bs2bdp filter;
-    filter=bs2b_open();
-    bs2b_close(filter);
-    return 0;
-}
-EOF
-  _libbs2b=no
-  if $_pkg_config --exists libbs2b ; then
-    _inc_tmp=$($_pkg_config --cflags libbs2b)
-    _ld_tmp=$($_pkg_config --libs libbs2b)
-    cc_check $_inc_tmp $_ld_tmp && extra_ldflags="$extra_ldflags $_ld_tmp" &&
-      extra_cflags="$extra_cflags $_inc_tmp" && _libbs2b=yes
-  else
-    for _inc_tmp in "" -I/usr/include/bs2b -I/usr/local/include \
-        -I/usr/local/include/bs2b ; do
-      if cc_check $_inc_tmp $_ld_lm -lbs2b ; then
-        extra_ldflags="$extra_ldflags -lbs2b"
-        extra_cflags="$extra_cflags $_inc_tmp"
+    _libbs2b=no
+    if pkg_config_add libbs2b ; then
         _libbs2b=yes
-        break
-      fi
-    done
-  fi
+    fi
 fi
 def_libbs2b="#undef CONFIG_LIBBS2B"
 test "$_libbs2b" = yes && def_libbs2b="#define CONFIG_LIBBS2B 1"
@@ -5933,9 +5784,7 @@ echores "$_qtx"
 echocheck "Nemesi Streaming Media libraries"
 if test "$_nemesi" = auto  && test "$networking" = yes ; then
     _nemesi=no
-    if $_pkg_config libnemesi --atleast-version=0.6.3 ; then
-        extra_cflags="$extra_cflags $($_pkg_config --cflags libnemesi)"
-        extra_ldflags="$extra_ldflags $($_pkg_config --libs libnemesi)"
+    if pkg_config_add libnemesi ; then
         _nemesi=yes
     fi
 fi
@@ -6009,11 +5858,7 @@ all_libav_libs="libavutil > 51.21.0:libavcodec > 53.34.0:libavformat > 53.20.0:l
 echocheck "Libav ($all_libav_libs)"
 if test "$ffmpeg" = auto ; then
   IFS=":"   # shell should not be used for programming
-  if $_pkg_config --exists --print-errors $all_libav_libs ; then
-    inc_ffmpeg=$($_pkg_config --cflags $all_libav_libs)
-    _ld_tmp=$($_pkg_config --libs $all_libav_libs)
-    extra_ldflags="$extra_ldflags $_ld_tmp"
-    extra_cflags="$extra_cflags $inc_ffmpeg"
+  if pkg_config_add $all_libav_libs ; then
     unset IFS
   else
     die "Unable to find development files for some of the required Libav libraries above. Aborting."
