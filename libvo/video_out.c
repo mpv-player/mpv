@@ -130,8 +130,8 @@ const struct vo_driver *video_out_drivers[] =
         &video_out_tdfx_vid,
 #endif
 #ifdef CONFIG_DIRECT3D
-        &video_out_direct3d,
         &video_out_direct3d_shaders,
+        &video_out_direct3d,
 #endif
 #ifdef CONFIG_DIRECTX
         &video_out_directx,
