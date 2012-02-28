@@ -63,8 +63,24 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	    }
 
     mp_msg(MSGT_VO,MSGL_DBG2, "PNG Compression level %i\n", z_compression);
-
+    uninit();
+    struct AVCodec *png_codec = avcodec_find_encoder(CODEC_ID_PNG);
+    if (!png_codec)
+        goto error;
+    avctx = avcodec_alloc_context3(png_codec);
+    if (!avctx)
+        goto error;
+    avctx->width = width;
+    avctx->height = height;
+    avctx->pix_fmt = imgfmt2pixfmt(format);
+    avctx->compression_level = z_compression;
+    if (avcodec_open2(avctx, png_codec, NULL) < 0)
+        goto error;
     return 0;
+
+ error:
+    uninit();
+    return -1;
 }
 
 
@@ -85,9 +101,6 @@ static uint32_t draw_image(mp_image_t* mpi){
         return 1;
     }
 
-    avctx->width = mpi->w;
-    avctx->height = mpi->h;
-    avctx->pix_fmt = imgfmt2pixfmt(mpi->imgfmt);
     pic.data[0] = mpi->planes[0];
     pic.linesize[0] = mpi->stride[0];
     buffersize = mpi->w * mpi->h * 8;
@@ -137,8 +150,10 @@ query_format(uint32_t format)
     return 0;
 }
 
-static void uninit(void){
-    avcodec_close(avctx);
+static void uninit(void)
+{
+    if (avctx)
+        avcodec_close(avctx);
     av_freep(&avctx);
     av_freep(&outbuffer);
     outbuffer_size = 0;
@@ -165,20 +180,7 @@ static int preinit(const char *arg)
     if (subopt_parse(arg, subopts) != 0) {
         return -1;
     }
-    struct AVCodec *png_codec = avcodec_find_encoder(CODEC_ID_PNG);
-    if (!png_codec)
-        goto error;
-    avctx = avcodec_alloc_context3(png_codec);
-    if (!avctx)
-        goto error;
-    if (avcodec_open2(avctx, png_codec, NULL) < 0)
-        goto error;
-    avctx->compression_level = z_compression;
     return 0;
-
- error:
-    uninit();
-    return -1;
 }
 
 static int control(uint32_t request, void *data)
