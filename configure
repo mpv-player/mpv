@@ -549,7 +549,6 @@ _armv6t2=auto
 _armvfp=auto
 neon=auto
 _iwmmxt=auto
-_mtrr=auto
 _altivec=auto
 _install=install
 _ranlib=ranlib
@@ -1071,8 +1070,6 @@ for ac_option do
   --disable-directfb)   _directfb=no    ;;
   --enable-bl)          _bl=yes         ;;
   --disable-bl)         _bl=no          ;;
-  --enable-mtrr)        _mtrr=yes       ;;
-  --disable-mtrr)       _mtrr=no        ;;
   --enable-shm)         _shm=yes        ;;
   --disable-shm)        _shm=no         ;;
   --enable-select)      _select=yes     ;;
@@ -1539,8 +1536,7 @@ if x86 ; then
 
   exts=$($_cpuinfo | egrep 'features|flags' | cut -d ':' -f 2 | head -n 1)
 
-  pparam=$(echo $exts | sed -e s/k6_mtrr/mtrr/ -e s/cyrix_arr/mtrr/ -e s/centaur_mcr/mtrr/ \
-                            -e s/xmm/sse/ -e s/kni/sse/)
+  pparam=$(echo $exts | sed -e s/xmm/sse/ -e s/kni/sse/)
   # SSE implies MMX2, but not all SSE processors report the mmxext CPU flag.
   pparam=$(echo $pparam | sed -e 's/sse/sse mmxext/')
 
@@ -1595,13 +1591,6 @@ EOF
   extcheck $_sse2     "sse2"     "xorpd %%xmm0, %%xmm0" || _gcc3_ext="$_gcc3_ext -mno-sse2"
   extcheck $_ssse3    "ssse3"    "pabsd %%xmm0, %%xmm0"
   extcheck $_cmov     "cmov"     "cmovb %%eax,  %%ebx"
-
-  echocheck "mtrr support"
-  if test "$_mtrr" = kernel_check ; then
-    _mtrr="yes"
-    _optimizing="$_optimizing mtrr"
-  fi
-  echores "$_mtrr"
 
   if test "$_gcc3_ext" != ""; then
     # if we had to disable sse/sse2 because the active kernel does not
@@ -2234,7 +2223,6 @@ if test "$_runtime_cpudetection" = yes ; then
     test "$_sse"      != no && _sse=yes
     test "$_sse2"     != no && _sse2=yes
     test "$_ssse3"    != no && _ssse3=yes
-    test "$_mtrr"     != no && _mtrr=yes
   fi
   if ppc; then
     _altivec=yes
@@ -6990,21 +6978,6 @@ Note: If you alter theses files (for instance CFLAGS) MPlayer may no longer
 Note: On non-Linux systems you might need to use 'gmake' instead of 'make'.
 
 EOF
-
-
-if test "$_mtrr" = yes ; then
-  echo "Please check mtrr settings at /proc/mtrr (see DOCS/HTML/$language_doc/video.html#mtrr)"
-  echo
-fi
-
-if ! x86_32; then
-  cat <<EOF
-NOTE: Win32 codec DLLs are not supported on your CPU ($host_arch) or your
-operating system ($system_name). You may encounter a few files that cannot
-be played due to missing open source video/audio codec support.
-
-EOF
-fi
 
 
 cat <<EOF
