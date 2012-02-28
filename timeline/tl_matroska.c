@@ -39,7 +39,7 @@
 struct find_entry {
     char *name;
     int matchlen;
-    blkcnt_t size;
+    off_t size;
 };
 
 static int cmp_entry(const void *pa, const void *pb)
@@ -50,7 +50,7 @@ static int cmp_entry(const void *pa, const void *pb)
     if (matchdiff)
         return FFSIGN(matchdiff);
     // check small files first
-    blkcnt_t sizediff = a->size - b->size;
+    off_t sizediff = a->size - b->size;
     if (sizediff)
         return FFSIGN(sizediff);
     return 0;
@@ -92,11 +92,11 @@ static char **find_files(const char *original_file, const char *suffix)
         struct stat statbuf;
         if (stat(name, &statbuf) != 0)
             continue;
-        blkcnt_t bsize = statbuf.st_blocks;
+        off_t size = statbuf.st_size;
 
         entries = talloc_realloc(entries, entries, struct find_entry,
                                  num_results + 1);
-        entries[num_results] = (struct find_entry) { name, matchlen, bsize };
+        entries[num_results] = (struct find_entry) { name, matchlen, size };
         num_results++;
     }
     closedir(dp);
