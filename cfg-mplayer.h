@@ -486,7 +486,7 @@ const m_option_t common_opts[] = {
     OPT_TIME("ss", seek_to_sec, 0),
 
     // start paused
-    OPT_FLAG_ON("paused", start_paused, 0),
+    OPT_FLAG_ON("pause", start_paused, 0),
 
     // stop at given position
     {"endpos", &end_at, CONF_TYPE_TIME_SIZE, 0, 0, 0, NULL},

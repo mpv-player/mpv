@@ -5003,7 +5003,7 @@ goto_enable_cache:
                    mpctx->paused ? VOCTRL_PAUSE : VOCTRL_RESUME, NULL);
 
     if (mpctx->opts.start_paused)
-        add_step_frame(mpctx);
+        pause_player(mpctx);
 
     while (!mpctx->stop_play)
         run_playloop(mpctx);
