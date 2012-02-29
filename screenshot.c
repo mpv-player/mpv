@@ -409,23 +409,34 @@ void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
 {
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
     const struct img_writer *writer = get_writer(ctx);
-    struct mp_image *dst = alloc_mpi(image->w, image->h, IMGFMT_RGB24);
+    struct mp_image *allocated_image = NULL;
+    const int destfmt = IMGFMT_RGB24;
 
-    struct SwsContext *sws = sws_getContextFromCmdLine_hq(image->width,
-                                                          image->height,
-                                                          image->imgfmt,
-                                                          dst->width,
-                                                          dst->height,
-                                                          dst->imgfmt);
+    if (image->imgfmt != destfmt) {
+        struct mp_image *dst = alloc_mpi(image->w, image->h, destfmt);
 
-    struct mp_csp_details colorspace;
-    get_detected_video_colorspace(mpctx->sh_video, &colorspace);
-    // this is a property of the output device; images always use full-range RGB
-    colorspace.levels_out = MP_CSP_LEVELS_PC;
-    mp_sws_set_colorspace(sws, &colorspace);
+        struct SwsContext *sws = sws_getContextFromCmdLine_hq(image->width,
+                                                              image->height,
+                                                              image->imgfmt,
+                                                              dst->width,
+                                                              dst->height,
+                                                              dst->imgfmt);
 
-    sws_scale(sws, (const uint8_t **)image->planes, image->stride, 0,
-              image->height, dst->planes, dst->stride);
+        struct mp_csp_details colorspace;
+        get_detected_video_colorspace(mpctx->sh_video, &colorspace);
+        // this is a property of the output device; images always use
+        // full-range RGB
+        colorspace.levels_out = MP_CSP_LEVELS_PC;
+        mp_sws_set_colorspace(sws, &colorspace);
+
+        sws_scale(sws, (const uint8_t **)image->planes, image->stride, 0,
+                image->height, dst->planes, dst->stride);
+
+        sws_freeContext(sws);
+
+        allocated_image = dst;
+        image = dst;
+    }
 
     char *filename = gen_fname(ctx);
     if (filename) {
@@ -436,7 +447,7 @@ void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
         } else {
             mp_msg(MSGT_CPLAYER, MSGL_INFO, "*** screenshot '%s' ***\n",
                    filename);
-            int success = writer->write(ctx, dst, fp);
+            int success = writer->write(ctx, image, fp);
             success = !fclose(fp) && success;
             if (!success)
                 mp_msg(MSGT_CPLAYER, MSGL_ERR, "Error writing screenshot!\n");
@@ -444,8 +455,7 @@ void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
         talloc_free(filename);
     }
 
-    sws_freeContext(sws);
-    free_mp_image(dst);
+    free_mp_image(allocated_image);
 }
 
 static void vf_screenshot_callback(void *pctx, struct mp_image *image)
