@@ -67,7 +67,7 @@ typedef struct screenshot_ctx {
 
 struct img_writer {
     const char *file_ext;
-    int (*write)(screenshot_ctx *ctx, mp_image_t *image, char *filename);
+    int (*write)(screenshot_ctx *ctx, mp_image_t *image, FILE *fp);
 };
 
 void screenshot_init(struct MPContext *mpctx)
@@ -79,18 +79,8 @@ void screenshot_init(struct MPContext *mpctx)
     };
 }
 
-static FILE *open_file(screenshot_ctx *ctx, char *fname) {
-    FILE *fp = fopen(fname, "wb");
-    if (fp == NULL)
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nError opening %s for writing!\n",
-               fname);
-    return fp;
-}
-
-static int write_png(screenshot_ctx *ctx, struct mp_image *image,
-                     char *filename)
+static int write_png(screenshot_ctx *ctx, struct mp_image *image, FILE *fp)
 {
-    FILE *fp = NULL;
     void *outbuffer = NULL;
     int success = 0;
 
@@ -121,10 +111,6 @@ static int write_png(screenshot_ctx *ctx, struct mp_image *image,
     if (size < 1)
         goto error_exit;
 
-    fp = open_file(ctx, filename);
-    if (fp == NULL)
-        goto error_exit;
-
     fwrite(outbuffer, size, 1, fp);
     fflush(fp);
 
@@ -135,8 +121,6 @@ static int write_png(screenshot_ctx *ctx, struct mp_image *image,
 error_exit:
     if (avctx)
         avcodec_close(avctx);
-    if (fp)
-        fclose(fp);
     free(outbuffer);
     return success;
 }
@@ -152,14 +136,10 @@ static void write_jpeg_error_exit(j_common_ptr cinfo)
   longjmp(*(jmp_buf*)cinfo->client_data, 1);
 }
 
-static int write_jpeg(screenshot_ctx *ctx, mp_image_t *image, char *filename)
+static int write_jpeg(screenshot_ctx *ctx, mp_image_t *image, FILE *fp)
 {
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
-    FILE *outfile = open_file(ctx, filename);
-
-    if (!outfile)
-        return 0;
 
     cinfo.err = jpeg_std_error(&jerr);
     jerr.error_exit = write_jpeg_error_exit;
@@ -168,12 +148,11 @@ static int write_jpeg(screenshot_ctx *ctx, mp_image_t *image, char *filename)
     cinfo.client_data = &error_return_jmpbuf;
     if (setjmp(cinfo.client_data)) {
         jpeg_destroy_compress(&cinfo);
-        fclose(outfile);
         return 0;
     }
 
     jpeg_create_compress(&cinfo);
-    jpeg_stdio_dest(&cinfo, outfile);
+    jpeg_stdio_dest(&cinfo, fp);
 
     cinfo.image_width = image->width;
     cinfo.image_height = image->height;
@@ -195,7 +174,6 @@ static int write_jpeg(screenshot_ctx *ctx, mp_image_t *image, char *filename)
     jpeg_finish_compress(&cinfo);
 
     jpeg_destroy_compress(&cinfo);
-    fclose(outfile);
 
     return 1;
 }
@@ -451,9 +429,18 @@ void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
 
     char *filename = gen_fname(ctx);
     if (filename) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "*** screenshot '%s' ***\n", filename);
-        if (!writer->write(ctx, dst, filename))
-            mp_msg(MSGT_CPLAYER, MSGL_ERR, "Error writing screenshot!\n");
+        FILE *fp = fopen(filename, "wb");
+        if (fp == NULL) {
+            mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nError opening %s for writing!\n",
+                   filename);
+        } else {
+            mp_msg(MSGT_CPLAYER, MSGL_INFO, "*** screenshot '%s' ***\n",
+                   filename);
+            int success = writer->write(ctx, dst, fp);
+            success = !fclose(fp) && success;
+            if (!success)
+                mp_msg(MSGT_CPLAYER, MSGL_ERR, "Error writing screenshot!\n");
+        }
         talloc_free(filename);
     }
 
