@@ -938,6 +938,7 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("screenshot-jpeg-quality", screenshot_jpeg_quality, 0, 0, 100),
     OPT_INTRANGE("screenshot-png-compression", screenshot_png_compression, 0, 0, 9),
     OPT_STRING("screenshot-filetype", screenshot_filetype, 0),
+    OPT_STRING("screenshot-template", screenshot_template, 0),
 
     OPT_FLAG_ON("list-properties", list_properties, CONF_GLOBAL),
     {"identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_FLAG, CONF_GLOBAL, 0, MSGL_V, NULL},

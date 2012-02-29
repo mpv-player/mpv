@@ -24,6 +24,9 @@
 struct MPContext;
 struct mp_image;
 
+// One time initialization at program start.
+void screenshot_init(struct MPContext *mpctx);
+
 // Request a taking & saving a screenshot of the currently displayed frame.
 // each_frame: If set, this toggles per-frame screenshots, exactly like the
 //             screenshot slave command (MP_CMD_SCREENSHOT).

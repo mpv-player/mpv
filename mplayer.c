@@ -3975,6 +3975,7 @@ int main(int argc, char *argv[])
 
     mp_msg_init();
     init_libav();
+    screenshot_init(mpctx);
 
 #ifdef CONFIG_X11
     mpctx->x11_state = vo_x11_init_state();
