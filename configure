@@ -1374,7 +1374,14 @@ TMPH="$mplayer_tmpdir/tmp.h"
 TMPS="$mplayer_tmpdir/tmp.S"
 
 rm -f "$TMPLOG"
-echo configuration: $configuration > "$TMPLOG"
+echo Parameters configure was run with: > "$TMPLOG"
+if test -n "$CFLAGS" ; then
+    echo ${_echo_n} CFLAGS="'$CFLAGS' ${_echo_c}" >> "$TMPLOG"
+fi
+if test -n "$PKG_CONFIG_PATH" ; then
+    echo ${_echo_n} PKG_CONFIG_PATH="'$PKG_CONFIG_PATH' ${_echo_c}" >> "$TMPLOG"
+fi
+echo ./configure $configuration >> "$TMPLOG"
 echo >> "$TMPLOG"
 
 
