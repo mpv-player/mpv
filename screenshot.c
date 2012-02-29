@@ -23,6 +23,8 @@
 #include <setjmp.h>
 #include <time.h>
 
+#include "osdep/io.h"
+
 #include <libswscale/swscale.h>
 #include <libavcodec/avcodec.h>
 
