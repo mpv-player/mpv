@@ -334,6 +334,7 @@ Optional features:
   --enable-winsock2_h    enable winsock2_h [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
   --enable-live          enable LIVE555 Streaming Media [disable]
+  --enable-libquvi       enable libquvi [autodetect]
   --enable-nemesi        enable Nemesi Streaming Media [autodetect]
   --enable-lcms2         enable LCMS2 support [autodetect]
   --disable-vcd          disable VCD support [autodetect]
@@ -612,6 +613,7 @@ _pvr=auto
 networking=yes
 _winsock2_h=auto
 _smb=auto
+_libquvi=auto
 _joystick=no
 _xvid=auto
 _libnut=auto
@@ -935,6 +937,8 @@ for ac_option do
   --disable-winsock2_h) _winsock2_h=no  ;;
   --enable-smb)         _smb=yes        ;;
   --disable-smb)        _smb=no ;;
+  --enable-libquvi)     _libquvi=yes    ;;
+  --disable-libquvi)    _libquvi=no     ;;
   --enable-joystick)    _joystick=yes   ;;
   --disable-joystick)   _joystick=no    ;;
   --enable-xvid)        _xvid=yes       ;;
@@ -3464,6 +3468,19 @@ else
 fi
 echores "$_smb"
 
+echocheck "libquvi support"
+if test "$_libquvi" = auto ; then
+    _libquvi=no
+    if pkg_config_add libquvi ; then
+        _libquvi=yes
+    fi
+fi
+if test "$_libquvi" = yes; then
+    def_libquvi="#define CONFIG_LIBQUVI 1"
+else
+    def_libquvi="#undef CONFIG_LIBQUVI"
+fi
+echores "$_libquvi"
 
 #########
 # VIDEO #
@@ -5718,6 +5735,7 @@ LCMS2 = $_lcms2
 LIBNUT = $_libnut
 LIBPOSTPROC = $libpostproc
 LIBSMBCLIENT = $_smb
+LIBQUVI = $_libquvi
 LIBTHEORA = $_theora
 LIRC = $_lirc
 LIVE555 = $_live
@@ -6046,6 +6064,7 @@ $def_live
 $def_nemesi
 $def_networking
 $def_smb
+$def_libquvi
 $def_socklen_t
 $def_vstream
 
