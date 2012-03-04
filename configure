@@ -335,7 +335,7 @@ Optional features:
   --disable-networking   disable networking [enable]
   --enable-winsock2_h    enable winsock2_h [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
-  --enable-live          enable LIVE555 Streaming Media [autodetect]
+  --enable-live          enable LIVE555 Streaming Media [disable]
   --enable-nemesi        enable Nemesi Streaming Media [autodetect]
   --disable-vcd          disable VCD support [autodetect]
   --disable-bluray       disable Blu-ray support [autodetect]
@@ -634,7 +634,7 @@ _dvdread_internal=auto
 _libdvdcss_internal=auto
 _xanim=auto
 _real=auto
-_live=auto
+_live=no
 _nemesi=auto
 _native_rtsp=yes
 _xinerama=auto
@@ -5745,7 +5745,7 @@ fi
 echores "$_nemesi"
 
 echocheck "LIVE555 Streaming Media libraries"
-if test "$_live" = auto  && test "$networking" = yes ; then
+if test "$_live" != no  && test "$networking" = yes ; then
   cat > $TMPCPP << EOF
 #include <liveMedia.hh>
 #if (LIVEMEDIA_LIBRARY_VERSION_INT < 1141257600)
