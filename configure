@@ -437,7 +437,6 @@ Video output:
   --disable-yuv4mpeg       disable yuv4mpeg video output [enable]
   --disable-corevideo      disable CoreVideo video output [autodetect]
   --disable-cocoa          disable Cocoa OpenGL backend [autodetect]
-  --disable-quartz         disable Quartz video output [autodetect]
 
 Audio output:
   --disable-alsa         disable ALSA audio output [autodetect]
@@ -699,7 +698,6 @@ _qtx=auto
 _coreaudio=auto
 _corevideo=auto
 _cocoa=auto
-_quartz=auto
 quicktime=auto
 _macosx_finder=no
 _macosx_bundle=auto
@@ -1135,8 +1133,6 @@ for ac_option do
   --disable-corevideo) _corevideo=no ;;
   --enable-cocoa) _cocoa=yes ;;
   --disable-cocoa) _cocoa=no ;;
-  --enable-quartz) _quartz=yes ;;
-  --disable-quartz) _quartz=no ;;
   --enable-macosx-finder) _macosx_finder=yes ;;
   --disable-macosx-finder) _macosx_finder=no ;;
   --enable-macosx-bundle) _macosx_bundle=yes ;;
@@ -4213,24 +4209,8 @@ if test "$quicktime" = yes ; then
   def_quicktime='#define CONFIG_QUICKTIME 1'
 else
   def_quicktime='#undef CONFIG_QUICKTIME'
-  _quartz=no
 fi
 echores $quicktime
-
-echocheck "Quartz"
-if test "$_quartz" = auto ; then
-  _quartz=no
-  statement_check Carbon/Carbon.h 'CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, false)' -framework Carbon && _quartz=yes
-fi
-if test "$_quartz" = yes ; then
-  libs_mplayer="$libs_mplayer -framework Carbon"
-  def_quartz='#define CONFIG_QUARTZ 1'
-  vomodules="quartz $vomodules"
-else
-  def_quartz='#undef CONFIG_QUARTZ'
-  novomodules="quartz $novomodules"
-fi
-echores $_quartz
 
 echocheck "CoreVideo"
 if test "$_corevideo" = auto ; then
@@ -6543,7 +6523,6 @@ PVR = $_pvr
 QTX_CODECS = $_qtx
 QTX_CODECS_WIN32 = $_qtx_codecs_win32
 QTX_EMULATION = $_qtx_emulation
-QUARTZ = $_quartz
 RADIO=$_radio
 RADIO_CAPTURE=$_radio_capture
 REAL_CODECS = $_real
@@ -6908,7 +6887,6 @@ $def_mga
 $def_mng
 $def_png
 $def_pnm
-$def_quartz
 $def_s3fb
 $def_sdl
 $def_sdl_sdl_h

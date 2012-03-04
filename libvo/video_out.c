@@ -117,7 +117,6 @@ extern struct vo_driver video_out_tdfx_vid;
 extern struct vo_driver video_out_xvr100;
 extern struct vo_driver video_out_tga;
 extern struct vo_driver video_out_corevideo;
-extern struct vo_driver video_out_quartz;
 extern struct vo_driver video_out_pnm;
 extern struct vo_driver video_out_md5sum;
 
@@ -140,9 +139,6 @@ const struct vo_driver *video_out_drivers[] =
 #endif
 #ifdef CONFIG_COREVIDEO
         &video_out_corevideo,
-#endif
-#ifdef CONFIG_QUARTZ
-        &video_out_quartz,
 #endif
 #ifdef CONFIG_XMGA
         &video_out_xmga,
