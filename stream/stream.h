@@ -183,9 +183,9 @@ int stream_fill_buffer(stream_t *s);
 int stream_seek_long(stream_t *s, off_t pos);
 
 #ifdef CONFIG_STREAM_CACHE
-int stream_enable_cache(stream_t *stream,int size,int min,int prefill);
+int stream_enable_cache(stream_t *stream,int64_t size,int64_t min,int64_t prefill);
 int cache_stream_fill_buffer(stream_t *s);
-int cache_stream_seek_long(stream_t *s,off_t pos);
+int cache_stream_seek_long(stream_t *s,int64_t pos);
 #else
 // no cache, define wrappers:
 #define cache_stream_fill_buffer(x) stream_fill_buffer(x)

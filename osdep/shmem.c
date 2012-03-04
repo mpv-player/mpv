@@ -36,6 +36,7 @@
 #endif
 #include <sys/socket.h>
 #include <fcntl.h>
+#include <inttypes.h>
 
 #include "mp_msg.h"
 
@@ -56,16 +57,21 @@
 
 static int shmem_type=0;
 
-void* shmem_alloc(int size){
+void* shmem_alloc(int64_t size){
 void* p;
 static int devzero = -1;
+if (size > SIZE_MAX) {
+  mp_msg(MSGT_OSDEP, MSGL_FATAL,
+         "Shared memory allocation larger than system max. allocation size.\n");
+  return NULL;
+}
 while(1){
   switch(shmem_type){
   case 0:  // ========= MAP_ANON|MAP_SHARED ==========
 #ifdef MAP_ANON
     p=mmap(0,size,PROT_READ|PROT_WRITE,MAP_ANON|MAP_SHARED,-1,0);
     if(p==MAP_FAILED) break; // failed
-    mp_dbg(MSGT_OSDEP, MSGL_DBG2, "shmem: %d bytes allocated using mmap anon (%p)\n",size,p);
+    mp_dbg(MSGT_OSDEP, MSGL_DBG2, "shmem: %"PRId64" bytes allocated using mmap anon (%p)\n",size,p);
     return p;
 #else
 // system does not support MAP_ANON at all (e.g. solaris 2.5.1/2.6), just fail
@@ -76,7 +82,7 @@ while(1){
     if (devzero == -1 && (devzero = open("/dev/zero", O_RDWR, 0)) == -1) break;
     p=mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,devzero,0);
     if(p==MAP_FAILED) break; // failed
-    mp_dbg(MSGT_OSDEP, MSGL_DBG2, "shmem: %d bytes allocated using mmap /dev/zero (%p)\n",size,p);
+    mp_dbg(MSGT_OSDEP, MSGL_DBG2, "shmem: %"PRId64" bytes allocated using mmap /dev/zero (%p)\n",size,p);
     return p;
   case 2: { // ========= shmget() ==========
 #ifdef HAVE_SHM
@@ -93,7 +99,7 @@ while(1){
       if (shmdt(p) == -1) perror ("shmdt()");
       break;
     }
-    mp_dbg(MSGT_OSDEP, MSGL_DBG2, "shmem: %d bytes allocated using SHM (%p)\n",size,p);
+    mp_dbg(MSGT_OSDEP, MSGL_DBG2, "shmem: %"PRId64" bytes allocated using SHM (%p)\n",size,p);
     return p;
 #else
     mp_msg(MSGT_OSDEP, MSGL_FATAL, "shmem: no SHM support was compiled in!\n");
@@ -102,19 +108,19 @@ while(1){
     }
   default:
     mp_msg(MSGT_OSDEP, MSGL_FATAL,
-	"FATAL: Cannot allocate %d bytes of shared memory :(\n",size);
+	"FATAL: Cannot allocate %"PRId64" bytes of shared memory :(\n",size);
     return NULL;
   }
   ++shmem_type;
 }
 }
 
-void shmem_free(void* p,int size){
+void shmem_free(void* p,int64_t size){
   switch(shmem_type){
     case 0:
     case 1:
 	    if(munmap(p,size)) {
-		mp_msg(MSGT_OSDEP, MSGL_ERR, "munmap failed on %p %d bytes: %s\n",
+		mp_msg(MSGT_OSDEP, MSGL_ERR, "munmap failed on %p %"PRId64" bytes: %s\n",
 		    p,size,strerror(errno));
 	    }
       break;
