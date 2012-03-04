@@ -166,6 +166,7 @@ yasm_check() {
 }
 
 pkg_config_add() {
+  unset IFS  # shell should not be used for programming
   echo >> "$TMPLOG"
   echo "$_pkg_config --cflags $@" >> "$TMPLOG"
   ctmp=$($_pkg_config --cflags "$@" 2>> "$TMPLOG") || return $?
@@ -5802,9 +5803,7 @@ all_libav_libs="libavutil > 51.21.0:libavcodec > 53.34.0:libavformat > 53.20.0:l
 echocheck "Libav ($all_libav_libs)"
 if test "$ffmpeg" = auto ; then
   IFS=":"   # shell should not be used for programming
-  if pkg_config_add $all_libav_libs ; then
-    unset IFS
-  else
+  if ! pkg_config_add $all_libav_libs ; then
     die "Unable to find development files for some of the required Libav libraries above. Aborting."
   fi
 fi
