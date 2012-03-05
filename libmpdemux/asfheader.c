@@ -22,9 +22,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <libavutil/intreadwrite.h>
+#include <libavutil/common.h>
+
 #include "config.h"
-#include "libavutil/common.h"
-#include "ffmpeg_files/intreadwrite.h"
 #include "mp_msg.h"
 
 #include "stream/stream.h"

@@ -26,11 +26,12 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <libavutil/intreadwrite.h>
+#include <libavutil/common.h>
+
 #include "config.h"
 #include "mp_msg.h"
 #include "mpbswap.h"
-#include "libavutil/common.h"
-#include "ffmpeg_files/intreadwrite.h"
 
 #include "ad_internal.h"
 

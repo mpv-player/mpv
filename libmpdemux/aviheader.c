@@ -21,6 +21,9 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <libavutil/common.h>
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
 #include "mp_msg.h"
 
@@ -29,7 +32,6 @@
 #include "stheader.h"
 #include "aviprint.h"
 #include "aviheader.h"
-#include "libavutil/common.h"
 
 static MainAVIHeader avih;
 
@@ -232,7 +234,7 @@ while(1){
       s->bIndexSubType = stream_read_char(demuxer->stream);
       s->bIndexType = stream_read_char(demuxer->stream);
       s->nEntriesInUse = stream_read_dword_le(demuxer->stream);
-      *(uint32_t *)s->dwChunkId = stream_read_dword_le(demuxer->stream);
+      AV_WN32(s->dwChunkId, stream_read_dword_le(demuxer->stream));
       stream_read(demuxer->stream, (char *)s->dwReserved, 3*4);
       memset(s->dwReserved, 0, 3*4);
 

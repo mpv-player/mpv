@@ -35,6 +35,9 @@
 #include <time.h>
 #include <stdarg.h>
 
+#include <libavutil/avstring.h>
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
 #include "mp_msg.h"
 
@@ -47,8 +50,6 @@
 #include "parse_es.h"
 #include "stheader.h"
 #include "sub/sub_cc.h"
-#include "libavutil/avstring.h"
-#include "ffmpeg_files/intreadwrite.h"
 
 extern int sub_justify;
 

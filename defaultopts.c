@@ -57,7 +57,6 @@ void set_default_mplayer_options(struct MPOpts *opts)
 
         .lavc_param = {
             .workaround_bugs = 1, // autodetect
-            .error_resilience = 2,
             .error_concealment = 3,
         },
         .input = {

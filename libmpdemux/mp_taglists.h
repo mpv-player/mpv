@@ -21,12 +21,8 @@
 
 #include <libavcodec/avcodec.h>
 
-#include "ffmpeg_files/taglists.h"
-
-extern const struct mp_AVCodecTag * const mp_wav_taglists[];
-
-extern const struct mp_AVCodecTag * const mp_codecid_override_taglists[];
-
-extern const struct mp_AVCodecTag * const mp_bmp_taglists[];
+unsigned int mp_taglist_override(enum CodecID id);
+unsigned int mp_taglist_video(enum CodecID id);
+unsigned int mp_taglist_audio(enum CodecID id);
 
 #endif /* MPLAYER_MP_TAGLISTS_H */

@@ -38,8 +38,9 @@
 #include <unistd.h>
 #include <inttypes.h>
 
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
-#include "ffmpeg_files/intreadwrite.h"
 #include "mpbswap.h"
 #include "ad_internal.h"
 

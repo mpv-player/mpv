@@ -23,9 +23,11 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/ioctl.h>
+
+#include <libavutil/intreadwrite.h>
+
 #include "mp_msg.h"
 #include "stream.h"
-#include "ffmpeg_files/intreadwrite.h"
 //=================== VideoCD ==========================
 #if	defined(__linux__) || defined(sun) || defined(__bsdi__)
 

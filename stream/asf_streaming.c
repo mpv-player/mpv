@@ -23,6 +23,8 @@
 #include <errno.h>
 #include <limits.h>
 
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
 #include "mp_msg.h"
 #include "options.h"
@@ -40,8 +42,6 @@
 #include "asf_mmst_streaming.h"
 #include "network.h"
 #include "tcp.h"
-
-#include "ffmpeg_files/intreadwrite.h"
 
 #include "libmpdemux/asfguid.h"
 

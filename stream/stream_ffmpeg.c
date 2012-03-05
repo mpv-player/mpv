@@ -101,9 +101,9 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     int dummy;
 
     if (mode == STREAM_READ)
-        flags = URL_RDONLY;
+        flags = AVIO_FLAG_READ;
     else if (mode == STREAM_WRITE)
-        flags = URL_WRONLY;
+        flags = AVIO_FLAG_WRITE;
     else {
         mp_msg(MSGT_OPEN, MSGL_ERR, "[ffmpeg] Unknown open mode %d\n", mode);
         res = STREAM_UNSUPPORTED;

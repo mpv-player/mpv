@@ -21,9 +21,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
 #include "mp_msg.h"
-#include "ffmpeg_files/intreadwrite.h"
 #include "mpbswap.h"
 #include "vd_internal.h"
 

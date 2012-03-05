@@ -20,9 +20,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "libavutil/common.h"
-#include "ffmpeg_files/intreadwrite.h"
-#include "mpbswap.h"
+#include <libavutil/common.h>
+#include <libavutil/intreadwrite.h>
 
 #include "stream/stream.h"
 #include "demuxer.h"

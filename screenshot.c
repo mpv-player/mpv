@@ -84,20 +84,26 @@ static int write_png(screenshot_ctx *ctx, struct mp_image *image, FILE *fp)
     void *outbuffer = NULL;
     int success = 0;
 
-    AVCodecContext *avctx = avcodec_alloc_context();
+    struct AVCodec *png_codec = avcodec_find_encoder(CODEC_ID_PNG);
+    AVCodecContext *avctx = NULL;
+    if (!png_codec)
+        goto print_open_fail;
+    avctx = avcodec_alloc_context3(png_codec);
     if (!avctx)
-        goto error_exit;
+        goto print_open_fail;
 
-    if (avcodec_open(avctx, avcodec_find_encoder(CODEC_ID_PNG))) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Could not open libavcodec PNG encoder"
-               " for saving screenshot!\n");
-        goto error_exit;
-    }
-
+    avctx->time_base = AV_TIME_BASE_Q;
     avctx->width = image->width;
     avctx->height = image->height;
     avctx->pix_fmt = PIX_FMT_RGB24;
     avctx->compression_level = ctx->mpctx->opts.screenshot_png_compression;
+
+    if (avcodec_open2(avctx, png_codec, NULL) < 0) {
+     print_open_fail:
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Could not open libavcodec PNG encoder"
+               " for saving screenshot\n");
+        goto error_exit;
+    }
 
     size_t outbuffer_size = image->width * image->height * 3 * 2;
     outbuffer = malloc(outbuffer_size);
@@ -105,22 +111,22 @@ static int write_png(screenshot_ctx *ctx, struct mp_image *image, FILE *fp)
         goto error_exit;
 
     AVFrame pic;
-    pic.data[0] = image->planes[0];
-    pic.linesize[0] = image->stride[0];
+    avcodec_get_frame_defaults(&pic);
+    for (int n = 0; n < 4; n++) {
+        pic.data[n] = image->planes[n];
+        pic.linesize[n] = image->stride[n];
+    }
     int size = avcodec_encode_video(avctx, outbuffer, outbuffer_size, &pic);
     if (size < 1)
         goto error_exit;
 
     fwrite(outbuffer, size, 1, fp);
-    fflush(fp);
-
-    if (ferror(fp))
-        goto error_exit;
 
     success = 1;
 error_exit:
     if (avctx)
         avcodec_close(avctx);
+    av_free(avctx);
     free(outbuffer);
     return success;
 }

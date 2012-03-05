@@ -281,7 +281,7 @@ int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts)
 
 int vo_redraw_frame(struct vo *vo)
 {
-    if (!vo->config_ok)
+    if (!vo->config_ok || !vo->hasframe)
         return -1;
     if (vo_control(vo, VOCTRL_REDRAW_FRAME, NULL) == true) {
         vo->redrawing = true;
@@ -354,6 +354,7 @@ void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration)
         vo->driver->flip_page_timed(vo, pts_us, duration);
     else
         vo->driver->flip_page(vo);
+    vo->hasframe = true;
 }
 
 void vo_check_events(struct vo *vo)
@@ -496,6 +497,7 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
     vo->frame_loaded = false;
     vo->waiting_mpi = NULL;
     vo->redrawing = false;
+    vo->hasframe = false;
     return ret;
 }
 

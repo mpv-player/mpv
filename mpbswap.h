@@ -19,12 +19,14 @@
 #ifndef MPLAYER_MPBSWAP_H
 #define MPLAYER_MPBSWAP_H
 
-#include <sys/types.h>
-#include "config.h"
-#include "ffmpeg_files/bswap.h"
+#include <libavutil/bswap.h>
 
-#ifndef HAVE_SWAB
-void swab(const void *from, void *to, ssize_t n);
-#endif
+#define bswap_16(x) av_bswap16(x)
+#define bswap_32(x) av_bswap32(x)
+#define be2me_16(x) av_be2ne16(x)
+#define be2me_32(x) av_be2ne32(x)
+#define le2me_16(x) av_le2ne16(x)
+#define le2me_32(x) av_le2ne32(x)
+#define le2me_64(x) av_le2ne64(x)
 
 #endif /* MPLAYER_MPBSWAP_H */

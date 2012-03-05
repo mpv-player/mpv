@@ -28,9 +28,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <libavutil/common.h>
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
-#include "libavutil/common.h"
-#include "ffmpeg_files/intreadwrite.h"
 #include "mpbswap.h"
 #include "ad_internal.h"
 

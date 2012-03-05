@@ -24,9 +24,11 @@
 #include <sys/types.h>
 #include <inttypes.h>
 #include <unistd.h>
-#include "ffmpeg_files/intreadwrite.h"
 #include <sys/cdio.h>
 #include <sys/ioctl.h>
+
+#include <libavutil/intreadwrite.h>
+
 #if defined(__NetBSD__) || defined(__OpenBSD__)
 #define VCD_NETBSD 1
 #endif

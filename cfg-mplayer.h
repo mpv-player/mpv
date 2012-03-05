@@ -86,7 +86,7 @@ extern int audio_substream_id;
 extern off_t ps_probe;
 
 extern int sws_flags;
-extern char* pp_help;
+extern const char pp_help[];
 
 #ifdef CONFIG_RADIO
 const m_option_t radioopts_conf[]={
@@ -599,7 +599,9 @@ const m_option_t common_opts[] = {
 
     // postprocessing:
     {"pp", &divx_quality, CONF_TYPE_INT, 0, 0, 0, NULL},
+#ifdef CONFIG_LIBPOSTPROC
     {"pphelp", &pp_help, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+#endif
 
     // scaling:
     {"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},

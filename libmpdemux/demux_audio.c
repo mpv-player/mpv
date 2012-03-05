@@ -16,21 +16,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
 #include "options.h"
 #include "mp_msg.h"
 
-#include <stdlib.h>
-#include <stdio.h>
 #include "stream/stream.h"
 #include "aviprint.h"
 #include "demuxer.h"
 #include "stheader.h"
 #include "genres.h"
 #include "mp3_hdr.h"
-#include "ffmpeg_files/intreadwrite.h"
-
-#include <string.h>
 
 #define MP3 1
 #define WAV 2

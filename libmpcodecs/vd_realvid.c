@@ -19,6 +19,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
 
 #ifdef HAVE_LIBDL
@@ -26,7 +28,6 @@
 #endif
 
 #include "mp_msg.h"
-#include "ffmpeg_files/intreadwrite.h"
 #include "path.h"
 
 #include "vd_internal.h"

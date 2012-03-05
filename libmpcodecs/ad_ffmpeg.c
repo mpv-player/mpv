@@ -23,6 +23,7 @@
 #include <assert.h>
 
 #include <libavcodec/avcodec.h>
+#include <libavutil/opt.h>
 
 #include "talloc.h"
 
@@ -67,10 +68,10 @@ static int setup_format(sh_audio_t *sh_audio,
 {
     int sample_format = sh_audio->sample_format;
     switch (lavc_context->sample_fmt) {
-    case SAMPLE_FMT_U8:  sample_format = AF_FORMAT_U8;       break;
-    case SAMPLE_FMT_S16: sample_format = AF_FORMAT_S16_NE;   break;
-    case SAMPLE_FMT_S32: sample_format = AF_FORMAT_S32_NE;   break;
-    case SAMPLE_FMT_FLT: sample_format = AF_FORMAT_FLOAT_NE; break;
+    case AV_SAMPLE_FMT_U8:  sample_format = AF_FORMAT_U8;       break;
+    case AV_SAMPLE_FMT_S16: sample_format = AF_FORMAT_S16_NE;   break;
+    case AV_SAMPLE_FMT_S32: sample_format = AF_FORMAT_S32_NE;   break;
+    case AV_SAMPLE_FMT_FLT: sample_format = AF_FORMAT_FLOAT_NE; break;
     default:
         mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Unsupported sample format\n");
     }
@@ -119,10 +120,12 @@ static int init(sh_audio_t *sh_audio)
 
     struct priv *ctx = talloc_zero(NULL, struct priv);
     sh_audio->context = ctx;
-    lavc_context = avcodec_alloc_context();
+    lavc_context = avcodec_alloc_context3(lavc_codec);
     ctx->avctx = lavc_context;
 
-    lavc_context->drc_scale = opts->drc_level;
+    // Always try to set - option only exists for AC3 at the moment
+    av_opt_set_double(lavc_context, "drc_scale", opts->drc_level,
+                      AV_OPT_SEARCH_CHILDREN);
     lavc_context->sample_rate = sh_audio->samplerate;
     lavc_context->bit_rate = sh_audio->i_bps * 8;
     if (sh_audio->wf) {
@@ -156,7 +159,7 @@ static int init(sh_audio_t *sh_audio)
     }
 
     /* open it */
-    if (avcodec_open(lavc_context, lavc_codec) < 0) {
+    if (avcodec_open2(lavc_context, lavc_codec, NULL) < 0) {
         mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Could not open codec.\n");
         uninit(sh_audio);
         return 0;
@@ -195,10 +198,10 @@ static int init(sh_audio_t *sh_audio)
         sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
 
     switch (lavc_context->sample_fmt) {
-    case SAMPLE_FMT_U8:
-    case SAMPLE_FMT_S16:
-    case SAMPLE_FMT_S32:
-    case SAMPLE_FMT_FLT:
+    case AV_SAMPLE_FMT_U8:
+    case AV_SAMPLE_FMT_S16:
+    case AV_SAMPLE_FMT_S32:
+    case AV_SAMPLE_FMT_FLT:
         break;
     default:
         uninit(sh_audio);
@@ -215,7 +218,7 @@ static void uninit(sh_audio_t *sh)
     AVCodecContext *lavc_context = ctx->avctx;
 
     if (lavc_context) {
-        if (lavc_context->codec && avcodec_close(lavc_context) < 0)
+        if (avcodec_close(lavc_context) < 0)
             mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not close codec.\n");
         av_freep(&lavc_context->extradata);
         av_freep(&lavc_context);

@@ -27,9 +27,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "config.h"
-#include "mp_msg.h"
-
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -37,12 +34,17 @@
 #include <unistd.h>
 #include <string.h>
 #include <math.h>
+
+#include <libavutil/avutil.h>
+#include <libavutil/intreadwrite.h>
+#include <libswscale/swscale.h>
+
+#include "config.h"
+#include "mp_msg.h"
+
 #include "libvo/video_out.h"
 #include "spudec.h"
 #include "vobsub.h"
-#include "libavutil/avutil.h"
-#include "ffmpeg_files/intreadwrite.h"
-#include "libswscale/swscale.h"
 #include "mpcommon.h"
 
 /* Valid values for spu_aamode:

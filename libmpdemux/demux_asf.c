@@ -24,6 +24,8 @@
 #include <unistd.h>
 #include <limits.h>
 
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
 #include "mp_msg.h"
 
@@ -33,7 +35,6 @@
 #include "demuxer.h"
 #include "libmpcodecs/dec_audio.h"
 #include "libvo/fastmemcpy.h"
-#include "ffmpeg_files/intreadwrite.h"
 
 // based on asf file-format doc by Eugene [http://divx.euro.ru]
 

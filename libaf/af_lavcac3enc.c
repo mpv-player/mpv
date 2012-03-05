@@ -26,12 +26,13 @@
 #include <inttypes.h>
 #include <assert.h>
 
+#include <libavcodec/avcodec.h>
+#include <libavutil/intreadwrite.h>
+
 #include "config.h"
 #include "af.h"
 #include "reorder_ch.h"
 
-#include "libavcodec/avcodec.h"
-#include "ffmpeg_files/intreadwrite.h"
 
 #define AC3_MAX_CHANNELS 6
 #define AC3_MAX_CODED_FRAME_SIZE 3840
@@ -98,15 +99,14 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
                 s->lavc_actx->sample_rate != af->data->rate ||
                 s->lavc_actx->bit_rate != bit_rate) {
 
-            if (s->lavc_actx->codec)
-                avcodec_close(s->lavc_actx);
+            avcodec_close(s->lavc_actx);
 
             // Put sample parameters
             s->lavc_actx->channels = af->data->nch;
             s->lavc_actx->sample_rate = af->data->rate;
             s->lavc_actx->bit_rate = bit_rate;
 
-            if(avcodec_open(s->lavc_actx, s->lavc_acodec) < 0) {
+            if (avcodec_open2(s->lavc_actx, s->lavc_acodec, NULL) < 0) {
                 mp_tmsg(MSGT_AFILTER, MSGL_ERR, "Couldn't open codec %s, br=%d.\n", "ac3", bit_rate);
                 return AF_ERROR;
             }
@@ -160,9 +160,8 @@ static void uninit(struct af_instance_s* af)
         af_ac3enc_t *s = af->setup;
         af->setup = NULL;
         if(s->lavc_actx) {
-            if (s->lavc_actx->codec)
-                avcodec_close(s->lavc_actx);
-            free(s->lavc_actx);
+            avcodec_close(s->lavc_actx);
+            av_free(s->lavc_actx);
         }
         free(s->pending_data);
         free(s);
@@ -291,23 +290,22 @@ static int af_open(af_instance_t* af){
         return AF_ERROR;
     }
 
-    s->lavc_actx = avcodec_alloc_context();
+    s->lavc_actx = avcodec_alloc_context3(s->lavc_acodec);
     if (!s->lavc_actx) {
         mp_tmsg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, couldn't allocate context!\n");
         return AF_ERROR;
     }
-    // using deprecated SampleFormat/FMT, AV* versions only added in 2010-11
-    const enum SampleFormat *fmts = s->lavc_acodec->sample_fmts;
+    const enum AVSampleFormat *fmts = s->lavc_acodec->sample_fmts;
     for (int i = 0; ; i++) {
-        if (fmts[i] == SAMPLE_FMT_NONE) {
+        if (fmts[i] == AV_SAMPLE_FMT_NONE) {
             mp_msg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, encoder doesn't "
                    "support expected sample formats!\n");
             return AF_ERROR;
-        } else if (fmts[i] == SAMPLE_FMT_S16) {
+        } else if (fmts[i] == AV_SAMPLE_FMT_S16) {
             s->in_sampleformat = AF_FORMAT_S16_NE;
             s->lavc_actx->sample_fmt = fmts[i];
             break;
-        } else if (fmts[i] == SAMPLE_FMT_FLT) {
+        } else if (fmts[i] == AV_SAMPLE_FMT_FLT) {
             s->in_sampleformat = AF_FORMAT_FLOAT_NE;
             s->lavc_actx->sample_fmt = fmts[i];
             break;

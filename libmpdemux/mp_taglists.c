@@ -16,16 +16,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <libavformat/avformat.h>
+
 #include "config.h"
-
-#include "libavformat/avformat.h"
-#include <libavcodec/avcodec.h>
-
 #include "mp_taglists.h"
 
-#include "ffmpeg_files/taglists.c"
+struct tag {
+    enum CodecID id;
+    unsigned int tag;
+};
 
-static const struct mp_AVCodecTag mp_wav_tags[] = {
+static const struct tag mp_wav_tags[] = {
     { CODEC_ID_ADPCM_4XM,         MKTAG('4', 'X', 'M', 'A')},
     { CODEC_ID_ADPCM_ADX,         MKTAG('S', 'a', 'd', 'x')},
     { CODEC_ID_ADPCM_EA,          MKTAG('A', 'D', 'E', 'A')},
@@ -60,9 +61,7 @@ static const struct mp_AVCodecTag mp_wav_tags[] = {
     { 0, 0 },
 };
 
-const struct mp_AVCodecTag * const mp_wav_taglists[] = {mp_ff_codec_wav_tags, mp_wav_tags, 0};
-
-static const struct mp_AVCodecTag mp_codecid_override_tags[] = {
+static const struct tag mp_codecid_override_tags[] = {
     { CODEC_ID_AAC,               MKTAG('M', 'P', '4', 'A')},
     { CODEC_ID_AAC_LATM,          MKTAG('M', 'P', '4', 'L')},
     { CODEC_ID_AC3,               0x2000},
@@ -89,9 +88,7 @@ static const struct mp_AVCodecTag mp_codecid_override_tags[] = {
     { 0, 0 },
 };
 
-const struct mp_AVCodecTag * const mp_codecid_override_taglists[] = {mp_codecid_override_tags, 0};
-
-static const struct mp_AVCodecTag mp_bmp_tags[] = {
+static const struct tag mp_bmp_tags[] = {
     { CODEC_ID_AMV,               MKTAG('A', 'M', 'V', 'V')},
     { CODEC_ID_ANM,               MKTAG('A', 'N', 'M', ' ')},
     { CODEC_ID_AVS,               MKTAG('A', 'V', 'S', ' ')},
@@ -127,4 +124,35 @@ static const struct mp_AVCodecTag mp_bmp_tags[] = {
     { 0, 0 },
 };
 
-const struct mp_AVCodecTag * const mp_bmp_taglists[] = {mp_ff_codec_bmp_tags, mp_bmp_tags, 0};
+static unsigned int codec_get_tag(const struct tag *tags, enum CodecID id)
+{
+    while (tags->id != CODEC_ID_NONE) {
+        if (tags->id == id)
+            return tags->tag;
+        tags++;
+    }
+    return 0;
+}
+
+unsigned int mp_taglist_override(enum CodecID id)
+{
+    return codec_get_tag(mp_codecid_override_tags, id);
+}
+
+unsigned int mp_taglist_video(enum CodecID id)
+{
+    const struct AVCodecTag *tags[] = {avformat_get_riff_video_tags(), NULL };
+    unsigned int tag = av_codec_get_tag(tags, id);
+    if (tag)
+        return tag;
+    return codec_get_tag(mp_bmp_tags, id);
+}
+
+unsigned int mp_taglist_audio(enum CodecID id)
+{
+    const struct AVCodecTag *tags[] = {avformat_get_riff_audio_tags(), NULL };
+    unsigned int tag = av_codec_get_tag(tags, id);
+    if (tag)
+        return tag;
+    return codec_get_tag(mp_wav_tags, id);
+}
