@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#define RTSPCLIENT_SYNCHRONOUS_INTERFACE 1
+
 extern "C" {
 // on MinGW, we must include windows.h before the things it conflicts
 #ifdef __MINGW32__    // with.  they are each protected from
