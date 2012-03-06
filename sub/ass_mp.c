@@ -248,8 +248,7 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts, int w, int h,
     int hinting;
     ass_set_frame_size(priv, w, h);
     ass_set_margins(priv, opts->ass_top_margin, opts->ass_bottom_margin, 0, 0);
-    ass_set_use_margins(priv, opts->ass_use_margins);
-    ass_set_font_scale(priv, opts->ass_font_scale);
+    mp_ass_reload_options(priv, opts);
     if (!unscaled && (opts->ass_hinting & 4))
         hinting = 0;
     else
