@@ -68,7 +68,8 @@ struct mp_csp_params {
     float rgamma;
     float ggamma;
     float bgamma;
-    int input_shift;
+    int texture_bits;
+    int input_bits;
 };
 
 enum mp_csp_equalizer_param {

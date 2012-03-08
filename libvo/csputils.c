@@ -143,10 +143,13 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
     int levels_in = params->colorspace.levels_in;
     if (levels_in <= MP_CSP_LEVELS_AUTO || levels_in >= MP_CSP_LEVELS_COUNT)
         levels_in = MP_CSP_LEVELS_TV;
+    assert(params->input_bits >= 8);
+    assert(params->texture_bits >= params->input_bits);
+    double s = (1 << params->input_bits-8) / ((1<<params->texture_bits)-1.);
     // The values below are written in 0-255 scale
     struct yuvlevels { double ymin, ymax, cmin, cmid; }
-        yuvlim =  { 16, 235, 16, 128 },
-        yuvfull = {  0, 255,  1, 128 },  // '1' to make it symmetric around 128
+        yuvlim =  { 16*s, 235*s, 16*s, 128*s },
+        yuvfull = {  0*s, 255*s,  1*s, 128*s },  // '1' for symmetry around 128
         yuvlev;
     switch (levels_in) {
     case MP_CSP_LEVELS_TV: yuvlev = yuvlim; break;
@@ -159,8 +162,8 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
     if (levels_out <= MP_CSP_LEVELS_AUTO || levels_out >= MP_CSP_LEVELS_COUNT)
         levels_out = MP_CSP_LEVELS_PC;
     struct rgblevels { double min, max; }
-        rgblim =  { 16, 235 },
-        rgbfull = {  0, 255 },
+        rgblim =  { 16/255., 235/255. },
+        rgbfull = {      0,        1  },
         rgblev;
     switch (levels_out) {
     case MP_CSP_LEVELS_TV: rgblev = rgblim; break;
@@ -176,8 +179,8 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
         m[i][COL_U] *= cmul;
         m[i][COL_V] *= cmul;
         // Set COL_C so that Y=umin,UV=cmid maps to RGB=min (black to black)
-        m[i][COL_C] = (rgblev.min - m[i][COL_Y] * yuvlev.ymin
-                       -(m[i][COL_U] + m[i][COL_V]) * yuvlev.cmid) / 255;
+        m[i][COL_C] = rgblev.min - m[i][COL_Y] * yuvlev.ymin
+                      -(m[i][COL_U] + m[i][COL_V]) * yuvlev.cmid;
     }
 
     // Brightness adds a constant to output R,G,B.
@@ -185,15 +188,8 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
     for (int i = 0; i < 3; i++) {
         m[i][COL_C] += params->brightness;
         m[i][COL_Y] *= params->contrast;
-        m[i][COL_C] += (rgblev.max-rgblev.min)/255 * (1 - params->contrast)/2;
+        m[i][COL_C] += (rgblev.max-rgblev.min) * (1 - params->contrast)/2;
     }
-
-    float depth_multiplier = params->input_shift >= 0 ?
-                             (1 << params->input_shift) :
-                             (1.0 / (1 << -params->input_shift));
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            m[i][j] *= depth_multiplier;
 }
 
 //! size of gamma map use to avoid slow exp function in gen_yuv2rgb_map

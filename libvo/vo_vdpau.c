@@ -599,7 +599,8 @@ static void update_csc_matrix(struct vo *vo)
     // both are float[3][4]
     VdpCSCMatrix matrix;
 
-    struct mp_csp_params cparams = { .colorspace = vc->colorspace };
+    struct mp_csp_params cparams = {
+        .colorspace = vc->colorspace, .input_bits = 8, .texture_bits = 8 };
     mp_csp_copy_equalizer_values(&cparams, &vc->video_eq);
     mp_get_yuv2rgb_coeffs(&cparams, matrix);
 

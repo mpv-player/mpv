@@ -220,7 +220,8 @@ static void update_yuvconv(struct vo *vo)
     mp_get_chroma_shift(p->image_format, &xs, &ys, &depth);
     params.chrom_texw = params.texw >> xs;
     params.chrom_texh = params.texh >> ys;
-    params.csp_params.input_shift = -depth & 7;
+    params.csp_params.input_bits = depth;
+    params.csp_params.texture_bits = depth+7 & ~7;
     glSetupYUVConversion(gl, &params);
     if (p->custom_prog) {
         FILE *f = fopen(p->custom_prog, "rb");
