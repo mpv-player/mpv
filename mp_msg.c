@@ -38,7 +38,7 @@
 #include "mp_msg.h"
 
 /* maximum message length of mp_msg */
-#define MSGSIZE_MAX 3072
+#define MSGSIZE_MAX 6144
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
