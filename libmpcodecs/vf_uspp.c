@@ -200,6 +200,8 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
 
     for(j=0; j<3; j++){
         int is_chroma= !!j;
+        if (!dst[j])
+            continue; // HACK avoid crash for Y8 colourspace
         store_slice_c(dst[j], p->temp[j], dst_stride[j], p->temp_stride[j], width>>is_chroma, height>>is_chroma, 8-p->log2_count);
     }
 }
