@@ -28,9 +28,11 @@
 #ifdef OPENAL_AL_H
 #include <OpenAL/alc.h>
 #include <OpenAL/al.h>
+#include <OpenAL/alext.h>
 #else
 #include <AL/alc.h>
 #include <AL/al.h>
+#include <AL/alext.h>
 #endif
 
 #include "mp_msg.h"
@@ -86,9 +88,25 @@ static int control(int cmd, void *arg) {
 static void print_help(void) {
   mp_msg(MSGT_AO, MSGL_FATAL,
           "\n-ao openal commandline help:\n"
-          "Example: mplayer -ao openal\n"
+          "Example: mplayer -ao openal:device=subdevice\n"
           "\nOptions:\n"
+	  "   device=subdevice\n"
+	  "      Audio device OpenAL should use. Devices can be listed\n"
+	  "      with -ao openal:device=help\n"
         );
+}
+
+static void list_devices(void) {
+  if (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") != AL_TRUE) {
+    mp_msg(MSGT_AO, MSGL_FATAL, "Device listing not supported.\n");
+    return;
+  }
+  const char *list = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+  mp_msg(MSGT_AO, MSGL_FATAL, "OpenAL devices:\n");
+  while (list && *list) {
+    mp_msg(MSGT_AO, MSGL_FATAL, "  '%s'\n", list);
+    list = list + strlen(list) + 1;
+  }
 }
 
 static int init(int rate, int channels, int format, int flags) {
@@ -105,7 +123,9 @@ static int init(int rate, int channels, int format, int flags) {
   ALCint freq = 0;
   ALCint attribs[] = {ALC_FREQUENCY, rate, 0, 0};
   int i;
+  char *device = NULL;
   const opt_t subopts[] = {
+    {"device", OPT_ARG_MSTRZ, &device, NULL},
     {NULL}
   };
   global_ao->no_persistent_volume = true;
@@ -113,11 +133,15 @@ static int init(int rate, int channels, int format, int flags) {
     print_help();
     return 0;
   }
+  if (strcmp(device, "help") == 0) {
+    list_devices();
+    goto err_out;
+  }
   if (channels > MAX_CHANS) {
     mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] Invalid number of channels: %i\n", channels);
     goto err_out;
   }
-  dev = alcOpenDevice(NULL);
+  dev = alcOpenDevice(device);
   if (!dev) {
     mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] could not open device\n");
     goto err_out;
@@ -146,9 +170,11 @@ static int init(int rate, int channels, int format, int flags) {
   ao_data.buffersize = CHUNK_SIZE * NUM_BUF;
   ao_data.outburst = channels * CHUNK_SIZE;
   tmpbuf = malloc(CHUNK_SIZE);
+  free(device);
   return 1;
 
 err_out:
+  free(device);
   return 0;
 }
 
