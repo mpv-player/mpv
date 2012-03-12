@@ -124,6 +124,7 @@ static int min_free_space = 0;            ///if the free space is below this val
 static int underrun_check = 0;            ///0 or last reported free space (underrun detection)
 static int device_num = 0;                ///wanted device number
 static GUID device;                       ///guid of the device
+static int audio_volume;
 
 /***************************************************************************************/
 
@@ -394,16 +395,16 @@ static int control(int cmd, void *arg)
 	switch (cmd) {
 		case AOCONTROL_GET_VOLUME: {
 			ao_control_vol_t* vol = (ao_control_vol_t*)arg;
-			IDirectSoundBuffer_GetVolume(hdsbuf, &volume);
-			vol->left = vol->right = pow(10.0, (float)(volume+10000) / 5000.0);
-			//printf("ao_dsound: volume: %f\n",vol->left);
+			vol->left = vol->right = audio_volume;
 			return CONTROL_OK;
 		}
 		case AOCONTROL_SET_VOLUME: {
 			ao_control_vol_t* vol = (ao_control_vol_t*)arg;
-			volume = (DWORD)(log10(vol->right) * 5000.0) - 10000;
+			volume = audio_volume = vol->right;
+			if (volume < 1)
+				volume = 1;
+			volume = (DWORD)(log10(volume) * 5000.0) - 10000;
 			IDirectSoundBuffer_SetVolume(hdsbuf, volume);
-			//printf("ao_dsound: volume: %f\n",vol->left);
 			return CONTROL_OK;
 		}
 	}
@@ -424,6 +425,7 @@ static int init(int rate, int channels, int format, int flags)
 	if (!InitDirectSound()) return 0;
 
         global_ao->no_persistent_volume = true;
+	audio_volume = 100;
 
 	// ok, now create the buffers
 	WAVEFORMATEXTENSIBLE wformat;
