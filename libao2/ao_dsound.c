@@ -121,6 +121,7 @@ static int min_free_space = 0;            ///if the free space is below this val
                                           ///there will always be at least this amout of free space to prevent
                                           ///get_space() from returning wrong values when buffer is 100% full.
                                           ///will be replaced with nBlockAlign in init()
+static int underrun_check = 0;            ///0 or last reported free space (underrun detection)
 static int device_num = 0;                ///wanted device number
 static GUID device;                       ///guid of the device
 
@@ -313,6 +314,8 @@ static int write_buffer(unsigned char *data, int len)
   DWORD dwBytes1;
   LPVOID lpvPtr2;
   DWORD dwBytes2;
+
+  underrun_check = 0;
 
   // Lock the buffer
   res = IDirectSoundBuffer_Lock(hdsbuf,write_offset, len, &lpvPtr1, &dwBytes1, &lpvPtr2, &dwBytes2, 0);
@@ -544,6 +547,7 @@ static void reset(void)
 	// reset directsound buffer
 	IDirectSoundBuffer_SetCurrentPosition(hdsbuf, 0);
 	write_offset=0;
+	underrun_check=0;
 }
 
 /**
@@ -568,22 +572,16 @@ static void audio_resume(void)
 */
 static void uninit(int immed)
 {
-	if(immed)reset();
-	else{
-		DWORD status;
-		IDirectSoundBuffer_Play(hdsbuf, 0, 0, 0);
-		while(!IDirectSoundBuffer_GetStatus(hdsbuf,&status) && (status&DSBSTATUS_PLAYING))
-			usec_sleep(20000);
-	}
+	if (!immed)
+		usec_sleep(get_delay() * 1000000);
+	reset();
+
 	DestroyBuffer();
 	UninitDirectSound();
 }
 
-/**
-\brief find out how many bytes can be written into the audio buffer without
-\return free space in bytes, has to return 0 if the buffer is almost full
-*/
-static int get_space(void)
+// return exact number of free (safe to write) bytes
+static int check_free_buffer_size(void)
 {
 	int space;
 	DWORD play_offset;
@@ -595,6 +593,28 @@ static int get_space(void)
 	// write_cursor is the position after which it is assumed to be save to write data
 	// write_offset is the postion where we actually write the data to
 	if(space > buffer_size)space -= buffer_size; // write_offset < play_offset
+	// Check for buffer underruns. An underrun happens if DirectSound
+	// started to play old data beyond the current write_offset. Detect this
+	// by checking whether the free space shrinks, even though no data was
+	// written (i.e. no write_buffer). Doesn't always work, but the only
+	// reason we need this is to deal with the situation when playback ends,
+	// and the buffer is only half-filled.
+	if (space < underrun_check) {
+		// there's no useful data in the buffers
+		space = buffer_size;
+		reset();
+	}
+	underrun_check = space;
+	return space;
+}
+
+/**
+\brief find out how many bytes can be written into the audio buffer without
+\return free space in bytes, has to return 0 if the buffer is almost full
+*/
+static int get_space(void)
+{
+	int space = check_free_buffer_size();
 	if(space < min_free_space)return 0;
 	return space-min_free_space;
 }
@@ -608,13 +628,7 @@ static int get_space(void)
 */
 static int play(void* data, int len, int flags)
 {
-	DWORD play_offset;
-	int space;
-
-	// make sure we have enough space to write data
-	IDirectSoundBuffer_GetCurrentPosition(hdsbuf,&play_offset,NULL);
-	space=buffer_size-(write_offset-play_offset);
-	if(space > buffer_size)space -= buffer_size; // write_offset < play_offset
+	int space = check_free_buffer_size();
 	if(space < len) len = space;
 
 	if (!(flags & AOPLAY_FINAL_CHUNK))
@@ -628,10 +642,6 @@ static int play(void* data, int len, int flags)
 */
 static float get_delay(void)
 {
-	DWORD play_offset;
-	int space;
-	IDirectSoundBuffer_GetCurrentPosition(hdsbuf,&play_offset,NULL);
-	space=play_offset-write_offset;
-	if(space <= 0)space += buffer_size;
+	int space = check_free_buffer_size();
 	return (float)(buffer_size - space) / (float)ao_data.bps;
 }
