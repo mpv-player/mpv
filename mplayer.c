@@ -79,7 +79,6 @@
 #include "sub/av_sub.h"
 #include "libmpcodecs/dec_teletext.h"
 #include "cpudetect.h"
-#include "version.h"
 
 #ifdef CONFIG_X11
 #include "libvo/x11_common.h"
@@ -3899,9 +3898,10 @@ static int select_audio(demuxer_t *demuxer, int audio_id, char **audio_lang)
     return demuxer->audio->id;
 }
 
-static void print_version(const char *name)
+static void print_version(void)
 {
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, MP_TITLE, name);
+    mp_msg(MSGT_CPLAYER, MSGL_INFO,
+           "%s (C) 2000-2012 MPlayer & mplayer2 teams\n", mplayer_version);
 
     /* Test for CPU capabilities (and corresponding OS support) for optimizing */
     GetCpuCaps(&gCpuCaps);
@@ -4031,7 +4031,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    print_version("MPlayer2");
+    print_version();
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
     {

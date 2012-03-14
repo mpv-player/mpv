@@ -18,4 +18,4 @@
 
 #include "version.h"
 
-const char *mplayer_version  = "MPlayer " VERSION;
+const char *mplayer_version  = "mplayer2 " VERSION;
