@@ -2504,7 +2504,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
     return decode_audio(sh_audio, &ao->buffer, playsize);
 }
 
-static int fill_audio_out_buffers(struct MPContext *mpctx)
+static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 {
     struct MPOpts *opts = &mpctx->opts;
     struct ao *ao = mpctx->ao;
@@ -2566,8 +2566,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     t = GetTimer() - t;
     tt = t * 0.000001f;
     audio_time_usage += tt;
-    if (mpctx->timeline && modifiable_audio_format) {
-        double endpts = mpctx->timeline[mpctx->timeline_part + 1].start;
+    if (endpts != MP_NOPTS_VALUE && modifiable_audio_format) {
         double bytes = (endpts - written_audio_pts(mpctx) + audio_delay)
                        * ao->bps / opts->playback_speed;
         if (playsize > bytes) {
@@ -2607,65 +2606,6 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
     }
 
     return -partial_fill;
-}
-
-static int sleep_until_near_frame(struct MPContext *mpctx, float *time_frame,
-                                  bool sync_to_audio, float *aq_sleep_time)
-{
-    struct MPOpts *opts = &mpctx->opts;
-    double audio_limit = 2;
-    current_module = "calc_sleep_time";
-
-    if (mpctx->restart_playback)
-        return 0;
-
-    *time_frame -= get_relative_time(mpctx); // reset timer
-
-    if (sync_to_audio) {
-        float delay = ao_get_delay(mpctx->ao);
-        mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "delay=%f\n", delay);
-
-        if (opts->autosync) {
-            /*
-             * Adjust this raw delay value by calculating the expected
-             * delay for this frame and generating a new value which is
-             * weighted between the two.  The higher autosync is, the
-             * closer to the delay value gets to that which "-nosound"
-             * would have used, and the longer it will take for A/V
-             * sync to settle at the right value (but it eventually will.)
-             * This settling time is very short for values below 100.
-             */
-            float predicted = mpctx->delay / opts->playback_speed + *time_frame;
-            float difference = delay - predicted;
-            delay = predicted + difference / (float)opts->autosync;
-        }
-
-        *time_frame = delay - mpctx->delay / opts->playback_speed;
-
-        // delay = amount of audio buffered in soundcard/driver
-        delay = FFMIN(delay, 0.5);
-        delay = FFMAX(delay, 0.1);
-        audio_limit = delay;
-    } else {
-        // If we're lagging more than 200 ms behind the right playback rate,
-        // don't try to "catch up".
-        // If benchmark is set always output frames as fast as possible
-        // without sleeping.
-        if (*time_frame < -0.2 || opts->benchmark)
-            *time_frame = 0;
-    }
-
-    double t = *time_frame - mpctx->video_out->flip_queue_offset;
-
-    if (t <= 0.05)
-        return 0;
-
-    t -= 0.05;
-    if (t > audio_limit * 0.6)
-        t = audio_limit * 0.5;
-    *aq_sleep_time += t;
-    mp_input_get_cmd(mpctx->input, t * 1000 + 1, 1);
-    return 1;
 }
 
 int reinit_video_chain(struct MPContext *mpctx)
@@ -3087,31 +3027,6 @@ void add_step_frame(struct MPContext *mpctx)
     unpause_player(mpctx);
 }
 
-static void pause_loop(struct MPContext *mpctx)
-{
-    mp_cmd_t *cmd;
-
-    update_pause_message(mpctx);
-
-    while ((cmd = mp_input_get_cmd(mpctx->input, 20, 1)) == NULL
-           || cmd->id == MP_CMD_SET_MOUSE_POS || cmd->pausing == 4) {
-        if (cmd) {
-            cmd = mp_input_get_cmd(mpctx->input, 0, 0);
-            run_command(mpctx, cmd);
-            mp_cmd_free(cmd);
-            continue;
-        }
-        if (mpctx->sh_video && mpctx->video_out)
-            vo_check_events(mpctx->video_out);
-        update_osd_msg(mpctx);
-        int hack = vo_osd_changed(0);
-        vo_osd_changed(hack);
-        if (hack || mpctx->sh_video && mpctx->video_out->want_redraw)
-            break;
-        update_pause_message(mpctx);
-    }
-}
-
 static void reinit_decoders(struct MPContext *mpctx)
 {
     reinit_video_chain(mpctx);
@@ -3131,7 +3046,6 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
         mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
         mpctx->delay = 0;
         mpctx->time_frame = 0;
-        mpctx->restart_playback = true;
         // Not all demuxers set d_video->pts during seek, so this value
         // (which is used by at least vobsub code below) may be completely
         // wrong (probably 0).
@@ -3159,6 +3073,7 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
         vobsub_seek(vo_vobsub, mpctx->sh_video->pts);
     }
 
+    mpctx->restart_playback = true;
     mpctx->hrseek_active = false;
     mpctx->hrseek_framedrop = false;
     mpctx->total_avsync_change = 0;
@@ -3489,8 +3404,20 @@ int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts)
 static void run_playloop(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
-    float aq_sleep_time = 0;
     bool full_audio_buffers = false;
+    bool audio_left = false, video_left = false;
+    double endpts = end_at.type == END_AT_TIME ? end_at.pos : MP_NOPTS_VALUE;
+    bool end_is_chapter = false;
+    double sleeptime = 0.5;
+    bool was_restart = mpctx->restart_playback;
+
+    if (mpctx->timeline) {
+        double end = mpctx->timeline[mpctx->timeline_part + 1].start;
+        if (endpts == MP_NOPTS_VALUE || end < endpts) {
+            endpts = end;
+            end_is_chapter = true;
+        }
+    }
 
     if (opts->chapterrange[1] > 0) {
         int cur_chapter = get_current_chapter(mpctx);
@@ -3504,79 +3431,27 @@ static void run_playloop(struct MPContext *mpctx)
         reinit_audio_chain(mpctx);
     }
 
-    /*========================== PLAY AUDIO ============================*/
-
-    if (!mpctx->sh_video)
-        mpctx->restart_playback = false;
-
-    if (mpctx->sh_audio && !mpctx->restart_playback) {
-        int status = fill_audio_out_buffers(mpctx);
-        full_audio_buffers = status >= 0 && !mpctx->ao->untimed;
-        if (status == -2)
-            // at eof, all audio at least written to ao
-            if (!mpctx->sh_video)
-                mpctx->stop_play = AT_END_OF_FILE;
+    if (mpctx->step_frames && !mpctx->sh_video) {
+        mpctx->step_frames = 0;
+        pause_player(mpctx);
     }
 
+    if (mpctx->sh_audio && !mpctx->restart_playback) {
+        int status = fill_audio_out_buffers(mpctx, endpts);
+        full_audio_buffers = status >= 0 && !mpctx->ao->untimed;
+        // Not at audio stream EOF yet
+        audio_left = status > -2;
+    }
 
-    if (!mpctx->sh_video) {
-        if (mpctx->step_frames) {
-            mpctx->step_frames = 0;
-            pause_player(mpctx);
-        }
-        // handle audio-only case:
-        double a_pos = 0, a_buf = 0;
-        // sh_audio can be NULL due to video stream switching
-        // TODO: handle this better
-        if (mpctx->sh_audio) {
-            a_buf = ao_get_delay(mpctx->ao);
-            a_pos = written_audio_pts(mpctx) - mpctx->opts.playback_speed *
-                    a_buf;
-        }
-
-        print_status(mpctx, a_pos, false);
-
-        update_subtitles(mpctx, a_pos, mpctx->video_offset, false);
-        update_osd_msg(mpctx);
-        if (end_at.type == END_AT_TIME && end_at.pos < a_pos)
-            mpctx->stop_play = AT_END_OF_FILE;
-        else if (mpctx->timeline && mpctx->stop_play == AT_END_OF_FILE
-                 && mpctx->timeline_part + 1 < mpctx->num_timeline_parts
-                 && mpctx->sh_audio) {
-            struct timeline_part *p = mpctx->timeline + mpctx->timeline_part;
-            if (!opts->gapless_audio && p->source != (p + 1)->source
-                && a_buf > 0.05) {
-                mpctx->stop_play = KEEP_PLAYING;
-                mp_input_get_cmd(mpctx->input, (a_buf - .05) * 1000, true);
-            } else {
-                seek(mpctx, (struct seek_params){ .type = MPSEEK_ABSOLUTE,
-                                                  .amount = (p + 1)->start },
-                     true);
-            }
-        } else if (!mpctx->stop_play) {
-            int sleep_time = 100;
-            if (mpctx->sh_audio) {
-                if (mpctx->ao->untimed)
-                    sleep_time = 0;
-                else if (full_audio_buffers)
-                    sleep_time = FFMAX(20, a_buf * 1000 - 50);
-                else
-                    sleep_time = 20;
-                sleep_time = FFMIN(sleep_time, 100);
-            }
-            mp_input_get_cmd(mpctx->input, sleep_time, true);
-        }
-    } else {
-
-        /*========================== PLAY VIDEO ============================*/
-
+    double buffered_audio = -1;
+    while (mpctx->sh_video) {   // never loops, for "break;" only
         vo_pts = mpctx->sh_video->timer * 90000.0;
         vo_fps = mpctx->sh_video->fps;
 
-        bool blit_frame = mpctx->video_out->frame_loaded;
-        if (!blit_frame) {
+        video_left = mpctx->video_out->hasframe;
+        if (!mpctx->video_out->frame_loaded
+            && (!mpctx->paused || mpctx->restart_playback)) {
             double frame_time = update_video(mpctx);
-            blit_frame = mpctx->video_out->frame_loaded;
             mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "*** ftime=%5.3f ***\n", frame_time);
             if (mpctx->sh_video->vf_initialized < 0) {
                 mp_tmsg(MSGT_CPLAYER, MSGL_FATAL,
@@ -3585,23 +3460,12 @@ static void run_playloop(struct MPContext *mpctx)
                 mpctx->stop_play = PT_NEXT_ENTRY;
                 return;
             }
-            if (frame_time < 0)
-                mpctx->stop_play = AT_END_OF_FILE;
-            else if (!mpctx->restart_playback) {
+            video_left = frame_time >= 0;
+            if (endpts != MP_NOPTS_VALUE)
+                video_left &= mpctx->sh_video->pts < endpts;
+            if (video_left && !mpctx->restart_playback) {
                 mpctx->time_frame += frame_time / opts->playback_speed;
                 adjust_sync(mpctx, frame_time);
-            }
-        }
-        if (mpctx->timeline) {
-            struct timeline_part *next =
-                mpctx->timeline + mpctx->timeline_part + 1;
-            if (mpctx->sh_video->pts >= next->start
-                || mpctx->stop_play == AT_END_OF_FILE
-                && mpctx->timeline_part + 1 < mpctx->num_timeline_parts) {
-                seek(mpctx, (struct seek_params){ .type = MPSEEK_ABSOLUTE,
-                                                  .amount = next->start },
-                     true);
-                return;
             }
         }
 
@@ -3625,78 +3489,116 @@ static void run_playloop(struct MPContext *mpctx)
             }
         }
 
-        bool frame_time_remaining = sleep_until_near_frame(mpctx,
-                                                           &mpctx->time_frame,
-                                                           full_audio_buffers,
-                                                           &aq_sleep_time);
+        if (!video_left || (mpctx->paused && !mpctx->restart_playback))
+            break;
+        if (!mpctx->video_out->frame_loaded) {
+            sleeptime = 0;
+            break;
+        }
+
+        mpctx->time_frame -= get_relative_time(mpctx);
+        if (full_audio_buffers && !mpctx->restart_playback) {
+            buffered_audio = ao_get_delay(mpctx->ao);
+            mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "delay=%f\n", buffered_audio);
+
+            if (opts->autosync) {
+                /* Smooth reported playback position from AO by averaging
+                 * it with the value expected based on previus value and
+                 * time elapsed since then. May help smooth video timing
+                 * with audio output that have inaccurate position reporting.
+                 * This is badly implemented; the behavior of the smoothing
+                 * now undesirably depends on how often this code runs
+                 * (mainly depends on video frame rate). */
+                float predicted = (mpctx->delay / opts->playback_speed +
+                                   mpctx->time_frame);
+                float difference = buffered_audio - predicted;
+                buffered_audio = predicted + difference / opts->autosync;
+            }
+
+            mpctx->time_frame = (buffered_audio -
+                                 mpctx->delay / opts->playback_speed);
+        } else {
+            /* If we're more than 200 ms behind the right playback
+             * position, don't try to speed up display of following
+             * frames to catch up; continue with default speed from
+             * the current frame instead.
+             * If benchmark is set always output frames immediately
+             * without sleeping.
+             */
+            if (mpctx->time_frame < -0.2 || opts->benchmark)
+                mpctx->time_frame = 0;
+        }
+
+        double vsleep = mpctx->time_frame - mpctx->video_out->flip_queue_offset;
+        if (vsleep > 0.050) {
+            sleeptime = FFMIN(sleeptime, vsleep - 0.040);
+            break;
+        }
+        sleeptime = 0;
 
         //=================== FLIP PAGE (VIDEO BLT): ======================
 
         current_module = "flip_page";
-        if (!frame_time_remaining && blit_frame) {
-            vo_new_frame_imminent(mpctx->video_out);
-            struct sh_video *sh_video = mpctx->sh_video;
-            mpctx->video_pts = sh_video->pts;
-            update_subtitles(mpctx, sh_video->pts, mpctx->video_offset, false);
-            update_teletext(sh_video, mpctx->demuxer, 0);
-            update_osd_msg(mpctx);
-            struct vf_instance *vf = sh_video->vfilter;
-            mpctx->osd->pts = mpctx->video_pts;
-            vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
-            vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
-            vo_osd_changed(0);
+        vo_new_frame_imminent(mpctx->video_out);
+        struct sh_video *sh_video = mpctx->sh_video;
+        mpctx->video_pts = sh_video->pts;
+        update_subtitles(mpctx, sh_video->pts, mpctx->video_offset, false);
+        update_teletext(sh_video, mpctx->demuxer, 0);
+        update_osd_msg(mpctx);
+        struct vf_instance *vf = sh_video->vfilter;
+        mpctx->osd->pts = mpctx->video_pts;
+        vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
+        vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
+        vo_osd_changed(0);
 
-            mpctx->time_frame -= mpctx->video_out->flip_queue_offset;
-            aq_sleep_time += mpctx->time_frame;
-            // flag 256 means: libvo driver does its timing (dvb card)
-            if (mpctx->time_frame > 0.001
-                && !(mpctx->sh_video->output_flags & VFCAP_TIMER))
-                mpctx->time_frame = timing_sleep(mpctx, mpctx->time_frame);
-            mpctx->time_frame += mpctx->video_out->flip_queue_offset;
+        mpctx->time_frame -= mpctx->video_out->flip_queue_offset;
+        float aq_sleep_time = mpctx->time_frame;
+        if (mpctx->time_frame > 0.001
+            && !(mpctx->sh_video->output_flags & VFCAP_TIMER))
+            mpctx->time_frame = timing_sleep(mpctx, mpctx->time_frame);
+        mpctx->time_frame += mpctx->video_out->flip_queue_offset;
 
-            unsigned int t2 = GetTimer();
-            /* Playing with playback speed it's possible to get pathological
-             * cases with mpctx->time_frame negative enough to cause an
-             * overflow in pts_us calculation, thus the FFMAX. */
-            double time_frame = FFMAX(mpctx->time_frame, -1);
-            unsigned int pts_us = mpctx->last_time + time_frame * 1e6;
-            int duration = -1;
-            double pts2 = mpctx->video_out->next_pts2;
-            if (pts2 != MP_NOPTS_VALUE && opts->correct_pts
-                && !mpctx->restart_playback) {
-                // expected A/V sync correction is ignored
-                double diff = (pts2 - mpctx->video_pts);
-                diff /= opts->playback_speed;
-                if (mpctx->time_frame < 0)
-                    diff += mpctx->time_frame;
-                if (diff < 0)
-                    diff = 0;
-                if (diff > 10)
-                    diff = 10;
-                duration = diff * 1e6;
-            }
-            vo_flip_page(mpctx->video_out, pts_us | 1, duration);
+        unsigned int t2 = GetTimer();
+        /* Playing with playback speed it's possible to get pathological
+         * cases with mpctx->time_frame negative enough to cause an
+         * overflow in pts_us calculation, thus the FFMAX. */
+        double time_frame = FFMAX(mpctx->time_frame, -1);
+        unsigned int pts_us = mpctx->last_time + time_frame * 1e6;
+        int duration = -1;
+        double pts2 = mpctx->video_out->next_pts2;
+        if (pts2 != MP_NOPTS_VALUE && opts->correct_pts &&
+                !mpctx->restart_playback) {
+            // expected A/V sync correction is ignored
+            double diff = (pts2 - mpctx->video_pts);
+            diff /= opts->playback_speed;
+            if (mpctx->time_frame < 0)
+                diff += mpctx->time_frame;
+            if (diff < 0)
+                diff = 0;
+            if (diff > 10)
+                diff = 10;
+            duration = diff * 1e6;
+        }
+        vo_flip_page(mpctx->video_out, pts_us | 1, duration);
 
-            mpctx->last_vo_flip_duration = (GetTimer() - t2) * 0.000001;
-            vout_time_usage += mpctx->last_vo_flip_duration;
-            if (mpctx->video_out->driver->flip_page_timed) {
-                // No need to adjust sync based on flip speed
-                mpctx->last_vo_flip_duration = 0;
-                // For print_status - VO call finishing early is OK for sync
-                mpctx->time_frame -= get_relative_time(mpctx);
-            }
-            if (mpctx->restart_playback) {
-                mpctx->syncing_audio = true;
-                if (mpctx->sh_audio)
-                    fill_audio_out_buffers(mpctx);
-                mpctx->restart_playback = false;
-                mpctx->time_frame = 0;
-                get_relative_time(mpctx);
-            }
-            print_status(mpctx, MP_NOPTS_VALUE, true);
-            screenshot_flip(mpctx);
-        } else
-            print_status(mpctx, MP_NOPTS_VALUE, false);
+        mpctx->last_vo_flip_duration = (GetTimer() - t2) * 0.000001;
+        vout_time_usage += mpctx->last_vo_flip_duration;
+        if (mpctx->video_out->driver->flip_page_timed) {
+            // No need to adjust sync based on flip speed
+            mpctx->last_vo_flip_duration = 0;
+            // For print_status - VO call finishing early is OK for sync
+            mpctx->time_frame -= get_relative_time(mpctx);
+        }
+        if (mpctx->restart_playback) {
+            mpctx->syncing_audio = true;
+            if (mpctx->sh_audio)
+                fill_audio_out_buffers(mpctx, endpts);
+            mpctx->restart_playback = false;
+            mpctx->time_frame = 0;
+            get_relative_time(mpctx);
+        }
+        print_status(mpctx, MP_NOPTS_VALUE, true);
+        screenshot_flip(mpctx);
 
         if (opts->auto_quality > 0) {
             current_module = "autoq";
@@ -3709,25 +3611,18 @@ static void run_playloop(struct MPContext *mpctx)
             set_video_quality(mpctx->sh_video, output_quality);
         }
 
-        if (!frame_time_remaining && blit_frame) {
-            if (play_n_frames >= 0) {
-                --play_n_frames;
-                if (play_n_frames <= 0)
-                    mpctx->stop_play = PT_NEXT_ENTRY;
-            }
-            if (mpctx->step_frames > 0) {
-                mpctx->step_frames--;
-                if (mpctx->step_frames == 0)
-                    pause_player(mpctx);
-            }
+        if (play_n_frames >= 0) {
+            --play_n_frames;
+            if (play_n_frames <= 0)
+                mpctx->stop_play = PT_NEXT_ENTRY;
         }
-
-        // FIXME: add size based support for -endpos
-        if (end_at.type == END_AT_TIME &&
-            !frame_time_remaining && end_at.pos <= mpctx->sh_video->pts)
-            mpctx->stop_play = PT_NEXT_ENTRY;
-
-    } // end if(mpctx->sh_video)
+        if (mpctx->step_frames > 0) {
+            mpctx->step_frames--;
+            if (mpctx->step_frames == 0)
+                pause_player(mpctx);
+        }
+        break;
+    } // video
 
 #ifdef CONFIG_DVDNAV
     if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
@@ -3753,48 +3648,116 @@ static void run_playloop(struct MPContext *mpctx)
     }
 #endif
 
-    //================= Keyboard events, SEEKing ====================
-
-    current_module = "key_events";
-
-    while (1) {
-        mp_cmd_t *cmd;
-        while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
-            /* Allow running consecutive seek commands to combine them,
-             * but execute the seek before running other commands.
-             * If the user seeks continuously (keeps arrow key down)
-             * try to finish showing a frame from one location before doing
-             * another seek (which could lead to unchanging display). */
-            if (mpctx->seek.type && cmd->id != MP_CMD_SEEK
-                || mpctx->restart_playback && cmd->id == MP_CMD_SEEK
-                && GetTimerMS() - mpctx->start_timestamp < 300)
-                break;
-            cmd = mp_input_get_cmd(mpctx->input, 0, 0);
-            run_command(mpctx, cmd);
-            mp_cmd_free(cmd);
-            if (mpctx->stop_play)
-                break;
+    if (mpctx->restart_playback && !video_left) {
+        if (mpctx->sh_audio) {
+            int status = fill_audio_out_buffers(mpctx, endpts);
+            full_audio_buffers = status >= 0 && !mpctx->ao->untimed;
+            // Not at audio stream EOF yet
+            audio_left = status > -2;
         }
-        bool slow_video = mpctx->sh_video && mpctx->video_out->frame_loaded;
-        if (!(mpctx->paused || slow_video) || mpctx->stop_play
-                || mpctx->seek.type || mpctx->restart_playback)
-            break;
-        if (mpctx->sh_video) {
-            update_osd_msg(mpctx);
+        mpctx->restart_playback = false;
+    }
+    if (mpctx->sh_audio && buffered_audio == -1)
+        buffered_audio = mpctx->paused ? 0 : ao_get_delay(mpctx->ao);
+
+    update_osd_msg(mpctx);
+    if (mpctx->paused)
+        update_pause_message(mpctx);
+    if (!video_left && (!mpctx->paused || was_restart)) {
+        double a_pos = 0;
+        if (mpctx->sh_audio) {
+            a_pos = (written_audio_pts(mpctx) -
+                     mpctx->opts.playback_speed * buffered_audio);
+        }
+        print_status(mpctx, a_pos, false);
+
+        if (!mpctx->sh_video)
+            update_subtitles(mpctx, a_pos, mpctx->video_offset, false);
+    }
+
+    /* It's possible for the user to simultaneously switch both audio
+     * and video streams to "disabled" at runtime. Handle this by waiting
+     * rather than immediately stopping playback due to EOF.
+     *
+     * When all audio has been written to output driver, stay in the
+     * main loop handling commands until it has been mostly consumed,
+     * except in the gapless case, where the next file will be started
+     * while audio from the current one still remains to be played.
+     *
+     * We want this check to trigger if we seeked to this position,
+     * but not if we paused at it with audio possibly still buffered in
+     * the AO. There's currently no working way to check buffered audio
+     * inside AO while paused. Thus the "was_restart" check below, which
+     * should trigger after seek only, when we know there's no audio
+     * buffered.
+     */
+    if ((mpctx->sh_audio || mpctx->sh_video) && !audio_left && !video_left
+        && (opts->gapless_audio || buffered_audio < 0.05)
+        && (!mpctx->paused || was_restart)) {
+        if (end_is_chapter) {
+            seek(mpctx, (struct seek_params){
+                        .type = MPSEEK_ABSOLUTE,
+                        .amount = mpctx->timeline[mpctx->timeline_part+1].start
+                        }, true);
+        } else
+            mpctx->stop_play = AT_END_OF_FILE;
+    } else if (!mpctx->stop_play) {
+        double audio_sleep = 9;
+        if (mpctx->sh_audio && !mpctx->paused) {
+            if (mpctx->ao->untimed) {
+                if (!mpctx->sh_video)
+                    audio_sleep = 0;
+            } else if (full_audio_buffers) {
+                audio_sleep = buffered_audio - 0.050;
+                // Keep extra safety margin if the buffers are large
+                if (audio_sleep > 0.100)
+                    audio_sleep = FFMAX(audio_sleep - 0.200, 0.100);
+                else
+                    audio_sleep = FFMAX(audio_sleep, 0.020);
+            } else
+                audio_sleep = 0.020;
+        }
+        sleeptime = FFMIN(sleeptime, audio_sleep);
+        if (sleeptime > 0) {
+            if (!mpctx->sh_video)
+                goto novideo;
             int hack = vo_osd_changed(0);
             vo_osd_changed(hack);
             if (hack || mpctx->video_out->want_redraw) {
                 if (redraw_osd(mpctx) < 0) {
-                    if (mpctx->paused)
+                    if (mpctx->paused && video_left)
                         add_step_frame(mpctx);
-                    break;
+                    else
+                        goto novideo;
                 } else
                     vo_osd_changed(0);
+            } else {
+            novideo:
+                mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);
             }
         }
-        if (!mpctx->paused)
+    }
+
+    //================= Keyboard events, SEEKing ====================
+
+    current_module = "key_events";
+
+    mp_cmd_t *cmd;
+    while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
+        /* Allow running consecutive seek commands to combine them,
+         * but execute the seek before running other commands.
+         * If the user seeks continuously (keeps arrow key down)
+         * try to finish showing a frame from one location before doing
+         * another seek (which could lead to unchanging display). */
+        if (mpctx->seek.type && cmd->id != MP_CMD_SEEK
+            || mpctx->restart_playback && cmd->id == MP_CMD_SEEK
+            && GetTimerMS() - mpctx->start_timestamp < 300)
             break;
-        pause_loop(mpctx);
+        cmd = mp_input_get_cmd(mpctx->input, 0, 0);
+        run_command(mpctx, cmd);
+        mp_cmd_free(cmd);
+        if (mpctx->stop_play)
+            break;
     }
 
     // handle -sstep
