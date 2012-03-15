@@ -1228,6 +1228,8 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
         if (mpctx->time_frame > 0)
             mpctx->last_av_difference +=
                     mpctx->time_frame * opts->playback_speed;
+        if (a_pos == MP_NOPTS_VALUE || mpctx->video_pts == MP_NOPTS_VALUE)
+            mpctx->last_av_difference = MP_NOPTS_VALUE;
         if (mpctx->last_av_difference > 0.5 && drop_frame_cnt > 50
             && !mpctx->drop_message_shown) {
             mp_tmsg(MSGT_AVSYNC, MSGL_WARN, SystemTooSlow);
@@ -1236,9 +1238,6 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
     }
     if (opts->quiet)
         return;
-
-    if (a_pos == MP_NOPTS_VALUE)
-        a_pos = -9;  // don't print a huge negative number
 
     int width;
     char *line;
@@ -1257,8 +1256,11 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 
     // Audio time
     if (mpctx->sh_audio) {
-        saddf(line, &pos, width, "A:%6.1f ", a_pos);
-        if (!sh_video) {
+        if (a_pos != MP_NOPTS_VALUE)
+            saddf(line, &pos, width, "A:%6.1f ", a_pos);
+        else
+            saddf(line, &pos, width, "A: ???   ");
+        if (!sh_video && a_pos != MP_NOPTS_VALUE) {
             float len = get_time_length(mpctx);
             saddf(line, &pos, width, "(");
             sadd_hhmmssf(line, &pos, width, a_pos);
@@ -1269,13 +1271,22 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
     }
 
     // Video time
-    if (sh_video)
-        saddf(line, &pos, width, "V:%6.1f ", mpctx->video_pts);
+    if (sh_video) {
+        if (mpctx->video_pts != MP_NOPTS_VALUE)
+            saddf(line, &pos, width, "V:%6.1f ", mpctx->video_pts);
+        else
+            saddf(line, &pos, width, "V: ???   ", mpctx->video_pts);
+    }
 
     // A-V sync
-    if (mpctx->sh_audio && sh_video)
-        saddf(line, &pos, width, "A-V:%7.3f ct:%7.3f ",
-              mpctx->last_av_difference, mpctx->total_avsync_change);
+    if (mpctx->sh_audio && sh_video) {
+        if (mpctx->last_av_difference != MP_NOPTS_VALUE)
+            saddf(line, &pos, width, "A-V:%7.3f ct:%7.3f ",
+                  mpctx->last_av_difference, mpctx->total_avsync_change);
+        else
+            saddf(line, &pos, width, "A-V: ???    ct:%7.3f ",
+                  mpctx->total_avsync_change);
+    }
 
     // Video stats
     if (sh_video)
@@ -3358,9 +3369,11 @@ double get_current_time(struct MPContext *mpctx)
     struct demuxer *demuxer = mpctx->demuxer;
     if (demuxer->stream_pts != MP_NOPTS_VALUE)
         return demuxer->stream_pts;
-    struct sh_video *sh_video = demuxer->video->sh;
-    if (sh_video)
-        return mpctx->video_pts;
+    if (mpctx->sh_video) {
+        double pts = mpctx->video_pts;
+        if (pts != MP_NOPTS_VALUE)
+            return pts;
+    }
     double apts = playing_audio_pts(mpctx);
     if (apts != MP_NOPTS_VALUE)
         return apts;
