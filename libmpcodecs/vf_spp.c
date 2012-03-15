@@ -571,7 +571,7 @@ static int vf_open(vf_instance_t *vf, char *args){
     memset(vf->priv, 0, sizeof(struct vf_priv_s));
 
     vf->priv->avctx= avcodec_alloc_context();
-    dsputil_init(&vf->priv->dsp, vf->priv->avctx);
+    ff_dsputil_init(&vf->priv->dsp, vf->priv->avctx);
 
     vf->priv->log2_count= 3;
 
