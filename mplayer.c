@@ -3030,14 +3030,7 @@ void add_step_frame(struct MPContext *mpctx)
     unpause_player(mpctx);
 }
 
-static void reinit_decoders(struct MPContext *mpctx)
-{
-    reinit_video_chain(mpctx);
-    reinit_audio_chain(mpctx);
-    mp_property_do("sub", M_PROPERTY_SET, &(int){mpctx->global_sub_pos}, mpctx);
-}
-
-static void seek_reset(struct MPContext *mpctx, bool reset_ao)
+static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
 {
     if (mpctx->sh_video) {
         current_module = "seek_video_reset";
@@ -3059,7 +3052,7 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
         update_teletext(mpctx->sh_video, mpctx->demuxer, 1);
     }
 
-    if (mpctx->sh_audio) {
+    if (mpctx->sh_audio && reset_ac) {
         current_module = "seek_audio_reset";
         resync_audio_stream(mpctx->sh_audio);
         if (reset_ao)
@@ -3168,13 +3161,19 @@ static int seek(MPContext *mpctx, struct seek_params seek,
         if (demuxer_amount == -1) {
             mpctx->stop_play = AT_END_OF_FILE;
             // Clear audio from current position
-            if (mpctx->sh_audio) {
+            if (mpctx->sh_audio && !timeline_fallthrough) {
                 ao_reset(mpctx->ao);
                 mpctx->sh_audio->a_buffer_len = 0;
             }
             return -1;
         }
     }
+    if (need_reset) {
+        reinit_video_chain(mpctx);
+        mp_property_do("sub", M_PROPERTY_SET, &(int){mpctx->global_sub_pos},
+                       mpctx);
+    }
+
     int demuxer_style = 0;
     switch (seek.type) {
     case MPSEEK_FACTOR:
@@ -3191,12 +3190,19 @@ static int seek(MPContext *mpctx, struct seek_params seek,
         demuxer_amount -= opts->hr_seek_demuxer_offset;
     int seekresult = demux_seek(mpctx->demuxer, demuxer_amount, audio_delay,
                                 demuxer_style);
-    if (need_reset)
-        reinit_decoders(mpctx);
-    if (seekresult == 0)
+    if (seekresult == 0) {
+        if (need_reset) {
+            reinit_audio_chain(mpctx);
+            seek_reset(mpctx, !timeline_fallthrough, false);
+        }
         return -1;
+    }
 
-    seek_reset(mpctx, !timeline_fallthrough);
+    if (need_reset)
+        reinit_audio_chain(mpctx);
+    /* If we just reinitialized audio it doesn't need to be reset,
+     * and resetting could lose audio some decoders produce during init. */
+    seek_reset(mpctx, !timeline_fallthrough, !need_reset);
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */
@@ -3384,7 +3390,7 @@ int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts)
         int res = demuxer_seek_chapter(mpctx->demuxer, chapter, seek_pts);
         if (res >= 0) {
             if (*seek_pts == -1)
-                seek_reset(mpctx, true);
+                seek_reset(mpctx, true, true);
             else {
                 mpctx->last_chapter_seek = res;
                 mpctx->last_chapter_pts = *seek_pts;
