@@ -137,6 +137,9 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_KVA
         &video_out_kva,
 #endif
+#ifdef CONFIG_GL_COCOA
+        &video_out_gl,
+#endif
 #ifdef CONFIG_COREVIDEO
         &video_out_corevideo,
 #endif
@@ -174,7 +177,7 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_SDL
         &video_out_sdl,
 #endif
-#ifdef CONFIG_GL
+#if (defined CONFIG_GL && !defined CONFIG_GL_COCOA)
         &video_out_gl,
 #endif
 #ifdef CONFIG_GL_SDL
