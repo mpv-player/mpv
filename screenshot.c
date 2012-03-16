@@ -23,10 +23,6 @@
 #include <setjmp.h>
 #include <time.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
 #include <libswscale/swscale.h>
 #include <libavcodec/avcodec.h>
 
@@ -43,6 +39,7 @@
 #include "bstr.h"
 #include "mp_msg.h"
 #include "metadata.h"
+#include "path.h"
 #include "libmpcodecs/img_format.h"
 #include "libmpcodecs/mp_image.h"
 #include "libmpcodecs/dec_video.h"
@@ -209,11 +206,7 @@ static const struct img_writer *get_writer(screenshot_ctx *ctx)
 
 static int fexists(char *fname)
 {
-    struct stat dummy;
-    if (stat(fname, &dummy) == 0)
-        return 1;
-    else
-        return 0;
+    return mp_path_exists(fname);
 }
 
 static char *stripext(void *talloc_ctx, const char *s)

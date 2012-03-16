@@ -36,11 +36,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <limits.h>
+#include "osdep/io.h"
 #if defined(__MINGW32__) || defined(__CYGWIN__)
-#ifdef __MINGW32__
-#include <path.h>
-#define mkdir(a,b) mkdir(a)
-#endif
 #include <windows.h>
 #if HAVE_WINSOCK2_H
 #include <winsock2.h>
@@ -53,6 +50,7 @@
 #include <sys/stat.h>
 
 #include "mp_msg.h"
+#include "path.h"
 
 #if defined(__linux__)
 #include <linux/cdrom.h>
@@ -472,7 +470,6 @@ static int cddb_read_cache(cddb_data_t *cddb_data)
 static int cddb_write_cache(cddb_data_t *cddb_data)
 {
     // We have the file, save it for cache.
-    struct stat file_stat;
     char file_name[100];
     int file_fd, ret;
     int wrote = 0;
@@ -481,8 +478,7 @@ static int cddb_write_cache(cddb_data_t *cddb_data)
         return -1;
 
     // Check if the CDDB cache dir exist
-    ret = stat(cddb_data->cache_dir, &file_stat);
-    if (ret < 0) {
+    if (!mp_path_exists(cddb_data->cache_dir)) {
         // Directory not present, create it.
         ret = mkdir(cddb_data->cache_dir, 0755);
 #ifdef __MINGW32__

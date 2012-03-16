@@ -55,6 +55,12 @@ int screen_height=24;
 char * erase_to_end_of_line = NULL;
 
 void get_screen_size(void){
+    CONSOLE_SCREEN_BUFFER_INFO cinfo;
+    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cinfo))
+    {
+        screen_width = cinfo.dwMaximumWindowSize.X;
+        screen_height = cinfo.dwMaximumWindowSize.Y;
+    }
 }
 
 static HANDLE in;
@@ -77,7 +83,7 @@ static int getch2_internal(void)
     /*check if there are input events*/
 	if(!GetNumberOfConsoleInputEvents(in,&retval))
 	{
-		printf("getch2: can't get number of input events: %i\n",GetLastError());
+		printf("getch2: can't get number of input events: %i\n",(int)GetLastError());
 		return -1;
 	}
     if(retval<=0)return -1;
@@ -165,7 +171,7 @@ void getch2_enable(void)
     in = GetStdHandle(STD_INPUT_HANDLE);
    	if(!GetNumberOfConsoleInputEvents(in,&retval))
 	{
-		printf("getch2: %i can't get number of input events  [disabling console input]\n",GetLastError());
+		printf("getch2: %i can't get number of input events  [disabling console input]\n",(int)GetLastError());
 		getch2_status = 0;
 	}
     else getch2_status=1;

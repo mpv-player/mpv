@@ -786,8 +786,8 @@ typedef struct tagSYSTEM_INFO
 	struct {
 		WORD wProcessorArchitecture;
 		WORD wReserved;
-	} DUMMYSTRUCTNAME;
-    } DUMMYUNIONNAME;
+	} s;
+    } u;
     DWORD	dwPageSize;
     LPVOID	lpMinimumApplicationAddress;
     LPVOID	lpMaximumApplicationAddress;

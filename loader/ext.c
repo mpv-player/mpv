@@ -443,12 +443,12 @@ LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protec
 
     if (type&MEM_RESERVE && (unsigned)address&0xffff) {
 	size += (unsigned)address&0xffff;
-	address = (unsigned)address&~0xffff;
+	address = (void*)((unsigned)address&~0xffff);
     }
     pgsz = sysconf(_SC_PAGESIZE);
     if (type&MEM_COMMIT && (unsigned)address%pgsz) {
 	size += (unsigned)address%pgsz;
-	address -= (unsigned)address%pgsz;
+	address = (void*)((unsigned)address - (unsigned)address%pgsz);
     }
 
     if (type&MEM_RESERVE && size<0x10000) size = 0x10000;
@@ -531,7 +531,6 @@ LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protec
 WIN_BOOL WINAPI VirtualFree(LPVOID  address, SIZE_T dwSize, DWORD dwFreeType)//not sure
 {
     virt_alloc* str=vm;
-    int answer;
 
     //printf("VirtualFree(0x%08X, %d, 0x%08X)\n", (unsigned)address, dwSize, dwFreeType);
     while(str)
@@ -542,7 +541,7 @@ WIN_BOOL WINAPI VirtualFree(LPVOID  address, SIZE_T dwSize, DWORD dwFreeType)//n
 	    continue;
 	}
 	//printf(" VirtualFree(...) munmap(0x%08X, %d)\n", (unsigned)str->address, str->mapping_size);
-	answer=munmap(str->address, str->mapping_size);
+	munmap(str->address, str->mapping_size);
 	if(str->next)str->next->prev=str->prev;
 	if(str->prev)str->prev->next=str->next;
 	if(vm==str)vm=str->prev;

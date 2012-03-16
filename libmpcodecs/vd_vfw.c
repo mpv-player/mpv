@@ -153,7 +153,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 static int init(sh_video_t *sh){
     HRESULT ret;
 //    unsigned int outfmt=sh->codec->outfmt[sh->outfmtidx];
-    int i, o_bih_len;
+    int o_bih_len;
     vd_vfw_ctx *priv;
 
     /* Hack for VSSH codec: new dll can't decode old files
@@ -198,7 +198,7 @@ static int init(sh_video_t *sh){
     ret = ICDecompressGetFormat(priv->handle, sh->bih, priv->o_bih);
     if(ret < 0){
 	mp_msg(MSGT_WIN32,MSGL_ERR,"ICDecompressGetFormat failed: Error %d\n", (int)ret);
-	for (i=0; i < o_bih_len; i++) mp_msg(MSGT_WIN32, MSGL_DBG2, "%02x ", priv->o_bih[i]);
+	//for (i=0; i < o_bih_len; i++) mp_msg(MSGT_WIN32, MSGL_DBG2, "%02x ", priv->o_bih[i]);
 	return 0;
     }
     mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressGetFormat OK\n");

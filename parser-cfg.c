@@ -25,6 +25,8 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include "osdep/io.h"
+
 #include "parser-cfg.h"
 #include "mp_msg.h"
 #include "m_option.h"

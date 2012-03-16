@@ -1563,7 +1563,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
 {
     struct MPOpts *opts = &mpctx->opts;
     demux_stream_t *const d_sub = mpctx->d_sub;
-    int source = -1, reset_spu = 0;
+    int source = -1, reset_spu av_unused = 0;  // used under CONFIG_DVDREAD
     int source_pos = -1;
 
     update_global_sub_size(mpctx);

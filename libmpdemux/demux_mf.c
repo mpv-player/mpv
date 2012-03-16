@@ -23,6 +23,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "osdep/io.h"
+
 #include "talloc.h"
 #include "config.h"
 #include "mp_msg.h"
@@ -49,20 +51,19 @@ static void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,float audio_del
 //     1 = successfully read a packet
 static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
   mf_t         * mf;
-  struct stat    fs;
   FILE         * f;
 
   mf=(mf_t*)demuxer->priv;
   if ( mf->curr_frame >= mf->nr_of_files ) return 0;
 
-  stat( mf->names[mf->curr_frame],&fs );
-//  printf( "[demux_mf] frame: %d (%s,%d)\n",mf->curr_frame,mf->names[mf->curr_frame],fs.st_size );
-
   if ( !( f=fopen( mf->names[mf->curr_frame],"rb" ) ) ) return 0;
   {
    sh_video_t     * sh_video = demuxer->video->sh;
-   demux_packet_t * dp = new_demux_packet( fs.st_size );
-   if ( !fread( dp->buffer,fs.st_size,1,f ) ) return 0;
+   fseek(f, 0, SEEK_END);
+   long file_size = ftell(f);
+   fseek(f, 0, SEEK_SET);
+   demux_packet_t * dp = new_demux_packet( file_size );
+   if ( !fread( dp->buffer,file_size,1,f ) ) return 0;
    dp->pts=mf->curr_frame / sh_video->fps;
    dp->pos=mf->curr_frame;
    dp->flags=0;

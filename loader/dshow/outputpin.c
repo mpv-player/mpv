@@ -552,8 +552,8 @@ static HRESULT STDCALL COutputPin_NewSegment(IPin * This,
 				       /* [in] */ REFERENCE_TIME tStop,
 				       /* [in] */ double dRate)
 {
-    Debug printf("COutputPin_NewSegment(%Ld,%Ld,%f) called\n",
-		 tStart, tStop, dRate);
+    Debug printf("COutputPin_NewSegment(%d,%d,%f) called\n",
+		 (int)tStart, (int)tStop, dRate);
     return 0;
 }
 
@@ -749,7 +749,7 @@ static HRESULT STDCALL COutputMemPin_ReceiveMultiple(IMemInputPin * This,
 					    /* [in] */ long nSamples,
 					    /* [out] */ long *nSamplesProcessed)
 {
-    HRESULT hr;
+    HRESULT hr = 0;
     Debug printf("COutputMemPin_ReceiveMultiple(%p) %ld\n", This,nSamples);
     for(*nSamplesProcessed=0; *nSamplesProcessed < nSamples; *nSamplesProcessed++) {
          hr = This->vt->Receive(This,pSamples[*nSamplesProcessed]);

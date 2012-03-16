@@ -216,7 +216,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 
 	enum_pins->vt->Reset(enum_pins);
 	result = enum_pins->vt->Next(enum_pins, (ULONG)256, (IPin**)array, &fetched);
-	enum_pins->vt->Release(enum_pins);
+	enum_pins->vt->Release((IUnknown*)enum_pins);
 	Debug printf("Pins enumeration returned %ld pins, error is %x\n", fetched, (int)result);
 
 	for (i = 0; i < fetched; i++)
@@ -306,7 +306,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	init++;
         break;
     }
-    tempAll->vt->Release(tempAll);
+    tempAll->vt->Release((IUnknown*)tempAll);
 
     if (!init)
     {

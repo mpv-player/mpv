@@ -21,6 +21,7 @@
 #ifndef MPLAYER_PATH_H
 #define MPLAYER_PATH_H
 
+#include <stdbool.h>
 #include "bstr.h"
 
 extern char *codec_path;
@@ -43,5 +44,8 @@ struct bstr mp_dirname(const char *path);
  * If p2 is an absolute path then the value of p1 is ignored.
  */
 char *mp_path_join(void *talloc_ctx, struct bstr p1, struct bstr p2);
+
+bool mp_path_exists(const char *path);
+bool mp_path_isdir(const char *path);
 
 #endif /* MPLAYER_PATH_H */

@@ -300,7 +300,6 @@ static void uninit(sh_audio_t *sh){
 }
 
 static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen){
-    int error;
     unsigned long FramesToGet=0; //how many frames the demuxer has to get
     unsigned long InputBufferSize=0; //size of the input buffer
     unsigned long ConvertedFrames=0;
@@ -331,7 +330,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 
 //    printf("\nSoundConverterConvertBuffer(myConv=%p,inbuf=%p,frames=%d,outbuf=%p,&convframes=%p,&convbytes=%p)\n",
 //	myConverter,sh->a_in_buffer,FramesToGet,buf,&ConvertedFrames,&ConvertedBytes);
-    error = SoundConverterConvertBuffer(myConverter,sh->a_in_buffer,
+    SoundConverterConvertBuffer(myConverter,sh->a_in_buffer,
 	FramesToGet,buf,&ConvertedFrames,&ConvertedBytes);
 //    printf("SoundConverterConvertBuffer:%i\n",error);
 //    printf("ConvertedFrames = %li\n",ConvertedFrames);

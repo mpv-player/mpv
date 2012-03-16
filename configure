@@ -166,6 +166,7 @@ yasm_check() {
 }
 
 pkg_config_add() {
+  unset IFS  # shell should not be used for programming
   echo >> "$TMPLOG"
   echo "$_pkg_config --cflags $@" >> "$TMPLOG"
   ctmp=$($_pkg_config --cflags "$@" 2>> "$TMPLOG") || return $?
@@ -335,7 +336,7 @@ Optional features:
   --disable-networking   disable networking [enable]
   --enable-winsock2_h    enable winsock2_h [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
-  --enable-live          enable LIVE555 Streaming Media [autodetect]
+  --enable-live          enable LIVE555 Streaming Media [disable]
   --enable-nemesi        enable Nemesi Streaming Media [autodetect]
   --disable-vcd          disable VCD support [autodetect]
   --disable-bluray       disable Blu-ray support [autodetect]
@@ -476,13 +477,14 @@ Available values for --language-msg are: all $msg_lang_all
 
 Miscellaneous options:
   --enable-runtime-cpudetection    enable runtime CPU detection [disable]
-  --enable-cross-compile enable cross-compilation [autodetect]
+  --enable-cross-compile enable cross-compilation [disable]
   --cc=COMPILER          C compiler to build MPlayer [gcc]
   --host-cc=COMPILER     C compiler for tools needed while building [gcc]
   --as=ASSEMBLER         assembler to build MPlayer [as]
   --nm=NM                nm tool to build MPlayer [nm]
   --yasm=YASM            Yasm assembler to build MPlayer [yasm]
   --ar=AR                librarian to build MPlayer [ar]
+  --pkg-config=PKGCONFIG pkg-config to find some libraries [pkg-config]
   --ranlib=RANLIB        ranlib to build MPlayer [ranlib]
   --windres=WINDRES      windres to build MPlayer [windres]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
@@ -551,16 +553,17 @@ neon=auto
 _iwmmxt=auto
 _altivec=auto
 _install=install
-_ranlib=ranlib
-_windres=windres
-_cc=cc
-_ar=ar
+_pkg_config=auto
+_ranlib=auto
+_windres=auto
+_cc=auto
+_ar=auto
 test "$CC" && _cc="$CC"
 _as=auto
 _nm=auto
-_yasm=yasm
+_yasm=auto
 _runtime_cpudetection=no
-_cross_compile=auto
+_cross_compile=no
 _prefix="/usr/local"
 ffmpeg=auto
 ffmpeg_internals=no
@@ -632,7 +635,7 @@ _dvdread_internal=auto
 _libdvdcss_internal=auto
 _xanim=auto
 _real=auto
-_live=auto
+_live=no
 _nemesi=auto
 _native_rtsp=yes
 _xinerama=auto
@@ -798,6 +801,9 @@ for ac_option do
     ;;
   --ar=*)
     _ar=$(echo $ac_option | cut -d '=' -f 2)
+    ;;
+  --pkg-config=*)
+    _pkg_config=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --ranlib=*)
     _ranlib=$(echo $ac_option | cut -d '=' -f 2)
@@ -1198,6 +1204,58 @@ test -z "$_confdir" && _confdir="$_prefix/etc/mplayer"
 test -z "$_libdir"  && _libdir="$_prefix/lib"
 test -z "$_localedir"  && _localedir="$_prefix/share/locale"
 
+for tmpdir in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
+  test "$tmpdir" && break
+done
+
+mplayer_tmpdir="$tmpdir/mplayer-configure-$RANDOM-$$"
+mkdir $mplayer_tmpdir || die "Unable to create tmpdir."
+
+TMPLOG="config.log"
+
+rm -f "$TMPLOG"
+echo Parameters configure was run with: > "$TMPLOG"
+if test -n "$CFLAGS" ; then
+    echo ${_echo_n} CFLAGS="'$CFLAGS' ${_echo_c}" >> "$TMPLOG"
+fi
+if test -n "$PKG_CONFIG_PATH" ; then
+    echo ${_echo_n} PKG_CONFIG_PATH="'$PKG_CONFIG_PATH' ${_echo_c}" >> "$TMPLOG"
+fi
+echo ./configure $configuration >> "$TMPLOG"
+echo >> "$TMPLOG"
+
+
+echocheck "cross compilation"
+echores $_cross_compile
+
+if test $_cross_compile = yes; then
+  tmp_run() {
+    return 0
+  }
+  test "$_host_cc" || _host_cc=cc
+fi
+
+tool_prefix=""
+
+if test $_cross_compile = yes ; then
+    # Usually cross-compiler prefixes match with the target triplet
+    test -n "$_target" && tool_prefix="$_target"-
+fi
+
+test "$_ranlib" = auto && _ranlib="$tool_prefix"ranlib
+test "$_windres" = auto && _windres="$tool_prefix"windres
+test "$_ar" = auto && _ar="$tool_prefix"ar
+test "$_yasm" = auto && _yasm="$tool_prefix"yasm
+test "$_pkg_config" = auto && _pkg_config="$tool_prefix"pkg-config
+
+if test "$_cc" = auto ; then
+    if test -n "$tool_prefix" ; then
+        _cc="$tool_prefix"gcc
+    else
+        _cc=cc
+    fi
+fi
+
 # Determine our OS name and CPU architecture
 if test -z "$_target" ; then
   # OS name
@@ -1268,21 +1326,25 @@ if test -z "$_target" ; then
     ;;
   esac
 else # if test -z "$_target"
-  system_name=$(echo $_target | cut -d '-' -f 2)
-  case "$(echo $system_name | tr A-Z a-z)" in
-    linux) system_name=Linux ;;
-    freebsd) system_name=FreeBSD ;;
-    gnu/kfreebsd) system_name=FreeBSD ;;
-    netbsd) system_name=NetBSD ;;
-    bsd/os) system_name=BSD/OS ;;
-    openbsd) system_name=OpenBSD ;;
-    dragonfly) system_name=DragonFly ;;
-    sunos) system_name=SunOS ;;
-    qnx) system_name=QNX ;;
-    morphos) system_name=MorphOS ;;
-    amigaos) system_name=AmigaOS ;;
-    mingw32*) system_name=MINGW32 ;;
-  esac
+  for i in 2 3; do
+    system_name=$(echo $_target | cut -d '-' -f $i)
+    case "$(echo $system_name | tr A-Z a-z)" in
+      linux) system_name=Linux ;;
+      freebsd) system_name=FreeBSD ;;
+      gnu/kfreebsd) system_name=FreeBSD ;;
+      netbsd) system_name=NetBSD ;;
+      bsd/os) system_name=BSD/OS ;;
+      openbsd) system_name=OpenBSD ;;
+      dragonfly) system_name=DragonFly ;;
+      sunos) system_name=SunOS ;;
+      qnx) system_name=QNX ;;
+      morphos) system_name=MorphOS ;;
+      amigaos) system_name=AmigaOS ;;
+      mingw32*) system_name=MINGW32 ;;
+      *) continue ;;
+    esac
+    break
+  done
   # We need to convert underscores so that values like k6-2 and pentium-mmx can be passed
   host_arch=$(echo $_target | cut -d '-' -f 1)
   if test $(echo $host_arch) != "x86_64" ; then
@@ -1336,6 +1398,7 @@ fi
 if mingw32 ; then
   _getch=getch2-win.c
   need_shmem=no
+  extra_cflags="$extra_cflags -D__USE_MINGW_ANSI_STDIO=1"
 fi
 
 if amigaos ; then
@@ -1359,24 +1422,11 @@ if os2 ; then
   def_priority="#define CONFIG_PRIORITY 1"
 fi
 
-for tmpdir in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
-  test "$tmpdir" && break
-done
-
-mplayer_tmpdir="$tmpdir/mplayer-configure-$RANDOM-$$"
-mkdir $mplayer_tmpdir || die "Unable to create tmpdir."
-
-TMPLOG="config.log"
 TMPC="$mplayer_tmpdir/tmp.c"
 TMPCPP="$mplayer_tmpdir/tmp.cpp"
 TMPEXE="$mplayer_tmpdir/tmp$_exesuf"
 TMPH="$mplayer_tmpdir/tmp.h"
 TMPS="$mplayer_tmpdir/tmp.S"
-
-rm -f "$TMPLOG"
-echo configuration: $configuration > "$TMPLOG"
-echo >> "$TMPLOG"
-
 
 if test "$_runtime_cpudetection" = yes && ! x86 && ! ppc; then
   die "Runtime CPU detection only works for x86, x86-64 and PPC!"
@@ -1463,26 +1513,12 @@ EOF
   cc_check && host_arch=x86_64 || host_arch=i386
 fi
 
-echo "Detected operating system: $system_name"
-echo "Detected host architecture: $host_arch"
-
-echocheck "cross compilation"
-if test $_cross_compile = auto ; then
-  _cross_compile=yes
-  cflag_check "" && "$TMPEXE" && _cross_compile=no
-fi
-echores $_cross_compile
-
-if test $_cross_compile = yes; then
-  tmp_run() {
-    return 0
-  }
-  test "$_host_cc" || _host_cc=cc
-fi
-
 echocheck "host cc"
 test "$_host_cc" || _host_cc=$_cc
 echores $_host_cc
+
+echo "Detected operating system: $system_name"
+echo "Detected host architecture: $host_arch"
 
 # ---
 
@@ -3611,7 +3647,6 @@ echores "$_apple_ir"
 fi #if linux
 
 echocheck "pkg-config"
-_pkg_config=pkg-config
 if $($_pkg_config --version > /dev/null 2>&1); then
   if test "$_ld_static"; then
     _pkg_config="$_pkg_config --static"
@@ -5711,7 +5746,7 @@ fi
 echores "$_nemesi"
 
 echocheck "LIVE555 Streaming Media libraries"
-if test "$_live" = auto  && test "$networking" = yes ; then
+if test "$_live" != no  && test "$networking" = yes ; then
   cat > $TMPCPP << EOF
 #include <liveMedia.hh>
 #if (LIVEMEDIA_LIBRARY_VERSION_INT < 1141257600)
@@ -5768,9 +5803,7 @@ all_libav_libs="libavutil > 51.21.0:libavcodec > 53.34.0:libavformat > 53.20.0:l
 echocheck "Libav ($all_libav_libs)"
 if test "$ffmpeg" = auto ; then
   IFS=":"   # shell should not be used for programming
-  if pkg_config_add $all_libav_libs ; then
-    unset IFS
-  else
+  if ! pkg_config_add $all_libav_libs ; then
     die "Unable to find development files for some of the required Libav libraries above. Aborting."
   fi
 fi

@@ -23,6 +23,7 @@
 
 #include "config.h"
 #include "osdep/getch2.h"
+#include "osdep/io.h"
 
 #ifdef CONFIG_TRANSLATION
 #include <locale.h>
@@ -38,6 +39,27 @@
 
 /* maximum message length of mp_msg */
 #define MSGSIZE_MAX 3072
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <io.h>
+#define hSTDOUT GetStdHandle(STD_OUTPUT_HANDLE)
+#define hSTDERR GetStdHandle(STD_ERROR_HANDLE)
+static short stdoutAttrs = 0;
+static const unsigned char ansi2win32[10] = {
+    0,
+    FOREGROUND_RED,
+    FOREGROUND_GREEN,
+    FOREGROUND_GREEN | FOREGROUND_RED,
+    FOREGROUND_BLUE,
+    FOREGROUND_BLUE  | FOREGROUND_RED,
+    FOREGROUND_BLUE  | FOREGROUND_GREEN,
+    FOREGROUND_BLUE  | FOREGROUND_GREEN | FOREGROUND_RED,
+    FOREGROUND_BLUE  | FOREGROUND_GREEN | FOREGROUND_RED,
+    FOREGROUND_BLUE  | FOREGROUND_GREEN | FOREGROUND_RED
+};
+#endif
 
 int mp_msg_levels[MSGT_MAX]; // verbose level of this module. initialized to -2
 int mp_msg_level_all = MSGL_STATUS;
@@ -82,6 +104,16 @@ const char* filename_recode(const char* filename)
 }
 
 void mp_msg_init(void){
+#ifdef _WIN32
+    CONSOLE_SCREEN_BUFFER_INFO cinfo;
+    long cmode = 0;
+    GetConsoleMode(hSTDOUT, &cmode);
+    cmode |= (ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
+    SetConsoleMode(hSTDOUT, cmode);
+    SetConsoleMode(hSTDERR, cmode);
+    GetConsoleScreenBufferInfo(hSTDOUT, &cinfo);
+    stdoutAttrs = cinfo.wAttributes;
+#endif
     int i;
     char *env = getenv("MPLAYER_VERBOSE");
     if (env)
@@ -91,7 +123,11 @@ void mp_msg_init(void){
 #ifdef CONFIG_ICONV
     mp_msg_charset = getenv("MPLAYER_CHARSET");
     if (!mp_msg_charset)
-      mp_msg_charset = get_term_charset();
+#ifdef _WIN32
+        mp_msg_charset = "UTF-8";
+#else
+        mp_msg_charset = get_term_charset();
+#endif
 #endif
 #ifdef CONFIG_TRANSLATION
     textdomain("mplayer");
@@ -124,7 +160,14 @@ static void set_msg_color(FILE* stream, int lev)
     }
 #endif
     if (mp_msg_color)
+    {
+#ifdef _WIN32
+        HANDLE *wstream = stream == stderr ? hSTDERR : hSTDOUT;
+        SetConsoleTextAttribute(wstream, ansi2win32[c] | FOREGROUND_INTENSITY);
+#else
         fprintf(stream, "\033[%d;3%dm", c >> 3, c & 7);
+#endif
+    }
 }
 
 static void print_msg_module(FILE* stream, int mod)
@@ -181,11 +224,20 @@ static void print_msg_module(FILE* stream, int mod)
 
     if (!mp_msg_module)
         return;
+#ifdef _WIN32
+    HANDLE *wstream = stream == stderr ? hSTDERR : hSTDOUT;
+    if (mp_msg_color)
+        SetConsoleTextAttribute(wstream, ansi2win32[c2&7] | FOREGROUND_INTENSITY);
+    fprintf(stream, "%9s", module_text[mod]);
+    if (mp_msg_color)
+        SetConsoleTextAttribute(wstream, stdoutAttrs);
+#else
     if (mp_msg_color)
         fprintf(stream, "\033[%d;3%dm", c2 >> 3, c2 & 7);
     fprintf(stream, "%9s", module_text[mod]);
     if (mp_msg_color)
         fprintf(stream, "\033[0;37m");
+#endif
     fprintf(stream, ": ");
 }
 
@@ -203,33 +255,43 @@ void mp_msg_va(int mod, int lev, const char *format, va_list va)
     tmp[MSGSIZE_MAX-1] = 0;
 
 #if defined(CONFIG_ICONV) && defined(MSG_CHARSET)
-    if (mp_msg_charset && strcasecmp(mp_msg_charset, "noconv")) {
-      char tmp2[MSGSIZE_MAX];
-      size_t inlen = strlen(tmp), outlen = MSGSIZE_MAX;
-      char *in = tmp, *out = tmp2;
-      if (!old_charset || strcmp(old_charset, mp_msg_charset)) {
-        if (old_charset) {
-          free(old_charset);
-          iconv_close(msgiconv);
+    if (mp_msg_charset && strcasecmp(mp_msg_charset, "noconv"))
+    {
+        char tmp2[MSGSIZE_MAX];
+        size_t inlen = strlen(tmp), outlen = MSGSIZE_MAX;
+        char *in = tmp, *out = tmp2;
+        if (!old_charset || strcmp(old_charset, mp_msg_charset))
+        {
+            if (old_charset)
+            {
+                free(old_charset);
+                iconv_close(msgiconv);
+            }
+            msgiconv = iconv_open(mp_msg_charset, MSG_CHARSET);
+            old_charset = strdup(mp_msg_charset);
         }
-        msgiconv = iconv_open(mp_msg_charset, MSG_CHARSET);
-        old_charset = strdup(mp_msg_charset);
-      }
-      if (msgiconv == (iconv_t)(-1)) {
-        fprintf(stderr,"iconv: conversion from %s to %s unsupported\n"
-               ,MSG_CHARSET,mp_msg_charset);
-      }else{
-      memset(tmp2, 0, MSGSIZE_MAX);
-      while (iconv(msgiconv, &in, &inlen, &out, &outlen) == -1) {
-        if (!inlen || !outlen)
-          break;
-        *out++ = *in++;
-        outlen--; inlen--;
-      }
-      strncpy(tmp, tmp2, MSGSIZE_MAX);
-      tmp[MSGSIZE_MAX-1] = 0;
-      tmp[MSGSIZE_MAX-2] = '\n';
-      }
+
+        if (msgiconv == (iconv_t)(-1))
+        {
+            fprintf(stderr,"iconv: conversion from %s to %s unsupported\n"
+                ,MSG_CHARSET,mp_msg_charset);
+        }
+        else
+        {
+            memset(tmp2, 0, MSGSIZE_MAX);
+
+            while (iconv(msgiconv, &in, &inlen, &out, &outlen) == -1)
+            {
+                if (!inlen || !outlen)
+                break;
+                *out++ = *in++;
+                outlen--; inlen--;
+            }
+
+            strncpy(tmp, tmp2, MSGSIZE_MAX);
+            tmp[MSGSIZE_MAX-1] = 0;
+            tmp[MSGSIZE_MAX-2] = '\n';
+        }
     }
 #endif
 
@@ -248,8 +310,16 @@ void mp_msg_va(int mod, int lev, const char *format, va_list va)
     header = len && (tmp[len-1] == '\n' || tmp[len-1] == '\r');
 
     fprintf(stream, "%s", tmp);
+
     if (mp_msg_color)
+    {
+#ifdef _WIN32
+        HANDLE *wstream = lev <= MSGL_WARN ? hSTDERR : hSTDOUT;
+        SetConsoleTextAttribute(wstream, stdoutAttrs);
+#else
         fprintf(stream, "\033[0m");
+#endif
+    }
     fflush(stream);
 }
 

@@ -227,7 +227,7 @@ MMRESULT WINAPI acmDriverOpen(PHACMDRIVER phad, HACMDRIVERID hadid, DWORD fdwOpe
 	return MMSYSERR_ERROR;
     }
 
-    pad->pfnDriverProc = GetProcAddress(pad->hDrvr, "DriverProc");
+    pad->pfnDriverProc = (DRIVERPROC)GetProcAddress(pad->hDrvr, "DriverProc");
 
     /* insert new pad at beg of list */
     pad->pNextACMDriver = padid->pACMDriverList;

@@ -114,6 +114,7 @@ static inline avm_list_t* avm_list_find(avm_list_t* head, void* member)
     return NULL;
 }
 
+#ifdef WIN32_LOADER
 static long MemAllocator_CreateAllocator(GUID* clsid, const GUID* iid, void** ppv)
 {
     IUnknown* p;
@@ -130,6 +131,7 @@ static long MemAllocator_CreateAllocator(GUID* clsid, const GUID* iid, void** pp
 
     return result;
 }
+#endif
 
 static HRESULT STDCALL MemAllocator_SetProperties(IMemAllocator * This,
 						  /* [in] */ ALLOCATOR_PROPERTIES *pRequest,

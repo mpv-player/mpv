@@ -129,7 +129,7 @@ static int init(sh_video_t *sh){
     DecompressSequenceFrameS = (OSErr (*)(ImageSequence,Ptr,long,CodecFlags,CodecFlags*,ICMCompletionProcRecordPtr))GetProcAddress(handler, "DecompressSequenceFrameS");
     GetGWorldPixMap = (PixMapHandle (*)(GWorldPtr))GetProcAddress(handler, "GetGWorldPixMap");
     QTNewGWorldFromPtr = (OSErr(*)(GWorldPtr *,OSType,const Rect *,CTabHandle,void*,GWorldFlags,void *,long))GetProcAddress(handler, "QTNewGWorldFromPtr");
-    NewHandleClear = (OSErr(*)(Size))GetProcAddress(handler, "NewHandleClear");
+    NewHandleClear = (Handle(*)(Size))GetProcAddress(handler, "NewHandleClear");
     DisposeHandle = (void (*)(Handle))GetProcAddress(handler, "DisposeHandle");
     DisposeGWorld = (void (*)(GWorldPtr))GetProcAddress(handler, "DisposeGWorld");
     CDSequenceEnd = (OSErr (*)(ImageSequence))GetProcAddress(handler, "CDSequenceEnd");
