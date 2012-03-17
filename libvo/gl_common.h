@@ -57,8 +57,6 @@ typedef struct GL GL;
 
 void glAdjustAlignment(GL *gl, int stride);
 
-const char *glValName(GLint value);
-
 int glFindFormat(uint32_t format, int have_texture_rg, int *bpp,
                  GLint *gl_texfmt, GLenum *gl_format, GLenum *gl_type);
 int glFmt2bpp(GLenum format, GLenum type);

@@ -100,62 +100,6 @@ void glAdjustAlignment(GL *gl, int stride)
     gl->PixelStorei(GL_PACK_ALIGNMENT, gl_alignment);
 }
 
-struct gl_name_map_struct {
-    GLint value;
-    const char *name;
-};
-
-#undef MAP
-#define MAP(a) {a, # a}
-//! mapping table for the glValName function
-static const struct gl_name_map_struct gl_name_map[] = {
-    // internal format
-    MAP(GL_R3_G3_B2), MAP(GL_RGB4), MAP(GL_RGB5), MAP(GL_RGB8),
-    MAP(GL_RGB10), MAP(GL_RGB12), MAP(GL_RGB16), MAP(GL_RGBA2),
-    MAP(GL_RGBA4), MAP(GL_RGB5_A1), MAP(GL_RGBA8), MAP(GL_RGB10_A2),
-    MAP(GL_RGBA12), MAP(GL_RGBA16), MAP(GL_LUMINANCE8), MAP(GL_LUMINANCE16),
-    MAP(GL_R16),
-
-    // format
-    MAP(GL_RGB), MAP(GL_RGBA), MAP(GL_RED), MAP(GL_GREEN), MAP(GL_BLUE),
-    MAP(GL_ALPHA), MAP(GL_LUMINANCE), MAP(GL_LUMINANCE_ALPHA),
-    MAP(GL_COLOR_INDEX),
-    // rest 1.2 only
-    MAP(GL_BGR), MAP(GL_BGRA),
-
-    //type
-    MAP(GL_BYTE), MAP(GL_UNSIGNED_BYTE), MAP(GL_SHORT), MAP(GL_UNSIGNED_SHORT),
-    MAP(GL_INT), MAP(GL_UNSIGNED_INT), MAP(GL_FLOAT), MAP(GL_DOUBLE),
-    MAP(GL_2_BYTES), MAP(GL_3_BYTES), MAP(GL_4_BYTES),
-    // rest 1.2 only
-    MAP(GL_UNSIGNED_BYTE_3_3_2), MAP(GL_UNSIGNED_BYTE_2_3_3_REV),
-    MAP(GL_UNSIGNED_SHORT_5_6_5), MAP(GL_UNSIGNED_SHORT_5_6_5_REV),
-    MAP(GL_UNSIGNED_SHORT_4_4_4_4), MAP(GL_UNSIGNED_SHORT_4_4_4_4_REV),
-    MAP(GL_UNSIGNED_SHORT_5_5_5_1), MAP(GL_UNSIGNED_SHORT_1_5_5_5_REV),
-    MAP(GL_UNSIGNED_INT_8_8_8_8), MAP(GL_UNSIGNED_INT_8_8_8_8_REV),
-    MAP(GL_UNSIGNED_INT_10_10_10_2), MAP(GL_UNSIGNED_INT_2_10_10_10_REV),
-    {0, 0}
-};
-#undef MAP
-
-/**
- * \brief return the name of an OpenGL constant
- * \param value the constant
- * \return name of the constant or "Unknown format!"
- * \ingroup glgeneral
- */
-const char *glValName(GLint value)
-{
-    int i = 0;
-
-    while (gl_name_map[i].name) {
-        if (gl_name_map[i].value == value)
-            return gl_name_map[i].name;
-        i++;
-    }
-    return "Unknown format!";
-}
-
 //! always return this format as internal texture format in glFindFormat
 #define TEXTUREFORMAT_ALWAYS GL_RGB8
 #undef TEXTUREFORMAT_ALWAYS
