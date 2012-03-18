@@ -24,6 +24,7 @@
 static play_tree_t *files = NULL;
 
 void macosx_wait_fileopen_events(void);
+void macosx_redirect_output_to_logfile(const char *filename);
 bool psn_matches_current_process(char *psn_arg_to_check);
 
 @interface FileOpenDelegate : NSObject
@@ -59,6 +60,16 @@ void macosx_wait_fileopen_events()
     [pool release];
 }
 
+void macosx_redirect_output_to_logfile(const char *filename)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSString *log_path = [NSHomeDirectory() stringByAppendingPathComponent:
+        [@"Library/Logs/" stringByAppendingFormat:@"%s.log", filename]];
+    freopen([log_path fileSystemRepresentation], "a", stdout);
+    freopen([log_path fileSystemRepresentation], "a", stderr);
+    [pool release];
+}
+
 bool psn_matches_current_process(char *psn_arg_to_check)
 {
     ProcessSerialNumber psn;
@@ -75,6 +86,7 @@ bool psn_matches_current_process(char *psn_arg_to_check)
 play_tree_t *macosx_finder_args(m_config_t *config, int argc, char **argv)
 {
     if (argc==2 && psn_matches_current_process(argv[1])) {
+        macosx_redirect_output_to_logfile("mplayer2");
         m_config_set_option0(config, "quiet", NULL, false);
         macosx_wait_fileopen_events();
     }
