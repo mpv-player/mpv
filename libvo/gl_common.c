@@ -487,11 +487,6 @@ static const extfunc_desc_t extfuncs[] = {
     DEF_GL3_DESC(UniformMatrix3fv),
     DEF_GL3_DESC(UniformMatrix4x3fv),
 
-#ifdef CONFIG_GL_WIN32
-    DEF_EXT_DESC(wglCreateContextAttribsARB, NULL,
-                 ("wglCreateContextAttribsARB")),
-#endif
-
     {-1}
 };
 
@@ -1856,7 +1851,6 @@ static int create_window_w32_gl3(struct MPGLContext *ctx, int gl_flags,
     HWND win = vo_w32_window;
     HDC windc = vo_w32_get_dc(win);
     HGLRC new_context = 0;
-    GL *gl = ctx->gl;
 
     new_context = wglCreateContext(windc);
     if (!new_context) {
@@ -1870,13 +1864,22 @@ static int create_window_w32_gl3(struct MPGLContext *ctx, int gl_flags,
         goto out;
     }
 
-    getFunctions(ctx->gl, w32gpa, NULL, true);
+    const char *(GLAPIENTRY *wglGetExtensionsStringARB)(HDC hdc)
+        = w32gpa((const GLubyte*)"wglGetExtensionsStringARB");
 
-    if (!gl->wglCreateContextAttribsARB) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] The current OpenGL implementation does"
-                                  " not support OpenGL 3.x \n");
-        goto out;
-    }
+    if (!wglGetExtensionsStringARB)
+        goto unsupported;
+
+    const char *wgl_exts = wglGetExtensionsStringARB(windc);
+    if (!strstr(wgl_exts, "WGL_ARB_create_context"))
+        goto unsupported;
+
+    HGLRC (GLAPIENTRY *wglCreateContextAttribsARB)(HDC hDC, HGLRC hShareContext,
+                                                   const int *attribList)
+        = w32gpa((const GLubyte*)"wglCreateContextAttribsARB");
+
+    if (!wglCreateContextAttribsARB)
+        goto unsupported;
 
     int attribs[] = {
         WGL_CONTEXT_MAJOR_VERSION_ARB, MPGL_VER_GET_MAJOR(gl_version),
@@ -1886,13 +1889,13 @@ static int create_window_w32_gl3(struct MPGLContext *ctx, int gl_flags,
         0
     };
 
-    *context = gl->wglCreateContextAttribsARB(windc, 0, attribs);
+    *context = wglCreateContextAttribsARB(windc, 0, attribs);
     if (! *context) {
         // NVidia, instead of ignoring WGL_CONTEXT_FLAGS_ARB, will error out if
         // it's present on pre-3.2 contexts.
         // Remove it from attribs and retry the context creation.
         attribs[6] = attribs[7] = 0;
-        *context = gl->wglCreateContextAttribsARB(windc, 0, attribs);
+        *context = wglCreateContextAttribsARB(windc, 0, attribs);
     }
     if (! *context) {
         int err = GetLastError();
@@ -1913,7 +1916,19 @@ static int create_window_w32_gl3(struct MPGLContext *ctx, int gl_flags,
     /* update function pointers */
     getFunctions(ctx->gl, w32gpa, NULL, true);
 
+    int pfmt = GetPixelFormat(windc);
+    PIXELFORMATDESCRIPTOR pfd;
+    if (DescribePixelFormat(windc, pfmt, sizeof(PIXELFORMATDESCRIPTOR), &pfd)) {
+        ctx->depth_r = pfd.cRedBits;
+        ctx->depth_g = pfd.cGreenBits;
+        ctx->depth_b = pfd.cBlueBits;
+    }
+
     return 0;
+
+unsupported:
+    mp_msg(MSGT_VO, MSGL_ERR, "[gl] The current OpenGL implementation does"
+                              " not support OpenGL 3.x \n");
 out:
     wglDeleteContext(new_context);
     return -1;
