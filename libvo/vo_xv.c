@@ -18,58 +18,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// Number of buffers _FOR_DOUBLEBUFFERING_MODE_
-// Use option -double to enable double buffering! (default: single buffer)
-#define NUM_BUFFERS 3
-
-/*
-Buffer allocation:
-
--nodr:
-  1: TEMP
-  2: 2*TEMP
-
--dr:
-  1: TEMP
-  3: 2*STATIC+TEMP
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
-
-#include "config.h"
-#include "options.h"
-#include "talloc.h"
-#include "mp_msg.h"
-#include "video_out.h"
-#include "libmpcodecs/vfcap.h"
-#include "libmpcodecs/mp_image.h"
-#include "osd.h"
-
+#include <errno.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <errno.h>
 
-#include "x11_common.h"
+#include <libavutil/common.h>
 
-#include "fastmemcpy.h"
-#include "sub/sub.h"
-#include "aspect.h"
-#include "csputils.h"
-
-#include "subopt-helper.h"
-
-#include "libavutil/common.h"
-
-static const vo_info_t info = {
-    "X11/Xv",
-    "xv",
-    "Gerd Knorr <kraxel@goldbach.in-berlin.de> and others",
-    ""
-};
+#include "config.h"
 
 #ifdef HAVE_SHM
 #include <sys/ipc.h>
@@ -80,6 +40,27 @@ static const vo_info_t info = {
 // Note: depends on the inclusion of X11/extensions/XShm.h
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
+
+#include "options.h"
+#include "talloc.h"
+#include "mp_msg.h"
+#include "video_out.h"
+#include "libmpcodecs/vfcap.h"
+#include "libmpcodecs/mp_image.h"
+#include "osd.h"
+#include "x11_common.h"
+#include "fastmemcpy.h"
+#include "sub/sub.h"
+#include "aspect.h"
+#include "csputils.h"
+#include "subopt-helper.h"
+
+static const vo_info_t info = {
+    "X11/Xv",
+    "xv",
+    "Gerd Knorr <kraxel@goldbach.in-berlin.de> and others",
+    ""
+};
 
 struct xvctx {
     XvAdaptorInfo *ai;
@@ -92,7 +73,7 @@ struct xvctx {
     bool have_image_copy;
     bool unchanged_image;
     int visible_buf;
-    XvImage *xvimage[NUM_BUFFERS + 1];
+    XvImage *xvimage[2 + 1];
     uint32_t image_width;
     uint32_t image_height;
     uint32_t image_format;
@@ -108,7 +89,7 @@ struct xvctx {
                            unsigned char *src, unsigned char *srca,
                            int stride);
 #ifdef HAVE_SHM
-    XShmSegmentInfo Shminfo[NUM_BUFFERS + 1];
+    XShmSegmentInfo Shminfo[2 + 1];
     int Shmem_Flag;
 #endif
 };
@@ -301,8 +282,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     for (i = 0; i < ctx->total_buffers; i++)
         deallocate_xvimage(vo, i);
 
-    ctx->num_buffers =
-        vo_doublebuffering ? (vo_directrendering ? NUM_BUFFERS : 2) : 1;
+    ctx->num_buffers = 2;
     ctx->total_buffers = ctx->num_buffers + 1;
 
     for (i = 0; i < ctx->total_buffers; i++)
@@ -462,12 +442,8 @@ static void flip_page(struct vo *vo)
     /* remember the currently visible buffer */
     ctx->visible_buf = ctx->current_buf;
 
-    if (ctx->num_buffers > 1) {
-        ctx->current_buf = vo_directrendering ? 0 : ((ctx->current_buf + 1) %
-                                                     ctx->num_buffers);
-        XFlush(vo->x11->display);
-    } else
-        XSync(vo->x11->display, False);
+    ctx->current_buf = (ctx->current_buf + 1) % ctx->num_buffers;
+    XFlush(vo->x11->display);
     return;
 }
 
@@ -553,10 +529,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 
     ctx->have_image_copy = false;
 
-    if (mpi->flags & MP_IMGFLAG_DIRECT)
-        // direct rendering:
-        ctx->current_buf = (size_t)(mpi->priv);      // hack!
-    else if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
+    if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
         ; // done
     else if (mpi->flags & MP_IMGFLAG_PLANAR)
         draw_slice(vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
@@ -575,66 +548,6 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
     }
     ctx->unchanged_image = true;
     return true;
-}
-
-static uint32_t get_image(struct xvctx *ctx, mp_image_t *mpi)
-{
-    // we shouldn't change current_buf unless we do DR!
-    int buf = ctx->current_buf;
-
-    if (mpi->type == MP_IMGTYPE_STATIC && ctx->num_buffers > 1)
-        return VO_FALSE;        // it is not static
-    if (mpi->imgfmt != ctx->image_format)
-        return VO_FALSE;        // needs conversion :(
-    if (mpi->flags & MP_IMGFLAG_READABLE
-        && (mpi->type == MP_IMGTYPE_IPB || mpi->type == MP_IMGTYPE_IP)) {
-        // reference (I/P) frame of IP or IPB:
-        if (ctx->num_buffers < 2)
-            return VO_FALSE;    // not enough
-        ctx->current_ip_buf ^= 1;
-        // for IPB with 2 buffers we can DR only one of the 2 P frames:
-        if (mpi->type == MP_IMGTYPE_IPB && ctx->num_buffers < 3
-            && ctx->current_ip_buf)
-            return VO_FALSE;
-        buf = ctx->current_ip_buf;
-        if (mpi->type == MP_IMGTYPE_IPB)
-            ++buf;              // preserve space for B
-    }
-    if (mpi->height > ctx->xvimage[buf]->height)
-        return VO_FALSE;        //buffer to small
-    if (mpi->width * (mpi->bpp / 8) > ctx->xvimage[buf]->pitches[0])
-        return VO_FALSE;        //buffer to small
-    if ((mpi->flags & (MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_ACCEPT_WIDTH))
-        || (mpi->width * (mpi->bpp / 8) == ctx->xvimage[buf]->pitches[0])) {
-        ctx->current_buf = buf;
-        XvImage *current_image = ctx->xvimage[ctx->current_buf];
-        mpi->planes[0] = current_image->data + current_image->offsets[0];
-        mpi->stride[0] = current_image->pitches[0];
-        mpi->width = mpi->stride[0] / (mpi->bpp / 8);
-        if (mpi->flags & MP_IMGFLAG_PLANAR) {
-            if (mpi->flags & MP_IMGFLAG_SWAPPED) {
-                // I420
-                mpi->planes[1] = current_image->data
-                               + current_image->offsets[1];
-                mpi->planes[2] = current_image->data
-                               + current_image->offsets[2];
-                mpi->stride[1] = current_image->pitches[1];
-                mpi->stride[2] = current_image->pitches[2];
-            } else {
-                // YV12
-                mpi->planes[1] = current_image->data
-                               + current_image->offsets[2];
-                mpi->planes[2] = current_image->data
-                               + current_image->offsets[1];
-                mpi->stride[1] = current_image->pitches[2];
-                mpi->stride[2] = current_image->pitches[1];
-            }
-        }
-        mpi->flags |= MP_IMGFLAG_DIRECT;
-        mpi->priv = (void *)(size_t)ctx->current_buf;
-        return VO_TRUE;
-    }
-    return VO_FALSE;
 }
 
 static int query_format(struct xvctx *ctx, uint32_t format)
@@ -813,8 +726,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return (ctx->is_paused = 0);
     case VOCTRL_QUERY_FORMAT:
         return query_format(ctx, *((uint32_t *) data));
-    case VOCTRL_GET_IMAGE:
-        return get_image(ctx, data);
     case VOCTRL_DRAW_IMAGE:
         return draw_image(vo, data);
     case VOCTRL_GET_PANSCAN:
