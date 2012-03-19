@@ -17,16 +17,11 @@
  */
 
 #include <string.h>
-#ifndef __MINGW32__
-#include <sys/ioctl.h>
-#endif
-#include <fcntl.h>
-#include <stdio.h>
-#include <unistd.h>
 
 #include "config.h"
 #include "libao2/audio_out.h"
 #include "libaf/af.h"
+#include "mp_msg.h"
 #include "mixer.h"
 
 
