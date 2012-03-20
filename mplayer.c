@@ -1905,13 +1905,14 @@ static bool is_av_sub(int type)
     return type == 'b' || type == 'p' || type == 'x';
 }
 
-void update_subtitles(struct MPContext *mpctx, double refpts,
-                      double sub_offset, bool reset)
+void update_subtitles(struct MPContext *mpctx, double refpts_tl, bool reset)
 {
+    mpctx->osd->sub_offset = mpctx->video_offset;
     struct MPOpts *opts = &mpctx->opts;
     struct sh_video *sh_video = mpctx->sh_video;
     struct demux_stream *d_sub = mpctx->d_sub;
-    double curpts = refpts + sub_delay;
+    double refpts_s = refpts_tl - mpctx->osd->sub_offset;
+    double curpts_s = refpts_s + sub_delay;
     unsigned char *packet = NULL;
     int len;
     struct sh_sub *sh_sub = d_sub->sh;
@@ -1936,7 +1937,7 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
         if (sub_fps == 0)
             sub_fps = sh_video ? sh_video->fps : 25;
         current_module = "find_sub";
-        find_sub(mpctx, mpctx->subdata, curpts *
+        find_sub(mpctx, mpctx->subdata, curpts_s *
                  (mpctx->subdata->sub_uses_time ? 100. : sub_fps));
         if (vo_sub)
             mpctx->vo_sub_last = vo_sub;
@@ -1951,13 +1952,13 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
             // Vobsub
             len = 0;
             if (vo_vobsub) {
-                if (curpts >= 0) {
-                    len = vobsub_get_packet(vo_vobsub, curpts,
+                if (curpts_s >= 0) {
+                    len = vobsub_get_packet(vo_vobsub, curpts_s,
                                             (void **)&packet, &timestamp);
                     if (len > 0)
                         mp_dbg(MSGT_CPLAYER, MSGL_V, "\rVOB sub: len=%d "
                                "v_pts=%5.3f v_timer=%5.3f sub=%5.3f ts=%d \n",
-                               len, refpts, sh_video->timer,
+                               len, refpts_s, sh_video->timer,
                                timestamp / 90000.0, timestamp);
                 }
             } else {
@@ -1969,14 +1970,14 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
                     // d_video->pts which would have been the simplest
                     // improvement doesn't work because mpeg specific hacks
                     // in video.c set d_video->pts to 0.
-                    float x = d_sub->pts - refpts;
+                    float x = d_sub->pts - refpts_s;
                     if (x > -20 && x < 20) // prevent missing subs on pts reset
                         timestamp = 90000 * d_sub->pts;
                     else
-                        timestamp = 90000 * curpts;
+                        timestamp = 90000 * curpts_s;
                     mp_dbg(MSGT_CPLAYER, MSGL_V, "\rDVD sub: len=%d  "
                            "v_pts=%5.3f  s_pts=%5.3f  ts=%d \n", len,
-                           refpts, d_sub->pts, timestamp);
+                           refpts_s, d_sub->pts, timestamp);
                 }
             }
             if (len <= 0 || !packet)
@@ -2002,19 +2003,19 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
             ds_get_next_pts(d_sub);
 
         while (d_sub->first) {
-            double subpts = ds_get_next_pts(d_sub) + sub_offset;
-            if (subpts > curpts) {
+            double subpts_s = ds_get_next_pts(d_sub);
+            if (subpts_s > curpts_s) {
                 // Libass handled subs can be fed to it in advance
                 if (!opts->ass_enabled || !is_text_sub(type))
                     break;
                 // Try to avoid demuxing whole file at once
-                if (d_sub->non_interleaved && subpts > curpts + 1)
+                if (d_sub->non_interleaved && subpts_s > curpts_s + 1)
                     break;
             }
             double duration = d_sub->first->duration;
             len = ds_get_packet_sub(d_sub, &packet);
             if (is_av_sub(type)) {
-                int ret = decode_avsub(sh_sub, packet, len, subpts, duration);
+                int ret = decode_avsub(sh_sub, packet, len, subpts_s, duration);
                 if (ret < 0)
                     mp_msg(MSGT_SPUDEC, MSGL_WARN, "lavc failed decoding "
                            "subtitle\n");
@@ -2043,10 +2044,10 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
                 continue;
             }
             if (sh_sub && sh_sub->active) {
-                sub_decode(sh_sub, mpctx->osd, packet, len, subpts, duration);
+                sub_decode(sh_sub, mpctx->osd, packet, len, subpts_s, duration);
                 continue;
             }
-            if (subpts != MP_NOPTS_VALUE) {
+            if (subpts_s != MP_NOPTS_VALUE) {
                 if (duration < 0)
                     sub_clear_text(&subs, MP_NOPTS_VALUE);
                 if (type == 'a') { // ssa/ass subs without libass => convert to plaintext
@@ -2060,21 +2061,21 @@ void update_subtitles(struct MPContext *mpctx, double refpts,
                     len -= p - packet;
                     packet = p;
                 }
-                double endpts = MP_NOPTS_VALUE;
-                if (subpts != MP_NOPTS_VALUE && duration >= 0)
-                    endpts = subpts + duration;
-                sub_add_text(&subs, packet, len, endpts);
+                double endpts_s = MP_NOPTS_VALUE;
+                if (subpts_s != MP_NOPTS_VALUE && duration >= 0)
+                    endpts_s = subpts_s + duration;
+                sub_add_text(&subs, packet, len, endpts_s);
                 set_osd_subtitle(mpctx, &subs);
             }
             if (d_sub->non_interleaved)
                 ds_get_next_pts(d_sub);
         }
         if (!opts->ass_enabled)
-            if (sub_clear_text(&subs, curpts))
+            if (sub_clear_text(&subs, curpts_s))
                 set_osd_subtitle(mpctx, &subs);
     }
     if (vo_spudec) {
-        spudec_heartbeat(vo_spudec, 90000 * curpts);
+        spudec_heartbeat(vo_spudec, 90000 * curpts_s);
         if (spudec_changed(vo_spudec))
             vo_osd_changed(OSDTYPE_SPU);
     }
@@ -3014,7 +3015,7 @@ static int redraw_osd(struct MPContext *mpctx)
         return -1;
     if (vo_redraw_frame(mpctx->video_out) < 0)
         return -1;
-    mpctx->osd->pts = mpctx->video_pts;
+    mpctx->osd->pts = mpctx->video_pts - mpctx->osd->sub_offset;
     if (!(sh_video->output_flags & VFCAP_EOSD_FILTER))
         vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
     vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
@@ -3047,8 +3048,7 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
         // wrong (probably 0).
         mpctx->sh_video->pts = mpctx->d_video->pts + mpctx->video_offset;
         mpctx->video_pts = mpctx->sh_video->pts;
-        update_subtitles(mpctx, mpctx->sh_video->pts, mpctx->video_offset,
-                         true);
+        update_subtitles(mpctx, mpctx->sh_video->pts, true);
         update_teletext(mpctx->sh_video, mpctx->demuxer, 1);
     }
 
@@ -3060,8 +3060,7 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
         mpctx->ao->buffer.len = mpctx->ao->buffer_playable_size;
         mpctx->sh_audio->a_buffer_len = 0;
         if (!mpctx->sh_video)
-            update_subtitles(mpctx, mpctx->sh_audio->pts,
-                             mpctx->video_offset, true);
+            update_subtitles(mpctx, mpctx->sh_audio->pts, true);
     }
 
     if (vo_vobsub && mpctx->sh_video) {
@@ -3551,11 +3550,11 @@ static void run_playloop(struct MPContext *mpctx)
         vo_new_frame_imminent(mpctx->video_out);
         struct sh_video *sh_video = mpctx->sh_video;
         mpctx->video_pts = sh_video->pts;
-        update_subtitles(mpctx, sh_video->pts, mpctx->video_offset, false);
+        update_subtitles(mpctx, sh_video->pts, false);
         update_teletext(sh_video, mpctx->demuxer, 0);
         update_osd_msg(mpctx);
         struct vf_instance *vf = sh_video->vfilter;
-        mpctx->osd->pts = mpctx->video_pts;
+        mpctx->osd->pts = mpctx->video_pts - mpctx->osd->sub_offset;
         vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
         vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
         vo_osd_changed(0);
@@ -3681,7 +3680,7 @@ static void run_playloop(struct MPContext *mpctx)
         print_status(mpctx, a_pos, false);
 
         if (!mpctx->sh_video)
-            update_subtitles(mpctx, a_pos, mpctx->video_offset, false);
+            update_subtitles(mpctx, a_pos, false);
     }
 
     /* It's possible for the user to simultaneously switch both audio
