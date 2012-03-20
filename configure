@@ -343,7 +343,6 @@ Optional features:
   --disable-dvdread      disable libdvdread [autodetect]
   --disable-dvdread-internal  disable internal libdvdread [autodetect]
   --disable-libdvdcss-internal  disable internal libdvdcss [autodetect]
-  --disable-cdparanoia   disable cdparanoia [autodetect]
   --disable-cddb         disable cddb [autodetect]
   --disable-bitmap-font  disable bitmap font support [enable]
   --disable-freetype     disable FreeType 2 font rendering [autodetect]
@@ -682,7 +681,7 @@ _charset="UTF-8"
 _crash_debug=no
 _sighandler=yes
 _libdv=auto
-_cdparanoia=auto
+_cdda=auto
 _cddb=auto
 _big_endian=auto
 _bitmap_font=yes
@@ -1067,8 +1066,6 @@ for ac_option do
   --disable-shm)        _shm=no         ;;
   --enable-select)      _select=yes     ;;
   --disable-select)     _select=no      ;;
-  --enable-cdparanoia)  _cdparanoia=yes ;;
-  --disable-cdparanoia) _cdparanoia=no  ;;
   --enable-cddb)        _cddb=yes       ;;
   --disable-cddb)       _cddb=no        ;;
   --enable-big-endian)  _big_endian=yes ;;
@@ -5170,57 +5167,25 @@ fi
 echores "$_libdvdcss_internal"
 
 
-echocheck "cdparanoia"
-if test "$_cdparanoia" = auto ; then
-    cat > $TMPC <<EOF
-#include <cdda_interface.h>
-#include <cdda_paranoia.h>
-// This need a better test. How ?
-int main(void) { void *test = cdda_verbose_set; return test == (void *)1; }
-EOF
-    _cdparanoia=no
-    for _inc_tmp in "" "-I/usr/include/cdda" "-I/usr/local/include/cdda" ; do
-      cc_check $_inc_tmp -lcdda_interface -lcdda_paranoia $_ld_lm &&
-        _cdparanoia=yes && extra_cflags="$extra_cflags $_inc_tmp" && break
-    done
-fi
-if test "$_cdparanoia" = yes ; then
-    _cdda='yes'
-    extra_ldflags="$extra_ldflags -lcdda_interface -lcdda_paranoia"
-    openbsd && extra_ldflags="$extra_ldflags -lutil"
-fi
-echores "$_cdparanoia"
-
-
 echocheck "libcdio"
-if test "$_libcdio" = auto && test "$_cdparanoia" = no ; then
+if test "$_libcdio" = auto ; then
     _libcdio=no
     if pkg_config_add libcdio_paranoia ; then
         _libcdio=yes
     fi
 fi
-if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
+if test "$_libcdio" = yes ; then
     _cdda='yes'
-    def_libcdio='#define CONFIG_LIBCDIO 1'
-    def_havelibcdio='yes'
-else
-    _libcdio=no
-    if test "$_cdparanoia" = yes ; then
-       res_comment="using cdparanoia"
-    fi
-    def_libcdio='#undef CONFIG_LIBCDIO'
-    def_havelibcdio='no'
-fi
-echores "$_libcdio"
-
-if test "$_cdda" = yes ; then
+    def_cdda='#define CONFIG_CDDA 1'
     test $_cddb = auto && test $networking = yes && _cddb=yes
-    def_cdparanoia='#define CONFIG_CDDA 1'
     inputmodules="cdda $inputmodules"
 else
-    def_cdparanoia='#undef CONFIG_CDDA'
+    _libcdio=no
+    _cdda='no'
+    def_cdda='#undef CONFIG_CDDA'
     noinputmodules="cdda $noinputmodules"
 fi
+echores "$_libcdio"
 
 if test "$_cddb" = yes ; then
     def_cddb='#define CONFIG_CDDB 1'
@@ -6683,9 +6648,9 @@ $(ff_config_enable "$cpuexts_all" "$cpuexts" "HAVE")
 #define DEFAULT_DVD_DEVICE   "$default_dvd_device"
 $def_bluray
 $def_bsdi_dvd
+$def_cdda
 $def_cddb
 $def_cdio
-$def_cdparanoia
 $def_cdrom
 $def_dvd
 $def_dvd_bsd
@@ -6696,7 +6661,6 @@ $def_dvdio
 $def_dvdnav
 $def_dvdread
 $def_hpux_scsi_h
-$def_libcdio
 $def_sol_scsi_h
 $def_vcd
 
