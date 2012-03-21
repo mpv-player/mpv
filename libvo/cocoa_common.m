@@ -379,6 +379,7 @@ void create_menu()
 - (void) fullscreen
 {
     if (!vo_fs) {
+        update_screen_info();
         [NSApp setPresentationOptions:NSApplicationPresentationHideDock|NSApplicationPresentationHideMenuBar];
         s->windowed_frame = [self frame];
         [self setHasShadow:NO];
