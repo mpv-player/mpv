@@ -19,6 +19,8 @@
 #ifndef MPLAYER_INPUT_H
 #define MPLAYER_INPUT_H
 
+#include <stdbool.h>
+
 // All command IDs
 enum mp_command_type {
     MP_CMD_SEEK,
@@ -153,14 +155,11 @@ enum mp_command_type {
 };
 
 // The arg types
-#define MP_CMD_ARG_INT 0
-#define MP_CMD_ARG_FLOAT 1
-#define MP_CMD_ARG_STRING 2
-#define MP_CMD_ARG_VOID 3
+#define MP_CMD_ARG_INT 1
+#define MP_CMD_ARG_FLOAT 2
+#define MP_CMD_ARG_STRING 3
 
-#ifndef MP_CMD_MAX_ARGS
 #define MP_CMD_MAX_ARGS 10
-#endif
 
 // Error codes for the drivers
 
@@ -180,19 +179,19 @@ struct input_ctx;
 
 struct mp_cmd_arg {
     int type;
+    bool optional;
     union {
         int i;
         float f;
         char *s;
-        void *v;
     } v;
 };
 
 typedef struct mp_cmd {
     int id;
     char *name;
-    int nargs;
     struct mp_cmd_arg args[MP_CMD_MAX_ARGS];
+    int nargs;
     int pausing;
     struct mp_cmd *queue_prev;
     struct mp_cmd *queue_next;
