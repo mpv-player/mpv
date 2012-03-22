@@ -50,8 +50,6 @@
 
 #include "libavcodec/vdpau.h"
 
-#include "sub/font_load.h"
-
 #include "libavutil/common.h"
 #include "libavutil/mathematics.h"
 
@@ -384,11 +382,7 @@ static void resize(struct vo *vo)
     vc->src_rect_vid.y1 = vc->flip ? src_rect.top    : src_rect.bottom;
     vc->border_x        = borders.left;
     vc->border_y        = borders.top;
-#ifdef CONFIG_FREETYPE
-    // adjust font size to display size
-    force_load_font = 1;
-#endif
-    vo_osd_changed(OSDTYPE_OSD);
+    vo_osd_resized();
     int flip_offset_ms = vo_fs ? vc->flip_offset_fs : vc->flip_offset_window;
     vo->flip_queue_offset = flip_offset_ms / 1000.;
 

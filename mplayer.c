@@ -80,12 +80,12 @@
 #include "sub/subreader.h"
 #include "sub/find_subfiles.h"
 #include "sub/dec_sub.h"
+#include "sub/sub_cc.h"
 
 #include "mp_osd.h"
 #include "libvo/video_out.h"
 #include "screenshot.h"
 
-#include "sub/font_load.h"
 #include "sub/sub.h"
 #include "sub/av_sub.h"
 #include "libmpcodecs/dec_teletext.h"
@@ -318,16 +318,6 @@ static int force_srate = 0;
 int frame_dropping = 0;      // option  0=no drop  1= drop vo  2= drop decode
 static int play_n_frames = -1;
 static int play_n_frames_mf = -1;
-
-// sub:
-char *font_name = NULL;
-char *sub_font_name = NULL;
-extern int font_fontconfig;
-float font_factor = 0.75;
-float sub_delay = 0;
-float sub_fps = 0;
-int subcc_enabled = 0;
-int suboverlap_enabled = 1;
 
 #include "sub/ass_mp.h"
 
@@ -708,14 +698,6 @@ void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
     current_module = "uninit_input";
     mp_input_uninit(mpctx->input);
 
-#ifdef CONFIG_FREETYPE
-    current_module = "uninit_font";
-    if (mpctx->osd && mpctx->osd->sub_font != vo_font)
-        free_font_desc(mpctx->osd->sub_font);
-    free_font_desc(vo_font);
-    vo_font = NULL;
-    done_freetype();
-#endif
     osd_free(mpctx->osd);
 
 #ifdef CONFIG_ASS
@@ -1652,7 +1634,6 @@ static void update_osd_msg(struct MPContext *mpctx)
     struct MPOpts *opts = &mpctx->opts;
     mp_osd_msg_t *msg;
     struct osd_state *osd = mpctx->osd;
-    char osd_text_timer[128];
 
     if (mpctx->add_osd_seek_info) {
         double percentage = get_percent_pos(mpctx);
@@ -1682,6 +1663,7 @@ static void update_osd_msg(struct MPContext *mpctx)
 
     if (mpctx->sh_video && opts->term_osd != 1) {
         // fallback on the timer
+        char osd_text_timer[128] = {0};
         if (opts->osd_level >= 2) {
             int len = get_time_length(mpctx);
             int percentage = -1;
@@ -1723,19 +1705,22 @@ static void update_osd_msg(struct MPContext *mpctx)
                 fractions_text[0] = 0;
             }
 
+            osd_get_function_sym(osd_text_timer, sizeof(osd_text_timer),
+                                 mpctx->osd_function);
+            size_t blen = strlen(osd_text_timer);
+
             if (opts->osd_level == 3)
-                snprintf(osd_text_timer, sizeof(osd_text_timer),
-                         "%c %02d:%02d:%02d%s / %02d:%02d:%02d%s",
-                         mpctx->osd_function, pts / 3600, (pts / 60) % 60, pts % 60,
-                         fractions_text, len / 3600, (len / 60) % 60, len % 60,
+                snprintf(osd_text_timer + blen, sizeof(osd_text_timer) - blen,
+                         " %02d:%02d:%02d%s / %02d:%02d:%02d%s",
+                         pts / 3600, (pts / 60) % 60, pts % 60, fractions_text,
+                         len / 3600, (len / 60) % 60, len % 60,
                          percentage_text);
             else
-                snprintf(osd_text_timer, sizeof(osd_text_timer),
-                         "%c %02d:%02d:%02d%s%s",
-                         mpctx->osd_function, pts / 3600, (pts / 60) % 60,
-                         pts % 60, fractions_text, percentage_text);
-        } else
-            osd_text_timer[0] = 0;
+                snprintf(osd_text_timer + blen, sizeof(osd_text_timer) - blen,
+                         " %02d:%02d:%02d%s%s",
+                         pts / 3600, (pts / 60) % 60, pts % 60, fractions_text,
+                         percentage_text);
+        }
 
         if (strcmp(osd->osd_text, osd_text_timer)) {
             osd_set_text(osd, osd_text_timer);
@@ -4090,44 +4075,11 @@ int main(int argc, char *argv[])
 
     //------ load global data first ------
 
-    mpctx->osd = osd_create();
-
-    // check font
-#ifdef CONFIG_FREETYPE
-    init_freetype();
-#endif
-#ifdef CONFIG_FONTCONFIG
-    if (font_fontconfig <= 0) {
-#endif
-#ifdef CONFIG_BITMAP_FONT
-    if (font_name) {
-        vo_font = read_font_desc(font_name, font_factor, verbose > 1);
-        if (!vo_font)
-            mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Cannot load bitmap font: %s\n",
-                    filename_recode(font_name));
-    } else {
-        // try default:
-        vo_font = read_font_desc(mem_ptr = get_path("font/font.desc"),
-                                 font_factor, verbose > 1);
-        free(mem_ptr); // release the buffer created by get_path()
-        if (!vo_font)
-            vo_font = read_font_desc(MPLAYER_DATADIR "/font/font.desc",
-                                     font_factor, verbose > 1);
-    }
-    if (sub_font_name)
-        mpctx->osd->sub_font = read_font_desc(sub_font_name, font_factor,
-                                              verbose > 1);
-    else
-        mpctx->osd->sub_font = vo_font;
-#endif
-#ifdef CONFIG_FONTCONFIG
-}
-#endif
-
 #ifdef CONFIG_ASS
     mpctx->ass_library = mp_ass_init(opts);
-    mpctx->osd->ass_library = mpctx->ass_library;
 #endif
+
+    mpctx->osd = osd_create(opts, mpctx->ass_library);
 
 #ifdef HAVE_RTC
     if (opts->rtc) {
@@ -4792,9 +4744,7 @@ goto_enable_cache:
     if (mpctx->sh_video) {
         if (mpctx->sh_video->output_flags & VFCAP_SPU && vo_spudec)
             spudec_set_hw_spu(vo_spudec, mpctx->video_out);
-#ifdef CONFIG_FREETYPE
-        force_load_font = 1;
-#endif
+        osd_font_invalidate();
     } else if (!mpctx->sh_audio)
         goto goto_next_file;
 

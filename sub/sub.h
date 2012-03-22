@@ -66,19 +66,24 @@ typedef struct mp_osd_obj_s {
     int allocated;
     unsigned char *alpha_buffer;
     unsigned char *bitmap_buffer;
+
+    struct ass_track *osd_track;
 } mp_osd_obj_t;
 
 struct osd_state {
     struct ass_library *ass_library;
     // flag to signal reinitialization due to ass-related option changes
     bool ass_force_reload;
+    int w, h;
     char *osd_text;
+    struct ass_renderer *osd_render;
     struct font_desc *sub_font;
     struct ass_track *ass_track;
     double pts;
     double sub_offset;
     bool ass_track_changed;
     bool vsfilter_aspect;
+    struct MPOpts *opts;
 };
 
 #include "subreader.h"
@@ -133,6 +138,22 @@ extern int spu_alignment;
 extern int spu_aamode;
 extern float spu_gaussvar;
 
+extern char *subtitle_font_encoding;
+extern float text_font_scale_factor;
+extern float osd_font_scale_factor;
+extern float subtitle_font_radius;
+extern float subtitle_font_thickness;
+extern int subtitle_autoscale;
+
+extern char *font_name;
+extern char *sub_font_name;
+extern float font_factor;
+extern float sub_delay;
+extern float sub_fps;
+
+extern int font_fontconfig;
+extern int sub_justify;
+
 void osd_draw_text(struct osd_state *osd, int dxs, int dys,
                    void (*draw_alpha)(void *ctx, int x0, int y0, int w, int h,
                                       unsigned char* src, unsigned char *srca,
@@ -149,10 +170,11 @@ void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
 void osd_remove_text(struct osd_state *osd, int dxs, int dys,
                      void (*remove)(int x0, int y0, int w, int h));
 
-struct osd_state *osd_create(void);
+struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib);
 void osd_set_text(struct osd_state *osd, const char *text);
 int osd_update(struct osd_state *osd, int dxs, int dys);
 int vo_osd_changed(int new_value);
+void vo_osd_resized(void);
 int vo_osd_check_range_update(int,int,int,int);
 void osd_free(struct osd_state *osd);
 
@@ -169,5 +191,21 @@ void osd_set_nav_box (uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey);
 #ifdef IS_OLD_VO
 #define vo_remove_text(...) osd_remove_text(global_osd, __VA_ARGS__)
 #endif
+
+// used only by osd_ft.c or osd_libass.c
+void osd_alloc_buf(mp_osd_obj_t* obj);
+void draw_alpha_buf(mp_osd_obj_t* obj, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
+void vo_draw_text_from_buffer(mp_osd_obj_t* obj,void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx);
+
+// defined in osd_ft.c or osd_libass.c
+void vo_update_text_osd(struct osd_state *osd, mp_osd_obj_t *obj);
+void vo_update_text_teletext(struct osd_state *osd, mp_osd_obj_t *obj);
+void vo_update_text_progbar(struct osd_state *osd, mp_osd_obj_t *obj);
+void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t *obj);
+void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function);
+void osd_font_invalidate(void);
+void osd_font_load(struct osd_state *osd);
+void osd_init_backend(struct osd_state *osd);
+void osd_destroy_backend(struct osd_state *osd);
 
 #endif /* MPLAYER_SUB_H */

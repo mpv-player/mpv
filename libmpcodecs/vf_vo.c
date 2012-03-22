@@ -33,8 +33,6 @@
 #include "sub/ass_mp.h"
 #include "sub/sub.h"
 
-extern float sub_delay;
-
 struct vf_priv_s {
     struct vo *vo;
 #ifdef CONFIG_ASS

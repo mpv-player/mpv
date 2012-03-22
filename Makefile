@@ -213,6 +213,10 @@ SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
 SRCS_COMMON-$(XANIM_CODECS)          += libmpcodecs/vd_xanim.c
 SRCS_COMMON-$(XMMS_PLUGINS)          += libmpdemux/demux_xmms.c
 SRCS_COMMON-$(XVID4)                 += libmpcodecs/vd_xvid4.c
+
+SRCS_COMMON-$(OLD_OSD)               += sub/osd_ft.c
+SRCS_COMMON-$(LIBASS_OSD)            += sub/osd_libass.c
+
 SRCS_COMMON = asxparser.c \
               av_log.c \
               av_opts.c \

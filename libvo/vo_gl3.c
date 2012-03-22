@@ -45,7 +45,6 @@
 #include "libmpcodecs/mp_image.h"
 #include "geometry.h"
 #include "osd.h"
-#include "sub/font_load.h"
 #include "sub/sub.h"
 #include "eosd_packer.h"
 
@@ -1186,12 +1185,7 @@ static void resize(struct gl_priv *p)
     update_window_sized_objects(p);
     update_all_uniforms(p);
 
-#ifdef CONFIG_FREETYPE
-    // adjust font size to display size
-    force_load_font = 1;
-#endif
-    vo_osd_changed(OSDTYPE_OSD);
-
+    vo_osd_resized();
     gl->Clear(GL_COLOR_BUFFER_BIT);
     vo->want_redraw = true;
 }

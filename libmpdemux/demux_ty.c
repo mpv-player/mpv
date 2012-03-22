@@ -50,8 +50,7 @@
 #include "parse_es.h"
 #include "stheader.h"
 #include "sub/sub_cc.h"
-
-extern int sub_justify;
+#include "sub/sub.h"
 
 // 2/c0: audio data
 // 3/c0: audio packet header (PES header)

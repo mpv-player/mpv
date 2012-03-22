@@ -361,6 +361,7 @@ Optional features:
   --disable-pthreads     disable Posix threads support [autodetect]
   --disable-w32threads   disable Win32 threads support [autodetect]
   --disable-libass       disable subtitle rendering with libass [autodetect]
+  --disable-libass-osd   disable OSD rendering with libass [autodetect]
   --enable-rpath         enable runtime linker path for extra libs [disabled]
   --disable-libpostproc  disable postprocess filter (vf_pp) [autodetect]
 
@@ -657,6 +658,7 @@ _vstream=auto
 _pthreads=auto
 _w32threads=auto
 _ass=auto
+_libass_osd=auto
 _rpath=no
 libpostproc=auto
 _asmalign_pot=auto
@@ -991,6 +993,8 @@ for ac_option do
   --disable-w32threads) _w32threads=no  ;;
   --enable-libass)      _ass=yes        ;;
   --disable-libass)     _ass=no         ;;
+  --enable-libass-osd)  _libass_osd=yes ;;
+  --disable-libass-osd) _libass_osd=no  ;;
   --enable-rpath)       _rpath=yes      ;;
   --disable-rpath)      _rpath=no       ;;
   --enable-libpostproc) libpostproc=yes ;;
@@ -4542,6 +4546,39 @@ else
     noinputmodules="cddb $noinputmodules"
 fi
 
+
+echocheck "SSA/ASS support"
+if test "$_ass" = auto ; then
+    if pkg_config_add libass ; then
+        _ass=yes
+        def_ass='#define CONFIG_ASS 1'
+    else
+        die "Unable to find development files for libass. Aborting. If you really mean to compile without libass support use --disable-libass."
+    fi
+else
+    def_ass='#undef CONFIG_ASS'
+fi
+echores "$_ass"
+
+
+echocheck "libass OSD support"
+_old_osd=yes
+if test "$_libass_osd" = auto ; then
+    _libass_osd=no
+    if test "$_ass" = yes ; then
+        _libass_osd=yes
+        _old_osd=no
+        _bitmap_font=no
+        # disable unneeded dependencies
+        _freetype=no
+        _fontconfig=no
+        # this should always be forced, because libass does bidi itself
+        _fribidi=no
+    fi
+fi
+echores "$_libass_osd"
+
+
 echocheck "bitmap font support"
 if test "$_bitmap_font" = yes ; then
   def_bitmap_font="#define CONFIG_BITMAP_FONT 1"
@@ -4591,20 +4628,6 @@ else
     def_fontconfig='#undef CONFIG_FONTCONFIG'
 fi
 echores "$_fontconfig"
-
-
-echocheck "SSA/ASS support"
-if test "$_ass" = auto ; then
-    if pkg_config_add libass ; then
-        _ass=yes
-        def_ass='#define CONFIG_ASS 1'
-    else
-        die "Unable to find development files for libass. Aborting. If you really mean to compile without libass support use --disable-libass."
-    fi
-else
-    def_ass='#undef CONFIG_ASS'
-fi
-echores "$_ass"
 
 
 echocheck "fribidi with charsets"
@@ -5724,6 +5747,8 @@ JPEG = $_jpeg
 LADSPA = $_ladspa
 LIBA52 = $_liba52
 LIBASS = $_ass
+LIBASS_OSD = $_libass_osd
+OLD_OSD = $_old_osd
 LIBBLURAY = $_bluray
 LIBBS2B = $_libbs2b
 LIBDCA = $_libdca

@@ -34,22 +34,11 @@
 #include "path.h"
 #include "ass_mp.h"
 #include "subreader.h"
+#include "sub/sub.h"
 #include "stream/stream.h"
 #include "options.h"
 
-#ifdef CONFIG_FONTCONFIG
-extern int font_fontconfig;
-#else
-static int font_fontconfig = -1;
-#endif
-extern char *font_name;
-extern char *sub_font_name;
-extern float text_font_scale_factor;
-extern int subtitle_autoscale;
-
-#ifdef CONFIG_ICONV
-extern char *sub_cp;
-#else
+#ifndef CONFIG_ICONV
 static char *sub_cp = 0;
 #endif
 

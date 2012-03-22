@@ -58,6 +58,8 @@ static int initialized=0;
 static int cc_mode=CC_ROLLON;
 static int cc_lines=4; ///< number of visible rows in CC roll-up mode, not used in CC roll-on mode
 
+int subcc_enabled = 0;
+
 static void build_char_table(void)
 {
   int i;

@@ -72,8 +72,6 @@ static const struct vf_priv_s {
     } *line_limits;
 } vf_priv_dflt;
 
-extern float sub_delay;
-
 static int config(struct vf_instance *vf,
                   int width, int height, int d_width, int d_height,
                   unsigned int flags, unsigned int outfmt)

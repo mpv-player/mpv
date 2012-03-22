@@ -83,13 +83,6 @@ typedef struct font_desc {
 
 extern font_desc_t* vo_font;
 
-extern char *subtitle_font_encoding;
-extern float text_font_scale_factor;
-extern float osd_font_scale_factor;
-extern float subtitle_font_radius;
-extern float subtitle_font_thickness;
-extern int subtitle_autoscale;
-
 extern int vo_image_width;
 extern int vo_image_height;
 

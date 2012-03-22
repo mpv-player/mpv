@@ -40,7 +40,6 @@
 #include "aspect.h"
 #include "w32_common.h"
 #include "libavutil/common.h"
-#include "sub/font_load.h"
 #include "sub/sub.h"
 #include "eosd_packer.h"
 
@@ -893,12 +892,7 @@ static bool resize_d3d(d3d_priv *priv)
 
     calc_fs_rect(priv);
 
-#ifdef CONFIG_FREETYPE
-    // font needs to be adjusted
-    force_load_font = 1;
-#endif
-    // OSD needs to be drawn fresh for new size
-    vo_osd_changed(OSDTYPE_OSD);
+    vo_osd_resized();
 
     priv->vo->want_redraw = true;
 

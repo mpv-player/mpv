@@ -48,22 +48,13 @@
 #include "mp_msg.h"
 #include "mplayer.h"
 #include "path.h"
+#include "sub/sub.h"
+
 #include "osd_font.h"
 
 #if (FREETYPE_MAJOR > 2) || (FREETYPE_MAJOR == 2 && FREETYPE_MINOR >= 1)
 #define HAVE_FREETYPE21
 #endif
-
-char *subtitle_font_encoding = NULL;
-float text_font_scale_factor = 3.5;
-float osd_font_scale_factor = 4.0;
-float subtitle_font_radius = 2.0;
-float subtitle_font_thickness = 2.0;
-// 0 = no autoscale
-// 1 = video height
-// 2 = video width
-// 3 = diagonal
-int subtitle_autoscale = 3;
 
 int vo_image_width = 0;
 int vo_image_height = 0;
