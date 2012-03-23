@@ -435,6 +435,7 @@ Video output:
   --disable-yuv4mpeg       disable yuv4mpeg video output [enable]
   --disable-corevideo      disable CoreVideo video output [autodetect]
   --disable-cocoa          disable Cocoa OpenGL backend [autodetect]
+  --disable-sharedbuffer   disable OSX shared buffer video output [autodetect]
 
 Audio output:
   --disable-alsa         disable ALSA audio output [autodetect]
@@ -691,6 +692,7 @@ _qtx=auto
 _coreaudio=auto
 _corevideo=auto
 _cocoa=auto
+_sharedbuffer=auto
 quicktime=auto
 _macosx_finder=no
 _macosx_bundle=auto
@@ -1120,6 +1122,8 @@ for ac_option do
   --disable-corevideo) _corevideo=no ;;
   --enable-cocoa) _cocoa=yes ;;
   --disable-cocoa) _cocoa=no ;;
+  --enable-sharedbuffer) _sharedbuffer=yes ;;
+  --disable-sharedbuffer) _sharedbuffer=no ;;
   --enable-macosx-finder) _macosx_finder=yes ;;
   --disable-macosx-finder) _macosx_finder=no ;;
   --enable-macosx-bundle) _macosx_bundle=yes ;;
@@ -4223,6 +4227,26 @@ else
 fi
 echores "$_corevideo"
 
+echocheck "SharedBuffer"
+if test "$_sharedbuffer" = auto ; then
+  cat > $TMPC <<EOF
+int main(void) {
+  NSApplicationLoad();
+}
+EOF
+  _sharedbuffer=no
+  cc_check -framework Cocoa && _sharedbuffer=yes
+fi
+if test "$_sharedbuffer" = yes ; then
+  vomodules="sharedbuffer $vomodules"
+  libs_mplayer="$libs_mplayer -framework Cocoa"
+  def_sharedbuffer='#define CONFIG_SHAREDBUFFER 1'
+else
+  novomodules="sharedbuffer $novomodules"
+  def_sharedbuffer='#undef CONFIG_SHAREDBUFFER'
+fi
+echores "$_sharedbuffer"
+
 fi #if darwin
 
 
@@ -6361,6 +6385,7 @@ CDDA = $_cdda
 CDDB = $_cddb
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
+SHAREDBUFFER = $_sharedbuffer
 DGA = $_dga
 DIRECT3D = $_direct3d
 DIRECTFB = $_directfb
@@ -6760,6 +6785,7 @@ $def_aa
 $def_bl
 $def_caca
 $def_corevideo
+$def_sharedbuffer
 $def_dga
 $def_dga1
 $def_dga2
