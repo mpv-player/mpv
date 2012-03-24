@@ -52,8 +52,7 @@ typedef struct mad_decoder_s {
 
 static int preinit(sh_audio_t *sh){
 
-  mad_decoder_t *this = malloc(sizeof(mad_decoder_t));
-  memset(this,0,sizeof(mad_decoder_t));
+  mad_decoder_t *this = calloc(1, sizeof(mad_decoder_t));
   sh->context = this;
 
   mad_synth_init  (&this->synth);
@@ -67,7 +66,7 @@ static int preinit(sh_audio_t *sh){
 }
 
 static int read_frame(sh_audio_t *sh){
-  mad_decoder_t *this = (mad_decoder_t *) sh->context;
+  mad_decoder_t *this = sh->context;
   int len;
 
 while((len=demux_read_data(sh->ds,&sh->a_in_buffer[sh->a_in_buffer_len],
@@ -94,21 +93,22 @@ return 0;
 }
 
 static int init(sh_audio_t *sh){
-  mad_decoder_t *this = (mad_decoder_t *) sh->context;
+  mad_decoder_t *this = sh->context;
 
   this->have_frame=read_frame(sh);
   if(!this->have_frame) return 0; // failed to sync...
 
   sh->channels=(this->frame.header.mode == MAD_MODE_SINGLE_CHANNEL) ? 1 : 2;
   sh->samplerate=this->frame.header.samplerate;
-  sh->i_bps=this->frame.header.bitrate/8;
+  if (sh->i_bps < 1)
+    sh->i_bps=this->frame.header.bitrate/8;
   sh->samplesize=2;
 
   return 1;
 }
 
 static void uninit(sh_audio_t *sh){
-  mad_decoder_t *this = (mad_decoder_t *) sh->context;
+  mad_decoder_t *this = sh->context;
   mad_synth_finish (&this->synth);
   mad_frame_finish (&this->frame);
   mad_stream_finish(&this->stream);
@@ -131,7 +131,7 @@ static inline signed int scale(mad_fixed_t sample) {
 }
 
 static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen){
-  mad_decoder_t *this = (mad_decoder_t *) sh->context;
+  mad_decoder_t *this = sh->context;
   int len=0;
 
   while(len<minlen && len+4608<=maxlen){
@@ -170,7 +170,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 }
 
 static int control(sh_audio_t *sh,int cmd,void* arg, ...){
-  mad_decoder_t *this = (mad_decoder_t *) sh->context;
+  mad_decoder_t *this = sh->context;
     // various optional functions you MAY implement:
     switch(cmd){
       case ADCTRL_RESYNC_STREAM:
