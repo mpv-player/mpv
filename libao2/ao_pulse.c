@@ -30,6 +30,7 @@
 #include "libaf/af_format.h"
 #include "mp_msg.h"
 #include "audio_out.h"
+#include "input/input.h"
 
 #define PULSE_CLIENT_NAME "mplayer2"
 
@@ -84,6 +85,7 @@ static void stream_request_cb(pa_stream *s, size_t length, void *userdata)
 {
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
+    mp_input_wakeup(ao->input_ctx);
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
@@ -263,8 +265,14 @@ static int init(struct ao *ao, char *params)
     pa_stream_set_write_callback(priv->stream, stream_request_cb, ao);
     pa_stream_set_latency_update_callback(priv->stream,
                                           stream_latency_update_cb, ao);
-
-    if (pa_stream_connect_playback(priv->stream, sink, NULL,
+    pa_buffer_attr bufattr = {
+        .maxlength = -1,
+        .tlength = pa_usec_to_bytes(1000000, &ss),
+        .prebuf = -1,
+        .minreq = -1,
+        .fragsize = -1,
+    };
+    if (pa_stream_connect_playback(priv->stream, sink, &bufattr,
                                    PA_STREAM_INTERPOLATE_TIMING
                                    | PA_STREAM_AUTO_TIMING_UPDATE, NULL,
                                    NULL) < 0)

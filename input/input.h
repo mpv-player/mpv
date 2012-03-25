@@ -272,6 +272,9 @@ void mp_input_uninit(struct input_ctx *ictx);
 struct m_config;
 void mp_input_register_options(struct m_config *cfg);
 
+// Wake up sleeping input loop from another thread.
+void mp_input_wakeup(struct input_ctx *ictx);
+
 // Interruptible usleep:  (used by libmpdemux)
 int mp_input_check_interrupt(struct input_ctx *ictx, int time);
 

@@ -1775,8 +1775,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     current_module = "af_preinit";
     if (!(mpctx->initialized_flags & INITIALIZED_AO)) {
         mpctx->initialized_flags |= INITIALIZED_AO;
-        mpctx->ao = ao_create();
-        mpctx->ao->opts = opts;
+        mpctx->ao = ao_create(opts, mpctx->input);
         mpctx->ao->samplerate = force_srate;
         mpctx->ao->format = opts->audio_output_format;
     }

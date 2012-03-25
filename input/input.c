@@ -622,6 +622,8 @@ struct input_ctx {
 
     struct cmd_queue key_cmd_queue;
     struct cmd_queue control_cmd_queue;
+
+    int wakeup_pipe[2];
 };
 
 
@@ -1104,6 +1106,13 @@ static int default_cmd_func(int fd, char *buf, int l)
     }
 }
 
+static int read_wakeup(void *ctx, int fd)
+{
+    char buf[100];
+    read(fd, buf, sizeof(buf));
+    return MP_INPUT_NOTHING;
+}
+
 
 static char *find_bind_for_key(const struct cmd_bind *binds, int n, int *keys)
 {
@@ -1126,7 +1135,7 @@ static char *find_bind_for_key(const struct cmd_bind *binds, int n, int *keys)
 }
 
 static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
-                                               char *section)
+                                                 char *section)
 {
     struct cmd_bind_section *bind_section = ictx->cmd_bind_sections;
 
@@ -1731,7 +1740,24 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
         .ar_delay = input_conf->ar_delay,
         .ar_rate = input_conf->ar_rate,
         .default_bindings = input_conf->default_bindings,
+        .wakeup_pipe = {-1, -1},
     };
+
+#ifndef __MINGW32__
+    long ret = pipe(ictx->wakeup_pipe);
+    for (int i = 0; i < 2 && ret >= 0; i++) {
+        ret = fcntl(ictx->wakeup_pipe[i], F_GETFL);
+        if (ret < 0)
+            break;
+        ret = fcntl(ictx->wakeup_pipe[i], F_SETFL, ret | O_NONBLOCK);
+    }
+    if (ret < 0)
+        mp_msg(MSGT_INPUT, MSGL_ERR,
+               "Failed to initialize wakeup pipe: %s\n", strerror(errno));
+    else
+        mp_input_add_key_fd(ictx, ictx->wakeup_pipe[0], true, read_wakeup,
+                            NULL, NULL);
+#endif
 
     char *file;
     char *config_file = input_conf->config_file;
@@ -1830,17 +1856,17 @@ void mp_input_uninit(struct input_ctx *ictx)
     if (!ictx)
         return;
 
-    unsigned int i;
-
-    for (i = 0; i < ictx->num_key_fd; i++) {
+    for (int i = 0; i < ictx->num_key_fd; i++) {
         if (ictx->key_fds[i].close_func)
             ictx->key_fds[i].close_func(ictx->key_fds[i].fd);
     }
-
-    for (i = 0; i < ictx->num_cmd_fd; i++) {
+    for (int i = 0; i < ictx->num_cmd_fd; i++) {
         if (ictx->cmd_fds[i].close_func)
             ictx->cmd_fds[i].close_func(ictx->cmd_fds[i].fd);
     }
+    for (int i = 0; i < 2; i++)
+        if (ictx->wakeup_pipe[i] != -1)
+            close(ictx->wakeup_pipe[i]);
     talloc_free(ictx);
 }
 
@@ -1888,6 +1914,12 @@ static int print_cmd_list(m_option_t *cfg)
         printf("\n");
     }
     exit(0);
+}
+
+void mp_input_wakeup(struct input_ctx *ictx)
+{
+    if (ictx->wakeup_pipe[1] >= 0)
+        write(ictx->wakeup_pipe[1], &(char){0}, 1);
 }
 
 /**
