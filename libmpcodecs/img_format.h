@@ -49,7 +49,7 @@
 #define IMGFMT_BGR24 (IMGFMT_BGR|24)
 #define IMGFMT_BGR32 (IMGFMT_BGR|32)
 
-#define IMGFMT_GBR24P (('G'<<24)|('B'<<16)|('R'<<8)|24)
+#define IMGFMT_GBRP (('G'<<24)|('B'<<16)|('R'<<8)|24)
 
 #if HAVE_BIGENDIAN
 #define IMGFMT_ABGR IMGFMT_RGB32

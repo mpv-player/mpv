@@ -1191,7 +1191,7 @@ static struct {
     {"argb", IMGFMT_ARGB},
     {"bgra", IMGFMT_BGRA},
     {"abgr", IMGFMT_ABGR},
-    {"gbr24p", IMGFMT_GBR24P},
+    {"gbrp", IMGFMT_GBRP},
     {"mjpeg", IMGFMT_MJPEG},
     {"mjpg", IMGFMT_MJPEG},
     { NULL, 0 }

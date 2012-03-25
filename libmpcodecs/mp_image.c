@@ -122,7 +122,7 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	return;
     }
     mpi->num_planes=3;
-    if (out_fmt == IMGFMT_GBR24P) {
+    if (out_fmt == IMGFMT_GBRP) {
         mpi->bpp=24;
         mpi->flags|=MP_IMGFLAG_PLANAR;
         return;
