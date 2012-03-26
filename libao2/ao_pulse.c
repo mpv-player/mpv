@@ -49,6 +49,7 @@ struct priv {
 
     bool broken_pause;
     int retval;
+    bool did_reset;
 };
 
 #define GENERIC_ERR_MSG(ctx, str) \
@@ -316,25 +317,40 @@ static void cork(struct ao *ao, bool pause)
 static int play(struct ao *ao, void *data, int len, int flags)
 {
     struct priv *priv = ao->priv;
+    /* For some reason Pulseaudio behaves worse if this is done after
+     * the write - rapidly repeated seeks result in bogus increasing
+     * reported latency. */
+    if (priv->did_reset)
+        cork(ao, false);
     pa_threaded_mainloop_lock(priv->mainloop);
     if (pa_stream_write(priv->stream, data, len, NULL, 0,
                         PA_SEEK_RELATIVE) < 0) {
         GENERIC_ERR_MSG(priv->context, "pa_stream_write() failed");
         len = -1;
     }
-    pa_threaded_mainloop_unlock(priv->mainloop);
+    if (priv->did_reset) {
+        priv->did_reset = false;
+        if (!waitop(priv, pa_stream_update_timing_info(priv->stream,
+                                                       success_cb, ao))
+            || !priv->retval)
+            GENERIC_ERR_MSG(priv->context, "pa_stream_UPP() failed");
+    } else
+        pa_threaded_mainloop_unlock(priv->mainloop);
     return len;
 }
 
 // Reset the audio stream, i.e. flush the playback buffer on the server side
 static void reset(struct ao *ao)
 {
+    // pa_stream_flush() works badly if not corked
+    cork(ao, true);
     struct priv *priv = ao->priv;
     pa_threaded_mainloop_lock(priv->mainloop);
     priv->retval = 0;
     if (!waitop(priv, pa_stream_flush(priv->stream, success_cb, ao)) ||
         !priv->retval)
         GENERIC_ERR_MSG(priv->context, "pa_stream_flush() failed");
+    priv->did_reset = true;
 }
 
 // Pause the audio stream by corking it on the server
@@ -347,6 +363,8 @@ static void pause(struct ao *ao)
 static void resume(struct ao *ao)
 {
     struct priv *priv = ao->priv;
+    if (priv->did_reset)
+        return;
     /* Without this, certain versions will cause an infinite hang because
      * pa_stream_writable_size returns 0 always.
      * Note that this workaround causes A-V desync after pause. */
