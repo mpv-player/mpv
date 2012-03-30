@@ -431,6 +431,10 @@ void uninit_mpglcontext(MPGLContext *ctx);
 int create_mpglcontext(struct MPGLContext *ctx, int gl_flags, int gl_version,
                        uint32_t d_width, uint32_t d_height, uint32_t flags);
 
+// print a multi line string with line numbers (e.g. for shader sources)
+// mod, lev: module and log level, as in mp_msg()
+void mp_log_source(int mod, int lev, const char *src);
+
 //function pointers loaded from the OpenGL library
 struct GL {
     void (GLAPIENTRY *Begin)(GLenum);

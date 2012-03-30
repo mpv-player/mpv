@@ -2587,3 +2587,19 @@ void uninit_mpglcontext(MPGLContext *ctx)
     }
     talloc_free(ctx);
 }
+
+void mp_log_source(int mod, int lev, const char *src)
+{
+    int line = 1;
+    if (!src)
+        return;
+    while (*src) {
+        const char *end = strchr(src, '\n');
+        const char *next = end + 1;
+        if (!end)
+            next = end = src + strlen(src);
+        mp_msg(mod, lev, "[%3d] %.*s\n", line, (int)(end - src), src);
+        line++;
+        src = next;
+    }
+}
