@@ -33,22 +33,8 @@
 #include "video_out.h"
 #include "csputils.h"
 
-#ifdef CONFIG_GL_WIN32
-#include <windows.h>
-#include "w32_common.h"
-#endif
-#ifdef CONFIG_GL_X11
-#include <X11/Xlib.h>
-#include <GL/glx.h>
-#include "x11_common.h"
-// This old-vo wrapper macro would conflict with the struct member
-#undef update_xinerama_info
-#endif
 #include <GL/gl.h>
-
-#ifdef CONFIG_GL_WIN32
 #include <GL/glext.h>
-#endif
 
 #include "libvo/gl_header_fixes.h"
 
@@ -191,22 +177,9 @@ typedef struct MPGLContext {
     GL *gl;
     enum MPGLType type;
     struct vo *vo;
+    void *priv;
     // Bit size of each component in the created framebuffer. 0 if unknown.
     int depth_r, depth_g, depth_b;
-    union {
-        int w32;
-#ifdef CONFIG_GL_X11
-        XVisualInfo *x11;
-#endif
-    } vinfo;
-    union {
-#ifdef CONFIG_GL_WIN32
-        HGLRC w32;
-#endif
-#ifdef CONFIG_GL_X11
-        GLXContext x11;
-#endif
-    } context;
     int (*create_window)(struct MPGLContext *ctx, uint32_t d_width,
                          uint32_t d_height, uint32_t flags);
     int (*setGlWindow)(struct MPGLContext *);
@@ -214,6 +187,7 @@ typedef struct MPGLContext {
     void (*swapGlBuffers)(struct MPGLContext *);
     int (*check_events)(struct vo *vo);
     void (*fullscreen)(struct vo *vo);
+    void (*vo_uninit)(struct vo *vo);
     // only available if GL3 context creation is supported
     // gl_flags: bitfield of MPGLFLAG_* constants
     // gl_version: requested OpenGL version number (use MPGL_VER())
