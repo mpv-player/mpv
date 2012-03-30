@@ -265,6 +265,7 @@ void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
                int sx, int sy, int rect_tex, int is_yv12, int flip);
 int loadGPUProgram(GL *gl, GLenum target, char *prog);
+void glCheckError(GL *gl, const char *info);
 
 /** \addtogroup glconversion
  * \{ */
@@ -369,10 +370,20 @@ enum MPGLType {
     GLTYPE_SDL,
 };
 
+enum {
+    MPGLFLAG_DEBUG = 1,
+};
+
+#define MPGL_VER(major, minor) (((major) << 16) | (minor))
+#define MPGL_VER_GET_MAJOR(ver) ((ver) >> 16)
+#define MPGL_VER_GET_MINOR(ver) ((ver) & ((1 << 16) - 1))
+
 typedef struct MPGLContext {
     GL *gl;
     enum MPGLType type;
     struct vo *vo;
+    // Bit size of each component in the created framebuffer. 0 if unknown.
+    int depth_r, depth_g, depth_b;
     union {
         int w32;
 #ifdef CONFIG_GL_X11
@@ -392,17 +403,29 @@ typedef struct MPGLContext {
     int (*setGlWindow)(struct MPGLContext *);
     void (*releaseGlContext)(struct MPGLContext *);
     void (*swapGlBuffers)(struct MPGLContext *);
-    void (*update_xinerama_info)(struct vo *vo);
-    void (*border)(struct vo *vo);
     int (*check_events)(struct vo *vo);
     void (*fullscreen)(struct vo *vo);
+    // only available if GL3 context creation is supported
+    // gl_flags: bitfield of MPGLFLAG_* constants
+    // gl_version: requested OpenGL version number (use MPGL_VER())
+    // return value is one of the SET_WINDOW_* constants
+    int (*create_window_gl3)(struct MPGLContext *ctx, int gl_flags,
+                             int gl_version, uint32_t d_width,
+                             uint32_t d_height, uint32_t flags);
+    // optional
     void (*ontop)(struct vo *vo);
+    void (*border)(struct vo *vo);
+    void (*update_xinerama_info)(struct vo *vo);
 } MPGLContext;
 
 int mpgl_find_backend(const char *name);
 
 MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo);
 void uninit_mpglcontext(MPGLContext *ctx);
+
+// calls create_window_gl3 or create_window+setGlWindow
+int create_mpglcontext(struct MPGLContext *ctx, int gl_flags, int gl_version,
+                       uint32_t d_width, uint32_t d_height, uint32_t flags);
 
 //function pointers loaded from the OpenGL library
 struct GL {
@@ -414,7 +437,6 @@ struct GL {
     void (GLAPIENTRY *Translated)(double, double, double);
     void (GLAPIENTRY *Scaled)(double, double, double);
     void (GLAPIENTRY *Ortho)(double, double, double, double, double,double);
-    void (GLAPIENTRY *Frustum)(double, double, double, double, double, double);
     void (GLAPIENTRY *PushMatrix)(void);
     void (GLAPIENTRY *PopMatrix)(void);
     void (GLAPIENTRY *Clear)(GLbitfield);
@@ -426,13 +448,10 @@ struct GL {
     void (GLAPIENTRY *CallLists)(GLsizei, GLenum, const GLvoid *);
     void (GLAPIENTRY *GenTextures)(GLsizei, GLuint *);
     void (GLAPIENTRY *DeleteTextures)(GLsizei, const GLuint *);
-    void (GLAPIENTRY *TexEnvf)(GLenum, GLenum, GLfloat);
     void (GLAPIENTRY *TexEnvi)(GLenum, GLenum, GLint);
     void (GLAPIENTRY *Color4ub)(GLubyte, GLubyte, GLubyte, GLubyte);
     void (GLAPIENTRY *Color4f)(GLfloat, GLfloat, GLfloat, GLfloat);
     void (GLAPIENTRY *ClearColor)(GLclampf, GLclampf, GLclampf, GLclampf);
-    void (GLAPIENTRY *ClearDepth)(GLclampd);
-    void (GLAPIENTRY *DepthFunc)(GLenum);
     void (GLAPIENTRY *Enable)(GLenum);
     void (GLAPIENTRY *Disable)(GLenum);
     const GLubyte *(GLAPIENTRY * GetString)(GLenum);
@@ -455,12 +474,8 @@ struct GL {
     void (GLAPIENTRY *TexParameterfv)(GLenum, GLenum, const GLfloat *);
     void (GLAPIENTRY *TexCoord2f)(GLfloat, GLfloat);
     void (GLAPIENTRY *Vertex2f)(GLfloat, GLfloat);
-    void (GLAPIENTRY *Vertex3f)(GLfloat, GLfloat, GLfloat);
-    void (GLAPIENTRY *Normal3f)(GLfloat, GLfloat, GLfloat);
-    void (GLAPIENTRY *Lightfv)(GLenum, GLenum, const GLfloat *);
-    void (GLAPIENTRY *ColorMaterial)(GLenum, GLenum);
-    void (GLAPIENTRY *ShadeModel)(GLenum);
     void (GLAPIENTRY *GetIntegerv)(GLenum, GLint *);
+    void (GLAPIENTRY *GetBooleanv)(GLenum, GLboolean *);
     void (GLAPIENTRY *ColorMask)(GLboolean, GLboolean, GLboolean, GLboolean);
     void (GLAPIENTRY *ReadPixels)(GLint, GLint, GLsizei, GLsizei, GLenum,
                                   GLenum, GLvoid *);
@@ -471,6 +486,7 @@ struct GL {
     void (GLAPIENTRY *DrawArrays)(GLenum, GLint, GLsizei);
     void (GLAPIENTRY *EnableClientState)(GLenum);
     void (GLAPIENTRY *DisableClientState)(GLenum);
+    GLenum (GLAPIENTRY *GetError)(void);
 
 
     // OpenGL extension functions
@@ -480,6 +496,22 @@ struct GL {
     GLvoid * (GLAPIENTRY * MapBuffer)(GLenum, GLenum);
     GLboolean (GLAPIENTRY *UnmapBuffer)(GLenum);
     void (GLAPIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
+    void (GLAPIENTRY *ActiveTexture)(GLenum);
+    void (GLAPIENTRY *BindTexture)(GLenum, GLuint);
+    void (GLAPIENTRY *MultiTexCoord2f)(GLenum, GLfloat, GLfloat);
+    void (GLAPIENTRY *GenPrograms)(GLsizei, GLuint *);
+    void (GLAPIENTRY *DeletePrograms)(GLsizei, const GLuint *);
+    void (GLAPIENTRY *BindProgram)(GLenum, GLuint);
+    void (GLAPIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
+    void (GLAPIENTRY *GetProgramivARB)(GLenum, GLenum, GLint *);
+    void (GLAPIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
+                                             GLfloat, GLfloat);
+    int (GLAPIENTRY *SwapInterval)(int);
+    void (GLAPIENTRY *TexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei,
+                                  GLsizei, GLint, GLenum, GLenum,
+                                  const GLvoid *);
+
+    // ancient ATI extensions
     void (GLAPIENTRY *BeginFragmentShader)(void);
     void (GLAPIENTRY *EndFragmentShader)(void);
     void (GLAPIENTRY *SampleMap)(GLuint, GLuint, GLenum);
@@ -489,20 +521,49 @@ struct GL {
                                         GLuint, GLuint, GLuint, GLuint, GLuint,
                                         GLuint, GLuint, GLuint);
     void (GLAPIENTRY *SetFragmentShaderConstant)(GLuint, const GLfloat *);
-    void (GLAPIENTRY *ActiveTexture)(GLenum);
-    void (GLAPIENTRY *BindTexture)(GLenum, GLuint);
-    void (GLAPIENTRY *MultiTexCoord2f)(GLenum, GLfloat, GLfloat);
-    void (GLAPIENTRY *GenPrograms)(GLsizei, GLuint *);
-    void (GLAPIENTRY *DeletePrograms)(GLsizei, const GLuint *);
-    void (GLAPIENTRY *BindProgram)(GLenum, GLuint);
-    void (GLAPIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
+
+
+    // GL 3, possibly in GL 2.x as well in form of extensions
+    void (GLAPIENTRY *GenVertexArrays)(GLsizei, GLuint *);
+    void (GLAPIENTRY *BindVertexArray)(GLuint);
+    GLint (GLAPIENTRY *GetAttribLocation)(GLuint, const GLchar *);
+    void (GLAPIENTRY *EnableVertexAttribArray)(GLuint);
+    void (GLAPIENTRY *DisableVertexAttribArray)(GLuint);
+    void (GLAPIENTRY *VertexAttribPointer)(GLuint, GLint, GLenum, GLboolean,
+                                           GLsizei, const GLvoid *);
+    void (GLAPIENTRY *DeleteVertexArrays)(GLsizei, const GLuint *);
+    void (GLAPIENTRY *UseProgram)(GLuint);
+    GLint (GLAPIENTRY *GetUniformLocation)(GLuint, const GLchar *);
+    void (GLAPIENTRY *CompileShader)(GLuint);
+    GLuint (GLAPIENTRY *CreateProgram)(void);
+    GLuint (GLAPIENTRY *CreateShader)(GLenum);
+    void (GLAPIENTRY *ShaderSource)(GLuint, GLsizei, const GLchar **,
+                                    const GLint *);
+    void (GLAPIENTRY *LinkProgram)(GLuint);
+    void (GLAPIENTRY *AttachShader)(GLuint, GLuint);
+    void (GLAPIENTRY *DeleteShader)(GLuint);
+    void (GLAPIENTRY *DeleteProgram)(GLuint);
+    void (GLAPIENTRY *GetShaderInfoLog)(GLuint, GLsizei, GLsizei *, GLchar *);
+    void (GLAPIENTRY *GetShaderiv)(GLuint, GLenum, GLint *);
+    void (GLAPIENTRY *GetProgramInfoLog)(GLuint, GLsizei, GLsizei *, GLchar *);
     void (GLAPIENTRY *GetProgramiv)(GLenum, GLenum, GLint *);
-    void (GLAPIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
-                                             GLfloat, GLfloat);
-    int (GLAPIENTRY *SwapInterval)(int);
-    void (GLAPIENTRY *TexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei,
-                                  GLsizei, GLint, GLenum, GLenum,
-                                  const GLvoid *);
+    const GLubyte* (GLAPIENTRY *GetStringi)(GLenum, GLuint);
+    void (GLAPIENTRY *BindAttribLocation)(GLuint, GLuint, const GLchar *);
+    void (GLAPIENTRY *BindFramebuffer)(GLenum, GLuint);
+    void (GLAPIENTRY *GenFramebuffers)(GLsizei, GLuint *);
+    void (GLAPIENTRY *DeleteFramebuffers)(GLsizei, const GLuint *);
+    GLenum (GLAPIENTRY *CheckFramebufferStatus)(GLenum);
+    void (GLAPIENTRY *FramebufferTexture2D)(GLenum, GLenum, GLenum, GLuint,
+                                            GLint);
+
+    void (GLAPIENTRY *Uniform1f)(GLint, GLfloat);
+    void (GLAPIENTRY *Uniform3f)(GLint, GLfloat, GLfloat, GLfloat);
+    void (GLAPIENTRY *Uniform1i)(GLint, GLint);
+    void (GLAPIENTRY *UniformMatrix3fv)(GLint, GLsizei, GLboolean,
+                                        const GLfloat *);
+    void (GLAPIENTRY *UniformMatrix4x3fv)(GLint, GLsizei, GLboolean,
+                                          const GLfloat *);
+
 };
 
 #endif /* MPLAYER_GL_COMMON_H */
