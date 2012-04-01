@@ -56,7 +56,7 @@ void vstream_error(const char *format, ...) {
     va_start(va, format);
     vsnprintf(buf, 1024, format, va);
     va_end(va);
-    mp_msg(MSGT_STREAM, MSGL_ERR, buf);
+    mp_msg(MSGT_STREAM, MSGL_ERR, "%s", buf);
 }
 
 static struct stream_priv_s {
@@ -152,7 +152,8 @@ static int open_s(stream_t *stream, int mode, void* opts, int* file_format) {
 
   stream->start_pos = 0;
   stream->end_pos = vstream_streamsize();
-  mp_msg(MSGT_OPEN, MSGL_DBG2, "Tivo stream size is %d\n", stream->end_pos);
+  mp_msg(MSGT_OPEN, MSGL_DBG2, "Tivo stream size is %lld\n",
+         (long long)stream->end_pos);
 
   stream->priv = p;
   stream->fill_buffer = fill_buffer;
