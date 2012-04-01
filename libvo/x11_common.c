@@ -46,7 +46,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#include <X11/keysymdef.h>
+#include <X11/keysym.h>
 
 #ifdef CONFIG_XSS
 #include <X11/extensions/scrnsaver.h>
@@ -780,12 +780,13 @@ static int check_resize(struct vo *vo)
 int vo_x11_check_events(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
+    struct MPOpts *opts = vo->opts;
     Display *display = vo->x11->display;
     int ret = 0;
     XEvent Event;
 
-    if (x11->vo_mouse_autohide && x11->mouse_waiting_hide &&
-                                 (GetTimerMS() - x11->mouse_timer >= 1000)) {
+    if (x11->mouse_waiting_hide && opts->cursor_autohide_delay != -1 &&
+        (GetTimerMS() - x11->mouse_timer >= opts->cursor_autohide_delay)) {
         vo_hidecursor(display, x11->window);
         x11->mouse_waiting_hide = 0;
     }
@@ -846,16 +847,14 @@ int vo_x11_check_events(struct vo *vo)
             case MotionNotify:
                     vo_mouse_movement(vo, Event.xmotion.x, Event.xmotion.y);
 
-                if (x11->vo_mouse_autohide)
-                {
+                if (opts->cursor_autohide_delay > -2) {
                     vo_showcursor(display, x11->window);
                     x11->mouse_waiting_hide = 1;
                     x11->mouse_timer = GetTimerMS();
                 }
                 break;
             case ButtonPress:
-                if (x11->vo_mouse_autohide)
-                {
+                if (opts->cursor_autohide_delay > -2) {
                     vo_showcursor(display, x11->window);
                     x11->mouse_waiting_hide = 1;
                     x11->mouse_timer = GetTimerMS();
@@ -865,8 +864,7 @@ int vo_x11_check_events(struct vo *vo)
                                 | MP_KEY_DOWN);
                 break;
             case ButtonRelease:
-                if (x11->vo_mouse_autohide)
-                {
+                if (opts->cursor_autohide_delay > -2) {
                     vo_showcursor(display, x11->window);
                     x11->mouse_waiting_hide = 1;
                     x11->mouse_timer = GetTimerMS();
@@ -1177,7 +1175,6 @@ final:
   x11->vo_gc = XCreateGC(mDisplay, x11->window, 0, NULL);
 
   XSync(mDisplay, False);
-  x11->vo_mouse_autohide = 1;
   vo->event_fd = ConnectionNumber(x11->display);
 }
 

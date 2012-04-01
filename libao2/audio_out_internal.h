@@ -19,6 +19,8 @@
 #ifndef MPLAYER_AUDIO_OUT_INTERNAL_H
 #define MPLAYER_AUDIO_OUT_INTERNAL_H
 
+#include "options.h"
+
 // prototypes:
 //static ao_info_t info;
 static int control(int cmd, void *arg);
@@ -33,6 +35,8 @@ static void audio_resume(void);
 
 extern struct ao *global_ao;
 #define ao_data (*global_ao)
+#define mixer_channel (global_ao->opts->mixer_channel)
+#define mixer_device (global_ao->opts->mixer_device)
 
 #define LIBAO_EXTERN(x) const struct ao_driver audio_out_##x = { \
     .info = &info,                                               \

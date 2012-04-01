@@ -19,6 +19,8 @@
 #ifndef MPLAYER_INPUT_H
 #define MPLAYER_INPUT_H
 
+#include <stdbool.h>
+
 // All command IDs
 enum mp_command_type {
     MP_CMD_SEEK,
@@ -154,14 +156,11 @@ enum mp_command_type {
 };
 
 // The arg types
-#define MP_CMD_ARG_VOID 0
 #define MP_CMD_ARG_INT 1
 #define MP_CMD_ARG_FLOAT 2
 #define MP_CMD_ARG_STRING 3
 
-#ifndef MP_CMD_MAX_ARGS
 #define MP_CMD_MAX_ARGS 10
-#endif
 
 // Error codes for the drivers
 
@@ -181,6 +180,7 @@ struct input_ctx;
 
 struct mp_cmd_arg {
     int type;
+    bool optional;
     union {
         int i;
         float f;
@@ -191,8 +191,8 @@ struct mp_cmd_arg {
 typedef struct mp_cmd {
     int id;
     char *name;
-    int nargs;
     struct mp_cmd_arg args[MP_CMD_MAX_ARGS];
+    int nargs;
     int pausing;
     struct mp_cmd *queue_next;
 } mp_cmd_t;
@@ -271,6 +271,9 @@ void mp_input_uninit(struct input_ctx *ictx);
 
 struct m_config;
 void mp_input_register_options(struct m_config *cfg);
+
+// Wake up sleeping input loop from another thread.
+void mp_input_wakeup(struct input_ctx *ictx);
 
 // Interruptible usleep:  (used by libmpdemux)
 int mp_input_check_interrupt(struct input_ctx *ictx, int time);

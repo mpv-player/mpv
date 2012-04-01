@@ -254,8 +254,7 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter);
 char *chapter_name(struct MPContext *mpctx, int chapter);
 double chapter_start_time(struct MPContext *mpctx, int chapter);
 int get_chapter_count(struct MPContext *mpctx);
-void update_subtitles(struct MPContext *mpctx, double refpts,
-                      double sub_offset, bool reset);
+void update_subtitles(struct MPContext *mpctx, double refpts, bool reset);
 
 
 // timeline/tl_matroska.c

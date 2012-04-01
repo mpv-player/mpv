@@ -339,7 +339,7 @@ char *mp_gtext(const char *string)
      * couple of reasons (locale stuff is badly designed and sucks in
      * general).
      *
-     * First setting the locale, especially LC_CTYPE, changes the
+     * First, setting the locale, especially LC_CTYPE, changes the
      * behavior of various C functions and we don't want that - we
      * want isalpha() for example to always behave like in the C
      * locale.
@@ -361,7 +361,7 @@ char *mp_gtext(const char *string)
      * affect gettext itself because it supports specifying the
      * character set directly with bind_textdomain_codeset()).
      *
-     * So the only solution (at leat short of trying to work around
+     * So the only solution (at least short of trying to work around
      * things possibly producing non-utf-8 output) is to leave all the
      * locale variables unset. Note that this means it's not possible
      * to get translated output from any libraries we call if they

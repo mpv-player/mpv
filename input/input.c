@@ -71,150 +71,152 @@ struct key_name {
     char *name;
 };
 
-/// This array defines all known commands.
-/// The first field is an id used to recognize the command without too many strcmp.
-/// The second is obviously the command name.
-/// The third is the minimum number of arguments this command needs.
-/// Then comes the definition of each argument, terminated with an arg of
-/// type 0 (this doesn't need to be explicit, because C will default initialize
-/// the following arguments to type 0).
-/// A command can take a maximum of MP_CMD_MAX_ARGS-1 arguments (-1 because of
-/// the last one) which is actually 9.
-
-/// For the args, the first field is the type (actually int, float or string), the second
-/// is the default value wich is used for optional arguments
+/* This array defines all known commands.
+ * The first field is an id used to recognize the command.
+ * The second is the command name used in slave mode and input.conf.
+ * Then comes the definition of each argument, first mandatory arguments
+ * (ARG_INT, ARG_FLOAT, ARG_STRING) if any, then optional arguments
+ * (OARG_INT(default), etc) if any. The command will be given the default
+ * argument value if the user didn't give enough arguments to specify it.
+ * A command can take a maximum of MP_CMD_MAX_ARGS arguments (10).
+ */
+#define ARG_INT { .type = MP_CMD_ARG_INT }
+#define OARG_INT(def) { .type = MP_CMD_ARG_INT, .optional = true, .v.i = def }
+#define ARG_FLOAT { .type = MP_CMD_ARG_FLOAT }
+#define OARG_FLOAT(def) { .type = MP_CMD_ARG_FLOAT, .optional = true, .v.f = def }
+#define ARG_STRING { .type = MP_CMD_ARG_STRING }
+#define OARG_STRING(def) { .type = MP_CMD_ARG_STRING, .optional = true, .v.s = def }
 
 static const mp_cmd_t mp_cmds[] = {
 #ifdef CONFIG_RADIO
-  { MP_CMD_RADIO_STEP_CHANNEL, "radio_step_channel", 1, { { MP_CMD_ARG_INT} } },
-  { MP_CMD_RADIO_SET_CHANNEL, "radio_set_channel", 1, { { MP_CMD_ARG_STRING} } },
-  { MP_CMD_RADIO_SET_FREQ, "radio_set_freq", 1, { {MP_CMD_ARG_FLOAT} } },
-  { MP_CMD_RADIO_STEP_FREQ, "radio_step_freq", 1, { {MP_CMD_ARG_FLOAT} } },
+  { MP_CMD_RADIO_STEP_CHANNEL, "radio_step_channel", { ARG_INT } },
+  { MP_CMD_RADIO_SET_CHANNEL, "radio_set_channel", { ARG_STRING } },
+  { MP_CMD_RADIO_SET_FREQ, "radio_set_freq", { ARG_FLOAT } },
+  { MP_CMD_RADIO_STEP_FREQ, "radio_step_freq", {ARG_FLOAT } },
 #endif
-  { MP_CMD_SEEK, "seek", 1, { {MP_CMD_ARG_FLOAT}, {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_EDL_MARK, "edl_mark", 0 },
-  { MP_CMD_AUDIO_DELAY, "audio_delay", 1, { {MP_CMD_ARG_FLOAT}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_SPEED_INCR, "speed_incr", 1, { {MP_CMD_ARG_FLOAT} } },
-  { MP_CMD_SPEED_MULT, "speed_mult", 1, { {MP_CMD_ARG_FLOAT} } },
-  { MP_CMD_SPEED_SET, "speed_set", 1, { {MP_CMD_ARG_FLOAT} } },
-  { MP_CMD_QUIT, "quit", 0, { {MP_CMD_ARG_INT} } },
-  { MP_CMD_STOP, "stop", 0 },
-  { MP_CMD_PAUSE, "pause", 0 },
-  { MP_CMD_FRAME_STEP, "frame_step", 0 },
-  { MP_CMD_PLAY_TREE_STEP, "pt_step", 1, { { MP_CMD_ARG_INT }, { MP_CMD_ARG_INT } } },
-  { MP_CMD_PLAY_TREE_UP_STEP, "pt_up_step", 1, { { MP_CMD_ARG_INT }, { MP_CMD_ARG_INT } } },
-  { MP_CMD_PLAY_ALT_SRC_STEP, "alt_src_step", 1, { { MP_CMD_ARG_INT } } },
-  { MP_CMD_LOOP, "loop", 1, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_SUB_DELAY, "sub_delay", 1, { {MP_CMD_ARG_FLOAT}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_SUB_STEP, "sub_step", 1, { { MP_CMD_ARG_INT }, {MP_CMD_ARG_INT} } },
-  { MP_CMD_OSD, "osd", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
-  { MP_CMD_OSD_SHOW_TEXT, "osd_show_text", 1, { {MP_CMD_ARG_STRING}, {MP_CMD_ARG_INT, {.i = -1}}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_OSD_SHOW_PROPERTY_TEXT, "osd_show_property_text",1, { {MP_CMD_ARG_STRING}, {MP_CMD_ARG_INT, {.i = -1}}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_OSD_SHOW_PROGRESSION, "osd_show_progression", 0 },
-  { MP_CMD_VOLUME, "volume", 1, { { MP_CMD_ARG_FLOAT }, {MP_CMD_ARG_INT} } },
-  { MP_CMD_BALANCE, "balance", 1, { { MP_CMD_ARG_FLOAT }, {MP_CMD_ARG_INT} } },
-  { MP_CMD_MIXER_USEMASTER, "use_master", 0 },
-  { MP_CMD_MUTE, "mute", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
-  { MP_CMD_CONTRAST, "contrast", 1, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_GAMMA, "gamma", 1, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} }  },
-  { MP_CMD_BRIGHTNESS, "brightness", 1, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} }  },
-  { MP_CMD_HUE, "hue", 1, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_SATURATION, "saturation", 1, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} }  },
-  { MP_CMD_FRAMEDROPPING, "frame_drop", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
-  { MP_CMD_SUB_POS, "sub_pos", 1, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_SUB_ALIGNMENT, "sub_alignment", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
-  { MP_CMD_SUB_VISIBILITY, "sub_visibility", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
-  { MP_CMD_SUB_LOAD, "sub_load", 1, { {MP_CMD_ARG_STRING} } },
-  { MP_CMD_SUB_REMOVE, "sub_remove", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
-  { MP_CMD_SUB_SELECT, "vobsub_lang", 0, { { MP_CMD_ARG_INT, {.i = -2}} } }, // for compatibility
-  { MP_CMD_SUB_SELECT, "sub_select", 0, { { MP_CMD_ARG_INT, {.i = -2}} } },
-  { MP_CMD_SUB_SOURCE, "sub_source", 0, { { MP_CMD_ARG_INT, {.i = -2}} } },
-  { MP_CMD_SUB_VOB, "sub_vob", 0, { { MP_CMD_ARG_INT, {.i = -2}} } },
-  { MP_CMD_SUB_DEMUX, "sub_demux", 0, { { MP_CMD_ARG_INT, {.i = -2}} } },
-  { MP_CMD_SUB_FILE, "sub_file", 0, { { MP_CMD_ARG_INT, {.i = -2}} } },
-  { MP_CMD_SUB_LOG, "sub_log", 0 },
-  { MP_CMD_SUB_SCALE, "sub_scale", 1, { {MP_CMD_ARG_FLOAT}, {MP_CMD_ARG_INT} } },
+  { MP_CMD_SEEK, "seek", { ARG_FLOAT, OARG_INT(0), OARG_INT(0) } },
+  { MP_CMD_EDL_MARK, "edl_mark", },
+  { MP_CMD_AUDIO_DELAY, "audio_delay", { ARG_FLOAT, OARG_INT(0) } },
+  { MP_CMD_SPEED_INCR, "speed_incr", { ARG_FLOAT } },
+  { MP_CMD_SPEED_MULT, "speed_mult", { ARG_FLOAT } },
+  { MP_CMD_SPEED_SET, "speed_set", { ARG_FLOAT } },
+  { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
+  { MP_CMD_STOP, "stop", },
+  { MP_CMD_PAUSE, "pause", },
+  { MP_CMD_FRAME_STEP, "frame_step", },
+  { MP_CMD_PLAY_TREE_STEP, "pt_step", { ARG_INT, OARG_INT(0) } },
+  { MP_CMD_PLAY_TREE_UP_STEP, "pt_up_step", { ARG_INT, OARG_INT(0) } },
+  { MP_CMD_PLAY_ALT_SRC_STEP, "alt_src_step", { ARG_INT } },
+  { MP_CMD_LOOP, "loop", { ARG_INT, OARG_INT(0) } },
+  { MP_CMD_SUB_DELAY, "sub_delay", { ARG_FLOAT, OARG_INT(0) } },
+  { MP_CMD_SUB_STEP, "sub_step", { ARG_INT, OARG_INT(0) } },
+  { MP_CMD_OSD, "osd", { OARG_INT(-1) } },
+  { MP_CMD_OSD_SHOW_TEXT, "osd_show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
+  { MP_CMD_OSD_SHOW_PROPERTY_TEXT, "osd_show_property_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
+  { MP_CMD_OSD_SHOW_PROGRESSION, "osd_show_progression", },
+  { MP_CMD_VOLUME, "volume", { ARG_FLOAT, OARG_INT(0) } },
+  { MP_CMD_BALANCE, "balance", { ARG_FLOAT, OARG_INT(0) } },
+  { MP_CMD_MIXER_USEMASTER, "use_master", },
+  { MP_CMD_MUTE, "mute", { OARG_INT(-1) } },
+  { MP_CMD_CONTRAST, "contrast", { ARG_INT, OARG_INT(0) } },
+  { MP_CMD_GAMMA, "gamma", { ARG_INT, OARG_INT(0) }  },
+  { MP_CMD_BRIGHTNESS, "brightness", { ARG_INT, OARG_INT(0) }  },
+  { MP_CMD_HUE, "hue", { ARG_INT, OARG_INT(0) } },
+  { MP_CMD_SATURATION, "saturation", { ARG_INT, OARG_INT(0) }  },
+  { MP_CMD_FRAMEDROPPING, "frame_drop", { OARG_INT(-1) } },
+  { MP_CMD_SUB_POS, "sub_pos", { ARG_INT, OARG_INT(0) } },
+  { MP_CMD_SUB_ALIGNMENT, "sub_alignment", { OARG_INT(-1) } },
+  { MP_CMD_SUB_VISIBILITY, "sub_visibility", { OARG_INT(-1) } },
+  { MP_CMD_SUB_LOAD, "sub_load", { ARG_STRING } },
+  { MP_CMD_SUB_REMOVE, "sub_remove", { OARG_INT(-1) } },
+  { MP_CMD_SUB_SELECT, "vobsub_lang", { OARG_INT(-2) } }, // for compatibility
+  { MP_CMD_SUB_SELECT, "sub_select", { OARG_INT(-2) } },
+  { MP_CMD_SUB_SOURCE, "sub_source", { OARG_INT(-2) } },
+  { MP_CMD_SUB_VOB, "sub_vob", { OARG_INT(-2) } },
+  { MP_CMD_SUB_DEMUX, "sub_demux", { OARG_INT(-2) } },
+  { MP_CMD_SUB_FILE, "sub_file", { OARG_INT(-2) } },
+  { MP_CMD_SUB_LOG, "sub_log", },
+  { MP_CMD_SUB_SCALE, "sub_scale", { ARG_FLOAT, OARG_INT(0) } },
 #ifdef CONFIG_ASS
-  { MP_CMD_ASS_USE_MARGINS, "ass_use_margins", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
+  { MP_CMD_ASS_USE_MARGINS, "ass_use_margins", { OARG_INT(-1) } },
 #endif
-  { MP_CMD_GET_PERCENT_POS, "get_percent_pos", 0 },
-  { MP_CMD_GET_TIME_POS, "get_time_pos", 0 },
-  { MP_CMD_GET_TIME_LENGTH, "get_time_length", 0 },
-  { MP_CMD_GET_FILENAME, "get_file_name", 0 },
-  { MP_CMD_GET_VIDEO_CODEC, "get_video_codec", 0 },
-  { MP_CMD_GET_VIDEO_BITRATE, "get_video_bitrate", 0 },
-  { MP_CMD_GET_VIDEO_RESOLUTION, "get_video_resolution", 0 },
-  { MP_CMD_GET_AUDIO_CODEC, "get_audio_codec", 0 },
-  { MP_CMD_GET_AUDIO_BITRATE, "get_audio_bitrate", 0 },
-  { MP_CMD_GET_AUDIO_SAMPLES, "get_audio_samples", 0 },
-  { MP_CMD_GET_META_TITLE, "get_meta_title", 0 },
-  { MP_CMD_GET_META_ARTIST, "get_meta_artist", 0 },
-  { MP_CMD_GET_META_ALBUM, "get_meta_album", 0 },
-  { MP_CMD_GET_META_YEAR, "get_meta_year", 0 },
-  { MP_CMD_GET_META_COMMENT, "get_meta_comment", 0 },
-  { MP_CMD_GET_META_TRACK, "get_meta_track", 0 },
-  { MP_CMD_GET_META_GENRE, "get_meta_genre", 0 },
-  { MP_CMD_SWITCH_AUDIO, "switch_audio", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
-  { MP_CMD_SWITCH_ANGLE, "switch_angle", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
-  { MP_CMD_SWITCH_TITLE, "switch_title", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
+  { MP_CMD_GET_PERCENT_POS, "get_percent_pos", },
+  { MP_CMD_GET_TIME_POS, "get_time_pos", },
+  { MP_CMD_GET_TIME_LENGTH, "get_time_length", },
+  { MP_CMD_GET_FILENAME, "get_file_name", },
+  { MP_CMD_GET_VIDEO_CODEC, "get_video_codec", },
+  { MP_CMD_GET_VIDEO_BITRATE, "get_video_bitrate", },
+  { MP_CMD_GET_VIDEO_RESOLUTION, "get_video_resolution", },
+  { MP_CMD_GET_AUDIO_CODEC, "get_audio_codec", },
+  { MP_CMD_GET_AUDIO_BITRATE, "get_audio_bitrate", },
+  { MP_CMD_GET_AUDIO_SAMPLES, "get_audio_samples", },
+  { MP_CMD_GET_META_TITLE, "get_meta_title", },
+  { MP_CMD_GET_META_ARTIST, "get_meta_artist", },
+  { MP_CMD_GET_META_ALBUM, "get_meta_album", },
+  { MP_CMD_GET_META_YEAR, "get_meta_year", },
+  { MP_CMD_GET_META_COMMENT, "get_meta_comment", },
+  { MP_CMD_GET_META_TRACK, "get_meta_track", },
+  { MP_CMD_GET_META_GENRE, "get_meta_genre", },
+  { MP_CMD_SWITCH_AUDIO, "switch_audio", { OARG_INT(-1) } },
+  { MP_CMD_SWITCH_ANGLE, "switch_angle", { OARG_INT(-1) } },
+  { MP_CMD_SWITCH_TITLE, "switch_title", { OARG_INT(-1) } },
 #ifdef CONFIG_TV
-  { MP_CMD_TV_START_SCAN, "tv_start_scan", 0 },
-  { MP_CMD_TV_STEP_CHANNEL, "tv_step_channel", 1, { {MP_CMD_ARG_INT} } },
-  { MP_CMD_TV_STEP_NORM, "tv_step_norm", 0 },
-  { MP_CMD_TV_STEP_CHANNEL_LIST, "tv_step_chanlist", 0 },
-  { MP_CMD_TV_SET_CHANNEL, "tv_set_channel", 1, { {MP_CMD_ARG_STRING} } },
-  { MP_CMD_TV_LAST_CHANNEL, "tv_last_channel", 0 },
-  { MP_CMD_TV_SET_FREQ, "tv_set_freq", 1, { {MP_CMD_ARG_FLOAT} } },
-  { MP_CMD_TV_STEP_FREQ, "tv_step_freq", 1, { {MP_CMD_ARG_FLOAT} } },
-  { MP_CMD_TV_SET_NORM, "tv_set_norm", 1, { {MP_CMD_ARG_STRING} } },
-  { MP_CMD_TV_SET_BRIGHTNESS, "tv_set_brightness", 1, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT, {.i = 1}} } },
-  { MP_CMD_TV_SET_CONTRAST, "tv_set_contrast", 1, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT, {.i = 1}} } },
-  { MP_CMD_TV_SET_HUE, "tv_set_hue", 1, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT, {.i = 1}} } },
-  { MP_CMD_TV_SET_SATURATION, "tv_set_saturation", 1, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT, {.i = 1}} } },
+  { MP_CMD_TV_START_SCAN, "tv_start_scan", },
+  { MP_CMD_TV_STEP_CHANNEL, "tv_step_channel", { ARG_INT } },
+  { MP_CMD_TV_STEP_NORM, "tv_step_norm", },
+  { MP_CMD_TV_STEP_CHANNEL_LIST, "tv_step_chanlist", },
+  { MP_CMD_TV_SET_CHANNEL, "tv_set_channel", { ARG_STRING } },
+  { MP_CMD_TV_LAST_CHANNEL, "tv_last_channel", },
+  { MP_CMD_TV_SET_FREQ, "tv_set_freq", { ARG_FLOAT } },
+  { MP_CMD_TV_STEP_FREQ, "tv_step_freq", { ARG_FLOAT } },
+  { MP_CMD_TV_SET_NORM, "tv_set_norm", { ARG_STRING } },
+  { MP_CMD_TV_SET_BRIGHTNESS, "tv_set_brightness", { ARG_INT, OARG_INT(1) } },
+  { MP_CMD_TV_SET_CONTRAST, "tv_set_contrast", { ARG_INT, OARG_INT(1) } },
+  { MP_CMD_TV_SET_HUE, "tv_set_hue", { ARG_INT, OARG_INT(1) } },
+  { MP_CMD_TV_SET_SATURATION, "tv_set_saturation", { ARG_INT, OARG_INT(1) } },
 #endif
-  { MP_CMD_SUB_FORCED_ONLY, "forced_subs_only", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
+  { MP_CMD_SUB_FORCED_ONLY, "forced_subs_only", { OARG_INT(-1) } },
 #ifdef CONFIG_DVBIN
-  { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", 2, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} } },
+  { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", { ARG_INT, ARG_INT } },
 #endif
-  { MP_CMD_SWITCH_RATIO, "switch_ratio", 0, { {MP_CMD_ARG_FLOAT} } },
-  { MP_CMD_VO_FULLSCREEN, "vo_fullscreen", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
-  { MP_CMD_VO_ONTOP, "vo_ontop", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
-  { MP_CMD_VO_ROOTWIN, "vo_rootwin", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
-  { MP_CMD_VO_BORDER, "vo_border", 0, { {MP_CMD_ARG_INT, {.i = -1}} } },
-  { MP_CMD_SCREENSHOT, "screenshot", 0, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_PANSCAN, "panscan",1, { {MP_CMD_ARG_FLOAT}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_SWITCH_VSYNC, "switch_vsync", 0, { {MP_CMD_ARG_INT} } },
-  { MP_CMD_LOADFILE, "loadfile", 1, { {MP_CMD_ARG_STRING}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_LOADLIST, "loadlist", 1, { {MP_CMD_ARG_STRING}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_PLAY_TREE_CLEAR, "pt_clear", 0 },
-  { MP_CMD_RUN, "run", 1, { {MP_CMD_ARG_STRING} } },
-  { MP_CMD_CAPTURING, "capturing", 0 },
-  { MP_CMD_VF_CHANGE_RECTANGLE, "change_rectangle", 2, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_TV_TELETEXT_ADD_DEC, "teletext_add_dec", 1, { {MP_CMD_ARG_STRING} } },
-  { MP_CMD_TV_TELETEXT_GO_LINK, "teletext_go_link", 1, { {MP_CMD_ARG_INT} } },
+  { MP_CMD_SWITCH_RATIO, "switch_ratio", { OARG_FLOAT(0) } },
+  { MP_CMD_VO_FULLSCREEN, "vo_fullscreen", { OARG_INT(-1) } },
+  { MP_CMD_VO_ONTOP, "vo_ontop", { OARG_INT(-1) } },
+  { MP_CMD_VO_ROOTWIN, "vo_rootwin", { OARG_INT(-1) } },
+  { MP_CMD_VO_BORDER, "vo_border", { OARG_INT(-1) } },
+  { MP_CMD_SCREENSHOT, "screenshot", { OARG_INT(0), OARG_INT(0) } },
+  { MP_CMD_PANSCAN, "panscan", { ARG_FLOAT, OARG_INT(0) } },
+  { MP_CMD_SWITCH_VSYNC, "switch_vsync", { OARG_INT(0) } },
+  { MP_CMD_LOADFILE, "loadfile", { ARG_STRING, OARG_INT(0) } },
+  { MP_CMD_LOADLIST, "loadlist", { ARG_STRING, OARG_INT(0) } },
+  { MP_CMD_PLAY_TREE_CLEAR, "pt_clear", },
+  { MP_CMD_RUN, "run", { ARG_STRING } },
+  { MP_CMD_CAPTURING, "capturing", },
+  { MP_CMD_VF_CHANGE_RECTANGLE, "change_rectangle", { ARG_INT, ARG_INT } },
+  { MP_CMD_TV_TELETEXT_ADD_DEC, "teletext_add_dec", { ARG_STRING } },
+  { MP_CMD_TV_TELETEXT_GO_LINK, "teletext_go_link", { ARG_INT } },
 
 #ifdef CONFIG_DVDNAV
-  { MP_CMD_DVDNAV, "dvdnav", 1, { {MP_CMD_ARG_STRING} } },
+  { MP_CMD_DVDNAV, "dvdnav", { ARG_STRING } },
 #endif
 
-  { MP_CMD_GET_VO_FULLSCREEN, "get_vo_fullscreen", 0 },
-  { MP_CMD_GET_SUB_VISIBILITY, "get_sub_visibility", 0 },
-  { MP_CMD_KEYDOWN_EVENTS, "key_down_event", 1, { {MP_CMD_ARG_INT} } },
-  { MP_CMD_SET_PROPERTY, "set_property", 2, { {MP_CMD_ARG_STRING},  {MP_CMD_ARG_STRING} } },
-  { MP_CMD_SET_PROPERTY_OSD, "set_property_osd", 2, { {MP_CMD_ARG_STRING},  {MP_CMD_ARG_STRING} } },
-  { MP_CMD_GET_PROPERTY, "get_property", 1, { {MP_CMD_ARG_STRING} } },
-  { MP_CMD_STEP_PROPERTY, "step_property", 1, { {MP_CMD_ARG_STRING}, {MP_CMD_ARG_FLOAT}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_STEP_PROPERTY_OSD, "step_property_osd", 1, { {MP_CMD_ARG_STRING}, {MP_CMD_ARG_FLOAT}, {MP_CMD_ARG_INT} } },
+  { MP_CMD_GET_VO_FULLSCREEN, "get_vo_fullscreen", },
+  { MP_CMD_GET_SUB_VISIBILITY, "get_sub_visibility", },
+  { MP_CMD_KEYDOWN_EVENTS, "key_down_event", { ARG_INT } },
+  { MP_CMD_SET_PROPERTY, "set_property", { ARG_STRING,  ARG_STRING } },
+  { MP_CMD_SET_PROPERTY_OSD, "set_property_osd", { ARG_STRING,  ARG_STRING } },
+  { MP_CMD_GET_PROPERTY, "get_property", { ARG_STRING } },
+  { MP_CMD_STEP_PROPERTY, "step_property", { ARG_STRING, OARG_FLOAT(0), OARG_INT(0) } },
+  { MP_CMD_STEP_PROPERTY_OSD, "step_property_osd", { ARG_STRING, OARG_FLOAT(0), OARG_INT(0) } },
 
-  { MP_CMD_SEEK_CHAPTER, "seek_chapter", 1, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} } },
-  { MP_CMD_SET_MOUSE_POS, "set_mouse_pos", 2, { {MP_CMD_ARG_INT}, {MP_CMD_ARG_INT} } },
+  { MP_CMD_SEEK_CHAPTER, "seek_chapter", { ARG_INT, OARG_INT(0) } },
+  { MP_CMD_SET_MOUSE_POS, "set_mouse_pos", { ARG_INT, ARG_INT } },
 
-  { MP_CMD_AF_SWITCH, "af_switch", 1, { {MP_CMD_ARG_STRING} } },
-  { MP_CMD_AF_ADD, "af_add", 1, { {MP_CMD_ARG_STRING} } },
-  { MP_CMD_AF_DEL, "af_del", 1, { {MP_CMD_ARG_STRING} } },
-  { MP_CMD_AF_CLR, "af_clr", 0 },
-  { MP_CMD_AF_CMDLINE, "af_cmdline", 2, { {MP_CMD_ARG_STRING}, {MP_CMD_ARG_STRING} } },
-
+  { MP_CMD_AF_SWITCH, "af_switch", { ARG_STRING } },
+  { MP_CMD_AF_ADD, "af_add", { ARG_STRING } },
+  { MP_CMD_AF_DEL, "af_del", { ARG_STRING } },
+  { MP_CMD_AF_CLR, "af_clr", },
+  { MP_CMD_AF_CMDLINE, "af_cmdline", { ARG_STRING, ARG_STRING } },
   {0}
 };
 
@@ -618,6 +620,8 @@ struct input_ctx {
 
     struct cmd_queue key_cmd_queue;
     struct cmd_queue control_cmd_queue;
+
+    int wakeup_pipe[2];
 };
 
 
@@ -990,10 +994,14 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
     }
     cmd->nargs = i;
 
-    if (cmd_def->nargs > cmd->nargs) {
-        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s requires at least %d "
+    int min_args;
+    for (min_args = 0; min_args < MP_CMD_MAX_ARGS
+             && cmd_def->args[min_args].type
+             && !cmd_def->args[min_args].optional; min_args++);
+    if (cmd->nargs < min_args) {
+        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command \"%s\" requires at least %d "
                 "arguments, we found only %d so far.\n", cmd_def->name,
-                cmd_def->nargs, cmd->nargs);
+                min_args, cmd->nargs);
         goto error;
     }
 
@@ -1116,6 +1124,13 @@ static int default_cmd_func(int fd, char *buf, int l)
     }
 }
 
+static int read_wakeup(void *ctx, int fd)
+{
+    char buf[100];
+    read(fd, buf, sizeof(buf));
+    return MP_INPUT_NOTHING;
+}
+
 
 static char *find_bind_for_key(const struct cmd_bind *binds, int n, int *keys)
 {
@@ -1138,7 +1153,7 @@ static char *find_bind_for_key(const struct cmd_bind *binds, int n, int *keys)
 }
 
 static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
-                                               char *section)
+                                                 char *section)
 {
     struct cmd_bind_section *bind_section = ictx->cmd_bind_sections;
 
@@ -1743,7 +1758,24 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
         .ar_delay = input_conf->ar_delay,
         .ar_rate = input_conf->ar_rate,
         .default_bindings = input_conf->default_bindings,
+        .wakeup_pipe = {-1, -1},
     };
+
+#ifndef __MINGW32__
+    long ret = pipe(ictx->wakeup_pipe);
+    for (int i = 0; i < 2 && ret >= 0; i++) {
+        ret = fcntl(ictx->wakeup_pipe[i], F_GETFL);
+        if (ret < 0)
+            break;
+        ret = fcntl(ictx->wakeup_pipe[i], F_SETFL, ret | O_NONBLOCK);
+    }
+    if (ret < 0)
+        mp_msg(MSGT_INPUT, MSGL_ERR,
+               "Failed to initialize wakeup pipe: %s\n", strerror(errno));
+    else
+        mp_input_add_key_fd(ictx, ictx->wakeup_pipe[0], true, read_wakeup,
+                            NULL, NULL);
+#endif
 
     char *file;
     char *config_file = input_conf->config_file;
@@ -1842,17 +1874,17 @@ void mp_input_uninit(struct input_ctx *ictx)
     if (!ictx)
         return;
 
-    unsigned int i;
-
-    for (i = 0; i < ictx->num_key_fd; i++) {
+    for (int i = 0; i < ictx->num_key_fd; i++) {
         if (ictx->key_fds[i].close_func)
             ictx->key_fds[i].close_func(ictx->key_fds[i].fd);
     }
-
-    for (i = 0; i < ictx->num_cmd_fd; i++) {
+    for (int i = 0; i < ictx->num_cmd_fd; i++) {
         if (ictx->cmd_fds[i].close_func)
             ictx->cmd_fds[i].close_func(ictx->cmd_fds[i].fd);
     }
+    for (int i = 0; i < 2; i++)
+        if (ictx->wakeup_pipe[i] != -1)
+            close(ictx->wakeup_pipe[i]);
     talloc_free(ictx);
 }
 
@@ -1892,7 +1924,7 @@ static int print_cmd_list(m_option_t *cfg)
             default:
                 type = "??";
             }
-            if (j + 1 > cmd->nargs)
+            if (cmd->args[j].optional)
                 printf(" [%s]", type);
             else
                 printf(" %s", type);
@@ -1900,6 +1932,12 @@ static int print_cmd_list(m_option_t *cfg)
         printf("\n");
     }
     exit(0);
+}
+
+void mp_input_wakeup(struct input_ctx *ictx)
+{
+    if (ictx->wakeup_pipe[1] >= 0)
+        write(ictx->wakeup_pipe[1], &(char){0}, 1);
 }
 
 /**

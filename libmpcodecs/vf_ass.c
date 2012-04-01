@@ -370,7 +370,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
             mp_ass_reload_options(vf->priv->renderer, vf->opts);
         osd->ass_force_reload = false;
         images = ass_render_frame(vf->priv->renderer, osd->ass_track,
-                                  (pts + sub_delay) * 1000 + .5, NULL);
+                        (pts - osd->sub_offset + sub_delay) * 1000 + .5, NULL);
     }
 
     prepare_image(vf, mpi);

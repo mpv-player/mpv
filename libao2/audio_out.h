@@ -81,6 +81,8 @@ struct ao {
     bool no_persistent_volume;
     const struct ao_driver *driver;
     void *priv;
+    struct MPOpts *opts;
+    struct input_ctx *input_ctx;
 };
 
 extern char *ao_subdevice;
@@ -118,7 +120,7 @@ typedef struct ao_control_vol {
     float right;
 } ao_control_vol_t;
 
-struct ao *ao_create(void);
+struct ao *ao_create(struct MPOpts *opts, struct input_ctx *input);
 void ao_init(struct ao *ao, char **ao_list);
 void ao_uninit(struct ao *ao, bool cut_audio);
 int ao_play(struct ao *ao, void *data, int len, int flags);

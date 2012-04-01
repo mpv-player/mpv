@@ -6,6 +6,10 @@ typedef struct MPOpts {
     char **audio_driver_list;
     int fixed_vo;
     int vo_ontop;
+    char *mixer_device;
+    char *mixer_channel;
+    int softvol;
+    float softvol_max;
     int gapless_audio;
     int ao_buffersize;
     int screen_size_x;
@@ -24,6 +28,7 @@ typedef struct MPOpts {
     int requested_colorspace;
     int requested_input_range;
     int requested_output_range;
+    int cursor_autohide_delay;
 
     // ranges -100 - 100, 1000 if the vo default should be used
     int vo_gamma_gamma;

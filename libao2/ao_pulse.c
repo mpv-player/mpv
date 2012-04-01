@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -29,67 +31,80 @@
 #include "libaf/af_format.h"
 #include "mp_msg.h"
 #include "audio_out.h"
-#include "audio_out_internal.h"
+#include "input/input.h"
 
-#define PULSE_CLIENT_NAME "MPlayer"
+#define PULSE_CLIENT_NAME "mplayer2"
 
-/** General driver info */
-static const ao_info_t info = {
-    "PulseAudio audio output",
-    "pulse",
-    "Lennart Poettering",
-    ""
+
+struct priv {
+    // PulseAudio playback stream object
+    struct pa_stream *stream;
+
+    // PulseAudio connection context
+    struct pa_context *context;
+
+    // Main event loop object
+    struct pa_threaded_mainloop *mainloop;
+
+    // temporary during control()
+    struct pa_sink_input_info pi;
+
+    bool broken_pause;
+    int retval;
+    bool did_reset;
 };
-
-/** PulseAudio playback stream object */
-static struct pa_stream *stream;
-
-/** PulseAudio connection context */
-static struct pa_context *context;
-
-/** Main event loop object */
-static struct pa_threaded_mainloop *mainloop;
-
-static int broken_pause;
-
-LIBAO_EXTERN(pulse)
 
 #define GENERIC_ERR_MSG(ctx, str) \
     mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] "str": %s\n", \
-    pa_strerror(pa_context_errno(ctx)))
+           pa_strerror(pa_context_errno(ctx)))
 
-static void context_state_cb(pa_context *c, void *userdata) {
+static void context_state_cb(pa_context *c, void *userdata)
+{
+    struct ao *ao = userdata;
+    struct priv *priv = ao->priv;
     switch (pa_context_get_state(c)) {
-        case PA_CONTEXT_READY:
-        case PA_CONTEXT_TERMINATED:
-        case PA_CONTEXT_FAILED:
-            pa_threaded_mainloop_signal(mainloop, 0);
-            break;
+    case PA_CONTEXT_READY:
+    case PA_CONTEXT_TERMINATED:
+    case PA_CONTEXT_FAILED:
+        pa_threaded_mainloop_signal(priv->mainloop, 0);
+        break;
     }
 }
 
-static void stream_state_cb(pa_stream *s, void *userdata) {
+static void stream_state_cb(pa_stream *s, void *userdata)
+{
+    struct ao *ao = userdata;
+    struct priv *priv = ao->priv;
     switch (pa_stream_get_state(s)) {
-        case PA_STREAM_READY:
-        case PA_STREAM_FAILED:
-        case PA_STREAM_TERMINATED:
-            pa_threaded_mainloop_signal(mainloop, 0);
-            break;
+    case PA_STREAM_READY:
+    case PA_STREAM_FAILED:
+    case PA_STREAM_TERMINATED:
+        pa_threaded_mainloop_signal(priv->mainloop, 0);
+        break;
     }
 }
 
-static void stream_request_cb(pa_stream *s, size_t length, void *userdata) {
-    pa_threaded_mainloop_signal(mainloop, 0);
+static void stream_request_cb(pa_stream *s, size_t length, void *userdata)
+{
+    struct ao *ao = userdata;
+    struct priv *priv = ao->priv;
+    mp_input_wakeup(ao->input_ctx);
+    pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
-static void stream_latency_update_cb(pa_stream *s, void *userdata) {
-    pa_threaded_mainloop_signal(mainloop, 0);
+static void stream_latency_update_cb(pa_stream *s, void *userdata)
+{
+    struct ao *ao = userdata;
+    struct priv *priv = ao->priv;
+    pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
-static void success_cb(pa_stream *s, int success, void *userdata) {
-    if (userdata)
-        *(int *)userdata = success;
-    pa_threaded_mainloop_signal(mainloop, 0);
+static void success_cb(pa_stream *s, int success, void *userdata)
+{
+    struct ao *ao = userdata;
+    struct priv *priv = ao->priv;
+    priv->retval = success;
+    pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
 /**
@@ -98,85 +113,116 @@ static void success_cb(pa_stream *s, int success, void *userdata) {
  * \param op operation to wait for
  * \return 1 if operation has finished normally (DONE state), 0 otherwise
  */
-static int waitop(pa_operation *op) {
-    pa_operation_state_t state;
+static int waitop(struct priv *priv, pa_operation *op)
+{
     if (!op) {
-        pa_threaded_mainloop_unlock(mainloop);
+        pa_threaded_mainloop_unlock(priv->mainloop);
         return 0;
     }
-    state = pa_operation_get_state(op);
+    pa_operation_state_t state = pa_operation_get_state(op);
     while (state == PA_OPERATION_RUNNING) {
-        pa_threaded_mainloop_wait(mainloop);
+        pa_threaded_mainloop_wait(priv->mainloop);
         state = pa_operation_get_state(op);
     }
     pa_operation_unref(op);
-    pa_threaded_mainloop_unlock(mainloop);
+    pa_threaded_mainloop_unlock(priv->mainloop);
     return state == PA_OPERATION_DONE;
 }
 
-static const struct format_map_s {
+static const struct format_map {
     int mp_format;
     pa_sample_format_t pa_format;
 } format_maps[] = {
     {AF_FORMAT_S16_LE, PA_SAMPLE_S16LE},
     {AF_FORMAT_S16_BE, PA_SAMPLE_S16BE},
-#ifdef PA_SAMPLE_S32NE
     {AF_FORMAT_S32_LE, PA_SAMPLE_S32LE},
     {AF_FORMAT_S32_BE, PA_SAMPLE_S32BE},
-#endif
-#ifdef PA_SAMPLE_FLOAT32NE
     {AF_FORMAT_FLOAT_LE, PA_SAMPLE_FLOAT32LE},
     {AF_FORMAT_FLOAT_BE, PA_SAMPLE_FLOAT32BE},
-#endif
     {AF_FORMAT_U8, PA_SAMPLE_U8},
     {AF_FORMAT_MU_LAW, PA_SAMPLE_ULAW},
     {AF_FORMAT_A_LAW, PA_SAMPLE_ALAW},
     {AF_FORMAT_UNKNOWN, 0}
 };
 
-static int init(int rate_hz, int channels, int format, int flags) {
+static void uninit(struct ao *ao, bool cut_audio)
+{
+    struct priv *priv = ao->priv;
+    if (priv->stream && !cut_audio) {
+        pa_threaded_mainloop_lock(priv->mainloop);
+        waitop(priv, pa_stream_drain(priv->stream, success_cb, ao));
+    }
+
+    if (priv->mainloop)
+        pa_threaded_mainloop_stop(priv->mainloop);
+
+    if (priv->stream) {
+        pa_stream_disconnect(priv->stream);
+        pa_stream_unref(priv->stream);
+        priv->stream = NULL;
+    }
+
+    if (priv->context) {
+        pa_context_disconnect(priv->context);
+        pa_context_unref(priv->context);
+        priv->context = NULL;
+    }
+
+    if (priv->mainloop) {
+        pa_threaded_mainloop_free(priv->mainloop);
+        priv->mainloop = NULL;
+    }
+}
+
+static int init(struct ao *ao, char *params)
+{
     struct pa_sample_spec ss;
     struct pa_channel_map map;
-    const struct format_map_s *fmt_map;
     char *devarg = NULL;
     char *host = NULL;
     char *sink = NULL;
     const char *version = pa_get_library_version();
 
-    if (ao_subdevice) {
+    struct priv *priv = talloc_zero(ao, struct priv);
+    ao->priv = priv;
+
+    if (params) {
         devarg = strdup(ao_subdevice);
         sink = strchr(devarg, ':');
-        if (sink) *sink++ = 0;
-        if (devarg[0]) host = devarg;
+        if (sink)
+            *sink++ = 0;
+        if (devarg[0])
+            host = devarg;
     }
 
-    broken_pause = 0;
-    // not sure which versions are affected, assume 0.9.11* to 0.9.14*
-    // known bad: 0.9.14, 0.9.13
-    // known good: 0.9.9, 0.9.10, 0.9.15
-    // to test: pause, wait ca. 5 seconds framestep and see if MPlayer hangs somewhen
-    if (strncmp(version, "0.9.1", 5) == 0 && version[5] >= '1' && version[5] <= '4') {
-        mp_msg(MSGT_AO, MSGL_WARN, "[pulse] working around probably broken pause functionality,\n"
-                                   "        see http://www.pulseaudio.org/ticket/440\n");
-        broken_pause = 1;
+    priv->broken_pause = false;
+    /* not sure which versions are affected, assume 0.9.11* to 0.9.14*
+     * known bad: 0.9.14, 0.9.13
+     * known good: 0.9.9, 0.9.10, 0.9.15
+     * To test: pause, wait ca. 5 seconds, framestep and see if MPlayer
+     * hangs somewhen. */
+    if (strncmp(version, "0.9.1", 5) == 0 && version[5] >= '1'
+        && version[5] <= '4') {
+        mp_msg(MSGT_AO, MSGL_WARN,
+               "[pulse] working around probably broken pause functionality,\n"
+               "        see http://www.pulseaudio.org/ticket/440\n");
+        priv->broken_pause = true;
     }
 
-    ss.channels = channels;
-    ss.rate = rate_hz;
+    ss.channels = ao->channels;
+    ss.rate = ao->samplerate;
 
-    ao_data.samplerate = rate_hz;
-    ao_data.channels = channels;
-
-    fmt_map = format_maps;
-    while (fmt_map->mp_format != format) {
+    const struct format_map *fmt_map = format_maps;
+    while (fmt_map->mp_format != ao->format) {
         if (fmt_map->mp_format == AF_FORMAT_UNKNOWN) {
-            mp_msg(MSGT_AO, MSGL_V, "AO: [pulse] Unsupported format, using default\n");
+            mp_msg(MSGT_AO, MSGL_V,
+                   "AO: [pulse] Unsupported format, using default\n");
             fmt_map = format_maps;
             break;
         }
         fmt_map++;
     }
-    ao_data.format = fmt_map->mp_format;
+    ao->format = fmt_map->mp_format;
     ss.format = fmt_map->pa_format;
 
     if (!pa_sample_spec_valid(&ss)) {
@@ -185,245 +231,295 @@ static int init(int rate_hz, int channels, int format, int flags) {
     }
 
     pa_channel_map_init_auto(&map, ss.channels, PA_CHANNEL_MAP_ALSA);
-    ao_data.bps = pa_bytes_per_second(&ss);
+    ao->bps = pa_bytes_per_second(&ss);
 
-    if (!(mainloop = pa_threaded_mainloop_new())) {
+    if (!(priv->mainloop = pa_threaded_mainloop_new())) {
         mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Failed to allocate main loop\n");
         goto fail;
     }
 
-    if (!(context = pa_context_new(pa_threaded_mainloop_get_api(mainloop), PULSE_CLIENT_NAME))) {
+    if (!(priv->context = pa_context_new(pa_threaded_mainloop_get_api(
+                                 priv->mainloop), PULSE_CLIENT_NAME))) {
         mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Failed to allocate context\n");
         goto fail;
     }
 
-    pa_context_set_state_callback(context, context_state_cb, NULL);
+    pa_context_set_state_callback(priv->context, context_state_cb, ao);
 
-    if (pa_context_connect(context, host, 0, NULL) < 0)
+    if (pa_context_connect(priv->context, host, 0, NULL) < 0)
         goto fail;
 
-    pa_threaded_mainloop_lock(mainloop);
+    pa_threaded_mainloop_lock(priv->mainloop);
 
-    if (pa_threaded_mainloop_start(mainloop) < 0)
+    if (pa_threaded_mainloop_start(priv->mainloop) < 0)
         goto unlock_and_fail;
 
     /* Wait until the context is ready */
-    pa_threaded_mainloop_wait(mainloop);
+    pa_threaded_mainloop_wait(priv->mainloop);
 
-    if (pa_context_get_state(context) != PA_CONTEXT_READY)
+    if (pa_context_get_state(priv->context) != PA_CONTEXT_READY)
         goto unlock_and_fail;
 
-    if (!(stream = pa_stream_new(context, "audio stream", &ss, &map)))
+    if (!(priv->stream = pa_stream_new(priv->context, "audio stream", &ss,
+                                       &map)))
         goto unlock_and_fail;
 
-    pa_stream_set_state_callback(stream, stream_state_cb, NULL);
-    pa_stream_set_write_callback(stream, stream_request_cb, NULL);
-    pa_stream_set_latency_update_callback(stream, stream_latency_update_cb, NULL);
-
-    if (pa_stream_connect_playback(stream, sink, NULL, PA_STREAM_INTERPOLATE_TIMING|PA_STREAM_AUTO_TIMING_UPDATE, NULL, NULL) < 0)
+    pa_stream_set_state_callback(priv->stream, stream_state_cb, ao);
+    pa_stream_set_write_callback(priv->stream, stream_request_cb, ao);
+    pa_stream_set_latency_update_callback(priv->stream,
+                                          stream_latency_update_cb, ao);
+    pa_buffer_attr bufattr = {
+        .maxlength = -1,
+        .tlength = pa_usec_to_bytes(1000000, &ss),
+        .prebuf = -1,
+        .minreq = -1,
+        .fragsize = -1,
+    };
+    if (pa_stream_connect_playback(priv->stream, sink, &bufattr,
+                                   PA_STREAM_INTERPOLATE_TIMING
+                                   | PA_STREAM_AUTO_TIMING_UPDATE, NULL,
+                                   NULL) < 0)
         goto unlock_and_fail;
 
     /* Wait until the stream is ready */
-    pa_threaded_mainloop_wait(mainloop);
+    pa_threaded_mainloop_wait(priv->mainloop);
 
-    if (pa_stream_get_state(stream) != PA_STREAM_READY)
+    if (pa_stream_get_state(priv->stream) != PA_STREAM_READY)
         goto unlock_and_fail;
 
-    pa_threaded_mainloop_unlock(mainloop);
+    pa_threaded_mainloop_unlock(priv->mainloop);
 
     free(devarg);
-    return 1;
+    return 0;
 
 unlock_and_fail:
 
-    if (mainloop)
-        pa_threaded_mainloop_unlock(mainloop);
+    if (priv->mainloop)
+        pa_threaded_mainloop_unlock(priv->mainloop);
 
 fail:
-    if (context)
-        GENERIC_ERR_MSG(context, "Init failed");
+    if (priv->context)
+        GENERIC_ERR_MSG(priv->context, "Init failed");
     free(devarg);
-    uninit(1);
-    return 0;
+    uninit(ao, true);
+    return -1;
 }
 
-/** Destroy libao driver */
-static void uninit(int immed) {
-    if (stream && !immed) {
-            pa_threaded_mainloop_lock(mainloop);
-            waitop(pa_stream_drain(stream, success_cb, NULL));
-    }
-
-    if (mainloop)
-        pa_threaded_mainloop_stop(mainloop);
-
-    if (stream) {
-        pa_stream_disconnect(stream);
-        pa_stream_unref(stream);
-        stream = NULL;
-    }
-
-    if (context) {
-        pa_context_disconnect(context);
-        pa_context_unref(context);
-        context = NULL;
-    }
-
-    if (mainloop) {
-        pa_threaded_mainloop_free(mainloop);
-        mainloop = NULL;
-    }
+static void cork(struct ao *ao, bool pause)
+{
+    struct priv *priv = ao->priv;
+    pa_threaded_mainloop_lock(priv->mainloop);
+    priv->retval = 0;
+    if (!waitop(priv, pa_stream_cork(priv->stream, pause, success_cb, ao)) ||
+        !priv->retval)
+        GENERIC_ERR_MSG(priv->context, "pa_stream_cork() failed");
 }
 
-/** Play the specified data to the pulseaudio server */
-static int play(void* data, int len, int flags) {
-    pa_threaded_mainloop_lock(mainloop);
-    if (pa_stream_write(stream, data, len, NULL, 0, PA_SEEK_RELATIVE) < 0) {
-        GENERIC_ERR_MSG(context, "pa_stream_write() failed");
+// Play the specified data to the pulseaudio server
+static int play(struct ao *ao, void *data, int len, int flags)
+{
+    struct priv *priv = ao->priv;
+    /* For some reason Pulseaudio behaves worse if this is done after
+     * the write - rapidly repeated seeks result in bogus increasing
+     * reported latency. */
+    if (priv->did_reset)
+        cork(ao, false);
+    pa_threaded_mainloop_lock(priv->mainloop);
+    if (pa_stream_write(priv->stream, data, len, NULL, 0,
+                        PA_SEEK_RELATIVE) < 0) {
+        GENERIC_ERR_MSG(priv->context, "pa_stream_write() failed");
         len = -1;
     }
-    pa_threaded_mainloop_unlock(mainloop);
+    if (priv->did_reset) {
+        priv->did_reset = false;
+        if (!waitop(priv, pa_stream_update_timing_info(priv->stream,
+                                                       success_cb, ao))
+            || !priv->retval)
+            GENERIC_ERR_MSG(priv->context, "pa_stream_UPP() failed");
+    } else
+        pa_threaded_mainloop_unlock(priv->mainloop);
     return len;
 }
 
-static void cork(int b) {
-    int success = 0;
-    pa_threaded_mainloop_lock(mainloop);
-    if (!waitop(pa_stream_cork(stream, b, success_cb, &success)) ||
-        !success)
-        GENERIC_ERR_MSG(context, "pa_stream_cork() failed");
+// Reset the audio stream, i.e. flush the playback buffer on the server side
+static void reset(struct ao *ao)
+{
+    // pa_stream_flush() works badly if not corked
+    cork(ao, true);
+    struct priv *priv = ao->priv;
+    pa_threaded_mainloop_lock(priv->mainloop);
+    priv->retval = 0;
+    if (!waitop(priv, pa_stream_flush(priv->stream, success_cb, ao)) ||
+        !priv->retval)
+        GENERIC_ERR_MSG(priv->context, "pa_stream_flush() failed");
+    priv->did_reset = true;
 }
 
-/** Pause the audio stream by corking it on the server */
-static void audio_pause(void) {
-    cork(1);
+// Pause the audio stream by corking it on the server
+static void pause(struct ao *ao)
+{
+    cork(ao, true);
 }
 
-/** Resume the audio stream by uncorking it on the server */
-static void audio_resume(void) {
-    // without this, certain versions will cause an infinite hang because
-    // pa_stream_writable_size returns 0 always.
-    // Note that this workaround causes A-V desync after pause
-    if (broken_pause) reset();
-    cork(0);
+// Resume the audio stream by uncorking it on the server
+static void resume(struct ao *ao)
+{
+    struct priv *priv = ao->priv;
+    if (priv->did_reset)
+        return;
+    /* Without this, certain versions will cause an infinite hang because
+     * pa_stream_writable_size returns 0 always.
+     * Note that this workaround causes A-V desync after pause. */
+    if (priv->broken_pause)
+        reset(ao);
+    cork(ao, false);
 }
 
-/** Reset the audio stream, i.e. flush the playback buffer on the server side */
-static void reset(void) {
-    int success = 0;
-    pa_threaded_mainloop_lock(mainloop);
-    if (!waitop(pa_stream_flush(stream, success_cb, &success)) ||
-        !success)
-        GENERIC_ERR_MSG(context, "pa_stream_flush() failed");
+// Return number of bytes that may be written to the server without blocking
+static int get_space(struct ao *ao)
+{
+    struct priv *priv = ao->priv;
+    pa_threaded_mainloop_lock(priv->mainloop);
+    size_t space = pa_stream_writable_size(priv->stream);
+    pa_threaded_mainloop_unlock(priv->mainloop);
+    return space;
 }
 
-/** Return number of bytes that may be written to the server without blocking */
-static int get_space(void) {
-    size_t l;
-    pa_threaded_mainloop_lock(mainloop);
-    l = pa_stream_writable_size(stream);
-    pa_threaded_mainloop_unlock(mainloop);
-    return l;
-}
-
-/** Return the current latency in seconds */
-static float get_delay(void) {
+// Return the current latency in seconds
+static float get_delay(struct ao *ao)
+{
+    struct priv *priv = ao->priv;
     pa_usec_t latency = (pa_usec_t) -1;
-    pa_threaded_mainloop_lock(mainloop);
-    while (pa_stream_get_latency(stream, &latency, NULL) < 0) {
-        if (pa_context_errno(context) != PA_ERR_NODATA) {
-            GENERIC_ERR_MSG(context, "pa_stream_get_latency() failed");
+    pa_threaded_mainloop_lock(priv->mainloop);
+    while (pa_stream_get_latency(priv->stream, &latency, NULL) < 0) {
+        if (pa_context_errno(priv->context) != PA_ERR_NODATA) {
+            GENERIC_ERR_MSG(priv->context, "pa_stream_get_latency() failed");
             break;
         }
         /* Wait until latency data is available again */
-        pa_threaded_mainloop_wait(mainloop);
+        pa_threaded_mainloop_wait(priv->mainloop);
     }
-    pa_threaded_mainloop_unlock(mainloop);
+    pa_threaded_mainloop_unlock(priv->mainloop);
     return latency == (pa_usec_t) -1 ? 0 : latency / 1000000.0;
 }
 
-/** A callback function that is called when the
- * pa_context_get_sink_input_info() operation completes. */
-static void info_func(struct pa_context *c, const struct pa_sink_input_info *i, int is_last, void *userdata) {
-    struct pa_sink_input_info *pi = userdata;
+/* A callback function that is called when the
+ * pa_context_get_sink_input_info() operation completes. Saves the
+ * volume field of the specified structure to the global variable volume.
+ */
+static void info_func(struct pa_context *c, const struct pa_sink_input_info *i,
+                      int is_last, void *userdata)
+{
+    struct ao *ao = userdata;
+    struct priv *priv = ao->priv;
     if (is_last < 0) {
-        GENERIC_ERR_MSG(context, "Failed to get sink input info");
+        GENERIC_ERR_MSG(priv->context, "Failed to get sink input info");
         return;
     }
     if (!i)
         return;
-    *pi = *i;
-    pa_threaded_mainloop_signal(mainloop, 0);
+    priv->pi = *i;
+    pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
-static int control(int cmd, void *arg) {
+static int control(struct ao *ao, int cmd, void *arg)
+{
+    struct priv *priv = ao->priv;
     switch (cmd) {
-        case AOCONTROL_GET_MUTE: // fallthrough
-        case AOCONTROL_GET_VOLUME: {
-            struct pa_sink_input_info pi;
-            ao_control_vol_t *vol = arg;
-            uint32_t devidx = pa_stream_get_index(stream);
-            pa_threaded_mainloop_lock(mainloop);
-            if (!waitop(pa_context_get_sink_input_info(context, devidx, info_func, &pi))) {
-                GENERIC_ERR_MSG(context, "pa_stream_get_sink_input_info() failed");
+    case AOCONTROL_GET_MUTE: // fallthrough
+    case AOCONTROL_GET_VOLUME: {
+        ao_control_vol_t *vol = arg;
+        uint32_t devidx = pa_stream_get_index(priv->stream);
+        pa_threaded_mainloop_lock(priv->mainloop);
+        if (!waitop(priv, pa_context_get_sink_input_info(priv->context, devidx,
+                                                         info_func, ao)))
+        {
+            GENERIC_ERR_MSG(priv->context,
+                            "pa_stream_get_sink_input_info() failed");
+            return CONTROL_ERROR;
+        }
+        // Warning: some information in pi might be unaccessible, because
+        // we naively copied the struct, without updating pointers etc.
+        // Pointers might point to invalid data, accessors might fail.
+        if (cmd == AOCONTROL_GET_VOLUME) {
+            if (priv->pi.volume.channels != 2)
+                vol->left = vol->right =
+                    pa_cvolume_avg(&priv->pi.volume) * 100 / PA_VOLUME_NORM;
+            else {
+                vol->left = priv->pi.volume.values[0] * 100 / PA_VOLUME_NORM;
+                vol->right = priv->pi.volume.values[1] * 100 / PA_VOLUME_NORM;
+            }
+        } else if (cmd == AOCONTROL_GET_MUTE) {
+            vol->left = vol->right = priv->pi.mute ? 0.0f : 1.0f;
+        }
+
+        return CONTROL_OK;
+        }
+
+    case AOCONTROL_SET_MUTE: // fallthrough
+    case AOCONTROL_SET_VOLUME: {
+        const ao_control_vol_t *vol = arg;
+        pa_operation *o;
+        struct pa_cvolume volume;
+
+        pa_cvolume_reset(&volume, ao->channels);
+        if (volume.channels != 2)
+            pa_cvolume_set(&volume, volume.channels,
+                           (pa_volume_t)vol->left * PA_VOLUME_NORM / 100);
+        else {
+            volume.values[0] = (pa_volume_t)vol->left * PA_VOLUME_NORM / 100;
+            volume.values[1] = (pa_volume_t)vol->right * PA_VOLUME_NORM / 100;
+        }
+
+        pa_threaded_mainloop_lock(priv->mainloop);
+        uint32_t stream_index = pa_stream_get_index(priv->stream);
+        if (cmd == AOCONTROL_SET_VOLUME) {
+            o = pa_context_set_sink_input_volume(priv->context, stream_index,
+                                                 &volume, NULL, NULL);
+            if (!o) {
+                pa_threaded_mainloop_unlock(priv->mainloop);
+                GENERIC_ERR_MSG(priv->context,
+                                "pa_context_set_sink_input_volume() failed");
                 return CONTROL_ERROR;
             }
-            // Warning: some information in pi might be unaccessible, because
-            // we naively copied the struct, without updating pointers etc.
-            // Pointers might point to invalid data, accessors might fail.
-            if (cmd == AOCONTROL_GET_VOLUME) {
-                if (pi.volume.channels != 2)
-                    vol->left = vol->right = pa_cvolume_avg(&pi.volume)*100/PA_VOLUME_NORM;
-                else {
-                    vol->left = pi.volume.values[0]*100/PA_VOLUME_NORM;
-                    vol->right = pi.volume.values[1]*100/PA_VOLUME_NORM;
-                }
-            } else if (cmd == AOCONTROL_GET_MUTE) {
-                vol->left = vol->right = pi.mute ? 0.0f : 1.0f;
+        } else if (cmd == AOCONTROL_SET_MUTE) {
+            int mute = vol->left == 0.0f || vol->right == 0.0f;
+            o = pa_context_set_sink_input_mute(priv->context, stream_index,
+                                               mute, NULL, NULL);
+            if (!o) {
+                pa_threaded_mainloop_unlock(priv->mainloop);
+                GENERIC_ERR_MSG(priv->context,
+                                "pa_context_set_sink_input_mute() failed");
+                return CONTROL_ERROR;
             }
-
-            return CONTROL_OK;
+        } else
+            abort();
+        /* We don't wait for completion here */
+        pa_operation_unref(o);
+        pa_threaded_mainloop_unlock(priv->mainloop);
+        return CONTROL_OK;
         }
 
-        case AOCONTROL_SET_MUTE: // fallthrough
-        case AOCONTROL_SET_VOLUME: {
-            const ao_control_vol_t *vol = arg;
-            pa_operation *o;
-            struct pa_cvolume volume;
-
-            pa_cvolume_reset(&volume, ao_data.channels);
-            if (volume.channels != 2)
-                pa_cvolume_set(&volume, volume.channels, (pa_volume_t)vol->left*PA_VOLUME_NORM/100);
-            else {
-                volume.values[0] = (pa_volume_t)vol->left*PA_VOLUME_NORM/100;
-                volume.values[1] = (pa_volume_t)vol->right*PA_VOLUME_NORM/100;
-            }
-
-            pa_threaded_mainloop_lock(mainloop);
-            if (cmd == AOCONTROL_SET_VOLUME) {
-                o = pa_context_set_sink_input_volume(context, pa_stream_get_index(stream), &volume, NULL, NULL);
-                if (!o) {
-                    pa_threaded_mainloop_unlock(mainloop);
-                    GENERIC_ERR_MSG(context, "pa_context_set_sink_input_volume() failed");
-                    return CONTROL_ERROR;
-                }
-            } else if (cmd == AOCONTROL_SET_MUTE) {
-                int mute = vol->left == 0.0f || vol->right == 0.0f;
-                o = pa_context_set_sink_input_mute(context, pa_stream_get_index(stream), mute, NULL, NULL);
-                if (!o) {
-                    pa_threaded_mainloop_unlock(mainloop);
-                    GENERIC_ERR_MSG(context, "pa_context_set_sink_input_mute() failed");
-                    return CONTROL_ERROR;
-                }
-            } else
-                abort();
-            /* We don't wait for completion here */
-            pa_operation_unref(o);
-            pa_threaded_mainloop_unlock(mainloop);
-            return CONTROL_OK;
-        }
-
-        default:
-            return CONTROL_UNKNOWN;
+    default:
+        return CONTROL_UNKNOWN;
     }
 }
+
+const struct ao_driver audio_out_pulse = {
+    .is_new = true,
+    .info = &(const struct ao_info) {
+        "PulseAudio audio output",
+        "pulse",
+        "Lennart Poettering",
+        "",
+    },
+    .control   = control,
+    .init      = init,
+    .uninit    = uninit,
+    .reset     = reset,
+    .get_space = get_space,
+    .play      = play,
+    .get_delay = get_delay,
+    .pause     = pause,
+    .resume    = resume,
+};

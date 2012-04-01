@@ -25,11 +25,6 @@
 #include "mixer.h"
 
 
-char *mixer_device = NULL;
-char *mixer_channel = NULL;
-int soft_vol = 0;
-float soft_vol_max = 110.0;
-
 static void internal_setvolume(mixer_t *mixer, float l, float r);
 
 
@@ -87,7 +82,7 @@ static void internal_getvolume(mixer_t *mixer, float *l, float *r)
     *l = 0;
     *r = 0;
     if (mixer->ao) {
-        if (soft_vol ||
+        if (mixer->softvol ||
             CONTROL_OK != ao_control(mixer->ao, AOCONTROL_GET_VOLUME, &vol))
         {
             if (!mixer->afilter)
@@ -100,8 +95,8 @@ static void internal_getvolume(mixer_t *mixer, float *l, float *r)
             } else {
                 af_from_dB(2, db_vals, db_vals, 20.0, -200.0, 60.0);
             }
-            vol.left = (db_vals[0] / (soft_vol_max / 100.0)) * 100.0;
-            vol.right = (db_vals[1] / (soft_vol_max / 100.0)) * 100.0;
+            vol.left = (db_vals[0] / (mixer->softvol_max / 100.0)) * 100.0;
+            vol.right = (db_vals[1] / (mixer->softvol_max / 100.0)) * 100.0;
         }
         *r = vol.right;
         *l = vol.left;
@@ -121,7 +116,7 @@ static void internal_setvolume(mixer_t *mixer, float l, float r)
     vol.right = r;
     vol.left = l;
     if (mixer->ao) {
-        bool use_softvol = soft_vol;
+        bool use_softvol = mixer->softvol;
         if (!use_softvol) {
             if (CONTROL_OK != ao_control(mixer->ao, AOCONTROL_SET_VOLUME, &vol))
             {
@@ -136,10 +131,11 @@ static void internal_setvolume(mixer_t *mixer, float l, float r)
             // af_volume uses values in dB
             float db_vals[AF_NCH];
             int i;
-            db_vals[0] = (l / 100.0) * (soft_vol_max / 100.0);
-            db_vals[1] = (r / 100.0) * (soft_vol_max / 100.0);
+            db_vals[0] = (l / 100.0) * (mixer->softvol_max / 100.0);
+            db_vals[1] = (r / 100.0) * (mixer->softvol_max / 100.0);
             for (i = 2; i < AF_NCH; i++)
-                db_vals[i] = ((l + r) / 100.0) * (soft_vol_max / 100.0) / 2.0;
+                db_vals[i] = ((l + r) / 100.0) * (mixer->softvol_max / 100.0)
+                             / 2.0;
             af_to_dB(AF_NCH, db_vals, db_vals, 20.0);
             if (!af_control_any_rev(mixer->afilter,
                             AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, db_vals))
@@ -225,7 +221,7 @@ void mixer_mute(mixer_t *mixer)
 bool mixer_getmuted(mixer_t *mixer)
 {
     ao_control_vol_t vol = {0};
-    if (!soft_vol &&
+    if (!mixer->softvol &&
         CONTROL_OK == ao_control(mixer->ao, AOCONTROL_GET_MUTE, &vol))
     {
         mixer->muted = vol.left == 0.0f || vol.right == 0.0f;
@@ -243,7 +239,7 @@ void mixer_setmuted(mixer_t *mixer, bool mute)
         return;
     ao_control_vol_t vol;
     vol.left = vol.right = mute ? 0.0f : 1.0f;
-    mixer->mute_emulation = soft_vol ||
+    mixer->mute_emulation = mixer->softvol ||
         CONTROL_OK != ao_control(mixer->ao, AOCONTROL_SET_MUTE, &vol);
     if (mixer->mute_emulation) {
         // mute is emulated by setting volume to 0

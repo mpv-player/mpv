@@ -24,17 +24,14 @@
 #include "libaf/af.h"
 #include "libao2/audio_out.h"
 
-extern char * mixer_device;
-extern char * mixer_channel;
-extern int soft_vol;
-extern float soft_vol_max;
-
-typedef struct mixer_s {
+typedef struct mixer {
     struct ao *ao;
     af_stream_t *afilter;
     int volstep;
     bool muted;
     bool mute_emulation;
+    bool softvol;
+    float softvol_max;
     float last_l, last_r;
     float restore_vol_l, restore_vol_r;
     bool restore_volume;

@@ -1764,7 +1764,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
     }
 #endif
 
-    update_subtitles(mpctx, 0, 0, true);
+    update_subtitles(mpctx, 0, true);
 
     return M_PROPERTY_OK;
 }

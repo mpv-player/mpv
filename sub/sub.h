@@ -76,6 +76,7 @@ struct osd_state {
     struct font_desc *sub_font;
     struct ass_track *ass_track;
     double pts;
+    double sub_offset;
     bool ass_track_changed;
     bool vsfilter_aspect;
 };

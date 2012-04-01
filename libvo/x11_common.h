@@ -48,7 +48,6 @@ struct vo_x11_state {
     unsigned long xv_colorkey;
     unsigned int xv_port;
 
-    int vo_mouse_autohide;
     int wm_type;
     int fs_type;
     int window_state;
