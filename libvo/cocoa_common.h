@@ -22,6 +22,8 @@
 
 #include "video_out.h"
 
+bool vo_cocoa_gui_running(void);
+
 int vo_cocoa_init(struct vo *vo);
 void vo_cocoa_uninit(struct vo *vo);
 

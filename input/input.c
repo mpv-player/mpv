@@ -59,6 +59,10 @@
 
 #include "ar.h"
 
+#ifdef CONFIG_COCOA
+#include "osdep/cocoa_events.h"
+#endif
+
 #define MP_MAX_KEY_DOWN 32
 
 struct cmd_bind {
@@ -1436,7 +1440,7 @@ static void read_events(struct input_ctx *ictx, int time)
  * every source until it's known to be empty. Instead we use this wrapper
  * to run select() again.
  */
-static void read_all_events(struct input_ctx *ictx, int time)
+static void read_all_fd_events(struct input_ctx *ictx, int time)
 {
     while (1) {
         read_events(ictx, time);
@@ -1444,6 +1448,15 @@ static void read_all_events(struct input_ctx *ictx, int time)
             return;
         time = 0;
     }
+}
+
+static void read_all_events(struct input_ctx *ictx, int time)
+{
+#ifdef CONFIG_COCOA
+    cocoa_events_read_all_events(ictx, time);
+#else
+    read_all_fd_events(ictx, time);
+#endif
 }
 
 int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
@@ -1743,6 +1756,10 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
         .wakeup_pipe = {-1, -1},
     };
 
+#ifdef CONFIG_COCOA
+    cocoa_events_init(ictx, read_all_fd_events);
+#endif
+
 #ifndef __MINGW32__
     long ret = pipe(ictx->wakeup_pipe);
     for (int i = 0; i < 2 && ret >= 0; i++) {
@@ -1848,11 +1865,16 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
             mp_tmsg(MSGT_INPUT, MSGL_ERR, "Can't open %s: %s\n",
                     input_conf->in_file, strerror(errno));
     }
+
     return ictx;
 }
 
 void mp_input_uninit(struct input_ctx *ictx)
 {
+#ifdef CONFIG_COCOA
+    cocoa_events_uninit();
+#endif
+
     if (!ictx)
         return;
 

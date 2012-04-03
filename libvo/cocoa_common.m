@@ -112,6 +112,11 @@ struct vo_cocoa_state *vo_cocoa_init_state(void)
     return s;
 }
 
+bool vo_cocoa_gui_running(void)
+{
+    return !!s;
+}
+
 int vo_cocoa_init(struct vo *vo)
 {
     s = vo_cocoa_init_state();
@@ -137,6 +142,7 @@ void vo_cocoa_uninit(struct vo *vo)
     s->pool = nil;
 
     talloc_free(s);
+    s = nil;
 }
 
 void update_screen_info(void)

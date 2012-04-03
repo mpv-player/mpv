@@ -4205,6 +4205,9 @@ EOF
 fi
 if test "$_cocoa" = yes ; then
   libs_mplayer="$libs_mplayer -framework Cocoa -framework OpenGL"
+  def_cocoa='#define CONFIG_COCOA 1'
+else
+  def_cocoa='#undef CONFIG_COCOA'
 fi
 echores "$_cocoa"
 
@@ -6383,6 +6386,7 @@ BL = $_bl
 CACA = $_caca
 CDDA = $_cdda
 CDDB = $_cddb
+COCOA = $_cocoa
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
 SHAREDBUFFER = $_sharedbuffer
@@ -6785,6 +6789,7 @@ $def_aa
 $def_bl
 $def_caca
 $def_corevideo
+$def_cocoa
 $def_sharedbuffer
 $def_dga
 $def_dga1
