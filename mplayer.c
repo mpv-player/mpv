@@ -3559,6 +3559,7 @@ static void run_playloop(struct MPContext *mpctx)
         vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
         vo_osd_changed(0);
 
+        mpctx->time_frame -= get_relative_time(mpctx);
         mpctx->time_frame -= vo->flip_queue_offset;
         float aq_sleep_time = mpctx->time_frame;
         if (mpctx->time_frame > 0.001
