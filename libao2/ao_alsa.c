@@ -83,7 +83,6 @@ static void alsa_error_handler(const char *file, int line, const char *function,
   va_start(va, format);
   vsnprintf(tmp, sizeof tmp, format, va);
   va_end(va);
-  tmp[sizeof tmp - 1] = '\0';
 
   if (err)
     mp_msg(MSGT_AO, MSGL_ERR, "[AO_ALSA] alsa-lib: %s:%i:(%s) %s: %s\n",
