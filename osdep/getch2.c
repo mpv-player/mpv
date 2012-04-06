@@ -158,11 +158,17 @@ void get_screen_size(void){
 #endif
 }
 
-void getch2(struct mp_fifo *fifo)
+bool getch2(struct mp_fifo *fifo)
 {
     int retval = read(0, &getch2_buf[getch2_len], BUF_LEN-getch2_len);
+    /* Return false on EOF to stop running select() on the FD, as it'd
+     * trigger all the time. Note that it's possible to get temporary
+     * EOF on terminal if the user presses ctrl-d, but that shouldn't
+     * happen if the terminal state change done in getch2_enable()
+     * works.
+     */
     if (retval < 1)
-        return;
+        return retval;
     getch2_len += retval;
 
     while (getch2_len > 0 && (getch2_len > 1 || getch2_buf[0] != 27)) {
@@ -279,6 +285,7 @@ void getch2(struct mp_fifo *fifo)
             getch2_buf[i] = getch2_buf[len+i];
         mplayer_put_key(fifo, code);
     }
+    return true;
 }
 
 static int getch2_status=0;

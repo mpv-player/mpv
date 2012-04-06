@@ -24,6 +24,8 @@
 #ifndef MPLAYER_GETCH2_H
 #define MPLAYER_GETCH2_H
 
+#include <stdbool.h>
+
 #include "config.h"
 
 /* Screen size. Initialized by load_termcap() and get_screen_size() */
@@ -45,7 +47,7 @@ void getch2_disable(void);
 
 /* Read a character or a special key code (see keycodes.h) */
 struct mp_fifo;
-void getch2(struct mp_fifo *fifo);
+bool getch2(struct mp_fifo *fifo);
 
 #ifdef CONFIG_ICONV
 /**

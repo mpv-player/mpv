@@ -3798,8 +3798,9 @@ static void run_playloop(struct MPContext *mpctx)
 
 static int read_keys(void *ctx, int fd)
 {
-    getch2(ctx);
-    return MP_INPUT_NOTHING;
+    if (getch2(ctx))
+        return MP_INPUT_NOTHING;
+    return MP_INPUT_DEAD;
 }
 
 static bool attachment_is_font(struct demux_attachment *att)
