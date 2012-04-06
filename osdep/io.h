@@ -46,6 +46,7 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 void mp_get_converted_argv(int *argc, char ***argv);
 
 int mp_stat(const char *path, struct stat *buf);
+int mp_printf(const char *format, ...);
 int mp_fprintf(FILE *stream, const char *format, ...);
 int mp_open(const char *filename, int oflag, ...);
 int mp_creat(const char *filename, int mode);
@@ -58,6 +59,7 @@ int mp_mkdir(const char *path, int mode);
 // NOTE: Stat is not overridden with mp_stat, because MinGW-w64 defines it as
 //       macro.
 
+#define printf(...) mp_printf(__VA_ARGS__)
 #define fprintf(...) mp_fprintf(__VA_ARGS__)
 #define open(...) mp_open(__VA_ARGS__)
 #define creat(...) mp_creat(__VA_ARGS__)

@@ -92,12 +92,9 @@ int mp_stat(const char *path, struct stat *buf)
     return res;
 }
 
-int mp_fprintf(FILE *stream, const char *format, ...)
+static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 {
-    va_list args;
     int done = 0;
-
-    va_start(args, format);
 
     if (stream == stdout || stream == stderr)
     {
@@ -146,9 +143,27 @@ int mp_fprintf(FILE *stream, const char *format, ...)
     else
         done = vfprintf(stream, format, args);
 
-    va_end(args);
-
     return done;
+}
+
+int mp_fprintf(FILE *stream, const char *format, ...)
+{
+    int res;
+    va_list args;
+    va_start(args, format);
+    res = mp_vfprintf(stream, format, args);
+    va_end(args);
+    return res;
+}
+
+int mp_printf(const char *format, ...)
+{
+    int res;
+    va_list args;
+    va_start(args, format);
+    res = mp_vfprintf(stdout, format, args);
+    va_end(args);
+    return res;
 }
 
 int mp_open(const char *filename, int oflag, ...)

@@ -46,7 +46,7 @@
 
 #define WIN_ID_TO_HWND(x) ((HWND)(uint32_t)(x))
 
-static const char classname[] = "mplayer2";
+static const wchar_t classname[] = L"mplayer2";
 int vo_vm = 0;
 
 static int depthonscreen;
@@ -75,10 +75,6 @@ HWND vo_window = 0;
 static HDC dev_hdc;
 static int event_flags;
 static int mon_cnt;
-
-static HMONITOR (WINAPI* myMonitorFromWindow)(HWND, DWORD);
-static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO);
-static BOOL (WINAPI* myEnumDisplayMonitors)(HDC, LPCRECT, MONITORENUMPROC, LPARAM);
 
 static bool key_state[256];
 
@@ -277,7 +273,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             break;
     }
 
-    return DefWindowProc(hWnd, message, wParam, lParam);
+    return DefWindowProcW(hWnd, message, wParam, lParam);
 }
 
 /**
@@ -300,9 +296,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 int vo_w32_check_events(void) {
     MSG msg;
     event_flags = 0;
-    while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
+    while (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        DispatchMessageW(&msg);
     }
     if (WinID >= 0) {
         BOOL res;
@@ -366,18 +362,18 @@ void w32_update_xinerama_info(void) {
         if (tmp) vo_screenwidth = tmp;
         tmp = GetSystemMetrics(SM_CYVIRTUALSCREEN);
         if (tmp) vo_screenheight = tmp;
-    } else if (xinerama_screen == -1 && myMonitorFromWindow && myGetMonitorInfo) {
+    } else if (xinerama_screen == -1) {
         MONITORINFO mi;
-        HMONITOR m = myMonitorFromWindow(vo_window, MONITOR_DEFAULTTOPRIMARY);
+        HMONITOR m = MonitorFromWindow(vo_window, MONITOR_DEFAULTTOPRIMARY);
         mi.cbSize = sizeof(mi);
-        myGetMonitorInfo(m, &mi);
+        GetMonitorInfoW(m, &mi);
         xinerama_x = mi.rcMonitor.left;
         xinerama_y = mi.rcMonitor.top;
         vo_screenwidth = mi.rcMonitor.right - mi.rcMonitor.left;
         vo_screenheight = mi.rcMonitor.bottom - mi.rcMonitor.top;
-    } else if (xinerama_screen > 0 && myEnumDisplayMonitors) {
+    } else if (xinerama_screen > 0) {
         mon_cnt = 0;
-        myEnumDisplayMonitors(NULL, NULL, mon_enum, 0);
+        EnumDisplayMonitors(NULL, NULL, mon_enum, 0);
     }
     aspect_save_screenres(vo_screenwidth, vo_screenheight);
 }
@@ -596,13 +592,13 @@ int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
  * \brief return the name of the selected device if it is indepedant
  * \return pointer to string, must be freed.
  */
-static char *get_display_name(void) {
-    DISPLAY_DEVICE disp;
+static wchar_t *get_display_name(void) {
+    DISPLAY_DEVICEW disp;
     disp.cb = sizeof(disp);
-    EnumDisplayDevices(NULL, vo_adapter_num, &disp, 0);
+    EnumDisplayDevicesW(NULL, vo_adapter_num, &disp, 0);
     if (disp.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)
         return NULL;
-    return strdup(disp.DeviceName);
+    return wcsdup(disp.DeviceName);
 }
 
 /**
@@ -623,24 +619,23 @@ static char *get_display_name(void) {
  */
 int vo_w32_init(void) {
     HICON mplayerIcon = 0;
-    char exedir[MAX_PATH];
-    HINSTANCE user32;
-    char *dev;
+    wchar_t exedir[MAX_PATH];
+    wchar_t *dev;
 
     if (vo_window)
         return 1;
 
-    hInstance = GetModuleHandle(0);
+    hInstance = GetModuleHandleW(NULL);
 
-    if (GetModuleFileName(0, exedir, MAX_PATH))
-        mplayerIcon = ExtractIcon(hInstance, exedir, 0);
+    if (GetModuleFileNameW(0, exedir, MAX_PATH))
+        mplayerIcon = ExtractIconW(hInstance, exedir, 0);
     if (!mplayerIcon)
         mplayerIcon = LoadIcon(0, IDI_APPLICATION);
 
   {
-    WNDCLASSEX wcex = { sizeof wcex, CS_OWNDC | CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW, WndProc, 0, 0, hInstance, mplayerIcon, LoadCursor(0, IDC_ARROW), NULL, 0, classname, mplayerIcon };
+    WNDCLASSEXW wcex = { sizeof wcex, CS_OWNDC | CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW, WndProc, 0, 0, hInstance, mplayerIcon, LoadCursor(0, IDC_ARROW), NULL, 0, classname, mplayerIcon };
 
-    if (!RegisterClassEx(&wcex)) {
+    if (!RegisterClassExW(&wcex)) {
         mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to register window class!\n");
         return 0;
     }
@@ -651,12 +646,12 @@ int vo_w32_init(void) {
         RECT r;
         GetClientRect(WIN_ID_TO_HWND(WinID), &r);
         vo_dwidth = r.right; vo_dheight = r.bottom;
-        vo_window = CreateWindowEx(WS_EX_NOPARENTNOTIFY, classname, classname,
+        vo_window = CreateWindowExW(WS_EX_NOPARENTNOTIFY, classname, classname,
                      WS_CHILD | WS_VISIBLE, 0, 0, vo_dwidth, vo_dheight,
                      WIN_ID_TO_HWND(WinID), 0, hInstance, 0);
         EnableWindow(vo_window, 0);
     } else
-        vo_window = CreateWindowEx(0, classname, classname,
+        vo_window = CreateWindowExW(0, classname, classname,
                       vo_border ? (WS_OVERLAPPEDWINDOW | WS_SIZEBOX) : WS_POPUP,
                       CW_USEDEFAULT, 0, 100, 100, 0, 0, hInstance, 0);
     if (!vo_window) {
@@ -664,18 +659,9 @@ int vo_w32_init(void) {
         return 0;
     }
 
-    myMonitorFromWindow = NULL;
-    myGetMonitorInfo = NULL;
-    myEnumDisplayMonitors = NULL;
-    user32 = GetModuleHandle("user32.dll");
-    if (user32) {
-        myMonitorFromWindow = (void *)GetProcAddress(user32, "MonitorFromWindow");
-        myGetMonitorInfo = GetProcAddress(user32, "GetMonitorInfoA");
-        myEnumDisplayMonitors = GetProcAddress(user32, "EnumDisplayMonitors");
-    }
     dev_hdc = 0;
     dev = get_display_name();
-    if (dev) dev_hdc = CreateDC(dev, NULL, NULL, NULL);
+    if (dev) dev_hdc = CreateDCW(dev, NULL, NULL, NULL);
     free(dev);
     updateScreenProperties();
 
@@ -750,7 +736,7 @@ void vo_w32_uninit(void) {
     dev_hdc = 0;
     DestroyWindow(vo_window);
     vo_window = 0;
-    UnregisterClass(classname, 0);
+    UnregisterClassW(classname, 0);
     o_dwidth = o_dheight = 0;
 }
 
