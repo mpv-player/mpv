@@ -60,8 +60,8 @@ bool getch2(struct mp_fifo *fifo);
 char *get_term_charset(void);
 #endif
 
-#if defined(__MINGW32__) || defined(__OS2__)
-/* slave cmd function for Windows and OS/2 */
+#if defined(__MINGW32__)
+// slave cmd function for Windows
 int mp_input_slave_cmd_func(int fd,char* dest,int size);
 #define USE_FD0_CMD_SELECT  0
 #define MP_INPUT_SLAVE_CMD_FUNC     mp_input_slave_cmd_func

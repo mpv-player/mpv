@@ -46,7 +46,6 @@
 
 #include "talloc.h"
 
-#include "osdep/osdep.h"
 #include "osdep/io.h"
 
 char *get_path(const char *filename){
@@ -82,25 +81,6 @@ char *get_path(const char *filename){
 		exedir[imax]='\0';
 		homedir = exedir;
 	}
-#elif defined(__OS2__)
-    {
-        PPIB ppib;
-        char path[260];
-
-        // Get process info blocks
-        DosGetInfoBlocks(NULL, &ppib);
-
-        // Get full path of the executable
-        DosQueryModuleName(ppib->pib_hmte, sizeof( path ), path);
-
-        // Truncate name part including last backslash
-        *strrchr(path, '\\') = 0;
-
-        // Convert backslash to slash
-        _fnslashify(path);
-
-        homedir = path;
-    }
 #else
 	return NULL;
 #endif

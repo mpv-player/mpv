@@ -40,9 +40,6 @@ CpuCaps gCpuCaps;
 #include <signal.h>
 #elif defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
-#elif defined(__OS2__)
-#define INCL_DOS
-#include <os2.h>
 #elif defined(__AMIGAOS4__)
 #include <proto/exec.h>
 #endif
@@ -88,24 +85,6 @@ LONG CALLBACK win32_sig_handler_sse(EXCEPTION_POINTERS* ep)
     return EXCEPTION_CONTINUE_SEARCH;
 }
 #endif /* defined(__MINGW32__) || defined(__CYGWIN__) */
-
-#ifdef __OS2__
-ULONG _System os2_sig_handler_sse(PEXCEPTIONREPORTRECORD       p1,
-                                  PEXCEPTIONREGISTRATIONRECORD p2,
-                                  PCONTEXTRECORD               p3,
-                                  PVOID                        p4)
-{
-    if(p1->ExceptionNum == XCPT_ILLEGAL_INSTRUCTION){
-        mp_msg(MSGT_CPUDETECT, MSGL_V, "SIGILL, ");
-
-        p3->ctx_RegEip += 3;
-        gCpuCaps.hasSSE = 0;
-
-        return XCPT_CONTINUE_EXECUTION;
-    }
-    return XCPT_CONTINUE_SEARCH;
-}
-#endif
 
 /* If we're running on a processor that can do SSE, let's see if we
  * are allowed to or not.  This will catch 2.4.0 or later kernels that
@@ -164,15 +143,6 @@ static void check_os_katmai_support( void )
         exc_fil = SetUnhandledExceptionFilter(win32_sig_handler_sse);
         __asm__ volatile ("xorps %xmm0, %xmm0");
         SetUnhandledExceptionFilter(exc_fil);
-        mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
-    }
-#elif defined(__OS2__)
-    EXCEPTIONREGISTRATIONRECORD RegRec = { 0, &os2_sig_handler_sse };
-    if ( gCpuCaps.hasSSE ) {
-        mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
-        DosSetExceptionHandler( &RegRec );
-        __asm__ volatile ("xorps %xmm0, %xmm0");
-        DosUnsetExceptionHandler( &RegRec );
         mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
     }
 #elif defined(__linux__)

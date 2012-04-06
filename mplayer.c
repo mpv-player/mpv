@@ -1247,7 +1247,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
         width = screen_width;
     else
         width = 80;
-#if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
+#if defined(__MINGW32__) || defined(__CYGWIN__)
     /* Windows command line is broken (MinGW's rxvt works, but we
      * should not depend on that). */
     width--;

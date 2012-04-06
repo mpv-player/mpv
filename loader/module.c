@@ -715,29 +715,9 @@ static int dump_component(char* name, int type, void* orig, ComponentParameters 
 
 #ifdef EMU_QTX_API
 
-#ifdef __OS2__
-uint32_t _System DosQueryMem(void *, uint32_t *, uint32_t *);
-#endif
-
 static int is_invalid_ptr_handle(void *p)
 {
-#ifdef __OS2__
-    uint32_t cb = 1;
-    uint32_t fl;
-
-    if(DosQueryMem(p, &cb, &fl))
-        return 1;
-
-    // Occasionally, ptr with 'EXEC' attr is passed.
-    // On OS/2, however, malloc() never sets 'EXEC' attr.
-    // So ptr with 'EXEC' attr is invalid.
-    if(fl & 0x04)
-        return 1;
-
-    return 0;
-#else
     return (uint32_t)p >= 0x60000000;
-#endif
 }
 
 static uint32_t ret_array[4096];

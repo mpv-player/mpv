@@ -24,7 +24,7 @@
 #include "config.h"
 
 //#define HAVE_TERMCAP
-#if !defined(__OS2__) && !defined(__MORPHOS__)
+#if !defined(__MORPHOS__)
 #define CONFIG_IOCTL
 #endif
 

@@ -215,7 +215,6 @@ mingw32()   { issystem "MINGW32"; }
 morphos()   { issystem "MorphOS"; }
 netbsd()    { issystem "NetBSD"; }
 openbsd()   { issystem "OpenBSD"; }
-os2()       { issystem "OS/2"; }
 qnx()       { issystem "QNX"; }
 sunos()     { issystem "SunOS"; }
 win32()     { cygwin || mingw32; }
@@ -402,7 +401,6 @@ Video output:
   --enable-vesa            enable VESA video output [autodetect]
   --enable-svga            enable SVGAlib video output [autodetect]
   --enable-sdl             enable SDL video output [autodetect]
-  --enable-kva             enable KVA video output [autodetect]
   --enable-aa              enable AAlib video output [autodetect]
   --enable-caca            enable CACA  video output [autodetect]
   --enable-ggi             enable GGI video output [autodetect]
@@ -450,8 +448,6 @@ Audio output:
   --disable-nas          disable NAS audio output [autodetect]
   --disable-sgiaudio     disable SGI audio output [autodetect]
   --disable-sunaudio     disable Sun audio output [autodetect]
-  --disable-kai          disable KAI audio output [autodetect]
-  --disable-dart         disable DART audio output [autodetect]
   --disable-win32waveout disable Windows waveout audio output [autodetect]
   --disable-coreaudio    disable CoreAudio audio output [autodetect]
   --disable-select       disable using select() on the audio device [enable]
@@ -575,7 +571,6 @@ _dga2=auto
 _xv=auto
 _vdpau=auto
 _sdl=auto
-_kva=auto
 _direct3d=auto
 _directx=auto
 _win32waveout=auto
@@ -608,8 +603,6 @@ _esd=auto
 _rsound=auto
 _pulse=auto
 _jack=auto
-_kai=auto
-_dart=auto
 _openal=no
 _libcdio=auto
 _mad=auto
@@ -866,8 +859,6 @@ for ac_option do
   --disable-vdpau)      _vdpau=no       ;;
   --enable-sdl)         _sdl=yes        ;;
   --disable-sdl)        _sdl=no         ;;
-  --enable-kva)         _kva=yes        ;;
-  --disable-kva)        _kva=no         ;;
   --enable-direct3d)    _direct3d=yes   ;;
   --disable-direct3d)   _direct3d=no    ;;
   --enable-directx)     _directx=yes    ;;
@@ -936,10 +927,6 @@ for ac_option do
   --disable-jack)       _jack=no        ;;
   --enable-openal)      _openal=yes     ;;
   --disable-openal)     _openal=no      ;;
-  --enable-kai)         _kai=yes        ;;
-  --disable-kai)        _kai=no         ;;
-  --enable-dart)        _dart=yes       ;;
-  --disable-dart)       _dart=no        ;;
   --enable-mad)         _mad=yes        ;;
   --disable-mad)        _mad=no         ;;
   --enable-libcdio)     _libcdio=yes    ;;
@@ -1407,15 +1394,6 @@ fi
 
 if qnx ; then
   extra_ldflags="$extra_ldflags -lph"
-fi
-
-if os2 ; then
-  _exesuf=".exe"
-  _getch=getch2-os2.c
-  need_shmem=no
-  _priority=yes
-  def_dos_paths="#define HAVE_DOS_PATHS 1"
-  def_priority="#define CONFIG_PRIORITY 1"
 fi
 
 TMPC="$mplayer_tmpdir/tmp.c"
@@ -3103,7 +3081,6 @@ if test "$_mman" = yes ; then
   def_mman_h='#define HAVE_SYS_MMAN_H 1'
 else
   def_mman_h='#undef HAVE_SYS_MMAN_H'
-  os2 && need_mmap=yes
 fi
 echores "$_mman"
 
@@ -3480,8 +3457,7 @@ int main(void) {int nfds = 1; fd_set readfds; struct timeval timeout; select(nfd
 EOF
 _posix_select=no
 def_posix_select='#undef HAVE_POSIX_SELECT'
-#select() of kLIBC (OS/2) supports socket only
-! os2 && cc_check && _posix_select=yes &&
+cc_check && _posix_select=yes &&
     def_posix_select='#define HAVE_POSIX_SELECT 1'
 echores "$_posix_select"
 
@@ -4611,24 +4587,6 @@ fi
 echores "$_gl"
 
 
-if os2 ; then
-echocheck "KVA (SNAP/WarpOverlay!/DIVE)"
-if test "$_kva" = auto; then
-  _kva=no;
-  header_check_broken os2.h kva.h -lkva && _kva=yes
-fi
-if test "$_kva" = yes ; then
-  def_kva='#define CONFIG_KVA 1'
-  libs_mplayer="$libs_mplayer -lkva"
-  vomodules="kva $vomodules"
-else
-  def_kva='#undef CONFIG_KVA'
-  novomodules="kva $novomodules"
-fi
-echores "$_kva"
-fi #if os2
-
-
 if win32; then
 
 echocheck "Windows waveout"
@@ -5034,41 +4992,8 @@ echores "$_sgiaudio"
 fi #if irix
 
 
-if os2 ; then
-echocheck "KAI (UNIAUD/DART)"
-if test "$_kai" = auto; then
-  _kai=no;
-  header_check_broken os2.h kai.h -lkai && _kai=yes
-fi
-if test "$_kai" = yes ; then
-  def_kai='#define CONFIG_KAI 1'
-  libs_mplayer="$libs_mplayer -lkai"
-  aomodules="kai $aomodules"
-else
-  def_kai='#undef CONFIG_KAI'
-  noaomodules="kai $noaomodules"
-fi
-echores "$_kai"
-
-echocheck "DART"
-if test "$_dart" = auto; then
-  _dart=no;
-  header_check_broken os2.h dart.h -ldart && _dart=yes
-fi
-if test "$_dart" = yes ; then
-  def_dart='#define CONFIG_DART 1'
-  libs_mplayer="$libs_mplayer -ldart"
-  aomodules="dart $aomodules"
-else
-  def_dart='#undef CONFIG_DART'
-  noaomodules="dart $noaomodules"
-fi
-echores "$_dart"
-fi #if os2
-
-
 # set default CD/DVD devices
-if win32 || os2 ; then
+if win32 ; then
   default_cdrom_device="D:"
 elif darwin ; then
   default_cdrom_device="/dev/disk1"
@@ -5089,7 +5014,7 @@ else
   default_cdrom_device="/dev/cdrom"
 fi
 
-if win32 || os2 || dragonfly || freebsd || openbsd || sunos || amigaos ; then
+if win32 || dragonfly || freebsd || openbsd || sunos || amigaos ; then
   default_dvd_device=$default_cdrom_device
 elif darwin ; then
   default_dvd_device="/dev/rdiskN"
@@ -5101,7 +5026,7 @@ fi
 echocheck "VCD support"
 if test "$_vcd" = auto; then
   _vcd=no
-  if linux || freebsd || netbsd || openbsd || dragonfly || bsdos || darwin || sunos || os2; then
+  if linux || freebsd || netbsd || openbsd || dragonfly || bsdos || darwin || sunos; then
     _vcd=yes
   elif mingw32; then
   header_check ddk/ntddcdrm.h && _vcd=yes
@@ -5144,7 +5069,7 @@ if test "$_dvdread_internal" = auto ; then
   if (linux || freebsd || netbsd || openbsd || dragonfly || sunos || hpux) &&
      (test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes ||
       test "$_dvdio" = yes || test "$_bsdi_dvd" = yes) ||
-     darwin || win32 || os2; then
+     darwin || win32; then
     _dvdread_internal=yes
     _dvdread=yes
     extra_cflags="-Ilibdvdread4 $extra_cflags"
@@ -5198,8 +5123,6 @@ if test "$_libdvdcss_internal" = yes ; then
     cflags_libdvdcss="-DSYS_CYGWIN -DWIN32"
   elif beos ; then
     cflags_libdvdcss="-DSYS_BEOS"
-  elif os2 ; then
-    cflags_libdvdcss="-DSYS_OS2"
   fi
   cflags_libdvdcss_dvdread="-Ilibdvdcss"
   def_dvdcss="#define HAVE_DVDCSS_DVDCSS_H 1"
@@ -5622,7 +5545,7 @@ fi
 # Fall back on default directory.
 if test -z "$_codecsdir" ; then
   _codecsdir="$_libdir/codecs"
-  mingw32 || os2 && _codecsdir="codecs"
+  mingw32 && _codecsdir="codecs"
 fi
 
 
@@ -5674,7 +5597,7 @@ if test "$_real" = auto ; then
   _real=no
   res_comment="dynamic loader support needed"
   if test "$_dl" = yes || test "$_win32dll" = yes &&
-     (linux || freebsd || netbsd || openbsd || dragonfly || darwin || win32 || os2) ; then
+     (linux || freebsd || netbsd || openbsd || dragonfly || darwin || win32) ; then
     _real=yes
   fi
 fi
@@ -6249,7 +6172,7 @@ fi
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
 _ld_dl_dynamic=''
 freebsd || netbsd || openbsd || dragonfly || bsdos && _ld_dl_dynamic='-rdynamic'
-if test "$_real" = yes || test "$_xanim" = yes && ! win32 && ! qnx && ! darwin && ! os2 && ! sunos; then
+if test "$_real" = yes || test "$_xanim" = yes && ! win32 && ! qnx && ! darwin && ! sunos; then
   _ld_dl_dynamic='-rdynamic'
 fi
 
@@ -6299,15 +6222,6 @@ else
   def_lircc='#undef CONFIG_LIRCC'
 fi
 echores "$_lircc"
-
-#############################################################################
-
-# On OS/2 nm supports only a.out. So the -Zomf compiler option to generate
-# the OMF format needs to come after the 'extern symbol prefix' check, which
-# uses nm.
-if os2 ; then
-  extra_ldflags="$extra_ldflags -Zomf -Zstack 16384 -Zbin-files -Zargs-wild"
-fi
 
 #############################################################################
 
@@ -6433,7 +6347,6 @@ MPLAYER  = $_mplayer
 
 NEED_GETTIMEOFDAY = $need_gettimeofday
 NEED_GLOB         = $need_glob
-NEED_MMAP         = $need_mmap
 NEED_SETENV       = $need_setenv
 NEED_SHMEM        = $need_shmem
 NEED_STRSEP       = $need_strsep
@@ -6455,7 +6368,6 @@ CDDA = $_cdda
 CDDB = $_cddb
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
-DART = $_dart
 DGA = $_dga
 DIRECT3D = $_direct3d
 DIRECTFB = $_directfb
@@ -6485,8 +6397,6 @@ IVTV = $_ivtv
 JACK = $_jack
 JOYSTICK = $_joystick
 JPEG = $_jpeg
-KAI = $_kai
-KVA = $_kva
 LADSPA = $_ladspa
 LIBA52 = $_liba52
 LIBASS = $_ass
@@ -6787,11 +6697,9 @@ $def_xmms
 $def_alsa
 $def_arts
 $def_coreaudio
-$def_dart
 $def_esd
 $def_esd_latency
 $def_jack
-$def_kai
 $def_nas
 $def_openal
 $def_openal_h
@@ -6881,7 +6789,6 @@ $def_gl_x11
 $def_gl_sdl
 $def_ivtv
 $def_jpeg
-$def_kva
 $def_md5sum
 $def_mga
 $def_mng
