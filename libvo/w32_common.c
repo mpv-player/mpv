@@ -80,9 +80,12 @@ static HMONITOR (WINAPI* myMonitorFromWindow)(HWND, DWORD);
 static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO);
 static BOOL (WINAPI* myEnumDisplayMonitors)(HDC, LPCRECT, MONITORENUMPROC, LPARAM);
 
+static bool key_state[256];
+
 static const struct mp_keymap vk_map[] = {
     // special keys
-    {VK_ESCAPE, KEY_ESC}, {VK_BACK, KEY_BS}, {VK_TAB, KEY_TAB}, {VK_CONTROL, KEY_CTRL},
+    {VK_ESCAPE, KEY_ESC}, {VK_BACK, KEY_BS}, {VK_TAB, KEY_TAB},
+    {VK_RETURN, KEY_ENTER}, {VK_PAUSE, KEY_PAUSE}, {VK_SNAPSHOT, KEY_PRINT},
 
     // cursor keys
     {VK_LEFT, KEY_LEFT}, {VK_UP, KEY_UP}, {VK_RIGHT, KEY_RIGHT}, {VK_DOWN, KEY_DOWN},
@@ -136,10 +139,21 @@ static int get_resize_border(int v) {
     }
 }
 
+static int mod_state(void)
+{
+    int res = 0;
+    if (key_state[VK_CONTROL])
+        res |= KEY_MODIFIER_CTRL;
+    if (key_state[VK_SHIFT])
+        res |= KEY_MODIFIER_SHIFT;
+    if (key_state[VK_MENU])
+        res |= KEY_MODIFIER_ALT;
+    return res;
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     RECT r;
     POINT p;
-    int mpkey;
     switch (message) {
         case WM_ERASEBKGND: // no need to erase background seperately
             return 1;
@@ -196,16 +210,34 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             }
             break;
         case WM_KEYDOWN:
-            mpkey = lookup_keymap_table(vk_map, wParam);
+        case WM_SYSKEYDOWN: {
+            key_state[wParam & 0xFF] = true;
+            int mpkey = lookup_keymap_table(vk_map, wParam);
             if (mpkey)
-                mplayer_put_key(mpkey);
+                mplayer_put_key(mpkey | mod_state());
+            break;
+        }
+        case WM_KEYUP:
+        case WM_SYSKEYUP:
+            key_state[wParam & 0xFF] = false;
             break;
         case WM_CHAR:
-            mplayer_put_key(wParam);
-            break;
+        case WM_SYSCHAR: {
+            int mods = mod_state();
+            // Apparently Ctrl+A to Ctrl+Z is special cased, and produces
+            // character codes from 1-26. Work it around.
+            if ((mods & KEY_MODIFIER_CTRL) && wParam >= 1 && wParam <= 26)
+                wParam = wParam - 1 + (mods & KEY_MODIFIER_SHIFT ? 'A' : 'a');
+            if (wParam >= 32 && wParam < (1<<21)) {
+                mplayer_put_key(wParam | mods);
+                // At least with Alt+char, not calling DefWindowProcW stops
+                // Windows from emitting a beep.
+                return 0;
+            }
+        }
         case WM_LBUTTONDOWN:
             if (!vo_nomouse_input && (vo_fs || (wParam & MK_CONTROL))) {
-                mplayer_put_key(MOUSE_BTN0);
+                mplayer_put_key(MOUSE_BTN0 | mod_state());
                 break;
             }
             if (!vo_fs) {
@@ -216,11 +248,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             break;
         case WM_MBUTTONDOWN:
             if (!vo_nomouse_input)
-                mplayer_put_key(MOUSE_BTN1);
+                mplayer_put_key(MOUSE_BTN1 | mod_state());
             break;
         case WM_RBUTTONDOWN:
             if (!vo_nomouse_input)
-                mplayer_put_key(MOUSE_BTN2);
+                mplayer_put_key(MOUSE_BTN2 | mod_state());
             break;
         case WM_MOUSEMOVE:
             vo_mouse_movement(global_vo, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
@@ -229,18 +261,18 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             if (!vo_nomouse_input) {
                 int x = GET_WHEEL_DELTA_WPARAM(wParam);
                 if (x > 0)
-                    mplayer_put_key(MOUSE_BTN3);
+                    mplayer_put_key(MOUSE_BTN3 | mod_state());
                 else
-                    mplayer_put_key(MOUSE_BTN4);
+                    mplayer_put_key(MOUSE_BTN4 | mod_state());
             }
             break;
         case WM_XBUTTONDOWN:
             if (!vo_nomouse_input) {
                 int x = HIWORD(wParam);
                 if (x == 1)
-                    mplayer_put_key(MOUSE_BTN5);
+                    mplayer_put_key(MOUSE_BTN5 | mod_state());
                 else // if (x == 2)
-                    mplayer_put_key(MOUSE_BTN6);
+                    mplayer_put_key(MOUSE_BTN6 | mod_state());
             }
             break;
     }

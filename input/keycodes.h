@@ -30,16 +30,15 @@
 #define KEY_TAB 9
 
 /* Control keys */
-#define KEY_CTRL (MP_KEY_BASE)
-#define KEY_BACKSPACE (KEY_CTRL+0)
-#define KEY_DELETE (KEY_CTRL+1)
-#define KEY_INSERT (KEY_CTRL+2)
-#define KEY_HOME (KEY_CTRL+3)
-#define KEY_END (KEY_CTRL+4)
-#define KEY_PAGE_UP (KEY_CTRL+5)
-#define KEY_PAGE_DOWN (KEY_CTRL+6)
-#define KEY_ESC (KEY_CTRL+7)
-#define KEY_PRINT (KEY_CTRL+8)
+#define KEY_BACKSPACE (MP_KEY_BASE+0)
+#define KEY_DELETE (MP_KEY_BASE+1)
+#define KEY_INSERT (MP_KEY_BASE+2)
+#define KEY_HOME (MP_KEY_BASE+3)
+#define KEY_END (MP_KEY_BASE+4)
+#define KEY_PAGE_UP (MP_KEY_BASE+5)
+#define KEY_PAGE_DOWN (MP_KEY_BASE+6)
+#define KEY_ESC (MP_KEY_BASE+7)
+#define KEY_PRINT (MP_KEY_BASE+8)
 
 /* Control keys short name */
 #define KEY_BS KEY_BACKSPACE
