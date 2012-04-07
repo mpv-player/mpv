@@ -97,8 +97,6 @@ static void alsa_error_handler(const char *file, int line, const char *function,
 static int control(int cmd, void *arg)
 {
   switch(cmd) {
-  case AOCONTROL_QUERY_FORMAT:
-    return CONTROL_TRUE;
   case AOCONTROL_GET_VOLUME:
   case AOCONTROL_SET_VOLUME:
     {

@@ -402,11 +402,6 @@ static void setup_device_paths(void)
 // to set/get/query special features/parameters
 static int control(int cmd,void *arg){
     switch(cmd){
-    case AOCONTROL_SET_DEVICE:
-	audio_dev=(char*)arg;
-	return CONTROL_OK;
-    case AOCONTROL_QUERY_FORMAT:
-	return CONTROL_TRUE;
     case AOCONTROL_GET_VOLUME:
     {
         int fd;

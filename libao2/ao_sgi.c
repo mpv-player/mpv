@@ -118,13 +118,6 @@ static int control(int cmd, void *arg){
 
   mp_tmsg(MSGT_AO, MSGL_INFO, "[AO SGI] control.\n");
 
-  switch(cmd) {
-  case AOCONTROL_QUERY_FORMAT:
-    /* Do not reject any format: return the closest matching
-     * format if the request is not supported natively. */
-    return CONTROL_TRUE;
-  }
-
   return CONTROL_UNKNOWN;
 }
 

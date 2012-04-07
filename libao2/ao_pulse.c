@@ -420,7 +420,7 @@ static void info_func(struct pa_context *c, const struct pa_sink_input_info *i,
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
-static int control(struct ao *ao, int cmd, void *arg)
+static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct priv *priv = ao->priv;
     switch (cmd) {
