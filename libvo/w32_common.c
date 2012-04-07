@@ -211,6 +211,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             int mpkey = lookup_keymap_table(vk_map, wParam);
             if (mpkey)
                 mplayer_put_key(mpkey | mod_state());
+            if (wParam == VK_F10)
+                return 0;
             break;
         }
         case WM_KEYUP:
