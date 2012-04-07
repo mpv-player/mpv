@@ -93,7 +93,7 @@ static const struct mp_keymap vk_map[] = {
     // F-keys
     {VK_F1, KEY_F+1}, {VK_F2, KEY_F+2}, {VK_F3, KEY_F+3}, {VK_F4, KEY_F+4},
     {VK_F5, KEY_F+5}, {VK_F6, KEY_F+6}, {VK_F7, KEY_F+7}, {VK_F8, KEY_F+8},
-    {VK_F9, KEY_F+9}, {VK_F10, KEY_F+10}, {VK_F11, KEY_F+11}, {VK_F1, KEY_F+12},
+    {VK_F9, KEY_F+9}, {VK_F10, KEY_F+10}, {VK_F11, KEY_F+11}, {VK_F12, KEY_F+12},
     // numpad
     {VK_NUMPAD0, KEY_KP0}, {VK_NUMPAD1, KEY_KP1}, {VK_NUMPAD2, KEY_KP2},
     {VK_NUMPAD3, KEY_KP3}, {VK_NUMPAD4, KEY_KP4}, {VK_NUMPAD5, KEY_KP5},
@@ -220,16 +220,22 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
         case WM_CHAR:
         case WM_SYSCHAR: {
             int mods = mod_state();
+            int code = wParam;
             // Apparently Ctrl+A to Ctrl+Z is special cased, and produces
             // character codes from 1-26. Work it around.
-            if ((mods & KEY_MODIFIER_CTRL) && wParam >= 1 && wParam <= 26)
-                wParam = wParam - 1 + (mods & KEY_MODIFIER_SHIFT ? 'A' : 'a');
-            if (wParam >= 32 && wParam < (1<<21)) {
-                mplayer_put_key(wParam | mods);
+            // Also, enter/return (including the keypad variant) and CTRL+J both
+            // map to wParam==10. As a workaround, check VK_RETURN to
+            // distinguish these two key combinations.
+            if ((mods & KEY_MODIFIER_CTRL) && code >= 1 && code <= 26
+                && !key_state[VK_RETURN])
+                code = code - 1 + (mods & KEY_MODIFIER_SHIFT ? 'A' : 'a');
+            if (code >= 32 && code < (1<<21)) {
+                mplayer_put_key(code | mods);
                 // At least with Alt+char, not calling DefWindowProcW stops
                 // Windows from emitting a beep.
                 return 0;
             }
+            break;
         }
         case WM_LBUTTONDOWN:
             if (!vo_nomouse_input && (vo_fs || (wParam & MK_CONTROL))) {
