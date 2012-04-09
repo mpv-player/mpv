@@ -39,6 +39,7 @@ typedef struct mixer {
 } mixer_t;
 
 void mixer_reinit(struct mixer *mixer, struct ao *ao);
+void mixer_uninit(struct mixer *mixer);
 void mixer_getvolume(mixer_t *mixer, float *l, float *r);
 void mixer_setvolume(mixer_t *mixer, float l, float r);
 void mixer_incvolume(mixer_t *mixer);

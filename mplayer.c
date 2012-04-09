@@ -681,8 +681,10 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
     if (mask & INITIALIZED_AO) {
         mpctx->initialized_flags &= ~INITIALIZED_AO;
         current_module = "uninit_ao";
-        if (mpctx->ao)
+        if (mpctx->ao) {
+            mixer_uninit(&mpctx->mixer);
             ao_uninit(mpctx->ao, mpctx->stop_play != AT_END_OF_FILE);
+        }
         mpctx->ao = NULL;
     }
 
@@ -691,8 +693,6 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
 void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
 {
-    if (mpctx->user_muted)
-        mixer_setmute(&mpctx->mixer, false);
     uninit_player(mpctx, INITIALIZED_ALL);
 #if defined(__MINGW32__) || defined(__CYGWIN__)
     timeEndPeriod(1);

@@ -719,8 +719,6 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
 
-    mpctx->user_muted = 0;
-
     switch (action) {
     case M_PROPERTY_SET:
         if (!arg)
@@ -757,12 +755,10 @@ static int mp_property_mute(m_option_t *prop, int action, void *arg,
         if (!arg)
             return M_PROPERTY_ERROR;
         mixer_setmute(&mpctx->mixer, *(int *) arg);
-        mpctx->user_muted = mpctx->mixer.muted;
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         mixer_setmute(&mpctx->mixer, !mixer_getmute(&mpctx->mixer));
-        mpctx->user_muted = mpctx->mixer.muted;
         return M_PROPERTY_OK;
     default:
         return m_property_flag_ro(prop, action, arg,

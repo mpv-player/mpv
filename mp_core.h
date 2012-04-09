@@ -188,8 +188,6 @@ typedef struct MPContext {
 
     float begin_skip; ///< start time of the current skip while on edlout mode
 
-    short user_muted; ///< Stores whether user wanted muted mode.
-
     int global_sub_size; // this encompasses all subtitle sources
     int global_sub_pos; // this encompasses all subtitle sources
     int set_of_sub_pos;

@@ -235,10 +235,32 @@ void mixer_reinit(struct mixer *mixer, struct ao *ao)
     const char *restore_reason = mixer->softvol ? "softvol" :
         mixer->ao->driver->info->short_name;
     if (mixer->restore_volume && !strcmp(mixer->restore_volume,
-                                         restore_reason)) {
+                                         restore_reason))
         mixer_setvolume(mixer, left, right);
-        mixer_setmute(mixer, muted);
-    }
+    mixer_setmute(mixer, muted);
     if (mixer->balance != 0)
         mixer_setbalance(mixer, mixer->balance);
+}
+
+/* Called before uninitializing the audio output. The main purpose is to
+ * turn off mute, in case it's a global/persistent setting which might
+ * otherwise be left enabled even after this player instance exits.
+ */
+void mixer_uninit(struct mixer *mixer)
+{
+    checkvolume(mixer);
+    if (mixer->muted) {
+        /* Current audio output API combines playing the remaining buffered
+         * audio and uninitializing the AO into one operation, even though
+         * ideally unmute would happen between those two steps. We can't do
+         * volume changes after uninitialization, but we don't want the
+         * remaining audio to play at full volume either. Thus this
+         * workaround to drop remaining audio first. */
+        ao_reset(mixer->ao);
+        mixer_setmute(mixer, false);
+        /* We remember mute status and re-enable it if we play more audio
+         * in the same process. */
+        mixer->muted = true;
+    }
+    mixer->ao = NULL;
 }
