@@ -1517,6 +1517,8 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 	    	    sh->bih->biSize = sizeof(*sh->bih);
 		    sh->disp_w = sh->bih->biWidth = stream_read_word(demuxer->stream);
 		    sh->disp_h = sh->bih->biHeight = stream_read_word(demuxer->stream);
+		    if (sh->disp_w > 0 && sh->disp_h > 0)
+			sh->aspect = (float)sh->disp_w / sh->disp_h;
 		    sh->bih->biPlanes = 1;
 		    sh->bih->biBitCount = 24;
 		    sh->bih->biCompression = sh->format;
