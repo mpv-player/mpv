@@ -164,6 +164,8 @@ static int init(int rate_hz, int channels, int format, int flags)
     float lag_seconds, lag_net = 0., lag_serv;
     struct timeval proto_start, proto_end;
 
+    global_ao->no_persistent_volume = true;
+
     if (esd_fd < 0) {
 	esd_fd = esd_open_sound(server);
 	if (esd_fd < 0) {

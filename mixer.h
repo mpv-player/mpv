@@ -32,8 +32,12 @@ typedef struct mixer {
     float softvol_max;
     bool muted;
     float vol_l, vol_r;
+    /* Contains ao driver name or "softvol" if volume is not persistent
+     * and needs to be restored after the driver is reinitialized. */
+    const char *restore_volume;
 } mixer_t;
 
+void mixer_reinit(struct mixer *mixer, struct ao *ao);
 void mixer_getvolume(mixer_t *mixer, float *l, float *r);
 void mixer_setvolume(mixer_t *mixer, float l, float r);
 void mixer_incvolume(mixer_t *mixer);

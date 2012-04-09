@@ -99,6 +99,7 @@ struct ao {
     int buffer_playable_size;
     bool initialized;
     bool untimed;
+    bool no_persistent_volume;
     const struct ao_driver *driver;
     void *priv;
     struct MPOpts *opts;

@@ -76,11 +76,17 @@ static void setvolume_internal(mixer_t *mixer, float l, float r)
 {
     struct ao_control_vol vol = {.left = l, .right = r};
     if (!mixer->softvol) {
+        // relies on the driver data being permanent (so ptr stays valid)
+        mixer->restore_volume = mixer->ao->no_persistent_volume ?
+            mixer->ao->driver->info->short_name : NULL;
         if (ao_control(mixer->ao, AOCONTROL_SET_VOLUME, &vol) != CONTROL_OK)
             mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
                     "[Mixer] Failed to change audio output volume.\n");
         return;
     }
+    mixer->restore_volume = "softvol";
+    if (!mixer->afilter)
+        return;
     // af_volume uses values in dB
     float db_vals[AF_NCH];
     int i;
@@ -196,4 +202,25 @@ void mixer_setbalance(mixer_t *mixer, float val)
 
     af_pan_balance->control(af_pan_balance,
                             AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val);
+}
+
+// Called after the audio filter chain is built or rebuilt.
+void mixer_reinit(struct mixer *mixer, struct ao *ao)
+{
+    mixer->ao = ao;
+    /* Use checkvolume() to see if softvol needs to be enabled because of
+     * lacking AO support, but first store values it could overwrite. */
+    float left = mixer->vol_l, right = mixer->vol_r;
+    bool muted = mixer->muted;
+    checkvolume(mixer);
+    /* Try to avoid restoring volume stored from one control method with
+     * another. Especially, restoring softvol volume (typically high) on
+     * system mixer could have very nasty effects. */
+    const char *restore_reason = mixer->softvol ? "softvol" :
+        mixer->ao->driver->info->short_name;
+    if (mixer->restore_volume && !strcmp(mixer->restore_volume,
+                                         restore_reason)) {
+        mixer_setvolume(mixer, left, right);
+        mixer_setmute(mixer, muted);
+    }
 }

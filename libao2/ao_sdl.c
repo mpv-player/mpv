@@ -135,6 +135,8 @@ static int init(int rate,int channels,int format,int flags){
 	/* SDL Audio Specifications */
 	SDL_AudioSpec aspec, obtained;
 
+        global_ao->no_persistent_volume = true;
+
 	/* Allocate ring-buffer memory */
 	buffer = av_fifo_alloc(BUFFSIZE);
 

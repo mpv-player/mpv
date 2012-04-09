@@ -420,6 +420,8 @@ static int init(int rate, int channels, int format, int flags)
     int res;
 	if (!InitDirectSound()) return 0;
 
+        global_ao->no_persistent_volume = true;
+
 	// ok, now create the buffers
 	WAVEFORMATEXTENSIBLE wformat;
 	DSBUFFERDESC dsbpridesc;
