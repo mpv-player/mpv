@@ -161,12 +161,23 @@ void mixer_decvolume(mixer_t *mixer)
 
 void mixer_getbalance(mixer_t *mixer, float *val)
 {
-    *val = 0.f;
-    if (!mixer->afilter)
-        return;
-    af_control_any_rev(mixer->afilter, AF_CONTROL_PAN_BALANCE | AF_CONTROL_GET,
-                       val);
+    if (mixer->afilter)
+        af_control_any_rev(mixer->afilter,
+                           AF_CONTROL_PAN_BALANCE | AF_CONTROL_GET,
+                           &mixer->balance);
+    *val = mixer->balance;
 }
+
+/* NOTE: Currently the balance code is seriously buggy: it always changes
+ * the af_pan mapping between the first two input channels and first two
+ * output channels to particular values. These values make sense for an
+ * af_pan instance that was automatically inserted for balance control
+ * only and is otherwise an identity transform, but if the filter was
+ * there for another reason, then ignoring and overriding the original
+ * values is completely wrong. In particular, this will break
+ * automatically inserted downmix filters; the original coefficients that
+ * are significantly below 1 will be overwritten with much higher values.
+ */
 
 void mixer_setbalance(mixer_t *mixer, float val)
 {
@@ -175,11 +186,16 @@ void mixer_setbalance(mixer_t *mixer, float val)
     af_control_ext_t arg_ext = { .arg = level };
     af_instance_t *af_pan_balance;
 
+    mixer->balance = val;
+
     if (!mixer->afilter)
         return;
 
     if (af_control_any_rev(mixer->afilter,
                            AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val))
+        return;
+
+    if (val == 0 || mixer->ao->channels < 2)
         return;
 
     if (!(af_pan_balance = af_add(mixer->afilter, "pan"))) {
@@ -223,4 +239,6 @@ void mixer_reinit(struct mixer *mixer, struct ao *ao)
         mixer_setvolume(mixer, left, right);
         mixer_setmute(mixer, muted);
     }
+    if (mixer->balance != 0)
+        mixer_setbalance(mixer, mixer->balance);
 }

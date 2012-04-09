@@ -35,6 +35,7 @@ typedef struct mixer {
     /* Contains ao driver name or "softvol" if volume is not persistent
      * and needs to be restored after the driver is reinitialized. */
     const char *restore_volume;
+    float balance;
 } mixer_t;
 
 void mixer_reinit(struct mixer *mixer, struct ao *ao);

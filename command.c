@@ -871,9 +871,6 @@ static int mp_property_balance(m_option_t *prop, int action, void *arg,
 {
     float bal;
 
-    if (!mpctx->sh_audio || mpctx->sh_audio->channels < 2)
-        return M_PROPERTY_UNAVAILABLE;
-
     switch (action) {
     case M_PROPERTY_GET:
         if (!arg)
