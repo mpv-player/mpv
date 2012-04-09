@@ -18,6 +18,8 @@
 
 #include <string.h>
 
+#include <libavutil/common.h>
+
 #include "config.h"
 #include "libao2/audio_out.h"
 #include "libaf/af.h"
@@ -25,16 +27,16 @@
 #include "mixer.h"
 
 
-void mixer_getvolume(mixer_t *mixer, float *l, float *r)
+static void checkvolume(struct mixer *mixer)
 {
-    *l = 0;
-    *r = 0;
     if (!mixer->ao)
         return;
 
     ao_control_vol_t vol;
     if (mixer->softvol || CONTROL_OK != ao_control(mixer->ao,
                                                 AOCONTROL_GET_VOLUME, &vol)) {
+        if (!mixer->afilter)
+            return;
         float db_vals[AF_NCH];
         if (!af_control_any_rev(mixer->afilter,
                         AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET, db_vals))
@@ -44,19 +46,34 @@ void mixer_getvolume(mixer_t *mixer, float *l, float *r)
         vol.left = (db_vals[0] / (mixer->softvol_max / 100.0)) * 100.0;
         vol.right = (db_vals[1] / (mixer->softvol_max / 100.0)) * 100.0;
     }
-    *r = vol.right;
-    *l = vol.left;
+    float l = mixer->vol_l;
+    float r = mixer->vol_r;
+    if (mixer->muted)
+        l = r = 0;
+    /* Try to detect cases where the volume has been changed by some external
+     * action (such as something else changing a shared system-wide volume).
+     * We don't test for exact equality, as some AOs may round the value
+     * we last set to some nearby supported value. 3 has been the default
+     * volume step for increase/decrease keys, and is apparently big enough
+     * to step to the next possible value in most setups.
+     */
+    if (FFABS(vol.left - l) >= 3 || FFABS(vol.right - r) >= 3) {
+        mixer->vol_l = vol.left;
+        mixer->vol_r = vol.right;
+        mixer->muted = false;
+    }
 }
 
-void mixer_setvolume(mixer_t *mixer, float l, float r)
+void mixer_getvolume(mixer_t *mixer, float *l, float *r)
 {
-    if (!mixer->ao) {
-        mixer->muted = 0;
-        return;
-    }
-    ao_control_vol_t vol;
-    vol.right = r;
-    vol.left = l;
+    checkvolume(mixer);
+    *l = mixer->vol_l;
+    *r = mixer->vol_r;
+}
+
+static void setvolume_internal(mixer_t *mixer, float l, float r)
+{
+    struct ao_control_vol vol = {.left = l, .right = r};
     if (mixer->softvol || CONTROL_OK != ao_control(mixer->ao,
                                                 AOCONTROL_SET_VOLUME, &vol)) {
         // af_volume uses values in dB
@@ -81,33 +98,16 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
             }
         }
     }
-    mixer->muted = 0;
 }
 
-void mixer_incvolume(mixer_t *mixer)
+void mixer_setvolume(mixer_t *mixer, float l, float r)
 {
-    float mixer_l, mixer_r;
-    mixer_getvolume(mixer, &mixer_l, &mixer_r);
-    mixer_l += mixer->volstep;
-    if (mixer_l > 100)
-        mixer_l = 100;
-    mixer_r += mixer->volstep;
-    if (mixer_r > 100)
-        mixer_r = 100;
-    mixer_setvolume(mixer, mixer_l, mixer_r);
-}
-
-void mixer_decvolume(mixer_t *mixer)
-{
-    float mixer_l, mixer_r;
-    mixer_getvolume(mixer, &mixer_l, &mixer_r);
-    mixer_l -= mixer->volstep;
-    if (mixer_l < 0)
-        mixer_l = 0;
-    mixer_r -= mixer->volstep;
-    if (mixer_r < 0)
-        mixer_r = 0;
-    mixer_setvolume(mixer, mixer_l, mixer_r);
+    checkvolume(mixer);  // to check mute status
+    mixer->vol_l = av_clip(l, 0, 100);
+    mixer->vol_r = av_clip(r, 0, 100);
+    if (!mixer->ao || mixer->muted)
+        return;
+    setvolume_internal(mixer, mixer->vol_l, mixer->vol_r);
 }
 
 void mixer_getbothvolume(mixer_t *mixer, float *b)
@@ -117,15 +117,37 @@ void mixer_getbothvolume(mixer_t *mixer, float *b)
     *b = (mixer_l + mixer_r) / 2;
 }
 
-void mixer_mute(mixer_t *mixer)
+void mixer_setmute(struct mixer *mixer, bool mute)
 {
-    if (mixer->muted) {
-        mixer_setvolume(mixer, mixer->last_l, mixer->last_r);
-    } else {
-        mixer_getvolume(mixer, &mixer->last_l, &mixer->last_r);
-        mixer_setvolume(mixer, 0, 0);
-        mixer->muted = 1;
+    checkvolume(mixer);
+    if (mute != mixer->muted) {
+        mixer->muted = mute;
+        setvolume_internal(mixer, mixer->vol_l * !mute, mixer->vol_r * !mute);
     }
+}
+
+bool mixer_getmute(struct mixer *mixer)
+{
+    checkvolume(mixer);
+    return mixer->muted;
+}
+
+static void addvolume(struct mixer *mixer, float d)
+{
+    checkvolume(mixer);
+    mixer_setvolume(mixer, mixer->vol_l + d, mixer->vol_r + d);
+    if (d > 0)
+        mixer_setmute(mixer, false);
+}
+
+void mixer_incvolume(mixer_t *mixer)
+{
+    addvolume(mixer, mixer->volstep);
+}
+
+void mixer_decvolume(mixer_t *mixer)
+{
+    addvolume(mixer, -mixer->volstep);
 }
 
 void mixer_getbalance(mixer_t *mixer, float *val)
