@@ -35,6 +35,7 @@ static void checkvolume(struct mixer *mixer)
     ao_control_vol_t vol;
     if (mixer->softvol || CONTROL_OK != ao_control(mixer->ao,
                                                 AOCONTROL_GET_VOLUME, &vol)) {
+        mixer->softvol = true;
         if (!mixer->afilter)
             return;
         float db_vals[AF_NCH];
@@ -74,35 +75,37 @@ void mixer_getvolume(mixer_t *mixer, float *l, float *r)
 static void setvolume_internal(mixer_t *mixer, float l, float r)
 {
     struct ao_control_vol vol = {.left = l, .right = r};
-    if (mixer->softvol || CONTROL_OK != ao_control(mixer->ao,
-                                                AOCONTROL_SET_VOLUME, &vol)) {
-        // af_volume uses values in dB
-        float db_vals[AF_NCH];
-        int i;
-        db_vals[0] = (l / 100.0) * (mixer->softvol_max / 100.0);
-        db_vals[1] = (r / 100.0) * (mixer->softvol_max / 100.0);
-        for (i = 2; i < AF_NCH; i++)
-            db_vals[i] = ((l + r) / 100.0) * (mixer->softvol_max / 100.0) / 2.0;
-        af_to_dB(AF_NCH, db_vals, db_vals, 20.0);
-        if (!af_control_any_rev(mixer->afilter,
-                AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, db_vals)) {
-            mp_tmsg(MSGT_GLOBAL, MSGL_INFO,
-                    "[Mixer] No hardware mixing, inserting volume filter.\n");
-            if (af_add(mixer->afilter, "volume")) {
-                if (!af_control_any_rev(mixer->afilter,
-                           AF_CONTROL_VOLUME_LEVEL|AF_CONTROL_SET, db_vals)) {
-                    mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
-                            "[Mixer] No volume control available.\n");
-                    return;
-                }
-            }
-        }
+    if (!mixer->softvol) {
+        if (ao_control(mixer->ao, AOCONTROL_SET_VOLUME, &vol) != CONTROL_OK)
+            mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
+                    "[Mixer] Failed to change audio output volume.\n");
+        return;
+    }
+    // af_volume uses values in dB
+    float db_vals[AF_NCH];
+    int i;
+    db_vals[0] = (l / 100.0) * (mixer->softvol_max / 100.0);
+    db_vals[1] = (r / 100.0) * (mixer->softvol_max / 100.0);
+    for (i = 2; i < AF_NCH; i++)
+        db_vals[i] = ((l + r) / 100.0) * (mixer->softvol_max / 100.0) / 2.0;
+    af_to_dB(AF_NCH, db_vals, db_vals, 20.0);
+    if (!af_control_any_rev(mixer->afilter,
+                            AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET,
+                            db_vals)) {
+        mp_tmsg(MSGT_GLOBAL, MSGL_INFO,
+                "[Mixer] No hardware mixing, inserting volume filter.\n");
+        if (!(af_add(mixer->afilter, "volume")
+              && af_control_any_rev(mixer->afilter,
+                                    AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET,
+                                    db_vals)))
+            mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
+                    "[Mixer] No volume control available.\n");
     }
 }
 
 void mixer_setvolume(mixer_t *mixer, float l, float r)
 {
-    checkvolume(mixer);  // to check mute status
+    checkvolume(mixer);  // to check mute status and AO support for volume
     mixer->vol_l = av_clip(l, 0, 100);
     mixer->vol_r = av_clip(r, 0, 100);
     if (!mixer->ao || mixer->muted)
