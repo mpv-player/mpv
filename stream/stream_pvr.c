@@ -89,7 +89,7 @@ int pvr_param_bitrate_peak = 0;
 char *pvr_param_stream_type = NULL;
 
 typedef struct station_elem_s {
-  char name[8];
+  char name[PVR_STATION_NAME_SIZE];
   int freq;
   char station[PVR_STATION_NAME_SIZE];
   int enabled;
