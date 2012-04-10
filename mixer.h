@@ -31,6 +31,8 @@ typedef struct mixer {
     bool softvol;
     float softvol_max;
     bool muted;
+    bool muted_by_us;
+    bool muted_using_volume;
     float vol_l, vol_r;
     /* Contains ao driver name or "softvol" if volume is not persistent
      * and needs to be restored after the driver is reinitialized. */

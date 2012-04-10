@@ -49,7 +49,7 @@ static void checkvolume(struct mixer *mixer)
     }
     float l = mixer->vol_l;
     float r = mixer->vol_r;
-    if (mixer->muted)
+    if (mixer->muted_using_volume)
         l = r = 0;
     /* Try to detect cases where the volume has been changed by some external
      * action (such as something else changing a shared system-wide volume).
@@ -61,8 +61,14 @@ static void checkvolume(struct mixer *mixer)
     if (FFABS(vol.left - l) >= 3 || FFABS(vol.right - r) >= 3) {
         mixer->vol_l = vol.left;
         mixer->vol_r = vol.right;
-        mixer->muted = false;
+        if (mixer->muted_using_volume)
+            mixer->muted = false;
     }
+    if (!mixer->softvol)
+        // Rely on the value not changing if the query is not supported
+        ao_control(mixer->ao, AOCONTROL_GET_MUTE, &mixer->muted);
+    mixer->muted_by_us &= mixer->muted;
+    mixer->muted_using_volume &= mixer->muted;
 }
 
 void mixer_getvolume(mixer_t *mixer, float *l, float *r)
@@ -130,8 +136,15 @@ void mixer_setmute(struct mixer *mixer, bool mute)
 {
     checkvolume(mixer);
     if (mute != mixer->muted) {
+        if (!mixer->softvol && !mixer->muted_using_volume && ao_control(
+                mixer->ao, AOCONTROL_SET_MUTE, &mute) == CONTROL_OK) {
+            mixer->muted_using_volume = false;
+        } else {
+            setvolume_internal(mixer, mixer->vol_l*!mute, mixer->vol_r*!mute);
+            mixer->muted_using_volume = mute;
+        }
         mixer->muted = mute;
-        setvolume_internal(mixer, mixer->vol_l * !mute, mixer->vol_r * !mute);
+        mixer->muted_by_us = mute;
     }
 }
 
@@ -227,7 +240,7 @@ void mixer_reinit(struct mixer *mixer, struct ao *ao)
     /* Use checkvolume() to see if softvol needs to be enabled because of
      * lacking AO support, but first store values it could overwrite. */
     float left = mixer->vol_l, right = mixer->vol_r;
-    bool muted = mixer->muted;
+    bool muted = mixer->muted_by_us;
     checkvolume(mixer);
     /* Try to avoid restoring volume stored from one control method with
      * another. Especially, restoring softvol volume (typically high) on
@@ -237,7 +250,11 @@ void mixer_reinit(struct mixer *mixer, struct ao *ao)
     if (mixer->restore_volume && !strcmp(mixer->restore_volume,
                                          restore_reason))
         mixer_setvolume(mixer, left, right);
-    mixer_setmute(mixer, muted);
+    /* We turn mute off at AO uninit, so it has to be restored (unless
+     * we're reinitializing filter chain while keeping AO); but we only
+     * enable mute, not turn external mute off. */
+    if (muted)
+        mixer_setmute(mixer, true);
     if (mixer->balance != 0)
         mixer_setbalance(mixer, mixer->balance);
 }
@@ -249,7 +266,7 @@ void mixer_reinit(struct mixer *mixer, struct ao *ao)
 void mixer_uninit(struct mixer *mixer)
 {
     checkvolume(mixer);
-    if (mixer->muted) {
+    if (mixer->muted_by_us) {
         /* Current audio output API combines playing the remaining buffered
          * audio and uninitializing the AO into one operation, even though
          * ideally unmute would happen between those two steps. We can't do
@@ -260,7 +277,7 @@ void mixer_uninit(struct mixer *mixer)
         mixer_setmute(mixer, false);
         /* We remember mute status and re-enable it if we play more audio
          * in the same process. */
-        mixer->muted = true;
+        mixer->muted_by_us = true;
     }
     mixer->ao = NULL;
 }

@@ -35,6 +35,9 @@ enum aocontrol {
     // If there's only one volume, SET should use average of left/right.
     AOCONTROL_GET_VOLUME,
     AOCONTROL_SET_VOLUME,
+    // _MUTE commands take a pointer to bool
+    AOCONTROL_GET_MUTE,
+    AOCONTROL_SET_MUTE,
 };
 
 #define AOPLAY_FINAL_CHUNK 1
