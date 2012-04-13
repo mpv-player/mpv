@@ -239,6 +239,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             }
             break;
         }
+        case WM_SETFOCUS:
+        case WM_KILLFOCUS:
+            // prevent modifier keys from getting stuck
+            memset(key_state, 0, sizeof(key_state));
+            break;
         case WM_LBUTTONDOWN:
             if (!vo_nomouse_input && (vo_fs || (wParam & MK_CONTROL))) {
                 mplayer_put_key(MOUSE_BTN0 | mod_state());
