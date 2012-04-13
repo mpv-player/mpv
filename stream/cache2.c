@@ -45,10 +45,6 @@
 #if defined(__MINGW32__)
 #include <windows.h>
 static void ThreadProc( void *s );
-#elif defined(__OS2__)
-#define INCL_DOS
-#include <os2.h>
-static void ThreadProc( void *s );
 #elif defined(PTHREAD_CACHE)
 #include <pthread.h>
 static void *ThreadProc(void *s);
@@ -453,8 +449,6 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
     s->stream=stream2;
 #if defined(__MINGW32__)
     stream->cache_pid = _beginthread( ThreadProc, 0, s );
-#elif defined(__OS2__)
-    stream->cache_pid = _beginthread( ThreadProc, NULL, 256 * 1024, s );
 #else
     {
     pthread_t tid;
@@ -499,7 +493,7 @@ err_out:
 }
 
 #if !FORKED_CACHE
-#if defined(__MINGW32__) || defined(__OS2__)
+#if defined(__MINGW32__)
 static void ThreadProc( void *s ){
   cache_mainloop(s);
   _endthread();

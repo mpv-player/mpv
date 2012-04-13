@@ -24,6 +24,8 @@
 #ifndef MPLAYER_GETCH2_H
 #define MPLAYER_GETCH2_H
 
+#include <stdbool.h>
+
 #include "config.h"
 
 /* Screen size. Initialized by load_termcap() and get_screen_size() */
@@ -45,7 +47,7 @@ void getch2_disable(void);
 
 /* Read a character or a special key code (see keycodes.h) */
 struct mp_fifo;
-void getch2(struct mp_fifo *fifo);
+bool getch2(struct mp_fifo *fifo);
 
 #ifdef CONFIG_ICONV
 /**
@@ -58,8 +60,8 @@ void getch2(struct mp_fifo *fifo);
 char *get_term_charset(void);
 #endif
 
-#if defined(__MINGW32__) || defined(__OS2__)
-/* slave cmd function for Windows and OS/2 */
+#if defined(__MINGW32__)
+// slave cmd function for Windows
 int mp_input_slave_cmd_func(int fd,char* dest,int size);
 #define USE_FD0_CMD_SELECT  0
 #define MP_INPUT_SLAVE_CMD_FUNC     mp_input_slave_cmd_func

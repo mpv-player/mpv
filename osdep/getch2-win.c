@@ -158,11 +158,12 @@ static int getch2_internal(void)
 	return -1;
 }
 
-void getch2(struct mp_fifo *fifo)
+bool getch2(struct mp_fifo *fifo)
 {
     int r = getch2_internal();
     if (r >= 0)
 	mplayer_put_key(fifo, r);
+    return true;
 }
 
 void getch2_enable(void)

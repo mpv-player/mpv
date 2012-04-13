@@ -1248,7 +1248,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
         width = screen_width;
     else
         width = 80;
-#if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
+#if defined(__MINGW32__) || defined(__CYGWIN__)
     /* Windows command line is broken (MinGW's rxvt works, but we
      * should not depend on that). */
     width--;
@@ -3462,12 +3462,12 @@ static void run_playloop(struct MPContext *mpctx)
 
     double buffered_audio = -1;
     while (mpctx->sh_video) {   // never loops, for "break;" only
+        struct vo *vo = mpctx->video_out;
         vo_pts = mpctx->sh_video->timer * 90000.0;
         vo_fps = mpctx->sh_video->fps;
 
-        video_left = mpctx->video_out->hasframe;
-        if (!mpctx->video_out->frame_loaded
-            && (!mpctx->paused || mpctx->restart_playback)) {
+        video_left = vo->hasframe || vo->frame_loaded;
+        if (!vo->frame_loaded && (!mpctx->paused || mpctx->restart_playback)) {
             double frame_time = update_video(mpctx);
             mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "*** ftime=%5.3f ***\n", frame_time);
             if (mpctx->sh_video->vf_initialized < 0) {
@@ -3478,18 +3478,19 @@ static void run_playloop(struct MPContext *mpctx)
                 return;
             }
             video_left = frame_time >= 0;
-            if (endpts != MP_NOPTS_VALUE)
-                video_left &= mpctx->sh_video->pts < endpts;
             if (video_left && !mpctx->restart_playback) {
                 mpctx->time_frame += frame_time / opts->playback_speed;
                 adjust_sync(mpctx, frame_time);
             }
         }
 
+        if (endpts != MP_NOPTS_VALUE)
+            video_left &= mpctx->sh_video->pts < endpts;
+
         // ================================================================
 
         current_module = "vo_check_events";
-        vo_check_events(mpctx->video_out);
+        vo_check_events(vo);
 
 #ifdef CONFIG_X11
         if (stop_xscreensaver) {
@@ -3508,7 +3509,7 @@ static void run_playloop(struct MPContext *mpctx)
 
         if (!video_left || (mpctx->paused && !mpctx->restart_playback))
             break;
-        if (!mpctx->video_out->frame_loaded) {
+        if (!vo->frame_loaded) {
             sleeptime = 0;
             break;
         }
@@ -3546,7 +3547,7 @@ static void run_playloop(struct MPContext *mpctx)
                 mpctx->time_frame = 0;
         }
 
-        double vsleep = mpctx->time_frame - mpctx->video_out->flip_queue_offset;
+        double vsleep = mpctx->time_frame - vo->flip_queue_offset;
         if (vsleep > 0.050) {
             sleeptime = FFMIN(sleeptime, vsleep - 0.040);
             break;
@@ -3556,7 +3557,7 @@ static void run_playloop(struct MPContext *mpctx)
         //=================== FLIP PAGE (VIDEO BLT): ======================
 
         current_module = "flip_page";
-        vo_new_frame_imminent(mpctx->video_out);
+        vo_new_frame_imminent(vo);
         struct sh_video *sh_video = mpctx->sh_video;
         mpctx->video_pts = sh_video->pts;
         update_subtitles(mpctx, sh_video->pts, false);
@@ -3568,12 +3569,13 @@ static void run_playloop(struct MPContext *mpctx)
         vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
         vo_osd_changed(0);
 
-        mpctx->time_frame -= mpctx->video_out->flip_queue_offset;
+        mpctx->time_frame -= get_relative_time(mpctx);
+        mpctx->time_frame -= vo->flip_queue_offset;
         float aq_sleep_time = mpctx->time_frame;
         if (mpctx->time_frame > 0.001
             && !(mpctx->sh_video->output_flags & VFCAP_TIMER))
             mpctx->time_frame = timing_sleep(mpctx, mpctx->time_frame);
-        mpctx->time_frame += mpctx->video_out->flip_queue_offset;
+        mpctx->time_frame += vo->flip_queue_offset;
 
         unsigned int t2 = GetTimer();
         /* Playing with playback speed it's possible to get pathological
@@ -3582,7 +3584,7 @@ static void run_playloop(struct MPContext *mpctx)
         double time_frame = FFMAX(mpctx->time_frame, -1);
         unsigned int pts_us = mpctx->last_time + time_frame * 1e6;
         int duration = -1;
-        double pts2 = mpctx->video_out->next_pts2;
+        double pts2 = vo->next_pts2;
         if (pts2 != MP_NOPTS_VALUE && opts->correct_pts &&
                 !mpctx->restart_playback) {
             // expected A/V sync correction is ignored
@@ -3596,11 +3598,11 @@ static void run_playloop(struct MPContext *mpctx)
                 diff = 10;
             duration = diff * 1e6;
         }
-        vo_flip_page(mpctx->video_out, pts_us | 1, duration);
+        vo_flip_page(vo, pts_us | 1, duration);
 
         mpctx->last_vo_flip_duration = (GetTimer() - t2) * 0.000001;
         vout_time_usage += mpctx->last_vo_flip_duration;
-        if (mpctx->video_out->driver->flip_page_timed) {
+        if (vo->driver->flip_page_timed) {
             // No need to adjust sync based on flip speed
             mpctx->last_vo_flip_duration = 0;
             // For print_status - VO call finishing early is OK for sync
@@ -3806,8 +3808,9 @@ static void run_playloop(struct MPContext *mpctx)
 
 static int read_keys(void *ctx, int fd)
 {
-    getch2(ctx);
-    return MP_INPUT_NOTHING;
+    if (getch2(ctx))
+        return MP_INPUT_NOTHING;
+    return MP_INPUT_DEAD;
 }
 
 static bool attachment_is_font(struct demux_attachment *att)

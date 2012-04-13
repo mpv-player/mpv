@@ -20,8 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "osdep.h"
-
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
 #endif
