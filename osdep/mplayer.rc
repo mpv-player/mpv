@@ -29,9 +29,9 @@ FILETYPE VFT_APP
 {
     BLOCK "StringFileInfo"
     {
-	    BLOCK "000004b0" // LANG_NEUTRAL,UNICODE_CP
+        BLOCK "000004b0" // LANG_NEUTRAL,UNICODE_CP
         {
-		    VALUE "Comments","mplayer2 is distributed under the terms of the GNU General Public License Version 3. Source code is available at http://www.mplayer2.org\000"
+            VALUE "Comments","mplayer2 is distributed under the terms of the GNU General Public License Version 3. Source code is available at http://www.mplayer2.org\000"
             VALUE "CompanyName", "\000"
             VALUE "FileDescription", "mplayer2 - Movie Player\000"
             VALUE "FileVersion",VERSION
@@ -45,7 +45,7 @@ FILETYPE VFT_APP
     }
     BLOCK "VarFileInfo"
     {
-	    VALUE "Translation",0,0x04b0
+        VALUE "Translation",0,0x04b0
     }
 }
 

@@ -631,12 +631,7 @@ int vo_w32_init(struct vo *vo)
 
     HINSTANCE hInstance = GetModuleHandleW(NULL);
 
-    HICON mplayerIcon = 0;
-    wchar_t exedir[MAX_PATH];
-    if (GetModuleFileNameW(0, exedir, MAX_PATH))
-        mplayerIcon = ExtractIconW(hInstance, exedir, 0);
-    if (!mplayerIcon)
-        mplayerIcon = LoadIcon(0, IDI_APPLICATION);
+    HICON mplayerIcon = LoadIconW(hInstance, L"IDI_ICON1");
 
     WNDCLASSEXW wcex = {
         .cbSize = sizeof wcex,
