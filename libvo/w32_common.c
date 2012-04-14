@@ -76,8 +76,6 @@ static HDC dev_hdc;
 static int event_flags;
 static int mon_cnt;
 
-static bool key_state[256];
-
 static const struct mp_keymap vk_map[] = {
     // special keys
     {VK_ESCAPE, KEY_ESC}, {VK_BACK, KEY_BS}, {VK_TAB, KEY_TAB},
@@ -135,14 +133,19 @@ static int get_resize_border(int v) {
     }
 }
 
+static bool key_state(int vk)
+{
+    return GetKeyState(vk) & 0x8000;
+}
+
 static int mod_state(void)
 {
     int res = 0;
-    if (key_state[VK_CONTROL])
+    if (key_state(VK_CONTROL))
         res |= KEY_MODIFIER_CTRL;
-    if (key_state[VK_SHIFT])
+    if (key_state(VK_SHIFT))
         res |= KEY_MODIFIER_SHIFT;
-    if (key_state[VK_MENU])
+    if (key_state(VK_MENU))
         res |= KEY_MODIFIER_ALT;
     return res;
 }
@@ -207,7 +210,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             break;
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN: {
-            key_state[wParam & 0xFF] = true;
             int mpkey = lookup_keymap_table(vk_map, wParam);
             if (mpkey)
                 mplayer_put_key(mpkey | mod_state());
@@ -215,10 +217,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 return 0;
             break;
         }
-        case WM_KEYUP:
-        case WM_SYSKEYUP:
-            key_state[wParam & 0xFF] = false;
-            break;
         case WM_CHAR:
         case WM_SYSCHAR: {
             int mods = mod_state();
@@ -229,7 +227,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             // map to wParam==10. As a workaround, check VK_RETURN to
             // distinguish these two key combinations.
             if ((mods & KEY_MODIFIER_CTRL) && code >= 1 && code <= 26
-                && !key_state[VK_RETURN])
+                && !key_state(VK_RETURN))
                 code = code - 1 + (mods & KEY_MODIFIER_SHIFT ? 'A' : 'a');
             if (code >= 32 && code < (1<<21)) {
                 mplayer_put_key(code | mods);
@@ -239,11 +237,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             }
             break;
         }
-        case WM_SETFOCUS:
-        case WM_KILLFOCUS:
-            // prevent modifier keys from getting stuck
-            memset(key_state, 0, sizeof(key_state));
-            break;
         case WM_LBUTTONDOWN:
             if (!vo_nomouse_input && (vo_fs || (wParam & MK_CONTROL))) {
                 mplayer_put_key(MOUSE_BTN0 | mod_state());
