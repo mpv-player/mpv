@@ -266,8 +266,13 @@ void mp_ass_configure_fonts(ASS_Renderer *priv)
         path = strdup(sub_font_name);
     else if (font_fontconfig < 0 && font_name)
         path = strdup(font_name);
-    else
+    else {
         path = get_path("subfont.ttf");
+        if (!mp_path_exists(path)) {
+            free(path);
+            path = NULL;
+        }
+    }
     if (font_fontconfig >= 0 && sub_font_name)
         family = strdup(sub_font_name);
     else if (font_fontconfig >= 0 && font_name)
