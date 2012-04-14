@@ -32,8 +32,6 @@
 #include "talloc.h"
 #include "video_out.h"
 #include "libmpcodecs/vfcap.h"
-// for global_vo
-#include "old_vo_wrapper.h"
 #include "csputils.h"
 #include "libmpcodecs/mp_image.h"
 #include "libmpcodecs/img_format.h"
@@ -756,7 +754,7 @@ static void fill_d3d_presentparams(d3d_priv *priv,
     present_params->SwapEffect             =
         priv->opt_swap_discard ? D3DSWAPEFFECT_DISCARD : D3DSWAPEFFECT_COPY;
     present_params->Flags                  = D3DPRESENTFLAG_VIDEO;
-    present_params->hDeviceWindow          = vo_w32_window; /* w32_common var */
+    present_params->hDeviceWindow          = priv->vo->w32->window;
     present_params->BackBufferWidth        = priv->cur_backbuf_width;
     present_params->BackBufferHeight       = priv->cur_backbuf_height;
     present_params->MultiSampleType        = D3DMULTISAMPLE_NONE;
@@ -795,7 +793,7 @@ static bool change_d3d_backbuffer(d3d_priv *priv)
     if (!priv->d3d_device) {
         if (FAILED(IDirect3D9_CreateDevice(priv->d3d_handle,
                                            D3DADAPTER_DEFAULT,
-                                           DEVTYPE, vo_w32_window,
+                                           DEVTYPE, priv->vo->w32->window,
                                            D3DCREATE_SOFTWARE_VERTEXPROCESSING
                                            | D3DCREATE_FPU_PRESERVE,
                                            &present_params, &priv->d3d_device)))
@@ -1468,8 +1466,7 @@ static int preinit_internal(struct vo *vo, const char *arg, bool allow_shaders)
     /* w32_common framework call. Configures window on the screen, gets
      * fullscreen dimensions and does other useful stuff.
      */
-    global_vo = vo;
-    if (!vo_w32_init()) {
+    if (!vo_w32_init(vo)) {
         mp_msg(MSGT_VO, MSGL_V,
                "<vo_direct3d>Configuring onscreen window failed.\n");
         goto err_out;
@@ -1509,7 +1506,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_DRAW_IMAGE:
         return d3d_upload_and_render_frame(priv, data);
     case VOCTRL_FULLSCREEN:
-        vo_w32_fullscreen();
+        vo_w32_fullscreen(vo);
         resize_d3d(priv);
         return VO_TRUE;
     case VOCTRL_RESET:
@@ -1546,13 +1543,13 @@ static int control(struct vo *vo, uint32_t request, void *data)
                >= 0 ? VO_TRUE : VO_NOTIMPL;
     }
     case VOCTRL_ONTOP:
-        vo_w32_ontop();
+        vo_w32_ontop(vo);
         return VO_TRUE;
     case VOCTRL_BORDER:
-        vo_w32_border();
+        vo_w32_border(vo);
         return VO_TRUE;
     case VOCTRL_UPDATE_SCREENINFO:
-        w32_update_xinerama_info();
+        w32_update_xinerama_info(vo);
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         calc_fs_rect(priv);
@@ -1606,7 +1603,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     /* w32_common framework call. Creates window on the screen with
      * the given coordinates.
      */
-    if (!vo_w32_config(d_width, d_height, options)) {
+    if (!vo_w32_config(vo, d_width, d_height, options)) {
         mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Creating window failed.\n");
         return VO_ERROR;
     }
@@ -1670,7 +1667,7 @@ static void uninit(struct vo *vo)
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>uninit called.\n");
 
     uninit_d3d(priv);
-    vo_w32_uninit(); /* w32_common framework call */
+    vo_w32_uninit(vo);
     if (priv->d3d9_dll)
         FreeLibrary(priv->d3d9_dll);
     priv->d3d9_dll = NULL;
@@ -1682,12 +1679,7 @@ static void check_events(struct vo *vo)
 {
     d3d_priv *priv = vo->priv;
 
-    int flags;
-    /* w32_common framework call. Handles video window events.
-     * Updates global libvo's vo_dwidth/vo_dheight upon resize
-     * with the new window width/height.
-     */
-    flags = vo_w32_check_events();
+    int flags = vo_w32_check_events(vo);
     if (flags & VO_EVENT_RESIZE)
         resize_d3d(priv);
 
@@ -1914,9 +1906,9 @@ static mp_image_t *get_window_screenshot(d3d_priv *priv)
         goto error_exit;
     }
 
-    GetClientRect(vo_w32_window, &window_rc);
+    GetClientRect(priv->vo->w32->window, &window_rc);
     pt = (POINT) { 0, 0 };
-    ClientToScreen(vo_w32_window, &pt);
+    ClientToScreen(priv->vo->w32->window, &pt);
     window_rc.left = pt.x;
     window_rc.top = pt.y;
     window_rc.right += window_rc.left;

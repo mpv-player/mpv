@@ -1775,7 +1775,7 @@ struct w32_context {
 static int create_window_w32(struct MPGLContext *ctx, uint32_t d_width,
                              uint32_t d_height, uint32_t flags)
 {
-    if (!vo_w32_config(d_width, d_height, flags))
+    if (!vo_w32_config(ctx->vo, d_width, d_height, flags))
         return -1;
     return 0;
 }
@@ -1799,7 +1799,7 @@ static void *w32gpa(const GLubyte *procName)
 static int create_window_w32_gl3(struct MPGLContext *ctx, int gl_flags,
                                  int gl_version, uint32_t d_width,
                                  uint32_t d_height, uint32_t flags) {
-    if (!vo_w32_config(d_width, d_height, flags))
+    if (!vo_w32_config(ctx->vo, d_width, d_height, flags))
         return -1;
 
     struct w32_context *w32_ctx = ctx->priv;
@@ -1808,8 +1808,8 @@ static int create_window_w32_gl3(struct MPGLContext *ctx, int gl_flags,
     if (*context) // reuse existing context
         return 0; // not reusing it breaks gl3!
 
-    HWND win = vo_w32_window;
-    HDC windc = vo_w32_get_dc(win);
+    HWND win = ctx->vo->w32->window;
+    HDC windc = vo_w32_get_dc(ctx->vo, win);
     HGLRC new_context = 0;
 
     new_context = wglCreateContext(windc);
@@ -1896,12 +1896,12 @@ out:
 
 static int setGlWindow_w32(MPGLContext *ctx)
 {
-    HWND win = vo_w32_window;
+    HWND win = ctx->vo->w32->window;
     struct w32_context *w32_ctx = ctx->priv;
     int *vinfo = &w32_ctx->vinfo;
     HGLRC *context = &w32_ctx->context;
     int new_vinfo;
-    HDC windc = vo_w32_get_dc(win);
+    HDC windc = vo_w32_get_dc(ctx->vo, win);
     HGLRC new_context = 0;
     int keep_context = 0;
     int res = SET_WINDOW_FAILED;
@@ -1934,7 +1934,6 @@ static int setGlWindow_w32(MPGLContext *ctx)
     }
 
     // set new values
-    vo_w32_window = win;
     {
         RECT rect;
         GetClientRect(win, &rect);
@@ -1955,7 +1954,7 @@ static int setGlWindow_w32(MPGLContext *ctx)
         res = SET_WINDOW_OK;
 
 out:
-    vo_w32_release_dc(win, windc);
+    vo_w32_release_dc(ctx->vo, win, windc);
     return res;
 }
 
@@ -1974,18 +1973,10 @@ static void releaseGlContext_w32(MPGLContext *ctx)
 
 static void swapGlBuffers_w32(MPGLContext *ctx)
 {
-    HDC vo_hdc = vo_w32_get_dc(vo_w32_window);
+    HDC vo_hdc = vo_w32_get_dc(ctx->vo, ctx->vo->w32->window);
     SwapBuffers(vo_hdc);
-    vo_w32_release_dc(vo_w32_window, vo_hdc);
+    vo_w32_release_dc(ctx->vo, ctx->vo->w32->window, vo_hdc);
 }
-
-//trivial wrappers (w32 code uses old vo API)
-static void new_vo_w32_ontop(struct vo *vo) { vo_w32_ontop(); }
-static void new_vo_w32_border(struct vo *vo) { vo_w32_border(); }
-static void new_vo_w32_fullscreen(struct vo *vo) { vo_w32_fullscreen(); }
-static int new_vo_w32_check_events(struct vo *vo) { return vo_w32_check_events(); }
-static void new_w32_update_xinerama_info(struct vo *vo) { w32_update_xinerama_info(); }
-static void new_vo_w32_uninit(struct vo *vo) { vo_w32_uninit(); }
 #endif
 
 #ifdef CONFIG_GL_X11
@@ -2461,15 +2452,13 @@ MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
         ctx->setGlWindow = setGlWindow_w32;
         ctx->releaseGlContext = releaseGlContext_w32;
         ctx->swapGlBuffers = swapGlBuffers_w32;
-        ctx->update_xinerama_info = new_w32_update_xinerama_info;
-        ctx->border = new_vo_w32_border;
-        ctx->check_events = new_vo_w32_check_events;
-        ctx->fullscreen = new_vo_w32_fullscreen;
-        ctx->ontop = new_vo_w32_ontop;
-        ctx->vo_uninit = new_vo_w32_uninit;
-        //the win32 code is hardcoded to use the deprecated vo API
-        global_vo = vo;
-        if (vo_w32_init())
+        ctx->update_xinerama_info = w32_update_xinerama_info;
+        ctx->border = vo_w32_border;
+        ctx->check_events = vo_w32_check_events;
+        ctx->fullscreen = vo_w32_fullscreen;
+        ctx->ontop = vo_w32_ontop;
+        ctx->vo_uninit = vo_w32_uninit;
+        if (vo_w32_init(vo))
             return ctx;
         break;
 #endif

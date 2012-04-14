@@ -20,21 +20,50 @@
 #define MPLAYER_W32_COMMON_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <windows.h>
 
-extern HWND vo_w32_window;
-extern int vo_vm;
+struct vo_w32_state {
+    HWND window;
 
-int vo_w32_init(void);
-void vo_w32_uninit(void);
-void vo_w32_ontop(void);
-void vo_w32_border(void);
-void vo_w32_fullscreen(void);
-int vo_w32_check_events(void);
-int vo_w32_config(uint32_t, uint32_t, uint32_t);
-void destroyRenderingContext(void);
-void w32_update_xinerama_info(void);
-HDC vo_w32_get_dc(HWND wnd);
-void vo_w32_release_dc(HWND wnd, HDC dc);
+    // HDC used when rendering to a device instead of window
+    HDC dev_hdc;
+
+    bool vm;
+
+    int depthonscreen;
+
+    // last non-fullscreen extends (updated only on fullscreen or on initialization)
+    int prev_width;
+    int prev_height;
+    int prev_x;
+    int prev_y;
+
+    // whether the window position and size were intialized
+    bool window_bounds_initialized;
+
+    bool current_fs;
+
+    int window_x;
+    int window_y;
+
+    // video size
+    uint32_t o_dwidth;
+    uint32_t o_dheight;
+
+    int event_flags;
+    int mon_cnt;
+};
+
+int vo_w32_init(struct vo *vo);
+void vo_w32_uninit(struct vo *vo);
+void vo_w32_ontop(struct vo *vo);
+void vo_w32_border(struct vo *vo);
+void vo_w32_fullscreen(struct vo *vo);
+int vo_w32_check_events(struct vo *vo);
+int vo_w32_config(struct vo *vo, uint32_t, uint32_t, uint32_t);
+void w32_update_xinerama_info(struct vo *vo);
+HDC vo_w32_get_dc(struct vo *vo, HWND wnd);
+void vo_w32_release_dc(struct vo *vo, HWND wnd, HDC dc);
 
 #endif /* MPLAYER_W32_COMMON_H */

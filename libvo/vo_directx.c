@@ -36,6 +36,8 @@
 #include "sub/sub.h"
 #include "w32_common.h"
 
+#define vo_w32_window (global_vo->w32->window)
+
 static LPDIRECTDRAWCOLORCONTROL g_cc = NULL;            //color control interface
 static LPDIRECTDRAW7 g_lpdd = NULL;                 //DirectDraw Object
 static LPDIRECTDRAWSURFACE7 g_lpddsPrimary = NULL;   //Primary Surface: viewport through the Desktop
@@ -335,7 +337,7 @@ static void uninit(void)
     hddraw_dll = NULL;
     mp_msg(MSGT_VO, MSGL_DBG3, "<vo_directx><INFO>ddraw.dll freed\n");
     mp_msg(MSGT_VO, MSGL_DBG3, "<vo_directx><INFO>uninitialized\n");
-    vo_w32_uninit();
+    vo_w32_uninit(global_vo);
 }
 
 static BOOL WINAPI EnumCallbackEx(GUID FAR *lpGUID, LPSTR lpDriverDescription, LPSTR lpDriverName, LPVOID lpContext, HMONITOR hm)
@@ -607,15 +609,15 @@ static uint32_t Directx_ManageDisplay(void)
 
 static void check_events(void)
 {
-    int evt = vo_w32_check_events();
+    int evt = vo_w32_check_events(global_vo);
     if (evt & (VO_EVENT_RESIZE | VO_EVENT_MOVE))
         Directx_ManageDisplay();
     if (evt & (VO_EVENT_RESIZE | VO_EVENT_MOVE | VO_EVENT_EXPOSE)) {
-        HDC dc = vo_w32_get_dc(vo_w32_window);
+        HDC dc = vo_w32_get_dc(global_vo, vo_w32_window);
         RECT r;
         GetClientRect(vo_w32_window, &r);
         FillRect(dc, &r, vo_fs || vidmode ? blackbrush : colorbrush);
-        vo_w32_release_dc(vo_w32_window, dc);
+        vo_w32_release_dc(global_vo, vo_w32_window, dc);
     }
 }
 
@@ -749,9 +751,9 @@ static int preinit(const char *arg)
     windowcolor = vo_colorkey;
     colorbrush  = CreateSolidBrush(windowcolor);
     blackbrush  = (HBRUSH)GetStockObject(BLACK_BRUSH);
-    if (!vo_w32_init())
+    if (!vo_w32_init(global_vo))
         return 1;
-    if (!vo_w32_config(100, 100, VOFLAG_HIDDEN))
+    if (!vo_w32_config(global_vo, 100, 100, VOFLAG_HIDDEN))
         return 1;
 
     if (Directx_InitDirectDraw() != 0)
@@ -958,7 +960,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
     g_lpddsPrimary = NULL;
     mp_msg(MSGT_VO, MSGL_DBG3, "<vo_directx><INFO>overlay surfaces released\n");
 
-    if (!vo_w32_config(d_width, d_height, options))
+    if (!vo_w32_config(global_vo, d_width, d_height, options))
         return 1;
 
     /*create the surfaces*/
@@ -1108,11 +1110,11 @@ static int control(uint32_t request, void *data)
     case VOCTRL_DRAW_IMAGE:
         return put_image(data);
     case VOCTRL_BORDER:
-        vo_w32_border();
+        vo_w32_border(global_vo);
         Directx_ManageDisplay();
         return VO_TRUE;
     case VOCTRL_ONTOP:
-        vo_w32_ontop();
+        vo_w32_ontop(global_vo);
         return VO_TRUE;
     case VOCTRL_ROOTWIN:
         if (WinID != -1)
@@ -1128,7 +1130,7 @@ static int control(uint32_t request, void *data)
         }
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
-        vo_w32_fullscreen();
+        vo_w32_fullscreen(global_vo);
         Directx_ManageDisplay();
         return VO_TRUE;
     case VOCTRL_SET_EQUALIZER: {
@@ -1140,7 +1142,7 @@ static int control(uint32_t request, void *data)
         return color_ctrl_get(args->name, args->valueptr);
     }
     case VOCTRL_UPDATE_SCREENINFO:
-        w32_update_xinerama_info();
+        w32_update_xinerama_info(global_vo);
         return VO_TRUE;
     }
     return VO_NOTIMPL;
