@@ -4544,7 +4544,7 @@ int main(int argc, char *argv[]) {
 EOF
   _gl=no
   for _ld_tmp in "" -lGL "-lGL -lXdamage" "-lGL $_ld_pthread" ; do
-    if test "$_cocoa" != yes && cc_check $_ld_tmp $_ld_lm ; then
+    if cc_check $_ld_tmp $_ld_lm ; then
       _gl=yes
       _gl_x11=yes
       libs_mplayer="$libs_mplayer $_ld_tmp $_ld_dl"

@@ -21,6 +21,8 @@
 #import <OpenGL/OpenGL.h>
 #import <QuartzCore/QuartzCore.h>
 #import <CoreServices/CoreServices.h> // for CGDisplayHideCursor
+#include <dlfcn.h>
+
 #include "cocoa_common.h"
 
 #include "options.h"
@@ -115,6 +117,19 @@ struct vo_cocoa_state *vo_cocoa_init_state(void)
 bool vo_cocoa_gui_running(void)
 {
     return !!s;
+}
+
+void *vo_cocoa_glgetaddr(const char *s)
+{
+    void *ret = NULL;
+    void *handle = dlopen(
+        "/System/Library/Frameworks/OpenGL.framework/OpenGL",
+        RTLD_LAZY | RTLD_LOCAL);
+    if (!handle)
+        return NULL;
+    ret = dlsym(handle, s);
+    dlclose(handle);
+    return ret;
 }
 
 int vo_cocoa_init(struct vo *vo)
