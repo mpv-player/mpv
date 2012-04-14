@@ -194,6 +194,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         case WM_SYSCHAR: {
             int mods = mod_state(vo);
             int code = wParam;
+            // Windows enables Ctrl+Alt when AltGr (VK_RMENU) is pressed.
+            // E.g. AltGr+9 on a German keyboard would yield Ctrl+Alt+[
+            // Warning: wine handles this differently. Don't test this on wine!
+            if (key_state(vo, VK_RMENU))
+                mods &= ~(KEY_MODIFIER_CTRL | KEY_MODIFIER_ALT);
             // Apparently Ctrl+A to Ctrl+Z is special cased, and produces
             // character codes from 1-26. Work it around.
             // Also, enter/return (including the keypad variant) and CTRL+J both
