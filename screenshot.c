@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <assert.h>
 
 #include <libswscale/swscale.h>
 #include <libavcodec/avcodec.h>
@@ -43,6 +44,7 @@
 #include "libvo/csputils.h"
 
 typedef struct screenshot_ctx {
+    AVFrame *pic;
     int full_window;
     int each_frame;
     int using_vf_screenshot;
@@ -51,10 +53,22 @@ typedef struct screenshot_ctx {
     char fname[102];
 } screenshot_ctx;
 
+static int destroy_ctx(void *ptr)
+{
+    struct screenshot_ctx *ctx = ptr;
+    av_free(ctx->pic);
+    return 0;
+}
+
 static screenshot_ctx *screenshot_get_ctx(MPContext *mpctx)
 {
-    if (!mpctx->screenshot_ctx)
-        mpctx->screenshot_ctx = talloc_zero(mpctx, screenshot_ctx);
+    if (!mpctx->screenshot_ctx) {
+        struct screenshot_ctx *ctx = talloc_zero(mpctx, screenshot_ctx);
+        talloc_set_destructor(ctx, destroy_ctx);
+        ctx->pic = avcodec_alloc_frame();
+        assert(ctx->pic);
+        mpctx->screenshot_ctx = ctx;
+    }
     return mpctx->screenshot_ctx;
 }
 
@@ -91,13 +105,13 @@ static int write_png(screenshot_ctx *ctx, struct mp_image *image)
     if (!outbuffer)
         goto error_exit;
 
-    AVFrame pic;
-    avcodec_get_frame_defaults(&pic);
+    AVFrame *pic = ctx->pic;
+    avcodec_get_frame_defaults(pic);
     for (int n = 0; n < 4; n++) {
-        pic.data[n] = image->planes[n];
-        pic.linesize[n] = image->stride[n];
+        pic->data[n] = image->planes[n];
+        pic->linesize[n] = image->stride[n];
     }
-    int size = avcodec_encode_video(avctx, outbuffer, outbuffer_size, &pic);
+    int size = avcodec_encode_video(avctx, outbuffer, outbuffer_size, pic);
     if (size < 1)
         goto error_exit;
 
