@@ -106,6 +106,27 @@ static const struct {
 
 #define SUBRIP_MAX_STACKED_FONT_TAGS    16
 
+/* Read the attribute value starting at *s, and skip *s past the value.
+ * Set out_value to the parsed value, with possible '"' stripped.
+ * Return whether the attribute is well formed. */
+static bool read_value(char **s, struct bstr *out_value)
+{
+    char term = 0;
+    if (**s == '"') {
+        term = '"';
+        (*s)++;
+    }
+    out_value->start = *s;
+    out_value->len = 0;
+    unsigned char *start = *s;
+    unsigned char *end = term ? strchr(start, term) : strpbrk(start, " >");
+    if (!end)
+        return false;
+    out_value->len = end - out_value->start;
+    *s = end + (term ? 1 : 0);
+    return true;
+}
+
 void subassconvert_subrip(const char *orig, char *dest, int dest_buffer_size)
 {
     /* line is not const to avoid warnings with strtol, etc.
@@ -174,34 +195,35 @@ void subassconvert_subrip(const char *orig, char *dest, int dest_buffer_size)
             line += 6;
 
             while (*line && *line != '>') {
-                if (strncmp(line, "size=\"", 6) == 0) {
-                    line += 6;
-                    tag->size = strtol(line, &line, 10);
-                    if (*line != '"')
+                if (strncmp(line, "size=", 5) == 0) {
+                    line += 5;
+                    struct bstr val;
+                    if (!read_value(&line, &val))
+                        break;
+                    tag->size = bstrtoll(val, &val, 10);
+                    if (val.len)
                         break;
                     append_text(&new_line, "{\\fs%d}", tag->size);
                     tag->has_size = true;
                     has_valid_attr = true;
-                } else if (strncmp(line, "color=\"", 7) == 0) {
-                    line += 7;
-                    if (*line == '#') {
+                } else if (strncmp(line, "color=", 6) == 0) {
+                    line += 6;
+                    struct bstr val;
+                    if (!read_value(&line, &val))
+                        break;
+                    if (bstr_eatstart(&val, bstr("#"))) {
                         // #RRGGBB format
-                        line++;
-                        tag->color = strtol(line, &line, 16) & 0x00ffffff;
-                        if (*line != '"')
+                        tag->color = bstrtoll(val, &val, 16) & 0x00ffffff;
+                        if (val.len)
                             break;
                         tag->color = ((tag->color & 0xff) << 16)
                             | (tag->color & 0xff00)
                             | ((tag->color & 0xff0000) >> 16);
                     } else {
                         // Standard web colors
-                        int len = indexof(line, '"');
-                        if (len <= 0)
-                            break;
                         for (int i = 0; i < FF_ARRAY_ELEMS(subrip_web_colors); i++) {
                             char *color = subrip_web_colors[i].s;
-                            if (strlen(color) == len
-                                && strncasecmp(line, color, len) == 0) {
+                            if (bstrcasecmp(val, bstr(color)) == 0) {
                                 tag->color = subrip_web_colors[i].v;
                                 goto foundcolor;
                             }
@@ -211,29 +233,25 @@ void subassconvert_subrip(const char *orig, char *dest, int dest_buffer_size)
                         mp_tmsg(MSGT_SUBREADER, MSGL_WARN,
                                 "SubRip: unknown font color in subtitle: %s\n", orig);
                         append_text(&new_line, "{\\c}");
-                        line += len + 1;
                         continue;
 
-                    foundcolor:
-                        line += len;
+                    foundcolor: ;
                     }
                     append_text(&new_line, "{\\c&H%06X&}", tag->color);
                     tag->has_color = true;
                     has_valid_attr = true;
-                } else if (strncmp(line, "face=\"", 6) == 0) {
+                } else if (strncmp(line, "face=", 5) == 0) {
                     /* Font face attribute */
-                    line += 6;
-                    int len = indexof(line, '"');
-                    if (len <= 0)
+                    line += 5;
+                    struct bstr val;
+                    if (!read_value(&line, &val))
                         break;
-                    tag->face.start = line;
-                    tag->face.len = len;
-                    line += len;
+                    tag->face = val;
                     append_text(&new_line, "{\\fn%.*s}", BSTR_P(tag->face));
                     tag->has_face = true;
                     has_valid_attr = true;
-                }
-                line++;
+                } else
+                    line++;
             }
 
             if (!has_valid_attr || *line != '>') { /* Not valid font tag */

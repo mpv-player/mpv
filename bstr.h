@@ -82,6 +82,9 @@ int bstr_decode_utf8(struct bstr str, struct bstr *out_next);
 // On error, -1 is returned. On success, it returns a value in the range [1, 4].
 int bstr_parse_utf8_code_length(unsigned char b);
 
+// If s starts with prefix, return true and return the rest of the string in s.
+bool bstr_eatstart(struct bstr *s, struct bstr prefix);
+
 static inline struct bstr bstr_cut(struct bstr str, int n)
 {
     if (n > str.len)
