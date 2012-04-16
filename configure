@@ -3796,6 +3796,87 @@ fi
 echores "$_directfb"
 
 
+if darwin; then
+
+echocheck "QuickTime"
+if test "$quicktime" = auto ; then
+  quicktime=no
+  statement_check QuickTime/QuickTime.h 'ImageDescription *desc; EnterMovies(); ExitMovies()' -framework QuickTime && quicktime=yes
+fi
+if test "$quicktime" = yes ; then
+  extra_ldflags="$extra_ldflags -framework QuickTime"
+  def_quicktime='#define CONFIG_QUICKTIME 1'
+else
+  def_quicktime='#undef CONFIG_QUICKTIME'
+fi
+echores $quicktime
+
+echocheck "Cocoa"
+if test "$_cocoa" = auto ; then
+  cat > $TMPC <<EOF
+#include <CoreServices/CoreServices.h>
+#include <OpenGL/OpenGL.h>
+int main(void) {
+  NSApplicationLoad();
+}
+EOF
+  _cocoa=no
+  cc_check -framework Cocoa -framework OpenGL && _cocoa=yes
+fi
+if test "$_cocoa" = yes ; then
+  libs_mplayer="$libs_mplayer -framework Cocoa -framework OpenGL"
+  def_cocoa='#define CONFIG_COCOA 1'
+else
+  def_cocoa='#undef CONFIG_COCOA'
+fi
+echores "$_cocoa"
+
+echocheck "CoreVideo"
+if test "$_cocoa" = yes && test "$_corevideo" = auto ; then
+  cat > $TMPC <<EOF
+#include <QuartzCore/CoreVideo.h>
+int main(void) { return 0; }
+EOF
+  _corevideo=no
+  cc_check -framework Cocoa -framework QuartzCore -framework OpenGL && _corevideo=yes
+fi
+if test "$_corevideo" = yes ; then
+  vomodules="corevideo $vomodules"
+  libs_mplayer="$libs_mplayer -framework QuartzCore"
+  def_corevideo='#define CONFIG_COREVIDEO 1'
+else
+  novomodules="corevideo $novomodules"
+  def_corevideo='#undef CONFIG_COREVIDEO'
+fi
+echores "$_corevideo"
+
+echocheck "SharedBuffer"
+if test "$_sharedbuffer" = auto ; then
+  cat > $TMPC <<EOF
+int main(void) {
+  NSApplicationLoad();
+}
+EOF
+  _sharedbuffer=no
+  cc_check -framework Cocoa && _sharedbuffer=yes
+fi
+if test "$_sharedbuffer" = yes ; then
+  vomodules="sharedbuffer $vomodules"
+  libs_mplayer="$libs_mplayer -framework Cocoa"
+  def_sharedbuffer='#define CONFIG_SHAREDBUFFER 1'
+else
+  novomodules="sharedbuffer $novomodules"
+  def_sharedbuffer='#undef CONFIG_SHAREDBUFFER'
+fi
+echores "$_sharedbuffer"
+
+depends_on_application_services(){
+  test "$_corevideo" = yes
+}
+
+fi #if darwin
+
+
 echocheck "X11 headers presence"
   _x11_headers="no"
   res_comment="check if the dev(el) packages are installed"
@@ -3831,7 +3912,20 @@ if test "$_x11" = auto && test "$_x11_headers" = yes ; then
       _ld_tmp="$I -lXext -lX11 $_ld_pthread"
     fi
     statement_check X11/Xutil.h 'XCreateWindow(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)' $_ld_tmp &&
-      libs_mplayer="$libs_mplayer $_ld_tmp" && _x11=yes && break
+      _x11=yes
+    # Check that there aren't conflicting headers between ApplicationServices
+    # and X11. On versions of Mac OSX prior to 10.7 the deprecated QuickDraw API
+    # is included by -framework ApplicationServices and clashes with the X11
+    # definition of the "Cursor" type.
+    if darwin && depends_on_application_services && test "$_x11" = yes ; then
+      _x11=no
+      header_check_broken ApplicationServices/ApplicationServices.h \
+        X11/Xutil.h $_ld_tmp && _x11=yes
+    fi
+    if test "$_x11" = yes ; then
+      libs_mplayer="$libs_mplayer $_ld_tmp"
+      break
+    fi
   done
 fi
 if test "$_x11" = yes ; then
@@ -4174,83 +4268,6 @@ else
   aomodules="mpegpes(file) $aomodules"
   vomodules="mpegpes(file) $vomodules"
 fi
-
-
-if darwin; then
-
-echocheck "QuickTime"
-if test "$quicktime" = auto ; then
-  quicktime=no
-  statement_check QuickTime/QuickTime.h 'ImageDescription *desc; EnterMovies(); ExitMovies()' -framework QuickTime && quicktime=yes
-fi
-if test "$quicktime" = yes ; then
-  extra_ldflags="$extra_ldflags -framework QuickTime"
-  def_quicktime='#define CONFIG_QUICKTIME 1'
-else
-  def_quicktime='#undef CONFIG_QUICKTIME'
-fi
-echores $quicktime
-
-echocheck "Cocoa"
-if test "$_cocoa" = auto ; then
-  cat > $TMPC <<EOF
-#include <CoreServices/CoreServices.h>
-#include <OpenGL/OpenGL.h>
-int main(void) {
-  NSApplicationLoad();
-}
-EOF
-  _cocoa=no
-  cc_check -framework Cocoa -framework OpenGL && _cocoa=yes
-fi
-if test "$_cocoa" = yes ; then
-  libs_mplayer="$libs_mplayer -framework Cocoa -framework OpenGL"
-  def_cocoa='#define CONFIG_COCOA 1'
-else
-  def_cocoa='#undef CONFIG_COCOA'
-fi
-echores "$_cocoa"
-
-echocheck "CoreVideo"
-if test "$_cocoa" = yes && test "$_corevideo" = auto ; then
-  cat > $TMPC <<EOF
-#include <QuartzCore/CoreVideo.h>
-int main(void) { return 0; }
-EOF
-  _corevideo=no
-  cc_check -framework Cocoa -framework QuartzCore -framework OpenGL && _corevideo=yes
-fi
-if test "$_corevideo" = yes ; then
-  vomodules="corevideo $vomodules"
-  libs_mplayer="$libs_mplayer -framework QuartzCore"
-  def_corevideo='#define CONFIG_COREVIDEO 1'
-else
-  novomodules="corevideo $novomodules"
-  def_corevideo='#undef CONFIG_COREVIDEO'
-fi
-echores "$_corevideo"
-
-echocheck "SharedBuffer"
-if test "$_sharedbuffer" = auto ; then
-  cat > $TMPC <<EOF
-int main(void) {
-  NSApplicationLoad();
-}
-EOF
-  _sharedbuffer=no
-  cc_check -framework Cocoa && _sharedbuffer=yes
-fi
-if test "$_sharedbuffer" = yes ; then
-  vomodules="sharedbuffer $vomodules"
-  libs_mplayer="$libs_mplayer -framework Cocoa"
-  def_sharedbuffer='#define CONFIG_SHAREDBUFFER 1'
-else
-  novomodules="sharedbuffer $novomodules"
-  def_sharedbuffer='#undef CONFIG_SHAREDBUFFER'
-fi
-echores "$_sharedbuffer"
-
-fi #if darwin
 
 
 echocheck "PNG support"
