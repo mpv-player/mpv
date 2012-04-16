@@ -2043,28 +2043,6 @@ static XVisualInfo *getWindowVisualInfo(MPGLContext *ctx, Window win)
     return XGetVisualInfo(ctx->vo->x11->display, VisualIDMask, &vinfo_template, &tmp);
 }
 
-static char *get_glx_exts(MPGLContext *ctx)
-{
-    Display *display = ctx->vo->x11->display;
-    const char *(*glXExtStr)(Display *, int);
-    char *glxstr = talloc_strdup(NULL, "");
-
-    glXExtStr = getdladdr("glXQueryExtensionsString");
-    if (glXExtStr)
-        glxstr = talloc_asprintf_append(glxstr, " %s",
-                    glXExtStr(display, ctx->vo->x11->screen));
-    glXExtStr = getdladdr("glXGetClientString");
-    if (glXExtStr)
-        glxstr = talloc_asprintf_append(glxstr, " %s",
-                    glXExtStr(display, GLX_EXTENSIONS));
-    glXExtStr = getdladdr("glXGetServerString");
-    if (glXExtStr)
-        glxstr = talloc_asprintf_append(glxstr, " %s",
-                    glXExtStr(display, GLX_EXTENSIONS));
-
-    return glxstr;
-}
-
 /**
  * \brief Changes the window in which video is displayed.
  * If possible only transfers the context to the new window, otherwise
@@ -2136,7 +2114,11 @@ static int setGlWindow_x11(MPGLContext *ctx)
         if (!getProcAddress)
             getProcAddress = getdladdr("glXGetProcAddressARB");
 
-        char *glxstr = get_glx_exts(ctx);
+        const char *glxstr = "";
+        const char *(*glXExtStr)(Display *, int)
+            = getdladdr("glXQueryExtensionsString");
+        if (glXExtStr)
+            glxstr = glXExtStr(display, ctx->vo->x11->screen);
 
         getFunctions(gl, getProcAddress, glxstr, false);
         if (!gl->GenPrograms && gl->GetString &&
@@ -2146,8 +2128,6 @@ static int setGlWindow_x11(MPGLContext *ctx)
                    "Broken glXGetProcAddress detected, trying workaround\n");
             getFunctions(gl, NULL, glxstr, false);
         }
-
-        talloc_free(glxstr);
 
         // and inform that reinit is neccessary
         return SET_WINDOW_REINIT;
@@ -2250,13 +2230,15 @@ static int create_window_x11_gl3(struct MPGLContext *ctx, int gl_flags,
         (glXCreateContextAttribsARBProc)
             glXGetProcAddressARB((const GLubyte *)"glXCreateContextAttribsARB");
 
-    char *glxstr = get_glx_exts(ctx);
-    bool have_ctx_ext = !!strstr(glxstr, "GLX_ARB_create_context");
+    const char *glxstr = "";
+    const char *(*glXExtStr)(Display *, int)
+        = getdladdr("glXQueryExtensionsString");
+    if (glXExtStr)
+        glxstr = glXExtStr(vo->x11->display, vo->x11->screen);
+    bool have_ctx_ext = glxstr && !!strstr(glxstr, "GLX_ARB_create_context");
 
-    if (!(have_ctx_ext && glXCreateContextAttribsARB))
-    {
+    if (!(have_ctx_ext && glXCreateContextAttribsARB)) {
         XFree(vinfo);
-        talloc_free(glxstr);
         return SET_WINDOW_FAILED;
     }
 
@@ -2273,7 +2255,6 @@ static int create_window_x11_gl3(struct MPGLContext *ctx, int gl_flags,
     if (!context) {
         mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GLX context!\n");
         XFree(vinfo);
-        talloc_free(glxstr);
         return SET_WINDOW_FAILED;
     }
 
@@ -2282,7 +2263,6 @@ static int create_window_x11_gl3(struct MPGLContext *ctx, int gl_flags,
         mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GLX context!\n");
         glXDestroyContext(vo->x11->display, context);
         XFree(vinfo);
-        talloc_free(glxstr);
         return SET_WINDOW_FAILED;
     }
 
@@ -2290,8 +2270,6 @@ static int create_window_x11_gl3(struct MPGLContext *ctx, int gl_flags,
     glx_ctx->context = context;
 
     getFunctions(ctx->gl, (void *)glXGetProcAddress, glxstr, true);
-
-    talloc_free(glxstr);
 
     return SET_WINDOW_REINIT;
 }
