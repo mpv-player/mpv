@@ -106,25 +106,30 @@ static const struct {
 
 #define SUBRIP_MAX_STACKED_FONT_TAGS    16
 
-/* Read the attribute value starting at *s, and skip *s past the value.
- * Set out_value to the parsed value, with possible '"' stripped.
- * Return whether the attribute is well formed. */
-static bool read_value(char **s, struct bstr *out_value)
+/* Read the HTML-style attribute starting at *s, and skip *s past the value.
+ * Set attr and val to the parsed attribute name and value.
+ * Return 0 on success, or -1 if no valid attribute was found.
+ */
+static int read_attr(char **s, struct bstr *attr, struct bstr *val)
 {
-    char term = 0;
-    if (**s == '"') {
-        term = '"';
-        (*s)++;
-    }
-    out_value->start = *s;
-    out_value->len = 0;
-    unsigned char *start = *s;
-    unsigned char *end = term ? strchr(start, term) : strpbrk(start, " >");
+    char *eq = strchr(*s, '=');
+    if (!eq)
+        return -1;
+    attr->start = *s;
+    attr->len = eq - *s;
+    for (int i = 0; i < attr->len; i++)
+        if (!isalnum(attr->start[i]))
+            return -1;
+    val->start = eq + 1;
+    bool quoted = val->start[0] == '"';
+    if (quoted)
+        val->start++;
+    unsigned char *end = strpbrk(val->start, quoted ? "\"" : " >");
     if (!end)
-        return false;
-    out_value->len = end - out_value->start;
-    *s = end + (term ? 1 : 0);
-    return true;
+        return -1;
+    val->len = end - val->start;
+    *s = end + quoted;
+    return 0;
 }
 
 void subassconvert_subrip(const char *orig, char *dest, int dest_buffer_size)
@@ -195,22 +200,21 @@ void subassconvert_subrip(const char *orig, char *dest, int dest_buffer_size)
             line += 6;
 
             while (*line && *line != '>') {
-                if (strncmp(line, "size=", 5) == 0) {
-                    line += 5;
-                    struct bstr val;
-                    if (!read_value(&line, &val))
-                        break;
+                if (*line == ' ') {
+                    line++;
+                    continue;
+                }
+                struct bstr attr, val;
+                if (read_attr(&line, &attr, &val) < 0)
+                    break;
+                if (!bstrcmp0(attr, "size")) {
                     tag->size = bstrtoll(val, &val, 10);
                     if (val.len)
                         break;
                     append_text(&new_line, "{\\fs%d}", tag->size);
                     tag->has_size = true;
                     has_valid_attr = true;
-                } else if (strncmp(line, "color=", 6) == 0) {
-                    line += 6;
-                    struct bstr val;
-                    if (!read_value(&line, &val))
-                        break;
+                } else if (!bstrcmp0(attr, "color")) {
                     if (bstr_eatstart(&val, bstr("#"))) {
                         // #RRGGBB format
                         tag->color = bstrtoll(val, &val, 16) & 0x00ffffff;
@@ -240,18 +244,15 @@ void subassconvert_subrip(const char *orig, char *dest, int dest_buffer_size)
                     append_text(&new_line, "{\\c&H%06X&}", tag->color);
                     tag->has_color = true;
                     has_valid_attr = true;
-                } else if (strncmp(line, "face=", 5) == 0) {
+                } else if (!bstrcmp0(attr, "face")) {
                     /* Font face attribute */
-                    line += 5;
-                    struct bstr val;
-                    if (!read_value(&line, &val))
-                        break;
                     tag->face = val;
                     append_text(&new_line, "{\\fn%.*s}", BSTR_P(tag->face));
                     tag->has_face = true;
                     has_valid_attr = true;
                 } else
-                    line++;
+                    mp_tmsg(MSGT_SUBREADER, MSGL_WARN,"SubRip: unrecognized "
+                            "attribute \"%.*s\" in font tag\n", BSTR_P(attr));
             }
 
             if (!has_valid_attr || *line != '>') { /* Not valid font tag */
