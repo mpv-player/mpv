@@ -112,6 +112,7 @@ void init_libav(void)
     av_log_set_callback(mp_msg_av_log_callback);
     avcodec_register_all();
     av_register_all();
+    avformat_network_init();
 }
 
 #define V(x) (x)>>16, (x)>>8 & 255, (x) & 255

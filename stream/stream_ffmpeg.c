@@ -56,7 +56,7 @@ static int seek(stream_t *s, off_t newpos)
 
 static int control(stream_t *s, int cmd, void *arg)
 {
-    AVIOContext *avio = avio;
+    AVIOContext *avio = s->priv;
     int64_t size, ts;
     double pts;
     switch(cmd) {
