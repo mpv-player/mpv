@@ -49,12 +49,15 @@ LIBAD_EXTERN(ffmpeg)
 
 struct priv {
     AVCodecContext *avctx;
-    int previous_data_left;
+    AVFrame *avframe;
+    char *output;
+    int output_left;
+    int unitsize;
+    int previous_data_left;  // input demuxer packet data
 };
 
 static int preinit(sh_audio_t *sh)
 {
-    sh->audio_out_minsize = AVCODEC_MAX_AUDIO_FRAME_SIZE;
     return 1;
 }
 
@@ -74,6 +77,7 @@ static int setup_format(sh_audio_t *sh_audio,
     case AV_SAMPLE_FMT_FLT: sample_format = AF_FORMAT_FLOAT_NE; break;
     default:
         mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Unsupported sample format\n");
+        sample_format = AF_FORMAT_UNKNOWN;
     }
 
     bool broken_srate        = false;
@@ -122,6 +126,7 @@ static int init(sh_audio_t *sh_audio)
     sh_audio->context = ctx;
     lavc_context = avcodec_alloc_context3(lavc_codec);
     ctx->avctx = lavc_context;
+    ctx->avframe = avcodec_alloc_frame();
 
     // Always try to set - option only exists for AC3 at the moment
     av_opt_set_double(lavc_context, "drc_scale", opts->drc_level,
@@ -223,6 +228,7 @@ static void uninit(sh_audio_t *sh)
         av_freep(&lavc_context->extradata);
         av_freep(&lavc_context);
     }
+    av_free(ctx->avframe);
     talloc_free(ctx);
     sh->context = NULL;
 }
@@ -235,86 +241,123 @@ static int control(sh_audio_t *sh, int cmd, void *arg, ...)
         avcodec_flush_buffers(ctx->avctx);
         ds_clear_parser(sh->ds);
         ctx->previous_data_left = 0;
+        ctx->output_left = 0;
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
 }
 
+static int decode_new_packet(struct sh_audio *sh)
+{
+    struct priv *priv = sh->context;
+    AVCodecContext *avctx = priv->avctx;
+    double pts = MP_NOPTS_VALUE;
+    int insize;
+    bool packet_already_used = priv->previous_data_left;
+    struct demux_packet *mpkt = ds_get_packet2(sh->ds,
+                                               priv->previous_data_left);
+    unsigned char *start;
+    if (!mpkt) {
+        assert(!priv->previous_data_left);
+        start = NULL;
+        insize = 0;
+        ds_parse(sh->ds, &start, &insize, pts, 0);
+        if (insize <= 0)
+            return -1;  // error or EOF
+    } else {
+        assert(mpkt->len >= priv->previous_data_left);
+        if (!priv->previous_data_left) {
+            priv->previous_data_left = mpkt->len;
+            pts = mpkt->pts;
+        }
+        insize = priv->previous_data_left;
+        start = mpkt->buffer + mpkt->len - priv->previous_data_left;
+        int consumed = ds_parse(sh->ds, &start, &insize, pts, 0);
+        priv->previous_data_left -= consumed;
+    }
+
+    AVPacket pkt;
+    av_init_packet(&pkt);
+    pkt.data = start;
+    pkt.size = insize;
+    if (mpkt && mpkt->avpacket) {
+        pkt.side_data = mpkt->avpacket->side_data;
+        pkt.side_data_elems = mpkt->avpacket->side_data_elems;
+    }
+    if (pts != MP_NOPTS_VALUE && !packet_already_used) {
+        sh->pts = pts;
+        sh->pts_bytes = 0;
+    }
+    int got_frame = 0;
+    int ret = avcodec_decode_audio4(avctx, priv->avframe, &got_frame, &pkt);
+    // LATM may need many packets to find mux info
+    if (ret == AVERROR(EAGAIN))
+        return 0;
+    if (ret < 0) {
+        mp_msg(MSGT_DECAUDIO, MSGL_V, "lavc_audio: error\n");
+        return -1;
+    }
+    if (!sh->parser)
+        priv->previous_data_left += insize - ret;
+    if (!got_frame)
+        return 0;
+    /* An error is reported later from output format checking, but make
+     * sure we don't crash by overreading first plane. */
+    if (av_sample_fmt_is_planar(avctx->sample_fmt) && avctx->channels > 1)
+        return 0;
+    uint64_t unitsize = (uint64_t)av_get_bytes_per_sample(avctx->sample_fmt) *
+                        avctx->channels;
+    if (unitsize > 100000)
+        abort();
+    priv->unitsize = unitsize;
+    uint64_t output_left = unitsize * priv->avframe->nb_samples;
+    if (output_left > 500000000)
+        abort();
+    priv->output_left = output_left;
+    priv->output = priv->avframe->data[0];
+    mp_dbg(MSGT_DECAUDIO, MSGL_DBG2, "Decoded %d -> %d  \n", insize,
+           priv->output_left);
+    return 0;
+}
+
+
 static int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
                         int maxlen)
 {
-    struct priv *ctx = sh_audio->context;
-    AVCodecContext *avctx = ctx->avctx;
+    struct priv *priv = sh_audio->context;
+    AVCodecContext *avctx = priv->avctx;
 
-    unsigned char *start = NULL;
-    int y, len = -1;
+    int len = -1;
     while (len < minlen) {
-        AVPacket pkt;
-        int len2 = maxlen;
-        double pts = MP_NOPTS_VALUE;
-        int x;
-        bool packet_already_used = ctx->previous_data_left;
-        struct demux_packet *mpkt = ds_get_packet2(sh_audio->ds,
-                                                   ctx->previous_data_left);
-        if (!mpkt) {
-            assert(!ctx->previous_data_left);
-            start = NULL;
-            x = 0;
-            ds_parse(sh_audio->ds, &start, &x, pts, 0);
-            if (x <= 0)
-                break;  // error
-        } else {
-            assert(mpkt->len >= ctx->previous_data_left);
-            if (!ctx->previous_data_left) {
-                ctx->previous_data_left = mpkt->len;
-                pts = mpkt->pts;
-            }
-            x = ctx->previous_data_left;
-            start = mpkt->buffer + mpkt->len - ctx->previous_data_left;
-            int consumed = ds_parse(sh_audio->ds, &start, &x, pts, 0);
-            ctx->previous_data_left -= consumed;
-        }
-        av_init_packet(&pkt);
-        pkt.data = start;
-        pkt.size = x;
-        if (mpkt && mpkt->avpacket) {
-            pkt.side_data = mpkt->avpacket->side_data;
-            pkt.side_data_elems = mpkt->avpacket->side_data_elems;
-        }
-        if (pts != MP_NOPTS_VALUE && !packet_already_used) {
-            sh_audio->pts = pts;
-            sh_audio->pts_bytes = 0;
-        }
-        y = avcodec_decode_audio3(avctx, (int16_t *)buf, &len2, &pkt);
-        // LATM may need many packets to find mux info
-        if (y == AVERROR(EAGAIN))
+        if (!priv->output_left) {
+            if (decode_new_packet(sh_audio) < 0)
+                break;
             continue;
-        if (y < 0) {
-            mp_msg(MSGT_DECAUDIO, MSGL_V, "lavc_audio: error\n");
-            break;
         }
-        if (!sh_audio->parser)
-            ctx->previous_data_left += x - y;
-        if (len2 > 0) {
-            if (avctx->channels >= 5) {
-                int samplesize = av_get_bytes_per_sample(avctx->sample_fmt);
-                reorder_channel_nch(buf, AF_CHANNEL_LAYOUT_LAVC_DEFAULT,
-                                    AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
-                                    avctx->channels,
-                                    len2 / samplesize, samplesize);
-            }
-            if (len < 0)
-                len = len2;
-            else
-                len += len2;
-            buf += len2;
-            maxlen -= len2;
-            sh_audio->pts_bytes += len2;
-        }
-        mp_dbg(MSGT_DECAUDIO, MSGL_DBG2, "Decoded %d -> %d  \n", y, len2);
-
         if (setup_format(sh_audio, avctx))
-            break;
+            return len;
+        int size = (minlen - len + priv->unitsize - 1);
+        size -= size % priv->unitsize;
+        size = FFMIN(size, priv->output_left);
+        if (size > maxlen)
+            abort();
+        memcpy(buf, priv->output, size);
+        priv->output += size;
+        priv->output_left -= size;
+        if (avctx->channels >= 5) {
+            int samplesize = av_get_bytes_per_sample(avctx->sample_fmt);
+            reorder_channel_nch(buf, AF_CHANNEL_LAYOUT_LAVC_DEFAULT,
+                                AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+                                avctx->channels,
+                                size / samplesize, samplesize);
+        }
+        if (len < 0)
+            len = size;
+        else
+            len += size;
+        buf += size;
+        maxlen -= size;
+        sh_audio->pts_bytes += size;
     }
     return len;
 }
