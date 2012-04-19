@@ -2310,23 +2310,22 @@ fi # if darwin && test "$cc_vendor" = "gnu" ; then
 # Checking for CFLAGS
 _install_strip="-s"
 if test "$_profile" != "" || test "$_debug" != "" ; then
-  CFLAGS="-O2 $_march $_mcpu $_pipe $_debug $_profile"
-  WARNFLAGS="-W -Wall"
   _install_strip=
-elif test -z "$CFLAGS" ; then
+fi
+if test -z "$CFLAGS" ; then
   if test "$cc_vendor" = "intel" ; then
-    CFLAGS="-O2 $_march $_mcpu $_pipe -fomit-frame-pointer"
+    CFLAGS="-O2 $_debug $_profile $_march $_mcpu $_pipe -fomit-frame-pointer"
     WARNFLAGS="-wd167 -wd556 -wd144"
   elif test "$cc_vendor" = "sun" ; then
-    CFLAGS="-O2 $_march $_mcpu $_pipe -xc99 -xregs=frameptr"
+    CFLAGS="-O2 $_debug $_profile $_march $_mcpu $_pipe -xc99 -xregs=frameptr"
   elif test "$cc_vendor" = "clang"; then
-    CFLAGS="-O2 $_march $_pipe"
+    CFLAGS="-O2 $_debug $_profile $_march $_pipe"
     WARNFLAGS="-Wall -Wno-switch-enum -Wno-logical-op-parentheses -Wpointer-arith -Wundef -Wno-pointer-sign -Wmissing-prototypes"
     ERRORFLAGS="-Werror=implicit-function-declaration"
   elif test "$cc_vendor" != "gnu" ; then
-    CFLAGS="-O2 $_march $_mcpu $_pipe"
+    CFLAGS="-O2 $_debug $_profile $_march $_mcpu $_pipe"
   else
-    CFLAGS="-O2 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
+    CFLAGS="-O2 $_debug $_profile $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
     WARNFLAGS="-Wall -Wno-switch -Wno-parentheses -Wpointer-arith -Wredundant-decls"
     ERRORFLAGS="-Werror-implicit-function-declaration"
     extra_ldflags="$extra_ldflags -ffast-math"
@@ -6844,12 +6843,8 @@ $def_yasm
 
 #define HAVE_INLINE_ASM 1
 
-/* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
-#ifndef MP_DEBUG
+/* Use these registers in x86 inline asm. No proper detection yet. */
 #define HAVE_EBP_AVAILABLE 1
-#else
-#define HAVE_EBP_AVAILABLE 0
-#endif
 
 #endif /* MPLAYER_CONFIG_H */
 EOF
