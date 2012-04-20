@@ -32,9 +32,12 @@
 #include <dsound.h>
 #include <math.h>
 
+#include <libavutil/avutil.h>
+
 #include "config.h"
 #include "audio/format.h"
 #include "ao.h"
+#include "audio/reorder_ch.h"
 #include "audio_out_internal.h"
 #include "core/mp_msg.h"
 #include "osdep/timer.h"
@@ -104,10 +107,25 @@ typedef struct {
 #endif
 
 static const int channel_mask[] = {
-  SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_RIGHT  | SPEAKER_LOW_FREQUENCY,
-  SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_RIGHT  | SPEAKER_BACK_LEFT    | SPEAKER_BACK_RIGHT,
-  SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_RIGHT  | SPEAKER_BACK_LEFT    | SPEAKER_BACK_RIGHT   | SPEAKER_LOW_FREQUENCY,
-  SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_CENTER | SPEAKER_FRONT_RIGHT  | SPEAKER_BACK_LEFT    | SPEAKER_BACK_RIGHT     | SPEAKER_LOW_FREQUENCY
+  /*  1 */ SPEAKER_FRONT_CENTER,
+  /*  2 */ SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_RIGHT,
+  /*  3 */ SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_RIGHT
+         | SPEAKER_LOW_FREQUENCY,
+  /*  4 */ SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_RIGHT
+         | SPEAKER_BACK_LEFT    | SPEAKER_BACK_RIGHT,
+  /*  5 */ SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_RIGHT
+         | SPEAKER_BACK_LEFT    | SPEAKER_BACK_RIGHT
+         | SPEAKER_LOW_FREQUENCY,
+  /*  6 */ SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_CENTER | SPEAKER_FRONT_RIGHT
+         | SPEAKER_BACK_LEFT    | SPEAKER_BACK_RIGHT
+         | SPEAKER_LOW_FREQUENCY,
+  /*  7 */ SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_CENTER | SPEAKER_FRONT_RIGHT
+         | SPEAKER_BACK_LEFT    | SPEAKER_BACK_CENTER  | SPEAKER_BACK_RIGHT
+         | SPEAKER_LOW_FREQUENCY,
+  /*  8 */ SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_CENTER | SPEAKER_FRONT_RIGHT
+         | SPEAKER_BACK_LEFT    | SPEAKER_BACK_RIGHT
+         | SPEAKER_SIDE_LEFT    | SPEAKER_SIDE_RIGHT
+         | SPEAKER_LOW_FREQUENCY,
 };
 
 static HINSTANCE hdsound_dll = NULL;      ///handle to the dll
@@ -329,32 +347,27 @@ static int write_buffer(unsigned char *data, int len)
 
   if (SUCCEEDED(res))
   {
-  	if( (ao_data.channels == 6) && !AF_FORMAT_IS_AC3(ao_data.format) ) {
-  	    // reorder channels while writing to pointers.
-  	    // it's this easy because buffer size and len are always
-  	    // aligned to multiples of channels*bytespersample
-  	    // there's probably some room for speed improvements here
-  	    const int chantable[6] = {0, 1, 4, 5, 2, 3}; // reorder "matrix"
-  	    int i, j;
-  	    int numsamp,sampsize;
-
-  	    sampsize = af_fmt2bits(ao_data.format)>>3; // bytes per sample
-  	    numsamp = dwBytes1 / (ao_data.channels * sampsize);  // number of samples for each channel in this buffer
-
-  	    for( i = 0; i < numsamp; i++ ) for( j = 0; j < ao_data.channels; j++ ) {
-                memcpy((char*)lpvPtr1+(i*ao_data.channels*sampsize)+(chantable[j]*sampsize),data+(i*ao_data.channels*sampsize)+(j*sampsize),sampsize);
-  	    }
-
-  	    if (NULL != lpvPtr2 )
-  	    {
-  	        numsamp = dwBytes2 / (ao_data.channels * sampsize);
-  	        for( i = 0; i < numsamp; i++ ) for( j = 0; j < ao_data.channels; j++ ) {
-                    memcpy((char*)lpvPtr2+(i*ao_data.channels*sampsize)+(chantable[j]*sampsize),data+dwBytes1+(i*ao_data.channels*sampsize)+(j*sampsize),sampsize);
-  	        }
-  	    }
+  	if (!AF_FORMAT_IS_AC3(ao_data.format)) {
+            int sampsize = af_fmt2bits(ao_data.format) / 8;
+            reorder_channel_copy_nch(data,
+                                     AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+                                     lpvPtr1,
+                                     AF_CHANNEL_LAYOUT_WAVEEX_DEFAULT,
+                                     ao_data.channels,
+                                     dwBytes1 / sampsize,
+                                     sampsize);
+            if (lpvPtr2 != NULL)
+                reorder_channel_copy_nch(data + dwBytes1,
+                                         AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+                                         lpvPtr2,
+                                         AF_CHANNEL_LAYOUT_WAVEEX_DEFAULT,
+                                         ao_data.channels,
+                                         dwBytes2 / sampsize,
+                                         sampsize);
 
   	    write_offset+=dwBytes1+dwBytes2;
-  	    if(write_offset>=buffer_size)write_offset=dwBytes2;
+  	    if(write_offset>=buffer_size)
+                write_offset=dwBytes2;
   	} else {
   	    // Write to pointers without reordering.
 	memcpy(lpvPtr1,data,dwBytes1);
@@ -432,7 +445,7 @@ static int init(int rate, int channels, int format, int flags)
 	DSBUFFERDESC dsbdesc;
 
 	//check if the channel count and format is supported in general
-	if (channels > 6) {
+	if (channels > FF_ARRAY_ELEMS(channel_mask)) {
 		UninitDirectSound();
 		mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: 8 channel audio not yet supported\n");
 		return 0;
@@ -490,7 +503,7 @@ static int init(int rate, int channels, int format, int flags)
 	                | DSBCAPS_CTRLVOLUME;         /** volume control enabled */
 
 	if (channels > 2) {
-		wformat.dwChannelMask = channel_mask[channels - 3];
+		wformat.dwChannelMask = channel_mask[channels - 1];
 		wformat.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
 		wformat.Samples.wValidBitsPerSample = wformat.Format.wBitsPerSample;
 		// Needed for 5.1 on emu101k - shit soundblaster
