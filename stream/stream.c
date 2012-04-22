@@ -262,6 +262,26 @@ stream_t *open_output_stream(const char *filename, struct MPOpts *options)
 
 //=================== STREAMER =========================
 
+static int stream_reconnect(stream_t *s)
+{
+#define MAX_RECONNECT_RETRIES 5
+#define RECONNECT_SLEEP_MS 1000
+    int retry = 0;
+    off_t pos = s->pos;
+    // Seeking is used as a hack to make network streams
+    // reopen the connection, ideally they would implement
+    // e.g. a STREAM_CTRL_RECONNECT to do this
+    do {
+        if (retry >= MAX_RECONNECT_RETRIES)
+            return 0;
+        if (retry) usec_sleep(RECONNECT_SLEEP_MS * 1000);
+        retry++;
+        s->eof=1;
+        stream_reset(s);
+    } while (stream_seek_internal(s, pos) >= 0 || s->pos != pos); // seek failed
+    return 1;
+}
+
 int stream_read_internal(stream_t *s, void *buf, int len)
 {
   int orig_len = len;
@@ -289,9 +309,8 @@ int stream_read_internal(stream_t *s, void *buf, int len)
     len= s->fill_buffer ? s->fill_buffer(s, buf, len) : 0;
   }
   if(len<=0){
-    off_t pos = s->pos;
     // do not retry if this looks like proper eof
-    if (s->eof || (s->end_pos && pos == s->end_pos))
+    if (s->eof || (s->end_pos && s->pos == s->end_pos))
       goto eof_out;
     // dvdnav has some horrible hacks to "suspend" reads,
     // we need to skip this code or seeks will hang.
@@ -300,12 +319,7 @@ int stream_read_internal(stream_t *s, void *buf, int len)
 
     // just in case this is an error e.g. due to network
     // timeout reset and retry
-    // Seeking is used as a hack to make network streams
-    // reopen the connection, ideally they would implement
-    // e.g. a STREAM_CTRL_RECONNECT to do this
-    s->eof=1;
-    stream_reset(s);
-    if (stream_seek_internal(s, pos) >= 0 || s->pos != pos) // seek failed
+    if (!stream_reconnect(s))
       goto eof_out;
     // make sure EOF is set to ensure no endless loops
     s->eof=1;
