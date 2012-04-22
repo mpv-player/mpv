@@ -568,18 +568,19 @@ void create_menu()
 - (void) applicationWillBecomeActive:(NSNotification *)aNotification
 {
     if (vo_fs) {
+        [s->window makeKeyAndOrderFront:s->window];
         [s->window setLevel:s->fullscreen_window_level];
-        [NSApp setPresentationOptions:NSApplicationPresentationHideDock|NSApplicationPresentationHideMenuBar];
-        [s->window makeKeyAndOrderFront:nil];
-        [NSApp activateIgnoringOtherApps: YES];
+        [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
+                                      NSApplicationPresentationHideMenuBar];
     }
 }
 
 - (void) applicationWillResignActive:(NSNotification *)aNotification
 {
     if (vo_fs) {
-        [s->window setLevel:s->windowed_window_level];
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
+        [s->window setLevel:s->windowed_window_level];
+        [s->window orderBack:s->window];
     }
 }
 
