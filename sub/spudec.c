@@ -60,8 +60,8 @@ int spu_alignment = -1;
 float spu_gaussvar = 1.0;
 extern int sub_pos;
 
-typedef struct packet_t packet_t;
-struct packet_t {
+typedef struct spu_packet_t packet_t;
+struct spu_packet_t {
   int is_decoded;
   unsigned char *packet;
   int data_len;
@@ -1324,25 +1324,14 @@ void spudec_free(void *this)
   }
 }
 
-/**
- * palette must contain at least 256 32-bit entries, otherwise crashes
- * are possible
- */
-void spudec_set_paletted(void *this, const uint8_t *pal_img, int pal_stride,
-                         const void *palette,
-                         int x, int y, int w, int h,
-                         double pts, double endpts)
+#define MP_NOPTS_VALUE (-1LL<<63) //both int64_t and double should be able to represent this exactly
+
+packet_t *spudec_packet_create(int x, int y, int w, int h)
 {
-  int i;
-  uint16_t g8a8_pal[256];
   packet_t *packet;
-  const uint32_t *pal = palette;
-  spudec_handle_t *spu = this;
-  uint8_t *img;
-  uint8_t *aimg;
   int stride = (w + 7) & ~7;
   if ((unsigned)w >= 0x8000 || (unsigned)h > 0x4000)
-    return;
+    return NULL;
   packet = calloc(1, sizeof(packet_t));
   packet->is_decoded = 1;
   packet->width = w;
@@ -1352,21 +1341,47 @@ void spudec_set_paletted(void *this, const uint8_t *pal_img, int pal_stride,
   packet->start_row = y;
   packet->data_len = 2 * stride * h;
   if (packet->data_len) { // size 0 is a special "clear" packet
-      packet->packet = malloc(packet->data_len);
-      img  = packet->packet;
-      aimg = packet->packet + stride * h;
-      for (i = 0; i < 256; i++) {
-          uint32_t pixel = pal[i];
-          int alpha = pixel >> 24;
-          int gray = (((pixel & 0x000000ff) >>  0) +
-                      ((pixel & 0x0000ff00) >>  7) +
-                      ((pixel & 0x00ff0000) >> 16)) >> 2;
-          gray = FFMIN(gray, alpha);
-          g8a8_pal[i] = (-alpha << 8) | gray;
-      }
-      pal2gray_alpha(g8a8_pal, pal_img, pal_stride,
-                     img, aimg, stride, w, h);
+    packet->packet = malloc(packet->data_len);
+    if (!packet->packet) {
+      free(packet);
+      packet = NULL;
+    }
   }
+  return packet;
+}
+
+void spudec_packet_clear(packet_t *packet)
+{
+  /* clear alpha and value, as value is premultiplied */
+  memset(packet->packet, 0, packet->data_len);
+}
+
+void spudec_packet_fill(packet_t *packet,
+                        const uint8_t *pal_img, int pal_stride,
+                        const void *palette,
+                        int x, int y, int w, int h)
+{
+  const uint32_t *pal = palette;
+  uint8_t *img  = packet->packet + x + y * packet->stride;
+  uint8_t *aimg = img + packet->stride * packet->height;
+  int i;
+  uint16_t g8a8_pal[256];
+
+  for (i = 0; i < 256; i++) {
+      uint32_t pixel = pal[i];
+      int alpha = pixel >> 24;
+      int gray = (((pixel & 0x000000ff) >>  0) +
+                  ((pixel & 0x0000ff00) >>  7) +
+                  ((pixel & 0x00ff0000) >> 16)) >> 2;
+      gray = FFMIN(gray, alpha);
+      g8a8_pal[i] = (-alpha << 8) | gray;
+  }
+  pal2gray_alpha(g8a8_pal, pal_img, pal_stride,
+                 img, aimg, packet->stride, w, h);
+}
+
+void spudec_packet_send(void *spu, packet_t *packet, double pts, double endpts)
+{
   packet->start_pts = 0;
   packet->end_pts = 0x7fffffff;
   if (pts != MP_NOPTS_VALUE)
@@ -1374,4 +1389,21 @@ void spudec_set_paletted(void *this, const uint8_t *pal_img, int pal_stride,
   if (endpts != MP_NOPTS_VALUE)
     packet->end_pts = endpts * 90000;
   spudec_queue_packet(spu, packet);
+}
+
+/**
+ * palette must contain at least 256 32-bit entries, otherwise crashes
+ * are possible
+ */
+void spudec_set_paletted(void *spu, const uint8_t *pal_img, int pal_stride,
+                         const void *palette,
+                         int x, int y, int w, int h,
+                         double pts, double endpts)
+{
+  packet_t *packet = spudec_packet_create(x, y, w, h);
+  if (!packet)
+      return;
+  if (packet->data_len) // size 0 is a special "clear" packet
+    spudec_packet_fill(packet, pal_img, pal_stride, palette, 0, 0, w, h);
+  spudec_packet_send(spu, packet, pts, endpts);
 }

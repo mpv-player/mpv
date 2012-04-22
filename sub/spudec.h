@@ -39,5 +39,13 @@ void spudec_set_paletted(void *this, const uint8_t *pal_img, int stride,
                          const void *palette,
                          int x, int y, int w, int h,
                          double pts, double endpts);
+struct spu_packet_t *spudec_packet_create(int x, int y, int w, int h);
+void spudec_packet_fill(struct spu_packet_t *packet,
+                        const uint8_t *pal_img, int pal_stride,
+                        const void *palette,
+                        int x, int y, int w, int h);
+void spudec_packet_send(void *spu, struct spu_packet_t *packet,
+                        double pts, double endpts);
+void spudec_packet_clear(struct spu_packet_t *packet);
 
 #endif /* MPLAYER_SPUDEC_H */
