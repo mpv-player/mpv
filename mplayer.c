@@ -2712,6 +2712,8 @@ int reinit_video_chain(struct MPContext *mpctx)
     sh_video->last_pts = MP_NOPTS_VALUE;
     sh_video->num_buffered_pts = 0;
     sh_video->next_frame_time = 0;
+    mpctx->restart_playback = true;
+    mpctx->delay = 0;
 
     if (opts->auto_quality > 0) {
         // Auto quality option enabled
@@ -4837,7 +4839,6 @@ goto_enable_cache:
             mixer_setvolume(&mpctx->mixer, start_volume, start_volume);
         if (!ignore_start)
             audio_delay -= mpctx->sh_audio->stream_delay;
-        mpctx->delay = -audio_delay;
     }
 
     if (!mpctx->sh_audio) {
