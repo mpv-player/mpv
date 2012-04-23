@@ -742,6 +742,8 @@ void vo_w32_uninit(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: uninit\n");
+    if (!w32)
+        return;
     resetMode(vo);
     ShowCursor(1);
     if (w32->dev_hdc) DeleteDC(w32->dev_hdc);
