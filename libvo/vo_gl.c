@@ -432,8 +432,10 @@ static int isSoftwareGl(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
     const char *renderer = p->gl->GetString(GL_RENDERER);
+    const char *vendor = p->gl->GetString(GL_VENDOR);
     return !renderer || strcmp(renderer, "Software Rasterizer") == 0 ||
-           strstr(renderer, "llvmpipe");
+           strstr(renderer, "llvmpipe") ||
+           strcmp(vendor, "Microsoft Corporation") == 0;
 }
 
 static void autodetectGlExtensions(struct vo *vo)
