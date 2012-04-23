@@ -291,7 +291,8 @@ int stream_read_internal(stream_t *s, void *buf, int len)
 #ifdef CONFIG_NETWORKING
     if( s->streaming_ctrl!=NULL && s->streaming_ctrl->streaming_read ) {
       len=s->streaming_ctrl->streaming_read(s->fd, buf, len, s->streaming_ctrl);
-      if (s->streaming_ctrl->status == streaming_stopped_e)
+      if (s->streaming_ctrl->status == streaming_stopped_e &&
+          (!s->end_pos || s->pos == s->end_pos))
         s->eof = 1;
     } else
 #endif
