@@ -45,8 +45,6 @@
 #include "fastmemcpy.h"
 #include "sub/ass_mp.h"
 
-static int preinit_nosw(struct vo *vo, const char *arg);
-
 //! How many parts the OSD may consist of at most
 #define MAX_OSD_PARTS 20
 
@@ -1187,7 +1185,7 @@ static int backend_valid(void *arg)
     return mpgl_find_backend(*(const char **)arg) >= 0;
 }
 
-static int preinit_internal(struct vo *vo, const char *arg, int allow_sw)
+static int preinit(struct vo *vo, const char *arg)
 {
     struct gl_priv *p = talloc_zero(vo, struct gl_priv);
     vo->priv = p;
@@ -1210,11 +1208,13 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw)
 
     p->eosd = eosd_packer_create(vo);
 
+    int allow_sw = 0;
+    char *backend_arg = NULL;
+
     //essentially unused; for legacy warnings only
     int user_colorspace = 0;
     int levelconv = -1;
     int aspect = -1;
-    char *backend_arg = NULL;
 
     const opt_t subopts[] = {
         {"manyfmts",     OPT_ARG_BOOL, &p->many_fmts,    NULL},
@@ -1239,6 +1239,7 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw)
         {"mipmapgen",    OPT_ARG_BOOL, &p->mipmap_gen,   NULL},
         {"osdcolor",     OPT_ARG_INT,  &p->osd_color,    NULL},
         {"stereo",       OPT_ARG_INT,  &p->stereo_mode,  NULL},
+        {"sw",           OPT_ARG_BOOL, &allow_sw,        NULL},
         {"backend",      OPT_ARG_MSTRZ,&backend_arg,     backend_valid},
         // Removed options.
         // They are only parsed to notify the user about the replacements.
@@ -1315,6 +1316,8 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw)
                "    1: side-by-side to red-cyan stereo\n"
                "    2: side-by-side to green-magenta stereo\n"
                "    3: side-by-side to quadbuffer stereo\n"
+               "  sw\n"
+               "    allow using a software renderer, if such is detected\n"
                "  backend=<sys>\n"
                "    auto: auto-select (default)\n"
                "    cocoa: Cocoa/OSX\n"
@@ -1384,11 +1387,6 @@ static int preinit_internal(struct vo *vo, const char *arg, int allow_sw)
 err_out:
     uninit(vo);
     return -1;
-}
-
-static int preinit(struct vo *vo, const char *arg)
-{
-    return preinit_internal(vo, arg, 1);
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
@@ -1511,11 +1509,9 @@ const struct vo_driver video_out_gl = {
     .uninit = uninit,
 };
 
-static int preinit_nosw(struct vo *vo, const char *arg)
-{
-    return preinit_internal(vo, arg, 0);
-}
-
+// "-vo gl" used to accept software renderers by default. This is not the case
+// anymore: you have to use "-vo gl:sw" to get this. This means gl and gl_nosw
+// are exactly the same thing now. Keep gl_nosw to not break user configs.
 const struct vo_driver video_out_gl_nosw =
 {
     .is_new = true,
@@ -1525,7 +1521,7 @@ const struct vo_driver video_out_gl_nosw =
         "Reimar Doeffinger <Reimar.Doeffinger@gmx.de>",
         ""
     },
-    .preinit = preinit_nosw,
+    .preinit = preinit,
     .config = config,
     .control = control,
     .draw_slice = draw_slice,

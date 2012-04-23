@@ -171,19 +171,16 @@ const struct vo_driver *video_out_drivers[] =
 #endif
 #ifdef CONFIG_GL
         &video_out_gl3,
+#if !defined CONFIG_GL_COCOA
+        &video_out_gl,
+#endif
 #endif
 #ifdef CONFIG_X11
-#ifdef CONFIG_GL
-        &video_out_gl_nosw,
-#endif
         &video_out_x11,
         &video_out_xover,
 #endif
 #ifdef CONFIG_SDL
         &video_out_sdl,
-#endif
-#if (defined CONFIG_GL && !defined CONFIG_GL_COCOA)
-        &video_out_gl,
 #endif
 #ifdef CONFIG_DGA
         &video_out_dga,
@@ -247,6 +244,11 @@ const struct vo_driver *video_out_drivers[] =
 #endif
 #ifdef CONFIG_MD5SUM
         &video_out_md5sum,
+#endif
+#ifdef CONFIG_X11
+#ifdef CONFIG_GL
+        &video_out_gl_nosw,
+#endif
 #endif
         NULL
 };
