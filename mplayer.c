@@ -31,6 +31,16 @@
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
+// No proper file descriptor event handling; keep waking up to poll input
+#define WAKEUP_PERIOD 0.02
+#else
+/* Even if we can immediately wake up in response to most input events,
+ * there are some timers which are not registered to the event loop
+ * and need to be checked periodically (like automatic mouse cursor hiding).
+ * OSD content updates behave similarly. Also some uncommon input devices
+ * may not have proper FD event support.
+ */
+#define WAKEUP_PERIOD 0.5
 #endif
 #include <string.h>
 #include <unistd.h>
@@ -3421,7 +3431,7 @@ static void run_playloop(struct MPContext *mpctx)
     bool audio_left = false, video_left = false;
     double endpts = end_at.type == END_AT_TIME ? end_at.pos : MP_NOPTS_VALUE;
     bool end_is_chapter = false;
-    double sleeptime = 0.5;
+    double sleeptime = WAKEUP_PERIOD;
     bool was_restart = mpctx->restart_playback;
 
     if (mpctx->timeline) {
@@ -4255,7 +4265,8 @@ play_next_file:
         uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_VO);
         play_tree_t *entry = NULL;
         mp_cmd_t *cmd;
-        while (!(cmd = mp_input_get_cmd(mpctx->input, 500, false)));
+        while (!(cmd = mp_input_get_cmd(mpctx->input, WAKEUP_PERIOD * 1000,
+                                        false)));
         switch (cmd->id) {
         case MP_CMD_LOADFILE:
             // prepare a tree entry with the new filename
