@@ -1760,8 +1760,10 @@ void reinit_audio_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     struct ao *ao;
-    if (!mpctx->sh_audio)
+    if (!mpctx->sh_audio) {
+        uninit_player(mpctx, INITIALIZED_AO);
         return;
+    }
     if (!(mpctx->initialized_flags & INITIALIZED_ACODEC)) {
         current_module = "init_audio_codec";
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "==========================================================================\n");
@@ -2615,8 +2617,10 @@ int reinit_video_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     sh_video_t * const sh_video = mpctx->sh_video;
-    if (!sh_video)
+    if (!sh_video) {
+        uninit_player(mpctx, INITIALIZED_VO);
         return 0;
+    }
     double ar = -1.0;
     //================== Init VIDEO (codec & libvo) ==========================
     if (!opts->fixed_vo || !(mpctx->initialized_flags & INITIALIZED_VO)) {
@@ -4244,17 +4248,12 @@ play_next_file:
         mp_msg(MSGT_CPLAYER, MSGL_DBG2, "\n[[[init getch2]]]\n");
     }
 
-    // ================= GUI idle loop (STOP state) =========================
+    // ================= idle loop (STOP state) =========================
     while (opts->player_idle_mode && !mpctx->filename) {
+        uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_VO);
         play_tree_t *entry = NULL;
         mp_cmd_t *cmd;
-        if (mpctx->video_out && mpctx->video_out->config_ok)
-            vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
-        while (!(cmd = mp_input_get_cmd(mpctx->input, 0, 0))) {
-            if (mpctx->video_out)
-                vo_check_events(mpctx->video_out);
-            usec_sleep(20000);
-        }
+        while (!(cmd = mp_input_get_cmd(mpctx->input, 500, false)));
         switch (cmd->id) {
         case MP_CMD_LOADFILE:
             // prepare a tree entry with the new filename
