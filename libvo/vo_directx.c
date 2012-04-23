@@ -452,6 +452,35 @@ static uint32_t Directx_InitDirectDraw(void)
     return 0;
 }
 
+static void clear_border(HDC dc, int x1, int y1, int x2, int y2)
+{
+    if (x2 <= x1 || y2 <= y1)
+        return;
+    FillRect(dc, &(RECT) { x1, y1, x2, y2 }, blackbrush);
+}
+
+static void redraw_window(void)
+{
+    HDC dc = vo_w32_get_dc(global_vo, vo_w32_window);
+    RECT r;
+    GetClientRect(vo_w32_window, &r);
+    if (vo_fs || vidmode) {
+        FillRect(dc, &r, blackbrush);
+    } else {
+        FillRect(dc, &r, colorbrush);
+        // clear borders (not needed in fs; fs uses background = colorkey)
+        RECT rc = rd;
+        POINT origin = { 0, 0 };
+        ClientToScreen(vo_w32_window, &origin);
+        OffsetRect(&rc, -origin.x, -origin.y);
+        clear_border(dc, r.left,   r.top,     r.right,  rc.top);    // top
+        clear_border(dc, r.left,   rc.bottom, r.right,  r.bottom);  // bottom
+        clear_border(dc, r.left,   rc.top,    rc.left,  rc.bottom); // left
+        clear_border(dc, rc.right, rc.top,    r.right,  rc.bottom); // right
+    }
+    vo_w32_release_dc(global_vo, vo_w32_window, dc);
+}
+
 static uint32_t Directx_ManageDisplay(void)
 {
     HRESULT ddrval;
@@ -459,6 +488,8 @@ static uint32_t Directx_ManageDisplay(void)
     DDOVERLAYFX ovfx = { .dwSize = sizeof(ovfx) };
     DWORD dwUpdateFlags = 0;
     int width, height;
+
+    redraw_window();
 
     POINT origin = { 0, 0 };
     ClientToScreen(vo_w32_window, &origin);
@@ -613,11 +644,7 @@ static void check_events(void)
     if (evt & (VO_EVENT_RESIZE | VO_EVENT_MOVE))
         Directx_ManageDisplay();
     if (evt & (VO_EVENT_RESIZE | VO_EVENT_MOVE | VO_EVENT_EXPOSE)) {
-        HDC dc = vo_w32_get_dc(global_vo, vo_w32_window);
-        RECT r;
-        GetClientRect(vo_w32_window, &r);
-        FillRect(dc, &r, vo_fs || vidmode ? blackbrush : colorbrush);
-        vo_w32_release_dc(global_vo, vo_w32_window, dc);
+        redraw_window();
     }
 }
 
