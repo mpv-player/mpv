@@ -785,6 +785,9 @@ static int reorder_self_5_step_1(void *src, unsigned int samples,
         if (chnum==6) {
             REORDER_SELF_SWAP_5_STEP_1(src_8,tmp,samples,6,s0,s1,s2,s3,s4);
         }
+        else if (chnum==8) {
+            REORDER_SELF_SWAP_5_STEP_1(src_8,tmp,samples,8,s0,s1,s2,s3,s4);
+        }
         else {
             REORDER_SELF_SWAP_5_STEP_1(src_8,tmp,samples,5,s0,s1,s2,s3,s4);
         }
@@ -796,6 +799,9 @@ static int reorder_self_5_step_1(void *src, unsigned int samples,
         int16_t tmp;
         if (chnum==6) {
             REORDER_SELF_SWAP_5_STEP_1(src_16,tmp,samples,6,s0,s1,s2,s3,s4);
+        }
+        else if (chnum==8) {
+            REORDER_SELF_SWAP_5_STEP_1(src_16,tmp,samples,8,s0,s1,s2,s3,s4);
         }
         else {
             REORDER_SELF_SWAP_5_STEP_1(src_16,tmp,samples,5,s0,s1,s2,s3,s4);
@@ -835,6 +841,9 @@ static int reorder_self_5_step_1(void *src, unsigned int samples,
         if (chnum==6) {
             REORDER_SELF_SWAP_5_STEP_1(src_32,tmp,samples,6,s0,s1,s2,s3,s4);
         }
+        else if (chnum==8) {
+            REORDER_SELF_SWAP_5_STEP_1(src_32,tmp,samples,8,s0,s1,s2,s3,s4);
+        }
         else {
             REORDER_SELF_SWAP_5_STEP_1(src_32,tmp,samples,5,s0,s1,s2,s3,s4);
         }
@@ -846,6 +855,9 @@ static int reorder_self_5_step_1(void *src, unsigned int samples,
         int64_t tmp;
         if (chnum==6) {
             REORDER_SELF_SWAP_5_STEP_1(src_64,tmp,samples,6,s0,s1,s2,s3,s4);
+        }
+        else if (chnum==8) {
+            REORDER_SELF_SWAP_5_STEP_1(src_64,tmp,samples,8,s0,s1,s2,s3,s4);
         }
         else {
             REORDER_SELF_SWAP_5_STEP_1(src_64,tmp,samples,5,s0,s1,s2,s3,s4);
@@ -1250,6 +1262,7 @@ void reorder_channel(void *src,
     // AF_CHANNEL_LAYOUT_7_1_A   L R C LFE Ls Rs Rls Rrs
     // AF_CHANNEL_LAYOUT_7_1_B   L R Ls Rs C LFE Rls Rrs
     // AF_CHANNEL_LAYOUT_7_1_C   L C R Ls Rs LFE Rls Rrs
+    // AF_CHANNEL_LAYOUT_7_1_D   C L R Ls Rs Rls Rrs LFE
     // AF_CHANNEL_LAYOUT_7_1_F   C L R LFE Ls Rs Rls Rrs
     case AF_CHANNEL_LAYOUT_7_1_A << 16 | AF_CHANNEL_LAYOUT_7_1_B:
     case AF_CHANNEL_LAYOUT_7_1_B << 16 | AF_CHANNEL_LAYOUT_7_1_A:
@@ -1257,6 +1270,12 @@ void reorder_channel(void *src,
             reorder_self_2(src, samples/2, samplesize*2, 4, 1, 2);
         else
             reorder_self_4_step_2(src, samples, samplesize, 8, 2, 3, 4, 5);
+        break;
+    case AF_CHANNEL_LAYOUT_7_1_B << 16 | AF_CHANNEL_LAYOUT_7_1_D:
+        // First convert to AF_CHANNEL_LAYOUT_7_1_F
+        reorder_self_2_4(src, samples, samplesize, 8, 3, 5, 4, 2, 1, 0);
+        // then convert to AF_CHANNEL_LAYOUT_7_1_D
+        reorder_self_5_step_1(src, samples, samplesize, 8, 3, 4, 5, 6, 7);
         break;
     case AF_CHANNEL_LAYOUT_7_1_C << 16 | AF_CHANNEL_LAYOUT_7_1_B:
         reorder_self_4_step_1(src, samples, samplesize, 8, 1, 2, 3, 4);
