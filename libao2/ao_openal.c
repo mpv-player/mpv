@@ -133,7 +133,7 @@ static int init(int rate, int channels, int format, int flags) {
     print_help();
     return 0;
   }
-  if (strcmp(device, "help") == 0) {
+  if (device && strcmp(device, "help") == 0) {
     list_devices();
     goto err_out;
   }
