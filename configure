@@ -443,6 +443,7 @@ Audio output:
   --disable-esd          disable esd audio output [autodetect]
   --disable-rsound       disable RSound audio output [autodetect]
   --disable-pulse        disable Pulseaudio audio output [autodetect]
+  --disable-portaudio    disable PortAudio audio output [autodetect]
   --disable-jack         disable JACK audio output [autodetect]
   --enable-openal        enable OpenAL audio output [disable]
   --disable-nas          disable NAS audio output [autodetect]
@@ -602,6 +603,7 @@ _arts=auto
 _esd=auto
 _rsound=auto
 _pulse=auto
+_portaudio=auto
 _jack=auto
 _openal=no
 _libcdio=auto
@@ -924,6 +926,8 @@ for ac_option do
   --disable-rsound)     _rsound=no      ;;
   --enable-pulse)       _pulse=yes      ;;
   --disable-pulse)      _pulse=no       ;;
+  --enable-portaudio)   _portaudio=yes  ;;
+  --disable-portaudio)  _portaudio=no   ;;
   --enable-jack)        _jack=yes       ;;
   --disable-jack)       _jack=no        ;;
   --enable-openal)      _openal=yes     ;;
@@ -4898,6 +4902,28 @@ else
 fi
 
 
+echocheck "PortAudio"
+if test "$_portaudio" = auto && test "$_pthreads" != yes ; then
+    _portaudio=no
+    res_comment="pthreads not enabled"
+fi
+if test "$_portaudio" = auto ; then
+  _portaudio=no
+  if pkg_config_add 'portaudio-2.0 >= 19' ; then
+      _portaudio=yes
+  fi
+fi
+echores "$_portaudio"
+
+if test "$_portaudio" = yes ; then
+  def_portaudio='#define CONFIG_PORTAUDIO 1'
+  aomodules="portaudio $aomodules"
+else
+  def_portaudio='#undef CONFIG_PORTAUDIO'
+  noaomodules="portaudio $noaomodules"
+fi
+
+
 echocheck "JACK"
 if test "$_jack" = auto ; then
   _jack=no
@@ -6433,6 +6459,7 @@ PNG = $_png
 PNM = $_pnm
 PRIORITY = $_priority
 PULSE = $_pulse
+PORTAUDIO = $_portaudio
 PVR = $_pvr
 QTX_CODECS = $_qtx
 QTX_CODECS_WIN32 = $_qtx_codecs_win32
@@ -6710,6 +6737,7 @@ $def_ossaudio
 $def_ossaudio_devdsp
 $def_ossaudio_devmixer
 $def_pulse
+$def_portaudio
 $def_rsound
 $def_sgiaudio
 $def_sunaudio

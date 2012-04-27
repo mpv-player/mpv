@@ -468,6 +468,7 @@ SRCS_MPLAYER-$(OPENAL)        += libao2/ao_openal.c
 SRCS_MPLAYER-$(OSS)           += libao2/ao_oss.c
 SRCS_MPLAYER-$(PNM)           += libvo/vo_pnm.c
 SRCS_MPLAYER-$(PULSE)         += libao2/ao_pulse.c
+SRCS_MPLAYER-$(PORTAUDIO)     += libao2/ao_portaudio.c
 SRCS_MPLAYER-$(RSOUND)        += libao2/ao_rsound.c
 SRCS_MPLAYER-$(S3FB)          += libvo/vo_s3fb.c
 SRCS_MPLAYER-$(SDL)           += libao2/ao_sdl.c libvo/vo_sdl.c libvo/sdl_common.c
