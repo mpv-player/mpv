@@ -23,6 +23,30 @@
 
 #include "bstr.h"
 
+#define CONTROL_OK 1
+#define CONTROL_TRUE 1
+#define CONTROL_FALSE 0
+#define CONTROL_UNKNOWN -1
+#define CONTROL_ERROR -2
+#define CONTROL_NA -3
+
+enum aocontrol {
+    // _VOLUME commands take struct ao_control_vol pointer for input/output.
+    // If there's only one volume, SET should use average of left/right.
+    AOCONTROL_GET_VOLUME,
+    AOCONTROL_SET_VOLUME,
+    // _MUTE commands take a pointer to bool
+    AOCONTROL_GET_MUTE,
+    AOCONTROL_SET_MUTE,
+};
+
+#define AOPLAY_FINAL_CHUNK 1
+
+typedef struct ao_control_vol {
+    float left;
+    float right;
+} ao_control_vol_t;
+
 typedef struct ao_info {
     /* driver name ("Matrox Millennium G200/G400" */
     const char *name;
@@ -53,7 +77,7 @@ struct ao_driver {
     bool is_new;
     const struct ao_info *info;
     const struct ao_old_functions *old_functions;
-    int (*control)(struct ao *ao, int cmd, void *arg);
+    int (*control)(struct ao *ao, enum aocontrol cmd, void *arg);
     int (*init)(struct ao *ao, char *params);
     void (*uninit)(struct ao *ao, bool cut_audio);
     void (*reset)(struct ao*ao);
@@ -89,49 +113,18 @@ extern char *ao_subdevice;
 
 void list_audio_out(void);
 
-#define CONTROL_OK 1
-#define CONTROL_TRUE 1
-#define CONTROL_FALSE 0
-#define CONTROL_UNKNOWN -1
-#define CONTROL_ERROR -2
-#define CONTROL_NA -3
-
-#define AOCONTROL_SET_DEVICE 1
-#define AOCONTROL_GET_DEVICE 2
-#define AOCONTROL_QUERY_FORMAT 3 /* test for availabilty of a format */
-// Uses ao_control_vol_t* as arg.
-// If the volume controls are joint, the average of both volumes should be used.
-#define AOCONTROL_GET_VOLUME 4
-#define AOCONTROL_SET_VOLUME 5
-// Uses ao_control_vol_t* as arg.
-// left==0.0f means muted, left==1.0f means not muted (right likewise)
-// Other values between are invalid.
-// If the mtue controls are joint, the output should be muted if either of the
-// two channels are muted.
-#define AOCONTROL_GET_MUTE 6
-#define AOCONTROL_SET_MUTE 7
-#define AOCONTROL_SET_PLUGIN_DRIVER 8
-#define AOCONTROL_SET_PLUGIN_LIST 9
-
-#define AOPLAY_FINAL_CHUNK 1
-
-typedef struct ao_control_vol {
-    float left;
-    float right;
-} ao_control_vol_t;
-
 struct ao *ao_create(struct MPOpts *opts, struct input_ctx *input);
 void ao_init(struct ao *ao, char **ao_list);
 void ao_uninit(struct ao *ao, bool cut_audio);
 int ao_play(struct ao *ao, void *data, int len, int flags);
-int ao_control(struct ao *ao, int cmd, void *arg);
+int ao_control(struct ao *ao, enum aocontrol cmd, void *arg);
 double ao_get_delay(struct ao *ao);
 int ao_get_space(struct ao *ao);
 void ao_reset(struct ao *ao);
 void ao_pause(struct ao *ao);
 void ao_resume(struct ao *ao);
 
-int old_ao_control(struct ao *ao, int cmd, void *arg);
+int old_ao_control(struct ao *ao, enum aocontrol cmd, void *arg);
 int old_ao_init(struct ao *ao, char *params);
 void old_ao_uninit(struct ao *ao, bool cut_audio);
 void old_ao_reset(struct ao*ao);

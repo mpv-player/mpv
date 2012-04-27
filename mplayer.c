@@ -1827,11 +1827,10 @@ void reinit_audio_chain(struct MPContext *mpctx)
                 "Couldn't find matching filter/ao format!\n");
         goto init_error;
     }
-    mpctx->mixer.ao = ao;
     mpctx->mixer.volstep = volstep;
     mpctx->mixer.softvol = opts->softvol;
     mpctx->mixer.softvol_max = opts->softvol_max;
-    mixer_reinit(&mpctx->mixer);
+    mixer_reinit(&mpctx->mixer, ao);
     mpctx->syncing_audio = true;
     return;
 

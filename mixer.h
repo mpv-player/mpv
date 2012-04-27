@@ -28,27 +28,27 @@ typedef struct mixer {
     struct ao *ao;
     af_stream_t *afilter;
     int volstep;
-    bool muted;
-    bool mute_emulation;
     bool softvol;
     float softvol_max;
-    float last_l, last_r;
-    float restore_vol_l, restore_vol_r;
-    bool restore_volume;
+    bool muted;
+    bool muted_by_us;
+    bool muted_using_volume;
+    float vol_l, vol_r;
+    /* Contains ao driver name or "softvol" if volume is not persistent
+     * and needs to be restored after the driver is reinitialized. */
+    const char *restore_volume;
     float balance;
-    bool restore_balance;
 } mixer_t;
 
-void mixer_reinit(mixer_t *mixer);
-void mixer_uninit(mixer_t *mixer);
+void mixer_reinit(struct mixer *mixer, struct ao *ao);
+void mixer_uninit(struct mixer *mixer);
 void mixer_getvolume(mixer_t *mixer, float *l, float *r);
 void mixer_setvolume(mixer_t *mixer, float l, float r);
 void mixer_incvolume(mixer_t *mixer);
 void mixer_decvolume(mixer_t *mixer);
 void mixer_getbothvolume(mixer_t *mixer, float *b);
-void mixer_mute(mixer_t *mixer);
-bool mixer_getmuted(mixer_t *mixer);
-void mixer_setmuted(mixer_t *mixer, bool mute);
+void mixer_setmute(mixer_t *mixer, bool mute);
+bool mixer_getmute(mixer_t *mixer);
 void mixer_getbalance(mixer_t *mixer, float *bal);
 void mixer_setbalance(mixer_t *mixer, float bal);
 

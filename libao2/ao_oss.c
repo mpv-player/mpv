@@ -179,22 +179,6 @@ static int volume_oss4(ao_control_vol_t *vol, int cmd) {
 // to set/get/query special features/parameters
 static int control(int cmd,void *arg){
     switch(cmd){
-	case AOCONTROL_SET_DEVICE:
-	    dsp=(char*)arg;
-	    return CONTROL_OK;
-	case AOCONTROL_GET_DEVICE:
-	    *(char**)arg=dsp;
-	    return CONTROL_OK;
-#ifdef SNDCTL_DSP_GETFMTS
-	case AOCONTROL_QUERY_FORMAT:
-	{
-	    int format;
-	    if (!ioctl(audio_fd, SNDCTL_DSP_GETFMTS, &format))
-		if ((unsigned int)format & (unsigned long)arg)
-	    	    return CONTROL_TRUE;
-	    return CONTROL_FALSE;
-	}
-#endif
 	case AOCONTROL_GET_VOLUME:
 	case AOCONTROL_SET_VOLUME:
 	{

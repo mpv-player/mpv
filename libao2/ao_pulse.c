@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <stdlib.h>
 
 #include <pulse/pulseaudio.h>
 
@@ -422,18 +421,16 @@ static void info_func(struct pa_context *c, const struct pa_sink_input_info *i,
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
-static int control(struct ao *ao, int cmd, void *arg)
+static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct priv *priv = ao->priv;
     switch (cmd) {
-    case AOCONTROL_GET_MUTE: // fallthrough
+    case AOCONTROL_GET_MUTE:
     case AOCONTROL_GET_VOLUME: {
-        ao_control_vol_t *vol = arg;
         uint32_t devidx = pa_stream_get_index(priv->stream);
         pa_threaded_mainloop_lock(priv->mainloop);
         if (!waitop(priv, pa_context_get_sink_input_info(priv->context, devidx,
-                                                         info_func, ao)))
-        {
+                                                         info_func, ao))) {
             GENERIC_ERR_MSG(priv->context,
                             "pa_stream_get_sink_input_info() failed");
             return CONTROL_ERROR;
@@ -442,6 +439,7 @@ static int control(struct ao *ao, int cmd, void *arg)
         // we naively copied the struct, without updating pointers etc.
         // Pointers might point to invalid data, accessors might fail.
         if (cmd == AOCONTROL_GET_VOLUME) {
+            ao_control_vol_t *vol = arg;
             if (priv->pi.volume.channels != 2)
                 vol->left = vol->right =
                     pa_cvolume_avg(&priv->pi.volume) * 100 / PA_VOLUME_NORM;
@@ -450,30 +448,30 @@ static int control(struct ao *ao, int cmd, void *arg)
                 vol->right = priv->pi.volume.values[1] * 100 / PA_VOLUME_NORM;
             }
         } else if (cmd == AOCONTROL_GET_MUTE) {
-            vol->left = vol->right = priv->pi.mute ? 0.0f : 1.0f;
+            bool *mute = arg;
+            *mute = priv->pi.mute;
         }
-
         return CONTROL_OK;
-        }
+    }
 
-    case AOCONTROL_SET_MUTE: // fallthrough
+    case AOCONTROL_SET_MUTE:
     case AOCONTROL_SET_VOLUME: {
-        const ao_control_vol_t *vol = arg;
         pa_operation *o;
-        struct pa_cvolume volume;
-
-        pa_cvolume_reset(&volume, ao->channels);
-        if (volume.channels != 2)
-            pa_cvolume_set(&volume, volume.channels,
-                           (pa_volume_t)vol->left * PA_VOLUME_NORM / 100);
-        else {
-            volume.values[0] = (pa_volume_t)vol->left * PA_VOLUME_NORM / 100;
-            volume.values[1] = (pa_volume_t)vol->right * PA_VOLUME_NORM / 100;
-        }
 
         pa_threaded_mainloop_lock(priv->mainloop);
         uint32_t stream_index = pa_stream_get_index(priv->stream);
         if (cmd == AOCONTROL_SET_VOLUME) {
+            const ao_control_vol_t *vol = arg;
+            struct pa_cvolume volume;
+
+            pa_cvolume_reset(&volume, ao->channels);
+            if (volume.channels != 2)
+                pa_cvolume_set(&volume, volume.channels,
+                               vol->left * PA_VOLUME_NORM / 100);
+            else {
+                volume.values[0] = vol->left * PA_VOLUME_NORM / 100;
+                volume.values[1] = vol->right * PA_VOLUME_NORM / 100;
+            }
             o = pa_context_set_sink_input_volume(priv->context, stream_index,
                                                  &volume, NULL, NULL);
             if (!o) {
@@ -483,9 +481,9 @@ static int control(struct ao *ao, int cmd, void *arg)
                 return CONTROL_ERROR;
             }
         } else if (cmd == AOCONTROL_SET_MUTE) {
-            int mute = vol->left == 0.0f || vol->right == 0.0f;
+            const bool *mute = arg;
             o = pa_context_set_sink_input_mute(priv->context, stream_index,
-                                               mute, NULL, NULL);
+                                               *mute, NULL, NULL);
             if (!o) {
                 pa_threaded_mainloop_unlock(priv->mainloop);
                 GENERIC_ERR_MSG(priv->context,
@@ -498,8 +496,7 @@ static int control(struct ao *ao, int cmd, void *arg)
         pa_operation_unref(o);
         pa_threaded_mainloop_unlock(priv->mainloop);
         return CONTROL_OK;
-        }
-
+    }
     default:
         return CONTROL_UNKNOWN;
     }

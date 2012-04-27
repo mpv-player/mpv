@@ -232,7 +232,7 @@ int ao_play(struct ao *ao, void *data, int len, int flags)
     return ao->driver->play(ao, data, len, flags);
 }
 
-int ao_control(struct ao *ao, int cmd, void *arg)
+int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     if (ao->driver->control)
         return ao->driver->control(ao, cmd, arg);
@@ -299,7 +299,7 @@ int old_ao_play(struct ao *ao, void *data, int len, int flags)
     return ao->driver->old_functions->play(data, len, flags);
 }
 
-int old_ao_control(struct ao *ao, int cmd, void *arg)
+int old_ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     return ao->driver->old_functions->control(cmd, arg);
 }

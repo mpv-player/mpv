@@ -417,8 +417,22 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             sh_video->video.dwRate = codec->time_base.den;
             sh_video->video.dwScale = codec->time_base.num;
         }
-        sh_video->fps = av_q2d(st->r_frame_rate);
-        sh_video->frametime = 1 / av_q2d(st->r_frame_rate);
+        /* Try to make up some frame rate value, even if it's not reliable.
+         * FPS information is needed to support subtitle formats which base
+         * timing on frame numbers.
+         * Libavformat seems to report no "reliable" FPS value for AVI files,
+         * while they are typically constant enough FPS that the value this
+         * heuristic makes up works with subtitles in practice.
+         */
+        double fps;
+        if (st->r_frame_rate.num)
+            fps = av_q2d(st->r_frame_rate);
+        else
+            fps = 1.0 / FFMAX(av_q2d(st->time_base),
+                              av_q2d(st->codec->time_base) *
+                              st->codec->ticks_per_frame);
+        sh_video->fps = fps;
+        sh_video->frametime = 1 / fps;
         sh_video->format = bih->biCompression;
         if (st->sample_aspect_ratio.num)
             sh_video->aspect = codec->width  * st->sample_aspect_ratio.num
