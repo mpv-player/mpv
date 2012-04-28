@@ -56,6 +56,9 @@ char *get_path(const char *filename){
 #else
 	static char *config_dir = "/.mplayer";
 #endif
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+	char exedir[260];
+#endif
 	int len;
 #ifdef CONFIG_MACOSX_BUNDLE
 	struct stat dummy;
@@ -73,9 +76,8 @@ char *get_path(const char *filename){
 	/* Hack to get fonts etc. loaded outside of Cygwin environment. */
 	{
 		int i,imax=0;
-		char exedir[260];
-		GetModuleFileNameA(NULL, exedir, 260);
-		for (i=0; i< strlen(exedir); i++)
+		len = (int)GetModuleFileNameA(NULL, exedir, 260);
+		for (i=0; i < len; i++)
 			if (exedir[i] =='\\')
 				{exedir[i]='/'; imax=i;}
 		exedir[imax]='\0';
