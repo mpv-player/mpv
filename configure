@@ -3164,7 +3164,7 @@ echores "$_zlib"
 echocheck "mad support"
 if test "$_mad" = auto ; then
   _mad=no
-  header_check mad.h -lmad && _mad=yes
+  statement_check mad.h 'mad_synth_init(0)' -lmad && _mad=yes
 fi
 if test "$_mad" = yes ; then
   def_mad='#define CONFIG_LIBMAD 1'
