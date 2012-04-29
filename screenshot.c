@@ -400,13 +400,13 @@ static char *gen_fname(screenshot_ctx *ctx)
         if (!fexists(fname))
             return fname;
 
-        talloc_free(fname);
-
         if (sequence == prev_sequence) {
-            mp_msg(MSGT_CPLAYER, MSGL_ERR, "Can't save screenshot, file "
-                   "already exists!\n");
+            mp_msg(MSGT_CPLAYER, MSGL_ERR, "Can't save screenshot, file '%s' "
+                   "already exists!\n", fname);
             return NULL;
         }
+
+        talloc_free(fname);
     }
 }
 
@@ -447,8 +447,8 @@ void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
     if (filename) {
         FILE *fp = fopen(filename, "wb");
         if (fp == NULL) {
-            mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nError opening %s for writing!\n",
-                   filename);
+            mp_msg(MSGT_CPLAYER, MSGL_ERR,
+                   "\nError opening '%s' for writing!\n", filename);
         } else {
             mp_msg(MSGT_CPLAYER, MSGL_INFO, "*** screenshot '%s' ***\n",
                    filename);
