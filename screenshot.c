@@ -23,8 +23,6 @@
 #include <setjmp.h>
 #include <time.h>
 
-#include "osdep/io.h"
-
 #include <libswscale/swscale.h>
 #include <libavcodec/avcodec.h>
 
@@ -33,6 +31,8 @@
 #ifdef CONFIG_JPEG
 #include <jpeglib.h>
 #endif
+
+#include "osdep/io.h"
 
 #include "talloc.h"
 #include "screenshot.h"
@@ -82,6 +82,7 @@ static int write_png(screenshot_ctx *ctx, struct mp_image *image, FILE *fp)
 {
     void *outbuffer = NULL;
     int success = 0;
+    AVFrame *pic = NULL;
 
     struct AVCodec *png_codec = avcodec_find_encoder(CODEC_ID_PNG);
     AVCodecContext *avctx = NULL;
@@ -109,13 +110,15 @@ static int write_png(screenshot_ctx *ctx, struct mp_image *image, FILE *fp)
     if (!outbuffer)
         goto error_exit;
 
-    AVFrame pic;
-    avcodec_get_frame_defaults(&pic);
+    pic = avcodec_alloc_frame();
+    if (!pic)
+        goto error_exit;
+    avcodec_get_frame_defaults(pic);
     for (int n = 0; n < 4; n++) {
-        pic.data[n] = image->planes[n];
-        pic.linesize[n] = image->stride[n];
+        pic->data[n] = image->planes[n];
+        pic->linesize[n] = image->stride[n];
     }
-    int size = avcodec_encode_video(avctx, outbuffer, outbuffer_size, &pic);
+    int size = avcodec_encode_video(avctx, outbuffer, outbuffer_size, pic);
     if (size < 1)
         goto error_exit;
 
@@ -126,6 +129,7 @@ error_exit:
     if (avctx)
         avcodec_close(avctx);
     av_free(avctx);
+    av_free(pic);
     free(outbuffer);
     return success;
 }

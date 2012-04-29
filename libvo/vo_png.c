@@ -50,6 +50,7 @@ static int z_compression;
 static int framenum;
 static int use_alpha;
 static AVCodecContext *avctx;
+static AVFrame *pic;
 static uint8_t *outbuffer;
 int outbuffer_size;
 
@@ -70,6 +71,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     avctx = avcodec_alloc_context3(png_codec);
     if (!avctx)
         goto error;
+    pic = avcodec_alloc_frame();
+    if (!pic)
+        goto error;
     avctx->width = width;
     avctx->height = height;
     avctx->pix_fmt = imgfmt2pixfmt(format);
@@ -85,7 +89,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 
 static uint32_t draw_image(mp_image_t* mpi){
-    AVFrame pic;
     int buffersize;
     int res;
     char buf[100];
@@ -101,15 +104,17 @@ static uint32_t draw_image(mp_image_t* mpi){
         return 1;
     }
 
-    pic.data[0] = mpi->planes[0];
-    pic.linesize[0] = mpi->stride[0];
+    avcodec_get_frame_defaults(pic);
+
+    pic->data[0] = mpi->planes[0];
+    pic->linesize[0] = mpi->stride[0];
     buffersize = mpi->w * mpi->h * 8;
     if (outbuffer_size < buffersize) {
         av_freep(&outbuffer);
         outbuffer = av_malloc(buffersize);
         outbuffer_size = buffersize;
     }
-    res = avcodec_encode_video(avctx, outbuffer, outbuffer_size, &pic);
+    res = avcodec_encode_video(avctx, outbuffer, outbuffer_size, pic);
 
     if(res < 0){
  	    mp_msg(MSGT_VO,MSGL_WARN, "[VO_PNG] Error in create_png.\n");
@@ -156,6 +161,8 @@ static void uninit(void)
         avcodec_close(avctx);
     av_freep(&avctx);
     av_freep(&outbuffer);
+    av_free(pic);
+    pic = NULL;
     outbuffer_size = 0;
 }
 
