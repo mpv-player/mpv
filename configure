@@ -435,6 +435,7 @@ Video output:
   --disable-yuv4mpeg       disable yuv4mpeg video output [enable]
   --disable-corevideo      disable CoreVideo video output [autodetect]
   --disable-cocoa          disable Cocoa OpenGL backend [autodetect]
+  --disable-sharedbuffer   disable OSX shared buffer video output [autodetect]
 
 Audio output:
   --disable-alsa         disable ALSA audio output [autodetect]
@@ -692,6 +693,7 @@ _qtx=auto
 _coreaudio=auto
 _corevideo=auto
 _cocoa=auto
+_sharedbuffer=auto
 quicktime=auto
 _macosx_finder=no
 _macosx_bundle=auto
@@ -1121,6 +1123,8 @@ for ac_option do
   --disable-corevideo) _corevideo=no ;;
   --enable-cocoa) _cocoa=yes ;;
   --disable-cocoa) _cocoa=no ;;
+  --enable-sharedbuffer) _sharedbuffer=yes ;;
+  --disable-sharedbuffer) _sharedbuffer=no ;;
   --enable-macosx-finder) _macosx_finder=yes ;;
   --disable-macosx-finder) _macosx_finder=no ;;
   --enable-macosx-bundle) _macosx_bundle=yes ;;
@@ -2311,23 +2315,22 @@ fi # if darwin && test "$cc_vendor" = "gnu" ; then
 # Checking for CFLAGS
 _install_strip="-s"
 if test "$_profile" != "" || test "$_debug" != "" ; then
-  CFLAGS="-O2 $_march $_mcpu $_pipe $_debug $_profile"
-  WARNFLAGS="-W -Wall"
   _install_strip=
-elif test -z "$CFLAGS" ; then
+fi
+if test -z "$CFLAGS" ; then
   if test "$cc_vendor" = "intel" ; then
-    CFLAGS="-O2 $_march $_mcpu $_pipe -fomit-frame-pointer"
+    CFLAGS="-O2 $_debug $_profile $_march $_mcpu $_pipe -fomit-frame-pointer"
     WARNFLAGS="-wd167 -wd556 -wd144"
   elif test "$cc_vendor" = "sun" ; then
-    CFLAGS="-O2 $_march $_mcpu $_pipe -xc99 -xregs=frameptr"
+    CFLAGS="-O2 $_debug $_profile $_march $_mcpu $_pipe -xc99 -xregs=frameptr"
   elif test "$cc_vendor" = "clang"; then
-    CFLAGS="-O2 $_march $_pipe"
+    CFLAGS="-O2 $_debug $_profile $_march $_pipe"
     WARNFLAGS="-Wall -Wno-switch-enum -Wno-logical-op-parentheses -Wpointer-arith -Wundef -Wno-pointer-sign -Wmissing-prototypes"
     ERRORFLAGS="-Werror=implicit-function-declaration"
   elif test "$cc_vendor" != "gnu" ; then
-    CFLAGS="-O2 $_march $_mcpu $_pipe"
+    CFLAGS="-O2 $_debug $_profile $_march $_mcpu $_pipe"
   else
-    CFLAGS="-O2 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
+    CFLAGS="-O2 $_debug $_profile $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
     WARNFLAGS="-Wall -Wno-switch -Wno-parentheses -Wpointer-arith -Wredundant-decls"
     ERRORFLAGS="-Werror-implicit-function-declaration"
     extra_ldflags="$extra_ldflags -ffast-math"
@@ -3794,6 +3797,87 @@ fi
 echores "$_directfb"
 
 
+if darwin; then
+
+echocheck "QuickTime"
+if test "$quicktime" = auto ; then
+  quicktime=no
+  statement_check QuickTime/QuickTime.h 'ImageDescription *desc; EnterMovies(); ExitMovies()' -framework QuickTime && quicktime=yes
+fi
+if test "$quicktime" = yes ; then
+  extra_ldflags="$extra_ldflags -framework QuickTime"
+  def_quicktime='#define CONFIG_QUICKTIME 1'
+else
+  def_quicktime='#undef CONFIG_QUICKTIME'
+fi
+echores $quicktime
+
+echocheck "Cocoa"
+if test "$_cocoa" = auto ; then
+  cat > $TMPC <<EOF
+#include <CoreServices/CoreServices.h>
+#include <OpenGL/OpenGL.h>
+int main(void) {
+  NSApplicationLoad();
+}
+EOF
+  _cocoa=no
+  cc_check -framework Cocoa -framework OpenGL && _cocoa=yes
+fi
+if test "$_cocoa" = yes ; then
+  libs_mplayer="$libs_mplayer -framework Cocoa -framework OpenGL"
+  def_cocoa='#define CONFIG_COCOA 1'
+else
+  def_cocoa='#undef CONFIG_COCOA'
+fi
+echores "$_cocoa"
+
+echocheck "CoreVideo"
+if test "$_cocoa" = yes && test "$_corevideo" = auto ; then
+  cat > $TMPC <<EOF
+#include <QuartzCore/CoreVideo.h>
+int main(void) { return 0; }
+EOF
+  _corevideo=no
+  cc_check -framework Cocoa -framework QuartzCore -framework OpenGL && _corevideo=yes
+fi
+if test "$_corevideo" = yes ; then
+  vomodules="corevideo $vomodules"
+  libs_mplayer="$libs_mplayer -framework QuartzCore"
+  def_corevideo='#define CONFIG_COREVIDEO 1'
+else
+  novomodules="corevideo $novomodules"
+  def_corevideo='#undef CONFIG_COREVIDEO'
+fi
+echores "$_corevideo"
+
+echocheck "SharedBuffer"
+if test "$_sharedbuffer" = auto ; then
+  cat > $TMPC <<EOF
+int main(void) {
+  NSApplicationLoad();
+}
+EOF
+  _sharedbuffer=no
+  cc_check -framework Cocoa && _sharedbuffer=yes
+fi
+if test "$_sharedbuffer" = yes ; then
+  vomodules="sharedbuffer $vomodules"
+  libs_mplayer="$libs_mplayer -framework Cocoa"
+  def_sharedbuffer='#define CONFIG_SHAREDBUFFER 1'
+else
+  novomodules="sharedbuffer $novomodules"
+  def_sharedbuffer='#undef CONFIG_SHAREDBUFFER'
+fi
+echores "$_sharedbuffer"
+
+depends_on_application_services(){
+  test "$_corevideo" = yes
+}
+
+fi #if darwin
+
+
 echocheck "X11 headers presence"
   _x11_headers="no"
   res_comment="check if the dev(el) packages are installed"
@@ -3829,7 +3913,20 @@ if test "$_x11" = auto && test "$_x11_headers" = yes ; then
       _ld_tmp="$I -lXext -lX11 $_ld_pthread"
     fi
     statement_check X11/Xutil.h 'XCreateWindow(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)' $_ld_tmp &&
-      libs_mplayer="$libs_mplayer $_ld_tmp" && _x11=yes && break
+      _x11=yes
+    # Check that there aren't conflicting headers between ApplicationServices
+    # and X11. On versions of Mac OSX prior to 10.7 the deprecated QuickDraw API
+    # is included by -framework ApplicationServices and clashes with the X11
+    # definition of the "Cursor" type.
+    if darwin && depends_on_application_services && test "$_x11" = yes ; then
+      _x11=no
+      header_check_broken ApplicationServices/ApplicationServices.h \
+        X11/Xutil.h $_ld_tmp && _x11=yes
+    fi
+    if test "$_x11" = yes ; then
+      libs_mplayer="$libs_mplayer $_ld_tmp"
+      break
+    fi
   done
 fi
 if test "$_x11" = yes ; then
@@ -4174,66 +4271,6 @@ else
 fi
 
 
-if darwin; then
-
-echocheck "QuickTime"
-if test "$quicktime" = auto ; then
-  quicktime=no
-  statement_check QuickTime/QuickTime.h 'ImageDescription *desc; EnterMovies(); ExitMovies()' -framework QuickTime && quicktime=yes
-fi
-if test "$quicktime" = yes ; then
-  extra_ldflags="$extra_ldflags -framework QuickTime"
-  def_quicktime='#define CONFIG_QUICKTIME 1'
-else
-  def_quicktime='#undef CONFIG_QUICKTIME'
-fi
-echores $quicktime
-
-echocheck "CoreVideo"
-if test "$_corevideo" = auto ; then
-  cat > $TMPC <<EOF
-#include <Carbon/Carbon.h>
-#include <CoreServices/CoreServices.h>
-#include <OpenGL/OpenGL.h>
-#include <QuartzCore/CoreVideo.h>
-int main(void) { return 0; }
-EOF
-  _corevideo=no
-  cc_check -framework Carbon -framework Cocoa -framework QuartzCore -framework OpenGL && _corevideo=yes
-fi
-if test "$_corevideo" = yes ; then
-  vomodules="corevideo $vomodules"
-  libs_mplayer="$libs_mplayer -framework Carbon -framework Cocoa -framework QuartzCore -framework OpenGL"
-  def_corevideo='#define CONFIG_COREVIDEO 1'
-else
-  novomodules="corevideo $novomodules"
-  def_corevideo='#undef CONFIG_COREVIDEO'
-fi
-echores "$_corevideo"
-
-echocheck "Cocoa"
-if test "$_gl" = no ; then
-  # if _gl is not enabled there is no point to add potentially unused linker flags
-  _cocoa=no
-fi
-if test "$_cocoa" = auto ; then
-  cat > $TMPC <<EOF
-#include <CoreServices/CoreServices.h>
-#include <OpenGL/OpenGL.h>
-#include <QuartzCore/CoreVideo.h>
-int main(void) { return 0; }
-EOF
-  _cocoa=no
-  cc_check -framework Cocoa -framework QuartzCore -framework OpenGL && _cocoa=yes
-fi
-if test "$_cocoa" = yes ; then
-  libs_mplayer="$libs_mplayer -framework Cocoa -framework QuartzCore -framework OpenGL"
-fi
-echores "$_cocoa"
-
-fi #if darwin
-
-
 echocheck "PNG support"
 if test "$_png" = auto ; then
   _png=no
@@ -4525,7 +4562,7 @@ int main(int argc, char *argv[]) {
 EOF
   _gl=no
   for _ld_tmp in "" -lGL "-lGL -lXdamage" "-lGL $_ld_pthread" ; do
-    if test "$_cocoa" != yes && cc_check $_ld_tmp $_ld_lm ; then
+    if cc_check $_ld_tmp $_ld_lm ; then
       _gl=yes
       _gl_x11=yes
       libs_mplayer="$libs_mplayer $_ld_tmp $_ld_dl"
@@ -6349,8 +6386,10 @@ BL = $_bl
 CACA = $_caca
 CDDA = $_cdda
 CDDB = $_cddb
+COCOA = $_cocoa
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
+SHAREDBUFFER = $_sharedbuffer
 DGA = $_dga
 DIRECT3D = $_direct3d
 DIRECTFB = $_directfb
@@ -6752,6 +6791,8 @@ $def_aa
 $def_bl
 $def_caca
 $def_corevideo
+$def_cocoa
+$def_sharedbuffer
 $def_dga
 $def_dga1
 $def_dga2
@@ -6829,12 +6870,8 @@ $def_yasm
 
 #define HAVE_INLINE_ASM 1
 
-/* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
-#ifndef MP_DEBUG
+/* Use these registers in x86 inline asm. No proper detection yet. */
 #define HAVE_EBP_AVAILABLE 1
-#else
-#define HAVE_EBP_AVAILABLE 0
-#endif
 
 #endif /* MPLAYER_CONFIG_H */
 EOF

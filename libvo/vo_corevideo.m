@@ -20,1057 +20,448 @@
  */
 
 #import "vo_corevideo.h"
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/mman.h>
-#include <unistd.h>
-#include <CoreServices/CoreServices.h>
-//special workaround for Apple bug #6267445
-//(OSServices Power API disabled in OSServices.h for 64bit systems)
-#ifndef __POWER__
-#include <CoreServices/../Frameworks/OSServices.framework/Headers/Power.h>
-#endif
 
-//MPLAYER
-#include "config.h"
-#include "fastmemcpy.h"
-#include "video_out.h"
-#include "video_out_internal.h"
-#include "aspect.h"
-#include "mp_msg.h"
-#include "m_option.h"
-#include "mp_fifo.h"
-#include "sub/sub.h"
-#include "subopt-helper.h"
+// mplayer includes
+#import "fastmemcpy.h"
+#import "talloc.h"
+#import "video_out.h"
+#import "aspect.h"
+#import "sub/font_load.h"
+#import "sub/sub.h"
+#import "subopt-helper.h"
 
-#include "input/input.h"
-#include "input/keycodes.h"
-#include "osx_common.h"
+#import "csputils.h"
+#import "libmpcodecs/vfcap.h"
+#import "libmpcodecs/mp_image.h"
+#import "osd.h"
 
-//Cocoa
-NSDistantObject *mplayerosxProxy;
-id <MPlayerOSXVOProto> mplayerosxProto;
-MPlayerOpenGLView *mpGLView;
-NSAutoreleasePool *autoreleasepool;
-OSType pixelFormat;
+#import "gl_common.h"
+#import "cocoa_common.h"
 
-//shared memory
-BOOL shared_buffer = false;
-#define DEFAULT_BUFFER_NAME "mplayerosx"
-static char *buffer_name;
-
-//Screen
-int screen_id = -1;
-NSRect screen_frame;
-NSScreen *screen_handle;
-NSArray *screen_array;
-
-//image
-unsigned char *image_data;
-// For double buffering
-static uint8_t image_page = 0;
-static unsigned char *image_datas[2];
-
-static uint32_t image_width;
-static uint32_t image_height;
-static uint32_t image_depth;
-static uint32_t image_bytes;
-static uint32_t image_format;
-
-//vo
-static int isFullscreen;
-static int isOntop;
-static int isRootwin;
-
-static float winAlpha = 1;
-static int int_pause = 0;
-
-static BOOL isLeopardOrLater;
-
-#define NSLeftAlternateKeyMask  (0x000020 | NSAlternateKeyMask)
-#define NSRightAlternateKeyMask (0x000040 | NSAlternateKeyMask)
-
-static vo_info_t info =
-{
-	"Mac OS X Core Video",
-	"corevideo",
-	"Nicolas Plourde <nicolas.plourde@gmail.com>",
-	""
+struct quad {
+    GLfloat lowerLeft[2];
+    GLfloat lowerRight[2];
+    GLfloat upperRight[2];
+    GLfloat upperLeft[2];
 };
 
-LIBVO_EXTERN(corevideo)
+#define CV_VERTICES_PER_QUAD 6
+#define CV_MAX_OSD_PARTS 20
 
-static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride)
+struct osd_p {
+    GLuint tex[CV_MAX_OSD_PARTS];
+    NSRect tex_rect[CV_MAX_OSD_PARTS];
+    int tex_cnt;
+};
+
+struct priv {
+    MPGLContext *mpglctx;
+    OSType pixelFormat;
+    unsigned int image_width;
+    unsigned int image_height;
+    struct mp_csp_details colorspace;
+
+    CVPixelBufferRef pixelBuffer;
+    CVOpenGLTextureCacheRef textureCache;
+    CVOpenGLTextureRef texture;
+    struct quad *quad;
+
+    struct osd_p *osd;
+};
+
+static struct priv *p;
+
+static void resize(struct vo *vo, int width, int height)
 {
-	switch (image_format)
-	{
-		case IMGFMT_RGB24:
-			vo_draw_alpha_rgb24(w,h,src,srca,stride,image_data+3*(y0*image_width+x0),3*image_width);
-			break;
-		case IMGFMT_ARGB:
-		case IMGFMT_BGRA:
-			vo_draw_alpha_rgb32(w,h,src,srca,stride,image_data+4*(y0*image_width+x0),4*image_width);
-			break;
-		case IMGFMT_YUY2:
-			vo_draw_alpha_yuy2(w,h,src,srca,stride,image_data + (x0 + y0 * image_width) * 2,image_width*2);
-			break;
-	}
+    GL *gl = p->mpglctx->gl;
+    p->image_width = width;
+    p->image_height = height;
+
+    mp_msg(MSGT_VO, MSGL_V, "[vo_corevideo] New OpenGL Viewport (0, 0, %d, "
+                            "%d)\n", p->image_width, p->image_height);
+
+    gl->Viewport(0, 0, p->image_width, p->image_height);
+    gl->MatrixMode(GL_PROJECTION);
+    gl->LoadIdentity();
+
+    if (aspect_scaling()) {
+        int new_w, new_h;
+        GLdouble scale_x, scale_y;
+
+        aspect(vo, &new_w, &new_h, A_WINZOOM);
+        panscan_calc_windowed(vo);
+        new_w += vo->panscan_x;
+        new_h += vo->panscan_y;
+        scale_x = (GLdouble)new_w / (GLdouble)p->image_width;
+        scale_y = (GLdouble)new_h / (GLdouble)p->image_height;
+        gl->Scaled(scale_x, scale_y, 1);
+    }
+
+    gl->Ortho(0, p->image_width, p->image_height, 0, -1.0, 1.0);
+    gl->MatrixMode(GL_MODELVIEW);
+    gl->LoadIdentity();
+
+    force_load_font = 1;
+    vo_osd_changed(OSDTYPE_OSD);
+
+    gl->Clear(GL_COLOR_BUFFER_BIT);
+    vo->want_redraw = true;
 }
 
-static void update_screen_info(void)
+static int init_gl(struct vo *vo, uint32_t d_width, uint32_t d_height)
 {
-	if (screen_id == -1 && xinerama_screen > -1)
-		screen_id = xinerama_screen;
+    GL *gl = p->mpglctx->gl;
 
-	screen_array = [NSScreen screens];
-	if(screen_id >= (int)[screen_array count])
-	{
-		mp_msg(MSGT_VO, MSGL_INFO, "[vo_corevideo] Device ID %d does not exist, falling back to main device\n", screen_id);
-		screen_id = -1;
-	}
-	if (screen_id < 0 && [mpGLView window])
-		screen_handle = [[mpGLView window] screen];
-	else
-		screen_handle = [screen_array objectAtIndex:(screen_id < 0 ? 0 : screen_id)];
+    const char *vendor     = gl->GetString(GL_VENDOR);
+    const char *version    = gl->GetString(GL_VERSION);
+    const char *renderer   = gl->GetString(GL_RENDERER);
 
-	screen_frame = [screen_handle frame];
-	vo_screenwidth = screen_frame.size.width;
-	vo_screenheight = screen_frame.size.height;
-	xinerama_x = xinerama_y = 0;
-	aspect_save_screenres(vo_screenwidth, vo_screenheight);
+    mp_msg(MSGT_VO, MSGL_V, "[vo_corevideo] Running on OpenGL '%s' by '%s',"
+           " version '%s'\n", renderer, vendor, version);
+
+    gl->Disable(GL_BLEND);
+    gl->Disable(GL_DEPTH_TEST);
+    gl->DepthMask(GL_FALSE);
+    gl->Disable(GL_CULL_FACE);
+    gl->Enable(GL_TEXTURE_2D);
+    gl->DrawBuffer(GL_BACK);
+    gl->TexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+    resize(vo, d_width, d_height);
+
+    gl->ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    gl->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (gl->SwapInterval)
+        gl->SwapInterval(1);
+    return 1;
 }
 
-static void free_file_specific(void)
+static void release_cv_entities(void) {
+    CVPixelBufferRelease(p->pixelBuffer);
+    p->pixelBuffer = NULL;
+    CVOpenGLTextureRelease(p->texture);
+    p->texture = NULL;
+    CVOpenGLTextureCacheRelease(p->textureCache);
+    p->textureCache = NULL;
+
+}
+
+static int config(struct vo *vo, uint32_t width, uint32_t height,
+                  uint32_t d_width, uint32_t d_height, uint32_t flags,
+                  uint32_t format)
 {
-	if(shared_buffer)
-	{
-		[mplayerosxProto stop];
-		mplayerosxProto = nil;
-		[mplayerosxProxy release];
-		mplayerosxProxy = nil;
+    release_cv_entities();
+    p->image_width = width;
+    p->image_height = height;
 
-		if (munmap(image_data, image_width*image_height*image_bytes) == -1)
-			mp_msg(MSGT_VO, MSGL_FATAL, "[vo_corevideo] uninit: munmap failed. Error: %s\n", strerror(errno));
+    if (p->mpglctx->create_window(p->mpglctx, d_width, d_height, flags) < 0)
+        return -1;
+    if (p->mpglctx->setGlWindow(p->mpglctx) == SET_WINDOW_FAILED)
+        return -1;
 
-		if (shm_unlink(buffer_name) == -1)
-			mp_msg(MSGT_VO, MSGL_FATAL, "[vo_corevideo] uninit: shm_unlink failed. Error: %s\n", strerror(errno));
-    } else {
-        free(image_datas[0]);
-        if (vo_doublebuffering)
-            free(image_datas[1]);
-        image_datas[0] = NULL;
-        image_datas[1] = NULL;
-        image_data = NULL;
+    init_gl(vo, vo->dwidth, vo->dheight);
+
+    return 0;
+}
+
+static void check_events(struct vo *vo)
+{
+    int e = p->mpglctx->check_events(vo);
+    if (e & VO_EVENT_RESIZE)
+        resize(vo, vo->dwidth, vo->dheight);
+}
+
+static void create_osd_texture(void *ctx, int x0, int y0, int w, int h,
+                               unsigned char *src, unsigned char *srca,
+                               int stride)
+{
+    struct osd_p *osd = p->osd;
+    GL *gl = p->mpglctx->gl;
+
+    if (w <= 0 || h <= 0 || stride < w) {
+        mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
+        return;
+    }
+
+    if (osd->tex_cnt >= CV_MAX_OSD_PARTS) {
+        mp_msg(MSGT_VO, MSGL_ERR, "Too many OSD parts, contact the"
+                                  " developers!\n");
+        return;
+    }
+
+    gl->GenTextures(1, &osd->tex[osd->tex_cnt]);
+    gl->BindTexture(GL_TEXTURE_2D, osd->tex[osd->tex_cnt]);
+    glCreateClearTex(gl, GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, GL_LUMINANCE_ALPHA,
+                     GL_UNSIGNED_BYTE, GL_LINEAR, w, h, 0);
+    {
+        int i;
+        unsigned char *tmp = malloc(stride * h * 2);
+        // convert alpha from weird MPlayer scale.
+        for (i = 0; i < h * stride; i++) {
+            tmp[i*2+0] = src[i];
+            tmp[i*2+1] = -srca[i];
+        }
+        glUploadTex(gl, GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE,
+                    tmp, stride * 2, 0, 0, w, h, 0);
+        free(tmp);
+    }
+
+    osd->tex_rect[osd->tex_cnt] = NSMakeRect(x0, y0, w, h);
+
+    gl->BindTexture(GL_TEXTURE_2D, 0);
+    osd->tex_cnt++;
+}
+
+static void clearOSD(struct vo *vo)
+{
+    struct osd_p *osd = p->osd;
+    GL *gl = p->mpglctx->gl;
+
+    if (!osd->tex_cnt)
+        return;
+    gl->DeleteTextures(osd->tex_cnt, osd->tex);
+    osd->tex_cnt = 0;
+}
+
+static void draw_osd(struct vo *vo, struct osd_state *osd_s)
+{
+    struct osd_p *osd = p->osd;
+    GL *gl = p->mpglctx->gl;
+
+    if (vo_osd_changed(0)) {
+        clearOSD(vo);
+        osd_draw_text_ext(osd_s, vo->dwidth, vo->dheight, 0, 0, 0, 0,
+                          p->image_width, p->image_height, create_osd_texture,
+                          vo);
+    }
+
+    if (osd->tex_cnt > 0) {
+        gl->Enable(GL_BLEND);
+        gl->BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+        for (int n = 0; n < osd->tex_cnt; n++) {
+            NSRect tr = osd->tex_rect[n];
+            gl->BindTexture(GL_TEXTURE_2D, osd->tex[n]);
+            glDrawTex(gl, tr.origin.x, tr.origin.y,
+                      tr.size.width, tr.size.height,
+                      0, 0, 1.0, 1.0, 1, 1, 0, 0, 0);
+        }
+
+        gl->Disable(GL_BLEND);
+        gl->BindTexture(GL_TEXTURE_2D, 0);
     }
 }
 
-static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+static void prepare_texture(void)
 {
-	free_file_specific();
+    CVReturn error;
+    struct quad *q = p->quad;
 
-	//misc mplayer setup
-	image_width = width;
-	image_height = height;
-	switch (image_format)
-	{
-		case IMGFMT_RGB24:
-			image_depth = 24;
-			break;
-		case IMGFMT_ARGB:
-		case IMGFMT_BGRA:
-			image_depth = 32;
-			break;
-		case IMGFMT_YUY2:
-			image_depth = 16;
-			break;
-	}
-	image_bytes = (image_depth + 7) / 8;
+    CVOpenGLTextureRelease(p->texture);
+    error = CVOpenGLTextureCacheCreateTextureFromImage(NULL,
+                p->textureCache, p->pixelBuffer, 0, &p->texture);
+    if(error != kCVReturnSuccess)
+        mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL"
+                                 " texture(%d)\n", error);
 
-	if(!shared_buffer)
-	{
-		config_movie_aspect((float)d_width/d_height);
-
-		vo_dwidth  = d_width  *= mpGLView->winSizeMult;
-		vo_dheight = d_height *= mpGLView->winSizeMult;
-
-		image_data = malloc(image_width*image_height*image_bytes);
-		image_datas[0] = image_data;
-		if (vo_doublebuffering)
-			image_datas[1] = malloc(image_width*image_height*image_bytes);
-		image_page = 0;
-
-		vo_fs = flags & VOFLAG_FULLSCREEN;
-
-		//config OpenGL View
-		[mpGLView config];
-		[mpGLView reshape];
-	}
-	else
-	{
-		int shm_fd;
-		mp_msg(MSGT_VO, MSGL_INFO, "[vo_corevideo] writing output to a shared buffer "
-				"named \"%s\"\n",buffer_name);
-
-		// create shared memory
-		shm_fd = shm_open(buffer_name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-		if (shm_fd == -1)
-		{
-			mp_msg(MSGT_VO, MSGL_FATAL,
-				   "[vo_corevideo] failed to open shared memory. Error: %s\n", strerror(errno));
-			return 1;
-		}
-
-
-		if (ftruncate(shm_fd, image_width*image_height*image_bytes) == -1)
-		{
-			mp_msg(MSGT_VO, MSGL_FATAL,
-				   "[vo_corevideo] failed to size shared memory, possibly already in use. Error: %s\n", strerror(errno));
-			close(shm_fd);
-			shm_unlink(buffer_name);
-			return 1;
-		}
-
-		image_data = mmap(NULL, image_width*image_height*image_bytes,
-					PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
-		close(shm_fd);
-
-		if (image_data == MAP_FAILED)
-		{
-			mp_msg(MSGT_VO, MSGL_FATAL,
-				   "[vo_corevideo] failed to map shared memory. Error: %s\n", strerror(errno));
-			shm_unlink(buffer_name);
-			return 1;
-		}
-
-		//connect to mplayerosx
-		mplayerosxProxy=[NSConnection rootProxyForConnectionWithRegisteredName:[NSString stringWithCString:buffer_name] host:nil];
-		if ([mplayerosxProxy conformsToProtocol:@protocol(MPlayerOSXVOProto)]) {
-			[mplayerosxProxy setProtocolForProxy:@protocol(MPlayerOSXVOProto)];
-			mplayerosxProto = (id <MPlayerOSXVOProto>)mplayerosxProxy;
-			[mplayerosxProto startWithWidth: image_width withHeight: image_height withBytes: image_bytes withAspect:d_width*100/d_height];
-		}
-		else {
-			[mplayerosxProxy release];
-			mplayerosxProxy = nil;
-			mplayerosxProto = nil;
-		}
-	}
-	return 0;
+    CVOpenGLTextureGetCleanTexCoords(p->texture, q->lowerLeft, q->lowerRight,
+                                                 q->upperRight, q->upperLeft);
 }
 
-static void check_events(void)
+static void do_render(struct vo *vo)
 {
-	if (mpGLView)
-		[mpGLView check_events];
+    struct quad *q = p->quad;
+    GL *gl = p->mpglctx->gl;
+    prepare_texture();
+
+    float x0 = 0;
+    float y0 = 0;
+    float  w = p->image_width;
+    float  h = p->image_height;
+
+    // vertically flips the image
+    y0 += h;
+    h = -h;
+
+    float xm = x0 + w;
+    float ym = y0 + h;
+
+    gl->Enable(CVOpenGLTextureGetTarget(p->texture));
+    gl->BindTexture(
+            CVOpenGLTextureGetTarget(p->texture),
+            CVOpenGLTextureGetName(p->texture));
+
+    gl->Begin(GL_QUADS);
+    gl->TexCoord2fv(q->lowerLeft);  gl->Vertex2f(x0, y0);
+    gl->TexCoord2fv(q->upperLeft);  gl->Vertex2f(x0, ym);
+    gl->TexCoord2fv(q->upperRight); gl->Vertex2f(xm, ym);
+    gl->TexCoord2fv(q->lowerRight); gl->Vertex2f(xm, y0);
+    gl->End();
+
+    gl->Disable(CVOpenGLTextureGetTarget(p->texture));
 }
 
-static void draw_osd(void)
+static void flip_page(struct vo *vo)
 {
-	vo_draw_text(image_width, image_height, draw_alpha);
+    p->mpglctx->swapGlBuffers(p->mpglctx);
+    p->mpglctx->gl->Clear(GL_COLOR_BUFFER_BIT);
 }
 
-static void flip_page(void)
+static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 {
-	if(shared_buffer) {
-		NSAutoreleasePool *pool = [NSAutoreleasePool new];
-		[mplayerosxProto render];
-		[pool release];
-	} else {
-		[mpGLView setCurrentTexture];
-		[mpGLView render];
-		if (vo_doublebuffering) {
-			image_page = 1 - image_page;
-			image_data = image_datas[image_page];
-		}
-	}
-}
+    CVReturn error;
 
-static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
-{
-	return 0;
-}
+    if (!p->textureCache || !p->pixelBuffer) {
+        error = CVOpenGLTextureCacheCreate(NULL, 0, vo_cocoa_cgl_context(),
+                    vo_cocoa_cgl_pixel_format(), 0, &p->textureCache);
+        if(error != kCVReturnSuccess)
+            mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL"
+                                     " texture Cache(%d)\n", error);
 
+        error = CVPixelBufferCreateWithBytes(NULL, mpi->width, mpi->height,
+                    p->pixelFormat, mpi->planes[0], mpi->width * mpi->bpp / 8,
+                    NULL, NULL, NULL, &p->pixelBuffer);
+        if(error != kCVReturnSuccess)
+            mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create Pixel"
+                                     "Buffer(%d)\n", error);
+    }
 
-static int draw_frame(uint8_t *src[])
-{
-	return 0;
-}
-
-static uint32_t draw_image(mp_image_t *mpi)
-{
-	memcpy_pic(image_data, mpi->planes[0], image_width*image_bytes, image_height, image_width*image_bytes, mpi->stride[0]);
-
-	return 0;
+    do_render(vo);
+    return VO_TRUE;
 }
 
 static int query_format(uint32_t format)
 {
-    const int supportflags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
-	image_format = format;
+    const int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
+                      VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN |
+                      VOCAP_NOSLICES;
+    switch (format) {
+        case IMGFMT_YUY2:
+            p->pixelFormat = kYUVSPixelFormat;
+            return flags;
 
-    switch(format)
-	{
-		case IMGFMT_YUY2:
-			pixelFormat = kYUVSPixelFormat;
-			return supportflags;
+        case IMGFMT_RGB24:
+            p->pixelFormat = k24RGBPixelFormat;
+            return flags;
 
-		case IMGFMT_RGB24:
-			pixelFormat = k24RGBPixelFormat;
-			return supportflags;
+        case IMGFMT_ARGB:
+            p->pixelFormat = k32ARGBPixelFormat;
+            return flags;
 
-		case IMGFMT_ARGB:
-			pixelFormat = k32ARGBPixelFormat;
-			return supportflags;
-
-		case IMGFMT_BGRA:
-			pixelFormat = k32BGRAPixelFormat;
-			return supportflags;
+        case IMGFMT_BGRA:
+            p->pixelFormat = k32BGRAPixelFormat;
+            return flags;
     }
     return 0;
 }
 
-static void uninit(void)
+static void uninit(struct vo *vo)
 {
-    SetSystemUIMode( kUIModeNormal, 0);
-    CGDisplayShowCursor(kCGDirectMainDisplay);
-
-    free_file_specific();
-
-    if(mpGLView)
-    {
-        NSAutoreleasePool *finalPool;
-        mpGLView = nil;
-        [autoreleasepool release];
-        finalPool = [[NSAutoreleasePool alloc] init];
-        [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES];
-        [finalPool release];
-    }
-
-    free(buffer_name);
-    buffer_name = NULL;
+    uninit_mpglcontext(p->mpglctx);
+    release_cv_entities();
+    talloc_free(p);
 }
 
-static const opt_t subopts[] = {
-{"device_id",     OPT_ARG_INT,  &screen_id,     NULL},
-{"shared_buffer", OPT_ARG_BOOL, &shared_buffer, NULL},
-{"buffer_name",   OPT_ARG_MSTRZ,&buffer_name,   NULL},
-{NULL}
+
+static int preinit(struct vo *vo, const char *arg)
+{
+    const opt_t subopts[] = {
+        {NULL}
+    };
+
+    if (subopt_parse(arg, subopts) != 0) {
+        mp_msg(MSGT_VO, MSGL_FATAL,
+                "\n-vo corevideo command line help:\n"
+                "Example: mplayer -vo corevideo\n"
+                "\n" );
+        return -1;
+    }
+
+    p = talloc_ptrtype(NULL, p);
+    *p = (struct priv) {
+        .mpglctx = init_mpglcontext(GLTYPE_COCOA, vo),
+        .colorspace = MP_CSP_DETAILS_DEFAULTS,
+        .quad = talloc_ptrtype(p, p->quad),
+        .osd = talloc_ptrtype(p, p->osd),
+    };
+
+    *p->osd = (struct osd_p) {
+        .tex_cnt = 0,
+    };
+
+    return 0;
+}
+
+static CFStringRef get_cv_csp_matrix(void)
+{
+    switch (p->colorspace.format) {
+        case MP_CSP_BT_601:
+            return kCVImageBufferYCbCrMatrix_ITU_R_601_4;
+        case MP_CSP_BT_709:
+            return kCVImageBufferYCbCrMatrix_ITU_R_709_2;
+        case MP_CSP_SMPTE_240M:
+            return kCVImageBufferYCbCrMatrix_SMPTE_240M_1995;
+    }
+    return kCVImageBufferYCbCrMatrix_ITU_R_601_4;
+}
+
+static void set_yuv_colorspace(struct vo *vo)
+{
+    CVBufferSetAttachment(p->pixelBuffer,
+                          kCVImageBufferYCbCrMatrixKey, get_cv_csp_matrix(),
+                          kCVAttachmentMode_ShouldPropagate);
+    vo->want_redraw = true;
+}
+
+static int control(struct vo *vo, uint32_t request, void *data)
+{
+    switch (request) {
+        case VOCTRL_DRAW_IMAGE:
+            return draw_image(vo, data);
+        case VOCTRL_QUERY_FORMAT:
+            return query_format(*(uint32_t*)data);
+        case VOCTRL_ONTOP:
+            p->mpglctx->ontop(vo);
+            return VO_TRUE;
+        case VOCTRL_FULLSCREEN:
+            p->mpglctx->fullscreen(vo);
+            resize(vo, vo->dwidth, vo->dheight);
+            return VO_TRUE;
+        case VOCTRL_GET_PANSCAN:
+            return VO_TRUE;
+        case VOCTRL_SET_PANSCAN:
+            resize(vo, vo->dwidth, vo->dheight);
+            return VO_TRUE;
+        case VOCTRL_UPDATE_SCREENINFO:
+            p->mpglctx->update_xinerama_info(vo);
+            return VO_TRUE;
+        case VOCTRL_REDRAW_FRAME:
+            do_render(vo);
+            return VO_TRUE;
+        case VOCTRL_SET_YUV_COLORSPACE:
+            p->colorspace.format = ((struct mp_csp_details *)data)->format;
+            set_yuv_colorspace(vo);
+            return VO_TRUE;
+        case VOCTRL_GET_YUV_COLORSPACE:
+            *(struct mp_csp_details *)data = p->colorspace;
+            return VO_TRUE;
+    }
+    return VO_NOTIMPL;
+}
+
+const struct vo_driver video_out_corevideo = {
+    .is_new = true,
+    .info = &(const vo_info_t) {
+        "Mac OS X Core Video",
+        "corevideo",
+        "Nicolas Plourde <nicolas.plourde@gmail.com> and others",
+        ""
+    },
+    .preinit = preinit,
+    .config = config,
+    .control = control,
+    .draw_osd = draw_osd,
+    .flip_page = flip_page,
+    .check_events = check_events,
+    .uninit = uninit,
 };
-
-static int preinit(const char *arg)
-{
-
-	// set defaults
-	screen_id = -1;
-	shared_buffer = false;
-	buffer_name = NULL;
-
-	if (subopt_parse(arg, subopts) != 0) {
-		mp_msg(MSGT_VO, MSGL_FATAL,
-				"\n-vo corevideo command line help:\n"
-				"Example: mplayer -vo corevideo:device_id=1:shared_buffer:buffer_name=mybuff\n"
-				"\nOptions:\n"
-				"  device_id=<0-...>\n"
-				"    Set screen device ID for fullscreen.\n"
-				"  shared_buffer\n"
-				"    Write output to a shared memory buffer instead of displaying it.\n"
-				"  buffer_name=<name>\n"
-				"    Name of the shared buffer created with shm_open() as well as\n"
-				"    the name of the NSConnection MPlayer will try to open.\n"
-				"    Setting buffer_name implicitly enables shared_buffer.\n"
-				"\n" );
-		return -1;
-	}
-
-	autoreleasepool = [[NSAutoreleasePool alloc] init];
-
-	if (!buffer_name)
-		buffer_name = strdup(DEFAULT_BUFFER_NAME);
-	else
-		shared_buffer = true;
-
-	if(!shared_buffer)
-	{
-		NSApplicationLoad();
-		NSApp = [NSApplication sharedApplication];
-		isLeopardOrLater = floor(NSAppKitVersionNumber) > 824;
-
-		osx_foreground_hack();
-
-		if(!mpGLView)
-		{
-			mpGLView = [[MPlayerOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100) pixelFormat:[MPlayerOpenGLView defaultPixelFormat]];
-			[mpGLView autorelease];
-		}
-		// Install an event handler so the Quit menu entry works
-		// The proper way using NSApp setDelegate: and
-		// applicationShouldTerminate: does not work,
-		// probably NSApplication never installs its handler.
-		[[NSAppleEventManager sharedAppleEventManager]
-			setEventHandler:mpGLView
-			andSelector:@selector(handleQuitEvent:withReplyEvent:)
-			forEventClass:kCoreEventClass
-			andEventID:kAEQuitApplication];
-
-		[mpGLView display];
-		[mpGLView preinit];
-	}
-
-    return 0;
-}
-
-static int control(uint32_t request, void *data)
-{
-	switch (request)
-	{
-		case VOCTRL_DRAW_IMAGE: return draw_image(data);
-		case VOCTRL_PAUSE: return int_pause = 1;
-		case VOCTRL_RESUME: return int_pause = 0;
-		case VOCTRL_QUERY_FORMAT: return query_format(*(uint32_t*)data);
-		case VOCTRL_ONTOP: vo_ontop = !vo_ontop; if(!shared_buffer){ [mpGLView ontop]; } else { [mplayerosxProto ontop]; } return VO_TRUE;
-		case VOCTRL_ROOTWIN: vo_rootwin = !vo_rootwin; [mpGLView rootwin]; return VO_TRUE;
-		case VOCTRL_FULLSCREEN: vo_fs = !vo_fs; if(!shared_buffer){ [mpGLView fullscreen: NO]; } else { [mplayerosxProto toggleFullscreen]; } return VO_TRUE;
-		case VOCTRL_GET_PANSCAN: return VO_TRUE;
-		case VOCTRL_SET_PANSCAN: [mpGLView panscan]; return VO_TRUE;
-		case VOCTRL_UPDATE_SCREENINFO: update_screen_info(); return VO_TRUE;
-	}
-	return VO_NOTIMPL;
-}
-
-//////////////////////////////////////////////////////////////////////////
-// NSOpenGLView Subclass
-//////////////////////////////////////////////////////////////////////////
-@implementation MPlayerOpenGLView
-- (void) preinit
-{
-	NSOpenGLContext *glContext;
-	GLint swapInterval = 1;
-	CVReturn error;
-
-	//init menu
-	[self initMenu];
-
-	//create window
-	window = [[NSWindow alloc]	initWithContentRect:NSMakeRect(0, 0, 100, 100)
-								styleMask:NSTitledWindowMask|NSTexturedBackgroundWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask
-								backing:NSBackingStoreBuffered defer:NO];
-
-	[window autorelease];
-	[window setDelegate:mpGLView];
-	[window setContentView:mpGLView];
-	[window setInitialFirstResponder:mpGLView];
-	[window setAcceptsMouseMovedEvents:YES];
-	[window setTitle:@"MPlayer - The Movie Player"];
-
-	isFullscreen = 0;
-	winSizeMult = 1;
-
-	//create OpenGL Context
-	glContext = [[NSOpenGLContext alloc] initWithFormat:[NSOpenGLView defaultPixelFormat] shareContext:nil];
-
-	[self setOpenGLContext:glContext];
-	[glContext setValues:&swapInterval forParameter:NSOpenGLCPSwapInterval];
-	[glContext setView:self];
-	[glContext makeCurrentContext];
-	[glContext release];
-
-	error = CVOpenGLTextureCacheCreate(NULL, 0, [glContext CGLContextObj], [[self pixelFormat] CGLPixelFormatObj], 0, &textureCache);
-	if(error != kCVReturnSuccess)
-		mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL texture Cache(%d)\n", error);
-}
-
-- (void) releaseVideoSpecific
-{
-	CVPixelBufferRelease(frameBuffers[0]);
-	frameBuffers[0] = NULL;
-	CVPixelBufferRelease(frameBuffers[1]);
-	frameBuffers[1] = NULL;
-	CVOpenGLTextureRelease(texture);
-	texture = NULL;
-}
-
-- (void) dealloc
-{
-	[self releaseVideoSpecific];
-	CVOpenGLTextureCacheRelease(textureCache);
-	textureCache = NULL;
-	[self setOpenGLContext:nil];
-	[super dealloc];
-}
-
-- (void) config
-{
-	NSRect visibleFrame;
-	CVReturn error = kCVReturnSuccess;
-
-	//config window
-	[window setContentSize:NSMakeSize(vo_dwidth, vo_dheight)];
-
-	// Use visibleFrame to position the window taking the menu bar and dock into account.
-	// Also flip vo_dy since the screen origin is in the bottom left on OSX.
-	update_screen_info();
-	visibleFrame = [screen_handle visibleFrame];
-	[window setFrameTopLeftPoint:NSMakePoint(
-		visibleFrame.origin.x + vo_dx,
-		visibleFrame.origin.y + visibleFrame.size.height - vo_dy)];
-
-	[self releaseVideoSpecific];
-	error = CVPixelBufferCreateWithBytes(NULL, image_width, image_height, pixelFormat, image_datas[0], image_width*image_bytes, NULL, NULL, NULL, &frameBuffers[0]);
-	if(error != kCVReturnSuccess)
-		mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create Pixel Buffer(%d)\n", error);
-	if (vo_doublebuffering) {
-		error = CVPixelBufferCreateWithBytes(NULL, image_width, image_height, pixelFormat, image_datas[1], image_width*image_bytes, NULL, NULL, NULL, &frameBuffers[1]);
-		if(error != kCVReturnSuccess)
-			mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create Pixel Double Buffer(%d)\n", error);
-	}
-
-	error = CVOpenGLTextureCacheCreateTextureFromImage(NULL, textureCache, frameBuffers[image_page], 0, &texture);
-	if(error != kCVReturnSuccess)
-		mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL texture(%d)\n", error);
-
-	//show window
-	[window makeKeyAndOrderFront:mpGLView];
-
-	if(vo_rootwin)
-		[mpGLView rootwin];
-
-	if(vo_fs)
-		[mpGLView fullscreen: NO];
-
-	if(vo_ontop)
-		[mpGLView ontop];
-}
-
-/*
-	Init Menu
-*/
-- (void)initMenu
-{
-	NSMenu *menu, *aspectMenu;
-	NSMenuItem *menuItem;
-
-	menu = [[NSMenu new] autorelease];
-	menuItem = [[NSMenuItem new] autorelease];
-	[menu addItem: menuItem];
-	[NSApp setMainMenu: menu];
-
-//Create Movie Menu
-	menu = [[NSMenu alloc] initWithTitle:@"Movie"];
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"Half Size" action:@selector(menuAction:) keyEquivalent:@"0"]; [menu addItem:menuItem];
-	kHalfScreenCmd = menuItem;
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"Normal Size" action:@selector(menuAction:) keyEquivalent:@"1"]; [menu addItem:menuItem];
-	kNormalScreenCmd = menuItem;
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"Double Size" action:@selector(menuAction:) keyEquivalent:@"2"]; [menu addItem:menuItem];
-	kDoubleScreenCmd = menuItem;
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"Full Size" action:@selector(menuAction:) keyEquivalent:@"f"]; [menu addItem:menuItem];
-	kFullScreenCmd = menuItem;
-	menuItem = [NSMenuItem separatorItem]; [menu addItem:menuItem];
-
-	aspectMenu = [[NSMenu alloc] initWithTitle:@"Aspect Ratio"];
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"Keep" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
-	if(vo_keepaspect) [menuItem setState:NSOnState];
-	kKeepAspectCmd = menuItem;
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"Pan-Scan" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
-	if(vo_panscan) [menuItem setState:NSOnState];
-	kPanScanCmd = menuItem;
-	menuItem = [NSMenuItem separatorItem]; [aspectMenu addItem:menuItem];
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"Original" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
-	kAspectOrgCmd = menuItem;
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"4:3" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
-	kAspectFullCmd = menuItem;
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"16:9" action:@selector(menuAction:) keyEquivalent:@""];	[aspectMenu addItem:menuItem];
-	kAspectWideCmd = menuItem;
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"Aspect Ratio" action:nil keyEquivalent:@""];
-	[menuItem setSubmenu:aspectMenu];
-	[menu addItem:menuItem];
-	[aspectMenu release];
-
-	//Add to menubar
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"Movie" action:nil keyEquivalent:@""];
-	[menuItem setSubmenu:menu];
-	[[NSApp mainMenu] addItem:menuItem];
-
-//Create Window Menu
-	menu = [[NSMenu alloc] initWithTitle:@"Window"];
-
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"Minimize" action:@selector(performMiniaturize:) keyEquivalent:@"m"]; [menu addItem:menuItem];
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"Zoom" action:@selector(performZoom:) keyEquivalent:@""]; [menu addItem:menuItem];
-
-	//Add to menubar
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"Window" action:nil keyEquivalent:@""];
-	[menuItem setSubmenu:menu];
-	[[NSApp mainMenu] addItem:menuItem];
-	[NSApp setWindowsMenu:menu];
-
-	[menu release];
-	[menuItem release];
-}
-
-- (void)set_winSizeMult:(float)mult
-{
-    NSRect frame;
-    int d_width, d_height;
-    aspect(&d_width, &d_height, A_NOZOOM);
-
-    if (isFullscreen) {
-        vo_fs = !vo_fs;
-        [self fullscreen:NO];
-    }
-
-    winSizeMult = mult;
-    frame.size.width  = d_width  * mult;
-    frame.size.height = d_height * mult;
-    [window setContentSize: frame.size];
-    [self reshape];
-}
-
-/*
-	Menu Action
- */
-- (void)menuAction:(id)sender
-{
-	if(sender == kHalfScreenCmd)
-		[self set_winSizeMult: 0.5];
-	if(sender == kNormalScreenCmd)
-		[self set_winSizeMult: 1];
-	if(sender == kDoubleScreenCmd)
-		[self set_winSizeMult: 2];
-	if(sender == kFullScreenCmd)
-	{
-		vo_fs = !vo_fs;
-		[self fullscreen:NO];
-	}
-
-	if(sender == kKeepAspectCmd)
-	{
-		vo_keepaspect = !vo_keepaspect;
-		if(vo_keepaspect)
-			[kKeepAspectCmd setState:NSOnState];
-		else
-			[kKeepAspectCmd setState:NSOffState];
-
-		[self reshape];
-	}
-
-	if(sender == kPanScanCmd)
-	{
-		vo_panscan = !vo_panscan;
-		if(vo_panscan)
-			[kPanScanCmd setState:NSOnState];
-		else
-			[kPanScanCmd setState:NSOffState];
-
-		[self panscan];
-	}
-
-	if(sender == kAspectOrgCmd)
-		change_movie_aspect(-1);
-
-	if(sender == kAspectFullCmd)
-		change_movie_aspect(4.0f/3.0f);
-
-	if(sender == kAspectWideCmd)
-		change_movie_aspect(16.0f/9.0f);
-}
-
-/*
-	Setup OpenGL
-*/
-- (void)prepareOpenGL
-{
-	glEnable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-	glDepthMask(GL_FALSE);
-	glDisable(GL_CULL_FACE);
-	[self reshape];
-}
-
-/*
-	reshape OpenGL viewport
-*/
-- (void)reshape
-{
-	int d_width, d_height;
-
-	NSRect frame = [self frame];
-	vo_dwidth  = frame.size.width;
-	vo_dheight = frame.size.height;
-
-	glViewport(0, 0, frame.size.width, frame.size.height);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, frame.size.width, frame.size.height, 0, -1.0, 1.0);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	//set texture frame
-	if(vo_keepaspect)
-	{
-		aspect(&d_width, &d_height, A_WINZOOM);
-
-		textureFrame = NSMakeRect((vo_dwidth - d_width) / 2, (vo_dheight - d_height) / 2, d_width, d_height);
-	}
-	else
-	{
-		textureFrame = frame;
-	}
-}
-
-/*
-	Render frame
-*/
-- (void) render
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	glEnable(CVOpenGLTextureGetTarget(texture));
-	glBindTexture(CVOpenGLTextureGetTarget(texture), CVOpenGLTextureGetName(texture));
-
-	glColor3f(1,1,1);
-	glBegin(GL_QUADS);
-	glTexCoord2f(upperLeft[0], upperLeft[1]); glVertex2i(	textureFrame.origin.x-(vo_panscan_x >> 1), textureFrame.origin.y-(vo_panscan_y >> 1));
-	glTexCoord2f(lowerLeft[0], lowerLeft[1]); glVertex2i(textureFrame.origin.x-(vo_panscan_x >> 1), NSMaxY(textureFrame)+(vo_panscan_y >> 1));
-	glTexCoord2f(lowerRight[0], lowerRight[1]); glVertex2i(NSMaxX(textureFrame)+(vo_panscan_x >> 1), NSMaxY(textureFrame)+(vo_panscan_y >> 1));
-	glTexCoord2f(upperRight[0], upperRight[1]); glVertex2i(NSMaxX(textureFrame)+(vo_panscan_x >> 1), textureFrame.origin.y-(vo_panscan_y >> 1));
-	glEnd();
-	glDisable(CVOpenGLTextureGetTarget(texture));
-
-	//render resize box
-	if(!isFullscreen)
-	{
-		NSRect frame = [self frame];
-
-		glBegin(GL_LINES);
-		glColor4f(0.2, 0.2, 0.2, 0.5);
-		glVertex2i(frame.size.width-1, frame.size.height-1); glVertex2i(frame.size.width-1, frame.size.height-1);
-		glVertex2i(frame.size.width-1, frame.size.height-5); glVertex2i(frame.size.width-5, frame.size.height-1);
-		glVertex2i(frame.size.width-1, frame.size.height-9); glVertex2i(frame.size.width-9, frame.size.height-1);
-
-		glColor4f(0.4, 0.4, 0.4, 0.5);
-		glVertex2i(frame.size.width-1, frame.size.height-2); glVertex2i(frame.size.width-2, frame.size.height-1);
-		glVertex2i(frame.size.width-1, frame.size.height-6); glVertex2i(frame.size.width-6, frame.size.height-1);
-		glVertex2i(frame.size.width-1, frame.size.height-10); glVertex2i(frame.size.width-10, frame.size.height-1);
-
-		glColor4f(0.6, 0.6, 0.6, 0.5);
-		glVertex2i(frame.size.width-1, frame.size.height-3); glVertex2i(frame.size.width-3, frame.size.height-1);
-		glVertex2i(frame.size.width-1, frame.size.height-7); glVertex2i(frame.size.width-7, frame.size.height-1);
-		glVertex2i(frame.size.width-1, frame.size.height-11); glVertex2i(frame.size.width-11, frame.size.height-1);
-		glEnd();
-	}
-
-	glFlush();
-}
-
-/*
-	Create OpenGL texture from current frame & set texco
-*/
-- (void) setCurrentTexture
-{
-	CVReturn error = kCVReturnSuccess;
-
-	CVOpenGLTextureRelease(texture);
-	error = CVOpenGLTextureCacheCreateTextureFromImage(NULL, textureCache, frameBuffers[image_page], 0, &texture);
-	if(error != kCVReturnSuccess)
-		mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL texture(%d)\n", error);
-
-    CVOpenGLTextureGetCleanTexCoords(texture, lowerLeft, lowerRight, upperRight, upperLeft);
-}
-
-/*
-	redraw win rect
-*/
-- (void) drawRect: (NSRect *) bounds
-{
-	[self render];
-}
-
-/*
-	Toggle Fullscreen
-*/
-- (void) fullscreen: (BOOL) animate
-{
-	static NSRect old_frame;
-	static NSRect old_view_frame;
-
-	panscan_calc();
-
-	//go fullscreen
-	if(vo_fs)
-	{
-		if(!isRootwin)
-		{
-			SetSystemUIMode( kUIModeAllHidden, kUIOptionAutoShowMenuBar);
-			CGDisplayHideCursor(kCGDirectMainDisplay);
-			mouseHide = YES;
-		}
-
-		old_frame = [window frame];	//save main window size & position
-		update_screen_info();
-
-		[window setFrame:screen_frame display:YES animate:animate]; //zoom-in window with nice useless sfx
-		old_view_frame = [self bounds];
-
-		//fix origin for multi screen setup
-		screen_frame.origin.x = 0;
-		screen_frame.origin.y = 0;
-		[self setFrame:screen_frame];
-		[self setNeedsDisplay:YES];
-		[window setHasShadow:NO];
-		isFullscreen = 1;
-	}
-	else
-	{
-		SetSystemUIMode( kUIModeNormal, 0);
-
-		isFullscreen = 0;
-		CGDisplayShowCursor(kCGDirectMainDisplay);
-		mouseHide = NO;
-
-		//revert window to previous setting
-		[self setFrame:old_view_frame];
-		[self setNeedsDisplay:YES];
-		[window setHasShadow:YES];
-		[window setFrame:old_frame display:YES animate:animate];//zoom-out window with nice useless sfx
-	}
-}
-
-/*
-	Toggle ontop
-*/
-- (void) ontop
-{
-	if(vo_ontop)
-	{
-		[window setLevel:NSScreenSaverWindowLevel];
-		isOntop = YES;
-	}
-	else
-	{
-		[window setLevel:NSNormalWindowLevel];
-		isOntop = NO;
-	}
-}
-
-/*
-	Toggle panscan
-*/
-- (void) panscan
-{
-	panscan_calc();
-}
-
-/*
-	Toggle rootwin
- */
-- (void) rootwin
-{
-	if(vo_rootwin)
-	{
-		[window setLevel:CGWindowLevelForKey(kCGDesktopWindowLevelKey)];
-		[window orderBack:self];
-		isRootwin = YES;
-	}
-	else
-	{
-		[window setLevel:NSNormalWindowLevel];
-		isRootwin = NO;
-	}
-}
-
-/*
-	Check event for new event
-*/
-- (void) check_events
-{
-	NSEvent *event;
-	int curTime = TickCount()/60;
-
-	//automatically hide mouse cursor (and future on-screen control?)
-	if(isFullscreen && !mouseHide && !isRootwin)
-	{
-		if(curTime - lastMouseHide >= 5 || lastMouseHide == 0)
-		{
-			CGDisplayHideCursor(kCGDirectMainDisplay);
-			mouseHide = TRUE;
-			lastMouseHide = curTime;
-		}
-	}
-
-	//update activity every 30 seconds to prevent
-	//screensaver from starting up.
-	if(curTime - lastScreensaverUpdate >= 30 || lastScreensaverUpdate == 0)
-	{
-		UpdateSystemActivity(UsrActivity);
-		lastScreensaverUpdate = curTime;
-	}
-
-	event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSEventTrackingRunLoopMode dequeue:YES];
-	if (event == nil)
-		return;
-	[NSApp sendEvent:event];
-	// Without SDL's bootstrap code (include SDL.h in mplayer.c),
-	// on Leopard, we have trouble to get the play window automatically focused
-	// when the app is actived. The Following code fix this problem.
-#ifndef CONFIG_SDL
-	if (isLeopardOrLater && [event type] == NSAppKitDefined
-			&& [event subtype] == NSApplicationActivatedEventType) {
-		[window makeMainWindow];
-		[window makeKeyAndOrderFront:mpGLView];
-	}
-#endif
-}
-
-/*
-	From NSView, respond to key equivalents.
-*/
-- (BOOL)performKeyEquivalent:(NSEvent *)theEvent
-{
-	switch([theEvent keyCode])
-	{
-		case 0x21: [window setAlphaValue: winAlpha-=0.05]; return YES;
-		case 0x1e: [window setAlphaValue: winAlpha+=0.05]; return YES;
-	}
-	return NO;
-}
-
-/*
-	Process key event
-*/
-- (void) keyDown: (NSEvent *) theEvent
-{
-	unsigned char charcode;
-	if (([theEvent modifierFlags] & NSRightAlternateKeyMask) == NSRightAlternateKeyMask)
-		charcode = *[[theEvent characters] UTF8String];
-	else
-		charcode = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
-
-	int key = convert_key([theEvent keyCode], charcode);
-
-	if (key > -1) {
-		if([theEvent modifierFlags] & NSShiftKeyMask)
-			key |= KEY_MODIFIER_SHIFT;
-		if([theEvent modifierFlags] & NSControlKeyMask)
-			key |= KEY_MODIFIER_CTRL;
-		if(([theEvent modifierFlags] & NSLeftAlternateKeyMask) == NSLeftAlternateKeyMask)
-			key |= KEY_MODIFIER_ALT;
-		if([theEvent modifierFlags] & NSCommandKeyMask)
-			key |= KEY_MODIFIER_META;
-		mplayer_put_key(key);
-	}
-}
-
-/*
-	Process mouse button event
-*/
-- (void) mouseMoved: (NSEvent *) theEvent
-{
-	if(isFullscreen && !isRootwin)
-	{
-		CGDisplayShowCursor(kCGDirectMainDisplay);
-		mouseHide = NO;
-	}
-	if (enable_mouse_movements && !isRootwin) {
-		NSPoint p =[self convertPoint:[theEvent locationInWindow] fromView:nil];
-		if ([self mouse:p inRect:textureFrame]) {
-                       vo_mouse_movement(global_vo, vo_fs ? p.x : p.x - textureFrame.origin.x,
-			                  vo_fs ? [self frame].size.height - p.y : NSMaxY(textureFrame) - p.y);
-		}
-	}
-}
-
-- (void) mouseDown: (NSEvent *) theEvent
-{
-	[self mouseEvent: theEvent];
-}
-
-- (void) mouseUp: (NSEvent *) theEvent
-{
-	[self mouseEvent: theEvent];
-}
-
-- (void) rightMouseDown: (NSEvent *) theEvent
-{
-	[self mouseEvent: theEvent];
-}
-
-- (void) rightMouseUp: (NSEvent *) theEvent
-{
-	[self mouseEvent: theEvent];
-}
-
-- (void) otherMouseDown: (NSEvent *) theEvent
-{
-	[self mouseEvent: theEvent];
-}
-
-- (void) otherMouseUp: (NSEvent *) theEvent
-{
-	[self mouseEvent: theEvent];
-}
-
-- (void) scrollWheel: (NSEvent *) theEvent
-{
-	if([theEvent deltaY] > 0)
-		mplayer_put_key(MOUSE_BTN3);
-	else
-		mplayer_put_key(MOUSE_BTN4);
-}
-
-- (void) mouseEvent: (NSEvent *) theEvent
-{
-	if ( [theEvent buttonNumber] >= 0 && [theEvent buttonNumber] <= 9 )
-	{
-		int buttonNumber = [theEvent buttonNumber];
-		// Fix to mplayer defined button order: left, middle, right
-		if (buttonNumber == 1)
-			buttonNumber = 2;
-		else if (buttonNumber == 2)
-			buttonNumber = 1;
-		switch([theEvent type])
-		{
-			case NSLeftMouseDown:
-			case NSRightMouseDown:
-			case NSOtherMouseDown:
-				mplayer_put_key((MOUSE_BTN0 + buttonNumber) | MP_KEY_DOWN);
-				break;
-			case NSLeftMouseUp:
-			case NSRightMouseUp:
-			case NSOtherMouseUp:
-				mplayer_put_key(MOUSE_BTN0 + buttonNumber);
-				break;
-		}
-	}
-}
-
-/*
-	NSResponder
-*/
-- (BOOL) acceptsFirstResponder
-{
-	return YES;
-}
-
-- (BOOL) becomeFirstResponder
-{
-	return YES;
-}
-
-- (BOOL) resignFirstResponder
-{
-	return YES;
-}
-
-- (BOOL)windowShouldClose:(id)sender
-{
-	mplayer_put_key(KEY_CLOSE_WIN);
-	// We have to wait for MPlayer to handle this,
-	// otherwise we are in trouble if the
-	// KEY_CLOSE_WIN handler is disabled
-	return NO;
-}
-
-- (void)handleQuitEvent:(NSAppleEventDescriptor*)e withReplyEvent:(NSAppleEventDescriptor*)r
-{
-	mplayer_put_key(KEY_CLOSE_WIN);
-}
-@end

@@ -31,6 +31,16 @@
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
+// No proper file descriptor event handling; keep waking up to poll input
+#define WAKEUP_PERIOD 0.02
+#else
+/* Even if we can immediately wake up in response to most input events,
+ * there are some timers which are not registered to the event loop
+ * and need to be checked periodically (like automatic mouse cursor hiding).
+ * OSD content updates behave similarly. Also some uncommon input devices
+ * may not have proper FD event support.
+ */
+#define WAKEUP_PERIOD 0.5
 #endif
 #include <string.h>
 #include <unistd.h>
@@ -1766,8 +1776,10 @@ void reinit_audio_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     struct ao *ao;
-    if (!mpctx->sh_audio)
+    if (!mpctx->sh_audio) {
+        uninit_player(mpctx, INITIALIZED_AO);
         return;
+    }
     if (!(mpctx->initialized_flags & INITIALIZED_ACODEC)) {
         current_module = "init_audio_codec";
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "==========================================================================\n");
@@ -2621,11 +2633,10 @@ int reinit_video_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     sh_video_t * const sh_video = mpctx->sh_video;
-    if (!sh_video){
+    if (!sh_video) {
         uninit_player(mpctx, INITIALIZED_VO);
         return 0;
     }
-
     double ar = -1.0;
     //================== Init VIDEO (codec & libvo) ==========================
     if (!opts->fixed_vo || !(mpctx->initialized_flags & INITIALIZED_VO)) {
@@ -2717,6 +2728,8 @@ int reinit_video_chain(struct MPContext *mpctx)
     sh_video->last_pts = MP_NOPTS_VALUE;
     sh_video->num_buffered_pts = 0;
     sh_video->next_frame_time = 0;
+    mpctx->restart_playback = true;
+    mpctx->delay = 0;
 
     if (opts->auto_quality > 0) {
         // Auto quality option enabled
@@ -3424,7 +3437,7 @@ static void run_playloop(struct MPContext *mpctx)
     bool audio_left = false, video_left = false;
     double endpts = end_at.type == END_AT_TIME ? end_at.pos : MP_NOPTS_VALUE;
     bool end_is_chapter = false;
-    double sleeptime = 0.5;
+    double sleeptime = WAKEUP_PERIOD;
     bool was_restart = mpctx->restart_playback;
 
     if (mpctx->timeline) {
@@ -4256,17 +4269,13 @@ play_next_file:
         mp_msg(MSGT_CPLAYER, MSGL_DBG2, "\n[[[init getch2]]]\n");
     }
 
-    // ================= GUI idle loop (STOP state) =========================
+    // ================= idle loop (STOP state) =========================
     while (opts->player_idle_mode && !mpctx->filename) {
+        uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_VO);
         play_tree_t *entry = NULL;
         mp_cmd_t *cmd;
-        if (mpctx->video_out && mpctx->video_out->config_ok)
-            vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
-        while (!(cmd = mp_input_get_cmd(mpctx->input, 0, 0))) {
-            if (mpctx->video_out)
-                vo_check_events(mpctx->video_out);
-            usec_sleep(20000);
-        }
+        while (!(cmd = mp_input_get_cmd(mpctx->input, WAKEUP_PERIOD * 1000,
+                                        false)));
         switch (cmd->id) {
         case MP_CMD_LOADFILE:
             // prepare a tree entry with the new filename
@@ -4853,7 +4862,6 @@ goto_enable_cache:
             mixer_setvolume(&mpctx->mixer, start_volume, start_volume);
         if (!ignore_start)
             audio_delay -= mpctx->sh_audio->stream_delay;
-        mpctx->delay = -audio_delay;
     }
 
     if (!mpctx->sh_audio) {

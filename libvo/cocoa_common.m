@@ -21,6 +21,8 @@
 #import <OpenGL/OpenGL.h>
 #import <QuartzCore/QuartzCore.h>
 #import <CoreServices/CoreServices.h> // for CGDisplayHideCursor and Gestalt
+#include <dlfcn.h>
+
 #include "cocoa_common.h"
 
 #include "options.h"
@@ -66,6 +68,7 @@ struct vo_cocoa_state {
     NSAutoreleasePool *pool;
     GLMPlayerWindow *window;
     NSOpenGLContext *glContext;
+    NSOpenGLPixelFormat *pixelFormat;
 
     NSSize current_video_size;
     NSSize previous_video_size;
@@ -125,6 +128,24 @@ struct vo_cocoa_state *vo_cocoa_init_state(void)
     return s;
 }
 
+bool vo_cocoa_gui_running(void)
+{
+    return !!s;
+}
+
+void *vo_cocoa_glgetaddr(const char *s)
+{
+    void *ret = NULL;
+    void *handle = dlopen(
+        "/System/Library/Frameworks/OpenGL.framework/OpenGL",
+        RTLD_LAZY | RTLD_LOCAL);
+    if (!handle)
+        return NULL;
+    ret = dlsym(handle, s);
+    dlclose(handle);
+    return ret;
+}
+
 int vo_cocoa_init(struct vo *vo)
 {
     s = vo_cocoa_init_state();
@@ -140,6 +161,8 @@ int vo_cocoa_init(struct vo *vo)
 void vo_cocoa_uninit(struct vo *vo)
 {
     CGDisplayShowCursor(kCGDirectMainDisplay);
+    [NSApp setPresentationOptions:NSApplicationPresentationDefault];
+
     [s->window release];
     s->window = nil;
     [s->glContext release];
@@ -148,6 +171,7 @@ void vo_cocoa_uninit(struct vo *vo)
     s->pool = nil;
 
     talloc_free(s);
+    s = nil;
 }
 
 void update_screen_info(void)
@@ -232,8 +256,8 @@ int vo_cocoa_create_window(struct vo *vo, uint32_t d_width,
         attr[i++] = (NSOpenGLPixelFormatAttribute)16; // 16 bit depth buffer
         attr[i] = (NSOpenGLPixelFormatAttribute)0;
 
-        NSOpenGLPixelFormat *pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:attr];
-        s->glContext = [[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil];
+        s->pixelFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes:attr] autorelease];
+        s->glContext = [[NSOpenGLContext alloc] initWithFormat:s->pixelFormat shareContext:nil];
 
         create_menu();
 
@@ -363,6 +387,16 @@ int vo_cocoa_swap_interval(int enabled)
 {
     [s->glContext setValues:&enabled forParameter:NSOpenGLCPSwapInterval];
     return 0;
+}
+
+void *vo_cocoa_cgl_context(void)
+{
+    return [s->glContext CGLContextObj];
+}
+
+void *vo_cocoa_cgl_pixel_format(void)
+{
+    return [s->pixelFormat CGLPixelFormatObj];
 }
 
 void create_menu()
@@ -565,18 +599,19 @@ bool is_lion_or_better(void)
 - (void) applicationWillBecomeActive:(NSNotification *)aNotification
 {
     if (vo_fs) {
+        [s->window makeKeyAndOrderFront:s->window];
         [s->window setLevel:s->fullscreen_window_level];
-        [NSApp setPresentationOptions:NSApplicationPresentationHideDock|NSApplicationPresentationHideMenuBar];
-        [s->window makeKeyAndOrderFront:nil];
-        [NSApp activateIgnoringOtherApps: YES];
+        [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
+                                      NSApplicationPresentationHideMenuBar];
     }
 }
 
 - (void) applicationWillResignActive:(NSNotification *)aNotification
 {
     if (vo_fs) {
-        [s->window setLevel:s->windowed_window_level];
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
+        [s->window setLevel:s->windowed_window_level];
+        [s->window orderBack:s->window];
     }
 }
 

@@ -22,6 +22,9 @@
 
 #include "video_out.h"
 
+bool vo_cocoa_gui_running(void);
+void *vo_cocoa_glgetaddr(const char *s);
+
 int vo_cocoa_init(struct vo *vo);
 void vo_cocoa_uninit(struct vo *vo);
 
@@ -39,5 +42,8 @@ void vo_cocoa_ontop(struct vo *vo);
 
 // returns an int to conform to the gl extensions from other platforms
 int vo_cocoa_swap_interval(int enabled);
+
+void *vo_cocoa_cgl_context(void);
+void *vo_cocoa_cgl_pixel_format(void);
 
 #endif /* MPLAYER_COCOA_COMMON_H */

@@ -330,6 +330,7 @@ static const extfunc_desc_t extfuncs[] = {
     DEF_FUNC_DESC(Color4ub),
     DEF_FUNC_DESC(Color4f),
     DEF_FUNC_DESC(TexCoord2f),
+    DEF_FUNC_DESC(TexCoord2fv),
     DEF_FUNC_DESC(Vertex2f),
     DEF_FUNC_DESC(VertexPointer),
     DEF_FUNC_DESC(ColorPointer),
@@ -1725,14 +1726,14 @@ static int create_window_cocoa_gl3(struct MPGLContext *ctx, int gl_flags,
                                  uint32_t d_height, uint32_t flags)
 {
     int rv = vo_cocoa_create_window(ctx->vo, d_width, d_height, flags, 1);
-    getFunctions(ctx->gl, (void *)getdladdr, NULL, true);
+    getFunctions(ctx->gl, (void *)vo_cocoa_glgetaddr, NULL, true);
     return rv;
 }
 
 static int setGlWindow_cocoa(MPGLContext *ctx)
 {
     vo_cocoa_change_attributes(ctx->vo);
-    getFunctions(ctx->gl, (void *)getdladdr, NULL, false);
+    getFunctions(ctx->gl, (void *)vo_cocoa_glgetaddr, NULL, false);
     if (!ctx->gl->SwapInterval)
         ctx->gl->SwapInterval = vo_cocoa_swap_interval;
     return SET_WINDOW_OK;
