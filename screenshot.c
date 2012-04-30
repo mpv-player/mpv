@@ -403,6 +403,7 @@ static char *gen_fname(screenshot_ctx *ctx)
         if (sequence == prev_sequence) {
             mp_msg(MSGT_CPLAYER, MSGL_ERR, "Can't save screenshot, file '%s' "
                    "already exists!\n", fname);
+            talloc_free(fname);
             return NULL;
         }
 
