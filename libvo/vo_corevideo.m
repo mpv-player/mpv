@@ -69,10 +69,9 @@ struct priv {
     struct osd_p *osd;
 };
 
-static struct priv *p;
-
 static void resize(struct vo *vo, int width, int height)
 {
+    struct priv *p = vo->priv;
     GL *gl = p->mpglctx->gl;
     p->image_width = width;
     p->image_height = height;
@@ -110,6 +109,7 @@ static void resize(struct vo *vo, int width, int height)
 
 static int init_gl(struct vo *vo, uint32_t d_width, uint32_t d_height)
 {
+    struct priv *p = vo->priv;
     GL *gl = p->mpglctx->gl;
 
     const char *vendor     = gl->GetString(GL_VENDOR);
@@ -136,7 +136,8 @@ static int init_gl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     return 1;
 }
 
-static void release_cv_entities(void) {
+static void release_cv_entities(struct vo *vo) {
+    struct priv *p = vo->priv;
     CVPixelBufferRelease(p->pixelBuffer);
     p->pixelBuffer = NULL;
     CVOpenGLTextureRelease(p->texture);
@@ -150,7 +151,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t d_width, uint32_t d_height, uint32_t flags,
                   uint32_t format)
 {
-    release_cv_entities();
+    struct priv *p = vo->priv;
+    release_cv_entities(vo);
     p->image_width = width;
     p->image_height = height;
 
@@ -166,6 +168,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
 static void check_events(struct vo *vo)
 {
+    struct priv *p = vo->priv;
     int e = p->mpglctx->check_events(vo);
     if (e & VO_EVENT_RESIZE)
         resize(vo, vo->dwidth, vo->dheight);
@@ -175,6 +178,7 @@ static void create_osd_texture(void *ctx, int x0, int y0, int w, int h,
                                unsigned char *src, unsigned char *srca,
                                int stride)
 {
+    struct priv *p = ((struct vo *) ctx)->priv;
     struct osd_p *osd = p->osd;
     GL *gl = p->mpglctx->gl;
 
@@ -214,6 +218,7 @@ static void create_osd_texture(void *ctx, int x0, int y0, int w, int h,
 
 static void clearOSD(struct vo *vo)
 {
+    struct priv *p = vo->priv;
     struct osd_p *osd = p->osd;
     GL *gl = p->mpglctx->gl;
 
@@ -225,6 +230,7 @@ static void clearOSD(struct vo *vo)
 
 static void draw_osd(struct vo *vo, struct osd_state *osd_s)
 {
+    struct priv *p = vo->priv;
     struct osd_p *osd = p->osd;
     GL *gl = p->mpglctx->gl;
 
@@ -252,10 +258,11 @@ static void draw_osd(struct vo *vo, struct osd_state *osd_s)
     }
 }
 
-static void prepare_texture(void)
+static void prepare_texture(struct vo *vo)
 {
-    CVReturn error;
+    struct priv *p = vo->priv;
     struct quad *q = p->quad;
+    CVReturn error;
 
     CVOpenGLTextureRelease(p->texture);
     error = CVOpenGLTextureCacheCreateTextureFromImage(NULL,
@@ -270,9 +277,10 @@ static void prepare_texture(void)
 
 static void do_render(struct vo *vo)
 {
+    struct priv *p = vo->priv;
     struct quad *q = p->quad;
     GL *gl = p->mpglctx->gl;
-    prepare_texture();
+    prepare_texture(vo);
 
     float x0 = 0;
     float y0 = 0;
@@ -303,12 +311,14 @@ static void do_render(struct vo *vo)
 
 static void flip_page(struct vo *vo)
 {
+    struct priv *p = vo->priv;
     p->mpglctx->swapGlBuffers(p->mpglctx);
     p->mpglctx->gl->Clear(GL_COLOR_BUFFER_BIT);
 }
 
 static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 {
+    struct priv *p = vo->priv;
     CVReturn error;
 
     if (!p->textureCache || !p->pixelBuffer) {
@@ -330,8 +340,9 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
     return VO_TRUE;
 }
 
-static int query_format(uint32_t format)
+static int query_format(struct vo *vo, uint32_t format)
 {
+    struct priv *p = vo->priv;
     const int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
                       VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN |
                       VOCAP_NOSLICES;
@@ -357,27 +368,16 @@ static int query_format(uint32_t format)
 
 static void uninit(struct vo *vo)
 {
+    struct priv *p = vo->priv;
     uninit_mpglcontext(p->mpglctx);
-    release_cv_entities();
-    talloc_free(p);
+    release_cv_entities(vo);
 }
 
 
 static int preinit(struct vo *vo, const char *arg)
 {
-    const opt_t subopts[] = {
-        {NULL}
-    };
+    struct priv *p = vo->priv;
 
-    if (subopt_parse(arg, subopts) != 0) {
-        mp_msg(MSGT_VO, MSGL_FATAL,
-                "\n-vo corevideo command line help:\n"
-                "Example: mplayer -vo corevideo\n"
-                "\n" );
-        return -1;
-    }
-
-    p = talloc_ptrtype(NULL, p);
     *p = (struct priv) {
         .mpglctx = init_mpglcontext(GLTYPE_COCOA, vo),
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
@@ -392,8 +392,9 @@ static int preinit(struct vo *vo, const char *arg)
     return 0;
 }
 
-static CFStringRef get_cv_csp_matrix(void)
+static CFStringRef get_cv_csp_matrix(struct vo *vo)
 {
+    struct priv *p = vo->priv;
     switch (p->colorspace.format) {
         case MP_CSP_BT_601:
             return kCVImageBufferYCbCrMatrix_ITU_R_601_4;
@@ -407,19 +408,21 @@ static CFStringRef get_cv_csp_matrix(void)
 
 static void set_yuv_colorspace(struct vo *vo)
 {
+    struct priv *p = vo->priv;
     CVBufferSetAttachment(p->pixelBuffer,
-                          kCVImageBufferYCbCrMatrixKey, get_cv_csp_matrix(),
+                          kCVImageBufferYCbCrMatrixKey, get_cv_csp_matrix(vo),
                           kCVAttachmentMode_ShouldPropagate);
     vo->want_redraw = true;
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
+    struct priv *p = vo->priv;
     switch (request) {
         case VOCTRL_DRAW_IMAGE:
             return draw_image(vo, data);
         case VOCTRL_QUERY_FORMAT:
-            return query_format(*(uint32_t*)data);
+            return query_format(vo, *(uint32_t*)data);
         case VOCTRL_ONTOP:
             p->mpglctx->ontop(vo);
             return VO_TRUE;
@@ -464,4 +467,5 @@ const struct vo_driver video_out_corevideo = {
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,
+    .privsize = sizeof(struct priv),
 };
