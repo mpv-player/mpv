@@ -186,7 +186,7 @@ static int init(struct ao *ao, char *params)
     ao->priv = priv;
 
     if (params) {
-        devarg = strdup(ao_subdevice);
+        devarg = strdup(params);
         sink = strchr(devarg, ':');
         if (sink)
             *sink++ = 0;
