@@ -3968,12 +3968,11 @@ echocheck "VDPAU"
 if test "$_vdpau" = auto && test "$_x11" = yes ; then
   _vdpau=no
   if test "$_dl" = yes ; then
-    return_statement_check vdpau/vdpau_x11.h 'vdp_device_create_x11(0, 0, 0, 0)' VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 -lvdpau && _vdpau=yes
+    pkg_config_add 'vdpau >= 0.2' && _vdpau=yes
   fi
 fi
 if test "$_vdpau" = yes ; then
   def_vdpau='#define CONFIG_VDPAU 1'
-  libs_mplayer="$libs_mplayer -lvdpau"
   vomodules="vdpau $vomodules"
 else
   def_vdpau='#define CONFIG_VDPAU 0'
@@ -5002,11 +5001,10 @@ echores "$_vcd"
 echocheck "Blu-ray support"
 if test "$_bluray" = auto ; then
   _bluray=no
-  statement_check libbluray/bluray.h 'bd_get_title_info(0, 0, 0)' -lbluray && _bluray=yes
+  pkg_config_add 'libbluray >= 0.2.1' && _bluray=yes
 fi
 if test "$_bluray" = yes ; then
   def_bluray='#define CONFIG_LIBBLURAY 1'
-  extra_ldflags="$extra_ldflags -lbluray"
   inputmodules="bluray $inputmodules"
 else
   def_bluray='#undef CONFIG_LIBBLURAY'
@@ -5333,7 +5331,7 @@ echocheck "mpg123 support"
 def_mpg123='#undef CONFIG_MPG123'
 if test "$_mpg123" = auto; then
   _mpg123=no
-  statement_check mpg123.h 'mpg123_init()' -lmpg123 && _mpg123=yes && extra_ldflags="$extra_ldflags -lmpg123"
+  pkg_config_add libmpg123 && _mpg123=yes
 fi
 if test "$_mpg123" = yes ; then
   def_mpg123='#define CONFIG_MPG123 1'
