@@ -209,7 +209,6 @@ dragonfly() { issystem "DragonFly"; }
 freebsd()   { issystem "FreeBSD" || issystem "GNU/kFreeBSD"; }
 gnu()       { issystem "GNU"; }
 hpux()      { issystem "HP-UX"; }
-irix()      { issystem "IRIX"; }
 linux()     { issystem "Linux"; }
 mingw32()   { issystem "MINGW32"; }
 morphos()   { issystem "MorphOS"; }
@@ -447,7 +446,6 @@ Audio output:
   --disable-jack         disable JACK audio output [autodetect]
   --enable-openal        enable OpenAL audio output [disable]
   --disable-nas          disable NAS audio output [autodetect]
-  --disable-sgiaudio     disable SGI audio output [autodetect]
   --disable-sunaudio     disable Sun audio output [autodetect]
   --disable-win32waveout disable Windows waveout audio output [autodetect]
   --disable-coreaudio    disable CoreAudio audio output [autodetect]
@@ -637,7 +635,6 @@ _mga=auto
 _xmga=auto
 _vm=auto
 _xf86keysym=auto
-_sgiaudio=auto
 _sunaudio=auto
 _alsa=auto
 _fastmemcpy=yes
@@ -992,8 +989,6 @@ for ac_option do
   --disable-xf86keysym) _xf86keysym=no  ;;
   --enable-sunaudio)    _sunaudio=yes   ;;
   --disable-sunaudio)   _sunaudio=no    ;;
-  --enable-sgiaudio)    _sgiaudio=yes   ;;
-  --disable-sgiaudio)   _sgiaudio=no    ;;
   --enable-alsa)        _alsa=yes       ;;
   --disable-alsa)       _alsa=no        ;;
   --enable-tv)          _tv=yes         ;;
@@ -1254,9 +1249,6 @@ if test -z "$_target" ; then
   Haiku)
     system_name=BeOS
     ;;
-  IRIX*)
-    system_name=IRIX
-    ;;
   GNU/kFreeBSD)
     system_name=FreeBSD
     ;;
@@ -1365,9 +1357,7 @@ if aix ; then
   extra_ldflags="$extra_ldflags -lC"
 fi
 
-if irix ; then
-  _ranlib='ar -r'
-elif linux ; then
+if linux ; then
   _ranlib='true'
 fi
 
@@ -2168,24 +2158,6 @@ EOF
   mips*)
     arch='mips'
     iproc='mips'
-
-    if irix ; then
-        echocheck "CPU type"
-        proc=$(hinv -c processor | grep CPU | cut -d " " -f3)
-        case "$(echo $proc)" in
-            R3000) _march='-mips1' _mcpu='-mtune=r2000' ;;
-            R4000) _march='-mips3' _mcpu='-mtune=r4000' ;;
-            R4400) _march='-mips3' _mcpu='-mtune=r4400' ;;
-            R4600) _march='-mips3' _mcpu='-mtune=r4600' ;;
-            R5000) _march='-mips4' _mcpu='-mtune=r5000' ;;
-            R8000|R10000|R12000|R14000|R16000) _march='-mips4' _mcpu='-mtune=r8000' ;;
-        esac
-        # gcc < 3.x does not support -mtune.
-        if test "$cc_vendor" = "gnu" && test "$_cc_major" -lt 3 ; then
-            _mcpu=''
-        fi
-        echores "$proc"
-    fi
 
     test $_fast_clz = "auto" && _fast_clz=yes
 
@@ -4274,11 +4246,6 @@ fi
 echocheck "PNG support"
 if test "$_png" = auto ; then
   _png=no
-  if irix ; then
-    # Don't check for -lpng on irix since it has its own libpng
-    # incompatible with the GNU libpng
-    res_comment="disabled on irix (not GNU libpng)"
-  else
 cat > $TMPC << EOF
 #include <stdio.h>
 #include <string.h>
@@ -4289,8 +4256,7 @@ int main(void) {
   return strcmp(PNG_LIBPNG_VER_STRING, png_libpng_ver);
 }
 EOF
-    cc_check -lpng -lz $_ld_lm && _png=yes
-  fi
+  cc_check -lpng -lz $_ld_lm && _png=yes
 fi
 echores "$_png"
 if test "$_png" = yes ; then
@@ -5032,24 +4998,6 @@ else
 fi
 echores $_coreaudio
 fi #if darwin
-
-
-if irix; then
-echocheck "SGI audio"
-if test "$_sgiaudio" = auto ; then
-  _sgiaudio=no
-  header_check dmedia/audio.h && _sgiaudio=yes
-fi
-if test "$_sgiaudio" = "yes" ; then
-  def_sgiaudio='#define CONFIG_SGI_AUDIO 1'
-  libs_mplayer="$libs_mplayer -laudio"
-  aomodules="sgi $aomodules"
-else
-  def_sgiaudio='#undef CONFIG_SGI_AUDIO'
-  noaomodules="sgi $noaomodules"
-fi
-echores "$_sgiaudio"
-fi #if irix
 
 
 # set default CD/DVD devices
@@ -6472,7 +6420,6 @@ S3FB = $_s3fb
 SDL = $_sdl
 SPEEX = $_speex
 STREAM_CACHE = $_stream_cache
-SGIAUDIO = $_sgiaudio
 SUNAUDIO = $_sunaudio
 SVGA = $_svga
 TDFXFB = $_tdfxfb
@@ -6739,7 +6686,6 @@ $def_ossaudio_devmixer
 $def_pulse
 $def_portaudio
 $def_rsound
-$def_sgiaudio
 $def_sunaudio
 $def_win32waveout
 

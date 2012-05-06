@@ -86,9 +86,6 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #ifdef CONFIG_PORTAUDIO
     &audio_out_portaudio,
 #endif
-#ifdef CONFIG_SGI_AUDIO
-    &audio_out_sgi,
-#endif
 #ifdef CONFIG_SUN_AUDIO
     &audio_out_sun,
 #endif
