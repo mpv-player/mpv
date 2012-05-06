@@ -90,12 +90,6 @@ static const struct ao_driver * const audio_out_drivers[] = {
     &audio_out_sun,
 #endif
     // wrappers:
-#ifdef CONFIG_ARTS
-    &audio_out_arts,
-#endif
-#ifdef CONFIG_ESD
-    &audio_out_esd,
-#endif
 #ifdef CONFIG_JACK
     &audio_out_jack,
 #endif
