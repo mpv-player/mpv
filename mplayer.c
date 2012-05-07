@@ -149,12 +149,6 @@ char *heartbeat_cmd;
 //             Config file
 //**************************************************************************//
 
-static int cfg_inc_verbose(m_option_t *conf)
-{
-    ++verbose;
-    return 0;
-}
-
 #include "path.h"
 
 //**************************************************************************//
@@ -3952,7 +3946,7 @@ int main(int argc, char *argv[])
     mp_input_register_options(mpctx->mconfig);
 
     // Preparse the command line
-    m_config_preparse_command_line(mpctx->mconfig, argc, argv);
+    m_config_preparse_command_line(mpctx->mconfig, argc, argv, &verbose);
 
 #if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL)
     set_path_env();
