@@ -633,16 +633,16 @@ struct input_ctx {
 
 int async_quit_request;
 
-static int print_key_list(m_option_t *cfg);
-static int print_cmd_list(m_option_t *cfg);
+static int print_key_list(m_option_t *cfg, char *optname, char *optparam);
+static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam);
 
 // Our command line options
 static const m_option_t input_conf[] = {
     OPT_STRING("conf", input.config_file, CONF_GLOBAL),
     OPT_INT("ar-delay", input.ar_delay, CONF_GLOBAL),
     OPT_INT("ar-rate", input.ar_rate, CONF_GLOBAL),
-    { "keylist", print_key_list, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL },
-    { "cmdlist", print_cmd_list, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL },
+    { "keylist", print_key_list, CONF_TYPE_PRINT_FUNC, CONF_NOCFG },
+    { "cmdlist", print_cmd_list, CONF_TYPE_PRINT_FUNC, CONF_NOCFG },
     OPT_STRING("js-dev", input.js_dev, CONF_GLOBAL),
     OPT_STRING("ar-dev", input.ar_dev, CONF_GLOBAL),
     OPT_STRING("file", input.in_file, CONF_GLOBAL),
@@ -1897,16 +1897,16 @@ void mp_input_register_options(m_config_t *cfg)
     m_config_register_options(cfg, mp_input_opts);
 }
 
-static int print_key_list(m_option_t *cfg)
+static int print_key_list(m_option_t *cfg, char *optname, char *optparam)
 {
     int i;
     printf("\n");
     for (i = 0; key_names[i].name != NULL; i++)
         printf("%s\n", key_names[i].name);
-    exit(0);
+    return M_OPT_EXIT;
 }
 
-static int print_cmd_list(m_option_t *cfg)
+static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam)
 {
     const mp_cmd_t *cmd;
     int i, j;
@@ -1935,7 +1935,7 @@ static int print_cmd_list(m_option_t *cfg)
         }
         printf("\n");
     }
-    exit(0);
+    return M_OPT_EXIT;
 }
 
 void mp_input_wakeup(struct input_ctx *ictx)
