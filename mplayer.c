@@ -857,9 +857,9 @@ static void exit_sighandler(int x)
 
 #include "cfg-mplayer.h"
 
-static int cfg_include(m_option_t *conf, char *filename)
+static int cfg_include(struct m_config *conf, char *filename)
 {
-    return m_config_parse_config_file(conf->priv, filename);
+    return m_config_parse_config_file(conf, filename);
 }
 
 #define DEF_CONFIG "# Write your default config options here!\n\n\n"

@@ -55,27 +55,8 @@ extern const m_option_type_t m_option_type_subconfig;
 extern const m_option_type_t m_option_type_imgfmt;
 extern const m_option_type_t m_option_type_afmt;
 
-// Func-based types
-extern const m_option_type_t m_option_type_func_param;
-extern const m_option_type_t m_option_type_func;
-
-// Callback used to reset func options.
-typedef void (*m_opt_default_func_t)(const m_option_t *, const char *);
-
-// Callback used by m_option_type_func_full options.
+// Callback used by m_option_type_print_func options.
 typedef int (*m_opt_func_full_t)(const m_option_t *, const char *, const char *);
-
-// Callback used by m_option_type_func_param options.
-typedef int (*m_opt_func_param_t)(const m_option_t *, const char *);
-
-// Callback used by m_option_type_func options.
-typedef int (*m_opt_func_t)(const m_option_t *);
-
-// Backwards compatibility
-typedef m_opt_default_func_t cfg_default_func_t;
-typedef m_opt_func_full_t cfg_func_arg_param_t;
-typedef m_opt_func_param_t cfg_func_param_t;
-typedef m_opt_func_t cfg_func_t;
 
 #define END_AT_NONE   0
 #define END_AT_TIME   1
@@ -175,8 +156,6 @@ struct m_opt_choice_alternatives {
 #define CONF_TYPE_FLOAT         (&m_option_type_float)
 #define CONF_TYPE_DOUBLE        (&m_option_type_double)
 #define CONF_TYPE_STRING        (&m_option_type_string)
-#define CONF_TYPE_FUNC          (&m_option_type_func)
-#define CONF_TYPE_FUNC_PARAM    (&m_option_type_func_param)
 #define CONF_TYPE_PRINT         (&m_option_type_print)
 #define CONF_TYPE_PRINT_INDIRECT (&m_option_type_print_indirect)
 #define CONF_TYPE_PRINT_FUNC    (&m_option_type_print_func)
@@ -198,8 +177,6 @@ struct m_opt_choice_alternatives {
 // Option type description
 struct m_option_type {
     const char *name;
-    // Syntax description, etc
-    const char *comments;
     // Size needed for the data.
     unsigned int size;
     // See \ref OptionTypeFlags.
@@ -229,35 +206,12 @@ struct m_option_type {
      */
     char *(*print)(const m_option_t *opt, const void *val);
 
-    /** \name
-     *  These functions are called to save/set/restore the status of the
-     *  variables. The difference between the 3 only matters for types like
-     *  \ref m_option_type_func where 'setting' needs to do more than just
-     *  copying some data.
-     */
-    //@{
-
-    // Update a save slot (dst) from the current value in the program (src).
-    /** \param opt The option to copy.
-     *  \param dst Pointer to the destination memory.
-     *  \param src Pointer to the source memory.
-     */
-    void (*save)(const m_option_t *opt, void *dst, const void *src);
-
-    // Set the value in the program (dst) from a save slot.
-    /** \param opt The option to copy.
-     *  \param dst Pointer to the destination memory.
-     *  \param src Pointer to the source memory.
-     */
-    void (*set)(const m_option_t *opt, void *dst, const void *src);
-
-    // Copy the data between two save slots. If NULL and size is > 0 a memcpy will be used.
+    // Copy data between two locations. Deep copy if the data has pointers.
     /** \param opt The option to copy.
      *  \param dst Pointer to the destination memory.
      *  \param src Pointer to the source memory.
      */
     void (*copy)(const m_option_t *opt, void *dst, const void *src);
-    //@}
 
     // Free the data allocated for a save slot.
     /** This is only needed for dynamic types like strings.
@@ -296,7 +250,6 @@ struct m_option {
     // Type dependent data (for all kinds of extended settings).
     /** This used to be a function pointer to hold a 'reverse to defaults' func.
      *  Now it can be used to pass any type of extra args needed by the parser.
-     *  Passing a 'default func' is still valid for all func based option types.
      */
     void *priv;
 
@@ -374,17 +327,6 @@ struct m_option {
  */
 #define M_OPT_TYPE_DYNAMIC              (1 << 2)
 
-// Indirect option type.
-/** If this is set the parse function doesn't directly return
- *  the wanted thing. Options use this if for some reasons they have to wait
- *  until the set call to be able to correctly set the target var.
- *  So for those types new values must first be parsed, then set to the target
- *  var. If this flag isn't set then new values can be parsed directly to the
- *  target var. It's used by the callback-based options as the callback call
- *  may append later on.
- */
-#define M_OPT_TYPE_INDIRECT             (1 << 3)
-
 ///////////////////////////// Parser flags /////////////////////////////////
 
 // On success parsers return the number of arguments consumed: 0 or 1.
@@ -415,13 +357,6 @@ struct m_option {
 /** M_OPT_EXIT must be the lowest number on this list.
  */
 #define M_OPT_EXIT              -6
-
-// These are kept for compatibility with older code.
-//
-#define ERR_NOT_AN_OPTION       M_OPT_UNKNOWN
-#define ERR_MISSING_PARAM       M_OPT_MISSING_PARAM
-#define ERR_OUT_OF_RANGE        M_OPT_OUT_OF_RANGE
-#define ERR_FUNC_ERR            M_OPT_PARSER_ERR
 
 char *m_option_strerror(int code);
 
@@ -465,8 +400,6 @@ static inline void m_option_copy(const m_option_t *opt, void *dst,
 {
     if (opt->type->copy)
         opt->type->copy(opt, dst, src);
-    else if (opt->type->size > 0)
-        memcpy(dst, src, opt->type->size);
 }
 
 // Helper around \ref m_option_type::free.

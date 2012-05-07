@@ -129,16 +129,12 @@ static char *print_flag(const m_option_t *opt, const void *val)
 }
 
 const m_option_type_t m_option_type_flag = {
-    "Flag",
-    "need yes or no in config files",
-    sizeof(int),
-    0,
-    parse_flag,
-    print_flag,
-    copy_opt,
-    copy_opt,
-    NULL,
-    NULL
+    // need yes or no in config files
+    .name  = "Flag",
+    .size  = sizeof(int),
+    .parse = parse_flag,
+    .print = print_flag,
+    .copy  = copy_opt,
 };
 
 // Integer
@@ -209,29 +205,19 @@ static char *print_int(const m_option_t *opt, const void *val)
 }
 
 const m_option_type_t m_option_type_int = {
-    "Integer",
-    "",
-    sizeof(int),
-    0,
-    parse_int,
-    print_int,
-    copy_opt,
-    copy_opt,
-    NULL,
-    NULL
+    .name  = "Integer",
+    .size  = sizeof(int),
+    .parse = parse_int,
+    .print = print_int,
+    .copy  = copy_opt,
 };
 
 const m_option_type_t m_option_type_int64 = {
-    "Integer64",
-    "",
-    sizeof(int64_t),
-    0,
-    parse_int64,
-    print_int,
-    copy_opt,
-    copy_opt,
-    NULL,
-    NULL
+    .name  = "Integer64",
+    .size  = sizeof(int64_t),
+    .parse = parse_int64,
+    .print = print_int,
+    .copy  = copy_opt,
 };
 
 static int parse_intpair(const struct m_option *opt, struct bstr name,
@@ -271,11 +257,10 @@ bad:
 }
 
 const struct m_option_type m_option_type_intpair = {
-    .name = "Int[-Int]",
-    .size = sizeof(int[2]),
+    .name  = "Int[-Int]",
+    .size  = sizeof(int[2]),
     .parse = parse_intpair,
-    .save = copy_opt,
-    .set = copy_opt,
+    .copy  = copy_opt,
 };
 
 static int parse_choice(const struct m_option *opt, struct bstr name,
@@ -315,12 +300,11 @@ static char *print_choice(const m_option_t *opt, const void *val)
 }
 
 const struct m_option_type m_option_type_choice = {
-    .name = "String",  // same as arbitrary strings in option list for now
-    .size = sizeof(int),
+    .name  = "String",  // same as arbitrary strings in option list for now
+    .size  = sizeof(int),
     .parse = parse_choice,
     .print = print_choice,
-    .save = copy_opt,
-    .set = copy_opt,
+    .copy  = copy_opt,
 };
 
 // Float
@@ -391,16 +375,12 @@ static char *print_double(const m_option_t *opt, const void *val)
 }
 
 const m_option_type_t m_option_type_double = {
-    "Double",
-    "double precision floating point number or ratio (numerator[:/]denominator)",
-    sizeof(double),
-    0,
-    parse_double,
-    print_double,
-    copy_opt,
-    copy_opt,
-    NULL,
-    NULL
+    // double precision float or ratio (numerator[:/]denominator)
+    .name  = "Double",
+    .size  = sizeof(double),
+    .parse = parse_double,
+    .print = print_double,
+    .copy  = copy_opt,
 };
 
 #undef VAL
@@ -423,16 +403,12 @@ static char *print_float(const m_option_t *opt, const void *val)
 }
 
 const m_option_type_t m_option_type_float = {
-    "Float",
-    "floating point number or ratio (numerator[:/]denominator)",
-    sizeof(float),
-    0,
-    parse_float,
-    print_float,
-    copy_opt,
-    copy_opt,
-    NULL,
-    NULL
+    // floating point number or ratio (numerator[:/]denominator)
+    .name  = "Float",
+    .size  = sizeof(float),
+    .parse = parse_float,
+    .print = print_float,
+    .copy  = copy_opt,
 };
 
 ///////////// Position
@@ -455,16 +431,12 @@ static char *print_position(const m_option_t *opt, const void *val)
 }
 
 const m_option_type_t m_option_type_position = {
-    "Position",
-    "Integer (off_t)",
-    sizeof(off_t),
-    0,
-    parse_position,
-    print_position,
-    copy_opt,
-    copy_opt,
-    NULL,
-    NULL
+    // Integer (off_t)
+    .name  = "Position",
+    .size  = sizeof(off_t),
+    .parse = parse_position,
+    .print = print_position,
+    .copy  = copy_opt,
 };
 
 
@@ -521,16 +493,13 @@ static void free_str(void *src)
 }
 
 const m_option_type_t m_option_type_string = {
-    "String",
-    "",
-    sizeof(char *),
-    M_OPT_TYPE_DYNAMIC,
-    parse_str,
-    print_str,
-    copy_str,
-    copy_str,
-    copy_str,
-    free_str
+    .name  = "String",
+    .size  = sizeof(char *),
+    .flags = M_OPT_TYPE_DYNAMIC,
+    .parse = parse_str,
+    .print = print_str,
+    .copy  = copy_str,
+    .free  = free_str,
 };
 
 //////////// String list
@@ -788,163 +757,23 @@ static char *print_str_list(const m_option_t *opt, const void *src)
 }
 
 const m_option_type_t m_option_type_string_list = {
-    "String list",
-    "A list of strings separated by ','\n"
-    "Option with a name ending in an * permits using the following suffix: \n"
-    "\t-add: Add the given parameters at the end of the list.\n"
-    "\t-pre: Add the given parameters at the beginning of the list.\n"
-    "\t-del: Remove the entry at the given indices.\n"
-    "\t-clr: Clear the list.\n"
-    "e.g: -vf-add flip,mirror -vf-del 2,5\n",
-    sizeof(char **),
-    M_OPT_TYPE_DYNAMIC | M_OPT_TYPE_ALLOW_WILDCARD,
-    parse_str_list,
-    print_str_list,
-    copy_str_list,
-    copy_str_list,
-    copy_str_list,
-    free_str_list
+    /* A list of strings separated by ','.
+     * Option with a name ending in '*' permits using the following suffixes:
+     *     -add: Add the given parameters at the end of the list.
+     *     -pre: Add the given parameters at the beginning of the list.
+     *     -del: Remove the entry at the given indices.
+     *     -clr: Clear the list.
+     * e.g: -vf-add flip,mirror -vf-del 2,5
+     */
+    .name  = "String list",
+    .size  = sizeof(char **),
+    .flags = M_OPT_TYPE_DYNAMIC | M_OPT_TYPE_ALLOW_WILDCARD,
+    .parse = parse_str_list,
+    .print = print_str_list,
+    .copy  = copy_str_list,
+    .free  = free_str_list,
 };
 
-
-///////////////////  Func based options
-
-// A chained list to save the various calls for func_param
-struct m_func_save {
-    struct m_func_save *next;
-    char *name;
-    char *param;
-};
-
-#undef VAL
-#define VAL(x) (*(struct m_func_save **)(x))
-
-static void free_func_pf(void *src)
-{
-    struct m_func_save *s, *n;
-
-    if (!src)
-        return;
-
-    s = VAL(src);
-
-    while (s) {
-        n = s->next;
-        talloc_free(s->name);
-        talloc_free(s->param);
-        talloc_free(s);
-        s = n;
-    }
-    VAL(src) = NULL;
-}
-
-// Parser for func_param
-static int parse_func_pf(const m_option_t *opt, struct bstr name,
-                         struct bstr param, bool ambiguous_param, void *dst)
-{
-    struct m_func_save *s, *p;
-
-    if (!dst)
-        return 1;
-
-    s = talloc_zero(NULL, struct m_func_save);
-    s->name = bstrdup0(NULL, name);
-    s->param = bstrdup0(NULL, param);
-
-    p = VAL(dst);
-    if (p) {
-        for (; p->next != NULL; p = p->next)
-            /**/;
-        p->next = s;
-    } else
-        VAL(dst) = s;
-
-    return 1;
-}
-
-static void copy_func_pf(const m_option_t *opt, void *dst, const void *src)
-{
-    struct m_func_save *d = NULL, *s, *last = NULL;
-
-    if (!(dst && src))
-        return;
-    s = VAL(src);
-
-    if (VAL(dst))
-        free_func_pf(dst);
-
-    while (s) {
-        d = talloc_zero(NULL, struct m_func_save);
-        d->name = talloc_strdup(NULL, s->name);
-        d->param = talloc_strdup(NULL, s->param);
-        if (last)
-            last->next = d;
-        else
-            VAL(dst) = d;
-        last = d;
-        s = s->next;
-    }
-
-
-}
-
-/////////////////// Func_param
-
-static void set_func_param(const m_option_t *opt, void *dst, const void *src)
-{
-    struct m_func_save *s;
-
-    if (!src)
-        return;
-    s = VAL(src);
-
-    if (!s)
-        return;
-
-    for (; s != NULL; s = s->next)
-        ((m_opt_func_param_t) opt->p)(opt, s->param);
-}
-
-const m_option_type_t m_option_type_func_param = {
-    "Func param",
-    "",
-    sizeof(struct m_func_save *),
-    M_OPT_TYPE_INDIRECT,
-    parse_func_pf,
-    NULL,
-    NULL, // Nothing to do on save
-    set_func_param,
-    copy_func_pf,
-    free_func_pf
-};
-
-/////////////// Func
-
-#undef VAL
-
-static int parse_func(const m_option_t *opt, struct bstr name,
-                      struct bstr param, bool ambiguous_param, void *dst)
-{
-    return 0;
-}
-
-static void set_func(const m_option_t *opt, void *dst, const void *src)
-{
-    ((m_opt_func_t) opt->p)(opt);
-}
-
-const m_option_type_t m_option_type_func = {
-    "Func",
-    "",
-    sizeof(int),
-    M_OPT_TYPE_INDIRECT,
-    parse_func,
-    NULL,
-    NULL, // Nothing to do on save
-    set_func,
-    NULL,
-    NULL
-};
 
 /////////////////// Print
 
@@ -969,42 +798,19 @@ static int parse_print(const m_option_t *opt, struct bstr name,
 }
 
 const m_option_type_t m_option_type_print = {
-    "Print",
-    "",
-    0,
-    0,
-    parse_print,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    .name  = "Print",
+    .parse = parse_print,
 };
 
 const m_option_type_t m_option_type_print_indirect = {
-    "Print",
-    "",
-    0,
-    0,
-    parse_print,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    .name  = "Print",
+    .parse = parse_print,
 };
 
 const m_option_type_t m_option_type_print_func = {
-    "Print",
-    "",
-    0,
-    M_OPT_TYPE_ALLOW_WILDCARD,
-    parse_print,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    .name  = "Print",
+    .flags = M_OPT_TYPE_ALLOW_WILDCARD,
+    .parse = parse_print,
 };
 
 
@@ -1097,16 +903,10 @@ static int parse_subconf(const m_option_t *opt, struct bstr name,
 }
 
 const m_option_type_t m_option_type_subconfig = {
-    "Subconfig",
-    "The syntax is -option opt1=foo:flag:opt2=blah",
-    sizeof(int),
-    M_OPT_TYPE_HAS_CHILD,
-    parse_subconf,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    // The syntax is -option opt1=foo:flag:opt2=blah
+    .name = "Subconfig",
+    .flags = M_OPT_TYPE_HAS_CHILD,
+    .parse = parse_subconf,
 };
 
 #include "libmpcodecs/img_format.h"
@@ -1230,16 +1030,11 @@ static int parse_imgfmt(const m_option_t *opt, struct bstr name,
 }
 
 const m_option_type_t m_option_type_imgfmt = {
-    "Image format",
-    "Please report any missing colorspaces.",
-    sizeof(uint32_t),
-    0,
-    parse_imgfmt,
-    NULL,
-    copy_opt,
-    copy_opt,
-    NULL,
-    NULL
+    // Please report any missing colorspaces
+    .name  = "Image format",
+    .size  = sizeof(uint32_t),
+    .parse = parse_imgfmt,
+    .copy  = copy_opt,
 };
 
 #include "libaf/af_format.h"
@@ -1325,16 +1120,11 @@ static int parse_afmt(const m_option_t *opt, struct bstr name,
 }
 
 const m_option_type_t m_option_type_afmt = {
-    "Audio format",
-    "Please report any missing formats.",
-    sizeof(uint32_t),
-    0,
-    parse_afmt,
-    NULL,
-    copy_opt,
-    copy_opt,
-    NULL,
-    NULL
+    // Please report any missing formats
+    .name  = "Audio format",
+    .size  = sizeof(uint32_t),
+    .parse = parse_afmt,
+    .copy  = copy_opt,
 };
 
 
@@ -1377,16 +1167,11 @@ static int parse_time(const m_option_t *opt, struct bstr name,
 }
 
 const m_option_type_t m_option_type_time = {
-    "Time",
-    "",
-    sizeof(double),
-    0,
-    parse_time,
-    print_double,
-    copy_opt,
-    copy_opt,
-    NULL,
-    NULL
+    .name  = "Time",
+    .size  = sizeof(double),
+    .parse = parse_time,
+    .print = print_double,
+    .copy  = copy_opt,
 };
 
 
@@ -1441,16 +1226,10 @@ out:
 }
 
 const m_option_type_t m_option_type_time_size = {
-    "Time or size",
-    "",
-    sizeof(m_time_size_t),
-    0,
-    parse_time_size,
-    NULL,
-    copy_opt,
-    copy_opt,
-    NULL,
-    NULL
+    .name  = "Time or size",
+    .size  = sizeof(m_time_size_t),
+    .parse = parse_time_size,
+    .copy  = copy_opt,
 };
 
 
@@ -1660,16 +1439,8 @@ static int parse_obj_params(const m_option_t *opt, struct bstr name,
 
 
 const m_option_type_t m_option_type_obj_params = {
-    "Object params",
-    "",
-    0,
-    0,
-    parse_obj_params,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    .name  = "Object params",
+    .parse = parse_obj_params,
 };
 
 /// Some predefined types as a definition would be quite lengthy
@@ -1999,16 +1770,12 @@ static void copy_obj_settings_list(const m_option_t *opt, void *dst,
 }
 
 const m_option_type_t m_option_type_obj_settings_list = {
-    "Object settings list",
-    "",
-    sizeof(m_obj_settings_t *),
-    M_OPT_TYPE_DYNAMIC | M_OPT_TYPE_ALLOW_WILDCARD,
-    parse_obj_settings_list,
-    NULL,
-    copy_obj_settings_list,
-    copy_obj_settings_list,
-    copy_obj_settings_list,
-    free_obj_settings_list,
+    .name  = "Object settings list",
+    .size  = sizeof(m_obj_settings_t *),
+    .flags = M_OPT_TYPE_DYNAMIC | M_OPT_TYPE_ALLOW_WILDCARD,
+    .parse = parse_obj_settings_list,
+    .copy  = copy_obj_settings_list,
+    .free  = free_obj_settings_list,
 };
 
 
@@ -2085,16 +1852,8 @@ static int parse_obj_presets(const m_option_t *opt, struct bstr name,
 
 
 const m_option_type_t m_option_type_obj_presets = {
-    "Object presets",
-    "",
-    0,
-    0,
-    parse_obj_presets,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    .name  = "Object presets",
+    .parse = parse_obj_presets,
 };
 
 static int parse_custom_url(const m_option_t *opt, struct bstr name,
@@ -2282,14 +2041,6 @@ static int parse_custom_url(const m_option_t *opt, struct bstr name,
 
 /// TODO : Write the other needed funcs for 'normal' options
 const m_option_type_t m_option_type_custom_url = {
-    "Custom URL",
-    "",
-    0,
-    0,
-    parse_custom_url,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    .name  = "Custom URL",
+    .parse = parse_custom_url,
 };
