@@ -88,6 +88,9 @@ char *pvr_param_bitrate_mode = NULL;
 int pvr_param_bitrate_peak = 0;
 char *pvr_param_stream_type = NULL;
 
+#define BUFSTRCPY(d, s) av_strlcpy(d, s, sizeof(d))
+#define BUFPRINTF(d, ...) snprintf(d, sizeof(d), __VA_ARGS__)
+
 typedef struct station_elem_s {
   char name[PVR_STATION_NAME_SIZE];
   int freq;
@@ -226,13 +229,12 @@ copycreate_stationlist (stationlist_t *stationlist, int num)
 
   /* transport the channel list data to our extented struct */
   stationlist->total = num;
-  av_strlcpy (stationlist->name, chanlists[chantab].name, PVR_STATION_NAME_SIZE);
+  BUFSTRCPY(stationlist->name, chanlists[chantab].name);
 
   for (i = 0; i < chanlists[chantab].count; i++)
   {
     stationlist->list[i].station[0]= '\0'; /* no station name yet */
-    av_strlcpy (stationlist->list[i].name,
-             chanlists[chantab].list[i].name, PVR_STATION_NAME_SIZE);
+    BUFSTRCPY(stationlist->list[i].name, chanlists[chantab].list[i].name);
     stationlist->list[i].freq = chanlists[chantab].list[i].freq;
     stationlist->list[i].enabled = 1; /* default enabled */
     stationlist->enabled++;
@@ -318,14 +320,11 @@ set_station (struct pvr_t *pvr, const char *station,
     }
 
     if (station)
-      av_strlcpy (pvr->stationlist.list[i].station,
-               station, PVR_STATION_NAME_SIZE);
+      BUFSTRCPY(pvr->stationlist.list[i].station, station);
     else if (channel)
-      av_strlcpy (pvr->stationlist.list[i].station,
-               channel, PVR_STATION_NAME_SIZE);
+      BUFSTRCPY(pvr->stationlist.list[i].station, channel);
     else
-      snprintf (pvr->stationlist.list[i].station,
-                PVR_STATION_NAME_SIZE, "F %d", freq);
+      BUFPRINTF(pvr->stationlist.list[i].station, "F %d", freq);
 
     mp_msg (MSGT_OPEN, MSGL_DBG2,
             "%s Set user station channel: %8s - freq: %8d - station: %s\n",
@@ -375,13 +374,11 @@ set_station (struct pvr_t *pvr, const char *station,
   pvr->stationlist.enabled++;
 
   if (station)
-    av_strlcpy (pvr->stationlist.list[i].station,
-             station, PVR_STATION_NAME_SIZE);
+    BUFSTRCPY(pvr->stationlist.list[i].station, station);
   if (channel)
-    av_strlcpy (pvr->stationlist.list[i].name, channel, PVR_STATION_NAME_SIZE);
+    BUFSTRCPY(pvr->stationlist.list[i].name, channel);
   else
-    snprintf (pvr->stationlist.list[i].name,
-              PVR_STATION_NAME_SIZE, "F %d", freq);
+    BUFPRINTF(pvr->stationlist.list[i].name, "F %d", freq);
 
   pvr->stationlist.list[i].freq = freq;
 
@@ -470,10 +467,10 @@ parse_setup_stationlist (struct pvr_t *pvr)
       if (!sep)
         continue; /* Wrong syntax, but mplayer should not crash */
 
-      av_strlcpy (station, sep + 1, PVR_STATION_NAME_SIZE);
+      BUFSTRCPY(station, sep + 1);
 
       sep[0] = '\0';
-      av_strlcpy (channel, tmp, PVR_STATION_NAME_SIZE);
+      BUFSTRCPY(channel, tmp);
 
       while ((sep = strchr (station, '_')))
         sep[0] = ' ';
