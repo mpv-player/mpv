@@ -2529,9 +2529,6 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 
     current_module = "play_audio";
 
-    if (ao->untimed && mpctx->sh_video && mpctx->delay > 0)
-        return 0;
-
     // hack used by some mpeg-writing AOs
     ao->brokenpts = ((mpctx->sh_video ? mpctx->sh_video->timer : 0) +
                      mpctx->delay) * 90000.0;
@@ -3453,9 +3450,9 @@ static void run_playloop(struct MPContext *mpctx)
         pause_player(mpctx);
     }
 
-    if (mpctx->sh_audio && !mpctx->restart_playback) {
+    if (mpctx->sh_audio && !mpctx->restart_playback && !mpctx->ao->untimed) {
         int status = fill_audio_out_buffers(mpctx, endpts);
-        full_audio_buffers = status >= 0 && !mpctx->ao->untimed;
+        full_audio_buffers = status >= 0;
         // Not at audio stream EOF yet
         audio_left = status > -2;
     }
@@ -3667,15 +3664,16 @@ static void run_playloop(struct MPContext *mpctx)
     }
 #endif
 
-    if (mpctx->restart_playback && !video_left) {
-        if (mpctx->sh_audio) {
-            int status = fill_audio_out_buffers(mpctx, endpts);
-            full_audio_buffers = status >= 0 && !mpctx->ao->untimed;
-            // Not at audio stream EOF yet
-            audio_left = status > -2;
-        }
-        mpctx->restart_playback = false;
+    if (mpctx->sh_audio && (mpctx->restart_playback ? !video_left :
+                            mpctx->ao->untimed && (mpctx->delay <= 0 ||
+                                                   !video_left))) {
+        int status = fill_audio_out_buffers(mpctx, endpts);
+        full_audio_buffers = status >= 0 && !mpctx->ao->untimed;
+        // Not at audio stream EOF yet
+        audio_left = status > -2;
     }
+    if (!video_left)
+        mpctx->restart_playback = false;
     if (mpctx->sh_audio && buffered_audio == -1)
         buffered_audio = mpctx->paused ? 0 : ao_get_delay(mpctx->ao);
 
@@ -3724,7 +3722,7 @@ static void run_playloop(struct MPContext *mpctx)
         double audio_sleep = 9;
         if (mpctx->sh_audio && !mpctx->paused) {
             if (mpctx->ao->untimed) {
-                if (!mpctx->sh_video)
+                if (!video_left)
                     audio_sleep = 0;
             } else if (full_audio_buffers) {
                 audio_sleep = buffered_audio - 0.050;
