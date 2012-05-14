@@ -405,6 +405,22 @@ void *vo_cocoa_cgl_pixel_format(void)
     return [s->pixelFormat CGLPixelFormatObj];
 }
 
+int vo_cocoa_cgl_color_size(void)
+{
+    GLint value;
+    CGLDescribePixelFormat(vo_cocoa_cgl_pixel_format(), 0,
+                           kCGLPFAColorSize, &value);
+    switch (value) {
+        case 32:
+        case 24:
+            return 8;
+        case 16:
+            return 5;
+    }
+
+    return 8;
+}
+
 void create_menu()
 {
     NSMenu *menu;

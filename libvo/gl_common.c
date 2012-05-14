@@ -1727,6 +1727,9 @@ static int create_window_cocoa_gl3(struct MPGLContext *ctx, int gl_flags,
 {
     int rv = vo_cocoa_create_window(ctx->vo, d_width, d_height, flags, 1);
     getFunctions(ctx->gl, (void *)vo_cocoa_glgetaddr, NULL, true);
+    ctx->depth_r = vo_cocoa_cgl_color_size();
+    ctx->depth_g = vo_cocoa_cgl_color_size();
+    ctx->depth_b = vo_cocoa_cgl_color_size();
     return rv;
 }
 

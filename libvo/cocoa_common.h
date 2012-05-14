@@ -46,4 +46,6 @@ int vo_cocoa_swap_interval(int enabled);
 void *vo_cocoa_cgl_context(void);
 void *vo_cocoa_cgl_pixel_format(void);
 
+int vo_cocoa_cgl_color_size(void);
+
 #endif /* MPLAYER_COCOA_COMMON_H */
