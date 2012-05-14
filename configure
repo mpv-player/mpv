@@ -1339,9 +1339,6 @@ fi
 
 if darwin; then
   extra_cflags="-mdynamic-no-pic $extra_cflags"
-  if test "$(basename $_cc)" != "clang" ; then
-    extra_cflags="-falign-loops=16 -shared-libgcc $extra_cflags"
-  fi
   _timer=timer-darwin.c
 fi
 
@@ -2301,6 +2298,10 @@ if test -z "$CFLAGS" ; then
   fi
 else
   warn_cflags=yes
+fi
+
+if darwin && test "$cc_vendor" = "gnu" ; then
+  extra_cflags="-falign-loops=16 -shared-libgcc $extra_cflags"
 fi
 
 if test "$cc_vendor" = "gnu" ; then
