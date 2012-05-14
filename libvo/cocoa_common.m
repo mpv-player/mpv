@@ -257,6 +257,12 @@ int vo_cocoa_create_window(struct vo *vo, uint32_t d_width,
         attr[i] = (NSOpenGLPixelFormatAttribute)0;
 
         s->pixelFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes:attr] autorelease];
+        if (!s->pixelFormat) {
+            mp_msg(MSGT_VO, MSGL_ERR,
+                "[cocoa] Invalid pixel format attribute "
+                "(GL3 not supported?)\n");
+            return -1;
+        }
         s->glContext = [[NSOpenGLContext alloc] initWithFormat:s->pixelFormat shareContext:nil];
 
         create_menu();
