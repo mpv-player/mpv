@@ -405,7 +405,7 @@ void *vo_cocoa_cgl_context(void)
 
 void *vo_cocoa_cgl_pixel_format(void)
 {
-    return [s->pixelFormat CGLPixelFormatObj];
+    return CGLGetPixelFormat(vo_cocoa_cgl_context());
 }
 
 int vo_cocoa_cgl_color_size(void)
