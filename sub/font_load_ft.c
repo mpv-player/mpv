@@ -1160,7 +1160,7 @@ void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_n
                 FcConfigSubstitute(0, fc_pattern, FcMatchPattern);
                 FcDefaultSubstitute(fc_pattern);
                 fc_pattern2 = fc_pattern;
-                fc_pattern = FcFontMatch(0, fc_pattern, 0);
+                fc_pattern = FcFontMatch(0, fc_pattern, &result);
                 FcPatternDestroy(fc_pattern2);
             }
             // s doesn't need to be freed according to fontconfig docs
