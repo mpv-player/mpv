@@ -863,7 +863,7 @@ const m_option_t mplayer_opts[]={
     OPT_FLAG_ON("benchmark", benchmark, 0),
 
     // dump some stream out instead of playing the file
-    OPT_STRING("dumpfile", stream_dump_name, 0),
+    OPT_STRING("dumpfile", stream_dump_name, 0, OPTDEF_STR("stream.dump")),
     {"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"dumpvideo", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 2, NULL},
     {"dumpsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 3, NULL},
@@ -912,7 +912,7 @@ const m_option_t mplayer_opts[]={
 #endif
 
     OPT_MAKE_FLAGS("term-osd", term_osd, 0),
-    OPT_STRING("term-osd-esc", term_osd_esc, 0),
+    OPT_STRING("term-osd-esc", term_osd_esc, 0, OPTDEF_STR("\x1b[A\r\x1b[K")),
     OPT_STRING("playing-msg", playing_msg, 0),
 
     {"slave", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},

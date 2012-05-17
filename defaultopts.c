@@ -22,7 +22,6 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .vo_gamma_hue = 1000,
         .osd_level = 1,
         .osd_duration = 1000,
-        .stream_dump_name = "stream.dump",
         .loop_times = -1,
         .ordered_chapters = 1,
         .chapter_merge_threshold = 100,
@@ -33,7 +32,6 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .user_correct_pts = -1,
         .initial_audio_sync = 1,
         .term_osd = 1,
-        .term_osd_esc = "\x1b[A\r\x1b[K",
         .consolecontrols = 1,
         .doubleclick_time = 300,
         .audio_id = -1,
@@ -60,7 +58,6 @@ void set_default_mplayer_options(struct MPOpts *opts)
             .error_concealment = 3,
         },
         .input = {
-             .config_file = "input.conf",
              .key_fifo_size = 7,
              .ar_delay = 100,
              .ar_rate = 8,

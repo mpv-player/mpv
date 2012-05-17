@@ -3942,6 +3942,7 @@ int main(int argc, char *argv[])
     m_config_register_options(mpctx->mconfig, mplayer_opts);
     m_config_register_options(mpctx->mconfig, common_opts);
     mp_input_register_options(mpctx->mconfig);
+    m_config_initialize(mpctx->mconfig, opts);
 
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, argc, argv, &verbose);

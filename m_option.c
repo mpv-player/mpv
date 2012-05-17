@@ -821,14 +821,13 @@ const m_option_type_t m_option_type_print_func = {
 static int parse_subconf(const m_option_t *opt, struct bstr name,
                          struct bstr param, bool ambiguous_param, void *dst)
 {
-    int nr = 0, i;
+    int nr = 0;
     char **lst = NULL;
 
     if (param.len == 0)
         return M_OPT_MISSING_PARAM;
 
     struct bstr p = param;
-    const struct m_option *subopts = opt->p;
 
     while (p.len) {
         int optlen = bstrcspn(p, ":=");
@@ -874,23 +873,11 @@ static int parse_subconf(const m_option_t *opt, struct bstr name,
             return M_OPT_INVALID;
         }
 
-        for (i = 0; subopts[i].name; i++)
-            if (!bstrcmp0(subopt, subopts[i].name))
-                break;
-        if (!subopts[i].name) {
-            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                   "Option %.*s: Unknown suboption %.*s\n",
-                   BSTR_P(name), BSTR_P(subopt));
-            return M_OPT_UNKNOWN;
-        }
-        int r = m_option_parse(&subopts[i], subopt, subparam, false, NULL);
-        if (r < 0)
-            return r;
         if (dst) {
             lst = talloc_realloc(NULL, lst, char *, 2 * (nr + 2));
-            lst[2 * nr] = bstrdup0(NULL, subopt);
+            lst[2 * nr] = bstrdup0(lst, subopt);
             lst[2 * nr + 1] = subparam.len == 0 ? NULL :
-                bstrdup0(NULL, subparam);
+                bstrdup0(lst, subparam);
             memset(&lst[2 * (nr + 1)], 0, 2 * sizeof(char *));
             nr++;
         }

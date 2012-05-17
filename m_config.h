@@ -96,6 +96,7 @@ typedef struct m_config {
 
     void *optstruct; // struct mpopts or other
     int (*includefunc)(struct m_config *conf, char *filename);
+    bool full;  // main config with save slot handling etc
 } m_config_t;
 
 
@@ -109,6 +110,10 @@ typedef struct m_config {
 struct m_config *
 m_config_new(void *optstruct,
              int includefunc(struct m_config *conf, char *filename));
+
+struct m_config *m_config_simple(const struct m_option *options);
+
+void m_config_initialize(struct m_config *conf, void *optstruct);
 
 // Free a config object.
 void m_config_free(struct m_config *config);
@@ -161,6 +166,9 @@ static inline int m_config_check_option0(struct m_config *config,
 {
     return m_config_check_option(config, bstr(name), bstr(param), ambiguous);
 }
+
+int m_config_parse_suboptions(struct m_config *config, void *optstruct,
+                              char *name, char *subopts);
 
 
 /*  Get the option matching the given name.

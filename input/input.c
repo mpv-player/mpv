@@ -638,7 +638,7 @@ static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam);
 
 // Our command line options
 static const m_option_t input_conf[] = {
-    OPT_STRING("conf", input.config_file, CONF_GLOBAL),
+    OPT_STRING("conf", input.config_file, CONF_GLOBAL, OPTDEF_STR("input.conf")),
     OPT_INT("ar-delay", input.ar_delay, CONF_GLOBAL),
     OPT_INT("ar-rate", input.ar_rate, CONF_GLOBAL),
     { "keylist", print_key_list, CONF_TYPE_PRINT_FUNC, CONF_NOCFG },
