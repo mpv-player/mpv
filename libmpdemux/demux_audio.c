@@ -437,13 +437,14 @@ static int demux_audio_open(demuxer_t* demuxer) {
     duration = (double) mp3_vbr_frames(s, demuxer->movi_start) * mp3_found->mpa_spf / mp3_found->mp3_freq;
     free(mp3_found);
     mp3_found = NULL;
-    if(s->end_pos && (s->flags & MP_STREAM_SEEK) == MP_STREAM_SEEK) {
-      stream_seek(s,s->end_pos-128);
+    if(demuxer->movi_end && (s->flags & MP_STREAM_SEEK) == MP_STREAM_SEEK) {
+      if(demuxer->movi_end >= 128) {
+        stream_seek(s,demuxer->movi_end-128);
       stream_read(s,hdr,3);
       if(!memcmp(hdr,"TAG",3)) {
 	char buf[31];
 	uint8_t g;
-	demuxer->movi_end = stream_tell(s)-3;
+          demuxer->movi_end -= 128;
 	stream_read(s,buf,30);
 	buf[30] = '\0';
 	demux_info_add(demuxer,"Title",buf);
@@ -467,6 +468,8 @@ static int demux_audio_open(demuxer_t* demuxer) {
 	g = stream_read_char(s);
 	demux_info_add(demuxer,"Genre",genres[g]);
       }
+      }
+      if(demuxer->movi_end >= 10) {
       stream_seek(s,demuxer->movi_end-10);
       stream_read(s,hdr,4);
       if(!memcmp(hdr,"3DI",3) && hdr[3] >= 4 && hdr[3] != 0xff) {
@@ -486,6 +489,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
           demuxer->movi_end -= len;
         }
       }
+    }
     }
     if (duration && demuxer->movi_end && demuxer->movi_end > demuxer->movi_start) sh_audio->wf->nAvgBytesPerSec = (demuxer->movi_end - demuxer->movi_start) / duration;
     sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
