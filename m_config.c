@@ -67,7 +67,8 @@ static int parse_profile(struct m_config *config, const struct m_option *opt,
     }
 
     char **list = NULL;
-    int r = m_option_type_string_list.parse(opt, name, param, false, &list);
+    int r = m_option_type_string_list.parse(opt, name, param, false, &list,
+                                            NULL);
     if (r < 0)
         return r;
     if (!list || !list[0])
@@ -144,7 +145,7 @@ static void m_option_save(const struct m_config *config,
 {
     if (opt->type->copy) {
         const void *src = m_option_get_ptr(opt, config->optstruct);
-        opt->type->copy(opt, dst, src);
+        opt->type->copy(opt, dst, src, NULL);
     }
 }
 
@@ -153,7 +154,7 @@ static void m_option_set(void *optstruct,
 {
     if (opt->type->copy) {
         void *dst = m_option_get_ptr(opt, optstruct);
-        opt->type->copy(opt, dst, src);
+        opt->type->copy(opt, dst, src, optstruct);
     }
 }
 
@@ -483,7 +484,8 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
     }
 
     void *dst = set ? m_option_get_ptr(co->opt, optstruct) : NULL;
-    int r = m_option_parse(co->opt, name, param, ambiguous_param, dst);
+    int r = co->opt->type->parse(co->opt, name, param, ambiguous_param, dst,
+                                 optstruct);
     // Parsing failed ?
     if (r < 0)
         return r;
@@ -498,7 +500,8 @@ static int parse_subopts(struct m_config *config, void *optstruct, char *name,
 {
     char **lst = NULL;
     // Split the argument into child options
-    int r = m_option_type_subconfig.parse(NULL, bstr(""), param, false, &lst);
+    int r = m_option_type_subconfig.parse(NULL, bstr(""), param, false, &lst,
+                                          optstruct);
     if (r < 0)
         return r;
     // Parse the child options

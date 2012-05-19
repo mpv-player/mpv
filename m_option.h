@@ -192,11 +192,12 @@ struct m_option_type {
      *         may not be an argument meant for this option
      *  \param dst Pointer to the memory where the data should be written.
      *             If NULL the parameter validity should still be checked.
+     *         talloc_ctx: talloc context if value type requires allocations
      *  \return On error a negative value is returned, on success the number
      *          of arguments consumed. For details see \ref OptionParserReturn.
      */
     int (*parse)(const m_option_t *opt, struct bstr name, struct bstr param,
-                 bool ambiguous_param, void *dst);
+                 bool ambiguous_param, void *dst, void *talloc_ctx);
 
     // Print back a value in string form.
     /** \param opt The option to print.
@@ -210,8 +211,10 @@ struct m_option_type {
     /** \param opt The option to copy.
      *  \param dst Pointer to the destination memory.
      *  \param src Pointer to the source memory.
+     *         talloc_ctx: talloc context to use in deep copy
      */
-    void (*copy)(const m_option_t *opt, void *dst, const void *src);
+    void (*copy)(const m_option_t *opt, void *dst, const void *src,
+                 void *talloc_ctx);
 
     // Free the data allocated for a save slot.
     /** This is only needed for dynamic types like strings.
@@ -385,7 +388,7 @@ static inline int m_option_parse(const m_option_t *opt, struct bstr name,
                                  struct bstr param, bool ambiguous_param,
                                  void *dst)
 {
-    return opt->type->parse(opt, name, param, ambiguous_param, dst);
+    return opt->type->parse(opt, name, param, ambiguous_param, dst, NULL);
 }
 
 // Helper to print options, see \ref m_option_type::print.
@@ -402,7 +405,7 @@ static inline void m_option_copy(const m_option_t *opt, void *dst,
                                  const void *src)
 {
     if (opt->type->copy)
-        opt->type->copy(opt, dst, src);
+        opt->type->copy(opt, dst, src, NULL);
 }
 
 // Helper around \ref m_option_type::free.
