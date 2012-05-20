@@ -36,12 +36,21 @@
 
 #define MAX_PROFILE_DEPTH 20
 
-static int parse_profile(const struct m_option *opt, struct bstr name,
-                         struct bstr param, bool ambiguous_param, void *dst)
+static int parse_include(struct m_config *config, struct bstr param, bool set)
 {
-    struct m_config *config = opt->priv;
-    char **list = NULL;
-    int i, r;
+    if (param.len == 0)
+        return M_OPT_MISSING_PARAM;
+    if (!set)
+        return 1;
+    char *filename = bstrdup0(NULL, param);
+    config->includefunc(config, filename);
+    talloc_free(filename);
+    return 1;
+}
+
+static int parse_profile(struct m_config *config, const struct m_option *opt,
+                         struct bstr name, struct bstr param, bool set)
+{
     if (!bstrcmp0(param, "help")) {
         struct m_profile *p;
         if (!config->profiles) {
@@ -57,40 +66,23 @@ static int parse_profile(const struct m_option *opt, struct bstr name,
         return M_OPT_EXIT - 1;
     }
 
-    r = m_option_type_string_list.parse(opt, name, param, false, &list);
+    char **list = NULL;
+    int r = m_option_type_string_list.parse(opt, name, param, false, &list);
     if (r < 0)
         return r;
     if (!list || !list[0])
         return M_OPT_INVALID;
-    for (i = 0; list[i]; i++)
-        if (!m_config_get_profile(config, list[i])) {
+    for (int i = 0; list[i]; i++) {
+        struct m_profile *p = m_config_get_profile(config, list[i]);
+        if (!p) {
             mp_tmsg(MSGT_CFGPARSER, MSGL_WARN, "Unknown profile '%s'.\n",
                     list[i]);
             r = M_OPT_INVALID;
-        }
-    if (dst)
-        m_option_copy(opt, dst, &list);
-    else
-        m_option_free(opt, &list);
-    return r;
-}
-
-static void set_profile(const struct m_option *opt, void *dst, const void *src)
-{
-    struct m_config *config = opt->priv;
-    struct m_profile *p;
-    char **list = NULL;
-    int i;
-    if (!src || !*(char ***)src)
-        return;
-    m_option_copy(opt, &list, src);
-    for (i = 0; list[i]; i++) {
-        p = m_config_get_profile(config, list[i]);
-        if (!p)
-            continue;
-        m_config_set_profile(config, p);
+        } else if (set)
+            m_config_set_profile(config, p);
     }
     m_option_free(opt, &list);
+    return r;
 }
 
 static int show_profile(struct m_option *opt, char *name, char *param)
@@ -150,18 +142,18 @@ static int list_options(struct m_option *opt, char *name, char *param)
 static void m_option_save(const struct m_config *config,
                           const struct m_option *opt, void *dst)
 {
-    if (opt->type->save) {
+    if (opt->type->copy) {
         const void *src = m_option_get_ptr(opt, config->optstruct);
-        opt->type->save(opt, dst, src);
+        opt->type->copy(opt, dst, src);
     }
 }
 
 static void m_option_set(const struct m_config *config,
                          const struct m_option *opt, const void *src)
 {
-    if (opt->type->set) {
+    if (opt->type->copy) {
         void *dst = m_option_get_ptr(opt, config->optstruct);
-        opt->type->set(opt, dst, src);
+        opt->type->copy(opt, dst, src);
     }
 }
 
@@ -172,40 +164,31 @@ static void m_config_add_option(struct m_config *config,
                                 const char *prefix, char *disabled_feature);
 
 struct m_config *m_config_new(void *optstruct,
-                              int includefunc(struct m_option *conf,
+                              int includefunc(struct m_config *conf,
                                               char *filename))
 {
     struct m_config *config;
-    static int initialized = 0;
-    static struct m_option_type profile_opt_type;
     static const struct m_option ref_opts[] = {
-        { "profile", NULL, &profile_opt_type, CONF_NOSAVE, 0, 0, NULL },
+        { "profile", NULL, CONF_TYPE_STRING_LIST, CONF_NOSAVE, 0, 0, NULL },
         { "show-profile", show_profile, CONF_TYPE_PRINT_FUNC, CONF_NOCFG },
         { "list-options", list_options, CONF_TYPE_PRINT_FUNC, CONF_NOCFG },
         { NULL }
     };
-    int i;
 
     config = talloc_zero(NULL, struct m_config);
     config->lvl = 1; // 0 Is the defaults
-    if (!initialized) {
-        initialized = 1;
-        profile_opt_type = m_option_type_string_list;
-        profile_opt_type.parse = parse_profile;
-        profile_opt_type.set = set_profile;
-    }
     struct m_option *self_opts = talloc_memdup(config, ref_opts,
                                                sizeof(ref_opts));
-    for (i = 0; self_opts[i].name; i++)
+    for (int i = 1; self_opts[i].name; i++)
         self_opts[i].priv = config;
     m_config_register_options(config, self_opts);
     if (includefunc) {
         struct m_option *p = talloc_ptrtype(config, p);
         *p = (struct m_option){
-            "include", includefunc, CONF_TYPE_FUNC_PARAM,
-            CONF_NOSAVE, 0, 0, config
+            "include", NULL, CONF_TYPE_STRING, CONF_NOSAVE,
         };
         m_config_add_option(config, p, NULL, NULL);
+        config->includefunc = includefunc;
     }
     config->optstruct = optstruct;
 
@@ -420,18 +403,15 @@ static struct m_config_option *m_config_get_co(const struct m_config *config,
     return NULL;
 }
 
-static int m_config_parse_option(const struct m_config *config,
+static int m_config_parse_option(struct m_config *config,
                                  struct bstr name, struct bstr param,
                                  bool ambiguous_param, bool set)
 {
-    struct m_config_option *co;
-    int r = 0;
-
     assert(config != NULL);
     assert(config->lvl > 0);
     assert(name.len != 0);
 
-    co = m_config_get_co(config, name);
+    struct m_config_option *co = m_config_get_co(config, name);
     if (!co)
         return M_OPT_UNKNOWN;
     if (co->disabled_feature) {
@@ -466,23 +446,27 @@ static int m_config_parse_option(const struct m_config *config,
          (co->opt->flags & M_OPT_PRE_PARSE) && (co->flags & M_CFG_OPT_SET)))
         set = 0;
 
+    if (config->includefunc && !bstrcmp0(name, "include")) {
+        return parse_include(config, param, set);
+    } else if (!bstrcmp0(name, "profile"))
+        return parse_profile(config, co->opt, name, param, set);
+
     // Option with children are a bit different to parse
     if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD) {
         char **lst = NULL;
-        int i, sr;
         // Parse the child options
-        r = m_option_parse(co->opt, name, param, false, &lst);
+        int r = m_option_parse(co->opt, name, param, false, &lst);
         // Set them now
         if (r >= 0)
-            for (i = 0; lst && lst[2 * i]; i++) {
+            for (int i = 0; lst && lst[2 * i]; i++) {
                 int l = strlen(co->name) + 1 + strlen(lst[2 * i]) + 1;
                 if (r >= 0) {
                     // Build the full name
                     char n[l];
                     sprintf(n, "%s:%s", co->name, lst[2 * i]);
-                    sr = m_config_parse_option(config, bstr(n),
-                                               bstr(lst[2 * i + 1]), false,
-                                               set);
+                    int sr = m_config_parse_option(config, bstr(n),
+                                                   bstr(lst[2 * i + 1]), false,
+                                                   set);
                     if (sr < 0) {
                         if (sr == M_OPT_UNKNOWN) {
                             mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
@@ -502,18 +486,16 @@ static int m_config_parse_option(const struct m_config *config,
                 talloc_free(lst[2 * i + 1]);
             }
         talloc_free(lst);
-    } else
-        r = m_option_parse(co->opt, name, param, ambiguous_param,
-                           set ? co->slots->data : NULL);
+        return r;
+    }
 
+    void *dst = set ? m_option_get_ptr(co->opt, config->optstruct) : NULL;
+    int r = m_option_parse(co->opt, name, param, ambiguous_param, dst);
     // Parsing failed ?
     if (r < 0)
         return r;
-    // Set the option
-    if (set) {
-        m_option_set(config, co->opt, co->slots->data);
+    else if (set)
         co->flags |= M_CFG_OPT_SET;
-    }
 
     return r;
 }
@@ -526,7 +508,7 @@ int m_config_set_option(struct m_config *config, struct bstr name,
     return m_config_parse_option(config, name, param, ambiguous_param, 1);
 }
 
-int m_config_check_option(const struct m_config *config, struct bstr name,
+int m_config_check_option(struct m_config *config, struct bstr name,
                           struct bstr param, bool ambiguous_param)
 {
     int r;

@@ -148,12 +148,6 @@ char *heartbeat_cmd;
 //             Config file
 //**************************************************************************//
 
-static int cfg_inc_verbose(m_option_t *conf)
-{
-    ++verbose;
-    return 0;
-}
-
 #include "path.h"
 
 //**************************************************************************//
@@ -864,9 +858,9 @@ static void exit_sighandler(int x)
 
 #include "cfg-mplayer.h"
 
-static int cfg_include(m_option_t *conf, char *filename)
+static int cfg_include(struct m_config *conf, char *filename)
 {
-    return m_config_parse_config_file(conf->priv, filename);
+    return m_config_parse_config_file(conf, filename);
 }
 
 #define DEF_CONFIG "# Write your default config options here!\n\n\n"
@@ -2541,9 +2535,6 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 
     current_module = "play_audio";
 
-    if (ao->untimed && mpctx->sh_video && mpctx->delay > 0)
-        return 0;
-
     // hack used by some mpeg-writing AOs
     ao->brokenpts = ((mpctx->sh_video ? mpctx->sh_video->timer : 0) +
                      mpctx->delay) * 90000.0;
@@ -3465,9 +3456,9 @@ static void run_playloop(struct MPContext *mpctx)
         pause_player(mpctx);
     }
 
-    if (mpctx->sh_audio && !mpctx->restart_playback) {
+    if (mpctx->sh_audio && !mpctx->restart_playback && !mpctx->ao->untimed) {
         int status = fill_audio_out_buffers(mpctx, endpts);
-        full_audio_buffers = status >= 0 && !mpctx->ao->untimed;
+        full_audio_buffers = status >= 0;
         // Not at audio stream EOF yet
         audio_left = status > -2;
     }
@@ -3679,15 +3670,16 @@ static void run_playloop(struct MPContext *mpctx)
     }
 #endif
 
-    if (mpctx->restart_playback && !video_left) {
-        if (mpctx->sh_audio) {
-            int status = fill_audio_out_buffers(mpctx, endpts);
-            full_audio_buffers = status >= 0 && !mpctx->ao->untimed;
-            // Not at audio stream EOF yet
-            audio_left = status > -2;
-        }
-        mpctx->restart_playback = false;
+    if (mpctx->sh_audio && (mpctx->restart_playback ? !video_left :
+                            mpctx->ao->untimed && (mpctx->delay <= 0 ||
+                                                   !video_left))) {
+        int status = fill_audio_out_buffers(mpctx, endpts);
+        full_audio_buffers = status >= 0 && !mpctx->ao->untimed;
+        // Not at audio stream EOF yet
+        audio_left = status > -2;
     }
+    if (!video_left)
+        mpctx->restart_playback = false;
     if (mpctx->sh_audio && buffered_audio == -1)
         buffered_audio = mpctx->paused ? 0 : ao_get_delay(mpctx->ao);
 
@@ -3736,7 +3728,7 @@ static void run_playloop(struct MPContext *mpctx)
         double audio_sleep = 9;
         if (mpctx->sh_audio && !mpctx->paused) {
             if (mpctx->ao->untimed) {
-                if (!mpctx->sh_video)
+                if (!video_left)
                     audio_sleep = 0;
             } else if (full_audio_buffers) {
                 audio_sleep = buffered_audio - 0.050;
@@ -3961,7 +3953,7 @@ int main(int argc, char *argv[])
     mp_input_register_options(mpctx->mconfig);
 
     // Preparse the command line
-    m_config_preparse_command_line(mpctx->mconfig, argc, argv);
+    m_config_preparse_command_line(mpctx->mconfig, argc, argv, &verbose);
 
 #if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL)
     set_path_env();

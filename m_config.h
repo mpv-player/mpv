@@ -95,6 +95,7 @@ typedef struct m_config {
     int profile_depth;
 
     void *optstruct; // struct mpopts or other
+    int (*includefunc)(struct m_config *conf, char *filename);
 } m_config_t;
 
 
@@ -107,7 +108,7 @@ typedef struct m_config {
 // Create a new config object.
 struct m_config *
 m_config_new(void *optstruct,
-             int includefunc(struct m_option *conf, char *filename));
+             int includefunc(struct m_config *conf, char *filename));
 
 // Free a config object.
 void m_config_free(struct m_config *config);
@@ -151,7 +152,7 @@ static inline int m_config_set_option0(struct m_config *config,
 /*  Check if an option setting is valid.
  *  Same as above m_config_set_option() but doesn't actually set anything.
  */
-int m_config_check_option(const struct m_config *config, struct bstr name,
+int m_config_check_option(struct m_config *config, struct bstr name,
                           struct bstr param, bool ambiguous_param);
 
 static inline int m_config_check_option0(struct m_config *config,

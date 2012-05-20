@@ -209,7 +209,6 @@ dragonfly() { issystem "DragonFly"; }
 freebsd()   { issystem "FreeBSD" || issystem "GNU/kFreeBSD"; }
 gnu()       { issystem "GNU"; }
 hpux()      { issystem "HP-UX"; }
-irix()      { issystem "IRIX"; }
 linux()     { issystem "Linux"; }
 mingw32()   { issystem "MINGW32"; }
 morphos()   { issystem "MorphOS"; }
@@ -440,14 +439,12 @@ Video output:
 Audio output:
   --disable-alsa         disable ALSA audio output [autodetect]
   --disable-ossaudio     disable OSS audio output [autodetect]
-  --disable-arts         disable aRts audio output [autodetect]
-  --disable-esd          disable esd audio output [autodetect]
   --disable-rsound       disable RSound audio output [autodetect]
   --disable-pulse        disable Pulseaudio audio output [autodetect]
+  --disable-portaudio    disable PortAudio audio output [autodetect]
   --disable-jack         disable JACK audio output [autodetect]
   --enable-openal        enable OpenAL audio output [disable]
   --disable-nas          disable NAS audio output [autodetect]
-  --disable-sgiaudio     disable SGI audio output [autodetect]
   --disable-sunaudio     disable Sun audio output [autodetect]
   --disable-win32waveout disable Windows waveout audio output [autodetect]
   --disable-coreaudio    disable CoreAudio audio output [autodetect]
@@ -599,10 +596,9 @@ _iconv=auto
 _langinfo=auto
 _rtc=auto
 _ossaudio=auto
-_arts=auto
-_esd=auto
 _rsound=auto
 _pulse=auto
+_portaudio=auto
 _jack=auto
 _openal=no
 _libcdio=auto
@@ -637,7 +633,6 @@ _mga=auto
 _xmga=auto
 _vm=auto
 _xf86keysym=auto
-_sgiaudio=auto
 _sunaudio=auto
 _alsa=auto
 _fastmemcpy=yes
@@ -918,14 +913,12 @@ for ac_option do
   --disable-libdv)      _libdv=no       ;;
   --enable-ossaudio)    _ossaudio=yes   ;;
   --disable-ossaudio)   _ossaudio=no    ;;
-  --enable-arts)        _arts=yes       ;;
-  --disable-arts)       _arts=no        ;;
-  --enable-esd)         _esd=yes        ;;
-  --disable-esd)        _esd=no         ;;
   --enable-rsound)      _rsound=yes     ;;
   --disable-rsound)     _rsound=no      ;;
   --enable-pulse)       _pulse=yes      ;;
   --disable-pulse)      _pulse=no       ;;
+  --enable-portaudio)   _portaudio=yes  ;;
+  --disable-portaudio)  _portaudio=no   ;;
   --enable-jack)        _jack=yes       ;;
   --disable-jack)       _jack=no        ;;
   --enable-openal)      _openal=yes     ;;
@@ -992,8 +985,6 @@ for ac_option do
   --disable-xf86keysym) _xf86keysym=no  ;;
   --enable-sunaudio)    _sunaudio=yes   ;;
   --disable-sunaudio)   _sunaudio=no    ;;
-  --enable-sgiaudio)    _sgiaudio=yes   ;;
-  --disable-sgiaudio)   _sgiaudio=no    ;;
   --enable-alsa)        _alsa=yes       ;;
   --disable-alsa)       _alsa=no        ;;
   --enable-tv)          _tv=yes         ;;
@@ -1254,9 +1245,6 @@ if test -z "$_target" ; then
   Haiku)
     system_name=BeOS
     ;;
-  IRIX*)
-    system_name=IRIX
-    ;;
   GNU/kFreeBSD)
     system_name=FreeBSD
     ;;
@@ -1355,9 +1343,6 @@ fi
 
 if darwin; then
   extra_cflags="-mdynamic-no-pic $extra_cflags"
-  if test "$(basename $_cc)" != "clang" ; then
-    extra_cflags="-falign-loops=16 -shared-libgcc $extra_cflags"
-  fi
   _timer=timer-darwin.c
 fi
 
@@ -1365,9 +1350,7 @@ if aix ; then
   extra_ldflags="$extra_ldflags -lC"
 fi
 
-if irix ; then
-  _ranlib='ar -r'
-elif linux ; then
+if linux ; then
   _ranlib='true'
 fi
 
@@ -2169,24 +2152,6 @@ EOF
     arch='mips'
     iproc='mips'
 
-    if irix ; then
-        echocheck "CPU type"
-        proc=$(hinv -c processor | grep CPU | cut -d " " -f3)
-        case "$(echo $proc)" in
-            R3000) _march='-mips1' _mcpu='-mtune=r2000' ;;
-            R4000) _march='-mips3' _mcpu='-mtune=r4000' ;;
-            R4400) _march='-mips3' _mcpu='-mtune=r4400' ;;
-            R4600) _march='-mips3' _mcpu='-mtune=r4600' ;;
-            R5000) _march='-mips4' _mcpu='-mtune=r5000' ;;
-            R8000|R10000|R12000|R14000|R16000) _march='-mips4' _mcpu='-mtune=r8000' ;;
-        esac
-        # gcc < 3.x does not support -mtune.
-        if test "$cc_vendor" = "gnu" && test "$_cc_major" -lt 3 ; then
-            _mcpu=''
-        fi
-        echores "$proc"
-    fi
-
     test $_fast_clz = "auto" && _fast_clz=yes
 
     ;;
@@ -2337,6 +2302,10 @@ if test -z "$CFLAGS" ; then
   fi
 else
   warn_cflags=yes
+fi
+
+if darwin && test "$cc_vendor" = "gnu" ; then
+  extra_cflags="-falign-loops=16 -shared-libgcc $extra_cflags"
 fi
 
 if test "$cc_vendor" = "gnu" ; then
@@ -4004,12 +3973,11 @@ echocheck "VDPAU"
 if test "$_vdpau" = auto && test "$_x11" = yes ; then
   _vdpau=no
   if test "$_dl" = yes ; then
-    return_statement_check vdpau/vdpau_x11.h 'vdp_device_create_x11(0, 0, 0, 0)' VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 -lvdpau && _vdpau=yes
+    pkg_config_add 'vdpau >= 0.2' && _vdpau=yes
   fi
 fi
 if test "$_vdpau" = yes ; then
   def_vdpau='#define CONFIG_VDPAU 1'
-  libs_mplayer="$libs_mplayer -lvdpau"
   vomodules="vdpau $vomodules"
 else
   def_vdpau='#define CONFIG_VDPAU 0'
@@ -4274,11 +4242,6 @@ fi
 echocheck "PNG support"
 if test "$_png" = auto ; then
   _png=no
-  if irix ; then
-    # Don't check for -lpng on irix since it has its own libpng
-    # incompatible with the GNU libpng
-    res_comment="disabled on irix (not GNU libpng)"
-  else
 cat > $TMPC << EOF
 #include <stdio.h>
 #include <string.h>
@@ -4289,8 +4252,7 @@ int main(void) {
   return strcmp(PNG_LIBPNG_VER_STRING, png_libpng_ver);
 }
 EOF
-    cc_check -lpng -lz $_ld_lm && _png=yes
-  fi
+  cc_check -lpng -lz $_ld_lm && _png=yes
 fi
 echores "$_png"
 if test "$_png" = yes ; then
@@ -4561,15 +4523,17 @@ int main(int argc, char *argv[]) {
 }
 EOF
   _gl=no
-  for _ld_tmp in "" -lGL "-lGL -lXdamage" "-lGL $_ld_pthread" ; do
-    if cc_check $_ld_tmp $_ld_lm ; then
-      _gl=yes
-      _gl_x11=yes
-      libs_mplayer="$libs_mplayer $_ld_tmp $_ld_dl"
-      break
-    fi
-  done
-  if cc_check -DGL_WIN32 -lopengl32 ; then
+  if test "$_x11" = yes ; then
+    for _ld_tmp in "" -lGL "-lGL -lXdamage" "-lGL $_ld_pthread" ; do
+      if cc_check $_ld_tmp $_ld_lm ; then
+        _gl=yes
+        _gl_x11=yes
+        libs_mplayer="$libs_mplayer $_ld_tmp $_ld_dl"
+        break
+      fi
+    done
+  fi
+  if win32 && cc_check -DGL_WIN32 -lopengl32 ; then
     _gl=yes
     _gl_win32=yes
     libs_mplayer="$libs_mplayer -lopengl32 -lgdi32"
@@ -4806,51 +4770,6 @@ fi
 echores "$_ossaudio"
 
 
-echocheck "aRts"
-if test "$_arts" = auto ; then
-  _arts=no
-  if ( artsc-config --version ) >> "$TMPLOG" 2>&1 ; then
-    statement_check artsc.h 'arts_init()' $(artsc-config --libs) $(artsc-config --cflags) &&
-      _arts=yes
-  fi
-fi
-
-if test "$_arts" = yes ; then
-  def_arts='#define CONFIG_ARTS 1'
-  aomodules="arts $aomodules"
-  libs_mplayer="$libs_mplayer $(artsc-config --libs)"
-  extra_cflags="$extra_cflags $(artsc-config --cflags)"
-else
-  noaomodules="arts $noaomodules"
-fi
-echores "$_arts"
-
-
-echocheck "EsounD"
-if test "$_esd" = auto ; then
-  _esd=no
-  if ( esd-config --version ) >> "$TMPLOG" 2>&1 ; then
-    statement_check esd.h 'esd_open_sound("test")' $(esd-config --libs) $(esd-config --cflags) && _esd=yes
-  fi
-fi
-echores "$_esd"
-
-if test "$_esd" = yes ; then
-  def_esd='#define CONFIG_ESD 1'
-  aomodules="esd $aomodules"
-  libs_mplayer="$libs_mplayer $(esd-config --libs)"
-  extra_cflags="$extra_cflags $(esd-config --cflags)"
-
-  echocheck "esd_get_latency()"
-  statement_check esd.h 'esd_get_latency(0)' $(esd-config --libs) $(esd-config --cflags) &&
-    _esd_latency=yes && def_esd_latency='#define CONFIG_ESD_LATENCY 1'
-  echores "$_esd_latency"
-else
-  def_esd='#undef CONFIG_ESD'
-  def_esd_latency='#undef CONFIG_ESD_LATENCY'
-  noaomodules="esd $noaomodules"
-fi
-
 echocheck "RSound"
 if test "$_rsound" = auto ; then
    _rsound=no
@@ -4899,6 +4818,28 @@ if test "$_pulse" = yes ; then
 else
   def_pulse='#undef CONFIG_PULSE'
   noaomodules="pulse $noaomodules"
+fi
+
+
+echocheck "PortAudio"
+if test "$_portaudio" = auto && test "$_pthreads" != yes ; then
+    _portaudio=no
+    res_comment="pthreads not enabled"
+fi
+if test "$_portaudio" = auto ; then
+  _portaudio=no
+  if pkg_config_add 'portaudio-2.0 >= 19' ; then
+      _portaudio=yes
+  fi
+fi
+echores "$_portaudio"
+
+if test "$_portaudio" = yes ; then
+  def_portaudio='#define CONFIG_PORTAUDIO 1'
+  aomodules="portaudio $aomodules"
+else
+  def_portaudio='#undef CONFIG_PORTAUDIO'
+  noaomodules="portaudio $noaomodules"
 fi
 
 
@@ -5012,24 +4953,6 @@ echores $_coreaudio
 fi #if darwin
 
 
-if irix; then
-echocheck "SGI audio"
-if test "$_sgiaudio" = auto ; then
-  _sgiaudio=no
-  header_check dmedia/audio.h && _sgiaudio=yes
-fi
-if test "$_sgiaudio" = "yes" ; then
-  def_sgiaudio='#define CONFIG_SGI_AUDIO 1'
-  libs_mplayer="$libs_mplayer -laudio"
-  aomodules="sgi $aomodules"
-else
-  def_sgiaudio='#undef CONFIG_SGI_AUDIO'
-  noaomodules="sgi $noaomodules"
-fi
-echores "$_sgiaudio"
-fi #if irix
-
-
 # set default CD/DVD devices
 if win32 ; then
   default_cdrom_device="D:"
@@ -5085,11 +5008,10 @@ echores "$_vcd"
 echocheck "Blu-ray support"
 if test "$_bluray" = auto ; then
   _bluray=no
-  statement_check libbluray/bluray.h 'bd_get_title_info(0, 0, 0)' -lbluray && _bluray=yes
+  pkg_config_add 'libbluray >= 0.2.1' && _bluray=yes
 fi
 if test "$_bluray" = yes ; then
   def_bluray='#define CONFIG_LIBBLURAY 1'
-  extra_ldflags="$extra_ldflags -lbluray"
   inputmodules="bluray $inputmodules"
 else
   def_bluray='#undef CONFIG_LIBBLURAY'
@@ -5411,12 +5333,13 @@ else
 fi
 echores "$_theora"
 
-# Any version of libmpg123 shall be fine.
+# Any version of libmpg123 that knows MPG123_RESYNC_LIMIT shall be fine.
+# That is, 1.2.0 onwards. Recommened is 1.14 onwards, though.
 echocheck "mpg123 support"
 def_mpg123='#undef CONFIG_MPG123'
 if test "$_mpg123" = auto; then
   _mpg123=no
-  statement_check mpg123.h 'mpg123_init()' -lmpg123 && _mpg123=yes && extra_ldflags="$extra_ldflags -lmpg123"
+  pkg_config_add 'libmpg123 >= 1.2.0' && _mpg123=yes
 fi
 if test "$_mpg123" = yes ; then
   def_mpg123='#define CONFIG_MPG123 1'
@@ -6379,7 +6302,6 @@ AA = $_aa
 ALSA = $_alsa
 APPLE_IR = $_apple_ir
 APPLE_REMOTE = $_apple_remote
-ARTS = $_arts
 AUDIO_INPUT = $_audio_input
 BITMAP_FONT = $_bitmap_font
 BL = $_bl
@@ -6400,7 +6322,6 @@ DVDNAV_INTERNAL = $dvdnav_internal
 DVDREAD = $_dvdread
 DVDREAD_INTERNAL = $_dvdread_internal
 DXR3 = $_dxr3
-ESD = $_esd
 FAAD = $_faad
 FASTMEMCPY = $_fastmemcpy
 FBDEV = $_fbdev
@@ -6452,6 +6373,7 @@ PNG = $_png
 PNM = $_pnm
 PRIORITY = $_priority
 PULSE = $_pulse
+PORTAUDIO = $_portaudio
 PVR = $_pvr
 QTX_CODECS = $_qtx
 QTX_CODECS_WIN32 = $_qtx_codecs_win32
@@ -6464,7 +6386,6 @@ S3FB = $_s3fb
 SDL = $_sdl
 SPEEX = $_speex
 STREAM_CACHE = $_stream_cache
-SGIAUDIO = $_sgiaudio
 SUNAUDIO = $_sunaudio
 SVGA = $_svga
 TDFXFB = $_tdfxfb
@@ -6717,10 +6638,7 @@ $def_xmms
 
 /* Audio output drivers */
 $def_alsa
-$def_arts
 $def_coreaudio
-$def_esd
-$def_esd_latency
 $def_jack
 $def_nas
 $def_openal
@@ -6729,8 +6647,8 @@ $def_ossaudio
 $def_ossaudio_devdsp
 $def_ossaudio_devmixer
 $def_pulse
+$def_portaudio
 $def_rsound
-$def_sgiaudio
 $def_sunaudio
 $def_win32waveout
 

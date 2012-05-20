@@ -55,6 +55,7 @@ extern const struct ao_driver audio_out_v4l2;
 extern const struct ao_driver audio_out_mpegpes;
 extern const struct ao_driver audio_out_pcm;
 extern const struct ao_driver audio_out_pss;
+extern const struct ao_driver audio_out_portaudio;
 
 static const struct ao_driver * const audio_out_drivers[] = {
 // native:
@@ -82,19 +83,13 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #ifdef CONFIG_OSS_AUDIO
     &audio_out_oss,
 #endif
-#ifdef CONFIG_SGI_AUDIO
-    &audio_out_sgi,
+#ifdef CONFIG_PORTAUDIO
+    &audio_out_portaudio,
 #endif
 #ifdef CONFIG_SUN_AUDIO
     &audio_out_sun,
 #endif
     // wrappers:
-#ifdef CONFIG_ARTS
-    &audio_out_arts,
-#endif
-#ifdef CONFIG_ESD
-    &audio_out_esd,
-#endif
 #ifdef CONFIG_JACK
     &audio_out_jack,
 #endif

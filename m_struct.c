@@ -48,13 +48,6 @@ m_struct_alloc(const m_struct_t* st) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Struct %s needs defaults\n",st->name);
     return NULL;
   }
-  // Check the struct fields
-  for(i = 0 ; st->fields[i].name ; i++) {
-    if(st->fields[i].type->flags & M_OPT_TYPE_INDIRECT) {
-      mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Struct %s->%s: Option types with the indirect flag are forbidden.\n",st->name,st->fields[i].name);
-      return NULL;
-    }
-  }
 
   r = calloc(1,st->size);
   memcpy(r,st->defaults,st->size);

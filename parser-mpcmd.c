@@ -308,7 +308,8 @@ extern int mp_msg_levels[];
  * command line parsing), and --really-quiet suppresses messages printed
  * during normal options parsing.
  */
-int m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
+int m_config_preparse_command_line(m_config_t *config, int argc, char **argv,
+                                   int *verbose)
 {
     int ret = 0;
 
@@ -330,6 +331,11 @@ int m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
         // Ignore invalid options
         if (map_to_option(config, old_syntax, NULL, &opt, &param) < 0)
             continue;
+        // "-v" is handled here
+        if (!bstrcmp0(opt, "v")) {
+            (*verbose)++;
+            continue;
+        }
         // Set, non-pre-parse options will be ignored
         int r = m_config_set_option(config, opt, param, old_syntax);
         if (r < 0)
