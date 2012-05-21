@@ -2703,6 +2703,7 @@ echores "$_direct3d"
 echocheck "Directx"
 if test "$_directx" = auto ; then
   cat > $TMPC << EOF
+#include <windows.h>
 #include <ddraw.h>
 #include <dsound.h>
 int main(void) { return 0; }
