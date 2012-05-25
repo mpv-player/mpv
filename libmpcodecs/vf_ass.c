@@ -25,6 +25,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <assert.h>
+#include <libavutil/common.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -114,7 +115,8 @@ static void get_image(struct vf_instance *vf, mp_image_t *mpi)
     // width never changes, always try full DR
     mpi->priv = vf->dmpi = vf_get_image(vf->next, mpi->imgfmt, mpi->type,
                                         mpi->flags | MP_IMGFLAG_READABLE,
-                                        vf->priv->outw, vf->priv->outh);
+                                        FFMAX(mpi->width,  vf->priv->outw),
+                                        FFMAX(mpi->height, vf->priv->outh));
 
     if ((vf->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
         !(vf->dmpi->flags & MP_IMGFLAG_DIRECT)) {
