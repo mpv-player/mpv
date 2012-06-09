@@ -395,6 +395,15 @@ static int tv_set_norm_i(tvi_handle_t *tvh, int norm)
    return 1;
 }
 
+static void set_norm_and_freq(tvi_handle_t *tvh, tv_channels_t *chan)
+{
+    float freq = (float)chan->freq/1000;
+    mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n",
+           chan->number, chan->name, freq);
+    tv_set_norm_i(tvh, chan->norm);
+    tv_set_freq(tvh, (unsigned long)(freq*16));
+}
+
 static int open_tv(tvi_handle_t *tvh)
 {
     int i;
@@ -568,10 +577,7 @@ static int open_tv(tvi_handle_t *tvh)
 			tv_channel_current = tv_channel_current->next;
 	}
 
-	mp_tmsg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n", tv_channel_current->number,
-			tv_channel_current->name, (float)tv_channel_current->freq/1000);
-	tv_set_norm_i(tvh, tv_channel_current->norm);
-	tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
+	set_norm_and_freq(tvh, tv_channel_current);
 	tv_channel_last = tv_channel_current;
     } else {
     /* we need to set frequency */
@@ -988,11 +994,7 @@ int tv_step_channel(tvi_handle_t *tvh, int direction) {
 				tv_channel_current = tv_channel_current->next;
 			else
 				tv_channel_current = tv_channel_list;
-
-				tv_set_norm_i(tvh, tv_channel_current->norm);
-				tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
-				mp_tmsg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n",
-			tv_channel_current->number, tv_channel_current->name, (float)tv_channel_current->freq/1000);
+			set_norm_and_freq(tvh, tv_channel_current);
 		}
 		if (direction == TV_CHANNEL_LOWER) {
 			tv_channel_last = tv_channel_current;
@@ -1001,10 +1003,7 @@ int tv_step_channel(tvi_handle_t *tvh, int direction) {
 			else
 				while (tv_channel_current->next)
 					tv_channel_current = tv_channel_current->next;
-				tv_set_norm_i(tvh, tv_channel_current->norm);
-				tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
-				mp_tmsg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n",
-			tv_channel_current->number, tv_channel_current->name, (float)tv_channel_current->freq/1000);
+			set_norm_and_freq(tvh, tv_channel_current);
 		}
 	} else tv_step_channel_real(tvh, direction);
 	return 1;
@@ -1044,10 +1043,7 @@ int tv_set_channel(tvi_handle_t *tvh, char *channel) {
 		for (i = 1; i < channel_int; i++)
 			if (tv_channel_current->next)
 				tv_channel_current = tv_channel_current->next;
-		mp_tmsg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n", tv_channel_current->number,
-				tv_channel_current->name, (float)tv_channel_current->freq/1000);
-		tv_set_norm_i(tvh, tv_channel_current->norm);
-		tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
+		set_norm_and_freq(tvh, tv_channel_current);
 	} else tv_set_channel_real(tvh, channel);
 	return 1;
 }
@@ -1062,10 +1058,7 @@ int tv_last_channel(tvi_handle_t *tvh) {
 		tv_channel_last = tv_channel_current;
 		tv_channel_current = tmp;
 
-		mp_tmsg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n", tv_channel_current->number,
-				tv_channel_current->name, (float)tv_channel_current->freq/1000);
-		tv_set_norm_i(tvh, tv_channel_current->norm);
-		tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
+		set_norm_and_freq(tvh, tv_channel_current);
 	} else {
 		int i;
 		struct CHANLIST cl;
