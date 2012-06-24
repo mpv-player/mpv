@@ -189,6 +189,13 @@ void vo_cocoa_uninit(struct vo *vo)
     s = nil;
 }
 
+static int current_screen_has_dock_or_menubar(void)
+{
+    NSRect f  = s->screen_frame;
+    NSRect vf = [s->screen_handle visibleFrame];
+    return f.size.height > vf.size.height || f.size.width > vf.size.width;
+}
+
 void update_screen_info(void)
 {
     s->screen_array = [NSScreen screens];
@@ -510,7 +517,8 @@ void create_menu()
 {
     if (!vo_fs) {
         update_screen_info();
-        [NSApp setPresentationOptions:NSApplicationPresentationHideDock|NSApplicationPresentationHideMenuBar];
+        if (current_screen_has_dock_or_menubar())
+            [NSApp setPresentationOptions:NSApplicationPresentationHideDock|NSApplicationPresentationHideMenuBar];
         s->windowed_frame = [self frame];
         [self setHasShadow:NO];
         [self setStyleMask:s->fullscreen_mask];
