@@ -95,13 +95,29 @@ static const struct {
     char *s;
     uint32_t v;
 } subrip_web_colors[] = {
-    /* 16 named HTML colors in BGR format */
-    {"red",     0x0000ff}, {"blue",   0xff0000}, {"lime",   0x00ff00},
-    {"aqua",    0xffff00}, {"purple", 0x800080}, {"yellow", 0x00ffff},
-    {"fuchsia", 0xff00ff}, {"white",  0xffffff}, {"gray",   0x808080},
-    {"maroon",  0x000080}, {"olive",  0x008080}, {"black",  0x000000},
-    {"silver",  0xc0c0c0}, {"teal",   0x808000}, {"green",  0x008000},
-    {"navy",    0x800000}
+    /* Named CSS3 colors in BGR format; a subset of those
+       at http://www.w3.org/TR/css3-color/#svg-color */
+    {"aqua",    0xffff00},
+    {"black",   0x000000},
+    {"blue",    0xff0000},
+    {"cyan",    0xffff00},
+    {"fuchsia", 0xff00ff},
+    {"gray",    0x808080},
+    {"green",   0x008000},
+    {"grey",    0x808080},
+    {"lime",    0x00ff00},
+    {"magenta", 0xff00ff},
+    {"maroon",  0x000080},
+    {"navy",    0x800000},
+    {"olive",   0x008080},
+    {"orange",  0x00a5ff},
+    {"pink",    0xcbc0ff},
+    {"purple",  0x800080},
+    {"red",     0x0000ff},
+    {"silver",  0xc0c0c0},
+    {"teal",    0x808000},
+    {"white",   0xffffff},
+    {"yellow",  0x00ffff},
 };
 
 #define SUBRIP_MAX_STACKED_FONT_TAGS    16
