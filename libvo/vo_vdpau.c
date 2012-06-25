@@ -43,7 +43,7 @@
 #include "aspect.h"
 #include "csputils.h"
 #include "sub/sub.h"
-#include "subopt-helper.h"
+#include "m_option.h"
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"
 #include "osdep/timer.h"
@@ -1633,66 +1633,16 @@ static void uninit(struct vo *vo)
 
 static int preinit(struct vo *vo, const char *arg)
 {
-    int i;
-    int user_colorspace = 0;
-    int studio_levels = 0;
-
-    struct vdpctx *vc = talloc_zero(vo, struct vdpctx);
-    vo->priv = vc;
+    struct vdpctx *vc = vo->priv;
 
     // Mark everything as invalid first so uninit() can tell what has been
     // allocated
     mark_vdpau_objects_uninitialized(vo);
 
     vc->colorspace = (struct mp_csp_details) MP_CSP_DETAILS_DEFAULTS;
-    vc->deint_type = 3;
-    vc->chroma_deint = 1;
-    vc->flip_offset_window = 50;
-    vc->flip_offset_fs = 50;
-    vc->num_output_surfaces = 3;
     vc->video_eq.capabilities = MP_CSP_EQ_CAPS_COLORMATRIX;
-    const opt_t subopts[] = {
-        {"deint",   OPT_ARG_INT,   &vc->deint,   NULL},
-        {"chroma-deint", OPT_ARG_BOOL,  &vc->chroma_deint,  NULL},
-        {"pullup",  OPT_ARG_BOOL,  &vc->pullup,  NULL},
-        {"denoise", OPT_ARG_FLOAT, &vc->denoise, NULL},
-        {"sharpen", OPT_ARG_FLOAT, &vc->sharpen, NULL},
-        {"colorspace", OPT_ARG_INT, &user_colorspace, NULL},
-        {"studio", OPT_ARG_BOOL, &studio_levels, NULL},
-        {"hqscaling", OPT_ARG_INT, &vc->hqscaling, NULL},
-        {"fps",     OPT_ARG_FLOAT, &vc->user_fps, NULL},
-        {"queuetime_windowed", OPT_ARG_INT, &vc->flip_offset_window, NULL},
-        {"queuetime_fs", OPT_ARG_INT, &vc->flip_offset_fs, NULL},
-        {"output_surfaces", OPT_ARG_INT, &vc->num_output_surfaces, NULL},
-        {NULL}
-    };
-    if (subopt_parse(arg, subopts) != 0) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[vdpau] Could not parse suboptions.\n");
-        return -1;
-    }
-    if (vc->hqscaling < 0 || vc->hqscaling > 9) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[vdpau] Invalid value for suboption "
-               "hqscaling\n");
-        return -1;
-    }
-    if (vc->num_output_surfaces < 2) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[vdpau] Invalid suboption "
-               "output_surfaces: can't use less than 2 surfaces\n");
-        return -1;
-    }
-    if (user_colorspace != 0 || studio_levels != 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] \"colorspace\" and \"studio\""
-               " suboptions have been removed. Use options --colormatrix and"
-               " --colormatrix-output-range=limited instead.\n");
-        return -1;
-    }
-    if (vc->num_output_surfaces > MAX_OUTPUT_SURFACES) {
-        mp_msg(MSGT_VO, MSGL_WARN, "[vdpau] Number of output surfaces "
-               "is limited to %d.\n", MAX_OUTPUT_SURFACES);
-        vc->num_output_surfaces = MAX_OUTPUT_SURFACES;
-    }
-    if (vc->deint)
-        vc->deint_type = FFABS(vc->deint);
+
+    vc->deint_type = vc->deint ? FFABS(vc->deint) : 3;
     if (vc->deint < 0)
         vc->deint = 0;
 
@@ -1709,7 +1659,7 @@ static int preinit(struct vo *vo, const char *arg)
     }
 
     // full grayscale palette.
-    for (i = 0; i < PALETTE_SIZE; ++i)
+    for (int i = 0; i < PALETTE_SIZE; ++i)
         vc->palette[i] = (i << 16) | (i << 8) | i;
 
     return 0;
@@ -1869,6 +1819,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return VO_NOTIMPL;
 }
 
+#undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct vdpctx
+
 const struct vo_driver video_out_vdpau = {
     .is_new = true,
     .buffer_frames = true,
@@ -1888,4 +1841,25 @@ const struct vo_driver video_out_vdpau = {
     .flip_page_timed = flip_page_timed,
     .check_events = check_events,
     .uninit = uninit,
+    .privsize = sizeof(struct vdpctx),
+    .options = (const struct m_option []){
+        OPT_INTRANGE("deint", deint, 0, -4, 4),
+        OPT_FLAG_ON("chroma-deint", chroma_deint, 0, OPTDEF_INT(1)),
+        OPT_FLAG_OFF("nochroma-deint", chroma_deint, 0),
+        OPT_MAKE_FLAGS("pullup", pullup, 0),
+        OPT_FLOATRANGE("denoise", denoise, 0, 0, 1),
+        OPT_FLOATRANGE("sharpen", sharpen, 0, -1, 1),
+        OPT_ERRORMESSAGE("colorspace", "vo_vdpau suboption \"colorspace\" has "
+                         "been removed. Use --colormatrix instead.\n"),
+        OPT_ERRORMESSAGE("studio", "vo_vdpau suboption \"studio\" has been "
+                         "removed. Use --colormatrix-output-range=limited "
+                         "instead.\n"),
+        OPT_INTRANGE("hqscaling", hqscaling, 0, 0, 9),
+        OPT_FLOAT("fps", user_fps, 0),
+        OPT_INT("queuetime_windowed", flip_offset_window, 0, OPTDEF_INT(50)),
+        OPT_INT("queuetime_fs", flip_offset_fs, 0, OPTDEF_INT(50)),
+        OPT_INTRANGE("output_surfaces", num_output_surfaces, 0,
+                     2, MAX_OUTPUT_SURFACES, OPTDEF_INT(3)),
+        {NULL},
+    }
 };

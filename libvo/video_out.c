@@ -36,8 +36,7 @@
 #include "old_vo_wrapper.h"
 #include "input/input.h"
 #include "mp_fifo.h"
-
-
+#include "m_config.h"
 #include "mp_msg.h"
 
 #include "osdep/shmem.h"
@@ -254,8 +253,21 @@ const struct vo_driver *video_out_drivers[] =
 };
 
 
-static int vo_preinit(struct vo *vo, const char *arg)
+static int vo_preinit(struct vo *vo, char *arg)
 {
+    if (vo->driver->privsize)
+        vo->priv = talloc_zero_size(vo, vo->driver->privsize);
+    if (vo->driver->options) {
+        struct m_config *cfg = m_config_simple(vo->driver->options);
+        m_config_initialize(cfg, vo->priv);
+        char n[50];
+        int l = snprintf(n, sizeof(n), "vo/%s", vo->driver->info->short_name);
+        assert(l < sizeof(n));
+        int r = m_config_parse_suboptions(cfg, vo->priv, n, arg);
+        talloc_free(cfg);
+        if (r < 0)
+            return r;
+    }
     return vo->driver->preinit(vo, arg);
 }
 
