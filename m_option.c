@@ -458,6 +458,9 @@ static int parse_str(const m_option_t *opt, struct bstr name,
                      struct bstr param, bool ambiguous_param, void *dst,
                      void *talloc_ctx)
 {
+    if (param.start == NULL)
+        return M_OPT_MISSING_PARAM;
+
     if ((opt->flags & M_OPT_MIN) && (param.len < opt->min)) {
         mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                "Parameter must be >= %d chars: %.*s\n",
@@ -891,8 +894,7 @@ static int parse_subconf(const m_option_t *opt, struct bstr name,
         if (dst) {
             lst = talloc_realloc(NULL, lst, char *, 2 * (nr + 2));
             lst[2 * nr] = bstrdup0(lst, subopt);
-            lst[2 * nr + 1] = subparam.len == 0 ? NULL :
-                bstrdup0(lst, subparam);
+            lst[2 * nr + 1] = bstrdup0(lst, subparam);
             memset(&lst[2 * (nr + 1)], 0, 2 * sizeof(char *));
             nr++;
         }

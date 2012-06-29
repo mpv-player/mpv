@@ -36,14 +36,18 @@ struct bstr {
 
 // demux_rtp.cpp (live555) C++ compilation workaround
 #ifndef __cplusplus
+// If str.start is NULL, return NULL.
 static inline char *bstrdup0(void *talloc_ctx, struct bstr str)
 {
     return talloc_strndup(talloc_ctx, (char *)str.start, str.len);
 }
 
+// Return start = NULL iff that is true for the original.
 static inline struct bstr bstrdup(void *talloc_ctx, struct bstr str)
 {
-    struct bstr r = { talloc_strndup(talloc_ctx, str.start, str.len), str.len };
+    struct bstr r = { NULL, str.len };
+    if (str.start)
+        r.start = talloc_memdup(talloc_ctx, str.start, str.len);
     return r;
 }
 
