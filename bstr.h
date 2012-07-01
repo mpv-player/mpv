@@ -64,6 +64,7 @@ int bstrcspn(struct bstr str, const char *reject);
 
 int bstr_find(struct bstr haystack, struct bstr needle);
 struct bstr *bstr_splitlines(void *talloc_ctx, struct bstr str);
+struct bstr bstr_getline(struct bstr str, struct bstr *rest);
 struct bstr bstr_lstrip(struct bstr str);
 struct bstr bstr_strip(struct bstr str);
 struct bstr bstr_split(struct bstr str, const char *sep, struct bstr *rest);
@@ -133,6 +134,11 @@ static inline int bstrcasecmp0(struct bstr str1, const char *str2)
 static inline int bstr_find0(struct bstr haystack, const char *needle)
 {
     return bstr_find(haystack, bstr(needle));
+}
+
+static inline int bstr_eatstart0(struct bstr *s, char *prefix)
+{
+    return bstr_eatstart(s, bstr(prefix));
 }
 
 #endif

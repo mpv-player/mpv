@@ -1,12 +1,5 @@
 /*
- * codec.conf parser
- *
- * to compile test application:
- *  cc -I. -DTESTING -o codec-cfg-test codec-cfg.c mp_msg.o osdep/getch2.o -ltermcap
- * to compile CODECS2HTML:
- *   gcc -DCODECS2HTML -o codecs2html codec-cfg.c mp_msg.o
- *
- * TODO: implement informat in CODECS2HTML too
+ * codecs.conf parser
  *
  * Copyright (C) 2001 Szabolcs Berecz <szabi@inf.elte.hu>
  *
@@ -44,24 +37,18 @@
 
 #include "config.h"
 #include "mp_msg.h"
-#ifdef CODECS2HTML
-#define mp_tmsg mp_msg
-#ifdef __GNUC__
-#define mp_msg(t, l, m, args...) fprintf(stderr, m, ##args)
-#else
-#define mp_msg(t, l, ...) fprintf(stderr, __VA_ARGS__)
-#endif
-#endif
-
-
 #include "libmpcodecs/img_format.h"
 #include "codec-cfg.h"
+#include "bstr.h"
+#include "stream/stream.h"
+#include "path.h"
 
-#ifdef CODECS2HTML
-#define CODEC_CFG_MIN 20100000
-#else
+static const char embedded_file[] =
 #include "codecs.conf.h"
-#endif
+    ;
+static const struct bstr builtin_codecs_conf = {
+    .start = (char *)embedded_file, .len = sizeof(embedded_file) - 1
+};
 
 #define mmioFOURCC( ch0, ch1, ch2, ch3 )				\
 		( (uint32_t)(uint8_t)(ch0) | ( (uint32_t)(uint8_t)(ch1) << 8 ) |	\
@@ -70,8 +57,6 @@
 #define PRINT_LINENUM mp_msg(MSGT_CODECCFG,MSGL_ERR," at line %d\n", line_num)
 
 #define MAX_NR_TOKEN    16
-
-#define MAX_LINE_LEN    1000
 
 #define RET_EOF         -1
 #define RET_EOL         -2
@@ -96,6 +81,8 @@ static int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
         goto err_out_too_many;
 
     do {
+        if (strlen(s) < 4)
+            goto err_out_parse_error;
         tmp = mmioFOURCC(s[0], s[1], s[2], s[3]);
         for (j = 0; j < i; j++)
             if (tmp == fourcc[j])
@@ -393,7 +380,7 @@ err_out_parse_error:
     return 0;
 }
 
-static FILE *fp;
+static struct bstr filetext;
 static int line_num = 0;
 static char *line;
 static char *token[MAX_NR_TOKEN];
@@ -413,8 +400,11 @@ static int get_token(int min, int max)
     memset(token, 0x00, sizeof(*token) * max);
 
     if (read_nextline) {
-        if (!fgets(line, MAX_LINE_LEN, fp))
+        if (!filetext.len)
             goto out_eof;
+        struct bstr nextline = bstr_getline(filetext, &filetext);
+        line = nextline.start;
+        line[nextline.len - 1] = 0;
         line_pos = 0;
         ++line_num;
         read_nextline = 0;
@@ -471,6 +461,16 @@ int parse_codec_cfg(const char *cfgfile)
     int *nr_codecsp;
     int codec_type;     /* TYPE_VIDEO/TYPE_AUDIO */
     int tmp, i;
+    int codec_cfg_min;
+
+    for (struct bstr s = builtin_codecs_conf; ; bstr_getline(s, &s)) {
+        if (!s.len)
+            abort();
+        if (bstr_eatstart0(&s, "release ")) {
+            codec_cfg_min = atoi(s.start);
+            break;
+        }
+    }
 
     // in case we call it a second time
     codecs_uninit_free();
@@ -478,31 +478,27 @@ int parse_codec_cfg(const char *cfgfile)
     nr_vcodecs = 0;
     nr_acodecs = 0;
 
-    if(cfgfile==NULL) {
-#ifdef CODECS2HTML
-        return 0;
-#else
-        /* following casts are harmless since {video,audio}_codecs will stay
-         * untouched in this case */
-        video_codecs = (codecs_t *)builtin_video_codecs;
-        audio_codecs = (codecs_t *)builtin_audio_codecs;
-        nr_vcodecs = sizeof(builtin_video_codecs)/sizeof(codecs_t);
-        nr_acodecs = sizeof(builtin_audio_codecs)/sizeof(codecs_t);
-        return 1;
-#endif
-    }
+    if (cfgfile) {
+        // Avoid printing errors from open_stream when trying optional files
+        if (!mp_path_exists(cfgfile)) {
+            mp_tmsg(MSGT_CODECCFG, MSGL_V,
+                    "No optional codecs config file: %s\n", cfgfile);
+            return 0;
+        }
+        mp_msg(MSGT_CODECCFG, MSGL_V, "Reading codec config file: %s\n",
+                cfgfile);
+        struct stream *s = open_stream(cfgfile, NULL, NULL);
+        if (!s)
+            return 0;
+        filetext = stream_read_complete(s, NULL, 10000000, 1);
+        free_stream(s);
+        if (!filetext.start)
+            return 0;
+    } else
+        // Parsing modifies the data
+        filetext = bstrdup(NULL, builtin_codecs_conf);
+    void *tmpmem = filetext.start;
 
-    mp_tmsg(MSGT_CODECCFG,MSGL_V,"Reading %s: ", cfgfile);
-
-    if ((fp = fopen(cfgfile, "r")) == NULL) {
-        mp_tmsg(MSGT_CODECCFG,MSGL_V,"Can't open '%s': %s\n", cfgfile, strerror(errno));
-        return 0;
-    }
-
-    if ((line = malloc(MAX_LINE_LEN + 1)) == NULL) {
-        mp_tmsg(MSGT_CODECCFG,MSGL_FATAL,"Can't get memory for 'line': %s\n", strerror(errno));
-        return 0;
-    }
     read_nextline = 1;
 
     /*
@@ -517,7 +513,7 @@ int parse_codec_cfg(const char *cfgfile)
         if (get_token(1, 2) < 0)
             goto err_out_parse_error;
         tmp = atoi(token[0]);
-        if (tmp < CODEC_CFG_MIN)
+        if (tmp < codec_cfg_min)
             goto err_out_release_num;
         codecs_conf_release = tmp;
         while ((tmp = get_token(1, 1)) == RET_EOL)
@@ -685,13 +681,13 @@ int parse_codec_cfg(const char *cfgfile)
     }
     if (!validate_codec(codec, codec_type))
         goto err_out_not_valid;
-    mp_tmsg(MSGT_CODECCFG,MSGL_INFO,"%d audio & %d video codecs\n", nr_acodecs, nr_vcodecs);
+    mp_tmsg(MSGT_CODECCFG, MSGL_V, "%d audio & %d video codecs\n", nr_acodecs,
+            nr_vcodecs);
     if(video_codecs) video_codecs[nr_vcodecs].name = NULL;
     if(audio_codecs) audio_codecs[nr_acodecs].name = NULL;
 out:
-    free(line);
+    talloc_free(tmpmem);
     line=NULL;
-    fclose(fp);
     return 1;
 
 err_out_parse_error:
@@ -701,10 +697,9 @@ err_out_print_linenum:
 err_out:
     codecs_uninit_free();
 
-    free(line);
+    talloc_free(tmpmem);
     line=NULL;
     line_num = 0;
-    fclose(fp);
     return 0;
 err_out_not_valid:
     mp_tmsg(MSGT_CODECCFG,MSGL_ERR,"Codec is not defined correctly.");
@@ -848,337 +843,3 @@ void list_codecs(int audioflag){
             mp_msg(MSGT_CODECCFG,MSGL_INFO,"%-11s %-9s %s  %s\n",c->name,c->drv,s,c->info);
         }
 }
-
-
-#ifdef CODECS2HTML
-static void wrapline(FILE *f2,char *s){
-    int c;
-    if(!s){
-        fprintf(f2,"-");
-        return;
-    }
-    while((c=*s++)){
-        if(c==',') fprintf(f2,"<br>"); else fputc(c,f2);
-    }
-}
-
-static void parsehtml(FILE *f1,FILE *f2,codecs_t *codec){
-    int c,d;
-    while((c=fgetc(f1))>=0){
-        if(c!='%'){
-            fputc(c,f2);
-            continue;
-        }
-        d=fgetc(f1);
-
-        switch(d){
-        case '.':
-        return; // end of section
-        case 'n':
-            wrapline(f2,codec->name); break;
-        case 'i':
-            wrapline(f2,codec->info); break;
-        case 'c':
-            wrapline(f2,codec->comment); break;
-        case 'd':
-            wrapline(f2,codec->dll); break;
-        case 'D':
-            fprintf(f2,"%c",!strcmp(codec->drv,"dshow")?'+':'-'); break;
-        case 'F':
-            for(d=0;d<CODECS_MAX_FOURCC;d++)
-                if(!d || codec->fourcc[d]!=0xFFFFFFFF)
-                    fprintf(f2,"%s%.4s",d?"<br>":"",(codec->fourcc[d]==0xFFFFFFFF || codec->fourcc[d]<0x20202020)?!d?"-":"":(char*) &codec->fourcc[d]);
-            break;
-        case 'f':
-            for(d=0;d<CODECS_MAX_FOURCC;d++)
-                if(codec->fourcc[d]!=0xFFFFFFFF)
-                    fprintf(f2,"%s0x%X",d?"<br>":"",codec->fourcc[d]);
-            break;
-        case 'Y':
-            for(d=0;d<CODECS_MAX_OUTFMT;d++)
-                if(codec->outfmt[d]!=0xFFFFFFFF){
-                    for (c=0; fmt_table[c].name; c++)
-                        if(fmt_table[c].num==codec->outfmt[d]) break;
-                    if(fmt_table[c].name)
-                        fprintf(f2,"%s%s",d?"<br>":"",fmt_table[c].name);
-                }
-            break;
-        default:
-            fputc(c,f2);
-            fputc(d,f2);
-        }
-    }
-}
-
-void skiphtml(FILE *f1){
-    int c,d;
-    while((c=fgetc(f1))>=0){
-        if(c!='%'){
-            continue;
-        }
-        d=fgetc(f1);
-        if(d=='.') return; // end of section
-    }
-}
-
-static void print_int_array(const unsigned int* a, int size)
-{
-    printf("{ ");
-    while (size--)
-        if(abs(*a)<256)
-            printf("%d%s", *a++, size?", ":"");
-        else
-            printf("0x%X%s", *a++, size?", ":"");
-    printf(" }");
-}
-
-static void print_char_array(const unsigned char* a, int size)
-{
-    printf("{ ");
-    while (size--)
-        if((*a)<10)
-            printf("%d%s", *a++, size?", ":"");
-        else
-            printf("0x%02x%s", *a++, size?", ":"");
-    printf(" }");
-}
-
-static void print_string(const char* s)
-{
-    if (!s) printf("NULL");
-    else printf("\"%s\"", s);
-}
-
-int main(int argc, char* argv[])
-{
-    codecs_t *cl;
-    FILE *f1;
-    FILE *f2;
-    int c,d,i;
-    int pos;
-    int section=-1;
-    int nr_codecs;
-    int win32=-1;
-    int dshow=-1;
-    int win32ex=-1;
-
-    /*
-     * Take path to codecs.conf from command line, or fall back on
-     * etc/codecs.conf
-     */
-    if (!(nr_codecs = parse_codec_cfg((argc>1)?argv[1]:"etc/codecs.conf")))
-        exit(1);
-    if (codecs_conf_release < CODEC_CFG_MIN)
-        exit(1);
-
-    if (argc > 1) {
-        int i, j;
-        const char* nm[2];
-        codecs_t* cod[2];
-        int nr[2];
-
-        nm[0] = "builtin_video_codecs";
-        cod[0] = video_codecs;
-        nr[0] = nr_vcodecs;
-
-        nm[1] = "builtin_audio_codecs";
-        cod[1] = audio_codecs;
-        nr[1] = nr_acodecs;
-
-        printf("/* GENERATED FROM %s, DO NOT EDIT! */\n\n",argv[1]);
-        printf("#include <stddef.h>\n");
-        printf("#include \"codec-cfg.h\"\n\n");
-        printf("#define CODEC_CFG_MIN %i\n\n", codecs_conf_release);
-
-        for (i=0; i<2; i++) {
-            printf("const codecs_t %s[] = {\n", nm[i]);
-            for (j = 0; j < nr[i]; j++) {
-                printf("{");
-
-                print_int_array(cod[i][j].fourcc, CODECS_MAX_FOURCC);
-                printf(", /* fourcc */\n");
-
-                print_int_array(cod[i][j].fourccmap, CODECS_MAX_FOURCC);
-                printf(", /* fourccmap */\n");
-
-                print_int_array(cod[i][j].outfmt, CODECS_MAX_OUTFMT);
-                printf(", /* outfmt */\n");
-
-                print_char_array(cod[i][j].outflags, CODECS_MAX_OUTFMT);
-                printf(", /* outflags */\n");
-
-                print_int_array(cod[i][j].infmt, CODECS_MAX_INFMT);
-                printf(", /* infmt */\n");
-
-                print_char_array(cod[i][j].inflags, CODECS_MAX_INFMT);
-                printf(", /* inflags */\n");
-
-                print_string(cod[i][j].name);    printf(", /* name */\n");
-                print_string(cod[i][j].info);    printf(", /* info */\n");
-                print_string(cod[i][j].comment); printf(", /* comment */\n");
-                print_string(cod[i][j].dll);     printf(", /* dll */\n");
-                print_string(cod[i][j].drv);     printf(", /* drv */\n");
-
-                printf("{ 0x%08lx, %hu, %hu,",
-                       cod[i][j].guid.f1,
-                       cod[i][j].guid.f2,
-                       cod[i][j].guid.f3);
-                print_char_array(cod[i][j].guid.f4, sizeof(cod[i][j].guid.f4));
-                printf(" }, /* GUID */\n");
-                printf("%hd /* flags */, %hd /* status */, %hd /* cpuflags */ }\n",
-                       cod[i][j].flags,
-                       cod[i][j].status,
-                       cod[i][j].cpuflags);
-                if (j < nr[i]) printf(",\n");
-            }
-            printf("};\n\n");
-        }
-        exit(0);
-    }
-
-    f1=fopen("DOCS/tech/codecs-in.html","rb"); if(!f1) exit(1);
-    f2=fopen("DOCS/codecs-status.html","wb"); if(!f2) exit(1);
-
-    while((c=fgetc(f1))>=0){
-        if(c!='%'){
-            fputc(c,f2);
-            continue;
-        }
-        d=fgetc(f1);
-        if(d>='0' && d<='9'){
-            // begin section
-            section=d-'0';
-            //printf("BEGIN %d\n",section);
-            if(section>=5){
-                // audio
-                cl = audio_codecs;
-                nr_codecs = nr_acodecs;
-                dshow=7;win32=4;
-            } else {
-                // video
-                cl = video_codecs;
-                nr_codecs = nr_vcodecs;
-                dshow=4;win32=2;win32ex=6;
-            }
-            pos=ftell(f1);
-            for(i=0;i<nr_codecs;i++){
-                fseek(f1,pos,SEEK_SET);
-                switch(section){
-                case 0:
-                case 5:
-                    if(cl[i].status==CODECS_STATUS_WORKING)
-//                if(!(!strcmp(cl[i].drv,"vfw") || !strcmp(cl[i].drv,"dshow") || !strcmp(cl[i].drv,"vfwex") || !strcmp(cl[i].drv,"acm")))
-                        parsehtml(f1,f2,&cl[i]);
-                    break;
-#if 0
-                case 1:
-                case 6:
-                    if(cl[i].status==CODECS_STATUS_WORKING)
-                        if((!strcmp(cl[i].drv,"vfw") || !strcmp(cl[i].drv,"dshow") || !strcmp(cl[i].drv,"vfwex") || !strcmp(cl[i].drv,"acm")))
-                            parsehtml(f1,f2,&cl[i]);
-                    break;
-#endif
-                case 2:
-                case 7:
-                    if(cl[i].status==CODECS_STATUS_PROBLEMS)
-                        parsehtml(f1,f2,&cl[i]);
-                    break;
-                case 3:
-                case 8:
-                    if(cl[i].status==CODECS_STATUS_NOT_WORKING)
-                        parsehtml(f1,f2,&cl[i]);
-                    break;
-                case 4:
-                case 9:
-                    if(cl[i].status==CODECS_STATUS_UNTESTED)
-                        parsehtml(f1,f2,&cl[i]);
-                    break;
-                default:
-                    printf("Warning! unimplemented section: %d\n",section);
-                }
-            }
-            fseek(f1,pos,SEEK_SET);
-            skiphtml(f1);
-
-            continue;
-        }
-        fputc(c,f2);
-        fputc(d,f2);
-    }
-
-    fclose(f2);
-    fclose(f1);
-    return 0;
-}
-
-#endif
-
-#ifdef TESTING
-int main(void)
-{
-    codecs_t *c;
-    int i,j, nr_codecs, state;
-
-    if (!(parse_codec_cfg("etc/codecs.conf")))
-        return 0;
-    if (!video_codecs)
-        printf("no videoconfig.\n");
-    if (!audio_codecs)
-        printf("no audioconfig.\n");
-
-    printf("videocodecs:\n");
-    c = video_codecs;
-    nr_codecs = nr_vcodecs;
-    state = 0;
-next:
-    if (c) {
-        printf("number of %scodecs: %d\n", state==0?"video":"audio",
-               nr_codecs);
-        for(i=0;i<nr_codecs;i++, c++){
-            printf("\n============== %scodec %02d ===============\n",
-                   state==0?"video":"audio",i);
-            printf("name='%s'\n",c->name);
-            printf("info='%s'\n",c->info);
-            printf("comment='%s'\n",c->comment);
-            printf("dll='%s'\n",c->dll);
-            /* printf("flags=%X  driver=%d status=%d cpuflags=%d\n",
-                      c->flags, c->driver, c->status, c->cpuflags); */
-            printf("flags=%X status=%d cpuflags=%d\n",
-                   c->flags, c->status, c->cpuflags);
-
-            for(j=0;j<CODECS_MAX_FOURCC;j++){
-                if(c->fourcc[j]!=0xFFFFFFFF){
-                    printf("fourcc %02d:  %08X (%.4s) ===> %08X (%.4s)\n",j,c->fourcc[j],(char *) &c->fourcc[j],c->fourccmap[j],(char *) &c->fourccmap[j]);
-                }
-            }
-
-            for(j=0;j<CODECS_MAX_OUTFMT;j++){
-                if(c->outfmt[j]!=0xFFFFFFFF){
-                    printf("outfmt %02d:  %08X (%.4s)  flags: %d\n",j,c->outfmt[j],(char *) &c->outfmt[j],c->outflags[j]);
-                }
-            }
-
-            for(j=0;j<CODECS_MAX_INFMT;j++){
-                if(c->infmt[j]!=0xFFFFFFFF){
-                    printf("infmt %02d:  %08X (%.4s)  flags: %d\n",j,c->infmt[j],(char *) &c->infmt[j],c->inflags[j]);
-                }
-            }
-
-            printf("GUID: %08lX %04X %04X",c->guid.f1,c->guid.f2,c->guid.f3);
-            for(j=0;j<8;j++) printf(" %02X",c->guid.f4[j]);
-            printf("\n");
-
-
-        }
-    }
-    if (!state) {
-        printf("audiocodecs:\n");
-        c = audio_codecs;
-        nr_codecs = nr_acodecs;
-        state = 1;
-        goto next;
-    }
-    return 0;
-}
-
-#endif

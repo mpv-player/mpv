@@ -471,7 +471,6 @@ Miscellaneous options:
   --enable-runtime-cpudetection    enable runtime CPU detection [disable]
   --enable-cross-compile enable cross-compilation [disable]
   --cc=COMPILER          C compiler to build MPlayer [gcc]
-  --host-cc=COMPILER     C compiler for tools needed while building [gcc]
   --as=ASSEMBLER         assembler to build MPlayer [as]
   --nm=NM                nm tool to build MPlayer [nm]
   --yasm=YASM            Yasm assembler to build MPlayer [yasm]
@@ -773,9 +772,6 @@ for ac_option do
     ;;
   --cc=*)
     _cc=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --host-cc=*)
-    _host_cc=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --as=*)
     _as=$(echo $ac_option | cut -d '=' -f 2)
@@ -1207,7 +1203,6 @@ if test $_cross_compile = yes; then
   tmp_run() {
     return 0
   }
-  test "$_host_cc" || _host_cc=cc
 fi
 
 tool_prefix=""
@@ -1470,10 +1465,6 @@ int main(void) {
 EOF
   cc_check && host_arch=x86_64 || host_arch=i386
 fi
-
-echocheck "host cc"
-test "$_host_cc" || _host_cc=$_cc
-echores $_host_cc
 
 echo "Detected operating system: $system_name"
 echo "Detected host architecture: $host_arch"
@@ -6239,7 +6230,6 @@ AR      = $_ar
 AS      = $_cc
 CC      = $_cc
 CXX     = $_cc
-HOST_CC = $_host_cc
 INSTALL = $_install
 INSTALLSTRIP = $_install_strip
 WINDRES = $_windres
