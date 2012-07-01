@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Generate vdpau_template.c
 
 functions = """

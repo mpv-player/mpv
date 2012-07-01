@@ -598,6 +598,15 @@ codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 	./$^ > $@
 
+libvo/vdpau_template.c: TOOLS/vdpau_functions.py
+	./$< > $@
+
+libmpdemux/ebml_types.h: TOOLS/matroska.py
+	./$< --generate-header > $@
+
+libmpdemux/ebml_defs.c: TOOLS/matroska.py
+	./$< --generate-definitions > $@
+
 # ./configure must be rerun if it changed
 config.mak: configure
 	@echo "############################################################"
@@ -631,6 +640,9 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 # Make sure all generated header files are created.
 codec-cfg.o: codecs.conf.h
 mpcommon.o osdep/mplayer-rc.o: version.h
+libvo/vo_vdpau.o: libvo/vdpau_template.c
+libmpdemux/ebml.o libmpdemux/demux_mkv.o: libmpdemux/ebml_types.h
+libmpdemux/ebml.o: libmpdemux/ebml_defs.c
 
 # Files that depend on libavcodec internals
 libmpcodecs/vf_fspp.o libmpcodecs/vf_mcdeint.o libmpcodecs/vf_spp.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
@@ -702,6 +714,8 @@ distclean: clean testsclean toolsclean driversclean
 	-$(RM) -r locale
 	-$(RM) $(call ADD_ALL_DIRS,/*.d)
 	-$(RM) config.log config.mak config.h codecs.conf.h version.h TAGS tags
+	-$(RM) libvo/vdpau_template.c
+	-$(RM) libmpdemux/ebml_types.h libmpdemux/ebml_defs.c
 	-$(RM) $(call ADD_ALL_EXESUFS,codec-cfg cpuinfo)
 
 doxygen:
@@ -712,10 +726,6 @@ TAGS:
 
 tags:
 	$(RM) $@; find . -name '*.[chS]' -o -name '*.asm' | xargs ctags -a
-
-generated_ebml:
-	TOOLS/matroska.py --generate-header >libmpdemux/ebml_types.h
-	TOOLS/matroska.py --generate-definitions >libmpdemux/ebml_defs.c
 
 ###### tests / tools #######
 
