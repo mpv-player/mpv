@@ -456,9 +456,11 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
     struct vdpctx *vc = vo->priv;
-    talloc_free(vc->vdp); // In case this is reinitialization after preemption
-    struct vdp_functions *vdp = talloc_zero(vc, struct vdp_functions);
-    vc->vdp = vdp;
+    if (vc->vdp)  // reinitialization after preemption
+        memset(vc->vdp, 0, sizeof(*vc->vdp));
+    else
+        vc->vdp = talloc_zero(vc, struct vdp_functions);
+    struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
 
     struct vdp_function {
