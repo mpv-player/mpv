@@ -702,14 +702,13 @@ uninstall:
 	$(RM) $(foreach lang,$(MSG_LANGS),$(LOCALEDIR)/$(lang)/LC_MESSAGES/mplayer.1)
 
 clean:
-	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
+	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.d /*.a /*.ho /*~)
 	-$(RM) $(call ADD_ALL_EXESUFS,mplayer)
 	-$(RM) $(MOFILES)
 
 distclean: clean testsclean toolsclean driversclean
 	-$(RM) -r DOCS/tech/doxygen
 	-$(RM) -r locale
-	-$(RM) $(call ADD_ALL_DIRS,/*.d)
 	-$(RM) config.log config.mak config.h codecs.conf.h version.h TAGS tags
 	-$(RM) libvo/vdpau_template.c
 	-$(RM) libmpdemux/ebml_types.h libmpdemux/ebml_defs.c
