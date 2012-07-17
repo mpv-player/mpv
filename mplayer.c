@@ -1846,6 +1846,8 @@ init_error:
 static double written_audio_pts(struct MPContext *mpctx)
 {
     sh_audio_t *sh_audio = mpctx->sh_audio;
+    if (!sh_audio)
+        return MP_NOPTS_VALUE;
     demux_stream_t *d_audio = mpctx->d_audio;
     // first calculate the end pts of audio that has been output by decoder
     double a_pts = sh_audio->pts;
@@ -4817,10 +4819,8 @@ goto_enable_cache:
     if (verbose)
         opts->term_osd = 0;
 
-    // Make sure old OSD does not stay around,
-    // e.g. with -fixed-vo and same-resolution files
+    // Make sure old OSD does not stay around
     clear_osd_msgs();
-    update_osd_msg(mpctx);
 
     //================ SETUP AUDIO ==========================
 
