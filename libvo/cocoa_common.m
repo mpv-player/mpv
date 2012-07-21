@@ -25,6 +25,8 @@
 
 #include "cocoa_common.h"
 
+#include "config.h"
+
 #include "options.h"
 #include "video_out.h"
 #include "aspect.h"
