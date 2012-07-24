@@ -233,7 +233,7 @@ static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
         len = tvh->functions->get_audio_framesize(tvh->priv);
 
         dp=new_demux_packet(len);
-        dp->flags|=1; /* Keyframe */
+        dp->keyframe = true;
         dp->pts=tvh->functions->grab_audio_frame(tvh->priv, dp->buffer,len);
         ds_add_packet(demux->audio,dp);
         }
@@ -245,7 +245,7 @@ static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
         {
 		len = tvh->functions->get_video_framesize(tvh->priv);
        	dp=new_demux_packet(len);
-		dp->flags|=1; /* Keyframe */
+        dp->keyframe = true;
   		dp->pts=tvh->functions->grab_video_frame(tvh->priv, dp->buffer, len);
    		ds_add_packet(demux->video,dp);
 	 }

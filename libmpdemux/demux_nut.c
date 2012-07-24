@@ -238,7 +238,7 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 	dp->pts = pts;
 
 	dp->pos = demuxer->filepos;
-	dp->flags= (pd.flags & NUT_FLAG_KEY) ? 0x10 : 0;
+	dp->keyframe = pd.flags & NUT_FLAG_KEY;
 
 	{int len = pd.len;
 	while ((ret = nut_read_frame(nut, &len, dp->buffer + pd.len-len)) == NUT_ERR_EAGAIN);

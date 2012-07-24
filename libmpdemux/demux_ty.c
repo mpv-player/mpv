@@ -294,7 +294,6 @@ static void demux_ty_CopyToDemuxPacket( demux_stream_t *ds,
    if (pts != MP_NOPTS_VALUE)
    dp->pts = pts / 90000.0;
    dp->pos = pos;
-   dp->flags = 0;
    ds_add_packet( ds, dp );
 }
 

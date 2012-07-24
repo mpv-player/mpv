@@ -258,13 +258,13 @@ static int demux_ogg_get_page_stream(ogg_demuxer_t *ogg_d,
 }
 
 static unsigned char *demux_ogg_read_packet(ogg_stream_t *os, ogg_packet *pack,
-                                            float *pts, int *flags,
+                                            float *pts, bool *keyframe,
                                             int samplesize)
 {
     unsigned char *data = pack->packet;
 
     *pts = MP_NOPTS_VALUE;
-    *flags = 0;
+    *keyframe = false;
 
     if (os->vorbis) {
         if (*pack->packet & PACKET_TYPE_HEADER) {
@@ -283,7 +283,7 @@ static unsigned char *demux_ogg_read_packet(ogg_stream_t *os, ogg_packet *pack,
                 if (os->lastsize > 0)
                     pack->granulepos += os->lastsize;
             } else
-                *flags = 1;
+                *keyframe = true;
             if (vi)
                 *pts = pack->granulepos / (float)vi->rate;
             os->lastsize = blocksize;
@@ -306,7 +306,7 @@ static unsigned char *demux_ogg_read_packet(ogg_stream_t *os, ogg_packet *pack,
             if (pack->granulepos >= 0) {
                 os->lastpos  = pack->granulepos >> keyframe_granule_shift;
                 os->lastpos += pack->granulepos & iframemask;
-                *flags = (pack->granulepos & iframemask) == 0;
+                *keyframe = (pack->granulepos & iframemask) == 0;
             } else {
                 os->lastpos++;
             }
@@ -332,7 +332,7 @@ static unsigned char *demux_ogg_read_packet(ogg_stream_t *os, ogg_packet *pack,
                 pack->granulepos = os->lastpos + (os->lastsize ? os->lastsize : 1);
             // If we already have a timestamp it can be a syncpoint
             if (*pack->packet & PACKET_IS_SYNCPOINT)
-                *flags = 1;
+                *keyframe = true;
             *pts = pack->granulepos / os->samplerate;
             // Save the packet length and timestamp
             os->lastsize = 0;
@@ -474,10 +474,6 @@ static int demux_ogg_add_packet(demux_stream_t *ds, ogg_stream_t *os,
                                 int id, ogg_packet *pack)
 {
     demuxer_t *d = ds->demuxer;
-    demux_packet_t *dp;
-    unsigned char *data;
-    float pts = 0;
-    int flags = 0;
     int samplesize = 1;
 
     // If packet is an comment header then we try to get comments at first
@@ -520,7 +516,10 @@ static int demux_ogg_add_packet(demux_stream_t *ds, ogg_stream_t *os,
     if (ds == d->audio && ((sh_audio_t*)ds->sh)->format == FOURCC_VORBIS) {
         samplesize = ((sh_audio_t *)ds->sh)->samplesize;
     }
-    data = demux_ogg_read_packet(os, pack, &pts, &flags, samplesize);
+    bool keyframe;
+    float pts;
+    unsigned char *data;
+    data = demux_ogg_read_packet(os, pack, &pts, &keyframe, samplesize);
     if (!data)
         return 0;
 
@@ -530,14 +529,15 @@ static int demux_ogg_add_packet(demux_stream_t *ds, ogg_stream_t *os,
         vo_osd_changed(OSDTYPE_SUBTITLE);
     }
     /// Send the packet
+    struct demux_packet *dp;
     dp = new_demux_packet(pack->bytes - (data - pack->packet));
     memcpy(dp->buffer, data, pack->bytes - (data - pack->packet));
     dp->pts   = pts;
-    dp->flags = flags;
+    dp->keyframe = keyframe;
     ds_add_packet(ds, dp);
     mp_msg(MSGT_DEMUX, MSGL_DBG2,
-           "New dp: %p  ds=%p  pts=%5.3f  len=%d  flag=%d  \n",
-           dp, ds, pts, dp->len, flags);
+           "New dp: %p  ds=%p  pts=%5.3f  len=%d  keyframe=%d  \n",
+           dp, ds, pts, dp->len, keyframe);
     return 1;
 }
 
@@ -606,12 +606,12 @@ static void demux_ogg_scan_stream(demuxer_t *demuxer)
         p = 0;
         while (ogg_stream_packetout(oss, &op) == 1) {
             float pts;
-            int flags;
+            bool keyframe;
 
-            demux_ogg_read_packet(os, &op, &pts, &flags, samplesize);
+            demux_ogg_read_packet(os, &op, &pts, &keyframe, samplesize);
             if (op.granulepos >= 0) {
                 ogg_d->final_granulepos = op.granulepos;
-                if (ogg_d->initial_granulepos == MP_NOPTS_VALUE && (flags & 1)) {
+                if (ogg_d->initial_granulepos == MP_NOPTS_VALUE && keyframe) {
                     ogg_d->initial_granulepos = op.granulepos;
                     if (index_mode != 2 && ogg_d->pos < demuxer->movi_end - 2 * 270000) {
                         //the 270000 are just a wild guess
@@ -621,7 +621,7 @@ static void demux_ogg_scan_stream(demuxer_t *demuxer)
                     }
                 }
             }
-            if (index_mode == 2 && (flags || (os->vorbis && op.granulepos >= 0))) {
+            if (index_mode == 2 && (keyframe || (os->vorbis && op.granulepos >= 0))) {
                 if (ogg_d->num_syncpoint > SIZE_MAX / sizeof(ogg_syncpoint_t) - 1)
                     break;
                 ogg_d->syncpoints = realloc_struct(ogg_d->syncpoints, (ogg_d->num_syncpoint + 1), sizeof(ogg_syncpoint_t));
@@ -1415,7 +1415,7 @@ static void demux_ogg_seek(demuxer_t *demuxer, float rel_seek_secs,
     int np;
     int is_gp_valid;
     float pts;
-    int is_keyframe;
+    bool is_keyframe;
     int samplesize = 1;
     ogg_int64_t granulepos_orig;
 

@@ -642,8 +642,10 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     av_init_packet(&pkt);
     pkt.data = data;
     pkt.size = len;
-    // HACK: make PNGs decode normally instead of as CorePNG delta frames
-    pkt.flags = AV_PKT_FLAG_KEY;
+    /* Some codecs (ZeroCodec, some cases of PNG) may want keyframe info
+     * from demuxer. */
+    if (packet && packet->keyframe)
+        pkt.flags |= AV_PKT_FLAG_KEY;
     if (packet && packet->avpacket) {
         pkt.side_data = packet->avpacket->side_data;
         pkt.side_data_elems = packet->avpacket->side_data_elems;

@@ -135,7 +135,7 @@ typedef struct demux_stream {
     off_t pos;               // position in the input stream (file)
     off_t dpos;              // position in the demuxed stream
     int pack_no;           // serial number of packet
-    int flags;             // flags of current packet (keyframe etc)
+    bool keyframe;         // keyframe flag of current packet
     int non_interleaved;   // 1 if this stream is not properly interleaved,
                            // so e.g. subtitle handling must do explicit reads.
 //---------------
@@ -315,7 +315,7 @@ void free_demuxer(struct demuxer *demuxer);
 
 void ds_add_packet(struct demux_stream *ds, struct demux_packet *dp);
 void ds_read_packet(struct demux_stream *ds, struct stream *stream, int len,
-                    double pts, off_t pos, int flags);
+                    double pts, off_t pos, bool keyframe);
 
 int demux_fill_buffer(struct demuxer *demux, struct demux_stream *ds);
 int ds_fill_buffer(struct demux_stream *ds);

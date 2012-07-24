@@ -2195,7 +2195,6 @@ if(trak->pos==0 && trak->stream_header_len>0){
     trak->stream_header = NULL;
     trak->stream_header_len = 0;
     dp->pts=pts;
-    dp->flags=0;
     dp->pos=pos; // FIXME?
     ds_add_packet(ds,dp);
 } else

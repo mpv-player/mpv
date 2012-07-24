@@ -185,7 +185,7 @@ static struct demux_packet *create_packet(size_t len)
     dp->duration = -1;
     dp->stream_pts = MP_NOPTS_VALUE;
     dp->pos = 0;
-    dp->flags = 0;
+    dp->keyframe = false;
     dp->refcount = 1;
     dp->master = NULL;
     dp->buffer = NULL;
@@ -599,14 +599,14 @@ void ds_clear_parser(demux_stream_t *ds)
 }
 
 void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len,
-                    double pts, off_t pos, int flags)
+                    double pts, off_t pos, bool keyframe)
 {
     demux_packet_t *dp = new_demux_packet(len);
     len = stream_read(stream, dp->buffer, len);
     resize_demux_packet(dp, len);
     dp->pts = pts;
     dp->pos = pos;
-    dp->flags = flags;
+    dp->keyframe = keyframe;
     // append packet to DS stream:
     ds_add_packet(ds, dp);
 }
@@ -650,7 +650,7 @@ int ds_fill_buffer(demux_stream_t *ds)
             ds->pts_bytes += p->len;    // !!!
             if (p->stream_pts != MP_NOPTS_VALUE)
                 demux->stream_pts = p->stream_pts;
-            ds->flags = p->flags;
+            ds->keyframe = p->keyframe;
             // unlink packet:
             ds->bytes -= p->len;
             ds->current = p;

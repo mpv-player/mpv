@@ -2785,8 +2785,8 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         decoded_frame = mp_dvdnav_restore_smpi(mpctx, &in_size, &packet, NULL);
         if (in_size >= 0 && !decoded_frame)
 #endif
-        decoded_frame = decode_video(sh_video, NULL, packet, in_size,
-                                     framedrop_type, sh_video->pts);
+        decoded_frame = decode_video(sh_video, sh_video->ds->current, packet,
+                                     in_size, framedrop_type, sh_video->pts);
 #ifdef CONFIG_DVDNAV
         // Save last still frame for future display
         mp_dvdnav_save_smpi(mpctx, in_size, packet, decoded_frame);

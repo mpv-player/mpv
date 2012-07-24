@@ -816,7 +816,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
                 av_q2d(priv->avfc->streams[id]->time_base);
     }
     dp->pos = demux->filepos;
-    dp->flags = !!(pkt->flags & AV_PKT_FLAG_KEY);
+    dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
     // append packet to DS stream:
     ds_add_packet(ds, dp);
     return 1;
