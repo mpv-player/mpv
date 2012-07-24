@@ -96,14 +96,12 @@ static int init_audio_codec(sh_audio_t *sh_audio)
 	   sh_audio->audio_out_minsize, base_size, sh_audio->a_buffer_size);
 
     sh_audio->a_buffer = av_mallocz(sh_audio->a_buffer_size);
-    if (!sh_audio->a_buffer) {
-	mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Cannot allocate audio out buffer.\n");
-	return 0;
-    }
+    if (!sh_audio->a_buffer)
+        abort();
     sh_audio->a_buffer_len = 0;
 
     if (!sh_audio->ad_driver->init(sh_audio)) {
-	mp_tmsg(MSGT_DECAUDIO, MSGL_WARN, "ADecoder init failed :(\n");
+	mp_tmsg(MSGT_DECAUDIO, MSGL_V, "ADecoder init failed :(\n");
 	uninit_audio(sh_audio);	// free buffers
 	return 0;
     }
@@ -111,7 +109,8 @@ static int init_audio_codec(sh_audio_t *sh_audio)
     sh_audio->initialized = 1;
 
     if (!sh_audio->channels || !sh_audio->samplerate) {
-	mp_tmsg(MSGT_DECAUDIO, MSGL_WARN, "Unknown/missing audio format -> no sound\n");
+	mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Audio decoder did not specify "
+                "audio format!\n");
 	uninit_audio(sh_audio);	// free buffers
 	return 0;
     }
@@ -119,18 +118,6 @@ static int init_audio_codec(sh_audio_t *sh_audio)
     if (!sh_audio->o_bps)
 	sh_audio->o_bps = sh_audio->channels * sh_audio->samplerate
 	                  * sh_audio->samplesize;
-
-    mp_msg(MSGT_DECAUDIO, MSGL_INFO,
-	   "AUDIO: %d Hz, %d ch, %s, %3.1f kbit/%3.2f%% (ratio: %d->%d)\n",
-	   sh_audio->samplerate, sh_audio->channels,
-	   af_fmt2str_short(sh_audio->sample_format),
-	   sh_audio->i_bps * 8 * 0.001,
-	   ((float) sh_audio->i_bps / sh_audio->o_bps) * 100.0,
-	   sh_audio->i_bps, sh_audio->o_bps);
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-	   "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
-	   sh_audio->i_bps * 8, sh_audio->samplerate, sh_audio->channels);
-
     return 1;
 }
 
@@ -181,13 +168,12 @@ static int init_audio(sh_audio_t *sh_audio, char *codecname, char *afm,
 	}
 	// it's available, let's try to init!
 	// init()
-	mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Opening audio decoder: [%s] %s\n",
+	mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Opening audio decoder: [%s] %s\n",
 	       mpadec->info->short_name, mpadec->info->name);
 	sh_audio->ad_driver = mpadec;
 	if (!init_audio_codec(sh_audio)) {
-	    mp_tmsg(MSGT_DECAUDIO, MSGL_WARN,
-                    "Could not open audio decoder %s.\n",
-                    mpadec->info->short_name);
+            mp_tmsg(MSGT_DECAUDIO, MSGL_WARN, "Audio decoder init failed for "
+                    "codecs.conf entry \"%s\".\n", sh_audio->codec->name);
 	    continue;		// try next...
 	}
 	// Yeah! We got it!
@@ -251,8 +237,25 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char **audio_codec_list,
 	return 0;   // failed
     }
 
-    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Selected audio codec: [%s] afm: %s (%s)\n",
-	   sh_audio->codec->name, sh_audio->codec->drv, sh_audio->codec->info);
+    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Selected audio codec: %s [%s]\n",
+            sh_audio->codecname ? sh_audio->codecname : sh_audio->codec->info,
+            sh_audio->ad_driver->info->print_name ?
+            sh_audio->ad_driver->info->print_name :
+            sh_audio->ad_driver->info->short_name);
+    mp_tmsg(MSGT_DECAUDIO, MSGL_V,
+            "Audio codecs.conf entry: %s (%s)  afm: %s\n",
+	   sh_audio->codec->name, sh_audio->codec->info, sh_audio->codec->drv);
+    mp_msg(MSGT_DECAUDIO, MSGL_INFO,
+	   "AUDIO: %d Hz, %d ch, %s, %3.1f kbit/%3.2f%% (ratio: %d->%d)\n",
+	   sh_audio->samplerate, sh_audio->channels,
+	   af_fmt2str_short(sh_audio->sample_format),
+	   sh_audio->i_bps * 8 * 0.001,
+	   ((float) sh_audio->i_bps / sh_audio->o_bps) * 100.0,
+	   sh_audio->i_bps, sh_audio->o_bps);
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO,
+	   "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
+	   sh_audio->i_bps * 8, sh_audio->samplerate, sh_audio->channels);
+
     return 1;   // success
 }
 

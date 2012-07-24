@@ -1770,13 +1770,10 @@ void reinit_audio_chain(struct MPContext *mpctx)
     }
     if (!(mpctx->initialized_flags & INITIALIZED_ACODEC)) {
         current_module = "init_audio_codec";
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "==========================================================================\n");
         if (!init_best_audio_codec(mpctx->sh_audio, audio_codec_list, audio_fm_list))
             goto init_error;
         mpctx->initialized_flags |= INITIALIZED_ACODEC;
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "==========================================================================\n");
     }
-
 
     current_module = "af_preinit";
     if (!(mpctx->initialized_flags & INITIALIZED_AO)) {
@@ -2696,9 +2693,7 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     current_module = "init_video_codec";
 
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "==========================================================================\n");
     init_best_video_codec(sh_video, video_codec_list, video_fm_list);
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "==========================================================================\n");
 
     if (!sh_video->initialized) {
         if (!opts->fixed_vo)

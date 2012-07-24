@@ -125,6 +125,11 @@ int mpcodecs_config_vo2(sh_video_t *sh, int w, int h,
     if (h)
         sh->disp_h = h;
 
+    mp_msg(MSGT_DECVIDEO, MSGL_INFO,
+           "VIDEO:  %dx%d  %5.3f fps  %5.1f kbps (%4.1f kB/s)\n",
+           sh->disp_w, sh->disp_h, sh->fps, sh->i_bps * 0.008,
+           sh->i_bps / 1000.0);
+
     if (!sh->disp_w || !sh->disp_h)
         return 0;
 
@@ -293,22 +298,23 @@ int mpcodecs_config_vo2(sh_video_t *sh, int w, int h,
             }
         }
         if (sh->aspect > 0.01) {
-            int w;
-            mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n",
-                   sh->aspect);
             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ASPECT=%1.4f\n",
                    sh->aspect);
-            w = (int) ((float) screen_size_y * sh->aspect);
-            w += w % 2;         // round
+            int w = screen_size_y * sh->aspect;
+            int h = screen_size_y;
             // we don't like horizontal downscale || user forced width:
             if (w < screen_size_x || opts->screen_size_xy > 8) {
-                screen_size_y =
-                    (int) ((float) screen_size_x * (1.0 / sh->aspect));
-                screen_size_y += screen_size_y % 2;     // round
-            } else
-                screen_size_x = w;      // keep new width
+                w = screen_size_x;
+                h = screen_size_x / sh->aspect;
+            }
+            if (abs(screen_size_x - w) >= 4 || abs(screen_size_y - h) >= 4) {
+                screen_size_x = w;
+                screen_size_y = h;
+                mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Aspect ratio is %.2f:1 - "
+                        "scaling to correct movie aspect.\n", sh->aspect);
+            }
         } else {
-            mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Movie-Aspect is undefined - no prescaling applied.\n");
+            mp_tmsg(MSGT_CPLAYER, MSGL_V, "Movie-Aspect is undefined - no prescaling applied.\n");
         }
     }
 

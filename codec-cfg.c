@@ -20,11 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define DEBUG
-
-//disable asserts
-#define NDEBUG
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -301,35 +296,11 @@ static int validate_codec(codecs_t *c, int type)
     if (!c->info)
         c->info = strdup(c->name);
 
-#if 0
-    if (c->fourcc[0] == 0xffffffff) {
-        mp_tmsg(MSGT_CODECCFG,MSGL_ERR,"\ncodec(%s) does not have FourCC/format!\n", c->name);
-        return 0;
-    }
-#endif
-
     if (!c->drv) {
         mp_tmsg(MSGT_CODECCFG,MSGL_ERR,"\ncodec(%s) does not have a driver!\n", c->name);
         return 0;
     }
 
-#if 0
-//FIXME: codec->driver == 4;... <- this should not be put in here...
-//FIXME: Where are they defined ????????????
-    if (!c->dll && (c->driver == 4 ||
-                    (c->driver == 2 && type == TYPE_VIDEO))) {
-        mp_tmsg(MSGT_CODECCFG,MSGL_ERR,"\ncodec(%s) needs a 'dll'!\n", c->name);
-        return 0;
-    }
-// FIXME: Can guid.f1 be 0? How does one know that it was not given?
-//      if (!(codec->flags & CODECS_FLAG_AUDIO) && codec->driver == 4)
-
-    if (type == TYPE_VIDEO)
-        if (c->outfmt[0] == 0xffffffff) {
-            mp_tmsg(MSGT_CODECCFG,MSGL_ERR,"\ncodec(%s) needs an 'outfmt'!\n", c->name);
-            return 0;
-        }
-#endif
     return 1;
 }
 
@@ -349,35 +320,6 @@ static int add_comment(char *s, char **d)
     }
     strcpy(*d + pos, s);
     return 1;
-}
-
-static short get_cpuflags(char *s)
-{
-    static char *flagstr[] = {
-        "mmx",
-        "sse",
-        "3dnow",
-        NULL
-    };
-    int i;
-    short flags = 0;
-
-    do {
-        for (i = 0; flagstr[i]; i++)
-            if (!strncmp(s, flagstr[i], strlen(flagstr[i])))
-                break;
-        if (!flagstr[i])
-            goto err_out_parse_error;
-        flags |= 1<<i;
-        s += strlen(flagstr[i]);
-    } while (*(s++) == ',');
-
-    if (*(--s) != '\0')
-        goto err_out_parse_error;
-
-    return flags;
-err_out_parse_error:
-    return 0;
 }
 
 static struct bstr filetext;
@@ -543,15 +485,11 @@ int parse_codec_cfg(const char *cfgfile)
                 codec_type = TYPE_VIDEO;
                 nr_codecsp = &nr_vcodecs;
                 codecsp = &video_codecs;
-            } else if (*token[0] == 'a') {
+            } else {
+                assert(*token[0] == 'a');
                 codec_type = TYPE_AUDIO;
                 nr_codecsp = &nr_acodecs;
                 codecsp = &audio_codecs;
-#ifdef DEBUG
-            } else {
-                mp_msg(MSGT_CODECCFG,MSGL_ERR,"picsba\n");
-                goto err_out;
-#endif
             }
             if (!(*codecsp = realloc(*codecsp,
                                      sizeof(codecs_t) * (*nr_codecsp + 2)))) {
@@ -671,11 +609,8 @@ int parse_codec_cfg(const char *cfgfile)
                 codec->status = CODECS_STATUS_PROBLEMS;
             else
                 goto err_out_parse_error;
-        } else if (!strcmp(token[0], "cpuflags")) {
-            if (get_token(1, 1) < 0)
-                goto err_out_parse_error;
-            if (!(codec->cpuflags = get_cpuflags(token[0])))
-                goto err_out_parse_error;
+        } else if (!strcmp(token[0], "anyinput")) {
+            codec->anyinput = true;
         } else
             goto err_out_parse_error;
     }
@@ -743,46 +678,32 @@ codecs_t *find_video_codec(unsigned int fourcc, unsigned int *fourccmap,
     return find_codec(fourcc, fourccmap, start, 0, force);
 }
 
-codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
-                     codecs_t *start, int audioflag, int force)
+struct codecs *find_codec(unsigned int fourcc, unsigned int *fourccmap,
+                          codecs_t *start, int audioflag, int force)
 {
-    int i, j;
-    codecs_t *c;
+    struct codecs *c, *end;
 
-#if 0
-    if (start) {
-        for (/* NOTHING */; start->name; start++) {
-            for (j = 0; j < CODECS_MAX_FOURCC; j++) {
-                if (start->fourcc[j] == fourcc) {
-                    if (fourccmap)
-                        *fourccmap = start->fourccmap[j];
-                    return start;
-                }
+    if (audioflag) {
+        c = audio_codecs;
+        end = c + nr_acodecs;
+    } else {
+        c = video_codecs;
+        end = c + nr_vcodecs;
+    }
+    if (start)
+        c = start + 1; // actually starts from the next one after the given one
+    for (; c < end; c++) {
+        for (int j = 0; j < CODECS_MAX_FOURCC; j++) {
+            if (c->fourcc[j] == -1)
+                break;
+            if (c->fourcc[j] == fourcc) {
+                if (fourccmap)
+                    *fourccmap = c->fourccmap[j];
+                return c;
             }
         }
-    } else
-#endif
-    {
-        if (audioflag) {
-            i = nr_acodecs;
-            c = audio_codecs;
-        } else {
-            i = nr_vcodecs;
-            c = video_codecs;
-        }
-        if(!i) return NULL;
-        for (/* NOTHING */; i--; c++) {
-            if(start && c<=start) continue;
-            for (j = 0; j < CODECS_MAX_FOURCC; j++) {
-                // FIXME: do NOT hardwire 'null' name here:
-                if (c->fourcc[j]==fourcc || !strcmp(c->drv,"null")) {
-                    if (fourccmap)
-                        *fourccmap = c->fourccmap[j];
-                    return c;
-                }
-            }
-            if (force) return c;
-        }
+        if (c->anyinput || force)
+            return c;
     }
     return NULL;
 }

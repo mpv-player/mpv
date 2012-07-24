@@ -998,11 +998,8 @@ static struct demuxer *demux_open_stream(struct MPOpts *opts,
         if (!desc)
             // should only happen with obsolete -demuxer 99 numeric format
             return NULL;
-        demuxer = open_given_type(opts, desc, stream, force, audio_id,
-                                  video_id, sub_id, filename, params);
-        if (demuxer)
-            goto dmx_open;
-        return NULL;
+        return open_given_type(opts, desc, stream, force, audio_id,
+                               video_id, sub_id, filename, params);
     }
 
     // Test demuxers with safe file checks
@@ -1011,7 +1008,7 @@ static struct demuxer *demux_open_stream(struct MPOpts *opts,
             demuxer = open_given_type(opts, desc, stream, false, audio_id,
                                       video_id, sub_id, filename, params);
             if (demuxer)
-                goto dmx_open;
+                return demuxer;
         }
     }
 
@@ -1024,7 +1021,7 @@ static struct demuxer *demux_open_stream(struct MPOpts *opts,
             demuxer = open_given_type(opts, desc, stream, false, audio_id,
                                       video_id, sub_id, filename, params);
         if (demuxer)
-            goto dmx_open;
+            return demuxer;
     }
 
     // Finally try detection for demuxers with unsafe checks
@@ -1033,28 +1030,11 @@ static struct demuxer *demux_open_stream(struct MPOpts *opts,
             demuxer = open_given_type(opts, desc, stream, false, audio_id,
                                       video_id, sub_id, filename, params);
             if (demuxer)
-                goto dmx_open;
+                return demuxer;
         }
     }
 
     return NULL;
-
- dmx_open:
-
-    if (demuxer->type == DEMUXER_TYPE_PLAYLIST)
-        return demuxer;
-
-    struct sh_video *sh_video = demuxer->video->sh;
-    if (sh_video && sh_video->bih) {
-        int biComp = le2me_32(sh_video->bih->biCompression);
-        mp_msg(MSGT_DEMUX, MSGL_INFO,
-               "VIDEO:  [%.4s]  %dx%d  %dbpp  %5.3f fps  %5.1f kbps (%4.1f kbyte/s)\n",
-               (char *) &biComp, sh_video->bih->biWidth,
-               sh_video->bih->biHeight, sh_video->bih->biBitCount,
-               sh_video->fps, sh_video->i_bps * 0.008f,
-               sh_video->i_bps / 1024.0f);
-    }
-    return demuxer;
 }
 
 struct demuxer *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
