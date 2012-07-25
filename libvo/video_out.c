@@ -180,9 +180,6 @@ const struct vo_driver *video_out_drivers[] =
 #if (defined CONFIG_GL && !defined CONFIG_GL_COCOA)
         &video_out_gl,
 #endif
-#ifdef CONFIG_SHAREDBUFFER
-        &video_out_sharedbuffer,
-#endif
 #ifdef CONFIG_GL_SDL
         &video_out_gl_sdl,
 #endif
@@ -248,6 +245,9 @@ const struct vo_driver *video_out_drivers[] =
 #endif
 #ifdef CONFIG_MD5SUM
         &video_out_md5sum,
+#endif
+#ifdef CONFIG_SHAREDBUFFER
+        &video_out_sharedbuffer,
 #endif
         NULL
 };
