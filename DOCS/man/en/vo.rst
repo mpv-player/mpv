@@ -161,21 +161,12 @@ directx (Windows only)
         Turns off hardware acceleration. Try this option if you have display
         problems.
 
-corevideo (Mac OS X 10.4 or 10.3.9 with QuickTime 7)
-    Mac OS X CoreVideo video output driver
+corevideo (Mac OS X 10.6 and later)
+    Mac OS X CoreVideo video output driver. Uses the CoreVideo APIs to fill
+    PixelBuffers and generate OpenGL textures from them (useful as a fallback
+    for vo_gl_).
 
-    device_id=<number>
-        Choose the display device to use for fullscreen or set it to -1 to
-        always use the same screen the video window is on (default: -1 -
-        auto).
-    shared_buffer
-        Write output to a shared memory buffer instead of displaying it and
-        try to open an existing NSConnection for communication with a GUI.
-    buffer_name=<name>
-        Name of the shared buffer created with shm_open as well as the name of
-        the NSConnection MPlayer will try to open (default: "mplayerosx").
-        Setting buffer_name implicitly enables shared_buffer.
-
+.. _vo_gl:
 gl
     OpenGL video output driver, simple version. Video size must be smaller
     than the maximum texture size of your OpenGL implementation. Intended to
@@ -512,3 +503,14 @@ tga
     filter.
 
     *EXAMPLE*: ``mplayer video.nut --vf=format=bgr15 --vo=tga``
+
+sharedbuffer (Mac OS X 10.6 and later)
+    Mac OS X headless video output designed to interact with GUIs. It copies
+    image data to a shared buffer so that the data can be read from a GUI and
+    rendered.
+
+    It uses the same protocol as MPlayer's ``-vo corevideo:shared_buffer``
+
+    buffer_name=<buffer_name>
+        Name of the shared buffer created with shm_open() as well as the name
+        of the NSConnection mplayer2 will try to open (default: mplayerosx).
