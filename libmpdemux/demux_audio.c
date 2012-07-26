@@ -583,11 +583,12 @@ static int demux_audio_open(demuxer_t* demuxer) {
 	    }
 	}
 	if (sh_audio->format == 0x2001) {
-	    sh_audio->needs_parsing = 1;
 	    mp_msg(MSGT_DEMUX,MSGL_DBG2,"[demux_audio] DTS sync offset = %u\n", i);
         }
 
     }
+    // All formats that have a parser will need it when stored in WAV
+    sh_audio->needs_parsing = 1;
     stream_seek(s,demuxer->movi_start);
   } break;
   case fLaC:
