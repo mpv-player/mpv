@@ -330,8 +330,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 #else
     ret = ICDecompress(priv->handle,
 #endif
-	  ( (sh->ds->flags&1) ? 0 : ICDECOMPRESS_NOTKEYFRAME ) |
-	  ( ((flags&3)==2 && !(sh->ds->flags&1))?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ),
+	  ( sh->ds->keyframe ? 0 : ICDECOMPRESS_NOTKEYFRAME ) |
+          ( (flags&3) == 2 && !sh->ds->keyframe ?
+               ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL : 0 ),
 	   sh->bih, data, priv->o_bih, (flags&3) ? 0 : mpi->planes[0]);
 
     if ((int)ret){
