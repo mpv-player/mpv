@@ -245,8 +245,6 @@ static const char * const preferred_internal[] = {
     /* lavf Matroska demuxer doesn't support ordered chapters and fails
      * for more files */
     "matroska",
-    /* lavf gives neither pts nor dts for some video frames in .rm */
-    "rm",
     NULL
 };
 
