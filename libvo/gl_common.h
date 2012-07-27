@@ -33,8 +33,14 @@
 #include "video_out.h"
 #include "csputils.h"
 
+#if defined(CONFIG_GL_COCOA) && !defined(CONFIG_GL_X11)
+#include <OpenGL/gl.h>
+#include <OpenGL/gl3.h>
+#include <OpenGL/glext.h>
+#else
 #include <GL/gl.h>
 #include <GL/glext.h>
+#endif
 
 #include "libvo/gl_header_fixes.h"
 
