@@ -154,6 +154,7 @@ struct vdpctx {
     int                                query_surface_num;
     VdpTime                            recent_vsync_time;
     float                              user_fps;
+    int                                composite_detect;
     unsigned int                       vsync_interval;
     uint64_t                           last_queue_time;
     uint64_t                           queue_time[MAX_OUTPUT_SURFACES];
@@ -545,7 +546,10 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
     vc->last_sync_update = GetTimer();
 
     vc->vsync_interval = 1;
-    if (vc->user_fps > 0) {
+    if (vc->composite_detect && vo_x11_screen_is_composited(vo)) {
+        mp_msg(MSGT_VO, MSGL_INFO, "[vdpau] Compositing window manager "
+               "detected. Assuming timing info is inaccurate.\n");
+    } else if (vc->user_fps > 0) {
         vc->vsync_interval = 1e9 / vc->user_fps;
         mp_msg(MSGT_VO, MSGL_INFO, "[vdpau] Assuming user-specified display "
                "refresh rate of %.3f Hz.\n", vc->user_fps);
@@ -1315,7 +1319,7 @@ static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration)
     else
         duration *= 1000;
 
-    if (vc->user_fps < 0)
+    if (vc->vsync_interval == 1)
         duration = -1;  // Make sure drop logic is disabled
 
     uint64_t now = sync_vdptime(vo);
@@ -1858,6 +1862,7 @@ const struct vo_driver video_out_vdpau = {
                          "instead.\n"),
         OPT_INTRANGE("hqscaling", hqscaling, 0, 0, 9),
         OPT_FLOAT("fps", user_fps, 0),
+        OPT_FLAG_ON("composite-detect", composite_detect, 0, OPTDEF_INT(1)),
         OPT_INT("queuetime_windowed", flip_offset_window, 0, OPTDEF_INT(50)),
         OPT_INT("queuetime_fs", flip_offset_fs, 0, OPTDEF_INT(50)),
         OPT_INTRANGE("output_surfaces", num_output_surfaces, 0,

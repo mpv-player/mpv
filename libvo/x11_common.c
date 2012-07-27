@@ -337,6 +337,9 @@ static void init_atoms(struct vo_x11_state *x11)
     XA_INIT(WM_PROTOCOLS);
     XA_INIT(WM_DELETE_WINDOW);
     XA_INIT(UTF8_STRING);
+    char buf[50];
+    sprintf(buf, "_NET_WM_CM_S%d", x11->screen);
+    x11->XA_NET_WM_CM = XInternAtom(x11->display, buf, False);
 }
 
 void update_xinerama_info(struct vo *vo) {
@@ -1939,6 +1942,12 @@ uint32_t vo_x11_get_equalizer(const char *name, int *value)
     else
         return VO_NOTIMPL;
     return VO_TRUE;
+}
+
+bool vo_x11_screen_is_composited(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    return XGetSelectionOwner(x11->display, x11->XA_NET_WM_CM) != None;
 }
 
 #ifdef CONFIG_XV
