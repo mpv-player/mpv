@@ -124,7 +124,6 @@ static int demux_rawdv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
       return 0;
    dp_video->pts=frames->current_frame/sh_video->fps;
    dp_video->pos=frames->current_filepos;
-   dp_video->flags=0;
 
    if (demuxer->audio && demuxer->audio->id>=-1)
    {
