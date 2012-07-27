@@ -510,15 +510,32 @@ static int parse_subopts(struct m_config *config, void *optstruct, char *name,
         char n[110];
         if (snprintf(n, 110, "%s%s", prefix, lst[2 * i]) > 100)
             abort();
-        int sr = m_config_parse_option(config, optstruct, bstr(n),
-                                       bstr(lst[2 * i + 1]), false, set);
-        if (sr < 0) {
-            if (sr == M_OPT_UNKNOWN) {
+        if (!m_config_get_option(config, bstr(n))) {
+            if (strncmp(lst[2 * i], "no-", 3))
+                goto nosubopt;
+            snprintf(n, 110, "%s%s", prefix, lst[2 * i] + 3);
+            const struct m_option *o = m_config_get_option(config, bstr(n));
+            if (!o || o->type != &m_option_type_flag) {
+            nosubopt:
                 mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
                         "Error: option '%s' has no suboption '%s'.\n",
                         name, lst[2 * i]);
                 r = M_OPT_INVALID;
-            } else if (sr == M_OPT_MISSING_PARAM) {
+                break;
+            }
+            if (lst[2 * i + 1]) {
+                mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                        "A --no-* option can't take parameters: "
+                        "%s=%s\n", lst[2 * i], lst[2 * i + 1]);
+                r = M_OPT_INVALID;
+                break;
+            }
+            lst[2 * i + 1] = "no";
+        }
+        int sr = m_config_parse_option(config, optstruct, bstr(n),
+                                       bstr(lst[2 * i + 1]), false, set);
+        if (sr < 0) {
+            if (sr == M_OPT_MISSING_PARAM) {
                 mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
                         "Error: suboption '%s' of '%s' must have "
                         "a parameter!\n", lst[2 * i], name);
@@ -571,7 +588,7 @@ const struct m_option *m_config_get_option(const struct m_config *config,
     struct m_config_option *co;
 
     assert(config != NULL);
-    assert(config->lvl > 0);
+    assert(config->lvl > 0 || !config->full);
 
     co = m_config_get_co(config, name);
     if (co)
