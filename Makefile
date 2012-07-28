@@ -555,7 +555,6 @@ DIRS =  . \
         stream/realrtsp \
         sub \
         timeline \
-        TOOLS \
 
 MOFILES := $(MSG_LANGS:%=locale/%/LC_MESSAGES/mplayer.mo)
 
@@ -715,7 +714,7 @@ clean:
 	-$(RM) $(call ADD_ALL_EXESUFS,mplayer)
 	-$(RM) $(MOFILES)
 
-distclean: clean testsclean toolsclean driversclean
+distclean: clean testsclean
 	-$(RM) -r locale
 	-$(RM) config.log config.mak config.h codecs.conf.h version.h TAGS tags
 	-$(RM) libvo/vdpau_template.c
@@ -748,38 +747,12 @@ tests: $(addsuffix $(EXESUF),$(TESTS))
 testsclean:
 	-$(RM) $(call ADD_ALL_EXESUFS,$(TESTS))
 
-TOOLS = $(addprefix TOOLS/,alaw-gen asfinfo avi-fix avisubdump compare dump_mp4 movinfo netstream subrip vivodump)
-
-ifdef ARCH_X86
-TOOLS += TOOLS/fastmemcpybench TOOLS/modify_reg
-endif
-
-ALLTOOLS = $(TOOLS) TOOLS/bmovl-test TOOLS/vfw2menc
-
-tools: $(addsuffix $(EXESUF),$(TOOLS))
-alltools: $(addsuffix $(EXESUF),$(ALLTOOLS))
-
-toolsclean:
-	-$(RM) $(call ADD_ALL_EXESUFS,$(ALLTOOLS))
-
-TOOLS/bmovl-test$(EXESUF): -lSDL_image
-
-TOOLS/subrip$(EXESUF): sub/vobsub.o sub/spudec.o sub/unrar_exec.o \
-    libvo/aclib.o \ libswscale/libswscale.a libavutil/libavutil.a $(TEST_OBJS)
-
-TOOLS/vfw2menc$(EXESUF): -lwinmm -lole32
-
 mplayer-nomain.o: mplayer.c
 	$(CC) $(CFLAGS) -DDISABLE_MAIN -c -o $@ $<
 
-TOOLS/netstream$(EXESUF): TOOLS/netstream.c
-TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c
-TOOLS/netstream$(EXESUF) TOOLS/vivodump$(EXESUF): $(subst mplayer.o,mplayer-nomain.o,$(OBJS_MPLAYER)) $(OBJS_COMMON) $(COMMON_LIBS)
-	$(CC) $(CFLAGS) -o $@ $^ $(EXTRALIBS_MPLAYER) $(EXTRALIBS)
-
 -include $(DEP_FILES)
 
-.PHONY: all locales *install* *tools drivers
+.PHONY: all locales *install*
 .PHONY: checkheaders *clean tests .version
 
 # Disable suffix rules.  Most of the builtin rules are suffix rules,
