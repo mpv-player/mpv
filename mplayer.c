@@ -3818,8 +3818,7 @@ static int select_audio(demuxer_t *demuxer, int audio_id, char **audio_lang)
 
 static void print_version(void)
 {
-    mp_msg(MSGT_CPLAYER, MSGL_INFO,
-           "%s (C) 2000-2012 MPlayer & mplayer2 teams\n", mplayer_version);
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s (C) 2000-2012\n", mplayer_version);
 
     /* Test for CPU capabilities (and corresponding OS support) for optimizing */
     GetCpuCaps(&gCpuCaps);
