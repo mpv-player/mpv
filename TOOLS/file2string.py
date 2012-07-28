@@ -8,7 +8,7 @@
 import sys
 
 def main(infile):
-    conv = ['\\' + oct(c)[2:] for c in range(256)]
+    conv = ['\\' + ("%03o" % c) for c in range(256)]
     safe_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" \
                  "0123456789!#%&'()*+,-./:;<=>?[]^_{|}~ "
     for c in safe_chars:
