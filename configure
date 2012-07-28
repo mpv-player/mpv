@@ -367,7 +367,7 @@ Codecs:
   --enable-mng              enable MNG input support [autodetect]
   --enable-jpeg             enable JPEG input/output support [autodetect]
   --enable-libcdio          enable libcdio support [autodetect]
-  --disable-win32dll        disable Win32 DLL support [autodetect]
+  --disable-win32dll        disable Win32 DLL support [disabled]
   --disable-qtx             disable QuickTime codecs support [enabled]
   --disable-xanim           disable XAnim codecs support [enabled]
   --disable-real            disable RealPlayer codecs support [enabled]
@@ -594,7 +594,7 @@ _xf86keysym=auto
 _alsa=auto
 _fastmemcpy=yes
 _unrar_exec=auto
-_win32dll=auto
+_win32dll=no
 _select=yes
 _radio=no
 _radio_capture=no
