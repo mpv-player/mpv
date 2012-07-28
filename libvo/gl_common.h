@@ -162,7 +162,6 @@ enum MPGLType {
     GLTYPE_COCOA,
     GLTYPE_W32,
     GLTYPE_X11,
-    GLTYPE_SDL,
 };
 
 enum {

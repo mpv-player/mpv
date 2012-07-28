@@ -376,13 +376,11 @@ int vo_cocoa_check_events(struct vo *vo)
     // Without SDL's bootstrap code (include SDL.h in mplayer.c),
     // on Leopard, we have trouble to get the play window automatically focused
     // when the app is actived. The Following code fix this problem.
-#ifndef CONFIG_SDL
     if ([event type] == NSAppKitDefined
             && [event subtype] == NSApplicationActivatedEventType) {
         [s->window makeMainWindow];
         [s->window makeKeyAndOrderFront:nil];
     }
-#endif
     return 0;
 }
 

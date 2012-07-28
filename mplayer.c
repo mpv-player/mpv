@@ -250,7 +250,6 @@ static const char help_text[] = _(
 "           ************************************************\n\n"\
 "Possible reasons, problems, workarounds:\n"\
 "- Most common: broken/buggy _audio_ driver\n"\
-"  - Try -ao sdl or use the OSS emulation of ALSA.\n"\
 "  - Experiment with different values for -autosync, 30 is a good start.\n"\
 "- Slow video output\n"\
 "  - Try a different -vo driver (-vo help for a list) or try -framedrop!\n"\
@@ -1163,19 +1162,6 @@ void init_vo_spudec(struct MPContext *mpctx)
                        mpctx);
     }
 }
-
-/*
- * In Mac OS X the SDL-lib is built upon Cocoa. The easiest way to
- * make it all work is to use the builtin SDL-bootstrap code, which
- * will be done automatically by replacing our main() if we include SDL.h.
- */
-#if defined(__APPLE__) && defined(CONFIG_SDL)
-#ifdef CONFIG_SDL_SDL_H
-#include <SDL/SDL.h>
-#else
-#include <SDL.h>
-#endif
-#endif
 
 /**
  * \brief append a formatted string

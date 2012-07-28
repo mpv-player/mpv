@@ -75,46 +75,23 @@ int vo_colorkey = 0x0000ff00; // default colorkey is green
 //
 // Externally visible list of all vo drivers
 //
-extern struct vo_driver video_out_mga;
-extern struct vo_driver video_out_xmga;
 extern struct vo_driver video_out_x11;
-extern struct vo_driver video_out_xover;
 extern struct vo_driver video_out_vdpau;
 extern struct vo_driver video_out_xv;
 extern struct vo_driver video_out_gl_nosw;
 extern struct vo_driver video_out_gl;
 extern struct vo_driver video_out_gl3;
-extern struct vo_driver video_out_dga;
-extern struct vo_driver video_out_sdl;
-extern struct vo_driver video_out_3dfx;
-extern struct vo_driver video_out_tdfxfb;
-extern struct vo_driver video_out_s3fb;
-extern struct vo_driver video_out_wii;
 extern struct vo_driver video_out_null;
-extern struct vo_driver video_out_bl;
-extern struct vo_driver video_out_fbdev;
-extern struct vo_driver video_out_fbdev2;
-extern struct vo_driver video_out_svga;
 extern struct vo_driver video_out_png;
-extern struct vo_driver video_out_ggi;
-extern struct vo_driver video_out_aa;
 extern struct vo_driver video_out_caca;
-extern struct vo_driver video_out_mpegpes;
 extern struct vo_driver video_out_yuv4mpeg;
 extern struct vo_driver video_out_direct3d;
 extern struct vo_driver video_out_direct3d_shaders;
 extern struct vo_driver video_out_directx;
-extern struct vo_driver video_out_kva;
-extern struct vo_driver video_out_dxr3;
-extern struct vo_driver video_out_ivtv;
 extern struct vo_driver video_out_v4l2;
 extern struct vo_driver video_out_jpeg;
 extern struct vo_driver video_out_gif89a;
-extern struct vo_driver video_out_vesa;
 extern struct vo_driver video_out_directfb;
-extern struct vo_driver video_out_dfbmga;
-extern struct vo_driver video_out_tdfx_vid;
-extern struct vo_driver video_out_xvr100;
 extern struct vo_driver video_out_tga;
 extern struct vo_driver video_out_corevideo;
 extern struct vo_driver video_out_sharedbuffer;
@@ -123,12 +100,6 @@ extern struct vo_driver video_out_md5sum;
 
 const struct vo_driver *video_out_drivers[] =
 {
-#ifdef CONFIG_XVR100
-        &video_out_xvr100,
-#endif
-#ifdef CONFIG_TDFX_VID
-        &video_out_tdfx_vid,
-#endif
 #ifdef CONFIG_DIRECT3D
         &video_out_direct3d_shaders,
         &video_out_direct3d,
@@ -136,32 +107,11 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_DIRECTX
         &video_out_directx,
 #endif
-#ifdef CONFIG_KVA
-        &video_out_kva,
-#endif
 #ifdef CONFIG_GL_COCOA
         &video_out_gl,
 #endif
 #ifdef CONFIG_COREVIDEO
         &video_out_corevideo,
-#endif
-#ifdef CONFIG_XMGA
-        &video_out_xmga,
-#endif
-#ifdef CONFIG_MGA
-        &video_out_mga,
-#endif
-#ifdef CONFIG_TDFXFB
-        &video_out_tdfxfb,
-#endif
-#ifdef CONFIG_S3FB
-        &video_out_s3fb,
-#endif
-#ifdef CONFIG_WII
-        &video_out_wii,
-#endif
-#ifdef CONFIG_3DFX
-        &video_out_3dfx,
 #endif
 #if CONFIG_VDPAU
         &video_out_vdpau,
@@ -177,47 +127,12 @@ const struct vo_driver *video_out_drivers[] =
 #endif
 #ifdef CONFIG_X11
         &video_out_x11,
-        &video_out_xover,
-#endif
-#ifdef CONFIG_SDL
-        &video_out_sdl,
-#endif
-#ifdef CONFIG_DGA
-        &video_out_dga,
-#endif
-#ifdef CONFIG_GGI
-        &video_out_ggi,
-#endif
-#ifdef CONFIG_FBDEV
-        &video_out_fbdev,
-        &video_out_fbdev2,
-#endif
-#ifdef CONFIG_SVGALIB
-        &video_out_svga,
-#endif
-#ifdef CONFIG_AA
-        &video_out_aa,
 #endif
 #ifdef CONFIG_CACA
         &video_out_caca,
 #endif
-#ifdef CONFIG_DXR3
-        &video_out_dxr3,
-#endif
-#ifdef CONFIG_IVTV
-        &video_out_ivtv,
-#endif
 #ifdef CONFIG_V4L2_DECODER
         &video_out_v4l2,
-#endif
-#ifdef CONFIG_BL
-        &video_out_bl,
-#endif
-#ifdef CONFIG_VESA
-        &video_out_vesa,
-#endif
-#ifdef CONFIG_DIRECTFB
-        &video_out_dfbmga,
 #endif
         &video_out_null,
         // should not be auto-selected
@@ -228,7 +143,6 @@ const struct vo_driver *video_out_drivers[] =
         // vo directfb can call exit() if initialization fails
         &video_out_directfb,
 #endif
-        &video_out_mpegpes,
 #ifdef CONFIG_YUV4MPEG
         &video_out_yuv4mpeg,
 #endif

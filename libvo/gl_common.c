@@ -2306,59 +2306,6 @@ static void swapGlBuffers_x11(MPGLContext *ctx)
 }
 #endif
 
-#ifdef CONFIG_GL_SDL
-#include "sdl_common.h"
-
-static int create_window_sdl(struct MPGLContext *ctx, uint32_t d_width,
-                             uint32_t d_height, uint32_t flags)
-{
-    SDL_WM_SetCaption(vo_get_window_title(ctx->vo), NULL);
-    ctx->vo->dwidth  = d_width;
-    ctx->vo->dheight = d_height;
-    return 0;
-}
-
-static void swapGlBuffers_sdl(MPGLContext *ctx)
-{
-    SDL_GL_SwapBuffers();
-}
-
-static void *sdlgpa(const GLubyte *name)
-{
-    return SDL_GL_GetProcAddress(name);
-}
-
-static int setGlWindow_sdl(MPGLContext *ctx)
-{
-    if (sdl_set_mode(0, SDL_OPENGL | SDL_RESIZABLE) < 0)
-        return SET_WINDOW_FAILED;
-    SDL_GL_LoadLibrary(NULL);
-    getFunctions(ctx->gl, sdlgpa, NULL, false);
-    return SET_WINDOW_OK;
-}
-
-static void releaseGlContext_sdl(MPGLContext *ctx)
-{
-}
-
-static int sdl_check_events(struct vo *vo)
-{
-    int res = 0;
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-        res |= sdl_default_handle_event(&event);
-    // poll "events" from within MPlayer code
-    res |= sdl_default_handle_event(NULL);
-    if (res & VO_EVENT_RESIZE)
-        sdl_set_mode(0, SDL_OPENGL | SDL_RESIZABLE);
-    return res;
-}
-
-static void new_sdl_update_xinerama_info(struct vo *vo) { sdl_update_xinerama_info(); }
-static void new_vo_sdl_fullscreen(struct vo *vo) { vo_sdl_fullscreen(); }
-static void new_vo_sdl_uninit(struct vo *vo) { vo_sdl_uninit(); }
-
-#endif
 
 struct backend {
     const char *name;
@@ -2370,13 +2317,11 @@ static struct backend backends[] = {
     {"cocoa", GLTYPE_COCOA},
     {"win", GLTYPE_W32},
     {"x11", GLTYPE_X11},
-    {"sdl", GLTYPE_SDL},
     // mplayer-svn aliases (note that mplayer-svn couples these with the numeric
     // values of the internal GLTYPE_* constants)
     {"-1", GLTYPE_AUTO},
     { "0", GLTYPE_W32},
     { "1", GLTYPE_X11},
-    { "2", GLTYPE_SDL},
 
     {0}
 };
@@ -2400,10 +2345,7 @@ MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
         ctx = init_mpglcontext(GLTYPE_W32, vo);
         if (ctx)
             return ctx;
-        ctx = init_mpglcontext(GLTYPE_X11, vo);
-        if (ctx)
-            return ctx;
-        return init_mpglcontext(GLTYPE_SDL, vo);
+        return init_mpglcontext(GLTYPE_X11, vo);
     }
     ctx = talloc_zero(NULL, MPGLContext);
     ctx->gl = talloc_zero(ctx, GL);
@@ -2459,22 +2401,6 @@ MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
         ctx->ontop = vo_x11_ontop;
         ctx->vo_uninit = vo_x11_uninit;
         if (vo_init(vo))
-            return ctx;
-        break;
-#endif
-#ifdef CONFIG_GL_SDL
-    case GLTYPE_SDL:
-        ctx->create_window = create_window_sdl;
-        ctx->setGlWindow = setGlWindow_sdl;
-        ctx->releaseGlContext = releaseGlContext_sdl;
-        ctx->swapGlBuffers = swapGlBuffers_sdl;
-        ctx->update_xinerama_info = new_sdl_update_xinerama_info;
-        ctx->check_events = sdl_check_events;
-        ctx->fullscreen = new_vo_sdl_fullscreen;
-        ctx->vo_uninit = new_vo_sdl_uninit;
-        //the SDL code is hardcoded to use the deprecated vo API
-        global_vo = vo;
-        if (vo_sdl_init())
             return ctx;
         break;
 #endif

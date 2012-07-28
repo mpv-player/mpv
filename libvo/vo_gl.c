@@ -1325,7 +1325,6 @@ static int preinit(struct vo *vo, const char *arg)
                "    cocoa: Cocoa/OSX\n"
                "    win: Win32/WGL\n"
                "    x11: X11/GLX\n"
-               "    sdl: SDL\n"
                "\n");
         return -1;
     }
@@ -1353,13 +1352,6 @@ static int preinit(struct vo *vo, const char *arg)
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;
-
-    if (p->glctx->type == GLTYPE_SDL && p->use_yuv == -1) {
-        // Apparently it's not possible to implement VOFLAG_HIDDEN on SDL 1.2,
-        // so don't do autodetection. Use a sufficiently useful and safe YUV
-        // conversion mode.
-        p->use_yuv = YUV_CONVERSION_FRAGMENT;
-    }
 
     if (p->use_yuv == -1 || !allow_sw) {
         if (create_window(vo, 320, 200, VOFLAG_HIDDEN) < 0)

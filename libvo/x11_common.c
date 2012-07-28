@@ -969,8 +969,7 @@ void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max
         x11->vo_hint.max_height = 0;
     }
 
-    // Set minimum height/width to 4 to avoid off-by-one errors
-    // and because mga_vid requires a minimal size of 4 pixels.
+    // Set minimum height/width to 4 to avoid off-by-one errors.
     x11->vo_hint.flags |= PMinSize;
     x11->vo_hint.min_width = x11->vo_hint.min_height = 4;
 
