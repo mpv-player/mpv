@@ -1234,7 +1234,7 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
 
 int demux_info_add(demuxer_t *demuxer, const char *opt, const char *param)
 {
-    return demux_info_add_bstr(demuxer, bstr(opt), bstr(param));
+    return demux_info_add_bstr(demuxer, bstr0(opt), bstr0(param));
 }
 
 int demux_info_add_bstr(demuxer_t *demuxer, struct bstr opt, struct bstr param)
@@ -1244,8 +1244,8 @@ int demux_info_add_bstr(demuxer_t *demuxer, struct bstr opt, struct bstr param)
 
 
     for (n = 0; info && info[2 * n] != NULL; n++) {
-        if (!bstrcasecmp(opt, bstr(info[2*n]))) {
-            if (!bstrcmp(param, bstr(info[2*n + 1]))) {
+        if (!bstrcasecmp(opt, bstr0(info[2*n]))) {
+            if (!bstrcmp(param, bstr0(info[2*n + 1]))) {
                 mp_msg(MSGT_DEMUX, MSGL_V, "Demuxer info %.*s set to unchanged value %.*s\n",
                        BSTR_P(opt), BSTR_P(param));
                 return 0;

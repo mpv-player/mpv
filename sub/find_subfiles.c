@@ -91,7 +91,7 @@ static void append_dir_subtitles(struct MPOpts *opts,
     FILE *f;
     assert(strlen(fname) < 1e6);
 
-    struct bstr f_fname = bstr(mp_basename(fname));
+    struct bstr f_fname = bstr0(mp_basename(fname));
     struct bstr f_fname_noext = bstrdup(tmpmem, strip_ext(f_fname));
     bstr_lower(f_fname_noext);
     struct bstr f_fname_trim = bstr_strip(f_fname_noext);
@@ -107,7 +107,7 @@ static void append_dir_subtitles(struct MPOpts *opts,
     mp_msg(MSGT_SUBREADER, MSGL_INFO, "Load subtitles in %.*s\n", BSTR_P(path));
     struct dirent *de;
     while ((de = readdir(d))) {
-        struct bstr dename = bstr(de->d_name);
+        struct bstr dename = bstr0(de->d_name);
         void *tmpmem2 = talloc_new(tmpmem);
 
         // retrieve various parts of the filename
@@ -118,11 +118,11 @@ static void append_dir_subtitles(struct MPOpts *opts,
 
         // If it's a .sub, check if there is a .idx with the same name. If
         // there is one, it's certainly a vobsub so we skip it.
-        if (bstrcasecmp(tmp_fname_ext, bstr("sub")) == 0) {
+        if (bstrcasecmp(tmp_fname_ext, bstr0("sub")) == 0) {
             char *idxname = talloc_asprintf(tmpmem2, "%.*s.idx",
                                             (int)tmp_fname_noext.len,
                                             de->d_name);
-            char *idx = mp_path_join(tmpmem2, path, bstr(idxname));
+            char *idx = mp_path_join(tmpmem2, path, bstr0(idxname));
             f = fopen(idx, "rt");
             if (f) {
                 fclose(f);
@@ -143,7 +143,7 @@ static void append_dir_subtitles(struct MPOpts *opts,
         while (1) {
             if (!sub_exts[i])
                 goto next_sub;
-            if (bstrcasecmp(bstr(sub_exts[i]), tmp_fname_ext) == 0)
+            if (bstrcasecmp(bstr0(sub_exts[i]), tmp_fname_ext) == 0)
                 break;
             i++;
         }
@@ -156,7 +156,7 @@ static void append_dir_subtitles(struct MPOpts *opts,
                 if (lang.len) {
                     for (int n = 0; opts->sub_lang[n]; n++) {
                         if (bstr_startswith(lang,
-                                            bstr(opts->sub_lang[n]))) {
+                                            bstr0(opts->sub_lang[n]))) {
                             prio = 4; // matches the movie name + lang extension
                             break;
                         }
@@ -219,15 +219,15 @@ char **find_text_subtitles(struct MPOpts *opts, const char *fname)
     if (opts->sub_paths) {
         for (int i = 0; opts->sub_paths[i]; i++) {
             char *path = mp_path_join(slist, mp_dirname(fname),
-                                      bstr(opts->sub_paths[i]));
-            append_dir_subtitles(opts, &slist, &n, bstr(path), fname, 0);
+                                      bstr0(opts->sub_paths[i]));
+            append_dir_subtitles(opts, &slist, &n, bstr0(path), fname, 0);
         }
     }
 
     // Load subtitles in ~/.mplayer/sub limiting sub fuzziness
     char *mp_subdir = get_path("sub/");
     if (mp_subdir)
-        append_dir_subtitles(opts, &slist, &n, bstr(mp_subdir), fname, 1);
+        append_dir_subtitles(opts, &slist, &n, bstr0(mp_subdir), fname, 1);
     free(mp_subdir);
 
     // Sort subs by priority and append them
@@ -247,7 +247,7 @@ char **find_vob_subtitles(struct MPOpts *opts, const char *fname)
     int n = 0;
 
     // Potential vobsub in the media directory
-    struct bstr bname = bstr(mp_basename(fname));
+    struct bstr bname = bstr0(mp_basename(fname));
     int pdot = bstrrchr(bname, '.');
     if (pdot >= 0)
         bname.len = pdot;
@@ -257,9 +257,9 @@ char **find_vob_subtitles(struct MPOpts *opts, const char *fname)
     if (opts->sub_paths) {
         for (int i = 0; opts->sub_paths[i]; i++) {
             char *path = mp_path_join(NULL, mp_dirname(fname),
-                                      bstr(opts->sub_paths[i]));
+                                      bstr0(opts->sub_paths[i]));
             MP_GROW_ARRAY(vobs, n);
-            vobs[n++] = mp_path_join(vobs, bstr(path), bname);
+            vobs[n++] = mp_path_join(vobs, bstr0(path), bname);
             talloc_free(path);
         }
     }
@@ -268,7 +268,7 @@ char **find_vob_subtitles(struct MPOpts *opts, const char *fname)
     char *mp_subdir = get_path("sub/");
     if (mp_subdir) {
         MP_GROW_ARRAY(vobs, n);
-        vobs[n++] = mp_path_join(vobs, bstr(mp_subdir), bname);
+        vobs[n++] = mp_path_join(vobs, bstr0(mp_subdir), bname);
     }
 
     free(mp_subdir);

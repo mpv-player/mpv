@@ -524,8 +524,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
                                               NULL, 0);
         char *filename = ftag ? ftag->value : NULL;
         if (st->codec->codec_id == CODEC_ID_TTF)
-            demuxer_add_attachment(demuxer, bstr(filename),
-                                   bstr("application/x-truetype-font"),
+            demuxer_add_attachment(demuxer, bstr0(filename),
+                                   bstr0("application/x-truetype-font"),
                                    (struct bstr){codec->extradata,
                                                  codec->extradata_size});
         break;
@@ -644,7 +644,7 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
         uint64_t end   = av_rescale_q(c->end, c->time_base,
                                       (AVRational){1, 1000000000});
         t = av_dict_get(c->metadata, "title", NULL, 0);
-        demuxer_add_chapter(demuxer, t ? bstr(t->value) : bstr(NULL),
+        demuxer_add_chapter(demuxer, t ? bstr0(t->value) : bstr0(NULL),
                             start, end);
     }
 

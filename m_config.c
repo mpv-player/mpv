@@ -412,7 +412,7 @@ static struct m_config_option *m_config_get_co(const struct m_config *config,
     struct m_config_option *co;
 
     for (co = config->opts; co; co = co->next) {
-        struct bstr coname = bstr(co->name);
+        struct bstr coname = bstr0(co->name);
         if ((co->opt->type->flags & M_OPT_TYPE_ALLOW_WILDCARD)
                 && bstr_endswith0(coname, "*")) {
             coname.len--;
@@ -500,7 +500,7 @@ static int parse_subopts(struct m_config *config, void *optstruct, char *name,
 {
     char **lst = NULL;
     // Split the argument into child options
-    int r = m_option_type_subconfig.parse(NULL, bstr(""), param, false, &lst,
+    int r = m_option_type_subconfig.parse(NULL, bstr0(""), param, false, &lst,
                                           optstruct);
     if (r < 0)
         return r;
@@ -510,11 +510,11 @@ static int parse_subopts(struct m_config *config, void *optstruct, char *name,
         char n[110];
         if (snprintf(n, 110, "%s%s", prefix, lst[2 * i]) > 100)
             abort();
-        if (!m_config_get_option(config, bstr(n))) {
+        if (!m_config_get_option(config, bstr0(n))) {
             if (strncmp(lst[2 * i], "no-", 3))
                 goto nosubopt;
             snprintf(n, 110, "%s%s", prefix, lst[2 * i] + 3);
-            const struct m_option *o = m_config_get_option(config, bstr(n));
+            const struct m_option *o = m_config_get_option(config, bstr0(n));
             if (!o || o->type != &m_option_type_flag) {
             nosubopt:
                 mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
@@ -532,8 +532,8 @@ static int parse_subopts(struct m_config *config, void *optstruct, char *name,
             }
             lst[2 * i + 1] = "no";
         }
-        int sr = m_config_parse_option(config, optstruct, bstr(n),
-                                       bstr(lst[2 * i + 1]), false, set);
+        int sr = m_config_parse_option(config, optstruct, bstr0(n),
+                                       bstr0(lst[2 * i + 1]), false, set);
         if (sr < 0) {
             if (sr == M_OPT_MISSING_PARAM) {
                 mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
@@ -578,7 +578,7 @@ int m_config_parse_suboptions(struct m_config *config, void *optstruct,
 {
     if (!subopts || !*subopts)
         return 0;
-    return parse_subopts(config, optstruct, name, "", bstr(subopts), true);
+    return parse_subopts(config, optstruct, name, "", bstr0(subopts), true);
 }
 
 

@@ -108,7 +108,7 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         if (!arg)
             return M_PROPERTY_ERROR;
         val = calloc(1, opt->type->size);
-        if ((r = m_option_parse(opt, bstr(opt->name), bstr(arg), false,
+        if ((r = m_option_parse(opt, bstr0(opt->name), bstr0(arg), false,
                 val)) <= 0) {
             free(val);
             return r;

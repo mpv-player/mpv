@@ -1373,7 +1373,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
             if (t->id == NULL)
                 goto error;
             if (t->prefix) {
-                if (!bstr_startswith0(bstr(track->codec_id), t->id))
+                if (!bstr_startswith0(bstr0(track->codec_id), t->id))
                     continue;
             } else {
                 if (strcmp(track->codec_id, t->id))
@@ -1633,8 +1633,8 @@ static int demux_mkv_open(demuxer_t *demuxer)
     if (ebml_master.doc_type.start == NULL) {
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] File has EBML header but no doctype."
                " Assuming \"matroska\".\n");
-    } else if (bstrcmp(ebml_master.doc_type, bstr("matroska")) != 0
-        && bstrcmp(ebml_master.doc_type, bstr("webm")) != 0) {
+    } else if (bstrcmp(ebml_master.doc_type, bstr0("matroska")) != 0
+        && bstrcmp(ebml_master.doc_type, bstr0("webm")) != 0) {
         mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] no head found\n");
         talloc_free(parse_ctx.talloc_ctx);
         return 0;

@@ -64,18 +64,18 @@ static int find_edl_source(struct edl_source *sources, int num_sources,
 
 void build_edl_timeline(struct MPContext *mpctx)
 {
-    const struct bstr file_prefix = bstr("<");
+    const struct bstr file_prefix = bstr0("<");
     void *tmpmem = talloc_new(NULL);
 
     struct bstr *lines = bstr_splitlines(tmpmem, mpctx->demuxer->file_contents);
     int linec = MP_TALLOC_ELEMS(lines);
-    struct bstr header = bstr("mplayer EDL file, version ");
+    struct bstr header = bstr0("mplayer EDL file, version ");
     if (!linec || !bstr_startswith(lines[0], header)) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "EDL: Bad EDL header!\n");
         goto out;
     }
     struct bstr version = bstr_strip(bstr_cut(lines[0], header.len));
-    if (bstrcmp(bstr("2"), version)) {
+    if (bstrcmp(bstr0("2"), version)) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "EDL: Unsupported EDL file version!\n");
         goto out;
     }
@@ -125,7 +125,7 @@ void build_edl_timeline(struct MPContext *mpctx)
             goto out;
         }
         struct bstr dirname = mp_dirname(mpctx->demuxer->filename);
-        char *fullname = mp_path_join(tmpmem, dirname, bstr(filename));
+        char *fullname = mp_path_join(tmpmem, dirname, bstr0(filename));
         edl_ids[num_sources++] = (struct edl_source){id, fullname, i+1};
     }
 
@@ -175,7 +175,7 @@ void build_edl_timeline(struct MPContext *mpctx)
                     if (!arg.len)
                         goto bad;
                     int64_t val;
-                    if (!bstrcmp(arg, bstr("*")))
+                    if (!bstrcmp(arg, bstr0("*")))
                         val = -1;
                     else if (isdigit(*arg.start)) {
                         val = bstrtoll(arg, &arg, 10) * 1000000000;

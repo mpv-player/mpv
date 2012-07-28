@@ -58,7 +58,7 @@ static const struct m_option *m_option_list_findb(const struct m_option *list,
                                                   struct bstr name)
 {
     for (int i = 0; list[i].name; i++) {
-        struct bstr lname = bstr(list[i].name);
+        struct bstr lname = bstr0(list[i].name);
         if ((list[i].type->flags & M_OPT_TYPE_ALLOW_WILDCARD)
                 && bstr_endswith0(lname, "*")) {
             lname.len--;
@@ -72,7 +72,7 @@ static const struct m_option *m_option_list_findb(const struct m_option *list,
 
 const m_option_t *m_option_list_find(const m_option_t *list, const char *name)
 {
-    return m_option_list_findb(list, bstr(name));
+    return m_option_list_findb(list, bstr0(name));
 }
 
 // Default function that just does a memcpy
@@ -857,7 +857,7 @@ static int parse_subconf(const m_option_t *opt, struct bstr name,
     while (p.len) {
         int optlen = bstrcspn(p, ":=");
         struct bstr subopt = bstr_splice(p, 0, optlen);
-        struct bstr subparam = bstr(NULL);
+        struct bstr subparam = bstr0(NULL);
         p = bstr_cut(p, optlen);
         if (bstr_startswith0(p, "=")) {
             p = bstr_cut(p, 1);
@@ -1311,7 +1311,7 @@ static int get_obj_param(struct bstr opt_name, struct bstr obj_name,
             return M_OPT_OUT_OF_RANGE;
         }
         opt = &desc->fields[(*nold)];
-        r = m_option_parse(opt, bstr(opt->name), str, false, NULL);
+        r = m_option_parse(opt, bstr0(opt->name), str, false, NULL);
         if (r < 0) {
             if (r > M_OPT_EXIT)
                 mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: "
@@ -1439,7 +1439,7 @@ static int parse_obj_params(const m_option_t *opt, struct bstr name,
         return M_OPT_INVALID;
 
     desc = p->desc;
-    r = get_obj_params(name, bstr(desc->name), param, desc, p->separator,
+    r = get_obj_params(name, bstr0(desc->name), param, desc, p->separator,
                        dst ? &opts : NULL);
     if (r < 0)
         return r;
@@ -1449,7 +1449,7 @@ static int parse_obj_params(const m_option_t *opt, struct bstr name,
         return 1;
 
     for (r = 0; opts[r]; r += 2)
-        m_struct_set(desc, dst, opts[r], bstr(opts[r + 1]));
+        m_struct_set(desc, dst, opts[r], bstr0(opts[r + 1]));
 
     return 1;
 }
@@ -1491,7 +1491,7 @@ static int parse_obj_settings(struct bstr opt, struct bstr str,
     const m_struct_t *desc;
     m_obj_settings_t *ret = _ret ? *_ret : NULL;
 
-    struct bstr param = bstr(NULL);
+    struct bstr param = bstr0(NULL);
     int idx = bstrchr(str, '=');
     if (idx >= 0) {
         param = bstr_cut(str, idx + 1);
@@ -2004,7 +2004,7 @@ static int parse_custom_url(const m_option_t *opt, struct bstr name,
                 int p = bstrtoll(bstr_cut(portstr, idx + 1), NULL, 0);
                 char tmp[100];
                 snprintf(tmp, 99, "%d", p);
-                r = m_struct_set(desc, dst, "port", bstr(tmp));
+                r = m_struct_set(desc, dst, "port", bstr0(tmp));
                 if (r < 0) {
                     mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                            "Option %.*s: Error while setting port.\n",
@@ -2043,7 +2043,7 @@ static int parse_custom_url(const m_option_t *opt, struct bstr name,
             if (dst) {
                 char *fname = bstrdup0(NULL, bstr_cut(path, 1));
                 url_unescape_string(fname, fname);
-                r = m_struct_set(desc, dst, "filename", bstr(fname));
+                r = m_struct_set(desc, dst, "filename", bstr0(fname));
                 talloc_free(fname);
                 if (r < 0) {
                     mp_msg(MSGT_CFGPARSER, MSGL_ERR,

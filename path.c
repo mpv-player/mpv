@@ -185,7 +185,7 @@ struct bstr mp_dirname(const char *path)
 {
     struct bstr ret = {(uint8_t *)path, mp_basename(path) - path};
     if (ret.len == 0)
-        return bstr(".");
+        return bstr0(".");
     return ret;
 }
 

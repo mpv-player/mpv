@@ -357,7 +357,7 @@ parse_pls(play_tree_parser_t* p) {
       entry = play_tree_new();
       play_tree_add_file(entry,entries[num].file);
       if (entries[num].length)
-          play_tree_set_param(entry, bstr("endpos"), bstr(entries[num].length));
+          play_tree_set_param(entry, bstr0("endpos"), bstr0(entries[num].length));
       free(entries[num].file);
       if(list)
 	play_tree_append_entry(last_entry,entry);

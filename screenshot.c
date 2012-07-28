@@ -355,7 +355,7 @@ static char *create_fname(struct MPContext *mpctx, char *template,
             char *end = strchr(template, '}');
             if (!end)
                 goto error_exit;
-            struct bstr prop = bstr_splice(bstr(template), 0, end - template);
+            struct bstr prop = bstr_splice(bstr0(template), 0, end - template);
             template = end + 1;
             char *s = do_format_property(mpctx, prop);
             if (s)

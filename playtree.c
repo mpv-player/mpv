@@ -359,7 +359,7 @@ play_tree_set_params_from(play_tree_t* dest,play_tree_t* src) {
     return;
 
   for(i = 0; src->params[i].name != NULL ; i++)
-      play_tree_set_param(dest, bstr(src->params[i].name), bstr(src->params[i].value));
+      play_tree_set_param(dest, bstr0(src->params[i].name), bstr0(src->params[i].value));
   if(src->flags & PLAY_TREE_RND) // pass the random flag too
     dest->flags |= PLAY_TREE_RND;
 

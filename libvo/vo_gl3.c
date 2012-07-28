@@ -486,7 +486,7 @@ static char *get_section(void *talloc_ctx, struct bstr source,
     bool copy = false;
     while (source.len) {
         struct bstr line = bstr_strip_linebreaks(bstr_getline(source, &source));
-        if (bstr_eatstart(&line, bstr(SECTION_HEADER))) {
+        if (bstr_eatstart(&line, bstr0(SECTION_HEADER))) {
             copy = bstrcmp0(line, section) == 0;
         } else if (copy) {
             res = talloc_asprintf_append_buffer(res, "%.*s\n", BSTR_P(line));
@@ -631,7 +631,7 @@ static void compile_shaders(struct gl_priv *p)
 
     void *tmp = talloc_new(NULL);
 
-    struct bstr src = bstr(vo_gl3_shaders);
+    struct bstr src = bstr0(vo_gl3_shaders);
     char *vertex_shader = get_section(tmp, src, "vertex_all");
     char *shader_prelude = get_section(tmp, src, "prelude");
     char *s_video = get_section(tmp, src, "frag_video");
@@ -1970,8 +1970,8 @@ static bool load_icc(struct gl_priv *p, const char *icc_file,
         mp_msg(MSGT_VO, MSGL_INFO, "[gl] Opening 3D LUT cache in file '%s'.\n",
                icc_cache);
         struct bstr cachedata = load_file(p, tmp, icc_cache);
-        if (bstr_eatstart(&cachedata, bstr(LUT3D_CACHE_HEADER))
-            && bstr_eatstart(&cachedata, bstr(cache_info))
+        if (bstr_eatstart(&cachedata, bstr0(LUT3D_CACHE_HEADER))
+            && bstr_eatstart(&cachedata, bstr0(cache_info))
             && bstr_eatstart(&cachedata, iccdata)
             && cachedata.len == talloc_get_size(output))
         {

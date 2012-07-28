@@ -151,7 +151,7 @@ static inline int m_config_set_option0(struct m_config *config,
                                        const char *name, const char *param,
                                        bool ambiguous)
 {
-    return m_config_set_option(config, bstr(name), bstr(param), ambiguous);
+    return m_config_set_option(config, bstr0(name), bstr0(param), ambiguous);
 }
 
 /*  Check if an option setting is valid.
@@ -164,7 +164,7 @@ static inline int m_config_check_option0(struct m_config *config,
                                          const char *name, const char *param,
                                          bool ambiguous)
 {
-    return m_config_check_option(config, bstr(name), bstr(param), ambiguous);
+    return m_config_check_option(config, bstr0(name), bstr0(param), ambiguous);
 }
 
 int m_config_parse_suboptions(struct m_config *config, void *optstruct,

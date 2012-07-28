@@ -83,7 +83,7 @@ static enum cue_command read_cmd(struct bstr *data, struct bstr *out_params)
     if (line.len == 0)
         return CUE_EMPTY;
     for (int n = 0; cue_command_strings[n].command != -1; n++) {
-        struct bstr name = bstr(cue_command_strings[n].text);
+        struct bstr name = bstr0(cue_command_strings[n].text);
         if (bstr_startswith(line, name)) {
             struct bstr rest = bstr_cut(line, name.len);
             if (rest.len && !strchr(WHITESPACE, rest.start[0]))
@@ -187,12 +187,12 @@ static void add_source(struct MPContext *mpctx, struct stream *s,
 
 static bool try_open(struct MPContext *mpctx, char *filename)
 {
-    struct bstr bfilename = bstr(filename);
+    struct bstr bfilename = bstr0(filename);
     // Avoid trying to open itself or another .cue file. Best would be
     // to check the result of demuxer auto-detection, but the demuxer
     // API doesn't allow this without opening a full demuxer.
-    if (bstr_case_endswith(bfilename, bstr(".cue"))
-        || bstrcasecmp(bstr(mpctx->demuxer->filename), bfilename) == 0)
+    if (bstr_case_endswith(bfilename, bstr0(".cue"))
+        || bstrcasecmp(bstr0(mpctx->demuxer->filename), bfilename) == 0)
         return false;
 
     int format = 0;
@@ -210,7 +210,7 @@ static bool try_open(struct MPContext *mpctx, char *filename)
     // fragile, but it's about the only way we have.
     // TODO: maybe also could check if the .bin file is a multiple of the Audio
     //       CD sector size (2352 bytes)
-    if (!d && bstr_case_endswith(bfilename, bstr(".bin"))) {
+    if (!d && bstr_case_endswith(bfilename, bstr0(".bin"))) {
         mp_msg(MSGT_CPLAYER, MSGL_WARN, "CUE: Opening as BIN file!\n");
         d = demux_open(&mpctx->opts, s, DEMUXER_TYPE_RAWAUDIO,
                        mpctx->opts.audio_id,
@@ -234,7 +234,7 @@ static bool open_source(struct MPContext *mpctx, struct bstr filename)
 
     struct bstr dirname = mp_dirname(mpctx->demuxer->filename);
 
-    struct bstr base_filename = bstr(mp_basename(bstrdup0(ctx, filename)));
+    struct bstr base_filename = bstr0(mp_basename(bstrdup0(ctx, filename)));
     if (!base_filename.len) {
         mp_msg(MSGT_CPLAYER, MSGL_WARN,
                "CUE: Invalid audio filename in .cue file!\n");
@@ -252,7 +252,7 @@ static bool open_source(struct MPContext *mpctx, struct bstr filename)
     // are renamed.
 
     struct bstr cuefile =
-        bstr_strip_ext(bstr(mp_basename(mpctx->demuxer->filename)));
+        bstr_strip_ext(bstr0(mp_basename(mpctx->demuxer->filename)));
 
     DIR *d = opendir(bstrdup0(ctx, dirname));
     if (!d)
@@ -260,7 +260,7 @@ static bool open_source(struct MPContext *mpctx, struct bstr filename)
     struct dirent *de;
     while ((de = readdir(d))) {
         char *dename0 = de->d_name;
-        struct bstr dename = bstr(dename0);
+        struct bstr dename = bstr0(dename0);
         if (bstr_case_startswith(dename, cuefile)) {
             mp_msg(MSGT_CPLAYER, MSGL_WARN, "CUE: No useful audio filename "
                     "in .cue file found, trying with '%s' instead!\n",

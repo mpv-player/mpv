@@ -215,7 +215,7 @@ void subassconvert_subrip(const char *orig, char *dest, int dest_buffer_size)
                     tag->has_size = true;
                     has_valid_attr = true;
                 } else if (!bstrcmp0(attr, "color")) {
-                    if (bstr_eatstart(&val, bstr("#"))) {
+                    if (bstr_eatstart(&val, bstr0("#"))) {
                         // #RRGGBB format
                         tag->color = bstrtoll(val, &val, 16) & 0x00ffffff;
                         if (val.len)
@@ -227,7 +227,7 @@ void subassconvert_subrip(const char *orig, char *dest, int dest_buffer_size)
                         // Standard web colors
                         for (int i = 0; i < FF_ARRAY_ELEMS(subrip_web_colors); i++) {
                             char *color = subrip_web_colors[i].s;
-                            if (bstrcasecmp(val, bstr(color)) == 0) {
+                            if (bstrcasecmp(val, bstr0(color)) == 0) {
                                 tag->color = subrip_web_colors[i].v;
                                 goto foundcolor;
                             }

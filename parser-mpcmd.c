@@ -55,7 +55,7 @@ static bool split_opt(struct bstr *opt, struct bstr *param, bool *old_syntax)
     if (bstr_startswith0(*opt, "--")) {
         *old_syntax = false;
         *opt = bstr_cut(*opt, 2);
-        *param = bstr(NULL);
+        *param = bstr0(NULL);
         int idx = bstrchr(*opt, '=');
         if (idx > 0) {
             *param = bstr_cut(*opt, idx + 1);
@@ -88,7 +88,7 @@ static int map_to_option(struct m_config *config, bool old_syntax,
     if (old_syntax)
         return -3;
     *optname = s;
-    *param = bstr("no");
+    *param = bstr0("no");
     return 0;
 }
 
@@ -118,7 +118,7 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
 
     for (int i = 1; i < argc; i++) {
         //next:
-        struct bstr opt = bstr(argv[i]);
+        struct bstr opt = bstr0(argv[i]);
         orig_opt = opt;
         /* check for -- (no more options id.) except --help! */
         if (!bstrcmp0(opt, "--")) {
@@ -150,7 +150,7 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
             continue;
         }
 
-        struct bstr param = bstr(i+1 < argc ? argv[i+1] : NULL);
+        struct bstr param = bstr0(i+1 < argc ? argv[i+1] : NULL);
         bool old_syntax;
         if (!no_more_opts && split_opt(&opt, &param, &old_syntax)) {
             // Handle some special arguments outside option parser.
@@ -220,7 +220,7 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
                     if (r >= 0) {
                         play_tree_t *pt = last_entry ? last_entry : last_parent;
                         if (r == 0)
-                            param = bstr(NULL);  // for old_syntax case
+                            param = bstr0(NULL);  // for old_syntax case
                         play_tree_set_param(pt, opt, param);
                     }
                 }
@@ -320,11 +320,11 @@ int m_config_preparse_command_line(m_config_t *config, int argc, char **argv,
     config->mode = M_COMMAND_LINE_PRE_PARSE;
 
     for (int i = 1 ; i < argc ; i++) {
-        struct bstr opt = bstr(argv[i]);
+        struct bstr opt = bstr0(argv[i]);
         // No more options after --
         if (!bstrcmp0(opt, "--"))
             break;
-        struct bstr param = bstr(i+1 < argc ? argv[i+1] : NULL);
+        struct bstr param = bstr0(i+1 < argc ? argv[i+1] : NULL);
         bool old_syntax;
         if (!split_opt(&opt, &param, &old_syntax))
             continue;   // Ignore non-option arguments

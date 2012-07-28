@@ -29,13 +29,11 @@
 /* NOTE: 'len' is size_t, but most string-handling functions below assume
  * that input size has been sanity checked and len fits in an int.
  */
-struct bstr {
+typedef struct bstr {
     unsigned char *start;
     size_t len;
-};
+} bstr;
 
-// demux_rtp.cpp (live555) C++ compilation workaround
-#ifndef __cplusplus
 // If str.start is NULL, return NULL.
 static inline char *bstrdup0(void *talloc_ctx, struct bstr str)
 {
@@ -51,7 +49,7 @@ static inline struct bstr bstrdup(void *talloc_ctx, struct bstr str)
     return r;
 }
 
-static inline struct bstr bstr(const unsigned char *s)
+static inline struct bstr bstr0(const unsigned char *s)
 {
     return (struct bstr){(unsigned char *)s, s ? strlen(s) : 0};
 }
@@ -124,7 +122,7 @@ static inline bool bstr_startswith(struct bstr str, struct bstr prefix)
 
 static inline bool bstr_startswith0(struct bstr str, const char *prefix)
 {
-    return bstr_startswith(str, bstr(prefix));
+    return bstr_startswith(str, bstr0(prefix));
 }
 
 static inline bool bstr_endswith(struct bstr str, struct bstr suffix)
@@ -136,30 +134,28 @@ static inline bool bstr_endswith(struct bstr str, struct bstr suffix)
 
 static inline bool bstr_endswith0(struct bstr str, const char *suffix)
 {
-    return bstr_endswith(str, bstr(suffix));
+    return bstr_endswith(str, bstr0(suffix));
 }
 
 static inline int bstrcmp0(struct bstr str1, const char *str2)
 {
-    return bstrcmp(str1, bstr(str2));
+    return bstrcmp(str1, bstr0(str2));
 }
 
 static inline int bstrcasecmp0(struct bstr str1, const char *str2)
 {
-    return bstrcasecmp(str1, bstr(str2));
+    return bstrcasecmp(str1, bstr0(str2));
 }
 
 static inline int bstr_find0(struct bstr haystack, const char *needle)
 {
-    return bstr_find(haystack, bstr(needle));
+    return bstr_find(haystack, bstr0(needle));
 }
 
 static inline int bstr_eatstart0(struct bstr *s, char *prefix)
 {
-    return bstr_eatstart(s, bstr(prefix));
+    return bstr_eatstart(s, bstr0(prefix));
 }
-
-#endif
 
 // create a pair (not single value!) for "%.*s" printf syntax
 #define BSTR_P(bstr) (int)((bstr).len), (bstr).start

@@ -1546,7 +1546,7 @@ int mp_input_get_key_from_name(const char *name)
     const char *p;
     while ((p = strchr(name, '+'))) {
         for (struct key_name *m = modifier_names; m->name; m++)
-            if (!bstrcasecmp(bstr(m->name),
+            if (!bstrcasecmp(bstr0(m->name),
                              (struct bstr){(char *)name, p - name})) {
                 modifiers |= m->key;
                 goto found;
@@ -1558,7 +1558,7 @@ found:
         name = p + 1;
     }
 
-    struct bstr bname = bstr(name);
+    struct bstr bname = bstr0(name);
 
     struct bstr rest;
     int code = bstr_decode_utf8(bname, &rest);
