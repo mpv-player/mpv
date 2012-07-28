@@ -714,7 +714,7 @@ clean:
 	-$(RM) $(call ADD_ALL_EXESUFS,mplayer)
 	-$(RM) $(MOFILES)
 
-distclean: clean testsclean
+distclean: clean
 	-$(RM) -r locale
 	-$(RM) config.log config.mak config.h codecs.conf.h version.h TAGS tags
 	-$(RM) libvo/vdpau_template.c
@@ -727,33 +727,13 @@ TAGS:
 tags:
 	$(RM) $@; find . -name '*.[chS]' -o -name '*.asm' | xargs ctags -a
 
-###### tests / tools #######
-
-TEST_OBJS = mp_msg.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
-
-LOADER_TEST_OBJS = $(SRCS_WIN32_EMULATION:.c=.o) $(SRCS_QTX_EMULATION:.S=.o) libavutil/libavutil.a osdep/mmap_anon.o cpudetect.o path.o $(TEST_OBJS)
-
-loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): CFLAGS += -g
-loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): $(LOADER_TEST_OBJS)
-
-TESTS =
-
-ifdef ARCH_X86
-TESTS += loader/qtx/list loader/qtx/qtxload
-endif
-
-tests: $(addsuffix $(EXESUF),$(TESTS))
-
-testsclean:
-	-$(RM) $(call ADD_ALL_EXESUFS,$(TESTS))
-
 mplayer-nomain.o: mplayer.c
 	$(CC) $(CFLAGS) -DDISABLE_MAIN -c -o $@ $<
 
 -include $(DEP_FILES)
 
 .PHONY: all locales *install*
-.PHONY: checkheaders *clean tests .version
+.PHONY: checkheaders *clean .version
 
 # Disable suffix rules.  Most of the builtin rules are suffix rules,
 # so this saves some time on slow systems.
