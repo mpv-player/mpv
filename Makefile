@@ -591,6 +591,10 @@ libvo/vo_gl3.c: libvo/vo_gl3_shaders.h
 libvo/vo_gl3_shaders.h: TOOLS/file2string.py libvo/vo_gl3_shaders.glsl
 	./$^ >$@
 
+sub/osd_libass.c: sub/osd_font.h
+sub/osd_font.h: TOOLS/file2string.py sub/osd_font.pfb
+	./$^ >$@
+
 # ./configure must be rerun if it changed
 config.mak: configure
 	@echo "############################################################"

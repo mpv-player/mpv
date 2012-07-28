@@ -27,7 +27,9 @@
 #include "sub.h"
 #include "libavutil/common.h"
 
+static const char osd_font_pfb[] =
 #include "sub/osd_font.h"
+;
 
 #include "sub/ass_mp.h"
 #include "mp_core.h"
@@ -43,7 +45,7 @@
 void osd_init_backend(struct osd_state *osd)
 {
     ass_add_font(osd->ass_library, "OSD", (void *)osd_font_pfb,
-                 sizeof(osd_font_pfb));
+                 sizeof(osd_font_pfb) - 1);
 
     osd->osd_render = ass_renderer_init(osd->ass_library);
     mp_ass_configure_fonts(osd->osd_render);
