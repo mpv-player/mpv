@@ -151,7 +151,6 @@ extern float font_factor;
 extern float sub_delay;
 extern float sub_fps;
 
-extern int font_fontconfig;
 extern int sub_justify;
 
 void osd_draw_text(struct osd_state *osd, int dxs, int dys,

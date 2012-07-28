@@ -344,12 +344,8 @@ Optional features:
   --disable-dvdread-internal  disable internal libdvdread [autodetect]
   --disable-libdvdcss-internal  disable internal libdvdcss [autodetect]
   --disable-cddb         disable cddb [autodetect]
-  --disable-bitmap-font  disable bitmap font support [enable]
-  --disable-freetype     disable FreeType 2 font rendering [autodetect]
-  --disable-fontconfig   disable fontconfig font lookup [autodetect]
   --disable-unrarexec    disable using of UnRAR executable [enabled]
   --disable-sortsub      disable subtitle sorting [enabled]
-  --enable-fribidi       enable the FriBiDi libs [autodetect]
   --disable-enca         disable ENCA charset oracle library [autodetect]
   --enable-macosx-finder enable Mac OS X Finder invocation parameter
                          parsing [disabled]
@@ -636,9 +632,6 @@ _libdv=auto
 _cdda=auto
 _cddb=auto
 _big_endian=auto
-_bitmap_font=yes
-_freetype=auto
-_fontconfig=auto
 _qtx=auto
 _coreaudio=auto
 _corevideo=auto
@@ -648,7 +641,6 @@ quicktime=auto
 _macosx_finder=no
 _macosx_bundle=auto
 _sortsub=yes
-_fribidi=auto
 _enca=auto
 _inet6=auto
 _gethostbyname2=auto
@@ -975,12 +967,6 @@ for ac_option do
   --disable-cddb)       _cddb=no        ;;
   --enable-big-endian)  _big_endian=yes ;;
   --disable-big-endian) _big_endian=no  ;;
-  --enable-bitmap-font)    _bitmap_font=yes   ;;
-  --disable-bitmap-font)   _bitmap_font=no    ;;
-  --enable-freetype)    _freetype=yes   ;;
-  --disable-freetype)   _freetype=no    ;;
-  --enable-fontconfig)  _fontconfig=yes ;;
-  --disable-fontconfig) _fontconfig=no  ;;
   --enable-unrarexec)   _unrar_exec=yes ;;
   --disable-unrarexec)  _unrar_exec=no  ;;
   --enable-ftp)         _ftp=yes        ;;
@@ -999,9 +985,6 @@ for ac_option do
   --disable-rpath)      _rpath=no       ;;
   --enable-libpostproc) libpostproc=yes ;;
   --disable-libpostproc) libpostproc=no ;;
-
-  --enable-fribidi)     _fribidi=yes    ;;
-  --disable-fribidi)    _fribidi=no     ;;
 
   --enable-enca)        _enca=yes       ;;
   --disable-enca)       _enca=no        ;;
@@ -4562,87 +4545,15 @@ echores "$_ass"
 
 
 echocheck "libass OSD support"
-_old_osd=yes
+_dummy_osd=yes
 if test "$_libass_osd" = auto ; then
     _libass_osd=no
     if test "$_ass" = yes ; then
         _libass_osd=yes
-        _old_osd=no
-        _bitmap_font=no
-        # disable unneeded dependencies
-        _freetype=no
-        _fontconfig=no
-        # this should always be forced, because libass does bidi itself
-        _fribidi=no
+        _dummy_osd=no
     fi
 fi
 echores "$_libass_osd"
-
-
-echocheck "bitmap font support"
-if test "$_bitmap_font" = yes ; then
-  def_bitmap_font="#define CONFIG_BITMAP_FONT 1"
-else
-  def_bitmap_font="#undef CONFIG_BITMAP_FONT"
-fi
-echores "$_bitmap_font"
-
-
-echocheck "freetype >= 2.0.9"
-
-# freetype depends on iconv
-if test "$_iconv" = no ; then
-    _freetype=no
-    res_comment="iconv support needed"
-fi
-
-if test "$_freetype" = auto ; then
-    if pkg_config_add freetype2 ; then
-        _freetype=yes
-    else
-        die "Unable to find development files for libfreetype. Aborting. If you really mean to compile without FreeType support use --disable-freetype."
-    fi
-fi
-if test "$_freetype" = yes ; then
-    def_freetype='#define CONFIG_FREETYPE 1'
-else
-    def_freetype='#undef CONFIG_FREETYPE'
-fi
-echores "$_freetype"
-
-if test "$_freetype" = no ; then
-    _fontconfig=no
-    res_comment="FreeType support needed"
-fi
-echocheck "fontconfig"
-if test "$_fontconfig" = auto ; then
-    if pkg_config_add 'fontconfig >= 2.4.2' ; then
-        _fontconfig=yes
-    else
-        die "Unable to find development files for libfontconfig. Aborting. If you really mean to compile without fontconfig support use --disable-fontconfig."
-    fi
-fi
-if test "$_fontconfig" = yes ; then
-    def_fontconfig='#define CONFIG_FONTCONFIG 1'
-else
-    def_fontconfig='#undef CONFIG_FONTCONFIG'
-fi
-echores "$_fontconfig"
-
-
-echocheck "fribidi with charsets"
-if test "$_fribidi" = auto ; then
-    _fribidi=no
-    if pkg_config_add fribidi ; then
-        _fribidi=yes
-    fi
-fi
-if test "$_fribidi" = yes ; then
-    def_fribidi='#define CONFIG_FRIBIDI 1'
-else
-    def_fribidi='#undef CONFIG_FRIBIDI'
-fi
-echores "$_fribidi"
 
 
 echocheck "ENCA"
@@ -5713,7 +5624,6 @@ ALSA = $_alsa
 APPLE_IR = $_apple_ir
 APPLE_REMOTE = $_apple_remote
 AUDIO_INPUT = $_audio_input
-BITMAP_FONT = $_bitmap_font
 CACA = $_caca
 CDDA = $_cdda
 CDDB = $_cddb
@@ -5732,7 +5642,6 @@ DVDREAD_INTERNAL = $_dvdread_internal
 DXR3 = $_dxr3
 FAAD = $_faad
 FASTMEMCPY = $_fastmemcpy
-FREETYPE = $_freetype
 FTP = $_ftp
 GIF = $_gif
 GL = $_gl
@@ -5748,7 +5657,7 @@ LADSPA = $_ladspa
 LIBA52 = $_liba52
 LIBASS = $_ass
 LIBASS_OSD = $_libass_osd
-OLD_OSD = $_old_osd
+DUMMY_OSD = $_dummy_osd
 LIBBLURAY = $_bluray
 LIBBS2B = $_libbs2b
 LIBDCA = $_libdca
@@ -6072,12 +5981,7 @@ $def_tv_v4l2
 
 /* font stuff */
 $def_ass
-$def_bitmap_font
 $def_enca
-$def_fontconfig
-$def_freetype
-$def_fribidi
-
 
 /* networking */
 $def_closesocket

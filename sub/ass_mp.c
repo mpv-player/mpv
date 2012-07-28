@@ -60,10 +60,8 @@ ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
         track->default_style = sid;
         ASS_Style *style = track->styles + sid;
         style->Name = strdup("Default");
-        style->FontName = (font_fontconfig >= 0
-                           && sub_font_name) ? strdup(sub_font_name)
-            : (font_fontconfig >= 0
-               && font_name) ? strdup(font_name) : strdup("Sans");
+        style->FontName = sub_font_name ? strdup(sub_font_name)
+            : font_name ? strdup(font_name) : strdup("Sans");
         style->treat_fontname_as_pattern = 1;
 
         double fs = track->PlayResY * text_font_scale_factor / 100.;
@@ -250,25 +248,19 @@ void mp_ass_configure_fonts(ASS_Renderer *priv)
 {
     char *dir, *path, *family;
     dir = get_path("fonts");
-    if (font_fontconfig < 0 && sub_font_name)
-        path = strdup(sub_font_name);
-    else if (font_fontconfig < 0 && font_name)
-        path = strdup(font_name);
-    else {
-        path = get_path("subfont.ttf");
-        if (!mp_path_exists(path)) {
-            free(path);
-            path = NULL;
-        }
+    path = get_path("subfont.ttf");
+    if (!mp_path_exists(path)) {
+        free(path);
+        path = NULL;
     }
-    if (font_fontconfig >= 0 && sub_font_name)
+    if (sub_font_name)
         family = strdup(sub_font_name);
-    else if (font_fontconfig >= 0 && font_name)
+    else if (font_name)
         family = strdup(font_name);
     else
         family = 0;
 
-    ass_set_fonts(priv, path, family, font_fontconfig + 1, NULL, 1);
+    ass_set_fonts(priv, path, family, 1, NULL, 1);
 
     free(dir);
     free(path);

@@ -32,7 +32,6 @@
 #include "sub/ass_mp.h"
 #include "mp_core.h"
 
-int font_fontconfig = 1;
 
 // Map OSD symbols (e.g. OSD_PLAY) to the glyphs in osd_font_pfb[].
 #define OSD_CODEPOINTS 0xE000

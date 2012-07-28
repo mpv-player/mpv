@@ -79,10 +79,6 @@ typedef struct sub_data {
     int sub_errs;
 } sub_data;
 
-extern char *fribidi_charset;
-extern int flip_hebrew;
-extern int fribidi_flip_commas;
-
 struct MPOpts;
 sub_data* sub_read_file (char *filename, float pts, struct MPOpts *opts);
 subtitle* subcp_recode (subtitle *sub);
