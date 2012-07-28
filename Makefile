@@ -725,9 +725,6 @@ TAGS:
 tags:
 	$(RM) $@; find . -name '*.[chS]' -o -name '*.asm' | xargs ctags -a
 
-mplayer-nomain.o: mplayer.c
-	$(CC) $(CFLAGS) -DDISABLE_MAIN -c -o $@ $<
-
 -include $(DEP_FILES)
 
 .PHONY: all locales *install*
