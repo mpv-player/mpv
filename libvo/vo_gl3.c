@@ -55,8 +55,10 @@
 #include "fastmemcpy.h"
 #include "sub/ass_mp.h"
 
+static const char vo_gl3_shaders[] =
 // Generated from libvo/vo_gl3_shaders.glsl
 #include "libvo/vo_gl3_shaders.h"
+;
 
 // How many parts the OSD may consist of at most.
 #define MAX_OSD_PARTS 20
@@ -630,7 +632,7 @@ static void compile_shaders(struct gl_priv *p)
 
     void *tmp = talloc_new(NULL);
 
-    struct bstr src = { (char*)vo_gl3_shaders, sizeof(vo_gl3_shaders) };
+    struct bstr src = bstr(vo_gl3_shaders);
     char *vertex_shader = get_section(tmp, src, "vertex_all");
     char *shader_prelude = get_section(tmp, src, "prelude");
     char *s_video = get_section(tmp, src, "frag_video");

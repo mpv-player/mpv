@@ -608,8 +608,8 @@ libmpdemux/ebml_types.h: TOOLS/matroska.py
 libmpdemux/ebml_defs.c: TOOLS/matroska.py
 	./$< --generate-definitions > $@
 
-libvo/vo_gl3_shaders.h: libvo/vo_gl3_shaders.glsl
-	python ./bin_to_header.py $^ $@
+libvo/vo_gl3_shaders.h: TOOLS/file2string.py libvo/vo_gl3_shaders.glsl
+	./$^ >$@
 
 libvo/vo_gl3.c: libvo/vo_gl3_shaders.h
 
