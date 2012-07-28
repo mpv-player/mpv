@@ -4770,7 +4770,7 @@ echocheck "FAAD2 support"
 if test "$_faad" = auto ; then
   _faad=no
   cat > $TMPC << EOF
-#include <faad.h>
+#include <neaacdec.h>
 #ifndef FAAD_MIN_STREAMSIZE
 #error Too old version
 #endif

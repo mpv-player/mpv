@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <faad.h>
+#include <neaacdec.h>
 
 #include "config.h"
 #include "options.h"
