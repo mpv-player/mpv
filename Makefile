@@ -765,7 +765,6 @@ alltools: $(addsuffix $(EXESUF),$(ALLTOOLS))
 
 toolsclean:
 	-$(RM) $(call ADD_ALL_EXESUFS,$(ALLTOOLS))
-	-$(RM) TOOLS/realcodecs/*.so.6.0
 
 TOOLS/bmovl-test$(EXESUF): -lSDL_image
 
@@ -781,16 +780,6 @@ TOOLS/netstream$(EXESUF): TOOLS/netstream.c
 TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c
 TOOLS/netstream$(EXESUF) TOOLS/vivodump$(EXESUF): $(subst mplayer.o,mplayer-nomain.o,$(OBJS_MPLAYER)) $(OBJS_COMMON) $(COMMON_LIBS)
 	$(CC) $(CFLAGS) -o $@ $^ $(EXTRALIBS_MPLAYER) $(EXTRALIBS)
-
-REAL_SRCS    = $(wildcard TOOLS/realcodecs/*.c)
-REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)
-
-realcodecs: $(REAL_TARGETS)
-realcodecs: CFLAGS += -g
-
-%.so.6.0: %.o
-	ld -shared -o $@ $< -ldl -lc
-
 
 -include $(DEP_FILES)
 
