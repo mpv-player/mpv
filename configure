@@ -152,19 +152,6 @@ EOF
   compile_check $TMPC $@
 }
 
-yasm_check() {
-  echo >> "$TMPLOG"
-  cat "$TMPS" >> "$TMPLOG"
-  echo >> "$TMPLOG"
-  echo "$_yasm $YASMFLAGS -o $TMPEXE $TMPS $@" >> "$TMPLOG"
-  rm -f "$TMPEXE"
-  $_yasm $YASMFLAGS -o "$TMPEXE" "$TMPS" "$@" >> "$TMPLOG" 2>&1
-  TMPRES="$?"
-  echo >> "$TMPLOG"
-  echo >> "$TMPLOG"
-  return "$TMPRES"
-}
-
 pkg_config_add() {
   unset IFS  # shell should not be used for programming
   echo >> "$TMPLOG"
@@ -445,12 +432,7 @@ Miscellaneous options:
   --enable-runtime-cpudetection    enable runtime CPU detection [disable]
   --enable-cross-compile enable cross-compilation [disable]
   --cc=COMPILER          C compiler to build MPlayer [gcc]
-  --as=ASSEMBLER         assembler to build MPlayer [as]
-  --nm=NM                nm tool to build MPlayer [nm]
-  --yasm=YASM            Yasm assembler to build MPlayer [yasm]
-  --ar=AR                librarian to build MPlayer [ar]
   --pkg-config=PKGCONFIG pkg-config to find some libraries [pkg-config]
-  --ranlib=RANLIB        ranlib to build MPlayer [ranlib]
   --windres=WINDRES      windres to build MPlayer [windres]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --enable-static        build a statically linked binary
@@ -518,14 +500,9 @@ _iwmmxt=auto
 _altivec=auto
 _install=install
 _pkg_config=auto
-_ranlib=auto
 _windres=auto
 _cc=auto
-_ar=auto
 test "$CC" && _cc="$CC"
-_as=auto
-_nm=auto
-_yasm=auto
 _runtime_cpudetection=no
 _cross_compile=no
 _prefix="/usr/local"
@@ -721,23 +698,8 @@ for ac_option do
   --cc=*)
     _cc=$(echo $ac_option | cut -d '=' -f 2)
     ;;
-  --as=*)
-    _as=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --nm=*)
-    _nm=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --yasm=*)
-    _yasm=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --ar=*)
-    _ar=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
   --pkg-config=*)
     _pkg_config=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --ranlib=*)
-    _ranlib=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --windres=*)
     _windres=$(echo $ac_option | cut -d '=' -f 2)
@@ -1110,10 +1072,7 @@ if test $_cross_compile = yes ; then
     test -n "$_target" && tool_prefix="$_target"-
 fi
 
-test "$_ranlib" = auto && _ranlib="$tool_prefix"ranlib
 test "$_windres" = auto && _windres="$tool_prefix"windres
-test "$_ar" = auto && _ar="$tool_prefix"ar
-test "$_yasm" = auto && _yasm="$tool_prefix"yasm
 test "$_pkg_config" = auto && _pkg_config="$tool_prefix"pkg-config
 
 if test "$_cc" = auto ; then
@@ -1236,10 +1195,6 @@ fi
 
 if aix ; then
   extra_ldflags="$extra_ldflags -lC"
-fi
-
-if linux ; then
-  _ranlib='true'
 fi
 
 if win32 ; then
@@ -1365,11 +1320,6 @@ echo "Detected host architecture: $host_arch"
 if test "$_as" = auto ; then
   _as=$($_cc -print-prog-name=as)
   test -z "$_as" && _as=as
-fi
-
-if test "$_nm" = auto ; then
-  _nm=$($_cc -print-prog-name=nm)
-  test -z "$_nm" && _nm=nm
 fi
 
 # XXX: this should be ok..
@@ -2104,18 +2054,6 @@ fi
 echores "$_byte_order"
 
 
-echocheck "extern symbol prefix"
-cat > $TMPC << EOF
-int ff_extern;
-EOF
-cc_check -c || die "Symbol mangling check failed."
-sym=$($_nm -P -g $TMPEXE)
-extern_prefix=${sym%%ff_extern*}
-def_extern_asm="#define EXTERN_ASM $extern_prefix"
-def_extern_prefix="#define EXTERN_PREFIX \"$extern_prefix\""
-echores $extern_prefix
-
-
 echocheck "assembler support of -pipe option"
 # -I. helps to detect compilers that just misunderstand -pipe like Sun C
 cflag_check -pipe -I. && _pipe="-pipe" && echores "yes" || echores "no"
@@ -2199,59 +2137,6 @@ if test -n "$CPPFLAGS" ; then
 fi
 
 
-
-if x86_32 ; then
-  # Checking assembler (_as) compatibility...
-  # Added workaround for older as that reads from stdin by default - atmos
-  as_version=$(echo '' | $_as -version 2>&1 | sed -n 's/^.*assembler \(version \)*\([0-9.]*\).*$/\2/p')
-  echocheck "assembler ($_as $as_version)"
-
-  _pref_as_version='2.9.1'
-  echo 'nop' > $TMPS
-  if test "$_mmx" = yes ; then
-    echo 'emms' >> $TMPS
-  fi
-  if test "$_3dnow" = yes ; then
-    _pref_as_version='2.10.1'
-    echo 'femms' >> $TMPS
-  fi
-  if test "$_3dnowext" = yes ; then
-    _pref_as_version='2.10.1'
-    echo 'pswapd %mm0, %mm0' >> $TMPS
-  fi
-  if test "$_mmxext" = yes ; then
-    _pref_as_version='2.10.1'
-    echo 'movntq %mm0, (%eax)' >> $TMPS
-  fi
-  if test "$_sse" = yes ; then
-    _pref_as_version='2.10.1'
-    echo 'xorps %xmm0, %xmm0' >> $TMPS
-  fi
-  #if test "$_sse2" = yes ; then
-  #  _pref_as_version='2.11'
-  #  echo 'xorpd %xmm0, %xmm0' >> $TMPS
-  #fi
-  if test "$_cmov" = yes ; then
-    _pref_as_version='2.10.1'
-    echo 'cmovb %eax, %ebx' >> $TMPS
-  fi
-  if test "$_ssse3" = yes ; then
-    _pref_as_version='2.16.92'
-    echo 'pabsd %xmm0, %xmm1' >> $TMPS
-  fi
-  $_as $TMPS -o $TMPEXE > /dev/null 2>&1 || as_verc_fail=yes
-
-  if test "$as_verc_fail" != yes ; then
-    echores "ok"
-  else
-    res_comment="Upgrade binutils to ${_pref_as_version} or use --disable-ssse3 etc."
-    echores "failed"
-    die "obsolete binutils version"
-  fi
-
-fi #if x86_32
-
-
 echocheck "PIC"
 pic=no
 cat > $TMPC << EOF
@@ -2301,47 +2186,7 @@ EOF
 cc_check && ebx_available=yes && def_ebx_available='#define HAVE_EBX_AVAILABLE 1'
 echores $ebx_available
 
-
-echocheck "yasm"
-if test -z "$YASMFLAGS" ; then
-  if darwin ; then
-    x86_64 && objformat="macho64" || objformat="macho"
-  elif win32 ; then
-    objformat="win32"
-  else
-    objformat="elf"
-  fi
-  # currently tested for Linux x86, x86_64
-  YASMFLAGS="-f $objformat"
-  x86_64 && YASMFLAGS="$YASMFLAGS -DARCH_X86_64 -m amd64"
-  test "$pic" = "yes" && YASMFLAGS="$YASMFLAGS -DPIC"
-  case "$objformat" in
-    elf) test $_debug && YASMFLAGS="$YASMFLAGS -g dwarf2" ;;
-    *)                   YASMFLAGS="$YASMFLAGS -DPREFIX"  ;;
-  esac
-else
-  warn_cflags=yes
-fi
-
-echo "pabsw xmm0, xmm0" > $TMPS
-yasm_check || _yasm=""
-if test $_yasm ; then
-  def_yasm='#define HAVE_YASM 1'
-  have_yasm="yes"
-  echores "$_yasm"
-else
-  def_yasm='#define HAVE_YASM 0'
-  have_yasm="no"
-  echores "no"
-fi
-
-echocheck "bswap"
-def_bswap='#define HAVE_BSWAP 0'
-echo 'bswap %eax' > $TMPS
-$_as $TMPS -o $TMPEXE > /dev/null 2>&1 && def_bswap='#define HAVE_BSWAP 1' && bswap=yes || bswap=no
-echores "$bswap"
 fi #if x86
-
 
 #FIXME: This should happen before the check for CFLAGS..
 def_altivec_h='#define HAVE_ALTIVEC_H 0'
@@ -5577,8 +5422,6 @@ MANDIR  = \$(DESTDIR)$_mandir
 CONFDIR = \$(DESTDIR)$_confdir
 LOCALEDIR = \$(DESTDIR)$_localedir
 
-AR      = $_ar
-AS      = $_cc
 CC      = $_cc
 CXX     = $_cc
 INSTALL = $_install
@@ -5724,17 +5567,12 @@ YUV4MPEG = $_yuv4mpeg
 FFMPEG_INTERNALS = $ffmpeg_internals
 FFMPEG_SOURCE_PATH = $_ffmpeg_source
 
-RANLIB     = $_ranlib
-YASM       = $_yasm
-YASMFLAGS  = $YASMFLAGS
-
 CONFIG_VDPAU    = $_vdpau
 CONFIG_ZLIB     = $_zlib
 
 HAVE_PTHREADS   = $_pthreads
 HAVE_SHM        = $_shm
 HAVE_W32THREADS = $_w32threads
-HAVE_YASM       = $have_yasm
 
 EOF
 
@@ -5851,8 +5689,6 @@ $def_asmalign_pot
 $def_builtin_expect
 $def_dl
 $def_dos_paths
-$def_extern_asm
-$def_extern_prefix
 $def_iconv
 $def_kstat
 $def_macosx_bundle
@@ -6056,7 +5892,6 @@ $def_roundf
 $def_threads
 $def_truncf
 $def_xform_asm
-$def_yasm
 
 #define HAVE_INLINE_ASM 1
 
@@ -6130,7 +5965,7 @@ EOF
 if test "$warn_cflags" = yes; then
   cat <<EOF
 
-MPlayer compilation will use the CPPFLAGS/CFLAGS/LDFLAGS/YASMFLAGS set by you,
+MPlayer compilation will use the CPPFLAGS/CFLAGS/LDFLAGS set by you,
 but:
 
     *** ***  DO NOT REPORT BUGS IF IT DOES NOT COMPILE/WORK!  *** ***
