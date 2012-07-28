@@ -19,6 +19,8 @@
 #ifndef MPLAYER_CODEC_CFG_H
 #define MPLAYER_CODEC_CFG_H
 
+#include <stdbool.h>
+
 #define CODECS_MAX_FOURCC       92
 #define CODECS_MAX_OUTFMT       16
 #define CODECS_MAX_INFMT        16
@@ -67,10 +69,9 @@ typedef struct codecs {
     char *dll;
     char* drv;
     GUID guid;
-//    short driver;
     short flags;
     short status;
-    short cpuflags;
+    bool anyinput;
 } codecs_t;
 
 int parse_codec_cfg(const char *cfgfile);

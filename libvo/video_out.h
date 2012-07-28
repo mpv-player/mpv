@@ -239,6 +239,12 @@ struct vo_driver {
      * Closes driver. Should restore the original state of the system.
      */
     void (*uninit)(struct vo *vo);
+
+    // Size of private struct for automatic allocation
+    int privsize;
+
+    // List of options to parse into priv struct (requires privsize to be set)
+    const struct m_option *options;
 };
 
 struct vo_old_functions {

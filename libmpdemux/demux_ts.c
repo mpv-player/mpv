@@ -3132,7 +3132,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				}
 				memmove(p, es->start, es->size);
 				*dp_offset += es->size;
-				(*dp)->flags = 0;
+				(*dp)->keyframe = 0;
 				(*dp)->pos = stream_tell(demuxer->stream);
 				(*dp)->pts = es->pts;
 				// subtitle packets must be returned immediately if possible

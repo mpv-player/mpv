@@ -78,7 +78,7 @@ struct cue_track {
 
 static enum cue_command read_cmd(struct bstr *data, struct bstr *out_params)
 {
-    struct bstr line = bstr_getline(*data, data);
+    struct bstr line = bstr_strip_linebreaks(bstr_getline(*data, data));
     line = bstr_lstrip(line);
     if (line.len == 0)
         return CUE_EMPTY;

@@ -245,8 +245,6 @@ static const char * const preferred_internal[] = {
     /* lavf Matroska demuxer doesn't support ordered chapters and fails
      * for more files */
     "matroska",
-    /* lavf gives neither pts nor dts for some video frames in .rm */
-    "rm",
     NULL
 };
 
@@ -310,6 +308,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             break;
         stream_type = "audio";
         priv->astreams[priv->audio_streams] = i;
+        sh_audio->libav_codec_id = codec->codec_id;
         wf = calloc(sizeof(*wf) + codec->extradata_size, 1);
         // mp4a tag is used for all mp4 files no matter what they actually contain
         if (codec->codec_tag == MKTAG('m', 'p', '4', 'a'))
@@ -387,6 +386,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             break;
         stream_type = "video";
         priv->vstreams[priv->video_streams] = i;
+        sh_video->libav_codec_id = codec->codec_id;
         bih = calloc(sizeof(*bih) + codec->extradata_size, 1);
 
         if (codec->codec_id == CODEC_ID_RAWVIDEO) {
@@ -398,9 +398,14 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             }
             if (!codec->codec_tag)
                 codec->codec_tag = avcodec_pix_fmt_to_codec_tag(codec->pix_fmt);
-        }
-        if (!codec->codec_tag)
+        } else if (!codec->codec_tag) {
             codec->codec_tag = mp_taglist_video(codec->codec_id);
+            /* 0 might mean either unset or rawvideo; if codec_id
+             * was not RAWVIDEO assume it's unset
+             */
+            if (!codec->codec_tag)
+                codec->codec_tag = -1;
+        }
         bih->biSize = sizeof(*bih) + codec->extradata_size;
         bih->biWidth = codec->width;
         bih->biHeight = codec->height;
@@ -492,6 +497,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             break;
         stream_type = "subtitle";
         priv->sstreams[priv->sub_streams] = i;
+        sh_sub->libav_codec_id = codec->codec_id;
         sh_sub->type = type;
         if (codec->extradata_size) {
             sh_sub->extradata = malloc(codec->extradata_size);
@@ -808,7 +814,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
                 av_q2d(priv->avfc->streams[id]->time_base);
     }
     dp->pos = demux->filepos;
-    dp->flags = !!(pkt->flags & AV_PKT_FLAG_KEY);
+    dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
     // append packet to DS stream:
     ds_add_packet(ds, dp);
     return 1;

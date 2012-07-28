@@ -484,7 +484,7 @@ static char *get_section(void *talloc_ctx, struct bstr source,
     char *res = talloc_strdup(talloc_ctx, "");
     bool copy = false;
     while (source.len) {
-        struct bstr line = bstr_getline(source, &source);
+        struct bstr line = bstr_strip_linebreaks(bstr_getline(source, &source));
         if (bstr_eatstart(&line, bstr(SECTION_HEADER))) {
             copy = bstrcmp0(line, section) == 0;
         } else if (copy) {

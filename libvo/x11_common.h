@@ -95,6 +95,7 @@ struct vo_x11_state {
     Atom XAWM_PROTOCOLS;
     Atom XAWM_DELETE_WINDOW;
     Atom XAUTF8_STRING;
+    Atom XA_NET_WM_CM;
 };
 
 #if defined(CONFIG_GL) || defined(CONFIG_X11) || defined(CONFIG_XV)
@@ -137,6 +138,7 @@ void vo_x11_uninit(struct vo *vo);
 Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo);
 uint32_t vo_x11_set_equalizer(struct vo *vo, const char *name, int value);
 uint32_t vo_x11_get_equalizer(const char *name, int *value);
+bool vo_x11_screen_is_composited(struct vo *vo);
 void fstype_help(void);
 void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
         int x, int y, unsigned int width, unsigned int height, int flags,

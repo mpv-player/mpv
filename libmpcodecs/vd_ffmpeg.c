@@ -43,11 +43,12 @@
 #include "osdep/numcores.h"
 
 static const vd_info_t info = {
-    "FFmpeg's libavcodec codec family",
+    "libavcodec video codecs",
     "ffmpeg",
-    "A'rpi",
-    "A'rpi, Michael, Alex",
-    "native codecs"
+    "",
+    "",
+    "native codecs",
+    .print_name = "libavcodec",
 };
 
 #include "libavcodec/avcodec.h"
@@ -129,13 +130,31 @@ static int init(sh_video_t *sh)
 
     ctx = sh->context = talloc_zero(NULL, vd_ffmpeg_ctx);
 
-    lavc_codec = avcodec_find_decoder_by_name(sh->codec->dll);
-    if (!lavc_codec) {
-        mp_tmsg(MSGT_DECVIDEO, MSGL_ERR,
-                "Cannot find codec '%s' in libavcodec...\n", sh->codec->dll);
-        uninit(sh);
+    if (sh->codec->dll) {
+        lavc_codec = avcodec_find_decoder_by_name(sh->codec->dll);
+        if (!lavc_codec) {
+            mp_tmsg(MSGT_DECVIDEO, MSGL_ERR,
+                    "Cannot find codec '%s' in libavcodec...\n",
+                    sh->codec->dll);
+            uninit(sh);
+            return 0;
+        }
+    } else if (!sh->libav_codec_id) {
+        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "No Libav codec ID known. "
+                "Generic lavc decoder is not applicable.\n");
         return 0;
+    } else {
+        lavc_codec = avcodec_find_decoder(sh->libav_codec_id);
+        if (!lavc_codec) {
+            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Libavcodec has no decoder "
+                   "for this codec\n");
+            return 0;
+        }
     }
+
+    sh->codecname = lavc_codec->long_name;
+    if (!sh->codecname)
+        sh->codecname = lavc_codec->name;
 
     if (sh->opts->vd_use_slices
             && (lavc_codec->capabilities & CODEC_CAP_DRAW_HORIZ_BAND)
@@ -191,7 +210,7 @@ static int init(sh_video_t *sh)
     if (lavc_param->threads > 1) {
         ctx->do_dr1 = false;
         ctx->do_slices = false;
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Asking decoder to use "
+        mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Asking decoder to use "
                 "%d threads if supported.\n", lavc_param->threads);
     }
 
@@ -320,8 +339,7 @@ static int init(sh_video_t *sh)
         uninit(sh);
         return 0;
     }
-    mp_msg(MSGT_DECVIDEO, MSGL_V, "INFO: libavcodec init OK!\n");
-    return 1; //mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, IMGFMT_YV12);
+    return 1;
 }
 
 static void uninit(sh_video_t *sh)
@@ -329,6 +347,7 @@ static void uninit(sh_video_t *sh)
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
 
+    sh->codecname = NULL;
     if (sh->opts->lavc_param.vstats && avctx->coded_frame) {
         for (int i = 1; i < 32; i++)
             mp_msg(MSGT_DECVIDEO, MSGL_INFO,
@@ -623,8 +642,10 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     av_init_packet(&pkt);
     pkt.data = data;
     pkt.size = len;
-    // HACK: make PNGs decode normally instead of as CorePNG delta frames
-    pkt.flags = AV_PKT_FLAG_KEY;
+    /* Some codecs (ZeroCodec, some cases of PNG) may want keyframe info
+     * from demuxer. */
+    if (packet && packet->keyframe)
+        pkt.flags |= AV_PKT_FLAG_KEY;
     if (packet && packet->avpacket) {
         pkt.side_data = packet->avpacket->side_data;
         pkt.side_data_elems = packet->avpacket->side_data_elems;

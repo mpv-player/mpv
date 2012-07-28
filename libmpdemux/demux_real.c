@@ -794,7 +794,7 @@ got_audio:
 		    if (x * apk_usize % w == 0)
 			dp->pts = priv->audio_timestamp[x * apk_usize / w];
                     dp->pos = priv->audio_filepos; // all equal
-                    dp->flags = x ? 0 : 0x10; // Mark first packet as keyframe
+                    dp->keyframe = !x;  // Mark first packet as keyframe
                     ds_add_packet(ds, dp);
                 }
             }
@@ -839,7 +839,7 @@ got_audio:
 	        dp->pts = timestamp/1000.0;
 	    priv->a_pts=timestamp;
 	    dp->pos = demuxer->filepos;
-	    dp->flags = (flags & 0x2) ? 0x10 : 0;
+	    dp->keyframe = flags & 0x2;
 	    ds_add_packet(ds, dp);
 
         } // codec_id check, codec default case
@@ -1003,7 +1003,7 @@ got_video:
 		dp = new_demux_packet(sizeof(dp_hdr_t)+vpkg_length+8*(1+2*(vpkg_header&0x3F)));
 	    	// the timestamp seems to be in milliseconds
                 dp->pos = demuxer->filepos;
-                dp->flags = (flags & 0x2) ? 0x10 : 0;
+                dp->keyframe = flags & 0x2;
 		ds->asf_seq = vpkg_seqnum;
 		dp_hdr=(dp_hdr_t*)dp->buffer;
 		dp_hdr->chunks=0;

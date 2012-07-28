@@ -310,13 +310,14 @@ static int init_video(sh_video_t *sh_video, char *codecname, char *vfm,
 
         // init()
         const struct vd_functions *vd = sh_video->vd_driver;
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Opening video decoder: [%s] %s\n",
+        mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Opening video decoder: [%s] %s\n",
                vd->info->short_name, vd->info->name);
         // clear vf init error, it is no longer relevant
         if (sh_video->vf_initialized < 0)
             sh_video->vf_initialized = 0;
         if (!vd->init(sh_video)) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "VDecoder init failed :(\n");
+            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Video decoder init failed for "
+                    "codecs.conf entry \"%s\".\n", sh_video->codec->name);
             sh_video->disp_w = orig_w;
             sh_video->disp_h = orig_h;
             if (sh_video->bih) {
@@ -389,8 +390,14 @@ int init_best_video_codec(sh_video_t *sh_video, char **video_codec_list,
         return 0;               // failed
     }
 
-    mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Selected video codec: [%s] vfm: %s (%s)\n",
-           sh_video->codec->name, sh_video->codec->drv, sh_video->codec->info);
+    mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Selected video codec: %s [%s]\n",
+            sh_video->codecname ? sh_video->codecname : sh_video->codec->info,
+            sh_video->vd_driver->info->print_name ?
+            sh_video->vd_driver->info->print_name :
+            sh_video->vd_driver->info->short_name);
+    mp_tmsg(MSGT_DECVIDEO, MSGL_V,
+            "Video codecs.conf entry: %s (%s)  vfm: %s\n",
+            sh_video->codec->name, sh_video->codec->info, sh_video->codec->drv);
     return 1;                   // success
 }
 

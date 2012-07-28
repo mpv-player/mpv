@@ -139,7 +139,7 @@ static int demux_ra_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
             memcpy(dp->buffer, ra_priv->audio_buf + x * len, len);
             dp->pts = x ? 0 : demuxer->filepos / ra_priv->data_size;
             dp->pos = demuxer->filepos; // all equal
-            dp->flags = x ? 0 : 0x10; // Mark first packet as keyframe
+            dp->keyframe = !x;   // Mark first packet as keyframe
             ds_add_packet(ds, dp);
         }
     } else {
@@ -148,7 +148,6 @@ static int demux_ra_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 
 	dp->pts = demuxer->filepos / ra_priv->data_size;
 	dp->pos = demuxer->filepos;
-	dp->flags = 0;
 	ds_add_packet(ds, dp);
     }
 

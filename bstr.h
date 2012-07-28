@@ -36,14 +36,18 @@ struct bstr {
 
 // demux_rtp.cpp (live555) C++ compilation workaround
 #ifndef __cplusplus
+// If str.start is NULL, return NULL.
 static inline char *bstrdup0(void *talloc_ctx, struct bstr str)
 {
     return talloc_strndup(talloc_ctx, (char *)str.start, str.len);
 }
 
+// Return start = NULL iff that is true for the original.
 static inline struct bstr bstrdup(void *talloc_ctx, struct bstr str)
 {
-    struct bstr r = { talloc_strndup(talloc_ctx, str.start, str.len), str.len };
+    struct bstr r = { NULL, str.len };
+    if (str.start)
+        r.start = talloc_memdup(talloc_ctx, str.start, str.len);
     return r;
 }
 
@@ -84,9 +88,12 @@ int bstr_parse_utf8_code_length(unsigned char b);
 
 // Return the text before the next line break, and return it. Change *rest to
 // point to the text following this line break. (rest can be NULL.)
-// Unlike bstr_splitlines, possible \r characters coming from files with CR+LF
-// line breaks are stripped.
+// Line break characters are not stripped.
 struct bstr bstr_getline(struct bstr str, struct bstr *rest);
+
+// Strip one trailing line break. This is intended for use with bstr_getline,
+// and will remove the trailing \n or \r\n sequence.
+struct bstr bstr_strip_linebreaks(struct bstr str);
 
 // If s starts with prefix, return true and return the rest of the string in s.
 bool bstr_eatstart(struct bstr *s, struct bstr prefix);
@@ -145,6 +152,11 @@ static inline int bstrcasecmp0(struct bstr str1, const char *str2)
 static inline int bstr_find0(struct bstr haystack, const char *needle)
 {
     return bstr_find(haystack, bstr(needle));
+}
+
+static inline int bstr_eatstart0(struct bstr *s, char *prefix)
+{
+    return bstr_eatstart(s, bstr(prefix));
 }
 
 #endif

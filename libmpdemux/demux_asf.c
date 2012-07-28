@@ -177,7 +177,7 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
         dp->pts=time*0.0000001;
       else
         dp->pts=time*0.001;
-      dp->flags=keyframe;
+      dp->keyframe = keyframe;
 //      if(ds==demux->video) printf("ASF time: %8d  dur: %5d  \n",time,dur);
       dp->pos=demux->filepos;
       ds->asf_packet=dp;
@@ -595,7 +595,8 @@ static void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,float audio_de
 	      continue;
 	  }
 	}
-	if(d_video->flags&1) break; // found a keyframe!
+	if (d_video->keyframe)
+            break;
 	if(!ds_fill_buffer(d_video)) break; // skip frame.  EOF?
     }
 

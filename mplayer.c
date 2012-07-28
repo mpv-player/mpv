@@ -1776,13 +1776,10 @@ void reinit_audio_chain(struct MPContext *mpctx)
     }
     if (!(mpctx->initialized_flags & INITIALIZED_ACODEC)) {
         current_module = "init_audio_codec";
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "==========================================================================\n");
         if (!init_best_audio_codec(mpctx->sh_audio, audio_codec_list, audio_fm_list))
             goto init_error;
         mpctx->initialized_flags |= INITIALIZED_ACODEC;
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "==========================================================================\n");
     }
-
 
     current_module = "af_preinit";
     if (!(mpctx->initialized_flags & INITIALIZED_AO)) {
@@ -1852,6 +1849,8 @@ init_error:
 static double written_audio_pts(struct MPContext *mpctx)
 {
     sh_audio_t *sh_audio = mpctx->sh_audio;
+    if (!sh_audio)
+        return MP_NOPTS_VALUE;
     demux_stream_t *d_audio = mpctx->d_audio;
     // first calculate the end pts of audio that has been output by decoder
     double a_pts = sh_audio->pts;
@@ -2700,9 +2699,7 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     current_module = "init_video_codec";
 
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "==========================================================================\n");
     init_best_video_codec(sh_video, video_codec_list, video_fm_list);
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "==========================================================================\n");
 
     if (!sh_video->initialized) {
         if (!opts->fixed_vo)
@@ -2794,8 +2791,8 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         decoded_frame = mp_dvdnav_restore_smpi(mpctx, &in_size, &packet, NULL);
         if (in_size >= 0 && !decoded_frame)
 #endif
-        decoded_frame = decode_video(sh_video, NULL, packet, in_size,
-                                     framedrop_type, sh_video->pts);
+        decoded_frame = decode_video(sh_video, sh_video->ds->current, packet,
+                                     in_size, framedrop_type, sh_video->pts);
 #ifdef CONFIG_DVDNAV
         // Save last still frame for future display
         mp_dvdnav_save_smpi(mpctx, in_size, packet, decoded_frame);
@@ -3951,6 +3948,7 @@ int main(int argc, char *argv[])
     m_config_register_options(mpctx->mconfig, mplayer_opts);
     m_config_register_options(mpctx->mconfig, common_opts);
     mp_input_register_options(mpctx->mconfig);
+    m_config_initialize(mpctx->mconfig, opts);
 
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, argc, argv, &verbose);
@@ -4828,10 +4826,8 @@ goto_enable_cache:
     if (verbose)
         opts->term_osd = 0;
 
-    // Make sure old OSD does not stay around,
-    // e.g. with -fixed-vo and same-resolution files
+    // Make sure old OSD does not stay around
     clear_osd_msgs();
-    update_osd_msg(mpctx);
 
     //================ SETUP AUDIO ==========================
 

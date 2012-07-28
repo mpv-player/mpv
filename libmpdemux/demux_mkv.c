@@ -1840,7 +1840,7 @@ static int demux_mkv_read_block_lacing(uint8_t *buffer, uint64_t *size,
 }
 
 static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
-                             uint8_t *buffer, uint32_t size, int64_t block_bref)
+                             uint8_t *buffer, uint32_t size, bool keyframe)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     demux_packet_t *dp;
@@ -1860,13 +1860,13 @@ static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
                                biCompression, &track->rv_kf_base,
                                &track->rv_kf_pts, NULL);
     dp->pos = demuxer->filepos;
-    dp->flags = block_bref ? 0 : 0x10;
+    dp->keyframe = keyframe;
 
     ds_add_packet(demuxer->video, dp);
 }
 
 static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
-                             uint8_t *buffer, uint32_t size, int64_t block_bref)
+                             uint8_t *buffer, uint32_t size, bool keyframe)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     int sps = track->sub_packet_size;
@@ -1952,7 +1952,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
                 dp->pts = (x * apk_usize % w) ? 0 :
                     track->audio_timestamp[x * apk_usize / w];
                 dp->pos = track->audio_filepos; // all equal
-                dp->flags = x ? 0 : 0x10;       // Mark first packet as keyframe
+                dp->keyframe = !x;   // Mark first packet as keyframe
                 ds_add_packet(demuxer->audio, dp);
             }
         }
@@ -1966,14 +1966,14 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
         track->ra_pts = mkv_d->last_pts;
 
         dp->pos = demuxer->filepos;
-        dp->flags = block_bref ? 0 : 0x10;
+        dp->keyframe = keyframe;
         ds_add_packet(demuxer->audio, dp);
     }
 }
 
 static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
-                        uint64_t block_duration, int64_t block_bref,
-                        int64_t block_fref, uint8_t simpleblock)
+                        uint64_t block_duration, bool keyframe,
+                        bool simpleblock)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     mkv_track_t *track = NULL;
@@ -1995,6 +1995,8 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
     length -= tmp + 2;
     old_length = length;
     flags = block[0];
+    if (simpleblock)
+        keyframe = flags & 0x80;
     if (demux_mkv_read_block_lacing(block, &length, &laces, &lace_size))
         return 0;
     block += old_length - length;
@@ -2015,13 +2017,8 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
         && track->id == demuxer->audio->id) {
         ds = demuxer->audio;
 
-        if (mkv_d->a_skip_to_keyframe) {
-            if (simpleblock) {
-                if (!(flags & 0x80))    /*current frame isn't a keyframe */
-                    use_this_block = 0;
-            } else if (block_bref != 0)
-                use_this_block = 0;
-        }
+        if (mkv_d->a_skip_to_keyframe)
+            use_this_block = keyframe;
         if (mkv_d->v_skip_to_keyframe)
             use_this_block = 0;
 
@@ -2043,13 +2040,8 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
     else if (track->type == MATROSKA_TRACK_VIDEO
              && track->id == demuxer->video->id) {
         ds = demuxer->video;
-        if (mkv_d->v_skip_to_keyframe) {
-            if (simpleblock) {
-                if (!(flags & 0x80))    /*current frame isn't a keyframe */
-                    use_this_block = 0;
-            } else if (block_bref != 0 || block_fref != 0)
-                use_this_block = 0;
-        }
+        if (mkv_d->v_skip_to_keyframe)
+            use_this_block = keyframe;
     } else if (track->type == MATROSKA_TRACK_SUBTITLE
                && track->id == demuxer->sub->id) {
         ds = demuxer->sub;
@@ -2069,10 +2061,10 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
         for (i = 0; i < laces; i++) {
             if (ds == demuxer->video && track->realmedia)
                 handle_realvideo(demuxer, track, block, lace_size[i],
-                                 block_bref);
+                                 keyframe);
             else if (ds == demuxer->audio && track->realmedia)
                 handle_realaudio(demuxer, track, block, lace_size[i],
-                                 block_bref);
+                                 keyframe);
             else {
                 int size = lace_size[i];
                 demux_packet_t *dp;
@@ -2083,8 +2075,7 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
                     memcpy(dp->buffer, buffer, size);
                     if (buffer != block)
                         talloc_free(buffer);
-                    dp->flags = (block_bref == 0
-                                 && block_fref == 0) ? 0x10 : 0;
+                    dp->keyframe = keyframe;
                     /* If default_duration is 0, assume no pts value is known
                      * for packets after the first one (rather than all pts
                      * values being the same) */
@@ -2122,7 +2113,7 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
     while (1) {
         while (mkv_d->cluster_size > 0) {
             uint64_t block_duration = 0, block_length = 0;
-            int64_t block_bref = 0, block_fref = 0;
+            bool keyframe = true;
             uint8_t *block = NULL;
 
             while (mkv_d->blockgroup_size > 0) {
@@ -2157,10 +2148,8 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
                         free(block);
                         return 0;
                     }
-                    if (num <= 0)
-                        block_bref = num;
-                    else
-                        block_fref = num;
+                    if (num)
+                        keyframe = false;
                     break;
 
                 case EBML_ID_INVALID:
@@ -2177,8 +2166,7 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
             if (block) {
                 int res = handle_block(demuxer, block, block_length,
-                                       block_duration, block_bref, block_fref,
-                                       0);
+                                       block_duration, keyframe, false);
                 free(block);
                 if (res < 0)
                     return 0;
@@ -2216,8 +2204,7 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
                     }
                     l = tmp + block_length;
                     res = handle_block(demuxer, block, block_length,
-                                       block_duration, block_bref,
-                                       block_fref, 1);
+                                       block_duration, false, true);
                     free(block);
                     mkv_d->cluster_size -= l + il;
                     if (res < 0)

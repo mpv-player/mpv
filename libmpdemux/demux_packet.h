@@ -19,6 +19,7 @@
 #ifndef MPLAYER_DEMUX_PACKET_H
 #define MPLAYER_DEMUX_PACKET_H
 
+#include <stdbool.h>
 #include <sys/types.h>
 
 // Holds one packet/frame/whatever
@@ -29,7 +30,7 @@ typedef struct demux_packet {
     double stream_pts;
     off_t pos; // position in index (AVI) or file (MPG)
     unsigned char *buffer;
-    int flags; // keyframe, etc
+    bool keyframe;
     int refcount; // counter for the master packet, if 0, buffer can be free()d
     struct demux_packet *master; //in clones, pointer to the master packet
     struct demux_packet *next;

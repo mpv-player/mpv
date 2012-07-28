@@ -141,7 +141,6 @@ static int demux_y4m_fill_buffer(demuxer_t *demux, demux_stream_t *dsds) {
   dp->pts=(float)priv->framenum/((sh_video_t*)ds->sh)->fps;
   priv->framenum++;
   dp->pos=demux->filepos;
-  dp->flags=0;
   ds_add_packet(ds, dp);
 
   return 1;

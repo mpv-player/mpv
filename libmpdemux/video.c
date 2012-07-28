@@ -636,7 +636,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     if(video_codec == VIDEO_MPEG12){
         sh_video->pts+=frame_time;
         if(picture_coding_type==1)
-            d_video->flags |= 1;
+            d_video->keyframe = true;
         if(picture_coding_type<=2 && sh_video->i_pts){
             sh_video->pts=sh_video->i_pts;
             sh_video->i_pts=pts;

@@ -67,7 +67,8 @@ static int parse_profile(struct m_config *config, const struct m_option *opt,
     }
 
     char **list = NULL;
-    int r = m_option_type_string_list.parse(opt, name, param, false, &list);
+    int r = m_option_type_string_list.parse(opt, name, param, false, &list,
+                                            NULL);
     if (r < 0)
         return r;
     if (!list || !list[0])
@@ -144,16 +145,16 @@ static void m_option_save(const struct m_config *config,
 {
     if (opt->type->copy) {
         const void *src = m_option_get_ptr(opt, config->optstruct);
-        opt->type->copy(opt, dst, src);
+        opt->type->copy(opt, dst, src, NULL);
     }
 }
 
-static void m_option_set(const struct m_config *config,
+static void m_option_set(void *optstruct,
                          const struct m_option *opt, const void *src)
 {
     if (opt->type->copy) {
-        void *dst = m_option_get_ptr(opt, config->optstruct);
-        opt->type->copy(opt, dst, src);
+        void *dst = m_option_get_ptr(opt, optstruct);
+        opt->type->copy(opt, dst, src, optstruct);
     }
 }
 
@@ -176,6 +177,7 @@ struct m_config *m_config_new(void *optstruct,
     };
 
     config = talloc_zero(NULL, struct m_config);
+    config->full = true;
     config->lvl = 1; // 0 Is the defaults
     struct m_option *self_opts = talloc_memdup(config, ref_opts,
                                                sizeof(ref_opts));
@@ -195,8 +197,16 @@ struct m_config *m_config_new(void *optstruct,
     return config;
 }
 
+struct m_config *m_config_simple(const struct m_option *options)
+{
+    struct m_config *config = talloc_zero(NULL, struct m_config);
+    m_config_register_options(config, options);
+    return config;
+}
+
 void m_config_free(struct m_config *config)
 {
+    assert(config->full);   // use talloc_free() for simple
     struct m_config_option *copt;
     for (copt = config->opts; copt; copt = copt->next) {
         if (copt->flags & M_CFG_OPT_ALIAS)
@@ -211,6 +221,17 @@ void m_config_free(struct m_config *config)
             m_option_free(copt->opt, sl->data);
     }
     talloc_free(config);
+}
+
+void m_config_initialize(struct m_config *config, void *optstruct)
+{
+    struct m_config_option *copt;
+    for (copt = config->opts; copt; copt = copt->next) {
+        const struct m_option *opt = copt->opt;
+        if (!opt->defval)
+            continue;
+        m_option_set(optstruct, opt, opt->defval);
+    }
 }
 
 void m_config_push(struct m_config *config)
@@ -278,7 +299,7 @@ void m_config_pop(struct m_config *config)
             pop++;
         }
         if (pop) // We removed some ctx -> set the previous value
-            m_option_set(config, co->opt, co->slots->data);
+            m_option_set(config->optstruct, co->opt, co->slots->data);
     }
 
     config->lvl--;
@@ -314,7 +335,7 @@ static void m_config_add_option(struct m_config *config,
     struct m_config_save_slot *sl;
 
     assert(config != NULL);
-    assert(config->lvl > 0);
+    assert(config->lvl > 0 || !config->full);
     assert(arg != NULL);
 
     // Allocate a new entry for this option
@@ -346,18 +367,18 @@ static void m_config_add_option(struct m_config *config,
                 }
             }
         }
-        if (!(co->flags & M_CFG_OPT_ALIAS)) {
+        if (config->full && !(co->flags & M_CFG_OPT_ALIAS)) {
             // Allocate a slot for the defaults
             sl = talloc_zero_size(co, sizeof(struct m_config_save_slot) +
                                   arg->type->size);
             m_option_save(config, arg, sl->data);
             // Hack to avoid too much trouble with dynamically allocated data:
             // We replace original default and always use a dynamic version
-            if ((arg->type->flags & M_OPT_TYPE_DYNAMIC)) {
+            if (!arg->new && (arg->type->flags & M_OPT_TYPE_DYNAMIC)) {
                 char **hackptr = m_option_get_ptr(arg, config->optstruct);
                 if (hackptr && *hackptr) {
                     *hackptr = NULL;
-                    m_option_set(config, arg, sl->data);
+                    m_option_set(config->optstruct, arg, sl->data);
                 }
             }
             sl->lvl = 0;
@@ -377,7 +398,7 @@ int m_config_register_options(struct m_config *config,
                               const struct m_option *args)
 {
     assert(config != NULL);
-    assert(config->lvl > 0);
+    assert(config->lvl > 0 || !config->full);
     assert(args != NULL);
 
     add_options(config, args, NULL, NULL);
@@ -403,12 +424,15 @@ static struct m_config_option *m_config_get_co(const struct m_config *config,
     return NULL;
 }
 
-static int m_config_parse_option(struct m_config *config,
+static int parse_subopts(struct m_config *config, void *optstruct, char *name,
+                         char *prefix, struct bstr param, bool set);
+
+static int m_config_parse_option(struct m_config *config, void *optstruct,
                                  struct bstr name, struct bstr param,
                                  bool ambiguous_param, bool set)
 {
     assert(config != NULL);
-    assert(config->lvl > 0);
+    assert(config->lvl > 0 || !config->full);
     assert(name.len != 0);
 
     struct m_config_option *co = m_config_get_co(config, name);
@@ -453,44 +477,15 @@ static int m_config_parse_option(struct m_config *config,
 
     // Option with children are a bit different to parse
     if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD) {
-        char **lst = NULL;
-        // Parse the child options
-        int r = m_option_parse(co->opt, name, param, false, &lst);
-        // Set them now
-        if (r >= 0)
-            for (int i = 0; lst && lst[2 * i]; i++) {
-                int l = strlen(co->name) + 1 + strlen(lst[2 * i]) + 1;
-                if (r >= 0) {
-                    // Build the full name
-                    char n[l];
-                    sprintf(n, "%s:%s", co->name, lst[2 * i]);
-                    int sr = m_config_parse_option(config, bstr(n),
-                                                   bstr(lst[2 * i + 1]), false,
-                                                   set);
-                    if (sr < 0) {
-                        if (sr == M_OPT_UNKNOWN) {
-                            mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                                 "Error: option '%s' has no suboption '%s'.\n",
-                                    co->name, lst[2 * i]);
-                            r = M_OPT_INVALID;
-                        } else if (sr == M_OPT_MISSING_PARAM) {
-                            mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                                    "Error: suboption '%s' of '%s' must have "
-                                    "a parameter!\n", lst[2 * i], co->name);
-                            r = M_OPT_INVALID;
-                        } else
-                            r = sr;
-                    }
-                }
-                talloc_free(lst[2 * i]);
-                talloc_free(lst[2 * i + 1]);
-            }
-        talloc_free(lst);
-        return r;
+        char prefix[110];
+        assert(strlen(co->name) < 100);
+        sprintf(prefix, "%s:", co->name);
+        return parse_subopts(config, optstruct, co->name, prefix, param, set);
     }
 
-    void *dst = set ? m_option_get_ptr(co->opt, config->optstruct) : NULL;
-    int r = m_option_parse(co->opt, name, param, ambiguous_param, dst);
+    void *dst = set ? m_option_get_ptr(co->opt, optstruct) : NULL;
+    int r = co->opt->type->parse(co->opt, name, param, ambiguous_param, dst,
+                                 optstruct);
     // Parsing failed ?
     if (r < 0)
         return r;
@@ -500,12 +495,67 @@ static int m_config_parse_option(struct m_config *config,
     return r;
 }
 
+static int parse_subopts(struct m_config *config, void *optstruct, char *name,
+                         char *prefix, struct bstr param, bool set)
+{
+    char **lst = NULL;
+    // Split the argument into child options
+    int r = m_option_type_subconfig.parse(NULL, bstr(""), param, false, &lst,
+                                          optstruct);
+    if (r < 0)
+        return r;
+    // Parse the child options
+    for (int i = 0; lst && lst[2 * i]; i++) {
+        // Build the full name
+        char n[110];
+        if (snprintf(n, 110, "%s%s", prefix, lst[2 * i]) > 100)
+            abort();
+        if (!m_config_get_option(config, bstr(n))) {
+            if (strncmp(lst[2 * i], "no-", 3))
+                goto nosubopt;
+            snprintf(n, 110, "%s%s", prefix, lst[2 * i] + 3);
+            const struct m_option *o = m_config_get_option(config, bstr(n));
+            if (!o || o->type != &m_option_type_flag) {
+            nosubopt:
+                mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                        "Error: option '%s' has no suboption '%s'.\n",
+                        name, lst[2 * i]);
+                r = M_OPT_INVALID;
+                break;
+            }
+            if (lst[2 * i + 1]) {
+                mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                        "A --no-* option can't take parameters: "
+                        "%s=%s\n", lst[2 * i], lst[2 * i + 1]);
+                r = M_OPT_INVALID;
+                break;
+            }
+            lst[2 * i + 1] = "no";
+        }
+        int sr = m_config_parse_option(config, optstruct, bstr(n),
+                                       bstr(lst[2 * i + 1]), false, set);
+        if (sr < 0) {
+            if (sr == M_OPT_MISSING_PARAM) {
+                mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                        "Error: suboption '%s' of '%s' must have "
+                        "a parameter!\n", lst[2 * i], name);
+                r = M_OPT_INVALID;
+            } else
+                r = sr;
+            break;
+        }
+    }
+    talloc_free(lst);
+    return r;
+}
+
 int m_config_set_option(struct m_config *config, struct bstr name,
                                  struct bstr param, bool ambiguous_param)
 {
     mp_msg(MSGT_CFGPARSER, MSGL_DBG2, "Setting %.*s=%.*s\n", BSTR_P(name),
            BSTR_P(param));
-    return m_config_parse_option(config, name, param, ambiguous_param, 1);
+    return m_config_parse_option(config, config->optstruct, name, param,
+                                 ambiguous_param, true);
 }
 
 int m_config_check_option(struct m_config *config, struct bstr name,
@@ -514,13 +564,21 @@ int m_config_check_option(struct m_config *config, struct bstr name,
     int r;
     mp_msg(MSGT_CFGPARSER, MSGL_DBG2, "Checking %.*s=%.*s\n", BSTR_P(name),
            BSTR_P(param));
-    r = m_config_parse_option(config, name, param, ambiguous_param, 0);
+    r = m_config_parse_option(config, NULL, name, param, ambiguous_param, 0);
     if (r == M_OPT_MISSING_PARAM) {
         mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
                 "Error: option '%.*s' must have a parameter!\n", BSTR_P(name));
         return M_OPT_INVALID;
     }
     return r;
+}
+
+int m_config_parse_suboptions(struct m_config *config, void *optstruct,
+                              char *name, char *subopts)
+{
+    if (!subopts || !*subopts)
+        return 0;
+    return parse_subopts(config, optstruct, name, "", bstr(subopts), true);
 }
 
 
@@ -530,7 +588,7 @@ const struct m_option *m_config_get_option(const struct m_config *config,
     struct m_config_option *co;
 
     assert(config != NULL);
-    assert(config->lvl > 0);
+    assert(config->lvl > 0 || !config->full);
 
     co = m_config_get_co(config, name);
     if (co)

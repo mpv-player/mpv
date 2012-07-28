@@ -130,7 +130,6 @@ static int demux_film_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
       return 0;
     dp->pts = film_chunk.pts;
     dp->pos = film_chunk.chunk_offset;
-    dp->flags = 0;
 
     // adjust the data before queuing it:
     //   8-bit: signed -> unsigned
@@ -197,7 +196,7 @@ static int demux_film_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
       dp->pts = film_chunk.pts;
       dp->pos = film_chunk.chunk_offset;
-      dp->flags = (film_chunk.syncinfo1 & 0x80000000) ? 1 : 0;
+      dp->keyframe = film_chunk.syncinfo1 & 0x80000000;
 
       // fix the CVID chunk size
       cvid_size = film_chunk.chunk_size - length_fix_bytes;

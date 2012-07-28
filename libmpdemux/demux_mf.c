@@ -66,7 +66,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
    if ( !fread( dp->buffer,file_size,1,f ) ) return 0;
    dp->pts=mf->curr_frame / sh_video->fps;
    dp->pos=mf->curr_frame;
-   dp->flags=0;
+   dp->keyframe = true;
    // append packet to DS stream:
    ds_add_packet( demuxer->video,dp );
   }

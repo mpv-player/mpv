@@ -596,11 +596,17 @@ mplayer$(EXESUF): EXTRALIBS += $(EXTRALIBS_MPLAYER)
 mplayer$(EXESUF):
 	$(CC) -o $@ $^ $(EXTRALIBS)
 
-codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h
-	$(HOST_CC) -O -DCODECS2HTML -I. -o $@ $<
+codecs.conf.h: TOOLS/file2string.py etc/codecs.conf
+	./$^ >$@
 
-codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
-	./$^ > $@
+libvo/vdpau_template.c: TOOLS/vdpau_functions.py
+	./$< > $@
+
+libmpdemux/ebml_types.h: TOOLS/matroska.py
+	./$< --generate-header > $@
+
+libmpdemux/ebml_defs.c: TOOLS/matroska.py
+	./$< --generate-definitions > $@
 
 libvo/vo_gl3_shaders.h: libvo/vo_gl3_shaders.glsl
 	python ./bin_to_header.py $^ $@
@@ -640,6 +646,9 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 # Make sure all generated header files are created.
 codec-cfg.o: codecs.conf.h
 mpcommon.o osdep/mplayer-rc.o: version.h
+libvo/vo_vdpau.o: libvo/vdpau_template.c
+libmpdemux/ebml.o libmpdemux/demux_mkv.o: libmpdemux/ebml_types.h
+libmpdemux/ebml.o: libmpdemux/ebml_defs.c
 
 # Files that depend on libavcodec internals
 libmpcodecs/vf_fspp.o libmpcodecs/vf_mcdeint.o libmpcodecs/vf_spp.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
@@ -702,16 +711,17 @@ uninstall:
 	$(RM) $(foreach lang,$(MSG_LANGS),$(LOCALEDIR)/$(lang)/LC_MESSAGES/mplayer.1)
 
 clean:
-	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
+	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.d /*.a /*.ho /*~)
 	-$(RM) $(call ADD_ALL_EXESUFS,mplayer)
 	-$(RM) $(MOFILES)
 
 distclean: clean testsclean toolsclean driversclean
 	-$(RM) -r DOCS/tech/doxygen
 	-$(RM) -r locale
-	-$(RM) $(call ADD_ALL_DIRS,/*.d)
 	-$(RM) config.log config.mak config.h codecs.conf.h version.h TAGS tags
-	-$(RM) $(call ADD_ALL_EXESUFS,codec-cfg cpuinfo)
+	-$(RM) libvo/vdpau_template.c
+	-$(RM) libmpdemux/ebml_types.h libmpdemux/ebml_defs.c
+	-$(RM) $(call ADD_ALL_EXESUFS,cpuinfo)
 
 doxygen:
 	doxygen DOCS/tech/Doxyfile
@@ -722,26 +732,16 @@ TAGS:
 tags:
 	$(RM) $@; find . -name '*.[chS]' -o -name '*.asm' | xargs ctags -a
 
-generated_ebml:
-	TOOLS/matroska.py --generate-header >libmpdemux/ebml_types.h
-	TOOLS/matroska.py --generate-definitions >libmpdemux/ebml_defs.c
-
 ###### tests / tools #######
 
 TEST_OBJS = mp_msg.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
-
-codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h $(TEST_OBJS)
-	$(CC) -I. -DTESTING -o $@ $^
-
-codecs2html$(EXESUF): codec-cfg.c $(TEST_OBJS)
-	$(CC) -I. -DCODECS2HTML -o $@ $^
 
 LOADER_TEST_OBJS = $(SRCS_WIN32_EMULATION:.c=.o) $(SRCS_QTX_EMULATION:.S=.o) libavutil/libavutil.a osdep/mmap_anon.o cpudetect.o path.o $(TEST_OBJS)
 
 loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): CFLAGS += -g
 loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): $(LOADER_TEST_OBJS)
 
-TESTS = codecs2html codec-cfg-test
+TESTS =
 
 ifdef ARCH_X86
 TESTS += loader/qtx/list loader/qtx/qtxload

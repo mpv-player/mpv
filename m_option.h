@@ -192,11 +192,12 @@ struct m_option_type {
      *         may not be an argument meant for this option
      *  \param dst Pointer to the memory where the data should be written.
      *             If NULL the parameter validity should still be checked.
+     *         talloc_ctx: talloc context if value type requires allocations
      *  \return On error a negative value is returned, on success the number
      *          of arguments consumed. For details see \ref OptionParserReturn.
      */
     int (*parse)(const m_option_t *opt, struct bstr name, struct bstr param,
-                 bool ambiguous_param, void *dst);
+                 bool ambiguous_param, void *dst, void *talloc_ctx);
 
     // Print back a value in string form.
     /** \param opt The option to print.
@@ -210,8 +211,10 @@ struct m_option_type {
     /** \param opt The option to copy.
      *  \param dst Pointer to the destination memory.
      *  \param src Pointer to the source memory.
+     *         talloc_ctx: talloc context to use in deep copy
      */
-    void (*copy)(const m_option_t *opt, void *dst, const void *src);
+    void (*copy)(const m_option_t *opt, void *dst, const void *src,
+                 void *talloc_ctx);
 
     // Free the data allocated for a save slot.
     /** This is only needed for dynamic types like strings.
@@ -256,6 +259,9 @@ struct m_option {
     int new;
 
     int offset;
+
+    // Initialize variable to given default before parsing options
+    void *defval;
 };
 
 
@@ -387,7 +393,7 @@ static inline int m_option_parse(const m_option_t *opt, struct bstr name,
                                  struct bstr param, bool ambiguous_param,
                                  void *dst)
 {
-    return opt->type->parse(opt, name, param, ambiguous_param, dst);
+    return opt->type->parse(opt, name, param, ambiguous_param, dst, NULL);
 }
 
 // Helper to print options, see \ref m_option_type::print.
@@ -404,7 +410,7 @@ static inline void m_option_copy(const m_option_t *opt, void *dst,
                                  const void *src)
 {
     if (opt->type->copy)
-        opt->type->copy(opt, dst, src);
+        opt->type->copy(opt, dst, src, NULL);
 }
 
 // Helper around \ref m_option_type::free.
@@ -429,22 +435,39 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_START_CONDITIONAL(enable, featurename) OPT_START_CONDITIONAL_AFTERMACROEVAL(enable, featurename)
 #define OPT_START_CONDITIONAL_AFTERMACROEVAL(enable, featurename) {"conditional functionality: " #enable, .p = featurename}
 
-#define OPT_FLAG_ON(optname, varname, flags) {optname, NULL, &m_option_type_flag, flags, 0, 1, NULL, 1, offsetof(struct MPOpts, varname)}
-#define OPT_FLAG_OFF(optname, varname, flags) {optname, NULL, &m_option_type_flag, flags, 1, 0, NULL, 1, offsetof(struct MPOpts, varname)}
+#define OPTDEF_STR(s) .defval = (void *)&(char * const){s}
+#define OPTDEF_INT(i) .defval = (void *)&(const int){i}
+
+#define OPT_GENERAL(optname, varname, flagv, ...) {.name = optname, .flags = flagv, .new = 1, .offset = offsetof(OPT_BASE_STRUCT, varname), __VA_ARGS__}
+
+/* The OPT_FLAG_CONSTANTS->OPT_FLAG_CONSTANTS_ kind of redirection exists to
+ * make the code fully standard-conforming: the C standard requires that
+ * __VA_ARGS__ has at least one argument (though GCC for example would accept
+ * 0). Thus the first OPT_FLAG_CONSTANTS is a wrapper which just adds one
+ * argument to ensure __VA_ARGS__ is not empty when calling the next macro.
+ */
+#define OPT_FLAG_ON(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_flag, .max = 1)
+#define OPT_FLAG_OFF(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_flag, .min = 1)
 #define OPT_MAKE_FLAGS(optname, varname, flags) OPT_FLAG_ON(optname, varname, flags), OPT_FLAG_OFF("no" optname, varname, flags)
-#define OPT_FLAG_CONSTANTS(optname, varname, flags, offvalue, value) {optname, NULL, &m_option_type_flag, flags, offvalue, value, NULL, 1, offsetof(struct MPOpts, varname)}
-#define OPT_STRINGLIST(optname, varname, flags) {optname, NULL, &m_option_type_string_list, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
-#define OPT_PATHLIST(optname, varname, flags) {optname, NULL, &m_option_type_string_list, flags, 0, 0, (void *)&(const char){OPTION_PATH_SEPARATOR}, 1, offsetof(struct MPOpts, varname)}
-#define OPT_INT(optname, varname, flags) {optname, NULL, &m_option_type_int, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
-#define OPT_INTRANGE(optname, varname, flags, min, max) {optname, NULL, &m_option_type_int, (flags) | CONF_RANGE, min, max, NULL, 1, offsetof(struct MPOpts, varname)}
-#define OPT_INTPAIR(optname, varname, flags) {optname, NULL, &m_option_type_intpair, (flags), 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
-#define OPT_FLOATRANGE(optname, varname, flags, min, max) {optname, NULL, &m_option_type_float, (flags) | CONF_RANGE, min, max, NULL, 1, offsetof(struct MPOpts, varname)}
-#define OPT_STRING(optname, varname, flags) {optname, NULL, &m_option_type_string, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
-#define OPT_SETTINGSLIST(optname, varname, flags, objlist) {optname, NULL, &m_option_type_obj_settings_list, flags, 0, 0, objlist, 1, offsetof(struct MPOpts, varname)}
-#define OPT_AUDIOFORMAT(optname, varname, flags) {optname, NULL, &m_option_type_afmt, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
+#define OPT_FLAG_CONSTANTS(...) OPT_FLAG_CONSTANTS_(__VA_ARGS__, .type = &m_option_type_flag)
+#define OPT_FLAG_CONSTANTS_(optname, varname, flags, offvalue, value, ...) OPT_GENERAL(optname, varname, flags, .min = offvalue, .max = value, __VA_ARGS__)
+#define OPT_STRINGLIST(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_string_list)
+#define OPT_PATHLIST(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_string_list, .priv = (void *)&(const char){OPTION_PATH_SEPARATOR})
+#define OPT_INT(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_int)
+#define OPT_INTRANGE(...) OPT_RANGE_(__VA_ARGS__, .type = &m_option_type_int)
+#define OPT_RANGE_(optname, varname, flags, minval, maxval, ...) OPT_GENERAL(optname, varname, (flags) | CONF_RANGE, .min = minval, .max = maxval, __VA_ARGS__)
+#define OPT_INTPAIR(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_intpair)
+#define OPT_FLOAT(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_float)
+#define OPT_FLOATRANGE(...) OPT_RANGE_(__VA_ARGS__, .type = &m_option_type_float)
+#define OPT_STRING(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_string)
+#define OPT_SETTINGSLIST(optname, varname, flags, objlist) OPT_GENERAL(optname, varname, flags, .type = &m_option_type_obj_settings_list, .priv = objlist)
+#define OPT_AUDIOFORMAT(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_afmt)
 #define OPT_HELPER_REMOVEPAREN(...) __VA_ARGS__
-#define OPT_CHOICE(optname, varname, flags, choices) {optname, NULL, &m_option_type_choice, flags, 0, 0, (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, 1, offsetof(struct MPOpts, varname)}
-#define OPT_TIME(optname, varname, flags) {optname, NULL, &m_option_type_time, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
-#define OPT_ERRORMESSAGE(optname, message) {optname, message, CONF_TYPE_PRINT}
+#define OPT_CHOICE(...) OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_choice)
+#define OPT_CHOICE_(optname, varname, flags, choices, ...) OPT_GENERAL(optname, varname, flags, .priv = (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, __VA_ARGS__)
+#define OPT_TIME(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_time)
+#define OPT_ERRORMESSAGE(optname, message) {.name = optname, .p = message, .type = &m_option_type_print}
+
+#define OPT_BASE_STRUCT struct MPOpts
 
 #endif /* MPLAYER_M_OPTION_H */

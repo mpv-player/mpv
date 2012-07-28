@@ -31,6 +31,7 @@ struct mp_codec_info
     const char *author;
     /* any additional comments */
     const char *comment;
+    const char *print_name;
 };
 
 #define CONTROL_OK 1

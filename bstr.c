@@ -192,9 +192,16 @@ struct bstr bstr_getline(struct bstr str, struct bstr *rest)
         pos = str.len;
     if (rest)
         *rest = bstr_cut(str, pos + 1);
-    str.len = pos;
-    if (str.len > 0 && str.start[str.len - 1] == '\r')
-        str.len -= 1;
+    return bstr_splice(str, 0, pos + 1);
+}
+
+struct bstr bstr_strip_linebreaks(struct bstr str)
+{
+    if (bstr_endswith0(str, "\r\n")) {
+        str = bstr_splice(str, 0, str.len - 2);
+    } else if (bstr_endswith0(str, "\n")) {
+        str = bstr_splice(str, 0, str.len - 1);
+    }
     return str;
 }
 
