@@ -595,22 +595,25 @@ mplayer$(EXESUF): EXTRALIBS += $(EXTRALIBS_MPLAYER)
 mplayer$(EXESUF):
 	$(CC) -o $@ $^ $(EXTRALIBS)
 
+codec-cfg.c: codecs.conf.h
 codecs.conf.h: TOOLS/file2string.py etc/codecs.conf
 	./$^ >$@
 
+libvo/vo_vdpau.c: libvo/vdpau_template.c
 libvo/vdpau_template.c: TOOLS/vdpau_functions.py
 	./$< > $@
 
+libmpdemux/ebml.c libmpdemux/demux_mkv.c: libmpdemux/ebml_types.h
 libmpdemux/ebml_types.h: TOOLS/matroska.py
 	./$< --generate-header > $@
 
+libmpdemux/ebml.c: libmpdemux/ebml_defs.c
 libmpdemux/ebml_defs.c: TOOLS/matroska.py
 	./$< --generate-definitions > $@
 
+libvo/vo_gl3.c: libvo/vo_gl3_shaders.h
 libvo/vo_gl3_shaders.h: TOOLS/file2string.py libvo/vo_gl3_shaders.glsl
 	./$^ >$@
-
-libvo/vo_gl3.c: libvo/vo_gl3_shaders.h
 
 # ./configure must be rerun if it changed
 config.mak: configure
@@ -642,12 +645,7 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 
 ###### dependency declarations / specific CFLAGS ######
 
-# Make sure all generated header files are created.
-codec-cfg.o: codecs.conf.h
 mpcommon.o osdep/mplayer-rc.o: version.h
-libvo/vo_vdpau.o: libvo/vdpau_template.c
-libmpdemux/ebml.o libmpdemux/demux_mkv.o: libmpdemux/ebml_types.h
-libmpdemux/ebml.o: libmpdemux/ebml_defs.c
 
 # Files that depend on libavcodec internals
 libmpcodecs/vf_fspp.o libmpcodecs/vf_mcdeint.o libmpcodecs/vf_spp.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
