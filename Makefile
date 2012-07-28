@@ -716,15 +716,11 @@ clean:
 	-$(RM) $(MOFILES)
 
 distclean: clean testsclean toolsclean driversclean
-	-$(RM) -r DOCS/tech/doxygen
 	-$(RM) -r locale
 	-$(RM) config.log config.mak config.h codecs.conf.h version.h TAGS tags
 	-$(RM) libvo/vdpau_template.c
 	-$(RM) libmpdemux/ebml_types.h libmpdemux/ebml_defs.c
 	-$(RM) $(call ADD_ALL_EXESUFS,cpuinfo)
-
-doxygen:
-	doxygen DOCS/tech/Doxyfile
 
 TAGS:
 	$(RM) $@; find . -name '*.[chS]' -o -name '*.asm' | xargs etags -a
@@ -783,7 +779,7 @@ TOOLS/netstream$(EXESUF) TOOLS/vivodump$(EXESUF): $(subst mplayer.o,mplayer-noma
 
 -include $(DEP_FILES)
 
-.PHONY: all doxygen locales *install* *tools drivers
+.PHONY: all locales *install* *tools drivers
 .PHONY: checkheaders *clean tests .version
 
 # Disable suffix rules.  Most of the builtin rules are suffix rules,
