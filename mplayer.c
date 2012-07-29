@@ -233,12 +233,6 @@ static const char help_text[] = _(
 
 #include "mp_fifo.h"
 
-// benchmark:
-double video_time_usage;
-double vout_time_usage;
-static double audio_time_usage;
-static int total_time_usage_start;
-static int total_frame_cnt;
 static int drop_frame_cnt; // total number of dropped frames
 
 // options:
@@ -1197,23 +1191,6 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
               (int)sh_video->num_frames,
               (int)sh_video->num_frames_decoded);
 
-    // CPU usage
-    if (sh_video) {
-        if (sh_video->timer > 0.5)
-            saddf(line, &pos, width, "%2d%% %2d%% %4.1f%% ",
-                  (int)(100.0 * video_time_usage * opts->playback_speed / (double)sh_video->timer),
-                  (int)(100.0 * vout_time_usage * opts->playback_speed / (double)sh_video->timer),
-                  (100.0 * audio_time_usage * opts->playback_speed / (double)sh_video->timer));
-        else
-            saddf(line, &pos, width, "??%% ??%% ??,?%% ");
-    } else if (mpctx->sh_audio) {
-        if (mpctx->delay > 0.5)
-            saddf(line, &pos, width, "%4.1f%% ",
-                  100.0 * audio_time_usage / (double)mpctx->delay);
-        else
-            saddf(line, &pos, width, "??,?%% ");
-    }
-
     // VO stats
     if (sh_video)
         saddf(line, &pos, width, "%d %d ", drop_frame_cnt, output_quality);
@@ -2026,7 +2003,6 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
         static int dropped_frames;
         float delay = opts->playback_speed * ao_get_delay(mpctx->ao);
         float d = delay - mpctx->delay;
-        ++total_frame_cnt;
         // we should avoid dropping too many frames in sequence unless we
         // are too late. and we allow 100ms A-V delay here:
         if (d < -dropped_frames * frame_time - 0.100 && !mpctx->paused
@@ -2391,7 +2367,6 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     struct MPOpts *opts = &mpctx->opts;
     struct ao *ao = mpctx->ao;
     unsigned int t;
-    double tt;
     int playsize;
     int playflags = 0;
     bool audio_eof = false;
@@ -2440,8 +2415,6 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
             audio_eof = true;
     }
     t = GetTimer() - t;
-    tt = t * 0.000001f;
-    audio_time_usage += tt;
     if (endpts != MP_NOPTS_VALUE && modifiable_audio_format) {
         double bytes = (endpts - written_audio_pts(mpctx) + audio_delay)
                        * ao->bps / opts->playback_speed;
@@ -2929,9 +2902,6 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
     mpctx->hrseek_active = false;
     mpctx->hrseek_framedrop = false;
     mpctx->total_avsync_change = 0;
-    audio_time_usage = 0;
-    video_time_usage = 0;
-    vout_time_usage = 0;
     drop_frame_cnt = 0;
 }
 
@@ -3382,10 +3352,10 @@ static void run_playloop(struct MPContext *mpctx)
              * position, don't try to speed up display of following
              * frames to catch up; continue with default speed from
              * the current frame instead.
-             * If benchmark is set always output frames immediately
+             * If untimed is set always output frames immediately
              * without sleeping.
              */
-            if (mpctx->time_frame < -0.2 || opts->benchmark)
+            if (mpctx->time_frame < -0.2 || opts->untimed)
                 mpctx->time_frame = 0;
         }
 
@@ -3442,7 +3412,6 @@ static void run_playloop(struct MPContext *mpctx)
         vo_flip_page(vo, pts_us | 1, duration);
 
         mpctx->last_vo_flip_duration = (GetTimer() - t2) * 0.000001;
-        vout_time_usage += mpctx->last_vo_flip_duration;
         if (vo->driver->flip_page_timed) {
             // No need to adjust sync based on flip speed
             mpctx->last_vo_flip_duration = 0;
@@ -4581,11 +4550,6 @@ goto_enable_cache:
 
     mp_tmsg(MSGT_CPLAYER, MSGL_V, "Starting playback...\n");
 
-    total_time_usage_start = GetTimer();
-    audio_time_usage = 0;
-    video_time_usage = 0;
-    vout_time_usage = 0;
-    total_frame_cnt = 0;
     drop_frame_cnt = 0;          // fix for multifile fps benchmark
     play_n_frames = play_n_frames_mf;
 
@@ -4662,36 +4626,6 @@ goto_enable_cache:
 goto_next_file:  // don't jump here after ao/vo/getch initialization!
 
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
-
-    if (opts->benchmark) {
-        double tot = video_time_usage + vout_time_usage + audio_time_usage;
-        double total_time_usage;
-        total_time_usage_start = GetTimer() - total_time_usage_start;
-        total_time_usage = (float)total_time_usage_start * 0.000001;
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "\nBENCHMARKs: VC:%8.3fs VO:%8.3fs "
-               "A:%8.3fs Sys:%8.3fs = %8.3fs\n",
-               video_time_usage, vout_time_usage, audio_time_usage,
-               total_time_usage - tot, total_time_usage);
-        if (total_time_usage > 0.0)
-            mp_msg(MSGT_CPLAYER, MSGL_INFO, "BENCHMARK%%: VC:%8.4f%% "
-                   "VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
-                   100.0 * video_time_usage / total_time_usage,
-                   100.0 * vout_time_usage / total_time_usage,
-                   100.0 * audio_time_usage / total_time_usage,
-                   100.0 * (total_time_usage - tot) / total_time_usage,
-                   100.0);
-        if (total_frame_cnt && frame_dropping)
-            mp_msg(MSGT_CPLAYER, MSGL_INFO, "BENCHMARKn: disp: %d (%3.2f fps)"
-                   "  drop: %d (%d%%)  total: %d (%3.2f fps)\n",
-                   total_frame_cnt - drop_frame_cnt,
-                   (total_time_usage > 0.5) ? ((total_frame_cnt -
-                           drop_frame_cnt) / total_time_usage) : 0,
-                   drop_frame_cnt,
-                   100 * drop_frame_cnt / total_frame_cnt,
-                   total_frame_cnt,
-                   (total_time_usage > 0.5) ?
-                           (total_frame_cnt / total_time_usage) : 0);
-    }
 
     // time to uninit all, except global stuff:
     int uninitialize_parts = INITIALIZED_ALL;

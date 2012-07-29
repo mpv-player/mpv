@@ -42,7 +42,7 @@ typedef struct MPOpts {
     int osd_fractions;
     char *vobsub_name;
     int auto_quality;
-    int benchmark;
+    int untimed;
     char *stream_dump_name;
     int capture_dump;
     int loop_times;

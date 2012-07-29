@@ -46,9 +46,6 @@
 
 // ===================================================================
 
-extern double video_time_usage;
-extern double vout_time_usage;
-
 #include "cpudetect.h"
 
 int field_dominance = -1;
@@ -406,9 +403,6 @@ void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
                    int drop_frame, double pts)
 {
     mp_image_t *mpi = NULL;
-    unsigned int t = GetTimer();
-    unsigned int t2;
-    double tt;
     struct MPOpts *opts = sh_video->opts;
 
     if (opts->correct_pts && pts != MP_NOPTS_VALUE) {
@@ -460,11 +454,6 @@ void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
     }
 #endif
 
-    t2 = GetTimer();
-    t = t2 - t;
-    tt = t * 0.000001f;
-    video_time_usage += tt;
-
     if (!mpi || drop_frame)
         return NULL;            // error / skipped frame
 
@@ -501,13 +490,7 @@ void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
 int filter_video(sh_video_t *sh_video, void *frame, double pts)
 {
     mp_image_t *mpi = frame;
-    unsigned int t2 = GetTimer();
     vf_instance_t *vf = sh_video->vfilter;
     // apply video filters and call the leaf vo/ve
-    int ret = vf->put_image(vf, mpi, pts);
-
-    t2 = GetTimer() - t2;
-    vout_time_usage += t2 * 0.000001;
-
-    return ret;
+    return vf->put_image(vf, mpi, pts);
 }
