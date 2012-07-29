@@ -27,36 +27,10 @@
 // meaningless ancient alias
 #define fast_memcpy memcpy
 
-static inline void * mem2agpcpy_pic(void * dst, const void * src, int bytesPerLine, int height, int dstStride, int srcStride)
-{
-	int i;
-	void *retval=dst;
-
-	if(dstStride == srcStride)
-	{
-		if (srcStride < 0) {
-	    		src = (uint8_t*)src + (height-1)*srcStride;
-	    		dst = (uint8_t*)dst + (height-1)*dstStride;
-	    		srcStride = -srcStride;
-		}
-
-		memcpy(dst, src, srcStride*height);
-	}
-	else
-	{
-		for(i=0; i<height; i++)
-		{
-			memcpy(dst, src, bytesPerLine);
-			src = (uint8_t*)src + srcStride;
-			dst = (uint8_t*)dst + dstStride;
-		}
-	}
-
-	return retval;
-}
-
 #define memcpy_pic(d, s, b, h, ds, ss) memcpy_pic2(d, s, b, h, ds, ss, 0)
 #define my_memcpy_pic(d, s, b, h, ds, ss) memcpy_pic2(d, s, b, h, ds, ss, 1)
+
+#define mem2agpcpy_pic memcpy_pic
 
 /**
  * \param limit2width always skip data between end of line and start of next
