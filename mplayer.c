@@ -4578,7 +4578,7 @@ goto_enable_cache:
     else if (opts->loop_times == 1)
         opts->loop_times = -1;
 
-    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Starting playback...\n");
+    mp_tmsg(MSGT_CPLAYER, MSGL_V, "Starting playback...\n");
 
     total_time_usage_start = GetTimer();
     audio_time_usage = 0;
