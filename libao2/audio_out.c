@@ -167,7 +167,9 @@ void ao_init(struct ao *ao, char **ao_list)
     for (int i = 0; audio_out_drivers[i]; i++) {
         const struct ao_driver *audio_out = audio_out_drivers[i];
         ao->driver = audio_out;
+        ao->probing = true;
         if (audio_out->init(ao, NULL) >= 0) {
+            ao->probing = false;
             ao->initialized = true;
             ao->driver = audio_out;
             return;

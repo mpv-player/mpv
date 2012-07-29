@@ -100,6 +100,7 @@ struct ao {
     double pts;
     struct bstr buffer;
     int buffer_playable_size;
+    bool probing;
     bool initialized;
     bool untimed;
     bool no_persistent_volume;

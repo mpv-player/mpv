@@ -297,8 +297,11 @@ unlock_and_fail:
         pa_threaded_mainloop_unlock(priv->mainloop);
 
 fail:
-    if (priv->context)
-        GENERIC_ERR_MSG(priv->context, "Init failed");
+    if (priv->context) {
+        if (!(pa_context_errno(priv->context) == PA_ERR_CONNECTIONREFUSED
+              && ao->probing))
+            GENERIC_ERR_MSG(priv->context, "Init failed");
+    }
     free(devarg);
     uninit(ao, true);
     return -1;
