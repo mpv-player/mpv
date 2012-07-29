@@ -50,7 +50,6 @@ struct priv {
 
     bool broken_pause;
     int retval;
-    bool did_reset;
 };
 
 #define GENERIC_ERR_MSG(ctx, str) \
@@ -275,9 +274,7 @@ static int init(struct ao *ao, char *params)
         .fragsize = -1,
     };
     if (pa_stream_connect_playback(priv->stream, sink, &bufattr,
-                                   PA_STREAM_INTERPOLATE_TIMING
-                                   | PA_STREAM_AUTO_TIMING_UPDATE, NULL,
-                                   NULL) < 0)
+                                   PA_STREAM_NOT_MONOTONIC, NULL, NULL) < 0)
         goto unlock_and_fail;
 
     /* Wait until the stream is ready */
@@ -318,25 +315,18 @@ static void cork(struct ao *ao, bool pause)
 static int play(struct ao *ao, void *data, int len, int flags)
 {
     struct priv *priv = ao->priv;
-    /* For some reason Pulseaudio behaves worse if this is done after
-     * the write - rapidly repeated seeks result in bogus increasing
-     * reported latency. */
-    if (priv->did_reset)
-        cork(ao, false);
     pa_threaded_mainloop_lock(priv->mainloop);
     if (pa_stream_write(priv->stream, data, len, NULL, 0,
                         PA_SEEK_RELATIVE) < 0) {
         GENERIC_ERR_MSG(priv->context, "pa_stream_write() failed");
         len = -1;
     }
-    if (priv->did_reset) {
-        priv->did_reset = false;
-        if (!waitop(priv, pa_stream_update_timing_info(priv->stream,
-                                                       success_cb, ao))
-            || !priv->retval)
-            GENERIC_ERR_MSG(priv->context, "pa_stream_UPP() failed");
-    } else
-        pa_threaded_mainloop_unlock(priv->mainloop);
+    if (flags & AOPLAY_FINAL_CHUNK) {
+        // Force start in case the stream was too short for prebuf
+        pa_operation *op = pa_stream_trigger(priv->stream, NULL, NULL);
+        pa_operation_unref(op);
+    }
+    pa_threaded_mainloop_unlock(priv->mainloop);
     return len;
 }
 
@@ -351,7 +341,7 @@ static void reset(struct ao *ao)
     if (!waitop(priv, pa_stream_flush(priv->stream, success_cb, ao)) ||
         !priv->retval)
         GENERIC_ERR_MSG(priv->context, "pa_stream_flush() failed");
-    priv->did_reset = true;
+    cork(ao, false);
 }
 
 // Pause the audio stream by corking it on the server
@@ -364,8 +354,6 @@ static void pause(struct ao *ao)
 static void resume(struct ao *ao)
 {
     struct priv *priv = ao->priv;
-    if (priv->did_reset)
-        return;
     /* Without this, certain versions will cause an infinite hang because
      * pa_stream_writable_size returns 0 always.
      * Note that this workaround causes A-V desync after pause. */
@@ -387,19 +375,57 @@ static int get_space(struct ao *ao)
 // Return the current latency in seconds
 static float get_delay(struct ao *ao)
 {
+    /* This code basically does what pa_stream_get_latency() _should_
+     * do, but doesn't due to multiple known bugs in PulseAudio (at
+     * PulseAudio version 2.1). In particular, the timing interpolation
+     * mode (PA_STREAM_INTERPOLATE_TIMING) can return completely bogus
+     * values, and the non-interpolating code has a bug causing too
+     * large results at end of stream (so a stream never seems to finish).
+     * This code can still return wrong values in some cases due to known
+     * PulseAudio bugs that can not be worked around on the client side.
+     *
+     * We always query the server for latest timing info. This may take
+     * too long to work well with remote audio servers, but at least
+     * this should be enough to fix the normal local playback case.
+     */
     struct priv *priv = ao->priv;
-    pa_usec_t latency = (pa_usec_t) -1;
     pa_threaded_mainloop_lock(priv->mainloop);
-    while (pa_stream_get_latency(priv->stream, &latency, NULL) < 0) {
-        if (pa_context_errno(priv->context) != PA_ERR_NODATA) {
-            GENERIC_ERR_MSG(priv->context, "pa_stream_get_latency() failed");
-            break;
-        }
-        /* Wait until latency data is available again */
-        pa_threaded_mainloop_wait(priv->mainloop);
+    if (!waitop(priv, pa_stream_update_timing_info(priv->stream, NULL, NULL))) {
+        GENERIC_ERR_MSG(priv->context, "pa_stream_update_timing_info() failed");
+        return 0;
     }
+    pa_threaded_mainloop_lock(priv->mainloop);
+    const pa_timing_info *ti = pa_stream_get_timing_info(priv->stream);
+    if (!ti) {
+        pa_threaded_mainloop_unlock(priv->mainloop);
+        GENERIC_ERR_MSG(priv->context, "pa_stream_get_timing_info() failed");
+        return 0;
+    }
+    const struct pa_sample_spec *ss = pa_stream_get_sample_spec(priv->stream);
+    if (!ss) {
+        pa_threaded_mainloop_unlock(priv->mainloop);
+        GENERIC_ERR_MSG(priv->context, "pa_stream_get_sample_spec() failed");
+        return 0;
+    }
+    // data left in PulseAudio's main buffers (not written to sink yet)
+    int64_t latency = pa_bytes_to_usec(ti->write_index - ti->read_index, ss);
+    // since this info may be from a while ago, playback has progressed since
+    latency -= ti->transport_usec;
+    // data already moved from buffers to sink, but not played yet
+    int64_t sink_latency = ti->sink_usec;
+    if (!ti->playing)
+        /* At the end of a stream, part of the data "left" in the sink may
+         * be padding silence after the end; that should be subtracted to
+         * get the amount of real audio from our stream. This adjustment
+         * is missing from Pulseaudio's own get_latency calculations
+         * (as of PulseAudio 2.1). */
+        sink_latency -= pa_bytes_to_usec(ti->since_underrun, ss);
+    if (sink_latency > 0)
+        latency += sink_latency;
+    if (latency < 0)
+        latency = 0;
     pa_threaded_mainloop_unlock(priv->mainloop);
-    return latency == (pa_usec_t) -1 ? 0 : latency / 1000000.0;
+    return latency / 1e6;
 }
 
 /* A callback function that is called when the
