@@ -310,7 +310,7 @@ int mpcodecs_config_vo2(sh_video_t *sh, int w, int h,
             if (abs(screen_size_x - w) >= 4 || abs(screen_size_y - h) >= 4) {
                 screen_size_x = w;
                 screen_size_y = h;
-                mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Aspect ratio is %.2f:1 - "
+                mp_tmsg(MSGT_CPLAYER, MSGL_V, "Aspect ratio is %.2f:1 - "
                         "scaling to correct movie aspect.\n", sh->aspect);
             }
         } else {
