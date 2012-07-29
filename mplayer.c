@@ -4037,7 +4037,7 @@ play_next_file:
         vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);
 
     if (mpctx->filename) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "\nPlaying %s.\n",
+        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Playing %s.\n",
                 filename_recode(mpctx->filename));
         if (use_filename_title && opts->vo_wintitle == NULL)
             opts->vo_wintitle = talloc_strdup(NULL,
