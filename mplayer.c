@@ -3683,13 +3683,10 @@ static int select_audio(demuxer_t *demuxer, int audio_id, char **audio_lang)
     return demuxer->audio->id;
 }
 
-static void print_version(void)
+static void print_version(int always)
 {
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s (C) 2000-2012\n", mplayer_version);
-
-    /* Test for CPU capabilities (and corresponding OS support) for optimizing */
-    GetCpuCaps(&gCpuCaps);
-    print_libav_versions();
+    mp_msg(MSGT_CPLAYER, always ? MSGL_INFO : MSGL_V,
+           "%s (C) 2000-2012\n", mplayer_version);
 }
 
 #ifdef PTW32_STATIC_LIB
@@ -3761,6 +3758,11 @@ int main(int argc, char *argv[])
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, argc, argv, &verbose);
 
+    print_version(false);
+    print_libav_versions();
+
+    GetCpuCaps(&gCpuCaps);
+
 #if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL)
     set_path_env();
 #endif
@@ -3790,8 +3792,6 @@ int main(int argc, char *argv[])
             }
         }
     }
-
-    print_version();
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
     {
@@ -3895,6 +3895,7 @@ int main(int argc, char *argv[])
 
     if (!mpctx->filename && !opts->player_idle_mode) {
         // no file/vcd/dvd -> show HELP:
+        print_version(true);
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", mp_gtext(help_text));
         exit_player_with_rc(mpctx, EXIT_NONE, 0);
     }
