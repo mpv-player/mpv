@@ -24,7 +24,6 @@
 
 #include "config.h"
 #include "mp_msg.h"
-#include "cpudetect.h"
 #include "options.h"
 
 #include "img_format.h"
@@ -316,13 +315,13 @@ static int config(struct vf_instance *vf,
 	    sfmt,
 		  vf->priv->w, vf->priv->h >> vf->priv->interlaced,
 	    dfmt,
-	    int_sws_flags | get_sws_cpuflags(), srcFilter, dstFilter, vf->priv->param);
+	    int_sws_flags, srcFilter, dstFilter, vf->priv->param);
     if(vf->priv->interlaced){
         vf->priv->ctx2=sws_getContext(width, height >> 1,
 	    sfmt,
 		  vf->priv->w, vf->priv->h >> 1,
 	    dfmt,
-	    int_sws_flags | get_sws_cpuflags(), srcFilter, dstFilter, vf->priv->param);
+	    int_sws_flags, srcFilter, dstFilter, vf->priv->param);
     }
     if(!vf->priv->ctx){
 	// error...
@@ -658,21 +657,11 @@ int sws_chr_hshift= 0;
 float sws_chr_sharpen= 0.0;
 float sws_lum_sharpen= 0.0;
 
-int get_sws_cpuflags(void){
-    return
-          (gCpuCaps.hasMMX   ? SWS_CPU_CAPS_MMX   : 0)
-	| (gCpuCaps.hasMMX2  ? SWS_CPU_CAPS_MMX2  : 0);
-}
-
 void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, SwsFilter **dstFilterParam)
 {
 	static int firstTime=1;
 	*flags=0;
 
-#if ARCH_X86
-	if(gCpuCaps.hasMMX)
-		__asm__ volatile("emms\n\t"::: "memory"); //FIXME this should not be required but it IS (even for non-MMX versions)
-#endif
 	if(firstTime)
 	{
 		firstTime=0;
@@ -719,7 +708,7 @@ static struct SwsContext *sws_getContextFromCmdLine2(int srcW, int srcH, int src
 	if (srcFormat == IMGFMT_RGB8 || srcFormat == IMGFMT_BGR8) sfmt = PIX_FMT_PAL8;
 	sws_getFlagsAndFilterFromCmdLine(&flags, &srcFilterParam, &dstFilterParam);
 
-	return sws_getContext(srcW, srcH, sfmt, dstW, dstH, dfmt, flags | extraflags | get_sws_cpuflags(), srcFilterParam, dstFilterParam, NULL);
+	return sws_getContext(srcW, srcH, sfmt, dstW, dstH, dfmt, flags | extraflags, srcFilterParam, dstFilterParam, NULL);
 }
 
 struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat, int dstW, int dstH, int dstFormat)

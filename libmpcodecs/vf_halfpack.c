@@ -200,7 +200,7 @@ static int config(struct vf_instance *vf,
 		vf->priv->ctx =
 			sws_getContext(width, height / 2, PIX_FMT_YUV422P,
 			               width, height / 2, PIX_FMT_YUYV422,
-			               SWS_POINT | SWS_PRINT_INFO | get_sws_cpuflags(),
+			               SWS_POINT | SWS_PRINT_INFO,
 			               NULL, NULL, NULL);
 	}
 	/* FIXME - also support UYVY output? */
