@@ -245,7 +245,7 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char **audio_codec_list,
     mp_tmsg(MSGT_DECAUDIO, MSGL_V,
             "Audio codecs.conf entry: %s (%s)  afm: %s\n",
 	   sh_audio->codec->name, sh_audio->codec->info, sh_audio->codec->drv);
-    mp_msg(MSGT_DECAUDIO, MSGL_INFO,
+    mp_msg(MSGT_DECAUDIO, MSGL_V,
 	   "AUDIO: %d Hz, %d ch, %s, %3.1f kbit/%3.2f%% (ratio: %d->%d)\n",
 	   sh_audio->samplerate, sh_audio->channels,
 	   af_fmt2str_short(sh_audio->sample_format),

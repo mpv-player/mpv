@@ -125,7 +125,7 @@ int mpcodecs_config_vo2(sh_video_t *sh, int w, int h,
     if (h)
         sh->disp_h = h;
 
-    mp_msg(MSGT_DECVIDEO, MSGL_INFO,
+    mp_msg(MSGT_DECVIDEO, MSGL_V,
            "VIDEO:  %dx%d  %5.3f fps  %5.1f kbps (%4.1f kB/s)\n",
            sh->disp_w, sh->disp_h, sh->fps, sh->i_bps * 0.008,
            sh->i_bps / 1000.0);
