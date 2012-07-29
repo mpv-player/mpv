@@ -103,8 +103,9 @@ static void setvolume_internal(mixer_t *mixer, float l, float r)
     af_to_dB(AF_NCH, db_vals, db_vals, 20.0);
     if (!af_control_any_rev(mixer->afilter,
                             AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET,
-                            db_vals)) {
-        mp_tmsg(MSGT_GLOBAL, MSGL_INFO,
+                            db_vals))
+    {
+        mp_tmsg(MSGT_GLOBAL, mixer->softvol ? MSGL_V : MSGL_WARN,
                 "[Mixer] No hardware mixing, inserting volume filter.\n");
         if (!(af_add(mixer->afilter, "volume")
               && af_control_any_rev(mixer->afilter,
