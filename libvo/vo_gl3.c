@@ -2164,7 +2164,7 @@ static int preinit(struct vo *vo, const char *arg)
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
         .use_npot = 1,
         .use_pbo = 0,
-        .swap_interval = 1,
+        .swap_interval = vo_vsync,
         .osd_color = 0xffffff,
         .fbo_format = GL_RGB16,
         .use_scale_sep = 1,
