@@ -37,7 +37,6 @@
 #include "spudec.h"
 #include "mp_msg.h"
 #include "path.h"
-#include "unrar_exec.h"
 #include "libavutil/common.h"
 
 extern int vobsub_id;
@@ -45,181 +44,6 @@ extern int vobsub_id;
 // overridden if slang match any of vobsub streams.
 static int vobsubid = -2;
 
-/**********************************************************************
- * RAR stream handling
- * The RAR file must have the same basename as the file to open
- **********************************************************************/
-#ifdef CONFIG_UNRAR_EXEC
-typedef struct {
-    FILE *file;
-    unsigned char *data;
-    unsigned long size;
-    unsigned long pos;
-} rar_stream_t;
-
-static rar_stream_t *rar_open(const char *const filename,
-                              const char *const mode)
-{
-    rar_stream_t *stream;
-    /* unrar_exec can only read */
-    if (strcmp("r", mode) && strcmp("rb", mode)) {
-        errno = EINVAL;
-        return NULL;
-    }
-    stream = malloc(sizeof(rar_stream_t));
-    if (stream == NULL)
-        return NULL;
-    /* first try normal access */
-    stream->file = fopen(filename, mode);
-    if (stream->file == NULL) {
-        char *rar_filename;
-        const char *p;
-        int rc;
-        /* Guess the RAR archive filename */
-        rar_filename = NULL;
-        p = strrchr(filename, '.');
-        if (p) {
-            ptrdiff_t l = p - filename;
-            rar_filename = malloc(l + 5);
-            if (rar_filename == NULL) {
-                free(stream);
-                return NULL;
-            }
-            strncpy(rar_filename, filename, l);
-            strcpy(rar_filename + l, ".rar");
-        } else {
-            rar_filename = malloc(strlen(filename) + 5);
-            if (rar_filename == NULL) {
-                free(stream);
-                return NULL;
-            }
-            strcpy(rar_filename, filename);
-            strcat(rar_filename, ".rar");
-        }
-        /* get rid of the path if there is any */
-        p = mp_basename(filename);
-        rc = unrar_exec_get(&stream->data, &stream->size, p, rar_filename);
-        if (!rc) {
-            /* There is no matching filename in the archive. However, sometimes
-             * the files we are looking for have been given arbitrary names in the archive.
-             * Let's look for a file with an exact match in the extension only. */
-            int i, num_files, name_len;
-            ArchiveList_struct *list, *lp;
-            num_files = unrar_exec_list(rar_filename, &list);
-            if (num_files > 0) {
-                char *demanded_ext;
-                demanded_ext = strrchr (p, '.');
-                if (demanded_ext) {
-                    int demanded_ext_len = strlen (demanded_ext);
-                    for (i = 0, lp = list; i < num_files; i++, lp = lp->next) {
-                        name_len = strlen (lp->item.Name);
-                        if (name_len >= demanded_ext_len && !strcasecmp (lp->item.Name + name_len - demanded_ext_len, demanded_ext)) {
-                            rc = unrar_exec_get(&stream->data, &stream->size,
-                                                lp->item.Name, rar_filename);
-                            if (rc)
-                                break;
-                        }
-                    }
-                }
-                unrar_exec_freelist(list);
-            }
-            if (!rc) {
-                free(rar_filename);
-                free(stream);
-                return NULL;
-            }
-        }
-
-        free(rar_filename);
-        stream->pos = 0;
-    }
-    return stream;
-}
-
-static int rar_close(rar_stream_t *stream)
-{
-    if (stream->file)
-        return fclose(stream->file);
-    free(stream->data);
-    return 0;
-}
-
-static int rar_eof(rar_stream_t *stream)
-{
-    if (stream->file)
-        return feof(stream->file);
-    return stream->pos >= stream->size;
-}
-
-static long rar_tell(rar_stream_t *stream)
-{
-    if (stream->file)
-        return ftell(stream->file);
-    return stream->pos;
-}
-
-static int rar_seek(rar_stream_t *stream, long offset, int whence)
-{
-    if (stream->file)
-        return fseek(stream->file, offset, whence);
-    switch (whence) {
-    case SEEK_SET:
-        if (offset < 0) {
-            errno = EINVAL;
-            return -1;
-        }
-        stream->pos = offset;
-        break;
-    case SEEK_CUR:
-        if (offset < 0 && stream->pos < (unsigned long) -offset) {
-            errno = EINVAL;
-            return -1;
-        }
-        stream->pos += offset;
-        break;
-    case SEEK_END:
-        if (offset < 0 && stream->size < (unsigned long) -offset) {
-            errno = EINVAL;
-            return -1;
-        }
-        stream->pos = stream->size + offset;
-        break;
-    default:
-        errno = EINVAL;
-        return -1;
-    }
-    return 0;
-}
-
-static int rar_getc(rar_stream_t *stream)
-{
-    if (stream->file)
-        return getc(stream->file);
-    if (rar_eof(stream))
-        return EOF;
-    return stream->data[stream->pos++];
-}
-
-static size_t rar_read(void *ptr, size_t size, size_t nmemb,
-                       rar_stream_t *stream)
-{
-    size_t res;
-    unsigned long remain;
-    if (stream->file)
-        return fread(ptr, size, nmemb, stream->file);
-    if (rar_eof(stream))
-        return 0;
-    res = size * nmemb;
-    remain = stream->size - stream->pos;
-    if (res > remain)
-        res = remain / size * size;
-    memcpy(ptr, stream->data + stream->pos, res);
-    stream->pos += res;
-    res /= size;
-    return res;
-}
-
-#else
 typedef FILE rar_stream_t;
 #define rar_open        fopen
 #define rar_close       fclose
@@ -228,7 +52,6 @@ typedef FILE rar_stream_t;
 #define rar_seek        fseek
 #define rar_getc        getc
 #define rar_read        fread
-#endif
 
 /**********************************************************************/
 

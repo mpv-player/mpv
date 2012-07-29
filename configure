@@ -324,7 +324,6 @@ Optional features:
   --disable-dvdread-internal  disable internal libdvdread [autodetect]
   --disable-libdvdcss-internal  disable internal libdvdcss [autodetect]
   --disable-cddb         disable cddb [autodetect]
-  --disable-unrarexec    disable using of UnRAR executable [enabled]
   --disable-sortsub      disable subtitle sorting [enabled]
   --disable-enca         disable ENCA charset oracle library [autodetect]
   --enable-macosx-finder enable Mac OS X Finder invocation parameter
@@ -525,7 +524,6 @@ _xinerama=auto
 _vm=auto
 _xf86keysym=auto
 _alsa=auto
-_unrar_exec=auto
 _win32dll=no
 _select=yes
 _radio=no
@@ -875,8 +873,6 @@ for ac_option do
   --disable-select)     _select=no      ;;
   --enable-cddb)        _cddb=yes       ;;
   --disable-cddb)       _cddb=no        ;;
-  --enable-unrarexec)   _unrar_exec=yes ;;
-  --disable-unrarexec)  _unrar_exec=no  ;;
   --enable-ftp)         _ftp=yes        ;;
   --disable-ftp)        _ftp=no         ;;
   --enable-vstream)     _vstream=yes    ;;
@@ -3889,18 +3885,6 @@ fi
 echores "$_libnut"
 
 
-echocheck "UnRAR executable"
-if test "$_unrar_exec" = auto ; then
-    _unrar_exec="yes"
-    mingw32 && _unrar_exec="no"
-fi
-if test "$_unrar_exec" = yes ; then
-    def_unrar_exec='#define CONFIG_UNRAR_EXEC 1'
-else
-    def_unrar_exec='#undef CONFIG_UNRAR_EXEC'
-fi
-echores "$_unrar_exec"
-
 echocheck "TV interface"
 if test "$_tv" = yes ; then
   def_tv='#define CONFIG_TV 1'
@@ -4502,7 +4486,6 @@ TV_DSHOW = $_tv_dshow
 TV_V4L  = $_tv_v4l
 TV_V4L1 = $_tv_v4l1
 TV_V4L2 = $_tv_v4l2
-UNRAR_EXEC = $_unrar_exec
 V4L2 = $_v4l2
 VCD = $_vcd
 VDPAU = $_vdpau
@@ -4650,7 +4633,6 @@ $def_priority
 $def_quicktime
 $def_restrict_keyword
 $def_rtc
-$def_unrar_exec
 
 
 /* configurable options */

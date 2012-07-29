@@ -44,8 +44,6 @@ extern char *lirc_configfile;
 extern char *vo_geometry;
 extern int stop_xscreensaver;
 
-extern char *unrar_executable;
-
 extern char *mp_msg_charset;
 extern int mp_msg_color;
 extern int mp_msg_module;
@@ -827,9 +825,6 @@ const m_option_t mplayer_opts[]={
 
     OPT_STRING("vobsub", vobsub_name, 0),
     {"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
-#ifdef CONFIG_UNRAR_EXEC
-    {"unrarexec", &unrar_executable, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#endif
 
     {"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 
