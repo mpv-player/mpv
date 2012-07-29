@@ -4232,9 +4232,6 @@ fi
 extra_ldflags="$extra_ldflags $_ld_pthread $_ld_dl $_ld_dl_dynamic"
 (netbsd || openbsd) && x86_32 && extra_ldflags="$extra_ldflags -li386"
 
-def_debug='#undef MP_DEBUG'
-test "$_debug" != "" && def_debug='#define MP_DEBUG 1'
-
 
 echocheck "joystick"
 def_joystick='#undef CONFIG_JOYSTICK'

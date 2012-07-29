@@ -138,17 +138,7 @@ void mp_msg_va(int mod, int lev, const char *format, va_list va);
 
 void mp_msg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
 void mp_tmsg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
-static inline void mp_dbg(int mod, int lev, const char *format, ...) PRINTF_ATTRIBUTE(3, 4);
-
-static inline void mp_dbg(int mod, int lev, const char *format, ...)
-{
-#ifdef MP_DEBUG
-    va_list va;
-    va_start(va, format);
-    mp_msg_va(mod, lev, format, va);
-    va_end(va);
-#endif
-}
+#define mp_dbg mp_msg
 
 const char* filename_recode(const char* filename);
 
