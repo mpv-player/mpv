@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <endian.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -320,7 +321,7 @@ ac3_retry:
   ao_data.format=format;
   oss_format=format2oss(format);
   if (oss_format == -1) {
-#if HAVE_BIGENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
     oss_format=AFMT_S16_BE;
 #else
     oss_format=AFMT_S16_LE;

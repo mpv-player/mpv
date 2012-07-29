@@ -20,11 +20,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#define _GNU_SOURCE
 #define _XOPEN_SOURCE 600
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <endian.h>
 
 #include <libavutil/intreadwrite.h>
 #include <libavutil/common.h>
@@ -551,7 +553,7 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
   buf16[3] = fsize << 3;
 
   if (!convert_16bits) {
-#if HAVE_BIGENDIAN
+#ifdef BIG_ENDIAN
   /* BE stream */
   if (indata_ptr[0] == 0x1f || indata_ptr[0] == 0x7f)
 #else

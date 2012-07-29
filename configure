@@ -186,29 +186,22 @@ die () {
 issystem() {
   test "$(echo $system_name | tr A-Z a-z)" = "$(echo $1 | tr A-Z a-z)"
 }
-aix()       { issystem "AIX"; }
-amigaos()   { issystem "AmigaOS"; }
-beos()      { issystem "BEOS"; }
-bsdos()     { issystem "BSD/OS"; }
 cygwin()    { issystem "CYGWIN"; }
 darwin()    { issystem "Darwin"; }
 dragonfly() { issystem "DragonFly"; }
 freebsd()   { issystem "FreeBSD" || issystem "GNU/kFreeBSD"; }
 gnu()       { issystem "GNU"; }
-hpux()      { issystem "HP-UX"; }
 linux()     { issystem "Linux"; }
 mingw32()   { issystem "MINGW32"; }
 morphos()   { issystem "MorphOS"; }
 netbsd()    { issystem "NetBSD"; }
 openbsd()   { issystem "OpenBSD"; }
-qnx()       { issystem "QNX"; }
 win32()     { cygwin || mingw32; }
 
 # arch test boolean functions
-# x86/x86pc is used by QNX
 x86_32() {
   case "$host_arch" in
-    i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686) return 0 ;;
+    i[3-9]86|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -429,7 +422,6 @@ Available values for --language-man are: all $man_lang_all
 Available values for --language-msg are: all $msg_lang_all
 
 Miscellaneous options:
-  --enable-runtime-cpudetection    enable runtime CPU detection [disable]
   --enable-cross-compile enable cross-compilation [disable]
   --cc=COMPILER          C compiler to build MPlayer [gcc]
   --pkg-config=PKGCONFIG pkg-config to find some libraries [pkg-config]
@@ -439,22 +431,7 @@ Miscellaneous options:
   --with-install=PATH    path to a custom install program
 
 Advanced options:
-  --enable-mmx              enable MMX [autodetect]
-  --enable-mmxext           enable MMX2 (Pentium III, Athlon) [autodetect]
-  --enable-3dnow            enable 3DNow! [autodetect]
-  --enable-3dnowext         enable extended 3DNow! [autodetect]
-  --enable-sse              enable SSE [autodetect]
-  --enable-sse2             enable SSE2 [autodetect]
-  --enable-ssse3            enable SSSE3 [autodetect]
   --enable-shm              enable shm [autodetect]
-  --enable-altivec          enable AltiVec (PowerPC) [autodetect]
-  --enable-armv5te          enable DSP extensions (ARM) [autodetect]
-  --enable-armv6            enable ARMv6 (ARM) [autodetect]
-  --enable-armv6t2          enable ARMv6t2 (ARM) [autodetect]
-  --enable-armvfp           enable ARM VFP (ARM) [autodetect]
-  --enable-neon             enable NEON (ARM) [autodetect]
-  --enable-iwmmxt           enable iWMMXt (ARM) [autodetect]
-  --enable-big-endian       force byte order to big-endian [autodetect]
   --enable-debug[=1-3]      compile-in debugging information [disable]
   --enable-profile          compile-in profiling information [disable]
   --disable-sighandler      disable sighandler for crashes [enable]
@@ -480,29 +457,11 @@ exit 0
 # GOTCHA: the variables below defines the default behavior for autodetection
 # and have - unless stated otherwise - at least 2 states : yes no
 # If autodetection is available then the third state is: auto
-_mmx=auto
-_3dnow=auto
-_3dnowext=auto
-_mmxext=auto
-_sse=auto
-_sse2=auto
-_ssse3=auto
-_cmov=auto
-_fast_cmov=auto
-_fast_clz=auto
-_armv5te=auto
-_armv6=auto
-_armv6t2=auto
-_armvfp=auto
-neon=auto
-_iwmmxt=auto
-_altivec=auto
 _install=install
 _pkg_config=auto
 _windres=auto
 _cc=auto
 test "$CC" && _cc="$CC"
-_runtime_cpudetection=no
 _cross_compile=no
 _prefix="/usr/local"
 ffmpeg=auto
@@ -606,7 +565,6 @@ _sighandler=yes
 _libdv=auto
 _cdda=auto
 _cddb=auto
-_big_endian=auto
 _qtx=auto
 _coreaudio=auto
 _corevideo=auto
@@ -741,8 +699,6 @@ for ac_option do
     ;;
   --enable-translation)              _translation=yes           ;;
   --disable-translation)             _translation=no            ;;
-  --enable-runtime-cpudetection)    _runtime_cpudetection=yes   ;;
-  --disable-runtime-cpudetection)   _runtime_cpudetection=no    ;;
   --enable-cross-compile)           _cross_compile=yes          ;;
   --disable-cross-compile)          _cross_compile=no           ;;
   --enable-mplayer)     _mplayer=yes    ;;
@@ -923,8 +879,6 @@ for ac_option do
   --disable-select)     _select=no      ;;
   --enable-cddb)        _cddb=yes       ;;
   --disable-cddb)       _cddb=no        ;;
-  --enable-big-endian)  _big_endian=yes ;;
-  --disable-big-endian) _big_endian=no  ;;
   --enable-unrarexec)   _unrar_exec=yes ;;
   --disable-unrarexec)  _unrar_exec=no  ;;
   --enable-ftp)         _ftp=yes        ;;
@@ -978,42 +932,6 @@ for ac_option do
   --disable-sighandler) _sighandler=no   ;;
   --enable-win32dll) _win32dll=yes ;;
   --disable-win32dll) _win32dll=no ;;
-
-  --enable-sse) _sse=yes ;;
-  --disable-sse) _sse=no ;;
-  --enable-sse2) _sse2=yes ;;
-  --disable-sse2) _sse2=no ;;
-  --enable-ssse3) _ssse3=yes ;;
-  --disable-ssse3) _ssse3=no ;;
-  --enable-mmxext) _mmxext=yes ;;
-  --disable-mmxext) _mmxext=no ;;
-  --enable-3dnow) _3dnow=yes ;;
-  --disable-3dnow) _3dnow=no _3dnowext=no ;;
-  --enable-3dnowext) _3dnow=yes _3dnowext=yes ;;
-  --disable-3dnowext) _3dnowext=no ;;
-  --enable-cmov) _cmov=yes ;;
-  --disable-cmov) _cmov=no ;;
-  --enable-fast-cmov) _fast_cmov=yes ;;
-  --disable-fast-cmov) _fast_cmov=no ;;
-  --enable-fast-clz) _fast_clz=yes ;;
-  --disable-fast-clz) _fast_clz=no ;;
-  --enable-altivec) _altivec=yes ;;
-  --disable-altivec) _altivec=no ;;
-  --enable-armv5te) _armv5te=yes ;;
-  --disable-armv5te) _armv5te=no ;;
-  --enable-armv6) _armv6=yes ;;
-  --disable-armv6) _armv6=no ;;
-  --enable-armv6t2) _armv6t2=yes ;;
-  --disable-armv6t2) _armv6t2=no ;;
-  --enable-armvfp) _armvfp=yes ;;
-  --disable-armvfp) _armvfp=no ;;
-  --enable-neon) neon=yes ;;
-  --disable-neon) neon=no ;;
-  --enable-iwmmxt) _iwmmxt=yes ;;
-  --disable-iwmmxt) _iwmmxt=no ;;
-  --enable-mmx) _mmx=yes ;;
-  --disable-mmx) # 3Dnow! and MMX2 require MMX
-        _3dnow=no _3dnowext=no _mmx=no _mmxext=no ;;
 
   *)
     echo "Unknown parameter: $ac_option" >&2
@@ -1084,25 +1002,19 @@ if test -z "$_target" ; then
   # OS name
   system_name=$(uname -s 2>&1)
   case "$system_name" in
-  Linux|FreeBSD|NetBSD|OpenBSD|DragonFly|BSD/OS|Darwin|QNX|GNU|BeOS|MorphOS|AIX|AmigaOS)
+  Linux|FreeBSD|NetBSD|OpenBSD|DragonFly|Darwin|GNU|MorphOS)
     ;;
   Haiku)
-    system_name=BeOS
+    system_name=Haiku
     ;;
   GNU/kFreeBSD)
     system_name=FreeBSD
-    ;;
-  HP-UX*)
-    system_name=HP-UX
     ;;
   [cC][yY][gG][wW][iI][nN]*)
     system_name=CYGWIN
     ;;
   MINGW32*)
     system_name=MINGW32
-    ;;
-  OS/2*)
-    system_name=OS/2
     ;;
   *)
     system_name="$system_name-UNKNOWN"
@@ -1124,9 +1036,8 @@ if test -z "$_target" ; then
       # Maybe uname -m (machine hardware name) returns something we
       # recognize.
 
-      # x86/x86pc is used by QNX
       case "$(uname -m 2>&1)" in
-      x86_64|amd64|i[3-9]86*|x86|x86pc|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686|BePC) host_arch=i386 ;;
+      x86_64|amd64|i[3-9]86*|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686|BePC) host_arch=i386 ;;
       ia64) host_arch=ia64 ;;
       macppc|ppc) host_arch=ppc ;;
       ppc64) host_arch=ppc64 ;;
@@ -1153,12 +1064,9 @@ else # if test -z "$_target"
       freebsd) system_name=FreeBSD ;;
       gnu/kfreebsd) system_name=FreeBSD ;;
       netbsd) system_name=NetBSD ;;
-      bsd/os) system_name=BSD/OS ;;
       openbsd) system_name=OpenBSD ;;
       dragonfly) system_name=DragonFly ;;
-      qnx) system_name=QNX ;;
       morphos) system_name=MorphOS ;;
-      amigaos) system_name=AmigaOS ;;
       mingw32*) system_name=MINGW32 ;;
       *) continue ;;
     esac
@@ -1189,10 +1097,6 @@ if darwin; then
   _timer=timer-darwin.c
 fi
 
-if aix ; then
-  extra_ldflags="$extra_ldflags -lC"
-fi
-
 if win32 ; then
   _exesuf=".exe"
   extra_cflags="$extra_cflags -fno-common"
@@ -1211,28 +1115,11 @@ if mingw32 ; then
   extra_cflags="$extra_cflags -D__USE_MINGW_ANSI_STDIO=1"
 fi
 
-if amigaos ; then
-  _select=no
-  _sighandler=no
-  _stream_cache=no
-  def_stream_cache="#undef CONFIG_STREAM_CACHE"
-  extra_cflags="-DNEWLIB -D__USE_INLINE__ $extra_cflags"
-fi
-
-if qnx ; then
-  extra_ldflags="$extra_ldflags -lph"
-fi
-
 TMPC="$mplayer_tmpdir/tmp.c"
 TMPCPP="$mplayer_tmpdir/tmp.cpp"
 TMPEXE="$mplayer_tmpdir/tmp$_exesuf"
 TMPH="$mplayer_tmpdir/tmp.h"
 TMPS="$mplayer_tmpdir/tmp.S"
-
-if test "$_runtime_cpudetection" = yes && ! x86 && ! ppc; then
-  die "Runtime CPU detection only works for x86, x86-64 and PPC!"
-fi
-
 
 # Checking CC version...
 # Intel C++ Compilers (no autoselect, use CC=/some/binary ./configure)
@@ -1321,350 +1208,16 @@ fi
 # XXX: this should be ok..
 _cpuinfo="echo"
 
-if test "$_runtime_cpudetection" = no ; then
-
-# Cygwin has /proc/cpuinfo, but only supports Intel CPUs
-# FIXME: Remove the cygwin check once AMD CPUs are supported
-if test -r /proc/cpuinfo && ! cygwin; then
-  # Linux with /proc mounted, extract CPU information from it
-  _cpuinfo="cat /proc/cpuinfo"
-elif test -r /compat/linux/proc/cpuinfo && ! x86 ; then
-  # FreeBSD with Linux emulation /proc mounted,
-  # extract CPU information from it
-  # Don't use it on x86 though, it never reports 3Dnow
-  _cpuinfo="cat /compat/linux/proc/cpuinfo"
-elif darwin && ! x86 ; then
-  # use hostinfo on Darwin
-  _cpuinfo="hostinfo"
-elif aix; then
-  # use 'lsattr' on AIX
-  _cpuinfo="lsattr -E -l proc0 -a type"
-elif x86; then
-  # all other OSes try to extract CPU information from a small helper
-  # program cpuinfo instead
-  $_cc -o cpuinfo$_exesuf cpuinfo.c
-  _cpuinfo="./cpuinfo$_exesuf"
-fi
-
-if x86 ; then
-  # gather more CPU information
-  pname=$($_cpuinfo | grep 'model name' | cut -d ':' -f 2 | head -n 1)
-  pvendor=$($_cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2 | head -n 1)
-  pfamily=$($_cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -n 1)
-  pmodel=$($_cpuinfo | grep -v 'model name' | grep 'model' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -n 1)
-  pstepping=$($_cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -n 1)
-
-  exts=$($_cpuinfo | egrep 'features|flags' | cut -d ':' -f 2 | head -n 1)
-
-  pparam=$(echo $exts | sed -e s/xmm/sse/ -e s/kni/sse/)
-  # SSE implies MMX2, but not all SSE processors report the mmxext CPU flag.
-  pparam=$(echo $pparam | sed -e 's/sse/sse mmxext/')
-
-  for ext in $pparam ; do
-    eval test \"\$_$ext\" = auto 2>/dev/null && eval _$ext=kernel_check
-  done
-
-  echocheck "CPU vendor"
-  echores "$pvendor ($pfamily:$pmodel:$pstepping)"
-
-  echocheck "CPU type"
-  echores "$pname"
-fi
-
-fi # test "$_runtime_cpudetection" = no
-
-if x86 && test "$_runtime_cpudetection" = no ; then
-  extcheck() {
-    if test "$1" = kernel_check ; then
-      echocheck "kernel support of $2"
-      cat > $TMPC <<EOF
-#include <stdlib.h>
-#include <signal.h>
-static void catch(int sig) { exit(1); }
-int main(void) {
-  signal(SIGILL, catch);
-  __asm__ volatile ("$3":::"memory"); return 0;
-}
-EOF
-
-      if cc_check && tmp_run ; then
-        eval _$2=yes
-        echores "yes"
-        _optimizing="$_optimizing $2"
-        return 0
-      else
-        eval _$2=no
-        echores "failed"
-        echo "It seems that your kernel does not correctly support $2."
-        echo "To use $2 extensions in MPlayer, you have to upgrade/recompile your kernel!"
-        return 1
-      fi
-    fi
-    return 0
-  }
-
-  extcheck $_mmx      "mmx"      "emms"
-  extcheck $_mmxext   "mmxext"   "sfence"
-  extcheck $_3dnow    "3dnow"    "femms"
-  extcheck $_3dnowext "3dnowext" "pswapd %%mm0, %%mm0"
-  extcheck $_sse      "sse"      "xorps %%xmm0, %%xmm0" || _gcc3_ext="$_gcc3_ext -mno-sse"
-  extcheck $_sse2     "sse2"     "xorpd %%xmm0, %%xmm0" || _gcc3_ext="$_gcc3_ext -mno-sse2"
-  extcheck $_ssse3    "ssse3"    "pabsd %%xmm0, %%xmm0"
-  extcheck $_cmov     "cmov"     "cmovb %%eax,  %%ebx"
-
-  if test "$_gcc3_ext" != ""; then
-    # if we had to disable sse/sse2 because the active kernel does not
-    # support this instruction set extension, we also have to tell
-    # gcc3 to not generate sse/sse2 instructions for normal C code
-    cflag_check $_march $_gcc3_ext && _march="$_march $_gcc3_ext"
-  fi
-
-fi
-
 
 def_fast_64bit='#define HAVE_FAST_64BIT 0'
-def_fast_unaligned='#define HAVE_FAST_UNALIGNED 0'
 arch_all='X86 IA64 SPARC ARM AVR32 SH4 PPC ALPHA MIPS PA_RISC S390 S390X VAX BFIN XTENSA TOMI GENERIC'
 subarch_all='X86_32 X86_64 PPC64'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
-  arch='x86'
-  subarch='x86_32'
-  def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
-  iproc=486
-  proc=i486
-
-
-  if test "$_runtime_cpudetection" = no ; then
-  case "$pvendor" in
-  AuthenticAMD)
-    case "$pfamily" in
-    3) proc=i386 iproc=386 ;;
-    4) proc=i486 iproc=486 ;;
-    5) iproc=586       # LGB: models are: K5/SSA5 K5 K5 K5 ? ? K6 K6 K6-2 K6-3
-        # K6 model 13 are the K6-2+ and K6-III+, only differing in cache size.
-        if test "$pmodel" -eq 9 -o "$pmodel" -eq 13; then
-            proc=k6-3
-        elif test "$pmodel" -eq 5 -o "$pmodel" -eq 10; then
-            proc=geode
-        elif test "$pmodel" -ge 8; then
-            proc=k6-2
-        elif test "$pmodel" -ge 6; then
-            proc=k6
-        else
-            proc=i586
-        fi
-        ;;
-    6) iproc=686
-        # It's a bit difficult to determine the correct type of Family 6
-        # AMD CPUs just from their signature. Instead, we check directly
-        # whether it supports SSE.
-        if test "$_sse" = yes; then
-            # gcc treats athlon-xp, athlon-4 and athlon-mp similarly.
-            proc=athlon-xp
-        else
-            # Again, gcc treats athlon and athlon-tbird similarly.
-            proc=athlon
-        fi
-        ;;
-    15) iproc=686
-        # k8 cpu-type only supported in gcc >= 3.4.0, but that will be
-        # caught and remedied in the optimization tests below.
-        proc=k8
-        ;;
-
-    *) proc=amdfam10 iproc=686
-        test $_fast_clz = "auto" && _fast_clz=yes
-        ;;
-    esac
-    ;;
-  GenuineIntel)
-    case "$pfamily" in
-    3) proc=i386 iproc=386 ;;
-    4) proc=i486 iproc=486 ;;
-    5) iproc=586
-        if test "$pmodel" -eq 4 || test "$pmodel" -eq 8; then
-            proc=pentium-mmx # 4 is desktop, 8 is mobile
-        else
-            proc=i586
-        fi
-        ;;
-    6) iproc=686
-        if test "$pmodel" -ge 15; then
-            proc=core2
-        elif test "$pmodel" -eq 9 -o "$pmodel" -ge 13; then
-            proc=pentium-m
-        elif test "$pmodel" -ge 7; then
-            proc=pentium3
-        elif test "$pmodel" -ge 3; then
-            proc=pentium2
-        else
-            proc=i686
-        fi
-        test $_fast_clz = "auto" && _fast_clz=yes
-        ;;
-    15) iproc=686
-        # A nocona in 32-bit mode has no more capabilities than a prescott.
-        if test "$pmodel" -ge 3; then
-            proc=prescott
-        else
-            proc=pentium4
-            test $_fast_clz = "auto" && _fast_clz=yes
-        fi
-        test $_fast_cmov = "auto" && _fast_cmov=no
-        ;;
-    *) proc=prescott iproc=686 ;;
-    esac
-    ;;
-  CentaurHauls)
-    case "$pfamily" in
-    5) iproc=586
-        if test "$pmodel" -ge 8; then
-            proc=winchip2
-        elif test "$pmodel" -ge 4; then
-            proc=winchip-c6
-        else
-            proc=i586
-        fi
-        ;;
-    6) iproc=686
-        if test "$pmodel" -ge 9; then
-            proc=c3-2
-        else
-            proc=c3
-            iproc=586
-        fi
-        ;;
-    *) proc=i686 iproc=i686 ;;
-    esac
-    ;;
-  unknown)
-    case "$pfamily" in
-    3) proc=i386 iproc=386 ;;
-    4) proc=i486 iproc=486 ;;
-    *) proc=i586 iproc=586 ;;
-    esac
-    ;;
-  *)
-    proc=i586 iproc=586 ;;
-  esac
-  test $_fast_clz = "auto" && _fast_clz=no
-  fi # test "$_runtime_cpudetection" = no
-
-
-    # check that gcc supports our CPU, if not, fall back to earlier ones
-    # LGB: check -mcpu and -march swithing step by step with enabling
-    # to fall back till 386.
-
-    # gcc >= 3.4.0  doesn't support -mcpu, we have to use -mtune instead
-
-    if [ "$cc_vendor" = "gnu" ] && ([ "$_cc_major" -gt 3 ] || ( [ "$_cc_major" = 3 ] && [ "$_cc_minor" -ge 4 ])) ; then
-        cpuopt=-mtune
-    else
-        cpuopt=-mcpu
-    fi
-
-    echocheck "GCC & CPU optimization abilities"
-  if test "$_runtime_cpudetection" = no ; then
-    if test $cc_vendor != "intel" && test $cc_vendor != "clang" ; then
-      cflag_check -march=native && proc=native
-    fi
-    if test "$proc" = "amdfam10"; then
-      cflag_check -march=$proc $cpuopt=$proc || proc=k8
-    fi
-    if test "$proc" = "k8"; then
-      cflag_check -march=$proc $cpuopt=$proc || proc=athlon-xp
-    fi
-    if test "$proc" = "athlon-xp"; then
-      cflag_check -march=$proc $cpuopt=$proc || proc=athlon
-    fi
-    if test "$proc" = "k6-3" || test "$proc" = "k6-2"; then
-      cflag_check -march=$proc $cpuopt=$proc  || proc=k6
-    fi
-    if test "$proc" = "k6" || test "$proc" = "c3"; then
-      if ! cflag_check -march=$proc $cpuopt=$proc; then
-        if cflag_check -march=i586 $cpuopt=i686; then
-          proc=i586-i686
-        else
-          proc=i586
-        fi
-      fi
-    fi
-    if test "$proc" = "prescott" ; then
-      cflag_check -march=$proc $cpuopt=$proc || proc=pentium4
-    fi
-    if test "$proc" = "core2" ; then
-      cflag_check -march=$proc $cpuopt=$proc || proc=pentium-m
-    fi
-    if test "$proc" = "pentium4" || test "$proc" = "pentium-m" || test "$proc" = "pentium3" || test "$proc" = "pentium2" || test "$proc" = "athlon" || test "$proc" = "c3-2" || test "$proc" = "geode"; then
-      cflag_check -march=$proc $cpuopt=$proc  || proc=i686
-    fi
-    if test "$proc" = "i686" || test "$proc" = "pentium-mmx" || test "$proc" = "winchip-c6" || test "$proc" = "winchip2"; then
-      cflag_check -march=$proc $cpuopt=$proc  || proc=i586
-    fi
-    if test "$proc" = "i586"; then
-      cflag_check -march=$proc $cpuopt=$proc  || proc=i486
-    fi
-    if test "$proc" = "i486" ; then
-      cflag_check -march=$proc $cpuopt=$proc  || proc=i386
-    fi
-    if test "$proc" = "i386" ; then
-      cflag_check -march=$proc $cpuopt=$proc  || proc=error
-    fi
-    if test "$proc" = "error" ; then
-        echores "CPU optimization disabled. CPU not recognized or your compiler is too old."
-      _mcpu=""
-      _march=""
-      _optimizing=""
-    elif test "$proc" = "i586-i686"; then
-      _march="-march=i586"
-      _mcpu="$cpuopt=i686"
-      _optimizing="$proc"
-    else
-      _march="-march=$proc"
-      _mcpu="$cpuopt=$proc"
-      _optimizing="$proc"
-    fi
-  else # if test "$_runtime_cpudetection" = no
-    _mcpu="$cpuopt=generic"
-    # at least i486 required, for bswap instruction
-    _march="-march=i486"
-    cflag_check $_mcpu || _mcpu="$cpuopt=i686"
-    cflag_check $_mcpu || _mcpu=""
-    cflag_check $_march $_mcpu || _march=""
-  fi
-
-    ## Gabucino : --target takes effect here (hopefully...) by overwriting
-    ##             autodetected mcpu/march parameters
-    if test "$_target" ; then
-      # TODO: it may be a good idea to check GCC and fall back in all cases
-      if test "$host_arch" = "i586-i686"; then
-        _march="-march=i586"
-        _mcpu="$cpuopt=i686"
-      else
-        _march="-march=$host_arch"
-        _mcpu="$cpuopt=$host_arch"
-      fi
-
-      proc="$host_arch"
-
-      case "$proc" in
-        i386) iproc=386 ;;
-        i486) iproc=486 ;;
-        i586|k5|k6|k6-2|k6-3|pentium|pentium-mmx) iproc=586 ;;
-        i686|athlon*|pentium*) iproc=686 ;;
-        *) iproc=586 ;;
-      esac
-    fi
-
-    if test $_cmov = "yes" && test $_fast_cmov = "auto" ; then
-        _fast_cmov="yes"
-    else
-        _fast_cmov="no"
-    fi
-    test $_fast_clz = "auto" && _fast_clz=yes
-
-    echores "$proc"
+    arch='x86'
+    subarch='x86_32'
+    iproc=486
+    proc=i486
     ;;
 
   ia64)
@@ -1676,111 +1229,13 @@ case "$host_arch" in
   x86_64|amd64)
     arch='x86'
     subarch='x86_64'
-    def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='x86_64'
-
-    # gcc >= 3.4.0  doesn't support -mcpu, we have to use -mtune instead
-    if test "$cc_vendor" = "gnu" && test "$_cc_major" -gt 3 -o "$_cc_major" -eq 3 -a "$_cc_minor" -ge 4 ; then
-        cpuopt=-mtune
-    else
-        cpuopt=-mcpu
-    fi
-    if test "$_runtime_cpudetection" = no ; then
-      case "$pvendor" in
-      AuthenticAMD)
-        case "$pfamily" in
-        15) proc=k8
-          test $_fast_clz = "auto" && _fast_clz=no
-          ;;
-        *) proc=amdfam10;;
-        esac
-        ;;
-      GenuineIntel)
-        case "$pfamily" in
-        6) proc=core2;;
-        *)
-          # 64-bit prescotts exist, but as far as GCC is concerned they
-          # have the same capabilities as a nocona.
-          proc=nocona
-          test $_fast_cmov = "auto" && _fast_cmov=no
-          test $_fast_clz = "auto" && _fast_clz=no
-          ;;
-        esac
-        ;;
-      *)
-        proc=error;;
-      esac
-    fi # test "$_runtime_cpudetection" = no
-
-    echocheck "GCC & CPU optimization abilities"
-    # This is a stripped-down version of the i386 fallback.
-    if test "$_runtime_cpudetection" = no ; then
-      if test $cc_vendor != "intel" && test $cc_vendor != "clang" ; then
-        cflag_check -march=native && proc=native
-      fi
-      # --- AMD processors ---
-      if test "$proc" = "amdfam10"; then
-        cflag_check -march=$proc $cpuopt=$proc || proc=k8
-      fi
-      if test "$proc" = "k8"; then
-        cflag_check -march=$proc $cpuopt=$proc || proc=athlon-xp
-      fi
-      # This will fail if gcc version < 3.3, which is ok because earlier
-      # versions don't really support 64-bit on amd64.
-      # Is this a valid assumption? -Corey
-      if test "$proc" = "athlon-xp"; then
-        cflag_check -march=$proc $cpuopt=$proc || proc=error
-      fi
-      # --- Intel processors ---
-      if test "$proc" = "core2"; then
-        cflag_check -march=$proc $cpuopt=$proc || proc=x86-64
-      fi
-      if test "$proc" = "x86-64"; then
-        cflag_check -march=$proc $cpuopt=$proc || proc=nocona
-      fi
-      if test "$proc" = "nocona"; then
-        cflag_check -march=$proc $cpuopt=$proc || proc=pentium4
-      fi
-      if test "$proc" = "pentium4"; then
-        cflag_check -march=$proc $cpuopt=$proc || proc=error
-      fi
-
-      _march="-march=$proc"
-      _mcpu="$cpuopt=$proc"
-      if test "$proc" = "error" ; then
-        echores "CPU optimization disabled. CPU not recognized or your compiler is too old."
-        _mcpu=""
-        _march=""
-      fi
-    else # if test "$_runtime_cpudetection" = no
-      # x86-64 is an undocumented option, an intersection of k8 and nocona.
-      _march="-march=x86-64"
-      _mcpu="$cpuopt=generic"
-      cflag_check $_mcpu || _mcpu="x86-64"
-      cflag_check $_mcpu || _mcpu=""
-      cflag_check $_march $_mcpu || _march=""
-    fi
-
-    _optimizing="$proc"
-    test $_fast_cmov = "auto" && _fast_cmov=yes
-    test $_fast_clz = "auto" && _fast_clz=yes
-
-    echores "$proc"
     ;;
 
   sparc|sparc64)
     arch='sparc'
     iproc='sparc'
-    if test "$host_arch" = "sparc64" ; then
-      _vis='yes'
-      proc='ultrasparc'
-      def_fast_64bit='#define HAVE_FAST_64BIT 1'
-    else
-        proc=v8
-    fi
-    _mcpu="-mcpu=$proc"
-    _optimizing="$proc"
     ;;
 
   arm*)
@@ -1790,9 +1245,7 @@ case "$host_arch" in
 
   avr32)
     arch='avr32'
-    def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='avr32'
-    test $_fast_clz = "auto" && _fast_clz=yes
     ;;
 
   sh|sh4)
@@ -1802,167 +1255,17 @@ case "$host_arch" in
 
   ppc|ppc64|powerpc|powerpc64)
     arch='ppc'
-    def_dcbzl='#define HAVE_DCBZL 0'
-    def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='ppc'
-
-    if test "$host_arch" = "ppc64" -o "$host_arch" = "powerpc64" ; then
-      subarch='ppc64'
-      def_fast_64bit='#define HAVE_FAST_64BIT 1'
-    fi
-    echocheck "CPU type"
-    case $system_name in
-      Linux)
-        proc=$($_cpuinfo | grep 'cpu' | cut -d ':' -f 2 | cut -d ',' -f 1 | cut -b 2- | head -n 1)
-        if test -n "$($_cpuinfo | grep altivec)"; then
-            test $_altivec = auto && _altivec=yes
-        fi
-        ;;
-      Darwin)
-        proc=$($_cpuinfo | grep "Processor type" | cut -f 3 -d ' ' | sed 's/ppc//')
-        if [ $(sysctl -n hw.vectorunit) -eq 1 -o \
-            "$(sysctl -n hw.optional.altivec 2> /dev/null)" = "1" ]; then
-            test $_altivec = auto && _altivec=yes
-        fi
-        ;;
-      NetBSD)
-        # only gcc 3.4 works reliably with AltiVec code under NetBSD
-        case $cc_version in
-            2*|3.0*|3.1*|3.2*|3.3*)
-                ;;
-            *)
-                if [ $(sysctl -n machdep.altivec) -eq 1 ]; then
-                    test $_altivec = auto && _altivec=yes
-                fi
-                ;;
-        esac
-        ;;
-      AIX)
-        proc=$($_cpuinfo | grep 'type' | cut -f 2 -d ' ' | sed 's/PowerPC_//')
-        ;;
-    esac
-    if test "$_altivec" = yes; then
-        echores "$proc altivec"
-    else
-        _altivec=no
-        echores "$proc"
-    fi
-
-    echocheck "GCC & CPU optimization abilities"
-
-    if test -n "$proc"; then
-        case "$proc" in
-            601) _march='-mcpu=601' _mcpu='-mtune=601' ;;
-            603) _march='-mcpu=603' _mcpu='-mtune=603' ;;
-            603e|603ev) _march='-mcpu=603e' _mcpu='-mtune=603e' ;;
-            604|604e|604r|604ev) _march='-mcpu=604' _mcpu='-mtune=604' ;;
-            740|740/750|745/755) _march='-mcpu=740' _mcpu='-mtune=740' ;;
-            750|750CX) _march='-mcpu=750' _mcpu='-mtune=750' ;;
-            POWER)  _march='-mcpu=power'  _mcpu='-mtune=power'  ;;
-            POWER2) _march='-mcpu=power2' _mcpu='-mtune=power2' ;;
-            POWER3) _march='-mcpu=power3' _mcpu='-mtune=power3' ;;
-            *) ;;
-        esac
-        # gcc 3.1(.1) and up supports 7400 and 7450
-        if test "$_cc_major" -ge "3" && test "$_cc_minor" -ge "1" || test "$_cc_major" -ge "4"; then
-            case "$proc" in
-                7400*|7410*) _march='-mcpu=7400' _mcpu='-mtune=7400' ;;
-                7447*|7450*|7455*) _march='-mcpu=7450' _mcpu='-mtune=7450' ;;
-                *) ;;
-            esac
-        fi
-        # gcc 3.2 and up supports 970
-        if test "$_cc_major" -ge "3" && test "$_cc_minor" -ge "3" || test "$_cc_major" -ge "4"; then
-            case "$proc" in
-                970*|PPC970*) _march='-mcpu=970' _mcpu='-mtune=970'
-                      def_dcbzl='#define HAVE_DCBZL 1' ;;
-                *) ;;
-            esac
-        fi
-        # gcc 3.3 and up supports POWER4
-        if test "$_cc_major" -ge "3" && test "$_cc_minor" -ge "3" || test "$_cc_major" -ge "4"; then
-            case "$proc" in
-                POWER4) _march='-mcpu=power4' _mcpu='-mtune=power4' ;;
-                *) ;;
-            esac
-        fi
-        # gcc 3.4 and up supports 440*
-        if test "$_cc_major" -ge "3" && test "$_cc_minor" -ge "4" || test "$_cc_major" -ge "4"; then
-            case "$proc" in
-                440EP*) _march='-mcpu=440fp' _mcpu='-mtune=440fp' ;;
-                440G* ) _march='-mcpu=440'   _mcpu='-mtune=440'   ;;
-                *) ;;
-            esac
-        fi
-        # gcc 4.0 and up supports POWER5
-        if test "$_cc_major" -ge "4"; then
-            case "$proc" in
-                POWER5*) _march='-mcpu=power5' _mcpu='-mtune=power5' ;;
-                *) ;;
-            esac
-        fi
-    fi
-
-    if test -n "$_mcpu"; then
-        _optimizing=$(echo $_mcpu | cut -c 8-)
-        echores "$_optimizing"
-    else
-        echores "none"
-    fi
-
-    test $_fast_clz = "auto" && _fast_clz=yes
-
     ;;
 
   alpha*)
     arch='alpha'
     iproc='alpha'
-    def_fast_64bit='#define HAVE_FAST_64BIT 1'
-
-    echocheck "CPU type"
-    cat > $TMPC << EOF
-int main(void) {
-    unsigned long ver, mask;
-    __asm__ ("implver %0" : "=r" (ver));
-    __asm__ ("amask %1, %0" : "=r" (mask) : "r" (-1));
-    printf("%ld-%x\n", ver, ~mask);
-    return 0;
-}
-EOF
-    $_cc -o "$TMPEXE" "$TMPC"
-    case $("$TMPEXE") in
-
-        0-0)    proc="ev4";   _mvi="0";;
-        1-0)    proc="ev5";   _mvi="0";;
-        1-1)    proc="ev56";  _mvi="0";;
-        1-101)  proc="pca56"; _mvi="1";;
-        2-303)  proc="ev6";   _mvi="1";;
-        2-307)  proc="ev67";  _mvi="1";;
-        2-1307) proc="ev68";  _mvi="1";;
-    esac
-    echores "$proc"
-
-    echocheck "GCC & CPU optimization abilities"
-    if test "$proc" = "ev68" ; then
-      cc_check -mcpu=$proc || proc=ev67
-    fi
-    if test "$proc" = "ev67" ; then
-      cc_check -mcpu=$proc || proc=ev6
-    fi
-    _mcpu="-mcpu=$proc"
-    echores "$proc"
-
-    test $_fast_clz = "auto" && _fast_clz=yes
-
-    _optimizing="$proc"
     ;;
 
   mips*)
     arch='mips'
     iproc='mips'
-
-    test $_fast_clz = "auto" && _fast_clz=yes
-
     ;;
 
   hppa)
@@ -2001,78 +1304,9 @@ EOF
     ;;
 esac # case "$host_arch" in
 
-if test "$_runtime_cpudetection" = yes ; then
-  if x86 ; then
-    test "$_cmov"     != no && _cmov=yes
-    x86_32 && _cmov=no
-    test "$_mmx"      != no && _mmx=yes
-    test "$_3dnow"    != no && _3dnow=yes
-    test "$_3dnowext" != no && _3dnowext=yes
-    test "$_mmxext"   != no && _mmxext=yes
-    test "$_sse"      != no && _sse=yes
-    test "$_sse2"     != no && _sse2=yes
-    test "$_ssse3"    != no && _ssse3=yes
-  fi
-  if ppc; then
-    _altivec=yes
-  fi
-fi
-
-
-# endian testing
-echocheck "byte order"
-if test "$_big_endian" = auto ; then
-  cat > $TMPC <<EOF
-short ascii_name[] = {
-  'M' << 8 | 'P', 'l' << 8 | 'a', 'y' << 8 | 'e', 'r' << 8 | 'B',
-  'i' << 8 | 'g', 'E' << 8 | 'n', 'd' << 8 | 'i', 'a' << 8 | 'n', 0 };
-int main(void) { return (long)ascii_name; }
-EOF
-  if cc_check ; then
-    if strings $TMPEXE | grep -q -l MPlayerBigEndian ; then
-      _big_endian=yes
-    else
-      _big_endian=no
-    fi
-  else
-    echo ${_echo_n} "failed to autodetect byte order, defaulting to ${_echo_c}"
-  fi
-fi
-if test "$_big_endian" = yes ; then
-  _byte_order='big-endian'
-  def_words_endian='#define WORDS_BIGENDIAN 1'
-  def_bigendian='#define HAVE_BIGENDIAN 1'
-else
-  _byte_order='little-endian'
-  def_words_endian='#undef WORDS_BIGENDIAN'
-  def_bigendian='#define HAVE_BIGENDIAN 0'
-fi
-echores "$_byte_order"
-
-
 echocheck "assembler support of -pipe option"
 # -I. helps to detect compilers that just misunderstand -pipe like Sun C
 cflag_check -pipe -I. && _pipe="-pipe" && echores "yes" || echores "no"
-
-
-if darwin && test "$cc_vendor" = "gnu" ; then
-echocheck "GCC support of -mstackrealign"
-# GCC 4.2 and some earlier Apple versions support this flag on x86. Since
-# Mac OS X/Intel has an ABI different from Windows this is needed to avoid
-# crashes when loading Win32 DLLs. Unfortunately some gcc versions create
-# wrong code with this flag, but this can be worked around by adding
-# -fno-unit-at-a-time as described in the blog post at
-# http://www.dribin.org/dave/blog/archives/2006/12/05/missing_third_param/
-cat > $TMPC << EOF
-__attribute__((noinline)) static int foo3(int i1, int i2, int i3) { return i3; }
-int main(void) { return foo3(1, 2, 3) == 3 ? 0 : 1; }
-EOF
-  cc_check -O2 -mstackrealign && tmp_run && cflags_stackrealign=-mstackrealign
-  test -z "$cflags_stackrealign" && cc_check -O2 -mstackrealign -fno-unit-at-a-time &&
-    tmp_run && cflags_stackrealign="-mstackrealign -fno-unit-at-a-time"
-  test -n "$cflags_stackrealign" && echores "yes" || echores "no"
-fi # if darwin && test "$cc_vendor" = "gnu" ; then
-
 
 # Checking for CFLAGS
 _install_strip="-s"
@@ -2097,10 +1331,6 @@ if test -z "$CFLAGS" ; then
   fi
 else
   warn_cflags=yes
-fi
-
-if darwin && test "$cc_vendor" = "gnu" ; then
-  extra_cflags="-falign-loops=16 -shared-libgcc $extra_cflags"
 fi
 
 if test "$cc_vendor" = "gnu" ; then
@@ -2183,151 +1413,6 @@ cc_check && ebx_available=yes && def_ebx_available='#define HAVE_EBX_AVAILABLE 1
 echores $ebx_available
 
 fi #if x86
-
-#FIXME: This should happen before the check for CFLAGS..
-def_altivec_h='#define HAVE_ALTIVEC_H 0'
-if ppc && ( test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ) ; then
-
-    # check if AltiVec is supported by the compiler, and how to enable it
-    echocheck "GCC AltiVec flags"
-    if $(cflag_check -maltivec -mabi=altivec) ; then
-    _altivec_gcc_flags="-maltivec -mabi=altivec"
-    # check if <altivec.h> should be included
-        if $(header_check altivec.h $_altivec_gcc_flags) ; then
-            def_altivec_h='#define HAVE_ALTIVEC_H 1'
-            inc_altivec_h='#include <altivec.h>'
-        else
-            if $(cflag_check -faltivec) ; then
-                _altivec_gcc_flags="-faltivec"
-            else
-                _altivec=no
-                _altivec_gcc_flags="none, AltiVec disabled"
-            fi
-        fi
-    fi
-    echores "$_altivec_gcc_flags"
-
-    # check if the compiler supports braces for vector declarations
-    cat > $TMPC << EOF
-$inc_altivec_h
-int main(void) { (vector int) {1}; return 0; }
-EOF
-    cc_check $_altivec_gcc_flags || die "You need a compiler that supports {} in AltiVec vector declarations."
-
-    # Disable runtime cpudetection if we cannot generate AltiVec code or
-    # AltiVec is disabled by the user.
-    test "$_runtime_cpudetection" = yes && test "$_altivec" = no \
-        && _runtime_cpudetection=no
-
-    # Show that we are optimizing for AltiVec (if enabled and supported).
-    test "$_runtime_cpudetection" = no && test "$_altivec" = yes \
-        && _optimizing="$_optimizing altivec"
-
-    # If AltiVec is enabled, make sure the correct flags turn up in CFLAGS.
-    test "$_altivec" = yes && CFLAGS="$CFLAGS $_altivec_gcc_flags"
-fi
-
-if ppc ; then
-def_xform_asm='#define HAVE_XFORM_ASM 0'
-xform_asm=no
-echocheck "XFORM ASM support"
-inline_asm_check '"lwzx %1, %y0" :: "Z"(*(int*)0), "r"(0)' &&
-  xform_asm=yes && def_xform_asm='#define HAVE_XFORM_ASM 1'
-echores "$xform_asm"
-fi
-
-if arm ; then
-  echocheck "ARMv5TE (Enhanced DSP Extensions)"
-  if test $_armv5te = "auto" ; then
-    _armv5te=no
-    inline_asm_check '"qadd r0, r0, r0"' && _armv5te=yes
-  fi
-  echores "$_armv5te"
-
-  test $_armv5te = "yes" && test $_fast_clz = "auto" && _fast_clz=yes
-
-  echocheck "ARMv6 (SIMD instructions)"
-  if test $_armv6 = "auto" ; then
-    _armv6=no
-    inline_asm_check '"sadd16 r0, r0, r0"' && _armv6=yes
-  fi
-  echores "$_armv6"
-
-  echocheck "ARMv6t2 (SIMD instructions)"
-  if test $_armv6t2 = "auto" ; then
-    _armv6t2=no
-    inline_asm_check '"movt r0, #0"' && _armv6t2=yes
-  fi
-  echores "$_armv6t2"
-
-  echocheck "ARM VFP"
-  if test $_armvfp = "auto" ; then
-    _armvfp=no
-    inline_asm_check '"fadds s0, s0, s0"' && _armvfp=yes
-  fi
-  echores "$_armvfp"
-
-  echocheck "ARM NEON"
-  if test $neon = "auto" ; then
-    neon=no
-    inline_asm_check '"vadd.i16 q0, q0, q0"' && neon=yes
-  fi
-  echores "$neon"
-
-  echocheck "iWMMXt (Intel XScale SIMD instructions)"
-  if test $_iwmmxt = "auto" ; then
-    _iwmmxt=no
-    inline_asm_check '"wunpckelub wr6, wr4"' && _iwmmxt=yes
-  fi
-  echores "$_iwmmxt"
-fi
-
-cpuexts_all='ALTIVEC MMX MMX2 AMD3DNOW AMD3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV FAST_CLZ ARMV5TE ARMV6 ARMV6T2 ARMVFP NEON IWMMXT MMI VIS MVI'
-test "$_altivec"   = yes && cpuexts="ALTIVEC $cpuexts"
-test "$_mmx"       = yes && cpuexts="MMX $cpuexts"
-test "$_mmxext"    = yes && cpuexts="MMX2 $cpuexts"
-test "$_3dnow"     = yes && cpuexts="AMD3DNOW $cpuexts"
-test "$_3dnowext"  = yes && cpuexts="AMD3DNOWEXT $cpuexts"
-test "$_sse"       = yes && cpuexts="SSE $cpuexts"
-test "$_sse2"      = yes && cpuexts="SSE2 $cpuexts"
-test "$_ssse3"     = yes && cpuexts="SSSE3 $cpuexts"
-test "$_cmov"      = yes && cpuexts="CMOV $cpuexts"
-test "$_fast_cmov" = yes && cpuexts="FAST_CMOV $cpuexts"
-test "$_fast_clz"  = yes && cpuexts="FAST_CLZ $cpuexts"
-test "$_armv5te"   = yes && cpuexts="ARMV5TE $cpuexts"
-test "$_armv6"     = yes && cpuexts="ARMV6 $cpuexts"
-test "$_armv6t2"   = yes && cpuexts="ARMV6T2 $cpuexts"
-test "$_armvfp"    = yes && cpuexts="ARMVFP $cpuexts"
-test "$neon"       = yes && cpuexts="NEON $cpuexts"
-test "$_iwmmxt"    = yes && cpuexts="IWMMXT $cpuexts"
-test "$_vis"       = yes && cpuexts="VIS $cpuexts"
-test "$_mvi"       = yes && cpuexts="MVI $cpuexts"
-
-# Checking kernel version...
-if x86_32 && linux ; then
-  _k_verc_problem=no
-  kernel_version=$(uname -r 2>&1)
-  echocheck "$system_name kernel version"
-  case "$kernel_version" in
-    '') kernel_version="?.??"; _k_verc_fail=yes;;
-    [0-1].[0-9].[0-9]*|2.[0-3].[0-9]*)
-      _k_verc_problem=yes;;
-  esac
-  if test "$_k_verc_problem" = yes && test "$_sse" = yes ; then
-    _k_verc_fail=yes
-  fi
-  if test "$_k_verc_fail" ; then
-    echores "$kernel_version, fail"
-    echo "WARNING! If you want to run MPlayer on this system, get prepared for problems!"
-    echo "2.2.x has limited SSE support. Upgrade the kernel or use --disable-sse if you"
-    echo "experience crashes. MPlayer tries to autodetect if your kernel correctly"
-    echo "supports SSE, but you have been warned! If you are using a kernel older than"
-    echo "2.2.x you must upgrade it to get SSE support!"
-#    die "Your kernel is too old for this CPU." # works fine on some 2.2.x so don't die (later check will test)
-  else
-    echores "$kernel_version, ok"
-  fi
-fi
 
 ######################
 # MAIN TESTS GO HERE #
@@ -2422,15 +1507,6 @@ else
   def_sighandler='#undef CONFIG_SIGHANDLER'
 fi
 echores "$_sighandler"
-
-echocheck "runtime cpudetection"
-if test "$_runtime_cpudetection" = yes ; then
-  _optimizing="Runtime CPU-Detection enabled"
-  def_runtime_cpudetection='#define CONFIG_RUNTIME_CPUDETECT 1'
-else
-  def_runtime_cpudetection='#define CONFIG_RUNTIME_CPUDETECT 0'
-fi
-echores "$_runtime_cpudetection"
 
 
 echocheck "restrict keyword"
@@ -2776,7 +1852,7 @@ def_threads='#define HAVE_THREADS 0'
 echocheck "pthread"
 if linux ; then
   THREAD_CFLAGS=-D_REENTRANT
-elif freebsd || netbsd || openbsd || bsdos ; then
+elif freebsd || netbsd || openbsd ; then
   THREAD_CFLAGS=-D_THREAD_SAFE
 fi
 if test "$_pthreads" = auto ; then
@@ -2793,15 +1869,13 @@ int main(void) {
 }
 EOF
 _pthreads=no
-if ! hpux ; then
-  for _ld_tmp in "-lpthreadGC2" "" "-lpthread" "-pthread" ; do
-    # for crosscompilation, we cannot execute the program, be happy if we can link statically
-    cc_check $THREAD_CFLAGS $_ld_tmp && (tmp_run || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && break
-  done
-  if test "$_pthreads" = no && mingw32 ; then
-    _ld_tmp="-lpthreadGC2 -lws2_32"
-    cc_check $_ld_tmp -DPTW32_STATIC_LIB && (tmp_run || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && CFLAGS="$CFLAGS -DPTW32_STATIC_LIB"
-  fi
+for _ld_tmp in "-lpthreadGC2" "" "-lpthread" "-pthread" ; do
+# for crosscompilation, we cannot execute the program, be happy if we can link statically
+cc_check $THREAD_CFLAGS $_ld_tmp && (tmp_run || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && break
+done
+if test "$_pthreads" = no && mingw32 ; then
+_ld_tmp="-lpthreadGC2 -lws2_32"
+cc_check $_ld_tmp -DPTW32_STATIC_LIB && (tmp_run || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && CFLAGS="$CFLAGS -DPTW32_STATIC_LIB"
 fi
 fi
 if test "$_pthreads" = yes ; then
@@ -2923,79 +1997,6 @@ def_sys_videoio_h='#undef HAVE_SYS_VIDEOIO_H'
 header_check sys/videoio.h && sys_videoio_h=yes &&
     def_sys_videoio_h='#define HAVE_SYS_VIDEOIO_H 1'
 echores "$sys_videoio_h"
-
-
-echocheck "sys/dvdio.h"
-_dvdio=no
-# FreeBSD 8.1 has broken dvdio.h
-header_check_broken sys/types.h sys/dvdio.h && _dvdio=yes
-if test "$_dvdio" = yes ; then
-  def_dvdio='#define DVD_STRUCT_IN_SYS_DVDIO_H 1'
-else
-  def_dvdio='#undef DVD_STRUCT_IN_SYS_DVDIO_H'
-fi
-echores "$_dvdio"
-
-
-echocheck "sys/cdio.h"
-_cdio=no
-# at least OpenSolaris has a broken cdio.h
-header_check_broken sys/types.h sys/cdio.h && _cdio=yes
-if test "$_cdio" = yes ; then
-  def_cdio='#define DVD_STRUCT_IN_SYS_CDIO_H 1'
-else
-  def_cdio='#undef DVD_STRUCT_IN_SYS_CDIO_H'
-fi
-echores "$_cdio"
-
-
-echocheck "linux/cdrom.h"
-_cdrom=no
-header_check linux/cdrom.h && _cdrom=yes
-if test "$_cdrom" = yes ; then
-  def_cdrom='#define DVD_STRUCT_IN_LINUX_CDROM_H 1'
-else
-  def_cdrom='#undef DVD_STRUCT_IN_LINUX_CDROM_H'
-fi
-echores "$_cdrom"
-
-
-echocheck "dvd.h"
-_dvd=no
-header_check dvd.h && _dvd=yes
-if test "$_dvd" = yes ; then
-  def_dvd='#define DVD_STRUCT_IN_DVD_H 1'
-else
-  def_dvd='#undef DVD_STRUCT_IN_DVD_H'
-fi
-echores "$_dvd"
-
-
-if bsdos; then
-echocheck "BSDI dvd.h"
-_bsdi_dvd=no
-header_check dvd.h && _bsdi_dvd=yes
-if test "$_bsdi_dvd" = yes ; then
-  def_bsdi_dvd='#define DVD_STRUCT_IN_BSDI_DVDIOCTL_DVD_H 1'
-else
-  def_bsdi_dvd='#undef DVD_STRUCT_IN_BSDI_DVDIOCTL_DVD_H'
-fi
-echores "$_bsdi_dvd"
-fi #if bsdos
-
-
-if hpux; then
-# also used by AIX, but AIX does not support VCD and/or libdvdread
-echocheck "HP-UX SCSI header"
-_hpux_scsi_h=no
-header_check sys/scsi.h && _hpux_scsi_h=yes
-if test "$_hpux_scsi_h" = yes ; then
-  def_hpux_scsi_h='#define HPUX_SCTL_IO 1'
-else
-  def_hpux_scsi_h='#undef HPUX_SCTL_IO'
-fi
-echores "$_hpux_scsi_h"
-fi #if hpux
 
 
 echocheck "termcap"
@@ -4208,13 +3209,11 @@ elif freebsd ; then
   default_cdrom_device="/dev/acd0"
 elif openbsd ; then
   default_cdrom_device="/dev/rcd0c"
-elif amigaos ; then
-  default_cdrom_device="a1ide.device:2"
 else
   default_cdrom_device="/dev/cdrom"
 fi
 
-if win32 || dragonfly || freebsd || openbsd || amigaos ; then
+if win32 || dragonfly || freebsd || openbsd ; then
   default_dvd_device=$default_cdrom_device
 elif darwin ; then
   default_dvd_device="/dev/rdiskN"
@@ -4226,7 +3225,7 @@ fi
 echocheck "VCD support"
 if test "$_vcd" = auto; then
   _vcd=no
-  if linux || freebsd || netbsd || openbsd || dragonfly || bsdos || darwin ; then
+  if linux || freebsd || netbsd || openbsd || dragonfly || darwin ; then
     _vcd=yes
   elif mingw32; then
   header_check ddk/ntddcdrm.h && _vcd=yes
@@ -4265,7 +3264,7 @@ fi
 if test "$_dvdread_internal" = auto ; then
   _dvdread_internal=no
   _dvdread=no
-  if (linux || freebsd || netbsd || openbsd || dragonfly || hpux) &&
+  if (linux || freebsd || netbsd || openbsd || dragonfly) &&
      (test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes ||
       test "$_dvdio" = yes || test "$_bsdi_dvd" = yes) ||
      darwin || win32; then
@@ -4307,10 +3306,9 @@ echocheck "internal libdvdcss"
 if test "$_libdvdcss_internal" = auto ; then
   _libdvdcss_internal=no
   test "$_dvdread_internal" = yes && test -d libdvdcss && _libdvdcss_internal=yes
-  hpux && test "$_hpux_scsi_h" = no && _libdvdcss_internal=no
 fi
 if test "$_libdvdcss_internal" = yes ; then
-  if linux || netbsd || openbsd || bsdos ; then
+  if linux || netbsd || openbsd ; then
     def_dvd_linux='#define HAVE_LINUX_DVD_STRUCT 1'
     openbsd && def_dvd_openbsd='#define HAVE_OPENBSD_DVD_STRUCT 1'
   elif freebsd || dragonfly ; then
@@ -4320,8 +3318,6 @@ if test "$_libdvdcss_internal" = yes ; then
     extra_ldflags="$extra_ldflags -framework IOKit -framework Carbon"
   elif cygwin ; then
     cflags_libdvdcss="-DSYS_CYGWIN -DWIN32"
-  elif beos ; then
-    cflags_libdvdcss="-DSYS_BEOS"
   fi
   cflags_libdvdcss_dvdread="-Ilibdvdcss"
   def_dvdcss="#define HAVE_DVDCSS_DVDCSS_H 1"
@@ -4667,7 +3663,7 @@ fi
 echocheck "Win32 codecs"
 if test "$_win32dll" = auto ; then
   _win32dll=no
-  if x86_32 && ! qnx; then
+  if x86_32 ; then
     _win32dll=yes
   fi
 fi
@@ -4933,7 +3929,7 @@ fi
 echores "$_tv"
 
 
-if freebsd || netbsd || openbsd || dragonfly || bsdos ; then
+if freebsd || netbsd || openbsd || dragonfly ; then
   echocheck "*BSD BT848 bt8xx header"
   _ioctl_bt848_h=no
   for file in "machine/ioctl_bt848.h" \
@@ -5005,7 +4001,7 @@ EOF
     noinputmodules="tv-bsdbt848 $noinputmodules"
   fi
   echores "$_tv_bsdbt848"
-fi #if freebsd || netbsd || openbsd || dragonfly || bsdos
+fi #if freebsd || netbsd || openbsd || dragonfly
 
 
 echocheck "DirectShow TV interface"
@@ -5119,7 +4115,7 @@ else
 fi
 echores "$_radio_v4l"
 
-if freebsd || netbsd || openbsd || dragonfly || bsdos &&
+if freebsd || netbsd || openbsd || dragonfly &&
   test "$_radio" = yes && test "$_radio_bsdbt848" = auto ; then
 echocheck "*BSD BrookTree 848 Radio interface"
    _radio_bsdbt848=no
@@ -5133,7 +4129,7 @@ int main(void) { ioctl(0, RADIO_GETFREQ, 0); return 0; }
 EOF
     cc_check && _radio_bsdbt848=yes
 echores "$_radio_bsdbt848"
-fi #if freebsd || netbsd || openbsd || dragonfly || bsdos && _radio && _radio_bsdbt848
+fi #if freebsd || netbsd || openbsd || dragonfly && _radio && _radio_bsdbt848
 
 if test "$_radio_bsdbt848" = yes ; then
   def_radio_bsdbt848='#define CONFIG_RADIO_BSDBT848 1'
@@ -5170,7 +4166,7 @@ echores "$_pvr"
 
 echocheck "ftp"
 if test "$_ftp" = "auto" ; then
-test "$networking" = "yes" && ! beos && _ftp=yes
+test "$networking" = "yes" && _ftp=yes
 fi
 if test "$_ftp" = yes ; then
   def_ftp='#define CONFIG_FTP 1'
@@ -5270,13 +4266,12 @@ fi
 # Dynamic linking flags
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
 _ld_dl_dynamic=''
-freebsd || netbsd || openbsd || dragonfly || bsdos && _ld_dl_dynamic='-rdynamic'
-if test "$_real" = yes || test "$_xanim" = yes && ! win32 && ! qnx && ! darwin ; then
+freebsd || netbsd || openbsd || dragonfly && _ld_dl_dynamic='-rdynamic'
+if test "$_real" = yes || test "$_xanim" = yes && ! win32 && ! darwin ; then
   _ld_dl_dynamic='-rdynamic'
 fi
 
 extra_ldflags="$extra_ldflags $_ld_pthread $_ld_dl $_ld_dl_dynamic"
-bsdos && extra_ldflags="$extra_ldflags -ldvd"
 (netbsd || openbsd) && x86_32 && extra_ldflags="$extra_ldflags -li386"
 
 def_debug='#undef MP_DEBUG'
@@ -5437,7 +4432,6 @@ EXESUFS_ALL = .exe
 ARCH = $arch
 $(mak_enable "$arch_all"    "$arch"    ARCH)
 $(mak_enable "$subarch_all" "$subarch" ARCH)
-$(mak_enable "$cpuexts_all" "$cpuexts" HAVE)
 
 MPLAYER  = $_mplayer
 
@@ -5634,7 +4628,6 @@ $def_dvdcss
 
 /* system headers */
 $def_alloca_h
-$def_altivec_h
 $def_malloc_h
 $def_mman_h
 $def_mman_has_map_failed
@@ -5690,7 +4683,6 @@ $def_unrar_exec
 $def_charset
 $def_crash_debug
 $def_debug
-$def_runtime_cpudetection
 $def_sighandler
 $def_sortsub
 $def_stream_cache
@@ -5700,12 +4692,15 @@ $def_pthread_cache
 /* CPU stuff */
 #define __CPU__ $iproc
 $def_ebx_available
-$def_words_endian
-$def_bigendian
 $(ff_config_enable "$arch_all" "$arch" "ARCH")
 $(ff_config_enable "$subarch_all" "$subarch" "ARCH")
-$(ff_config_enable "$cpuexts_all" "$cpuexts" "HAVE")
 
+#define HAVE_AMD3DNOW 0
+#define HAVE_MMX ARCH_X86
+#define HAVE_MMX2 ARCH_X86
+#define HAVE_SSE ARCH_X86
+#define HAVE_SSE2 ARCH_X86
+#define HAVE_SSSE3 ARCH_X86
 
 /* Blu-ray/DVD/VCD/CD */
 #define DEFAULT_CDROM_DEVICE "$default_cdrom_device"
@@ -5724,8 +4719,6 @@ $def_dvd_openbsd
 $def_dvdio
 $def_dvdnav
 $def_dvdread
-$def_hpux_scsi_h
-$def_sol_scsi_h
 $def_vcd
 
 
@@ -5863,7 +4856,6 @@ $def_dcbzl
 $def_exp2
 $def_exp2f
 $def_fast_64bit
-$def_fast_unaligned
 $def_llrint
 $def_log2
 $def_log2f
@@ -5898,9 +4890,6 @@ Config files successfully generated by ./configure $configuration !
   Install prefix: $_prefix
   Data directory: $_datadir
   Config direct.: $_confdir
-
-  Byte order: $_byte_order
-  Optimizing for: $_optimizing
 
   Languages:
     Messages (in addition to English): $language_msg
@@ -5938,8 +4927,7 @@ skipping autodetection. This behavior is unlike what you may be used to from
 autoconf-based configure scripts that can decide to override you. This greater
 level of control comes at a price. You may have to provide the correct compiler
 and linker flags yourself.
-If you used one of these options (except --enable-runtime-cpudetection and
-similar ones that turn on internal features) and experience a compilation or
+If you used one of these options and experience a compilation or
 linking failure, make sure you have passed the necessary compiler/linker flags
 to configure.
 

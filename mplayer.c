@@ -3822,35 +3822,6 @@ static void print_version(void)
 
     /* Test for CPU capabilities (and corresponding OS support) for optimizing */
     GetCpuCaps(&gCpuCaps);
-#if ARCH_X86
-    mp_msg(MSGT_CPLAYER, MSGL_V,
-           "CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNowExt: %d SSE: %d SSE2: %d SSSE3: %d\n",
-           gCpuCaps.hasMMX, gCpuCaps.hasMMX2,
-           gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
-           gCpuCaps.hasSSE, gCpuCaps.hasSSE2, gCpuCaps.hasSSSE3);
-#if CONFIG_RUNTIME_CPUDETECT
-    mp_tmsg(MSGT_CPLAYER, MSGL_V, "Compiled with runtime CPU detection.\n");
-#else
-    mp_tmsg(MSGT_CPLAYER, MSGL_V, "Compiled for x86 CPU with extensions:");
-    if (HAVE_MMX)
-        mp_msg(MSGT_CPLAYER, MSGL_V, " MMX");
-    if (HAVE_MMX2)
-        mp_msg(MSGT_CPLAYER, MSGL_V, " MMX2");
-    if (HAVE_AMD3DNOW)
-        mp_msg(MSGT_CPLAYER, MSGL_V, " 3DNow");
-    if (HAVE_AMD3DNOWEXT)
-        mp_msg(MSGT_CPLAYER, MSGL_V, " 3DNowExt");
-    if (HAVE_SSE)
-        mp_msg(MSGT_CPLAYER, MSGL_V, " SSE");
-    if (HAVE_SSE2)
-        mp_msg(MSGT_CPLAYER, MSGL_V, " SSE2");
-    if (HAVE_SSSE3)
-        mp_msg(MSGT_CPLAYER, MSGL_V, " SSSE3");
-    if (HAVE_CMOV)
-        mp_msg(MSGT_CPLAYER, MSGL_V, " CMOV");
-    mp_msg(MSGT_CPLAYER, MSGL_V, "\n");
-#endif /* CONFIG_RUNTIME_CPUDETECT */
-#endif /* ARCH_X86 */
     print_libav_versions();
 }
 

@@ -44,6 +44,7 @@
 #include <inttypes.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <endian.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -820,7 +821,7 @@ static int OpenSPDIF(void)
 
     /* FIXME: If output stream is not native byte-order, we need change endian somewhere. */
     /*        Although there's no such case reported.                                     */
-#if HAVE_BIGENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
     if (!(ao->stream_format.mFormatFlags & kAudioFormatFlagIsBigEndian))
 #else
     /* tell mplayer that we need a byteswap on AC3 streams, */

@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <endian.h>
 
 #include "talloc.h"
 
@@ -177,7 +178,7 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
     if (!buf)
         return 0;
 
-#if HAVE_BIGENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
     for (i = 0; i < CDIO_CD_FRAMESIZE_RAW / 2; i++)
         buf[i] = le2me_16(buf[i]);
 #endif

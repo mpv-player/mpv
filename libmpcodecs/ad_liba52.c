@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#define _GNU_SOURCE
 #define _XOPEN_SOURCE 600
 #include <stdio.h>
 #include <stdlib.h>
@@ -191,9 +192,6 @@ static int init(sh_audio_t *sh_audio)
   if(gCpuCaps.has3DNow) a52_accel|=MM_ACCEL_X86_3DNOW;
 #ifdef MM_ACCEL_X86_3DNOWEXT
   if(gCpuCaps.has3DNowExt) a52_accel|=MM_ACCEL_X86_3DNOWEXT;
-#endif
-#ifdef MM_ACCEL_PPC_ALTIVEC
-  if(gCpuCaps.hasAltiVec) a52_accel|=MM_ACCEL_PPC_ALTIVEC;
 #endif
   a52_state=a52_init (a52_accel);
   if (a52_state == NULL) {

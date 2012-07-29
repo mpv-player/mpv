@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <endian.h>
 
 #include "config.h"
 #include "video_out.h"
@@ -261,7 +262,7 @@ static void freeMyXImage(void)
     ImageData = NULL;
 }
 
-#if HAVE_BIGENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
 #define BO_NATIVE    MSBFirst
 #define BO_NONNATIVE LSBFirst
 #else
@@ -431,7 +432,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     // we can easily "emulate" them.
     if (out_format & 64 && (IMGFMT_IS_RGB(out_format) || IMGFMT_IS_BGR(out_format))) {
       out_format &= ~64;
-#if HAVE_BIGENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
       out_offset = 1;
 #else
       out_offset = -1;

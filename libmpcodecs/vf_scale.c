@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <endian.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -405,7 +406,7 @@ static void start_slice(struct vf_instance *vf, mp_image_t *mpi){
 static void scale(struct SwsContext *sws1, struct SwsContext *sws2, uint8_t *src[MP_MAX_PLANES], int src_stride[MP_MAX_PLANES],
                   int y, int h,  uint8_t *dst[MP_MAX_PLANES], int dst_stride[MP_MAX_PLANES], int interlaced){
     const uint8_t *src2[MP_MAX_PLANES]={src[0], src[1], src[2], src[3]};
-#if HAVE_BIGENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
     uint32_t pal2[256];
     if (src[1] && !src[2]){
         int i;
@@ -661,8 +662,7 @@ int get_sws_cpuflags(void){
     return
           (gCpuCaps.hasMMX   ? SWS_CPU_CAPS_MMX   : 0)
 	| (gCpuCaps.hasMMX2  ? SWS_CPU_CAPS_MMX2  : 0)
-	| (gCpuCaps.has3DNow ? SWS_CPU_CAPS_3DNOW : 0)
-        | (gCpuCaps.hasAltiVec ? SWS_CPU_CAPS_ALTIVEC : 0);
+	| (gCpuCaps.has3DNow ? SWS_CPU_CAPS_3DNOW : 0);
 }
 
 void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, SwsFilter **dstFilterParam)

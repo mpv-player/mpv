@@ -19,6 +19,7 @@
 #ifndef MPLAYER_MS_HDR_H
 #define MPLAYER_MS_HDR_H
 
+#include <endian.h>
 #include "config.h"
 
 #ifndef _WAVEFORMATEX_
@@ -81,7 +82,7 @@ typedef struct {
 #endif
 
 #ifndef le2me_BITMAPINFOHEADER
-#if HAVE_BIGENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
 #define le2me_BITMAPINFOHEADER(h) {					\
     (h)->biSize = le2me_32((h)->biSize);				\
     (h)->biWidth = le2me_32((h)->biWidth);				\

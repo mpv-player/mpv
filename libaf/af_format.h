@@ -23,6 +23,7 @@
 #ifndef MPLAYER_AF_FORMAT_H
 #define MPLAYER_AF_FORMAT_H
 
+#include <endian.h>
 #include "config.h"
 
 // Endianness
@@ -30,7 +31,7 @@
 #define AF_FORMAT_LE		(1<<0) // Little Endian
 #define AF_FORMAT_END_MASK	(1<<0)
 
-#if HAVE_BIGENDIAN	       	// Native endian of cpu
+#if BYTE_ORDER == BIG_ENDIAN
 #define	AF_FORMAT_NE		AF_FORMAT_BE
 #else
 #define	AF_FORMAT_NE		AF_FORMAT_LE
@@ -86,7 +87,7 @@
 #define AF_FORMAT_AC3_LE	(AF_FORMAT_AC3|AF_FORMAT_16BIT|AF_FORMAT_LE)
 #define AF_FORMAT_AC3_BE	(AF_FORMAT_AC3|AF_FORMAT_16BIT|AF_FORMAT_BE)
 
-#if HAVE_BIGENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
 #define AF_FORMAT_U16_NE AF_FORMAT_U16_BE
 #define AF_FORMAT_S16_NE AF_FORMAT_S16_BE
 #define AF_FORMAT_U24_NE AF_FORMAT_U24_BE

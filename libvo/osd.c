@@ -27,6 +27,7 @@
 #include "osd.h"
 #include "mp_msg.h"
 #include <inttypes.h>
+#include <endian.h>
 #include "cpudetect.h"
 
 #if ARCH_X86
@@ -34,6 +35,8 @@ static const uint64_t bFF __attribute__((aligned(8))) = 0xFFFFFFFFFFFFFFFFULL;
 static const unsigned long long mask24lh  __attribute__((aligned(8))) = 0xFFFF000000000000ULL;
 static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FFFFFFFFFFFFULL;
 #endif
+
+#define CONFIG_RUNTIME_CPUDETECT 1
 
 //Note: we have C, X86-nommx, MMX, MMX2, 3DNOW version therse no 3DNOW+MMX2 one
 //Plain C versions

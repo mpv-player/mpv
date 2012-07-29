@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <time.h>
 #include <stdbool.h>
+#include <endian.h>
 
 #include <libavutil/common.h>
 #include <libavutil/opt.h>
@@ -773,7 +774,7 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
         mpi->stride[2] *= 2;
     }
 
-#if HAVE_BIGENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
     // FIXME: this might cause problems for buffers with FF_BUFFER_HINTS_PRESERVE
     if (mpi->bpp == 8)
         swap_palette(mpi->planes[1]);

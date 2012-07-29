@@ -133,6 +133,19 @@ static void (*longcount)(long long*)=longcount_stub;
 
 static pthread_mutex_t memmut = PTHREAD_MUTEX_INITIALIZER;
 
+
+static void do_cpuid(unsigned int ax, unsigned int *p)
+{
+// code from libavcodec:
+    __asm__ volatile
+        ("mov %%"REG_b", %%"REG_S"\n\t"
+         "cpuid\n\t"
+         "xchg %%"REG_b", %%"REG_S
+         : "=a" (p[0]), "=S" (p[1]),
+           "=c" (p[2]), "=d" (p[3])
+         : "0" (ax));
+}
+
 static unsigned int localcount_stub(void)
 {
     unsigned int regs[4];
@@ -1000,7 +1013,6 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 
     /* mplayer's way to detect PF's */
     {
-#include "cpudetect.h"
 
 	if (gCpuCaps.hasMMX)
 	    PF[PF_MMX_INSTRUCTIONS_AVAILABLE] = TRUE;
@@ -1011,22 +1023,8 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	if (gCpuCaps.has3DNow)
 	    PF[PF_AMD3D_INSTRUCTIONS_AVAILABLE] = TRUE;
 
-	    if (gCpuCaps.cpuType == 4)
-	    {
-	        cachedsi.dwProcessorType = PROCESSOR_INTEL_486;
-		cachedsi.wProcessorLevel = 4;
-	    }
-	    else if (gCpuCaps.cpuType >= 5)
-	    {
 		cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
 		cachedsi.wProcessorLevel = 5;
-	    }
-	    else
-	    {
-	        cachedsi.dwProcessorType = PROCESSOR_INTEL_386;
-		cachedsi.wProcessorLevel = 3;
-	    }
-	    cachedsi.wProcessorRevision = gCpuCaps.cpuStepping;
     	    cachedsi.dwNumberOfProcessors = 1;	/* hardcoded */
     }
 

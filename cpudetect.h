@@ -19,6 +19,7 @@
 #ifndef MPLAYER_CPUDETECT_H
 #define MPLAYER_CPUDETECT_H
 
+#include <stdbool.h>
 #include "config.h"
 
 #define CPUTYPE_I386    3
@@ -30,21 +31,16 @@
 
 typedef struct cpucaps_s {
     int cpuType;
-    int cpuModel;
     int cpuStepping;
-    int hasMMX;
-    int hasMMX2;
-    int has3DNow;
-    int has3DNowExt;
-    int hasSSE;
-    int hasSSE2;
-    int hasSSE3;
-    int hasSSSE3;
-    int hasSSE4a;
-    int isX86;
-    unsigned cl_size; /* size of cache line */
-    int hasAltiVec;
-    int hasTSC;
+    bool isX86;
+    bool hasMMX;
+    bool hasMMX2;
+    bool has3DNow;
+    bool has3DNowExt;
+    bool hasSSE;
+    bool hasSSE2;
+    bool hasSSE3;
+    bool hasSSSE3;
 } CpuCaps;
 
 extern CpuCaps gCpuCaps;
