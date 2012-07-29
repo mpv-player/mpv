@@ -354,6 +354,10 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
     else {
         struct sh_sub *sh = talloc_zero(demuxer, struct sh_sub);
         demuxer->s_streams[id] = sh;
+        sh->stream_type = STREAM_SUBTITLE;
+        sh->demuxer_id = demuxer->new_stream_id++;
+        sh->id = sid;
+        sh->index = id;
         sh->sid = sid;
         sh->opts = demuxer->opts;
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
@@ -394,6 +398,10 @@ sh_audio_t *new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
         mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found audio stream: %d\n", id);
         struct sh_audio *sh = talloc_zero(demuxer, struct sh_audio);
         demuxer->a_streams[id] = sh;
+        sh->stream_type = STREAM_AUDIO;
+        sh->demuxer_id = demuxer->new_stream_id++;
+        sh->id = aid;
+        sh->index = id;
         sh->aid = aid;
         sh->ds = demuxer->audio;
         // set some defaults
@@ -430,6 +438,10 @@ sh_video_t *new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
         mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found video stream: %d\n", id);
         struct sh_video *sh = talloc_zero(demuxer, struct sh_video);
         demuxer->v_streams[id] = sh;
+        sh->stream_type = STREAM_VIDEO;
+        sh->demuxer_id = demuxer->new_stream_id++;
+        sh->id = vid;
+        sh->index = id;
         sh->vid = vid;
         sh->ds = demuxer->video;
         sh->opts = demuxer->opts;

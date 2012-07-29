@@ -428,6 +428,63 @@ char *get_metadata(struct MPContext *mpctx, metadata_t type)
     return talloc_strdup(NULL, "");
 }
 
+static void print_stream(struct MPContext *mpctx, sh_common_t *s)
+{
+    const char *tname = "?";
+    const char *selopt = "?";
+    const char *langopt = "?";
+    switch (s->stream_type) {
+    case STREAM_VIDEO:
+        tname = "video"; selopt = "vid"; langopt = "vlang";
+        break;
+    case STREAM_AUDIO:
+        tname = "audio"; selopt = "aid"; langopt = "alang";
+        break;
+    case STREAM_SUBTITLE:
+        tname = "subtitle"; selopt = "sid"; langopt = "slang";
+        break;
+    }
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, "[stream] ID %d: %s", s->demuxer_id, tname);
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, " --%s=%d", selopt, s->id);
+    if (s->lang)
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, " --%s=%s", langopt, s->lang);
+    if (s->default_track)
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, " (*)");
+    if (s->title)
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, " '%s'", s->title);
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, " (");
+    if (s->format) {
+        // not sure about endian crap
+        char name[sizeof(s->format) + 1] = {0};
+        memcpy(name, &s->format, sizeof(s->format));
+        bool ok = true;
+        for (int n = 0; name[n]; n++) {
+            if ((name[n] < 32 || name[n] >= 128) && name[n] != 0)
+                ok = false;
+        }
+        if (ok && strlen(name) > 0) {
+            mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", name);
+        } else {
+            mp_msg(MSGT_CPLAYER, MSGL_INFO, "%#x", s->format);
+        }
+    } else if (s->stream_type == STREAM_SUBTITLE) {
+        char t = ((sh_sub_t*)s)->type;
+        const char *name = NULL;
+        switch (t) {
+        case 't': name = "SRT"; break;
+        case 'a': name = "ASS"; break;
+        case 'v': name = "VobSub"; break;
+        }
+        if (!name)
+            name = (char[2]){t, '\0'};
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", name);
+    }
+    if (s->demuxer_codecname)
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "/%s", s->demuxer_codecname);
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, ")");
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
+}
+
 static void print_file_properties(struct MPContext *mpctx, const char *filename)
 {
     double start_pts = MP_NOPTS_VALUE;
@@ -502,6 +559,23 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
                 talloc_free(name);
             }
         }
+    }
+    // xxx I think this might be invalid C
+    //     should resolve the crapmess in stheader.h
+    for (int n = 0; n < MAX_V_STREAMS; n++) {
+        sh_common_t *s = (sh_common_t*)mpctx->demuxer->v_streams[n];
+        if (s)
+            print_stream(mpctx, s);
+    }
+    for (int n = 0; n < MAX_A_STREAMS; n++) {
+        sh_common_t *s = (sh_common_t*)mpctx->demuxer->a_streams[n];
+        if (s)
+            print_stream(mpctx, s);
+    }
+    for (int n = 0; n < MAX_S_STREAMS; n++) {
+        sh_common_t *s = (sh_common_t*)mpctx->demuxer->s_streams[n];
+        if (s)
+            print_stream(mpctx, s);
     }
 }
 

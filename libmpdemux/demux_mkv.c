@@ -1121,12 +1121,12 @@ static void display_create_tracks(demuxer_t *demuxer)
             break;
         }
         if (mkv_d->tracks[i]->name)
-            mp_tmsg(MSGT_DEMUX, MSGL_INFO,
+            mp_tmsg(MSGT_DEMUX, MSGL_V,
                     "[mkv] Track ID %u: %s (%s) \"%s\", %s\n",
                     mkv_d->tracks[i]->tnum, type, mkv_d->tracks[i]->codec_id,
                     mkv_d->tracks[i]->name, str);
         else
-            mp_tmsg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: %s (%s), %s\n",
+            mp_tmsg(MSGT_DEMUX, MSGL_V, "[mkv] Track ID %u: %s (%s), %s\n",
                     mkv_d->tracks[i]->tnum, type, mkv_d->tracks[i]->codec_id,
                     str);
     }
@@ -1271,6 +1271,8 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
     }
 
     sh_v = new_sh_video(demuxer, vid);
+    sh_v->demuxer_id = track->tnum;
+    sh_v->demuxer_codecname = track->codec_id;
     sh_v->title = talloc_strdup(sh_v, track->name);
     sh_v->bih = bih;
     sh_v->format = sh_v->bih->biCompression;
@@ -1342,6 +1344,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
 
     if (track->language && (strcmp(track->language, "und") != 0))
         sh_a->lang = talloc_strdup(sh_a, track->language);
+    sh_a->demuxer_id = track->tnum;
+    sh_a->demuxer_codecname = track->codec_id;
     sh_a->title = talloc_strdup(sh_a, track->name);
     sh_a->default_track = track->default_track;
     sh_a->ds = demuxer->audio;
@@ -1579,6 +1583,8 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track,
         int size;
         uint8_t *buffer;
         sh_sub_t *sh = new_sh_sub(demuxer, sid);
+        sh->demuxer_id = track->tnum;
+        sh->demuxer_codecname = track->codec_id;
         track->sh_sub = sh;
         sh->type = track->subtitle_type;
         size = track->private_size;
@@ -1720,7 +1726,7 @@ static int demux_mkv_open(demuxer_t *demuxer)
                                   MATROSKA_TRACK_VIDEO);
 
     if (track && demuxer->v_streams[track->id]) {
-        mp_tmsg(MSGT_DEMUX, MSGL_INFO, "[mkv] Will play video track %u.\n",
+        mp_tmsg(MSGT_DEMUX, MSGL_V, "[mkv] Will play video track %u.\n",
                 track->tnum);
         demuxer->video->id = track->id;
         demuxer->video->sh = demuxer->v_streams[track->id];

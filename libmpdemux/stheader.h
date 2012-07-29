@@ -26,9 +26,24 @@
 struct MPOpts;
 struct demuxer;
 
+enum STREAM_TYPE {
+    STREAM_VIDEO = 1,
+    STREAM_AUDIO,
+    STREAM_SUBTITLE,
+};
+
 // Stream headers:
 
+// id: the type specific id, e.g. aid or sid
+// index: index into stream array (currently one array per type)
+// demuxer_id: demuxer specific ID (-1 if unknown, otherwise >= 0)
+
 #define SH_COMMON                                                       \
+    enum STREAM_TYPE stream_type;                                       \
+    int id;                                                             \
+    int index;                                                          \
+    int demuxer_id;                                                     \
+    const char *demuxer_codecname;                                      \
     struct MPOpts *opts;                                                \
     struct demux_stream *ds;                                            \
     struct codecs *codec;                                               \

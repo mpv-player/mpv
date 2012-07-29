@@ -282,6 +282,8 @@ typedef struct demuxer {
     char **info;  // metadata
     struct MPOpts *opts;
     struct demuxer_params *params;
+
+    int new_stream_id;
 } demuxer_t;
 
 typedef struct {
