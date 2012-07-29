@@ -454,7 +454,6 @@ Advanced options:
   --enable-armvfp           enable ARM VFP (ARM) [autodetect]
   --enable-neon             enable NEON (ARM) [autodetect]
   --enable-iwmmxt           enable iWMMXt (ARM) [autodetect]
-  --disable-fastmemcpy      disable 3DNow!/SSE/MMX optimized memcpy [enable]
   --enable-big-endian       force byte order to big-endian [autodetect]
   --enable-debug[=1-3]      compile-in debugging information [disable]
   --enable-profile          compile-in profiling information [disable]
@@ -569,7 +568,6 @@ _xinerama=auto
 _vm=auto
 _xf86keysym=auto
 _alsa=auto
-_fastmemcpy=yes
 _unrar_exec=auto
 _win32dll=no
 _select=yes
@@ -885,8 +883,6 @@ for ac_option do
   --disable-radio-bsdbt848)     _radio_bsdbt848=no      ;;
   --enable-pvr)         _pvr=yes        ;;
   --disable-pvr)        _pvr=no         ;;
-  --enable-fastmemcpy)  _fastmemcpy=yes ;;
-  --disable-fastmemcpy) _fastmemcpy=no  ;;
   --enable-networking)     networking=yes    ;;
   --disable-networking)    networking=no     ;;
   --enable-winsock2_h)  _winsock2_h=yes ;;
@@ -2742,15 +2738,6 @@ else
   def_alloca_h='#undef HAVE_ALLOCA_H'
 fi
 echores "$_alloca"
-
-
-echocheck "fastmemcpy"
-if test "$_fastmemcpy" = yes ; then
-  def_fastmemcpy='#define CONFIG_FASTMEMCPY 1'
-else
-  def_fastmemcpy='#undef CONFIG_FASTMEMCPY'
-fi
-echores "$_fastmemcpy"
 
 
 echocheck "mman.h"
@@ -5484,7 +5471,6 @@ DVDREAD = $_dvdread
 DVDREAD_INTERNAL = $_dvdread_internal
 DXR3 = $_dxr3
 FAAD = $_faad
-FASTMEMCPY = $_fastmemcpy
 FTP = $_ftp
 GIF = $_gif
 GL = $_gl
@@ -5704,7 +5690,6 @@ $def_unrar_exec
 $def_charset
 $def_crash_debug
 $def_debug
-$def_fastmemcpy
 $def_runtime_cpudetection
 $def_sighandler
 $def_sortsub

@@ -24,13 +24,8 @@
 #include <string.h>
 #include <stddef.h>
 
-void * fast_memcpy(void * to, const void * from, size_t len);
-void * mem2agpcpy(void * to, const void * from, size_t len);
-
-#if ! defined(CONFIG_FASTMEMCPY) || ! (HAVE_MMX || HAVE_MMX2 || HAVE_AMD3DNOW /* || HAVE_SSE || HAVE_SSE2 */)
-#define mem2agpcpy(a,b,c) memcpy(a,b,c)
-#define fast_memcpy(a,b,c) memcpy(a,b,c)
-#endif
+// meaningless ancient alias
+#define fast_memcpy memcpy
 
 static inline void * mem2agpcpy_pic(void * dst, const void * src, int bytesPerLine, int height, int dstStride, int srcStride)
 {
@@ -45,13 +40,13 @@ static inline void * mem2agpcpy_pic(void * dst, const void * src, int bytesPerLi
 	    		srcStride = -srcStride;
 		}
 
-		mem2agpcpy(dst, src, srcStride*height);
+		memcpy(dst, src, srcStride*height);
 	}
 	else
 	{
 		for(i=0; i<height; i++)
 		{
-			mem2agpcpy(dst, src, bytesPerLine);
+			memcpy(dst, src, bytesPerLine);
 			src = (uint8_t*)src + srcStride;
 			dst = (uint8_t*)dst + dstStride;
 		}
@@ -82,13 +77,13 @@ static inline void * memcpy_pic2(void * dst, const void * src,
 	    		srcStride = -srcStride;
 		}
 
-		fast_memcpy(dst, src, srcStride*height);
+		memcpy(dst, src, srcStride*height);
 	}
 	else
 	{
 		for(i=0; i<height; i++)
 		{
-			fast_memcpy(dst, src, bytesPerLine);
+			memcpy(dst, src, bytesPerLine);
 			src = (uint8_t*)src + srcStride;
 			dst = (uint8_t*)dst + dstStride;
 		}

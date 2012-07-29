@@ -56,7 +56,6 @@ SRCS_COMMON-$(DVDREAD_INTERNAL)      += libdvdread4/bitreader.c \
                                         libdvdread4/nav_read.c \
 
 SRCS_COMMON-$(FAAD)                  += libmpcodecs/ad_faad.c
-SRCS_COMMON-$(FASTMEMCPY)            += libvo/aclib.c
 
 # These filters use private headers and do not work with shared libavcodec.
 SRCS_COMMON-$(FFMPEG_INTERNALS)      += libmpcodecs/vf_mcdeint.c \
