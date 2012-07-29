@@ -106,7 +106,7 @@ const m_option_t radioopts_conf[]={
 #ifdef CONFIG_TV
 const m_option_t tvopts_conf[]={
     {"immediatemode", &stream_tv_defaults.immediate, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
-    {"noaudio", &stream_tv_defaults.noaudio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"no-audio", &stream_tv_defaults.noaudio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"audiorate", &stream_tv_defaults.audiorate, CONF_TYPE_INT, 0, 0, 0, NULL},
     {"driver", &stream_tv_defaults.driver, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"device", &stream_tv_defaults.device, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -156,13 +156,9 @@ const m_option_t tvopts_conf[]={
     {"audioid", &stream_tv_defaults.audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
 #ifdef CONFIG_TV_DSHOW
     {"hidden_video_renderer", &stream_tv_defaults.hidden_video_renderer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"nohidden_video_renderer", &stream_tv_defaults.hidden_video_renderer, CONF_TYPE_FLAG, 0, 0, 0, NULL},
     {"hidden_vp_renderer", &stream_tv_defaults.hidden_vp_renderer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"nohidden_vp_renderer", &stream_tv_defaults.hidden_vp_renderer, CONF_TYPE_FLAG, 0, 0, 0, NULL},
     {"system_clock", &stream_tv_defaults.system_clock, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"nosystem_clock", &stream_tv_defaults.system_clock, CONF_TYPE_FLAG, 0, 0, 0, NULL},
     {"normalize_audio_chunks", &stream_tv_defaults.normalize_audio_chunks, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"nonormalize_audio_chunks", &stream_tv_defaults.normalize_audio_chunks, CONF_TYPE_FLAG, 0, 0, 0, NULL},
 #endif
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -375,9 +371,7 @@ const m_option_t common_opts[] = {
     {"v", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
         {"msglevel", (void *) msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
     {"msgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-    {"nomsgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
     {"msgmodule", &mp_msg_module, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-    {"nomsgmodule", &mp_msg_module, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 #ifdef CONFIG_ICONV
     {"msgcharset", &mp_msg_charset, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
@@ -392,7 +386,7 @@ const m_option_t common_opts[] = {
 
 #ifdef CONFIG_STREAM_CACHE
     {"cache", &stream_cache_size, CONF_TYPE_INT, CONF_RANGE, 32, 1048576, NULL},
-    {"nocache", &stream_cache_size, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"no-cache", &stream_cache_size, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     OPT_FLOATRANGE("cache-min", stream_cache_min_percent, 0, 0, 99),
     OPT_FLOATRANGE("cache-seek-min", stream_cache_seek_min_percent, 0, 0, 99),
 #else
@@ -432,12 +426,10 @@ const m_option_t common_opts[] = {
     {"user-agent", &network_useragent, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"referrer", &network_referrer, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"cookies", &network_cookies_enabled, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"nocookies", &network_cookies_enabled, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"cookies-file", &cookies_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"prefer-ipv4", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"ipv4-only-proxy", &network_ipv4_only_proxy, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"reuse-socket", &reuse_socket, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"noreuse-socket", &reuse_socket, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 #ifdef HAVE_AF_INET6
     {"prefer-ipv6", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 #else
@@ -495,10 +487,8 @@ const m_option_t common_opts[] = {
 
     // AVI specific: force non-interleaved mode
     {"ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"noni", &force_ni, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
     // AVI and Ogg only: (re)build index at startup
-    {"noidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 0, NULL},
     {"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1, NULL},
     {"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2, NULL},
     {"saveidx", &index_file_save, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -509,10 +499,10 @@ const m_option_t common_opts[] = {
     {"ausid", &audio_substream_id, CONF_TYPE_INT, 0, 0, 0, NULL},
     OPT_INTRANGE("vid", video_id, 0, -2, 8190),
     OPT_INTRANGE("sid", sub_id, 0, -2, 8190),
-    OPT_FLAG_CONSTANTS("nosub", sub_id, 0, -1, -2),
-    OPT_FLAG_CONSTANTS("novideo", video_id, 0, -1, -2),
+    OPT_FLAG_CONSTANTS("no-sub", sub_id, 0, -1, -2),
+    OPT_FLAG_CONSTANTS("no-video", video_id, 0, -1, -2),
     OPT_FLAG_CONSTANTS("sound", audio_id, 0, -2, -1),
-    OPT_FLAG_CONSTANTS("nosound", audio_id, 0, -1, -2),
+    OPT_FLAG_CONSTANTS("no-sound", audio_id, 0, -1, -2),
     OPT_STRINGLIST("alang", audio_lang, 0),
     OPT_STRINGLIST("slang", sub_lang, 0),
 
@@ -561,7 +551,6 @@ const m_option_t common_opts[] = {
 
     // AVI specific: A-V sync mode (bps vs. interleaving)
     {"bps", &pts_from_bps, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"nobps", &pts_from_bps, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
     // set A-V sync correction speed (0=disables it):
     {"mc", &default_max_pts_correction, CONF_TYPE_FLOAT, CONF_RANGE, 0, 100, NULL},
@@ -578,7 +567,6 @@ const m_option_t common_opts[] = {
 
     // ignore header-specified delay (dwStart)
     {"ignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"noignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
     OPT_FLOATRANGE("a52drc", drc_level, 0, 0, 2),
 
@@ -610,11 +598,11 @@ const m_option_t common_opts[] = {
     {"ssf", (void *) scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     OPT_MAKE_FLAGS("zoom", softzoom, 0),
     OPT_FLOATRANGE("aspect", movie_aspect, 0, 0.1, 10.0),
-    OPT_FLAG_CONSTANTS("noaspect", movie_aspect, 0, 0, 0),
+    OPT_FLAG_CONSTANTS("no-aspect", movie_aspect, 0, 0, 0),
     OPT_FLOATRANGE("xy", screen_size_xy, 0, 0.001, 4096),
 
     OPT_FLAG_CONSTANTS("flip", flip, 0, -1, 1),
-    OPT_FLAG_CONSTANTS("noflip", flip, 0, -1, 0),
+    OPT_FLAG_CONSTANTS("no-flip", flip, 0, -1, 0),
     {"tsprog", &ts_prog, CONF_TYPE_INT, CONF_RANGE, 0, 65534, NULL},
     {"tsprobe", &ts_probe, CONF_TYPE_POSITION, 0, 0, TS_MAX_PROBE_SIZE, NULL},
     {"psprobe", &ps_probe, CONF_TYPE_POSITION, 0, 0, TS_MAX_PROBE_SIZE, NULL},
@@ -641,17 +629,14 @@ const m_option_t common_opts[] = {
     {"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
     OPT_MAKE_FLAGS("autosub", sub_auto, 0),
     {"unicode", &sub_unicode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"nounicode", &sub_unicode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"utf8", &sub_utf8, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"noutf8", &sub_utf8, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"forcedsubsonly", &forced_subs_only, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     // specify IFO file for VOBSUB subtitle
     {"ifo", &spudec_ifo, CONF_TYPE_STRING, 0, 0, 0, NULL},
     // enable Closed Captioning display
     {"subcc", &subcc_enabled, CONF_TYPE_INT, CONF_RANGE, 0, 4, NULL},
-    {"nosubcc", &subcc_enabled, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"no-subcc", &subcc_enabled, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"overlapsub", &suboverlap_enabled, CONF_TYPE_FLAG, 0, 0, 2, NULL},
-    {"nooverlapsub", &suboverlap_enabled, CONF_TYPE_FLAG, 0, 0, 0, NULL},
     {"sub-bg-color", &sub_bg_color, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
     {"sub-bg-alpha", &sub_bg_alpha, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
     {"sub-no-text-pp", &sub_no_text_pp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -708,7 +693,7 @@ const m_option_t mplayer_opts[]={
     OPT_MAKE_FLAGS("ontop", vo_ontop, 0),
     {"rootwin", &vo_rootwin, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"border", &vo_border, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"noborder", &vo_border, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"no-border", &vo_border, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
     OPT_STRING("mixer", mixer_device, 0),
     OPT_STRING("mixer-channel", mixer_channel, 0),
@@ -761,12 +746,10 @@ const m_option_t mplayer_opts[]={
     // set bpp (x11+vm, dga, fbdev, vesa, svga?)
     OPT_INTRANGE("bpp", vo_dbpp, 0, 0, 32),
     {"colorkey", &vo_colorkey, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"nocolorkey", &vo_colorkey, CONF_TYPE_FLAG, 0, 0, 0x1000000, NULL},
+    {"no-colorkey", &vo_colorkey, CONF_TYPE_FLAG, 0, 0, 0x1000000, NULL},
     {"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"nodouble", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     // wait for v-sync (vesa)
     {"vsync", &vo_vsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"novsync", &vo_vsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
     OPT_FLOATRANGE("panscanrange", vo_panscanrange, 0, -19.0, 99.0),
     OPT_CHOICE("colormatrix", requested_colorspace, 0,
@@ -784,7 +767,6 @@ const m_option_t mplayer_opts[]={
                 {"full", MP_CSP_LEVELS_PC})),
 
     {"grabpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"nograbpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     OPT_INTRANGE("cursor-autohide-delay", cursor_autohide_delay, 0, -2, 30000),
 
     {"adapter", &vo_adapter_num, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
@@ -792,12 +774,10 @@ const m_option_t mplayer_opts[]={
     {"wid", &WinID, CONF_TYPE_INT64, 0, 0, 0, NULL},
 #ifdef CONFIG_X11
     {"stop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"nostop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"fstype", &vo_fstype_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 #endif
     {"heartbeat-cmd", &heartbeat_cmd, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"mouseinput", &vo_nomouse_input, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-    {"nomouseinput", &vo_nomouse_input, CONF_TYPE_FLAG,0, 0, 1, NULL},
 
     {"xineramascreen", &xinerama_screen, CONF_TYPE_INT, CONF_RANGE, -2, 32, NULL},
 
@@ -807,18 +787,14 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("hue", vo_gamma_hue, 0, -100, 100),
     OPT_INTRANGE("gamma", vo_gamma_gamma, 0, -100, 100),
     {"keepaspect", &vo_keepaspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"nokeepaspect", &vo_keepaspect, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
     // direct rendering (decoding to video out buffer)
     {"dr", &vo_directrendering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"nodr", &vo_directrendering, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
 //---------------------- mplayer-only options ------------------------
 
     {"use-filedir-conf", &use_filedir_conf, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-    {"nouse-filedir-conf", &use_filedir_conf, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
     {"use-filename-title", &use_filename_title, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-    {"nouse-filename-title", &use_filename_title, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
     OPT_INTRANGE("osdlevel", osd_level, 0, 0, 3),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
     OPT_INTRANGE("osd-fractions", osd_fractions, 0, 0, 2),
@@ -830,7 +806,6 @@ const m_option_t mplayer_opts[]={
 
     {"framedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"hardframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 2, NULL},
-    {"noframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
     OPT_FLAG_ON("untimed", untimed, 0),
 
@@ -855,13 +830,11 @@ const m_option_t mplayer_opts[]={
     {"leak-report", "", CONF_TYPE_PRINT, 0, 0, 0, (void*)1},
     // these should be removed when gmplayer is forgotten
     {"gui", "Internal GUI was removed. Use some other frontend instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-    {"nogui", "Internal GUI was removed, -nogui is no longer valid.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 
-    OPT_FLAG_CONSTANTS("noloop", loop_times, 0, 0, -1),
+    OPT_FLAG_CONSTANTS("no-loop", loop_times, 0, 0, -1),
     OPT_INTRANGE("loop", loop_times, 0, -1, 10000),
     {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG, 0, 0, NULL},
     {"shuffle", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
-    {"noshuffle", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
 
     OPT_MAKE_FLAGS("ordered-chapters", ordered_chapters, 0),
     OPT_INTRANGE("chapter-merge-threshold", chapter_merge_threshold, 0, 0, 10000),
@@ -874,7 +847,7 @@ const m_option_t mplayer_opts[]={
     OPT_CHOICE("hr-seek", hr_seek, 0,
                ({"off", -1}, {"absolute", 0}, {"always", 1}, {"on", 1})),
     OPT_FLOATRANGE("hr-seek-demuxer-offset", hr_seek_demuxer_offset, 0, -9, 99),
-    OPT_FLAG_CONSTANTS("noautosync", autosync, 0, 0, -1),
+    OPT_FLAG_CONSTANTS("no-autosync", autosync, 0, 0, -1),
     OPT_INTRANGE("autosync", autosync, 0, 0, 10000),
 
     OPT_FLAG_ON("softsleep", softsleep, 0),
@@ -884,10 +857,6 @@ const m_option_t mplayer_opts[]={
                 {"auto", 2},
                 {"off", 0})),
 
-    // set term_osd to 0
-    // this is for compatibility
-    {"noterm-osd", NULL, &m_option_type_flag, 0, 1, 0, NULL, 1, offsetof(struct MPOpts, term_osd)},
-
     OPT_STRING("term-osd-esc", term_osd_esc, 0, OPTDEF_STR("\x1b[A\r\x1b[K")),
     OPT_STRING("playing-msg", playing_msg, 0),
 
@@ -896,7 +865,6 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
     OPT_MAKE_FLAGS("consolecontrols", consolecontrols, CONF_GLOBAL),
     {"mouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-    {"nomouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
     OPT_INTRANGE("doubleclick-time", doubleclick_time, 0, 0, 1000),
 #ifdef CONFIG_TV
     {"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
