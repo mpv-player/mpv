@@ -206,25 +206,26 @@ static const char help_text[] = _(
 
 
 #define SystemTooSlow _("\n\n"\
-"           ************************************************\n"\
-"           **** Your system is too SLOW to play this!  ****\n"\
-"           ************************************************\n\n"\
+"           *************************************************\n"\
+"           **** Audio/Video desynchronisation detected! ****\n"\
+"           *************************************************\n\n"\
+"This means either the audio or the video is played too slowly.\n"\
 "Possible reasons, problems, workarounds:\n"\
-"- Most common: broken/buggy _audio_ driver\n"\
-"  - Experiment with different values for -autosync, 30 is a good start.\n"\
-"- Slow video output\n"\
-"  - Try a different -vo driver (-vo help for a list) or try -framedrop!\n"\
-"- Slow CPU\n"\
-"  - Don't try to play a big DVD/DivX on a slow CPU! Try some of the lavdopts,\n"\
-"    e.g. -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all.\n"\
-"- Broken file\n"\
-"  - Try various combinations of -nobps -ni -forceidx -mc 0.\n"\
-"- Slow media (NFS/SMB mounts, DVD, VCD etc)\n"\
-"  - Try -cache 8192.\n"\
-"- Are you using -cache to play a non-interleaved AVI file?\n"\
-"  - Try -nocache.\n"\
-"Read DOCS/HTML/en/video.html for tuning/speedup tips.\n"\
-"If none of this helps you, read DOCS/HTML/en/bugreports.html.\n\n")
+"- Your system is simply too slow for this file.\n"\
+"     Transcode it to a lower bitrate file with tools like HandBrake.\n"\
+"- Broken/buggy _audio_ driver.\n"\
+"     Experiment with different values for --autosync, 30 is a good start.\n"\
+"     If you have PulseAudio, try --ao=alsa .\n"\
+"- Slow video output.\n"\
+"     Try a different -vo driver (-vo help for a list) or try -framedrop!\n"\
+"- Playing a video file with --vo=gl/gl3 with higher FPS than your monitor.\n"\
+"     This is due to vsync limiting the framerate. Try --no-vsync, or a\n"\
+"     different VO.\n"\
+"- Playing from a slow network source.\n"\
+"     Download the file instead.\n"\
+"- Try to find out whether audio or video is causing this by experimenting\n"\
+"  with --no-video and --no-sound.\n"\
+"If none of this helps you, file a bug report.\n\n")
 
 
 //**************************************************************************//
