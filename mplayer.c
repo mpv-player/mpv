@@ -109,16 +109,6 @@ float start_volume = -1;
 
 char *heartbeat_cmd;
 
-#ifdef HAVE_RTC
-#ifdef __linux__
-#include <linux/rtc.h>
-#else
-#include <rtc.h>
-#define RTC_IRQP_SET RTCIO_IRQP_SET
-#define RTC_PIE_ON   RTCIO_PIE_ON
-#endif /* __linux__ */
-#endif /* HAVE_RTC */
-
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
 #ifdef CONFIG_DVBIN
@@ -1975,41 +1965,22 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
     return 0;
 }
 
-
-#ifdef HAVE_RTC
-int rtc_fd = -1;
-#endif
-
 static float timing_sleep(struct MPContext *mpctx, float time_frame)
 {
-#ifdef HAVE_RTC
-    if (rtc_fd >= 0) {
-        // -------- RTC -----------
-        while (time_frame > 0.000) {
-            unsigned long rtc_ts;
-            if (read(rtc_fd, &rtc_ts, sizeof(rtc_ts)) <= 0)
-                mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
-                        "Linux RTC read error: %s\n", strerror(errno));
-            time_frame -= get_relative_time(mpctx);
-        }
-    } else
-#endif
-    {
-        // assume kernel HZ=100 for softsleep, works with larger HZ but with
-        // unnecessarily high CPU usage
-        struct MPOpts *opts = &mpctx->opts;
-        float margin = opts->softsleep ? 0.011 : 0;
-        while (time_frame > margin) {
-            usec_sleep(1000000 * (time_frame - margin));
-            time_frame -= get_relative_time(mpctx);
-        }
-        if (opts->softsleep) {
-            if (time_frame < 0)
-                mp_tmsg(MSGT_AVSYNC, MSGL_WARN,
-                        "Warning! Softsleep underflow!\n");
-            while (time_frame > 0)
-                time_frame -= get_relative_time(mpctx);  // burn the CPU
-        }
+    // assume kernel HZ=100 for softsleep, works with larger HZ but with
+    // unnecessarily high CPU usage
+    struct MPOpts *opts = &mpctx->opts;
+    float margin = opts->softsleep ? 0.011 : 0;
+    while (time_frame > margin) {
+        usec_sleep(1000000 * (time_frame - margin));
+        time_frame -= get_relative_time(mpctx);
+    }
+    if (opts->softsleep) {
+        if (time_frame < 0)
+            mp_tmsg(MSGT_AVSYNC, MSGL_WARN,
+                    "Warning! Softsleep underflow!\n");
+        while (time_frame > 0)
+            time_frame -= get_relative_time(mpctx);  // burn the CPU
     }
     return time_frame;
 }
@@ -3871,40 +3842,6 @@ int main(int argc, char *argv[])
 #endif
 
     mpctx->osd = osd_create(opts, mpctx->ass_library);
-
-#ifdef HAVE_RTC
-    if (opts->rtc) {
-        char *rtc_device = opts->rtc_device;
-        // seteuid(0); /* Can't hurt to try to get root here */
-        if ((rtc_fd = open(rtc_device ? rtc_device : "/dev/rtc", O_RDONLY)) < 0)
-            mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Failed to open %s: %s "
-                    "(it should be readable by the user.)\n",
-                    rtc_device ? rtc_device : "/dev/rtc", strerror(errno));
-        else {
-            unsigned long irqp = 1024; /* 512 seemed OK. 128 is jerky. */
-
-            if (ioctl(rtc_fd, RTC_IRQP_SET, irqp) < 0) {
-                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Linux RTC init error in "
-                        "ioctl (rtc_irqp_set %lu): %s\n",
-                        irqp, strerror(errno));
-                mp_tmsg(MSGT_CPLAYER, MSGL_HINT, "Try adding \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" to your system startup scripts.\n", irqp);
-                close(rtc_fd);
-                rtc_fd = -1;
-            } else if (ioctl(rtc_fd, RTC_PIE_ON, 0) < 0) {
-                /* variable only by the root */
-                mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Linux RTC init error in "
-                        "ioctl (rtc_pie_on): %s\n", strerror(errno));
-                close(rtc_fd);
-                rtc_fd = -1;
-            } else
-                mp_tmsg(MSGT_CPLAYER, MSGL_V,
-                        "Using Linux hardware RTC timing (%ldHz).\n", irqp);
-        }
-    }
-    if (rtc_fd < 0)
-#endif /* HAVE_RTC */
-    mp_msg(MSGT_CPLAYER, MSGL_V, "Using %s timing\n",
-           opts->softsleep ? "software" : timer_name);
 
 #ifdef HAVE_TERMCAP
     load_termcap(NULL); // load key-codes

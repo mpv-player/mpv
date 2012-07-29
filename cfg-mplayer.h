@@ -880,10 +880,6 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("autosync", autosync, 0, 0, 10000),
 
     OPT_FLAG_ON("softsleep", softsleep, 0),
-#ifdef HAVE_RTC
-    OPT_MAKE_FLAGS("rtc", rtc, 0),
-    OPT_STRING("rtc-device", rtc_device, 0),
-#endif
 
     OPT_CHOICE("term-osd", term_osd, M_OPT_IMPLICIT_DEFAULT,
                ({"force", 1},

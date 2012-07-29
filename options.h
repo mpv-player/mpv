@@ -62,8 +62,6 @@ typedef struct MPOpts {
     float hr_seek_demuxer_offset;
     int autosync;
     int softsleep;
-    int rtc;
-    char *rtc_device;
     int term_osd;
     char *term_osd_esc;
     char *playing_msg;

@@ -309,7 +309,6 @@ Optional features:
   --disable-tv-v4l2      disable Video4Linux2 TV interface [autodetect]
   --disable-tv-bsdbt848  disable BSD BT848 interface [autodetect]
   --disable-pvr          disable Video4Linux2 MPEG PVR [autodetect]
-  --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
   --disable-networking   disable networking [enable]
   --enable-winsock2_h    enable winsock2_h [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
@@ -486,7 +485,6 @@ _dvb=auto
 _v4l2=auto
 _iconv=auto
 _langinfo=auto
-_rtc=auto
 _ossaudio=auto
 _rsound=auto
 _pulse=auto
@@ -737,8 +735,6 @@ for ac_option do
   --disable-iconv)      _iconv=no       ;;
   --enable-langinfo)    _langinfo=yes   ;;
   --disable-langinfo)   _langinfo=no    ;;
-  --enable-rtc)         _rtc=yes        ;;
-  --disable-rtc)        _rtc=no         ;;
   --enable-libdv)       _libdv=yes      ;;
   --disable-libdv)      _libdv=no       ;;
   --enable-ossaudio)    _ossaudio=yes   ;;
@@ -3389,30 +3385,6 @@ fi
 echores "$_zlib"
 
 
-echocheck "RTC"
-if test "$_rtc" = auto ; then
-  cat > $TMPC << EOF
-#include <sys/ioctl.h>
-#ifdef __linux__
-#include <linux/rtc.h>
-#else
-#include <rtc.h>
-#define RTC_PIE_ON RTCIO_PIE_ON
-#endif
-int main(void) { return RTC_PIE_ON; }
-EOF
-  _rtc=no
-  cc_check && _rtc=yes
-  ppc && _rtc=no
-fi
-if test "$_rtc" = yes ; then
-  def_rtc='#define HAVE_RTC 1'
-else
-  def_rtc='#undef HAVE_RTC'
-fi
-echores "$_rtc"
-
-
 echocheck "mad support"
 if test "$_mad" = auto ; then
   _mad=no
@@ -4629,7 +4601,6 @@ $def_macosx_finder
 $def_priority
 $def_quicktime
 $def_restrict_keyword
-$def_rtc
 
 
 /* configurable options */
