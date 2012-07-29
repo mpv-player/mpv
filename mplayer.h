@@ -23,8 +23,6 @@
 
 #include "mp_msg.h"
 
-extern char* current_module;
-
 extern char ** audio_fm_list;
 extern char ** video_fm_list;
 extern char ** video_driver_list;
