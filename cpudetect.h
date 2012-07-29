@@ -35,8 +35,6 @@ typedef struct cpucaps_s {
     bool isX86;
     bool hasMMX;
     bool hasMMX2;
-    bool has3DNow;
-    bool has3DNowExt;
     bool hasSSE;
     bool hasSSE2;
     bool hasSSE3;

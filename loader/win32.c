@@ -1020,8 +1020,6 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	    PF[PF_XMMI_INSTRUCTIONS_AVAILABLE] = TRUE;
 	if (gCpuCaps.hasSSE2)
 	    PF[PF_XMMI64_INSTRUCTIONS_AVAILABLE] = TRUE;
-	if (gCpuCaps.has3DNow)
-	    PF[PF_AMD3D_INSTRUCTIONS_AVAILABLE] = TRUE;
 
 		cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
 		cachedsi.wProcessorLevel = 5;

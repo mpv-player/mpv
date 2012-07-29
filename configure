@@ -4695,7 +4695,6 @@ $def_ebx_available
 $(ff_config_enable "$arch_all" "$arch" "ARCH")
 $(ff_config_enable "$subarch_all" "$subarch" "ARCH")
 
-#define HAVE_AMD3DNOW 0
 #define HAVE_MMX ARCH_X86
 #define HAVE_MMX2 ARCH_X86
 #define HAVE_SSE ARCH_X86

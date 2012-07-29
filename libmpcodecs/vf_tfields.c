@@ -71,42 +71,6 @@ static void deint(unsigned char *dest, int ds, unsigned char *src, int ss, int w
 		fast_memcpy(dest, src, w);
 }
 
-#if HAVE_AMD3DNOW
-static void qpel_li_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
-{
-	int i, j, ssd=ss;
-	long crap1, crap2;
-	if (up) {
-		ssd = -ss;
-		fast_memcpy(d, s, w);
-		d += ds;
-		s += ss;
-	}
-	for (i=h-1; i; i--) {
-		__asm__ volatile(
-			"1: \n\t"
-			"movq (%%"REG_S"), %%mm0 \n\t"
-			"movq (%%"REG_S",%%"REG_a"), %%mm1 \n\t"
-			"pavgusb %%mm0, %%mm1 \n\t"
-			"add $8, %%"REG_S" \n\t"
-			"pavgusb %%mm0, %%mm1 \n\t"
-			"movq %%mm1, (%%"REG_D") \n\t"
-			"add $8, %%"REG_D" \n\t"
-			"decl %%ecx \n\t"
-			"jnz 1b \n\t"
-			: "=S"(crap1), "=D"(crap2)
-			: "c"(w>>3), "S"(s), "D"(d), "a"((long)ssd)
-		);
-		for (j=w-(w&7); j<w; j++)
-			d[j] = (s[j+ssd] + 3*s[j])>>2;
-		d += ds;
-		s += ss;
-	}
-	if (!up) fast_memcpy(d, s, w);
-	__asm__ volatile("emms \n\t" : : : "memory");
-}
-#endif
-
 #if HAVE_MMX2
 static void qpel_li_MMX2(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
 {
@@ -498,9 +462,6 @@ static int vf_open(vf_instance_t *vf, char *args)
 #endif
 #if HAVE_MMX2
 	if(gCpuCaps.hasMMX2) qpel_li = qpel_li_MMX2;
-#endif
-#if HAVE_AMD3DNOW
-	if(gCpuCaps.has3DNow) qpel_li = qpel_li_3DNOW;
 #endif
 	return 1;
 }

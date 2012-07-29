@@ -66,8 +66,6 @@ static void init_pullup(struct vf_instance *vf, mp_image_t *mpi)
 
 	if (gCpuCaps.hasMMX) c->cpu |= PULLUP_CPU_MMX;
 	if (gCpuCaps.hasMMX2) c->cpu |= PULLUP_CPU_MMX2;
-	if (gCpuCaps.has3DNow) c->cpu |= PULLUP_CPU_3DNOW;
-	if (gCpuCaps.has3DNowExt) c->cpu |= PULLUP_CPU_3DNOWEXT;
 	if (gCpuCaps.hasSSE) c->cpu |= PULLUP_CPU_SSE;
 	if (gCpuCaps.hasSSE2) c->cpu |= PULLUP_CPU_SSE2;
 

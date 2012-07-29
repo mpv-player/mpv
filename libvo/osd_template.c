@@ -24,11 +24,7 @@
 #undef PREFETCHW
 #undef PAVGB
 
-#if HAVE_AMD3DNOW
-#define PREFETCH  "prefetch"
-#define PREFETCHW "prefetchw"
-#define PAVGB	  "pavgusb"
-#elif HAVE_MMX2
+#if HAVE_MMX2
 #define PREFETCH "prefetchnta"
 #define PREFETCHW "prefetcht0"
 #define PAVGB	  "pavgb"
@@ -37,12 +33,7 @@
 #define PREFETCHW " # nop"
 #endif
 
-#if HAVE_AMD3DNOW
-/* On K6 femms is faster of emms. On K7 femms is directly mapped on emms. */
-#define EMMS     "femms"
-#else
 #define EMMS     "emms"
-#endif
 
 static inline void RENAME(vo_draw_alpha_yv12)(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
@@ -324,12 +315,6 @@ static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, 
     dstbase++;
 #endif
 #if HAVE_MMX
-#if HAVE_AMD3DNOW
-    __asm__ volatile(
-        "pxor %%mm7, %%mm7\n\t"
-        "pcmpeqb %%mm6, %%mm6\n\t" // F..F
-        ::);
-#else /* HAVE_AMD3DNOW */
     __asm__ volatile(
         "pxor %%mm7, %%mm7\n\t"
         "pcmpeqb %%mm5, %%mm5\n\t" // F..F
@@ -337,48 +322,11 @@ static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, 
         "psllw $8, %%mm5\n\t" //FF00FF00FF00
         "psrlw $8, %%mm4\n\t" //00FF00FF00FF
         ::);
-#endif /* HAVE_AMD3DNOW */
 #endif /* HAVE_MMX */
     for(y=0;y<h;y++){
         register int x;
 #if ARCH_X86 && (!ARCH_X86_64 || HAVE_MMX)
 #if HAVE_MMX
-#if HAVE_AMD3DNOW
-    __asm__ volatile(
-	PREFETCHW" %0\n\t"
-	PREFETCH" %1\n\t"
-	PREFETCH" %2\n\t"
-	::"m"(*dstbase),"m"(*srca),"m"(*src):"memory");
-    for(x=0;x<w;x+=2){
-     if(srca[x] || srca[x+1])
-	__asm__ volatile(
-		PREFETCHW" 32%0\n\t"
-		PREFETCH" 32%1\n\t"
-		PREFETCH" 32%2\n\t"
-		"movq	%0, %%mm0\n\t" // dstbase
-		"movq	%%mm0, %%mm1\n\t"
-		"punpcklbw %%mm7, %%mm0\n\t"
-		"punpckhbw %%mm7, %%mm1\n\t"
-		"movd	%1, %%mm2\n\t" // srca ABCD0000
-		"paddb	%%mm6, %%mm2\n\t"
-		"punpcklbw %%mm2, %%mm2\n\t" // srca AABBCCDD
-		"punpcklbw %%mm2, %%mm2\n\t" // srca AAAABBBB
-		"movq	%%mm2, %%mm3\n\t"
-		"punpcklbw %%mm7, %%mm2\n\t" // srca 0A0A0A0A
-		"punpckhbw %%mm7, %%mm3\n\t" // srca 0B0B0B0B
-		"pmullw	%%mm2, %%mm0\n\t"
-		"pmullw	%%mm3, %%mm1\n\t"
-		"psrlw	$8, %%mm0\n\t"
-		"psrlw	$8, %%mm1\n\t"
-		"packuswb %%mm1, %%mm0\n\t"
-		"movd %2, %%mm2	\n\t" // src ABCD0000
-		"punpcklbw %%mm2, %%mm2\n\t" // src AABBCCDD
-		"punpcklbw %%mm2, %%mm2\n\t" // src AAAABBBB
-		"paddb	%%mm2, %%mm0\n\t"
-		"movq	%%mm0, %0\n\t"
-		:: "m" (dstbase[4*x]), "m" (srca[x]), "m" (src[x]));
-	}
-#else //this is faster for intels crap
     __asm__ volatile(
 	PREFETCHW" %0\n\t"
 	PREFETCH" %1\n\t"
@@ -430,7 +378,6 @@ static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, 
 		:: "m" (dstbase[4*x]), "m" (srca[x]), "m" (src[x]), "m" (bFF)
 		: "%eax");
 	}
-#endif
 #else /* HAVE_MMX */
     for(x=0;x<w;x++){
         if(srca[x]){

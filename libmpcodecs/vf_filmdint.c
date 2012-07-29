@@ -445,23 +445,6 @@ block_metrics_faster_c(unsigned char *a, unsigned char *b, int as, int bs,
 	    );								     \
     } while (--lines);
 
-static inline struct metrics
-block_metrics_3dnow(unsigned char *a, unsigned char *b, int as, int bs,
-		    int lines, struct vf_priv_s *p, struct frame_stats *s)
-{
-    struct metrics tm;
-#if !HAVE_AMD3DNOW
-    mp_msg(MSGT_VFILTER, MSGL_FATAL, "block_metrics_3dnow: internal error\n");
-#else
-    static const unsigned long long ones = 0x0101010101010101ull;
-
-    BLOCK_METRICS_TEMPLATE();
-    __asm__ volatile("movq %%mm7, %0\n\temms" : "=m" (tm));
-    get_block_stats(&tm, p, s);
-#endif
-    return tm;
-}
-
 #undef PSUMBW
 #undef PSADBW
 #undef PMAXUB
@@ -797,9 +780,6 @@ static void diff_planes(struct vf_priv_s *p, struct frame_stats *s,
 	if (p->mmx2 == 1) {
 	    for (i = 0; i < w; i += 8)
 		block_metrics_mmx2(of+i, nf+i, os, ns, 4, p, s);
-	} else if (p->mmx2 == 2) {
-	    for (i = 0; i < w; i += 8)
-		block_metrics_3dnow(of+i, nf+i, os, ns, 4, p, s);
 	} else if (p->fast > 3) {
 	    for (i = 0; i < w; i += 8)
 		block_metrics_faster_c(of+i, nf+i, os, ns, 4, p, s);
@@ -1426,7 +1406,7 @@ static int vf_open(vf_instance_t *vf, char *args)
     p->dint_thres = 4;
     p->luma_only = 0;
     p->fast = 3;
-    p->mmx2 = gCpuCaps.hasMMX2 ? 1 : gCpuCaps.has3DNow ? 2 : 0;
+    p->mmx2 = gCpuCaps.hasMMX2;
     if (args) {
 	const char *args_remain = parse_args(p, args);
 	if (args_remain) {
@@ -1444,9 +1424,6 @@ static int vf_open(vf_instance_t *vf, char *args)
 	p->mmx2 = 0;
 #if !HAVE_MMX
     p->mmx2 = 0;
-#endif
-#if !HAVE_AMD3DNOW
-    p->mmx2 &= 1;
 #endif
     p->thres.odd  = p->thres.even;
     p->thres.temp = p->thres.noise;

@@ -661,8 +661,7 @@ float sws_lum_sharpen= 0.0;
 int get_sws_cpuflags(void){
     return
           (gCpuCaps.hasMMX   ? SWS_CPU_CAPS_MMX   : 0)
-	| (gCpuCaps.hasMMX2  ? SWS_CPU_CAPS_MMX2  : 0)
-	| (gCpuCaps.has3DNow ? SWS_CPU_CAPS_3DNOW : 0);
+	| (gCpuCaps.hasMMX2  ? SWS_CPU_CAPS_MMX2  : 0);
 }
 
 void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, SwsFilter **dstFilterParam)
