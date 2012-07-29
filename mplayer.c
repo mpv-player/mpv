@@ -1148,59 +1148,51 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 #endif
     line = malloc(width + 1); // one additional char for the terminating null
 
-    // Audio time
-    if (mpctx->sh_audio) {
-        if (a_pos != MP_NOPTS_VALUE)
-            saddf(line, &pos, width, "A:%6.1f ", a_pos);
-        else
-            saddf(line, &pos, width, "A: ???   ");
-        if (!sh_video && a_pos != MP_NOPTS_VALUE) {
-            float len = get_time_length(mpctx);
-            saddf(line, &pos, width, "(");
-            sadd_hhmmssf(line, &pos, width, a_pos);
-            saddf(line, &pos, width, ") of %.1f (", len);
-            sadd_hhmmssf(line, &pos, width, len);
-            saddf(line, &pos, width, ") ");
-        }
+    // Playback position
+    double cur = MP_NOPTS_VALUE;
+    if (mpctx->sh_audio && a_pos != MP_NOPTS_VALUE) {
+        cur = a_pos;
+    } else if (mpctx->sh_video && mpctx->video_pts != MP_NOPTS_VALUE) {
+        cur = mpctx->video_pts;
     }
+    if (cur != MP_NOPTS_VALUE) {
+        saddf(line, &pos, width, "T:%6.1f ", cur);
+        saddf(line, &pos, width, "(");
+        sadd_hhmmssf(line, &pos, width, cur);
+        saddf(line, &pos, width, ") ");
+    } else
+        saddf(line, &pos, width, "T: ??? ");
 
-    // Video time
-    if (sh_video) {
-        if (mpctx->video_pts != MP_NOPTS_VALUE)
-            saddf(line, &pos, width, "V:%6.1f ", mpctx->video_pts);
-        else
-            saddf(line, &pos, width, "V: ???   ", mpctx->video_pts);
+    double len = get_time_length(mpctx);
+    if (len >= 0) {
+        saddf(line, &pos, width, "of %.1f (", len);
+        sadd_hhmmssf(line, &pos, width, len);
+        saddf(line, &pos, width, ") ");
     }
 
     // A-V sync
     if (mpctx->sh_audio && sh_video) {
         if (mpctx->last_av_difference != MP_NOPTS_VALUE)
-            saddf(line, &pos, width, "A-V:%7.3f ct:%7.3f ",
-                  mpctx->last_av_difference, mpctx->total_avsync_change);
+            saddf(line, &pos, width, "A-V:%7.3f ", mpctx->last_av_difference);
         else
-            saddf(line, &pos, width, "A-V: ???    ct:%7.3f ",
-                  mpctx->total_avsync_change);
+            saddf(line, &pos, width, "A-V: ??? ");
+        if (fabs(mpctx->total_avsync_change) > 0.01)
+            saddf(line, &pos, width, "ct:%7.3f ", mpctx->total_avsync_change);
     }
 
-    // Video stats
-    if (sh_video)
-        saddf(line, &pos, width, "%3d/%3d ",
-              (int)sh_video->num_frames,
-              (int)sh_video->num_frames_decoded);
-
     // VO stats
-    if (sh_video)
-        saddf(line, &pos, width, "%d ", drop_frame_cnt);
+    if (sh_video && drop_frame_cnt)
+        saddf(line, &pos, width, "Dropped: %d ", drop_frame_cnt);
 
 #ifdef CONFIG_STREAM_CACHE
     // cache stats
     if (stream_cache_size > 0)
-        saddf(line, &pos, width, "%d%% ", cache_fill_status(mpctx->stream));
+        saddf(line, &pos, width, "Cache: %d%% ", cache_fill_status(mpctx->stream));
 #endif
 
     // other
     if (opts->playback_speed != 1)
-        saddf(line, &pos, width, "%4.2fx ", opts->playback_speed);
+        saddf(line, &pos, width, "Speed: %4.2fx ", opts->playback_speed);
 
     // end
     if (erase_to_end_of_line) {
