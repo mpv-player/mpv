@@ -104,7 +104,7 @@ static void append_dir_subtitles(struct MPOpts *opts,
     DIR *d = opendir(path0);
     if (!d)
         goto out;
-    mp_msg(MSGT_SUBREADER, MSGL_INFO, "Load subtitles in %.*s\n", BSTR_P(path));
+    mp_msg(MSGT_SUBREADER, MSGL_V, "Load subtitles in %.*s\n", BSTR_P(path));
     struct dirent *de;
     while ((de = readdir(d))) {
         struct bstr dename = bstr0(de->d_name);
