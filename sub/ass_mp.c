@@ -267,8 +267,20 @@ void mp_ass_configure_fonts(ASS_Renderer *priv)
     free(family);
 }
 
+static int map_ass_level[] = {
+    MSGL_ERR,           // 0 "FATAL errors"
+    MSGL_WARN,
+    MSGL_INFO,
+    MSGL_V,
+    MSGL_V,
+    MSGL_V,             // 5 application recommended level
+    MSGL_DBG2,
+    MSGL_DBG3,          // 7 "verbose DEBUG"
+};
+
 static void message_callback(int level, const char *format, va_list va, void *ctx)
 {
+    level = map_ass_level[level];
     mp_msg(MSGT_ASS, level, "[ass] ");
     mp_msg_va(MSGT_ASS, level, format, va);
     // libass messages lack trailing \n
