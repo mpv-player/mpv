@@ -832,8 +832,6 @@ const m_option_t mplayer_opts[]={
     {"hardframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 2, NULL},
     {"noframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
-    OPT_INTRANGE("autoq", auto_quality, 0, 0, 100),
-
     OPT_FLAG_ON("untimed", untimed, 0),
 
     // dump some stream out instead of playing the file

@@ -235,9 +235,6 @@ static const char help_text[] = _(
 
 static int drop_frame_cnt; // total number of dropped frames
 
-// options:
-static int output_quality;
-
 // seek:
 static off_t seek_to_byte;
 static off_t step_sec;
@@ -1193,7 +1190,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 
     // VO stats
     if (sh_video)
-        saddf(line, &pos, width, "%d %d ", drop_frame_cnt, output_quality);
+        saddf(line, &pos, width, "%d ", drop_frame_cnt);
 
 #ifdef CONFIG_STREAM_CACHE
     // cache stats
@@ -2551,18 +2548,6 @@ int reinit_video_chain(struct MPContext *mpctx)
     mpctx->restart_playback = true;
     mpctx->delay = 0;
 
-    if (opts->auto_quality > 0) {
-        // Auto quality option enabled
-        output_quality = get_video_quality_max(sh_video);
-        if (opts->auto_quality > output_quality)
-            opts->auto_quality = output_quality;
-        else
-            output_quality = opts->auto_quality;
-        mp_msg(MSGT_CPLAYER, MSGL_V,
-               "AutoQ: setting quality to %d.\n", output_quality);
-        set_video_quality(sh_video, output_quality);
-    }
-
     // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
 
     return 1;
@@ -3382,7 +3367,6 @@ static void run_playloop(struct MPContext *mpctx)
 
         mpctx->time_frame -= get_relative_time(mpctx);
         mpctx->time_frame -= vo->flip_queue_offset;
-        float aq_sleep_time = mpctx->time_frame;
         if (mpctx->time_frame > 0.001
             && !(mpctx->sh_video->output_flags & VFCAP_TIMER))
             mpctx->time_frame = timing_sleep(mpctx, mpctx->time_frame);
@@ -3428,16 +3412,6 @@ static void run_playloop(struct MPContext *mpctx)
         }
         print_status(mpctx, MP_NOPTS_VALUE, true);
         screenshot_flip(mpctx);
-
-        if (opts->auto_quality > 0) {
-            if (output_quality < opts->auto_quality && aq_sleep_time > 0)
-                ++output_quality;
-            else if (output_quality > 1 && aq_sleep_time < 0)
-                --output_quality;
-            else if (output_quality > 0 && aq_sleep_time < -0.050f) // 50ms
-                output_quality = 0;
-            set_video_quality(mpctx->sh_video, output_quality);
-        }
 
         if (play_n_frames >= 0) {
             --play_n_frames;
