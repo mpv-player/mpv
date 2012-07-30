@@ -23,9 +23,6 @@
 #include <endian.h>
 
 #include "config.h"
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 
 #include "mp_msg.h"
 #include "m_option.h"

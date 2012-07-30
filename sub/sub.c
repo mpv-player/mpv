@@ -24,9 +24,6 @@
 #include <libavutil/common.h>
 
 #include "config.h"
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 
 #include "stream/stream.h"
 #include "stream/stream_dvdnav.h"

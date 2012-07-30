@@ -1713,29 +1713,6 @@ if test "$_inttypes" = no ; then
 fi
 
 
-echocheck "malloc.h"
-_malloc=no
-header_check malloc.h && _malloc=yes
-if test "$_malloc" = yes ; then
-  def_malloc_h='#define HAVE_MALLOC_H 1'
-else
-  def_malloc_h='#define HAVE_MALLOC_H 0'
-fi
-echores "$_malloc"
-
-
-
-echocheck "alloca.h"
-_alloca=no
-statement_check alloca.h 'alloca(0)' && _alloca=yes
-if cc_check ; then
-  def_alloca_h='#define HAVE_ALLOCA_H 1'
-else
-  def_alloca_h='#undef HAVE_ALLOCA_H'
-fi
-echores "$_alloca"
-
-
 echocheck "mman.h"
 _mman=no
 statement_check sys/mman.h 'mmap(0, 0, 0, 0, 0, 0)' && _mman=yes
@@ -3074,10 +3051,6 @@ fi
 echores "$_openal"
 
 echocheck "ALSA audio"
-if test "$_alloca" != yes ; then
-  _alsa=no
-  res_comment="alloca missing"
-fi
 if test "$_alsa" = auto ; then
     _alsa=no
     if pkg_config_add "alsa >= 1.0.9" ; then
@@ -4346,8 +4319,6 @@ $def_dvdcss
 
 
 /* system headers */
-$def_alloca_h
-$def_malloc_h
 $def_mman_h
 $def_mman_has_map_failed
 $def_soundcard_h

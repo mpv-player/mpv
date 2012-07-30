@@ -30,10 +30,6 @@
 #include "mp_msg.h"
 #include "cpudetect.h"
 
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-
 #include "libavutil/mem.h"
 
 #include "img_format.h"
