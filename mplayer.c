@@ -224,7 +224,7 @@ static const char help_text[] = _(
 "- Playing from a slow network source.\n"\
 "     Download the file instead.\n"\
 "- Try to find out whether audio or video is causing this by experimenting\n"\
-"  with --no-video and --no-sound.\n"\
+"  with --no-video and --no-audio.\n"\
 "If none of this helps you, file a bug report.\n\n")
 
 

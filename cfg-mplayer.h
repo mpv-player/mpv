@@ -502,7 +502,7 @@ const m_option_t common_opts[] = {
     OPT_FLAG_CONSTANTS("no-sub", sub_id, 0, -1, -2),
     OPT_FLAG_CONSTANTS("no-video", video_id, 0, -1, -2),
     OPT_FLAG_CONSTANTS("sound", audio_id, 0, -2, -1),
-    OPT_FLAG_CONSTANTS("no-sound", audio_id, 0, -1, -2),
+    OPT_FLAG_CONSTANTS("no-audio", audio_id, 0, -1, -2),
     OPT_STRINGLIST("alang", audio_lang, 0),
     OPT_STRINGLIST("slang", sub_lang, 0),
 
