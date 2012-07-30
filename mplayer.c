@@ -1118,13 +1118,16 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 #endif
     line = malloc(width + 1); // one additional char for the terminating null
 
-    // Playback position
+    // Playback status
+    if (mpctx->paused)
+        saddf(line, &pos, width, "(PAUSED!) ");
     if (mpctx->sh_audio)
         saddf(line, &pos, width, "A");
     if (mpctx->sh_video)
         saddf(line, &pos, width, "V");
     saddf(line, &pos, width, ":");
 
+    // Playback position
     double cur = MP_NOPTS_VALUE;
     if (mpctx->sh_audio && a_pos != MP_NOPTS_VALUE) {
         cur = a_pos;
@@ -1181,8 +1184,6 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
         mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "%s\r", line);
     }
     free(line);
-
-    mpctx->status_printed = true;
 }
 
 struct stream_dump_progress {
@@ -2712,48 +2713,6 @@ static double update_video(struct MPContext *mpctx)
     return frame_time;
 }
 
-static int get_cache_fill(struct MPContext *mpctx)
-{
-#ifdef CONFIG_STREAM_CACHE
-    if (stream_cache_size > 0)
-        return cache_fill_status(mpctx->stream);
-#endif
-    return -1;
-}
-
-static void update_pause_message(struct MPContext *mpctx)
-{
-    struct MPOpts *opts = &mpctx->opts;
-
-    if (opts->quiet)
-        return;
-
-    int cache_fill = get_cache_fill(mpctx);
-    bool cache_changed = cache_fill != mpctx->paused_cache_fill;
-
-    if (!mpctx->status_printed && !cache_changed)
-        return;
-
-    char *msg = mp_gtext("  =====  PAUSE  =====");
-    char *tmpmem = NULL;
-    if (cache_fill >= 0)
-        msg = tmpmem = talloc_asprintf(NULL, "%s %d%%", msg, cache_fill);
-
-    if (opts->term_osd && !mpctx->sh_video) {
-        set_osd_msg(OSD_MSG_PAUSE, 1, 0, "%s", msg);
-        update_osd_msg(mpctx);
-    } else {
-        if (mpctx->status_printed)
-            mp_msg(MSGT_CPLAYER, MSGL_STATUS, "\n");
-        mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%s\r", msg);
-    }
-
-    mpctx->paused_cache_fill = cache_fill;
-    mpctx->status_printed = false;
-
-    talloc_free(tmpmem);
-}
-
 void pause_player(struct MPContext *mpctx)
 {
     if (mpctx->paused)
@@ -2769,9 +2728,7 @@ void pause_player(struct MPContext *mpctx)
     if (mpctx->ao && mpctx->sh_audio)
         ao_pause(mpctx->ao);    // pause audio, keep data if possible
 
-    mpctx->paused_cache_fill = get_cache_fill(mpctx);
-    mpctx->status_printed = true;
-    update_pause_message(mpctx);
+    print_status(mpctx, MP_NOPTS_VALUE, false);
 
     if (!mpctx->opts.quiet)
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
@@ -3432,8 +3389,13 @@ static void run_playloop(struct MPContext *mpctx)
         buffered_audio = mpctx->paused ? 0 : ao_get_delay(mpctx->ao);
 
     update_osd_msg(mpctx);
-    if (mpctx->paused)
-        update_pause_message(mpctx);
+
+#ifdef CONFIG_STREAM_CACHE
+    // The cache status is part of the status line. Possibly update it.
+    if (mpctx->paused && stream_cache_size > 0)
+        print_status(mpctx, MP_NOPTS_VALUE, false);
+#endif
+
     if (!video_left && (!mpctx->paused || was_restart)) {
         double a_pos = 0;
         if (mpctx->sh_audio) {
@@ -3643,7 +3605,6 @@ int main(int argc, char *argv[])
         .set_of_sub_pos = -1,
         .file_format = DEMUXER_TYPE_UNKNOWN,
         .last_dvb_step = 1,
-        .paused_cache_fill = -1,
         .terminal_osd_text = talloc_strdup(mpctx, ""),
     };
 
