@@ -29,7 +29,6 @@
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
-#include "demux_ogg.h"
 #include "aviheader.h"
 
 extern const demuxer_desc_t demuxer_desc_avi_ni;
@@ -862,38 +861,6 @@ static int avi_check_file(demuxer_t *demuxer)
 }
 
 
-static demuxer_t* demux_open_hack_avi(demuxer_t *demuxer)
-{
-   struct MPOpts *opts = demuxer->opts;
-   sh_audio_t* sh_a;
-
-   demuxer = demux_open_avi(demuxer);
-   if(!demuxer) return NULL; // failed to open
-   sh_a = demuxer->audio->sh;
-   if(demuxer->audio->id != -2 && sh_a) {
-#ifdef CONFIG_OGGVORBIS
-    // support for Ogg-in-AVI:
-    if(sh_a->format == 0xFFFE)
-      demuxer = init_avi_with_ogg(demuxer);
-    else if(sh_a->format == 0x674F) {
-      stream_t* s;
-      demuxer_t  *od;
-      s = new_ds_stream(demuxer->audio);
-      od = new_demuxer(opts, s,DEMUXER_TYPE_OGG,-1,-2,-2,NULL);
-      if(!demux_ogg_open(od)) {
-        mp_tmsg( MSGT_DEMUXER,MSGL_ERR,"Unable to open the Ogg demuxer.\n");
-        free_stream(s);
-        demuxer->audio->id = -2;
-      } else
-        demuxer = new_demuxers_demuxer(demuxer,od,demuxer);
-   }
-#endif
-   }
-
-   return demuxer;
-}
-
-
 const demuxer_desc_t demuxer_desc_avi = {
   "AVI demuxer",
   "avi",
@@ -904,7 +871,7 @@ const demuxer_desc_t demuxer_desc_avi = {
   1, // safe autodetect
   avi_check_file,
   demux_avi_fill_buffer,
-  demux_open_hack_avi,
+  demux_open_avi,
   demux_close_avi,
   demux_seek_avi,
   demux_avi_control
@@ -920,7 +887,7 @@ const demuxer_desc_t demuxer_desc_avi_ni = {
   1, // safe autodetect
   avi_check_file,
   demux_avi_fill_buffer_ni,
-  demux_open_hack_avi,
+  demux_open_avi,
   demux_close_avi,
   demux_seek_avi,
   demux_avi_control
@@ -936,7 +903,7 @@ const demuxer_desc_t demuxer_desc_avi_nini = {
   1, // safe autodetect
   avi_check_file,
   demux_avi_fill_buffer_nini,
-  demux_open_hack_avi,
+  demux_open_avi,
   demux_close_avi,
   demux_seek_avi,
   demux_avi_control

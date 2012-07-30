@@ -41,20 +41,14 @@ extern const ad_functions_t mpcodecs_ad_dvdpcm;
 extern const ad_functions_t mpcodecs_ad_alaw;
 extern const ad_functions_t mpcodecs_ad_imaadpcm;
 extern const ad_functions_t mpcodecs_ad_msadpcm;
-extern const ad_functions_t mpcodecs_ad_dk3adpcm;
-extern const ad_functions_t mpcodecs_ad_dk4adpcm;
 extern const ad_functions_t mpcodecs_ad_dshow;
 extern const ad_functions_t mpcodecs_ad_dmo;
 extern const ad_functions_t mpcodecs_ad_acm;
 extern const ad_functions_t mpcodecs_ad_faad;
-extern const ad_functions_t mpcodecs_ad_libvorbis;
-extern const ad_functions_t mpcodecs_ad_speex;
 extern const ad_functions_t mpcodecs_ad_libmad;
 extern const ad_functions_t mpcodecs_ad_realaud;
 extern const ad_functions_t mpcodecs_ad_libdv;
 extern const ad_functions_t mpcodecs_ad_qtaudio;
-extern const ad_functions_t mpcodecs_ad_twin;
-extern const ad_functions_t mpcodecs_ad_libmusepack;
 extern const ad_functions_t mpcodecs_ad_libdca;
 
 const ad_functions_t * const mpcodecs_ad_drivers[] =
@@ -73,7 +67,6 @@ const ad_functions_t * const mpcodecs_ad_drivers[] =
   &mpcodecs_ad_alaw,
   &mpcodecs_ad_imaadpcm,
   &mpcodecs_ad_msadpcm,
-  &mpcodecs_ad_dk3adpcm,
 #ifdef CONFIG_WIN32DLL
   &mpcodecs_ad_dshow,
   &mpcodecs_ad_dmo,
@@ -86,12 +79,6 @@ const ad_functions_t * const mpcodecs_ad_drivers[] =
 #ifdef CONFIG_FAAD
   &mpcodecs_ad_faad,
 #endif
-#ifdef CONFIG_OGGVORBIS
-  &mpcodecs_ad_libvorbis,
-#endif
-#ifdef CONFIG_SPEEX
-  &mpcodecs_ad_speex,
-#endif
 #ifdef CONFIG_LIBMAD
   &mpcodecs_ad_libmad,
 #endif
@@ -100,9 +87,6 @@ const ad_functions_t * const mpcodecs_ad_drivers[] =
 #endif
 #ifdef CONFIG_LIBDV095
   &mpcodecs_ad_libdv,
-#endif
-#ifdef CONFIG_MUSEPACK
-  &mpcodecs_ad_libmusepack,
 #endif
 #ifdef CONFIG_LIBDCA
   &mpcodecs_ad_libdca,

@@ -4237,10 +4237,6 @@ goto_enable_cache:
     mpctx->d_video = mpctx->demuxer->video;
     mpctx->d_sub = mpctx->demuxer->sub;
 
-    if (ts_prog) {
-        int tmp = ts_prog;
-        mp_property_do("switch_program", M_PROPERTY_SET, &tmp, mpctx);
-    }
     // select audio stream
     for (int i = 0; i < mpctx->num_sources; i++)
         select_audio(mpctx->sources[i].demuxer->audio->demuxer, opts->audio_id,
@@ -4288,7 +4284,7 @@ goto_enable_cache:
         while (!ds->eof) {
             unsigned char *start;
             int in_size = ds_get_packet(ds, &start);
-            if ((mpctx->demuxer->file_format == DEMUXER_TYPE_AVI || mpctx->demuxer->file_format == DEMUXER_TYPE_ASF || mpctx->demuxer->file_format == DEMUXER_TYPE_MOV)
+            if ((mpctx->demuxer->file_format == DEMUXER_TYPE_AVI || mpctx->demuxer->file_format == DEMUXER_TYPE_ASF)
                 && stream_dump_type == 2)
                 fwrite(&in_size, 1, 4, f);
             if (in_size > 0) {

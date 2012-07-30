@@ -349,13 +349,7 @@ Codecs:
   --disable-qtx             disable QuickTime codecs support [enabled]
   --disable-xanim           disable XAnim codecs support [enabled]
   --disable-real            disable RealPlayer codecs support [enabled]
-  --disable-xvid            disable Xvid [autodetect]
-  --disable-libnut          disable libnut [autodetect]
   --enable-libav            skip Libav autodetection [autodetect]
-  --disable-libvorbis       disable libvorbis support [autodetect]
-  --disable-tremor          disable Tremor [autodetect if no libvorbis]
-  --disable-speex           disable Speex support [autodetect]
-  --enable-theora           enable OggTheora libraries [autodetect]
   --enable-faad             enable FAAD2 (AAC) [autodetect]
   --disable-ladspa          disable LADSPA plugin support [autodetect]
   --disable-libbs2b         disable libbs2b audio filter support [autodetect]
@@ -364,8 +358,6 @@ Codecs:
   --disable-mad             disable libmad (MPEG audio) support [autodetect]
   --enable-libdca           enable libdca support [autodetect]
   --disable-liba52          disable liba52 [autodetect]
-  --enable-musepack         enable libmpcdec support (deprecated, libavcodec
-                            Musepack decoder is preferred) [disabled]
 
 Video output:
   --enable-gl              enable OpenGL video output [autodetect]
@@ -492,10 +484,6 @@ _jack=auto
 _openal=no
 _libcdio=auto
 _mad=auto
-_tremor=auto
-_libvorbis=auto
-_speex=auto
-_theora=auto
 _mpg123=auto
 _liba52=auto
 _libdca=auto
@@ -538,8 +526,6 @@ _winsock2_h=auto
 _smb=auto
 _libquvi=auto
 _joystick=no
-_xvid=auto
-_libnut=auto
 _lirc=auto
 _lircc=auto
 _apple_remote=auto
@@ -568,7 +554,6 @@ _enca=auto
 _inet6=auto
 _gethostbyname2=auto
 _ftp=auto
-_musepack=no
 _vstream=auto
 _pthreads=auto
 _w32threads=auto
@@ -751,22 +736,12 @@ for ac_option do
   --disable-mad)        _mad=no         ;;
   --enable-libcdio)     _libcdio=yes    ;;
   --disable-libcdio)    _libcdio=no     ;;
-  --enable-libvorbis)   _libvorbis=yes  ;;
-  --disable-libvorbis)  _libvorbis=no   ;;
-  --enable-speex)       _speex=yes      ;;
-  --disable-speex)      _speex=no       ;;
-  --enable-tremor)      _tremor=yes     ;;
-  --disable-tremor)     _tremor=no      ;;
-  --enable-theora)      _theora=yes     ;;
-  --disable-theora)     _theora=no      ;;
   --enable-mpg123)      _mpg123=yes     ;;
   --disable-mpg123)     _mpg123=no      ;;
   --enable-liba52)      _liba52=yes     ;;
   --disable-liba52)     _liba52=no      ;;
   --enable-libdca)      _libdca=yes     ;;
   --disable-libdca)     _libdca=no      ;;
-  --enable-musepack)    _musepack=yes   ;;
-  --disable-musepack)   _musepack=no    ;;
   --enable-faad)        _faad=yes       ;;
   --disable-faad)       _faad=no        ;;
   --enable-ladspa)      _ladspa=yes     ;;
@@ -835,10 +810,6 @@ for ac_option do
   --disable-libquvi)    _libquvi=no     ;;
   --enable-joystick)    _joystick=yes   ;;
   --disable-joystick)   _joystick=no    ;;
-  --enable-xvid)        _xvid=yes       ;;
-  --disable-xvid)       _xvid=no        ;;
-  --enable-libnut)      _libnut=yes     ;;
-  --disable-libnut)     _libnut=no      ;;
   --enable-libav)       ffmpeg=yes      ;;
   --ffmpeg-source-dir=*)
     _ffmpeg_source=$(echo $ac_option | cut -d '=' -f 2 ) ;;
@@ -3396,71 +3367,6 @@ else
 fi
 echores "$_mad"
 
-echocheck "OggVorbis support"
-if test "$_libvorbis" = auto; then
-  _libvorbis=no
-  statement_check vorbis/codec.h 'vorbis_packet_blocksize(0, 0)' -lvorbis -logg $_ld_lm && _libvorbis=yes && _tremor=no
-elif test "$_libvorbis" = yes ; then
-  _tremor=no
-fi
-if test "$_tremor" = auto; then
-  _tremor=no
-  statement_check tremor/ivorbiscodec.h 'vorbis_packet_blocksize(0, 0)' -logg -lvorbisidec $_ld_lm && _tremor=yes
-fi
-if test "$_tremor" = yes ; then
-  _vorbis=yes
-  def_vorbis='#define CONFIG_OGGVORBIS 1'
-  def_tremor='#define CONFIG_TREMOR 1'
-  codecmodules="tremor(external) $codecmodules"
-  res_comment="external Tremor"
-  extra_ldflags="$extra_ldflags -logg -lvorbisidec"
-elif test "$_libvorbis" = yes ; then
-  _vorbis=yes
-  def_vorbis='#define CONFIG_OGGVORBIS 1'
-  codecmodules="libvorbis $codecmodules"
-  res_comment="libvorbis"
-  extra_ldflags="$extra_ldflags -lvorbis -logg"
-else
-  _vorbis=no
-  nocodecmodules="libvorbis $nocodecmodules"
-fi
-echores "$_vorbis"
-
-echocheck "libspeex (version >= 1.1 required)"
-if test "$_speex" = auto ; then
-  _speex=no
-  cat > $TMPC << EOF
-#include <stddef.h>
-#include <speex/speex.h>
-int main(void) { SpeexBits bits; void *dec = NULL; speex_decode_int(dec, &bits, dec); return 0; }
-EOF
-  cc_check -lspeex $_ld_lm && _speex=yes
-fi
-if test "$_speex" = yes ; then
-  def_speex='#define CONFIG_SPEEX 1'
-  extra_ldflags="$extra_ldflags -lspeex"
-  codecmodules="speex $codecmodules"
-else
-  def_speex='#undef CONFIG_SPEEX'
-  nocodecmodules="speex $nocodecmodules"
-fi
-echores "$_speex"
-
-echocheck "OggTheora support"
-if test "$_theora" = auto ; then
-  _theora=no
-  if pkg_config_add theora ; then
-      _theora=yes
-  fi
-fi
-if test "$_theora" = yes ; then
-  def_theora='#define CONFIG_OGGTHEORA 1'
-  codecmodules="libtheora $codecmodules"
-else
-  def_theora='#undef CONFIG_OGGTHEORA'
-  nocodecmodules="libtheora $nocodecmodules"
-fi
-echores "$_theora"
 
 # Any version of libmpg123 that knows MPG123_RESYNC_LIMIT shall be fine.
 # That is, 1.2.0 onwards. Recommened is 1.14 onwards, though.
@@ -3513,32 +3419,6 @@ else
   nocodecmodules="libdca $nocodecmodules"
 fi
 echores "$_libdca"
-
-echocheck "libmpcdec (musepack, version >= 1.2.1 required)"
-if test "$_musepack" = yes ; then
-  _musepack=no
-  cat > $TMPC << EOF
-#include <stddef.h>
-#include <mpcdec/mpcdec.h>
-int main(void) {
-  mpc_streaminfo info;
-  mpc_decoder decoder;
-  mpc_decoder_set_streaminfo(&decoder, &info);
-  mpc_decoder_decode_frame(&decoder, NULL, 0, NULL);
-  return 0;
-}
-EOF
-  cc_check -lmpcdec $_ld_lm && _musepack=yes
-fi
-if test "$_musepack" = yes ; then
-  def_musepack='#define CONFIG_MUSEPACK 1'
-  extra_ldflags="$extra_ldflags -lmpcdec"
-  codecmodules="musepack $codecmodules"
-else
-  def_musepack='#undef CONFIG_MUSEPACK'
-  nocodecmodules="musepack $nocodecmodules"
-fi
-echores "$_musepack"
 
 
 echocheck "FAAD2 support"
@@ -3817,40 +3697,6 @@ else
   nocodecmodules="libdv $nocodecmodules"
 fi
 echores "$_libdv"
-
-
-echocheck "Xvid"
-if test "$_xvid" = auto ; then
-  _xvid=no
-  for _ld_tmp in "-lxvidcore $_ld_lm" "-lxvidcore $_ld_lm $_ld_pthread" ; do
-    statement_check xvid.h 'xvid_global(0, 0, 0, 0)' $_ld_tmp &&
-      extra_ldflags="$extra_ldflags $_ld_tmp" && _xvid=yes && break
-  done
-fi
-
-if test "$_xvid" = yes ; then
-  def_xvid='#define CONFIG_XVID4 1'
-  codecmodules="xvid $codecmodules"
-else
-  def_xvid='#undef CONFIG_XVID4'
-  nocodecmodules="xvid $nocodecmodules"
-fi
-echores "$_xvid"
-
-
-echocheck "libnut"
-if test "$_libnut" = auto ; then
-  _libnut=no
-   statement_check libnut.h 'nut_context_tt * nut; nut_error(0)' -lnut && _libnut=yes
-fi
-
-if test "$_libnut" = yes ; then
-  def_libnut='#define CONFIG_LIBNUT 1'
-  extra_ldflags="$extra_ldflags -lnut"
-else
-  def_libnut='#undef CONFIG_LIBNUT'
-fi
-echores "$_libnut"
 
 
 echocheck "TV interface"
@@ -4391,7 +4237,6 @@ LIBDVDCSS_INTERNAL = $_libdvdcss_internal
 LIBMAD = $_mad
 LIBNEMESI = $_nemesi
 LCMS2 = $_lcms2
-LIBNUT = $_libnut
 LIBPOSTPROC = $libpostproc
 LIBSMBCLIENT = $_smb
 LIBQUVI = $_libquvi
@@ -4402,7 +4247,6 @@ MACOSX_FINDER = $_macosx_finder
 MD5SUM = $_md5sum
 MNG = $_mng
 MPG123 = $_mpg123
-MUSEPACK = $_musepack
 NATIVE_RTSP = $_native_rtsp
 NETWORKING = $networking
 OPENAL = $_openal
@@ -4421,7 +4265,6 @@ RADIO=$_radio
 RADIO_CAPTURE=$_radio_capture
 REAL_CODECS = $_real
 RSOUND = $_rsound
-SPEEX = $_speex
 STREAM_CACHE = $_stream_cache
 TGA = $_tga
 TV = $_tv
@@ -4433,14 +4276,12 @@ TV_V4L2 = $_tv_v4l2
 V4L2 = $_v4l2
 VCD = $_vcd
 VDPAU = $_vdpau
-VORBIS = $_vorbis
 VSTREAM = $_vstream
 WIN32DLL = $_win32dll
 WIN32_EMULATION = $_win32_emulation
 X11 = $_x11
 XANIM_CODECS = $_xanim
 XV = $_xv
-XVID4 = $_xvid
 YUV4MPEG = $_yuv4mpeg
 
 # FFmpeg
@@ -4624,16 +4465,9 @@ $def_libdca
 $def_libdv
 $def_mad
 $def_mpg123
-$def_musepack
-$def_speex
-$def_theora
-$def_tremor
-$def_vorbis
-$def_xvid
 $def_zlib
 
 $def_libpostproc
-$def_libnut
 
 
 /* binary codecs */

@@ -1610,8 +1610,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
 
         if ((d_sub->demuxer->type == DEMUXER_TYPE_MATROSKA
              || d_sub->demuxer->type == DEMUXER_TYPE_LAVF
-             || d_sub->demuxer->type == DEMUXER_TYPE_LAVF_PREFERRED
-             || d_sub->demuxer->type == DEMUXER_TYPE_OGG)
+             || d_sub->demuxer->type == DEMUXER_TYPE_LAVF_PREFERRED)
             && d_sub->sh && opts->sub_id >= 0) {
             struct sh_sub *sh = d_sub->sh;
             char *lang = sh->lang ? sh->lang : mp_gtext("unknown");

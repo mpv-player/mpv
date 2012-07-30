@@ -30,7 +30,6 @@
 #include "config.h"
 #include "m_config.h"
 #include "m_option.h"
-#include "libmpdemux/demux_ts.h"
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
 #include "libvo/csputils.h"
@@ -76,12 +75,6 @@ extern int dvd_speed; /* stream/stream_dvd.c */
 extern const m_option_t demux_rawaudio_opts[];
 extern const m_option_t demux_rawvideo_opts[];
 extern const m_option_t cdda_opts[];
-
-extern int ts_prog;
-extern int ts_keep_broken;
-extern off_t ts_probe;
-extern int audio_substream_id;
-extern off_t ps_probe;
 
 extern int sws_flags;
 extern const char pp_help[];
@@ -465,7 +458,6 @@ const m_option_t common_opts[] = {
 
     // select audio/video/subtitle stream
     OPT_INTRANGE("aid", audio_id, 0, -2, 8190),
-    {"ausid", &audio_substream_id, CONF_TYPE_INT, 0, 0, 0, NULL},
     OPT_INTRANGE("vid", video_id, 0, -2, 8190),
     OPT_INTRANGE("sid", sub_id, 0, -2, 8190),
     OPT_FLAG_CONSTANTS("no-sub", sub_id, 0, -1, -2),
@@ -566,10 +558,6 @@ const m_option_t common_opts[] = {
 
     OPT_FLAG_CONSTANTS("flip", flip, 0, -1, 1),
     OPT_FLAG_CONSTANTS("no-flip", flip, 0, -1, 0),
-    {"tsprog", &ts_prog, CONF_TYPE_INT, CONF_RANGE, 0, 65534, NULL},
-    {"tsprobe", &ts_probe, CONF_TYPE_POSITION, 0, 0, TS_MAX_PROBE_SIZE, NULL},
-    {"psprobe", &ps_probe, CONF_TYPE_POSITION, 0, 0, TS_MAX_PROBE_SIZE, NULL},
-    {"tskeepbroken", &ts_keep_broken, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
     // draw by slices or whole frame (useful with libmpeg2/libavcodec)
     OPT_MAKE_FLAGS("slices", vd_use_slices, 0),

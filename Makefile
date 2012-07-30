@@ -88,11 +88,9 @@ SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
 
 SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
                                         stream/stream_nemesi.c
-SRCS_COMMON-$(LIBNUT)                += libmpdemux/demux_nut.c
 SRCS_COMMON-$(LIBPOSTPROC)           += libmpcodecs/vf_pp.c
 SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
 
-SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
 SRCS_COMMON-$(LIVE555)               += libmpdemux/demux_rtp.cpp \
                                         libmpdemux/demux_rtp_codec.cpp \
                                         stream/stream_live555.c
@@ -103,8 +101,6 @@ SRCS_COMMON-$(COCOA)                 += libvo/osx_common.c \
 SRCS_COMMON-$(MNG)                   += libmpdemux/demux_mng.c
 SRCS_COMMON-$(MPG123)                += libmpcodecs/ad_mpg123.c
 
-SRCS_COMMON-$(MUSEPACK)              += libmpcodecs/ad_mpc.c \
-                                        libmpdemux/demux_mpc.c
 SRCS_COMMON-$(NATIVE_RTSP)           += stream/stream_rtsp.c \
                                         stream/freesdp/common.c \
                                         stream/freesdp/errorlist.c \
@@ -148,7 +144,6 @@ SRCS_COMMON-$(RADIO)                 += stream/stream_radio.c
 SRCS_COMMON-$(RADIO_CAPTURE)         += stream/audio_in.c
 SRCS_COMMON-$(REAL_CODECS)           += libmpcodecs/ad_realaud.c \
                                         libmpcodecs/vd_realvid.c
-SRCS_COMMON-$(SPEEX)                 += libmpcodecs/ad_speex.c
 SRCS_COMMON-$(STREAM_CACHE)          += stream/cache2.c
 
 SRCS_COMMON-$(TV)                    += stream/stream_tv.c stream/tv.c \
@@ -161,8 +156,6 @@ SRCS_COMMON-$(TV_DSHOW)              += stream/tvi_dshow.c \
 SRCS_COMMON-$(TV_V4L1)               += stream/tvi_v4l.c  stream/audio_in.c
 SRCS_COMMON-$(TV_V4L2)               += stream/tvi_v4l2.c stream/audio_in.c
 SRCS_COMMON-$(VCD)                   += stream/stream_vcd.c
-SRCS_COMMON-$(VORBIS)                += libmpcodecs/ad_libvorbis.c \
-                                        libmpdemux/demux_ogg.c
 SRCS_COMMON-$(VSTREAM)               += stream/stream_vstream.c
 SRCS_QTX_EMULATION                   += loader/wrapper.S
 SRCS_COMMON-$(QTX_EMULATION)         += $(SRCS_QTX_EMULATION)
@@ -181,7 +174,6 @@ SRCS_COMMON-$(WIN32_EMULATION)       += $(SRCS_WIN32_EMULATION)
 SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
                                         libmpcodecs/ad_dmo.c \
                                         libmpcodecs/ad_dshow.c \
-                                        libmpcodecs/ad_twin.c \
                                         libmpcodecs/vd_dmo.c \
                                         libmpcodecs/vd_dshow.c \
                                         libmpcodecs/vd_vfw.c \
@@ -207,7 +199,6 @@ SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
                                         loader/dmo/dmo_guids.c \
 
 SRCS_COMMON-$(XANIM_CODECS)          += libmpcodecs/vd_xanim.c
-SRCS_COMMON-$(XVID4)                 += libmpcodecs/vd_xvid4.c
 
 SRCS_COMMON-$(DUMMY_OSD)             += sub/osd_dummy.c
 SRCS_COMMON-$(LIBASS_OSD)            += sub/osd_libass.c
@@ -262,7 +253,6 @@ SRCS_COMMON = asxparser.c \
               libaf/window.c \
               libmpcodecs/ad.c \
               libmpcodecs/ad_alaw.c \
-              libmpcodecs/ad_dk3adpcm.c \
               libmpcodecs/ad_dvdpcm.c \
               libmpcodecs/ad_ffmpeg.c \
               libmpcodecs/ad_hwac3.c \
@@ -280,11 +270,9 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vd_ffmpeg.c \
               libmpcodecs/vd_hmblck.c \
               libmpcodecs/vd_lzo.c \
-              libmpcodecs/vd_mpegpes.c \
               libmpcodecs/vd_mtga.c \
               libmpcodecs/vd_null.c \
               libmpcodecs/vd_raw.c \
-              libmpcodecs/vd_sgi.c \
               libmpcodecs/vf.c \
               libmpcodecs/vf_1bpp.c \
               libmpcodecs/vf_2xsai.c \
@@ -357,48 +345,30 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_yadif.c \
               libmpcodecs/vf_yuvcsp.c \
               libmpcodecs/vf_yvu9.c \
-              libmpdemux/aac_hdr.c \
               libmpdemux/asfheader.c \
               libmpdemux/aviheader.c \
               libmpdemux/aviprint.c \
               libmpdemux/demuxer.c \
-              libmpdemux/demux_aac.c \
               libmpdemux/demux_asf.c \
               libmpdemux/demux_audio.c \
               libmpdemux/demux_avi.c \
               libmpdemux/demux_demuxers.c \
               libmpdemux/demux_edl.c \
               libmpdemux/demux_cue.c \
-              libmpdemux/demux_film.c \
-              libmpdemux/demux_fli.c \
               libmpdemux/demux_lavf.c \
-              libmpdemux/demux_lmlm4.c \
               libmpdemux/demux_mf.c \
               libmpdemux/demux_mkv.c \
-              libmpdemux/demux_mov.c \
-              libmpdemux/demux_mpg.c \
-              libmpdemux/demux_nsv.c \
-              libmpdemux/demux_pva.c \
               libmpdemux/demux_rawaudio.c \
               libmpdemux/demux_rawvideo.c \
               libmpdemux/demux_realaud.c \
               libmpdemux/demux_real.c \
-              libmpdemux/demux_roq.c \
-              libmpdemux/demux_smjpeg.c \
-              libmpdemux/demux_ts.c \
-              libmpdemux/demux_ty.c \
               libmpdemux/demux_viv.c \
-              libmpdemux/demux_vqf.c \
-              libmpdemux/demux_y4m.c \
               libmpdemux/ebml.c \
               libmpdemux/extension.c \
               libmpdemux/mf.c \
               libmpdemux/mp3_hdr.c \
               libmpdemux/mp_taglists.c \
-              libmpdemux/mpeg_hdr.c \
               libmpdemux/mpeg_packetizer.c \
-              libmpdemux/parse_es.c \
-              libmpdemux/parse_mp4.c \
               libmpdemux/video.c \
               libmpdemux/yuv4mpeg.c \
               libmpdemux/yuv4mpeg_ratio.c \

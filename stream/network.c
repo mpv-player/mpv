@@ -65,23 +65,8 @@ int   network_ipv4_only_proxy = 0;
 
 
 const mime_struct_t mime_type_table[] = {
-	// Flash Video
-	{ "video/x-flv", DEMUXER_TYPE_LAVF_PREFERRED},
-	// do not force any demuxer in this case!
-	// we want the lavf demuxer to be tried first (happens automatically anyway),
-	// but for mov reference files to work we must also try
-	// the native demuxer if lavf fails.
-	{ "video/quicktime", 0 },
 	// MP3 streaming, some MP3 streaming server answer with audio/mpeg
 	{ "audio/mpeg", DEMUXER_TYPE_AUDIO },
-	// MPEG streaming
-	{ "video/mpeg", DEMUXER_TYPE_UNKNOWN },
-	{ "video/x-mpeg", DEMUXER_TYPE_UNKNOWN },
-	{ "video/x-mpeg2", DEMUXER_TYPE_UNKNOWN },
-	// AVI ??? => video/x-msvideo
-	{ "video/x-msvideo", DEMUXER_TYPE_AVI },
-	// MOV => video/quicktime
-	{ "video/quicktime", DEMUXER_TYPE_MOV },
 	// ASF
         { "audio/x-ms-wax", DEMUXER_TYPE_ASF },
 	{ "audio/x-ms-wma", DEMUXER_TYPE_ASF },
@@ -91,7 +76,6 @@ const mime_struct_t mime_type_table[] = {
 	{ "video/x-ms-wma", DEMUXER_TYPE_ASF },
 	{ "application/x-mms-framed", DEMUXER_TYPE_ASF },
 	{ "application/vnd.ms.wms-hdr.asfv1", DEMUXER_TYPE_ASF },
-	{ "application/octet-stream", DEMUXER_TYPE_UNKNOWN },
 	// Playlists
 	{ "video/x-ms-wmx", DEMUXER_TYPE_PLAYLIST },
 	{ "video/x-ms-wvx", DEMUXER_TYPE_PLAYLIST },
@@ -100,11 +84,6 @@ const mime_struct_t mime_type_table[] = {
 	{ "audio/x-pls", DEMUXER_TYPE_PLAYLIST },
 	// Real Media
 //	{ "audio/x-pn-realaudio", DEMUXER_TYPE_REAL },
-	// OGG Streaming
-	{ "application/x-ogg", DEMUXER_TYPE_OGG },
-	// NullSoft Streaming Video
-	{ "video/nsv", DEMUXER_TYPE_NSV},
-	{ "misc/ultravox", DEMUXER_TYPE_NSV},
 	{ NULL, DEMUXER_TYPE_UNKNOWN},
 };
 

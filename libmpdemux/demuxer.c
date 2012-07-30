@@ -58,41 +58,19 @@ extern const demuxer_desc_t demuxer_desc_rawvideo;
 extern const demuxer_desc_t demuxer_desc_tv;
 extern const demuxer_desc_t demuxer_desc_mf;
 extern const demuxer_desc_t demuxer_desc_avi;
-extern const demuxer_desc_t demuxer_desc_y4m;
 extern const demuxer_desc_t demuxer_desc_asf;
 extern const demuxer_desc_t demuxer_desc_real;
-extern const demuxer_desc_t demuxer_desc_smjpeg;
 extern const demuxer_desc_t demuxer_desc_matroska;
 extern const demuxer_desc_t demuxer_desc_realaudio;
-extern const demuxer_desc_t demuxer_desc_vqf;
-extern const demuxer_desc_t demuxer_desc_mov;
 extern const demuxer_desc_t demuxer_desc_vivo;
-extern const demuxer_desc_t demuxer_desc_fli;
-extern const demuxer_desc_t demuxer_desc_film;
-extern const demuxer_desc_t demuxer_desc_roq;
 extern const demuxer_desc_t demuxer_desc_gif;
-extern const demuxer_desc_t demuxer_desc_ogg;
 extern const demuxer_desc_t demuxer_desc_avs;
-extern const demuxer_desc_t demuxer_desc_pva;
-extern const demuxer_desc_t demuxer_desc_nsv;
-extern const demuxer_desc_t demuxer_desc_mpeg_ts;
-extern const demuxer_desc_t demuxer_desc_lmlm4;
-extern const demuxer_desc_t demuxer_desc_mpeg_ps;
-extern const demuxer_desc_t demuxer_desc_mpeg_pes;
-extern const demuxer_desc_t demuxer_desc_mpeg_es;
-extern const demuxer_desc_t demuxer_desc_mpeg_gxf;
-extern const demuxer_desc_t demuxer_desc_mpeg4_es;
-extern const demuxer_desc_t demuxer_desc_h264_es;
 extern const demuxer_desc_t demuxer_desc_rawdv;
-extern const demuxer_desc_t demuxer_desc_mpc;
 extern const demuxer_desc_t demuxer_desc_audio;
-extern const demuxer_desc_t demuxer_desc_mpeg_ty;
 extern const demuxer_desc_t demuxer_desc_rtp;
 extern const demuxer_desc_t demuxer_desc_rtp_nemesi;
 extern const demuxer_desc_t demuxer_desc_lavf;
 extern const demuxer_desc_t demuxer_desc_lavf_preferred;
-extern const demuxer_desc_t demuxer_desc_aac;
-extern const demuxer_desc_t demuxer_desc_nut;
 extern const demuxer_desc_t demuxer_desc_mng;
 
 /* Please do not add any new demuxers here. If you want to implement a new
@@ -110,39 +88,16 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_mf,
     &demuxer_desc_lavf_preferred,
     &demuxer_desc_avi,
-    &demuxer_desc_y4m,
     &demuxer_desc_asf,
-    &demuxer_desc_nsv,
-    &demuxer_desc_real,
-    &demuxer_desc_smjpeg,
     &demuxer_desc_matroska,
     &demuxer_desc_realaudio,
-    &demuxer_desc_vqf,
-    &demuxer_desc_mov,
-    &demuxer_desc_vivo,
-    &demuxer_desc_fli,
-    &demuxer_desc_film,
-    &demuxer_desc_roq,
 #ifdef CONFIG_GIF
     &demuxer_desc_gif,
-#endif
-#ifdef CONFIG_OGGVORBIS
-    &demuxer_desc_ogg,
 #endif
 #ifdef CONFIG_WIN32DLL
     &demuxer_desc_avs,
 #endif
-    &demuxer_desc_pva,
-    &demuxer_desc_mpeg_ts,
-    &demuxer_desc_lmlm4,
-    &demuxer_desc_mpeg_ps,
-    &demuxer_desc_mpeg_pes,
-    &demuxer_desc_mpeg_es,
-    &demuxer_desc_mpeg_gxf,
-    &demuxer_desc_mpeg4_es,
-    &demuxer_desc_h264_es,
     &demuxer_desc_audio,
-    &demuxer_desc_mpeg_ty,
 #ifdef CONFIG_LIVE555
     &demuxer_desc_rtp,
 #endif
@@ -150,15 +105,8 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_rtp_nemesi,
 #endif
     &demuxer_desc_lavf,
-#ifdef CONFIG_MUSEPACK
-    &demuxer_desc_mpc,
-#endif
 #ifdef CONFIG_LIBDV095
     &demuxer_desc_rawdv,
-#endif
-    &demuxer_desc_aac,
-#ifdef CONFIG_LIBNUT
-    &demuxer_desc_nut,
 #endif
 #ifdef CONFIG_MNG
     &demuxer_desc_mng,
@@ -1001,6 +949,22 @@ static struct demuxer *demux_open_stream(struct MPOpts *opts,
 {
     struct demuxer *demuxer = NULL;
     const struct demuxer_desc *desc;
+
+    // Some code (e.g. dvd stuff, network code, or extension.c) explicitly
+    // request certain file formats. The list of formats are always handled by
+    // libavformat.
+    // Maybe attempts should be made to convert the mplayer format to the libav
+    // format, instead of reyling on libav to auto-detect the stream's format
+    // correctly.
+    switch (file_format) {
+    case DEMUXER_TYPE_MPEG_PS:
+    case DEMUXER_TYPE_MPEG_TS:
+    case DEMUXER_TYPE_Y4M:
+    case DEMUXER_TYPE_NSV:
+    case DEMUXER_TYPE_AAC:
+    case DEMUXER_TYPE_MPC:
+        file_format = DEMUXER_TYPE_LAVF;
+    }
 
     // If somebody requested a demuxer check it
     if (file_format) {

@@ -39,7 +39,6 @@
 
 extern const vd_functions_t mpcodecs_vd_null;
 extern const vd_functions_t mpcodecs_vd_ffmpeg;
-extern const vd_functions_t mpcodecs_vd_theora;
 extern const vd_functions_t mpcodecs_vd_dshow;
 extern const vd_functions_t mpcodecs_vd_dmo;
 extern const vd_functions_t mpcodecs_vd_vfw;
@@ -50,10 +49,7 @@ extern const vd_functions_t mpcodecs_vd_xanim;
 extern const vd_functions_t mpcodecs_vd_mpng;
 extern const vd_functions_t mpcodecs_vd_ijpg;
 extern const vd_functions_t mpcodecs_vd_mtga;
-extern const vd_functions_t mpcodecs_vd_sgi;
-extern const vd_functions_t mpcodecs_vd_mpegpes;
 extern const vd_functions_t mpcodecs_vd_realvid;
-extern const vd_functions_t mpcodecs_vd_xvid;
 extern const vd_functions_t mpcodecs_vd_libdv;
 extern const vd_functions_t mpcodecs_vd_lzo;
 extern const vd_functions_t mpcodecs_vd_qtvideo;
@@ -65,9 +61,6 @@ extern const vd_functions_t mpcodecs_vd_qtvideo;
 const vd_functions_t * const mpcodecs_vd_drivers[] = {
     &mpcodecs_vd_null,
     &mpcodecs_vd_ffmpeg,
-#ifdef CONFIG_OGGTHEORA
-    &mpcodecs_vd_theora,
-#endif
 #ifdef CONFIG_WIN32DLL
     &mpcodecs_vd_dshow,
     &mpcodecs_vd_dmo,
@@ -87,13 +80,8 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
     &mpcodecs_vd_ijpg,
 #endif
     &mpcodecs_vd_mtga,
-    &mpcodecs_vd_sgi,
-    &mpcodecs_vd_mpegpes,
 #ifdef CONFIG_REALCODECS
     &mpcodecs_vd_realvid,
-#endif
-#ifdef CONFIG_XVID4
-    &mpcodecs_vd_xvid,
 #endif
 #ifdef CONFIG_LIBDV095
     &mpcodecs_vd_libdv,
