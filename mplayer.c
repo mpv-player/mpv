@@ -174,28 +174,28 @@ static const char help_text[] = _(
 " --playlist=<file> specify playlist file\n"
 "\n");
 
-
-#define SystemTooSlow _("\n\n"\
-"           *************************************************\n"\
-"           **** Audio/Video desynchronisation detected! ****\n"\
-"           *************************************************\n\n"\
-"This means either the audio or the video is played too slowly.\n"\
-"Possible reasons, problems, workarounds:\n"\
-"- Your system is simply too slow for this file.\n"\
-"     Transcode it to a lower bitrate file with tools like HandBrake.\n"\
-"- Broken/buggy _audio_ driver.\n"\
-"     Experiment with different values for --autosync, 30 is a good start.\n"\
-"     If you have PulseAudio, try --ao=alsa .\n"\
-"- Slow video output.\n"\
-"     Try a different -vo driver (-vo help for a list) or try -framedrop!\n"\
-"- Playing a video file with --vo=gl/gl3 with higher FPS than your monitor.\n"\
-"     This is due to vsync limiting the framerate. Try --no-vsync, or a\n"\
-"     different VO.\n"\
-"- Playing from a slow network source.\n"\
-"     Download the file instead.\n"\
-"- Try to find out whether audio or video is causing this by experimenting\n"\
-"  with --no-video and --no-audio.\n"\
-"If none of this helps you, file a bug report.\n\n")
+static const char av_desync_help_text[] = _(
+"\n\n"
+"           *************************************************\n"
+"           **** Audio/Video desynchronisation detected! ****\n"
+"           *************************************************\n\n"
+"This means either the audio or the video is played too slowly.\n"
+"Possible reasons, problems, workarounds:\n"
+"- Your system is simply too slow for this file.\n"
+"     Transcode it to a lower bitrate file with tools like HandBrake.\n"
+"- Broken/buggy _audio_ driver.\n"
+"     Experiment with different values for --autosync, 30 is a good start.\n"
+"     If you have PulseAudio, try --ao=alsa .\n"
+"- Slow video output.\n"
+"     Try a different -vo driver (-vo help for a list) or try -framedrop!\n"
+"- Playing a video file with --vo=gl/gl3 with higher FPS than your monitor.\n"
+"     This is due to vsync limiting the framerate. Try --no-vsync, or a\n"
+"     different VO.\n"
+"- Playing from a slow network source.\n"
+"     Download the file instead.\n"
+"- Try to find out whether audio or video is causing this by experimenting\n"
+"  with --no-video and --no-audio.\n"
+"If none of this helps you, file a bug report.\n\n");
 
 
 //**************************************************************************//
@@ -1096,7 +1096,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
             mpctx->last_av_difference = MP_NOPTS_VALUE;
         if (mpctx->last_av_difference > 0.5 && drop_frame_cnt > 50
             && !mpctx->drop_message_shown) {
-            mp_tmsg(MSGT_AVSYNC, MSGL_WARN, SystemTooSlow);
+            mp_tmsg(MSGT_AVSYNC, MSGL_WARN, mp_gtext(av_desync_help_text));
             mpctx->drop_message_shown = true;
         }
     }
