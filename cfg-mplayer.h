@@ -762,15 +762,6 @@ const m_option_t mplayer_opts[]={
 
     // dump some stream out instead of playing the file
     OPT_STRING("dumpfile", stream_dump_name, 0, OPTDEF_STR("stream.dump")),
-    {"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"dumpvideo", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 2, NULL},
-    {"dumpsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 3, NULL},
-    {"dumpmpsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 4, NULL},
-    {"dumpstream", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 5, NULL},
-    {"dumpsrtsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 6, NULL},
-    {"dumpmicrodvdsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 7, NULL},
-    {"dumpjacosub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 8, NULL},
-    {"dumpsami", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 9, NULL},
 
     OPT_MAKE_FLAGS("capture", capture_dump, 0),
 

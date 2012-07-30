@@ -228,9 +228,6 @@ int forced_subs_only = 0;
 // cache2:
 int stream_cache_size = -1;
 
-// dump:
-int stream_dump_type = 0;
-
 // A-V sync:
 static float default_max_pts_correction = -1;
 float audio_delay = 0;
@@ -1184,50 +1181,6 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
         mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "%s\r", line);
     }
     free(line);
-}
-
-struct stream_dump_progress {
-    uint64_t count;
-    unsigned start_time;
-    unsigned last_print_time;
-};
-
-static void stream_dump_progress_start(struct stream_dump_progress *p)
-{
-    p->start_time = p->last_print_time = GetTimerMS();
-    p->count = 0;
-}
-
-static void stream_dump_progress(struct stream_dump_progress *p,
-                                 uint64_t len, stream_t *stream)
-{
-    p->count += len;
-    unsigned t = GetTimerMS();
-    if (t - p->last_print_time < 1000)
-        return;
-
-    uint64_t start = stream->start_pos;
-    uint64_t end   = stream->end_pos;
-    uint64_t pos   = stream->pos;
-
-    p->last_print_time = t;
-    /* TODO: pretty print sizes; ETA */
-    if (end > start && pos >= start && pos <= end) {
-        mp_tmsg(MSGT_STATUSLINE, MSGL_STATUS,
-                "dump: %"PRIu64 " bytes written (~%.1f%%)",
-                p->count, 100.0 * (pos - start) / (end - start));
-        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "\r");
-    } else {
-        mp_tmsg(MSGT_STATUSLINE, MSGL_STATUS,
-                "dump: %"PRIu64 " bytes written", p->count);
-        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "\r");
-    }
-}
-
-static void stream_dump_progress_end(struct stream_dump_progress *p, char *name)
-{
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "dump: %"PRIu64 " bytes written to '%s'.\n",
-           p->count, name);
 }
 
 /**
@@ -3987,50 +3940,6 @@ play_next_file:
     }
     mpctx->stream->start_pos += seek_to_byte;
 
-    if (stream_dump_type == 5) {
-        unsigned char buf[4096];
-        int len;
-        FILE *f;
-        stream_reset(mpctx->stream);
-        stream_seek(mpctx->stream, mpctx->stream->start_pos);
-        f = fopen(opts->stream_dump_name, "wb");
-        if (!f) {
-            mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, "Cannot open dump file.\n");
-            exit_player(mpctx, EXIT_ERROR);
-        }
-        if (opts->chapterrange[0] > 1) {
-            int chapter = opts->chapterrange[0] - 1;
-            stream_control(mpctx->stream, STREAM_CTRL_SEEK_TO_CHAPTER, &chapter);
-        }
-        struct stream_dump_progress info;
-        stream_dump_progress_start(&info);
-        while (!mpctx->stream->eof && !async_quit_request) {
-            len = stream_read(mpctx->stream, buf, 4096);
-            if (len > 0) {
-                if (fwrite(buf, len, 1, f) != 1) {
-                    mp_tmsg(MSGT_GLOBAL, MSGL_FATAL, "%s: Error writing file.\n", opts->stream_dump_name);
-                    exit_player(mpctx, EXIT_ERROR);
-                }
-            }
-            stream_dump_progress(&info, len, mpctx->stream);
-            if (opts->chapterrange[1] > 0) {
-                int chapter = -1;
-                if (stream_control(mpctx->stream,
-                        STREAM_CTRL_GET_CURRENT_CHAPTER, &chapter) == STREAM_OK
-                        && chapter + 1 > opts->chapterrange[1])
-                    break;
-            }
-        }
-        if (fclose(f)) {
-            mp_tmsg(MSGT_GLOBAL, MSGL_FATAL, "%s: Error writing file.\n",
-                    opts->stream_dump_name);
-            exit_player(mpctx, EXIT_ERROR);
-        }
-        stream_dump_progress_end(&info, opts->stream_dump_name);
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Stream dump complete.\n");
-        exit_player_with_rc(mpctx, EXIT_EOF, 0);
-    }
-
 #ifdef CONFIG_DVDREAD
     if (mpctx->stream->type == STREAMTYPE_DVD) {
         if (opts->audio_lang && opts->audio_id == -1)
@@ -4209,67 +4118,6 @@ goto_enable_cache:
         select_audio(mpctx->sources[i].demuxer->audio->demuxer, opts->audio_id,
                      opts->audio_lang);
 
-    // DUMP STREAMS:
-    if ((stream_dump_type) && (stream_dump_type < 4)) {
-        FILE *f;
-        demux_stream_t *ds = NULL;
-        // select stream to dump
-        switch (stream_dump_type) {
-        case 1: ds = mpctx->d_audio;
-            break;
-        case 2: ds = mpctx->d_video;
-            break;
-        case 3: ds = mpctx->d_sub;
-            break;
-        }
-        if (!ds) {
-            mp_tmsg(MSGT_CPLAYER, MSGL_FATAL,
-                    "dump: FATAL: Selected stream missing!\n");
-            exit_player(mpctx, EXIT_ERROR);
-        }
-        // disable other streams:
-        if (mpctx->d_audio && mpctx->d_audio != ds) {
-            ds_free_packs(mpctx->d_audio);
-            mpctx->d_audio->id = -2;
-        }
-        if (mpctx->d_video && mpctx->d_video != ds) {
-            ds_free_packs(mpctx->d_video);
-            mpctx->d_video->id = -2;
-        }
-        if (mpctx->d_sub && mpctx->d_sub != ds) {
-            ds_free_packs(mpctx->d_sub);
-            mpctx->d_sub->id = -2;
-        }
-        // let's dump it!
-        f = fopen(opts->stream_dump_name, "wb");
-        if (!f) {
-            mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, "Cannot open dump file.\n");
-            exit_player(mpctx, EXIT_ERROR);
-        }
-        struct stream_dump_progress info;
-        stream_dump_progress_start(&info);
-        while (!ds->eof) {
-            unsigned char *start;
-            int in_size = ds_get_packet(ds, &start);
-            if ((mpctx->demuxer->file_format == DEMUXER_TYPE_AVI || mpctx->demuxer->file_format == DEMUXER_TYPE_ASF)
-                && stream_dump_type == 2)
-                fwrite(&in_size, 1, 4, f);
-            if (in_size > 0) {
-                fwrite(start, in_size, 1, f);
-                stream_dump_progress(&info, in_size, mpctx->stream);
-            }
-            if (opts->chapterrange[1] > 0) {
-                int cur_chapter = demuxer_get_current_chapter(mpctx->demuxer, 0);
-                if (cur_chapter != -1 && cur_chapter + 1 > opts->chapterrange[1])
-                    break;
-            }
-        }
-        fclose(f);
-        stream_dump_progress_end(&info, opts->stream_dump_name);
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Stream dump complete.\n");
-        exit_player_with_rc(mpctx, EXIT_EOF, 0);
-    }
-
     mpctx->sh_audio = mpctx->d_audio->sh;
     mpctx->sh_video = mpctx->d_video->sh;
 
@@ -4343,23 +4191,7 @@ goto_enable_cache:
     if (mpctx->set_of_sub_size > 0)
         mpctx->sub_counts[SUB_SOURCE_SUBS] = mpctx->set_of_sub_size;
 
-    if (select_subtitle(mpctx)) {
-        if (mpctx->subdata)
-            switch (stream_dump_type) {
-            case 3: list_sub_file(mpctx->subdata);
-                break;
-            case 4: dump_mpsub(mpctx->subdata, mpctx->sh_video->fps);
-                break;
-            case 6: dump_srt(mpctx->subdata, mpctx->sh_video->fps);
-                break;
-            case 7: dump_microdvd(mpctx->subdata, mpctx->sh_video->fps);
-                break;
-            case 8: dump_jacosub(mpctx->subdata, mpctx->sh_video->fps);
-                break;
-            case 9: dump_sami(mpctx->subdata, mpctx->sh_video->fps);
-                break;
-            }
-    }
+    select_subtitle(mpctx);
 
     print_file_properties(mpctx, mpctx->filename);
 
