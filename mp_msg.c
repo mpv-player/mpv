@@ -30,11 +30,6 @@
 #include <libintl.h>
 #endif
 
-#ifdef CONFIG_ICONV
-#include <iconv.h>
-#include <errno.h>
-#endif
-
 #include "mp_msg.h"
 
 /* maximum message length of mp_msg */
@@ -66,42 +61,6 @@ int mp_msg_level_all = MSGL_STATUS;
 int verbose = 0;
 int mp_msg_color = 0;
 int mp_msg_module = 0;
-#ifdef CONFIG_ICONV
-char *mp_msg_charset = NULL;
-static char *old_charset = NULL;
-static iconv_t msgiconv;
-#endif
-
-const char* filename_recode(const char* filename)
-{
-#if !defined(CONFIG_ICONV) || !defined(MSG_CHARSET)
-    return filename;
-#else
-    static iconv_t inv_msgiconv = (iconv_t)(-1);
-    static char recoded_filename[MSGSIZE_MAX];
-    size_t filename_len, max_path;
-    char* precoded;
-    if (!mp_msg_charset ||
-        !strcasecmp(mp_msg_charset, MSG_CHARSET) ||
-        !strcasecmp(mp_msg_charset, "noconv"))
-        return filename;
-    if (inv_msgiconv == (iconv_t)(-1)) {
-        inv_msgiconv = iconv_open(MSG_CHARSET, mp_msg_charset);
-        if (inv_msgiconv == (iconv_t)(-1))
-            return filename;
-    }
-    filename_len = strlen(filename);
-    max_path = MSGSIZE_MAX - 4;
-    precoded = recoded_filename;
-    if (iconv(inv_msgiconv, (char **)&filename, &filename_len,
-              &precoded, &max_path) == (size_t)(-1) && errno == E2BIG) {
-        precoded[0] = precoded[1] = precoded[2] = '.';
-        precoded += 3;
-    }
-    *precoded = '\0';
-    return recoded_filename;
-#endif
-}
 
 void mp_msg_init(void){
 #ifdef _WIN32
@@ -120,15 +79,6 @@ void mp_msg_init(void){
         verbose = atoi(env);
     for(i=0;i<MSGT_MAX;i++) mp_msg_levels[i] = -2;
     mp_msg_levels[MSGT_IDENTIFY] = -1; // no -identify output by default
-#ifdef CONFIG_ICONV
-    mp_msg_charset = getenv("MPLAYER_CHARSET");
-    if (!mp_msg_charset)
-#ifdef _WIN32
-        mp_msg_charset = "UTF-8";
-#else
-        mp_msg_charset = get_term_charset();
-#endif
-#endif
 #ifdef CONFIG_TRANSLATION
     textdomain("mplayer");
     char *localedir = getenv("MPLAYER_LOCALEDIR");
@@ -253,47 +203,6 @@ void mp_msg_va(int mod, int lev, const char *format, va_list va)
     vsnprintf(tmp, MSGSIZE_MAX, format, va);
     tmp[MSGSIZE_MAX-2] = '\n';
     tmp[MSGSIZE_MAX-1] = 0;
-
-#if defined(CONFIG_ICONV) && defined(MSG_CHARSET)
-    if (mp_msg_charset && strcasecmp(mp_msg_charset, "noconv"))
-    {
-        char tmp2[MSGSIZE_MAX];
-        size_t inlen = strlen(tmp), outlen = MSGSIZE_MAX;
-        char *in = tmp, *out = tmp2;
-        if (!old_charset || strcmp(old_charset, mp_msg_charset))
-        {
-            if (old_charset)
-            {
-                free(old_charset);
-                iconv_close(msgiconv);
-            }
-            msgiconv = iconv_open(mp_msg_charset, MSG_CHARSET);
-            old_charset = strdup(mp_msg_charset);
-        }
-
-        if (msgiconv == (iconv_t)(-1))
-        {
-            fprintf(stderr,"iconv: conversion from %s to %s unsupported\n"
-                ,MSG_CHARSET,mp_msg_charset);
-        }
-        else
-        {
-            memset(tmp2, 0, MSGSIZE_MAX);
-
-            while (iconv(msgiconv, &in, &inlen, &out, &outlen) == -1)
-            {
-                if (!inlen || !outlen)
-                break;
-                *out++ = *in++;
-                outlen--; inlen--;
-            }
-
-            strncpy(tmp, tmp2, MSGSIZE_MAX);
-            tmp[MSGSIZE_MAX-1] = 0;
-            tmp[MSGSIZE_MAX-2] = '\n';
-        }
-    }
-#endif
 
     /* A status line is normally intended to be overwritten by the next
      * status line, and does not end with a '\n'. If we're printing a normal

@@ -43,7 +43,6 @@ extern char *lirc_configfile;
 extern char *vo_geometry;
 extern int stop_xscreensaver;
 
-extern char *mp_msg_charset;
 extern int mp_msg_color;
 extern int mp_msg_module;
 
@@ -365,9 +364,6 @@ const m_option_t common_opts[] = {
         {"msglevel", (void *) msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
     {"msgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
     {"msgmodule", &mp_msg_module, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-#ifdef CONFIG_ICONV
-    {"msgcharset", &mp_msg_charset, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
-#endif
 #ifdef CONFIG_PRIORITY
     {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif

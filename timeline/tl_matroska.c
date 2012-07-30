@@ -135,8 +135,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
 
     int num_left = num_sources - 1;
     for (int i = 0; i < num_filenames && num_left > 0; i++) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Checking file %s\n",
-               filename_recode(filenames[i]));
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Checking file %s\n", filenames[i]);
         int format = 0;
         struct stream *s = open_stream(filenames[i], &mpctx->opts, &format);
         if (!s)
@@ -157,7 +156,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
                     continue;
                 if (!memcmp(uid_map[i], d->matroska_data.segment_uid, 16)) {
                     mp_msg(MSGT_CPLAYER, MSGL_INFO,"Match for source %d: %s\n",
-                           i, filename_recode(d->filename));
+                           i, d->filename);
                     sources[i].stream = s;
                     sources[i].demuxer = d;
                     num_left--;

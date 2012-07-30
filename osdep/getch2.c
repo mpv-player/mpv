@@ -50,11 +50,6 @@
 #endif
 #endif
 
-#if defined(HAVE_LANGINFO) && defined(CONFIG_ICONV)
-#include <locale.h>
-#include <langinfo.h>
-#endif
-
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -325,16 +320,3 @@ void getch2_disable(void){
     tcsetattr(0,TCSANOW,&tio_orig);
 #endif
 }
-
-#ifdef CONFIG_ICONV
-char* get_term_charset(void)
-{
-    char* charset = NULL;
-#ifdef HAVE_LANGINFO
-    setlocale(LC_CTYPE, "");
-    charset = strdup(nl_langinfo(CODESET));
-    setlocale(LC_CTYPE, "C");
-#endif
-    return charset;
-}
-#endif

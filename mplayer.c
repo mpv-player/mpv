@@ -448,7 +448,7 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
     double start_pts = MP_NOPTS_VALUE;
     double video_start_pts = MP_NOPTS_VALUE;
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILENAME=%s\n",
-           filename_recode(filename));
+           filename);
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DEMUXER=%s\n",
            mpctx->demuxer->desc->name);
     if (mpctx->sh_video) {
@@ -968,7 +968,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps,
 
     if (!asst && !subd) {
         mp_tmsg(MSGT_CPLAYER, noerr ? MSGL_WARN : MSGL_ERR,
-                "Cannot load subtitles: %s\n", filename_recode(filename));
+                "Cannot load subtitles: %s\n", filename);
         return;
     }
 
@@ -977,11 +977,10 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps,
     mpctx->track_was_native_ass[mpctx->set_of_sub_size] = is_native_ass;
     mp_msg(MSGT_IDENTIFY, MSGL_INFO,
            "ID_FILE_SUB_ID=%d\n", mpctx->set_of_sub_size);
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_FILENAME=%s\n",
-           filename_recode(filename));
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_FILENAME=%s\n", filename);
     ++mpctx->set_of_sub_size;
     mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "SUB: Added subtitle file (%d): %s\n",
-            mpctx->set_of_sub_size, filename_recode(filename));
+            mpctx->set_of_sub_size, filename);
 }
 
 void init_vo_spudec(struct MPContext *mpctx)
@@ -3862,8 +3861,7 @@ play_next_file:
         vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);
 
     if (mpctx->filename) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Playing %s.\n",
-                filename_recode(mpctx->filename));
+        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Playing %s.\n", mpctx->filename);
         if (use_filename_title && opts->vo_wintitle == NULL)
             opts->vo_wintitle = talloc_strdup(NULL,
                                               mp_basename(mpctx->filename));
@@ -3875,7 +3873,7 @@ play_next_file:
         if ((edl_fd = fopen(edl_output_filename, "w")) == NULL) {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
                     "Can't open EDL file [%s] for writing.\n",
-                    filename_recode(edl_output_filename));
+                    edl_output_filename);
         }
     }
 
@@ -3885,7 +3883,7 @@ play_next_file:
         vo_vobsub = vobsub_open(opts->vobsub_name, spudec_ifo, 1, &vo_spudec);
         if (vo_vobsub == NULL)
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Cannot load subtitles: %s\n",
-                    filename_recode(opts->vobsub_name));
+                    opts->vobsub_name);
     } else if (opts->sub_auto && mpctx->filename) {
         char **vob = find_vob_subtitles(opts, mpctx->filename);
         for (int i = 0; i < MP_TALLOC_ELEMS(vob); i++) {
@@ -3932,7 +3930,7 @@ play_next_file:
         play_tree_t *entry;
         // Handle playlist
         mp_msg(MSGT_CPLAYER, MSGL_V, "Parsing playlist %s...\n",
-               filename_recode(mpctx->filename));
+               mpctx->filename);
         entry = parse_playtree(mpctx->stream, mpctx->mconfig, 0);
         mpctx->eof = playtree_add_playlist(mpctx, entry);
         goto goto_next_file;
@@ -3997,7 +3995,7 @@ goto_enable_cache:
             const char *bname;
 
             mp_msg(MSGT_CPLAYER, MSGL_V, "Adding file %s to element entry.\n",
-                   filename_recode(playlist_entry));
+                   playlist_entry);
 
             bname = mp_basename(playlist_entry);
             if ((strlen(bname) > 10) && !strncmp(bname, "qt", 2) &&
@@ -4072,7 +4070,7 @@ goto_enable_cache:
         mp_msg(MSGT_CPLAYER, MSGL_V, "Source files:\n");
         for (int i = 0; i < mpctx->num_sources; i++)
             mp_msg(MSGT_CPLAYER, MSGL_V, "%d: %s\n", i,
-                   filename_recode(mpctx->sources[i].demuxer->filename));
+                   mpctx->sources[i].demuxer->filename);
         mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline parts: (number, start, "
                "source_start, source):\n");
         for (int i = 0; i < part_count; i++) {
