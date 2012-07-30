@@ -1724,28 +1724,6 @@ fi
 echores "$_malloc"
 
 
-echocheck "memalign()"
-# XXX restrict to x86 ? extend to other CPUs/cacheline sizes ?
-def_memalign_hack='#define CONFIG_MEMALIGN_HACK 0'
-_memalign=no
-statement_check malloc.h 'memalign(64, sizeof(char))' && _memalign=yes
-if test "$_memalign" = yes ; then
-  def_memalign='#define HAVE_MEMALIGN 1'
-else
-  def_memalign='#define HAVE_MEMALIGN 0'
-  def_map_memalign='#define memalign(a, b) malloc(b)'
-  darwin || def_memalign_hack='#define CONFIG_MEMALIGN_HACK 1'
-fi
-echores "$_memalign"
-
-
-echocheck "posix_memalign()"
-posix_memalign=no
-def_posix_memalign='#define HAVE_POSIX_MEMALIGN 0'
-define_statement_check "_XOPEN_SOURCE 600" "stdlib.h" 'posix_memalign(NULL, 0, 0)' &&
-    posix_memalign=yes && def_posix_memalign='#define HAVE_POSIX_MEMALIGN 1'
-echores "$posix_memalign"
-
 
 echocheck "alloca.h"
 _alloca=no
@@ -4387,8 +4365,6 @@ $def_gettimeofday
 $def_glob
 $def_langinfo
 $def_lrintf
-$def_map_memalign
-$def_memalign
 $def_nanosleep
 $def_posix_select
 $def_select
@@ -4587,9 +4563,7 @@ $def_llrint
 $def_log2
 $def_log2f
 $def_lrint
-$def_memalign_hack
 $def_mkstemp
-$def_posix_memalign
 $def_pthreads
 $def_round
 $def_roundf

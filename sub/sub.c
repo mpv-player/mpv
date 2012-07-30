@@ -20,6 +20,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <libavutil/mem.h>
+#include <libavutil/common.h>
+
 #include "config.h"
 #if HAVE_MALLOC_H
 #include <malloc.h>
@@ -38,7 +41,6 @@
 #include "libvo/video_out.h"
 #include "sub.h"
 #include "spudec.h"
-#include "libavutil/common.h"
 
 
 char * const sub_osd_names[]={
@@ -140,8 +142,8 @@ void osd_alloc_buf(mp_osd_obj_t* obj)
 	obj->allocated = len;
 	free(obj->bitmap_buffer);
 	free(obj->alpha_buffer);
-	obj->bitmap_buffer = memalign(16, len);
-	obj->alpha_buffer  = memalign(16, len);
+	obj->bitmap_buffer = av_malloc(len);
+	obj->alpha_buffer  = av_malloc(len);
     }
     memset(obj->bitmap_buffer, sub_bg_color, len);
     memset(obj->alpha_buffer, sub_bg_alpha, len);
