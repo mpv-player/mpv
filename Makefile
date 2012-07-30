@@ -207,7 +207,6 @@ SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
                                         loader/dmo/dmo_guids.c \
 
 SRCS_COMMON-$(XANIM_CODECS)          += libmpcodecs/vd_xanim.c
-SRCS_COMMON-$(XMMS_PLUGINS)          += libmpdemux/demux_xmms.c
 SRCS_COMMON-$(XVID4)                 += libmpcodecs/vd_xvid4.c
 
 SRCS_COMMON-$(DUMMY_OSD)             += sub/osd_dummy.c

@@ -362,7 +362,6 @@ Codecs:
   --disable-libdv           disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mpg123          disable libmpg123 MP3 decoding support [autodetect]
   --disable-mad             disable libmad (MPEG audio) support [autodetect]
-  --enable-xmms             enable XMMS input plugin support [disabled]
   --enable-libdca           enable libdca support [autodetect]
   --disable-liba52          disable liba52 [autodetect]
   --enable-musepack         enable libmpcdec support (deprecated, libavcodec
@@ -503,7 +502,6 @@ _libdca=auto
 _faad=auto
 _ladspa=auto
 _libbs2b=auto
-_xmms=no
 _vcd=auto
 _bluray=auto
 _dvdnav=auto
@@ -775,8 +773,6 @@ for ac_option do
   --disable-ladspa)     _ladspa=no      ;;
   --enable-libbs2b)     _libbs2b=yes    ;;
   --disable-libbs2b)    _libbs2b=no     ;;
-  --enable-xmms)        _xmms=yes       ;;
-  --disable-xmms)       _xmms=no        ;;
   --enable-vcd)         _vcd=yes        ;;
   --disable-vcd)        _vcd=no         ;;
   --enable-bluray)      _bluray=yes     ;;
@@ -4146,27 +4142,6 @@ fi
 echores "$_sortsub"
 
 
-echocheck "XMMS inputplugin support"
-if test "$_xmms" = yes ; then
-  if ( xmms-config --version ) >/dev/null 2>&1 ; then
-      _xmmsplugindir=$(xmms-config --input-plugin-dir)
-      _xmmslibdir=$(xmms-config --exec-prefix)/lib
-  else
-      _xmmsplugindir=/usr/lib/xmms/Input
-      _xmmslibdir=/usr/lib
-  fi
-
-  def_xmms='#define CONFIG_XMMS 1'
-  if darwin ; then
-     extra_ldflags="$extra_ldflags ${_xmmslibdir}/libxmms.dylib"
-  else
-     extra_ldflags="$extra_ldflags ${_xmmslibdir}/libxmms.so.1 -export-dynamic"
-  fi
-else
-  def_xmms='#undef CONFIG_XMMS'
-fi
-echores "$_xmms"
-
 if test "$_charset" != "noconv" ; then
   def_charset="#define MSG_CHARSET \"$_charset\""
 else
@@ -4464,7 +4439,6 @@ WIN32DLL = $_win32dll
 WIN32_EMULATION = $_win32_emulation
 X11 = $_x11
 XANIM_CODECS = $_xanim
-XMMS_PLUGINS = $_xmms
 XV = $_xv
 XVID4 = $_xvid
 YUV4MPEG = $_yuv4mpeg
@@ -4669,9 +4643,7 @@ $def_real
 $def_win32_loader
 $def_win32dll
 $def_xanim
-$def_xmms
 #define BINARY_CODECS_PATH "$_codecsdir"
-#define XMMS_INPUT_PLUGIN_DIR "$_xmmsplugindir"
 
 
 /* Audio output drivers */

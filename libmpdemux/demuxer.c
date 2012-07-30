@@ -86,7 +86,6 @@ extern const demuxer_desc_t demuxer_desc_h264_es;
 extern const demuxer_desc_t demuxer_desc_rawdv;
 extern const demuxer_desc_t demuxer_desc_mpc;
 extern const demuxer_desc_t demuxer_desc_audio;
-extern const demuxer_desc_t demuxer_desc_xmms;
 extern const demuxer_desc_t demuxer_desc_mpeg_ty;
 extern const demuxer_desc_t demuxer_desc_rtp;
 extern const demuxer_desc_t demuxer_desc_rtp_nemesi;
@@ -160,9 +159,6 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_aac,
 #ifdef CONFIG_LIBNUT
     &demuxer_desc_nut,
-#endif
-#ifdef CONFIG_XMMS
-    &demuxer_desc_xmms,
 #endif
 #ifdef CONFIG_MNG
     &demuxer_desc_mng,
