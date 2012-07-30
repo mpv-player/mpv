@@ -1119,6 +1119,12 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
     line = malloc(width + 1); // one additional char for the terminating null
 
     // Playback position
+    if (mpctx->sh_audio)
+        saddf(line, &pos, width, "A");
+    if (mpctx->sh_video)
+        saddf(line, &pos, width, "V");
+    saddf(line, &pos, width, ":");
+
     double cur = MP_NOPTS_VALUE;
     if (mpctx->sh_audio && a_pos != MP_NOPTS_VALUE) {
         cur = a_pos;
@@ -1126,12 +1132,12 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
         cur = mpctx->video_pts;
     }
     if (cur != MP_NOPTS_VALUE) {
-        saddf(line, &pos, width, "T:%6.1f ", cur);
+        saddf(line, &pos, width, "%6.1f ", cur);
         saddf(line, &pos, width, "(");
         sadd_hhmmssf(line, &pos, width, cur);
         saddf(line, &pos, width, ") ");
     } else
-        saddf(line, &pos, width, "T: ??? ");
+        saddf(line, &pos, width, " ??? ");
 
     double len = get_time_length(mpctx);
     if (len >= 0) {
