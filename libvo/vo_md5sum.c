@@ -40,7 +40,6 @@
 #include "mp_msg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "mplayer.h"			/* for exit_player_bad() */
 #include "libavutil/md5.h"
 
 /* ------------------------------------------------------------------------- */
@@ -78,7 +77,6 @@ int framenum = 0;
 
 static void md5sum_write_error(void) {
     mp_tmsg(MSGT_VO, MSGL_ERR, "%s: Error writing file.\n", info.short_name);
-    exit_player_bad(_("Fatal error"));
 }
 
 /* ------------------------------------------------------------------------- */
@@ -144,7 +142,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                _("Unable to create output file."));
         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n",
                info.short_name, _("This error has occurred"), strerror(errno) );
-        exit_player_bad(_("Fatal error"));
+        return -1;
     }
 
     return 0;

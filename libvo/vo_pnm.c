@@ -39,7 +39,6 @@
 #include "mp_msg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "mplayer.h"			/* for exit_player_bad() */
 #include "osdep/io.h"
 
 /* ------------------------------------------------------------------------- */
@@ -98,7 +97,6 @@ char *pnm_file_extension = NULL;
 
 static void pnm_write_error(void) {
     mp_tmsg(MSGT_VO, MSGL_ERR, "%s: Error writing file.\n", info.short_name);
-    exit_player_bad(_("Fatal error"));
 }
 
 /* ------------------------------------------------------------------------- */
@@ -209,17 +207,17 @@ static void pnm_mkdir(char *buf, int verbose) {
                            _("This error has occurred"), strerror(errno) );
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
                            _("Unable to access"), buf);
-                    exit_player_bad(_("Fatal error"));
+                    return;
                 }
                 if ( !S_ISDIR(stat_p.st_mode) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
                            buf, _("already exists, but is not a directory."));
-                    exit_player_bad(_("Fatal error"));
+                    return;
                 }
                 if ( !(stat_p.st_mode & S_IWUSR) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
                            buf, _("Output directory already exists, but is not writable."));
-                    exit_player_bad(_("Fatal error"));
+                    return;
                 }
 
                 if (strcmp(buf, ".") != 0) {
@@ -233,7 +231,7 @@ static void pnm_mkdir(char *buf, int verbose) {
                        _("This error has occurred"), strerror(errno) );
                 mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
                        buf, _("Unable to create output directory."));
-                exit_player_bad(_("Fatal error"));
+                return;
         } /* end switch */
     } else if ( verbose ) {
         mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
@@ -437,7 +435,7 @@ static void pnm_write_image(mp_image_t *mpi)
 
     if (!mpi) {
         mp_msg(MSGT_VO, MSGL_ERR, "%s: No image data supplied to video output driver\n", info.short_name );
-        exit_player_bad(_("Fatal error"));
+        return;
     }
 
     /* Start writing to new subdirectory after a certain amount of frames */
@@ -469,7 +467,7 @@ static void pnm_write_image(mp_image_t *mpi)
         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n",
                 info.short_name, "This error has occurred",
                 strerror(errno) );
-        exit_player_bad(_("Fatal error"));
+        return;
     }
 
     pnm_write_pnm(outfile, mpi);

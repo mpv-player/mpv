@@ -44,7 +44,6 @@
 #include "mp_msg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "mplayer.h"			/* for exit_player_bad() */
 #include "osdep/io.h"
 
 /* ------------------------------------------------------------------------- */
@@ -117,17 +116,17 @@ static void jpeg_mkdir(const char *buf, int verbose) {
                            _("This error has occurred"), strerror(errno) );
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
                            _("Unable to access"), buf);
-                    exit_player_bad(_("Fatal error"));
+                    return;
                 }
                 if ( !S_ISDIR(stat_p.st_mode) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
                            buf, _("already exists, but is not a directory."));
-                    exit_player_bad(_("Fatal error"));
+                    return;
                 }
                 if ( !(stat_p.st_mode & S_IWUSR) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
                            buf, _("Output directory already exists, but is not writable."));
-                    exit_player_bad(_("Fatal error"));
+                    return;
                 }
 
                 mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
@@ -139,7 +138,7 @@ static void jpeg_mkdir(const char *buf, int verbose) {
                        _("This error has occurred"), strerror(errno) );
                 mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
                        buf, _("Unable to create output directory."));
-                exit_player_bad(_("Fatal error"));
+                return;
         } /* end switch */
     } else if ( verbose ) {
         mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
@@ -188,7 +187,7 @@ static uint32_t jpeg_write(const char * name, uint8_t * buffer)
         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n",
                info.short_name, _("This error has occurred"),
                strerror(errno) );
-        exit_player_bad(_("Fatal error"));
+        return 1;
     }
 
     cinfo.err = jpeg_std_error(&jerr);
