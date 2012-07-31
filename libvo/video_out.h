@@ -77,6 +77,8 @@ enum mp_voctrl {
     VOCTRL_GET_YUV_COLORSPACE,          // struct mp_csp_details
 
     VOCTRL_SCREENSHOT,                  // struct voctrl_screenshot_args
+
+    VOCTRL_SET_COMMAND_LINE,            // char*
 };
 
 // VOCTRL_SET_EQUALIZER

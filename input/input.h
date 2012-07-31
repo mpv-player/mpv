@@ -155,6 +155,9 @@ enum mp_command_type {
 
     MP_CMD_SHOW_CHAPTERS,
     MP_CMD_SHOW_TRACKS,
+
+    /// Video output commands
+    MP_CMD_VO_CMDLINE,
 };
 
 // The arg types

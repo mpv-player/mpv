@@ -3625,6 +3625,19 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
 #endif
 
+    case MP_CMD_VO_CMDLINE:
+        if (mpctx->video_out) {
+            char *s = cmd->args[0].v.s;
+            mp_msg(MSGT_CPLAYER, MSGL_INFO, "Setting vo cmd line to '%s'.\n",
+                   s);
+            if (vo_control(mpctx->video_out, VOCTRL_SET_COMMAND_LINE, s) > 0) {
+                set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, "vo='%s'", s);
+            } else {
+                set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, "Failed!");
+            }
+        }
+        break;
+
     case MP_CMD_AF_SWITCH:
         if (sh_audio) {
             af_uninit(mpctx->mixer.afilter);
