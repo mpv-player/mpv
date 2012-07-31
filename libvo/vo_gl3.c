@@ -168,6 +168,9 @@ struct gl_priv {
     int stereo_mode;
     int osd_color;
 
+    struct gl_priv *defaults;
+    struct gl_priv *orig_cmdline;
+
     GLuint vertex_buffer;
     GLuint vao;
 
@@ -259,6 +262,7 @@ static const char help_text[];
 
 static void uninit_rendering(struct gl_priv *p);
 static void delete_shaders(struct gl_priv *p);
+static bool reparse_cmdline(struct gl_priv *p, char *arg);
 
 
 static void default_tex_params(struct GL *gl, GLenum target, GLint filter)
@@ -894,6 +898,9 @@ static void init_dither(struct gl_priv *p)
 static void reinit_rendering(struct gl_priv *p)
 {
     mp_msg(MSGT_VO, MSGL_V, "[gl] Reinit rendering.\n");
+
+    if (p->gl->SwapInterval && p->swap_interval >= 0)
+        p->gl->SwapInterval(p->swap_interval);
 
     debug_check_gl(p, "before scaler initialization");
 
@@ -1641,8 +1648,6 @@ static int init_gl(struct gl_priv *p)
 
     gl->ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     gl->Clear(GL_COLOR_BUFFER_BIT);
-    if (gl->SwapInterval && p->swap_interval >= 0)
-        gl->SwapInterval(p->swap_interval);
 
     debug_check_gl(p, "after init_gl");
 
@@ -1911,6 +1916,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_REDRAW_FRAME:
         do_render(p);
         return true;
+    case VOCTRL_SET_COMMAND_LINE: {
+        char *arg = data;
+        if (!reparse_cmdline(p, arg))
+            return false;
+        reinit_rendering(p);
+        resize(p);
+        vo->want_redraw = true;
+        return true;
+    }
     }
     return VO_NOTIMPL;
 }
@@ -2154,6 +2168,67 @@ static void print_scalers(void)
 }
 #endif
 
+static bool reparse_cmdline(struct gl_priv *p, char *arg)
+{
+    struct gl_priv tmp = *p->defaults;
+    struct gl_priv *opt = &tmp;
+
+    if (strcmp(arg, "-") == 0) {
+        tmp = *p->orig_cmdline;
+        arg = "";
+    }
+
+    char *scalers[2] = {0};
+    char *fbo_format = NULL;
+
+    const opt_t subopts[] = {
+        {"srgb",                OPT_ARG_BOOL,   &opt->use_srgb},
+        {"pbo",                 OPT_ARG_BOOL,   &opt->use_pbo},
+        {"glfinish",            OPT_ARG_BOOL,   &opt->use_glFinish},
+        {"swapinterval",        OPT_ARG_INT,    &opt->swap_interval},
+        {"osdcolor",            OPT_ARG_INT,    &opt->osd_color},
+        {"lscale",              OPT_ARG_MSTRZ,  &scalers[0], scaler_valid},
+        {"cscale",              OPT_ARG_MSTRZ,  &scalers[1], scaler_valid},
+        {"lparam1",             OPT_ARG_FLOAT,  &opt->scaler_params[0]},
+        {"lparam2",             OPT_ARG_FLOAT,  &opt->scaler_params[1]},
+        {"fancy-downscaling",   OPT_ARG_BOOL,   &opt->use_fancy_downscaling},
+        {"indirect",            OPT_ARG_BOOL,   &opt->use_indirect},
+        {"scale-sep",           OPT_ARG_BOOL,   &opt->use_scale_sep},
+        {"fbo-format",          OPT_ARG_MSTRZ,  &fbo_format, fbo_format_valid},
+        {"dither-depth",        OPT_ARG_INT,    &opt->dither_depth},
+        {NULL}
+    };
+
+    if (subopt_parse(arg, subopts) != 0)
+        return false;
+
+    p->fbo_format = opt->fbo_format;
+    if (fbo_format)
+        p->fbo_format = find_fbo_format(fbo_format);
+    free(fbo_format);
+
+    for (int n = 0; n < 2; n++) {
+        p->scalers[n].name = opt->scalers[n].name;
+        if (scalers[n])
+            p->scalers[n].name = handle_scaler_opt(scalers[n]);
+        free(scalers[n]);
+    }
+
+    // xxx ideally we'd put all options into an option struct, and just copy
+    p->use_srgb = opt->use_srgb; //xxx changing srgb will be wrong on RGB input!
+    p->use_pbo = opt->use_pbo;
+    p->use_glFinish = opt->use_glFinish;
+    p->swap_interval = opt->swap_interval;
+    p->osd_color = opt->osd_color;
+    memcpy(p->scaler_params, opt->scaler_params, sizeof(p->scaler_params));
+    p->use_fancy_downscaling = opt->use_fancy_downscaling;
+    p->use_indirect = opt->use_indirect;
+    p->use_scale_sep = opt->use_scale_sep;
+    p->dither_depth = opt->dither_depth;
+
+    return true;
+}
+
 static int preinit(struct vo *vo, const char *arg)
 {
     struct gl_priv *p = talloc_zero(vo, struct gl_priv);
@@ -2176,6 +2251,8 @@ static int preinit(struct vo *vo, const char *arg)
         .scaler_params = {NAN, NAN},
     };
 
+    p->defaults = talloc(p, struct gl_priv);
+    *p->defaults = *p;
 
     char *scalers[2] = {0};
     char *backend_arg = NULL;
@@ -2247,6 +2324,9 @@ static int preinit(struct vo *vo, const char *arg)
 
     if (!success)
         goto err_out;
+
+    p->orig_cmdline = talloc(p, struct gl_priv);
+    *p->orig_cmdline = *p;
 
     p->eosd = eosd_packer_create(vo);
 
