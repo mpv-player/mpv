@@ -19,7 +19,7 @@
 #ifndef MPLAYER_ASF_H
 #define MPLAYER_ASF_H
 
-#include <endian.h>
+#include <sys/types.h>
 #include <inttypes.h>
 #include "libavutil/common.h"
 #include "mpbswap.h"

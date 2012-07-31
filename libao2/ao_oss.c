@@ -29,7 +29,6 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
-#include <endian.h>
 
 #include "config.h"
 #include "mp_msg.h"

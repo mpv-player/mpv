@@ -23,7 +23,7 @@
 #ifndef MPLAYER_AF_FORMAT_H
 #define MPLAYER_AF_FORMAT_H
 
-#include <endian.h>
+#include <sys/types.h>
 #include "config.h"
 
 // Endianness

@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <endian.h>
+#include <sys/types.h>
 
 #include "config.h"
 #include "video_out.h"

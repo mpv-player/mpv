@@ -21,7 +21,6 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <endian.h>
 #include "config.h"
 #include "libavutil/common.h"
 #include "mpbswap.h"

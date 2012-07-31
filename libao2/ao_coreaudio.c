@@ -44,7 +44,6 @@
 #include <inttypes.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <endian.h>
 
 #include "config.h"
 #include "mp_msg.h"

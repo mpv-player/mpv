@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <endian.h>
+#include <sys/types.h>
 
 #include <libavutil/intreadwrite.h>
 #include <libavutil/common.h>

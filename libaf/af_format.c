@@ -26,7 +26,7 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <math.h>
-#include <endian.h>
+#include <sys/types.h>
 
 #include "config.h"
 #include "af.h"

@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <endian.h>
+#include <sys/types.h>
 
 #include "config.h"
 

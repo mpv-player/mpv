@@ -19,7 +19,7 @@
 #ifndef MPLAYER_MS_HDR_H
 #define MPLAYER_MS_HDR_H
 
-#include <endian.h>
+#include <sys/types.h>
 #include "config.h"
 
 #ifndef _WAVEFORMATEX_

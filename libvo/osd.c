@@ -27,7 +27,7 @@
 #include "osd.h"
 #include "mp_msg.h"
 #include <inttypes.h>
-#include <endian.h>
+#include <sys/types.h>
 #include "cpudetect.h"
 
 #if ARCH_X86

@@ -21,7 +21,7 @@
 #include <assert.h>
 #include <time.h>
 #include <stdbool.h>
-#include <endian.h>
+#include <sys/types.h>
 
 #include <libavutil/common.h>
 #include <libavutil/opt.h>
