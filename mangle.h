@@ -31,7 +31,7 @@
 #define attribute_used
 #endif
 
-#if _WIN32
+#if defined(_WIN32) || defined(__DARWIN)
 #define EXTERN_PREFIX "_"
 #else
 #define EXTERN_PREFIX ""
