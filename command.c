@@ -3201,16 +3201,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         mpctx->stop_play = PT_STOP;
         break;
 
-    case MP_CMD_OSD_SHOW_PROGRESSION: {
-        int len = get_time_length(mpctx);
-        int pts = get_current_time(mpctx);
-        set_osd_bar(mpctx, 0, "Position", 0, 100, get_percent_pos(mpctx));
-        set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
-                    "%c %02d:%02d:%02d / %02d:%02d:%02d",
-                    mpctx->osd_function, pts / 3600, (pts / 60) % 60, pts % 60,
-                    len / 3600, (len / 60) % 60, len % 60);
+    case MP_CMD_OSD_SHOW_PROGRESSION:
+        mp_show_osd_progression(mpctx);
         break;
-    }
 
 #ifdef CONFIG_RADIO
     case MP_CMD_RADIO_STEP_CHANNEL:

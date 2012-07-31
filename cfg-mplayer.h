@@ -744,7 +744,7 @@ const m_option_t mplayer_opts[]={
     {"use-filename-title", &use_filename_title, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
     OPT_INTRANGE("osdlevel", osd_level, 0, 0, 3),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
-    OPT_INTRANGE("osd-fractions", osd_fractions, 0, 0, 2),
+    OPT_MAKE_FLAGS("osd-fractions", osd_fractions, 0),
 
     OPT_STRING("vobsub", vobsub_name, 0),
     {"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},

@@ -92,8 +92,6 @@ typedef struct MPContext {
     struct subtitle *vo_sub_last;
 
     bool add_osd_seek_info;
-    // if nonzero, hide current OSD contents when GetTimerMS() reaches this
-    unsigned int osd_show_percentage_until;
     unsigned int osd_visible;
 
     int osd_function;
