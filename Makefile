@@ -218,8 +218,8 @@ SRCS_COMMON = asxparser.c \
               mpcommon.c \
               parser-cfg.c \
               path.c \
-              playtree.c \
-              playtreeparser.c \
+              playlist.c \
+              playlist_parser.c \
               subopt-helper.c \
               talloc.c \
               libaf/af.c \

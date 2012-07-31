@@ -28,7 +28,8 @@
 #include "mp_msg.h"
 #include "m_option.h"
 #include "m_config.h"
-#include "playtree.h"
+#include "playlist.h"
+#include "playlist_parser.h"
 #include "parser-mpcmd.h"
 #include "osdep/macosx_finder_args.h"
 
@@ -37,16 +38,6 @@
 
 #define dvd_range(a)  (a > 0 && a < 256)
 
-
-static inline void add_entry(play_tree_t **last_parentp,
-                             play_tree_t **last_entryp, play_tree_t *entry)
-{
-    if (*last_entryp == NULL)
-        play_tree_set_child(*last_parentp, entry);
-    else
-        play_tree_append_entry(*last_entryp, entry);
-    *last_entryp = entry;
-}
 
 static bool split_opt(struct bstr *opt, struct bstr *param, bool *old_syntax)
 {
@@ -92,15 +83,18 @@ static int map_to_option(struct m_config *config, bool old_syntax,
     return 0;
 }
 
-// Parse command line to set up config and playtree
-play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
-                                            char **argv)
+bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
+                                    int argc, char **argv)
 {
     int mode = 0;
     bool no_more_opts = false;
     bool opt_exit = false;   // exit immediately after parsing (help options)
-    play_tree_t *last_parent, *last_entry = NULL, *root;
+    struct playlist_entry *local_start = NULL;
     struct bstr orig_opt;
+    bool shuffle = false;
+
+    int local_params_count = 0;
+    struct playlist_param *local_params = 0;
 
     assert(config != NULL);
     assert(argv != NULL);
@@ -109,12 +103,9 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
     config->mode = M_COMMAND_LINE;
     mode = GLOBAL;
 #ifdef CONFIG_MACOSX_FINDER
-    root = macosx_finder_args(config, argc, argv);
-    if (root)
-        return root;
+    if (macosx_finder_args(config, files, argc, argv))
+        return true;
 #endif
-
-    last_parent = root = play_tree_new();
 
     for (int i = 1; i < argc; i++) {
         //next:
@@ -125,103 +116,100 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
             no_more_opts = true;
             continue;
         }
-        if (!bstrcmp0(opt, "{")) {
-            play_tree_t *entry = play_tree_new();
-            mode = LOCAL;
-            if (last_parent->flags & PLAY_TREE_RND)
-                entry->flags |= PLAY_TREE_RND;
-            if (last_entry == NULL)
-                play_tree_set_child(last_parent, entry);
-            else {
-                play_tree_append_entry(last_entry, entry);
-                last_entry = NULL;
+        if (!bstrcmp0(opt, "--{")) {
+            if (mode != GLOBAL) {
+                mp_msg(MSGT_CFGPARSER, MSGL_ERR, "'--{' can not be nested\n");
+                goto err_out;
             }
-            last_parent = entry;
+            mode = LOCAL;
+            assert(!local_start);
+            local_start = files->last;
             continue;
         }
 
-        if (!bstrcmp0(opt, "}")) {
-            if (!last_parent || !last_parent->parent) {
-                mp_msg(MSGT_CFGPARSER, MSGL_ERR, "too much }-\n");
+        if (!bstrcmp0(opt, "--}")) {
+            if (mode != LOCAL) {
+                mp_msg(MSGT_CFGPARSER, MSGL_ERR, "too many closing '--}'\n");
                 goto err_out;
             }
-            last_entry = last_parent;
-            last_parent = last_entry->parent;
+            if (local_params_count) {
+                // The files added between '{' and '}' are the entries from the
+                // entry _after_ local_start, until the end of the list. If
+                // local_start is NULL, the list was empty on '{', and we want
+                // all files in the list.
+                struct playlist_entry *cur
+                    = local_start ? local_start->next : files->first;
+                if (!cur)
+                    mp_msg(MSGT_CFGPARSER, MSGL_WARN, "ignored options\n");
+                while (cur) {
+                    playlist_entry_add_params(cur, local_params,
+                                              local_params_count);
+                    cur = cur->next;
+                }
+            }
+            local_params_count = 0;
+            mode = GLOBAL;
+            local_start = NULL;
             continue;
         }
 
         struct bstr param = bstr0(i+1 < argc ? argv[i+1] : NULL);
         bool old_syntax;
         if (!no_more_opts && split_opt(&opt, &param, &old_syntax)) {
+            const struct m_option *mp_opt;
+            int ok = map_to_option(config, old_syntax, &mp_opt, &opt, &param);
+            if (ok < 0) {
+                if (ok == -3)
+                    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                            "Option --%.*s can't be used with single-dash "
+                            "syntax\n", BSTR_P(opt));
+                else if (ok == -2)
+                    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                            "A --no-* option can't take parameters: "
+                            "--%.*s=%.*s\n", BSTR_P(opt), BSTR_P(param));
+                else
+                    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                            "Unknown option on the command line: --%.*s\n",
+                            BSTR_P(opt));
+                goto print_err;
+            }
+            if (mode == LOCAL && (mp_opt->flags & M_OPT_GLOBAL)) {
+                mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                        "Option --%.*s is global and can't be set per-file\n",
+                        BSTR_P(opt));
+                goto print_err;
+            }
             // Handle some special arguments outside option parser.
             // --loop when it applies to a group of files (per-file is option)
-            if (bstrcasecmp0(opt, "loop") == 0 &&
-                (!last_entry || last_entry->child)) {
-                struct bstr rest;
-                int l = bstrtoll(param, &rest, 0);
-                if (!param.len || rest.len) {
-                    mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                            "The loop option must be an integer: \"%.*s\"\n",
-                            BSTR_P(param));
-                    goto print_err;
-                } else {
-                    play_tree_t *pt = last_entry ? last_entry : last_parent;
-                    l = l <= 0 ? -1 : l;
-                    pt->loop = l;
-                    i += old_syntax;
-                }
-            } else if (bstrcasecmp0(opt, "shuffle") == 0) {
-                if (last_entry && last_entry->child)
-                    last_entry->flags |= PLAY_TREE_RND;
-                else
-                    last_parent->flags |= PLAY_TREE_RND;
-            } else if (bstrcasecmp0(opt, "noshuffle") == 0 ||
-                       bstrcasecmp0(opt, "no-shuffle") == 0) {
-                if (last_entry && last_entry->child)
-                    last_entry->flags &= ~PLAY_TREE_RND;
-                else
-                    last_parent->flags &= ~PLAY_TREE_RND;
+            if (bstrcasecmp0(opt, "shuffle") == 0) {
+                shuffle = true;
+            } else if (bstrcasecmp0(opt, "no-shuffle") == 0) {
+                shuffle = false;
             } else if (bstrcasecmp0(opt, "playlist") == 0) {
                 if (param.len <= 0)
                     goto print_err;
-                struct play_tree *entry = parse_playlist_file(config, param);
-                if (!entry)
+                // append the playlist to the local args
+                char *param0 = bstrdup0(NULL, param);
+                struct playlist *pl = playlist_parse_file(param0);
+                talloc_free(param0);
+                if (!pl)
                     goto print_err;
-                add_entry(&last_parent, &last_entry, entry);
-                if ((last_parent->flags & PLAY_TREE_RND) && entry->child)
-                    entry->flags |= PLAY_TREE_RND;
-                mode = LOCAL;
+                playlist_transfer_entries(files, pl);
+                talloc_free(pl);
                 i += old_syntax;
             } else {
                 // "normal" options
-                const struct m_option *mp_opt;
-                int ok = map_to_option(config, old_syntax, &mp_opt, &opt,
-                                       &param);
-                if (ok < 0) {
-                    if (ok == -3)
-                        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                                "Option --%.*s can't be used with single-dash "
-                                "syntax\n", BSTR_P(opt));
-                    else if (ok == -2)
-                        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                                "A --no-* option can't take parameters: "
-                                "--%.*s=%.*s\n", BSTR_P(opt), BSTR_P(param));
-                    else
-                        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                                "Unknown option on the command line: --%.*s\n",
-                                BSTR_P(opt));
-                    goto print_err;
-                }
                 int r;
-                if (mode == GLOBAL || (mp_opt->flags & M_OPT_GLOBAL)) {
+                if (mode == GLOBAL) {
                     r = m_config_set_option(config, opt, param, old_syntax);
                 } else {
                     r = m_config_check_option(config, opt, param, old_syntax);
                     if (r >= 0) {
-                        play_tree_t *pt = last_entry ? last_entry : last_parent;
                         if (r == 0)
                             param = bstr0(NULL);  // for old_syntax case
-                        play_tree_set_param(pt, opt, param);
+                        struct playlist_param p = {opt, param};
+                        MP_TARRAY_APPEND(NULL, local_params,
+                                         local_params_count, p);
                     }
                 }
                 if (r <= M_OPT_EXIT) {
@@ -241,7 +229,6 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
             }
         } else {  /* filename */
             int is_dvdnav = strstr(argv[i], "dvdnav://") != NULL;
-            play_tree_t *entry = play_tree_new();
             mp_msg(MSGT_CFGPARSER, MSGL_DBG2, "Adding file %s\n", argv[i]);
             // expand DVD filename entries like dvd://1-3 into component titles
             if (strstr(argv[i], "dvd://") != NULL || is_dvdnav) {
@@ -260,45 +247,48 @@ play_tree_t *m_config_parse_mp_command_line(m_config_t *config, int argc,
                     if (dvd_range(start_title) && dvd_range(end_title)
                             && (start_title < end_title)) {
                         for (int j = start_title; j <= end_title; j++) {
-                            if (j != start_title)
-                                entry = play_tree_new();
                             char entbuf[15];
                             snprintf(entbuf, sizeof(entbuf),
                                     is_dvdnav ? "dvdnav://%d" : "dvd://%d", j);
-                            play_tree_add_file(entry, entbuf);
-                            add_entry(&last_parent, &last_entry, entry);
-                            last_entry = entry;
+                            playlist_add_file(files, entbuf);
                         }
                     } else
                         mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
                                 "Invalid play entry %s\n", argv[i]);
 
                 } else // dvd:// or dvd://x entry
-                    play_tree_add_file(entry, argv[i]);
+                    playlist_add_file(files, argv[i]);
             } else
-                play_tree_add_file(entry, argv[i]);
+                playlist_add_file(files, argv[i]);
 
             // Lock stdin if it will be used as input
             if (strcasecmp(argv[i], "-") == 0)
                 m_config_set_option0(config, "consolecontrols", "no", false);
-            add_entry(&last_parent, &last_entry, entry);
-            mode = LOCAL; // We start entry specific options
         }
     }
 
     if (opt_exit)
         goto err_out;
-    if (last_parent != root)
-        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Missing }- ?\n");
-    return root;
+
+    if (mode != GLOBAL) {
+        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                "Missing closing --} on command line.\n");
+        goto err_out;
+    }
+
+    if (shuffle)
+        playlist_shuffle(files);
+
+    talloc_free(local_params);
+    return true;
 
 print_err:
     mp_tmsg(MSGT_CFGPARSER, MSGL_FATAL,
             "Error parsing option on the command line: %.*s\n",
             BSTR_P(orig_opt));
 err_out:
-    play_tree_free(root, 1);
-    return NULL;
+    talloc_free(local_params);
+    return false;
 }
 
 extern int mp_msg_levels[];

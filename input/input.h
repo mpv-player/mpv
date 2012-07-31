@@ -28,9 +28,8 @@ enum mp_command_type {
     MP_CMD_QUIT,
     MP_CMD_PAUSE,
     MP_CMD_GRAB_FRAMES, // deprecated: was a no-op command for years
-    MP_CMD_PLAY_TREE_STEP,
-    MP_CMD_PLAY_TREE_UP_STEP,
-    MP_CMD_PLAY_ALT_SRC_STEP,
+    MP_CMD_PLAYLIST_NEXT,
+    MP_CMD_PLAYLIST_PREV,
     MP_CMD_SUB_DELAY,
     MP_CMD_OSD,
     MP_CMD_VOLUME,
@@ -52,7 +51,7 @@ enum mp_command_type {
     MP_CMD_MUTE,
     MP_CMD_LOADFILE,
     MP_CMD_LOADLIST,
-    MP_CMD_PLAY_TREE_CLEAR,
+    MP_CMD_PLAYLIST_CLEAR,
     MP_CMD_VF_CHANGE_RECTANGLE,
     MP_CMD_GAMMA,
     MP_CMD_SUB_VISIBILITY,
@@ -200,6 +199,9 @@ typedef struct mp_cmd {
     struct mp_cmd *queue_next;
 } mp_cmd_t;
 
+
+// Executing this command will abort playback (play something else, or quit).
+bool mp_input_is_abort_cmd(int cmd_id);
 
 /* Add a new command input source.
  * "fd" is a file descriptor (use a negative value if you don't use any fd)

@@ -108,9 +108,8 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_STOP, "stop", },
   { MP_CMD_PAUSE, "pause", },
   { MP_CMD_FRAME_STEP, "frame_step", },
-  { MP_CMD_PLAY_TREE_STEP, "pt_step", { ARG_INT, OARG_INT(0) } },
-  { MP_CMD_PLAY_TREE_UP_STEP, "pt_up_step", { ARG_INT, OARG_INT(0) } },
-  { MP_CMD_PLAY_ALT_SRC_STEP, "alt_src_step", { ARG_INT } },
+  { MP_CMD_PLAYLIST_NEXT, "playlist_next", { OARG_INT(0) } },
+  { MP_CMD_PLAYLIST_PREV, "playlist_prev", { OARG_INT(0) } },
   { MP_CMD_LOOP, "loop", { ARG_INT, OARG_INT(0) } },
   { MP_CMD_SUB_DELAY, "sub_delay", { ARG_FLOAT, OARG_INT(0) } },
   { MP_CMD_SUB_STEP, "sub_step", { ARG_INT, OARG_INT(0) } },
@@ -193,7 +192,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SWITCH_VSYNC, "switch_vsync", { OARG_INT(0) } },
   { MP_CMD_LOADFILE, "loadfile", { ARG_STRING, OARG_INT(0) } },
   { MP_CMD_LOADLIST, "loadlist", { ARG_STRING, OARG_INT(0) } },
-  { MP_CMD_PLAY_TREE_CLEAR, "pt_clear", },
+  { MP_CMD_PLAYLIST_CLEAR, "playlist_clear", },
   { MP_CMD_RUN, "run", { ARG_STRING } },
   { MP_CMD_CAPTURING, "capturing", },
   { MP_CMD_VF_CHANGE_RECTANGLE, "change_rectangle", { ARG_INT, ARG_INT } },
@@ -444,13 +443,9 @@ static const struct cmd_bind def_cmd_binds[] = {
   { { 'p', 0 }, "pause" },
   { { ' ', 0 }, "pause" },
   { { '.', 0 }, "frame_step" },
-  { { KEY_HOME, 0 }, "pt_up_step 1" },
-  { { KEY_END, 0 }, "pt_up_step -1" },
-  { { '>', 0 }, "pt_step 1" },
-  { { KEY_ENTER, 0 }, "pt_step 1 1" },
-  { { '<', 0 }, "pt_step -1" },
-  { { KEY_INS, 0 }, "alt_src_step 1" },
-  { { KEY_DEL, 0 }, "alt_src_step -1" },
+  { { '>', 0 }, "playlist_next" },
+  { { KEY_ENTER, 0 }, "playlist_next 1" },
+  { { '<', 0 }, "playlist_prev" },
   { { 'o', 0 }, "osd" },
   { { 'I', 0 }, "osd_show_property_text \"${filename}\"" },
   { { 'P', 0 }, "osd_show_progression" },
@@ -537,8 +532,8 @@ static const struct cmd_bind def_cmd_binds[] = {
   { { KEY_STOP, 0 }, "quit" },
   { { KEY_FORWARD, 0 }, "seek 60" },
   { { KEY_REWIND, 0 }, "seek -60" },
-  { { KEY_NEXT, 0 }, "pt_step 1" },
-  { { KEY_PREV, 0 }, "pt_step -1" },
+  { { KEY_NEXT, 0 }, "playlist_next" },
+  { { KEY_PREV, 0 }, "playlist_prev" },
   { { KEY_VOLUME_UP, 0 }, "volume 1" },
   { { KEY_VOLUME_DOWN, 0 }, "volume -1" },
   { { KEY_MUTE, 0 }, "mute" },
@@ -709,13 +704,12 @@ static char *get_key_combo_name(int *keys, int max)
     return ret;
 }
 
-static bool is_abort_cmd(int cmd_id)
+bool mp_input_is_abort_cmd(int cmd_id)
 {
     switch (cmd_id) {
     case MP_CMD_QUIT:
-    case MP_CMD_PLAY_TREE_STEP:
-    case MP_CMD_PLAY_TREE_UP_STEP:
-    case MP_CMD_PLAY_ALT_SRC_STEP:
+    case MP_CMD_PLAYLIST_NEXT:
+    case MP_CMD_PLAYLIST_PREV:
         return true;
     }
     return false;
@@ -732,7 +726,7 @@ static int queue_count_cmds(struct cmd_queue *queue)
 static bool queue_has_abort_cmds(struct cmd_queue *queue)
 {
     for (struct mp_cmd *cmd = queue->first; cmd; cmd = cmd->queue_next) {
-        if (is_abort_cmd(cmd->id))
+        if (mp_input_is_abort_cmd(cmd->id))
             return true;
     }
     return false;
@@ -1339,7 +1333,7 @@ void mp_input_feed_key(struct input_ctx *ictx, int code)
         return;
     struct cmd_queue *queue = &ictx->key_cmd_queue;
     if (queue_count_cmds(queue) >= ictx->key_fifo_size &&
-            (!is_abort_cmd(cmd->id) || queue_has_abort_cmds(queue)))
+            (!mp_input_is_abort_cmd(cmd->id) || queue_has_abort_cmds(queue)))
         return;
     queue_add(queue, cmd, false);
 }

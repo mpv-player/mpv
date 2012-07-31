@@ -32,6 +32,8 @@
 #include "libmpdemux/stheader.h"
 #include "codec-cfg.h"
 #include "mplayer.h"
+#include "playlist.h"
+#include "playlist_parser.h"
 #include "sub/sub.h"
 #include "sub/dec_sub.h"
 #include "m_option.h"
@@ -43,7 +45,7 @@
 #include "mp_osd.h"
 #include "libvo/video_out.h"
 #include "libvo/csputils.h"
-#include "playtree.h"
+#include "playlist.h"
 #include "libao2/audio_out.h"
 #include "mpcommon.h"
 #include "mixer.h"
@@ -2771,28 +2773,6 @@ static void remove_subtitle_range(MPContext *mpctx, int start, int count)
     }
 }
 
-static void do_clear_pt(struct play_tree *node, struct play_tree *exclude)
-{
-    while (node) {
-        do_clear_pt(node->child, exclude);
-        struct play_tree *next = node->next;
-        // do not delete root node, or nodes that could lead to "exclude" node
-        if (node->parent && !node->child && node != exclude)
-            play_tree_remove(node, 1, 1);
-        node = next;
-    }
-}
-
-static void clear_play_tree(MPContext *mpctx)
-{
-    struct play_tree *exclude = NULL;
-    if (mpctx->playtree_iter) {
-        assert(mpctx->playtree == mpctx->playtree_iter->root);
-        exclude = mpctx->playtree_iter->tree;
-    }
-    do_clear_pt(mpctx->playtree, exclude);
-}
-
 static char *format_time(double time)
 {
     int h, m, s = time;
@@ -3085,53 +3065,20 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         exit_player_with_rc(mpctx, EXIT_QUIT,
                             (cmd->nargs > 0) ? cmd->args[0].v.i : 0);
 
-    case MP_CMD_PLAY_TREE_STEP: {
-        int n = cmd->args[0].v.i == 0 ? 1 : cmd->args[0].v.i;
-        int force = cmd->args[1].v.i;
+    case MP_CMD_PLAYLIST_NEXT:
+    case MP_CMD_PLAYLIST_PREV:
+    {
+        int dir = cmd->id == MP_CMD_PLAYLIST_PREV ? -1 : +1;
+        int force = cmd->args[0].v.i;
 
-        {
-            if (!force && mpctx->playtree_iter) {
-                play_tree_iter_t *i =
-                    play_tree_iter_new_copy(mpctx->playtree_iter);
-                if (play_tree_iter_step(i, n, 0) ==
-                    PLAY_TREE_ITER_ENTRY)
-                    mpctx->stop_play =
-                        (n > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
-                play_tree_iter_free(i);
-            } else
-                mpctx->stop_play = (n > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
-            if (mpctx->stop_play)
-                mpctx->play_tree_step = n;
-        }
+        struct playlist_entry *e = playlist_get_next(mpctx->playlist, dir);
+        if (!e && !force)
+            break;
+        mpctx->playlist->current = e;
+        mpctx->playlist->current_was_replaced = false;
+        mpctx->stop_play = PT_CURRENT_ENTRY;
         break;
     }
-
-    case MP_CMD_PLAY_TREE_UP_STEP: {
-        int n = cmd->args[0].v.i > 0 ? 1 : -1;
-        int force = cmd->args[1].v.i;
-
-        if (!force && mpctx->playtree_iter) {
-            play_tree_iter_t *i =
-                play_tree_iter_new_copy(mpctx->playtree_iter);
-            if (play_tree_iter_up_step(i, n, 0) == PLAY_TREE_ITER_ENTRY)
-                mpctx->stop_play = (n > 0) ? PT_UP_NEXT : PT_UP_PREV;
-            play_tree_iter_free(i);
-        } else
-            mpctx->stop_play = (n > 0) ? PT_UP_NEXT : PT_UP_PREV;
-        break;
-    }
-
-    case MP_CMD_PLAY_ALT_SRC_STEP:
-        if (mpctx->playtree_iter && mpctx->playtree_iter->num_files > 1) {
-            int v = cmd->args[0].v.i;
-            if (v > 0
-                && mpctx->playtree_iter->file <
-                mpctx->playtree_iter->num_files)
-                mpctx->stop_play = PT_NEXT_SRC;
-            else if (v < 0 && mpctx->playtree_iter->file > 1)
-                mpctx->stop_play = PT_PREV_SRC;
-        }
-        break;
 
     case MP_CMD_SUB_STEP:
         if (sh_video) {
@@ -3198,56 +3145,59 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_LOADFILE: {
-        play_tree_t *e = play_tree_new();
-        play_tree_add_file(e, cmd->args[0].v.s);
+        char *filename = cmd->args[0].v.s;
+        bool append = cmd->args[1].v.i;
 
-        if (cmd->args[1].v.i)       // append
-            play_tree_append_entry(mpctx->playtree->child, e);
-        else {
-            // Go back to the starting point.
-            while (play_tree_iter_up_step(mpctx->playtree_iter, 0, 1)
-                    != PLAY_TREE_ITER_END)
-                /* NOP */;
-            play_tree_free_list(mpctx->playtree->child, 1);
-            play_tree_set_child(mpctx->playtree, e);
-            pt_iter_goto_head(mpctx->playtree_iter);
-            mpctx->stop_play = PT_NEXT_SRC;
+        if (!append)
+            playlist_clear(mpctx->playlist);
+
+        playlist_add(mpctx->playlist, playlist_entry_new(filename));
+
+        if (!append) {
+            mpctx->playlist->current = mpctx->playlist->first;
+            mpctx->playlist->current_was_replaced = false;
+            mpctx->stop_play = PT_CURRENT_ENTRY;
         }
         break;
     }
 
     case MP_CMD_LOADLIST: {
-        play_tree_t *e = parse_playlist_file(mpctx->mconfig,
-                                             bstr0(cmd->args[0].v.s));
-        if (!e)
+        char *filename = cmd->args[0].v.s;
+        bool append = cmd->args[1].v.i;
+        struct playlist *pl = playlist_parse_file(filename);
+        if (!pl) {
+            if (!append)
+                playlist_clear(mpctx->playlist);
+            playlist_transfer_entries(mpctx->playlist, pl);
+            talloc_free(pl);
+
+            if (!append)
+                mpctx->stop_play = PT_NEXT_ENTRY;
+        } else {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
-                    "\nUnable to load playlist %s.\n", cmd->args[0].v.s);
-        else {
-            if (cmd->args[1].v.i)           // append
-                play_tree_append_entry(mpctx->playtree->child, e);
-            else {
-                // Go back to the starting point.
-                while (play_tree_iter_up_step(mpctx->playtree_iter, 0, 1)
-                        != PLAY_TREE_ITER_END)
-                    /* NOP */;
-                play_tree_free_list(mpctx->playtree->child, 1);
-                play_tree_set_child(mpctx->playtree, e);
-                pt_iter_goto_head(mpctx->playtree_iter);
-                mpctx->stop_play = PT_NEXT_SRC;
-            }
+                    "\nUnable to load playlist %s.\n", filename);
         }
         break;
     }
 
-    case MP_CMD_PLAY_TREE_CLEAR:
-        clear_play_tree(mpctx);
+    case MP_CMD_PLAYLIST_CLEAR: {
+        // Supposed to clear the playlist, except the currently played item.
+        if (mpctx->playlist->current_was_replaced)
+            mpctx->playlist->current = NULL;
+        while (mpctx->playlist->first) {
+            struct playlist_entry *e = mpctx->playlist->first;
+            if (e == mpctx->playlist->current) {
+                e = e->next;
+                if (!e)
+                    break;
+            }
+            playlist_remove(mpctx->playlist, e);
+        }
         break;
+    }
 
     case MP_CMD_STOP:
         // Go back to the starting point.
-        while (play_tree_iter_up_step(mpctx->playtree_iter, 0, 1) !=
-                PLAY_TREE_ITER_END)
-            /* NOP */;
         mpctx->stop_play = PT_STOP;
         break;
 

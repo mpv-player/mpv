@@ -19,6 +19,8 @@
 #ifndef MPLAYER_MPCOMMON_H
 #define MPLAYER_MPCOMMON_H
 
+#include <stdlib.h>
+
 // both int64_t and double should be able to represent this exactly
 #define MP_NOPTS_VALUE (-1LL<<63)
 
@@ -30,6 +32,28 @@
         p = talloc_realloc_size(NULL, p, talloc_get_size(p) * 2); } while (0)
 #define MP_RESIZE_ARRAY(ctx, p, count) do {     \
         p = talloc_realloc_size((ctx), p, (count) * sizeof(p[0])); } while (0)
+
+
+#define MP_TARRAY_GROW(ctx, p, nextidx)             \
+    do {                                            \
+        size_t nextidx_ = (nextidx);                \
+        size_t nelems_ = MP_TALLOC_ELEMS(p);        \
+        if (nextidx_ <= nelems_)                    \
+            p = talloc_realloc_size((ctx), p,       \
+               (nextidx_ + 1) * sizeof((p)[0]) * 2);\
+    } while (0)
+
+#define MP_TARRAY_APPEND(ctx, p, idxvar, val)       \
+    do {                                            \
+        MP_TARRAY_GROW(ctx, p, idxvar);             \
+        p[idxvar] = (val);                          \
+        idxvar++;                                   \
+    } while (0)
+
+#define MP_EXPAND_ARGS(...) __VA_ARGS__
+
+#define talloc_struct(ctx, type, ...) \
+    talloc_memdup(ctx, &(type) MP_EXPAND_ARGS(__VA_ARGS__), sizeof(type))
 
 #ifdef __GNUC__
 

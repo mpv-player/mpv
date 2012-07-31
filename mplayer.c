@@ -119,8 +119,8 @@ char *heartbeat_cmd;
 //**************************************************************************//
 //             Playtree
 //**************************************************************************//
-#include "playtree.h"
-#include "playtreeparser.h"
+#include "playlist.h"
+#include "playlist_parser.h"
 
 //**************************************************************************//
 //             Config
@@ -685,13 +685,6 @@ void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
     mpctx->ass_library = NULL;
 #endif
 
-    if (mpctx->playtree_iter)
-        play_tree_iter_free(mpctx->playtree_iter);
-    mpctx->playtree_iter = NULL;
-    if (mpctx->playtree)
-        play_tree_free(mpctx->playtree, 1);
-    mpctx->playtree = NULL;
-
     talloc_free(mpctx->key_fifo);
 
     switch (how) {
@@ -876,62 +869,36 @@ static void load_per_file_config(m_config_t *conf, const char * const file)
     }
 }
 
+static void load_per_file_options(m_config_t *conf,
+                                  struct playlist_param *params,
+                                  int params_count)
+{
+    for (int n = 0; n < params_count; n++)
+        m_config_set_option(conf, params[n].name, params[n].value, false);
+}
+
 /* When libmpdemux performs a blocking operation (network connection or
  * cache filling) if the operation fails we use this function to check
  * if it was interrupted by the user.
- * The function returns a new value for eof. */
-static int libmpdemux_was_interrupted(struct MPContext *mpctx, int stop_play)
+ * The function returns whether it was interrupted. */
+static bool libmpdemux_was_interrupted(struct MPContext *mpctx)
 {
-    mp_cmd_t *cmd;
-    if ((cmd = mp_input_get_cmd(mpctx->input, 0, 0)) != NULL) {
-        switch (cmd->id) {
-        case MP_CMD_QUIT:
-            exit_player_with_rc(mpctx, EXIT_QUIT,
-                                (cmd->nargs > 0) ? cmd->args[0].v.i : 0);
-        case MP_CMD_PLAY_TREE_STEP: {
-            stop_play = (cmd->args[0].v.i > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
-            mpctx->play_tree_step =
-                    (cmd->args[0].v.i == 0) ? 1 : cmd->args[0].v.i;
-        } break;
-        case MP_CMD_PLAY_TREE_UP_STEP: {
-            stop_play = (cmd->args[0].v.i > 0) ? PT_UP_NEXT : PT_UP_PREV;
-        } break;
-        case MP_CMD_PLAY_ALT_SRC_STEP: {
-            stop_play = (cmd->args[0].v.i > 0) ?  PT_NEXT_SRC : PT_PREV_SRC;
-        } break;
+    // Basically, give queued up user commands a chance to run, if the normal
+    // play loop (which does run_command()) hasn't been executed for a while.
+    mp_cmd_t *cmd = mp_input_get_cmd(mpctx->input, 0, 0);
+    if (cmd) {
+        // Only run "safe" commands. Consider the case someone queues up a
+        // command to load a file, and immediately after that to select a
+        // subtitle stream. This function can be called between opening the
+        // file and opening the demuxer. We don't want the subtitle command to
+        // be lost.
+        if (mp_input_is_abort_cmd(cmd->id)) {
+            run_command(mpctx, cmd);
+            mp_cmd_free(cmd);
         }
-        mp_cmd_free(cmd);
     }
-    return stop_play;
-}
-
-static int playtree_add_playlist(struct MPContext *mpctx, play_tree_t *entry)
-{
-    play_tree_add_bpf(entry, bstr0(mpctx->filename));
-
-    {
-        if (!entry) {
-            entry = mpctx->playtree_iter->tree;
-            if (play_tree_iter_step(mpctx->playtree_iter, 1, 0)
-                    != PLAY_TREE_ITER_ENTRY)
-                return PT_NEXT_ENTRY;
-            if (mpctx->playtree_iter->tree == entry) { // Single file loop
-                if (play_tree_iter_up_step(mpctx->playtree_iter, 1, 0)
-                        != PLAY_TREE_ITER_ENTRY)
-                    return PT_NEXT_ENTRY;
-            }
-            play_tree_remove(entry, 1, 1);
-            return PT_NEXT_SRC;
-        }
-        play_tree_insert_entry(mpctx->playtree_iter->tree, entry);
-        play_tree_set_params_from(entry, mpctx->playtree_iter->tree);
-        entry = mpctx->playtree_iter->tree;
-        if (play_tree_iter_step(mpctx->playtree_iter, 1, 0)
-                != PLAY_TREE_ITER_ENTRY)
-            return PT_NEXT_ENTRY;
-        play_tree_remove(entry, 1, 1);
-    }
-    return PT_NEXT_SRC;
+    return mpctx->stop_play != KEEP_PLAYING
+        || mpctx->stop_play != AT_END_OF_FILE;
 }
 
 void add_subtitles(struct MPContext *mpctx, char *filename, float fps,
@@ -3508,6 +3475,20 @@ static int select_audio(demuxer_t *demuxer, int audio_id, char **audio_lang)
     return demuxer->audio->id;
 }
 
+// Waiting for the slave master to send us a new file to play.
+static void idle_loop(struct MPContext *mpctx)
+{
+    // ================= idle loop (STOP state) =========================
+    while (mpctx->opts.player_idle_mode && !mpctx->playlist->current) {
+        uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_VO);
+        mp_cmd_t *cmd;
+        while (!(cmd = mp_input_get_cmd(mpctx->input, WAKEUP_PERIOD * 1000,
+                                        false)));
+        run_command(mpctx, cmd);
+        mp_cmd_free(cmd);
+    }
+}
+
 static void print_version(int always)
 {
     mp_msg(MSGT_CPLAYER, always ? MSGL_INFO : MSGL_V,
@@ -3552,7 +3533,6 @@ int main(int argc, char *argv[])
     *mpctx = (struct MPContext){
         .osd_function = OSD_PLAY,
         .begin_skip = MP_NOPTS_VALUE,
-        .play_tree_step = 1,
         .global_sub_pos = -1,
         .set_of_sub_pos = -1,
         .file_format = DEMUXER_TYPE_UNKNOWN,
@@ -3577,7 +3557,6 @@ int main(int argc, char *argv[])
     m_config_register_options(mpctx->mconfig, mplayer_opts);
     m_config_register_options(mpctx->mconfig, common_opts);
     mp_input_register_options(mpctx->mconfig);
-    m_config_initialize(mpctx->mconfig, opts);
 
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, argc, argv, &verbose);
@@ -3597,24 +3576,13 @@ int main(int argc, char *argv[])
 
     parse_cfgfiles(mpctx, mpctx->mconfig);
 
-    mpctx->playtree = m_config_parse_mp_command_line(mpctx->mconfig, argc, argv);
-    if (mpctx->playtree == NULL)
+    mpctx->playlist = talloc_struct(mpctx, struct playlist, {0});
+    if (m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
+                                       argc, argv))
+    {
+        mpctx->playlist->current = mpctx->playlist->first;
+    } else {
         opt_exit = 1;
-    else {
-        mpctx->playtree = play_tree_cleanup(mpctx->playtree);
-        if (mpctx->playtree) {
-            mpctx->playtree_iter = play_tree_iter_new(mpctx->playtree,
-                                                      mpctx->mconfig);
-            if (mpctx->playtree_iter) {
-                if (play_tree_iter_step(mpctx->playtree_iter, 0, 0) !=
-                        PLAY_TREE_ITER_ENTRY) {
-                    play_tree_iter_free(mpctx->playtree_iter);
-                    mpctx->playtree_iter = NULL;
-                }
-                mpctx->filename = play_tree_iter_get_file(mpctx->playtree_iter,
-                                                          1);
-            }
-        }
     }
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
@@ -3717,7 +3685,7 @@ int main(int argc, char *argv[])
     if (opt_exit)
         exit_player(mpctx, EXIT_NONE);
 
-    if (!mpctx->filename && !opts->player_idle_mode) {
+    if (!mpctx->playlist->first && !opts->player_idle_mode) {
         // no file/vcd/dvd -> show HELP:
         print_version(true);
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", mp_gtext(help_text));
@@ -3763,15 +3731,26 @@ int main(int argc, char *argv[])
 
 play_next_file:
 
+    mpctx->stop_play = 0;
+
     // init global sub numbers
     mpctx->global_sub_size = 0;
     memset(mpctx->sub_counts, 0, sizeof(mpctx->sub_counts));
 
-    if (mpctx->filename) {
-        load_per_protocol_config(mpctx->mconfig, mpctx->filename);
-        load_per_extension_config(mpctx->mconfig, mpctx->filename);
-        load_per_file_config(mpctx->mconfig, mpctx->filename);
+    mpctx->filename = NULL;
+    if (mpctx->playlist->current)
+        mpctx->filename = mpctx->playlist->current->filename;
+
+    if (!mpctx->filename) {
+        idle_loop(mpctx);
+        goto play_next_file;
     }
+
+    m_config_enter_file_local(mpctx->mconfig);
+
+    load_per_protocol_config(mpctx->mconfig, mpctx->filename);
+    load_per_extension_config(mpctx->mconfig, mpctx->filename);
+    load_per_file_config(mpctx->mconfig, mpctx->filename);
 
     if (opts->video_driver_list)
         load_per_output_config(mpctx->mconfig, PROFILE_CFG_VO,
@@ -3779,6 +3758,10 @@ play_next_file:
     if (opts->audio_driver_list)
         load_per_output_config(mpctx->mconfig, PROFILE_CFG_AO,
                                opts->audio_driver_list[0]);
+
+    assert(mpctx->playlist->current);
+    load_per_file_options(mpctx->mconfig, mpctx->playlist->current->params,
+                          mpctx->playlist->current->params_count);
 
     // We must enable getch2 here to be able to interrupt network connection
     // or cache filling
@@ -3792,80 +3775,15 @@ play_next_file:
         mp_msg(MSGT_CPLAYER, MSGL_DBG2, "\n[[[init getch2]]]\n");
     }
 
-    // ================= idle loop (STOP state) =========================
-    while (opts->player_idle_mode && !mpctx->filename) {
-        uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_VO);
-        play_tree_t *entry = NULL;
-        mp_cmd_t *cmd;
-        while (!(cmd = mp_input_get_cmd(mpctx->input, WAKEUP_PERIOD * 1000,
-                                        false)));
-        switch (cmd->id) {
-        case MP_CMD_LOADFILE:
-            // prepare a tree entry with the new filename
-            entry = play_tree_new();
-            play_tree_add_file(entry, cmd->args[0].v.s);
-            // The entry is added to the main playtree after the switch().
-            break;
-        case MP_CMD_LOADLIST:
-            entry = parse_playlist_file(mpctx->mconfig, bstr0(cmd->args[0].v.s));
-            break;
-        case MP_CMD_QUIT:
-            exit_player_with_rc(mpctx, EXIT_QUIT,
-                                (cmd->nargs > 0) ? cmd->args[0].v.i : 0);
-            break;
-        case MP_CMD_VO_FULLSCREEN:
-        case MP_CMD_GET_PROPERTY:
-        case MP_CMD_SET_PROPERTY:
-        case MP_CMD_STEP_PROPERTY:
-            run_command(mpctx, cmd);
-            break;
-        }
-
-        mp_cmd_free(cmd);
-
-        if (entry) { // user entered a command that gave a valid entry
-            if (mpctx->playtree)
-                // the playtree is always a node with one child. let's clear it
-                play_tree_free_list(mpctx->playtree->child, 1);
-            else
-                // .. or make a brand new playtree
-                mpctx->playtree = play_tree_new();
-
-            if (!mpctx->playtree)
-                continue;    // couldn't make playtree! wait for next command
-
-            play_tree_set_child(mpctx->playtree, entry);
-
-            /* Make iterator start at the top the of tree. */
-            mpctx->playtree_iter = play_tree_iter_new(mpctx->playtree,
-                                                      mpctx->mconfig);
-            if (!mpctx->playtree_iter)
-                continue;
-
-            // find the first real item in the tree
-            if (play_tree_iter_step(mpctx->playtree_iter, 0, 0) !=
-                    PLAY_TREE_ITER_ENTRY) {
-                // no items!
-                play_tree_iter_free(mpctx->playtree_iter);
-                mpctx->playtree_iter = NULL;
-                continue; // wait for next command
-            }
-            mpctx->filename = play_tree_iter_get_file(mpctx->playtree_iter, 1);
-        }
-    }
-
 #ifdef CONFIG_ASS
     ass_set_style_overrides(mpctx->ass_library, opts->ass_force_style_list);
 #endif
     if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
         vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);
 
-    if (mpctx->filename) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Playing %s.\n", mpctx->filename);
-        if (use_filename_title && opts->vo_wintitle == NULL)
-            opts->vo_wintitle = talloc_strdup(NULL,
-                                              mp_basename(mpctx->filename));
-    }
+    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Playing %s.\n", mpctx->filename);
+    if (use_filename_title && opts->vo_wintitle == NULL)
+        opts->vo_wintitle = talloc_strdup(NULL, mp_basename(mpctx->filename));
 
     if (edl_output_filename) {
         if (edl_fd)
@@ -3884,7 +3802,7 @@ play_next_file:
         if (vo_vobsub == NULL)
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Cannot load subtitles: %s\n",
                     opts->vobsub_name);
-    } else if (opts->sub_auto && mpctx->filename) {
+    } else if (opts->sub_auto) {
         char **vob = find_vob_subtitles(opts, mpctx->filename);
         for (int i = 0; i < MP_TALLOC_ELEMS(vob); i++) {
             vo_vobsub = vobsub_open(vob[i], spudec_ifo, 0, &vo_spudec);
@@ -3916,7 +3834,7 @@ play_next_file:
 
     mpctx->stream = open_stream(mpctx->filename, opts, &mpctx->file_format);
     if (!mpctx->stream) { // error...
-        mpctx->stop_play = libmpdemux_was_interrupted(mpctx, PT_NEXT_ENTRY);
+        libmpdemux_was_interrupted(mpctx);
         goto goto_next_file;
     }
     mpctx->initialized_flags |= INITIALIZED_STREAM;
@@ -3927,12 +3845,19 @@ play_next_file:
                "MPlayer's playlist code is unsafe and should only be used with "
                "trusted sources.\nPlayback will probably fail.\n\n");
 #if 0
-        play_tree_t *entry;
         // Handle playlist
-        mp_msg(MSGT_CPLAYER, MSGL_V, "Parsing playlist %s...\n",
+        mp_msg(MSGT_CPLAYER, MSGL_WARN, "Parsing playlist %s...\n",
                mpctx->filename);
-        entry = parse_playtree(mpctx->stream, mpctx->mconfig, 0);
-        mpctx->eof = playtree_add_playlist(mpctx, entry);
+        bool empty = true;
+        struct playlist *pl = playlist_parse(mpctx->stream);
+        if (pl) {
+            empty = pl->first == NULL;
+            playlist_transfer_entries(mpctx->playlist, pl);
+            talloc_free(pl);
+        }
+        if (empty)
+            mp_msg(MSGT_CPLAYER, MSGL_ERR, "Playlist was invalid or empty!\n");
+        mpctx->stop_play = PT_NEXT_ENTRY;
         goto goto_next_file;
 #endif
     }
@@ -3974,7 +3899,7 @@ goto_enable_cache:
                                   stream_cache_size * 1024 * (stream_cache_min_percent / 100.0),
                                   stream_cache_size * 1024 * (stream_cache_seek_min_percent / 100.0));
         if (res == 0)
-            if ((mpctx->stop_play = libmpdemux_was_interrupted(mpctx, PT_NEXT_ENTRY)))
+            if (libmpdemux_was_interrupted(mpctx))
                 goto goto_next_file;
     }
 
@@ -3988,7 +3913,7 @@ goto_enable_cache:
 
     if (mpctx->demuxer && mpctx->demuxer->type == DEMUXER_TYPE_PLAYLIST) {
         unsigned char *playlist_entry;
-        play_tree_t *list = NULL, *entry = NULL;
+        int entries_added = 0;
 
         while (ds_get_packet(mpctx->demuxer->video, &playlist_entry) > 0) {
             char *temp;
@@ -4005,8 +3930,6 @@ goto_enable_cache:
             if (!strcmp(playlist_entry, mpctx->filename)) // self-reference
                 continue;
 
-            entry = play_tree_new();
-
             if (mpctx->filename && !strcmp(mp_basename(playlist_entry),
                     playlist_entry)) { // add reference path of current file
                 temp = malloc((strlen(mpctx->filename) - strlen(mp_basename(
@@ -4021,26 +3944,22 @@ goto_enable_cache:
                         free(temp);
                         continue;
                     }
-                    play_tree_add_file(entry, temp);
+                    playlist_add_file(mpctx->playlist, temp);
+                    entries_added++;
                     mp_msg(MSGT_CPLAYER, MSGL_V,
                            "Resolving reference to %s.\n", temp);
                     free(temp);
                 }
-            } else
-                play_tree_add_file(entry, playlist_entry);
-
-            if (!list)
-                list = entry;
-            else
-                play_tree_append_entry(list, entry);
+            } else {
+                playlist_add_file(mpctx->playlist, playlist_entry);
+                entries_added++;
+            }
         }
         free_demuxer(mpctx->demuxer);
         mpctx->demuxer = NULL;
 
-        if (list) {
-            entry = play_tree_new();
-            play_tree_set_child(entry, list);
-            mpctx->stop_play = playtree_add_playlist(mpctx, entry);
+        if (entries_added) {
+            mpctx->stop_play = PT_NEXT_ENTRY;
             goto goto_next_file;
         }
     }
@@ -4356,6 +4275,9 @@ goto_next_file:  // don't jump here after ao/vo/getch initialization!
 
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
 
+    // xxx handle this as INITIALIZED_CONFIG?
+    m_config_leave_file_local(mpctx->mconfig);
+
     // time to uninit all, except global stuff:
     int uninitialize_parts = INITIALIZED_ALL;
     if (opts->fixed_vo)
@@ -4363,6 +4285,8 @@ goto_next_file:  // don't jump here after ao/vo/getch initialization!
     if (opts->gapless_audio && mpctx->stop_play == AT_END_OF_FILE)
         uninitialize_parts -= INITIALIZED_AO;
     uninit_player(mpctx, uninitialize_parts);
+
+    mpctx->filename = NULL;
 
     if (mpctx->set_of_sub_size > 0) {
         for (i = 0; i < mpctx->set_of_sub_size; ++i) {
@@ -4382,55 +4306,25 @@ goto_next_file:  // don't jump here after ao/vo/getch initialization!
         ass_clear_fonts(mpctx->ass_library);
 #endif
 
-    if (!mpctx->stop_play) // In case some goto jumped here...
+    if (!mpctx->stop_play || mpctx->stop_play == AT_END_OF_FILE)
         mpctx->stop_play = PT_NEXT_ENTRY;
 
-    int playtree_direction = 1;
+    struct playlist_entry *new_entry = NULL;
 
-    if (mpctx->stop_play == PT_NEXT_ENTRY
-            || mpctx->stop_play == PT_PREV_ENTRY) {
-        if (play_tree_iter_step(mpctx->playtree_iter, mpctx->play_tree_step, 0)
-                != PLAY_TREE_ITER_ENTRY) {
-            play_tree_iter_free(mpctx->playtree_iter);
-            mpctx->playtree_iter = NULL;
-        }
-        mpctx->play_tree_step = 1;
-    } else if (mpctx->stop_play == PT_UP_NEXT ||
-               mpctx->stop_play == PT_UP_PREV) {
-        int direction = mpctx->stop_play == PT_UP_NEXT ? 1 : -1;
-        if (mpctx->playtree_iter) {
-            if (play_tree_iter_up_step(mpctx->playtree_iter, direction, 0) !=
-                    PLAY_TREE_ITER_ENTRY) {
-                play_tree_iter_free(mpctx->playtree_iter);
-                mpctx->playtree_iter = NULL;
-            }
-        }
-    } else if (mpctx->stop_play == PT_STOP) {
-        play_tree_iter_free(mpctx->playtree_iter);
-        mpctx->playtree_iter = NULL;
-    } else // NEXT PREV SRC
-        playtree_direction = mpctx->stop_play == PT_PREV_SRC ? -1 : 1;
-
-    while (mpctx->playtree_iter != NULL) {
-        mpctx->filename = play_tree_iter_get_file(mpctx->playtree_iter,
-                                                  playtree_direction);
-        if (mpctx->filename == NULL) {
-            if (play_tree_iter_step(mpctx->playtree_iter, playtree_direction,
-                    0) != PLAY_TREE_ITER_ENTRY) {
-                play_tree_iter_free(mpctx->playtree_iter);
-                mpctx->playtree_iter = NULL;
-            }
-            ;
-        } else
-            break;
+    if (mpctx->stop_play == PT_NEXT_ENTRY) {
+        new_entry = playlist_get_next(mpctx->playlist, +1);
+    } else if (mpctx->stop_play == PT_CURRENT_ENTRY) {
+        new_entry = mpctx->playlist->current;
+    } else { // PT_STOP
+        playlist_clear(mpctx->playlist);
     }
 
-    if (mpctx->playtree_iter != NULL || opts->player_idle_mode) {
-        if (!mpctx->playtree_iter)
-            mpctx->filename = NULL;
-        mpctx->stop_play = 0;
+    mpctx->playlist->current = new_entry;
+    mpctx->playlist->current_was_replaced = false;
+    mpctx->stop_play = 0;
+
+    if (mpctx->playlist->current || opts->player_idle_mode)
         goto play_next_file;
-    }
 
     exit_player_with_rc(mpctx, EXIT_EOF, 0);
 

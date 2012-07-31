@@ -31,17 +31,6 @@ typedef struct m_profile m_profile_t;
 struct m_option;
 struct m_option_type;
 
-// Config option save slot
-struct m_config_save_slot {
-    // Previous level slot.
-    struct m_config_save_slot *prev;
-    // Level at which the save was made.
-    int lvl;
-    // We have to store other datatypes in this as well,
-    // so make sure we get properly aligned addresses.
-    unsigned char data[0] __attribute__ ((aligned(8)));
-};
-
 // Config option
 struct m_config_option {
     struct m_config_option *next;
@@ -51,8 +40,8 @@ struct m_config_option {
     char *disabled_feature;
     // Option description.
     const struct m_option *opt;
-    // Save slot stack.
-    struct m_config_save_slot *slots;
+    // Raw value of the backup of the global value (or NULL).
+    void *global_backup;
     // See \ref ConfigOptionFlags.
     unsigned int flags;
 };
@@ -86,9 +75,12 @@ typedef struct m_config {
     /** This contains all options and suboptions.
      */
     struct m_config_option *opts;
-    // Current stack level.
-    int lvl;
     enum option_source mode;
+    // When options are set (via m_config_set_option or m_config_set_profile),
+    // back up the old value (unless it's already backed up). Used for restoring
+    // global options when per-file options are set.
+    bool file_local_mode;
+
     // List of defined profiles.
     struct m_profile *profiles;
     // Depth when recursively including profiles.
@@ -96,7 +88,6 @@ typedef struct m_config {
 
     void *optstruct; // struct mpopts or other
     int (*includefunc)(struct m_config *conf, char *filename);
-    bool full;  // main config with save slot handling etc
 } m_config_t;
 
 
@@ -111,22 +102,14 @@ struct m_config *
 m_config_new(void *optstruct,
              int includefunc(struct m_config *conf, char *filename));
 
-struct m_config *m_config_simple(const struct m_option *options);
-
-void m_config_initialize(struct m_config *conf, void *optstruct);
+struct m_config *m_config_simple(const struct m_option *options,
+                                 void *optstruct);
 
 // Free a config object.
 void m_config_free(struct m_config *config);
 
-/* Push a new context.
- * \param config The config object.
- */
-void m_config_push(struct m_config *config);
-
-/* Pop the current context restoring the previous context state.
- * \param config The config object.
- */
-void m_config_pop(struct m_config *config);
+void m_config_enter_file_local(struct m_config *config);
+void m_config_leave_file_local(struct m_config *config);
 
 /*  Register some options to be used.
  *  \param config The config object.
@@ -167,8 +150,8 @@ static inline int m_config_check_option0(struct m_config *config,
     return m_config_check_option(config, bstr0(name), bstr0(param), ambiguous);
 }
 
-int m_config_parse_suboptions(struct m_config *config, void *optstruct,
-                              char *name, char *subopts);
+int m_config_parse_suboptions(struct m_config *config, char *name,
+                              char *subopts);
 
 
 /*  Get the option matching the given name.

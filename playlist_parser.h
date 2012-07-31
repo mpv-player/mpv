@@ -16,15 +16,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MPLAYER_PARSER_MPCMD_H
-#define MPLAYER_PARSER_MPCMD_H
+#ifndef MPLAYER_PLAYLISTPARSER_H
+#define MPLAYER_PLAYLISTPARSER_H
 
 #include <stdbool.h>
-#include "m_config.h"
 
-bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
-                                    int argc, char **argv);
-int m_config_preparse_command_line(m_config_t *config, int argc, char **argv,
-                                   int *verbose);
+struct stream;
+struct playlist;
 
-#endif /* MPLAYER_PARSER_MPCMD_H */
+// Parse the given stream as playlist. Append entries to pl. Return whether
+// there was an error when parsing.
+// deep = Parser depth. Some formats allow including other files,
+struct playlist *playlist_parse(struct stream* stream);
+struct playlist *playlist_probe_and_parse(struct stream* stream);
+struct playlist *playlist_parse_file(const char *file);
+
+#endif

@@ -19,9 +19,11 @@
 #import <Cocoa/Cocoa.h>
 #import <ApplicationServices/ApplicationServices.h>
 #include <stdio.h>
+#include "talloc.h"
+#include "playlist.h"
 #include "macosx_finder_args.h"
 
-static play_tree_t *files = NULL;
+static struct playlist *files = NULL;
 
 void macosx_wait_fileopen_events(void);
 void macosx_redirect_output_to_logfile(const char *filename);
@@ -34,19 +36,9 @@ bool psn_matches_current_process(char *psn_arg_to_check);
 @implementation FileOpenDelegate
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames
 {
-    files = play_tree_new();
-    play_tree_t *last_entry = nil;
-    for (NSString *filename in filenames) {
-        play_tree_t *entry = play_tree_new();
-        play_tree_add_file(entry, [filename UTF8String]);
-
-        if (last_entry)
-          play_tree_append_entry(files, entry);
-        else
-          play_tree_set_child(files, entry);
-
-        last_entry = entry;
-    }
+    files = talloc_zero(NULL, struct playlist);
+    for (NSString *filename in filenames)
+        playlist_add_file(files, [filename UTF8String]);
     [NSApp stop:nil]; // stop the runloop (give back control to mplayer2 code)
 }
 @end
@@ -83,7 +75,8 @@ bool psn_matches_current_process(char *psn_arg_to_check)
     return strcmp(psn_arg, psn_arg_to_check) == 0;
 }
 
-play_tree_t *macosx_finder_args(m_config_t *config, int argc, char **argv)
+bool *macosx_finder_args(m_config_t *config, struct playlist *pl_files,
+                         int argc, char **argv)
 {
     if (argc==2 && psn_matches_current_process(argv[1])) {
         macosx_redirect_output_to_logfile("mplayer2");
@@ -91,5 +84,12 @@ play_tree_t *macosx_finder_args(m_config_t *config, int argc, char **argv)
         macosx_wait_fileopen_events();
     }
 
-    return files;
+    if (files) {
+        playlist_transfer_entries(pl_files, files);
+        talloc_free(files);
+        files = NULL;
+        return true;
+    } else {
+        return false;
+    }
 }

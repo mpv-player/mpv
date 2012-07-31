@@ -19,9 +19,11 @@
 #ifndef MPLAYER_MACOSX_FINDER_ARGS_H
 #define MPLAYER_MACOSX_FINDER_ARGS_H
 
+#include <stdbool.h>
 #include "m_config.h"
-#include "playtree.h"
 
-play_tree_t *macosx_finder_args(m_config_t *config, int argc, char **argv);
+struct playlist;
+bool *macosx_finder_args(m_config_t *config, struct playlist *files,
+                         int argc, char **argv);
 
 #endif /* MPLAYER_MACOSX_FINDER_ARGS_H */

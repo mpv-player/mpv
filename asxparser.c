@@ -24,13 +24,62 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "playtree.h"
-#include "playtreeparser.h"
+#include "playlist.h"
+#include "playlist_parser.h"
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
 #include "asxparser.h"
 #include "mp_msg.h"
-#include "m_config.h"
+
+
+typedef struct ASX_Parser_t ASX_Parser_t;
+
+typedef struct {
+  char* buffer;
+  int line;
+} ASX_LineSave_t;
+
+struct ASX_Parser_t {
+  int line; // Curent line
+  ASX_LineSave_t *ret_stack;
+  int ret_stack_size;
+  char* last_body;
+  int deep;
+  struct playlist *pl;
+};
+
+ASX_Parser_t *asx_parser_new(struct playlist *pl);
+
+void
+asx_parser_free(ASX_Parser_t* parser);
+
+/*
+ * Return -1 on error, 0 when nothing is found, 1 on sucess
+ */
+int
+asx_get_element(ASX_Parser_t* parser,char** _buffer,
+                char** _element,char** _body,char*** _attribs);
+
+int
+asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs);
+
+/////// Attribs utils
+
+char*
+asx_get_attrib(const char* attrib,char** attribs);
+
+int
+asx_attrib_to_enum(const char* val,char** valid_vals);
+
+#define asx_free_attribs(a) asx_list_free(&a,free)
+
+////// List utils
+
+typedef void (*ASX_FreeFunc)(void* arg);
+
+void
+asx_list_free(void* list_ptr,ASX_FreeFunc free_func);
+
 
 ////// List utils
 
@@ -77,11 +126,10 @@ asx_attrib_to_enum(const char* val,char** valid_vals) {
 #define asx_warning_attrib_required(p,e,a) mp_msg(MSGT_PLAYTREE,MSGL_WARN,"At line %d : element %s don't have the required attribute %s",p->line,e,a)
 #define asx_warning_body_parse_error(p,e) mp_msg(MSGT_PLAYTREE,MSGL_WARN,"At line %d : error while parsing %s body",p->line,e)
 
-ASX_Parser_t*
-asx_parser_new(struct m_config *mconfig)
+ASX_Parser_t *asx_parser_new(struct playlist *pl)
 {
   ASX_Parser_t* parser = calloc(1,sizeof(ASX_Parser_t));
-  parser->mconfig = mconfig;
+  parser->pl = pl;
   return parser;
 }
 
@@ -388,7 +436,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
 }
 
 static void
-asx_parse_ref(ASX_Parser_t* parser, char** attribs, play_tree_t* pt) {
+asx_parse_ref(ASX_Parser_t* parser, char** attribs) {
   char *href;
 
   href = asx_get_attrib("HREF",attribs);
@@ -409,7 +457,7 @@ asx_parse_ref(ASX_Parser_t* parser, char** attribs, play_tree_t* pt) {
   }
 #endif
 
-  play_tree_add_file(pt,href);
+  playlist_add_file(parser->pl, href);
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Adding file %s to element entry\n",href);
 
@@ -417,212 +465,137 @@ asx_parse_ref(ASX_Parser_t* parser, char** attribs, play_tree_t* pt) {
 
 }
 
-static play_tree_t*
-asx_parse_entryref(ASX_Parser_t* parser,char* buffer,char** _attribs) {
-  play_tree_t* pt;
+static void asx_parse_entryref(ASX_Parser_t* parser,char* buffer,char** _attribs) {
   char *href;
   stream_t* stream;
-  play_tree_parser_t* ptp;
   int f=DEMUXER_TYPE_UNKNOWN;
 
   if(parser->deep > 0)
-    return NULL;
+    return;
 
   href = asx_get_attrib("HREF",_attribs);
   if(href == NULL) {
     asx_warning_attrib_required(parser,"ENTRYREF" ,"HREF" );
-    return NULL;
+    return;
   }
   stream=open_stream(href,0,&f);
   if(!stream) {
     mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Can't open playlist %s\n",href);
     free(href);
-    return NULL;
+    return;
   }
 
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Adding playlist %s to element entryref\n",href);
+  mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Not recursively loading playlist %s\n",href);
 
-  ptp = play_tree_parser_new(stream, parser->mconfig, parser->deep+1);
-
-  pt = play_tree_parser_get_play_tree(ptp, 1);
-
-  play_tree_parser_free(ptp);
   free_stream(stream);
   free(href);
   //mp_msg(MSGT_PLAYTREE,MSGL_INFO,"Need to implement entryref\n");
-
-  return pt;
 }
 
-static play_tree_t*
-asx_parse_entry(ASX_Parser_t* parser,char* buffer,char** _attribs) {
+static void asx_parse_entry(ASX_Parser_t* parser,char* buffer,char** _attribs) {
   char *element,*body,**attribs;
-  int r,nref=0;
-  play_tree_t *ref;
-
-  ref = play_tree_new();
+  int r;
 
   while(buffer && buffer[0] != '\0') {
     r = asx_get_element(parser,&buffer,&element,&body,&attribs);
     if(r < 0) {
       asx_warning_body_parse_error(parser,"ENTRY");
-      return NULL;
+      return;
     } else if (r == 0) { // No more element
       break;
     }
     if(strcasecmp(element,"REF") == 0) {
-      asx_parse_ref(parser,attribs,ref);
+      asx_parse_ref(parser,attribs);
       mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to entry\n",element);
-      nref++;
     } else
       mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Ignoring element %s\n",element);
     free(body);
     asx_free_attribs(attribs);
   }
 
-  if(nref <= 0) {
-    play_tree_free(ref,1);
-    return NULL;
-  }
-  return ref;
-
 }
 
 
-static play_tree_t*
-asx_parse_repeat(ASX_Parser_t* parser,char* buffer,char** _attribs) {
+static void asx_parse_repeat(ASX_Parser_t* parser,char* buffer,char** _attribs) {
   char *element,*body,**attribs;
-  play_tree_t *repeat, *list=NULL, *entry;
-  char* count;
   int r;
 
-  repeat = play_tree_new();
-
-  count = asx_get_attrib("COUNT",_attribs);
-  if(count == NULL) {
-    mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Setting element repeat loop to infinit\n");
-    repeat->loop = -1; // Infinit
-  } else {
-    repeat->loop = atoi(count);
-    free(count);
-    if(repeat->loop == 0) repeat->loop = 1;
-    mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Setting element repeat loop to %d\n",repeat->loop);
-  }
+  asx_get_attrib("COUNT",_attribs);
+  mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Ignoring repeated playlist entries\n");
 
   while(buffer && buffer[0] != '\0') {
     r = asx_get_element(parser,&buffer,&element,&body,&attribs);
     if(r < 0) {
       asx_warning_body_parse_error(parser,"REPEAT");
-      return NULL;
+      return;
     } else if (r == 0) { // No more element
       break;
     }
     if(strcasecmp(element,"ENTRY") == 0) {
-       entry = asx_parse_entry(parser,body,attribs);
-       if(entry) {
-         if(!list) list =  entry;
-         else play_tree_append_entry(list,entry);
-         mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to repeat\n",element);
-       }
+       asx_parse_entry(parser,body,attribs);
     } else if(strcasecmp(element,"ENTRYREF") == 0) {
-       entry = asx_parse_entryref(parser,body,attribs);
-       if(entry) {
-         if(!list) list =  entry;
-         else play_tree_append_entry(list,entry);
-         mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to repeat\n",element);
-       }
+       asx_parse_entryref(parser,body,attribs);
      } else if(strcasecmp(element,"REPEAT") == 0) {
-       entry = asx_parse_repeat(parser,body,attribs);
-       if(entry) {
-         if(!list) list =  entry;
-         else play_tree_append_entry(list,entry);
-         mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to repeat\n",element);
-       }
+       asx_parse_repeat(parser,body,attribs);
      } else
        mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Ignoring element %s\n",element);
      free(body);
      asx_free_attribs(attribs);
   }
 
-  if(!list) {
-    play_tree_free(repeat,1);
-    return NULL;
-  }
-  play_tree_set_child(repeat,list);
-
-  return repeat;
-
 }
 
 
-
-play_tree_t*
-asx_parser_build_tree(struct m_config *mconfig, char* buffer,int deep) {
+bool asx_parse(char* buffer, struct playlist *pl)
+{
   char *element,*asx_body,**asx_attribs,*body = NULL, **attribs;
   int r;
-  play_tree_t *asx,*entry,*list = NULL;
-  ASX_Parser_t* parser = asx_parser_new(mconfig);
+  ASX_Parser_t* parser = asx_parser_new(pl);
 
   parser->line = 1;
-  parser->deep = deep;
+  parser->deep = 0;
 
    r = asx_get_element(parser,&buffer,&element,&asx_body,&asx_attribs);
   if(r < 0) {
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : Syntax error ???",parser->line);
     asx_parser_free(parser);
-    return NULL;
+    return false;
   } else if(r == 0) { // No contents
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"empty asx element");
     asx_parser_free(parser);
-    return NULL;
+    return false;
   }
 
   if(strcasecmp(element,"ASX") != 0) {
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"first element isn't ASX, it's %s\n",element);
     asx_free_attribs(asx_attribs);
     asx_parser_free(parser);
-    return NULL;
+    return false;
   }
 
   if(!asx_body) {
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"ASX element is empty");
     asx_free_attribs(asx_attribs);
     asx_parser_free(parser);
-    return NULL;
+    return false;
   }
 
-  asx = play_tree_new();
   buffer = asx_body;
   while(buffer && buffer[0] != '\0') {
     r = asx_get_element(parser,&buffer,&element,&body,&attribs);
      if(r < 0) {
        asx_warning_body_parse_error(parser,"ASX");
        asx_parser_free(parser);
-       return NULL;
+       return false;
      } else if (r == 0) { // No more element
        break;
      }
      if(strcasecmp(element,"ENTRY") == 0) {
-       entry = asx_parse_entry(parser,body,attribs);
-       if(entry) {
-         if(!list) list =  entry;
-         else play_tree_append_entry(list,entry);
-         mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to asx\n",element);
-       }
+       asx_parse_entry(parser,body,attribs);
      } else if(strcasecmp(element,"ENTRYREF") == 0) {
-       entry = asx_parse_entryref(parser,body,attribs);
-       if(entry) {
-         if(!list) list =  entry;
-         else play_tree_append_entry(list,entry);
-         mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to asx\n",element);
-       }
+       asx_parse_entryref(parser,body,attribs);
      } else if(strcasecmp(element,"REPEAT") == 0) {
-       entry = asx_parse_repeat(parser,body,attribs);
-       if(entry) {
-         if(!list) list =  entry;
-         else play_tree_append_entry(list,entry);
-         mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding element %s to asx\n",element);
-       }
+       asx_parse_repeat(parser,body,attribs);
      } else
        mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Ignoring element %s\n",element);
      free(body);
@@ -632,15 +605,5 @@ asx_parser_build_tree(struct m_config *mconfig, char* buffer,int deep) {
   free(asx_body);
   asx_free_attribs(asx_attribs);
   asx_parser_free(parser);
-
-
-  if(!list) {
-    play_tree_free(asx,1);
-
-    return NULL;
-  }
-
-  play_tree_set_child(asx,list);
-
-  return asx;
+  return true;
 }

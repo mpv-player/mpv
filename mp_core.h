@@ -49,15 +49,11 @@
 
 
 enum stop_play_reason {
-    KEEP_PLAYING = 0,  // must be 0, numeric values of others do not matter
-    AT_END_OF_FILE,
-    PT_NEXT_ENTRY,
-    PT_PREV_ENTRY,
-    PT_NEXT_SRC,
-    PT_PREV_SRC,
-    PT_UP_NEXT,
-    PT_UP_PREV,
-    PT_STOP,
+    KEEP_PLAYING = 0,   // must be 0, numeric values of others do not matter
+    AT_END_OF_FILE,     // file has ended normally, prepare to play next
+    PT_NEXT_ENTRY,      // prepare to play next entry in playlist
+    PT_CURRENT_ENTRY,   // prepare to play mpctx->playlist->current
+    PT_STOP,            // stop playback, clear playlist
 };
 
 enum exit_reason {
@@ -101,11 +97,9 @@ typedef struct MPContext {
     unsigned int osd_visible;
 
     int osd_function;
-    struct play_tree *playtree;
-    struct play_tree_iter *playtree_iter;
+    struct playlist *playlist;
     char *filename; // currently playing file
     enum stop_play_reason stop_play;
-    int play_tree_step;
     unsigned int initialized_flags;  // which subsystems have been initialized
 
     struct content_source *sources;

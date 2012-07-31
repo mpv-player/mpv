@@ -16,9 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/// \file
-/// \ingroup PlaytreeParser
-
 #include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -35,16 +32,25 @@
 #include "talloc.h"
 #include "asxparser.h"
 #include "m_config.h"
-#include "playtree.h"
-#include "playtreeparser.h"
+#include "playlist.h"
+#include "playlist_parser.h"
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
 #include "mp_msg.h"
+#include "path.h"
 
 
 #define BUF_STEP 1024
 
 #define WHITES " \n\r\t"
+
+typedef struct play_tree_parser {
+  struct stream *stream;
+  char *buffer,*iter,*line;
+  int buffer_size , buffer_end;
+  int keep;
+  struct playlist *pl;
+} play_tree_parser_t;
 
 static void
 strstrip(char* str) {
@@ -164,8 +170,7 @@ play_tree_parser_stop_keeping(play_tree_parser_t* p) {
 }
 
 
-static play_tree_t*
-parse_asx(play_tree_parser_t* p) {
+static bool parse_asx(play_tree_parser_t* p) {
   int comments = 0,get_line = 1;
   char* line = NULL;
 
@@ -175,7 +180,7 @@ parse_asx(play_tree_parser_t* p) {
     if(get_line) {
       line = play_tree_parser_get_line(p);
       if(!line)
-	return NULL;
+	return false;
       strstrip(line);
       if(line[0] == '\0')
 	continue;
@@ -184,7 +189,7 @@ parse_asx(play_tree_parser_t* p) {
       if(line[0] != '<') {
 	mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"First char isn't '<' but '%c'\n",line[0]);
 	mp_msg(MSGT_PLAYTREE,MSGL_DBG3,"Buffer = [%s]\n",p->buffer);
-	return NULL;
+	return false;
       } else if(strncmp(line,"<!--",4) == 0) { // Comments
 	comments = 1;
 	line += 4;
@@ -193,7 +198,7 @@ parse_asx(play_tree_parser_t* p) {
       } else if(strncasecmp(line,"<ASX",4) == 0) // We got an asx element
 	break;
       else // We don't get an asx
-	return NULL;
+	return false;
     } else { // Comments
       char* c;
       c = strchr(line,'-');
@@ -224,7 +229,7 @@ parse_asx(play_tree_parser_t* p) {
     /* NOTHING */;
 
  mp_msg(MSGT_PLAYTREE,MSGL_DBG3,"Parsing asx file: [%s]\n",p->buffer);
- return asx_parser_build_tree(p->mconfig, p->buffer,p->deep);
+ return asx_parse(p->buffer,p->pl);
 }
 
 static char*
@@ -281,12 +286,10 @@ pls_read_entry(char* line,pls_entry_t** _e,int* _max_entry,char** val) {
 }
 
 
-static play_tree_t*
-parse_pls(play_tree_parser_t* p) {
+static bool parse_pls(play_tree_parser_t* p) {
   char *line,*v;
   pls_entry_t* entries = NULL;
   int n_entries = 0,max_entry=0,num;
-  play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying Winamp playlist...\n");
   while((line = play_tree_parser_get_line(p))) {
@@ -295,14 +298,14 @@ parse_pls(play_tree_parser_t* p) {
       break;
   }
   if (!line)
-    return NULL;
+    return false;
   if(strcasecmp(line,"[playlist]"))
-    return NULL;
+    return false;
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected Winamp playlist format\n");
   play_tree_parser_stop_keeping(p);
   line = play_tree_parser_get_line(p);
   if(!line)
-    return NULL;
+    return false;
   strstrip(line);
   if(strncasecmp(line,"NumberOfEntries",15) == 0) {
     v = pls_entry_get_value(line);
@@ -354,16 +357,10 @@ parse_pls(play_tree_parser_t* p) {
       mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Entry %d don't have a file !!!!\n",num+1);
     else {
       mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding entry %s\n",entries[num].file);
-      entry = play_tree_new();
-      play_tree_add_file(entry,entries[num].file);
+      playlist_add_file(p->pl,entries[num].file);
       if (entries[num].length)
-          play_tree_set_param(entry, bstr0("endpos"), bstr0(entries[num].length));
+          playlist_entry_add_param(p->pl->last,  bstr0("endpos"), bstr0(entries[num].length));
       free(entries[num].file);
-      if(list)
-	play_tree_append_entry(last_entry,entry);
-      else
-	list = entry;
-      last_entry = entry;
     }
     // When we have info in playtree we add these info
     free(entries[num].title);
@@ -371,22 +368,14 @@ parse_pls(play_tree_parser_t* p) {
   }
 
   free(entries);
-
-  if (!list)
-    return NULL;
-
-  entry = play_tree_new();
-  play_tree_set_child(entry,list);
-  return entry;
+  return true;
 }
 
 /*
  Reference Ini-Format: Each entry is assumed a reference
  */
-static play_tree_t*
-parse_ref_ini(play_tree_parser_t* p) {
+static bool parse_ref_ini(play_tree_parser_t* p) {
   char *line,*v;
-  play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying reference-ini playlist...\n");
   if (!(line = play_tree_parser_get_line(p)))
@@ -408,28 +397,17 @@ parse_ref_ini(play_tree_parser_t* p) {
       else
       {
         mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding entry %s\n",v);
-        entry = play_tree_new();
-        play_tree_add_file(entry,v);
-        if(list)
-  	  play_tree_append_entry(last_entry,entry);
-        else
-  	  list = entry;
-	last_entry = entry;
+        playlist_add_file(p->pl, v);
       }
     }
     line = play_tree_parser_get_line(p);
   }
 
-  if(!list) return NULL;
-  entry = play_tree_new();
-  play_tree_set_child(entry,list);
-  return entry;
+  return true;
 }
 
-static play_tree_t*
-parse_m3u(play_tree_parser_t* p) {
+static bool parse_m3u(play_tree_parser_t* p) {
   char* line;
-  play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying extended m3u playlist...\n");
   if (!(line = play_tree_parser_get_line(p)))
@@ -459,26 +437,15 @@ parse_m3u(play_tree_parser_t* p) {
 #endif
       continue;
     }
-    entry = play_tree_new();
-    play_tree_add_file(entry,line);
-    if(!list)
-      list = entry;
-    else
-      play_tree_append_entry(last_entry,entry);
-    last_entry = entry;
+    playlist_add_file(p->pl, line);
   }
 
-  if(!list) return NULL;
-  entry = play_tree_new();
-  play_tree_set_child(entry,list);
-  return entry;
+  return true;
 }
 
-static play_tree_t*
-parse_smil(play_tree_parser_t* p) {
+static bool parse_smil(play_tree_parser_t* p) {
   int entrymode=0;
   char* line,source[512],*pos,*s_start,*s_end,*src_line;
-  play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
   int is_rmsmil = 0;
   unsigned int npkt, ttlpkt;
 
@@ -591,13 +558,7 @@ parse_smil(play_tree_parser_t* p) {
         }
         strncpy(source,s_start,s_end-s_start);
         source[(s_end-s_start)]='\0'; // Null terminate
-        entry = play_tree_new();
-        play_tree_add_file(entry,source);
-        if(!list)  //Insert new entry
-          list = entry;
-        else
-          play_tree_append_entry(last_entry,entry);
-        last_entry = entry;
+        playlist_add_file(p->pl, source);
         pos = s_end;
       }
     }
@@ -605,45 +566,11 @@ parse_smil(play_tree_parser_t* p) {
   } while((src_line = play_tree_parser_get_line(p)) != NULL);
 
   free(line);
-
-  if(!list) return NULL; // Nothing found
-
-  entry = play_tree_new();
-  play_tree_set_child(entry,list);
-  return entry;
+  return true;
 }
 
-static play_tree_t*
-embedded_playlist_parse(struct m_config *mconfig, char *line) {
-  int f=DEMUXER_TYPE_PLAYLIST;
-  stream_t* stream;
-  play_tree_parser_t* ptp;
-  play_tree_t* entry;
-
-  // Get stream opened to link
-  stream=open_stream(line,0,&f);
-  if(!stream) {
-    mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Can't open playlist %s\n",line);
-    return NULL;
-  }
-
-  //add new playtree
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Adding playlist %s to element entryref\n",line);
-
-  ptp = play_tree_parser_new(stream, mconfig, 1);
-  entry = play_tree_parser_get_play_tree(ptp, 1);
-  play_tree_parser_free(ptp);
-  free_stream(stream);
-
-  return entry;
-}
-
-static play_tree_t*
-parse_textplain(play_tree_parser_t* p) {
+static bool parse_textplain(play_tree_parser_t* p) {
   char* line;
-  char *c;
-  int embedded;
-  play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying plaintext playlist...\n");
   play_tree_parser_stop_keeping(p);
@@ -653,41 +580,10 @@ parse_textplain(play_tree_parser_t* p) {
     if(line[0] == '\0' || line[0] == '#' || (line[0] == '/' && line[1] == '/'))
       continue;
 
-    //Special check for embedded smil or ram reference in file
-    embedded = 0;
-    if (strlen(line) > 5)
-      for(c = line; c[0]; c++ )
-        if ( ((c[0] == '.') && //start with . and next have smil with optional ? or &
-           (tolower(c[1]) == 's') && (tolower(c[2])== 'm') &&
-           (tolower(c[3]) == 'i') && (tolower(c[4]) == 'l') &&
-           (!c[5] || c[5] == '?' || c[5] == '&')) || // or
-          ((c[0] == '.') && // start with . and next have smi or ram with optional ? or &
-          ( ((tolower(c[1]) == 's') && (tolower(c[2])== 'm') && (tolower(c[3]) == 'i')) ||
-            ((tolower(c[1]) == 'r') && (tolower(c[2])== 'a') && (tolower(c[3]) == 'm')) )
-           && (!c[4] || c[4] == '?' || c[4] == '&')) ){
-            entry=embedded_playlist_parse(p->mconfig, line);
-          embedded = 1;
-          break;
-        }
-
-    if (!embedded) {      //regular file link
-      entry = play_tree_new();
-      play_tree_add_file(entry,line);
-    }
-
-    if (entry != NULL) {
-      if(!list)
-        list = entry;
-      else
-        play_tree_append_entry(last_entry,entry);
-      last_entry = entry;
-    }
+      playlist_add_file(p->pl,line);
   }
 
-  if(!list) return NULL;
-  entry = play_tree_new();
-  play_tree_set_child(entry,list);
-  return entry;
+  return true;
 }
 
 /**
@@ -745,10 +641,9 @@ static void utf16_to_ascii(char *buf, int len) {
   buf[i] = 0; // just in case
 }
 
-static play_tree_t *parse_nsc(play_tree_parser_t* p) {
+static bool parse_nsc(play_tree_parser_t* p) {
   char *line, *addr = NULL, *url, *unicast_url = NULL;
   int port = 0;
-  play_tree_t *entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying nsc playlist...\n");
   while((line = play_tree_parser_get_line(p)) != NULL) {
@@ -758,7 +653,7 @@ static play_tree_t *parse_nsc(play_tree_parser_t* p) {
     if (strncasecmp(line,"[Address]", 9) == 0)
       break; // nsc header found
     else
-      return NULL;
+      return false;
   }
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected nsc playlist format\n");
   play_tree_parser_stop_keeping(p);
@@ -783,203 +678,103 @@ static play_tree_t *parse_nsc(play_tree_parser_t* p) {
     }
   }
 
+  bool success = false;
+
   if (unicast_url)
     url = strdup(unicast_url);
   else if (addr && port) {
     url = malloc(strlen(addr) + 7 + 20 + 1);
     sprintf(url, "http://%s:%i", addr, port);
   } else
-   goto out;
+   goto err_out;
 
-  entry = play_tree_new();
-  play_tree_add_file(entry, url);
+  playlist_add_file(p->pl, url);
   free(url);
-out:
+  success = true;
+err_out:
   free(addr);
   free(unicast_url);
-  return entry;
+  return success;
 }
 
-play_tree_t*
-parse_playtree(stream_t *stream, struct m_config *mconfig, int forced) {
-  play_tree_parser_t* p;
-  play_tree_t* ret;
-
-  assert(stream != NULL);
-
-  p = play_tree_parser_new(stream, mconfig, 0);
-  if(!p)
-    return NULL;
-
-  ret = play_tree_parser_get_play_tree(p, forced);
-  play_tree_parser_free(p);
-
-  return ret;
-}
-
-static void
-play_tree_add_basepath(play_tree_t* pt, char* bp) {
-  int i,bl = strlen(bp),fl;
-
-  if(pt->child) {
-    play_tree_t* i;
-    for(i = pt->child ; i != NULL ; i = i->next)
-      play_tree_add_basepath(i,bp);
-    return;
-  }
-
-  if(!pt->files)
-    return;
-
-  for(i = 0 ; pt->files[i] != NULL ; i++) {
-    fl = strlen(pt->files[i]);
-    // if we find a full unix path, url:// or X:\ at the beginning,
-    // don't mangle it.
-    if(fl <= 0 || strstr(pt->files[i],"://") || (strstr(pt->files[i],":\\") == pt->files[i] + 1) || (pt->files[i][0] == '/') )
-      continue;
-    // if the path begins with \ then prepend drive letter to it.
-    if (pt->files[i][0] == '\\') {
-      if (pt->files[i][1] == '\\')
-        continue;
-      pt->files[i] = realloc(pt->files[i], 2 + fl + 1);
-      memmove(pt->files[i] + 2,pt->files[i],fl+1);
-      memcpy(pt->files[i],bp,2);
-      continue;
-    }
-    pt->files[i] = realloc(pt->files[i], bl + fl + 1);
-    memmove(pt->files[i] + bl,pt->files[i],fl+1);
-    memcpy(pt->files[i],bp,bl);
-  }
-}
-
-// Wrapper for play_tree_add_basepath (add base path from file)
-void play_tree_add_bpf(play_tree_t *pt, struct bstr filename)
+struct playlist *playlist_parse_file(const char *file)
 {
-  char *ls, *file;
-
-  if (pt)
-  {
-    file = bstrdup0(NULL, filename);
-    if (file)
-    {
-      ls = strrchr(file,'/');
-      if(!ls) ls = strrchr(file,'\\');
-      if(ls) {
-        ls[1] = '\0';
-        play_tree_add_basepath(pt,file);
-      }
-      talloc_free(file);
-    }
-  }
-}
-
-play_tree_t*
-parse_playlist_file(struct m_config *mconfig, struct bstr file) {
   stream_t *stream;
-  play_tree_t* ret;
   int f=DEMUXER_TYPE_PLAYLIST;
 
-  char *file0 = bstrdup0(NULL, file);
-  stream = open_stream(file0, 0, &f);
-  talloc_free(file0);
-
+  stream = open_stream(file, 0, &f);
   if(!stream) {
       mp_msg(MSGT_PLAYTREE,MSGL_ERR,
-             "Error while opening playlist file %.*s: %s\n",
-             BSTR_P(file), strerror(errno));
-    return NULL;
+             "Error while opening playlist file %s: %s\n",
+             file, strerror(errno));
+    return false;
   }
 
   mp_msg(MSGT_PLAYTREE, MSGL_V,
-         "Parsing playlist file %.*s...\n", BSTR_P(file));
+         "Parsing playlist file %s...\n", file);
 
-  ret = parse_playtree(stream, mconfig, 1);
+  struct playlist *ret = playlist_parse(stream);
   free_stream(stream);
 
-  play_tree_add_bpf(ret, file);
+  playlist_add_base_path(ret, mp_dirname(file));
 
   return ret;
 
 }
 
+typedef bool (*parser_fn)(play_tree_parser_t *);
+static const parser_fn pl_parsers[] = {
+    parse_asx,
+    parse_pls,
+    parse_m3u,
+    parse_ref_ini,
+    parse_smil,
+    parse_nsc,
+    parse_textplain
+};
 
-play_tree_parser_t*
-play_tree_parser_new(stream_t* stream, struct m_config *mconfig, int deep) {
-  play_tree_parser_t* p;
 
-  p = calloc(1,sizeof(play_tree_parser_t));
-  if(!p)
-    return NULL;
-  p->stream = stream;
-  p->mconfig = mconfig;
-  p->deep = deep;
-  p->keep = 1;
+static struct playlist *do_parse(struct stream* stream, bool forced)
+{
+  play_tree_parser_t p = {
+      .stream = stream,
+      .pl = talloc_zero(NULL, struct playlist),
+      .keep = 1,
+  };
 
-  return p;
-
-}
-
-void
-play_tree_parser_free(play_tree_parser_t* p) {
-
-  assert(p != NULL);
-
-  free(p->buffer);
-  free(p->line);
-  free(p);
-}
-
-play_tree_t*
-play_tree_parser_get_play_tree(play_tree_parser_t* p, int forced) {
-  play_tree_t* tree = NULL;
-
-  assert(p != NULL);
-
-  while(play_tree_parser_get_line(p) != NULL) {
-    play_tree_parser_reset(p);
-
-    tree = parse_asx(p);
-    if(tree) break;
-    play_tree_parser_reset(p);
-
-    tree = parse_pls(p);
-    if(tree) break;
-    play_tree_parser_reset(p);
-
-    tree = parse_m3u(p);
-    if(tree) break;
-    play_tree_parser_reset(p);
-
-    tree = parse_ref_ini(p);
-    if(tree) break;
-    play_tree_parser_reset(p);
-
-    tree = parse_smil(p);
-    if(tree) break;
-    play_tree_parser_reset(p);
-
-    tree = parse_nsc(p);
-    if(tree) break;
-    play_tree_parser_reset(p);
-
-    // Here come the others formats ( textplain must stay the last one )
-    if (forced)
-    {
-      tree = parse_textplain(p);
-      if(tree) break;
+  bool success = false;
+  if (play_tree_parser_get_line(&p) != NULL) {
+    for (int n = 0; n < sizeof(pl_parsers) / sizeof(pl_parsers[0]); n++) {
+      play_tree_parser_reset(&p);
+      if (pl_parsers[n] == parse_textplain && !forced)
+        break;
+      if (pl_parsers[n](&p)) {
+        success = true;
+        break;
+      }
     }
-    break;
   }
 
-  if(tree)
+  if(success)
     mp_msg(MSGT_PLAYTREE,MSGL_V,"Playlist successfully parsed\n");
-  else
+  else {
     mp_msg(MSGT_PLAYTREE,((forced==1)?MSGL_ERR:MSGL_V),"Error while parsing playlist\n");
+    talloc_free(p.pl);
+    p.pl = NULL;
+  }
 
-  if(tree)
-    tree = play_tree_cleanup(tree);
+  if (p.pl && !p.pl->first)
+    mp_msg(MSGT_PLAYTREE,((forced==1)?MSGL_WARN:MSGL_V),"Warning: empty playlist\n");
 
-  if(!tree) mp_msg(MSGT_PLAYTREE,((forced==1)?MSGL_WARN:MSGL_V),"Warning: empty playlist\n");
+  return p.pl;
+}
 
-  return tree;
+struct playlist *playlist_parse(struct stream* stream)
+{
+    return do_parse(stream, true);
+}
+
+struct playlist *playlist_probe_and_parse(struct stream* stream)
+{
+    return do_parse(stream, false);
 }
