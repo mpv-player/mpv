@@ -46,6 +46,7 @@
 #include "talloc.h"
 #include "options.h"
 #include "bstr.h"
+#include "stream/stream.h"
 
 #include "joystick.h"
 
@@ -1616,80 +1617,15 @@ static void bind_keys(struct input_ctx *ictx,
     memcpy(bind->input, keys, (MP_MAX_KEY_DOWN + 1) * sizeof(int));
 }
 
-static int parse_config(struct input_ctx *ictx, char *file)
+static int parse_config(struct input_ctx *ictx, bstr data)
 {
-    int fd = open(file, O_RDONLY);
-
-    if (fd < 0) {
-        mp_msg(MSGT_INPUT, MSGL_V, "Can't open input config file %s: %s\n",
-               file, strerror(errno));
-        return 0;
-    }
-
-    mp_msg(MSGT_INPUT, MSGL_V, "Parsing input config file %s\n", file);
-
-
-    unsigned char buffer[512];
-    struct bstr buf = { buffer, 0 };
-    bool eof = false, comments = false;
     int n_binds = 0, keys[MP_MAX_KEY_DOWN + 1];
 
-    while (1) {
-        if (buf.start != buffer) {
-            memmove(buffer, buf.start, buf.len);
-            buf.start = buffer;
-        }
-        if (!eof && buf.len < sizeof(buffer)) {
-            int r = read(fd, buffer + buf.len, sizeof(buffer) - buf.len);
-            if (r < 0) {
-                if (errno == EINTR)
-                    continue;
-                mp_tmsg(MSGT_INPUT, MSGL_ERR, "Error while reading "
-                        "input config file %s: %s\n", file, strerror(errno));
-                close(fd);
-                return 0;
-            } else if (r == 0) {
-                eof = true;
-            } else {
-                buf.len += r;
-                continue;
-            }
-        }
-        if (buf.len == 0) {
-            mp_msg(MSGT_INPUT, MSGL_V, "Input config file %s parsed: "
-                   "%d binds\n", file, n_binds);
-            close(fd);
-            return 1;
-        }
-        if (comments) {
-            int idx = bstrchr(buf, '\n');
-            if (idx >= 0) {
-                buf = bstr_cut(buf, idx + 1);
-                comments = false;
-            } else
-                buf = bstr_cut(buf, buf.len);
+    while (data.len) {
+        bstr line = bstr_strip_linebreaks(bstr_getline(data, &data));
+        line = bstr_lstrip(line);
+        if (line.len == 0 || bstr_startswith0(line, "#"))
             continue;
-        }
-        buf = bstr_lstrip(buf);
-        if (buf.start != buffer)
-            continue;
-        if (buf.start[0] == '#') {
-            comments = true;
-            continue;
-        }
-        int eol = bstrchr(buf, '\n');
-        if (eol < 0) {
-            if (eof) {
-                eol = buf.len;
-            } else {
-                mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                        "Key binding is too long: %.*s\n", BSTR_P(buf));
-                comments = true;
-                continue;
-            }
-        }
-        struct bstr line = bstr_splice(buf, 0, eol);
-        buf = bstr_cut(buf, eol);
         struct bstr command;
         // Find the key name starting a line
         struct bstr keyname = bstr_split(line, SPACE_CHAR, &command);
@@ -1712,6 +1648,26 @@ static int parse_config(struct input_ctx *ictx, char *file)
         n_binds++;
         talloc_free(cmd);
     }
+
+    return n_binds;
+}
+
+static int parse_config_file(struct input_ctx *ictx, char *file)
+{
+    struct bstr res = {0};
+    stream_t *s = open_stream(file, NULL, NULL);
+    if (!s) {
+        mp_msg(MSGT_INPUT, MSGL_V, "Can't open input config file %s.\n", file);
+        return 0;
+    }
+    res = stream_read_complete(s, NULL, 1000000, 0);
+    free_stream(s);
+    mp_msg(MSGT_INPUT, MSGL_V, "Parsing input config file %s\n", file);
+    int n_binds = parse_config(ictx, res);
+    talloc_free(res.start);
+    mp_msg(MSGT_INPUT, MSGL_V, "Input config file %s parsed: %d binds\n",
+           file, n_binds);
+    return 1;
 }
 
 void mp_input_set_section(struct input_ctx *ictx, char *name)
@@ -1776,14 +1732,14 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
     if (!file)
         return ictx;
 
-    if (!parse_config(ictx, file)) {
+    if (!parse_config_file(ictx, file)) {
         // free file if it was allocated by get_path(),
         // before it gets overwritten
         if (file != config_file)
             free(file);
         // Try global conf dir
         file = MPLAYER_CONFDIR "/input.conf";
-        if (!parse_config(ictx, file))
+        if (!parse_config_file(ictx, file))
             mp_msg(MSGT_INPUT, MSGL_V, "Falling back on default (hardcoded) "
                    "input config\n");
     } else {
