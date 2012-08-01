@@ -26,7 +26,6 @@
 #import "talloc.h"
 #import "video_out.h"
 #import "aspect.h"
-#import "sub/font_load.h"
 #import "sub/sub.h"
 #import "subopt-helper.h"
 
@@ -100,7 +99,6 @@ static void resize(struct vo *vo, int width, int height)
     gl->MatrixMode(GL_MODELVIEW);
     gl->LoadIdentity();
 
-    force_load_font = 1;
     vo_osd_changed(OSDTYPE_OSD);
 
     gl->Clear(GL_COLOR_BUFFER_BIT);
