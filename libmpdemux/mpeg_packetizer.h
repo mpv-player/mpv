@@ -34,13 +34,4 @@
 int send_mpeg_pes_packet (unsigned char *data, int len, int id, uint64_t pts,
                           int type, int my_write (const unsigned char *data, int len));
 
-/* Send MPEG <type> PS packet */
-int send_mpeg_ps_packet (unsigned char *data, int len, int id, uint64_t pts,
-                         int type,int my_write (const unsigned char *data, int len));
-
-/* Send MPEG 2 LPCM packet */
-int send_mpeg_lpcm_packet (unsigned char *data, int len,
-                           int id, uint64_t pts, int freq_id,
-                           int my_write (const unsigned char *data, int len));
-
 #endif /* MPLAYER_MPEG_PACKETIZER_H */

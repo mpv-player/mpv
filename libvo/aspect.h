@@ -22,7 +22,6 @@
 
 struct vo;
 void panscan_init(struct vo *vo);
-void panscan_calc(struct vo *vo);
 void panscan_calc_windowed(struct vo *vo);
 
 void aspect_save_orig(struct vo *vo, int orgw, int orgh);

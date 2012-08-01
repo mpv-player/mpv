@@ -56,21 +56,8 @@
 // Exported functions
 FLOAT_TYPE af_filter_fir(unsigned int n, const FLOAT_TYPE* w, const FLOAT_TYPE* x);
 
-FLOAT_TYPE* af_filter_pfir(unsigned int n, unsigned int k,
-                           unsigned int xi, const FLOAT_TYPE** w,
-                           const FLOAT_TYPE** x, FLOAT_TYPE* y,
-                           unsigned int s);
-
-//int af_filter_updateq(unsigned int n, unsigned int xi,
-//                      FLOAT_TYPE* xq, FLOAT_TYPE* in);
-int af_filter_updatepq(unsigned int n, unsigned int k, unsigned int xi,
-                       FLOAT_TYPE** xq, const FLOAT_TYPE* in, unsigned int s);
-
 int af_filter_design_fir(unsigned int n, FLOAT_TYPE* w, const FLOAT_TYPE* fc,
                          unsigned int flags, FLOAT_TYPE opt);
-
-int af_filter_design_pfir(unsigned int n, unsigned int k, const FLOAT_TYPE* w,
-                          FLOAT_TYPE** pw, FLOAT_TYPE g, unsigned int flags);
 
 int af_filter_szxform(const FLOAT_TYPE* a, const FLOAT_TYPE* b, FLOAT_TYPE Q,
                       FLOAT_TYPE fc, FLOAT_TYPE fs, FLOAT_TYPE *k,

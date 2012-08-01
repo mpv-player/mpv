@@ -1209,16 +1209,6 @@ nothing_to_do:
   }
 }
 
-void spudec_update_palette(void * this, unsigned int *palette)
-{
-  spudec_handle_t *spu = this;
-  if (spu && palette) {
-    memcpy(spu->global_palette, palette, sizeof(spu->global_palette));
-    if(spu->hw_spu)
-      vo_control(spu->hw_spu, VOCTRL_SET_SPU_PALETTE, spu->global_palette);
-  }
-}
-
 void spudec_set_font_factor(void * this, double factor)
 {
   spudec_handle_t *spu = this;
@@ -1332,15 +1322,6 @@ void spudec_free(void *this)
     spu->pal_width = spu->pal_height  = 0;
     free(spu);
   }
-}
-
-void spudec_set_hw_spu(void *this, struct vo *hw_spu)
-{
-  spudec_handle_t *spu = this;
-  if (!spu)
-    return;
-  spu->hw_spu = hw_spu;
-  vo_control(hw_spu, VOCTRL_SET_SPU_PALETTE, spu->global_palette);
 }
 
 /**

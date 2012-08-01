@@ -581,8 +581,6 @@ const m_option_t common_opts[] = {
     // specify IFO file for VOBSUB subtitle
     {"ifo", &spudec_ifo, CONF_TYPE_STRING, 0, 0, 0, NULL},
     // enable Closed Captioning display
-    {"subcc", &subcc_enabled, CONF_TYPE_INT, CONF_RANGE, 0, 4, NULL},
-    {"no-subcc", &subcc_enabled, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"overlapsub", &suboverlap_enabled, CONF_TYPE_FLAG, 0, 0, 2, NULL},
     {"sub-bg-color", &sub_bg_color, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
     {"sub-bg-alpha", &sub_bg_alpha, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},

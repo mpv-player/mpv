@@ -143,11 +143,6 @@ static void panscan_calc_internal(struct vo *vo, int zoom)
     vo->panscan_y = vo_panscan_area * vo->panscan_amount;
 }
 
-void panscan_calc(struct vo *vo)
-{
-    panscan_calc_internal(vo, A_ZOOM);
-}
-
 /**
  * vos that set vo_dwidth and v_dheight correctly should call this to update
  * vo_panscan_x and vo_panscan_y

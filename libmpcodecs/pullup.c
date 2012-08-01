@@ -442,21 +442,6 @@ void pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b,
 	c->head = c->head->next;
 }
 
-void pullup_flush_fields(struct pullup_context *c)
-{
-	struct pullup_field *f;
-
-	for (f = c->first; f && f != c->head; f = f->next) {
-		pullup_release_buffer(f->buffer, f->parity);
-		f->buffer = 0;
-	}
-	c->first = c->last = 0;
-}
-
-
-
-
-
 
 
 

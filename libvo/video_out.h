@@ -49,7 +49,6 @@ enum mp_voctrl {
     /* libmpcodecs direct rendering */
     VOCTRL_GET_IMAGE,
     VOCTRL_DRAW_IMAGE,
-    VOCTRL_SET_SPU_PALETTE,
     VOCTRL_GET_PANSCAN,
     VOCTRL_SET_PANSCAN,
     VOCTRL_SET_EQUALIZER,               // struct voctrl_set_equalizer_args

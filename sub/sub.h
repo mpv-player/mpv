@@ -166,8 +166,6 @@ void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
                                           unsigned char *srca,
                                           int stride),
                        void *ctx);
-void osd_remove_text(struct osd_state *osd, int dxs, int dys,
-                     void (*remove)(int x0, int y0, int w, int h));
 
 struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib);
 void osd_set_text(struct osd_state *osd, const char *text);
@@ -176,10 +174,6 @@ int vo_osd_changed(int new_value);
 void vo_osd_resized(void);
 int vo_osd_check_range_update(int,int,int,int);
 void osd_free(struct osd_state *osd);
-
-extern int vo_osd_changed_flag;
-
-unsigned utf8_get_char(const char **str);
 
 #ifdef CONFIG_DVDNAV
 #include <inttypes.h>
@@ -193,7 +187,6 @@ void osd_set_nav_box (uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey);
 
 // used only by osd_ft.c or osd_libass.c
 void osd_alloc_buf(mp_osd_obj_t* obj);
-void draw_alpha_buf(mp_osd_obj_t* obj, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
 void vo_draw_text_from_buffer(mp_osd_obj_t* obj,void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx);
 
 // defined in osd_ft.c or osd_libass.c

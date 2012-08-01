@@ -94,39 +94,6 @@ float font_factor = 0.75;
 float sub_delay = 0;
 float sub_fps = 0;
 
-// renders char to a big per-object buffer where alpha and bitmap are separated
-void draw_alpha_buf(mp_osd_obj_t* obj, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
-{
-    int dststride = obj->stride;
-    int dstskip = obj->stride-w;
-    int srcskip = stride-w;
-    int i, j;
-    unsigned char *b = obj->bitmap_buffer + (y0-obj->bbox.y1)*dststride + (x0-obj->bbox.x1);
-    unsigned char *a = obj->alpha_buffer  + (y0-obj->bbox.y1)*dststride + (x0-obj->bbox.x1);
-    unsigned char *bs = src;
-    unsigned char *as = srca;
-
-    if (x0 < obj->bbox.x1 || x0+w > obj->bbox.x2 || y0 < obj->bbox.y1 || y0+h > obj->bbox.y2) {
-	fprintf(stderr, "osd text out of range: bbox [%d %d %d %d], txt [%d %d %d %d]\n",
-		obj->bbox.x1, obj->bbox.x2, obj->bbox.y1, obj->bbox.y2,
-		x0, x0+w, y0, y0+h);
-	return;
-    }
-
-    for (i = 0; i < h; i++) {
-	for (j = 0; j < w; j++, b++, a++, bs++, as++) {
-	    if (*b < *bs) *b = *bs;
-	    if (*as) {
-		if (*a == 0 || *a > *as) *a = *as;
-	    }
-	}
-	b+= dstskip;
-	a+= dstskip;
-	bs+= srcskip;
-	as+= srcskip;
-    }
-}
-
 // allocates/enlarges the alpha/bitmap buffer
 void osd_alloc_buf(mp_osd_obj_t* obj)
 {
@@ -158,20 +125,6 @@ void vo_draw_text_from_buffer(mp_osd_obj_t* obj,void (*draw_alpha)(void *ctx, in
 		   obj->alpha_buffer,
 		   obj->stride);
     }
-}
-
-unsigned utf8_get_char(const char **str) {
-  const uint8_t *strp = (const uint8_t *)*str;
-  unsigned c;
-  GET_UTF8(c, *strp++, goto no_utf8;);
-  *str = (const char *)strp;
-  return c;
-
-no_utf8:
-  strp = (const uint8_t *)*str;
-  c = *strp++;
-  *str = (const char *)strp;
-  return c;
 }
 
 #ifdef CONFIG_DVDNAV
@@ -392,28 +345,6 @@ void osd_set_text(struct osd_state *osd, const char *text) {
     osd->osd_text = talloc_strdup(osd, text);
 }
 
-int vo_osd_changed_flag=0;
-
-void osd_remove_text(struct osd_state *osd, int dxs, int dys,
-                    void (*remove)(int x0, int y0, int w, int h))
-{
-    mp_osd_obj_t* obj=vo_osd_list;
-    osd_update(osd, dxs, dys);
-    while(obj){
-      if(((obj->flags&OSDFLAG_CHANGED) || (obj->flags&OSDFLAG_VISIBLE)) &&
-         (obj->flags&OSDFLAG_OLD_BBOX)){
-          int w=obj->old_bbox.x2-obj->old_bbox.x1;
-	  int h=obj->old_bbox.y2-obj->old_bbox.y1;
-	  if(w>0 && h>0){
-	      vo_osd_changed_flag=obj->flags&OSDFLAG_CHANGED;	// temp hack
-              remove(obj->old_bbox.x1,obj->old_bbox.y1,w,h);
-	  }
-//	  obj->flags&=~OSDFLAG_OLD_BBOX;
-      }
-      obj=obj->next;
-    }
-}
-
 void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
                        int left_border, int top_border, int right_border,
                        int bottom_border, int orig_w, int orig_h,
@@ -428,7 +359,6 @@ void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
                    bottom_border, orig_w, orig_h);
     while(obj){
       if(obj->flags&OSDFLAG_VISIBLE){
-	vo_osd_changed_flag=obj->flags&OSDFLAG_CHANGED;	// temp hack
 	switch(obj->type){
 	case OSDTYPE_SPU:
 	    vo_draw_spudec_sub(obj, draw_alpha, ctx); // FIXME

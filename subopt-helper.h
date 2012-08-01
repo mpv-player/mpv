@@ -60,6 +60,5 @@ int int_non_neg(void *iptr);
 int int_pos(void *iptr);
 
 int strargcmp(strarg_t *arg, const char *str);
-int strargcasecmp(strarg_t *arg, char *str);
 
 #endif /* MPLAYER_SUBOPT_HELPER_H */

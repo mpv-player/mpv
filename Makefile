@@ -370,8 +370,6 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/mp_taglists.c \
               libmpdemux/mpeg_packetizer.c \
               libmpdemux/video.c \
-              libmpdemux/yuv4mpeg.c \
-              libmpdemux/yuv4mpeg_ratio.c \
               libvo/osd.c \
               libvo/eosd_packer.c \
               osdep/numcores.c \
@@ -392,7 +390,6 @@ SRCS_COMMON = asxparser.c \
               sub/find_subfiles.c \
               sub/spudec.c \
               sub/sub.c \
-              sub/sub_cc.c \
               sub/subassconvert.c \
               sub/subreader.c \
               sub/vobsub.c \

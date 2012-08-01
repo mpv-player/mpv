@@ -145,26 +145,3 @@ send_mpeg_pes_packet (unsigned char *data, int len, int id, uint64_t pts,
 {
     return send_mpeg_pes_packet_ll(data, len, id, pts, type, NULL, 0, 0, my_write);
 }
-
-
-/* Send MPEG <type> PS packet */
-int
-send_mpeg_ps_packet(unsigned char *data, int len, int id, uint64_t pts, int type,
-                      int my_write (const unsigned char *data, int len))
-{
-  if(type == 2)
-    my_write (ps2_header, sizeof (ps2_header));
-  else
-    my_write (ps1_header, sizeof (ps1_header));
-  return send_mpeg_pes_packet (data, len, id, pts, type, my_write);
-}
-
-/* Send MPEG 2 LPCM packet */
-int
-send_mpeg_lpcm_packet(unsigned char* data, int len,
-                       int id, uint64_t pts, int freq_id,
-                       int my_write (const unsigned char *data, int len))
-{
-    unsigned char header[7] = {0xA0, 0x07, 0x00, 0x04, 0x0C, 1 | (freq_id << 4), 0x80};
-    return send_mpeg_pes_packet_ll(data, len, 0xBD, pts, 2, header, sizeof(header), 1, my_write);
-}

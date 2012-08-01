@@ -309,17 +309,6 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
     return demuxer->s_streams[id];
 }
 
-struct sh_sub *new_sh_sub_sid_lang(struct demuxer *demuxer, int id, int sid,
-                                   const char *lang)
-{
-    struct sh_sub *sh = new_sh_sub_sid(demuxer, id, sid);
-    if (lang && lang[0] && strcmp(lang, "und")) {
-        sh->lang = talloc_strdup(sh, lang);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", sid, lang);
-    }
-    return sh;
-}
-
 static void free_sh_sub(sh_sub_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);
@@ -679,43 +668,6 @@ int demux_read_data(demux_stream_t *ds, unsigned char *mem, int len)
         }
     }
     return bytes;
-}
-
-/**
- * \brief read data until the given 3-byte pattern is encountered, up to maxlen
- * \param mem memory to read data into, may be NULL to discard data
- * \param maxlen maximum number of bytes to read
- * \param read number of bytes actually read
- * \param pattern pattern to search for (lowest 8 bits are ignored)
- * \return whether pattern was found
- */
-int demux_pattern_3(demux_stream_t *ds, unsigned char *mem, int maxlen,
-                    int *read, uint32_t pattern)
-{
-    register uint32_t head = 0xffffff00;
-    register uint32_t pat = pattern & 0xffffff00;
-    int total_len = 0;
-    do {
-        register unsigned char *ds_buf = &ds->buffer[ds->buffer_size];
-        int len = ds->buffer_size - ds->buffer_pos;
-        register long pos = -len;
-        if (unlikely(pos >= 0)) { // buffer is empty
-            ds_fill_buffer(ds);
-            continue;
-        }
-        do {
-            head |= ds_buf[pos];
-            head <<= 8;
-        } while (++pos && head != pat);
-        len += pos;
-        if (total_len + len > maxlen)
-            len = maxlen - total_len;
-        len = demux_read_data(ds, mem ? &mem[total_len] : NULL, len);
-        total_len += len;
-    } while ((head != pat || total_len < 3) && total_len < maxlen && !ds->eof);
-    if (read)
-        *read = total_len;
-    return total_len >= 3 && head == pat;
 }
 
 void ds_free_packs(demux_stream_t *ds)

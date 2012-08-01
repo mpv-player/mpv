@@ -26,51 +26,6 @@
 
 #include "af.h"
 
-// Convert from string to format
-int af_str2fmt(const char* str)
-{
-  int format=0;
-  // Scan for endianness
-  if(strstr(str,"be") || strstr(str,"BE"))
-    format |= AF_FORMAT_BE;
-  else if(strstr(str,"le") || strstr(str,"LE"))
-    format |= AF_FORMAT_LE;
-  else
-    format |= AF_FORMAT_NE;
-
-  // Scan for special formats
-  if(strstr(str,"mulaw") || strstr(str,"MULAW")){
-    format |= AF_FORMAT_MU_LAW; return format;
-  }
-  if(strstr(str,"alaw") || strstr(str,"ALAW")){
-    format |= AF_FORMAT_A_LAW; return format;
-  }
-  if(strstr(str,"ac3") || strstr(str,"AC3")){
-    format |= AF_FORMAT_AC3 | AF_FORMAT_16BIT; return format;
-  }
-  if(strstr(str,"mpeg2") || strstr(str,"MPEG2")){
-    format |= AF_FORMAT_MPEG2; return format;
-  }
-  if(strstr(str,"imaadpcm") || strstr(str,"IMAADPCM")){
-    format |= AF_FORMAT_IMA_ADPCM; return format;
-  }
-
-  // Scan for int/float
-  if(strstr(str,"float") || strstr(str,"FLOAT")){
-    format |= AF_FORMAT_F; return format;
-  }
-  else
-    format |= AF_FORMAT_I;
-
-  // Scan for signed/unsigned
-  if(strstr(str,"unsigned") || strstr(str,"UNSIGNED"))
-    format |= AF_FORMAT_US;
-  else
-    format |= AF_FORMAT_SI;
-
-  return format;
-}
-
 int af_fmt2bits(int format)
 {
     if (AF_FORMAT_IS_AC3(format)) return 16;

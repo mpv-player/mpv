@@ -80,27 +80,6 @@ int m_struct_set(const m_struct_t *st, void *obj, const char *field,
   return 1;
 }
 
-void
-m_struct_reset(const m_struct_t* st, void* obj, const char* field) {
-  const m_option_t* f;
-
-  if(!field) { // Reset all options
-    int i;
-    for(i = 0 ; st->fields[i].name ; i++)
-      m_option_copy(&st->fields[i],M_ST_MB_P(obj,st->fields[i].p),M_ST_MB_P(st->defaults,st->fields[i].p));
-    return;
-  }
-
-  // Only one
-  f = m_struct_get_field(st,field);
-  if(!f) {
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Struct %s doesn't have any %s field\n",
-	   st->name,field);
-    return;
-  }
-  m_option_copy(f,M_ST_MB_P(obj,f->p),M_ST_MB_P(st->defaults,f->p));
-}
-
 /// Free an allocated struct
 void
 m_struct_free(const m_struct_t* st, void* obj) {
@@ -109,19 +88,4 @@ m_struct_free(const m_struct_t* st, void* obj) {
   for(i = 0 ; st->fields[i].name ; i++)
     m_option_free(&st->fields[i],M_ST_MB_P(obj,st->fields[i].p));
   free(obj);
-}
-
-void*
-m_struct_copy(const m_struct_t* st, void* obj) {
-  void* r = malloc(st->size);
-  int i;
-
-  memcpy(r,obj,st->size);
-  for(i = 0 ; st->fields[i].name ; i++) {
-    if(st->fields[i].type->flags & M_OPT_TYPE_DYNAMIC)
-      memset(M_ST_MB_P(r,st->fields[i].p),0,st->fields[i].type->size);
-    m_option_copy(&st->fields[i],M_ST_MB_P(r,st->fields[i].p),M_ST_MB_P(obj,st->fields[i].p));
-  }
-
-  return r;
 }

@@ -91,12 +91,6 @@ void subcp_close (void); /* for demux_ogg.c */
 const char* guess_buffer_cp(unsigned char* buffer, int buflen, const char *preferred_language, const char *fallback);
 const char* guess_cp(struct stream *st, const char *preferred_language, const char *fallback);
 #endif
-void list_sub_file(sub_data* subd);
-void dump_srt(sub_data* subd, float fps);
-void dump_mpsub(sub_data* subd, float fps);
-void dump_microdvd(sub_data* subd, float fps);
-void dump_jacosub(sub_data* subd, float fps);
-void dump_sami(sub_data* subd, float fps);
 void sub_free( sub_data * subd );
 struct MPContext;
 void find_sub(struct MPContext *mpctx, sub_data* subd,int key);

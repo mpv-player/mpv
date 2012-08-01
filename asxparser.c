@@ -68,9 +68,6 @@ asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs);
 char*
 asx_get_attrib(const char* attrib,char** attribs);
 
-int
-asx_attrib_to_enum(const char* val,char** valid_vals);
-
 #define asx_free_attribs(a) asx_list_free(&a,free)
 
 ////// List utils
@@ -107,20 +104,6 @@ asx_get_attrib(const char* attrib,char** attribs) {
       return strdup(ptr[1]);
   }
   return NULL;
-}
-
-int
-asx_attrib_to_enum(const char* val,char** valid_vals) {
-  char** ptr;
-  int r = 0;
-
-  if(valid_vals == NULL || val == NULL) return -2;
-  for(ptr = valid_vals ; ptr[0] != NULL ; ptr++) {
-    if(strcasecmp(val,ptr[0]) == 0) return r;
-    r++;
-  }
-
-  return -1;
 }
 
 #define asx_warning_attrib_required(p,e,a) mp_msg(MSGT_PLAYTREE,MSGL_WARN,"At line %d : element %s don't have the required attribute %s",p->line,e,a)

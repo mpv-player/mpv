@@ -36,7 +36,6 @@ void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
 int filter_video(sh_video_t *sh_video, void *frame, double pts);
 
 int get_video_quality_max(sh_video_t *sh_video);
-void set_video_quality(sh_video_t *sh_video, int quality);
 
 int get_video_colors(sh_video_t *sh_video, const char *item, int *value);
 int set_video_colors(sh_video_t *sh_video, const char *item, int value);

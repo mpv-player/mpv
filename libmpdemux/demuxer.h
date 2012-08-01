@@ -317,8 +317,6 @@ static inline int ds_tell_pts(struct demux_stream *ds)
 }
 
 int demux_read_data(struct demux_stream *ds, unsigned char *mem, int len);
-int demux_pattern_3(struct demux_stream *ds, unsigned char *mem, int maxlen,
-                    int *read, uint32_t pattern);
 
 #define demux_peekc(ds) ( \
         (likely(ds->buffer_pos<ds->buffer_size)) ? ds->buffer[ds->buffer_pos] \

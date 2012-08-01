@@ -92,22 +92,6 @@ m_struct_alloc(const m_struct_t* st);
 int m_struct_set(const m_struct_t *st, void *obj, const char *field,
                  struct bstr param);
 
-/// Reset a field (or all if field == NULL) to defaults.
-/** \param st Struct definition.
- *  \param obj Pointer to the struct to set.
- *  \param field Name of the field to reset, if NULL all fields are reseted.
- */
-void
-m_struct_reset(const m_struct_t* st, void* obj, const char* field);
-
-/// Create a copy of an existing struct.
-/** \param st Struct definition.
- *  \param obj Pointer to the struct to copy.
- *  \return Newly allocated copy of obj.
- */
-void*
-m_struct_copy(const m_struct_t* st, void* obj);
-
 /// Free an allocated struct.
 /** \param st Struct definition.
  *  \param obj Pointer to the struct to copy.

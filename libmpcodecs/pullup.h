@@ -89,7 +89,6 @@ struct pullup_buffer *pullup_get_buffer(struct pullup_context *c, int parity);
 
 void pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b,
                          int parity, double pts);
-void pullup_flush_fields(struct pullup_context *c);
 
 struct pullup_frame *pullup_get_frame(struct pullup_context *c);
 void pullup_pack_frame(struct pullup_context *c, struct pullup_frame *fr);

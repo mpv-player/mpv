@@ -859,30 +859,6 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
     return 1;
 }
 
-int mp_input_parse_and_queue_cmds(struct input_ctx *ictx, const char *str)
-{
-    int cmd_num = 0;
-
-    while (*str == '\n' || *str == '\r' || *str == ' ')
-        ++str;
-    while (*str) {
-        mp_cmd_t *cmd;
-        size_t len = strcspn(str, "\r\n");
-        char *cmdbuf = talloc_size(NULL, len + 1);
-        av_strlcpy(cmdbuf, str, len + 1);
-        cmd = mp_input_parse_cmd(cmdbuf);
-        if (cmd) {
-            mp_input_queue_cmd(ictx, cmd);
-            ++cmd_num;
-        }
-        str += len;
-        while (*str == '\n' || *str == '\r' || *str == ' ')
-            ++str;
-        talloc_free(cmdbuf);
-    }
-    return cmd_num;
-}
-
 mp_cmd_t *mp_input_parse_cmd(char *str)
 {
     int i, l;

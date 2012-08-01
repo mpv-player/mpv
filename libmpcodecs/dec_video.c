@@ -72,19 +72,6 @@ int get_video_quality_max(sh_video_t *sh_video)
     return 0;
 }
 
-void set_video_quality(sh_video_t *sh_video, int quality)
-{
-    vf_instance_t *vf = sh_video->vfilter;
-    if (vf) {
-        int ret = vf->control(vf, VFCTRL_SET_PP_LEVEL, (void *) (&quality));
-        if (ret == CONTROL_TRUE)
-            return;             // success
-    }
-    const struct vd_functions *vd = sh_video->vd_driver;
-    if (vd)
-        vd->control(sh_video, VDCTRL_SET_PP_LEVEL, (void *) (&quality));
-}
-
 int set_video_colors(sh_video_t *sh_video, const char *item, int value)
 {
     vf_instance_t *vf = sh_video->vfilter;

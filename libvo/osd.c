@@ -128,20 +128,6 @@ void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, in
 #endif
 }
 
-void vo_draw_alpha_uyvy(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
-#if ARCH_X86
-	// ordered by speed / fastest first
-	if(gCpuCaps.hasMMX2)
-		vo_draw_alpha_uyvy_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
-	else if(gCpuCaps.hasMMX)
-		vo_draw_alpha_uyvy_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-	else
-		vo_draw_alpha_uyvy_X86(w, h, src, srca, srcstride, dstbase, dststride);
-#else
-		vo_draw_alpha_uyvy_C(w, h, src, srca, srcstride, dstbase, dststride);
-#endif
-}
-
 void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
 #if ARCH_X86
 	// ordered by speed / fastest first

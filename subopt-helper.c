@@ -336,11 +336,3 @@ int strargcmp(strarg_t *arg, const char *str) {
     res = arg->len - strlen(str);
   return res;
 }
-
-/** \brief compare the stings just as strcasecmp does */
-int strargcasecmp(strarg_t *arg, char *str) {
-  int res = strncasecmp(arg->str, str, arg->len);
-  if (!res && arg->len != strlen(str))
-    res = arg->len - strlen(str);
-  return res;
-}

@@ -252,12 +252,6 @@ struct mp_cmd *mp_input_get_cmd(struct input_ctx *ictx, int time,
 /* Parse text and return corresponding struct mp_cmd. */
 struct mp_cmd *mp_input_parse_cmd(char *str);
 
-/**
- * Parse and queue commands separated by '\n'.
- * Return number of commands queued.
- */
-int mp_input_parse_and_queue_cmds(struct input_ctx *ictx, const char *str);
-
 // After getting a command from mp_input_get_cmd you need to free it using this
 // function
 void mp_cmd_free(struct mp_cmd *cmd);

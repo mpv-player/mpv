@@ -74,7 +74,6 @@
 #include "sub/subreader.h"
 #include "sub/find_subfiles.h"
 #include "sub/dec_sub.h"
-#include "sub/sub_cc.h"
 
 #include "mp_osd.h"
 #include "libvo/video_out.h"
@@ -4091,8 +4090,6 @@ goto_enable_cache:
 
     reinit_video_chain(mpctx);
     if (mpctx->sh_video) {
-        if (mpctx->sh_video->output_flags & VFCAP_SPU && vo_spudec)
-            spudec_set_hw_spu(vo_spudec, mpctx->video_out);
         osd_font_invalidate();
     } else if (!mpctx->sh_audio)
         goto goto_next_file;

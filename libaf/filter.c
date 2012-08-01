@@ -46,51 +46,6 @@ inline FLOAT_TYPE af_filter_fir(register unsigned int n, const FLOAT_TYPE* w,
   return y;
 }
 
-/* C implementation of parallel FIR filter y(k)=w(k) * x(k) (where * denotes convolution)
-
-   n  number of filter taps, where mod(n,4)==0
-   d  number of filters
-   xi current index in xq
-   w  filter taps k by n big
-   x  input signal must be a circular buffers which are indexed backwards
-   y  output buffer
-   s  output buffer stride
-*/
-FLOAT_TYPE* af_filter_pfir(unsigned int n, unsigned int d, unsigned int xi,
-                           const FLOAT_TYPE** w, const FLOAT_TYPE** x, FLOAT_TYPE* y,
-                           unsigned int s)
-{
-  register const FLOAT_TYPE* xt = *x + xi;
-  register const FLOAT_TYPE* wt = *w;
-  register int    nt = 2*n;
-  while(d-- > 0){
-    *y = af_filter_fir(n,wt,xt);
-    wt+=n;
-    xt+=nt;
-    y+=s;
-  }
-  return y;
-}
-
-/* Add new data to circular queue designed to be used with a parallel
-   FIR filter, with d filters. xq is the circular queue, in pointing
-   at the new samples, xi current index in xq and n the length of the
-   filter. xq must be n*2 by k big, s is the index for in.
-*/
-int af_filter_updatepq(unsigned int n, unsigned int d, unsigned int xi,
-                       FLOAT_TYPE** xq, const FLOAT_TYPE* in, unsigned int s)
-{
-  register FLOAT_TYPE* txq = *xq + xi;
-  register int nt = n*2;
-
-  while(d-- >0){
-    *txq= *(txq+n) = *in;
-    txq+=nt;
-    in+=s;
-  }
-  return (++xi)&(n-1);
-}
-
 /******************************************************************************
 *  FIR filter design
 ******************************************************************************/
@@ -232,51 +187,6 @@ int af_filter_design_fir(unsigned int n, FLOAT_TYPE* w, const FLOAT_TYPE* fc,
     w[i] *= g;
 
   return 0;
-}
-
-/* Design polyphase FIR filter from prototype filter
-
-   n     length of prototype filter
-   k     number of polyphase components
-   w     prototype filter taps
-   pw    Parallel FIR filter
-   g     Filter gain
-   flags FWD forward indexing
-         REW reverse indexing
-	 ODD multiply every 2nd filter tap by -1 => HP filter
-
-   returns 0 if OK, -1 if fail
-*/
-int af_filter_design_pfir(unsigned int n, unsigned int k, const FLOAT_TYPE* w,
-                          FLOAT_TYPE** pw, FLOAT_TYPE g, unsigned int flags)
-{
-  int l = (int)n/k;	// Length of individual FIR filters
-  int i;     	// Counters
-  int j;
-  FLOAT_TYPE t;	// g * w[i]
-
-  // Sanity check
-  if(l<1 || k<1 || !w || !pw)
-    return -1;
-
-  // Do the stuff
-  if(flags&REW){
-    for(j=l-1;j>-1;j--){//Columns
-      for(i=0;i<(int)k;i++){//Rows
-	t=g *  *w++;
-	pw[i][j]=t * ((flags & ODD) ? ((j & 1) ? -1 : 1) : 1);
-      }
-    }
-  }
-  else{
-    for(j=0;j<l;j++){//Columns
-      for(i=0;i<(int)k;i++){//Rows
-	t=g *  *w++;
-	pw[i][j]=t * ((flags & ODD) ? ((j & 1) ? 1 : -1) : 1);
-      }
-    }
-  }
-  return -1;
 }
 
 /******************************************************************************
