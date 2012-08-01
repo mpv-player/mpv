@@ -39,7 +39,6 @@ void GetCpuCaps(CpuCaps *c)
     memset(c, 0, sizeof(*c));
     int flags = av_get_cpu_flags();
 #if ARCH_X86
-    c->isX86 = 1;
     c->hasMMX = flags & AV_CPU_FLAG_MMX;
     c->hasMMX2 = flags & AV_CPU_FLAG_MMX2;
     c->hasSSE = flags & AV_CPU_FLAG_SSE;

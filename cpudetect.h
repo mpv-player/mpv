@@ -22,17 +22,9 @@
 #include <stdbool.h>
 #include "config.h"
 
-#define CPUTYPE_I386    3
-#define CPUTYPE_I486    4
-#define CPUTYPE_I586    5
-#define CPUTYPE_I686    6
-
 #include "ffmpeg_files/x86_cpu.h"
 
 typedef struct cpucaps_s {
-    int cpuType;
-    int cpuStepping;
-    bool isX86;
     bool hasMMX;
     bool hasMMX2;
     bool hasSSE;
@@ -43,11 +35,6 @@ typedef struct cpucaps_s {
 
 extern CpuCaps gCpuCaps;
 
-void do_cpuid(unsigned int ax, unsigned int *p);
-
 void GetCpuCaps(CpuCaps *caps);
-
-/* returned value is malloc()'ed so free() it after use */
-char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]);
 
 #endif /* MPLAYER_CPUDETECT_H */
