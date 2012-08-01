@@ -645,7 +645,6 @@ distclean: clean
 	-$(RM) config.log config.mak config.h codecs.conf.h version.h TAGS tags
 	-$(RM) libvo/vdpau_template.c
 	-$(RM) libmpdemux/ebml_types.h libmpdemux/ebml_defs.c
-	-$(RM) $(call ADD_ALL_EXESUFS,cpuinfo)
 
 TAGS:
 	$(RM) $@; find . -name '*.[chS]' -o -name '*.asm' | xargs etags -a

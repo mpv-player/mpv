@@ -10,8 +10,6 @@
 /version.h
 /codecs.conf.h
 /input/input_conf.h
-/codec-cfg
-/cpuinfo
 /tags
 /TAGS
 /locale
