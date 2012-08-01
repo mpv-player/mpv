@@ -1438,24 +1438,24 @@ static int get_input_from_name(char *name, int *keys)
     return 1;
 }
 
-#define SPACE_CHAR " \n\r\t"
-
 static void bind_keys(struct input_ctx *ictx, bool builtin,
-                      const int keys[MP_MAX_KEY_DOWN + 1], char *cmd)
+                      const int keys[MP_MAX_KEY_DOWN + 1], bstr command)
 {
     int i = 0, j;
     struct cmd_bind *bind = NULL;
     struct cmd_bind_section *bind_section = NULL;
-    char *section = NULL, *p;
+    char *section = NULL;
 
-    if (*cmd == '{' && (p = strchr(cmd, '}'))) {
-        *p = 0;
-        section = ++cmd;
-        cmd = ++p;
-        // Jump beginning space
-        cmd += strspn(cmd, SPACE_CHAR);
+    if (bstr_startswith0(command, "{")) {
+        int p = bstrchr(command, '}');
+        if (p != -1) {
+            bstr bsection = bstr_strip(bstr_splice(command, 1, p));
+            section = bstrdup0(NULL, bsection);
+            command = bstr_lstrip(bstr_cut(command, p + 1));
+        }
     }
     bind_section = get_bind_section(ictx, builtin, section);
+    talloc_free(section);
 
     if (bind_section->cmd_binds) {
         for (i = 0; bind_section->cmd_binds[i].cmd != NULL; i++) {
@@ -1476,7 +1476,7 @@ static void bind_keys(struct input_ctx *ictx, bool builtin,
         bind = &bind_section->cmd_binds[i];
     }
     talloc_free(bind->cmd);
-    bind->cmd = talloc_strdup(bind_section->cmd_binds, cmd);
+    bind->cmd = bstrdup0(bind_section->cmd_binds, command);
     memcpy(bind->input, keys, (MP_MAX_KEY_DOWN + 1) * sizeof(int));
 }
 
@@ -1491,7 +1491,7 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data)
             continue;
         struct bstr command;
         // Find the key name starting a line
-        struct bstr keyname = bstr_split(line, SPACE_CHAR, &command);
+        struct bstr keyname = bstr_split(line, WHITESPACE, &command);
         command = bstr_strip(command);
         if (command.len == 0) {
             mp_tmsg(MSGT_INPUT, MSGL_ERR,
@@ -1506,10 +1506,8 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data)
             continue;
         }
         talloc_free(name);
-        char *cmd = bstrdup0(NULL, command);
-        bind_keys(ictx, builtin, keys, cmd);
+        bind_keys(ictx, builtin, keys, command);
         n_binds++;
-        talloc_free(cmd);
     }
 
     return n_binds;
