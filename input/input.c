@@ -400,158 +400,6 @@ struct key_name modifier_names[] = {
 
 #define KEY_MODIFIER_MASK (KEY_MODIFIER_SHIFT | KEY_MODIFIER_CTRL | KEY_MODIFIER_ALT | KEY_MODIFIER_META)
 
-// This is the default binding. The content of input.conf overrides these.
-// The first arg is a null terminated array of key codes.
-// The second is the command
-
-static const struct cmd_bind def_cmd_binds[] = {
-
-  { { MOUSE_BTN0_DBL, 0 }, "vo_fullscreen" },
-  { { MOUSE_BTN2, 0 }, "pause" },
-  { {  MOUSE_BTN3, 0 }, "seek 10" },
-  { {  MOUSE_BTN4, 0 }, "seek -10" },
-  { {  MOUSE_BTN5, 0 }, "volume 1" },
-  { {  MOUSE_BTN6, 0 }, "volume -1" },
-
-#ifdef CONFIG_DVDNAV
-  { { KEY_KP8, 0 }, "dvdnav up" },   // up
-  { { KEY_KP2, 0 }, "dvdnav down" },   // down
-  { { KEY_KP4, 0 }, "dvdnav left" },   // left
-  { { KEY_KP6, 0 }, "dvdnav right" },   // right
-  { { KEY_KP5, 0 }, "dvdnav menu" },   // menu
-  { { KEY_KPENTER, 0 }, "dvdnav select" },   // select
-  { { MOUSE_BTN0, 0 }, "dvdnav mouse" },   //select
-  { { KEY_KP7, 0 }, "dvdnav prev" },   // previous menu
-#endif
-
-  { { KEY_RIGHT, 0 }, "seek 10" },
-  { {  KEY_LEFT, 0 }, "seek -10" },
-  { { KEY_MODIFIER_SHIFT + KEY_RIGHT, 0 }, "seek  1 0 1" },
-  { { KEY_MODIFIER_SHIFT + KEY_LEFT,  0 }, "seek -1 0 1" },
-  { {  KEY_UP, 0 }, "seek 60" },
-  { {  KEY_DOWN, 0 }, "seek -60" },
-  { { KEY_MODIFIER_SHIFT + KEY_UP,    0 }, "seek  5 0 1" },
-  { { KEY_MODIFIER_SHIFT + KEY_DOWN,  0 }, "seek -5 0 1" },
-  { {  KEY_PAGE_UP, 0 }, "seek 600" },
-  { { KEY_PAGE_DOWN, 0 }, "seek -600" },
-  { { '+', 0 }, "audio_delay 0.100" },
-  { { '-', 0 }, "audio_delay -0.100" },
-  { { '[', 0 }, "speed_mult 0.9091" },
-  { { ']', 0 }, "speed_mult 1.1" },
-  { { '{', 0 }, "speed_mult 0.5" },
-  { { '}', 0 }, "speed_mult 2.0" },
-  { { KEY_BACKSPACE, 0 }, "speed_set 1.0" },
-  { { 'q', 0 }, "quit" },
-  { { KEY_ESC, 0 }, "quit" },
-  { { 'p', 0 }, "pause" },
-  { { ' ', 0 }, "pause" },
-  { { '.', 0 }, "frame_step" },
-  { { '>', 0 }, "playlist_next" },
-  { { KEY_ENTER, 0 }, "playlist_next 1" },
-  { { '<', 0 }, "playlist_prev" },
-  { { 'o', 0 }, "osd" },
-  { { 'I', 0 }, "osd_show_property_text \"${filename}\"" },
-  { { 'P', 0 }, "osd_show_progression" },
-  { { 'z', 0 }, "sub_delay -0.1" },
-  { { 'x', 0 }, "sub_delay +0.1" },
-  { { 'g', 0 }, "sub_step -1" },
-  { { 'y', 0 }, "sub_step +1" },
-  { { '9', 0 }, "volume -1" },
-  { { '/', 0 }, "volume -1" },
-  { { '0', 0 }, "volume 1" },
-  { { '*', 0 }, "volume 1" },
-  { { '(', 0 }, "balance -0.1" },
-  { { ')', 0 }, "balance 0.1" },
-  { { 'm', 0 }, "mute" },
-  { { '1', 0 }, "contrast -1" },
-  { { '2', 0 }, "contrast 1" },
-  { { '3', 0 }, "brightness -1" },
-  { { '4', 0 }, "brightness 1" },
-  { { '5', 0 }, "hue -1" },
-  { { '6', 0 }, "hue 1" },
-  { { '7', 0 }, "saturation -1" },
-  { { '8', 0 }, "saturation 1" },
-  { { 'd', 0 }, "frame_drop" },
-  { { 'D', 0 }, "step_property_osd deinterlace" },
-  { { 'c', 0 }, "step_property_osd colormatrix" },
-  { { 'r', 0 }, "sub_pos -1" },
-  { { 't', 0 }, "sub_pos +1" },
-  { { 'a', 0 }, "sub_alignment" },
-  { { 'v', 0 }, "sub_visibility" },
-  { { 'V', 0 }, "step_property_osd ass_vsfilter_aspect_compat" },
-  { { 'j', 0 }, "sub_select" },
-  { { 'J', 0 }, "sub_select -3" },
-  { { 'F', 0 }, "forced_subs_only" },
-  { { '#', 0 }, "switch_audio" },
-  { { '_', 0 }, "step_property switch_video" },
-  { { KEY_TAB, 0 }, "step_property switch_program" },
-  { { 'i', 0 }, "edl_mark" },
-#ifdef CONFIG_TV
-  { { 'h', 0 }, "tv_step_channel 1" },
-  { { 'k', 0 }, "tv_step_channel -1" },
-  { { 'n', 0 }, "tv_step_norm" },
-  { { 'u', 0 }, "tv_step_chanlist" },
-#endif
-  { { 'X', 0 }, "step_property teletext_mode 1" },
-  { { 'W', 0 }, "step_property teletext_page 1" },
-  { { 'Q', 0 }, "step_property teletext_page -1" },
-#ifdef CONFIG_JOYSTICK
-  { { JOY_AXIS0_PLUS, 0 }, "seek 10" },
-  { { JOY_AXIS0_MINUS, 0 }, "seek -10" },
-  { { JOY_AXIS1_MINUS, 0 }, "seek 60" },
-  { { JOY_AXIS1_PLUS, 0 }, "seek -60" },
-  { { JOY_BTN0, 0 }, "pause" },
-  { { JOY_BTN1, 0 }, "osd" },
-  { { JOY_BTN2, 0 }, "volume 1"},
-  { { JOY_BTN3, 0 }, "volume -1"},
-#endif
-#ifdef CONFIG_APPLE_REMOTE
-  { { AR_PLAY, 0}, "pause" },
-  { { AR_PLAY_HOLD, 0}, "quit" },
-  { { AR_NEXT, 0 }, "seek 30" },
-  { { AR_NEXT_HOLD, 0 }, "seek 120" },
-  { { AR_PREV, 0 }, "seek -10" },
-  { { AR_PREV_HOLD, 0 }, "seek -120" },
-  { { AR_MENU, 0 }, "osd" },
-  { { AR_MENU_HOLD, 0 }, "mute" },
-  { { AR_VUP, 0 }, "volume 1"},
-  { { AR_VDOWN, 0 }, "volume -1"},
-#endif
-  { { 'T', 0 }, "vo_ontop" },
-  { { 'f', 0 }, "vo_fullscreen" },
-  { { 'C', 0 }, "step_property_osd capturing" },
-  { { 's', 0 }, "screenshot 0" },
-  { { 'S', 0 }, "screenshot 1" },
-  { { KEY_MODIFIER_ALT + 's', 0 }, "screenshot 0 1" },
-  { { KEY_MODIFIER_ALT + 'S', 0 }, "screenshot 1 1" },
-  { { 'w', 0 }, "panscan -0.1" },
-  { { 'e', 0 }, "panscan +0.1" },
-
-  { { KEY_POWER, 0 }, "quit" },
-  { { KEY_MENU, 0 }, "osd" },
-  { { KEY_PLAY, 0 }, "pause" },
-  { { KEY_PAUSE, 0 }, "pause" },
-  { { KEY_PLAYPAUSE, 0 }, "pause" },
-  { { KEY_STOP, 0 }, "quit" },
-  { { KEY_FORWARD, 0 }, "seek 60" },
-  { { KEY_REWIND, 0 }, "seek -60" },
-  { { KEY_NEXT, 0 }, "playlist_next" },
-  { { KEY_PREV, 0 }, "playlist_prev" },
-  { { KEY_VOLUME_UP, 0 }, "volume 1" },
-  { { KEY_VOLUME_DOWN, 0 }, "volume -1" },
-  { { KEY_MUTE, 0 }, "mute" },
-
-  { { KEY_CLOSE_WIN, 0 }, "quit" },
-
-  { { '!', 0 }, "seek_chapter -1" },
-  { { '@', 0 }, "seek_chapter 1" },
-  { { 'A', 0 }, "switch_angle 1" },
-  { { 'U', 0 }, "stop" },
-
-  { { 0 }, NULL }
-};
-
-
 #ifndef MP_MAX_KEY_FD
 #define MP_MAX_KEY_FD 10
 #endif
@@ -658,6 +506,10 @@ static const m_option_t mp_input_opts[] = {
 };
 
 static int default_cmd_func(int fd, char *buf, int l);
+
+static const char builtin_input_conf[] =
+#include "input/input_conf.h"
+;
 
 // Encode the unicode codepoint as UTF-8, and append to the end of the
 // talloc'ed buffer.
@@ -1588,7 +1440,7 @@ static int get_input_from_name(char *name, int *keys)
 
 #define SPACE_CHAR " \n\r\t"
 
-static void bind_keys(struct input_ctx *ictx,
+static void bind_keys(struct input_ctx *ictx, bool builtin,
                       const int keys[MP_MAX_KEY_DOWN + 1], char *cmd)
 {
     int i = 0, j;
@@ -1603,7 +1455,7 @@ static void bind_keys(struct input_ctx *ictx,
         // Jump beginning space
         cmd += strspn(cmd, SPACE_CHAR);
     }
-    bind_section = get_bind_section(ictx, false, section);
+    bind_section = get_bind_section(ictx, builtin, section);
 
     if (bind_section->cmd_binds) {
         for (i = 0; bind_section->cmd_binds[i].cmd != NULL; i++) {
@@ -1628,7 +1480,7 @@ static void bind_keys(struct input_ctx *ictx,
     memcpy(bind->input, keys, (MP_MAX_KEY_DOWN + 1) * sizeof(int));
 }
 
-static int parse_config(struct input_ctx *ictx, bstr data)
+static int parse_config(struct input_ctx *ictx, bool builtin, bstr data)
 {
     int n_binds = 0, keys[MP_MAX_KEY_DOWN + 1];
 
@@ -1655,7 +1507,7 @@ static int parse_config(struct input_ctx *ictx, bstr data)
         }
         talloc_free(name);
         char *cmd = bstrdup0(NULL, command);
-        bind_keys(ictx, keys, cmd);
+        bind_keys(ictx, builtin, keys, cmd);
         n_binds++;
         talloc_free(cmd);
     }
@@ -1674,7 +1526,7 @@ static int parse_config_file(struct input_ctx *ictx, char *file)
     res = stream_read_complete(s, NULL, 1000000, 0);
     free_stream(s);
     mp_msg(MSGT_INPUT, MSGL_V, "Parsing input config file %s\n", file);
-    int n_binds = parse_config(ictx, res);
+    int n_binds = parse_config(ictx, false, res);
     talloc_free(res.start);
     mp_msg(MSGT_INPUT, MSGL_V, "Input config file %s parsed: %d binds\n",
            file, n_binds);
@@ -1705,8 +1557,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
     };
     ictx->section = talloc_strdup(ictx, "default");
 
-    get_bind_section(ictx, true, "default")->cmd_binds
-        = (struct cmd_bind *)def_cmd_binds;
+    parse_config(ictx, true, bstr0(builtin_input_conf));
 
 #ifdef CONFIG_COCOA
     cocoa_events_init(ictx, read_all_fd_events);

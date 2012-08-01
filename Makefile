@@ -519,6 +519,10 @@ codec-cfg.c: codecs.conf.h
 codecs.conf.h: TOOLS/file2string.py etc/codecs.conf
 	./$^ >$@
 
+input/input.c: input/input_conf.h
+input/input_conf.h: TOOLS/file2string.py etc/input.conf
+	./$^ >$@
+
 libvo/vo_vdpau.c: libvo/vdpau_template.c
 libvo/vdpau_template.c: TOOLS/vdpau_functions.py
 	./$< > $@
