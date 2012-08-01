@@ -1439,7 +1439,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    if (vo_osd_changed(0)) {
+    if (vo_osd_has_changed(osd)) {
         clear_osd(p);
         osd_draw_text_ext(osd, vo->dwidth, vo->dheight, p->border_x,
                           p->border_y, p->border_x,

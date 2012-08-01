@@ -1457,10 +1457,7 @@ static void update_osd_msg(struct MPContext *mpctx)
     // Look if we have a msg
     if ((msg = get_osd_msg(mpctx))) {
         if (mpctx->sh_video && opts->term_osd != 1) {
-            if (strcmp(osd->osd_text, msg->msg)) {
-                osd_set_text(osd, msg->msg);
-                vo_osd_changed(OSDTYPE_OSD);
-            }
+            osd_set_text(osd, msg->msg);
         } else if (opts->term_osd) {
             if (strcmp(mpctx->terminal_osd_text, msg->msg)) {
                 talloc_free(mpctx->terminal_osd_text);
@@ -1480,10 +1477,7 @@ static void update_osd_msg(struct MPContext *mpctx)
         if (opts->osd_level >= 2)
             sadd_osd_status(text, len, mpctx, opts->osd_level == 3);
 
-        if (strcmp(osd->osd_text, text)) {
-            osd_set_text(osd, text);
-            vo_osd_changed(OSDTYPE_OSD);
-        }
+        osd_set_text(osd, text);
         return;
     }
 
@@ -3349,16 +3343,14 @@ static void run_playloop(struct MPContext *mpctx)
         if (sleeptime > 0) {
             if (!mpctx->sh_video)
                 goto novideo;
-            int hack = vo_osd_changed(0);
-            vo_osd_changed(hack);
-            if (hack || mpctx->video_out->want_redraw) {
+            if (vo_osd_has_changed(mpctx->osd) || mpctx->video_out->want_redraw)
+            {
                 if (redraw_osd(mpctx) < 0) {
                     if (mpctx->paused && video_left)
                         add_step_frame(mpctx);
                     else
                         goto novideo;
-                } else
-                    vo_osd_changed(0);
+                }
             } else {
             novideo:
                 mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);

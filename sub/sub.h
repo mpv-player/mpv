@@ -170,7 +170,8 @@ void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
 struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib);
 void osd_set_text(struct osd_state *osd, const char *text);
 int osd_update(struct osd_state *osd, int dxs, int dys);
-int vo_osd_changed(int new_value);
+void vo_osd_changed(int new_value);
+bool vo_osd_has_changed(struct osd_state *osd);
 void vo_osd_resized(void);
 int vo_osd_check_range_update(int,int,int,int);
 void osd_free(struct osd_state *osd);

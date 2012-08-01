@@ -332,17 +332,20 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
 #endif
     new_osd_obj(OSDTYPE_TELETEXT);
     osd_font_invalidate();
-    osd_set_text(osd, NULL);
+    osd->osd_text = talloc_strdup(osd, "");
     osd_init_backend(osd);
     return osd;
 }
 
-void osd_set_text(struct osd_state *osd, const char *text) {
-    talloc_free(osd->osd_text);
-    //osd->text must never be NULL
+void osd_set_text(struct osd_state *osd, const char *text)
+{
     if (!text)
         text = "";
+    if (strcmp(osd->osd_text, text) == 0)
+        return;
+    talloc_free(osd->osd_text);
     osd->osd_text = talloc_strdup(osd, text);
+    vo_osd_changed(OSDTYPE_OSD);
 }
 
 void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
@@ -390,20 +393,25 @@ void osd_draw_text(struct osd_state *osd, int dxs, int dys,
     osd_draw_text_ext(osd, dxs, dys, 0, 0, 0, 0, dxs, dys, draw_alpha, ctx);
 }
 
-static int vo_osd_changed_status = 0;
-
-int vo_osd_changed(int new_value)
+void vo_osd_changed(int new_value)
 {
     mp_osd_obj_t* obj=vo_osd_list;
-    int ret = vo_osd_changed_status;
-    vo_osd_changed_status = new_value;
 
     while(obj){
 	if(obj->type==new_value) obj->flags|=OSDFLAG_FORCE_UPDATE;
 	obj=obj->next;
     }
+}
 
-    return ret;
+bool vo_osd_has_changed(struct osd_state *osd)
+{
+    mp_osd_obj_t* obj = vo_osd_list;
+    while (obj) {
+        if (obj->flags & OSDFLAG_FORCE_UPDATE)
+            return true;
+        obj = obj->next;
+    }
+    return false;
 }
 
 void vo_osd_resized()

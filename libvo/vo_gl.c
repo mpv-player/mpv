@@ -785,7 +785,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 
     if (!p->use_osd)
         return;
-    if (vo_osd_changed(0)) {
+    if (vo_osd_has_changed(osd)) {
         int osd_h, osd_w;
         clearOSD(vo);
         osd_w = p->scaled_osd ? p->image_width : vo->dwidth;

@@ -99,7 +99,7 @@ static void resize(struct vo *vo, int width, int height)
     gl->MatrixMode(GL_MODELVIEW);
     gl->LoadIdentity();
 
-    vo_osd_changed(OSDTYPE_OSD);
+    vo_osd_resized();
 
     gl->Clear(GL_COLOR_BUFFER_BIT);
     vo->want_redraw = true;
@@ -232,7 +232,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd_s)
     struct osd_p *osd = p->osd;
     GL *gl = p->mpglctx->gl;
 
-    if (vo_osd_changed(0)) {
+    if (vo_osd_has_changed()) {
         clearOSD(vo);
         osd_draw_text_ext(osd_s, vo->dwidth, vo->dheight, 0, 0, 0, 0,
                           p->image_width, p->image_height, create_osd_texture,
