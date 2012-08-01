@@ -580,6 +580,7 @@ struct input_fd {
 
 struct cmd_bind_section {
     struct cmd_bind *cmd_binds;
+    bool is_builtin;
     char *section;
     struct cmd_bind_section *next;
 };
@@ -610,9 +611,6 @@ struct input_ctx {
     struct cmd_bind_section *cmd_bind_sections;
     // Name of currently used command section
     char *section;
-    // The command binds of current section
-    struct cmd_bind *cmd_binds;
-    struct cmd_bind *cmd_binds_default;
 
     // Used to track whether we managed to read something while checking
     // events sources. If yes, the sources may have more queued.
@@ -1134,6 +1132,7 @@ static char *find_bind_for_key(const struct cmd_bind *binds, int n, int *keys)
 }
 
 static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
+                                                 bool builtin,
                                                  char *section)
 {
     struct cmd_bind_section *bind_section = ictx->cmd_bind_sections;
@@ -1141,7 +1140,8 @@ static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
     if (section == NULL)
         section = "default";
     while (bind_section) {
-        if (strcmp(section, bind_section->section) == 0)
+        if (strcmp(section, bind_section->section) == 0
+            && builtin == bind_section->is_builtin)
             return bind_section;
         if (bind_section->next == NULL)
             break;
@@ -1156,8 +1156,18 @@ static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
     }
     bind_section->cmd_binds = NULL;
     bind_section->section = talloc_strdup(bind_section, section);
+    bind_section->is_builtin = builtin;
     bind_section->next = NULL;
     return bind_section;
+}
+
+static char *section_find_bind_for_key(struct input_ctx *ictx,
+                                       bool builtin, char *section,
+                                       int n, int *keys)
+{
+    struct cmd_bind_section *bs = get_bind_section(ictx, builtin, section);
+    const struct cmd_bind *binds = bs->cmd_binds;
+    return binds ? find_bind_for_key(binds, n, keys) : NULL;
 }
 
 static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
@@ -1165,12 +1175,13 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
     char *cmd = NULL;
     mp_cmd_t *ret;
 
-    if (ictx->cmd_binds)
-        cmd = find_bind_for_key(ictx->cmd_binds, n, keys);
-    if (ictx->cmd_binds_default && cmd == NULL)
-        cmd = find_bind_for_key(ictx->cmd_binds_default, n, keys);
+    cmd = section_find_bind_for_key(ictx, false, ictx->section, n, keys);
     if (ictx->default_bindings && cmd == NULL)
-        cmd = find_bind_for_key(def_cmd_binds, n, keys);
+        cmd = section_find_bind_for_key(ictx, true, ictx->section, n, keys);
+    if (cmd == NULL)
+        cmd = section_find_bind_for_key(ictx, false, "default", n, keys);
+    if (ictx->default_bindings && cmd == NULL)
+        cmd = section_find_bind_for_key(ictx, true, "default", n, keys);
 
     if (cmd == NULL) {
         char *key_buf = get_key_combo_name(keys, n);
@@ -1592,7 +1603,7 @@ static void bind_keys(struct input_ctx *ictx,
         // Jump beginning space
         cmd += strspn(cmd, SPACE_CHAR);
     }
-    bind_section = get_bind_section(ictx, section);
+    bind_section = get_bind_section(ictx, false, section);
 
     if (bind_section->cmd_binds) {
         for (i = 0; bind_section->cmd_binds[i].cmd != NULL; i++) {
@@ -1672,21 +1683,8 @@ static int parse_config_file(struct input_ctx *ictx, char *file)
 
 void mp_input_set_section(struct input_ctx *ictx, char *name)
 {
-    struct cmd_bind_section *bind_section = NULL;
-
-    ictx->cmd_binds = NULL;
-    ictx->cmd_binds_default = NULL;
     talloc_free(ictx->section);
-    if (name)
-        ictx->section = talloc_strdup(ictx, name);
-    else
-        ictx->section = talloc_strdup(ictx, "default");
-    if ((bind_section = get_bind_section(ictx, ictx->section)))
-        ictx->cmd_binds = bind_section->cmd_binds;
-    if (strcmp(ictx->section, "default") == 0)
-        return;
-    if ((bind_section = get_bind_section(ictx, NULL)))
-        ictx->cmd_binds_default = bind_section->cmd_binds;
+    ictx->section = talloc_strdup(ictx, name ? name : "default");
 }
 
 char *mp_input_get_section(struct input_ctx *ictx)
@@ -1705,6 +1703,10 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
         .default_bindings = input_conf->default_bindings,
         .wakeup_pipe = {-1, -1},
     };
+    ictx->section = talloc_strdup(ictx, "default");
+
+    get_bind_section(ictx, true, "default")->cmd_binds
+        = (struct cmd_bind *)def_cmd_binds;
 
 #ifdef CONFIG_COCOA
     cocoa_events_init(ictx, read_all_fd_events);
