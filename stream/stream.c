@@ -60,10 +60,8 @@ static struct input_ctx *stream_check_interrupt_ctx;
 extern const stream_info_t stream_info_vcd;
 extern const stream_info_t stream_info_cdda;
 extern const stream_info_t stream_info_netstream;
-extern const stream_info_t stream_info_pnm;
 extern const stream_info_t stream_info_asf;
 extern const stream_info_t stream_info_rtsp;
-extern const stream_info_t stream_info_rtp;
 extern const stream_info_t stream_info_udp;
 extern const stream_info_t stream_info_http1;
 extern const stream_info_t stream_info_http2;
@@ -98,13 +96,13 @@ static const stream_info_t* const auto_open_streams[] = {
   &stream_info_netstream,
   &stream_info_http1,
   &stream_info_asf,
-  &stream_info_pnm,
+#ifdef CONFIG_LIBNEMESI
   &stream_info_rtsp,
+#endif
 #ifdef CONFIG_LIVE555
   &stream_info_sdp,
   &stream_info_rtsp_sip,
 #endif
-  &stream_info_rtp,
   &stream_info_udp,
   &stream_info_http2,
 #endif

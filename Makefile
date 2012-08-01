@@ -101,14 +101,6 @@ SRCS_COMMON-$(COCOA)                 += libvo/osx_common.c \
 SRCS_COMMON-$(MNG)                   += libmpdemux/demux_mng.c
 SRCS_COMMON-$(MPG123)                += libmpcodecs/ad_mpg123.c
 
-SRCS_COMMON-$(NATIVE_RTSP)           += stream/stream_rtsp.c \
-                                        stream/freesdp/common.c \
-                                        stream/freesdp/errorlist.c \
-                                        stream/freesdp/parser.c \
-                                        stream/librtsp/rtsp.c \
-                                        stream/librtsp/rtsp_rtp.c \
-                                        stream/librtsp/rtsp_session.c \
-
 SRCS_COMMON-$(NEED_GETTIMEOFDAY)     += osdep/gettimeofday.c
 SRCS_COMMON-$(NEED_GLOB)             += osdep/glob-win.c
 SRCS_COMMON-$(NEED_SETENV)           += osdep/setenv.c
@@ -122,18 +114,9 @@ SRCS_COMMON-$(NETWORKING)            += stream/stream_netstream.c \
                                         stream/cookies.c \
                                         stream/http.c \
                                         stream/network.c \
-                                        stream/pnm.c \
-                                        stream/rtp.c \
                                         stream/udp.c \
                                         stream/tcp.c \
-                                        stream/stream_rtp.c \
                                         stream/stream_udp.c \
-                                        stream/librtsp/rtsp.c \
-                                        stream/realrtsp/asmrp.c \
-                                        stream/realrtsp/real.c \
-                                        stream/realrtsp/rmff.c \
-                                        stream/realrtsp/sdpplin.c \
-                                        stream/realrtsp/xbuffer.c \
 
 SRCS_COMMON-$(PNG)                   += libmpcodecs/vd_mpng.c
 SRCS_COMMON-$(PRIORITY)              += osdep/priority.c
@@ -490,9 +473,6 @@ DIRS =  . \
         loader/wine \
         osdep \
         stream \
-        stream/freesdp \
-        stream/librtsp \
-        stream/realrtsp \
         sub \
         timeline \
 

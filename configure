@@ -500,7 +500,6 @@ _real=auto
 _live=no
 _nemesi=auto
 _lcms2=auto
-_native_rtsp=yes
 _xinerama=auto
 _vm=auto
 _xf86keysym=auto
@@ -3517,11 +3516,9 @@ if test "$_nemesi" = auto  && test "$networking" = yes ; then
     fi
 fi
 if test "$_nemesi" = yes; then
-    _native_rtsp=no
     def_nemesi='#define CONFIG_LIBNEMESI 1'
     inputmodules="nemesi $inputmodules"
 else
-    _native_rtsp="$networking"
     _nemesi=no
     def_nemesi='#undef CONFIG_LIBNEMESI'
     noinputmodules="nemesi $noinputmodules"
@@ -4168,7 +4165,6 @@ MACOSX_FINDER = $_macosx_finder
 MD5SUM = $_md5sum
 MNG = $_mng
 MPG123 = $_mpg123
-NATIVE_RTSP = $_native_rtsp
 NETWORKING = $networking
 OPENAL = $_openal
 OSS = $_ossaudio

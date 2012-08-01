@@ -184,11 +184,11 @@ const m_option_t pvropts_conf[]={
 extern const m_option_t dvbin_opts_conf[];
 extern const m_option_t lavfdopts_conf[];
 
-extern int rtsp_transport_tcp;
-extern int rtsp_transport_http;
-extern int rtsp_transport_sctp;
-extern int rtsp_port;
-extern char *rtsp_destination;
+int rtsp_transport_tcp;
+int rtsp_transport_http;
+int rtsp_transport_sctp;
+int rtsp_port;
+char *rtsp_destination;
 
 
 extern int sws_chr_vshift;
