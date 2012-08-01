@@ -639,12 +639,17 @@ clean:
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.d /*.a /*.ho /*~)
 	-$(RM) $(call ADD_ALL_EXESUFS,mplayer)
 	-$(RM) $(MOFILES)
+	-$(RM) version.h
+	-$(RM) codecs.conf.h
+	-$(RM) input/input_conf.h
+	-$(RM) libvo/vdpau_template.c
+	-$(RM) libmpdemux/ebml_types.h libmpdemux/ebml_defs.c
+	-$(RM) libvo/vo_gl3_shaders.h
+	-$(RM) sub/osd_font.h
 
 distclean: clean
 	-$(RM) -r locale
-	-$(RM) config.log config.mak config.h codecs.conf.h version.h TAGS tags
-	-$(RM) libvo/vdpau_template.c
-	-$(RM) libmpdemux/ebml_types.h libmpdemux/ebml_defs.c
+	-$(RM) config.log config.mak config.h TAGS tags
 
 TAGS:
 	$(RM) $@; find . -name '*.[chS]' -o -name '*.asm' | xargs etags -a
