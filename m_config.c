@@ -333,7 +333,7 @@ static void m_config_add_option(struct m_config *config,
                 // Target data in optstruct is supposed to be cleared (consider
                 // m_option freeing previously set dynamic data).
                 optstruct_set(config, arg, arg->defval);
-            } else if (!arg->new && (arg->type->flags & M_OPT_TYPE_DYNAMIC)) {
+            } else if (arg->type->flags & M_OPT_TYPE_DYNAMIC) {
                 // Initialize dynamically managed fields from static data (like
                 // string options): copy the option into temporary memory,
                 // clear the original option (to void m_option freeing the
