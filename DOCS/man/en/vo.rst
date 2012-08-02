@@ -59,13 +59,6 @@ x11 (X11 only)
     Shared memory video output driver without hardware acceleration that works
     whenever X11 is present.
 
-xover (X11 only)
-    Adds X11 support to all overlay based video output drivers. Currently only
-    supported by tdfx_vid.
-
-    <vo_driver>
-        Select the driver to use as source to overlay on top of X11.
-
 vdpau (X11 only)
     Uses the VDPAU interface to display and optionally also decode video.
     Hardware decoding is used with ``--vc=ffmpeg12vdpau``,
@@ -158,25 +151,6 @@ vdpau (X11 only)
     driver implementation may also have limits on the length of maximum
     queuing time or number of queued surfaces that work well or at all.
 
-dga (X11 only)
-    Play video through the XFree86 Direct Graphics Access extension.
-    Considered obsolete.
-
-sdl (SDL only, buggy/outdated)
-    Highly platform independent SDL (Simple Directmedia Layer) library video
-    output driver. Since SDL uses its own X11 layer, MPlayer X11 options do
-    not have any effect on SDL. Note that it has several minor bugs
-    (``--vm``/``--no-vm`` is mostly ignored, ``--fs`` behaves like ``--no-vm``
-    should, window is in top-left corner when returning from fullscreen,
-    panscan is not supported, ...).
-
-    driver=<driver>
-        Explicitly choose the SDL driver to use.
-    (no-)forcexv
-        Use XVideo through the sdl video output driver (default: forcexv).
-    (no-)hwaccel
-        Use hardware accelerated scaler (default: hwaccel).
-
 direct3d (Windows only) (BETA CODE!)
     Video output driver that uses the Direct3D interface (useful for Vista).
 
@@ -201,49 +175,6 @@ corevideo (Mac OS X 10.4 or 10.3.9 with QuickTime 7)
         Name of the shared buffer created with shm_open as well as the name of
         the NSConnection MPlayer will try to open (default: "mplayerosx").
         Setting buffer_name implicitly enables shared_buffer.
-
-fbdev (Linux only)
-    Uses the kernel framebuffer to play video.
-
-    <device>
-        Explicitly choose the fbdev device name to use (e.g. ``/dev/fb0``).
-
-fbdev2 (Linux only)
-    Uses the kernel framebuffer to play video, alternative implementation.
-
-    <device>
-        Explicitly choose the fbdev device name to use (default: ``/dev/fb0``).
-
-vesa
-    Very general video output driver that should work on any VESA VBE 2.0
-    compatible card.
-
-    (no-)dga
-        Turns DGA mode on or off (default: on).
-    neotv_pal
-        Activate the NeoMagic TV out and set it to PAL norm.
-    neotv_ntsc
-        Activate the NeoMagic TV out and set it to NTSC norm.
-    lvo
-        Activate the Linux Video Overlay on top of VESA mode.
-
-svga
-    Play video using the SVGA library.
-
-    <video mode>
-        Specify video mode to use. The mode can be given in a
-        <width>x<height>x<colors> format, e.g. 640x480x16M or be a graphics
-        mode number, e.g. 84.
-    bbosd
-        Draw OSD into black bands below the movie (slower).
-    native
-        Use only native drawing functions. This avoids direct rendering, OSD
-        and hardware acceleration.
-    retrace
-        Force frame switch on vertical retrace. Usable only with ``--double``.
-        It has the same effect as the ``--vsync`` option.
-    sq
-        Try to select a video mode with square pixels.
 
 gl
     OpenGL video output driver, simple version. Video size must be smaller
@@ -433,34 +364,8 @@ gl
 null
     Produces no video output. Useful for benchmarking.
 
-aa
-    ASCII art video output driver that works on a text console. You can get a
-    list and an explanation of available suboptions by executing ``mplayer
-    --vo=aa:help``.
-
-    *NOTE*: The driver does not handle ``--aspect`` correctly.
-
-    *HINT*: You probably have to specify ``--monitorpixelaspect``. Try
-    ``mplayer --vo=aa --monitorpixelaspect=0.5``.
-
 caca
     Color ASCII art video output driver that works on a text console.
-
-bl
-    Video playback using the Blinkenlights UDP protocol. This driver is highly
-    hardware specific.
-
-    <subdevice>
-        Explicitly choose the Blinkenlights subdevice driver to use. It is
-        something like ``arcade:host=localhost:2323`` or
-        ``hdl:file=name1,file=name2``. You must specify a subdevice.
-
-ggi
-    GGI graphics system video output driver
-
-    <driver>
-        Explicitly choose the GGI driver to use. Replace any ',' that would
-        appear in the driver string by a '.'.
 
 directfb
     Play video using the DirectFB library.
@@ -484,117 +389,6 @@ directfb
     dfbopts=<list>
         Specify a parameter list for DirectFB.
 
-dfbmga
-    Matrox G400/G450/G550 specific video output driver that uses the DirectFB
-    library to make use of special hardware features. Enables CRTC2 (second
-    head), displaying video independently of the first head.
-
-    (no-)input
-        same as directfb (default: disabled)
-    buffermode=single|double|triple
-        same as directfb (default: triple)
-    fieldparity=top|bottom
-        same as directfb
-    (no-)bes
-        Enable the use of the Matrox BES (backend scaler) (default: disabled).
-        Gives very good results concerning speed and output quality as
-        interpolated picture processing is done in hardware. Works only on the
-        primary head.
-    (no-)spic
-        Make use of the Matrox sub picture layer to display the OSD (default:
-        enabled).
-    (no-)crtc2
-        Turn on TV-out on the second head (default: enabled). The output
-        quality is amazing as it is a full interlaced picture with proper sync
-        to every odd/even field.
-    tvnorm=pal|ntsc|auto
-        Will set the TV norm of the Matrox card without the need for modifying
-        ``/etc/directfbrc`` (default: disabled). Valid norms are pal = PAL,
-        ntsc = NTSC. Special norm is auto (auto-adjust using PAL/NTSC) because
-        it decides which norm to use by looking at the framerate of the movie.
-
-mga (Linux only)
-    Matrox specific video output driver that makes use of the YUV back end
-    scaler on Gxxx cards through a kernel module. If you have a Matrox card,
-    this is the fastest option.
-
-    <device>
-        Explicitly choose the Matrox device name to use (default:
-        ``/dev/mga_vid``).
-
-xmga (Linux, X11 only)
-    The mga video output driver, running in an X11 window.
-
-    <device>
-        Explicitly choose the Matrox device name to use (default:
-        ``/dev/mga_vid``).
-
-s3fb (Linux only) (see also ``--dr``)
-    S3 Virge specific video output driver. This driver supports the card's YUV
-    conversion and scaling, double buffering and direct rendering features.
-    Use ``--vf=format=yuy2`` to get hardware-accelerated YUY2 rendering, which
-    is much faster than YV12 on this card.
-
-    <device>
-        Explicitly choose the fbdev device name to use (default: ``/dev/fb0``).
-
-wii (Linux only)
-    Nintendo Wii/GameCube specific video output driver.
-
-3dfx (Linux only)
-    3dfx-specific video output driver that directly uses the hardware on top
-    of X11. Only 16 bpp are supported.
-
-tdfxfb (Linux only)
-    This driver employs the tdfxfb framebuffer driver to play movies with YUV
-    acceleration on 3dfx cards.
-
-    <device>
-        Explicitly choose the fbdev device name to use (default: ``/dev/fb0``).
-
-tdfx_vid (Linux only)
-    3dfx-specific video output driver that works in combination with the
-    tdfx_vid kernel module.
-
-    <device>
-        Explicitly choose the device name to use (default: ``/dev/tdfx_vid``).
-
-dxr3 (DXR3 only)
-    Sigma Designs em8300 MPEG decoder chip (Creative DXR3, Sigma Designs
-    Hollywood Plus) specific video output driver. See also the lavc video
-    filter.
-
-    overlay
-        Activates the overlay instead of TV-out.
-    prebuf
-        Turns on prebuffering.
-    sync
-        Will turn on the new sync-engine.
-    norm=<norm>
-        Specifies the TV norm.
-
-        :0: Does not change current norm (default).
-        :1: Auto-adjust using PAL/NTSC.
-        :2: Auto-adjust using PAL/PAL-60.
-        :3: PAL
-        :4: PAL-60
-        :5: NTSC
-
-    <0-3>
-        Specifies the device number to use if you have more than one em8300
-        card.
-
-ivtv (IVTV only)
-    Conexant CX23415 (iCompression iTVC15) or Conexant CX23416 (iCompression
-    iTVC16) MPEG decoder chip (Hauppauge WinTV PVR-150/250/350/500) specific
-    video output driver for TV-out. See also the lavc video filter.
-
-    <device>
-        Explicitly choose the MPEG decoder device name to use (default:
-        ``/dev/video16``).
-    <output>
-        Explicitly choose the TV-out output to be used for the video signal.
-
 v4l2 (requires Linux 2.6.22+ kernel)
     Video output driver for V4L2 compliant cards with built-in hardware MPEG
     decoder. See also the lavc video filter.
@@ -604,17 +398,6 @@ v4l2 (requires Linux 2.6.22+ kernel)
         ``/dev/video16``).
     <output>
         Explicitly choose the TV-out output to be used for the video signal.
-
-mpegpes (DVB only)
-    Video output driver for DVB cards that writes the output to an MPEG-PES
-    file if no DVB card is installed.
-
-    card=<1-4>
-        Specifies the device number to use if you have more than one DVB
-        output card (V3 API only, such as 1.x.y series drivers). If not
-        specified MPlayer will search the first usable card.
-    <filename>
-        output filename (default: ``./grab.mpg``)
 
 md5sum
     Calculate MD5 sums of each frame and write them to a file. Supports RGB24

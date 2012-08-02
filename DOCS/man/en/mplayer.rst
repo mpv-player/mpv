@@ -4,9 +4,10 @@ mplayer2 manual page
 Synopsis
 ========
 
-| **mplayer** [options] [file|URL|playlist|-]
-| **mplayer** [options] file1 [specific options] [file2] [specific options]
-| **mplayer** [options] {group of files and options} [group-specific options]
+| **mplayer** [options] [file|URL|-]
+| **mplayer** [options] --playlist=PLAYLIST
+| **mplayer** [options] files
+| **mplayer** [options] {group of files and options}
 | **mplayer** [br]://[title][/device] [options]
 | **mplayer** [dvd|dvdnav]://[title|[start\_title]-end\_title][/device] [options]
 | **mplayer** \vcd://track[/device]
@@ -26,8 +27,7 @@ Synopsis
 DESCRIPTION
 ===========
 
-**mplayer** is a movie player for Linux (runs on many other platforms and CPU
-architectures, see the documentation). It supports a wide variety of video
+**mplayer** is a movie player for Linux. It supports a wide variety of video
 file formats, audio and video codecs, and subtitle types. Special input URL
 types are available to read input from a variety of sources other than disk
 files. Depending on platform, a variety of different video and audio output
@@ -75,12 +75,6 @@ BACKSPACE
 ENTER
     Go forward in the playlist, even over the end.
 
-HOME and END
-    next/previous playtree entry in the parent list
-
-INS and DEL (ASX playlist only)
-    next/previous alternative source.
-
 p / SPACE
     Pause (pressing again unpauses).
 
@@ -109,10 +103,10 @@ U
 m
     Mute sound.
 
-\_ (MPEG-TS, AVI and libavformat only)
+\_
     Cycle through the available video tracks.
 
-\# (DVD, Blu-ray, MPEG, Matroska, AVI and libavformat only)
+\#
     Cycle through the available audio tracks.
 
 TAB (MPEG-TS and libavformat only)
@@ -141,7 +135,7 @@ j and J
     Cycle through the available subtitles.
 
 y and g
-    Step forward/backward in the subtitle list.
+    Adjust subtitle delay to immediately display previous/next subtitle.
 
 F
     Toggle displaying "forced subtitles".
@@ -165,10 +159,10 @@ r and t
 i (``--edlout`` mode only)
     Set start or end of an EDL skip and write it out to the given file.
 
-s (``--vf`` screenshot only)
+s
     Take a screenshot.
 
-S (``--vf`` screenshot only)
+S
     Start/stop taking screenshots.
 
 I
@@ -186,7 +180,7 @@ D (``--vo=vdpau``, ``--vf=yadif``, ``--vf=kerndeint`` only)
 A
     Cycle through the available DVD angles.
 
-c (currently ``--vo=vdpau`` and ``--vo=xv`` only)
+c
     Change YUV colorspace.
 
 (The following keys are valid only when using a video output that supports the
@@ -222,14 +216,6 @@ command + f
 
 command + [ and command + ]
     Set movie window alpha.
-
-(The following keys are valid only when using the sdl video output driver.)
-
-c
-    Cycle through available fullscreen modes.
-
-n
-    Restore original mode.
 
 (The following keys are valid if you have a keyboard with multimedia keys.)
 

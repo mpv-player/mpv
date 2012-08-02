@@ -120,7 +120,7 @@
 
 --aspect=<ratio>
     Override movie aspect ratio, in case aspect information is incorrect or
-    missing in the file being played. See also ``--noaspect``.
+    missing in the file being played. See also ``--no-aspect``.
 
     *EXAMPLE*:
 
@@ -217,22 +217,6 @@
     Enables caching for the stream used by ``--audiofile``, using the
     specified amount of memory.
 
---ausid=<ID>
-    Select audio substream channel. Currently the valid range is 0x55..0x75
-    and applies only to MPEG-TS when handled by the native demuxer (not by
-    libavformat). The format type may not be correctly identified because of
-    how this information (or lack thereof) is embedded in the stream, but it
-    will demux correctly the audio streams when multiple substreams are
-    present. MPlayer prints the available substream IDs when run with
-    ``--identify``. See also ``--alang``.
-
---autoq=<quality>
-    Used with ``--vf=[s]pp``.
-    Dynamically changes the level of postprocessing depending on the available
-    spare CPU time. The number you specify will be the maximum level used.
-    Usually you can use some big number. You have to use ``--vf=[s]pp``
-    without parameters in order for this to work.
-
 --autosub, --no-autosub
     Load additional subtitle files matching the video filename. Enabled by
     default. See also ``--sub-fuzziness``.
@@ -242,9 +226,9 @@
     Specifying ``--autosync=0``, the default, will cause frame timing to be
     based entirely on audio delay measurements. Specifying ``--autosync=1``
     will do the same, but will subtly change the A/V correction algorithm. An
-    uneven video framerate in a movie which plays fine with ``--nosound`` can
+    uneven video framerate in a movie which plays fine with ``--no-audio`` can
     often be helped by setting this to an integer value greater than 1. The
-    higher the value, the closer the timing will be to ``--nosound``. Try
+    higher the value, the closer the timing will be to ``--no-audio``. Try
     ``--autosync=30`` to smooth out problems with sound drivers which do not
     implement a perfect audio delay measurement. With this value, if large A/V
     sync offsets occur, they will only take about 1 or 2 seconds to settle
@@ -258,13 +242,9 @@
     is also used to set the maximum delivery bandwidth allowing faster cache
     filling and stream dumping.
 
---benchmark
-    Prints some statistics on CPU usage and dropped frames at the end of
-    playback. Use in combination with ``--nosound`` and ``--vo=null`` for
-    benchmarking only the video codec.
-
-    *NOTE*: With this option MPlayer will also ignore frame duration when
-    playing only video (you can think of that as infinite fps).
+--untimed
+    Do not sleep when outputting video frames. Useful for benchmarks when used
+    with --no-audio.
 
 --bluray-angle=<ID>
     Some Blu-ray discs contain scenes that can be viewed from multiple angles.
@@ -297,7 +277,7 @@
     size of the cache in kilobytes. Caching is enabled by default (with a
     default cache size) for network streams. May be useful when playing files
     from slow media, but can also have negative effects, especially with file
-    formats that require a lot of seeking, such as mp4. See also ``--nocache``.
+    formats that require a lot of seeking, such as mp4. See also ``--no-cache``.
 
 --cache-min=<percentage>
     Playback will start when the cache has been filled up to <percentage> of
@@ -467,7 +447,7 @@
     Changes the colorkey to an RGB value of your choice. 0x000000 is black and
     0xffffff is white. Only supported by the fbdev, svga, vesa, xmga, xover,
     xv (see ``--vo=xv:ck``) and directx video output drivers. See also
-    ``--nocolorkey``.
+    ``--no-colorkey``.
 
 --consolecontrols, --no-consolecontrols
     ``--no-consolecontrols`` prevents the player from reading key events from
@@ -501,11 +481,6 @@
     option. Without ``--correct-pts`` the subtitle timing will typically be
     off by some frames. This option does not work correctly with some demuxers
     and codecs.
-
---crash-debug
-    DEBUG CODE.
-    Automatically attaches gdb upon crash or **SIGTRAP**. Support must be
-    compiled in by configuring with ``--enable-crash-debug``.
 
 --cursor-autohide-delay=<number>
     Make mouse cursor automatically hide after given number of milliseconds.
@@ -544,60 +519,9 @@
 
     *WARNING*: May cause OSD/SUB corruption!
 
---dumpaudio
-    Dumps raw compressed audio stream to ``./stream.dump`` (useful with
-    MPEG/AC-3, in most other cases the resulting file will not be playable).
-    If you give more than one of ``--dumpaudio``, ``--dumpvideo``,
-    ``--dumpstream`` on the command line only the last one will work.
-
 --dumpfile=<filename>
     Specify which file MPlayer should dump to. Should be used together with
     ``--dumpaudio`` / ``--dumpvideo`` / ``--dumpstream`` / ``--capture``.
-
---dumpjacosub
-    Convert the given subtitle (specified with the ``--sub`` option) to the
-    time-based JACOsub subtitle format. Creates a ``dumpsub.js`` file in the
-    current directory.
-
---dumpmicrodvdsub
-    Convert the given subtitle (specified with the ``--sub`` option) to the
-    MicroDVD subtitle format. Creates a dumpsub.sub file in the current
-    directory.
-
---dumpmpsub
-    Convert the given subtitle (specified with the ``--sub`` option) to
-    MPlayer's subtitle format, MPsub. Creates a dump.mpsub file in the current
-    directory.
-
---dumpsami
-    Convert the given subtitle (specified with the ``--sub`` option) to the
-    time-based SAMI subtitle format. Creates a ``dumpsub.smi`` file in the
-    current directory.
-
---dumpsrtsub
-    Convert the given subtitle (specified with the ``--sub`` option) to the
-    time-based SubViewer (SRT) subtitle format. Creates a ``dumpsub.srt`` file
-    in the current directory.
-
-    *NOTE*: Some broken hardware players choke on SRT subtitle files with Unix
-    line endings. If you are unlucky enough to have such a box, pass your
-    subtitle files through ``unix2dos`` or a similar program to replace Unix
-    line endings with DOS/Windows line endings.
-
---dumpstream
-    Dumps the raw stream to ``./stream.dump``. Useful when ripping from DVD or
-    network. If you give more than one of ``--dumpaudio``, ``--dumpvideo``,
-    ``--dumpstream`` on the command line only the last one will work.
-
---dumpsub
-    BETA CODE.
-    Dumps the subtitle substream from VOB streams. Also see the **--dump*sub**
-    options.
-
---dumpvideo
-    Dump raw compressed video stream to ``./stream.dump`` (not very usable).
-    If you give more than one of ``--dumpaudio``, ``--dumpvideo``,
-    ``--dumpstream`` on the command line only the last one will work.
 
 --dvbin=<options>
     Pass the following parameters to the DVB input module, in order to
@@ -733,9 +657,6 @@
     - ``--font=~/.mplayer/arialuni.ttf`` (no fontconfig)
     - ``--font='Bitstream Vera Sans'`` (usual case with fontconfig)
     - ``--font='Bitstream Vera Sans:style=Bold'`` (usual case with fontconfig)
-
---fontconfig, --no-fontconfig
-    Enables the use of fontconfig managed fonts. Enabled by default.
 
 --force-window-position
     Forcefully move MPlayer's video output window to default location whenever
@@ -881,7 +802,7 @@
     *NOTE*: mplayer uses this command without any checking, it is your
     responsibility to ensure it does not cause security problems (e.g. make
     sure to use full paths if "." is in your path like on Windows). It also
-    only works when playing video (i.e. not with ``--novideo`` but works with
+    only works when playing video (i.e. not with ``--no-video`` but works with
     ``-vo=null``).
 
     This can be "misused" to disable screensavers that do not support the
@@ -1326,16 +1247,6 @@
     Enabled by default. Disable mouse button press/release input
     (mozplayerxp's context menu relies on this option).
 
---msgcharset=<charset>
-    Convert console messages to the specified character set (default:
-    autodetect). Text will be in the encoding specified with the --charset
-    configure option. Set this to "noconv" to disable conversion (for e.g.
-    iconv problems).
-
-    *NOTE*: The option takes effect after command line parsing has finished.
-    The ``MPLAYER_CHARSET`` environment variable can help you get rid of the
-    first lines of garbled output.
-
 --msgcolor
     Enable colorful console output on terminals that support ANSI color.
 
@@ -1375,23 +1286,23 @@
     Force usage of non-interleaved AVI parser (fixes playback of some bad AVI
     files).
 
---noaspect
+--no-aspect
     Ignore aspect ratio information from video file and assume the video has
     square pixels. See also ``--aspect``.
 
---nobps
+--no-bps
     (Internal AVI demuxer which is not used by default only)
     Do not use average byte/second value for A-V sync. Helps with some AVI
     files with broken header.
 
---nocache
+--no-cache
     Turn off input stream caching. See ``--cache``.
 
---nocolorkey
+--no-colorkey
     Disables colorkeying. Only supported by the fbdev, svga, vesa, xmga,
     xover, xv (see ``--vo=xv:ck``) and directx video output drivers.
 
---noconfig=<options>
+--no-config=<options>
     Do not parse selected configuration files.
 
     *NOTE*: If ``--include`` or ``--use-filedir-conf`` options are specified
@@ -1403,18 +1314,18 @@
     :system: system configuration file
     :user:   user configuration file
 
---noidx
+--no-idx
     Do not use index present in the file even if one is present.
 
---nosound
+--no-audio
     Do not play sound. Useful for benchmarking.
 
---nosub
+--no-sub
     Disables any otherwise auto-selected internal subtitles (as e.g. the
     Matroska/mkv demuxer supports). Use ``--no-autosub`` to disable the
     loading of external subtitle files.
 
---novideo
+--no-video
     Do not play video. With some demuxers this may not work. In those cases
     you can try ``--vc=null --vo=null`` instead; but ``--vc=null`` is always
     unreliable.
@@ -1433,15 +1344,8 @@
 --osd-duration=<time>
     Set the duration of the OSD messages in ms (default: 1000).
 
---osd-fractions=<0-2>
-    Set how fractions of seconds of the current timestamp are printed on the
-    OSD:
-
-    :0: Do not display fractions (default).
-    :1: Show the first two decimals.
-    :2: Show approximate frame count within current second. This frame count
-        is not accurate but only an approximation. For variable fps, the
-        approximation is known to be far off the correct frame count.
+--osd-fractions
+    Show OSD times with fractions of seconds.
 
 --osdlevel=<0-3>
     Specifies which mode the OSD should start in.
@@ -1533,12 +1437,6 @@
 --profile=<profile1,profile2,...>
     Use the given profile(s), ``--profile=help`` displays a list of the
     defined profiles.
-
---psprobe=<bytecount>
-    When playing an MPEG-PS or MPEG-PES streams, this option lets you specify
-    how many bytes in the stream you want MPlayer to scan in order to identify
-    the video codec used. This option is needed to play EVO or VDR files
-    containing H.264 streams.
 
 --pts-association-mode=<auto|decode|sort>
     Select the method used to determine which container packet timestamp
@@ -1726,16 +1624,6 @@
     images may cover the movie window, though. May not work with all video
     output drivers.
 
---rtc
-    Turns on usage of the Linux RTC (realtime clock - ``/dev/rtc``) as timing
-    mechanism. This wakes up the process every 1/1024 seconds to check the
-    current time. Useless with modern Linux kernels configured for desktop use
-    as they already wake up the process with similar accuracy when using
-    normal timed sleep.
-
---rtc-device=<device>
-    Use the specified device for RTC timing.
-
 --rtsp-destination
     Used with ``rtsp://`` URLs to force the destination IP address to be
     bound. This option may be useful with some RTSP server which do not send
@@ -1793,7 +1681,7 @@
     Display the subtitle stream specified by <ID> (0-31). MPlayer prints the
     available subtitle IDs when run in verbose (``-v``) mode. If you cannot
     select one of the subtitles on a DVD, try ``--vobsubid``.
-    See also ``--slang``, ``--vobsubid``, ``--nosub``.
+    See also ``--slang``, ``--vobsubid``, ``--no-sub``.
 
 --slang=<languagecode[,languagecode,...]>
     Specify a priority list of subtitle languages to use. Different container
@@ -1833,9 +1721,9 @@
     timing is imprecise and you cannot use the RTC either. Comes at the
     price of higher CPU consumption.
 
---softvol
-    Force the use of the software mixer, instead of using the sound card
-    mixer.
+--no-softvol
+    Try to use the sound card mixer (if available), instead of using the volume
+    audio filter.
 
 --softvol-max=<10.0-10000.0>
     Set the maximum amplification level in percent (default: 110). A value of
@@ -1969,13 +1857,6 @@
     :1: Align subtitle center.
     :2: Align subtitle bottom edge (default).
 
---subcc=<1-4>
-    Display DVD Closed Caption (CC) subtitles from the specified channel.
-    These are *not* the VOB subtitles, these are special ASCII subtitles for
-    the hearing impaired encoded in the VOB userdata stream on most region 1
-    DVDs. CC subtitles have not been spotted on DVDs from other regions so
-    far.
-
 --subcp=<codepage>
     If your system supports ``iconv(3)``, you can use this option to specify
     the subtitle codepage.
@@ -2089,22 +1970,7 @@
     the line used for the OSD and clear it (default: ``^[[A\r^[[K``).
 
 --title
-    Set the window title. Supported by X11-based video output drivers.
-    See also ``--use-filename-title``.
-
---tskeepbroken
-    Tells MPlayer not to discard TS packets reported as broken in the stream.
-    Sometimes needed to play corrupted MPEG-TS files.
-
---tsprobe=<bytecount>
-    When playing an MPEG-TS stream, this option lets you specify how many
-    bytes in the stream you want MPlayer to search for the desired audio and
-    video IDs.
-
---tsprog=<1-65534>
-    When playing an MPEG-TS stream, you can specify with this option which
-    program (if present) you want to play. Can be used with ``--vid`` and
-    ``--aid``.
+    Set the window title. The string can contain property names.
 
 --tv=<option1:option2:...>
     This option tunes various properties of the TV capture module. For
@@ -2342,12 +2208,6 @@
 --unicode
     Tells MPlayer to handle the subtitle file as unicode.
 
---unrarexec=<filename>
-    Specify the path to the unrar executable so MPlayer can use it to access
-    rar-compressed VOBsub files (default: not set, so the feature is off). The
-    path must include the executable's filename, i.e.
-    ``/usr/local/bin/unrar``. Not supported on MingW.
-
 --use-filedir-conf
     Look for a file-specific configuration file in the same directory as the
     file that is being played.
@@ -2449,8 +2309,8 @@
     with ``--softvol``). A value of -1 (the default) will not change the
     volume. See also ``--af=volume``.
 
---vsync
-    Enables VBI for the vesa, dfbmga and svga video output drivers.
+--no-vsync
+    Tries to disable vsync.
 
 --wid=<ID>
     (X11, OpenGL and DirectX only)

@@ -32,9 +32,6 @@ alsa
         the ALSA device name. For hwac3 output via S/PDIF, use an "iec958" or
         "spdif" device, unless you really know how to set it correctly.
 
-alsa5
-    ALSA 0.5 audio output driver
-
 oss
     OSS audio output driver
 
@@ -44,14 +41,6 @@ oss
         Sets the audio mixer device (default: ``/dev/mixer``).
     <mixer-channel>
         Sets the audio mixer channel (default: pcm).
-
-sdl (SDL only)
-    highly platform independent SDL (Simple Directmedia Layer) library audio
-    output driver
-
-    <driver>
-        Explicitly choose the SDL audio driver to use (default: let SDL
-        choose).
 
 jack
     audio output through JACK (Jack Audio Connection Kit)
@@ -67,9 +56,6 @@ jack
     (no-)autostart
         Automatically start jackd if necessary (default: disabled). Note that
         this seems unreliable and will spam stdout with server messages.
-
-nas
-    audio output through NAS
 
 coreaudio (Mac OS X only)
     native Mac OS X audio output driver
@@ -90,15 +76,6 @@ pulse
         string uses a local connection, "localhost" uses network transfer
         (most likely not what you want).
 
-sun (Sun only)
-    native Sun audio output driver
-
-    <device>
-        Explicitly choose the audio device to use (default: ``/dev/audio``).
-
-win32 (Windows only)
-    native Windows waveout audio output driver
-
 dsound (Windows only)
     DirectX DirectSound audio output driver
 
@@ -106,21 +83,8 @@ dsound (Windows only)
         Sets the device number to use. Playing a file with ``-v`` will show a
         list of available devices.
 
-ivtv (IVTV only)
-    IVTV specific MPEG audio output driver. Works with ``--ac=hwmpa`` only.
-
 v4l2 (requires Linux 2.6.22+ kernel)
     Audio output driver for V4L2 cards with hardware MPEG decoder.
-
-mpegpes (DVB only)
-    Audio output driver for DVB cards that writes the output to an MPEG-PES
-    file if no DVB card is installed.
-
-    card=<1-4>
-        DVB card to use if more than one card is present. If not specified
-        MPlayer will search the first usable card.
-    file=<filename>
-        output filename
 
 null
     Produces no audio output but maintains video playback speed. Use
@@ -147,6 +111,3 @@ rsound
     port=<number>
         Set the TCP port used for connecting to the server (default: 12345).
         Not used if connecting to a Unix domain socket.
-
-plugin
-    plugin audio output driver
