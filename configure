@@ -1436,16 +1436,6 @@ fi
 echores "$_builtin_expect"
 
 
-echocheck "posix4"
-# required for nanosleep on some systems
-_posix4=no
-statement_check time.h 'nanosleep(0, 0)' -lposix4 && _posix4=yes
-if test "$_posix4" = yes ; then
-  extra_ldflags="$extra_ldflags -lposix4"
-fi
-echores "$_posix4"
-
-
 echocheck "mkstemp"
 _mkstemp=no
 define_statement_check "_XOPEN_SOURCE 600" "stdlib.h" 'mkstemp("")' && _mkstemp=yes
