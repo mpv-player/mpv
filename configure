@@ -1417,27 +1417,6 @@ language_msg=$tmp_language_msg
 echores "messages (en+): $language_msg - man pages: $language_man - documentation: $language_doc"
 
 
-echocheck "restrict keyword"
-for restrict_keyword in restrict __restrict __restrict__ ; do
-  echo "void foo(char * $restrict_keyword p); int main(void) { return 0; }" > $TMPC
-  if cc_check; then
-    def_restrict_keyword=$restrict_keyword
-    break;
-  fi
-done
-if [ -n "$def_restrict_keyword" ]; then
-  echores "$def_restrict_keyword"
-else
-  echores "none"
-fi
-# Avoid infinite recursion loop ("#define restrict restrict")
-if [ "$def_restrict_keyword" != "restrict" ]; then
-  def_restrict_keyword="#define restrict $def_restrict_keyword"
-else
-  def_restrict_keyword=""
-fi
-
-
 echocheck "__builtin_expect"
 # GCC branch prediction hint
 cat > $TMPC << EOF
@@ -1477,19 +1456,6 @@ if test "$_posix4" = yes ; then
   extra_ldflags="$extra_ldflags -lposix4"
 fi
 echores "$_posix4"
-
-for func in exp2 exp2f llrint log2 log2f lrint lrintf round roundf truncf; do
-echocheck $func
-eval _$func=no
-statement_check math.h "${func}(2.0)" -D_ISOC99_SOURCE $_ld_lm && eval _$func=yes
-if eval test "x\$_$func" = "xyes"; then
-  eval def_$func="\"#define HAVE_$(echo $func | tr '[a-z]' '[A-Z]') 1\""
-  echores yes
-else
-  eval def_$func="\"#define HAVE_$(echo $func | tr '[a-z]' '[A-Z]') 0\""
-  echores no
-fi
-done
 
 
 echocheck "mkstemp"
@@ -1541,14 +1507,6 @@ if test $_winsock2_h = yes ; then
 else
   def_winsock2_h='#define HAVE_WINSOCK2_H 0'
 fi
-
-
-echocheck "arpa/inet.h"
-arpa_inet_h=no
-def_arpa_inet_h='#define HAVE_ARPA_INET_H 0'
-header_check arpa/inet.h && arpa_inet_h=yes &&
-  def_arpa_inet_h='#define HAVE_ARPA_INET_H 1'
-echores "$arpa_inet_h"
 
 
 echocheck "inet_pton()"
@@ -2013,19 +1971,6 @@ else
   win32 && need_glob=yes
 fi
 echores "$_glob"
-
-
-echocheck "setenv()"
-_setenv=no
-statement_check stdlib.h 'setenv("", "", 0)' && _setenv=yes
-if test "$_setenv" = yes ; then
-  def_setenv='#define HAVE_SETENV 1'
-  need_setenv=no
-else
-  def_setenv='#undef HAVE_SETENV'
-  need_setenv=yes
-fi
-echores "$_setenv"
 
 
 echocheck "setmode()"
@@ -4057,7 +4002,6 @@ MPLAYER  = $_mplayer
 
 NEED_GETTIMEOFDAY = $need_gettimeofday
 NEED_GLOB         = $need_glob
-NEED_SETENV       = $need_setenv
 NEED_SHMEM        = $need_shmem
 NEED_STRSEP       = $need_strsep
 NEED_SWAB         = $need_swab
@@ -4252,11 +4196,9 @@ $def_winsock2_h
 $def_gethostbyname2
 $def_gettimeofday
 $def_glob
-$def_lrintf
 $def_nanosleep
 $def_posix_select
 $def_select
-$def_setenv
 $def_setmode
 $def_shm
 $def_strsep
@@ -4279,7 +4221,6 @@ $def_macosx_bundle
 $def_macosx_finder
 $def_priority
 $def_quicktime
-$def_restrict_keyword
 
 
 /* configurable options */
@@ -4437,22 +4378,10 @@ $def_yuv4mpeg
 /* FFmpeg */
 $def_ffmpeg_internals
 
-$def_arpa_inet_h
-$def_bswap
-$def_dcbzl
-$def_exp2
-$def_exp2f
 $def_fast_64bit
-$def_llrint
-$def_log2
-$def_log2f
-$def_lrint
 $def_mkstemp
 $def_pthreads
-$def_round
-$def_roundf
 $def_threads
-$def_truncf
 $def_xform_asm
 
 #define HAVE_INLINE_ASM 1
