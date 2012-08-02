@@ -17,7 +17,6 @@ Synopsis
 | **mplayer** \dvb://[card\_number@]channel [options]
 | **mplayer** \mf://[filemask|\@listfile] [-mf options] [options]
 | **mplayer** [cdda|cddb]://track[-endtrack][:speed][/device] [options]
-| **mplayer** \cue://file[:track] [options]
 | **mplayer** [file|mms[t]|http|http\_proxy|rt[s]p|ftp|udp|unsv|icyx|noicyx|smb]:// [user:pass\@]URL[:port] [options]
 | **mplayer** \sdp://file [options]
 | **mplayer** \mpst://host[:port]/URL [options]

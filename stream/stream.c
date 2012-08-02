@@ -76,7 +76,6 @@ extern const stream_info_t stream_info_smb;
 extern const stream_info_t stream_info_sdp;
 extern const stream_info_t stream_info_rtsp_sip;
 
-extern const stream_info_t stream_info_cue;
 extern const stream_info_t stream_info_null;
 extern const stream_info_t stream_info_mf;
 extern const stream_info_t stream_info_ffmpeg;
@@ -127,7 +126,6 @@ static const stream_info_t* const auto_open_streams[] = {
 #ifdef CONFIG_LIBSMBCLIENT
   &stream_info_smb,
 #endif
-  &stream_info_cue,
 #ifdef CONFIG_DVDREAD
   &stream_info_ifo,
   &stream_info_dvd,

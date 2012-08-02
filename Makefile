@@ -359,7 +359,6 @@ SRCS_COMMON = asxparser.c \
               osdep/$(TIMER) \
               stream/open.c \
               stream/stream.c \
-              stream/stream_cue.c \
               stream/stream_ffmpeg.c \
               stream/stream_file.c \
               stream/stream_mf.c \
