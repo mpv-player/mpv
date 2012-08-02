@@ -1436,18 +1436,6 @@ fi
 echores "$_builtin_expect"
 
 
-echocheck "kstat"
-_kstat=no
-statement_check kstat.h 'kstat_open()' -lkstat && _kstat=yes
-if test "$_kstat" = yes ; then
-  def_kstat="#define HAVE_LIBKSTAT 1"
-  extra_ldflags="$extra_ldflags -lkstat"
-else
-  def_kstat="#undef HAVE_LIBKSTAT"
-fi
-echores "$_kstat"
-
-
 echocheck "posix4"
 # required for nanosleep on some systems
 _posix4=no
@@ -4216,7 +4204,6 @@ $def_builtin_expect
 $def_dl
 $def_dos_paths
 $def_iconv
-$def_kstat
 $def_macosx_bundle
 $def_macosx_finder
 $def_priority

@@ -66,9 +66,6 @@ for DLL to know too much about its environment.
 #include <dirent.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#ifdef	HAVE_KSTAT
-#include <kstat.h>
-#endif
 
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
@@ -2149,47 +2146,6 @@ static double linux_cpuinfo_freq(void)
     return freq;
 }
 
-
-static double solaris_kstat_freq(void)
-{
-#if	defined(HAVE_LIBKSTAT) && defined(KSTAT_DATA_INT32)
-    /*
-     * try to extract the CPU speed from the solaris kernel's kstat data
-     */
-    kstat_ctl_t   *kc;
-    kstat_t       *ksp;
-    kstat_named_t *kdata;
-    int            mhz = 0;
-
-    kc = kstat_open();
-    if (kc != NULL)
-    {
-	ksp = kstat_lookup(kc, "cpu_info", 0, "cpu_info0");
-
-	/* kstat found and name/value pairs? */
-	if (ksp != NULL && ksp->ks_type == KSTAT_TYPE_NAMED)
-	{
-	    /* read the kstat data from the kernel */
-	    if (kstat_read(kc, ksp, NULL) != -1)
-	    {
-		/*
-		 * lookup desired "clock_MHz" entry, check the expected
-		 * data type
-		 */
-		kdata = (kstat_named_t *)kstat_data_lookup(ksp, "clock_MHz");
-		if (kdata != NULL && kdata->data_type == KSTAT_DATA_INT32)
-		    mhz = kdata->value.i32;
-	    }
-	}
-	kstat_close(kc);
-    }
-
-    if (mhz > 0)
-	return mhz * 1000.;
-#endif	/* HAVE_LIBKSTAT */
-    return -1;		// kstat stuff is not available, CPU freq is unknown
-}
-
 /*
  * Measure CPU freq using the pentium's time stamp counter register (TSC)
  */
@@ -2214,9 +2170,6 @@ static double CPU_Freq(void)
     double freq;
 
     if ((freq = linux_cpuinfo_freq()) > 0)
-	return freq;
-
-    if ((freq = solaris_kstat_freq()) > 0)
 	return freq;
 
     return tsc_freq();
