@@ -451,9 +451,13 @@ DEP_FILES = $(patsubst %.S,%.d,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_CO
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 
-INSTALL_TARGETS-$(MPLAYER)  += install-mplayer \
+INSTALL_TARGETS-$(MPLAYER)  += check_rst2man       \
+                               install-mplayer     \
                                install-mplayer-man \
                                install-mplayer-msg
+
+INSTALL_NO_MAN_TARGETS-$(MPLAYER) += install-mplayer  \
+                                     install-mplayer-msg
 
 DIRS =  . \
         input \
@@ -494,6 +498,9 @@ endif
 ###### generic rules #######
 
 all: $(ALL_PRG-yes) locales
+
+%.1: %.rst
+	rst2man $< $@
 
 %.o: %.S
 	$(CC) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
@@ -594,7 +601,12 @@ stream/stream_dvdnav%: CFLAGS := $(CFLAGS_LIBDVDNAV) $(CFLAGS)
 
 ###### installation / clean / generic rules #######
 
+check_rst2man:
+	@which rst2man > /dev/null 2>&1 || (printf "\n\trst2man not found. You need the docutils (>= 0.7) to generate the manpages. Alternatively you can use 'install-no-man' rule.\n\n" && exit 1)
+
 install: $(INSTALL_TARGETS-yes)
+
+install-no-man: $(INSTALL_NO_MAN_TARGETS-yes)
 
 install-dirs:
 	if test ! -d $(BINDIR) ; then $(INSTALL) -d $(BINDIR) ; fi
@@ -607,12 +619,12 @@ install-%: %$(EXESUF) install-dirs
 install-mplayer-man:  $(foreach lang,$(MAN_LANGS),install-mplayer-man-$(lang))
 install-mplayer-msg:  $(foreach lang,$(MSG_LANGS),install-mplayer-msg-$(lang))
 
-install-mplayer-man-en:
+install-mplayer-man-en: DOCS/man/en/mplayer.1
 	if test ! -d $(MANDIR)/man1 ; then $(INSTALL) -d $(MANDIR)/man1 ; fi
 	$(INSTALL) -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
 
 define MPLAYER_MAN_RULE
-install-mplayer-man-$(lang):
+install-mplayer-man-$(lang): DOCS/man/$(lang)/mplayer.1
 	if test ! -d $(MANDIR)/$(lang)/man1 ; then $(INSTALL) -d $(MANDIR)/$(lang)/man1 ; fi
 	$(INSTALL) -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
 endef
@@ -637,6 +649,8 @@ uninstall:
 
 clean:
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.d /*.a /*.ho /*~)
+	-$(RM) $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1,DOCS/man/$(lang)/$(man)))
+	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
 	-$(RM) $(call ADD_ALL_EXESUFS,mplayer)
 	-$(RM) $(MOFILES)
 	-$(RM) version.h

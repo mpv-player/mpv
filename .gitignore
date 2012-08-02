@@ -19,3 +19,5 @@
 /libmpdemux/ebml_types.h
 /libvo/vdpau_template.c
 /sub/osd_font.h
+DOCS/man/*/mplayer.1
+
