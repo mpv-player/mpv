@@ -195,7 +195,6 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_LOADLIST, "loadlist", { ARG_STRING, OARG_INT(0) } },
   { MP_CMD_PLAYLIST_CLEAR, "playlist_clear", },
   { MP_CMD_RUN, "run", { ARG_STRING } },
-  { MP_CMD_CAPTURING, "capturing", },
   { MP_CMD_VF_CHANGE_RECTANGLE, "change_rectangle", { ARG_INT, ARG_INT } },
   { MP_CMD_TV_TELETEXT_ADD_DEC, "teletext_add_dec", { ARG_STRING } },
   { MP_CMD_TV_TELETEXT_GO_LINK, "teletext_go_link", { ARG_INT } },

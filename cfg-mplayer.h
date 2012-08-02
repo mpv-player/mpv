@@ -750,11 +750,6 @@ const m_option_t mplayer_opts[]={
 
     OPT_FLAG_ON("untimed", untimed, 0),
 
-    // dump some stream out instead of playing the file
-    OPT_STRING("dumpfile", stream_dump_name, 0, OPTDEF_STR("stream.dump")),
-
-    OPT_MAKE_FLAGS("capture", capture_dump, 0),
-
 #ifdef CONFIG_LIRC
     {"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif

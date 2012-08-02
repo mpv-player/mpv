@@ -1240,40 +1240,6 @@ static int mp_property_colormatrix_output_range(m_option_t *prop, int action,
                                   prop, action, arg, mpctx);
 }
 
-static int mp_property_capture(m_option_t *prop, int action,
-                               void *arg, MPContext *mpctx)
-{
-    struct MPOpts *opts = &mpctx->opts;
-
-    if (!mpctx->stream)
-        return M_PROPERTY_UNAVAILABLE;
-
-    if (!opts->capture_dump) {
-        mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
-                "Capturing not enabled (forgot -capture parameter?)\n");
-        return M_PROPERTY_ERROR;
-    }
-
-    int capturing = !!mpctx->stream->capture_file;
-
-    int ret = m_property_flag(prop, action, arg, &capturing);
-    if (ret == M_PROPERTY_OK && capturing != !!mpctx->stream->capture_file) {
-        if (capturing) {
-            mpctx->stream->capture_file = fopen(opts->stream_dump_name, "wb");
-            if (!mpctx->stream->capture_file) {
-                mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
-                        "Error opening capture file: %s\n", strerror(errno));
-                ret = M_PROPERTY_ERROR;
-            }
-        } else {
-            fclose(mpctx->stream->capture_file);
-            mpctx->stream->capture_file = NULL;
-        }
-    }
-
-    return ret;
-}
-
 /// Panscan (RW)
 static int mp_property_panscan(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
@@ -2272,8 +2238,6 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "pause", mp_property_pause, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
-    { "capturing", mp_property_capture, CONF_TYPE_FLAG,
-      M_OPT_RANGE, 0, 1, NULL },
     { "pts_association_mode", mp_property_generic_option, &m_option_type_choice,
       0, 0, 0, "pts-association-mode" },
     { "hr_seek", mp_property_generic_option, &m_option_type_choice,
@@ -2454,7 +2418,6 @@ static struct property_osd_display {
     // general
     { "loop", 0, -1, _("Loop: %s") },
     { "chapter", -1, -1, NULL },
-    { "capturing", 0, -1, _("Capturing: %s") },
     { "pts_association_mode", 0, -1, "PTS association mode: %s" },
     { "hr_seek", 0, -1, "hr-seek: %s" },
     { "speed", 0, -1, _("Speed: x %6s") },
@@ -2585,7 +2548,6 @@ static struct {
     { "chapter", MP_CMD_SEEK_CHAPTER, 0},
     { "angle", MP_CMD_SWITCH_ANGLE, 0},
     { "pause", MP_CMD_PAUSE, 0},
-    { "capturing", MP_CMD_CAPTURING, 1},
     // audio
     { "volume", MP_CMD_VOLUME, 0},
     { "mute", MP_CMD_MUTE, 1},

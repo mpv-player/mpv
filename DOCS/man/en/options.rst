@@ -289,16 +289,6 @@
     filled to this position rather than performing a stream seek (default:
     50).
 
---capture
-    Allows capturing the primary stream (not additional audio tracks or other
-    kind of streams) into the file specified by ``--dumpfile`` or by default.
-    If this option is given, capturing can be started and stopped by pressing
-    the key bound to this function (see section `INTERACTIVE CONTROL`_). Same
-    as for ``--dumpstream``, this will likely not produce usable results for
-    anything else than MPEG streams. Note that, due to cache latencies,
-    captured data may begin and end somewhat delayed compared to what you see
-    displayed.
-
 --cdda=<option1:option2>
     This option can be used to tune the CD Audio reading feature of MPlayer.
 
@@ -513,10 +503,6 @@
     Time in milliseconds to recognize two consecutive button presses as a
     double-click (default: 300). Set to 0 to let your windowing system decide
     what a double-click is (``--vo=directx`` only).
-
---dumpfile=<filename>
-    Specify which file MPlayer should dump to. Should be used together with
-    ``--dumpaudio`` / ``--dumpvideo`` / ``--dumpstream`` / ``--capture``.
 
 --dvbin=<options>
     Pass the following parameters to the DVB input module, in order to

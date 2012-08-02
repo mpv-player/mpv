@@ -43,8 +43,6 @@ typedef struct MPOpts {
     char *vobsub_name;
     int auto_quality;
     int untimed;
-    char *stream_dump_name;
-    int capture_dump;
     int loop_times;
     int ordered_chapters;
     int chapter_merge_threshold;
