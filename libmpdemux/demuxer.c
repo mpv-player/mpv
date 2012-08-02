@@ -41,7 +41,6 @@
 #include "mf.h"
 
 #include "libaf/af_format.h"
-#include "libmpcodecs/dec_teletext.h"
 
 #include "libavcodec/avcodec.h"
 #if MP_INPUT_BUFFER_PADDING_SIZE < FF_INPUT_BUFFER_PADDING_SIZE
@@ -417,8 +416,6 @@ void free_demuxer(demuxer_t *demuxer)
     free_demuxer_stream(demuxer->sub);
  skip_streamfree:
     free(demuxer->filename);
-    if (demuxer->teletext)
-        teletext_control(demuxer->teletext, TV_VBI_CONTROL_STOP, NULL);
     talloc_free(demuxer);
 }
 

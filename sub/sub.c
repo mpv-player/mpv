@@ -29,7 +29,6 @@
 #include "stream/stream_dvdnav.h"
 #define OSD_NAV_BOX_ALPHA 0x7f
 
-#include "libmpcodecs/dec_teletext.h"
 #include "osdep/timer.h"
 
 #include "talloc.h"
@@ -57,10 +56,6 @@ char * const sub_osd_names[]={
 };
 char * const sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "", "", "", "", "", "" };
 
-void* vo_osd_teletext_page=NULL;
-int vo_osd_teletext_half = 0;
-int vo_osd_teletext_mode=0;
-int vo_osd_teletext_format=0;
 int sub_unicode=0;
 int sub_utf8=0;
 int sub_pos=100;
@@ -250,9 +245,6 @@ static int osd_update_ext(struct osd_state *osd, int dxs, int dys,
 	case OSDTYPE_SUBTITLE:
 	    vo_update_text_sub(osd, obj);
 	    break;
-	case OSDTYPE_TELETEXT:
-	    vo_update_text_teletext(osd, obj);
-	    break;
 	case OSDTYPE_PROGBAR:
 	    vo_update_text_progbar(osd, obj);
 	    break;
@@ -330,7 +322,6 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
 #ifdef CONFIG_DVDNAV
     new_osd_obj(OSDTYPE_DVDNAV);
 #endif
-    new_osd_obj(OSDTYPE_TELETEXT);
     osd_font_invalidate();
     osd->osd_text = talloc_strdup(osd, "");
     osd_init_backend(osd);
@@ -369,7 +360,6 @@ void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
 #ifdef CONFIG_DVDNAV
         case OSDTYPE_DVDNAV:
 #endif
-	case OSDTYPE_TELETEXT:
 	case OSDTYPE_OSD:
 	case OSDTYPE_SUBTITLE:
 	case OSDTYPE_PROGBAR:

@@ -263,15 +263,6 @@ keypad 7
 keypad ENTER
     Confirm choice.
 
-(The following keys are used for controlling TV teletext. The data may come
-from either an analog TV source or an MPEG transport stream.)
-
-X
-    Switch teletext on/off.
-
-Q and W
-    Go to next/prev teletext page.
-
 mouse control
 -------------
 

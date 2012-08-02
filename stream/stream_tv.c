@@ -70,12 +70,6 @@ tv_param_t stream_tv_defaults = {
     0,             //hue
     0,             //saturation
     -1,            //gain
-    {
-    NULL,          //tdevice
-    0,             //tformat
-    100,           //tpage
-    0,             //tlang
-    },
     0,             //scan_autostart
     50,            //scan_threshold
     0.5,            //scan_period

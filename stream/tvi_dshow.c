@@ -76,7 +76,6 @@
 
 #include <stdio.h>
 #include "libmpcodecs/img_format.h"
-#include "libmpcodecs/dec_teletext.h"
 #include "libaf/af_format.h"
 #include "osdep/timer.h"
 
@@ -200,6 +199,15 @@ typedef struct priv {
 
     tv_param_t* tv_param;                   ///< TV parameters
 } priv_t;
+
+typedef struct tt_stream_props_s{
+    int sampling_rate;
+    int samples_per_line;
+    int offset;
+    int count[2];     ///< number of lines in first and second fields
+    int interlaced;   ///< vbi data are interlaced
+    int bufsize;      ///< required buffer size
+} tt_stream_props;
 
 #include "tvi_def.h"
 
@@ -2344,7 +2352,6 @@ static void vbi_grabber(priv_t* priv)
     buf=calloc(1,rb->blocksize);
     for(i=0; i<23 && rb->count; i++){
         memcpy(buf,rb->ringbuffer[rb->head],rb->blocksize);
-        teletext_control(priv->priv_vbi,TV_VBI_CONTROL_DECODE_PAGE,&buf);
         rb->head = (rb->head + 1) % rb->buffersize;
         rb->count--;
     }
@@ -2588,20 +2595,6 @@ static HRESULT build_vbi_chain(priv_t *priv)
     if(priv->chains[2]->rbuf)
         return S_OK;
 
-    if(priv->tv_param->teletext.device)
-    {
-        priv->chains[2]->rbuf=calloc(1,sizeof(grabber_ringbuffer_t));
-        if(!priv->chains[2]->rbuf)
-            return E_OUTOFMEMORY;
-
-        init_ringbuffer(priv->chains[2]->rbuf,24,priv->tsp.bufsize);
-
-        hr=build_sub_graph(priv, priv->chains[2],&PIN_CATEGORY_VBI);
-        if(FAILED(hr)){
-            mp_tmsg(MSGT_TV, MSGL_ERR, "tvi_dshow: Unable to build VBI chain of capture graph. Error:0x%x\n",(unsigned int)hr);
-            return 0;
-        }
-    }
     return S_OK;
 }
 
@@ -3012,7 +3005,6 @@ static int uninit(priv_t * priv)
     if (priv->dwRegister) {
         RemoveFromRot(priv->dwRegister);
     }
-    teletext_control(priv->priv_vbi,TV_VBI_CONTROL_STOP,(void*)1);
     //stop audio grabber thread
 
     if (priv->state && priv->pMediaControl) {
@@ -3517,19 +3509,6 @@ static int control(priv_t * priv, int cmd, void *arg)
     case TVI_CONTROL_IMMEDIATE:
 	priv->immediate_mode = 1;
 	return TVI_CONTROL_TRUE;
-    case TVI_CONTROL_VBI_INIT:
-    {
-        void* ptr;
-        ptr=&(priv->tsp);
-        if(teletext_control(NULL,TV_VBI_CONTROL_START,&ptr)==VBI_CONTROL_TRUE)
-            priv->priv_vbi=ptr;
-        else
-            priv->priv_vbi=NULL;
-        return TVI_CONTROL_TRUE;
-    }
-    case TVI_CONTROL_GET_VBI_PTR:
-        *(void **)arg=priv->priv_vbi;
-        return TVI_CONTROL_TRUE;
     }
     return TVI_CONTROL_UNKNOWN;
 }

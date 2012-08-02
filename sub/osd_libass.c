@@ -361,16 +361,6 @@ void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj)
     talloc_free(text);
 }
 
-// Unimplemented.
-void vo_update_text_teletext(struct osd_state *osd, mp_osd_obj_t *obj)
-{
-    obj->flags |= OSDFLAG_CHANGED;
-    obj->flags &= ~OSDFLAG_VISIBLE;
-    if (!vo_osd_teletext_page || !vo_osd_teletext_mode)
-        return;
-    mp_msg(MSGT_OSD, MSGL_ERR, "OSD: teletext rendering not implemented\n");
-}
-
 // unneeded
 void osd_font_invalidate(void) {}
 void osd_font_load(struct osd_state *osd) {}

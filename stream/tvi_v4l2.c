@@ -57,7 +57,6 @@ known issues:
 #endif
 #include "mp_msg.h"
 #include "libmpcodecs/img_format.h"
-#include "libmpcodecs/dec_teletext.h"
 #include "libaf/af_format.h"
 #include "tv.h"
 #include "audio_in.h"
@@ -162,6 +161,15 @@ typedef struct priv {
 
     tv_param_t                  *tv_param;
 } priv_t;
+
+typedef struct tt_stream_props_s{
+    int sampling_rate;
+    int samples_per_line;
+    int offset;
+    int count[2];     ///< number of lines in first and second fields
+    int interlaced;   ///< vbi data are interlaced
+    int bufsize;      ///< required buffer size
+} tt_stream_props;
 
 #include "tvi_def.h"
 
@@ -594,52 +602,6 @@ static int get_control(priv_t *priv, struct v4l2_control *control, int val_signe
     return TVI_CONTROL_TRUE;
 }
 
-static int vbi_init(priv_t* priv,char* device)
-{
-    int vbi_fd=0;
-    struct v4l2_capability cap;
-    struct v4l2_format fmt;
-    int res;
-
-    if(!device)
-        return TVI_CONTROL_FALSE;
-
-    priv->vbi_dev=strdup(device);
-
-    vbi_fd=open(priv->vbi_dev,O_RDWR);
-    if(vbi_fd<0){
-        mp_msg(MSGT_TV,MSGL_ERR,"vbi: could not open device %s\n",priv->vbi_dev);
-        return  TVI_CONTROL_FALSE;
-    }
-
-    if(ioctl(vbi_fd,VIDIOC_QUERYCAP,&cap)<0){
-        mp_msg(MSGT_TV,MSGL_ERR,"vbi: Query capabilities failed for %s\n",priv->vbi_dev);
-        close(vbi_fd);
-        return  TVI_CONTROL_FALSE;
-    }
-    if(!(cap.capabilities & V4L2_CAP_VBI_CAPTURE)){
-        mp_msg(MSGT_TV,MSGL_ERR,"vbi: %s does not support VBI capture\n",priv->vbi_dev);
-        close(vbi_fd);
-        return  TVI_CONTROL_FALSE;
-    }
-
-    memset(&fmt,0,sizeof(struct v4l2_format));
-    fmt.type=V4L2_BUF_TYPE_VBI_CAPTURE;
-    if((res=ioctl(vbi_fd,VIDIOC_G_FMT,&fmt))<0){
-        mp_msg(MSGT_TV,MSGL_ERR,"vbi: Query format failed: %x\n",res);
-        close(vbi_fd);
-        return  TVI_CONTROL_FALSE;
-    }
-    if(fmt.fmt.vbi.sample_format!=V4L2_PIX_FMT_GREY){
-        mp_msg(MSGT_TV,MSGL_ERR,"vbi: format 0x%x is not supported\n",fmt.fmt.vbi.sample_format);
-        close(vbi_fd);
-        return TVI_CONTROL_FALSE;
-    }
-    priv->vbi_fd=vbi_fd;
-    mp_msg(MSGT_TV,MSGL_DBG3,"vbi: init ok\n");
-    return TVI_CONTROL_TRUE;
-}
-
 static int vbi_get_props(priv_t* priv,tt_stream_props* ptsp)
 {
     struct v4l2_format fmt;
@@ -710,7 +672,6 @@ static void *vbi_grabber(void *data)
 	    seq=0;
 	}
 	prev_seq=seq;
-        teletext_control(priv->priv_vbi,TV_VBI_CONTROL_DECODE_PAGE,&buf);
 	mp_msg(MSGT_TV,MSGL_DBG3,"grabber: seq:%d\n",seq);
     }
     free(buf);
@@ -1034,26 +995,6 @@ static int control(priv_t *priv, int cmd, void *arg)
         if (audio_in_set_samplerate(&priv->audio_in, *(int*)arg) < 0) return TVI_CONTROL_FALSE;
 //        setup_audio_buffer_sizes(priv);
         return TVI_CONTROL_TRUE;
-    case TVI_CONTROL_VBI_INIT:
-    {
-        void* ptr;
-	tt_stream_props tsp;
-
-        if (vbi_init(priv,*(char**)arg)!=TVI_CONTROL_TRUE)
-	    return TVI_CONTROL_FALSE;
-        if(vbi_get_props(priv,&tsp)==TVI_CONTROL_TRUE)
-        {
-            ptr=&tsp;
-            if(teletext_control(NULL,TV_VBI_CONTROL_START,&ptr)==VBI_CONTROL_TRUE)
-                priv->priv_vbi=ptr;
-	    else
-	        priv->priv_vbi=NULL;
-        }
-	return TVI_CONTROL_TRUE;
-    }
-    case TVI_CONTROL_GET_VBI_PTR:
-        *(void **)arg=priv->priv_vbi;
-        return TVI_CONTROL_TRUE;
     }
     mp_msg(MSGT_TV, MSGL_V, "%s: unknown control: %d\n", info.short_name, cmd);
     return TVI_CONTROL_UNKNOWN;
@@ -1103,7 +1044,6 @@ static int uninit(priv_t *priv)
     if(priv->vbi_grabber_thread)
         pthread_join(priv->vbi_grabber_thread, NULL);
 
-    teletext_control(priv->priv_vbi,TV_VBI_CONTROL_STOP,(void*)1);
     priv->priv_vbi=NULL;
 
     if(priv->vbi_fd){

@@ -248,9 +248,6 @@ typedef struct demuxer {
     struct sh_video *v_streams[MAX_V_STREAMS];
     struct sh_sub   *s_streams[MAX_S_STREAMS];
 
-    // teletext decoder private data, if demuxer stream contains teletext
-    void *teletext;
-
     struct demux_chapter *chapters;
     int num_chapters;
 

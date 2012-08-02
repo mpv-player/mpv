@@ -10,10 +10,6 @@ void vo_update_text_osd(struct osd_state *osd, mp_osd_obj_t *obj)
 {
 }
 
-void vo_update_text_teletext(struct osd_state *osd, mp_osd_obj_t *obj)
-{
-}
-
 void vo_update_text_progbar(struct osd_state *osd, mp_osd_obj_t *obj)
 {
 }

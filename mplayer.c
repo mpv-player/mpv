@@ -81,7 +81,6 @@
 
 #include "sub/sub.h"
 #include "sub/av_sub.h"
-#include "libmpcodecs/dec_teletext.h"
 #include "cpudetect.h"
 
 #ifdef CONFIG_X11
@@ -1727,14 +1726,7 @@ void update_subtitles(struct MPContext *mpctx, double refpts_tl, bool reset)
             if (vo_vobsub || timestamp >= 0)
                 spudec_assemble(vo_spudec, packet, len, timestamp);
         }
-    } else if (is_text_sub(type) || is_av_sub(type) || type == 'd') {
-        if (type == 'd' && !d_sub->demuxer->teletext) {
-            tt_stream_props tsp = { 0 };
-            void *ptr = &tsp;
-            if (teletext_control(NULL, TV_VBI_CONTROL_START, &ptr) ==
-                    VBI_CONTROL_TRUE)
-                d_sub->demuxer->teletext = ptr;
-        }
+    } else if (is_text_sub(type) || is_av_sub(type)) {
         if (d_sub->non_interleaved)
             ds_get_next_pts(d_sub);
 
@@ -1762,22 +1754,6 @@ void update_subtitles(struct MPContext *mpctx, double refpts_tl, bool reset)
                     continue;
                 len = FFMIN(len - 2, AV_RB16(packet));
                 packet += 2;
-            }
-            if (type == 'd') {
-                if (d_sub->demuxer->teletext) {
-                    uint8_t *p = packet;
-                    p++;
-                    len--;
-                    while (len >= 46) {
-                        int sublen = p[1];
-                        if (p[0] == 2 || p[0] == 3)
-                            teletext_control(d_sub->demuxer->teletext,
-                                             TV_VBI_CONTROL_DECODE_DVB, p + 2);
-                        p   += sublen + 2;
-                        len -= sublen + 2;
-                    }
-                }
-                continue;
             }
             if (sh_sub && sh_sub->active) {
                 sub_decode(sh_sub, mpctx->osd, packet, len, subpts_s, duration);
@@ -1815,38 +1791,6 @@ void update_subtitles(struct MPContext *mpctx, double refpts_tl, bool reset)
         if (spudec_changed(vo_spudec))
             vo_osd_changed(OSDTYPE_SPU);
     }
-}
-
-static void update_teletext(sh_video_t *sh_video, demuxer_t *demuxer, int reset)
-{
-    int page_changed;
-
-    if (!demuxer->teletext)
-        return;
-
-    //Also forcing page update when such ioctl is not supported or call error occured
-    if (teletext_control(demuxer->teletext, TV_VBI_CONTROL_IS_CHANGED,
-            &page_changed) != VBI_CONTROL_TRUE)
-        page_changed = 1;
-
-    if (!page_changed)
-        return;
-
-    if (teletext_control(demuxer->teletext, TV_VBI_CONTROL_GET_VBIPAGE,
-            &vo_osd_teletext_page) != VBI_CONTROL_TRUE)
-        vo_osd_teletext_page = NULL;
-    if (teletext_control(demuxer->teletext, TV_VBI_CONTROL_GET_HALF_PAGE,
-            &vo_osd_teletext_half) != VBI_CONTROL_TRUE)
-        vo_osd_teletext_half = 0;
-    if (teletext_control(demuxer->teletext, TV_VBI_CONTROL_GET_MODE,
-            &vo_osd_teletext_mode) != VBI_CONTROL_TRUE)
-        vo_osd_teletext_mode = 0;
-    if (teletext_control(demuxer->teletext, TV_VBI_CONTROL_GET_FORMAT,
-            &vo_osd_teletext_format) != VBI_CONTROL_TRUE)
-        vo_osd_teletext_format = 0;
-    vo_osd_changed(OSDTYPE_TELETEXT);
-
-    teletext_control(demuxer->teletext, TV_VBI_CONTROL_MARK_UNCHANGED, NULL);
 }
 
 static int check_framedrop(struct MPContext *mpctx, double frame_time)
@@ -2691,7 +2635,6 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
         mpctx->sh_video->pts = mpctx->d_video->pts + mpctx->video_offset;
         mpctx->video_pts = mpctx->sh_video->pts;
         update_subtitles(mpctx, mpctx->sh_video->pts, true);
-        update_teletext(mpctx->sh_video, mpctx->demuxer, 1);
     }
 
     if (mpctx->sh_audio && reset_ac) {
@@ -3182,7 +3125,6 @@ static void run_playloop(struct MPContext *mpctx)
         struct sh_video *sh_video = mpctx->sh_video;
         mpctx->video_pts = sh_video->pts;
         update_subtitles(mpctx, sh_video->pts, false);
-        update_teletext(sh_video, mpctx->demuxer, 0);
         update_osd_msg(mpctx);
         struct vf_instance *vf = sh_video->vfilter;
         mpctx->osd->pts = mpctx->video_pts - mpctx->osd->sub_offset;

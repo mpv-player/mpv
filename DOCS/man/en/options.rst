@@ -2186,28 +2186,6 @@
         Choose the quality of the JPEG compression (< 60 recommended for full
         size).
 
-    tdevice=<value>
-        Specify TV teletext device (example: ``/dev/vbi0``) (default: none).
-
-    tformat=<format>
-        Specify TV teletext display format (default: 0):
-
-        :0: opaque
-        :1: transparent
-        :2: opaque with inverted colors
-        :3: transparent with inverted colors
-
-    tpage=<100-899>
-        Specify initial TV teletext page number (default: 100).
-
-    tlang=<-1-127>
-        Specify default teletext language code (default: 0), which will be
-        used as primary language until a type 28 packet is received. Useful
-        when the teletext system uses a non-latin character set, but language
-        codes are not transmitted via teletext type 28 packets for some
-        reason. To see a list of supported language codes set this option to
-        -1.
-
     hidden_video_renderer (dshow only)
         Terminate stream with video renderer instead of Null renderer
         (default: off). Will help if video freezes but audio does not.

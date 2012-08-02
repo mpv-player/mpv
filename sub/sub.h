@@ -30,7 +30,6 @@ typedef struct mp_osd_bbox_s {
 #define OSDTYPE_PROGBAR 3
 #define OSDTYPE_SPU 4
 #define OSDTYPE_DVDNAV 5
-#define OSDTYPE_TELETEXT 6
 
 #define OSDFLAG_VISIBLE 1
 #define OSDFLAG_CHANGED 2
@@ -89,11 +88,6 @@ struct osd_state {
 #include "subreader.h"
 
 extern subtitle* vo_sub;
-
-extern void* vo_osd_teletext_page;
-extern int vo_osd_teletext_half;
-extern int vo_osd_teletext_mode;
-extern int vo_osd_teletext_format;
 
 extern int vo_osd_progbar_type;
 extern int vo_osd_progbar_value;   // 0..255
@@ -192,7 +186,6 @@ void vo_draw_text_from_buffer(mp_osd_obj_t* obj,void (*draw_alpha)(void *ctx, in
 
 // defined in osd_ft.c or osd_libass.c
 void vo_update_text_osd(struct osd_state *osd, mp_osd_obj_t *obj);
-void vo_update_text_teletext(struct osd_state *osd, mp_osd_obj_t *obj);
 void vo_update_text_progbar(struct osd_state *osd, mp_osd_obj_t *obj);
 void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t *obj);
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function);
