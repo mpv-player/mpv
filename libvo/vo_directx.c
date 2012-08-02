@@ -862,10 +862,6 @@ static void flip_page(void)
         g_lpddsPrimary->lpVtbl->Blt(g_lpddsPrimary, &rd, g_lpddsBack, NULL, DDBLT_WAIT, &ddbltfx);
     }
     if (g_lpddsBack->lpVtbl->Lock(g_lpddsBack, NULL, &ddsdsf, DDLOCK_NOSYSLOCK | DDLOCK_WAIT, NULL) == DD_OK) {
-        if (vo_directrendering && (dstride != ddsdsf.lPitch)) {
-            mp_msg(MSGT_VO, MSGL_WARN, "<vo_directx><WARN>stride changed !!!! disabling direct rendering\n");
-            vo_directrendering = 0;
-        }
         free(tmp_image);
         tmp_image = NULL;
         dstride   = ddsdsf.lPitch;
@@ -880,43 +876,6 @@ static int draw_frame(uint8_t *src[])
 {
     fast_memcpy(image, *src, dstride * image_height);
     return 0;
-}
-
-static uint32_t get_image(mp_image_t *mpi)
-{
-    if (mpi->flags & MP_IMGFLAG_READABLE) {
-        mp_msg(MSGT_VO, MSGL_V, "<vo_directx><ERROR>slow video ram\n");
-        return VO_FALSE;
-    }
-    if (mpi->type == MP_IMGTYPE_STATIC) {
-        mp_msg(MSGT_VO, MSGL_V, "<vo_directx><ERROR>not static\n");
-        return VO_FALSE;
-    }
-    if (mpi->width == dstride || (mpi->flags & (MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_ACCEPT_WIDTH))) {
-        if (mpi->flags & MP_IMGFLAG_PLANAR) {
-            if (image_format == IMGFMT_YV12) {
-                mpi->planes[2] = image + dstride * image_height;
-                mpi->planes[1] = image + dstride * image_height + dstride * image_height / 4;
-                mpi->stride[1] = mpi->stride[2] = dstride / 2;
-            } else if (image_format == IMGFMT_IYUV || image_format == IMGFMT_I420) {
-                mpi->planes[1] = image + dstride * image_height;
-                mpi->planes[2] = image + dstride * image_height + dstride * image_height / 4;
-                mpi->stride[1] = mpi->stride[2] = dstride / 2;
-            } else if (image_format == IMGFMT_YVU9) {
-                mpi->planes[2] = image + dstride * image_height;
-                mpi->planes[1] = image + dstride * image_height + dstride * image_height / 16;
-                mpi->stride[1] = mpi->stride[2] = dstride / 4;
-            }
-        }
-        mpi->planes[0] = image;
-        mpi->stride[0] = dstride;
-        mpi->width     = image_width;
-        mpi->height    = image_height;
-        mpi->flags    |= MP_IMGFLAG_DIRECT;
-        mp_msg(MSGT_VO, MSGL_DBG3, "<vo_directx><INFO>Direct Rendering ENABLED\n");
-        return VO_TRUE;
-    }
-    return VO_FALSE;
 }
 
 static uint32_t put_image(mp_image_t *mpi)
@@ -1130,8 +1089,6 @@ static uint32_t color_ctrl_get(const char *what, int *value)
 static int control(uint32_t request, void *data)
 {
     switch (request) {
-    case VOCTRL_GET_IMAGE:
-        return get_image(data);
     case VOCTRL_QUERY_FORMAT:
         return query_format(*(uint32_t *)data);
     case VOCTRL_DRAW_IMAGE:

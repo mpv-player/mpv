@@ -66,7 +66,6 @@ int vo_pts=0; // for hw decoding
 float vo_fps=0;
 
 char *vo_subdevice = NULL;
-int vo_directrendering=0;
 
 int vo_colorkey = 0x0000ff00; // default colorkey is green
                               // (0xff000000 means that colorkey has been disabled)

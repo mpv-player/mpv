@@ -514,11 +514,6 @@
     double-click (default: 300). Set to 0 to let your windowing system decide
     what a double-click is (``--vo=directx`` only).
 
---dr
-    Turns on direct rendering (not supported by all codecs and video outputs)
-
-    *WARNING*: May cause OSD/SUB corruption!
-
 --dumpfile=<filename>
     Specify which file MPlayer should dump to. Should be used together with
     ``--dumpaudio`` / ``--dumpvideo`` / ``--dumpstream`` / ``--capture``.

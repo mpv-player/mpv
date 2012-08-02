@@ -1834,8 +1834,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     switch (request) {
     case VOCTRL_QUERY_FORMAT:
         return query_format(*(uint32_t *)data);
-    case VOCTRL_GET_IMAGE:
-        return get_image(vo, data);
     case VOCTRL_DRAW_IMAGE:
         return draw_image(p, data);
     case VOCTRL_DRAW_EOSD:

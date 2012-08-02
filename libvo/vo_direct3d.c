@@ -1493,10 +1493,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     switch (request) {
     case VOCTRL_QUERY_FORMAT:
         return query_format(priv, *(uint32_t*) data);
-    case VOCTRL_GET_IMAGE:
-        mp_msg(MSGT_VO, MSGL_V,
-               "<vo_direct3d>Direct Rendering request. Not implemented yet.\n");
-        return VO_NOTIMPL;
     case VOCTRL_DRAW_IMAGE:
         return d3d_upload_and_render_frame(priv, data);
     case VOCTRL_FULLSCREEN:

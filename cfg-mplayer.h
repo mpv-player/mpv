@@ -733,9 +733,6 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("gamma", vo_gamma_gamma, 0, -100, 100),
     {"keepaspect", &vo_keepaspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
-    // direct rendering (decoding to video out buffer)
-    {"dr", &vo_directrendering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-
 //---------------------- mplayer-only options ------------------------
 
     {"use-filedir-conf", &use_filedir_conf, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},

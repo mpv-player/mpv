@@ -1091,75 +1091,6 @@ if (layer) {
     return VO_FALSE;
 }
 
-static uint32_t get_image(mp_image_t *mpi)
-{
-
-        int err;
-        uint8_t *dst;
-        int pitch;
-
-//    if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: get_image() called\n");
-    if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram
-    if(mpi->type==MP_IMGTYPE_STATIC) return VO_FALSE; // it is not static
-
-//    printf("width=%d vs. pitch=%d, flags=0x%X  \n",mpi->width,pitch,mpi->flags);
-
-    if(mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)){
-       // we're lucky or codec accepts stride => ok, let's go!
-
-	    if (frame) {
-		err = frame->Lock(frame,DSLF_WRITE|DSLF_READ,(void *)&dst,&pitch);
-		framelocked=1;
-	    } else {
- 		err = primary->Lock(primary,DSLF_WRITE,(void *)&dst,&pitch);
-		primarylocked=1;
-	    }
-
-	    if (err) {
-		mp_msg(MSGT_VO, MSGL_ERR,"DirectFB: DR lock failed!");
-		return VO_FALSE;
-	    };
-
-       if(mpi->flags&MP_IMGFLAG_PLANAR){
-    	   //YV12 format
-	   mpi->planes[0]=dst;
-	   if(mpi->flags&MP_IMGFLAG_SWAPPED){
-	   mpi->planes[1]=dst + pitch*height;
-	   mpi->planes[2]=mpi->planes[1] + pitch*height/4;
-	   } else {
-	   mpi->planes[2]=dst + pitch*height;
-	   mpi->planes[1]=mpi->planes[2] + pitch*height/4;
-	   }
-	   mpi->width=width;
-	   mpi->stride[0]=pitch;
-	   mpi->stride[1]=mpi->stride[2]=pitch/2;
-       } else {
-    	   //YUY2 and RGB formats
-           mpi->planes[0]=dst;
-	   mpi->width=width;
-	   mpi->stride[0]=pitch;
-       }
-
-       // center image
-
-       if (!frame) {
-            if(mpi->flags&MP_IMGFLAG_PLANAR){
-		mpi->planes[0]= dst + yoffset * pitch + xoffset;
-		mpi->planes[1]+= ((yoffset * pitch) >> 2) + (xoffset >> 1);
-		mpi->planes[2]+= ((yoffset * pitch) >> 2) + (xoffset >> 1);
-	    } else {
-		mpi->planes[0]=dst + yoffset * pitch + xoffset * (mpi->bpp >> 3);
-	    }
-       }
-
-       mpi->flags|=MP_IMGFLAG_DIRECT;
-//       if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: get_image() SUCCESS -> Direct Rendering ENABLED\n");
-       return VO_TRUE;
-
-    }
-    return VO_FALSE;
-}
-
 static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 {
         int i;
@@ -1375,8 +1306,6 @@ static int control(uint32_t request, void *data)
   switch (request) {
     case VOCTRL_QUERY_FORMAT:
 	return query_format(*((uint32_t*)data));
-    case VOCTRL_GET_IMAGE:
-	return get_image(data);
     case VOCTRL_DRAW_IMAGE:
 	return put_image(data);
     case VOCTRL_SET_EQUALIZER:

@@ -549,32 +549,6 @@ static int draw_frame(uint8_t * src[])
     return VO_ERROR;
 }
 
-static uint32_t get_image(mp_image_t * mpi)
-{
-    if (zoomFlag ||
-        !IMGFMT_IS_BGR(mpi->imgfmt) ||
-        (IMGFMT_BGR_DEPTH(mpi->imgfmt) != vo_depthonscreen) ||
-        ((mpi->type != MP_IMGTYPE_STATIC)
-         && (mpi->type != MP_IMGTYPE_TEMP))
-        || (mpi->flags & MP_IMGFLAG_PLANAR)
-        || (mpi->flags & MP_IMGFLAG_YUV) || (mpi->width != image_width)
-        || (mpi->height != image_height))
-        return VO_FALSE;
-
-    if (Flip_Flag)
-    {
-        mpi->stride[0] = -image_width * ((bpp + 7) / 8);
-        mpi->planes[0] = ImageData - mpi->stride[0] * (image_height - 1);
-    } else
-    {
-        mpi->stride[0] = image_width * ((bpp + 7) / 8);
-        mpi->planes[0] = ImageData;
-    }
-    mpi->flags |= MP_IMGFLAG_DIRECT;
-
-    return VO_TRUE;
-}
-
 static int query_format(uint32_t format)
 {
     mp_msg(MSGT_VO, MSGL_DBG2,
@@ -650,8 +624,6 @@ static int control(uint32_t request, void *data)
             return int_pause = 0;
         case VOCTRL_QUERY_FORMAT:
             return query_format(*((uint32_t *) data));
-        case VOCTRL_GET_IMAGE:
-            return get_image(data);
         case VOCTRL_FULLSCREEN:
             vo_x11_fullscreen();
             vo_x11_clearwindow(mDisplay, vo_window);

@@ -172,7 +172,7 @@ gl
     than the maximum texture size of your OpenGL implementation. Intended to
     work even with the most basic OpenGL implementations, but also makes use
     of newer extensions, which allow support for more colorspaces and direct
-    rendering. For optimal speed try adding the options ``--dr=-noslices``
+    rendering.
 
     The code performs very few checks, so if a feature does not work, this
     might be because it is not supported by your card/OpenGL implementation
@@ -181,7 +181,7 @@ gl
 
     (no-)ati-hack
         ATI drivers may give a corrupted image when PBOs are used (when using
-        ``--dr`` or `force-pbo`). This option fixes this, at the expense of
+        `force-pbo`). This option fixes this, at the expense of
         using a bit more memory.
     (no-)force-pbo
         Always uses PBOs to transfer textures even if this involves an extra
