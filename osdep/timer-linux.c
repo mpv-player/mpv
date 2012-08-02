@@ -20,9 +20,6 @@
  */
 
 #include <unistd.h>
-#ifdef __BEOS__
-#define usleep(t) snooze(t)
-#endif
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>

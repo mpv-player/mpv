@@ -1349,14 +1349,6 @@ fi #if x86
 ######################
 
 
-echocheck "-lposix"
-if cflag_check -lposix ; then
-  extra_ldflags="$extra_ldflags -lposix"
-  echores "yes"
-else
-  echores "no"
-fi
-
 echocheck "-lm"
 if cflag_check -lm ; then
   _ld_lm="-lm"
@@ -1460,7 +1452,6 @@ echores "$_nanosleep"
 
 echocheck "socklib"
 # for Solaris (socket stuff is in -lsocket, gethostbyname and friends in -lnsl):
-# for BeOS (socket stuff is in -lsocket, gethostbyname and friends in -lbind):
 cat > $TMPC << EOF
 #include <netdb.h>
 #include <sys/socket.h>
@@ -1882,19 +1873,6 @@ else
 fi
 echores "$_vsscanf"
 
-
-echocheck "swab()"
-_swab=no
-define_statement_check "_XOPEN_SOURCE 600" "unistd.h" 'int a, b; swab(&a, &b, 0)' ||
-    statement_check "string.h" 'int a, b; swab(&a, &b, 0)' && _swab=yes
-if test "$_swab" = yes ; then
-  def_swab='#define HAVE_SWAB 1'
-  need_swab=no
-else
-  def_swab='#undef HAVE_SWAB'
-  need_swab=yes
-fi
-echores "$_swab"
 
 echocheck "POSIX select()"
 cat > $TMPC << EOF
@@ -3982,7 +3960,6 @@ NEED_GETTIMEOFDAY = $need_gettimeofday
 NEED_GLOB         = $need_glob
 NEED_SHMEM        = $need_shmem
 NEED_STRSEP       = $need_strsep
-NEED_SWAB         = $need_swab
 NEED_VSSCANF      = $need_vsscanf
 
 # features
@@ -4180,7 +4157,6 @@ $def_select
 $def_setmode
 $def_shm
 $def_strsep
-$def_swab
 $def_sysi86
 $def_sysi86_iv
 $def_termcap
