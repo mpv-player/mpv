@@ -1297,28 +1297,22 @@ remove-logo=/path/to/logo_bitmap_file_name.pgm
         [path] + filename of the filter image.
 
 screenshot
-    Allows acquiring screenshots of the movie using slave mode commands that
-    can be bound to keypresses. See the slave mode documentation and the
-    ``INTERACTIVE CONTROL`` section for details. Files named ``shotNNNN.png``
-    will be saved in the working directory, using the first available number -
-    no files will be overwritten. The filter has no overhead when not used. It
-    does however break playback in some cases, especially VDPAU hardware
-    decoding is incompatible with the filter. Thus it is not completely safe to
-    add the filter to default configuration "just in case you might want to
-    take screenshots". Make sure that the screenshot filter is added after all
-    other filters whose effect you want to record on the saved image. E.g. it
-    should be the last filter if you want to have an exact screenshot of what
-    you see on the monitor.
+    Optional filter for screenshot support. This is only needed if the video
+    output doesn't provide working direct screenshot support. Note that it is
+    not always safe to insert this filter by default. See the
+    ``Taking screenshots`` section for details.
 
 ass
     Moves SSA/ASS subtitle rendering to an arbitrary point in the filter
-    chain. See the ``--ass`` option.
+    chain, or force subtitle rendering in the video filter as opposed to using
+    video output EOSD support. See the ``--ass`` option.
 
     *EXAMPLE*:
 
-    ``--vf=ass,screenshot``
-        Moves SSA/ASS rendering before the screenshot filter. Screenshots
-        taken this way will contain subtitles.
+    ``--vf=ass,eq``
+        Moves SSA/ASS rendering before the eq filter. This will put both
+        subtitle colors and video under the influence of the video equalizer
+        settings.
 
 blackframe[=amount:threshold]
     Detect frames that are (almost) completely black. Can be useful to detect

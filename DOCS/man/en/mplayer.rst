@@ -408,6 +408,28 @@ OPTIONS
 
 .. include:: vf.rst
 
+Taking screenshots
+==================
+
+Screenshots of the currently played file can be taken using the 'screenshot'
+slave mode command, which is by default bound to the ``s`` key. Files named
+``shotNNNN.png`` will be saved in the working directory, using the first
+available number - no files will be overwritten.
+
+A screenshot will usually contain the unscaled video contents at the end of the
+video filter chain. Some video output drivers will include subtitles and OSD in
+the video frame as well - this is because of technical restrictions.
+
+The ``screenshot`` video filter is normally not required when using a
+recommended GUI video output driver. The ``screenshot`` filter will be attempted
+to be used if the video output doesn't support screenshots. Note that taking
+screenshots with the video filter is not instant: the screenshot will be only
+saved when the next video frame is displayed. This means attempting to take a
+screenshot while the player is paused will do nothing, until the user unpauses
+or seeks. Also, the screenshot filter is not compatible with hardware decoding,
+and actually will cause initialization failure when use with hardware decodingis
+attempted. Using the ``screenshot`` video filter is not recommended for these
+reasons.
 
 ENVIRONMENT VARIABLES
 =====================

@@ -1663,6 +1663,71 @@
     Seek to byte position. Useful for playback from CD-ROM images or VOB files
     with junk at the beginning. See also ``--ss``.
 
+--screenshot-filetype=<type>
+    Set the image file type used for saving screenshots.
+
+    Available choices:
+
+    :png:   PNG (default)
+    :jpg:   JPEG
+    :jpeg:  JPEG (same as jpg, but with .jpeg file ending)
+
+--screenshot-jpeg-quality=<0-100>
+    Set the JPEG quality level. Higher means better quality. The default is 85.
+
+--screenshot-png-compression=<0-9>
+    Set the PNG compression level. Higher means better compression. This will
+    affect the file size of the written screenshot file, and the time it takes
+    to write a screenshot. Too high compression might occupy enough CPU time to
+    interrupt playback. The default is 7.
+
+--screenshot-template=<template>
+    Specify the filename template used to save screenshots. The template
+    specifies the filename without file extension, and can contain format
+    specifiers, which will be substituted when taking a screeshot.
+    By default the template is ``shot%n``, which results in filenames like
+    ``shot0012.png`` for example.
+
+    The template can start with a relative or absolute path, in order to
+    specify a directory location where screenshots should be saved.
+
+    If the final screenshot filename points to an already existing file, the
+    file won't be overwritten. The screenshot will either not be saved, or if
+    the template contains ``%n``, saved using different, newly generated
+    filename.
+
+    Allowed format specifiers:
+
+    ``%nX``
+        A sequence number, padded with zeros to length X. E.g. passing the
+        format ``%n4`` will yield ``0012`` on the 12th screenshot. The number is
+        incremented every time a screenshot is taken, or if the file already
+        exists. The length ``X`` must be in the range 0-9.
+    ``%f``
+        Filename of the currently played video.
+    ``%F``
+        Same as ``%f``, but strip the file extension, including the dot.
+    ``%p``
+        Current playback time, in the same format as used in the OSD. The
+        result is a string of the form "HH:MM:SS". For example, if the video is
+        at the time position 5 minutes and 34 seconds, ``%p`` will be replaced
+        with "00:05:34".
+    ``%P``
+        Similar to ``%p``, but extended with the playback time in milliseconds.
+        It is formatted as "HH:MM:SS.mmm", with "mmm" being the millisecond
+        part of the playback time. (Note that this is a simple way for getting
+        unique per-frame timestamps. Frame numbers would be more intuitive, but
+        are not easily implementable, because container formats usually use
+        time stamps for identifying frames.)
+    ``%tX``
+        Specify the current local date/time using he format ``X``. This format
+        specifier uses the UNIX ``strftime()`` function internally, and inserts
+        the result of passing "%X" to ``strftime``. For example, ``%tm`` will
+        insert the number of the current month as number. You have to use
+        multiple ``%tX`` specifiers to build a full date/time string.
+    ``%%``
+        Replaced with the ``%`` character itself.
+
 --screenh=<pixels>
     Specify the screen height for video output drivers which do not know the
     screen resolution like fbdev, x11 and TV-out.
