@@ -208,13 +208,11 @@ SRCS_COMMON = asxparser.c \
               libaf/af.c \
               libaf/af_center.c \
               libaf/af_channels.c \
-              libaf/af_comp.c \
               libaf/af_delay.c \
               libaf/af_dummy.c \
               libaf/af_equalizer.c \
               libaf/af_extrastereo.c \
               libaf/af_format.c \
-              libaf/af_gate.c \
               libaf/af_hrtf.c \
               libaf/af_karaoke.c \
               libaf/af_lavcac3enc.c \

@@ -465,15 +465,6 @@ ladspa=file:label[:controls...]
         available controls and their valid ranges are printed. This eliminates
         the use of 'analyseplugin' from the LADSPA SDK.
 
-comp
-    Compressor/expander filter usable for microphone input. Prevents artifacts
-    on very loud sound and raises the volume on very low sound. This filter is
-    untested, maybe even unusable.
-
-gate
-    Noise gate filter similar to the comp audio filter. This filter is
-    untested, maybe even unusable.
-
 karaoke
     Simple voice removal filter exploiting the fact that voice is usually
     recorded with mono gear and later 'center' mixed onto the final audio
