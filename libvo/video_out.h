@@ -293,6 +293,8 @@ struct vo {
         int scrh; // vertical resolution
         float asp;
     } aspdat;
+
+    char *window_title;
 };
 
 struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11,

@@ -247,7 +247,6 @@ FILE *edl_fd;  // file to write to when in -edlout mode.
 char *edl_output_filename; // file to put EDL entries in (-edlout)
 
 int use_filedir_conf;
-int use_filename_title;
 
 #include "mpcommon.h"
 #include "command.h"
@@ -2311,6 +2310,16 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     return -partial_fill;
 }
 
+static void vo_update_window_title(struct MPContext *mpctx)
+{
+    if (!mpctx->video_out)
+        return;
+    char *title = property_expand_string(mpctx, mpctx->opts.vo_wintitle);
+    talloc_free(mpctx->video_out->window_title);
+    mpctx->video_out->window_title = talloc_strdup(mpctx->video_out, title);
+    free(title);
+}
+
 int reinit_video_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -2333,6 +2342,8 @@ int reinit_video_chain(struct MPContext *mpctx)
         }
         mpctx->initialized_flags |= INITIALIZED_VO;
     }
+
+    vo_update_window_title(mpctx);
 
     if (stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO,
                 &ar) != STREAM_UNSUPPORTED)
@@ -3750,8 +3761,6 @@ play_next_file:
         vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);
 
     mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Playing %s.\n", mpctx->filename);
-    if (use_filename_title && opts->vo_wintitle == NULL)
-        opts->vo_wintitle = talloc_strdup(NULL, mp_basename(mpctx->filename));
 
     if (edl_output_filename) {
         if (edl_fd)
