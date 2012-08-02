@@ -49,10 +49,6 @@
 #include <linux/videodev2.h>
 #endif
 
-#ifdef CONFIG_RADIO_V4L
-#include <linux/videodev.h>
-#endif
-
 #endif // !IOCTL_BT848_H_NAME
 
 
@@ -408,137 +404,6 @@ static const radio_driver_t radio_driver_v4l2={
     get_frequency_v4l2
 };
 #endif /* CONFIG_RADIO_V4L2 */
-#ifdef CONFIG_RADIO_V4L
-/*****************************************************************
- * \brief get fraction value for using in set_frequency and get_frequency
- * \return STREAM_OK if success, STREAM_ERROR otherwise
- *
- * V4L2_TUNER_CAP_LOW:
- * unit=62.5Hz
- * frac= 1MHz/unit=1000000/62.5 =16000
- *
- * otherwise:
- * unit=62500Hz
- * frac= 1MHz/unit=1000000/62500 =16
- *
- */
-static int init_frac_v4l(radio_priv_t* priv){
-    struct video_tuner tuner;
-    memset(&tuner,0,sizeof(tuner));
-    if (ioctl(priv->radio_fd, VIDIOCGTUNER, &tuner) <0){
-        mp_tmsg(MSGT_RADIO,MSGL_WARN,"[radio] Warning: ioctl get tuner failed: %s. Setting frac to %d.\n",strerror(errno),priv->frac);
-        return  STREAM_ERROR;
-    }
-    if(tuner.flags & VIDEO_TUNER_LOW){
-        priv->frac=16000;
-        mp_tmsg(MSGT_RADIO,MSGL_DBG2,"[radio] tuner is low:yes frac=%d\n",priv->frac);
-    }else{
-        priv->frac=16;
-        mp_tmsg(MSGT_RADIO,MSGL_DBG2,"[radio] tuner is low:no frac=%d\n",priv->frac);
-    }
-
-    priv->rangelow=((float)tuner.rangelow)/priv->frac;
-    priv->rangehigh=((float)tuner.rangehigh)/priv->frac;
-    mp_tmsg(MSGT_RADIO,MSGL_V,"[radio] Allowed frequency range is %.2f-%.2f MHz.\n",priv->rangelow,priv->rangehigh);
-
-    return STREAM_OK;
-}
-
-/*****************************************************************
- * \brief tune card to given frequency
- * \param frequency frequency in MHz
- * \return STREAM_OK if success, STREAM_ERROR otherwise
- */
-static int set_frequency_v4l(radio_priv_t* priv,float frequency){
-    __u32 freq;
-    freq=frequency*priv->frac;
-    if (ioctl(priv->radio_fd, VIDIOCSFREQ, &freq) < 0) {
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] ioctl set frequency 0x%x (%.2f) failed: %s\n",freq,frequency,strerror(errno));
-        return  STREAM_ERROR;
-    }
-    return STREAM_OK;
-}
-/*****************************************************************
- * \brief get current tuned frequency from card
- * \param frequency where to store frequency in MHz
- * \return STREAM_OK if success, STREAM_ERROR otherwise
- */
-static int get_frequency_v4l(radio_priv_t* priv,float* frequency){
-    __u32 freq;
-    if (ioctl(priv->radio_fd, VIDIOCGFREQ, &freq) < 0) {
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] ioctl get frequency failed: %s\n",strerror(errno));
-        return  STREAM_ERROR;
-    }
-    *frequency=((float)freq)/priv->frac;
-    return STREAM_OK;
-}
-
-/*****************************************************************
- * \brief set volume on radio card
- * \param volume volume level (0..100)
- * \return STREAM_OK if success, STREAM_ERROR otherwise
- */
-static void set_volume_v4l(radio_priv_t* priv,int volume){
-    struct video_audio audio;
-
-    /*arg must be between 0 and 100*/
-    if (volume > 100) volume = 100;
-    if (volume < 0) volume = 0;
-
-    memset(&audio,0,sizeof(audio));
-    audio.flags = (volume==0?VIDEO_AUDIO_MUTE:0);
-    if (ioctl(priv->radio_fd, VIDIOCSAUDIO, &audio)<0){
-        mp_tmsg(MSGT_RADIO,MSGL_WARN,"[radio] ioctl set mute failed: %s\n",strerror(errno));
-    }
-
-    memset(&audio,0,sizeof(audio));
-    audio.flags = VIDEO_AUDIO_VOLUME;
-    audio.mode = VIDEO_SOUND_STEREO;
-    audio.audio = 0;
-    audio.volume =  volume* (65535 / 100);
-
-    if (ioctl(priv->radio_fd, VIDIOCSAUDIO, &audio) < 0){
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] ioctl set volume failed: %s\n",strerror(errno));
-    }
-}
-
-/*****************************************************************
- * \brief get current volume from radio card
- * \param volume where to store volume level (0..100)
- * \return STREAM_OK if success, STREAM_ERROR otherwise
- */
-static int get_volume_v4l(radio_priv_t* priv,int* volume){
-    struct video_audio audio;
-
-    memset(&audio,0,sizeof(audio));
-    audio.audio=0;
-    if (ioctl(priv->radio_fd, VIDIOCGAUDIO, &audio) < 0){
-        mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] ioctl get volume failed: %s\n",strerror(errno));
-        return STREAM_ERROR;
-    }
-
-    if (audio.flags & VIDEO_AUDIO_VOLUME){
-        *volume=100*audio.volume/65535;
-        /*arg must be between 0 and 100*/
-        if (*volume > 100) *volume = 100;
-        if (*volume < 0) *volume = 0;
-        return STREAM_OK;
-    }
-
-    return STREAM_ERROR;
-}
-
-/* v4l driver info structure */
-static const radio_driver_t radio_driver_v4l={
-    "v4l",
-    _("[radio] Using V4Lv1 radio interface.\n"),
-    init_frac_v4l,
-    set_volume_v4l,
-    get_volume_v4l,
-    set_frequency_v4l,
-    get_frequency_v4l
-};
-#endif /* CONFIG_RADIO_V4L */
 #ifdef CONFIG_RADIO_BSDBT848
 
 /*****************************************************************
@@ -1083,9 +948,6 @@ static const radio_driver_t* radio_drivers[]={
 #endif
 #ifdef CONFIG_RADIO_V4L2
     &radio_driver_v4l2,
-#endif
-#ifdef CONFIG_RADIO_V4L
-    &radio_driver_v4l,
 #endif
     0
 };

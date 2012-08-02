@@ -58,7 +58,6 @@ char *tv_channel_last_real;
 /* enumerating drivers (like in stream.c) */
 extern const tvi_info_t tvi_info_dummy;
 extern const tvi_info_t tvi_info_dshow;
-extern const tvi_info_t tvi_info_v4l;
 extern const tvi_info_t tvi_info_v4l2;
 extern const tvi_info_t tvi_info_bsdbt848;
 
@@ -66,9 +65,6 @@ extern const tvi_info_t tvi_info_bsdbt848;
 static const tvi_info_t* tvi_driver_list[]={
 #ifdef CONFIG_TV_V4L2
     &tvi_info_v4l2,
-#endif
-#ifdef CONFIG_TV_V4L1
-    &tvi_info_v4l,
 #endif
 #ifdef CONFIG_TV_BSDBT848
     &tvi_info_bsdbt848,
@@ -477,26 +473,6 @@ static int open_tv(tvi_handle_t *tvh)
     else
 #endif
     tv_set_norm(tvh,tvh->tv_param->norm);
-
-#ifdef CONFIG_TV_V4L1
-    if ( tvh->tv_param->mjpeg )
-    {
-      /* set width to expected value */
-      if (tvh->tv_param->width == -1)
-        {
-          tvh->tv_param->width = 704/tvh->tv_param->decimation;
-        }
-      if (tvh->tv_param->height == -1)
-        {
-	  if ( tvh->norm != TV_NORM_NTSC )
-            tvh->tv_param->height = 576/tvh->tv_param->decimation;
-	  else
-            tvh->tv_param->height = 480/tvh->tv_param->decimation;
-        }
-      mp_tmsg(MSGT_TV, MSGL_INFO,
-	       "  MJP: width %d height %d\n", tvh->tv_param->width, tvh->tv_param->height);
-    }
-#endif
 
     /* limits on w&h are norm-dependent -- JM */
     if (tvh->tv_param->width != -1 && tvh->tv_param->height != -1) {

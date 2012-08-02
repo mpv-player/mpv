@@ -121,12 +121,12 @@ const m_option_t tvopts_conf[]={
     {"hue", &stream_tv_defaults.hue, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
     {"saturation", &stream_tv_defaults.saturation, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
     {"gain", &stream_tv_defaults.gain, CONF_TYPE_INT, CONF_RANGE, -1, 100, NULL},
-#if defined(CONFIG_TV_V4L) || defined(CONFIG_TV_V4L2) || defined(CONFIG_TV_DSHOW)
+#if defined(CONFIG_TV_V4L2) || defined(CONFIG_TV_DSHOW)
     {"buffersize", &stream_tv_defaults.buffer_size, CONF_TYPE_INT, CONF_RANGE, 16, 1024, NULL},
     {"amode", &stream_tv_defaults.amode, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
     {"volume", &stream_tv_defaults.volume, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
 #endif
-#if defined(CONFIG_TV_V4L) || defined(CONFIG_TV_V4L2)
+#if defined(CONFIG_TV_V4L2)
     {"bass", &stream_tv_defaults.bass, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
     {"treble", &stream_tv_defaults.treble, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
     {"balance", &stream_tv_defaults.balance, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
@@ -139,7 +139,7 @@ const m_option_t tvopts_conf[]={
 #ifdef CONFIG_ALSA
     {"alsa", &stream_tv_defaults.alsa, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif /* CONFIG_ALSA */
-#endif /* defined(CONFIG_TV_V4L) || defined(CONFIG_TV_V4L2) */
+#endif /* defined(CONFIG_TV_V4L2) */
     {"adevice", &stream_tv_defaults.adevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"tdevice", &stream_tv_defaults.teletext.device, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"tpage", &stream_tv_defaults.teletext.page, CONF_TYPE_INT, CONF_RANGE, 100, 899, NULL},
