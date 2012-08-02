@@ -683,22 +683,11 @@ int vf_config_wrapper(struct vf_instance *vf,
                       int width, int height, int d_width, int d_height,
                       unsigned int flags, unsigned int outfmt)
 {
-    int r;
-    if ((vf->default_caps & VFCAP_CONSTANT) && vf->fmt.have_configured) {
-        if ((vf->fmt.orig_width != width)
-            || (vf->fmt.orig_height != height)
-            || (vf->fmt.orig_fmt != outfmt)) {
-            mp_tmsg(MSGT_VFILTER, MSGL_ERR, "\nNew video file has different "
-                    "resolution or colorspace than the previous one.\n");
-            return 0;
-        }
-        return 1;
-    }
     vf->fmt.have_configured = 1;
     vf->fmt.orig_height = height;
     vf->fmt.orig_width = width;
     vf->fmt.orig_fmt = outfmt;
-    r = vf->config(vf, width, height, d_width, d_height, flags, outfmt);
+    int r = vf->config(vf, width, height, d_width, d_height, flags, outfmt);
     if (!r)
         vf->fmt.have_configured = 0;
     return r;

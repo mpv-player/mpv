@@ -35,15 +35,11 @@
 
 // driver/hardware handles timing (blocking)
 #define VFCAP_TIMER 0x100
-// driver _always_ flip image upside-down (for ve_vfw)
-#define VFCAP_FLIPPED 0x200
 // vf filter: accepts stride (put_image)
 // vo driver: has draw_slice() support for the given csp
 #define VFCAP_ACCEPT_STRIDE 0x400
 // filter does postprocessing (so you shouldn't scale/filter image before it)
 #define VFCAP_POSTPROC 0x800
-// filter cannot be reconfigured to different size & format
-#define VFCAP_CONSTANT 0x1000
 // filter can draw EOSD
 #define VFCAP_EOSD 0x2000
 // filter will draw EOSD at screen resolution (without scaling)
