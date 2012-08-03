@@ -565,9 +565,7 @@ const m_option_t common_opts[] = {
 
     OPT_STRINGLIST("sub", sub_name, 0),
     OPT_PATHLIST("sub-paths", sub_paths, 0),
-#ifdef CONFIG_ICONV
     {"subcp", &sub_cp, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#endif
     {"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
     {"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
     OPT_MAKE_FLAGS("autosub", sub_auto, 0),

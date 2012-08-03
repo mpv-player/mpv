@@ -38,10 +38,6 @@
 #include "stream/stream.h"
 #include "options.h"
 
-#ifndef CONFIG_ICONV
-static char *sub_cp = 0;
-#endif
-
 ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
 {
     ASS_Track *track = ass_new_track(library);

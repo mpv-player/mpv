@@ -45,8 +45,10 @@
 
 #ifdef CONFIG_ICONV
 #include <iconv.h>
-char *sub_cp=NULL;
 #endif
+
+char *sub_cp=NULL;
+
 
 int suboverlap_enabled = 1;
 
