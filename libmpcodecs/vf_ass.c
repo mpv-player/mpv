@@ -290,7 +290,7 @@ static void copy_to_image(struct vf_instance *vf)
         unsigned char *dst      = vf->dmpi->planes[pl];
         unsigned char *src      = vf->priv->planes[pl];
         unsigned char *src_next = vf->priv->planes[pl] + src_stride;
-        for (i = 0; i < vf->dmpi->chroma_height; ++i) {
+        for (i = 0; i < vf->priv->outh / 2; ++i) {
             for (j = vf->priv->line_limits[i].start; j < vf->priv->line_limits[i].end; j++) {
                 unsigned val = 0;
                 val += src[j << 1];
