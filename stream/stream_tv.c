@@ -49,7 +49,7 @@ tv_param_t stream_tv_defaults = {
     -1.0,          //fps
     NULL,          //channels
     0,             //noaudio;
-    0,             //immediate;
+    1,             //immediate;
     44100,         //audiorate;
     0,             //audio_id
     -1,            //amode

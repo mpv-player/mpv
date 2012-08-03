@@ -3491,10 +3491,6 @@ int main(int argc, char *argv[])
     set_path_env();
 #endif
 
-#ifdef CONFIG_TV
-    stream_tv_defaults.immediate = 1;
-#endif
-
     parse_cfgfiles(mpctx, mpctx->mconfig);
 
     mpctx->playlist = talloc_struct(mpctx, struct playlist, {0});
