@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "osdep/io.h"
 
@@ -169,7 +170,8 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
 #endif
       f=open(filename,m, openmode);
     if(f<0) {
-      mp_tmsg(MSGT_OPEN,MSGL_ERR,"File not found: '%s'\n",filename);
+        mp_tmsg(MSGT_OPEN, MSGL_ERR, "Cannot open file '%s': %s\n", filename,
+                strerror(errno));
       m_struct_free(&stream_opts,opts);
       return STREAM_ERROR;
     }
