@@ -2665,13 +2665,13 @@ static void show_tracks_on_osd(MPContext *mpctx)
     if (cnt > 1)
         res = talloc_asprintf_append(res, "(Warning: more than one video stream.)\n");
 
-#define STD_TRACK_HDR(st, id)                                   \
+#define STD_TRACK_HDR(st, id, lang)                                   \
     res = talloc_asprintf_append(res, "%s(%d) ", IND, st->id);  \
     if (st->title) {                                            \
         res = talloc_asprintf_append(res, "'%s' ", st->title);  \
     }                                                           \
-    if (st->lang) {                                             \
-        res = talloc_asprintf_append(res, "(%s) ", st->lang);   \
+    if (lang) {                                                 \
+        res = talloc_asprintf_append(res, "(%s) ", lang);       \
     }
 
     for (n = 0; n < MAX_A_STREAMS; n++) {
@@ -2680,7 +2680,8 @@ static void show_tracks_on_osd(MPContext *mpctx)
             cnt++;
             if (a == cur_a)
                 res = talloc_asprintf_append(res, "> ");
-            STD_TRACK_HDR(a, aid)
+            char *lang = demuxer_audio_lang(mpctx->demuxer, a->index);
+            STD_TRACK_HDR(a, aid, lang)
             if (a == cur_a)
                 res = talloc_asprintf_append(res, "<");
             res = talloc_asprintf_append(res, "\n");
@@ -2695,7 +2696,8 @@ static void show_tracks_on_osd(MPContext *mpctx)
             cnt++;
             if (s == cur_s)
                 res = talloc_asprintf_append(res, "> ");
-            STD_TRACK_HDR(s, sid)
+            char *lang = demuxer_sub_lang(mpctx->demuxer, s->index);
+            STD_TRACK_HDR(s, sid, lang)
             char *type = "?";
             switch (s->type) {
             case 't': type = "SRT"; break;

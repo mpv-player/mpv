@@ -401,8 +401,13 @@ static void print_stream(struct MPContext *mpctx, sh_common_t *s)
     }
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "[stream] ID %d: %s", s->demuxer_id, tname);
     mp_msg(MSGT_CPLAYER, MSGL_INFO, " --%s=%d", selopt, s->id);
-    if (s->lang)
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, " --%s=%s", langopt, s->lang);
+    char *lang = NULL;
+    if (s->stream_type == STREAM_AUDIO)
+        lang = demuxer_audio_lang(mpctx->demuxer, s->index);
+    if (s->stream_type == STREAM_SUBTITLE)
+        lang = demuxer_sub_lang(mpctx->demuxer, s->index);
+    if (lang)
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, " --%s=%s", langopt, lang);
     if (s->default_track)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " (*)");
     if (s->title)
