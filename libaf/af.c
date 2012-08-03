@@ -47,7 +47,6 @@ extern af_info_t af_info_center;
 extern af_info_t af_info_sinesuppress;
 extern af_info_t af_info_karaoke;
 extern af_info_t af_info_scaletempo;
-extern af_info_t af_info_stats;
 extern af_info_t af_info_bs2b;
 
 static af_info_t* filter_list[]={
@@ -77,7 +76,6 @@ static af_info_t* filter_list[]={
    &af_info_sinesuppress,
    &af_info_karaoke,
    &af_info_scaletempo,
-   &af_info_stats,
 #ifdef CONFIG_LIBBS2B
    &af_info_bs2b,
 #endif
