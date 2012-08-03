@@ -969,6 +969,7 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
         if (new_id != current_id)
             uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC);
         if (new_id != current_id && new_id >= 0) {
+            mpctx->opts.audio_id = new_id;
             sh_audio_t *sh2;
             sh2 = mpctx->d_audio->demuxer->a_streams[mpctx->d_audio->id];
             sh2->ds = mpctx->d_audio;
