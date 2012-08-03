@@ -3388,6 +3388,170 @@ static int select_audio(demuxer_t *demuxer, int audio_id, char **audio_lang)
     return demuxer->audio->id;
 }
 
+static void init_input(struct MPContext *mpctx)
+{
+    mpctx->input = mp_input_init(&mpctx->opts.input);
+    mpctx->key_fifo = mp_fifo_create(mpctx->input, &mpctx->opts);
+    if (slave_mode)
+        mp_input_add_cmd_fd(mpctx->input, 0, USE_FD0_CMD_SELECT, MP_INPUT_SLAVE_CMD_FUNC, NULL);
+    else if (mpctx->opts.consolecontrols)
+        mp_input_add_key_fd(mpctx->input, 0, 1, read_keys, NULL, mpctx->key_fifo);
+    // Set the libstream interrupt callback
+    stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
+}
+
+static void open_vobsubs_from_options(struct MPContext *mpctx)
+{
+    if (mpctx->opts.vobsub_name) {
+        vo_vobsub = vobsub_open(mpctx->opts.vobsub_name, spudec_ifo, 1, &vo_spudec);
+        if (vo_vobsub == NULL)
+            mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Cannot load subtitles: %s\n",
+                    mpctx->opts.vobsub_name);
+    } else if (mpctx->opts.sub_auto) {
+        char **vob = find_vob_subtitles(&mpctx->opts, mpctx->filename);
+        for (int i = 0; i < MP_TALLOC_ELEMS(vob); i++) {
+            vo_vobsub = vobsub_open(vob[i], spudec_ifo, 0, &vo_spudec);
+            if (vo_vobsub)
+                break;
+        }
+        talloc_free(vob);
+    }
+    if (vo_vobsub) {
+        mpctx->initialized_flags |= INITIALIZED_VOBSUB;
+        vobsub_set_from_lang(vo_vobsub, mpctx->opts.sub_lang);
+        mp_property_do("sub_forced_only", M_PROPERTY_SET, &forced_subs_only,
+                       mpctx);
+
+        // setup global sub numbering
+        mpctx->sub_counts[SUB_SOURCE_VOBSUB] =
+                vobsub_get_indexes_count(vo_vobsub);
+    }
+}
+
+static void open_subtitles_from_options(struct MPContext *mpctx)
+{
+    // after reading video params we should load subtitles because
+    // we know fps so now we can adjust subtitle time to ~6 seconds AST
+    // check .sub
+    double sub_fps = mpctx->sh_video ? mpctx->sh_video->fps : 25;
+    if (mpctx->opts.sub_name) {
+        for (int i = 0; mpctx->opts.sub_name[i] != NULL; ++i)
+            add_subtitles(mpctx, mpctx->opts.sub_name[i], sub_fps, 0);
+    }
+    if (mpctx->opts.sub_auto) { // auto load sub file ...
+        char **tmp = find_text_subtitles(&mpctx->opts, mpctx->filename);
+        int nsub = MP_TALLOC_ELEMS(tmp);
+        for (int i = 0; i < nsub; i++)
+            add_subtitles(mpctx, tmp[i], sub_fps, 1);
+        talloc_free(tmp);
+    }
+    if (mpctx->set_of_sub_size > 0)
+        mpctx->sub_counts[SUB_SOURCE_SUBS] = mpctx->set_of_sub_size;
+}
+
+static void print_timeline(struct MPContext *mpctx)
+{
+    if (mpctx->timeline) {
+        mpctx->timeline_part = 0;
+        mpctx->demuxer = mpctx->timeline[0].source->demuxer;
+
+        int part_count = mpctx->num_timeline_parts;
+        mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline contains %d parts from %d "
+               "sources. Total length %.3f seconds.\n", part_count,
+               mpctx->num_sources, mpctx->timeline[part_count].start);
+        mp_msg(MSGT_CPLAYER, MSGL_V, "Source files:\n");
+        for (int i = 0; i < mpctx->num_sources; i++)
+            mp_msg(MSGT_CPLAYER, MSGL_V, "%d: %s\n", i,
+                   mpctx->sources[i].demuxer->filename);
+        mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline parts: (number, start, "
+               "source_start, source):\n");
+        for (int i = 0; i < part_count; i++) {
+            struct timeline_part *p = mpctx->timeline + i;
+            mp_msg(MSGT_CPLAYER, MSGL_V, "%3d %9.3f %9.3f %3td\n", i, p->start,
+                   p->source_start, p->source - mpctx->sources);
+        }
+        mp_msg(MSGT_CPLAYER, MSGL_V, "END %9.3f\n",
+               mpctx->timeline[part_count].start);
+    }
+}
+
+static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
+{
+#ifdef CONFIG_ASS
+    if (mpctx->opts.ass_enabled && mpctx->ass_library) {
+        for (int j = 0; j < mpctx->num_sources; j++) {
+            struct demuxer *d = mpctx->sources[j].demuxer;
+            for (int i = 0; i < d->num_attachments; i++) {
+                struct demux_attachment *att = d->attachments + i;
+                if (mpctx->opts.use_embedded_fonts && attachment_is_font(att))
+                    ass_add_font(mpctx->ass_library, att->name, att->data,
+                                 att->data_size);
+            }
+        }
+    }
+#endif
+}
+
+// Read data from a playlist, and add the entries to the mplayer playlist.
+// Return true if playlist entries were added.
+static bool process_playlist_demuxer(struct MPContext *mpctx)
+{
+    // HACK to get MOV Reference Files working
+    if (mpctx->demuxer && mpctx->demuxer->type == DEMUXER_TYPE_PLAYLIST) {
+        unsigned char *playlist_entry;
+        int entries_added = 0;
+
+        while (ds_get_packet(mpctx->demuxer->video, &playlist_entry) > 0) {
+            char *temp;
+            const char *bname;
+
+            mp_msg(MSGT_CPLAYER, MSGL_V, "Adding file %s to element entry.\n",
+                   playlist_entry);
+
+            bname = mp_basename(playlist_entry);
+            if ((strlen(bname) > 10) && !strncmp(bname, "qt", 2) &&
+                    !strncmp(bname + 3, "gateQT", 6))
+                continue;
+
+            if (!strcmp(playlist_entry, mpctx->filename)) // self-reference
+                continue;
+
+            if (mpctx->filename && !strcmp(mp_basename(playlist_entry),
+                    playlist_entry)) { // add reference path of current file
+                temp = malloc((strlen(mpctx->filename) - strlen(mp_basename(
+                        mpctx->filename)) + strlen(playlist_entry) + 1));
+                if (temp) {
+                    strncpy(temp, mpctx->filename, strlen(mpctx->filename) -
+                            strlen(mp_basename(mpctx->filename)));
+                    temp[strlen(mpctx->filename) - strlen(mp_basename(
+                            mpctx->filename))] = '\0';
+                    strcat(temp, playlist_entry);
+                    if (!strcmp(temp, mpctx->filename)) {
+                        free(temp);
+                        continue;
+                    }
+                    playlist_add_file(mpctx->playlist, temp);
+                    entries_added++;
+                    mp_msg(MSGT_CPLAYER, MSGL_V,
+                           "Resolving reference to %s.\n", temp);
+                    free(temp);
+                }
+            } else {
+                playlist_add_file(mpctx->playlist, playlist_entry);
+                entries_added++;
+            }
+        }
+        free_demuxer(mpctx->demuxer);
+        mpctx->demuxer = NULL;
+
+        if (entries_added) {
+            mpctx->stop_play = PT_NEXT_ENTRY;
+            return true;
+        }
+    }
+    return false;
+}
+
 // Waiting for the slave master to send us a new file to play.
 static void idle_loop(struct MPContext *mpctx)
 {
@@ -3406,6 +3570,70 @@ static void print_version(int always)
 {
     mp_msg(MSGT_CPLAYER, always ? MSGL_INFO : MSGL_V,
            "%s (C) 2000-2012\n", mplayer_version);
+}
+
+static bool handle_help_options(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    int opt_exit = 0;
+    if (opts->video_driver_list &&
+            strcmp(opts->video_driver_list[0], "help") == 0) {
+        list_video_out();
+        opt_exit = 1;
+    }
+    if (opts->audio_driver_list &&
+            strcmp(opts->audio_driver_list[0], "help") == 0) {
+        list_audio_out();
+        opt_exit = 1;
+    }
+    if (audio_codec_list && strcmp(audio_codec_list[0], "help") == 0) {
+        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Available audio codecs:\n");
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_CODECS\n");
+        list_codecs(1);
+        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
+        opt_exit = 1;
+    }
+    if (video_codec_list && strcmp(video_codec_list[0], "help") == 0) {
+        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Available video codecs:\n");
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_CODECS\n");
+        list_codecs(0);
+        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
+        opt_exit = 1;
+    }
+    if (video_fm_list && strcmp(video_fm_list[0], "help") == 0) {
+        vfm_help();
+        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
+        opt_exit = 1;
+    }
+    if (audio_fm_list && strcmp(audio_fm_list[0], "help") == 0) {
+        afm_help();
+        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
+        opt_exit = 1;
+    }
+    if (af_cfg.list && strcmp(af_cfg.list[0], "help") == 0) {
+        af_help();
+        printf("\n");
+        opt_exit = 1;
+    }
+#ifdef CONFIG_X11
+    if (vo_fstype_list && strcmp(vo_fstype_list[0], "help") == 0) {
+        fstype_help();
+        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
+        opt_exit = 1;
+    }
+#endif
+    if ((opts->demuxer_name && strcmp(opts->demuxer_name, "help") == 0) ||
+        (opts->audio_demuxer_name && strcmp(opts->audio_demuxer_name, "help") == 0) ||
+        (opts->sub_demuxer_name && strcmp(opts->sub_demuxer_name, "help") == 0)) {
+        demuxer_help();
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
+        opt_exit = 1;
+    }
+    if (opts->list_properties) {
+        property_print_help();
+        opt_exit = 1;
+    }
+    return opt_exit;
 }
 
 #ifdef PTW32_STATIC_LIB
@@ -3473,10 +3701,6 @@ int main(int argc, char *argv[])
                      || !strcmp(argv[1], "--leak-report")))
         talloc_enable_leak_report();
 
-    /* Flag indicating whether MPlayer should exit without playing anything. */
-    int opt_exit = 0;
-    int i;
-
     struct MPContext *mpctx = talloc(NULL, MPContext);
     *mpctx = (struct MPContext){
         .osd_function = OSD_PLAY,
@@ -3514,24 +3738,12 @@ int main(int argc, char *argv[])
     {
         mpctx->playlist->current = mpctx->playlist->first;
     } else {
-        opt_exit = 1;
+        exit_player(mpctx, EXIT_ERROR);
     }
 
 #ifdef CONFIG_PRIORITY
     set_priority();
 #endif
-
-    if (opts->video_driver_list &&
-            strcmp(opts->video_driver_list[0], "help") == 0) {
-        list_video_out();
-        opt_exit = 1;
-    }
-
-    if (opts->audio_driver_list &&
-            strcmp(opts->audio_driver_list[0], "help") == 0) {
-        list_audio_out();
-        opt_exit = 1;
-    }
 
     /* Check codecs.conf. */
     if (!codecs_file || !parse_codec_cfg(codecs_file)) {
@@ -3547,55 +3759,7 @@ int main(int argc, char *argv[])
         free(mem_ptr); // release the buffer created by get_path()
     }
 
-    if (audio_codec_list && strcmp(audio_codec_list[0], "help") == 0) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Available audio codecs:\n");
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_CODECS\n");
-        list_codecs(1);
-        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
-        opt_exit = 1;
-    }
-    if (video_codec_list && strcmp(video_codec_list[0], "help") == 0) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Available video codecs:\n");
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_CODECS\n");
-        list_codecs(0);
-        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
-        opt_exit = 1;
-    }
-    if (video_fm_list && strcmp(video_fm_list[0], "help") == 0) {
-        vfm_help();
-        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
-        opt_exit = 1;
-    }
-    if (audio_fm_list && strcmp(audio_fm_list[0], "help") == 0) {
-        afm_help();
-        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
-        opt_exit = 1;
-    }
-    if (af_cfg.list && strcmp(af_cfg.list[0], "help") == 0) {
-        af_help();
-        printf("\n");
-        opt_exit = 1;
-    }
-#ifdef CONFIG_X11
-    if (vo_fstype_list && strcmp(vo_fstype_list[0], "help") == 0) {
-        fstype_help();
-        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
-        opt_exit = 1;
-    }
-#endif
-    if ((opts->demuxer_name && strcmp(opts->demuxer_name, "help") == 0) ||
-        (opts->audio_demuxer_name && strcmp(opts->audio_demuxer_name, "help") == 0) ||
-        (opts->sub_demuxer_name && strcmp(opts->sub_demuxer_name, "help") == 0)) {
-        demuxer_help();
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
-        opt_exit = 1;
-    }
-    if (opts->list_properties) {
-        property_print_help();
-        opt_exit = 1;
-    }
-
-    if (opt_exit)
+    if (handle_help_options(mpctx))
         exit_player(mpctx, EXIT_NONE);
 
     if (!mpctx->playlist->first && !opts->player_idle_mode) {
@@ -3611,7 +3775,7 @@ int main(int argc, char *argv[])
     // Many users forget to include command line in bugreports...
     if (mp_msg_test(MSGT_CPLAYER, MSGL_V)) {
         mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "CommandLine:");
-        for (i = 1; i < argc; i++)
+        for (int i = 1; i < argc; i++)
             mp_msg(MSGT_CPLAYER, MSGL_INFO, " '%s'", argv[i]);
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
     }
@@ -3624,17 +3788,7 @@ int main(int argc, char *argv[])
 
     mpctx->osd = osd_create(opts, mpctx->ass_library);
 
-    // ========== Init keyboard FIFO (connection to libvo) ============
-
-    // Init input system
-    mpctx->input = mp_input_init(&opts->input);
-    mpctx->key_fifo = mp_fifo_create(mpctx->input, opts);
-    if (slave_mode)
-        mp_input_add_cmd_fd(mpctx->input, 0, USE_FD0_CMD_SELECT, MP_INPUT_SLAVE_CMD_FUNC, NULL);
-    else if (opts->consolecontrols)
-        mp_input_add_key_fd(mpctx->input, 0, 1, read_keys, NULL, mpctx->key_fifo);
-    // Set the libstream interrupt callback
-    stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
+    init_input(mpctx);
 
     // ***************** Now, let's see the per-file stuff ******************
 
@@ -3702,32 +3856,7 @@ play_next_file:
         }
     }
 
-    //==================== Open VOB-Sub ============================
-
-    if (opts->vobsub_name) {
-        vo_vobsub = vobsub_open(opts->vobsub_name, spudec_ifo, 1, &vo_spudec);
-        if (vo_vobsub == NULL)
-            mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Cannot load subtitles: %s\n",
-                    opts->vobsub_name);
-    } else if (opts->sub_auto) {
-        char **vob = find_vob_subtitles(opts, mpctx->filename);
-        for (int i = 0; i < MP_TALLOC_ELEMS(vob); i++) {
-            vo_vobsub = vobsub_open(vob[i], spudec_ifo, 0, &vo_spudec);
-            if (vo_vobsub)
-                break;
-        }
-        talloc_free(vob);
-    }
-    if (vo_vobsub) {
-        mpctx->initialized_flags |= INITIALIZED_VOBSUB;
-        vobsub_set_from_lang(vo_vobsub, opts->sub_lang);
-        mp_property_do("sub_forced_only", M_PROPERTY_SET, &forced_subs_only,
-                       mpctx);
-
-        // setup global sub numbering
-        mpctx->sub_counts[SUB_SOURCE_VOBSUB] =
-                vobsub_get_indexes_count(vo_vobsub);
-    }
+    open_vobsubs_from_options(mpctx);
 
     //============ Open & Sync STREAM --- fork cache2 ====================
 
@@ -3816,60 +3945,8 @@ goto_enable_cache:
                                 opts->audio_id, opts->video_id, opts->sub_id,
                                 mpctx->filename);
 
-    // HACK to get MOV Reference Files working
-
-    if (mpctx->demuxer && mpctx->demuxer->type == DEMUXER_TYPE_PLAYLIST) {
-        unsigned char *playlist_entry;
-        int entries_added = 0;
-
-        while (ds_get_packet(mpctx->demuxer->video, &playlist_entry) > 0) {
-            char *temp;
-            const char *bname;
-
-            mp_msg(MSGT_CPLAYER, MSGL_V, "Adding file %s to element entry.\n",
-                   playlist_entry);
-
-            bname = mp_basename(playlist_entry);
-            if ((strlen(bname) > 10) && !strncmp(bname, "qt", 2) &&
-                    !strncmp(bname + 3, "gateQT", 6))
-                continue;
-
-            if (!strcmp(playlist_entry, mpctx->filename)) // self-reference
-                continue;
-
-            if (mpctx->filename && !strcmp(mp_basename(playlist_entry),
-                    playlist_entry)) { // add reference path of current file
-                temp = malloc((strlen(mpctx->filename) - strlen(mp_basename(
-                        mpctx->filename)) + strlen(playlist_entry) + 1));
-                if (temp) {
-                    strncpy(temp, mpctx->filename, strlen(mpctx->filename) -
-                            strlen(mp_basename(mpctx->filename)));
-                    temp[strlen(mpctx->filename) - strlen(mp_basename(
-                            mpctx->filename))] = '\0';
-                    strcat(temp, playlist_entry);
-                    if (!strcmp(temp, mpctx->filename)) {
-                        free(temp);
-                        continue;
-                    }
-                    playlist_add_file(mpctx->playlist, temp);
-                    entries_added++;
-                    mp_msg(MSGT_CPLAYER, MSGL_V,
-                           "Resolving reference to %s.\n", temp);
-                    free(temp);
-                }
-            } else {
-                playlist_add_file(mpctx->playlist, playlist_entry);
-                entries_added++;
-            }
-        }
-        free_demuxer(mpctx->demuxer);
-        mpctx->demuxer = NULL;
-
-        if (entries_added) {
-            mpctx->stop_play = PT_NEXT_ENTRY;
-            goto goto_next_file;
-        }
-    }
+    if (process_playlist_demuxer(mpctx))
+        goto goto_next_file;
 
     if (!mpctx->demuxer) {
         mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Failed to recognize file format.\n");
@@ -3885,28 +3962,7 @@ goto_enable_cache:
     if (mpctx->demuxer->type == DEMUXER_TYPE_CUE)
         build_cue_timeline(mpctx);
 
-    if (mpctx->timeline) {
-        mpctx->timeline_part = 0;
-        mpctx->demuxer = mpctx->timeline[0].source->demuxer;
-
-        int part_count = mpctx->num_timeline_parts;
-        mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline contains %d parts from %d "
-               "sources. Total length %.3f seconds.\n", part_count,
-               mpctx->num_sources, mpctx->timeline[part_count].start);
-        mp_msg(MSGT_CPLAYER, MSGL_V, "Source files:\n");
-        for (int i = 0; i < mpctx->num_sources; i++)
-            mp_msg(MSGT_CPLAYER, MSGL_V, "%d: %s\n", i,
-                   mpctx->sources[i].demuxer->filename);
-        mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline parts: (number, start, "
-               "source_start, source):\n");
-        for (int i = 0; i < part_count; i++) {
-            struct timeline_part *p = mpctx->timeline + i;
-            mp_msg(MSGT_CPLAYER, MSGL_V, "%3d %9.3f %9.3f %3td\n", i, p->start,
-                   p->source_start, p->source - mpctx->sources);
-        }
-        mp_msg(MSGT_CPLAYER, MSGL_V, "END %9.3f\n",
-               mpctx->timeline[part_count].start);
-    }
+    print_timeline(mpctx);
 
     if (!mpctx->sources) {
         mpctx->sources = talloc_ptrtype(NULL, mpctx->sources);
@@ -3919,19 +3975,7 @@ goto_enable_cache:
 
     mpctx->initialized_flags |= INITIALIZED_DEMUXER;
 
-#ifdef CONFIG_ASS
-    if (opts->ass_enabled && mpctx->ass_library) {
-        for (int j = 0; j < mpctx->num_sources; j++) {
-            struct demuxer *d = mpctx->sources[j].demuxer;
-            for (int i = 0; i < d->num_attachments; i++) {
-                struct demux_attachment *att = d->attachments + i;
-                if (opts->use_embedded_fonts && attachment_is_font(att))
-                    ass_add_font(mpctx->ass_library, att->name, att->data,
-                                 att->data_size);
-            }
-        }
-    }
-#endif
+    add_subtitle_fonts_from_sources(mpctx);
 
     mpctx->d_audio = mpctx->demuxer->audio;
     mpctx->d_video = mpctx->demuxer->video;
@@ -3997,23 +4041,7 @@ goto_enable_cache:
                               || mpctx->stream->type == STREAMTYPE_DVDNAV))
         init_vo_spudec(mpctx);
 
-    // after reading video params we should load subtitles because
-    // we know fps so now we can adjust subtitle time to ~6 seconds AST
-    // check .sub
-    double sub_fps = mpctx->sh_video ? mpctx->sh_video->fps : 25;
-    if (opts->sub_name) {
-        for (i = 0; opts->sub_name[i] != NULL; ++i)
-            add_subtitles(mpctx, opts->sub_name[i], sub_fps, 0);
-    }
-    if (opts->sub_auto) { // auto load sub file ...
-        char **tmp = find_text_subtitles(opts, mpctx->filename);
-        int nsub = MP_TALLOC_ELEMS(tmp);
-        for (int i = 0; i < nsub; i++)
-            add_subtitles(mpctx, tmp[i], sub_fps, 1);
-        talloc_free(tmp);
-    }
-    if (mpctx->set_of_sub_size > 0)
-        mpctx->sub_counts[SUB_SOURCE_SUBS] = mpctx->set_of_sub_size;
+    open_subtitles_from_options(mpctx);
 
     select_subtitle(mpctx);
 
@@ -4033,7 +4061,6 @@ goto_enable_cache:
         free(msg);
     }
 
-
     // Disable the term OSD in verbose mode
     if (verbose)
         opts->term_osd = 0;
@@ -4041,7 +4068,7 @@ goto_enable_cache:
     // Make sure old OSD does not stay around
     clear_osd_msgs();
 
-    //================ SETUP AUDIO ==========================
+    //================ SETUP STREAMS ==========================
 
     if (mpctx->sh_audio) {
         reinit_audio_chain(mpctx);
@@ -4194,7 +4221,7 @@ goto_next_file:  // don't jump here after ao/vo/getch initialization!
     mpctx->filename = NULL;
 
     if (mpctx->set_of_sub_size > 0) {
-        for (i = 0; i < mpctx->set_of_sub_size; ++i) {
+        for (int i = 0; i < mpctx->set_of_sub_size; ++i) {
             sub_free(mpctx->set_of_subtitles[i]);
 #ifdef CONFIG_ASS
             if (mpctx->set_of_ass_tracks[i])
