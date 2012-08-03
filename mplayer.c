@@ -3424,27 +3424,62 @@ static void detach_ptw32(void)
 }
 #endif
 
-/* This preprocessor directive is a hack to generate a mplayer-nomain.o object
- * file for some tools to link against. */
-#ifndef DISABLE_MAIN
-int main(int argc, char *argv[])
+static void osdep_preinit(int *p_argc, char ***p_argv)
 {
-#ifdef PTW32_STATIC_LIB
-    pthread_win32_process_attach_np();
-    pthread_win32_thread_attach_np();
-    atexit(detach_ptw32);
-#endif
-    if (argc > 1 && (!strcmp(argv[1], "-leak-report")
-                     || !strcmp(argv[1], "--leak-report")))
-        talloc_enable_leak_report();
+    GetCpuCaps(&gCpuCaps);
 
 #ifdef __MINGW32__
     mp_get_converted_argv(&argc, &argv);
 #endif
 
-    char *mem_ptr;
+#ifdef PTW32_STATIC_LIB
+    pthread_win32_process_attach_np();
+    pthread_win32_thread_attach_np();
+    atexit(detach_ptw32);
+#endif
 
-    // movie info:
+    InitTimer();
+    srand(GetTimerMS());
+
+#if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL)
+    set_path_env();
+#endif
+
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+    {
+        HMODULE kernel32 = GetModuleHandle("Kernel32.dll");
+        BOOL WINAPI (*setDEP)(DWORD) = NULL;
+        BOOL WINAPI (*setDllDir)(LPCTSTR) = NULL;
+        if (kernel32) {
+            setDEP = GetProcAddress(kernel32, "SetProcessDEPPolicy");
+            setDllDir = GetProcAddress(kernel32, "SetDllDirectoryA");
+        }
+        if (setDEP)
+            setDEP(3);
+        if (setDllDir)
+            setDllDir("");
+    }
+    // stop Windows from showing all kinds of annoying error dialogs
+    SetErrorMode(0x8003);
+    // request 1ms timer resolution
+    timeBeginPeriod(1);
+#endif
+
+#ifdef HAVE_TERMCAP
+    load_termcap(NULL); // load key-codes
+#endif
+}
+
+/* This preprocessor directive is a hack to generate a mplayer-nomain.o object
+ * file for some tools to link against. */
+#ifndef DISABLE_MAIN
+int main(int argc, char *argv[])
+{
+    osdep_preinit(&argc, &argv);
+
+    if (argc > 1 && (!strcmp(argv[1], "-leak-report")
+                     || !strcmp(argv[1], "--leak-report")))
+        talloc_enable_leak_report();
 
     /* Flag indicating whether MPlayer should exit without playing anything. */
     int opt_exit = 0;
@@ -3460,9 +3495,6 @@ int main(int argc, char *argv[])
         .last_dvb_step = 1,
         .terminal_osd_text = talloc_strdup(mpctx, ""),
     };
-
-    InitTimer();
-    srand(GetTimerMS());
 
     mp_msg_init();
     init_libav();
@@ -3485,12 +3517,6 @@ int main(int argc, char *argv[])
     print_version(false);
     print_libav_versions();
 
-    GetCpuCaps(&gCpuCaps);
-
-#if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL)
-    set_path_env();
-#endif
-
     parse_cfgfiles(mpctx, mpctx->mconfig);
 
     mpctx->playlist = talloc_struct(mpctx, struct playlist, {0});
@@ -3501,26 +3527,6 @@ int main(int argc, char *argv[])
     } else {
         opt_exit = 1;
     }
-
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-    {
-        HMODULE kernel32 = GetModuleHandle("Kernel32.dll");
-        BOOL WINAPI (*setDEP)(DWORD) = NULL;
-        BOOL WINAPI (*setDllDir)(LPCTSTR) = NULL;
-        if (kernel32) {
-            setDEP = GetProcAddress(kernel32, "SetProcessDEPPolicy");
-            setDllDir = GetProcAddress(kernel32, "SetDllDirectoryA");
-        }
-        if (setDEP)
-            setDEP(3);
-        if (setDllDir)
-            setDllDir("");
-    }
-    // stop Windows from showing all kinds of annoying error dialogs
-    SetErrorMode(0x8003);
-    // request 1ms timer resolution
-    timeBeginPeriod(1);
-#endif
 
 #ifdef CONFIG_PRIORITY
     set_priority();
@@ -3540,6 +3546,7 @@ int main(int argc, char *argv[])
 
     /* Check codecs.conf. */
     if (!codecs_file || !parse_codec_cfg(codecs_file)) {
+        char *mem_ptr;
         if (!parse_codec_cfg(mem_ptr = get_path("codecs.conf"))) {
             if (!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")) {
                 if (!parse_codec_cfg(NULL))
@@ -3627,10 +3634,6 @@ int main(int argc, char *argv[])
 #endif
 
     mpctx->osd = osd_create(opts, mpctx->ass_library);
-
-#ifdef HAVE_TERMCAP
-    load_termcap(NULL); // load key-codes
-#endif
 
     // ========== Init keyboard FIFO (connection to libvo) ============
 
