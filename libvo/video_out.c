@@ -330,7 +330,7 @@ void list_video_out(void)
     mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
 
-struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11,
+struct vo *init_best_video_out(struct MPOpts *opts,
                                struct mp_fifo *key_fifo,
                                struct input_ctx *input_ctx)
 {
@@ -339,7 +339,6 @@ struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11,
     struct vo *vo = talloc_ptrtype(NULL, vo);
     struct vo initial_values = {
         .opts = opts,
-        .x11 = x11,
         .key_fifo = key_fifo,
         .input_ctx = input_ctx,
         .event_fd = -1,

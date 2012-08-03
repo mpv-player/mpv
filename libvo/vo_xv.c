@@ -595,8 +595,12 @@ static int preinit(struct vo *vo, const char *arg)
     strarg_t ck_method_arg = { 0, NULL };
     struct xvctx *ctx = talloc_zero(vo, struct xvctx);
     vo->priv = ctx;
-    struct vo_x11_state *x11 = vo->x11;
     int xv_adaptor = -1;
+
+    if (!vo_init(vo))
+        return -1;
+
+    struct vo_x11_state *x11 = vo->x11;
 
     const opt_t subopts[] =
     {
@@ -617,9 +621,6 @@ static int preinit(struct vo *vo, const char *arg)
 
     /* modify colorkey settings according to the given options */
     xv_setup_colorkeyhandling(vo, ck_method_arg.str, ck_src_arg.str);
-
-    if (!vo_init(vo))
-        return -1;
 
     /* check for Xvideo extension */
     unsigned int ver, rel, req, ev, err;

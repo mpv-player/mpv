@@ -82,7 +82,6 @@ struct chapter {
 typedef struct MPContext {
     struct MPOpts opts;
     struct m_config *mconfig;
-    struct vo_x11_state *x11_state;
     struct mp_fifo *key_fifo;
     struct input_ctx *input;
     struct osd_state *osd;
