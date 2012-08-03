@@ -309,7 +309,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_audio = new_sh_audio_aid(demuxer, i, priv->audio_streams);
         if (!sh_audio)
             break;
-        sh_audio->demuxer_id = i;
+        sh_audio->gsh->demuxer_id = i;
         sh_audio->demuxer_codecname = codec_name;
         stream_type = "audio";
         priv->astreams[priv->audio_streams] = i;
@@ -366,7 +366,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             break;
         }
         if (title && title->value) {
-            sh_audio->title = talloc_strdup(sh_audio, title->value);
+            sh_audio->gsh->title = talloc_strdup(sh_audio, title->value);
             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_NAME=%s\n",
                    priv->audio_streams, title->value);
         }
@@ -376,7 +376,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
                    priv->audio_streams, sh_audio->lang);
         }
         if (st->disposition & AV_DISPOSITION_DEFAULT)
-            sh_audio->default_track = 1;
+            sh_audio->gsh->default_track = 1;
         if (mp_msg_test(MSGT_HEADER, MSGL_V))
             print_wave_header(sh_audio->wf, MSGL_V);
         st->discard = AVDISCARD_ALL;
@@ -389,7 +389,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_video = new_sh_video_vid(demuxer, i, priv->video_streams);
         if (!sh_video)
             break;
-        sh_video->demuxer_id = i;
+        sh_video->gsh->demuxer_id = i;
         sh_video->demuxer_codecname = codec_name;
         stream_type = "video";
         priv->vstreams[priv->video_streams] = i;
@@ -454,7 +454,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
                     / (float)(codec->height * codec->sample_aspect_ratio.den);
         sh_video->i_bps = codec->bit_rate / 8;
         if (title && title->value) {
-            sh_video->title = talloc_strdup(sh_video, title->value);
+            sh_video->gsh->title = talloc_strdup(sh_video, title->value);
             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VID_%d_NAME=%s\n",
                    priv->video_streams, title->value);
         }
@@ -502,7 +502,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_sub = new_sh_sub_sid(demuxer, i, priv->sub_streams);
         if (!sh_sub)
             break;
-        sh_sub->demuxer_id = i;
+        sh_sub->gsh->demuxer_id = i;
         sh_sub->demuxer_codecname = codec_name;
         stream_type = "subtitle";
         priv->sstreams[priv->sub_streams] = i;
@@ -514,7 +514,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             sh_sub->extradata_len = codec->extradata_size;
         }
         if (title && title->value) {
-            sh_sub->title = talloc_strdup(sh_sub, title->value);
+            sh_sub->gsh->title = talloc_strdup(sh_sub, title->value);
             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_NAME=%s\n",
                    priv->sub_streams, title->value);
         }
@@ -524,7 +524,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
                    priv->sub_streams, sh_sub->lang);
         }
         if (st->disposition & AV_DISPOSITION_DEFAULT)
-            sh_sub->default_track = 1;
+            sh_sub->gsh->default_track = 1;
         stream_id = priv->sub_streams++;
         break;
     }

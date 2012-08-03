@@ -284,6 +284,58 @@ const char *sh_sub_type2str(int type)
     return "unknown";
 }
 
+static struct sh_stream *new_sh_stream(demuxer_t *demuxer,
+                                       enum stream_type type,
+                                       int stream_index,
+                                       int tid)
+{
+    struct sh_stream *sh = talloc_struct(demuxer, struct sh_stream, {
+        .type = type,
+        .index = demuxer->num_streams,
+        .demuxer_id = demuxer->new_stream_id++, // possibly temporary value only
+        .tid = tid,
+        .stream_index = stream_index,
+        .opts = demuxer->opts,
+    });
+    MP_TARRAY_APPEND(demuxer, demuxer->streams, demuxer->num_streams, sh);
+    switch (sh->type) {
+        case STREAM_VIDEO: {
+            struct sh_video *sht = talloc_zero(demuxer, struct sh_video);
+            sht->vid = sh->tid;
+            sht->ds = demuxer->video;
+            sh->video = sht;
+            sh->common_header = (struct sh_common *) sht;
+            demuxer->v_streams[sh->stream_index] = sht;
+            break;
+        }
+        case STREAM_AUDIO: {
+            struct sh_audio *sht = talloc_zero(demuxer, struct sh_audio);
+            sht->aid = tid;
+            sht->ds = demuxer->audio;
+            sht->samplesize = 2;
+            sht->sample_format = AF_FORMAT_S16_NE;
+            sh->audio = sht;
+            sh->common_header = (struct sh_common *) sht;
+            demuxer->a_streams[sh->stream_index] = sht;
+            break;
+        }
+        case STREAM_SUB: {
+            struct sh_sub *sht = talloc_zero(demuxer, struct sh_sub);
+            sht->sid = tid;
+            sht->ds = demuxer->sub;
+            sh->sub = sht;
+            sh->common_header = (struct sh_common *) sht;
+            demuxer->s_streams[sh->stream_index] = sht;
+            break;
+        }
+        default: assert(false);
+    }
+    sh->common_header->id = sh->tid;
+    sh->common_header->opts = sh->opts;
+    sh->common_header->gsh = sh;
+    return sh;
+}
+
 sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
 {
     if (id > MAX_S_STREAMS - 1 || id < 0) {
@@ -295,14 +347,7 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
     if (demuxer->s_streams[id])
         mp_msg(MSGT_DEMUXER, MSGL_WARN, "Sub stream %i redefined\n", id);
     else {
-        struct sh_sub *sh = talloc_zero(demuxer, struct sh_sub);
-        demuxer->s_streams[id] = sh;
-        sh->stream_type = STREAM_SUBTITLE;
-        sh->demuxer_id = demuxer->new_stream_id++;
-        sh->id = sid;
-        sh->index = id;
-        sh->sid = sid;
-        sh->opts = demuxer->opts;
+        new_sh_stream(demuxer, STREAM_SUB, id, sid);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
     }
     return demuxer->s_streams[id];
@@ -328,18 +373,7 @@ sh_audio_t *new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
         mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "WARNING: Audio stream header %d redefined.\n", id);
     } else {
         mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found audio stream: %d\n", id);
-        struct sh_audio *sh = talloc_zero(demuxer, struct sh_audio);
-        demuxer->a_streams[id] = sh;
-        sh->stream_type = STREAM_AUDIO;
-        sh->demuxer_id = demuxer->new_stream_id++;
-        sh->id = aid;
-        sh->index = id;
-        sh->aid = aid;
-        sh->ds = demuxer->audio;
-        // set some defaults
-        sh->samplesize = 2;
-        sh->sample_format = AF_FORMAT_S16_NE;
-        sh->opts = demuxer->opts;
+        new_sh_stream(demuxer, STREAM_AUDIO, id, aid);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", aid);
     }
     return demuxer->a_streams[id];
@@ -368,15 +402,7 @@ sh_video_t *new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
         mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "WARNING: Video stream header %d redefined.\n", id);
     else {
         mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found video stream: %d\n", id);
-        struct sh_video *sh = talloc_zero(demuxer, struct sh_video);
-        demuxer->v_streams[id] = sh;
-        sh->stream_type = STREAM_VIDEO;
-        sh->demuxer_id = demuxer->new_stream_id++;
-        sh->id = vid;
-        sh->index = id;
-        sh->vid = vid;
-        sh->ds = demuxer->video;
-        sh->opts = demuxer->opts;
+        new_sh_stream(demuxer, STREAM_VIDEO, id, vid);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", vid);
     }
     return demuxer->v_streams[id];
@@ -1452,7 +1478,7 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle)
     return angle;
 }
 
-char *demuxer_audio_lang(demuxer_t *d, int id)
+static char *demuxer_audio_lang(demuxer_t *d, int id)
 {
     struct stream_lang_req req;
     sh_audio_t *sh;
@@ -1470,7 +1496,7 @@ char *demuxer_audio_lang(demuxer_t *d, int id)
     return NULL;
 }
 
-char *demuxer_sub_lang(demuxer_t *d, int id)
+static char *demuxer_sub_lang(demuxer_t *d, int id)
 {
     struct stream_lang_req req;
     sh_sub_t *sh;
@@ -1488,6 +1514,15 @@ char *demuxer_sub_lang(demuxer_t *d, int id)
     return NULL;
 }
 
+char *demuxer_stream_lang(demuxer_t *d, struct sh_stream *s)
+{
+    switch (s->type) {
+    case STREAM_AUDIO: return demuxer_audio_lang(d, s->stream_index);
+    case STREAM_SUB: return demuxer_sub_lang(d, s->stream_index);
+    default: return NULL;
+    }
+}
+
 int demuxer_audio_track_by_lang_and_default(struct demuxer *d, char **langt)
 {
     int n = 0;
@@ -1497,7 +1532,7 @@ int demuxer_audio_track_by_lang_and_default(struct demuxer *d, char **langt)
         for (int i = 0; i < MAX_A_STREAMS; i++) {
             struct sh_audio *sh = d->a_streams[i];
             if (sh && (!lang || sh->lang && !strcmp(lang, sh->lang))) {
-                if (sh->default_track)
+                if (sh->gsh->default_track)
                     return sh->aid;
                 if (id < 0)
                     id = sh->aid;
@@ -1519,7 +1554,7 @@ int demuxer_sub_track_by_lang_and_default(struct demuxer *d, char **langt)
         for (int i = 0; i < MAX_S_STREAMS; i++) {
             struct sh_sub *sh = d->s_streams[i];
             if (sh && (!lang || sh->lang && !strcmp(lang, sh->lang))) {
-                if (sh->default_track)
+                if (sh->gsh->default_track)
                     return sh->sid;
                 if (id < 0)
                     id = sh->sid;

@@ -944,13 +944,13 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
         if (!sh || current_id < 0)
             *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
         else {
-            char *lang = demuxer_audio_lang(mpctx->demuxer, current_id);
+            char *lang = demuxer_stream_lang(mpctx->demuxer, sh->gsh);
             if (!lang)
                 lang = talloc_strdup(NULL, mp_gtext("unknown"));
 
-            if (sh->title)
+            if (sh->gsh->title)
                 *(char **)arg = talloc_asprintf(NULL, "(%d) %s (\"%s\")",
-                                                current_id, lang, sh->title);
+                                            current_id, lang, sh->gsh->title);
             else
                 *(char **)arg = talloc_asprintf(NULL, "(%d) %s", current_id,
                                                 lang);
@@ -1566,8 +1566,9 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
                                              vobsub_id, language ? language : mp_gtext("unknown"));
             return M_PROPERTY_OK;
         }
-        if (opts->sub_id >= 0) {
-            char *lang = demuxer_sub_lang(mpctx->demuxer, opts->sub_id);
+        if (opts->sub_id >= 0 && mpctx->d_sub && mpctx->d_sub->sh) {
+            struct sh_stream *sh = mpctx->d_sub->sh;
+            char *lang = demuxer_stream_lang(mpctx->demuxer, sh);
             if (!lang)
                 lang = talloc_strdup(NULL, mp_gtext("unknown"));
             *(char **) arg = talloc_asprintf(NULL, "(%d) %s", opts->sub_id,
@@ -2641,79 +2642,47 @@ static void show_chapters_on_osd(MPContext *mpctx)
 static void show_tracks_on_osd(MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
-    char *res = NULL;
-    const char *IND = "";
-    int n;
-    int cnt = 0;
-    struct sh_audio *cur_a;
-    struct sh_sub *cur_s;
-    demux_stream_t *d_sub;
     demuxer_t *demuxer = mpctx->demuxer;
+    char *res = NULL;
 
     if (!demuxer)
         return;
 
-    cur_a = mpctx->sh_audio;
-    d_sub = mpctx->d_sub;
-    cur_s = d_sub && opts->sub_id >= 0 ? d_sub->sh : NULL;
+    struct sh_stream *cur_a = mpctx->sh_audio ? mpctx->sh_audio->gsh : NULL;
+    struct sh_stream *cur_s = NULL;
+    if (opts->sub_id >= 0 && mpctx->d_sub && mpctx->d_sub->sh)
+        cur_s = ((struct sh_sub *)mpctx->d_sub->sh)->gsh;
 
-    for (n = 0; n < MAX_V_STREAMS; n++) {
-        struct sh_video *v = demuxer->v_streams[n];
-        if (v) {
-            cnt++;
+    int v_count = 0;
+    enum stream_type t = STREAM_AUDIO;
+
+    for (int n = 0; n < demuxer->num_streams; n++) {
+        struct sh_stream *sh = demuxer->streams[n];
+        if (sh->type == STREAM_VIDEO) {
+            v_count++;
+            continue;
         }
-    }
-    if (cnt > 1)
-        res = talloc_asprintf_append(res, "(Warning: more than one video stream.)\n");
-
-#define STD_TRACK_HDR(st, id, lang)                                   \
-    res = talloc_asprintf_append(res, "%s(%d) ", IND, st->id);  \
-    if (st->title) {                                            \
-        res = talloc_asprintf_append(res, "'%s' ", st->title);  \
-    }                                                           \
-    if (lang) {                                                 \
-        res = talloc_asprintf_append(res, "(%s) ", lang);       \
-    }
-
-    for (n = 0; n < MAX_A_STREAMS; n++) {
-        struct sh_audio *a = demuxer->a_streams[n];
-        if (a) {
-            cnt++;
-            if (a == cur_a)
-                res = talloc_asprintf_append(res, "> ");
-            char *lang = demuxer_audio_lang(mpctx->demuxer, a->index);
-            STD_TRACK_HDR(a, aid, lang)
-            if (a == cur_a)
-                res = talloc_asprintf_append(res, "<");
+        if (t != sh->type)
             res = talloc_asprintf_append(res, "\n");
-        }
+        bool selected = sh == cur_a || sh == cur_s;
+        res = talloc_asprintf_append(res, "%s: ",
+                                sh->type == STREAM_AUDIO ? "Audio" : "Sub");
+        if (selected)
+            res = talloc_asprintf_append(res, "> ");
+        res = talloc_asprintf_append(res, "(%d) ", sh->tid);
+        if (sh->title)
+            res = talloc_asprintf_append(res, "'%s' ", sh->title);
+        char *lang = demuxer_stream_lang(mpctx->demuxer, sh);
+        if (lang)
+            res = talloc_asprintf_append(res, "(%s) ", lang);
+        if (selected)
+            res = talloc_asprintf_append(res, "<");
+        res = talloc_asprintf_append(res, "\n");
+        t = sh->type;
     }
 
-    res = talloc_asprintf_append(res, "\n");
-
-    for (n = 0; n < MAX_S_STREAMS; n++) {
-        struct sh_sub *s = demuxer->s_streams[n];
-        if (s) {
-            cnt++;
-            if (s == cur_s)
-                res = talloc_asprintf_append(res, "> ");
-            char *lang = demuxer_sub_lang(mpctx->demuxer, s->index);
-            STD_TRACK_HDR(s, sid, lang)
-            char *type = "?";
-            switch (s->type) {
-            case 't': type = "SRT"; break;
-            case 'v': type = "VOB"; break;
-            case 'a': type = NULL; break; //"ASS/SSA";
-            }
-            if (type)
-                res = talloc_asprintf_append(res, " [%s]", type);
-            if (s == cur_s)
-                res = talloc_asprintf_append(res, "<");
-            res = talloc_asprintf_append(res, "\n");
-        }
-    }
-
-#undef STD_TRACK_HDR
+    if (v_count > 1)
+        res = talloc_asprintf_append(res, "\n(Warning: more than one video stream.)\n");
 
     set_osd_msg(OSD_MSG_TEXT, 1, opts->osd_duration, "%s", res);
     talloc_free(res);

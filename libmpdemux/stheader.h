@@ -26,23 +26,43 @@
 struct MPOpts;
 struct demuxer;
 
-enum STREAM_TYPE {
+enum stream_type {
     STREAM_VIDEO = 1,
     STREAM_AUDIO,
-    STREAM_SUBTITLE,
+    STREAM_SUB,
 };
 
 // Stream headers:
 
-// id: the type specific id, e.g. aid or sid
-// index: index into stream array (currently one array per type)
-// demuxer_id: demuxer specific ID (-1 if unknown, otherwise >= 0)
+struct sh_stream {
+    enum stream_type type;
+    // Index into demuxer->streams.
+    int index;
+    // The (possibly) type specific id, e.g. aid or sid.
+    int tid;
+    // Index into stream array (currently one array per type, e.g. a_streams).
+    int stream_index;
+    // Demuxer specific ID (-1 if unknown, otherwise >= 0).
+    int demuxer_id;
+    // Abomination.
+    struct sh_common *common_header;
+    // One of these is non-NULL, the others are NULL, depending on the stream
+    // type.
+    struct sh_audio *audio;
+    struct sh_video *video;
+    struct sh_sub *sub;
+
+    char *title;
+    bool default_track;
+
+    // shouldn't exist type of stuff
+    struct MPOpts *opts;
+};
+
 
 #define SH_COMMON                                                       \
-    enum STREAM_TYPE stream_type;                                       \
     int id;                                                             \
-    int index;                                                          \
-    int demuxer_id;                                                     \
+    struct sh_stream *gsh;                                              \
     const char *demuxer_codecname;                                      \
     struct MPOpts *opts;                                                \
     struct demux_stream *ds;                                            \
@@ -64,8 +84,6 @@ enum STREAM_TYPE {
     void *context;                                                      \
     const char *codecname;                                              \
     char *lang;   /* track language */                                  \
-    char *title;  /* track title */                                     \
-    bool default_track;                                                 \
 
 typedef struct sh_common {
     SH_COMMON

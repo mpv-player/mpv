@@ -1271,9 +1271,9 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
     }
 
     sh_v = new_sh_video(demuxer, vid);
-    sh_v->demuxer_id = track->tnum;
+    sh_v->gsh->demuxer_id = track->tnum;
     sh_v->demuxer_codecname = track->codec_id;
-    sh_v->title = talloc_strdup(sh_v, track->name);
+    sh_v->gsh->title = talloc_strdup(sh_v, track->name);
     sh_v->bih = bih;
     sh_v->format = sh_v->bih->biCompression;
     if (track->v_frate == 0.0)
@@ -1344,10 +1344,10 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
 
     if (track->language && (strcmp(track->language, "und") != 0))
         sh_a->lang = talloc_strdup(sh_a, track->language);
-    sh_a->demuxer_id = track->tnum;
+    sh_a->gsh->demuxer_id = track->tnum;
     sh_a->demuxer_codecname = track->codec_id;
-    sh_a->title = talloc_strdup(sh_a, track->name);
-    sh_a->default_track = track->default_track;
+    sh_a->gsh->title = talloc_strdup(sh_a, track->name);
+    sh_a->gsh->default_track = track->default_track;
     sh_a->ds = demuxer->audio;
     if (track->ms_compat) {
         if (track->private_size < sizeof(*sh_a->wf))
@@ -1583,7 +1583,7 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track,
         int size;
         uint8_t *buffer;
         sh_sub_t *sh = new_sh_sub(demuxer, sid);
-        sh->demuxer_id = track->tnum;
+        sh->gsh->demuxer_id = track->tnum;
         sh->demuxer_codecname = track->codec_id;
         track->sh_sub = sh;
         sh->type = track->subtitle_type;
@@ -1600,8 +1600,8 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track,
         sh->extradata_len = track->private_size;
         if (track->language && (strcmp(track->language, "und") != 0))
             sh->lang = talloc_strdup(sh, track->language);
-        sh->title = talloc_strdup(sh, track->name);
-        sh->default_track = track->default_track;
+        sh->gsh->title = talloc_strdup(sh, track->name);
+        sh->gsh->default_track = track->default_track;
     } else {
         mp_tmsg(MSGT_DEMUX, MSGL_ERR,
                 "[mkv] Subtitle type '%s' is not supported.\n",

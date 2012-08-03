@@ -147,9 +147,10 @@ typedef struct demuxer_info {
     char *copyright;
 } demuxer_info_t;
 
-#define MAX_A_STREAMS 256
-#define MAX_V_STREAMS 256
-#define MAX_S_STREAMS 256
+#define MAX_SH_STREAMS 256
+#define MAX_A_STREAMS MAX_SH_STREAMS
+#define MAX_V_STREAMS MAX_SH_STREAMS
+#define MAX_S_STREAMS MAX_SH_STREAMS
 
 struct demuxer;
 
@@ -244,9 +245,12 @@ typedef struct demuxer {
     struct demux_stream *sub;   // dvd subtitle buffer/demuxer
 
     // stream headers:
-    struct sh_audio *a_streams[MAX_A_STREAMS];
-    struct sh_video *v_streams[MAX_V_STREAMS];
-    struct sh_sub   *s_streams[MAX_S_STREAMS];
+    struct sh_audio *a_streams[MAX_SH_STREAMS];
+    struct sh_video *v_streams[MAX_SH_STREAMS];
+    struct sh_sub   *s_streams[MAX_SH_STREAMS];
+
+    struct sh_stream **streams;
+    int num_streams;
 
     int num_titles;
 
@@ -415,7 +419,6 @@ int demuxer_angles_count(struct demuxer *demuxer);
 int demuxer_audio_track_by_lang_and_default(struct demuxer *d, char **langt);
 int demuxer_sub_track_by_lang_and_default(struct demuxer *d, char **langt);
 
-char *demuxer_audio_lang(demuxer_t *d, int id);
-char *demuxer_sub_lang(demuxer_t *d, int id);
+char *demuxer_stream_lang(demuxer_t *d, struct sh_stream *s);
 
 #endif /* MPLAYER_DEMUXER_H */
