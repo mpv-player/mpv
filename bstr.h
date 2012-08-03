@@ -45,11 +45,11 @@ static inline struct bstr bstrdup(void *talloc_ctx, struct bstr str)
 {
     struct bstr r = { NULL, str.len };
     if (str.start)
-        r.start = talloc_memdup(talloc_ctx, str.start, str.len);
+        r.start = (unsigned char *)talloc_memdup(talloc_ctx, str.start, str.len);
     return r;
 }
 
-static inline struct bstr bstr0(const unsigned char *s)
+static inline struct bstr bstr0(const char *s)
 {
     return (struct bstr){(unsigned char *)s, s ? strlen(s) : 0};
 }
@@ -108,7 +108,7 @@ static inline struct bstr bstr_cut(struct bstr str, int n)
         if (n < 0)
             n = 0;
     }
-    if (n > str.len)
+    if (((size_t)n) > str.len)
         n = str.len;
     return (struct bstr){str.start + n, str.len - n};
 }
