@@ -1178,9 +1178,6 @@ struct mp_osd_msg {
     unsigned time;
 };
 
-/// OSD message stack.
-static mp_osd_msg_t *osd_msg_stack = NULL;
-
 /**
  *  \brief Add a message on the OSD message stack
  *
@@ -1188,23 +1185,23 @@ static mp_osd_msg_t *osd_msg_stack = NULL;
  *  it is pulled on top of the stack, otherwise a new message is created.
  *
  */
-static void set_osd_msg_va(int id, int level, int time, const char *fmt,
-                           va_list ap)
+static void set_osd_msg_va(struct MPContext *mpctx, int id, int level, int time,
+                           const char *fmt, va_list ap)
 {
     mp_osd_msg_t *msg, *last = NULL;
 
     // look if the id is already in the stack
-    for (msg = osd_msg_stack; msg && msg->id != id;
+    for (msg = mpctx->osd_msg_stack; msg && msg->id != id;
          last = msg, msg = msg->prev) ;
     // not found: alloc it
     if (!msg) {
-        msg = talloc_zero(NULL, mp_osd_msg_t);
-        msg->prev = osd_msg_stack;
-        osd_msg_stack = msg;
+        msg = talloc_zero(mpctx, mp_osd_msg_t);
+        msg->prev = mpctx->osd_msg_stack;
+        mpctx->osd_msg_stack = msg;
     } else if (last) { // found, but it's not on top of the stack
         last->prev = msg->prev;
-        msg->prev = osd_msg_stack;
-        osd_msg_stack = msg;
+        msg->prev = mpctx->osd_msg_stack;
+        mpctx->osd_msg_stack = msg;
     }
     talloc_free(msg->msg);
     // write the msg
@@ -1216,19 +1213,21 @@ static void set_osd_msg_va(int id, int level, int time, const char *fmt,
 
 }
 
-void set_osd_msg(int id, int level, int time, const char *fmt, ...)
+void set_osd_msg(struct MPContext *mpctx, int id, int level, int time,
+                 const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    set_osd_msg_va(id, level, time, fmt, ap);
+    set_osd_msg_va(mpctx, id, level, time, fmt, ap);
     va_end(ap);
 }
 
-void set_osd_tmsg(int id, int level, int time, const char *fmt, ...)
+void set_osd_tmsg(struct MPContext *mpctx, int id, int level, int time,
+                  const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    set_osd_msg_va(id, level, time, mp_gtext(fmt), ap);
+    set_osd_msg_va(mpctx, id, level, time, mp_gtext(fmt), ap);
     va_end(ap);
 }
 
@@ -1239,12 +1238,12 @@ void set_osd_tmsg(int id, int level, int time, const char *fmt, ...)
  *
  */
 
-void rm_osd_msg(int id)
+void rm_osd_msg(struct MPContext *mpctx, int id)
 {
     mp_osd_msg_t *msg, *last = NULL;
 
     // Search for the msg
-    for (msg = osd_msg_stack; msg && msg->id != id;
+    for (msg = mpctx->osd_msg_stack; msg && msg->id != id;
          last = msg, msg = msg->prev) ;
     if (!msg)
         return;
@@ -1253,7 +1252,7 @@ void rm_osd_msg(int id)
     if (last)
         last->prev = msg->prev;
     else
-        osd_msg_stack = msg->prev;
+        mpctx->osd_msg_stack = msg->prev;
     talloc_free(msg);
 }
 
@@ -1262,15 +1261,15 @@ void rm_osd_msg(int id)
  *
  */
 
-static void clear_osd_msgs(void)
+static void clear_osd_msgs(struct MPContext *mpctx)
 {
-    mp_osd_msg_t *msg = osd_msg_stack, *prev = NULL;
+    mp_osd_msg_t *msg = mpctx->osd_msg_stack, *prev = NULL;
     while (msg) {
         prev = msg->prev;
         talloc_free(msg);
         msg = prev;
     }
-    osd_msg_stack = NULL;
+    mpctx->osd_msg_stack = NULL;
 }
 
 /**
@@ -1308,7 +1307,7 @@ static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
     last_update = now;
 
     // Look for the first message in the stack with high enough level.
-    for (msg = osd_msg_stack; msg; last = msg, msg = prev) {
+    for (msg = mpctx->osd_msg_stack; msg; last = msg, msg = prev) {
         prev = msg->prev;
         if (msg->level > opts->osd_level && hidden_dec_done)
             continue;
@@ -1331,7 +1330,7 @@ static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
             last->prev = prev;
             msg = last;
         } else {
-            osd_msg_stack = prev;
+            mpctx->osd_msg_stack = prev;
             msg = NULL;
         }
     }
@@ -1361,7 +1360,7 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char *name,
         return;
     }
 
-    set_osd_msg(OSD_MSG_BAR, 1, opts->osd_duration, "%s: %d %%",
+    set_osd_msg(mpctx, OSD_MSG_BAR, 1, opts->osd_duration, "%s: %d %%",
                 name, ROUND(100 * (val - min) / (max - min)));
 }
 
@@ -1377,12 +1376,12 @@ void set_osd_subtitle(struct MPContext *mpctx, subtitle *subs)
         // reverse order, since newest set_osd_msg is displayed first
         for (i = SUB_MAX_TEXT - 1; i >= 0; i--) {
             if (!subs || i >= subs->lines || !subs->text[i])
-                rm_osd_msg(OSD_MSG_SUB_BASE + i);
+                rm_osd_msg(mpctx, OSD_MSG_SUB_BASE + i);
             else {
                 // HACK: currently display time for each sub line
                 // except the last is set to 2 seconds.
                 int display_time = i == subs->lines - 1 ? 180000 : 2000;
-                set_osd_msg(OSD_MSG_SUB_BASE + i, 1, display_time,
+                set_osd_msg(mpctx, OSD_MSG_SUB_BASE + i, 1, display_time,
                             "%s", subs->text[i]);
             }
         }
@@ -1470,7 +1469,7 @@ void mp_show_osd_progression(struct MPContext *mpctx)
     int len = sizeof(text);
 
     sadd_osd_status(text, len, mpctx, true);
-    set_osd_msg(OSD_MSG_TEXT, 1, mpctx->opts.osd_duration, "%s", text);
+    set_osd_msg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts.osd_duration, "%s", text);
 
     set_osd_bar(mpctx, 0, "Position", 0, 100, get_percent_pos(mpctx));
 }
@@ -3855,7 +3854,7 @@ goto_enable_cache:
         opts->term_osd = 0;
 
     // Make sure old OSD does not stay around
-    clear_osd_msgs();
+    clear_osd_msgs(mpctx);
 
     //================ SETUP STREAMS ==========================
 

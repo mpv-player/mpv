@@ -86,6 +86,7 @@ typedef struct MPContext {
     struct mp_fifo *key_fifo;
     struct input_ctx *input;
     struct osd_state *osd;
+    struct mp_osd_msg *osd_msg_stack;
     char *terminal_osd_text;
     struct sub_data *subdata; // current sub_data style subtitles if any
     // last sub_data style sub line if any, used by log_sub() only
