@@ -67,8 +67,7 @@ static int parse_profile(struct m_config *config, const struct m_option *opt,
     }
 
     char **list = NULL;
-    int r = m_option_type_string_list.parse(opt, name, param, false, &list,
-                                            NULL);
+    int r = m_option_type_string_list.parse(opt, name, param, false, &list);
     if (r < 0)
         return r;
     if (!list || !list[0])
@@ -151,7 +150,7 @@ static void optstruct_get(const struct m_config *config,
                           void *dst)
 {
     if (opt->type->copy)
-        opt->type->copy(opt, dst, optstruct_ptr(config, opt), NULL);
+        opt->type->copy(opt, dst, optstruct_ptr(config, opt));
 }
 
 static void optstruct_set(const struct m_config *config,
@@ -159,10 +158,8 @@ static void optstruct_set(const struct m_config *config,
                           const void *src)
 {
     if (opt->type->copy)
-        opt->type->copy(opt, optstruct_ptr(config, opt), src, config->optstruct);
+        opt->type->copy(opt, optstruct_ptr(config, opt), src);
 }
-
-
 
 static void m_config_add_option(struct m_config *config,
                                 const struct m_option *arg,
@@ -445,8 +442,7 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
         ensure_backup(config, co);
 
     void *dst = set ? m_option_get_ptr(co->opt, optstruct) : NULL;
-    int r = co->opt->type->parse(co->opt, name, param, ambiguous_param, dst,
-                                 optstruct);
+    int r = m_option_parse(co->opt, name, param, ambiguous_param, dst);
     // Parsing failed ?
     if (r < 0)
         return r;
@@ -461,8 +457,7 @@ static int parse_subopts(struct m_config *config, void *optstruct, char *name,
 {
     char **lst = NULL;
     // Split the argument into child options
-    int r = m_option_type_subconfig.parse(NULL, bstr0(""), param, false, &lst,
-                                          optstruct);
+    int r = m_option_type_subconfig.parse(NULL, bstr0(""), param, false, &lst);
     if (r < 0)
         return r;
     // Parse the child options

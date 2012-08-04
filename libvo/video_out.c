@@ -176,11 +176,11 @@ static int vo_preinit(struct vo *vo, char *arg)
         vo->priv = talloc_zero_size(vo, vo->driver->privsize);
     if (vo->driver->options) {
         struct m_config *cfg = m_config_simple(vo->driver->options, vo->priv);
+        talloc_steal(vo->priv, cfg);
         char n[50];
         int l = snprintf(n, sizeof(n), "vo/%s", vo->driver->info->short_name);
         assert(l < sizeof(n));
         int r = m_config_parse_suboptions(cfg, n, arg);
-        talloc_free(cfg);
         if (r < 0)
             return r;
     }
