@@ -196,7 +196,7 @@ struct m_config *m_config_new(void *optstruct,
                                               char *filename))
 {
     static const struct m_option ref_opts[] = {
-        { "profile", NULL, CONF_TYPE_STRING_LIST, CONF_NOSAVE, 0, 0, NULL },
+        { "profile", NULL, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL },
         { "show-profile", show_profile, CONF_TYPE_PRINT_FUNC, CONF_NOCFG },
         { "list-options", list_options, CONF_TYPE_PRINT_FUNC, CONF_NOCFG },
         { NULL }
@@ -212,7 +212,7 @@ struct m_config *m_config_new(void *optstruct,
     if (includefunc) {
         struct m_option *p = talloc_ptrtype(config, p);
         *p = (struct m_option){
-            "include", NULL, CONF_TYPE_STRING, CONF_NOSAVE,
+            "include", NULL, CONF_TYPE_STRING, 0,
         };
         m_config_add_option(config, p, NULL, NULL);
         config->includefunc = includefunc;
@@ -232,7 +232,7 @@ static void ensure_backup(struct m_config *config, struct m_config_option *co)
         return;
     if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD)
         return;
-    if (co->opt->flags & (M_OPT_GLOBAL | M_OPT_NOSAVE))
+    if (co->opt->flags & M_OPT_GLOBAL)
         return;
     if (co->flags & M_CFG_OPT_ALIAS)
         return;

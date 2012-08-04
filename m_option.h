@@ -284,13 +284,6 @@ struct m_option {
  */
 #define M_OPT_GLOBAL            (1 << 4)
 
-// The \ref Config won't save this option on push.
-/** It won't be saved on push but the command line parser will add it with
- *  its entry (i.e. it may be set later)
- *  e.g options : -include
- */
-#define M_OPT_NOSAVE            (1 << 5)
-
 // The option should be set during command line pre-parsing
 #define M_OPT_PRE_PARSE         (1 << 6)
 
@@ -306,7 +299,6 @@ struct m_option {
 #define CONF_NOCFG              M_OPT_NOCFG
 #define CONF_NOCMD              M_OPT_NOCMD
 #define CONF_GLOBAL             M_OPT_GLOBAL
-#define CONF_NOSAVE             M_OPT_NOSAVE
 #define CONF_PRE_PARSE          M_OPT_PRE_PARSE
 
 // These flags are used to describe special parser capabilities or behavior.

@@ -665,8 +665,8 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("x", screen_size_x, 0, 0, 4096),
     OPT_INTRANGE("y", screen_size_y, 0, 0, 4096),
     // set screen dimensions (when not detectable or virtual!=visible)
-    OPT_INTRANGE("screenw", vo_screenwidth, CONF_NOSAVE, 0, 4096),
-    OPT_INTRANGE("screenh", vo_screenheight, CONF_NOSAVE, 0, 4096),
+    OPT_INTRANGE("screenw", vo_screenwidth, CONF_GLOBAL, 0, 4096),
+    OPT_INTRANGE("screenh", vo_screenheight, CONF_GLOBAL, 0, 4096),
     // Geometry string
     {"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
     OPT_MAKE_FLAGS("force-window-position", force_window_position, 0),
@@ -679,7 +679,7 @@ const m_option_t mplayer_opts[]={
     // video mode switching: (x11,xv,dga)
     OPT_MAKE_FLAGS("vm", vidmode, 0),
     // start in fullscreen mode:
-    OPT_MAKE_FLAGS("fs", fullscreen, CONF_NOSAVE),
+    OPT_MAKE_FLAGS("fs", fullscreen, CONF_GLOBAL),
     // set fullscreen switch method (workaround for buggy WMs)
     {"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
     // set bpp (x11+vm, dga, fbdev, vesa, svga?)
