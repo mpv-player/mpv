@@ -3462,9 +3462,6 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
 static void print_timeline(struct MPContext *mpctx)
 {
     if (mpctx->timeline) {
-        mpctx->timeline_part = 0;
-        mpctx->demuxer = mpctx->timeline[0].source->demuxer;
-
         int part_count = mpctx->num_timeline_parts;
         mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline contains %d parts from %d "
                "sources. Total length %.3f seconds.\n", part_count,
@@ -3748,6 +3745,10 @@ goto_enable_cache:
     if (mpctx->demuxer->type == DEMUXER_TYPE_CUE)
         build_cue_timeline(mpctx);
 
+    if (mpctx->timeline) {
+        mpctx->timeline_part = 0;
+        mpctx->demuxer = mpctx->timeline[0].source->demuxer;
+    }
     print_timeline(mpctx);
 
     if (!mpctx->sources) {
