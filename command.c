@@ -2872,8 +2872,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_QUIT:
-        exit_player_with_rc(mpctx, EXIT_QUIT,
-                            (cmd->nargs > 0) ? cmd->args[0].v.i : 0);
+        mpctx->stop_play = PT_QUIT;
+        mpctx->quit_player_rc = (cmd->nargs > 0) ? cmd->args[0].v.i : 0;
+        break;
 
     case MP_CMD_PLAYLIST_NEXT:
     case MP_CMD_PLAYLIST_PREV:

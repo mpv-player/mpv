@@ -652,7 +652,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
     }
 }
 
-void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
+static void exit_player(struct MPContext *mpctx, enum exit_reason how, int rc)
 {
     uninit_player(mpctx, INITIALIZED_ALL);
 #if defined(__MINGW32__) || defined(__CYGWIN__)
@@ -700,11 +700,6 @@ void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc)
     exit(rc);
 }
 
-static void exit_player(struct MPContext *mpctx, enum exit_reason how)
-{
-    exit_player_with_rc(mpctx, how, 1);
-}
-
 #include "cfg-mplayer.h"
 
 static int cfg_include(struct m_config *conf, char *filename)
@@ -714,14 +709,14 @@ static int cfg_include(struct m_config *conf, char *filename)
 
 #define DEF_CONFIG "# Write your default config options here!\n\n\n"
 
-static void parse_cfgfiles(struct MPContext *mpctx, m_config_t *conf)
+static bool parse_cfgfiles(struct MPContext *mpctx, m_config_t *conf)
 {
     struct MPOpts *opts = &mpctx->opts;
     char *conffile;
     int conffile_fd;
     if (!(opts->noconfig & 2) &&
         m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mplayer.conf") < 0)
-        exit_player(mpctx, EXIT_NONE);
+        return false;
     if ((conffile = get_path("")) == NULL)
         mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Cannot find HOME directory.\n");
     else {
@@ -739,10 +734,11 @@ static void parse_cfgfiles(struct MPContext *mpctx, m_config_t *conf)
             }
             if (!(opts->noconfig & 1) &&
                 m_config_parse_config_file(conf, conffile) < 0)
-                exit_player(mpctx, EXIT_NONE);
+                return false;
             free(conffile);
         }
     }
+    return true;
 }
 
 #define PROFILE_CFG_PROTOCOL "protocol."
@@ -1509,7 +1505,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
                             &ao->samplerate, &ao->channels, &ao->format)) {
         mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Error at audio filter chain "
                 "pre-init!\n");
-        exit_player(mpctx, EXIT_ERROR);
+        goto init_error;
     }
     if (!ao->initialized) {
         ao->buffersize = opts->ao_buffersize;
@@ -3564,7 +3560,9 @@ static bool process_playlist_demuxer(struct MPContext *mpctx)
 static void idle_loop(struct MPContext *mpctx)
 {
     // ================= idle loop (STOP state) =========================
-    while (mpctx->opts.player_idle_mode && !mpctx->playlist->current) {
+    while (mpctx->opts.player_idle_mode && !mpctx->playlist->current
+           && mpctx->stop_play != PT_QUIT)
+    {
         uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_VO);
         mp_cmd_t *cmd;
         while (!(cmd = mp_input_get_cmd(mpctx->input, WAKEUP_PERIOD * 1000,
@@ -3818,7 +3816,7 @@ goto_enable_cache:
             }
         }
 #endif
-        goto terminate_playback; // exit_player(_("Fatal error"));
+        goto terminate_playback;
     }
 
     /* display clip info */
@@ -4033,7 +4031,12 @@ static void play_files(struct MPContext *mpctx)
 {
     for (;;) {
         idle_loop(mpctx);
+        if (mpctx->stop_play == PT_QUIT)
+            break;
+
         play_current_file(mpctx);
+        if (mpctx->stop_play == PT_QUIT)
+            break;
 
         if (!mpctx->stop_play || mpctx->stop_play == AT_END_OF_FILE)
             mpctx->stop_play = PT_NEXT_ENTRY;
@@ -4127,7 +4130,7 @@ static bool handle_help_options(struct MPContext *mpctx)
     return opt_exit;
 }
 
-static void load_codecs_conf(struct MPContext *mpctx)
+static bool load_codecs_conf(struct MPContext *mpctx)
 {
     /* Check codecs.conf. */
     if (!codecs_file || !parse_codec_cfg(codecs_file)) {
@@ -4135,13 +4138,14 @@ static void load_codecs_conf(struct MPContext *mpctx)
         if (!parse_codec_cfg(mem_ptr = get_path("codecs.conf"))) {
             if (!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")) {
                 if (!parse_codec_cfg(NULL))
-                    exit_player_with_rc(mpctx, EXIT_NONE, 0);
+                    return false;
                 mp_tmsg(MSGT_CPLAYER, MSGL_V,
                         "Using built-in default codecs.conf.\n");
             }
         }
         free(mem_ptr); // release the buffer created by get_path()
     }
+    return true;
 }
 
 #ifdef PTW32_STATIC_LIB
@@ -4238,7 +4242,8 @@ int main(int argc, char *argv[])
     print_version(false);
     print_libav_versions();
 
-    parse_cfgfiles(mpctx, mpctx->mconfig);
+    if (!parse_cfgfiles(mpctx, mpctx->mconfig))
+        exit_player(mpctx, EXIT_NONE, 1);
 
     mpctx->playlist = talloc_struct(mpctx, struct playlist, {0});
     if (m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
@@ -4246,13 +4251,14 @@ int main(int argc, char *argv[])
     {
         mpctx->playlist->current = mpctx->playlist->first;
     } else {
-        exit_player(mpctx, EXIT_ERROR);
+        exit_player(mpctx, EXIT_ERROR, 1);
     }
 
-    load_codecs_conf(mpctx);
+    if (!load_codecs_conf(mpctx))
+        exit_player(mpctx, EXIT_ERROR, 1);
 
     if (handle_help_options(mpctx))
-        exit_player(mpctx, EXIT_NONE);
+        exit_player(mpctx, EXIT_NONE, 1);
 
     mp_msg(MSGT_CPLAYER, MSGL_V, "Configuration: " CONFIGURATION "\n");
     mp_tmsg(MSGT_CPLAYER, MSGL_V, "Command line:");
@@ -4264,7 +4270,7 @@ int main(int argc, char *argv[])
         // no file/vcd/dvd -> show HELP:
         print_version(true);
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", mp_gtext(help_text));
-        exit_player_with_rc(mpctx, EXIT_NONE, 0);
+        exit_player(mpctx, EXIT_NONE, 0);
     }
 
 #ifdef CONFIG_PRIORITY
@@ -4281,7 +4287,7 @@ int main(int argc, char *argv[])
 
     play_files(mpctx);
 
-    exit_player_with_rc(mpctx, EXIT_EOF, 0);
+    exit_player(mpctx, EXIT_EOF, mpctx->quit_player_rc);
 
     return 1;
 }

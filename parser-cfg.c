@@ -41,7 +41,7 @@ static int recursion_depth = 0;
 /// Setup the \ref Config from a config file.
 /** \param config The config object.
  *  \param conffile Path to the config file.
- *  \return 1 on sucess, -1 on error.
+ *  \return 1 on sucess, -1 on error, 0 if file not accessible.
  */
 int m_config_parse_config_file(m_config_t *config, const char *conffile)
 {

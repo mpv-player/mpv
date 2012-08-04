@@ -54,6 +54,7 @@ enum stop_play_reason {
     PT_NEXT_ENTRY,      // prepare to play next entry in playlist
     PT_CURRENT_ENTRY,   // prepare to play mpctx->playlist->current
     PT_STOP,            // stop playback, clear playlist
+    PT_QUIT,            // stop playback, quit player
 };
 
 enum exit_reason {
@@ -98,6 +99,9 @@ typedef struct MPContext {
     char *filename; // currently playing file
     enum stop_play_reason stop_play;
     unsigned int initialized_flags;  // which subsystems have been initialized
+
+    // Return code to use with PT_QUIT
+    int quit_player_rc;
 
     struct content_source *sources;
     int num_sources;
@@ -227,7 +231,6 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask);
 void reinit_audio_chain(struct MPContext *mpctx);
 void init_vo_spudec(struct MPContext *mpctx);
 double playing_audio_pts(struct MPContext *mpctx);
-void exit_player_with_rc(struct MPContext *mpctx, enum exit_reason how, int rc);
 void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr);
 int reinit_video_chain(struct MPContext *mpctx);
 void pause_player(struct MPContext *mpctx);
