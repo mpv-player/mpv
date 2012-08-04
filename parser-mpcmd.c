@@ -97,6 +97,7 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
     struct playlist_param *local_params = 0;
 
     assert(config != NULL);
+    assert(!config->file_local_mode);
     assert(argv != NULL);
     assert(argc >= 1);
 
@@ -122,6 +123,8 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 goto err_out;
             }
             mode = LOCAL;
+            // Needed for option checking.
+            m_config_enter_file_local(config);
             assert(!local_start);
             local_start = files->last;
             continue;
@@ -149,6 +152,7 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             }
             local_params_count = 0;
             mode = GLOBAL;
+            m_config_leave_file_local(config);
             local_start = NULL;
             continue;
         }
@@ -171,12 +175,6 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                     mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
                             "Unknown option on the command line: --%.*s\n",
                             BSTR_P(opt));
-                goto print_err;
-            }
-            if (mode == LOCAL && (mp_opt->flags & M_OPT_GLOBAL)) {
-                mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                        "Option --%.*s is global and can't be set per-file\n",
-                        BSTR_P(opt));
                 goto print_err;
             }
             // Handle some special arguments outside option parser.
@@ -280,6 +278,7 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
         playlist_shuffle(files);
 
     talloc_free(local_params);
+    assert(!config->file_local_mode);
     return true;
 
 print_err:
@@ -288,6 +287,8 @@ print_err:
             BSTR_P(orig_opt));
 err_out:
     talloc_free(local_params);
+    if (config->file_local_mode)
+        m_config_leave_file_local(config);
     return false;
 }
 

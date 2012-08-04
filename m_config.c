@@ -413,6 +413,12 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
                 BSTR_P(name));
         return M_OPT_INVALID;
     }
+    if (config->file_local_mode && (co->opt->flags & M_OPT_GLOBAL)) {
+        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                "The %.*s option is global and can't be set per-file.\n",
+                BSTR_P(name));
+        return M_OPT_INVALID;
+    }
     // During command line preparse set only pre-parse options
     // Otherwise only set pre-parse option if they were not already set.
     if (((config->mode == M_COMMAND_LINE_PRE_PARSE) &&
