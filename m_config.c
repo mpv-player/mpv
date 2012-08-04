@@ -182,11 +182,19 @@ static int config_destroy(void *p)
     return 0;
 }
 
+struct m_config *m_config_simple(void *optstruct)
+{
+    struct m_config *config = talloc_struct(NULL, struct m_config, {
+        .optstruct = optstruct,
+    });
+    talloc_set_destructor(config, config_destroy);
+    return config;
+}
+
 struct m_config *m_config_new(void *optstruct,
                               int includefunc(struct m_config *conf,
                                               char *filename))
 {
-    struct m_config *config;
     static const struct m_option ref_opts[] = {
         { "profile", NULL, CONF_TYPE_STRING_LIST, CONF_NOSAVE, 0, 0, NULL },
         { "show-profile", show_profile, CONF_TYPE_PRINT_FUNC, CONF_NOCFG },
@@ -194,8 +202,8 @@ struct m_config *m_config_new(void *optstruct,
         { NULL }
     };
 
-    config = talloc_zero(NULL, struct m_config);
-    talloc_set_destructor(config, config_destroy);
+    struct m_config *config = m_config_simple(optstruct);
+
     struct m_option *self_opts = talloc_memdup(config, ref_opts,
                                                sizeof(ref_opts));
     for (int i = 1; self_opts[i].name; i++)
@@ -209,19 +217,7 @@ struct m_config *m_config_new(void *optstruct,
         m_config_add_option(config, p, NULL, NULL);
         config->includefunc = includefunc;
     }
-    config->optstruct = optstruct;
 
-    return config;
-}
-
-struct m_config *m_config_simple(const struct m_option *options,
-                                 void *optstruct)
-{
-    struct m_config *config = talloc_struct(NULL, struct m_config, {
-        .optstruct = optstruct,
-    });
-    talloc_set_destructor(config, config_destroy);
-    m_config_register_options(config, options);
     return config;
 }
 

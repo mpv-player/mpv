@@ -175,8 +175,9 @@ static int vo_preinit(struct vo *vo, char *arg)
     if (vo->driver->privsize)
         vo->priv = talloc_zero_size(vo, vo->driver->privsize);
     if (vo->driver->options) {
-        struct m_config *cfg = m_config_simple(vo->driver->options, vo->priv);
+        struct m_config *cfg = m_config_simple(vo->priv);
         talloc_steal(vo->priv, cfg);
+        m_config_register_options(cfg, vo->driver->options);
         char n[50];
         int l = snprintf(n, sizeof(n), "vo/%s", vo->driver->info->short_name);
         assert(l < sizeof(n));

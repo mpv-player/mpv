@@ -102,8 +102,7 @@ struct m_config *
 m_config_new(void *optstruct,
              int includefunc(struct m_config *conf, char *filename));
 
-struct m_config *m_config_simple(const struct m_option *options,
-                                 void *optstruct);
+struct m_config *m_config_simple(void *optstruct);
 
 // Free a config object.
 void m_config_free(struct m_config *config);
