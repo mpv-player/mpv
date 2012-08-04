@@ -3607,7 +3607,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     assert(mpctx->playlist->current);
     load_per_file_options(mpctx->mconfig, mpctx->playlist->current->params,
-                          mpctx->playlist->current->params_count);
+                          mpctx->playlist->current->num_params);
 
     // We must enable getch2 here to be able to interrupt network connection
     // or cache filling

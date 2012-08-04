@@ -32,7 +32,7 @@ struct playlist_entry {
     char *filename;
 
     struct playlist_param *params;
-    int params_count;
+    int num_params;
 };
 
 struct playlist {

@@ -32,14 +32,14 @@ struct playlist_entry *playlist_entry_new(const char *filename)
 void playlist_entry_add_param(struct playlist_entry *e, bstr name, bstr value)
 {
     struct playlist_param p = {bstrdup(e, name), bstrdup(e, value)};
-    MP_TARRAY_APPEND(e, e->params, e->params_count, p);
+    MP_TARRAY_APPEND(e, e->params, e->num_params, p);
 }
 
 void playlist_entry_add_params(struct playlist_entry *e,
                                struct playlist_param *params,
-                               int params_count)
+                               int num_params)
 {
-    for (int n = 0; n < params_count; n++)
+    for (int n = 0; n < num_params; n++)
         playlist_entry_add_param(e, params[n].name, params[n].value);
 }
 
