@@ -404,6 +404,7 @@ static void print_stream(struct MPContext *mpctx, struct sh_stream *s)
     char *lang = demuxer_stream_lang(mpctx->demuxer, s);
     if (lang)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " --%s=%s", langopt, lang);
+    talloc_free(lang);
     if (s->default_track)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " (*)");
     if (s->title)

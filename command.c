@@ -2686,6 +2686,7 @@ static void show_tracks_on_osd(MPContext *mpctx)
         char *lang = demuxer_stream_lang(mpctx->demuxer, sh);
         if (lang)
             res = talloc_asprintf_append(res, "(%s) ", lang);
+        talloc_free(lang);
         if (selected)
             res = talloc_asprintf_append(res, "<");
         res = talloc_asprintf_append(res, "\n");
