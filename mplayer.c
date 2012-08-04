@@ -425,7 +425,7 @@ static void print_stream(struct MPContext *mpctx, struct sh_stream *s)
             mp_msg(MSGT_CPLAYER, MSGL_INFO, "%#x", format);
         }
     } else if (s->type == STREAM_SUB) {
-        char t = ((sh_sub_t*)s)->type;
+        char t = s->sub->type;
         const char *name = NULL;
         switch (t) {
         case 't': name = "SRT"; break;
