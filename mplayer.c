@@ -2914,17 +2914,20 @@ int get_current_chapter(struct MPContext *mpctx)
 char *chapter_display_name(struct MPContext *mpctx, int chapter)
 {
     char *name = chapter_name(mpctx, chapter);
+    char *dname = name;
     if (name) {
-        name = talloc_asprintf(name, "(%d) %s", chapter + 1, name);
+        dname = talloc_asprintf(NULL, "(%d) %s", chapter + 1, name);
     } else {
         int chapter_count = get_chapter_count(mpctx);
         if (chapter_count <= 0)
-            name = talloc_asprintf(NULL, "(%d)", chapter + 1);
+            dname = talloc_asprintf(NULL, "(%d)", chapter + 1);
         else
-            name = talloc_asprintf(NULL, "(%d) of %d", chapter + 1,
-                                   chapter_count);
+            dname = talloc_asprintf(NULL, "(%d) of %d", chapter + 1,
+                                    chapter_count);
     }
-    return name;
+    if (dname != name)
+        talloc_free(name);
+    return dname;
 }
 
 // returns NULL if chapter name unavailable
