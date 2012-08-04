@@ -448,7 +448,8 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
     double video_start_pts = MP_NOPTS_VALUE;
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILENAME=%s\n",
            filename);
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DEMUXER=%s\n",
+    if (mpctx->demuxer)
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DEMUXER=%s\n",
            mpctx->demuxer->desc->name);
     if (mpctx->sh_video) {
         /* Assume FOURCC if all bytes >= 0x20 (' ') */
@@ -516,9 +517,9 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
                 talloc_free(name);
             }
         }
+        for (int n = 0; n < mpctx->demuxer->num_streams; n++)
+            print_stream(mpctx, mpctx->demuxer->streams[n]);
     }
-    for (int n = 0; n < mpctx->demuxer->num_streams; n++)
-        print_stream(mpctx, mpctx->demuxer->streams[n]);
 }
 
 /// step size of mixer changes
@@ -2551,7 +2552,9 @@ void pause_player(struct MPContext *mpctx)
     if (mpctx->ao && mpctx->sh_audio)
         ao_pause(mpctx->ao);    // pause audio, keep data if possible
 
-    print_status(mpctx, MP_NOPTS_VALUE, false);
+    // Only print status if there's actually a file being played.
+    if (mpctx->demuxer)
+        print_status(mpctx, MP_NOPTS_VALUE, false);
 
     if (!mpctx->opts.quiet)
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
@@ -2682,6 +2685,9 @@ static int seek(MPContext *mpctx, struct seek_params seek,
                 bool timeline_fallthrough)
 {
     struct MPOpts *opts = &mpctx->opts;
+
+    if (!mpctx->demuxer)
+        return -1;
 
     if (mpctx->stop_play == AT_END_OF_FILE)
         mpctx->stop_play = KEEP_PLAYING;
@@ -2816,10 +2822,13 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
 
 double get_time_length(struct MPContext *mpctx)
 {
+    struct demuxer *demuxer = mpctx->demuxer;
+    if (!demuxer)
+        return 0;
+
     if (mpctx->timeline)
         return mpctx->timeline[mpctx->num_timeline_parts].start;
 
-    struct demuxer *demuxer = mpctx->demuxer;
     double get_time_ans;
     // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
     if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,
@@ -2846,6 +2855,8 @@ double get_time_length(struct MPContext *mpctx)
 double get_current_time(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
+    if (!demuxer)
+        return 0;
     if (demuxer->stream_pts != MP_NOPTS_VALUE)
         return demuxer->stream_pts;
     if (mpctx->sh_video) {
@@ -2862,6 +2873,8 @@ double get_current_time(struct MPContext *mpctx)
 int get_percent_pos(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
+    if (!demuxer)
+        return 0;
     int ans = 0;
     if (mpctx->timeline)
         ans = get_current_time(mpctx) * 100 /
@@ -2888,15 +2901,17 @@ int get_percent_pos(struct MPContext *mpctx)
 int get_current_chapter(struct MPContext *mpctx)
 {
     double current_pts = get_current_time(mpctx);
-    if (!mpctx->chapters)
+    if (mpctx->chapters) {
+        int i;
+        for (i = 1; i < mpctx->num_chapters; i++)
+            if (current_pts < mpctx->chapters[i].start)
+                break;
+        return FFMAX(mpctx->last_chapter_seek, i - 1);
+    }
+    if (mpctx->demuxer)
         return FFMAX(mpctx->last_chapter_seek,
                      demuxer_get_current_chapter(mpctx->demuxer, current_pts));
-
-    int i;
-    for (i = 1; i < mpctx->num_chapters; i++)
-        if (current_pts < mpctx->chapters[i].start)
-            break;
-    return FFMAX(mpctx->last_chapter_seek, i - 1);
+    return -2;
 }
 
 char *chapter_display_name(struct MPContext *mpctx, int chapter)
@@ -2918,30 +2933,46 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter)
 // returns NULL if chapter name unavailable
 char *chapter_name(struct MPContext *mpctx, int chapter)
 {
-    if (!mpctx->chapters)
+    if (mpctx->chapters)
+        return talloc_strdup(NULL, mpctx->chapters[chapter].name);
+    if (mpctx->demuxer)
         return demuxer_chapter_name(mpctx->demuxer, chapter);
-    return talloc_strdup(NULL, mpctx->chapters[chapter].name);
+    return NULL;
 }
 
-// returns the start of the chapter in seconds
+// returns the start of the chapter in seconds (-1 if unavailable)
 double chapter_start_time(struct MPContext *mpctx, int chapter)
 {
-    if (!mpctx->chapters)
+    if (mpctx->chapters)
+        return mpctx->chapters[chapter].start;
+    if (mpctx->demuxer)
         return demuxer_chapter_time(mpctx->demuxer, chapter, NULL);
-    return mpctx->chapters[chapter].start;
+    return -1;
 }
 
 int get_chapter_count(struct MPContext *mpctx)
 {
-    if (!mpctx->chapters)
+    if (mpctx->chapters)
+        return mpctx->num_chapters;
+    if (mpctx->demuxer)
         return demuxer_chapter_count(mpctx->demuxer);
-    return mpctx->num_chapters;
+    return 0;
 }
 
 int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts)
 {
     mpctx->last_chapter_seek = -2;
-    if (!mpctx->chapters) {
+    if (mpctx->chapters) {
+        if (chapter >= mpctx->num_chapters)
+            return -1;
+        if (chapter < 0)
+            chapter = 0;
+        *seek_pts = mpctx->chapters[chapter].start;
+        mpctx->last_chapter_seek = chapter;
+        mpctx->last_chapter_pts = *seek_pts;
+        return chapter;
+    }
+    if (mpctx->demuxer) {
         int res = demuxer_seek_chapter(mpctx->demuxer, chapter, seek_pts);
         if (res >= 0) {
             if (*seek_pts == -1)
@@ -2953,15 +2984,7 @@ int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts)
         }
         return res;
     }
-
-    if (chapter >= mpctx->num_chapters)
-        return -1;
-    if (chapter < 0)
-        chapter = 0;
-    *seek_pts = mpctx->chapters[chapter].start;
-    mpctx->last_chapter_seek = chapter;
-    mpctx->last_chapter_pts = *seek_pts;
-    return chapter;
+    return -1;
 }
 
 

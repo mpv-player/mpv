@@ -155,6 +155,12 @@ static void update_global_sub_size(MPContext *mpctx)
     int i;
     int cnt = 0;
 
+    if (!mpctx->demuxer) {
+        mpctx->global_sub_size = -1;
+        mpctx->global_sub_pos = -1;
+        return;
+    }
+
     // update number of demuxer sub streams
     for (i = 0; i < MAX_S_STREAMS; i++)
         if (mpctx->d_sub->demuxer->s_streams[i])
@@ -1041,6 +1047,9 @@ static int mp_property_program(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
     demux_program_t prog;
+
+    if (!mpctx->demuxer)
+        return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
     case M_PROPERTY_STEP_UP:
@@ -2041,6 +2050,8 @@ static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
                                 MPContext *mpctx)
 {
     int r, val;
+    if (!mpctx->demuxer)
+        return M_PROPERTY_UNAVAILABLE;
     tvi_handle_t *tvh = mpctx->demuxer->priv;
     if (mpctx->demuxer->type != DEMUXER_TYPE_TV || !tvh)
         return M_PROPERTY_UNAVAILABLE;
@@ -3005,7 +3016,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
 #ifdef CONFIG_RADIO
     case MP_CMD_RADIO_STEP_CHANNEL:
-        if (mpctx->demuxer->stream->type == STREAMTYPE_RADIO) {
+        if (mpctx->demuxer && mpctx->demuxer->stream->type == STREAMTYPE_RADIO) {
             int v = cmd->args[0].v.i;
             if (v > 0)
                 radio_step_channel(mpctx->demuxer->stream,
@@ -3022,7 +3033,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_RADIO_SET_CHANNEL:
-        if (mpctx->demuxer->stream->type == STREAMTYPE_RADIO) {
+        if (mpctx->demuxer && mpctx->demuxer->stream->type == STREAMTYPE_RADIO) {
             radio_set_channel(mpctx->demuxer->stream, cmd->args[0].v.s);
             if (radio_get_channel_name(mpctx->demuxer->stream)) {
                 set_osd_tmsg(OSD_MSG_RADIO_CHANNEL, 1, osd_duration,
@@ -3033,23 +3044,23 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_RADIO_SET_FREQ:
-        if (mpctx->demuxer->stream->type == STREAMTYPE_RADIO)
+        if (mpctx->demuxer && mpctx->demuxer->stream->type == STREAMTYPE_RADIO)
             radio_set_freq(mpctx->demuxer->stream, cmd->args[0].v.f);
         break;
 
     case MP_CMD_RADIO_STEP_FREQ:
-        if (mpctx->demuxer->stream->type == STREAMTYPE_RADIO)
+        if (mpctx->demuxer && mpctx->demuxer->stream->type == STREAMTYPE_RADIO)
             radio_step_freq(mpctx->demuxer->stream, cmd->args[0].v.f);
         break;
 #endif
 
 #ifdef CONFIG_TV
     case MP_CMD_TV_START_SCAN:
-        if (mpctx->file_format == DEMUXER_TYPE_TV)
+        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV)
             tv_start_scan((tvi_handle_t *) (mpctx->demuxer->priv), 1);
         break;
     case MP_CMD_TV_SET_FREQ:
-        if (mpctx->file_format == DEMUXER_TYPE_TV)
+        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV)
             tv_set_freq((tvi_handle_t *) (mpctx->demuxer->priv),
                         cmd->args[0].v.f * 16.0);
 #ifdef CONFIG_PVR
@@ -3063,7 +3074,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_TV_STEP_FREQ:
-        if (mpctx->file_format == DEMUXER_TYPE_TV)
+        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV)
             tv_step_freq((tvi_handle_t *) (mpctx->demuxer->priv),
                          cmd->args[0].v.f * 16.0);
 #ifdef CONFIG_PVR
@@ -3077,13 +3088,13 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_TV_SET_NORM:
-        if (mpctx->file_format == DEMUXER_TYPE_TV)
+        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV)
             tv_set_norm((tvi_handle_t *) (mpctx->demuxer->priv),
                         cmd->args[0].v.s);
         break;
 
     case MP_CMD_TV_STEP_CHANNEL:
-        if (mpctx->file_format == DEMUXER_TYPE_TV) {
+        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV) {
             int v = cmd->args[0].v.i;
             if (v > 0) {
                 tv_step_channel((tvi_handle_t *) (mpctx->
@@ -3130,7 +3141,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_TV_SET_CHANNEL:
-        if (mpctx->file_format == DEMUXER_TYPE_TV) {
+        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV) {
             tv_set_channel((tvi_handle_t *) (mpctx->demuxer->priv),
                            cmd->args[0].v.s);
             if (tv_channel_list) {
@@ -3164,7 +3175,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 #endif /* CONFIG_DVBIN */
 
     case MP_CMD_TV_LAST_CHANNEL:
-        if (mpctx->file_format == DEMUXER_TYPE_TV) {
+        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV) {
             tv_last_channel((tvi_handle_t *) (mpctx->demuxer->priv));
             if (tv_channel_list) {
                 set_osd_tmsg(OSD_MSG_TV_CHANNEL, 1, osd_duration,
@@ -3183,12 +3194,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_TV_STEP_NORM:
-        if (mpctx->file_format == DEMUXER_TYPE_TV)
+        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV)
             tv_step_norm((tvi_handle_t *) (mpctx->demuxer->priv));
         break;
 
     case MP_CMD_TV_STEP_CHANNEL_LIST:
-        if (mpctx->file_format == DEMUXER_TYPE_TV)
+        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV)
             tv_step_chanlist((tvi_handle_t *) (mpctx->demuxer->priv));
         break;
 #endif /* CONFIG_TV */
