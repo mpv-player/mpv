@@ -99,8 +99,8 @@ void osd_alloc_buf(mp_osd_obj_t* obj)
     len = obj->stride*(obj->bbox.y2-obj->bbox.y1);
     if (obj->allocated<len) {
 	obj->allocated = len;
-	free(obj->bitmap_buffer);
-	free(obj->alpha_buffer);
+	av_free(obj->bitmap_buffer);
+	av_free(obj->alpha_buffer);
 	obj->bitmap_buffer = av_malloc(len);
 	obj->alpha_buffer  = av_malloc(len);
     }
@@ -211,8 +211,8 @@ void osd_free(struct osd_state *osd)
     mp_osd_obj_t* obj=vo_osd_list;
     while(obj){
 	mp_osd_obj_t* next=obj->next;
-	free(obj->alpha_buffer);
-	free(obj->bitmap_buffer);
+	av_free(obj->alpha_buffer);
+	av_free(obj->bitmap_buffer);
 	free(obj);
 	obj=next;
     }
