@@ -1702,11 +1702,6 @@ const struct vo_driver video_out_vdpau = {
         OPT_MAKE_FLAGS("pullup", pullup, 0),
         OPT_FLOATRANGE("denoise", denoise, 0, 0, 1),
         OPT_FLOATRANGE("sharpen", sharpen, 0, -1, 1),
-        OPT_ERRORMESSAGE("colorspace", "vo_vdpau suboption \"colorspace\" has "
-                         "been removed. Use --colormatrix instead.\n"),
-        OPT_ERRORMESSAGE("studio", "vo_vdpau suboption \"studio\" has been "
-                         "removed. Use --colormatrix-output-range=limited "
-                         "instead.\n"),
         OPT_INTRANGE("hqscaling", hqscaling, 0, 0, 9),
         OPT_FLOAT("fps", user_fps, 0),
         OPT_FLAG_ON("composite-detect", composite_detect, 0, OPTDEF_INT(1)),

@@ -421,11 +421,6 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPTION_PATH_SEPARATOR ':'
 #endif
 
-// The code will interpret arguments different from 1 as disabled, thus
-// CONFIG_FOO etc mean disabled if no such macro is defined.
-#define OPT_START_CONDITIONAL(enable, featurename) OPT_START_CONDITIONAL_AFTERMACROEVAL(enable, featurename)
-#define OPT_START_CONDITIONAL_AFTERMACROEVAL(enable, featurename) {"conditional functionality: " #enable, .p = featurename}
-
 #define OPTDEF_STR(s) .defval = (void *)&(char * const){s}
 #define OPTDEF_INT(i) .defval = (void *)&(const int){i}
 
@@ -457,7 +452,6 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_CHOICE(...) OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_choice)
 #define OPT_CHOICE_(optname, varname, flags, choices, ...) OPT_GENERAL(optname, varname, flags, .priv = (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, __VA_ARGS__)
 #define OPT_TIME(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_time)
-#define OPT_ERRORMESSAGE(optname, message) {.name = optname, .p = message, .type = &m_option_type_print}
 
 #define OPT_BASE_STRUCT struct MPOpts
 

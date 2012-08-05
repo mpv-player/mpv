@@ -436,9 +436,6 @@ const m_option_t common_opts[] = {
     // stop at given position
     {"endpos", &end_at, CONF_TYPE_TIME_SIZE, 0, 0, 0, NULL},
 
-    OPT_ERRORMESSAGE("edl", "Old EDL functionality using the --edl option is "
-                     "not supported.\n"),
-
     // AVI specific: force non-interleaved mode
     {"ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
@@ -594,7 +591,6 @@ const m_option_t common_opts[] = {
     {"subfont-blur", &subtitle_font_radius, CONF_TYPE_FLOAT, CONF_RANGE, 0, 8, NULL},
     {"subfont-outline", &subtitle_font_thickness, CONF_TYPE_FLOAT, CONF_RANGE, 0, 8, NULL},
     {"subfont-autoscale", &subtitle_autoscale, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
-    OPT_START_CONDITIONAL(CONFIG_ASS, "libass"),
     OPT_MAKE_FLAGS("ass", ass_enabled, 0),
     OPT_FLOATRANGE("ass-font-scale", ass_font_scale, 0, 0, 100),
     OPT_FLOATRANGE("ass-line-spacing", ass_line_spacing, 0, -1000, 1000),
@@ -608,7 +604,6 @@ const m_option_t common_opts[] = {
     OPT_STRING("ass-border-color", ass_border_color, 0),
     OPT_STRING("ass-styles", ass_styles_file, 0),
     OPT_INTRANGE("ass-hinting", ass_hinting, 0, 0, 7),
-    OPT_START_CONDITIONAL(1, ""),
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -690,10 +685,10 @@ const m_option_t mplayer_opts[]={
     {"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
     OPT_FLOATRANGE("panscanrange", vo_panscanrange, 0, -19.0, 99.0),
     OPT_CHOICE("colormatrix", requested_colorspace, 0,
-               ({"auto", MP_CSP_AUTO}, {"0", MP_CSP_AUTO},
-                {"BT.601", MP_CSP_BT_601}, {"sd", MP_CSP_BT_601}, {"1", MP_CSP_BT_601},
-                {"BT.709", MP_CSP_BT_709}, {"hd", MP_CSP_BT_709}, {"2", MP_CSP_BT_709},
-                {"SMPTE-240M", MP_CSP_SMPTE_240M}, {"3", MP_CSP_SMPTE_240M})),
+               ({"auto", MP_CSP_AUTO},
+                {"BT.601", MP_CSP_BT_601},
+                {"BT.709", MP_CSP_BT_709},
+                {"SMPTE-240M", MP_CSP_SMPTE_240M})),
     OPT_CHOICE("colormatrix-input-range", requested_input_range, 0,
                ({"auto", MP_CSP_LEVELS_AUTO},
                 {"limited", MP_CSP_LEVELS_TV},
