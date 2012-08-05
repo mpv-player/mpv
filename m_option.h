@@ -49,7 +49,6 @@ extern const m_option_type_t m_option_type_time_size;
 extern const m_option_type_t m_option_type_choice;
 
 extern const m_option_type_t m_option_type_print;
-extern const m_option_type_t m_option_type_print_indirect;
 extern const m_option_type_t m_option_type_print_func;
 extern const m_option_type_t m_option_type_subconfig;
 extern const m_option_type_t m_option_type_imgfmt;
@@ -157,7 +156,6 @@ struct m_opt_choice_alternatives {
 #define CONF_TYPE_DOUBLE        (&m_option_type_double)
 #define CONF_TYPE_STRING        (&m_option_type_string)
 #define CONF_TYPE_PRINT         (&m_option_type_print)
-#define CONF_TYPE_PRINT_INDIRECT (&m_option_type_print_indirect)
 #define CONF_TYPE_PRINT_FUNC    (&m_option_type_print_func)
 #define CONF_TYPE_SUBCONFIG     (&m_option_type_subconfig)
 #define CONF_TYPE_STRING_LIST   (&m_option_type_string_list)

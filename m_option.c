@@ -790,9 +790,7 @@ const m_option_type_t m_option_type_string_list = {
 static int parse_print(const m_option_t *opt, struct bstr name,
                        struct bstr param, bool ambiguous_param, void *dst)
 {
-    if (opt->type == CONF_TYPE_PRINT_INDIRECT)
-        mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", *(char **) opt->p);
-    else if (opt->type == CONF_TYPE_PRINT_FUNC) {
+    if (opt->type == CONF_TYPE_PRINT_FUNC) {
         char *name0 = bstrdup0(NULL, name);
         char *param0 = bstrdup0(NULL, param);
         int r = ((m_opt_func_full_t) opt->p)(opt, name0, param0);
@@ -808,11 +806,6 @@ static int parse_print(const m_option_t *opt, struct bstr name,
 }
 
 const m_option_type_t m_option_type_print = {
-    .name  = "Print",
-    .parse = parse_print,
-};
-
-const m_option_type_t m_option_type_print_indirect = {
     .name  = "Print",
     .parse = parse_print,
 };
