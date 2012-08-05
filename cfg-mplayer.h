@@ -343,7 +343,7 @@ const m_option_t msgl_config[]={
     "   ass        - libass messages\n"
     "   statusline - playback/encoding status line\n"
     "   fixme      - messages not yet fixed to map to module\n"
-    "\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+    "\n", CONF_TYPE_PRINT, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 
 };
@@ -356,8 +356,8 @@ const m_option_t common_opts[] = {
     OPT_MAKE_FLAGS("quiet", quiet, CONF_GLOBAL),
     {"really-quiet", &verbose, CONF_TYPE_FLAG, CONF_GLOBAL|CONF_PRE_PARSE, 0, -10, NULL},
     // -v is handled in command line preparser
-    {"v", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
-        {"msglevel", (void *) msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+    {"v", NULL, CONF_TYPE_FLAG, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
+    {"msglevel", (void *) msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
     {"msgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
     {"msgmodule", &mp_msg_module, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 #ifdef CONFIG_PRIORITY
@@ -537,7 +537,7 @@ const m_option_t common_opts[] = {
     // postprocessing:
     {"pp", &divx_quality, CONF_TYPE_INT, 0, 0, 0, NULL},
 #ifdef CONFIG_LIBPOSTPROC
-    {"pphelp", &pp_help, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+    {"pphelp", &pp_help, CONF_TYPE_PRINT, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
 #endif
 
     // scaling:
@@ -549,7 +549,6 @@ const m_option_t common_opts[] = {
     OPT_FLOATRANGE("xy", screen_size_xy, 0, 0.001, 4096),
 
     OPT_FLAG_CONSTANTS("flip", flip, 0, -1, 1),
-    OPT_FLAG_CONSTANTS("no-flip", flip, 0, -1, 0),
 
     // draw by slices or whole frame (useful with libmpeg2/libavcodec)
     OPT_MAKE_FLAGS("slices", vd_use_slices, 0),
@@ -632,7 +631,6 @@ const m_option_t mplayer_opts[]={
     OPT_MAKE_FLAGS("ontop", vo_ontop, 0),
     {"rootwin", &vo_rootwin, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"border", &vo_border, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"no-border", &vo_border, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
     OPT_STRING("mixer", mixer_device, 0),
     OPT_STRING("mixer-channel", mixer_channel, 0),
@@ -752,8 +750,11 @@ const m_option_t mplayer_opts[]={
 
     OPT_FLAG_CONSTANTS("no-loop", loop_times, 0, 0, -1),
     OPT_INTRANGE("loop", loop_times, 0, -1, 10000),
-    {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG, 0, 0, NULL},
+
+    {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN, 1, 0, NULL},
     {"shuffle", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
+    {"{", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
+    {"}", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
 
     OPT_MAKE_FLAGS("ordered-chapters", ordered_chapters, 0),
     OPT_INTRANGE("chapter-merge-threshold", chapter_merge_threshold, 0, 0, 10000),

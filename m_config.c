@@ -67,7 +67,7 @@ static int parse_profile(struct m_config *config, const struct m_option *opt,
     }
 
     char **list = NULL;
-    int r = m_option_type_string_list.parse(opt, name, param, false, &list);
+    int r = m_option_type_string_list.parse(opt, name, param, &list);
     if (r < 0)
         return r;
     if (!list || !list[0])
@@ -197,7 +197,8 @@ struct m_config *m_config_new(void *optstruct,
 {
     static const struct m_option ref_opts[] = {
         { "profile", NULL, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL },
-        { "show-profile", show_profile, CONF_TYPE_PRINT_FUNC, CONF_NOCFG },
+        { "show-profile", show_profile, &m_option_type_print_func_param,
+          CONF_NOCFG },
         { "list-options", list_options, CONF_TYPE_PRINT_FUNC, CONF_NOCFG },
         { NULL }
     };
@@ -380,8 +381,7 @@ static int parse_subopts(struct m_config *config, void *optstruct, char *name,
                          char *prefix, struct bstr param, bool set);
 
 static int m_config_parse_option(struct m_config *config, void *optstruct,
-                                 struct bstr name, struct bstr param,
-                                 bool ambiguous_param, bool set)
+                                 struct bstr name, struct bstr param, bool set)
 {
     assert(config != NULL);
     assert(name.len != 0);
@@ -419,13 +419,6 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
                 BSTR_P(name));
         return M_OPT_INVALID;
     }
-    // During command line preparse set only pre-parse options
-    // Otherwise only set pre-parse option if they were not already set.
-    if (((config->mode == M_COMMAND_LINE_PRE_PARSE) &&
-         !(co->opt->flags & M_OPT_PRE_PARSE)) ||
-        ((config->mode != M_COMMAND_LINE_PRE_PARSE) &&
-         (co->opt->flags & M_OPT_PRE_PARSE) && (co->flags & M_CFG_OPT_SET)))
-        set = 0;
 
     if (config->includefunc && !bstrcmp0(name, "include")) {
         return parse_include(config, param, set);
@@ -444,14 +437,7 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
         ensure_backup(config, co);
 
     void *dst = set ? m_option_get_ptr(co->opt, optstruct) : NULL;
-    int r = m_option_parse(co->opt, name, param, ambiguous_param, dst);
-    // Parsing failed ?
-    if (r < 0)
-        return r;
-    else if (set)
-        co->flags |= M_CFG_OPT_SET;
-
-    return r;
+    return m_option_parse(co->opt, name, param, dst);
 }
 
 static int parse_subopts(struct m_config *config, void *optstruct, char *name,
@@ -459,7 +445,7 @@ static int parse_subopts(struct m_config *config, void *optstruct, char *name,
 {
     char **lst = NULL;
     // Split the argument into child options
-    int r = m_option_type_subconfig.parse(NULL, bstr0(""), param, false, &lst);
+    int r = m_option_type_subconfig.parse(NULL, bstr0(""), param, &lst);
     if (r < 0)
         return r;
     // Parse the child options
@@ -491,7 +477,7 @@ static int parse_subopts(struct m_config *config, void *optstruct, char *name,
             lst[2 * i + 1] = "no";
         }
         int sr = m_config_parse_option(config, optstruct, bstr0(n),
-                                       bstr0(lst[2 * i + 1]), false, set);
+                                       bstr0(lst[2 * i + 1]), set);
         if (sr < 0) {
             if (sr == M_OPT_MISSING_PARAM) {
                 mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
@@ -508,21 +494,20 @@ static int parse_subopts(struct m_config *config, void *optstruct, char *name,
 }
 
 int m_config_set_option(struct m_config *config, struct bstr name,
-                                 struct bstr param, bool ambiguous_param)
+                                 struct bstr param)
 {
     mp_msg(MSGT_CFGPARSER, MSGL_DBG2, "Setting %.*s=%.*s\n", BSTR_P(name),
            BSTR_P(param));
-    return m_config_parse_option(config, config->optstruct, name, param,
-                                 ambiguous_param, true);
+    return m_config_parse_option(config, config->optstruct, name, param, true);
 }
 
 int m_config_check_option(struct m_config *config, struct bstr name,
-                          struct bstr param, bool ambiguous_param)
+                          struct bstr param)
 {
     int r;
     mp_msg(MSGT_CFGPARSER, MSGL_DBG2, "Checking %.*s=%.*s\n", BSTR_P(name),
            BSTR_P(param));
-    r = m_config_parse_option(config, NULL, name, param, ambiguous_param, 0);
+    r = m_config_parse_option(config, NULL, name, param, 0);
     if (r == M_OPT_MISSING_PARAM) {
         mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
                 "Error: option '%.*s' must have a parameter!\n", BSTR_P(name));
@@ -623,7 +608,7 @@ void m_profile_set_desc(struct m_profile *p, char *desc)
 int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
                                 char *name, char *val)
 {
-    int i = m_config_check_option0(config, name, val, false);
+    int i = m_config_check_option0(config, name, val);
     if (i < 0)
         return i;
     p->opts = talloc_realloc(p, p->opts, char *, 2 * (p->num_opts + 2));
@@ -646,7 +631,7 @@ void m_config_set_profile(struct m_config *config, struct m_profile *p)
     config->mode = M_CONFIG_FILE;
     config->profile_depth++;
     for (i = 0; i < p->num_opts; i++)
-        m_config_set_option0(config, p->opts[2 * i], p->opts[2 * i + 1], false);
+        m_config_set_option0(config, p->opts[2 * i], p->opts[2 * i + 1]);
     config->profile_depth--;
     config->mode = prev_mode;
 }

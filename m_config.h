@@ -60,12 +60,10 @@ struct m_profile {
 };
 
 enum option_source {
-    // Set when parsing from a config file.
-    M_CONFIG_FILE,
     // Set when parsing command line arguments.
     M_COMMAND_LINE,
-    // Set when pre-parsing the command line
-    M_COMMAND_LINE_PRE_PARSE,
+    // Set when parsing from a config file.
+    M_CONFIG_FILE,
 };
 
 // Config object
@@ -89,10 +87,6 @@ typedef struct m_config {
     void *optstruct; // struct mpopts or other
     int (*includefunc)(struct m_config *conf, char *filename);
 } m_config_t;
-
-
-// Set if an option has been set at the current level.
-#define M_CFG_OPT_SET    (1 << 0)
 
 // Set if another option already uses the same variable.
 #define M_CFG_OPT_ALIAS  (1 << 1)
@@ -122,31 +116,27 @@ int m_config_register_options(struct m_config *config,
  *  \param config The config object.
  *  \param name The option's name.
  *  \param param The value of the option, can be NULL.
- *  \param ambiguous_param: old style cmdline option, "param" may be a
-           parameter to this option or something entirely unrelated
  *  \return See \ref OptionParserReturn.
  */
 int m_config_set_option(struct m_config *config, struct bstr name,
-                        struct bstr param, bool ambiguous_param);
+                        struct bstr param);
 
 static inline int m_config_set_option0(struct m_config *config,
-                                       const char *name, const char *param,
-                                       bool ambiguous)
+                                       const char *name, const char *param)
 {
-    return m_config_set_option(config, bstr0(name), bstr0(param), ambiguous);
+    return m_config_set_option(config, bstr0(name), bstr0(param));
 }
 
 /*  Check if an option setting is valid.
  *  Same as above m_config_set_option() but doesn't actually set anything.
  */
 int m_config_check_option(struct m_config *config, struct bstr name,
-                          struct bstr param, bool ambiguous_param);
+                          struct bstr param);
 
 static inline int m_config_check_option0(struct m_config *config,
-                                         const char *name, const char *param,
-                                         bool ambiguous)
+                                         const char *name, const char *param)
 {
-    return m_config_check_option(config, bstr0(name), bstr0(param), ambiguous);
+    return m_config_check_option(config, bstr0(name), bstr0(param));
 }
 
 int m_config_parse_suboptions(struct m_config *config, char *name,

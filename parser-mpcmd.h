@@ -20,11 +20,14 @@
 #define MPLAYER_PARSER_MPCMD_H
 
 #include <stdbool.h>
-#include "m_config.h"
 
-bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
+struct playlist;
+struct m_config;
+
+bool m_config_parse_mp_command_line(struct m_config *config,
+                                    struct playlist *files,
                                     int argc, char **argv);
-int m_config_preparse_command_line(m_config_t *config, int argc, char **argv,
-                                   int *verbose);
+void m_config_preparse_command_line(struct m_config *config,
+                                    int argc, char **argv);
 
 #endif /* MPLAYER_PARSER_MPCMD_H */

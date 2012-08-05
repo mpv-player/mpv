@@ -26,6 +26,8 @@
 
 #define ROUND(x) ((int)((x) < 0 ? (x) - 0.5 : (x) + 0.5))
 
+#define MP_EXPAND_ARGS(...) __VA_ARGS__
+
 #define MP_TALLOC_ELEMS(p) (talloc_get_size(p) / sizeof((p)[0]))
 #define MP_GROW_ARRAY(p, nextidx) do {          \
     if ((nextidx) == MP_TALLOC_ELEMS(p))        \
@@ -43,14 +45,12 @@
                (nextidx_ + 1) * sizeof((p)[0]) * 2);\
     } while (0)
 
-#define MP_TARRAY_APPEND(ctx, p, idxvar, val)       \
+#define MP_TARRAY_APPEND(ctx, p, idxvar, ...)       \
     do {                                            \
         MP_TARRAY_GROW(ctx, p, idxvar);             \
-        p[idxvar] = (val);                          \
+        p[idxvar] = (MP_EXPAND_ARGS(__VA_ARGS__));  \
         idxvar++;                                   \
     } while (0)
-
-#define MP_EXPAND_ARGS(...) __VA_ARGS__
 
 #define talloc_struct(ctx, type, ...) \
     talloc_memdup(ctx, &(type) MP_EXPAND_ARGS(__VA_ARGS__), sizeof(type))

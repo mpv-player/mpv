@@ -50,6 +50,7 @@ extern const m_option_type_t m_option_type_choice;
 
 extern const m_option_type_t m_option_type_print;
 extern const m_option_type_t m_option_type_print_func;
+extern const m_option_type_t m_option_type_print_func_param;
 extern const m_option_type_t m_option_type_subconfig;
 extern const m_option_type_t m_option_type_imgfmt;
 extern const m_option_type_t m_option_type_afmt;
@@ -177,7 +178,7 @@ struct m_option_type {
     const char *name;
     // Size needed for the data.
     unsigned int size;
-    // See \ref OptionTypeFlags.
+    // One of M_OPT_TYPE*.
     unsigned int flags;
 
     // Parse the data from a string.
@@ -186,7 +187,6 @@ struct m_option_type {
      *  \param opt The option that is parsed.
      *  \param name The full option name.
      *  \param param The parameter to parse.
-     *  \param ambiguous_param: "param" old cmdline style, "param" may or
      *         may not be an argument meant for this option
      *  \param dst Pointer to the memory where the data should be written.
      *             If NULL the parameter validity should still be checked.
@@ -194,7 +194,7 @@ struct m_option_type {
      *          of arguments consumed. For details see \ref OptionParserReturn.
      */
     int (*parse)(const m_option_t *opt, struct bstr name, struct bstr param,
-                 bool ambiguous_param, void *dst);
+                 void *dst);
 
     // Print back a value in string form.
     /** \param opt The option to print.
@@ -325,6 +325,11 @@ struct m_option {
  */
 #define M_OPT_TYPE_DYNAMIC              (1 << 2)
 
+// The parameter is optional and by default no parameter is preferred. If the
+// "old syntax" is used, the command line parser will assume that the argument
+// takes no parameter.
+#define M_OPT_TYPE_OLD_SYNTAX_NO_PARAM  (1 << 3)
+
 ///////////////////////////// Parser flags /////////////////////////////////
 
 // On success parsers return the number of arguments consumed: 0 or 1.
@@ -377,10 +382,9 @@ static inline void *m_option_get_ptr(const struct m_option *opt,
 
 // Helper to parse options, see \ref m_option_type::parse.
 static inline int m_option_parse(const m_option_t *opt, struct bstr name,
-                                 struct bstr param, bool ambiguous_param,
-                                 void *dst)
+                                 struct bstr param, void *dst)
 {
-    return opt->type->parse(opt, name, param, ambiguous_param, dst);
+    return opt->type->parse(opt, name, param, dst);
 }
 
 // Helper to print options, see \ref m_option_type::print.

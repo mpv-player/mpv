@@ -853,7 +853,7 @@ static void load_per_file_options(m_config_t *conf,
                                   int params_count)
 {
     for (int n = 0; n < params_count; n++)
-        m_config_set_option(conf, params[n].name, params[n].value, false);
+        m_config_set_option(conf, params[n].name, params[n].value);
 }
 
 /* When libmpdemux performs a blocking operation (network connection or
@@ -4211,8 +4211,13 @@ int main(int argc, char *argv[])
 {
     osdep_preinit(&argc, &argv);
 
-    if (argc > 1 && (!strcmp(argv[1], "-leak-report")
-                     || !strcmp(argv[1], "--leak-report")))
+    if (argc >= 1) {
+        argc--;
+        argv++;
+    }
+
+    if (argc > 0 && (!strcmp(argv[0], "-leak-report")
+                     || !strcmp(argv[0], "--leak-report")))
         talloc_enable_leak_report();
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
@@ -4224,6 +4229,7 @@ int main(int argc, char *argv[])
         .file_format = DEMUXER_TYPE_UNKNOWN,
         .last_dvb_step = 1,
         .terminal_osd_text = talloc_strdup(mpctx, ""),
+        .playlist = talloc_struct(mpctx, struct playlist, {0}),
     };
 
     mp_msg_init();
@@ -4239,7 +4245,7 @@ int main(int argc, char *argv[])
     mp_input_register_options(mpctx->mconfig);
 
     // Preparse the command line
-    m_config_preparse_command_line(mpctx->mconfig, argc, argv, &verbose);
+    m_config_preparse_command_line(mpctx->mconfig, argc, argv);
 
     print_version(false);
     print_libav_versions();
@@ -4247,12 +4253,9 @@ int main(int argc, char *argv[])
     if (!parse_cfgfiles(mpctx, mpctx->mconfig))
         exit_player(mpctx, EXIT_NONE, 1);
 
-    mpctx->playlist = talloc_struct(mpctx, struct playlist, {0});
-    if (m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
-                                       argc, argv))
+    if (!m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
+                                        argc, argv))
     {
-        mpctx->playlist->current = mpctx->playlist->first;
-    } else {
         exit_player(mpctx, EXIT_ERROR, 1);
     }
 
@@ -4269,7 +4272,6 @@ int main(int argc, char *argv[])
     mp_msg(MSGT_CPLAYER, MSGL_V, "\n");
 
     if (!mpctx->playlist->first && !opts->player_idle_mode) {
-        // no file/vcd/dvd -> show HELP:
         print_version(true);
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", mp_gtext(help_text));
         exit_player(mpctx, EXIT_NONE, 0);
@@ -4287,6 +4289,7 @@ int main(int argc, char *argv[])
 
     init_input(mpctx);
 
+    mpctx->playlist->current = mpctx->playlist->first;
     play_files(mpctx);
 
     exit_player(mpctx, EXIT_EOF, mpctx->quit_player_rc);
