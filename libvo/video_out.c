@@ -81,7 +81,6 @@ extern struct vo_driver video_out_gl_nosw;
 extern struct vo_driver video_out_gl;
 extern struct vo_driver video_out_gl3;
 extern struct vo_driver video_out_null;
-extern struct vo_driver video_out_png;
 extern struct vo_driver video_out_image;
 extern struct vo_driver video_out_caca;
 extern struct vo_driver video_out_yuv4mpeg;
@@ -89,13 +88,10 @@ extern struct vo_driver video_out_direct3d;
 extern struct vo_driver video_out_direct3d_shaders;
 extern struct vo_driver video_out_directx;
 extern struct vo_driver video_out_v4l2;
-extern struct vo_driver video_out_jpeg;
 extern struct vo_driver video_out_gif89a;
 extern struct vo_driver video_out_directfb;
-extern struct vo_driver video_out_tga;
 extern struct vo_driver video_out_corevideo;
 extern struct vo_driver video_out_sharedbuffer;
-extern struct vo_driver video_out_pnm;
 extern struct vo_driver video_out_md5sum;
 
 const struct vo_driver *video_out_drivers[] =
@@ -146,19 +142,9 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_YUV4MPEG
         &video_out_yuv4mpeg,
 #endif
-        &video_out_png,
         &video_out_image,
-#ifdef CONFIG_JPEG
-        &video_out_jpeg,
-#endif
 #ifdef CONFIG_GIF
         &video_out_gif89a,
-#endif
-#ifdef CONFIG_TGA
-        &video_out_tga,
-#endif
-#ifdef CONFIG_PNM
-        &video_out_pnm,
 #endif
 #ifdef CONFIG_MD5SUM
         &video_out_md5sum,

@@ -339,7 +339,7 @@ Optional features:
 
 Codecs:
   --enable-gif              enable GIF support [autodetect]
-  --enable-png              enable PNG input/output support [autodetect]
+  --enable-png              enable PNG input support [autodetect]
   --enable-mng              enable MNG input support [autodetect]
   --enable-jpeg             enable JPEG input/output support [autodetect]
   --enable-libcdio          enable libcdio support [autodetect]
@@ -371,8 +371,6 @@ Video output:
   --enable-xshape          enable XShape support [autodetect]
   --disable-xss            disable screensaver support via xss [autodetect]
   --enable-directfb        enable DirectFB video output [autodetect]
-  --disable-tga            disable Targa video output [enable]
-  --disable-pnm            disable PNM video output [enable]
   --disable-md5sum         disable md5sum video output [enable]
   --disable-yuv4mpeg       disable yuv4mpeg video output [enable]
   --disable-corevideo      disable CoreVideo video output [autodetect]
@@ -462,7 +460,6 @@ _nas=auto
 _png=auto
 _mng=auto
 _jpeg=auto
-_pnm=yes
 _md5sum=yes
 _yuv4mpeg=yes
 _gif=auto
@@ -525,7 +522,6 @@ _apple_remote=auto
 _apple_ir=auto
 _termcap=auto
 _termios=auto
-_tga=yes
 _directfb=auto
 #language=en
 _shm=auto
@@ -687,8 +683,6 @@ for ac_option do
   --disable-mng)        _mng=no         ;;
   --enable-jpeg)        _jpeg=yes       ;;
   --disable-jpeg)       _jpeg=no        ;;
-  --enable-pnm)         _pnm=yes        ;;
-  --disable-pnm)        _pnm=no         ;;
   --enable-md5sum)      _md5sum=yes     ;;
   --disable-md5sum)     _md5sum=no      ;;
   --enable-yuv4mpeg)    _yuv4mpeg=yes   ;;
@@ -809,8 +803,6 @@ for ac_option do
   --disable-termcap)    _termcap=no     ;;
   --enable-termios)     _termios=yes    ;;
   --disable-termios)    _termios=no     ;;
-  --disable-tga)        _tga=no         ;;
-  --enable-tga)         _tga=yes        ;;
   --enable-directfb)    _directfb=yes   ;;
   --disable-directfb)   _directfb=no    ;;
   --enable-shm)         _shm=yes        ;;
@@ -2062,17 +2054,6 @@ echores "$_libquvi"
 #########
 
 
-echocheck "tga"
-if test "$_tga" = yes ; then
-  def_tga='#define CONFIG_TGA 1'
-  vomodules="tga $vomodules"
-else
-  def_tga='#undef CONFIG_TGA'
-  novomodules="tga $novomodules"
-fi
-echores "$_tga"
-
-
 echocheck "md5sum support"
 if test "$_md5sum" = yes; then
   def_md5sum="#define CONFIG_MD5SUM 1"
@@ -2503,19 +2484,6 @@ else
   def_jpeg='#undef CONFIG_JPEG'
   novomodules="jpeg $novomodules"
 fi
-
-
-
-echocheck "PNM support"
-if test "$_pnm" = yes; then
-  def_pnm="#define CONFIG_PNM 1"
-  vomodules="pnm $vomodules"
-else
-  def_pnm="#undef CONFIG_PNM"
-  novomodules="pnm $novomodules"
-fi
-echores "$_pnm"
-
 
 
 echocheck "GIF support"
@@ -4015,7 +3983,6 @@ OPENAL = $_openal
 OSS = $_ossaudio
 PE_EXECUTABLE = $_pe_executable
 PNG = $_png
-PNM = $_pnm
 PRIORITY = $_priority
 PULSE = $_pulse
 PORTAUDIO = $_portaudio
@@ -4028,7 +3995,6 @@ RADIO_CAPTURE=$_radio_capture
 REAL_CODECS = $_real
 RSOUND = $_rsound
 STREAM_CACHE = $_stream_cache
-TGA = $_tga
 TV = $_tv
 TV_BSDBT848 = $_tv_bsdbt848
 TV_DSHOW = $_tv_dshow
@@ -4306,8 +4272,6 @@ $def_jpeg
 $def_md5sum
 $def_mng
 $def_png
-$def_pnm
-$def_tga
 $def_v4l2
 $def_vdpau
 $def_vm

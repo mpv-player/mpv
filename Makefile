@@ -394,16 +394,13 @@ SRCS_MPLAYER-$(GL_X11)       += libvo/x11_common.c
 
 SRCS_MPLAYER-$(JACK)         += libao2/ao_jack.c
 SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
-SRCS_MPLAYER-$(JPEG)         += libvo/vo_jpeg.c
 SRCS_MPLAYER-$(LIRC)          += input/lirc.c
 SRCS_MPLAYER-$(MD5SUM)        += libvo/vo_md5sum.c
 SRCS_MPLAYER-$(OPENAL)        += libao2/ao_openal.c
 SRCS_MPLAYER-$(OSS)           += libao2/ao_oss.c
-SRCS_MPLAYER-$(PNM)           += libvo/vo_pnm.c
 SRCS_MPLAYER-$(PULSE)         += libao2/ao_pulse.c
 SRCS_MPLAYER-$(PORTAUDIO)     += libao2/ao_portaudio.c
 SRCS_MPLAYER-$(RSOUND)        += libao2/ao_rsound.c
-SRCS_MPLAYER-$(TGA)           += libvo/vo_tga.c
 SRCS_MPLAYER-$(V4L2)          += libvo/vo_v4l2.c
 SRCS_MPLAYER-$(V4L2)          += libao2/ao_v4l2.c
 SRCS_MPLAYER-$(VDPAU)         += libvo/vo_vdpau.c
@@ -431,7 +428,6 @@ SRCS_MPLAYER = command.c \
                libvo/old_vo_wrapper.c \
                libvo/video_out.c \
                libvo/vo_null.c \
-               libvo/vo_png.c \
                libvo/vo_image.c \
                $(SRCS_MPLAYER-yes)
 
