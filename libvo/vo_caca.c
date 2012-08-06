@@ -31,26 +31,19 @@
 #include <string.h>
 #include <time.h>
 #include <errno.h>
+#include <assert.h>
 #include <caca.h>
 
 #include "config.h"
 #include "video_out.h"
-#include "video_out_internal.h"
 #include "sub/sub.h"
+#include "libmpcodecs/mp_image.h"
+#include "libmpcodecs/vfcap.h"
 
 #include "input/keycodes.h"
 #include "input/input.h"
 #include "mp_msg.h"
 #include "mp_fifo.h"
-
-static const vo_info_t info = {
-    "libcaca",
-    "caca",
-    "Pigeon <pigeon@pigeond.net>",
-    ""
-};
-
-const LIBVO_EXTERN(caca)
 
 /* caca stuff */
 static caca_canvas_t  *canvas;
@@ -157,8 +150,8 @@ static int resize(void)
     return 0;
 }
 
-static int config(uint32_t width, uint32_t height, uint32_t d_width,
-                  uint32_t d_height, uint32_t flags, char *title,
+static int config(struct vo *vo, uint32_t width, uint32_t height,
+                  uint32_t d_width, uint32_t d_height, uint32_t flags,
                   uint32_t format)
 {
     image_height = height;
@@ -171,18 +164,21 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     return resize();
 }
 
-static int draw_frame(uint8_t *src[])
+static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 {
-    caca_dither_bitmap(canvas, 0, 0, screen_w, screen_h, dither, src[0]);
+    assert(mpi->stride[0] == image_width * 3);
+    caca_dither_bitmap(canvas, 0, 0, screen_w, screen_h, dither,
+                       mpi->planes[0]);
+    return true;
+}
+
+static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
+                      int x, int y)
+{
     return 0;
 }
 
-static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
-{
-    return 0;
-}
-
-static void flip_page(void)
+static void flip_page(struct vo *vo)
 {
     if (showosdmessage) {
         if (time(NULL) >= stoposd) {
@@ -237,7 +233,7 @@ static const struct mp_keymap keysym_map[] = {
     {0, 0}
 };
 
-static void check_events(void)
+static void check_events(struct vo *vo)
 {
     caca_event_t cev;
     while (caca_get_event(display, CACA_EVENT_ANY, &cev, 0)) {
@@ -248,18 +244,20 @@ static void check_events(void)
             resize();
             break;
         case CACA_EVENT_QUIT:
-            mplayer_put_key(KEY_CLOSE_WIN);
+            mplayer_put_key(vo->key_fifo, KEY_CLOSE_WIN);
             break;
         case CACA_EVENT_MOUSE_MOTION:
-            vo_mouse_movement(global_vo, cev.data.mouse.x, cev.data.mouse.y);
+            vo_mouse_movement(vo, cev.data.mouse.x, cev.data.mouse.y);
             break;
         case CACA_EVENT_MOUSE_PRESS:
             if (!vo_nomouse_input)
-                mplayer_put_key((MOUSE_BTN0 + cev.data.mouse.button - 1) | MP_KEY_DOWN);
+                mplayer_put_key(vo->key_fifo,
+                        (MOUSE_BTN0 + cev.data.mouse.button - 1) | MP_KEY_DOWN);
             break;
         case CACA_EVENT_MOUSE_RELEASE:
             if (!vo_nomouse_input)
-                mplayer_put_key(MOUSE_BTN0 + cev.data.mouse.button - 1);
+                mplayer_put_key(vo->key_fifo,
+                                MOUSE_BTN0 + cev.data.mouse.button - 1);
             break;
         case CACA_EVENT_KEY_PRESS:
         {
@@ -268,13 +266,14 @@ static void check_events(void)
             const char *msg_name;
 
             if (mpkey)
-                mplayer_put_key(mpkey);
+                mplayer_put_key(vo->key_fifo, mpkey);
             else
             switch (key) {
             case 'd':
             case 'D':
                 /* Toggle dithering algorithm */
-                set_next_str(caca_get_dither_algorithm_list(dither), &dither_algo, &msg_name);
+                set_next_str(caca_get_dither_algorithm_list(dither),
+                             &dither_algo, &msg_name);
                 caca_set_dither_algorithm(dither, dither_algo);
                 osdmessage(MESSAGE_DURATION, "Using %s", msg_name);
                 break;
@@ -282,7 +281,8 @@ static void check_events(void)
             case 'a':
             case 'A':
                 /* Toggle antialiasing method */
-                set_next_str(caca_get_dither_antialias_list(dither), &dither_antialias, &msg_name);
+                set_next_str(caca_get_dither_antialias_list(dither),
+                             &dither_antialias, &msg_name);
                 caca_set_dither_antialias(dither, dither_antialias);
                 osdmessage(MESSAGE_DURATION, "Using %s", msg_name);
                 break;
@@ -290,7 +290,8 @@ static void check_events(void)
             case 'h':
             case 'H':
                 /* Toggle charset method */
-                set_next_str(caca_get_dither_charset_list(dither), &dither_charset, &msg_name);
+                set_next_str(caca_get_dither_charset_list(dither),
+                             &dither_charset, &msg_name);
                 caca_set_dither_charset(dither, dither_charset);
                 osdmessage(MESSAGE_DURATION, "Using %s", msg_name);
                 break;
@@ -298,14 +299,15 @@ static void check_events(void)
             case 'c':
             case 'C':
                 /* Toggle color method */
-                set_next_str(caca_get_dither_color_list(dither), &dither_color, &msg_name);
+                set_next_str(caca_get_dither_color_list(dither),
+                             &dither_color, &msg_name);
                 caca_set_dither_color(dither, dither_color);
                 osdmessage(MESSAGE_DURATION, "Using %s", msg_name);
                 break;
 
             default:
                 if (key <= 255)
-                    mplayer_put_key(key);
+                    mplayer_put_key(vo->key_fifo, key);
                 break;
             }
         }
@@ -313,7 +315,7 @@ static void check_events(void)
     }
 }
 
-static void uninit(void)
+static void uninit(struct vo *vo)
 {
     caca_free_dither(dither);
     dither = NULL;
@@ -321,15 +323,14 @@ static void uninit(void)
     caca_free_canvas(canvas);
 }
 
-
-static void draw_osd(void)
+static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     if (vo_osd_progbar_type != -1)
         osdpercent(MESSAGE_DURATION, 0, 255, vo_osd_progbar_value,
                    sub_osd_names[vo_osd_progbar_type], "");
 }
 
-static int preinit(const char *arg)
+static int preinit(struct vo *vo, const char *arg)
 {
     if (arg) {
         mp_msg(MSGT_VO, MSGL_ERR, "vo_caca: Unknown subdevice: %s\n", arg);
@@ -363,12 +364,32 @@ static int query_format(uint32_t format)
     return 0;
 }
 
-static int control(uint32_t request, void *data)
+static int control(struct vo *vo, uint32_t request, void *data)
 {
     switch (request) {
     case VOCTRL_QUERY_FORMAT:
         return query_format(*((uint32_t *)data));
+    case VOCTRL_DRAW_IMAGE:
+        return draw_image(vo, data);
     default:
         return VO_NOTIMPL;
     }
 }
+
+const struct vo_driver video_out_caca = {
+    .is_new = false,
+    .info = &(const vo_info_t) {
+        "libcaca",
+        "caca",
+        "Pigeon <pigeon@pigeond.net>",
+        ""
+    },
+    .preinit = preinit,
+    .config = config,
+    .control = control,
+    .draw_slice = draw_slice,
+    .draw_osd = draw_osd,
+    .flip_page = flip_page,
+    .check_events = check_events,
+    .uninit = uninit,
+};
