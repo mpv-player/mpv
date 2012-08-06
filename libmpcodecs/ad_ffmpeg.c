@@ -291,6 +291,7 @@ static int decode_new_packet(struct sh_audio *sh)
         start = mpkt->buffer + mpkt->len - priv->previous_data_left;
         int consumed = ds_parse(sh->ds, &start, &insize, pts, 0);
         priv->previous_data_left -= consumed;
+        priv->previous_data_left = FFMAX(priv->previous_data_left, 0);
     }
 
     AVPacket pkt;
@@ -314,8 +315,9 @@ static int decode_new_packet(struct sh_audio *sh)
         mp_msg(MSGT_DECAUDIO, MSGL_V, "lavc_audio: error\n");
         return -1;
     }
-    if (!sh->parser)
-        priv->previous_data_left += insize - ret;
+    // The "insize >= ret" test is sanity check against decoder overreads
+    if (!sh->parser && insize >= ret)
+        priv->previous_data_left = insize - ret;
     if (!got_frame)
         return 0;
     /* An error is reported later from output format checking, but make
