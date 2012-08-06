@@ -165,6 +165,15 @@ typedef struct {
     void** arStreamCaps;               ///< VIDEO_STREAM_CONFIG_CAPS or AUDIO_STREAM_CONFIG_CAPS
 } chain_t;
 
+typedef struct tt_stream_props_s{
+    int sampling_rate;
+    int samples_per_line;
+    int offset;
+    int count[2];     ///< number of lines in first and second fields
+    int interlaced;   ///< vbi data are interlaced
+    int bufsize;      ///< required buffer size
+} tt_stream_props;
+
 typedef struct priv {
     int dev_index;              ///< capture device index in device list (defaul: 0, first available device)
     int adev_index;             ///< audio capture device index in device list (default: -1, not used)
@@ -199,15 +208,6 @@ typedef struct priv {
 
     tv_param_t* tv_param;                   ///< TV parameters
 } priv_t;
-
-typedef struct tt_stream_props_s{
-    int sampling_rate;
-    int samples_per_line;
-    int offset;
-    int count[2];     ///< number of lines in first and second fields
-    int interlaced;   ///< vbi data are interlaced
-    int bufsize;      ///< required buffer size
-} tt_stream_props;
 
 #include "tvi_def.h"
 

@@ -1018,6 +1018,10 @@ if mingw32 ; then
   _getch=getch2-win.c
   need_shmem=no
   extra_cflags="$extra_cflags -D__USE_MINGW_ANSI_STDIO=1"
+  # Hack for missing BYTE_ORDER declarations in <sys/types.h>.
+  # (For some reason, they are in <sys/param.h>, but we don't bother switching
+  # the includes based on whether we're compiling for MinGW.)
+  extra_cflags="$extra_cflags -DBYTE_ORDER=1234 -DLITTLE_ENDIAN=1234 -DBIG_ENDIAN=4321"
 fi
 
 TMPC="$mplayer_tmpdir/tmp.c"

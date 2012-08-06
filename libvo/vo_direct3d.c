@@ -1987,7 +1987,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     if (!priv->d3d_device)
         return;
 
-    if (vo_osd_has_changed()) {
+    if (vo_osd_has_changed(osd)) {
         struct draw_osd_closure ctx = { priv };
 
         /* clear the OSD */

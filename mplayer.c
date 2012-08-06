@@ -4163,7 +4163,7 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
     GetCpuCaps(&gCpuCaps);
 
 #ifdef __MINGW32__
-    mp_get_converted_argv(&argc, &argv);
+    mp_get_converted_argv(p_argc, p_argv);
 #endif
 
 #ifdef PTW32_STATIC_LIB
