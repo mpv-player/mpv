@@ -262,15 +262,12 @@ void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
     struct mp_csp_details colorspace;
     get_detected_video_colorspace(mpctx->sh_video, &colorspace);
 
-    struct image_writer_opts opts = image_writer_opts_defaults;
-    opts.filetype = mpctx->opts.screenshot_filetype;
-    opts.jpeg_quality = mpctx->opts.screenshot_jpeg_quality;
-    opts.png_compression = mpctx->opts.screenshot_png_compression;
+    struct image_writer_opts *opts = mpctx->opts.screenshot_image_opts;
 
-    char *filename = gen_fname(ctx, image_writer_file_ext(&opts));
+    char *filename = gen_fname(ctx, image_writer_file_ext(opts));
     if (filename) {
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "*** screenshot '%s' ***\n", filename);
-        if (!write_image(image, &colorspace, &opts, filename))
+        if (!write_image(image, &colorspace, opts, filename))
             mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nError writing screenshot!\n");
         talloc_free(filename);
     }

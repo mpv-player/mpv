@@ -616,6 +616,14 @@ const m_option_t tvscan_conf[]={
 };
 #endif
 
+extern const struct m_sub_options image_writer_conf;
+
+const m_option_t screenshot_conf[] = {
+    OPT_SUBSTRUCT(screenshot_image_opts, image_writer_conf, M_OPT_MERGE),
+    OPT_STRING("template", screenshot_template, 0),
+    {0},
+};
+
 const m_option_t mplayer_opts[]={
     /* name, pointer, type, flags, min, max */
 
@@ -785,10 +793,8 @@ const m_option_t mplayer_opts[]={
     {"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif /* CONFIG_TV */
 
-    OPT_INTRANGE("screenshot-jpeg-quality", screenshot_jpeg_quality, 0, 0, 100),
-    OPT_INTRANGE("screenshot-png-compression", screenshot_png_compression, 0, 0, 9),
-    OPT_STRING("screenshot-filetype", screenshot_filetype, 0),
-    OPT_STRING("screenshot-template", screenshot_template, 0),
+    {"screenshot", (void *) screenshot_conf, CONF_TYPE_SUBCONFIG,
+     M_OPT_PREFIXED, 0, 0, NULL},
 
     OPT_FLAG_ON("list-properties", list_properties, CONF_GLOBAL),
     {"identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_FLAG, CONF_GLOBAL, 0, MSGL_V, NULL},

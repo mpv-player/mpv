@@ -51,6 +51,20 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .jpeg_quality = 85,
 };
 
+#undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct image_writer_opts
+
+const struct m_sub_options image_writer_conf = {
+    .opts = (m_option_t[]) {
+        OPT_INTRANGE("jpeg-quality", jpeg_quality, 0, 0, 100),
+        OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
+        OPT_STRING("filetype", filetype, 0),
+        {0},
+    },
+    .size = sizeof(struct image_writer_opts),
+    .defaults = &image_writer_opts_defaults,
+};
+
 struct image_writer_ctx {
     const struct image_writer_opts *opts;
     const struct img_writer *writer;

@@ -85,9 +85,7 @@ typedef struct MPOpts {
     char *sub_demuxer_name;
     int extension_parsing;
 
-    int screenshot_jpeg_quality;
-    int screenshot_png_compression;
-    char *screenshot_filetype;
+    struct image_writer_opts *screenshot_image_opts;
     char *screenshot_template;
 
     int audio_output_channels;
