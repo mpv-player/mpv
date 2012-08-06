@@ -49,6 +49,11 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .filetype = "png",
     .png_compression = 7,
     .jpeg_quality = 85,
+    .jpeg_optimize = 100,
+    .jpeg_smooth = 0,
+    .jpeg_dpi = 72,
+    .jpeg_progressive = 0,
+    .jpeg_baseline = 1,
 };
 
 #undef OPT_BASE_STRUCT
@@ -57,6 +62,11 @@ const struct image_writer_opts image_writer_opts_defaults = {
 const struct m_sub_options image_writer_conf = {
     .opts = (m_option_t[]) {
         OPT_INTRANGE("jpeg-quality", jpeg_quality, 0, 0, 100),
+        OPT_INTRANGE("jpeg-optimize", jpeg_optimize, 0, 0, 100),
+        OPT_INTRANGE("jpeg-smooth", jpeg_smooth, 0, 0, 100),
+        OPT_INTRANGE("jpeg-dpi", jpeg_dpi, M_OPT_MIN, 1, 99999),
+        OPT_MAKE_FLAGS("jpeg-progressive", jpeg_progressive, 0),
+        OPT_MAKE_FLAGS("jpeg-baseline", jpeg_baseline, 0),
         OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
         OPT_STRING("filetype", filetype, 0),
         {0},
@@ -168,8 +178,24 @@ static int write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
     cinfo.input_components = 3;
     cinfo.in_color_space = JCS_RGB;
 
+    cinfo.write_JFIF_header = TRUE;
+    cinfo.JFIF_major_version = 1;
+    cinfo.JFIF_minor_version = 2;
+    cinfo.density_unit = 1; /* 0=unknown, 1=dpi, 2=dpcm */
+    /* Image DPI is determined by Y_density, so we leave that at
+       jpeg_dpi if possible and crunch X_density instead (PAR > 1) */
+    // NOTE: write_image never passes anamorphic images currently
+    cinfo.X_density = ctx->opts->jpeg_dpi*image->width/image->w;
+    cinfo.Y_density = ctx->opts->jpeg_dpi*image->height/image->h;
+    cinfo.write_Adobe_marker = TRUE;
+
     jpeg_set_defaults(&cinfo);
-    jpeg_set_quality(&cinfo, ctx->opts->jpeg_quality, 1);
+    jpeg_set_quality(&cinfo, ctx->opts->jpeg_quality, ctx->opts->jpeg_baseline);
+    cinfo.optimize_coding = ctx->opts->jpeg_optimize;
+    cinfo.smoothing_factor = ctx->opts->jpeg_smooth;
+
+    if (ctx->opts->jpeg_progressive)
+        jpeg_simple_progression(&cinfo);
 
     jpeg_start_compress(&cinfo, TRUE);
 

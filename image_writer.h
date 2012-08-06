@@ -22,6 +22,11 @@ struct image_writer_opts {
     char *filetype;
     int png_compression;
     int jpeg_quality;
+    int jpeg_optimize;
+    int jpeg_smooth;
+    int jpeg_dpi;
+    int jpeg_progressive;
+    int jpeg_baseline;
 };
 
 extern const struct image_writer_opts image_writer_opts_defaults;
