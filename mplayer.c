@@ -2584,6 +2584,7 @@ static int redraw_osd(struct MPContext *mpctx)
     if (!(sh_video->output_flags & VFCAP_EOSD_FILTER))
         vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
     vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
+    vo_osd_reset_changed();
     vo_flip_page(mpctx->video_out, 0, -1);
     return 0;
 }
@@ -3131,7 +3132,7 @@ static void run_playloop(struct MPContext *mpctx)
         mpctx->osd->pts = mpctx->video_pts - mpctx->osd->sub_offset;
         vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
         vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
-        vo_osd_changed(0);
+        vo_osd_reset_changed();
 
         mpctx->time_frame -= get_relative_time(mpctx);
         mpctx->time_frame -= vo->flip_queue_offset;

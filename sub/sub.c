@@ -393,6 +393,15 @@ void vo_osd_changed(int new_value)
     }
 }
 
+void vo_osd_reset_changed(void)
+{
+    mp_osd_obj_t* obj = vo_osd_list;
+    while (obj) {
+        obj->flags = obj->flags & ~OSDFLAG_FORCE_UPDATE;
+        obj = obj->next;
+    }
+}
+
 bool vo_osd_has_changed(struct osd_state *osd)
 {
     mp_osd_obj_t* obj = vo_osd_list;
