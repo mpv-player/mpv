@@ -29,14 +29,19 @@
 #include <libavutil/common.h>
 #include "config.h"
 #include "video_out.h"
-#include "video_out_internal.h"
 #include "fastmemcpy.h"
 #include "mp_msg.h"
 #include "aspect.h"
 #include "sub/sub.h"
 #include "w32_common.h"
+#include "libmpcodecs/vfcap.h"
+#include "libmpcodecs/mp_image.h"
+#include "osd.h"
+#include "options.h"
 
-#define vo_w32_window (global_vo->w32->window)
+static struct vo *dx_vo;
+
+#define vo_w32_window (dx_vo->w32->window)
 
 static LPDIRECTDRAWCOLORCONTROL g_cc = NULL;            //color control interface
 static LPDIRECTDRAW7 g_lpdd = NULL;                 //DirectDraw Object
@@ -107,17 +112,8 @@ struct directx_fourcc_caps {
 // what hw supports with corresponding format in g_ddpf
 static uint32_t drv_caps[NUM_FORMATS];
 
-static const vo_info_t info = {
-    "Directx DDraw YUV/RGB/BGR renderer",
-    "directx",
-    "Sascha Sommer <saschasommer@freenet.de>",
-    ""
-};
-
-const LIBVO_EXTERN(directx)
-
-static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
-                       unsigned char *srca, int stride)
+static void draw_osd_elem(void *ctx, int x0, int y0, int w, int h,
+                          unsigned char *src, unsigned char *srca, int stride)
 {
     switch (image_format) {
     case IMGFMT_YV12:
@@ -151,12 +147,12 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
     }
 }
 
-static void draw_osd(void)
+static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
-    vo_draw_text(image_width, image_height, draw_alpha);
+    osd_draw_text(osd, image_width, image_height, draw_osd_elem, NULL);
 }
 
-static int query_format(uint32_t format)
+static int query_format(struct vo *vo, uint32_t format)
 {
     int i;
     for (i = 0; i < NUM_FORMATS; i++)
@@ -207,7 +203,7 @@ static uint32_t Directx_CreatePrimarySurface(void)
         g_lpddsPrimary->lpVtbl->Release(g_lpddsPrimary);
     g_lpddsPrimary = NULL;
 
-    if (vidmode)
+    if (dx_vo->opts->vidmode)
         g_lpdd->lpVtbl->SetDisplayMode(g_lpdd, vm_width, vm_height, vm_bpp, vo_refresh_rate, 0);
     //set flags and create a primary surface.
     ddsd.dwFlags = DDSD_CAPS;
@@ -300,7 +296,7 @@ static uint32_t Directx_CreateBackpuffer(void)
     return 0;
 }
 
-static void uninit(void)
+static void uninit(struct vo *vo)
 {
     if (g_cc)
         g_cc->lpVtbl->Release(g_cc);
@@ -328,7 +324,7 @@ static void uninit(void)
     colorbrush = NULL;
     mp_msg(MSGT_VO, MSGL_DBG3, "<vo_directx><INFO>GDI resources deleted\n");
     if (g_lpdd) {
-        if (vidmode)
+        if (dx_vo->opts->vidmode)
             g_lpdd->lpVtbl->RestoreDisplayMode(g_lpdd);
         g_lpdd->lpVtbl->Release(g_lpdd);
     }
@@ -337,7 +333,8 @@ static void uninit(void)
     hddraw_dll = NULL;
     mp_msg(MSGT_VO, MSGL_DBG3, "<vo_directx><INFO>ddraw.dll freed\n");
     mp_msg(MSGT_VO, MSGL_DBG3, "<vo_directx><INFO>uninitialized\n");
-    vo_w32_uninit(global_vo);
+    vo_w32_uninit(vo);
+    dx_vo = NULL;
 }
 
 static BOOL WINAPI EnumCallbackEx(GUID FAR *lpGUID, LPSTR lpDriverDescription, LPSTR lpDriverName, LPVOID lpContext, HMONITOR hm)
@@ -418,20 +415,20 @@ static uint32_t Directx_InitDirectDraw(void)
 
     //get current screen siz for selected monitor ...
     g_lpdd->lpVtbl->GetDisplayMode(g_lpdd, &ddsd);
-    if (vo_screenwidth && vo_screenheight) {
-        vm_height = vo_screenheight;
-        vm_width  = vo_screenwidth;
+    if (dx_vo->opts->vo_screenwidth && dx_vo->opts->vo_screenheight) {
+        vm_height = dx_vo->opts->vo_screenheight;
+        vm_width  = dx_vo->opts->vo_screenwidth;
     } else {
         vm_height = ddsd.dwHeight;
         vm_width  = ddsd.dwWidth;
     }
 
-    if (vo_dbpp)
-        vm_bpp = vo_dbpp;
+    if (dx_vo->opts->vo_dbpp)
+        vm_bpp = dx_vo->opts->vo_dbpp;
     else
         vm_bpp = ddsd.ddpfPixelFormat.dwRGBBitCount;
 
-    if (vidmode) {
+    if (dx_vo->opts->vidmode) {
         if (g_lpdd->lpVtbl->SetCooperativeLevel(g_lpdd, vo_w32_window, DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN) != DD_OK) {
             mp_msg(MSGT_VO, MSGL_FATAL, "<vo_directx><FATAL ERROR>can't set cooperativelevel for exclusive mode\n");
             return 1;
@@ -461,10 +458,10 @@ static void clear_border(HDC dc, int x1, int y1, int x2, int y2)
 
 static void redraw_window(void)
 {
-    HDC dc = vo_w32_get_dc(global_vo, vo_w32_window);
+    HDC dc = vo_w32_get_dc(dx_vo, vo_w32_window);
     RECT r;
     GetClientRect(vo_w32_window, &r);
-    if (vo_fs || vidmode) {
+    if (vo_fs || dx_vo->opts->vidmode) {
         FillRect(dc, &r, blackbrush);
     } else {
         FillRect(dc, &r, colorbrush);
@@ -478,7 +475,7 @@ static void redraw_window(void)
         clear_border(dc, r.left,   rc.top,    rc.left,  rc.bottom); // left
         clear_border(dc, rc.right, rc.top,    r.right,  rc.bottom); // right
     }
-    vo_w32_release_dc(global_vo, vo_w32_window, dc);
+    vo_w32_release_dc(dx_vo, vo_w32_window, dc);
 }
 
 static uint32_t Directx_ManageDisplay(void)
@@ -496,17 +493,17 @@ static uint32_t Directx_ManageDisplay(void)
 
     rd.left = origin.x - xinerama_x;
     rd.top  = origin.y - xinerama_y;
-    width   = vo_dwidth;
-    height  = vo_dheight;
+    width   = dx_vo->dwidth;
+    height  = dx_vo->dheight;
 
     if (aspect_scaling()) {
-        aspect(&width, &height, A_WINZOOM);
-        panscan_calc_windowed();
-        width   += vo_panscan_x;
-        height  += vo_panscan_y;
+        aspect(dx_vo, &width, &height, A_WINZOOM);
+        panscan_calc_windowed(dx_vo);
+        width   += dx_vo->panscan_x;
+        height  += dx_vo->panscan_y;
     }
-    rd.left += (vo_dwidth  - width ) / 2;
-    rd.top  += (vo_dheight - height) / 2;
+    rd.left += (dx_vo->dwidth  - width ) / 2;
+    rd.top  += (dx_vo->dheight - height) / 2;
 
     rd.right  = rd.left + width;
     rd.bottom = rd.top + height;
@@ -542,10 +539,10 @@ static uint32_t Directx_ManageDisplay(void)
             rs.left = (-rd.left * 1000) / xstretch1000;
         if (rd.top < 0)
             rs.top = (-rd.top * 1000) / ystretch1000;
-        if (rd.right > vo_screenwidth)
-            rs.right = ((vo_screenwidth - rd.left) * 1000) / xstretch1000;
-        if (rd.bottom > vo_screenheight)
-            rs.bottom = ((vo_screenheight - rd.top) * 1000) / ystretch1000;
+        if (rd.right > dx_vo->opts->vo_screenwidth)
+            rs.right = ((dx_vo->opts->vo_screenwidth - rd.left) * 1000) / xstretch1000;
+        if (rd.bottom > dx_vo->opts->vo_screenheight)
+            rs.bottom = ((dx_vo->opts->vo_screenheight - rd.top) * 1000) / ystretch1000;
         /*do not allow to zoom or shrink if hardware isn't able to do so*/
         if (width < image_width && !(capsDrv.dwFXCaps & DDFXCAPS_OVERLAYSHRINKX)) {
             if (capsDrv.dwFXCaps & DDFXCAPS_OVERLAYSHRINKXN)
@@ -585,7 +582,7 @@ static uint32_t Directx_ManageDisplay(void)
         if ((capsDrv.dwCaps & DDCAPS_ALIGNSIZEDEST) && capsDrv.dwAlignSizeDest)
             rd.right = rd.left + ((rd.right - rd.left) & - (signed)(capsDrv.dwAlignSizeDest));
         /*create an overlay FX structure to specify a destination color key*/
-        if (vo_fs || vidmode) {
+        if (vo_fs || dx_vo->opts->vidmode) {
             ovfx.dckDestColorkey.dwColorSpaceLowValue  = 0;
             ovfx.dckDestColorkey.dwColorSpaceHighValue = 0;
         } else {
@@ -598,7 +595,7 @@ static uint32_t Directx_ManageDisplay(void)
         if (capsDrv.dwCKeyCaps & DDCKEYCAPS_DESTOVERLAY)
             dwUpdateFlags |= DDOVER_KEYDESTOVERRIDE;
         else if (!tmp_image)
-            vo_ontop = 1;
+            dx_vo->opts->vo_ontop = 1;
     } else {
         g_lpddclipper->lpVtbl->SetHWnd(g_lpddclipper, 0, vo_w32_window);
     }
@@ -606,8 +603,8 @@ static uint32_t Directx_ManageDisplay(void)
     /*make sure the overlay is inside the screen*/
     rd.top    = FFMAX(rd.top,  0);
     rd.left   = FFMAX(rd.left, 0);
-    rd.bottom = FFMIN(rd.bottom, vo_screenheight);
-    rd.right  = FFMIN(rd.right,  vo_screenwidth);
+    rd.bottom = FFMIN(rd.bottom, dx_vo->opts->vo_screenheight);
+    rd.right  = FFMIN(rd.right,  dx_vo->opts->vo_screenwidth);
 
     /*for nonoverlay mode we are finished, for overlay mode we have to display the overlay first*/
     if (nooverlay)
@@ -638,9 +635,9 @@ static uint32_t Directx_ManageDisplay(void)
     return 0;
 }
 
-static void check_events(void)
+static void check_events(struct vo *vo)
 {
-    int evt = vo_w32_check_events(global_vo);
+    int evt = vo_w32_check_events(vo);
     if (evt & (VO_EVENT_RESIZE | VO_EVENT_MOVE))
         Directx_ManageDisplay();
     if (evt & (VO_EVENT_RESIZE | VO_EVENT_MOVE | VO_EVENT_EXPOSE)) {
@@ -766,8 +763,9 @@ static uint32_t Directx_CheckPrimaryPixelformat(void)
     return 0;
 }
 
-static int preinit(const char *arg)
+static int preinit(struct vo *vo, const char *arg)
 {
+    dx_vo = vo;
     if (arg) {
         if (strstr(arg, "noaccel")) {
             mp_msg(MSGT_VO, MSGL_V, "<vo_directx><INFO>disabled overlay\n");
@@ -778,9 +776,9 @@ static int preinit(const char *arg)
     windowcolor = vo_colorkey;
     colorbrush  = CreateSolidBrush(windowcolor);
     blackbrush  = (HBRUSH)GetStockObject(BLACK_BRUSH);
-    if (!vo_w32_init(global_vo))
+    if (!vo_w32_init(vo))
         return 1;
-    if (!vo_w32_config(global_vo, 100, 100, VOFLAG_HIDDEN))
+    if (!vo_w32_config(vo, 100, 100, VOFLAG_HIDDEN))
         return 1;
 
     if (Directx_InitDirectDraw() != 0)
@@ -799,7 +797,7 @@ static int preinit(const char *arg)
     return 0;
 }
 
-static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
+static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y)
 {
     uint8_t *s;
     uint8_t *d;
@@ -832,7 +830,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
     return 0;
 }
 
-static void flip_page(void)
+static void flip_page(struct vo *vo)
 {
     HRESULT dxresult;
     g_lpddsBack->lpVtbl->Unlock(g_lpddsBack, NULL);
@@ -872,12 +870,6 @@ static void flip_page(void)
     }
 }
 
-static int draw_frame(uint8_t *src[])
-{
-    fast_memcpy(image, *src, dstride * image_height);
-    return 0;
-}
-
 static uint32_t put_image(mp_image_t *mpi)
 {
     uint8_t *d;
@@ -894,7 +886,7 @@ static uint32_t put_image(mp_image_t *mpi)
 
     if (mpi->flags & MP_IMGFLAG_PLANAR) {
         if (image_format != IMGFMT_YVU9)
-            draw_slice(mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
+            draw_slice(dx_vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
         else {
             // copy Y
             d = image + dstride * y + x;
@@ -919,7 +911,7 @@ static uint32_t put_image(mp_image_t *mpi)
     return VO_TRUE;
 }
 
-static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t options, char *title, uint32_t format)
+static int config(struct vo *vo, uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t options, uint32_t format)
 {
     image_format = format;
     image_width  = width;
@@ -946,7 +938,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
     g_lpddsPrimary = NULL;
     mp_msg(MSGT_VO, MSGL_DBG3, "<vo_directx><INFO>overlay surfaces released\n");
 
-    if (!vo_w32_config(global_vo, d_width, d_height, options))
+    if (!vo_w32_config(vo, d_width, d_height, options))
         return 1;
 
     /*create the surfaces*/
@@ -1086,24 +1078,24 @@ static uint32_t color_ctrl_get(const char *what, int *value)
     return r;
 }
 
-static int control(uint32_t request, void *data)
+static int control(struct vo *vo, uint32_t request, void *data)
 {
     switch (request) {
     case VOCTRL_QUERY_FORMAT:
-        return query_format(*(uint32_t *)data);
+        return query_format(vo, *(uint32_t *)data);
     case VOCTRL_DRAW_IMAGE:
         return put_image(data);
     case VOCTRL_BORDER:
-        vo_w32_border(global_vo);
+        vo_w32_border(vo);
         Directx_ManageDisplay();
         return VO_TRUE;
     case VOCTRL_ONTOP:
-        vo_w32_ontop(global_vo);
+        vo_w32_ontop(vo);
         return VO_TRUE;
     case VOCTRL_ROOTWIN:
         if (WinID != -1)
             return VO_TRUE;
-        if (vidmode) {
+        if (dx_vo->opts->vidmode) {
             mp_msg(MSGT_VO, MSGL_ERR, "<vo_directx><ERROR>rootwin has no meaning in exclusive mode\n");
         } else {
             if (vo_rootwin)
@@ -1114,7 +1106,7 @@ static int control(uint32_t request, void *data)
         }
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
-        vo_w32_fullscreen(global_vo);
+        vo_w32_fullscreen(vo);
         Directx_ManageDisplay();
         return VO_TRUE;
     case VOCTRL_SET_EQUALIZER: {
@@ -1126,8 +1118,26 @@ static int control(uint32_t request, void *data)
         return color_ctrl_get(args->name, args->valueptr);
     }
     case VOCTRL_UPDATE_SCREENINFO:
-        w32_update_xinerama_info(global_vo);
+        w32_update_xinerama_info(vo);
         return VO_TRUE;
     }
     return VO_NOTIMPL;
 }
+
+const struct vo_driver video_out_directx = {
+    .is_new = false,
+    .info = &(const vo_info_t) {
+        "Directx DDraw YUV/RGB/BGR renderer",
+        "directx",
+        "Sascha Sommer <saschasommer@freenet.de>",
+        ""
+    },
+    .preinit = preinit,
+    .config = config,
+    .control = control,
+    .draw_slice = draw_slice,
+    .draw_osd = draw_osd,
+    .flip_page = flip_page,
+    .check_events = check_events,
+    .uninit = uninit,
+};
