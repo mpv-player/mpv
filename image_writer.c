@@ -46,7 +46,7 @@
 #include "m_option.h"
 
 const struct image_writer_opts image_writer_opts_defaults = {
-    .filetype = "png",
+    .format = "png",
     .png_compression = 7,
     .jpeg_quality = 85,
     .jpeg_optimize = 100,
@@ -68,7 +68,7 @@ const struct m_sub_options image_writer_conf = {
         OPT_MAKE_FLAGS("jpeg-progressive", jpeg_progressive, 0),
         OPT_MAKE_FLAGS("jpeg-baseline", jpeg_baseline, 0),
         OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
-        OPT_STRING("filetype", filetype, 0),
+        OPT_STRING("format", format, 0),
         {0},
     },
     .size = sizeof(struct image_writer_opts),
@@ -239,7 +239,7 @@ static const struct img_writer img_writers[] = {
 
 static const struct img_writer *get_writer(const struct image_writer_opts *opts)
 {
-    const char *type = opts->filetype;
+    const char *type = opts->format;
 
     for (size_t n = 0; n < sizeof(img_writers) / sizeof(img_writers[0]); n++) {
         const struct img_writer *writer = &img_writers[n];

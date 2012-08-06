@@ -1644,7 +1644,7 @@
     Seek to byte position. Useful for playback from CD-ROM images or VOB files
     with junk at the beginning. See also ``--ss``.
 
---screenshot-filetype=<type>
+--screenshot-format=<type>
     Set the image file type used for saving screenshots.
 
     Available choices:

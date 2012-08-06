@@ -19,7 +19,7 @@ struct mp_image;
 struct mp_csp_details;
 
 struct image_writer_opts {
-    char *filetype;
+    char *format;
     int png_compression;
     int jpeg_quality;
     int jpeg_optimize;
