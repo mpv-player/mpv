@@ -200,6 +200,11 @@ static const struct img_writer img_writers[] = {
       .lavc_codec = CODEC_ID_PGMYUV,
       .pixfmts = (int[]) { IMGFMT_YV12, 0 },
     },
+    { "tga", write_lavc,
+      .lavc_codec = CODEC_ID_TARGA,
+      .pixfmts = (int[]) { IMGFMT_BGR24, IMGFMT_BGRA, IMGFMT_BGR15LE,
+                           IMGFMT_Y800, 0},
+    },
 #ifdef CONFIG_JPEG
     { "jpg", write_jpeg },
     { "jpeg", write_jpeg },
