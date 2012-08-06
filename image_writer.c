@@ -209,6 +209,7 @@ int write_image(struct mp_image *image, const struct mp_csp_details *csp,
     struct mp_image *allocated_image = NULL;
     const int destfmt = IMGFMT_RGB24;
     struct image_writer_opts defs = image_writer_opts_defaults;
+    bool is_anamorphic = image->w != image->width || image->h != image->height;
 
     if (!opts)
         opts = &defs;
@@ -216,7 +217,7 @@ int write_image(struct mp_image *image, const struct mp_csp_details *csp,
     const struct img_writer *writer = get_writer(opts);
     struct image_writer_ctx ctx = { opts };
 
-    if (image->imgfmt != destfmt) {
+    if (image->imgfmt != destfmt || is_anamorphic) {
         struct mp_image *dst = alloc_mpi(image->w, image->h, destfmt);
 
         struct SwsContext *sws = sws_getContextFromCmdLine_hq(image->width,
