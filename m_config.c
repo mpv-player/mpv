@@ -162,8 +162,8 @@ static void optstruct_set(const struct m_config *config,
 }
 
 static void m_config_add_option(struct m_config *config,
-                                const struct m_option *arg,
-                                const char *prefix);
+                                struct m_config_option *parent,
+                                const struct m_option *arg);
 
 static int config_destroy(void *p)
 {
@@ -215,7 +215,7 @@ struct m_config *m_config_new(void *optstruct,
         *p = (struct m_option){
             "include", NULL, CONF_TYPE_STRING, 0,
         };
-        m_config_add_option(config, p, NULL);
+        m_config_add_option(config, NULL, p);
         config->includefunc = includefunc;
     }
 
@@ -263,15 +263,17 @@ void m_config_leave_file_local(struct m_config *config)
     }
 }
 
-static void add_options(struct m_config *config, const struct m_option *defs,
-                        const char *prefix)
+static void add_options(struct m_config *config,
+                        struct m_config_option *parent,
+                        const struct m_option *defs)
 {
     for (int i = 0; defs[i].name; i++)
-        m_config_add_option(config, defs + i, prefix);
+        m_config_add_option(config, parent, defs + i);
 }
 
 static void m_config_add_option(struct m_config *config,
-                                const struct m_option *arg, const char *prefix)
+                                struct m_config_option *parent,
+                                const struct m_option *arg)
 {
     struct m_config_option *co;
 
@@ -282,15 +284,27 @@ static void m_config_add_option(struct m_config *config,
     co = talloc_zero(config, struct m_config_option);
     co->opt = arg;
 
+    if (parent) {
+        // Merge case: pretend it has no parent (note that we still must follow
+        //             the "real" parent for accessing struct fields)
+        if (parent->opt->flags & M_OPT_MERGE)
+            co->parent = parent->parent;
+        else
+            co->parent = parent;
+    }
+
     // Fill in the full name
-    if (prefix && *prefix)
-        co->name = talloc_asprintf(co, "%s:%s", prefix, arg->name);
-    else
+    if (co->parent) {
+        const char *sep = (co->parent->opt->flags & M_OPT_PREFIXED) ? "-" : ":";
+        co->name = talloc_asprintf(co, "%s%s%s", co->parent->name, sep,
+                                   arg->name);
+    } else
         co->name = (char *)arg->name;
 
     // Option with children -> add them
     if (arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
-        add_options(config, arg->p, co->name);
+        const struct m_option *sub = arg->p;
+        add_options(config, co, sub);
     } else {
         struct m_config_option *i;
         // Check if there is already an option pointing to this address
@@ -328,8 +342,12 @@ static void m_config_add_option(struct m_config *config,
             }
         }
     }
-    co->next = config->opts;
-    config->opts = co;
+
+    // pretend that merge options don't exist (only their children matter)
+    if (!(arg->flags & M_OPT_MERGE)) {
+        co->next = config->opts;
+        config->opts = co;
+    }
 }
 
 int m_config_register_options(struct m_config *config,
@@ -338,7 +356,7 @@ int m_config_register_options(struct m_config *config,
     assert(config != NULL);
     assert(args != NULL);
 
-    add_options(config, args, NULL);
+    add_options(config, NULL, args);
 
     return 1;
 }

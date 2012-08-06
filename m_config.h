@@ -42,6 +42,8 @@ struct m_config_option {
     void *global_backup;
     // See \ref ConfigOptionFlags.
     unsigned int flags;
+    // If this is a suboption, the option that contains this option.
+    struct m_config_option *parent;
 };
 
 // Profiles allow to predefine some sets of options that can then

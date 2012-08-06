@@ -290,6 +290,14 @@ struct m_option {
 // For m_option_type_choice, the first listed choice will be used.
 #define M_OPT_IMPLICIT_DEFAULT  (1 << 7)
 
+// For options with children, add all children as top-level arguments
+// (e.g. "--parent=child=value" becomes "--parent-child=value")
+#define M_OPT_PREFIXED          (1 << 8)
+
+// Similar to M_OPT_PREFIXED, but drop the prefix.
+// (e.g. "--parent=child=value" becomes "--child=value")
+#define M_OPT_MERGE             (1 << 9)
+
 // These are kept for compatibility with older code.
 #define CONF_MIN                M_OPT_MIN
 #define CONF_MAX                M_OPT_MAX
