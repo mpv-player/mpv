@@ -390,119 +390,44 @@ v4l2 (requires Linux 2.6.22+ kernel)
     <output>
         Explicitly choose the TV-out output to be used for the video signal.
 
-md5sum
-    Calculate MD5 sums of each frame and write them to a file. Supports RGB24
-    and YV12 colorspaces. Useful for debugging.
-
-    outfile=<value>
-        Specify the output filename (default: ``./md5sums``).
-
-yuv4mpeg
-    Transforms the video stream into a sequence of uncompressed YUV 4:2:0
-    images and stores it in a file (default: ``./stream.yuv``). The format is
-    the same as the one employed by mjpegtools, so this is useful if you want
-    to process the video with the mjpegtools suite. It supports the YV12
-    format. If your source file has a different format and is interlaced, make
-    sure to use ``--vf=scale=::1`` to ensure the conversion uses interlaced
-    mode. You can combine it with the ``--fixed-vo`` option to concatenate
-    files with the same dimensions and fps value.
-
-    interlaced
-        Write the output as interlaced frames, top field first.
-    interlaced_bf
-        Write the output as interlaced frames, bottom field first.
-    file=<filename>
-        Write the output to <filename> instead of the default ``stream.yuv``.
-
-    *NOTE*: If you do not specify any option the output is progressive (i.e.
-    not interlaced).
-
-gif89a
-    Output each frame into a single animated GIF file in the current
-    directory. It supports only RGB format with 24 bpp and the output is
-    converted to 256 colors.
-
-    <fps>
-        Float value to specify framerate (default: 5.0).
-    <output>
-        Specify the output filename (default: ``./out.gif``).
-
-    *NOTE*: You must specify the framerate before the filename or the
-    framerate will be part of the filename.
-
-    *EXAMPLE*: ``mplayer video.nut --vo=gif89a:fps=15:output=test.gif``
-
-jpeg
-    Output each frame into a JPEG file in the current directory. Each file
+image
+    Output each frame into an image file in the current directory. Each file
     takes the frame number padded with leading zeros as name.
 
-    [no]progressive
+    format=<format>
+        Select the image file format.
+
+        jpg
+            JPEG files, extension .jpg.
+        jpeg
+            JPEG files, extension .jpeg.
+        png
+            PNG files.
+        ppm
+            Portable bitmap format.
+        pgm
+            Portable graymap format.
+        pgmyuv
+            Portable graymap format, using the YV12 pixel format.
+        tga
+            Truevision TGA.
+
+    png-compression=<0-9>
+        PNG compression factor (speed vs. file size tradeoff) (default: 7)
+    jpeg-quality=<0-100>
+        JPEG quality factor (default: 85)
+    [no-]jpeg-progressive
         Specify standard or progressive JPEG (default: noprogressive).
-    [no]baseline
-        Specify use of baseline or not (default: baseline).
-    optimize=<0-100>
-        optimization factor (default: 100)
-    smooth=<0-100>
+    [no-]jpeg-baseline
+        Specify use of JPEG baseline or not (default: baseline).
+    jpeg-optimize=<0-100>
+        JPEG ptimization factor (default: 100)
+    jpeg-smooth=<0-100>
         smooth factor (default: 0)
-    quality=<0-100>
-        quality factor (default: 75)
+    jpeg-dpi=<1->
+        JPEG DPI (default: 72)
     outdir=<dirname>
-        Specify the directory to save the JPEG files to (default: ``./``).
-    subdirs=<prefix>
-        Create numbered subdirectories with the specified prefix to save the
-        files in instead of the current directory.
-    maxfiles=<value> (subdirs only)
-        Maximum number of files to be saved per subdirectory. Must be equal to
-        or larger than 1 (default: 1000).
-
-pnm
-    Output each frame into a PNM file in the current directory. Each file
-    takes the frame number padded with leading zeros as name. It supports PPM,
-    PGM and PGMYUV files in both raw and ASCII mode. See also ``pnm(5)``,
-    ``ppm(5)`` and ``pgm(5)``.
-
-    ppm
-        Write PPM files (default).
-    pgm
-        Write PGM files.
-    pgmyuv
-        Write PGMYUV files. PGMYUV is like PGM, but it also contains the U and
-        V plane, appended at the bottom of the picture.
-    raw
-        Write PNM files in raw mode (default).
-    ascii
-        Write PNM files in ASCII mode.
-    outdir=<dirname>
-        Specify the directory to save the PNM files to (default: ``./``).
-    subdirs=<prefix>
-        Create numbered subdirectories with the specified prefix to save the
-        files in instead of the current directory.
-    maxfiles=<value> (subdirs only)
-        Maximum number of files to be saved per subdirectory. Must be equal to
-        or larger than 1 (default: 1000).
-
-png
-    Output each frame into a PNG file in the current directory. Each file
-    takes the frame number padded with leading zeros as name. 24bpp RGB and
-    BGR formats are supported.
-
-    z=<0-9>
-        Specifies the compression level. 0 is no compression, 9 is maximum
-        compression.
-    alpha
-        Create PNG files with an alpha channel. Note that MPlayer in general
-        does not support alpha, so this will only be useful in some rare
-        cases.
-
-tga
-    Output each frame into a Targa file in the current directory. Each file
-    takes the frame number padded with leading zeros as name. The purpose of
-    this video output driver is to have a simple lossless image writer to use
-    without any external library. It supports the BGR[A] color format, with
-    15, 24 and 32 bpp. You can force a particular format with the format video
-    filter.
-
-    *EXAMPLE*: ``mplayer video.nut --vf=format=bgr15 --vo=tga``
+        Specify the directory to save the image files to (default: ``./``).
 
 sharedbuffer (Mac OS X 10.6 and later)
     Mac OS X headless video output designed to interact with GUIs. It copies
