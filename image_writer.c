@@ -74,31 +74,33 @@ struct img_writer {
     const char *file_ext;
     int (*write)(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp);
     int *pixfmts;
+    int lavc_codec;
 };
 
-static int write_png(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
+static int write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
 {
     void *outbuffer = NULL;
     int success = 0;
     AVFrame *pic = NULL;
 
-    struct AVCodec *png_codec = avcodec_find_encoder(CODEC_ID_PNG);
+    struct AVCodec *codec = avcodec_find_encoder(ctx->writer->lavc_codec);
     AVCodecContext *avctx = NULL;
-    if (!png_codec)
+    if (!codec)
         goto print_open_fail;
-    avctx = avcodec_alloc_context3(png_codec);
+    avctx = avcodec_alloc_context3(codec);
     if (!avctx)
         goto print_open_fail;
 
     avctx->time_base = AV_TIME_BASE_Q;
     avctx->width = image->width;
     avctx->height = image->height;
-    avctx->pix_fmt = PIX_FMT_RGB24;
-    avctx->compression_level = ctx->opts->png_compression;
+    avctx->pix_fmt = imgfmt2pixfmt(image->imgfmt);
+    if (ctx->writer->lavc_codec == CODEC_ID_PNG)
+        avctx->compression_level = ctx->opts->png_compression;
 
-    if (avcodec_open2(avctx, png_codec, NULL) < 0) {
+    if (avcodec_open2(avctx, codec, NULL) < 0) {
      print_open_fail:
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Could not open libavcodec PNG encoder"
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Could not open libavcodec encoder"
                " for saving images\n");
         goto error_exit;
     }
@@ -188,7 +190,16 @@ static int write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
 #endif
 
 static const struct img_writer img_writers[] = {
-    { "png", write_png },
+    { "png", write_lavc, .lavc_codec = CODEC_ID_PNG },
+    { "ppm", write_lavc, .lavc_codec = CODEC_ID_PPM },
+    { "pgm", write_lavc,
+      .lavc_codec = CODEC_ID_PGM,
+      .pixfmts = (int[]) { IMGFMT_Y800, 0 },
+    },
+    { "pgmyuv", write_lavc,
+      .lavc_codec = CODEC_ID_PGMYUV,
+      .pixfmts = (int[]) { IMGFMT_YV12, 0 },
+    },
 #ifdef CONFIG_JPEG
     { "jpg", write_jpeg },
     { "jpeg", write_jpeg },
