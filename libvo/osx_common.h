@@ -19,8 +19,10 @@
 #ifndef MPLAYER_OSX_COMMON_H
 #define MPLAYER_OSX_COMMON_H
 
+struct vo;
+
 int convert_key(unsigned key, unsigned charcode);
-void change_movie_aspect(float new_aspect);
+void change_movie_aspect(struct vo *vo, float new_aspect);
 void config_movie_aspect(float config_aspect);
 void osx_foreground_hack(void);
 

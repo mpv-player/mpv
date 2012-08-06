@@ -21,7 +21,6 @@
 #include <Carbon/Carbon.h>
 #include "config.h"
 #include "osx_common.h"
-#include "old_vo_defines.h"
 #include "video_out.h"
 #include "input/keycodes.h"
 #include "input/input.h"
@@ -122,14 +121,14 @@ static float old_movie_aspect;
  * Sends MPlayer a command to change aspect to the requested value.
  * @param new_aspect desired new aspect, < 0 means restore original.
  */
-void change_movie_aspect(float new_aspect)
+void change_movie_aspect(struct vo *vo, float new_aspect)
 {
     char cmd_str[64];
     if (new_aspect < 0)
         new_aspect = old_movie_aspect;
     our_aspect_change = 1;
     snprintf(cmd_str, sizeof(cmd_str), "switch_ratio %f", new_aspect);
-    mp_input_queue_cmd(global_vo->input_ctx, mp_input_parse_cmd(cmd_str));
+    mp_input_queue_cmd(vo->input_ctx, mp_input_parse_cmd(cmd_str));
 }
 
 /**
