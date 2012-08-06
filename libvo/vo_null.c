@@ -27,83 +27,77 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "video_out.h"
-#include "video_out_internal.h"
+#include "libmpcodecs/vfcap.h"
+#include "libmpcodecs/mp_image.h"
 
-static const vo_info_t info =
+static int draw_slice(struct vo *vo, uint8_t *image[], int stride[],
+                      int w, int h, int x, int y)
 {
-	"Null video output",
-	"null",
-	"Aaron Holtzman <aholtzma@ess.engr.uvic.ca>",
-	""
-};
-
-const LIBVO_EXTERN(null)
-
-static uint32_t image_width, image_height;
-
-//static uint32_t
-static int draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
-//draw_slice(uint8_t *src[], uint32_t slice_num)
-{
-	return 0;
+    return 0;
 }
 
-static void draw_osd(void)
+static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
 }
 
-static void
-flip_page(void)
+static void flip_page(struct vo *vo)
 {
 }
 
-static int
-draw_frame(uint8_t *src[])
-{
-	return 0;
-}
-
-static int
-query_format(uint32_t format)
+static int query_format(struct vo *vo, uint32_t format)
 {
     if (IMGFMT_IS_HWACCEL(format))
         return 0;
     return VFCAP_CSP_SUPPORTED;
 }
 
-static int
-config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+static int config(struct vo *vo, uint32_t width, uint32_t height,
+                  uint32_t d_width, uint32_t d_height, uint32_t flags,
+                  uint32_t format)
 {
-	image_width = width;
-	image_height = height;
-	return 0;
+    return 0;
 }
 
-static void
-uninit(void)
-{
-}
-
-
-static void check_events(void)
+static void uninit(struct vo *vo)
 {
 }
 
-static int preinit(const char *arg)
+static void check_events(struct vo *vo)
 {
-    if(arg)
-    {
-	mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_NULL] Unknown subdevice: %s.\n",arg);
-	return ENOSYS;
+}
+
+static int preinit(struct vo *vo, const char *arg)
+{
+    if (arg) {
+        mp_tmsg(MSGT_VO, MSGL_WARN, "[VO_NULL] Unknown subdevice: %s.\n", arg);
+        return ENOSYS;
     }
     return 0;
 }
 
-static int control(uint32_t request, void *data)
+static int control(struct vo *vo, uint32_t request, void *data)
 {
-  switch (request) {
-  case VOCTRL_QUERY_FORMAT:
-    return query_format(*((uint32_t*)data));
-  }
-  return VO_NOTIMPL;
+    switch (request) {
+    case VOCTRL_QUERY_FORMAT:
+        return query_format(vo, *((uint32_t *)data));
+    }
+    return VO_NOTIMPL;
 }
+
+const struct vo_driver video_out_null = {
+    .is_new = false,
+    .info = &(const vo_info_t) {
+        "Null video output",
+        "null",
+        "Aaron Holtzman <aholtzma@ess.engr.uvic.ca>",
+        ""
+    },
+    .preinit = preinit,
+    .config = config,
+    .control = control,
+    .draw_slice = draw_slice,
+    .draw_osd = draw_osd,
+    .flip_page = flip_page,
+    .check_events = check_events,
+    .uninit = uninit,
+};
