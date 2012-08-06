@@ -419,7 +419,6 @@ SRCS_MPLAYER = command.c \
                libvo/csputils.c \
                libvo/filter_kernels.c \
                libvo/geometry.c \
-               libvo/old_vo_wrapper.c \
                libvo/video_out.c \
                libvo/vo_null.c \
                libvo/vo_image.c \

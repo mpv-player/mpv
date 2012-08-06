@@ -156,10 +156,6 @@ struct vo_driver {
     // of pts values itself
     bool buffer_frames;
 
-    // This is set if the driver is not new and contains pointers to
-    // old-API functions to be used instead of the ones below.
-    struct vo_old_functions *old_functions;
-
     const vo_info_t *info;
     /*
      * Preinitializes driver (real INITIALIZATION)
@@ -239,20 +235,6 @@ struct vo_driver {
     const struct m_option *options;
 };
 
-struct vo_old_functions {
-    int (*preinit)(const char *arg);
-    int (*config)(uint32_t width, uint32_t height, uint32_t d_width,
-                  uint32_t d_height, uint32_t fullscreen, char *title,
-                  uint32_t format);
-    int (*control)(uint32_t request, void *data);
-    int (*draw_frame)(uint8_t *src[]);
-    int (*draw_slice)(uint8_t *src[], int stride[], int w,int h, int x,int y);
-    void (*draw_osd)(void);
-    void (*flip_page)(void);
-    void (*check_events)(void);
-    void (*uninit)(void);
-};
-
 struct vo {
     int config_ok;  // Last config call was successful?
     int config_count;  // Total number of successful config calls
@@ -313,7 +295,6 @@ int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts);
 int vo_redraw_frame(struct vo *vo);
 int vo_get_buffered_frame(struct vo *vo, bool eof);
 void vo_skip_frame(struct vo *vo);
-int vo_draw_frame(struct vo *vo, uint8_t *src[]);
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y);
 void vo_new_frame_imminent(struct vo *vo);
 void vo_draw_osd(struct vo *vo, struct osd_state *osd);

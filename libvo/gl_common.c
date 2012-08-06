@@ -41,7 +41,6 @@
 #include <math.h>
 #include "talloc.h"
 #include "gl_common.h"
-#include "old_vo_wrapper.h"
 #include "csputils.h"
 #include "aspect.h"
 #include "pnm_loader.h"

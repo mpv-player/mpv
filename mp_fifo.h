@@ -29,9 +29,4 @@ struct input_ctx;
 struct MPOpts;
 struct mp_fifo *mp_fifo_create(struct input_ctx *input, struct MPOpts *opts);
 
-
-#ifdef IS_OLD_VO
-#define mplayer_put_key(key) mplayer_put_key(global_vo->key_fifo, key)
-#endif
-
 #endif /* MPLAYER_MP_FIFO_H */

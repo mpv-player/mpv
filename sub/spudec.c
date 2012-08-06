@@ -42,7 +42,6 @@
 #include "config.h"
 #include "mp_msg.h"
 
-#include "libvo/video_out.h"
 #include "spudec.h"
 #include "vobsub.h"
 #include "mpcommon.h"
@@ -119,7 +118,6 @@ typedef struct {
   unsigned char *scaled_aimage;
   int auto_palette; /* 1 if we lack a palette and must use an heuristic. */
   int font_start_level;  /* Darkest value used for the computed font */
-  struct vo *hw_spu;
   int spu_changed;
   unsigned int forced_subs_only;     /* flag: 0=display all subtitle, !0 display only forced subtitles */
   unsigned int is_forced_sub;         /* true if current subtitle is a forced subtitle */
@@ -580,16 +578,7 @@ static void spudec_process_control(spudec_handle_t *this, int pts100)
 
 static void spudec_decode(spudec_handle_t *this, int pts100)
 {
-  if (!this->hw_spu)
-    spudec_process_control(this, pts100);
-  else if (pts100 >= 0) {
-    static vo_mpegpes_t packet = { NULL, 0, 0x20, 0 };
-    static vo_mpegpes_t *pkg=&packet;
-    packet.data = this->packet;
-    packet.size = this->packet_size;
-    packet.timestamp = pts100;
-    vo_draw_frame(this->hw_spu, (uint8_t**)&pkg);
-  }
+  spudec_process_control(this, pts100);
 }
 
 int spudec_changed(void * this)

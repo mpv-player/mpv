@@ -216,8 +216,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
         if (vf->default_caps & VFCAP_ACCEPT_STRIDE)
             vo_draw_slice(video_out, mpi->planes, mpi->stride, mpi->w, mpi->h,
                           0, 0);
-        else
-            vo_draw_frame(video_out, mpi->planes);
+        // else: out of luck
     }
     return 1;
 }

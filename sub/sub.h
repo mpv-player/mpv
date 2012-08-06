@@ -175,11 +175,6 @@ void osd_free(struct osd_state *osd);
 void osd_set_nav_box (uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey);
 #endif
 
-
-#ifdef IS_OLD_VO
-#define vo_remove_text(...) osd_remove_text(global_osd, __VA_ARGS__)
-#endif
-
 // used only by osd_ft.c or osd_libass.c
 void osd_alloc_buf(mp_osd_obj_t* obj);
 void vo_draw_text_from_buffer(mp_osd_obj_t* obj,void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx);

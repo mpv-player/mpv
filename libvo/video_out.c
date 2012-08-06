@@ -33,7 +33,6 @@
 #include "video_out.h"
 #include "aspect.h"
 #include "geometry.h"
-#include "old_vo_wrapper.h"
 #include "input/input.h"
 #include "mp_fifo.h"
 #include "m_config.h"
@@ -217,14 +216,6 @@ void vo_skip_frame(struct vo *vo)
 {
     vo_control(vo, VOCTRL_SKIPFRAME, NULL);
     vo->frame_loaded = false;
-}
-
-int vo_draw_frame(struct vo *vo, uint8_t *src[])
-{
-    assert(!vo->driver->is_new);
-    if (!vo->config_ok)
-        return 0;
-    return old_vo_draw_frame(vo, src);
 }
 
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y)

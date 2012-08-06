@@ -19,7 +19,7 @@
 #ifndef MPLAYER_SPUDEC_H
 #define MPLAYER_SPUDEC_H
 
-#include "libvo/video_out.h"
+#include <stdint.h>
 
 void spudec_heartbeat(void *this, unsigned int pts100);
 void spudec_assemble(void *this, unsigned char *packet, unsigned int len, int pts100);

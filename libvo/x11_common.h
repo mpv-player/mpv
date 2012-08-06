@@ -188,47 +188,4 @@ void update_xinerama_info(struct vo *vo);
 int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return);
 void xscreensaver_heartbeat(struct vo_x11_state *x11);
 
-// Old VOs use incompatible function calls, translate them to new
-// prototypes
-#ifdef IS_OLD_VO
-#define vo_x11_create_vo_window(vis, x, y, width, height, flags, col_map, classname, title) \
-        vo_x11_create_vo_window(global_vo, vis, x, y, width, height, flags, col_map, classname)
-#define vo_x11_fullscreen() vo_x11_fullscreen(global_vo)
-#define vo_x11_update_geometry() vo_x11_update_geometry(global_vo, 1)
-#define vo_x11_ontop() vo_x11_ontop(global_vo)
-#define vo_init() vo_init(global_vo)
-#define vo_x11_ewmh_fullscreen(action) vo_x11_ewmh_fullscreen(global_vo->x11->display, action)
-#define update_xinerama_info() update_xinerama_info(global_vo)
-#define vo_x11_uninit() vo_x11_uninit(global_vo)
-#define vo_x11_check_events(display) vo_x11_check_events(global_vo)
-#define vo_x11_sizehint(...) vo_x11_sizehint(global_vo, __VA_ARGS__)
-#define vo_vm_switch() vo_vm_switch(global_vo)
-#define vo_x11_create_colormap(vinfo) vo_x11_create_colormap(global_vo, vinfo)
-#define vo_x11_set_equalizer(...) vo_x11_set_equalizer(global_vo, __VA_ARGS__)
-#define vo_xv_set_eq(...) vo_xv_set_eq(global_vo, __VA_ARGS__)
-#define vo_xv_get_eq(...) vo_xv_get_eq(global_vo, __VA_ARGS__)
-#define vo_xv_enable_vsync() vo_xv_enable_vsync(global_vo)
-#define vo_xv_get_max_img_dim(...) vo_xv_get_max_img_dim(global_vo, __VA_ARGS__)
-#define vo_xv_init_colorkey() vo_xv_init_colorkey(global_vo)
-#define vo_xv_draw_colorkey(...) vo_xv_draw_colorkey(global_vo, __VA_ARGS__)
-#define vo_x11_clearwindow_part(display, ...) vo_x11_clearwindow_part(global_vo, __VA_ARGS__)
-#define vo_vm_close() vo_vm_close(global_vo)
-#define vo_x11_clearwindow(display, window) vo_x11_clearwindow(global_vo, window)
-#define vo_x11_classhint(display, window, name) vo_x11_classhint(global_vo, window, name)
-#define vo_x11_setlayer(display, window, layer) vo_x11_setlayer(global_vo, window, layer)
-#define xv_setup_colorkeyhandling(a, b) xv_setup_colorkeyhandling(global_vo, a, b)
-#define vo_x11_border() vo_x11_border(global_vo)
-
-#define mDisplay global_vo->x11->display
-#define vo_depthonscreen global_vo->x11->depthonscreen
-#define vo_window global_vo->x11->window
-#define xv_ck_info global_vo->x11->xv_ck_info
-#define xv_colorkey global_vo->x11->xv_colorkey
-#define xv_port global_vo->x11->xv_port
-#define vo_gc global_vo->x11->vo_gc
-#define mRootWin global_vo->x11->rootwin
-#define mScreen global_vo->x11->screen
-#define mLocalDisplay global_vo->x11->display_is_local
-#endif
-
 #endif /* MPLAYER_X11_COMMON_H */
