@@ -366,7 +366,6 @@ int vo_cocoa_check_events(struct vo *vo)
         return 0;
     l_vo = vo;
     [NSApp sendEvent:event];
-    l_vo = nil;
 
     if (s->did_resize) {
         s->did_resize = NO;
@@ -422,27 +421,53 @@ int vo_cocoa_cgl_color_size(void)
     return 8;
 }
 
+static NSMenuItem *new_menu_item(NSMenu *parent_menu, NSString *title,
+                                 SEL action, NSString *key_equivalent)
+{
+    NSMenuItem *new_item = [[NSMenuItem alloc]
+                                initWithTitle:title
+                                       action:action
+                                keyEquivalent:key_equivalent];
+    [parent_menu addItem:new_item];
+    return [new_item autorelease];
+}
+
+static NSMenuItem *new_main_menu_item(NSMenu *parent_menu, NSMenu *child_menu,
+                                      NSString *title)
+{
+    NSMenuItem *new_item = [[NSMenuItem alloc]
+                                initWithTitle:title
+                                       action:nil
+                                keyEquivalent:@""];
+    [new_item setSubmenu:child_menu];
+    [parent_menu addItem:new_item];
+    return [new_item autorelease];
+}
+
 void create_menu()
 {
-    NSMenu *menu;
-    NSMenuItem *menuItem;
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    NSMenu *main_menu, *m_menu, *w_menu;
+    NSMenuItem *app_menu_item;
 
-    menu = [[NSMenu new] autorelease];
-    menuItem = [[NSMenuItem new] autorelease];
-    [menu addItem: menuItem];
-    [NSApp setMainMenu: menu];
+    main_menu = [[NSMenu new] autorelease];
+    app_menu_item = [[NSMenuItem new] autorelease];
+    [main_menu addItem:app_menu_item];
+    [NSApp setMainMenu: main_menu];
 
-    menu = [[NSMenu alloc] initWithTitle:@"Movie"];
-    menuItem = [[NSMenuItem alloc] initWithTitle:@"Half Size" action:@selector(halfSize) keyEquivalent:@"0"]; [menu addItem:menuItem];
-    menuItem = [[NSMenuItem alloc] initWithTitle:@"Normal Size" action:@selector(normalSize) keyEquivalent:@"1"]; [menu addItem:menuItem];
-    menuItem = [[NSMenuItem alloc] initWithTitle:@"Double Size" action:@selector(doubleSize) keyEquivalent:@"2"]; [menu addItem:menuItem];
+    m_menu = [[[NSMenu alloc] initWithTitle:@"Movie"] autorelease];
+    new_menu_item(m_menu, @"Half Size", @selector(halfSize), @"0");
+    new_menu_item(m_menu, @"Normal Size", @selector(normalSize), @"1");
+    new_menu_item(m_menu, @"Double Size", @selector(doubleSize), @"2");
 
-    menuItem = [[NSMenuItem alloc] initWithTitle:@"Movie" action:nil keyEquivalent:@""];
-    [menuItem setSubmenu:menu];
-    [[NSApp mainMenu] addItem:menuItem];
+    new_main_menu_item(main_menu, m_menu, @"Movie");
 
-    [menu release];
-    [menuItem release];
+    w_menu = [[[NSMenu alloc] initWithTitle:@"Window"] autorelease];
+    new_menu_item(w_menu, @"Minimize", @selector(performMiniaturize:), @"m");
+    new_menu_item(w_menu, @"Zoom", @selector(performZoom:), @"z");
+
+    new_main_menu_item(main_menu, w_menu, @"Window");
+    [pool release];
 }
 
 bool is_lion_or_better(void)
