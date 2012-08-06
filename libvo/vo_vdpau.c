@@ -1694,7 +1694,7 @@ const struct vo_driver video_out_vdpau = {
     .flip_page_timed = flip_page_timed,
     .check_events = check_events,
     .uninit = uninit,
-    .privsize = sizeof(struct vdpctx),
+    .priv_size = sizeof(struct vdpctx),
     .options = (const struct m_option []){
         OPT_INTRANGE("deint", deint, 0, -4, 4),
         OPT_FLAG_ON("chroma-deint", chroma_deint, 0, OPTDEF_INT(1)),

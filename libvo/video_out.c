@@ -172,8 +172,8 @@ const struct vo_driver *video_out_drivers[] =
 
 static int vo_preinit(struct vo *vo, char *arg)
 {
-    if (vo->driver->privsize)
-        vo->priv = talloc_zero_size(vo, vo->driver->privsize);
+    if (vo->driver->priv_size)
+        vo->priv = talloc_zero_size(vo, vo->driver->priv_size);
     if (vo->driver->options) {
         struct m_config *cfg = m_config_simple(vo->priv);
         talloc_steal(vo->priv, cfg);

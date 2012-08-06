@@ -229,8 +229,8 @@ struct vo_driver {
      */
     void (*uninit)(struct vo *vo);
 
-    // Size of private struct for automatic allocation
-    int privsize;
+    // Size of private struct for automatic allocation (0 doesn't allocate)
+    int priv_size;
 
     // List of options to parse into priv struct (requires privsize to be set)
     const struct m_option *options;
