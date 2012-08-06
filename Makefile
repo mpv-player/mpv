@@ -432,6 +432,7 @@ SRCS_MPLAYER = command.c \
                libvo/video_out.c \
                libvo/vo_null.c \
                libvo/vo_png.c \
+               libvo/vo_image.c \
                $(SRCS_MPLAYER-yes)
 
 COMMON_LIBS += $(COMMON_LIBS-yes)

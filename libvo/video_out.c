@@ -82,6 +82,7 @@ extern struct vo_driver video_out_gl;
 extern struct vo_driver video_out_gl3;
 extern struct vo_driver video_out_null;
 extern struct vo_driver video_out_png;
+extern struct vo_driver video_out_image;
 extern struct vo_driver video_out_caca;
 extern struct vo_driver video_out_yuv4mpeg;
 extern struct vo_driver video_out_direct3d;
@@ -146,6 +147,7 @@ const struct vo_driver *video_out_drivers[] =
         &video_out_yuv4mpeg,
 #endif
         &video_out_png,
+        &video_out_image,
 #ifdef CONFIG_JPEG
         &video_out_jpeg,
 #endif
@@ -172,8 +174,11 @@ const struct vo_driver *video_out_drivers[] =
 
 static int vo_preinit(struct vo *vo, char *arg)
 {
-    if (vo->driver->priv_size)
+    if (vo->driver->priv_size) {
         vo->priv = talloc_zero_size(vo, vo->driver->priv_size);
+        if (vo->driver->priv_defaults)
+            memcpy(vo->priv, vo->driver->priv_defaults, vo->driver->priv_size);
+    }
     if (vo->driver->options) {
         struct m_config *cfg = m_config_simple(vo->priv);
         talloc_steal(vo->priv, cfg);

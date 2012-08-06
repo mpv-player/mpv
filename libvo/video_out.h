@@ -232,6 +232,9 @@ struct vo_driver {
     // Size of private struct for automatic allocation (0 doesn't allocate)
     int priv_size;
 
+    // If not NULL, it's copied into the newly allocated private struct.
+    const void *priv_defaults;
+
     // List of options to parse into priv struct (requires privsize to be set)
     const struct m_option *options;
 };
