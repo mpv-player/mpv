@@ -52,6 +52,7 @@ extern const m_option_type_t m_option_type_print;
 extern const m_option_type_t m_option_type_print_func;
 extern const m_option_type_t m_option_type_print_func_param;
 extern const m_option_type_t m_option_type_subconfig;
+extern const m_option_type_t m_option_type_subconfig_struct;
 extern const m_option_type_t m_option_type_imgfmt;
 extern const m_option_type_t m_option_type_afmt;
 
@@ -148,6 +149,12 @@ struct m_opt_choice_alternatives {
     int value;
 };
 
+// m_option.priv points to this if M_OPT_TYPE_USE_SUBSTRUCT is used
+struct m_sub_options {
+    const struct m_option *opts;
+    size_t size;
+    const void *defaults;
+};
 
 // FIXME: backward compatibility
 #define CONF_TYPE_FLAG          (&m_option_type_flag)
@@ -338,6 +345,10 @@ struct m_option {
 // takes no parameter.
 #define M_OPT_TYPE_OLD_SYNTAX_NO_PARAM  (1 << 3)
 
+// modify M_OPT_TYPE_HAS_CHILD so that m_option::p points to
+// struct m_sub_options, instead of a direct m_option array.
+#define M_OPT_TYPE_USE_SUBSTRUCT        (1 << 4)
+
 ///////////////////////////// Parser flags /////////////////////////////////
 
 // On success parsers return the number of arguments consumed: 0 or 1.
@@ -460,6 +471,12 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_CHOICE(...) OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_choice)
 #define OPT_CHOICE_(optname, varname, flags, choices, ...) OPT_GENERAL(optname, varname, flags, .priv = (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, __VA_ARGS__)
 #define OPT_TIME(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_time)
+
+// subconf must have the type struct m_sub_options.
+// flagv should be M_OPT_MERGE or M_OPT_FLATTEN.
+// varname refers to the field, that must be a pointer to a field described by
+// the subconf struct.
+#define OPT_SUBSTRUCT(varname, subconf, flagv) OPT_GENERAL("-", varname, flagv, .type = &m_option_type_subconfig_struct, .priv = (void*)&subconf)
 
 #define OPT_BASE_STRUCT struct MPOpts
 

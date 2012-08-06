@@ -30,6 +30,7 @@
 typedef struct m_profile m_profile_t;
 struct m_option;
 struct m_option_type;
+struct m_sub_options;
 
 // Config option
 struct m_config_option {
@@ -38,6 +39,8 @@ struct m_config_option {
     char *name;
     // Option description.
     const struct m_option *opt;
+    // Raw value of the option.
+    void *data;
     // Raw value of the backup of the global value (or NULL).
     void *global_backup;
     // See \ref ConfigOptionFlags.
@@ -197,5 +200,8 @@ int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
  *  \param p The profile object.
  */
 void m_config_set_profile(struct m_config *config, struct m_profile *p);
+
+void *m_config_alloc_struct(void *talloc_parent,
+                            const struct m_sub_options *subopts);
 
 #endif /* MPLAYER_M_CONFIG_H */

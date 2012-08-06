@@ -139,26 +139,18 @@ static int list_options(struct m_option *opt, char *name, char *param)
     return M_OPT_EXIT;
 }
 
-static void *optstruct_ptr(const struct m_config *config,
-                           const struct m_option *opt)
+// The memcpys are supposed to work around the struct aliasing violation,
+// that would result if we just dereferenced a void** (where the void** is
+// actually casted from struct some_type* ).
+static void *substruct_read_ptr(void *ptr)
 {
-    return m_option_get_ptr(opt, config->optstruct);
+    void *res;
+    memcpy(&res, ptr, sizeof(void*));
+    return res;
 }
-
-static void optstruct_get(const struct m_config *config,
-                          const struct m_option *opt,
-                          void *dst)
+static void substruct_write_ptr(void *ptr, void *val)
 {
-    if (opt->type->copy)
-        opt->type->copy(opt, dst, optstruct_ptr(config, opt));
-}
-
-static void optstruct_set(const struct m_config *config,
-                          const struct m_option *opt,
-                          const void *src)
-{
-    if (opt->type->copy)
-        opt->type->copy(opt, optstruct_ptr(config, opt), src);
+    memcpy(ptr, &val, sizeof(void*));
 }
 
 static void m_config_add_option(struct m_config *config,
@@ -172,9 +164,7 @@ static int config_destroy(void *p)
         if (copt->flags & M_CFG_OPT_ALIAS)
             continue;
         if (copt->opt->type->flags & M_OPT_TYPE_DYNAMIC) {
-            void *ptr = m_option_get_ptr(copt->opt, config->optstruct);
-            if (ptr)
-                m_option_free(copt->opt, ptr);
+            m_option_free(copt->opt, copt->data);
         }
         if (copt->global_backup)
             m_option_free(copt->opt, copt->global_backup);
@@ -240,7 +230,7 @@ static void ensure_backup(struct m_config *config, struct m_config_option *co)
     if (co->global_backup)
         return;
     co->global_backup = talloc_zero_size(co, co->opt->type->size);
-    optstruct_get(config, co->opt, co->global_backup);
+    m_option_copy(co->opt, co->global_backup, co->data);
 }
 
 void m_config_enter_file_local(struct m_config *config)
@@ -255,7 +245,7 @@ void m_config_leave_file_local(struct m_config *config)
     config->file_local_mode = false;
     for (struct m_config_option *co = config->opts; co; co = co->next) {
         if (co->global_backup) {
-            optstruct_set(config, co->opt, co->global_backup);
+            m_option_copy(co->opt, co->data, co->global_backup);
             m_option_free(co->opt, co->global_backup);
             talloc_free(co->global_backup);
             co->global_backup = NULL;
@@ -284,6 +274,11 @@ static void m_config_add_option(struct m_config *config,
     co = talloc_zero(config, struct m_config_option);
     co->opt = arg;
 
+    void *optstruct = config->optstruct;
+    if (parent && (parent->opt->type->flags & M_OPT_TYPE_USE_SUBSTRUCT))
+        optstruct = substruct_read_ptr(parent->data);
+    co->data = arg->new ? (char *)optstruct + arg->offset : arg->p;
+
     if (parent) {
         // Merge case: pretend it has no parent (note that we still must follow
         //             the "real" parent for accessing struct fields)
@@ -303,15 +298,22 @@ static void m_config_add_option(struct m_config *config,
 
     // Option with children -> add them
     if (arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
-        const struct m_option *sub = arg->p;
-        add_options(config, co, sub);
+        if (arg->type->flags & M_OPT_TYPE_USE_SUBSTRUCT) {
+            const struct m_sub_options *subopts = arg->priv;
+            if (!substruct_read_ptr(co->data)) {
+                void *subdata = m_config_alloc_struct(config, subopts);
+                substruct_write_ptr(co->data, subdata);
+            }
+            add_options(config, co, subopts->opts);
+        } else {
+            const struct m_option *sub = arg->p;
+            add_options(config, co, sub);
+        }
     } else {
-        struct m_config_option *i;
         // Check if there is already an option pointing to this address
-        if (arg->p || arg->new && arg->offset >= 0) {
-            for (i = config->opts; i; i = i->next) {
-                if (arg->new ? (i->opt->new && i->opt->offset == arg->offset)
-                    : (!i->opt->new && i->opt->p == arg->p)) {
+        if (co->data) {
+            for (struct m_config_option *i = config->opts; i; i = i->next) {
+                if (co->data == i->data) {
                     // So we don't save the same vars more than 1 time
                     co->flags |= M_CFG_OPT_ALIAS;
                     break;
@@ -324,18 +326,17 @@ static void m_config_add_option(struct m_config *config,
             if (arg->defval) {
                 // Target data in optstruct is supposed to be cleared (consider
                 // m_option freeing previously set dynamic data).
-                optstruct_set(config, arg, arg->defval);
+                m_option_copy(arg, co->data, arg->defval);
             } else if (arg->type->flags & M_OPT_TYPE_DYNAMIC) {
                 // Initialize dynamically managed fields from static data (like
                 // string options): copy the option into temporary memory,
                 // clear the original option (to void m_option freeing the
                 // static data), copy it back.
-                void *init_data = optstruct_ptr(config, arg);
-                if (init_data) {
+                if (co->data) {
                     void *temp = talloc_zero_size(NULL, arg->type->size);
-                    m_option_copy(arg, temp, init_data);
-                    memset(init_data, 0, arg->type->size);
-                    optstruct_set(config, arg, temp);
+                    m_option_copy(arg, temp, co->data);
+                    memset(co->data, 0, arg->type->size);
+                    m_option_copy(arg, co->data, temp);
                     m_option_free(arg, temp);
                     talloc_free(temp);
                 }
@@ -431,8 +432,7 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
     if (set)
         ensure_backup(config, co);
 
-    void *dst = set ? m_option_get_ptr(co->opt, optstruct) : NULL;
-    return m_option_parse(co->opt, name, param, dst);
+    return m_option_parse(co->opt, name, param, set ? co->data : NULL);
 }
 
 static int parse_subopts(struct m_config *config, void *optstruct, char *name,
@@ -629,4 +629,13 @@ void m_config_set_profile(struct m_config *config, struct m_profile *p)
         m_config_set_option0(config, p->opts[2 * i], p->opts[2 * i + 1]);
     config->profile_depth--;
     config->mode = prev_mode;
+}
+
+void *m_config_alloc_struct(void *talloc_parent,
+                            const struct m_sub_options *subopts)
+{
+    void *substruct = talloc_zero_size(talloc_parent, subopts->size);
+    if (subopts->defaults)
+        memcpy(substruct, subopts->defaults, subopts->size);
+    return substruct;
 }

@@ -907,6 +907,12 @@ const m_option_type_t m_option_type_subconfig = {
     .parse = parse_subconf,
 };
 
+const m_option_type_t m_option_type_subconfig_struct = {
+    .name = "Subconfig",
+    .flags = M_OPT_TYPE_HAS_CHILD | M_OPT_TYPE_USE_SUBSTRUCT,
+    .parse = parse_subconf,
+};
+
 #include "libmpcodecs/img_format.h"
 
 /* FIXME: snyc with img_format.h */
