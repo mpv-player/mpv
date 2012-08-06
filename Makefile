@@ -346,7 +346,6 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/mf.c \
               libmpdemux/mp3_hdr.c \
               libmpdemux/mp_taglists.c \
-              libmpdemux/mpeg_packetizer.c \
               libmpdemux/video.c \
               libvo/osd.c \
               libvo/eosd_packer.c \
@@ -399,8 +398,6 @@ SRCS_MPLAYER-$(OSS)           += libao2/ao_oss.c
 SRCS_MPLAYER-$(PULSE)         += libao2/ao_pulse.c
 SRCS_MPLAYER-$(PORTAUDIO)     += libao2/ao_portaudio.c
 SRCS_MPLAYER-$(RSOUND)        += libao2/ao_rsound.c
-SRCS_MPLAYER-$(V4L2)          += libvo/vo_v4l2.c
-SRCS_MPLAYER-$(V4L2)          += libao2/ao_v4l2.c
 SRCS_MPLAYER-$(VDPAU)         += libvo/vo_vdpau.c
 
 SRCS_MPLAYER-$(X11)           += libvo/vo_x11.c libvo/x11_common.c

@@ -362,7 +362,6 @@ Video output:
   --enable-caca            enable CACA  video output [autodetect]
   --enable-direct3d        enable Direct3D video output [autodetect]
   --enable-directx         enable DirectX video output [autodetect]
-  --enable-v4l2            enable V4L2 Decoder audio/video output [autodetect]
   --enable-xv              enable Xv video output [autodetect]
   --enable-vdpau           enable VDPAU acceleration [autodetect]
   --enable-vm              enable XF86VidMode support [autodetect]
@@ -463,7 +462,6 @@ _gl=auto
 _aa=auto
 _caca=auto
 _dvb=auto
-_v4l2=auto
 _iconv=auto
 _ossaudio=auto
 _rsound=auto
@@ -687,8 +685,6 @@ for ac_option do
   --disable-caca)       _caca=no        ;;
   --enable-dvb)         _dvb=yes        ;;
   --disable-dvb)        _dvb=no         ;;
-  --enable-v4l2)        _v4l2=yes       ;;
-  --disable-v4l2)       _v4l2=no        ;;
   --enable-iconv)       _iconv=yes      ;;
   --disable-iconv)      _iconv=no       ;;
   --enable-libdv)       _libdv=yes      ;;
@@ -2664,37 +2660,6 @@ echores "$_directx"
 fi #if win32; then
 
 
-echocheck "V4L2 MPEG Decoder"
-if test "$_v4l2" = auto ; then
-  cat > $TMPC << EOF
-#include <sys/time.h>
-#include <linux/videodev2.h>
-#include <linux/version.h>
-int main(void) {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
-#error kernel headers too old, need 2.6.22
-#endif
-  struct v4l2_ext_controls ctrls;
-  ctrls.ctrl_class = V4L2_CTRL_CLASS_MPEG;
-  return 0;
-}
-EOF
-  _v4l2=no
-  cc_check && _v4l2=yes
-fi
-if test "$_v4l2" = yes ; then
-  def_v4l2='#define CONFIG_V4L2_DECODER 1'
-  vomodules="v4l2 $vomodules"
-  aomodules="v4l2 $aomodules"
-else
-  def_v4l2='#undef CONFIG_V4L2_DECODER'
-  novomodules="v4l2 $novomodules"
-  noaomodules="v4l2 $noaomodules"
-fi
-echores "$_v4l2"
-
-
-
 #########
 # AUDIO #
 #########
@@ -3968,7 +3933,6 @@ TV = $_tv
 TV_BSDBT848 = $_tv_bsdbt848
 TV_DSHOW = $_tv_dshow
 TV_V4L2 = $_tv_v4l2
-V4L2 = $_v4l2
 VCD = $_vcd
 VDPAU = $_vdpau
 VSTREAM = $_vstream

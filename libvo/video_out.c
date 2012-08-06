@@ -86,7 +86,6 @@ extern struct vo_driver video_out_caca;
 extern struct vo_driver video_out_direct3d;
 extern struct vo_driver video_out_direct3d_shaders;
 extern struct vo_driver video_out_directx;
-extern struct vo_driver video_out_v4l2;
 extern struct vo_driver video_out_directfb;
 extern struct vo_driver video_out_corevideo;
 extern struct vo_driver video_out_sharedbuffer;
@@ -123,9 +122,6 @@ const struct vo_driver *video_out_drivers[] =
 #endif
 #ifdef CONFIG_CACA
         &video_out_caca,
-#endif
-#ifdef CONFIG_V4L2_DECODER
-        &video_out_v4l2,
 #endif
         &video_out_null,
         // should not be auto-selected
