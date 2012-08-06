@@ -171,10 +171,6 @@ static void get_image(struct vf_instance *vf, mp_image_t *mpi){
 
 static void start_slice(struct vf_instance *vf, mp_image_t *mpi){
 //    printf("start_slice called! flag=%d\n",mpi->flags&MP_IMGFLAG_DRAW_CALLBACK);
-    if(!vf->next->draw_slice){
-	mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
-	return;
-    }
     // they want slices!!! allocate the buffer.
     if(!mpi->priv)
 	mpi->priv=vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
@@ -182,8 +178,6 @@ static void start_slice(struct vf_instance *vf, mp_image_t *mpi){
 	    MP_IMGTYPE_TEMP, mpi->flags,
             FFMAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x),
             FFMAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
-    if(!(vf->dmpi->flags&MP_IMGFLAG_DRAW_CALLBACK))
-	mp_tmsg(MSGT_VFILTER, MSGL_WARN, "WARNING! Next filter doesn't support SLICES, get ready for sig11...\n"); // shouldn't happen.
     vf->priv->first_slice = 1;
 }
 
