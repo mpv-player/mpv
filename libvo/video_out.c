@@ -83,16 +83,13 @@ extern struct vo_driver video_out_gl3;
 extern struct vo_driver video_out_null;
 extern struct vo_driver video_out_image;
 extern struct vo_driver video_out_caca;
-extern struct vo_driver video_out_yuv4mpeg;
 extern struct vo_driver video_out_direct3d;
 extern struct vo_driver video_out_direct3d_shaders;
 extern struct vo_driver video_out_directx;
 extern struct vo_driver video_out_v4l2;
-extern struct vo_driver video_out_gif89a;
 extern struct vo_driver video_out_directfb;
 extern struct vo_driver video_out_corevideo;
 extern struct vo_driver video_out_sharedbuffer;
-extern struct vo_driver video_out_md5sum;
 
 const struct vo_driver *video_out_drivers[] =
 {
@@ -139,16 +136,7 @@ const struct vo_driver *video_out_drivers[] =
         // vo directfb can call exit() if initialization fails
         &video_out_directfb,
 #endif
-#ifdef CONFIG_YUV4MPEG
-        &video_out_yuv4mpeg,
-#endif
         &video_out_image,
-#ifdef CONFIG_GIF
-        &video_out_gif89a,
-#endif
-#ifdef CONFIG_MD5SUM
-        &video_out_md5sum,
-#endif
 #ifdef CONFIG_X11
 #ifdef CONFIG_GL
         &video_out_gl_nosw,

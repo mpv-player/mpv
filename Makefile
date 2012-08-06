@@ -386,7 +386,6 @@ SRCS_MPLAYER-$(SHAREDBUFFER) += libvo/vo_sharedbuffer.m
 SRCS_MPLAYER-$(DIRECT3D)     += libvo/vo_direct3d.c libvo/w32_common.c
 SRCS_MPLAYER-$(DIRECTFB)     += libvo/vo_directfb2.c
 SRCS_MPLAYER-$(DIRECTX)      += libao2/ao_dsound.c libvo/vo_directx.c
-SRCS_MPLAYER-$(GIF)          += libvo/vo_gif89a.c
 SRCS_MPLAYER-$(GL)           += libvo/gl_common.c libvo/vo_gl.c libvo/vo_gl3.c \
                                 pnm_loader.c
 SRCS_MPLAYER-$(GL_WIN32)     += libvo/w32_common.c
@@ -395,7 +394,6 @@ SRCS_MPLAYER-$(GL_X11)       += libvo/x11_common.c
 SRCS_MPLAYER-$(JACK)         += libao2/ao_jack.c
 SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
 SRCS_MPLAYER-$(LIRC)          += input/lirc.c
-SRCS_MPLAYER-$(MD5SUM)        += libvo/vo_md5sum.c
 SRCS_MPLAYER-$(OPENAL)        += libao2/ao_openal.c
 SRCS_MPLAYER-$(OSS)           += libao2/ao_oss.c
 SRCS_MPLAYER-$(PULSE)         += libao2/ao_pulse.c
@@ -407,7 +405,6 @@ SRCS_MPLAYER-$(VDPAU)         += libvo/vo_vdpau.c
 
 SRCS_MPLAYER-$(X11)           += libvo/vo_x11.c libvo/x11_common.c
 SRCS_MPLAYER-$(XV)            += libvo/vo_xv.c
-SRCS_MPLAYER-$(YUV4MPEG)      += libvo/vo_yuv4mpeg.c
 
 SRCS_MPLAYER = command.c \
                m_property.c \

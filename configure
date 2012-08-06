@@ -371,8 +371,6 @@ Video output:
   --enable-xshape          enable XShape support [autodetect]
   --disable-xss            disable screensaver support via xss [autodetect]
   --enable-directfb        enable DirectFB video output [autodetect]
-  --disable-md5sum         disable md5sum video output [enable]
-  --disable-yuv4mpeg       disable yuv4mpeg video output [enable]
   --disable-corevideo      disable CoreVideo video output [autodetect]
   --disable-cocoa          disable Cocoa OpenGL backend [autodetect]
   --disable-sharedbuffer   disable OSX shared buffer video output [autodetect]
@@ -460,8 +458,6 @@ _nas=auto
 _png=auto
 _mng=auto
 _jpeg=auto
-_md5sum=yes
-_yuv4mpeg=yes
 _gif=auto
 _gl=auto
 _aa=auto
@@ -683,10 +679,6 @@ for ac_option do
   --disable-mng)        _mng=no         ;;
   --enable-jpeg)        _jpeg=yes       ;;
   --disable-jpeg)       _jpeg=no        ;;
-  --enable-md5sum)      _md5sum=yes     ;;
-  --disable-md5sum)     _md5sum=no      ;;
-  --enable-yuv4mpeg)    _yuv4mpeg=yes   ;;
-  --disable-yuv4mpeg)   _yuv4mpeg=no    ;;
   --enable-gif)         _gif=yes        ;;
   --disable-gif)        _gif=no         ;;
   --enable-gl)          _gl=yes         ;;
@@ -2052,28 +2044,6 @@ echores "$_libquvi"
 #########
 # VIDEO #
 #########
-
-
-echocheck "md5sum support"
-if test "$_md5sum" = yes; then
-  def_md5sum="#define CONFIG_MD5SUM 1"
-  vomodules="md5sum $vomodules"
-else
-  def_md5sum="#undef CONFIG_MD5SUM"
-  novomodules="md5sum $novomodules"
-fi
-echores "$_md5sum"
-
-
-echocheck "yuv4mpeg support"
-if test "$_yuv4mpeg" = yes; then
-  def_yuv4mpeg="#define CONFIG_YUV4MPEG 1"
-  vomodules="yuv4mpeg $vomodules"
-else
-  def_yuv4mpeg="#undef CONFIG_YUV4MPEG"
-  novomodules="yuv4mpeg $novomodules"
-fi
-echores "$_yuv4mpeg"
 
 
 echocheck "DirectFB"
@@ -3975,7 +3945,6 @@ LIBTHEORA = $_theora
 LIRC = $_lirc
 LIVE555 = $_live
 MACOSX_FINDER = $_macosx_finder
-MD5SUM = $_md5sum
 MNG = $_mng
 MPG123 = $_mpg123
 NETWORKING = $networking
@@ -4008,7 +3977,6 @@ WIN32_EMULATION = $_win32_emulation
 X11 = $_x11
 XANIM_CODECS = $_xanim
 XV = $_xv
-YUV4MPEG = $_yuv4mpeg
 
 # FFmpeg
 FFMPEG_INTERNALS = $ffmpeg_internals
@@ -4269,7 +4237,6 @@ $def_gl_cocoa
 $def_gl_win32
 $def_gl_x11
 $def_jpeg
-$def_md5sum
 $def_mng
 $def_png
 $def_v4l2
@@ -4281,7 +4248,6 @@ $def_xf86keysym
 $def_xinerama
 $def_xss
 $def_xv
-$def_yuv4mpeg
 
 
 /* FFmpeg */
