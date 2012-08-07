@@ -312,6 +312,48 @@ the *XXX* option or if *XXX* is compiled in.
 | `mplayer --ao pcm:file=%\`expr length "$NAME"\`%"$NAME" test.avi`
 
 
+Per-file options
+----------------
+
+When playing multiple files, any option given on the command line usually
+affects all files. Example:
+
+`mplayer --a file1.mkv --b file2.mkv --c`
+
++-----------+-------------------------+
+| File      | Active options          |
++===========+=========================+
+| file1.mkv | --a --b --c             |
++-----------+-------------------------+
+| file2.mkv | --a --b --c             |
++-----------+-------------------------+
+
+Also, if any option is changed at runtime (via slave commands), they aren't
+reset when a new file is played.
+
+Sometimes, it's useful to change options per-file. This can be achieved by
+adding the special per-file markers `--{` and `--}`. (Note that you must
+escape these on some shells.) Example:
+
+`mplayer --a file1.mkv --b --\\\{ --c file2.mkv --d file3.mkv --e --\\\} file4.mkv --f`
+
++-----------+-------------------------+
+| File      | Active options          |
++===========+=========================+
+| file1.mkv | --a --b --f             |
++-----------+-------------------------+
+| file2.mkv | --a --b --f --c --d --e |
++-----------+-------------------------+
+| file3.mkv | --a --b --f --c --d --e |
++-----------+-------------------------+
+| file4.mkv | --a --b --f             |
++-----------+-------------------------+
+
+Additionally, any file-local option changed at runtime is reset when the current
+file stops playing. If option ``-c`` is changed during playback of `file2.mkv`,
+it's reset when advancing to `file3.mkv`. This only affects file-local options.
+The option ``--a`` is never reset here.
+
 CONFIGURATION FILES
 ===================
 
