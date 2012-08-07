@@ -76,15 +76,21 @@ pulse
         string uses a local connection, "localhost" uses network transfer
         (most likely not what you want).
 
+portaudio
+    PortAudio audio output driver. This works on all platforms, and has extensive
+    MS Windows support.
+
+    device
+        Specify the subdevice to use. Giving ``help`` as device name lists all
+        devices found by PortAudio. Devices can be given as numeric values,
+        starting from ``1``.
+
 dsound (Windows only)
     DirectX DirectSound audio output driver
 
     device=<devicenum>
         Sets the device number to use. Playing a file with ``-v`` will show a
         list of available devices.
-
-v4l2 (requires Linux 2.6.22+ kernel)
-    Audio output driver for V4L2 cards with hardware MPEG decoder.
 
 null
     Produces no audio output but maintains video playback speed. Use

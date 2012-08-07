@@ -24,8 +24,9 @@ in the list. Suboptions are optional and can mostly be omitted.
 Available video output drivers are:
 
 xv (X11 only)
-    Uses the XVideo extension to enable hardware accelerated playback. If you
-    cannot use a hardware specific driver, this is probably the best option.
+    Uses the XVideo extension to enable hardware accelerated playback. This is
+    the most compatible VO on X, but may be low quality, and has issues with
+    OSD and subtitle display.
     For information about what colorkey is used and how it is drawn run
     MPlayer with ``-v`` option and look out for the lines tagged with ``[xv
     common]`` at the beginning.
@@ -151,11 +152,81 @@ vdpau (X11 only)
     driver implementation may also have limits on the length of maximum
     queuing time or number of queued surfaces that work well or at all.
 
-direct3d (Windows only) (BETA CODE!)
-    Video output driver that uses the Direct3D interface (useful for Vista).
+direct3d_shaders (Windows only)
+    Video output driver that uses the Direct3D interface.
+
+    prefer-stretchrect
+        Use IDirect3DDevice9::StretchRect over other methods if possible.
+
+    disable-stretchrect
+        Never render the video using IDirect3DDevice9::StretchRect.
+
+    disable-textures
+        Never render the video using D3D texture rendering. (Rendering with
+        textures + shader will still be allowed. Add disable-shaders to
+        completely disable video rendering with textures.)
+
+    disable-shaders
+        Never use shaders when rendering video.
+
+    only-8bit
+        Never render YUV video with more than 8 bits per component.
+        (Using this flag will force software conversion to 8 bit.)
+
+    disable-eosd
+        Disable EOSD rendering for subtitles.
+        (Using this flag might force the insertion of the 'ass' video filter,
+         which will render the subtitles in software.)
+
+    disable-texture-align
+        Normally texture sizes are always aligned to 16. With this option
+        enabled, the video texture will always have exactly the same size as
+        the video itself.
+
+
+    Debug options. These might be incorrect, might be removed in the future, might
+    crash, might cause slow downs, etc. Contact the developers if you actually need
+    any of these for performance or proper operation.
+
+    force-power-of-2
+        Always force textures to power of 2, even if the device reports
+        non-power-of-2 texture sizes as supported.
+
+    texture-memory=N
+        Only affects operation with shaders/texturing enabled, and (E)OSD.
+        Values for N:
+            0
+                default, will often use an additional shadow texture + copy
+            1
+                use D3DPOOL_MANAGED
+            2
+                use D3DPOOL_DEFAULT
+            3
+                use D3DPOOL_SYSTEMMEM, but without shadow texture
+
+    swap-discard
+        Use D3DSWAPEFFECT_DISCARD, which might be faster.
+        Might be slower too, as it must (?) clear every frame.
+
+    exact-backbuffer
+        Always resize the backbuffer to window size.
+
+    no16bit-textures
+        Don't use textures with a 16 bit color channel for YUV formats that
+        use more than 8 bits per component. Instead, use D3DFMT_A8L8 textures
+        and compute the values sampled from the 2 channels back into one.
+        Might be slower, since the shader becomes slightly more complicated.
+        Might work better, if your drivers either don't support D3DFMT_L16,
+        or if either the texture unit or the shaders don't operate in at least
+        16 bit precision.
+
+direct3d (Windows only)
+    Same as ``direct3d_shaders``, but with the options ``disable-textures``
+    and ``disable-shaders`` forced.
 
 directx (Windows only)
-    Video output driver that uses the DirectX interface.
+    Video output driver that uses the DirectX interface. Deprecated, always
+    prefer direct3d* by default.
 
     noaccel
         Turns off hardware acceleration. Try this option if you have display
@@ -352,6 +423,229 @@ gl
         enabled). This option is for testing; to disable the OSD use
         ``--osdlevel=0`` instead.
 
+    backend=<sys>
+        auto
+            auto-select (default)
+        cocoa
+            Cocoa/OSX
+        win
+            Win32/WGL
+        x11
+            X11/GLX
+
+gl3
+    OpenGL video output driver, extended version. The requires an OpenGL 3
+    capable graphics driver. (Note: this is only because of developer pedantery.
+    The dependency on actual OpenGL 3 features is rather low.)
+
+    It supports extended scaling methods, dithering and color management.
+    It tries to use sane defaults for good quality output.
+
+    Note that some cheaper LCDs do dithering that gravely interferes with
+    vo_gl3's dithering. Disabling dithering with ``dither-depth=-1`` helps.
+
+    lscale=<filter>
+        Set the scaling filter. Possible choices:
+            bilinear
+            bicubic_fast
+            sharpen3
+            sharpen5
+            hanning
+            hamming
+            hermite
+            quadric
+            bicubic
+            kaiser
+            catmull_rom
+            mitchell
+            spline16
+            spline36
+            gaussian
+            sinc2
+            sinc3
+            sinc4
+            lanczos2
+            lanczos3
+            lanczos4
+            blackman2
+            blackman3
+            blackman4
+
+        bilinear
+            Bilinear hardware texture filtering (fastest, mid-quality).
+
+        lanczos2
+            Lanczos scaling with radius=2. Provides a good quality and speed.
+            This is the default.
+
+        lanczos3
+            Lanczos with radius=3.
+
+        bicubic_fast
+            Bicubic filter. Has a blurring effect on the image, even if no
+            scaling is done.
+
+        sharpen3
+            Unsharp masking (sharpening) with radius=3 and a default strength
+            of 0.5 (see ``lparam1``).
+
+        sharpen5
+            Unsharp masking (sharpening) with radius=5 and a default strength
+            of 0.5 (see ``lparam1``).
+
+        mitchell
+            Mitchell-Netravali. The ``b`` and ``c`` parameters can be set with
+            ``lparam1`` and ``lparam2``. Both are set to 1/3 by default.
+
+    lparam1=<value>
+        Set filter parameters. Ignored if the filter is not tunable. These are
+        unset by default, and use the filter specific default if applicable.
+
+    lparam2=<value>
+        See ``lparam1``.
+
+    osdcolor=<0xAARRGGBB>
+        Use the given color for the OSD.
+
+    stereo=<value>
+        Select a method for stereo display. You may have to use ``--aspect`` to
+        fix the aspect value. Experimental, do not expect too much from it.
+
+        0
+            Normal 2D display
+        1
+            Convert side by side input to full-color red-cyan stereo.
+        2
+            Convert side by side input to full-color green-magenta stereo.
+        3
+            Convert side by side input to quadbuffered stereo. Only supported
+            by very few OpenGL cards.
+
+    srgb
+        Enable gamma-correct scaling by working in linear light. This
+        makes use of sRGB textures and framebuffers.
+        This option forces the options 'indirect' and 'gamma'.
+        NOTE: for BT.709 colorspaces, a gamma of 2.35 is assumed. For
+        other YUV colorspaces, 2.2 is assumed. RGB input is always
+        assumed to be in sRGB.
+
+    pbo
+        Enable use of PBOs. This is faster, but can sometimes lead to
+        sparodic and temporary image corruption.
+
+    dither-depth=<n>
+        Positive non-zero values select the target bit depth. Default: 0.
+
+        \-1
+            Disable any dithering done by mplayer.
+        0
+            Automatic selection. If output bit depth can't be detected,
+            8 bits per component are assumed.
+        8
+            Dither to 8 bit output.
+
+        Note that dithering will always be disabled if the bit depth
+        of the video is lower or qual to the detected dither-depth.
+        If color management is enabled, input depth is assumed to be
+        16 bits, because the 3D LUT output is 16 bit wide.
+
+        Note that the depth of the connected video display device can not be
+        detected. Often, LCD panels will do dithering on their own, which
+        conflicts with vo_gl3's dithering, and leads to ugly output.
+
+    debug
+        Check for OpenGL errors, i.e. call glGetError(). Also request a
+        debug OpenGL context (which does nothing with current graphics drivers
+        as of this writing).
+
+
+    swapinterval=<n>
+        Interval in displayed frames between to buffer swaps.
+        1 is equivalent to enable VSYNC, 0 to disable VSYNC.
+
+    no-scale-sep
+        When using a separable scale filter for luma, usually two filter
+        passes are done. This is often faster. However, it forces
+        conversion to RGB in an extra pass, so it can actually be slower
+        if used with fast filters on small screen resolutions. Using
+        this options will make rendering a single operation.
+        Note that chroma scalers are always done as 1-pass filters.
+
+    cscale=<n>
+        As lscale but for chroma (2x slower with little visible effect).
+        Note that with some scaling filters, upscaling is always done in
+        RGB. If chroma is not subsampled, this option is ignored, and the
+        luma scaler is used instead. Setting this option is often useless.
+
+    no-fancy-downscaling
+        When using convolution based filters, don't extend the filter
+        size when downscaling. Trades downscaling performance for
+        reduced quality.
+
+    no-npot
+        Force use of power-of-2 texture sizes. For debugging only.
+        Borders will be distorted due to filtering.
+
+    glfinish
+        Call glFinish() before swapping buffers
+
+    backend=<sys>
+        auto
+            auto-select (default)
+        cocoa
+            Cocoa/OSX
+        win
+            Win32/WGL
+        x11
+            X11/GLX
+
+    indirect
+        Do YUV conversion and scaling as separate passes. This will
+        first render the video into a video-sized RGB texture, and
+        draw the result on screen. The luma scaler is used to scale
+        the RGB image when rendering to screen. The chroma scaler
+        is used only on YUV conversion, and only if the video uses
+        chroma-subsampling.
+        This mechanism is disabled on RGB input.
+
+    fbo-format=<fmt>
+        Selects the internal format of any FBO textures used.
+        fmt can be one of: rgb, rgba, rgb8, rgb16, rgb16f, rgb32f
+        Default: rgb16.
+
+    gamma
+        Always enable gamma control. (Disables delayed enabling.)
+
+    force-gl2
+        Create a legacy GL context. This will randomly malfunction
+        if the proper extensions are not supported.
+
+    icc-profile=<file>
+        Load an ICC profile and use it to transform linear RGB to
+        screen output. Needs LittleCMS2 support compiled in.
+
+    icc-cache=<file>
+        Store and load the 3D LUT created from the ICC profile in
+        this file. This can be used to speed up loading, since
+        LittleCMS2 can take a while to create the 3D LUT.
+        Note that this file contains an uncompressed LUT. Its size depends on
+        the ``3dlut-size``, can be become very big.
+
+    icc-intent=<value>
+        0
+            perceptual
+        1
+            relative colorimetric
+        2
+            saturation
+        3
+            absolute colorimetric (default)
+
+    3dlut-size=<r>x<g>x<b>
+        Size of the 3D LUT generated from the ICC profile in each
+        dimension. Default is 128x256x64.
+        Sizes must be a power of two, and 256 at most.
+
 null
     Produces no video output. Useful for benchmarking.
 
@@ -379,16 +673,6 @@ directfb
         Will force layer with ID N for playback (default: -1 - auto).
     dfbopts=<list>
         Specify a parameter list for DirectFB.
-
-v4l2 (requires Linux 2.6.22+ kernel)
-    Video output driver for V4L2 compliant cards with built-in hardware MPEG
-    decoder. See also the lavc video filter.
-
-    <device>
-        Explicitly choose the MPEG decoder device name to use (default:
-        ``/dev/video16``).
-    <output>
-        Explicitly choose the TV-out output to be used for the video signal.
 
 image
     Output each frame into an image file in the current directory. Each file
