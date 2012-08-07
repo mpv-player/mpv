@@ -20,7 +20,7 @@
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/OpenGL.h>
 #import <QuartzCore/QuartzCore.h>
-#import <CoreServices/CoreServices.h> // for CGDisplayHideCursor and Gestalt
+#import <CoreServices/CoreServices.h> // for CGDisplayHideCursor
 #include <dlfcn.h>
 
 #include "cocoa_common.h"
@@ -53,6 +53,14 @@
 
 #define NSLeftAlternateKeyMask (0x000020 | NSAlternateKeyMask)
 #define NSRightAlternateKeyMask (0x000040 | NSAlternateKeyMask)
+
+// add methods not available on OSX versions prior to 10.7
+#ifndef MAC_OS_X_VERSION_10_7
+@interface NSView (IntroducedInLion)
+- (NSRect)convertRectToBacking:(NSRect)aRect;
+- (void)setWantsBestResolutionOpenGLSurface:(BOOL)aBool;
+@end
+#endif
 
 @interface GLMPlayerWindow : NSWindow <NSWindowDelegate>
 - (BOOL) canBecomeKeyWindow;
@@ -111,8 +119,6 @@ void resize_window(struct vo *vo);
 void vo_cocoa_display_cursor(int requested_state);
 void create_menu(void);
 
-bool is_lion_or_better(void);
-
 struct vo_cocoa_state *vo_cocoa_init_state(void)
 {
     struct vo_cocoa_state *s = talloc_ptrtype(NULL, s);
@@ -128,6 +134,13 @@ struct vo_cocoa_state *vo_cocoa_init_state(void)
         .display_cursor = 1,
     };
     return s;
+}
+
+static bool supports_hidpi(NSView *view)
+{
+    SEL hdpi_selector = @selector(setWantsBestResolutionOpenGLSurface:);
+    return is_osx_version_at_least(10, 7, 0) && view &&
+           [view respondsToSelector:hdpi_selector];
 }
 
 bool vo_cocoa_gui_running(void)
@@ -207,8 +220,17 @@ int vo_cocoa_change_attributes(struct vo *vo)
 
 void resize_window(struct vo *vo)
 {
-    vo->dwidth = [[s->window contentView] frame].size.width;
-    vo->dheight = [[s->window contentView] frame].size.height;
+    NSView *view = [s->window contentView];
+    NSRect frame;
+
+    if (supports_hidpi(view)) {
+        frame = [view convertRectToBacking: [view frame]];
+    } else {
+        frame = [view frame];
+    }
+
+    vo->dwidth  = frame.size.width;
+    vo->dheight = frame.size.height;
     [s->glContext update];
 }
 
@@ -247,9 +269,13 @@ int vo_cocoa_create_window(struct vo *vo, uint32_t d_width,
 
         GLMPlayerOpenGLView *glView = [[GLMPlayerOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];
 
+        // check for HiDPI support and enable it (available on 10.7 +)
+        if (supports_hidpi(glView))
+            [glView setWantsBestResolutionOpenGLSurface:YES];
+
         int i = 0;
         NSOpenGLPixelFormatAttribute attr[32];
-        if (is_lion_or_better()) {
+        if (is_osx_version_at_least(10, 7, 0)) {
           attr[i++] = NSOpenGLPFAOpenGLProfile;
           attr[i++] = (gl3profile ? NSOpenGLProfileVersion3_2Core : NSOpenGLProfileVersionLegacy);
         } else if(gl3profile) {
@@ -470,17 +496,6 @@ void create_menu()
 
     new_main_menu_item(main_menu, w_menu, @"Window");
     [pool release];
-}
-
-bool is_lion_or_better(void)
-{
-    SInt32 major, minor;
-    Gestalt(gestaltSystemVersionMajor, &major);
-    Gestalt(gestaltSystemVersionMinor, &minor);
-    if(major >= 10 && minor >= 7)
-      return YES;
-    else
-      return NO;
 }
 
 @implementation GLMPlayerWindow
