@@ -44,6 +44,7 @@ static const char osd_font_pfb[] =
 
 void osd_init_backend(struct osd_state *osd)
 {
+    osd->ass_library = mp_ass_init(osd->opts);
     ass_add_font(osd->ass_library, "OSD", (void *)osd_font_pfb,
                  sizeof(osd_font_pfb) - 1);
 
@@ -54,9 +55,12 @@ void osd_init_backend(struct osd_state *osd)
 
 void osd_destroy_backend(struct osd_state *osd)
 {
-    if (osd && osd->osd_render) {
-        ass_renderer_done(osd->osd_render);
+    if (osd) {
+        if (osd->osd_render)
+            ass_renderer_done(osd->osd_render);
         osd->osd_render = NULL;
+        ass_library_done(osd->ass_library);
+        osd->ass_library = NULL;
     }
 }
 

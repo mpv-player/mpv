@@ -4286,7 +4286,7 @@ int main(int argc, char *argv[])
     mpctx->ass_library = mp_ass_init(opts);
 #endif
 
-    mpctx->osd = osd_create(opts, mpctx->ass_library);
+    mpctx->osd = osd_create(opts);
 
     init_input(mpctx);
 

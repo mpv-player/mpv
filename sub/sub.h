@@ -161,7 +161,7 @@ void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
                                           int stride),
                        void *ctx);
 
-struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib);
+struct osd_state *osd_create(struct MPOpts *opts);
 void osd_set_text(struct osd_state *osd, const char *text);
 int osd_update(struct osd_state *osd, int dxs, int dys);
 void vo_osd_changed(int new_value);
