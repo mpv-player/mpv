@@ -3997,12 +3997,6 @@ cat > $TMPH << EOF
 /* set up audio OUTBURST. Do not change this! */
 #define OUTBURST 512
 
-/* Enable fast OSD/SUB renderer (looks ugly, but uses less CPU power) */
-#undef FAST_OSD
-#undef FAST_OSD_TABLE
-
-
-
 #define CONFIGURATION "$configuration"
 
 #define MPLAYER_DATADIR "$_datadir"

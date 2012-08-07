@@ -66,19 +66,15 @@ struct gl_priv {
     int scaled_osd;
     //! Textures for OSD
     GLuint osdtex[MAX_OSD_PARTS];
-#ifndef FAST_OSD
     //! Alpha textures for OSD
     GLuint osdatex[MAX_OSD_PARTS];
-#endif
     GLuint eosd_texture;
     int eosd_texture_width, eosd_texture_height;
     struct eosd_packer *eosd;
     struct vertex_eosd *eosd_va;
     //! Display lists that draw the OSD parts
     GLuint osdDispList[MAX_OSD_PARTS];
-#ifndef FAST_OSD
     GLuint osdaDispList[MAX_OSD_PARTS];
-#endif
     //! How many parts the OSD currently consists of
     int osdtexCnt;
     int osd_color;
@@ -267,11 +263,9 @@ static void clearOSD(struct vo *vo)
     if (!p->osdtexCnt)
         return;
     gl->DeleteTextures(p->osdtexCnt, p->osdtex);
-#ifndef FAST_OSD
     gl->DeleteTextures(p->osdtexCnt, p->osdatex);
     for (i = 0; i < p->osdtexCnt; i++)
         gl->DeleteLists(p->osdaDispList[i], 1);
-#endif
     for (i = 0; i < p->osdtexCnt; i++)
         gl->DeleteLists(p->osdDispList[i], 1);
     p->osdtexCnt = 0;
@@ -695,7 +689,6 @@ static void create_osd_texture(void *ctx, int x0, int y0, int w, int h,
     glUploadTex(gl, p->target, GL_LUMINANCE, GL_UNSIGNED_BYTE, src, stride,
                 0, 0, w, h, 0);
 
-#ifndef FAST_OSD
     gl->GenTextures(1, &p->osdatex[p->osdtexCnt]);
     gl->BindTexture(p->target, p->osdatex[p->osdtexCnt]);
     glCreateClearTex(gl, p->target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE,
@@ -711,19 +704,17 @@ static void create_osd_texture(void *ctx, int x0, int y0, int w, int h,
                     0, 0, w, h, 0);
         free(tmp);
     }
-#endif
 
     gl->BindTexture(p->target, 0);
 
     // Create a list for rendering this OSD part
-#ifndef FAST_OSD
     p->osdaDispList[p->osdtexCnt] = gl->GenLists(1);
     gl->NewList(p->osdaDispList[p->osdtexCnt], GL_COMPILE);
     // render alpha
     gl->BindTexture(p->target, p->osdatex[p->osdtexCnt]);
     glDrawTex(gl, x0, y0, w, h, 0, 0, w, h, sx, sy, p->use_rectangle == 1, 0, 0);
     gl->EndList();
-#endif
+
     p->osdDispList[p->osdtexCnt] = gl->GenLists(1);
     gl->NewList(p->osdDispList[p->osdtexCnt], GL_COMPILE);
     // render OSD
@@ -765,10 +756,8 @@ static void do_render_osd(struct vo *vo, int type)
         gl->Color4ub((p->osd_color >> 16) & 0xff, (p->osd_color >> 8) & 0xff,
                      p->osd_color & 0xff, 0xff - (p->osd_color >> 24));
         // draw OSD
-#ifndef FAST_OSD
         gl->BlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
         gl->CallLists(p->osdtexCnt, GL_UNSIGNED_INT, p->osdaDispList);
-#endif
         gl->BlendFunc(GL_SRC_ALPHA, GL_ONE);
         gl->CallLists(p->osdtexCnt, GL_UNSIGNED_INT, p->osdDispList);
     }
