@@ -545,7 +545,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
         set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration,
                      "Chapter: %s", chapter_name);
     } else if (step_all > 0)
-        queue_seek(mpctx, MPSEEK_RELATIVE, 1000000000, 0);
+        mpctx->stop_play = PT_NEXT_ENTRY;
     else
         set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration,
                      "Chapter: (%d) %s", 0, mp_gtext("unknown"));
