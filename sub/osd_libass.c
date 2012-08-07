@@ -44,11 +44,11 @@ static const char osd_font_pfb[] =
 
 void osd_init_backend(struct osd_state *osd)
 {
-    osd->ass_library = mp_ass_init(osd->opts);
-    ass_add_font(osd->ass_library, "OSD", (void *)osd_font_pfb,
+    osd->osd_ass_library = mp_ass_init(osd->opts);
+    ass_add_font(osd->osd_ass_library, "OSD", (void *)osd_font_pfb,
                  sizeof(osd_font_pfb) - 1);
 
-    osd->osd_render = ass_renderer_init(osd->ass_library);
+    osd->osd_render = ass_renderer_init(osd->osd_ass_library);
     mp_ass_configure_fonts(osd->osd_render);
     ass_set_aspect_ratio(osd->osd_render, 1.0, 1.0);
 }
@@ -59,8 +59,8 @@ void osd_destroy_backend(struct osd_state *osd)
         if (osd->osd_render)
             ass_renderer_done(osd->osd_render);
         osd->osd_render = NULL;
-        ass_library_done(osd->ass_library);
-        osd->ass_library = NULL;
+        ass_library_done(osd->osd_ass_library);
+        osd->osd_ass_library = NULL;
     }
 }
 
@@ -185,7 +185,7 @@ static void update_font_scale(ASS_Track *track, ASS_Style *style, double factor)
 
 static ASS_Track *create_osd_ass_track(struct osd_state *osd)
 {
-    ASS_Track *track = mp_ass_default_track(osd->ass_library, osd->opts);
+    ASS_Track *track = mp_ass_default_track(osd->osd_ass_library, osd->opts);
     ASS_Style *style = track->styles + track->default_style;
 
     track->PlayResX = track->PlayResY * 1.33333;
@@ -344,7 +344,7 @@ void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj)
     }
 
     if (!obj->osd_track)
-        obj->osd_track = mp_ass_default_track(osd->ass_library, osd->opts);
+        obj->osd_track = mp_ass_default_track(osd->osd_ass_library, osd->opts);
 
     ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
 

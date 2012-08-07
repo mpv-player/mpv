@@ -304,11 +304,12 @@ int osd_update(struct osd_state *osd, int dxs, int dys)
     return osd_update_ext(osd, dxs, dys, 0, 0, 0, 0, dxs, dys);
 }
 
-struct osd_state *osd_create(struct MPOpts *opts)
+struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
 {
     struct osd_state *osd = talloc_zero(NULL, struct osd_state);
     *osd = (struct osd_state){
         .opts = opts,
+        .ass_library = asslib,
     };
     if(!draw_alpha_init_flag){
 	draw_alpha_init_flag=1;
