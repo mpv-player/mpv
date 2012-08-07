@@ -421,6 +421,8 @@ and actually will cause initialization failure when use with hardware decodingis
 attempted. Using the ``screenshot`` video filter is not recommended for these
 reasons.
 
+.. include:: changes.rst
+
 ENVIRONMENT VARIABLES
 =====================
 
