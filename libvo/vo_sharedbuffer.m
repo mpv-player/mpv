@@ -261,7 +261,7 @@ const struct vo_driver video_out_sharedbuffer = {
     .check_events = check_events,
     .uninit = uninit,
     .draw_osd = draw_osd,
-    .privsize = sizeof(struct priv),
+    .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_STRING("buffer_name", buffer_name, 0, OPTDEF_STR("mplayerosx")),
         {NULL},

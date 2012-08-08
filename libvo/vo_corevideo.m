@@ -232,7 +232,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd_s)
     struct osd_p *osd = p->osd;
     GL *gl = p->mpglctx->gl;
 
-    if (vo_osd_has_changed()) {
+    if (vo_osd_has_changed(osd_s)) {
         clearOSD(vo);
         osd_draw_text_ext(osd_s, vo->dwidth, vo->dheight, 0, 0, 0, 0,
                           p->image_width, p->image_height, create_osd_texture,
@@ -465,5 +465,5 @@ const struct vo_driver video_out_corevideo = {
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,
-    .privsize = sizeof(struct priv),
+    .priv_size = sizeof(struct priv),
 };
