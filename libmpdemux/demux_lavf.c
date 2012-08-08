@@ -320,6 +320,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             codec->codec_tag = 0;
         if (!codec->codec_tag)
             codec->codec_tag = mp_taglist_audio(codec->codec_id);
+        if (!codec->codec_tag)
+            codec->codec_tag = -1;
         wf->wFormatTag = codec->codec_tag;
         wf->nChannels = codec->channels;
         wf->nSamplesPerSec = codec->sample_rate;
