@@ -136,7 +136,7 @@ typedef struct demux_stream {
 // ---- mov -----
     unsigned int ss_mul, ss_div;
 // ---- stream header ----
-    void *sh;
+    void *sh;              // points to sh_audio or sh_video
 } demux_stream_t;
 
 typedef struct demuxer_info {

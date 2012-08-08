@@ -1576,12 +1576,16 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_OK;
         }
         if (opts->sub_id >= 0 && mpctx->d_sub && mpctx->d_sub->sh) {
-            struct sh_stream *sh = mpctx->d_sub->sh;
+            struct sh_stream *sh = ((struct sh_sub *)mpctx->d_sub->sh)->gsh;
             char *lang = demuxer_stream_lang(mpctx->demuxer, sh);
             if (!lang)
                 lang = talloc_strdup(NULL, mp_gtext("unknown"));
-            *(char **) arg = talloc_asprintf(NULL, "(%d) %s", opts->sub_id,
-                                             lang);
+            if (sh->title)
+                *(char **)arg = talloc_asprintf(NULL, "(%d) %s (\"%s\")",
+                                                opts->sub_id, lang, sh->title);
+            else
+                *(char **) arg = talloc_asprintf(NULL, "(%d) %s", opts->sub_id,
+                                                 lang);
             talloc_free(lang);
             return M_PROPERTY_OK;
         }
