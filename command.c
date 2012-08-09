@@ -2249,6 +2249,8 @@ static const m_option_t mp_properties[] = {
     { "tv_hue", mp_property_tv_color, CONF_TYPE_INT,
       M_OPT_RANGE, -100, 100, .offset = TV_COLOR_HUE },
 #endif
+
+    {0},
 };
 
 
