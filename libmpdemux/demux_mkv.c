@@ -53,10 +53,6 @@
 #include "sub/sub.h"
 
 
-#ifdef CONFIG_QTX_CODECS
-#include "loader/qtx/qtxsdk/components.h"
-#endif
-
 static const unsigned char sipr_swaps[38][2] = {
     {0,63},{1,22},{2,44},{3,90},{5,81},{7,31},{8,86},{9,58},{10,36},{12,68},
     {13,39},{14,73},{15,53},{16,69},{17,57},{19,88},{20,34},{21,71},{24,46},
@@ -1157,7 +1153,6 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
                                 int vid)
 {
     BITMAPINFOHEADER *bih;
-    void *ImageDesc = NULL;
     sh_video_t *sh_v;
 
     if (track->ms_compat) {     /* MS compatibility mode */
@@ -1222,32 +1217,6 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
             memcpy(dst, src - 8, 8 + cnt);
             track->realmedia = 1;
 
-#ifdef CONFIG_QTX_CODECS
-        } else if (track->private_size >= sizeof(ImageDescription)
-                   && !strcmp(track->codec_id, MKV_V_QUICKTIME)) {
-            ImageDescriptionPtr idesc;
-
-            idesc = (ImageDescriptionPtr) track->private_data;
-            idesc->idSize = be2me_32(idesc->idSize);
-            idesc->cType = be2me_32(idesc->cType);
-            idesc->version = be2me_16(idesc->version);
-            idesc->revisionLevel = be2me_16(idesc->revisionLevel);
-            idesc->vendor = be2me_32(idesc->vendor);
-            idesc->temporalQuality = be2me_32(idesc->temporalQuality);
-            idesc->spatialQuality = be2me_32(idesc->spatialQuality);
-            idesc->width = be2me_16(idesc->width);
-            idesc->height = be2me_16(idesc->height);
-            idesc->hRes = be2me_32(idesc->hRes);
-            idesc->vRes = be2me_32(idesc->vRes);
-            idesc->dataSize = be2me_32(idesc->dataSize);
-            idesc->frameCount = be2me_16(idesc->frameCount);
-            idesc->depth = be2me_16(idesc->depth);
-            idesc->clutID = be2me_16(idesc->clutID);
-            bih->biPlanes = 1;
-            bih->biCompression = idesc->cType;
-            ImageDesc = idesc;
-#endif                          /* CONFIG_QTX_CODECS */
-
         } else {
             const videocodec_info_t *vi = vinfo;
             while (vi->id && strcmp(vi->id, track->codec_id))
@@ -1295,7 +1264,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
         sh_v->disp_w = track->v_dwidth;
         sh_v->disp_h = track->v_dheight;
     }
-    sh_v->ImageDesc = ImageDesc;
+    sh_v->ImageDesc = NULL;
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Aspect: %f\n", sh_v->aspect);
 
     sh_v->ds = demuxer->video;

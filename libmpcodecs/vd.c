@@ -39,13 +39,8 @@
 
 extern const vd_functions_t mpcodecs_vd_null;
 extern const vd_functions_t mpcodecs_vd_ffmpeg;
-extern const vd_functions_t mpcodecs_vd_dshow;
-extern const vd_functions_t mpcodecs_vd_dmo;
-extern const vd_functions_t mpcodecs_vd_vfw;
-extern const vd_functions_t mpcodecs_vd_vfwex;
 extern const vd_functions_t mpcodecs_vd_raw;
 extern const vd_functions_t mpcodecs_vd_hmblck;
-extern const vd_functions_t mpcodecs_vd_xanim;
 extern const vd_functions_t mpcodecs_vd_mpng;
 extern const vd_functions_t mpcodecs_vd_ijpg;
 extern const vd_functions_t mpcodecs_vd_mtga;
@@ -61,18 +56,9 @@ extern const vd_functions_t mpcodecs_vd_qtvideo;
 const vd_functions_t * const mpcodecs_vd_drivers[] = {
     &mpcodecs_vd_null,
     &mpcodecs_vd_ffmpeg,
-#ifdef CONFIG_WIN32DLL
-    &mpcodecs_vd_dshow,
-    &mpcodecs_vd_dmo,
-    &mpcodecs_vd_vfw,
-    &mpcodecs_vd_vfwex,
-#endif
     &mpcodecs_vd_lzo,
     &mpcodecs_vd_raw,
     &mpcodecs_vd_hmblck,
-#ifdef CONFIG_XANIM
-    &mpcodecs_vd_xanim,
-#endif
 #ifdef CONFIG_PNG
     &mpcodecs_vd_mpng,
 #endif
@@ -80,14 +66,8 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
     &mpcodecs_vd_ijpg,
 #endif
     &mpcodecs_vd_mtga,
-#ifdef CONFIG_REALCODECS
-    &mpcodecs_vd_realvid,
-#endif
 #ifdef CONFIG_LIBDV095
     &mpcodecs_vd_libdv,
-#endif
-#ifdef CONFIG_QTX_CODECS
-    &mpcodecs_vd_qtvideo,
 #endif
     /* Please do not add any new decoders here. If you want to implement a new
      * decoder, add it to libavcodec, except for wrappers around external

@@ -40,15 +40,9 @@ extern const ad_functions_t mpcodecs_ad_pcm;
 extern const ad_functions_t mpcodecs_ad_dvdpcm;
 extern const ad_functions_t mpcodecs_ad_alaw;
 extern const ad_functions_t mpcodecs_ad_imaadpcm;
-extern const ad_functions_t mpcodecs_ad_msadpcm;
-extern const ad_functions_t mpcodecs_ad_dshow;
-extern const ad_functions_t mpcodecs_ad_dmo;
-extern const ad_functions_t mpcodecs_ad_acm;
 extern const ad_functions_t mpcodecs_ad_faad;
 extern const ad_functions_t mpcodecs_ad_libmad;
-extern const ad_functions_t mpcodecs_ad_realaud;
 extern const ad_functions_t mpcodecs_ad_libdv;
-extern const ad_functions_t mpcodecs_ad_qtaudio;
 extern const ad_functions_t mpcodecs_ad_spdif;
 extern const ad_functions_t mpcodecs_ad_libdca;
 
@@ -68,24 +62,11 @@ const ad_functions_t * const mpcodecs_ad_drivers[] =
   &mpcodecs_ad_dvdpcm,
   &mpcodecs_ad_alaw,
   &mpcodecs_ad_imaadpcm,
-  &mpcodecs_ad_msadpcm,
-#ifdef CONFIG_WIN32DLL
-  &mpcodecs_ad_dshow,
-  &mpcodecs_ad_dmo,
-  &mpcodecs_ad_acm,
-  &mpcodecs_ad_twin,
-#endif
-#ifdef CONFIG_QTX_CODECS
-  &mpcodecs_ad_qtaudio,
-#endif
 #ifdef CONFIG_FAAD
   &mpcodecs_ad_faad,
 #endif
 #ifdef CONFIG_LIBMAD
   &mpcodecs_ad_libmad,
-#endif
-#ifdef CONFIG_REALCODECS
-  &mpcodecs_ad_realaud,
 #endif
 #ifdef CONFIG_LIBDV095
   &mpcodecs_ad_libdv,

@@ -120,66 +120,17 @@ SRCS_COMMON-$(NETWORKING)            += stream/stream_netstream.c \
 SRCS_COMMON-$(PNG)                   += libmpcodecs/vd_mpng.c
 SRCS_COMMON-$(PRIORITY)              += osdep/priority.c
 SRCS_COMMON-$(PVR)                   += stream/stream_pvr.c
-SRCS_COMMON-$(QTX_CODECS)            += libmpcodecs/ad_qtaudio.c \
-                                        libmpcodecs/vd_qtvideo.c
 SRCS_COMMON-$(RADIO)                 += stream/stream_radio.c
 SRCS_COMMON-$(RADIO_CAPTURE)         += stream/audio_in.c
-SRCS_COMMON-$(REAL_CODECS)           += libmpcodecs/ad_realaud.c \
-                                        libmpcodecs/vd_realvid.c
 SRCS_COMMON-$(STREAM_CACHE)          += stream/cache2.c
 
 SRCS_COMMON-$(TV)                    += stream/stream_tv.c stream/tv.c \
                                         stream/frequencies.c stream/tvi_dummy.c
 SRCS_COMMON-$(TV_BSDBT848)           += stream/tvi_bsdbt848.c
-SRCS_COMMON-$(TV_DSHOW)              += stream/tvi_dshow.c \
-                                        loader/dshow/guids.c \
-                                        loader/dshow/mediatype.c \
 
 SRCS_COMMON-$(TV_V4L2)               += stream/tvi_v4l2.c stream/audio_in.c
 SRCS_COMMON-$(VCD)                   += stream/stream_vcd.c
 SRCS_COMMON-$(VSTREAM)               += stream/stream_vstream.c
-SRCS_QTX_EMULATION                   += loader/wrapper.S
-SRCS_COMMON-$(QTX_EMULATION)         += $(SRCS_QTX_EMULATION)
-SRCS_WIN32_EMULATION                 += loader/elfdll.c \
-                                        loader/ext.c \
-                                        loader/ldt_keeper.c \
-                                        loader/module.c \
-                                        loader/pe_image.c \
-                                        loader/pe_resource.c \
-                                        loader/registry.c \
-                                        loader/resource.c \
-                                        loader/win32.c \
-
-SRCS_COMMON-$(WIN32_EMULATION)       += $(SRCS_WIN32_EMULATION)
-
-SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
-                                        libmpcodecs/ad_dmo.c \
-                                        libmpcodecs/ad_dshow.c \
-                                        libmpcodecs/vd_dmo.c \
-                                        libmpcodecs/vd_dshow.c \
-                                        libmpcodecs/vd_vfw.c \
-                                        libmpcodecs/vd_vfwex.c \
-                                        libmpdemux/demux_avs.c \
-                                        loader/afl.c \
-                                        loader/drv.c \
-                                        loader/vfl.c \
-                                        loader/dshow/DS_AudioDecoder.c \
-                                        loader/dshow/DS_Filter.c \
-                                        loader/dshow/DS_VideoDecoder.c \
-                                        loader/dshow/allocator.c \
-                                        loader/dshow/cmediasample.c \
-                                        loader/dshow/graph.c \
-                                        loader/dshow/guids.c \
-                                        loader/dshow/inputpin.c \
-                                        loader/dshow/mediatype.c \
-                                        loader/dshow/outputpin.c \
-                                        loader/dmo/DMO_AudioDecoder.c \
-                                        loader/dmo/DMO_VideoDecoder.c   \
-                                        loader/dmo/buffer.c   \
-                                        loader/dmo/dmo.c  \
-                                        loader/dmo/dmo_guids.c \
-
-SRCS_COMMON-$(XANIM_CODECS)          += libmpcodecs/vd_xanim.c
 
 SRCS_COMMON-$(DUMMY_OSD)             += sub/osd_dummy.c
 SRCS_COMMON-$(LIBASS_OSD)            += sub/osd_libass.c
@@ -455,10 +406,6 @@ DIRS =  . \
         libmpcodecs/native \
         libmpdemux \
         libvo \
-        loader \
-        loader/dshow \
-        loader/dmo \
-        loader/wine \
         osdep \
         stream \
         sub \
@@ -574,10 +521,6 @@ osdep/mplayer-rc.o: osdep/mplayer.exe.manifest
 libdvdcss/%:   CFLAGS := -Ilibdvdcss -D_GNU_SOURCE -DVERSION=\"1.2.10\" $(CFLAGS_LIBDVDCSS) $(CFLAGS)
 libdvdnav/%:   CFLAGS := -Ilibdvdnav -D_GNU_SOURCE -DHAVE_CONFIG_H -DVERSION=\"MPlayer-custom\" $(CFLAGS)
 libdvdread4/%: CFLAGS := -Ilibdvdread4 -D_GNU_SOURCE $(CFLAGS_LIBDVDCSS_DVDREAD) $(CFLAGS)
-
-loader/%: CFLAGS += -fno-omit-frame-pointer $(CFLAGS_NO_OMIT_LEAF_FRAME_POINTER)
-#loader/%: CFLAGS += -Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT
-loader/win32%: CFLAGS += $(CFLAGS_STACKREALIGN)
 
 stream/stream_dvdnav%: CFLAGS := $(CFLAGS_LIBDVDNAV) $(CFLAGS)
 

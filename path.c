@@ -142,29 +142,6 @@ char *get_path(const char *filename){
 	return buff;
 }
 
-#if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL)
-void set_path_env(void)
-{
-	/*make our codec dirs available for LoadLibraryA()*/
-	char win32path[MAX_PATH];
-#ifdef __CYGWIN__
-	cygwin_conv_to_full_win32_path(BINARY_CODECS_PATH, win32path);
-#else /*__CYGWIN__*/
-	/* Expand to absolute path unless it's already absolute */
-	if (!strstr(BINARY_CODECS_PATH,":") && BINARY_CODECS_PATH[0] != '\\') {
-		GetModuleFileNameA(NULL, win32path, MAX_PATH);
-		strcpy(strrchr(win32path, '\\') + 1, BINARY_CODECS_PATH);
-	}
-	else strcpy(win32path, BINARY_CODECS_PATH);
-#endif /*__CYGWIN__*/
-	mp_msg(MSGT_WIN32, MSGL_V, "Setting PATH to %s\n", win32path);
-	if (!SetEnvironmentVariableA("PATH", win32path))
-		mp_msg(MSGT_WIN32, MSGL_WARN, "Cannot set PATH!");
-}
-#endif /* (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL) */
-
-char *codec_path = BINARY_CODECS_PATH;
-
 char *mp_basename(const char *path)
 {
     char *s;

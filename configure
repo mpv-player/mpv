@@ -340,7 +340,6 @@ Optional features:
   --disable-ftp          disable FTP support [enabled]
   --disable-vstream      disable TiVo vstream client support [autodetect]
   --disable-pthreads     disable Posix threads support [autodetect]
-  --disable-w32threads   disable Win32 threads support [autodetect]
   --disable-libass       disable subtitle rendering with libass [autodetect]
   --disable-libass-osd   disable OSD rendering with libass [autodetect]
   --enable-rpath         enable runtime linker path for extra libs [disabled]
@@ -352,10 +351,6 @@ Codecs:
   --enable-mng              enable MNG input support [autodetect]
   --enable-jpeg             enable JPEG input/output support [autodetect]
   --enable-libcdio          enable libcdio support [autodetect]
-  --disable-win32dll        disable Win32 DLL support [disabled]
-  --disable-qtx             disable QuickTime codecs support [enabled]
-  --disable-xanim           disable XAnim codecs support [enabled]
-  --disable-real            disable RealPlayer codecs support [enabled]
   --enable-libav            skip Libav autodetection [autodetect]
   --enable-faad             enable FAAD2 (AAC) [autodetect]
   --disable-ladspa          disable LADSPA plugin support [autodetect]
@@ -493,8 +488,6 @@ _dvdreadconfig=dvdread-config
 _dvdread=auto
 _dvdread_internal=auto
 _libdvdcss_internal=auto
-_xanim=auto
-_real=auto
 _live=no
 _nemesi=auto
 _lcms2=auto
@@ -502,7 +495,6 @@ _xinerama=auto
 _vm=auto
 _xf86keysym=auto
 _alsa=auto
-_win32dll=no
 _select=yes
 _radio=no
 _radio_capture=no
@@ -511,7 +503,6 @@ _radio_bsdbt848=auto
 _tv=yes
 _tv_v4l2=auto
 _tv_bsdbt848=auto
-_tv_dshow=auto
 _pvr=auto
 networking=yes
 _winsock2_h=auto
@@ -531,11 +522,9 @@ _translation=no
 _libdv=auto
 _cdda=auto
 _cddb=auto
-_qtx=auto
 _coreaudio=auto
 _corevideo=auto
 _cocoa=auto
-quicktime=auto
 _macosx_finder=no
 _macosx_bundle=auto
 _sortsub=yes
@@ -545,7 +534,6 @@ _gethostbyname2=auto
 _ftp=auto
 _vstream=auto
 _pthreads=auto
-_w32threads=auto
 _ass=auto
 _libass_osd=auto
 _rpath=no
@@ -736,10 +724,6 @@ for ac_option do
   --disable-libdvdcss-internal) _libdvdcss_internal=no  ;;
   --enable-dvdnav)      _dvdnav=yes     ;;
   --disable-dvdnav)     _dvdnav=no      ;;
-  --enable-xanim)       _xanim=yes      ;;
-  --disable-xanim)      _xanim=no       ;;
-  --enable-real)        _real=yes       ;;
-  --disable-real)       _real=no        ;;
   --enable-live)        _live=yes       ;;
   --disable-live)       _live=no        ;;
   --enable-nemesi)      _nemesi=yes     ;;
@@ -760,8 +744,6 @@ for ac_option do
   --disable-tv-bsdbt848) _tv_bsdbt848=no  ;;
   --enable-tv-v4l2)     _tv_v4l2=yes    ;;
   --disable-tv-v4l2)    _tv_v4l2=no     ;;
-  --enable-tv-dshow)    _tv_dshow=yes   ;;
-  --disable-tv-dshow)   _tv_dshow=no    ;;
   --enable-radio)       _radio=yes      ;;
   --enable-radio-capture)       _radio_capture=yes      ;;
   --disable-radio-capture)      _radio_capture=no       ;;
@@ -812,8 +794,6 @@ for ac_option do
   --disable-vstream)    _vstream=no     ;;
   --enable-pthreads)    _pthreads=yes   ;;
   --disable-pthreads)   _pthreads=no    ;;
-  --enable-w32threads)  _w32threads=yes ;;
-  --disable-w32threads) _w32threads=no  ;;
   --enable-libass)      _ass=yes        ;;
   --disable-libass)     _ass=no         ;;
   --enable-libass-osd)  _libass_osd=yes ;;
@@ -832,9 +812,6 @@ for ac_option do
   --enable-gethostbyname2)      _gethostbyname2=yes     ;;
   --disable-gethostbyname2)     _gethostbyname2=no      ;;
 
-  --enable-qtx) _qtx=yes ;;
-  --disable-qtx) _qtx=no ;;
-
   --enable-coreaudio) _coreaudio=yes ;;
   --disable-coreaudio) _coreaudio=no ;;
   --enable-corevideo) _corevideo=yes ;;
@@ -848,9 +825,6 @@ for ac_option do
 
   --enable-sortsub) _sortsub=yes ;;
   --disable-sortsub) _sortsub=no ;;
-
-  --enable-win32dll) _win32dll=yes ;;
-  --disable-win32dll) _win32dll=no ;;
 
   *)
     echo "Unknown parameter: $ac_option" >&2
@@ -1261,7 +1235,6 @@ else
   CFLAGS="-D_ISOC99_SOURCE -D_BSD_SOURCE $CFLAGS"
 fi
 
-cflag_check -mno-omit-leaf-frame-pointer && cflags_no_omit_leaf_frame_pointer="-mno-omit-leaf-frame-pointer"
 cflag_check -MD -MP && DEPFLAGS="-MD -MP"
 
 
@@ -1661,7 +1634,6 @@ else
   res_comment="v4l2, ao_nas, win32 loader disabled"
   def_pthreads='#undef HAVE_PTHREADS'
   _nas=no ; _tv_v4l2=no
-  mingw32 || _win32dll=no
 fi
 echores "$_pthreads"
 
@@ -1673,18 +1645,6 @@ if cygwin ; then
     def_stream_cache="#undef CONFIG_STREAM_CACHE"
   fi
 fi
-
-echocheck "w32threads"
-if test "$_pthreads" = yes ; then
-  res_comment="using pthread instead"
-  _w32threads=no
-fi
-if test "$_w32threads" = auto ; then
-  _w32threads=no
-  mingw32 && _w32threads=yes
-fi
-test "$_w32threads" = yes && def_threads='#define HAVE_THREADS 1'
-echores "$_w32threads"
 
 echocheck "rpath"
 if test "$_rpath" = yes ; then
@@ -2083,19 +2043,6 @@ echores "$_directfb"
 
 
 if darwin; then
-
-echocheck "QuickTime"
-if test "$quicktime" = auto ; then
-  quicktime=no
-  statement_check QuickTime/QuickTime.h 'ImageDescription *desc; EnterMovies(); ExitMovies()' -framework QuickTime && quicktime=yes
-fi
-if test "$quicktime" = yes ; then
-  extra_ldflags="$extra_ldflags -framework QuickTime"
-  def_quicktime='#define CONFIG_QUICKTIME 1'
-else
-  def_quicktime='#undef CONFIG_QUICKTIME'
-fi
-echores $quicktime
 
 echocheck "Cocoa"
 if test "$_cocoa" = auto ; then
@@ -3193,85 +3140,6 @@ if test -z "$_codecsdir" ; then
 fi
 
 
-echocheck "Win32 codecs"
-if test "$_win32dll" = auto ; then
-  _win32dll=no
-  if x86_32 ; then
-    _win32dll=yes
-  fi
-fi
-if test "$_win32dll" = yes ; then
-  def_win32dll='#define CONFIG_WIN32DLL 1'
-  if ! win32 ; then
-    def_win32_loader='#define WIN32_LOADER 1'
-    _win32_emulation=yes
-  else
-    extra_ldflags="$extra_ldflags -ladvapi32 -lole32"
-    res_comment="using native windows"
-  fi
-  codecmodules="win32 $codecmodules"
-else
-  def_win32dll='#undef CONFIG_WIN32DLL'
-  def_win32_loader='#undef WIN32_LOADER'
-  nocodecmodules="win32 $nocodecmodules"
-fi
-echores "$_win32dll"
-
-
-echocheck "XAnim codecs"
-if test "$_xanim" = auto ; then
-  _xanim=no
-  res_comment="dynamic loader support needed"
-  if test "$_dl" = yes ; then
-    _xanim=yes
-  fi
-fi
-if test "$_xanim" = yes ; then
-  def_xanim='#define CONFIG_XANIM 1'
-  codecmodules="xanim $codecmodules"
-else
-  def_xanim='#undef CONFIG_XANIM'
-  nocodecmodules="xanim $nocodecmodules"
-fi
-echores "$_xanim"
-
-
-echocheck "RealPlayer codecs"
-if test "$_real" = auto ; then
-  _real=no
-  res_comment="dynamic loader support needed"
-  if test "$_dl" = yes || test "$_win32dll" = yes &&
-     (linux || freebsd || netbsd || openbsd || dragonfly || darwin || win32) ; then
-    _real=yes
-  fi
-fi
-if test "$_real" = yes ; then
-  def_real='#define CONFIG_REALCODECS 1'
-  codecmodules="real $codecmodules"
-else
-  def_real='#undef CONFIG_REALCODECS'
-  nocodecmodules="real $nocodecmodules"
-fi
-echores "$_real"
-
-
-echocheck "QuickTime codecs"
-_qtx_emulation=no
-def_qtx_win32='#undef CONFIG_QTX_CODECS_WIN32'
-if test "$_qtx" = auto ; then
-  test "$_win32dll" = yes || test "$quicktime" = yes && _qtx=yes
-fi
-if test "$_qtx" = yes ; then
-    def_qtx='#define CONFIG_QTX_CODECS 1'
-    win32 && _qtx_codecs_win32=yes && def_qtx_win32='#define CONFIG_QTX_CODECS_WIN32 1'
-    codecmodules="qtx $codecmodules"
-    darwin || win32 || _qtx_emulation=yes
-else
-    def_qtx='#undef CONFIG_QTX_CODECS'
-    nocodecmodules="qtx $nocodecmodules"
-fi
-echores "$_qtx"
-
 echocheck "LCMS2 support"
 if test "$_lcms2" = auto ; then
     _lcms2=no
@@ -3489,24 +3357,6 @@ EOF
 fi #if freebsd || netbsd || openbsd || dragonfly
 
 
-echocheck "DirectShow TV interface"
-if test "$_tv_dshow" = auto ; then
-  _tv_dshow=no
-  if test "$_tv" = yes && win32 ; then
-    statement_check ole2.h 'void* p; CoCreateInstance((GUID*)&GUID_NULL, NULL, CLSCTX_INPROC_SERVER, &GUID_NULL, &p)' -lole32 -luuid && _tv_dshow=yes
-  fi
-fi
-if test "$_tv_dshow" = yes ; then
-  inputmodules="tv-dshow $inputmodules"
-  def_tv_dshow='#define CONFIG_TV_DSHOW 1'
-  extra_ldflags="$extra_ldflags -lole32 -luuid"
-else
-  noinputmodules="tv-dshow $noinputmodules"
-  def_tv_dshow='#undef CONFIG_TV_DSHOW'
-fi
-echores "$_tv_dshow"
-
-
 echocheck "Video 4 Linux 2 TV interface"
 if test "$_tv_v4l2" = auto ; then
   _tv_v4l2=no
@@ -3676,15 +3526,7 @@ else
 fi
 
 
-# Dynamic linking flags
-# (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
-_ld_dl_dynamic=''
-freebsd || netbsd || openbsd || dragonfly && _ld_dl_dynamic='-rdynamic'
-if test "$_real" = yes || test "$_xanim" = yes && ! win32 && ! darwin ; then
-  _ld_dl_dynamic='-rdynamic'
-fi
-
-extra_ldflags="$extra_ldflags $_ld_pthread $_ld_dl $_ld_dl_dynamic"
+extra_ldflags="$extra_ldflags $_ld_pthread $_ld_dl"
 (netbsd || openbsd) && x86_32 && extra_ldflags="$extra_ldflags -li386"
 
 
@@ -3826,8 +3668,6 @@ DEPFLAGS = $DEPFLAGS
 CFLAGS_LIBDVDCSS         = $cflags_libdvdcss
 CFLAGS_LIBDVDCSS_DVDREAD = $cflags_libdvdcss_dvdread
 CFLAGS_LIBDVDNAV         = $cflags_libdvdnav
-CFLAGS_NO_OMIT_LEAF_FRAME_POINTER = $cflags_no_omit_leaf_frame_pointer
-CFLAGS_STACKREALIGN      = $cflags_stackrealign
 
 EXTRALIBS          = $extra_ldflags $_ld_static $_ld_lm $extra_libs
 EXTRALIBS_MPLAYER  = $libs_mplayer
@@ -3913,25 +3753,17 @@ PRIORITY = $_priority
 PULSE = $_pulse
 PORTAUDIO = $_portaudio
 PVR = $_pvr
-QTX_CODECS = $_qtx
-QTX_CODECS_WIN32 = $_qtx_codecs_win32
-QTX_EMULATION = $_qtx_emulation
 RADIO=$_radio
 RADIO_CAPTURE=$_radio_capture
-REAL_CODECS = $_real
 RSOUND = $_rsound
 STREAM_CACHE = $_stream_cache
 TV = $_tv
 TV_BSDBT848 = $_tv_bsdbt848
-TV_DSHOW = $_tv_dshow
 TV_V4L2 = $_tv_v4l2
 VCD = $_vcd
 VDPAU = $_vdpau
 VSTREAM = $_vstream
-WIN32DLL = $_win32dll
-WIN32_EMULATION = $_win32_emulation
 X11 = $_x11
-XANIM_CODECS = $_xanim
 XV = $_xv
 
 # FFmpeg
@@ -3943,7 +3775,6 @@ CONFIG_ZLIB     = $_zlib
 
 HAVE_PTHREADS   = $_pthreads
 HAVE_SHM        = $_shm
-HAVE_W32THREADS = $_w32threads
 
 EOF
 
@@ -4049,7 +3880,6 @@ $def_iconv
 $def_macosx_bundle
 $def_macosx_finder
 $def_priority
-$def_quicktime
 
 
 /* configurable options */
@@ -4103,16 +3933,6 @@ $def_zlib
 $def_libpostproc
 
 
-/* binary codecs */
-$def_qtx
-$def_qtx_win32
-$def_real
-$def_win32_loader
-$def_win32dll
-$def_xanim
-#define BINARY_CODECS_PATH "$_codecsdir"
-
-
 /* Audio output drivers */
 $def_alsa
 $def_coreaudio
@@ -4146,7 +3966,6 @@ $def_radio_capture
 $def_radio_v4l2
 $def_tv
 $def_tv_bsdbt848
-$def_tv_dshow
 $def_tv_v4l2
 
 
