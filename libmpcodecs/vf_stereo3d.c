@@ -48,6 +48,7 @@ typedef enum stereo_code {
     ANAGLYPH_YB_GRAY,   //anaglyph yellow/blue gray
     ANAGLYPH_YB_HALF,   //anaglyph yellow/blue half colored
     ANAGLYPH_YB_COLOR,  //anaglyph yellow/blue colored
+    ANAGLYPH_YB_DUBOIS, //anaglyph yellow/blue dubois
     MONO_L,             //mono output for debugging (left eye only)
     MONO_R,             //mono output for debugging (right eye only)
     SIDE_BY_SIDE_LR,    //side by side parallel (left eye left, right eye right)
@@ -74,37 +75,51 @@ typedef struct component {
 } component;
 
 //==global variables==//
-static const int ana_coeff[10][3][6] = {
-    {{19595, 38470,  7471,     0,     0,     0},    //ANAGLYPH_RC_GRAY
+static const int ana_coeff[][3][6] = {
+  [ANAGLYPH_RC_GRAY]   =
+    {{19595, 38470,  7471,     0,     0,     0},
      {    0,     0,     0, 19595, 38470,  7471},
      {    0,     0,     0, 19595, 38470,  7471}},
-    {{19595, 38470,  7471,     0,     0,     0},    //ANAGLYPH_RC_HALF
+  [ANAGLYPH_RC_HALF]   =
+    {{19595, 38470,  7471,     0,     0,     0},
      {    0,     0,     0,     0, 65536,     0},
      {    0,     0,     0,     0,     0, 65536}},
-    {{65536,     0,     0,     0,     0,     0},    //ANAGLYPH_RC_COLOR
+  [ANAGLYPH_RC_COLOR]  =
+    {{65536,     0,     0,     0,     0,     0},
      {    0,     0,     0,     0, 65536,     0},
      {    0,     0,     0,     0,     0, 65536}},
-    {{29891, 32800, 11559, -2849, -5763,  -102},    //ANAGLYPH_RC_DUBOIS
+  [ANAGLYPH_RC_DUBOIS] =
+    {{29891, 32800, 11559, -2849, -5763,  -102},
      {-2627, -2479, -1033, 24804, 48080, -1209},
      { -997, -1350,  -358, -4729, -7403, 80373}},
-    {{    0,     0,     0, 19595, 38470,  7471},    //ANAGLYPH_GM_GRAY
+  [ANAGLYPH_GM_GRAY]   =
+    {{    0,     0,     0, 19595, 38470,  7471},
      {19595, 38470,  7471,     0,     0,     0},
      {    0,     0,     0, 19595, 38470,  7471}},
-    {{    0,     0,     0, 65536,     0,     0},    //ANAGLYPH_GM_HALF
+  [ANAGLYPH_GM_HALF]   =
+    {{    0,     0,     0, 65536,     0,     0},
      {19595, 38470,  7471,     0,     0,     0},
      {    0,     0,     0,     0,     0, 65536}},
-    {{    0,     0,     0, 65536,     0,     0},    //ANAGLYPH_GM_COLOR
+  [ANAGLYPH_GM_COLOR]  =
+    {{    0,     0,     0, 65536,     0,     0},
      {    0, 65536,     0,     0,     0,     0},
      {    0,     0,     0,     0,     0, 65536}},
-    {{    0,     0,     0, 19595, 38470,  7471},    //ANAGLYPH_YB_GRAY
+  [ANAGLYPH_YB_GRAY]   =
+    {{    0,     0,     0, 19595, 38470,  7471},
      {    0,     0,     0, 19595, 38470,  7471},
      {19595, 38470,  7471,     0,     0,     0}},
-    {{    0,     0,     0, 65536,     0,     0},    //ANAGLYPH_YB_HALF
+  [ANAGLYPH_YB_HALF]   =
+    {{    0,     0,     0, 65536,     0,     0},
      {    0,     0,     0,     0, 65536,     0},
      {19595, 38470,  7471,     0,     0,     0}},
-    {{    0,     0,     0, 65536,     0,     0},    //ANAGLYPH_YB_COLOR
+  [ANAGLYPH_YB_COLOR]  =
+    {{    0,     0,     0, 65536,     0,     0},
      {    0,     0,     0,     0, 65536,     0},
-     {    0,     0, 65536,     0,     0,     0}}
+     {    0,     0, 65536,     0,     0,     0}},
+  [ANAGLYPH_YB_DUBOIS] =
+    {{65535,-12650,18451,   -987, -7590, -1049},
+     {-1604, 56032, 4196,    370,  3826, -1049},
+     {-2345,-10676, 1358,   5801, 11416, 56217}},
 };
 
 struct vf_priv_s {
@@ -202,6 +217,7 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
     case ANAGLYPH_YB_GRAY:
     case ANAGLYPH_YB_HALF:
     case ANAGLYPH_YB_COLOR:
+    case ANAGLYPH_YB_DUBOIS:
         memcpy(vf->priv->ana_matrix, ana_coeff[vf->priv->out.fmt],
                sizeof(vf->priv->ana_matrix));
         break;
@@ -413,6 +429,8 @@ static const struct format_preset {
     {"anaglyph_yellow_blue_half_color",  ANAGLYPH_YB_HALF},
     {"aybc",                             ANAGLYPH_YB_COLOR},
     {"anaglyph_yellow_blue_color",       ANAGLYPH_YB_COLOR},
+    {"aybd",                             ANAGLYPH_YB_DUBOIS},
+    {"anaglyph_yellow_blue_dubois",      ANAGLYPH_YB_DUBOIS},
     {"ml",                               MONO_L},
     {"mono_left",                        MONO_L},
     {"mr",                               MONO_R},
