@@ -3372,7 +3372,11 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_RUN:
 #ifndef __MINGW32__
         if (!fork()) {
-            execl("/bin/sh", "sh", "-c", cmd->args[0].v.s, NULL);
+            char *exp_cmd = property_expand_string(mpctx, cmd->args[0].v.s);
+            if (exp_cmd) {
+                execl("/bin/sh", "sh", "-c", exp_cmd, NULL);
+                free(exp_cmd);
+            }
             exit(0);
         }
 #endif
