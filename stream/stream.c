@@ -71,7 +71,6 @@ extern const stream_info_t stream_info_radio;
 extern const stream_info_t stream_info_pvr;
 extern const stream_info_t stream_info_ftp;
 extern const stream_info_t stream_info_vstream;
-extern const stream_info_t stream_info_dvdnav;
 extern const stream_info_t stream_info_smb;
 extern const stream_info_t stream_info_sdp;
 extern const stream_info_t stream_info_rtsp_sip;
@@ -129,9 +128,6 @@ static const stream_info_t* const auto_open_streams[] = {
 #ifdef CONFIG_DVDREAD
   &stream_info_ifo,
   &stream_info_dvd,
-#endif
-#ifdef CONFIG_DVDNAV
-  &stream_info_dvdnav,
 #endif
 #ifdef CONFIG_LIBBLURAY
   &stream_info_bluray,
@@ -312,10 +308,6 @@ int stream_read_internal(stream_t *s, void *buf, int len)
   if(len<=0){
     // do not retry if this looks like proper eof
     if (s->eof || (s->end_pos && s->pos == s->end_pos))
-      goto eof_out;
-    // dvdnav has some horrible hacks to "suspend" reads,
-    // we need to skip this code or seeks will hang.
-    if (s->type == STREAMTYPE_DVDNAV)
       goto eof_out;
 
     // just in case this is an error e.g. due to network

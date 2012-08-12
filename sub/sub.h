@@ -29,7 +29,6 @@ typedef struct mp_osd_bbox_s {
 #define OSDTYPE_SUBTITLE 2
 #define OSDTYPE_PROGBAR 3
 #define OSDTYPE_SPU 4
-#define OSDTYPE_DVDNAV 5
 
 #define OSDFLAG_VISIBLE 1
 #define OSDFLAG_CHANGED 2
@@ -172,11 +171,6 @@ bool vo_osd_has_changed(struct osd_state *osd);
 void vo_osd_resized(void);
 int vo_osd_check_range_update(int,int,int,int);
 void osd_free(struct osd_state *osd);
-
-#ifdef CONFIG_DVDNAV
-#include <inttypes.h>
-void osd_set_nav_box (uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey);
-#endif
 
 // used only by osd_ft.c or osd_libass.c
 void osd_alloc_buf(mp_osd_obj_t* obj);

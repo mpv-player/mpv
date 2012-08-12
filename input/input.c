@@ -197,10 +197,6 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_RUN, "run", { ARG_STRING } },
   { MP_CMD_VF_CHANGE_RECTANGLE, "change_rectangle", { ARG_INT, ARG_INT } },
 
-#ifdef CONFIG_DVDNAV
-  { MP_CMD_DVDNAV, "dvdnav", { ARG_STRING } },
-#endif
-
   { MP_CMD_GET_VO_FULLSCREEN, "get_vo_fullscreen", },
   { MP_CMD_GET_SUB_VISIBILITY, "get_sub_visibility", },
   { MP_CMD_KEYDOWN_EVENTS, "key_down_event", { ARG_INT } },

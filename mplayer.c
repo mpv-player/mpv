@@ -146,7 +146,6 @@ static int max_framesize = 0;
 #ifdef CONFIG_DVDREAD
 #include "stream/stream_dvd.h"
 #endif
-#include "stream/stream_dvdnav.h"
 
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
@@ -526,19 +525,6 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
 /// step size of mixer changes
 int volstep = 3;
 
-#ifdef CONFIG_DVDNAV
-static void mp_dvdnav_context_free(MPContext *ctx)
-{
-    if (ctx->nav_smpi)
-        free_mp_image(ctx->nav_smpi);
-    ctx->nav_smpi = NULL;
-    free(ctx->nav_buffer);
-    ctx->nav_buffer = NULL;
-    ctx->nav_start = NULL;
-    ctx->nav_in_size = 0;
-}
-#endif
-
 static void uninit_subs(struct demuxer *demuxer)
 {
     for (int i = 0; i < MAX_S_STREAMS; i++) {
@@ -615,9 +601,6 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         mpctx->initialized_flags &= ~INITIALIZED_VO;
         vo_destroy(mpctx->video_out);
         mpctx->video_out = NULL;
-#ifdef CONFIG_DVDNAV
-        mp_dvdnav_context_free(mpctx);
-#endif
     }
 
     // Must be after libvo uninit, as few vo drivers (svgalib) have tty code.
@@ -950,13 +933,6 @@ void init_vo_spudec(struct MPContext *mpctx)
     if (vo_spudec == NULL && mpctx->stream->type == STREAMTYPE_DVD) {
         vo_spudec = spudec_new_scaled(((dvd_priv_t *)(mpctx->stream->priv))->
                 cur_pgc->palette, width, height, NULL, 0);
-    }
-#endif
-
-#ifdef CONFIG_DVDNAV
-    if (vo_spudec == NULL && mpctx->stream->type == STREAMTYPE_DVDNAV) {
-        unsigned int *palette = mp_dvdnav_get_spu_clut(mpctx->stream);
-        vo_spudec = spudec_new_scaled(palette, width, height, NULL, 0);
     }
 #endif
 
@@ -1854,149 +1830,6 @@ static int select_subtitle(MPContext *mpctx)
     return found;
 }
 
-#ifdef CONFIG_DVDNAV
-#ifndef FF_B_TYPE
-#define FF_B_TYPE 3
-#endif
-/// store decoded video image
-static mp_image_t *mp_dvdnav_copy_mpi(mp_image_t *to_mpi,
-                                      mp_image_t *from_mpi)
-{
-    mp_image_t *mpi;
-
-    /// Do not store B-frames
-    if (from_mpi->pict_type == FF_B_TYPE)
-        return to_mpi;
-
-    if (to_mpi &&
-        to_mpi->w == from_mpi->w &&
-        to_mpi->h == from_mpi->h &&
-        to_mpi->imgfmt == from_mpi->imgfmt)
-        mpi = to_mpi;
-    else {
-        if (to_mpi)
-            free_mp_image(to_mpi);
-        if (from_mpi->w == 0 || from_mpi->h == 0)
-            return NULL;
-        mpi = alloc_mpi(from_mpi->w, from_mpi->h, from_mpi->imgfmt);
-    }
-
-    copy_mpi(mpi, from_mpi);
-    return mpi;
-}
-
-static void mp_dvdnav_reset_stream(MPContext *ctx)
-{
-    struct MPOpts *opts = &ctx->opts;
-    if (ctx->sh_video) {
-        /// clear video pts
-        ctx->d_video->pts = 0.0f;
-        ctx->sh_video->pts = 0.0f;
-        ctx->sh_video->i_pts = 0.0f;
-        ctx->sh_video->last_pts = 0.0f;
-        ctx->sh_video->num_buffered_pts = 0;
-        ctx->sh_video->num_frames = 0;
-        ctx->sh_video->num_frames_decoded = 0;
-        ctx->sh_video->timer = 0.0f;
-        ctx->sh_video->stream_delay = 0.0f;
-        ctx->sh_video->timer = 0;
-        ctx->demuxer->stream_pts = MP_NOPTS_VALUE;
-    }
-
-    if (ctx->sh_audio) {
-        /// free audio packets and reset
-        ds_free_packs(ctx->d_audio);
-        audio_delay -= ctx->sh_audio->stream_delay;
-        ctx->delay = -audio_delay;
-        ao_reset(ctx->ao);
-        resync_audio_stream(ctx->sh_audio);
-    }
-
-    audio_delay = 0.0f;
-    ctx->sub_counts[SUB_SOURCE_DEMUX] = mp_dvdnav_number_of_subs(ctx->stream);
-    if (opts->sub_lang && opts->sub_id == dvdsub_lang_id) {
-        dvdsub_lang_id = mp_dvdnav_sid_from_lang(ctx->stream, opts->sub_lang);
-        if (dvdsub_lang_id != opts->sub_id) {
-            opts->sub_id = dvdsub_lang_id;
-            select_subtitle(ctx);
-        }
-    }
-
-    /// clear all EOF related flags
-    ctx->d_video->eof = ctx->d_audio->eof = ctx->stream->eof = 0;
-}
-
-/// Restore last decoded DVDNAV (still frame)
-static mp_image_t *mp_dvdnav_restore_smpi(struct MPContext *mpctx,
-                                          int *in_size,
-                                          unsigned char **start,
-                                          mp_image_t *decoded_frame)
-{
-    if (mpctx->stream->type != STREAMTYPE_DVDNAV)
-        return decoded_frame;
-
-    /// a change occurred in dvdnav stream
-    if (mp_dvdnav_cell_has_changed(mpctx->stream, 0)) {
-        mp_dvdnav_read_wait(mpctx->stream, 1, 1);
-        mp_dvdnav_context_free(mpctx);
-        mp_dvdnav_reset_stream(mpctx);
-        mp_dvdnav_read_wait(mpctx->stream, 0, 1);
-        mp_dvdnav_cell_has_changed(mpctx->stream, 1);
-    }
-
-    if (*in_size < 0) {
-        float len;
-
-        /// Display still frame, if any
-        if (mpctx->nav_smpi && !mpctx->nav_buffer)
-            decoded_frame = mpctx->nav_smpi;
-
-        /// increment video frame : continue playing after still frame
-        len = get_time_length(mpctx);
-        if (mpctx->sh_video->pts >= len &&
-            mpctx->sh_video->pts > 0.0 && len > 0.0) {
-            mp_dvdnav_skip_still(mpctx->stream);
-            mp_dvdnav_skip_wait(mpctx->stream);
-        }
-        mpctx->sh_video->pts += 1 / mpctx->sh_video->fps;
-
-        if (mpctx->nav_buffer) {
-            *start = mpctx->nav_start;
-            *in_size = mpctx->nav_in_size;
-            if (mpctx->nav_start)
-                memcpy(*start, mpctx->nav_buffer, mpctx->nav_in_size);
-        }
-    }
-
-    return decoded_frame;
-}
-
-/// Save last decoded DVDNAV (still frame)
-static void mp_dvdnav_save_smpi(struct MPContext *mpctx, int in_size,
-                                unsigned char *start,
-                                mp_image_t *decoded_frame)
-{
-    if (mpctx->stream->type != STREAMTYPE_DVDNAV)
-        return;
-
-    free(mpctx->nav_buffer);
-    mpctx->nav_buffer  = NULL;
-    mpctx->nav_start   = NULL;
-    mpctx->nav_in_size = -1;
-
-    if (in_size > 0)
-        mpctx->nav_buffer = malloc(in_size);
-    if (mpctx->nav_buffer) {
-        mpctx->nav_start = start;
-        mpctx->nav_in_size = in_size;
-        memcpy(mpctx->nav_buffer, start, in_size);
-    }
-
-    if (decoded_frame && mpctx->nav_smpi != decoded_frame)
-        mpctx->nav_smpi = mp_dvdnav_copy_mpi(mpctx->nav_smpi, decoded_frame);
-}
-#endif /* CONFIG_DVDNAV */
-
 /* Modify video timing to match the audio timeline. There are two main
  * reasons this is needed. First, video and audio can start from different
  * positions at beginning of file or after a seek (MPlayer starts both
@@ -2365,20 +2198,8 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         while (!in_size)
             in_size = video_read_frame(sh_video, &sh_video->next_frame_time,
                                        &packet, force_fps);
-        if (in_size < 0) {
-#ifdef CONFIG_DVDNAV
-            if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
-                if (mp_dvdnav_is_eof(mpctx->stream))
-                    return -1;
-                if (mpctx->d_video)
-                    mpctx->d_video->eof = 0;
-                if (mpctx->d_audio)
-                    mpctx->d_audio->eof = 0;
-                mpctx->stream->eof = 0;
-            } else
-#endif
+        if (in_size < 0)
             return -1;
-        }
         if (in_size > max_framesize)
             max_framesize = in_size;
         sh_video->timer += frame_time;
@@ -2389,16 +2210,8 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         int framedrop_type = check_framedrop(mpctx, frame_time);
 
         void *decoded_frame;
-#ifdef CONFIG_DVDNAV
-        decoded_frame = mp_dvdnav_restore_smpi(mpctx, &in_size, &packet, NULL);
-        if (in_size >= 0 && !decoded_frame)
-#endif
         decoded_frame = decode_video(sh_video, sh_video->ds->current, packet,
                                      in_size, framedrop_type, sh_video->pts);
-#ifdef CONFIG_DVDNAV
-        // Save last still frame for future display
-        mp_dvdnav_save_smpi(mpctx, in_size, packet, decoded_frame);
-#endif
         if (decoded_frame) {
             filter_video(sh_video, decoded_frame, sh_video->pts);
         }
@@ -3195,30 +3008,6 @@ static void run_playloop(struct MPContext *mpctx)
         break;
     } // video
 
-#ifdef CONFIG_DVDNAV
-    if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
-        nav_highlight_t hl;
-        mp_dvdnav_get_highlight(mpctx->stream, &hl);
-        if (!vo_spudec || !spudec_apply_palette_crop(vo_spudec, hl.palette, hl.sx, hl.sy, hl.ex, hl.ey)) {
-            osd_set_nav_box(hl.sx, hl.sy, hl.ex, hl.ey);
-            vo_osd_changed(OSDTYPE_DVDNAV);
-        } else {
-            osd_set_nav_box(0, 0, 0, 0);
-            vo_osd_changed(OSDTYPE_DVDNAV);
-            vo_osd_changed(OSDTYPE_SPU);
-        }
-
-        if (mp_dvdnav_stream_has_changed(mpctx->stream)) {
-            double ar = -1.0;
-            if (mpctx->sh_video &&
-                stream_control(mpctx->demuxer->stream,
-                               STREAM_CTRL_GET_ASPECT_RATIO, &ar)
-                != STREAM_UNSUPPORTED)
-                mpctx->sh_video->stream_aspect = ar;
-        }
-    }
-#endif
-
     if (mpctx->sh_audio && (mpctx->restart_playback ? !video_left :
                             mpctx->ao->untimed && (mpctx->delay <= 0 ||
                                                    !video_left))) {
@@ -3635,21 +3424,6 @@ static void play_current_file(struct MPContext *mpctx)
     }
 #endif
 
-#ifdef CONFIG_DVDNAV
-    if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
-        if (opts->audio_lang && opts->audio_id == -1)
-            opts->audio_id = mp_dvdnav_aid_from_lang(mpctx->stream,
-                                                     opts->audio_lang);
-        dvdsub_lang_id = -3;
-        if (opts->sub_lang && opts->sub_id == -1)
-            dvdsub_lang_id = opts->sub_id = mp_dvdnav_sid_from_lang(
-                    mpctx->stream, opts->sub_lang);
-        // setup global sub numbering
-        mpctx->sub_counts[SUB_SOURCE_DEMUX] = mp_dvdnav_number_of_subs(
-                mpctx->stream);
-    }
-#endif
-
     // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
 goto_enable_cache:
     if (stream_cache_size > 0) {
@@ -3763,8 +3537,7 @@ goto_enable_cache:
     demux_info_print(mpctx->demuxer);
 
     //================= Read SUBTITLES (DVD & TEXT) =========================
-    if (vo_spudec == NULL && (mpctx->stream->type == STREAMTYPE_DVD
-                              || mpctx->stream->type == STREAMTYPE_DVDNAV))
+    if (vo_spudec == NULL && (mpctx->stream->type == STREAMTYPE_DVD))
         init_vo_spudec(mpctx);
 
     open_subtitles_from_options(mpctx);
@@ -3844,8 +3617,6 @@ goto_enable_cache:
     //TODO: add desired (stream-based) sections here
     if (mpctx->stream->type == STREAMTYPE_TV)
         mp_input_set_section(mpctx->input, "tv");
-    if (mpctx->stream->type == STREAMTYPE_DVDNAV)
-        mp_input_set_section(mpctx->input, "dvdnav");
 
     //==================== START PLAYING =======================
 
@@ -3895,14 +3666,6 @@ goto_enable_cache:
                 "Option -endpos in MPlayer does not yet support size units.\n");
         end_at.type = END_AT_NONE;
     }
-
-#ifdef CONFIG_DVDNAV
-    mp_dvdnav_context_free(mpctx);
-    if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
-        mp_dvdnav_read_wait(mpctx->stream, 0, 1);
-        mp_dvdnav_cell_has_changed(mpctx->stream, 1);
-    }
-#endif
 
     mpctx->seek = (struct seek_params){ 0 };
     get_relative_time(mpctx); // reset current delta

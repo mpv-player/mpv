@@ -42,7 +42,6 @@
 #define STREAMTYPE_MEMORY  4   // read data from memory area
 #define STREAMTYPE_PLAYLIST 6  // FIXME!!! same as STREAMTYPE_FILE now
 #define STREAMTYPE_DS   8      // read from a demuxer stream
-#define STREAMTYPE_DVDNAV 9    // we cannot safely "seek" in this...
 #define STREAMTYPE_CDDA 10     // raw audio CD reader
 #define STREAMTYPE_SMB 11      // smb:// url, using libsmbclient (samba)
 #define STREAMTYPE_VCDBINCUE 12      // vcd directly from bin/cue files

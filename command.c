@@ -65,7 +65,6 @@
 #ifdef CONFIG_DVDREAD
 #include "stream/stream_dvd.h"
 #endif
-#include "stream/stream_dvdnav.h"
 #include "m_struct.h"
 #include "screenshot.h"
 
@@ -1690,10 +1689,9 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
         }
     }
 #ifdef CONFIG_DVDREAD
-    if (vo_spudec
-        && (mpctx->stream->type == STREAMTYPE_DVD
-            || mpctx->stream->type == STREAMTYPE_DVDNAV)
-        && opts->sub_id < 0 && reset_spu) {
+    if (vo_spudec && (mpctx->stream->type == STREAMTYPE_DVD)
+        && opts->sub_id < 0 && reset_spu)
+    {
         d_sub->id = -2;
         d_sub->sh = NULL;
     }
@@ -2512,36 +2510,6 @@ static bool set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     return 1;
 }
-
-#ifdef CONFIG_DVDNAV
-static const struct {
-    const char *name;
-    const enum mp_command_type cmd;
-} mp_dvdnav_bindings[] = {
-    { "up", MP_CMD_DVDNAV_UP              },
-    { "down", MP_CMD_DVDNAV_DOWN            },
-    { "left", MP_CMD_DVDNAV_LEFT            },
-    { "right", MP_CMD_DVDNAV_RIGHT           },
-    { "menu", MP_CMD_DVDNAV_MENU            },
-    { "select", MP_CMD_DVDNAV_SELECT          },
-    { "prev", MP_CMD_DVDNAV_PREVMENU        },
-    { "mouse", MP_CMD_DVDNAV_MOUSECLICK      },
-
-    /*
-     * keep old dvdnav sub-command options for a while in order not to
-     *  break slave-mode API too suddenly.
-     */
-    { "1", MP_CMD_DVDNAV_UP              },
-    { "2", MP_CMD_DVDNAV_DOWN            },
-    { "3", MP_CMD_DVDNAV_LEFT            },
-    { "4", MP_CMD_DVDNAV_RIGHT           },
-    { "5", MP_CMD_DVDNAV_MENU            },
-    { "6", MP_CMD_DVDNAV_SELECT          },
-    { "7", MP_CMD_DVDNAV_PREVMENU        },
-    { "8", MP_CMD_DVDNAV_MOUSECLICK      },
-    { NULL, 0                             }
-};
-#endif
 
 static const char *property_error_string(int error_value)
 {
@@ -3392,49 +3360,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         pointer_x = cmd->args[0].v.i;
         pointer_y = cmd->args[1].v.i;
         rescale_input_coordinates(mpctx, pointer_x, pointer_y, &dx, &dy);
-#ifdef CONFIG_DVDNAV
-        if (mpctx->stream->type == STREAMTYPE_DVDNAV
-            && dx > 0.0 && dy > 0.0) {
-            int button = -1;
-            pointer_x = (int) (dx * (double) sh_video->disp_w);
-            pointer_y = (int) (dy * (double) sh_video->disp_h);
-            mp_dvdnav_update_mouse_pos(mpctx->stream,
-                                       pointer_x, pointer_y, &button);
-            if (opts->osd_level > 1 && button > 0)
-                set_osd_msg(mpctx, OSD_MSG_TEXT, 1, osd_duration,
-                            "Selected button number %d", button);
-        }
-#endif
         break;
     }
-
-#ifdef CONFIG_DVDNAV
-    case MP_CMD_DVDNAV: {
-        int button = -1;
-        int i;
-        enum mp_command_type command = 0;
-        if (mpctx->stream->type != STREAMTYPE_DVDNAV)
-            break;
-
-        for (i = 0; mp_dvdnav_bindings[i].name; i++)
-            if (cmd->args[0].v.s &&
-                !strcasecmp(cmd->args[0].v.s,
-                            mp_dvdnav_bindings[i].name))
-                command = mp_dvdnav_bindings[i].cmd;
-
-        mp_dvdnav_handle_input(mpctx->stream, command, &button);
-        if (opts->osd_level > 1 && button > 0)
-            set_osd_msg(mpctx, OSD_MSG_TEXT, 1, osd_duration,
-                        "Selected button number %d", button);
-        break;
-    }
-
-    case MP_CMD_SWITCH_TITLE:
-        if (mpctx->stream->type == STREAMTYPE_DVDNAV)
-            mp_dvdnav_switch_title(mpctx->stream, cmd->args[0].v.i);
-        break;
-
-#endif
 
     case MP_CMD_VO_CMDLINE:
         if (mpctx->video_out) {

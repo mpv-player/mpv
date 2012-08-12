@@ -325,10 +325,7 @@ Optional features:
   --enable-lcms2         enable LCMS2 support [autodetect]
   --disable-vcd          disable VCD support [autodetect]
   --disable-bluray       disable Blu-ray support [autodetect]
-  --disable-dvdnav       disable libdvdnav [autodetect]
   --disable-dvdread      disable libdvdread [autodetect]
-  --disable-dvdread-internal  disable internal libdvdread [autodetect]
-  --disable-libdvdcss-internal  disable internal libdvdcss [autodetect]
   --disable-cddb         disable cddb [autodetect]
   --disable-sortsub      disable subtitle sorting [enabled]
   --disable-enca         disable ENCA charset oracle library [autodetect]
@@ -425,7 +422,6 @@ Use these options if autodetection fails:
   --extra-libs=FLAGS          extra linker flags
   --extra-libs-mplayer=FLAGS  extra linker flags for MPlayer
 
-  --with-dvdnav-config=PATH   path to dvdnav-config
   --with-dvdread-config=PATH  path to dvdread-config
 
 This configure script is NOT autoconf-based, even though its output is similar.
@@ -482,12 +478,8 @@ _ladspa=auto
 _libbs2b=auto
 _vcd=auto
 _bluray=auto
-_dvdnav=auto
-_dvdnavconfig=dvdnav-config
 _dvdreadconfig=dvdread-config
 _dvdread=auto
-_dvdread_internal=auto
-_libdvdcss_internal=auto
 _live=no
 _nemesi=auto
 _lcms2=auto
@@ -578,10 +570,6 @@ for ac_option do
 
   --with-install=*)
     _install=$(echo $ac_option | cut -d '=' -f 2 )
-    ;;
-
-  --with-dvdnav-config=*)
-    _dvdnavconfig=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --with-dvdread-config=*)
     _dvdreadconfig=$(echo $ac_option | cut -d '=' -f 2)
@@ -718,12 +706,6 @@ for ac_option do
   --disable-bluray)     _bluray=no      ;;
   --enable-dvdread)     _dvdread=yes    ;;
   --disable-dvdread)    _dvdread=no     ;;
-  --enable-dvdread-internal)    _dvdread_internal=yes   ;;
-  --disable-dvdread-internal)   _dvdread_internal=no    ;;
-  --enable-libdvdcss-internal)  _libdvdcss_internal=yes ;;
-  --disable-libdvdcss-internal) _libdvdcss_internal=no  ;;
-  --enable-dvdnav)      _dvdnav=yes     ;;
-  --disable-dvdnav)     _dvdnav=no      ;;
   --enable-live)        _live=yes       ;;
   --disable-live)       _live=no        ;;
   --enable-nemesi)      _nemesi=yes     ;;
@@ -2852,75 +2834,20 @@ else
 fi
 echores "$_bluray"
 
-echocheck "dvdread"
-if test "$_dvdread_internal" = auto && test ! -f "libdvdread4/dvd_reader.c" ; then
-  _dvdread_internal=no
-fi
-if test "$_dvdread_internal" = auto ; then
-  _dvdread_internal=no
-  _dvdread=no
-  if (linux || freebsd || netbsd || openbsd || dragonfly) &&
-     (test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes ||
-      test "$_dvdio" = yes || test "$_bsdi_dvd" = yes) ||
-     darwin || win32; then
-    _dvdread_internal=yes
-    _dvdread=yes
-    extra_cflags="-Ilibdvdread4 $extra_cflags"
-  fi
-elif test "$_dvdread" = auto ; then
-  _dvdread=no
-  if test "$_dl" = yes; then
-    _dvdreadcflags=$($_dvdreadconfig --cflags 2> /dev/null)
-    _dvdreadlibs=$($_dvdreadconfig --libs 2> /dev/null)
-    if header_check dvdread/dvd_reader.h $_dvdreadcflags $_dvdreadlibs $_ld_dl ; then
-      _dvdread=yes
-      extra_cflags="$extra_cflags $_dvdreadcflags"
-      extra_ldflags="$extra_ldflags $_dvdreadlibs"
-      res_comment="external"
-    fi
-  fi
-fi
 
-if test "$_dvdread_internal" = yes; then
+echocheck "dvdread"
+if test "$_dvdread" = auto ; then
+  _dvdread=no
+  pkg_config_add 'dvdread >= 4.2.0' && _dvdread=yes
+fi
+if test "$_dvdread" = yes ; then
   def_dvdread='#define CONFIG_DVDREAD 1'
-  inputmodules="dvdread(internal) $inputmodules"
-  res_comment="internal"
-elif test "$_dvdread" = yes; then
-  def_dvdread='#define CONFIG_DVDREAD 1'
-  extra_ldflags="$extra_ldflags -ldvdread"
-  inputmodules="dvdread(external) $inputmodules"
-  res_comment="external"
+  inputmodules="dvdread $inputmodules"
 else
   def_dvdread='#undef CONFIG_DVDREAD'
   noinputmodules="dvdread $noinputmodules"
 fi
 echores "$_dvdread"
-
-
-echocheck "internal libdvdcss"
-if test "$_libdvdcss_internal" = auto ; then
-  _libdvdcss_internal=no
-  test "$_dvdread_internal" = yes && test -d libdvdcss && _libdvdcss_internal=yes
-fi
-if test "$_libdvdcss_internal" = yes ; then
-  if linux || netbsd || openbsd ; then
-    def_dvd_linux='#define HAVE_LINUX_DVD_STRUCT 1'
-    openbsd && def_dvd_openbsd='#define HAVE_OPENBSD_DVD_STRUCT 1'
-  elif freebsd || dragonfly ; then
-    def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
-  elif darwin ; then
-    def_dvd_darwin='#define DARWIN_DVD_IOCTL'
-    extra_ldflags="$extra_ldflags -framework IOKit -framework Carbon"
-  elif cygwin ; then
-    cflags_libdvdcss="-DSYS_CYGWIN -DWIN32"
-  fi
-  cflags_libdvdcss_dvdread="-Ilibdvdcss"
-  def_dvdcss="#define HAVE_DVDCSS_DVDCSS_H 1"
-  inputmodules="libdvdcss(internal) $inputmodules"
-else
-  noinputmodules="libdvdcss(internal) $noinputmodules"
-fi
-echores "$_libdvdcss_internal"
 
 
 echocheck "libcdio"
@@ -3575,49 +3502,7 @@ CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE
 
 CXXFLAGS=" $CFLAGS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS"
 
-# This must be the last test to be performed. Any other tests following it
-# could fail due to linker errors. libdvdnavmini is intentionally not linked
-# against libdvdread (to permit MPlayer to use its own copy of the library).
-# So any compilation using the flags added here but not linking against
-# libdvdread can fail.
-echocheck "DVD support (libdvdnav)"
-if test "$_dvdread_internal" = yes && test ! -f "libdvdnav/dvdnav.c" ; then
-  _dvdnav=no
-fi
-dvdnav_internal=no
-if test "$_dvdnav" = auto ; then
-  if test "$_dvdread_internal" = yes ; then
-    _dvdnav=yes
-    dvdnav_internal=yes
-    res_comment="internal"
-  else
-    $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
-  fi
-fi
-if test "$_dvdnav" = auto ; then
-  _dvdnav=no
-  _dvdnavdir=$($_dvdnavconfig --cflags)
-  _dvdnavlibs=$($_dvdnavconfig --libs)
-  statement_check_broken stdint.h dvdnav/dvdnav.h 'dvdnav_t *dvd = 0' $_dvdnavdir $_dvdnavlibs $_ld_dl $_ld_pthread && _dvdnav=yes
-fi
-if test "$_dvdnav" = yes ; then
-  def_dvdnav='#define CONFIG_DVDNAV 1'
-  if test "$dvdnav_internal" = yes ; then
-    cflags_libdvdnav="-Ilibdvdnav"
-    inputmodules="dvdnav(internal) $inputmodules"
-  else
-    extra_cflags="$extra_cflags $($_dvdnavconfig --cflags)"
-    extra_ldflags="$extra_ldflags $($_dvdnavconfig --minilibs)"
-    inputmodules="dvdnav $inputmodules"
-  fi
-else
-  def_dvdnav='#undef CONFIG_DVDNAV'
-  noinputmodules="dvdnav $noinputmodules"
-fi
-echores "$_dvdnav"
-
 # DO NOT ADD ANY TESTS THAT USE LINKER FLAGS HERE (like cc_check).
-# Read dvdnav comment above.
 
 mak_enable () {
 list=$(echo $1 | tr '[a-z]' '[A-Z]')
@@ -3667,7 +3552,6 @@ DEPFLAGS = $DEPFLAGS
 
 CFLAGS_LIBDVDCSS         = $cflags_libdvdcss
 CFLAGS_LIBDVDCSS_DVDREAD = $cflags_libdvdcss_dvdread
-CFLAGS_LIBDVDNAV         = $cflags_libdvdnav
 
 EXTRALIBS          = $extra_ldflags $_ld_static $_ld_lm $extra_libs
 EXTRALIBS_MPLAYER  = $libs_mplayer
@@ -3705,10 +3589,7 @@ DIRECT3D = $_direct3d
 DIRECTFB = $_directfb
 DIRECTX = $_directx
 DVBIN = $_dvbin
-DVDNAV = $_dvdnav
-DVDNAV_INTERNAL = $dvdnav_internal
 DVDREAD = $_dvdread
-DVDREAD_INTERNAL = $_dvdread_internal
 DXR3 = $_dxr3
 FAAD = $_faad
 FTP = $_ftp
@@ -3731,7 +3612,6 @@ LIBBLURAY = $_bluray
 LIBBS2B = $_libbs2b
 LIBDCA = $_libdca
 LIBDV = $_libdv
-LIBDVDCSS_INTERNAL = $_libdvdcss_internal
 LIBMAD = $_mad
 LIBNEMESI = $_nemesi
 LCMS2 = $_lcms2
@@ -3835,8 +3715,6 @@ $def_translation
 /* libdvdread */
 #define STDC_HEADERS 1
 #define HAVE_MEMCPY 1
-/* libdvdnav */
-#define READ_CACHE_TRACE 0
 /* libdvdread */
 #define HAVE_DLFCN_H 1
 $def_dvdcss
@@ -3916,7 +3794,6 @@ $def_dvd_darwin
 $def_dvd_linux
 $def_dvd_openbsd
 $def_dvdio
-$def_dvdnav
 $def_dvdread
 $def_vcd
 

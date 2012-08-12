@@ -26,8 +26,6 @@
 #include "config.h"
 
 #include "stream/stream.h"
-#include "stream/stream_dvdnav.h"
-#define OSD_NAV_BOX_ALPHA 0x7f
 
 #include "osdep/timer.h"
 
@@ -66,9 +64,6 @@ int sub_visibility=1;
 int sub_bg_color=0; /* subtitles background color */
 int sub_bg_alpha=0;
 int sub_justify=0;
-#ifdef CONFIG_DVDNAV
-static nav_highlight_t nav_hl;
-#endif
 
 int vo_osd_progbar_type=-1;
 int vo_osd_progbar_value=100;   // 0..256
@@ -122,52 +117,6 @@ void vo_draw_text_from_buffer(mp_osd_obj_t* obj,void (*draw_alpha)(void *ctx, in
 		   obj->stride);
     }
 }
-
-#ifdef CONFIG_DVDNAV
-void osd_set_nav_box (uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey) {
-  nav_hl.sx = sx;
-  nav_hl.sy = sy;
-  nav_hl.ex = ex;
-  nav_hl.ey = ey;
-}
-
-inline static void vo_update_nav (mp_osd_obj_t *obj, int dxs, int dys, int left_border, int top_border,
-                      int right_border, int bottom_border, int orig_w, int orig_h) {
-  int len;
-  int sx = nav_hl.sx, sy = nav_hl.sy;
-  int ex = nav_hl.ex, ey = nav_hl.ey;
-  int scaled_w = dxs - left_border - right_border;
-  int scaled_h = dys - top_border - bottom_border;
-  if (scaled_w != orig_w) {
-    sx = sx * scaled_w / orig_w;
-    ex = ex * scaled_w / orig_w;
-  }
-  if (scaled_h != orig_h) {
-    sy = sy * scaled_h / orig_h;
-    ey = ey * scaled_h / orig_h;
-  }
-  sx += left_border; ex += left_border;
-  sy += top_border;  ey += top_border;
-  sx = FFMIN(FFMAX(sx, 0), dxs);
-  ex = FFMIN(FFMAX(ex, 0), dxs);
-  sy = FFMIN(FFMAX(sy, 0), dys);
-  ey = FFMIN(FFMAX(ey, 0), dys);
-
-  obj->bbox.x1 = obj->x = sx;
-  obj->bbox.y1 = obj->y = sy;
-  obj->bbox.x2 = ex;
-  obj->bbox.y2 = ey;
-
-  osd_alloc_buf (obj);
-  len = obj->stride * (obj->bbox.y2 - obj->bbox.y1);
-  memset (obj->bitmap_buffer, OSD_NAV_BOX_ALPHA, len);
-  memset (obj->alpha_buffer, OSD_NAV_BOX_ALPHA, len);
-  obj->flags |= OSDFLAG_BBOX | OSDFLAG_CHANGED;
-  if (obj->bbox.y2 > obj->bbox.y1 && obj->bbox.x2 > obj->bbox.x1)
-    obj->flags |= OSDFLAG_VISIBLE;
-}
-#endif
-
 
 inline static void vo_update_spudec_sub(struct osd_state *osd, mp_osd_obj_t* obj)
 {
@@ -238,11 +187,6 @@ static int osd_update_ext(struct osd_state *osd, int dxs, int dys,
         int vis=obj->flags&OSDFLAG_VISIBLE;
 	obj->flags&=~OSDFLAG_BBOX;
 	switch(obj->type){
-#ifdef CONFIG_DVDNAV
-        case OSDTYPE_DVDNAV:
-           vo_update_nav(obj,dxs,dys, left_border, top_border, right_border, bottom_border, orig_w, orig_h);
-           break;
-#endif
 	case OSDTYPE_SUBTITLE:
 	    vo_update_text_sub(osd, obj);
 	    break;
@@ -320,9 +264,6 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
     new_osd_obj(OSDTYPE_SUBTITLE);
     new_osd_obj(OSDTYPE_PROGBAR);
     new_osd_obj(OSDTYPE_SPU);
-#ifdef CONFIG_DVDNAV
-    new_osd_obj(OSDTYPE_DVDNAV);
-#endif
     osd_font_invalidate();
     osd->osd_text = talloc_strdup(osd, "");
     osd_init_backend(osd);
@@ -358,9 +299,6 @@ void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
 	case OSDTYPE_SPU:
 	    vo_draw_spudec_sub(obj, draw_alpha, ctx); // FIXME
 	    break;
-#ifdef CONFIG_DVDNAV
-        case OSDTYPE_DVDNAV:
-#endif
 	case OSDTYPE_OSD:
 	case OSDTYPE_SUBTITLE:
 	case OSDTYPE_PROGBAR:

@@ -9,7 +9,7 @@ Synopsis
 | **mplayer** [options] files
 | **mplayer** [options] {group of files and options}
 | **mplayer** [br]://[title][/device] [options]
-| **mplayer** [dvd|dvdnav]://[title|[start\_title]-end\_title][/device] [options]
+| **mplayer** dvd://[title|[start\_title]-end\_title][/device] [options]
 | **mplayer** \vcd://track[/device]
 | **mplayer** \tv://[channel][/input_id] [options]
 | **mplayer** radio://[channel|frequency][/capture] [options]
@@ -239,30 +239,6 @@ n
 u
     Change channel list.
 
-(The following keys are only valid if you compiled with dvdnav support: They
-are used to navigate the menus.)
-
-keypad 8
-    Select button up.
-
-keypad 2
-    Select button down.
-
-keypad 4
-    Select button left.
-
-keypad 6
-    Select button right.
-
-keypad 5
-    Return to main menu.
-
-keypad 7
-    Return to nearest menu (the order of preference is: chapter->title->root).
-
-keypad ENTER
-    Confirm choice.
-
 mouse control
 -------------
 
@@ -409,12 +385,6 @@ option. To end the profile, start another one or use the profile name
 | profile-desc="profile for dvd:// streams"
 | vf=pp=hb/vb/dr/al/fd
 | alang=en
-|
-| [protocol.dvdnav]
-| profile-desc="profile for dvdnav:// streams"
-| profile=protocol.dvd
-| mouse-movements=yes
-| nocache=yes
 |
 | [extension.flv]
 | profile-desc="profile for .flv files"
@@ -679,9 +649,6 @@ Play DVD video from a directory with VOB files:
 
 Copy a DVD title to hard disk, saving to file title1.vob :
     ``mplayer dvd://1 --dumpstream --dumpfile=title1.vob``
-
-Play a DVD with dvdnav from path /dev/sr1:
-    ``mplayer dvdnav:////dev/sr1``
 
 Stream from HTTP:
     ``mplayer http://mplayer.hq/example.avi``

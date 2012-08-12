@@ -265,10 +265,9 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             // filename
             bstr file = p.arg;
             char *file0 = bstrdup0(NULL, p.arg);
-            int is_dvdnav = bstr_startswith0(file, "dvdnav://");
             // expand DVD filename entries like dvd://1-3 into component titles
-            if (bstr_startswith0(file, "dvd://") || is_dvdnav) {
-                int offset = is_dvdnav ? 9 : 6;
+            if (bstr_startswith0(file, "dvd://")) {
+                int offset = 6;
                 char *splitpos = strstr(file0 + offset, "-");
                 if (splitpos != NULL) {
                     int start_title = strtol(file0 + offset, NULL, 10);
@@ -284,8 +283,7 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                             && (start_title < end_title)) {
                         for (int j = start_title; j <= end_title; j++) {
                             char entbuf[15];
-                            snprintf(entbuf, sizeof(entbuf),
-                                    is_dvdnav ? "dvdnav://%d" : "dvd://%d", j);
+                            snprintf(entbuf, sizeof(entbuf), "dvd://%d", j);
                             playlist_add_file(files, entbuf);
                         }
                     } else
