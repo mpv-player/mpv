@@ -30,8 +30,6 @@
 #define memcpy_pic(d, s, b, h, ds, ss) memcpy_pic2(d, s, b, h, ds, ss, 0)
 #define my_memcpy_pic(d, s, b, h, ds, ss) memcpy_pic2(d, s, b, h, ds, ss, 1)
 
-#define mem2agpcpy_pic memcpy_pic
-
 /**
  * \param limit2width always skip data between end of line and start of next
  *                    instead of copying the full block when strides are the same

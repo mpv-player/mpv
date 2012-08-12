@@ -84,8 +84,6 @@ extern struct vo_driver video_out_image;
 extern struct vo_driver video_out_caca;
 extern struct vo_driver video_out_direct3d;
 extern struct vo_driver video_out_direct3d_shaders;
-extern struct vo_driver video_out_directx;
-extern struct vo_driver video_out_directfb;
 extern struct vo_driver video_out_corevideo;
 
 const struct vo_driver *video_out_drivers[] =
@@ -93,9 +91,6 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_DIRECT3D
         &video_out_direct3d_shaders,
         &video_out_direct3d,
-#endif
-#ifdef CONFIG_DIRECTX
-        &video_out_directx,
 #endif
 #ifdef CONFIG_GL_COCOA
         &video_out_gl,
@@ -123,10 +118,6 @@ const struct vo_driver *video_out_drivers[] =
 #endif
         &video_out_null,
         // should not be auto-selected
-#ifdef CONFIG_DIRECTFB
-        // vo directfb can call exit() if initialization fails
-        &video_out_directfb,
-#endif
         &video_out_image,
 #ifdef CONFIG_X11
 #ifdef CONFIG_GL

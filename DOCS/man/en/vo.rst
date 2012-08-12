@@ -224,14 +224,6 @@ direct3d (Windows only)
     Same as ``direct3d_shaders``, but with the options ``disable-textures``
     and ``disable-shaders`` forced.
 
-directx (Windows only)
-    Video output driver that uses the DirectX interface. Deprecated, always
-    prefer direct3d* by default.
-
-    noaccel
-        Turns off hardware acceleration. Try this option if you have display
-        problems.
-
 corevideo (Mac OS X 10.6 and later)
     Mac OS X CoreVideo video output driver. Uses the CoreVideo APIs to fill
     PixelBuffers and generate OpenGL textures from them (useful as a fallback
@@ -651,28 +643,6 @@ null
 
 caca
     Color ASCII art video output driver that works on a text console.
-
-directfb
-    Play video using the DirectFB library.
-
-    (no-)input
-        Use the DirectFB instead of the MPlayer keyboard code (default:
-        enabled).
-    buffermode=single|double|triple
-        Double and triple buffering give best results if you want to avoid
-        tearing issues. Triple buffering is more efficient than double
-        buffering as it does not block MPlayer while waiting for the vertical
-        retrace. Single buffering should be avoided (default: single).
-    fieldparity=top|bottom
-        Control the output order for interlaced frames (default: disabled).
-        Valid values are top = top fields first, bottom = bottom fields first.
-        This option does not have any effect on progressive film material like
-        most MPEG movies are. You need to enable this option if you have
-        tearing issues or unsmooth motions watching interlaced film material.
-    layer=N
-        Will force layer with ID N for playback (default: -1 - auto).
-    dfbopts=<list>
-        Specify a parameter list for DirectFB.
 
 image
     Output each frame into an image file in the current directory. Each file

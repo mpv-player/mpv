@@ -307,8 +307,6 @@ SRCS_MPLAYER-$(CACA)         += libvo/vo_caca.c
 SRCS_MPLAYER-$(COREAUDIO)    += libao2/ao_coreaudio.c
 SRCS_MPLAYER-$(COREVIDEO)    += libvo/vo_corevideo.m
 SRCS_MPLAYER-$(DIRECT3D)     += libvo/vo_direct3d.c libvo/w32_common.c
-SRCS_MPLAYER-$(DIRECTFB)     += libvo/vo_directfb2.c
-SRCS_MPLAYER-$(DIRECTX)      += libao2/ao_dsound.c libvo/vo_directx.c
 SRCS_MPLAYER-$(GL)           += libvo/gl_common.c libvo/vo_gl.c libvo/vo_gl3.c \
                                 pnm_loader.c
 SRCS_MPLAYER-$(GL_WIN32)     += libvo/w32_common.c

@@ -362,7 +362,6 @@ Video output:
   --enable-gl              enable OpenGL video output [autodetect]
   --enable-caca            enable CACA  video output [autodetect]
   --enable-direct3d        enable Direct3D video output [autodetect]
-  --enable-directx         enable DirectX video output [autodetect]
   --enable-xv              enable Xv video output [autodetect]
   --enable-vdpau           enable VDPAU acceleration [autodetect]
   --enable-vm              enable XF86VidMode support [autodetect]
@@ -370,7 +369,6 @@ Video output:
   --enable-x11             enable X11 video output [autodetect]
   --enable-xshape          enable XShape support [autodetect]
   --disable-xss            disable screensaver support via xss [autodetect]
-  --enable-directfb        enable DirectFB video output [autodetect]
   --disable-corevideo      disable CoreVideo video output [autodetect]
   --disable-cocoa          disable Cocoa OpenGL backend [autodetect]
 
@@ -451,7 +449,6 @@ _xss=auto
 _xv=auto
 _vdpau=auto
 _direct3d=auto
-_directx=auto
 _nas=auto
 _png=auto
 _mng=auto
@@ -507,7 +504,6 @@ _apple_remote=auto
 _apple_ir=auto
 _termcap=auto
 _termios=auto
-_directfb=auto
 #language=en
 _shm=auto
 _translation=no
@@ -652,8 +648,6 @@ for ac_option do
   --disable-vdpau)      _vdpau=no       ;;
   --enable-direct3d)    _direct3d=yes   ;;
   --disable-direct3d)   _direct3d=no    ;;
-  --enable-directx)     _directx=yes    ;;
-  --disable-directx)    _directx=no     ;;
   --enable-png)         _png=yes        ;;
   --disable-png)        _png=no         ;;
   --enable-mng)         _mng=yes        ;;
@@ -762,8 +756,6 @@ for ac_option do
   --disable-termcap)    _termcap=no     ;;
   --enable-termios)     _termios=yes    ;;
   --disable-termios)    _termios=no     ;;
-  --enable-directfb)    _directfb=yes   ;;
-  --disable-directfb)   _directfb=no    ;;
   --enable-shm)         _shm=yes        ;;
   --disable-shm)        _shm=no         ;;
   --enable-select)      _select=yes     ;;
@@ -1997,33 +1989,6 @@ echores "$_libquvi"
 #########
 
 
-echocheck "DirectFB"
-if test "$_directfb" = auto ; then
-  _directfb=no
-  cat > $TMPC << EOF
-#include <directfb.h>
-#include <directfb_version.h>
-#if (DIRECTFB_MAJOR_VERSION << 16 | DIRECTFB_MINOR_VERSION << 8 | DIRECTFB_MICRO_VERSION) < (0 << 16 | 9 << 8 | 22)
-#error "DirectFB version too old."
-#endif
-int main(void) { DirectFBInit(0, 0); return 0; }
-EOF
-  for _inc_tmp in "" -I/usr/local/include/directfb -I/usr/include/directfb -I/usr/local/include; do
-    cc_check $_inc_tmp -ldirectfb &&
-      _directfb=yes && extra_cflags="$extra_cflags $_inc_tmp" && break
-  done
-fi
-if test "$_directfb" = yes ; then
-  def_directfb='#define CONFIG_DIRECTFB 1'
-  vomodules="directfb $vomodules"
-  libs_mplayer="$libs_mplayer -ldirectfb"
-else
-  def_directfb='#undef CONFIG_DIRECTFB'
-  novomodules="directfb $novomodules"
-fi
-echores "$_directfb"
-
-
 if darwin; then
 
 echocheck "Cocoa"
@@ -2555,29 +2520,6 @@ else
   novomodules="direct3d $novomodules"
 fi
 echores "$_direct3d"
-
-echocheck "Directx"
-if test "$_directx" = auto ; then
-  cat > $TMPC << EOF
-#include <windows.h>
-#include <ddraw.h>
-#include <dsound.h>
-int main(void) { return 0; }
-EOF
-  _directx=no
-  cc_check -lgdi32 && _directx=yes
-fi
-if test "$_directx" = yes ; then
-  def_directx='#define CONFIG_DIRECTX 1'
-  libs_mplayer="$libs_mplayer -lgdi32"
-  vomodules="directx $vomodules"
-  aomodules="dsound $aomodules"
-else
-  def_directx='#undef CONFIG_DIRECTX'
-  novomodules="directx $novomodules"
-  noaomodules="dsound $noaomodules"
-fi
-echores "$_directx"
 
 fi #if win32; then
 
@@ -3586,8 +3528,6 @@ COCOA = $_cocoa
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
 DIRECT3D = $_direct3d
-DIRECTFB = $_directfb
-DIRECTX = $_directx
 DVBIN = $_dvbin
 DVDREAD = $_dvdread
 DXR3 = $_dxr3
@@ -3872,8 +3812,6 @@ $def_caca
 $def_corevideo
 $def_cocoa
 $def_direct3d
-$def_directfb
-$def_directx
 $def_gif
 $def_gif_4
 $def_gif_tvt_hack
