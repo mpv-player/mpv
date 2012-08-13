@@ -8,6 +8,7 @@
 /config.mak
 /config.log
 /mpv
+/mpv.app
 /version.h
 /codecs.conf.h
 /input/input_conf.h
