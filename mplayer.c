@@ -1060,7 +1060,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 
     // Playback status
     if (mpctx->paused)
-        saddf(line, width, "(PAUSED!) ");
+        saddf(line, width, "(Paused) ");
     if (mpctx->sh_audio)
         saddf(line, width, "A");
     if (mpctx->sh_video)
@@ -1075,7 +1075,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
         cur = mpctx->video_pts;
     }
     if (cur != MP_NOPTS_VALUE) {
-        saddf(line, width, "%6.1f ", cur);
+        saddf(line, width, " %.1f ", cur);
         saddf(line, width, "(");
         sadd_hhmmssff(line, width, cur, mpctx->opts.osd_fractions);
         saddf(line, width, ")");
@@ -1091,29 +1091,29 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 
     sadd_percentage(line, width, get_percent_pos(mpctx));
 
+    // other
+    if (opts->playback_speed != 1)
+        saddf(line, width, " x%4.2f", opts->playback_speed);
+
     // A-V sync
     if (mpctx->sh_audio && sh_video) {
         if (mpctx->last_av_difference != MP_NOPTS_VALUE)
             saddf(line, width, " A-V:%7.3f", mpctx->last_av_difference);
         else
             saddf(line, width, " A-V: ???");
-        if (fabs(mpctx->total_avsync_change) > 0.01)
+        if (fabs(mpctx->total_avsync_change) > 0.05)
             saddf(line, width, " ct:%7.3f", mpctx->total_avsync_change);
     }
 
     // VO stats
     if (sh_video && drop_frame_cnt)
-        saddf(line, width, " Dropped: %d", drop_frame_cnt);
+        saddf(line, width, " D: %d", drop_frame_cnt);
 
 #ifdef CONFIG_STREAM_CACHE
     // cache stats
     if (stream_cache_size > 0)
-        saddf(line, width, " Cache: %d%%", cache_fill_status(mpctx->stream));
+        saddf(line, width, " C: %d%%", cache_fill_status(mpctx->stream));
 #endif
-
-    // other
-    if (opts->playback_speed != 1)
-        saddf(line, width, " Speed: %4.2fx", opts->playback_speed);
 
     // end
     if (erase_to_end_of_line) {
