@@ -46,9 +46,9 @@
 #include "m_option.h"
 
 const struct image_writer_opts image_writer_opts_defaults = {
-    .format = "png",
+    .format = "jpg",
     .png_compression = 7,
-    .jpeg_quality = 85,
+    .jpeg_quality = 90,
     .jpeg_optimize = 100,
     .jpeg_smooth = 0,
     .jpeg_dpi = 72,
