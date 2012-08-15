@@ -3499,66 +3499,6 @@ static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
 #endif
 }
 
-// Read data from a playlist, and add the entries to the mplayer playlist.
-// Return true if playlist entries were added.
-static bool process_playlist_demuxer(struct MPContext *mpctx)
-{
-    // HACK to get MOV Reference Files working
-    if (mpctx->demuxer && mpctx->demuxer->type == DEMUXER_TYPE_PLAYLIST) {
-        unsigned char *playlist_entry;
-        int entries_added = 0;
-
-        while (ds_get_packet(mpctx->demuxer->video, &playlist_entry) > 0) {
-            char *temp;
-            const char *bname;
-
-            mp_msg(MSGT_CPLAYER, MSGL_V, "Adding file %s to element entry.\n",
-                   playlist_entry);
-
-            bname = mp_basename(playlist_entry);
-            if ((strlen(bname) > 10) && !strncmp(bname, "qt", 2) &&
-                    !strncmp(bname + 3, "gateQT", 6))
-                continue;
-
-            if (!strcmp(playlist_entry, mpctx->filename)) // self-reference
-                continue;
-
-            if (mpctx->filename && !strcmp(mp_basename(playlist_entry),
-                    playlist_entry)) { // add reference path of current file
-                temp = malloc((strlen(mpctx->filename) - strlen(mp_basename(
-                        mpctx->filename)) + strlen(playlist_entry) + 1));
-                if (temp) {
-                    strncpy(temp, mpctx->filename, strlen(mpctx->filename) -
-                            strlen(mp_basename(mpctx->filename)));
-                    temp[strlen(mpctx->filename) - strlen(mp_basename(
-                            mpctx->filename))] = '\0';
-                    strcat(temp, playlist_entry);
-                    if (!strcmp(temp, mpctx->filename)) {
-                        free(temp);
-                        continue;
-                    }
-                    playlist_add_file(mpctx->playlist, temp);
-                    entries_added++;
-                    mp_msg(MSGT_CPLAYER, MSGL_V,
-                           "Resolving reference to %s.\n", temp);
-                    free(temp);
-                }
-            } else {
-                playlist_add_file(mpctx->playlist, playlist_entry);
-                entries_added++;
-            }
-        }
-        free_demuxer(mpctx->demuxer);
-        mpctx->demuxer = NULL;
-
-        if (entries_added) {
-            mpctx->stop_play = PT_NEXT_ENTRY;
-            return true;
-        }
-    }
-    return false;
-}
-
 // Waiting for the slave master to send us a new file to play.
 static void idle_loop(struct MPContext *mpctx)
 {
@@ -3729,9 +3669,6 @@ goto_enable_cache:
     mpctx->demuxer = demux_open(opts, mpctx->stream, mpctx->file_format,
                                 opts->audio_id, opts->video_id, opts->sub_id,
                                 mpctx->filename);
-
-    if (process_playlist_demuxer(mpctx))
-        goto terminate_playback;
 
     if (!mpctx->demuxer) {
         mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Failed to recognize file format.\n");
