@@ -22,7 +22,7 @@
 #include <assert.h>
 #include <pthread.h>
 
-#include <libavutil/avutil.h>
+#include <libavutil/common.h>
 #include <portaudio.h>
 
 #include "config.h"

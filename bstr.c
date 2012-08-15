@@ -17,10 +17,11 @@
  */
 
 #include <string.h>
-#include <libavutil/avutil.h>
 #include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
+
+#include <libavutil/common.h>
 
 #include "talloc.h"
 

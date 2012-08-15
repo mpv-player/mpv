@@ -24,14 +24,16 @@
 #include <inttypes.h>
 #include <assert.h>
 
+#include <libavutil/mem.h>
+#include <libavutil/common.h>
+#include <libswscale/swscale.h>
+
 #include "config.h"
 #include "mp_msg.h"
 
-#include "libavutil/avutil.h"
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-#include "libswscale/swscale.h"
 #include "vf_scale.h"
 
 

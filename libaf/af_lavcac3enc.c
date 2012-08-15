@@ -28,6 +28,7 @@
 
 #include <libavcodec/avcodec.h>
 #include <libavutil/intreadwrite.h>
+#include <libavutil/mem.h>
 
 #include "config.h"
 #include "af.h"

@@ -29,7 +29,7 @@
 #include <assert.h>
 #include "config.h"
 
-#include <libavutil/avutil.h>
+#include <libavutil/common.h>
 
 #ifdef CONFIG_LCMS2
 #include <lcms2.h>

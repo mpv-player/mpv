@@ -21,6 +21,8 @@
 #include <string.h>
 #include <assert.h>
 #include <sys/types.h>
+#include <libavutil/common.h>
+#include <libavutil/mem.h>
 
 #include "config.h"
 
@@ -34,7 +36,6 @@
 #include "vf.h"
 
 #include "libvo/fastmemcpy.h"
-#include "libavutil/mem.h"
 
 extern const vf_info_t vf_info_vo;
 extern const vf_info_t vf_info_rectangle;

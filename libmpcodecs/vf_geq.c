@@ -24,6 +24,9 @@
 #include <math.h>
 #include <inttypes.h>
 
+#include <libavutil/eval.h>
+#include <libavutil/common.h>
+
 #include "config.h"
 
 #include "mp_msg.h"
@@ -32,9 +35,6 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-
-#include "libavcodec/avcodec.h"
-#include "libavutil/eval.h"
 
 struct vf_priv_s {
     AVExpr * e[3];

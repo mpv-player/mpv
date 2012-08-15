@@ -25,6 +25,7 @@
 #include <inttypes.h>
 
 #include <libavutil/eval.h>
+#include <libavutil/mem.h>
 
 #include "mp_msg.h"
 #include "cpudetect.h"

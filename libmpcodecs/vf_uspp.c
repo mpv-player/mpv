@@ -25,12 +25,13 @@
 #include <math.h>
 #include <assert.h>
 
+#include <libavcodec/avcodec.h>
+#include <libavutil/mem.h>
+
 #include "config.h"
 
 #include "mp_msg.h"
 #include "cpudetect.h"
-
-#include "libavcodec/avcodec.h"
 
 #include "img_format.h"
 #include "mp_image.h"

@@ -33,13 +33,14 @@
 #include <inttypes.h>
 #include <math.h>
 
+#include <libavutil/common.h>
+
 #include "config.h"
 #include "cpudetect.h"
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 #include "libvo/fastmemcpy.h"
-#include "libavutil/avutil.h"
 #include "ffmpeg_files/x86_cpu.h"
 
 #include "m_option.h"

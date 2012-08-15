@@ -16,8 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "config.h"
-
 // Initial draft of my new cache system...
 // Note it runs in 2 processes (using fork()), but doesn't require locking!!
 // TODO: seeking, data consistency checking
@@ -39,7 +37,10 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "libavutil/avutil.h"
+#include <libavutil/common.h>
+
+#include "config.h"
+
 #include "osdep/shmem.h"
 #include "osdep/timer.h"
 #if defined(__MINGW32__)
