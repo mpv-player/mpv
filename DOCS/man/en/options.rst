@@ -1743,16 +1743,21 @@
     - ``mplayer --slang=jpn example.mkv`` plays a Matroska file with Japanese
       subtitles.
 
---slave
-    Switches on slave mode, in which MPlayer works as a backend for other
-    programs. Instead of intercepting keyboard events, MPlayer will read
-    commands separated by a newline (\n) from stdin. See also ``--input``,
-    suboption ``file``.
+--slave-broken
+    Switches on the old slave mode. This is for testing only, and incompatible
+    to the removed --slave switch.
 
-    *NOTE*: See ``DOCS/tech/slave.txt`` for a description of slave commands.
-    Also, this is not intended to disable other inputs, e.g. via the video
-    window. If you want to do that, use something like
-    ``--input=nodefault-bindings:conf=/dev/null``.
+    *NOTE*: Changes incompatible to slave mode applications have been made. In
+    particular, the status line output was changed, which is used by some
+    applications to determine the current playback position. This switch has
+    been renamed to prevent these applications from working with this version
+    of mplayer, because it would lead to buggy and confusing behavior only.
+    Moreover, the slave mode protocol is so horribly bad that it should not be
+    used for new programs, nor should existing programs attempt to adapt to the
+    changed output and use the --slave-broken switch. Instead, a new, saner
+    protocol should be developed (and will, if there is enough interest).
+
+    This affects smplayer, smplayer2, mplayosx, and others.
 
 --slices, --no-slices
     Drawing video by 16-pixel height slices/bands, instead draws the

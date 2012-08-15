@@ -783,7 +783,7 @@ const m_option_t mplayer_opts[]={
     OPT_STRING("term-osd-esc", term_osd_esc, 0, OPTDEF_STR("\x1b[A\r\x1b[K")),
     OPT_STRING("playing-msg", playing_msg, 0),
 
-    {"slave", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
+    {"slave-broken", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
     OPT_MAKE_FLAGS("idle", player_idle_mode, CONF_GLOBAL),
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
     OPT_MAKE_FLAGS("consolecontrols", consolecontrols, CONF_GLOBAL),
