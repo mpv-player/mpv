@@ -712,14 +712,3 @@ image
         JPEG DPI (default: 72)
     outdir=<dirname>
         Specify the directory to save the image files to (default: ``./``).
-
-sharedbuffer (Mac OS X 10.6 and later)
-    Mac OS X headless video output designed to interact with GUIs. It copies
-    image data to a shared buffer so that the data can be read from a GUI and
-    rendered.
-
-    It uses the same protocol as MPlayer's ``-vo corevideo:shared_buffer``
-
-    buffer_name=<buffer_name>
-        Name of the shared buffer created with shm_open() as well as the name
-        of the NSConnection mplayer2 will try to open (default: mplayerosx).

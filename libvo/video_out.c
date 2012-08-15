@@ -87,7 +87,6 @@ extern struct vo_driver video_out_direct3d_shaders;
 extern struct vo_driver video_out_directx;
 extern struct vo_driver video_out_directfb;
 extern struct vo_driver video_out_corevideo;
-extern struct vo_driver video_out_sharedbuffer;
 
 const struct vo_driver *video_out_drivers[] =
 {
@@ -124,9 +123,6 @@ const struct vo_driver *video_out_drivers[] =
 #endif
         &video_out_null,
         // should not be auto-selected
-#ifdef CONFIG_SHAREDBUFFER
-        &video_out_sharedbuffer,
-#endif
 #ifdef CONFIG_DIRECTFB
         // vo directfb can call exit() if initialization fails
         &video_out_directfb,
