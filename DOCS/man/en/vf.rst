@@ -53,42 +53,9 @@ crop[=w:h:x:y]
     <x>,<y>
         Position of the cropped picture, defaults to center.
 
-cropdetect[=limit:round[:reset]]
-    Calculates necessary cropping parameters and prints the recommended
-    parameters to stdout.
-
-    <limit>
-        Threshold, which can be optionally specified from nothing (0) to
-        everything (255) (default: 24).
-    <round>
-        Value which the width/height should be divisible by (default: 16). The
-        offset is automatically adjusted to center the video. Use 2 to get
-        only even dimensions (needed for 4:2:2 video). 16 is best when
-        encoding to most video codecs.
-    <reset>
-        Counter that determines after how many frames cropdetect will reset
-        the previously detected largest video area and start over to detect
-        the current optimal crop area (default: 0). This can be useful when
-        channel logos distort the video area. 0 indicates never reset and
-        return the largest area encountered during playback.
-
-rectangle[=w:h:x:y]
-    Draws a rectangle of the requested width and height at the specified
-    coordinates over the image and prints current rectangle parameters to the
-    console. This can be used to find optimal cropping parameters. If you bind
-    the ``input.conf`` directive 'change_rectangle' to keystrokes, you can
-    move and resize the rectangle on the fly.
-
-    <w>,<h>
-        width and height (default: -1, maximum possible width where boundaries
-        are still visible.)
-    <x>,<y>
-        top left corner position (default: -1, uppermost leftmost)
-
-expand[=w:h:x:y:osd:aspect:round]
+expand[=w:h:x:y:aspect:round]
     Expands (not scales) movie resolution to the given value and places the
-    unscaled original at coordinates x, y. Can be used for placing
-    subtitles/OSD in the resulting black bands.
+    unscaled original at coordinates x, y.
 
     <w>,<h>
         Expanded width,height (default: original width,height). Negative
@@ -101,12 +68,6 @@ expand[=w:h:x:y:osd:aspect:round]
 
     <x>,<y>
         position of original image on the expanded image (default: center)
-
-    <osd>
-        OSD/subtitle rendering
-
-        :0: disable (default)
-        :1: enable
 
     <aspect>
         Expands to fit an aspect instead of a resolution (default: 0).

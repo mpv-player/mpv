@@ -2443,7 +2443,7 @@ static double update_video(struct MPContext *mpctx)
     struct sh_video *sh_video = mpctx->sh_video;
     struct vo *video_out = mpctx->video_out;
     sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SET_OSD_OBJ,
-                               mpctx->osd); // hack for vf_expand
+                               mpctx->osd); // for vf_ass
     if (!mpctx->opts.correct_pts)
         return update_video_nocorrect_pts(mpctx);
 

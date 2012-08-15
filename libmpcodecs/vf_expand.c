@@ -16,8 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define OSD_SUPPORT
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,11 +32,6 @@
 #include "libvo/fastmemcpy.h"
 #include "libavutil/avutil.h"
 
-#ifdef OSD_SUPPORT
-#include "sub/sub.h"
-#include "libvo/osd.h"
-#endif
-
 #include "m_option.h"
 #include "m_struct.h"
 
@@ -52,79 +45,21 @@ static struct vf_priv_s {
     int cfg_exp_x, cfg_exp_y;
     int exp_w,exp_h;
     int exp_x,exp_y;
-    int osd_enabled;
     double aspect;
     int round;
     int passthrough;
     int first_slice;
-    struct osd_state *osd;
 } const vf_priv_dflt = {
   -1,-1,
   -1,-1,
   -1,-1,
   -1,-1,
-  0,
   0.,
   1,
   0,
   0
 };
 
-//===========================================================================//
-#ifdef OSD_SUPPORT
-
-static void draw_func(void *ctx, int x0,int y0, int w,int h,unsigned char* src, unsigned char *srca, int stride){
-    struct vf_instance *vf = ctx;
-    unsigned char* dst;
-    if(w<=0 || h<=0) return; // nothing to do...
-//    printf("OSD redraw: %d;%d %dx%d  \n",x0,y0,w,h);
-    dst=vf->dmpi->planes[0]+
-			vf->dmpi->stride[0]*y0+
-			(vf->dmpi->bpp>>3)*x0;
-    switch(vf->dmpi->imgfmt){
-    case IMGFMT_BGR12:
-    case IMGFMT_RGB12:
-        vo_draw_alpha_rgb12(w, h, src, srca, stride, dst, vf->dmpi->stride[0]);
-        break;
-    case IMGFMT_BGR15:
-    case IMGFMT_RGB15:
-	vo_draw_alpha_rgb15(w,h,src,srca,stride,dst,vf->dmpi->stride[0]);
-	break;
-    case IMGFMT_BGR16:
-    case IMGFMT_RGB16:
-	vo_draw_alpha_rgb16(w,h,src,srca,stride,dst,vf->dmpi->stride[0]);
-	break;
-    case IMGFMT_BGR24:
-    case IMGFMT_RGB24:
-	vo_draw_alpha_rgb24(w,h,src,srca,stride,dst,vf->dmpi->stride[0]);
-	break;
-    case IMGFMT_BGR32:
-    case IMGFMT_RGB32:
-	vo_draw_alpha_rgb32(w,h,src,srca,stride,dst,vf->dmpi->stride[0]);
-	break;
-    case IMGFMT_YV12:
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
-    case IMGFMT_YVU9:
-    case IMGFMT_IF09:
-    case IMGFMT_Y800:
-    case IMGFMT_Y8:
-	vo_draw_alpha_yv12(w,h,src,srca,stride,dst,vf->dmpi->stride[0]);
-	break;
-    case IMGFMT_YUY2:
-	vo_draw_alpha_yuy2(w,h,src,srca,stride,dst,vf->dmpi->stride[0]);
-	break;
-    case IMGFMT_UYVY:
-	vo_draw_alpha_yuy2(w,h,src,srca,stride,dst+1,vf->dmpi->stride[0]);
-	break;
-    }
-}
-
-static void draw_osd(struct vf_instance *vf,int w,int h){
-    osd_draw_text(vf->priv->osd, vf->priv->exp_w,vf->priv->exp_h,draw_func,vf);
-}
-
-#endif
 //===========================================================================//
 
 static int config(struct vf_instance *vf,
@@ -204,14 +139,6 @@ static int config(struct vf_instance *vf,
 
 static void get_image(struct vf_instance *vf, mp_image_t *mpi){
 //    if(mpi->type==MP_IMGTYPE_IPB) return; // not yet working
-#ifdef OSD_SUPPORT
-    if(vf->priv->osd_enabled && (mpi->flags&MP_IMGFLAG_PRESERVE)){
-	// check if we have to render osd!
-	osd_update(vf->priv->osd, vf->priv->exp_w, vf->priv->exp_h);
-	if(vo_osd_check_range_update(vf->priv->exp_x,vf->priv->exp_y,
-	    vf->priv->exp_x+mpi->w,vf->priv->exp_y+mpi->h)) return;
-    }
-#endif
     if(vf->priv->exp_w==mpi->width ||
        (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) ){
 	// try full DR !
@@ -345,9 +272,6 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	if(!vf->dmpi) { mp_tmsg(MSGT_VFILTER, MSGL_WARN, "Why do we get NULL??\n"); return 0; }
 	mpi->priv=NULL;
         clear_borders(vf,mpi->w,mpi->h);
-#ifdef OSD_SUPPORT
-	if(vf->priv->osd_enabled) draw_osd(vf,mpi->w,mpi->h);
-#endif
 	// we've used DR, so we're ready...
 	if(!(mpi->flags&MP_IMGFLAG_PLANAR))
 	    vf->dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
@@ -381,25 +305,12 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	vf->dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
     }
     clear_borders(vf,mpi->w,mpi->h);
-#ifdef OSD_SUPPORT
-    if(vf->priv->osd_enabled) draw_osd(vf,mpi->w,mpi->h);
-#endif
     return vf_next_put_image(vf,vf->dmpi, pts);
 }
 
 //===========================================================================//
 
 static int control(struct vf_instance *vf, int request, void* data){
-#ifdef OSD_SUPPORT
-    switch(request){
-    case VFCTRL_SET_OSD_OBJ:
-        vf->priv->osd = data;
-        break;
-    case VFCTRL_DRAW_OSD:
-	if(vf->priv->osd_enabled) return CONTROL_TRUE;
-        break;
-    }
-#endif
     return vf_next_control(vf,request,data);
 }
 
@@ -415,16 +326,13 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->draw_slice=draw_slice;
     vf->get_image=get_image;
     vf->put_image=put_image;
-    mp_msg(MSGT_VFILTER, MSGL_INFO, "Expand: %d x %d, %d ; %d, osd: %d, aspect: %f, round: %d\n",
+    mp_msg(MSGT_VFILTER, MSGL_INFO, "Expand: %d x %d, %d ; %d, aspect: %f, round: %d\n",
     vf->priv->cfg_exp_w,
     vf->priv->cfg_exp_h,
     vf->priv->cfg_exp_x,
     vf->priv->cfg_exp_y,
-    vf->priv->osd_enabled,
     vf->priv->aspect,
     vf->priv->round);
-    if (vf->priv->osd_enabled)
-        vf->default_caps = VFCAP_OSD_FILTER;
     return 1;
 }
 
@@ -434,7 +342,6 @@ static m_option_t vf_opts_fields[] = {
   {"h", ST_OFF(cfg_exp_h), CONF_TYPE_INT, 0, 0 ,0, NULL},
   {"x", ST_OFF(cfg_exp_x), CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL},
   {"y", ST_OFF(cfg_exp_y), CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL},
-  {"osd", ST_OFF(osd_enabled), CONF_TYPE_FLAG, 0 , 0, 1, NULL},
   {"aspect", ST_OFF(aspect), CONF_TYPE_DOUBLE, M_OPT_MIN, 0, 0, NULL},
   {"round", ST_OFF(round), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
@@ -450,11 +357,7 @@ static const m_struct_t vf_opts = {
 
 
 const vf_info_t vf_info_expand = {
-#ifdef OSD_SUPPORT
-    "expanding & osd",
-#else
     "expanding",
-#endif
     "expand",
     "A'rpi",
     "",
