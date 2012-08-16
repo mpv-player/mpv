@@ -306,7 +306,6 @@ struct vo *init_best_video_out(struct MPOpts *opts,
         .input_ctx = input_ctx,
         .event_fd = -1,
         .registered_fd = -1,
-        .window_title = talloc_strdup(vo, ""),
     };
     // first try the preferred drivers, with their optional subdevice param:
     if (vo_list && vo_list[0])
@@ -351,7 +350,7 @@ struct vo *init_best_video_out(struct MPOpts *opts,
             return vo; // success!
         talloc_free_children(vo);
     }
-    free(vo);
+    talloc_free(vo);
     return NULL;
 }
 
@@ -488,6 +487,8 @@ void calc_src_dst_rects(struct vo *vo, int src_width, int src_height,
 // you need to keep the string for an extended period of time.
 const char *vo_get_window_title(struct vo *vo)
 {
+    if (!vo->window_title)
+        vo->window_title = talloc_strdup(vo, "");
     return vo->window_title;
 }
 
