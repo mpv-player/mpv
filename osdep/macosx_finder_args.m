@@ -36,8 +36,10 @@ bool psn_matches_current_process(char *psn_arg_to_check);
 @implementation FileOpenDelegate
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames
 {
+    NSArray *sorted_filenames = [filenames
+        sortedArrayUsingSelector:@selector(compare:)];
     files = talloc_zero(NULL, struct playlist);
-    for (NSString *filename in filenames)
+    for (NSString *filename in sorted_filenames)
         playlist_add_file(files, [filename UTF8String]);
     [NSApp stop:nil]; // stop the runloop (give back control to mplayer2 code)
 }
