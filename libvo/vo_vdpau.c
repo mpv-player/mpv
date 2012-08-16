@@ -1505,7 +1505,7 @@ static int preinit(struct vo *vo, const char *arg)
     // After this calling uninit() should work to free resources
 
     if (win_x11_init_vdpau_procs(vo) < 0) {
-        if (vc->vdp->device_destroy)
+        if (vc->vdp && vc->vdp->device_destroy)
             vc->vdp->device_destroy(vc->vdp_device);
         vo_x11_uninit(vo);
         return -1;
