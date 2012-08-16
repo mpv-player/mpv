@@ -75,12 +75,12 @@ bool psn_matches_current_process(char *psn_arg_to_check)
     return strcmp(psn_arg, psn_arg_to_check) == 0;
 }
 
-bool *macosx_finder_args(m_config_t *config, struct playlist *pl_files,
+bool macosx_finder_args(m_config_t *config, struct playlist *pl_files,
                          int argc, char **argv)
 {
-    if (argc==2 && psn_matches_current_process(argv[1])) {
+    if (argc==1 && psn_matches_current_process(argv[0])) {
         macosx_redirect_output_to_logfile("mplayer2");
-        m_config_set_option0(config, "quiet", NULL, false);
+        m_config_set_option0(config, "quiet", NULL);
         macosx_wait_fileopen_events();
     }
 

@@ -23,7 +23,7 @@
 #include "m_config.h"
 
 struct playlist;
-bool *macosx_finder_args(m_config_t *config, struct playlist *files,
+bool macosx_finder_args(m_config_t *config, struct playlist *files,
                          int argc, char **argv);
 
 #endif /* MPLAYER_MACOSX_FINDER_ARGS_H */
