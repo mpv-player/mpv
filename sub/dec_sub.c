@@ -27,6 +27,7 @@
 #include "options.h"
 
 extern const struct sd_functions sd_ass;
+extern const struct sd_functions sd_lavc;
 
 void sub_init(struct sh_sub *sh, struct osd_state *osd)
 {
@@ -36,8 +37,11 @@ void sub_init(struct sh_sub *sh, struct osd_state *osd)
     if (opts->ass_enabled && is_text_sub(sh->type))
         sh->sd_driver = &sd_ass;
 #endif
+    if (strchr("bpx", sh->type))
+        sh->sd_driver = &sd_lavc;
     if (sh->sd_driver) {
-        sh->sd_driver->init(sh, osd);
+        if (sh->sd_driver->init(sh, osd) < 0)
+            return;
         sh->initialized = true;
         sh->active = true;
     }

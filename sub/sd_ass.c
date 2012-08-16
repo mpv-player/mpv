@@ -43,7 +43,7 @@ static void free_last_event(ASS_Track *track)
     track->n_events--;
 }
 
-static void init(struct sh_sub *sh, struct osd_state *osd)
+static int init(struct sh_sub *sh, struct osd_state *osd)
 {
     struct sd_ass_priv *ctx;
 
@@ -65,6 +65,7 @@ static void init(struct sh_sub *sh, struct osd_state *osd)
     osd->ass_track = ctx->ass_track;
     osd->vsfilter_aspect = sh->type == 'a';
     osd->ass_track_changed = true;
+    return 0;
 }
 
 static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,

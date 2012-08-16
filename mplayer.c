@@ -80,7 +80,6 @@
 #include "screenshot.h"
 
 #include "sub/sub.h"
-#include "sub/av_sub.h"
 #include "cpudetect.h"
 
 #ifdef CONFIG_X11
@@ -587,8 +586,6 @@ static void uninit_subs(struct demuxer *demuxer)
         struct sh_sub *sh = demuxer->s_streams[i];
         if (sh && sh->initialized)
             sub_uninit(sh);
-        if (sh && is_av_sub(sh->type))
-            reset_avsub(sh);
     }
 }
 
@@ -1747,7 +1744,6 @@ double playing_audio_pts(struct MPContext *mpctx)
 static void reset_subtitles(struct MPContext *mpctx)
 {
     struct sh_sub *sh_sub = mpctx->sh_sub;
-    int type = sh_sub ? sh_sub->type : '\0';
 
     if (sh_sub)
         sub_reset(sh_sub, mpctx->osd);
@@ -1758,8 +1754,6 @@ static void reset_subtitles(struct MPContext *mpctx)
         spudec_reset(vo_spudec);
         vo_osd_changed(OSDTYPE_SPU);
     }
-    if (sh_sub && is_av_sub(type))
-        reset_avsub(sh_sub);
 }
 
 static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
@@ -1836,7 +1830,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
             if (track->vobsub_id_plus_one || timestamp >= 0)
                 spudec_assemble(vo_spudec, packet, len, timestamp);
         }
-    } else if (d_sub && (is_text_sub(type) || is_av_sub(type))) {
+    } else if (d_sub && (is_text_sub(type) || (sh_sub && sh_sub->active))) {
         if (d_sub->non_interleaved)
             ds_get_next_pts(d_sub);
 
@@ -1852,13 +1846,6 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
             }
             double duration = d_sub->first->duration;
             len = ds_get_packet_sub(d_sub, &packet);
-            if (is_av_sub(type)) {
-                int ret = decode_avsub(sh_sub, packet, len, subpts_s, duration);
-                if (ret < 0)
-                    mp_msg(MSGT_SPUDEC, MSGL_WARN, "lavc failed decoding "
-                           "subtitle\n");
-                continue;
-            }
             if (type == 'm') {
                 if (len < 2)
                     continue;
@@ -1869,6 +1856,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 sub_decode(sh_sub, mpctx->osd, packet, len, subpts_s, duration);
                 continue;
             }
+            // is_text_sub() case
             if (subpts_s != MP_NOPTS_VALUE) {
                 if (duration < 0)
                     sub_clear_text(&mpctx->subs, MP_NOPTS_VALUE);

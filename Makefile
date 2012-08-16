@@ -252,10 +252,10 @@ SRCS_COMMON = asxparser.c \
               stream/stream_mf.c \
               stream/stream_null.c \
               stream/url.c \
-              sub/av_sub.c \
               sub/dec_sub.c \
               sub/find_sub.c \
               sub/find_subfiles.c \
+              sub/sd_lavc.c \
               sub/spudec.c \
               sub/sub.c \
               sub/subassconvert.c \
