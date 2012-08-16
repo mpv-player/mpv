@@ -43,6 +43,15 @@ configuration="$*"
 
 # Prefer these macros to full length text !
 # These macros only return an error code - NO display is done
+command_check() {
+  echo >> "$TMPLOG"
+  echo "$@" >> "$TMPLOG"
+  "$@" >> "$TMPLOG" 2>&1
+  TMPRES="$?"
+  echo >> "$TMPLOG"
+  return "$TMPRES"
+}
+
 compile_check() {
   source="$1"
   shift
@@ -1087,6 +1096,10 @@ test "$cc_fail" = yes && die "unsupported compiler version"
 echocheck "working compiler"
 cflag_check "" || die "Compiler is not functioning correctly. Check your installation and custom CFLAGS $CFLAGS ."
 echo "yes"
+
+echocheck "python3"
+command_check python3 -c '' || die "Python 3 is not functioning correctly. Check your installation and PATH."
+echo yes
 
 if test -z "$_target" && x86 ; then
   cat > $TMPC << EOF
