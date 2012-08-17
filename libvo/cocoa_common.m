@@ -666,8 +666,9 @@ void create_menu()
     if (vo_fs) {
         [s->window makeKeyAndOrderFront:s->window];
         [s->window setLevel:s->fullscreen_window_level];
-        [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
-                                      NSApplicationPresentationHideMenuBar];
+        if (current_screen_has_dock_or_menubar())
+            [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
+                                          NSApplicationPresentationHideMenuBar];
     }
 }
 
