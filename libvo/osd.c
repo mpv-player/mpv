@@ -153,24 +153,6 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
 #endif
 }
 
-void vo_draw_alpha_init(void){
-//FIXME the optimized stuff is a lie for 15/16bpp as they aren't optimized yet
-	if( mp_msg_test(MSGT_OSD,MSGL_V) )
-	{
-#if ARCH_X86
-		// ordered per speed fasterst first
-		if(gCpuCaps.hasMMX2)
-			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX (with tiny bit MMX2) Optimized OnScreenDisplay\n");
-		else if(gCpuCaps.hasMMX)
-			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX Optimized OnScreenDisplay\n");
-		else
-			mp_msg(MSGT_OSD,MSGL_INFO,"Using X86 Optimized OnScreenDisplay\n");
-#else
-			mp_msg(MSGT_OSD,MSGL_INFO,"Using Unoptimized OnScreenDisplay\n");
-#endif
-	}
-}
-
 void vo_draw_alpha_rgb12(int w, int h, unsigned char* src, unsigned char *srca,
                          int srcstride, unsigned char* dstbase, int dststride) {
     int y;

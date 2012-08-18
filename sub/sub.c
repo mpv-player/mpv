@@ -137,11 +137,7 @@ inline static void vo_draw_spudec_sub(mp_osd_obj_t* obj, void (*draw_alpha)(void
 void *vo_spudec=NULL;
 void *vo_vobsub=NULL;
 
-static int draw_alpha_init_flag=0;
-
-void vo_draw_alpha_init(void);
-
-       mp_osd_obj_t* vo_osd_list=NULL;
+mp_osd_obj_t* vo_osd_list=NULL;
 
 static mp_osd_obj_t* new_osd_obj(int type){
     mp_osd_obj_t* osd=malloc(sizeof(mp_osd_obj_t));
@@ -255,10 +251,6 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
         .opts = opts,
         .ass_library = asslib,
     };
-    if(!draw_alpha_init_flag){
-	draw_alpha_init_flag=1;
-	vo_draw_alpha_init();
-    }
     // temp hack, should be moved to mplayer later
     new_osd_obj(OSDTYPE_OSD);
     new_osd_obj(OSDTYPE_SUBTITLE);

@@ -22,8 +22,6 @@
 #ifndef MPLAYER_OSD_H
 #define MPLAYER_OSD_H
 
-void vo_draw_alpha_init(void); // build tables
-
 void vo_draw_alpha_yv12(int w,  int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase, int dststride);
 void vo_draw_alpha_yuy2(int w,  int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase, int dststride);
 void vo_draw_alpha_rgb24(int w, int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase, int dststride);
