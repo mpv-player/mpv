@@ -31,6 +31,7 @@
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
+#include "libmpcodecs/img_format.h"
 
 #define MNG_SUPPORT_READ
 #define MNG_SUPPORT_DISPLAY
@@ -436,14 +437,14 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
     sh_video->ds = demuxer->video;
 
     // set format of pixels in video packets
-    sh_video->format = mmioFOURCC(32, 'B', 'G', 'R');
+    sh_video->format = IMGFMT_RGB32;
 
     // set framerate to some value (MNG does not have a fixed framerate)
     sh_video->fps       = 5.0f;
     sh_video->frametime = 1.0f / sh_video->fps;
 
     // set video frame parameters
-    sh_video->bih                = malloc(sizeof(*sh_video->bih));
+    sh_video->bih                = calloc(1, sizeof(*sh_video->bih));
     sh_video->bih->biCompression = sh_video->format;
     sh_video->bih->biWidth       = mng_priv->width;
     sh_video->bih->biHeight      = mng_priv->height;

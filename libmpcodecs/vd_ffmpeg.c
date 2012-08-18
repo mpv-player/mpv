@@ -125,7 +125,8 @@ static int init(sh_video_t *sh)
     struct lavc_param *lavc_param = &sh->opts->lavc_param;
     AVCodecContext *avctx;
     vd_ffmpeg_ctx *ctx;
-    AVCodec *lavc_codec;
+    AVCodec *lavc_codec = NULL;
+    enum PixelFormat rawfmt = PIX_FMT_NONE;
     int do_vis_debug = lavc_param->vismv ||
             (lavc_param->debug & (FF_DEBUG_VIS_MB_TYPE | FF_DEBUG_VIS_QP));
 
@@ -140,17 +141,22 @@ static int init(sh_video_t *sh)
             uninit(sh);
             return 0;
         }
-    } else if (!sh->libav_codec_id) {
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "No Libav codec ID known. "
-                "Generic lavc decoder is not applicable.\n");
-        return 0;
-    } else {
+    } else if (sh->libav_codec_id) {
         lavc_codec = avcodec_find_decoder(sh->libav_codec_id);
         if (!lavc_codec) {
             mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Libavcodec has no decoder "
                    "for this codec\n");
+            uninit(sh);
             return 0;
         }
+    } else if (!IMGFMT_IS_HWACCEL(sh->format)) {
+        rawfmt = imgfmt2pixfmt(sh->format);
+        if (rawfmt != PIX_FMT_NONE)
+            lavc_codec = avcodec_find_decoder_by_name("rawvideo");
+    }
+    if (!lavc_codec) {
+        uninit(sh);
+        return 0;
     }
 
     sh->codecname = lavc_codec->long_name;
@@ -230,7 +236,11 @@ static int init(sh_video_t *sh)
     if (lavc_param->gray)
         avctx->flags |= CODEC_FLAG_GRAY;
     avctx->flags2 |= lavc_param->fast;
-    avctx->codec_tag = sh->format;
+    if (rawfmt == PIX_FMT_NONE) {
+        avctx->codec_tag = sh->format;
+    } else {
+        avctx->pix_fmt = rawfmt;
+    }
     avctx->stream_codec_tag = sh->video.fccHandler;
     avctx->idct_algo = lavc_param->idct_algo;
     avctx->error_concealment = lavc_param->error_concealment;
