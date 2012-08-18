@@ -45,7 +45,6 @@ extern const vd_functions_t mpcodecs_vd_mpng;
 extern const vd_functions_t mpcodecs_vd_ijpg;
 extern const vd_functions_t mpcodecs_vd_mtga;
 extern const vd_functions_t mpcodecs_vd_realvid;
-extern const vd_functions_t mpcodecs_vd_libdv;
 extern const vd_functions_t mpcodecs_vd_lzo;
 extern const vd_functions_t mpcodecs_vd_qtvideo;
 
@@ -66,9 +65,6 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
     &mpcodecs_vd_ijpg,
 #endif
     &mpcodecs_vd_mtga,
-#ifdef CONFIG_LIBDV095
-    &mpcodecs_vd_libdv,
-#endif
     /* Please do not add any new decoders here. If you want to implement a new
      * decoder, add it to libavcodec, except for wrappers around external
      * libraries and decoders requiring binary support. */

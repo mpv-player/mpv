@@ -54,9 +54,6 @@ SRCS_COMMON-$(LIBASS)                += libmpcodecs/vf_ass.c \
 SRCS_COMMON-$(LIBBLURAY)             += stream/stream_bluray.c
 SRCS_COMMON-$(LIBBS2B)               += libaf/af_bs2b.c
 SRCS_COMMON-$(LIBDCA)                += libmpcodecs/ad_libdca.c
-SRCS_COMMON-$(LIBDV)                 += libmpcodecs/ad_libdv.c \
-                                        libmpcodecs/vd_libdv.c \
-                                        libmpdemux/demux_rawdv.c
 
 SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
 

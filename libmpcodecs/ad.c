@@ -42,7 +42,6 @@ extern const ad_functions_t mpcodecs_ad_alaw;
 extern const ad_functions_t mpcodecs_ad_imaadpcm;
 extern const ad_functions_t mpcodecs_ad_faad;
 extern const ad_functions_t mpcodecs_ad_libmad;
-extern const ad_functions_t mpcodecs_ad_libdv;
 extern const ad_functions_t mpcodecs_ad_spdif;
 extern const ad_functions_t mpcodecs_ad_libdca;
 
@@ -67,9 +66,6 @@ const ad_functions_t * const mpcodecs_ad_drivers[] =
 #endif
 #ifdef CONFIG_LIBMAD
   &mpcodecs_ad_libmad,
-#endif
-#ifdef CONFIG_LIBDV095
-  &mpcodecs_ad_libdv,
 #endif
 #ifdef CONFIG_LIBDCA
   &mpcodecs_ad_libdca,

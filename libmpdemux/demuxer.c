@@ -60,7 +60,6 @@ extern const demuxer_desc_t demuxer_desc_avi;
 extern const demuxer_desc_t demuxer_desc_asf;
 extern const demuxer_desc_t demuxer_desc_matroska;
 extern const demuxer_desc_t demuxer_desc_gif;
-extern const demuxer_desc_t demuxer_desc_rawdv;
 extern const demuxer_desc_t demuxer_desc_lavf;
 extern const demuxer_desc_t demuxer_desc_lavf_preferred;
 extern const demuxer_desc_t demuxer_desc_mng;
@@ -86,9 +85,6 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_gif,
 #endif
     &demuxer_desc_lavf,
-#ifdef CONFIG_LIBDV095
-    &demuxer_desc_rawdv,
-#endif
 #ifdef CONFIG_MNG
     &demuxer_desc_mng,
 #endif

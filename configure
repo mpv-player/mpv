@@ -350,7 +350,6 @@ Codecs:
   --enable-faad             enable FAAD2 (AAC) [autodetect]
   --disable-ladspa          disable LADSPA plugin support [autodetect]
   --disable-libbs2b         disable libbs2b audio filter support [autodetect]
-  --disable-libdv           disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mpg123          disable libmpg123 MP3 decoding support [autodetect]
   --disable-mad             disable libmad (MPEG audio) support [autodetect]
   --enable-libdca           enable libdca support [autodetect]
@@ -500,7 +499,6 @@ _termios=auto
 #language=en
 _shm=auto
 _translation=no
-_libdv=auto
 _cdda=auto
 _cddb=auto
 _coreaudio=auto
@@ -654,8 +652,6 @@ for ac_option do
   --disable-dvb)        _dvb=no         ;;
   --enable-iconv)       _iconv=yes      ;;
   --disable-iconv)      _iconv=no       ;;
-  --enable-libdv)       _libdv=yes      ;;
-  --disable-libdv)      _libdv=no       ;;
   --enable-ossaudio)    _ossaudio=yes   ;;
   --disable-ossaudio)   _ossaudio=no    ;;
   --enable-rsound)      _rsound=yes     ;;
@@ -3042,22 +3038,6 @@ fi
 echores "$libpostproc"
 
 
-echocheck "libdv-0.9.5+"
-if test "$_libdv" = auto ; then
-  _libdv=no
-  statement_check libdv/dv.h 'dv_encoder_new(1, 1, 1)' -ldv $_ld_pthread $_ld_lm && _libdv=yes
-fi
-if test "$_libdv" = yes ; then
-  def_libdv='#define CONFIG_LIBDV095 1'
-  extra_ldflags="$extra_ldflags -ldv"
-  codecmodules="libdv $codecmodules"
-else
-  def_libdv='#undef CONFIG_LIBDV095'
-  nocodecmodules="libdv $nocodecmodules"
-fi
-echores "$_libdv"
-
-
 echocheck "TV interface"
 if test "$_tv" = yes ; then
   def_tv='#define CONFIG_TV 1'
@@ -3466,7 +3446,6 @@ DUMMY_OSD = $_dummy_osd
 LIBBLURAY = $_bluray
 LIBBS2B = $_libbs2b
 LIBDCA = $_libdca
-LIBDV = $_libdv
 LIBMAD = $_mad
 LCMS2 = $_lcms2
 LIBPOSTPROC = $libpostproc
@@ -3640,7 +3619,6 @@ $def_vcd
 $def_faad
 $def_liba52
 $def_libdca
-$def_libdv
 $def_mad
 $def_mpg123
 $def_zlib
