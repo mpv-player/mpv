@@ -320,7 +320,6 @@ Optional features:
   --enable-winsock2_h    enable winsock2_h [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
   --enable-libquvi       enable libquvi [autodetect]
-  --enable-nemesi        enable Nemesi Streaming Media [autodetect]
   --enable-lcms2         enable LCMS2 support [autodetect]
   --disable-vcd          disable VCD support [autodetect]
   --disable-bluray       disable Blu-ray support [autodetect]
@@ -473,7 +472,6 @@ _libbs2b=auto
 _vcd=auto
 _bluray=auto
 _dvdread=auto
-_nemesi=auto
 _lcms2=auto
 _xinerama=auto
 _vm=auto
@@ -692,8 +690,6 @@ for ac_option do
   --disable-bluray)     _bluray=no      ;;
   --enable-dvdread)     _dvdread=yes    ;;
   --disable-dvdread)    _dvdread=no     ;;
-  --enable-nemesi)      _nemesi=yes     ;;
-  --disable-nemesi)     _nemesi=no      ;;
   --enable-lcms2)       _lcms2=yes      ;;
   --disable-lcms2)      _lcms2=no       ;;
   --enable-xinerama)    _xinerama=yes   ;;
@@ -3013,23 +3009,6 @@ else
 fi
 echores "$_lcms2"
 
-echocheck "Nemesi Streaming Media libraries"
-if test "$_nemesi" = auto  && test "$networking" = yes ; then
-    _nemesi=no
-    if pkg_config_add libnemesi ; then
-        _nemesi=yes
-    fi
-fi
-if test "$_nemesi" = yes; then
-    def_nemesi='#define CONFIG_LIBNEMESI 1'
-    inputmodules="nemesi $inputmodules"
-else
-    _nemesi=no
-    def_nemesi='#undef CONFIG_LIBNEMESI'
-    noinputmodules="nemesi $noinputmodules"
-fi
-echores "$_nemesi"
-
 
 # Test with > against Libav 0.8 versions which will NOT work rather than
 # specify minimum version, to allow (future) point releases to possibly work.
@@ -3489,7 +3468,6 @@ LIBBS2B = $_libbs2b
 LIBDCA = $_libdca
 LIBDV = $_libdv
 LIBMAD = $_mad
-LIBNEMESI = $_nemesi
 LCMS2 = $_lcms2
 LIBPOSTPROC = $libpostproc
 LIBSMBCLIENT = $_smb
@@ -3716,7 +3694,6 @@ $def_ftp
 $def_inet6
 $def_inet_aton
 $def_inet_pton
-$def_nemesi
 $def_networking
 $def_smb
 $def_libquvi

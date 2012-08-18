@@ -60,8 +60,6 @@ SRCS_COMMON-$(LIBDV)                 += libmpcodecs/ad_libdv.c \
 
 SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
 
-SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
-                                        stream/stream_nemesi.c
 SRCS_COMMON-$(LIBPOSTPROC)           += libmpcodecs/vf_pp.c
 SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
 
