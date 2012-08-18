@@ -370,10 +370,6 @@ DIRS =  . \
         input \
         libaf \
         libao2 \
-        libdvdcss \
-        libdvdnav \
-        libdvdnav/vm \
-        libdvdread4 \
         libmpcodecs \
         libmpcodecs/native \
         libmpdemux \

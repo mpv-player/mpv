@@ -420,8 +420,6 @@ Use these options if autodetection fails:
   --extra-libs=FLAGS          extra linker flags
   --extra-libs-mplayer=FLAGS  extra linker flags for MPlayer
 
-  --with-dvdread-config=PATH  path to dvdread-config
-
 This configure script is NOT autoconf-based, even though its output is similar.
 It will try to autodetect all configuration options. If you --enable an option
 it will be forcefully turned on, skipping autodetection. This can break
@@ -475,7 +473,6 @@ _ladspa=auto
 _libbs2b=auto
 _vcd=auto
 _bluray=auto
-_dvdreadconfig=dvdread-config
 _dvdread=auto
 _live=no
 _nemesi=auto
@@ -566,9 +563,6 @@ for ac_option do
 
   --with-install=*)
     _install=$(echo $ac_option | cut -d '=' -f 2 )
-    ;;
-  --with-dvdread-config=*)
-    _dvdreadconfig=$(echo $ac_option | cut -d '=' -f 2)
     ;;
 
   --extra-cflags=*)
@@ -3492,9 +3486,6 @@ CFLAGS   = $WARNFLAGS $ERRORFLAGS $WARN_CFLAGS $CFLAGS $extra_cflags
 CXXFLAGS = $WARNFLAGS $ERRORFLAGS $CXXFLAGS $extra_cflags $extra_cxxflags
 DEPFLAGS = $DEPFLAGS
 
-CFLAGS_LIBDVDCSS         = $cflags_libdvdcss
-CFLAGS_LIBDVDCSS_DVDREAD = $cflags_libdvdcss_dvdread
-
 EXTRALIBS          = $extra_ldflags $_ld_static $_ld_lm $extra_libs
 EXTRALIBS_MPLAYER  = $libs_mplayer
 
@@ -3643,21 +3634,6 @@ cat > $TMPH << EOF
 #define MPLAYER_LOCALEDIR "$_localedir"
 
 $def_translation
-
-/* definitions needed by included libraries */
-#define HAVE_INTTYPES_H 1
-/* libdvdcss */
-#define HAVE_ERRNO_H 1
-/* libdvdcss + libdvdread */
-#define HAVE_LIMITS_H 1
-/* libdvdcss */
-#define HAVE_UNISTD_H 1
-/* libdvdread */
-#define STDC_HEADERS 1
-#define HAVE_MEMCPY 1
-/* libdvdread */
-#define HAVE_DLFCN_H 1
-$def_dvdcss
 
 
 /* system headers */
