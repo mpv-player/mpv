@@ -58,14 +58,9 @@ extern const demuxer_desc_t demuxer_desc_tv;
 extern const demuxer_desc_t demuxer_desc_mf;
 extern const demuxer_desc_t demuxer_desc_avi;
 extern const demuxer_desc_t demuxer_desc_asf;
-extern const demuxer_desc_t demuxer_desc_real;
 extern const demuxer_desc_t demuxer_desc_matroska;
-extern const demuxer_desc_t demuxer_desc_realaudio;
-extern const demuxer_desc_t demuxer_desc_vivo;
 extern const demuxer_desc_t demuxer_desc_gif;
-extern const demuxer_desc_t demuxer_desc_avs;
 extern const demuxer_desc_t demuxer_desc_rawdv;
-extern const demuxer_desc_t demuxer_desc_audio;
 extern const demuxer_desc_t demuxer_desc_rtp;
 extern const demuxer_desc_t demuxer_desc_rtp_nemesi;
 extern const demuxer_desc_t demuxer_desc_lavf;
@@ -89,14 +84,9 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_avi,
     &demuxer_desc_asf,
     &demuxer_desc_matroska,
-    &demuxer_desc_realaudio,
 #ifdef CONFIG_GIF
     &demuxer_desc_gif,
 #endif
-#ifdef CONFIG_WIN32DLL
-    &demuxer_desc_avs,
-#endif
-    &demuxer_desc_audio,
 #ifdef CONFIG_LIVE555
     &demuxer_desc_rtp,
 #endif

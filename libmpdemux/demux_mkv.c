@@ -46,7 +46,7 @@
 #include "stheader.h"
 #include "ebml.h"
 #include "matroska.h"
-#include "demux_real.h"
+//#include "demux_real.h"
 
 #include "mp_msg.h"
 
@@ -1812,6 +1812,54 @@ static int demux_mkv_read_block_lacing(uint8_t *buffer, uint64_t *size,
     free(lace_size);
     mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Bad input [lacing]\n");
     return 1;
+}
+
+#define SKIP_BITS(n) buffer<<=n
+#define SHOW_BITS(n) ((buffer)>>(32-(n)))
+
+static double real_fix_timestamp(unsigned char *buf, unsigned int timestamp, unsigned int format, int64_t *kf_base, int *kf_pts, double *pts){
+  double v_pts;
+  unsigned char *s = buf + 1 + (*buf+1)*8;
+  uint32_t buffer= (s[0]<<24) + (s[1]<<16) + (s[2]<<8) + s[3];
+  unsigned int kf=timestamp;
+  int pict_type;
+
+  if(format==mmioFOURCC('R','V','3','0') || format==mmioFOURCC('R','V','4','0')){
+    if(format==mmioFOURCC('R','V','3','0')){
+      SKIP_BITS(3);
+      pict_type= SHOW_BITS(2);
+      SKIP_BITS(2 + 7);
+    }else{
+      SKIP_BITS(1);
+      pict_type= SHOW_BITS(2);
+      SKIP_BITS(2 + 7 + 3);
+    }
+    kf= SHOW_BITS(13);  //    kf= 2*SHOW_BITS(12);
+//    if(pict_type==0)
+    if(pict_type<=1){
+      // I frame, sync timestamps:
+      *kf_base=(int64_t)timestamp-kf;
+      mp_msg(MSGT_DEMUX, MSGL_DBG2,"\nTS: base=%08"PRIX64"\n",*kf_base);
+      kf=timestamp;
+    } else {
+      // P/B frame, merge timestamps:
+      int64_t tmp=(int64_t)timestamp-*kf_base;
+      kf|=tmp&(~0x1fff);        // combine with packet timestamp
+      if(kf<tmp-4096) kf+=8192; else // workaround wrap-around problems
+      if(kf>tmp+4096) kf-=8192;
+      kf+=*kf_base;
+    }
+    if(pict_type != 3){ // P || I  frame -> swap timestamps
+        unsigned int tmp=kf;
+        kf=*kf_pts;
+        *kf_pts=tmp;
+//      if(kf<=tmp) kf=0;
+    }
+  }
+    v_pts=kf*0.001f;
+//    if(pts && (v_pts<*pts || !kf)) v_pts=*pts+frametime;
+    if(pts) *pts=v_pts;
+    return v_pts;
 }
 
 static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,

@@ -204,30 +204,7 @@ const m_option_t scaler_filter_conf[]={
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-/* VIVO demuxer options: */
-extern int vivo_param_version;
-extern char *vivo_param_acodec;
-extern int vivo_param_abitrate;
-extern int vivo_param_samplerate;
-extern int vivo_param_bytesperblock;
-extern int vivo_param_width;
-extern int vivo_param_height;
-extern int vivo_param_vformat;
 extern char *dvd_device, *cdrom_device;
-
-const m_option_t vivoopts_conf[]={
-    {"version", &vivo_param_version, CONF_TYPE_INT, 0, 0, 0, NULL},
-    /* audio options */
-    {"acodec", &vivo_param_acodec, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"abitrate", &vivo_param_abitrate, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"samplerate", &vivo_param_samplerate, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"bytesperblock", &vivo_param_bytesperblock, CONF_TYPE_INT, 0, 0, 0, NULL},
-    /* video options */
-    {"width", &vivo_param_width, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"height", &vivo_param_height, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"vformat", &vivo_param_vformat, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {NULL, NULL, 0, 0, 0, 0, NULL}
-};
 
 extern int    mf_w;
 extern int    mf_h;
@@ -485,7 +462,6 @@ const m_option_t common_opts[] = {
 #ifdef CONFIG_PVR
     {"pvr", (void *) pvropts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif /* CONFIG_PVR */
-    {"vivo", (void *) vivoopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #ifdef CONFIG_DVBIN
     {"dvbin", (void *) dvbin_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif

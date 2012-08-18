@@ -253,7 +253,6 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/aviprint.c \
               libmpdemux/demuxer.c \
               libmpdemux/demux_asf.c \
-              libmpdemux/demux_audio.c \
               libmpdemux/demux_avi.c \
               libmpdemux/demux_demuxers.c \
               libmpdemux/demux_edl.c \
@@ -263,9 +262,6 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/demux_mkv.c \
               libmpdemux/demux_rawaudio.c \
               libmpdemux/demux_rawvideo.c \
-              libmpdemux/demux_realaud.c \
-              libmpdemux/demux_real.c \
-              libmpdemux/demux_viv.c \
               libmpdemux/ebml.c \
               libmpdemux/extension.c \
               libmpdemux/mf.c \

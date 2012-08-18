@@ -66,7 +66,7 @@ int   network_ipv4_only_proxy = 0;
 
 const mime_struct_t mime_type_table[] = {
 	// MP3 streaming, some MP3 streaming server answer with audio/mpeg
-	{ "audio/mpeg", DEMUXER_TYPE_AUDIO },
+	{ "audio/mpeg", DEMUXER_TYPE_LAVF },
 	// ASF
         { "audio/x-ms-wax", DEMUXER_TYPE_ASF },
 	{ "audio/x-ms-wma", DEMUXER_TYPE_ASF },
