@@ -112,7 +112,7 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
     else if (whence == SEEK_SET)
         pos += stream->start_pos;
     else if (whence == AVSEEK_SIZE && stream->end_pos > 0) {
-        off_t size;
+        uint64_t size;
         if (stream_control(stream, STREAM_CTRL_GET_SIZE, &size) == STREAM_OK)
             return size;
         return stream->end_pos - stream->start_pos;

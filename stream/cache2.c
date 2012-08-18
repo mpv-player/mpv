@@ -87,7 +87,7 @@ typedef struct {
   // callback
   stream_t* stream;
   volatile int control;
-  volatile unsigned control_uint_arg;
+  volatile uint64_t control_uint_arg;
   volatile double control_double_arg;
   volatile struct stream_lang_req control_lang_arg;
   volatile int control_res;
@@ -260,6 +260,7 @@ static int cache_fill(cache_vars_t *s)
 static int cache_execute_control(cache_vars_t *s) {
   double double_res;
   unsigned uint_res;
+  uint64_t uint64_res;
   int needs_flush = 0;
   static unsigned last;
   int quit = s->control == -2;
@@ -313,6 +314,10 @@ static int cache_execute_control(cache_vars_t *s) {
     case STREAM_CTRL_GET_ANGLE:
       s->control_res = s->stream->control(s->stream, s->control, &uint_res);
       s->control_uint_arg = uint_res;
+      break;
+    case STREAM_CTRL_GET_SIZE:
+      s->control_res = s->stream->control(s->stream, s->control, &uint64_res);
+      s->control_uint_arg = uint64_res;
       break;
     case STREAM_CTRL_GET_LANG:
       s->control_res = s->stream->control(s->stream, s->control, (void *)&s->control_lang_arg);
@@ -640,6 +645,7 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
     case STREAM_CTRL_GET_ASPECT_RATIO:
     case STREAM_CTRL_GET_NUM_ANGLES:
     case STREAM_CTRL_GET_ANGLE:
+    case STREAM_CTRL_GET_SIZE:
     case -2:
       s->control = cmd;
       break;
@@ -681,6 +687,9 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
     case STREAM_CTRL_GET_NUM_ANGLES:
     case STREAM_CTRL_GET_ANGLE:
       *(unsigned *)arg = s->control_uint_arg;
+      break;
+    case STREAM_CTRL_GET_SIZE:
+      *(uint64_t *)arg = s->control_uint_arg;
       break;
     case STREAM_CTRL_GET_LANG:
       *(struct stream_lang_req *)arg = s->control_lang_arg;

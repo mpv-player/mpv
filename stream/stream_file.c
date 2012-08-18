@@ -105,7 +105,7 @@ static int control(stream_t *s, int cmd, void *arg) {
       size = lseek(s->fd, 0, SEEK_END);
       lseek(s->fd, s->pos, SEEK_SET);
       if(size != (off_t)-1) {
-        *((off_t*)arg) = size;
+        *(uint64_t*)arg = size;
         return 1;
       }
     }
