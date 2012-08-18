@@ -65,9 +65,6 @@ SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
 SRCS_COMMON-$(LIBPOSTPROC)           += libmpcodecs/vf_pp.c
 SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
 
-SRCS_COMMON-$(LIVE555)               += libmpdemux/demux_rtp.cpp \
-                                        libmpdemux/demux_rtp_codec.cpp \
-                                        stream/stream_live555.c
 SRCS_COMMON-$(MACOSX_FINDER)         += osdep/macosx_finder_args.m
 SRCS_COMMON-$(COCOA)                 += libvo/osx_common.c \
                                         libvo/cocoa_common.m \

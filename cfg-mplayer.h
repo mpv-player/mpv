@@ -382,13 +382,10 @@ const m_option_t common_opts[] = {
 #endif /* HAVE_AF_INET6 */
 #endif /* CONFIG_NETWORKING */
 
-#ifdef CONFIG_LIVE555
-    {"rtsp-stream-over-http", &rtsp_transport_http, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#endif /* CONFIG_LIVE555 */
-#if defined(CONFIG_LIBNEMESI) || defined(CONFIG_LIVE555)
+#if defined(CONFIG_LIBNEMESI)
     // -rtsp-stream-over-tcp option, specifying TCP streaming of RTP/RTCP
     {"rtsp-stream-over-tcp", &rtsp_transport_tcp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#endif /* defined(CONFIG_LIBNEMESI) || defined(CONFIG_LIVE555) */
+#endif /* defined(CONFIG_LIBNEMESI) */
 #ifdef CONFIG_LIBNEMESI
     {"rtsp-stream-over-sctp", &rtsp_transport_sctp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif /* CONFIG_LIBNEMESI */

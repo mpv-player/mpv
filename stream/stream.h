@@ -70,10 +70,6 @@
 #define MP_STREAM_SEEK_BW  2
 #define MP_STREAM_SEEK_FW  4
 #define MP_STREAM_SEEK  (MP_STREAM_SEEK_BW|MP_STREAM_SEEK_FW)
-/** This is a HACK for live555 that does not respect the
-    separation between stream an demuxer and thus is not
-    actually a stream cache can not be used */
-#define STREAM_NON_CACHEABLE 8
 
 //////////// Open return code
 #define STREAM_REDIRECTED -2

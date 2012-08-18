@@ -72,8 +72,6 @@ extern const stream_info_t stream_info_pvr;
 extern const stream_info_t stream_info_ftp;
 extern const stream_info_t stream_info_vstream;
 extern const stream_info_t stream_info_smb;
-extern const stream_info_t stream_info_sdp;
-extern const stream_info_t stream_info_rtsp_sip;
 
 extern const stream_info_t stream_info_null;
 extern const stream_info_t stream_info_mf;
@@ -96,10 +94,6 @@ static const stream_info_t* const auto_open_streams[] = {
   &stream_info_asf,
 #ifdef CONFIG_LIBNEMESI
   &stream_info_rtsp,
-#endif
-#ifdef CONFIG_LIVE555
-  &stream_info_sdp,
-  &stream_info_rtsp_sip,
 #endif
   &stream_info_udp,
   &stream_info_http2,

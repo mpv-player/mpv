@@ -441,10 +441,6 @@ int stream_enable_cache(stream_t *stream,int64_t size,int64_t min,int64_t seek_l
   int res = -1;
   cache_vars_t* s;
 
-  if (stream->flags & STREAM_NON_CACHEABLE) {
-    mp_msg(MSGT_CACHE,MSGL_STATUS,"\rThis stream is non-cacheable\n");
-    return 1;
-  }
   if (size > SIZE_MAX) {
     mp_msg(MSGT_CACHE, MSGL_FATAL, "Cache size larger than max. allocation size\n");
     return -1;

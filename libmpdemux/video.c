@@ -37,10 +37,6 @@
 /* biCompression constant */
 #define BI_RGB        0L
 
-#ifdef CONFIG_LIVE555
-#include "demux_rtp.h"
-#endif
-
 int video_read_properties(sh_video_t *sh_video){
 demux_stream_t *d_video=sh_video->ds;
 

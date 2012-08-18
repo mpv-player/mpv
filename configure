@@ -319,7 +319,6 @@ Optional features:
   --disable-networking   disable networking [enable]
   --enable-winsock2_h    enable winsock2_h [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
-  --enable-live          enable LIVE555 Streaming Media [disable]
   --enable-libquvi       enable libquvi [autodetect]
   --enable-nemesi        enable Nemesi Streaming Media [autodetect]
   --enable-lcms2         enable LCMS2 support [autodetect]
@@ -474,7 +473,6 @@ _libbs2b=auto
 _vcd=auto
 _bluray=auto
 _dvdread=auto
-_live=no
 _nemesi=auto
 _lcms2=auto
 _xinerama=auto
@@ -694,8 +692,6 @@ for ac_option do
   --disable-bluray)     _bluray=no      ;;
   --enable-dvdread)     _dvdread=yes    ;;
   --disable-dvdread)    _dvdread=no     ;;
-  --enable-live)        _live=yes       ;;
-  --disable-live)       _live=no        ;;
   --enable-nemesi)      _nemesi=yes     ;;
   --disable-nemesi)     _nemesi=no      ;;
   --enable-lcms2)       _lcms2=yes      ;;
@@ -3034,57 +3030,6 @@ else
 fi
 echores "$_nemesi"
 
-echocheck "LIVE555 Streaming Media libraries"
-if test "$_live" != no  && test "$networking" = yes ; then
-  cat > $TMPCPP << EOF
-#include <liveMedia.hh>
-#if (LIVEMEDIA_LIBRARY_VERSION_INT < 1141257600)
-#error Please upgrade to version 2006.03.03 or later of the "LIVE555 Streaming Media" libraries - available from <www.live555.com/liveMedia/>
-#endif
-int main(void) { return 0; }
-EOF
-
-  _live=no
-  for I in $extra_cflags "-I$_libdir/live" "-I/usr/lib/live" "-I/usr/lib64/live" "-I/usr/local/live" "-I/usr/local/lib/live" ; do
-    cxx_check $I/liveMedia/include $I/UsageEnvironment/include $I/groupsock/include &&
-        _livelibdir=$(echo $I| sed s/-I//) &&
-      extra_ldflags="$_livelibdir/liveMedia/libliveMedia.a \
-                 $_livelibdir/groupsock/libgroupsock.a \
-                 $_livelibdir/UsageEnvironment/libUsageEnvironment.a \
-                 $_livelibdir/BasicUsageEnvironment/libBasicUsageEnvironment.a \
-                 $extra_ldflags  -lstdc++" \
-      extra_cxxflags="-I$_livelibdir/liveMedia/include \
-                  -I$_livelibdir/UsageEnvironment/include \
-                  -I$_livelibdir/BasicUsageEnvironment/include \
-                  -I$_livelibdir/groupsock/include" &&
-      _live=yes && break
-  done
-  if test "$_live" != yes ; then
-      ld_tmp="-lliveMedia -lgroupsock -lUsageEnvironment -lBasicUsageEnvironment -lstdc++"
-      if cxx_check -I/usr/include/liveMedia -I/usr/include/UsageEnvironment -I/usr/include/groupsock $ld_tmp; then
-          _live_dist=yes
-      fi
-  fi
-fi
-if test "$_live" = yes && test "$networking" = yes; then
-  test $_livelibdir && res_comment="using $_livelibdir"
-  def_live='#define CONFIG_LIVE555 1'
- inputmodules="live555 $inputmodules"
-elif test "$_live_dist" = yes && test "$networking" = yes; then
-  res_comment="using distribution version"
-  _live="yes"
-  def_live='#define CONFIG_LIVE555 1'
-  extra_ldflags="$extra_ldflags $ld_tmp"
-  extra_cxxflags="-I/usr/include/liveMedia -I/usr/include/UsageEnvironment -I/usr/include/BasicUsageEnvironment -I/usr/include/groupsock"
- inputmodules="live555 $inputmodules"
-else
-  _live=no
-  def_live='#undef CONFIG_LIVE555'
-  noinputmodules="live555 $noinputmodules"
-fi
-echores "$_live"
-
-
 
 # Test with > against Libav 0.8 versions which will NOT work rather than
 # specify minimum version, to allow (future) point releases to possibly work.
@@ -3551,7 +3496,6 @@ LIBSMBCLIENT = $_smb
 LIBQUVI = $_libquvi
 LIBTHEORA = $_theora
 LIRC = $_lirc
-LIVE555 = $_live
 MACOSX_FINDER = $_macosx_finder
 MNG = $_mng
 MPG123 = $_mpg123
@@ -3772,7 +3716,6 @@ $def_ftp
 $def_inet6
 $def_inet_aton
 $def_inet_pton
-$def_live
 $def_nemesi
 $def_networking
 $def_smb
