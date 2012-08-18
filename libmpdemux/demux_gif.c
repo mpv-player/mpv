@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <libavformat/avformat.h>
 
 #include "config.h"
 
@@ -157,19 +158,24 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
     return 0; // oops
   }
 
-  len = gif->Image.Width * gif->Image.Height;
-  dp = new_demux_packet(priv->w * priv->h);
   buf = calloc(gif->Image.Width, gif->Image.Height);
-  if (priv->useref)
-    fast_memcpy(dp->buffer, priv->refimg, priv->w * priv->h);
-  else
-    memset(dp->buffer, gif->SBackGroundColor, priv->w * priv->h);
-
+  len = gif->Image.Width * gif->Image.Height;
   if (DGifGetLine(gif, buf, len) == GIF_ERROR) {
     PrintGifError();
     free(buf);
     return 0; // oops
   }
+
+  AVPacket *avpacket = talloc(NULL, AVPacket);
+  if (av_new_packet(avpacket, priv->w * priv->h) != 0)
+      abort();
+  dp = new_demux_packet_fromdata(avpacket->data, avpacket->size);
+  dp->avpacket = avpacket;
+
+  if (priv->useref)
+    fast_memcpy(dp->buffer, priv->refimg, priv->w * priv->h);
+  else
+    memset(dp->buffer, gif->SBackGroundColor, priv->w * priv->h);
 
   effective_map = gif->Image.ColorMap;
   if (effective_map == NULL) effective_map = gif->SColorMap;
@@ -227,6 +233,12 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
   free(buf);
 
+  int palsize = 256 * 4;
+  uint8_t *pal = av_packet_new_side_data(avpacket, AV_PKT_DATA_PALETTE,
+                                         palsize);
+  if (pal)
+      memcpy(pal, priv->palette, palsize);
+
   demuxer->video->dpos++;
   dp->pts = ((float)priv->current_pts) / 100;
   dp->pos = stream_tell(demuxer->stream);
@@ -276,12 +288,14 @@ static demuxer_t* demux_open_gif(demuxer_t* demuxer)
   // video_read_properties() will choke
   sh_video->ds = demuxer->video;
 
-  sh_video->format = mmioFOURCC(8, 'R', 'G', 'B');
+  sh_video->format = mmioFOURCC('r', 'a', 'w', ' ');
 
   sh_video->fps = 5.0f;
   sh_video->frametime = 1.0f / sh_video->fps;
 
-  sh_video->bih = malloc(sizeof(*sh_video->bih) + (256 * 4));
+  int size = sizeof(*sh_video->bih) + (256 * 4);
+  sh_video->bih = calloc(1, size);
+  sh_video->bih->biSize = size;
   sh_video->bih->biCompression = sh_video->format;
   sh_video->bih->biWidth = priv->w = (uint16_t)gif->SWidth;
   sh_video->bih->biHeight = priv->h = (uint16_t)gif->SHeight;
