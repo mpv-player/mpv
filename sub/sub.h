@@ -42,23 +42,11 @@ typedef struct mp_osd_bbox_s {
 typedef struct mp_osd_obj_s {
     struct mp_osd_obj_s* next;
     unsigned char type;
-    unsigned char alignment; // 2 bits: x;y percentages, 2 bits: x;y relative to parent; 2 bits: alignment left/right/center
     unsigned short flags;
     int x,y;
     int dxs,dys;
     mp_osd_bbox_t bbox; // bounding box
     mp_osd_bbox_t old_bbox; // the renderer will save bbox here
-    union {
-	struct {
-	    void* sub;			// value of vo_sub at last update
-	    int utbl[MAX_UCS+1];	// subtitle text
-	    int xtbl[MAX_UCSLINES];	// x positions
-	    int lines;			// no. of lines
-	} subtitle;
-	struct {
-	    int elems;
-	} progbar;
-    } params;
     int stride;
 
     int allocated;
