@@ -34,8 +34,6 @@ SRCS_COMMON-$(DVBIN)                 += stream/dvb_tune.c \
 SRCS_COMMON-$(DVDREAD)               += stream/stream_dvd.c \
                                         stream/stream_dvd_common.c
 
-SRCS_COMMON-$(FAAD)                  += libmpcodecs/ad_faad.c
-
 # These filters use private headers and do not work with shared libavcodec.
 SRCS_COMMON-$(FFMPEG_INTERNALS)      += libmpcodecs/vf_mcdeint.c \
                                         libmpcodecs/vf_spp.c \
@@ -44,18 +42,13 @@ SRCS_COMMON-$(FTP)                   += stream/stream_ftp.c
 SRCS_COMMON-$(GIF)                   += libmpdemux/demux_gif.c
 SRCS_COMMON-$(HAVE_POSIX_SELECT)     += libmpcodecs/vf_bmovl.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c osdep/mmap_anon.c
-SRCS_COMMON-$(JPEG)                  += libmpcodecs/vd_ijpg.c
 SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
-SRCS_COMMON-$(LIBA52)                += libmpcodecs/ad_liba52.c
 SRCS_COMMON-$(LIBASS)                += libmpcodecs/vf_ass.c \
                                         sub/ass_mp.c \
                                         sub/sd_ass.c \
 
 SRCS_COMMON-$(LIBBLURAY)             += stream/stream_bluray.c
 SRCS_COMMON-$(LIBBS2B)               += libaf/af_bs2b.c
-SRCS_COMMON-$(LIBDCA)                += libmpcodecs/ad_libdca.c
-
-SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
 
 SRCS_COMMON-$(LIBPOSTPROC)           += libmpcodecs/vf_pp.c
 SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
@@ -83,7 +76,6 @@ SRCS_COMMON-$(NETWORKING)            += stream/stream_netstream.c \
                                         stream/tcp.c \
                                         stream/stream_udp.c \
 
-SRCS_COMMON-$(PNG)                   += libmpcodecs/vd_mpng.c
 SRCS_COMMON-$(PRIORITY)              += osdep/priority.c
 SRCS_COMMON-$(PVR)                   += stream/stream_pvr.c
 SRCS_COMMON-$(RADIO)                 += stream/stream_radio.c
@@ -147,15 +139,8 @@ SRCS_COMMON = asxparser.c \
               libaf/reorder_ch.c \
               libaf/window.c \
               libmpcodecs/ad.c \
-              libmpcodecs/ad_alaw.c \
-              libmpcodecs/ad_dvdpcm.c \
               libmpcodecs/ad_ffmpeg.c \
               libmpcodecs/ad_spdif.c      \
-              libmpcodecs/ad_hwac3.c \
-              libmpcodecs/ad_hwmpa.c \
-              libmpcodecs/ad_imaadpcm.c \
-              libmpcodecs/ad_msadpcm.c \
-              libmpcodecs/ad_pcm.c \
               libmpcodecs/dec_audio.c \
               libmpcodecs/dec_video.c \
               libmpcodecs/img_format.c \
@@ -163,11 +148,6 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/pullup.c \
               libmpcodecs/vd.c \
               libmpcodecs/vd_ffmpeg.c \
-              libmpcodecs/vd_hmblck.c \
-              libmpcodecs/vd_lzo.c \
-              libmpcodecs/vd_mtga.c \
-              libmpcodecs/vd_null.c \
-              libmpcodecs/vd_raw.c \
               libmpcodecs/vf.c \
               libmpcodecs/vf_1bpp.c \
               libmpcodecs/vf_2xsai.c \
@@ -257,7 +237,6 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/ebml.c \
               libmpdemux/extension.c \
               libmpdemux/mf.c \
-              libmpdemux/mp3_hdr.c \
               libmpdemux/mp_taglists.c \
               libmpdemux/video.c \
               libvo/osd.c \
@@ -359,7 +338,6 @@ DIRS =  . \
         libaf \
         libao2 \
         libmpcodecs \
-        libmpcodecs/native \
         libmpdemux \
         libvo \
         osdep \

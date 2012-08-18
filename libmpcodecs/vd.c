@@ -37,34 +37,14 @@
 #include "vf.h"
 #include "libvo/video_out.h"
 
-extern const vd_functions_t mpcodecs_vd_null;
 extern const vd_functions_t mpcodecs_vd_ffmpeg;
-extern const vd_functions_t mpcodecs_vd_raw;
-extern const vd_functions_t mpcodecs_vd_hmblck;
-extern const vd_functions_t mpcodecs_vd_mpng;
-extern const vd_functions_t mpcodecs_vd_ijpg;
-extern const vd_functions_t mpcodecs_vd_mtga;
-extern const vd_functions_t mpcodecs_vd_realvid;
-extern const vd_functions_t mpcodecs_vd_lzo;
-extern const vd_functions_t mpcodecs_vd_qtvideo;
 
 /* Please do not add any new decoders here. If you want to implement a new
  * decoder, add it to libavcodec, except for wrappers around external
  * libraries and decoders requiring binary support. */
 
 const vd_functions_t * const mpcodecs_vd_drivers[] = {
-    &mpcodecs_vd_null,
     &mpcodecs_vd_ffmpeg,
-    &mpcodecs_vd_lzo,
-    &mpcodecs_vd_raw,
-    &mpcodecs_vd_hmblck,
-#ifdef CONFIG_PNG
-    &mpcodecs_vd_mpng,
-#endif
-#ifdef CONFIG_JPEG
-    &mpcodecs_vd_ijpg,
-#endif
-    &mpcodecs_vd_mtga,
     /* Please do not add any new decoders here. If you want to implement a new
      * decoder, add it to libavcodec, except for wrappers around external
      * libraries and decoders requiring binary support. */

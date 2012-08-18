@@ -33,42 +33,14 @@
 
 extern const ad_functions_t mpcodecs_ad_mpg123;
 extern const ad_functions_t mpcodecs_ad_ffmpeg;
-extern const ad_functions_t mpcodecs_ad_liba52;
-extern const ad_functions_t mpcodecs_ad_hwac3;
-extern const ad_functions_t mpcodecs_ad_hwmpa;
-extern const ad_functions_t mpcodecs_ad_pcm;
-extern const ad_functions_t mpcodecs_ad_dvdpcm;
-extern const ad_functions_t mpcodecs_ad_alaw;
-extern const ad_functions_t mpcodecs_ad_imaadpcm;
-extern const ad_functions_t mpcodecs_ad_faad;
-extern const ad_functions_t mpcodecs_ad_libmad;
 extern const ad_functions_t mpcodecs_ad_spdif;
-extern const ad_functions_t mpcodecs_ad_libdca;
 
 const ad_functions_t * const mpcodecs_ad_drivers[] =
 {
 #ifdef CONFIG_MPG123
   &mpcodecs_ad_mpg123,
 #endif
-#ifdef CONFIG_LIBA52
-  &mpcodecs_ad_liba52,
-#endif
-  &mpcodecs_ad_hwac3,
-  &mpcodecs_ad_hwmpa,
   &mpcodecs_ad_ffmpeg,
   &mpcodecs_ad_spdif,
-  &mpcodecs_ad_pcm,
-  &mpcodecs_ad_dvdpcm,
-  &mpcodecs_ad_alaw,
-  &mpcodecs_ad_imaadpcm,
-#ifdef CONFIG_FAAD
-  &mpcodecs_ad_faad,
-#endif
-#ifdef CONFIG_LIBMAD
-  &mpcodecs_ad_libmad,
-#endif
-#ifdef CONFIG_LIBDCA
-  &mpcodecs_ad_libdca,
-#endif
   NULL
 };
