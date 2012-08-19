@@ -31,8 +31,6 @@ extern float  audio_delay;
 
 extern double force_fps;
 
-extern int stream_cache_size;
-
 extern int frame_dropping;
 
 extern int auto_quality;

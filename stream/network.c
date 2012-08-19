@@ -29,6 +29,7 @@
 #include <ctype.h>
 
 #include "config.h"
+#include "options.h"
 
 #include "mp_msg.h"
 
@@ -46,8 +47,6 @@
 #include "http.h"
 #include "cookies.h"
 #include "url.h"
-
-extern int stream_cache_size;
 
 /* Variables for the command line option -user, -passwd, -bandwidth,
    -user-agent and -nocookies */
@@ -461,13 +460,14 @@ nop_streaming_seek( int fd, off_t pos, streaming_ctrl_t *stream_ctrl ) {
 
 
 void fixup_network_stream_cache(stream_t *stream) {
+  struct MPOpts *opts = stream->opts;
   if(stream->streaming_ctrl->buffering) {
-    if(stream_cache_size<0) {
+    if(opts->stream_cache_size<0) {
       // cache option not set, will use our computed value.
       // buffer in KBytes, *5 because the prefill is 20% of the buffer.
-      stream_cache_size = (stream->streaming_ctrl->prebuffer_size/1024)*5;
-      if( stream_cache_size<64 ) stream_cache_size = 64;	// 16KBytes min buffer
+      opts->stream_cache_size = (stream->streaming_ctrl->prebuffer_size/1024)*5;
+      if( opts->stream_cache_size<64 ) opts->stream_cache_size = 64;	// 16KBytes min buffer
     }
-    mp_tmsg(MSGT_NETWORK,MSGL_INFO,"Cache size set to %d KBytes\n", stream_cache_size);
+    mp_tmsg(MSGT_NETWORK,MSGL_INFO,"Cache size set to %d KBytes\n", opts->stream_cache_size);
   }
 }

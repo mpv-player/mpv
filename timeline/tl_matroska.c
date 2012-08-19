@@ -112,6 +112,50 @@ static char **find_files(const char *original_file, const char *suffix)
     return results;
 }
 
+static struct demuxer *open_demuxer(struct stream *stream,
+        struct MPContext *mpctx, char *filename, unsigned char uid_map[][16])
+{
+    return demux_open_withparams(&mpctx->opts, stream,
+                DEMUXER_TYPE_MATROSKA, NULL, mpctx->opts.audio_id,
+                mpctx->opts.video_id, mpctx->opts.sub_id, filename,
+                &(struct demuxer_params){.matroska_wanted_uids = uid_map});
+}
+
+static int enable_cache(struct MPContext *mpctx, struct stream **stream,
+                        struct demuxer **demuxer, unsigned char uid_map[][16])
+{
+    struct MPOpts *opts = &mpctx->opts;
+
+    if (opts->stream_cache_size <= 0)
+        return 0;
+
+    char *filename = talloc_strdup(NULL, (*demuxer)->filename);
+    free_demuxer(*demuxer);
+    free_stream(*stream);
+
+    int format = 0;
+    *stream = open_stream(filename, &mpctx->opts, &format);
+    if (!*stream) {
+        talloc_free(filename);
+        return -1;
+    }
+
+    stream_enable_cache_percent(*stream,
+                                opts->stream_cache_size,
+                                opts->stream_cache_min_percent,
+                                opts->stream_cache_seek_min_percent);
+
+    *demuxer = open_demuxer(*stream, mpctx, filename, uid_map);
+    if (!*demuxer) {
+        talloc_free(filename);
+        free_stream(*stream);
+        return -1;
+    }
+
+    talloc_free(filename);
+    return 1;
+}
+
 static int find_ordered_chapter_sources(struct MPContext *mpctx,
                                         struct demuxer **sources,
                                         int num_sources,
@@ -140,11 +184,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
         struct stream *s = open_stream(filenames[i], &mpctx->opts, &format);
         if (!s)
             continue;
-        struct demuxer *d = demux_open_withparams(&mpctx->opts, s,
-                DEMUXER_TYPE_MATROSKA, NULL, mpctx->opts.audio_id,
-                mpctx->opts.video_id, mpctx->opts.sub_id, filenames[i],
-                &(struct demuxer_params){.matroska_wanted_uids = uid_map});
-
+        struct demuxer *d = open_demuxer(s, mpctx, filenames[i], uid_map);
 
         if (!d) {
             free_stream(s);
@@ -157,6 +197,10 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
                 if (!memcmp(uid_map[i], d->matroska_data.segment_uid, 16)) {
                     mp_msg(MSGT_CPLAYER, MSGL_INFO,"Match for source %d: %s\n",
                            i, d->filename);
+
+                    if (enable_cache(mpctx, &s, &d, uid_map) < 0)
+                        continue;
+
                     sources[i] = d;
                     num_left--;
                     goto match;

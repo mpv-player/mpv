@@ -221,9 +221,6 @@ int vobsub_id = -1;
 static char *spudec_ifo = NULL;
 int forced_subs_only = 0;
 
-// cache2:
-int stream_cache_size = -1;
-
 // A-V sync:
 static float default_max_pts_correction = -1;
 float audio_delay = 0;
@@ -1252,7 +1249,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 
 #ifdef CONFIG_STREAM_CACHE
     // cache stats
-    if (stream_cache_size > 0)
+    if (opts->stream_cache_size > 0)
         saddf(line, width, " C: %d%%", cache_fill_status(mpctx->stream));
 #endif
 
@@ -3286,7 +3283,7 @@ static void run_playloop(struct MPContext *mpctx)
 
 #ifdef CONFIG_STREAM_CACHE
     // The cache status is part of the status line. Possibly update it.
-    if (mpctx->paused && stream_cache_size > 0)
+    if (mpctx->paused && opts->stream_cache_size > 0)
         print_status(mpctx, MP_NOPTS_VALUE, false);
 #endif
 
@@ -3804,13 +3801,11 @@ static void play_current_file(struct MPContext *mpctx)
 
     // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
 goto_enable_cache:
-    if (stream_cache_size > 0) {
-        int res;
-        float stream_cache_min_percent = opts->stream_cache_min_percent;
-        float stream_cache_seek_min_percent = opts->stream_cache_seek_min_percent;
-        res = stream_enable_cache(mpctx->stream, stream_cache_size * 1024ull,
-                                  stream_cache_size * 1024ull * (stream_cache_min_percent / 100.0),
-                                  stream_cache_size * 1024ull * (stream_cache_seek_min_percent / 100.0));
+    if (opts->stream_cache_size > 0) {
+        int res = stream_enable_cache_percent(mpctx->stream,
+                                              opts->stream_cache_size,
+                                              opts->stream_cache_min_percent,
+                                              opts->stream_cache_seek_min_percent);
         if (res == 0)
             if (libmpdemux_was_interrupted(mpctx))
                 goto terminate_playback;

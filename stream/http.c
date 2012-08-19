@@ -45,7 +45,6 @@
 
 #include <libavutil/avutil.h>
 
-extern int stream_cache_size;
 extern int network_bandwidth;
 
 typedef struct {

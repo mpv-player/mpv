@@ -434,6 +434,14 @@ static void cache_mainloop(cache_vars_t *s) {
     } while (cache_execute_control(s));
 }
 
+int stream_enable_cache_percent(stream_t *stream, int64_t stream_cache_size,
+    float stream_cache_min_percent, float stream_cache_seek_min_percent)
+{
+    return stream_enable_cache(stream, stream_cache_size * 1024,
+        stream_cache_size * 1024 * (stream_cache_min_percent / 100.0),
+        stream_cache_size * 1024 * (stream_cache_seek_min_percent / 100.0));
+}
+
 /**
  * \return 1 on success, 0 if the function was interrupted and -1 on error
  */
