@@ -3861,6 +3861,13 @@ static void detach_ptw32(void)
 
 static void osdep_preinit(int *p_argc, char ***p_argv)
 {
+    char *enable_talloc = getenv("MPLAYER_LEAK_REPORT");
+    if (*p_argc > 1 && (strcmp((*p_argv)[1], "-leak-report") == 0
+                     || strcmp((*p_argv)[1], "--leak-report") == 0))
+        enable_talloc = "1";
+    if (enable_talloc && strcmp(enable_talloc, "1") == 0)
+        talloc_enable_leak_report();
+
     GetCpuCaps(&gCpuCaps);
 
 #ifdef __MINGW32__
@@ -3899,10 +3906,6 @@ int main(int argc, char *argv[])
         argc--;
         argv++;
     }
-
-    if (argc > 0 && (!strcmp(argv[0], "-leak-report")
-                     || !strcmp(argv[0], "--leak-report")))
-        talloc_enable_leak_report();
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
     *mpctx = (struct MPContext){
