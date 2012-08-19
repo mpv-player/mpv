@@ -141,7 +141,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
         if (!s)
             continue;
         struct demuxer *d = demux_open_withparams(&mpctx->opts, s,
-                DEMUXER_TYPE_MATROSKA, mpctx->opts.audio_id,
+                DEMUXER_TYPE_MATROSKA, NULL, mpctx->opts.audio_id,
                 mpctx->opts.video_id, mpctx->opts.sub_id, filenames[i],
                 &(struct demuxer_params){.matroska_wanted_uids = uid_map});
 

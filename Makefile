@@ -227,7 +227,6 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/demuxer.c \
               libmpdemux/demux_asf.c \
               libmpdemux/demux_avi.c \
-              libmpdemux/demux_demuxers.c \
               libmpdemux/demux_edl.c \
               libmpdemux/demux_cue.c \
               libmpdemux/demux_lavf.c \

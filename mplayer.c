@@ -2754,6 +2754,33 @@ static int seek(MPContext *mpctx, struct seek_params seek,
         return -1;
     }
 
+    // If audio or demuxer subs come from different files, seek them too:
+    bool have_external_tracks = false;
+    for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
+        struct track *track = mpctx->current_track[type];
+        have_external_tracks |= track && track->is_external && track->demuxer;
+    }
+    if (have_external_tracks) {
+        double main_new_pos = MP_NOPTS_VALUE;
+        if (seek.type == MPSEEK_ABSOLUTE)
+            main_new_pos = seek.amount - mpctx->video_offset;
+        for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
+            struct demux_stream *ds = mpctx->demuxer->ds[type];
+            if (ds->sh && main_new_pos == MP_NOPTS_VALUE) {
+                demux_fill_buffer(mpctx->demuxer, ds);
+                if (ds->first)
+                    main_new_pos = ds->first->pts;
+            }
+        }
+        assert(main_new_pos != MP_NOPTS_VALUE);
+        for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
+            struct track *track = mpctx->current_track[type];
+            if (track && track->is_external && track->demuxer)
+                demux_seek(track->demuxer, main_new_pos, audio_delay,
+                           SEEK_ABSOLUTE);
+        }
+    }
+
     if (need_reset)
         reinit_audio_chain(mpctx);
     /* If we just reinitialized audio it doesn't need to be reset,
@@ -3498,6 +3525,79 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
     }
 }
 
+static void open_external_file(struct MPContext *mpctx, char *filename,
+                               char *demuxer_name, int stream_cache,
+                               enum stream_type filter)
+{
+    if (!filename)
+        return;
+    int format = 0;
+    struct stream *stream = open_stream(filename, &mpctx->opts, &format);
+    if (!stream)
+        goto err_out;
+    if (stream_cache) {
+        if (!stream_enable_cache(stream, stream_cache * 1024,
+                stream_cache * 1024 *
+                        (mpctx->opts.stream_cache_min_percent / 100.0),
+                stream_cache * 1024 *
+                        (mpctx->opts.stream_cache_seek_min_percent / 100.0)))
+        {
+            free_stream(stream);
+            mp_msg(MSGT_CPLAYER, MSGL_ERR,
+                    "Can't enable external file stream cache\n");
+            return;
+        }
+    }
+    // deal with broken demuxers: preselect streams
+    int vs = -2, as = -2, ss = -2;
+    switch (filter) {
+    case STREAM_VIDEO: vs = -1; break;
+    case STREAM_AUDIO: as = -1; break;
+    case STREAM_SUB: ss = -1; break;
+    }
+    vs = -1; // avi can't go without video
+    struct demuxer *demuxer =
+        demux_open_withparams(&mpctx->opts, stream, format, demuxer_name,
+                              as, vs, ss, filename, NULL);
+    if (!demuxer) {
+        free_stream(stream);
+        goto err_out;
+    }
+    int num_added = 0;
+    for (int n = 0; n < demuxer->num_streams; n++) {
+        struct sh_stream *stream = demuxer->streams[n];
+        if (stream->type == filter) {
+            struct track *t = add_stream_track(mpctx, stream, false);
+            t->is_external = true;
+        }
+    }
+    if (num_added == 0) {
+        mp_msg(MSGT_CPLAYER, MSGL_WARN, "No streams added from file %s.\n",
+               filename);
+    }
+    MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, demuxer);
+    return;
+
+err_out:
+    mp_msg(MSGT_CPLAYER, MSGL_ERR, "Can not open external file %s.\n",
+           filename);
+}
+
+static void open_audiofiles_from_options(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    open_external_file(mpctx, opts->audio_stream, opts->audio_demuxer_name,
+                       opts->audio_stream_cache, STREAM_AUDIO);
+}
+
+// Just for -subfile. open_subtitles_from_options handles -sub text sub files.
+static void open_subfiles_from_options(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    open_external_file(mpctx, opts->sub_stream, opts->sub_demuxer_name,
+                       0, STREAM_SUB);
+}
+
 static void print_timeline(struct MPContext *mpctx)
 {
     if (mpctx->timeline) {
@@ -3714,6 +3814,8 @@ goto_enable_cache:
 
     open_subtitles_from_options(mpctx);
     open_vobsubs_from_options(mpctx);
+    open_audiofiles_from_options(mpctx);
+    open_subfiles_from_options(mpctx);
 
     mpctx->current_track[STREAM_VIDEO] =
         select_track(mpctx, STREAM_VIDEO, mpctx->opts.video_id, NULL, true);

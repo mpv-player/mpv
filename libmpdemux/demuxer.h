@@ -72,7 +72,6 @@ enum demuxer_type {
      * as demuxer type by the user (-demuxer option). */
     DEMUXER_TYPE_END,
 
-    DEMUXER_TYPE_DEMUXERS,
     DEMUXER_TYPE_PLAYLIST,
 };
 
@@ -352,14 +351,14 @@ struct demuxer *demux_open(struct MPOpts *opts, struct stream *stream,
                            char *filename);
 
 struct demuxer *demux_open_withparams(struct MPOpts *opts,
-        struct stream *stream, int file_format, int aid, int vid, int sid,
-        char *filename, struct demuxer_params *params);
+                                      struct stream *stream, int file_format,
+                                      char *force_format, int audio_id,
+                                      int video_id, int sub_id, char *filename,
+                                      struct demuxer_params *params);
 
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, float rel_seek_secs, float audio_delay,
                int flags);
-struct demuxer *new_demuxers_demuxer(struct demuxer *vd, struct demuxer *ad,
-                                     struct demuxer *sd);
 
 // AVI demuxer params:
 extern int index_mode;  // -1=untouched  0=don't use index  1=use (generate) index
