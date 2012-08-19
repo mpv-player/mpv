@@ -189,10 +189,12 @@ static void free_demuxer_stream(struct demux_stream *ds)
     free(ds);
 }
 
-static struct demux_stream *new_demuxer_stream(struct demuxer *demuxer, int id)
+static struct demux_stream *new_demuxer_stream(struct demuxer *demuxer,
+                                               enum stream_type type, int id)
 {
     demux_stream_t *ds = malloc(sizeof(demux_stream_t));
-    *ds = (demux_stream_t){
+    *ds = (demux_stream_t) {
+        .stream_type = type,
         .id = id,
         .demuxer = demuxer,
         .asf_seq = -1,
@@ -200,6 +202,19 @@ static struct demux_stream *new_demuxer_stream(struct demuxer *demuxer, int id)
     return ds;
 }
 
+struct sh_stream *ds_gsh(struct demux_stream *ds)
+{
+    // Ideally ds would have a gsh field, but since all the old demuxers set
+    // ds->sh themselves and we don't want to change them, enjoy this hack.
+    if (!ds->sh)
+        return NULL;
+    switch (ds->stream_type) {
+    case STREAM_VIDEO: return ((struct sh_video *)ds->sh)->gsh;
+    case STREAM_AUDIO: return ((struct sh_audio *)ds->sh)->gsh;
+    case STREAM_SUB: return ((struct sh_sub *)ds->sh)->gsh;
+    }
+    assert(false);
+}
 
 /**
  * Get demuxer description structure for a given demuxer type
@@ -231,9 +246,12 @@ demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
     d->seekable = 1;
     d->synced = 0;
     d->filepos = -1;
-    d->audio = new_demuxer_stream(d, a_id);
-    d->video = new_demuxer_stream(d, v_id);
-    d->sub = new_demuxer_stream(d, s_id);
+    d->audio = new_demuxer_stream(d, STREAM_VIDEO, a_id);
+    d->video = new_demuxer_stream(d, STREAM_AUDIO, v_id);
+    d->sub = new_demuxer_stream(d, STREAM_SUB, s_id);
+    d->ds[STREAM_VIDEO] = d->video;
+    d->ds[STREAM_AUDIO] = d->audio;
+    d->ds[STREAM_SUB] = d->sub;
     d->type = type;
     d->opts = opts;
     if (type)
@@ -269,8 +287,9 @@ static struct sh_stream *new_sh_stream(demuxer_t *demuxer,
 {
     struct sh_stream *sh = talloc_struct(demuxer, struct sh_stream, {
         .type = type,
+        .demuxer = demuxer,
         .index = demuxer->num_streams,
-        .demuxer_id = demuxer->new_stream_id++, // possibly temporary value only
+        .demuxer_id = tid, // may be overwritten by demuxer
         .tid = tid,
         .stream_index = stream_index,
         .opts = demuxer->opts,
@@ -308,7 +327,6 @@ static struct sh_stream *new_sh_stream(demuxer_t *demuxer,
         }
         default: assert(false);
     }
-    sh->common_header->id = sh->tid;
     sh->common_header->opts = sh->opts;
     sh->common_header->gsh = sh;
     return sh;
@@ -1235,37 +1253,42 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
     return DEMUXER_CTRL_NOTIMPL;
 }
 
-int demuxer_switch_audio(demuxer_t *demuxer, int index)
+struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
+                                               enum stream_type t, int id)
 {
-    int res = demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &index);
-    if (res == DEMUXER_CTRL_NOTIMPL) {
-        struct sh_audio *sh_audio = demuxer->audio->sh;
-        return sh_audio ? sh_audio->aid : -2;
+    for (int n = 0; n < d->num_streams; n++) {
+        struct sh_stream *s = d->streams[n];
+        if (s->type == t && s->demuxer_id == id)
+            return d->streams[n];
     }
-    if (demuxer->audio->id >= 0) {
-        struct sh_audio *sh_audio = demuxer->a_streams[demuxer->audio->id];
-        demuxer->audio->sh = sh_audio;
-        index = sh_audio->aid; // internal MPEG demuxers don't set it right
-    }
-    else
-        demuxer->audio->sh = NULL;
-    return index;
+    return NULL;
 }
 
-int demuxer_switch_video(demuxer_t *demuxer, int index)
+void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
+                          struct sh_stream *stream)
 {
-    int res = demux_control(demuxer, DEMUXER_CTRL_SWITCH_VIDEO, &index);
-    if (res == DEMUXER_CTRL_NOTIMPL) {
-        struct sh_video *sh_video = demuxer->video->sh;
-        return sh_video ? sh_video->vid : -2;
+    assert(!stream || stream->type == type);
+    int index = stream ? stream->tid : -2;
+    if (type == STREAM_AUDIO) {
+        demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &index);
+    } else if (type == STREAM_VIDEO) {
+        demux_control(demuxer, DEMUXER_CTRL_SWITCH_VIDEO, &index);
+    } else if (type == STREAM_SUB) {
+        int index2 = stream ? stream->stream_index : -2;
+        if (demuxer->ds[type]->id != index2)
+            ds_free_packs(demuxer->ds[type]);
+        demuxer->ds[type]->id = index2;
     }
-    if (demuxer->video->id >= 0) {
-        struct sh_video *sh_video = demuxer->v_streams[demuxer->video->id];
-        demuxer->video->sh = sh_video;
-        index = sh_video->vid; // internal MPEG demuxers don't set it right
-    } else
-        demuxer->video->sh = NULL;
-    return index;
+    int new_id = demuxer->ds[type]->id;
+    void *new = NULL;
+    if (new_id >= 0) {
+        switch (type) {
+        case STREAM_VIDEO: new = demuxer->v_streams[new_id]; break;
+        case STREAM_AUDIO: new = demuxer->a_streams[new_id]; break;
+        case STREAM_SUB: new = demuxer->s_streams[new_id]; break;
+        }
+    }
+    demuxer->ds[type]->sh = new;
 }
 
 int demuxer_add_attachment(demuxer_t *demuxer, struct bstr name,
@@ -1456,91 +1479,15 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle)
     return angle;
 }
 
-static char *demuxer_audio_lang(demuxer_t *d, int id)
+char *demuxer_stream_lang(demuxer_t *d, struct sh_stream *sh)
 {
-    struct stream_lang_req req;
-    sh_audio_t *sh;
-    if (id < 0 || id >= MAX_A_STREAMS)
-        return NULL;
-    sh = d->a_streams[id];
-    if (!sh)
-        return NULL;
-    if (sh->lang)
-        return talloc_strdup(NULL, sh->lang);
-    req.type = stream_ctrl_audio;
-    req.id = sh->aid;
-    if (stream_control(d->stream, STREAM_CTRL_GET_LANG, &req) == STREAM_OK)
-        return req.name;
-    return NULL;
-}
-
-static char *demuxer_sub_lang(demuxer_t *d, int id)
-{
-    struct stream_lang_req req;
-    sh_sub_t *sh;
-    if (id < 0 || id >= MAX_S_STREAMS)
-        return NULL;
-    sh = d->s_streams[id];
-    if (sh && sh->lang)
-        return talloc_strdup(NULL, sh->lang);
-    req.type = stream_ctrl_sub;
-    // assume 1:1 mapping so we can show the language of
-    // DVD subs even when we have not yet created the stream.
-    req.id = sh ? sh->sid : id;
-    if (stream_control(d->stream, STREAM_CTRL_GET_LANG, &req) == STREAM_OK)
-        return req.name;
-    return NULL;
-}
-
-char *demuxer_stream_lang(demuxer_t *d, struct sh_stream *s)
-{
-    switch (s->type) {
-    case STREAM_AUDIO: return demuxer_audio_lang(d, s->stream_index);
-    case STREAM_SUB: return demuxer_sub_lang(d, s->stream_index);
+    struct stream_lang_req req = { .id = sh->tid };     // assume 1:1 mapping
+    switch (sh->type) {
+    case STREAM_AUDIO: req.type = stream_ctrl_audio; break;
+    case STREAM_SUB: req.type = stream_ctrl_sub; break;
     default: return NULL;
     }
-}
-
-int demuxer_audio_track_by_lang_and_default(struct demuxer *d, char **langt)
-{
-    int n = 0;
-    while (1) {
-        char *lang = langt ? langt[n++] : NULL;
-        int id = -1;
-        for (int i = 0; i < MAX_A_STREAMS; i++) {
-            struct sh_audio *sh = d->a_streams[i];
-            if (sh && (!lang || sh->lang && !strcmp(lang, sh->lang))) {
-                if (sh->gsh->default_track)
-                    return sh->aid;
-                if (id < 0)
-                    id = sh->aid;
-            }
-        }
-        if (id >= 0)
-            return id;
-        if (!lang)
-            return -1;
-    }
-}
-
-int demuxer_sub_track_by_lang_and_default(struct demuxer *d, char **langt)
-{
-    int n = 0;
-    while (1) {
-        char *lang = langt ? langt[n++] : NULL;
-        int id = -1;
-        for (int i = 0; i < MAX_S_STREAMS; i++) {
-            struct sh_sub *sh = d->s_streams[i];
-            if (sh && (!lang || sh->lang && !strcmp(lang, sh->lang))) {
-                if (sh->gsh->default_track)
-                    return sh->sid;
-                if (id < 0)
-                    id = sh->sid;
-            }
-        }
-        if (!lang)
-            return -1;
-        if (id >= 0)
-            return id;
-    }
+    if (stream_control(d->stream, STREAM_CTRL_GET_LANG, &req) == STREAM_OK)
+        return req.name;
+    return NULL;
 }

@@ -134,10 +134,6 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SUB_LOAD, "sub_load", { ARG_STRING } },
   { MP_CMD_SUB_SELECT, "vobsub_lang", { OARG_INT(-2) } }, // for compatibility
   { MP_CMD_SUB_SELECT, "sub_select", { OARG_INT(-2) } },
-  { MP_CMD_SUB_SOURCE, "sub_source", { OARG_INT(-2) } },
-  { MP_CMD_SUB_VOB, "sub_vob", { OARG_INT(-2) } },
-  { MP_CMD_SUB_DEMUX, "sub_demux", { OARG_INT(-2) } },
-  { MP_CMD_SUB_FILE, "sub_file", { OARG_INT(-2) } },
   { MP_CMD_SUB_SCALE, "sub_scale", { ARG_FLOAT, OARG_INT(0) } },
 #ifdef CONFIG_ASS
   { MP_CMD_ASS_USE_MARGINS, "ass_use_margins", { OARG_INT(-1) } },

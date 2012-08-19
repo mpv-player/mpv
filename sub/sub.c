@@ -289,7 +289,8 @@ void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
       if(obj->flags&OSDFLAG_VISIBLE){
 	switch(obj->type){
 	case OSDTYPE_SPU:
-	    vo_draw_spudec_sub(obj, draw_alpha, ctx); // FIXME
+            if (vo_spudec)
+                vo_draw_spudec_sub(obj, draw_alpha, ctx); // FIXME
 	    break;
 	case OSDTYPE_OSD:
 	case OSDTYPE_SUBTITLE:

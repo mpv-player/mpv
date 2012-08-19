@@ -309,7 +309,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_audio = new_sh_audio_aid(demuxer, i, priv->audio_streams);
         if (!sh_audio)
             break;
-        sh_audio->gsh->demuxer_id = i;
         sh_audio->demuxer_codecname = codec_name;
         stream_type = "audio";
         priv->astreams[priv->audio_streams] = i;
@@ -391,7 +390,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_video = new_sh_video_vid(demuxer, i, priv->video_streams);
         if (!sh_video)
             break;
-        sh_video->gsh->demuxer_id = i;
         sh_video->demuxer_codecname = codec_name;
         stream_type = "video";
         priv->vstreams[priv->video_streams] = i;
@@ -504,7 +502,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_sub = new_sh_sub_sid(demuxer, i, priv->sub_streams);
         if (!sh_sub)
             break;
-        sh_sub->gsh->demuxer_id = i;
         sh_sub->demuxer_codecname = codec_name;
         stream_type = "subtitle";
         priv->sstreams[priv->sub_streams] = i;

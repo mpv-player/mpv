@@ -105,86 +105,6 @@ static void rescale_input_coordinates(struct MPContext *mpctx, int ix, int iy,
            vo->dheight, vo_fs);
 }
 
-static int sub_pos_by_source(MPContext *mpctx, int src)
-{
-    int i, cnt = 0;
-    if (src >= SUB_SOURCES || mpctx->sub_counts[src] == 0)
-        return -1;
-    for (i = 0; i < src; i++)
-        cnt += mpctx->sub_counts[i];
-    return cnt;
-}
-
-static int sub_source_and_index_by_pos(MPContext *mpctx, int *pos)
-{
-    int start = 0;
-    int i;
-    for (i = 0; i < SUB_SOURCES; i++) {
-        int cnt = mpctx->sub_counts[i];
-        if (*pos >= start && *pos < start + cnt) {
-            *pos -= start;
-            return i;
-        }
-        start += cnt;
-    }
-    *pos = -1;
-    return -1;
-}
-
-static int sub_source_by_pos(MPContext *mpctx, int pos)
-{
-    return sub_source_and_index_by_pos(mpctx, &pos);
-}
-
-static int sub_source_pos(MPContext *mpctx)
-{
-    int pos = mpctx->global_sub_pos;
-    sub_source_and_index_by_pos(mpctx, &pos);
-    return pos;
-}
-
-static int sub_source(MPContext *mpctx)
-{
-    return sub_source_by_pos(mpctx, mpctx->global_sub_pos);
-}
-
-static void update_global_sub_size(MPContext *mpctx)
-{
-    struct MPOpts *opts = &mpctx->opts;
-    int i;
-    int cnt = 0;
-
-    if (!mpctx->demuxer) {
-        mpctx->global_sub_size = -1;
-        mpctx->global_sub_pos = -1;
-        return;
-    }
-
-    // update number of demuxer sub streams
-    for (i = 0; i < MAX_S_STREAMS; i++)
-        if (mpctx->d_sub->demuxer->s_streams[i])
-            cnt++;
-    if (cnt > mpctx->sub_counts[SUB_SOURCE_DEMUX])
-        mpctx->sub_counts[SUB_SOURCE_DEMUX] = cnt;
-
-    // update global size
-    mpctx->global_sub_size = 0;
-    for (i = 0; i < SUB_SOURCES; i++)
-        mpctx->global_sub_size += mpctx->sub_counts[i];
-
-    // update global_sub_pos if we auto-detected a demuxer sub
-    if (mpctx->global_sub_pos == -1) {
-        int sub_id = -1;
-        if (mpctx->demuxer->sub)
-            sub_id = mpctx->demuxer->sub->id;
-        if (sub_id < 0)
-            sub_id = opts->sub_id;
-        if (sub_id >= 0 && sub_id < mpctx->sub_counts[SUB_SOURCE_DEMUX])
-            mpctx->global_sub_pos = sub_pos_by_source(mpctx, SUB_SOURCE_DEMUX) +
-                                    sub_id;
-    }
-}
-
 static int mp_property_generic_option(struct m_option *prop, int action,
                                       void *arg, MPContext *mpctx)
 {
@@ -893,120 +813,91 @@ static int mp_property_balance(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-/// Selected audio id (RW)
-static int mp_property_audio(m_option_t *prop, int action, void *arg,
-                             MPContext *mpctx)
+static struct track* track_next(struct MPContext *mpctx, enum stream_type type,
+                                int direction, struct track *track)
 {
-    int current_id, tmp;
+    assert(direction == -1 || direction == +1);
+    struct track *prev = NULL, *next = NULL;
+    bool seen = track == NULL;
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *cur = mpctx->tracks[n];
+        if (cur->type == type) {
+            if (cur == track) {
+                seen = true;
+            } else {
+                if (seen && !next) {
+                    next = cur;
+                } else if (!seen || !track) {
+                    prev = cur;
+                }
+            }
+        }
+    }
+    return direction > 0 ? next : prev;
+}
+
+static int property_switch_track(m_option_t *prop, int action, void *arg,
+                                 MPContext *mpctx, enum stream_type type)
+{
     if (!mpctx->num_sources)
         return M_PROPERTY_UNAVAILABLE;
-    struct sh_audio *sh = mpctx->sh_audio;
-    current_id = sh ? sh->aid : -2;
+    struct track *track = mpctx->current_track[type];
 
     switch (action) {
     case M_PROPERTY_GET:
         if (!arg)
             return M_PROPERTY_ERROR;
-        *(int *) arg = current_id;
+        *(int *) arg = track ? track->user_tid : -1;
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
         if (!arg)
             return M_PROPERTY_ERROR;
 
-        if (!sh || current_id < 0)
+        if (!track)
             *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
         else {
-            char *lang = demuxer_stream_lang(sh->ds->demuxer, sh->gsh);
+            char *lang = track->lang;
             if (!lang)
-                lang = talloc_strdup(NULL, mp_gtext("unknown"));
+                lang = mp_gtext("unknown");
 
-            if (sh->gsh->title)
+            if (track->title)
                 *(char **)arg = talloc_asprintf(NULL, "(%d) %s (\"%s\")",
-                                            current_id, lang, sh->gsh->title);
+                                           track->user_tid, lang, track->title);
             else
-                *(char **)arg = talloc_asprintf(NULL, "(%d) %s", current_id,
-                                                lang);
-
-            talloc_free(lang);
+                *(char **)arg = talloc_asprintf(NULL, "(%d) %s",
+                                                track->user_tid, lang);
         }
         return M_PROPERTY_OK;
 
     case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_SET:
+    case M_PROPERTY_STEP_DOWN:
+    case M_PROPERTY_SET: {
+        int i = (arg ? *((int *) arg) : +1) *
+                (action == M_PROPERTY_STEP_DOWN ? -1 : +1);
         if (action == M_PROPERTY_SET && arg)
-            tmp = *((int *) arg);
+            track = mp_track_by_tid(mpctx, type, i);
         else
-            tmp = -1;
-        int new_id = demuxer_switch_audio(mpctx->d_audio->demuxer, tmp);
-        if (new_id != current_id)
-            uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC);
-        if (new_id != current_id && new_id >= 0) {
-            mpctx->opts.audio_id = new_id;
-            sh_audio_t *sh2;
-            sh2 = mpctx->d_audio->demuxer->a_streams[mpctx->d_audio->id];
-            sh2->ds = mpctx->d_audio;
-            mpctx->sh_audio = sh2;
-            reinit_audio_chain(mpctx);
-        }
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", new_id);
+            track = track_next(mpctx, type, i > 0 ? +1 : -1, track);
+        mp_switch_track(mpctx, type, track);
         return M_PROPERTY_OK;
+    }
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
+}
 
+/// Selected audio id (RW)
+static int mp_property_audio(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
+{
+    return property_switch_track(prop, action, arg, mpctx, STREAM_AUDIO);
 }
 
 /// Selected video id (RW)
 static int mp_property_video(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
-    struct MPOpts *opts = &mpctx->opts;
-    int current_id, tmp;
-    if (!mpctx->num_sources)
-        return M_PROPERTY_UNAVAILABLE;
-    current_id = mpctx->sh_video ? mpctx->sh_video->vid : -2;
-
-    switch (action) {
-    case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        *(int *) arg = current_id;
-        return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-
-        if (current_id < 0)
-            *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
-        else {
-            *(char **) arg = talloc_asprintf(NULL, "(%d) %s", current_id,
-                                             mp_gtext("unknown"));
-        }
-        return M_PROPERTY_OK;
-
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_SET:
-        if (action == M_PROPERTY_SET && arg)
-            tmp = *((int *) arg);
-        else
-            tmp = -1;
-        int new_id = demuxer_switch_video(mpctx->d_video->demuxer, tmp);
-        if (new_id != current_id)
-            uninit_player(mpctx, INITIALIZED_VCODEC |
-                          (opts->fixed_vo && new_id >= 0 ? 0 : INITIALIZED_VO));
-        if (new_id != current_id && new_id >= 0) {
-            sh_video_t *sh2;
-            sh2 = mpctx->d_video->demuxer->v_streams[mpctx->d_video->id];
-            sh2->ds = mpctx->d_video;
-            mpctx->sh_video = sh2;
-            reinit_video_chain(mpctx);
-        }
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_TRACK=%d\n", new_id);
-        return M_PROPERTY_OK;
-
-    default:
-        return M_PROPERTY_NOT_IMPLEMENTED;
-    }
+    return property_switch_track(prop, action, arg, mpctx, STREAM_VIDEO);
 }
 
 static int mp_property_program(m_option_t *prop, int action, void *arg,
@@ -1364,7 +1255,7 @@ static int mp_property_gamma(m_option_t *prop, int action, void *arg,
     }
 
 #ifdef CONFIG_TV
-    if (mpctx->sh_video->ds->demuxer->type == DEMUXER_TYPE_TV) {
+    if (mpctx->sh_video->gsh->demuxer->type == DEMUXER_TYPE_TV) {
         int l = strlen(prop->name);
         char tv_prop[3 + l + 1];
         sprintf(tv_prop, "tv_%s", prop->name);
@@ -1496,350 +1387,7 @@ static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
 static int mp_property_sub(m_option_t *prop, int action, void *arg,
                            MPContext *mpctx)
 {
-    struct MPOpts *opts = &mpctx->opts;
-    demux_stream_t *const d_sub = mpctx->d_sub;
-    int source = -1, reset_spu av_unused = 0;  // used under CONFIG_DVDREAD
-    int source_pos = -1;
-
-    update_global_sub_size(mpctx);
-    const int global_sub_size = mpctx->global_sub_size;
-
-    if (global_sub_size <= 0)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        *(int *) arg = mpctx->global_sub_pos;
-        return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        char *sub_name = NULL;
-        if (mpctx->subdata)
-            sub_name = mpctx->subdata->filename;
-#ifdef CONFIG_ASS
-        if (mpctx->osd->ass_track)
-            sub_name = mpctx->osd->ass_track->name;
-#endif
-        if (!sub_name && mpctx->subdata)
-            sub_name = mpctx->subdata->filename;
-        if (sub_name) {
-            const char *tmp = mp_basename(sub_name);
-
-            *(char **) arg = talloc_asprintf(NULL, "(%d) %s%s",
-                                             mpctx->set_of_sub_pos + 1,
-                                             strlen(tmp) < 20 ? "" : "...",
-                                             strlen(tmp) < 20 ? tmp : tmp + strlen(tmp) - 19);
-            return M_PROPERTY_OK;
-        }
-
-        if (vo_vobsub && vobsub_id >= 0) {
-            const char *language = mp_gtext("unknown");
-            language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
-            *(char **) arg = talloc_asprintf(NULL, "(%d) %s",
-                                             vobsub_id, language ? language : mp_gtext("unknown"));
-            return M_PROPERTY_OK;
-        }
-        if (opts->sub_id >= 0 && mpctx->d_sub && mpctx->d_sub->sh) {
-            struct sh_stream *sh = ((struct sh_sub *)mpctx->d_sub->sh)->gsh;
-            char *lang = demuxer_stream_lang(sh->common_header->ds->demuxer, sh);
-            if (!lang)
-                lang = talloc_strdup(NULL, mp_gtext("unknown"));
-            if (sh->title)
-                *(char **)arg = talloc_asprintf(NULL, "(%d) %s (\"%s\")",
-                                                opts->sub_id, lang, sh->title);
-            else
-                *(char **) arg = talloc_asprintf(NULL, "(%d) %s", opts->sub_id,
-                                                 lang);
-            talloc_free(lang);
-            return M_PROPERTY_OK;
-        }
-        *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
-        return M_PROPERTY_OK;
-
-    case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        if (*(int *) arg < -1)
-            *(int *) arg = -1;
-        else if (*(int *) arg >= global_sub_size)
-            *(int *) arg = global_sub_size - 1;
-        mpctx->global_sub_pos = *(int *) arg;
-        break;
-    case M_PROPERTY_STEP_UP:
-        mpctx->global_sub_pos += 2;
-        mpctx->global_sub_pos =
-            (mpctx->global_sub_pos % (global_sub_size + 1)) - 1;
-        break;
-    case M_PROPERTY_STEP_DOWN:
-        mpctx->global_sub_pos += global_sub_size + 1;
-        mpctx->global_sub_pos =
-            (mpctx->global_sub_pos % (global_sub_size + 1)) - 1;
-        break;
-    default:
-        return M_PROPERTY_NOT_IMPLEMENTED;
-    }
-
-    if (mpctx->global_sub_pos >= 0) {
-        source = sub_source(mpctx);
-        source_pos = sub_source_pos(mpctx);
-    }
-
-    mp_msg(MSGT_CPLAYER, MSGL_DBG3,
-           "subtitles: %d subs, (v@%d s@%d d@%d), @%d, source @%d\n",
-           global_sub_size,
-           mpctx->sub_counts[SUB_SOURCE_VOBSUB],
-           mpctx->sub_counts[SUB_SOURCE_SUBS],
-           mpctx->sub_counts[SUB_SOURCE_DEMUX],
-           mpctx->global_sub_pos, source);
-
-    mpctx->set_of_sub_pos = -1;
-    mpctx->subdata = NULL;
-
-    vobsub_id = -1;
-    opts->sub_id = -1;
-    if (d_sub) {
-        if (d_sub->id > -2)
-            reset_spu = 1;
-        d_sub->id = -2;
-    }
-    mpctx->osd->ass_track = NULL;
-    uninit_player(mpctx, INITIALIZED_SUB);
-
-    if (source == SUB_SOURCE_VOBSUB)
-        vobsub_id = vobsub_get_id_by_index(vo_vobsub, source_pos);
-    else if (source == SUB_SOURCE_SUBS) {
-        mpctx->set_of_sub_pos = source_pos;
-#ifdef CONFIG_ASS
-        if (opts->ass_enabled
-            && mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos]) {
-            mpctx->osd->ass_track =
-                mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos];
-            mpctx->osd->ass_track_changed = true;
-            mpctx->osd->vsfilter_aspect =
-                mpctx->track_was_native_ass[mpctx->set_of_sub_pos];
-        } else
-#endif
-        {
-            mpctx->subdata = mpctx->set_of_subtitles[mpctx->set_of_sub_pos];
-            vo_osd_changed(OSDTYPE_SUBTITLE);
-        }
-    } else if (source == SUB_SOURCE_DEMUX) {
-        opts->sub_id = source_pos;
-        if (d_sub && opts->sub_id < MAX_S_STREAMS) {
-            int i = 0;
-            // default: assume 1:1 mapping of sid and stream id
-            d_sub->id = opts->sub_id;
-            d_sub->sh = mpctx->d_sub->demuxer->s_streams[d_sub->id];
-            ds_free_packs(d_sub);
-            for (i = 0; i < MAX_S_STREAMS; i++) {
-                sh_sub_t *sh = mpctx->d_sub->demuxer->s_streams[i];
-                if (sh && sh->sid == opts->sub_id) {
-                    d_sub->id = i;
-                    d_sub->sh = sh;
-                    break;
-                }
-            }
-            if (d_sub->sh && d_sub->id >= 0) {
-                sh_sub_t *sh = d_sub->sh;
-                if (sh->type == 'v')
-                    init_vo_spudec(mpctx);
-                else {
-                    sub_init(sh, mpctx->osd);
-                    mpctx->initialized_flags |= INITIALIZED_SUB;
-                }
-            } else {
-                d_sub->id = -2;
-                d_sub->sh = NULL;
-            }
-        }
-    }
-#ifdef CONFIG_DVDREAD
-    if (vo_spudec && (mpctx->stream->type == STREAMTYPE_DVD)
-        && opts->sub_id < 0 && reset_spu)
-    {
-        d_sub->id = -2;
-        d_sub->sh = NULL;
-    }
-#endif
-
-    update_subtitles(mpctx, 0, true);
-
-    return M_PROPERTY_OK;
-}
-
-/// Selected sub source (RW)
-static int mp_property_sub_source(m_option_t *prop, int action, void *arg,
-                                  MPContext *mpctx)
-{
-    int source;
-    update_global_sub_size(mpctx);
-    if (!mpctx->sh_video || mpctx->global_sub_size <= 0)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        *(int *) arg = sub_source(mpctx);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        char *sourcename;
-        switch (sub_source(mpctx)) {
-        case SUB_SOURCE_SUBS:
-            sourcename = mp_gtext("file");
-            break;
-        case SUB_SOURCE_VOBSUB:
-            sourcename = mp_gtext("vobsub");
-            break;
-        case SUB_SOURCE_DEMUX:
-            sourcename = mp_gtext("embedded");
-            break;
-        default:
-            sourcename = mp_gtext("disabled");
-        }
-        *(char **)arg = talloc_strdup(NULL, sourcename);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        M_PROPERTY_CLAMP(prop, *(int *)arg);
-        if (*(int *) arg < 0)
-            mpctx->global_sub_pos = -1;
-        else if (*(int *) arg != sub_source(mpctx)) {
-            int new_pos = sub_pos_by_source(mpctx, *(int *)arg);
-            if (new_pos == -1)
-                return M_PROPERTY_UNAVAILABLE;
-            mpctx->global_sub_pos = new_pos;
-        }
-        break;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN: {
-        int step_all = (arg && *(int *)arg != 0 ? *(int *)arg : 1)
-                       * (action == M_PROPERTY_STEP_UP ? 1 : -1);
-        int step = (step_all > 0) ? 1 : -1;
-        int cur_source = sub_source(mpctx);
-        source = cur_source;
-        while (step_all) {
-            source += step;
-            if (source >= SUB_SOURCES)
-                source = -1;
-            else if (source < -1)
-                source = SUB_SOURCES - 1;
-            if (source == cur_source || source == -1 ||
-                mpctx->sub_counts[source])
-                step_all -= step;
-        }
-        if (source == cur_source)
-            return M_PROPERTY_OK;
-        if (source == -1)
-            mpctx->global_sub_pos = -1;
-        else
-            mpctx->global_sub_pos = sub_pos_by_source(mpctx, source);
-        break;
-    }
-    default:
-        return M_PROPERTY_NOT_IMPLEMENTED;
-    }
-    --mpctx->global_sub_pos;
-    return mp_property_sub(prop, M_PROPERTY_STEP_UP, NULL, mpctx);
-}
-
-/// Selected subtitles from specific source (RW)
-static int mp_property_sub_by_type(m_option_t *prop, int action, void *arg,
-                                   MPContext *mpctx)
-{
-    int source, is_cur_source, offset, new_pos;
-    update_global_sub_size(mpctx);
-    if (!mpctx->sh_video || mpctx->global_sub_size <= 0)
-        return M_PROPERTY_UNAVAILABLE;
-
-    if (!strcmp(prop->name, "sub_file"))
-        source = SUB_SOURCE_SUBS;
-    else if (!strcmp(prop->name, "sub_vob"))
-        source = SUB_SOURCE_VOBSUB;
-    else if (!strcmp(prop->name, "sub_demux"))
-        source = SUB_SOURCE_DEMUX;
-    else
-        return M_PROPERTY_ERROR;
-
-    offset = sub_pos_by_source(mpctx, source);
-    if (offset < 0)
-        return M_PROPERTY_UNAVAILABLE;
-
-    is_cur_source = sub_source(mpctx) == source;
-    new_pos = mpctx->global_sub_pos;
-    switch (action) {
-    case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        if (is_cur_source) {
-            *(int *) arg = sub_source_pos(mpctx);
-            if (source == SUB_SOURCE_VOBSUB)
-                *(int *) arg = vobsub_get_id_by_index(vo_vobsub, *(int *) arg);
-        } else
-            *(int *) arg = -1;
-        return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        if (is_cur_source)
-            return mp_property_sub(prop, M_PROPERTY_PRINT, arg, mpctx);
-        *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
-        return M_PROPERTY_OK;
-    case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        if (*(int *) arg >= 0) {
-            int index = *(int *)arg;
-            if (source == SUB_SOURCE_VOBSUB)
-                index = vobsub_get_index_by_id(vo_vobsub, index);
-            new_pos = offset + index;
-            if (index < 0 || index > mpctx->sub_counts[source]) {
-                new_pos = -1;
-                *(int *) arg = -1;
-            }
-        } else
-            new_pos = -1;
-        break;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN: {
-        int step_all = (arg && *(int *)arg != 0 ? *(int *)arg : 1)
-                       * (action == M_PROPERTY_STEP_UP ? 1 : -1);
-        int step = (step_all > 0) ? 1 : -1;
-        int max_sub_pos_for_source = -1;
-        if (!is_cur_source)
-            new_pos = -1;
-        while (step_all) {
-            if (new_pos == -1) {
-                if (step > 0)
-                    new_pos = offset;
-                else if (max_sub_pos_for_source == -1) {
-                    // Find max pos for specific source
-                    new_pos = mpctx->global_sub_size - 1;
-                    while (new_pos >= 0 && sub_source(mpctx) != source)
-                        new_pos--;
-                } else
-                    new_pos = max_sub_pos_for_source;
-            } else {
-                new_pos += step;
-                if (new_pos < offset ||
-                    new_pos >= mpctx->global_sub_size ||
-                    sub_source(mpctx) != source)
-                    new_pos = -1;
-            }
-            step_all -= step;
-        }
-        break;
-    }
-    default:
-        return M_PROPERTY_NOT_IMPLEMENTED;
-    }
-    return mp_property_sub(prop, M_PROPERTY_SET, &new_pos, mpctx);
+    return property_switch_track(prop, action, arg, mpctx, STREAM_SUB);
 }
 
 /// Subtitle delay (RW)
@@ -1859,8 +1407,7 @@ static int mp_property_sub_alignment(m_option_t *prop, int action,
         _("top"), _("center"), _("bottom")
     };
 
-    if (!mpctx->sh_video || mpctx->global_sub_pos < 0
-        || sub_source(mpctx) != SUB_SOURCE_SUBS)
+    if (!mpctx->current_track[STREAM_SUB])
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
@@ -2183,14 +1730,6 @@ static const m_option_t mp_properties[] = {
     // Subs
     { "sub", mp_property_sub, CONF_TYPE_INT,
       M_OPT_MIN, -1, 0, NULL },
-    { "sub_source", mp_property_sub_source, CONF_TYPE_INT,
-      M_OPT_RANGE, -1, SUB_SOURCES - 1, NULL },
-    { "sub_vob", mp_property_sub_by_type, CONF_TYPE_INT,
-      M_OPT_MIN, -1, 0, NULL },
-    { "sub_demux", mp_property_sub_by_type, CONF_TYPE_INT,
-      M_OPT_MIN, -1, 0, NULL },
-    { "sub_file", mp_property_sub_by_type, CONF_TYPE_INT,
-      M_OPT_MIN, -1, 0, NULL },
     { "sub_delay", mp_property_sub_delay, CONF_TYPE_FLOAT,
       0, 0, 0, NULL },
     { "sub_pos", mp_property_sub_pos, CONF_TYPE_INT,
@@ -2299,10 +1838,6 @@ static struct property_osd_display {
     { "vsync", 0, -1, _("VSync: %s") },
     // subs
     { "sub", 0, -1, _("Subtitles: %s") },
-    { "sub_source", 0, -1, _("Sub source: %s") },
-    { "sub_vob", 0, -1, _("Subtitles: %s") },
-    { "sub_demux", 0, -1, _("Subtitles: %s") },
-    { "sub_file", 0, -1, _("Subtitles: %s") },
     { "sub_pos", 0, -1, _("Sub position: %s/100") },
     { "sub_alignment", 0, -1, _("Sub alignment: %s") },
     { "sub_delay", 0, OSD_MSG_SUB_DELAY, _("Sub delay: %s") },
@@ -2423,10 +1958,6 @@ static struct {
     { "vsync", MP_CMD_SWITCH_VSYNC, 1},
     // subs
     { "sub", MP_CMD_SUB_SELECT, 1},
-    { "sub_source", MP_CMD_SUB_SOURCE, 1},
-    { "sub_vob", MP_CMD_SUB_VOB, 1},
-    { "sub_demux", MP_CMD_SUB_DEMUX, 1},
-    { "sub_file", MP_CMD_SUB_FILE, 1},
     { "sub_pos", MP_CMD_SUB_POS, 0},
     { "sub_alignment", MP_CMD_SUB_ALIGNMENT, 1},
     { "sub_delay", MP_CMD_SUB_DELAY, 0},
@@ -2539,51 +2070,45 @@ static void show_chapters_on_osd(MPContext *mpctx)
     talloc_free(res);
 }
 
+static const char *track_type_name(enum stream_type t)
+{
+    switch (t) {
+    case STREAM_VIDEO: return "Video";
+    case STREAM_AUDIO: return "Audio";
+    case STREAM_SUB: return "Sub";
+    }
+    return NULL;
+}
+
 static void show_tracks_on_osd(MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
-    demuxer_t *demuxer = mpctx->master_demuxer;
     char *res = NULL;
 
-    if (!demuxer)
-        return;
+    for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            struct track *track = mpctx->tracks[n];
+            if (track->type != type)
+                continue;
 
-    struct sh_stream *cur_a = mpctx->sh_audio ? mpctx->sh_audio->gsh : NULL;
-    struct sh_stream *cur_s = NULL;
-    if (opts->sub_id >= 0 && mpctx->d_sub && mpctx->d_sub->sh)
-        cur_s = ((struct sh_sub *)mpctx->d_sub->sh)->gsh;
-
-    int v_count = 0;
-    enum stream_type t = STREAM_AUDIO;
-
-    for (int n = 0; n < demuxer->num_streams; n++) {
-        struct sh_stream *sh = demuxer->streams[n];
-        if (sh->type == STREAM_VIDEO) {
-            v_count++;
-            continue;
-        }
-        if (t != sh->type)
+            bool selected = mpctx->current_track[track->type] == track;
+            res = talloc_asprintf_append(res, "%s: ", track_type_name(track->type));
+            if (selected)
+                res = talloc_asprintf_append(res, "> ");
+            res = talloc_asprintf_append(res, "(%d) ", track->user_tid);
+            if (track->title)
+                res = talloc_asprintf_append(res, "'%s' ", track->title);
+            if (track->lang)
+                res = talloc_asprintf_append(res, "(%s) ", track->lang);
+            if (track->is_external)
+                res = talloc_asprintf_append(res, "(external) ");
+            if (selected)
+                res = talloc_asprintf_append(res, "<");
             res = talloc_asprintf_append(res, "\n");
-        bool selected = sh == cur_a || sh == cur_s;
-        res = talloc_asprintf_append(res, "%s: ",
-                                sh->type == STREAM_AUDIO ? "Audio" : "Sub");
-        if (selected)
-            res = talloc_asprintf_append(res, "> ");
-        res = talloc_asprintf_append(res, "(%d) ", sh->tid);
-        if (sh->title)
-            res = talloc_asprintf_append(res, "'%s' ", sh->title);
-        char *lang = demuxer_stream_lang(sh->common_header->ds->demuxer, sh);
-        if (lang)
-            res = talloc_asprintf_append(res, "(%s) ", lang);
-        talloc_free(lang);
-        if (selected)
-            res = talloc_asprintf_append(res, "<");
-        res = talloc_asprintf_append(res, "\n");
-        t = sh->type;
-    }
+        }
 
-    if (v_count > 1)
-        res = talloc_asprintf_append(res, "\n(Warning: more than one video stream.)\n");
+        res = talloc_asprintf_append(res, "\n");
+    }
 
     set_osd_msg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration, "%s", res);
     talloc_free(res);
@@ -2783,7 +2308,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_SUB_STEP:
         if (sh_video) {
             int movement = cmd->args[0].v.i;
-            step_sub(mpctx->subdata, mpctx->video_pts, movement);
+            struct track *track = mpctx->current_track[STREAM_SUB];
+            if (track && track->subdata)
+                step_sub(track->subdata, mpctx->video_pts, movement);
 #ifdef CONFIG_ASS
             if (mpctx->osd->ass_track)
                 sub_delay +=
@@ -3083,12 +2610,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_SUB_LOAD:
         if (sh_video) {
-            int n = mpctx->set_of_sub_size;
             add_subtitles(mpctx, cmd->args[0].v.s, sh_video->fps, 0);
-            if (n != mpctx->set_of_sub_size) {
-                mpctx->sub_counts[SUB_SOURCE_SUBS]++;
-                ++mpctx->global_sub_size;
-            }
         }
         break;
 

@@ -25,6 +25,7 @@
 #include "mixer.h"
 #include "sub/subreader.h"
 #include "sub/find_subfiles.h"
+#include "libmpdemux/demuxer.h"
 
 // definitions used internally by the core player code
 
@@ -75,6 +76,46 @@ struct chapter {
     char *name;
 };
 
+struct track {
+    enum stream_type type;
+    // The type specific ID, also called aid (audio), sid (subs), vid (video).
+    // For UI purposes only; this ID doesn't have anything to do with any
+    // IDs coming from demuxers or container files.
+    int user_tid;
+
+    // Same as stream->demuxer_id. -1 if not set.
+    int demuxer_id;
+
+    char *title;
+    bool default_track;
+    char *lang;
+
+    // If this track is from an external file (e.g. subtitle file).
+    bool is_external;
+
+    // If the track's stream changes with the timeline (ordered chapters).
+    bool under_timeline;
+
+    // NULL if not backed by a demuxer (e.g. external subtitles).
+    // Value can change if under_timeline==true.
+    struct demuxer *demuxer;
+    // Invariant: (!demuxer && !stream) || stream->demuxer == demuxer
+    struct sh_stream *stream;
+
+    // NOTE: demuxer subtitles, i.e. if stream!=NULL, do not use the following
+    //       fields. The data is stored in stream->sub this case.
+
+    // External text subtitle using libass subtitle renderer.
+    struct ass_track *ass_track;
+    bool native_ass_track;
+
+    // External text subtitle using non-libass subtitle renderer.
+    struct sub_data *subdata;
+
+    // External image subtitle (data is in vo_vobsub). 0 if not set.
+    int vobsub_id_plus_one;
+};
+
 typedef struct MPContext {
     struct MPOpts opts;
     struct m_config *mconfig;
@@ -83,7 +124,7 @@ typedef struct MPContext {
     struct osd_state *osd;
     struct mp_osd_msg *osd_msg_stack;
     char *terminal_osd_text;
-    struct sub_data *subdata; // current sub_data style subtitles if any
+    subtitle subs; // subtitle list used when reading subtitles from demuxer
 
     bool add_osd_seek_info;
     unsigned int osd_visible;
@@ -99,6 +140,7 @@ typedef struct MPContext {
 
     struct demuxer **sources;
     int num_sources;
+
     struct timeline_part *timeline;
     int num_timeline_parts;
     int timeline_part;
@@ -110,11 +152,17 @@ typedef struct MPContext {
 
     struct stream *stream;
     struct demuxer *demuxer;
-    struct sh_audio *sh_audio;
-    struct sh_video *sh_video;
-    struct demux_stream *d_audio;
-    struct demux_stream *d_video;
-    struct demux_stream *d_sub;
+
+    struct track **tracks;
+    int num_tracks;
+
+    // Selected tracks. NULL if no track selected.
+    struct track *current_track[STREAM_TYPE_COUNT];
+
+    struct sh_stream *sh[STREAM_TYPE_COUNT];
+    struct sh_audio *sh_audio;          // same as sh[STREAM_AUDIO]->audio
+    struct sh_video *sh_video;          // same as sh[STREAM_VIDEO]->video
+    struct sh_sub *sh_sub;              // same as sh[STREAM_SUB]->sub
 
     // Uses: accessing metadata (consider ordered chapters case, where the main
     // demuxer defines metadata), or special purpose demuxers like TV.
@@ -185,16 +233,6 @@ typedef struct MPContext {
 
     float begin_skip; ///< start time of the current skip while on edlout mode
 
-    int global_sub_size; // this encompasses all subtitle sources
-    int global_sub_pos; // this encompasses all subtitle sources
-    int set_of_sub_pos;
-    int set_of_sub_size;
-    int sub_counts[SUB_SOURCES];
-    // set_of_ass_tracks[i] contains subtitles from set_of_subtitles[i]
-    // parsed by libass or NULL if format unsupported
-    struct ass_track *set_of_ass_tracks[MAX_SUBTITLE_FILES];
-    sub_data* set_of_subtitles[MAX_SUBTITLE_FILES];
-    bool track_was_native_ass[MAX_SUBTITLE_FILES];
     struct ass_library *ass_library;
 
     int file_format;
@@ -240,8 +278,10 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter);
 char *chapter_name(struct MPContext *mpctx, int chapter);
 double chapter_start_time(struct MPContext *mpctx, int chapter);
 int get_chapter_count(struct MPContext *mpctx);
-void update_subtitles(struct MPContext *mpctx, double refpts, bool reset);
-
+void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
+                     struct track *track);
+struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
+                              int tid);
 
 // timeline/tl_matroska.c
 void build_ordered_chapter_timeline(struct MPContext *mpctx);

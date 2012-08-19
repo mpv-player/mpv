@@ -24,6 +24,11 @@
 #include "spudec.h"
 #include "av_sub.h"
 
+bool is_av_sub(int type)
+{
+    return type == 'b' || type == 'p' || type == 'x';
+}
+
 void reset_avsub(struct sh_sub *sh)
 {
     if (sh->context) {

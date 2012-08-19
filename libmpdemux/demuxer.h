@@ -28,6 +28,7 @@
 #include "bstr.h"
 #include "mpcommon.h"
 #include "demux_packet.h"
+#include "stheader.h"
 
 struct MPOpts;
 
@@ -103,6 +104,7 @@ enum timestamp_type {
 #define MP_INPUT_BUFFER_PADDING_SIZE 16
 
 typedef struct demux_stream {
+    enum stream_type stream_type;
     int buffer_pos;        // current buffer position
     int buffer_size;       // current buffer size
     unsigned char *buffer; // current buffer, never free() it, always use free_demux_packet(buffer_ref);
@@ -233,6 +235,9 @@ typedef struct demuxer {
     bool accurate_seek;
     enum timestamp_type timestamp_type;
 
+    struct demux_stream *ds[STREAM_TYPE_COUNT]; // video/audio/sub buffers
+
+    // These correspond to ds[], e.g.: audio == ds[STREAM_AUDIO]
     struct demux_stream *audio; // audio buffer/demuxer
     struct demux_stream *video; // video buffer/demuxer
     struct demux_stream *sub;   // dvd subtitle buffer/demuxer
@@ -261,8 +266,6 @@ typedef struct demuxer {
     char **info;  // metadata
     struct MPOpts *opts;
     struct demuxer_params *params;
-
-    int new_stream_id;
 } demuxer_t;
 
 typedef struct {
@@ -294,6 +297,8 @@ struct demuxer *new_demuxer(struct MPOpts *opts, struct stream *stream,
                             int type, int a_id, int v_id, int s_id,
                             char *filename);
 void free_demuxer(struct demuxer *demuxer);
+
+struct sh_stream *ds_gsh(struct demux_stream *ds);
 
 void ds_add_packet(struct demux_stream *ds, struct demux_packet *dp);
 void ds_read_packet(struct demux_stream *ds, struct stream *stream, int len,
@@ -369,8 +374,8 @@ char *demux_info_get(struct demuxer *demuxer, const char *opt);
 int demux_info_print(struct demuxer *demuxer);
 int demux_control(struct demuxer *demuxer, int cmd, void *arg);
 
-int demuxer_switch_audio(struct demuxer *demuxer, int index);
-int demuxer_switch_video(struct demuxer *demuxer, int index);
+void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
+                          struct sh_stream *stream);
 
 int demuxer_type_by_filename(char *filename);
 
@@ -398,19 +403,8 @@ int demuxer_set_angle(struct demuxer *demuxer, int angle);
 /// Get number of angles.
 int demuxer_angles_count(struct demuxer *demuxer);
 
-/* Get the index of a track.
- * lang is a string list, NULL is same as empty list
- * Sort tracks based on the following criteria:
- * 1) earlier match in lang list, or last no match
- * 2) track is marked default (default wins)
- * 3) track number (lower wins)
- * For audio, select best track according to these criteria; only return -1
- * if there are no tracks at all.
- * For subs, select best track according to the same criteria, but return -1
- * if all tracks are no-lang-match, not-default.
- */
-int demuxer_audio_track_by_lang_and_default(struct demuxer *d, char **langt);
-int demuxer_sub_track_by_lang_and_default(struct demuxer *d, char **langt);
+struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
+                                               enum stream_type t, int id);
 
 char *demuxer_stream_lang(demuxer_t *d, struct sh_stream *s);
 
