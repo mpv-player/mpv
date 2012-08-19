@@ -286,7 +286,7 @@ static int is_valid_metadata_type(struct MPContext *mpctx, metadata_t type)
     case META_INFO_COMMENT:
     case META_INFO_TRACK:
     case META_INFO_GENRE:
-        if (!mpctx->demuxer)
+        if (!mpctx->master_demuxer)
             return 0;
         break;
 
@@ -299,7 +299,7 @@ static int is_valid_metadata_type(struct MPContext *mpctx, metadata_t type)
 
 static char *get_demuxer_info(struct MPContext *mpctx, char *tag)
 {
-    char **info = mpctx->demuxer->info;
+    char **info = mpctx->master_demuxer->info;
     int n;
 
     if (!info || !tag)
@@ -400,7 +400,7 @@ static void print_stream(struct MPContext *mpctx, struct sh_stream *s)
     }
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "[stream] ID %d: %s", s->demuxer_id, tname);
     mp_msg(MSGT_CPLAYER, MSGL_INFO, " --%s=%d", selopt, s->tid);
-    char *lang = demuxer_stream_lang(mpctx->demuxer, s);
+    char *lang = demuxer_stream_lang(s->common_header->ds->demuxer, s);
     if (lang)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " --%s=%s", langopt, lang);
     talloc_free(lang);
@@ -448,9 +448,6 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
     double video_start_pts = MP_NOPTS_VALUE;
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILENAME=%s\n",
            filename);
-    if (mpctx->demuxer)
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DEMUXER=%s\n",
-           mpctx->demuxer->desc->name);
     if (mpctx->sh_video) {
         /* Assume FOURCC if all bytes >= 0x20 (' ') */
         if (mpctx->sh_video->format >= 0x20202020)
@@ -498,11 +495,8 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_START_TIME=unknown\n");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO,
            "ID_LENGTH=%.2f\n", get_time_length(mpctx));
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SEEKABLE=%d\n",
-           mpctx->stream->seek
-           && (!mpctx->demuxer || mpctx->demuxer->seekable));
-    if (mpctx->demuxer) {
-        int chapter_count = get_chapter_count(mpctx);
+    int chapter_count = get_chapter_count(mpctx);
+    if (chapter_count >= 0) {
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTERS=%d\n", chapter_count);
         for (int i = 0; i < chapter_count; i++) {
             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_ID=%d\n", i);
@@ -517,8 +511,10 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
                 talloc_free(name);
             }
         }
-        for (int n = 0; n < mpctx->demuxer->num_streams; n++)
-            print_stream(mpctx, mpctx->demuxer->streams[n]);
+    }
+    if (mpctx->master_demuxer) {
+        for (int n = 0; n < mpctx->master_demuxer->num_streams; n++)
+            print_stream(mpctx, mpctx->master_demuxer->streams[n]);
     }
 }
 
@@ -563,6 +559,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
     if (mask & INITIALIZED_DEMUXER) {
         mpctx->initialized_flags &= ~INITIALIZED_DEMUXER;
+        mpctx->master_demuxer = NULL;
         if (mpctx->num_sources) {
             mpctx->demuxer = mpctx->sources[0];
             for (int i = 1; i < mpctx->num_sources; i++) {
@@ -2089,9 +2086,11 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     vo_update_window_title(mpctx);
 
-    if (stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO,
-                &ar) != STREAM_UNSUPPORTED)
+    assert(mpctx->sh_video == mpctx->d_video->sh);
+    if (stream_control(mpctx->d_video->demuxer->stream,
+                       STREAM_CTRL_GET_ASPECT_RATIO, &ar) != STREAM_UNSUPPORTED)
         mpctx->sh_video->stream_aspect = ar;
+
     {
         char *vf_arg[] = {
             "_oldargs_", (char *)mpctx->video_out, NULL
@@ -2353,7 +2352,7 @@ void pause_player(struct MPContext *mpctx)
         ao_pause(mpctx->ao);    // pause audio, keep data if possible
 
     // Only print status if there's actually a file being played.
-    if (mpctx->demuxer)
+    if (mpctx->num_sources)
         print_status(mpctx, MP_NOPTS_VALUE, false);
 
     if (!mpctx->opts.quiet)
@@ -2621,7 +2620,6 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
     abort();
 }
 
-
 double get_time_length(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
@@ -2710,9 +2708,9 @@ int get_current_chapter(struct MPContext *mpctx)
                 break;
         return FFMAX(mpctx->last_chapter_seek, i - 1);
     }
-    if (mpctx->demuxer)
+    if (mpctx->master_demuxer)
         return FFMAX(mpctx->last_chapter_seek,
-                     demuxer_get_current_chapter(mpctx->demuxer, current_pts));
+                demuxer_get_current_chapter(mpctx->master_demuxer, current_pts));
     return -2;
 }
 
@@ -2740,8 +2738,8 @@ char *chapter_name(struct MPContext *mpctx, int chapter)
 {
     if (mpctx->chapters)
         return talloc_strdup(NULL, mpctx->chapters[chapter].name);
-    if (mpctx->demuxer)
-        return demuxer_chapter_name(mpctx->demuxer, chapter);
+    if (mpctx->master_demuxer)
+        return demuxer_chapter_name(mpctx->master_demuxer, chapter);
     return NULL;
 }
 
@@ -2750,8 +2748,8 @@ double chapter_start_time(struct MPContext *mpctx, int chapter)
 {
     if (mpctx->chapters)
         return mpctx->chapters[chapter].start;
-    if (mpctx->demuxer)
-        return demuxer_chapter_time(mpctx->demuxer, chapter, NULL);
+    if (mpctx->master_demuxer)
+        return demuxer_chapter_time(mpctx->master_demuxer, chapter, NULL);
     return -1;
 }
 
@@ -2759,8 +2757,8 @@ int get_chapter_count(struct MPContext *mpctx)
 {
     if (mpctx->chapters)
         return mpctx->num_chapters;
-    if (mpctx->demuxer)
-        return demuxer_chapter_count(mpctx->demuxer);
+    if (mpctx->master_demuxer)
+        return demuxer_chapter_count(mpctx->master_demuxer);
     return 0;
 }
 
@@ -2777,11 +2775,12 @@ int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts)
         mpctx->last_chapter_pts = *seek_pts;
         return chapter;
     }
-    if (mpctx->demuxer) {
-        int res = demuxer_seek_chapter(mpctx->demuxer, chapter, seek_pts);
+
+    if (mpctx->master_demuxer) {
+        int res = demuxer_seek_chapter(mpctx->master_demuxer, chapter, seek_pts);
         if (res >= 0) {
             if (*seek_pts == -1)
-                seek_reset(mpctx, true, true);
+                seek_reset(mpctx, true, true);  // for DVD
             else {
                 mpctx->last_chapter_seek = res;
                 mpctx->last_chapter_pts = *seek_pts;
@@ -3366,13 +3365,13 @@ static void play_current_file(struct MPContext *mpctx)
 
     //============ Open & Sync STREAM --- fork cache2 ====================
 
-    mpctx->stream = NULL;
-    mpctx->demuxer = NULL;
-    mpctx->d_audio = NULL;
-    mpctx->d_video = NULL;
-    mpctx->d_sub = NULL;
-    mpctx->sh_audio = NULL;
-    mpctx->sh_video = NULL;
+    assert(mpctx->stream == NULL);
+    assert(mpctx->demuxer == NULL);
+    assert(mpctx->d_audio == NULL);
+    assert(mpctx->d_video == NULL);
+    assert(mpctx->d_sub == NULL);
+    assert(mpctx->sh_audio == NULL);
+    assert(mpctx->sh_video == NULL);
 
     mpctx->stream = open_stream(mpctx->filename, opts, &mpctx->file_format);
     if (!mpctx->stream) { // error...
@@ -3435,6 +3434,7 @@ goto_enable_cache:
     mpctx->demuxer = demux_open(opts, mpctx->stream, mpctx->file_format,
                                 opts->audio_id, opts->video_id, opts->sub_id,
                                 mpctx->filename);
+    mpctx->master_demuxer = mpctx->demuxer;
 
     if (!mpctx->demuxer) {
         mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Failed to recognize file format.\n");
@@ -3484,7 +3484,7 @@ goto_enable_cache:
         } else {
             mp_tmsg(MSGT_CPLAYER, MSGL_V, "[V] filefmt:%d  fourcc:0x%X  "
                     "size:%dx%d  fps:%5.3f  ftime:=%6.4f\n",
-                    mpctx->demuxer->file_format, mpctx->sh_video->format,
+                    mpctx->master_demuxer->file_format, mpctx->sh_video->format,
                     mpctx->sh_video->disp_w, mpctx->sh_video->disp_h,
                     mpctx->sh_video->fps, mpctx->sh_video->frametime);
             if (force_fps) {
@@ -3522,7 +3522,7 @@ goto_enable_cache:
     }
 
     /* display clip info */
-    demux_info_print(mpctx->demuxer);
+    demux_info_print(mpctx->master_demuxer);
 
     //================= Read SUBTITLES (DVD & TEXT) =========================
     if (vo_spudec == NULL && (mpctx->stream->type == STREAMTYPE_DVD))
@@ -3603,7 +3603,7 @@ goto_enable_cache:
 
     mp_input_set_section(mpctx->input, NULL, 0);
     //TODO: add desired (stream-based) sections here
-    if (mpctx->stream->type == STREAMTYPE_TV)
+    if (mpctx->master_demuxer->type == DEMUXER_TYPE_TV)
         mp_input_set_section(mpctx->input, "tv", 0);
 
     //==================== START PLAYING =======================

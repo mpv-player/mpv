@@ -115,6 +115,11 @@ typedef struct MPContext {
     struct demux_stream *d_audio;
     struct demux_stream *d_video;
     struct demux_stream *d_sub;
+
+    // Uses: accessing metadata (consider ordered chapters case, where the main
+    // demuxer defines metadata), or special purpose demuxers like TV.
+    struct demuxer *master_demuxer;
+
     mixer_t mixer;
     struct ao *ao;
     struct vo *video_out;

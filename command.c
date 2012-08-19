@@ -296,27 +296,28 @@ static int mp_property_filename(m_option_t *prop, int action, void *arg,
 static int mp_property_demuxer(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
-    if (!mpctx->demuxer)
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_string_ro(prop, action, arg,
-                                (char *) mpctx->demuxer->desc->name);
+    return m_property_string_ro(prop, action, arg, (char *)demuxer->desc->name);
 }
 
 /// Position in the stream (RW)
 static int mp_property_stream_pos(m_option_t *prop, int action, void *arg,
                                   MPContext *mpctx)
 {
-    if (!mpctx->demuxer || !mpctx->demuxer->stream)
+    struct stream *stream = mpctx->stream;
+    if (!stream)
         return M_PROPERTY_UNAVAILABLE;
     if (!arg)
         return M_PROPERTY_ERROR;
     switch (action) {
     case M_PROPERTY_GET:
-        *(off_t *) arg = stream_tell(mpctx->demuxer->stream);
+        *(off_t *) arg = stream_tell(stream);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         M_PROPERTY_CLAMP(prop, *(off_t *) arg);
-        stream_seek(mpctx->demuxer->stream, *(off_t *) arg);
+        stream_seek(stream, *(off_t *) arg);
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -326,11 +327,12 @@ static int mp_property_stream_pos(m_option_t *prop, int action, void *arg,
 static int mp_property_stream_start(m_option_t *prop, int action,
                                     void *arg, MPContext *mpctx)
 {
-    if (!mpctx->demuxer || !mpctx->demuxer->stream)
+    struct stream *stream = mpctx->stream;
+    if (!stream)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_GET:
-        *(off_t *) arg = mpctx->demuxer->stream->start_pos;
+        *(off_t *) arg = stream->start_pos;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -340,11 +342,12 @@ static int mp_property_stream_start(m_option_t *prop, int action,
 static int mp_property_stream_end(m_option_t *prop, int action, void *arg,
                                   MPContext *mpctx)
 {
-    if (!mpctx->demuxer || !mpctx->demuxer->stream)
+    struct stream *stream = mpctx->stream;
+    if (!stream)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_GET:
-        *(off_t *) arg = mpctx->demuxer->stream->end_pos;
+        *(off_t *) arg = stream->end_pos;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -354,12 +357,12 @@ static int mp_property_stream_end(m_option_t *prop, int action, void *arg,
 static int mp_property_stream_length(m_option_t *prop, int action,
                                      void *arg, MPContext *mpctx)
 {
-    if (!mpctx->demuxer || !mpctx->demuxer->stream)
+    struct stream *stream = mpctx->stream;
+    if (!stream)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_GET:
-        *(off_t *) arg =
-            mpctx->demuxer->stream->end_pos - mpctx->demuxer->stream->start_pos;
+        *(off_t *) arg = stream->end_pos - stream->start_pos;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -369,10 +372,14 @@ static int mp_property_stream_length(m_option_t *prop, int action,
 static int mp_property_stream_time_pos(m_option_t *prop, int action,
                                        void *arg, MPContext *mpctx)
 {
-    if (!mpctx->demuxer || mpctx->demuxer->stream_pts == MP_NOPTS_VALUE)
+    struct demuxer *demuxer = mpctx->demuxer;
+    if (!demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+    double pts = demuxer->stream_pts;
+    if (pts == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_time_ro(prop, action, arg, mpctx->demuxer->stream_pts);
+    return m_property_time_ro(prop, action, arg, pts);
 }
 
 
@@ -382,8 +389,7 @@ static int mp_property_length(m_option_t *prop, int action, void *arg,
 {
     double len;
 
-    if (!mpctx->demuxer ||
-        !(int) (len = get_time_length(mpctx)))
+    if (!(int) (len = get_time_length(mpctx)))
         return M_PROPERTY_UNAVAILABLE;
 
     return m_property_time_ro(prop, action, arg, len);
@@ -395,7 +401,7 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
 {
     int pos;
 
-    if (!mpctx->demuxer)
+    if (!mpctx->num_sources)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
@@ -424,7 +430,7 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
 static int mp_property_time_pos(m_option_t *prop, int action,
                                 void *arg, MPContext *mpctx)
 {
-    if (!(mpctx->sh_video || mpctx->sh_audio))
+    if (!mpctx->num_sources)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
@@ -448,12 +454,10 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
-    int chapter = -1;
     int step_all;
     char *chapter_name = NULL;
 
-    if (mpctx->demuxer)
-        chapter = get_current_chapter(mpctx);
+    int chapter = get_current_chapter(mpctx);
     if (chapter < -1)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -514,18 +518,20 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
 static int mp_property_titles(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
 {
-    if (!mpctx->demuxer)
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
-    if (mpctx->demuxer->num_titles == 0)
-        stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_NUM_TITLES, &mpctx->demuxer->num_titles);
-    return m_property_int_ro(prop, action, arg, mpctx->demuxer->num_titles);
+    if (demuxer->num_titles == 0)
+        stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_TITLES,
+                       &demuxer->num_titles);
+    return m_property_int_ro(prop, action, arg, demuxer->num_titles);
 }
 
 /// Number of chapters in file
 static int mp_property_chapters(m_option_t *prop, int action, void *arg,
                                 MPContext *mpctx)
 {
-    if (!mpctx->demuxer)
+    if (!mpctx->num_sources)
         return M_PROPERTY_UNAVAILABLE;
     int count = get_chapter_count(mpctx);
     return m_property_int_ro(prop, action, arg, count);
@@ -536,14 +542,15 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
+    struct demuxer *demuxer = mpctx->master_demuxer;
     int angle = -1;
     int angles;
 
-    if (mpctx->demuxer)
-        angle = demuxer_get_current_angle(mpctx->demuxer);
+    if (demuxer)
+        angle = demuxer_get_current_angle(demuxer);
     if (angle < 0)
         return M_PROPERTY_UNAVAILABLE;
-    angles = demuxer_angles_count(mpctx->demuxer);
+    angles = demuxer_angles_count(demuxer);
     if (angles <= 1)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -583,13 +590,13 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
-    angle = demuxer_set_angle(mpctx->demuxer, angle);
+    angle = demuxer_set_angle(demuxer, angle);
     if (angle >= 0) {
-        struct sh_video *sh_video = mpctx->demuxer->video->sh;
+        struct sh_video *sh_video = demuxer->video->sh;
         if (sh_video)
             resync_video_stream(sh_video);
 
-        struct sh_audio *sh_audio = mpctx->demuxer->audio->sh;
+        struct sh_audio *sh_audio = demuxer->audio->sh;
         if (sh_audio)
             resync_audio_stream(sh_audio);
     }
@@ -603,26 +610,28 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
 static int mp_property_metadata(m_option_t *prop, int action, void *arg,
                                 MPContext *mpctx)
 {
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (!demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+
     m_property_action_t *ka;
     char *meta;
     static const m_option_t key_type =
     {
         "metadata", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL
     };
-    if (!mpctx->demuxer)
-        return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
     case M_PROPERTY_GET:
         if (!arg)
             return M_PROPERTY_ERROR;
-        *(char ***)arg = mpctx->demuxer->info;
+        *(char ***)arg = demuxer->info;
         return M_PROPERTY_OK;
     case M_PROPERTY_KEY_ACTION:
         if (!arg)
             return M_PROPERTY_ERROR;
         ka = arg;
-        if (!(meta = demux_info_get(mpctx->demuxer, ka->key)))
+        if (!(meta = demux_info_get(demuxer, ka->key)))
             return M_PROPERTY_UNKNOWN;
         switch (ka->action) {
         case M_PROPERTY_GET:
@@ -889,7 +898,7 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
     int current_id, tmp;
-    if (!mpctx->demuxer || !mpctx->d_audio)
+    if (!mpctx->num_sources)
         return M_PROPERTY_UNAVAILABLE;
     struct sh_audio *sh = mpctx->sh_audio;
     current_id = sh ? sh->aid : -2;
@@ -907,7 +916,7 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
         if (!sh || current_id < 0)
             *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
         else {
-            char *lang = demuxer_stream_lang(mpctx->demuxer, sh->gsh);
+            char *lang = demuxer_stream_lang(sh->ds->demuxer, sh->gsh);
             if (!lang)
                 lang = talloc_strdup(NULL, mp_gtext("unknown"));
 
@@ -953,7 +962,7 @@ static int mp_property_video(m_option_t *prop, int action, void *arg,
 {
     struct MPOpts *opts = &mpctx->opts;
     int current_id, tmp;
-    if (!mpctx->demuxer || !mpctx->d_video)
+    if (!mpctx->num_sources)
         return M_PROPERTY_UNAVAILABLE;
     current_id = mpctx->sh_video ? mpctx->sh_video->vid : -2;
 
@@ -1005,7 +1014,8 @@ static int mp_property_program(m_option_t *prop, int action, void *arg,
 {
     demux_program_t prog;
 
-    if (!mpctx->demuxer)
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
@@ -1015,8 +1025,8 @@ static int mp_property_program(m_option_t *prop, int action, void *arg,
             prog.progid = *((int *) arg);
         else
             prog.progid = -1;
-        if (demux_control(mpctx->demuxer, DEMUXER_CTRL_IDENTIFY_PROGRAM,
-                          &prog) == DEMUXER_CTRL_NOTIMPL)
+        if (demux_control(demuxer, DEMUXER_CTRL_IDENTIFY_PROGRAM, &prog) ==
+            DEMUXER_CTRL_NOTIMPL)
             return M_PROPERTY_ERROR;
 
         if (prog.aid < 0 && prog.vid < 0) {
@@ -1354,7 +1364,7 @@ static int mp_property_gamma(m_option_t *prop, int action, void *arg,
     }
 
 #ifdef CONFIG_TV
-    if (mpctx->demuxer->type == DEMUXER_TYPE_TV) {
+    if (mpctx->sh_video->ds->demuxer->type == DEMUXER_TYPE_TV) {
         int l = strlen(prop->name);
         char tv_prop[3 + l + 1];
         sprintf(tv_prop, "tv_%s", prop->name);
@@ -1534,7 +1544,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
         }
         if (opts->sub_id >= 0 && mpctx->d_sub && mpctx->d_sub->sh) {
             struct sh_stream *sh = ((struct sh_sub *)mpctx->d_sub->sh)->gsh;
-            char *lang = demuxer_stream_lang(mpctx->demuxer, sh);
+            char *lang = demuxer_stream_lang(sh->common_header->ds->demuxer, sh);
             if (!lang)
                 lang = talloc_strdup(NULL, mp_gtext("unknown"));
             if (sh->title)
@@ -2005,15 +2015,20 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
 
 #ifdef CONFIG_TV
 
+static tvi_handle_t *get_tvh(struct MPContext *mpctx)
+{
+    if (!(mpctx->master_demuxer && mpctx->master_demuxer->type == DEMUXER_TYPE_TV))
+        return NULL;
+    return mpctx->master_demuxer->priv;
+}
+
 /// TV color settings (RW)
 static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
                                 MPContext *mpctx)
 {
     int r, val;
-    if (!mpctx->demuxer)
-        return M_PROPERTY_UNAVAILABLE;
-    tvi_handle_t *tvh = mpctx->demuxer->priv;
-    if (mpctx->demuxer->type != DEMUXER_TYPE_TV || !tvh)
+    tvi_handle_t *tvh = get_tvh(mpctx);
+    if (!tvh)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
@@ -2499,7 +2514,7 @@ static char *format_time(double time)
 static void show_chapters_on_osd(MPContext *mpctx)
 {
     int count = get_chapter_count(mpctx);
-    int cur = mpctx->demuxer ? get_current_chapter(mpctx) : -1;
+    int cur = mpctx->num_sources ? get_current_chapter(mpctx) : -1;
     char *res = NULL;
     int n;
 
@@ -2527,7 +2542,7 @@ static void show_chapters_on_osd(MPContext *mpctx)
 static void show_tracks_on_osd(MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
-    demuxer_t *demuxer = mpctx->demuxer;
+    demuxer_t *demuxer = mpctx->master_demuxer;
     char *res = NULL;
 
     if (!demuxer)
@@ -2557,7 +2572,7 @@ static void show_tracks_on_osd(MPContext *mpctx)
         res = talloc_asprintf_append(res, "(%d) ", sh->tid);
         if (sh->title)
             res = talloc_asprintf_append(res, "'%s' ", sh->title);
-        char *lang = demuxer_stream_lang(mpctx->demuxer, sh);
+        char *lang = demuxer_stream_lang(sh->common_header->ds->demuxer, sh);
         if (lang)
             res = talloc_asprintf_append(res, "(%s) ", lang);
         talloc_free(lang);
@@ -2888,53 +2903,50 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
 #ifdef CONFIG_RADIO
     case MP_CMD_RADIO_STEP_CHANNEL:
-        if (mpctx->demuxer && mpctx->demuxer->stream->type == STREAMTYPE_RADIO) {
+        if (mpctx->stream && mpctx->stream->type == STREAMTYPE_RADIO) {
             int v = cmd->args[0].v.i;
             if (v > 0)
-                radio_step_channel(mpctx->demuxer->stream,
-                                   RADIO_CHANNEL_HIGHER);
+                radio_step_channel(mpctx->stream, RADIO_CHANNEL_HIGHER);
             else
-                radio_step_channel(mpctx->demuxer->stream,
-                                   RADIO_CHANNEL_LOWER);
-            if (radio_get_channel_name(mpctx->demuxer->stream)) {
+                radio_step_channel(mpctx->stream, RADIO_CHANNEL_LOWER);
+            if (radio_get_channel_name(mpctx->stream)) {
                 set_osd_tmsg(OSD_MSG_RADIO_CHANNEL, 1, osd_duration,
                              "Channel: %s",
-                             radio_get_channel_name(mpctx->demuxer->stream));
+                             radio_get_channel_name(mpctx->stream));
             }
         }
         break;
 
     case MP_CMD_RADIO_SET_CHANNEL:
-        if (mpctx->demuxer && mpctx->demuxer->stream->type == STREAMTYPE_RADIO) {
-            radio_set_channel(mpctx->demuxer->stream, cmd->args[0].v.s);
-            if (radio_get_channel_name(mpctx->demuxer->stream)) {
+        if (mpctx->stream && mpctx->stream->type == STREAMTYPE_RADIO) {
+            radio_set_channel(mpctx->stream, cmd->args[0].v.s);
+            if (radio_get_channel_name(mpctx->stream)) {
                 set_osd_tmsg(OSD_MSG_RADIO_CHANNEL, 1, osd_duration,
                              "Channel: %s",
-                             radio_get_channel_name(mpctx->demuxer->stream));
+                             radio_get_channel_name(mpctx->stream));
             }
         }
         break;
 
     case MP_CMD_RADIO_SET_FREQ:
-        if (mpctx->demuxer && mpctx->demuxer->stream->type == STREAMTYPE_RADIO)
-            radio_set_freq(mpctx->demuxer->stream, cmd->args[0].v.f);
+        if (mpctx->stream && mpctx->stream->type == STREAMTYPE_RADIO)
+            radio_set_freq(mpctx->stream, cmd->args[0].v.f);
         break;
 
     case MP_CMD_RADIO_STEP_FREQ:
-        if (mpctx->demuxer && mpctx->demuxer->stream->type == STREAMTYPE_RADIO)
-            radio_step_freq(mpctx->demuxer->stream, cmd->args[0].v.f);
+        if (mpctx->stream && mpctx->stream->type == STREAMTYPE_RADIO)
+            radio_step_freq(mpctx->stream, cmd->args[0].v.f);
         break;
 #endif
 
 #ifdef CONFIG_TV
     case MP_CMD_TV_START_SCAN:
-        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV)
-            tv_start_scan((tvi_handle_t *) (mpctx->demuxer->priv), 1);
+        if (get_tvh(mpctx))
+            tv_start_scan(get_tvh(mpctx), 1);
         break;
     case MP_CMD_TV_SET_FREQ:
-        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV)
-            tv_set_freq((tvi_handle_t *) (mpctx->demuxer->priv),
-                        cmd->args[0].v.f * 16.0);
+        if (get_tvh(mpctx))
+            tv_set_freq(get_tvh(mpctx), cmd->args[0].v.f * 16.0);
 #ifdef CONFIG_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_set_freq(mpctx->stream, ROUND(cmd->args[0].v.f));
@@ -2946,9 +2958,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_TV_STEP_FREQ:
-        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV)
-            tv_step_freq((tvi_handle_t *) (mpctx->demuxer->priv),
-                         cmd->args[0].v.f * 16.0);
+        if (get_tvh(mpctx))
+            tv_step_freq(get_tvh(mpctx), cmd->args[0].v.f * 16.0);
 #ifdef CONFIG_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_force_freq_step(mpctx->stream, ROUND(cmd->args[0].v.f));
@@ -2960,22 +2971,17 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_TV_SET_NORM:
-        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV)
-            tv_set_norm((tvi_handle_t *) (mpctx->demuxer->priv),
-                        cmd->args[0].v.s);
+        if (get_tvh(mpctx))
+            tv_set_norm(get_tvh(mpctx), cmd->args[0].v.s);
         break;
 
     case MP_CMD_TV_STEP_CHANNEL:
-        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV) {
+        if (get_tvh(mpctx)) {
             int v = cmd->args[0].v.i;
             if (v > 0) {
-                tv_step_channel((tvi_handle_t *) (mpctx->
-                                                  demuxer->priv),
-                                TV_CHANNEL_HIGHER);
+                tv_step_channel(get_tvh(mpctx), TV_CHANNEL_HIGHER);
             } else {
-                tv_step_channel((tvi_handle_t *) (mpctx->
-                                                  demuxer->priv),
-                                TV_CHANNEL_LOWER);
+                tv_step_channel(get_tvh(mpctx), TV_CHANNEL_LOWER);
             }
             if (tv_channel_list) {
                 set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, 1, osd_duration,
@@ -3013,9 +3019,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_TV_SET_CHANNEL:
-        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV) {
-            tv_set_channel((tvi_handle_t *) (mpctx->demuxer->priv),
-                           cmd->args[0].v.s);
+        if (get_tvh(mpctx)) {
+            tv_set_channel(get_tvh(mpctx), cmd->args[0].v.s);
             if (tv_channel_list) {
                 set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, 1, osd_duration,
                              "Channel: %s", tv_channel_current->name);
@@ -3047,8 +3052,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 #endif /* CONFIG_DVBIN */
 
     case MP_CMD_TV_LAST_CHANNEL:
-        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV) {
-            tv_last_channel((tvi_handle_t *) (mpctx->demuxer->priv));
+        if (get_tvh(mpctx)) {
+            tv_last_channel(get_tvh(mpctx));
             if (tv_channel_list) {
                 set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, 1, osd_duration,
                              "Channel: %s", tv_channel_current->name);
@@ -3066,13 +3071,13 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_TV_STEP_NORM:
-        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV)
-            tv_step_norm((tvi_handle_t *) (mpctx->demuxer->priv));
+        if (get_tvh(mpctx))
+            tv_step_norm(get_tvh(mpctx));
         break;
 
     case MP_CMD_TV_STEP_CHANNEL_LIST:
-        if (mpctx->demuxer && mpctx->file_format == DEMUXER_TYPE_TV)
-            tv_step_chanlist((tvi_handle_t *) (mpctx->demuxer->priv));
+        if (get_tvh(mpctx))
+            tv_step_chanlist(get_tvh(mpctx));
         break;
 #endif /* CONFIG_TV */
 
