@@ -173,16 +173,9 @@ bool mp_probe_cue(struct bstr data)
     return valid;
 }
 
-static void add_source(struct MPContext *mpctx, struct stream *s,
-                       struct demuxer *d)
+static void add_source(struct MPContext *mpctx, struct demuxer *d)
 {
-    mpctx->num_sources++;
-    mpctx->sources = talloc_realloc(NULL, mpctx->sources, struct content_source,
-                                    mpctx->num_sources);
-    mpctx->sources[mpctx->num_sources - 1] = (struct content_source) {
-        .stream = s,
-        .demuxer = d,
-    };
+    MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, d);
 }
 
 static bool try_open(struct MPContext *mpctx, char *filename)
@@ -219,7 +212,7 @@ static bool try_open(struct MPContext *mpctx, char *filename)
                        filename);
     }
     if (d) {
-        add_source(mpctx, s, d);
+        add_source(mpctx, d);
         return true;
     }
     mp_msg(MSGT_CPLAYER, MSGL_ERR, "Could not open source '%s'!\n", filename);
@@ -281,9 +274,8 @@ out:
 }
 
 // return length of the source in seconds, or -1 if unknown
-static double source_get_length(struct content_source *source)
+static double source_get_length(struct demuxer *demuxer)
 {
-    struct demuxer *demuxer = source->demuxer;
     double get_time_ans;
     // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
     if (demuxer && demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,
@@ -373,7 +365,7 @@ void build_cue_timeline(struct MPContext *mpctx)
         }
     }
 
-    add_source(mpctx, mpctx->stream, mpctx->demuxer);
+    add_source(mpctx, mpctx->demuxer);
 
     for (size_t i = 0; i < file_count; i++) {
         if (!open_source(mpctx, files[i]))
@@ -386,7 +378,7 @@ void build_cue_timeline(struct MPContext *mpctx)
                                                     track_count);
     double starttime = 0;
     for (int i = 0; i < track_count; i++) {
-        struct content_source *source = mpctx->sources + 1 + tracks[i].source;
+        struct demuxer *source = mpctx->sources[1 + tracks[i].source];
         double duration;
         if (i + 1 < track_count && tracks[i].source == tracks[i + 1].source) {
             duration = tracks[i + 1].start - tracks[i].start;

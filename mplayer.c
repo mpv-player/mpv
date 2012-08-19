@@ -564,11 +564,12 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
     if (mask & INITIALIZED_DEMUXER) {
         mpctx->initialized_flags &= ~INITIALIZED_DEMUXER;
         if (mpctx->num_sources) {
-            mpctx->demuxer = mpctx->sources[0].demuxer;
+            mpctx->demuxer = mpctx->sources[0];
             for (int i = 1; i < mpctx->num_sources; i++) {
-                uninit_subs(mpctx->sources[i].demuxer);
-                free_stream(mpctx->sources[i].stream);
-                free_demuxer(mpctx->sources[i].demuxer);
+                struct demuxer *demuxer = mpctx->sources[i];
+                uninit_subs(demuxer);
+                free_stream(demuxer->stream);
+                free_demuxer(demuxer);
             }
         }
         talloc_free(mpctx->sources);
@@ -2455,12 +2456,13 @@ static bool timeline_set_part(struct MPContext *mpctx, int i)
         mpctx->stop_play = AT_END_OF_FILE;  // let audio uninit drain data
     uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts.fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts.gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_ACODEC | INITIALIZED_SUB);
     mpctx->stop_play = orig_stop_play;
-    mpctx->demuxer = n->source->demuxer;
+    mpctx->demuxer = n->source;
     mpctx->d_video = mpctx->demuxer->video;
     mpctx->d_audio = mpctx->demuxer->audio;
     mpctx->d_sub = mpctx->demuxer->sub;
     mpctx->sh_video = mpctx->d_video->sh;
     mpctx->sh_audio = mpctx->d_audio->sh;
+    mpctx->stream = mpctx->demuxer->stream;
     return true;
 }
 
@@ -3250,13 +3252,13 @@ static void print_timeline(struct MPContext *mpctx)
         mp_msg(MSGT_CPLAYER, MSGL_V, "Source files:\n");
         for (int i = 0; i < mpctx->num_sources; i++)
             mp_msg(MSGT_CPLAYER, MSGL_V, "%d: %s\n", i,
-                   mpctx->sources[i].demuxer->filename);
+                   mpctx->sources[i]->filename);
         mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline parts: (number, start, "
                "source_start, source):\n");
         for (int i = 0; i < part_count; i++) {
             struct timeline_part *p = mpctx->timeline + i;
-            mp_msg(MSGT_CPLAYER, MSGL_V, "%3d %9.3f %9.3f %3td\n", i, p->start,
-                   p->source_start, p->source - mpctx->sources);
+            mp_msg(MSGT_CPLAYER, MSGL_V, "%3d %9.3f %9.3f %p/%s\n", i, p->start,
+                   p->source_start, p->source, p->source->filename);
         }
         mp_msg(MSGT_CPLAYER, MSGL_V, "END %9.3f\n",
                mpctx->timeline[part_count].start);
@@ -3268,7 +3270,7 @@ static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
 #ifdef CONFIG_ASS
     if (mpctx->opts.ass_enabled && mpctx->ass_library) {
         for (int j = 0; j < mpctx->num_sources; j++) {
-            struct demuxer *d = mpctx->sources[j].demuxer;
+            struct demuxer *d = mpctx->sources[j];
             for (int i = 0; i < d->num_attachments; i++) {
                 struct demux_attachment *att = d->attachments + i;
                 if (mpctx->opts.use_embedded_fonts && attachment_is_font(att))
@@ -3452,17 +3454,13 @@ goto_enable_cache:
 
     if (mpctx->timeline) {
         mpctx->timeline_part = 0;
-        mpctx->demuxer = mpctx->timeline[0].source->demuxer;
+        mpctx->demuxer = mpctx->timeline[0].source;
     }
     print_timeline(mpctx);
 
-    if (!mpctx->sources) {
-        mpctx->sources = talloc_ptrtype(NULL, mpctx->sources);
-        *mpctx->sources = (struct content_source){
-            .stream = mpctx->stream,
-            .demuxer = mpctx->demuxer
-        };
-        mpctx->num_sources = 1;
+    if (!mpctx->num_sources) {
+        MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources,
+                         mpctx->demuxer);
     }
 
     mpctx->initialized_flags |= INITIALIZED_DEMUXER;
@@ -3475,7 +3473,7 @@ goto_enable_cache:
 
     // select audio stream
     for (int i = 0; i < mpctx->num_sources; i++)
-        select_audio(mpctx->sources[i].demuxer->audio->demuxer, opts->audio_id,
+        select_audio(mpctx->sources[i]->audio->demuxer, opts->audio_id,
                      opts->audio_lang);
 
     mpctx->sh_audio = mpctx->d_audio->sh;

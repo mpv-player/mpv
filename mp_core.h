@@ -64,15 +64,10 @@ enum exit_reason {
   EXIT_ERROR
 };
 
-struct content_source {
-    struct stream *stream;
-    struct demuxer *demuxer;
-};
-
 struct timeline_part {
     double start;
     double source_start;
-    struct content_source *source;
+    struct demuxer *source;
 };
 
 struct chapter {
@@ -104,7 +99,7 @@ typedef struct MPContext {
     // Return code to use with PT_QUIT
     int quit_player_rc;
 
-    struct content_source *sources;
+    struct demuxer **sources;
     int num_sources;
     struct timeline_part *timeline;
     int num_timeline_parts;

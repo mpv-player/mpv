@@ -346,11 +346,10 @@ void build_edl_timeline(struct MPContext *mpctx)
 
     // Open source files
 
-    struct content_source *sources = talloc_array_ptrtype(NULL, sources,
-                                                          num_sources + 1);
+    struct demuxer **sources = talloc_array_ptrtype(NULL, sources,
+                                                    num_sources + 1);
     mpctx->sources = sources;
-    sources[0].stream = mpctx->stream;
-    sources[0].demuxer = mpctx->demuxer;
+    sources[0] = mpctx->demuxer;
     mpctx->num_sources = 1;
 
     for (int i = 0; i < num_sources; i++) {
@@ -371,8 +370,7 @@ void build_edl_timeline(struct MPContext *mpctx)
                    "file on line %d!\n", edl_ids[i].lineno);
             goto out;
         }
-        sources[mpctx->num_sources].stream = s;
-        sources[mpctx->num_sources].demuxer = d;
+        sources[mpctx->num_sources] = d;
         mpctx->num_sources++;
     }
 
@@ -385,7 +383,7 @@ void build_edl_timeline(struct MPContext *mpctx)
         timeline[i].start = starttime / 1e9;
         starttime += parts[i].duration;
         timeline[i].source_start = parts[i].src.start / 1e9;
-        timeline[i].source = sources + parts[i].id + 1;
+        timeline[i].source = sources[parts[i].id + 1];
     }
     if (parts[num_parts - 1].id != -1) {
         timeline[num_parts].start = starttime / 1e9;

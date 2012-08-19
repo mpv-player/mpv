@@ -96,7 +96,7 @@ static char **find_files(const char *original_file, const char *suffix)
             continue;
         off_t size = statbuf.st_size;
 
-        entries = talloc_realloc(entries, entries, struct find_entry,
+        entries = talloc_realloc(tmpmem, entries, struct find_entry,
                                  num_results + 1);
         entries[num_results] = (struct find_entry) { name, matchlen, size };
         num_results++;
@@ -113,7 +113,7 @@ static char **find_files(const char *original_file, const char *suffix)
 }
 
 static int find_ordered_chapter_sources(struct MPContext *mpctx,
-                                        struct content_source *sources,
+                                        struct demuxer **sources,
                                         int num_sources,
                                         unsigned char uid_map[][16])
 {
@@ -122,7 +122,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
     if (num_sources > 1) {
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "This file references data from "
                "other sources.\n");
-        if (mpctx->stream->type != STREAMTYPE_FILE) {
+        if (mpctx->demuxer->stream->type != STREAMTYPE_FILE) {
             mp_msg(MSGT_CPLAYER, MSGL_WARN, "Playback source is not a "
                    "normal disk file. Will not search for related files.\n");
         } else {
@@ -152,13 +152,12 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
         }
         if (d->file_format == DEMUXER_TYPE_MATROSKA) {
             for (int i = 1; i < num_sources; i++) {
-                if (sources[i].demuxer)
+                if (sources[i])
                     continue;
                 if (!memcmp(uid_map[i], d->matroska_data.segment_uid, 16)) {
                     mp_msg(MSGT_CPLAYER, MSGL_INFO,"Match for source %d: %s\n",
                            i, d->filename);
-                    sources[i].stream = s;
-                    sources[i].demuxer = d;
+                    sources[i] = d;
                     num_left--;
                     goto match;
                 }
@@ -175,7 +174,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "Failed to find ordered chapter part!\n"
                "There will be parts MISSING from the video!\n");
         for (int i = 1, j = 1; i < num_sources; i++)
-            if (sources[i].demuxer) {
+            if (sources[i]) {
                 sources[j] = sources[i];
                 memcpy(uid_map[j], uid_map[i], 16);
                 j++;
@@ -202,10 +201,9 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
 
     // +1 because sources/uid_map[0] is original file even if all chapters
     // actually use other sources and need separate entries
-    struct content_source *sources = talloc_array_ptrtype(NULL, sources,
-                                                   m->num_ordered_chapters+1);
-    sources[0].stream = mpctx->stream;
-    sources[0].demuxer = mpctx->demuxer;
+    struct demuxer **sources = talloc_array_ptrtype(NULL, sources,
+                                                    m->num_ordered_chapters+1);
+    sources[0] = mpctx->demuxer;
     unsigned char (*uid_map)[16] = talloc_array_ptrtype(NULL, uid_map,
                                                  m->num_ordered_chapters + 1);
     int num_sources = 1;
@@ -220,7 +218,7 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
             if (!memcmp(c->segment_uid, uid_map[j], 16))
                 goto found1;
         memcpy(uid_map[num_sources], c->segment_uid, 16);
-        sources[num_sources] = (struct content_source){};
+        sources[num_sources] = NULL;
         num_sources++;
     found1:
         ;
@@ -262,8 +260,8 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
         int64_t join_diff = c->start - starttime - prev_part_offset;
         if (part_count == 0
             || FFABS(join_diff) > opts->chapter_merge_threshold * 1000000
-            || sources + j != timeline[part_count - 1].source) {
-            timeline[part_count].source = sources + j;
+            || sources[j] != timeline[part_count - 1].source) {
+            timeline[part_count].source = sources[j];
             timeline[part_count].start = starttime / 1e9;
             timeline[part_count].source_start = c->start / 1e9;
             prev_part_offset = c->start - starttime;
