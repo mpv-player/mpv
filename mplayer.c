@@ -3951,7 +3951,7 @@ int main(int argc, char *argv[])
 
     mp_msg(MSGT_CPLAYER, MSGL_V, "Configuration: " CONFIGURATION "\n");
     mp_tmsg(MSGT_CPLAYER, MSGL_V, "Command line:");
-    for (int i = 1; i < argc; i++)
+    for (int i = 0; i < argc; i++)
         mp_msg(MSGT_CPLAYER, MSGL_V, " '%s'", argv[i]);
     mp_msg(MSGT_CPLAYER, MSGL_V, "\n");
 
