@@ -2486,64 +2486,6 @@ static const char *property_error_string(int error_value)
     return "UNKNOWN";
 }
 
-static void remove_subtitle_range(MPContext *mpctx, int start, int count)
-{
-    int idx;
-    int end = start + count;
-    int after = mpctx->set_of_sub_size - end;
-    sub_data **subs = mpctx->set_of_subtitles;
-#ifdef CONFIG_ASS
-    struct ass_track **ass_tracks = mpctx->set_of_ass_tracks;
-#endif
-    if (count < 0 || count > mpctx->set_of_sub_size ||
-        start < 0 || start > mpctx->set_of_sub_size - count) {
-        mp_msg(MSGT_CPLAYER, MSGL_ERR,
-               "Cannot remove invalid subtitle range %i +%i\n", start, count);
-        return;
-    }
-    for (idx = start; idx < end; idx++) {
-        sub_data *subd = subs[idx];
-        char *filename = "";
-        if (subd)
-            filename = subd->filename;
-#ifdef CONFIG_ASS
-        if (!subd)
-            filename = ass_tracks[idx]->name;
-#endif
-        mp_msg(MSGT_CPLAYER, MSGL_STATUS,
-               "SUB: Removed subtitle file (%d): %s\n", idx + 1, filename);
-        sub_free(subd);
-        subs[idx] = NULL;
-#ifdef CONFIG_ASS
-        if (ass_tracks[idx])
-            ass_free_track(ass_tracks[idx]);
-        ass_tracks[idx] = NULL;
-#endif
-    }
-
-    mpctx->global_sub_size -= count;
-    mpctx->set_of_sub_size -= count;
-    if (mpctx->set_of_sub_size <= 0)
-        mpctx->sub_counts[SUB_SOURCE_SUBS] = 0;
-
-    memmove(subs + start, subs + end, after * sizeof(*subs));
-    memset(subs + start + after, 0, count * sizeof(*subs));
-#ifdef CONFIG_ASS
-    memmove(ass_tracks + start, ass_tracks + end, after * sizeof(*ass_tracks));
-    memset(ass_tracks + start + after, 0, count * sizeof(*ass_tracks));
-#endif
-
-    if (mpctx->set_of_sub_pos >= start && mpctx->set_of_sub_pos < end) {
-        mpctx->global_sub_pos = -2;
-        mpctx->subdata = NULL;
-        mpctx->osd->ass_track = NULL;
-        mp_input_queue_cmd(mpctx->input, mp_input_parse_cmd("sub_select"));
-    } else if (mpctx->set_of_sub_pos >= end) {
-        mpctx->set_of_sub_pos -= count;
-        mpctx->global_sub_pos -= count;
-    }
-}
-
 static char *format_time(double time)
 {
     int h, m, s = time;
@@ -3142,16 +3084,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 mpctx->sub_counts[SUB_SOURCE_SUBS]++;
                 ++mpctx->global_sub_size;
             }
-        }
-        break;
-
-    case MP_CMD_SUB_REMOVE:
-        if (sh_video) {
-            int v = cmd->args[0].v.i;
-            if (v < 0)
-                remove_subtitle_range(mpctx, 0, mpctx->set_of_sub_size);
-            else if (v < mpctx->set_of_sub_size)
-                remove_subtitle_range(mpctx, v, 1);
         }
         break;
 

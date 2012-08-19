@@ -132,7 +132,6 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SUB_ALIGNMENT, "sub_alignment", { OARG_INT(-1) } },
   { MP_CMD_SUB_VISIBILITY, "sub_visibility", { OARG_INT(-1) } },
   { MP_CMD_SUB_LOAD, "sub_load", { ARG_STRING } },
-  { MP_CMD_SUB_REMOVE, "sub_remove", { OARG_INT(-1) } },
   { MP_CMD_SUB_SELECT, "vobsub_lang", { OARG_INT(-2) } }, // for compatibility
   { MP_CMD_SUB_SELECT, "sub_select", { OARG_INT(-2) } },
   { MP_CMD_SUB_SOURCE, "sub_source", { OARG_INT(-2) } },
