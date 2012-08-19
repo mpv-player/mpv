@@ -81,7 +81,6 @@ enum mp_command_type {
     MP_CMD_SPEED_MULT,
     MP_CMD_SPEED_SET,
     MP_CMD_RUN,
-    MP_CMD_SUB_LOG,
     MP_CMD_SWITCH_AUDIO,
     MP_CMD_GET_TIME_POS,
     MP_CMD_SUB_LOAD,

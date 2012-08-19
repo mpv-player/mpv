@@ -185,48 +185,6 @@ static void update_global_sub_size(MPContext *mpctx)
     }
 }
 
-/**
- * \brief Log the currently displayed subtitle to a file
- *
- * Logs the current or last displayed subtitle together with filename
- * and time information to ~/.mplayer/subtitle_log
- *
- * Intended purpose is to allow convenient marking of bogus subtitles
- * which need to be fixed while watching the movie.
- */
-
-static void log_sub(struct MPContext *mpctx)
-{
-    char *fname;
-    FILE *f;
-    int i;
-    struct subtitle *vo_sub_last = mpctx->vo_sub_last;
-
-    if (mpctx->subdata == NULL || vo_sub_last == NULL)
-        return;
-    fname = get_path("subtitle_log");
-    f = fopen(fname, "a");
-    if (!f)
-        return;
-    fprintf(f, "----------------------------------------------------------\n");
-    if (mpctx->subdata->sub_uses_time) {
-        fprintf(f,
-                "N: %s S: %02ld:%02ld:%02ld.%02ld E: %02ld:%02ld:%02ld.%02ld\n",
-                mpctx->filename, vo_sub_last->start / 360000,
-                (vo_sub_last->start / 6000) % 60,
-                (vo_sub_last->start / 100) % 60, vo_sub_last->start % 100,
-                vo_sub_last->end / 360000, (vo_sub_last->end / 6000) % 60,
-                (vo_sub_last->end / 100) % 60, vo_sub_last->end % 100);
-    } else {
-        fprintf(f, "N: %s S: %ld E: %ld\n", mpctx->filename,
-                vo_sub_last->start, vo_sub_last->end);
-    }
-    for (i = 0; i < vo_sub_last->lines; i++)
-        fprintf(f, "%s\n", vo_sub_last->text[i]);
-    fclose(f);
-}
-
-
 static int mp_property_generic_option(struct m_option *prop, int action,
                                       void *arg, MPContext *mpctx)
 {
@@ -2879,10 +2837,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             set_osd_tmsg(mpctx, OSD_MSG_SUB_DELAY, 1, osd_duration,
                          "Sub delay: %d ms", ROUND(sub_delay * 1000));
         }
-        break;
-
-    case MP_CMD_SUB_LOG:
-        log_sub(mpctx);
         break;
 
     case MP_CMD_OSD: {

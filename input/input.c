@@ -139,7 +139,6 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SUB_VOB, "sub_vob", { OARG_INT(-2) } },
   { MP_CMD_SUB_DEMUX, "sub_demux", { OARG_INT(-2) } },
   { MP_CMD_SUB_FILE, "sub_file", { OARG_INT(-2) } },
-  { MP_CMD_SUB_LOG, "sub_log", },
   { MP_CMD_SUB_SCALE, "sub_scale", { ARG_FLOAT, OARG_INT(0) } },
 #ifdef CONFIG_ASS
   { MP_CMD_ASS_USE_MARGINS, "ass_use_margins", { OARG_INT(-1) } },

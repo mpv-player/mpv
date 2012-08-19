@@ -84,8 +84,6 @@ typedef struct MPContext {
     struct mp_osd_msg *osd_msg_stack;
     char *terminal_osd_text;
     struct sub_data *subdata; // current sub_data style subtitles if any
-    // last sub_data style sub line if any, used by log_sub() only
-    struct subtitle *vo_sub_last;
 
     bool add_osd_seek_info;
     unsigned int osd_visible;

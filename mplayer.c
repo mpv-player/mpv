@@ -1621,8 +1621,6 @@ void update_subtitles(struct MPContext *mpctx, double refpts_tl, bool reset)
             sub_fps = sh_video ? sh_video->fps : 25;
         find_sub(mpctx, mpctx->subdata, curpts_s *
                  (mpctx->subdata->sub_uses_time ? 100. : sub_fps));
-        if (vo_sub)
-            mpctx->vo_sub_last = vo_sub;
     }
 
     // DVD sub:
@@ -3709,7 +3707,7 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
         }
         mpctx->set_of_sub_size = 0;
     }
-    mpctx->vo_sub_last = vo_sub = NULL;
+    vo_sub = NULL;
     mpctx->subdata = NULL;
 #ifdef CONFIG_ASS
     mpctx->osd->ass_track = NULL;
