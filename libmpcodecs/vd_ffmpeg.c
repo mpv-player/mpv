@@ -42,6 +42,7 @@
 #include "libmpdemux/demux_packet.h"
 #include "codec-cfg.h"
 #include "osdep/numcores.h"
+#include "libvo/csputils.h"
 
 static const vd_info_t info = {
     "libavcodec video codecs",
@@ -463,6 +464,10 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt)
             };
         else
             supported_fmts = (const unsigned int[]){ctx->best_csp, 0xffffffff};
+
+        sh->colorspace = avcol_spc_to_mp_csp(avctx->colorspace);
+        sh->color_range = avcol_range_to_mp_csp_levels(avctx->color_range);
+
         if (!mpcodecs_config_vo2(sh, sh->disp_w, sh->disp_h, supported_fmts,
                                  ctx->best_csp))
             return -1;

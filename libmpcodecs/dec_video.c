@@ -129,9 +129,15 @@ void get_detected_video_colorspace(struct sh_video *sh, struct mp_csp_details *c
     csp->levels_out = opts->requested_output_range;
 
     if (csp->format == MP_CSP_AUTO)
+        csp->format = sh->colorspace;
+    if (csp->format == MP_CSP_AUTO)
         csp->format = mp_csp_guess_colorspace(vf->w, vf->h);
+
+    if (csp->levels_in == MP_CSP_LEVELS_AUTO)
+        csp->levels_in = sh->color_range;
     if (csp->levels_in == MP_CSP_LEVELS_AUTO)
         csp->levels_in = MP_CSP_LEVELS_TV;
+
     if (csp->levels_out == MP_CSP_LEVELS_AUTO)
         csp->levels_out = MP_CSP_LEVELS_PC;
 }

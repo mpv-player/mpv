@@ -47,6 +47,37 @@ char * const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
     "gamma",
 };
 
+enum mp_csp avcol_spc_to_mp_csp(enum AVColorSpace colorspace)
+{
+    switch (colorspace) {
+        case AVCOL_SPC_BT709:
+            return MP_CSP_BT_709;
+            break;
+        case AVCOL_SPC_BT470BG:
+        case AVCOL_SPC_SMPTE170M:
+            return MP_CSP_BT_601;
+            break;
+        case AVCOL_SPC_SMPTE240M:
+            return MP_CSP_SMPTE_240M;
+            break;
+        default:
+            return MP_CSP_AUTO;
+    }
+}
+
+enum mp_csp_levels avcol_range_to_mp_csp_levels(enum AVColorRange range)
+{
+    switch (range) {
+        case AVCOL_RANGE_MPEG:
+            return MP_CSP_LEVELS_TV;
+            break;
+        case AVCOL_RANGE_JPEG:
+            return MP_CSP_LEVELS_PC;
+            break;
+        default:
+            return MP_CSP_LEVELS_AUTO;
+    }
+}
 
 enum mp_csp mp_csp_guess_colorspace(int width, int height)
 {
