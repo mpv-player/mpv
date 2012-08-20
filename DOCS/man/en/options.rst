@@ -416,7 +416,7 @@
 
     :auto:      automatic selection (normally limited range) (default)
     :limited:   limited range (16-235 for luma, 16-240 for chroma)
-    :full:      full range (16-235 for luma, 0-255 for chroma)
+    :full:      full range (0-255 for both luma and chroma)
 
 --colormatrix-output-range=<color-range>
     RGB color levels used with YUV to RGB conversion. Normally, output devices
