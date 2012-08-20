@@ -92,6 +92,7 @@ Command line switches
     Old                                 New
     =================================== ===================================
     -nosound                            --no-audio
+    -use-filename-title                 --title="${filename}"
     =================================== ===================================
 
 input.conf and slave commands
