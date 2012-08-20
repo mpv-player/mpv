@@ -230,8 +230,8 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile)
             PRINT_LINENUM;
             if (tmp == M_OPT_UNKNOWN) {
                 mp_msg(MSGT_CFGPARSER, MSGL_WARN,
-                       "Warning unknown option %s at line %d\n",
-                       opt, line_num);
+                       "Warning: unknown option '%s' at line %d in file '%s'.\n",
+                       opt, line_num, conffile);
                 continue;
             }
             mp_msg(MSGT_CFGPARSER, MSGL_ERR,
