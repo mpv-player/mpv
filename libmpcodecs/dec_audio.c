@@ -37,9 +37,7 @@
 
 #include "libaf/af.h"
 
-#ifdef CONFIG_FAKE_MONO
 int fakemono = 0;
-#endif
 
 af_cfg_t af_cfg = { 1, NULL };	// Configuration for audio filters
 

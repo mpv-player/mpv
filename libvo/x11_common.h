@@ -98,12 +98,6 @@ struct vo_x11_state {
     Atom XA_NET_WM_CM;
 };
 
-#if defined(CONFIG_GL) || defined(CONFIG_X11) || defined(CONFIG_XV)
-#define X11_FULLSCREEN 1
-#endif
-
-#ifdef X11_FULLSCREEN
-
 #define vo_wm_LAYER 1
 #define vo_wm_FULLSCREEN 2
 #define vo_wm_STAYS_ON_TOP 4
@@ -150,7 +144,6 @@ void vo_x11_ontop(struct vo *vo);
 void vo_x11_border(struct vo *vo);
 void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action);
 
-#endif
 
 int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, const char *name, int value);
 int vo_xv_get_eq(struct vo *vo, uint32_t xv_port, const char *name, int *value);

@@ -93,14 +93,12 @@ static int preinit(sh_audio_t *sh)
     if (!con->handle)
         goto bad_end;
 
-#ifdef CONFIG_FAKE_MONO
     /* Guessing here: Default value triggers forced upmix of mono to stereo. */
     flag = fakemono == 0 ? MPG123_FORCE_STEREO :
            fakemono == 1 ? MPG123_MONO_LEFT    :
            fakemono == 2 ? MPG123_MONO_RIGHT   : 0;
     if (mpg123_param(con->handle, MPG123_ADD_FLAGS, flag, 0.0) != MPG123_OK)
         goto bad_end;
-#endif
 
     /* Basic settings.
      * Don't spill messages, enable better resync with non-seekable streams.

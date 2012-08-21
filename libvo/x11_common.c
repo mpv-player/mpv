@@ -31,8 +31,6 @@
 #include "x11_common.h"
 #include "talloc.h"
 
-#ifdef X11_FULLSCREEN
-
 #include <string.h>
 #include <unistd.h>
 #include <assert.h>
@@ -1748,8 +1746,6 @@ double vo_vm_get_fps(struct vo *vo)
     return 1e3 * clock / modeline.htotal / modeline.vtotal;
 }
 #endif
-
-#endif                          /* X11_FULLSCREEN */
 
 
 /*

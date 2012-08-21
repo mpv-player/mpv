@@ -3421,16 +3421,6 @@ cat > $TMPH << EOF
 #ifndef MPLAYER_CONFIG_H
 #define MPLAYER_CONFIG_H
 
-/* Undefine this if you do not want to select mono audio (left or right)
-   with a stereo MPEG layer 2/3 audio stream. The command line option
-   -stereo has three possible values (0 for stereo, 1 for left-only, 2 for
-   right-only), with 0 being the default.
-   */
-#define CONFIG_FAKE_MONO 1
-
-/* set up audio OUTBURST. Do not change this! */
-#define OUTBURST 512
-
 #define CONFIGURATION "$configuration"
 
 #define MPLAYER_DATADIR "$_datadir"

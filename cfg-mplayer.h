@@ -470,9 +470,7 @@ const m_option_t common_opts[] = {
 // ------------------------- codec/vfilter options --------------------
 
     // MP3-only: select stereo/left/right
-#ifdef CONFIG_FAKE_MONO
     {"stereo", &fakemono, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
-#endif
 
     {"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
     {"af-adv", (void *) audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
