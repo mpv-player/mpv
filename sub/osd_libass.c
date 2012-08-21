@@ -149,7 +149,10 @@ static void draw_ass_osd(struct osd_state *osd, mp_osd_obj_t *obj)
                                        NULL);
 
     int x1, y1, x2, y2;
-    ass_bb(imgs, &x1, &y1, &x2, &y2);
+    if (!ass_bb(imgs, &x1, &y1, &x2, &y2)) {
+        obj->flags &= ~OSDFLAG_VISIBLE;
+        return;
+    }
 
     obj->bbox.x1 = x1;
     obj->bbox.y1 = y1;
@@ -200,22 +203,14 @@ static ASS_Track *create_osd_ass_track(struct osd_state *osd)
     return track;
 }
 
-// xxx extremely evil hack to get rid of '[ass] Event height has changed'
-static void reset_ass_event(ASS_Event *event)
-{
-    free(event->render_priv);
-    event->render_priv = NULL;
-}
-
 static ASS_Event *get_osd_ass_event(ASS_Track *track)
 {
-    if (!track->n_events)
-        ass_alloc_event(track);
+    ass_flush_events(track);
+    ass_alloc_event(track);
     ASS_Event *event = track->events + 0;
     event->Start = 0;
     event->Duration = 100;
     event->Style = track->default_style;
-    reset_ass_event(event);
     return event;
 }
 
