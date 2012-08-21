@@ -236,4 +236,14 @@ const char *vo_format_name(int format);
  */
 int mp_get_chroma_shift(int format, int *x_shift, int *y_shift, int *component_bits);
 
+struct mp_imgfmt_entry {
+    const char *name;
+    unsigned int fmt;
+};
+
+extern struct mp_imgfmt_entry mp_imgfmt_list[];
+
+unsigned int mp_imgfmt_from_name(const char *name);
+const char *mp_imgfmt_to_name(unsigned int fmt);
+
 #endif /* MPLAYER_IMG_FORMAT_H */

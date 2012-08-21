@@ -21,6 +21,8 @@
 #include "stdio.h"
 #include "mpbswap.h"
 
+#include <string.h>
+
 const char *vo_format_name(int format)
 {
     static char unknown_format[20];
@@ -198,4 +200,103 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift, int *component_b
         bpp += 8;
     bpp *= (bits + 7) >> 3;
     return err ? 0 : bpp;
+}
+
+struct mp_imgfmt_entry mp_imgfmt_list[] = {
+    {"444p16le", IMGFMT_444P16_LE},
+    {"444p16be", IMGFMT_444P16_BE},
+    {"444p10le", IMGFMT_444P10_LE},
+    {"444p10be", IMGFMT_444P10_BE},
+    {"444p9le", IMGFMT_444P9_LE},
+    {"444p9be", IMGFMT_444P9_BE},
+    {"422p16le", IMGFMT_422P16_LE},
+    {"422p16be", IMGFMT_422P16_BE},
+    {"422p10le", IMGFMT_422P10_LE},
+    {"422p10be", IMGFMT_422P10_BE},
+    {"422p9le",  IMGFMT_422P9_LE},
+    {"422p9be",  IMGFMT_422P9_BE},
+    {"420p16le", IMGFMT_420P16_LE},
+    {"420p16be", IMGFMT_420P16_BE},
+    {"420p10le", IMGFMT_420P10_LE},
+    {"420p10be", IMGFMT_420P10_BE},
+    {"420p9le", IMGFMT_420P9_LE},
+    {"420p9be", IMGFMT_420P9_BE},
+    {"444p16", IMGFMT_444P16},
+    {"444p10", IMGFMT_444P10},
+    {"444p9", IMGFMT_444P9},
+    {"422p16", IMGFMT_422P16},
+    {"422p10", IMGFMT_422P10},
+    {"420p10", IMGFMT_420P10},
+    {"420p9", IMGFMT_420P9},
+    {"420p16", IMGFMT_420P16},
+    {"420a", IMGFMT_420A},
+    {"444p", IMGFMT_444P},
+    {"422p", IMGFMT_422P},
+    {"411p", IMGFMT_411P},
+    {"440p", IMGFMT_440P},
+    {"yuy2", IMGFMT_YUY2},
+    {"yvyu", IMGFMT_YVYU},
+    {"uyvy", IMGFMT_UYVY},
+    {"yvu9", IMGFMT_YVU9},
+    {"if09", IMGFMT_IF09},
+    {"yv12", IMGFMT_YV12},
+    {"i420", IMGFMT_I420},
+    {"iyuv", IMGFMT_IYUV},
+    {"clpl", IMGFMT_CLPL},
+    {"hm12", IMGFMT_HM12},
+    {"y800", IMGFMT_Y800},
+    {"y8", IMGFMT_Y8},
+    {"nv12", IMGFMT_NV12},
+    {"nv21", IMGFMT_NV21},
+    {"bgr24", IMGFMT_BGR24},
+    {"bgr32", IMGFMT_BGR32},
+    {"bgr16", IMGFMT_BGR16},
+    {"bgr15", IMGFMT_BGR15},
+    {"bgr12", IMGFMT_BGR12},
+    {"bgr8", IMGFMT_BGR8},
+    {"bgr4", IMGFMT_BGR4},
+    {"bg4b", IMGFMT_BG4B},
+    {"bgr1", IMGFMT_BGR1},
+    {"rgb48be", IMGFMT_RGB48BE},
+    {"rgb48le", IMGFMT_RGB48LE},
+    {"rgb48ne", IMGFMT_RGB48NE},
+    {"rgb24", IMGFMT_RGB24},
+    {"rgb32", IMGFMT_RGB32},
+    {"rgb16", IMGFMT_RGB16},
+    {"rgb15", IMGFMT_RGB15},
+    {"rgb12", IMGFMT_RGB12},
+    {"rgb8", IMGFMT_RGB8},
+    {"rgb4", IMGFMT_RGB4},
+    {"rg4b", IMGFMT_RG4B},
+    {"rgb1", IMGFMT_RGB1},
+    {"rgba", IMGFMT_RGBA},
+    {"argb", IMGFMT_ARGB},
+    {"bgra", IMGFMT_BGRA},
+    {"abgr", IMGFMT_ABGR},
+    {"gbrp", IMGFMT_GBRP},
+    {"mjpeg", IMGFMT_MJPEG},
+    {"mjpg", IMGFMT_MJPEG},
+    { NULL, 0 }
+};
+
+unsigned int mp_imgfmt_from_name(const char *name)
+{
+    struct mp_imgfmt_entry *p = mp_imgfmt_list;
+    if (!name)
+        return 0;
+    for(; p->name; ++p) {
+        if(!strcmp(name, p->name))
+            return p->fmt;
+    }
+    return 0;
+}
+
+const char *mp_imgfmt_to_name(unsigned int fmt)
+{
+    struct mp_imgfmt_entry *p = mp_imgfmt_list;
+    for(; p->name; ++p) {
+        if(p->fmt == fmt)
+            return p->name;
+    }
+    return NULL;
 }
