@@ -382,7 +382,8 @@
     format is RGB (if the video output driver supports RGB output, you can
     force this with ``-vf scale,format=rgba``).
 
-    If this option is set to ``auto`` (which is the default), the color space
+    If this option is set to ``auto`` (which is the default), the video's
+    color space flag will be used. If that flag is unset, the color space
     will be selected automatically. This is done using a simple heuristic that
     attempts to distinguish SD and HD video. If the video is larger than
     1279x576 pixels, BT.709 (HD) will be used; otherwise BT.601 (SD) is
@@ -404,7 +405,8 @@
 --colormatrix-input-range=<color-range>
     YUV color levels used with YUV to RGB conversion. This option is only
     necessary when playing broken files, which don't follow standard color
-    levels.
+    levels or which are flagged wrong. If the video doesn't specify its
+    color range, it is assumed to be limited range.
 
     The same limitations as with --colormatrix apply.
 
