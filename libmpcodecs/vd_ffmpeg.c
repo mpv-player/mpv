@@ -194,9 +194,6 @@ static int init(sh_video_t *sh)
         avctx->release_buffer  = release_buffer;
         avctx->reget_buffer    = get_buffer;
         avctx->draw_horiz_band = draw_slice;
-        if (lavc_codec->capabilities & CODEC_CAP_HWACCEL)
-            mp_msg(MSGT_DECVIDEO, MSGL_V, "[VD_FFMPEG] XVMC-accelerated "
-                   "MPEG-2.\n");
         if (lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU)
             mp_msg(MSGT_DECVIDEO, MSGL_V, "[VD_FFMPEG] VDPAU hardware "
                    "decoding.\n");

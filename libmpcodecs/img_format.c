@@ -107,8 +107,6 @@ const char *vo_format_name(int format)
 	case IMGFMT_YUVP: return "Packed YUVP";
 	case IMGFMT_UYVP: return "Packed UYVP";
 	case IMGFMT_MPEGPES: return "Mpeg PES";
-	case IMGFMT_XVMC_MOCO_MPEG2: return "MPEG1/2 Motion Compensation";
-	case IMGFMT_XVMC_IDCT_MPEG2: return "MPEG1/2 Motion Compensation and IDCT";
 	case IMGFMT_VDPAU_MPEG1: return "MPEG1 VDPAU acceleration";
 	case IMGFMT_VDPAU_MPEG2: return "MPEG2 VDPAU acceleration";
 	case IMGFMT_VDPAU_H264: return "H.264 VDPAU acceleration";
@@ -116,11 +114,12 @@ const char *vo_format_name(int format)
 	case IMGFMT_VDPAU_WMV3: return "WMV3 VDPAU acceleration";
 	case IMGFMT_VDPAU_VC1: return "VC1 VDPAU acceleration";
     }
-    snprintf(unknown_format,20,"Unknown 0x%04x",format);
+    snprintf(unknown_format, 20, "Unknown 0x%04x", format);
     return unknown_format;
 }
 
-int mp_get_chroma_shift(int format, int *x_shift, int *y_shift, int *component_bits)
+int mp_get_chroma_shift(int format, int *x_shift, int *y_shift,
+                        int *component_bits)
 {
     int xs = 0, ys = 0;
     int bpp;
@@ -170,31 +169,35 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift, int *component_b
             err = 1;
             break;
         }
-    } else switch (format) {
-    case IMGFMT_420A:
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
-    case IMGFMT_YV12:
-        xs = 1;
-        ys = 1;
-        break;
-    case IMGFMT_IF09:
-    case IMGFMT_YVU9:
-        xs = 2;
-        ys = 2;
-        break;
-    case IMGFMT_Y8:
-    case IMGFMT_Y800:
-        xs = 31;
-        ys = 31;
-        break;
-    default:
-        err = 1;
-        break;
-    }
-    if (x_shift) *x_shift = xs;
-    if (y_shift) *y_shift = ys;
-    if (component_bits) *component_bits = bits;
+    } else
+        switch (format) {
+        case IMGFMT_420A:
+        case IMGFMT_I420:
+        case IMGFMT_IYUV:
+        case IMGFMT_YV12:
+            xs = 1;
+            ys = 1;
+            break;
+        case IMGFMT_IF09:
+        case IMGFMT_YVU9:
+            xs = 2;
+            ys = 2;
+            break;
+        case IMGFMT_Y8:
+        case IMGFMT_Y800:
+            xs = 31;
+            ys = 31;
+            break;
+        default:
+            err = 1;
+            break;
+        }
+    if (x_shift)
+        *x_shift = xs;
+    if (y_shift)
+        *y_shift = ys;
+    if (component_bits)
+        *component_bits = bits;
     bpp = 8 + ((16 >> xs) >> ys);
     if (format == IMGFMT_420A)
         bpp += 8;
