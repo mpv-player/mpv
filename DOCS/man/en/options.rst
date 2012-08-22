@@ -943,7 +943,7 @@
     default MPlayer tries to keep the correct video aspect ratio by
     instructing the window manager to maintain window aspect when resizing,
     and by adding black bars if the window manager nevertheless allows window
-    shape to change. This option disables window manager aspect hints and
+    shape to change. --no-keepaspect disables window manager aspect hints and
     scales the video to completely fill the window without regard for aspect
     ratio.
 
