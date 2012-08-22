@@ -16,10 +16,8 @@ in the list. Suboptions are optional and can mostly be omitted.
 
 *EXAMPLE*:
 
-    ``--vo=xmga,xv,``
-        Try the Matrox X11 driver, then the Xv driver, then others.
-    ``--vo=directx:noaccel``
-        Uses the DirectX driver with acceleration features turned off.
+    ``--vo=gl,xv,``
+        Try the gl driver, then the Xv driver, then others.
 
 Available video output drivers are:
 

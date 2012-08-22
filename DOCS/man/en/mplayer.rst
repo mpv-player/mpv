@@ -358,8 +358,8 @@ as the file played and then tries to load any file-specific configuration.
 
 *EXAMPLE MPLAYER CONFIGURATION FILE:*
 
-| # Use Matrox driver by default.
-| vo=xmga
+| # Use gl3 video output by default.
+| vo=gl3
 | # I love practicing handstands while watching videos.
 | flip=yes
 | # Decode multiple files from PNG,
@@ -389,9 +389,6 @@ option. To end the profile, start another one or use the profile name
 | [extension.flv]
 | profile-desc="profile for .flv files"
 | flip=yes
-|
-| [vo.pnm]
-| outdir=/tmp
 |
 | [ao.alsa]
 | device=spdif
@@ -519,12 +516,6 @@ libdvdcss:
         FIXME: Document this.
 
 libao2:
-    ``AO_SUN_DISABLE_SAMPLE_TIMING``
-        FIXME: Document this.
-
-    ``AUDIODEV``
-        FIXME: Document this.
-
     ``AUDIOSERVER``
         Specifies the Network Audio System server to which the nas audio
         output driver should connect and the transport that should be used. If
@@ -647,20 +638,11 @@ Play from a different DVD device:
 Play DVD video from a directory with VOB files:
     ``mplayer dvd://1 --dvd-device=/path/to/directory/``
 
-Copy a DVD title to hard disk, saving to file title1.vob :
-    ``mplayer dvd://1 --dumpstream --dumpfile=title1.vob``
-
 Stream from HTTP:
     ``mplayer http://mplayer.hq/example.avi``
 
 Stream using RTSP:
     ``mplayer rtsp://server.example.com/streamName``
-
-Convert subtitles to MPsub format:
-    ``mplayer dummy.avi --sub=source.sub --dumpmpsub``
-
-Convert subtitles to MPsub format without watching the movie:
-    ``mplayer /dev/zero --rawvideo=pal:fps=xx --demuxer=rawvideo --vc=null --vo=null --noframedrop --benchmark --sub=source.sub --dumpmpsub``
 
 input from standard V4L:
     ``mplayer tv:// --tv=driver=v4l:width=640:height=480:outfmt=i420 --vc=rawi420 --vo=xv``

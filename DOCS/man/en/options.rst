@@ -264,10 +264,6 @@
     Play movie with window border and decorations. Since this is on by
     default, use ``--no-border`` to disable the standard window decorations.
 
---bpp=<depth>
-    Override the autodetected color depth. Only supported by the fbdev, dga,
-    svga, vesa video output drivers.
-
 --brightness=<-100-100>
     Adjust the brightness of the video signal (default: 0). Not supported by
     all video output drivers.
@@ -435,9 +431,8 @@
 
 --colorkey=<number>
     Changes the colorkey to an RGB value of your choice. 0x000000 is black and
-    0xffffff is white. Only supported by the fbdev, svga, vesa, xmga, xover,
-    xv (see ``--vo=xv:ck``) and directx video output drivers. See also
-    ``--no-colorkey``.
+    0xffffff is white. Only supported by the xv (see ``--vo=xv:ck``) video
+    output driver. See also ``--no-colorkey``.
 
 --consolecontrols, --no-consolecontrols
     ``--no-consolecontrols`` prevents the player from reading key events from
@@ -501,8 +496,7 @@
 
 --doubleclick-time
     Time in milliseconds to recognize two consecutive button presses as a
-    double-click (default: 300). Set to 0 to let your windowing system decide
-    what a double-click is (``--vo=directx`` only).
+    double-click (default: 300).
 
 --dvbin=<options>
     Pass the following parameters to the DVB input module, in order to
@@ -575,17 +569,6 @@
     (demuxer) cannot be detected reliably (the file has no header or it is not
     reliable enough), the filename extension is used to select the demuxer.
     Always falls back on content-based demuxer selection.
-
---fbmode=<modename>
-    (``--vo=fbdev`` only)
-    Change video mode to the one that is labeled as <modename> in
-    ``/etc/fb.modes``.
-
-    *NOTE*: VESA framebuffer does not support mode changing.
-
---fbmodeconfig=<filename>
-    (``--vo=fbdev`` only)
-    Override framebuffer mode configuration file (default: ``/etc/fb.modes``).
 
 --ffactor=<number>
     Resample the font alphamap. Can be:
@@ -1191,18 +1174,6 @@
     the <name,number> format, i.e. a channel labeled 'PCM 1' in alsamixer must
     be converted to PCM,1.
 
---monitor-dotclock=<range[,range,...]>
-    Used with ``--vo=fbdev`` and ``--vo=vesa`` only.
-    Specify the dotclock or pixelclock range of the monitor.
-
---monitor-hfreq=<range[,range,...]>
-    Used with ``--vo=fbdev`` and ``--vo=vesa`` only.
-    Specify the horizontal frequency range of the monitor.
-
---monitor-vfreq=<range[,range,...]>
-    Used with ``--vo=fbdev`` and ``--vo=vesa`` only.
-    Specify the vertical frequency range of the monitor.
-
 --monitoraspect=<ratio>
     Set the aspect ratio of your monitor or TV screen. A value of 0 disables a
     previous setting (e.g. in the config file). Overrides the
@@ -1280,8 +1251,8 @@
     Turn off input stream caching. See ``--cache``.
 
 --no-colorkey
-    Disables colorkeying. Only supported by the fbdev, svga, vesa, xmga,
-    xover, xv (see ``--vo=xv:ck``) and directx video output drivers.
+    Disables colorkeying. Only supported by the xv (see ``--vo=xv:ck``) video
+    output driver.
 
 --no-config=<options>
     Do not parse selected configuration files.
@@ -1313,8 +1284,7 @@
 
 --ontop
     Makes the player window stay on top of other windows. Supported by video
-    output drivers which use X11, except SDL, as well as directx, corevideo
-    and ggi.
+    output drivers which use X11, as well as corevideo.
 
 --ordered-chapters, --no-ordered-chapters
     Enabled by default.
@@ -1592,10 +1562,6 @@
 --referrer=<string>
     Specify a referrer path or URL for HTTP requests.
 
---refreshrate=<Hz>
-    Set the monitor refreshrate in Hz. Currently only supported by
-    ``--vo=directx`` combined with the ``--vm`` option.
-
 --reuse-socket
     (udp:// only)
     Allows a socket to be reused by other processes as soon as it is closed.
@@ -1711,11 +1677,11 @@
 
 --screenh=<pixels>
     Specify the screen height for video output drivers which do not know the
-    screen resolution like fbdev, x11 and TV-out.
+    screen resolution, like x11 and TV-out.
 
 --screenw=<pixels>
     Specify the screen width for video output drivers which do not know the
-    screen resolution like fbdev, x11 and TV-out.
+    screen resolution, like x11 and TV-out.
 
 --show-profile=<profile>
     Show the description and content of a profile.
@@ -1762,9 +1728,8 @@
 --slices, --no-slices
     Drawing video by 16-pixel height slices/bands, instead draws the
     whole frame in a single run. May be faster or slower, depending on video
-    card and available cache. It has effect only with libmpeg2 and libavcodec
-    codecs. Enabled by default if applicable; usually disabled when threading
-    is used.
+    card and available cache. It has effect only with libavcodec codecs.
+    Enabled by default if applicable; usually disabled when threading is used.
 
 --softsleep
     Time frames by repeatedly checking the current time instead of asking
@@ -2243,11 +2208,6 @@
 
     *WARNING*: May be dangerous if playing from untrusted media.
 
---use-filename-title
-    Set the window title using the media filename, when not set with
-    ``--title``. Supported by X11-based video output drivers. See also
-    ``--title``.
-
 --user=<username>
     Used with some network protocols.
     Specify username for HTTP authentication. See also ``--passwd``.
@@ -2305,16 +2265,9 @@
     playing an MPEG-TS stream, MPlayer will use the first program (if present)
     with the chosen video stream.
 
---vivo=<suboption>
-    (DEBUG CODE)
-    Force audio parameters for the VIVO demuxer (for debugging purposes).
-    FIXME: Document this.
-
 --vm
-    Try to change to a different video mode. Supported by the dga, x11, xv,
-    sdl and directx video output drivers. If used with the directx video
-    output driver the ``--screenw``, ``--screenh``, ``--bpp`` and
-    ``--refreshrate`` options can be used to set the new display mode.
+    Try to change to a different video mode. Supported by the x11 and xv video
+    output drivers.
 
 --vo=<driver1[:suboption1[=value]:...],driver2,...[,]>
     Specify a priority list of video output drivers to be used. For
@@ -2402,5 +2355,5 @@
 
 --zoom
     Allow software scaling, where available. This will allow scaling with
-    output drivers (like x11, fbdev) that do not support hardware scaling
+    output drivers (like x11) that do not support hardware scaling,
     where MPlayer disables scaling by default for performance reasons.
