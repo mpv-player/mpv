@@ -1460,9 +1460,9 @@
 
 --quiet
     Make console output less verbose; in particular, prevents the status line
-    (i.e. A: 0.7 V: 0.6 A-V: 0.068 ...) from being displayed. Particularly
-    useful on slow terminals or broken ones which do not properly handle
-    carriage return (i.e. \\r).
+    (i.e. AV: 3.4 (00:00:03.37) / 5320.6 ...) from being displayed.
+    Particularly useful on slow terminals or broken ones which do not properly
+    handle carriage return (i.e. \\r).
 
 --radio=<option1:option2:...>
     These options set various parameters of the radio capture module. For
