@@ -47,7 +47,7 @@ jack
 
     port=<name>
         Connects to the ports with the given name (default: physical ports).
-    name=<client
+    name=<client>
         Client name that is passed to JACK (default: MPlayer [<PID>]). Useful
         if you want to have certain connections established automatically.
     (no-)estimate

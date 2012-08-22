@@ -326,7 +326,7 @@ escape these on some shells.) Example:
 +-----------+-------------------------+
 
 Additionally, any file-local option changed at runtime is reset when the current
-file stops playing. If option ``-c`` is changed during playback of `file2.mkv`,
+file stops playing. If option ``--c`` is changed during playback of `file2.mkv`,
 it's reset when advancing to `file3.mkv`. This only affects file-local options.
 The option ``--a`` is never reset here.
 
@@ -429,9 +429,9 @@ screenshots with the video filter is not instant: the screenshot will be only
 saved when the next video frame is displayed. This means attempting to take a
 screenshot while the player is paused will do nothing, until the user unpauses
 or seeks. Also, the screenshot filter is not compatible with hardware decoding,
-and actually will cause initialization failure when use with hardware decodingis
-attempted. Using the ``screenshot`` video filter is not recommended for these
-reasons.
+and actually will cause initialization failure when use with hardware decoding
+is attempted. Using the ``screenshot`` video filter is not recommended for
+these reasons.
 
 .. include:: changes.rst
 
@@ -494,7 +494,7 @@ libdvdcss:
            rely on a key exchange with the DVD drive, but rather uses a crypto
            attack to guess the title key. On rare cases this may fail because
            there is not enough encrypted data on the disc to perform a
-           statistical attack, but in the other hand it is the only way to
+           statistical attack, but on the other hand it is the only way to
            decrypt a DVD stored on a hard disc, or a DVD with the wrong region
            on an RPC2 drive.
 

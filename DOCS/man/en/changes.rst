@@ -55,7 +55,7 @@ General changes for mplayer2 to mplayer3
 * Improved OpenGL output (``vo_gl3``)
 * Make ``--softvol`` default (**mplayer3** is not a mixer control panel)
 * Improved support for .cue files
-* Screenshot improvements (can save screenshots as JPG, configfurable filenames)
+* Screenshot improvements (can save screenshots as JPG, configurable filenames)
 * Removal of teletext support
 * Replace image VOs (``vo_jpeg`` etc.) with ``vo_image``
 * Remove ``vo_gif89a``, ``vo_md5sum``, ``vo_yuv4mpeg`` (the plan is to merge

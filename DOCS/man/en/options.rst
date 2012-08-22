@@ -479,7 +479,7 @@
     OS X Cocoa.
 
 --delay=<sec>
-    audio delay in seconds (positive or negative float value) Negative values
+    audio delay in seconds (positive or negative float value). Negative values
     delay the audio, and positive values delay the video.
 
 --demuxer=<[+]name>
@@ -770,7 +770,7 @@
         Places the window at the bottom right corner of the screen.
 
 --grabpointer, --no-grabpointer
-    ``-no-grabpointer`` tells the player to not grab the mouse pointer after a
+    ``--no-grabpointer`` tells the player to not grab the mouse pointer after a
     video mode change (``--vm``). Useful for multihead setups.
 
 --hardframedrop
@@ -1391,7 +1391,7 @@
 
 --pp=<quality>
     This option only works when decoding video with Win32 DirectShow DLLs with
-    internal postprocessingi routines. See also ``--vf=pp``. Set the DLL
+    internal postprocessing routines. See also ``--vf=pp``. Set the DLL
     postprocess level. The valid range of ``--pp`` values varies by codec, it
     is mostly 0-6, where 0=disable, 6=slowest/best.
 
@@ -1580,10 +1580,10 @@
 
     *EXAMPLE*:
 
-    - ``mplayer foreman.qcif --demuxer=rawvideo --rawvideo qcif`` Play the
+    - ``mplayer foreman.qcif --demuxer=rawvideo --rawvideo=qcif`` Play the
       famous "foreman" sample video.
 
-    - ``mplayer sample-720x576.yuv --demuxer=rawvideo --rawvideo w=720:h=576``
+    - ``mplayer sample-720x576.yuv --demuxer=rawvideo --rawvideo=w=720:h=576``
       Play a raw YUV sample.
 
 --really-quiet
@@ -1757,7 +1757,7 @@
     changed output and use the --slave-broken switch. Instead, a new, saner
     protocol should be developed (and will, if there is enough interest).
 
-    This affects smplayer, smplayer2, mplayosx, and others.
+    This affects smplayer, smplayer2, mplayerosx, and others.
 
 --slices, --no-slices
     Drawing video by 16-pixel height slices/bands, instead draws the
