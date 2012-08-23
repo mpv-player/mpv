@@ -1617,12 +1617,16 @@
 
     Available choices:
 
-    :png:   PNG (default)
-    :jpg:   JPEG
+    :png:   PNG
+    :ppm:   PPM
+    :pgm:   PGM
+    :pgmyuv:   PGM with YV12 pixel format
+    :tga:   TARGA
+    :jpg:   JPEG (default)
     :jpeg:  JPEG (same as jpg, but with .jpeg file ending)
 
 --screenshot-jpeg-quality=<0-100>
-    Set the JPEG quality level. Higher means better quality. The default is 85.
+    Set the JPEG quality level. Higher means better quality. The default is 90.
 
 --screenshot-png-compression=<0-9>
     Set the PNG compression level. Higher means better compression. This will
