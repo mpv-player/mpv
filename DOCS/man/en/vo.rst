@@ -667,7 +667,7 @@ image
     png-compression=<0-9>
         PNG compression factor (speed vs. file size tradeoff) (default: 7)
     jpeg-quality=<0-100>
-        JPEG quality factor (default: 85)
+        JPEG quality factor (default: 90)
     [no-]jpeg-progressive
         Specify standard or progressive JPEG (default: noprogressive).
     [no-]jpeg-baseline
