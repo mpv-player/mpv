@@ -1756,7 +1756,7 @@
     audio filter.
 
 --softvol-max=<10.0-10000.0>
-    Set the maximum amplification level in percent (default: 110). A value of
+    Set the maximum amplification level in percent (default: 200). A value of
     200 will allow you to adjust the volume up to a maximum of double the
     current level. With values below 100 the initial volume (which is 100%)
     will be above the maximum, which e.g. the OSD cannot display correctly.
