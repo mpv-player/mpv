@@ -1405,3 +1405,23 @@ fixpts[=options]
 
     *NOTE*: Using this filter together with any sort of seeking (including
     ``--ss``) may make demons fly out of your nose.
+
+dlopen=dll[:a0[:a1[:a2[:a3]]]]
+    Loads an external library to filter the image. The library interface
+    is the vf_dlopen interface specified using libmpcodecs/vf_dlopen.h.
+
+    dll=<library>
+        Specify the library to load. This may require a full file system path
+        in some cases! This argument is required.
+
+    a0=<string>
+        Specify the first parameter to pass to the library.
+
+    a1=<string>
+        Specify the second parameter to pass to the library.
+
+    a2=<string>
+        Specify the third parameter to pass to the library.
+
+    a3=<string>
+        Specify the fourth parameter to pass to the library.

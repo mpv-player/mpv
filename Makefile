@@ -161,6 +161,7 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_detc.c \
               libmpcodecs/vf_dint.c \
               libmpcodecs/vf_divtc.c \
+              libmpcodecs/vf_dlopen.c \
               libmpcodecs/vf_down3dright.c \
               libmpcodecs/vf_dsize.c \
               libmpcodecs/vf_dvbscale.c \
