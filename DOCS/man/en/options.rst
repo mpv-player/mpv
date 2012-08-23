@@ -1651,11 +1651,15 @@
 
     Allowed format specifiers:
 
-    ``%nX``
-        A sequence number, padded with zeros to length X. E.g. passing the
-        format ``%n4`` will yield ``0012`` on the 12th screenshot. The number is
-        incremented every time a screenshot is taken, or if the file already
-        exists. The length ``X`` must be in the range 0-9.
+    ``%[#][0X]n``
+        A sequence number, padded with zeros to length X (default: 04). E.g.
+        passing the format ``%04n`` will yield ``0012`` on the 12th screenshot.
+        The number is incremented every time a screenshot is taken, or if the
+        file already exists. The length ``X`` must be in the range 0-9. With
+        the optional # sign mplayer will use the lowest available number. For
+        example, if you take three screenshots--0001, 0002, 0003--and delete
+        the first two, the next two screenshots won't be 0004 and 0005, but
+        0001 and 0002 again.
     ``%f``
         Filename of the currently played video.
     ``%F``
@@ -1673,11 +1677,15 @@
         are not easily implementable, because container formats usually use
         time stamps for identifying frames.)
     ``%tX``
-        Specify the current local date/time using he format ``X``. This format
+        Specify the current local date/time using the format ``X``. This format
         specifier uses the UNIX ``strftime()`` function internally, and inserts
         the result of passing "%X" to ``strftime``. For example, ``%tm`` will
         insert the number of the current month as number. You have to use
         multiple ``%tX`` specifiers to build a full date/time string.
+    ``%{prop[:fallback text]}``
+        Insert the value of the slave property 'prop'. E.g. %{filename} is the
+        same as %f. If the property doesn't exist or is not available, nothing
+        is inserted, unless a fallback is specified.
     ``%%``
         Replaced with the ``%`` character itself.
 
