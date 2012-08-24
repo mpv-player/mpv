@@ -166,6 +166,12 @@ enum mp_command_type {
 // Key FIFO was full - release events may be lost, zero button-down status
 #define MP_INPUT_RELEASE_ALL -5
 
+enum mp_input_section_flags {
+    // If a key binding is not defined in the current section, search the
+    // default section for it ("default" refers to bindings with no section
+    // specified, not to the default input.conf aka builtin key bindings)
+    MP_INPUT_NO_DEFAULT_SECTION = 1,
+};
 
 struct input_ctx;
 
@@ -246,7 +252,8 @@ void mp_cmd_free(struct mp_cmd *cmd);
 struct mp_cmd *mp_cmd_clone(struct mp_cmd *cmd);
 
 // Set current input section
-void mp_input_set_section(struct input_ctx *ictx, char *name);
+// flags is a bitfield of enum mp_input_section_flags values
+void mp_input_set_section(struct input_ctx *ictx, char *name, int flags);
 
 // Get current input section
 char *mp_input_get_section(struct input_ctx *ictx);

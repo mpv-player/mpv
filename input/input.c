@@ -452,6 +452,8 @@ struct input_ctx {
     struct cmd_bind_section *cmd_bind_sections;
     // Name of currently used command section
     char *section;
+    // Bitfield of mp_input_section_flags
+    int section_flags;
 
     // Used to track whether we managed to read something while checking
     // events sources. If yes, the sources may have more queued.
@@ -1023,10 +1025,12 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
     cmd = section_find_bind_for_key(ictx, false, ictx->section, n, keys);
     if (ictx->default_bindings && cmd == NULL)
         cmd = section_find_bind_for_key(ictx, true, ictx->section, n, keys);
-    if (cmd == NULL)
-        cmd = section_find_bind_for_key(ictx, false, "default", n, keys);
-    if (ictx->default_bindings && cmd == NULL)
-        cmd = section_find_bind_for_key(ictx, true, "default", n, keys);
+    if (!(ictx->section_flags & MP_INPUT_NO_DEFAULT_SECTION)) {
+        if (cmd == NULL)
+            cmd = section_find_bind_for_key(ictx, false, "default", n, keys);
+        if (ictx->default_bindings && cmd == NULL)
+            cmd = section_find_bind_for_key(ictx, true, "default", n, keys);
+    }
 
     if (cmd == NULL) {
         char *key_buf = get_key_combo_name(keys, n);
@@ -1524,10 +1528,11 @@ static int parse_config_file(struct input_ctx *ictx, char *file)
     return 1;
 }
 
-void mp_input_set_section(struct input_ctx *ictx, char *name)
+void mp_input_set_section(struct input_ctx *ictx, char *name, int flags)
 {
     talloc_free(ictx->section);
     ictx->section = talloc_strdup(ictx, name ? name : "default");
+    ictx->section_flags = flags;
 }
 
 char *mp_input_get_section(struct input_ctx *ictx)
