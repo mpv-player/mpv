@@ -328,8 +328,10 @@ struct vo *init_best_video_out(struct MPOpts *opts,
             // continue...
             free(name);
             ++vo_list;
-            if (!(vo_list[0]))
+            if (!(vo_list[0])) {
+                talloc_free(vo);
                 return NULL; // do NOT fallback to others
+            }
 	}
     // now try the rest...
     vo_subdevice = NULL;
