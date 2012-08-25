@@ -16,10 +16,8 @@ in the list. Suboptions are optional and can mostly be omitted.
 
 *EXAMPLE*:
 
-    ``--vo=xmga,xv,``
-        Try the Matrox X11 driver, then the Xv driver, then others.
-    ``--vo=directx:noaccel``
-        Uses the DirectX driver with acceleration features turned off.
+    ``--vo=gl,xv,``
+        Try the gl driver, then the Xv driver, then others.
 
 Available video output drivers are:
 
@@ -176,7 +174,7 @@ direct3d_shaders (Windows only)
     disable-eosd
         Disable EOSD rendering for subtitles.
         (Using this flag might force the insertion of the 'ass' video filter,
-         which will render the subtitles in software.)
+        which will render the subtitles in software.)
 
     disable-texture-align
         Normally texture sizes are always aligned to 16. With this option
@@ -427,7 +425,7 @@ gl
 
 gl3
     OpenGL video output driver, extended version. The requires an OpenGL 3
-    capable graphics driver. (Note: this is only because of developer pedantery.
+    capable graphics driver. (Note: this is only because of developer pedantry.
     The dependency on actual OpenGL 3 features is rather low.)
 
     It supports extended scaling methods, dithering and color management.
@@ -523,7 +521,7 @@ gl3
 
     pbo
         Enable use of PBOs. This is faster, but can sometimes lead to
-        sparodic and temporary image corruption.
+        sporadic and temporary image corruption.
 
     dither-depth=<n>
         Positive non-zero values select the target bit depth. Default: 0.
@@ -537,7 +535,7 @@ gl3
             Dither to 8 bit output.
 
         Note that dithering will always be disabled if the bit depth
-        of the video is lower or qual to the detected dither-depth.
+        of the video is lower or equal to the detected dither-depth.
         If color management is enabled, input depth is assumed to be
         16 bits, because the 3D LUT output is 16 bit wide.
 
@@ -552,7 +550,7 @@ gl3
 
 
     swapinterval=<n>
-        Interval in displayed frames between to buffer swaps.
+        Interval in displayed frames between two buffer swaps.
         1 is equivalent to enable VSYNC, 0 to disable VSYNC.
 
     no-scale-sep
@@ -621,7 +619,7 @@ gl3
         this file. This can be used to speed up loading, since
         LittleCMS2 can take a while to create the 3D LUT.
         Note that this file contains an uncompressed LUT. Its size depends on
-        the ``3dlut-size``, can be become very big.
+        the ``3dlut-size``, can become very big.
 
     icc-intent=<value>
         0
@@ -669,13 +667,13 @@ image
     png-compression=<0-9>
         PNG compression factor (speed vs. file size tradeoff) (default: 7)
     jpeg-quality=<0-100>
-        JPEG quality factor (default: 85)
+        JPEG quality factor (default: 90)
     [no-]jpeg-progressive
         Specify standard or progressive JPEG (default: noprogressive).
     [no-]jpeg-baseline
         Specify use of JPEG baseline or not (default: baseline).
     jpeg-optimize=<0-100>
-        JPEG ptimization factor (default: 100)
+        JPEG optimization factor (default: 100)
     jpeg-smooth=<0-100>
         smooth factor (default: 0)
     jpeg-dpi=<1->

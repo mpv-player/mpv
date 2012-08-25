@@ -264,10 +264,6 @@
     Play movie with window border and decorations. Since this is on by
     default, use ``--no-border`` to disable the standard window decorations.
 
---bpp=<depth>
-    Override the autodetected color depth. Only supported by the fbdev, dga,
-    svga, vesa video output drivers.
-
 --brightness=<-100-100>
     Adjust the brightness of the video signal (default: 0). Not supported by
     all video output drivers.
@@ -386,7 +382,8 @@
     format is RGB (if the video output driver supports RGB output, you can
     force this with ``-vf scale,format=rgba``).
 
-    If this option is set to ``auto`` (which is the default), the color space
+    If this option is set to ``auto`` (which is the default), the video's
+    color space flag will be used. If that flag is unset, the color space
     will be selected automatically. This is done using a simple heuristic that
     attempts to distinguish SD and HD video. If the video is larger than
     1279x576 pixels, BT.709 (HD) will be used; otherwise BT.601 (SD) is
@@ -408,7 +405,8 @@
 --colormatrix-input-range=<color-range>
     YUV color levels used with YUV to RGB conversion. This option is only
     necessary when playing broken files, which don't follow standard color
-    levels.
+    levels or which are flagged wrong. If the video doesn't specify its
+    color range, it is assumed to be limited range.
 
     The same limitations as with --colormatrix apply.
 
@@ -435,9 +433,8 @@
 
 --colorkey=<number>
     Changes the colorkey to an RGB value of your choice. 0x000000 is black and
-    0xffffff is white. Only supported by the fbdev, svga, vesa, xmga, xover,
-    xv (see ``--vo=xv:ck``) and directx video output drivers. See also
-    ``--no-colorkey``.
+    0xffffff is white. Only supported by the xv (see ``--vo=xv:ck``) video
+    output driver. See also ``--no-colorkey``.
 
 --consolecontrols, --no-consolecontrols
     ``--no-consolecontrols`` prevents the player from reading key events from
@@ -479,7 +476,7 @@
     OS X Cocoa.
 
 --delay=<sec>
-    audio delay in seconds (positive or negative float value) Negative values
+    audio delay in seconds (positive or negative float value). Negative values
     delay the audio, and positive values delay the video.
 
 --demuxer=<[+]name>
@@ -501,8 +498,7 @@
 
 --doubleclick-time
     Time in milliseconds to recognize two consecutive button presses as a
-    double-click (default: 300). Set to 0 to let your windowing system decide
-    what a double-click is (``--vo=directx`` only).
+    double-click (default: 300).
 
 --dvbin=<options>
     Pass the following parameters to the DVB input module, in order to
@@ -575,17 +571,6 @@
     (demuxer) cannot be detected reliably (the file has no header or it is not
     reliable enough), the filename extension is used to select the demuxer.
     Always falls back on content-based demuxer selection.
-
---fbmode=<modename>
-    (``--vo=fbdev`` only)
-    Change video mode to the one that is labeled as <modename> in
-    ``/etc/fb.modes``.
-
-    *NOTE*: VESA framebuffer does not support mode changing.
-
---fbmodeconfig=<filename>
-    (``--vo=fbdev`` only)
-    Override framebuffer mode configuration file (default: ``/etc/fb.modes``).
 
 --ffactor=<number>
     Resample the font alphamap. Can be:
@@ -770,7 +755,7 @@
         Places the window at the bottom right corner of the screen.
 
 --grabpointer, --no-grabpointer
-    ``-no-grabpointer`` tells the player to not grab the mouse pointer after a
+    ``--no-grabpointer`` tells the player to not grab the mouse pointer after a
     video mode change (``--vm``). Useful for multihead setups.
 
 --hardframedrop
@@ -958,7 +943,7 @@
     default MPlayer tries to keep the correct video aspect ratio by
     instructing the window manager to maintain window aspect when resizing,
     and by adding black bars if the window manager nevertheless allows window
-    shape to change. This option disables window manager aspect hints and
+    shape to change. --no-keepaspect disables window manager aspect hints and
     scales the video to completely fill the window without regard for aspect
     ratio.
 
@@ -1191,18 +1176,6 @@
     the <name,number> format, i.e. a channel labeled 'PCM 1' in alsamixer must
     be converted to PCM,1.
 
---monitor-dotclock=<range[,range,...]>
-    Used with ``--vo=fbdev`` and ``--vo=vesa`` only.
-    Specify the dotclock or pixelclock range of the monitor.
-
---monitor-hfreq=<range[,range,...]>
-    Used with ``--vo=fbdev`` and ``--vo=vesa`` only.
-    Specify the horizontal frequency range of the monitor.
-
---monitor-vfreq=<range[,range,...]>
-    Used with ``--vo=fbdev`` and ``--vo=vesa`` only.
-    Specify the vertical frequency range of the monitor.
-
 --monitoraspect=<ratio>
     Set the aspect ratio of your monitor or TV screen. A value of 0 disables a
     previous setting (e.g. in the config file). Overrides the
@@ -1280,8 +1253,8 @@
     Turn off input stream caching. See ``--cache``.
 
 --no-colorkey
-    Disables colorkeying. Only supported by the fbdev, svga, vesa, xmga,
-    xover, xv (see ``--vo=xv:ck``) and directx video output drivers.
+    Disables colorkeying. Only supported by the xv (see ``--vo=xv:ck``) video
+    output driver.
 
 --no-config=<options>
     Do not parse selected configuration files.
@@ -1313,8 +1286,7 @@
 
 --ontop
     Makes the player window stay on top of other windows. Supported by video
-    output drivers which use X11, except SDL, as well as directx, corevideo
-    and ggi.
+    output drivers which use X11, as well as corevideo.
 
 --ordered-chapters, --no-ordered-chapters
     Enabled by default.
@@ -1391,7 +1363,7 @@
 
 --pp=<quality>
     This option only works when decoding video with Win32 DirectShow DLLs with
-    internal postprocessingi routines. See also ``--vf=pp``. Set the DLL
+    internal postprocessing routines. See also ``--vf=pp``. Set the DLL
     postprocess level. The valid range of ``--pp`` values varies by codec, it
     is mostly 0-6, where 0=disable, 6=slowest/best.
 
@@ -1488,9 +1460,9 @@
 
 --quiet
     Make console output less verbose; in particular, prevents the status line
-    (i.e. A: 0.7 V: 0.6 A-V: 0.068 ...) from being displayed. Particularly
-    useful on slow terminals or broken ones which do not properly handle
-    carriage return (i.e. \\r).
+    (i.e. AV: 3.4 (00:00:03.37) / 5320.6 ...) from being displayed.
+    Particularly useful on slow terminals or broken ones which do not properly
+    handle carriage return (i.e. \\r).
 
 --radio=<option1:option2:...>
     These options set various parameters of the radio capture module. For
@@ -1580,10 +1552,10 @@
 
     *EXAMPLE*:
 
-    - ``mplayer foreman.qcif --demuxer=rawvideo --rawvideo qcif`` Play the
+    - ``mplayer foreman.qcif --demuxer=rawvideo --rawvideo=qcif`` Play the
       famous "foreman" sample video.
 
-    - ``mplayer sample-720x576.yuv --demuxer=rawvideo --rawvideo w=720:h=576``
+    - ``mplayer sample-720x576.yuv --demuxer=rawvideo --rawvideo=w=720:h=576``
       Play a raw YUV sample.
 
 --really-quiet
@@ -1591,10 +1563,6 @@
 
 --referrer=<string>
     Specify a referrer path or URL for HTTP requests.
-
---refreshrate=<Hz>
-    Set the monitor refreshrate in Hz. Currently only supported by
-    ``--vo=directx`` combined with the ``--vm`` option.
 
 --reuse-socket
     (udp:// only)
@@ -1649,12 +1617,16 @@
 
     Available choices:
 
-    :png:   PNG (default)
-    :jpg:   JPEG
+    :png:   PNG
+    :ppm:   PPM
+    :pgm:   PGM
+    :pgmyuv:   PGM with YV12 pixel format
+    :tga:   TARGA
+    :jpg:   JPEG (default)
     :jpeg:  JPEG (same as jpg, but with .jpeg file ending)
 
 --screenshot-jpeg-quality=<0-100>
-    Set the JPEG quality level. Higher means better quality. The default is 85.
+    Set the JPEG quality level. Higher means better quality. The default is 90.
 
 --screenshot-png-compression=<0-9>
     Set the PNG compression level. Higher means better compression. This will
@@ -1679,11 +1651,15 @@
 
     Allowed format specifiers:
 
-    ``%nX``
-        A sequence number, padded with zeros to length X. E.g. passing the
-        format ``%n4`` will yield ``0012`` on the 12th screenshot. The number is
-        incremented every time a screenshot is taken, or if the file already
-        exists. The length ``X`` must be in the range 0-9.
+    ``%[#][0X]n``
+        A sequence number, padded with zeros to length X (default: 04). E.g.
+        passing the format ``%04n`` will yield ``0012`` on the 12th screenshot.
+        The number is incremented every time a screenshot is taken, or if the
+        file already exists. The length ``X`` must be in the range 0-9. With
+        the optional # sign mplayer will use the lowest available number. For
+        example, if you take three screenshots--0001, 0002, 0003--and delete
+        the first two, the next two screenshots won't be 0004 and 0005, but
+        0001 and 0002 again.
     ``%f``
         Filename of the currently played video.
     ``%F``
@@ -1701,21 +1677,25 @@
         are not easily implementable, because container formats usually use
         time stamps for identifying frames.)
     ``%tX``
-        Specify the current local date/time using he format ``X``. This format
+        Specify the current local date/time using the format ``X``. This format
         specifier uses the UNIX ``strftime()`` function internally, and inserts
         the result of passing "%X" to ``strftime``. For example, ``%tm`` will
         insert the number of the current month as number. You have to use
         multiple ``%tX`` specifiers to build a full date/time string.
+    ``%{prop[:fallback text]}``
+        Insert the value of the slave property 'prop'. E.g. %{filename} is the
+        same as %f. If the property doesn't exist or is not available, nothing
+        is inserted, unless a fallback is specified.
     ``%%``
         Replaced with the ``%`` character itself.
 
 --screenh=<pixels>
     Specify the screen height for video output drivers which do not know the
-    screen resolution like fbdev, x11 and TV-out.
+    screen resolution, like x11 and TV-out.
 
 --screenw=<pixels>
     Specify the screen width for video output drivers which do not know the
-    screen resolution like fbdev, x11 and TV-out.
+    screen resolution, like x11 and TV-out.
 
 --show-profile=<profile>
     Show the description and content of a profile.
@@ -1757,14 +1737,13 @@
     changed output and use the --slave-broken switch. Instead, a new, saner
     protocol should be developed (and will, if there is enough interest).
 
-    This affects smplayer, smplayer2, mplayosx, and others.
+    This affects smplayer, smplayer2, mplayerosx, and others.
 
 --slices, --no-slices
     Drawing video by 16-pixel height slices/bands, instead draws the
     whole frame in a single run. May be faster or slower, depending on video
-    card and available cache. It has effect only with libmpeg2 and libavcodec
-    codecs. Enabled by default if applicable; usually disabled when threading
-    is used.
+    card and available cache. It has effect only with libavcodec codecs.
+    Enabled by default if applicable; usually disabled when threading is used.
 
 --softsleep
     Time frames by repeatedly checking the current time instead of asking
@@ -1777,7 +1756,7 @@
     audio filter.
 
 --softvol-max=<10.0-10000.0>
-    Set the maximum amplification level in percent (default: 110). A value of
+    Set the maximum amplification level in percent (default: 200). A value of
     200 will allow you to adjust the volume up to a maximum of double the
     current level. With values below 100 the initial volume (which is 100%)
     will be above the maximum, which e.g. the OSD cannot display correctly.
@@ -2243,11 +2222,6 @@
 
     *WARNING*: May be dangerous if playing from untrusted media.
 
---use-filename-title
-    Set the window title using the media filename, when not set with
-    ``--title``. Supported by X11-based video output drivers. See also
-    ``--title``.
-
 --user=<username>
     Used with some network protocols.
     Specify username for HTTP authentication. See also ``--passwd``.
@@ -2305,16 +2279,9 @@
     playing an MPEG-TS stream, MPlayer will use the first program (if present)
     with the chosen video stream.
 
---vivo=<suboption>
-    (DEBUG CODE)
-    Force audio parameters for the VIVO demuxer (for debugging purposes).
-    FIXME: Document this.
-
 --vm
-    Try to change to a different video mode. Supported by the dga, x11, xv,
-    sdl and directx video output drivers. If used with the directx video
-    output driver the ``--screenw``, ``--screenh``, ``--bpp`` and
-    ``--refreshrate`` options can be used to set the new display mode.
+    Try to change to a different video mode. Supported by the x11 and xv video
+    output drivers.
 
 --vo=<driver1[:suboption1[=value]:...],driver2,...[,]>
     Specify a priority list of video output drivers to be used. For
@@ -2402,5 +2369,5 @@
 
 --zoom
     Allow software scaling, where available. This will allow scaling with
-    output drivers (like x11, fbdev) that do not support hardware scaling
+    output drivers (like x11) that do not support hardware scaling,
     where MPlayer disables scaling by default for performance reasons.
