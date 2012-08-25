@@ -61,10 +61,4 @@ typedef struct ass_image {
 
 #endif
 
-typedef struct {
-    ASS_Image *imgs;
-    int changed;
-} mp_eosd_images_t;
-
-
 #endif                          /* MPLAYER_ASS_MP_H */

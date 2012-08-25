@@ -30,7 +30,6 @@
 
 #include "libvo/video_out.h"
 
-#include "sub/ass_mp.h"
 #include "sub/sub.h"
 
 struct vf_priv_s {
@@ -122,40 +121,29 @@ static int control(struct vf_instance *vf, int request, void *data)
         };
         return vo_control(video_out, VOCTRL_GET_EQUALIZER, &param) == VO_TRUE;
     }
-#ifdef CONFIG_ASS
     case VFCTRL_INIT_EOSD: {
         vf->priv->prev_visibility = false;
         return CONTROL_TRUE;
     }
 
     case VFCTRL_DRAW_EOSD: {
-        struct mp_eosd_res dim = { 0 };
+        struct osd_state *osd = data;
+        osd->dim = (struct mp_eosd_res){0};
         if (!video_out->config_ok ||
-                vo_control(video_out, VOCTRL_GET_EOSD_RES, &dim) != true) {
+                vo_control(video_out, VOCTRL_GET_EOSD_RES, &osd->dim) != true) {
             vf->priv->prev_visibility = false;
             return CONTROL_FALSE;
         }
-        struct osd_state *osd = data;
-        mp_eosd_images_t images = { NULL, 2 };
-        ASS_Renderer *renderer = osd->ass_renderer;
-        double scale = 1;
-        if (osd->vsfilter_aspect && vf->opts->ass_vsfilter_aspect_compat)
-            scale = vf->priv->scale_ratio;
-        if (sub_visibility && osd->ass_track && (osd->pts != MP_NOPTS_VALUE)) {
-            mp_ass_configure(renderer, vf->opts, &dim,
-                             vf->default_caps & VFCAP_EOSD_UNSCALED);
-            ass_set_aspect_ratio(renderer, scale, 1);
-            images.imgs = ass_render_frame(renderer, osd->ass_track,
-                                           (osd->pts + sub_delay) * 1000 + .5,
-                                           &images.changed);
-            if (!vf->priv->prev_visibility)
-                images.changed = 2;
-            vf->priv->prev_visibility = true;
-        } else
-            vf->priv->prev_visibility = false;
+        osd->normal_scale = 1;
+        osd->vsfilter_scale = vf->priv->scale_ratio;
+        osd->unscaled = vf->default_caps & VFCAP_EOSD_UNSCALED;
+        struct sub_bitmaps images;
+        sub_get_bitmaps(osd, &images);
+        if (!vf->priv->prev_visibility)
+            images.changed = 2;
+        vf->priv->prev_visibility = true;
         return vo_control(video_out, VOCTRL_DRAW_EOSD, &images) == VO_TRUE;
     }
-#endif
     }
     return CONTROL_UNKNOWN;
 }

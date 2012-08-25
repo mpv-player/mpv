@@ -30,6 +30,7 @@
 #include "osdep/timer.h"
 
 #include "talloc.h"
+#include "options.h"
 #include "mplayer.h"
 #include "mp_msg.h"
 #include "libvo/video_out.h"
@@ -170,6 +171,7 @@ static int osd_update_ext(struct osd_state *osd, int dxs, int dys,
                           int left_border, int top_border, int right_border,
                           int bottom_border, int orig_w, int orig_h)
 {
+    struct MPOpts *opts = osd->opts;
     mp_osd_obj_t* obj=vo_osd_list;
     int chg=0;
 
@@ -190,7 +192,7 @@ static int osd_update_ext(struct osd_state *osd, int dxs, int dys,
 	    vo_update_text_progbar(osd, obj);
 	    break;
 	case OSDTYPE_SPU:
-	    if(sub_visibility && vo_spudec && spudec_visible(vo_spudec)){
+	    if (opts->sub_visibility && vo_spudec && spudec_visible(vo_spudec)){
 	        vo_update_spudec_sub(osd, obj);
 		obj->flags|=OSDFLAG_VISIBLE|OSDFLAG_CHANGED;
 	    }

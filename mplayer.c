@@ -605,8 +605,13 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
     if (mask & INITIALIZED_SUB) {
         mpctx->initialized_flags &= ~INITIALIZED_SUB;
+        struct track *track = mpctx->current_track[STREAM_SUB];
+        // One of these was active; they can't be both active.
+        assert(!(mpctx->sh_sub && (track && track->sh_sub)));
         if (mpctx->sh_sub)
             sub_switchoff(mpctx->sh_sub, mpctx->osd);
+        if (track && track->sh_sub)
+            sub_switchoff(track->sh_sub, mpctx->osd);
         cleanup_demux_stream(mpctx, STREAM_SUB);
         reset_subtitles(mpctx);
     }
@@ -623,10 +628,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         for (int i = 0; i < mpctx->num_tracks; i++) {
             struct track *track = mpctx->tracks[i];
             sub_free(track->subdata);
-#ifdef CONFIG_ASS
-            if (track->ass_track)
-                ass_free_track(track->ass_track);
-#endif
+            talloc_free(track->sh_sub);
             talloc_free(track);
         }
         mpctx->num_tracks = 0;
@@ -1040,16 +1042,16 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps,
 {
     struct MPOpts *opts = &mpctx->opts;
     sub_data *subd = NULL;
-    struct ass_track *asst = NULL;
-    bool is_native_ass = false;
+    struct sh_sub *sh = NULL;
 
     if (filename == NULL)
         return;
 
-#ifdef CONFIG_ASS
     if (opts->ass_enabled) {
-        asst = mp_ass_read_stream(mpctx->ass_library, filename, sub_cp);
-        is_native_ass = asst;
+#ifdef CONFIG_ASS
+        struct ass_track *asst = mp_ass_read_stream(mpctx->ass_library,
+                                                    filename, sub_cp);
+        bool is_native_ass = asst;
         if (!asst) {
             subd = sub_read_file(filename, fps, &mpctx->opts);
             if (subd) {
@@ -1058,12 +1060,14 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps,
                 subd = NULL;
             }
         }
-    } else
+        if (asst)
+            sh = sd_ass_create_from_track(asst, is_native_ass, opts);
 #endif
-    subd = sub_read_file(filename, fps, &mpctx->opts);
+    } else
+        subd = sub_read_file(filename, fps, &mpctx->opts);
 
 
-    if (!asst && !subd) {
+    if (!sh && !subd) {
         mp_tmsg(MSGT_CPLAYER, noerr ? MSGL_WARN : MSGL_ERR,
                 "Cannot load subtitles: %s\n", filename);
         return;
@@ -1072,11 +1076,11 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps,
     struct track *track = talloc_ptrtype(NULL, track);
     *track = (struct track) {
         .type = STREAM_SUB,
+        .title = talloc_strdup(track, filename),
         .user_tid = find_new_tid(mpctx, STREAM_SUB),
         .demuxer_id = -1,
         .is_external = true,
-        .ass_track = asst,
-        .native_ass_track = is_native_ass,
+        .sh_sub = sh,
         .subdata = subd,
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
@@ -1743,10 +1747,6 @@ double playing_audio_pts(struct MPContext *mpctx)
 
 static void reset_subtitles(struct MPContext *mpctx)
 {
-    struct sh_sub *sh_sub = mpctx->sh_sub;
-
-    if (sh_sub)
-        sub_reset(sh_sub, mpctx->osd);
     sub_clear_text(&mpctx->subs, MP_NOPTS_VALUE);
     if (vo_sub)
         set_osd_subtitle(mpctx, NULL);
@@ -1941,7 +1941,6 @@ static void reinit_subs(struct MPContext *mpctx)
 
     init_demux_stream(mpctx, STREAM_SUB);
 
-    mpctx->osd->ass_track = NULL;
     vobsub_id = -1;
 
     if (!track)
@@ -1967,20 +1966,17 @@ static void reinit_subs(struct MPContext *mpctx)
 
     if (track->vobsub_id_plus_one) {
         vobsub_id = track->vobsub_id_plus_one - 1;
-    } else if (track->subdata || track->ass_track) {
+    } else if (track->subdata || track->sh_sub) {
 #ifdef CONFIG_ASS
-        if (opts->ass_enabled && track->ass_track) {
-            mpctx->osd->ass_track = track->ass_track;
-            mpctx->osd->vsfilter_aspect = track->native_ass_track;
-        }
+        if (opts->ass_enabled && track->sh_sub)
+            sub_init(track->sh_sub, mpctx->osd);
 #endif
         vo_osd_changed(OSDTYPE_SUBTITLE);
     } else if (track->stream) {
         if (mpctx->sh_sub->type == 'v')
             init_vo_spudec(mpctx);
-        else {
+        else
             sub_init(mpctx->sh_sub, mpctx->osd);
-        }
     }
 }
 
@@ -2365,11 +2361,9 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     sh_video->vfilter = append_filters(sh_video->vfilter, opts->vf_settings);
 
-#ifdef CONFIG_ASS
     if (opts->ass_enabled)
         sh_video->vfilter->control(sh_video->vfilter, VFCTRL_INIT_EOSD,
                                    mpctx->ass_library);
-#endif
 
     init_best_video_codec(sh_video, video_codec_list, video_fm_list);
 
@@ -2616,7 +2610,10 @@ static int redraw_osd(struct MPContext *mpctx)
         return -1;
     if (vo_redraw_frame(mpctx->video_out) < 0)
         return -1;
-    mpctx->osd->pts = mpctx->video_pts - mpctx->osd->sub_offset;
+    mpctx->osd->sub_pts = mpctx->video_pts;
+    if (mpctx->osd->sub_pts != MP_NOPTS_VALUE)
+        mpctx->osd->sub_pts += sub_delay - mpctx->osd->sub_offset;
+
     if (!(sh_video->output_flags & VFCAP_EOSD_FILTER))
         vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
     vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
@@ -3215,7 +3212,9 @@ static void run_playloop(struct MPContext *mpctx)
         update_subtitles(mpctx, sh_video->pts);
         update_osd_msg(mpctx);
         struct vf_instance *vf = sh_video->vfilter;
-        mpctx->osd->pts = mpctx->video_pts - mpctx->osd->sub_offset;
+        mpctx->osd->sub_pts = mpctx->video_pts;
+        if (mpctx->osd->sub_pts != MP_NOPTS_VALUE)
+            mpctx->osd->sub_pts += sub_delay - mpctx->osd->sub_offset;
         vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
         vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
         vo_osd_reset_changed();
@@ -4048,7 +4047,6 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
 
     vo_sub = NULL;
 #ifdef CONFIG_ASS
-    mpctx->osd->ass_track = NULL;
     if (mpctx->osd->ass_renderer)
         ass_renderer_done(mpctx->osd->ass_renderer);
     mpctx->osd->ass_renderer = NULL;

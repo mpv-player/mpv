@@ -107,8 +107,8 @@ struct track {
     //       fields. The data is stored in stream->sub this case.
 
     // External text subtitle using libass subtitle renderer.
-    struct ass_track *ass_track;
-    bool native_ass_track;
+    // The sh_sub is a dummy and doesn't belong to a demuxer.
+    struct sh_sub *sh_sub;
 
     // External text subtitle using non-libass subtitle renderer.
     struct sub_data *subdata;

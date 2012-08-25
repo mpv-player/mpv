@@ -23,6 +23,7 @@
 #include <stdbool.h>
 
 #include "sub/ass_mp.h"
+#include "sub/dec_sub.h"
 
 // Pool of surfaces
 struct eosd_surface {

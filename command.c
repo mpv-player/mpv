@@ -1487,6 +1487,8 @@ static int mp_property_sub_alignment(m_option_t *prop, int action,
 static int mp_property_sub_visibility(m_option_t *prop, int action,
                                       void *arg, MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
+
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -1500,7 +1502,7 @@ static int mp_property_sub_visibility(m_option_t *prop, int action,
         if (vo_spudec)
             vo_osd_changed(OSDTYPE_SPU);
     default:
-        return m_property_flag(prop, action, arg, &sub_visibility);
+        return m_property_flag(prop, action, arg, &opts->sub_visibility);
     }
 }
 
@@ -1579,34 +1581,28 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
         if (!arg)
             return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(float *) arg);
-#ifdef CONFIG_ASS
         if (opts->ass_enabled)
             opts->ass_font_scale = *(float *) arg;
-#endif
         text_font_scale_factor = *(float *) arg;
         vo_osd_resized();
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-#ifdef CONFIG_ASS
         if (opts->ass_enabled) {
             opts->ass_font_scale += (arg ? *(float *) arg : 0.1) *
                               (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
             M_PROPERTY_CLAMP(prop, opts->ass_font_scale);
         }
-#endif
         text_font_scale_factor += (arg ? *(float *) arg : 0.1) *
                                   (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
         M_PROPERTY_CLAMP(prop, text_font_scale_factor);
         vo_osd_resized();
         return M_PROPERTY_OK;
     default:
-#ifdef CONFIG_ASS
         if (opts->ass_enabled)
             return m_property_float_ro(prop, action, arg, opts->ass_font_scale);
         else
-#endif
-        return m_property_float_ro(prop, action, arg, text_font_scale_factor);
+            return m_property_float_ro(prop, action, arg, text_font_scale_factor);
     }
 }
 
@@ -2371,7 +2367,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             struct track *track = mpctx->current_track[STREAM_SUB];
             if (track && track->subdata)
                 step_sub(track->subdata, mpctx->video_pts, movement);
-#ifdef CONFIG_ASS
+#if 0
+            // currently not implemented with libass
             if (mpctx->osd->ass_track)
                 sub_delay +=
                     ass_step_sub(mpctx->osd->ass_track,
@@ -2677,7 +2674,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_GET_SUB_VISIBILITY:
         if (sh_video) {
             mp_msg(MSGT_GLOBAL, MSGL_INFO,
-                   "ANS_SUB_VISIBILITY=%d\n", sub_visibility);
+                   "ANS_SUB_VISIBILITY=%d\n", opts->sub_visibility);
         }
         break;
 

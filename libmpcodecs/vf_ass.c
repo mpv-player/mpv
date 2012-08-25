@@ -352,19 +352,21 @@ static int render_frame(struct vf_instance *vf, mp_image_t *mpi,
 
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
-    struct osd_state *osd = vf->priv->osd;
+    struct vf_priv_s *priv = vf->priv;
+    struct MPOpts *opts = vf->opts;
+    struct osd_state *osd = priv->osd;
     ASS_Image *images = 0;
-    ASS_Renderer *renderer = osd->ass_renderer;
-    bool vs = osd->vsfilter_aspect && vf->opts->ass_vsfilter_aspect_compat;
-    if (sub_visibility && osd->ass_track && (pts != MP_NOPTS_VALUE)) {
-        struct mp_eosd_res dim = { .w = vf->priv->outw, .h = vf->priv->outh,
-                                   .mt = vf->opts->ass_top_margin,
-                                   .mb = vf->opts->ass_bottom_margin };
-        mp_ass_configure(renderer, vf->opts, &dim, 0);
-        ass_set_aspect_ratio(renderer,
-                             vs ? 1. : vf->priv->aspect_correction, 1);
-        images = ass_render_frame(renderer, osd->ass_track,
-                        (pts - osd->sub_offset + sub_delay) * 1000 + .5, NULL);
+    if (pts != MP_NOPTS_VALUE) {
+        osd->dim = (struct mp_eosd_res){ .w = vf->priv->outw,
+                                         .h = vf->priv->outh,
+                                         .mt = opts->ass_top_margin,
+                                         .mb = opts->ass_bottom_margin };
+        osd->normal_scale = vf->priv->aspect_correction;
+        osd->vsfilter_scale = 1;
+        osd->sub_pts = pts - osd->sub_offset;
+        struct sub_bitmaps b;
+        sub_get_bitmaps(osd, &b);
+        images = b.imgs;
     }
 
     prepare_image(vf, mpi);

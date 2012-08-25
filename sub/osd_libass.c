@@ -331,9 +331,11 @@ void vo_update_text_progbar(struct osd_state *osd, mp_osd_obj_t* obj)
 
 void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj)
 {
+    struct MPOpts *opts = osd->opts;
+
     obj->flags |= OSDFLAG_CHANGED | OSDFLAG_VISIBLE;
 
-    if (!vo_sub || !sub_visibility) {
+    if (!vo_sub || !opts->sub_visibility) {
         obj->flags &= ~OSDFLAG_VISIBLE;
         return;
     }
