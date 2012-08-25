@@ -3078,8 +3078,12 @@ static void run_playloop(struct MPContext *mpctx)
                 mp_tmsg(MSGT_CPLAYER, MSGL_FATAL,
                         "\nFATAL: Could not initialize video filters (-vf) "
                         "or video output (-vo).\n");
-                mpctx->stop_play = PT_NEXT_ENTRY;
-                return;
+                uninit_player(mpctx, INITIALIZED_VCODEC | INITIALIZED_VO);
+                cleanup_demux_stream(mpctx, STREAM_VIDEO);
+                mpctx->current_track[STREAM_VIDEO] = NULL;
+                if (!mpctx->current_track[STREAM_AUDIO])
+                    mpctx->stop_play = PT_NEXT_ENTRY;
+                break;
             }
             video_left = frame_time >= 0;
             if (video_left && !mpctx->restart_playback) {
