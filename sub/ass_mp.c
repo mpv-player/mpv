@@ -225,13 +225,14 @@ ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
     return track;
 }
 
-void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts, int w, int h,
-                      bool unscaled)
+void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
+                      struct mp_eosd_res *dim, bool unscaled)
 {
     int hinting;
-    ass_set_frame_size(priv, w, h);
-    ass_set_margins(priv, opts->ass_top_margin, opts->ass_bottom_margin, 0, 0);
-    mp_ass_reload_options(priv, opts);
+    ass_set_frame_size(priv, dim->w, dim->h);
+    ass_set_margins(priv, dim->mt, dim->mb, dim->ml, dim->mr);
+    ass_set_use_margins(priv, opts->ass_use_margins);
+    ass_set_font_scale(priv, opts->ass_font_scale);
     if (!unscaled && (opts->ass_hinting & 4))
         hinting = 0;
     else
@@ -293,15 +294,4 @@ ASS_Library *mp_ass_init(struct MPOpts *opts)
     ass_set_extract_fonts(priv, opts->use_embedded_fonts);
     free(path);
     return priv;
-}
-
-void mp_ass_reload_options(ASS_Renderer *priv, struct MPOpts *opts)
-{
-    /* This could be needed for vf_ass case if the margins were actually
-     * runtime configurable, but would be wrong with EOSD:
-     * ass_set_margins(priv, opts->ass_top_margin, opts->ass_bottom_margin,
-     *                 0, 0);
-     */
-    ass_set_use_margins(priv, opts->ass_use_margins);
-    ass_set_font_scale(priv, opts->ass_font_scale);
 }

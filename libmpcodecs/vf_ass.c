@@ -62,9 +62,7 @@ static const struct vf_priv_s {
     int auto_insert;
 
     struct osd_state *osd;
-    ASS_Renderer *renderer;
-
-    double realaspect;
+    double aspect_correction;
 
     unsigned char *planes[3];
     struct line_limits {
@@ -93,11 +91,7 @@ static int config(struct vf_instance *vf,
     vf->priv->planes[2]   = malloc(vf->priv->outw * vf->priv->outh);
     vf->priv->line_limits = malloc((vf->priv->outh + 1) / 2 * sizeof(*vf->priv->line_limits));
 
-    if (vf->priv->renderer) {
-        mp_ass_configure(vf->priv->renderer, opts,
-                         vf->priv->outw, vf->priv->outh, 0);
-        vf->priv->realaspect = (double)width / height * d_height / d_width;
-    }
+    vf->priv->aspect_correction = (double)width / height * d_height / d_width;
 
     return vf_next_config(vf, vf->priv->outw, vf->priv->outh, d_width,
 			  d_height, flags, outfmt);
@@ -360,22 +354,21 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     struct osd_state *osd = vf->priv->osd;
     ASS_Image *images = 0;
-    double scale = osd->vsfilter_aspect
-            && vf->opts->ass_vsfilter_aspect_compat
-            ? 1 : vf->priv->realaspect;
-    if (sub_visibility && vf->priv->renderer && osd->ass_track
-            && (pts != MP_NOPTS_VALUE)) {
-        ass_set_aspect_ratio(vf->priv->renderer, scale, 1);
-        if (osd->ass_force_reload)
-            mp_ass_reload_options(vf->priv->renderer, vf->opts);
-        osd->ass_force_reload = false;
-        images = ass_render_frame(vf->priv->renderer, osd->ass_track,
+    ASS_Renderer *renderer = osd->ass_renderer;
+    bool vs = osd->vsfilter_aspect && vf->opts->ass_vsfilter_aspect_compat;
+    if (sub_visibility && osd->ass_track && (pts != MP_NOPTS_VALUE)) {
+        struct mp_eosd_res dim = { .w = vf->priv->outw, .h = vf->priv->outh,
+                                   .mt = vf->opts->ass_top_margin,
+                                   .mb = vf->opts->ass_bottom_margin };
+        mp_ass_configure(renderer, vf->opts, &dim, 0);
+        ass_set_aspect_ratio(renderer,
+                             vs ? 1. : vf->priv->aspect_correction, 1);
+        images = ass_render_frame(renderer, osd->ass_track,
                         (pts - osd->sub_offset + sub_delay) * 1000 + .5, NULL);
     }
 
     prepare_image(vf, mpi);
-    if (images)
-        render_frame(vf, mpi, images);
+    render_frame(vf, mpi, images);
 
     return vf_next_put_image(vf, vf->dmpi, pts);
 }
@@ -398,23 +391,15 @@ static int control(vf_instance_t *vf, int request, void *data)
         vf->priv->osd = data;
         break;
     case VFCTRL_INIT_EOSD:
-        vf->priv->renderer = ass_renderer_init((ASS_Library *)data);
-        if (!vf->priv->renderer)
-            return CONTROL_FALSE;
-        mp_ass_configure_fonts(vf->priv->renderer);
         return CONTROL_TRUE;
     case VFCTRL_DRAW_EOSD:
-        if (vf->priv->renderer)
-            return CONTROL_TRUE;
-        break;
+        return CONTROL_TRUE;
     }
     return vf_next_control(vf, request, data);
 }
 
 static void uninit(struct vf_instance *vf)
 {
-    if (vf->priv->renderer)
-        ass_renderer_done(vf->priv->renderer);
     free(vf->priv->planes[1]);
     free(vf->priv->planes[2]);
     free(vf->priv->line_limits);

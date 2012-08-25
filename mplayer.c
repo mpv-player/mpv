@@ -1971,13 +1971,10 @@ static void reinit_subs(struct MPContext *mpctx)
 #ifdef CONFIG_ASS
         if (opts->ass_enabled && track->ass_track) {
             mpctx->osd->ass_track = track->ass_track;
-            mpctx->osd->ass_track_changed = true;
             mpctx->osd->vsfilter_aspect = track->native_ass_track;
-        } else
-#endif
-        {
-            vo_osd_changed(OSDTYPE_SUBTITLE);
         }
+#endif
+        vo_osd_changed(OSDTYPE_SUBTITLE);
     } else if (track->stream) {
         if (mpctx->sh_sub->type == 'v')
             init_vo_spudec(mpctx);
@@ -3679,7 +3676,7 @@ static void print_timeline(struct MPContext *mpctx)
 static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
 {
 #ifdef CONFIG_ASS
-    if (mpctx->opts.ass_enabled && mpctx->ass_library) {
+    if (mpctx->opts.ass_enabled) {
         for (int j = 0; j < mpctx->num_sources; j++) {
             struct demuxer *d = mpctx->sources[j];
             for (int i = 0; i < d->num_attachments; i++) {
@@ -3690,6 +3687,13 @@ static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
             }
         }
     }
+
+    // libass seems to misbehave if fonts are changed while a renderer
+    // exists, so we (re)create the renderer after fonts are set.
+    assert(!mpctx->osd->ass_renderer);
+    mpctx->osd->ass_renderer = ass_renderer_init(mpctx->osd->ass_library);
+    if (mpctx->osd->ass_renderer)
+        mp_ass_configure_fonts(mpctx->osd->ass_renderer);
 #endif
 }
 
@@ -4045,8 +4049,10 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     vo_sub = NULL;
 #ifdef CONFIG_ASS
     mpctx->osd->ass_track = NULL;
-    if (mpctx->ass_library)
-        ass_clear_fonts(mpctx->ass_library);
+    if (mpctx->osd->ass_renderer)
+        ass_renderer_done(mpctx->osd->ass_renderer);
+    mpctx->osd->ass_renderer = NULL;
+    ass_clear_fonts(mpctx->ass_library);
 #endif
 }
 

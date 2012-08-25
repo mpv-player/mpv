@@ -21,6 +21,9 @@
 
 #include <stdbool.h>
 
+#include "subreader.h"
+#include "dec_sub.h"
+
 typedef struct mp_osd_bbox_s {
     int x1,y1,x2,y2;
 } mp_osd_bbox_t;
@@ -58,14 +61,12 @@ typedef struct mp_osd_obj_s {
 
 struct osd_state {
     struct ass_library *ass_library;
-    // flag to signal reinitialization due to ass-related option changes
-    bool ass_force_reload;
+    struct ass_renderer *ass_renderer;
     int w, h;
     char *osd_text;
     struct ass_track *ass_track;
     double pts;
     double sub_offset;
-    bool ass_track_changed;
     bool vsfilter_aspect;
 
     struct ass_renderer *osd_render;
@@ -73,8 +74,6 @@ struct osd_state {
 
     struct MPOpts *opts;
 };
-
-#include "subreader.h"
 
 extern subtitle* vo_sub;
 
