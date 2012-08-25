@@ -3585,6 +3585,8 @@ $def_caca
 $def_corevideo
 $def_cocoa
 $def_direct3d
+$def_dvb
+$def_dvbin
 $def_gif
 $def_gif_4
 $def_gif_tvt_hack
