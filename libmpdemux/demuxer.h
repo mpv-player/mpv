@@ -249,7 +249,8 @@ typedef struct demuxer {
     struct sh_stream **streams;
     int num_streams;
 
-    int num_titles;
+    int num_editions;
+    int edition;
 
     struct demux_chapter *chapters;
     int num_chapters;

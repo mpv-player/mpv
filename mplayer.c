@@ -516,6 +516,11 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
             }
         }
     }
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (demuxer->num_editions > 1)
+        mp_msg(MSGT_CPLAYER, MSGL_INFO,
+               "Playing edition %d of %d (--edition=%d).\n",
+               demuxer->edition + 1, demuxer->num_editions, demuxer->edition);
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int n = 0; n < mpctx->num_tracks; n++)
             if (mpctx->tracks[n]->type == t)
@@ -4022,6 +4027,10 @@ static void play_files(struct MPContext *mpctx)
         if (mpctx->stop_play == PT_NEXT_ENTRY) {
             new_entry = playlist_get_next(mpctx->playlist, +1);
         } else if (mpctx->stop_play == PT_CURRENT_ENTRY) {
+            new_entry = mpctx->playlist->current;
+        } else if (mpctx->stop_play == PT_RESTART) {
+            // The same as PT_CURRENT_ENTRY, unless we decide that the current
+            // playlist entry can be removed during playback.
             new_entry = mpctx->playlist->current;
         } else { // PT_STOP
             playlist_clear(mpctx->playlist);

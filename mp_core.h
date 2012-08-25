@@ -55,6 +55,7 @@ enum stop_play_reason {
     PT_NEXT_ENTRY,      // prepare to play next entry in playlist
     PT_CURRENT_ENTRY,   // prepare to play mpctx->playlist->current
     PT_STOP,            // stop playback, clear playlist
+    PT_RESTART,         // restart previous file
     PT_QUIT,            // stop playback, quit player
 };
 

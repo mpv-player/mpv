@@ -434,6 +434,51 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_OK;
 }
 
+static int mp_property_edition(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (!demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+    if (demuxer->num_editions <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int edition = demuxer->edition;
+
+    switch (action) {
+    case M_PROPERTY_GET:
+    case M_PROPERTY_PRINT:
+        return m_property_int_ro(prop, action, arg, edition);
+    case M_PROPERTY_SET:
+        if (!arg)
+            return M_PROPERTY_ERROR;
+        M_PROPERTY_CLAMP(prop, *(int *)arg);
+        edition = *(int *)arg;
+        break;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN: {
+        edition += arg ? *(int *)arg : (action == M_PROPERTY_STEP_UP ? 1 : -1);
+        if (edition < 0)
+            edition = demuxer->num_editions - 1;
+        if (edition >= demuxer->num_editions)
+            edition = 0;
+        break;
+    }
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+
+    if (edition != demuxer->edition) {
+        opts->edition_id = edition;
+        mpctx->stop_play = PT_RESTART;
+        set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration,
+                     "Playing edition %d of %d.", edition + 1,
+                     demuxer->num_editions);
+    }
+    return M_PROPERTY_OK;
+}
+
 /// Number of titles in file
 static int mp_property_titles(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
@@ -441,10 +486,9 @@ static int mp_property_titles(m_option_t *prop, int action, void *arg,
     struct demuxer *demuxer = mpctx->master_demuxer;
     if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
-    if (demuxer->num_titles == 0)
-        stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_TITLES,
-                       &demuxer->num_titles);
-    return m_property_int_ro(prop, action, arg, demuxer->num_titles);
+    int num_titles = 0;
+    stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_TITLES, &num_titles);
+    return m_property_int_ro(prop, action, arg, num_titles);
 }
 
 /// Number of chapters in file
@@ -455,6 +499,17 @@ static int mp_property_chapters(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_UNAVAILABLE;
     int count = get_chapter_count(mpctx);
     return m_property_int_ro(prop, action, arg, count);
+}
+
+static int mp_property_editions(m_option_t *prop, int action, void *arg,
+                                MPContext *mpctx)
+{
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (!demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+    if (demuxer->num_editions <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(prop, action, arg, demuxer->num_editions);
 }
 
 /// Current dvd angle (RW)
@@ -1638,10 +1693,13 @@ static const m_option_t mp_properties[] = {
       M_OPT_MIN, 0, 0, NULL },
     { "chapter", mp_property_chapter, CONF_TYPE_INT,
       M_OPT_MIN, 0, 0, NULL },
+    { "edition", mp_property_edition, CONF_TYPE_INT,
+      M_OPT_MIN, -1, 0, NULL },
     { "titles", mp_property_titles, CONF_TYPE_INT,
       0, 0, 0, NULL },
     { "chapters", mp_property_chapters, CONF_TYPE_INT,
       0, 0, 0, NULL },
+    { "editions", mp_property_editions, CONF_TYPE_INT },
     { "angle", mp_property_angle, CONF_TYPE_INT,
       CONF_RANGE, -2, 10, NULL },
     { "metadata", mp_property_metadata, CONF_TYPE_STRING_LIST,
@@ -2109,6 +2167,12 @@ static void show_tracks_on_osd(MPContext *mpctx)
 
         res = talloc_asprintf_append(res, "\n");
     }
+
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (demuxer && demuxer->num_editions > 1)
+        res = talloc_asprintf_append(res, "\nEdition: %d of %d\n",
+                                     demuxer->edition + 1,
+                                     demuxer->num_editions);
 
     set_osd_msg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration, "%s", res);
     talloc_free(res);

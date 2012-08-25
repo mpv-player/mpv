@@ -856,6 +856,9 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                "[mkv] Found %d editions, will play #%d (first is 0).\n",
                num_editions, selected_edition);
 
+    demuxer->num_editions = num_editions;
+    demuxer->edition = selected_edition;
+
     talloc_free(parse_ctx.talloc_ctx);
     mp_msg(MSGT_DEMUX, MSGL_V,
            "[mkv] \\---- [ parsing chapters ] ---------\n");
