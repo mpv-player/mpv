@@ -1340,22 +1340,6 @@ void rm_osd_msg(struct MPContext *mpctx, int id)
 }
 
 /**
- *  \brief Remove all messages from the OSD stack
- *
- */
-
-static void clear_osd_msgs(struct MPContext *mpctx)
-{
-    mp_osd_msg_t *msg = mpctx->osd_msg_stack, *prev = NULL;
-    while (msg) {
-        prev = msg->prev;
-        talloc_free(msg);
-        msg = prev;
-    }
-    mpctx->osd_msg_stack = NULL;
-}
-
-/**
  *  \brief Get the current message from the OSD stack.
  *
  *  This function decrements the message timer and destroys the old ones.
@@ -3876,9 +3860,6 @@ goto_enable_cache:
     // Disable the term OSD in verbose mode
     if (verbose)
         opts->term_osd = 0;
-
-    // Make sure old OSD does not stay around
-    clear_osd_msgs(mpctx);
 
     //================ SETUP STREAMS ==========================
 
