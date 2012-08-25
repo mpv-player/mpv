@@ -1007,7 +1007,7 @@ redo:
                     prog->aid = program->stream_index[i];
                 break;
             case AVMEDIA_TYPE_SUBTITLE:
-                if (prog->sid == -2 && priv->avfc->streams[program->stream_index[i]]->codec->codec_id == CODEC_ID_TEXT)
+                if (prog->sid == -2)
                     prog->sid = program->stream_index[i];
                 break;
             }
