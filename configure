@@ -429,6 +429,8 @@ _pkg_config=auto
 _windres=auto
 _cc=auto
 test "$CC" && _cc="$CC"
+_debug=
+_opt=-O2
 _cross_compile=no
 _prefix="/usr/local"
 ffmpeg=auto
@@ -603,9 +605,11 @@ for ac_option do
     ;;
   --enable-debug)
     _debug='-g'
+    _opt=
     ;;
   --enable-debug=*)
     _debug=$(echo $_echo_n '-g'$_echo_c; echo $ac_option | cut -d '=' -f 2)
+    _opt=
     ;;
   --disable-debug)
     _debug=
@@ -1143,16 +1147,16 @@ if test "$_profile" != "" || test "$_debug" != "" ; then
 fi
 if test -z "$CFLAGS" ; then
   if test "$cc_vendor" = "intel" ; then
-    CFLAGS="-O2 $_debug $_profile $_march $_mcpu $_pipe -fomit-frame-pointer"
+    CFLAGS="$_opt $_debug $_profile $_march $_mcpu $_pipe -fomit-frame-pointer"
     WARNFLAGS="-wd167 -wd556 -wd144"
   elif test "$cc_vendor" = "clang"; then
-    CFLAGS="-O2 $_debug $_profile $_march $_pipe"
+    CFLAGS="$_opt $_debug $_profile $_march $_pipe"
     WARNFLAGS="-Wall -Wno-switch-enum -Wno-logical-op-parentheses -Wpointer-arith -Wundef -Wno-pointer-sign -Wmissing-prototypes"
     ERRORFLAGS="-Werror=implicit-function-declaration"
   elif test "$cc_vendor" != "gnu" ; then
-    CFLAGS="-O2 $_debug $_profile $_march $_mcpu $_pipe"
+    CFLAGS="$_opt $_debug $_profile $_march $_mcpu $_pipe"
   else
-    CFLAGS="-O2 $_debug $_profile $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
+    CFLAGS="$_opt $_debug $_profile $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
     WARNFLAGS="-Wall -Wno-switch -Wno-parentheses -Wpointer-arith -Wredundant-decls"
     ERRORFLAGS="-Werror-implicit-function-declaration"
     extra_ldflags="$extra_ldflags -ffast-math"
