@@ -27,7 +27,7 @@
 #define INITIAL_FILL_USLEEP_COUNT 10
 #define FILL_USLEEP_TIME 50000
 #define PREFILL_SLEEP_TIME 200
-#define CONTROL_SLEEP_TIME 0
+#define CONTROL_SLEEP_TIME 1
 
 #include <stdio.h>
 #include <stdlib.h>
