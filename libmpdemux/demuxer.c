@@ -272,7 +272,7 @@ demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
         if (!(d->desc = get_demuxer_desc_from_type(type)))
             mp_msg(MSGT_DEMUXER, MSGL_ERR,
                    "BUG! Invalid demuxer type in new_demuxer(), "
-                   "big troubles ahead.");
+                   "big troubles ahead.\n");
     if (filename) // Filename hack for avs_check_file
         d->filename = strdup(filename);
     stream_seek(stream, stream->start_pos);
