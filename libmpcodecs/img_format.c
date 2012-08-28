@@ -25,95 +25,10 @@
 
 const char *vo_format_name(int format)
 {
+    const char *name = mp_imgfmt_to_name(format);
+    if (name)
+        return name;
     static char unknown_format[20];
-    switch(format)
-    {
-	case IMGFMT_RGB1: return "RGB 1-bit";
-	case IMGFMT_RGB4: return "RGB 4-bit";
-	case IMGFMT_RG4B: return "RGB 4-bit per byte";
-	case IMGFMT_RGB8: return "RGB 8-bit";
-	case IMGFMT_RGB12: return "RGB 12-bit";
-	case IMGFMT_RGB15: return "RGB 15-bit";
-	case IMGFMT_RGB16: return "RGB 16-bit";
-	case IMGFMT_RGB24: return "RGB 24-bit";
-//	case IMGFMT_RGB32: return "RGB 32-bit";
-	case IMGFMT_RGB48LE: return "RGB 48-bit LE";
-	case IMGFMT_RGB48BE: return "RGB 48-bit BE";
-	case IMGFMT_BGR1: return "BGR 1-bit";
-	case IMGFMT_BGR4: return "BGR 4-bit";
-	case IMGFMT_BG4B: return "BGR 4-bit per byte";
-	case IMGFMT_BGR8: return "BGR 8-bit";
-	case IMGFMT_BGR12: return "BGR 12-bit";
-	case IMGFMT_BGR15: return "BGR 15-bit";
-	case IMGFMT_BGR16: return "BGR 16-bit";
-	case IMGFMT_BGR24: return "BGR 24-bit";
-//	case IMGFMT_BGR32: return "BGR 32-bit";
-	case IMGFMT_ABGR: return "ABGR";
-	case IMGFMT_BGRA: return "BGRA";
-	case IMGFMT_ARGB: return "ARGB";
-	case IMGFMT_RGBA: return "RGBA";
-        case IMGFMT_GBRP: return "Planar GBR 24-bit";
-	case IMGFMT_YVU9: return "Planar YVU9";
-	case IMGFMT_IF09: return "Planar IF09";
-	case IMGFMT_YV12: return "Planar YV12";
-	case IMGFMT_I420: return "Planar I420";
-	case IMGFMT_IYUV: return "Planar IYUV";
-	case IMGFMT_CLPL: return "Planar CLPL";
-	case IMGFMT_Y800: return "Planar Y800";
-	case IMGFMT_Y8: return "Planar Y8";
-	case IMGFMT_420P16_LE: return "Planar 420P 16-bit little-endian";
-	case IMGFMT_420P16_BE: return "Planar 420P 16-bit big-endian";
-	case IMGFMT_420P10_LE: return "Planar 420P 10-bit little-endian";
-	case IMGFMT_420P10_BE: return "Planar 420P 10-bit big-endian";
-	case IMGFMT_420P9_LE: return "Planar 420P 9-bit little-endian";
-	case IMGFMT_420P9_BE: return "Planar 420P 9-bit big-endian";
-	case IMGFMT_422P16_LE: return "Planar 422P 16-bit little-endian";
-	case IMGFMT_422P16_BE: return "Planar 422P 16-bit big-endian";
-	case IMGFMT_422P10_LE: return "Planar 422P 10-bit little-endian";
-	case IMGFMT_422P10_BE: return "Planar 422P 10-bit big-endian";
-        case IMGFMT_422P9_LE:  return "Planar 422P 9-bit little-endian";
-        case IMGFMT_422P9_BE:  return "Planar 422P 9-bit big-endian";
-	case IMGFMT_444P16_LE: return "Planar 444P 16-bit little-endian";
-	case IMGFMT_444P16_BE: return "Planar 444P 16-bit big-endian";
-	case IMGFMT_444P10_LE: return "Planar 444P 10-bit little-endian";
-	case IMGFMT_444P10_BE: return "Planar 444P 10-bit big-endian";
-	case IMGFMT_444P9_LE: return "Planar 444P 9-bit little-endian";
-	case IMGFMT_444P9_BE: return "Planar 444P 9-bit big-endian";
-	case IMGFMT_420A: return "Planar 420P with alpha";
-	case IMGFMT_444P: return "Planar 444P";
-	case IMGFMT_422P: return "Planar 422P";
-	case IMGFMT_411P: return "Planar 411P";
-	case IMGFMT_NV12: return "Planar NV12";
-	case IMGFMT_NV21: return "Planar NV21";
-        case IMGFMT_HM12: return "Planar NV12 Macroblock";
-	case IMGFMT_IUYV: return "Packed IUYV";
-	case IMGFMT_IY41: return "Packed IY41";
-	case IMGFMT_IYU1: return "Packed IYU1";
-	case IMGFMT_IYU2: return "Packed IYU2";
-	case IMGFMT_UYVY: return "Packed UYVY";
-	case IMGFMT_UYNV: return "Packed UYNV";
-	case IMGFMT_cyuv: return "Packed CYUV";
-	case IMGFMT_Y422: return "Packed Y422";
-	case IMGFMT_YUY2: return "Packed YUY2";
-	case IMGFMT_YUNV: return "Packed YUNV";
-	case IMGFMT_YVYU: return "Packed YVYU";
-	case IMGFMT_Y41P: return "Packed Y41P";
-	case IMGFMT_Y211: return "Packed Y211";
-	case IMGFMT_Y41T: return "Packed Y41T";
-	case IMGFMT_Y42T: return "Packed Y42T";
-	case IMGFMT_V422: return "Packed V422";
-	case IMGFMT_V655: return "Packed V655";
-	case IMGFMT_CLJR: return "Packed CLJR";
-	case IMGFMT_YUVP: return "Packed YUVP";
-	case IMGFMT_UYVP: return "Packed UYVP";
-	case IMGFMT_MPEGPES: return "Mpeg PES";
-	case IMGFMT_VDPAU_MPEG1: return "MPEG1 VDPAU acceleration";
-	case IMGFMT_VDPAU_MPEG2: return "MPEG2 VDPAU acceleration";
-	case IMGFMT_VDPAU_H264: return "H.264 VDPAU acceleration";
-        case IMGFMT_VDPAU_MPEG4: return "MPEG-4 Part 2 VDPAU acceleration";
-	case IMGFMT_VDPAU_WMV3: return "WMV3 VDPAU acceleration";
-	case IMGFMT_VDPAU_VC1: return "VC1 VDPAU acceleration";
-    }
     snprintf(unknown_format, 20, "Unknown 0x%04x", format);
     return unknown_format;
 }
@@ -279,17 +194,30 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
     {"gbrp", IMGFMT_GBRP},
     {"mjpeg", IMGFMT_MJPEG},
     {"mjpg", IMGFMT_MJPEG},
-    { NULL, 0 }
+    {"mpes", IMGFMT_MPEGPES},
+    {"vdpau_h264", IMGFMT_VDPAU_H264},
+    {"vdpau_mpeg1", IMGFMT_VDPAU_MPEG1},
+    {"vdpau_mpeg2", IMGFMT_VDPAU_MPEG2},
+    {"vdpau_mpeg4", IMGFMT_VDPAU_MPEG4},
+    {"vdpau_wmv3", IMGFMT_VDPAU_WMV3},
+    {"vdpau_vc1", IMGFMT_VDPAU_VC1},
+    {0}
 };
 
-unsigned int mp_imgfmt_from_name(const char *name)
+unsigned int mp_imgfmt_from_name(bstr name, bool allow_hwaccel)
 {
-    struct mp_imgfmt_entry *p = mp_imgfmt_list;
-    if (!name)
-        return 0;
-    for(; p->name; ++p) {
-        if(!strcmp(name, p->name))
+    if (bstr_startswith0(name, "0x")) {
+        bstr rest;
+        unsigned int fmt = bstrtoll(name, &rest, 16);
+        if (rest.len == 0)
+            return fmt;
+    }
+    for(struct mp_imgfmt_entry *p = mp_imgfmt_list; p->name; ++p) {
+        if(!bstrcasecmp0(name, p->name)) {
+            if (!allow_hwaccel && IMGFMT_IS_HWACCEL(p->fmt))
+                return 0;
             return p->fmt;
+        }
     }
     return 0;
 }

@@ -21,6 +21,7 @@
 
 #include <sys/types.h>
 #include "config.h"
+#include "bstr.h"
 
 /* RGB/BGR Formats */
 
@@ -235,7 +236,7 @@ struct mp_imgfmt_entry {
 
 extern struct mp_imgfmt_entry mp_imgfmt_list[];
 
-unsigned int mp_imgfmt_from_name(const char *name);
+unsigned int mp_imgfmt_from_name(bstr name, bool allow_hwaccel);
 const char *mp_imgfmt_to_name(unsigned int fmt);
 
 #endif /* MPLAYER_IMG_FORMAT_H */

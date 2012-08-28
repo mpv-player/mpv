@@ -918,35 +918,23 @@ const m_option_type_t m_option_type_subconfig_struct = {
 static int parse_imgfmt(const m_option_t *opt, struct bstr name,
                         struct bstr param, void *dst)
 {
-    uint32_t fmt = 0;
-    int i;
-
     if (param.len == 0)
         return M_OPT_MISSING_PARAM;
 
     if (!bstrcmp0(param, "help")) {
         mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Available formats:");
-        for (i = 0; mp_imgfmt_list[i].name; i++)
+        for (int i = 0; mp_imgfmt_list[i].name; i++)
             mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %s", mp_imgfmt_list[i].name);
         mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
         return M_OPT_EXIT - 1;
     }
 
-    if (bstr_startswith0(param, "0x"))
-        fmt = bstrtoll(param, NULL, 16);
-    else {
-        for (i = 0; mp_imgfmt_list[i].name; i++) {
-            if (!bstrcasecmp0(param, mp_imgfmt_list[i].name)) {
-                fmt = mp_imgfmt_list[i].fmt;
-                break;
-            }
-        }
-        if (!mp_imgfmt_list[i].name) {
-            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                   "Option %.*s: unknown format name: '%.*s'\n",
-                   BSTR_P(name), BSTR_P(param));
-            return M_OPT_INVALID;
-        }
+    unsigned int fmt = mp_imgfmt_from_name(param, false);
+    if (!fmt) {
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+               "Option %.*s: unknown format name: '%.*s'\n",
+               BSTR_P(name), BSTR_P(param));
+        return M_OPT_INVALID;
     }
 
     if (dst)

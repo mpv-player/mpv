@@ -141,78 +141,6 @@ static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int
     return 1;
 }
 
-static const struct {
-    const char *name;
-    const unsigned int num;
-} fmt_table[] = {
-    // note: due to parser deficiencies/simplicity, if one format
-    // name matches the beginning of another, the longer one _must_
-    // come first in this list.
-    {"YV12",  IMGFMT_YV12},
-    {"I420",  IMGFMT_I420},
-    {"IYUV",  IMGFMT_IYUV},
-    {"NV12",  IMGFMT_NV12},
-    {"NV21",  IMGFMT_NV21},
-    {"YVU9",  IMGFMT_YVU9},
-    {"IF09",  IMGFMT_IF09},
-    {"444P16LE", IMGFMT_444P16_LE},
-    {"444P16BE", IMGFMT_444P16_BE},
-    {"422P16LE", IMGFMT_422P16_LE},
-    {"422P16BE", IMGFMT_422P16_BE},
-    {"420P16LE", IMGFMT_420P16_LE},
-    {"420P16BE", IMGFMT_420P16_BE},
-    {"444P16", IMGFMT_444P16},
-    {"444P10", IMGFMT_444P10},
-    {"444P9", IMGFMT_444P9},
-    {"422P16", IMGFMT_422P16},
-    {"422P10", IMGFMT_422P10},
-    {"422P9", IMGFMT_422P9},
-    {"420P16", IMGFMT_420P16},
-    {"420P10", IMGFMT_420P10},
-    {"420P9", IMGFMT_420P9},
-    {"420A",  IMGFMT_420A},
-    {"444P",  IMGFMT_444P},
-    {"422P",  IMGFMT_422P},
-    {"411P",  IMGFMT_411P},
-    {"440P",  IMGFMT_440P},
-    {"Y800",  IMGFMT_Y800},
-    {"Y8",    IMGFMT_Y8},
-
-    {"YUY2",  IMGFMT_YUY2},
-    {"UYVY",  IMGFMT_UYVY},
-    {"YVYU",  IMGFMT_YVYU},
-
-    {"RGB48LE",  IMGFMT_RGB48LE},
-    {"RGB48BE",  IMGFMT_RGB48BE},
-    {"RGB4",  IMGFMT_RGB4},
-    {"RGB8",  IMGFMT_RGB8},
-    {"RGB15", IMGFMT_RGB15},
-    {"RGB16", IMGFMT_RGB16},
-    {"RGB24", IMGFMT_RGB24},
-    {"RGB32", IMGFMT_RGB32},
-    {"BGR4",  IMGFMT_BGR4},
-    {"BGR8",  IMGFMT_BGR8},
-    {"BGR15", IMGFMT_BGR15},
-    {"BGR16", IMGFMT_BGR16},
-    {"BGR24", IMGFMT_BGR24},
-    {"BGR32", IMGFMT_BGR32},
-    {"RGB1",  IMGFMT_RGB1},
-    {"BGR1",  IMGFMT_BGR1},
-    {"GBRP",  IMGFMT_GBRP},
-
-    {"MPES",  IMGFMT_MPEGPES},
-
-    {"VDPAU_MPEG1",IMGFMT_VDPAU_MPEG1},
-    {"VDPAU_MPEG2",IMGFMT_VDPAU_MPEG2},
-    {"VDPAU_H264",IMGFMT_VDPAU_H264},
-    {"VDPAU_WMV3",IMGFMT_VDPAU_WMV3},
-    {"VDPAU_VC1",IMGFMT_VDPAU_VC1},
-    {"VDPAU_MPEG4",IMGFMT_VDPAU_MPEG4},
-
-    {NULL,    0}
-};
-
-
 static int add_to_inout(char *sfmt, char *sflags, unsigned int *outfmt,
                         unsigned char *outflags)
 {
@@ -253,15 +181,14 @@ static int add_to_inout(char *sfmt, char *sflags, unsigned int *outfmt,
     }
 
     do {
-        for (j = 0; fmt_table[j].name != NULL; j++)
-            if (!strncmp(sfmt, fmt_table[j].name, strlen(fmt_table[j].name)))
-                break;
-        if (fmt_table[j].name == NULL)
+        for (j = 0; isalnum(sfmt[j]) || sfmt[j] == '_'; j++);
+        unsigned int fmt = mp_imgfmt_from_name((bstr) {sfmt, j}, true);
+        if (!fmt)
             goto err_out_parse_error;
-        outfmt[i] = fmt_table[j].num;
+        outfmt[i] = fmt;
         outflags[i] = flags;
         ++i;
-        sfmt+=strlen(fmt_table[j].name);
+        sfmt += j;
     } while ((*(sfmt++) == ',') && --freeslots);
 
     if (!freeslots)

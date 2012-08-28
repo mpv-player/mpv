@@ -112,7 +112,8 @@ static int config(struct vf_instance *vf,
     }
 
     if (vf->priv->filter.out_fmt)
-        vf->priv->outfmt = mp_imgfmt_from_name(vf->priv->filter.out_fmt);
+        vf->priv->outfmt = mp_imgfmt_from_name(bstr0(vf->priv->filter.out_fmt),
+                                               false);
     else {
         struct vf_dlopen_formatpair *p = vf->priv->filter.format_mapping;
         vf->priv->outfmt = 0;
@@ -120,7 +121,7 @@ static int config(struct vf_instance *vf,
             for (; p->from; ++p) {
                 // TODO support pixel format classes in matching
                 if (!strcmp(p->from, vf->priv->filter.in_fmt)) {
-                    vf->priv->outfmt = p->to ? mp_imgfmt_from_name(p->to) : fmt;
+                    vf->priv->outfmt = mp_imgfmt_from_name(bstr0(p->to), false);
                     break;
                 }
             }
@@ -261,7 +262,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
         for (; p->from; ++p) {
             // TODO support pixel format classes in matching
             if (!strcmp(p->from, fmtname)) {
-                outfmt = p->to ? mp_imgfmt_from_name(p->to) : fmt;
+                outfmt = mp_imgfmt_from_name(bstr0(p->to), false);
                 break;
             }
         }
