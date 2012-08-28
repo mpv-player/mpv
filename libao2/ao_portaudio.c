@@ -27,7 +27,7 @@
 
 #include "config.h"
 #include "subopt-helper.h"
-#include "libaf/af_format.h"
+#include "libaf/format.h"
 #include "mp_msg.h"
 #include "audio_out.h"
 

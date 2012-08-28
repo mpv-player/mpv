@@ -169,7 +169,7 @@ libvo/:
     vo_vdpau and vo_gl3 should be taken as reference.
 
 libaf/:
-    Audio filter chain. af_format.h/format.c define the audio formats.
+    Audio filter chain. format.h/format.c define the audio formats.
 
 libao2/:
     Audio outputs. (It was probably named libao2 because libao is already

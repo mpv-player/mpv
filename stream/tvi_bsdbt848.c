@@ -78,7 +78,7 @@
 #endif
 #endif
 
-#include "libaf/af_format.h"
+#include "libaf/format.h"
 #include "libmpcodecs/img_format.h"
 #include "tv.h"
 #include "mp_msg.h"

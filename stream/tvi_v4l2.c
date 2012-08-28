@@ -57,7 +57,7 @@ known issues:
 #endif
 #include "mp_msg.h"
 #include "libmpcodecs/img_format.h"
-#include "libaf/af_format.h"
+#include "libaf/format.h"
 #include "tv.h"
 #include "audio_in.h"
 

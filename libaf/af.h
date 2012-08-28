@@ -24,7 +24,7 @@
 #include "config.h"
 
 #include "options.h"
-#include "af_format.h"
+#include "libaf/format.h"
 #include "control.h"
 #include "cpudetect.h"
 #include "mp_msg.h"

@@ -40,7 +40,7 @@
 #include "stheader.h"
 #include "mf.h"
 
-#include "libaf/af_format.h"
+#include "libaf/format.h"
 
 #include "libavcodec/avcodec.h"
 #if MP_INPUT_BUFFER_PADDING_SIZE < FF_INPUT_BUFFER_PADDING_SIZE

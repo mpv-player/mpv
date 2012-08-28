@@ -20,7 +20,7 @@
 #define MPLAYER_AD_INTERNAL_H
 
 #include "codec-cfg.h"
-#include "libaf/af_format.h"
+#include "libaf/format.h"
 
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"

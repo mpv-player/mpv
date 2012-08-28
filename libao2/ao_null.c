@@ -25,7 +25,7 @@
 
 #include "config.h"
 #include "osdep/timer.h"
-#include "libaf/af_format.h"
+#include "libaf/format.h"
 #include "audio_out.h"
 
 struct priv {

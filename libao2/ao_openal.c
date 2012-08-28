@@ -39,7 +39,7 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
-#include "libaf/af_format.h"
+#include "libaf/format.h"
 #include "osdep/timer.h"
 #include "subopt-helper.h"
 

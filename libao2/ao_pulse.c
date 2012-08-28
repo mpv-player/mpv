@@ -27,7 +27,7 @@
 #include <pulse/pulseaudio.h>
 
 #include "config.h"
-#include "libaf/af_format.h"
+#include "libaf/format.h"
 #include "mp_msg.h"
 #include "audio_out.h"
 #include "input/input.h"

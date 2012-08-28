@@ -951,7 +951,7 @@ const m_option_type_t m_option_type_imgfmt = {
     .copy  = copy_opt,
 };
 
-#include "libaf/af_format.h"
+#include "libaf/format.h"
 
 static int parse_afmt(const m_option_t *opt, struct bstr name,
                       struct bstr param, void *dst)

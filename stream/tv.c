@@ -41,7 +41,7 @@
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
 
-#include "libaf/af_format.h"
+#include "libaf/format.h"
 #include "libmpcodecs/img_format.h"
 #include "libavutil/avstring.h"
 #include "osdep/timer.h"
