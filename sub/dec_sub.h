@@ -12,7 +12,7 @@ typedef struct mp_eosd_res {
 
 typedef struct sub_bitmaps {
     struct ass_image *imgs;
-    int changed;
+    int bitmap_id, bitmap_pos_id;
 } mp_eosd_images_t;
 
 static inline bool is_text_sub(int type)

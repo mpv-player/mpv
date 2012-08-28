@@ -186,6 +186,8 @@ struct vdpctx {
     } *eosd_targets, osd_targets[MAX_OLD_OSD_BITMAPS][2];
     int eosd_targets_size;
     int eosd_render_count;
+    int bitmap_id;
+    int bitmap_pos_id;
 
     // Video equalizer
     struct mp_csp_equalizer video_eq;
@@ -812,6 +814,7 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
     vc->vdp_device = VDP_INVALID_HANDLE;
     talloc_free(vc->osd_surface.packer);
     talloc_free(vc->eosd_surface.packer);
+    vc->bitmap_id = vc->bitmap_pos_id = 0;
     vc->osd_surface = vc->eosd_surface = (struct eosd_bitmap_surface){
         .surface = VDP_INVALID_HANDLE,
     };
@@ -999,7 +1002,7 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
     struct eosd_bitmap_surface *sfc = &vc->eosd_surface;
     bool need_upload = false;
 
-    if (imgs->changed == 0 && sfc->packer)
+    if (imgs->bitmap_pos_id == vc->bitmap_pos_id)
         return; // Nothing changed and we still have the old data
 
     vc->eosd_render_count = 0;
@@ -1007,7 +1010,7 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
     if (!imgs->imgs)
         return; // There's nothing to render!
 
-    if (imgs->changed == 1)
+    if (imgs->bitmap_id == vc->bitmap_id)
         goto eosd_skip_upload;
 
     need_upload = true;
@@ -1069,6 +1072,8 @@ eosd_skip_upload:
         target->dest.y1 = p->h + p->dst_y;
         vc->eosd_render_count++;
     }
+    vc->bitmap_id = imgs->bitmap_id;
+    vc->bitmap_pos_id = imgs->bitmap_pos_id;
 }
 
 static void record_osd(void *ctx, int x0, int y0, int w, int h,

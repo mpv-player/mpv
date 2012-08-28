@@ -147,17 +147,18 @@ void eosd_packer_generate(struct eosd_packer *state, mp_eosd_images_t *imgs,
     ASS_Image *p;
     struct eosd_surface *sfc = &state->surface;
 
-    *out_need_reposition = false;
-    *out_need_upload = false;
+    *out_need_reposition = imgs->bitmap_pos_id != state->last_bitmap_pos_id;
+    *out_need_upload = imgs->bitmap_id != state->last_bitmap_id;
     *out_need_reallocate = false;
 
-    int change_state = imgs->changed;
+    state->last_bitmap_pos_id = imgs->bitmap_pos_id;
+    state->last_bitmap_id = imgs->bitmap_id;
 
     // eosd_reinit() was probably called, force full reupload.
     if (state->targets_count == 0 && img)
-        change_state = 2;
+        *out_need_upload = true;
 
-    if (change_state == 0)
+    if (!(*out_need_reposition) && !(*out_need_upload))
         return; // Nothing changed, no need to redraw
 
     state->targets_count = 0;
@@ -167,7 +168,7 @@ void eosd_packer_generate(struct eosd_packer *state, mp_eosd_images_t *imgs,
     if (!img)
         return; // There's nothing to render!
 
-    if (change_state == 1)
+    if (!(*out_need_upload))
         goto eosd_skip_upload;
 
     *out_need_upload = true;

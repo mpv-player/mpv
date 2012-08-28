@@ -58,6 +58,8 @@ struct eosd_packer {
     uint32_t max_surface_height;
 
     int *scratch;
+    int last_bitmap_id;
+    int last_bitmap_pos_id;
 };
 
 struct eosd_packer *eosd_packer_create(void *talloc_ctx);

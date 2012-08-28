@@ -63,7 +63,8 @@ struct osd_state {
     struct ass_library *ass_library;
     struct ass_renderer *ass_renderer;
     struct sh_sub *sh_sub;
-    bool changed_outside_sd;
+    int bitmap_id;
+    int bitmap_pos_id;
     double sub_pts;
     double sub_offset;
     struct mp_eosd_res dim;

@@ -45,7 +45,7 @@ void sub_init(struct sh_sub *sh, struct osd_state *osd)
         if (sh->sd_driver->init(sh, osd) < 0)
             return;
         osd->sh_sub = sh;
-        osd->changed_outside_sd = true;
+        osd->bitmap_id = ++osd->bitmap_pos_id;
         sh->initialized = true;
         sh->active = true;
     }
@@ -62,16 +62,23 @@ void sub_get_bitmaps(struct osd_state *osd, struct sub_bitmaps *res)
 {
     struct MPOpts *opts = osd->opts;
 
-    *res = (struct sub_bitmaps){.imgs = NULL, .changed = 2};
+    *res = (struct sub_bitmaps){ .bitmap_id = osd->bitmap_id,
+                                 .bitmap_pos_id = osd->bitmap_pos_id };
     if (!opts->sub_visibility || !osd->sh_sub || !osd->sh_sub->active) {
-        osd->changed_outside_sd = true;
+        /* Change ID in case we just switched from visible subtitles
+         * to current state. Hopefully, unnecessarily claiming that
+         * things may have changed is harmless for empty contents.
+         * Increase osd-> values ahead so that _next_ returned id
+         * is also guaranteed to differ from this one.
+         */
+        res->bitmap_id = ++res->bitmap_pos_id;
+        osd->bitmap_id = osd->bitmap_pos_id += 2;
         return;
     }
     if (osd->sh_sub->sd_driver->get_bitmaps)
         osd->sh_sub->sd_driver->get_bitmaps(osd->sh_sub, osd, res);
-    if (osd->changed_outside_sd)
-        res->changed = 2;
-    osd->changed_outside_sd = false;
+    osd->bitmap_id = res->bitmap_id;
+    osd->bitmap_pos_id = res->bitmap_pos_id;
 }
 
 void sub_reset(struct sh_sub *sh, struct osd_state *osd)

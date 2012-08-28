@@ -140,8 +140,13 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
     ASS_Renderer *renderer = osd->ass_renderer;
     mp_ass_configure(renderer, opts, &osd->dim, osd->unscaled);
     ass_set_aspect_ratio(renderer, scale, 1);
+    int changed;
     res->imgs = ass_render_frame(renderer, ctx->ass_track,
-                                 osd->sub_pts * 1000 + .5, &res->changed);
+                                 osd->sub_pts * 1000 + .5, &changed);
+    if (changed == 2)
+        res->bitmap_id = ++res->bitmap_pos_id;
+    else if (changed)
+        res->bitmap_pos_id++;
 }
 
 static void reset(struct sh_sub *sh, struct osd_state *osd)
