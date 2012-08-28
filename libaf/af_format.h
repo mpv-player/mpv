@@ -25,6 +25,7 @@
 
 #include <sys/types.h>
 #include "config.h"
+#include "bstr.h"
 
 // Endianness
 #define AF_FORMAT_BE		(0<<0) // Big Endian
@@ -118,7 +119,14 @@
 #define AF_FORMAT_IS_AC3(fmt) (((fmt) & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_AC3)
 #define AF_FORMAT_IS_IEC61937(fmt) (((fmt) & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_IEC61937)
 
-int af_str2fmt_short(const char *str);
+struct af_fmt_entry {
+    const char *name;
+    int format;
+};
+
+extern const struct af_fmt_entry af_fmtstr_table[];
+
+int af_str2fmt_short(bstr str);
 int af_fmt2bits(int format);
 int af_bits2fmt(int bits);
 char* af_fmt2str(int format, char* str, int size);

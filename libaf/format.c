@@ -53,64 +53,16 @@ int af_bits2fmt(int bits)
    converted string, size is the size of the buffer */
 char* af_fmt2str(int format, char* str, int size)
 {
-  int i=0;
-
-  if (size < 1)
-    return NULL;
-  size--; // reserve one for terminating 0
-
-  // Endianness
-  if(AF_FORMAT_LE == (format & AF_FORMAT_END_MASK))
-    i+=snprintf(str,size-i,"little-endian ");
-  else
-    i+=snprintf(str,size-i,"big-endian ");
-
-  if(format & AF_FORMAT_SPECIAL_MASK){
-    switch(format & AF_FORMAT_SPECIAL_MASK){
-    case(AF_FORMAT_MU_LAW):
-      i+=snprintf(&str[i],size-i,"mu-law "); break;
-    case(AF_FORMAT_A_LAW):
-      i+=snprintf(&str[i],size-i,"A-law "); break;
-    case(AF_FORMAT_MPEG2):
-      i+=snprintf(&str[i],size-i,"MPEG-2 "); break;
-    case(AF_FORMAT_AC3):
-      i+=snprintf(&str[i],size-i,"AC3 "); break;
-    case(AF_FORMAT_IEC61937):
-      i+=snprintf(&str[i],size-i,"IEC61937 "); break;
-    case(AF_FORMAT_IMA_ADPCM):
-      i+=snprintf(&str[i],size-i,"IMA-ADPCM "); break;
-    default:
-      i+=snprintf(&str[i],size-i,"%s",mp_gtext("unknown format "));
+    const char *name = af_fmt2str_short(format);
+    if (name) {
+        snprintf(str, size, "%s", name);
+    } else {
+        snprintf(str, size, "%#x", format);
     }
-  }
-  else{
-    // Bits
-    i+=snprintf(&str[i],size-i,"%d-bit ", af_fmt2bits(format));
-
-    // Point
-    if(AF_FORMAT_F == (format & AF_FORMAT_POINT_MASK))
-      i+=snprintf(&str[i],size-i,"float ");
-    else{
-      // Sign
-      if(AF_FORMAT_US == (format & AF_FORMAT_SIGN_MASK))
-	i+=snprintf(&str[i],size-i,"unsigned ");
-      else
-	i+=snprintf(&str[i],size-i,"signed ");
-
-      i+=snprintf(&str[i],size-i,"int ");
-    }
-  }
-  // remove trailing space
-  if (i > 0 && str[i - 1] == ' ')
-    i--;
-  str[i] = 0; // make sure it is 0 terminated.
-  return str;
+    return str;
 }
 
-static struct {
-    const char *name;
-    const int format;
-} af_fmtstr_table[] = {
+const struct af_fmt_entry af_fmtstr_table[] = {
     { "mulaw", AF_FORMAT_MU_LAW },
     { "alaw", AF_FORMAT_A_LAW },
     { "mpeg2", AF_FORMAT_MPEG2 },
@@ -146,7 +98,7 @@ static struct {
     { "floatbe", AF_FORMAT_FLOAT_BE },
     { "floatne", AF_FORMAT_FLOAT_NE },
 
-    { NULL, 0 }
+    {0}
 };
 
 const char *af_fmt2str_short(int format)
@@ -160,13 +112,18 @@ const char *af_fmt2str_short(int format)
     return "??";
 }
 
-int af_str2fmt_short(const char* str)
+int af_str2fmt_short(bstr str)
 {
-    int i;
+    if (bstr_startswith0(str, "0x")) {
+        bstr rest;
+        int fmt = bstrtoll(str, &rest, 16);
+        if (rest.len == 0)
+            return fmt;
+    }
 
-    for (i = 0; af_fmtstr_table[i].name; i++)
-	if (!strcasecmp(str, af_fmtstr_table[i].name))
-	    return af_fmtstr_table[i].format;
+    for (int i = 0; af_fmtstr_table[i].name; i++)
+        if (!bstrcasecmp0(str, af_fmtstr_table[i].name))
+            return af_fmtstr_table[i].format;
 
     return -1;
 }
