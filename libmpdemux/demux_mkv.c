@@ -884,6 +884,7 @@ static int demux_mkv_read_tags(demuxer_t *demuxer)
             demux_info_add_bstr(demuxer, tag.simple_tag[j].tag_name, tag.simple_tag[j].tag_string);
     }
 
+    talloc_free(parse_ctx.talloc_ctx);
     return 0;
 }
 
