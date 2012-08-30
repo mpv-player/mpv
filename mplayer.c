@@ -252,6 +252,7 @@ int use_filedir_conf;
 #include "metadata.h"
 
 static void reset_subtitles(struct MPContext *mpctx);
+static void reinit_subs(struct MPContext *mpctx);
 
 static float get_relative_time(struct MPContext *mpctx)
 {
@@ -941,6 +942,20 @@ static int find_new_tid(struct MPContext *mpctx, enum stream_type t)
     return new_id + 1;
 }
 
+// Map stream number (as used by libdvdread) to MPEG IDs (as used by demuxer).
+static int map_id_from_demuxer(struct demuxer *d, enum stream_type type, int id)
+{
+    if (d->stream->type == STREAMTYPE_DVD && type == STREAM_SUB)
+        id = id & 0x1F;
+    return id;
+}
+static int map_id_to_demuxer(struct demuxer *d, enum stream_type type, int id)
+{
+    if (d->stream->type == STREAMTYPE_DVD && type == STREAM_SUB)
+        id = id | 0x20;
+    return id;
+}
+
 static struct track *add_stream_track(struct MPContext *mpctx,
                                       struct sh_stream *stream,
                                       bool under_timeline)
@@ -949,7 +964,21 @@ static struct track *add_stream_track(struct MPContext *mpctx,
         struct track *track = mpctx->tracks[i];
         if (track->stream == stream)
             return track;
+        // DVD subtitle track that was added later
+        if (stream->type == STREAM_SUB && track->type == STREAM_SUB &&
+            map_id_from_demuxer(stream->demuxer, stream->type,
+                                stream->demuxer_id) == track->demuxer_id
+            && !track->stream)
+        {
+            track->stream = stream;
+            track->demuxer_id = stream->demuxer_id;
+            // Initialize lazily selected track
+            if (track == mpctx->current_track[STREAM_SUB])
+                reinit_subs(mpctx);
+            return track;
+        }
     }
+
     struct track *track = talloc_ptrtype(NULL, track);
     *track = (struct track) {
         .type = stream->type,
@@ -964,12 +993,16 @@ static struct track *add_stream_track(struct MPContext *mpctx,
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
 
-    // Needed for DVD and Blu-Ray. (Note that at least with DVDs and demux_lavf,
-    // this code is broken: unlike demux_mpg, the demuxer streams are not
-    // directly mapped to MPEG stream IDs.)
-    if (!track->lang)
-        track->lang = talloc_steal(track, demuxer_stream_lang(track->demuxer,
-                                                              track->stream));
+    // Needed for DVD and Blu-ray.
+    if (!track->lang) {
+        struct stream_lang_req req = {
+            .type = track->type,
+            .id = map_id_from_demuxer(track->demuxer, track->type,
+                                      track->demuxer_id)
+        };
+        stream_control(track->demuxer->stream, STREAM_CTRL_GET_LANG, &req);
+        track->lang = talloc_steal(track, req.name);
+    }
 
     return track;
 }
@@ -978,6 +1011,31 @@ static void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
 {
     for (int n = 0; n < demuxer->num_streams; n++)
         add_stream_track(mpctx, demuxer->streams[n], !!mpctx->timeline);
+}
+
+static void add_dvd_tracks(struct MPContext *mpctx)
+{
+#ifdef CONFIG_DVDREAD
+    struct demuxer *demuxer = mpctx->demuxer;
+    struct stream *stream = demuxer->stream;
+    if (stream->type == STREAMTYPE_DVD) {
+        int n_subs = dvd_number_of_subs(stream);
+        for (int n = 0; n < n_subs; n++) {
+            struct track *track = talloc_ptrtype(NULL, track);
+            *track = (struct track) {
+                .type = STREAM_SUB,
+                .user_tid = find_new_tid(mpctx, STREAM_SUB),
+                .demuxer_id = n,
+                .demuxer = mpctx->demuxer,
+            };
+            MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
+
+            struct stream_lang_req req = {.type = STREAM_SUB, .id = n};
+            stream_control(stream, STREAM_CTRL_GET_LANG, &req);
+            track->lang = talloc_steal(track, req.name);
+        }
+    }
+#endif
 }
 
 void add_subtitles(struct MPContext *mpctx, char *filename, float fps,
@@ -1900,6 +1958,22 @@ static void reinit_subs(struct MPContext *mpctx)
 
     if (!track)
         return;
+
+    if (track->demuxer && !track->stream) {
+        // Lazily added DVD track - we must not miss the first subtitle packet,
+        // which makes the demuxer create the sh_stream, and contains the first
+        // subtitle event.
+
+        // demux_mpg - maps IDs directly to the logical stream number
+        track->demuxer->sub->id = track->demuxer_id;
+
+        // demux_lavf - IDs are essentially random, have to use MPEG IDs
+        int id = map_id_to_demuxer(track->demuxer, track->type,
+                                   track->demuxer_id);
+        demux_control(track->demuxer, DEMUXER_CTRL_AUTOSELECT_SUBTITLE, &id);
+
+        return;
+    }
 
     mpctx->initialized_flags |= INITIALIZED_SUB;
 
@@ -3795,6 +3869,7 @@ goto_enable_cache:
         // On the contrary, the EDL and CUE demuxers are empty wrappers.
         mpctx->demuxer = mpctx->timeline[0].source;
     }
+    add_dvd_tracks(mpctx);
     add_demuxer_tracks(mpctx, mpctx->demuxer);
 
     mpctx->timeline_part = 0;

@@ -96,13 +96,8 @@
 #define STREAM_CTRL_GET_NUM_TITLES 12
 #define STREAM_CTRL_GET_LANG 13
 
-enum stream_ctrl_type {
-	stream_ctrl_audio,
-	stream_ctrl_sub,
-};
-
 struct stream_lang_req {
-	enum stream_ctrl_type type;
+	int type; // STREAM_AUDIO, STREAM_SUB
 	int id;
         char *name;
 };

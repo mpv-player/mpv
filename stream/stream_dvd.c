@@ -693,10 +693,10 @@ static int control(stream_t *stream,int cmd,void* arg)
             struct stream_lang_req *req = arg;
             int lang = 0;
             switch(req->type) {
-            case stream_ctrl_audio:
+            case STREAM_AUDIO:
                 lang = dvd_lang_from_aid(stream, req->id);
                 break;
-            case stream_ctrl_sub:
+            case STREAM_SUB:
                 lang = dvd_lang_from_sid(stream, req->id);
                 break;
             }

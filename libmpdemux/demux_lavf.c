@@ -24,6 +24,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
@@ -70,6 +71,7 @@ typedef struct lavf_priv {
     int audio_streams;
     int video_streams;
     int sub_streams;
+    int autoselect_sub;
     int64_t last_pts;
     int astreams[MAX_A_STREAMS];
     int vstreams[MAX_V_STREAMS];
@@ -164,6 +166,7 @@ static int lavf_check_file(demuxer_t *demuxer)
     if (!demuxer->priv)
         demuxer->priv = calloc(sizeof(lavf_priv_t), 1);
     priv = demuxer->priv;
+    priv->autoselect_sub = -1;
 
     char *format = lavfdopts->format;
     if (!format)
@@ -302,6 +305,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
     AVCodec *avc = avcodec_find_decoder(codec->codec_id);
     const char *codec_name = avc ? avc->name : "unknown";
 
+    bool set_demuxer_id = matches_avinputformat_name(priv, "mpeg");
+
     switch (codec->codec_type) {
     case AVMEDIA_TYPE_AUDIO: {
         WAVEFORMATEX *wf;
@@ -310,6 +315,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         if (!sh_audio)
             break;
         sh_audio->demuxer_codecname = codec_name;
+        if (set_demuxer_id)
+            sh_audio->gsh->demuxer_id = st->id;
         stream_type = "audio";
         priv->astreams[priv->audio_streams] = i;
         sh_audio->libav_codec_id = codec->codec_id;
@@ -391,6 +398,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         if (!sh_video)
             break;
         sh_video->demuxer_codecname = codec_name;
+        if (set_demuxer_id)
+            sh_video->gsh->demuxer_id = st->id;
         stream_type = "video";
         priv->vstreams[priv->video_streams] = i;
         sh_video->libav_codec_id = codec->codec_id;
@@ -503,6 +512,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         if (!sh_sub)
             break;
         sh_sub->demuxer_codecname = codec_name;
+        if (set_demuxer_id)
+            sh_sub->gsh->demuxer_id = st->id;
         stream_type = "subtitle";
         priv->sstreams[priv->sub_streams] = i;
         sh_sub->libav_codec_id = codec->codec_id;
@@ -774,6 +785,14 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
 
     id = pkt->stream_index;
 
+    assert(id >= 0 && id < MAX_S_STREAMS);
+    if (demux->s_streams[id] && demux->sub->id == -1 &&
+        demux->s_streams[id]->gsh->demuxer_id == priv->autoselect_sub)
+    {
+        priv->autoselect_sub = -1;
+        demux->sub->id = id;
+    }
+
     if (id == demux->audio->id || priv->internet_radio_hack) {
         // audio
         ds = demux->audio;
@@ -942,6 +961,12 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
                 priv->avfc->streams[newid]->discard = AVDISCARD_NONE;
             return DEMUXER_CTRL_OK;
         }
+    }
+    case DEMUXER_CTRL_AUTOSELECT_SUBTITLE:
+    {
+        demuxer->sub->id = -1;
+        priv->autoselect_sub = *((int *)arg);
+        return DEMUXER_CTRL_OK;
     }
     case DEMUXER_CTRL_IDENTIFY_PROGRAM:
     {

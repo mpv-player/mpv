@@ -93,6 +93,7 @@ enum timestamp_type {
 #define DEMUXER_CTRL_SWITCH_VIDEO 14
 #define DEMUXER_CTRL_IDENTIFY_PROGRAM 15
 #define DEMUXER_CTRL_CORRECT_PTS 16
+#define DEMUXER_CTRL_AUTOSELECT_SUBTITLE 17
 
 #define SEEK_ABSOLUTE (1 << 0)
 #define SEEK_FACTOR   (1 << 1)
@@ -405,7 +406,5 @@ int demuxer_angles_count(struct demuxer *demuxer);
 
 struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
                                                enum stream_type t, int id);
-
-char *demuxer_stream_lang(demuxer_t *d, struct sh_stream *s);
 
 #endif /* MPLAYER_DEMUXER_H */

@@ -199,11 +199,11 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             BLURAY_STREAM_INFO *si = NULL;
             int count = 0;
             switch (req->type) {
-            case stream_ctrl_audio:
+            case STREAM_AUDIO:
                 count = ti->clips[0].audio_stream_count;
                 si = ti->clips[0].audio_streams;
                 break;
-            case stream_ctrl_sub:
+            case STREAM_SUB:
                 count = ti->clips[0].pg_stream_count;
                 si = ti->clips[0].pg_streams;
                 break;

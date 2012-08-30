@@ -1369,16 +1369,3 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle)
 
     return angle;
 }
-
-char *demuxer_stream_lang(demuxer_t *d, struct sh_stream *sh)
-{
-    struct stream_lang_req req = { .id = sh->tid };     // assume 1:1 mapping
-    switch (sh->type) {
-    case STREAM_AUDIO: req.type = stream_ctrl_audio; break;
-    case STREAM_SUB: req.type = stream_ctrl_sub; break;
-    default: return NULL;
-    }
-    if (stream_control(d->stream, STREAM_CTRL_GET_LANG, &req) == STREAM_OK)
-        return req.name;
-    return NULL;
-}
