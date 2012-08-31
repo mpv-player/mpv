@@ -1157,37 +1157,18 @@ struct mp_osd_msg {
     bool show_position;
 };
 
-/**
- *  \brief Add a message on the OSD message stack
- *
- *  If a message with the same id is already present in the stack
- *  it is pulled on top of the stack, otherwise a new message is created.
- *
- */
 static mp_osd_msg_t *add_osd_msg(struct MPContext *mpctx, int id, int level,
                                  int time)
 {
-    mp_osd_msg_t *msg, *last = NULL;
-
-    // look if the id is already in the stack
-    for (msg = mpctx->osd_msg_stack; msg && msg->id != id;
-         last = msg, msg = msg->prev) ;
-    // not found: alloc it
-    if (!msg) {
-        msg = talloc_zero(mpctx, mp_osd_msg_t);
-        msg->prev = mpctx->osd_msg_stack;
-        mpctx->osd_msg_stack = msg;
-    } else if (last) { // found, but it's not on top of the stack
-        last->prev = msg->prev;
-        msg->prev = mpctx->osd_msg_stack;
-        mpctx->osd_msg_stack = msg;
-    }
-    talloc_free_children(msg);
-    msg->msg = "";
-    // set id and time
-    msg->id = id;
-    msg->level = level;
-    msg->time = time;
+    rm_osd_msg(mpctx, id);
+    mp_osd_msg_t *msg = talloc_struct(mpctx, mp_osd_msg_t, {
+        .prev = mpctx->osd_msg_stack,
+        .msg = "",
+        .id = id,
+        .level = level,
+        .time = time,
+    });
+    mpctx->osd_msg_stack = msg;
     return msg;
 }
 
