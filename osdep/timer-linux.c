@@ -26,13 +26,6 @@
 #include "config.h"
 #include "timer.h"
 
-const char timer_name[] =
-#ifdef HAVE_NANOSLEEP
-    "nanosleep()";
-#else
-    "usleep()";
-#endif
-
 int usec_sleep(int usec_delay)
 {
 #ifdef HAVE_NANOSLEEP

@@ -30,9 +30,6 @@
 /* global variables */
 static double timebase_ratio;
 
-const char timer_name[] = "Darwin accurate";
-
-
 
 /* the core sleep function, uses floats and is used in MPlayer G2 */
 static float sleep_accurate(float time_frame)
