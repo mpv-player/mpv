@@ -200,7 +200,9 @@ mp_image_t *vf_get_image(vf_instance_t *vf, unsigned int outfmt,
 
     if (vf->put_image == vf_next_put_image) {
         // passthru mode, if the filter uses the fallback/default put_image()
-        return vf_get_image(vf->next, outfmt, mp_imgtype, mp_imgflag, w, h);
+        mpi = vf_get_image(vf->next,outfmt,mp_imgtype,mp_imgflag,w,h);
+        mpi->usage_count++;
+        return mpi;
     }
 
     // Note: we should call libvo first to check if it supports direct rendering
