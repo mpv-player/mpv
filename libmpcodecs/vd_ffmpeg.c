@@ -585,6 +585,10 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic)
     if (mpi) {
         // release mpi (in case MPI_IMGTYPE_NUMBERED is used, e.g. for VDPAU)
         mpi->usage_count--;
+        if (mpi->usage_count < 0) {
+            mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Bad mp_image usage count, please report!\n");
+            mpi->usage_count = 0;
+        }
     }
 
     if (pic->type != FF_BUFFER_TYPE_USER) {
