@@ -28,6 +28,7 @@
 #include "mp_msg.h"
 #include "mpcommon.h"
 #include "sub/ass_mp.h"
+#include "sub/dec_sub.h"
 
 
 #define HEIGHT_SORT_BITS 4
@@ -55,7 +56,7 @@ static int size_index(int s)
  * free rectangle with corners (13, 20)-(w, 50) is filled recursively.
  */
 static int pack_rectangles(struct pos *in, struct pos *out, int num_rects,
-                           int w, int h, int *scratch)
+                           int w, int h, int *scratch, int *used_width)
 {
     int bins[16 << HEIGHT_SORT_BITS];
     int sizes[16 << HEIGHT_SORT_BITS] = { 0 };
@@ -100,11 +101,12 @@ static int pack_rectangles(struct pos *in, struct pos *out, int num_rects,
                 s.x = right;
                 maxy = FFMAX(maxy, bottom);
             }
+            *used_width = FFMAX(*used_width, s.x);
             if (maxy > 0)
                 s.bottom = maxy;
         }
     }
-    return num_rects ? -1 : 0;
+    return num_rects ? -1 : y;
 }
 
 int packer_pack(struct bitmap_packer *packer)
@@ -115,7 +117,7 @@ int packer_pack(struct bitmap_packer *packer)
     struct pos *in = packer->in;
     int xmax = 0, ymax = 0;
     for (int i = 0; i < packer->count; i++) {
-        if (in[i].x == 0 || in[i].y == 0)
+        if (in[i].x <= packer->padding || in[i].y <= packer->padding)
             in[i] = (struct pos){0, 0};
         if (in[i].x < 0 || in [i].x > 65535 || in[i].y < 0 || in[i].y > 65535) {
             mp_msg(MSGT_VO, MSGL_FATAL, "Invalid OSD / subtitle bitmap size\n");
@@ -124,20 +126,33 @@ int packer_pack(struct bitmap_packer *packer)
         xmax = FFMAX(xmax, in[i].x);
         ymax = FFMAX(ymax, in[i].y);
     }
+    xmax = FFMAX(0, xmax - packer->padding);
+    ymax = FFMAX(0, ymax - packer->padding);
     if (xmax > packer->w)
         packer->w = 1 << av_log2(xmax - 1) + 1;
     if (ymax > packer->h)
         packer->h = 1 << av_log2(ymax - 1) + 1;
     while (1) {
-        if (pack_rectangles(in, packer->result, packer->count, packer->w,
-                            packer->h, packer->scratch) >= 0)
+        int used_width = 0;
+        int y = pack_rectangles(in, packer->result, packer->count,
+                                packer->w + packer->padding,
+                                packer->h + packer->padding,
+                                packer->scratch, &used_width);
+        if (y >= 0) {
+            // No padding at edges
+            packer->used_width = FFMIN(used_width, packer->w);
+            packer->used_height = FFMIN(y, packer->h);
             return packer->w != w_orig || packer->h != h_orig;
+        }
         if (packer->w <= packer->h && packer->w != packer->w_max)
             packer->w = FFMIN(packer->w * 2, packer->w_max);
         else if (packer->h != packer->h_max)
             packer->h = FFMIN(packer->h * 2, packer->h_max);
-        else
+        else {
+            packer->w = w_orig;
+            packer->h = h_orig;
             return -1;
+        }
     }
 }
 
@@ -156,8 +171,8 @@ void packer_set_size(struct bitmap_packer *packer, int size)
                                            packer->asize + 16);
 }
 
-int packer_pack_from_assimg(struct bitmap_packer *packer,
-                            struct ass_image *imglist)
+static int packer_pack_from_assimg(struct bitmap_packer *packer,
+                                   struct ass_image *imglist)
 {
     int count = 0;
     struct ass_image *img = imglist;
@@ -170,5 +185,22 @@ int packer_pack_from_assimg(struct bitmap_packer *packer,
         count++;
     }
     packer->count = count;
+    return packer_pack(packer);
+}
+
+int packer_pack_from_subbitmaps(struct bitmap_packer *packer,
+                                struct sub_bitmaps *b, int padding_pixels)
+{
+    packer->padding = 0;
+    packer->count = 0;
+    if (b->type == SUBBITMAP_EMPTY)
+        return 0;
+    if (b->type == SUBBITMAP_LIBASS)
+        return packer_pack_from_assimg(packer, b->imgs);
+    packer->padding = padding_pixels;
+    packer_set_size(packer, b->part_count);
+    int a = packer->padding;
+    for (int i = 0; i < b->part_count; i++)
+        packer->in[i] = (struct pos){b->parts[i].w + a, b->parts[i].h + a};
     return packer_pack(packer);
 }

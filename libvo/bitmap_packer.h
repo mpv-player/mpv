@@ -11,9 +11,12 @@ struct bitmap_packer {
     int h;
     int w_max;
     int h_max;
+    int padding;
     int count;
     struct pos *in;
     struct pos *result;
+    int used_width;
+    int used_height;
 
     // internal
     int *scratch;
@@ -21,6 +24,7 @@ struct bitmap_packer {
 };
 
 struct ass_image;
+struct sub_bitmaps;
 
 /* Reallocate packer->in for at least to desired number of items.
  * Also sets packer->count to the same value.
@@ -41,7 +45,7 @@ int packer_pack(struct bitmap_packer *packer);
  * packer->in will be reallocated if needed and filled from the
  * given image list.
  */
-int packer_pack_from_assimg(struct bitmap_packer *packer,
-                            struct ass_image *imglist);
+int packer_pack_from_subbitmaps(struct bitmap_packer *packer,
+                                struct sub_bitmaps *b, int padding_pixels);
 
 #endif

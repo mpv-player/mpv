@@ -172,6 +172,7 @@ struct vdpctx {
 
     // EOSD
     struct eosd_bitmap_surface {
+        VdpRGBAFormat format;
         VdpBitmapSurface surface;
         uint32_t max_width;
         uint32_t max_height;
@@ -1007,16 +1008,35 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
 
     vc->eosd_render_count = 0;
 
-    if (!imgs->imgs)
-        return; // There's nothing to render!
+    if (imgs->type == SUBBITMAP_EMPTY)
+        return;
 
     if (imgs->bitmap_id == vc->bitmap_id)
         goto eosd_skip_upload;
 
     need_upload = true;
+    VdpRGBAFormat format;
+    int format_size;
+    switch (imgs->type) {
+    case SUBBITMAP_LIBASS:
+        format = VDP_RGBA_FORMAT_A8;
+        format_size = 1;
+        break;
+    case SUBBITMAP_RGBA:
+        format = VDP_RGBA_FORMAT_B8G8R8A8;
+        format_size = 4;
+        break;
+    default:
+        abort();
+    };
+    if (sfc->format != format) {
+        talloc_free(sfc->packer);
+        sfc->packer = NULL;
+    };
+    sfc->format = format;
     if (!sfc->packer)
-        sfc->packer = make_packer(vo, VDP_RGBA_FORMAT_A8);
-    int r = packer_pack_from_assimg(sfc->packer, imgs->imgs);
+        sfc->packer = make_packer(vo, format);
+    int r = packer_pack_from_subbitmaps(sfc->packer, imgs, imgs->scaled);
     if (r < 0) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] EOSD bitmaps do not fit on "
                "a surface with the maximum supported size\n");
@@ -1028,12 +1048,20 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
         }
         mp_msg(MSGT_VO, MSGL_V, "[vdpau] Allocating a %dx%d surface for "
                "EOSD bitmaps.\n", sfc->packer->w, sfc->packer->h);
-        vdp_st = vdp->bitmap_surface_create(vc->vdp_device, VDP_RGBA_FORMAT_A8,
+        vdp_st = vdp->bitmap_surface_create(vc->vdp_device, format,
                                             sfc->packer->w, sfc->packer->h,
                                             true, &sfc->surface);
         if (vdp_st != VDP_STATUS_OK)
             sfc->surface = VDP_INVALID_HANDLE;
         CHECK_ST_WARNING("EOSD: error when creating surface");
+    }
+    if (imgs->scaled) {
+        char zeros[sfc->packer->used_width * format_size];
+        memset(zeros, 0, sizeof(zeros));
+        vdp_st = vdp->bitmap_surface_put_bits_native(sfc->surface,
+                &(const void *){zeros}, &(uint32_t){0},
+                &(VdpRect){0, 0, sfc->packer->used_width,
+                                 sfc->packer->used_height});
     }
 
 eosd_skip_upload:
@@ -1046,31 +1074,54 @@ eosd_skip_upload:
                                            * sizeof(*vc->eosd_targets));
         }
 
-    int i = 0;
-    for (ASS_Image *p = imgs->imgs; p; p = p->next, i++) {
-        if (p->w == 0 || p->h == 0)
-            continue;
-        struct eosd_target *target = &vc->eosd_targets[vc->eosd_render_count];
-        int x = sfc->packer->result[i].x;
-        int y = sfc->packer->result[i].y;
-        target->source = (VdpRect){x, y, x + p->w, y + p->h};
-        if (need_upload) {
-            vdp_st = vdp->
-                bitmap_surface_put_bits_native(sfc->surface,
-                                               (const void *) &p->bitmap,
-                                               &p->stride, &target->source);
-            CHECK_ST_WARNING("EOSD: putbits failed");
+    if (imgs->type == SUBBITMAP_LIBASS) {
+        int i = 0;
+        for (ASS_Image *p = imgs->imgs; p; p = p->next, i++) {
+            if (p->w == 0 || p->h == 0)
+                continue;
+            struct eosd_target *target = vc->eosd_targets +
+                                         vc->eosd_render_count;
+            int x = sfc->packer->result[i].x;
+            int y = sfc->packer->result[i].y;
+            target->source = (VdpRect){x, y, x + p->w, y + p->h};
+            if (need_upload) {
+                vdp_st = vdp->
+                    bitmap_surface_put_bits_native(sfc->surface,
+                                                   (const void *) &p->bitmap,
+                                                   &p->stride, &target->source);
+                CHECK_ST_WARNING("EOSD: putbits failed");
+            }
+            // Render dest, color, etc.
+            target->color.alpha = 1.0 - ((p->color >> 0) & 0xff) / 255.0;
+            target->color.blue  = ((p->color >>  8) & 0xff) / 255.0;
+            target->color.green = ((p->color >> 16) & 0xff) / 255.0;
+            target->color.red   = ((p->color >> 24) & 0xff) / 255.0;
+            target->dest.x0 = p->dst_x;
+            target->dest.y0 = p->dst_y;
+            target->dest.x1 = p->w + p->dst_x;
+            target->dest.y1 = p->h + p->dst_y;
+            vc->eosd_render_count++;
         }
-        // Render dest, color, etc.
-        target->color.alpha = 1.0 - ((p->color >> 0) & 0xff) / 255.0;
-        target->color.blue  = ((p->color >>  8) & 0xff) / 255.0;
-        target->color.green = ((p->color >> 16) & 0xff) / 255.0;
-        target->color.red   = ((p->color >> 24) & 0xff) / 255.0;
-        target->dest.x0 = p->dst_x;
-        target->dest.y0 = p->dst_y;
-        target->dest.x1 = p->w + p->dst_x;
-        target->dest.y1 = p->h + p->dst_y;
-        vc->eosd_render_count++;
+    } else {
+        for (int i = 0 ;i < sfc->packer->count; i++) {
+            struct sub_bitmap *b = &imgs->parts[i];
+            struct eosd_target *target = vc->eosd_targets +
+                                         vc->eosd_render_count;
+            int x = sfc->packer->result[i].x;
+            int y = sfc->packer->result[i].y;
+            target->source = (VdpRect){x, y, x + b->w, y + b->h};
+            if (need_upload) {
+                vdp_st = vdp->
+                    bitmap_surface_put_bits_native(sfc->surface,
+                                                   &(const void *){b->bitmap},
+                                                   &(uint32_t){b->w * 4},
+                                                   &target->source);
+                CHECK_ST_WARNING("EOSD: putbits failed");
+            }
+            target->color = (VdpColor){1, 1, 1, 1};
+            target->dest = (VdpRect){b->x, b->y, b->x + b->dw, b->y + b->dh};
+            vc->eosd_render_count++;
+        }
     }
     vc->bitmap_id = imgs->bitmap_id;
     vc->bitmap_pos_id = imgs->bitmap_pos_id;
@@ -1529,7 +1580,7 @@ static int query_format(uint32_t format)
 {
     int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
         | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_EOSD
-        | VFCAP_EOSD_UNSCALED | VFCAP_FLIP;
+        | VFCAP_EOSD_UNSCALED | VFCAP_EOSD_RGBA | VFCAP_FLIP;
     switch (format) {
     case IMGFMT_YV12:
     case IMGFMT_I420:

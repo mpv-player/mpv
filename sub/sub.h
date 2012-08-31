@@ -71,6 +71,7 @@ struct osd_state {
     double normal_scale;
     double vsfilter_scale;
     bool unscaled;
+    bool support_rgba;
 
     struct ass_renderer *osd_render;
     struct ass_library *osd_ass_library;

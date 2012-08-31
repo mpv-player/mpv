@@ -147,6 +147,7 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
         res->bitmap_id = ++res->bitmap_pos_id;
     else if (changed)
         res->bitmap_pos_id++;
+    res->type = SUBBITMAP_LIBASS;
 }
 
 static void reset(struct sh_sub *sh, struct osd_state *osd)

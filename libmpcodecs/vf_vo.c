@@ -119,6 +119,7 @@ static int control(struct vf_instance *vf, int request, void *data)
     }
     case VFCTRL_DRAW_EOSD: {
         struct osd_state *osd = data;
+        osd->support_rgba = vf->default_caps & VFCAP_EOSD_RGBA;
         osd->dim = (struct mp_eosd_res){0};
         if (!video_out->config_ok ||
                 vo_control(video_out, VOCTRL_GET_EOSD_RES, &osd->dim) != true)
