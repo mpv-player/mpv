@@ -34,9 +34,6 @@
 #include "stream/stream_radio.h"
 #include "libvo/csputils.h"
 
-extern char *fb_mode_cfgfile;
-extern char *fb_mode_name;
-
 extern char *lirc_configfile;
 
 /* only used at startup (setting these values from configfile) */
@@ -602,17 +599,6 @@ const m_option_t mplayer_opts[]={
     {"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 
-#if defined(CONFIG_FBDEV) || defined(CONFIG_VESA)
-    {"monitor-hfreq", &monitor_hfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"monitor-vfreq", &monitor_vfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"monitor-dotclock", &monitor_dotclock_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#endif
-
-#ifdef CONFIG_FBDEV
-    {"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"fbmodeconfig", &fb_mode_cfgfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#endif
-
     // force window width/height or resolution (with -vm)
     OPT_INTRANGE("x", screen_size_x, 0, 0, 4096),
     OPT_INTRANGE("y", screen_size_y, 0, 0, 4096),
@@ -634,12 +620,12 @@ const m_option_t mplayer_opts[]={
     OPT_MAKE_FLAGS("fs", fullscreen, CONF_GLOBAL),
     // set fullscreen switch method (workaround for buggy WMs)
     {"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
-    // set bpp (x11+vm, dga, fbdev, vesa, svga?)
+    // set bpp (x11+vm)
     OPT_INTRANGE("bpp", vo_dbpp, 0, 0, 32),
     {"colorkey", &vo_colorkey, CONF_TYPE_INT, 0, 0, 0, NULL},
     {"no-colorkey", &vo_colorkey, CONF_TYPE_FLAG, 0, 0, 0x1000000, NULL},
     {"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    // wait for v-sync (vesa)
+    // wait for v-sync (gl)
     {"vsync", &vo_vsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
     OPT_FLOATRANGE("panscanrange", vo_panscanrange, 0, -19.0, 99.0),

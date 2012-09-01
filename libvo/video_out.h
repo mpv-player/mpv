@@ -328,18 +328,6 @@ extern int vo_colorkey;
 
 extern int64_t WinID;
 
-typedef struct {
-        float min;
-	float max;
-	} range_t;
-
-float range_max(range_t *r);
-int in_range(range_t *r, float f);
-range_t *str2range(char *s);
-extern char *monitor_hfreq_str;
-extern char *monitor_vfreq_str;
-extern char *monitor_dotclock_str;
-
 struct mp_keymap {
   int from;
   int to;
