@@ -106,6 +106,7 @@ SRCS_COMMON = asxparser.c \
               m_struct.c \
               mp_msg.c \
               mpcommon.c \
+              version.c \
               parser-cfg.c \
               path.c \
               playlist.c \
@@ -446,7 +447,7 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 
 ###### dependency declarations / specific CFLAGS ######
 
-mpcommon.o osdep/mplayer-rc.o: version.h
+version.c osdep/mplayer-rc.o: version.h
 
 # Files that depend on libavcodec internals
 libmpcodecs/vf_fspp.o libmpcodecs/vf_mcdeint.o libmpcodecs/vf_spp.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
