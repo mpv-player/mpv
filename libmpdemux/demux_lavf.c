@@ -44,7 +44,6 @@
 #include "demuxer.h"
 #include "stheader.h"
 #include "m_option.h"
-#include "sub/sub.h"
 
 #include "mp_taglists.h"
 
@@ -812,7 +811,6 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
     } else if (id == demux->sub->id) {
         // subtitle
         ds = demux->sub;
-        sub_utf8 = 1;
     } else {
         talloc_free(pkt);
         return 1;

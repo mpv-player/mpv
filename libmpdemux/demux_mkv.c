@@ -50,8 +50,6 @@
 
 #include "mp_msg.h"
 
-#include "sub/sub.h"
-
 
 static const unsigned char sipr_swaps[38][2] = {
     {0,63},{1,22},{2,44},{3,90},{5,81},{7,31},{8,86},{9,58},{10,36},{12,68},
@@ -2077,7 +2075,6 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
                    "lacing. This is abnormal and not supported.\n");
             use_this_block = 0;
         }
-        sub_utf8 = 1; // XXX this variable should be eventually removed
     } else
         use_this_block = 0;
 
