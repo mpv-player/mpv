@@ -324,8 +324,6 @@ extern int enable_mouse_movements;
 extern int vo_pts;
 extern float vo_fps;
 
-extern char *vo_subdevice;
-
 extern int vo_colorkey;
 
 extern int64_t WinID;
