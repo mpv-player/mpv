@@ -1266,7 +1266,6 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
         sh_v->disp_w = track->v_dwidth;
         sh_v->disp_h = track->v_dheight;
     }
-    sh_v->ImageDesc = NULL;
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Aspect: %f\n", sh_v->aspect);
 
     sh_v->ds = demuxer->video;
