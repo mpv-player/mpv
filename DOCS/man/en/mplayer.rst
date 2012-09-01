@@ -8,7 +8,7 @@ Synopsis
 | **mplayer** [options] --playlist=PLAYLIST
 | **mplayer** [options] files
 | **mplayer** [options] {group of files and options}
-| **mplayer** [br]://[title][/device] [options]
+| **mplayer** [bd]://[title][/device] [options]
 | **mplayer** dvd://[title|[start\_title]-end\_title][/device] [options]
 | **mplayer** \vcd://track[/device]
 | **mplayer** \tv://[channel][/input_id] [options]
@@ -610,8 +610,8 @@ EXAMPLES OF MPLAYER USAGE
 =========================
 
 Quickstart Blu-ray playing:
-    - ``mplayer br:////path/to/disc``
-    - ``mplayer br:// --bluray-device=/path/to/disc``
+    - ``mplayer bd:////path/to/disc``
+    - ``mplayer bd:// --bluray-device=/path/to/disc``
 
 Quickstart DVD playing:
     ``mplayer dvd://1``
