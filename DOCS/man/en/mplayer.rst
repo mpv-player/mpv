@@ -602,10 +602,6 @@ FILES
 ``~/.mplayer/input.conf``
     input bindings (see ``--input=keylist`` for the full list)
 
-``~/.mplayer/font/``
-    font directory (There must be a ``font.desc`` file and files with ``.RAW``
-    extension.)
-
 ``~/.mplayer/DVDkeys/``
     cached CSS keys
 

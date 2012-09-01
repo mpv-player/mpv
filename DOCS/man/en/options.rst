@@ -614,12 +614,10 @@
     specify a particular font. See also ``--subfont``. With fontconfig enabled
     the argument is a fontconfig pattern and the default is ``sans``. Without
     fontconfig the argument is a filename and the default is
-    ``~/.mplayer/subfont.ttf`` with freetype enabled, or
-    ``~/.mplayer/font/font.desc`` without it.
+    ``~/.mplayer/subfont.ttf``.
 
     *EXAMPLE*:
 
-    - ``--font=~/.mplayer/arial-14/font.desc``  (no fontconfig or freetype)
     - ``--font=~/.mplayer/arialuni.ttf`` (no fontconfig)
     - ``--font='Bitstream Vera Sans'`` (usual case with fontconfig)
     - ``--font='Bitstream Vera Sans:style=Bold'`` (usual case with fontconfig)
