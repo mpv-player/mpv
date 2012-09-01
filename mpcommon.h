@@ -20,6 +20,7 @@
 #define MPLAYER_MPCOMMON_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 // both int64_t and double should be able to represent this exactly
 #define MP_NOPTS_VALUE (-1LL<<63)
@@ -76,5 +77,7 @@
 #endif
 
 extern const char *mplayer_version;
+
+char *mp_format_time(double time, bool fractions);
 
 #endif /* MPLAYER_MPCOMMON_H */

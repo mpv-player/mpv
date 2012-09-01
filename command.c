@@ -2082,16 +2082,6 @@ static const char *property_error_string(int error_value)
     return "UNKNOWN";
 }
 
-static char *format_time(double time)
-{
-    int h, m, s = time;
-    h = s / 3600;
-    s -= h * 3600;
-    m = s / 60;
-    s -= m * 60;
-    return talloc_asprintf(NULL, "%02d:%02d:%02d", h, m, s);
-}
-
 static void show_chapters_on_osd(MPContext *mpctx)
 {
     int count = get_chapter_count(mpctx);
@@ -2106,7 +2096,7 @@ static void show_chapters_on_osd(MPContext *mpctx)
     for (n = 0; n < count; n++) {
         char *name = chapter_display_name(mpctx, n);
         double t = chapter_start_time(mpctx, n);
-        char* time = format_time(t);
+        char* time = mp_format_time(t, false);
         res = talloc_asprintf_append(res, "%s", time);
         talloc_free(time);
         char *m1 = "> ", *m2 = " <";

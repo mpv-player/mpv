@@ -67,20 +67,6 @@ static char *stripext(void *talloc_ctx, const char *s)
     return talloc_asprintf(talloc_ctx, "%.*s", end - s, s);
 }
 
-static char *format_time(void *talloc_ctx, double time, bool sub_seconds)
-{
-    int h, m, s = time;
-    h = s / 3600;
-    s -= h * 3600;
-    m = s / 60;
-    s -= m * 60;
-    char *res = talloc_asprintf(talloc_ctx, "%02d:%02d:%02d", h, m, s);
-    if (sub_seconds)
-        res = talloc_asprintf_append(res, ".%03d",
-                                     (int)((time - (int)time) * 1000));
-    return res;
-}
-
 static char *do_format_property(struct MPContext *mpctx, struct bstr s) {
     struct bstr prop_name = s;
     int fallbackpos = bstrchr(s, ':');
@@ -179,10 +165,12 @@ static char *create_fname(struct MPContext *mpctx, char *template,
             break;
         }
         case 'p':
-        case 'P':
-            append_filename(&res,
-                    format_time(res, get_current_time(mpctx), fmt == 'P'));
+        case 'P': {
+            char *t = mp_format_time(get_current_time(mpctx), fmt == 'P');
+            append_filename(&res, t);
+            talloc_free(t);
             break;
+        }
         case 't': {
             char fmt = *template;
             if (!fmt)

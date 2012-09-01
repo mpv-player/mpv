@@ -1151,20 +1151,9 @@ static void saddf(char *buf, int len, const char *format, ...)
  */
 static void sadd_hhmmssff(char *buf, int len, double time, bool fractions)
 {
-    if (time < 0) {
-        saddf(buf, len, "unknown");
-        return;
-    }
-    int h, m, s = time;
-    h = s / 3600;
-    s -= h * 3600;
-    m = s / 60;
-    s -= m * 60;
-    saddf(buf, len, "%02d:", h);
-    saddf(buf, len, "%02d:", m);
-    saddf(buf, len, "%02d", s);
-    if (fractions)
-        saddf(buf, len, ".%02d", (int)((time - (int)time) * 100));
+    char *s = mp_format_time(time, fractions);
+    saddf(buf, len, "%s", s);
+    talloc_free(s);
 }
 
 static void sadd_percentage(char *buf, int len, int percent) {
