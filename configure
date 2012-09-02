@@ -1943,7 +1943,7 @@ echores "$_smb"
 echocheck "libquvi support"
 if test "$_libquvi" = auto ; then
     _libquvi=no
-    if pkg_config_add libquvi ; then
+    if pkg_config_add 'libquvi >= 0.4.1' ; then
         _libquvi=yes
     fi
 fi
