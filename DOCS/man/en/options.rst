@@ -1874,14 +1874,6 @@
     - ``/tmp/subs/``
     - ``~/.mplayer/sub/``
 
---subalign=<0-2>
-    Specify which edge of the subtitles should be aligned at the height given
-    by ``--subpos``.
-
-    :0: Align subtitle top edge (original behavior).
-    :1: Align subtitle center.
-    :2: Align subtitle bottom edge (default).
-
 --subcp=<codepage>
     If your system supports ``iconv(3)``, you can use this option to specify
     the subtitle codepage.

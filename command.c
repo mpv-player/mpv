@@ -1454,35 +1454,6 @@ static int mp_property_sub_delay(m_option_t *prop, int action, void *arg,
     return m_property_delay(prop, action, arg, &sub_delay);
 }
 
-/// Alignment of text subtitles (RW)
-static int mp_property_sub_alignment(m_option_t *prop, int action,
-                                     void *arg, MPContext *mpctx)
-{
-    char *name[] = {
-        _("top"), _("center"), _("bottom")
-    };
-
-    if (!mpctx->current_track[STREAM_SUB])
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        M_PROPERTY_CLAMP(prop, sub_alignment);
-        *(char **) arg = talloc_strdup(NULL, mp_gtext(name[sub_alignment]));
-        return M_PROPERTY_OK;
-    case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        vo_osd_changed(OSDTYPE_SUBTITLE);
-    default:
-        return m_property_choice(prop, action, arg, &sub_alignment);
-    }
-}
-
 /// Subtitle visibility (RW)
 static int mp_property_sub_visibility(m_option_t *prop, int action,
                                       void *arg, MPContext *mpctx)
@@ -1784,8 +1755,6 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "sub_pos", mp_property_sub_pos, CONF_TYPE_INT,
       M_OPT_RANGE, 0, 100, NULL },
-    { "sub_alignment", mp_property_sub_alignment, CONF_TYPE_INT,
-      M_OPT_RANGE, 0, 2, NULL },
     { "sub_visibility", mp_property_sub_visibility, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
     { "sub_forced_only", mp_property_sub_forced_only, CONF_TYPE_FLAG,
@@ -1889,7 +1858,6 @@ static struct property_osd_display {
     // subs
     { "sub", 0, -1, _("Subtitles: %s") },
     { "sub_pos", 0, -1, _("Sub position: %s/100") },
-    { "sub_alignment", 0, -1, _("Sub alignment: %s") },
     { "sub_delay", 0, OSD_MSG_SUB_DELAY, _("Sub delay: %s") },
     { "sub_visibility", 0, -1, _("Subtitles: %s") },
     { "sub_forced_only", 0, -1, _("Forced sub only: %s") },
@@ -2009,7 +1977,6 @@ static struct {
     // subs
     { "sub", MP_CMD_SUB_SELECT, 1},
     { "sub_pos", MP_CMD_SUB_POS, 0},
-    { "sub_alignment", MP_CMD_SUB_ALIGNMENT, 1},
     { "sub_delay", MP_CMD_SUB_DELAY, 0},
     { "sub_visibility", MP_CMD_SUB_VISIBILITY, 1},
     { "sub_forced_only", MP_CMD_SUB_FORCED_ONLY, 1},
