@@ -28,20 +28,17 @@
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
+#include "libaf/format.h"
 
 
 static int channels = 2;
 static int samplerate = 44100;
-static int samplesize = 2;
-static int bitrate = 0;
-static int format = 0x1; // Raw PCM
+static int format = AF_FORMAT_S16_NE;
 
 const m_option_t demux_rawaudio_opts[] = {
   { "channels", &channels, CONF_TYPE_INT,CONF_RANGE,1,8, NULL },
   { "rate", &samplerate, CONF_TYPE_INT,CONF_RANGE,1000,8*48000, NULL },
-  { "samplesize", &samplesize, CONF_TYPE_INT,CONF_RANGE,1,8, NULL },
-  { "bitrate", &bitrate, CONF_TYPE_INT,CONF_MIN,0,0, NULL },
-  { "format", &format, CONF_TYPE_INT, CONF_MIN, 0 , 0, NULL },
+  { "format", &format, CONF_TYPE_AFMT, 0, 0, 0, NULL },
   {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -50,20 +47,21 @@ static demuxer_t* demux_rawaudio_open(demuxer_t* demuxer) {
   sh_audio_t* sh_audio;
   WAVEFORMATEX* w;
 
+  if ((format & AF_FORMAT_SPECIAL_MASK) != 0)
+      return NULL;
+
   sh_audio = new_sh_audio(demuxer,0);
   sh_audio->wf = w = malloc(sizeof(*w));
-  w->wFormatTag = sh_audio->format = format;
+  // Not a WAVEFORMATEX format; just abuse it to pass the internal mplayer
+  // format to ad_pcm.c
+  w->wFormatTag = format;
+  sh_audio->format = MKTAG('M', 'P', 'a', 'f');
   w->nChannels = sh_audio->channels = channels;
   w->nSamplesPerSec = sh_audio->samplerate = samplerate;
-  if (bitrate > 999)
-    w->nAvgBytesPerSec = bitrate/8;
-  else if (bitrate > 0)
-    w->nAvgBytesPerSec = bitrate*125;
-  else
-    w->nAvgBytesPerSec = samplerate*samplesize*channels;
-  w->nBlockAlign = channels*samplesize;
-  sh_audio->samplesize = samplesize;
-  w->wBitsPerSample = 8*samplesize;
+  sh_audio->samplesize = (af_fmt2bits(format) + 7) / 8;
+  w->nAvgBytesPerSec = samplerate * sh_audio->samplesize * channels;
+  w->nBlockAlign = channels * sh_audio->samplesize;
+  w->wBitsPerSample = 8 * sh_audio->samplesize;
   w->cbSize = 0;
 
   demuxer->movi_start = demuxer->stream->start_pos;

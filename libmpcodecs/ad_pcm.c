@@ -21,6 +21,8 @@
 #include <unistd.h>
 #include <stdbool.h>
 
+#include <libavutil/common.h>
+
 #include "talloc.h"
 #include "config.h"
 #include "ad_internal.h"
@@ -118,6 +120,10 @@ static int init(sh_audio_t * sh_audio)
     case 0x696e3332: // '23ni', little endian int32, MPlayer internal fourCC
         sh_audio->sample_format = AF_FORMAT_S32_LE;
         sh_audio->samplesize = 4;
+        break;
+    case MKTAG('M', 'P', 'a', 'f'):
+        sh_audio->sample_format = h->wFormatTag;
+        sh_audio->samplesize = (af_fmt2bits(sh_audio->sample_format) + 7) / 8;
         break;
     default:
         if (sh_audio->samplesize != 2)

@@ -66,6 +66,8 @@
 #define AF_FORMAT_IEC61937      (6<<6)
 #define AF_FORMAT_SPECIAL_MASK	(7<<6)
 
+#define AF_FORMAT_MASK          ((1<<9)-1)
+
 // PREDEFINED formats
 
 #define AF_FORMAT_U8		(AF_FORMAT_I|AF_FORMAT_US|AF_FORMAT_8BIT|AF_FORMAT_NE)

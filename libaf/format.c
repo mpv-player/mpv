@@ -112,12 +112,17 @@ const char *af_fmt2str_short(int format)
     return "??";
 }
 
+static bool af_fmt_valid(int format)
+{
+    return (format & AF_FORMAT_MASK) == format;
+}
+
 int af_str2fmt_short(bstr str)
 {
     if (bstr_startswith0(str, "0x")) {
         bstr rest;
         int fmt = bstrtoll(str, &rest, 16);
-        if (rest.len == 0)
+        if (rest.len == 0 && af_fmt_valid(fmt))
             return fmt;
     }
 

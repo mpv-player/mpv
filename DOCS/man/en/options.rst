@@ -1521,16 +1521,13 @@
 --rawaudio=<option1:option2:...>
     This option lets you play raw audio files. You have to use
     ``--demuxer=rawaudio`` as well. It may also be used to play audio CDs
-    which are not 44kHz 16-bit stereo. For playing raw AC-3 streams use
-    ``--rawaudio=format=0x2000 --demuxer=rawaudio``.
+    which are not 44kHz 16-bit stereo.
 
     Available options are:
 
     :channels=<value>:   number of channels
     :rate=<value>:       rate in samples per second
-    :samplesize=<value>: sample size in bytes
-    :bitrate=<value>:    bitrate for rawaudio files
-    :format=<value>:     fourcc in hex
+    :format=<value>:     mplayer audio format (e.g. s16le)
 
 --rawvideo=<option1:option2:...>
     This option lets you play raw video files. You have to use
