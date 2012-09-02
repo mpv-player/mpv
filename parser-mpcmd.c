@@ -70,6 +70,11 @@ static int split_opt_silent(struct parse_state *p)
     if (p->no_more_opts || !bstr_startswith0(p->arg, "-") || p->arg.len == 1)
         return 0;
 
+    if (bstrcmp0(p->arg, "--") == 0) {
+        p->no_more_opts = true;
+        return split_opt_silent(p);
+    }
+
     bool old_syntax = !bstr_startswith0(p->arg, "--");
     if (old_syntax) {
         p->arg = bstr_cut(p->arg, 1);
