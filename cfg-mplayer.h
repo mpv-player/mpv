@@ -711,9 +711,9 @@ const m_option_t mplayer_opts[]={
 
     OPT_FLAG_ON("softsleep", softsleep, 0),
 
-    OPT_CHOICE("term-osd", term_osd, M_OPT_IMPLICIT_DEFAULT,
+    OPT_CHOICE("term-osd", term_osd, 0,
                ({"force", 1},
-                {"auto", 2},
+                {"auto", 2}, {"", 2},
                 {"off", 0})),
 
     OPT_STRING("term-osd-esc", term_osd_esc, 0, OPTDEF_STR("\x1b[A\r\x1b[K")),

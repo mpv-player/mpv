@@ -267,21 +267,13 @@ const struct m_option_type m_option_type_intpair = {
 static int parse_choice(const struct m_option *opt, struct bstr name,
                         struct bstr param, void *dst)
 {
-    bool allow_empty = opt->flags & M_OPT_IMPLICIT_DEFAULT;
-    int ret;
-
     struct m_opt_choice_alternatives *alt = opt->priv;
-    if (param.len == 0) {
-        if (!allow_empty)
-            return M_OPT_MISSING_PARAM;
-        ret = 0;
-    } else {
-        for ( ; alt->name; alt++)
-            if (!bstrcasecmp0(param, alt->name))
-                break;
-        ret = 1;
-    }
+    for ( ; alt->name; alt++)
+        if (!bstrcasecmp0(param, alt->name))
+            break;
     if (!alt->name) {
+        if (param.len == 0)
+            return M_OPT_MISSING_PARAM;
         mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                "Invalid value for option %.*s: %.*s\n",
                BSTR_P(name), BSTR_P(param));
@@ -294,7 +286,7 @@ static int parse_choice(const struct m_option *opt, struct bstr name,
     if (dst)
         *(int *)dst = alt->value;
 
-    return ret;
+    return 1;
 }
 
 static char *print_choice(const m_option_t *opt, const void *val)
