@@ -1142,8 +1142,9 @@
 
     *NOTE*: This option is obsolete now that MPlayer has OpenDML support.
 
---loop=<number>
-    Loops movie playback <number> times. 0 means forever.
+--loop=<number|inf|off>
+    Loops playback <number> times. ``inf`` means forever and ``off`` disables
+    looping.
 
 --mc=<seconds/frame>
     Maximum A-V sync correction per frame (in seconds)

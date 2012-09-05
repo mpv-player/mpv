@@ -105,6 +105,66 @@ static void rescale_input_coordinates(struct MPContext *mpctx, int ix, int iy,
            vo->dheight, vo_fs);
 }
 
+static void choice_get_min_max(const struct m_option *opt, int *min, int *max)
+{
+    assert(opt->type == &m_option_type_choice);
+    *min = INT_MAX;
+    *max = INT_MIN;
+    for (struct m_opt_choice_alternatives *alt = opt->priv; alt->name; alt++) {
+        *min = FFMIN(*min, alt->value);
+        *max = FFMAX(*max, alt->value);
+    }
+    if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
+        *min = FFMIN(*min, opt->min);
+        *max = FFMAX(*max, opt->max);
+    }
+}
+
+static void check_choice(int dir, int val, bool *found, int *best, int choice)
+{
+    if ((dir == -1 && (!(*found) || choice > (*best)) && choice < val) ||
+        (dir == +1 && (!(*found) || choice < (*best)) && choice > val))
+    {
+        *found = true;
+        *best = choice;
+    }
+}
+
+static int step_choice(const struct m_option *opt, int val, int add, bool wrap)
+{
+    assert(opt->type == &m_option_type_choice);
+    int dir = add > 0 ? +1 : -1;
+    bool found = false;
+    int best = 0; // init. value unused
+
+    if (add == 0)
+        return val;
+
+    if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
+        int newval = val + add;
+        if (val >= opt->min && val <= opt->max &&
+            newval >= opt->min && newval <= opt->max)
+        {
+            found = true;
+            best = newval;
+        } else {
+            check_choice(dir, val, &found, &best, opt->min);
+            check_choice(dir, val, &found, &best, opt->max);
+        }
+    }
+
+    for (struct m_opt_choice_alternatives *alt = opt->priv; alt->name; alt++)
+        check_choice(dir, val, &found, &best, alt->value);
+
+    if (!found) {
+        int min, max;
+        choice_get_min_max(opt, &min, &max);
+        best = (dir == -1) ^ wrap ? min : max;
+    }
+
+    return best;
+}
+
 static int mp_property_generic_option(struct m_option *prop, int action,
                                       void *arg, MPContext *mpctx)
 {
@@ -125,13 +185,9 @@ static int mp_property_generic_option(struct m_option *prop, int action,
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
         if (opt->type == &m_option_type_choice) {
+            int add = arg ? (*(int *)arg) : +1;
             int v = *(int *) valptr;
-            int best = v;
-            struct m_opt_choice_alternatives *alt;
-            for (alt = opt->priv; alt->name; alt++)
-                if ((unsigned) alt->value - v - 1 < (unsigned) best - v - 1)
-                    best = alt->value;
-            *(int *) valptr = best;
+            *(int *) valptr = step_choice(opt, v, add, true);
             return M_PROPERTY_OK;
         }
         break;
@@ -150,20 +206,7 @@ static int mp_property_osdlevel(m_option_t *prop, int action, void *arg,
 static int mp_property_loop(m_option_t *prop, int action, void *arg,
                             MPContext *mpctx)
 {
-    struct MPOpts *opts = &mpctx->opts;
-    switch (action) {
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        if (opts->loop_times < 0)
-            *(char **)arg = talloc_strdup(NULL, "off");
-        else if (opts->loop_times == 0)
-            *(char **)arg = talloc_strdup(NULL, "inf");
-        else
-            break;
-        return M_PROPERTY_OK;
-    }
-    return m_property_int_range(prop, action, arg, &opts->loop_times);
+    return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
 /// Playback speed (RW)
@@ -1628,8 +1671,8 @@ static const m_option_t mp_properties[] = {
     // General
     { "osdlevel", mp_property_osdlevel, CONF_TYPE_INT,
       M_OPT_RANGE, 0, 3, NULL },
-    { "loop", mp_property_loop, CONF_TYPE_INT,
-      M_OPT_MIN, -1, 0, NULL },
+    { "loop", mp_property_loop, &m_option_type_choice,
+      0, 0, 0, "loop" },
     { "speed", mp_property_playback_speed, CONF_TYPE_FLOAT,
       M_OPT_RANGE, 0.01, 100.0, NULL },
     { "filename", mp_property_filename, CONF_TYPE_STRING,
@@ -2192,7 +2235,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                                     &prop, mpctx)) <= 0)
                 goto step_prop_err;
             if (prop->type == CONF_TYPE_INT ||
-                prop->type == CONF_TYPE_FLAG)
+                prop->type == CONF_TYPE_FLAG ||
+                prop->type == &m_option_type_choice)
                 i = cmd->args[1].v.f, arg = &i;
             else if (prop->type == CONF_TYPE_FLOAT)
                 arg = &cmd->args[1].v.f;

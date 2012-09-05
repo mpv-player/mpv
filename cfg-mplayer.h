@@ -688,7 +688,9 @@ const m_option_t mplayer_opts[]={
     {"leak-report", "", CONF_TYPE_PRINT, 0, 0, 0, (void*)1},
 
     OPT_FLAG_CONSTANTS("no-loop", loop_times, 0, 0, -1),
-    OPT_INTRANGE("loop", loop_times, 0, -1, 10000),
+    OPT_CHOICE_OR_INT("loop", loop_times, 0, 1, 10000,
+                      ({"off", -1}, {"0", -1},
+                       {"inf", 0})),
 
     {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN, 1, 0, NULL},
     {"shuffle", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},

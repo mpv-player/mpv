@@ -93,6 +93,7 @@ Command line switches
     =================================== ===================================
     -nosound                            --no-audio
     -use-filename-title                 --title="${filename}"
+    -loop 0                             --loop=inf
     =================================== ===================================
 
 input.conf and slave commands

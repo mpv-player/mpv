@@ -274,6 +274,14 @@ static int parse_choice(const struct m_option *opt, struct bstr name,
     if (!alt->name) {
         if (param.len == 0)
             return M_OPT_MISSING_PARAM;
+        if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
+            long long val;
+            if (parse_longlong(opt, name, param, &val) == 1) {
+                if (dst)
+                    *(int *)dst = val;
+                return 1;
+            }
+        }
         mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                "Invalid value for option %.*s: %.*s\n",
                BSTR_P(name), BSTR_P(param));
@@ -296,6 +304,10 @@ static char *print_choice(const m_option_t *opt, const void *val)
     for (alt = opt->priv; alt->name; alt++)
         if (alt->value == v)
             return talloc_strdup(NULL, alt->name);
+    if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
+        if (v >= opt->min && v <= opt->max)
+            return talloc_asprintf(NULL, "%d", v);
+    }
     abort();
 }
 

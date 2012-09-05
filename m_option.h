@@ -465,6 +465,10 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_HELPER_REMOVEPAREN(...) __VA_ARGS__
 #define OPT_CHOICE(...) OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_choice)
 #define OPT_CHOICE_(optname, varname, flags, choices, ...) OPT_GENERAL(optname, varname, flags, .priv = (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, __VA_ARGS__)
+// Union of choices and an int range. The choice values can be included in the
+// int range, or be completely separate - both works.
+#define OPT_CHOICE_OR_INT(...) OPT_CHOICE_OR_INT_(__VA_ARGS__, .type = &m_option_type_choice)
+#define OPT_CHOICE_OR_INT_(optname, varname, flags, minval, maxval, choices, ...) OPT_GENERAL(optname, varname, (flags) | CONF_RANGE, .min = minval, .max = maxval, .priv = (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, __VA_ARGS__)
 #define OPT_TIME(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_time)
 
 // subconf must have the type struct m_sub_options.
