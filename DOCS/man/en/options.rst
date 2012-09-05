@@ -87,12 +87,9 @@
     :``--afm=ffmpeg``:    Try FFmpeg's libavcodec codecs first.
     :``--afm=acm,dshow``: Try Win32 codecs first.
 
---aid=<ID>
-    Select audio channel (MPEG: 0-31, AVI/OGM: 1-99, ASF/RM: 0-127, VOB(AC-3):
-    128-159, VOB(LPCM): 160-191, MPEG-TS 17-8190). MPlayer prints the
-    available audio IDs when run in verbose (-v) mode. When playing an MPEG-TS
-    stream, MPlayer will use the first program (if present) with the chosen
-    audio stream. See also ``--alang``.
+--aid=<ID|auto|off>
+    Select audio channel. ``auto`` selects the default, ``off`` disables audio.
+    See also ``--alang``.
 
 --alang=<languagecode[,languagecode,...]>
     Specify a priority list of audio languages to use. Different container
@@ -1271,17 +1268,15 @@
     Do not use index present in the file even if one is present.
 
 --no-audio
-    Do not play sound. Useful for benchmarking.
+    Do not play sound. With some demuxers this may not work. In those cases
+    you can try ``--ao=null`` instead.
 
 --no-sub
-    Disables any otherwise auto-selected internal subtitles (as e.g. the
-    Matroska/mkv demuxer supports). Use ``--no-autosub`` to disable the
-    loading of external subtitle files.
+    Disables display of internal and external subtitles.
 
 --no-video
     Do not play video. With some demuxers this may not work. In those cases
-    you can try ``--vc=null --vo=null`` instead; but ``--vc=null`` is always
-    unreliable.
+    you can try ``--vo=null`` instead.
 
 --ontop
     Makes the player window stay on top of other windows. Supported by video
@@ -1699,10 +1694,9 @@
 --shuffle
     Play files in random order.
 
---sid=<ID>
-    Display the subtitle stream specified by <ID> (0-31). MPlayer prints the
-    available subtitle IDs when run in verbose (``-v``) mode. If you cannot
-    select one of the subtitles on a DVD, try ``--vobsubid``.
+--sid=<ID|auto|off>
+    Display the subtitle stream specified by <ID> (0-31). ``auto`` selects the
+    default, ``off`` disables subtitles.
     See also ``--slang``, ``--vobsubid``, ``--no-sub``.
 
 --slang=<languagecode[,languagecode,...]>
@@ -2262,10 +2256,8 @@
     :``--vfm=xanim``:
         Try XAnim codecs first.
 
---vid=<ID>
-    Select video channel (MPG: 0-15, ASF: 0-255, MPEG-TS: 17-8190). When
-    playing an MPEG-TS stream, MPlayer will use the first program (if present)
-    with the chosen video stream.
+--vid=<ID|auto|off>
+    Select video channel. ``auto`` selects the default, ``off`` disables video.
 
 --vm
     Try to change to a different video mode. Supported by the x11 and xv video

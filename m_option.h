@@ -471,6 +471,8 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_CHOICE_OR_INT_(optname, varname, flags, minval, maxval, choices, ...) OPT_GENERAL(optname, varname, (flags) | CONF_RANGE, .min = minval, .max = maxval, .priv = (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, __VA_ARGS__)
 #define OPT_TIME(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_time)
 
+#define OPT_TRACKCHOICE(name, var) OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"off", -2}, {"no", -2}, {"auto", -1}))
+
 // subconf must have the type struct m_sub_options.
 // flagv should be M_OPT_MERGE or M_OPT_FLATTEN.
 // varname refers to the field, that must be a pointer to a field described by

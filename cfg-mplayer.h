@@ -397,12 +397,11 @@ const m_option_t common_opts[] = {
     {"loadidx", &index_file_load, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
     // select audio/video/subtitle stream
-    OPT_INTRANGE("aid", audio_id, 0, -2, 8190),
-    OPT_INTRANGE("vid", video_id, 0, -2, 8190),
-    OPT_INTRANGE("sid", sub_id, 0, -2, 8190),
+    OPT_TRACKCHOICE("aid", audio_id),
+    OPT_TRACKCHOICE("vid", video_id),
+    OPT_TRACKCHOICE("sid", sub_id),
     OPT_FLAG_CONSTANTS("no-sub", sub_id, 0, -1, -2),
     OPT_FLAG_CONSTANTS("no-video", video_id, 0, -1, -2),
-    OPT_FLAG_CONSTANTS("audio", audio_id, 0, -2, -1),
     OPT_FLAG_CONSTANTS("no-audio", audio_id, 0, -1, -2),
     OPT_STRINGLIST("alang", audio_lang, 0),
     OPT_STRINGLIST("slang", sub_lang, 0),
