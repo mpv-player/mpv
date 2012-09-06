@@ -1965,115 +1965,6 @@ static int show_property_osd(MPContext *mpctx, const char *pname)
     return 0;
 }
 
-
-/**
- * Command to property bridge
- *
- * It is used to handle most commands that just set a property
- * and optionally display something on the OSD.
- * Two kinds of commands are handled: adjust or toggle.
- *
- * Adjust commands take 1 or 2 parameters: <value> <abs>
- * If <abs> is non-zero the property is set to the given value
- * otherwise it is adjusted.
- *
- * Toggle commands take 0 or 1 parameters. With no parameter
- * or a value less than the property minimum it just steps the
- * property to its next or previous value respectively.
- * Otherwise it sets it to the given value.
- */
-
-/// List of the commands that can be handled by setting a property.
-static struct {
-    /// property name
-    const char *name;
-    /// cmd id
-    int cmd;
-    /// set/adjust or toggle command
-    int toggle;
-} set_prop_cmd[] = {
-    // general
-    { "loop", MP_CMD_LOOP, 0},
-    { "chapter", MP_CMD_SEEK_CHAPTER, 0},
-    { "angle", MP_CMD_SWITCH_ANGLE, 0},
-    { "pause", MP_CMD_PAUSE, 0},
-    // audio
-    { "volume", MP_CMD_VOLUME, 0},
-    { "mute", MP_CMD_MUTE, 1},
-    { "audio_delay", MP_CMD_AUDIO_DELAY, 0},
-    { "switch_audio", MP_CMD_SWITCH_AUDIO, 1},
-    { "balance", MP_CMD_BALANCE, 0},
-    // video
-    { "fullscreen", MP_CMD_VO_FULLSCREEN, 1},
-    { "panscan", MP_CMD_PANSCAN, 0},
-    { "ontop", MP_CMD_VO_ONTOP, 1},
-    { "rootwin", MP_CMD_VO_ROOTWIN, 1},
-    { "border", MP_CMD_VO_BORDER, 1},
-    { "framedropping", MP_CMD_FRAMEDROPPING, 1},
-    { "gamma", MP_CMD_GAMMA, 0},
-    { "brightness", MP_CMD_BRIGHTNESS, 0},
-    { "contrast", MP_CMD_CONTRAST, 0},
-    { "saturation", MP_CMD_SATURATION, 0},
-    { "hue", MP_CMD_HUE, 0},
-    { "vsync", MP_CMD_SWITCH_VSYNC, 1},
-    // subs
-    { "sub", MP_CMD_SUB_SELECT, 1},
-    { "sub_pos", MP_CMD_SUB_POS, 0},
-    { "sub_delay", MP_CMD_SUB_DELAY, 0},
-    { "sub_visibility", MP_CMD_SUB_VISIBILITY, 1},
-    { "sub_forced_only", MP_CMD_SUB_FORCED_ONLY, 1},
-    { "sub_scale", MP_CMD_SUB_SCALE, 0},
-#ifdef CONFIG_ASS
-    { "ass_use_margins", MP_CMD_ASS_USE_MARGINS, 1},
-#endif
-#ifdef CONFIG_TV
-    { "tv_brightness", MP_CMD_TV_SET_BRIGHTNESS, 0},
-    { "tv_hue", MP_CMD_TV_SET_HUE, 0},
-    { "tv_saturation", MP_CMD_TV_SET_SATURATION, 0},
-    { "tv_contrast", MP_CMD_TV_SET_CONTRAST, 0},
-#endif
-    {}
-};
-
-/// Handle commands that set a property.
-static bool set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
-{
-    int i, r;
-    m_option_t *prop;
-    const char *pname;
-
-    // look for the command
-    for (i = 0; set_prop_cmd[i].name; i++)
-        if (set_prop_cmd[i].cmd == cmd->id)
-            break;
-    if (!(pname = set_prop_cmd[i].name))
-        return 0;
-
-    if (mp_property_do(pname, M_PROPERTY_GET_TYPE, &prop, mpctx) <= 0 || !prop)
-        return 0;
-
-    // toggle command
-    if (set_prop_cmd[i].toggle) {
-        // set to value
-        if (cmd->nargs > 0 && cmd->args[0].v.i >= prop->min)
-            r = mp_property_do(pname, M_PROPERTY_SET, &cmd->args[0].v.i, mpctx);
-        else if (cmd->nargs > 0)
-            r = mp_property_do(pname, M_PROPERTY_STEP_DOWN, NULL, mpctx);
-        else
-            r = mp_property_do(pname, M_PROPERTY_STEP_UP, NULL, mpctx);
-    } else if (cmd->args[1].v.i)        //set
-        r = mp_property_do(pname, M_PROPERTY_SET, &cmd->args[0].v, mpctx);
-    else                        // adjust
-        r = mp_property_do(pname, M_PROPERTY_STEP_UP, &cmd->args[0].v, mpctx);
-
-    if (r <= 0)
-        return 1;
-
-    show_property_osd(mpctx, pname);
-
-    return 1;
-}
-
 static const char *property_error_string(int error_value)
 {
     switch (error_value) {
@@ -2176,8 +2067,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     sh_video_t *const sh_video = mpctx->sh_video;
     int osd_duration = opts->osd_duration;
     int case_fallthrough_hack = 0;
-    if (set_property_command(mpctx, cmd))
-        goto old_pause_hack;  // was handled already
     switch (cmd->id) {
     case MP_CMD_SEEK: {
         mpctx->add_osd_seek_info = true;
@@ -2774,7 +2663,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                "Received unknown cmd %s\n", cmd->name);
     }
 
-old_pause_hack:
     switch (cmd->pausing) {
     case 1:     // "pausing"
         pause_player(mpctx);

@@ -101,46 +101,21 @@ static const mp_cmd_t mp_cmds[] = {
 #endif
   { MP_CMD_SEEK, "seek", { ARG_FLOAT, OARG_INT(0), OARG_INT(0) } },
   { MP_CMD_EDL_MARK, "edl_mark", },
-  { MP_CMD_AUDIO_DELAY, "audio_delay", { ARG_FLOAT, OARG_INT(0) } },
   { MP_CMD_SPEED_INCR, "speed_incr", { ARG_FLOAT } },
   { MP_CMD_SPEED_MULT, "speed_mult", { ARG_FLOAT } },
   { MP_CMD_SPEED_SET, "speed_set", { ARG_FLOAT } },
   { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
   { MP_CMD_STOP, "stop", },
-  { MP_CMD_PAUSE, "pause", },
   { MP_CMD_FRAME_STEP, "frame_step", },
   { MP_CMD_PLAYLIST_NEXT, "playlist_next", { OARG_INT(0) } },
   { MP_CMD_PLAYLIST_PREV, "playlist_prev", { OARG_INT(0) } },
-  { MP_CMD_LOOP, "loop", { ARG_INT, OARG_INT(0) } },
-  { MP_CMD_SUB_DELAY, "sub_delay", { ARG_FLOAT, OARG_INT(0) } },
   { MP_CMD_SUB_STEP, "sub_step", { ARG_INT, OARG_INT(0) } },
   { MP_CMD_OSD, "osd", { OARG_INT(-1) } },
   { MP_CMD_OSD_SHOW_TEXT, "osd_show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
   { MP_CMD_OSD_SHOW_PROPERTY_TEXT, "osd_show_property_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
   { MP_CMD_OSD_SHOW_PROGRESSION, "osd_show_progression", },
-  { MP_CMD_VOLUME, "volume", { ARG_FLOAT, OARG_INT(0) } },
-  { MP_CMD_BALANCE, "balance", { ARG_FLOAT, OARG_INT(0) } },
   { MP_CMD_MIXER_USEMASTER, "use_master", },
-  { MP_CMD_MUTE, "mute", { OARG_INT(-1) } },
-  { MP_CMD_CONTRAST, "contrast", { ARG_INT, OARG_INT(0) } },
-  { MP_CMD_GAMMA, "gamma", { ARG_INT, OARG_INT(0) }  },
-  { MP_CMD_BRIGHTNESS, "brightness", { ARG_INT, OARG_INT(0) }  },
-  { MP_CMD_HUE, "hue", { ARG_INT, OARG_INT(0) } },
-  { MP_CMD_SATURATION, "saturation", { ARG_INT, OARG_INT(0) }  },
-  { MP_CMD_FRAMEDROPPING, "frame_drop", { OARG_INT(-1) } },
-  { MP_CMD_SUB_POS, "sub_pos", { ARG_INT, OARG_INT(0) } },
-  { MP_CMD_SUB_ALIGNMENT, "sub_alignment", { OARG_INT(-1) } },
-  { MP_CMD_SUB_VISIBILITY, "sub_visibility", { OARG_INT(-1) } },
   { MP_CMD_SUB_LOAD, "sub_load", { ARG_STRING } },
-  { MP_CMD_SUB_SELECT, "vobsub_lang", { OARG_INT(-2) } }, // for compatibility
-  { MP_CMD_SUB_SELECT, "sub_select", { OARG_INT(-2) } },
-  { MP_CMD_SUB_SCALE, "sub_scale", { ARG_FLOAT, OARG_INT(0) } },
-#ifdef CONFIG_ASS
-  { MP_CMD_ASS_USE_MARGINS, "ass_use_margins", { OARG_INT(-1) } },
-#endif
-  { MP_CMD_SWITCH_AUDIO, "switch_audio", { OARG_INT(-1) } },
-  { MP_CMD_SWITCH_ANGLE, "switch_angle", { OARG_INT(-1) } },
-  { MP_CMD_SWITCH_TITLE, "switch_title", { OARG_INT(-1) } },
 #ifdef CONFIG_TV
   { MP_CMD_TV_START_SCAN, "tv_start_scan", },
   { MP_CMD_TV_STEP_CHANNEL, "tv_step_channel", { ARG_INT } },
@@ -151,23 +126,12 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_TV_SET_FREQ, "tv_set_freq", { ARG_FLOAT } },
   { MP_CMD_TV_STEP_FREQ, "tv_step_freq", { ARG_FLOAT } },
   { MP_CMD_TV_SET_NORM, "tv_set_norm", { ARG_STRING } },
-  { MP_CMD_TV_SET_BRIGHTNESS, "tv_set_brightness", { ARG_INT, OARG_INT(1) } },
-  { MP_CMD_TV_SET_CONTRAST, "tv_set_contrast", { ARG_INT, OARG_INT(1) } },
-  { MP_CMD_TV_SET_HUE, "tv_set_hue", { ARG_INT, OARG_INT(1) } },
-  { MP_CMD_TV_SET_SATURATION, "tv_set_saturation", { ARG_INT, OARG_INT(1) } },
 #endif
-  { MP_CMD_SUB_FORCED_ONLY, "forced_subs_only", { OARG_INT(-1) } },
 #ifdef CONFIG_DVBIN
   { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", { ARG_INT, ARG_INT } },
 #endif
   { MP_CMD_SWITCH_RATIO, "switch_ratio", { OARG_FLOAT(0) } },
-  { MP_CMD_VO_FULLSCREEN, "vo_fullscreen", { OARG_INT(-1) } },
-  { MP_CMD_VO_ONTOP, "vo_ontop", { OARG_INT(-1) } },
-  { MP_CMD_VO_ROOTWIN, "vo_rootwin", { OARG_INT(-1) } },
-  { MP_CMD_VO_BORDER, "vo_border", { OARG_INT(-1) } },
   { MP_CMD_SCREENSHOT, "screenshot", { OARG_INT(0), OARG_INT(0) } },
-  { MP_CMD_PANSCAN, "panscan", { ARG_FLOAT, OARG_INT(0) } },
-  { MP_CMD_SWITCH_VSYNC, "switch_vsync", { OARG_INT(0) } },
   { MP_CMD_LOADFILE, "loadfile", { ARG_STRING, OARG_INT(0) } },
   { MP_CMD_LOADLIST, "loadlist", { ARG_STRING, OARG_INT(0) } },
   { MP_CMD_PLAYLIST_CLEAR, "playlist_clear", },
@@ -180,7 +144,6 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_STEP_PROPERTY, "step_property", { ARG_STRING, OARG_FLOAT(0), OARG_INT(0) } },
   { MP_CMD_STEP_PROPERTY_OSD, "step_property_osd", { ARG_STRING, OARG_FLOAT(0), OARG_INT(0) } },
 
-  { MP_CMD_SEEK_CHAPTER, "seek_chapter", { ARG_INT, OARG_INT(0) } },
   { MP_CMD_SET_MOUSE_POS, "set_mouse_pos", { ARG_INT, ARG_INT } },
 
   { MP_CMD_AF_SWITCH, "af_switch", { ARG_STRING } },
@@ -196,6 +159,50 @@ static const mp_cmd_t mp_cmds[] = {
 
   {0}
 };
+
+// Map legacy commands to proper commands
+struct legacy_cmd {
+    const char *old, *new;
+};
+#define LEGACY_STEP(old) {old, "step_property_osd " old}
+static const struct legacy_cmd legacy_cmds[] = {
+    LEGACY_STEP("loop"),
+    {"seek_chapter", "step_property_osd chapter"},
+    {"switch_angle", "step_property_osd angle"},
+    LEGACY_STEP("pause"),
+    LEGACY_STEP("volume"),
+    LEGACY_STEP("mute"),
+    LEGACY_STEP("audio_delay"),
+    LEGACY_STEP("switch_audio"),
+    LEGACY_STEP("balance"),
+    {"vo_fullscreen", "step_property fullscreen"},
+    LEGACY_STEP("panscan"),
+    {"vo_ontop", "step_property_osd ontop"},
+    {"vo_rootwin", "step_property_osd rootwin"},
+    {"vo_border", "step_property_osd border"},
+    {"frame_drop", "step_property_osd framedropping"},
+    LEGACY_STEP("gamma"),
+    LEGACY_STEP("brightness"),
+    LEGACY_STEP("contrast"),
+    LEGACY_STEP("saturation"),
+    LEGACY_STEP("hue"),
+    {"switch_vsync", "step_property_osd vsync"},
+    {"sub_select", "step_property_osd sub"},
+    LEGACY_STEP("sub_pos"),
+    LEGACY_STEP("sub_delay"),
+    LEGACY_STEP("sub_visibility"),
+    {"forced_subs_only", "step_property_osd sub_forced_only"},
+    LEGACY_STEP("sub_scale"),
+    LEGACY_STEP("ass_use_margins"),
+    {"tv_set_brightness", "tv_brightness"},
+    {"tv_set_hue", "tv_hue"},
+    {"tv_set_saturation", "tv_saturation"},
+    {"tv_set_contrast", "tv_contrast"},
+    {"pt_step 1", "playlist_next"},
+    {"pt_step -1", "playlist_prev"},
+    {0}
+};
+
 
 /// The names of the keys as used in input.conf
 /// If you add some new keys, you also need to add them here
@@ -685,6 +692,8 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
     int pausing = 0;
     char *ptr;
     const mp_cmd_t *cmd_def;
+    mp_cmd_t *cmd = NULL;
+    void *tmp = NULL;
 
     // Ignore heading spaces.
     while (str[0] == ' ' || str[0] == '\t')
@@ -704,6 +713,18 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
         str = &str[19];
     }
 
+    for (const struct legacy_cmd *entry = legacy_cmds; entry->old; entry++) {
+        size_t old_len = strlen(entry->old);
+        if (strncasecmp(entry->old, str, old_len) == 0) {
+            mp_tmsg(MSGT_INPUT, MSGL_WARN, "Warning: command '%s' is "
+                    "deprecated, replaced with '%s'. Fix your input.conf!\n",
+                    entry->old, entry->new);
+            str = talloc_asprintf(NULL, "%s%s", entry->new, str + old_len);
+            tmp = str;
+            break;
+        }
+    }
+
     ptr = str + strcspn(str, "\t ");
     if (*ptr != 0)
         l = ptr - str;
@@ -711,7 +732,7 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
         l = strlen(str);
 
     if (l == 0)
-        return NULL;
+        goto error;
 
     for (i = 0; mp_cmds[i].name != NULL; i++) {
         if (strncasecmp(mp_cmds[i].name, str, l) == 0)
@@ -719,11 +740,11 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
     }
 
     if (mp_cmds[i].name == NULL)
-        return NULL;
+        goto error;
 
     cmd_def = &mp_cmds[i];
 
-    mp_cmd_t *cmd = talloc_ptrtype(NULL, cmd);
+    cmd = talloc_ptrtype(NULL, cmd);
     *cmd = (mp_cmd_t){
         .id = cmd_def->id,
         .name = talloc_strdup(cmd, cmd_def->name),
@@ -815,10 +836,12 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
     if (i < MP_CMD_MAX_ARGS)
         cmd->args[i].type = 0;
 
+    talloc_free(tmp);
     return cmd;
 
  error:
     mp_cmd_free(cmd);
+    talloc_free(tmp);
     return NULL;
 }
 
