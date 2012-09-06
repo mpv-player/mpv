@@ -19,7 +19,6 @@
 #ifndef MPLAYER_MP_OSD_H
 #define MPLAYER_MP_OSD_H
 
-#define OSD_MSG_TV_CHANNEL              0
 #define OSD_MSG_TEXT                    1
 #define OSD_MSG_SUB_DELAY               2
 #define OSD_MSG_SPEED                   3
@@ -27,6 +26,7 @@
 #define OSD_MSG_BAR                     5
 #define OSD_MSG_PAUSE                   6
 #define OSD_MSG_RADIO_CHANNEL           7
+#define OSD_MSG_TV_CHANNEL              8
 /// Base id for messages generated from the commmand to property bridge.
 #define OSD_MSG_PROPERTY                0x100
 #define OSD_MSG_SUB_BASE                0x1000

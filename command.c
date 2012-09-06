@@ -1862,55 +1862,54 @@ void property_print_help(void)
 static struct property_osd_display {
     /// property name
     const char *name;
+    /// osd msg template
+    const char *osd_msg;
     /// progressbar type
     int osd_progbar; // -1 is special value for seek indicators
     /// osd msg id if it must be shared
     int osd_id;
-    /// osd msg template
-    const char *osd_msg;
 } property_osd_display[] = {
     // general
-    { "loop", 0, -1, _("Loop: %s") },
-    { "chapter", -1, -1, NULL },
-    { "pts_association_mode", 0, -1, "PTS association mode: %s" },
-    { "hr_seek", 0, -1, "hr-seek: %s" },
-    { "speed", 0, -1, _("Speed: x %6s") },
+    { "loop", _("Loop: %s") },
+    { "chapter", NULL, .osd_progbar = -1 },
+    { "pts_association_mode", "PTS association mode: %s" },
+    { "hr_seek", "hr-seek: %s" },
+    { "speed", _("Speed: x %6s") },
     // audio
-    { "volume", OSD_VOLUME, -1, _("Volume") },
-    { "mute", 0, -1, _("Mute: %s") },
-    { "audio_delay", 0, -1, _("A-V delay: %s") },
-    { "switch_audio", 0, -1, _("Audio: %s") },
-    { "balance", OSD_BALANCE, -1, _("Balance") },
+    { "volume", _("Volume"), .osd_progbar = OSD_VOLUME },
+    { "mute", _("Mute: %s") },
+    { "audio_delay", _("A-V delay: %s") },
+    { "switch_audio", _("Audio: %s") },
+    { "balance", _("Balance"), .osd_progbar = OSD_BALANCE },
     // video
-    { "panscan", OSD_PANSCAN, -1, _("Panscan") },
-    { "ontop", 0, -1, _("Stay on top: %s") },
-    { "rootwin", 0, -1, _("Rootwin: %s") },
-    { "border", 0, -1, _("Border: %s") },
-    { "framedropping", 0, -1, _("Framedropping: %s") },
-    { "deinterlace", 0, -1, _("Deinterlace: %s") },
-    { "colormatrix", 0, -1, _("YUV colormatrix: %s") },
-    { "colormatrix_input_range", 0, -1, _("YUV input range: %s") },
-    { "colormatrix_output_range", 0, -1, _("RGB output range: %s") },
-    { "gamma", OSD_BRIGHTNESS, -1, _("Gamma") },
-    { "brightness", OSD_BRIGHTNESS, -1, _("Brightness") },
-    { "contrast", OSD_CONTRAST, -1, _("Contrast") },
-    { "saturation", OSD_SATURATION, -1, _("Saturation") },
-    { "hue", OSD_HUE, -1, _("Hue") },
-    { "vsync", 0, -1, _("VSync: %s") },
+    { "panscan", _("Panscan"), .osd_progbar = OSD_PANSCAN },
+    { "ontop", _("Stay on top: %s") },
+    { "rootwin", _("Rootwin: %s") },
+    { "border", _("Border: %s") },
+    { "framedropping", _("Framedropping: %s") },
+    { "deinterlace", _("Deinterlace: %s") },
+    { "colormatrix", _("YUV colormatrix: %s") },
+    { "colormatrix_input_range", _("YUV input range: %s") },
+    { "colormatrix_output_range", _("RGB output range: %s") },
+    { "gamma", _("Gamma"), .osd_progbar = OSD_BRIGHTNESS },
+    { "brightness", _("Brightness"), .osd_progbar = OSD_BRIGHTNESS },
+    { "contrast", _("Contrast"), .osd_progbar = OSD_CONTRAST },
+    { "saturation", _("Saturation"), .osd_progbar = OSD_SATURATION },
+    { "hue", _("Hue"), .osd_progbar = OSD_HUE },
+    { "vsync", _("VSync: %s") },
     // subs
-    { "sub", 0, -1, _("Subtitles: %s") },
-    { "sub_pos", 0, -1, _("Sub position: %s/100") },
-    { "sub_delay", 0, OSD_MSG_SUB_DELAY, _("Sub delay: %s") },
-    { "sub_visibility", 0, -1, _("Subtitles: %s") },
-    { "sub_forced_only", 0, -1, _("Forced sub only: %s") },
-    { "sub_scale", 0, -1, _("Sub Scale: %s")},
-    { "ass_vsfilter_aspect_compat", 0, -1,
-      _("Subtitle VSFilter aspect compat: %s")},
+    { "sub", _("Subtitles: %s") },
+    { "sub_pos", _("Sub position: %s/100") },
+    { "sub_delay", _("Sub delay: %s"), .osd_id = OSD_MSG_SUB_DELAY },
+    { "sub_visibility", _("Subtitles: %s") },
+    { "sub_forced_only", _("Forced sub only: %s") },
+    { "sub_scale", _("Sub Scale: %s")},
+    { "ass_vsfilter_aspect_compat", _("Subtitle VSFilter aspect compat: %s")},
 #ifdef CONFIG_TV
-    { "tv_brightness", OSD_BRIGHTNESS, -1, _("Brightness") },
-    { "tv_hue", OSD_HUE, -1, _("Hue") },
-    { "tv_saturation", OSD_SATURATION, -1, _("Saturation") },
-    { "tv_contrast", OSD_CONTRAST, -1, _("Contrast") },
+    { "tv_brightness", _("Brightness"), .osd_progbar = OSD_BRIGHTNESS },
+    { "tv_hue", _("Hue"), .osd_progbar = OSD_HUE},
+    { "tv_saturation", _("Saturation"), .osd_progbar = OSD_SATURATION },
+    { "tv_contrast", _("Contrast"), .osd_progbar = OSD_CONTRAST },
 #endif
     {}
 };
@@ -1957,7 +1956,7 @@ static int show_property_osd(MPContext *mpctx, const char *pname)
         char *val = mp_property_print(pname, mpctx);
         if (val) {
             int index = p - property_osd_display;
-            set_osd_tmsg(mpctx, p->osd_id >= 0 ? p->osd_id : OSD_MSG_PROPERTY + index,
+            set_osd_tmsg(mpctx, p->osd_id > 0 ? p->osd_id : OSD_MSG_PROPERTY + index,
                          1, opts->osd_duration, p->osd_msg, val);
             talloc_free(val);
         }
