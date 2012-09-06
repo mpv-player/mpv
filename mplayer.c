@@ -247,8 +247,6 @@ int use_filedir_conf;
 #include "mpcommon.h"
 #include "command.h"
 
-#include "metadata.h"
-
 static void reset_subtitles(struct MPContext *mpctx);
 static void reinit_subs(struct MPContext *mpctx);
 
@@ -258,129 +256,6 @@ static float get_relative_time(struct MPContext *mpctx)
     unsigned int delta = new_time - mpctx->last_time;
     mpctx->last_time = new_time;
     return delta * 0.000001;
-}
-
-static int is_valid_metadata_type(struct MPContext *mpctx, metadata_t type)
-{
-    switch (type) {
-    /* check for valid video stream */
-    case META_VIDEO_CODEC:
-    case META_VIDEO_BITRATE:
-    case META_VIDEO_RESOLUTION:
-        if (!mpctx->sh_video)
-            return 0;
-        break;
-
-    /* check for valid audio stream */
-    case META_AUDIO_CODEC:
-    case META_AUDIO_BITRATE:
-    case META_AUDIO_SAMPLES:
-        if (!mpctx->sh_audio)
-            return 0;
-        break;
-
-    /* check for valid demuxer */
-    case META_INFO_TITLE:
-    case META_INFO_ARTIST:
-    case META_INFO_ALBUM:
-    case META_INFO_YEAR:
-    case META_INFO_COMMENT:
-    case META_INFO_TRACK:
-    case META_INFO_GENRE:
-        if (!mpctx->master_demuxer)
-            return 0;
-        break;
-
-    default:
-        break;
-    }
-
-    return 1;
-}
-
-static char *get_demuxer_info(struct MPContext *mpctx, char *tag)
-{
-    char **info = mpctx->master_demuxer->info;
-    int n;
-
-    if (!info || !tag)
-        return talloc_strdup(NULL, "");
-
-    for (n = 0; info[2 * n] != NULL; n++)
-        if (!strcasecmp(info[2 * n], tag))
-            break;
-
-    return talloc_strdup(NULL, info[2 * n + 1] ? info[2 * n + 1] : "");
-}
-
-char *get_metadata(struct MPContext *mpctx, metadata_t type)
-{
-    sh_audio_t * const sh_audio = mpctx->sh_audio;
-    sh_video_t * const sh_video = mpctx->sh_video;
-
-    if (!is_valid_metadata_type(mpctx, type))
-        return NULL;
-
-    switch (type) {
-    case META_NAME:
-        return talloc_strdup(NULL, mp_basename(mpctx->filename));
-    case META_VIDEO_CODEC:
-        if (sh_video->format == 0x10000001)
-            return talloc_strdup(NULL, "mpeg1");
-        else if (sh_video->format == 0x10000002)
-            return talloc_strdup(NULL, "mpeg2");
-        else if (sh_video->format == 0x10000004)
-            return talloc_strdup(NULL, "mpeg4");
-        else if (sh_video->format == 0x10000005)
-            return talloc_strdup(NULL, "h264");
-        else if (sh_video->format >= 0x20202020)
-            return talloc_asprintf(NULL, "%.4s", (char *) &sh_video->format);
-        else
-            return talloc_asprintf(NULL, "0x%08X", sh_video->format);
-    case META_VIDEO_BITRATE:
-        return talloc_asprintf(NULL, "%d kbps",
-                               (int) (sh_video->i_bps * 8 / 1024));
-    case META_VIDEO_RESOLUTION:
-        return talloc_asprintf(NULL, "%d x %d", sh_video->disp_w,
-                               sh_video->disp_h);
-    case META_AUDIO_CODEC:
-        if (sh_audio->codec && sh_audio->codec->name)
-            return talloc_strdup(NULL, sh_audio->codec->name);
-        return talloc_strdup(NULL, "");
-    case META_AUDIO_BITRATE:
-        return talloc_asprintf(NULL, "%d kbps",
-                               (int) (sh_audio->i_bps * 8 / 1000));
-    case META_AUDIO_SAMPLES:
-        return talloc_asprintf(NULL, "%d Hz, %d ch.", sh_audio->samplerate,
-                               sh_audio->channels);
-
-    /* check for valid demuxer */
-    case META_INFO_TITLE:
-        return get_demuxer_info(mpctx, "Title");
-
-    case META_INFO_ARTIST:
-        return get_demuxer_info(mpctx, "Artist");
-
-    case META_INFO_ALBUM:
-        return get_demuxer_info(mpctx, "Album");
-
-    case META_INFO_YEAR:
-        return get_demuxer_info(mpctx, "Year");
-
-    case META_INFO_COMMENT:
-        return get_demuxer_info(mpctx, "Comment");
-
-    case META_INFO_TRACK:
-        return get_demuxer_info(mpctx, "Track");
-
-    case META_INFO_GENRE:
-        return get_demuxer_info(mpctx, "Genre");
-
-    default:
-        break;
-    }
-
-    return talloc_strdup(NULL, "");
 }
 
 static void print_stream(struct MPContext *mpctx, struct track *t, int id)

@@ -30,7 +30,6 @@
 #include "m_property.h"
 #include "bstr.h"
 #include "mp_msg.h"
-#include "metadata.h"
 #include "path.h"
 #include "libmpcodecs/mp_image.h"
 #include "libmpcodecs/dec_video.h"
@@ -154,14 +153,13 @@ static char *create_fname(struct MPContext *mpctx, char *template,
         }
         case 'f':
         case 'F': {
-            char *video_file = get_metadata(mpctx, META_NAME);
+            char *video_file = mp_basename(mpctx->filename);
             if (video_file) {
                 char *name = video_file;
                 if (fmt == 'F')
                     name = stripext(res, video_file);
                 append_filename(&res, name);
             }
-            talloc_free(video_file);
             break;
         }
         case 'p':
