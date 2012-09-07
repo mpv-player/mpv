@@ -63,6 +63,12 @@ extern const demuxer_desc_t demuxer_desc_gif;
 extern const demuxer_desc_t demuxer_desc_lavf;
 extern const demuxer_desc_t demuxer_desc_lavf_preferred;
 extern const demuxer_desc_t demuxer_desc_mng;
+extern const demuxer_desc_t demuxer_desc_mpeg_ps;
+extern const demuxer_desc_t demuxer_desc_mpeg_pes;
+extern const demuxer_desc_t demuxer_desc_mpeg_gxf;
+extern const demuxer_desc_t demuxer_desc_mpeg_es;
+extern const demuxer_desc_t demuxer_desc_mpeg4_es;
+extern const demuxer_desc_t demuxer_desc_h264_es;
 
 /* Please do not add any new demuxers here. If you want to implement a new
  * demuxer, add it to libavformat, except for wrappers around external
@@ -88,6 +94,12 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef CONFIG_MNG
     &demuxer_desc_mng,
 #endif
+    &demuxer_desc_mpeg_ps,
+    &demuxer_desc_mpeg_pes,
+    &demuxer_desc_mpeg_gxf,
+    &demuxer_desc_mpeg_es,
+    &demuxer_desc_mpeg4_es,
+    &demuxer_desc_h264_es,
     /* Please do not add any new demuxers here. If you want to implement a new
      * demuxer, add it to libavformat, except for wrappers around external
      * libraries and demuxers requiring binary support. */
@@ -685,6 +697,43 @@ int demux_read_data(demux_stream_t *ds, unsigned char *mem, int len)
     return bytes;
 }
 
+/**
+ * \brief read data until the given 3-byte pattern is encountered, up to maxlen
+ * \param mem memory to read data into, may be NULL to discard data
+ * \param maxlen maximum number of bytes to read
+ * \param read number of bytes actually read
+ * \param pattern pattern to search for (lowest 8 bits are ignored)
+ * \return whether pattern was found
+ */
+int demux_pattern_3(demux_stream_t *ds, unsigned char *mem, int maxlen,
+                    int *read, uint32_t pattern)
+{
+    register uint32_t head = 0xffffff00;
+    register uint32_t pat = pattern & 0xffffff00;
+    int total_len = 0;
+    do {
+        register unsigned char *ds_buf = &ds->buffer[ds->buffer_size];
+        int len = ds->buffer_size - ds->buffer_pos;
+        register long pos = -len;
+        if (unlikely(pos >= 0)) { // buffer is empty
+            ds_fill_buffer(ds);
+            continue;
+        }
+        do {
+            head |= ds_buf[pos];
+            head <<= 8;
+        } while (++pos && head != pat);
+        len += pos;
+        if (total_len + len > maxlen)
+            len = maxlen - total_len;
+        len = demux_read_data(ds, mem ? &mem[total_len] : NULL, len);
+        total_len += len;
+    } while ((head != pat || total_len < 3) && total_len < maxlen && !ds->eof);
+    if (read)
+        *read = total_len;
+    return total_len >= 3 && head == pat;
+}
+
 void ds_free_packs(demux_stream_t *ds)
 {
     demux_packet_t *dp = ds->first;
@@ -938,7 +987,7 @@ struct demuxer *demux_open_withparams(struct MPOpts *opts,
     // format, instead of reyling on libav to auto-detect the stream's format
     // correctly.
     switch (file_format) {
-    case DEMUXER_TYPE_MPEG_PS:
+    //case DEMUXER_TYPE_MPEG_PS:
     case DEMUXER_TYPE_MPEG_TS:
     case DEMUXER_TYPE_Y4M:
     case DEMUXER_TYPE_NSV:
