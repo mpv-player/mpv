@@ -89,7 +89,7 @@ static void close_f(stream_t *stream)
     avio_close(avio);
 }
 
-static const char prefix[] = "ffmpeg://";
+static const char * const prefix[] = { "lavf://", "ffmpeg://" };
 
 static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
 {
@@ -97,8 +97,6 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     const char *filename;
     AVIOContext *avio = NULL;
     int res = STREAM_ERROR;
-    int64_t size;
-    int dummy;
 
     if (mode == STREAM_READ)
         flags = AVIO_FLAG_READ;
@@ -116,12 +114,22 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
         mp_msg(MSGT_OPEN, MSGL_ERR, "[ffmpeg] No URL\n");
         goto out;
     }
-    if (!strncmp(filename, prefix, strlen(prefix)))
-        filename += strlen(prefix);
-    dummy = !strncmp(filename, "rtsp:", 5);
+    for (int i = 0; i < sizeof(prefix) / sizeof(prefix[0]); i++)
+        if (!strncmp(filename, prefix[i], strlen(prefix[i])))
+            filename += strlen(prefix[i]);
+    if (!strncmp(filename, "rtsp:", 5)) {
+        /* This is handled as a special demuxer, without a separate
+         * stream layer. demux_lavf will do all the real work.
+         */
+        stream->type = STREAMTYPE_STREAM;
+        stream->seek = NULL;
+        *file_format = DEMUXER_TYPE_LAVF;
+        stream->lavf_type = "rtsp";
+        return STREAM_OK;
+    }
     mp_msg(MSGT_OPEN, MSGL_V, "[ffmpeg] Opening %s\n", filename);
 
-    if (!dummy && avio_open(&avio, filename, flags) < 0)
+    if (avio_open(&avio, filename, flags) < 0)
         goto out;
 
     char *rtmp[] = {"rtmp:", "rtmpt:", "rtmpe:", "rtmpte:", "rtmps:"};
@@ -131,21 +139,19 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
             stream->lavf_type = "flv";
         }
     stream->priv = avio;
-    size = dummy ? 0 : avio_size(avio);
+    int64_t size = avio_size(avio);
     if (size >= 0)
         stream->end_pos = size;
     stream->type = STREAMTYPE_FILE;
     stream->seek = seek;
-    if (dummy || !avio->seekable) {
+    if (!avio->seekable) {
         stream->type = STREAMTYPE_STREAM;
         stream->seek = NULL;
     }
-    if (!dummy) {
-        stream->fill_buffer = fill_buffer;
-        stream->write_buffer = write_buffer;
-        stream->control = control;
-        stream->close = close_f;
-    }
+    stream->fill_buffer = fill_buffer;
+    stream->write_buffer = write_buffer;
+    stream->control = control;
+    stream->close = close_f;
     res = STREAM_OK;
 
 out:
@@ -158,7 +164,7 @@ const stream_info_t stream_info_ffmpeg = {
   "",
   "",
   open_f,
-  { "ffmpeg", "rtmp", NULL },
+  { "lavf", "ffmpeg", "rtmp", "rtsp", NULL },
   NULL,
   1 // Urls are an option string
 };

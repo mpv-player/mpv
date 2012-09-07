@@ -200,7 +200,8 @@ static int lavf_check_file(demuxer_t *demuxer)
             mp_msg(MSGT_DEMUX, MSGL_WARN, "Stream url is not set!\n");
             avpd.filename = "";
         }
-        if (!strncmp(avpd.filename, "ffmpeg://", 9))
+        if (!strncmp(avpd.filename, "ffmpeg://", 9) ||
+                !strncmp(avpd.filename, "lavf://", 7))
             avpd.filename += 9;
         avpd.buf_size = probe_data_size;
 
@@ -616,10 +617,12 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
     }
 
     if (demuxer->stream->url) {
-        if (!strncmp(demuxer->stream->url, "ffmpeg://rtsp:", 14))
-            av_strlcpy(mp_filename, demuxer->stream->url + 9,
-                       sizeof(mp_filename));
-        else
+        if (demuxer->stream->lavf_type && !strcmp(demuxer->stream->lavf_type,
+                                                  "rtsp")) {
+            // Remove possible leading ffmpeg:// or lavf://
+            char *name = strstr(demuxer->stream->url, "rtsp:");
+            av_strlcpy(mp_filename, name, sizeof(mp_filename));
+        } else
             av_strlcat(mp_filename, demuxer->stream->url, sizeof(mp_filename));
     } else
         av_strlcat(mp_filename, "foobar.dummy", sizeof(mp_filename));

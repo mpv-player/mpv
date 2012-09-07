@@ -93,6 +93,7 @@ static const stream_info_t* const auto_open_streams[] = {
 #ifdef CONFIG_CDDA
   &stream_info_cdda,
 #endif
+  &stream_info_ffmpeg,  // use for rstp:// before http fallback
 #ifdef CONFIG_NETWORKING
   &stream_info_netstream,
   &stream_info_http1,
@@ -128,7 +129,6 @@ static const stream_info_t* const auto_open_streams[] = {
 #ifdef CONFIG_LIBBLURAY
   &stream_info_bluray,
 #endif
-  &stream_info_ffmpeg,
 
   &stream_info_null,
   &stream_info_mf,
