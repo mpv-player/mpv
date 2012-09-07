@@ -235,6 +235,7 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/demux_mf.c \
               libmpdemux/demux_mkv.c \
               libmpdemux/demux_mpg.c \
+              libmpdemux/demux_ts.c \
               libmpdemux/mp3_hdr.c \
               libmpdemux/parse_es.c \
               libmpdemux/mpeg_hdr.c \

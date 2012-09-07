@@ -69,6 +69,7 @@ extern const demuxer_desc_t demuxer_desc_mpeg_gxf;
 extern const demuxer_desc_t demuxer_desc_mpeg_es;
 extern const demuxer_desc_t demuxer_desc_mpeg4_es;
 extern const demuxer_desc_t demuxer_desc_h264_es;
+extern const demuxer_desc_t demuxer_desc_mpeg_ts;
 
 /* Please do not add any new demuxers here. If you want to implement a new
  * demuxer, add it to libavformat, except for wrappers around external
@@ -100,6 +101,7 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_mpeg_es,
     &demuxer_desc_mpeg4_es,
     &demuxer_desc_h264_es,
+    &demuxer_desc_mpeg_ts,
     /* Please do not add any new demuxers here. If you want to implement a new
      * demuxer, add it to libavformat, except for wrappers around external
      * libraries and demuxers requiring binary support. */
@@ -359,6 +361,17 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
     }
     return demuxer->s_streams[id];
+}
+
+struct sh_sub *new_sh_sub_sid_lang(struct demuxer *demuxer, int id, int sid,
+                                   const char *lang)
+{
+    struct sh_sub *sh = new_sh_sub_sid(demuxer, id, sid);
+    if (lang && lang[0] && strcmp(lang, "und")) {
+        sh->lang = talloc_strdup(sh, lang);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", sid, lang);
+    }
+    return sh;
 }
 
 static void free_sh_sub(sh_sub_t *sh)
@@ -988,7 +1001,7 @@ struct demuxer *demux_open_withparams(struct MPOpts *opts,
     // correctly.
     switch (file_format) {
     //case DEMUXER_TYPE_MPEG_PS:
-    case DEMUXER_TYPE_MPEG_TS:
+    //case DEMUXER_TYPE_MPEG_TS:
     case DEMUXER_TYPE_Y4M:
     case DEMUXER_TYPE_NSV:
     case DEMUXER_TYPE_AAC:
