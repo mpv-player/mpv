@@ -1966,6 +1966,22 @@ static void reinit_subs(struct MPContext *mpctx)
     }
 }
 
+static char *track_layout_hash(struct MPContext *mpctx)
+{
+    char *h = talloc_strdup(NULL, "");
+    for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            struct track *track = mpctx->tracks[n];
+            if (track->type != type)
+                continue;
+            h = talloc_asprintf_append_buffer(h, "%d-%d-%d-%d-%s\n", type,
+                    track->user_tid, track->default_track, track->is_external,
+                    track->lang ? track->lang : "");
+        }
+    }
+    return h;
+}
+
 void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
                      struct track *track)
 {
@@ -1997,6 +2013,9 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
         mpctx->opts.sub_id = user_tid;
         reinit_subs(mpctx);
     }
+
+    talloc_free(mpctx->track_layout_hash);
+    mpctx->track_layout_hash = talloc_steal(mpctx, track_layout_hash(mpctx));
 }
 
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
@@ -3492,6 +3511,30 @@ static struct track *select_track(struct MPContext *mpctx,
     return pick;
 }
 
+// Normally, video/audio/sub track selection is persistent across files. This
+// code resets track selection if the new file has a different track layout.
+static void check_previous_track_selection(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+
+    if (!mpctx->track_layout_hash)
+        return;
+
+    char *h = track_layout_hash(mpctx);
+    if (strcmp(h, mpctx->track_layout_hash) != 0) {
+        // Reset selection, but only if they're not "auto" or "off".
+        if (opts->video_id >= 0)
+            mpctx->opts.video_id = -1;
+        if (opts->audio_id >= 0)
+            mpctx->opts.audio_id = -1;
+        if (opts->sub_id >= 0)
+            mpctx->opts.sub_id = -1;
+        talloc_free(mpctx->track_layout_hash);
+        mpctx->track_layout_hash = NULL;
+    }
+    talloc_free(h);
+}
+
 static void init_input(struct MPContext *mpctx)
 {
     mpctx->input = mp_input_init(&mpctx->opts.input);
@@ -3859,6 +3902,8 @@ goto_enable_cache:
     open_vobsubs_from_options(mpctx);
     open_audiofiles_from_options(mpctx);
     open_subfiles_from_options(mpctx);
+
+    check_previous_track_selection(mpctx);
 
     mpctx->current_track[STREAM_VIDEO] =
         select_track(mpctx, STREAM_VIDEO, mpctx->opts.video_id, NULL, true);
