@@ -558,7 +558,6 @@ static int mp_property_editions(m_option_t *prop, int action, void *arg,
 static int mp_property_angle(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
-    struct MPOpts *opts = &mpctx->opts;
     struct demuxer *demuxer = mpctx->master_demuxer;
     int angle = -1;
     int angles;
@@ -618,8 +617,6 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
             resync_audio_stream(sh_audio);
     }
 
-    set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration,
-                 "Angle: %d/%d", angle, angles);
     return M_PROPERTY_OK;
 }
 
@@ -1897,6 +1894,7 @@ static struct property_osd_display {
     { "saturation", _("Saturation"), .osd_progbar = OSD_SATURATION },
     { "hue", _("Hue"), .osd_progbar = OSD_HUE },
     { "vsync", _("VSync: %s") },
+    { "angle", _("Angle: %s") },
     // subs
     { "sub", _("Subtitles: %s") },
     { "sub_pos", _("Sub position: %s/100") },
@@ -2065,31 +2063,32 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     sh_audio_t *const sh_audio = mpctx->sh_audio;
     sh_video_t *const sh_video = mpctx->sh_video;
     int osd_duration = opts->osd_duration;
+    int osdl = cmd->on_osd ? 1 : OSD_LEVEL_INVISIBLE;
     int case_fallthrough_hack = 0;
     switch (cmd->id) {
     case MP_CMD_SEEK: {
-        mpctx->add_osd_seek_info = true;
         float v = cmd->args[0].v.f;
         int abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
         int exact = (cmd->nargs > 2) ? cmd->args[2].v.i : 0;
+        int function;
         if (abs == 2) {   // Absolute seek to a timestamp in seconds
             queue_seek(mpctx, MPSEEK_ABSOLUTE, v, exact);
-            mpctx->osd_function = v > get_current_time(mpctx) ?
-                                  OSD_FFW : OSD_REW;
+            function = v > get_current_time(mpctx) ? OSD_FFW : OSD_REW;
         } else if (abs) {           /* Absolute seek by percentage */
             queue_seek(mpctx, MPSEEK_FACTOR, v / 100.0, exact);
-            mpctx->osd_function = OSD_FFW; // Direction isn't set correctly
+            function = OSD_FFW; // Direction isn't set correctly
         } else {
             queue_seek(mpctx, MPSEEK_RELATIVE, v, exact);
-            mpctx->osd_function = (v > 0) ? OSD_FFW : OSD_REW;
+            function = (v > 0) ? OSD_FFW : OSD_REW;
+        }
+        if (cmd->on_osd) {
+            mpctx->add_osd_seek_info = true;
+            mpctx->osd_function = function;
         }
         break;
     }
 
-    case MP_CMD_SET_PROPERTY_OSD:
-        case_fallthrough_hack = 1;
-
-    case MP_CMD_SET_PROPERTY: {
+    case MP_CMD_SET: {
         int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_PARSE,
                                cmd->args[1].v.s, mpctx);
         if (r == M_PROPERTY_UNKNOWN)
@@ -2099,7 +2098,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
                    "Failed to set property '%s' to '%s'.\n",
                    cmd->args[0].v.s, cmd->args[1].v.s);
-        else if (case_fallthrough_hack)
+        else if (cmd->on_osd)
             show_property_osd(mpctx, cmd->args[0].v.s);
         if (r <= 0)
             mp_msg(MSGT_GLOBAL, MSGL_INFO,
@@ -2107,10 +2106,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
-    case MP_CMD_STEP_PROPERTY_OSD:
-        case_fallthrough_hack = 1;
-
-    case MP_CMD_STEP_PROPERTY: {
+    case MP_CMD_SWITCH: {
         void *arg = NULL;
         int r, i;
         double d;
@@ -2149,7 +2145,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
                    "Failed to increment property '%s' by %f.\n",
                    cmd->args[0].v.s, cmd->args[1].v.f);
-        else if (case_fallthrough_hack)
+        else if (cmd->on_osd)
             show_property_osd(mpctx, cmd->args[0].v.s);
         if (r <= 0)
             mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_ERROR=%s\n",
@@ -2209,7 +2205,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_SPEED_INCR: {
         float v = cmd->args[0].v.f;
         mp_property_do("speed", M_PROPERTY_STEP_UP, &v, mpctx);
-        show_property_osd(mpctx, "speed");
+        if (cmd->on_osd)
+            show_property_osd(mpctx, "speed");
         break;
     }
 
@@ -2221,7 +2218,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (case_fallthrough_hack)
             v *= mpctx->opts.playback_speed;
         mp_property_do("speed", M_PROPERTY_SET, &v, mpctx);
-        show_property_osd(mpctx, "speed");
+        if (cmd->on_osd)
+            show_property_osd(mpctx, "speed");
         break;
     }
 
@@ -2267,7 +2265,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             }
 #endif
             if (available)
-                set_osd_tmsg(mpctx, OSD_MSG_SUB_DELAY, 1, osd_duration,
+                set_osd_tmsg(mpctx, OSD_MSG_SUB_DELAY, osdl, osd_duration,
                              "Sub delay: %d ms", ROUND(sub_delay * 1000));
         }
         break;
@@ -2282,9 +2280,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             opts->osd_level = (opts->osd_level + 1) % (max + 1);
         else
             opts->osd_level = v > max ? max : v;
-        /* Show OSD state when disabled, but not when an explicit
-           argument is given to the OSD command, i.e. in slave mode. */
-        if (v == -1 && opts->osd_level <= 1)
+        if (cmd->on_osd && opts->osd_level <= 1)
             set_osd_tmsg(mpctx, OSD_MSG_OSD_STATUS, 0, osd_duration,
                          "OSD: %s",
                          opts->osd_level ? mp_gtext("enabled") :
@@ -2386,7 +2382,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             else
                 radio_step_channel(mpctx->stream, RADIO_CHANNEL_LOWER);
             if (radio_get_channel_name(mpctx->stream)) {
-                set_osd_tmsg(OSD_MSG_RADIO_CHANNEL, 1, osd_duration,
+                set_osd_tmsg(OSD_MSG_RADIO_CHANNEL, osdl, osd_duration,
                              "Channel: %s",
                              radio_get_channel_name(mpctx->stream));
             }
@@ -2397,7 +2393,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (mpctx->stream && mpctx->stream->type == STREAMTYPE_RADIO) {
             radio_set_channel(mpctx->stream, cmd->args[0].v.s);
             if (radio_get_channel_name(mpctx->stream)) {
-                set_osd_tmsg(OSD_MSG_RADIO_CHANNEL, 1, osd_duration,
+                set_osd_tmsg(OSD_MSG_RADIO_CHANNEL, osdl, osd_duration,
                              "Channel: %s",
                              radio_get_channel_name(mpctx->stream));
             }
@@ -2426,7 +2422,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 #ifdef CONFIG_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_set_freq(mpctx->stream, ROUND(cmd->args[0].v.f));
-            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: %s",
+            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: %s",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_stationname(mpctx->stream));
         }
@@ -2439,7 +2435,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 #ifdef CONFIG_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_force_freq_step(mpctx->stream, ROUND(cmd->args[0].v.f));
-            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: f %d",
+            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: f %d",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_frequency(mpctx->stream));
         }
@@ -2460,7 +2456,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 tv_step_channel(get_tvh(mpctx), TV_CHANNEL_LOWER);
             }
             if (tv_channel_list) {
-                set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, 1, osd_duration,
+                set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
                 //vo_osd_changed(OSDTYPE_SUBTITLE);
             }
@@ -2469,7 +2465,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         else if (mpctx->stream &&
                  mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_set_channel_step(mpctx->stream, cmd->args[0].v.i);
-            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: %s",
+            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: %s",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_stationname(mpctx->stream));
         }
@@ -2498,7 +2494,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (get_tvh(mpctx)) {
             tv_set_channel(get_tvh(mpctx), cmd->args[0].v.s);
             if (tv_channel_list) {
-                set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, 1, osd_duration,
+                set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
                 //vo_osd_changed(OSDTYPE_SUBTITLE);
             }
@@ -2506,7 +2502,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 #ifdef CONFIG_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_set_channel(mpctx->stream, cmd->args[0].v.s);
-            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: %s",
+            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: %s",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_stationname(mpctx->stream));
         }
@@ -2531,7 +2527,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (get_tvh(mpctx)) {
             tv_last_channel(get_tvh(mpctx));
             if (tv_channel_list) {
-                set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, 1, osd_duration,
+                set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
                 //vo_osd_changed(OSDTYPE_SUBTITLE);
             }
@@ -2539,7 +2535,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 #ifdef CONFIG_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_set_lastchannel(mpctx->stream);
-            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: %s",
+            set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: %s",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_stationname(mpctx->stream));
         }
@@ -2599,9 +2595,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             mp_msg(MSGT_CPLAYER, MSGL_INFO, "Setting vo cmd line to '%s'.\n",
                    s);
             if (vo_control(mpctx->video_out, VOCTRL_SET_COMMAND_LINE, s) > 0) {
-                set_osd_msg(mpctx, OSD_MSG_TEXT, 1, osd_duration, "vo='%s'", s);
+                set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration, "vo='%s'", s);
             } else {
-                set_osd_msg(mpctx, OSD_MSG_TEXT, 1, osd_duration, "Failed!");
+                set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration, "Failed!");
             }
         }
         break;

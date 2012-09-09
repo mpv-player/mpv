@@ -1240,6 +1240,8 @@ static mp_osd_msg_t *add_osd_msg(struct MPContext *mpctx, int id, int level,
 static void set_osd_msg_va(struct MPContext *mpctx, int id, int level, int time,
                            const char *fmt, va_list ap)
 {
+    if (level == OSD_LEVEL_INVISIBLE)
+        return;
     mp_osd_msg_t *msg = add_osd_msg(mpctx, id, level, time);
     msg->msg = talloc_vasprintf(msg, fmt, ap);
 }

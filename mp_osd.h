@@ -33,6 +33,7 @@
 
 #define MAX_OSD_LEVEL 3
 #define MAX_TERM_OSD_LEVEL 1
+#define OSD_LEVEL_INVISIBLE 4
 
 struct MPContext;
 

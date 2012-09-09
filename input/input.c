@@ -138,11 +138,9 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_RUN, "run", { ARG_STRING } },
 
   { MP_CMD_KEYDOWN_EVENTS, "key_down_event", { ARG_INT } },
-  { MP_CMD_SET_PROPERTY, "set_property", { ARG_STRING,  ARG_STRING } },
-  { MP_CMD_SET_PROPERTY_OSD, "set_property_osd", { ARG_STRING,  ARG_STRING } },
+  { MP_CMD_SET, "set", { ARG_STRING,  ARG_STRING } },
   { MP_CMD_GET_PROPERTY, "get_property", { ARG_STRING } },
-  { MP_CMD_STEP_PROPERTY, "step_property", { ARG_STRING, OARG_FLOAT(0), OARG_INT(0) } },
-  { MP_CMD_STEP_PROPERTY_OSD, "step_property_osd", { ARG_STRING, OARG_FLOAT(0), OARG_INT(0) } },
+  { MP_CMD_SWITCH, "switch", { ARG_STRING, OARG_FLOAT(0), OARG_INT(0) } },
 
   { MP_CMD_SET_MOUSE_POS, "set_mouse_pos", { ARG_INT, ARG_INT } },
 
@@ -164,40 +162,44 @@ static const mp_cmd_t mp_cmds[] = {
 struct legacy_cmd {
     const char *old, *new;
 };
-#define LEGACY_STEP(old) {old, "step_property_osd " old}
+#define LEGACY_STEP(old) {old, "switch " old}
 static const struct legacy_cmd legacy_cmds[] = {
     LEGACY_STEP("loop"),
-    {"seek_chapter", "step_property_osd chapter"},
-    {"switch_angle", "step_property_osd angle"},
+    {"seek_chapter", "switch chapter"},
+    {"switch_angle", "switch angle"},
     LEGACY_STEP("pause"),
     LEGACY_STEP("volume"),
     LEGACY_STEP("mute"),
     LEGACY_STEP("audio_delay"),
     LEGACY_STEP("switch_audio"),
     LEGACY_STEP("balance"),
-    {"vo_fullscreen", "step_property fullscreen"},
+    {"vo_fullscreen", "no-osd switch fullscreen"},
     LEGACY_STEP("panscan"),
-    {"vo_ontop", "step_property_osd ontop"},
-    {"vo_rootwin", "step_property_osd rootwin"},
-    {"vo_border", "step_property_osd border"},
-    {"frame_drop", "step_property_osd framedropping"},
+    {"vo_ontop", "switch ontop"},
+    {"vo_rootwin", "switch rootwin"},
+    {"vo_border", "switch border"},
+    {"frame_drop", "switch framedropping"},
     LEGACY_STEP("gamma"),
     LEGACY_STEP("brightness"),
     LEGACY_STEP("contrast"),
     LEGACY_STEP("saturation"),
     LEGACY_STEP("hue"),
-    {"switch_vsync", "step_property_osd vsync"},
-    {"sub_select", "step_property_osd sub"},
+    {"switch_vsync", "switch vsync"},
+    {"sub_select", "switch sub"},
     LEGACY_STEP("sub_pos"),
     LEGACY_STEP("sub_delay"),
     LEGACY_STEP("sub_visibility"),
-    {"forced_subs_only", "step_property_osd sub_forced_only"},
+    {"forced_subs_only", "switch sub_forced_only"},
     LEGACY_STEP("sub_scale"),
     LEGACY_STEP("ass_use_margins"),
     {"tv_set_brightness", "tv_brightness"},
     {"tv_set_hue", "tv_hue"},
     {"tv_set_saturation", "tv_saturation"},
     {"tv_set_contrast", "tv_contrast"},
+    {"step_property_osd", "switch"},
+    {"step_property", "no-osd switch"},
+    {"set_property", "no-osd set"},
+    {"set_property_osd", "set"},
     {"pt_step 1", "playlist_next"},
     {"pt_step -1", "playlist_prev"},
     {0}
@@ -686,18 +688,31 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
     return 1;
 }
 
+static char *skip_ws(char *str)
+{
+    while (str[0] == ' ' || str[0] == '\t')
+        ++str;
+    return str;
+}
+
+static char *skip_no_ws(char *str)
+{
+    while (str[0] && !(str[0] == ' ' || str[0] == '\t'))
+        ++str;
+    return str;
+}
+
 mp_cmd_t *mp_input_parse_cmd(char *str)
 {
     int i, l;
     int pausing = 0;
+    int on_osd = MP_ON_OSD_AUTO;
     char *ptr;
     const mp_cmd_t *cmd_def;
     mp_cmd_t *cmd = NULL;
     void *tmp = NULL;
 
-    // Ignore heading spaces.
-    while (str[0] == ' ' || str[0] == '\t')
-        ++str;
+    str = skip_ws(str);
 
     if (strncmp(str, "pausing ", 8) == 0) {
         pausing = 1;
@@ -713,6 +728,8 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
         str = &str[19];
     }
 
+    str = skip_ws(str);
+
     for (const struct legacy_cmd *entry = legacy_cmds; entry->old; entry++) {
         size_t old_len = strlen(entry->old);
         if (strncasecmp(entry->old, str, old_len) == 0) {
@@ -725,7 +742,14 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
         }
     }
 
-    ptr = str + strcspn(str, "\t ");
+    str = skip_ws(str);
+
+    if (strncmp(str, "no-osd ", 7) == 0) {
+        on_osd = MP_ON_OSD_NO;
+        str = &str[7];
+    }
+
+    ptr = skip_no_ws(str);
     if (*ptr != 0)
         l = ptr - str;
     else
@@ -735,7 +759,8 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
         goto error;
 
     for (i = 0; mp_cmds[i].name != NULL; i++) {
-        if (strncasecmp(mp_cmds[i].name, str, l) == 0)
+        const char *cmd = mp_cmds[i].name;
+        if (strncasecmp(cmd, str, l) == 0 && strlen(cmd) == l)
             break;
     }
 
@@ -749,6 +774,7 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
         .id = cmd_def->id,
         .name = talloc_strdup(cmd, cmd_def->name),
         .pausing = pausing,
+        .on_osd = on_osd,
     };
 
     ptr = str;

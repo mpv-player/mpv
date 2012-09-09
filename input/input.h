@@ -51,8 +51,7 @@ enum mp_command_type {
     MP_CMD_RUN,
     MP_CMD_SUB_LOAD,
     MP_CMD_KEYDOWN_EVENTS,
-    MP_CMD_SET_PROPERTY,
-    MP_CMD_SET_PROPERTY_OSD,
+    MP_CMD_SET,
     MP_CMD_GET_PROPERTY,
     MP_CMD_OSD_SHOW_PROPERTY_TEXT,
     MP_CMD_OSD_SHOW_PROGRESSION,
@@ -60,8 +59,7 @@ enum mp_command_type {
     MP_CMD_RADIO_SET_CHANNEL,
     MP_CMD_RADIO_SET_FREQ,
     MP_CMD_SET_MOUSE_POS,
-    MP_CMD_STEP_PROPERTY,
-    MP_CMD_STEP_PROPERTY_OSD,
+    MP_CMD_SWITCH,
     MP_CMD_RADIO_STEP_FREQ,
     MP_CMD_TV_STEP_FREQ,
     MP_CMD_TV_START_SCAN,
@@ -104,6 +102,11 @@ enum mp_command_type {
 // Key FIFO was full - release events may be lost, zero button-down status
 #define MP_INPUT_RELEASE_ALL -5
 
+enum mp_on_osd {
+    MP_ON_OSD_NO = 0,
+    MP_ON_OSD_AUTO,
+};
+
 enum mp_input_section_flags {
     // If a key binding is not defined in the current section, search the
     // default section for it ("default" refers to bindings with no section
@@ -129,6 +132,7 @@ typedef struct mp_cmd {
     struct mp_cmd_arg args[MP_CMD_MAX_ARGS];
     int nargs;
     int pausing;
+    enum mp_on_osd on_osd;
     struct mp_cmd *queue_next;
 } mp_cmd_t;
 
