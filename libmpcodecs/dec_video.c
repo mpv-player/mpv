@@ -170,20 +170,6 @@ void set_video_colorspace(struct sh_video *sh)
 
 }
 
-int set_rectangle(sh_video_t *sh_video, int param, int value)
-{
-    vf_instance_t *vf = sh_video->vfilter;
-    int data[] = { param, value };
-
-    mp_dbg(MSGT_DECVIDEO, MSGL_V, "set rectangle \n");
-    if (vf) {
-        int ret = vf->control(vf, VFCTRL_CHANGE_RECTANGLE, data);
-        if (ret)
-            return 1;
-    }
-    return 0;
-}
-
 void resync_video_stream(sh_video_t *sh_video)
 {
     const struct vd_functions *vd = sh_video->vd_driver;

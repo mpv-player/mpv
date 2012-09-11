@@ -189,7 +189,6 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_LOADLIST, "loadlist", { ARG_STRING, OARG_INT(0) } },
   { MP_CMD_PLAYLIST_CLEAR, "playlist_clear", },
   { MP_CMD_RUN, "run", { ARG_STRING } },
-  { MP_CMD_VF_CHANGE_RECTANGLE, "change_rectangle", { ARG_INT, ARG_INT } },
 
   { MP_CMD_GET_VO_FULLSCREEN, "get_vo_fullscreen", },
   { MP_CMD_GET_SUB_VISIBILITY, "get_sub_visibility", },

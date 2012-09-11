@@ -38,7 +38,6 @@
 #include "libvo/fastmemcpy.h"
 
 extern const vf_info_t vf_info_vo;
-extern const vf_info_t vf_info_rectangle;
 extern const vf_info_t vf_info_bmovl;
 extern const vf_info_t vf_info_crop;
 extern const vf_info_t vf_info_expand;
@@ -118,7 +117,6 @@ extern const vf_info_t vf_info_dlopen;
 
 // list of available filters:
 static const vf_info_t *const filter_list[] = {
-    &vf_info_rectangle,
 #ifdef HAVE_POSIX_SELECT
     &vf_info_bmovl,
 #endif

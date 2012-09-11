@@ -100,7 +100,6 @@ struct vf_ctrl_screenshot {
 #define VFCTRL_SET_EQUALIZER 6 // set color options (brightness,contrast etc)
 #define VFCTRL_GET_EQUALIZER 8 // get color options (brightness,contrast etc)
 #define VFCTRL_DRAW_OSD 7
-#define VFCTRL_CHANGE_RECTANGLE 9  // vf_rectangle control
 #define VFCTRL_DUPLICATE_FRAME 11  // For encoding - encode zero-change frame
 #define VFCTRL_SKIP_NEXT_FRAME 12  // For encoding - drop the next frame that passes thru
 #define VFCTRL_FLUSH_FRAMES    13  // For encoding - flush delayed frames

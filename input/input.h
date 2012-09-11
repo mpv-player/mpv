@@ -50,7 +50,6 @@ enum mp_command_type {
     MP_CMD_LOADFILE,
     MP_CMD_LOADLIST,
     MP_CMD_PLAYLIST_CLEAR,
-    MP_CMD_VF_CHANGE_RECTANGLE,
     MP_CMD_GAMMA,
     MP_CMD_SUB_VISIBILITY,
     MP_CMD_VOBSUB_LANG, // deprecated: combined with SUB_SELECT

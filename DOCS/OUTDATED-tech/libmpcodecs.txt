@@ -340,7 +340,6 @@ You can control the filter at runtime from MPlayer/MEncoder/dec_video:
 #define VFCTRL_SET_EQUALIZER      6 /* set color options (brightness,contrast etc) */
 #define VFCTRL_GET_EQUALIZER      8 /* get color options (brightness,contrast etc) */
 #define VFCTRL_DRAW_OSD           7
-#define VFCTRL_CHANGE_RECTANGLE   9 /* Change the rectangle boundaries */
 
 
     void (*get_image)(struct vf_instance *vf, mp_image_t *mpi);

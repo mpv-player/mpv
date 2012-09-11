@@ -2687,12 +2687,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         screenshot_request(mpctx, cmd->args[0].v.i, cmd->args[1].v.i);
         break;
 
-    case MP_CMD_VF_CHANGE_RECTANGLE:
-        if (!sh_video)
-            break;
-        set_rectangle(sh_video, cmd->args[0].v.i, cmd->args[1].v.i);
-        break;
-
     case MP_CMD_GET_TIME_LENGTH:
         mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_LENGTH=%.2f\n",
                get_time_length(mpctx));
