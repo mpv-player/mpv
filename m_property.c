@@ -160,12 +160,17 @@ char *m_properties_expand_string(const m_option_t *prop_list, char *str,
             lvl--, str++, l = 0;
         } else if (str[0] == '$' && str[1] == '{'
                    && (e = strchr(str + 2, '}'))) {
-            int pl = e - str - 2;
+            str += 2;
+            int method = M_PROPERTY_PRINT;
+            if (str[0] == '=') {
+                str += 1;
+                method = M_PROPERTY_TO_STRING;
+            }
+            int pl = e - str;
             char pname[pl + 1];
-            memcpy(pname, str + 2, pl);
+            memcpy(pname, str, pl);
             pname[pl] = 0;
-            if (m_property_do(prop_list, pname,
-                              M_PROPERTY_PRINT, &p, ctx) >= 0 && p)
+            if (m_property_do(prop_list, pname, method, &p, ctx) >= 0 && p)
                 l = strlen(p), fr = 1;
             else
                 l = 0;
