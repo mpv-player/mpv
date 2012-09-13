@@ -319,8 +319,8 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
     CVReturn error;
 
     if (!p->textureCache || !p->pixelBuffer) {
-        error = CVOpenGLTextureCacheCreate(NULL, 0, vo_cocoa_cgl_context(),
-                    vo_cocoa_cgl_pixel_format(), 0, &p->textureCache);
+        error = CVOpenGLTextureCacheCreate(NULL, 0, vo_cocoa_cgl_context(vo),
+                    vo_cocoa_cgl_pixel_format(vo), 0, &p->textureCache);
         if(error != kCVReturnSuccess)
             mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL"
                                      " texture Cache(%d)\n", error);
