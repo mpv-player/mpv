@@ -332,14 +332,14 @@ const m_option_t common_opts[] = {
 #ifdef CONFIG_PRIORITY
     {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
-    OPT_CHOICE("noconfig", noconfig, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE,
+    OPT_CHOICE("no-config", noconfig, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE,
                ({"off", 0}, {"user", 1}, {"system", 2}, {"all", 3})),
 
 // ------------------------- stream options --------------------
 
 #ifdef CONFIG_STREAM_CACHE
     OPT_INTRANGE("cache", stream_cache_size, 0, 32, 0x7fffffff, OPTDEF_INT(-1)),
-    OPT_FLAG_CONSTANTS("nocache", stream_cache_size, 0, -1, 0),
+    OPT_FLAG_CONSTANTS("no-cache", stream_cache_size, 0, -1, 0),
 
     OPT_FLOATRANGE("cache-min", stream_cache_min_percent, 0, 0, 99),
     OPT_FLOATRANGE("cache-seek-min", stream_cache_seek_min_percent, 0, 0, 99),
