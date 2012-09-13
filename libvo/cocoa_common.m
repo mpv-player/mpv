@@ -424,14 +424,13 @@ int vo_cocoa_check_events(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     NSEvent *event;
-    float curTime = TickCount()/60;
-    int msCurTime = (int) (curTime * 1000);
+    int ms_time = (int) ([[NSProcessInfo processInfo] systemUptime] * 1000);
 
     // automatically hide mouse cursor
     if (vo_fs && s->display_cursor &&
-        (msCurTime - s->cursor_timer >= s->cursor_autohide_delay)) {
+        (ms_time - s->cursor_timer >= s->cursor_autohide_delay)) {
         vo_cocoa_display_cursor(vo, 0);
-        s->cursor_timer = msCurTime;
+        s->cursor_timer = ms_time;
     }
 
     event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil
