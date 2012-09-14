@@ -114,7 +114,6 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_OSD_SHOW_TEXT, "osd_show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
   { MP_CMD_OSD_SHOW_PROPERTY_TEXT, "osd_show_property_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
   { MP_CMD_OSD_SHOW_PROGRESSION, "osd_show_progression", },
-  { MP_CMD_MIXER_USEMASTER, "use_master", },
   { MP_CMD_SUB_LOAD, "sub_load", { ARG_STRING } },
 #ifdef CONFIG_TV
   { MP_CMD_TV_START_SCAN, "tv_start_scan", },
