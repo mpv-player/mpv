@@ -106,6 +106,7 @@ struct ao {
     bool no_persistent_volume;
     const struct ao_driver *driver;
     void *priv;
+    struct encode_lavc_context *encode_lavc_ctx;
     struct MPOpts *opts;
     struct input_ctx *input_ctx;
 };

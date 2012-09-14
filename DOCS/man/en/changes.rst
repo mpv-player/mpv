@@ -63,6 +63,7 @@ General changes for mplayer2 to mplayer3
 * Do not lose settings when playing a new file in the same player instance
 * New location for config files, new name for the binary. (Planned change.)
 * Slave mode compatibility broken (see below)
+* Encoding functionality (replacement for mencoder)
 * General code cleanups
 * Many more changes
 

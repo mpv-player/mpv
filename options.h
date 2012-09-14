@@ -159,6 +159,24 @@ typedef struct MPOpts {
         int use_ar; // apple remote
         int default_bindings;
     } input;
+
+    struct encode_output_conf {
+        char *file;
+        char *format;
+        char **fopts;
+        float fps;
+        char *vcodec;
+        char **vopts;
+        char *acodec;
+        char **aopts;
+        int harddup;
+        float voffset;
+        float aoffset;
+        int copyts;
+        int rawts;
+        int autofps;
+        int neverdrop;
+    } encode_output;
 } MPOpts;
 
 #endif

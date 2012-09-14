@@ -98,6 +98,8 @@
 
 #include "input/input.h"
 
+#include "encode.h"
+
 int slave_mode = 0;
 int enable_mouse_movements = 0;
 float start_volume = -1;
@@ -702,6 +704,14 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 static void exit_player(struct MPContext *mpctx, enum exit_reason how, int rc)
 {
     uninit_player(mpctx, INITIALIZED_ALL);
+
+#ifdef CONFIG_ENCODING
+    encode_lavc_finish(mpctx->encode_lavc_ctx);
+    encode_lavc_free(mpctx->encode_lavc_ctx);
+#endif
+
+    mpctx->encode_lavc_ctx = NULL;
+
 #if defined(__MINGW32__) || defined(__CYGWIN__)
     timeEndPeriod(1);
 #endif
@@ -1243,9 +1253,27 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
             saddf(line, width, " ct:%7.3f", mpctx->total_avsync_change);
     }
 
-    // VO stats
-    if (sh_video && drop_frame_cnt)
-        saddf(line, width, " D: %d", drop_frame_cnt);
+#ifdef CONFIG_ENCODING
+    float position = (get_current_time(mpctx) - opts->seek_to_sec) /
+                     (get_time_length(mpctx) - opts->seek_to_sec);
+    if (end_at.type == END_AT_TIME)
+        position = max(position, (get_current_time(mpctx) - opts->seek_to_sec)
+                               / (end_at.pos - opts->seek_to_sec));
+    if (play_n_frames_mf)
+        position = max(position,
+                       1.0 - play_n_frames / (double) play_n_frames_mf);
+    char lavcbuf[80];
+    if (encode_lavc_getstatus(mpctx->encode_lavc_ctx, lavcbuf, sizeof(lavcbuf),
+            position, get_current_time(mpctx) - opts->seek_to_sec) >= 0) {
+        // encoding stats
+        saddf(line, width, "%s ", lavcbuf);
+    } else
+#endif
+    {
+        // VO stats
+        if (sh_video && drop_frame_cnt)
+            saddf(line, width, " D: %d", drop_frame_cnt);
+    }
 
 #ifdef CONFIG_STREAM_CACHE
     // cache stats
@@ -1623,6 +1651,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     }
     if (!ao->initialized) {
         ao->buffersize = opts->ao_buffersize;
+        ao->encode_lavc_ctx = mpctx->encode_lavc_ctx;
         ao_init(ao, opts->audio_driver_list);
         if (!ao->initialized) {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
@@ -2308,8 +2337,10 @@ int reinit_video_chain(struct MPContext *mpctx)
     double ar = -1.0;
     //================== Init VIDEO (codec & libvo) ==========================
     if (!opts->fixed_vo || !(mpctx->initialized_flags & INITIALIZED_VO)) {
-        if (!(mpctx->video_out = init_best_video_out(opts, mpctx->key_fifo,
-                                                     mpctx->input))) {
+        mpctx->video_out
+            = init_best_video_out(opts, mpctx->key_fifo, mpctx->input,
+                                  mpctx->encode_lavc_ctx);
+        if (!mpctx->video_out) {
             mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, "Error opening/initializing "
                     "the selected video_out (-vo) device.\n");
             goto err_out;
@@ -2672,6 +2703,10 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
     mpctx->hrseek_framedrop = false;
     mpctx->total_avsync_change = 0;
     drop_frame_cnt = 0;
+
+#ifdef CONFIG_ENCODING
+    encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
+#endif
 }
 
 static bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
@@ -3072,6 +3107,13 @@ static void run_playloop(struct MPContext *mpctx)
     bool end_is_chapter = false;
     double sleeptime = WAKEUP_PERIOD;
     bool was_restart = mpctx->restart_playback;
+
+#ifdef CONFIG_ENCODING
+    if (encode_lavc_didfail(mpctx->encode_lavc_ctx)) {
+        mpctx->stop_play = PT_QUIT;
+        return;
+    }
+#endif
 
     // Add tracks that were added by the demuxer later (e.g. MPEG)
     if (!mpctx->timeline && mpctx->demuxer)
@@ -3756,6 +3798,10 @@ static void play_current_file(struct MPContext *mpctx)
     if (!mpctx->filename)
         goto terminate_playback;
 
+#ifdef CONFIG_ENCODING
+    encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
+#endif
+
     m_config_enter_file_local(mpctx->mconfig);
 
     load_per_protocol_config(mpctx->mconfig, mpctx->filename);
@@ -3946,6 +3992,13 @@ goto_enable_cache:
         goto terminate_playback;
     }
 
+#ifdef CONFIG_ENCODING
+    if (mpctx->encode_lavc_ctx && mpctx->sh_video)
+        encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_VIDEO);
+    if (mpctx->encode_lavc_ctx && mpctx->sh_audio)
+        encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_AUDIO);
+#endif
+
     if (opts->playing_msg) {
         char *msg = property_expand_string(mpctx, opts->playing_msg);
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", msg);
@@ -3982,6 +4035,8 @@ goto_enable_cache:
     //TODO: add desired (stream-based) sections here
     if (mpctx->master_demuxer->type == DEMUXER_TYPE_TV)
         mp_input_set_section(mpctx->input, "tv", 0);
+    if (mpctx->encode_lavc_ctx)
+        mp_input_set_section(mpctx->input, "encode", MP_INPUT_NO_DEFAULT_SECTION);
 
     //==================== START PLAYING =======================
 
@@ -4068,7 +4123,7 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     int uninitialize_parts = INITIALIZED_ALL;
     if (opts->fixed_vo)
         uninitialize_parts -= INITIALIZED_VO;
-    if (opts->gapless_audio && mpctx->stop_play == AT_END_OF_FILE)
+    if (opts->gapless_audio && mpctx->stop_play == AT_END_OF_FILE || mpctx->encode_lavc_ctx)
         uninitialize_parts -= INITIALIZED_AO;
     uninit_player(mpctx, uninitialize_parts);
 
@@ -4189,6 +4244,10 @@ static bool handle_help_options(struct MPContext *mpctx)
         property_print_help();
         opt_exit = 1;
     }
+#ifdef CONFIG_ENCODING
+    if (encode_lavc_showhelp(&mpctx->opts))
+        opt_exit = 1;
+#endif
     return opt_exit;
 }
 
@@ -4323,6 +4382,32 @@ int main(int argc, char *argv[])
 
 #ifdef CONFIG_PRIORITY
     set_priority();
+#endif
+
+#ifdef CONFIG_ENCODING
+    if (opts->encode_output.file) {
+        mpctx->encode_lavc_ctx = encode_lavc_init(&opts->encode_output);
+	if(!mpctx->encode_lavc_ctx) {
+            mp_msg(MSGT_VO, MSGL_INFO, "Encoding initialization failed.");
+            exit_player(mpctx, EXIT_ERROR, 1);
+	}
+    }
+
+    if (opts->encode_output.file) {
+        m_config_set_option0(mpctx->mconfig, "vo", "lavc");
+        m_config_set_option0(mpctx->mconfig, "ao", "lavc");
+        m_config_set_option0(mpctx->mconfig, "fixed-vo", "yes");
+        m_config_set_option0(mpctx->mconfig, "gapless-audio", "yes");
+        m_config_set_option0(mpctx->mconfig, "untimed", "yes");
+
+        // default osd level 0
+        if (opts->osd_level < 0)
+            m_config_set_option0(mpctx->mconfig, "osdlevel", "0");
+    } else {
+        // default osd level 1
+        if (opts->osd_level < 0)
+            m_config_set_option0(mpctx->mconfig, "osdlevel", "1");
+    }
 #endif
 
 #ifdef CONFIG_ASS

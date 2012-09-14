@@ -6707,7 +6707,7 @@ This will give much better results for material that has undergone
 heavy editing after telecine was applied, but as a result it is not as
 forgiving of noisy input, for example TV capture.
 The optional parameter (ivtc=1) corresponds to the dr=1 option for the
-detc filter, and should not be used with MPlayer.
+detc filter, and should not be used for playback.
 Further development on ivtc has stopped, as the pullup and filmdint
 filters appear to be much more accurate.
 .
@@ -6765,9 +6765,6 @@ access to the field-flags set by the MPEG-2 decoder.
 Depending on the source MPEG, you may be fine ignoring this advice, as
 long as you do not see lots of "Bottom-first field" warnings.
 With no options it does normal inverse telecine.
-When this filter is used with MPlayer, it will result in an uneven
-framerate during playback, but it is still generally better than using
-pp=lb or no deinterlacing at all.
 Multiple options can be specified separated by /.
 .RSs
 .IPs crop=<w>:<h>:<x>:<y>
@@ -7510,6 +7507,197 @@ Using this filter together with any sort of seeking (including -ss and EDLs)
 may make demons fly out of your nose.
 .RE
 .
+.\" --------------------------------------------------------------------------
+.\" encoding
+.\" --------------------------------------------------------------------------
+.
+.SH ENCODING OPTIONS
+.
+.TP
+.B \-o <filename>
+Enable encoding mode and specify the output file name.
+.RE
+.
+.TP
+.B \-of <format>
+Specify the output format (overrides autodetection by the extension of the file specified by \-o).
+See \-of help for a full list of supported formats.
+.RE
+.
+.TP
+.B \-ofopts <options>
+Specify the output format options for libavformat.
+See \-ofopts help for a full list of supported options.
+.RE
+.PP
+.I NOTE:
+To get a full list of available format options, see \-ofopts help.
+.sp 1
+Options are managed in lists.
+There are a few commands to manage the options list.
+.
+.TP
+.B \-ofopts\-add <option1[,option2,...]>
+Appends the options given as arguments to the options list.
+.
+.TP
+.B \-ofopts\-pre <option1[,option2,...]>
+Prepends the options given as arguments to the options list.
+.
+.TP
+.B \-ofopts\-del <index1[,index2,...]>
+Deletes the options at the given indexes.
+Index numbers start at 0, negative numbers address the end of the
+list (\-1 is the last).
+.
+.TP
+.B \-ofopts\-clr
+Completely empties the options list.
+.
+.RE
+.
+.TP
+.B \-ofps <float value>
+Specifies the output format time base (default: 24000). Low values like 25 limit video fps by dropping frames.
+.RE
+.
+.TP
+.B \-oautofps
+Sets the output format time base to the guessed frame rate of the input video (simulates mencoder behaviour, useful for AVI; may cause frame drops). Note that not all codecs and not all formats support VFR encoding, and some which do have bugs when a target bitrate is specified - use
+.B \-ofps
+or
+.B \-oautofps
+to force CFR encoding in these cases.
+.RE
+.
+.TP
+.B \-oharddup
+If set, the frame rate given by
+.B \-ofps
+is attained not by skipping time codes, but by duplicating frames (constant frame rate mode).
+.RE
+.
+.TP
+.B \-oneverdrop
+If set, frames are never dropped. Instead, time codes of video are readjusted
+to always increase. This may cause AV desync, though; to work around this,
+use a high-fps time base using
+.B \-ofps
+and absolutely avoid
+.B \-oautofps
+.RE
+.
+.TP
+.B \-oac <codec>
+Specify the output audio codec.
+See \-oac help for a full list of supported codecs.
+.RE
+.
+.TP
+.B \-oaoffset <value>
+Shifts audio data by the given time (in seconds) by adding/removing samples at the start.
+.RE
+.
+.TP
+.B \-oacopts <options>
+Specify the output audio codec options for libavcodec.
+See \-oacopts help for a full list of supported options.
+.RE
+.PP
+.I EXAMPLE:
+.B \-oac libmp3lame \-oacopts b=128000
+selects 128kbps MP3 encoding.
+.PP
+.I NOTE:
+To get a full list of available audio codec options, see \-oacopts help.
+.sp 1
+Options are managed in lists.
+There are a few commands to manage the options list.
+.
+.TP
+.B \-oacopts\-add <option1[,option2,...]>
+Appends the options given as arguments to the options list.
+.
+.TP
+.B \-oacopts\-pre <option1[,option2,...]>
+Prepends the options given as arguments to the options list.
+.
+.TP
+.B \-oacopts\-del <index1[,index2,...]>
+Deletes the options at the given indexes.
+Index numbers start at 0, negative numbers address the end of the
+list (\-1 is the last).
+.
+.TP
+.B \-oacopts\-clr
+Completely empties the options list.
+.
+.TP
+.B \-ovc <codec>
+Specify the output video codec.
+See \-ovc help for a full list of supported codecs.
+.RE
+.
+.TP
+.B \-ovoffset <value>
+Shifts video data by the given time (in seconds) by shifting the pts values.
+.RE
+.
+.TP
+.B \-ocopyts
+Copies input pts to the output video (not supported by some output container formats, e.g. avi).
+By default, audio pts are set to playback time and video pts are synchronized to match audio pts, as some output formats do not support anything else.
+.RE
+.
+.TP
+.B \-ovcopts <options>
+Specify the output video codec options for libavcodec.
+See \-ovcopts help for a full list of supported options.
+.RE
+.PP
+.I EXAMPLE:
+.B \-ovc mpeg4 \-ovcopts qscale=5
+selects constant quantizer scale 5 for MPEG-4 encoding.
+.PP
+.B \-ovc libx264 \-ovcopts crf=23
+selects VBR quality factor 23 for H.264 encoding.
+.I NOTE:
+To get a full list of available video codec options, see \-ovcopts help.
+.PP
+.sp 1
+Options are managed in lists.
+There are a few commands to manage the options list.
+.
+.TP
+.B \-ovcopts\-add <option1[,option2,...]>
+Appends the options given as arguments to the options list.
+.
+.TP
+.B \-ovcopts\-pre <option1[,option2,...]>
+Prepends the options given as arguments to the options list.
+.
+.TP
+.B \-ovcopts\-del <index1[,index2,...]>
+Deletes the options at the given indexes.
+Index numbers start at 0, negative numbers address the end of the
+list (\-1 is the last).
+.
+.TP
+.B \-ovcopts\-clr
+Completely empties the options list.
+.
+.PP
+.I NOTE for \-ovc libx264:
+The x264 codec provides a set of presets/tunings/profiles which can be included with the ovcopts.
+.PP
+Available presets: preset=ultrafast, preset=superfast, preset=veryfast, preset=faster, preset=fast, preset=medium, preset=slow, preset=slower, preset=veryslow, preset=placebo (default: preset=medium)
+.PP
+Available tunings: tune=film, tune=animation, tune=grain, tune=stillimage, tune=psnr, tune=ssim, tune=fastdecode, tune=zerolatency (default: none)
+.PP
+Available profiles: profile=baseline, profile=main, profile=high (default: profile=high)
+.PP
+.I EXAMPLE:
+.B mplayer \-o <outfile> <infile> \-ovc libx264 \-ovcopts preset=veryslow,crf=23,tune=animation,profile=main \-oac aac \-oacopts b=128000
 .
 .\" --------------------------------------------------------------------------
 .\" environment variables

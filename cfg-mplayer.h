@@ -245,6 +245,7 @@ const m_option_t msgl_config[]={
     { "lirc", &mp_msg_levels[MSGT_LIRC], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "stream", &mp_msg_levels[MSGT_STREAM], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "cache", &mp_msg_levels[MSGT_CACHE], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+    { "encode", &mp_msg_levels[MSGT_ENCODE], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "xacodec", &mp_msg_levels[MSGT_XACODEC], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "tv", &mp_msg_levels[MSGT_TV], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
     { "radio", &mp_msg_levels[MSGT_RADIO], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
@@ -289,6 +290,7 @@ const m_option_t msgl_config[]={
     "   lirc       - lirc_mp.c and input lirc driver\n"
     "   stream     - stream.c\n"
     "   cache      - cache2.c\n"
+    "   encode     - encode_lavc.c and associated vo/ao drivers\n"
     "   xacodec    - XAnim codecs\n"
     "   tv         - TV input subsystem\n"
     "   osdep      - OS-dependent parts\n"
@@ -738,6 +740,22 @@ const m_option_t mplayer_opts[]={
     {"identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_FLAG, CONF_GLOBAL, 0, MSGL_V, NULL},
     {"help", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
     {"h", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
+
+    OPT_STRING("o", encode_output.file, CONF_GLOBAL),
+    OPT_STRING("of", encode_output.format, CONF_GLOBAL),
+    OPT_STRINGLIST("ofopts*", encode_output.fopts, CONF_GLOBAL),
+    OPT_FLOATRANGE("ofps", encode_output.fps, CONF_GLOBAL, 0.0, 1000000.0),
+    OPT_STRING("ovc", encode_output.vcodec, CONF_GLOBAL),
+    OPT_STRINGLIST("ovcopts*", encode_output.vopts, CONF_GLOBAL),
+    OPT_STRING("oac", encode_output.acodec, CONF_GLOBAL),
+    OPT_STRINGLIST("oacopts*", encode_output.aopts, CONF_GLOBAL),
+    OPT_MAKE_FLAGS("oharddup", encode_output.harddup, CONF_GLOBAL),
+    OPT_FLOATRANGE("ovoffset", encode_output.voffset, CONF_GLOBAL, -1000000.0, 1000000.0),
+    OPT_FLOATRANGE("oaoffset", encode_output.aoffset, CONF_GLOBAL, -1000000.0, 1000000.0),
+    OPT_MAKE_FLAGS("ocopyts", encode_output.copyts, CONF_GLOBAL),
+    OPT_MAKE_FLAGS("orawts", encode_output.rawts, CONF_GLOBAL),
+    OPT_MAKE_FLAGS("oautofps", encode_output.autofps, CONF_GLOBAL),
+    OPT_MAKE_FLAGS("oneverdrop", encode_output.neverdrop, CONF_GLOBAL),
 
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };

@@ -79,6 +79,8 @@ extern int verbose;
 #define MSGT_STREAM 20  // stream.c
 #define MSGT_CACHE 21 	// cache2.c
 
+#define MSGT_ENCODE 22 // now encode_lavc.c
+
 #define MSGT_XACODEC 23	// XAnim codecs
 
 #define MSGT_TV 24	// TV input subsystem

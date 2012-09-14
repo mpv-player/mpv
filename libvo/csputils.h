@@ -116,6 +116,10 @@ enum mp_csp avcol_spc_to_mp_csp(enum AVColorSpace colorspace);
 
 enum mp_csp_levels avcol_range_to_mp_csp_levels(enum AVColorRange range);
 
+enum AVColorSpace mp_csp_to_avcol_spc(enum mp_csp colorspace);
+
+enum AVColorRange mp_csp_levels_to_avcol_range(enum mp_csp_levels range);
+
 enum mp_csp mp_csp_guess_colorspace(int width, int height);
 
 void mp_gen_gamma_map(unsigned char *map, int size, float gamma);

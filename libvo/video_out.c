@@ -78,6 +78,7 @@ extern struct vo_driver video_out_gl;
 extern struct vo_driver video_out_gl3;
 extern struct vo_driver video_out_null;
 extern struct vo_driver video_out_image;
+extern struct vo_driver video_out_lavc;
 extern struct vo_driver video_out_caca;
 extern struct vo_driver video_out_direct3d;
 extern struct vo_driver video_out_direct3d_shaders;
@@ -116,6 +117,9 @@ const struct vo_driver *video_out_drivers[] =
         &video_out_null,
         // should not be auto-selected
         &video_out_image,
+#ifdef CONFIG_ENCODING
+        &video_out_lavc,
+#endif
 #ifdef CONFIG_X11
 #ifdef CONFIG_GL
         &video_out_gl_nosw,
@@ -283,7 +287,8 @@ void list_video_out(void)
 
 struct vo *init_best_video_out(struct MPOpts *opts,
                                struct mp_fifo *key_fifo,
-                               struct input_ctx *input_ctx)
+                               struct input_ctx *input_ctx,
+                               struct encode_lavc_context *encode_lavc_ctx)
 {
     char **vo_list = opts->video_driver_list;
     int i;
@@ -291,6 +296,7 @@ struct vo *init_best_video_out(struct MPOpts *opts,
     struct vo initial_values = {
         .opts = opts,
         .key_fifo = key_fifo,
+        .encode_lavc_ctx = encode_lavc_ctx,
         .input_ctx = input_ctx,
         .event_fd = -1,
         .registered_fd = -1,

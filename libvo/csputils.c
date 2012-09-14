@@ -50,32 +50,39 @@ char * const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
 enum mp_csp avcol_spc_to_mp_csp(enum AVColorSpace colorspace)
 {
     switch (colorspace) {
-        case AVCOL_SPC_BT709:
-            return MP_CSP_BT_709;
-            break;
-        case AVCOL_SPC_BT470BG:
-        case AVCOL_SPC_SMPTE170M:
-            return MP_CSP_BT_601;
-            break;
-        case AVCOL_SPC_SMPTE240M:
-            return MP_CSP_SMPTE_240M;
-            break;
-        default:
-            return MP_CSP_AUTO;
+        case AVCOL_SPC_BT709:     return MP_CSP_BT_709;
+        case AVCOL_SPC_BT470BG:   return MP_CSP_BT_601;
+	case AVCOL_SPC_SMPTE170M: return MP_CSP_BT_601;
+        case AVCOL_SPC_SMPTE240M: return MP_CSP_SMPTE_240M;
+        default:                  return MP_CSP_AUTO;
     }
 }
 
 enum mp_csp_levels avcol_range_to_mp_csp_levels(enum AVColorRange range)
 {
     switch (range) {
-        case AVCOL_RANGE_MPEG:
-            return MP_CSP_LEVELS_TV;
-            break;
-        case AVCOL_RANGE_JPEG:
-            return MP_CSP_LEVELS_PC;
-            break;
-        default:
-            return MP_CSP_LEVELS_AUTO;
+        case AVCOL_RANGE_MPEG: return MP_CSP_LEVELS_TV;
+        case AVCOL_RANGE_JPEG: return MP_CSP_LEVELS_PC;
+        default:               return MP_CSP_LEVELS_AUTO;
+    }
+}
+
+enum AVColorSpace mp_csp_to_avcol_spc(enum mp_csp colorspace)
+{
+    switch (colorspace) {
+        case MP_CSP_BT_709:     return AVCOL_SPC_BT709;
+        case MP_CSP_BT_601:     return AVCOL_SPC_BT470BG;
+        case MP_CSP_SMPTE_240M: return AVCOL_SPC_SMPTE240M;
+        default:                return AVCOL_SPC_RGB;
+    }
+}
+
+enum AVColorRange mp_csp_levels_to_avcol_range(enum mp_csp_levels range)
+{
+    switch (range) {
+        case MP_CSP_LEVELS_TV: return AVCOL_RANGE_MPEG;
+        case MP_CSP_LEVELS_PC: return AVCOL_RANGE_JPEG;
+        default:               return AVCOL_RANGE_UNSPECIFIED;
     }
 }
 

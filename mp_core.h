@@ -252,6 +252,8 @@ typedef struct MPContext {
     struct screenshot_ctx *screenshot_ctx;
 
     char *track_layout_hash;
+
+    struct encode_lavc_context *encode_lavc_ctx;
 } MPContext;
 
 

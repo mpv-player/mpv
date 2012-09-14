@@ -407,6 +407,8 @@ OPTIONS
 
 .. include:: vf.rst
 
+.. include:: encode.rst
+
 Taking screenshots
 ==================
 
