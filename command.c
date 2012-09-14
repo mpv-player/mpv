@@ -2097,7 +2097,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     sh_video_t *const sh_video = mpctx->sh_video;
     int osd_duration = opts->osd_duration;
     int osdl = cmd->on_osd ? 1 : OSD_LEVEL_INVISIBLE;
-    int case_fallthrough_hack = 0;
     switch (cmd->id) {
     case MP_CMD_SEEK: {
         float v = cmd->args[0].v.f;
@@ -2238,21 +2237,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         video_reset_aspect(sh_video);
         break;
 
-    case MP_CMD_SPEED_INCR: {
+    case MP_CMD_SPEED_MULT: {
         float v = cmd->args[0].v.f;
-        mp_property_do("speed", M_PROPERTY_STEP_UP, &v, mpctx);
-        if (cmd->on_osd)
-            show_property_osd(mpctx, "speed");
-        break;
-    }
-
-    case MP_CMD_SPEED_MULT:
-        case_fallthrough_hack = true;
-
-    case MP_CMD_SPEED_SET: {
-        float v = cmd->args[0].v.f;
-        if (case_fallthrough_hack)
-            v *= mpctx->opts.playback_speed;
+        v *= mpctx->opts.playback_speed;
         mp_property_do("speed", M_PROPERTY_SET, &v, mpctx);
         if (cmd->on_osd)
             show_property_osd(mpctx, "speed");

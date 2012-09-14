@@ -101,9 +101,7 @@ static const mp_cmd_t mp_cmds[] = {
 #endif
   { MP_CMD_SEEK, "seek", { ARG_FLOAT, OARG_INT(0), OARG_INT(0) } },
   { MP_CMD_EDL_MARK, "edl_mark", },
-  { MP_CMD_SPEED_INCR, "speed_incr", { ARG_FLOAT } },
   { MP_CMD_SPEED_MULT, "speed_mult", { ARG_FLOAT } },
-  { MP_CMD_SPEED_SET, "speed_set", { ARG_FLOAT } },
   { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
   { MP_CMD_STOP, "stop", },
   { MP_CMD_FRAME_STEP, "frame_step", },
@@ -198,6 +196,8 @@ static const struct legacy_cmd legacy_cmds[] = {
     {"step_property",           "no-osd switch"},
     {"set_property",            "no-osd set"},
     {"set_property_osd",        "set"},
+    {"speed_set",               "set speed"},
+    // Approximate
     {"pt_step 1",               "playlist_next"},
     {"pt_step -1",              "playlist_prev"},
     {0}
