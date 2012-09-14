@@ -794,7 +794,7 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
                             "unterminated.\n", cmd_def->name, i + 1);
                     goto error;
                 }
-                if (*ptr == term)
+                if (*ptr == term || (*ptr == '\t' && term == ' '))
                     break;
                 if (*ptr == '\\')
                     ptr++;
