@@ -1003,7 +1003,7 @@ void init_vo_spudec(struct MPContext *mpctx)
 
     if (vo_spudec != NULL) {
         mpctx->initialized_flags |= INITIALIZED_SPUDEC;
-        mp_property_do("sub_forced_only", M_PROPERTY_SET, &forced_subs_only,
+        mp_property_do("sub-forced-only", M_PROPERTY_SET, &forced_subs_only,
                        mpctx);
     }
 }
@@ -3486,7 +3486,7 @@ static void open_vobsubs_from_options(struct MPContext *mpctx)
         mpctx->initialized_flags |= INITIALIZED_VOBSUB;
         // TODO: let frontend do the selection
         vobsub_set_from_lang(vo_vobsub, mpctx->opts.sub_lang);
-        mp_property_do("sub_forced_only", M_PROPERTY_SET, &forced_subs_only,
+        mp_property_do("sub-forced-only", M_PROPERTY_SET, &forced_subs_only,
                        mpctx);
 
         for (int i = 0; i < vobsub_get_indexes_count(vo_vobsub); i++) {

@@ -1019,8 +1019,8 @@ static int mp_property_program(m_option_t *prop, int action, void *arg,
                    "Selected program contains no audio or video streams!\n");
             return M_PROPERTY_ERROR;
         }
-        mp_property_do("switch_audio", M_PROPERTY_SET, &prog.aid, mpctx);
-        mp_property_do("switch_video", M_PROPERTY_SET, &prog.vid, mpctx);
+        mp_property_do("audio", M_PROPERTY_SET, &prog.aid, mpctx);
+        mp_property_do("video", M_PROPERTY_SET, &prog.vid, mpctx);
         return M_PROPERTY_OK;
 
     default:
@@ -1352,7 +1352,7 @@ static int mp_property_gamma(m_option_t *prop, int action, void *arg,
     if (mpctx->sh_video->gsh->demuxer->type == DEMUXER_TYPE_TV) {
         int l = strlen(prop->name);
         char tv_prop[3 + l + 1];
-        sprintf(tv_prop, "tv_%s", prop->name);
+        sprintf(tv_prop, "tv-%s", prop->name);
         return mp_property_do(tv_prop, action, arg, mpctx);
     }
 #endif
@@ -1677,21 +1677,21 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "demuxer", mp_property_demuxer, CONF_TYPE_STRING,
       0, 0, 0, NULL },
-    { "stream_pos", mp_property_stream_pos, CONF_TYPE_POSITION,
+    { "stream-pos", mp_property_stream_pos, CONF_TYPE_POSITION,
       M_OPT_MIN, 0, 0, NULL },
-    { "stream_start", mp_property_stream_start, CONF_TYPE_POSITION,
+    { "stream-start", mp_property_stream_start, CONF_TYPE_POSITION,
       M_OPT_MIN, 0, 0, NULL },
-    { "stream_end", mp_property_stream_end, CONF_TYPE_POSITION,
+    { "stream-end", mp_property_stream_end, CONF_TYPE_POSITION,
       M_OPT_MIN, 0, 0, NULL },
-    { "stream_length", mp_property_stream_length, CONF_TYPE_POSITION,
+    { "stream-length", mp_property_stream_length, CONF_TYPE_POSITION,
       M_OPT_MIN, 0, 0, NULL },
-    { "stream_time_pos", mp_property_stream_time_pos, CONF_TYPE_TIME,
+    { "stream-time-pos", mp_property_stream_time_pos, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
     { "length", mp_property_length, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
-    { "percent_pos", mp_property_percent_pos, CONF_TYPE_INT,
+    { "percent-pos", mp_property_percent_pos, CONF_TYPE_INT,
       M_OPT_RANGE, 0, 100, NULL },
-    { "time_pos", mp_property_time_pos, CONF_TYPE_TIME,
+    { "time-pos", mp_property_time_pos, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
     { "chapter", mp_property_chapter, CONF_TYPE_INT,
       M_OPT_MIN, 0, 0, NULL },
@@ -1708,9 +1708,9 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "pause", mp_property_pause, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
-    { "pts_association_mode", mp_property_generic_option, &m_option_type_choice,
+    { "pts-association-mode", mp_property_generic_option, &m_option_type_choice,
       0, 0, 0, "pts-association-mode" },
-    { "hr_seek", mp_property_generic_option, &m_option_type_choice,
+    { "hr-seek", mp_property_generic_option, &m_option_type_choice,
       0, 0, 0, "hr-seek" },
 
     // Audio
@@ -1718,19 +1718,19 @@ static const m_option_t mp_properties[] = {
       M_OPT_RANGE, 0, 100, NULL },
     { "mute", mp_property_mute, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
-    { "audio_delay", mp_property_audio_delay, CONF_TYPE_FLOAT,
+    { "audio-delay", mp_property_audio_delay, CONF_TYPE_FLOAT,
       M_OPT_RANGE, -100, 100, NULL },
-    { "audio_format", mp_property_audio_format, CONF_TYPE_INT,
+    { "audio-format", mp_property_audio_format, CONF_TYPE_INT,
       0, 0, 0, NULL },
-    { "audio_codec", mp_property_audio_codec, CONF_TYPE_STRING,
+    { "audio-codec", mp_property_audio_codec, CONF_TYPE_STRING,
       0, 0, 0, NULL },
-    { "audio_bitrate", mp_property_audio_bitrate, CONF_TYPE_INT,
+    { "audio-bitrate", mp_property_audio_bitrate, CONF_TYPE_INT,
       0, 0, 0, NULL },
     { "samplerate", mp_property_samplerate, CONF_TYPE_INT,
       0, 0, 0, NULL },
     { "channels", mp_property_channels, CONF_TYPE_INT,
       0, 0, 0, NULL },
-    { "switch_audio", mp_property_audio, CONF_TYPE_INT,
+    { "audio", mp_property_audio, CONF_TYPE_INT,
       CONF_RANGE, -2, 65535, NULL },
     { "balance", mp_property_balance, CONF_TYPE_FLOAT,
       M_OPT_RANGE, -1, 1, NULL },
@@ -1742,9 +1742,9 @@ static const m_option_t mp_properties[] = {
       M_OPT_RANGE, 0, 1, NULL },
     { "colormatrix", mp_property_colormatrix, &m_option_type_choice,
       0, 0, 0, "colormatrix" },
-    { "colormatrix_input_range", mp_property_colormatrix_input_range, &m_option_type_choice,
+    { "colormatrix-input-range", mp_property_colormatrix_input_range, &m_option_type_choice,
       0, 0, 0, "colormatrix-input-range" },
-    { "colormatrix_output_range", mp_property_colormatrix_output_range, &m_option_type_choice,
+    { "colormatrix-output-range", mp_property_colormatrix_output_range, &m_option_type_choice,
       0, 0, 0, "colormatrix-output-range" },
     { "ontop", mp_property_ontop, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
@@ -1768,11 +1768,11 @@ static const m_option_t mp_properties[] = {
       M_OPT_RANGE, 0, 1, NULL },
     { "vsync", mp_property_vsync, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
-    { "video_format", mp_property_video_format, CONF_TYPE_INT,
+    { "video-format", mp_property_video_format, CONF_TYPE_INT,
       0, 0, 0, NULL },
-    { "video_codec", mp_property_video_codec, CONF_TYPE_STRING,
+    { "video-codec", mp_property_video_codec, CONF_TYPE_STRING,
       0, 0, 0, NULL },
-    { "video_bitrate", mp_property_video_bitrate, CONF_TYPE_INT,
+    { "video-bitrate", mp_property_video_bitrate, CONF_TYPE_INT,
       0, 0, 0, NULL },
     { "width", mp_property_width, CONF_TYPE_INT,
       0, 0, 0, NULL },
@@ -1782,45 +1782,78 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "aspect", mp_property_aspect, CONF_TYPE_FLOAT,
       0, 0, 0, NULL },
-    { "switch_video", mp_property_video, CONF_TYPE_INT,
+    { "video", mp_property_video, CONF_TYPE_INT,
       CONF_RANGE, -2, 65535, NULL },
-    { "switch_program", mp_property_program, CONF_TYPE_INT,
+    { "program", mp_property_program, CONF_TYPE_INT,
       CONF_RANGE, -1, 65535, NULL },
 
     // Subs
     { "sub", mp_property_sub, CONF_TYPE_INT,
       M_OPT_MIN, -1, 0, NULL },
-    { "sub_delay", mp_property_sub_delay, CONF_TYPE_FLOAT,
+    { "sub-delay", mp_property_sub_delay, CONF_TYPE_FLOAT,
       0, 0, 0, NULL },
-    { "sub_pos", mp_property_sub_pos, CONF_TYPE_INT,
+    { "sub-pos", mp_property_sub_pos, CONF_TYPE_INT,
       M_OPT_RANGE, 0, 100, NULL },
-    { "sub_visibility", mp_property_sub_visibility, CONF_TYPE_FLAG,
+    { "sub-visibility", mp_property_sub_visibility, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
-    { "sub_forced_only", mp_property_sub_forced_only, CONF_TYPE_FLAG,
+    { "sub-forced-only", mp_property_sub_forced_only, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
-    { "sub_scale", mp_property_sub_scale, CONF_TYPE_FLOAT,
+    { "sub-scale", mp_property_sub_scale, CONF_TYPE_FLOAT,
       M_OPT_RANGE, 0, 100, NULL },
 #ifdef CONFIG_ASS
-    { "ass_use_margins", mp_property_ass_use_margins, CONF_TYPE_FLAG,
+    { "ass-use-margins", mp_property_ass_use_margins, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
-    { "ass_vsfilter_aspect_compat", mp_property_ass_vsfilter_aspect_compat,
+    { "ass-vsfilter-aspect-compat", mp_property_ass_vsfilter_aspect_compat,
       CONF_TYPE_FLAG, M_OPT_RANGE, 0, 1, NULL },
 #endif
 
 #ifdef CONFIG_TV
-    { "tv_brightness", mp_property_tv_color, CONF_TYPE_INT,
+    { "tv-brightness", mp_property_tv_color, CONF_TYPE_INT,
       M_OPT_RANGE, -100, 100, .offset = TV_COLOR_BRIGHTNESS },
-    { "tv_contrast", mp_property_tv_color, CONF_TYPE_INT,
+    { "tv-contrast", mp_property_tv_color, CONF_TYPE_INT,
       M_OPT_RANGE, -100, 100, .offset = TV_COLOR_CONTRAST },
-    { "tv_saturation", mp_property_tv_color, CONF_TYPE_INT,
+    { "tv-saturation", mp_property_tv_color, CONF_TYPE_INT,
       M_OPT_RANGE, -100, 100, .offset = TV_COLOR_SATURATION },
-    { "tv_hue", mp_property_tv_color, CONF_TYPE_INT,
+    { "tv-hue", mp_property_tv_color, CONF_TYPE_INT,
       M_OPT_RANGE, -100, 100, .offset = TV_COLOR_HUE },
 #endif
 
     {0},
 };
 
+struct legacy_prop {
+    const char *old, *new;
+};
+static const struct legacy_prop legacy_props[] = {
+    {"switch_video",    "video"},
+    {"switch_audio",    "audio"},
+    {"switch_program",  "program"},
+    {0}
+};
+
+static char *translate_legacy_property(void *talloc_ctx, const char *name)
+{
+    char *new_name = NULL;
+    for (int n = 0; legacy_props[n].new; n++) {
+        if (strcmp(name, legacy_props[n].old) == 0) {
+            new_name = (char *)legacy_props[n].new;
+            break;
+        }
+    }
+    if (!new_name && strchr(name, '_')) {
+        // Old names used "_" instead of "-"
+        new_name = talloc_strdup(talloc_ctx, name);
+        for (int n = 0; new_name[n]; n++) {
+            if (new_name[n] == '_')
+                new_name[n] = '-';
+        }
+    }
+    if (new_name) {
+        mp_msg(MSGT_CPLAYER, MSGL_ERR, "Warning: property '%s' is deprecated, "
+               "replaced with '%s'. Fix your input.conf!\n", name, new_name);
+    }
+    return new_name ? new_name : (char *)name;
+}
 
 int mp_property_do(const char *name, int action, void *val, void *ctx)
 {
@@ -1869,14 +1902,14 @@ static struct property_osd_display {
     // general
     { "loop", _("Loop: %s") },
     { "chapter", NULL, .osd_progbar = -1 },
-    { "pts_association_mode", "PTS association mode: %s" },
-    { "hr_seek", "hr-seek: %s" },
+    { "pts-association-mode", "PTS association mode: %s" },
+    { "hr-seek", "hr-seek: %s" },
     { "speed", _("Speed: x %6s") },
     // audio
     { "volume", _("Volume"), .osd_progbar = OSD_VOLUME },
     { "mute", _("Mute: %s") },
-    { "audio_delay", _("A-V delay: %s") },
-    { "switch_audio", _("Audio: %s") },
+    { "audio-delay", _("A-V delay: %s") },
+    { "audio", _("Audio: %s") },
     { "balance", _("Balance"), .osd_progbar = OSD_BALANCE },
     // video
     { "panscan", _("Panscan"), .osd_progbar = OSD_PANSCAN },
@@ -1886,8 +1919,8 @@ static struct property_osd_display {
     { "framedropping", _("Framedropping: %s") },
     { "deinterlace", _("Deinterlace: %s") },
     { "colormatrix", _("YUV colormatrix: %s") },
-    { "colormatrix_input_range", _("YUV input range: %s") },
-    { "colormatrix_output_range", _("RGB output range: %s") },
+    { "colormatrix-input-range", _("YUV input range: %s") },
+    { "colormatrix-output-range", _("RGB output range: %s") },
     { "gamma", _("Gamma"), .osd_progbar = OSD_BRIGHTNESS },
     { "brightness", _("Brightness"), .osd_progbar = OSD_BRIGHTNESS },
     { "contrast", _("Contrast"), .osd_progbar = OSD_CONTRAST },
@@ -1897,17 +1930,17 @@ static struct property_osd_display {
     { "angle", _("Angle: %s") },
     // subs
     { "sub", _("Subtitles: %s") },
-    { "sub_pos", _("Sub position: %s/100") },
-    { "sub_delay", _("Sub delay: %s"), .osd_id = OSD_MSG_SUB_DELAY },
-    { "sub_visibility", _("Subtitles: %s") },
-    { "sub_forced_only", _("Forced sub only: %s") },
-    { "sub_scale", _("Sub Scale: %s")},
-    { "ass_vsfilter_aspect_compat", _("Subtitle VSFilter aspect compat: %s")},
+    { "sub-pos", _("Sub position: %s/100") },
+    { "sub-delay", _("Sub delay: %s"), .osd_id = OSD_MSG_SUB_DELAY },
+    { "sub-visibility", _("Subtitles: %s") },
+    { "sub-forced-only", _("Forced sub only: %s") },
+    { "sub-scale", _("Sub Scale: %s")},
+    { "ass-vsfilter-aspect-compat", _("Subtitle VSFilter aspect compat: %s")},
 #ifdef CONFIG_TV
-    { "tv_brightness", _("Brightness"), .osd_progbar = OSD_BRIGHTNESS },
-    { "tv_hue", _("Hue"), .osd_progbar = OSD_HUE},
-    { "tv_saturation", _("Saturation"), .osd_progbar = OSD_SATURATION },
-    { "tv_contrast", _("Contrast"), .osd_progbar = OSD_CONTRAST },
+    { "tv-brightness", _("Brightness"), .osd_progbar = OSD_BRIGHTNESS },
+    { "tv-hue", _("Hue"), .osd_progbar = OSD_HUE},
+    { "tv-saturation", _("Saturation"), .osd_progbar = OSD_SATURATION },
+    { "tv-contrast", _("Contrast"), .osd_progbar = OSD_CONTRAST },
 #endif
     {}
 };
@@ -2089,6 +2122,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SET: {
+        cmd->args[0].v.s = translate_legacy_property(cmd, cmd->args[0].v.s);
         int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_PARSE,
                                cmd->args[1].v.s, mpctx);
         if (r == M_PROPERTY_UNKNOWN)
@@ -2111,6 +2145,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         int r, i;
         double d;
         off_t o;
+        cmd->args[0].v.s = translate_legacy_property(cmd, cmd->args[0].v.s);
         if (cmd->args[1].v.f) {
             m_option_t *prop;
             if ((r = mp_property_do(cmd->args[0].v.s,
@@ -2154,6 +2189,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_GET_PROPERTY: {
+        cmd->args[0].v.s = translate_legacy_property(cmd, cmd->args[0].v.s);
         char *tmp;
         int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_TO_STRING,
                                &tmp, mpctx);
