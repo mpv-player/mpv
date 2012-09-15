@@ -335,7 +335,7 @@ try_fec:
 }
 
 static int parse_avc_sps(uint8_t *buf, int len, int *w, int *h);
-static inline uint8_t *pid_lang_from_pmt(ts_priv_t *priv, int pid);
+static uint8_t *pid_lang_from_pmt(ts_priv_t *priv, int pid);
 
 static void ts_add_stream(demuxer_t * demuxer, ES_stream_t *es)
 {
@@ -530,7 +530,7 @@ static int ts_check_file(demuxer_t * demuxer)
 }
 
 
-static inline int32_t progid_idx_in_pmt(ts_priv_t *priv, uint16_t progid)
+static int32_t progid_idx_in_pmt(ts_priv_t *priv, uint16_t progid)
 {
 	int x;
 
@@ -547,7 +547,7 @@ static inline int32_t progid_idx_in_pmt(ts_priv_t *priv, uint16_t progid)
 }
 
 
-static inline int32_t progid_for_pid(ts_priv_t *priv, int pid, int32_t req)		//finds the first program listing a pid
+static int32_t progid_for_pid(ts_priv_t *priv, int pid, int32_t req)		//finds the first program listing a pid
 {
 	int i, j;
 	pmt_t *pmt;
@@ -577,7 +577,7 @@ static inline int32_t progid_for_pid(ts_priv_t *priv, int pid, int32_t req)		//f
 	return -1;
 }
 
-static inline int32_t prog_pcr_pid(ts_priv_t *priv, int progid)
+static int32_t prog_pcr_pid(ts_priv_t *priv, int progid)
 {
 	int i;
 
@@ -592,7 +592,7 @@ static inline int32_t prog_pcr_pid(ts_priv_t *priv, int progid)
 }
 
 
-static inline int pid_match_lang(ts_priv_t *priv, uint16_t pid, char *lang)
+static int pid_match_lang(ts_priv_t *priv, uint16_t pid, char *lang)
 {
 	uint16_t i, j;
 	pmt_t *pmt;
@@ -1664,7 +1664,7 @@ static void ts_dump_streams(ts_priv_t *priv)
 }
 
 
-static inline int32_t prog_idx_in_pat(ts_priv_t *priv, uint16_t progid)
+static int32_t prog_idx_in_pat(ts_priv_t *priv, uint16_t progid)
 {
 	int x;
 
@@ -1681,7 +1681,7 @@ static inline int32_t prog_idx_in_pat(ts_priv_t *priv, uint16_t progid)
 }
 
 
-static inline int32_t prog_id_in_pat(ts_priv_t *priv, uint16_t pid)
+static int32_t prog_id_in_pat(ts_priv_t *priv, uint16_t pid)
 {
 	int x;
 
@@ -1811,7 +1811,7 @@ static int parse_pat(ts_priv_t * priv, int is_start, unsigned char *buff, int si
 }
 
 
-static inline int32_t es_pid_in_pmt(pmt_t * pmt, uint16_t pid)
+static int32_t es_pid_in_pmt(pmt_t * pmt, uint16_t pid)
 {
 	uint16_t i;
 
@@ -2650,7 +2650,7 @@ static pmt_t* pmt_of_pid(ts_priv_t *priv, int pid, mp4_decoder_config_t **mp4_de
 }
 
 
-static inline int32_t pid_type_from_pmt(ts_priv_t *priv, int pid)
+static int32_t pid_type_from_pmt(ts_priv_t *priv, int pid)
 {
 	int32_t pmt_idx, pid_idx, i, j;
 
@@ -2677,7 +2677,7 @@ static inline int32_t pid_type_from_pmt(ts_priv_t *priv, int pid)
 }
 
 
-static inline uint8_t *pid_lang_from_pmt(ts_priv_t *priv, int pid)
+static uint8_t *pid_lang_from_pmt(ts_priv_t *priv, int pid)
 {
 	int32_t pmt_idx, pid_idx, i, j;
 
