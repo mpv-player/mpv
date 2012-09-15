@@ -2287,7 +2287,7 @@ static int parse_descriptors(struct pmt_es_t *es, uint8_t *ptr)
 		else if(ptr[j] == 0x56) // Teletext
 		{
 			if(descr_len >= 5) {
-				memcpy(es->lang, ptr+2, 3);
+				memcpy(es->lang, ptr+j+2, 3);
 				es->lang[3] = 0;
 			}
 			es->type = SPU_TELETEXT;
