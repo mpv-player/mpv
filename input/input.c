@@ -109,9 +109,8 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_PLAYLIST_PREV, "playlist_prev", { OARG_INT(0) } },
   { MP_CMD_SUB_STEP, "sub_step", { ARG_INT, OARG_INT(0) } },
   { MP_CMD_OSD, "osd", { OARG_INT(-1) } },
-  { MP_CMD_OSD_SHOW_TEXT, "osd_show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
-  { MP_CMD_OSD_SHOW_PROPERTY_TEXT, "osd_show_property_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
-  { MP_CMD_OSD_SHOW_PROGRESSION, "osd_show_progression", },
+  { MP_CMD_SHOW_TEXT, "show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
+  { MP_CMD_SHOW_PROGRESS, "show_progress", },
   { MP_CMD_SUB_LOAD, "sub_load", { ARG_STRING } },
 #ifdef CONFIG_TV
   { MP_CMD_TV_START_SCAN, "tv_start_scan", },
@@ -197,6 +196,9 @@ static const struct legacy_cmd legacy_cmds[] = {
     {"set_property",            "no-osd set"},
     {"set_property_osd",        "set"},
     {"speed_set",               "set speed"},
+    {"osd_show_text",           "show_text"},
+    {"osd_show_property_text",  "show_text"},
+    {"osd_show_progression",    "show_progress"},
     // Approximate
     {"pt_step 1",               "playlist_next"},
     {"pt_step -1",              "playlist_prev"},

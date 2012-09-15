@@ -2313,22 +2313,14 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
-    case MP_CMD_OSD_SHOW_TEXT:
-        set_osd_msg(mpctx, OSD_MSG_TEXT, cmd->args[2].v.i,
-                    (cmd->args[1].v.i <
-                     0 ? osd_duration : cmd->args[1].v.i),
-                    "%s", cmd->args[0].v.s);
-        break;
-
-    case MP_CMD_OSD_SHOW_PROPERTY_TEXT: {
+    case MP_CMD_SHOW_TEXT: {
         char *txt = m_properties_expand_string(mp_properties,
                                                cmd->args[0].v.s,
                                                mpctx);
         // if no argument supplied use default osd_duration, else <arg> ms.
         if (txt) {
             set_osd_msg(mpctx, OSD_MSG_TEXT, cmd->args[2].v.i,
-                        (cmd->args[1].v.i <
-                         0 ? osd_duration : cmd->args[1].v.i),
+                        (cmd->args[1].v.i < 0 ? osd_duration : cmd->args[1].v.i),
                         "%s", txt);
             free(txt);
         }
@@ -2392,7 +2384,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         mpctx->stop_play = PT_STOP;
         break;
 
-    case MP_CMD_OSD_SHOW_PROGRESSION:
+    case MP_CMD_SHOW_PROGRESS:
         mp_show_osd_progression(mpctx);
         break;
 
