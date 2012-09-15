@@ -136,7 +136,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_KEYDOWN_EVENTS, "key_down_event", { ARG_INT } },
   { MP_CMD_SET, "set", { ARG_STRING,  ARG_STRING } },
   { MP_CMD_GET_PROPERTY, "get_property", { ARG_STRING } },
-  { MP_CMD_SWITCH, "switch", { ARG_STRING, OARG_FLOAT(0), OARG_INT(0) } },
+  { MP_CMD_SWITCH, "switch", { ARG_STRING, OARG_FLOAT(0) } },
 
   { MP_CMD_SET_MOUSE_POS, "set_mouse_pos", { ARG_INT, ARG_INT } },
 
