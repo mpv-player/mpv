@@ -21,6 +21,7 @@
 #import <OpenGL/OpenGL.h>
 #import <QuartzCore/QuartzCore.h>
 #import <CoreServices/CoreServices.h> // for CGDisplayHideCursor
+#import <IOKit/pwr_mgt/IOPMLib.h>
 #include <dlfcn.h>
 
 #include "cocoa_common.h"
@@ -62,6 +63,11 @@
 @end
 #endif
 
+// add power management assertion not available on OSX versions prior to 10.7
+#ifndef kIOPMAssertionTypePreventUserIdleDisplaySleep
+#define kIOPMAssertionTypePreventUserIdleDisplaySleep CFSTR("PreventUserIdleDisplaySleep")
+#endif
+
 @interface GLMPlayerWindow : NSWindow <NSWindowDelegate> {
     struct vo *_vo;
 }
@@ -100,14 +106,14 @@ struct vo_cocoa_state {
     NSInteger windowed_window_level;
     NSInteger fullscreen_window_level;
 
-    int last_screensaver_update;
-
     int display_cursor;
     int cursor_timer;
     int cursor_autohide_delay;
 
     bool did_resize;
     bool out_fs_resize;
+
+    IOPMAssertionID power_mgmt_assertion;
 };
 
 static int _instances = 0;
@@ -129,6 +135,7 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .out_fs_resize = NO,
         .display_cursor = 1,
         .cursor_autohide_delay = vo->opts->cursor_autohide_delay,
+        .power_mgmt_assertion = kIOPMNullAssertionID,
     };
     return s;
 }
@@ -158,6 +165,27 @@ void *vo_cocoa_glgetaddr(const char *s)
     return ret;
 }
 
+static void enable_power_management(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    if (!s->power_mgmt_assertion) return;
+    IOPMAssertionRelease(s->power_mgmt_assertion);
+    s->power_mgmt_assertion = kIOPMNullAssertionID;
+}
+
+static void disable_power_management(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    if (s->power_mgmt_assertion) return;
+
+    CFStringRef assertion_type = kIOPMAssertionTypeNoDisplaySleep;
+    if (is_osx_version_at_least(10, 7, 0))
+        assertion_type = kIOPMAssertionTypePreventUserIdleDisplaySleep;
+
+    IOPMAssertionCreateWithName(assertion_type, kIOPMAssertionLevelOn,
+        CFSTR("org.mplayer2.power_mgmt"), &s->power_mgmt_assertion);
+}
+
 int vo_cocoa_init(struct vo *vo)
 {
     vo->cocoa = vo_cocoa_init_state(vo);
@@ -166,6 +194,7 @@ int vo_cocoa_init(struct vo *vo)
     NSApplicationLoad();
     NSApp = [NSApplication sharedApplication];
     [NSApp setActivationPolicy: NSApplicationActivationPolicyRegular];
+    disable_power_management(vo);
 
     return 1;
 }
@@ -174,6 +203,7 @@ void vo_cocoa_uninit(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     CGDisplayShowCursor(kCGDirectMainDisplay);
+    enable_power_management(vo);
     [NSApp setPresentationOptions:NSApplicationPresentationDefault];
 
     [s->window release];
@@ -184,6 +214,16 @@ void vo_cocoa_uninit(struct vo *vo)
     s->pool = nil;
 
     _instances--;
+}
+
+void vo_cocoa_pause(struct vo *vo)
+{
+    enable_power_management(vo);
+}
+
+void vo_cocoa_resume(struct vo *vo)
+{
+    disable_power_management(vo);
 }
 
 static int current_screen_has_dock_or_menubar(struct vo *vo)
@@ -392,14 +432,6 @@ int vo_cocoa_check_events(struct vo *vo)
         (msCurTime - s->cursor_timer >= s->cursor_autohide_delay)) {
         vo_cocoa_display_cursor(vo, 0);
         s->cursor_timer = msCurTime;
-    }
-
-    //update activity every 30 seconds to prevent
-    //screensaver from starting up.
-    if ((int)curTime - s->last_screensaver_update >= 30 || s->last_screensaver_update == 0)
-    {
-        UpdateSystemActivity(UsrActivity);
-        s->last_screensaver_update = (int)curTime;
     }
 
     event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil

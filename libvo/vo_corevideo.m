@@ -423,6 +423,16 @@ static int control(struct vo *vo, uint32_t request, void *data)
         case VOCTRL_ONTOP:
             p->mpglctx->ontop(vo);
             return VO_TRUE;
+        case VOCTRL_PAUSE:
+            if (!p->mpglctx->pause)
+                break;
+            p->mpglctx->pause(vo);
+            return VO_TRUE;
+        case VOCTRL_RESUME:
+            if (!p->mpglctx->resume)
+                break;
+            p->mpglctx->resume(vo);
+            return VO_TRUE;
         case VOCTRL_FULLSCREEN:
             p->mpglctx->fullscreen(vo);
             resize(vo, vo->dwidth, vo->dheight);

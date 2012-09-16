@@ -2492,6 +2492,8 @@ MPGLContext *mpgl_init(enum MPGLType type, struct vo *vo)
         ctx->fullscreen = cocoa_fullscreen;
         ctx->ontop = vo_cocoa_ontop;
         ctx->vo_init = vo_cocoa_init;
+        ctx->pause = vo_cocoa_pause;
+        ctx->resume = vo_cocoa_resume;
         ctx->vo_uninit = vo_cocoa_uninit;
         break;
 #endif

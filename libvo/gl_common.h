@@ -212,6 +212,8 @@ typedef struct MPGLContext {
                               uint32_t d_height, uint32_t flags);
 
     // optional
+    void (*pause)(struct vo *vo);
+    void (*resume)(struct vo *vo);
     void (*ontop)(struct vo *vo);
     void (*border)(struct vo *vo);
     void (*update_xinerama_info)(struct vo *vo);
