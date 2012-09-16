@@ -1442,6 +1442,16 @@ static int control(struct vo *vo, uint32_t request, void *data)
         if (vo_doublebuffering)
             do_render(vo);
         return true;
+    case VOCTRL_PAUSE:
+        if (!p->glctx->pause)
+            break;
+        p->glctx->pause(vo);
+        return VO_TRUE;
+    case VOCTRL_RESUME:
+        if (!p->glctx->resume)
+            break;
+        p->glctx->resume(vo);
+        return VO_TRUE;
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         if (args->full_window)
