@@ -63,19 +63,20 @@
 
 // add power management assertion not available on OSX versions prior to 10.7
 #ifndef kIOPMAssertionTypePreventUserIdleDisplaySleep
-#define kIOPMAssertionTypePreventUserIdleDisplaySleep CFSTR("PreventUserIdleDisplaySleep")
+#define kIOPMAssertionTypePreventUserIdleDisplaySleep \
+    CFSTR("PreventUserIdleDisplaySleep")
 #endif
 
 @interface GLMPlayerWindow : NSWindow <NSWindowDelegate> {
     struct vo *_vo;
 }
-- (void) setVideoOutput:(struct vo *)vo;
-- (BOOL) canBecomeKeyWindow;
-- (BOOL) canBecomeMainWindow;
-- (void) fullscreen;
-- (void) mouseEvent:(NSEvent *)theEvent;
-- (void) mulSize:(float)multiplier;
-- (void) setContentSize:(NSSize)newSize keepCentered:(BOOL)keepCentered;
+- (void)setVideoOutput:(struct vo *)vo;
+- (BOOL)canBecomeKeyWindow;
+- (BOOL)canBecomeMainWindow;
+- (void)fullscreen;
+- (void)mouseEvent:(NSEvent *)theEvent;
+- (void)mulSize:(float)multiplier;
+- (void)setContentSize:(NSSize)newSize keepCentered:(BOOL)keepCentered;
 @end
 
 @interface GLMPlayerOpenGLView : NSView
@@ -126,7 +127,8 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .did_resize = NO,
         .current_video_size = {0,0},
         .previous_video_size = {0,0},
-        .windowed_mask = NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask,
+        .windowed_mask = NSTitledWindowMask|NSClosableWindowMask|
+            NSMiniaturizableWindowMask|NSResizableWindowMask,
         .fullscreen_mask = NSBorderlessWindowMask,
         .fullscreen_window_level = NSNormalWindowLevel + 1,
         .windowed_frame = {{0,0},{0,0}},
@@ -237,7 +239,8 @@ static void update_screen_info(struct vo *vo)
     struct vo_cocoa_state *s = vo->cocoa;
     s->screen_array = [NSScreen screens];
     if (xinerama_screen >= (int)[s->screen_array count]) {
-        mp_msg(MSGT_VO, MSGL_INFO, "[cocoa] Device ID %d does not exist, falling back to main device\n", xinerama_screen);
+        mp_msg(MSGT_VO, MSGL_INFO, "[cocoa] Device ID %d does not exist, "
+            "falling back to main device\n", xinerama_screen);
         xinerama_screen = -1;
     }
 
@@ -255,7 +258,8 @@ void vo_cocoa_update_xinerama_info(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     update_screen_info(vo);
-    aspect_save_screenres(vo, s->screen_frame.size.width, s->screen_frame.size.height);
+    aspect_save_screenres(vo, s->screen_frame.size.width,
+                              s->screen_frame.size.height);
 }
 
 int vo_cocoa_change_attributes(struct vo *vo)
@@ -312,11 +316,17 @@ int vo_cocoa_create_window(struct vo *vo, uint32_t d_width,
     s->current_video_size = NSMakeSize(d_width, d_height);
 
     if (!(s->window || s->glContext)) { // keep using the same window
-        s->window = [[GLMPlayerWindow alloc] initWithContentRect:NSMakeRect(0, 0, d_width, d_height)
-                                             styleMask:s->windowed_mask
-                                             backing:NSBackingStoreBuffered defer:NO];
+        const NSRect window_rect = NSMakeRect(0, 0, d_width, d_height);
+        const NSRect glview_rect = NSMakeRect(0, 0, 100, 100);
 
-        GLMPlayerOpenGLView *glView = [[GLMPlayerOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];
+        s->window =
+            [[GLMPlayerWindow alloc] initWithContentRect:window_rect
+                                               styleMask:s->windowed_mask
+                                                 backing:NSBackingStoreBuffered
+                                                   defer:NO];
+
+        GLMPlayerOpenGLView *glView =
+            [[GLMPlayerOpenGLView alloc] initWithFrame:glview_rect];
 
         // check for HiDPI support and enable it (available on 10.7 +)
         if (supports_hidpi(glView))
@@ -326,7 +336,11 @@ int vo_cocoa_create_window(struct vo *vo, uint32_t d_width,
         NSOpenGLPixelFormatAttribute attr[32];
         if (is_osx_version_at_least(10, 7, 0)) {
           attr[i++] = NSOpenGLPFAOpenGLProfile;
-          attr[i++] = (gl3profile ? NSOpenGLProfileVersion3_2Core : NSOpenGLProfileVersionLegacy);
+          if (gl3profile) {
+              attr[i++] = NSOpenGLProfileVersion3_2Core;
+          } else {
+              attr[i++] = NSOpenGLProfileVersionLegacy;
+          }
         } else if(gl3profile) {
             mp_msg(MSGT_VO, MSGL_ERR,
                 "[cocoa] Invalid pixel format attribute "
@@ -336,14 +350,17 @@ int vo_cocoa_create_window(struct vo *vo, uint32_t d_width,
         attr[i++] = NSOpenGLPFADoubleBuffer; // double buffered
         attr[i] = (NSOpenGLPixelFormatAttribute)0;
 
-        s->pixelFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes:attr] autorelease];
+        s->pixelFormat =
+            [[[NSOpenGLPixelFormat alloc] initWithAttributes:attr] autorelease];
         if (!s->pixelFormat) {
             mp_msg(MSGT_VO, MSGL_ERR,
                 "[cocoa] Invalid pixel format attribute "
                 "(GL3 not supported?)\n");
             return -1;
         }
-        s->glContext = [[NSOpenGLContext alloc] initWithFormat:s->pixelFormat shareContext:nil];
+        s->glContext =
+            [[NSOpenGLContext alloc] initWithFormat:s->pixelFormat
+                                       shareContext:nil];
 
         create_menu();
 
@@ -377,9 +394,10 @@ int vo_cocoa_create_window(struct vo *vo, uint32_t d_width,
                 // we will resize as soon as we get out of fullscreen
                 s->out_fs_resize = YES;
             } else {
-                // only if we are not in fullscreen and the video size did change
-                // we actually resize the window and set a new aspect ratio
-                [s->window setContentSize:s->current_video_size keepCentered:YES];
+                // only if we are not in fullscreen and the video size did
+                // change we resize the window and set a new aspect ratio
+                [s->window setContentSize:s->current_video_size
+                             keepCentered:YES];
                 [s->window setContentAspectRatio:s->current_video_size];
             }
         }
@@ -390,7 +408,8 @@ int vo_cocoa_create_window(struct vo *vo, uint32_t d_width,
     if (s->window_title)
         [s->window_title release];
 
-    s->window_title = [[NSString alloc] initWithUTF8String:vo_get_window_title(vo)];
+    s->window_title =
+        [[NSString alloc] initWithUTF8String:vo_get_window_title(vo)];
     [s->window setTitle: s->window_title];
 
     return 0;
@@ -498,10 +517,9 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 static NSMenuItem *new_menu_item(NSMenu *parent_menu, NSString *title,
                                  SEL action, NSString *key_equivalent)
 {
-    NSMenuItem *new_item = [[NSMenuItem alloc]
-                                initWithTitle:title
-                                       action:action
-                                keyEquivalent:key_equivalent];
+    NSMenuItem *new_item =
+        [[NSMenuItem alloc] initWithTitle:title action:action
+                                         keyEquivalent:key_equivalent];
     [parent_menu addItem:new_item];
     return [new_item autorelease];
 }
@@ -509,10 +527,9 @@ static NSMenuItem *new_menu_item(NSMenu *parent_menu, NSString *title,
 static NSMenuItem *new_main_menu_item(NSMenu *parent_menu, NSMenu *child_menu,
                                       NSString *title)
 {
-    NSMenuItem *new_item = [[NSMenuItem alloc]
-                                initWithTitle:title
-                                       action:nil
-                                keyEquivalent:@""];
+    NSMenuItem *new_item =
+        [[NSMenuItem alloc] initWithTitle:title action:nil
+                                         keyEquivalent:@""];
     [new_item setSubmenu:child_menu];
     [parent_menu addItem:new_item];
     return [new_item autorelease];
@@ -545,25 +562,26 @@ void create_menu()
 }
 
 @implementation GLMPlayerWindow
-- (void) setVideoOutput:(struct vo *)vo
+- (void)setVideoOutput:(struct vo *)vo
 {
     _vo = vo;
 }
 
-- (void) windowDidResize:(NSNotification *) notification
+- (void)windowDidResize:(NSNotification *) notification
 {
     struct vo_cocoa_state *s = _vo->cocoa;
     if (_vo)
         s->did_resize = YES;
 }
 
-- (void) fullscreen
+- (void)fullscreen
 {
     struct vo_cocoa_state *s = _vo->cocoa;
     if (!vo_fs) {
         update_screen_info(_vo);
         if (current_screen_has_dock_or_menubar(_vo))
-            [NSApp setPresentationOptions:NSApplicationPresentationHideDock|NSApplicationPresentationHideMenuBar];
+            [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
+                NSApplicationPresentationHideMenuBar];
         s->windowed_frame = [self frame];
         [self setHasShadow:NO];
         [self setStyleMask:s->fullscreen_mask];
@@ -590,12 +608,12 @@ void create_menu()
     }
 }
 
-- (BOOL) canBecomeMainWindow { return YES; }
-- (BOOL) canBecomeKeyWindow { return YES; }
-- (BOOL) acceptsFirstResponder { return YES; }
-- (BOOL) becomeFirstResponder { return YES; }
-- (BOOL) resignFirstResponder { return YES; }
-- (BOOL) windowShouldClose:(id)sender
+- (BOOL)canBecomeMainWindow { return YES; }
+- (BOOL)canBecomeKeyWindow { return YES; }
+- (BOOL)acceptsFirstResponder { return YES; }
+- (BOOL)becomeFirstResponder { return YES; }
+- (BOOL)resignFirstResponder { return YES; }
+- (BOOL)windowShouldClose:(id)sender
 {
     mplayer_put_key(_vo->key_fifo, KEY_CLOSE_WIN);
     // We have to wait for MPlayer to handle this,
@@ -604,21 +622,24 @@ void create_menu()
     return NO;
 }
 
-- (BOOL) isMovableByWindowBackground
+- (BOOL)isMovableByWindowBackground
 {
-    // this is only valid as a starting value. it will be rewritten in the -fullscreen method.
+    // this is only valid as a starting value. it will be rewritten in the
+    // -fullscreen method.
     return !vo_fs;
 }
 
-- (void) handleQuitEvent:(NSAppleEventDescriptor*)e withReplyEvent:(NSAppleEventDescriptor*)r
+- (void)handleQuitEvent:(NSAppleEventDescriptor*)e
+         withReplyEvent:(NSAppleEventDescriptor*)r
 {
     mplayer_put_key(_vo->key_fifo, KEY_CLOSE_WIN);
 }
 
-- (void) keyDown:(NSEvent *)theEvent
+- (void)keyDown:(NSEvent *)theEvent
 {
     unsigned char charcode;
-    if (([theEvent modifierFlags] & NSRightAlternateKeyMask) == NSRightAlternateKeyMask)
+    if (([theEvent modifierFlags] & NSRightAlternateKeyMask) ==
+            NSRightAlternateKeyMask)
         charcode = *[[theEvent characters] UTF8String];
     else
         charcode = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
@@ -630,7 +651,8 @@ void create_menu()
             key |= KEY_MODIFIER_SHIFT;
         if ([theEvent modifierFlags] & NSControlKeyMask)
             key |= KEY_MODIFIER_CTRL;
-        if (([theEvent modifierFlags] & NSLeftAlternateKeyMask) == NSLeftAlternateKeyMask)
+        if (([theEvent modifierFlags] & NSLeftAlternateKeyMask) ==
+                NSLeftAlternateKeyMask)
             key |= KEY_MODIFIER_ALT;
         if ([theEvent modifierFlags] & NSCommandKeyMask)
             key |= KEY_MODIFIER_META;
@@ -638,48 +660,48 @@ void create_menu()
     }
 }
 
-- (void) mouseMoved: (NSEvent *) theEvent
+- (void)mouseMoved: (NSEvent *) theEvent
 {
     if (vo_fs)
         vo_cocoa_display_cursor(_vo, 1);
 }
 
-- (void) mouseDragged:(NSEvent *)theEvent
+- (void)mouseDragged:(NSEvent *)theEvent
 {
     [self mouseEvent: theEvent];
 }
 
-- (void) mouseDown:(NSEvent *)theEvent
+- (void)mouseDown:(NSEvent *)theEvent
 {
     [self mouseEvent: theEvent];
 }
 
-- (void) mouseUp:(NSEvent *)theEvent
+- (void)mouseUp:(NSEvent *)theEvent
 {
     [self mouseEvent: theEvent];
 }
 
-- (void) rightMouseDown:(NSEvent *)theEvent
+- (void)rightMouseDown:(NSEvent *)theEvent
 {
     [self mouseEvent: theEvent];
 }
 
-- (void) rightMouseUp:(NSEvent *)theEvent
+- (void)rightMouseUp:(NSEvent *)theEvent
 {
     [self mouseEvent: theEvent];
 }
 
-- (void) otherMouseDown:(NSEvent *)theEvent
+- (void)otherMouseDown:(NSEvent *)theEvent
 {
     [self mouseEvent: theEvent];
 }
 
-- (void) otherMouseUp:(NSEvent *)theEvent
+- (void)otherMouseUp:(NSEvent *)theEvent
 {
     [self mouseEvent: theEvent];
 }
 
-- (void) scrollWheel:(NSEvent *)theEvent
+- (void)scrollWheel:(NSEvent *)theEvent
 {
     if ([theEvent deltaY] > 0)
         mplayer_put_key(_vo->key_fifo, MOUSE_BTN3);
@@ -687,7 +709,7 @@ void create_menu()
         mplayer_put_key(_vo->key_fifo, MOUSE_BTN4);
 }
 
-- (void) mouseEvent:(NSEvent *)theEvent
+- (void)mouseEvent:(NSEvent *)theEvent
 {
     if ([theEvent buttonNumber] >= 0 && [theEvent buttonNumber] <= 9) {
         int buttonNumber = [theEvent buttonNumber];
@@ -698,7 +720,8 @@ void create_menu()
             case NSLeftMouseDown:
             case NSRightMouseDown:
             case NSOtherMouseDown:
-                mplayer_put_key(_vo->key_fifo, (MOUSE_BTN0 + buttonNumber) | MP_KEY_DOWN);
+                mplayer_put_key(_vo->key_fifo,
+                                (MOUSE_BTN0 + buttonNumber) | MP_KEY_DOWN);
                 // Looks like Cocoa doesn't create MouseUp events when we are
                 // doing the second click in a double click. Put in the key_fifo
                 // the key that would be put from the MouseUp handling code.
@@ -714,7 +737,7 @@ void create_menu()
     }
 }
 
-- (void) applicationWillBecomeActive:(NSNotification *)aNotification
+- (void)applicationWillBecomeActive:(NSNotification *)aNotification
 {
     if (vo_fs) {
         struct vo_cocoa_state *s = _vo->cocoa;
@@ -726,7 +749,7 @@ void create_menu()
     }
 }
 
-- (void) applicationWillResignActive:(NSNotification *)aNotification
+- (void)applicationWillResignActive:(NSNotification *)aNotification
 {
     if (vo_fs) {
         struct vo_cocoa_state *s = _vo->cocoa;
@@ -736,7 +759,7 @@ void create_menu()
     }
 }
 
-- (void) applicationDidFinishLaunching:(NSNotification*)notification
+- (void)applicationDidFinishLaunching:(NSNotification*)notification
 {
     // Install an event handler so the Quit menu entry works
     // The proper way using NSApp setDelegate: and
@@ -749,18 +772,18 @@ void create_menu()
         andEventID:kAEQuitApplication];
 }
 
-- (void) normalSize
+- (void)normalSize
 {
     struct vo_cocoa_state *s = _vo->cocoa;
     if (!vo_fs)
         [self setContentSize:s->current_video_size keepCentered:YES];
 }
 
-- (void) halfSize { [self mulSize:0.5f];}
+- (void)halfSize { [self mulSize:0.5f];}
 
-- (void) doubleSize { [self mulSize:2.0f];}
+- (void)doubleSize { [self mulSize:2.0f];}
 
-- (void) mulSize:(float)multiplier
+- (void)mulSize:(float)multiplier
 {
     if (!vo_fs) {
         struct vo_cocoa_state *s = _vo->cocoa;
@@ -771,33 +794,41 @@ void create_menu()
     }
 }
 
-- (void) setContentSize:(NSSize)ns keepCentered:(BOOL)keepCentered
+- (void)setCenteredContentSize:(NSSize)ns
+{
+    NSRect nf = [self frame];
+    NSRect vf = [[self screen] visibleFrame];
+    NSRect cb = [[self contentView] bounds];
+    int title_height = nf.size.height - cb.size.height;
+    double ratio = (double)ns.width / (double)ns.height;
+
+    // clip the new size to the visibleFrame's size if needed
+    if (ns.width > vf.size.width || ns.height + title_height > vf.size.height) {
+        ns = vf.size;
+        ns.height -= title_height; // make space for the title bar
+
+        if (ns.width > ns.height) {
+            ns.height = ((double)ns.width * 1/ratio + 0.5);
+        } else {
+            ns.width = ((double)ns.height * ratio + 0.5);
+        }
+    }
+
+    int dw = nf.size.width - ns.width;
+    int dh = nf.size.height - ns.height - title_height;
+
+    nf.origin.x += dw / 2;
+    nf.origin.y += dh / 2;
+
+    NSRect new_frame =
+        NSMakeRect(nf.origin.x, nf.origin.y, ns.width, ns.height + title_height);
+    [self setFrame:new_frame display:YES animate:NO];
+}
+
+- (void)setContentSize:(NSSize)ns keepCentered:(BOOL)keepCentered
 {
     if (keepCentered) {
-        NSRect nf = [self frame];
-        NSRect vf = [[self screen] visibleFrame];
-        int title_height = nf.size.height - [[self contentView] bounds].size.height;
-        double ratio = (double)ns.width / (double)ns.height;
-
-        // clip the new size to the visibleFrame's size if needed
-        if (ns.width > vf.size.width || ns.height + title_height > vf.size.height) {
-            ns = vf.size;
-            ns.height -= title_height; // make space for the title bar
-
-            if (ns.width > ns.height) {
-                ns.height = ((double)ns.width * 1/ratio + 0.5);
-            } else {
-                ns.width = ((double)ns.height * ratio + 0.5);
-            }
-        }
-
-        int dw = nf.size.width - ns.width;
-        int dh = nf.size.height - ns.height - title_height;
-
-        nf.origin.x += dw / 2;
-        nf.origin.y += dh / 2;
-
-        [self setFrame: NSMakeRect(nf.origin.x, nf.origin.y, ns.width, ns.height + title_height) display:YES animate:NO];
+        [self setCenteredContentSize:ns]
     } else {
         [self setContentSize:ns];
     }
@@ -805,7 +836,7 @@ void create_menu()
 @end
 
 @implementation GLMPlayerOpenGLView
-- (void) drawRect: (NSRect)rect
+- (void)drawRect: (NSRect)rect
 {
     [[NSColor clearColor] set];
     NSRectFill([self bounds]);
