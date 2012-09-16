@@ -1982,21 +1982,6 @@ static void swapGlBuffers_cocoa(MPGLContext *ctx)
 {
     vo_cocoa_swap_buffers(ctx->vo);
 }
-
-static int cocoa_check_events(struct vo *vo)
-{
-    return vo_cocoa_check_events(vo);
-}
-
-static void cocoa_update_xinerama_info(struct vo *vo)
-{
-    vo_cocoa_update_xinerama_info(vo);
-}
-
-static void cocoa_fullscreen(struct vo *vo)
-{
-    vo_cocoa_fullscreen(vo);
-}
 #endif
 
 #ifdef CONFIG_GL_WIN32
@@ -2487,9 +2472,9 @@ MPGLContext *mpgl_init(enum MPGLType type, struct vo *vo)
         ctx->create_window_gl3 = create_window_cocoa_gl3;
         ctx->releaseGlContext = releaseGlContext_cocoa;
         ctx->swapGlBuffers = swapGlBuffers_cocoa;
-        ctx->check_events = cocoa_check_events;
-        ctx->update_xinerama_info = cocoa_update_xinerama_info;
-        ctx->fullscreen = cocoa_fullscreen;
+        ctx->check_events = vo_cocoa_check_events;
+        ctx->update_xinerama_info = vo_cocoa_update_xinerama_info;
+        ctx->fullscreen = vo_cocoa_fullscreen;
         ctx->ontop = vo_cocoa_ontop;
         ctx->vo_init = vo_cocoa_init;
         ctx->pause = vo_cocoa_pause;
