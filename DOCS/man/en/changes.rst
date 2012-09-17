@@ -96,6 +96,7 @@ Command line switches
     -use-filename-title                 --title="${filename}"
     -loop 0                             --loop=inf
     -hardframedrop                      --framedrop=hard
+    -osdlevel                           --osd-level
     =================================== ===================================
 
 input.conf and slave commands

@@ -670,6 +670,8 @@ const m_option_t mplayer_opts[]={
 
     {"use-filedir-conf", &use_filedir_conf, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
     OPT_INTRANGE("osdlevel", osd_level, 0, 0, 3),
+    OPT_CHOICE("osd-level", osd_level, 0,
+               ({"0", 0}, {"1", 1}, {"2", 2}, {"3", 3})),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
     OPT_MAKE_FLAGS("osd-fractions", osd_fractions, 0),
 

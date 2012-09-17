@@ -1294,7 +1294,7 @@
 --osd-fractions
     Show OSD times with fractions of seconds.
 
---osdlevel=<0-3>
+--osd-level=<0-3>
     Specifies which mode the OSD should start in.
 
     :0: subtitles only

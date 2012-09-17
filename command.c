@@ -194,20 +194,6 @@ static int mp_property_generic_option(struct m_option *prop, int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-/// OSD level (RW)
-static int mp_property_osdlevel(m_option_t *prop, int action, void *arg,
-                                MPContext *mpctx)
-{
-    return m_property_choice(prop, action, arg, &mpctx->opts.osd_level);
-}
-
-/// Loop (RW)
-static int mp_property_loop(m_option_t *prop, int action, void *arg,
-                            MPContext *mpctx)
-{
-    return mp_property_generic_option(prop, action, arg, mpctx);
-}
-
 /// Playback speed (RW)
 static int mp_property_playback_speed(m_option_t *prop, int action,
                                       void *arg, MPContext *mpctx)
@@ -1652,9 +1638,9 @@ static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
  */
 static const m_option_t mp_properties[] = {
     // General
-    { "osdlevel", mp_property_osdlevel, CONF_TYPE_INT,
-      M_OPT_RANGE, 0, 3, NULL },
-    { "loop", mp_property_loop, &m_option_type_choice,
+    { "osd-level", mp_property_generic_option, &m_option_type_choice,
+      0, 0, 0, "osd-level" },
+    { "loop", mp_property_generic_option, &m_option_type_choice,
       0, 0, 0, "loop" },
     { "speed", mp_property_playback_speed, CONF_TYPE_FLOAT,
       M_OPT_RANGE, 0.01, 100.0, NULL },
@@ -1816,6 +1802,7 @@ static const struct legacy_prop legacy_props[] = {
     {"switch_audio",    "audio"},
     {"switch_program",  "program"},
     {"framedropping",   "framedrop"},
+    {"osdlevel",        "osd-level"},
     {0}
 };
 

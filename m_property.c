@@ -274,19 +274,6 @@ int m_property_int_range(const m_option_t *prop, int action,
     return m_property_int_ro(prop, action, arg, *var);
 }
 
-int m_property_choice(const m_option_t *prop, int action,
-                      void *arg, int *var)
-{
-    switch (action) {
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        *var += action == M_PROPERTY_STEP_UP ? 1 : prop->max;
-        *var %= (int)prop->max + 1;
-        return 1;
-    }
-    return m_property_int_range(prop, action, arg, var);
-}
-
 int m_property_flag_ro(const m_option_t *prop, int action,
                        void *arg, int var)
 {

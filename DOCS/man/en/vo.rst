@@ -411,7 +411,7 @@ gl
     (no-)osd
         Enable or disable support for OSD rendering via OpenGL (default:
         enabled). This option is for testing; to disable the OSD use
-        ``--osdlevel=0`` instead.
+        ``--osd-level=0`` instead.
 
     backend=<sys>
         auto
