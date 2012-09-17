@@ -230,7 +230,6 @@ static int ignore_start = 0;
 
 double force_fps = 0;
 static int force_srate = 0;
-int frame_dropping = 0;      // option  0=no drop  1= drop vo  2= drop decode
 static int play_n_frames = -1;
 static int play_n_frames_mf = -1;
 
@@ -1797,7 +1796,7 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
             && !mpctx->restart_playback) {
             ++drop_frame_cnt;
             ++dropped_frames;
-            return frame_dropping;
+            return mpctx->opts.frame_dropping;
         } else
             dropped_frames = 0;
     }

@@ -643,11 +643,14 @@
 --fps=<float>
     Override video framerate. Useful if the original value is wrong or missing.
 
---framedrop
+--framedrop=<no|yes|hard>
     Skip displaying some frames to maintain A/V sync on slow systems. Video
     filters are not applied to such frames. For B-frames even decoding is
-    skipped completely. May produce unwatchably choppy output. See also
-    ``--hardframedrop``.
+    skipped completely. May produce unwatchably choppy output. With ``hard``,
+    decoding and output of any frame can be skipped, and will lead to an even
+    worse playback experience.
+
+    Practical use of this feature is questionable. Disabled by default.
 
 --frames=<number>
     Play/convert only first <number> frames, then quit.
@@ -752,9 +755,6 @@
 --grabpointer, --no-grabpointer
     ``--no-grabpointer`` tells the player to not grab the mouse pointer after a
     video mode change (``--vm``). Useful for multihead setups.
-
---hardframedrop
-    More intense frame dropping (breaks decoding). Leads to image distortion!
 
 --heartbeat-cmd
     Command that is executed every 30 seconds during playback via *system()* -

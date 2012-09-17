@@ -1280,26 +1280,13 @@ static int mp_property_border(m_option_t *prop, int action, void *arg,
                                &vo_border, mpctx);
 }
 
-/// Framedropping state (RW)
-static int mp_property_framedropping(m_option_t *prop, int action,
+static int mp_property_framedrop(m_option_t *prop, int action,
                                      void *arg, MPContext *mpctx)
 {
-
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
 
-    switch (action) {
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        *(char **) arg = talloc_strdup(NULL, frame_dropping == 1 ?
-                                       mp_gtext("enabled") :
-                                       (frame_dropping == 2 ? mp_gtext("hard") :
-                                        mp_gtext("disabled")));
-        return M_PROPERTY_OK;
-    default:
-        return m_property_choice(prop, action, arg, &frame_dropping);
-    }
+    return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
 /// Color settings, try to use vf/vo then fall back on TV. (RW)
@@ -1752,8 +1739,8 @@ static const m_option_t mp_properties[] = {
       M_OPT_RANGE, 0, 1, NULL },
     { "border", mp_property_border, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
-    { "framedropping", mp_property_framedropping, CONF_TYPE_INT,
-      M_OPT_RANGE, 0, 2, NULL },
+    { "framedrop", mp_property_framedrop, &m_option_type_choice,
+      0, 0, 0, "framedrop" },
     { "gamma", mp_property_gamma, CONF_TYPE_INT,
       M_OPT_RANGE, -100, 100, .offset = offsetof(struct MPOpts, vo_gamma_gamma)},
     { "brightness", mp_property_gamma, CONF_TYPE_INT,
@@ -1828,6 +1815,7 @@ static const struct legacy_prop legacy_props[] = {
     {"switch_video",    "video"},
     {"switch_audio",    "audio"},
     {"switch_program",  "program"},
+    {"framedropping",   "framedrop"},
     {0}
 };
 
@@ -1916,7 +1904,7 @@ static struct property_osd_display {
     { "ontop", _("Stay on top: %s") },
     { "rootwin", _("Rootwin: %s") },
     { "border", _("Border: %s") },
-    { "framedropping", _("Framedropping: %s") },
+    { "framedrop", _("Framedrop: %s") },
     { "deinterlace", _("Deinterlace: %s") },
     { "colormatrix", _("YUV colormatrix: %s") },
     { "colormatrix-input-range", _("YUV input range: %s") },

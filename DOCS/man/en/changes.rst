@@ -87,7 +87,7 @@ Command line switches
   ``-no-opt``, or better ``--no-opt``.
 * Per-file options are not the default anymore. You can explicitly specify
   file local options. See ``Usage`` section.
-* Table of renamed switches:
+* Table of renamed/replaced switches:
 
     =================================== ===================================
     Old                                 New
@@ -95,6 +95,7 @@ Command line switches
     -nosound                            --no-audio
     -use-filename-title                 --title="${filename}"
     -loop 0                             --loop=inf
+    -hardframedrop                      --framedrop=hard
     =================================== ===================================
 
 input.conf and slave commands

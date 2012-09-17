@@ -173,7 +173,7 @@ static const struct legacy_cmd legacy_cmds[] = {
     {"vo_ontop",                "switch ontop"},
     {"vo_rootwin",              "switch rootwin"},
     {"vo_border",               "switch border"},
-    {"frame_drop",              "switch framedropping"},
+    {"frame_drop",              "switch framedrop"},
     {"gamma",                   "switch gamma"},
     {"brightness",              "switch brightness"},
     {"contrast",                "switch contrast"},

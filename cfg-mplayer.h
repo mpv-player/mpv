@@ -678,8 +678,10 @@ const m_option_t mplayer_opts[]={
 
     {"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 
-    {"framedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"hardframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 2, NULL},
+    OPT_CHOICE("framedrop", frame_dropping, 0,
+               ({"no", 0},
+                {"yes", 1}, {"", 1},
+                {"hard", 2})),
 
     OPT_FLAG_ON("untimed", untimed, 0),
 
