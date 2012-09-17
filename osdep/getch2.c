@@ -292,7 +292,7 @@ static void do_enable_getch2(void)
     struct termios tio_new;
     tcgetattr(0,&tio_new);
     tio_new.c_lflag &= ~(ICANON|ECHO); /* Clear ICANON and ECHO. */
-    tio_new.c_cc[VMIN] = 0;
+    tio_new.c_cc[VMIN] = 1;
     tio_new.c_cc[VTIME] = 0;
     tcsetattr(0,TCSANOW,&tio_new);
 #endif
