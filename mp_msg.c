@@ -201,7 +201,7 @@ static void print_msg_module(FILE* stream, int mod)
 void mp_msg_va(int mod, int lev, const char *format, va_list va)
 {
     char tmp[MSGSIZE_MAX];
-    FILE *stream = lev <= MSGL_WARN ? stderr : stdout;
+    FILE *stream = lev == MSGL_STATUS ? stderr : stdout;
     static int header = 1;
     // indicates if last line printed was a status line
     static int statusline;
@@ -215,7 +215,7 @@ void mp_msg_va(int mod, int lev, const char *format, va_list va)
      * status line, and does not end with a '\n'. If we're printing a normal
      * line instead after the status one print '\n' to change line. */
     if (statusline && lev != MSGL_STATUS)
-        fprintf(stream, "\n");
+        fprintf(stderr, "\n");
     statusline = lev == MSGL_STATUS;
 
     if (header)
