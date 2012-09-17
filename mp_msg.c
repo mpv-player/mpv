@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "osdep/getch2.h"
@@ -59,8 +60,13 @@ static const unsigned char ansi2win32[10] = {
 int mp_msg_levels[MSGT_MAX]; // verbose level of this module. initialized to -2
 int mp_msg_level_all = MSGL_STATUS;
 int verbose = 0;
-int mp_msg_color = 0;
+int mp_msg_color = 1;
 int mp_msg_module = 0;
+int mp_msg_cancolor = 0;
+
+static int mp_msg_docolor(void) {
+	return mp_msg_cancolor && mp_msg_color;
+}
 
 void mp_msg_init(void){
 #ifdef _WIN32
@@ -78,6 +84,7 @@ void mp_msg_init(void){
     if (env)
         verbose = atoi(env);
     for(i=0;i<MSGT_MAX;i++) mp_msg_levels[i] = -2;
+    mp_msg_cancolor = isatty(fileno(stdout));
     mp_msg_levels[MSGT_IDENTIFY] = -1; // no -identify output by default
 #ifdef CONFIG_TRANSLATION
     textdomain("mplayer");
@@ -109,7 +116,7 @@ static void set_msg_color(FILE* stream, int lev)
         flag = 0;
     }
 #endif
-    if (mp_msg_color)
+    if (mp_msg_docolor())
     {
 #ifdef _WIN32
         HANDLE *wstream = stream == stderr ? hSTDERR : hSTDOUT;
@@ -176,16 +183,16 @@ static void print_msg_module(FILE* stream, int mod)
         return;
 #ifdef _WIN32
     HANDLE *wstream = stream == stderr ? hSTDERR : hSTDOUT;
-    if (mp_msg_color)
+    if (mp_msg_docolor())
         SetConsoleTextAttribute(wstream, ansi2win32[c2&7] | FOREGROUND_INTENSITY);
     fprintf(stream, "%9s", module_text[mod]);
-    if (mp_msg_color)
+    if (mp_msg_docolor())
         SetConsoleTextAttribute(wstream, stdoutAttrs);
 #else
-    if (mp_msg_color)
+    if (mp_msg_docolor())
         fprintf(stream, "\033[%d;3%dm", c2 >> 3, c2 & 7);
     fprintf(stream, "%9s", module_text[mod]);
-    if (mp_msg_color)
+    if (mp_msg_docolor())
         fprintf(stream, "\033[0;37m");
 #endif
     fprintf(stream, ": ");
@@ -220,7 +227,7 @@ void mp_msg_va(int mod, int lev, const char *format, va_list va)
 
     fprintf(stream, "%s", tmp);
 
-    if (mp_msg_color)
+    if (mp_msg_docolor())
     {
 #ifdef _WIN32
         HANDLE *wstream = lev <= MSGL_WARN ? hSTDERR : hSTDOUT;
