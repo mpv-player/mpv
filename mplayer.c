@@ -4391,22 +4391,11 @@ int main(int argc, char *argv[])
             mp_msg(MSGT_VO, MSGL_INFO, "Encoding initialization failed.");
             exit_player(mpctx, EXIT_ERROR, 1);
 	}
-    }
-
-    if (opts->encode_output.file) {
         m_config_set_option0(mpctx->mconfig, "vo", "lavc");
         m_config_set_option0(mpctx->mconfig, "ao", "lavc");
         m_config_set_option0(mpctx->mconfig, "fixed-vo", "yes");
         m_config_set_option0(mpctx->mconfig, "gapless-audio", "yes");
         m_config_set_option0(mpctx->mconfig, "untimed", "yes");
-
-        // default osd level 0
-        if (opts->osd_level < 0)
-            m_config_set_option0(mpctx->mconfig, "osdlevel", "0");
-    } else {
-        // default osd level 1
-        if (opts->osd_level < 0)
-            m_config_set_option0(mpctx->mconfig, "osdlevel", "1");
     }
 #endif
 

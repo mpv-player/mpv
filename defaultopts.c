@@ -22,7 +22,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .vo_gamma_contrast = 1000,
         .vo_gamma_saturation = 1000,
         .vo_gamma_hue = 1000,
-        .osd_level = -1,
+        .osd_level = 1,
         .osd_duration = 1000,
         .loop_times = -1,
         .ordered_chapters = 1,
