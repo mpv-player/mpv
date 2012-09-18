@@ -209,6 +209,11 @@ struct m_option_type {
      */
     char *(*print)(const m_option_t *opt, const void *val);
 
+    // Print the value in a human readable form. Unlike print(), it doesn't
+    // necessarily return the exact value, and is generally not parseable with
+    // parse().
+    char *(*pretty_print)(const m_option_t *opt, const void *val);
+
     // Copy data between two locations. Deep copy if the data has pointers.
     /** \param opt The option to copy.
      *  \param dst Pointer to the destination memory.
@@ -411,6 +416,15 @@ static inline char *m_option_print(const m_option_t *opt, const void *val_ptr)
         return opt->type->print(opt, val_ptr);
     else
         return NULL;
+}
+
+static inline char *m_option_pretty_print(const m_option_t *opt,
+                                          const void *val_ptr)
+{
+    if (opt->type->pretty_print)
+        return opt->type->pretty_print(opt, val_ptr);
+    else
+        return m_option_print(opt, val_ptr);
 }
 
 // Helper around \ref m_option_type::copy.

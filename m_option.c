@@ -489,8 +489,12 @@ static int parse_double(const m_option_t *opt, struct bstr name,
 
 static char *print_double(const m_option_t *opt, const void *val)
 {
-    opt = NULL;
     return talloc_asprintf(NULL, "%f", VAL(val));
+}
+
+static char *print_double_f2(const m_option_t *opt, const void *val)
+{
+    return talloc_asprintf(NULL, "%.2f", VAL(val));
 }
 
 static void add_double(const m_option_t *opt, void *val, double add, bool wrap)
@@ -516,6 +520,7 @@ const m_option_type_t m_option_type_double = {
     .size  = sizeof(double),
     .parse = parse_double,
     .print = print_double,
+    .pretty_print = print_double_f2,
     .copy  = copy_opt,
 };
 
@@ -534,8 +539,12 @@ static int parse_float(const m_option_t *opt, struct bstr name,
 
 static char *print_float(const m_option_t *opt, const void *val)
 {
-    opt = NULL;
     return talloc_asprintf(NULL, "%f", VAL(val));
+}
+
+static char *print_float_f2(const m_option_t *opt, const void *val)
+{
+    return talloc_asprintf(NULL, "%.2f", VAL(val));
 }
 
 static void add_float(const m_option_t *opt, void *val, double add, bool wrap)
@@ -551,6 +560,7 @@ const m_option_type_t m_option_type_float = {
     .size  = sizeof(float),
     .parse = parse_float,
     .print = print_float,
+    .pretty_print = print_float_f2,
     .copy  = copy_opt,
     .add = add_float,
 };
@@ -1135,11 +1145,17 @@ static int parse_time(const m_option_t *opt, struct bstr name,
     return 1;
 }
 
+static char *pretty_print_time(const m_option_t *opt, const void *val)
+{
+    return mp_format_time(*(double *)val, false);
+}
+
 const m_option_type_t m_option_type_time = {
     .name  = "Time",
     .size  = sizeof(double),
     .parse = parse_time,
     .print = print_double,
+    .pretty_print = pretty_print_time,
     .copy  = copy_opt,
     .add = add_double,
 };

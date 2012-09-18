@@ -71,6 +71,16 @@
 #include "mp_fifo.h"
 #include "libavutil/avstring.h"
 
+static char *format_bitrate(int rate)
+{
+    return talloc_asprintf(NULL, "%d kbps", rate * 8 / 1000);
+}
+
+static char *format_delay(double time)
+{
+    return talloc_asprintf(NULL, "%d ms", ROUND(time * 1000));
+}
+
 static void rescale_input_coordinates(struct MPContext *mpctx, int ix, int iy,
                                       double *dx, double *dy)
 {
@@ -249,7 +259,7 @@ static int mp_property_stream_time_pos(m_option_t *prop, int action,
     if (pts == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_time_ro(prop, action, arg, pts);
+    return m_property_double_ro(prop, action, arg, pts);
 }
 
 
@@ -262,7 +272,7 @@ static int mp_property_length(m_option_t *prop, int action, void *arg,
     if (!(int) (len = get_time_length(mpctx)))
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_time_ro(prop, action, arg, len);
+    return m_property_double_ro(prop, action, arg, len);
 }
 
 /// Current position in percent (RW)
@@ -300,7 +310,7 @@ static int mp_property_time_pos(m_option_t *prop, int action,
         queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, 0);
         return M_PROPERTY_OK;
     }
-    return m_property_time_ro(prop, action, arg, get_current_time(mpctx));
+    return m_property_double_ro(prop, action, arg, get_current_time(mpctx));
 }
 
 /// Current chapter (RW)
@@ -594,10 +604,13 @@ static int mp_property_audio_delay(m_option_t *prop, int action,
     if (!(mpctx->sh_audio && mpctx->sh_video))
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
+    case M_PROPERTY_PRINT:
+        *(char **)arg = format_delay(audio_delay);
+        return M_PROPERTY_OK;
     case M_PROPERTY_SET: {
         int ret;
         float delay = audio_delay;
-        ret = m_property_delay(prop, action, arg, &audio_delay);
+        ret = m_property_float_range(prop, action, arg, &audio_delay);
         if (ret != M_PROPERTY_OK)
             return ret;
         if (mpctx->sh_audio)
@@ -605,7 +618,7 @@ static int mp_property_audio_delay(m_option_t *prop, int action,
     }
         return M_PROPERTY_OK;
     default:
-        return m_property_delay(prop, action, arg, &audio_delay);
+        return m_property_float_range(prop, action, arg, &audio_delay);
     }
 }
 
@@ -634,7 +647,12 @@ static int mp_property_audio_bitrate(m_option_t *prop, int action,
 {
     if (!mpctx->sh_audio)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_bitrate(prop, action, arg, mpctx->sh_audio->i_bps);
+    switch (action) {
+    case M_PROPERTY_PRINT:
+        *(char **)arg = format_bitrate(mpctx->sh_audio->i_bps);
+        return M_PROPERTY_OK;
+    }
+    return m_property_int_ro(prop, action, arg, mpctx->sh_audio->i_bps);
 }
 
 /// Samplerate (RO)
@@ -1148,7 +1166,12 @@ static int mp_property_video_bitrate(m_option_t *prop, int action,
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_bitrate(prop, action, arg, mpctx->sh_video->i_bps);
+    switch (action) {
+    case M_PROPERTY_PRINT:
+        *(char **)arg = format_bitrate(mpctx->sh_video->i_bps);
+        return M_PROPERTY_OK;
+    }
+    return m_property_int_ro(prop, action, arg, mpctx->sh_video->i_bps);
 }
 
 /// Video display width (RO)
@@ -1213,7 +1236,12 @@ static int mp_property_sub_delay(m_option_t *prop, int action, void *arg,
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_delay(prop, action, arg, &sub_delay);
+    switch (action) {
+    case M_PROPERTY_PRINT:
+        *(char **)arg = format_delay(sub_delay);
+        return M_PROPERTY_OK;
+    }
+    return m_property_float_range(prop, action, arg, &sub_delay);
 }
 
 /// Subtitle visibility (RW)
@@ -1298,7 +1326,8 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
         M_PROPERTY_CLAMP(prop, *(float *) arg);
         if (opts->ass_enabled)
             opts->ass_font_scale = *(float *) arg;
-        text_font_scale_factor = *(float *) arg;
+        else
+            text_font_scale_factor = *(float *) arg;
         vo_osd_resized();
         return M_PROPERTY_OK;
     default:

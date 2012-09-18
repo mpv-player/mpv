@@ -190,23 +190,12 @@ int m_property_float_ro(const m_option_t* prop,int action,
 int m_property_float_range(const m_option_t* prop,int action,
                            void* arg,float* var);
 
-/// float with a print function which print the time in ms
-int m_property_delay(const m_option_t* prop,int action,
-                     void* arg,float* var);
-
 /// Implement get, print
 int m_property_double_ro(const m_option_t* prop,int action,
                          void* arg,double var);
 
-/// Implement print
-int m_property_time_ro(const m_option_t* prop,int action,
-                       void* arg,double var);
-
 /// get/print the string
 int m_property_string_ro(const m_option_t* prop,int action,void* arg, char* str);
-
-/// get/print a bitrate
-int m_property_bitrate(const m_option_t* prop,int action,void* arg,int rate);
 
 ///@}
 
