@@ -43,7 +43,6 @@ extern const m_option_type_t m_option_type_float;
 extern const m_option_type_t m_option_type_double;
 extern const m_option_type_t m_option_type_string;
 extern const m_option_type_t m_option_type_string_list;
-extern const m_option_type_t m_option_type_position;
 extern const m_option_type_t m_option_type_time;
 extern const m_option_type_t m_option_type_time_size;
 extern const m_option_type_t m_option_type_choice;
@@ -167,7 +166,6 @@ struct m_sub_options {
 #define CONF_TYPE_PRINT_FUNC    (&m_option_type_print_func)
 #define CONF_TYPE_SUBCONFIG     (&m_option_type_subconfig)
 #define CONF_TYPE_STRING_LIST   (&m_option_type_string_list)
-#define CONF_TYPE_POSITION      (&m_option_type_position)
 #define CONF_TYPE_IMGFMT        (&m_option_type_imgfmt)
 #define CONF_TYPE_AFMT          (&m_option_type_afmt)
 #define CONF_TYPE_SPAN          (&m_option_type_span)

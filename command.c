@@ -261,11 +261,11 @@ static int mp_property_stream_pos(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_ERROR;
     switch (action) {
     case M_PROPERTY_GET:
-        *(off_t *) arg = stream_tell(stream);
+        *(int64_t *) arg = stream_tell(stream);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(off_t *) arg);
-        stream_seek(stream, *(off_t *) arg);
+        M_PROPERTY_CLAMP(prop, *(int64_t *) arg);
+        stream_seek(stream, *(int64_t *) arg);
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -280,7 +280,7 @@ static int mp_property_stream_start(m_option_t *prop, int action,
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_GET:
-        *(off_t *) arg = stream->start_pos;
+        *(int64_t *) arg = stream->start_pos;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -295,7 +295,7 @@ static int mp_property_stream_end(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_GET:
-        *(off_t *) arg = stream->end_pos;
+        *(int64_t *) arg = stream->end_pos;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -310,7 +310,7 @@ static int mp_property_stream_length(m_option_t *prop, int action,
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_GET:
-        *(off_t *) arg = stream->end_pos - stream->start_pos;
+        *(int64_t *) arg = stream->end_pos - stream->start_pos;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -1650,13 +1650,13 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "demuxer", mp_property_demuxer, CONF_TYPE_STRING,
       0, 0, 0, NULL },
-    { "stream-pos", mp_property_stream_pos, CONF_TYPE_POSITION,
+    { "stream-pos", mp_property_stream_pos, CONF_TYPE_INT64,
       M_OPT_MIN, 0, 0, NULL },
-    { "stream-start", mp_property_stream_start, CONF_TYPE_POSITION,
+    { "stream-start", mp_property_stream_start, CONF_TYPE_INT64,
       M_OPT_MIN, 0, 0, NULL },
-    { "stream-end", mp_property_stream_end, CONF_TYPE_POSITION,
+    { "stream-end", mp_property_stream_end, CONF_TYPE_INT64,
       M_OPT_MIN, 0, 0, NULL },
-    { "stream-length", mp_property_stream_length, CONF_TYPE_POSITION,
+    { "stream-length", mp_property_stream_length, CONF_TYPE_INT64,
       M_OPT_MIN, 0, 0, NULL },
     { "stream-time-pos", mp_property_stream_time_pos, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
@@ -2118,7 +2118,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         void *arg = NULL;
         int r, i;
         double d;
-        off_t o;
+        int64_t o;
         cmd->args[0].v.s = translate_legacy_property(cmd, cmd->args[0].v.s);
         if (cmd->args[1].v.f) {
             m_option_t *prop;
@@ -2135,7 +2135,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             else if (prop->type == CONF_TYPE_DOUBLE ||
                      prop->type == CONF_TYPE_TIME)
                 d = cmd->args[1].v.f, arg = &d;
-            else if (prop->type == CONF_TYPE_POSITION)
+            else if (prop->type == CONF_TYPE_INT64)
                 o = cmd->args[1].v.f, arg = &o;
             else
                 mp_msg(MSGT_CPLAYER, MSGL_WARN,

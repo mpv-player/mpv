@@ -423,35 +423,6 @@ const m_option_type_t m_option_type_float = {
     .copy  = copy_opt,
 };
 
-///////////// Position
-#undef VAL
-#define VAL(x) (*(off_t *)(x))
-
-static int parse_position(const m_option_t *opt, struct bstr name,
-                          struct bstr param, void *dst)
-{
-    long long tmp;
-    int r = parse_longlong(opt, name, param, &tmp);
-    if (r >= 0 && dst)
-        *(off_t *)dst = tmp;
-    return r;
-}
-
-static char *print_position(const m_option_t *opt, const void *val)
-{
-    return talloc_asprintf(NULL, "%"PRId64, (int64_t)VAL(val));
-}
-
-const m_option_type_t m_option_type_position = {
-    // Integer (off_t)
-    .name  = "Position",
-    .size  = sizeof(off_t),
-    .parse = parse_position,
-    .print = print_position,
-    .copy  = copy_opt,
-};
-
-
 ///////////// String
 
 #undef VAL

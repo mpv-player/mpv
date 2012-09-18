@@ -204,8 +204,8 @@ static const char av_desync_help_text[] = _(
 static int drop_frame_cnt; // total number of dropped frames
 
 // seek:
-static off_t seek_to_byte;
-static off_t step_sec;
+static int64_t seek_to_byte;
+static double step_sec;
 
 static m_time_size_t end_at = { .type = END_AT_NONE, .pos = 0 };
 

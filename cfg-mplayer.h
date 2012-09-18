@@ -381,7 +381,7 @@ const m_option_t common_opts[] = {
     {"frames", &play_n_frames_mf, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 
     // seek to byte/seconds position
-    {"sb", &seek_to_byte, CONF_TYPE_POSITION, CONF_MIN, 0, 0, NULL},
+    {"sb", &seek_to_byte, CONF_TYPE_INT64, CONF_MIN, 0, 0, NULL},
     OPT_TIME("ss", seek_to_sec, 0),
 
     // start paused
@@ -678,7 +678,7 @@ const m_option_t mplayer_opts[]={
     OPT_STRING("vobsub", vobsub_name, 0),
     {"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 
-    {"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+    {"sstep", &step_sec, CONF_TYPE_DOUBLE, CONF_MIN, 0, 0, NULL},
 
     OPT_CHOICE("framedrop", frame_dropping, 0,
                ({"no", 0},
