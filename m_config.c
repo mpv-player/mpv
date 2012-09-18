@@ -237,6 +237,10 @@ void m_config_enter_file_local(struct m_config *config)
 {
     assert(!config->file_local_mode);
     config->file_local_mode = true;
+    for (struct m_config_option *co = config->opts; co; co = co->next) {
+        if (co->opt->flags & M_OPT_LOCAL)
+            ensure_backup(config, co);
+    }
 }
 
 void m_config_leave_file_local(struct m_config *config)
