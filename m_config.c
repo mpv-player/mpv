@@ -334,15 +334,14 @@ static void m_config_add_option(struct m_config *config,
             } else if (arg->type->flags & M_OPT_TYPE_DYNAMIC) {
                 // Initialize dynamically managed fields from static data (like
                 // string options): copy the option into temporary memory,
-                // clear the original option (to void m_option freeing the
+                // clear the original option (to stop m_option from freeing the
                 // static data), copy it back.
                 if (co->data) {
-                    void *temp = talloc_zero_size(NULL, arg->type->size);
-                    m_option_copy(arg, temp, co->data);
+                    union m_option_value temp = {0};
+                    m_option_copy(arg, &temp, co->data);
                     memset(co->data, 0, arg->type->size);
-                    m_option_copy(arg, co->data, temp);
-                    m_option_free(arg, temp);
-                    talloc_free(temp);
+                    m_option_copy(arg, co->data, &temp);
+                    m_option_free(arg, &temp);
                 }
             }
         }
