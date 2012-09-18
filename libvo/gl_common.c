@@ -2185,114 +2185,10 @@ static void swapGlBuffers_w32(MPGLContext *ctx)
 struct glx_context {
     XVisualInfo *vinfo;
     GLXContext context;
+    GLXFBConfig fbc;
 };
 
-// Returns the XVisualInfo associated with Window win.
-static XVisualInfo *getWindowVisualInfo(MPGLContext *ctx, Window win)
-{
-    XWindowAttributes xw_attr;
-    XVisualInfo vinfo_template;
-    int tmp;
-    XGetWindowAttributes(ctx->vo->x11->display, win, &xw_attr);
-    vinfo_template.visualid = XVisualIDFromVisual(xw_attr.visual);
-    return XGetVisualInfo(ctx->vo->x11->display, VisualIDMask, &vinfo_template, &tmp);
-}
-
-static bool create_window_x11_old(struct MPGLContext *ctx, uint32_t d_width,
-                                  uint32_t d_height, uint32_t flags)
-{
-    struct glx_context *glx_ctx = ctx->priv;
-    Display *display = ctx->vo->x11->display;
-    struct vo *vo = ctx->vo;
-    GL *gl = ctx->gl;
-
-    if (glx_ctx->context) {
-        // GL context and window already exist.
-        // Only update window geometry etc.
-        Colormap colormap = XCreateColormap(display, vo->x11->rootwin,
-                                            glx_ctx->vinfo->visual, AllocNone);
-        vo_x11_create_vo_window(vo, glx_ctx->vinfo, vo->dx, vo->dy, d_width,
-                                d_height, flags, colormap, "gl");
-        XFreeColormap(display, colormap);
-        return true;
-    }
-
-    static int default_glx_attribs[] = {
-        GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1,
-        GLX_DOUBLEBUFFER, None
-    };
-    static int stereo_glx_attribs[]  = {
-        GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1,
-        GLX_DOUBLEBUFFER, GLX_STEREO, None
-    };
-    XVisualInfo *vinfo = NULL;
-    if (flags & VOFLAG_STEREO) {
-        vinfo = glXChooseVisual(display, vo->x11->screen, stereo_glx_attribs);
-        if (!vinfo)
-            mp_msg(MSGT_VO, MSGL_ERR, "[gl] Could not find a stereo visual,"
-                    " 3D will probably not work!\n");
-    }
-    if (!vinfo)
-        vinfo = glXChooseVisual(display, vo->x11->screen, default_glx_attribs);
-    if (!vinfo) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
-        return false;
-    }
-    mp_msg(MSGT_VO, MSGL_V, "[gl] GLX chose visual with ID 0x%x\n",
-            (int)vinfo->visualid);
-
-    Colormap colormap = XCreateColormap(display, vo->x11->rootwin,
-                                        vinfo->visual, AllocNone);
-    vo_x11_create_vo_window(vo, vinfo, vo->dx, vo->dy, d_width, d_height,
-                            flags, colormap, "gl");
-
-    XVisualInfo *new_vinfo = getWindowVisualInfo(ctx, ctx->vo->x11->window);
-    GLXContext new_context = glXCreateContext(display, new_vinfo, NULL, True);
-    if (!new_context) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GLX context!\n");
-        XFree(new_vinfo);
-        return false;
-    }
-
-    if (!glXMakeCurrent(display, ctx->vo->x11->window, new_context)) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GLX context!\n");
-        glXDestroyContext(display, new_context);
-        XFree(new_vinfo);
-        return false;
-    }
-
-    void *(*getProcAddress)(const GLubyte *);
-    getProcAddress = getdladdr("glXGetProcAddress");
-    if (!getProcAddress)
-        getProcAddress = getdladdr("glXGetProcAddressARB");
-
-    const char *glxstr = "";
-    const char *(*glXExtStr)(Display *, int)
-        = getdladdr("glXQueryExtensionsString");
-    if (glXExtStr)
-        glxstr = glXExtStr(display, ctx->vo->x11->screen);
-
-    getFunctions(gl, getProcAddress, glxstr, false);
-    if (!gl->GenPrograms && gl->GetString &&
-        gl->version < MPGL_VER(3, 0) &&
-        getProcAddress &&
-        strstr(gl->GetString(GL_EXTENSIONS), "GL_ARB_vertex_program"))
-    {
-        mp_msg(MSGT_VO, MSGL_WARN,
-                "Broken glXGetProcAddress detected, trying workaround\n");
-        getFunctions(gl, NULL, glxstr, false);
-    }
-
-    glx_ctx->context = new_context;
-    glx_ctx->vinfo = new_vinfo;
-
-    if (!glXIsDirect(vo->x11->display, new_context))
-        ctx->gl->mpgl_caps &= ~MPGL_CAP_NO_SW;
-
-    return true;
-}
-
-// The GL3 initialization code roughly follows/copies from:
+// The GL3/FBC initialization code roughly follows/copies from:
 //  http://www.opengl.org/wiki/Tutorial:_OpenGL_3.0_Context_Creation_(GLX)
 // but also uses some of the old code.
 
@@ -2312,11 +2208,8 @@ static GLXFBConfig select_fb_config(struct vo *vo, const int *attribs)
     return fbconfig;
 }
 
-typedef GLXContext (*glXCreateContextAttribsARBProc)
-    (Display*, GLXFBConfig, GLXContext, Bool, const int*);
-
-static bool create_window_x11_gl3(struct MPGLContext *ctx, uint32_t d_width,
-                                  uint32_t d_height, uint32_t flags)
+static bool create_glx_window(struct MPGLContext *ctx, uint32_t d_width,
+                              uint32_t d_height, uint32_t flags)
 {
     struct vo *vo = ctx->vo;
     struct glx_context *glx_ctx = ctx->priv;
@@ -2369,18 +2262,96 @@ static bool create_window_x11_gl3(struct MPGLContext *ctx, uint32_t d_width,
         return false;
     }
 
+    glx_ctx->fbc = fbc;
+    glx_ctx->vinfo = glXGetVisualFromFBConfig(vo->x11->display, fbc);
+
+    mp_msg(MSGT_VO, MSGL_V, "[gl] GLX chose visual with ID 0x%x\n",
+            (int)glx_ctx->vinfo->visualid);
+
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_RED_SIZE, &ctx->depth_r);
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_GREEN_SIZE, &ctx->depth_g);
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_BLUE_SIZE, &ctx->depth_b);
 
-    XVisualInfo *vinfo = glXGetVisualFromFBConfig(vo->x11->display, fbc);
-    mp_msg(MSGT_VO, MSGL_V, "[gl] GLX chose visual with ID 0x%x\n",
-            (int)vinfo->visualid);
     Colormap colormap = XCreateColormap(vo->x11->display, vo->x11->rootwin,
-                                        vinfo->visual, AllocNone);
-    vo_x11_create_vo_window(vo, vinfo, vo->dx, vo->dy, d_width, d_height,
-                            flags, colormap, "gl");
+                                        glx_ctx->vinfo->visual, AllocNone);
+    vo_x11_create_vo_window(vo, glx_ctx->vinfo, vo->dx, vo->dy, d_width,
+                            d_height, flags, colormap, "gl");
     XFreeColormap(vo->x11->display, colormap);
+
+    return true;
+}
+
+static bool create_window_x11_old(struct MPGLContext *ctx, uint32_t d_width,
+                                  uint32_t d_height, uint32_t flags)
+{
+    struct glx_context *glx_ctx = ctx->priv;
+    Display *display = ctx->vo->x11->display;
+    struct vo *vo = ctx->vo;
+    GL *gl = ctx->gl;
+
+    if (!create_glx_window(ctx, d_width, d_height, flags))
+        return false;
+
+    if (glx_ctx->context)
+        return true;
+
+    GLXContext new_context = glXCreateContext(display, glx_ctx->vinfo, NULL,
+                                              True);
+    if (!new_context) {
+        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GLX context!\n");
+        return false;
+    }
+
+    if (!glXMakeCurrent(display, ctx->vo->x11->window, new_context)) {
+        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GLX context!\n");
+        glXDestroyContext(display, new_context);
+        return false;
+    }
+
+    void *(*getProcAddress)(const GLubyte *);
+    getProcAddress = getdladdr("glXGetProcAddress");
+    if (!getProcAddress)
+        getProcAddress = getdladdr("glXGetProcAddressARB");
+
+    const char *glxstr = "";
+    const char *(*glXExtStr)(Display *, int)
+        = getdladdr("glXQueryExtensionsString");
+    if (glXExtStr)
+        glxstr = glXExtStr(display, ctx->vo->x11->screen);
+
+    getFunctions(gl, getProcAddress, glxstr, false);
+    if (!gl->GenPrograms && gl->GetString &&
+        gl->version < MPGL_VER(3, 0) &&
+        getProcAddress &&
+        strstr(gl->GetString(GL_EXTENSIONS), "GL_ARB_vertex_program"))
+    {
+        mp_msg(MSGT_VO, MSGL_WARN,
+                "Broken glXGetProcAddress detected, trying workaround\n");
+        getFunctions(gl, NULL, glxstr, false);
+    }
+
+    glx_ctx->context = new_context;
+
+    if (!glXIsDirect(vo->x11->display, new_context))
+        ctx->gl->mpgl_caps &= ~MPGL_CAP_NO_SW;
+
+    return true;
+}
+
+typedef GLXContext (*glXCreateContextAttribsARBProc)
+    (Display*, GLXFBConfig, GLXContext, Bool, const int*);
+
+static bool create_window_x11_gl3(struct MPGLContext *ctx, uint32_t d_width,
+                                  uint32_t d_height, uint32_t flags)
+{
+    struct glx_context *glx_ctx = ctx->priv;
+    struct vo *vo = ctx->vo;
+
+    if (!create_glx_window(ctx, d_width, d_height, flags))
+        return false;
+
+    if (glx_ctx->context)
+        return true;
 
     glXCreateContextAttribsARBProc glXCreateContextAttribsARB =
         (glXCreateContextAttribsARBProc)
@@ -2394,7 +2365,6 @@ static bool create_window_x11_gl3(struct MPGLContext *ctx, uint32_t d_width,
     bool have_ctx_ext = glxstr && !!strstr(glxstr, "GLX_ARB_create_context");
 
     if (!(have_ctx_ext && glXCreateContextAttribsARB)) {
-        XFree(vinfo);
         return false;
     }
 
@@ -2407,11 +2377,11 @@ static bool create_window_x11_gl3(struct MPGLContext *ctx, uint32_t d_width,
             | (flags & VOFLAG_GL_DEBUG ? GLX_CONTEXT_DEBUG_BIT_ARB : 0),
         None
     };
-    GLXContext context = glXCreateContextAttribsARB(vo->x11->display, fbc, 0,
-                                                    True, context_attribs);
+    GLXContext context = glXCreateContextAttribsARB(vo->x11->display,
+                                                    glx_ctx->fbc, 0, True,
+                                                    context_attribs);
     if (!context) {
         mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GLX context!\n");
-        XFree(vinfo);
         return false;
     }
 
@@ -2419,11 +2389,9 @@ static bool create_window_x11_gl3(struct MPGLContext *ctx, uint32_t d_width,
     if (!glXMakeCurrent(vo->x11->display, vo->x11->window, context)) {
         mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GLX context!\n");
         glXDestroyContext(vo->x11->display, context);
-        XFree(vinfo);
         return false;
     }
 
-    glx_ctx->vinfo = vinfo;
     glx_ctx->context = context;
 
     getFunctions(ctx->gl, (void *)glXGetProcAddress, glxstr, true);
