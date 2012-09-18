@@ -472,7 +472,7 @@
     will stay hidden. Supported by video output drivers which use X11 or
     OS X Cocoa.
 
---delay=<sec>
+--audio-delay=<sec>
     audio delay in seconds (positive or negative float value). Negative values
     delay the audio, and positive values delay the video.
 
@@ -624,7 +624,7 @@
     there is a change in video parameters, video stream or file. This used to
     be the default behavior. Currently only affects X11 VOs.
 
---forcedsubsonly
+--sub-forced-only
     Display only forced subtitles for the DVD subtitle stream selected by e.g.
     ``--slang``.
 
@@ -659,6 +659,7 @@
     Specifies the character set that will be passed to FriBiDi when decoding
     non-UTF-8 subtitles (default: ISO8859-8).
 
+--fullscreen
 --fs
     Fullscreen playback (centers movie, and paints black bands around it).
 
@@ -1312,9 +1313,6 @@
     controls how much of the image is cropped. May not work with all video
     output drivers.
 
-    *NOTE*: Values between -1 and 0 are allowed as well, but highly
-    experimental and may crash or worse. Use at your own risk!
-
 --panscanrange=<-19.0-99.0>
     (experimental)
     Change the range of the pan-and-scan functionality (default: 1). Positive
@@ -1894,7 +1892,7 @@
     - ``--subcp=enca:pl:cp1250`` guess the encoding for Polish, fall back on
       cp1250.
 
---subdelay=<sec>
+--sub-delay=<sec>
     Delays subtitles by <sec> seconds. Can be negative.
 
 --subfile=<filename>
@@ -1941,7 +1939,7 @@
     *NOTE*: <rate> > movie fps speeds the subtitles up for frame-based
     subtitle files and slows them down for time-based ones.
 
---subpos=<0-100>
+--sub-pos=<0-100>
     Specify the position of subtitles on the screen. The value is the vertical
     position of the subtitle in % of the screen height.
     Can be useful with ``--vf=expand``.

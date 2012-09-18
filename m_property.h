@@ -154,42 +154,11 @@ int mp_property_do(const char* name,int action, void* val, void *ctx);
 /// Get the value of a property as a string suitable for display in an UI.
 char* mp_property_print(const char *name, void* ctx);
 
-/// \defgroup PropertyImplHelper Property implementation helpers
-/// \ingroup Properties
-/// \brief Helper functions for common property types.
-///@{
-
-/// Implement get.
-int m_property_int_ro(const m_option_t* prop,int action,
-                      void* arg,int var);
-
-/// Implement set, get and step up/down.
-int m_property_int_range(const m_option_t* prop,int action,
-                         void* arg,int* var);
-
-int m_property_flag_ro(const m_option_t* prop,int action,
-                    void* arg,int var);
-
-/// Switch betwen min and max.
-int m_property_flag(const m_option_t* prop,int action,
-                    void* arg,int* var);
-
-/// Implement get, print.
-int m_property_float_ro(const m_option_t* prop,int action,
-                        void* arg,float var);
-
-/// Implement set, get and step up/down
-int m_property_float_range(const m_option_t* prop,int action,
-                           void* arg,float* var);
-
-/// Implement get, print
-int m_property_double_ro(const m_option_t* prop,int action,
-                         void* arg,double var);
-
-/// get/print the string
-int m_property_string_ro(const m_option_t* prop,int action,void* arg, char* str);
-
-///@}
+int m_property_int_ro(const m_option_t* prop, int action, void* arg, int var);
+int m_property_float_ro(const m_option_t* prop, int action, void* arg,
+                        float var);
+int m_property_double_ro(const m_option_t* prop, int action, void* arg,
+                         double var);
 
 ///@}
 

@@ -97,6 +97,10 @@ Command line switches
     -loop 0                             --loop=inf
     -hardframedrop                      --framedrop=hard
     -osdlevel                           --osd-level
+    -delay                              --audio-delay
+    -subdelay                           --sub-delay
+    -subpos                             --sub-pos
+    -forcedsubsonly                     --sub-forced-only
     =================================== ===================================
 
 input.conf and slave commands

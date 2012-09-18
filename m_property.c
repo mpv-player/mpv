@@ -82,6 +82,7 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
         str = m_option_pretty_print(opt, &val);
+        m_option_free(opt, &val);
         *(char **)arg = str;
         return str != NULL;
     case M_PROPERTY_TO_STRING:
@@ -95,6 +96,7 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
         str = m_option_print(opt, &val);
+        m_option_free(opt, &val);
         *(char **)arg = str;
         return str != NULL;
     case M_PROPERTY_PARSE:
@@ -215,9 +217,14 @@ char *m_properties_expand_string(const m_option_t *prop_list, char *str,
                 char pname[pl + 1];
                 memcpy(pname, str + (is_not ? 3 : 2), pl);
                 pname[pl] = 0;
-                if (m_property_do(prop_list, pname, M_PROPERTY_GET, NULL, ctx) < 0) {
+                struct m_option *opt;
+                union m_option_value val = {0};
+                if (m_property_do(prop_list, pname, M_PROPERTY_GET_TYPE, &opt, ctx) <= 0 &&
+                    m_property_do(prop_list, pname, M_PROPERTY_GET, &val, ctx) <= 0)
+                {
                     if (!is_not)
                         skip = 1, skip_lvl = lvl;
+                    m_option_free(opt, &val);
                 } else if (is_not)
                     skip = 1, skip_lvl = lvl;
             }
@@ -270,82 +277,32 @@ void m_properties_print_help_list(const m_option_t *list)
     mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "\nTotal: %d properties\n", count);
 }
 
-// Some generic property implementations
-
 int m_property_int_ro(const m_option_t *prop, int action,
                       void *arg, int var)
 {
-    switch (action) {
-    case M_PROPERTY_GET:
+    if (action == M_PROPERTY_GET) {
         *(int *)arg = var;
-        return 1;
+        return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-int m_property_int_range(const m_option_t *prop, int action,
-                         void *arg, int *var)
-{
-    switch (action) {
-    case M_PROPERTY_SET:
-        *var = *(int *)arg;
-        return 1;
-    }
-    return m_property_int_ro(prop, action, arg, *var);
-}
-
-int m_property_flag_ro(const m_option_t *prop, int action,
-                       void *arg, int var)
-{
-    return m_property_int_ro(prop, action, arg, var);
-}
-
-int m_property_flag(const m_option_t *prop, int action,
-                    void *arg, int *var)
-{
-    return m_property_int_range(prop, action, arg, var);
 }
 
 int m_property_float_ro(const m_option_t *prop, int action,
                         void *arg, float var)
 {
-    switch (action) {
-    case M_PROPERTY_GET:
+    if (action == M_PROPERTY_GET) {
         *(float *)arg = var;
-        return 1;
+        return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-int m_property_float_range(const m_option_t *prop, int action,
-                           void *arg, float *var)
-{
-    switch (action) {
-    case M_PROPERTY_SET:
-        *var = *(float *)arg;
-        return 1;
-    }
-    return m_property_float_ro(prop, action, arg, *var);
 }
 
 int m_property_double_ro(const m_option_t *prop, int action,
                          void *arg, double var)
 {
-    switch (action) {
-    case M_PROPERTY_GET:
+    if (action == M_PROPERTY_GET) {
         *(double *)arg = var;
-        return 1;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-int m_property_string_ro(const m_option_t *prop, int action, void *arg,
-                         char *str)
-{
-    switch (action) {
-    case M_PROPERTY_GET:
-        *(char **)arg = str;
-        return 1;
+        return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
