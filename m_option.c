@@ -94,23 +94,15 @@ static int parse_flag(const m_option_t *opt, struct bstr name,
                       struct bstr param, void *dst)
 {
     if (param.len) {
-        char * const enable[] = { "yes", "on", "ja", "si", "igen", "y", "j",
-                                  "i", "tak", "ja", "true", "1" };
-        for (int i = 0; i < sizeof(enable) / sizeof(enable[0]); i++) {
-            if (!bstrcasecmp0(param, enable[i])) {
-                if (dst)
-                    VAL(dst) = opt->max;
-                return 1;
-            }
+        if (!bstrcasecmp0(param, "yes")) {
+            if (dst)
+                VAL(dst) = opt->max;
+            return 1;
         }
-        char * const disable[] = { "no", "off", "nein", "nicht", "nem", "n",
-                                   "nie", "nej", "false", "0" };
-        for (int i = 0; i < sizeof(disable) / sizeof(disable[0]); i++) {
-            if (!bstrcasecmp0(param, disable[i])) {
-                if (dst)
-                    VAL(dst) = opt->min;
-                return 1;
-            }
+        if (!bstrcasecmp0(param, "no")) {
+            if (dst)
+                VAL(dst) = opt->min;
+            return 1;
         }
         mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                "Invalid parameter for %.*s flag: %.*s\n",

@@ -87,8 +87,8 @@
     :``--afm=ffmpeg``:    Try FFmpeg's libavcodec codecs first.
     :``--afm=acm,dshow``: Try Win32 codecs first.
 
---aid=<ID|auto|off>
-    Select audio channel. ``auto`` selects the default, ``off`` disables audio.
+--aid=<ID|auto|no>
+    Select audio channel. ``auto`` selects the default, ``no`` disables audio.
     See also ``--alang``.
 
 --alang=<languagecode[,languagecode,...]>
@@ -789,7 +789,7 @@
     backwards since it has to rewind to the beginning to find an exact frame
     position.
 
---hr-seek=<off|absolute|always>
+--hr-seek=<no|absolute|yes>
     Select when to use precise seeks that are not limited to keyframes. Such
     seeks require decoding video from the previous keyframe up to the target
     position and so can take some time depending on decoding performance. For
@@ -797,11 +797,11 @@
     default choice to use for seeks; it's possible to explicitly override that
     default in the definition of key bindings and in slave mode commands.
 
-    :off:      Never use precise seeks.
+    :no:       Never use precise seeks.
     :absolute: Use precise seeks if the seek is to an absolute position in the
                file, such as a chapter seek, but not for relative seeks like
                the default behavior of arrow keys (default).
-    :always:   Use precise seeks whenever possible.
+    :yes:      Use precise seeks whenever possible.
 
 --hr-seek-demuxer-offset=<seconds>
     This option exists to work around failures to do precise seeks (as in
@@ -1139,8 +1139,8 @@
 
     *NOTE*: This option is obsolete now that MPlayer has OpenDML support.
 
---loop=<number|inf|off>
-    Loops playback <number> times. ``inf`` means forever and ``off`` disables
+--loop=<number|inf|no>
+    Loops playback <number> times. ``inf`` means forever and ``no`` disables
     looping.
 
 --mc=<seconds/frame>
@@ -1694,9 +1694,9 @@
 --shuffle
     Play files in random order.
 
---sid=<ID|auto|off>
+--sid=<ID|auto|no>
     Display the subtitle stream specified by <ID> (0-31). ``auto`` selects the
-    default, ``off`` disables subtitles.
+    default, ``no`` disables subtitles.
     See also ``--slang``, ``--vobsubid``, ``--no-sub``.
 
 --slang=<languagecode[,languagecode,...]>
@@ -2256,8 +2256,8 @@
     :``--vfm=xanim``:
         Try XAnim codecs first.
 
---vid=<ID|auto|off>
-    Select video channel. ``auto`` selects the default, ``off`` disables video.
+--vid=<ID|auto|no>
+    Select video channel. ``auto`` selects the default, ``no`` disables video.
 
 --vm
     Try to change to a different video mode. Supported by the x11 and xv video

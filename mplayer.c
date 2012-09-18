@@ -2253,7 +2253,7 @@ int reinit_video_chain(struct MPContext *mpctx)
                 &vf_info_ass, NULL
             };
             char *vf_arg[] = {
-                "auto", "1", NULL
+                "auto", "yes", NULL
             };
             int retcode = 0;
             struct vf_instance *vf_ass = vf_open_plugin_noerr(opts, libass_vfs,
