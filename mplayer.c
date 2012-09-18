@@ -919,22 +919,18 @@ static void load_per_file_options(m_config_t *conf,
  * The function returns whether it was interrupted. */
 static bool libmpdemux_was_interrupted(struct MPContext *mpctx)
 {
-    // Basically, give queued up user commands a chance to run, if the normal
-    // play loop (which does run_command()) hasn't been executed for a while.
-    mp_cmd_t *cmd = mp_input_get_cmd(mpctx->input, 0, 0);
-    if (cmd) {
-        // Only run "safe" commands. Consider the case someone queues up a
-        // command to load a file, and immediately after that to select a
-        // subtitle stream. This function can be called between opening the
-        // file and opening the demuxer. We don't want the subtitle command to
-        // be lost.
-        if (mp_input_is_abort_cmd(cmd->id)) {
+    for (;;) {
+        if (mpctx->stop_play != KEEP_PLAYING
+            && mpctx->stop_play != AT_END_OF_FILE)
+            return true;
+        mp_cmd_t *cmd = mp_input_get_cmd(mpctx->input, 0, 0);
+        if (!cmd)
+            break;
+        if (mp_input_is_abort_cmd(cmd->id))
             run_command(mpctx, cmd);
-            mp_cmd_free(cmd);
-        }
+        mp_cmd_free(cmd);
     }
-    return mpctx->stop_play != KEEP_PLAYING
-        || mpctx->stop_play != AT_END_OF_FILE;
+    return false;
 }
 
 static int find_new_tid(struct MPContext *mpctx, enum stream_type t)
