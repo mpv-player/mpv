@@ -57,8 +57,6 @@ static int do_action(const m_option_t *prop_list, const char *name,
         return M_PROPERTY_UNKNOWN;
     r = ((m_property_ctrl_f)prop->p)(prop, action, arg, ctx);
     if (action == M_PROPERTY_GET_TYPE && r < 0) {
-        if (!arg)
-            return M_PROPERTY_ERROR;
         *(const m_option_t **)arg = prop;
         return M_PROPERTY_OK;
     }
@@ -90,8 +88,6 @@ int m_property_do(const m_option_t *prop_list, const char *name,
             free(val);
             return r;
         }
-        if (!arg)
-            return M_PROPERTY_ERROR;
         char *str = m_option_print(opt, val);
         free(val);
         *(char **)arg = str;
@@ -105,8 +101,6 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         if ((r =
              do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx)) <= 0)
             return r;
-        if (!arg)
-            return M_PROPERTY_ERROR;
         val = calloc(1, opt->type->size);
         if ((r = m_option_parse(opt, bstr0(opt->name), bstr0(arg), val)) <= 0) {
             free(val);
@@ -268,8 +262,6 @@ int m_property_int_ro(const m_option_t *prop, int action,
 {
     switch (action) {
     case M_PROPERTY_GET:
-        if (!arg)
-            return 0;
         *(int *)arg = var;
         return 1;
     }
@@ -281,8 +273,6 @@ int m_property_int_range(const m_option_t *prop, int action,
 {
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return 0;
         M_PROPERTY_CLAMP(prop, *(int *)arg);
         *var = *(int *)arg;
         return 1;
@@ -295,8 +285,6 @@ int m_property_flag_ro(const m_option_t *prop, int action,
 {
     switch (action) {
     case M_PROPERTY_PRINT:
-        if (!arg)
-            return 0;
         *(char **)arg = talloc_strdup(NULL, (var > prop->min) ?
                                mp_gtext("enabled") : mp_gtext("disabled"));
         return 1;
@@ -319,13 +307,9 @@ int m_property_float_ro(const m_option_t *prop, int action,
 {
     switch (action) {
     case M_PROPERTY_GET:
-        if (!arg)
-            return 0;
         *(float *)arg = var;
         return 1;
     case M_PROPERTY_PRINT:
-        if (!arg)
-            return 0;
         *(char **)arg = talloc_asprintf(NULL, "%.2f", var);
         return 1;
     }
@@ -337,8 +321,6 @@ int m_property_float_range(const m_option_t *prop, int action,
 {
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return 0;
         M_PROPERTY_CLAMP(prop, *(float *)arg);
         *var = *(float *)arg;
         return 1;
@@ -351,8 +333,6 @@ int m_property_delay(const m_option_t *prop, int action,
 {
     switch (action) {
     case M_PROPERTY_PRINT:
-        if (!arg)
-            return 0;
         *(char **)arg = talloc_asprintf(NULL, "%d ms", ROUND((*var) * 1000));
         return 1;
     default:
@@ -365,13 +345,9 @@ int m_property_double_ro(const m_option_t *prop, int action,
 {
     switch (action) {
     case M_PROPERTY_GET:
-        if (!arg)
-            return 0;
         *(double *)arg = var;
         return 1;
     case M_PROPERTY_PRINT:
-        if (!arg)
-            return 0;
         *(char **)arg = talloc_asprintf(NULL, "%.2f", var);
         return 1;
     }
@@ -383,12 +359,8 @@ int m_property_time_ro(const m_option_t *prop, int action,
 {
     switch (action) {
     case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        else {
-            *(char **)arg = mp_format_time(var, false);
-            return M_PROPERTY_OK;
-        }
+        *(char **)arg = mp_format_time(var, false);
+        return M_PROPERTY_OK;
     }
     return m_property_double_ro(prop, action, arg, var);
 }
@@ -398,13 +370,9 @@ int m_property_string_ro(const m_option_t *prop, int action, void *arg,
 {
     switch (action) {
     case M_PROPERTY_GET:
-        if (!arg)
-            return 0;
         *(char **)arg = str;
         return 1;
     case M_PROPERTY_PRINT:
-        if (!arg)
-            return 0;
         *(char **)arg = talloc_strdup(NULL, str);
         return 1;
     }
@@ -415,8 +383,6 @@ int m_property_bitrate(const m_option_t *prop, int action, void *arg, int rate)
 {
     switch (action) {
     case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         *(char **)arg = talloc_asprintf(NULL, "%d kbps", rate * 8 / 1000);
         return M_PROPERTY_OK;
     }

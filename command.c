@@ -134,8 +134,6 @@ static int mp_property_playback_speed(m_option_t *prop, int action,
     double orig_speed = opts->playback_speed;
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         opts->playback_speed = *(float *) arg;
         M_PROPERTY_CLAMP(prop, opts->playback_speed);
         // Adjust time until next frame flip for nosound mode
@@ -183,8 +181,6 @@ static int mp_property_stream_pos(m_option_t *prop, int action, void *arg,
     struct stream *stream = mpctx->stream;
     if (!stream)
         return M_PROPERTY_UNAVAILABLE;
-    if (!arg)
-        return M_PROPERTY_ERROR;
     switch (action) {
     case M_PROPERTY_GET:
         *(int64_t *) arg = stream_tell(stream);
@@ -280,8 +276,6 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(int *)arg);
         pos = *(int *)arg;
         break;
@@ -302,8 +296,6 @@ static int mp_property_time_pos(m_option_t *prop, int action,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(double *)arg);
         queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, 0);
         return M_PROPERTY_OK;
@@ -325,13 +317,9 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         *(int *) arg = chapter;
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
-        if (!arg)
-            return M_PROPERTY_ERROR;
         chapter_name = chapter_display_name(mpctx, chapter);
         if (!chapter_name)
             return M_PROPERTY_UNAVAILABLE;
@@ -339,8 +327,6 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(int *)arg);
         step_all = *(int *)arg - chapter;
         chapter += step_all;
@@ -384,8 +370,6 @@ static int mp_property_edition(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_PRINT:
         return m_property_int_ro(prop, action, arg, edition);
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(int *)arg);
         edition = *(int *)arg;
         break;
@@ -462,19 +446,13 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         *(int *) arg = angle;
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
-        if (!arg)
-            return M_PROPERTY_ERROR;
         *(char **) arg = talloc_asprintf(NULL, "%d/%d", angle, angles);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         angle = *(int *)arg;
         M_PROPERTY_CLAMP(prop, angle);
         break;
@@ -515,25 +493,17 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         *(char ***)arg = demuxer->info;
         return M_PROPERTY_OK;
     case M_PROPERTY_KEY_ACTION:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         ka = arg;
         if (!(meta = demux_info_get(demuxer, ka->key)))
             return M_PROPERTY_UNKNOWN;
         switch (ka->action) {
         case M_PROPERTY_GET:
-            if (!ka->arg)
-                return M_PROPERTY_ERROR;
             *(char **)ka->arg = meta;
             return M_PROPERTY_OK;
         case M_PROPERTY_GET_TYPE:
-            if (!ka->arg)
-                return M_PROPERTY_ERROR;
             *(const m_option_t **)ka->arg = &key_type;
             return M_PROPERTY_OK;
         }
@@ -548,8 +518,6 @@ static int mp_property_pause(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         if (*(int *)arg) {
             pause_player(mpctx);
         } else {
@@ -572,14 +540,10 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         mixer_getbothvolume(&mpctx->mixer, arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
         float vol;
-        if (!arg)
-            return M_PROPERTY_ERROR;
         mixer_getbothvolume(&mpctx->mixer, &vol);
         return m_property_float_range(prop, action, arg, &vol);
     }
@@ -592,8 +556,6 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(float *) arg);
         mixer_setvolume(&mpctx->mixer, *(float *) arg, *(float *) arg);
         return M_PROPERTY_OK;
@@ -617,8 +579,6 @@ static int mp_property_mute(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         mixer_setmute(&mpctx->mixer, *(int *) arg);
         return M_PROPERTY_OK;
     default:
@@ -685,8 +645,6 @@ static int mp_property_samplerate(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         *(char **)arg = talloc_asprintf(NULL, "%d kHz",
                                         mpctx->sh_audio->samplerate / 1000);
         return M_PROPERTY_OK;
@@ -702,8 +660,6 @@ static int mp_property_channels(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         switch (mpctx->sh_audio->channels) {
         case 1:
             *(char **) arg = talloc_strdup(NULL, "mono");
@@ -728,14 +684,10 @@ static int mp_property_balance(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         mixer_getbalance(&mpctx->mixer, arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
         char **str = arg;
-        if (!arg)
-            return M_PROPERTY_ERROR;
         mixer_getbalance(&mpctx->mixer, &bal);
         if (bal == 0.f)
             *str = talloc_strdup(NULL, "center");
@@ -751,8 +703,6 @@ static int mp_property_balance(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(float *)arg);
         mixer_setbalance(&mpctx->mixer, *(float *)arg);
         return M_PROPERTY_OK;
@@ -792,14 +742,9 @@ static int property_switch_track(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         *(int *) arg = track ? track->user_tid : -1;
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-
         if (!track)
             *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
         else {
@@ -887,8 +832,6 @@ static int mp_property_fullscreen(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(int *) arg);
         if (vo_fs == !!*(int *) arg)
             return M_PROPERTY_OK;
@@ -910,13 +853,9 @@ static int mp_property_deinterlace(m_option_t *prop, int action,
     vf = mpctx->sh_video->vfilter;
     switch (action) {
     case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         vf->control(vf, VFCTRL_GET_DEINTERLACE, arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(int *) arg);
         vf->control(vf, VFCTRL_SET_DEINTERLACE, arg);
         return M_PROPERTY_OK;
@@ -944,9 +883,7 @@ static int mp_property_colormatrix(m_option_t *prop, int action, void *arg,
 {
     struct MPOpts *opts = &mpctx->opts;
     switch (action) {
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
+    case M_PROPERTY_PRINT: ;
         struct mp_csp_details actual = { .format = -1 };
         char *req_csp = mp_csp_names[opts->requested_colorspace];
         char *real_csp = NULL;
@@ -986,9 +923,7 @@ static int levels_property_helper(int offset, m_option_t *prop, int action,
     int *valptr = (int *)m_option_get_ptr(opt, &mpctx->opts);
 
     switch (action) {
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
+    case M_PROPERTY_PRINT: ;
         struct mp_csp_details actual = {0};
         int actual_level = -1;
         char *req_level = m_option_print(opt, valptr);
@@ -1044,8 +979,6 @@ static int mp_property_panscan(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(float *) arg);
         vo_panscan = *(float *) arg;
         vo_control(mpctx->video_out, VOCTRL_SET_PANSCAN, NULL);
@@ -1067,8 +1000,6 @@ static int mp_property_vo_flag(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(int *) arg);
         if (*vo_var == !!*(int *) arg)
             return M_PROPERTY_OK;
@@ -1130,8 +1061,6 @@ static int mp_property_gamma(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(int *) arg);
         *gamma = *(int *) arg;
         r = set_video_colors(mpctx->sh_video, prop->name, *gamma);
@@ -1140,8 +1069,6 @@ static int mp_property_gamma(m_option_t *prop, int action, void *arg,
         return r;
     case M_PROPERTY_GET:
         if (get_video_colors(mpctx->sh_video, prop->name, &val) > 0) {
-            if (!arg)
-                return M_PROPERTY_ERROR;
             *(int *)arg = val;
             return M_PROPERTY_OK;
         }
@@ -1178,8 +1105,6 @@ static int mp_property_video_format(m_option_t *prop, int action,
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         switch (mpctx->sh_video->format) {
         case 0x10000001:
             meta = talloc_strdup(NULL, "mpeg1");
@@ -1269,8 +1194,6 @@ static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
 {
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         vo_osd_changed(OSDTYPE_SUBTITLE);
     default:
         return m_property_int_range(prop, action, arg, &sub_pos);
@@ -1304,8 +1227,6 @@ static int mp_property_sub_visibility(m_option_t *prop, int action,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         vo_osd_changed(OSDTYPE_SUBTITLE);
         if (vo_spudec)
             vo_osd_changed(OSDTYPE_SPU);
@@ -1325,8 +1246,6 @@ static int mp_property_ass_use_margins(m_option_t *prop, int action,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         vo_osd_changed(OSDTYPE_SUBTITLE);
     default:
         return m_property_flag(prop, action, arg, &opts->ass_use_margins);
@@ -1341,8 +1260,6 @@ static int mp_property_ass_vsfilter_aspect_compat(m_option_t *prop, int action,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         vo_osd_changed(OSDTYPE_SUBTITLE);
     default:
         return m_property_flag(prop, action, arg,
@@ -1361,8 +1278,6 @@ static int mp_property_sub_forced_only(m_option_t *prop, int action,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         m_property_flag(prop, action, arg, &forced_subs_only);
         spudec_set_forced_subs_only(vo_spudec, forced_subs_only);
         return M_PROPERTY_OK;
@@ -1380,8 +1295,6 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(float *) arg);
         if (opts->ass_enabled)
             opts->ass_font_scale = *(float *) arg;
@@ -1416,8 +1329,6 @@ static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(int *) arg);
         return tv_set_color_options(tvh, prop->offset, *(int *) arg);
     case M_PROPERTY_GET:
