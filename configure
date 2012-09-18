@@ -662,7 +662,7 @@ for ac_option do
   --disable-portaudio)  _portaudio=no   ;;
   --enable-jack)        _jack=yes       ;;
   --disable-jack)       _jack=no        ;;
-  --enable-openal)      _openal=yes     ;;
+  --enable-openal)      _openal=auto    ;;
   --disable-openal)     _openal=no      ;;
   --enable-libcdio)     _libcdio=yes    ;;
   --disable-libcdio)    _libcdio=no     ;;
