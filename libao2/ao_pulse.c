@@ -34,6 +34,8 @@
 
 #define PULSE_CLIENT_NAME "mplayer2"
 
+#define VOL_PA2MP(v) ((v) * 100 / PA_VOLUME_UI_MAX)
+#define VOL_MP2PA(v) ((v) * PA_VOLUME_UI_MAX / 100)
 
 struct priv {
     // PulseAudio playback stream object
@@ -473,10 +475,10 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             ao_control_vol_t *vol = arg;
             if (priv->pi.volume.channels != 2)
                 vol->left = vol->right =
-                    pa_cvolume_avg(&priv->pi.volume) * 100 / PA_VOLUME_NORM;
+                    VOL_PA2MP(pa_cvolume_avg(&priv->pi.volume));
             else {
-                vol->left = priv->pi.volume.values[0] * 100 / PA_VOLUME_NORM;
-                vol->right = priv->pi.volume.values[1] * 100 / PA_VOLUME_NORM;
+                vol->left = VOL_PA2MP(priv->pi.volume.values[0]);
+                vol->right = VOL_PA2MP(priv->pi.volume.values[1]);
             }
         } else if (cmd == AOCONTROL_GET_MUTE) {
             bool *mute = arg;
@@ -497,11 +499,10 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
             pa_cvolume_reset(&volume, ao->channels);
             if (volume.channels != 2)
-                pa_cvolume_set(&volume, volume.channels,
-                               vol->left * PA_VOLUME_NORM / 100);
+                pa_cvolume_set(&volume, volume.channels, VOL_MP2PA(vol->left));
             else {
-                volume.values[0] = vol->left * PA_VOLUME_NORM / 100;
-                volume.values[1] = vol->right * PA_VOLUME_NORM / 100;
+                volume.values[0] = VOL_MP2PA(vol->left);
+                volume.values[1] = VOL_MP2PA(vol->right);
             }
             o = pa_context_set_sink_input_volume(priv->context, stream_index,
                                                  &volume, NULL, NULL);
