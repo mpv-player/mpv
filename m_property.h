@@ -58,18 +58,6 @@
  */
 #define M_PROPERTY_PARSE       3
 
-/// Increment the current value.
-/** The sign of the argument is also taken into account if applicable.
- *  \param arg Pointer to a variable of the right type or NULL.
- */
-#define M_PROPERTY_STEP_UP     4
-
-/// Decrement the current value.
-/** The sign of the argument is also taken into account if applicable.
- *  \param arg Pointer to a variable of the right type or NULL.
- */
-#define M_PROPERTY_STEP_DOWN   5
-
 /// Get a string containg a parsable representation.
 /** Set the variable to a newly allocated string or NULL.
  *  \param arg Pointer to a char* variable.
@@ -81,6 +69,10 @@
 
 /// Get a m_option describing the property.
 #define M_PROPERTY_GET_TYPE    8
+
+// Switch the property up/down by a given value.
+// arg: (double) value to add to the property
+#define M_PROPERTY_SWITCH 9
 
 ///@}
 

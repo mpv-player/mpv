@@ -104,66 +104,6 @@ static void rescale_input_coordinates(struct MPContext *mpctx, int ix, int iy,
            vo->dheight, vo_fs);
 }
 
-static void choice_get_min_max(const struct m_option *opt, int *min, int *max)
-{
-    assert(opt->type == &m_option_type_choice);
-    *min = INT_MAX;
-    *max = INT_MIN;
-    for (struct m_opt_choice_alternatives *alt = opt->priv; alt->name; alt++) {
-        *min = FFMIN(*min, alt->value);
-        *max = FFMAX(*max, alt->value);
-    }
-    if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
-        *min = FFMIN(*min, opt->min);
-        *max = FFMAX(*max, opt->max);
-    }
-}
-
-static void check_choice(int dir, int val, bool *found, int *best, int choice)
-{
-    if ((dir == -1 && (!(*found) || choice > (*best)) && choice < val) ||
-        (dir == +1 && (!(*found) || choice < (*best)) && choice > val))
-    {
-        *found = true;
-        *best = choice;
-    }
-}
-
-static int step_choice(const struct m_option *opt, int val, int add, bool wrap)
-{
-    assert(opt->type == &m_option_type_choice);
-    int dir = add > 0 ? +1 : -1;
-    bool found = false;
-    int best = 0; // init. value unused
-
-    if (add == 0)
-        return val;
-
-    if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
-        int newval = val + add;
-        if (val >= opt->min && val <= opt->max &&
-            newval >= opt->min && newval <= opt->max)
-        {
-            found = true;
-            best = newval;
-        } else {
-            check_choice(dir, val, &found, &best, opt->min);
-            check_choice(dir, val, &found, &best, opt->max);
-        }
-    }
-
-    for (struct m_opt_choice_alternatives *alt = opt->priv; alt->name; alt++)
-        check_choice(dir, val, &found, &best, alt->value);
-
-    if (!found) {
-        int min, max;
-        choice_get_min_max(opt, &min, &max);
-        best = (dir == -1) ^ wrap ? min : max;
-    }
-
-    return best;
-}
-
 static int mp_property_generic_option(struct m_option *prop, int action,
                                       void *arg, MPContext *mpctx)
 {
@@ -182,14 +122,6 @@ static int mp_property_generic_option(struct m_option *prop, int action,
     case M_PROPERTY_SET:
         m_option_copy(opt, valptr, arg);
         return M_PROPERTY_OK;
-    case M_PROPERTY_STEP_UP:
-        if (opt->type == &m_option_type_choice) {
-            int add = arg ? (*(int *)arg) : +1;
-            int v = *(int *) valptr;
-            *(int *) valptr = step_choice(opt, v, add, true);
-            return M_PROPERTY_OK;
-        }
-        break;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -205,12 +137,6 @@ static int mp_property_playback_speed(m_option_t *prop, int action,
         if (!arg)
             return M_PROPERTY_ERROR;
         opts->playback_speed = *(float *) arg;
-        goto set;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        opts->playback_speed += (arg ? *(float *) arg : 0.1) *
-                                (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
-    set:
         M_PROPERTY_CLAMP(prop, opts->playback_speed);
         // Adjust time until next frame flip for nosound mode
         mpctx->time_frame *= orig_speed / opts->playback_speed;
@@ -359,13 +285,6 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
         M_PROPERTY_CLAMP(prop, *(int *)arg);
         pos = *(int *)arg;
         break;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        pos = get_percent_pos(mpctx);
-        pos += (arg ? *(int *)arg : 10) *
-               (action == M_PROPERTY_STEP_UP ? 1 : -1);
-        M_PROPERTY_CLAMP(prop, pos);
-        break;
     default:
         return m_property_int_ro(prop, action, arg, get_percent_pos(mpctx));
     }
@@ -387,11 +306,6 @@ static int mp_property_time_pos(m_option_t *prop, int action,
             return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(double *)arg);
         queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, 0);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        queue_seek(mpctx, MPSEEK_RELATIVE, (arg ? *(double *)arg : 10.0) *
-                   (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0), 0);
         return M_PROPERTY_OK;
     }
     return m_property_time_ro(prop, action, arg, get_current_time(mpctx));
@@ -431,15 +345,6 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
         step_all = *(int *)arg - chapter;
         chapter += step_all;
         break;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN: {
-        step_all = (arg && *(int *)arg != 0 ? *(int *)arg : 1)
-                   * (action == M_PROPERTY_STEP_UP ? 1 : -1);
-        chapter += step_all;
-        if (chapter < 0)
-            chapter = 0;
-        break;
-    }
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
@@ -484,9 +389,8 @@ static int mp_property_edition(m_option_t *prop, int action, void *arg,
         M_PROPERTY_CLAMP(prop, *(int *)arg);
         edition = *(int *)arg;
         break;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN: {
-        edition += arg ? *(int *)arg : (action == M_PROPERTY_STEP_UP ? 1 : -1);
+    case M_PROPERTY_SWITCH: {
+        edition += *(double *)arg;
         if (edition < 0)
             edition = demuxer->num_editions - 1;
         if (edition >= demuxer->num_editions)
@@ -574,21 +478,9 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
         angle = *(int *)arg;
         M_PROPERTY_CLAMP(prop, angle);
         break;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN: {
-        int step = 0;
-        if (arg)
-            step = *(int *)arg;
-        if (!step)
-            step = 1;
-        step *= (action == M_PROPERTY_STEP_UP ? 1 : -1);
-        angle += step;
-        if (angle < 1) //cycle
-            angle = angles;
-        else if (angle > angles)
-            angle = 1;
-        break;
-    }
+    case M_PROPERTY_SWITCH:
+        // NOTE: should cycle
+        return M_PROPERTY_NOT_IMPLEMENTED;
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
@@ -658,14 +550,10 @@ static int mp_property_pause(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_SET:
         if (!arg)
             return M_PROPERTY_ERROR;
-        if (mpctx->paused == (bool) * (int *)arg)
-            return M_PROPERTY_OK;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        if (mpctx->paused) {
-            unpause_player(mpctx);
-        } else {
+        if (*(int *)arg) {
             pause_player(mpctx);
+        } else {
+            unpause_player(mpctx);
         }
         return M_PROPERTY_OK;
     default:
@@ -695,8 +583,7 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
         mixer_getbothvolume(&mpctx->mixer, &vol);
         return m_property_float_range(prop, action, arg, &vol);
     }
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
+    case M_PROPERTY_SWITCH:
     case M_PROPERTY_SET:
         break;
     default:
@@ -710,17 +597,11 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
         M_PROPERTY_CLAMP(prop, *(float *) arg);
         mixer_setvolume(&mpctx->mixer, *(float *) arg, *(float *) arg);
         return M_PROPERTY_OK;
-    case M_PROPERTY_STEP_UP:
-        if (arg && *(float *) arg <= 0)
+    case M_PROPERTY_SWITCH:
+        if (*(double *) arg <= 0)
             mixer_decvolume(&mpctx->mixer);
         else
             mixer_incvolume(&mpctx->mixer);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_STEP_DOWN:
-        if (arg && *(float *) arg <= 0)
-            mixer_incvolume(&mpctx->mixer);
-        else
-            mixer_decvolume(&mpctx->mixer);
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -740,10 +621,6 @@ static int mp_property_mute(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_ERROR;
         mixer_setmute(&mpctx->mixer, *(int *) arg);
         return M_PROPERTY_OK;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        mixer_setmute(&mpctx->mixer, !mixer_getmute(&mpctx->mixer));
-        return M_PROPERTY_OK;
     default:
         return m_property_flag_ro(prop, action, arg,
                                   mixer_getmute(&mpctx->mixer));
@@ -757,9 +634,7 @@ static int mp_property_audio_delay(m_option_t *prop, int action,
     if (!(mpctx->sh_audio && mpctx->sh_video))
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
-    case M_PROPERTY_SET:
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN: {
+    case M_PROPERTY_SET: {
         int ret;
         float delay = audio_delay;
         ret = m_property_delay(prop, action, arg, &audio_delay);
@@ -875,14 +750,6 @@ static int mp_property_balance(m_option_t *prop, int action, void *arg,
         }
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        mixer_getbalance(&mpctx->mixer, &bal);
-        bal += (arg ? *(float *)arg : .1f) *
-               (action == M_PROPERTY_STEP_UP ? 1.f : -1.f);
-        M_PROPERTY_CLAMP(prop, bal);
-        mixer_setbalance(&mpctx->mixer, bal);
-        return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         if (!arg)
             return M_PROPERTY_ERROR;
@@ -949,18 +816,13 @@ static int property_switch_track(m_option_t *prop, int action, void *arg,
         }
         return M_PROPERTY_OK;
 
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-    case M_PROPERTY_SET: {
-        int i = (arg ? *((int *) arg) : +1) *
-                (action == M_PROPERTY_STEP_DOWN ? -1 : +1);
-        if (action == M_PROPERTY_SET && arg)
-            track = mp_track_by_tid(mpctx, type, i);
-        else
-            track = track_next(mpctx, type, i > 0 ? +1 : -1, track);
-        mp_switch_track(mpctx, type, track);
+    case M_PROPERTY_SWITCH:
+        mp_switch_track(mpctx, type,
+            track_next(mpctx, type, *(double *)arg >= 0 ? +1 : -1, track));
         return M_PROPERTY_OK;
-    }
+    case M_PROPERTY_SET:
+        mp_switch_track(mpctx, type, mp_track_by_tid(mpctx, type, *(int *)arg));
+        return M_PROPERTY_OK;
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
@@ -990,7 +852,7 @@ static int mp_property_program(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
-    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_SWITCH:
     case M_PROPERTY_SET:
         if (action == M_PROPERTY_SET && arg)
             prog.progid = *((int *) arg);
@@ -1030,8 +892,6 @@ static int mp_property_fullscreen(m_option_t *prop, int action, void *arg,
         M_PROPERTY_CLAMP(prop, *(int *) arg);
         if (vo_fs == !!*(int *) arg)
             return M_PROPERTY_OK;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
         if (mpctx->video_out->config_ok)
             vo_control(mpctx->video_out, VOCTRL_FULLSCREEN, 0);
         mpctx->opts.fullscreen = vo_fs;
@@ -1044,7 +904,6 @@ static int mp_property_fullscreen(m_option_t *prop, int action, void *arg,
 static int mp_property_deinterlace(m_option_t *prop, int action,
                                    void *arg, MPContext *mpctx)
 {
-    int deinterlace;
     vf_instance_t *vf;
     if (!mpctx->sh_video || !mpctx->sh_video->vfilter)
         return M_PROPERTY_UNAVAILABLE;
@@ -1061,12 +920,6 @@ static int mp_property_deinterlace(m_option_t *prop, int action,
         M_PROPERTY_CLAMP(prop, *(int *) arg);
         vf->control(vf, VFCTRL_SET_DEINTERLACE, arg);
         return M_PROPERTY_OK;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        vf->control(vf, VFCTRL_GET_DEINTERLACE, &deinterlace);
-        deinterlace = !deinterlace;
-        vf->control(vf, VFCTRL_SET_DEINTERLACE, &deinterlace);
-        return M_PROPERTY_OK;
     }
     int value = 0;
     vf->control(vf, VFCTRL_GET_DEINTERLACE, &value);
@@ -1077,11 +930,8 @@ static int colormatrix_property_helper(m_option_t *prop, int action,
                                       void *arg, MPContext *mpctx)
 {
     int r = mp_property_generic_option(prop, action, arg, mpctx);
-    // testing for an actual change is too much effort
     switch (action) {
     case M_PROPERTY_SET:
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
         if (mpctx->sh_video)
             set_video_colorspace(mpctx->sh_video);
         break;
@@ -1200,16 +1050,6 @@ static int mp_property_panscan(m_option_t *prop, int action, void *arg,
         vo_panscan = *(float *) arg;
         vo_control(mpctx->video_out, VOCTRL_SET_PANSCAN, NULL);
         return M_PROPERTY_OK;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        vo_panscan += (arg ? *(float *) arg : 0.1) *
-                      (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
-        if (vo_panscan > 1)
-            vo_panscan = 1;
-        else if (vo_panscan < 0)
-            vo_panscan = 0;
-        vo_control(mpctx->video_out, VOCTRL_SET_PANSCAN, NULL);
-        return M_PROPERTY_OK;
     default:
         return m_property_float_range(prop, action, arg, &vo_panscan);
     }
@@ -1232,8 +1072,6 @@ static int mp_property_vo_flag(m_option_t *prop, int action, void *arg,
         M_PROPERTY_CLAMP(prop, *(int *) arg);
         if (*vo_var == !!*(int *) arg)
             return M_PROPERTY_OK;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
         if (mpctx->video_out->config_ok)
             vo_control(mpctx->video_out, vo_ctrl, 0);
         return M_PROPERTY_OK;
@@ -1308,15 +1146,6 @@ static int mp_property_gamma(m_option_t *prop, int action, void *arg,
             return M_PROPERTY_OK;
         }
         break;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        *gamma += (arg ? *(int *) arg : 1) *
-                  (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
-        M_PROPERTY_CLAMP(prop, *gamma);
-        r = set_video_colors(mpctx->sh_video, prop->name, *gamma);
-        if (r <= 0)
-            break;
-        return r;
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
@@ -1442,8 +1271,6 @@ static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_SET:
         if (!arg)
             return M_PROPERTY_ERROR;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
         vo_osd_changed(OSDTYPE_SUBTITLE);
     default:
         return m_property_int_range(prop, action, arg, &sub_pos);
@@ -1479,8 +1306,6 @@ static int mp_property_sub_visibility(m_option_t *prop, int action,
     case M_PROPERTY_SET:
         if (!arg)
             return M_PROPERTY_ERROR;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
         vo_osd_changed(OSDTYPE_SUBTITLE);
         if (vo_spudec)
             vo_osd_changed(OSDTYPE_SPU);
@@ -1502,8 +1327,6 @@ static int mp_property_ass_use_margins(m_option_t *prop, int action,
     case M_PROPERTY_SET:
         if (!arg)
             return M_PROPERTY_ERROR;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
         vo_osd_changed(OSDTYPE_SUBTITLE);
     default:
         return m_property_flag(prop, action, arg, &opts->ass_use_margins);
@@ -1520,8 +1343,6 @@ static int mp_property_ass_vsfilter_aspect_compat(m_option_t *prop, int action,
     case M_PROPERTY_SET:
         if (!arg)
             return M_PROPERTY_ERROR;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
         vo_osd_changed(OSDTYPE_SUBTITLE);
     default:
         return m_property_flag(prop, action, arg,
@@ -1542,8 +1363,6 @@ static int mp_property_sub_forced_only(m_option_t *prop, int action,
     case M_PROPERTY_SET:
         if (!arg)
             return M_PROPERTY_ERROR;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
         m_property_flag(prop, action, arg, &forced_subs_only);
         spudec_set_forced_subs_only(vo_spudec, forced_subs_only);
         return M_PROPERTY_OK;
@@ -1569,18 +1388,6 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
         text_font_scale_factor = *(float *) arg;
         vo_osd_resized();
         return M_PROPERTY_OK;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        if (opts->ass_enabled) {
-            opts->ass_font_scale += (arg ? *(float *) arg : 0.1) *
-                              (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
-            M_PROPERTY_CLAMP(prop, opts->ass_font_scale);
-        }
-        text_font_scale_factor += (arg ? *(float *) arg : 0.1) *
-                                  (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
-        M_PROPERTY_CLAMP(prop, text_font_scale_factor);
-        vo_osd_resized();
-        return M_PROPERTY_OK;
     default:
         if (opts->ass_enabled)
             return m_property_float_ro(prop, action, arg, opts->ass_font_scale);
@@ -1603,7 +1410,6 @@ static tvi_handle_t *get_tvh(struct MPContext *mpctx)
 static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
                                 MPContext *mpctx)
 {
-    int r, val;
     tvi_handle_t *tvh = get_tvh(mpctx);
     if (!tvh)
         return M_PROPERTY_UNAVAILABLE;
@@ -1616,17 +1422,6 @@ static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
         return tv_set_color_options(tvh, prop->offset, *(int *) arg);
     case M_PROPERTY_GET:
         return tv_get_color_options(tvh, prop->offset, arg);
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        if ((r = tv_get_color_options(tvh, prop->offset, &val)) >= 0) {
-            if (!r)
-                return M_PROPERTY_ERROR;
-            val += (arg ? *(int *) arg : 1) *
-                   (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
-            M_PROPERTY_CLAMP(prop, val);
-            return tv_set_color_options(tvh, prop->offset, val);
-        }
-        return M_PROPERTY_ERROR;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -2115,35 +1910,11 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SWITCH: {
-        void *arg = NULL;
-        int r, i;
-        double d;
-        int64_t o;
         cmd->args[0].v.s = translate_legacy_property(cmd, cmd->args[0].v.s);
-        if (cmd->args[1].v.f) {
-            m_option_t *prop;
-            if ((r = mp_property_do(cmd->args[0].v.s,
-                                    M_PROPERTY_GET_TYPE,
-                                    &prop, mpctx)) <= 0)
-                goto step_prop_err;
-            if (prop->type == CONF_TYPE_INT ||
-                prop->type == CONF_TYPE_FLAG ||
-                prop->type == &m_option_type_choice)
-                i = cmd->args[1].v.f, arg = &i;
-            else if (prop->type == CONF_TYPE_FLOAT)
-                arg = &cmd->args[1].v.f;
-            else if (prop->type == CONF_TYPE_DOUBLE ||
-                     prop->type == CONF_TYPE_TIME)
-                d = cmd->args[1].v.f, arg = &d;
-            else if (prop->type == CONF_TYPE_INT64)
-                o = cmd->args[1].v.f, arg = &o;
-            else
-                mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                       "Ignoring step size stepping property '%s'.\n",
-                       cmd->args[0].v.s);
-        }
-        r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_STEP_UP, arg, mpctx);
-      step_prop_err:
+        double s = 1;
+        if (cmd->args[1].v.f)
+            s = cmd->args[1].v.f;
+        int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_SWITCH, &s, mpctx);
         if (r == M_PROPERTY_UNKNOWN)
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
                    "Unknown property: '%s'\n", cmd->args[0].v.s);

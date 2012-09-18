@@ -222,6 +222,11 @@ struct m_option_type {
      *             set to NULL.
      */
     void (*free)(void *dst);
+
+    // Add the value add to the value in val. For types that are not numeric,
+    // add gives merely the direction. The wrap parameter determines whether
+    // the value is clipped, or wraps around to the opposite max/min.
+    void (*add)(const m_option_t *opt, void *val, double add, bool wrap);
 };
 
 // Option description

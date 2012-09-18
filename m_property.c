@@ -116,6 +116,28 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         m_option_free(opt, val);
         free(val);
         return r;
+    case M_PROPERTY_SWITCH:
+        if ((r = do_action(prop_list, name, M_PROPERTY_SWITCH, arg, ctx)) !=
+            M_PROPERTY_NOT_IMPLEMENTED)
+            return r;
+        if ((r =
+             do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx)) <= 0)
+            return r;
+        // Fallback to m_option
+        if (!opt->type->add)
+            return M_PROPERTY_NOT_IMPLEMENTED;
+        val = calloc(1, opt->type->size);
+        if ((r = do_action(prop_list, name, M_PROPERTY_GET, val, ctx)) <= 0) {
+            free(val);
+            return r;
+        }
+        bool wrap = opt->type == &m_option_type_choice ||
+                    opt->type == &m_option_type_flag;
+        opt->type->add(opt, val, *(double*)arg, wrap);
+        r = do_action(prop_list, name, M_PROPERTY_SET, val, ctx);
+        m_option_free(opt, val);
+        free(val);
+        return r;
     }
     return do_action(prop_list, name, action, arg, ctx);
 }
@@ -264,12 +286,6 @@ int m_property_int_range(const m_option_t *prop, int action,
         M_PROPERTY_CLAMP(prop, *(int *)arg);
         *var = *(int *)arg;
         return 1;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        *var += (arg ? *(int *)arg : 1) *
-                (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
-        M_PROPERTY_CLAMP(prop, *var);
-        return 1;
     }
     return m_property_int_ro(prop, action, arg, *var);
 }
@@ -292,10 +308,6 @@ int m_property_flag(const m_option_t *prop, int action,
                     void *arg, int *var)
 {
     switch (action) {
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        *var = *var == prop->min ? prop->max : prop->min;
-        return 1;
     case M_PROPERTY_PRINT:
         return m_property_flag_ro(prop, action, arg, *var);
     }
@@ -329,12 +341,6 @@ int m_property_float_range(const m_option_t *prop, int action,
             return 0;
         M_PROPERTY_CLAMP(prop, *(float *)arg);
         *var = *(float *)arg;
-        return 1;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        *var += (arg ? *(float *)arg : 0.1) *
-                (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
-        M_PROPERTY_CLAMP(prop, *var);
         return 1;
     }
     return m_property_float_ro(prop, action, arg, *var);
