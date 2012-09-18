@@ -104,6 +104,7 @@ struct ao {
     bool initialized;
     bool untimed;
     bool no_persistent_volume;
+    bool per_application_mixer;
     const struct ao_driver *driver;
     void *priv;
     struct encode_lavc_context *encode_lavc_ctx;

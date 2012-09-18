@@ -24,11 +24,17 @@
 #include "libaf/af.h"
 #include "libao2/audio_out.h"
 
+enum {
+    SOFTVOL_NO = 0,
+    SOFTVOL_YES = 1,
+    SOFTVOL_AUTO = 2,
+};
+
 typedef struct mixer {
     struct ao *ao;
     af_stream_t *afilter;
     int volstep;
-    bool softvol;
+    int softvol;
     float softvol_max;
     bool muted;
     bool muted_by_us;

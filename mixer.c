@@ -32,10 +32,15 @@ static void checkvolume(struct mixer *mixer)
     if (!mixer->ao)
         return;
 
+    if (mixer->softvol == SOFTVOL_AUTO) {
+        mixer->softvol = mixer->ao->per_application_mixer
+                         ? SOFTVOL_NO : SOFTVOL_YES;
+    }
+
     ao_control_vol_t vol;
     if (mixer->softvol || CONTROL_OK != ao_control(mixer->ao,
                                                 AOCONTROL_GET_VOLUME, &vol)) {
-        mixer->softvol = true;
+        mixer->softvol = SOFTVOL_YES;
         if (!mixer->afilter)
             return;
         float db_vals[AF_NCH];

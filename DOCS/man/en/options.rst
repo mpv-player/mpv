@@ -1741,9 +1741,19 @@
     timing is imprecise and you cannot use the RTC either. Comes at the
     price of higher CPU consumption.
 
---no-softvol
-    Try to use the sound card mixer (if available), instead of using the volume
-    audio filter.
+--softvol=<mode>
+    Control whether to use the volume controls of the audio output driver, or
+    the internal mplayer volume filter.
+
+    :no:    prefer audio driver controls, use the volume filter only if
+            absolutely needed
+    :yes:   always use the volume filter
+    :auto:  prefer the volume filter if the audio driver uses the system mixer (default)
+
+    The intention with ``auto`` is to avoid changing system mixer settings with
+    default settings. mplayer is a video player, not a mixer panel. On the other
+    hand, mixer controls should be used for sound servers like PulseAudio, which
+    provide per-application volume.
 
 --softvol-max=<10.0-10000.0>
     Set the maximum amplification level in percent (default: 200). A value of

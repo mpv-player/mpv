@@ -3,6 +3,7 @@
 #include "config.h"
 #include "defaultopts.h"
 #include "options.h"
+#include "mixer.h"
 
 void set_default_mplayer_options(struct MPOpts *opts)
 {
@@ -10,7 +11,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .audio_driver_list = NULL,
         .video_driver_list = NULL,
         .fixed_vo = 1,
-        .softvol = 1,
+        .softvol = SOFTVOL_AUTO,
         .softvol_max = 200,
         .ao_buffersize = -1,
         .vo_wintitle = "mplayer - ${filename}",

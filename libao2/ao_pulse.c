@@ -184,6 +184,8 @@ static int init(struct ao *ao, char *params)
     struct priv *priv = talloc_zero(ao, struct priv);
     ao->priv = priv;
 
+    ao->per_application_mixer = true;
+
     if (params) {
         devarg = strdup(params);
         sink = strchr(devarg, ':');

@@ -587,7 +587,10 @@ const m_option_t mplayer_opts[]={
 
     OPT_STRING("mixer", mixer_device, 0),
     OPT_STRING("mixer-channel", mixer_channel, 0),
-    OPT_MAKE_FLAGS("softvol", softvol, 0),
+    OPT_CHOICE("softvol", softvol, 0,
+               ({"no", SOFTVOL_NO},
+                {"yes", SOFTVOL_YES},
+                {"auto", SOFTVOL_AUTO})),
     OPT_FLOATRANGE("softvol-max", softvol_max, 0, 10, 10000),
     {"volstep", &volstep, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
     {"volume", &start_volume, CONF_TYPE_FLOAT, CONF_RANGE, -1, 10000, NULL},
