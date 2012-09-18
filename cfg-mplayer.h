@@ -333,7 +333,7 @@ const m_option_t common_opts[] = {
     {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
     OPT_CHOICE("no-config", noconfig, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE,
-               ({"off", 0}, {"user", 1}, {"system", 2}, {"all", 3})),
+               ({"no", 0}, {"user", 1}, {"system", 2}, {"all", 3})),
 
 // ------------------------- stream options --------------------
 
@@ -695,7 +695,7 @@ const m_option_t mplayer_opts[]={
 
     OPT_FLAG_CONSTANTS("no-loop", loop_times, 0, 0, -1),
     OPT_CHOICE_OR_INT("loop", loop_times, 0, 1, 10000,
-                      ({"off", -1}, {"0", -1},
+                      ({"no", -1}, {"0", -1},
                        {"inf", 0})),
 
     {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN, 1, 0, NULL},
@@ -712,7 +712,7 @@ const m_option_t mplayer_opts[]={
                ({"auto", 0}, {"decoder", 1}, {"sort", 2})),
     OPT_MAKE_FLAGS("initial-audio-sync", initial_audio_sync, 0),
     OPT_CHOICE("hr-seek", hr_seek, 0,
-               ({"off", -1}, {"absolute", 0}, {"always", 1}, {"on", 1})),
+               ({"no", -1}, {"absolute", 0}, {"always", 1}, {"yes", 1})),
     OPT_FLOATRANGE("hr-seek-demuxer-offset", hr_seek_demuxer_offset, 0, -9, 99),
     OPT_FLAG_CONSTANTS("no-autosync", autosync, 0, 0, -1),
     OPT_INTRANGE("autosync", autosync, 0, 0, 10000),
@@ -722,7 +722,7 @@ const m_option_t mplayer_opts[]={
     OPT_CHOICE("term-osd", term_osd, 0,
                ({"force", 1},
                 {"auto", 2}, {"", 2},
-                {"off", 0})),
+                {"no", 0})),
 
     OPT_STRING("term-osd-esc", term_osd_esc, 0, OPTDEF_STR("\x1b[A\r\x1b[K")),
     OPT_STRING("playing-msg", playing_msg, 0),
