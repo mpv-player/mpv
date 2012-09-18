@@ -67,7 +67,7 @@ int m_property_do(const m_option_t *prop_list, const char *name,
                   int action, void *arg, void *ctx)
 {
     const m_option_t *opt;
-    void *val;
+    union m_option_value val = {0};
     int r;
     char *str;
 
@@ -78,13 +78,10 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         if ((r =
              do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx)) <= 0)
             return r;
-        val = calloc(1, opt->type->size);
-        if ((r = do_action(prop_list, name, M_PROPERTY_GET, val, ctx)) <= 0) {
-            free(val);
+        // Fallback to m_option
+        if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
-        }
-        str = m_option_pretty_print(opt, val);
-        free(val);
+        str = m_option_pretty_print(opt, &val);
         *(char **)arg = str;
         return str != NULL;
     case M_PROPERTY_TO_STRING:
@@ -95,13 +92,9 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         if ((r =
              do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx)) <= 0)
             return r;
-        val = calloc(1, opt->type->size);
-        if ((r = do_action(prop_list, name, M_PROPERTY_GET, val, ctx)) <= 0) {
-            free(val);
+        if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
-        }
-        str = m_option_print(opt, val);
-        free(val);
+        str = m_option_print(opt, &val);
         *(char **)arg = str;
         return str != NULL;
     case M_PROPERTY_PARSE:
@@ -113,14 +106,10 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         if ((r =
              do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx)) <= 0)
             return r;
-        val = calloc(1, opt->type->size);
-        if ((r = m_option_parse(opt, bstr0(opt->name), bstr0(arg), val)) <= 0) {
-            free(val);
+        if ((r = m_option_parse(opt, bstr0(opt->name), bstr0(arg), &val)) <= 0)
             return r;
-        }
-        r = do_action(prop_list, name, M_PROPERTY_SET, val, ctx);
-        m_option_free(opt, val);
-        free(val);
+        r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
+        m_option_free(opt, &val);
         return r;
     case M_PROPERTY_SWITCH:
         if ((r = do_action(prop_list, name, M_PROPERTY_SWITCH, arg, ctx)) !=
@@ -132,17 +121,13 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         // Fallback to m_option
         if (!opt->type->add)
             return M_PROPERTY_NOT_IMPLEMENTED;
-        val = calloc(1, opt->type->size);
-        if ((r = do_action(prop_list, name, M_PROPERTY_GET, val, ctx)) <= 0) {
-            free(val);
+        if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
-        }
         bool wrap = opt->type == &m_option_type_choice ||
                     opt->type == &m_option_type_flag;
-        opt->type->add(opt, val, *(double*)arg, wrap);
-        r = do_action(prop_list, name, M_PROPERTY_SET, val, ctx);
-        m_option_free(opt, val);
-        free(val);
+        opt->type->add(opt, &val, *(double*)arg, wrap);
+        r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
+        m_option_free(opt, &val);
         return r;
     }
     return do_action(prop_list, name, action, arg, ctx);

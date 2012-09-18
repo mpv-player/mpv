@@ -176,6 +176,25 @@ struct m_sub_options {
 #define CONF_TYPE_TIME          (&m_option_type_time)
 #define CONF_TYPE_TIME_SIZE     (&m_option_type_time_size)
 
+// Possible option values. Code is allowed to access option data without going
+// through this union. It serves for self-documentation and to get minimal
+// size/alignment requirements for option values in general.
+union m_option_value {
+    int flag; // not the C type "bool"!
+    int int_;
+    int64_t int64;
+    float float_;
+    double double_;
+    char *string;
+    char **string_list;
+    int imgfmt;
+    int afmt;
+    m_span_t span;
+    m_obj_settings_t *obj_settings_list;
+    double time;
+    m_time_size_t time_size;
+};
+
 ////////////////////////////////////////////////////////////////////////////
 
 // Option type description
