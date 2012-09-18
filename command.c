@@ -1827,9 +1827,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                    cmd->args[0].v.s, cmd->args[1].v.s);
         else if (cmd->on_osd)
             show_property_osd(mpctx, cmd->args[0].v.s);
-        if (r <= 0)
-            mp_msg(MSGT_GLOBAL, MSGL_INFO,
-                   "ANS_ERROR=%s\n", property_error_string(r));
         break;
     }
 
@@ -1844,13 +1841,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                    "Unknown property: '%s'\n", cmd->args[0].v.s);
         else if (r <= 0)
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                   "Failed to increment property '%s' by %f.\n",
-                   cmd->args[0].v.s, cmd->args[1].v.f);
+                   "Failed to increment property '%s' by %g.\n",
+                   cmd->args[0].v.s, s);
         else if (cmd->on_osd)
             show_property_osd(mpctx, cmd->args[0].v.s);
-        if (r <= 0)
-            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_ERROR=%s\n",
-                   property_error_string(r));
         break;
     }
 
