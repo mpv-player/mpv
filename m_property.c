@@ -129,6 +129,24 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
         m_option_free(opt, &val);
         return r;
+    case M_PROPERTY_SET:
+        if ((r =
+             do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx)) <= 0)
+            return r;
+        if (!opt->type->clamp) {
+            mp_msg(MSGT_CPLAYER, MSGL_WARN, "Property '%s' without clamp().\n",
+                   name);
+        } else {
+            m_option_copy(opt, &val, arg);
+            r = opt->type->clamp(opt, arg);
+            m_option_free(opt, &val);
+            if (r != 0) {
+                mp_msg(MSGT_CPLAYER, MSGL_ERR,
+                       "Property '%s': invalid value.\n", name);
+                return M_PROPERTY_ERROR;
+            }
+        }
+        return do_action(prop_list, name, M_PROPERTY_SET, arg, ctx);
     }
     return do_action(prop_list, name, action, arg, ctx);
 }
@@ -270,7 +288,6 @@ int m_property_int_range(const m_option_t *prop, int action,
 {
     switch (action) {
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(int *)arg);
         *var = *(int *)arg;
         return 1;
     }
@@ -305,7 +322,6 @@ int m_property_float_range(const m_option_t *prop, int action,
 {
     switch (action) {
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(float *)arg);
         *var = *(float *)arg;
         return 1;
     }

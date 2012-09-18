@@ -145,7 +145,6 @@ static int mp_property_playback_speed(m_option_t *prop, int action,
     switch (action) {
     case M_PROPERTY_SET:
         opts->playback_speed = *(float *) arg;
-        M_PROPERTY_CLAMP(prop, opts->playback_speed);
         // Adjust time until next frame flip for nosound mode
         mpctx->time_frame *= orig_speed / opts->playback_speed;
         reinit_audio_chain(mpctx);
@@ -196,7 +195,6 @@ static int mp_property_stream_pos(m_option_t *prop, int action, void *arg,
         *(int64_t *) arg = stream_tell(stream);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(int64_t *) arg);
         stream_seek(stream, *(int64_t *) arg);
         return M_PROPERTY_OK;
     }
@@ -286,7 +284,6 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
 
     switch (action) {
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(int *)arg);
         pos = *(int *)arg;
         break;
     default:
@@ -306,7 +303,6 @@ static int mp_property_time_pos(m_option_t *prop, int action,
 
     switch (action) {
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(double *)arg);
         queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, 0);
         return M_PROPERTY_OK;
     }
@@ -337,7 +333,6 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(int *)arg);
         step_all = *(int *)arg - chapter;
         chapter += step_all;
         break;
@@ -380,7 +375,6 @@ static int mp_property_edition(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_PRINT:
         return m_property_int_ro(prop, action, arg, edition);
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(int *)arg);
         edition = *(int *)arg;
         break;
     case M_PROPERTY_SWITCH: {
@@ -464,7 +458,6 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
     }
     case M_PROPERTY_SET:
         angle = *(int *)arg;
-        M_PROPERTY_CLAMP(prop, angle);
         break;
     case M_PROPERTY_SWITCH:
         // NOTE: should cycle
@@ -566,7 +559,6 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(float *) arg);
         mixer_setvolume(&mpctx->mixer, *(float *) arg, *(float *) arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_SWITCH:
@@ -721,7 +713,6 @@ static int mp_property_balance(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(float *)arg);
         mixer_setbalance(&mpctx->mixer, *(float *)arg);
         return M_PROPERTY_OK;
     }
@@ -850,7 +841,6 @@ static int mp_property_fullscreen(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(int *) arg);
         if (vo_fs == !!*(int *) arg)
             return M_PROPERTY_OK;
         if (mpctx->video_out->config_ok)
@@ -874,7 +864,6 @@ static int mp_property_deinterlace(m_option_t *prop, int action,
         vf->control(vf, VFCTRL_GET_DEINTERLACE, arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(int *) arg);
         vf->control(vf, VFCTRL_SET_DEINTERLACE, arg);
         return M_PROPERTY_OK;
     }
@@ -997,7 +986,6 @@ static int mp_property_panscan(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(float *) arg);
         vo_panscan = *(float *) arg;
         vo_control(mpctx->video_out, VOCTRL_SET_PANSCAN, NULL);
         return M_PROPERTY_OK;
@@ -1018,7 +1006,6 @@ static int mp_property_vo_flag(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(int *) arg);
         if (*vo_var == !!*(int *) arg)
             return M_PROPERTY_OK;
         if (mpctx->video_out->config_ok)
@@ -1079,7 +1066,6 @@ static int mp_property_gamma(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(int *) arg);
         *gamma = *(int *) arg;
         r = set_video_colors(mpctx->sh_video, prop->name, *gamma);
         if (r <= 0)
@@ -1323,7 +1309,6 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(float *) arg);
         if (opts->ass_enabled)
             opts->ass_font_scale = *(float *) arg;
         else
@@ -1358,7 +1343,6 @@ static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_SET:
-        M_PROPERTY_CLAMP(prop, *(int *) arg);
         return tv_set_color_options(tvh, prop->offset, *(int *) arg);
     case M_PROPERTY_GET:
         return tv_get_color_options(tvh, prop->offset, arg);

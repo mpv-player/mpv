@@ -159,14 +159,6 @@ char* mp_property_print(const char *name, void* ctx);
 /// \brief Helper functions for common property types.
 ///@{
 
-/// Clamp a value according to \ref m_option::min and \ref m_option::max.
-#define M_PROPERTY_CLAMP(prop,val) do {                                 \
-        if(((prop)->flags & M_OPT_MIN) && (val) < (prop)->min)          \
-            (val) = (prop)->min;                                        \
-        else if(((prop)->flags & M_OPT_MAX) && (val) > (prop)->max)     \
-            (val) = (prop)->max;                                        \
-    } while(0)
-
 /// Implement get.
 int m_property_int_ro(const m_option_t* prop,int action,
                       void* arg,int var);

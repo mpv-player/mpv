@@ -90,6 +90,14 @@ static void copy_opt(const m_option_t *opt, void *dst, const void *src)
 
 #define VAL(x) (*(int *)(x))
 
+static int clamp_flag(const m_option_t *opt, void *val)
+{
+    if (VAL(val) == opt->min || VAL(val) == opt->max)
+        return 0;
+    VAL(val) = opt->min;
+    return M_OPT_OUT_OF_RANGE;
+}
+
 static int parse_flag(const m_option_t *opt, struct bstr name,
                       struct bstr param, void *dst)
 {
@@ -141,11 +149,28 @@ const m_option_type_t m_option_type_flag = {
     .print = print_flag,
     .copy  = copy_opt,
     .add = add_flag,
+    .clamp = clamp_flag,
 };
 
 // Integer
 
 #undef VAL
+
+static int clamp_longlong(const m_option_t *opt, void *val)
+{
+    long long v = *(long long *)val;
+    int r = 0;
+    if ((opt->flags & M_OPT_MAX) && (v > opt->max)) {
+        v = opt->max;
+        r = M_OPT_OUT_OF_RANGE;
+    }
+    if ((opt->flags & M_OPT_MIN) && (v < opt->min)) {
+        v = opt->min;
+        r = M_OPT_OUT_OF_RANGE;
+    }
+    *(long long *)val = v;
+    return r;
+}
 
 static int parse_longlong(const m_option_t *opt, struct bstr name,
                           struct bstr param, void *dst)
@@ -184,6 +209,22 @@ static int parse_longlong(const m_option_t *opt, struct bstr name,
     return 1;
 }
 
+static int clamp_int(const m_option_t *opt, void *val)
+{
+    long long tmp = *(int *)val;
+    int r = clamp_longlong(opt, &tmp);
+    *(int *)val = tmp;
+    return r;
+}
+
+static int clamp_int64(const m_option_t *opt, void *val)
+{
+    long long tmp = *(int64_t *)val;
+    int r = clamp_longlong(opt, &tmp);
+    *(int64_t *)val = tmp;
+    return r;
+}
+
 static int parse_int(const m_option_t *opt, struct bstr name,
                      struct bstr param, void *dst)
 {
@@ -203,7 +244,6 @@ static int parse_int64(const m_option_t *opt, struct bstr name,
         *(int64_t *)dst = tmp;
     return r;
 }
-
 
 static char *print_int(const m_option_t *opt, const void *val)
 {
@@ -247,6 +287,7 @@ const m_option_type_t m_option_type_int = {
     .print = print_int,
     .copy  = copy_opt,
     .add = add_int,
+    .clamp = clamp_int,
 };
 
 const m_option_type_t m_option_type_int64 = {
@@ -256,6 +297,7 @@ const m_option_type_t m_option_type_int64 = {
     .print = print_int,
     .copy  = copy_opt,
     .add = add_int64,
+    .clamp = clamp_int64,
 };
 
 static int parse_intpair(const struct m_option *opt, struct bstr name,
@@ -300,6 +342,21 @@ const struct m_option_type m_option_type_intpair = {
     .parse = parse_intpair,
     .copy  = copy_opt,
 };
+
+static int clamp_choice(const m_option_t *opt, void *val)
+{
+    int v = *(int *)val;
+    if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
+        if (v >= opt->min && v <= opt->max)
+            return 0;
+    }
+    ;
+    for (struct m_opt_choice_alternatives *alt = opt->priv; alt->name; alt++) {
+        if (alt->value == v)
+            return 0;
+    }
+    return M_OPT_INVALID;
+}
 
 static int parse_choice(const struct m_option *opt, struct bstr name,
                         struct bstr param, void *dst)
@@ -416,12 +473,29 @@ const struct m_option_type m_option_type_choice = {
     .print = print_choice,
     .copy  = copy_opt,
     .add = add_choice,
+    .clamp = clamp_choice,
 };
 
 // Float
 
 #undef VAL
 #define VAL(x) (*(double *)(x))
+
+static int clamp_double(const m_option_t *opt, void *val)
+{
+    double v = VAL(val);
+    int r = 0;
+    if ((opt->flags & M_OPT_MAX) && (v > opt->max)) {
+        v = opt->max;
+        r = M_OPT_OUT_OF_RANGE;
+    }
+    if ((opt->flags & M_OPT_MIN) && (v < opt->min)) {
+        v = opt->min;
+        r = M_OPT_OUT_OF_RANGE;
+    }
+    VAL(val) = v;
+    return r;
+}
 
 static int parse_double(const m_option_t *opt, struct bstr name,
                         struct bstr param, void *dst)
@@ -514,10 +588,19 @@ const m_option_type_t m_option_type_double = {
     .print = print_double,
     .pretty_print = print_double_f2,
     .copy  = copy_opt,
+    .clamp = clamp_double,
 };
 
 #undef VAL
 #define VAL(x) (*(float *)(x))
+
+static int clamp_float(const m_option_t *opt, void *val)
+{
+    double tmp = VAL(val);
+    int r = clamp_double(opt, &tmp);
+    VAL(val) = tmp;
+    return r;
+}
 
 static int parse_float(const m_option_t *opt, struct bstr name,
                        struct bstr param, void *dst)
@@ -555,12 +638,24 @@ const m_option_type_t m_option_type_float = {
     .pretty_print = print_float_f2,
     .copy  = copy_opt,
     .add = add_float,
+    .clamp = clamp_float,
 };
 
 ///////////// String
 
 #undef VAL
 #define VAL(x) (*(char **)(x))
+
+static int clamp_str(const m_option_t *opt, void *val)
+{
+    char *v = VAL(val);
+    int len = v ? strlen(v) : 0;
+    if ((opt->flags & M_OPT_MIN) && (len < opt->min))
+        return M_OPT_OUT_OF_RANGE;
+    if ((opt->flags & M_OPT_MAX) && (len > opt->max))
+        return M_OPT_OUT_OF_RANGE;
+    return 0;
+}
 
 static int parse_str(const m_option_t *opt, struct bstr name,
                      struct bstr param, void *dst)
@@ -620,6 +715,7 @@ const m_option_type_t m_option_type_string = {
     .print = print_str,
     .copy  = copy_str,
     .free  = free_str,
+    .clamp = clamp_str,
 };
 
 //////////// String list
@@ -1150,6 +1246,7 @@ const m_option_type_t m_option_type_time = {
     .pretty_print = pretty_print_time,
     .copy  = copy_opt,
     .add = add_double,
+    .clamp = clamp_double,
 };
 
 

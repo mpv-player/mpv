@@ -251,6 +251,13 @@ struct m_option_type {
     // add gives merely the direction. The wrap parameter determines whether
     // the value is clipped, or wraps around to the opposite max/min.
     void (*add)(const m_option_t *opt, void *val, double add, bool wrap);
+
+    // Clamp the value in val to the option's valid value range.
+    // Return values:
+    //  M_OPT_OUT_OF_RANGE: val was invalid, and modified (clamped) to be valid
+    //  M_OPT_INVALID:      val was invalid, and can't be made valid
+    //  0:                  val was already valid and is unchanged
+    int (*clamp)(const m_option_t *opt, void *val);
 };
 
 // Option description
