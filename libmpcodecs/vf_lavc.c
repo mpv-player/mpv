@@ -76,11 +76,6 @@ static int config(struct vf_instance *vf,
 	return 0;
     }
 
-    if (lavc_venc_context.codec->encode == NULL) {
-	mp_msg(MSGT_VFILTER,MSGL_ERR,"avcodec init failed (ctx->codec->encode == NULL)!\n");
-	return 0;
-    }
-
     return vf_next_config(vf,width,height,d_width,d_height,flags,IMGFMT_MPEGPES);
 }
 
