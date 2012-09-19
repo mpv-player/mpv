@@ -161,7 +161,7 @@ static int config_destroy(void *p)
 {
     struct m_config *config = p;
     for (struct m_config_option *copt = config->opts; copt; copt = copt->next) {
-        if (copt->flags & M_CFG_OPT_ALIAS)
+        if (copt->alias_owner)
             continue;
         if (copt->opt->type->flags & M_OPT_TYPE_DYNAMIC) {
             m_option_free(copt->opt, copt->data);
@@ -219,13 +219,13 @@ void m_config_free(struct m_config *config)
 
 static void ensure_backup(struct m_config *config, struct m_config_option *co)
 {
+    while (co->alias_owner)
+        co = co->alias_owner;
     if (!config->file_local_mode)
         return;
     if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD)
         return;
     if (co->opt->flags & M_OPT_GLOBAL)
-        return;
-    if (co->flags & M_CFG_OPT_ALIAS)
         return;
     if (co->global_backup)
         return;
@@ -319,12 +319,12 @@ static void m_config_add_option(struct m_config *config,
             for (struct m_config_option *i = config->opts; i; i = i->next) {
                 if (co->data == i->data) {
                     // So we don't save the same vars more than 1 time
-                    co->flags |= M_CFG_OPT_ALIAS;
+                    co->alias_owner = i;
                     break;
                 }
             }
         }
-        if (co->flags & M_CFG_OPT_ALIAS) {
+        if (co->alias_owner) {
             assert(!arg->defval);
         } else {
             if (arg->defval) {

@@ -43,10 +43,12 @@ struct m_config_option {
     void *data;
     // Raw value of the backup of the global value (or NULL).
     void *global_backup;
-    // See \ref ConfigOptionFlags.
-    unsigned int flags;
     // If this is a suboption, the option that contains this option.
     struct m_config_option *parent;
+    // If this option aliases another, more important option. The alias_owner
+    // option is the one that has the most correct option type for the data
+    // variable, and which is considered the original.
+    struct m_config_option *alias_owner;
 };
 
 // Profiles allow to predefine some sets of options that can then
@@ -90,9 +92,6 @@ typedef struct m_config {
     void *optstruct; // struct mpopts or other
     int (*includefunc)(struct m_config *conf, char *filename);
 } m_config_t;
-
-// Set if another option already uses the same variable.
-#define M_CFG_OPT_ALIAS  (1 << 1)
 
 // Create a new config object.
 struct m_config *
