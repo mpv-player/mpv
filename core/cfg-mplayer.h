@@ -71,7 +71,7 @@ const m_option_t radioopts_conf[]={
 #ifdef CONFIG_TV
 const m_option_t tvopts_conf[]={
     {"immediatemode", &stream_tv_defaults.immediate, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
-    {"no-audio", &stream_tv_defaults.noaudio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"audio", &stream_tv_defaults.noaudio, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"audiorate", &stream_tv_defaults.audiorate, CONF_TYPE_INT, 0, 0, 0, NULL},
     {"driver", &stream_tv_defaults.driver, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"device", &stream_tv_defaults.device, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -288,9 +288,9 @@ extern const m_option_t lavc_decode_opts_conf[];
 const m_option_t common_opts[] = {
 // ------------------------- common options --------------------
     OPT_MAKE_FLAGS("quiet", quiet, CONF_GLOBAL),
-    {"really-quiet", &verbose, CONF_TYPE_FLAG, CONF_GLOBAL|CONF_PRE_PARSE, 0, -10, NULL},
+    {"really-quiet", &verbose, CONF_TYPE_STORE, CONF_GLOBAL|CONF_PRE_PARSE, 0, -10, NULL},
     // -v is handled in command line preparser
-    {"v", NULL, CONF_TYPE_FLAG, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
+    {"v", NULL, CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
     {"msglevel", (void *) msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
     {"msgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL | CONF_PRE_PARSE, 0, 1, NULL},
     {"msgmodule", &mp_msg_module, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
@@ -303,9 +303,9 @@ const m_option_t common_opts[] = {
 // ------------------------- stream options --------------------
 
 #ifdef CONFIG_STREAM_CACHE
-    OPT_INTRANGE("cache", stream_cache_size, 0, 32, 0x7fffffff, OPTDEF_INT(-1)),
-    OPT_FLAG_CONSTANTS("no-cache", stream_cache_size, 0, -1, 0),
-
+    OPT_CHOICE_OR_INT("cache", stream_cache_size, 0, 32, 0x7fffffff,
+                      ({"no", -1}),
+                      OPTDEF_INT(-1)),
     OPT_FLOATRANGE("cache-min", stream_cache_min_percent, 0, 0, 99),
     OPT_FLOATRANGE("cache-seek-min", stream_cache_seek_min_percent, 0, 0, 99),
     OPT_CHOICE_OR_INT("cache-pause", stream_cache_pause, 0,
@@ -367,9 +367,9 @@ const m_option_t common_opts[] = {
     OPT_TRACKCHOICE("aid", audio_id),
     OPT_TRACKCHOICE("vid", video_id),
     OPT_TRACKCHOICE("sid", sub_id),
-    OPT_FLAG_CONSTANTS("no-sub", sub_id, 0, -1, -2),
-    OPT_FLAG_CONSTANTS("no-video", video_id, 0, -1, -2),
-    OPT_FLAG_CONSTANTS("no-audio", audio_id, 0, -1, -2),
+    OPT_FLAG_STORE("no-sub", sub_id, 0, -2),
+    OPT_FLAG_STORE("no-video", video_id, 0, -2),
+    OPT_FLAG_STORE("no-audio", audio_id, 0, -2),
     OPT_STRINGLIST("alang", audio_lang, 0),
     OPT_STRINGLIST("slang", sub_lang, 0),
 
@@ -462,7 +462,8 @@ const m_option_t common_opts[] = {
     {"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},
     {"ssf", (void *) scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     OPT_FLOATRANGE("aspect", movie_aspect, 0, 0.1, 10.0),
-    OPT_FLAG_CONSTANTS("no-aspect", movie_aspect, 0, 0, 0),
+    // xxx: this aliases int with float, which is very evil (but works in this case)
+    OPT_FLAG_STORE("no-aspect", movie_aspect, 0, 0),
 
     OPT_FLAG_CONSTANTS("flip", flip, 0, 0, 1),
 
@@ -579,7 +580,7 @@ const m_option_t mplayer_opts[]={
     // set bpp (x11+vm)
     OPT_INTRANGE("bpp", vo_dbpp, 0, 0, 32),
     {"colorkey", &vo_colorkey, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"no-colorkey", &vo_colorkey, CONF_TYPE_FLAG, 0, 0, 0x1000000, NULL},
+    {"no-colorkey", &vo_colorkey, CONF_TYPE_STORE, 0, 0, 0x1000000, NULL},
     // wait for v-sync (gl)
     {"vsync", &vo_vsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1.0, NULL},
@@ -645,8 +646,7 @@ const m_option_t mplayer_opts[]={
 
     {"leak-report", "", CONF_TYPE_PRINT, 0, 0, 0, (void*)1},
 
-    OPT_FLAG_CONSTANTS("no-loop", loop_times, 0, 0, -1),
-    OPT_CHOICE_OR_INT("loop", loop_times, CONF_GLOBAL, 1, 10000,
+    OPT_CHOICE_OR_INT("loop", loop_times, M_OPT_GLOBAL, 1, 10000,
                       ({"no", -1}, {"0", -1},
                        {"inf", 0})),
 
@@ -666,8 +666,8 @@ const m_option_t mplayer_opts[]={
     OPT_CHOICE("hr-seek", hr_seek, 0,
                ({"no", -1}, {"absolute", 0}, {"always", 1}, {"yes", 1})),
     OPT_FLOATRANGE("hr-seek-demuxer-offset", hr_seek_demuxer_offset, 0, -9, 99),
-    OPT_FLAG_CONSTANTS("no-autosync", autosync, 0, 0, -1),
-    OPT_INTRANGE("autosync", autosync, 0, 0, 10000),
+    OPT_CHOICE_OR_INT("autosync", autosync, 0, 0, 10000,
+                      ({"no", -1})),
 
     OPT_FLAG_ON("softsleep", softsleep, 0),
 

@@ -152,6 +152,31 @@ const m_option_type_t m_option_type_flag = {
     .clamp = clamp_flag,
 };
 
+// Single-value, write-only flag
+
+static int parse_store(const m_option_t *opt, struct bstr name,
+                       struct bstr param, void *dst)
+{
+    if (param.len == 0 || bstrcasecmp0(param, "yes") == 0) {
+        if (dst)
+            VAL(dst) = opt->max;
+        return 0;
+    } else {
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+               "Invalid parameter for %.*s flag: %.*s\n",
+               BSTR_P(name), BSTR_P(param));
+        return M_OPT_INVALID;
+    }
+}
+
+const m_option_type_t m_option_type_store = {
+    // can only be activated
+    .name  = "Flag",
+    .size  = sizeof(int),
+    .flags = M_OPT_TYPE_OLD_SYNTAX_NO_PARAM,
+    .parse = parse_store,
+};
+
 // Integer
 
 #undef VAL

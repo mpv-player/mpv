@@ -36,6 +36,7 @@ struct m_struct_st;
 
 // Simple types
 extern const m_option_type_t m_option_type_flag;
+extern const m_option_type_t m_option_type_store;
 extern const m_option_type_t m_option_type_int;
 extern const m_option_type_t m_option_type_int64;
 extern const m_option_type_t m_option_type_intpair;
@@ -180,6 +181,7 @@ struct m_sub_options {
 
 // FIXME: backward compatibility
 #define CONF_TYPE_FLAG          (&m_option_type_flag)
+#define CONF_TYPE_STORE         (&m_option_type_store)
 #define CONF_TYPE_INT           (&m_option_type_int)
 #define CONF_TYPE_INT64         (&m_option_type_int64)
 #define CONF_TYPE_FLOAT         (&m_option_type_float)
@@ -205,6 +207,7 @@ struct m_sub_options {
 // size/alignment requirements for option values in general.
 union m_option_value {
     int flag; // not the C type "bool"!
+    int store;
     int int_;
     int64_t int64;
     float float_;
@@ -513,6 +516,7 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_MAKE_FLAGS OPT_FLAG_ON
 #define OPT_FLAG_CONSTANTS(...) OPT_FLAG_CONSTANTS_(__VA_ARGS__, .type = &m_option_type_flag)
 #define OPT_FLAG_CONSTANTS_(optname, varname, flags, offvalue, value, ...) OPT_GENERAL(optname, varname, flags, .min = offvalue, .max = value, __VA_ARGS__)
+#define OPT_FLAG_STORE(optname, varname, flags, value) OPT_GENERAL(optname, varname, flags, .max = value, .type = &m_option_type_store)
 #define OPT_STRINGLIST(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_string_list)
 #define OPT_PATHLIST(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_string_list, .priv = (void *)&(const char){OPTION_PATH_SEPARATOR})
 #define OPT_INT(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_int)

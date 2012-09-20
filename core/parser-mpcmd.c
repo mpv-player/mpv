@@ -87,32 +87,21 @@ static int split_opt_silent(struct parse_state *p)
         }
     }
 
-    p->mp_opt = m_config_get_option(p->config, p->arg);
-    if (!p->mp_opt) {
-        // Automagic "no-" arguments: "--no-bla" turns into "--bla=no".
-        if (!bstr_startswith0(p->arg, "no-"))
-            return -1;
+    if (m_config_map_option(p->config, &p->arg, &p->param) == M_OPT_INVALID)
+        return -2;
 
-        struct bstr s = bstr_cut(p->arg, 3);
-        p->mp_opt = m_config_get_option(p->config, s);
-        if (!p->mp_opt || p->mp_opt->type != &m_option_type_flag)
-            return -1;
-        // Avoid allowing "--no-no-bla".
-        if (bstr_startswith(bstr0(p->mp_opt->name), bstr0("no-")))
-            return -1;
-        // Flag options never have parameters.
+    p->mp_opt = m_config_get_option(p->config, p->arg);
+    if (!p->mp_opt)
+        return -1;
+
+    if ((p->mp_opt->type->flags & M_OPT_TYPE_OLD_SYNTAX_NO_PARAM)
+        || p->param.len
+        || bstr_endswith0(p->arg, "-clr"))
+    {
         old_syntax = false;
-        if (p->param.len)
-            return -2;
-        p->arg = s;
-        p->param = bstr0("no");
     }
 
-    if (bstr_endswith0(p->arg, "-clr"))
-        old_syntax = false;
-
-    if (old_syntax && !(p->mp_opt->type->flags & M_OPT_TYPE_OLD_SYNTAX_NO_PARAM))
-    {
+    if (old_syntax) {
         if (p->argc < 1)
             return -3;
         p->param = bstr0(p->argv[0]);

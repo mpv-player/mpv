@@ -392,6 +392,13 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
     assert(config != NULL);
     assert(name.len != 0);
 
+    if (m_config_map_option(config, &name, &param) == M_OPT_INVALID) {
+        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                "A no-* option can't take parameters: --%.*s=%.*s\n",
+                BSTR_P(name), BSTR_P(param));
+        return M_OPT_INVALID;
+    }
+
     struct m_config_option *co = m_config_get_co(config, name);
     if (!co)
         return M_OPT_UNKNOWN;
@@ -446,32 +453,15 @@ static int parse_subopts(struct m_config *config, void *optstruct, char *name,
         char n[110];
         if (snprintf(n, 110, "%s%s", prefix, lst[2 * i]) > 100)
             abort();
-        if (!m_config_get_option(config, bstr0(n))) {
-            if (strncmp(lst[2 * i], "no-", 3))
-                goto nosubopt;
-            snprintf(n, 110, "%s%s", prefix, lst[2 * i] + 3);
-            const struct m_option *o = m_config_get_option(config, bstr0(n));
-            if (!o || o->type != &m_option_type_flag) {
-            nosubopt:
+        int sr = m_config_parse_option(config, optstruct, bstr0(n),
+                                       bstr0(lst[2 * i + 1]), set);
+        if (sr < 0) {
+            if (sr == M_OPT_UNKNOWN) {
                 mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
                         "Error: option '%s' has no suboption '%s'.\n",
                         name, lst[2 * i]);
                 r = M_OPT_INVALID;
-                break;
-            }
-            if (lst[2 * i + 1]) {
-                mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                        "A --no-* option can't take parameters: "
-                        "%s=%s\n", lst[2 * i], lst[2 * i + 1]);
-                r = M_OPT_INVALID;
-                break;
-            }
-            lst[2 * i + 1] = "no";
-        }
-        int sr = m_config_parse_option(config, optstruct, bstr0(n),
-                                       bstr0(lst[2 * i + 1]), set);
-        if (sr < 0) {
-            if (sr == M_OPT_MISSING_PARAM) {
+            } else if (sr == M_OPT_MISSING_PARAM) {
                 mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
                         "Error: suboption '%s' of '%s' must have "
                         "a parameter!\n", lst[2 * i], name);
@@ -530,6 +520,29 @@ const struct m_option *m_config_get_option(const struct m_config *config,
         return co->opt;
     else
         return NULL;
+}
+
+int m_config_map_option(struct m_config *config, bstr *name, bstr *param)
+{
+    bstr s = *name;
+    if (m_config_get_option(config, s))
+        return 0;
+
+    if (!bstr_eatstart0(&s, "no-"))
+        return M_OPT_UNKNOWN;
+
+    const struct m_option *opt = m_config_get_option(config, s);
+    if (!opt || (opt->type != &m_option_type_flag
+                 && opt->type != &m_option_type_choice))
+        return M_OPT_UNKNOWN;
+    // Avoid allowing "--no-no-opt".
+    if (bstr_startswith(bstr0(opt->name), bstr0("no-")))
+        return M_OPT_UNKNOWN;
+    if (param->len)
+        return M_OPT_INVALID;
+    *name = s;
+    *param = bstr0("no");
+    return 0;
 }
 
 void m_config_print_option_list(const struct m_config *config)

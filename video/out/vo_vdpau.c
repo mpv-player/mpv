@@ -1643,7 +1643,6 @@ const struct vo_driver video_out_vdpau = {
     .options = (const struct m_option []){
         OPT_INTRANGE("deint", deint, 0, -4, 4),
         OPT_FLAG_ON("chroma-deint", chroma_deint, 0, OPTDEF_INT(1)),
-        OPT_FLAG_OFF("nochroma-deint", chroma_deint, 0),
         OPT_MAKE_FLAGS("pullup", pullup, 0),
         OPT_FLOATRANGE("denoise", denoise, 0, 0, 1),
         OPT_FLOATRANGE("sharpen", sharpen, 0, -1, 1),
