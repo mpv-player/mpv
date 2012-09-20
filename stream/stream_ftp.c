@@ -417,7 +417,6 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
 
   if (readresp(p, NULL) == 0) {
     close_f(stream);
-    m_struct_free(&stream_opts,opts);
     return STREAM_ERROR;
   }
 
