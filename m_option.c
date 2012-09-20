@@ -1979,6 +1979,8 @@ static int parse_custom_url(const m_option_t *opt, struct bstr name,
     struct bstr path = bstr_cut(ptr1, idx);
     idx = bstrchr(hostpart, '@');
     if (idx >= 0) {
+        struct bstr userpass = bstr_splice(hostpart, 0, idx);
+        hostpart = bstr_cut(hostpart, idx + 1);
         // We got something, at least a username...
         if (!m_option_list_find(desc->fields, "username")) {
             mp_msg(MSGT_CFGPARSER, MSGL_WARN,
@@ -1986,7 +1988,6 @@ static int parse_custom_url(const m_option_t *opt, struct bstr name,
                    BSTR_P(name));
             // skip
         } else {
-            struct bstr userpass = bstr_splice(hostpart, 0, idx);
             idx = bstrchr(userpass, ':');
             if (idx >= 0) {
                 // We also have a password
@@ -2026,7 +2027,6 @@ static int parse_custom_url(const m_option_t *opt, struct bstr name,
                 }
             }
         }
-        hostpart = bstr_cut(hostpart, idx + 1);
     }
 
     // Before looking for a port number check if we have an IPv6 type
