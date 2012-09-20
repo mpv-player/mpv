@@ -144,66 +144,50 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile)
         while (isspace(line[line_pos]))
             ++line_pos;
 
+        param_pos = 0;
+
         /* check '=' */
-        if (line[line_pos++] != '=') {
-            PRINT_LINENUM;
-            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                   "option %s needs a parameter\n", opt);
-            ret = -1;
-            errors++;
-            continue;
-        }
+        if (line[line_pos] == '=') {
+            line_pos++;
+            /* whitespaces... */
+            while (isspace(line[line_pos]))
+                ++line_pos;
 
-        /* whitespaces... */
-        while (isspace(line[line_pos]))
-            ++line_pos;
-
-        /* read the parameter */
-        if (line[line_pos] == '"' || line[line_pos] == '\'') {
-            c = line[line_pos];
-            ++line_pos;
-            for (param_pos = 0; line[line_pos] != c; /* NOTHING */) {
-                param[param_pos++] = line[line_pos++];
-                if (param_pos >= MAX_PARAM_LEN) {
-                    PRINT_LINENUM;
-                    mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                           "option %s has a too long parameter\n", opt);
-                    ret = -1;
-                    errors++;
-                    goto nextline;
+            /* read the parameter */
+            if (line[line_pos] == '"' || line[line_pos] == '\'') {
+                c = line[line_pos];
+                ++line_pos;
+                for (param_pos = 0; line[line_pos] != c; /* NOTHING */) {
+                    param[param_pos++] = line[line_pos++];
+                    if (param_pos >= MAX_PARAM_LEN) {
+                        PRINT_LINENUM;
+                        mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+                               "option %s has a too long parameter\n", opt);
+                        ret = -1;
+                        errors++;
+                        goto nextline;
+                    }
+                }
+                line_pos++;                 /* skip the closing " or ' */
+            } else {
+                for (param_pos = 0; isprint(line[line_pos])
+                        && !isspace(line[line_pos])
+                        && line[line_pos] != '#'; /* NOTHING */) {
+                    param[param_pos++] = line[line_pos++];
+                    if (param_pos >= MAX_PARAM_LEN) {
+                        PRINT_LINENUM;
+                        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "too long parameter\n");
+                        ret = -1;
+                        errors++;
+                        goto nextline;
+                    }
                 }
             }
-            line_pos++;                 /* skip the closing " or ' */
-        } else {
-            for (param_pos = 0; isprint(line[line_pos])
-                     && !isspace(line[line_pos])
-                     && line[line_pos] != '#'; /* NOTHING */) {
-                param[param_pos++] = line[line_pos++];
-                if (param_pos >= MAX_PARAM_LEN) {
-                    PRINT_LINENUM;
-                    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "too long parameter\n");
-                    ret = -1;
-                    errors++;
-                    goto nextline;
-                }
-            }
+
+            while (isspace(line[line_pos]))
+                ++line_pos;
         }
         param[param_pos] = '\0';
-
-        /* did we read a parameter? */
-        if (param_pos == 0) {
-            PRINT_LINENUM;
-            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                   "option %s needs a parameter\n", opt);
-            ret = -1;
-            errors++;
-            continue;
-        }
-
-        /* now, check if we have some more chars on the line */
-        /* whitespace... */
-        while (isspace(line[line_pos]))
-            ++line_pos;
 
         /* EOL / comment */
         if (line[line_pos] != '\0' && line[line_pos] != '#') {
