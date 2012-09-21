@@ -36,6 +36,8 @@ typedef struct {
 	char *password;
 } URL_t;
 
+int url_is_protocol(const URL_t *url, const char *proto);
+void url_set_protocol(URL_t *url, const char *proto);
 URL_t *url_redirect(URL_t **url, const char *redir);
 
 char *get_http_proxy_url(const URL_t *proxy, const char *host_url);

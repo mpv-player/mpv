@@ -60,25 +60,65 @@ end:
     return p;
 }
 
+static int is_proxy(const URL_t *url) {
+  return !strcasecmp(url->protocol, "http_proxy") && url->file && strstr(url->file, "://");
+}
+
+int url_is_protocol(const URL_t *url, const char *proto) {
+  int proxy = is_proxy(url);
+  if (proxy) {
+    URL_t *tmp = url_new(url->file + 1);
+    int res = !strcasecmp(tmp->protocol, proto);
+    url_free(tmp);
+    return res;
+  }
+  return !strcasecmp(url->protocol, proto);
+}
+
+void url_set_protocol(URL_t *url, const char *proto) {
+  int proxy = is_proxy(url);
+  if (proxy) {
+    char *dst = url->file + 1;
+    int oldlen = strstr(dst, "://") - dst;
+    int newlen = strlen(proto);
+    if (newlen != oldlen) {
+      mp_msg(MSGT_NETWORK, MSGL_ERR, "Setting protocol not implemented!\n");
+      return;
+    }
+    memcpy(dst, proto, newlen);
+    return;
+  }
+  free(url->protocol);
+  url->protocol = strdup(proto);
+}
+
 URL_t *url_redirect(URL_t **url, const char *redir) {
   URL_t *u = *url;
+  int proxy = is_proxy(u);
+  const char *oldurl = proxy ? u->file + 1 : u->url;
+  const char *newurl = redir;
+  char *buffer = NULL;
   URL_t *res;
   if (!strchr(redir, '/') || *redir == '/') {
     char *tmp;
-    char *newurl = malloc(strlen(u->url) + strlen(redir) + 1);
-    strcpy(newurl, u->url);
+    newurl = buffer = malloc(strlen(oldurl) + strlen(redir) + 1);
+    strcpy(buffer, oldurl);
     if (*redir == '/') {
       redir++;
-      tmp = strstr(newurl, "://");
+      tmp = strstr(buffer, "://");
       if (tmp) tmp = strchr(tmp + 3, '/');
     } else
-      tmp = strrchr(newurl, '/');
+      tmp = strrchr(buffer, '/');
     if (tmp) tmp[1] = 0;
-    strcat(newurl, redir);
-    res = url_new(newurl);
-    free(newurl);
-  } else
-    res = url_new(redir);
+    strcat(buffer, redir);
+  }
+  if (proxy) {
+    char *tmp = get_http_proxy_url(u, newurl);
+    free(buffer);
+    newurl = buffer = tmp;
+  }
+  res = url_new(newurl);
+  free(buffer);
   url_free(u);
   *url = res;
   return res;

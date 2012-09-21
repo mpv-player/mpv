@@ -829,18 +829,16 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 				if( next_url!=NULL ) {
 					int is_ultravox = strcasecmp(stream->streaming_ctrl->url->protocol, "unsv") == 0;
 					stream->streaming_ctrl->url = url_redirect( &url, next_url );
-					if (!strcasecmp(url->protocol, "mms")) {
+					if (url_is_protocol(url, "mms")) {
 						res = STREAM_REDIRECTED;
 						goto err_out;
 					}
-					if (strcasecmp(url->protocol, "http")) {
+					if (!url_is_protocol(url, "http")) {
 						mp_msg(MSGT_NETWORK,MSGL_ERR,"Unsupported http %d redirect to %s protocol\n", http_hdr->status_code, url->protocol);
 						goto err_out;
 					}
-					if (is_ultravox)  {
-						free(url->protocol);
-						url->protocol = strdup("unsv");
-					}
+					if (is_ultravox)
+						url_set_protocol(url, "unsv");
 					redirect = 1;
 				}
 				break;
