@@ -58,7 +58,7 @@ static int do_action(const m_option_t *prop_list, const char *name,
     int (*control)(const m_option_t*, int, void*, void*) = prop->p;
     int r = control(prop, action, arg, ctx);
     if (action == M_PROPERTY_GET_TYPE && r < 0) {
-        *(const m_option_t **)arg = prop;
+        *(struct m_option *)arg = *prop;
         return M_PROPERTY_OK;
     }
     return r;
@@ -70,11 +70,11 @@ int m_property_do(const m_option_t *prop_list, const char *name,
     union m_option_value val = {0};
     int r;
 
-    const m_option_t *opt = NULL;
+    struct m_option opt = {0};
     r = do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx);
     if (r <= 0)
         return r;
-    assert(opt);
+    assert(opt.type);
 
     switch (action) {
     case M_PROPERTY_PRINT: {
@@ -83,25 +83,25 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         // Fallback to m_option
         if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
-        char *str = m_option_pretty_print(opt, &val);
-        m_option_free(opt, &val);
+        char *str = m_option_pretty_print(&opt, &val);
+        m_option_free(&opt, &val);
         *(char **)arg = str;
         return str != NULL;
     }
     case M_PROPERTY_TO_STRING: {
         if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
-        char *str = m_option_print(opt, &val);
-        m_option_free(opt, &val);
+        char *str = m_option_print(&opt, &val);
+        m_option_free(&opt, &val);
         *(char **)arg = str;
         return str != NULL;
     }
     case M_PROPERTY_PARSE: {
         // (reject 0 return value: success, but empty string with flag)
-        if (m_option_parse(opt, bstr0(opt->name), bstr0(arg), &val) <= 0)
+        if (m_option_parse(&opt, bstr0(opt->name), bstr0(arg), &val) <= 0)
             return M_PROPERTY_ERROR;
         r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
-        m_option_free(opt, &val);
+        m_option_free(&opt, &val);
         return r;
     }
     case M_PROPERTY_SWITCH: {
@@ -109,25 +109,25 @@ int m_property_do(const m_option_t *prop_list, const char *name,
             M_PROPERTY_NOT_IMPLEMENTED)
             return r;
         // Fallback to m_option
-        if (!opt->type->add)
+        if (!opt.type->add)
             return M_PROPERTY_NOT_IMPLEMENTED;
         if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
-        bool wrap = opt->type == &m_option_type_choice ||
-                    opt->type == &m_option_type_flag;
-        opt->type->add(opt, &val, *(double*)arg, wrap);
+        bool wrap = opt.type == &m_option_type_choice ||
+                    opt.type == &m_option_type_flag;
+        opt.type->add(&opt, &val, *(double*)arg, wrap);
         r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
-        m_option_free(opt, &val);
+        m_option_free(&opt, &val);
         return r;
     }
     case M_PROPERTY_SET: {
-        if (!opt->type->clamp) {
+        if (!opt.type->clamp) {
             mp_msg(MSGT_CPLAYER, MSGL_WARN, "Property '%s' without clamp().\n",
                    name);
         } else {
-            m_option_copy(opt, &val, arg);
-            r = opt->type->clamp(opt, arg);
-            m_option_free(opt, &val);
+            m_option_copy(&opt, &val, arg);
+            r = opt.type->clamp(&opt, arg);
+            m_option_free(&opt, &val);
             if (r != 0) {
                 mp_msg(MSGT_CPLAYER, MSGL_ERR,
                        "Property '%s': invalid value.\n", name);
@@ -205,14 +205,14 @@ char *m_properties_expand_string(const m_option_t *prop_list, char *str,
                 char pname[pl + 1];
                 memcpy(pname, str + (is_not ? 3 : 2), pl);
                 pname[pl] = 0;
-                struct m_option *opt;
+                struct m_option opt = {0};
                 union m_option_value val = {0};
                 if (m_property_do(prop_list, pname, M_PROPERTY_GET_TYPE, &opt, ctx) <= 0 &&
                     m_property_do(prop_list, pname, M_PROPERTY_GET, &val, ctx) <= 0)
                 {
                     if (!is_not)
                         skip = 1, skip_lvl = lvl;
-                    m_option_free(opt, &val);
+                    m_option_free(&opt, &val);
                 } else if (is_not)
                     skip = 1, skip_lvl = lvl;
             }

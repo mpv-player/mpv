@@ -125,7 +125,7 @@ static int mp_property_generic_option(struct m_option *prop, int action,
 
     switch (action) {
     case M_PROPERTY_GET_TYPE:
-        *(const struct m_option **)arg = opt->opt;
+        *(struct m_option *)arg = *(opt->opt);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
         m_option_copy(opt->opt, arg, valptr);
@@ -513,7 +513,7 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
             *(char **)ka->arg = talloc_strdup(NULL, meta);
             return M_PROPERTY_OK;
         case M_PROPERTY_GET_TYPE:
-            *(const m_option_t **)ka->arg = &key_type;
+            *(struct m_option *)ka->arg = key_type;
             return M_PROPERTY_OK;
         }
     }
@@ -918,22 +918,22 @@ static int levels_property_helper(int offset, m_option_t *prop, int action,
     if (action != M_PROPERTY_PRINT)
         return colormatrix_property_helper(prop, action, arg, mpctx);
 
-    const struct m_option *opt = NULL;
+    struct m_option opt = {0};
     mp_property_generic_option(prop, M_PROPERTY_GET_TYPE, &opt, mpctx);
-    assert(opt);
+    assert(opt.type);
 
     int requested = 0;
     mp_property_generic_option(prop, M_PROPERTY_GET, &requested, mpctx);
 
     struct mp_csp_details actual = {0};
     int actual_level = -1;
-    char *req_level = m_option_print(opt, &requested);
+    char *req_level = m_option_print(&opt, &requested);
     char *real_level = NULL;
     if (mpctx->sh_video) {
         struct vf_instance *vf = mpctx->sh_video->vfilter;
         if (vf->control(vf, VFCTRL_GET_YUV_COLORSPACE, &actual) == true) {
             actual_level = *(enum mp_csp_levels *)(((char *)&actual) + offset);
-            real_level = m_option_print(opt, &actual_level);
+            real_level = m_option_print(&opt, &actual_level);
         } else {
             real_level = talloc_strdup(NULL, "Unknown");
         }
@@ -1591,8 +1591,7 @@ static struct property_osd_display {
 static int show_property_osd(MPContext *mpctx, const char *pname)
 {
     struct MPOpts *opts = &mpctx->opts;
-    int r;
-    m_option_t *prop;
+    struct m_option prop = {0};
     struct property_osd_display *p;
 
     // look for the command
@@ -1603,21 +1602,22 @@ static int show_property_osd(MPContext *mpctx, const char *pname)
     if (!p->name)
         return -1;
 
-    if (mp_property_do(pname, M_PROPERTY_GET_TYPE, &prop, mpctx) <= 0 || !prop)
+    if (mp_property_do(pname, M_PROPERTY_GET_TYPE, &prop, mpctx) <= 0)
         return -1;
 
     if (p->osd_progbar == -1)
         mpctx->add_osd_seek_info = true;
     else if (p->osd_progbar) {
-        if (prop->type == CONF_TYPE_INT) {
-            if (mp_property_do(pname, M_PROPERTY_GET, &r, mpctx) > 0)
+        if (prop.type == CONF_TYPE_INT) {
+            int i;
+            if (mp_property_do(pname, M_PROPERTY_GET, &i, mpctx) > 0)
                 set_osd_bar(mpctx, p->osd_progbar, mp_gtext(p->osd_msg),
-                            prop->min, prop->max, r);
-        } else if (prop->type == CONF_TYPE_FLOAT) {
+                            prop.min, prop.max, i);
+        } else if (prop.type == CONF_TYPE_FLOAT) {
             float f;
             if (mp_property_do(pname, M_PROPERTY_GET, &f, mpctx) > 0)
                 set_osd_bar(mpctx, p->osd_progbar, mp_gtext(p->osd_msg),
-                            prop->min, prop->max, f);
+                            prop.min, prop.max, f);
         } else {
             mp_msg(MSGT_CPLAYER, MSGL_ERR,
                    "Property use an unsupported type.\n");

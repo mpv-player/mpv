@@ -25,7 +25,7 @@ enum mp_property_action {
     // Get the property type. This defines the fundamental data type read from
     // or written to the property.
     // If unimplemented, the m_option entry that defines the property is used.
-    //  arg: const m_option**
+    //  arg: m_option*
     M_PROPERTY_GET_TYPE,
 
     // Get the current value.
