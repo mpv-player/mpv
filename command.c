@@ -915,39 +915,41 @@ static int mp_property_colormatrix(m_option_t *prop, int action, void *arg,
 static int levels_property_helper(int offset, m_option_t *prop, int action,
                                   void *arg, MPContext *mpctx)
 {
-    char *optname = prop->priv;
-    const struct m_option *opt = m_config_get_option(mpctx->mconfig,
-                                                     bstr0(optname));
-    int *valptr = (int *)m_option_get_ptr(opt, &mpctx->opts);
+    if (action != M_PROPERTY_PRINT)
+        return colormatrix_property_helper(prop, action, arg, mpctx);
 
-    if (action == M_PROPERTY_PRINT) {
-        struct mp_csp_details actual = {0};
-        int actual_level = -1;
-        char *req_level = m_option_print(opt, valptr);
-        char *real_level = NULL;
-        if (mpctx->sh_video) {
-            struct vf_instance *vf = mpctx->sh_video->vfilter;
-            if (vf->control(vf, VFCTRL_GET_YUV_COLORSPACE, &actual) == true) {
-                actual_level = *(enum mp_csp_levels *)(((char *)&actual) + offset);
-                real_level = m_option_print(opt, &actual_level);
-            } else {
-                real_level = talloc_strdup(NULL, "Unknown");
-            }
+    const struct m_option *opt = NULL;
+    mp_property_generic_option(prop, M_PROPERTY_GET_TYPE, &opt, mpctx);
+    assert(opt);
+
+    int requested = 0;
+    mp_property_generic_option(prop, M_PROPERTY_GET, &requested, mpctx);
+
+    struct mp_csp_details actual = {0};
+    int actual_level = -1;
+    char *req_level = m_option_print(opt, &requested);
+    char *real_level = NULL;
+    if (mpctx->sh_video) {
+        struct vf_instance *vf = mpctx->sh_video->vfilter;
+        if (vf->control(vf, VFCTRL_GET_YUV_COLORSPACE, &actual) == true) {
+            actual_level = *(enum mp_csp_levels *)(((char *)&actual) + offset);
+            real_level = m_option_print(opt, &actual_level);
+        } else {
+            real_level = talloc_strdup(NULL, "Unknown");
         }
-        char *res;
-        if (*valptr == MP_CSP_LEVELS_AUTO && real_level) {
-            res = talloc_asprintf(NULL, "Auto (%s)", real_level);
-        } else if (*valptr == actual_level || !real_level) {
-            res = talloc_strdup(NULL, real_level);
-        } else
-            res = talloc_asprintf(NULL, mp_gtext("%s, but %s used"),
-                                  req_level, real_level);
-        talloc_free(req_level);
-        talloc_free(real_level);
-        *(char **)arg = res;
-        return M_PROPERTY_OK;
     }
-    return colormatrix_property_helper(prop, action, arg, mpctx);
+    char *res;
+    if (requested == MP_CSP_LEVELS_AUTO && real_level) {
+        res = talloc_asprintf(NULL, "Auto (%s)", real_level);
+    } else if (requested == actual_level || !real_level) {
+        res = talloc_strdup(NULL, real_level);
+    } else
+        res = talloc_asprintf(NULL, mp_gtext("%s, but %s used"),
+                                req_level, real_level);
+    talloc_free(req_level);
+    talloc_free(real_level);
+    *(char **)arg = res;
+    return M_PROPERTY_OK;
 }
 
 static int mp_property_colormatrix_input_range(m_option_t *prop, int action,
