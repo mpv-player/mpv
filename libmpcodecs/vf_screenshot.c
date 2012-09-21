@@ -56,6 +56,7 @@ static int config(struct vf_instance *vf,
 
 static void start_slice(struct vf_instance *vf, mp_image_t *mpi)
 {
+    mpi->priv=
     vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
         mpi->type, mpi->flags, mpi->width, mpi->height);
     if (vf->priv->shot) {
@@ -118,10 +119,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     mp_image_t *dmpi = (mp_image_t *)mpi->priv;
 
-    if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
-      dmpi = vf->dmpi;
-    else
-    if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
+    if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))){
         dmpi=vf_get_image(vf->next,mpi->imgfmt,
                                     MP_IMGTYPE_EXPORT, 0,
                                     mpi->width, mpi->height);
