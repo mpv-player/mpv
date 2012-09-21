@@ -881,35 +881,35 @@ static int colormatrix_property_helper(m_option_t *prop, int action,
 static int mp_property_colormatrix(m_option_t *prop, int action, void *arg,
                                    MPContext *mpctx)
 {
+    if (action != M_PROPERTY_PRINT)
+        return colormatrix_property_helper(prop, action, arg, mpctx);
+
     struct MPOpts *opts = &mpctx->opts;
-    if (action == M_PROPERTY_PRINT) {
-        struct mp_csp_details actual = { .format = -1 };
-        char *req_csp = mp_csp_names[opts->requested_colorspace];
-        char *real_csp = NULL;
-        if (mpctx->sh_video) {
-            struct vf_instance *vf = mpctx->sh_video->vfilter;
-            if (vf->control(vf, VFCTRL_GET_YUV_COLORSPACE, &actual) == true) {
-                real_csp = mp_csp_names[actual.format];
-            } else {
-                real_csp = "Unknown";
-            }
+    struct mp_csp_details actual = { .format = -1 };
+    char *req_csp = mp_csp_names[opts->requested_colorspace];
+    char *real_csp = NULL;
+    if (mpctx->sh_video) {
+        struct vf_instance *vf = mpctx->sh_video->vfilter;
+        if (vf->control(vf, VFCTRL_GET_YUV_COLORSPACE, &actual) == true) {
+            real_csp = mp_csp_names[actual.format];
+        } else {
+            real_csp = "Unknown";
         }
-        char *res;
-        if (opts->requested_colorspace == MP_CSP_AUTO && real_csp) {
-            // Caveat: doesn't handle the case when the autodetected colorspace
-            // is different from the actual colorspace as used by the
-            // VO - the OSD will display the VO colorspace without
-            // indication that it doesn't match the requested colorspace.
-            res = talloc_asprintf(NULL, "Auto (%s)", real_csp);
-        } else if (opts->requested_colorspace == actual.format || !real_csp) {
-            res = talloc_strdup(NULL, req_csp);
-        } else
-            res = talloc_asprintf(NULL, mp_gtext("%s, but %s used"),
-                                  req_csp, real_csp);
-        *(char **)arg = res;
-        return M_PROPERTY_OK;
     }
-    return colormatrix_property_helper(prop, action, arg, mpctx);
+    char *res;
+    if (opts->requested_colorspace == MP_CSP_AUTO && real_csp) {
+        // Caveat: doesn't handle the case when the autodetected colorspace
+        // is different from the actual colorspace as used by the
+        // VO - the OSD will display the VO colorspace without
+        // indication that it doesn't match the requested colorspace.
+        res = talloc_asprintf(NULL, "Auto (%s)", real_csp);
+    } else if (opts->requested_colorspace == actual.format || !real_csp) {
+        res = talloc_strdup(NULL, req_csp);
+    } else
+        res = talloc_asprintf(NULL, mp_gtext("%s, but %s used"),
+                                req_csp, real_csp);
+    *(char **)arg = res;
+    return M_PROPERTY_OK;
 }
 
 static int levels_property_helper(int offset, m_option_t *prop, int action,
