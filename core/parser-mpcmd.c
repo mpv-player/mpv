@@ -47,7 +47,7 @@ struct parse_state {
     bool no_more_opts;
     bool error;
 
-    const struct m_option *mp_opt;      // NULL <=> it's a file arg
+    bool is_opt;
     struct bstr arg;
     struct bstr param;
 };
@@ -60,7 +60,7 @@ static int split_opt_silent(struct parse_state *p)
     if (p->argc < 1)
         return 1;
 
-    p->mp_opt = NULL;
+    p->is_opt = false;
     p->arg = bstr0(p->argv[0]);
     p->param = bstr0(NULL);
 
@@ -75,35 +75,20 @@ static int split_opt_silent(struct parse_state *p)
         return split_opt_silent(p);
     }
 
-    bool old_syntax = !bstr_startswith0(p->arg, "--");
-    if (old_syntax) {
-        p->arg = bstr_cut(p->arg, 1);
-    } else {
-        p->arg = bstr_cut(p->arg, 2);
-        int idx = bstrchr(p->arg, '=');
-        if (idx > 0) {
-            p->param = bstr_cut(p->arg, idx + 1);
-            p->arg = bstr_splice(p->arg, 0, idx);
-        }
-    }
+    p->is_opt = true;
 
-    if (m_config_map_option(p->config, &p->arg, &p->param) == M_OPT_INVALID)
-        return -2;
+    if (!bstr_eatstart0(&p->arg, "--"))
+        bstr_eatstart0(&p->arg, "-");
 
-    p->mp_opt = m_config_get_option(p->config, p->arg);
-    if (!p->mp_opt)
-        return -1;
+    bool ambiguous = !bstr_split_tok(p->arg, "=", &p->arg, &p->param);
 
-    if ((p->mp_opt->type->flags & M_OPT_TYPE_OLD_SYNTAX_NO_PARAM)
-        || p->param.len
-        || bstr_endswith0(p->arg, "-clr"))
-    {
-        old_syntax = false;
-    }
+    int r = m_config_map_option(p->config, &p->arg, &p->param, ambiguous);
+    if (r < 0)
+        return r;
 
-    if (old_syntax) {
+    if (ambiguous && r > 0) {
         if (p->argc < 1)
-            return -3;
+            return M_OPT_MISSING_PARAM;
         p->param = bstr0(p->argv[0]);
         p->argc--;
         p->argv++;
@@ -119,17 +104,10 @@ static bool split_opt(struct parse_state *p)
     if (r >= 0)
         return r == 0;
     p->error = true;
-    if (r == -2)
-        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                "A no-* option can't take parameters: --%.*s=%.*s\n",
-                BSTR_P(p->arg), BSTR_P(p->param));
-    else if (r == -3)
-        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                "Option %.*s needs a parameter.\n", BSTR_P(p->arg));
-    else
-        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                "Unknown option on the command line: %.*s\n",
-                BSTR_P(p->arg));
+
+    mp_tmsg(MSGT_CFGPARSER, MSGL_FATAL,
+            "Error parsing commandline option %.*s: %s\n",
+            BSTR_P(p->arg), m_option_strerror(r));
     return false;
 }
 
@@ -154,7 +132,6 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
     assert(config != NULL);
     assert(!config->file_local_mode);
 
-    config->mode = M_COMMAND_LINE;
     mode = GLOBAL;
 #ifdef CONFIG_MACOSX_FINDER
     if (macosx_finder_args(config, files, argc, argv))
@@ -163,22 +140,16 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
 
     struct parse_state p = {config, argc, argv};
     while (split_opt(&p)) {
-        if (p.mp_opt) {
+        if (p.is_opt) {
             int r;
-            if (mode == GLOBAL && !(p.mp_opt->flags & M_OPT_PRE_PARSE)) {
-                r = m_config_set_option(config, p.arg, p.param);
-            } else {
-                r = m_config_check_option(config, p.arg, p.param);
-            }
+            r = m_config_set_option_ext(config, p.arg, p.param,
+                                        mode == LOCAL ? M_SETOPT_CHECK_ONLY : 0);
             if (r <= M_OPT_EXIT)
                 goto err_out;
             if (r < 0) {
-                char *msg = m_option_strerror(r);
-                if (!msg)
-                    goto print_err;
                 mp_tmsg(MSGT_CFGPARSER, MSGL_FATAL,
-                        "Error parsing commandline option %.*s: %s\n",
-                        BSTR_P(p.arg), msg);
+                        "Setting commandline option --%.*s=%.*s failed.\n",
+                        BSTR_P(p.arg), BSTR_P(p.param));
                 goto err_out;
             }
 
@@ -237,8 +208,11 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 char *param0 = bstrdup0(NULL, p.param);
                 struct playlist *pl = playlist_parse_file(param0);
                 talloc_free(param0);
-                if (!pl)
-                    goto print_err;
+                if (!pl) {
+                    mp_tmsg(MSGT_CFGPARSER, MSGL_FATAL,
+                            "Error reading playlist '%.*s'", BSTR_P(p.param));
+                    goto err_out;
+                }
                 playlist_transfer_entries(files, pl);
                 talloc_free(pl);
                 continue;
@@ -305,9 +279,6 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
     assert(!config->file_local_mode);
     return true;
 
-print_err:
-    mp_tmsg(MSGT_CFGPARSER, MSGL_FATAL,
-            "Error parsing option on the command line: %.*s\n", BSTR_P(p.arg));
 err_out:
     talloc_free(local_params);
     if (config->file_local_mode)
@@ -330,11 +301,11 @@ void m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
 
     struct parse_state p = {config, argc, argv};
     while (split_opt_silent(&p) == 0) {
-        if (p.mp_opt) {
+        if (p.is_opt) {
             // Ignore non-pre-parse options. They will be set later.
             // Option parsing errors will be handled later as well.
-            if (p.mp_opt->flags & M_OPT_PRE_PARSE)
-                m_config_set_option(config, p.arg, p.param);
+            m_config_set_option_ext(config, p.arg, p.param,
+                                    M_SETOPT_PRE_PARSE_ONLY);
             if (bstrcmp0(p.arg, "v") == 0)
                 verbose++;
         }

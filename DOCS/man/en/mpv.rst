@@ -285,29 +285,6 @@ the *XXX* option or if *XXX* is compiled in.
 | Or in a script:
 | `mpv --ao=pcm:file=%\`expr length "$NAME"\`%"$NAME" test.avi`
 
-Single dash versus double dash options
---------------------------------------
-
-There are actually two option syntaxes: one which uses a single dash (``-opt``),
-and one with double dashes (``--opt``). The double dash syntax always requires
-a ``=`` to separate option name and value, while single dash options use a
-space.
-
-
-| Both of these examples pass the value `pcm:file=test.wav` to the `ao` option:
-| `mpv -ao pcm:file=test.wav`
-| `mpv --ao=pcm:file=test.wav`
-
-| This passes the empty string to `ao`, while `pcm:file=test.wav` is interpreted
-  as filename (common mistake):
-| `mpv --ao pcm:file=test.wav`
-
-It's best to stick to one syntax to avoid usage errors. The double dash syntax
-is preferred, and used throughout the manpage.
-
-*NOTE*: the differences between these syntaxes might be removed in the future.
-However, this has not happened yet.
-
 Per-file options
 ----------------
 

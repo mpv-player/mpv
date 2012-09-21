@@ -549,10 +549,10 @@ const m_option_t mplayer_opts[]={
     OPT_FLOATRANGE("softvol-max", softvol_max, 0, 10, 10000),
     {"volstep", &volstep, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
     OPT_FLOATRANGE("volume", mixer_init_volume, 0, -1, 10000),
-    OPT_CHOICE("mute", mixer_init_mute, 0,
+    OPT_CHOICE("mute", mixer_init_mute, M_OPT_OPTIONAL_PARAM,
                ({"auto", -1},
                 {"no", 0},
-                {"yes", 1})),
+                {"yes", 1}, {"", 1})),
     OPT_MAKE_FLAGS("gapless-audio", gapless_audio, 0),
     // override audio buffer size (used only by -ao oss/win32, obsolete)
     OPT_INT("abs", ao_buffersize, 0),
@@ -635,7 +635,7 @@ const m_option_t mplayer_opts[]={
 
     OPT_CHOICE("framedrop", frame_dropping, 0,
                ({"no", 0},
-                {"yes", 1}, {"", 1},
+                {"yes", 1},
                 {"hard", 2})),
 
     OPT_FLAG_ON("untimed", untimed, 0),
@@ -673,7 +673,7 @@ const m_option_t mplayer_opts[]={
 
     OPT_CHOICE("term-osd", term_osd, 0,
                ({"force", 1},
-                {"auto", 2}, {"", 2},
+                {"auto", 2},
                 {"no", 0})),
 
     OPT_STRING("term-osd-esc", term_osd_esc, 0, OPTDEF_STR("\x1b[A\r\x1b[K")),

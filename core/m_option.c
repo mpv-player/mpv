@@ -43,17 +43,18 @@ char *m_option_strerror(int code)
 {
     switch (code) {
     case M_OPT_UNKNOWN:
-        return mp_gtext("Unrecognized option name");
+        return mp_gtext("option not found");
     case M_OPT_MISSING_PARAM:
-        return mp_gtext("Required parameter for option missing");
+        return mp_gtext("option requires parameter");
     case M_OPT_INVALID:
-        return mp_gtext("Option parameter could not be parsed");
+        return mp_gtext("option parameter could not be parsed");
     case M_OPT_OUT_OF_RANGE:
-        return mp_gtext("Parameter is outside values allowed for option");
+        return mp_gtext("parameter is outside values allowed for option");
+    case M_OPT_DISALLOW_PARAM:
+        return mp_gtext("option doesn't take a parameter");
     case M_OPT_PARSER_ERR:
-        return mp_gtext("Parser error");
     default:
-        return NULL;
+        return mp_gtext("parser error");
     }
 }
 
@@ -144,7 +145,7 @@ const m_option_type_t m_option_type_flag = {
     // need yes or no in config files
     .name  = "Flag",
     .size  = sizeof(int),
-    .flags = M_OPT_TYPE_OLD_SYNTAX_NO_PARAM,
+    .flags = M_OPT_TYPE_OPTIONAL_PARAM,
     .parse = parse_flag,
     .print = print_flag,
     .copy  = copy_opt,
@@ -165,7 +166,7 @@ static int parse_store(const m_option_t *opt, struct bstr name,
         mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                "Invalid parameter for %.*s flag: %.*s\n",
                BSTR_P(name), BSTR_P(param));
-        return M_OPT_INVALID;
+        return M_OPT_DISALLOW_PARAM;
     }
 }
 
@@ -173,7 +174,7 @@ const m_option_type_t m_option_type_store = {
     // can only be activated
     .name  = "Flag",
     .size  = sizeof(int),
-    .flags = M_OPT_TYPE_OLD_SYNTAX_NO_PARAM,
+    .flags = M_OPT_TYPE_OPTIONAL_PARAM,
     .parse = parse_store,
 };
 
@@ -1039,7 +1040,7 @@ static int parse_print(const m_option_t *opt, struct bstr name,
 
 const m_option_type_t m_option_type_print = {
     .name  = "Print",
-    .flags = M_OPT_TYPE_OLD_SYNTAX_NO_PARAM,
+    .flags = M_OPT_TYPE_OPTIONAL_PARAM,
     .parse = parse_print,
 };
 
@@ -1051,7 +1052,7 @@ const m_option_type_t m_option_type_print_func_param = {
 
 const m_option_type_t m_option_type_print_func = {
     .name  = "Print",
-    .flags = M_OPT_TYPE_ALLOW_WILDCARD | M_OPT_TYPE_OLD_SYNTAX_NO_PARAM,
+    .flags = M_OPT_TYPE_ALLOW_WILDCARD | M_OPT_TYPE_OPTIONAL_PARAM,
     .parse = parse_print,
 };
 

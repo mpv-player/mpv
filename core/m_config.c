@@ -384,20 +384,18 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
 }
 
 static int parse_subopts(struct m_config *config, void *optstruct, char *name,
-                         char *prefix, struct bstr param, bool set);
+                         char *prefix, struct bstr param, int flags);
 
 static int m_config_parse_option(struct m_config *config, void *optstruct,
-                                 struct bstr name, struct bstr param, bool set)
+                                 struct bstr name, struct bstr param, int flags)
 {
     assert(config != NULL);
     assert(name.len != 0);
+    bool set = !(flags & M_SETOPT_CHECK_ONLY);
 
-    if (m_config_map_option(config, &name, &param) == M_OPT_INVALID) {
-        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                "A no-* option can't take parameters: --%.*s=%.*s\n",
-                BSTR_P(name), BSTR_P(param));
-        return M_OPT_INVALID;
-    }
+    int r = m_config_map_option(config, &name, &param, false);
+    if (r < 0)
+        return r;
 
     struct m_config_option *co = m_config_get_co(config, name);
     if (!co)
@@ -406,8 +404,11 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
     // This is the only mandatory function
     assert(co->opt->type->parse);
 
+    if ((flags & M_SETOPT_PRE_PARSE_ONLY) && !(co->opt->flags & M_OPT_PRE_PARSE))
+        return 0;
+
     // Check if this option isn't forbidden in the current mode
-    if ((config->mode == M_CONFIG_FILE) && (co->opt->flags & M_OPT_NOCFG)) {
+    if ((flags & M_SETOPT_FROM_CONFIG_FILE) && (co->opt->flags & M_OPT_NOCFG)) {
         mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
                 "The %.*s option can't be used in a config file.\n",
                 BSTR_P(name));
@@ -430,7 +431,7 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
         char prefix[110];
         assert(strlen(co->name) < 100);
         sprintf(prefix, "%s:", co->name);
-        return parse_subopts(config, optstruct, co->name, prefix, param, set);
+        return parse_subopts(config, optstruct, co->name, prefix, param, flags);
     }
 
     if (set)
@@ -440,7 +441,7 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
 }
 
 static int parse_subopts(struct m_config *config, void *optstruct, char *name,
-                         char *prefix, struct bstr param, bool set)
+                         char *prefix, struct bstr param, int flags)
 {
     char **lst = NULL;
     // Split the argument into child options
@@ -453,48 +454,19 @@ static int parse_subopts(struct m_config *config, void *optstruct, char *name,
         char n[110];
         if (snprintf(n, 110, "%s%s", prefix, lst[2 * i]) > 100)
             abort();
-        int sr = m_config_parse_option(config, optstruct, bstr0(n),
-                                       bstr0(lst[2 * i + 1]), set);
-        if (sr < 0) {
-            if (sr == M_OPT_UNKNOWN) {
+        r = m_config_parse_option(config, optstruct, bstr0(n),
+                                  bstr0(lst[2 * i + 1]), flags);
+        if (r < 0) {
+            if (r > M_OPT_EXIT) {
                 mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                        "Error: option '%s' has no suboption '%s'.\n",
-                        name, lst[2 * i]);
+                        "Error parsing suboption %s/%s (%s)\n",
+                        name, lst[2 * i], m_option_strerror(r));
                 r = M_OPT_INVALID;
-            } else if (sr == M_OPT_MISSING_PARAM) {
-                mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                        "Error: suboption '%s' of '%s' must have "
-                        "a parameter!\n", lst[2 * i], name);
-                r = M_OPT_INVALID;
-            } else
-                r = sr;
+            }
             break;
         }
     }
     talloc_free(lst);
-    return r;
-}
-
-int m_config_set_option(struct m_config *config, struct bstr name,
-                                 struct bstr param)
-{
-    mp_msg(MSGT_CFGPARSER, MSGL_DBG2, "Setting %.*s=%.*s\n", BSTR_P(name),
-           BSTR_P(param));
-    return m_config_parse_option(config, config->optstruct, name, param, true);
-}
-
-int m_config_check_option(struct m_config *config, struct bstr name,
-                          struct bstr param)
-{
-    int r;
-    mp_msg(MSGT_CFGPARSER, MSGL_DBG2, "Checking %.*s=%.*s\n", BSTR_P(name),
-           BSTR_P(param));
-    r = m_config_parse_option(config, NULL, name, param, 0);
-    if (r == M_OPT_MISSING_PARAM) {
-        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                "Error: option '%.*s' must have a parameter!\n", BSTR_P(name));
-        return M_OPT_INVALID;
-    }
     return r;
 }
 
@@ -503,10 +475,32 @@ int m_config_parse_suboptions(struct m_config *config, char *name,
 {
     if (!subopts || !*subopts)
         return 0;
-    return parse_subopts(config, config->optstruct, name, "", bstr0(subopts),
-                         true);
+    int r = parse_subopts(config, config->optstruct, name, "", bstr0(subopts), 0);
+    if (r < 0 && r > M_OPT_EXIT) {
+        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "Error parsing suboption %s (%s)\n",
+                name, m_option_strerror(r));
+        r = M_OPT_INVALID;
+    }
+    return r;
 }
 
+int m_config_set_option_ext(struct m_config *config, struct bstr name,
+                            struct bstr param, int flags)
+{
+    int r = m_config_parse_option(config, config->optstruct, name, param, flags);
+    if (r < 0 && r > M_OPT_EXIT) {
+        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "Error parsing option %.*s (%s)\n",
+                BSTR_P(name), m_option_strerror(r));
+        r = M_OPT_INVALID;
+    }
+    return r;
+}
+
+int m_config_set_option(struct m_config *config, struct bstr name,
+                                 struct bstr param)
+{
+    return m_config_set_option_ext(config, name, param, 0);
+}
 
 const struct m_option *m_config_get_option(const struct m_config *config,
                                            struct bstr name)
@@ -522,16 +516,24 @@ const struct m_option *m_config_get_option(const struct m_config *config,
         return NULL;
 }
 
-int m_config_map_option(struct m_config *config, bstr *name, bstr *param)
+int m_config_map_option(struct m_config *config, bstr *name, bstr *param,
+                        bool ambiguous)
 {
     bstr s = *name;
-    if (m_config_get_option(config, s))
-        return 0;
+    const struct m_option *opt = m_config_get_option(config, s);
+    if (opt) {
+        if (bstr_endswith0(s, "-clr"))
+            return (ambiguous || !param->len) ? 0 : M_OPT_DISALLOW_PARAM;
+        if (ambiguous && ((opt->flags & M_OPT_OPTIONAL_PARAM) ||
+                          (opt->type->flags & M_OPT_TYPE_OPTIONAL_PARAM)))
+            return 0;
+        return 1;
+    }
 
     if (!bstr_eatstart0(&s, "no-"))
         return M_OPT_UNKNOWN;
 
-    const struct m_option *opt = m_config_get_option(config, s);
+    opt = m_config_get_option(config, s);
     if (!opt || (opt->type != &m_option_type_flag
                  && opt->type != &m_option_type_choice))
         return M_OPT_UNKNOWN;
@@ -539,7 +541,7 @@ int m_config_map_option(struct m_config *config, bstr *name, bstr *param)
     if (bstr_startswith(bstr0(opt->name), bstr0("no-")))
         return M_OPT_UNKNOWN;
     if (param->len)
-        return M_OPT_INVALID;
+        return M_OPT_DISALLOW_PARAM;
     *name = s;
     *param = bstr0("no");
     return 0;
@@ -610,14 +612,16 @@ void m_profile_set_desc(struct m_profile *p, char *desc)
 }
 
 int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
-                                char *name, char *val)
+                                bstr name, bstr val)
 {
-    int i = m_config_check_option0(config, name, val);
+    int i = m_config_set_option_ext(config, name, val,
+                                    M_SETOPT_CHECK_ONLY |
+                                    M_SETOPT_FROM_CONFIG_FILE);
     if (i < 0)
         return i;
     p->opts = talloc_realloc(p, p->opts, char *, 2 * (p->num_opts + 2));
-    p->opts[p->num_opts * 2] = talloc_strdup(p, name);
-    p->opts[p->num_opts * 2 + 1] = talloc_strdup(p, val);
+    p->opts[p->num_opts * 2] = bstrdup0(p, name);
+    p->opts[p->num_opts * 2 + 1] = bstrdup0(p, val);
     p->num_opts++;
     p->opts[p->num_opts * 2] = p->opts[p->num_opts * 2 + 1] = NULL;
     return 1;
@@ -625,19 +629,19 @@ int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
 
 void m_config_set_profile(struct m_config *config, struct m_profile *p)
 {
-    int i;
     if (config->profile_depth > MAX_PROFILE_DEPTH) {
         mp_tmsg(MSGT_CFGPARSER, MSGL_WARN,
                 "WARNING: Profile inclusion too deep.\n");
         return;
     }
-    int prev_mode = config->mode;
-    config->mode = M_CONFIG_FILE;
     config->profile_depth++;
-    for (i = 0; i < p->num_opts; i++)
-        m_config_set_option0(config, p->opts[2 * i], p->opts[2 * i + 1]);
+    for (int i = 0; i < p->num_opts; i++) {
+        m_config_set_option_ext(config,
+                                bstr0(p->opts[2 * i]),
+                                bstr0(p->opts[2 * i + 1]),
+                                M_SETOPT_FROM_CONFIG_FILE);
+    }
     config->profile_depth--;
-    config->mode = prev_mode;
 }
 
 void *m_config_alloc_struct(void *talloc_parent,
