@@ -115,6 +115,7 @@ int m_property_do(const m_option_t *prop_list, const char *name,
             return r;
         bool wrap = opt.type == &m_option_type_choice ||
                     opt.type == &m_option_type_flag;
+        do_action(prop_list, name, M_PROPERTY_GET_WRAP, &wrap, ctx);
         opt.type->add(&opt, &val, *(double*)arg, wrap);
         r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
         m_option_free(&opt, &val);

@@ -382,29 +382,33 @@ static int mp_property_edition(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_GET:
         *(int *)arg = edition;
         return M_PROPERTY_OK;
-    case M_PROPERTY_SET:
+    case M_PROPERTY_SET: {
         edition = *(int *)arg;
-        break;
-    case M_PROPERTY_SWITCH: {
-        edition += *(double *)arg;
-        if (edition < 0)
-            edition = demuxer->num_editions - 1;
-        if (edition >= demuxer->num_editions)
-            edition = 0;
-        break;
+        if (edition != demuxer->edition) {
+            opts->edition_id = edition;
+            mpctx->stop_play = PT_RESTART;
+            set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration,
+                        "Playing edition %d of %d.", edition + 1,
+                        demuxer->num_editions);
+        }
+        return M_PROPERTY_OK;
     }
-    default:
-        return M_PROPERTY_NOT_IMPLEMENTED;
+    case M_PROPERTY_GET_TYPE: {
+        struct m_option opt = {
+            .name = prop->name,
+            .type = CONF_TYPE_INT,
+            .flags = CONF_RANGE,
+            .min = 0,
+            .max = demuxer->num_editions - 1,
+        };
+        *(struct m_option *)arg = opt;
+        return M_PROPERTY_OK;
     }
-
-    if (edition != demuxer->edition) {
-        opts->edition_id = edition;
-        mpctx->stop_play = PT_RESTART;
-        set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration,
-                     "Playing edition %d of %d.", edition + 1,
-                     demuxer->num_editions);
+    case M_PROPERTY_GET_WRAP:
+        *(bool *)arg = true;
+        return M_PROPERTY_OK;
     }
-    return M_PROPERTY_OK;
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 /// Number of titles in file
@@ -476,9 +480,9 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
                 resync_audio_stream(sh_audio);
         }
         return M_PROPERTY_OK;
-    case M_PROPERTY_SWITCH:
-        // NOTE: should cycle
-        return M_PROPERTY_NOT_IMPLEMENTED;
+    case M_PROPERTY_GET_WRAP:
+        *(bool *)arg = true;
+        return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -1351,8 +1355,7 @@ static const m_option_t mp_properties[] = {
       M_OPT_MIN, 0, 0, NULL },
     { "chapter", mp_property_chapter, CONF_TYPE_INT,
       M_OPT_MIN, 0, 0, NULL },
-    { "edition", mp_property_edition, CONF_TYPE_INT,
-      M_OPT_MIN, -1, 0, NULL },
+    M_OPTION_PROPERTY_CUSTOM("edition", mp_property_edition),
     { "titles", mp_property_titles, CONF_TYPE_INT,
       0, 0, 0, NULL },
     { "chapters", mp_property_chapters, CONF_TYPE_INT,

@@ -64,6 +64,10 @@ enum mp_property_action {
     // Pass down an action to a sub-property.
     // arg: struct m_property_action*
     M_PROPERTY_KEY_ACTION,
+
+    // Get wrap method.
+    //  arg: bool* (true: wrap/cycle, false: clamp)
+    M_PROPERTY_GET_WRAP,
 };
 
 // Argument for M_PROPERTY_KEY_ACTION
