@@ -491,8 +491,6 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
     if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
-    m_property_action_t *ka;
-    char *meta;
     static const m_option_t key_type =
     {
         "metadata", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL
@@ -505,9 +503,10 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
         *(char ***)arg = slist;
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_KEY_ACTION:
-        ka = arg;
-        if (!(meta = demux_info_get(demuxer, ka->key)))
+    case M_PROPERTY_KEY_ACTION: {
+        struct m_property_action *ka = arg;
+        char *meta = demux_info_get(demuxer, ka->key);
+        if (!meta)
             return M_PROPERTY_UNKNOWN;
         switch (ka->action) {
         case M_PROPERTY_GET:
@@ -517,6 +516,7 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
             *(const m_option_t **)ka->arg = &key_type;
             return M_PROPERTY_OK;
         }
+    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -1495,12 +1495,13 @@ static char *translate_legacy_property(void *talloc_ctx, const char *name)
     return new_name ? new_name : (char *)name;
 }
 
-int mp_property_do(const char *name, int action, void *val, void *ctx)
+int mp_property_do(const char *name, int action, void *val,
+                   struct MPContext *ctx)
 {
     return m_property_do(mp_properties, name, action, val, ctx);
 }
 
-char *mp_property_print(const char *name, void *ctx)
+char *mp_property_print(const char *name, struct MPContext *ctx)
 {
     char *ret = NULL;
     if (mp_property_do(name, M_PROPERTY_PRINT, &ret, ctx) <= 0)
@@ -1646,8 +1647,6 @@ static const char *property_error_string(int error_value)
         return "NOT_IMPLEMENTED";
     case M_PROPERTY_UNKNOWN:
         return "PROPERTY_UNKNOWN";
-    case M_PROPERTY_DISABLED:
-        return "DISABLED";
     }
     return "UNKNOWN";
 }

@@ -27,7 +27,7 @@
 #include "talloc.h"
 #include "screenshot.h"
 #include "mp_core.h"
-#include "m_property.h"
+#include "command.h"
 #include "bstr.h"
 #include "mp_msg.h"
 #include "path.h"

@@ -38,17 +38,17 @@ static int do_action(const m_option_t *prop_list, const char *name,
 {
     const char *sep;
     const m_option_t *prop;
-    m_property_action_t ka;
-    int r;
     if ((sep = strchr(name, '/')) && sep[1]) {
         int len = sep - name;
         char base[len + 1];
         memcpy(base, name, len);
         base[len] = 0;
         prop = m_option_list_find(prop_list, base);
-        ka.key = sep + 1;
-        ka.action = action;
-        ka.arg = arg;
+        struct m_property_action ka = {
+            .key = sep + 1,
+            .action = action,
+            .arg = arg,
+        };
         action = M_PROPERTY_KEY_ACTION;
         arg = &ka;
     } else
@@ -56,7 +56,7 @@ static int do_action(const m_option_t *prop_list, const char *name,
     if (!prop)
         return M_PROPERTY_UNKNOWN;
     int (*control)(const m_option_t*, int, void*, void*) = prop->p;
-    r = control(prop, action, arg, ctx);
+    int r = control(prop, action, arg, ctx);
     if (action == M_PROPERTY_GET_TYPE && r < 0) {
         *(const m_option_t **)arg = prop;
         return M_PROPERTY_OK;
