@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
-#include <unistd.h>
+#include <assert.h>
 
 #include "talloc.h"
 #include "m_option.h"
@@ -55,7 +55,8 @@ static int do_action(const m_option_t *prop_list, const char *name,
         prop = m_option_list_find(prop_list, name);
     if (!prop)
         return M_PROPERTY_UNKNOWN;
-    r = ((m_property_ctrl_f)prop->p)(prop, action, arg, ctx);
+    int (*control)(const m_option_t*, int, void*, void*) = prop->p;
+    r = control(prop, action, arg, ctx);
     if (action == M_PROPERTY_GET_TYPE && r < 0) {
         *(const m_option_t **)arg = prop;
         return M_PROPERTY_OK;
@@ -66,59 +67,46 @@ static int do_action(const m_option_t *prop_list, const char *name,
 int m_property_do(const m_option_t *prop_list, const char *name,
                   int action, void *arg, void *ctx)
 {
-    const m_option_t *opt;
     union m_option_value val = {0};
     int r;
-    char *str;
+
+    const m_option_t *opt = NULL;
+    r = do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx);
+    if (r <= 0)
+        return r;
+    assert(opt);
 
     switch (action) {
-    case M_PROPERTY_PRINT:
+    case M_PROPERTY_PRINT: {
         if ((r = do_action(prop_list, name, M_PROPERTY_PRINT, arg, ctx)) >= 0)
-            return r;
-        if ((r =
-             do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx)) <= 0)
             return r;
         // Fallback to m_option
         if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
-        str = m_option_pretty_print(opt, &val);
+        char *str = m_option_pretty_print(opt, &val);
         m_option_free(opt, &val);
         *(char **)arg = str;
         return str != NULL;
-    case M_PROPERTY_TO_STRING:
-        if ((r = do_action(prop_list, name, M_PROPERTY_TO_STRING, arg, ctx)) !=
-            M_PROPERTY_NOT_IMPLEMENTED)
-            return r;
-        // fallback on the options API. Get the type, value and print.
-        if ((r =
-             do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx)) <= 0)
-            return r;
+    }
+    case M_PROPERTY_TO_STRING: {
         if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
-        str = m_option_print(opt, &val);
+        char *str = m_option_print(opt, &val);
         m_option_free(opt, &val);
         *(char **)arg = str;
         return str != NULL;
-    case M_PROPERTY_PARSE:
-        // try the property own parsing func
-        if ((r = do_action(prop_list, name, M_PROPERTY_PARSE, arg, ctx)) !=
-            M_PROPERTY_NOT_IMPLEMENTED)
-            return r;
-        // fallback on the options API, get the type and parse.
-        if ((r =
-             do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx)) <= 0)
-            return r;
-        if ((r = m_option_parse(opt, bstr0(opt->name), bstr0(arg), &val)) <= 0)
-            return r;
+    }
+    case M_PROPERTY_PARSE: {
+        // (reject 0 return value: success, but empty string with flag)
+        if (m_option_parse(opt, bstr0(opt->name), bstr0(arg), &val) <= 0)
+            return M_PROPERTY_ERROR;
         r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
         m_option_free(opt, &val);
         return r;
-    case M_PROPERTY_SWITCH:
+    }
+    case M_PROPERTY_SWITCH: {
         if ((r = do_action(prop_list, name, M_PROPERTY_SWITCH, arg, ctx)) !=
             M_PROPERTY_NOT_IMPLEMENTED)
-            return r;
-        if ((r =
-             do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx)) <= 0)
             return r;
         // Fallback to m_option
         if (!opt->type->add)
@@ -131,10 +119,8 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
         m_option_free(opt, &val);
         return r;
-    case M_PROPERTY_SET:
-        if ((r =
-             do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx)) <= 0)
-            return r;
+    }
+    case M_PROPERTY_SET: {
         if (!opt->type->clamp) {
             mp_msg(MSGT_CPLAYER, MSGL_WARN, "Property '%s' without clamp().\n",
                    name);
@@ -150,7 +136,9 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         }
         return do_action(prop_list, name, M_PROPERTY_SET, arg, ctx);
     }
-    return do_action(prop_list, name, action, arg, ctx);
+    default:
+        return do_action(prop_list, name, action, arg, ctx);
+    }
 }
 
 char *m_properties_expand_string(const m_option_t *prop_list, char *str,
