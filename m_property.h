@@ -19,7 +19,9 @@
 #ifndef MPLAYER_M_PROPERTY_H
 #define MPLAYER_M_PROPERTY_H
 
-#include "m_option.h"
+#include <stdbool.h>
+
+struct m_option;
 
 enum mp_property_action {
     // Get the property type. This defines the fundamental data type read from
@@ -47,7 +49,7 @@ enum mp_property_action {
     // Switch the property up/down by a given value.
     // If unimplemented, the property wrapper uses the property type as
     // fallback.
-    //  arg: double* (value to add to the property)
+    //  arg: struct m_property_switch_arg*
     M_PROPERTY_SWITCH,
 
     // Set a new value from a string. The property wrapper parses this using the
@@ -62,16 +64,18 @@ enum mp_property_action {
     M_PROPERTY_TO_STRING,
 
     // Pass down an action to a sub-property.
-    // arg: struct m_property_action*
+    // arg: struct m_property_action_arg*
     M_PROPERTY_KEY_ACTION,
+};
 
-    // Get wrap method.
-    //  arg: bool* (true: wrap/cycle, false: clamp)
-    M_PROPERTY_GET_WRAP,
+// Argument for M_PROPERTY_SWITCH
+struct m_property_switch_arg {
+    double inc;         // value to add to property, or cycle direction
+    bool wrap;          // whether value should wrap around on over/underflow
 };
 
 // Argument for M_PROPERTY_KEY_ACTION
-struct m_property_action {
+struct m_property_action_arg {
     const char* key;
     int action;
     void* arg;
@@ -103,7 +107,7 @@ int m_property_do(const struct m_option* prop_list, const char* property_name,
                   int action, void* arg, void *ctx);
 
 // Print a list of properties.
-void m_properties_print_help_list(const m_option_t* list);
+void m_properties_print_help_list(const struct m_option* list);
 
 // Expand a property string.
 /* This function allows to print strings containing property values.

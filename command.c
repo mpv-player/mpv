@@ -404,9 +404,6 @@ static int mp_property_edition(m_option_t *prop, int action, void *arg,
         *(struct m_option *)arg = opt;
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_GET_WRAP:
-        *(bool *)arg = true;
-        return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -480,9 +477,6 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
                 resync_audio_stream(sh_audio);
         }
         return M_PROPERTY_OK;
-    case M_PROPERTY_GET_WRAP:
-        *(bool *)arg = true;
-        return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -508,7 +502,7 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_KEY_ACTION: {
-        struct m_property_action *ka = arg;
+        struct m_property_action_arg *ka = arg;
         char *meta = demux_info_get(demuxer, ka->key);
         if (!meta)
             return M_PROPERTY_UNKNOWN;
@@ -561,12 +555,14 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_SET:
         mixer_setvolume(&mpctx->mixer, *(float *) arg, *(float *) arg);
         return M_PROPERTY_OK;
-    case M_PROPERTY_SWITCH:
-        if (*(double *) arg <= 0)
+    case M_PROPERTY_SWITCH: {
+        struct m_property_switch_arg *sarg = arg;
+        if (sarg->inc <= 0)
             mixer_decvolume(&mpctx->mixer);
         else
             mixer_incvolume(&mpctx->mixer);
         return M_PROPERTY_OK;
+    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -775,10 +771,12 @@ static int property_switch_track(m_option_t *prop, int action, void *arg,
         }
         return M_PROPERTY_OK;
 
-    case M_PROPERTY_SWITCH:
+    case M_PROPERTY_SWITCH: {
+        struct m_property_switch_arg *sarg = arg;
         mp_switch_track(mpctx, type,
-            track_next(mpctx, type, *(double *)arg >= 0 ? +1 : -1, track));
+            track_next(mpctx, type, sarg->inc >= 0 ? +1 : -1, track));
         return M_PROPERTY_OK;
+    }
     case M_PROPERTY_SET:
         mp_switch_track(mpctx, type, mp_track_by_tid(mpctx, type, *(int *)arg));
         return M_PROPERTY_OK;
@@ -1793,11 +1791,16 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
-    case MP_CMD_SWITCH: {
+    case MP_CMD_ADD:
+    case MP_CMD_CYCLE:
+    {
         cmd->args[0].v.s = translate_legacy_property(cmd, cmd->args[0].v.s);
-        double s = 1;
+        struct m_property_switch_arg s = {
+            .inc = 1,
+            .wrap = cmd->id == MP_CMD_CYCLE,
+        };
         if (cmd->args[1].v.f)
-            s = cmd->args[1].v.f;
+            s.inc = cmd->args[1].v.f;
         int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_SWITCH, &s, mpctx);
         if (r == M_PROPERTY_UNKNOWN)
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
@@ -1805,7 +1808,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         else if (r <= 0)
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
                    "Failed to increment property '%s' by %g.\n",
-                   cmd->args[0].v.s, s);
+                   cmd->args[0].v.s, s.inc);
         else if (cmd->on_osd)
             show_property_osd(mpctx, cmd->args[0].v.s);
         break;

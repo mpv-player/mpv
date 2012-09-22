@@ -44,7 +44,7 @@ static int do_action(const m_option_t *prop_list, const char *name,
         memcpy(base, name, len);
         base[len] = 0;
         prop = m_option_list_find(prop_list, base);
-        struct m_property_action ka = {
+        struct m_property_action_arg ka = {
             .key = sep + 1,
             .action = action,
             .arg = arg,
@@ -105,6 +105,7 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         return r;
     }
     case M_PROPERTY_SWITCH: {
+        struct m_property_switch_arg *sarg = arg;
         if ((r = do_action(prop_list, name, M_PROPERTY_SWITCH, arg, ctx)) !=
             M_PROPERTY_NOT_IMPLEMENTED)
             return r;
@@ -113,10 +114,7 @@ int m_property_do(const m_option_t *prop_list, const char *name,
             return M_PROPERTY_NOT_IMPLEMENTED;
         if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
-        bool wrap = opt.type == &m_option_type_choice ||
-                    opt.type == &m_option_type_flag;
-        do_action(prop_list, name, M_PROPERTY_GET_WRAP, &wrap, ctx);
-        opt.type->add(&opt, &val, *(double*)arg, wrap);
+        opt.type->add(&opt, &val, sarg->inc, sarg->wrap);
         r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
         m_option_free(&opt, &val);
         return r;
