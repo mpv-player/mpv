@@ -24,6 +24,7 @@
 
 // All command IDs
 enum mp_command_type {
+    MP_CMD_IGNORE,
     MP_CMD_SEEK,
     MP_CMD_QUIT,
     MP_CMD_PLAYLIST_NEXT,

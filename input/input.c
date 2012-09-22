@@ -93,6 +93,7 @@ struct key_name {
 #define OARG_STRING(def) { .type = MP_CMD_ARG_STRING, .optional = true, .v.s = def }
 
 static const mp_cmd_t mp_cmds[] = {
+  { MP_CMD_IGNORE, "ignore", },
 #ifdef CONFIG_RADIO
   { MP_CMD_RADIO_STEP_CHANNEL, "radio_step_channel", { ARG_INT } },
   { MP_CMD_RADIO_SET_CHANNEL, "radio_set_channel", { ARG_STRING } },
@@ -825,8 +826,11 @@ mp_cmd_t *mp_input_parse_cmd(bstr str)
         cmd_idx++;
     }
 
-    if (mp_cmds[cmd_idx].name == NULL)
+    if (mp_cmds[cmd_idx].name == NULL) {
+        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command '%.*s' not found.\n",
+                BSTR_P(str));
         goto error;
+    }
 
     cmd = talloc_ptrtype(NULL, cmd);
     *cmd = mp_cmds[cmd_idx];
@@ -1037,15 +1041,14 @@ static char *find_bind_for_key(const struct cmd_bind *binds, int n, int *keys)
 }
 
 static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
-                                                 bool builtin,
-                                                 char *section)
+                                                 bool builtin, bstr section)
 {
     struct cmd_bind_section *bind_section = ictx->cmd_bind_sections;
 
-    if (section == NULL)
-        section = "default";
+    if (section.len == 0)
+        section = bstr0("default");
     while (bind_section) {
-        if (strcmp(section, bind_section->section) == 0
+        if (bstrcmp0(section, bind_section->section) == 0
             && builtin == bind_section->is_builtin)
             return bind_section;
         if (bind_section->next == NULL)
@@ -1060,7 +1063,7 @@ static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
         bind_section = ictx->cmd_bind_sections;
     }
     bind_section->cmd_binds = NULL;
-    bind_section->section = talloc_strdup(bind_section, section);
+    bind_section->section = bstrdup0(bind_section, section);
     bind_section->is_builtin = builtin;
     bind_section->next = NULL;
     return bind_section;
@@ -1070,9 +1073,9 @@ static char *section_find_bind_for_key(struct input_ctx *ictx,
                                        bool builtin, char *section,
                                        int n, int *keys)
 {
-    struct cmd_bind_section *bs = get_bind_section(ictx, builtin, section);
-    const struct cmd_bind *binds = bs->cmd_binds;
-    return binds ? find_bind_for_key(binds, n, keys) : NULL;
+    struct cmd_bind_section *bs = get_bind_section(ictx, builtin,
+                                                   bstr0(section));
+    return bs->cmd_binds ? find_bind_for_key(bs->cmd_binds, n, keys) : NULL;
 }
 
 static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
@@ -1097,8 +1100,6 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
         talloc_free(key_buf);
         return NULL;
     }
-    if (strcmp(cmd, "ignore") == 0)
-        return NULL;
     ret =  mp_input_parse_cmd(bstr0(cmd));
     if (!ret) {
         char *key_buf = get_key_combo_name(keys, n);
@@ -1493,24 +1494,14 @@ static int get_input_from_name(char *name, int *keys)
     return 1;
 }
 
-static void bind_keys(struct input_ctx *ictx, bool builtin,
+static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
                       const int keys[MP_MAX_KEY_DOWN + 1], bstr command)
 {
     int i = 0, j;
     struct cmd_bind *bind = NULL;
     struct cmd_bind_section *bind_section = NULL;
-    char *section = NULL;
 
-    if (bstr_startswith0(command, "{")) {
-        int p = bstrchr(command, '}');
-        if (p != -1) {
-            bstr bsection = bstr_strip(bstr_splice(command, 1, p));
-            section = bstrdup0(NULL, bsection);
-            command = bstr_lstrip(bstr_cut(command, p + 1));
-        }
-    }
     bind_section = get_bind_section(ictx, builtin, section);
-    talloc_free(section);
 
     if (bind_section->cmd_binds) {
         for (i = 0; bind_section->cmd_binds[i].cmd != NULL; i++) {
@@ -1561,7 +1552,17 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data)
             continue;
         }
         talloc_free(name);
-        bind_keys(ictx, builtin, keys, command);
+
+        bstr section = {0};
+        if (bstr_startswith0(command, "{")) {
+            int p = bstrchr(command, '}');
+            if (p != -1) {
+                section = bstr_strip(bstr_splice(command, 1, p));
+                command = bstr_lstrip(bstr_cut(command, p + 1));
+            }
+        }
+
+        bind_keys(ictx, builtin, section, keys, command);
         n_binds++;
 
         // Print warnings if invalid commands are encountered.
