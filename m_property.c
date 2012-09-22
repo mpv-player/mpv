@@ -88,7 +88,7 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         *(char **)arg = str;
         return str != NULL;
     }
-    case M_PROPERTY_TO_STRING: {
+    case M_PROPERTY_GET_STRING: {
         if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
         char *str = m_option_print(&opt, &val);
@@ -96,9 +96,9 @@ int m_property_do(const m_option_t *prop_list, const char *name,
         *(char **)arg = str;
         return str != NULL;
     }
-    case M_PROPERTY_PARSE: {
+    case M_PROPERTY_SET_STRING: {
         // (reject 0 return value: success, but empty string with flag)
-        if (m_option_parse(&opt, bstr0(opt->name), bstr0(arg), &val) <= 0)
+        if (m_option_parse(&opt, bstr0(name), bstr0(arg), &val) <= 0)
             return M_PROPERTY_ERROR;
         r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
         m_option_free(&opt, &val);
@@ -184,7 +184,7 @@ char *m_properties_expand_string(const m_option_t *prop_list, char *str,
             int method = M_PROPERTY_PRINT;
             if (str[0] == '=') {
                 str += 1;
-                method = M_PROPERTY_TO_STRING;
+                method = M_PROPERTY_GET_STRING;
             }
             int pl = e - str;
             char pname[pl + 1];

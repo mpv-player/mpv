@@ -52,19 +52,19 @@ enum mp_property_action {
     //  arg: struct m_property_switch_arg*
     M_PROPERTY_SWITCH,
 
+    // Get a string containing a parsable representation.
+    // Can't be overridden by property implementations.
+    //  arg: char**
+    M_PROPERTY_GET_STRING,
+
     // Set a new value from a string. The property wrapper parses this using the
     // parse function provided by the property type.
     // Can't be overridden by property implementations.
     //  arg: char*
-    M_PROPERTY_PARSE,
-
-    // Get a string containing a parsable representation.
-    // Can't be overridden by property implementations.
-    //  arg: char**
-    M_PROPERTY_TO_STRING,
+    M_PROPERTY_SET_STRING,
 
     // Pass down an action to a sub-property.
-    // arg: struct m_property_action_arg*
+    //  arg: struct m_property_action_arg*
     M_PROPERTY_KEY_ACTION,
 };
 

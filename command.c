@@ -1777,7 +1777,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_SET: {
         cmd->args[0].v.s = translate_legacy_property(cmd, cmd->args[0].v.s);
-        int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_PARSE,
+        int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_SET_STRING,
                                cmd->args[1].v.s, mpctx);
         if (r == M_PROPERTY_UNKNOWN)
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
@@ -1817,7 +1817,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_GET_PROPERTY: {
         cmd->args[0].v.s = translate_legacy_property(cmd, cmd->args[0].v.s);
         char *tmp;
-        int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_TO_STRING,
+        int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_GET_STRING,
                                &tmp, mpctx);
         if (r <= 0) {
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
