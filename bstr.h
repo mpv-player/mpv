@@ -152,7 +152,7 @@ static inline int bstr_find0(struct bstr haystack, const char *needle)
     return bstr_find(haystack, bstr0(needle));
 }
 
-static inline int bstr_eatstart0(struct bstr *s, char *prefix)
+static inline int bstr_eatstart0(struct bstr *s, const char *prefix)
 {
     return bstr_eatstart(s, bstr0(prefix));
 }

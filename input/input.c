@@ -691,185 +691,217 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
     return 1;
 }
 
-static char *skip_ws(char *str)
+static bool read_token(bstr str, bstr *out_rest, bstr *out_token)
 {
-    while (str[0] == ' ' || str[0] == '\t')
-        ++str;
-    return str;
+    bstr t = bstr_lstrip(str);
+    int next = bstrcspn(t, WHITESPACE "#");
+    // Handle comments
+    if (t.start[next] == '#')
+        t = bstr_splice(t, 0, next);
+    if (!t.len)
+        return false;
+    *out_token = bstr_splice(t, 0, next);
+    *out_rest = bstr_cut(t, next);
+    return true;
 }
 
-static char *skip_no_ws(char *str)
+static bool eat_token(bstr *str, const char *tok)
 {
-    while (str[0] && !(str[0] == ' ' || str[0] == '\t'))
-        ++str;
-    return str;
+    bstr rest, token;
+    if (read_token(*str, &rest, &token) && bstrcmp0(token, tok) == 0) {
+        *str = rest;
+        return true;
+    }
+    return false;
 }
 
-mp_cmd_t *mp_input_parse_cmd(bstr str_b)
+static bool append_escape(bstr *code, char **str)
 {
-    int i, l;
+    if (code->len < 1)
+        return false;
+    char replace = 0;
+    switch (code->start[0]) {
+    case '"':  replace = '"';  break;
+    case '\\': replace = '\\'; break;
+    case 'b':  replace = '\b'; break;
+    case 'f':  replace = '\f'; break;
+    case 'n':  replace = '\n'; break;
+    case 'r':  replace = '\r'; break;
+    case 't':  replace = '\t'; break;
+    case 'e':  replace = '\x1b'; break;
+    case '\'': replace = '\''; break;
+    }
+    if (replace) {
+        *str = talloc_strndup_append_buffer(*str, &replace, 1);
+        *code = bstr_cut(*code, 1);
+        return true;
+    }
+    if (code->start[0] == 'x' && code->len >= 3) {
+        bstr num = bstr_splice(*code, 1, 3);
+        char c = bstrtoll(num, &num, 16);
+        if (!num.len)
+            return false;
+        *str = talloc_strndup_append_buffer(*str, &c, 1);
+        *code = bstr_cut(*code, 3);
+        return true;
+    }
+    if (code->start[0] == 'u' && code->len >= 5) {
+        bstr num = bstr_splice(*code, 1, 5);
+        int c = bstrtoll(num, &num, 16);
+        if (num.len)
+            return false;
+        *str = append_utf8_buffer(*str, c);
+        *code = bstr_cut(*code, 5);
+        return true;
+    }
+    return false;
+}
+
+static bool read_escaped_string(void *talloc_ctx, bstr *str, bstr *literal)
+{
+    bstr t = *str;
+    char *new = talloc_strdup(talloc_ctx, "");
+    while (t.len) {
+        if (t.start[0] == '"')
+            break;
+        if (t.start[0] == '\\') {
+            t = bstr_cut(t, 1);
+            if (!append_escape(&t, &new))
+                goto error;
+        } else {
+            new = talloc_strndup_append_buffer(new, t.start, 1);
+            t = bstr_cut(t, 1);
+        }
+    }
+    int len = str->len - t.len;
+    *literal = new ? bstr0(new) : bstr_splice(*str, 0, len);
+    *str = bstr_cut(*str, len);
+    return true;
+error:
+    talloc_free(new);
+    return false;
+}
+
+mp_cmd_t *mp_input_parse_cmd(bstr str)
+{
     int pausing = 0;
     int on_osd = MP_ON_OSD_AUTO;
-    char *ptr;
-    const mp_cmd_t *cmd_def;
-    mp_cmd_t *cmd = NULL;
+    struct mp_cmd *cmd = NULL;
     void *tmp = talloc_new(NULL);
-    char *str = bstrdup0(tmp, str_b);
 
-    str = skip_ws(str);
-
-    if (strncmp(str, "pausing ", 8) == 0) {
+    if (eat_token(&str, "pausing")) {
         pausing = 1;
-        str = &str[8];
-    } else if (strncmp(str, "pausing_keep ", 13) == 0) {
+    } else if (eat_token(&str, "pausing_keep")) {
         pausing = 2;
-        str = &str[13];
-    } else if (strncmp(str, "pausing_toggle ", 15) == 0) {
+    } else if (eat_token(&str, "pausing_toggle")) {
         pausing = 3;
-        str = &str[15];
-    } else if (strncmp(str, "pausing_keep_force ", 19) == 0) {
+    } else if (eat_token(&str, "pausing_keep_force")) {
         pausing = 4;
-        str = &str[19];
     }
 
-    str = skip_ws(str);
-
+    str = bstr_lstrip(str);
     for (const struct legacy_cmd *entry = legacy_cmds; entry->old; entry++) {
         size_t old_len = strlen(entry->old);
-        if (strncasecmp(entry->old, str, old_len) == 0) {
+        if (bstrcasecmp(bstr_splice(str, 0, old_len),
+                        (bstr) {(char *)entry->old, old_len}) == 0)
+        {
             mp_tmsg(MSGT_INPUT, MSGL_WARN, "Warning: command '%s' is "
                     "deprecated, replaced with '%s'. Fix your input.conf!\n",
                     entry->old, entry->new);
-            str = talloc_asprintf(tmp, "%s%s", entry->new, str + old_len);
+            bstr s = bstr_cut(str, old_len);
+            str = bstr0(talloc_asprintf(tmp, "%s%.*s", entry->new, BSTR_P(s)));
             break;
         }
     }
 
-    str = skip_ws(str);
-
-    if (strncmp(str, "no-osd ", 7) == 0) {
+    if (eat_token(&str, "no-osd")) {
         on_osd = MP_ON_OSD_NO;
-        str = &str[7];
     }
 
-    ptr = skip_no_ws(str);
-    if (*ptr != 0)
-        l = ptr - str;
-    else
-        l = strlen(str);
-
-    if (l == 0)
-        goto error;
-
-    for (i = 0; mp_cmds[i].name != NULL; i++) {
-        const char *cmd = mp_cmds[i].name;
-        if (strncasecmp(cmd, str, l) == 0 && strlen(cmd) == l)
+    int cmd_idx = 0;
+    while (mp_cmds[cmd_idx].name != NULL) {
+        if (eat_token(&str, mp_cmds[cmd_idx].name))
             break;
+        cmd_idx++;
     }
 
-    if (mp_cmds[i].name == NULL)
+    if (mp_cmds[cmd_idx].name == NULL)
         goto error;
-
-    cmd_def = &mp_cmds[i];
 
     cmd = talloc_ptrtype(NULL, cmd);
-    *cmd = (mp_cmd_t){
-        .id = cmd_def->id,
-        .name = talloc_strdup(cmd, cmd_def->name),
-        .pausing = pausing,
-        .on_osd = on_osd,
-    };
+    *cmd = mp_cmds[cmd_idx];
+    cmd->pausing = pausing;
+    cmd->on_osd = on_osd;
 
-    ptr = str;
-
-    for (i = 0; ptr && i < MP_CMD_MAX_ARGS; i++) {
-        while (ptr[0] != ' ' && ptr[0] != '\t' && ptr[0] != '\0')
-            ptr++;
-        if (ptr[0] == '\0')
+    for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
+        if (!cmd->args[i].type)
             break;
-        while (ptr[0] == ' ' || ptr[0] == '\t')
-            ptr++;
-        if (ptr[0] == '\0' || ptr[0] == '#')
-            break;
-        cmd->args[i].type = cmd_def->args[i].type;
-        switch (cmd_def->args[i].type) {
-        case MP_CMD_ARG_INT:
-            errno = 0;
-            cmd->args[i].v.i = atoi(ptr);
-            if (errno != 0) {
+        str = bstr_lstrip(str);
+        bstr arg = {0};
+        if (cmd->args[i].type == MP_CMD_ARG_STRING &&
+            bstr_eatstart0(&str, "\""))
+        {
+            if (!read_escaped_string(tmp, &str, &arg)) {
                 mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
-                        "isn't an integer.\n", cmd_def->name, i + 1);
+                        "has broken string escapes.\n", cmd->name, i + 1);
                 goto error;
             }
-            break;
-        case MP_CMD_ARG_FLOAT:
-            errno = 0;
-            cmd->args[i].v.f = atof(ptr);
-            if (errno != 0) {
-                mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
-                        "isn't a float.\n", cmd_def->name, i + 1);
+            if (!bstr_eatstart0(&str, "\"")) {
+                mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d is "
+                        "unterminated.\n", cmd->name, i + 1);
                 goto error;
             }
-            break;
-        case MP_CMD_ARG_STRING: {
-            int term = ' ';
-            if (*ptr == '\'' || *ptr == '"')
-                term = *ptr++;
-            char *argptr = talloc_size(cmd, strlen(ptr) + 1);
-            cmd->args[i].v.s = argptr;
-            while (1) {
-                if (*ptr == 0) {
-                    if (term == ' ')
-                        break;
-                    mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d is "
-                            "unterminated.\n", cmd_def->name, i + 1);
-                    goto error;
-                }
-                if (*ptr == term)
-                    break;
-                if (*ptr == '\\')
-                    ptr++;
-                if (*ptr != 0)
-                    *argptr++ = *ptr++;
-            }
-            *argptr = 0;
-            break;
+        } else {
+            if (!read_token(str, &str, &arg))
+                break;
         }
-        case 0:
-            ptr = NULL;
-            break;
-        default:
-            mp_tmsg(MSGT_INPUT, MSGL_ERR, "Unknown argument %d\n", i);
+        // Prevent option API from trying to deallocate static strings
+        cmd->args[i].v = ((struct mp_cmd_arg) {0}).v;
+        struct m_option opt = {0};
+        switch (cmd->args[i].type) {
+        case MP_CMD_ARG_INT:    opt.type = &m_option_type_int; break;
+        case MP_CMD_ARG_FLOAT:  opt.type = &m_option_type_float; break;
+        case MP_CMD_ARG_STRING: opt.type = &m_option_type_string; break;
+        default: abort();
         }
+        int r = m_option_parse(&opt, bstr0(cmd->name), arg, &cmd->args[i].v);
+        if (r < 0) {
+            mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
+                    "can't be parsed: %s.\n", cmd->name, i + 1,
+                    m_option_strerror(r));
+            goto error;
+        }
+        if (opt.type == &m_option_type_string)
+            cmd->args[i].v.s = talloc_steal(cmd, cmd->args[i].v.s);
+        cmd->nargs++;
     }
-    cmd->nargs = i;
 
-    int min_args;
-    for (min_args = 0; min_args < MP_CMD_MAX_ARGS
-             && cmd_def->args[min_args].type
-             && !cmd_def->args[min_args].optional; min_args++);
-    if (cmd->nargs < min_args) {
-        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command \"%s\" requires at least %d "
-                "arguments, we found only %d so far.\n", cmd_def->name,
-                min_args, cmd->nargs);
+    bstr dummy;
+    if (read_token(str, &dummy, &dummy)) {
+        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s has trailing unused "
+                "arguments: '%.*s'.\n", cmd->name, BSTR_P(str));
+        // Better make it fatal to make it clear something is wrong.
         goto error;
     }
 
-    for (; i < MP_CMD_MAX_ARGS && cmd_def->args[i].type; i++) {
-        memcpy(&cmd->args[i], &cmd_def->args[i], sizeof(struct mp_cmd_arg));
-        if (cmd_def->args[i].type == MP_CMD_ARG_STRING
-            && cmd_def->args[i].v.s != NULL)
-            cmd->args[i].v.s = talloc_strdup(cmd, cmd_def->args[i].v.s);
+    int min_args = 0;
+    while (min_args < MP_CMD_MAX_ARGS && cmd->args[min_args].type
+           && !cmd->args[min_args].optional)
+    {
+        min_args++;
     }
-
-    if (i < MP_CMD_MAX_ARGS)
-        cmd->args[i].type = 0;
+    if (cmd->nargs < min_args) {
+        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s requires at least %d "
+                "arguments, we found only %d so far.\n", cmd->name, min_args,
+                cmd->nargs);
+        goto error;
+    }
 
     talloc_free(tmp);
     return cmd;
 
- error:
-    mp_cmd_free(cmd);
+error:
+    talloc_free(cmd);
     talloc_free(tmp);
     return NULL;
 }

@@ -144,37 +144,11 @@ char *m_properties_expand_string(const m_option_t *prop_list, char *str,
                                  void *ctx)
 {
     int l, fr = 0, pos = 0, size = strlen(str) + 512;
-    char *p = NULL, *e, *ret = malloc(size), num_val;
+    char *p = NULL, *e, *ret = malloc(size);
     int skip = 0, lvl = 0, skip_lvl = 0;
 
     while (str[0]) {
-        if (str[0] == '\\') {
-            int sl = 1;
-            switch (str[1]) {
-            case 'e':
-                p = "\x1b", l = 1; break;
-            case 'n':
-                p = "\n", l = 1; break;
-            case 'r':
-                p = "\r", l = 1; break;
-            case 't':
-                p = "\t", l = 1; break;
-            case 'x':
-                if (str[2]) {
-                    char num[3] = { str[2], str[3], 0 };
-                    char *end = num;
-                    num_val = strtol(num, &end, 16);
-                    sl = end - num + 1;
-                    l = 1;
-                    p = &num_val;
-                } else
-                    l = 0;
-                break;
-            default:
-                p = str + 1, l = 1;
-            }
-            str += 1 + sl;
-        } else if (lvl > 0 && str[0] == ')') {
+        if (lvl > 0 && str[0] == ')') {
             if (skip && lvl <= skip_lvl)
                 skip = 0;
             lvl--, str++, l = 0;
