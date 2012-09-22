@@ -126,7 +126,6 @@ static const mp_cmd_t mp_cmds[] = {
 #ifdef CONFIG_DVBIN
   { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", { ARG_INT, ARG_INT } },
 #endif
-  { MP_CMD_SWITCH_RATIO, "switch_ratio", { OARG_FLOAT(0) } },
   { MP_CMD_SCREENSHOT, "screenshot", { OARG_INT(0), OARG_INT(0) } },
   { MP_CMD_LOADFILE, "loadfile", { ARG_STRING, OARG_INT(0) } },
   { MP_CMD_LOADLIST, "loadlist", { ARG_STRING, OARG_INT(0) } },
@@ -199,9 +198,12 @@ static const struct legacy_cmd legacy_cmds[] = {
     {"osd_show_text",           "show_text"},
     {"osd_show_property_text",  "show_text"},
     {"osd_show_progression",    "show_progress"},
-    // Approximate
+    // Approximate (can fail if user added additional whitespace)
     {"pt_step 1",               "playlist_next"},
     {"pt_step -1",              "playlist_prev"},
+    // Switch_ratio without argument resets aspect ratio
+    {"switch_ratio ",           "set aspect "},
+    {"switch_ratio",            "set aspect 0"},
     {0}
 };
 

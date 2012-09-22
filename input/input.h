@@ -41,7 +41,6 @@ enum mp_command_type {
     MP_CMD_TV_LAST_CHANNEL,
     MP_CMD_TV_SET_FREQ,
     MP_CMD_TV_SET_NORM,
-    MP_CMD_SWITCH_RATIO,
     MP_CMD_FRAME_STEP,
     MP_CMD_SPEED_MULT,
     MP_CMD_RUN,

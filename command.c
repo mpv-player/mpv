@@ -1187,7 +1187,20 @@ static int mp_property_aspect(m_option_t *prop, int action, void *arg,
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_float_ro(prop, action, arg, mpctx->sh_video->aspect);
+    switch (action) {
+    case M_PROPERTY_SET: {
+        float f = *(float *)arg;
+        if (f < 0.1)
+            f = (float)mpctx->sh_video->disp_w / mpctx->sh_video->disp_h;
+        mpctx->opts.movie_aspect = f;
+        video_reset_aspect(mpctx->sh_video);
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET:
+        *(float *)arg = mpctx->sh_video->aspect;
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 // For subtitle related properties using the generic option bridge.
@@ -1429,7 +1442,7 @@ static const m_option_t mp_properties[] = {
     { "fps", mp_property_fps, CONF_TYPE_FLOAT,
       0, 0, 0, NULL },
     { "aspect", mp_property_aspect, CONF_TYPE_FLOAT,
-      0, 0, 0, NULL },
+      CONF_RANGE, 0, 10, NULL },
     { "video", mp_property_video, CONF_TYPE_INT,
       CONF_RANGE, -2, 65535, NULL },
     { "program", mp_property_program, CONF_TYPE_INT,
@@ -1836,16 +1849,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 mpctx->begin_skip = MP_NOPTS_VALUE;
             }
         }
-        break;
-
-    case MP_CMD_SWITCH_RATIO:
-        if (!sh_video)
-            break;
-        if (cmd->nargs == 0 || cmd->args[0].v.f == -1)
-            opts->movie_aspect = (float) sh_video->disp_w / sh_video->disp_h;
-        else
-            opts->movie_aspect = cmd->args[0].v.f;
-        video_reset_aspect(sh_video);
         break;
 
     case MP_CMD_SPEED_MULT: {
