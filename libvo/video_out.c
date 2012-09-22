@@ -500,5 +500,5 @@ void vo_mouse_movement(struct vo *vo, int posx, int posy)
   if (!enable_mouse_movements)
     return;
   snprintf(cmd_str, sizeof(cmd_str), "set_mouse_pos %i %i", posx, posy);
-  mp_input_queue_cmd(vo->input_ctx, mp_input_parse_cmd(cmd_str));
+  mp_input_queue_cmd(vo->input_ctx, mp_input_parse_cmd(bstr0(cmd_str)));
 }

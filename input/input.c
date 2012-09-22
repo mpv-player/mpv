@@ -705,7 +705,7 @@ static char *skip_no_ws(char *str)
     return str;
 }
 
-mp_cmd_t *mp_input_parse_cmd(char *str)
+mp_cmd_t *mp_input_parse_cmd(bstr str_b)
 {
     int i, l;
     int pausing = 0;
@@ -713,7 +713,8 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
     char *ptr;
     const mp_cmd_t *cmd_def;
     mp_cmd_t *cmd = NULL;
-    void *tmp = NULL;
+    void *tmp = talloc_new(NULL);
+    char *str = bstrdup0(tmp, str_b);
 
     str = skip_ws(str);
 
@@ -739,8 +740,7 @@ mp_cmd_t *mp_input_parse_cmd(char *str)
             mp_tmsg(MSGT_INPUT, MSGL_WARN, "Warning: command '%s' is "
                     "deprecated, replaced with '%s'. Fix your input.conf!\n",
                     entry->old, entry->new);
-            str = talloc_asprintf(NULL, "%s%s", entry->new, str + old_len);
-            tmp = str;
+            str = talloc_asprintf(tmp, "%s%s", entry->new, str + old_len);
             break;
         }
     }
@@ -1067,7 +1067,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
     }
     if (strcmp(cmd, "ignore") == 0)
         return NULL;
-    ret =  mp_input_parse_cmd(cmd);
+    ret =  mp_input_parse_cmd(bstr0(cmd));
     if (!ret) {
         char *key_buf = get_key_combo_name(keys, n);
         mp_tmsg(MSGT_INPUT, MSGL_ERR,
@@ -1209,7 +1209,7 @@ static void read_cmd_fd(struct input_ctx *ictx, struct input_fd *cmd_fd)
     char *text;
     while ((r = read_cmd(cmd_fd, &text)) >= 0) {
         ictx->got_new_events = true;
-        struct mp_cmd *cmd = mp_input_parse_cmd(text);
+        struct mp_cmd *cmd = mp_input_parse_cmd(bstr0(text));
         talloc_free(text);
         if (cmd)
             queue_add(&ictx->control_cmd_queue, cmd, false);
@@ -1356,7 +1356,7 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
 {
     if (async_quit_request)
-        return mp_input_parse_cmd("quit 1");
+        return mp_input_parse_cmd(bstr0("quit 1"));
 
     if (ictx->control_cmd_queue.first || ictx->key_cmd_queue.first)
         time = 0;
@@ -1531,6 +1531,9 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data)
         talloc_free(name);
         bind_keys(ictx, builtin, keys, command);
         n_binds++;
+
+        // Print warnings if invalid commands are encountered.
+        talloc_free(mp_input_parse_cmd(command));
     }
 
     return n_binds;

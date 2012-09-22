@@ -20,6 +20,7 @@
 #define MPLAYER_INPUT_H
 
 #include <stdbool.h>
+#include "bstr.h"
 
 // All command IDs
 enum mp_command_type {
@@ -180,7 +181,7 @@ struct mp_cmd *mp_input_get_cmd(struct input_ctx *ictx, int time,
                                 int peek_only);
 
 /* Parse text and return corresponding struct mp_cmd. */
-struct mp_cmd *mp_input_parse_cmd(char *str);
+struct mp_cmd *mp_input_parse_cmd(bstr str);
 
 // After getting a command from mp_input_get_cmd you need to free it using this
 // function
