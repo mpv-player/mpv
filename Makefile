@@ -233,7 +233,7 @@ SRCS_MPLAYER-$(CACA)         += libvo/vo_caca.c
 SRCS_MPLAYER-$(COREAUDIO)    += libao2/ao_coreaudio.c
 SRCS_MPLAYER-$(COREVIDEO)    += libvo/vo_corevideo.m
 SRCS_MPLAYER-$(DIRECT3D)     += libvo/vo_direct3d.c libvo/w32_common.c
-SRCS_MPLAYER-$(GL)           += libvo/gl_common.c libvo/vo_gl3.c \
+SRCS_MPLAYER-$(GL)           += libvo/gl_common.c libvo/vo_opengl.c \
                                 libvo/vo_opengl_old.c pnm_loader.c
 SRCS_MPLAYER-$(ENCODING)     += libvo/vo_lavc.c libao2/ao_lavc.c encode_lavc.c
 SRCS_MPLAYER-$(GL_WIN32)     += libvo/w32_common.c
@@ -367,7 +367,7 @@ libmpdemux/ebml.c: libmpdemux/ebml_defs.c
 libmpdemux/ebml_defs.c: TOOLS/matroska.py
 	./$< --generate-definitions > $@
 
-libvo/vo_gl3.c: libvo/vo_gl3_shaders.h
+libvo/vo_opengl.c: libvo/vo_gl3_shaders.h
 libvo/vo_gl3_shaders.h: TOOLS/file2string.py libvo/vo_gl3_shaders.glsl
 	./$^ >$@
 
