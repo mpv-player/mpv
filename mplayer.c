@@ -186,7 +186,7 @@ static const char av_desync_help_text[] = _(
 "     If you have PulseAudio, try --ao=alsa .\n"
 "- Slow video output.\n"
 "     Try a different -vo driver (-vo help for a list) or try -framedrop!\n"
-"- Playing a video file with --vo=gl/gl3 with higher FPS than your monitor.\n"
+"- Playing a video file with --vo=opengl with higher FPS than the monitor.\n"
 "     This is due to vsync limiting the framerate. Try --no-vsync, or a\n"
 "     different VO.\n"
 "- Playing from a slow network source.\n"

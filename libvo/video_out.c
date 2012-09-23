@@ -73,8 +73,8 @@ int vo_colorkey = 0x0000ff00; // default colorkey is green
 extern struct vo_driver video_out_x11;
 extern struct vo_driver video_out_vdpau;
 extern struct vo_driver video_out_xv;
-extern struct vo_driver video_out_gl_nosw;
-extern struct vo_driver video_out_gl;
+extern struct vo_driver video_out_opengl;
+extern struct vo_driver video_out_opengl_old;
 extern struct vo_driver video_out_gl3;
 extern struct vo_driver video_out_null;
 extern struct vo_driver video_out_image;
@@ -91,7 +91,8 @@ const struct vo_driver *video_out_drivers[] =
         &video_out_direct3d,
 #endif
 #ifdef CONFIG_GL_COCOA
-        &video_out_gl,
+        &video_out_opengl,
+        &video_out_opengl_old,
 #endif
 #ifdef CONFIG_COREVIDEO
         &video_out_corevideo,
@@ -103,9 +104,9 @@ const struct vo_driver *video_out_drivers[] =
         &video_out_xv,
 #endif
 #ifdef CONFIG_GL
-        &video_out_gl3,
 #if !defined CONFIG_GL_COCOA
-        &video_out_gl,
+        &video_out_opengl,
+        &video_out_opengl_old,
 #endif
 #endif
 #ifdef CONFIG_X11
@@ -120,10 +121,8 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_ENCODING
         &video_out_lavc,
 #endif
-#ifdef CONFIG_X11
 #ifdef CONFIG_GL
-        &video_out_gl_nosw,
-#endif
+        &video_out_gl3,
 #endif
         NULL
 };

@@ -1230,8 +1230,8 @@ static int preinit(struct vo *vo, const char *arg)
 
     if (subopt_parse(arg, subopts) != 0) {
         mp_msg(MSGT_VO, MSGL_FATAL,
-               "\n-vo gl command line help:\n"
-               "Example: mplayer -vo gl:slice-height=4\n"
+               "\n-vo opengl_old command line help:\n"
+               "Example: mplayer -vo opengl_old:slice-height=4\n"
                "\nOptions:\n"
                "  nomanyfmts\n"
                "    Disable extended color formats for OpenGL 1.2 and later\n"
@@ -1454,33 +1454,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return VO_NOTIMPL;
 }
 
-const struct vo_driver video_out_gl = {
+const struct vo_driver video_out_opengl_old = {
     .is_new = true,
     .info = &(const vo_info_t) {
         "OpenGL",
-        "gl",
-        "Reimar Doeffinger <Reimar.Doeffinger@gmx.de>",
-        ""
-    },
-    .preinit = preinit,
-    .config = config,
-    .control = control,
-    .draw_slice = draw_slice,
-    .draw_osd = draw_osd,
-    .flip_page = flip_page,
-    .check_events = check_events,
-    .uninit = uninit,
-};
-
-// "-vo gl" used to accept software renderers by default. This is not the case
-// anymore: you have to use "-vo gl:sw" to get this. This means gl and gl_nosw
-// are exactly the same thing now. Keep gl_nosw to not break user configs.
-const struct vo_driver video_out_gl_nosw =
-{
-    .is_new = true,
-    .info = &(const vo_info_t) {
-        "OpenGL no software rendering",
-        "gl_nosw",
+        "opengl-old",
         "Reimar Doeffinger <Reimar.Doeffinger@gmx.de>",
         ""
     },

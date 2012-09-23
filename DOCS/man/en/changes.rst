@@ -52,7 +52,7 @@ General changes for mplayer2 to mplayer3
 * Cleaned up terminal output (nicer status line, less useless noise)
 * Support for playing URLs of popular streaming sites directly
   (e.g. ``mplayer3 https://www.youtube.com/watch?v=...``)
-* Improved OpenGL output (``vo_gl3``)
+* Improved OpenGL output (``vo_opengl``)
 * Make ``--softvol`` default (**mplayer3** is not a mixer control panel)
 * Improved support for .cue files
 * Screenshot improvements (can save screenshots as JPG, configurable filenames)

@@ -54,7 +54,7 @@
 #include "fastmemcpy.h"
 #include "sub/ass_mp.h"
 
-static const char vo_gl3_shaders[] =
+static const char vo_opengl_shaders[] =
 // Generated from libvo/vo_opengl_shaders.glsl
 #include "libvo/vo_opengl_shaders.h"
 ;
@@ -655,7 +655,7 @@ static void compile_shaders(struct gl_priv *p)
 
     void *tmp = talloc_new(NULL);
 
-    struct bstr src = bstr0(vo_gl3_shaders);
+    struct bstr src = bstr0(vo_opengl_shaders);
     char *vertex_shader = get_section(tmp, src, "vertex_all");
     char *shader_prelude = get_section(tmp, src, "prelude");
     char *s_video = get_section(tmp, src, "frag_video");
@@ -2437,10 +2437,29 @@ err_out:
     return -1;
 }
 
+const struct vo_driver video_out_opengl = {
+    .is_new = true,
+    .info = &(const vo_info_t) {
+        "Extended OpenGL Renderer",
+        "opengl",
+        "Based on vo_gl.c by Reimar Doeffinger",
+        ""
+    },
+    .preinit = preinit,
+    .config = config,
+    .control = control,
+    .draw_slice = draw_slice,
+    .draw_osd = draw_osd,
+    .flip_page = flip_page,
+    .check_events = check_events,
+    .uninit = uninit,
+};
+
+// short-term compatibility
 const struct vo_driver video_out_gl3 = {
     .is_new = true,
     .info = &(const vo_info_t) {
-        "OpenGL 3.x",
+        "Extended OpenGL Renderer",
         "gl3",
         "Based on vo_gl.c by Reimar Doeffinger",
         ""
@@ -2456,8 +2475,8 @@ const struct vo_driver video_out_gl3 = {
 };
 
 static const char help_text[] =
-"\n--vo=gl3 command line help:\n"
-"Example: mplayer --vo=gl3:scale-sep:lscale=lanczos2\n"
+"\n--vo=opengl command line help:\n"
+"Example: mplayer --vo=opengl:scale-sep:lscale=lanczos2\n"
 "\nOptions:\n"
 "  lscale=<filter>\n"
 "    Set the scaling filter. Possible choices:\n"
