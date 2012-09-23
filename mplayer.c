@@ -2172,10 +2172,9 @@ static void vo_update_window_title(struct MPContext *mpctx)
 {
     if (!mpctx->video_out)
         return;
-    char *title = property_expand_string(mpctx, mpctx->opts.vo_wintitle);
+    char *title = mp_property_expand_string(mpctx, mpctx->opts.vo_wintitle);
     talloc_free(mpctx->video_out->window_title);
-    mpctx->video_out->window_title = talloc_strdup(mpctx->video_out, title);
-    free(title);
+    mpctx->video_out->window_title = talloc_steal(mpctx, title);
 }
 
 int reinit_video_chain(struct MPContext *mpctx)
@@ -3876,9 +3875,9 @@ goto_enable_cache:
 #endif
 
     if (opts->playing_msg) {
-        char *msg = property_expand_string(mpctx, opts->playing_msg);
+        char *msg = mp_property_expand_string(mpctx, opts->playing_msg);
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", msg);
-        free(msg);
+        talloc_free(msg);
     }
 
     // Disable the term OSD in verbose mode

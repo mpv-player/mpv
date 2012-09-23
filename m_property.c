@@ -27,6 +27,8 @@
 #include <inttypes.h>
 #include <assert.h>
 
+#include <libavutil/common.h>
+
 #include "talloc.h"
 #include "m_option.h"
 #include "m_property.h"
@@ -140,73 +142,94 @@ int m_property_do(const m_option_t *prop_list, const char *name,
     }
 }
 
-char *m_properties_expand_string(const m_option_t *prop_list, char *str,
+static int m_property_do_bstr(const m_option_t *prop_list, bstr name,
+                              int action, void *arg, void *ctx)
+{
+    char name0[64];
+    if (name.len >= sizeof(name0))
+        return M_PROPERTY_UNKNOWN;
+    snprintf(name0, sizeof(name0), "%.*s", BSTR_P(name));
+    return m_property_do(prop_list, name0, action, arg, ctx);
+}
+
+static void append_str(char **s, int *len, bstr append)
+{
+    MP_TARRAY_GROW(NULL, *s, *len + append.len);
+    memcpy(*s + *len, append.start, append.len);
+    *len = *len + append.len;
+}
+
+char *m_properties_expand_string(const m_option_t *prop_list, char *str0,
                                  void *ctx)
 {
-    int l, fr = 0, pos = 0, size = strlen(str) + 512;
-    char *p = NULL, *e, *ret = malloc(size);
-    int skip = 0, lvl = 0, skip_lvl = 0;
+    char *ret = NULL;
+    int ret_len = 0;
+    bool skip = false;
+    int level = 0, skip_level = 0;
+    bstr str = bstr0(str0);
 
-    while (str[0]) {
-        if (lvl > 0 && str[0] == ')') {
-            if (skip && lvl <= skip_lvl)
-                skip = 0;
-            lvl--, str++, l = 0;
-        } else if (str[0] == '$' && str[1] == '{'
-                   && (e = strchr(str + 2, '}'))) {
-            str += 2;
-            int method = M_PROPERTY_PRINT;
-            if (str[0] == '=') {
-                str += 1;
-                method = M_PROPERTY_GET_STRING;
-            }
-            int pl = e - str;
-            char pname[pl + 1];
-            memcpy(pname, str, pl);
-            pname[pl] = 0;
-            if (m_property_do(prop_list, pname, method, &p, ctx) >= 0 && p)
-                l = strlen(p), fr = 1;
-            else
-                l = 0;
-            str = e + 1;
-        } else if (str[0] == '?' && str[1] == '('
-                   && (e = strchr(str + 2, ':'))) {
-            lvl++;
+    while (str.len) {
+        if (level > 0 && bstr_eatstart0(&str, "}")) {
+            if (skip && level <= skip_level)
+                skip = false;
+            level--;
+        } else if (bstr_startswith0(str, "${") && bstr_find0(str, "}") >= 0) {
+            str = bstr_cut(str, 2);
+            level++;
+
+            // Assume ":" and "}" can't be part of the property name
+            // => if ":" comes before "}", it must be for the fallback
+            int term_pos = bstrcspn(str, ":}");
+            bstr name = bstr_splice(str, 0, term_pos < 0 ? str.len : term_pos);
+            str = bstr_cut(str, term_pos);
+            bool have_fallback = bstr_eatstart0(&str, ":");
+
             if (!skip) {
-                int is_not = str[2] == '!';
-                int pl = e - str - (is_not ? 3 : 2);
-                char pname[pl + 1];
-                memcpy(pname, str + (is_not ? 3 : 2), pl);
-                pname[pl] = 0;
-                struct m_option opt = {0};
-                union m_option_value val = {0};
-                if (m_property_do(prop_list, pname, M_PROPERTY_GET_TYPE, &opt, ctx) <= 0 &&
-                    m_property_do(prop_list, pname, M_PROPERTY_GET, &val, ctx) <= 0)
-                {
-                    if (!is_not)
-                        skip = 1, skip_lvl = lvl;
-                    m_option_free(&opt, &val);
-                } else if (is_not)
-                    skip = 1, skip_lvl = lvl;
+                bool cond_yes = bstr_eatstart0(&name, "?");
+                bool cond_no = !cond_yes && bstr_eatstart0(&name, "!");
+                bool raw = bstr_eatstart0(&name, "=");
+                int method = (raw || cond_yes || cond_no)
+                             ? M_PROPERTY_GET_STRING : M_PROPERTY_PRINT;
+
+                char *s = NULL;
+                int r = m_property_do_bstr(prop_list, name, method, &s, ctx);
+                if (cond_yes || cond_no) {
+                    skip = (!!s != cond_yes);
+                } else {
+                    skip = !!s;
+                    char *append = s;
+                    if (!s && !have_fallback && !raw) {
+                        append = r == M_PROPERTY_UNAVAILABLE
+                                 ? "(unavailable)" : "(error)";
+                    }
+                    append_str(&ret, &ret_len, bstr0(append));
+                }
+                talloc_free(s);
+                if (skip)
+                    skip_level = level;
             }
-            str = e + 1, l = 0;
-        } else
-            p = str, l = 1, str++;
+        } else if (level == 0 && bstr_eatstart0(&str, "$>")) {
+            append_str(&ret, &ret_len, str);
+            break;
+        } else {
+            char c;
 
-        if (skip || l <= 0)
-            continue;
+            // Other combinations, e.g. "$x", are added verbatim
+            if (bstr_eatstart0(&str, "$$")) {
+                c = '$';
+            } else if (bstr_eatstart0(&str, "$}")) {
+                c = '}';
+            } else {
+                c = str.start[0];
+                str = bstr_cut(str, 1);
+            }
 
-        if (pos + l + 1 > size) {
-            size = pos + l + 512;
-            ret = realloc(ret, size);
+            if (!skip)
+                MP_TARRAY_APPEND(NULL, ret, ret_len, c);
         }
-        memcpy(ret + pos, p, l);
-        pos += l;
-        if (fr)
-            talloc_free(p), fr = 0;
     }
 
-    ret[pos] = 0;
+    MP_TARRAY_APPEND(NULL, ret, ret_len, '\0');
     return ret;
 }
 

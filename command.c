@@ -1525,7 +1525,7 @@ char *mp_property_print(const char *name, struct MPContext *ctx)
     return ret;
 }
 
-char *property_expand_string(MPContext *mpctx, char *str)
+char *mp_property_expand_string(struct MPContext *mpctx, char *str)
 {
     return m_properties_expand_string(mp_properties, str, mpctx);
 }
@@ -1931,15 +1931,13 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SHOW_TEXT: {
-        char *txt = m_properties_expand_string(mp_properties,
-                                               cmd->args[0].v.s,
-                                               mpctx);
-        // if no argument supplied use default osd_duration, else <arg> ms.
+        char *txt = mp_property_expand_string(mpctx, cmd->args[0].v.s);
         if (txt) {
+            // if no argument supplied use default osd_duration, else <arg> ms.
             set_osd_msg(mpctx, OSD_MSG_TEXT, cmd->args[2].v.i,
                         (cmd->args[1].v.i < 0 ? osd_duration : cmd->args[1].v.i),
                         "%s", txt);
-            free(txt);
+            talloc_free(txt);
         }
         break;
     }
@@ -2198,10 +2196,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_RUN:
 #ifndef __MINGW32__
         if (!fork()) {
-            char *exp_cmd = property_expand_string(mpctx, cmd->args[0].v.s);
-            if (exp_cmd) {
-                execl("/bin/sh", "sh", "-c", exp_cmd, NULL);
-                free(exp_cmd);
+            char *s = mp_property_expand_string(mpctx, cmd->args[0].v.s);
+            if (s) {
+                execl("/bin/sh", "sh", "-c", s, NULL);
+                talloc_free(s);
             }
             exit(0);
         }
