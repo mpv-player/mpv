@@ -103,7 +103,7 @@ int mp_msg_test(int mod, int lev)
 
 static void set_msg_color(FILE* stream, int lev)
 {
-    static const unsigned char v_colors[10] = {9, 1, 3, 15, 7, 2, 2, 8, 8, 8};
+    static const unsigned char v_colors[10] = {9, 1, 3, 15, 7, 7, 2, 8, 8, 8};
     int c = v_colors[lev];
 #ifdef MP_ANNOY_ME
     /* that's only a silly color test */
