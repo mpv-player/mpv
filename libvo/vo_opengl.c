@@ -234,6 +234,8 @@ struct gl_priv {
     struct vo_rect dst_rect;    // video rectangle on output window
     int border_x, border_y;     // OSD borders
     int vp_x, vp_y, vp_w, vp_h; // GL viewport
+
+    int frames_rendered;
 };
 
 struct fmt_entry {
@@ -275,7 +277,7 @@ static void default_tex_params(struct GL *gl, GLenum target, GLint filter)
 
 static void debug_check_gl(struct gl_priv *p, const char *msg)
 {
-    if (p->use_gl_debug)
+    if (p->use_gl_debug || p->frames_rendered < 5)
         glCheckError(p->gl, msg);
 }
 
@@ -1238,6 +1240,8 @@ static void flip_page(struct vo *vo)
     {
         gl->Clear(GL_COLOR_BUFFER_BIT);
     }
+
+    p->frames_rendered++;
 }
 
 static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
