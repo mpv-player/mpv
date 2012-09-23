@@ -1223,9 +1223,13 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
     assert(!stream || stream->type == type);
     int index = stream ? stream->tid : -2;
     if (type == STREAM_AUDIO) {
-        demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &index);
+        if (demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &index)
+                == DEMUXER_CTRL_NOTIMPL)
+            demuxer->audio->id = index;
     } else if (type == STREAM_VIDEO) {
-        demux_control(demuxer, DEMUXER_CTRL_SWITCH_VIDEO, &index);
+        if (demux_control(demuxer, DEMUXER_CTRL_SWITCH_VIDEO, &index)
+                == DEMUXER_CTRL_NOTIMPL)
+            demuxer->video->id = index;
     } else if (type == STREAM_SUB) {
         int index2 = stream ? stream->stream_index : -2;
         if (demuxer->ds[type]->id != index2)
