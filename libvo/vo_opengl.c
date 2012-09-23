@@ -55,8 +55,8 @@
 #include "sub/ass_mp.h"
 
 static const char vo_gl3_shaders[] =
-// Generated from libvo/vo_gl3_shaders.glsl
-#include "libvo/vo_gl3_shaders.h"
+// Generated from libvo/vo_opengl_shaders.glsl
+#include "libvo/vo_opengl_shaders.h"
 ;
 
 // How many parts the OSD may consist of at most.

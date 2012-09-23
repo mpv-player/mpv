@@ -367,8 +367,8 @@ libmpdemux/ebml.c: libmpdemux/ebml_defs.c
 libmpdemux/ebml_defs.c: TOOLS/matroska.py
 	./$< --generate-definitions > $@
 
-libvo/vo_opengl.c: libvo/vo_gl3_shaders.h
-libvo/vo_gl3_shaders.h: TOOLS/file2string.py libvo/vo_gl3_shaders.glsl
+libvo/vo_opengl.c: libvo/vo_opengl_shaders.h
+libvo/vo_opengl_shaders.h: TOOLS/file2string.py libvo/vo_opengl_shaders.glsl
 	./$^ >$@
 
 sub/osd_libass.c: sub/osd_font.h
@@ -469,7 +469,7 @@ clean:
 	-$(RM) input/input_conf.h
 	-$(RM) libvo/vdpau_template.c
 	-$(RM) libmpdemux/ebml_types.h libmpdemux/ebml_defs.c
-	-$(RM) libvo/vo_gl3_shaders.h
+	-$(RM) libvo/vo_opengl_shaders.h
 	-$(RM) sub/osd_font.h
 
 distclean: clean

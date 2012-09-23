@@ -15,7 +15,7 @@
 /TAGS
 /locale
 /po
-/libvo/vo_gl3_shaders.h
+/libvo/vo_opengl_shaders.h
 /libmpdemux/ebml_defs.c
 /libmpdemux/ebml_types.h
 /libvo/vdpau_template.c
