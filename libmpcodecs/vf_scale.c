@@ -238,13 +238,6 @@ static int config(struct vf_instance *vf,
 	}
     }
 
-    if(vf->priv->noup){
-        if((vf->priv->w > width) + (vf->priv->h > height) >= vf->priv->noup){
-            vf->priv->w= width;
-            vf->priv->h= height;
-        }
-    }
-
     if (vf->priv->w <= -8) {
       vf->priv->w += 8;
       round_w = 1;
@@ -287,6 +280,14 @@ static int config(struct vf_instance *vf,
       vf->priv->w = ((vf->priv->w + 8) / 16) * 16;
     if (round_h)
       vf->priv->h = ((vf->priv->h + 8) / 16) * 16;
+
+    // check for upscaling, now that all parameters had been applied
+    if(vf->priv->noup){
+        if((vf->priv->w > width) + (vf->priv->h > height) >= vf->priv->noup){
+            vf->priv->w= width;
+            vf->priv->h= height;
+        }
+    }
 
     // calculate the missing parameters:
     switch(best) {
