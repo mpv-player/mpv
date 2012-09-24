@@ -500,12 +500,13 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_SETTINGSLIST(optname, varname, flags, objlist) OPT_GENERAL(optname, varname, flags, .type = &m_option_type_obj_settings_list, .priv = objlist)
 #define OPT_AUDIOFORMAT(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_afmt)
 #define OPT_HELPER_REMOVEPAREN(...) __VA_ARGS__
+#define M_CHOICES(choices) .priv = (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}
 #define OPT_CHOICE(...) OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_choice)
-#define OPT_CHOICE_(optname, varname, flags, choices, ...) OPT_GENERAL(optname, varname, flags, .priv = (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, __VA_ARGS__)
+#define OPT_CHOICE_(optname, varname, flags, choices, ...) OPT_GENERAL(optname, varname, flags, M_CHOICES(choices), __VA_ARGS__)
 // Union of choices and an int range. The choice values can be included in the
 // int range, or be completely separate - both works.
 #define OPT_CHOICE_OR_INT(...) OPT_CHOICE_OR_INT_(__VA_ARGS__, .type = &m_option_type_choice)
-#define OPT_CHOICE_OR_INT_(optname, varname, flags, minval, maxval, choices, ...) OPT_GENERAL(optname, varname, (flags) | CONF_RANGE, .min = minval, .max = maxval, .priv = (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, __VA_ARGS__)
+#define OPT_CHOICE_OR_INT_(optname, varname, flags, minval, maxval, choices, ...) OPT_GENERAL(optname, varname, (flags) | CONF_RANGE, .min = minval, .max = maxval, M_CHOICES(choices), __VA_ARGS__)
 #define OPT_TIME(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_time)
 
 #define OPT_TRACKCHOICE(name, var) OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}))
