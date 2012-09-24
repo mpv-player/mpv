@@ -21,6 +21,7 @@
 
 #include <stdbool.h>
 #include "bstr.h"
+#include "m_option.h"
 
 // All command IDs
 enum mp_command_type {
@@ -80,11 +81,6 @@ enum mp_command_type {
     MP_CMD_VO_CMDLINE,
 };
 
-// The arg types
-#define MP_CMD_ARG_INT 1
-#define MP_CMD_ARG_FLOAT 2
-#define MP_CMD_ARG_STRING 3
-
 #define MP_CMD_MAX_ARGS 10
 
 // Error codes for the drivers
@@ -115,7 +111,7 @@ enum mp_input_section_flags {
 struct input_ctx;
 
 struct mp_cmd_arg {
-    int type;
+    struct m_option type;
     bool optional;
     union {
         int i;

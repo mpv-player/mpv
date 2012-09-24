@@ -85,12 +85,20 @@ struct key_name {
  * argument value if the user didn't give enough arguments to specify it.
  * A command can take a maximum of MP_CMD_MAX_ARGS arguments (10).
  */
-#define ARG_INT { .type = MP_CMD_ARG_INT }
-#define OARG_INT(def) { .type = MP_CMD_ARG_INT, .optional = true, .v.i = def }
-#define ARG_FLOAT { .type = MP_CMD_ARG_FLOAT }
-#define OARG_FLOAT(def) { .type = MP_CMD_ARG_FLOAT, .optional = true, .v.f = def }
-#define ARG_STRING { .type = MP_CMD_ARG_STRING }
-#define OARG_STRING(def) { .type = MP_CMD_ARG_STRING, .optional = true, .v.s = def }
+
+#define ARG_INT                 { .type = {"", NULL, &m_option_type_int} }
+#define ARG_FLOAT               { .type = {"", NULL, &m_option_type_float} }
+#define ARG_STRING              { .type = {"", NULL, &m_option_type_string} }
+#define ARG_CHOICE(c)           { .type = {"", NULL, &m_option_type_choice,    \
+                                           M_CHOICES(c)} }
+
+#define OARG_FLOAT(def)         { .type = {"", NULL, &m_option_type_float},    \
+                                  .optional = true, .v.f = def }
+#define OARG_INT(def)           { .type = {"", NULL, &m_option_type_int},      \
+                                  .optional = true, .v.i = def }
+#define OARG_CHOICE(def, c)     { .type = {"", NULL, &m_option_type_choice,    \
+                                           M_CHOICES(c)},                      \
+                                  .optional = true, .v.i = def }
 
 static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_IGNORE, "ignore", },
@@ -100,14 +108,28 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_RADIO_SET_FREQ, "radio_set_freq", { ARG_FLOAT } },
   { MP_CMD_RADIO_STEP_FREQ, "radio_step_freq", {ARG_FLOAT } },
 #endif
-  { MP_CMD_SEEK, "seek", { ARG_FLOAT, OARG_INT(0), OARG_INT(0) } },
+  { MP_CMD_SEEK, "seek", {
+      ARG_FLOAT,
+      OARG_CHOICE(0, ({"relative", 0},          {"0", 0},
+                      {"absolute-percent", 1},  {"1", 1},
+                      {"absolute", 2},          {"2", 2})),
+      OARG_CHOICE(0, ({"default-precise", 0},   {"0", 0},
+                      {"exact", 1},             {"1", 1},
+                      {"keyframes", -1},        {"-1", -1})),
+  }},
   { MP_CMD_EDL_MARK, "edl_mark", },
   { MP_CMD_SPEED_MULT, "speed_mult", { ARG_FLOAT } },
   { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
   { MP_CMD_STOP, "stop", },
   { MP_CMD_FRAME_STEP, "frame_step", },
-  { MP_CMD_PLAYLIST_NEXT, "playlist_next", { OARG_INT(0) } },
-  { MP_CMD_PLAYLIST_PREV, "playlist_prev", { OARG_INT(0) } },
+  { MP_CMD_PLAYLIST_NEXT, "playlist_next", {
+      OARG_CHOICE(0, ({"weak", 0},              {"0", 0},
+                      {"force", 1},             {"1", 1})),
+  }},
+  { MP_CMD_PLAYLIST_PREV, "playlist_prev", {
+      OARG_CHOICE(0, ({"weak", 0},              {"0", 0},
+                      {"force", 1},             {"1", 1})),
+  }},
   { MP_CMD_SUB_STEP, "sub_step", { ARG_INT, OARG_INT(0) } },
   { MP_CMD_OSD, "osd", { OARG_INT(-1) } },
   { MP_CMD_SHOW_TEXT, "show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
@@ -127,9 +149,22 @@ static const mp_cmd_t mp_cmds[] = {
 #ifdef CONFIG_DVBIN
   { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", { ARG_INT, ARG_INT } },
 #endif
-  { MP_CMD_SCREENSHOT, "screenshot", { OARG_INT(0), OARG_INT(0) } },
-  { MP_CMD_LOADFILE, "loadfile", { ARG_STRING, OARG_INT(0) } },
-  { MP_CMD_LOADLIST, "loadlist", { ARG_STRING, OARG_INT(0) } },
+  { MP_CMD_SCREENSHOT, "screenshot", {
+      OARG_CHOICE(0, ({"single", 0},           {"0", 0},
+                      {"each-frame", 1},       {"1", 1})),
+      OARG_CHOICE(0, ({"video", 0},            {"0", 0},
+                      {"window", 1},           {"1", 1})),
+  }},
+  { MP_CMD_LOADFILE, "loadfile", {
+      ARG_STRING,
+      OARG_CHOICE(0, ({"replace", 0},          {"0", 0},
+                      {"append", 1},           {"1", 1})),
+  }},
+  { MP_CMD_LOADLIST, "loadlist", {
+      ARG_STRING,
+      OARG_CHOICE(0, ({"replace", 0},          {"0", 0},
+                      {"append", 1},           {"1", 1})),
+  }},
   { MP_CMD_PLAYLIST_CLEAR, "playlist_clear", },
   { MP_CMD_RUN, "run", { ARG_STRING } },
 
@@ -838,11 +873,13 @@ mp_cmd_t *mp_input_parse_cmd(bstr str)
     cmd->on_osd = on_osd;
 
     for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
-        if (!cmd->args[i].type)
+        struct mp_cmd_arg *cmdarg = &cmd->args[i];
+        if (!cmdarg->type.type)
             break;
+        cmd->nargs++;
         str = bstr_lstrip(str);
         bstr arg = {0};
-        if (cmd->args[i].type == MP_CMD_ARG_STRING &&
+        if (cmdarg->type.type == &m_option_type_string &&
             bstr_eatstart0(&str, "\""))
         {
             if (!read_escaped_string(tmp, &str, &arg)) {
@@ -858,26 +895,20 @@ mp_cmd_t *mp_input_parse_cmd(bstr str)
         } else {
             if (!read_token(str, &str, &arg))
                 break;
+            if (cmdarg->optional && bstrcmp0(arg, "-") == 0)
+                continue;
         }
         // Prevent option API from trying to deallocate static strings
-        cmd->args[i].v = ((struct mp_cmd_arg) {0}).v;
-        struct m_option opt = {0};
-        switch (cmd->args[i].type) {
-        case MP_CMD_ARG_INT:    opt.type = &m_option_type_int; break;
-        case MP_CMD_ARG_FLOAT:  opt.type = &m_option_type_float; break;
-        case MP_CMD_ARG_STRING: opt.type = &m_option_type_string; break;
-        default: abort();
-        }
-        int r = m_option_parse(&opt, bstr0(cmd->name), arg, &cmd->args[i].v);
+        cmdarg->v = ((struct mp_cmd_arg) {{0}}).v;
+        int r = m_option_parse(&cmdarg->type, bstr0(cmd->name), arg, &cmdarg->v);
         if (r < 0) {
             mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
                     "can't be parsed: %s.\n", cmd->name, i + 1,
                     m_option_strerror(r));
             goto error;
         }
-        if (opt.type == &m_option_type_string)
-            cmd->args[i].v.s = talloc_steal(cmd, cmd->args[i].v.s);
-        cmd->nargs++;
+        if (cmdarg->type.type == &m_option_type_string)
+            cmdarg->v.s = talloc_steal(cmd, cmdarg->v.s);
     }
 
     bstr dummy;
@@ -889,7 +920,7 @@ mp_cmd_t *mp_input_parse_cmd(bstr str)
     }
 
     int min_args = 0;
-    while (min_args < MP_CMD_MAX_ARGS && cmd->args[min_args].type
+    while (min_args < MP_CMD_MAX_ARGS && cmd->args[min_args].type.type
            && !cmd->args[min_args].optional)
     {
         min_args++;
@@ -1424,8 +1455,8 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
 
     ret = talloc_memdup(NULL, cmd, sizeof(mp_cmd_t));
     ret->name = talloc_strdup(ret, cmd->name);
-    for (i = 0; i < MP_CMD_MAX_ARGS && cmd->args[i].type; i++) {
-        if (cmd->args[i].type == MP_CMD_ARG_STRING && cmd->args[i].v.s != NULL)
+    for (i = 0; i < MP_CMD_MAX_ARGS; i++) {
+        if (cmd->args[i].type.type == &m_option_type_string)
             ret->args[i].v.s = talloc_strdup(ret, cmd->args[i].v.s);
     }
 
@@ -1771,24 +1802,11 @@ static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam)
 {
     const mp_cmd_t *cmd;
     int i, j;
-    const char *type;
 
     for (i = 0; (cmd = &mp_cmds[i])->name != NULL; i++) {
         printf("%-20.20s", cmd->name);
-        for (j = 0; j < MP_CMD_MAX_ARGS && cmd->args[j].type; j++) {
-            switch (cmd->args[j].type) {
-            case MP_CMD_ARG_INT:
-                type = "Integer";
-                break;
-            case MP_CMD_ARG_FLOAT:
-                type = "Float";
-                break;
-            case MP_CMD_ARG_STRING:
-                type = "String";
-                break;
-            default:
-                type = "??";
-            }
+        for (j = 0; j < MP_CMD_MAX_ARGS && cmd->args[j].type.type; j++) {
+            const char *type = cmd->args[j].type.type->name;
             if (cmd->args[j].optional)
                 printf(" [%s]", type);
             else
