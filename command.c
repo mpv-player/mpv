@@ -142,12 +142,17 @@ static int mp_property_playback_speed(m_option_t *prop, int action,
                                       void *arg, MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
-    if (action == M_PROPERTY_SET) {
-        double orig_speed = opts->playback_speed;
+    double orig_speed = opts->playback_speed;
+    switch (action) {
+    case M_PROPERTY_SET: {
         opts->playback_speed = *(float *) arg;
         // Adjust time until next frame flip for nosound mode
         mpctx->time_frame *= orig_speed / opts->playback_speed;
         reinit_audio_chain(mpctx);
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_PRINT:
+        *(char **)arg = talloc_asprintf(NULL, "x %6.2f", orig_speed);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(prop, action, arg, mpctx);
@@ -325,9 +330,6 @@ static int mp_property_time_pos(m_option_t *prop, int action,
 static int mp_property_chapter(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
-    struct MPOpts *opts = &mpctx->opts;
-    char *chapter_name = NULL;
-
     int chapter = get_current_chapter(mpctx);
     if (chapter < -1)
         return M_PROPERTY_UNAVAILABLE;
@@ -337,7 +339,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
         *(int *) arg = chapter;
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
-        chapter_name = chapter_display_name(mpctx, chapter);
+        char *chapter_name = chapter_display_name(mpctx, chapter);
         if (!chapter_name)
             return M_PROPERTY_UNAVAILABLE;
         *(char **) arg = chapter_name;
@@ -352,15 +354,8 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
         if (chapter >= 0) {
             if (next_pts > -1.0)
                 queue_seek(mpctx, MPSEEK_ABSOLUTE, next_pts, 0);
-            chapter_name = chapter_display_name(mpctx, chapter);
-            set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration,
-                        "Chapter: %s", chapter_name);
         } else if (step_all > 0)
             mpctx->stop_play = PT_NEXT_ENTRY;
-        else
-            set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration,
-                        "Chapter: (%d) %s", 0, mp_gtext("unknown"));
-        talloc_free(chapter_name);
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -387,9 +382,6 @@ static int mp_property_edition(m_option_t *prop, int action, void *arg,
         if (edition != demuxer->edition) {
             opts->edition_id = edition;
             mpctx->stop_play = PT_RESTART;
-            set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration,
-                        "Playing edition %d of %d.", edition + 1,
-                        demuxer->num_editions);
         }
         return M_PROPERTY_OK;
     }
@@ -1235,6 +1227,18 @@ static int mp_property_sub_delay(m_option_t *prop, int action, void *arg,
     return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
+static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
+{
+    if (!mpctx->sh_video)
+        return M_PROPERTY_UNAVAILABLE;
+    if (action == M_PROPERTY_PRINT) {
+        *(char **)arg = talloc_asprintf(NULL, "%d/100", sub_pos);
+        return M_PROPERTY_OK;
+    }
+    return property_sub_helper(prop, action, arg, mpctx);
+}
+
 /// Subtitle visibility (RW)
 static int mp_property_sub_visibility(m_option_t *prop, int action,
                                       void *arg, MPContext *mpctx)
@@ -1450,7 +1454,7 @@ static const m_option_t mp_properties[] = {
     { "sub", mp_property_sub, CONF_TYPE_INT,
       M_OPT_MIN, -1, 0, NULL },
     M_OPTION_PROPERTY_CUSTOM("sub-delay", mp_property_sub_delay),
-    M_OPTION_PROPERTY_CUSTOM("sub-pos", property_sub_helper),
+    M_OPTION_PROPERTY_CUSTOM("sub-pos", mp_property_sub_pos),
     { "sub-visibility", mp_property_sub_visibility, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
     M_OPTION_PROPERTY_CUSTOM("sub-forced-only", mp_property_sub_forced_only),
@@ -1538,118 +1542,139 @@ void property_print_help(void)
 
 /* List of default ways to show a property on OSD.
  *
- * Setting osd_progbar to -1 displays seek bar, other nonzero displays
- * a bar showing the current position between min/max values of the
- * property. In this case osd_msg is only used for terminal output
- * if there is no video; it'll be a label shown together with percentage.
- *
- * Otherwise setting osd_msg will show the string on OSD, formatted with
- * the text value of the property as argument.
+ * If osd_progbar is set, a bar showing the current position between min/max
+ * values of the property is shown. In this case osd_msg is only used for
+ * terminal output if there is no video; it'll be a label shown together with
+ * percentage.
  */
 static struct property_osd_display {
-    /// property name
+    // property name
     const char *name;
-    /// osd msg template
-    const char *osd_msg;
-    /// progressbar type
-    int osd_progbar; // -1 is special value for seek indicators
-    /// osd msg id if it must be shared
+    // name used on OSD
+    const char *osd_name;
+    // progressbar type
+    int osd_progbar;
+    // osd msg id if it must be shared
     int osd_id;
+    // Needs special ways to display the new value (seeks are delayed)
+    int seek_msg, seek_bar;
 } property_osd_display[] = {
     // general
-    { "loop", _("Loop: %s") },
-    { "chapter", NULL, .osd_progbar = -1 },
-    { "pts-association-mode", "PTS association mode: %s" },
-    { "hr-seek", "hr-seek: %s" },
-    { "speed", _("Speed: x %6s") },
+    { "loop", _("Loop") },
+    { "chapter", .seek_msg = OSD_SEEK_INFO_CHAPTER_TEXT,
+                 .seek_bar = OSD_SEEK_INFO_BAR },
+    { "edition", .seek_msg = OSD_SEEK_INFO_EDITION },
+    { "pts-association-mode", "PTS association mode" },
+    { "hr-seek", "hr-seek" },
+    { "speed", _("Speed") },
     // audio
     { "volume", _("Volume"), .osd_progbar = OSD_VOLUME },
-    { "mute", _("Mute: %s") },
-    { "audio-delay", _("A-V delay: %s") },
-    { "audio", _("Audio: %s") },
+    { "mute", _("Mute") },
+    { "audio-delay", _("A-V delay") },
+    { "audio", _("Audio") },
     { "balance", _("Balance"), .osd_progbar = OSD_BALANCE },
     // video
     { "panscan", _("Panscan"), .osd_progbar = OSD_PANSCAN },
-    { "ontop", _("Stay on top: %s") },
-    { "rootwin", _("Rootwin: %s") },
-    { "border", _("Border: %s") },
-    { "framedrop", _("Framedrop: %s") },
-    { "deinterlace", _("Deinterlace: %s") },
-    { "colormatrix", _("YUV colormatrix: %s") },
-    { "colormatrix-input-range", _("YUV input range: %s") },
-    { "colormatrix-output-range", _("RGB output range: %s") },
+    { "ontop", _("Stay on top") },
+    { "rootwin", _("Rootwin") },
+    { "border", _("Border") },
+    { "framedrop", _("Framedrop") },
+    { "deinterlace", _("Deinterlace") },
+    { "colormatrix", _("YUV colormatrix") },
+    { "colormatrix-input-range", _("YUV input range") },
+    { "colormatrix-output-range", _("RGB output range") },
     { "gamma", _("Gamma"), .osd_progbar = OSD_BRIGHTNESS },
     { "brightness", _("Brightness"), .osd_progbar = OSD_BRIGHTNESS },
     { "contrast", _("Contrast"), .osd_progbar = OSD_CONTRAST },
     { "saturation", _("Saturation"), .osd_progbar = OSD_SATURATION },
     { "hue", _("Hue"), .osd_progbar = OSD_HUE },
-    { "vsync", _("VSync: %s") },
-    { "angle", _("Angle: %s") },
+    { "vsync", _("VSync") },
+    { "angle", _("Angle") },
     // subs
-    { "sub", _("Subtitles: %s") },
-    { "sub-pos", _("Sub position: %s/100") },
-    { "sub-delay", _("Sub delay: %s"), .osd_id = OSD_MSG_SUB_DELAY },
-    { "sub-visibility", _("Subtitles: %s") },
-    { "sub-forced-only", _("Forced sub only: %s") },
-    { "sub-scale", _("Sub Scale: %s")},
-    { "ass-vsfilter-aspect-compat", _("Subtitle VSFilter aspect compat: %s")},
+    { "sub", _("Subtitles") },
+    { "sub-pos", _("Sub position") },
+    { "sub-delay", _("Sub delay"), .osd_id = OSD_MSG_SUB_DELAY },
+    { "sub-visibility", _("Subtitles") },
+    { "sub-forced-only", _("Forced sub only") },
+    { "sub-scale", _("Sub Scale")},
+    { "ass-vsfilter-aspect-compat", _("Subtitle VSFilter aspect compat")},
 #ifdef CONFIG_TV
     { "tv-brightness", _("Brightness"), .osd_progbar = OSD_BRIGHTNESS },
     { "tv-hue", _("Hue"), .osd_progbar = OSD_HUE},
     { "tv-saturation", _("Saturation"), .osd_progbar = OSD_SATURATION },
     { "tv-contrast", _("Contrast"), .osd_progbar = OSD_CONTRAST },
 #endif
-    {}
+    {0}
 };
 
-static int show_property_osd(MPContext *mpctx, const char *pname)
+static void show_property_osd(MPContext *mpctx, const char *pname,
+                              enum mp_on_osd osd_mode)
 {
     struct MPOpts *opts = &mpctx->opts;
     struct m_option prop = {0};
     struct property_osd_display *p;
 
-    // look for the command
-    for (p = property_osd_display; p->name; p++)
-        if (!strcmp(p->name, pname))
-            break;
-
-    if (!p->name)
-        return -1;
-
     if (mp_property_do(pname, M_PROPERTY_GET_TYPE, &prop, mpctx) <= 0)
-        return -1;
+        return;
 
-    if (p->osd_progbar == -1)
-        mpctx->add_osd_seek_info = true;
-    else if (p->osd_progbar) {
+    int osd_progbar = 0;
+    const char *osd_name = NULL;
+
+    // look for the command
+    for (p = property_osd_display; p->name; p++) {
+        if (!strcmp(p->name, prop.name)) {
+            osd_progbar = p->seek_bar ? 1 : p->osd_progbar;
+            osd_name = p->seek_msg ? "" : mp_gtext(p->osd_name);
+            break;
+        }
+    }
+    if (!p->name)
+        p = NULL;
+
+    if (osd_mode != MP_ON_OSD_AUTO) {
+        osd_name = osd_name ? osd_name : prop.name;
+        if (!(osd_mode & MP_ON_OSD_MSG))
+            osd_name = NULL;
+        osd_progbar = osd_progbar ? osd_progbar : ' ';
+        if (!(osd_mode & MP_ON_OSD_BAR))
+            osd_progbar = 0;
+    }
+
+    if (p && (p->seek_msg || p->seek_bar)) {
+        mpctx->add_osd_seek_info |=
+            (osd_name ? p->seek_msg : 0) | (osd_progbar ? p->seek_bar : 0);
+        return;
+    }
+
+    if (osd_progbar && (prop.flags & CONF_RANGE) == CONF_RANGE) {
         if (prop.type == CONF_TYPE_INT) {
             int i;
-            if (mp_property_do(pname, M_PROPERTY_GET, &i, mpctx) > 0)
-                set_osd_bar(mpctx, p->osd_progbar, mp_gtext(p->osd_msg),
+            if (mp_property_do(prop.name, M_PROPERTY_GET, &i, mpctx) > 0)
+                set_osd_bar(mpctx, osd_progbar, osd_name,
                             prop.min, prop.max, i);
         } else if (prop.type == CONF_TYPE_FLOAT) {
             float f;
-            if (mp_property_do(pname, M_PROPERTY_GET, &f, mpctx) > 0)
-                set_osd_bar(mpctx, p->osd_progbar, mp_gtext(p->osd_msg),
+            if (mp_property_do(prop.name, M_PROPERTY_GET, &f, mpctx) > 0)
+                set_osd_bar(mpctx, osd_progbar, osd_name,
                             prop.min, prop.max, f);
-        } else {
-            mp_msg(MSGT_CPLAYER, MSGL_ERR,
-                   "Property use an unsupported type.\n");
-            return -1;
         }
-        return 0;
+        if (osd_mode == MP_ON_OSD_AUTO)
+            return;
     }
 
-    if (p->osd_msg) {
-        char *val = mp_property_print(pname, mpctx);
+    if (osd_name) {
+        char *val = mp_property_print(prop.name, mpctx);
         if (val) {
-            int index = p - property_osd_display;
-            set_osd_tmsg(mpctx, p->osd_id > 0 ? p->osd_id : OSD_MSG_PROPERTY + index,
-                         1, opts->osd_duration, p->osd_msg, val);
+            int osd_id = 0;
+            if (p) {
+                int index = p - property_osd_display;
+                osd_id = p->osd_id ? p->osd_id : OSD_MSG_PROPERTY + index;
+            }
+            set_osd_tmsg(mpctx, osd_id, 1, opts->osd_duration,
+                         "%s: %s", osd_name, val);
             talloc_free(val);
         }
     }
-    return 0;
 }
 
 static const char *property_error_string(int error_value)
@@ -1751,7 +1776,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     sh_audio_t *const sh_audio = mpctx->sh_audio;
     sh_video_t *const sh_video = mpctx->sh_video;
     int osd_duration = opts->osd_duration;
-    int osdl = cmd->on_osd ? 1 : OSD_LEVEL_INVISIBLE;
+    bool auto_osd = cmd->on_osd == MP_ON_OSD_AUTO;
+    bool msg_osd = auto_osd || (cmd->on_osd & MP_ON_OSD_MSG);
+    bool bar_osd = auto_osd || (cmd->on_osd & MP_ON_OSD_BAR);
+    int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
     switch (cmd->id) {
     case MP_CMD_SEEK: {
         float v = cmd->args[0].v.f;
@@ -1768,10 +1796,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             queue_seek(mpctx, MPSEEK_RELATIVE, v, exact);
             function = (v > 0) ? OSD_FFW : OSD_REW;
         }
-        if (cmd->on_osd) {
-            mpctx->add_osd_seek_info = true;
+        if (bar_osd)
+            mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
+        if (msg_osd && !auto_osd)
+            mpctx->add_osd_seek_info |= OSD_SEEK_INFO_TEXT;
+        if (mpctx->add_osd_seek_info)
             mpctx->osd_function = function;
-        }
         break;
     }
 
@@ -1786,8 +1816,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
                    "Failed to set property '%s' to '%s'.\n",
                    cmd->args[0].v.s, cmd->args[1].v.s);
-        else if (cmd->on_osd)
-            show_property_osd(mpctx, cmd->args[0].v.s);
+        else
+            show_property_osd(mpctx, cmd->args[0].v.s, cmd->on_osd);
         break;
     }
 
@@ -1809,8 +1839,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
                    "Failed to increment property '%s' by %g.\n",
                    cmd->args[0].v.s, s.inc);
-        else if (cmd->on_osd)
-            show_property_osd(mpctx, cmd->args[0].v.s);
+        else
+            show_property_osd(mpctx, cmd->args[0].v.s, cmd->on_osd);
         break;
     }
 
@@ -1858,8 +1888,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         float v = cmd->args[0].v.f;
         v *= mpctx->opts.playback_speed;
         mp_property_do("speed", M_PROPERTY_SET, &v, mpctx);
-        if (cmd->on_osd)
-            show_property_osd(mpctx, "speed");
+        show_property_osd(mpctx, "speed", cmd->on_osd);
         break;
     }
 
@@ -1920,7 +1949,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             opts->osd_level = (opts->osd_level + 1) % (max + 1);
         else
             opts->osd_level = v > max ? max : v;
-        if (cmd->on_osd && opts->osd_level <= 1)
+        if (msg_osd && opts->osd_level <= 1)
             set_osd_tmsg(mpctx, OSD_MSG_OSD_STATUS, 0, osd_duration,
                          "OSD: %s",
                          opts->osd_level ? mp_gtext("enabled") :
@@ -2000,7 +2029,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_SHOW_PROGRESS:
-        mp_show_osd_progression(mpctx);
+        mpctx->add_osd_seek_info |=
+                (msg_osd ? OSD_SEEK_INFO_TEXT : 0) |
+                (bar_osd ? OSD_SEEK_INFO_BAR : 0);
         break;
 
 #ifdef CONFIG_RADIO

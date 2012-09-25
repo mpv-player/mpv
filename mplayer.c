@@ -1425,6 +1425,35 @@ static void sadd_osd_status(char *buffer, int len, struct MPContext *mpctx,
     }
 }
 
+// OSD messages initated by seeking commands are added lazily with this
+// function, because multiple successive seek commands can be coalesced.
+static void add_seek_osd_messages(struct MPContext *mpctx)
+{
+    if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_BAR)
+        set_osd_bar(mpctx, 0, "Position", 0, 100, get_percent_pos(mpctx));
+    if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_TEXT) {
+        mp_osd_msg_t *msg = add_osd_msg(mpctx, OSD_MSG_TEXT, 1,
+                                        mpctx->opts.osd_duration);
+        msg->show_position = true;
+    }
+    if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_CHAPTER_TEXT) {
+        char *chapter = chapter_display_name(mpctx, get_current_chapter(mpctx));
+        set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts.osd_duration,
+                     "Chapter: %s", chapter);
+        talloc_free(chapter);
+    }
+    assert(mpctx->master_demuxer);
+    if ((mpctx->add_osd_seek_info & OSD_SEEK_INFO_EDITION)
+        && mpctx->master_demuxer)
+    {
+        set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts.osd_duration,
+                     "Playing edition %d of %d.",
+                     mpctx->master_demuxer->edition + 1,
+                     mpctx->master_demuxer->num_editions);
+    }
+    mpctx->add_osd_seek_info = 0;
+}
+
 /**
  * \brief Update the OSD message line.
  *
@@ -1439,10 +1468,7 @@ static void update_osd_msg(struct MPContext *mpctx)
     struct MPOpts *opts = &mpctx->opts;
     struct osd_state *osd = mpctx->osd;
 
-    if (mpctx->add_osd_seek_info) {
-        set_osd_bar(mpctx, 0, "Position", 0, 100, get_percent_pos(mpctx));
-        mpctx->add_osd_seek_info = false;
-    }
+    add_seek_osd_messages(mpctx);
 
     // Look if we have a msg
     mp_osd_msg_t *msg = get_osd_msg(mpctx);
@@ -1481,15 +1507,6 @@ static void update_osd_msg(struct MPContext *mpctx)
         mpctx->terminal_osd_text[0] = '\0';
         mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%s\n", opts->term_osd_esc);
     }
-}
-
-void mp_show_osd_progression(struct MPContext *mpctx)
-{
-    mp_osd_msg_t *msg = add_osd_msg(mpctx, OSD_MSG_TEXT, 1,
-                                    mpctx->opts.osd_duration);
-    msg->show_position = true;
-
-    set_osd_bar(mpctx, 0, "Position", 0, 100, get_percent_pos(mpctx));
 }
 
 void reinit_audio_chain(struct MPContext *mpctx)
@@ -3676,6 +3693,8 @@ static void play_current_file(struct MPContext *mpctx)
 #ifdef CONFIG_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
 #endif
+
+    mpctx->add_osd_seek_info &= OSD_SEEK_INFO_EDITION;
 
     m_config_enter_file_local(mpctx->mconfig);
 

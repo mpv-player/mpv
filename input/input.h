@@ -97,8 +97,10 @@ enum mp_command_type {
 #define MP_INPUT_RELEASE_ALL -5
 
 enum mp_on_osd {
-    MP_ON_OSD_NO = 0,
-    MP_ON_OSD_AUTO,
+    MP_ON_OSD_NO = 0,           // prefer not using OSD
+    MP_ON_OSD_AUTO = 1,         // use default behavior of the specific command
+    MP_ON_OSD_BAR = 2,          // force a bar, if applicable
+    MP_ON_OSD_MSG = 4,          // force a message, if applicable
 };
 
 enum mp_input_section_flags {

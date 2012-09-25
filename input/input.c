@@ -852,6 +852,14 @@ mp_cmd_t *mp_input_parse_cmd(bstr str)
 
     if (eat_token(&str, "no-osd")) {
         on_osd = MP_ON_OSD_NO;
+    } else if (eat_token(&str, "osd-bar")) {
+        on_osd = MP_ON_OSD_BAR;
+    } else if (eat_token(&str, "osd-msg")) {
+        on_osd = MP_ON_OSD_MSG;
+    } else if (eat_token(&str, "osd-msg-bar")) {
+        on_osd = MP_ON_OSD_MSG | MP_ON_OSD_BAR;
+    } else if (eat_token(&str, "osd-auto")) {
+        // default
     }
 
     int cmd_idx = 0;

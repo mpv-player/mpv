@@ -41,6 +41,5 @@ void set_osd_bar(struct MPContext *mpctx, int type,const char* name,double min,d
 void set_osd_msg(struct MPContext *mpctx, int id, int level, int time, const char* fmt, ...);
 void set_osd_tmsg(struct MPContext *mpctx, int id, int level, int time, const char* fmt, ...);
 void rm_osd_msg(struct MPContext *mpctx, int id);
-void mp_show_osd_progression(struct MPContext *mpctx);
 
 #endif /* MPLAYER_MP_OSD_H */
