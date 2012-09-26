@@ -65,7 +65,6 @@ __midentify__allprops="
 
     demuxer
 
-    program
     length
     chapters
     editions
