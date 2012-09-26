@@ -1329,14 +1329,14 @@ static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
 
 // Use option-to-property-bridge. (The property and option have the same names.)
 #define M_OPTION_PROPERTY(name) \
-    {(name), mp_property_generic_option, &m_option_type_choice, 0, 0, 0, (name)}
+    {(name), mp_property_generic_option, &m_option_type_dummy, 0, 0, 0, (name)}
 
 // OPTION_PROPERTY(), but with a custom property handler. The custom handler
 // must let unknown operations fall back to mp_property_generic_option().
 #define M_OPTION_PROPERTY_CUSTOM(name, handler) \
-    {(name), (handler), &m_option_type_choice, 0, 0, 0, (name)}
+    {(name), (handler), &m_option_type_dummy, 0, 0, 0, (name)}
 #define M_OPTION_PROPERTY_CUSTOM_(name, handler, ...) \
-    {(name), (handler), &m_option_type_choice, 0, 0, 0, (name), __VA_ARGS__}
+    {(name), (handler), &m_option_type_dummy, 0, 0, 0, (name), __VA_ARGS__}
 
 /// All properties available in MPlayer.
 /** \ingroup Properties

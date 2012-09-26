@@ -35,6 +35,10 @@
 #include "mp_msg.h"
 #include "mpcommon.h"
 
+const struct m_option_type m_option_type_dummy = {
+    .name = "Unknown",
+};
+
 static int do_action(const m_option_t *prop_list, const char *name,
                      int action, void *arg, void *ctx)
 {
@@ -59,7 +63,9 @@ static int do_action(const m_option_t *prop_list, const char *name,
         return M_PROPERTY_UNKNOWN;
     int (*control)(const m_option_t*, int, void*, void*) = prop->p;
     int r = control(prop, action, arg, ctx);
-    if (action == M_PROPERTY_GET_TYPE && r < 0) {
+    if (action == M_PROPERTY_GET_TYPE && r < 0 &&
+        prop->type != &m_option_type_dummy)
+    {
         *(struct m_option *)arg = *prop;
         return M_PROPERTY_OK;
     }

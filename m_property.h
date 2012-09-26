@@ -23,6 +23,8 @@
 
 struct m_option;
 
+extern const struct m_option_type m_option_type_dummy;
+
 enum mp_property_action {
     // Get the property type. This defines the fundamental data type read from
     // or written to the property.
