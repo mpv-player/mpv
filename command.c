@@ -791,6 +791,18 @@ static int mp_property_video(m_option_t *prop, int action, void *arg,
     return property_switch_track(prop, action, arg, mpctx, STREAM_VIDEO);
 }
 
+static struct track *find_track_by_demuxer_id(MPContext *mpctx,
+                                              enum stream_type type,
+                                              int demuxer_id)
+{
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *track = mpctx->tracks[n];
+        if (track->type == type && track->demuxer_id == demuxer_id)
+            return track;
+    }
+    return NULL;
+}
+
 static int mp_property_program(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
@@ -816,8 +828,10 @@ static int mp_property_program(m_option_t *prop, int action, void *arg,
                    "Selected program contains no audio or video streams!\n");
             return M_PROPERTY_ERROR;
         }
-        mp_property_do("audio", M_PROPERTY_SET, &prog.aid, mpctx);
-        mp_property_do("video", M_PROPERTY_SET, &prog.vid, mpctx);
+        mp_switch_track(mpctx, STREAM_AUDIO,
+                find_track_by_demuxer_id(mpctx, STREAM_AUDIO, prog.aid));
+        mp_switch_track(mpctx, STREAM_VIDEO,
+                find_track_by_demuxer_id(mpctx, STREAM_VIDEO, prog.vid));
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
