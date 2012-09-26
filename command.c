@@ -1523,7 +1523,7 @@ static char *translate_legacy_property(void *talloc_ctx, const char *name)
         }
     }
     if (new_name) {
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, "Warning: property '%s' is deprecated, "
+        mp_msg(MSGT_CPLAYER, MSGL_V, "Warning: property '%s' is deprecated, "
                "replaced with '%s'. Fix your input.conf!\n", name, new_name);
     }
     return new_name ? new_name : (char *)name;

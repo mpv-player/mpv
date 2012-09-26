@@ -843,7 +843,7 @@ mp_cmd_t *mp_input_parse_cmd(bstr str)
         if (bstrcasecmp(bstr_splice(str, 0, old_len),
                         (bstr) {(char *)entry->old, old_len}) == 0)
         {
-            mp_tmsg(MSGT_INPUT, MSGL_WARN, "Warning: command '%s' is "
+            mp_tmsg(MSGT_INPUT, MSGL_V, "Warning: command '%s' is "
                     "deprecated, replaced with '%s'. Fix your input.conf!\n",
                     entry->old, entry->new);
             bstr s = bstr_cut(str, old_len);
