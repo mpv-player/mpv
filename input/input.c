@@ -130,7 +130,7 @@ static const mp_cmd_t mp_cmds[] = {
       OARG_CHOICE(0, ({"weak", 0},              {"0", 0},
                       {"force", 1},             {"1", 1})),
   }},
-  { MP_CMD_SUB_STEP, "sub_step", { ARG_INT, OARG_INT(0) } },
+  { MP_CMD_SUB_STEP, "sub_step", { ARG_INT } },
   { MP_CMD_OSD, "osd", { OARG_INT(-1) } },
   { MP_CMD_SHOW_TEXT, "show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
   { MP_CMD_SHOW_PROGRESS, "show_progress", },
