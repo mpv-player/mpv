@@ -106,15 +106,42 @@ Command line switches
 input.conf and slave commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Table of renamed slave commands:
+* Table of renamed input commands:
 
-    =================================== ===================================
-    Old                                 New
-    =================================== ===================================
-    pt_step 1 b                         playlist_next b
-    pt_step -1 b                        playlist_prev b
-    pt_clear                            playlist_clear
-    =================================== ===================================
+    This lists only commands that are not always gracefully handled by the
+    internal legacy translation layer. If an input.conf contains any legacy
+    commands, they will be displayed with ``-v`` when it is loaded, and show
+    and the replacement commands.
+
+    Properties containing ``_`` to separate words use ``-`` instead.
+
+    +--------------------------------+----------------------------------------+
+    | Old                            | New                                    |
+    +================================+========================================+
+    | pt_step 1 [0|1]                | playlist_next [weak|force]             |
+    |                                | (translation layer can't deal with     |
+    |                                | whitespace)                            |
+    +--------------------------------+----------------------------------------+
+    | pt_step -1 [0|1]               | playlist_prev [weak|force] (same)      |
+    +--------------------------------+----------------------------------------+
+    | switch_ratio [<ratio>]         | set aspect <ratio>                     |
+    |                                | set aspect 0 (to reset aspect)         |
+    +--------------------------------+----------------------------------------+
+    | step_property_osd <prop> <step>| cycle <prop> <step> (wraps),           |
+    | <dir>                          | add <prop> <step> (clamps).            |
+    |                                | <dir> parameter unsupported. Use       |
+    |                                | a negative step instead.               |
+    +--------------------------------+----------------------------------------+
+    | step_property <prop> <step>    | Prefix cycle or add with no-osd:       |
+    | <dur>                          | no-osd cycle <prop> <step>             |
+    +--------------------------------+----------------------------------------+
+    | osd_show_property_text <text>  | show_text <text>                       |
+    |                                | The property expansion format string   |
+    |                                | syntax slightly changed.               |
+    +--------------------------------+----------------------------------------+
+    | osd_show_text                  | Now does the same as                   |
+    |                                | osd_show_property_text.                |
+    +--------------------------------+----------------------------------------+
 
 Other
 ~~~~~

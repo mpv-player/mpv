@@ -1326,15 +1326,33 @@
     See also ``--user``.
 
 --playing-msg=<string>
-    Print out a string before starting playback. The following expansions are
-    supported:
+    Print out a string before starting playback. The string is expanded for
+    properties, e.g. ``--playing-msg=file: ${filename}`` will print the string
+    ``file: `` followed by the currently played filename.
+
+    The following expansions are supported:
 
     ${NAME}
-        Expand to the value of the property ``NAME``.
-    ?(NAME:TEXT)
-        Expand ``TEXT`` only if the property ``NAME`` is available.
-    ?(!NAME:TEXT)
-        Expand ``TEXT`` only if the property ``NAME`` is not available.
+        Expands to the value of the property ``NAME``. If ``NAME`` starts with
+        ``=``, use the raw value of the property. If retrieving the property
+        fails, expand to an error string. (Use ``${NAME:}`` with a trailing
+        ``:`` to expand to an empty string instead.)
+    ${NAME:STR}
+        Expands to the value of the property ``NAME``, or ``STR`` if the
+        property can't be retrieved. ``STR`` is expanded recursively.
+    ${!NAME:STR}
+        Expands to ``STR`` (recursively) if the property ``NAME`` can't be
+        retrieved.
+    ${?NAME:STR}
+        Expands to ``STR`` (recursively) if the property ``NAME`` is available.
+    $$
+        Expands to ``$``.
+    $}
+        Expands to ``}``. (To produce this character inside rexursive
+        expansion.)
+    $>
+        Disable property expansion and special handling of ``$`` for the rest
+        of the string.
 
 --playlist=<filename>
     Play files according to a playlist file (ASX, Winamp, SMIL, or
@@ -1980,7 +1998,7 @@
     the line used for the OSD and clear it (default: ``^[[A\r^[[K``).
 
 --title
-    Set the window title. The string can contain property names.
+    Set the window title. Properties are expanded (see ``--playing-msg``).
 
 --tv=<option1:option2:...>
     This option tunes various properties of the TV capture module. For

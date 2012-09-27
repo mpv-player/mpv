@@ -409,6 +409,8 @@ OPTIONS
 
 .. include:: encode.rst
 
+.. include:: input.rst
+
 Taking screenshots
 ==================
 
