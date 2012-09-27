@@ -11,7 +11,7 @@
 /*
  * telecine filter
  *
- * usage: -vf dlopen=./telecine.so:t:32
+ * usage: -vf dlopen=./telecine.so:t:23
  *
  * Parameter: first parameter is "t" for top field first, "b" for bottom field first
  * then digits (0-9) for how many fields a frame is to be displayed
@@ -44,6 +44,7 @@ typedef struct {
     int occupied;
     double lastpts_in;
     double lastpts_out;
+    int first_frame_of_group;
 } tc_data_t;
 
 static int tc_config(struct vf_dlopen_context *ctx)
@@ -116,9 +117,9 @@ static int tc_put_image(struct vf_dlopen_context *ctx)
 
     if (tc->pattern_pos == 0 && !tc->occupied) {
         // at the start of the pattern, reset pts
-        double newpts = ctx->inpic.pts - (delta * tc->pts_num) / tc->pts_denom;
-        // printf("pts reset: %f -> %f (delta: %f)\n", tc->lastpts_out, newpts, newpts - tc->lastpts_out);
-        tc->lastpts_out = newpts;
+        // printf("pts reset: %f -> %f (delta: %f)\n", tc->lastpts_out, ctx->inpic.pts, ctx->inpic.pts - tc->lastpts_out);
+        tc->lastpts_out = ctx->inpic.pts;
+        tc->first_frame_of_group = 1;
     }
     ++tc->pattern_pos;
     if (!tc->pattern[tc->pattern_pos])
@@ -150,7 +151,10 @@ static int tc_put_image(struct vf_dlopen_context *ctx)
                 (ctx->inpic.planeheight[p] - !tc->firstfield + 1) / 2
                 );
         }
-        tc->lastpts_out += (delta * tc->pts_num) / tc->pts_denom;
+        if (tc->first_frame_of_group)
+            tc->first_frame_of_group = 0;
+        else
+            tc->lastpts_out += (delta * tc->pts_num) / tc->pts_denom;
         ctx->outpic[nout].pts = tc->lastpts_out;
         // printf("pts written: %f\n", ctx->outpic[nout].pts);
         ++nout;
@@ -167,7 +171,10 @@ static int tc_put_image(struct vf_dlopen_context *ctx)
                 MIN(ctx->inpic.planestride[p], ctx->outpic[nout].planestride[p]),
                 ctx->inpic.planeheight[p]
                 );
-        tc->lastpts_out += (delta * tc->pts_num) / tc->pts_denom;
+        if (tc->first_frame_of_group)
+            tc->first_frame_of_group = 0;
+        else
+            tc->lastpts_out += (delta * tc->pts_num) / tc->pts_denom;
         ctx->outpic[nout].pts = tc->lastpts_out;
         // printf("pts written: %f\n", ctx->outpic[nout].pts);
         ++nout;
