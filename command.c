@@ -1493,42 +1493,6 @@ static const m_option_t mp_properties[] = {
     {0},
 };
 
-struct legacy_prop {
-    const char *old, *new;
-};
-static const struct legacy_prop legacy_props[] = {
-    {"switch_video",    "video"},
-    {"switch_audio",    "audio"},
-    {"switch_program",  "program"},
-    {"framedropping",   "framedrop"},
-    {"osdlevel",        "osd-level"},
-    {0}
-};
-
-static char *translate_legacy_property(void *talloc_ctx, const char *name)
-{
-    char *new_name = NULL;
-    for (int n = 0; legacy_props[n].new; n++) {
-        if (strcmp(name, legacy_props[n].old) == 0) {
-            new_name = (char *)legacy_props[n].new;
-            break;
-        }
-    }
-    if (!new_name && strchr(name, '_')) {
-        // Old names used "_" instead of "-"
-        new_name = talloc_strdup(talloc_ctx, name);
-        for (int n = 0; new_name[n]; n++) {
-            if (new_name[n] == '_')
-                new_name[n] = '-';
-        }
-    }
-    if (new_name) {
-        mp_msg(MSGT_CPLAYER, MSGL_V, "Warning: property '%s' is deprecated, "
-               "replaced with '%s'. Fix your input.conf!\n", name, new_name);
-    }
-    return new_name ? new_name : (char *)name;
-}
-
 int mp_property_do(const char *name, int action, void *val,
                    struct MPContext *ctx)
 {
@@ -1820,7 +1784,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SET: {
-        cmd->args[0].v.s = translate_legacy_property(cmd, cmd->args[0].v.s);
         int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_SET_STRING,
                                cmd->args[1].v.s, mpctx);
         if (r == M_PROPERTY_UNKNOWN)
@@ -1838,7 +1801,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_ADD:
     case MP_CMD_CYCLE:
     {
-        cmd->args[0].v.s = translate_legacy_property(cmd, cmd->args[0].v.s);
         struct m_property_switch_arg s = {
             .inc = 1,
             .wrap = cmd->id == MP_CMD_CYCLE,
@@ -1859,7 +1821,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_GET_PROPERTY: {
-        cmd->args[0].v.s = translate_legacy_property(cmd, cmd->args[0].v.s);
         char *tmp;
         int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_GET_STRING,
                                &tmp, mpctx);
