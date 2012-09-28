@@ -158,16 +158,6 @@ struct vdpctx {
     VdpChromaType                      vdp_chroma_type;
     VdpYCbCrFormat                     vdp_pixel_format;
 
-    /* draw_osd */
-    struct old_osd {
-        int x0, y0, w, h;
-        unsigned char *src, *srca;
-        int stride;
-    } old_osd_elements[MAX_OSD_PARTS];
-    int old_osd_count;
-    unsigned char                     *osd_data_temp;
-    int                                osd_data_size;
-
     // EOSD
     struct eosd_bitmap_surface {
         VdpRGBAFormat format;
@@ -175,19 +165,17 @@ struct vdpctx {
         uint32_t max_width;
         uint32_t max_height;
         struct bitmap_packer *packer;
-        struct eosd_target *targets;
+        // List of surfaces to be rendered
+        struct eosd_target {
+            VdpRect source;
+            VdpRect dest;
+            VdpColor color;
+        } *targets;
         int targets_size;
         int render_count;
         int bitmap_id;
         int bitmap_pos_id;
-    } eosd_surfaces[MAX_OSD_PARTS], osd_surface;
-
-    // List of surfaces to be rendered
-    struct eosd_target {
-        VdpRect source;
-        VdpRect dest;
-        VdpColor color;
-    } osd_targets[MAX_OSD_PARTS][2];
+    } eosd_surfaces[MAX_OSD_PARTS];
 
     // Video equalizer
     struct mp_csp_equalizer video_eq;
@@ -812,7 +800,6 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
     for (int i = 0; i < MAX_OUTPUT_SURFACES; i++)
         vc->output_surfaces[i] = VDP_INVALID_HANDLE;
     vc->vdp_device = VDP_INVALID_HANDLE;
-    talloc_free(vc->osd_surface.packer);
     for (int i = 0; i < MAX_OSD_PARTS; i++) {
         struct eosd_bitmap_surface *sfc = &vc->eosd_surfaces[i];
         talloc_free(sfc->packer);
@@ -821,9 +808,6 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
             .surface = VDP_INVALID_HANDLE,
         };
     }
-    vc->osd_surface = (struct eosd_bitmap_surface){
-        .surface = VDP_INVALID_HANDLE,
-    };
     vc->output_surface_width = vc->output_surface_height = -1;
 }
 
@@ -1108,157 +1092,6 @@ eosd_skip_upload:
 
     sfc->bitmap_id = imgs->bitmap_id;
     sfc->bitmap_pos_id = imgs->bitmap_pos_id;
-}
-
-static void record_osd(void *ctx, int x0, int y0, int w, int h,
-                       unsigned char *src, unsigned char *srca, int stride)
-{
-    struct vo *vo = ctx;
-    struct vdpctx *vc = vo->priv;
-
-    assert(vc->old_osd_count < MAX_OSD_PARTS);
-    if (!w || !h)
-        return;
-    vc->old_osd_elements[vc->old_osd_count++] = (struct old_osd){
-        x0, y0, w, h, src, srca, stride};
-}
-
-static void render_old_osd(struct vo *vo)
-{
-    struct vdpctx *vc = vo->priv;
-    struct vdp_functions *vdp = vc->vdp;
-    VdpOutputSurface output_surface = vc->output_surfaces[vc->surface_num];
-    VdpStatus vdp_st;
-    struct eosd_bitmap_surface *sfc = &vc->osd_surface;
-
-    if (!sfc->packer)
-        sfc->packer = make_packer(vo, VDP_RGBA_FORMAT_A8);
-
-    packer_set_size(sfc->packer, vc->old_osd_count * 2);
-    for (int i = 0; i < vc->old_osd_count; i++) {
-        struct old_osd *o = &vc->old_osd_elements[i];
-        sfc->packer->in[i*2] = sfc->packer->in[i*2 + 1] =
-            (struct pos){o->w, o->h};
-    };
-    int r = packer_pack(sfc->packer);
-    if (r < 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] OSD bitmaps do not fit on "
-               "a surface with the maximum supported size\n");
-        vc->old_osd_count = 0;
-        return;
-    } else if (r == 1) {
-        if (sfc->surface != VDP_INVALID_HANDLE) {
-            vdp_st = vdp->bitmap_surface_destroy(sfc->surface);
-            CHECK_ST_WARNING("Error when calling vdp_bitmap_surface_destroy");
-        }
-        mp_msg(MSGT_VO, MSGL_V, "[vdpau] Allocating a %dx%d surface for "
-               "OSD bitmaps.\n", sfc->packer->w, sfc->packer->h);
-        vdp_st = vdp->bitmap_surface_create(vc->vdp_device, VDP_RGBA_FORMAT_A8,
-                                            sfc->packer->w, sfc->packer->h,
-                                            true, &sfc->surface);
-        if (vdp_st != VDP_STATUS_OK)
-            sfc->surface = VDP_INVALID_HANDLE;
-        CHECK_ST_WARNING("OSD: error when creating surface");
-    }
-
-    for (int i = 0; i < vc->old_osd_count; i++) {
-        struct old_osd *o = &vc->old_osd_elements[i];
-        struct eosd_target *target1 = &vc->osd_targets[i][0];
-        struct eosd_target *target2 = &vc->osd_targets[i][1];
-        int w = o->w, h = o->h;
-        int sx = sfc->packer->result[i * 2].x;
-        int sy = sfc->packer->result[i * 2].y;
-        target1->source = (VdpRect){ sx, sy, sx + w, sy + h };
-        target1->dest = (VdpRect){ o->x0, o->y0, o->x0 + w, o->y0 + h };
-        sx = sfc->packer->result[i * 2 + 1].x;
-        sy = sfc->packer->result[i * 2 + 1].y;
-        target2->source = (VdpRect){ sx, sy, sx + w, sy + h };
-        target2->dest = target1->dest;
-        vdp_st = vdp->bitmap_surface_put_bits_native(sfc->surface,
-                                                     &(const void *){o->src},
-                                                     &(uint32_t){o->stride},
-                                                     &target1->source);
-        CHECK_ST_WARNING("OSD: putbits failed");
-        int size_required = w * h;
-        if (vc->osd_data_size < size_required) {
-            talloc_free(vc->osd_data_temp);
-            vc->osd_data_temp = talloc_size(vc, size_required);
-            vc->osd_data_size = size_required;
-        }
-        for (int y = 0; y < h; y++)
-            for (int x = 0; x < w; x++)
-                vc->osd_data_temp[y * w + x] = -o->srca[y * o->stride + x];
-        vdp_st = vdp->bitmap_surface_put_bits_native(sfc->surface,
-                                            &(const void *){vc->osd_data_temp},
-                                            &(uint32_t){w},
-                                            &target2->source);
-        CHECK_ST_WARNING("OSD: putbits failed");
-    }
-
-    VdpOutputSurfaceRenderBlendState blend_state_alpha = {
-        .struct_version = VDP_OUTPUT_SURFACE_RENDER_BLEND_STATE_VERSION,
-        .blend_factor_source_color =
-            VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_ZERO,
-        .blend_factor_source_alpha =
-            VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_ZERO,
-        .blend_factor_destination_color =
-            VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
-        .blend_factor_destination_alpha =
-            VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
-        .blend_equation_color = VDP_OUTPUT_SURFACE_RENDER_BLEND_EQUATION_ADD,
-        .blend_equation_alpha = VDP_OUTPUT_SURFACE_RENDER_BLEND_EQUATION_ADD,
-    };
-
-    VdpOutputSurfaceRenderBlendState blend_state_gray = {
-        .struct_version = VDP_OUTPUT_SURFACE_RENDER_BLEND_STATE_VERSION,
-        .blend_factor_source_color =
-            VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_SRC_ALPHA,
-        .blend_factor_source_alpha =
-            VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_SRC_ALPHA,
-        .blend_factor_destination_color =
-            VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_ONE,
-        .blend_factor_destination_alpha =
-            VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_ONE,
-        .blend_equation_color = VDP_OUTPUT_SURFACE_RENDER_BLEND_EQUATION_ADD,
-        .blend_equation_alpha = VDP_OUTPUT_SURFACE_RENDER_BLEND_EQUATION_ADD,
-    };
-
-    for (int i = 0; i < vc->old_osd_count; i++) {
-        struct eosd_target *target1 = &vc->osd_targets[i][0];
-        struct eosd_target *target2 = &vc->osd_targets[i][1];
-        vdp_st = vdp->
-            output_surface_render_bitmap_surface(output_surface,
-                                                 &target2->dest,
-                                                 vc->osd_surface.surface,
-                                                 &target2->source,
-                                                 &(VdpColor){1, 1, 1, 1},
-                                                 &blend_state_alpha,
-                                                 VDP_OUTPUT_SURFACE_RENDER_ROTATE_0);
-        CHECK_ST_WARNING("OSD: Error when rendering");
-        vdp_st = vdp->
-            output_surface_render_bitmap_surface(output_surface,
-                                                 &target1->dest,
-                                                 vc->osd_surface.surface,
-                                                 &target1->source,
-                                                 &(VdpColor){1, 1, 1, 1},
-                                                 &blend_state_gray,
-                                                 VDP_OUTPUT_SURFACE_RENDER_ROTATE_0);
-        CHECK_ST_WARNING("OSD: Error when rendering");
-    }
-}
-
-static void draw_osd(struct vo *vo, struct osd_state *osd)
-{
-    struct vdpctx *vc = vo->priv;
-
-    if (handle_preemption(vo) < 0)
-        return;
-
-    vc->old_osd_count = 0;
-    osd_draw_text_ext(osd, vo->dwidth, vo->dheight, vc->border_x, vc->border_y,
-                      vc->border_x, vc->border_y, vc->vid_width,
-                      vc->vid_height, record_osd, vo);
-    render_old_osd(vo);
 }
 
 static int update_presentation_queue_status(struct vo *vo)
@@ -1619,11 +1452,6 @@ static void destroy_vdpau_objects(struct vo *vo)
         }
     }
 
-    if (vc->osd_surface.surface != VDP_INVALID_HANDLE) {
-        vdp_st = vdp->bitmap_surface_destroy(vc->osd_surface.surface);
-        CHECK_ST_WARNING("Error when calling vdp_bitmap_surface_destroy");
-    }
-
     vdp_st = vdp->device_destroy(vc->vdp_device);
     CHECK_ST_WARNING("Error when calling vdp_device_destroy");
 }
@@ -1802,6 +1630,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
         r->mt = r->mb = vc->border_y;
         return VO_TRUE;
     }
+    case VOCTRL_QUERY_EOSD_FORMAT: {
+        int format = *(int *)data;
+        return (format == SUBBITMAP_LIBASS || format == SUBBITMAP_RGBA)
+               ? VO_TRUE : VO_NOTIMPL;
+    }
     case VOCTRL_NEWFRAME:
         vc->deint_queue_pos = next_deint_queue_pos(vo, true);
         if (status_ok(vo))
@@ -1849,7 +1682,7 @@ const struct vo_driver video_out_vdpau = {
     .draw_image = draw_image,
     .get_buffered_frame = set_next_frame_info,
     .draw_slice = draw_slice,
-    .draw_osd = draw_osd,
+    .draw_osd = draw_osd_with_eosd,
     .flip_page_timed = flip_page_timed,
     .check_events = check_events,
     .uninit = uninit,
