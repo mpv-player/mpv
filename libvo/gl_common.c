@@ -427,6 +427,7 @@ static const extfunc_desc_t extfuncs[] = {
     DEF_GL3_DESC(FramebufferTexture2D),
     DEF_GL3_DESC(Uniform1f),
     DEF_GL3_DESC(Uniform3f),
+    DEF_GL3_DESC(Uniform4f),
     DEF_GL3_DESC(Uniform1i),
     DEF_GL3_DESC(UniformMatrix3fv),
     DEF_GL3_DESC(UniformMatrix4x3fv),
@@ -672,6 +673,31 @@ void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
     }
     if (y < y_max)
         gl->TexSubImage2D(target, 0, x, y, w, y_max - y, format, type, data);
+}
+
+// Like glUploadTex, but upload a byte array with all elements set to val.
+// If scratch is not NULL, points to a resizeable talloc memory block than can
+// be freely used by the function (for avoiding temporary memory allocations).
+void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
+                int x, int y, int w, int h, uint8_t val, void **scratch)
+{
+    int bpp = glFmt2bpp(format, type);
+    int stride = w * bpp;
+    int size = h * stride;
+    if (size < 1)
+        return;
+    void *data = scratch ? *scratch : NULL;
+    if (talloc_get_size(data) < size)
+        data = talloc_realloc(NULL, data, char *, size);
+    memset(data, val, size);
+    glAdjustAlignment(gl, stride);
+    gl->PixelStorei(GL_UNPACK_ROW_LENGTH, w);
+    gl->TexSubImage2D(target, 0, x, y, w, h, format, type, data);
+    if (scratch) {
+        *scratch = data;
+    } else {
+        talloc_free(data);
+    }
 }
 
 /**

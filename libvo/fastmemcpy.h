@@ -64,4 +64,17 @@ static inline void * memcpy_pic2(void * dst, const void * src,
 	return retval;
 }
 
+static inline void memset_pic(void *dst, int fill, int bytesPerLine, int height,
+                              int stride)
+{
+    if (bytesPerLine == stride) {
+        memset(dst, fill, stride * height);
+    } else {
+        for (int i = 0; i < height; i++) {
+            memset(dst, fill, bytesPerLine);
+            dst = (uint8_t *)dst + stride;
+        }
+    }
+}
+
 #endif /* MPLAYER_FASTMEMCPY_H */

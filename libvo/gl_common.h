@@ -60,6 +60,8 @@ int glCreatePPMTex(GL *gl, GLenum target, GLenum fmt, GLint filter,
 void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
                  const void *dataptr, int stride,
                  int x, int y, int w, int h, int slice);
+void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
+                int x, int y, int w, int h, uint8_t val, void **scratch);
 void glDownloadTex(GL *gl, GLenum target, GLenum format, GLenum type,
                    void *dataptr, int stride);
 void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
@@ -351,6 +353,7 @@ struct GL {
 
     void (GLAPIENTRY *Uniform1f)(GLint, GLfloat);
     void (GLAPIENTRY *Uniform3f)(GLint, GLfloat, GLfloat, GLfloat);
+    void (GLAPIENTRY *Uniform4f)(GLint, GLfloat, GLfloat, GLfloat, GLfloat);
     void (GLAPIENTRY *Uniform1i)(GLint, GLint);
     void (GLAPIENTRY *UniformMatrix3fv)(GLint, GLsizei, GLboolean,
                                         const GLfloat *);
