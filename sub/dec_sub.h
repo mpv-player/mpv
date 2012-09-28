@@ -1,14 +1,22 @@
 #ifndef MPLAYER_DEC_SUB_H
 #define MPLAYER_DEC_SUB_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
+#define MAX_OSD_PARTS 8
+
 struct sh_sub;
 struct osd_state;
 struct ass_track;
 
-enum sub_bitmap_type {
+enum sub_bitmap_format {
     SUBBITMAP_EMPTY,
-    SUBBITMAP_LIBASS,
-    SUBBITMAP_RGBA,
+    SUBBITMAP_LIBASS,   // A8, with a per-surface blend color (libass.color)
+    SUBBITMAP_RGBA,     // B8G8R8A8
+    SUBBITMAP_OLD,      // I8A8 (monochrome), premultiplied alpha
+
+    SUBBITMAP_COUNT
 };
 
 typedef struct mp_eosd_res {
@@ -16,21 +24,34 @@ typedef struct mp_eosd_res {
     int mt, mb, ml, mr; // borders (top, bottom, left, right)
 } mp_eosd_res_t;
 
-typedef struct sub_bitmaps {
-    enum sub_bitmap_type type;
+struct sub_bitmap {
+    void *bitmap;
+    int stride;
+    int w, h;
+    int x, y;
+    // Note: not clipped, going outside the screen area is allowed
+    int dw, dh;
 
+    union {
+        struct {
+            uint32_t color;
+        } libass;
+    };
+};
+
+typedef struct sub_bitmaps {
+    int render_index;   // for VO cache state (limited by MAX_OSD_PARTS)
+
+    enum sub_bitmap_format format;
+    bool scaled;        // if false, dw==w && dh==h
+
+    struct sub_bitmap *parts;
+    int num_parts;
+
+    // Provided for VOs with old code
     struct ass_image *imgs;
 
-    struct sub_bitmap {
-        int w, h;
-        int x, y;
-        // Note: not clipped, going outside the screen area is allowed
-        int dw, dh;
-        void *bitmap;
-    } *parts;
-    int part_count;
-
-    bool scaled;
+    // Incremented on each change
     int bitmap_id, bitmap_pos_id;
 } mp_eosd_images_t;
 

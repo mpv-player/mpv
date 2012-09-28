@@ -62,7 +62,8 @@ void sub_get_bitmaps(struct osd_state *osd, struct sub_bitmaps *res)
 {
     struct MPOpts *opts = osd->opts;
 
-    *res = (struct sub_bitmaps){ .type = SUBBITMAP_EMPTY,
+    *res = (struct sub_bitmaps){ .render_index = 0,
+                                 .format = SUBBITMAP_EMPTY,
                                  .bitmap_id = osd->bitmap_id,
                                  .bitmap_pos_id = osd->bitmap_pos_id };
     if (!opts->sub_visibility || !osd->sh_sub || !osd->sh_sub->active) {

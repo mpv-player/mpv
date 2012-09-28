@@ -26,6 +26,13 @@ struct bitmap_packer {
 struct ass_image;
 struct sub_bitmaps;
 
+// Clear all internal state. Leave the following fields: w_max, h_max
+void packer_reset(struct bitmap_packer *packer);
+
+// Get the bounding box used for bitmap data (including padding).
+// The bounding box doesn't exceed (0,0)-(packer->w,packer->h).
+void packer_get_bb(struct bitmap_packer *packer, struct pos out_bb[2]);
+
 /* Reallocate packer->in for at least to desired number of items.
  * Also sets packer->count to the same value.
  */
@@ -46,6 +53,6 @@ int packer_pack(struct bitmap_packer *packer);
  * given image list.
  */
 int packer_pack_from_subbitmaps(struct bitmap_packer *packer,
-                                struct sub_bitmaps *b, int padding_pixels);
+                                struct sub_bitmaps *b);
 
 #endif

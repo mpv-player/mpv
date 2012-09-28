@@ -45,11 +45,10 @@ struct quad {
 };
 
 #define CV_VERTICES_PER_QUAD 6
-#define CV_MAX_OSD_PARTS 20
 
 struct osd_p {
-    GLuint tex[CV_MAX_OSD_PARTS];
-    NSRect tex_rect[CV_MAX_OSD_PARTS];
+    GLuint tex[MAX_OSD_PARTS];
+    NSRect tex_rect[MAX_OSD_PARTS];
     int tex_cnt;
 };
 
@@ -185,7 +184,7 @@ static void create_osd_texture(void *ctx, int x0, int y0, int w, int h,
         return;
     }
 
-    if (osd->tex_cnt >= CV_MAX_OSD_PARTS) {
+    if (osd->tex_cnt >= MAX_OSD_PARTS) {
         mp_msg(MSGT_VO, MSGL_ERR, "Too many OSD parts, contact the"
                                   " developers!\n");
         return;

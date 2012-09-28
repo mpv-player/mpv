@@ -59,9 +59,6 @@ static const char vo_gl3_shaders[] =
 #include "libvo/vo_gl3_shaders.h"
 ;
 
-// How many parts the OSD may consist of at most.
-#define MAX_OSD_PARTS 20
-
 // Pixel width of 1D lookup textures.
 #define LOOKUP_TEXTURE_SIZE 256
 

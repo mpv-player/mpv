@@ -175,6 +175,7 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
                 uint32_t *outbmp = talloc_size(priv->inbitmaps,
                                                r->w * r->h * 4);
                 b->bitmap = outbmp;
+                b->stride = r->w * 4;
                 b->w = r->w;
                 b->h = r->h;
                 b->x = r->x;
@@ -233,13 +234,13 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
         SET(bo->dh, bi->h * yscale);
     }
     res->parts = priv->outbitmaps;
-    res->part_count = priv->count;
+    res->num_parts = priv->count;
     if (priv->bitmaps_changed)
         res->bitmap_id = ++res->bitmap_pos_id;
     else if (pos_changed)
         res->bitmap_pos_id++;
     priv->bitmaps_changed = false;
-    res->type = SUBBITMAP_RGBA;
+    res->format = SUBBITMAP_RGBA;
     res->scaled = xscale != 1 || yscale != 1;
 }
 

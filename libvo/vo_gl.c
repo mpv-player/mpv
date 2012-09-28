@@ -44,9 +44,6 @@
 #include "fastmemcpy.h"
 #include "sub/ass_mp.h"
 
-//! How many parts the OSD may consist of at most
-#define MAX_OSD_PARTS 20
-
 //for gl_priv.use_yuv
 #define MASK_ALL_YUV (~(1 << YUV_CONVERSION_NONE))
 #define MASK_NOT_COMBINERS (~((1 << YUV_CONVERSION_NONE) | (1 << YUV_CONVERSION_COMBINERS)))

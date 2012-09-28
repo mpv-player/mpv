@@ -46,7 +46,6 @@
 #define VFCAP_EOSD_UNSCALED 0x4000
 // used by libvo and vf_vo, indicates the VO does not support draw_slice for this format
 #define VOCAP_NOSLICES 0x8000
-#define VFCAP_OSD_FILTER  0x10000 // OSD is drawn in filter chain
 #define VFCAP_EOSD_FILTER 0x20000 // EOSD is drawn in filter chain
 #define VFCAP_EOSD_RGBA 0x40000
 

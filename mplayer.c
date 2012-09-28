@@ -2638,8 +2638,6 @@ static int redraw_osd(struct MPContext *mpctx)
 {
     struct sh_video *sh_video = mpctx->sh_video;
     struct vf_instance *vf = sh_video->vfilter;
-    if (sh_video->output_flags & VFCAP_OSD_FILTER)
-        return -1;
     if (vo_redraw_frame(mpctx->video_out) < 0)
         return -1;
     mpctx->osd->sub_pts = mpctx->video_pts;

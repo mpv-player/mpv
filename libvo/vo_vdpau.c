@@ -92,8 +92,6 @@ struct vdp_functions {
 #undef VDP_FUNCTION
 };
 
-#define MAX_OLD_OSD_BITMAPS 6
-
 struct vdpctx {
     struct vdp_functions *vdp;
 
@@ -165,7 +163,7 @@ struct vdpctx {
         int x0, y0, w, h;
         unsigned char *src, *srca;
         int stride;
-    } old_osd_elements[MAX_OLD_OSD_BITMAPS];
+    } old_osd_elements[MAX_OSD_PARTS];
     int old_osd_count;
     unsigned char                     *osd_data_temp;
     int                                osd_data_size;
@@ -184,7 +182,7 @@ struct vdpctx {
         VdpRect source;
         VdpRect dest;
         VdpColor color;
-    } *eosd_targets, osd_targets[MAX_OLD_OSD_BITMAPS][2];
+    } *eosd_targets, osd_targets[MAX_OSD_PARTS][2];
     int eosd_targets_size;
     int eosd_render_count;
     int bitmap_id;
@@ -1008,7 +1006,7 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
 
     vc->eosd_render_count = 0;
 
-    if (imgs->type == SUBBITMAP_EMPTY)
+    if (imgs->format == SUBBITMAP_EMPTY)
         return;
 
     if (imgs->bitmap_id == vc->bitmap_id)
@@ -1017,7 +1015,7 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
     need_upload = true;
     VdpRGBAFormat format;
     int format_size;
-    switch (imgs->type) {
+    switch (imgs->format) {
     case SUBBITMAP_LIBASS:
         format = VDP_RGBA_FORMAT_A8;
         format_size = 1;
@@ -1036,7 +1034,8 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
     sfc->format = format;
     if (!sfc->packer)
         sfc->packer = make_packer(vo, format);
-    int r = packer_pack_from_subbitmaps(sfc->packer, imgs, imgs->scaled);
+    sfc->packer->padding = imgs->scaled; // assume 2x2 filter on scaling
+    int r = packer_pack_from_subbitmaps(sfc->packer, imgs);
     if (r < 0) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] EOSD bitmaps do not fit on "
                "a surface with the maximum supported size\n");
@@ -1072,57 +1071,34 @@ eosd_skip_upload:
         vc->eosd_targets_size = sfc->packer->count;
         vc->eosd_targets = talloc_size(vc, vc->eosd_targets_size
                                            * sizeof(*vc->eosd_targets));
-        }
-
-    if (imgs->type == SUBBITMAP_LIBASS) {
-        int i = 0;
-        for (ASS_Image *p = imgs->imgs; p; p = p->next, i++) {
-            if (p->w == 0 || p->h == 0)
-                continue;
-            struct eosd_target *target = vc->eosd_targets +
-                                         vc->eosd_render_count;
-            int x = sfc->packer->result[i].x;
-            int y = sfc->packer->result[i].y;
-            target->source = (VdpRect){x, y, x + p->w, y + p->h};
-            if (need_upload) {
-                vdp_st = vdp->
-                    bitmap_surface_put_bits_native(sfc->surface,
-                                                   (const void *) &p->bitmap,
-                                                   &p->stride, &target->source);
-                CHECK_ST_WARNING("EOSD: putbits failed");
-            }
-            // Render dest, color, etc.
-            target->color.alpha = 1.0 - ((p->color >> 0) & 0xff) / 255.0;
-            target->color.blue  = ((p->color >>  8) & 0xff) / 255.0;
-            target->color.green = ((p->color >> 16) & 0xff) / 255.0;
-            target->color.red   = ((p->color >> 24) & 0xff) / 255.0;
-            target->dest.x0 = p->dst_x;
-            target->dest.y0 = p->dst_y;
-            target->dest.x1 = p->w + p->dst_x;
-            target->dest.y1 = p->h + p->dst_y;
-            vc->eosd_render_count++;
-        }
-    } else {
-        for (int i = 0 ;i < sfc->packer->count; i++) {
-            struct sub_bitmap *b = &imgs->parts[i];
-            struct eosd_target *target = vc->eosd_targets +
-                                         vc->eosd_render_count;
-            int x = sfc->packer->result[i].x;
-            int y = sfc->packer->result[i].y;
-            target->source = (VdpRect){x, y, x + b->w, y + b->h};
-            if (need_upload) {
-                vdp_st = vdp->
-                    bitmap_surface_put_bits_native(sfc->surface,
-                                                   &(const void *){b->bitmap},
-                                                   &(uint32_t){b->w * 4},
-                                                   &target->source);
-                CHECK_ST_WARNING("EOSD: putbits failed");
-            }
-            target->color = (VdpColor){1, 1, 1, 1};
-            target->dest = (VdpRect){b->x, b->y, b->x + b->dw, b->y + b->dh};
-            vc->eosd_render_count++;
-        }
     }
+
+    for (int i = 0 ;i < sfc->packer->count; i++) {
+        struct sub_bitmap *b = &imgs->parts[i];
+        struct eosd_target *target = vc->eosd_targets + vc->eosd_render_count;
+        int x = sfc->packer->result[i].x;
+        int y = sfc->packer->result[i].y;
+        target->source = (VdpRect){x, y, x + b->w, y + b->h};
+        target->dest = (VdpRect){b->x, b->y, b->x + b->dw, b->y + b->dh};
+        target->color = (VdpColor){1, 1, 1, 1};
+        if (imgs->format == SUBBITMAP_LIBASS) {
+            uint32_t color = b->libass.color;
+            target->color.alpha = 1.0 - ((color >> 0) & 0xff) / 255.0;
+            target->color.blue  = ((color >>  8) & 0xff) / 255.0;
+            target->color.green = ((color >> 16) & 0xff) / 255.0;
+            target->color.red   = ((color >> 24) & 0xff) / 255.0;
+        }
+        if (need_upload) {
+            vdp_st = vdp->
+                bitmap_surface_put_bits_native(sfc->surface,
+                                               &(const void *){b->bitmap},
+                                               &(uint32_t){b->stride},
+                                               &target->source);
+                CHECK_ST_WARNING("EOSD: putbits failed");
+        }
+        vc->eosd_render_count++;
+    }
+
     vc->bitmap_id = imgs->bitmap_id;
     vc->bitmap_pos_id = imgs->bitmap_pos_id;
 }
@@ -1133,7 +1109,7 @@ static void record_osd(void *ctx, int x0, int y0, int w, int h,
     struct vo *vo = ctx;
     struct vdpctx *vc = vo->priv;
 
-    assert(vc->old_osd_count < MAX_OLD_OSD_BITMAPS);
+    assert(vc->old_osd_count < MAX_OSD_PARTS);
     if (!w || !h)
         return;
     vc->old_osd_elements[vc->old_osd_count++] = (struct old_osd){

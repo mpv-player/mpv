@@ -30,6 +30,24 @@
 #include "sub/ass_mp.h"
 #include "sub/dec_sub.h"
 
+void packer_reset(struct bitmap_packer *packer)
+{
+    struct bitmap_packer old = *packer;
+    *packer = (struct bitmap_packer) {
+        .w_max = old.w_max,
+        .h_max = old.h_max,
+    };
+    talloc_free_children(packer);
+}
+
+void packer_get_bb(struct bitmap_packer *packer, struct pos out_bb[2])
+{
+    out_bb[0] = (struct pos) {0};
+    out_bb[1] = (struct pos) {
+        FFMIN(packer->used_width + packer->padding, packer->w),
+        FFMIN(packer->used_height + packer->padding, packer->h),
+    };
+}
 
 #define HEIGHT_SORT_BITS 4
 static int size_index(int s)
@@ -171,36 +189,15 @@ void packer_set_size(struct bitmap_packer *packer, int size)
                                            packer->asize + 16);
 }
 
-static int packer_pack_from_assimg(struct bitmap_packer *packer,
-                                   struct ass_image *imglist)
-{
-    int count = 0;
-    struct ass_image *img = imglist;
-    while (img) {
-        if (count >= packer->asize)
-            packer_set_size(packer, FFMAX(packer->asize * 2, 32));
-        packer->in[count].x = img->w;
-        packer->in[count].y = img->h;
-        img = img->next;
-        count++;
-    }
-    packer->count = count;
-    return packer_pack(packer);
-}
-
 int packer_pack_from_subbitmaps(struct bitmap_packer *packer,
-                                struct sub_bitmaps *b, int padding_pixels)
+                                struct sub_bitmaps *b)
 {
-    packer->padding = 0;
     packer->count = 0;
-    if (b->type == SUBBITMAP_EMPTY)
+    if (b->format == SUBBITMAP_EMPTY)
         return 0;
-    if (b->type == SUBBITMAP_LIBASS)
-        return packer_pack_from_assimg(packer, b->imgs);
-    packer->padding = padding_pixels;
-    packer_set_size(packer, b->part_count);
+    packer_set_size(packer, b->num_parts);
     int a = packer->padding;
-    for (int i = 0; i < b->part_count; i++)
+    for (int i = 0; i < b->num_parts; i++)
         packer->in[i] = (struct pos){b->parts[i].w + a, b->parts[i].h + a};
     return packer_pack(packer);
 }
