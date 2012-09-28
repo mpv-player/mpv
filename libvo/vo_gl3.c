@@ -186,11 +186,6 @@ struct gl_priv {
     GLuint osd_programs[SUBBITMAP_COUNT];
     GLuint indirect_program, scale_sep_program, final_program;
 
-    // old OSD code - should go away
-    GLuint osd_textures[MAX_OSD_PARTS];
-    int osd_textures_count;
-    struct vertex osd_va[MAX_OSD_PARTS * VERTICES_PER_QUAD];
-
     struct osd_render *osd[MAX_OSD_PARTS];
 
     GLuint lut_3d_texture;
@@ -1414,96 +1409,6 @@ static mp_image_t *get_window_screenshot(struct gl_priv *p)
     return image;
 }
 
-static void clear_osd(struct gl_priv *p)
-{
-    GL *gl = p->gl;
-
-    if (!p->osd_textures_count)
-        return;
-    gl->DeleteTextures(p->osd_textures_count, p->osd_textures);
-    p->osd_textures_count = 0;
-}
-
-static void create_osd_texture(void *ctx, int x0, int y0, int w, int h,
-                               unsigned char *src, unsigned char *srca,
-                               int stride)
-{
-    struct gl_priv *p = ctx;
-    GL *gl = p->gl;
-
-    if (w <= 0 || h <= 0 || stride < w) {
-        mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
-        return;
-    }
-
-    if (p->osd_textures_count >= MAX_OSD_PARTS) {
-        mp_msg(MSGT_VO, MSGL_ERR, "Too many OSD parts, contact the developers!\n");
-        return;
-    }
-
-    int sx, sy;
-    tex_size(p, w, h, &sx, &sy);
-
-    gl->GenTextures(1, &p->osd_textures[p->osd_textures_count]);
-    gl->BindTexture(GL_TEXTURE_2D, p->osd_textures[p->osd_textures_count]);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RG, sx, sy, 0, GL_RG, GL_UNSIGNED_BYTE,
-                   NULL);
-    default_tex_params(gl, GL_TEXTURE_2D, GL_NEAREST);
-    unsigned char *tmp = malloc(stride * h * 2);
-    // Convert alpha from weird MPlayer scale.
-    for (int i = 0; i < h * stride; i++) {
-        tmp[i*2+0] = src[i];
-        tmp[i*2+1] = -srca[i];
-    }
-    glUploadTex(gl, GL_TEXTURE_2D, GL_RG, GL_UNSIGNED_BYTE, tmp, stride * 2,
-                0, 0, w, h, 0);
-    free(tmp);
-
-    gl->BindTexture(GL_TEXTURE_2D, 0);
-
-    uint8_t color[4] = {(p->osd_color >> 16) & 0xff, (p->osd_color >> 8) & 0xff,
-                        p->osd_color & 0xff, 0xff - (p->osd_color >> 24)};
-
-    write_quad(&p->osd_va[p->osd_textures_count * VERTICES_PER_QUAD],
-               x0, y0, x0 + w, y0 + h, 0, 0, w, h,
-               sx, sy, color, false);
-
-    p->osd_textures_count++;
-}
-
-static void draw_osd(struct vo *vo, struct osd_state *osd)
-{
-    struct gl_priv *p = vo->priv;
-    GL *gl = p->gl;
-
-    if (vo_osd_has_changed(osd)) {
-        clear_osd(p);
-        osd_draw_text_ext(osd, vo->dwidth, vo->dheight, p->border_x,
-                          p->border_y, p->border_x,
-                          p->border_y, p->image_width,
-                          p->image_height, create_osd_texture, p);
-    }
-
-    if (p->osd_textures_count > 0) {
-        gl->Enable(GL_BLEND);
-        // OSD bitmaps use premultiplied alpha.
-        gl->BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-        gl->UseProgram(p->osd_programs[SUBBITMAP_OLD]);
-
-        for (int n = 0; n < p->osd_textures_count; n++) {
-            gl->BindTexture(GL_TEXTURE_2D, p->osd_textures[n]);
-            draw_triangles(p, &p->osd_va[n * VERTICES_PER_QUAD],
-                           VERTICES_PER_QUAD);
-        }
-
-        gl->UseProgram(0);
-
-        gl->Disable(GL_BLEND);
-        gl->BindTexture(GL_TEXTURE_2D, 0);
-    }
-}
-
 static void gen_eosd(struct gl_priv *p, struct osd_render *osd,
                      struct sub_bitmaps *imgs)
 {
@@ -1763,7 +1668,6 @@ static void uninit_gl(struct gl_priv *p)
     gl->DeleteBuffers(1, &p->vertex_buffer);
     p->vertex_buffer = 0;
 
-    clear_osd(p);
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_render *osd = p->osd[n];
         if (!osd)
@@ -2462,7 +2366,7 @@ const struct vo_driver video_out_gl3 = {
     .config = config,
     .control = control,
     .draw_slice = draw_slice,
-    .draw_osd = draw_osd,
+    .draw_osd = emulate_draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,
