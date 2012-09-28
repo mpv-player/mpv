@@ -175,18 +175,19 @@ struct vdpctx {
         uint32_t max_width;
         uint32_t max_height;
         struct bitmap_packer *packer;
-    } eosd_surface, osd_surface;
+        struct eosd_target *targets;
+        int targets_size;
+        int render_count;
+        int bitmap_id;
+        int bitmap_pos_id;
+    } eosd_surfaces[MAX_OSD_PARTS], osd_surface;
 
     // List of surfaces to be rendered
     struct eosd_target {
         VdpRect source;
         VdpRect dest;
         VdpColor color;
-    } *eosd_targets, osd_targets[MAX_OSD_PARTS][2];
-    int eosd_targets_size;
-    int eosd_render_count;
-    int bitmap_id;
-    int bitmap_pos_id;
+    } osd_targets[MAX_OSD_PARTS][2];
 
     // Video equalizer
     struct mp_csp_equalizer video_eq;
@@ -812,13 +813,18 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
         vc->output_surfaces[i] = VDP_INVALID_HANDLE;
     vc->vdp_device = VDP_INVALID_HANDLE;
     talloc_free(vc->osd_surface.packer);
-    talloc_free(vc->eosd_surface.packer);
-    vc->bitmap_id = vc->bitmap_pos_id = 0;
-    vc->osd_surface = vc->eosd_surface = (struct eosd_bitmap_surface){
+    for (int i = 0; i < MAX_OSD_PARTS; i++) {
+        struct eosd_bitmap_surface *sfc = &vc->eosd_surfaces[i];
+        talloc_free(sfc->packer);
+        sfc->bitmap_id = sfc->bitmap_pos_id = 0;
+        *sfc = (struct eosd_bitmap_surface){
+            .surface = VDP_INVALID_HANDLE,
+        };
+    }
+    vc->osd_surface = (struct eosd_bitmap_surface){
         .surface = VDP_INVALID_HANDLE,
     };
     vc->output_surface_width = vc->output_surface_height = -1;
-    vc->eosd_render_count = 0;
 }
 
 static int handle_preemption(struct vo *vo)
@@ -958,11 +964,12 @@ static struct bitmap_packer *make_packer(struct vo *vo, VdpRGBAFormat format)
     return packer;
 }
 
-static void draw_eosd(struct vo *vo)
+static void draw_eosd(struct vo *vo, int index)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
+    struct eosd_bitmap_surface *sfc = &vc->eosd_surfaces[index];
     VdpOutputSurface output_surface = vc->output_surfaces[vc->surface_num];
     int i;
 
@@ -980,13 +987,13 @@ static void draw_eosd(struct vo *vo)
         .blend_equation_alpha = VDP_OUTPUT_SURFACE_RENDER_BLEND_EQUATION_ADD,
     };
 
-    for (i = 0; i < vc->eosd_render_count; i++) {
+    for (i = 0; i < sfc->render_count; i++) {
         vdp_st = vdp->
             output_surface_render_bitmap_surface(output_surface,
-                                                 &vc->eosd_targets[i].dest,
-                                                 vc->eosd_surface.surface,
-                                                 &vc->eosd_targets[i].source,
-                                                 &vc->eosd_targets[i].color,
+                                                 &sfc->targets[i].dest,
+                                                 sfc->surface,
+                                                 &sfc->targets[i].source,
+                                                 &sfc->targets[i].color,
                                                  &blend_state,
                                                  VDP_OUTPUT_SURFACE_RENDER_ROTATE_0);
         CHECK_ST_WARNING("EOSD: Error when rendering");
@@ -998,18 +1005,18 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
-    struct eosd_bitmap_surface *sfc = &vc->eosd_surface;
+    struct eosd_bitmap_surface *sfc = &vc->eosd_surfaces[imgs->render_index];
     bool need_upload = false;
 
-    if (imgs->bitmap_pos_id == vc->bitmap_pos_id)
+    if (imgs->bitmap_pos_id == sfc->bitmap_pos_id)
         return; // Nothing changed and we still have the old data
 
-    vc->eosd_render_count = 0;
+    sfc->render_count = 0;
 
     if (imgs->format == SUBBITMAP_EMPTY)
         return;
 
-    if (imgs->bitmap_id == vc->bitmap_id)
+    if (imgs->bitmap_id == sfc->bitmap_id)
         goto eosd_skip_upload;
 
     need_upload = true;
@@ -1066,16 +1073,16 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
 eosd_skip_upload:
     if (sfc->surface == VDP_INVALID_HANDLE)
         return;
-    if (sfc->packer->count > vc->eosd_targets_size) {
-        talloc_free(vc->eosd_targets);
-        vc->eosd_targets_size = sfc->packer->count;
-        vc->eosd_targets = talloc_size(vc, vc->eosd_targets_size
-                                           * sizeof(*vc->eosd_targets));
+    if (sfc->packer->count > sfc->targets_size) {
+        talloc_free(sfc->targets);
+        sfc->targets_size = sfc->packer->count;
+        sfc->targets = talloc_size(vc, sfc->targets_size
+                                       * sizeof(*sfc->targets));
     }
 
     for (int i = 0 ;i < sfc->packer->count; i++) {
         struct sub_bitmap *b = &imgs->parts[i];
-        struct eosd_target *target = vc->eosd_targets + vc->eosd_render_count;
+        struct eosd_target *target = sfc->targets + sfc->render_count;
         int x = sfc->packer->result[i].x;
         int y = sfc->packer->result[i].y;
         target->source = (VdpRect){x, y, x + b->w, y + b->h};
@@ -1096,11 +1103,11 @@ eosd_skip_upload:
                                                &target->source);
                 CHECK_ST_WARNING("EOSD: putbits failed");
         }
-        vc->eosd_render_count++;
+        sfc->render_count++;
     }
 
-    vc->bitmap_id = imgs->bitmap_id;
-    vc->bitmap_pos_id = imgs->bitmap_pos_id;
+    sfc->bitmap_id = imgs->bitmap_id;
+    sfc->bitmap_pos_id = imgs->bitmap_pos_id;
 }
 
 static void record_osd(void *ctx, int x0, int y0, int w, int h,
@@ -1604,9 +1611,12 @@ static void destroy_vdpau_objects(struct vo *vo)
         CHECK_ST_WARNING("Error when calling vdp_output_surface_destroy");
     }
 
-    if (vc->eosd_surface.surface != VDP_INVALID_HANDLE) {
-        vdp_st = vdp->bitmap_surface_destroy(vc->eosd_surface.surface);
-        CHECK_ST_WARNING("Error when calling vdp_bitmap_surface_destroy");
+    for (int i = 0; i < MAX_OSD_PARTS; i++) {
+        struct eosd_bitmap_surface *sfc = &vc->eosd_surfaces[i];
+        if (sfc->surface != VDP_INVALID_HANDLE) {
+            vdp_st = vdp->bitmap_surface_destroy(sfc->surface);
+            CHECK_ST_WARNING("Error when calling vdp_bitmap_surface_destroy");
+        }
     }
 
     if (vc->osd_surface.surface != VDP_INVALID_HANDLE) {
@@ -1779,8 +1789,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
         if (!data)
             return VO_FALSE;
         if (status_ok(vo)) {
-            generate_eosd(vo, data);
-            draw_eosd(vo);
+            mp_eosd_images_t *imgs = data;
+            generate_eosd(vo, imgs);
+            draw_eosd(vo, imgs->render_index);
         }
         return VO_TRUE;
     case VOCTRL_GET_EOSD_RES: {
