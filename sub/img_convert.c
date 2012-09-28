@@ -31,7 +31,7 @@ struct osd_conv_cache {
     // for osd_conv_cache_alloc_old_p() (SUBBITMAP_PLANAR)
     int allocated, stride;
     struct old_osd_planar bmp;
-    // for osd_conv_cache_alloc_old() (SUBBITMAP_OLD_PLANAR)
+    // for osd_conv_cache_alloc_bmp() (various other formats)
     unsigned char *packed;
 };
 
@@ -73,15 +73,16 @@ static void osd_conv_cache_alloc_old_p(struct osd_conv_cache *c, int w, int h)
     };
 }
 
-static void osd_conv_cache_alloc_old(struct osd_conv_cache *c, int w, int h)
+static void osd_conv_cache_alloc_bmp(struct osd_conv_cache *c, int w, int h,
+                                     int bpp)
 {
     size_t size = talloc_get_size(c->packed);
-    size_t new_size = w * 2 * h;
+    size_t new_size = w * bpp * h;
     if (new_size > size)
         c->packed = talloc_realloc(c, c->packed, unsigned char, new_size);
     c->part = (struct sub_bitmap) {
         .bitmap = c->packed,
-        .stride = w * 2,
+        .stride = w * bpp,
         .w = w, .h = h,
         .dw = w, .dh = h,
     };
@@ -176,6 +177,47 @@ bool osd_conv_ass_to_old_p(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
     return true;
 }
 
+// SUBBITMAP_OLD_PLANAR -> SUBBITMAP_RGBA
+bool osd_conv_old_p_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
+{
+    struct sub_bitmaps src = *imgs;
+    if (src.format != SUBBITMAP_OLD_PLANAR || src.num_parts > 1)
+        return false;
+
+    imgs->format = SUBBITMAP_RGBA;
+    imgs->num_parts = 0;
+    imgs->parts = NULL;
+
+    if (src.num_parts == 0)
+        return true;
+
+    struct sub_bitmap *s = &src.parts[0];
+    struct old_osd_planar *p = s->bitmap;
+
+    osd_conv_cache_alloc_bmp(c, s->w, s->h, 4);
+
+    for (int y = 0; y < s->h; y++) {
+        unsigned char *y_src = p->bitmap + s->stride * y;
+        unsigned char *y_srca = p->alpha + s->stride * y;
+        unsigned char *cur = c->packed + y * s->w * 4;
+        for (int x = 0; x < s->w; x++) {
+            // This is incorrect, as input is premultiplied alpha, but output
+            // has to be non-premultiplied. However, this code is for
+            // compatibility with spudec.c only, and DVD subtitles have
+            // binary transparency only - the rendered result will be the same.
+            cur[x*4+0] = cur[x*4+1] = cur[x*4+2] = y_src[x];
+            cur[x*4+3] = -y_srca[x];
+        }
+    }
+
+    c->part.x = s->x;
+    c->part.y = s->y;
+
+    imgs->parts = &c->part;
+    imgs->num_parts = 1;
+    return true;
+}
+
 // SUBBITMAP_OLD_PLANAR -> SUBBITMAP_OLD
 bool osd_conv_old_p_to_old(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
 {
@@ -193,7 +235,7 @@ bool osd_conv_old_p_to_old(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
     struct sub_bitmap *s = &src.parts[0];
     struct old_osd_planar *p = s->bitmap;
 
-    osd_conv_cache_alloc_old(c, s->w, s->h);
+    osd_conv_cache_alloc_bmp(c, s->w, s->h, 2);
 
     for (int y = 0; y < s->h; y++) {
         unsigned char *y_src = p->bitmap + s->stride * y;

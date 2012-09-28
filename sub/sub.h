@@ -34,7 +34,7 @@ struct vo;
 
 #define MAX_OSD_PARTS 5
 
-#define OSD_CONV_CACHE_MAX 2
+#define OSD_CONV_CACHE_MAX 3
 
 struct osd_object {
     int type; // OSDTYPE_*

@@ -210,6 +210,10 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
         cached |= osd_conv_old_p_to_old(obj->cache[1], out_imgs);
     }
 
+    if (formats[SUBBITMAP_RGBA] && out_imgs->format == SUBBITMAP_OLD_PLANAR) {
+        cached |= osd_conv_old_p_to_rgba(obj->cache[2], out_imgs);
+    }
+
     if (cached)
         obj->cached = *out_imgs;
 
