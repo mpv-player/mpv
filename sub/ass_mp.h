@@ -46,6 +46,11 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
 void mp_ass_configure_fonts(ASS_Renderer *priv);
 ASS_Library *mp_ass_init(struct MPOpts *opts);
 
+struct sub_bitmap;
+struct sub_bitmaps;
+void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
+                         struct sub_bitmap **parts, struct sub_bitmaps *res);
+
 #else /* CONFIG_ASS */
 
 /* Needed for EOSD code using this type to compile */

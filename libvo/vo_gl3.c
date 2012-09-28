@@ -1851,6 +1851,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
         r->mt = r->mb = p->border_y;
         return VO_TRUE;
     }
+    case VOCTRL_QUERY_EOSD_FORMAT: {
+        int *p = data;
+        return osd_to_gl_formats[*p].shader ? VO_TRUE : VO_NOTIMPL;
+    }
     case VOCTRL_ONTOP:
         if (!p->glctx->ontop)
             break;
@@ -2366,7 +2370,7 @@ const struct vo_driver video_out_gl3 = {
     .config = config,
     .control = control,
     .draw_slice = draw_slice,
-    .draw_osd = emulate_draw_osd,
+    .draw_osd = draw_osd_with_eosd,
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,

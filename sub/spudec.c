@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 
 #include <libavutil/common.h>
 #include <libavutil/intreadwrite.h>
@@ -44,6 +45,7 @@
 
 #include "spudec.h"
 #include "vobsub.h"
+#include "sub.h"
 #include "mpcommon.h"
 
 /* Valid values for spu_aamode:
@@ -57,7 +59,6 @@
 int spu_aamode = 3;
 int spu_alignment = -1;
 float spu_gaussvar = 1.0;
-extern int sub_pos;
 
 typedef struct spu_packet_t packet_t;
 struct spu_packet_t {
@@ -123,6 +124,9 @@ typedef struct {
   unsigned int is_forced_sub;         /* true if current subtitle is a forced subtitle */
 
   struct palette_crop_cache palette_crop_cache;
+
+  struct sub_bitmap borrowed_sub_part;
+  struct old_osd_planar borrowed_sub_image;
 } spudec_handle_t;
 
 static void spudec_queue_packet(spudec_handle_t *this, packet_t *packet)
@@ -720,6 +724,40 @@ void spudec_set_forced_subs_only(void * const this, const unsigned int flag)
       ((spudec_handle_t *)this)->forced_subs_only=flag;
       mp_msg(MSGT_SPUDEC,MSGL_DBG2,"SPU: Display only forced subs now %s\n", flag ? "enabled": "disabled");
   }
+}
+
+static void get_data(void *ctx, int x0,int y0, int w,int h, unsigned char* src,
+                     unsigned char *srca, int stride)
+{
+    struct sub_bitmaps *bmp = ctx;
+    assert(bmp->num_parts == 0);
+    bmp->num_parts = 1;
+    struct sub_bitmap *s = &bmp->parts[0];
+    struct old_osd_planar *p = s->bitmap;
+    // We know that the data stays valid until the next SPU related call
+    p->bitmap = src;
+    p->alpha = srca;
+    *s = (struct sub_bitmap) {
+        .bitmap = p, .stride = stride,
+        .x = x0, .y = y0,
+        .w = w, .h = h,
+        .dw = w, .dh = h,
+    };
+}
+
+void spudec_get_bitmap(void *this, int w, int h, struct sub_bitmaps *res)
+{
+    spudec_handle_t *spu = this;
+    *res = (struct sub_bitmaps) {
+        .format = SUBBITMAP_OLD_PLANAR,
+        .parts = &spu->borrowed_sub_part,
+    };
+    res->parts[0].bitmap = &spu->borrowed_sub_image;
+    if (w == -1 && h == -1) {
+        spudec_draw(this, get_data, res);
+    } else {
+        spudec_draw_scaled(this, w, h, get_data, res);
+    }
 }
 
 void spudec_draw(void *this, void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx)

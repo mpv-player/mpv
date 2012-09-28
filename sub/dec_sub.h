@@ -4,19 +4,24 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define MAX_OSD_PARTS 8
-
 struct sh_sub;
 struct osd_state;
 struct ass_track;
 
 enum sub_bitmap_format {
-    SUBBITMAP_EMPTY,
+    SUBBITMAP_EMPTY = 0,// no bitmaps; always has num_parts==0
     SUBBITMAP_LIBASS,   // A8, with a per-surface blend color (libass.color)
-    SUBBITMAP_RGBA,     // B8G8R8A8
+    SUBBITMAP_RGBA,     // B8G8R8A8, can be scaled
     SUBBITMAP_OLD,      // I8A8 (monochrome), premultiplied alpha
+    SUBBITMAP_OLD_PLANAR, // like previous, but bitmap points to old_osd_planar
 
     SUBBITMAP_COUNT
+};
+
+// For SUBBITMAP_OLD_PANAR
+struct old_osd_planar {
+    unsigned char *bitmap;
+    unsigned char *alpha;
 };
 
 typedef struct mp_eosd_res {

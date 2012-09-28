@@ -264,6 +264,41 @@ void mp_ass_configure_fonts(ASS_Renderer *priv)
     free(family);
 }
 
+void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
+                         struct sub_bitmap **parts, struct sub_bitmaps *res)
+{
+    int changed;
+    res->imgs = ass_render_frame(renderer, track, time, &changed);
+    if (changed == 2)
+        res->bitmap_id = ++res->bitmap_pos_id;
+    else if (changed)
+        res->bitmap_pos_id++;
+    res->format = SUBBITMAP_LIBASS;
+
+    res->parts = *parts;
+    res->num_parts = 0;
+    int num_parts_alloc = MP_TALLOC_ELEMS(res->parts);
+    for (struct ass_image *img = res->imgs; img; img = img->next) {
+        if (img->w == 0 || img->h == 0)
+            continue;
+        if (res->num_parts >= num_parts_alloc) {
+            num_parts_alloc = FFMAX(num_parts_alloc * 2, 32);
+            res->parts = talloc_realloc(NULL, res->parts, struct sub_bitmap,
+                                        num_parts_alloc);
+        }
+        struct sub_bitmap *p = &res->parts[res->num_parts];
+        p->bitmap = img->bitmap;
+        p->stride = img->stride;
+        p->libass.color = img->color;
+        p->dw = p->w = img->w;
+        p->dh = p->h = img->h;
+        p->x = img->dst_x;
+        p->y = img->dst_y;
+        res->num_parts++;
+    }
+    *parts = res->parts;
+}
+
 static int map_ass_level[] = {
     MSGL_ERR,           // 0 "FATAL errors"
     MSGL_WARN,

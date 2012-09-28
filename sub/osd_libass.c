@@ -55,116 +55,12 @@ void osd_init_backend(struct osd_state *osd)
 
 void osd_destroy_backend(struct osd_state *osd)
 {
-    if (osd) {
-        if (osd->osd_render)
-            ass_renderer_done(osd->osd_render);
-        osd->osd_render = NULL;
-        ass_library_done(osd->osd_ass_library);
-        osd->osd_ass_library = NULL;
-    }
+    if (osd->osd_render)
+        ass_renderer_done(osd->osd_render);
+    osd->osd_render = NULL;
+    ass_library_done(osd->osd_ass_library);
+    osd->osd_ass_library = NULL;
 }
-
-static void eosd_draw_alpha_a8i8(unsigned char *src,
-                                 int src_w, int src_h,
-                                 int src_stride,
-                                 unsigned char *dst_a,
-                                 unsigned char *dst_i,
-                                 size_t dst_stride,
-                                 int dst_x, int dst_y,
-                                 uint32_t color)
-{
-    const unsigned int r = (color >> 24) & 0xff;
-    const unsigned int g = (color >> 16) & 0xff;
-    const unsigned int b = (color >>  8) & 0xff;
-    const unsigned int a = 0xff - (color & 0xff);
-
-    int gray = (r + g + b) / 3; // not correct
-
-    dst_a += dst_y * dst_stride + dst_x;
-    dst_i += dst_y * dst_stride + dst_x;
-
-    int src_skip = src_stride - src_w;
-    int dst_skip = dst_stride - src_w;
-
-    for (int y = 0; y < src_h; y++) {
-        for (int x = 0; x < src_w; x++) {
-            unsigned char as = (*src * a) >> 8;
-            unsigned char bs = (gray * as) >> 8;
-            // to mplayer scale
-            as = -as;
-
-            unsigned char *a = dst_a;
-            unsigned char *b = dst_i;
-
-            // NOTE: many special cases, because alpha=0 means transparency,
-            //       while alpha=1..255 is opaque..transparent
-            if (as) {
-                *b = ((*b * as) >> 8) + bs;
-                if (*a) {
-                    *a = (*a * as) >> 8;
-                    if (*a < 1)
-                        *a = 1;
-                } else {
-                    *a = as;
-                }
-            }
-
-            dst_a++;
-            dst_i++;
-            src++;
-        }
-        dst_a += dst_skip;
-        dst_i += dst_skip;
-        src += src_skip;
-    }
-}
-
-static void eosd_render_a8i8(unsigned char *a, unsigned char *i, size_t stride,
-                             int x, int y, ASS_Image *imgs)
-{
-    for (ASS_Image *p = imgs; p; p = p->next) {
-        eosd_draw_alpha_a8i8(p->bitmap, p->w, p->h, p->stride, a, i, stride,
-                             x + p->dst_x, y + p->dst_y, p->color);
-    }
-}
-
-static bool ass_bb(ASS_Image *imgs, int *x1, int *y1, int *x2, int *y2)
-{
-    *x1 = *y1 = INT_MAX;
-    *x2 = *y2 = INT_MIN;
-    for (ASS_Image *p = imgs; p; p = p->next) {
-        *x1 = FFMIN(*x1, p->dst_x);
-        *y1 = FFMIN(*y1, p->dst_y);
-        *x2 = FFMAX(*x2, p->dst_x + p->w);
-        *y2 = FFMAX(*y2, p->dst_y + p->h);
-    }
-    return *x1 < *x2 && *y1 < *y2;
-}
-
-static void draw_ass_osd(struct osd_state *osd, mp_osd_obj_t *obj)
-{
-    ass_set_frame_size(osd->osd_render, osd->w, osd->h);
-
-    ASS_Image *imgs = ass_render_frame(osd->osd_render, obj->osd_track, 0,
-                                       NULL);
-
-    int x1, y1, x2, y2;
-    if (!ass_bb(imgs, &x1, &y1, &x2, &y2)) {
-        obj->flags &= ~OSDFLAG_VISIBLE;
-        return;
-    }
-
-    obj->bbox.x1 = x1;
-    obj->bbox.y1 = y1;
-    obj->bbox.x2 = x2;
-    obj->bbox.y2 = y2;
-    obj->flags |= OSDFLAG_BBOX;
-    osd_alloc_buf(obj);
-
-    eosd_render_a8i8(obj->alpha_buffer, obj->bitmap_buffer, obj->stride,
-                     -x1, -y1, imgs);
-}
-
 
 static void update_font_scale(ASS_Track *track, ASS_Style *style, double factor)
 {
@@ -211,7 +107,14 @@ static ASS_Event *get_osd_ass_event(ASS_Track *track)
     event->Start = 0;
     event->Duration = 100;
     event->Style = track->default_style;
+    assert(event->Text == NULL);
     return event;
+}
+
+static void clear_obj(struct osd_object *obj)
+{
+    if (obj->osd_track)
+        ass_flush_events(obj->osd_track);
 }
 
 static char *append_utf8_buffer(char *buffer, uint32_t codepoint)
@@ -257,25 +160,27 @@ static char *mangle_ass(const char *in)
     return res;
 }
 
-void vo_update_text_osd(struct osd_state *osd, mp_osd_obj_t* obj)
+static void update_osd(struct osd_state *osd, struct osd_object *obj)
 {
+    if (!osd->osd_text[0]) {
+        clear_obj(obj);
+        return;
+    }
+
     if (!obj->osd_track)
         obj->osd_track = create_osd_ass_track(osd);
     ASS_Event *event = get_osd_ass_event(obj->osd_track);
-    event->Text = mangle_ass(osd->osd_text);
-    draw_ass_osd(osd, obj);
-    talloc_free(event->Text);
-    event->Text = NULL;
+    char *text = mangle_ass(osd->osd_text);
+    event->Text = strdup(text);
+    talloc_free(text);
 }
 
 #define OSDBAR_ELEMS 46
 
-void vo_update_text_progbar(struct osd_state *osd, mp_osd_obj_t* obj)
+static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 {
-    obj->flags |= OSDFLAG_CHANGED | OSDFLAG_VISIBLE;
-
     if (vo_osd_progbar_type < 0) {
-        obj->flags &= ~OSDFLAG_VISIBLE;
+        clear_obj(obj);
         return;
     }
 
@@ -322,21 +227,16 @@ void vo_update_text_progbar(struct osd_state *osd, mp_osd_obj_t* obj)
     text = append_utf8_buffer(text, OSD_CODEPOINTS + OSD_PB_END);
 
     ASS_Event *event = get_osd_ass_event(obj->osd_track);
-    event->Text = text;
-    draw_ass_osd(osd, obj);
-    event->Text = NULL;
-
+    event->Text = strdup(text);
     talloc_free(text);
 }
 
-void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj)
+static void update_sub(struct osd_state *osd, struct osd_object *obj)
 {
     struct MPOpts *opts = osd->opts;
 
-    obj->flags |= OSDFLAG_CHANGED | OSDFLAG_VISIBLE;
-
-    if (!vo_sub || !opts->sub_visibility) {
-        obj->flags &= ~OSDFLAG_VISIBLE;
+    if (!(vo_sub && opts->sub_visibility)) {
+        clear_obj(obj);
         return;
     }
 
@@ -354,14 +254,39 @@ void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj)
         text = talloc_asprintf_append_buffer(text, "%s\n", vo_sub->text[n]);
 
     ASS_Event *event = get_osd_ass_event(obj->osd_track);
-    event->Text = mangle_ass(text);
-    draw_ass_osd(osd, obj);
-    talloc_free(event->Text);
-    event->Text = NULL;
-
+    char *escaped_text = mangle_ass(text);
+    event->Text = strdup(escaped_text);
+    talloc_free(escaped_text);
     talloc_free(text);
 }
 
-// unneeded
-void osd_font_invalidate(void) {}
-void osd_font_load(struct osd_state *osd) {}
+static void update_object(struct osd_state *osd, struct osd_object *obj)
+{
+    switch (obj->type) {
+    case OSDTYPE_OSD:
+        update_osd(osd, obj);
+        break;
+    case OSDTYPE_SUBTITLE:
+        update_sub(osd, obj);
+        break;
+    case OSDTYPE_PROGBAR:
+        update_progbar(osd, obj);
+        break;
+    }
+}
+
+void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
+                            struct sub_bitmaps *out_imgs)
+{
+    if (obj->force_redraw)
+        update_object(osd, obj);
+
+    *out_imgs = (struct sub_bitmaps) {0};
+    if (!obj->osd_track)
+        return;
+
+    ass_set_frame_size(osd->osd_render, osd->w, osd->h);
+    mp_ass_render_frame(osd->osd_render, obj->osd_track, 0,
+                        &obj->parts_cache, out_imgs);
+    talloc_steal(obj, obj->parts_cache);
+}

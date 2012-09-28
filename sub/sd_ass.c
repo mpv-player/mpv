@@ -141,39 +141,9 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
     ASS_Renderer *renderer = osd->ass_renderer;
     mp_ass_configure(renderer, opts, &osd->dim, osd->unscaled);
     ass_set_aspect_ratio(renderer, scale, 1);
-    int changed;
-    res->imgs = ass_render_frame(renderer, ctx->ass_track,
-                                 osd->sub_pts * 1000 + .5, &changed);
-    if (changed == 2)
-        res->bitmap_id = ++res->bitmap_pos_id;
-    else if (changed)
-        res->bitmap_pos_id++;
-    res->format = SUBBITMAP_LIBASS;
-
-    int num_parts = 0;
-    int num_parts_alloc = MP_TALLOC_ELEMS(ctx->parts);
-    struct ass_image *img = res->imgs;
-    while (img) {
-        if (img->w == 0 || img->h == 0)
-            continue;
-        if (num_parts >= num_parts_alloc) {
-            num_parts_alloc = FFMAX(num_parts_alloc * 2, 32);
-            ctx->parts = talloc_realloc(ctx, ctx->parts, struct sub_bitmap,
-                                        num_parts_alloc);
-        }
-        struct sub_bitmap *p = &ctx->parts[num_parts];
-        p->bitmap = img->bitmap;
-        p->stride = img->stride;
-        p->libass.color = img->color;
-        p->dw = p->w = img->w;
-        p->dh = p->h = img->h;
-        p->x = img->dst_x;
-        p->y = img->dst_y;
-        img = img->next;
-        num_parts++;
-    }
-    res->parts = ctx->parts;
-    res->num_parts = num_parts;
+    mp_ass_render_frame(renderer, ctx->ass_track, osd->sub_pts * 1000 + .5,
+                        &ctx->parts, res);
+    talloc_steal(ctx, ctx->parts);
 }
 
 static void reset(struct sh_sub *sh, struct osd_state *osd)
