@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <libavutil/mem.h>
 #include <libavutil/common.h>
@@ -253,6 +254,7 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
         .ass_library = asslib,
     };
     // temp hack, should be moved to mplayer later
+    new_osd_obj(OSDTYPE_ASS);
     new_osd_obj(OSDTYPE_OSD);
     new_osd_obj(OSDTYPE_SUBTITLE);
     new_osd_obj(OSDTYPE_PROGBAR);
@@ -368,4 +370,75 @@ int vo_osd_check_range_update(int x1,int y1,int x2,int y2){
 	obj=obj->next;
     }
     return 0;
+}
+
+struct draw_osd_closure {
+    struct vo *vo;
+    struct osd_state *osd;
+    int render_index;
+};
+
+static void eosd_draw_osd_part(void *ctx, int x0, int y0, int w, int h,
+                               unsigned char *src, unsigned char *srca,
+                               int stride)
+{
+    struct draw_osd_closure *c = ctx;
+
+    assert(c->render_index < MAX_OSD_PARTS);
+    assert(w > 0 && h > 0);
+
+    size_t scratch_size = talloc_get_size(c->osd->scratch);
+    size_t new_size = stride * h * 2;
+    if (new_size > scratch_size) {
+        scratch_size = new_size;
+        c->osd->scratch = talloc_realloc(c->osd, c->osd->scratch, char *,
+                                         new_size);
+    }
+
+    unsigned char *tmp = c->osd->scratch;
+
+    for (int y = 0; y < h; y++) {
+        unsigned char *y_src = src + stride * y;
+        unsigned char *y_srca = srca + stride * y;
+        unsigned char *cur = tmp + y * w * 2;
+        for (int x = 0; x < w; x++) {
+            cur[x*2+0] = y_src[x];
+            cur[x*2+1] = -y_srca[x];
+        }
+    }
+
+    struct sub_bitmaps *imgs = &c->osd->eosd[c->render_index];
+    imgs->render_index = c->render_index;
+    imgs->format = SUBBITMAP_OLD;
+    imgs->bitmap_id++;
+    imgs->bitmap_pos_id++;
+    if (!imgs->num_parts) {
+        imgs->num_parts = 1;
+        imgs->parts = talloc_array(c->osd, struct sub_bitmap, imgs->num_parts);
+    }
+
+    imgs->parts[0] = (struct sub_bitmap) {
+        .bitmap = tmp,
+        .stride = w * 2,
+        .x = x0, .y = y0,
+        .w = w, .h = h,
+        .dw = w, .dh = h,
+    };
+
+    vo_control(c->vo, VOCTRL_DRAW_EOSD, imgs);
+
+    c->render_index++;
+}
+
+// draw old-OSD using EOSD
+void emulate_draw_osd(struct vo *vo, struct osd_state *osd)
+{
+    mp_eosd_res_t res = {0};
+    if (vo_control(vo, VOCTRL_GET_EOSD_RES, &res) != VO_TRUE)
+        return;
+
+    struct draw_osd_closure c = {vo, osd};
+    c.render_index = 1; // 0 is the "normal" EOSD renderer for subtitles
+    osd_draw_text_ext(osd, res.w, res.h, res.ml, res.mt, res.mr, res.mb, 0, 0,
+                      eosd_draw_osd_part, &c);
 }

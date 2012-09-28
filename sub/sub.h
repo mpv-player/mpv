@@ -24,10 +24,13 @@
 #include "subreader.h"
 #include "dec_sub.h"
 
+struct vo;
+
 typedef struct mp_osd_bbox_s {
     int x1,y1,x2,y2;
 } mp_osd_bbox_t;
 
+#define OSDTYPE_ASS 0
 #define OSDTYPE_OSD 1
 #define OSDTYPE_SUBTITLE 2
 #define OSDTYPE_PROGBAR 3
@@ -77,6 +80,10 @@ struct osd_state {
     struct ass_library *osd_ass_library;
     char *osd_text;
     int w, h;
+
+    struct sub_bitmaps eosd[MAX_OSD_PARTS];
+
+    void *scratch;
 
     struct MPOpts *opts;
 };
@@ -152,6 +159,8 @@ void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
                                           unsigned char *srca,
                                           int stride),
                        void *ctx);
+
+void emulate_draw_osd(struct vo *vo, struct osd_state *osd);
 
 struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib);
 void osd_set_text(struct osd_state *osd, const char *text);
