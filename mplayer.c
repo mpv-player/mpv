@@ -1430,7 +1430,7 @@ static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
         // the difference is greater assume it's wrapped around from below 0
         if (mpctx->osd_visible - now > 36000000) {
             mpctx->osd_visible = 0;
-            vo_osd_progbar_type = -1; // disable
+            mpctx->osd->progbar_type = -1; // disable
             vo_osd_changed(OSDTYPE_PROGBAR);
             mpctx->osd_function = mpctx->paused ? OSD_PAUSE : OSD_PLAY;
         }
@@ -1490,8 +1490,8 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char *name,
 
     if (mpctx->sh_video && opts->term_osd != 1) {
         mpctx->osd_visible = (GetTimerMS() + 1000) | 1;
-        vo_osd_progbar_type = type;
-        vo_osd_progbar_value = 256 * (val - min) / (max - min);
+        mpctx->osd->progbar_type = type;
+        mpctx->osd->progbar_value = 256 * (val - min) / (max - min);
         vo_osd_changed(OSDTYPE_PROGBAR);
         return;
     }

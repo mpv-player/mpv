@@ -73,6 +73,7 @@ struct osd_state {
     int w, h;
 
     char *osd_text;             // OSDTYPE_OSD
+    int progbar_type, progbar_value; // OSDTYPE_PROGBAR
 
     // temporary for sub decoders
     int bitmap_id;
@@ -86,9 +87,6 @@ struct osd_state {
 };
 
 extern subtitle* vo_sub;
-
-extern int vo_osd_progbar_type;
-extern int vo_osd_progbar_value;   // 0..255
 
 extern void* vo_spudec;
 extern void* vo_vobsub;

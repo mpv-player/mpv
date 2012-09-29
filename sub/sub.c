@@ -66,8 +66,6 @@ int sub_bg_color=0; /* subtitles background color */
 int sub_bg_alpha=0;
 int sub_justify=0;
 
-int vo_osd_progbar_type=-1;
-int vo_osd_progbar_value=100;   // 0..256
 subtitle* vo_sub=NULL;
 char *subtitle_font_encoding = NULL;
 float text_font_scale_factor = 3.5;
@@ -113,6 +111,8 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
     *osd = (struct osd_state) {
         .opts = opts,
         .ass_library = asslib,
+        .osd_text = talloc_strdup(osd, ""),
+        .progbar_type = -1,
     };
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = talloc_struct(osd, struct osd_object, {
@@ -122,7 +122,6 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
             obj->cache[i] = talloc_steal(obj, osd_conv_cache_new());
         osd->objs[n] = obj;
     }
-    osd->osd_text = talloc_strdup(osd, "");
     osd_init_backend(osd);
     global_osd = osd;
     return osd;

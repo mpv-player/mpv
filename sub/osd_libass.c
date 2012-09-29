@@ -176,7 +176,7 @@ static void update_osd(struct osd_state *osd, struct osd_object *obj)
 
 static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 {
-    if (vo_osd_progbar_type < 0) {
+    if (osd->progbar_type < 0) {
         clear_obj(obj);
         return;
     }
@@ -199,16 +199,16 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     style->FontSize = 22.0;
     style->Outline = style->FontSize / 16 * scale;
 
-    int active = (vo_osd_progbar_value * OSDBAR_ELEMS + 255) / 256;
+    int active = (osd->progbar_value * OSDBAR_ELEMS + 255) / 256;
     active = FFMIN(OSDBAR_ELEMS, FFMAX(active, 0));
 
     char *text = talloc_strdup(NULL, "{\\q2}");
 
-    if (vo_osd_progbar_type >= 32) {
-        text = append_utf8_buffer(text, vo_osd_progbar_type);
-    } else if (vo_osd_progbar_type > 0) {
+    if (osd->progbar_type >= 32) {
+        text = append_utf8_buffer(text, osd->progbar_type);
+    } else if (osd->progbar_type > 0) {
         text = talloc_strdup_append_buffer(text, ASS_USE_OSD_FONT);
-        text = append_utf8_buffer(text, OSD_CODEPOINTS + vo_osd_progbar_type);
+        text = append_utf8_buffer(text, OSD_CODEPOINTS + osd->progbar_type);
         text = talloc_strdup_append_buffer(text, "{\\r}");
     }
 
