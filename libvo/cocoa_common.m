@@ -102,7 +102,7 @@ struct vo_cocoa_state {
 
     NSString *window_title;
 
-    NSInteger windowed_window_level;
+    NSInteger window_level;
     NSInteger fullscreen_window_level;
 
     int display_cursor;
@@ -130,7 +130,6 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .windowed_mask = NSTitledWindowMask|NSClosableWindowMask|
             NSMiniaturizableWindowMask|NSResizableWindowMask,
         .fullscreen_mask = NSBorderlessWindowMask,
-        .fullscreen_window_level = NSNormalWindowLevel + 1,
         .windowed_frame = {{0,0},{0,0}},
         .out_fs_resize = NO,
         .display_cursor = 1,
@@ -288,13 +287,13 @@ static void vo_set_level(struct vo *vo, int ontop)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     if (ontop) {
-        s->windowed_window_level = NSNormalWindowLevel + 1;
+        s->window_level = NSNormalWindowLevel + 1;
     } else {
-        s->windowed_window_level = NSNormalWindowLevel;
+        s->window_level = NSNormalWindowLevel;
     }
 
     if (!vo_fs)
-        [s->window setLevel:s->windowed_window_level];
+        [s->window setLevel:s->window_level];
 }
 
 void vo_cocoa_ontop(struct vo *vo)
@@ -610,7 +609,6 @@ void create_menu()
         [self setHasShadow:NO];
         [self setStyleMask:s->fullscreen_mask];
         [self setFrame:s->screen_frame display:YES animate:NO];
-        [self setLevel:s->fullscreen_window_level];
         vo_fs = VO_TRUE;
         vo_cocoa_display_cursor(_vo, 0);
         [self setMovableByWindowBackground: NO];
@@ -625,7 +623,6 @@ void create_menu()
             s->out_fs_resize = NO;
         }
         [self setContentAspectRatio:s->current_video_size];
-        [self setLevel:s->windowed_window_level];
         vo_fs = VO_FALSE;
         vo_cocoa_display_cursor(_vo, 1);
         [self setMovableByWindowBackground: YES];
@@ -763,23 +760,16 @@ void create_menu()
 
 - (void)applicationWillBecomeActive:(NSNotification *)aNotification
 {
-    if (vo_fs) {
-        struct vo_cocoa_state *s = _vo->cocoa;
-        [s->window makeKeyAndOrderFront:s->window];
-        [s->window setLevel:s->fullscreen_window_level];
-        if (current_screen_has_dock_or_menubar(_vo))
-            [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
-                                          NSApplicationPresentationHideMenuBar];
+    if (vo_fs && current_screen_has_dock_or_menubar(_vo)) {
+        [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
+                                      NSApplicationPresentationHideMenuBar];
     }
 }
 
 - (void)applicationWillResignActive:(NSNotification *)aNotification
 {
     if (vo_fs) {
-        struct vo_cocoa_state *s = _vo->cocoa;
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
-        [s->window setLevel:s->windowed_window_level];
-        [s->window orderBack:s->window];
     }
 }
 
