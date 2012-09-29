@@ -26,13 +26,15 @@
 
 struct vo;
 
-#define OSDTYPE_ASS 0
-#define OSDTYPE_OSD 1
-#define OSDTYPE_SUBTITLE 2
-#define OSDTYPE_PROGBAR 3
-#define OSDTYPE_SPU 4
+enum mp_osdtype {
+    OSDTYPE_ASS,
+    OSDTYPE_OSD,
+    OSDTYPE_SUBTITLE,
+    OSDTYPE_PROGBAR,
+    OSDTYPE_SPU,
 
-#define MAX_OSD_PARTS 5
+    MAX_OSD_PARTS
+};
 
 #define OSD_CONV_CACHE_MAX 3
 
@@ -91,24 +93,31 @@ extern int vo_osd_progbar_value;   // 0..255
 extern void* vo_spudec;
 extern void* vo_vobsub;
 
-#define OSD_PLAY 0x01
-#define OSD_PAUSE 0x02
-#define OSD_STOP 0x03
-#define OSD_REW 0x04
-#define OSD_FFW 0x05
-#define OSD_CLOCK 0x06
-#define OSD_CONTRAST 0x07
-#define OSD_SATURATION 0x08
-#define OSD_VOLUME 0x09
-#define OSD_BRIGHTNESS 0x0A
-#define OSD_HUE 0x0B
-#define OSD_BALANCE 0x0C
-#define OSD_PANSCAN 0x50
+// Start of OSD symbols in osd_font.pfb
+#define OSD_CODEPOINTS 0xE000
 
-#define OSD_PB_START 0x10
-#define OSD_PB_0 0x11
-#define OSD_PB_END 0x12
-#define OSD_PB_1 0x13
+// OSD symbols. osd_font.pfb has them starting from codepoint OSD_CODEPOINTS.
+// Symbols with a value >= 32 are normal unicode codepoints.
+enum mp_osd_font_codepoints {
+    OSD_PLAY = 0x01,
+    OSD_PAUSE = 0x02,
+    OSD_STOP = 0x03,
+    OSD_REW = 0x04,
+    OSD_FFW = 0x05,
+    OSD_CLOCK = 0x06,
+    OSD_CONTRAST = 0x07,
+    OSD_SATURATION = 0x08,
+    OSD_VOLUME = 0x09,
+    OSD_BRIGHTNESS = 0x0A,
+    OSD_HUE = 0x0B,
+    OSD_BALANCE = 0x0C,
+    OSD_PANSCAN = 0x50,
+
+    OSD_PB_START = 0x10,
+    OSD_PB_0 = 0x11,
+    OSD_PB_END = 0x12,
+    OSD_PB_1 = 0x13,
+};
 
 /* now in textform */
 extern char * const sub_osd_names[];

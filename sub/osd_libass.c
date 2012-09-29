@@ -35,9 +35,6 @@ static const char osd_font_pfb[] =
 #include "mp_core.h"
 
 
-// Map OSD symbols (e.g. OSD_PLAY) to the glyphs in osd_font_pfb[].
-#define OSD_CODEPOINTS 0xE000
-
 // NOTE: \fs-5 to reduce the size of the symbols in relation to normal text.
 //       Done because libass doesn't center characters that are too high.
 #define ASS_USE_OSD_FONT "{\\fnOSD\\fs-5}"
