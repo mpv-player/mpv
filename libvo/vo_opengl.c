@@ -2459,25 +2459,6 @@ const struct vo_driver video_out_opengl = {
     .uninit = uninit,
 };
 
-// short-term compatibility
-const struct vo_driver video_out_gl3 = {
-    .is_new = true,
-    .info = &(const vo_info_t) {
-        "Extended OpenGL Renderer",
-        "gl3",
-        "Based on vo_gl.c by Reimar Doeffinger",
-        ""
-    },
-    .preinit = preinit,
-    .config = config,
-    .control = control,
-    .draw_slice = draw_slice,
-    .draw_osd = draw_osd,
-    .flip_page = flip_page,
-    .check_events = check_events,
-    .uninit = uninit,
-};
-
 static const char help_text[] =
 "\n--vo=opengl command line help:\n"
 "Example: mplayer --vo=opengl:scale-sep:lscale=lanczos2\n"

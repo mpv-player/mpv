@@ -30,6 +30,7 @@
 #include "config.h"
 #include "options.h"
 #include "talloc.h"
+#include "bstr.h"
 #include "video_out.h"
 #include "aspect.h"
 #include "geometry.h"
@@ -75,7 +76,6 @@ extern struct vo_driver video_out_vdpau;
 extern struct vo_driver video_out_xv;
 extern struct vo_driver video_out_opengl;
 extern struct vo_driver video_out_opengl_old;
-extern struct vo_driver video_out_gl3;
 extern struct vo_driver video_out_null;
 extern struct vo_driver video_out_image;
 extern struct vo_driver video_out_lavc;
@@ -120,9 +120,6 @@ const struct vo_driver *video_out_drivers[] =
         &video_out_image,
 #ifdef CONFIG_ENCODING
         &video_out_lavc,
-#endif
-#ifdef CONFIG_GL
-        &video_out_gl3,
 #endif
         NULL
 };
@@ -284,6 +281,20 @@ void list_video_out(void)
     mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
 
+static void replace_legacy_vo_name(bstr *name)
+{
+    bstr new = *name;
+    if (bstr_equals0(*name, "gl"))
+        new = bstr0("opengl");
+    if (bstr_equals0(*name, "gl3"))
+        new = bstr0("opengl");
+    if (!bstr_equals(*name, new)) {
+        mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "VO driver '%.*s' has been replaced "
+                "with '%.*s'!\n", BSTR_P(*name), BSTR_P(new));
+    }
+    *name = new;
+}
+
 struct vo *init_best_video_out(struct MPOpts *opts,
                                struct mp_fifo *key_fifo,
                                struct input_ctx *input_ctx,
@@ -303,32 +314,27 @@ struct vo *init_best_video_out(struct MPOpts *opts,
     // first try the preferred drivers, with their optional subdevice param:
     if (vo_list && vo_list[0])
         while (vo_list[0][0]) {
-            char *name = strdup(vo_list[0]);
-            char *vo_subdevice = strchr(name,':');
-            if (!strcmp(name, "pgm"))
-                mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "The pgm video output driver has been replaced by -vo pnm:pgmyuv.\n");
-            if (!strcmp(name, "md5"))
-                mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "The md5 video output driver has been replaced by -vo md5sum.\n");
-            if (vo_subdevice) {
-                vo_subdevice[0] = 0;
-                ++vo_subdevice;
+            char *arg = vo_list[0];
+            bstr name = bstr0(arg);
+            char *params = strchr(arg, ':');
+            if (params) {
+                name = bstr_splice(name, 0, params - arg);
+                params++;
             }
+            replace_legacy_vo_name(&name);
             for (i = 0; video_out_drivers[i]; i++) {
                 const struct vo_driver *video_driver = video_out_drivers[i];
                 const vo_info_t *info = video_driver->info;
-                if (!strcmp(info->short_name, name)) {
+                if (bstr_equals0(name, info->short_name)) {
                     // name matches, try it
                     *vo = initial_values;
                     vo->driver = video_driver;
-                    if (!vo_preinit(vo, vo_subdevice)) {
-                        free(name);
+                    if (!vo_preinit(vo, params))
                         return vo; // success!
-                    }
                     talloc_free_children(vo);
 		}
 	    }
             // continue...
-            free(name);
             ++vo_list;
             if (!(vo_list[0])) {
                 talloc_free(vo);
