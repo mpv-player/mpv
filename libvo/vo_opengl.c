@@ -2323,6 +2323,8 @@ static int preinit(struct vo *vo, const char *arg)
     struct gl_priv *p = talloc_zero(vo, struct gl_priv);
     vo->priv = p;
 
+    bool hq = strcmp(vo->driver->info->short_name, "opengl-hq") == 0;
+
     *p = (struct gl_priv) {
         .vo = vo,
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
@@ -2330,11 +2332,12 @@ static int preinit(struct vo *vo, const char *arg)
         .use_pbo = 0,
         .swap_interval = vo_vsync,
         .osd_color = 0xffffff,
+        .dither_depth = hq ? 0 : -1,
         .fbo_format = GL_RGB16,
         .use_scale_sep = 1,
-        .use_fancy_downscaling = 1,
+        .use_fancy_downscaling = hq,
         .scalers = {
-            { .index = 0, .name = "lanczos2" },
+            { .index = 0, .name = hq ? "lanczos2" : "bilinear" },
             { .index = 1, .name = "bilinear" },
         },
         .scaler_params = {NAN, NAN},
@@ -2459,6 +2462,24 @@ const struct vo_driver video_out_opengl = {
     .uninit = uninit,
 };
 
+const struct vo_driver video_out_opengl_hq = {
+    .is_new = true,
+    .info = &(const vo_info_t) {
+        "Extended OpenGL Renderer (high quality rendering preset)",
+        "opengl-hq",
+        "Based on vo_gl.c by Reimar Doeffinger",
+        ""
+    },
+    .preinit = preinit,
+    .config = config,
+    .control = control,
+    .draw_slice = draw_slice,
+    .draw_osd = draw_osd,
+    .flip_page = flip_page,
+    .check_events = check_events,
+    .uninit = uninit,
+};
+
 static const char help_text[] =
 "\n--vo=opengl command line help:\n"
 "Example: mplayer --vo=opengl:scale-sep:lscale=lanczos2\n"
@@ -2528,10 +2549,9 @@ static const char help_text[] =
 "    Note that with some scaling filters, upscaling is always done in\n"
 "    RGB. If chroma is not subsampled, this option is ignored, and the\n"
 "    luma scaler is used instead. Setting this option is often useless.\n"
-"  no-fancy-downscaling\n"
-"    When using convolution based filters, don't extend the filter\n"
-"    size when downscaling. Trades downscaling performance for\n"
-"    reduced quality.\n"
+"  fancy-downscaling\n"
+"    When using convolution based filters, extend the filter size\n"
+"    when downscaling. Trades quality for reduced downscaling performance.\n"
 "  no-npot\n"
 "    Force use of power-of-2 texture sizes. For debugging only.\n"
 "    Borders will look discolored due to filtering.\n"

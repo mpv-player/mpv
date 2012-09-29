@@ -228,14 +228,13 @@ corevideo (Mac OS X 10.6 and later)
     for vo_opengl_).
 
 .. _vo_opengl:
+
 opengl
-    OpenGL video output driver.
+    OpenGL video output driver. It supports extended scaling methods, dithering
+    and color management.
 
-    It supports extended scaling methods, dithering and color management.
-    It tries to use sane defaults for good quality output.
-
-    Note that some cheaper LCDs do dithering that gravely interferes with
-    vo_opengl's dithering. Disabling dithering with ``dither-depth=-1`` helps.
+    By default, it tries to use fast and fail-safe settings. Use the driver
+    ``opengl-hq`` to use this driver with a high quality rendering preset.
 
     Requires at least OpenGL 2.1 and the GL_ARB_texture_rg extension. For older
     drivers, ``opengl-old`` may work.
@@ -375,10 +374,9 @@ opengl
         RGB. If chroma is not subsampled, this option is ignored, and the
         luma scaler is used instead. Setting this option is often useless.
 
-    no-fancy-downscaling
-        When using convolution based filters, don't extend the filter
-        size when downscaling. Trades downscaling performance for
-        reduced quality.
+    fancy-downscaling
+        When using convolution based filters, extend the filter size
+        when downscaling. Trades quality for reduced downscaling performance.
 
     no-npot
         Force use of power-of-2 texture sizes. For debugging only.
@@ -442,6 +440,17 @@ opengl
         Size of the 3D LUT generated from the ICC profile in each
         dimension. Default is 128x256x64.
         Sizes must be a power of two, and 256 at most.
+
+opengl-hq
+    Same as ``opengl``, but with default settings for high quality rendering.
+
+    This is equivalent to:
+
+    | --vo=opengl:lscale=lanczos2:fancy-downscaling:dither-depth=0
+
+    Note that some cheaper LCDs do dithering that gravely interferes with
+    vo_opengl's dithering. Disabling dithering with ``dither-depth=-1`` helps.
+
 
 opengl-old
     OpenGL video output driver, old version. Video size must be smaller

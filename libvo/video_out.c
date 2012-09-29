@@ -75,6 +75,7 @@ extern struct vo_driver video_out_x11;
 extern struct vo_driver video_out_vdpau;
 extern struct vo_driver video_out_xv;
 extern struct vo_driver video_out_opengl;
+extern struct vo_driver video_out_opengl_hq;
 extern struct vo_driver video_out_opengl_old;
 extern struct vo_driver video_out_null;
 extern struct vo_driver video_out_image;
@@ -120,6 +121,9 @@ const struct vo_driver *video_out_drivers[] =
         &video_out_image,
 #ifdef CONFIG_ENCODING
         &video_out_lavc,
+#endif
+#ifdef CONFIG_GL
+        &video_out_opengl_hq,
 #endif
         NULL
 };
@@ -287,7 +291,7 @@ static void replace_legacy_vo_name(bstr *name)
     if (bstr_equals0(*name, "gl"))
         new = bstr0("opengl");
     if (bstr_equals0(*name, "gl3"))
-        new = bstr0("opengl");
+        new = bstr0("opengl-hq");
     if (!bstr_equals(*name, new)) {
         mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "VO driver '%.*s' has been replaced "
                 "with '%.*s'!\n", BSTR_P(*name), BSTR_P(new));
