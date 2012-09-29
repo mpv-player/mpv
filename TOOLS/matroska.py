@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 Generate C definitions for parsing Matroska files.
 Can also be used to directly parse Matroska files and display their contents.

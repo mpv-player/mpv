@@ -1019,8 +1019,8 @@ echocheck "working compiler"
 cflag_check "" || die "Compiler is not functioning correctly. Check your installation and custom CFLAGS $CFLAGS ."
 echo "yes"
 
-echocheck "python3"
-command_check python3 -c '' || die "Python 3 is not functioning correctly. Check your installation and PATH."
+echocheck "python"
+command_check python -c '' || die "Python is not functioning correctly. Check your installation and PATH."
 echo yes
 
 if test -z "$_target" && x86 ; then
