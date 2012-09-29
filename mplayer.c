@@ -1758,6 +1758,8 @@ double playing_audio_pts(struct MPContext *mpctx)
 
 static void reset_subtitles(struct MPContext *mpctx)
 {
+    if (mpctx->sh_sub)
+        sub_reset(mpctx->sh_sub, mpctx->osd);
     sub_clear_text(&mpctx->subs, MP_NOPTS_VALUE);
     if (vo_sub)
         set_osd_subtitle(mpctx, NULL);
