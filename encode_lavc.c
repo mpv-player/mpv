@@ -140,34 +140,12 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
     encode_lavc_discontinuity(ctx);
     ctx->options = options;
 
-    ctx->avc = avformat_alloc_context();
-
-    if (ctx->options->format) {
-        char *tok;
-        const char *in = ctx->options->format;
-        while (*in) {
-            tok = av_get_token(&in, ",");
-            ctx->vc = avcodec_find_encoder_by_name(tok);
-            ctx->avc->oformat = av_guess_format(tok, ctx->options->file, NULL);
-            av_free(tok);
-            if (ctx->avc->oformat)
-                ctx->vc = NULL;
-            if (ctx->vc)
-                break;
-            if (*in)
-                ++in;
-        }
-    } else {
-        ctx->avc->oformat = av_guess_format(NULL, ctx->options->file, NULL);
-    }
-
-    if (!ctx->avc->oformat) {
-        encode_lavc_fail(ctx, "encode-lavc: format not found\n");
+    ctx->avc = NULL;
+    avformat_alloc_output_context2(&ctx->avc, NULL, ctx->options->format, ctx->options->file);
+    if (!ctx->avc) {
+        encode_lavc_fail(ctx, "encode-lavc: avformat context allocation failed\n");
         return NULL;
     }
-
-    av_strlcpy(ctx->avc->filename, ctx->options->file,
-               sizeof(ctx->avc->filename));
 
     ctx->foptions = NULL;
     if (ctx->options->fopts) {
@@ -469,7 +447,8 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
             encode_lavc_fail(ctx, "vo-lavc: encoder not found\n");
             return NULL;
         }
-        stream = avformat_new_stream(ctx->avc, ctx->vc);
+        stream = avformat_new_stream(ctx->avc, NULL);
+        avcodec_get_context_defaults3(stream->codec, ctx->vc);
 
         // stream->time_base = ctx->timebase;
         // doing this breaks mpeg2ts in ffmpeg
@@ -519,7 +498,8 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
             encode_lavc_fail(ctx, "ao-lavc: encoder not found\n");
             return NULL;
         }
-        stream = avformat_new_stream(ctx->avc, ctx->ac);
+        stream = avformat_new_stream(ctx->avc, NULL);
+        avcodec_get_context_defaults3(stream->codec, ctx->ac);
 
         stream->codec->codec_id = ctx->ac->id;
         stream->codec->time_base = ctx->timebase;
