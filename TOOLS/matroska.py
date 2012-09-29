@@ -22,6 +22,8 @@ Can also be used to directly parse Matroska files and display their contents.
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+# for compatibility with Python 2.x
+from __future__ import print_function
 
 elements_ebml = (
     'EBML, 1a45dfa3, sub', (
