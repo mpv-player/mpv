@@ -446,7 +446,7 @@ opengl-hq
 
     This is equivalent to:
 
-    | --vo=opengl:lscale=lanczos2:fancy-downscaling:dither-depth=0
+    | --vo=opengl:lscale=lanczos2:fancy-downscaling:dither-depth=0:pbo
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     vo_opengl's dithering. Disabling dithering with ``dither-depth=-1`` helps.

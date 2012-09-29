@@ -2329,7 +2329,7 @@ static int preinit(struct vo *vo, const char *arg)
         .vo = vo,
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
         .use_npot = 1,
-        .use_pbo = 0,
+        .use_pbo = hq,
         .swap_interval = vo_vsync,
         .osd_color = 0xffffff,
         .dither_depth = hq ? 0 : -1,
