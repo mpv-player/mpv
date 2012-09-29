@@ -760,6 +760,8 @@ const m_option_t mplayer_opts[]={
     OPT_MAKE_FLAGS("orawts", encode_output.rawts, CONF_GLOBAL),
     OPT_MAKE_FLAGS("oautofps", encode_output.autofps, CONF_GLOBAL),
     OPT_MAKE_FLAGS("oneverdrop", encode_output.neverdrop, CONF_GLOBAL),
+    OPT_MAKE_FLAGS("ovfirst", encode_output.video_first, CONF_GLOBAL),
+    OPT_MAKE_FLAGS("oafirst", encode_output.audio_first, CONF_GLOBAL),
 
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };

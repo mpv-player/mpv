@@ -59,8 +59,11 @@ struct encode_lavc_context {
     struct stream *twopass_bytebuffer_v;
     unsigned int t0;
     unsigned int frames;
+
     bool expect_video;
     bool expect_audio;
+    bool video_first;
+    bool audio_first;
 
     // has encoding failed?
     bool failed;

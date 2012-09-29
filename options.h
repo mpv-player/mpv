@@ -176,6 +176,8 @@ typedef struct MPOpts {
         int rawts;
         int autofps;
         int neverdrop;
+        int video_first;
+        int audio_first;
     } encode_output;
 } MPOpts;
 

@@ -405,6 +405,8 @@ static int encode(struct ao *ao, double apts, void *data)
 
     encode_lavc_write_stats(ao->encode_lavc_ctx, ac->stream);
 
+    packet.stream_index = ac->stream->index;
+
     // Do we need this at all? Better be safe than sorry...
     if (packet.pts == AV_NOPTS_VALUE) {
         mp_msg(MSGT_ENCODE, MSGL_WARN, "ao-lavc: encoder lost pts, why?\n");

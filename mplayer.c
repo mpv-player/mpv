@@ -3961,6 +3961,13 @@ goto_enable_cache:
 
     preselect_demux_streams(mpctx);
 
+#ifdef CONFIG_ENCODING
+    if (mpctx->encode_lavc_ctx && mpctx->current_track[STREAM_VIDEO])
+        encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_VIDEO);
+    if (mpctx->encode_lavc_ctx && mpctx->current_track[STREAM_AUDIO])
+        encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_AUDIO);
+#endif
+
     reinit_video_chain(mpctx);
     reinit_audio_chain(mpctx);
     reinit_subs(mpctx);
@@ -3987,13 +3994,6 @@ goto_enable_cache:
 #endif
         goto terminate_playback;
     }
-
-#ifdef CONFIG_ENCODING
-    if (mpctx->encode_lavc_ctx && mpctx->sh_video)
-        encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_VIDEO);
-    if (mpctx->encode_lavc_ctx && mpctx->sh_audio)
-        encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_AUDIO);
-#endif
 
     if (opts->playing_msg) {
         char *msg = property_expand_string(mpctx, opts->playing_msg);

@@ -56,8 +56,8 @@ You can encode files from one format/codec to another using this facility.
     avoid --oautofps.
 
 --oac=<codec>
-    Specifies the output audio codec.
-    See --oac=help for a full list of supported codecs.
+    Specifies the output audio codec. This can be a comma separated list of
+    possible codecs to try. See --oac=help for a full list of supported codecs.
 
 --oaoffset=<value>
     Shifts audio data by the given time (in seconds) by adding/removing
@@ -86,26 +86,17 @@ You can encode files from one format/codec to another using this facility.
     --oacopts-clr
         Completely empties the options list.
 
+--oafirst
+    Force the audio stream to become the first stream in the output. By default
+    the order is unspecified.
+
 --ovc=<codec>
-    Specifies the output video codec.
-    See --ovc=help for a full list of supported codecs.
+    Specifies the output video codec. This can be a comma separated list of
+    possible codecs to try. See --ovc=help for a full list of supported codecs.
 
 --ovoffset=<value>
     Shifts video data by the given time (in seconds) by shifting the pts
     values.
-
---ocopyts
-    Copies input pts to the output video (not supported by some output
-    container formats, e.g. avi). Discontinuities are still fixed.
-    By default, audio pts are set to playback time and video pts are
-    synchronized to match audio pts, as some output formats do not support
-    anything else.
-
---orawts
-    Copies input pts to the output video (not supported by some output
-    container formats, e.g. avi). In this modem discontinuities are not fixed
-    and all pts are passed through as-is. Never seek backwards or use multiple
-    input files in this mode!
 
 --ovcopts <options>
     Specifies the output video codec options for libavcodec.
@@ -132,3 +123,20 @@ You can encode files from one format/codec to another using this facility.
 
     --ovcopts-clr
         Completely empties the options list.
+
+--ovfirst
+    Force the video stream to become the first stream in the output. By default
+    the order is unspecified.
+
+--ocopyts
+    Copies input pts to the output video (not supported by some output
+    container formats, e.g. avi). Discontinuities are still fixed.
+    By default, audio pts are set to playback time and video pts are
+    synchronized to match audio pts, as some output formats do not support
+    anything else.
+
+--orawts
+    Copies input pts to the output video (not supported by some output
+    container formats, e.g. avi). In this modem discontinuities are not fixed
+    and all pts are passed through as-is. Never seek backwards or use multiple
+    input files in this mode!

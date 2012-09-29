@@ -208,6 +208,13 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
     ctx->vbytes = 0;
     ctx->frames = 0;
 
+    if (options->video_first) {
+        ctx->video_first = true;
+    }
+    if (options->audio_first) {
+        ctx->audio_first = true;
+    }
+
     return ctx;
 }
 
@@ -408,6 +415,26 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
             // already have a stream of that type, this cannot really happen
             return NULL;
 
+    if (ctx->avc->nb_streams == 0) {
+        // if this stream isn't stream #0, allocate a dummy stream first for
+        // the next loop to use
+        if (mt == AVMEDIA_TYPE_VIDEO && ctx->audio_first) {
+            mp_msg(MSGT_ENCODE, MSGL_INFO, "vo-lavc: preallocated audio stream for later use\n");
+            avformat_new_stream(ctx->avc, NULL); // this one is AVMEDIA_TYPE_UNKNOWN for now
+        }
+        if (mt == AVMEDIA_TYPE_AUDIO && ctx->video_first) {
+            mp_msg(MSGT_ENCODE, MSGL_INFO, "ao-lavc: preallocated video stream for later use\n");
+            avformat_new_stream(ctx->avc, NULL); // this one is AVMEDIA_TYPE_UNKNOWN for now
+        }
+    } else {
+        // find possibly preallocated stream
+        for (i = 0; i < ctx->avc->nb_streams; ++i)
+            if (ctx->avc->streams[i]->codec->codec_type == AVMEDIA_TYPE_UNKNOWN) // preallocated stream
+                stream = ctx->avc->streams[i];
+    }
+    if (!stream)
+        stream = avformat_new_stream(ctx->avc, NULL);
+
     if (ctx->timebase.den == 0) {
         AVRational r;
 
@@ -447,7 +474,6 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
             encode_lavc_fail(ctx, "vo-lavc: encoder not found\n");
             return NULL;
         }
-        stream = avformat_new_stream(ctx->avc, NULL);
         avcodec_get_context_defaults3(stream->codec, ctx->vc);
 
         // stream->time_base = ctx->timebase;
@@ -455,9 +481,7 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
         // which doesn't properly force the time base to be 90000
         // furthermore, ffmpeg.c doesn't do this either and works
 
-        stream->codec->codec_id = ctx->vc->id;
         stream->codec->time_base = ctx->timebase;
-        stream->codec->codec_type = AVMEDIA_TYPE_VIDEO;
 
         dummy = avcodec_alloc_context3(ctx->vc);
         dummy->codec = ctx->vc; // FIXME remove this once we can, caused by a bug in libav, elenril is aware of this
@@ -498,12 +522,9 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
             encode_lavc_fail(ctx, "ao-lavc: encoder not found\n");
             return NULL;
         }
-        stream = avformat_new_stream(ctx->avc, NULL);
         avcodec_get_context_defaults3(stream->codec, ctx->ac);
 
-        stream->codec->codec_id = ctx->ac->id;
         stream->codec->time_base = ctx->timebase;
-        stream->codec->codec_type = AVMEDIA_TYPE_AUDIO;
 
         dummy = avcodec_alloc_context3(ctx->ac);
         dummy->codec = ctx->ac; // FIXME remove this once we can, caused by a bug in libav, elenril is aware of this
@@ -676,10 +697,14 @@ int encode_lavc_write_frame(struct encode_lavc_context *ctx, AVPacket *packet)
         return -1;
 
     mp_msg(MSGT_ENCODE, MSGL_DBG2,
-           "encode-lavc: write frame: stream %d ptsi %d (%f) size %d\n",
+           "encode-lavc: write frame: stream %d ptsi %d (%f) dtsi %d (%f) size %d\n",
            (int)packet->stream_index,
            (int)packet->pts,
            packet->pts * (double)ctx->avc->streams[packet->stream_index]->
+                   time_base.num / (double)ctx->avc->streams[packet->
+                   stream_index]->time_base.den,
+           (int)packet->dts,
+           packet->dts * (double)ctx->avc->streams[packet->stream_index]->
                    time_base.num / (double)ctx->avc->streams[packet->
                    stream_index]->time_base.den,
            (int)packet->size);
