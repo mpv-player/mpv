@@ -1,6 +1,7 @@
 *.o
 *.a
 *.d
+*.exe
 .depend
 
 /config.h
