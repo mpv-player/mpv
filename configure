@@ -931,7 +931,7 @@ fi
 
 if win32 ; then
   _exesuf=".exe"
-  extra_cflags="$extra_cflags -fno-common"
+  extra_cflags="$extra_cflags -fno-common -DWINVER=0x0500"
   # -lwinmm is always needed for osdep/timer-win2.c
   extra_ldflags="$extra_ldflags -lwinmm"
   _pe_executable=yes
