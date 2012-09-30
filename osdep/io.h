@@ -28,6 +28,10 @@ wchar_t *mp_from_utf8(void *talloc_ctx, const char *s);
 char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 #endif
 
+#ifdef __CYGWIN__
+#include <io.h>
+#endif
+
 #ifdef __MINGW32__
 
 #include <stdio.h>
