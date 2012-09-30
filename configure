@@ -951,6 +951,10 @@ if mingw32 ; then
   extra_cflags="$extra_cflags -DBYTE_ORDER=1234 -DLITTLE_ENDIAN=1234 -DBIG_ENDIAN=4321"
 fi
 
+if cygwin ; then
+  extra_cflags="$extra_cflags -mwin32"
+fi
+
 TMPC="$mplayer_tmpdir/tmp.c"
 TMPCPP="$mplayer_tmpdir/tmp.cpp"
 TMPEXE="$mplayer_tmpdir/tmp$_exesuf"
