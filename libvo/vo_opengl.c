@@ -2333,7 +2333,7 @@ static int preinit(struct vo *vo, const char *arg)
         .swap_interval = vo_vsync,
         .osd_color = 0xffffff,
         .dither_depth = hq ? 0 : -1,
-        .fbo_format = GL_RGB16,
+        .fbo_format = hq ? GL_RGB16 : GL_RGB,
         .use_scale_sep = 1,
         .use_fancy_downscaling = hq,
         .scalers = {

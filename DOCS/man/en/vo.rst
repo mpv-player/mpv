@@ -410,7 +410,7 @@ opengl
     fbo-format=<fmt>
         Selects the internal format of any FBO textures used.
         fmt can be one of: rgb, rgba, rgb8, rgb10, rgb16, rgb16f, rgb32f
-        Default: rgb16.
+        Default: rgb.
 
     gamma
         Always enable gamma control. (Disables delayed enabling.)
@@ -446,7 +446,7 @@ opengl-hq
 
     This is equivalent to:
 
-    | --vo=opengl:lscale=lanczos2:fancy-downscaling:dither-depth=0:pbo
+    | --vo=opengl:lscale=lanczos2:fancy-downscaling:dither-depth=0:pbo:fbo-format=rgb16
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     vo_opengl's dithering. Disabling dithering with ``dither-depth=-1`` helps.
