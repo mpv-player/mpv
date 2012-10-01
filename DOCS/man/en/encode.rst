@@ -10,8 +10,8 @@ You can encode files from one format/codec to another using this facility.
 
 --of=<format>
     Specifies the output format (overrides autodetection by the extension of
-    the file specified by -o).
-    See --of=help for a full list of supported formats.
+    the file specified by -o). This can be a comma separated list of possible
+    formats to try. See --of=help for a full list of supported formats.
 
 --ofopts=<options>
     Specifies the output format options for libavformat.
