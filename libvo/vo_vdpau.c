@@ -997,7 +997,7 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
 
     sfc->render_count = 0;
 
-    if (imgs->format == SUBBITMAP_EMPTY)
+    if (imgs->format == SUBBITMAP_EMPTY || imgs->num_parts == 0)
         return;
 
     if (imgs->bitmap_id == sfc->bitmap_id)

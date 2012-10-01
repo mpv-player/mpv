@@ -1419,7 +1419,7 @@ static void gen_eosd(struct gl_priv *p, struct osd_render *osd,
 
     osd->num_vertices = 0;
 
-    if (imgs->format == SUBBITMAP_EMPTY)
+    if (imgs->format == SUBBITMAP_EMPTY || imgs->num_parts == 0)
         return;
 
     bool need_upload = imgs->bitmap_id != osd->bitmap_id;
