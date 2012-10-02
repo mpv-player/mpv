@@ -271,6 +271,9 @@ void mixer_reinit(struct mixer *mixer, struct ao *ao)
  */
 void mixer_uninit(struct mixer *mixer)
 {
+    if (!mixer->ao)
+        return;
+
     checkvolume(mixer);
     if (mixer->muted_by_us) {
         /* Current audio output API combines playing the remaining buffered
