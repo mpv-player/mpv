@@ -413,6 +413,9 @@ gl
         enabled). This option is for testing; to disable the OSD use
         ``--osdlevel=0`` instead.
 
+    sw
+        Continue even if a software renderer is detected.
+
     backend=<sys>
         auto
             auto-select (default)
@@ -424,15 +427,15 @@ gl
             X11/GLX
 
 gl3
-    OpenGL video output driver, extended version. The requires an OpenGL 3
-    capable graphics driver. (Note: this is only because of developer pedantry.
-    The dependency on actual OpenGL 3 features is rather low.)
+    OpenGL video output driver, extended version.
 
     It supports extended scaling methods, dithering and color management.
     It tries to use sane defaults for good quality output.
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     vo_gl3's dithering. Disabling dithering with ``dither-depth=-1`` helps.
+
+    Some features are available with OpenGL 3 capable graphics drivers only.
 
     lscale=<filter>
         Set the scaling filter. Possible choices:
@@ -579,6 +582,9 @@ gl3
     glfinish
         Call glFinish() before swapping buffers
 
+    sw
+        Continue even if a software renderer is detected.
+
     backend=<sys>
         auto
             auto-select (default)
@@ -600,15 +606,11 @@ gl3
 
     fbo-format=<fmt>
         Selects the internal format of any FBO textures used.
-        fmt can be one of: rgb, rgba, rgb8, rgb16, rgb16f, rgb32f
+        fmt can be one of: rgb, rgba, rgb8, rgb10, rgb16, rgb16f, rgb32f
         Default: rgb16.
 
     gamma
         Always enable gamma control. (Disables delayed enabling.)
-
-    force-gl2
-        Create a legacy GL context. This will randomly malfunction
-        if the proper extensions are not supported.
 
     icc-profile=<file>
         Load an ICC profile and use it to transform linear RGB to

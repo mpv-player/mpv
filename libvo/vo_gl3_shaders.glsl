@@ -22,7 +22,29 @@
 
 // inserted at the beginning of all shaders
 #!section prelude
+
+// GLSL 1.20 compatibility layer
+// texture() should be assumed to always map to texture2D()
+#if __VERSION__ >= 130
+# define texture1D texture
+# define texture3D texture
+# define DECLARE_FRAGPARMS \
+    out vec4 out_color;
+#else
+# define texture texture2D
+# define DECLARE_FRAGPARMS
+# define out_color gl_FragColor
+# define in varying
+#endif
+
 #!section vertex_all
+
+#if __VERSION__ < 130
+# undef in
+# define in attribute
+# define out varying
+#endif
+
 uniform mat3 transform;
 uniform sampler3D lut_3d;
 
@@ -40,37 +62,36 @@ void main() {
     gl_Position = vec4(position, 1);
     color = vertex_color;
 #ifdef USE_3DLUT
-    color = vec4(texture(lut_3d, color.rgb).rgb, color.a);
+    color = vec4(texture3D(lut_3d, color.rgb).rgb, color.a);
 #endif
     texcoord = vertex_texcoord;
 }
 
 #!section frag_eosd
-uniform sampler2D texture1;
+uniform sampler2D textures[3];
 
 in vec2 texcoord;
 in vec4 color;
-out vec4 out_color;
+DECLARE_FRAGPARMS
 
 void main() {
-    out_color = vec4(color.rgb, color.a * texture(texture1, texcoord).r);
+    out_color = vec4(color.rgb, color.a * texture(textures[0], texcoord).r);
 }
 
 #!section frag_osd
-uniform sampler2D texture1;
+uniform sampler2D textures[3];
 
 in vec2 texcoord;
 in vec4 color;
-out vec4 out_color;
+DECLARE_FRAGPARMS
 
 void main() {
-    out_color = texture(texture1, texcoord).rrrg * color;
+    out_color = texture(textures[0], texcoord).rrrg * color;
 }
 
 #!section frag_video
-uniform sampler2D texture1;
-uniform sampler2D texture2;
-uniform sampler2D texture3;
+uniform sampler2D textures[3];
+uniform vec2 textures_size[3];
 uniform sampler1D lut_c_1d;
 uniform sampler1D lut_l_1d;
 uniform sampler2D lut_c_2d;
@@ -83,11 +104,12 @@ uniform float conv_gamma;
 uniform float dither_quantization;
 uniform float dither_multiply;
 uniform float filter_param1;
+uniform vec2 dither_size;
 
 in vec2 texcoord;
-out vec4 out_color;
+DECLARE_FRAGPARMS
 
-vec4 sample_bilinear(sampler2D tex, vec2 texcoord) {
+vec4 sample_bilinear(sampler2D tex, vec2 texsize, vec2 texcoord) {
     return texture(tex, texcoord);
 }
 
@@ -108,8 +130,7 @@ vec4 calcweights(float s) {
     return t;
 }
 
-vec4 sample_bicubic_fast(sampler2D tex, vec2 texcoord) {
-    vec2 texsize = textureSize(tex, 0);
+vec4 sample_bicubic_fast(sampler2D tex, vec2 texsize, vec2 texcoord) {
     vec2 pt = 1 / texsize;
     vec2 fcoord = fract(texcoord * texsize + vec2(0.5, 0.5));
     vec4 parmx = calcweights(fcoord.x);
@@ -130,12 +151,12 @@ vec4 sample_bicubic_fast(sampler2D tex, vec2 texcoord) {
 }
 
 float[2] weights2(sampler1D lookup, float f) {
-    vec4 c = texture(lookup, f);
+    vec4 c = texture1D(lookup, f);
     return float[2](c.r, c.g);
 }
 
 float[4] weights4(sampler1D lookup, float f) {
-    vec4 c = texture(lookup, f);
+    vec4 c = texture1D(lookup, f);
     return float[4](c.r, c.g, c.b, c.a);
 }
 
@@ -169,13 +190,13 @@ float[16] weights16(sampler2D lookup, float f) {
                      c3.r, c3.g, c3.b, c3.a, c4.r, c4.g, c4.b, c4.a);
 }
 
-#define CONVOLUTION_SEP_N(NAME, N)                                           \
-    vec4 NAME(sampler2D tex, vec2 texcoord, vec2 pt, float weights[N]) {     \
-        vec4 res = vec4(0);                                                  \
-        for (int n = 0; n < N; n++) {                                        \
-            res += weights[n] * texture(tex, texcoord + pt * n);             \
-        }                                                                    \
-        return res;                                                          \
+#define CONVOLUTION_SEP_N(NAME, N)                                          \
+    vec4 NAME(sampler2D tex, vec2 texcoord, vec2 pt, float weights[N]) {    \
+        vec4 res = vec4(0);                                                 \
+        for (int n = 0; n < N; n++) {                                       \
+            res += weights[n] * texture(tex, texcoord + pt * n);            \
+        }                                                                   \
+        return res;                                                         \
     }
 
 CONVOLUTION_SEP_N(convolution_sep2, 2)
@@ -188,8 +209,8 @@ CONVOLUTION_SEP_N(convolution_sep16, 16)
 // The dir parameter is (0, 1) or (1, 0), and we expect the shader compiler to
 // remove all the redundant multiplications and additions.
 #define SAMPLE_CONVOLUTION_SEP_N(NAME, N, SAMPLERT, CONV_FUNC, WEIGHTS_FUNC)\
-    vec4 NAME(vec2 dir, SAMPLERT lookup, sampler2D tex, vec2 texcoord) {    \
-        vec2 texsize = textureSize(tex, 0);                                 \
+    vec4 NAME(vec2 dir, SAMPLERT lookup, sampler2D tex, vec2 texsize,       \
+              vec2 texcoord) {                                              \
         vec2 pt = (1 / texsize) * dir;                                      \
         float fcoord = dot(fract(texcoord * texsize - 0.5), dir);           \
         vec2 base = texcoord - fcoord * pt;                                 \
@@ -226,8 +247,7 @@ CONVOLUTION_N(convolution12, 12)
 CONVOLUTION_N(convolution16, 16)
 
 #define SAMPLE_CONVOLUTION_N(NAME, N, SAMPLERT, CONV_FUNC, WEIGHTS_FUNC)    \
-    vec4 NAME(SAMPLERT lookup, sampler2D tex, vec2 texcoord) {              \
-        vec2 texsize = textureSize(tex, 0);                                 \
+    vec4 NAME(SAMPLERT lookup, sampler2D tex, vec2 texsize, vec2 texcoord) {\
         vec2 pt = 1 / texsize;                                              \
         vec2 fcoord = fract(texcoord * texsize - 0.5);                      \
         vec2 base = texcoord - fcoord * pt;                                 \
@@ -245,8 +265,7 @@ SAMPLE_CONVOLUTION_N(sample_convolution16, 16, sampler2D, convolution16, weights
 
 
 // Unsharp masking
-vec4 sample_sharpen3(sampler2D tex, vec2 texcoord) {
-    vec2 texsize = textureSize(tex, 0);
+vec4 sample_sharpen3(sampler2D tex, vec2 texsize, vec2 texcoord) {
     vec2 pt = 1 / texsize;
     vec2 st = pt * 0.5;
     vec4 p = texture(tex, texcoord);
@@ -257,8 +276,7 @@ vec4 sample_sharpen3(sampler2D tex, vec2 texcoord) {
     return p + (p - 0.25 * sum) * filter_param1;
 }
 
-vec4 sample_sharpen5(sampler2D tex, vec2 texcoord) {
-    vec2 texsize = textureSize(tex, 0);
+vec4 sample_sharpen5(sampler2D tex, vec2 texsize, vec2 texcoord) {
     vec2 pt = 1 / texsize;
     vec2 st1 = pt * 1.2;
     vec4 p = texture(tex, texcoord);
@@ -277,11 +295,11 @@ vec4 sample_sharpen5(sampler2D tex, vec2 texcoord) {
 
 void main() {
 #ifdef USE_PLANAR
-    vec3 color = vec3(SAMPLE_L(texture1, texcoord).r,
-                      SAMPLE_C(texture2, texcoord).r,
-                      SAMPLE_C(texture3, texcoord).r);
+    vec3 color = vec3(SAMPLE_L(textures[0], textures_size[0], texcoord).r,
+                      SAMPLE_C(textures[1], textures_size[1], texcoord).r,
+                      SAMPLE_C(textures[2], textures_size[2], texcoord).r);
 #else
-    vec3 color = SAMPLE_L(texture1, texcoord).rgb;
+    vec3 color = SAMPLE_L(textures[0], textures_size[0], texcoord).rgb;
 #endif
 #ifdef USE_GBRP
     color.gbr = color;
@@ -306,11 +324,11 @@ void main() {
     color = pow(color, inv_gamma);
 #endif
 #ifdef USE_3DLUT
-    color = texture(lut_3d, color).rgb;
+    color = texture3D(lut_3d, color).rgb;
 #endif
 #ifdef USE_DITHER
-    float dither = texture(dither, gl_FragCoord.xy / textureSize(dither, 0)).r;
-    color = floor(color * dither_multiply + dither ) / dither_quantization;
+    float dither_value = texture(dither, gl_FragCoord.xy / dither_size).r;
+    color = floor(color * dither_multiply + dither_value ) / dither_quantization;
 #endif
     out_color = vec4(color, 1);
 }

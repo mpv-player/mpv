@@ -62,6 +62,8 @@ struct gl_priv {
     MPGLContext *glctx;
     GL *gl;
 
+    int allow_sw;
+
     int use_osd;
     int scaled_osd;
     //! Textures for OSD
@@ -388,6 +390,9 @@ static void uninitGl(struct vo *vo)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
+    if (!gl)
+        return;
+
     int i = 0;
     if (gl->DeletePrograms && p->fragprog)
         gl->DeletePrograms(1, &p->fragprog);
@@ -413,16 +418,6 @@ static void uninitGl(struct vo *vo)
     p->buffersize_uv = 0;
     p->bufferptr_uv[0] = p->bufferptr_uv[1] = 0;
     p->err_shown = 0;
-}
-
-static int isSoftwareGl(struct vo *vo)
-{
-    struct gl_priv *p = vo->priv;
-    const char *renderer = p->gl->GetString(GL_RENDERER);
-    const char *vendor = p->gl->GetString(GL_VENDOR);
-    return !renderer || strcmp(renderer, "Software Rasterizer") == 0 ||
-           strstr(renderer, "llvmpipe") ||
-           strcmp(vendor, "Microsoft Corporation") == 0;
 }
 
 static void autodetectGlExtensions(struct vo *vo)
@@ -596,15 +591,18 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     return 1;
 }
 
-static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
-                         uint32_t flags)
+static bool create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
+                          uint32_t flags)
 {
     struct gl_priv *p = vo->priv;
 
     if (p->stereo_mode == GL_3D_QUADBUFFER)
         flags |= VOFLAG_STEREO;
 
-    return p->glctx->create_window(p->glctx, d_width, d_height, flags);
+    int mpgl_caps = MPGL_CAP_GL_LEGACY;
+    if (!p->allow_sw)
+        mpgl_caps |= MPGL_CAP_NO_SW;
+    return mpgl_create_window(p->glctx, mpgl_caps, d_width, d_height, flags);
 }
 
 static int config(struct vo *vo, uint32_t width, uint32_t height,
@@ -626,13 +624,12 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     p->vo_flipped = !!(flags & VOFLAG_FLIPPING);
 
-    if (create_window(vo, d_width, d_height, flags) < 0)
-        return -1;
-
     if (vo->config_count)
         uninitGl(vo);
-    if (p->glctx->setGlWindow(p->glctx) == SET_WINDOW_FAILED)
+
+    if (!create_window(vo, d_width, d_height, flags))
         return -1;
+
     initGl(vo, vo->dwidth, vo->dheight);
 
     return 0;
@@ -1153,13 +1150,12 @@ static void uninit(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
 
-    if (p->glctx)
-        uninitGl(vo);
+    uninitGl(vo);
     free(p->custom_prog);
     p->custom_prog = NULL;
     free(p->custom_tex);
     p->custom_tex = NULL;
-    uninit_mpglcontext(p->glctx);
+    mpgl_uninit(p->glctx);
     p->glctx = NULL;
     p->gl = NULL;
 }
@@ -1192,7 +1188,6 @@ static int preinit(struct vo *vo, const char *arg)
 
     p->eosd = eosd_packer_create(vo);
 
-    int allow_sw = 0;
     char *backend_arg = NULL;
 
     //essentially unused; for legacy warnings only
@@ -1223,7 +1218,7 @@ static int preinit(struct vo *vo, const char *arg)
         {"mipmapgen",    OPT_ARG_BOOL, &p->mipmap_gen,   NULL},
         {"osdcolor",     OPT_ARG_INT,  &p->osd_color,    NULL},
         {"stereo",       OPT_ARG_INT,  &p->stereo_mode,  NULL},
-        {"sw",           OPT_ARG_BOOL, &allow_sw,        NULL},
+        {"sw",           OPT_ARG_BOOL, &p->allow_sw,     NULL},
         {"backend",      OPT_ARG_MSTRZ,&backend_arg,     backend_valid},
         // Removed options.
         // They are only parsed to notify the user about the replacements.
@@ -1330,27 +1325,21 @@ static int preinit(struct vo *vo, const char *arg)
     int backend = backend_arg ? mpgl_find_backend(backend_arg) : GLTYPE_AUTO;
     free(backend_arg);
 
-    p->glctx = init_mpglcontext(backend, vo);
+    p->glctx = mpgl_init(backend, vo);
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;
 
-    if (p->use_yuv == -1 || !allow_sw) {
-        if (create_window(vo, 320, 200, VOFLAG_HIDDEN) < 0)
-            goto err_out;
-        if (p->glctx->setGlWindow(p->glctx) == SET_WINDOW_FAILED)
-            goto err_out;
-        if (!allow_sw && isSoftwareGl(vo))
+    if (p->use_yuv == -1) {
+        if (!create_window(vo, 320, 200, VOFLAG_HIDDEN))
             goto err_out;
         autodetectGlExtensions(vo);
         // We created a window to test whether the GL context supports hardware
         // acceleration and so on. Destroy that window to make sure all state
         // associated with it is lost.
-        uninit(vo);
-        p->glctx = init_mpglcontext(backend, vo);
-        if (!p->glctx)
+        uninitGl(vo);
+        if (!mpgl_destroy_window(p->glctx))
             goto err_out;
-        p->gl = p->glctx->gl;
     }
     if (p->many_fmts)
         mp_msg(MSGT_VO, MSGL_INFO, "[gl] using extended formats. "

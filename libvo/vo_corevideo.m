@@ -154,9 +154,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     p->image_width = width;
     p->image_height = height;
 
-    if (p->mpglctx->create_window(p->mpglctx, d_width, d_height, flags) < 0)
-        return -1;
-    if (p->mpglctx->setGlWindow(p->mpglctx) == SET_WINDOW_FAILED)
+    int mpgl_caps = MPGL_CAP_GL_LEGACY;
+    if (!mpgl_create_window(p->mpglctx, mpgl_caps, d_width, d_height, flags))
         return -1;
 
     init_gl(vo, vo->dwidth, vo->dheight);
@@ -367,7 +366,7 @@ static int query_format(struct vo *vo, uint32_t format)
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    uninit_mpglcontext(p->mpglctx);
+    mpgl_uninit(p->mpglctx);
     release_cv_entities(vo);
 }
 
@@ -377,7 +376,7 @@ static int preinit(struct vo *vo, const char *arg)
     struct priv *p = vo->priv;
 
     *p = (struct priv) {
-        .mpglctx = init_mpglcontext(GLTYPE_COCOA, vo),
+        .mpglctx = mpgl_init(GLTYPE_COCOA, vo),
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
         .quad = talloc_ptrtype(p, p->quad),
         .osd = talloc_ptrtype(p, p->osd),
