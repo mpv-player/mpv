@@ -59,8 +59,11 @@ void osd_destroy_backend(struct osd_state *osd)
     osd->osd_ass_library = NULL;
 }
 
-static void update_font_scale(ASS_Track *track, ASS_Style *style, double factor)
+static void update_font_style(ASS_Track *track, ASS_Style *style, double factor)
 {
+    // Set to neutral base direction, as opposed to VSFilter LTR default
+    style->Encoding = -1;
+
     // duplicated from ass_mp.c
     double fs = track->PlayResY * factor / 100.;
     /* The font size is always proportional to video height only;
@@ -86,7 +89,7 @@ static ASS_Track *create_osd_ass_track(struct osd_state *osd)
 
     track->PlayResX = track->PlayResY * 1.33333;
 
-    update_font_scale(track, style, text_font_scale_factor);
+    update_font_style(track, style, text_font_scale_factor);
 
     style->Alignment = 5;
 
@@ -243,7 +246,7 @@ static void update_sub(struct osd_state *osd, struct osd_object *obj)
     ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
 
     style->MarginV = obj->osd_track->PlayResY * ((100 - sub_pos)/110.0);
-    update_font_scale(obj->osd_track, style, text_font_scale_factor);
+    update_font_style(obj->osd_track, style, text_font_scale_factor);
 
     char *text = talloc_strdup(NULL, "");
 
