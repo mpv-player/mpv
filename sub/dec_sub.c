@@ -39,7 +39,7 @@ void sub_init(struct sh_sub *sh, struct osd_state *osd)
     if (opts->ass_enabled && is_text_sub(sh->type))
         sh->sd_driver = &sd_ass;
 #endif
-    if (strchr("bpx", sh->type))
+    if (strchr("bpxv", sh->type))
         sh->sd_driver = &sd_lavc;
     if (sh->sd_driver) {
         if (sh->sd_driver->init(sh, osd) < 0)

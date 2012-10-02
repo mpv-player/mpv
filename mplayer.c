@@ -1795,7 +1795,9 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
     }
 
     // DVD sub:
-    if (track->vobsub_id_plus_one || type == 'v') {
+    if ((track->vobsub_id_plus_one || type == 'v')
+        && !(sh_sub && sh_sub->active))
+    {
         int timestamp;
         // Get a sub packet from the demuxer (or the vobsub.c thing, which
         // should be a demuxer, but isn't).

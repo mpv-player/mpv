@@ -77,6 +77,26 @@ static void old_avsub_to_spudec(AVSubtitleRect **rects, int num_rects,
     spudec_packet_send(vo_spudec, packet, pts, endpts);
 }
 
+static void guess_resolution(char type, int *w, int *h)
+{
+    if (type == 'v') {
+        /* XXX Although the video frame is some size, the SPU frame is
+           always maximum size i.e. 720 wide and 576 or 480 high */
+        // For HD files in MKV the VobSub resolution can be higher though,
+        // see largeres_vobsub.mkv
+        if (*w <= 720 && *h <= 576) {
+            *w = 720;
+            *h = (*h == 480 || *h == 240) ? 480 : 576;
+        }
+    } else {
+        // Hope that PGS subs set these and 720/576 works for dvb subs
+        if (!*w)
+            *w = 720;
+        if (!*h)
+            *h = 576;
+    }
+}
+
 static int init(struct sh_sub *sh, struct osd_state *osd)
 {
     if (sh->initialized)
@@ -158,8 +178,7 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
     if (sub.num_rects > 0) {
         switch (sub.rects[0]->type) {
         case SUBTITLE_BITMAP:
-            // Assume resolution heuristics only work for PGS and DVB
-            if (!osd->support_rgba || sh->type != 'p' && sh->type != 'b') {
+            if (!osd->support_rgba) {
                 if (!vo_spudec)
                     vo_spudec = spudec_new_scaled(NULL, ctx->width, ctx->height,
                                                   NULL, 0);
@@ -214,13 +233,9 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
         priv->outbitmaps = talloc_memdup(priv, priv->inbitmaps,
                                          talloc_get_size(priv->inbitmaps));
     bool pos_changed = false;
-    // Hope that PGS subs set these and 720/576 works for dvb subs
     int inw = priv->avctx->width;
-    if (!inw)
-        inw = 720;
     int inh = priv->avctx->height;
-    if (!inh)
-        inh = 576;
+    guess_resolution(sh->type, &inw, &inh);
     struct mp_eosd_res *d = &osd->dim;
     double xscale = (double) (d->w - d->ml - d->mr) / inw;
     double yscale = (double) (d->h - d->mt - d->mb) / inh;
