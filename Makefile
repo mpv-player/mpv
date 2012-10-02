@@ -34,13 +34,8 @@ SRCS_COMMON-$(DVBIN)                 += stream/dvb_tune.c \
 SRCS_COMMON-$(DVDREAD)               += stream/stream_dvd.c \
                                         stream/stream_dvd_common.c
 
-# These filters use private headers and do not work with shared libavcodec.
-SRCS_COMMON-$(FFMPEG_INTERNALS)      += libmpcodecs/vf_mcdeint.c \
-                                        libmpcodecs/vf_spp.c \
-
 SRCS_COMMON-$(FTP)                   += stream/stream_ftp.c
 SRCS_COMMON-$(GIF)                   += libmpdemux/demux_gif.c
-SRCS_COMMON-$(HAVE_POSIX_SELECT)     += libmpcodecs/vf_bmovl.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c osdep/mmap_anon.c
 SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
 SRCS_COMMON-$(LIBASS)                += libmpcodecs/vf_ass.c \
@@ -152,77 +147,33 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vd.c \
               libmpcodecs/vd_ffmpeg.c \
               libmpcodecs/vf.c \
-              libmpcodecs/vf_1bpp.c \
-              libmpcodecs/vf_2xsai.c \
-              libmpcodecs/vf_blackframe.c \
-              libmpcodecs/vf_boxblur.c \
               libmpcodecs/vf_crop.c \
-              libmpcodecs/vf_cropdetect.c \
-              libmpcodecs/vf_decimate.c \
               libmpcodecs/vf_delogo.c \
-              libmpcodecs/vf_denoise3d.c \
-              libmpcodecs/vf_detc.c \
-              libmpcodecs/vf_dint.c \
               libmpcodecs/vf_divtc.c \
               libmpcodecs/vf_dlopen.c \
               libmpcodecs/vf_down3dright.c \
               libmpcodecs/vf_dsize.c \
-              libmpcodecs/vf_dvbscale.c \
-              libmpcodecs/vf_eq.c \
               libmpcodecs/vf_eq2.c \
               libmpcodecs/vf_expand.c \
-              libmpcodecs/vf_field.c \
-              libmpcodecs/vf_fil.c \
-              libmpcodecs/vf_filmdint.c \
-              libmpcodecs/vf_fixpts.c \
               libmpcodecs/vf_flip.c \
               libmpcodecs/vf_format.c \
-              libmpcodecs/vf_framestep.c \
-              libmpcodecs/vf_fspp.c \
-              libmpcodecs/vf_geq.c \
               libmpcodecs/vf_gradfun.c \
-              libmpcodecs/vf_halfpack.c \
-              libmpcodecs/vf_harddup.c \
               libmpcodecs/vf_hqdn3d.c \
-              libmpcodecs/vf_hue.c \
-              libmpcodecs/vf_il.c \
               libmpcodecs/vf_ilpack.c \
-              libmpcodecs/vf_ivtc.c \
-              libmpcodecs/vf_kerndeint.c \
-              libmpcodecs/vf_lavc.c \
-              libmpcodecs/vf_lavcdeint.c \
               libmpcodecs/vf_mirror.c \
               libmpcodecs/vf_noformat.c \
               libmpcodecs/vf_noise.c \
-              libmpcodecs/vf_ow.c \
-              libmpcodecs/vf_palette.c \
-              libmpcodecs/vf_perspective.c \
               libmpcodecs/vf_phase.c \
-              libmpcodecs/vf_pp7.c \
               libmpcodecs/vf_pullup.c \
-              libmpcodecs/vf_qp.c \
-              libmpcodecs/vf_remove_logo.c \
-              libmpcodecs/vf_rgbtest.c \
               libmpcodecs/vf_rotate.c \
-              libmpcodecs/vf_sab.c \
               libmpcodecs/vf_scale.c \
               libmpcodecs/vf_screenshot.c \
-              libmpcodecs/vf_smartblur.c \
               libmpcodecs/vf_softpulldown.c \
               libmpcodecs/vf_stereo3d.c \
-              libmpcodecs/vf_softskip.c \
               libmpcodecs/vf_swapuv.c \
-              libmpcodecs/vf_telecine.c \
-              libmpcodecs/vf_test.c \
-              libmpcodecs/vf_tfields.c \
-              libmpcodecs/vf_tile.c \
-              libmpcodecs/vf_tinterlace.c \
               libmpcodecs/vf_unsharp.c \
-              libmpcodecs/vf_uspp.c \
               libmpcodecs/vf_vo.c \
               libmpcodecs/vf_yadif.c \
-              libmpcodecs/vf_yuvcsp.c \
-              libmpcodecs/vf_yvu9.c \
               libmpdemux/asfheader.c \
               libmpdemux/aviheader.c \
               libmpdemux/aviprint.c \
@@ -455,9 +406,6 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 ###### dependency declarations / specific CFLAGS ######
 
 version.c osdep/mplayer-rc.o: version.h
-
-# Files that depend on libavcodec internals
-libmpcodecs/vf_fspp.o libmpcodecs/vf_mcdeint.o libmpcodecs/vf_spp.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
 
 osdep/mplayer-rc.o: osdep/mplayer.exe.manifest
 

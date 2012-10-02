@@ -435,7 +435,6 @@ _opt=-O2
 _cross_compile=no
 _prefix="/usr/local"
 ffmpeg=auto
-ffmpeg_internals=no
 _mplayer=yes
 _encoding=yes
 _x11=auto
@@ -715,8 +714,6 @@ for ac_option do
   --enable-joystick)    _joystick=yes   ;;
   --disable-joystick)   _joystick=no    ;;
   --enable-libav)       ffmpeg=yes      ;;
-  --ffmpeg-source-dir=*)
-    _ffmpeg_source=$(echo $ac_option | cut -d '=' -f 2 ) ;;
 
   --enable-lirc)        _lirc=yes       ;;
   --disable-lirc)       _lirc=no        ;;
@@ -2933,10 +2930,6 @@ if test "$ffmpeg" = auto ; then
 fi
 echores "yes"
 
-def_ffmpeg_internals="#undef CONFIG_FFMPEG_INTERNALS"
-if ! test -z "$_ffmpeg_source" ; then
-  def_ffmpeg_internals="#define CONFIG_FFMPEG_INTERNALS 1" && ffmpeg_internals=yes
-fi
 
 echocheck "libpostproc >= 52.0.0"
 if test "$libpostproc" = auto ; then
@@ -3399,8 +3392,6 @@ XV = $_xv
 
 # FFmpeg
 ENCODING = $_encoding
-FFMPEG_INTERNALS = $ffmpeg_internals
-FFMPEG_SOURCE_PATH = $_ffmpeg_source
 
 CONFIG_VDPAU    = $_vdpau
 CONFIG_ZLIB     = $_zlib
@@ -3617,7 +3608,6 @@ $def_xv
 
 /* FFmpeg */
 $def_encoding
-$def_ffmpeg_internals
 
 $def_fast_64bit
 $def_mkstemp
