@@ -64,6 +64,7 @@ typedef struct MPOpts {
     int term_osd;
     char *term_osd_esc;
     char *playing_msg;
+    char *status_msg;
     int player_idle_mode;
     int consolecontrols;
     int doubleclick_time;

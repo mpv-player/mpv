@@ -1042,6 +1042,30 @@ static void sadd_percentage(char *buf, int len, int percent) {
         saddf(buf, len, " (%d%%)", percent);
 }
 
+static int get_term_width(void)
+{
+    get_screen_size();
+    int width = screen_width > 0 ? screen_width : 80;
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+    /* Windows command line is broken (MinGW's rxvt works, but we
+     * should not depend on that). */
+    width--;
+#endif
+    return width;
+}
+
+static void write_status_line(struct MPContext *mpctx, const char *line)
+{
+    if (erase_to_end_of_line) {
+        mp_msg(MSGT_STATUSLINE, MSGL_STATUS,
+               "%s%s\r", line, erase_to_end_of_line);
+    } else {
+        int pos = strlen(line);
+        int width = get_term_width() - pos;
+        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "%s%*s\r", line, width, "");
+    }
+}
+
 static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -1065,19 +1089,16 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
     if (opts->quiet)
         return;
 
-    int width;
-    char *line;
-    get_screen_size();
-    if (screen_width > 0)
-        width = screen_width;
-    else
-        width = 80;
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-    /* Windows command line is broken (MinGW's rxvt works, but we
-     * should not depend on that). */
-    width--;
-#endif
-    line = malloc(width + 1); // one additional char for the terminating null
+    if (opts->status_msg) {
+        char *r = mp_property_expand_string(mpctx, opts->status_msg);
+        write_status_line(mpctx, r);
+        talloc_free(r);
+        return;
+    }
+
+    // one additional char for the terminating null
+    int width = get_term_width() + 1;
+    char *line = malloc(width);
     line[0] = '\0';
 
     // Playback status
@@ -1156,15 +1177,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 #endif
 
     // end
-    if (erase_to_end_of_line) {
-        mp_msg(MSGT_STATUSLINE, MSGL_STATUS,
-               "%s%s\r", line, erase_to_end_of_line);
-    } else {
-        int pos = strlen(line);
-        memset(&line[pos], ' ', width - pos);
-        line[width] = 0;
-        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "%s\r", line);
-    }
+    write_status_line(mpctx, line);
     free(line);
 }
 

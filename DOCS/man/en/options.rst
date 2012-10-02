@@ -1354,6 +1354,10 @@
         Disable property expansion and special handling of ``$`` for the rest
         of the string.
 
+--status-msg=<string>
+    Print out a custom string during playback instead of the standard status
+    line. Expands properties. See ``--playing-msg``.
+
 --playlist=<filename>
     Play files according to a playlist file (ASX, Winamp, SMIL, or
     one-file-per-line format).
