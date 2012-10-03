@@ -1649,7 +1649,7 @@ void glDisable3D(GL *gl, int type)
         gl->ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         break;
     case GL_3D_QUADBUFFER:
-        gl->DrawBuffer(vo_doublebuffering ? GL_BACK : GL_FRONT);
+        gl->DrawBuffer(GL_BACK);
         gl->GetIntegerv(GL_DRAW_BUFFER, &buffer);
         switch (buffer) {
         case GL_FRONT:

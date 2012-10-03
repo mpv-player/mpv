@@ -310,7 +310,6 @@ extern int xinerama_x;
 extern int xinerama_y;
 
 extern int vo_grabpointer;
-extern int vo_doublebuffering;
 extern int vo_vsync;
 extern int vo_fs;
 extern int vo_fsmode;

@@ -523,7 +523,7 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     gl->DepthMask(GL_FALSE);
     gl->Disable(GL_CULL_FACE);
     gl->Enable(p->target);
-    gl->DrawBuffer(vo_doublebuffering ? GL_BACK : GL_FRONT);
+    gl->DrawBuffer(GL_BACK);
     gl->TexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
     mp_msg(MSGT_VO, MSGL_V, "[gl] Creating %dx%d texture...\n",
@@ -781,8 +781,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
                           p->ass_border_y, p->image_width,
                           p->image_height, create_osd_texture, vo);
     }
-    if (vo_doublebuffering)
-        do_render_osd(vo, RENDER_OSD);
+    do_render_osd(vo, RENDER_OSD);
 }
 
 static void do_render(struct vo *vo)
@@ -826,20 +825,11 @@ static void flip_page(struct vo *vo)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    if (vo_doublebuffering) {
-        if (p->use_glFinish)
-            gl->Finish();
-        p->glctx->swapGlBuffers(p->glctx);
-        if (aspect_scaling())
-            gl->Clear(GL_COLOR_BUFFER_BIT);
-    } else {
-        do_render(vo);
-        do_render_osd(vo, RENDER_OSD | RENDER_EOSD);
-        if (p->use_glFinish)
-            gl->Finish();
-        else
-            gl->Flush();
-    }
+    if (p->use_glFinish)
+        gl->Finish();
+    p->glctx->swapGlBuffers(p->glctx);
+    if (aspect_scaling())
+        gl->Clear(GL_COLOR_BUFFER_BIT);
 }
 
 static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
@@ -1063,8 +1053,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     }
 skip_upload:
-    if (vo_doublebuffering)
-        do_render(vo);
+    do_render(vo);
     return VO_TRUE;
 }
 
@@ -1375,8 +1364,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         if (!data)
             return VO_FALSE;
         genEOSD(vo, data);
-        if (vo_doublebuffering)
-            do_render_osd(vo, RENDER_EOSD);
+        do_render_osd(vo, RENDER_EOSD);
         return VO_TRUE;
     case VOCTRL_GET_EOSD_RES: {
         mp_eosd_res_t *r = data;
@@ -1447,8 +1435,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         p->glctx->update_xinerama_info(vo);
         return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
-        if (vo_doublebuffering)
-            do_render(vo);
+        do_render(vo);
         return true;
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;

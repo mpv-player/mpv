@@ -629,7 +629,6 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("bpp", vo_dbpp, 0, 0, 32),
     {"colorkey", &vo_colorkey, CONF_TYPE_INT, 0, 0, 0, NULL},
     {"no-colorkey", &vo_colorkey, CONF_TYPE_FLAG, 0, 0, 0x1000000, NULL},
-    {"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     // wait for v-sync (gl)
     {"vsync", &vo_vsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},

@@ -489,10 +489,6 @@
 
     ``--display=xtest.localdomain:0``
 
---double, --no-double
-    Double buffering. The option to disable this exists mostly for debugging
-    purposes and should not normally be used.
-
 --doubleclick-time
     Time in milliseconds to recognize two consecutive button presses as a
     double-click (default: 300).
