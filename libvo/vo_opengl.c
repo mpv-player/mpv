@@ -1534,7 +1534,7 @@ static void gen_eosd(struct gl_priv *p, mp_eosd_images_t *imgs)
                                      * sizeof(struct vertex)
                                      * VERTICES_PER_QUAD);
 
-    if (need_upload && p->use_pbo) {
+    if (need_upload && p->use_pbo && p->eosd->targets_count) {
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->eosd_buffer);
         char *data = gl->MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
         if (!data) {
