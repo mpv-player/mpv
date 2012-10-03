@@ -50,6 +50,7 @@
 #include "bitmap_packer.h"
 
 #include "gl_common.h"
+#include "gl_osd.h"
 #include "filter_kernels.h"
 #include "aspect.h"
 #include "fastmemcpy.h"
@@ -142,17 +143,6 @@ struct fbotex {
     int vp_w, vp_h;             // viewport of fbo / used part of the texture
 };
 
-struct osd_render {
-    enum sub_bitmap_format format;
-    int bitmap_id, bitmap_pos_id;
-    GLuint texture;
-    int width, height;
-    GLuint buffer;
-    int num_vertices;
-    struct vertex *vertices;
-    struct bitmap_packer *packer;
-};
-
 struct gl_priv {
     struct vo *vo;
     MPGLContext *glctx;
@@ -186,7 +176,7 @@ struct gl_priv {
     GLuint osd_programs[SUBBITMAP_COUNT];
     GLuint indirect_program, scale_sep_program, final_program;
 
-    struct osd_render *osd[MAX_OSD_PARTS];
+    struct mpgl_osd *osd;
 
     GLuint lut_3d_texture;
     int lut_3d_w, lut_3d_h, lut_3d_d;
@@ -260,23 +250,10 @@ static const struct fmt_entry mp_to_gl_formats[] = {
     {0},
 };
 
-struct osd_fmt_entry {
-    GLint internal_format;
-    GLint format;
-    int stride;                 // bytes per pixel
-    GLenum type;
-    const char *shader;         // shader entry in the .glsl file
-};
-
-static const struct osd_fmt_entry osd_to_gl_formats[] = {
-    [SUBBITMAP_LIBASS]
-        = {GL_RED,  GL_RED,  1, GL_UNSIGNED_BYTE, "frag_osd_libass"},
-    [SUBBITMAP_RGBA]
-        = {GL_RGBA, GL_BGRA, 4, GL_UNSIGNED_BYTE, "frag_osd_rgba"},
-    [SUBBITMAP_OLD]
-        = {GL_RG,   GL_RG,   2, GL_UNSIGNED_BYTE, "frag_osd_old"},
-    // Make array long enough to contain all formats
-    [SUBBITMAP_COUNT]  = {0}
+static const char *osd_shaders[SUBBITMAP_COUNT] = {
+    [SUBBITMAP_LIBASS] = "frag_osd_libass",
+    [SUBBITMAP_RGBA] =   "frag_osd_rgba",
+    [SUBBITMAP_OLD] =    "frag_osd_old",
 };
 
 
@@ -678,11 +655,11 @@ static void compile_shaders(struct gl_priv *p)
     shader_def_opt(&header_osd, "USE_3DLUT", p->use_lut_3d);
 
     for (int n = 0; n < SUBBITMAP_COUNT; n++) {
-        struct osd_fmt_entry fmt = osd_to_gl_formats[n];
-        if (fmt.shader) {
-            char *s_osd = get_section(tmp, src, fmt.shader);
+        const char *name = osd_shaders[n];
+        if (name) {
+            char *s_osd = get_section(tmp, src, name);
             p->osd_programs[n] =
-                create_program(gl, fmt.shader, header_osd, vertex_shader, s_osd);
+                create_program(gl, name, header_osd, vertex_shader, s_osd);
         }
     }
 
@@ -947,6 +924,11 @@ static void reinit_rendering(struct gl_priv *p)
 
     if (p->indirect_program && !p->indirect_fbo.fbo)
         fbotex_init(p, &p->indirect_fbo, p->texture_width, p->texture_height);
+
+    if (!p->osd) {
+        p->osd = mpgl_osd_init(p->gl, false);
+        p->osd->use_pbo = p->use_pbo;
+    }
 }
 
 static void uninit_rendering(struct gl_priv *p)
@@ -964,6 +946,10 @@ static void uninit_rendering(struct gl_priv *p)
 
     gl->DeleteTextures(1, &p->dither_texture);
     p->dither_texture = 0;
+
+    if (p->osd)
+        mpgl_osd_destroy(p->osd);
+    p->osd = NULL;
 }
 
 static void init_lut_3d(struct gl_priv *p)
@@ -1409,166 +1395,51 @@ static mp_image_t *get_window_screenshot(struct gl_priv *p)
     return image;
 }
 
-static void gen_eosd(struct gl_priv *p, struct osd_render *osd,
-                     struct sub_bitmaps *imgs)
-{
-    GL *gl = p->gl;
-
-    if (imgs->bitmap_pos_id == osd->bitmap_pos_id)
-        return;
-
-    osd->num_vertices = 0;
-
-    if (imgs->format == SUBBITMAP_EMPTY || imgs->num_parts == 0)
-        return;
-
-    bool need_upload = imgs->bitmap_id != osd->bitmap_id;
-    bool need_allocate = false;
-
-    if (imgs->format != osd->format) {
-        packer_reset(osd->packer);
-        osd->format = imgs->format;
-        need_allocate = true;
-    }
-
-    osd->bitmap_id = imgs->bitmap_id;
-    osd->bitmap_pos_id = imgs->bitmap_pos_id;
-
-    osd->packer->padding = imgs->scaled; // assume 2x2 filter on scaling
-    int r = packer_pack_from_subbitmaps(osd->packer, imgs);
-    if (r < 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] EOSD bitmaps do not fit on "
-               "a surface with the maximum supported size %dx%d.\n",
-               osd->packer->w_max, osd->packer->h_max);
-        return;
-    } else if (r > 0) {
-        need_allocate = true;
-    }
-
-    struct osd_fmt_entry fmt = osd_to_gl_formats[imgs->format];
-    assert(fmt.shader);
-
-    if (!osd->texture) {
-        gl->GenTextures(1, &osd->texture);
-        gl->GenBuffers(1, &osd->buffer);
-    }
-
-    gl->BindTexture(GL_TEXTURE_2D, osd->texture);
-
-    if (need_allocate) {
-        tex_size(p, osd->packer->w, osd->packer->h, &osd->width, &osd->height);
-        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt.internal_format, osd->width,
-                       osd->height, 0, fmt.format, fmt.type, NULL);
-        default_tex_params(gl, GL_TEXTURE_2D, GL_LINEAR);
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, osd->buffer);
-        gl->BufferData(GL_PIXEL_UNPACK_BUFFER,
-                       osd->width * osd->height * fmt.stride,
-                       NULL, GL_DYNAMIC_COPY);
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    }
-
-    struct pos bb[2];
-    packer_get_bb(osd->packer, bb);
-
-    if (need_upload && p->use_pbo) {
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, osd->buffer);
-        char *data = gl->MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-        size_t stride = osd->width * fmt.stride;
-        if (!data) {
-            mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Error: can't upload subtitles! "
-                                        "Remove the 'pbo' suboption.\n");
-        } else {
-            if (imgs->scaled) {
-                int w = bb[1].x - bb[0].x;
-                int h = bb[1].y - bb[0].y;
-                memset_pic(data, 0, w * fmt.stride, h, stride);
-            }
-            for (int n = 0; n < osd->packer->count; n++) {
-                struct sub_bitmap *b = &imgs->parts[n];
-                struct pos p = osd->packer->result[n];
-
-                void *pdata = data + p.y * stride + p.x * fmt.stride;
-                memcpy_pic(pdata, b->bitmap, b->w * fmt.stride, b->h,
-                           stride, b->stride);
-            }
-            if (!gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER))
-                mp_msg(MSGT_VO, MSGL_FATAL, "[gl] EOSD PBO upload failed. "
-                       "Remove the 'pbo' suboption.\n");
-            glUploadTex(gl, GL_TEXTURE_2D, fmt.format, fmt.type, NULL, stride,
-                        bb[0].x, bb[0].y, bb[1].x - bb[0].x, bb[1].y - bb[0].y,
-                        0);
-            need_upload = false;
-        }
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    }
-    if (need_upload) {
-        // non-PBO upload
-        if (imgs->scaled) {
-            glClearTex(gl, GL_TEXTURE_2D, fmt.format, fmt.type,
-                       bb[0].x, bb[0].y, bb[1].x - bb[0].y, bb[1].y - bb[0].y,
-                       0, &p->scratch);
-        }
-        for (int n = 0; n < osd->packer->count; n++) {
-            struct sub_bitmap *b = &imgs->parts[n];
-            struct pos p = osd->packer->result[n];
-
-            glUploadTex(gl, GL_TEXTURE_2D, fmt.format, fmt.type,
-                        b->bitmap, b->stride, p.x, p.y, b->w, b->h, 0);
-        }
-    }
-
-    gl->BindTexture(GL_TEXTURE_2D, 0);
-
-    debug_check_gl(p, "EOSD upload");
-
-    osd->vertices = talloc_realloc_size(osd, osd->vertices,
-                                        osd->packer->count
-                                        * sizeof(struct vertex)
-                                        * VERTICES_PER_QUAD);
-
-    for (int n = 0; n < osd->packer->count; n++) {
-        struct sub_bitmap *b = &imgs->parts[n];
-        struct pos p = osd->packer->result[n];
-
-        // NOTE: the blend color is used with SUBBITMAP_LIBASS only, so it
-        //       doesn't matter that we upload garbage for the other formats
-        uint32_t c = b->libass.color;
-        uint8_t color[4] = { c >> 24, (c >> 16) & 0xff,
-                             (c >> 8) & 0xff, 255 - (c & 0xff) };
-
-        write_quad(&osd->vertices[osd->num_vertices],
-                   b->x, b->y, b->x + b->dw, b->y + b->dh,
-                   p.x, p.y, p.x + b->w, p.y + b->h,
-                   osd->width, osd->height, color, false);
-        osd->num_vertices += VERTICES_PER_QUAD;
-    }
-}
-
 static void draw_eosd(struct gl_priv *p, struct sub_bitmaps *imgs)
 {
     GL *gl = p->gl;
 
-    struct osd_render *osd = p->osd[imgs->render_index];
+    assert(p->osd);
 
-    gen_eosd(p, osd, imgs);
-
-    if (osd->num_vertices == 0)
+    struct mpgl_osd_part *osd = mpgl_osd_generate(p->osd, imgs);
+    if (!osd)
         return;
 
     assert(osd->format != SUBBITMAP_EMPTY);
 
-    gl->Enable(GL_BLEND);
-    if (osd->format == SUBBITMAP_OLD) {
-        gl->BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    } else {
-        gl->BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    if (!osd->num_vertices) {
+        osd->vertices = talloc_realloc(osd, osd->vertices, struct vertex,
+                                       osd->packer->count * VERTICES_PER_QUAD);
+
+        struct vertex *va = osd->vertices;
+
+        for (int n = 0; n < osd->packer->count; n++) {
+            struct sub_bitmap *b = &imgs->parts[n];
+            struct pos p = osd->packer->result[n];
+
+            // NOTE: the blend color is used with SUBBITMAP_LIBASS only, so it
+            //       doesn't matter that we upload garbage for the other formats
+            uint32_t c = b->libass.color;
+            uint8_t color[4] = { c >> 24, (c >> 16) & 0xff,
+                                (c >> 8) & 0xff, 255 - (c & 0xff) };
+
+            write_quad(&va[osd->num_vertices],
+                    b->x, b->y, b->x + b->dw, b->y + b->dh,
+                    p.x, p.y, p.x + b->w, p.y + b->h,
+                    osd->w, osd->h, color, false);
+            osd->num_vertices += VERTICES_PER_QUAD;
+        }
     }
-    gl->BindTexture(GL_TEXTURE_2D, osd->texture);
+
+    debug_check_gl(p, "before drawing osd");
+
     gl->UseProgram(p->osd_programs[osd->format]);
+    mpgl_osd_gl_set_state(p->osd, osd);
     draw_triangles(p, osd->vertices, osd->num_vertices);
+    mpgl_osd_gl_unset_state(p->osd, osd);
     gl->UseProgram(0);
-    gl->BindTexture(GL_TEXTURE_2D, 0);
-    gl->Disable(GL_BLEND);
+
+    debug_check_gl(p, "after drawing osd");
 }
 
 static void setup_vertex_array(GL *gl)
@@ -1630,21 +1501,6 @@ static int init_gl(struct gl_priv *p)
     gl->BindBuffer(GL_ARRAY_BUFFER, 0);
     gl->BindVertexArray(0);
 
-    GLint max_texture_size;
-    gl->GetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
-
-    for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        assert(!p->osd[n]);
-        struct osd_render *osd = talloc_ptrtype(p, osd);
-        *osd = (struct osd_render) {
-            .packer = talloc_struct(osd, struct bitmap_packer, {
-                .w_max = max_texture_size,
-                .h_max = max_texture_size,
-            }),
-        };
-        p->osd[n] = osd;
-    }
-
     gl->ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     gl->Clear(GL_COLOR_BUFFER_BIT);
 
@@ -1667,16 +1523,6 @@ static void uninit_gl(struct gl_priv *p)
     p->vao = 0;
     gl->DeleteBuffers(1, &p->vertex_buffer);
     p->vertex_buffer = 0;
-
-    for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        struct osd_render *osd = p->osd[n];
-        if (!osd)
-            continue;
-        gl->DeleteTextures(1, &osd->texture);
-        gl->DeleteBuffers(1, &osd->buffer);
-        talloc_free(osd);
-        p->osd[n] = NULL;
-    }
 
     gl->DeleteTextures(1, &p->lut_3d_texture);
     p->lut_3d_texture = 0;
@@ -1852,8 +1698,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     }
     case VOCTRL_QUERY_EOSD_FORMAT: {
-        int *p = data;
-        return osd_to_gl_formats[*p].shader ? VO_TRUE : VO_NOTIMPL;
+        int f = *(int *)data;
+        return (mpgl_osd_query_format(p->osd, f) && osd_shaders[f])
+               ? VO_TRUE : VO_NOTIMPL;
     }
     case VOCTRL_ONTOP:
         if (!p->glctx->ontop)

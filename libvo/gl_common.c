@@ -38,6 +38,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <assert.h>
 #include <math.h>
 #include "talloc.h"
 #include "gl_common.h"
@@ -45,6 +46,8 @@
 #include "aspect.h"
 #include "pnm_loader.h"
 #include "options.h"
+#include "sub/sub.h"
+#include "bitmap_packer.h"
 
 //! \defgroup glgeneral OpenGL general helper functions
 

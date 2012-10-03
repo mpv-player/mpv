@@ -20,6 +20,7 @@
  */
 
 #include <stdlib.h>
+#include <assert.h>
 
 #include <libavutil/common.h>
 
@@ -29,6 +30,9 @@
 #include "mpcommon.h"
 #include "sub/ass_mp.h"
 #include "sub/dec_sub.h"
+#include "fastmemcpy.h"
+
+#define IS_POWER_OF_2(x) (((x) > 0) && !(((x) - 1) & (x)))
 
 void packer_reset(struct bitmap_packer *packer)
 {
@@ -160,6 +164,8 @@ int packer_pack(struct bitmap_packer *packer)
             // No padding at edges
             packer->used_width = FFMIN(used_width, packer->w);
             packer->used_height = FFMIN(y, packer->h);
+            assert(packer->w == 0 || IS_POWER_OF_2(packer->w));
+            assert(packer->h == 0 || IS_POWER_OF_2(packer->h));
             return packer->w != w_orig || packer->h != h_orig;
         }
         if (packer->w <= packer->h && packer->w != packer->w_max)
@@ -200,4 +206,23 @@ int packer_pack_from_subbitmaps(struct bitmap_packer *packer,
     for (int i = 0; i < b->num_parts; i++)
         packer->in[i] = (struct pos){b->parts[i].w + a, b->parts[i].h + a};
     return packer_pack(packer);
+}
+
+void packer_copy_subbitmaps(struct bitmap_packer *packer, struct sub_bitmaps *b,
+                            void *data, int pixel_stride, int stride)
+{
+    assert(packer->count == b->num_parts);
+    if (packer->padding) {
+        struct pos bb[2];
+        packer_get_bb(packer, bb);
+        memset_pic(data, 0, bb[1].x * pixel_stride, bb[1].y, stride);
+    }
+    for (int n = 0; n < packer->count; n++) {
+        struct sub_bitmap *s = &b->parts[n];
+        struct pos p = packer->result[n];
+
+        void *pdata = (uint8_t *)data + p.y * stride + p.x * pixel_stride;
+        memcpy_pic(pdata, s->bitmap, s->w * pixel_stride, s->h,
+                   stride, s->stride);
+    }
 }
