@@ -163,8 +163,6 @@
     :1:       FreeType autohinter, light mode
     :2:       FreeType autohinter, normal mode
     :3:       font native hinter
-    :0-3 + 4: The same, but hinting will only be performed if the OSD is
-              rendered at screen resolution and will therefore not be scaled.
 
     The default value is 0 (no hinting).
 

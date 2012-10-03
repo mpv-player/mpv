@@ -42,8 +42,6 @@
 #define VFCAP_POSTPROC 0x800
 // filter can draw EOSD
 #define VFCAP_EOSD 0x2000
-// filter will draw EOSD at screen resolution (without scaling)
-#define VFCAP_EOSD_UNSCALED 0x4000
 // used by libvo and vf_vo, indicates the VO does not support draw_slice for this format
 #define VOCAP_NOSLICES 0x8000
 #define VFCAP_EOSD_FILTER 0x20000 // EOSD is drawn in filter chain

@@ -126,7 +126,6 @@ static int control(struct vf_instance *vf, int request, void *data)
             return CONTROL_FALSE;
         osd->normal_scale = 1;
         osd->vsfilter_scale = vf->priv->scale_ratio;
-        osd->unscaled = vf->default_caps & VFCAP_EOSD_UNSCALED;
         struct sub_bitmaps images;
         sub_get_bitmaps(osd, &images);
         return vo_control(video_out, VOCTRL_DRAW_EOSD, &images) == VO_TRUE;

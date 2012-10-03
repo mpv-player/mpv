@@ -1758,7 +1758,7 @@ static int query_format(uint32_t format)
 {
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP |
                VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE |
-               VFCAP_OSD | VFCAP_EOSD | VFCAP_EOSD_UNSCALED | VFCAP_EOSD_RGBA;
+               VFCAP_OSD | VFCAP_EOSD | VFCAP_EOSD_RGBA;
     if (!init_format(format, NULL))
         return 0;
     return caps;

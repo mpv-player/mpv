@@ -1116,7 +1116,7 @@ static int query_format(struct vo *vo, uint32_t format)
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP |
                VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
     if (p->use_osd)
-        caps |= VFCAP_OSD | VFCAP_EOSD | (p->scaled_osd ? 0 : VFCAP_EOSD_UNSCALED);
+        caps |= VFCAP_OSD | VFCAP_EOSD;
     if (format == IMGFMT_RGB24 || format == IMGFMT_RGBA)
         return caps;
     if (p->use_yuv && mp_get_chroma_shift(format, NULL, NULL, &depth) &&

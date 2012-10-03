@@ -226,17 +226,14 @@ ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
 }
 
 void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
-                      struct mp_eosd_res *dim, bool unscaled)
+                      struct mp_eosd_res *dim)
 {
     int hinting;
     ass_set_frame_size(priv, dim->w, dim->h);
     ass_set_margins(priv, dim->mt, dim->mb, dim->ml, dim->mr);
     ass_set_use_margins(priv, opts->ass_use_margins);
     ass_set_font_scale(priv, opts->ass_font_scale);
-    if (!unscaled && (opts->ass_hinting & 4))
-        hinting = 0;
-    else
-        hinting = opts->ass_hinting & 3;
+    hinting = opts->ass_hinting & 3; // +4 was for no hinting if scaled
     ass_set_hinting(priv, hinting);
     ass_set_line_spacing(priv, opts->ass_line_spacing);
 }

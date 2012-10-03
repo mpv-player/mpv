@@ -67,7 +67,6 @@ struct osd_state {
     struct mp_eosd_res dim;
     double normal_scale;
     double vsfilter_scale;
-    bool unscaled;
     bool support_rgba;
 
     int w, h;

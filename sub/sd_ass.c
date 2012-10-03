@@ -139,7 +139,7 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
     if (ctx->vsfilter_aspect && opts->ass_vsfilter_aspect_compat)
         scale = osd->vsfilter_scale;
     ASS_Renderer *renderer = osd->ass_renderer;
-    mp_ass_configure(renderer, opts, &osd->dim, osd->unscaled);
+    mp_ass_configure(renderer, opts, &osd->dim);
     ass_set_aspect_ratio(renderer, scale, 1);
     mp_ass_render_frame(renderer, ctx->ass_track, osd->sub_pts * 1000 + .5,
                         &ctx->parts, res);
