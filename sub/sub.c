@@ -172,8 +172,10 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
 
     if (obj->type == OSDTYPE_SPU) {
         *out_imgs = (struct sub_bitmaps) {0};
-        if (spu_visible(osd, obj))
-            spudec_get_bitmap(vo_spudec, osd->res.w, osd->res.h, out_imgs);
+        if (spu_visible(osd, obj)) {
+            //spudec_get_bitmap(vo_spudec, osd->res.w, osd->res.h, out_imgs);
+            spudec_get_indexed(vo_spudec, &osd->res, out_imgs);
+        }
         // Normal change-detection (sub. dec. calls vo_osd_changed(OSDTYPE_SPU))
         if (obj->force_redraw) {
             out_imgs->bitmap_id++;
@@ -183,9 +185,6 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
         struct sub_render_params p = *sub_params;
         if (p.pts != MP_NOPTS_VALUE)
             p.pts += sub_delay - osd->sub_offset;
-
-        p.support_rgba = formats[SUBBITMAP_RGBA];
-
         sub_get_bitmaps(osd, &p, out_imgs);
     } else {
         osd_object_get_bitmaps(osd, obj, out_imgs);
@@ -204,7 +203,7 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
         && formats[obj->cached.format])
     {
         *out_imgs = obj->cached;
-        return true;
+        return out_imgs->num_parts > 0;
     }
 
     out_imgs->render_index = obj->type;
@@ -212,22 +211,22 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
     out_imgs->bitmap_pos_id = obj->vo_bitmap_pos_id;
 
     if (formats[out_imgs->format])
-        return true;
+        return out_imgs->num_parts > 0;
 
     bool cached = false; // do we have a copy of all the image data?
 
-    if ((formats[SUBBITMAP_OLD_PLANAR] || formats[SUBBITMAP_OLD])
-        && out_imgs->format == SUBBITMAP_LIBASS)
+    if (formats[SUBBITMAP_RGBA] && out_imgs->format == SUBBITMAP_INDEXED) {
+        cached |= osd_conv_idx_to_rgba(obj->cache[0], out_imgs);
+    }
+
+    if (formats[SUBBITMAP_OLD_PLANAR] && out_imgs->format == SUBBITMAP_INDEXED)
     {
-        cached |= osd_conv_ass_to_old_p(obj->cache[0], out_imgs);
+        cached |= osd_conv_idx_to_old_p(obj->cache[1], out_imgs,
+                                        osd->res.w, osd->res.h);
     }
 
-    if (formats[SUBBITMAP_OLD] && out_imgs->format == SUBBITMAP_OLD_PLANAR) {
-        cached |= osd_conv_old_p_to_old(obj->cache[1], out_imgs);
-    }
-
-    if (formats[SUBBITMAP_RGBA] && out_imgs->format == SUBBITMAP_OLD_PLANAR) {
-        cached |= osd_conv_old_p_to_rgba(obj->cache[2], out_imgs);
+    if (formats[SUBBITMAP_OLD_PLANAR] && out_imgs->format == SUBBITMAP_LIBASS) {
+        cached |= osd_conv_ass_to_old_p(obj->cache[2], out_imgs);
     }
 
     if (cached)
@@ -238,7 +237,7 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
                obj->type, out_imgs->format);
         return false;
     }
-    return true;
+    return out_imgs->num_parts > 0;
 }
 
 // This is a hack to render the first subtitle OSD object, which is not empty.
@@ -290,7 +289,6 @@ void draw_osd_with_eosd(struct vo *vo, struct osd_state *osd)
         .dim = dim,
         .normal_scale = 1,
         .vsfilter_scale = (double) asp.prew / asp.preh * asp.orgh / asp.orgw,
-        .support_rgba = formats[SUBBITMAP_RGBA],
     };
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {

@@ -66,17 +66,6 @@ void main() {
     out_color = texture(texture1, texcoord);
 }
 
-#!section frag_osd_old
-uniform sampler2D texture1;
-uniform vec4 osd_color;
-
-in vec2 texcoord;
-out vec4 out_color;
-
-void main() {
-    out_color = texture(texture1, texcoord).rrrg * osd_color;
-}
-
 #!section frag_video
 uniform sampler2D texture1;
 uniform sampler2D texture2;

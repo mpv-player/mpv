@@ -30,11 +30,18 @@ struct sub_render_params;
 enum sub_bitmap_format {
     SUBBITMAP_EMPTY = 0,// no bitmaps; always has num_parts==0
     SUBBITMAP_LIBASS,   // A8, with a per-surface blend color (libass.color)
-    SUBBITMAP_RGBA,     // B8G8R8A8, can be scaled
-    SUBBITMAP_OLD,      // I8A8 (monochrome), premultiplied alpha
+    SUBBITMAP_RGBA,     // B8G8R8A8 (MSB=A, LSB=B), can be scaled
+    SUBBITMAP_INDEXED,  // scaled, bitmap points to osd_bmp_indexed
     SUBBITMAP_OLD_PLANAR, // like previous, but bitmap points to old_osd_planar
 
     SUBBITMAP_COUNT
+};
+
+// For SUBBITMAP_INDEXED
+struct osd_bmp_indexed {
+    uint8_t *bitmap;
+    // Each entry is like a pixel in SUBBITMAP_RGBA format
+    uint32_t palette[256];
 };
 
 // For SUBBITMAP_OLD_PANAR
@@ -46,9 +53,10 @@ struct old_osd_planar {
 struct sub_bitmap {
     void *bitmap;
     int stride;
+    // Note: not clipped, going outside the screen area is allowed
+    //       (except for SUBBITMAP_LIBASS, which is always clipped)
     int w, h;
     int x, y;
-    // Note: not clipped, going outside the screen area is allowed
     int dw, dh;
 
     union {
@@ -59,10 +67,14 @@ struct sub_bitmap {
 };
 
 struct sub_bitmaps {
-    int render_index;   // for VO cache state (limited by MAX_OSD_PARTS)
+    // For VO cache state (limited by MAX_OSD_PARTS)
+    int render_index;
 
     enum sub_bitmap_format format;
-    bool scaled;        // if false, dw==w && dh==h
+
+    // If false, dw==w && dh==h.
+    // SUBBITMAP_LIBASS is never scaled.
+    bool scaled;
 
     struct sub_bitmap *parts;
     int num_parts;
@@ -119,8 +131,6 @@ struct osd_state {
     struct sh_sub *sh_sub;
     double sub_offset;
     double vo_sub_pts;
-
-    bool support_rgba;
 
     bool render_subs_in_filter;
 

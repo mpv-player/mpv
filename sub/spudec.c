@@ -127,6 +127,7 @@ typedef struct {
 
   struct sub_bitmap borrowed_sub_part;
   struct old_osd_planar borrowed_sub_image;
+  struct osd_bmp_indexed borrowed_bmp;
 } spudec_handle_t;
 
 static void spudec_queue_packet(spudec_handle_t *this, packet_t *packet)
@@ -760,6 +761,50 @@ void spudec_get_bitmap(void *this, int w, int h, struct sub_bitmaps *res)
     }
 }
 
+void spudec_get_indexed(void *this, struct mp_eosd_res *dim,
+                        struct sub_bitmaps *res)
+{
+    spudec_handle_t *spu = this;
+    *res = (struct sub_bitmaps) { .format = SUBBITMAP_INDEXED };
+    struct sub_bitmap *part = &spu->borrowed_sub_part;
+    res->parts = part;
+    if (spudec_visible(spu)) {
+        struct osd_bmp_indexed *bmp = &spu->borrowed_bmp;
+        part->bitmap = bmp;
+        bmp->bitmap = spu->pal_image;
+        part->stride = spu->pal_width;
+        part->w = spu->pal_width;
+        part->h = spu->pal_height;
+        double xscale = (double) (dim->w - dim->ml - dim->mr) / spu->orig_frame_width;
+        double yscale = (double) (dim->h - dim->mt - dim->mb) / spu->orig_frame_height;
+        part->x = spu->pal_start_col * xscale + dim->ml;
+        part->y = spu->pal_start_row * yscale + dim->mt;
+        part->dw = part->w * xscale;
+        part->dh = part->h * yscale;
+        res->num_parts = 1;
+        memset(bmp->palette, 0, sizeof(bmp->palette));
+        for (int i = 0; i < 4; ++i) {
+            int alpha = spu->alpha[i];
+            // extend 4 -> 8 bit
+            alpha |= alpha << 4;
+            if (spu->custom && (spu->cuspal[i] >> 31) != 0)
+                alpha = 0;
+            int color = spu->custom ? spu->cuspal[i] :
+                        spu->global_palette[spu->palette[i]];
+            int y = (color >> 16) & 0xff;
+            int u = (color >> 8) & 0xff;
+            int v = color & 0xff;
+            // stolen from some site, likely incorrect
+            int b = 1.164 * (y - 16)                     + 2.018 * (u - 128);
+            int g = 1.164 * (y - 16) - 0.813 * (v - 128) - 0.391 * (u - 128);
+            int r = 1.164 * (y - 16) + 1.596 * (v - 128);
+#define CL(x) FFMAX(FFMIN((x), 255), 0)
+            bmp->palette[i] = (alpha << 24) | CL(r) | (CL(g) << 8) | (CL(b) << 16);
+#undef CL
+        }
+    }
+}
+
 void spudec_draw(void *this, void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx)
 {
     spudec_handle_t *spu = this;
@@ -1323,6 +1368,14 @@ void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigne
   else
     mp_msg(MSGT_SPUDEC,MSGL_FATAL, "FATAL: spudec_init: calloc");
   return this;
+}
+
+void spudec_set_res(void *this, unsigned int frame_width, unsigned int frame_height)
+{
+    spudec_handle_t *spu = this;
+    // intentionally do not apply resolution heuristics
+    spu->orig_frame_width = frame_width;
+    spu->orig_frame_height = frame_height;
 }
 
 void *spudec_new(unsigned int *palette)

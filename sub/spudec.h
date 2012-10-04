@@ -22,14 +22,17 @@
 #include <stdint.h>
 
 struct sub_bitmaps;
+struct mp_eosd_res;
 
 void spudec_heartbeat(void *this, unsigned int pts100);
 void spudec_assemble(void *this, unsigned char *packet, unsigned int len, int pts100);
 void spudec_draw(void *this, void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx);
 void spudec_draw_scaled(void *this, unsigned int dxs, unsigned int dys, void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx);
 void spudec_get_bitmap(void *this, int w, int h, struct sub_bitmaps *res);
+void spudec_get_indexed(void *this, struct mp_eosd_res *dim, struct sub_bitmaps *res);
 int spudec_apply_palette_crop(void *this, uint32_t palette, int sx, int ex, int sy, int ey);
 void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigned int frame_height, uint8_t *extradata, int extradata_len);
+void spudec_set_res(void *this, unsigned int frame_width, unsigned int frame_height);
 void *spudec_new(unsigned int *palette);
 void spudec_free(void *this);
 void spudec_reset(void *this);	// called after seek

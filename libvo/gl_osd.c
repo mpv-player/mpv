@@ -33,20 +33,16 @@ struct osd_fmt_entry {
 static const int blend_factors[SUBBITMAP_COUNT][2] = {
     [SUBBITMAP_LIBASS] = {GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA},
     [SUBBITMAP_RGBA] =   {GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA},
-    [SUBBITMAP_OLD] =    {GL_ONE,       GL_ONE_MINUS_SRC_ALPHA},
 };
 
 static const struct osd_fmt_entry osd_to_gl3_formats[SUBBITMAP_COUNT] = {
     [SUBBITMAP_LIBASS] = {GL_RED,   GL_RED,   GL_UNSIGNED_BYTE},
     [SUBBITMAP_RGBA] =   {GL_RGBA,  GL_BGRA,  GL_UNSIGNED_BYTE},
-    [SUBBITMAP_OLD] =    {GL_RG,    GL_RG,    GL_UNSIGNED_BYTE},
 };
 
 static const struct osd_fmt_entry osd_to_gl_legacy_formats[SUBBITMAP_COUNT] = {
     [SUBBITMAP_LIBASS] = {GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE},
     [SUBBITMAP_RGBA] =   {GL_RGBA,  GL_BGRA,  GL_UNSIGNED_BYTE},
-    [SUBBITMAP_OLD] =
-        {GL_LUMINANCE_ALPHA,  GL_LUMINANCE_ALPHA,  GL_UNSIGNED_BYTE},
 };
 
 struct mpgl_osd *mpgl_osd_init(GL *gl, bool legacy)

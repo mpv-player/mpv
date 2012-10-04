@@ -16,6 +16,7 @@
  */
 
 #include <stdlib.h>
+#include <assert.h>
 
 #include <libavcodec/avcodec.h>
 
@@ -23,60 +24,20 @@
 #include "mp_msg.h"
 #include "libmpdemux/stheader.h"
 #include "sd.h"
-#include "spudec.h"
-// Current code still pushes subs directly to global spudec
 #include "dec_sub.h"
 #include "sub.h"
 
 struct sd_lavc_priv {
     AVCodecContext *avctx;
+    AVSubtitle sub;
+    bool have_sub;
     int count;
     struct sub_bitmap *inbitmaps;
     struct sub_bitmap *outbitmaps;
+    struct osd_bmp_indexed *imgs;
     bool bitmaps_changed;
     double endpts;
 };
-
-static void old_avsub_to_spudec(AVSubtitleRect **rects, int num_rects,
-                                double pts, double endpts)
-{
-    int i, xmin = INT_MAX, ymin = INT_MAX, xmax = INT_MIN, ymax = INT_MIN;
-    struct spu_packet_t *packet;
-
-    if (num_rects == 1) {
-        spudec_set_paletted(vo_spudec,
-                            rects[0]->pict.data[0],
-                            rects[0]->pict.linesize[0],
-                            rects[0]->pict.data[1],
-                            rects[0]->x,
-                            rects[0]->y,
-                            rects[0]->w,
-                            rects[0]->h,
-                            pts,
-                            endpts);
-        return;
-    }
-    for (i = 0; i < num_rects; i++) {
-        xmin = FFMIN(xmin, rects[i]->x);
-        ymin = FFMIN(ymin, rects[i]->y);
-        xmax = FFMAX(xmax, rects[i]->x + rects[i]->w);
-        ymax = FFMAX(ymax, rects[i]->y + rects[i]->h);
-    }
-    packet = spudec_packet_create(xmin, ymin, xmax - xmin, ymax - ymin);
-    if (!packet)
-        return;
-    spudec_packet_clear(packet);
-    for (i = 0; i < num_rects; i++)
-        spudec_packet_fill(packet,
-                           rects[i]->pict.data[0],
-                           rects[i]->pict.linesize[0],
-                           rects[i]->pict.data[1],
-                           rects[i]->x - xmin,
-                           rects[i]->y - ymin,
-                           rects[i]->w,
-                           rects[i]->h);
-    spudec_packet_send(vo_spudec, packet, pts, endpts);
-}
 
 static void guess_resolution(char type, int *w, int *h)
 {
@@ -143,8 +104,13 @@ static void clear(struct sd_lavc_priv *priv)
     talloc_free(priv->inbitmaps);
     talloc_free(priv->outbitmaps);
     priv->inbitmaps = priv->outbitmaps = NULL;
+    talloc_free(priv->imgs);
+    priv->imgs = NULL;
     priv->bitmaps_changed = true;
     priv->endpts = MP_NOPTS_VALUE;
+    if (priv->have_sub)
+        avsubtitle_free(&priv->sub);
+    priv->have_sub = false;
 }
 
 static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
@@ -166,6 +132,8 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
     int res = avcodec_decode_subtitle2(ctx, &sub, &got_sub, &pkt);
     if (res < 0 || !got_sub)
         return;
+    priv->sub = sub;
+    priv->have_sub = true;
     if (pts != MP_NOPTS_VALUE) {
         if (sub.end_display_time > sub.start_display_time)
             duration = (sub.end_display_time - sub.start_display_time) / 1000.0;
@@ -174,39 +142,27 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
     double endpts = MP_NOPTS_VALUE;
     if (pts != MP_NOPTS_VALUE && duration >= 0)
         endpts = pts + duration;
-    if (vo_spudec && sub.num_rects == 0)
-        spudec_set_paletted(vo_spudec, NULL, 0, NULL, 0, 0, 0, 0, pts, endpts);
     if (sub.num_rects > 0) {
         switch (sub.rects[0]->type) {
         case SUBTITLE_BITMAP:
-            if (!osd->support_rgba) {
-                if (!vo_spudec)
-                    vo_spudec = spudec_new_scaled(NULL, ctx->width, ctx->height,
-                                                  NULL, 0);
-                old_avsub_to_spudec(sub.rects, sub.num_rects, pts, endpts);
-                vo_osd_changed(OSDTYPE_SPU);
-                break;
-            }
             priv->inbitmaps = talloc_array(priv, struct sub_bitmap,
                                            sub.num_rects);
+            priv->imgs = talloc_array(priv, struct osd_bmp_indexed,
+                                      sub.num_rects);
             for (int i = 0; i < sub.num_rects; i++) {
                 struct AVSubtitleRect *r = sub.rects[i];
                 struct sub_bitmap *b = &priv->inbitmaps[i];
-                uint32_t *outbmp = talloc_size(priv->inbitmaps,
-                                               r->w * r->h * 4);
-                b->bitmap = outbmp;
-                b->stride = r->w * 4;
+                struct osd_bmp_indexed *img = &priv->imgs[i];
+                img->bitmap = r->pict.data[0];
+                assert(r->nb_colors > 0);
+                assert(r->nb_colors * 4 <= sizeof(img->palette));
+                memcpy(img->palette, r->pict.data[1], r->nb_colors * 4);
+                b->bitmap = img;
+                b->stride = r->pict.linesize[0];
                 b->w = r->w;
                 b->h = r->h;
                 b->x = r->x;
                 b->y = r->y;
-                uint8_t *inbmp = r->pict.data[0];
-                uint32_t *palette = (uint32_t *) r->pict.data[1];
-                for (int y = 0; y < r->h; y++) {
-                    for (int x = 0; x < r->w; x++)
-                        *outbmp++ = palette[*inbmp++];
-                    inbmp += r->pict.linesize[0] - r->w;
-                };
             }
             priv->count = sub.num_rects;
             priv->endpts = endpts;
@@ -217,7 +173,6 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
             break;
         }
     }
-    avsubtitle_free(&sub);
 }
 
 static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
@@ -229,8 +184,6 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
     if (priv->endpts != MP_NOPTS_VALUE && (params->pts >= priv->endpts ||
                                            params->pts < priv->endpts - 300))
         clear(priv);
-    if (!params->support_rgba)
-        return;
     if (priv->bitmaps_changed && priv->count > 0)
         priv->outbitmaps = talloc_memdup(priv, priv->inbitmaps,
                                          talloc_get_size(priv->inbitmaps));
@@ -257,7 +210,7 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
     else if (pos_changed)
         res->bitmap_pos_id++;
     priv->bitmaps_changed = false;
-    res->format = SUBBITMAP_RGBA;
+    res->format = SUBBITMAP_INDEXED;
     res->scaled = xscale != 1 || yscale != 1;
 }
 
@@ -274,6 +227,7 @@ static void uninit(struct sh_sub *sh)
 {
     struct sd_lavc_priv *priv = sh->context;
 
+    clear(priv);
     avcodec_close(priv->avctx);
     av_free(priv->avctx);
     talloc_free(priv);

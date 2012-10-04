@@ -63,9 +63,6 @@ void sub_get_bitmaps(struct osd_state *osd, struct sub_render_params *params,
 {
     struct MPOpts *opts = osd->opts;
 
-    // temporary hack
-    osd->support_rgba = params->support_rgba;
-
     *res = (struct sub_bitmaps) {0};
     if (!opts->sub_visibility || !osd->sh_sub || !osd->sh_sub->active) {
         /* Change ID in case we just switched from visible subtitles

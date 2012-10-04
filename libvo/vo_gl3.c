@@ -252,7 +252,6 @@ static const struct fmt_entry mp_to_gl_formats[] = {
 static const char *osd_shaders[SUBBITMAP_COUNT] = {
     [SUBBITMAP_LIBASS] = "frag_osd_libass",
     [SUBBITMAP_RGBA] =   "frag_osd_rgba",
-    [SUBBITMAP_OLD] =    "frag_osd_old",
 };
 
 

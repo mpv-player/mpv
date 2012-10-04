@@ -25,14 +25,16 @@
 
 #include "img_convert.h"
 #include "sub.h"
+#include "spudec.h"
 
 struct osd_conv_cache {
     struct sub_bitmap part;
+    struct sub_bitmap *parts;
     // for osd_conv_cache_alloc_old_p() (SUBBITMAP_PLANAR)
     int allocated, stride;
     struct old_osd_planar bmp;
-    // for osd_conv_cache_alloc_bmp() (various other formats)
-    unsigned char *packed;
+    // for osd_conv_idx_to_old_p(), a spudec.c handle
+    void *spudec;
 };
 
 static int osd_conv_cache_destroy(void *p)
@@ -40,6 +42,8 @@ static int osd_conv_cache_destroy(void *p)
     struct osd_conv_cache *c = p;
     av_free(c->bmp.bitmap);
     av_free(c->bmp.alpha);
+    if (c->spudec)
+        spudec_free(c->spudec);
     return 0;
 }
 
@@ -68,21 +72,6 @@ static void osd_conv_cache_alloc_old_p(struct osd_conv_cache *c, int w, int h)
     c->part = (struct sub_bitmap) {
         .bitmap = &c->bmp,
         .stride = c->stride,
-        .w = w, .h = h,
-        .dw = w, .dh = h,
-    };
-}
-
-static void osd_conv_cache_alloc_bmp(struct osd_conv_cache *c, int w, int h,
-                                     int bpp)
-{
-    size_t size = talloc_get_size(c->packed);
-    size_t new_size = w * bpp * h;
-    if (new_size > size)
-        c->packed = talloc_realloc(c, c->packed, unsigned char, new_size);
-    c->part = (struct sub_bitmap) {
-        .bitmap = c->packed,
-        .stride = w * bpp,
         .w = w, .h = h,
         .dw = w, .dh = h,
     };
@@ -177,80 +166,99 @@ bool osd_conv_ass_to_old_p(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
     return true;
 }
 
-// SUBBITMAP_OLD_PLANAR -> SUBBITMAP_RGBA
-bool osd_conv_old_p_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
+bool osd_conv_idx_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
 {
     struct sub_bitmaps src = *imgs;
-    if (src.format != SUBBITMAP_OLD_PLANAR || src.num_parts > 1)
+    if (src.format != SUBBITMAP_INDEXED)
         return false;
 
     imgs->format = SUBBITMAP_RGBA;
-    imgs->num_parts = 0;
-    imgs->parts = NULL;
+    talloc_free(c->parts);
+    imgs->parts = c->parts = talloc_array(c, struct sub_bitmap, src.num_parts);
 
-    if (src.num_parts == 0)
-        return true;
+    for (int n = 0; n < src.num_parts; n++) {
+        struct sub_bitmap *d = &imgs->parts[n];
+        struct sub_bitmap *s = &src.parts[n];
+        struct osd_bmp_indexed *sb = s->bitmap;
 
-    struct sub_bitmap *s = &src.parts[0];
-    struct old_osd_planar *p = s->bitmap;
+        *d = *s;
+        d->stride = s->w * 4;
+        d->bitmap = talloc_size(c->parts, s->h * d->stride);
 
-    osd_conv_cache_alloc_bmp(c, s->w, s->h, 4);
-
-    for (int y = 0; y < s->h; y++) {
-        unsigned char *y_src = p->bitmap + s->stride * y;
-        unsigned char *y_srca = p->alpha + s->stride * y;
-        unsigned char *cur = c->packed + y * s->w * 4;
-        for (int x = 0; x < s->w; x++) {
-            // This is incorrect, as input is premultiplied alpha, but output
-            // has to be non-premultiplied. However, this code is for
-            // compatibility with spudec.c only, and DVD subtitles have
-            // binary transparency only - the rendered result will be the same.
-            cur[x*4+0] = cur[x*4+1] = cur[x*4+2] = y_src[x];
-            cur[x*4+3] = -y_srca[x];
+        uint32_t *palette = sb->palette;
+        uint32_t *outbmp = d->bitmap;
+        for (int y = 0; y < s->h; y++) {
+            uint8_t *inbmp = sb->bitmap + y * s->stride;
+            for (int x = 0; x < s->w; x++)
+                *outbmp++ = palette[*inbmp++];
         }
     }
-
-    c->part.x = s->x;
-    c->part.y = s->y;
-
-    imgs->parts = &c->part;
-    imgs->num_parts = 1;
     return true;
 }
 
-// SUBBITMAP_OLD_PLANAR -> SUBBITMAP_OLD
-bool osd_conv_old_p_to_old(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
+bool osd_conv_idx_to_old_p(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
+                           int screen_w, int screen_h)
 {
     struct sub_bitmaps src = *imgs;
-    if (src.format != SUBBITMAP_OLD_PLANAR || src.num_parts > 1)
+    if (src.format != SUBBITMAP_INDEXED)
         return false;
 
-    imgs->format = SUBBITMAP_OLD;
+    imgs->format = SUBBITMAP_OLD_PLANAR;
     imgs->num_parts = 0;
     imgs->parts = NULL;
-
     if (src.num_parts == 0)
         return true;
 
-    struct sub_bitmap *s = &src.parts[0];
-    struct old_osd_planar *p = s->bitmap;
+    // assume they are all evenly scaled (and size 0 is not possible)
+    // could put more effort into it to reduce rounding errors, but it doesn't
+    // make much sense anyway
+    struct sub_bitmap *s0 = &src.parts[0];
+    double scale_x = (double)s0->w / s0->dw;
+    double scale_y = (double)s0->h / s0->dh;
+    double scale = FFMIN(scale_x, scale_y);
 
-    osd_conv_cache_alloc_bmp(c, s->w, s->h, 2);
+    int xmin, ymin, xmax, ymax;
 
-    for (int y = 0; y < s->h; y++) {
-        unsigned char *y_src = p->bitmap + s->stride * y;
-        unsigned char *y_srca = p->alpha + s->stride * y;
-        unsigned char *cur = c->packed + y * s->w * 2;
-        for (int x = 0; x < s->w; x++) {
-            cur[x*2+0] = y_src[x];
-            cur[x*2+1] = -y_srca[x];
-        }
+    xmin = ymin = INT_MAX;
+    xmax = ymax = INT_MIN;
+    for (int n = 0; n < src.num_parts; n++) {
+        struct sub_bitmap *s = &src.parts[n];
+        int sx = s->x * scale;
+        int sy = s->y * scale;
+        xmin = FFMIN(xmin, sx);
+        ymin = FFMIN(ymin, sy);
+        xmax = FFMAX(xmax, sx + s->w);
+        ymax = FFMAX(ymax, sy + s->h);
     }
 
-    c->part.x = s->x;
-    c->part.y = s->y;
+    int w = xmax - xmin;
+    int h = ymax - ymin;
 
-    imgs->parts = &c->part;
-    imgs->num_parts = 1;
+    struct spu_packet_t *packet = spudec_packet_create(xmin, ymin, w, h);
+    if (!packet)
+        return false;
+    spudec_packet_clear(packet);
+    for (int n = 0; n < src.num_parts; n++) {
+        struct sub_bitmap *s = &src.parts[n];
+        struct osd_bmp_indexed *sb = s->bitmap;
+        int sx = s->x * scale;
+        int sy = s->y * scale;
+        assert(sx >= xmin);
+        assert(sy >= ymin);
+        assert(sx - xmin + s->w <= w);
+        assert(sy - ymin + s->h <= h);
+        // assumes sub-images are not overlapping
+        spudec_packet_fill(packet, sb->bitmap, s->stride, sb->palette,
+                           sx - xmin, sy - ymin, s->w, s->h);
+    }
+    if (!c->spudec)
+        c->spudec = spudec_new_scaled(NULL, 0, 0, NULL, 0);
+    spudec_packet_send(c->spudec, packet, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
+    spudec_set_res(c->spudec, screen_w * scale, screen_h * scale);
+    spudec_heartbeat(c->spudec, 0);
+    spudec_get_bitmap(c->spudec, screen_w, screen_h, imgs);
+    imgs->render_index = src.render_index;
+    imgs->bitmap_id = src.bitmap_id;
+    imgs->bitmap_pos_id = src.bitmap_pos_id;
     return true;
 }

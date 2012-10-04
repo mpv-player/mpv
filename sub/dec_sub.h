@@ -15,8 +15,6 @@ struct sub_render_params {
     struct mp_eosd_res dim;
     double normal_scale;
     double vsfilter_scale;
-
-    bool support_rgba;
 };
 
 static inline bool is_text_sub(int type)
