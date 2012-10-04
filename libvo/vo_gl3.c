@@ -1210,7 +1210,6 @@ static void resize(struct gl_priv *p)
     update_window_sized_objects(p);
     update_all_uniforms(p);
 
-    vo_osd_resized();
     gl->Clear(GL_COLOR_BUFFER_BIT);
     vo->want_redraw = true;
 }

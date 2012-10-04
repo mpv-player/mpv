@@ -1598,7 +1598,8 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
         if (opts->ass_enabled)
             opts->ass_font_scale = *(float *) arg;
         text_font_scale_factor = *(float *) arg;
-        vo_osd_resized();
+        vo_osd_changed(OSDTYPE_SUBTITLE);
+        vo_osd_changed(OSDTYPE_OSD);
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
@@ -1610,7 +1611,8 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
         text_font_scale_factor += (arg ? *(float *) arg : 0.1) *
                                   (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
         M_PROPERTY_CLAMP(prop, text_font_scale_factor);
-        vo_osd_resized();
+        vo_osd_changed(OSDTYPE_SUBTITLE);
+        vo_osd_changed(OSDTYPE_OSD);
         return M_PROPERTY_OK;
     default:
         if (opts->ass_enabled)

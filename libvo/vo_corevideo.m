@@ -91,8 +91,6 @@ static void resize(struct vo *vo, int width, int height)
     gl->MatrixMode(GL_MODELVIEW);
     gl->LoadIdentity();
 
-    vo_osd_resized();
-
     gl->Clear(GL_COLOR_BUFFER_BIT);
     vo->want_redraw = true;
 }

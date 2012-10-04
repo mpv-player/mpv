@@ -301,14 +301,6 @@ void vo_osd_reset_changed(void)
         osd->objs[n]->force_redraw = false;
 }
 
-void vo_osd_resized(void)
-{
-    // Counter the typical vo_osd_has_changed(osd) call in VO's draw_osd()
-    struct osd_state *osd = global_osd;
-    for (int n = 0; n < MAX_OSD_PARTS; n++)
-        osd->objs[n]->force_redraw = true;
-}
-
 bool sub_bitmaps_bb(struct sub_bitmaps *imgs, int *x1, int *y1,
                     int *x2, int *y2)
 {

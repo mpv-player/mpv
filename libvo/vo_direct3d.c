@@ -850,8 +850,6 @@ static bool resize_d3d(d3d_priv *priv)
 
     calc_fs_rect(priv);
 
-    vo_osd_resized();
-
     priv->vo->want_redraw = true;
 
     return 1;

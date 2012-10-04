@@ -169,7 +169,6 @@ void osd_update(struct osd_state *osd, int dxs, int dys);
 void vo_osd_changed(int new_value);
 void vo_osd_reset_changed(void);
 bool vo_osd_has_changed(struct osd_state *osd);
-void vo_osd_resized(void);
 void osd_free(struct osd_state *osd);
 
 bool sub_bitmaps_bb(struct sub_bitmaps *imgs, int *x1, int *y1,
