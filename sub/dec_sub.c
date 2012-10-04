@@ -45,7 +45,7 @@ void sub_init(struct sh_sub *sh, struct osd_state *osd)
         if (sh->sd_driver->init(sh, osd) < 0)
             return;
         osd->sh_sub = sh;
-        osd->bitmap_id = ++osd->bitmap_pos_id;
+        osd->switch_sub_id++;
         sh->initialized = true;
         sh->active = true;
     }
@@ -58,14 +58,15 @@ void sub_decode(struct sh_sub *sh, struct osd_state *osd, void *data,
         sh->sd_driver->decode(sh, osd, data, data_len, pts, duration);
 }
 
-void sub_get_bitmaps(struct osd_state *osd, struct sub_bitmaps *res)
+void sub_get_bitmaps(struct osd_state *osd, struct sub_render_params *params,
+                     struct sub_bitmaps *res)
 {
     struct MPOpts *opts = osd->opts;
 
-    *res = (struct sub_bitmaps){ .render_index = 0,
-                                 .format = SUBBITMAP_EMPTY,
-                                 .bitmap_id = osd->bitmap_id,
-                                 .bitmap_pos_id = osd->bitmap_pos_id };
+    // temporary hack
+    osd->support_rgba = params->support_rgba;
+
+    *res = (struct sub_bitmaps) {0};
     if (!opts->sub_visibility || !osd->sh_sub || !osd->sh_sub->active) {
         /* Change ID in case we just switched from visible subtitles
          * to current state. Hopefully, unnecessarily claiming that
@@ -73,14 +74,15 @@ void sub_get_bitmaps(struct osd_state *osd, struct sub_bitmaps *res)
          * Increase osd-> values ahead so that _next_ returned id
          * is also guaranteed to differ from this one.
          */
-        res->bitmap_id = ++res->bitmap_pos_id;
-        osd->bitmap_id = osd->bitmap_pos_id += 2;
-        return;
+        osd->switch_sub_id++;
+    } else {
+        if (osd->sh_sub->sd_driver->get_bitmaps)
+            osd->sh_sub->sd_driver->get_bitmaps(osd->sh_sub, osd, params, res);
     }
-    if (osd->sh_sub->sd_driver->get_bitmaps)
-        osd->sh_sub->sd_driver->get_bitmaps(osd->sh_sub, osd, res);
-    osd->bitmap_id = res->bitmap_id;
-    osd->bitmap_pos_id = res->bitmap_pos_id;
+
+    res->bitmap_id += osd->switch_sub_id;
+    res->bitmap_pos_id += osd->switch_sub_id;
+    osd->switch_sub_id = 0;
 }
 
 void sub_reset(struct sh_sub *sh, struct osd_state *osd)

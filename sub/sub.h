@@ -67,10 +67,6 @@ struct osd_state {
     double sub_offset;
     double vo_sub_pts;
 
-    double sub_pts;
-    struct mp_eosd_res dim;
-    double normal_scale;
-    double vsfilter_scale;
     bool support_rgba;
 
     bool render_subs_in_filter;
@@ -80,9 +76,7 @@ struct osd_state {
     char *osd_text;             // OSDTYPE_OSD
     int progbar_type, progbar_value; // OSDTYPE_PROGBAR
 
-    // temporary for sub decoders
-    int bitmap_id;
-    int bitmap_pos_id;
+    int switch_sub_id;
 
     struct MPOpts *opts;
 

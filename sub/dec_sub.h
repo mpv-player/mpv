@@ -76,7 +76,8 @@ static inline bool is_text_sub(int type)
 
 void sub_decode(struct sh_sub *sh, struct osd_state *osd, void *data,
                 int data_len, double pts, double duration);
-void sub_get_bitmaps(struct osd_state *osd, struct sub_bitmaps *res);
+void sub_get_bitmaps(struct osd_state *osd, struct sub_render_params *params,
+                     struct sub_bitmaps *res);
 void sub_init(struct sh_sub *sh, struct osd_state *osd);
 void sub_reset(struct sh_sub *sh, struct osd_state *osd);
 void sub_switchoff(struct sh_sub *sh, struct osd_state *osd);

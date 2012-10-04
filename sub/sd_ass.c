@@ -127,21 +127,22 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
 }
 
 static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
+                        struct sub_render_params *params,
                         struct sub_bitmaps *res)
 {
     struct sd_ass_priv *ctx = sh->context;
     struct MPOpts *opts = osd->opts;
 
-    if (osd->sub_pts == MP_NOPTS_VALUE)
+    if (params->pts == MP_NOPTS_VALUE)
         return;
 
-    double scale = osd->normal_scale;
+    double scale = params->normal_scale;
     if (ctx->vsfilter_aspect && opts->ass_vsfilter_aspect_compat)
-        scale = osd->vsfilter_scale;
+        scale = params->vsfilter_scale;
     ASS_Renderer *renderer = osd->ass_renderer;
-    mp_ass_configure(renderer, opts, &osd->dim);
+    mp_ass_configure(renderer, opts, &params->dim);
     ass_set_aspect_ratio(renderer, scale, 1);
-    mp_ass_render_frame(renderer, ctx->ass_track, osd->sub_pts * 1000 + .5,
+    mp_ass_render_frame(renderer, ctx->ass_track, params->pts * 1000 + .5,
                         &ctx->parts, res);
     talloc_steal(ctx, ctx->parts);
 }

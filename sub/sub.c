@@ -178,18 +178,13 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
             out_imgs->bitmap_pos_id++;
         }
     } else if (obj->type == OSDTYPE_SUB) {
-        double pts = sub_params->pts;
-        if (pts != MP_NOPTS_VALUE)
-            pts += sub_delay - osd->sub_offset;
+        struct sub_render_params p = *sub_params;
+        if (p.pts != MP_NOPTS_VALUE)
+            p.pts += sub_delay - osd->sub_offset;
 
-        // passing the parameters is a big temporary hack
-        osd->sub_pts = pts;
-        osd->dim = sub_params->dim;
-        osd->normal_scale = sub_params->normal_scale;
-        osd->vsfilter_scale = sub_params->vsfilter_scale;
-        osd->support_rgba = formats[SUBBITMAP_RGBA];
+        p.support_rgba = formats[SUBBITMAP_RGBA];
 
-        sub_get_bitmaps(osd, out_imgs);
+        sub_get_bitmaps(osd, &p, out_imgs);
     } else {
         osd_object_get_bitmaps(osd, obj, out_imgs);
     }
