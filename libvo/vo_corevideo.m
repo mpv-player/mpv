@@ -35,6 +35,7 @@
 #import "osd.h"
 
 #import "gl_common.h"
+#import "gl_osd.h"
 #import "cocoa_common.h"
 
 struct quad {
@@ -42,14 +43,6 @@ struct quad {
     GLfloat lowerRight[2];
     GLfloat upperRight[2];
     GLfloat upperLeft[2];
-};
-
-#define CV_VERTICES_PER_QUAD 6
-
-struct osd_p {
-    GLuint tex[MAX_OSD_PARTS];
-    NSRect tex_rect[MAX_OSD_PARTS];
-    int tex_cnt;
 };
 
 struct priv {
@@ -64,7 +57,7 @@ struct priv {
     CVOpenGLTextureRef texture;
     struct quad *quad;
 
-    struct osd_p *osd;
+    struct mpgl_osd *osd;
 };
 
 static void resize(struct vo *vo, int width, int height)
@@ -124,6 +117,9 @@ static int init_gl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     gl->DrawBuffer(GL_BACK);
     gl->TexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
+    if (!p->osd)
+        p->osd = mpgl_osd_init(gl, true);
+
     resize(vo, d_width, d_height);
 
     gl->ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -141,7 +137,6 @@ static void release_cv_entities(struct vo *vo) {
     p->texture = NULL;
     CVOpenGLTextureCacheRelease(p->textureCache);
     p->textureCache = NULL;
-
 }
 
 static int config(struct vo *vo, uint32_t width, uint32_t height,
@@ -169,90 +164,6 @@ static void check_events(struct vo *vo)
     int e = p->mpglctx->check_events(vo);
     if (e & VO_EVENT_RESIZE)
         resize(vo, vo->dwidth, vo->dheight);
-}
-
-static void create_osd_texture(void *ctx, int x0, int y0, int w, int h,
-                               unsigned char *src, unsigned char *srca,
-                               int stride)
-{
-    struct priv *p = ((struct vo *) ctx)->priv;
-    struct osd_p *osd = p->osd;
-    GL *gl = p->mpglctx->gl;
-
-    if (w <= 0 || h <= 0 || stride < w) {
-        mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
-        return;
-    }
-
-    if (osd->tex_cnt >= MAX_OSD_PARTS) {
-        mp_msg(MSGT_VO, MSGL_ERR, "Too many OSD parts, contact the"
-                                  " developers!\n");
-        return;
-    }
-
-    gl->GenTextures(1, &osd->tex[osd->tex_cnt]);
-    gl->BindTexture(GL_TEXTURE_2D, osd->tex[osd->tex_cnt]);
-    glCreateClearTex(gl, GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, GL_LUMINANCE_ALPHA,
-                     GL_UNSIGNED_BYTE, GL_LINEAR, w, h, 0);
-    {
-        int i;
-        unsigned char *tmp = malloc(stride * h * 2);
-        // convert alpha from weird MPlayer scale.
-        for (i = 0; i < h * stride; i++) {
-            tmp[i*2+0] = src[i];
-            tmp[i*2+1] = -srca[i];
-        }
-        glUploadTex(gl, GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE,
-                    tmp, stride * 2, 0, 0, w, h, 0);
-        free(tmp);
-    }
-
-    osd->tex_rect[osd->tex_cnt] = NSMakeRect(x0, y0, w, h);
-
-    gl->BindTexture(GL_TEXTURE_2D, 0);
-    osd->tex_cnt++;
-}
-
-static void clearOSD(struct vo *vo)
-{
-    struct priv *p = vo->priv;
-    struct osd_p *osd = p->osd;
-    GL *gl = p->mpglctx->gl;
-
-    if (!osd->tex_cnt)
-        return;
-    gl->DeleteTextures(osd->tex_cnt, osd->tex);
-    osd->tex_cnt = 0;
-}
-
-static void draw_osd(struct vo *vo, struct osd_state *osd_s)
-{
-    struct priv *p = vo->priv;
-    struct osd_p *osd = p->osd;
-    GL *gl = p->mpglctx->gl;
-
-    if (vo_osd_has_changed(osd_s)) {
-        clearOSD(vo);
-        osd_draw_text_ext(osd_s, vo->dwidth, vo->dheight, 0, 0, 0, 0,
-                          p->image_width, p->image_height, create_osd_texture,
-                          vo);
-    }
-
-    if (osd->tex_cnt > 0) {
-        gl->Enable(GL_BLEND);
-        gl->BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-        for (int n = 0; n < osd->tex_cnt; n++) {
-            NSRect tr = osd->tex_rect[n];
-            gl->BindTexture(GL_TEXTURE_2D, osd->tex[n]);
-            glDrawTex(gl, tr.origin.x, tr.origin.y,
-                      tr.size.width, tr.size.height,
-                      0, 0, 1.0, 1.0, 1, 1, 0, 0, 0);
-        }
-
-        gl->Disable(GL_BLEND);
-        gl->BindTexture(GL_TEXTURE_2D, 0);
-    }
 }
 
 static void prepare_texture(struct vo *vo)
@@ -342,7 +253,7 @@ static int query_format(struct vo *vo, uint32_t format)
     struct priv *p = vo->priv;
     const int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
                       VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN |
-                      VOCAP_NOSLICES;
+                      VOCAP_NOSLICES | VFCAP_EOSD;
     switch (format) {
         case IMGFMT_YUY2:
             p->pixelFormat = kYUVSPixelFormat;
@@ -366,6 +277,8 @@ static int query_format(struct vo *vo, uint32_t format)
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
+    if (p->osd)
+        mpgl_osd_destroy(p->osd);
     uninit_mpglcontext(p->mpglctx);
     release_cv_entities(vo);
 }
@@ -379,11 +292,6 @@ static int preinit(struct vo *vo, const char *arg)
         .mpglctx = init_mpglcontext(GLTYPE_COCOA, vo),
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
         .quad = talloc_ptrtype(p, p->quad),
-        .osd = talloc_ptrtype(p, p->osd),
-    };
-
-    *p->osd = (struct osd_p) {
-        .tex_cnt = 0,
     };
 
     return 0;
@@ -420,6 +328,19 @@ static int control(struct vo *vo, uint32_t request, void *data)
             return draw_image(vo, data);
         case VOCTRL_QUERY_FORMAT:
             return query_format(vo, *(uint32_t*)data);
+        case VOCTRL_DRAW_EOSD:
+            mpgl_osd_draw_legacy(p->osd, data);
+            return VO_TRUE;
+        case VOCTRL_QUERY_EOSD_FORMAT:
+            return mpgl_osd_query_format(p->osd, *(int *)data)
+                   ? VO_TRUE : VO_NOTIMPL;
+        case VOCTRL_GET_EOSD_RES: {
+            mp_eosd_res_t *r = data;
+            r->w = vo->dwidth;
+            r->h = vo->dheight;
+            r->mt = r->mb = r->ml = r->mr = 0;
+            return VO_TRUE;
+        }
         case VOCTRL_ONTOP:
             p->mpglctx->ontop(vo);
             return VO_TRUE;
@@ -460,7 +381,7 @@ const struct vo_driver video_out_corevideo = {
     .preinit = preinit,
     .config = config,
     .control = control,
-    .draw_osd = draw_osd,
+    .draw_osd = draw_osd_with_eosd,
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,
