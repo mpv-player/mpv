@@ -28,6 +28,7 @@
 #include "mp_msg.h"
 #include "libmpdemux/stheader.h"
 #include "sub.h"
+#include "dec_sub.h"
 #include "ass_mp.h"
 #include "sd.h"
 #include "subassconvert.h"

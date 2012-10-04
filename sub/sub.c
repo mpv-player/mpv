@@ -35,7 +35,7 @@
 #include "mp_msg.h"
 #include "libvo/video_out.h"
 #include "sub.h"
-#include "sub/ass_mp.h"
+#include "dec_sub.h"
 #include "img_convert.h"
 #include "spudec.h"
 
@@ -92,9 +92,11 @@ static struct osd_state *global_osd;
 
 static void osd_update_ext(struct osd_state *osd, struct mp_eosd_res res)
 {
-    if (osd->w != res.w || osd->h != res.h) {
-        osd->w = res.w;
-        osd->h = res.h;
+    struct mp_eosd_res old = osd->res;
+    if (old.w != res.w || old.h != res.h || old.ml != res.ml || old.mt != res.mt
+        || old.mr != res.mr || old.mb != res.mb)
+    {
+        osd->res = res;
         for (int n = 0; n < MAX_OSD_PARTS; n++)
             osd->objs[n]->force_redraw = true;
     }
@@ -171,7 +173,7 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
     if (obj->type == OSDTYPE_SPU) {
         *out_imgs = (struct sub_bitmaps) {0};
         if (spu_visible(osd, obj))
-            spudec_get_bitmap(vo_spudec, osd->w, osd->h, out_imgs);
+            spudec_get_bitmap(vo_spudec, osd->res.w, osd->res.h, out_imgs);
         // Normal change-detection (sub. dec. calls vo_osd_changed(OSDTYPE_SPU))
         if (obj->force_redraw) {
             out_imgs->bitmap_id++;
@@ -269,7 +271,7 @@ bool osd_draw_sub(struct osd_state *osd, struct sub_bitmaps *out_imgs,
 
 void draw_osd_with_eosd(struct vo *vo, struct osd_state *osd)
 {
-    mp_eosd_res_t dim = {0};
+    struct mp_eosd_res dim = {0};
     if (vo_control(vo, VOCTRL_GET_EOSD_RES, &dim) != VO_TRUE)
         return;
 

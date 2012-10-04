@@ -51,7 +51,6 @@
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"
 #include "osdep/timer.h"
-#include "sub/ass_mp.h"
 #include "bitmap_packer.h"
 
 #define WRAP_ADD(x, a, m) ((a) < 0 \
@@ -984,7 +983,7 @@ static void draw_eosd(struct vo *vo, int index)
     }
 }
 
-static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
+static void generate_eosd(struct vo *vo, struct sub_bitmaps *imgs)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
@@ -1617,7 +1616,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         if (!data)
             return VO_FALSE;
         if (status_ok(vo)) {
-            mp_eosd_images_t *imgs = data;
+            struct sub_bitmaps *imgs = data;
             generate_eosd(vo, imgs);
             draw_eosd(vo, imgs->render_index);
         }

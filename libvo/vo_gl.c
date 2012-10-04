@@ -42,7 +42,6 @@
 #include "gl_osd.h"
 #include "aspect.h"
 #include "fastmemcpy.h"
-#include "sub/ass_mp.h"
 
 //for gl_priv.use_yuv
 #define MASK_ALL_YUV (~(1 << YUV_CONVERSION_NONE))
@@ -1096,7 +1095,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_QUERY_EOSD_FORMAT:
         return mpgl_osd_query_format(p->osd, *(int *)data) ? VO_TRUE : VO_NOTIMPL;
     case VOCTRL_GET_EOSD_RES: {
-        mp_eosd_res_t *r = data;
+        struct mp_eosd_res *r = data;
         r->w = vo->dwidth;
         r->h = vo->dheight;
         r->mt = r->mb = r->ml = r->mr = 0;

@@ -28,7 +28,6 @@
 #include "bitmap_packer.h"
 #include "mp_msg.h"
 #include "mpcommon.h"
-#include "sub/ass_mp.h"
 #include "sub/dec_sub.h"
 #include "fastmemcpy.h"
 

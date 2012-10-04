@@ -35,6 +35,7 @@
 #include "mp_image.h"
 #include "vf.h"
 #include "sub/sub.h"
+#include "sub/dec_sub.h"
 
 #include "libvo/fastmemcpy.h"
 

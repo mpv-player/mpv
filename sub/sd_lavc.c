@@ -25,6 +25,7 @@
 #include "sd.h"
 #include "spudec.h"
 // Current code still pushes subs directly to global spudec
+#include "dec_sub.h"
 #include "sub.h"
 
 struct sd_lavc_priv {
