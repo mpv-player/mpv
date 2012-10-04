@@ -27,7 +27,7 @@
 struct vo;
 
 enum mp_osdtype {
-    OSDTYPE_ASS,
+    OSDTYPE_SUB,
     OSDTYPE_OSD,
     OSDTYPE_SUBTITLE,
     OSDTYPE_PROGBAR,
@@ -40,6 +40,8 @@ enum mp_osdtype {
 
 struct osd_object {
     int type; // OSDTYPE_*
+    bool is_sub;
+
     bool force_redraw;
 
     // caches for OSD conversion (internal to render_object())
@@ -62,12 +64,16 @@ struct osd_state {
     struct ass_library *ass_library;
     struct ass_renderer *ass_renderer;
     struct sh_sub *sh_sub;
-    double sub_pts;
     double sub_offset;
+    double vo_sub_pts;
+
+    double sub_pts;
     struct mp_eosd_res dim;
     double normal_scale;
     double vsfilter_scale;
     bool support_rgba;
+
+    bool render_subs_in_filter;
 
     int w, h;
 
@@ -170,6 +176,10 @@ void vo_osd_changed(int new_value);
 void vo_osd_reset_changed(void);
 bool vo_osd_has_changed(struct osd_state *osd);
 void osd_free(struct osd_state *osd);
+
+bool osd_draw_sub(struct osd_state *osd, struct sub_bitmaps *out_imgs,
+                  struct sub_render_params *sub_params,
+                  const bool formats[SUBBITMAP_COUNT]);
 
 bool sub_bitmaps_bb(struct sub_bitmaps *imgs, int *x1, int *y1,
                     int *x2, int *y2);

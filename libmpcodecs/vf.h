@@ -104,8 +104,7 @@ struct vf_ctrl_screenshot {
 #define VFCTRL_SKIP_NEXT_FRAME 12  // For encoding - drop the next frame that passes thru
 #define VFCTRL_FLUSH_FRAMES    13  // For encoding - flush delayed frames
 #define VFCTRL_SCREENSHOT      14  // Take screenshot, arg is vf_ctrl_screenshot
-#define VFCTRL_INIT_EOSD       15  // Select EOSD renderer
-#define VFCTRL_DRAW_EOSD       16  // Render EOSD */
+#define VFCTRL_INIT_OSD        15  // Filter OSD renderer present?
 #define VFCTRL_SET_DEINTERLACE 18  // Set deinterlacing status
 #define VFCTRL_GET_DEINTERLACE 19  // Get deinterlacing status
 /* Hack to make the OSD state object available to vf_expand and vf_ass which

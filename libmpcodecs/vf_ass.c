@@ -355,23 +355,23 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
     struct vf_priv_s *priv = vf->priv;
     struct MPOpts *opts = vf->opts;
     struct osd_state *osd = priv->osd;
-    ASS_Image *images = 0;
+    struct sub_bitmaps imgs = (struct sub_bitmaps) {0};
     if (pts != MP_NOPTS_VALUE) {
-        osd->dim = (struct mp_eosd_res){ .w = vf->priv->outw,
-                                         .h = vf->priv->outh,
-                                         .mt = opts->ass_top_margin,
-                                         .mb = opts->ass_bottom_margin };
-        osd->normal_scale = vf->priv->aspect_correction;
-        osd->vsfilter_scale = 1;
-        osd->sub_pts = pts - osd->sub_offset;
-        osd->support_rgba = false;
-        struct sub_bitmaps b;
-        sub_get_bitmaps(osd, &b);
-        images = b.imgs;
+        struct sub_render_params subparams = {
+            .pts = pts,
+            .dim = { .w = vf->priv->outw,
+                     .h = vf->priv->outh,
+                     .mt = opts->ass_top_margin,
+                     .mb = opts->ass_bottom_margin },
+            .normal_scale = vf->priv->aspect_correction,
+            .vsfilter_scale = 1,
+        };
+        bool formats[SUBBITMAP_COUNT] = {[SUBBITMAP_LIBASS] = true};
+        osd_draw_sub(osd, &imgs, &subparams, formats);
     }
 
     prepare_image(vf, mpi);
-    render_frame(vf, mpi, images);
+    render_frame(vf, mpi, imgs.imgs);
 
     return vf_next_put_image(vf, vf->dmpi, pts);
 }
@@ -393,9 +393,7 @@ static int control(vf_instance_t *vf, int request, void *data)
     case VFCTRL_SET_OSD_OBJ:
         vf->priv->osd = data;
         break;
-    case VFCTRL_INIT_EOSD:
-        return CONTROL_TRUE;
-    case VFCTRL_DRAW_EOSD:
+    case VFCTRL_INIT_OSD:
         return CONTROL_TRUE;
     }
     return vf_next_control(vf, request, data);

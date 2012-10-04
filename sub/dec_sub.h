@@ -60,6 +60,15 @@ typedef struct sub_bitmaps {
     int bitmap_id, bitmap_pos_id;
 } mp_eosd_images_t;
 
+struct sub_render_params {
+    double pts;
+    struct mp_eosd_res dim;
+    double normal_scale;
+    double vsfilter_scale;
+
+    bool support_rgba;
+};
+
 static inline bool is_text_sub(int type)
 {
     return type == 't' || type == 'm' || type == 'a';

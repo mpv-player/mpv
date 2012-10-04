@@ -114,6 +114,7 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
         .osd_text = talloc_strdup(osd, ""),
         .progbar_type = -1,
     };
+
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = talloc_struct(osd, struct osd_object, {
             .type = n,
@@ -122,6 +123,11 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
             obj->cache[i] = talloc_steal(obj, osd_conv_cache_new());
         osd->objs[n] = obj;
     }
+
+    // OSDTYPE_SPU is an odd case, because vf_ass.c can't render it.
+    osd->objs[OSDTYPE_SUB]->is_sub = true;      // dec_sub.c
+    osd->objs[OSDTYPE_SUBTITLE]->is_sub = true; // osd_libass.c
+
     osd_init_backend(osd);
     global_osd = osd;
     return osd;
@@ -157,6 +163,7 @@ static bool spu_visible(struct osd_state *osd, struct osd_object *obj)
 // Return false on format mismatch, or if nothing to be renderer.
 static bool render_object(struct osd_state *osd, struct osd_object *obj,
                           struct sub_bitmaps *out_imgs,
+                          struct sub_render_params *sub_params,
                           const bool formats[SUBBITMAP_COUNT])
 {
     memset(out_imgs, 0x55, sizeof(*out_imgs));
@@ -170,6 +177,19 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
             out_imgs->bitmap_id++;
             out_imgs->bitmap_pos_id++;
         }
+    } else if (obj->type == OSDTYPE_SUB) {
+        double pts = sub_params->pts;
+        if (pts != MP_NOPTS_VALUE)
+            pts += sub_delay - osd->sub_offset;
+
+        // passing the parameters is a big temporary hack
+        osd->sub_pts = pts;
+        osd->dim = sub_params->dim;
+        osd->normal_scale = sub_params->normal_scale;
+        osd->vsfilter_scale = sub_params->vsfilter_scale;
+        osd->support_rgba = formats[SUBBITMAP_RGBA];
+
+        sub_get_bitmaps(osd, out_imgs);
     } else {
         osd_object_get_bitmaps(osd, obj, out_imgs);
     }
@@ -216,13 +236,46 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
     if (cached)
         obj->cached = *out_imgs;
 
-    return formats[out_imgs->format];
+    if (!formats[out_imgs->format]) {
+        mp_msg(MSGT_OSD, MSGL_ERR, "Can't render OSD part %d (format %d).\n",
+               obj->type, out_imgs->format);
+        return false;
+    }
+    return true;
+}
+
+// This is a hack to render the first subtitle OSD object, which is not empty.
+// It's a hack because it's really only useful for subtitles: normal OSD can
+// have multiple objects, and rendering one object may invalidate data of a
+// previously rendered, different object (that's how osd_libass.c works).
+// Also, it assumes this is called from a filter: it disables VO rendering of
+// subtitles, because we don't want to render both.
+bool osd_draw_sub(struct osd_state *osd, struct sub_bitmaps *out_imgs,
+                  struct sub_render_params *sub_params,
+                  const bool formats[SUBBITMAP_COUNT])
+{
+    *out_imgs = (struct sub_bitmaps) {0};
+    for (int n = 0; n < MAX_OSD_PARTS; n++) {
+        struct osd_object *obj = osd->objs[n];
+        if (obj->is_sub) {
+            // hack to allow rendering non-ASS subs with vf_ass inserted
+            // (vf_ass is auto-inserted if VOs don't support EOSD)
+#ifdef CONFIG_ASS
+            osd->render_subs_in_filter = !!sub_get_ass_track(osd);
+            if (!osd->render_subs_in_filter)
+                return false;
+#endif
+            if (render_object(osd, obj, out_imgs, sub_params, formats))
+                return true;
+        }
+    }
+    return false;
 }
 
 void draw_osd_with_eosd(struct vo *vo, struct osd_state *osd)
 {
-    mp_eosd_res_t res = {0};
-    if (vo_control(vo, VOCTRL_GET_EOSD_RES, &res) != VO_TRUE)
+    mp_eosd_res_t dim = {0};
+    if (vo_control(vo, VOCTRL_GET_EOSD_RES, &dim) != VO_TRUE)
         return;
 
     bool formats[SUBBITMAP_COUNT];
@@ -231,12 +284,24 @@ void draw_osd_with_eosd(struct vo *vo, struct osd_state *osd)
         formats[n] = vo_control(vo, VOCTRL_QUERY_EOSD_FORMAT, &data) == VO_TRUE;
     }
 
-    osd_update_ext(osd, res);
+    osd_update_ext(osd, dim);
+
+    struct aspect_data asp = vo->aspdat;
+
+    struct sub_render_params subparams = {
+        .pts = osd->vo_sub_pts,
+        .dim = dim,
+        .normal_scale = 1,
+        .vsfilter_scale = (double) asp.prew / asp.preh * asp.orgh / asp.orgw,
+        .support_rgba = formats[SUBBITMAP_RGBA],
+    };
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = osd->objs[n];
+        if (obj->is_sub && osd->render_subs_in_filter)
+            continue;
         struct sub_bitmaps imgs;
-        if (render_object(osd, obj, &imgs, formats))
+        if (render_object(osd, obj, &imgs, &subparams, formats))
             vo_control(vo, VOCTRL_DRAW_EOSD, &imgs);
     }
 }
@@ -249,14 +314,22 @@ void osd_draw_text_ext(struct osd_state *osd, int w, int h,
                                           int stride),
                    void *ctx)
 {
-    struct mp_eosd_res res =
+    struct mp_eosd_res dim =
         {.w = w, .h = h, .ml = ml, .mt = mt, .mr = mr, .mb = mb};
-    osd_update_ext(osd, res);
+    osd_update_ext(osd, dim);
+    struct sub_render_params subparams = {
+        .pts = osd->vo_sub_pts,
+        .dim = dim,
+        .normal_scale = 1,
+        .vsfilter_scale = 1, // unknown
+    };
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = osd->objs[n];
+        if (obj->is_sub && osd->render_subs_in_filter)
+            continue;
         struct sub_bitmaps imgs;
         bool formats[SUBBITMAP_COUNT] = {[SUBBITMAP_OLD_PLANAR] = true};
-        if (render_object(osd, obj, &imgs, formats)) {
+        if (render_object(osd, obj, &imgs, &subparams, formats)) {
             assert(imgs.num_parts == 1);
             struct sub_bitmap *part = &imgs.parts[0];
             struct old_osd_planar *bmp = part->bitmap;

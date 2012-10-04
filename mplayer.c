@@ -2397,9 +2397,9 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     sh_video->vfilter = append_filters(sh_video->vfilter, opts->vf_settings);
 
-    if (opts->ass_enabled)
-        sh_video->vfilter->control(sh_video->vfilter, VFCTRL_INIT_EOSD,
-                                   mpctx->ass_library);
+    struct vf_instance *vf = sh_video->vfilter;
+    mpctx->osd->render_subs_in_filter
+        = vf->control(vf, VFCTRL_INIT_OSD, NULL) == VO_TRUE;
 
     init_best_video_codec(sh_video, video_codec_list, video_fm_list);
 
@@ -2644,12 +2644,10 @@ static int redraw_osd(struct MPContext *mpctx)
     struct vf_instance *vf = sh_video->vfilter;
     if (vo_redraw_frame(mpctx->video_out) < 0)
         return -1;
-    mpctx->osd->sub_pts = mpctx->video_pts;
-    if (mpctx->osd->sub_pts != MP_NOPTS_VALUE)
-        mpctx->osd->sub_pts += sub_delay - mpctx->osd->sub_offset;
+    mpctx->osd->vo_sub_pts = mpctx->video_pts;
 
-    if (!(sh_video->output_flags & VFCAP_EOSD_FILTER))
-        vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
+    // NOTE: probably should use VO ctrl directly, and/or check if a filter does
+    //       OSD rendering (a filter can't redraw anything here)
     vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
     vo_osd_reset_changed();
     vo_flip_page(mpctx->video_out, 0, -1);
@@ -3257,10 +3255,7 @@ static void run_playloop(struct MPContext *mpctx)
         update_subtitles(mpctx, sh_video->pts);
         update_osd_msg(mpctx);
         struct vf_instance *vf = sh_video->vfilter;
-        mpctx->osd->sub_pts = mpctx->video_pts;
-        if (mpctx->osd->sub_pts != MP_NOPTS_VALUE)
-            mpctx->osd->sub_pts += sub_delay - mpctx->osd->sub_offset;
-        vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
+        mpctx->osd->vo_sub_pts = mpctx->video_pts;
         vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
         vo_osd_reset_changed();
 

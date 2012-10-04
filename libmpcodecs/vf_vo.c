@@ -34,7 +34,6 @@
 
 struct vf_priv_s {
     struct vo *vo;
-    double scale_ratio;
 };
 #define video_out (vf->priv->vo)
 
@@ -73,8 +72,6 @@ static int config(struct vf_instance *vf,
 
     if (vo_config(video_out, width, height, d_width, d_height, flags, outfmt))
         return 0;
-
-    vf->priv->scale_ratio = (double) d_width / d_height * height / width;
 
     return 1;
 }
@@ -116,19 +113,6 @@ static int control(struct vf_instance *vf, int request, void *data)
             eq->item, &eq->value
         };
         return vo_control(video_out, VOCTRL_GET_EQUALIZER, &param) == VO_TRUE;
-    }
-    case VFCTRL_DRAW_EOSD: {
-        struct osd_state *osd = data;
-        osd->support_rgba = vf->default_caps & VFCAP_EOSD_RGBA;
-        osd->dim = (struct mp_eosd_res){0};
-        if (!video_out->config_ok ||
-                vo_control(video_out, VOCTRL_GET_EOSD_RES, &osd->dim) != true)
-            return CONTROL_FALSE;
-        osd->normal_scale = 1;
-        osd->vsfilter_scale = vf->priv->scale_ratio;
-        struct sub_bitmaps images;
-        sub_get_bitmaps(osd, &images);
-        return vo_control(video_out, VOCTRL_DRAW_EOSD, &images) == VO_TRUE;
     }
     }
     return CONTROL_UNKNOWN;
