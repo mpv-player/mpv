@@ -21,6 +21,7 @@ struct mpgl_osd_part {
 struct mpgl_osd {
     GL *gl;
     bool use_pbo;
+    bool scaled;
     struct mpgl_osd_part *parts[MAX_OSD_PARTS];
     const struct osd_fmt_entry *fmt_table;
     void *scratch;

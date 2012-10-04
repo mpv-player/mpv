@@ -37,9 +37,9 @@
 #include "geometry.h"
 #include "osd.h"
 #include "sub/sub.h"
-#include "eosd_packer.h"
 
 #include "gl_common.h"
+#include "gl_osd.h"
 #include "aspect.h"
 #include "fastmemcpy.h"
 #include "sub/ass_mp.h"
@@ -49,31 +49,13 @@
 #define MASK_NOT_COMBINERS (~((1 << YUV_CONVERSION_NONE) | (1 << YUV_CONVERSION_COMBINERS)))
 #define MASK_GAMMA_SUPPORT (MASK_NOT_COMBINERS & ~(1 << YUV_CONVERSION_FRAGMENT))
 
-struct vertex_eosd {
-    float x, y;
-    uint8_t color[4];
-    float u, v;
-};
-
 struct gl_priv {
     MPGLContext *glctx;
     GL *gl;
 
     int use_osd;
     int scaled_osd;
-    //! Textures for OSD
-    GLuint osdtex[MAX_OSD_PARTS];
-    //! Alpha textures for OSD
-    GLuint osdatex[MAX_OSD_PARTS];
-    GLuint eosd_texture;
-    int eosd_texture_width, eosd_texture_height;
-    struct eosd_packer *eosd;
-    struct vertex_eosd *eosd_va;
-    //! Display lists that draw the OSD parts
-    GLuint osdDispList[MAX_OSD_PARTS];
-    GLuint osdaDispList[MAX_OSD_PARTS];
-    //! How many parts the OSD currently consists of
-    int osdtexCnt;
+    struct mpgl_osd *osd;
     int osd_color;
 
     int use_ycbcr;
@@ -248,133 +230,23 @@ static void update_yuvconv(struct vo *vo)
     }
 }
 
-/**
- * \brief remove all OSD textures and display-lists, thus clearing it.
- */
-static void clearOSD(struct vo *vo)
-{
-    struct gl_priv *p = vo->priv;
-    GL *gl = p->gl;
-
-    int i;
-    if (!p->osdtexCnt)
-        return;
-    gl->DeleteTextures(p->osdtexCnt, p->osdtex);
-    gl->DeleteTextures(p->osdtexCnt, p->osdatex);
-    for (i = 0; i < p->osdtexCnt; i++)
-        gl->DeleteLists(p->osdaDispList[i], 1);
-    for (i = 0; i < p->osdtexCnt; i++)
-        gl->DeleteLists(p->osdDispList[i], 1);
-    p->osdtexCnt = 0;
-}
-
-/**
- * \brief construct display list from ass image list
- * \param img image list to create OSD from.
- */
-static void genEOSD(struct vo *vo, mp_eosd_images_t *imgs)
-{
-    struct gl_priv *p = vo->priv;
-    GL *gl = p->gl;
-
-    bool need_repos, need_upload, need_allocate;
-    eosd_packer_generate(p->eosd, imgs, &need_repos, &need_upload,
-                         &need_allocate);
-
-    if (!need_repos)
-        return;
-
-    if (!p->eosd_texture)
-        gl->GenTextures(1, &p->eosd_texture);
-
-    gl->BindTexture(p->target, p->eosd_texture);
-
-    if (need_allocate) {
-        texSize(vo, p->eosd->surface.w, p->eosd->surface.h,
-                &p->eosd_texture_width, &p->eosd_texture_height);
-        // xxx it doesn't need to be cleared, that's a waste of time
-        glCreateClearTex(gl, p->target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE,
-                         GL_NEAREST, p->eosd_texture_width,
-                         p->eosd_texture_height, 0);
-    }
-
-    // 2 triangles primitives per quad = 6 vertices per quad
-    // not using GL_QUADS, as it is deprecated in OpenGL 3.x and later
-    p->eosd_va = talloc_realloc_size(p->eosd, p->eosd_va,
-                                     p->eosd->targets_count
-                                     * sizeof(struct vertex_eosd) * 6);
-
-    float eosd_w = p->eosd_texture_width;
-    float eosd_h = p->eosd_texture_height;
-
-    if (p->use_rectangle == 1)
-        eosd_w = eosd_h = 1.0f;
-
-    for (int n = 0; n < p->eosd->targets_count; n++) {
-        struct eosd_target *target = &p->eosd->targets[n];
-        ASS_Image *i = target->ass_img;
-
-        if (need_upload) {
-            glUploadTex(gl, p->target, GL_ALPHA, GL_UNSIGNED_BYTE, i->bitmap,
-                        i->stride, target->source.x0, target->source.y0,
-                        i->w, i->h, 0);
-        }
-
-        uint8_t color[4] = { i->color >> 24, (i->color >> 16) & 0xff,
-                            (i->color >> 8) & 0xff, 255 - (i->color & 0xff) };
-
-        float x0 = target->dest.x0;
-        float y0 = target->dest.y0;
-        float x1 = target->dest.x1;
-        float y1 = target->dest.y1;
-        float tx0 = target->source.x0 / eosd_w;
-        float ty0 = target->source.y0 / eosd_h;
-        float tx1 = target->source.x1 / eosd_w;
-        float ty1 = target->source.y1 / eosd_h;
-
-#define COLOR_INIT {color[0], color[1], color[2], color[3]}
-        struct vertex_eosd *va = &p->eosd_va[n * 6];
-        va[0] = (struct vertex_eosd) { x0, y0, COLOR_INIT, tx0, ty0 };
-        va[1] = (struct vertex_eosd) { x0, y1, COLOR_INIT, tx0, ty1 };
-        va[2] = (struct vertex_eosd) { x1, y0, COLOR_INIT, tx1, ty0 };
-        va[3] = (struct vertex_eosd) { x1, y1, COLOR_INIT, tx1, ty1 };
-        va[4] = va[2];
-        va[5] = va[1];
-#undef COLOR_INIT
-    }
-
-    gl->BindTexture(p->target, 0);
-}
-
 // Note: relies on state being setup, like projection matrix and blending
-static void drawEOSD(struct vo *vo)
+static void render_osd(struct vo *vo, struct sub_bitmaps *imgs)
 {
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    if (p->eosd->targets_count == 0)
-        return;
-
-    gl->BindTexture(p->target, p->eosd_texture);
-
-    struct vertex_eosd *va = p->eosd_va;
-    size_t stride = sizeof(struct vertex_eosd);
-
-    gl->VertexPointer(2, GL_FLOAT, stride, &va[0].x);
-    gl->ColorPointer(4, GL_UNSIGNED_BYTE, stride, &va[0].color[0]);
-    gl->TexCoordPointer(2, GL_FLOAT, stride, &va[0].u);
-
-    gl->EnableClientState(GL_VERTEX_ARRAY);
-    gl->EnableClientState(GL_TEXTURE_COORD_ARRAY);
-    gl->EnableClientState(GL_COLOR_ARRAY);
-
-    gl->DrawArrays(GL_TRIANGLES, 0, p->eosd->targets_count * 6);
-
-    gl->DisableClientState(GL_VERTEX_ARRAY);
-    gl->DisableClientState(GL_TEXTURE_COORD_ARRAY);
-    gl->DisableClientState(GL_COLOR_ARRAY);
-
-    gl->BindTexture(p->target, 0);
+    if (!p->scaled_osd) {
+        gl->MatrixMode(GL_PROJECTION);
+        gl->PushMatrix();
+        gl->LoadIdentity();
+        gl->Ortho(0, vo->dwidth, vo->dheight, 0, -1, 1);
+    }
+    gl->Color4ub((p->osd_color >> 16) & 0xff, (p->osd_color >> 8) & 0xff,
+                 p->osd_color & 0xff, 0xff - (p->osd_color >> 24));
+    mpgl_osd_draw_legacy(p->osd, imgs);
+    if (!p->scaled_osd)
+        gl->PopMatrix();
 }
 
 /**
@@ -394,13 +266,9 @@ static void uninitGl(struct vo *vo)
     if (i)
         gl->DeleteTextures(i, p->default_texs);
     p->default_texs[0] = 0;
-    clearOSD(vo);
-    if (p->eosd_texture)
-        gl->DeleteTextures(1, &p->eosd_texture);
-    eosd_packer_reinit(p->eosd, 0, 0);
-    p->eosd_texture = 0;
-    if (gl->DeleteBuffers && p->buffer)
-        gl->DeleteBuffers(1, &p->buffer);
+    if (p->osd)
+        mpgl_osd_destroy(p->osd);
+    p->osd = NULL;
     p->buffer = 0;
     p->buffersize = 0;
     p->bufferptr = NULL;
@@ -580,9 +448,8 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
         update_yuvconv(vo);
     }
 
-    GLint max_texture_size;
-    gl->GetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
-    eosd_packer_reinit(p->eosd, max_texture_size, max_texture_size);
+    p->osd = mpgl_osd_init(gl, true);
+    p->osd->scaled = p->scaled_osd;
 
     resize(vo, d_width, d_height);
 
@@ -648,140 +515,6 @@ static void check_events(struct vo *vo)
         resize(vo, vo->dwidth, vo->dheight);
     if (e & VO_EVENT_EXPOSE)
         vo->want_redraw = true;
-}
-
-/**
- * Creates the textures and the display list needed for displaying
- * an OSD part.
- * Callback function for osd_draw_text_ext().
- */
-static void create_osd_texture(void *ctx, int x0, int y0, int w, int h,
-                               unsigned char *src, unsigned char *srca,
-                               int stride)
-{
-    struct vo *vo = ctx;
-    struct gl_priv *p = vo->priv;
-    GL *gl = p->gl;
-
-    // initialize to 8 to avoid special-casing on alignment
-    int sx = 8, sy = 8;
-    GLint scale_type = p->scaled_osd ? GL_LINEAR : GL_NEAREST;
-
-    if (w <= 0 || h <= 0 || stride < w) {
-        mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
-        return;
-    }
-    texSize(vo, w, h, &sx, &sy);
-
-    if (p->osdtexCnt >= MAX_OSD_PARTS) {
-        mp_msg(MSGT_VO, MSGL_ERR, "Too many OSD parts, contact the developers!\n");
-        return;
-    }
-
-    // create Textures for OSD part
-    gl->GenTextures(1, &p->osdtex[p->osdtexCnt]);
-    gl->BindTexture(p->target, p->osdtex[p->osdtexCnt]);
-    glCreateClearTex(gl, p->target, GL_LUMINANCE, GL_LUMINANCE,
-                     GL_UNSIGNED_BYTE, scale_type, sx, sy, 0);
-    glUploadTex(gl, p->target, GL_LUMINANCE, GL_UNSIGNED_BYTE, src, stride,
-                0, 0, w, h, 0);
-
-    gl->GenTextures(1, &p->osdatex[p->osdtexCnt]);
-    gl->BindTexture(p->target, p->osdatex[p->osdtexCnt]);
-    glCreateClearTex(gl, p->target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE,
-                     scale_type, sx, sy, 0);
-    {
-        int i;
-        char *tmp = malloc(stride * h);
-        // convert alpha from weird MPlayer scale.
-        // in-place is not possible since it is reused for future OSDs
-        for (i = h * stride - 1; i >= 0; i--)
-            tmp[i] = -srca[i];
-        glUploadTex(gl, p->target, GL_ALPHA, GL_UNSIGNED_BYTE, tmp, stride,
-                    0, 0, w, h, 0);
-        free(tmp);
-    }
-
-    gl->BindTexture(p->target, 0);
-
-    // Create a list for rendering this OSD part
-    p->osdaDispList[p->osdtexCnt] = gl->GenLists(1);
-    gl->NewList(p->osdaDispList[p->osdtexCnt], GL_COMPILE);
-    // render alpha
-    gl->BindTexture(p->target, p->osdatex[p->osdtexCnt]);
-    glDrawTex(gl, x0, y0, w, h, 0, 0, w, h, sx, sy, p->use_rectangle == 1, 0, 0);
-    gl->EndList();
-
-    p->osdDispList[p->osdtexCnt] = gl->GenLists(1);
-    gl->NewList(p->osdDispList[p->osdtexCnt], GL_COMPILE);
-    // render OSD
-    gl->BindTexture(p->target, p->osdtex[p->osdtexCnt]);
-    glDrawTex(gl, x0, y0, w, h, 0, 0, w, h, sx, sy, p->use_rectangle == 1, 0, 0);
-    gl->EndList();
-
-    p->osdtexCnt++;
-}
-
-#define RENDER_OSD  1
-#define RENDER_EOSD 2
-
-/**
- * \param type bit 0: render OSD, bit 1: render EOSD
- */
-static void do_render_osd(struct vo *vo, int type)
-{
-    struct gl_priv *p = vo->priv;
-    GL *gl = p->gl;
-
-    int draw_osd  = (type & RENDER_OSD) && p->osdtexCnt > 0;
-    int draw_eosd = (type & RENDER_EOSD);
-    if (!draw_osd && !draw_eosd)
-        return;
-    // set special rendering parameters
-    if (!p->scaled_osd) {
-        gl->MatrixMode(GL_PROJECTION);
-        gl->PushMatrix();
-        gl->LoadIdentity();
-        gl->Ortho(0, vo->dwidth, vo->dheight, 0, -1, 1);
-    }
-    gl->Enable(GL_BLEND);
-    if (draw_eosd) {
-        gl->BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        drawEOSD(vo);
-    }
-    if (draw_osd) {
-        gl->Color4ub((p->osd_color >> 16) & 0xff, (p->osd_color >> 8) & 0xff,
-                     p->osd_color & 0xff, 0xff - (p->osd_color >> 24));
-        // draw OSD
-        gl->BlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
-        gl->CallLists(p->osdtexCnt, GL_UNSIGNED_INT, p->osdaDispList);
-        gl->BlendFunc(GL_SRC_ALPHA, GL_ONE);
-        gl->CallLists(p->osdtexCnt, GL_UNSIGNED_INT, p->osdDispList);
-    }
-    // set rendering parameters back to defaults
-    gl->Disable(GL_BLEND);
-    if (!p->scaled_osd)
-        gl->PopMatrix();
-    gl->BindTexture(p->target, 0);
-}
-
-static void draw_osd(struct vo *vo, struct osd_state *osd)
-{
-    struct gl_priv *p = vo->priv;
-
-    if (!p->use_osd)
-        return;
-    if (vo_osd_has_changed(osd)) {
-        int osd_h, osd_w;
-        clearOSD(vo);
-        osd_w = p->scaled_osd ? p->image_width : vo->dwidth;
-        osd_h = p->scaled_osd ? p->image_height : vo->dheight;
-        osd_draw_text_ext(osd, osd_w, osd_h, p->ass_border_x,
-                          p->ass_border_y, p->ass_border_x,
-                          p->ass_border_y, p->image_width,
-                          p->image_height, create_osd_texture, vo);
-    }
-    do_render_osd(vo, RENDER_OSD);
 }
 
 static void do_render(struct vo *vo)
@@ -1176,8 +909,6 @@ static int preinit(struct vo *vo, const char *arg)
         .osd_color = 0xffffff,
     };
 
-    p->eosd = eosd_packer_create(vo);
-
     int allow_sw = 0;
     char *backend_arg = NULL;
 
@@ -1361,11 +1092,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_DRAW_IMAGE:
         return draw_image(vo, data);
     case VOCTRL_DRAW_EOSD:
-        if (!data)
-            return VO_FALSE;
-        genEOSD(vo, data);
-        do_render_osd(vo, RENDER_EOSD);
+        render_osd(vo, data);
         return VO_TRUE;
+    case VOCTRL_QUERY_EOSD_FORMAT:
+        return mpgl_osd_query_format(p->osd, *(int *)data) ? VO_TRUE : VO_NOTIMPL;
     case VOCTRL_GET_EOSD_RES: {
         mp_eosd_res_t *r = data;
         r->w = vo->dwidth;
@@ -1461,7 +1191,7 @@ const struct vo_driver video_out_gl = {
     .config = config,
     .control = control,
     .draw_slice = draw_slice,
-    .draw_osd = draw_osd,
+    .draw_osd = draw_osd_with_eosd,
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,
@@ -1483,7 +1213,7 @@ const struct vo_driver video_out_gl_nosw =
     .config = config,
     .control = control,
     .draw_slice = draw_slice,
-    .draw_osd = draw_osd,
+    .draw_osd = draw_osd_with_eosd,
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,

@@ -159,7 +159,8 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
 {
     GL *gl = ctx->gl;
 
-    osd->packer->padding = imgs->scaled; // assume 2x2 filter on scaling
+    // assume 2x2 filter on scaling
+    osd->packer->padding = ctx->scaled || imgs->scaled;
     int r = packer_pack_from_subbitmaps(osd->packer, imgs);
     if (r < 0) {
         mp_msg(MSGT_VO, MSGL_ERR, "[gl] EOSD bitmaps do not fit on "
