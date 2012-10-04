@@ -247,7 +247,6 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/mp_taglists.c \
               libmpdemux/video.c \
               libvo/osd.c \
-              libvo/eosd_packer.c \
               libvo/bitmap_packer.c \
               osdep/numcores.c \
               osdep/io.c \
