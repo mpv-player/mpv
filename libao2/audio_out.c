@@ -48,9 +48,6 @@ extern const struct ao_driver audio_out_portaudio;
 
 static const struct ao_driver * const audio_out_drivers[] = {
 // native:
-#ifdef CONFIG_DIRECTX
-    &audio_out_dsound,
-#endif
 #ifdef CONFIG_COREAUDIO
     &audio_out_coreaudio,
 #endif
@@ -66,6 +63,9 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #ifdef CONFIG_PORTAUDIO
     &audio_out_portaudio,
 #endif
+#ifdef CONFIG_DSOUND
+    &audio_out_dsound,
+#endif
     // wrappers:
 #ifdef CONFIG_JACK
     &audio_out_jack,
@@ -73,12 +73,12 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #ifdef CONFIG_OPENAL
     &audio_out_openal,
 #endif
-#ifdef CONFIG_ENCODING
-    &audio_out_lavc,
-#endif
     &audio_out_null,
     // should not be auto-selected:
     &audio_out_pcm,
+#ifdef CONFIG_ENCODING
+    &audio_out_lavc,
+#endif
 #ifdef CONFIG_RSOUND
     &audio_out_rsound,
 #endif

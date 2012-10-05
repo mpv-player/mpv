@@ -375,6 +375,7 @@ Audio output:
   --disable-jack         disable JACK audio output [autodetect]
   --enable-openal        enable OpenAL audio output [disable]
   --disable-coreaudio    disable CoreAudio audio output [autodetect]
+  --disable-dsound        disable DirectSound audio output [autodetect]
   --disable-select       disable using select() on the audio device [enable]
 
 Language options:
@@ -443,6 +444,7 @@ _xss=auto
 _xv=auto
 _vdpau=auto
 _direct3d=auto
+_dsound=auto
 _nas=auto
 _png=auto
 _mng=auto
@@ -635,6 +637,8 @@ for ac_option do
   --disable-vdpau)      _vdpau=no       ;;
   --enable-direct3d)    _direct3d=yes   ;;
   --disable-direct3d)   _direct3d=no    ;;
+  --enable-dsound)      _dsound=yes     ;;
+  --disable-dsound)     _dsound=no      ;;
   --enable-png)         _png=yes        ;;
   --disable-png)        _png=no         ;;
   --enable-mng)         _mng=yes        ;;
@@ -2478,6 +2482,7 @@ echores "$_gl"
 
 if win32; then
 
+
 echocheck "Direct3D"
 if test "$_direct3d" = auto ; then
   _direct3d=no
@@ -2491,6 +2496,22 @@ else
   novomodules="direct3d $novomodules"
 fi
 echores "$_direct3d"
+
+
+echocheck "DirectSound"
+if test "$_dsound" = auto ; then
+  _dsound=no
+  header_check dsound.h && _dsound=yes
+fi
+if test "$_dsound" = yes ; then
+  def_dsound='#define CONFIG_DSOUND 1'
+  aomodules="dsound $aomodules"
+else
+  def_dsound='#undef CONFIG_DSOUND'
+  noaomodules="dsound $noaomodules"
+fi
+echores "$_dsound"
+
 
 fi #if win32; then
 
@@ -3339,6 +3360,7 @@ COCOA = $_cocoa
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
 DIRECT3D = $_direct3d
+DSOUND = $_dsound
 DVBIN = $_dvbin
 DVDREAD = $_dvdread
 DXR3 = $_dxr3
@@ -3583,6 +3605,7 @@ $def_caca
 $def_corevideo
 $def_cocoa
 $def_direct3d
+$def_dsound
 $def_dvb
 $def_dvbin
 $def_gif
