@@ -970,14 +970,21 @@ static void draw_eosd(struct vo *vo, int index)
         .blend_equation_alpha = VDP_OUTPUT_SURFACE_RENDER_BLEND_EQUATION_ADD,
     };
 
+    VdpOutputSurfaceRenderBlendState blend_state_premultiplied = blend_state;
+    blend_state_premultiplied.blend_factor_source_color =
+            VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_ONE;
+
     for (i = 0; i < sfc->render_count; i++) {
+        VdpOutputSurfaceRenderBlendState *blend = &blend_state;
+        if (sfc->format == VDP_RGBA_FORMAT_B8G8R8A8)
+            blend = &blend_state_premultiplied;
         vdp_st = vdp->
             output_surface_render_bitmap_surface(output_surface,
                                                  &sfc->targets[i].dest,
                                                  sfc->surface,
                                                  &sfc->targets[i].source,
                                                  &sfc->targets[i].color,
-                                                 &blend_state,
+                                                 blend,
                                                  VDP_OUTPUT_SURFACE_RENDER_ROTATE_0);
         CHECK_ST_WARNING("EOSD: Error when rendering");
     }

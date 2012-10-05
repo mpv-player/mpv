@@ -166,6 +166,21 @@ bool osd_conv_ass_to_old_p(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
     return true;
 }
 
+static void rgba_to_premultiplied_rgba(uint32_t *colors, size_t count)
+{
+    for (int n = 0; n < count; n++) {
+        uint32_t c = colors[n];
+        int b = c & 0xFF;
+        int g = (c >> 8) & 0xFF;
+        int r = (c >> 16) & 0xFF;
+        int a = (c >> 24) & 0xFF;
+        b = b * a / 255;
+        g = g * a / 255;
+        r = r * a / 255;
+        colors[n] = b | (g << 8) | (r << 16) | (a << 24);
+    }
+}
+
 bool osd_conv_idx_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
 {
     struct sub_bitmaps src = *imgs;
@@ -179,18 +194,19 @@ bool osd_conv_idx_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
     for (int n = 0; n < src.num_parts; n++) {
         struct sub_bitmap *d = &imgs->parts[n];
         struct sub_bitmap *s = &src.parts[n];
-        struct osd_bmp_indexed *sb = s->bitmap;
+        struct osd_bmp_indexed sb = *(struct osd_bmp_indexed *)s->bitmap;
+
+        rgba_to_premultiplied_rgba(sb.palette, 256);
 
         *d = *s;
         d->stride = s->w * 4;
         d->bitmap = talloc_size(c->parts, s->h * d->stride);
 
-        uint32_t *palette = sb->palette;
         uint32_t *outbmp = d->bitmap;
         for (int y = 0; y < s->h; y++) {
-            uint8_t *inbmp = sb->bitmap + y * s->stride;
+            uint8_t *inbmp = sb.bitmap + y * s->stride;
             for (int x = 0; x < s->w; x++)
-                *outbmp++ = palette[*inbmp++];
+                *outbmp++ = sb.palette[*inbmp++];
         }
     }
     return true;

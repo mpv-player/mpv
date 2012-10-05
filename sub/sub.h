@@ -30,7 +30,7 @@ struct sub_render_params;
 enum sub_bitmap_format {
     SUBBITMAP_EMPTY = 0,// no bitmaps; always has num_parts==0
     SUBBITMAP_LIBASS,   // A8, with a per-surface blend color (libass.color)
-    SUBBITMAP_RGBA,     // B8G8R8A8 (MSB=A, LSB=B), can be scaled
+    SUBBITMAP_RGBA,     // B8G8R8A8 (MSB=A, LSB=B), scaled, premultiplied alpha
     SUBBITMAP_INDEXED,  // scaled, bitmap points to osd_bmp_indexed
     SUBBITMAP_OLD_PLANAR, // like previous, but bitmap points to old_osd_planar
 

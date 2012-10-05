@@ -2049,6 +2049,9 @@ static void draw_osd(d3d_priv *priv, struct sub_bitmaps *imgs)
 
         IDirect3DDevice9_SetTextureStageState(priv->d3d_device, 0,
                                             D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+    } else {
+        IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_SRCBLEND,
+                                        D3DBLEND_ONE);
     }
 
     IDirect3DDevice9_SetFVF(priv->d3d_device, D3DFVF_EOSD_VERTEX);
@@ -2060,6 +2063,8 @@ static void draw_osd(d3d_priv *priv, struct sub_bitmaps *imgs)
                                           D3DTSS_COLORARG1, D3DTA_TEXTURE);
     IDirect3DDevice9_SetTextureStageState(priv->d3d_device, 0,
                                           D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+    IDirect3DDevice9_SetRenderState(priv->d3d_device,
+                                    D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 
     IDirect3DDevice9_SetTexture(priv->d3d_device, 0, NULL);
 
