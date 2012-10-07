@@ -422,42 +422,12 @@ static mp_image_t *get_screenshot(struct vo *vo)
     struct xvctx *ctx = vo->priv;
 
     // try to get an image without OSD
-    if (ctx->have_image_copy)
-        copy_backup_image(vo, ctx->visible_buf, ctx->num_buffers);
+    int id = ctx->have_image_copy ? ctx->num_buffers : ctx->visible_buf;
+    struct mp_image img = get_xv_buffer(vo, id);
+    img.w = ctx->image_d_width;
+    img.h = ctx->image_d_height;
 
-    XvImage *xv_image = ctx->xvimage[ctx->visible_buf];
-
-    int w = xv_image->width;
-    int h = xv_image->height;
-
-    mp_image_t *image = alloc_mpi(w, h, ctx->image_format);
-
-    int bytes = 1;
-    if (!(image->flags & MP_IMGFLAG_PLANAR) && (image->flags & MP_IMGFLAG_YUV))
-        // packed YUV
-        bytes = image->bpp / 8;
-
-    memcpy_pic(image->planes[0], xv_image->data + xv_image->offsets[0],
-               bytes * w, h, image->stride[0], xv_image->pitches[0]);
-
-    if (image->flags & MP_IMGFLAG_PLANAR) {
-        int swap = ctx->image_format == IMGFMT_YV12;
-        int p1 = swap ? 2 : 1;
-        int p2 = swap ? 1 : 2;
-
-        w /= 2;
-        h /= 2;
-
-        memcpy_pic(image->planes[p1], xv_image->data + xv_image->offsets[1],
-                   w, h, image->stride[p1], xv_image->pitches[1]);
-        memcpy_pic(image->planes[p2], xv_image->data + xv_image->offsets[2],
-                   w, h, image->stride[p2], xv_image->pitches[2]);
-    }
-
-    image->w = ctx->image_d_width;
-    image->h = ctx->image_d_height;
-
-    return image;
+    return talloc_memdup(NULL, &img, sizeof(img));
 }
 
 static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
