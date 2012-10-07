@@ -46,6 +46,7 @@
 #include "vobsub.h"
 #include "sub.h"
 #include "mpcommon.h"
+#include "libvo/csputils.h"
 
 typedef struct spu_packet_t packet_t;
 struct spu_packet_t {
@@ -186,6 +187,9 @@ static int spudec_alloc_image(spudec_handle_t *this, int stride, int height)
 static void setup_palette(spudec_handle_t *spu, uint32_t palette[256])
 {
     memset(palette, 0, sizeof(palette));
+    struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
+    float cmatrix[3][4];
+    mp_get_yuv2rgb_coeffs(&csp, cmatrix);
     for (int i = 0; i < 4; ++i) {
         int alpha = spu->alpha[i];
         // extend 4 -> 8 bit
@@ -194,16 +198,10 @@ static void setup_palette(spudec_handle_t *spu, uint32_t palette[256])
             alpha = 0;
         int color = spu->custom ? spu->cuspal[i] :
                     spu->global_palette[spu->palette[i]];
-        int y = (color >> 16) & 0xff;
-        int u = (color >> 8) & 0xff;
-        int v = color & 0xff;
-        // stolen from some site, likely incorrect
-        int b = 1.164 * (y - 16)                     + 2.018 * (u - 128);
-        int g = 1.164 * (y - 16) - 0.813 * (v - 128) - 0.391 * (u - 128);
-        int r = 1.164 * (y - 16) + 1.596 * (v - 128);
-#define CL(x) FFMAX(FFMIN((x), 255), 0)
-        palette[i] = (alpha << 24) | CL(r) | (CL(g) << 8) | (CL(b) << 16);
-#undef CL
+        uint8_t c[3] = {(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff};
+        mp_map_color(cmatrix, c);
+        // R and G swapped, possibly due to vobsub_palette_to_yuv()
+        palette[i] = (alpha << 24) | (c[2] << 16) | (c[1] << 8) | c[0];
     }
 }
 

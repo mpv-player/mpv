@@ -73,6 +73,12 @@ struct mp_csp_params {
     int input_bits;
 };
 
+#define MP_CSP_PARAMS_DEFAULTS {                                \
+    .colorspace = MP_CSP_DETAILS_DEFAULTS,                      \
+    .brightness = 0, .contrast = 1, .hue = 0, .saturation = 1,  \
+    .rgamma = 1, .ggamma = 1, .bgamma = 1,                      \
+    .texture_bits = 8, .input_bits = 8}
+
 enum mp_csp_equalizer_param {
     MP_CSP_EQ_BRIGHTNESS,
     MP_CSP_EQ_CONTRAST,
@@ -142,5 +148,7 @@ void mp_gen_yuv2rgb_map(struct mp_csp_params *params, uint8_t *map, int size);
                                                        (minv)[c][2] * (b) + \
                                                        (minv)[c][3] * (scale))
 void mp_invert_yuv2rgb(float out[3][4], float in[3][4]);
+
+void mp_map_color(float matrix[3][4], uint8_t c[3]);
 
 #endif /* MPLAYER_CSPUTILS_H */
