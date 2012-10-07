@@ -37,6 +37,7 @@
 #include "sub.h"
 #include "dec_sub.h"
 #include "img_convert.h"
+#include "draw_bmp.h"
 #include "spudec.h"
 
 
@@ -298,6 +299,30 @@ void draw_osd_with_eosd(struct vo *vo, struct osd_state *osd)
         if (render_object(osd, obj, &imgs, &subparams, formats))
             vo_control(vo, VOCTRL_DRAW_EOSD, &imgs);
     }
+}
+
+// Returns whether anything was drawn.
+bool osd_draw_on_image(struct osd_state *osd, struct mp_image *dest,
+                       struct mp_csp_details *dest_csp,
+                       struct sub_render_params *sub_params)
+{
+    static const bool formats[SUBBITMAP_COUNT] = {
+        [SUBBITMAP_LIBASS] = true,
+        [SUBBITMAP_RGBA] = true,
+    };
+    bool changed = false;
+    osd_update_ext(osd, sub_params->dim);
+    for (int n = 0; n < MAX_OSD_PARTS; n++) {
+        struct osd_object *obj = osd->objs[n];
+        if (obj->is_sub && osd->render_subs_in_filter)
+            continue;
+        struct sub_bitmaps imgs;
+        if (render_object(osd, obj, &imgs, sub_params, formats)) {
+            mp_draw_sub_bitmaps(dest, &imgs, dest_csp);
+            changed = true;
+        }
+    }
+    return changed;
 }
 
 void osd_draw_text_ext(struct osd_state *osd, int w, int h,
