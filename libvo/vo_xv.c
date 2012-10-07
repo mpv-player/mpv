@@ -47,7 +47,6 @@
 #include "video_out.h"
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"
-#include "osd.h"
 #include "x11_common.h"
 #include "fastmemcpy.h"
 #include "sub/sub.h"

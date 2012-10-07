@@ -1781,30 +1781,6 @@
 --speed=<0.01-100>
     Slow down or speed up playback by the factor given as parameter.
 
---spuaa=<mode>
-    Antialiasing/scaling mode for DVD/VOBsub. A value of 16 may be added to
-    <mode> in order to force scaling even when original and scaled frame size
-    already match. This can be employed to e.g. smooth subtitles with gaussian
-    blur. Available modes are:
-
-    :0: none (fastest, very ugly)
-    :1: approximate (broken?)
-    :2: full (slow)
-    :3: bilinear (default, fast and not too bad)
-    :4: uses swscaler gaussian blur (looks very good)
-
---spualign=<-1-2>
-    Specify how SPU (DVD/VOBsub) subtitles should be aligned.
-
-    :-1:  Original position
-    :0:   Align at top (original behavior, default).
-    :1:   Align at center.
-    :2:   Align at bottom.
-
---spugauss=<0.0-3.0>
-    Variance parameter of gaussian used by ``--spuaa=4``. Higher means more
-    blur (default: 1.0).
-
 --srate=<Hz>
     Select the output sample rate to be used (of course sound cards have
     limits on this). If the sample frequency selected is different from that

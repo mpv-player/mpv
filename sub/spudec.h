@@ -26,32 +26,14 @@ struct mp_eosd_res;
 
 void spudec_heartbeat(void *this, unsigned int pts100);
 void spudec_assemble(void *this, unsigned char *packet, unsigned int len, int pts100);
-void spudec_draw(void *this, void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx);
-void spudec_draw_scaled(void *this, unsigned int dxs, unsigned int dys, void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx);
-void spudec_get_bitmap(void *this, int w, int h, struct sub_bitmaps *res);
 void spudec_get_indexed(void *this, struct mp_eosd_res *dim, struct sub_bitmaps *res);
-int spudec_apply_palette_crop(void *this, uint32_t palette, int sx, int ex, int sy, int ey);
 void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigned int frame_height, uint8_t *extradata, int extradata_len);
-void spudec_set_res(void *this, unsigned int frame_width, unsigned int frame_height);
 void *spudec_new(unsigned int *palette);
 void spudec_free(void *this);
 void spudec_reset(void *this);	// called after seek
 int spudec_visible(void *this); // check if spu is visible
 void spudec_set_font_factor(void * this, double factor); // sets the equivalent to ffactor
 int spudec_changed(void *this);
-void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int* bbox);
 void spudec_set_forced_subs_only(void * const this, const unsigned int flag);
-void spudec_set_paletted(void *this, const uint8_t *pal_img, int stride,
-                         const void *palette,
-                         int x, int y, int w, int h,
-                         double pts, double endpts);
-struct spu_packet_t *spudec_packet_create(int x, int y, int w, int h);
-void spudec_packet_fill(struct spu_packet_t *packet,
-                        const uint8_t *pal_img, int pal_stride,
-                        const void *palette,
-                        int x, int y, int w, int h);
-void spudec_packet_send(void *spu, struct spu_packet_t *packet,
-                        double pts, double endpts);
-void spudec_packet_clear(struct spu_packet_t *packet);
 
 #endif /* MPLAYER_SPUDEC_H */

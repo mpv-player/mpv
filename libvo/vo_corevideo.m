@@ -32,7 +32,6 @@
 #import "csputils.h"
 #import "libmpcodecs/vfcap.h"
 #import "libmpcodecs/mp_image.h"
-#import "osd.h"
 
 #import "gl_common.h"
 #import "gl_osd.h"

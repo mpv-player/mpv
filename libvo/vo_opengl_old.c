@@ -35,7 +35,6 @@
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"
 #include "geometry.h"
-#include "osd.h"
 #include "sub/sub.h"
 
 #include "gl_common.h"

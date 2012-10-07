@@ -25,7 +25,6 @@
 #include "video_out.h"
 #include "aspect.h"
 #include "csputils.h"
-#include "osd.h"
 #include "libmpcodecs/mp_image.h"
 #include "libmpcodecs/vfcap.h"
 

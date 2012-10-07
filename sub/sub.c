@@ -219,16 +219,6 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
         cached |= osd_conv_idx_to_rgba(obj->cache[0], out_imgs);
     }
 
-    if (formats[SUBBITMAP_OLD_PLANAR] && out_imgs->format == SUBBITMAP_INDEXED)
-    {
-        cached |= osd_conv_idx_to_old_p(obj->cache[1], out_imgs,
-                                        osd->res.w, osd->res.h);
-    }
-
-    if (formats[SUBBITMAP_OLD_PLANAR] && out_imgs->format == SUBBITMAP_LIBASS) {
-        cached |= osd_conv_ass_to_old_p(obj->cache[2], out_imgs);
-    }
-
     if (cached)
         obj->cached = *out_imgs;
 
@@ -323,48 +313,6 @@ bool osd_draw_on_image(struct osd_state *osd, struct mp_image *dest,
         }
     }
     return changed;
-}
-
-void osd_draw_text_ext(struct osd_state *osd, int w, int h,
-                       int ml, int mt, int mr, int mb, int unused0, int unused1,
-                       void (*draw_alpha)(void *ctx, int x0, int y0, int w,
-                                          int h, unsigned char* src,
-                                          unsigned char *srca,
-                                          int stride),
-                   void *ctx)
-{
-    struct mp_eosd_res dim =
-        {.w = w, .h = h, .ml = ml, .mt = mt, .mr = mr, .mb = mb};
-    osd_update_ext(osd, dim);
-    struct sub_render_params subparams = {
-        .pts = osd->vo_sub_pts,
-        .dim = dim,
-        .normal_scale = 1,
-        .vsfilter_scale = 1, // unknown
-    };
-    for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        struct osd_object *obj = osd->objs[n];
-        if (obj->is_sub && osd->render_subs_in_filter)
-            continue;
-        struct sub_bitmaps imgs;
-        bool formats[SUBBITMAP_COUNT] = {[SUBBITMAP_OLD_PLANAR] = true};
-        if (render_object(osd, obj, &imgs, &subparams, formats)) {
-            assert(imgs.num_parts == 1);
-            struct sub_bitmap *part = &imgs.parts[0];
-            struct old_osd_planar *bmp = part->bitmap;
-            draw_alpha(ctx, part->x, part->y, part->w, part->h,
-                        bmp->bitmap, bmp->alpha, part->stride);
-        }
-    }
-}
-
-void osd_draw_text(struct osd_state *osd, int w, int h,
-                   void (*draw_alpha)(void *ctx, int x0, int y0, int w, int h,
-                                      unsigned char* src, unsigned char *srca,
-                                      int stride),
-                   void *ctx)
-{
-    osd_draw_text_ext(osd, w, h, 0, 0, 0, 0, 0, 0, draw_alpha, ctx);
 }
 
 void vo_osd_changed(int new_value)

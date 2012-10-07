@@ -32,7 +32,6 @@ enum sub_bitmap_format {
     SUBBITMAP_LIBASS,   // A8, with a per-surface blend color (libass.color)
     SUBBITMAP_RGBA,     // B8G8R8A8 (MSB=A, LSB=B), scaled, premultiplied alpha
     SUBBITMAP_INDEXED,  // scaled, bitmap points to osd_bmp_indexed
-    SUBBITMAP_OLD_PLANAR, // like previous, but bitmap points to old_osd_planar
 
     SUBBITMAP_COUNT
 };
@@ -42,12 +41,6 @@ struct osd_bmp_indexed {
     uint8_t *bitmap;
     // Each entry is like a pixel in SUBBITMAP_RGBA format
     uint32_t palette[256];
-};
-
-// For SUBBITMAP_OLD_PANAR
-struct old_osd_planar {
-    unsigned char *bitmap;
-    unsigned char *alpha;
 };
 
 struct sub_bitmap {
@@ -191,9 +184,6 @@ extern int sub_pos;
 extern int sub_width_p;
 extern int sub_bg_color; /* subtitles background color */
 extern int sub_bg_alpha;
-extern int spu_alignment;
-extern int spu_aamode;
-extern float spu_gaussvar;
 
 extern char *subtitle_font_encoding;
 extern float text_font_scale_factor;
@@ -209,20 +199,6 @@ extern float sub_delay;
 extern float sub_fps;
 
 extern int sub_justify;
-
-void osd_draw_text(struct osd_state *osd, int dxs, int dys,
-                   void (*draw_alpha)(void *ctx, int x0, int y0, int w, int h,
-                                      unsigned char* src, unsigned char *srca,
-                                      int stride),
-                   void *ctx);
-void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
-                       int left_border, int top_border, int right_border,
-                       int bottom_border, int orig_w, int orig_h,
-                       void (*draw_alpha)(void *ctx, int x0, int y0, int w,
-                                          int h, unsigned char* src,
-                                          unsigned char *srca,
-                                          int stride),
-                       void *ctx);
 
 void draw_osd_with_eosd(struct vo *vo, struct osd_state *osd);
 

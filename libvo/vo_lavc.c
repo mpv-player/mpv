@@ -35,7 +35,6 @@
 
 #include "sub/sub.h"
 #include "sub/draw_bmp.h"
-#include "libvo/osd.h"
 
 struct priv {
     uint8_t *buffer;
