@@ -34,8 +34,11 @@
 #include "csputils.h"
 
 #if defined(CONFIG_GL_COCOA) && !defined(CONFIG_GL_X11)
-#include <OpenGL/gl.h>
+#ifdef GL_VERSION_3_0
 #include <OpenGL/gl3.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include <OpenGL/glext.h>
 #else
 #include <GL/gl.h>
