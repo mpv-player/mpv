@@ -125,8 +125,8 @@ typedef struct {
 
   struct palette_crop_cache palette_crop_cache;
 
-  struct sub_bitmap borrowed_sub_part;
   struct old_osd_planar borrowed_sub_image;
+  struct sub_bitmap sub_part, borrowed_sub_part;
   struct osd_bmp_indexed borrowed_bmp;
 } spudec_handle_t;
 
@@ -344,6 +344,70 @@ int spudec_apply_palette_crop(void *this, uint32_t palette,
   return c->result;
 }
 
+static void setup_palette(spudec_handle_t *spu, uint32_t palette[256])
+{
+    memset(palette, 0, sizeof(palette));
+    for (int i = 0; i < 4; ++i) {
+        int alpha = spu->alpha[i];
+        // extend 4 -> 8 bit
+        alpha |= alpha << 4;
+        if (spu->custom && (spu->cuspal[i] >> 31) != 0)
+            alpha = 0;
+        int color = spu->custom ? spu->cuspal[i] :
+                    spu->global_palette[spu->palette[i]];
+        int y = (color >> 16) & 0xff;
+        int u = (color >> 8) & 0xff;
+        int v = color & 0xff;
+        // stolen from some site, likely incorrect
+        int b = 1.164 * (y - 16)                     + 2.018 * (u - 128);
+        int g = 1.164 * (y - 16) - 0.813 * (v - 128) - 0.391 * (u - 128);
+        int r = 1.164 * (y - 16) + 1.596 * (v - 128);
+#define CL(x) FFMAX(FFMIN((x), 255), 0)
+        palette[i] = (alpha << 24) | CL(r) | (CL(g) << 8) | (CL(b) << 16);
+#undef CL
+    }
+}
+
+static void crop_image(struct sub_bitmap *part)
+{
+    if (part->w < 1 || part->h < 1)
+        return;
+    struct osd_bmp_indexed *bmp = part->bitmap;
+    bool invisible[256];
+    for (int n = 0; n < 256; n++)
+        invisible[n] = !(bmp->palette[n] >> 24);
+    int y0 = 0, y1 = part->h, x0 = part->w, x1 = 0;
+    bool y_all_invisible = true;
+    for (int y = 0; y < part->h; y++) {
+        uint8_t *pixels = bmp->bitmap + part->stride * y;
+        int cur = 0;
+        while (cur < part->w && invisible[pixels[cur]])
+            cur++;
+        int start_visible = cur;
+        int last_visible = -1;
+        while (cur < part->w) {
+            if (!invisible[pixels[cur]])
+                last_visible = cur;
+            cur++;
+        }
+        x0 = FFMIN(x0, start_visible);
+        x1 = FFMAX(x1, last_visible);
+        bool all_invisible = last_visible == -1;
+        if (all_invisible) {
+            if (y_all_invisible)
+                y0 = y;
+        } else {
+            y_all_invisible = false;
+            y1 = y + 1;
+        }
+    }
+    bmp->bitmap += x0 + y0 * part->stride;
+    part->w = FFMAX(x1 - x0, 0);
+    part->h = FFMAX(y1 - y0, 0);
+    part->x += x0;
+    part->y += y0;
+}
+
 static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
 {
   unsigned int i, x, y;
@@ -391,6 +455,18 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
     dst += len;
   }
   apply_palette_crop(this, 0, 0, this->pal_width, this->pal_height);
+
+  struct sub_bitmap *sub_part = &this->sub_part;
+  struct osd_bmp_indexed *bmp = &this->borrowed_bmp;
+  bmp->bitmap = this->pal_image;
+  setup_palette(this, bmp->palette);
+  sub_part->bitmap = bmp;
+  sub_part->stride = this->pal_width;
+  sub_part->w = this->pal_width;
+  sub_part->h = this->pal_height;
+  sub_part->x = this->pal_start_col;
+  sub_part->y = this->pal_start_row;
+  crop_image(sub_part);
 }
 
 
@@ -768,40 +844,18 @@ void spudec_get_indexed(void *this, struct mp_eosd_res *dim,
     *res = (struct sub_bitmaps) { .format = SUBBITMAP_INDEXED };
     struct sub_bitmap *part = &spu->borrowed_sub_part;
     res->parts = part;
-    if (spudec_visible(spu)) {
-        struct osd_bmp_indexed *bmp = &spu->borrowed_bmp;
-        part->bitmap = bmp;
-        bmp->bitmap = spu->pal_image;
-        part->stride = spu->pal_width;
-        part->w = spu->pal_width;
-        part->h = spu->pal_height;
+    *part = spu->sub_part;
+    // Empty subs do happen when cropping
+    bool empty = part->w < 1 || part->h < 1;
+    if (spudec_visible(spu) && !empty) {
         double xscale = (double) (dim->w - dim->ml - dim->mr) / spu->orig_frame_width;
         double yscale = (double) (dim->h - dim->mt - dim->mb) / spu->orig_frame_height;
-        part->x = spu->pal_start_col * xscale + dim->ml;
-        part->y = spu->pal_start_row * yscale + dim->mt;
+        part->x = part->x * xscale + dim->ml;
+        part->y = part->y * yscale + dim->mt;
         part->dw = part->w * xscale;
         part->dh = part->h * yscale;
         res->num_parts = 1;
-        memset(bmp->palette, 0, sizeof(bmp->palette));
-        for (int i = 0; i < 4; ++i) {
-            int alpha = spu->alpha[i];
-            // extend 4 -> 8 bit
-            alpha |= alpha << 4;
-            if (spu->custom && (spu->cuspal[i] >> 31) != 0)
-                alpha = 0;
-            int color = spu->custom ? spu->cuspal[i] :
-                        spu->global_palette[spu->palette[i]];
-            int y = (color >> 16) & 0xff;
-            int u = (color >> 8) & 0xff;
-            int v = color & 0xff;
-            // stolen from some site, likely incorrect
-            int b = 1.164 * (y - 16)                     + 2.018 * (u - 128);
-            int g = 1.164 * (y - 16) - 0.813 * (v - 128) - 0.391 * (u - 128);
-            int r = 1.164 * (y - 16) + 1.596 * (v - 128);
-#define CL(x) FFMAX(FFMIN((x), 255), 0)
-            bmp->palette[i] = (alpha << 24) | CL(r) | (CL(g) << 8) | (CL(b) << 16);
-#undef CL
-        }
+        res->scaled = true;
     }
 }
 
