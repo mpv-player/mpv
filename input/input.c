@@ -132,6 +132,7 @@ static const mp_cmd_t mp_cmds[] = {
   }},
   { MP_CMD_SUB_STEP, "sub_step", { ARG_INT } },
   { MP_CMD_OSD, "osd", { OARG_INT(-1) } },
+  { MP_CMD_PRINT_TEXT, "print_text", { ARG_STRING } },
   { MP_CMD_SHOW_TEXT, "show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
   { MP_CMD_SHOW_PROGRESS, "show_progress", },
   { MP_CMD_SUB_LOAD, "sub_load", { ARG_STRING } },

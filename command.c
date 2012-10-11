@@ -1936,6 +1936,15 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
+    case MP_CMD_PRINT_TEXT: {
+        char *txt = mp_property_expand_string(mpctx, cmd->args[0].v.s);
+        if (txt) {
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "%s\n", txt);
+            talloc_free(txt);
+        }
+        break;
+    }
+
     case MP_CMD_SHOW_TEXT: {
         char *txt = mp_property_expand_string(mpctx, cmd->args[0].v.s);
         if (txt) {

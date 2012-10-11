@@ -160,6 +160,10 @@ osd [<level>]
     Toggle OSD level. If <level> is specified, set the OSD mode
     (see ``--osd-level`` for valid values).
 
+print_text "<string>"
+    Print text to stdout. The string can contain properties, which are expanded
+    like in ``--playing-msg``.
+
 show_text "<string>" [<duration>] [<level>]
     Show text on the OSD. The string can contain properties, which are expanded
     like in ``--playing-msg``. This can be used to show playback time, filename,
