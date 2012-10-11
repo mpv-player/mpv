@@ -176,6 +176,14 @@
     rendering text subtitles. The syntax of the file is exactly like the ``[V4
     Styles]`` / ``[V4+ Styles]`` section of SSA/ASS.
 
+--ass-style-override=<yes|no>
+    Control whether user style overrides should be applied.
+
+    :yes: Apply all the ``--ass-*`` style override options. Changing the default
+          for any of these options can lead to incorrect subtitle rendering.
+          (Default.)
+    :no:  Render subtitles as forced by subtitle scripts.
+
 --ass-top-margin=<value>
     Adds a black band at the top of the frame. The SSA/ASS renderer can place
     toptitles there (with ``--ass-use-margins``).

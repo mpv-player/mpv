@@ -47,7 +47,7 @@ ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
     track->PlayResY = 288;
     track->WrapStyle = 0;
 
-    if (opts->ass_styles_file)
+    if (opts->ass_styles_file && opts->ass_style_override)
         ass_read_styles(track, opts->ass_styles_file, sub_cp);
 
     if (track->n_styles == 0) {
@@ -95,7 +95,9 @@ ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
         style->ScaleY = 1.;
     }
 
-    ass_process_force_style(track);
+    if (opts->ass_style_override)
+        ass_process_force_style(track);
+
     return track;
 }
 
@@ -228,20 +230,32 @@ ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
 void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
                       struct mp_eosd_res *dim, bool unscaled)
 {
-    int hinting;
     ass_set_frame_size(priv, dim->w, dim->h);
     ass_set_margins(priv, dim->mt, dim->mb, dim->ml, dim->mr);
-    ass_set_use_margins(priv, opts->ass_use_margins);
+
+    int set_use_margins = 0;
+    int set_sub_pos = 0;
+    float set_line_spacing = 0;
+    float set_font_scale = 1;
+    int set_hinting = 0;
+    if (opts->ass_style_override) {
+        set_use_margins = opts->ass_use_margins;
+        set_sub_pos = 100 - sub_pos;
+        set_line_spacing = opts->ass_line_spacing;
+        set_font_scale = opts->ass_font_scale;
+        if (!unscaled && (opts->ass_hinting & 4))
+            set_hinting = 0;
+        else
+            set_hinting = opts->ass_hinting & 3;
+    }
+
+    ass_set_use_margins(priv, set_use_margins);
 #if LIBASS_VERSION >= 0x01010000
-    ass_set_line_position(priv, 100 - sub_pos);
+    ass_set_line_position(priv, set_sub_pos);
 #endif
-    ass_set_font_scale(priv, opts->ass_font_scale);
-    if (!unscaled && (opts->ass_hinting & 4))
-        hinting = 0;
-    else
-        hinting = opts->ass_hinting & 3;
-    ass_set_hinting(priv, hinting);
-    ass_set_line_spacing(priv, opts->ass_line_spacing);
+    ass_set_font_scale(priv, set_font_scale);
+    ass_set_hinting(priv, set_hinting);
+    ass_set_line_spacing(priv, set_line_spacing);
 }
 
 void mp_ass_configure_fonts(ASS_Renderer *priv)

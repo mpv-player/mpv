@@ -116,6 +116,7 @@ typedef struct MPOpts {
     char *ass_color;
     char *ass_border_color;
     char *ass_styles_file;
+    int ass_style_override;
     int ass_hinting;
     struct lavc_param {
         int workaround_bugs;

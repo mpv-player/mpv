@@ -54,6 +54,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
 #endif
         .ass_font_scale = 1,
         .ass_vsfilter_aspect_compat = 1,
+        .ass_style_override = 1,
         .use_embedded_fonts = 1,
 
         .lavc_param = {

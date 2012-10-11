@@ -296,6 +296,7 @@ sub-forced-only             x see ``--sub-forced-only``
 sub-scale                   x subtitle font size multiplicator
 ass-use-margins             x see ``--ass-use-margins``
 ass-vsfilter-aspect-compat  x see ``--ass-vsfilter-aspect-compat``
+ass-style-override          x see ``--ass-style-override``
 tv-brightness
 tv-contrast
 tv-saturation

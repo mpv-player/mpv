@@ -1477,6 +1477,7 @@ static const m_option_t mp_properties[] = {
 #ifdef CONFIG_ASS
     M_OPTION_PROPERTY_CUSTOM("ass-use-margins", property_sub_helper),
     M_OPTION_PROPERTY_CUSTOM("ass-vsfilter-aspect-compat", property_sub_helper),
+    M_OPTION_PROPERTY_CUSTOM("ass-style-override", property_sub_helper),
 #endif
 
 #ifdef CONFIG_TV
@@ -1576,6 +1577,7 @@ static struct property_osd_display {
     { "sub-forced-only", _("Forced sub only") },
     { "sub-scale", _("Sub Scale")},
     { "ass-vsfilter-aspect-compat", _("Subtitle VSFilter aspect compat")},
+    { "ass-style-override", _("ASS subtitle style override")},
 #ifdef CONFIG_TV
     { "tv-brightness", _("Brightness"), .osd_progbar = OSD_BRIGHTNESS },
     { "tv-hue", _("Hue"), .osd_progbar = OSD_HUE},

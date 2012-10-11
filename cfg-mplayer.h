@@ -553,6 +553,8 @@ const m_option_t common_opts[] = {
     OPT_STRING("ass-border-color", ass_border_color, 0),
     OPT_STRING("ass-styles", ass_styles_file, 0),
     OPT_INTRANGE("ass-hinting", ass_hinting, 0, 0, 7),
+    OPT_CHOICE("ass-style-override", ass_style_override, 0,
+               ({"no", 0}, {"yes", 1})),
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 

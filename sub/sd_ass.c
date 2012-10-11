@@ -135,7 +135,9 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
         return;
 
     double scale = osd->normal_scale;
-    if (ctx->vsfilter_aspect && opts->ass_vsfilter_aspect_compat)
+    bool use_vs_aspect = opts->ass_style_override
+                         ? opts->ass_vsfilter_aspect_compat : 1;
+    if (ctx->vsfilter_aspect && use_vs_aspect)
         scale = osd->vsfilter_scale;
     ASS_Renderer *renderer = osd->ass_renderer;
     mp_ass_configure(renderer, opts, &osd->dim, osd->unscaled);
