@@ -1231,7 +1231,7 @@ static int preinit(struct vo *vo, const char *arg)
     if (subopt_parse(arg, subopts) != 0) {
         mp_msg(MSGT_VO, MSGL_FATAL,
                "\n-vo opengl_old command line help:\n"
-               "Example: mplayer -vo opengl_old:slice-height=4\n"
+               "Example: mpv -vo opengl_old:slice-height=4\n"
                "\nOptions:\n"
                "  nomanyfmts\n"
                "    Disable extended color formats for OpenGL 1.2 and later\n"

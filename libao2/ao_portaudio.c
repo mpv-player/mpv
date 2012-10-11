@@ -68,7 +68,7 @@ static void print_help(void)
 {
     mp_msg(MSGT_AO, MSGL_FATAL,
            "\n-ao portaudio commandline help:\n"
-          "Example: mplayer -ao portaudio:device=subdevice\n"
+          "Example: mpv -ao portaudio:device=subdevice\n"
           "\nOptions:\n"
           "   device=subdevice\n"
           "      Audio device PortAudio should use. Devices can be listed\n"

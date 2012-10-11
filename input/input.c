@@ -1612,7 +1612,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
 
 #ifdef CONFIG_LIRCC
     if (input_conf->use_lircc) {
-        int fd = lircc_init("mplayer", NULL);
+        int fd = lircc_init("mpv", NULL);
         if (fd >= 0)
             mp_input_add_cmd_fd(ictx, fd, 1, NULL, lircc_cleanup);
     }

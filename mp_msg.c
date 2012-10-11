@@ -80,19 +80,19 @@ void mp_msg_init(void){
     stdoutAttrs = cinfo.wAttributes;
 #endif
     int i;
-    char *env = getenv("MPLAYER_VERBOSE");
+    char *env = getenv("MPV_VERBOSE");
     if (env)
         verbose = atoi(env);
     for(i=0;i<MSGT_MAX;i++) mp_msg_levels[i] = -2;
     mp_msg_cancolor = isatty(fileno(stdout));
     mp_msg_levels[MSGT_IDENTIFY] = -1; // no -identify output by default
 #ifdef CONFIG_TRANSLATION
-    textdomain("mplayer");
-    char *localedir = getenv("MPLAYER_LOCALEDIR");
+    textdomain("mpv");
+    char *localedir = getenv("MPV_LOCALEDIR");
     if (localedir == NULL && strlen(MPLAYER_LOCALEDIR))
         localedir = MPLAYER_LOCALEDIR;
-    bindtextdomain("mplayer", localedir);
-    bind_textdomain_codeset("mplayer", "UTF-8");
+    bindtextdomain("mpv", localedir);
+    bind_textdomain_codeset("mpv", "UTF-8");
 #endif
 }
 

@@ -52,9 +52,9 @@ char *get_path(const char *filename){
 	char *homedir;
 	char *buff;
 #ifdef __MINGW32__
-	static char *config_dir = "/mplayer";
+	static char *config_dir = "/mpv";
 #else
-	static char *config_dir = "/.mplayer";
+	static char *config_dir = "/.mpv";
 #endif
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 	char exedir[260];
@@ -69,7 +69,7 @@ char *get_path(const char *filename){
 	char *bdl_url_path = NULL;
 #endif
 
-	if ((homedir = getenv("MPLAYER_HOME")) != NULL)
+	if ((homedir = getenv("MPV_HOME")) != NULL)
 		config_dir = "";
 	else if ((homedir = getenv("HOME")) == NULL)
 #if defined(__MINGW32__) || defined(__CYGWIN__)

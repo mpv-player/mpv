@@ -41,8 +41,8 @@
 #include "path.h"
 
 #define DEF_SZ 512 // default buffer size (in samples)
-#define SHARED_FILE "mplayer-af_export" /* default file name
-					   (relative to ~/.mplayer/ */
+#define SHARED_FILE "mpv-af_export" /* default file name
+					   (relative to ~/.mpv/ */
 
 #define SIZE_HEADER (2 * sizeof(int) + sizeof(unsigned long long))
 

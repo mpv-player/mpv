@@ -3,10 +3,7 @@
 CHANGES FROM OTHER VERSIONS OF MPLAYER
 ======================================
 
-xxx: since I don't have a new name yet, I'm referring to this version of mplayer
-as **mplayer3**, I don't intend to use that name.
-
-**mplayer3** is based on mplayer2, which in turn is based on the original
+**mpv** is based on mplayer2, which in turn is based on the original
 MPlayer (also called mplayer, mplayer-svn, mplayer1). Many changes
 have been made. Some changes are incompatible, or completely change how the
 player behaves.
@@ -37,7 +34,7 @@ General changes for mplayer-svn to mplayer2
 * General code cleanups
 * Many more changes
 
-General changes for mplayer2 to mplayer3
+General changes for mplayer2 to mpv
 ----------------------------------------
 
 * Removal of lots of unneeded code to encourage developer activity (less
@@ -51,9 +48,9 @@ General changes for mplayer2 to mplayer3
   languages like Arabic should be better supported.
 * Cleaned up terminal output (nicer status line, less useless noise)
 * Support for playing URLs of popular streaming sites directly
-  (e.g. ``mplayer3 https://www.youtube.com/watch?v=...``)
+  (e.g. ``mpv https://www.youtube.com/watch?v=...``)
 * Improved OpenGL output (``vo_opengl``)
-* Make ``--softvol`` default (**mplayer3** is not a mixer control panel)
+* Make ``--softvol`` default (**mpv** is not a mixer control panel)
 * Improved support for .cue files
 * Screenshot improvements (can save screenshots as JPG, configurable filenames)
 * Removal of teletext support
@@ -113,7 +110,7 @@ input.conf and slave commands
 Other
 ~~~~~
 
-* The playtree has been removed. **mplayer3**'s internal playlist is a simple and
+* The playtree has been removed. **mpv**'s internal playlist is a simple and
   flat list now. This makes the code easier, and makes using it less confusing.
 * Slave mode is broken. This mode is entirely insane in the ``old`` versions of
   mplayer. A proper slave mode application needed tons of code and hacks to get
@@ -123,7 +120,7 @@ Other
   slave mode application, and as such it's virtually impossible to improve
   terminal output intended for users without possibly breaking something.
 
-  This is absolutely insane, and **mplayer3** will not try to keep slave mode
+  This is absolutely insane, and **mpv** will not try to keep slave mode
   compatible. If you're a developer of a slave mode application, contact us,
   and a new and better protocol can be developed.
 
@@ -152,6 +149,6 @@ Why this fork?
   withheld as to not turn this into a rant.
 * mplayer-svn rarely merged from mplayer2, and mplayer2 practically stopped
   merging from mplayer-svn (not even code cleanups or new features are merged)
-* **mplayer3** intents to continuously merge from mplayer-svn and mplayer2, while
+* **mpv** intents to continuously merge from mplayer-svn and mplayer2, while
   speeding up development. There is willingness for significant changes, even
   if this means breaking compatibility.

@@ -378,7 +378,7 @@ static void print_help(void)
 
     mp_msg(MSGT_AO, MSGL_FATAL,
            "\n-ao coreaudio commandline help:\n"
-           "Example: mplayer -ao coreaudio:device_id=266\n"
+           "Example: mpv -ao coreaudio:device_id=266\n"
            "    open Core Audio with output device ID 266.\n"
            "\nOptions:\n"
            "    device_id\n"

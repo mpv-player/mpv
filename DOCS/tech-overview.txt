@@ -1,6 +1,6 @@
 NOTE: DOCS/OUTDATED-tech/* may contain more detailed information, but most of it
       is possibly or definitely outdated. This file intends to give a big
-      picture of how mplayer is structured.
+      picture of how mplayer/mpv is structured.
 
 mplayer.c:
     This contains the main play loop, anything related to mplayer and playback
@@ -65,8 +65,8 @@ talloc.h & talloc.c:
     One very useful feature of talloc is fast tracking of memory leaks. ("Fast"
     as in it doesn't require valgrind.) You can enable it by passing the option
     --leak-report as first parameter, or better, setting the
-    MPLAYER_LEAK_REPORT environment variable to "1":
-        export MPLAYER_LEAK_REPORT=1
+    MPV_LEAK_REPORT environment variable to "1":
+        export MPV_LEAK_REPORT=1
     This will list all unfree'd allocations on exit.
 
     Documentation can be found here:

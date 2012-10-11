@@ -2045,7 +2045,7 @@ static struct bstr load_file(struct gl_priv *p, void *talloc_ctx,
     return res;
 }
 
-#define LUT3D_CACHE_HEADER "mplayer2 3dlut cache 1.0\n"
+#define LUT3D_CACHE_HEADER "mpv 3dlut cache 1.0\n"
 
 static bool load_icc(struct gl_priv *p, const char *icc_file,
                      const char *icc_cache, int icc_intent,
@@ -2482,7 +2482,7 @@ const struct vo_driver video_out_opengl_hq = {
 
 static const char help_text[] =
 "\n--vo=opengl command line help:\n"
-"Example: mplayer --vo=opengl:scale-sep:lscale=lanczos2\n"
+"Example: mpv --vo=opengl:scale-sep:lscale=lanczos2\n"
 "\nOptions:\n"
 "  lscale=<filter>\n"
 "    Set the scaling filter. Possible choices:\n"
@@ -2521,7 +2521,7 @@ static const char help_text[] =
 "    sparodic and temporary image corruption.\n"
 "  dither-depth=<n>\n"
 "    Positive non-zero values select the target bit depth.\n"
-"    -1: Disable any dithering done by mplayer.\n"
+"    -1: Disable any dithering done by mpv.\n"
 "     0: Automatic selection. If output bit depth can't be detected,\n"
 "        8 bits per component are assumed.\n"
 "     8: Dither to 8 bit output.\n"

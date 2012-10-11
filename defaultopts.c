@@ -14,7 +14,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .softvol = SOFTVOL_AUTO,
         .softvol_max = 200,
         .ao_buffersize = -1,
-        .vo_wintitle = "mplayer - ${filename}",
+        .vo_wintitle = "mpv - ${filename}",
         .monitor_pixel_aspect = 1.0,
         .vo_panscanrange = 1.0,
         .cursor_autohide_delay = 1000,

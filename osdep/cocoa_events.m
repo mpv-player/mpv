@@ -106,7 +106,7 @@ void cocoa_events_init(struct input_ctx *ictx,
     *p = (struct priv){
         .is_runloop_polling = NO,
         .read_all_fd_events = read_all_fd_events,
-        .select_queue = dispatch_queue_create("org.mplayer2.select_queue",
+        .select_queue = dispatch_queue_create("org.mpv.select_queue",
                                               NULL),
     };
 }

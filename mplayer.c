@@ -161,7 +161,7 @@ static int max_framesize = 0;
 #include "defaultopts.h"
 
 static const char help_text[] = _(
-"Usage:   mplayer [options] [url|path/]filename\n"
+"Usage:   mpv [options] [url|path/]filename\n"
 "\n"
 "Basic options: (complete list in the man page)\n"
 " --ss=<position>   seek to given (seconds or hh:mm:ss) position\n"
@@ -772,7 +772,7 @@ static bool parse_cfgfiles(struct MPContext *mpctx, m_config_t *conf)
     char *conffile;
     int conffile_fd;
     if (!(opts->noconfig & 2) &&
-        m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mplayer.conf") < 0)
+        m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf") < 0)
         return false;
     if ((conffile = get_path("")) == NULL)
         mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Cannot find HOME directory.\n");
@@ -891,7 +891,7 @@ static void load_per_file_config(m_config_t *conf, const char * const file)
     if (use_filedir_conf) {
         char dircfg[MP_PATH_MAX];
         strcpy(dircfg, cfg);
-        strcpy(dircfg + (name - cfg), "mplayer.conf");
+        strcpy(dircfg + (name - cfg), "mpv.conf");
         try_load_config(conf, dircfg);
 
         if (try_load_config(conf, cfg))
@@ -3863,7 +3863,7 @@ static void play_current_file(struct MPContext *mpctx)
     if (mpctx->file_format == DEMUXER_TYPE_PLAYLIST) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nThis looks like a playlist, but "
                "playlist support will not be used automatically.\n"
-               "MPlayer's playlist code is unsafe and should only be used with "
+               "mpv's playlist code is unsafe and should only be used with "
                "trusted sources.\nPlayback will probably fail.\n\n");
 #if 0
         // Handle playlist
@@ -4079,7 +4079,7 @@ goto_enable_cache:
 
     if (end_at.type == END_AT_SIZE) {
         mp_tmsg(MSGT_CPLAYER, MSGL_WARN,
-                "Option -endpos in MPlayer does not yet support size units.\n");
+                "Option -endpos in mpv does not yet support size units.\n");
         end_at.type = END_AT_NONE;
     }
 
@@ -4176,7 +4176,7 @@ static void play_files(struct MPContext *mpctx)
 static void print_version(int always)
 {
     mp_msg(MSGT_CPLAYER, always ? MSGL_INFO : MSGL_V,
-           "%s (C) 2000-2012\n", mplayer_version);
+           "%s (C) 2000-2012 mpv/MPlayer/mplayer2 projects\n", mplayer_version);
 }
 
 static bool handle_help_options(struct MPContext *mpctx)
@@ -4275,7 +4275,7 @@ static void detach_ptw32(void)
 
 static void osdep_preinit(int *p_argc, char ***p_argv)
 {
-    char *enable_talloc = getenv("MPLAYER_LEAK_REPORT");
+    char *enable_talloc = getenv("MPV_LEAK_REPORT");
     if (*p_argc > 1 && (strcmp((*p_argv)[1], "-leak-report") == 0
                      || strcmp((*p_argv)[1], "--leak-report") == 0))
         enable_talloc = "1";

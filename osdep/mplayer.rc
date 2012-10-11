@@ -31,14 +31,14 @@ FILETYPE VFT_APP
     {
         BLOCK "000004b0" // LANG_NEUTRAL,UNICODE_CP
         {
-            VALUE "Comments","mplayer2 is distributed under the terms of the GNU General Public License Version 3. Source code is available at http://www.mplayer2.org\000"
+            VALUE "Comments","mpv is distributed under the terms of the GNU General Public License Version 3.\000"
             VALUE "CompanyName", "\000"
-            VALUE "FileDescription", "mplayer2 - Movie Player\000"
+            VALUE "FileDescription", "mpv - Movie Player\000"
             VALUE "FileVersion",VERSION
-            VALUE "LegalCopyright", " (C) 2000-2012 MPlayer Team\000"
+            VALUE "LegalCopyright", " (C) 2000-2012 MPlayer Team and others\000"
             //VALUE "LegalTrademarks"," \000";
-            VALUE "OriginalFilename", "mplayer.exe\000"
-            VALUE "ProductName", "mplayer2 - The Movie Player\000"
+            VALUE "OriginalFilename", "mpv.exe\000"
+            VALUE "ProductName", "mpv - The Movie Player\000"
             VALUE "ProductVersion",VERSION
             //VALUE "SpecialBuild","\000"
         }
@@ -52,4 +52,4 @@ FILETYPE VFT_APP
 IDI_ICON1 ICON DISCARDABLE  "etc/mplayer.ico"
 
 // for some reason RT_MANIFEST does not work
-1 24 "mplayer.exe.manifest"
+1 24 "mpv.exe.manifest"

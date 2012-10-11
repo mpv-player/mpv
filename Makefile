@@ -284,15 +284,15 @@ OBJS_MPLAYER   += $(OBJS_MPLAYER-yes)
 MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
 DEP_FILES = $(patsubst %.S,%.d,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON:.m=.d) $(SRCS_MPLAYER:.m=.d))))
 
-ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
+ALL_PRG-$(MPLAYER)  += mpv$(EXESUF)
 
 INSTALL_TARGETS-$(MPLAYER)  += check_rst2man       \
-                               install-mplayer     \
-                               install-mplayer-man \
-                               install-mplayer-msg
+                               install-mpv     \
+                               install-mpv-man \
+                               install-mpv-msg
 
-INSTALL_NO_MAN_TARGETS-$(MPLAYER) += install-mplayer  \
-                                     install-mplayer-msg
+INSTALL_NO_MAN_TARGETS-$(MPLAYER) += install-mpv  \
+                                     install-mpv-msg
 
 DIRS =  . \
         input \
@@ -306,7 +306,7 @@ DIRS =  . \
         sub \
         timeline \
 
-MOFILES := $(MSG_LANGS:%=locale/%/LC_MESSAGES/mplayer.mo)
+MOFILES := $(MSG_LANGS:%=locale/%/LC_MESSAGES/mpv.mo)
 
 ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
 
@@ -343,9 +343,9 @@ all: $(ALL_PRG-yes) locales
 %-rc.o: %.rc
 	$(WINDRES) -I. $< $@
 
-mplayer$(EXESUF): $(MPLAYER_DEPS)
-mplayer$(EXESUF): EXTRALIBS += $(EXTRALIBS_MPLAYER)
-mplayer$(EXESUF):
+mpv$(EXESUF): $(MPLAYER_DEPS)
+mpv$(EXESUF): EXTRALIBS += $(EXTRALIBS_MPLAYER)
+mpv$(EXESUF):
 	$(CC) -o $@ $^ $(EXTRALIBS)
 
 codec-cfg.c: codecs.conf.h
@@ -393,7 +393,7 @@ version.h .version: version.sh
 
 locales: $(MOFILES)
 
-locale/%/LC_MESSAGES/mplayer.mo: po/%.po
+locale/%/LC_MESSAGES/mpv.mo: po/%.po
 	mkdir -p $(dir $@)
 	msgfmt -c -o $@ $<
 
@@ -428,42 +428,40 @@ install-dirs:
 install-%: %$(EXESUF) install-dirs
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
 
-install-mplayer-man:  $(foreach lang,$(MAN_LANGS),install-mplayer-man-$(lang))
-install-mplayer-msg:  $(foreach lang,$(MSG_LANGS),install-mplayer-msg-$(lang))
+install-mpv-man:  $(foreach lang,$(MAN_LANGS),install-mpv-man-$(lang))
+install-mpv-msg:  $(foreach lang,$(MSG_LANGS),install-mpv-msg-$(lang))
 
-install-mplayer-man-en: DOCS/man/en/mplayer.1
+install-mpv-man-en: DOCS/man/en/mpv.1
 	if test ! -d $(MANDIR)/man1 ; then $(INSTALL) -d $(MANDIR)/man1 ; fi
-	$(INSTALL) -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
+	$(INSTALL) -m 644 DOCS/man/en/mpv.1 $(MANDIR)/man1/
 
 define MPLAYER_MAN_RULE
-install-mplayer-man-$(lang): DOCS/man/$(lang)/mplayer.1
+install-mpv-man-$(lang): DOCS/man/$(lang)/mpv.1
 	if test ! -d $(MANDIR)/$(lang)/man1 ; then $(INSTALL) -d $(MANDIR)/$(lang)/man1 ; fi
-	$(INSTALL) -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
+	$(INSTALL) -m 644 DOCS/man/$(lang)/mpv.1 $(MANDIR)/$(lang)/man1/
 endef
 
 $(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MPLAYER_MAN_RULE)))
 
 define MPLAYER_MSG_RULE
-install-mplayer-msg-$(lang):
+install-mpv-msg-$(lang):
 	if test ! -d $(LOCALEDIR)/$(lang)/LC_MESSAGES ; then $(INSTALL) -d $(LOCALEDIR)/$(lang)/LC_MESSAGES ; fi
-	$(INSTALL) -m 644 locale/$(lang)/LC_MESSAGES/mplayer.mo $(LOCALEDIR)/$(lang)/LC_MESSAGES/
+	$(INSTALL) -m 644 locale/$(lang)/LC_MESSAGES/mpv.mo $(LOCALEDIR)/$(lang)/LC_MESSAGES/
 endef
 
 $(foreach lang,$(MSG_LANG_ALL),$(eval $(MPLAYER_MSG_RULE)))
 
 uninstall:
-	$(RM) $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
-	$(RM) $(prefix)/share/pixmaps/mplayer.xpm
-	$(RM) $(prefix)/share/applications/mplayer.desktop
-	$(RM) $(MANDIR)/man1/mplayer.1
-	$(RM) $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1,$(MANDIR)/$(lang)/man1/$(man)))
-	$(RM) $(foreach lang,$(MSG_LANGS),$(LOCALEDIR)/$(lang)/LC_MESSAGES/mplayer.1)
+	$(RM) $(BINDIR)/mpv$(EXESUF)
+	$(RM) $(MANDIR)/man1/mpv.1
+	$(RM) $(foreach lang,$(MAN_LANGS),$(foreach man,mpv.1,$(MANDIR)/$(lang)/man1/$(man)))
+	$(RM) $(foreach lang,$(MSG_LANGS),$(LOCALEDIR)/$(lang)/LC_MESSAGES/mpv.1)
 
 clean:
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.d /*.a /*.ho /*~)
-	-$(RM) $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1,DOCS/man/$(lang)/$(man)))
+	-$(RM) $(foreach lang,$(MAN_LANGS),$(foreach man,mpv.1,DOCS/man/$(lang)/$(man)))
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
-	-$(RM) $(call ADD_ALL_EXESUFS,mplayer)
+	-$(RM) $(call ADD_ALL_EXESUFS,mpv)
 	-$(RM) $(MOFILES)
 	-$(RM) version.h
 	-$(RM) codecs.conf.h

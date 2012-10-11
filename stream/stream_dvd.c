@@ -1021,7 +1021,7 @@ fail:
       m_struct_free(&stream_opts, opts);
       return STREAM_UNSUPPORTED;
   }
-  mp_tmsg(MSGT_DVD,MSGL_ERR,"MPlayer was compiled without DVD support, exiting.\n");
+  mp_tmsg(MSGT_DVD,MSGL_ERR,"mpv was compiled without DVD support, exiting.\n");
   m_struct_free(&stream_opts,opts);
   return STREAM_UNSUPPORTED;
 }

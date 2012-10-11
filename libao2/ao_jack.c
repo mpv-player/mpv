@@ -188,8 +188,8 @@ static void print_help (void)
 {
   mp_msg (MSGT_AO, MSGL_FATAL,
            "\n-ao jack commandline help:\n"
-           "Example: mplayer -ao jack:port=myout\n"
-           "  connects MPlayer to the jack ports named myout\n"
+           "Example: mpv -ao jack:port=myout\n"
+           "  connects mpv to the jack ports named myout\n"
            "\nOptions:\n"
            "  port=<port name>\n"
            "    Connects to the given ports instead of the default physical ones\n"
@@ -228,7 +228,7 @@ static int init(int rate, int channels, int format, int flags) {
   }
   if (!client_name) {
     client_name = malloc(40);
-    sprintf(client_name, "MPlayer [%d]", getpid());
+    sprintf(client_name, "mpv [%d]", getpid());
   }
   if (!autostart)
     open_options |= JackNoStartServer;

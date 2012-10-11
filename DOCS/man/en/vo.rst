@@ -9,7 +9,7 @@ syntax is:
 --vo=<driver1[:suboption1[=value]:...],driver2,...[,]>
     Specify a priority list of video output drivers to be used.
 
-If the list has a trailing ',' MPlayer will fall back on drivers not contained
+If the list has a trailing ',' mpv will fall back on drivers not contained
 in the list. Suboptions are optional and can mostly be omitted.
 
 *NOTE*: See ``--vo=help`` for a list of compiled-in video output drivers.
@@ -26,7 +26,7 @@ xv (X11 only)
     the most compatible VO on X, but may be low quality, and has issues with
     OSD and subtitle display.
     For information about what colorkey is used and how it is drawn run
-    MPlayer with ``-v`` option and look out for the lines tagged with ``[xv
+    mpv with ``-v`` option and look out for the lines tagged with ``[xv
     common]`` at the beginning.
 
     adaptor=<number>
@@ -39,7 +39,7 @@ xv (X11 only)
         cur
           The default takes the colorkey currently set in Xv.
         use
-          Use but do not set the colorkey from MPlayer (use the ``--colorkey``
+          Use but do not set the colorkey from mpv (use the ``--colorkey``
           option to change it).
         set
           Same as use but also sets the supplied colorkey.
@@ -128,8 +128,8 @@ vdpau (X11 only)
         3). See below for additional information.
 
     Using the VDPAU frame queueing functionality controlled by the queuetime
-    options makes MPlayer's frame flip timing less sensitive to system CPU
-    load and allows MPlayer to start decoding the next frame(s) slightly
+    options makes mpv's frame flip timing less sensitive to system CPU
+    load and allows mpv to start decoding the next frame(s) slightly
     earlier which can reduce jitter caused by individual slow-to-decode
     frames. However the NVIDIA graphics drivers can make other window behavior
     such as window moves choppy if VDPAU is using the blit queue (mainly
@@ -334,7 +334,7 @@ opengl
         Positive non-zero values select the target bit depth. Default: 0.
 
         \-1
-            Disable any dithering done by mplayer.
+            Disable any dithering done by mpv.
         0
             Automatic selection. If output bit depth can't be detected,
             8 bits per component are assumed.
