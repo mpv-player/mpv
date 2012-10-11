@@ -345,8 +345,10 @@ void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj)
 
     ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
 
-    style->MarginV = obj->osd_track->PlayResY * ((100 - sub_pos)/110.0);
     update_font_scale(obj->osd_track, style, text_font_scale_factor);
+#if LIBASS_VERSION >= 0x01010000
+    ass_set_line_position(osd->osd_render, 100 - sub_pos);
+#endif
 
     char *text = talloc_strdup(NULL, "");
 

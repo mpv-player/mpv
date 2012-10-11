@@ -232,6 +232,9 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
     ass_set_frame_size(priv, dim->w, dim->h);
     ass_set_margins(priv, dim->mt, dim->mb, dim->ml, dim->mr);
     ass_set_use_margins(priv, opts->ass_use_margins);
+#if LIBASS_VERSION >= 0x01010000
+    ass_set_line_position(priv, 100 - sub_pos);
+#endif
     ass_set_font_scale(priv, opts->ass_font_scale);
     if (!unscaled && (opts->ass_hinting & 4))
         hinting = 0;
