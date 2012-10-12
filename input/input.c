@@ -100,6 +100,13 @@ struct key_name {
                                            M_CHOICES(c)},                      \
                                   .optional = true, .v.i = def }
 
+static int parse_cycle_dir(const struct m_option *opt, struct bstr name,
+                           struct bstr param, void *dst);
+static const struct m_option_type m_option_type_cycle_dir = {
+    .name = "up|down",
+    .parse = parse_cycle_dir,
+};
+
 static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_IGNORE, "ignore", },
 #ifdef CONFIG_RADIO
@@ -173,7 +180,12 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SET, "set", { ARG_STRING,  ARG_STRING } },
   { MP_CMD_GET_PROPERTY, "get_property", { ARG_STRING } },
   { MP_CMD_ADD, "add", { ARG_STRING, OARG_FLOAT(0) } },
-  { MP_CMD_CYCLE, "cycle", { ARG_STRING, OARG_FLOAT(0) } },
+  { MP_CMD_CYCLE, "cycle", {
+      ARG_STRING,
+      { .type = {"", NULL, &m_option_type_cycle_dir},
+        .optional = true,
+        .v.f = 1 },
+  }},
 
   { MP_CMD_SET_MOUSE_POS, "set_mouse_pos", { ARG_INT, ARG_INT } },
 
@@ -727,6 +739,21 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
     };
     ictx->num_key_fd++;
 
+    return 1;
+}
+
+static int parse_cycle_dir(const struct m_option *opt, struct bstr name,
+                           struct bstr param, void *dst)
+{
+    float val;
+    if (bstrcmp0(param, "up") == 0) {
+        val = +1;
+    } else if (bstrcmp0(param, "down") == 0) {
+        val = -1;
+    } else {
+        return m_option_type_float.parse(opt, name, param, dst);
+    }
+    *(float *)dst = val;
     return 1;
 }
 

@@ -79,10 +79,10 @@ add <property> [<value>]
     Add the given value to the property. On overflow or underflow, clamp the
     property to the maximum. If <value> is omitted, assume ``1``.
 
-cycle <property> [<value>]
-    Cycle the given property. Negative values cycle the property backwards. On
+cycle <property> [up|down]
+    Cycle the given property. ``up`` and ``down`` set the cycle direction. On
     overflow, set the property back to the minimum, on underflow set it to the
-    maximum. If <value> is omitted, assume ``1``.
+    maximum. If ``up`` or ``down`` is omitted, assume ``up``.
 
 speed_mult <value>
     Multiply the ``speed`` property by the given value.
