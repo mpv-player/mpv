@@ -365,8 +365,8 @@ int m_config_register_options(struct m_config *config,
     return 1;
 }
 
-static struct m_config_option *m_config_get_co(const struct m_config *config,
-                                               struct bstr name)
+struct m_config_option *m_config_get_co(const struct m_config *config,
+                                        struct bstr name)
 {
     struct m_config_option *co;
 

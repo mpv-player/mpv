@@ -31,10 +31,6 @@ extern float  audio_delay;
 
 extern double force_fps;
 
-extern int frame_dropping;
-
-extern int auto_quality;
-
 extern int vobsub_id;
 
 struct MPContext;

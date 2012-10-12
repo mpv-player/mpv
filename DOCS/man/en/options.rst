@@ -176,6 +176,14 @@
     rendering text subtitles. The syntax of the file is exactly like the ``[V4
     Styles]`` / ``[V4+ Styles]`` section of SSA/ASS.
 
+--ass-style-override=<yes|no>
+    Control whether user style overrides should be applied.
+
+    :yes: Apply all the ``--ass-*`` style override options. Changing the default
+          for any of these options can lead to incorrect subtitle rendering.
+          (Default.)
+    :no:  Render subtitles as forced by subtitle scripts.
+
 --ass-top-margin=<value>
     Adds a black band at the top of the frame. The SSA/ASS renderer can place
     toptitles there (with ``--ass-use-margins``).
@@ -472,7 +480,7 @@
     will stay hidden. Supported by video output drivers which use X11 or
     OS X Cocoa.
 
---delay=<sec>
+--audio-delay=<sec>
     audio delay in seconds (positive or negative float value). Negative values
     delay the audio, and positive values delay the video.
 
@@ -624,7 +632,7 @@
     there is a change in video parameters, video stream or file. This used to
     be the default behavior. Currently only affects X11 VOs.
 
---forcedsubsonly
+--sub-forced-only
     Display only forced subtitles for the DVD subtitle stream selected by e.g.
     ``--slang``.
 
@@ -643,11 +651,14 @@
 --fps=<float>
     Override video framerate. Useful if the original value is wrong or missing.
 
---framedrop
+--framedrop=<no|yes|hard>
     Skip displaying some frames to maintain A/V sync on slow systems. Video
     filters are not applied to such frames. For B-frames even decoding is
-    skipped completely. May produce unwatchably choppy output. See also
-    ``--hardframedrop``.
+    skipped completely. May produce unwatchably choppy output. With ``hard``,
+    decoding and output of any frame can be skipped, and will lead to an even
+    worse playback experience.
+
+    Practical use of this feature is questionable. Disabled by default.
 
 --frames=<number>
     Play/convert only first <number> frames, then quit.
@@ -656,6 +667,7 @@
     Specifies the character set that will be passed to FriBiDi when decoding
     non-UTF-8 subtitles (default: ISO8859-8).
 
+--fullscreen
 --fs
     Fullscreen playback (centers movie, and paints black bands around it).
 
@@ -752,9 +764,6 @@
 --grabpointer, --no-grabpointer
     ``--no-grabpointer`` tells the player to not grab the mouse pointer after a
     video mode change (``--vm``). Useful for multihead setups.
-
---hardframedrop
-    More intense frame dropping (breaks decoding). Leads to image distortion!
 
 --heartbeat-cmd
     Command that is executed every 30 seconds during playback via *system()* -
@@ -1294,7 +1303,7 @@
 --osd-fractions
     Show OSD times with fractions of seconds.
 
---osdlevel=<0-3>
+--osd-level=<0-3>
     Specifies which mode the OSD should start in.
 
     :0: subtitles only
@@ -1312,9 +1321,6 @@
     controls how much of the image is cropped. May not work with all video
     output drivers.
 
-    *NOTE*: Values between -1 and 0 are allowed as well, but highly
-    experimental and may crash or worse. Use at your own risk!
-
 --panscanrange=<-19.0-99.0>
     (experimental)
     Change the range of the pan-and-scan functionality (default: 1). Positive
@@ -1328,15 +1334,37 @@
     See also ``--user``.
 
 --playing-msg=<string>
-    Print out a string before starting playback. The following expansions are
-    supported:
+    Print out a string before starting playback. The string is expanded for
+    properties, e.g. ``--playing-msg=file: ${filename}`` will print the string
+    ``file: `` followed by the currently played filename.
+
+    The following expansions are supported:
 
     ${NAME}
-        Expand to the value of the property ``NAME``.
-    ?(NAME:TEXT)
-        Expand ``TEXT`` only if the property ``NAME`` is available.
-    ?(!NAME:TEXT)
-        Expand ``TEXT`` only if the property ``NAME`` is not available.
+        Expands to the value of the property ``NAME``. If ``NAME`` starts with
+        ``=``, use the raw value of the property. If retrieving the property
+        fails, expand to an error string. (Use ``${NAME:}`` with a trailing
+        ``:`` to expand to an empty string instead.)
+    ${NAME:STR}
+        Expands to the value of the property ``NAME``, or ``STR`` if the
+        property can't be retrieved. ``STR`` is expanded recursively.
+    ${!NAME:STR}
+        Expands to ``STR`` (recursively) if the property ``NAME`` can't be
+        retrieved.
+    ${?NAME:STR}
+        Expands to ``STR`` (recursively) if the property ``NAME`` is available.
+    $$
+        Expands to ``$``.
+    $}
+        Expands to ``}``. (To produce this character inside rexursive
+        expansion.)
+    $>
+        Disable property expansion and special handling of ``$`` for the rest
+        of the string.
+
+--status-msg=<string>
+    Print out a custom string during playback instead of the standard status
+    line. Expands properties. See ``--playing-msg``.
 
 --playlist=<filename>
     Play files according to a playlist file (ASX, Winamp, SMIL, or
@@ -1892,7 +1920,7 @@
     - ``--subcp=enca:pl:cp1250`` guess the encoding for Polish, fall back on
       cp1250.
 
---subdelay=<sec>
+--sub-delay=<sec>
     Delays subtitles by <sec> seconds. Can be negative.
 
 --subfile=<filename>
@@ -1939,7 +1967,7 @@
     *NOTE*: <rate> > movie fps speeds the subtitles up for frame-based
     subtitle files and slows them down for time-based ones.
 
---subpos=<0-100>
+--sub-pos=<0-100>
     Specify the position of subtitles on the screen. The value is the vertical
     position of the subtitle in % of the screen height.
     Can be useful with ``--vf=expand``.
@@ -1980,7 +2008,7 @@
     the line used for the OSD and clear it (default: ``^[[A\r^[[K``).
 
 --title
-    Set the window title. The string can contain property names.
+    Set the window title. Properties are expanded (see ``--playing-msg``).
 
 --tv=<option1:option2:...>
     This option tunes various properties of the TV capture module. For

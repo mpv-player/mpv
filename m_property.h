@@ -19,209 +19,119 @@
 #ifndef MPLAYER_M_PROPERTY_H
 #define MPLAYER_M_PROPERTY_H
 
-#include "m_option.h"
+#include <stdbool.h>
 
-/// \defgroup Properties
-///
-/// Properties provide an interface to query and set the state of various
-/// things in MPlayer. The API is based on the \ref Options API like the
-/// \ref Config, but instead of using variables, properties use an ioctl like
-/// function. The function is used to perform various actions like get and set
-/// (see \ref PropertyActions).
-///@{
+struct m_option;
 
-/// \file
+extern const struct m_option_type m_option_type_dummy;
 
-/// \defgroup PropertyActions Property actions
-/// \ingroup Properties
-///@{
+enum mp_property_action {
+    // Get the property type. This defines the fundamental data type read from
+    // or written to the property.
+    // If unimplemented, the m_option entry that defines the property is used.
+    //  arg: m_option*
+    M_PROPERTY_GET_TYPE,
 
-/// Get the current value.
-/** \param arg Pointer to a variable of the right type.
- */
-#define M_PROPERTY_GET         0
+    // Get the current value.
+    //  arg: pointer to a variable of the type according to the property type
+    M_PROPERTY_GET,
 
-/// Get a string representing the current value.
-/** Set the variable to a newly allocated string or NULL.
- *  \param arg Pointer to a char* variable.
- */
-#define M_PROPERTY_PRINT       1
+    // Set a new value. The property wrapper will make sure that only valid
+    // values are set (e.g. according to the property type's min/max range).
+    // If unimplemented, the property is read-only.
+    //  arg: pointer to a variable of the type according to the property type
+    M_PROPERTY_SET,
 
-/// Set a new value.
-/** The variable is updated to the value actually set.
- *  \param arg Pointer to a variable of the right type.
- */
-#define M_PROPERTY_SET         2
+    // Get human readable string representing the current value.
+    // If unimplemented, the property wrapper uses the property type as
+    // fallback.
+    //  arg: char**
+    M_PROPERTY_PRINT,
 
-/// Set a new value from a string.
-/** \param arg String containing the value.
- */
-#define M_PROPERTY_PARSE       3
+    // Switch the property up/down by a given value.
+    // If unimplemented, the property wrapper uses the property type as
+    // fallback.
+    //  arg: struct m_property_switch_arg*
+    M_PROPERTY_SWITCH,
 
-/// Increment the current value.
-/** The sign of the argument is also taken into account if applicable.
- *  \param arg Pointer to a variable of the right type or NULL.
- */
-#define M_PROPERTY_STEP_UP     4
+    // Get a string containing a parsable representation.
+    // Can't be overridden by property implementations.
+    //  arg: char**
+    M_PROPERTY_GET_STRING,
 
-/// Decrement the current value.
-/** The sign of the argument is also taken into account if applicable.
- *  \param arg Pointer to a variable of the right type or NULL.
- */
-#define M_PROPERTY_STEP_DOWN   5
+    // Set a new value from a string. The property wrapper parses this using the
+    // parse function provided by the property type.
+    // Can't be overridden by property implementations.
+    //  arg: char*
+    M_PROPERTY_SET_STRING,
 
-/// Get a string containg a parsable representation.
-/** Set the variable to a newly allocated string or NULL.
- *  \param arg Pointer to a char* variable.
- */
-#define M_PROPERTY_TO_STRING   6
+    // Pass down an action to a sub-property.
+    //  arg: struct m_property_action_arg*
+    M_PROPERTY_KEY_ACTION,
+};
 
-/// Pass down an action to a sub-property.
-#define M_PROPERTY_KEY_ACTION  7
+// Argument for M_PROPERTY_SWITCH
+struct m_property_switch_arg {
+    double inc;         // value to add to property, or cycle direction
+    bool wrap;          // whether value should wrap around on over/underflow
+};
 
-/// Get a m_option describing the property.
-#define M_PROPERTY_GET_TYPE    8
-
-///@}
-
-/// \defgroup PropertyActionsArg Property actions argument type
-/// \ingroup Properties
-/// \brief  Types used as action argument.
-///@{
-
-/// Argument for \ref M_PROPERTY_KEY_ACTION
-typedef struct {
+// Argument for M_PROPERTY_KEY_ACTION
+struct m_property_action_arg {
     const char* key;
     int action;
     void* arg;
-} m_property_action_t;
+};
 
-///@}
+enum mp_property_return {
+    // Returned on success.
+    M_PROPERTY_OK = 1,
 
-/// \defgroup PropertyActionsReturn Property actions return code
-/// \ingroup Properties
-/// \brief  Return values for the control function.
-///@{
+    // Returned on error.
+    M_PROPERTY_ERROR = 0,
 
-/// Returned on success.
-#define M_PROPERTY_OK                1
+    // Returned when the property can't be used, for example video related
+    // properties while playing audio only.
+    M_PROPERTY_UNAVAILABLE = -1,
 
-/// Returned on error.
-#define M_PROPERTY_ERROR             0
+    // Returned if the requested action is not implemented.
+    M_PROPERTY_NOT_IMPLEMENTED = -2,
 
-/// \brief Returned when the property can't be used, for example something about
-/// the subs while playing audio only
-#define M_PROPERTY_UNAVAILABLE      -1
+    // Returned when asking for a property that doesn't exist.
+    M_PROPERTY_UNKNOWN = -3,
+};
 
-/// Returned if the requested action is not implemented.
-#define M_PROPERTY_NOT_IMPLEMENTED  -2
-
-/// Returned when asking for a property that doesn't exist.
-#define M_PROPERTY_UNKNOWN          -3
-
-/// Returned when the action can't be done (like setting the volume when edl mute).
-#define M_PROPERTY_DISABLED         -4
-
-///@}
-
-/// \ingroup Properties
-/// \brief Property action callback.
-typedef int(*m_property_ctrl_f)(const m_option_t* prop,int action,void* arg,void *ctx);
-
-/// Do an action on a property.
-/** \param prop_list The list of properties.
- *  \param prop The path of the property.
- *  \param action See \ref PropertyActions.
- *  \param arg Argument, usually a pointer to the data type used by the property.
- *  \return See \ref PropertyActionsReturn.
- */
-int m_property_do(const m_option_t* prop_list, const char* prop,
+// Access a property.
+// action: one of m_property_action
+// ctx: opaque value passed through to property implementation
+// returns: one of mp_property_return
+int m_property_do(const struct m_option* prop_list, const char* property_name,
                   int action, void* arg, void *ctx);
 
-/// Print a list of properties.
-void m_properties_print_help_list(const m_option_t* list);
+// Print a list of properties.
+void m_properties_print_help_list(const struct m_option* list);
 
-/// Expand a property string.
-/** This function allows to print strings containing property values.
- *  ${NAME} is expanded to the value of property NAME or an empty
- *  string in case of error. $(NAME:STR) expand STR only if the property
- *  NAME is available.
- *
- *  \param prop_list An array of \ref m_option describing the available
- *                   properties.
- *  \param str The string to expand.
- *  \return The newly allocated expanded string.
- */
-char* m_properties_expand_string(const m_option_t* prop_list,char* str, void *ctx);
+// Expand a property string.
+// This function allows to print strings containing property values.
+//  ${NAME} is expanded to the value of property NAME.
+//  If NAME starts with '=', use the raw value of the property.
+//  ${NAME:STR} expands to the property, or STR if the property is not
+//  available.
+//  ${?NAME:STR} expands to STR if the property is available.
+//  ${!NAME:STR} expands to STR if the property is not available.
+// General syntax: "${" ["?" | "!"] ["="] NAME ":" STR "}"
+// STR is recursively expanded using the same rules.
+// "$$" can be used to escape "$", and "$}" to escape "}".
+// "$>" disables parsing of "$" for the rest of the string.
+char* m_properties_expand_string(const struct m_option* prop_list, char *str,
+                                 void *ctx);
 
-// Helpers to use MPlayer's properties
-
-/// Do an action with an MPlayer property.
-int mp_property_do(const char* name,int action, void* val, void *ctx);
-
-/// Get the value of a property as a string suitable for display in an UI.
-char* mp_property_print(const char *name, void* ctx);
-
-/// \defgroup PropertyImplHelper Property implementation helpers
-/// \ingroup Properties
-/// \brief Helper functions for common property types.
-///@{
-
-/// Clamp a value according to \ref m_option::min and \ref m_option::max.
-#define M_PROPERTY_CLAMP(prop,val) do {                                 \
-        if(((prop)->flags & M_OPT_MIN) && (val) < (prop)->min)          \
-            (val) = (prop)->min;                                        \
-        else if(((prop)->flags & M_OPT_MAX) && (val) > (prop)->max)     \
-            (val) = (prop)->max;                                        \
-    } while(0)
-
-/// Implement get.
-int m_property_int_ro(const m_option_t* prop,int action,
-                      void* arg,int var);
-
-/// Implement set, get and step up/down.
-int m_property_int_range(const m_option_t* prop,int action,
-                         void* arg,int* var);
-
-/// Same as m_property_int_range but cycle.
-int m_property_choice(const m_option_t* prop,int action,
-                      void* arg,int* var);
-
-int m_property_flag_ro(const m_option_t* prop,int action,
-                    void* arg,int var);
-
-/// Switch betwen min and max.
-int m_property_flag(const m_option_t* prop,int action,
-                    void* arg,int* var);
-
-/// Implement get, print.
-int m_property_float_ro(const m_option_t* prop,int action,
-                        void* arg,float var);
-
-/// Implement set, get and step up/down
-int m_property_float_range(const m_option_t* prop,int action,
-                           void* arg,float* var);
-
-/// float with a print function which print the time in ms
-int m_property_delay(const m_option_t* prop,int action,
-                     void* arg,float* var);
-
-/// Implement get, print
-int m_property_double_ro(const m_option_t* prop,int action,
-                         void* arg,double var);
-
-/// Implement print
-int m_property_time_ro(const m_option_t* prop,int action,
-                       void* arg,double var);
-
-/// get/print the string
-int m_property_string_ro(const m_option_t* prop,int action,void* arg, char* str);
-
-/// get/print a bitrate
-int m_property_bitrate(const m_option_t* prop,int action,void* arg,int rate);
-
-///@}
-
-///@}
+// Trivial helpers for implementing properties.
+int m_property_int_ro(const struct m_option* prop, int action, void* arg,
+                      int var);
+int m_property_float_ro(const struct m_option* prop, int action, void* arg,
+                        float var);
+int m_property_double_ro(const struct m_option* prop, int action, void* arg,
+                         double var);
 
 #endif /* MPLAYER_M_PROPERTY_H */

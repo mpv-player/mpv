@@ -204,8 +204,8 @@ static const char av_desync_help_text[] = _(
 static int drop_frame_cnt; // total number of dropped frames
 
 // seek:
-static off_t seek_to_byte;
-static off_t step_sec;
+static int64_t seek_to_byte;
+static double step_sec;
 
 static m_time_size_t end_at = { .type = END_AT_NONE, .pos = 0 };
 
@@ -230,7 +230,6 @@ static int ignore_start = 0;
 
 double force_fps = 0;
 static int force_srate = 0;
-int frame_dropping = 0;      // option  0=no drop  1= drop vo  2= drop decode
 static int play_n_frames = -1;
 static int play_n_frames_mf = -1;
 
@@ -247,8 +246,6 @@ int use_filedir_conf;
 #include "mpcommon.h"
 #include "command.h"
 
-#include "metadata.h"
-
 static void reset_subtitles(struct MPContext *mpctx);
 static void reinit_subs(struct MPContext *mpctx);
 
@@ -258,129 +255,6 @@ static float get_relative_time(struct MPContext *mpctx)
     unsigned int delta = new_time - mpctx->last_time;
     mpctx->last_time = new_time;
     return delta * 0.000001;
-}
-
-static int is_valid_metadata_type(struct MPContext *mpctx, metadata_t type)
-{
-    switch (type) {
-    /* check for valid video stream */
-    case META_VIDEO_CODEC:
-    case META_VIDEO_BITRATE:
-    case META_VIDEO_RESOLUTION:
-        if (!mpctx->sh_video)
-            return 0;
-        break;
-
-    /* check for valid audio stream */
-    case META_AUDIO_CODEC:
-    case META_AUDIO_BITRATE:
-    case META_AUDIO_SAMPLES:
-        if (!mpctx->sh_audio)
-            return 0;
-        break;
-
-    /* check for valid demuxer */
-    case META_INFO_TITLE:
-    case META_INFO_ARTIST:
-    case META_INFO_ALBUM:
-    case META_INFO_YEAR:
-    case META_INFO_COMMENT:
-    case META_INFO_TRACK:
-    case META_INFO_GENRE:
-        if (!mpctx->master_demuxer)
-            return 0;
-        break;
-
-    default:
-        break;
-    }
-
-    return 1;
-}
-
-static char *get_demuxer_info(struct MPContext *mpctx, char *tag)
-{
-    char **info = mpctx->master_demuxer->info;
-    int n;
-
-    if (!info || !tag)
-        return talloc_strdup(NULL, "");
-
-    for (n = 0; info[2 * n] != NULL; n++)
-        if (!strcasecmp(info[2 * n], tag))
-            break;
-
-    return talloc_strdup(NULL, info[2 * n + 1] ? info[2 * n + 1] : "");
-}
-
-char *get_metadata(struct MPContext *mpctx, metadata_t type)
-{
-    sh_audio_t * const sh_audio = mpctx->sh_audio;
-    sh_video_t * const sh_video = mpctx->sh_video;
-
-    if (!is_valid_metadata_type(mpctx, type))
-        return NULL;
-
-    switch (type) {
-    case META_NAME:
-        return talloc_strdup(NULL, mp_basename(mpctx->filename));
-    case META_VIDEO_CODEC:
-        if (sh_video->format == 0x10000001)
-            return talloc_strdup(NULL, "mpeg1");
-        else if (sh_video->format == 0x10000002)
-            return talloc_strdup(NULL, "mpeg2");
-        else if (sh_video->format == 0x10000004)
-            return talloc_strdup(NULL, "mpeg4");
-        else if (sh_video->format == 0x10000005)
-            return talloc_strdup(NULL, "h264");
-        else if (sh_video->format >= 0x20202020)
-            return talloc_asprintf(NULL, "%.4s", (char *) &sh_video->format);
-        else
-            return talloc_asprintf(NULL, "0x%08X", sh_video->format);
-    case META_VIDEO_BITRATE:
-        return talloc_asprintf(NULL, "%d kbps",
-                               (int) (sh_video->i_bps * 8 / 1024));
-    case META_VIDEO_RESOLUTION:
-        return talloc_asprintf(NULL, "%d x %d", sh_video->disp_w,
-                               sh_video->disp_h);
-    case META_AUDIO_CODEC:
-        if (sh_audio->codec && sh_audio->codec->name)
-            return talloc_strdup(NULL, sh_audio->codec->name);
-        return talloc_strdup(NULL, "");
-    case META_AUDIO_BITRATE:
-        return talloc_asprintf(NULL, "%d kbps",
-                               (int) (sh_audio->i_bps * 8 / 1000));
-    case META_AUDIO_SAMPLES:
-        return talloc_asprintf(NULL, "%d Hz, %d ch.", sh_audio->samplerate,
-                               sh_audio->channels);
-
-    /* check for valid demuxer */
-    case META_INFO_TITLE:
-        return get_demuxer_info(mpctx, "Title");
-
-    case META_INFO_ARTIST:
-        return get_demuxer_info(mpctx, "Artist");
-
-    case META_INFO_ALBUM:
-        return get_demuxer_info(mpctx, "Album");
-
-    case META_INFO_YEAR:
-        return get_demuxer_info(mpctx, "Year");
-
-    case META_INFO_COMMENT:
-        return get_demuxer_info(mpctx, "Comment");
-
-    case META_INFO_TRACK:
-        return get_demuxer_info(mpctx, "Track");
-
-    case META_INFO_GENRE:
-        return get_demuxer_info(mpctx, "Genre");
-
-    default:
-        break;
-    }
-
-    return talloc_strdup(NULL, "");
 }
 
 static void print_stream(struct MPContext *mpctx, struct track *t, int id)
@@ -1124,7 +998,7 @@ void init_vo_spudec(struct MPContext *mpctx)
 
     if (vo_spudec != NULL) {
         mpctx->initialized_flags |= INITIALIZED_SPUDEC;
-        mp_property_do("sub_forced_only", M_PROPERTY_SET, &forced_subs_only,
+        mp_property_do("sub-forced-only", M_PROPERTY_SET, &forced_subs_only,
                        mpctx);
     }
 }
@@ -1164,6 +1038,30 @@ static void sadd_percentage(char *buf, int len, int percent) {
         saddf(buf, len, " (%d%%)", percent);
 }
 
+static int get_term_width(void)
+{
+    get_screen_size();
+    int width = screen_width > 0 ? screen_width : 80;
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+    /* Windows command line is broken (MinGW's rxvt works, but we
+     * should not depend on that). */
+    width--;
+#endif
+    return width;
+}
+
+static void write_status_line(struct MPContext *mpctx, const char *line)
+{
+    if (erase_to_end_of_line) {
+        mp_msg(MSGT_STATUSLINE, MSGL_STATUS,
+               "%s%s\r", line, erase_to_end_of_line);
+    } else {
+        int pos = strlen(line);
+        int width = get_term_width() - pos;
+        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "%s%*s\r", line, width, "");
+    }
+}
+
 static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -1187,19 +1085,16 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
     if (opts->quiet)
         return;
 
-    int width;
-    char *line;
-    get_screen_size();
-    if (screen_width > 0)
-        width = screen_width;
-    else
-        width = 80;
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-    /* Windows command line is broken (MinGW's rxvt works, but we
-     * should not depend on that). */
-    width--;
-#endif
-    line = malloc(width + 1); // one additional char for the terminating null
+    if (opts->status_msg) {
+        char *r = mp_property_expand_string(mpctx, opts->status_msg);
+        write_status_line(mpctx, r);
+        talloc_free(r);
+        return;
+    }
+
+    // one additional char for the terminating null
+    int width = get_term_width() + 1;
+    char *line = malloc(width);
     line[0] = '\0';
 
     // Playback status
@@ -1278,15 +1173,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 #endif
 
     // end
-    if (erase_to_end_of_line) {
-        mp_msg(MSGT_STATUSLINE, MSGL_STATUS,
-               "%s%s\r", line, erase_to_end_of_line);
-    } else {
-        int pos = strlen(line);
-        memset(&line[pos], ' ', width - pos);
-        line[width] = 0;
-        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "%s\r", line);
-    }
+    write_status_line(mpctx, line);
     free(line);
 }
 
@@ -1361,6 +1248,8 @@ static mp_osd_msg_t *add_osd_msg(struct MPContext *mpctx, int id, int level,
 static void set_osd_msg_va(struct MPContext *mpctx, int id, int level, int time,
                            const char *fmt, va_list ap)
 {
+    if (level == OSD_LEVEL_INVISIBLE)
+        return;
     mp_osd_msg_t *msg = add_osd_msg(mpctx, id, level, time);
     msg->msg = talloc_vasprintf(msg, fmt, ap);
 }
@@ -1545,6 +1434,35 @@ static void sadd_osd_status(char *buffer, int len, struct MPContext *mpctx,
     }
 }
 
+// OSD messages initated by seeking commands are added lazily with this
+// function, because multiple successive seek commands can be coalesced.
+static void add_seek_osd_messages(struct MPContext *mpctx)
+{
+    if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_BAR)
+        set_osd_bar(mpctx, 0, "Position", 0, 100, get_percent_pos(mpctx));
+    if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_TEXT) {
+        mp_osd_msg_t *msg = add_osd_msg(mpctx, OSD_MSG_TEXT, 1,
+                                        mpctx->opts.osd_duration);
+        msg->show_position = true;
+    }
+    if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_CHAPTER_TEXT) {
+        char *chapter = chapter_display_name(mpctx, get_current_chapter(mpctx));
+        set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts.osd_duration,
+                     "Chapter: %s", chapter);
+        talloc_free(chapter);
+    }
+    assert(mpctx->master_demuxer);
+    if ((mpctx->add_osd_seek_info & OSD_SEEK_INFO_EDITION)
+        && mpctx->master_demuxer)
+    {
+        set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts.osd_duration,
+                     "Playing edition %d of %d.",
+                     mpctx->master_demuxer->edition + 1,
+                     mpctx->master_demuxer->num_editions);
+    }
+    mpctx->add_osd_seek_info = 0;
+}
+
 /**
  * \brief Update the OSD message line.
  *
@@ -1559,10 +1477,7 @@ static void update_osd_msg(struct MPContext *mpctx)
     struct MPOpts *opts = &mpctx->opts;
     struct osd_state *osd = mpctx->osd;
 
-    if (mpctx->add_osd_seek_info) {
-        set_osd_bar(mpctx, 0, "Position", 0, 100, get_percent_pos(mpctx));
-        mpctx->add_osd_seek_info = false;
-    }
+    add_seek_osd_messages(mpctx);
 
     // Look if we have a msg
     mp_osd_msg_t *msg = get_osd_msg(mpctx);
@@ -1601,15 +1516,6 @@ static void update_osd_msg(struct MPContext *mpctx)
         mpctx->terminal_osd_text[0] = '\0';
         mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%s\n", opts->term_osd_esc);
     }
-}
-
-void mp_show_osd_progression(struct MPContext *mpctx)
-{
-    mp_osd_msg_t *msg = add_osd_msg(mpctx, OSD_MSG_TEXT, 1,
-                                    mpctx->opts.osd_duration);
-    msg->show_position = true;
-
-    set_osd_bar(mpctx, 0, "Position", 0, 100, get_percent_pos(mpctx));
 }
 
 void reinit_audio_chain(struct MPContext *mpctx)
@@ -1916,7 +1822,7 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
             && !mpctx->restart_playback) {
             ++drop_frame_cnt;
             ++dropped_frames;
-            return frame_dropping;
+            return mpctx->opts.frame_dropping;
         } else
             dropped_frames = 0;
     }
@@ -2292,10 +2198,9 @@ static void vo_update_window_title(struct MPContext *mpctx)
 {
     if (!mpctx->video_out)
         return;
-    char *title = property_expand_string(mpctx, mpctx->opts.vo_wintitle);
+    char *title = mp_property_expand_string(mpctx, mpctx->opts.vo_wintitle);
     talloc_free(mpctx->video_out->window_title);
-    mpctx->video_out->window_title = talloc_strdup(mpctx->video_out, title);
-    free(title);
+    mpctx->video_out->window_title = talloc_steal(mpctx, title);
 }
 
 int reinit_video_chain(struct MPContext *mpctx)
@@ -3605,7 +3510,7 @@ static void open_vobsubs_from_options(struct MPContext *mpctx)
         mpctx->initialized_flags |= INITIALIZED_VOBSUB;
         // TODO: let frontend do the selection
         vobsub_set_from_lang(vo_vobsub, mpctx->opts.sub_lang);
-        mp_property_do("sub_forced_only", M_PROPERTY_SET, &forced_subs_only,
+        mp_property_do("sub-forced-only", M_PROPERTY_SET, &forced_subs_only,
                        mpctx);
 
         for (int i = 0; i < vobsub_get_indexes_count(vo_vobsub); i++) {
@@ -3798,6 +3703,8 @@ static void play_current_file(struct MPContext *mpctx)
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
 #endif
 
+    mpctx->add_osd_seek_info &= OSD_SEEK_INFO_EDITION;
+
     m_config_enter_file_local(mpctx->mconfig);
 
     load_per_protocol_config(mpctx->mconfig, mpctx->filename);
@@ -3828,7 +3735,8 @@ static void play_current_file(struct MPContext *mpctx)
     }
 
 #ifdef CONFIG_ASS
-    ass_set_style_overrides(mpctx->ass_library, opts->ass_force_style_list);
+    if (opts->ass_style_override)
+        ass_set_style_overrides(mpctx->ass_library, opts->ass_force_style_list);
 #endif
     if (mpctx->video_out && mpctx->video_out->config_ok)
         vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);
@@ -3996,9 +3904,9 @@ goto_enable_cache:
     }
 
     if (opts->playing_msg) {
-        char *msg = property_expand_string(mpctx, opts->playing_msg);
+        char *msg = mp_property_expand_string(mpctx, opts->playing_msg);
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", msg);
-        free(msg);
+        talloc_free(msg);
     }
 
     // Disable the term OSD in verbose mode

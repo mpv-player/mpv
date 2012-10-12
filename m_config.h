@@ -152,6 +152,9 @@ int m_config_parse_suboptions(struct m_config *config, char *name,
 const struct m_option *m_config_get_option(const struct m_config *config,
                                            struct bstr name);
 
+struct m_config_option *m_config_get_co(const struct m_config *config,
+                                        struct bstr name);
+
 /*  Print a list of all registered options.
  *  \param config The config object.
  */

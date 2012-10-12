@@ -59,30 +59,29 @@ fi
 __midentify__allprops="
     filename
     path
-    stream_start
-    stream_end
-    stream_length
+    stream-start
+    stream-end
+    stream-length
 
     demuxer
 
-    switch_program
     length
     chapters
     editions
     titles
 
-    switch_audio
-    audio_bitrate
-    audio_codec
-    audio_format
+    audio
+    audio-bitrate
+    audio-codec
+    audio-format
     channels
     samplerate
 
-    switch_video
+    video
     angle
-    video_bitrate
-    video_codec
-    video_format
+    video-bitrate
+    video-codec
+    video-format
     aspect
     fps
     width

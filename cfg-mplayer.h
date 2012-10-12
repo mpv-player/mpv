@@ -382,7 +382,7 @@ const m_option_t common_opts[] = {
     {"frames", &play_n_frames_mf, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 
     // seek to byte/seconds position
-    {"sb", &seek_to_byte, CONF_TYPE_POSITION, CONF_MIN, 0, 0, NULL},
+    {"sb", &seek_to_byte, CONF_TYPE_INT64, CONF_MIN, 0, 0, NULL},
     OPT_TIME("ss", seek_to_sec, 0),
 
     // start paused
@@ -460,7 +460,7 @@ const m_option_t common_opts[] = {
     OPT_FLOATRANGE("speed", playback_speed, 0, 0.01, 100.0),
 
     // set a-v distance
-    {"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -100.0, 100.0, NULL},
+    {"audio-delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -100.0, 100.0, NULL},
 
     // ignore header-specified delay (dwStart)
     {"ignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -513,12 +513,12 @@ const m_option_t common_opts[] = {
     OPT_STRINGLIST("sub", sub_name, 0),
     OPT_PATHLIST("sub-paths", sub_paths, 0),
     {"subcp", &sub_cp, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
+    {"sub-delay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
     {"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
     OPT_MAKE_FLAGS("autosub", sub_auto, 0),
     {"unicode", &sub_unicode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"utf8", &sub_utf8, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"forcedsubsonly", &forced_subs_only, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"sub-forced-only", &forced_subs_only, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     // specify IFO file for VOBSUB subtitle
     {"ifo", &spudec_ifo, CONF_TYPE_STRING, 0, 0, 0, NULL},
     // enable Closed Captioning display
@@ -530,7 +530,7 @@ const m_option_t common_opts[] = {
     {"font", &font_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"subfont", &sub_font_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"ffactor", &font_factor, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 10.0, NULL},
-    {"subpos", &sub_pos, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
+    {"sub-pos", &sub_pos, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
     {"subwidth", &sub_width_p, CONF_TYPE_INT, CONF_RANGE, 10, 100, NULL},
     {"spualign", &spu_alignment, CONF_TYPE_INT, CONF_RANGE, -1, 2, NULL},
     {"spuaa", &spu_aamode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
@@ -554,6 +554,8 @@ const m_option_t common_opts[] = {
     OPT_STRING("ass-border-color", ass_border_color, 0),
     OPT_STRING("ass-styles", ass_styles_file, 0),
     OPT_INTRANGE("ass-hinting", ass_hinting, 0, 0, 7),
+    OPT_CHOICE("ass-style-override", ass_style_override, 0,
+               ({"no", 0}, {"yes", 1})),
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -622,6 +624,7 @@ const m_option_t mplayer_opts[]={
     // video mode switching: (x11,xv,dga)
     OPT_MAKE_FLAGS("vm", vidmode, 0),
     // start in fullscreen mode:
+    OPT_MAKE_FLAGS("fullscreen", fullscreen, CONF_GLOBAL),
     OPT_MAKE_FLAGS("fs", fullscreen, CONF_GLOBAL),
     // set fullscreen switch method (workaround for buggy WMs)
     {"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
@@ -632,7 +635,7 @@ const m_option_t mplayer_opts[]={
     {"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     // wait for v-sync (gl)
     {"vsync", &vo_vsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
+    {"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1.0, NULL},
     OPT_FLOATRANGE("panscanrange", vo_panscanrange, 0, -19.0, 99.0),
     OPT_CHOICE("colormatrix", requested_colorspace, 0,
                ({"auto", MP_CSP_AUTO},
@@ -674,16 +677,20 @@ const m_option_t mplayer_opts[]={
 
     {"use-filedir-conf", &use_filedir_conf, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
     OPT_INTRANGE("osdlevel", osd_level, 0, 0, 3),
+    OPT_CHOICE("osd-level", osd_level, 0,
+               ({"0", 0}, {"1", 1}, {"2", 2}, {"3", 3})),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
     OPT_MAKE_FLAGS("osd-fractions", osd_fractions, 0),
 
     OPT_STRING("vobsub", vobsub_name, 0),
     {"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 
-    {"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+    {"sstep", &step_sec, CONF_TYPE_DOUBLE, CONF_MIN, 0, 0, NULL},
 
-    {"framedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"hardframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 2, NULL},
+    OPT_CHOICE("framedrop", frame_dropping, 0,
+               ({"no", 0},
+                {"yes", 1}, {"", 1},
+                {"hard", 2})),
 
     OPT_FLAG_ON("untimed", untimed, 0),
 
@@ -726,6 +733,7 @@ const m_option_t mplayer_opts[]={
 
     OPT_STRING("term-osd-esc", term_osd_esc, 0, OPTDEF_STR("\x1b[A\r\x1b[K")),
     OPT_STRING("playing-msg", playing_msg, 0),
+    OPT_STRING("status-msg", status_msg, 0),
 
     {"slave-broken", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
     OPT_MAKE_FLAGS("idle", player_idle_mode, CONF_GLOBAL),

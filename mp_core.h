@@ -77,6 +77,13 @@ struct chapter {
     char *name;
 };
 
+enum mp_osd_seek_info {
+    OSD_SEEK_INFO_BAR           = 1,
+    OSD_SEEK_INFO_TEXT          = 2,
+    OSD_SEEK_INFO_CHAPTER_TEXT  = 4,
+    OSD_SEEK_INFO_EDITION       = 8,
+};
+
 struct track {
     enum stream_type type;
     // The type specific ID, also called aid (audio), sid (subs), vid (video).
@@ -127,7 +134,7 @@ typedef struct MPContext {
     char *terminal_osd_text;
     subtitle subs; // subtitle list used when reading subtitles from demuxer
 
-    bool add_osd_seek_info;
+    int add_osd_seek_info; // bitfield of enum mp_osd_seek_info
     unsigned int osd_visible;
 
     int osd_function;

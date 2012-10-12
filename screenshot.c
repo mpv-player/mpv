@@ -27,10 +27,9 @@
 #include "talloc.h"
 #include "screenshot.h"
 #include "mp_core.h"
-#include "m_property.h"
+#include "command.h"
 #include "bstr.h"
 #include "mp_msg.h"
-#include "metadata.h"
 #include "path.h"
 #include "libmpcodecs/mp_image.h"
 #include "libmpcodecs/dec_video.h"
@@ -65,19 +64,6 @@ static char *stripext(void *talloc_ctx, const char *s)
     if (!end)
         end = s + strlen(s);
     return talloc_asprintf(talloc_ctx, "%.*s", end - s, s);
-}
-
-static char *do_format_property(struct MPContext *mpctx, struct bstr s) {
-    struct bstr prop_name = s;
-    int fallbackpos = bstrchr(s, ':');
-    if (fallbackpos >= 0)
-        prop_name = bstr_splice(prop_name, 0, fallbackpos);
-    char *pn = bstrdup0(NULL, prop_name);
-    char *res = mp_property_print(pn, mpctx);
-    talloc_free(pn);
-    if (!res && fallbackpos >= 0)
-        res = bstrdup0(NULL, bstr_cut(s, fallbackpos + 1));
-    return res;
 }
 
 #ifdef _WIN32
@@ -154,14 +140,13 @@ static char *create_fname(struct MPContext *mpctx, char *template,
         }
         case 'f':
         case 'F': {
-            char *video_file = get_metadata(mpctx, META_NAME);
+            char *video_file = mp_basename(mpctx->filename);
             if (video_file) {
                 char *name = video_file;
                 if (fmt == 'F')
                     name = stripext(res, video_file);
                 append_filename(&res, name);
             }
-            talloc_free(video_file);
             break;
         }
         case 'p':
@@ -188,11 +173,13 @@ static char *create_fname(struct MPContext *mpctx, char *template,
             if (!end)
                 goto error_exit;
             struct bstr prop = bstr_splice(bstr0(template), 0, end - template);
-            template = end + 1;
-            char *s = do_format_property(mpctx, prop);
+            char *tmp = talloc_asprintf(NULL, "${%.*s}", BSTR_P(prop));
+            char *s = mp_property_expand_string(mpctx, tmp);
+            talloc_free(tmp);
             if (s)
                 append_filename(&res, s);
             talloc_free(s);
+            template = end + 1;
             break;
         }
         case '%':

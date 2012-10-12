@@ -43,7 +43,6 @@ extern const m_option_type_t m_option_type_float;
 extern const m_option_type_t m_option_type_double;
 extern const m_option_type_t m_option_type_string;
 extern const m_option_type_t m_option_type_string_list;
-extern const m_option_type_t m_option_type_position;
 extern const m_option_type_t m_option_type_time;
 extern const m_option_type_t m_option_type_time_size;
 extern const m_option_type_t m_option_type_choice;
@@ -167,7 +166,6 @@ struct m_sub_options {
 #define CONF_TYPE_PRINT_FUNC    (&m_option_type_print_func)
 #define CONF_TYPE_SUBCONFIG     (&m_option_type_subconfig)
 #define CONF_TYPE_STRING_LIST   (&m_option_type_string_list)
-#define CONF_TYPE_POSITION      (&m_option_type_position)
 #define CONF_TYPE_IMGFMT        (&m_option_type_imgfmt)
 #define CONF_TYPE_AFMT          (&m_option_type_afmt)
 #define CONF_TYPE_SPAN          (&m_option_type_span)
@@ -230,6 +228,11 @@ struct m_option_type {
      */
     char *(*print)(const m_option_t *opt, const void *val);
 
+    // Print the value in a human readable form. Unlike print(), it doesn't
+    // necessarily return the exact value, and is generally not parseable with
+    // parse().
+    char *(*pretty_print)(const m_option_t *opt, const void *val);
+
     // Copy data between two locations. Deep copy if the data has pointers.
     /** \param opt The option to copy.
      *  \param dst Pointer to the destination memory.
@@ -243,6 +246,18 @@ struct m_option_type {
      *             set to NULL.
      */
     void (*free)(void *dst);
+
+    // Add the value add to the value in val. For types that are not numeric,
+    // add gives merely the direction. The wrap parameter determines whether
+    // the value is clipped, or wraps around to the opposite max/min.
+    void (*add)(const m_option_t *opt, void *val, double add, bool wrap);
+
+    // Clamp the value in val to the option's valid value range.
+    // Return values:
+    //  M_OPT_OUT_OF_RANGE: val was invalid, and modified (clamped) to be valid
+    //  M_OPT_INVALID:      val was invalid, and can't be made valid
+    //  0:                  val was already valid and is unchanged
+    int (*clamp)(const m_option_t *opt, void *val);
 };
 
 // Option description
@@ -408,12 +423,6 @@ char *m_option_strerror(int code);
  */
 const m_option_t *m_option_list_find(const m_option_t *list, const char *name);
 
-static inline void *m_option_get_ptr(const struct m_option *opt,
-                                     void *optstruct)
-{
-    return opt->new ? (char *) optstruct + opt->offset : opt->p;
-}
-
 // Helper to parse options, see \ref m_option_type::parse.
 static inline int m_option_parse(const m_option_t *opt, struct bstr name,
                                  struct bstr param, void *dst)
@@ -428,6 +437,15 @@ static inline char *m_option_print(const m_option_t *opt, const void *val_ptr)
         return opt->type->print(opt, val_ptr);
     else
         return NULL;
+}
+
+static inline char *m_option_pretty_print(const m_option_t *opt,
+                                          const void *val_ptr)
+{
+    if (opt->type->pretty_print)
+        return opt->type->pretty_print(opt, val_ptr);
+    else
+        return m_option_print(opt, val_ptr);
 }
 
 // Helper around \ref m_option_type::copy.
@@ -483,12 +501,13 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_SETTINGSLIST(optname, varname, flags, objlist) OPT_GENERAL(optname, varname, flags, .type = &m_option_type_obj_settings_list, .priv = objlist)
 #define OPT_AUDIOFORMAT(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_afmt)
 #define OPT_HELPER_REMOVEPAREN(...) __VA_ARGS__
+#define M_CHOICES(choices) .priv = (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}
 #define OPT_CHOICE(...) OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_choice)
-#define OPT_CHOICE_(optname, varname, flags, choices, ...) OPT_GENERAL(optname, varname, flags, .priv = (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, __VA_ARGS__)
+#define OPT_CHOICE_(optname, varname, flags, choices, ...) OPT_GENERAL(optname, varname, flags, M_CHOICES(choices), __VA_ARGS__)
 // Union of choices and an int range. The choice values can be included in the
 // int range, or be completely separate - both works.
 #define OPT_CHOICE_OR_INT(...) OPT_CHOICE_OR_INT_(__VA_ARGS__, .type = &m_option_type_choice)
-#define OPT_CHOICE_OR_INT_(optname, varname, flags, minval, maxval, choices, ...) OPT_GENERAL(optname, varname, (flags) | CONF_RANGE, .min = minval, .max = maxval, .priv = (void *)&(const struct m_opt_choice_alternatives[]){OPT_HELPER_REMOVEPAREN choices, {NULL}}, __VA_ARGS__)
+#define OPT_CHOICE_OR_INT_(optname, varname, flags, minval, maxval, choices, ...) OPT_GENERAL(optname, varname, (flags) | CONF_RANGE, .min = minval, .max = maxval, M_CHOICES(choices), __VA_ARGS__)
 #define OPT_TIME(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_time)
 
 #define OPT_TRACKCHOICE(name, var) OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}))

@@ -41,7 +41,6 @@ typedef struct MPOpts {
     int osd_duration;
     int osd_fractions;
     char *vobsub_name;
-    int auto_quality;
     int untimed;
     int loop_times;
     int ordered_chapters;
@@ -61,9 +60,11 @@ typedef struct MPOpts {
     float hr_seek_demuxer_offset;
     int autosync;
     int softsleep;
+    int frame_dropping;
     int term_osd;
     char *term_osd_esc;
     char *playing_msg;
+    char *status_msg;
     int player_idle_mode;
     int consolecontrols;
     int doubleclick_time;
@@ -115,6 +116,7 @@ typedef struct MPOpts {
     char *ass_color;
     char *ass_border_color;
     char *ass_styles_file;
+    int ass_style_override;
     int ass_hinting;
     struct lavc_param {
         int workaround_bugs;

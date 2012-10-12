@@ -25,7 +25,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
-#include <unistd.h>
+#include <assert.h>
+
+#include <libavutil/common.h>
 
 #include "talloc.h"
 #include "m_option.h"
@@ -33,173 +35,254 @@
 #include "mp_msg.h"
 #include "mpcommon.h"
 
+const struct m_option_type m_option_type_dummy = {
+    .name = "Unknown",
+};
+
+struct legacy_prop {
+    const char *old, *new;
+};
+static const struct legacy_prop legacy_props[] = {
+    {"switch_video",    "video"},
+    {"switch_audio",    "audio"},
+    {"switch_program",  "program"},
+    {"framedropping",   "framedrop"},
+    {"osdlevel",        "osd-level"},
+    {0}
+};
+
+static bool translate_legacy_property(const char *name, char *buffer,
+                                      size_t buffer_size)
+{
+    if (strlen(name) + 1 > buffer_size)
+        return false;
+
+    const char *old_name = name;
+
+    for (int n = 0; legacy_props[n].new; n++) {
+        if (strcmp(name, legacy_props[n].old) == 0) {
+            name = legacy_props[n].new;
+            break;
+        }
+    }
+
+    snprintf(buffer, buffer_size, "%s", name);
+
+    // Old names used "_" instead of "-"
+    for (int n = 0; buffer[n]; n++) {
+        if (buffer[n] == '_')
+            buffer[n] = '-';
+    }
+
+    if (strcmp(old_name, buffer) != 0) {
+        mp_msg(MSGT_CPLAYER, MSGL_V, "Warning: property '%s' is deprecated, "
+               "replaced with '%s'. Fix your input.conf!\n", old_name, buffer);
+    }
+
+    return true;
+}
+
 static int do_action(const m_option_t *prop_list, const char *name,
                      int action, void *arg, void *ctx)
 {
     const char *sep;
     const m_option_t *prop;
-    m_property_action_t ka;
-    int r;
     if ((sep = strchr(name, '/')) && sep[1]) {
         int len = sep - name;
         char base[len + 1];
         memcpy(base, name, len);
         base[len] = 0;
         prop = m_option_list_find(prop_list, base);
-        ka.key = sep + 1;
-        ka.action = action;
-        ka.arg = arg;
+        struct m_property_action_arg ka = {
+            .key = sep + 1,
+            .action = action,
+            .arg = arg,
+        };
         action = M_PROPERTY_KEY_ACTION;
         arg = &ka;
     } else
         prop = m_option_list_find(prop_list, name);
     if (!prop)
         return M_PROPERTY_UNKNOWN;
-    r = ((m_property_ctrl_f)prop->p)(prop, action, arg, ctx);
-    if (action == M_PROPERTY_GET_TYPE && r < 0) {
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        *(const m_option_t **)arg = prop;
+    int (*control)(const m_option_t*, int, void*, void*) = prop->p;
+    int r = control(prop, action, arg, ctx);
+    if (action == M_PROPERTY_GET_TYPE && r < 0 &&
+        prop->type != &m_option_type_dummy)
+    {
+        *(struct m_option *)arg = *prop;
         return M_PROPERTY_OK;
     }
     return r;
 }
 
-int m_property_do(const m_option_t *prop_list, const char *name,
+int m_property_do(const m_option_t *prop_list, const char *in_name,
                   int action, void *arg, void *ctx)
 {
-    const m_option_t *opt;
     union m_option_value val = {0};
     int r;
 
+    char name[64];
+    if (!translate_legacy_property(in_name, name, sizeof(name)))
+        return M_PROPERTY_UNKNOWN;
+
+    struct m_option opt = {0};
+    r = do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx);
+    if (r <= 0)
+        return r;
+    assert(opt.type);
+
     switch (action) {
-    case M_PROPERTY_PRINT:
+    case M_PROPERTY_PRINT: {
         if ((r = do_action(prop_list, name, M_PROPERTY_PRINT, arg, ctx)) >= 0)
             return r;
-    // fallback on the default print for this type
-    case M_PROPERTY_TO_STRING:
-        if ((r = do_action(prop_list, name, M_PROPERTY_TO_STRING, arg, ctx)) !=
-            M_PROPERTY_NOT_IMPLEMENTED)
-            return r;
-        // fallback on the options API. Get the type, value and print.
-        if ((r =
-             do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx)) <= 0)
-            return r;
+        // Fallback to m_option
         if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        char *str = m_option_print(opt, &val);
+        char *str = m_option_pretty_print(&opt, &val);
+        m_option_free(&opt, &val);
         *(char **)arg = str;
         return str != NULL;
-    case M_PROPERTY_PARSE:
-        // try the property own parsing func
-        if ((r = do_action(prop_list, name, M_PROPERTY_PARSE, arg, ctx)) !=
-            M_PROPERTY_NOT_IMPLEMENTED)
+    }
+    case M_PROPERTY_GET_STRING: {
+        if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
             return r;
-        // fallback on the options API, get the type and parse.
-        if ((r =
-             do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx)) <= 0)
-            return r;
-        if (!arg)
+        char *str = m_option_print(&opt, &val);
+        m_option_free(&opt, &val);
+        *(char **)arg = str;
+        return str != NULL;
+    }
+    case M_PROPERTY_SET_STRING: {
+        // (reject 0 return value: success, but empty string with flag)
+        if (m_option_parse(&opt, bstr0(name), bstr0(arg), &val) <= 0)
             return M_PROPERTY_ERROR;
-        if ((r = m_option_parse(opt, bstr0(opt->name), bstr0(arg), &val)) <= 0)
-            return r;
         r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
-        m_option_free(opt, &val);
+        m_option_free(&opt, &val);
         return r;
     }
-    return do_action(prop_list, name, action, arg, ctx);
+    case M_PROPERTY_SWITCH: {
+        struct m_property_switch_arg *sarg = arg;
+        if ((r = do_action(prop_list, name, M_PROPERTY_SWITCH, arg, ctx)) !=
+            M_PROPERTY_NOT_IMPLEMENTED)
+            return r;
+        // Fallback to m_option
+        if (!opt.type->add)
+            return M_PROPERTY_NOT_IMPLEMENTED;
+        if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
+            return r;
+        opt.type->add(&opt, &val, sarg->inc, sarg->wrap);
+        r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
+        m_option_free(&opt, &val);
+        return r;
+    }
+    case M_PROPERTY_SET: {
+        if (!opt.type->clamp) {
+            mp_msg(MSGT_CPLAYER, MSGL_WARN, "Property '%s' without clamp().\n",
+                   name);
+        } else {
+            m_option_copy(&opt, &val, arg);
+            r = opt.type->clamp(&opt, arg);
+            m_option_free(&opt, &val);
+            if (r != 0) {
+                mp_msg(MSGT_CPLAYER, MSGL_ERR,
+                       "Property '%s': invalid value.\n", name);
+                return M_PROPERTY_ERROR;
+            }
+        }
+        return do_action(prop_list, name, M_PROPERTY_SET, arg, ctx);
+    }
+    default:
+        return do_action(prop_list, name, action, arg, ctx);
+    }
 }
 
-char *m_properties_expand_string(const m_option_t *prop_list, char *str,
+static int m_property_do_bstr(const m_option_t *prop_list, bstr name,
+                              int action, void *arg, void *ctx)
+{
+    char name0[64];
+    if (name.len >= sizeof(name0))
+        return M_PROPERTY_UNKNOWN;
+    snprintf(name0, sizeof(name0), "%.*s", BSTR_P(name));
+    return m_property_do(prop_list, name0, action, arg, ctx);
+}
+
+static void append_str(char **s, int *len, bstr append)
+{
+    MP_TARRAY_GROW(NULL, *s, *len + append.len);
+    memcpy(*s + *len, append.start, append.len);
+    *len = *len + append.len;
+}
+
+char *m_properties_expand_string(const m_option_t *prop_list, char *str0,
                                  void *ctx)
 {
-    int l, fr = 0, pos = 0, size = strlen(str) + 512;
-    char *p = NULL, *e, *ret = malloc(size), num_val;
-    int skip = 0, lvl = 0, skip_lvl = 0;
+    char *ret = NULL;
+    int ret_len = 0;
+    bool skip = false;
+    int level = 0, skip_level = 0;
+    bstr str = bstr0(str0);
 
-    while (str[0]) {
-        if (str[0] == '\\') {
-            int sl = 1;
-            switch (str[1]) {
-            case 'e':
-                p = "\x1b", l = 1; break;
-            case 'n':
-                p = "\n", l = 1; break;
-            case 'r':
-                p = "\r", l = 1; break;
-            case 't':
-                p = "\t", l = 1; break;
-            case 'x':
-                if (str[2]) {
-                    char num[3] = { str[2], str[3], 0 };
-                    char *end = num;
-                    num_val = strtol(num, &end, 16);
-                    sl = end - num + 1;
-                    l = 1;
-                    p = &num_val;
-                } else
-                    l = 0;
-                break;
-            default:
-                p = str + 1, l = 1;
-            }
-            str += 1 + sl;
-        } else if (lvl > 0 && str[0] == ')') {
-            if (skip && lvl <= skip_lvl)
-                skip = 0;
-            lvl--, str++, l = 0;
-        } else if (str[0] == '$' && str[1] == '{'
-                   && (e = strchr(str + 2, '}'))) {
-            str += 2;
-            int method = M_PROPERTY_PRINT;
-            if (str[0] == '=') {
-                str += 1;
-                method = M_PROPERTY_TO_STRING;
-            }
-            int pl = e - str;
-            char pname[pl + 1];
-            memcpy(pname, str, pl);
-            pname[pl] = 0;
-            if (m_property_do(prop_list, pname, method, &p, ctx) >= 0 && p)
-                l = strlen(p), fr = 1;
-            else
-                l = 0;
-            str = e + 1;
-        } else if (str[0] == '?' && str[1] == '('
-                   && (e = strchr(str + 2, ':'))) {
-            lvl++;
+    while (str.len) {
+        if (level > 0 && bstr_eatstart0(&str, "}")) {
+            if (skip && level <= skip_level)
+                skip = false;
+            level--;
+        } else if (bstr_startswith0(str, "${") && bstr_find0(str, "}") >= 0) {
+            str = bstr_cut(str, 2);
+            level++;
+
+            // Assume ":" and "}" can't be part of the property name
+            // => if ":" comes before "}", it must be for the fallback
+            int term_pos = bstrcspn(str, ":}");
+            bstr name = bstr_splice(str, 0, term_pos < 0 ? str.len : term_pos);
+            str = bstr_cut(str, term_pos);
+            bool have_fallback = bstr_eatstart0(&str, ":");
+
             if (!skip) {
-                int is_not = str[2] == '!';
-                int pl = e - str - (is_not ? 3 : 2);
-                char pname[pl + 1];
-                memcpy(pname, str + (is_not ? 3 : 2), pl);
-                pname[pl] = 0;
-                if (m_property_do(prop_list, pname, M_PROPERTY_GET, NULL, ctx) < 0) {
-                    if (!is_not)
-                        skip = 1, skip_lvl = lvl;
-                } else if (is_not)
-                    skip = 1, skip_lvl = lvl;
+                bool cond_yes = bstr_eatstart0(&name, "?");
+                bool cond_no = !cond_yes && bstr_eatstart0(&name, "!");
+                bool raw = bstr_eatstart0(&name, "=");
+                int method = (raw || cond_yes || cond_no)
+                             ? M_PROPERTY_GET_STRING : M_PROPERTY_PRINT;
+
+                char *s = NULL;
+                int r = m_property_do_bstr(prop_list, name, method, &s, ctx);
+                if (cond_yes || cond_no) {
+                    skip = (!!s != cond_yes);
+                } else {
+                    skip = !!s;
+                    char *append = s;
+                    if (!s && !have_fallback && !raw) {
+                        append = r == M_PROPERTY_UNAVAILABLE
+                                 ? "(unavailable)" : "(error)";
+                    }
+                    append_str(&ret, &ret_len, bstr0(append));
+                }
+                talloc_free(s);
+                if (skip)
+                    skip_level = level;
             }
-            str = e + 1, l = 0;
-        } else
-            p = str, l = 1, str++;
+        } else if (level == 0 && bstr_eatstart0(&str, "$>")) {
+            append_str(&ret, &ret_len, str);
+            break;
+        } else {
+            char c;
 
-        if (skip || l <= 0)
-            continue;
+            // Other combinations, e.g. "$x", are added verbatim
+            if (bstr_eatstart0(&str, "$$")) {
+                c = '$';
+            } else if (bstr_eatstart0(&str, "$}")) {
+                c = '}';
+            } else {
+                c = str.start[0];
+                str = bstr_cut(str, 1);
+            }
 
-        if (pos + l + 1 > size) {
-            size = pos + l + 512;
-            ret = realloc(ret, size);
+            if (!skip)
+                MP_TARRAY_APPEND(NULL, ret, ret_len, c);
         }
-        memcpy(ret + pos, p, l);
-        pos += l;
-        if (fr)
-            talloc_free(p), fr = 0;
     }
 
-    ret[pos] = 0;
+    MP_TARRAY_APPEND(NULL, ret, ret_len, '\0');
     return ret;
 }
 
@@ -231,193 +314,32 @@ void m_properties_print_help_list(const m_option_t *list)
     mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "\nTotal: %d properties\n", count);
 }
 
-// Some generic property implementations
-
 int m_property_int_ro(const m_option_t *prop, int action,
                       void *arg, int var)
 {
-    switch (action) {
-    case M_PROPERTY_GET:
-        if (!arg)
-            return 0;
+    if (action == M_PROPERTY_GET) {
         *(int *)arg = var;
-        return 1;
+        return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-int m_property_int_range(const m_option_t *prop, int action,
-                         void *arg, int *var)
-{
-    switch (action) {
-    case M_PROPERTY_SET:
-        if (!arg)
-            return 0;
-        M_PROPERTY_CLAMP(prop, *(int *)arg);
-        *var = *(int *)arg;
-        return 1;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        *var += (arg ? *(int *)arg : 1) *
-                (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
-        M_PROPERTY_CLAMP(prop, *var);
-        return 1;
-    }
-    return m_property_int_ro(prop, action, arg, *var);
-}
-
-int m_property_choice(const m_option_t *prop, int action,
-                      void *arg, int *var)
-{
-    switch (action) {
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        *var += action == M_PROPERTY_STEP_UP ? 1 : prop->max;
-        *var %= (int)prop->max + 1;
-        return 1;
-    }
-    return m_property_int_range(prop, action, arg, var);
-}
-
-int m_property_flag_ro(const m_option_t *prop, int action,
-                       void *arg, int var)
-{
-    switch (action) {
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return 0;
-        *(char **)arg = talloc_strdup(NULL, (var > prop->min) ?
-                               mp_gtext("enabled") : mp_gtext("disabled"));
-        return 1;
-    }
-    return m_property_int_ro(prop, action, arg, var);
-}
-
-int m_property_flag(const m_option_t *prop, int action,
-                    void *arg, int *var)
-{
-    switch (action) {
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        *var = *var == prop->min ? prop->max : prop->min;
-        return 1;
-    case M_PROPERTY_PRINT:
-        return m_property_flag_ro(prop, action, arg, *var);
-    }
-    return m_property_int_range(prop, action, arg, var);
 }
 
 int m_property_float_ro(const m_option_t *prop, int action,
                         void *arg, float var)
 {
-    switch (action) {
-    case M_PROPERTY_GET:
-        if (!arg)
-            return 0;
+    if (action == M_PROPERTY_GET) {
         *(float *)arg = var;
-        return 1;
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return 0;
-        *(char **)arg = talloc_asprintf(NULL, "%.2f", var);
-        return 1;
+        return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-int m_property_float_range(const m_option_t *prop, int action,
-                           void *arg, float *var)
-{
-    switch (action) {
-    case M_PROPERTY_SET:
-        if (!arg)
-            return 0;
-        M_PROPERTY_CLAMP(prop, *(float *)arg);
-        *var = *(float *)arg;
-        return 1;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        *var += (arg ? *(float *)arg : 0.1) *
-                (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
-        M_PROPERTY_CLAMP(prop, *var);
-        return 1;
-    }
-    return m_property_float_ro(prop, action, arg, *var);
-}
-
-int m_property_delay(const m_option_t *prop, int action,
-                     void *arg, float *var)
-{
-    switch (action) {
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return 0;
-        *(char **)arg = talloc_asprintf(NULL, "%d ms", ROUND((*var) * 1000));
-        return 1;
-    default:
-        return m_property_float_range(prop, action, arg, var);
-    }
 }
 
 int m_property_double_ro(const m_option_t *prop, int action,
                          void *arg, double var)
 {
-    switch (action) {
-    case M_PROPERTY_GET:
-        if (!arg)
-            return 0;
+    if (action == M_PROPERTY_GET) {
         *(double *)arg = var;
-        return 1;
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return 0;
-        *(char **)arg = talloc_asprintf(NULL, "%.2f", var);
-        return 1;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-int m_property_time_ro(const m_option_t *prop, int action,
-                       void *arg, double var)
-{
-    switch (action) {
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        else {
-            *(char **)arg = mp_format_time(var, false);
-            return M_PROPERTY_OK;
-        }
-    }
-    return m_property_double_ro(prop, action, arg, var);
-}
-
-int m_property_string_ro(const m_option_t *prop, int action, void *arg,
-                         char *str)
-{
-    switch (action) {
-    case M_PROPERTY_GET:
-        if (!arg)
-            return 0;
-        *(char **)arg = str;
-        return 1;
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return 0;
-        *(char **)arg = talloc_strdup(NULL, str);
-        return 1;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-int m_property_bitrate(const m_option_t *prop, int action, void *arg, int rate)
-{
-    switch (action) {
-    case M_PROPERTY_PRINT:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        *(char **)arg = talloc_asprintf(NULL, "%d kbps", rate * 8 / 1000);
         return M_PROPERTY_OK;
     }
-    return m_property_int_ro(prop, action, arg, rate);
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
