@@ -205,6 +205,8 @@ stream_t *open_stream_full(const char *filename, int mode,
   stream_t* s;
   char *redirected_url = NULL;
 
+  assert(filename);
+
   int dummy;
   if (!file_format)
     file_format = &dummy;
@@ -250,24 +252,12 @@ stream_t *open_stream_full(const char *filename, int mode,
 stream_t* open_stream(const char *filename, struct MPOpts *options,
                       int *file_format)
 {
-
-if(!filename) {
-   mp_msg(MSGT_OPEN,MSGL_ERR,"NULL filename, report this bug\n");
-   return NULL;
-}
-
   return open_stream_full(filename,STREAM_READ,options,file_format);
 }
 
 stream_t *open_output_stream(const char *filename, struct MPOpts *options)
 {
-  int file_format; //unused
-  if(!filename) {
-    mp_msg(MSGT_OPEN,MSGL_ERR,"open_output_stream(), NULL filename, report this bug\n");
-    return NULL;
-  }
-
-  return open_stream_full(filename,STREAM_WRITE,options,&file_format);
+  return open_stream_full(filename,STREAM_WRITE,options,NULL);
 }
 
 //=================== STREAMER =========================
