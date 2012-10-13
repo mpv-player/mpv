@@ -109,12 +109,12 @@ static const struct m_option_type m_option_type_cycle_dir = {
 
 static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_IGNORE, "ignore", },
-#ifdef CONFIG_RADIO
+
   { MP_CMD_RADIO_STEP_CHANNEL, "radio_step_channel", { ARG_INT } },
   { MP_CMD_RADIO_SET_CHANNEL, "radio_set_channel", { ARG_STRING } },
   { MP_CMD_RADIO_SET_FREQ, "radio_set_freq", { ARG_FLOAT } },
   { MP_CMD_RADIO_STEP_FREQ, "radio_step_freq", {ARG_FLOAT } },
-#endif
+
   { MP_CMD_SEEK, "seek", {
       ARG_FLOAT,
       OARG_CHOICE(0, ({"relative", 0},          {"0", 0},
@@ -143,7 +143,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SHOW_TEXT, "show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
   { MP_CMD_SHOW_PROGRESS, "show_progress", },
   { MP_CMD_SUB_LOAD, "sub_load", { ARG_STRING } },
-#ifdef CONFIG_TV
+
   { MP_CMD_TV_START_SCAN, "tv_start_scan", },
   { MP_CMD_TV_STEP_CHANNEL, "tv_step_channel", { ARG_INT } },
   { MP_CMD_TV_STEP_NORM, "tv_step_norm", },
@@ -153,10 +153,9 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_TV_SET_FREQ, "tv_set_freq", { ARG_FLOAT } },
   { MP_CMD_TV_STEP_FREQ, "tv_step_freq", { ARG_FLOAT } },
   { MP_CMD_TV_SET_NORM, "tv_set_norm", { ARG_STRING } },
-#endif
-#ifdef CONFIG_DVBIN
+
   { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", { ARG_INT, ARG_INT } },
-#endif
+
   { MP_CMD_SCREENSHOT, "screenshot", {
       OARG_CHOICE(0, ({"single", 0},           {"0", 0},
                       {"each-frame", 1},       {"1", 1})),
