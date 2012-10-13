@@ -948,10 +948,10 @@ static void uninit_rendering(struct gl_priv *p)
     delete_shaders(p);
 
     for (int n = 0; n < 2; n++) {
-        gl->DeleteTextures(1, &p->scalers->gl_lut);
-        p->scalers->gl_lut = 0;
-        p->scalers->lut_name = NULL;
-        p->scalers->kernel = NULL;
+        gl->DeleteTextures(1, &p->scalers[n].gl_lut);
+        p->scalers[n].gl_lut = 0;
+        p->scalers[n].lut_name = NULL;
+        p->scalers[n].kernel = NULL;
     }
 
     gl->DeleteTextures(1, &p->dither_texture);
