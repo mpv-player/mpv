@@ -485,6 +485,8 @@ struct input_ctx {
     unsigned int num_key_down;
     unsigned int last_key_down;
 
+    bool test;
+
     bool default_bindings;
     // List of command binding sections
     struct cmd_bind_section *cmd_bind_sections;
@@ -526,6 +528,7 @@ static const m_option_t input_conf[] = {
     OPT_STRING("ar-dev", input.ar_dev, CONF_GLOBAL),
     OPT_STRING("file", input.in_file, CONF_GLOBAL),
     OPT_MAKE_FLAGS("default-bindings", input.default_bindings, CONF_GLOBAL),
+    OPT_MAKE_FLAGS("test", input.test, CONF_GLOBAL),
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -854,6 +857,7 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
     int pausing = 0;
     int on_osd = MP_ON_OSD_AUTO;
     struct mp_cmd *cmd = NULL;
+    bstr start = str;
     void *tmp = talloc_new(NULL);
 
     if (eat_token(&str, "pausing")) {
@@ -877,6 +881,7 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
                     entry->old, entry->new, loc);
             bstr s = bstr_cut(str, old_len);
             str = bstr0(talloc_asprintf(tmp, "%s%.*s", entry->new, BSTR_P(s)));
+            start = str;
             break;
         }
     }
@@ -970,6 +975,9 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
                 cmd->nargs);
         goto error;
     }
+
+    bstr orig = (bstr) {start.start, str.start - start.start};
+    cmd->original = bstrdup(cmd, bstr_strip(orig));
 
     talloc_free(tmp);
     return cmd;
@@ -1090,6 +1098,67 @@ static int read_wakeup(void *ctx, int fd)
     return MP_INPUT_NOTHING;
 }
 
+static bool bind_matches_key(struct cmd_bind *bind, int n, int *keys);
+
+static void append_bind_info(char **pmsg, struct cmd_bind *bind)
+{
+    char *msg = *pmsg;
+    struct mp_cmd *cmd = mp_input_parse_cmd(bstr0(bind->cmd), bind->location);
+    bstr stripped = cmd ? cmd->original : bstr0(bind->cmd);
+    msg = talloc_asprintf_append(msg, " '%.*s'", BSTR_P(stripped));
+    if (!cmd)
+        msg = talloc_asprintf_append(msg, " (invalid)");
+    if (strcmp(bind->owner->section, "default") != 0)
+        msg = talloc_asprintf_append(msg, " in section {%s}",
+                                     bind->owner->section);
+    if (bind->owner->is_builtin) {
+        msg = talloc_asprintf_append(msg, " (default binding)");
+    } else {
+        msg = talloc_asprintf_append(msg, " in %s", bind->location);
+    }
+    *pmsg = msg;
+}
+
+static mp_cmd_t *handle_test(struct input_ctx *ictx, int n, int *keys)
+{
+    char *key_buf = get_key_combo_name(keys, n);
+    // "$>" to disable property substitution when invoking "show_text"
+    char *msg = talloc_asprintf(NULL, "$>Key %s is bound to:\n", key_buf);
+    talloc_free(key_buf);
+
+    int count = 0;
+    for (struct cmd_bind_section *bs = ictx->cmd_bind_sections;
+         bs; bs = bs->next)
+    {
+        for (struct cmd_bind *bind = bs->cmd_binds; bind->cmd; bind++) {
+            if (bind_matches_key(bind, n, keys)) {
+                count++;
+                msg = talloc_asprintf_append(msg, "%d. ", count);
+                append_bind_info(&msg, bind);
+                msg = talloc_asprintf_append(msg, "\n");
+            }
+        }
+    }
+
+    if (!count)
+        msg = talloc_asprintf_append(msg, "(nothing)");
+
+    mp_cmd_t *res = mp_input_parse_cmd(bstr0("show_text \"\""), "");
+    res->args[0].v.s = talloc_steal(res, msg);
+    return res;
+}
+
+static bool bind_matches_key(struct cmd_bind *bind, int n, int *keys)
+{
+    int found = 1, s;
+    for (s = 0; s < n && bind->input[s] != 0; s++) {
+        if (bind->input[s] != keys[s]) {
+            found = 0;
+            break;
+        }
+    }
+    return found && bind->input[s] == 0 && s == n;
+}
 
 static struct cmd_bind *find_bind_for_key(struct cmd_bind *binds, int n,
                                           int *keys)
@@ -1099,14 +1168,7 @@ static struct cmd_bind *find_bind_for_key(struct cmd_bind *binds, int n,
     if (n <= 0)
         return NULL;
     for (j = 0; binds[j].cmd != NULL; j++) {
-        int found = 1, s;
-        for (s = 0; s < n && binds[j].input[s] != 0; s++) {
-            if (binds[j].input[s] != keys[s]) {
-                found = 0;
-                break;
-            }
-        }
-        if (found && binds[j].input[s] == 0 && s == n)
+        if (bind_matches_key(&binds[j], n, keys))
             break;
     }
     return binds[j].cmd ? &binds[j] : NULL;
@@ -1152,10 +1214,11 @@ static struct cmd_bind *section_find_bind_for_key(struct input_ctx *ictx,
 
 static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
 {
-    struct cmd_bind *cmd = NULL;
-    mp_cmd_t *ret;
+    if (ictx->test)
+        return handle_test(ictx, n, keys);
 
-    cmd = section_find_bind_for_key(ictx, false, ictx->section, n, keys);
+    struct cmd_bind *cmd
+        = section_find_bind_for_key(ictx, false, ictx->section, n, keys);
     if (ictx->default_bindings && cmd == NULL)
         cmd = section_find_bind_for_key(ictx, true, ictx->section, n, keys);
     if (!(ictx->section_flags & MP_INPUT_NO_DEFAULT_SECTION)) {
@@ -1172,7 +1235,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
         talloc_free(key_buf);
         return NULL;
     }
-    ret =  mp_input_parse_cmd(bstr0(cmd->cmd), cmd->location);
+    mp_cmd_t *ret = mp_input_parse_cmd(bstr0(cmd->cmd), cmd->location);
     if (!ret) {
         char *key_buf = get_key_combo_name(keys, n);
         mp_tmsg(MSGT_INPUT, MSGL_ERR,
@@ -1697,6 +1760,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
         .ar_delay = input_conf->ar_delay,
         .ar_rate = input_conf->ar_rate,
         .default_bindings = input_conf->default_bindings,
+        .test = input_conf->test,
         .wakeup_pipe = {-1, -1},
     };
     ictx->section = talloc_strdup(ictx, "default");

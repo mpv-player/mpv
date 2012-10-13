@@ -160,6 +160,7 @@ typedef struct MPOpts {
         int use_lircc;
         int use_ar; // apple remote
         int default_bindings;
+        int test;
     } input;
 
     struct encode_output_conf {

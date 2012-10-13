@@ -935,6 +935,13 @@
         can do several `echo "seek 10" > mp_pipe` and the pipe will stay
         valid.
 
+    test
+        Input test mode. Instead of executing commands on key presses, mpv
+        will show the keys and the bound commands on the OSD. Has to be used
+        with a dummy video, and the normal ways to quit the player will not
+        work (key bindings that normally quit will be shown on OSD only, just
+        like any other binding).
+
 --ipv4-only-proxy
     Skip any HTTP proxy for IPv6 addresses. It will still be used for IPv4
     connections.

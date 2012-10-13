@@ -130,6 +130,7 @@ typedef struct mp_cmd {
     int nargs;
     int pausing;
     enum mp_on_osd on_osd;
+    bstr original;
     struct mp_cmd *queue_next;
 } mp_cmd_t;
 
