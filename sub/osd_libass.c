@@ -233,14 +233,6 @@ static char *mangle_ass(const char *in)
 {
     char *res = talloc_strdup(NULL, "");
     while (*in) {
-        if (in[0] == '\\' && strchr("nNh{}", in[1])) {
-            // Undo escaping, e.g. \{ -> \\{
-            // Note that e.g. \\j still must be emitted as \\j
-            // (libass only understands the escapes listed in the strchr args)
-            res = talloc_asprintf_append_buffer(res, "\\\\%c", in[1]);
-            in += 2;
-            continue;
-        }
         // As used by osd_get_function_sym().
         if (in[0] == '\xFF') {
             res = talloc_strdup_append_buffer(res, ASS_USE_OSD_FONT);
@@ -252,6 +244,9 @@ static char *mangle_ass(const char *in)
         if (*in == '{')
             res = talloc_strdup_append_buffer(res, "\\");
         res = talloc_strndup_append_buffer(res, in, 1);
+        // Break ASS escapes with U+2060 WORD JOINER
+        if (*in == '\\')
+            append_utf8_buffer(res, 0x2060);
         in++;
     }
     return res;
