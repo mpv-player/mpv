@@ -180,8 +180,9 @@ int mp_input_queue_cmd(struct input_ctx *ictx, struct mp_cmd *cmd);
 struct mp_cmd *mp_input_get_cmd(struct input_ctx *ictx, int time,
                                 int peek_only);
 
-/* Parse text and return corresponding struct mp_cmd. */
-struct mp_cmd *mp_input_parse_cmd(bstr str);
+// Parse text and return corresponding struct mp_cmd.
+// The location parameter is for error messages.
+struct mp_cmd *mp_input_parse_cmd(bstr str, const char *location);
 
 // After getting a command from mp_input_get_cmd you need to free it using this
 // function

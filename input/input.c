@@ -69,6 +69,8 @@
 struct cmd_bind {
     int input[MP_MAX_KEY_DOWN + 1];
     char *cmd;
+    char *location;     // filename/line number of definition
+    struct cmd_bind_section *owner;
 };
 
 struct key_name {
@@ -847,7 +849,7 @@ error:
     return false;
 }
 
-mp_cmd_t *mp_input_parse_cmd(bstr str)
+mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
 {
     int pausing = 0;
     int on_osd = MP_ON_OSD_AUTO;
@@ -871,8 +873,8 @@ mp_cmd_t *mp_input_parse_cmd(bstr str)
                         (bstr) {(char *)entry->old, old_len}) == 0)
         {
             mp_tmsg(MSGT_INPUT, MSGL_V, "Warning: command '%s' is "
-                    "deprecated, replaced with '%s'. Fix your input.conf!\n",
-                    entry->old, entry->new);
+                    "deprecated, replaced with '%s' at %s.\n",
+                    entry->old, entry->new, loc);
             bstr s = bstr_cut(str, old_len);
             str = bstr0(talloc_asprintf(tmp, "%s%.*s", entry->new, BSTR_P(s)));
             break;
@@ -973,6 +975,7 @@ mp_cmd_t *mp_input_parse_cmd(bstr str)
     return cmd;
 
 error:
+    mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command was defined at %s.\n", loc);
     talloc_free(cmd);
     talloc_free(tmp);
     return NULL;
@@ -1088,7 +1091,8 @@ static int read_wakeup(void *ctx, int fd)
 }
 
 
-static char *find_bind_for_key(const struct cmd_bind *binds, int n, int *keys)
+static struct cmd_bind *find_bind_for_key(struct cmd_bind *binds, int n,
+                                          int *keys)
 {
     int j;
 
@@ -1105,7 +1109,7 @@ static char *find_bind_for_key(const struct cmd_bind *binds, int n, int *keys)
         if (found && binds[j].input[s] == 0 && s == n)
             break;
     }
-    return binds[j].cmd;
+    return binds[j].cmd ? &binds[j] : NULL;
 }
 
 static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
@@ -1137,9 +1141,9 @@ static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
     return bind_section;
 }
 
-static char *section_find_bind_for_key(struct input_ctx *ictx,
-                                       bool builtin, char *section,
-                                       int n, int *keys)
+static struct cmd_bind *section_find_bind_for_key(struct input_ctx *ictx,
+                                                  bool builtin, char *section,
+                                                  int n, int *keys)
 {
     struct cmd_bind_section *bs = get_bind_section(ictx, builtin,
                                                    bstr0(section));
@@ -1148,7 +1152,7 @@ static char *section_find_bind_for_key(struct input_ctx *ictx,
 
 static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
 {
-    char *cmd = NULL;
+    struct cmd_bind *cmd = NULL;
     mp_cmd_t *ret;
 
     cmd = section_find_bind_for_key(ictx, false, ictx->section, n, keys);
@@ -1168,11 +1172,11 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
         talloc_free(key_buf);
         return NULL;
     }
-    ret =  mp_input_parse_cmd(bstr0(cmd));
+    ret =  mp_input_parse_cmd(bstr0(cmd->cmd), cmd->location);
     if (!ret) {
         char *key_buf = get_key_combo_name(keys, n);
         mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                "Invalid command for bound key '%s': '%s'\n", key_buf, cmd);
+                "Invalid command for bound key '%s': '%s'\n", key_buf, cmd->cmd);
         talloc_free(key_buf);
     }
     return ret;
@@ -1310,7 +1314,7 @@ static void read_cmd_fd(struct input_ctx *ictx, struct input_fd *cmd_fd)
     char *text;
     while ((r = read_cmd(cmd_fd, &text)) >= 0) {
         ictx->got_new_events = true;
-        struct mp_cmd *cmd = mp_input_parse_cmd(bstr0(text));
+        struct mp_cmd *cmd = mp_input_parse_cmd(bstr0(text), "<pipe>");
         talloc_free(text);
         if (cmd)
             queue_add(&ictx->control_cmd_queue, cmd, false);
@@ -1457,7 +1461,7 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
 {
     if (async_quit_request)
-        return mp_input_parse_cmd(bstr0("quit 1"));
+        return mp_input_parse_cmd(bstr0("quit 1"), "");
 
     if (ictx->control_cmd_queue.first || ictx->key_cmd_queue.first)
         time = 0;
@@ -1563,7 +1567,8 @@ static int get_input_from_name(char *name, int *keys)
 }
 
 static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
-                      const int keys[MP_MAX_KEY_DOWN + 1], bstr command)
+                      const int keys[MP_MAX_KEY_DOWN + 1], bstr command,
+                      const char *loc)
 {
     int i = 0, j;
     struct cmd_bind *bind = NULL;
@@ -1591,14 +1596,24 @@ static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
     }
     talloc_free(bind->cmd);
     bind->cmd = bstrdup0(bind_section->cmd_binds, command);
+    bind->location = talloc_strdup(bind_section->cmd_binds, loc);
+    bind->owner = bind_section;
     memcpy(bind->input, keys, (MP_MAX_KEY_DOWN + 1) * sizeof(int));
 }
 
-static int parse_config(struct input_ctx *ictx, bool builtin, bstr data)
+static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
+                        const char *location)
 {
     int n_binds = 0, keys[MP_MAX_KEY_DOWN + 1];
+    int line_no = 0;
+    char *cur_loc = NULL;
 
     while (data.len) {
+        line_no++;
+        if (cur_loc)
+            talloc_free(cur_loc);
+        cur_loc = talloc_asprintf(NULL, "%s:%d", location, line_no);
+
         bstr line = bstr_strip_linebreaks(bstr_getline(data, &data));
         line = bstr_lstrip(line);
         if (line.len == 0 || bstr_startswith0(line, "#"))
@@ -1609,14 +1624,15 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data)
         command = bstr_strip(command);
         if (command.len == 0) {
             mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                    "Unfinished key binding: %.*s\n", BSTR_P(line));
+                    "Unfinished key binding: %.*s at %s\n", BSTR_P(line),
+                    cur_loc);
             continue;
         }
         char *name = bstrdup0(NULL, keyname);
         if (!get_input_from_name(name, keys)) {
             talloc_free(name);
             mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                    "Unknown key '%.*s'\n", BSTR_P(keyname));
+                    "Unknown key '%.*s' at %s\n", BSTR_P(keyname), cur_loc);
             continue;
         }
         talloc_free(name);
@@ -1630,12 +1646,14 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data)
             }
         }
 
-        bind_keys(ictx, builtin, section, keys, command);
+        bind_keys(ictx, builtin, section, keys, command, cur_loc);
         n_binds++;
 
         // Print warnings if invalid commands are encountered.
-        talloc_free(mp_input_parse_cmd(command));
+        talloc_free(mp_input_parse_cmd(command, cur_loc));
     }
+
+    talloc_free(cur_loc);
 
     return n_binds;
 }
@@ -1651,7 +1669,7 @@ static int parse_config_file(struct input_ctx *ictx, char *file)
     res = stream_read_complete(s, NULL, 1000000, 0);
     free_stream(s);
     mp_msg(MSGT_INPUT, MSGL_V, "Parsing input config file %s\n", file);
-    int n_binds = parse_config(ictx, false, res);
+    int n_binds = parse_config(ictx, false, res, file);
     talloc_free(res.start);
     mp_msg(MSGT_INPUT, MSGL_V, "Input config file %s parsed: %d binds\n",
            file, n_binds);
@@ -1683,7 +1701,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
     };
     ictx->section = talloc_strdup(ictx, "default");
 
-    parse_config(ictx, true, bstr0(builtin_input_conf));
+    parse_config(ictx, true, bstr0(builtin_input_conf), "<default>");
 
 #ifdef CONFIG_COCOA
     cocoa_events_init(ictx, read_all_fd_events);
