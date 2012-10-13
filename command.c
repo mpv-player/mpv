@@ -162,8 +162,38 @@ static int mp_property_playback_speed(m_option_t *prop, int action,
 static int mp_property_path(m_option_t *prop, int action, void *arg,
                             MPContext *mpctx)
 {
+    if (!mpctx->filename)
+        return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_GET) {
         *(char **)arg = talloc_strdup(NULL, mpctx->filename);
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_media_title(m_option_t *prop, int action, void *arg,
+                                   MPContext *mpctx)
+{
+    char *name = mpctx->filename;
+    if (mpctx->resolve_result)
+        name = mpctx->resolve_result->title;
+    if (!name)
+        return M_PROPERTY_UNAVAILABLE;
+    if (action == M_PROPERTY_GET) {
+        *(char **)arg = talloc_strdup(NULL, name);
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_stream_path(m_option_t *prop, int action, void *arg,
+                                   MPContext *mpctx)
+{
+    struct stream *stream = mpctx->stream;
+    if (!stream || !stream->url)
+        return M_PROPERTY_UNAVAILABLE;
+    if (action == M_PROPERTY_GET) {
+        *(char **)arg = talloc_strdup(NULL, stream->url);
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -1363,6 +1393,10 @@ static const m_option_t mp_properties[] = {
     { "filename", mp_property_filename, CONF_TYPE_STRING,
       0, 0, 0, NULL },
     { "path", mp_property_path, CONF_TYPE_STRING,
+      0, 0, 0, NULL },
+    { "media-title", mp_property_media_title, CONF_TYPE_STRING,
+      0, 0, 0, NULL },
+    { "stream-path", mp_property_stream_path, CONF_TYPE_STRING,
       0, 0, 0, NULL },
     { "demuxer", mp_property_demuxer, CONF_TYPE_STRING,
       0, 0, 0, NULL },

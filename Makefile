@@ -204,7 +204,6 @@ SRCS_COMMON = asxparser.c \
               osdep/io.c \
               osdep/$(GETCH) \
               osdep/$(TIMER) \
-              stream/open.c \
               stream/stream.c \
               stream/stream_ffmpeg.c \
               stream/stream_file.c \
@@ -242,6 +241,7 @@ SRCS_MPLAYER-$(GL_X11)       += libvo/x11_common.c
 
 SRCS_MPLAYER-$(JACK)         += libao2/ao_jack.c
 SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
+SRCS_MPLAYER-$(LIBQUVI)       += quvi.c
 SRCS_MPLAYER-$(LIRC)          += input/lirc.c
 SRCS_MPLAYER-$(OPENAL)        += libao2/ao_openal.c
 SRCS_MPLAYER-$(OSS)           += libao2/ao_oss.c

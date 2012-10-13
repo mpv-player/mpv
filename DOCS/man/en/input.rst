@@ -237,7 +237,9 @@ loop                        x see ``--loop``
 speed                       x see ``--speed``
 filename                      currently played file (path stripped)
 path                          currently played file (full path)
+media-title                   filename or libquvi QUVIPROP_PAGETITLE
 demuxer
+stream-path                   filename (full path) of stream layer filename
 stream-pos                  x byte position in source stream
 stream-start                  start byte offset in source stream
 stream-end                    end position in bytes in source stream

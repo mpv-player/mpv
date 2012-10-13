@@ -3668,6 +3668,16 @@ static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
 #endif
 }
 
+static struct mp_resolve_result *resolve_url(const char *filename,
+                                             struct MPOpts *opts)
+{
+#ifdef CONFIG_LIBQUVI
+    return mp_resolve_quvi(filename, opts);
+#else
+    return NULL;
+#endif
+}
+
 // Waiting for the slave master to send us a new file to play.
 static void idle_loop(struct MPContext *mpctx)
 {
@@ -3691,8 +3701,9 @@ static void play_current_file(struct MPContext *mpctx)
     struct MPOpts *opts = &mpctx->opts;
 
     mpctx->stop_play = 0;
-
     mpctx->filename = NULL;
+    mpctx->file_format = DEMUXER_TYPE_UNKNOWN;
+
     if (mpctx->playlist->current)
         mpctx->filename = mpctx->playlist->current->filename;
 
@@ -3761,7 +3772,11 @@ static void play_current_file(struct MPContext *mpctx)
     assert(mpctx->sh_video == NULL);
     assert(mpctx->sh_sub == NULL);
 
-    mpctx->stream = open_stream(mpctx->filename, opts, &mpctx->file_format);
+    char *stream_filename = mpctx->filename;
+    mpctx->resolve_result = resolve_url(stream_filename, opts);
+    if (mpctx->resolve_result)
+        stream_filename = mpctx->resolve_result->url;
+    mpctx->stream = open_stream(stream_filename, opts, &mpctx->file_format);
     if (!mpctx->stream) { // error...
         libmpdemux_was_interrupted(mpctx);
         goto terminate_playback;
@@ -4032,6 +4047,9 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     uninit_player(mpctx, uninitialize_parts);
 
     mpctx->filename = NULL;
+    mpctx->file_format = DEMUXER_TYPE_UNKNOWN;
+    talloc_free(mpctx->resolve_result);
+    mpctx->resolve_result = NULL;
 
     vo_sub = NULL;
 #ifdef CONFIG_ASS
