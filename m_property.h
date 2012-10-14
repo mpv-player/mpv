@@ -20,6 +20,7 @@
 #define MPLAYER_M_PROPERTY_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 struct m_option;
 
@@ -129,9 +130,13 @@ char* m_properties_expand_string(const struct m_option* prop_list, char *str,
 // Trivial helpers for implementing properties.
 int m_property_int_ro(const struct m_option* prop, int action, void* arg,
                       int var);
+int m_property_int64_ro(const struct m_option* prop, int action, void* arg,
+                        int64_t var);
 int m_property_float_ro(const struct m_option* prop, int action, void* arg,
                         float var);
 int m_property_double_ro(const struct m_option* prop, int action, void* arg,
                          double var);
+int m_property_strdup_ro(const struct m_option* prop, int action, void* arg,
+                         const char *var);
 
 #endif /* MPLAYER_M_PROPERTY_H */

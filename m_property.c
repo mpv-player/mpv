@@ -324,6 +324,16 @@ int m_property_int_ro(const m_option_t *prop, int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+int m_property_int64_ro(const struct m_option* prop, int action, void* arg,
+                        int64_t var)
+{
+    if (action == M_PROPERTY_GET) {
+        *(int64_t *)arg = var;
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 int m_property_float_ro(const m_option_t *prop, int action,
                         void *arg, float var)
 {
@@ -339,6 +349,16 @@ int m_property_double_ro(const m_option_t *prop, int action,
 {
     if (action == M_PROPERTY_GET) {
         *(double *)arg = var;
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+int m_property_strdup_ro(const struct m_option* prop, int action, void* arg,
+                         const char *var)
+{
+    if (action == M_PROPERTY_GET) {
+        *(char **)arg = talloc_strdup(NULL, var);
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;

@@ -164,11 +164,7 @@ static int mp_property_path(m_option_t *prop, int action, void *arg,
 {
     if (!mpctx->filename)
         return M_PROPERTY_UNAVAILABLE;
-    if (action == M_PROPERTY_GET) {
-        *(char **)arg = talloc_strdup(NULL, mpctx->filename);
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return m_property_strdup_ro(prop, action, arg, mpctx->filename);
 }
 
 static int mp_property_media_title(m_option_t *prop, int action, void *arg,
@@ -179,11 +175,7 @@ static int mp_property_media_title(m_option_t *prop, int action, void *arg,
         name = mpctx->resolve_result->title;
     if (!name)
         return M_PROPERTY_UNAVAILABLE;
-    if (action == M_PROPERTY_GET) {
-        *(char **)arg = talloc_strdup(NULL, name);
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return m_property_strdup_ro(prop, action, arg, name);
 }
 
 static int mp_property_stream_path(m_option_t *prop, int action, void *arg,
@@ -192,11 +184,7 @@ static int mp_property_stream_path(m_option_t *prop, int action, void *arg,
     struct stream *stream = mpctx->stream;
     if (!stream || !stream->url)
         return M_PROPERTY_UNAVAILABLE;
-    if (action == M_PROPERTY_GET) {
-        *(char **)arg = talloc_strdup(NULL, stream->url);
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return m_property_strdup_ro(prop, action, arg, stream->url);
 }
 
 /// filename without path (RO)
@@ -205,14 +193,8 @@ static int mp_property_filename(m_option_t *prop, int action, void *arg,
 {
     if (!mpctx->filename)
         return M_PROPERTY_UNAVAILABLE;
-    if (action == M_PROPERTY_GET) {
-        char *f = (char *)mp_basename(mpctx->filename);
-        if (!*f)
-            f = mpctx->filename;
-        *(char **)arg = talloc_strdup(NULL, f);
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    char *f = (char *)mp_basename(mpctx->filename);
+    return m_property_strdup_ro(prop, action, arg, (*f) ? f : mpctx->filename);
 }
 
 /// Demuxer name (RO)
@@ -222,11 +204,7 @@ static int mp_property_demuxer(m_option_t *prop, int action, void *arg,
     struct demuxer *demuxer = mpctx->master_demuxer;
     if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
-    if (action == M_PROPERTY_GET) {
-        *(char **)arg = talloc_strdup(NULL, demuxer->desc->name);
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return m_property_strdup_ro(prop, action, arg, demuxer->desc->name);
 }
 
 /// Position in the stream (RW)
@@ -254,12 +232,7 @@ static int mp_property_stream_start(m_option_t *prop, int action,
     struct stream *stream = mpctx->stream;
     if (!stream)
         return M_PROPERTY_UNAVAILABLE;
-    switch (action) {
-    case M_PROPERTY_GET:
-        *(int64_t *) arg = stream->start_pos;
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return m_property_int64_ro(prop, action, arg, stream->start_pos);
 }
 
 /// Stream end offset (RO)
@@ -269,12 +242,7 @@ static int mp_property_stream_end(m_option_t *prop, int action, void *arg,
     struct stream *stream = mpctx->stream;
     if (!stream)
         return M_PROPERTY_UNAVAILABLE;
-    switch (action) {
-    case M_PROPERTY_GET:
-        *(int64_t *) arg = stream->end_pos;
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return m_property_int64_ro(prop, action, arg, stream->end_pos);
 }
 
 /// Stream length (RO)
@@ -284,12 +252,8 @@ static int mp_property_stream_length(m_option_t *prop, int action,
     struct stream *stream = mpctx->stream;
     if (!stream)
         return M_PROPERTY_UNAVAILABLE;
-    switch (action) {
-    case M_PROPERTY_GET:
-        *(int64_t *) arg = stream->end_pos - stream->start_pos;
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return m_property_int64_ro(prop, action, arg,
+                               stream->end_pos - stream->start_pos);
 }
 
 /// Current stream position in seconds (RO)
