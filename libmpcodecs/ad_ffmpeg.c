@@ -52,6 +52,7 @@ struct priv {
     AVCodecContext *avctx;
     AVFrame *avframe;
     char *output;
+    char *output_packed; // used by deplanarize to store packed audio samples
     int output_left;
     int unitsize;
     int previous_data_left;  // input demuxer packet data
@@ -71,7 +72,7 @@ static int setup_format(sh_audio_t *sh_audio,
                         const AVCodecContext *lavc_context)
 {
     int sample_format = sh_audio->sample_format;
-    switch (lavc_context->sample_fmt) {
+    switch (av_get_packed_sample_fmt(lavc_context->sample_fmt)) {
     case AV_SAMPLE_FMT_U8:  sample_format = AF_FORMAT_U8;       break;
     case AV_SAMPLE_FMT_S16: sample_format = AF_FORMAT_S16_NE;   break;
     case AV_SAMPLE_FMT_S32: sample_format = AF_FORMAT_S32_NE;   break;
@@ -218,7 +219,7 @@ static int init(sh_audio_t *sh_audio)
     if (sh_audio->wf && sh_audio->wf->nAvgBytesPerSec)
         sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
 
-    switch (lavc_context->sample_fmt) {
+    switch (av_get_packed_sample_fmt(lavc_context->sample_fmt)) {
     case AV_SAMPLE_FMT_U8:
     case AV_SAMPLE_FMT_S16:
     case AV_SAMPLE_FMT_S32:
@@ -262,6 +263,34 @@ static int control(sh_audio_t *sh, int cmd, void *arg, ...)
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
+}
+
+static av_always_inline void deplanarize(struct sh_audio *sh)
+{
+    struct priv *priv = sh->context;
+
+    size_t bps        = av_get_bytes_per_sample(priv->avctx->sample_fmt);
+    size_t nb_samples = priv->avframe->nb_samples;
+    size_t channels   = priv->avctx->channels;
+    size_t size       = bps * nb_samples * channels;
+
+    if (talloc_get_size(priv->output_packed) != size)
+        priv->output_packed =
+            talloc_realloc_size(priv, priv->output_packed, size);
+
+    size_t offset = 0;
+    unsigned char *output_ptr = priv->output_packed;
+    unsigned char **src = priv->avframe->data;
+
+    for (size_t s = 0; s < nb_samples; s++) {
+        for (size_t c = 0; c < channels; c++) {
+            memcpy(output_ptr, src[c] + offset, bps);
+            output_ptr += bps;
+        }
+        offset += bps;
+    }
+
+    priv->output = priv->output_packed;
 }
 
 static int decode_new_packet(struct sh_audio *sh)
@@ -320,10 +349,6 @@ static int decode_new_packet(struct sh_audio *sh)
         priv->previous_data_left = insize - ret;
     if (!got_frame)
         return 0;
-    /* An error is reported later from output format checking, but make
-     * sure we don't crash by overreading first plane. */
-    if (av_sample_fmt_is_planar(avctx->sample_fmt) && avctx->channels > 1)
-        return 0;
     uint64_t unitsize = (uint64_t)av_get_bytes_per_sample(avctx->sample_fmt) *
                         avctx->channels;
     if (unitsize > 100000)
@@ -333,7 +358,11 @@ static int decode_new_packet(struct sh_audio *sh)
     if (output_left > 500000000)
         abort();
     priv->output_left = output_left;
-    priv->output = priv->avframe->data[0];
+    if (av_sample_fmt_is_planar(avctx->sample_fmt) && avctx->channels > 1) {
+        deplanarize(sh);
+    } else {
+        priv->output = priv->avframe->data[0];
+    }
     mp_dbg(MSGT_DECAUDIO, MSGL_DBG2, "Decoded %d -> %d  \n", insize,
            priv->output_left);
     return 0;
