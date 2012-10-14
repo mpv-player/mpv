@@ -632,11 +632,6 @@ static void queue_remove(struct cmd_queue *queue, struct mp_cmd *cmd)
     *p_prev = cmd->queue_next;
 }
 
-static void queue_pop(struct cmd_queue *queue)
-{
-    queue_remove(queue, queue->first);
-}
-
 static void queue_add(struct cmd_queue *queue, struct mp_cmd *cmd,
                       bool at_head)
 {
@@ -1529,20 +1524,20 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
     if (ictx->control_cmd_queue.first || ictx->key_cmd_queue.first)
         time = 0;
     read_all_events(ictx, time);
-    struct mp_cmd *ret;
     struct cmd_queue *queue = &ictx->control_cmd_queue;
     if (!queue->first)
         queue = &ictx->key_cmd_queue;
     if (!queue->first) {
-        ret = check_autorepeat(ictx);
-        if (!ret)
-            return NULL;
-        queue_add(queue, ret, false);
-    } else
-        ret = queue->first;
+        struct mp_cmd *repeated = check_autorepeat(ictx);
+        if (repeated)
+            queue_add(queue, repeated, false);
+    }
+    struct mp_cmd *ret = queue->first;
+    if (!ret)
+        return NULL;
 
     if (!peek_only)
-        queue_pop(queue);
+        queue_remove(queue, ret);
 
     return ret;
 }
