@@ -239,7 +239,8 @@ opengl
     Requires at least OpenGL 2.1 and the GL_ARB_texture_rg extension. For older
     drivers, ``opengl-old`` may work.
 
-    Some features are available with OpenGL 3 capable graphics drivers only.
+    Some features are available with OpenGL 3 capable graphics drivers only
+    (or if the necessary extensions are available).
 
     lscale=<filter>
         Set the scaling filter. Possible choices:
@@ -270,10 +271,11 @@ opengl
 
         bilinear
             Bilinear hardware texture filtering (fastest, mid-quality).
+            This is the default.
 
         lanczos2
-            Lanczos scaling with radius=2. Provides a good quality and speed.
-            This is the default.
+            Lanczos scaling with radius=2. Provides good quality and speed.
+            This is the default when using ``opengl-hq``.
 
         lanczos3
             Lanczos with radius=3.
@@ -322,9 +324,10 @@ opengl
         Enable gamma-correct scaling by working in linear light. This
         makes use of sRGB textures and framebuffers.
         This option forces the options 'indirect' and 'gamma'.
-        NOTE: for BT.709 colorspaces, a gamma of 2.35 is assumed. For
-        other YUV colorspaces, 2.2 is assumed. RGB input is always
+        NOTE: for YUV colorspaces, gamma 2.2 is assumed. RGB input is always
         assumed to be in sRGB.
+        This option is not really useful, as gamma-correct scaling has not much
+        influence on typical video playback.
 
     pbo
         Enable use of PBOs. This is faster, but can sometimes lead to
@@ -406,9 +409,12 @@ opengl
         is used only on YUV conversion, and only if the video uses
         chroma-subsampling.
         This mechanism is disabled on RGB input.
+        Specifying this option directly is generally useful for debugging only.
 
     fbo-format=<fmt>
-        Selects the internal format of any FBO textures used.
+        Selects the internal format of textures used for FBOs. The format can
+        influence performance and quality of the video output. (FBOs are not
+        always used, and typically only when using extended scalers.)
         fmt can be one of: rgb, rgba, rgb8, rgb10, rgb16, rgb16f, rgb32f
         Default: rgb.
 
@@ -424,7 +430,7 @@ opengl
         this file. This can be used to speed up loading, since
         LittleCMS2 can take a while to create the 3D LUT.
         Note that this file contains an uncompressed LUT. Its size depends on
-        the ``3dlut-size``, can become very big.
+        the ``3dlut-size``, and can be very big.
 
     icc-intent=<value>
         0
@@ -451,6 +457,12 @@ opengl-hq
     Note that some cheaper LCDs do dithering that gravely interferes with
     vo_opengl's dithering. Disabling dithering with ``dither-depth=-1`` helps.
 
+    Unlike ``opengl``, ``opengl-hq`` makes use of FBOs by default. Sometimes you
+    can achieve better quality or performance by changing the fbo-format
+    sub-option to ``rgb16f``, ``rgb32f`` or ``rgb``. (Known problems include
+    Mesa/Intel not accepting ``rgb16``, Mesa sometimes not being compiled with
+    float texture support, and some OSX setups being very slow with ``rgb16``,
+    but fast with ``rgb32f``.)
 
 opengl-old
     OpenGL video output driver, old version. Video size must be smaller
