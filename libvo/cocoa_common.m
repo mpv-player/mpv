@@ -304,103 +304,127 @@ void vo_cocoa_ontop(struct vo *vo)
     vo_set_level(vo, opts->vo_ontop);
 }
 
+static void update_state_sizes(struct vo_cocoa_state *s,
+                               uint32_t d_width, uint32_t d_height)
+{
+    if (s->current_video_size.width > 0 || s->current_video_size.height > 0)
+        s->previous_video_size = s->current_video_size;
+    s->current_video_size = NSMakeSize(d_width, d_height);
+}
+
+static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
+                         uint32_t flags, int gl3profile)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    struct MPOpts *opts = vo->opts;
+
+    const NSRect window_rect = NSMakeRect(0, 0, d_width, d_height);
+    const NSRect glview_rect = NSMakeRect(0, 0, 100, 100);
+
+    s->window =
+        [[GLMPlayerWindow alloc] initWithContentRect:window_rect
+                                           styleMask:s->windowed_mask
+                                             backing:NSBackingStoreBuffered
+                                               defer:NO];
+
+    GLMPlayerOpenGLView *glView =
+        [[GLMPlayerOpenGLView alloc] initWithFrame:glview_rect];
+
+    // check for HiDPI support and enable it (available on 10.7 +)
+    if (supports_hidpi(glView))
+        [glView setWantsBestResolutionOpenGLSurface:YES];
+
+    int i = 0;
+    NSOpenGLPixelFormatAttribute attr[32];
+    if (is_osx_version_at_least(10, 7, 0)) {
+      attr[i++] = NSOpenGLPFAOpenGLProfile;
+      if (gl3profile) {
+          attr[i++] = NSOpenGLProfileVersion3_2Core;
+      } else {
+          attr[i++] = NSOpenGLProfileVersionLegacy;
+      }
+    } else if(gl3profile) {
+        mp_msg(MSGT_VO, MSGL_ERR,
+            "[cocoa] Invalid pixel format attribute "
+            "(GL3 is not supported on OSX versions prior to 10.7)\n");
+        return -1;
+    }
+    attr[i++] = NSOpenGLPFADoubleBuffer; // double buffered
+    attr[i] = (NSOpenGLPixelFormatAttribute)0;
+
+    s->pixelFormat =
+        [[[NSOpenGLPixelFormat alloc] initWithAttributes:attr] autorelease];
+    if (!s->pixelFormat) {
+        mp_msg(MSGT_VO, MSGL_ERR,
+            "[cocoa] Invalid pixel format attribute "
+            "(GL3 not supported?)\n");
+        return -1;
+    }
+    s->glContext =
+        [[NSOpenGLContext alloc] initWithFormat:s->pixelFormat
+                                   shareContext:nil];
+
+    create_menu();
+
+    [s->window setContentView:glView];
+    [glView release];
+    [s->window setAcceptsMouseMovedEvents:YES];
+    [s->glContext setView:glView];
+    [s->glContext makeCurrentContext];
+
+    [NSApp setDelegate:s->window];
+    [s->window setDelegate:s->window];
+    [s->window setContentSize:s->current_video_size];
+    [s->window setContentAspectRatio:s->current_video_size];
+    [s->window center];
+
+    if (flags & VOFLAG_HIDDEN) {
+        [s->window orderOut:nil];
+    } else {
+        [s->window makeKeyAndOrderFront:nil];
+        [NSApp activateIgnoringOtherApps:YES];
+    }
+
+    if (flags & VOFLAG_FULLSCREEN)
+        vo_cocoa_fullscreen(vo);
+
+    vo_set_level(vo, opts->vo_ontop);
+
+    return 0;
+}
+
+static void update_window(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+
+    if (s->current_video_size.width  != s->previous_video_size.width ||
+        s->current_video_size.height != s->previous_video_size.height) {
+        if (vo_fs) {
+            // we will resize as soon as we get out of fullscreen
+            s->out_fs_resize = YES;
+        } else {
+            // only if we are not in fullscreen and the video size did
+            // change we resize the window and set a new aspect ratio
+            [s->window setContentSize:s->current_video_size
+                         keepCentered:YES];
+            [s->window setContentAspectRatio:s->current_video_size];
+        }
+    }
+}
+
 int vo_cocoa_create_window(struct vo *vo, uint32_t d_width,
                            uint32_t d_height, uint32_t flags,
                            int gl3profile)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    struct MPOpts *opts = vo->opts;
 
-    if (s->current_video_size.width > 0 || s->current_video_size.height > 0)
-        s->previous_video_size = s->current_video_size;
-    s->current_video_size = NSMakeSize(d_width, d_height);
+    update_state_sizes(s, d_width, d_height);
 
-    if (!(s->window || s->glContext)) { // keep using the same window
-        const NSRect window_rect = NSMakeRect(0, 0, d_width, d_height);
-        const NSRect glview_rect = NSMakeRect(0, 0, 100, 100);
-
-        s->window =
-            [[GLMPlayerWindow alloc] initWithContentRect:window_rect
-                                               styleMask:s->windowed_mask
-                                                 backing:NSBackingStoreBuffered
-                                                   defer:NO];
-
-        GLMPlayerOpenGLView *glView =
-            [[GLMPlayerOpenGLView alloc] initWithFrame:glview_rect];
-
-        // check for HiDPI support and enable it (available on 10.7 +)
-        if (supports_hidpi(glView))
-            [glView setWantsBestResolutionOpenGLSurface:YES];
-
-        int i = 0;
-        NSOpenGLPixelFormatAttribute attr[32];
-        if (is_osx_version_at_least(10, 7, 0)) {
-          attr[i++] = NSOpenGLPFAOpenGLProfile;
-          if (gl3profile) {
-              attr[i++] = NSOpenGLProfileVersion3_2Core;
-          } else {
-              attr[i++] = NSOpenGLProfileVersionLegacy;
-          }
-        } else if(gl3profile) {
-            mp_msg(MSGT_VO, MSGL_ERR,
-                "[cocoa] Invalid pixel format attribute "
-                "(GL3 is not supported on OSX versions prior to 10.7)\n");
+    if (!(s->window || s->glContext)) {
+        if (create_window(vo, d_width, d_height, flags, gl3profile) < 0)
             return -1;
-        }
-        attr[i++] = NSOpenGLPFADoubleBuffer; // double buffered
-        attr[i] = (NSOpenGLPixelFormatAttribute)0;
-
-        s->pixelFormat =
-            [[[NSOpenGLPixelFormat alloc] initWithAttributes:attr] autorelease];
-        if (!s->pixelFormat) {
-            mp_msg(MSGT_VO, MSGL_ERR,
-                "[cocoa] Invalid pixel format attribute "
-                "(GL3 not supported?)\n");
-            return -1;
-        }
-        s->glContext =
-            [[NSOpenGLContext alloc] initWithFormat:s->pixelFormat
-                                       shareContext:nil];
-
-        create_menu();
-
-        [s->window setContentView:glView];
-        [glView release];
-        [s->window setAcceptsMouseMovedEvents:YES];
-        [s->glContext setView:glView];
-        [s->glContext makeCurrentContext];
-
-        [NSApp setDelegate:s->window];
-        [s->window setDelegate:s->window];
-        [s->window setContentSize:s->current_video_size];
-        [s->window setContentAspectRatio:s->current_video_size];
-        [s->window center];
-
-        if (flags & VOFLAG_HIDDEN) {
-            [s->window orderOut:nil];
-        } else {
-            [s->window makeKeyAndOrderFront:nil];
-            [NSApp activateIgnoringOtherApps:YES];
-        }
-
-        if (flags & VOFLAG_FULLSCREEN)
-            vo_cocoa_fullscreen(vo);
-
-        vo_set_level(vo, opts->vo_ontop);
     } else {
-        if (s->current_video_size.width  != s->previous_video_size.width ||
-            s->current_video_size.height != s->previous_video_size.height) {
-            if (vo_fs) {
-                // we will resize as soon as we get out of fullscreen
-                s->out_fs_resize = YES;
-            } else {
-                // only if we are not in fullscreen and the video size did
-                // change we resize the window and set a new aspect ratio
-                [s->window setContentSize:s->current_video_size
-                             keepCentered:YES];
-                [s->window setContentAspectRatio:s->current_video_size];
-            }
-        }
+        update_window(vo);
     }
 
     resize_window(vo);
@@ -828,7 +852,7 @@ void create_menu()
 - (void)setContentSize:(NSSize)ns keepCentered:(BOOL)keepCentered
 {
     if (keepCentered) {
-        [self setCenteredContentSize:ns]
+        [self setCenteredContentSize:ns];
     } else {
         [self setContentSize:ns];
     }
