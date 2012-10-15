@@ -481,6 +481,9 @@ TAGS:
 tags:
 	$(RM) $@; find . -name '*.[chS]' -o -name '*.asm' | xargs ctags -a
 
+osxbundle:
+	@TOOLS/osxbundle.py mpv
+
 -include $(DEP_FILES)
 
 .PHONY: all locales *install*
