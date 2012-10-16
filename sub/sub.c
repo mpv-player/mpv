@@ -176,11 +176,6 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
             //spudec_get_bitmap(vo_spudec, osd->res.w, osd->res.h, out_imgs);
             spudec_get_indexed(vo_spudec, &osd->res, out_imgs);
         }
-        // Normal change-detection (sub. dec. calls vo_osd_changed(OSDTYPE_SPU))
-        if (obj->force_redraw) {
-            out_imgs->bitmap_id++;
-            out_imgs->bitmap_pos_id++;
-        }
     } else if (obj->type == OSDTYPE_SUB) {
         struct sub_render_params p = *sub_params;
         if (p.pts != MP_NOPTS_VALUE)
@@ -190,6 +185,11 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
         osd_object_get_bitmaps(osd, obj, out_imgs);
     }
 
+    if (obj->force_redraw) {
+        out_imgs->bitmap_id++;
+        out_imgs->bitmap_pos_id++;
+    }
+
     obj->force_redraw = false;
     obj->vo_bitmap_id += out_imgs->bitmap_id;
     obj->vo_bitmap_pos_id += out_imgs->bitmap_pos_id;
@@ -197,8 +197,7 @@ static bool render_object(struct osd_state *osd, struct osd_object *obj,
     if (out_imgs->num_parts == 0)
         return false;
 
-    if (out_imgs->bitmap_id == 0 && out_imgs->bitmap_pos_id == 0
-        && obj->cached.bitmap_id == obj->vo_bitmap_id
+    if (obj->cached.bitmap_id == obj->vo_bitmap_id
         && obj->cached.bitmap_pos_id == obj->vo_bitmap_pos_id
         && formats[obj->cached.format])
     {

@@ -187,7 +187,6 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
     if (priv->bitmaps_changed && priv->count > 0)
         priv->outbitmaps = talloc_memdup(priv, priv->inbitmaps,
                                          talloc_get_size(priv->inbitmaps));
-    bool pos_changed = false;
     int inw = priv->avctx->width;
     int inh = priv->avctx->height;
     guess_resolution(sh->type, &inw, &inh);
@@ -197,18 +196,15 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
     for (int i = 0; i < priv->count; i++) {
         struct sub_bitmap *bi = &priv->inbitmaps[i];
         struct sub_bitmap *bo = &priv->outbitmaps[i];
-#define SET(var, val) pos_changed |= var != (int)(val); var = (val)
-        SET(bo->x, bi->x * xscale + d->ml);
-        SET(bo->y, bi->y * yscale + d->mt);
-        SET(bo->dw, bi->w * xscale);
-        SET(bo->dh, bi->h * yscale);
+        bo->x = bi->x * xscale + d->ml;
+        bo->y = bi->y * yscale + d->mt;
+        bo->dw = bi->w * xscale;
+        bo->dh = bi->h * yscale;
     }
     res->parts = priv->outbitmaps;
     res->num_parts = priv->count;
     if (priv->bitmaps_changed)
         res->bitmap_id = ++res->bitmap_pos_id;
-    else if (pos_changed)
-        res->bitmap_pos_id++;
     priv->bitmaps_changed = false;
     res->format = SUBBITMAP_INDEXED;
     res->scaled = xscale != 1 || yscale != 1;

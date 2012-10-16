@@ -857,6 +857,10 @@ void spudec_get_indexed(void *this, struct mp_eosd_res *dim,
         res->num_parts = 1;
         res->scaled = true;
     }
+    if (spu->spu_changed) {
+        res->bitmap_id = res->bitmap_pos_id = 1;
+        spu->spu_changed = 0;
+    }
 }
 
 void spudec_draw(void *this, void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx)
