@@ -1,12 +1,13 @@
 *.o
 *.a
 *.d
+*.exe
 .depend
 
 /config.h
 /config.mak
 /config.log
-/mplayer
+/mpv
 /version.h
 /codecs.conf.h
 /input/input_conf.h
@@ -14,10 +15,10 @@
 /TAGS
 /locale
 /po
-/libvo/vo_gl3_shaders.h
+/libvo/vo_opengl_shaders.h
 /libmpdemux/ebml_defs.c
 /libmpdemux/ebml_types.h
 /libvo/vdpau_template.c
 /sub/osd_font.h
-DOCS/man/*/mplayer.1
+DOCS/man/*/mpv.1
 

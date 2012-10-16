@@ -3,22 +3,22 @@
 # file identification script
 #
 # manual usage:
-#   mplayer2_identify.sh foo.mkv
+#   mpv_identify.sh foo.mkv
 #
 # sh/dash/ksh/bash usage:
-#   . mplayer2_identify.sh FOO_ foo.mkv
+#   . mpv_identify.sh FOO_ foo.mkv
 # will fill properties into variables like FOO_length
 #
 # zsh usage:
-#   mplayer2_identify() { emulate -L sh; . mplayer2_identify.sh "$@"; }
-#   mplayer2_identify FOO_ foo.mkv
+#   mpv_identify() { emulate -L sh; . mpv_identify.sh "$@"; }
+#   mpv_identify FOO_ foo.mkv
 # will fill properties into variables like FOO_length
 #
 # When multiple files were specified, their info will be put into FOO_* for the
 # first file, FOO_1_* for the second file, FOO_2_* for the third file, etc.
 
 case "$0" in
-    mplayer2_identify.sh|*/mplayer2_identify.sh)
+    mpv_identify.sh|*/mpv_identify.sh)
         # we are NOT being sourced
         case "$1" in
             '')
@@ -59,30 +59,29 @@ fi
 __midentify__allprops="
     filename
     path
-    stream_start
-    stream_end
-    stream_length
+    stream-start
+    stream-end
+    stream-length
 
     demuxer
 
-    switch_program
     length
     chapters
     editions
     titles
 
-    switch_audio
-    audio_bitrate
-    audio_codec
-    audio_format
+    audio
+    audio-bitrate
+    audio-codec
+    audio-format
     channels
     samplerate
 
-    switch_video
+    video
     angle
-    video_bitrate
-    video_codec
-    video_format
+    video-bitrate
+    video-codec
+    video-format
     aspect
     fps
     width
@@ -90,7 +89,7 @@ __midentify__allprops="
 
     sub
 "
-# TODO add metadata support once mplayer can do it
+# TODO add metadata support once mpv can do it
 
 __midentify__propstr="X-MIDENTIFY-START:\\n"
 for __midentify__key in $__midentify__allprops; do
@@ -98,7 +97,7 @@ for __midentify__key in $__midentify__allprops; do
     eval unset $__midentify__nextprefix$__midentify__key
 done
 
-__midentify__output=`mplayer --playing-msg="$__midentify__propstr" --vo=null --ao=null --frames=0 "$@"`
+__midentify__output=`mpv --playing-msg="$__midentify__propstr" --vo=null --ao=null --frames=0 "$@"`
 __midentify__fileindex=0
 __midentify__prefix=
 while :; do

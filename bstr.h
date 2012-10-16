@@ -142,6 +142,16 @@ static inline int bstrcmp0(struct bstr str1, const char *str2)
     return bstrcmp(str1, bstr0(str2));
 }
 
+static inline bool bstr_equals(struct bstr str1, struct bstr str2)
+{
+    return bstrcmp(str1, str2) == 0;
+}
+
+static inline bool bstr_equals0(struct bstr str1, const char *str2)
+{
+    return bstrcmp(str1, bstr0(str2)) == 0;
+}
+
 static inline int bstrcasecmp0(struct bstr str1, const char *str2)
 {
     return bstrcasecmp(str1, bstr0(str2));
@@ -152,7 +162,7 @@ static inline int bstr_find0(struct bstr haystack, const char *needle)
     return bstr_find(haystack, bstr0(needle));
 }
 
-static inline int bstr_eatstart0(struct bstr *s, char *prefix)
+static inline int bstr_eatstart0(struct bstr *s, const char *prefix)
 {
     return bstr_eatstart(s, bstr0(prefix));
 }

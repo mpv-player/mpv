@@ -9,7 +9,7 @@ syntax is:
 --ao=<driver1[:suboption1[=value]:...],driver2,...[,]>
     Specify a priority list of audio output drivers to be used.
 
-If the list has a trailing ',' MPlayer will fall back on drivers not contained
+If the list has a trailing ',' mpv will fall back on drivers not contained
 in the list. Suboptions are optional and can mostly be omitted.
 
 *NOTE*: See ``--ao=help`` for a list of compiled-in audio output drivers.
@@ -48,7 +48,7 @@ jack
     port=<name>
         Connects to the ports with the given name (default: physical ports).
     name=<client>
-        Client name that is passed to JACK (default: MPlayer [<PID>]). Useful
+        Client name that is passed to JACK (default: mpv [<PID>]). Useful
         if you want to have certain connections established automatically.
     (no-)estimate
         Estimate the audio delay, supposed to make the video playback smoother

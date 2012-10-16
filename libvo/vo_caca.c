@@ -351,7 +351,7 @@ static int preinit(struct vo *vo, const char *arg)
         return ENOSYS;
     }
 
-    caca_set_display_title(display, "MPlayer");
+    caca_set_display_title(display, "mpv");
 
     return 0;
 }

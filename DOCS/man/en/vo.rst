@@ -9,15 +9,15 @@ syntax is:
 --vo=<driver1[:suboption1[=value]:...],driver2,...[,]>
     Specify a priority list of video output drivers to be used.
 
-If the list has a trailing ',' MPlayer will fall back on drivers not contained
+If the list has a trailing ',' mpv will fall back on drivers not contained
 in the list. Suboptions are optional and can mostly be omitted.
 
 *NOTE*: See ``--vo=help`` for a list of compiled-in video output drivers.
 
 *EXAMPLE*:
 
-    ``--vo=gl,xv,``
-        Try the gl driver, then the Xv driver, then others.
+    ``--vo=opengl,xv,``
+        Try the OpenGL driver, then the Xv driver, then others.
 
 Available video output drivers are:
 
@@ -26,7 +26,7 @@ xv (X11 only)
     the most compatible VO on X, but may be low quality, and has issues with
     OSD and subtitle display.
     For information about what colorkey is used and how it is drawn run
-    MPlayer with ``-v`` option and look out for the lines tagged with ``[xv
+    mpv with ``-v`` option and look out for the lines tagged with ``[xv
     common]`` at the beginning.
 
     adaptor=<number>
@@ -39,7 +39,7 @@ xv (X11 only)
         cur
           The default takes the colorkey currently set in Xv.
         use
-          Use but do not set the colorkey from MPlayer (use the ``--colorkey``
+          Use but do not set the colorkey from mpv (use the ``--colorkey``
           option to change it).
         set
           Same as use but also sets the supplied colorkey.
@@ -128,8 +128,8 @@ vdpau (X11 only)
         3). See below for additional information.
 
     Using the VDPAU frame queueing functionality controlled by the queuetime
-    options makes MPlayer's frame flip timing less sensitive to system CPU
-    load and allows MPlayer to start decoding the next frame(s) slightly
+    options makes mpv's frame flip timing less sensitive to system CPU
+    load and allows mpv to start decoding the next frame(s) slightly
     earlier which can reduce jitter caused by individual slow-to-decode
     frames. However the NVIDIA graphics drivers can make other window behavior
     such as window moves choppy if VDPAU is using the blit queue (mainly
@@ -225,11 +225,247 @@ direct3d (Windows only)
 corevideo (Mac OS X 10.6 and later)
     Mac OS X CoreVideo video output driver. Uses the CoreVideo APIs to fill
     PixelBuffers and generate OpenGL textures from them (useful as a fallback
-    for vo_gl_).
+    for vo_opengl_).
 
-.. _vo_gl:
-gl
-    OpenGL video output driver, simple version. Video size must be smaller
+.. _vo_opengl:
+
+opengl
+    OpenGL video output driver. It supports extended scaling methods, dithering
+    and color management.
+
+    By default, it tries to use fast and fail-safe settings. Use the driver
+    ``opengl-hq`` to use this driver with a high quality rendering preset.
+
+    Requires at least OpenGL 2.1 and the GL_ARB_texture_rg extension. For older
+    drivers, ``opengl-old`` may work.
+
+    Some features are available with OpenGL 3 capable graphics drivers only
+    (or if the necessary extensions are available).
+
+    lscale=<filter>
+        Set the scaling filter. Possible choices:
+            bilinear
+            bicubic_fast
+            sharpen3
+            sharpen5
+            hanning
+            hamming
+            hermite
+            quadric
+            bicubic
+            kaiser
+            catmull_rom
+            mitchell
+            spline16
+            spline36
+            gaussian
+            sinc2
+            sinc3
+            sinc4
+            lanczos2
+            lanczos3
+            lanczos4
+            blackman2
+            blackman3
+            blackman4
+
+        bilinear
+            Bilinear hardware texture filtering (fastest, mid-quality).
+            This is the default.
+
+        lanczos2
+            Lanczos scaling with radius=2. Provides good quality and speed.
+            This is the default when using ``opengl-hq``.
+
+        lanczos3
+            Lanczos with radius=3.
+
+        bicubic_fast
+            Bicubic filter. Has a blurring effect on the image, even if no
+            scaling is done.
+
+        sharpen3
+            Unsharp masking (sharpening) with radius=3 and a default strength
+            of 0.5 (see ``lparam1``).
+
+        sharpen5
+            Unsharp masking (sharpening) with radius=5 and a default strength
+            of 0.5 (see ``lparam1``).
+
+        mitchell
+            Mitchell-Netravali. The ``b`` and ``c`` parameters can be set with
+            ``lparam1`` and ``lparam2``. Both are set to 1/3 by default.
+
+    lparam1=<value>
+        Set filter parameters. Ignored if the filter is not tunable. These are
+        unset by default, and use the filter specific default if applicable.
+
+    lparam2=<value>
+        See ``lparam1``.
+
+    osdcolor=<0xAARRGGBB>
+        Use the given color for the OSD.
+
+    stereo=<value>
+        Select a method for stereo display. You may have to use ``--aspect`` to
+        fix the aspect value. Experimental, do not expect too much from it.
+
+        0
+            Normal 2D display
+        1
+            Convert side by side input to full-color red-cyan stereo.
+        2
+            Convert side by side input to full-color green-magenta stereo.
+        3
+            Convert side by side input to quadbuffered stereo. Only supported
+            by very few OpenGL cards.
+
+    srgb
+        Enable gamma-correct scaling by working in linear light. This
+        makes use of sRGB textures and framebuffers.
+        This option forces the options 'indirect' and 'gamma'.
+        NOTE: for YUV colorspaces, gamma 2.2 is assumed. RGB input is always
+        assumed to be in sRGB.
+        This option is not really useful, as gamma-correct scaling has not much
+        influence on typical video playback.
+
+    pbo
+        Enable use of PBOs. This is faster, but can sometimes lead to
+        sporadic and temporary image corruption.
+
+    dither-depth=<n>
+        Positive non-zero values select the target bit depth. Default: 0.
+
+        \-1
+            Disable any dithering done by mpv.
+        0
+            Automatic selection. If output bit depth can't be detected,
+            8 bits per component are assumed.
+        8
+            Dither to 8 bit output.
+
+        Note that dithering will always be disabled if the bit depth
+        of the video is lower or equal to the detected dither-depth.
+        If color management is enabled, input depth is assumed to be
+        16 bits, because the 3D LUT output is 16 bit wide.
+
+        Note that the depth of the connected video display device can not be
+        detected. Often, LCD panels will do dithering on their own, which
+        conflicts with vo_opengl's dithering, and leads to ugly output.
+
+    debug
+        Check for OpenGL errors, i.e. call glGetError(). Also request a
+        debug OpenGL context (which does nothing with current graphics drivers
+        as of this writing).
+
+
+    swapinterval=<n>
+        Interval in displayed frames between two buffer swaps.
+        1 is equivalent to enable VSYNC, 0 to disable VSYNC.
+
+    no-scale-sep
+        When using a separable scale filter for luma, usually two filter
+        passes are done. This is often faster. However, it forces
+        conversion to RGB in an extra pass, so it can actually be slower
+        if used with fast filters on small screen resolutions. Using
+        this options will make rendering a single operation.
+        Note that chroma scalers are always done as 1-pass filters.
+
+    cscale=<n>
+        As lscale but for chroma (2x slower with little visible effect).
+        Note that with some scaling filters, upscaling is always done in
+        RGB. If chroma is not subsampled, this option is ignored, and the
+        luma scaler is used instead. Setting this option is often useless.
+
+    fancy-downscaling
+        When using convolution based filters, extend the filter size
+        when downscaling. Trades quality for reduced downscaling performance.
+
+    no-npot
+        Force use of power-of-2 texture sizes. For debugging only.
+        Borders will be distorted due to filtering.
+
+    glfinish
+        Call glFinish() before swapping buffers
+
+    sw
+        Continue even if a software renderer is detected.
+
+    backend=<sys>
+        auto
+            auto-select (default)
+        cocoa
+            Cocoa/OSX
+        win
+            Win32/WGL
+        x11
+            X11/GLX
+
+    indirect
+        Do YUV conversion and scaling as separate passes. This will
+        first render the video into a video-sized RGB texture, and
+        draw the result on screen. The luma scaler is used to scale
+        the RGB image when rendering to screen. The chroma scaler
+        is used only on YUV conversion, and only if the video uses
+        chroma-subsampling.
+        This mechanism is disabled on RGB input.
+        Specifying this option directly is generally useful for debugging only.
+
+    fbo-format=<fmt>
+        Selects the internal format of textures used for FBOs. The format can
+        influence performance and quality of the video output. (FBOs are not
+        always used, and typically only when using extended scalers.)
+        fmt can be one of: rgb, rgba, rgb8, rgb10, rgb16, rgb16f, rgb32f
+        Default: rgb.
+
+    gamma
+        Always enable gamma control. (Disables delayed enabling.)
+
+    icc-profile=<file>
+        Load an ICC profile and use it to transform linear RGB to
+        screen output. Needs LittleCMS2 support compiled in.
+
+    icc-cache=<file>
+        Store and load the 3D LUT created from the ICC profile in
+        this file. This can be used to speed up loading, since
+        LittleCMS2 can take a while to create the 3D LUT.
+        Note that this file contains an uncompressed LUT. Its size depends on
+        the ``3dlut-size``, and can be very big.
+
+    icc-intent=<value>
+        0
+            perceptual
+        1
+            relative colorimetric
+        2
+            saturation
+        3
+            absolute colorimetric (default)
+
+    3dlut-size=<r>x<g>x<b>
+        Size of the 3D LUT generated from the ICC profile in each
+        dimension. Default is 128x256x64.
+        Sizes must be a power of two, and 256 at most.
+
+opengl-hq
+    Same as ``opengl``, but with default settings for high quality rendering.
+
+    This is equivalent to:
+
+    | --vo=opengl:lscale=lanczos2:fancy-downscaling:dither-depth=0:pbo:fbo-format=rgb16
+
+    Note that some cheaper LCDs do dithering that gravely interferes with
+    vo_opengl's dithering. Disabling dithering with ``dither-depth=-1`` helps.
+
+    Unlike ``opengl``, ``opengl-hq`` makes use of FBOs by default. Sometimes you
+    can achieve better quality or performance by changing the fbo-format
+    sub-option to ``rgb16f``, ``rgb32f`` or ``rgb``. (Known problems include
+    Mesa/Intel not accepting ``rgb16``, Mesa sometimes not being compiled with
+    float texture support, and some OSX setups being very slow with ``rgb16``,
+    but fast with ``rgb32f``.)
+
+opengl-old
+    OpenGL video output driver, old version. Video size must be smaller
     than the maximum texture size of your OpenGL implementation. Intended to
     work even with the most basic OpenGL implementations, but also makes use
     of newer extensions, which allow support for more colorspaces and direct
@@ -411,7 +647,10 @@ gl
     (no-)osd
         Enable or disable support for OSD rendering via OpenGL (default:
         enabled). This option is for testing; to disable the OSD use
-        ``--osdlevel=0`` instead.
+        ``--osd-level=0`` instead.
+
+    sw
+        Continue even if a software renderer is detected.
 
     backend=<sys>
         auto
@@ -422,219 +661,6 @@ gl
             Win32/WGL
         x11
             X11/GLX
-
-gl3
-    OpenGL video output driver, extended version. The requires an OpenGL 3
-    capable graphics driver. (Note: this is only because of developer pedantry.
-    The dependency on actual OpenGL 3 features is rather low.)
-
-    It supports extended scaling methods, dithering and color management.
-    It tries to use sane defaults for good quality output.
-
-    Note that some cheaper LCDs do dithering that gravely interferes with
-    vo_gl3's dithering. Disabling dithering with ``dither-depth=-1`` helps.
-
-    lscale=<filter>
-        Set the scaling filter. Possible choices:
-            bilinear
-            bicubic_fast
-            sharpen3
-            sharpen5
-            hanning
-            hamming
-            hermite
-            quadric
-            bicubic
-            kaiser
-            catmull_rom
-            mitchell
-            spline16
-            spline36
-            gaussian
-            sinc2
-            sinc3
-            sinc4
-            lanczos2
-            lanczos3
-            lanczos4
-            blackman2
-            blackman3
-            blackman4
-
-        bilinear
-            Bilinear hardware texture filtering (fastest, mid-quality).
-
-        lanczos2
-            Lanczos scaling with radius=2. Provides a good quality and speed.
-            This is the default.
-
-        lanczos3
-            Lanczos with radius=3.
-
-        bicubic_fast
-            Bicubic filter. Has a blurring effect on the image, even if no
-            scaling is done.
-
-        sharpen3
-            Unsharp masking (sharpening) with radius=3 and a default strength
-            of 0.5 (see ``lparam1``).
-
-        sharpen5
-            Unsharp masking (sharpening) with radius=5 and a default strength
-            of 0.5 (see ``lparam1``).
-
-        mitchell
-            Mitchell-Netravali. The ``b`` and ``c`` parameters can be set with
-            ``lparam1`` and ``lparam2``. Both are set to 1/3 by default.
-
-    lparam1=<value>
-        Set filter parameters. Ignored if the filter is not tunable. These are
-        unset by default, and use the filter specific default if applicable.
-
-    lparam2=<value>
-        See ``lparam1``.
-
-    osdcolor=<0xAARRGGBB>
-        Use the given color for the OSD.
-
-    stereo=<value>
-        Select a method for stereo display. You may have to use ``--aspect`` to
-        fix the aspect value. Experimental, do not expect too much from it.
-
-        0
-            Normal 2D display
-        1
-            Convert side by side input to full-color red-cyan stereo.
-        2
-            Convert side by side input to full-color green-magenta stereo.
-        3
-            Convert side by side input to quadbuffered stereo. Only supported
-            by very few OpenGL cards.
-
-    srgb
-        Enable gamma-correct scaling by working in linear light. This
-        makes use of sRGB textures and framebuffers.
-        This option forces the options 'indirect' and 'gamma'.
-        NOTE: for BT.709 colorspaces, a gamma of 2.35 is assumed. For
-        other YUV colorspaces, 2.2 is assumed. RGB input is always
-        assumed to be in sRGB.
-
-    pbo
-        Enable use of PBOs. This is faster, but can sometimes lead to
-        sporadic and temporary image corruption.
-
-    dither-depth=<n>
-        Positive non-zero values select the target bit depth. Default: 0.
-
-        \-1
-            Disable any dithering done by mplayer.
-        0
-            Automatic selection. If output bit depth can't be detected,
-            8 bits per component are assumed.
-        8
-            Dither to 8 bit output.
-
-        Note that dithering will always be disabled if the bit depth
-        of the video is lower or equal to the detected dither-depth.
-        If color management is enabled, input depth is assumed to be
-        16 bits, because the 3D LUT output is 16 bit wide.
-
-        Note that the depth of the connected video display device can not be
-        detected. Often, LCD panels will do dithering on their own, which
-        conflicts with vo_gl3's dithering, and leads to ugly output.
-
-    debug
-        Check for OpenGL errors, i.e. call glGetError(). Also request a
-        debug OpenGL context (which does nothing with current graphics drivers
-        as of this writing).
-
-
-    swapinterval=<n>
-        Interval in displayed frames between two buffer swaps.
-        1 is equivalent to enable VSYNC, 0 to disable VSYNC.
-
-    no-scale-sep
-        When using a separable scale filter for luma, usually two filter
-        passes are done. This is often faster. However, it forces
-        conversion to RGB in an extra pass, so it can actually be slower
-        if used with fast filters on small screen resolutions. Using
-        this options will make rendering a single operation.
-        Note that chroma scalers are always done as 1-pass filters.
-
-    cscale=<n>
-        As lscale but for chroma (2x slower with little visible effect).
-        Note that with some scaling filters, upscaling is always done in
-        RGB. If chroma is not subsampled, this option is ignored, and the
-        luma scaler is used instead. Setting this option is often useless.
-
-    no-fancy-downscaling
-        When using convolution based filters, don't extend the filter
-        size when downscaling. Trades downscaling performance for
-        reduced quality.
-
-    no-npot
-        Force use of power-of-2 texture sizes. For debugging only.
-        Borders will be distorted due to filtering.
-
-    glfinish
-        Call glFinish() before swapping buffers
-
-    backend=<sys>
-        auto
-            auto-select (default)
-        cocoa
-            Cocoa/OSX
-        win
-            Win32/WGL
-        x11
-            X11/GLX
-
-    indirect
-        Do YUV conversion and scaling as separate passes. This will
-        first render the video into a video-sized RGB texture, and
-        draw the result on screen. The luma scaler is used to scale
-        the RGB image when rendering to screen. The chroma scaler
-        is used only on YUV conversion, and only if the video uses
-        chroma-subsampling.
-        This mechanism is disabled on RGB input.
-
-    fbo-format=<fmt>
-        Selects the internal format of any FBO textures used.
-        fmt can be one of: rgb, rgba, rgb8, rgb16, rgb16f, rgb32f
-        Default: rgb16.
-
-    gamma
-        Always enable gamma control. (Disables delayed enabling.)
-
-    force-gl2
-        Create a legacy GL context. This will randomly malfunction
-        if the proper extensions are not supported.
-
-    icc-profile=<file>
-        Load an ICC profile and use it to transform linear RGB to
-        screen output. Needs LittleCMS2 support compiled in.
-
-    icc-cache=<file>
-        Store and load the 3D LUT created from the ICC profile in
-        this file. This can be used to speed up loading, since
-        LittleCMS2 can take a while to create the 3D LUT.
-        Note that this file contains an uncompressed LUT. Its size depends on
-        the ``3dlut-size``, can become very big.
-
-    icc-intent=<value>
-        0
-            perceptual
-        1
-            relative colorimetric
-        2
-            saturation
-        3
-            absolute colorimetric (default)
-
-    3dlut-size=<r>x<g>x<b>
-        Size of the 3D LUT generated from the ICC profile in each
-        dimension. Default is 128x256x64.
-        Sizes must be a power of two, and 256 at most.
 
 null
     Produces no video output. Useful for benchmarking.

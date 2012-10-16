@@ -274,7 +274,7 @@ esac
 
 msg_lang_all=''
 ls po/*.po >/dev/null 2>&1 && msg_lang_all=$(echo po/*.po | sed -e 's:po/\([^[:space:]]*\)\.po:\1:g')
-man_lang_all=$(echo DOCS/man/??/mplayer.1 DOCS/man/??_??/mplayer.1 | sed -e "s:DOCS/man/\(..\)/mplayer.1:\1:g" -e "s:DOCS/man/\(.._..\)/mplayer.1:\1:g")
+man_lang_all=$(echo DOCS/man/??/mpv.1 DOCS/man/??_??/mpv.1 | sed -e "s:DOCS/man/\(..\)/mpv.1:\1:g" -e "s:DOCS/man/\(.._..\)/mpv.1:\1:g")
 doc_lang_all=$(echo DOCS/xml/??/ DOCS/xml/??_??/ | sed -e "s:DOCS/xml/\(..\)/:\1:g" -e "s:DOCS/xml/\(.._..\)/:\1:g")
 
 show_help(){
@@ -288,16 +288,16 @@ Installation directories:
   --prefix=DIR           prefix directory for installation [/usr/local]
   --bindir=DIR           directory for installing binaries [PREFIX/bin]
   --datadir=DIR          directory for installing machine independent
-                         data files (skins, etc) [PREFIX/share/mplayer]
+                         data files (skins, etc) [PREFIX/share/mpv]
   --mandir=DIR           directory for installing man pages [PREFIX/share/man]
   --confdir=DIR          directory for installing configuration files
-                         [PREFIX/etc/mplayer]
+                         [PREFIX/etc/mpv]
   --localedir=DIR        directory for locale tree [PREFIX/share/locale]
   --libdir=DIR           directory for object code libraries [PREFIX/lib]
   --codecsdir=DIR        directory for binary codecs [LIBDIR/codecs]
 
 Optional features:
-  --disable-mplayer      disable MPlayer compilation [enable]
+  --disable-mpv          disable mpv compilation [enable]
   --disable-encoding     disable encoding functionality [enable]
   --enable-termcap       use termcap database for key codes [autodetect]
   --enable-termios       use termios database for key codes [autodetect]
@@ -375,6 +375,7 @@ Audio output:
   --disable-jack         disable JACK audio output [autodetect]
   --enable-openal        enable OpenAL audio output [disable]
   --disable-coreaudio    disable CoreAudio audio output [autodetect]
+  --disable-dsound        disable DirectSound audio output [autodetect]
   --disable-select       disable using select() on the audio device [enable]
 
 Language options:
@@ -396,9 +397,9 @@ Available values for --language-msg are: all $msg_lang_all
 
 Miscellaneous options:
   --enable-cross-compile enable cross-compilation [disable]
-  --cc=COMPILER          C compiler to build MPlayer [gcc]
+  --cc=COMPILER          C compiler to build mpv [gcc]
   --pkg-config=PKGCONFIG pkg-config to find some libraries [pkg-config]
-  --windres=WINDRES      windres to build MPlayer [windres]
+  --windres=WINDRES      windres to build mpv [windres]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --enable-static        build a statically linked binary
   --with-install=PATH    path to a custom install program
@@ -412,7 +413,7 @@ Use these options if autodetection fails:
   --extra-cflags=FLAGS        extra CFLAGS
   --extra-ldflags=FLAGS       extra LDFLAGS
   --extra-libs=FLAGS          extra linker flags
-  --extra-libs-mplayer=FLAGS  extra linker flags for MPlayer
+  --extra-libs-mpv=FLAGS      extra linker flags for mpv
 
 This configure script is NOT autoconf-based, even though its output is similar.
 It will try to autodetect all configuration options. If you --enable an option
@@ -435,7 +436,6 @@ _opt=-O2
 _cross_compile=no
 _prefix="/usr/local"
 ffmpeg=auto
-ffmpeg_internals=no
 _mplayer=yes
 _encoding=yes
 _x11=auto
@@ -444,6 +444,7 @@ _xss=auto
 _xv=auto
 _vdpau=auto
 _direct3d=auto
+_dsound=auto
 _nas=auto
 _png=auto
 _mng=auto
@@ -564,7 +565,7 @@ for ac_option do
   --extra-libs=*)
     extra_libs=$(echo $ac_option | cut -d '=' -f 2)
     ;;
-  --extra-libs-mplayer=*)
+  --extra-libs-mpv=*)
     libs_mplayer=$(echo $ac_option | cut -d '=' -f 2)
     ;;
 
@@ -620,8 +621,8 @@ for ac_option do
   --disable-translation)             _translation=no            ;;
   --enable-cross-compile)           _cross_compile=yes          ;;
   --disable-cross-compile)          _cross_compile=no           ;;
-  --enable-mplayer)     _mplayer=yes    ;;
-  --disable-mplayer)    _mplayer=no     ;;
+  --enable-mpv)         _mplayer=yes    ;;
+  --disable-mpv)        _mplayer=no     ;;
   --enable-encoding)    _encoding=yes   ;;
   --disable-encoding)   _encoding=no    ;;
   --enable-x11)         _x11=yes        ;;
@@ -636,6 +637,8 @@ for ac_option do
   --disable-vdpau)      _vdpau=no       ;;
   --enable-direct3d)    _direct3d=yes   ;;
   --disable-direct3d)   _direct3d=no    ;;
+  --enable-dsound)      _dsound=yes     ;;
+  --disable-dsound)     _dsound=no      ;;
   --enable-png)         _png=yes        ;;
   --disable-png)        _png=no         ;;
   --enable-mng)         _mng=yes        ;;
@@ -715,8 +718,6 @@ for ac_option do
   --enable-joystick)    _joystick=yes   ;;
   --disable-joystick)   _joystick=no    ;;
   --enable-libav)       ffmpeg=yes      ;;
-  --ffmpeg-source-dir=*)
-    _ffmpeg_source=$(echo $ac_option | cut -d '=' -f 2 ) ;;
 
   --enable-lirc)        _lirc=yes       ;;
   --disable-lirc)       _lirc=no        ;;
@@ -784,9 +785,9 @@ done
 
 # Atmos: moved this here, to be correct, if --prefix is specified
 test -z "$_bindir"  && _bindir="$_prefix/bin"
-test -z "$_datadir" && _datadir="$_prefix/share/mplayer"
+test -z "$_datadir" && _datadir="$_prefix/share/mpv"
 test -z "$_mandir"  && _mandir="$_prefix/share/man"
-test -z "$_confdir" && _confdir="$_prefix/etc/mplayer"
+test -z "$_confdir" && _confdir="$_prefix/etc/mpv"
 test -z "$_libdir"  && _libdir="$_prefix/lib"
 test -z "$_localedir"  && _localedir="$_prefix/share/locale"
 
@@ -794,7 +795,7 @@ for tmpdir in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
   test "$tmpdir" && break
 done
 
-mplayer_tmpdir="$tmpdir/mplayer-configure-$RANDOM-$$"
+mplayer_tmpdir="$tmpdir/mpv-configure-$RANDOM-$$"
 mkdir $mplayer_tmpdir || die "Unable to create tmpdir."
 
 TMPLOG="config.log"
@@ -931,7 +932,7 @@ fi
 
 if win32 ; then
   _exesuf=".exe"
-  extra_cflags="$extra_cflags -fno-common"
+  extra_cflags="$extra_cflags -fno-common -DWINVER=0x0500"
   # -lwinmm is always needed for osdep/timer-win2.c
   extra_ldflags="$extra_ldflags -lwinmm"
   _pe_executable=yes
@@ -949,6 +950,10 @@ if mingw32 ; then
   # (For some reason, they are in <sys/param.h>, but we don't bother switching
   # the includes based on whether we're compiling for MinGW.)
   extra_cflags="$extra_cflags -DBYTE_ORDER=1234 -DLITTLE_ENDIAN=1234 -DBIG_ENDIAN=4321"
+fi
+
+if cygwin ; then
+  extra_cflags="$extra_cflags -mwin32"
 fi
 
 TMPC="$mplayer_tmpdir/tmp.c"
@@ -1019,8 +1024,8 @@ echocheck "working compiler"
 cflag_check "" || die "Compiler is not functioning correctly. Check your installation and custom CFLAGS $CFLAGS ."
 echo "yes"
 
-echocheck "python3"
-command_check python3 -c '' || die "Python 3 is not functioning correctly. Check your installation and PATH."
+echocheck "python"
+command_check python -c '' || die "Python is not functioning correctly. Check your installation and PATH."
 echo yes
 
 if test -z "$_target" && x86 ; then
@@ -1135,7 +1140,7 @@ case "$host_arch" in
 
   *)
     echo "The architecture of your CPU ($host_arch) is not supported by this configure script"
-    echo "It seems nobody has ported MPlayer to your OS or CPU type yet."
+    echo "It seems nobody has ported mpv to your OS or CPU type yet."
     die "unsupported architecture $host_arch"
     ;;
 esac # case "$host_arch" in
@@ -2477,6 +2482,7 @@ echores "$_gl"
 
 if win32; then
 
+
 echocheck "Direct3D"
 if test "$_direct3d" = auto ; then
   _direct3d=no
@@ -2490,6 +2496,22 @@ else
   novomodules="direct3d $novomodules"
 fi
 echores "$_direct3d"
+
+
+echocheck "DirectSound"
+if test "$_dsound" = auto ; then
+  _dsound=no
+  header_check dsound.h && _dsound=yes
+fi
+if test "$_dsound" = yes ; then
+  def_dsound='#define CONFIG_DSOUND 1'
+  aomodules="dsound $aomodules"
+else
+  def_dsound='#undef CONFIG_DSOUND'
+  noaomodules="dsound $noaomodules"
+fi
+echores "$_dsound"
+
 
 fi #if win32; then
 
@@ -2929,10 +2951,6 @@ if test "$ffmpeg" = auto ; then
 fi
 echores "yes"
 
-def_ffmpeg_internals="#undef CONFIG_FFMPEG_INTERNALS"
-if ! test -z "$_ffmpeg_source" ; then
-  def_ffmpeg_internals="#define CONFIG_FFMPEG_INTERNALS 1" && ffmpeg_internals=yes
-fi
 
 echocheck "libpostproc >= 52.0.0"
 if test "$libpostproc" = auto ; then
@@ -3342,6 +3360,7 @@ COCOA = $_cocoa
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
 DIRECT3D = $_direct3d
+DSOUND = $_dsound
 DVBIN = $_dvbin
 DVDREAD = $_dvdread
 DXR3 = $_dxr3
@@ -3395,8 +3414,6 @@ XV = $_xv
 
 # FFmpeg
 ENCODING = $_encoding
-FFMPEG_INTERNALS = $ffmpeg_internals
-FFMPEG_SOURCE_PATH = $_ffmpeg_source
 
 CONFIG_VDPAU    = $_vdpau
 CONFIG_ZLIB     = $_zlib
@@ -3588,6 +3605,7 @@ $def_caca
 $def_corevideo
 $def_cocoa
 $def_direct3d
+$def_dsound
 $def_dvb
 $def_dvbin
 $def_gif
@@ -3613,7 +3631,6 @@ $def_xv
 
 /* FFmpeg */
 $def_encoding
-$def_ffmpeg_internals
 
 $def_fast_64bit
 $def_mkstemp
@@ -3660,10 +3677,10 @@ Config files successfully generated by ./configure $configuration !
     Video output: $novomodules
 
 'config.h' and 'config.mak' contain your configuration options.
-Note: If you alter theses files (for instance CFLAGS) MPlayer may no longer
+Note: If you alter theses files (for instance CFLAGS) mpv may no longer
       compile *** DO NOT REPORT BUGS if you tweak these files ***
 
-'make' will now compile MPlayer and 'make install' will install it.
+'make' will now compile mpv and 'make install' will install it.
 Note: On non-Linux systems you might need to use 'gmake' instead of 'make'.
 
 EOF
@@ -3682,19 +3699,16 @@ If you used one of these options and experience a compilation or
 linking failure, make sure you have passed the necessary compiler/linker flags
 to configure.
 
-If you suspect a bug, please read DOCS/HTML/$language_doc/bugreports.html.
-
 EOF
 
 if test "$warn_cflags" = yes; then
   cat <<EOF
 
-MPlayer compilation will use the CPPFLAGS/CFLAGS/LDFLAGS set by you,
-but:
+mpv compilation will use the CPPFLAGS/CFLAGS/LDFLAGS set by you, but:
 
     *** ***  DO NOT REPORT BUGS IF IT DOES NOT COMPILE/WORK!  *** ***
 
-It is strongly recommended to let MPlayer choose the correct CFLAGS!
+It is strongly recommended to let mpv choose the correct CFLAGS!
 To do so, execute 'CFLAGS= ./configure <options>'
 
 EOF

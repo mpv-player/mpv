@@ -53,6 +53,12 @@
 
 #include "cache2.h"
 
+/// We keep these 2 for the gui atm, but they will be removed.
+int vcd_track=0;
+char* cdrom_device=NULL;
+char* dvd_device=NULL;
+int dvd_title=0;
+
 struct input_ctx;
 static int (*stream_check_interrupt_cb)(struct input_ctx *ctx, int time);
 static struct input_ctx *stream_check_interrupt_ctx;
@@ -199,6 +205,14 @@ stream_t *open_stream_full(const char *filename, int mode,
   stream_t* s;
   char *redirected_url = NULL;
 
+  assert(filename);
+
+  int dummy;
+  if (!file_format)
+    file_format = &dummy;
+
+  *file_format = DEMUXER_TYPE_UNKNOWN;
+
   for(i = 0 ; auto_open_streams[i] ; i++) {
     sinfo = auto_open_streams[i];
     if(!sinfo->protocols) {
@@ -235,15 +249,15 @@ stream_t *open_stream_full(const char *filename, int mode,
   return NULL;
 }
 
+stream_t* open_stream(const char *filename, struct MPOpts *options,
+                      int *file_format)
+{
+  return open_stream_full(filename,STREAM_READ,options,file_format);
+}
+
 stream_t *open_output_stream(const char *filename, struct MPOpts *options)
 {
-  int file_format; //unused
-  if(!filename) {
-    mp_msg(MSGT_OPEN,MSGL_ERR,"open_output_stream(), NULL filename, report this bug\n");
-    return NULL;
-  }
-
-  return open_stream_full(filename,STREAM_WRITE,options,&file_format);
+  return open_stream_full(filename,STREAM_WRITE,options,NULL);
 }
 
 //=================== STREAMER =========================

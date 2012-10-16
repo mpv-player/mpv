@@ -470,7 +470,7 @@ static void parse_trackencodings(struct demuxer *demuxer,
         else if (e.comp_algo == 0) {
             mp_tmsg(MSGT_DEMUX, MSGL_WARN,
                     "[mkv] Track %u was compressed with zlib "
-                    "but mplayer has not been compiled\n"
+                    "but mpv has not been compiled\n"
                     "[mkv] with support for zlib compression. "
                     "Skipping track.\n",
                     track->tnum);

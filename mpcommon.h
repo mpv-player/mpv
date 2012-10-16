@@ -41,7 +41,7 @@
     do {                                            \
         size_t nextidx_ = (nextidx);                \
         size_t nelems_ = MP_TALLOC_ELEMS(p);        \
-        if (nextidx_ <= nelems_)                    \
+        if (nextidx_ >= nelems_)                    \
             p = talloc_realloc_size((ctx), p,       \
                (nextidx_ + 1) * sizeof((p)[0]) * 2);\
     } while (0)

@@ -69,6 +69,8 @@
 struct cmd_bind {
     int input[MP_MAX_KEY_DOWN + 1];
     char *cmd;
+    char *location;     // filename/line number of definition
+    struct cmd_bind_section *owner;
 };
 
 struct key_name {
@@ -85,80 +87,65 @@ struct key_name {
  * argument value if the user didn't give enough arguments to specify it.
  * A command can take a maximum of MP_CMD_MAX_ARGS arguments (10).
  */
-#define ARG_INT { .type = MP_CMD_ARG_INT }
-#define OARG_INT(def) { .type = MP_CMD_ARG_INT, .optional = true, .v.i = def }
-#define ARG_FLOAT { .type = MP_CMD_ARG_FLOAT }
-#define OARG_FLOAT(def) { .type = MP_CMD_ARG_FLOAT, .optional = true, .v.f = def }
-#define ARG_STRING { .type = MP_CMD_ARG_STRING }
-#define OARG_STRING(def) { .type = MP_CMD_ARG_STRING, .optional = true, .v.s = def }
+
+#define ARG_INT                 { .type = {"", NULL, &m_option_type_int} }
+#define ARG_FLOAT               { .type = {"", NULL, &m_option_type_float} }
+#define ARG_STRING              { .type = {"", NULL, &m_option_type_string} }
+#define ARG_CHOICE(c)           { .type = {"", NULL, &m_option_type_choice,    \
+                                           M_CHOICES(c)} }
+
+#define OARG_FLOAT(def)         { .type = {"", NULL, &m_option_type_float},    \
+                                  .optional = true, .v.f = def }
+#define OARG_INT(def)           { .type = {"", NULL, &m_option_type_int},      \
+                                  .optional = true, .v.i = def }
+#define OARG_CHOICE(def, c)     { .type = {"", NULL, &m_option_type_choice,    \
+                                           M_CHOICES(c)},                      \
+                                  .optional = true, .v.i = def }
+
+static int parse_cycle_dir(const struct m_option *opt, struct bstr name,
+                           struct bstr param, void *dst);
+static const struct m_option_type m_option_type_cycle_dir = {
+    .name = "up|down",
+    .parse = parse_cycle_dir,
+};
 
 static const mp_cmd_t mp_cmds[] = {
-#ifdef CONFIG_RADIO
+  { MP_CMD_IGNORE, "ignore", },
+
   { MP_CMD_RADIO_STEP_CHANNEL, "radio_step_channel", { ARG_INT } },
   { MP_CMD_RADIO_SET_CHANNEL, "radio_set_channel", { ARG_STRING } },
   { MP_CMD_RADIO_SET_FREQ, "radio_set_freq", { ARG_FLOAT } },
   { MP_CMD_RADIO_STEP_FREQ, "radio_step_freq", {ARG_FLOAT } },
-#endif
-  { MP_CMD_SEEK, "seek", { ARG_FLOAT, OARG_INT(0), OARG_INT(0) } },
+
+  { MP_CMD_SEEK, "seek", {
+      ARG_FLOAT,
+      OARG_CHOICE(0, ({"relative", 0},          {"0", 0},
+                      {"absolute-percent", 1},  {"1", 1},
+                      {"absolute", 2},          {"2", 2})),
+      OARG_CHOICE(0, ({"default-precise", 0},   {"0", 0},
+                      {"exact", 1},             {"1", 1},
+                      {"keyframes", -1},        {"-1", -1})),
+  }},
   { MP_CMD_EDL_MARK, "edl_mark", },
-  { MP_CMD_AUDIO_DELAY, "audio_delay", { ARG_FLOAT, OARG_INT(0) } },
-  { MP_CMD_SPEED_INCR, "speed_incr", { ARG_FLOAT } },
   { MP_CMD_SPEED_MULT, "speed_mult", { ARG_FLOAT } },
-  { MP_CMD_SPEED_SET, "speed_set", { ARG_FLOAT } },
   { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
   { MP_CMD_STOP, "stop", },
-  { MP_CMD_PAUSE, "pause", },
   { MP_CMD_FRAME_STEP, "frame_step", },
-  { MP_CMD_PLAYLIST_NEXT, "playlist_next", { OARG_INT(0) } },
-  { MP_CMD_PLAYLIST_PREV, "playlist_prev", { OARG_INT(0) } },
-  { MP_CMD_LOOP, "loop", { ARG_INT, OARG_INT(0) } },
-  { MP_CMD_SUB_DELAY, "sub_delay", { ARG_FLOAT, OARG_INT(0) } },
-  { MP_CMD_SUB_STEP, "sub_step", { ARG_INT, OARG_INT(0) } },
+  { MP_CMD_PLAYLIST_NEXT, "playlist_next", {
+      OARG_CHOICE(0, ({"weak", 0},              {"0", 0},
+                      {"force", 1},             {"1", 1})),
+  }},
+  { MP_CMD_PLAYLIST_PREV, "playlist_prev", {
+      OARG_CHOICE(0, ({"weak", 0},              {"0", 0},
+                      {"force", 1},             {"1", 1})),
+  }},
+  { MP_CMD_SUB_STEP, "sub_step", { ARG_INT } },
   { MP_CMD_OSD, "osd", { OARG_INT(-1) } },
-  { MP_CMD_OSD_SHOW_TEXT, "osd_show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
-  { MP_CMD_OSD_SHOW_PROPERTY_TEXT, "osd_show_property_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
-  { MP_CMD_OSD_SHOW_PROGRESSION, "osd_show_progression", },
-  { MP_CMD_VOLUME, "volume", { ARG_FLOAT, OARG_INT(0) } },
-  { MP_CMD_BALANCE, "balance", { ARG_FLOAT, OARG_INT(0) } },
-  { MP_CMD_MIXER_USEMASTER, "use_master", },
-  { MP_CMD_MUTE, "mute", { OARG_INT(-1) } },
-  { MP_CMD_CONTRAST, "contrast", { ARG_INT, OARG_INT(0) } },
-  { MP_CMD_GAMMA, "gamma", { ARG_INT, OARG_INT(0) }  },
-  { MP_CMD_BRIGHTNESS, "brightness", { ARG_INT, OARG_INT(0) }  },
-  { MP_CMD_HUE, "hue", { ARG_INT, OARG_INT(0) } },
-  { MP_CMD_SATURATION, "saturation", { ARG_INT, OARG_INT(0) }  },
-  { MP_CMD_FRAMEDROPPING, "frame_drop", { OARG_INT(-1) } },
-  { MP_CMD_SUB_POS, "sub_pos", { ARG_INT, OARG_INT(0) } },
-  { MP_CMD_SUB_ALIGNMENT, "sub_alignment", { OARG_INT(-1) } },
-  { MP_CMD_SUB_VISIBILITY, "sub_visibility", { OARG_INT(-1) } },
+  { MP_CMD_PRINT_TEXT, "print_text", { ARG_STRING } },
+  { MP_CMD_SHOW_TEXT, "show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
+  { MP_CMD_SHOW_PROGRESS, "show_progress", },
   { MP_CMD_SUB_LOAD, "sub_load", { ARG_STRING } },
-  { MP_CMD_SUB_SELECT, "vobsub_lang", { OARG_INT(-2) } }, // for compatibility
-  { MP_CMD_SUB_SELECT, "sub_select", { OARG_INT(-2) } },
-  { MP_CMD_SUB_SCALE, "sub_scale", { ARG_FLOAT, OARG_INT(0) } },
-#ifdef CONFIG_ASS
-  { MP_CMD_ASS_USE_MARGINS, "ass_use_margins", { OARG_INT(-1) } },
-#endif
-  { MP_CMD_GET_PERCENT_POS, "get_percent_pos", },
-  { MP_CMD_GET_TIME_POS, "get_time_pos", },
-  { MP_CMD_GET_TIME_LENGTH, "get_time_length", },
-  { MP_CMD_GET_FILENAME, "get_file_name", },
-  { MP_CMD_GET_VIDEO_CODEC, "get_video_codec", },
-  { MP_CMD_GET_VIDEO_BITRATE, "get_video_bitrate", },
-  { MP_CMD_GET_VIDEO_RESOLUTION, "get_video_resolution", },
-  { MP_CMD_GET_AUDIO_CODEC, "get_audio_codec", },
-  { MP_CMD_GET_AUDIO_BITRATE, "get_audio_bitrate", },
-  { MP_CMD_GET_AUDIO_SAMPLES, "get_audio_samples", },
-  { MP_CMD_GET_META_TITLE, "get_meta_title", },
-  { MP_CMD_GET_META_ARTIST, "get_meta_artist", },
-  { MP_CMD_GET_META_ALBUM, "get_meta_album", },
-  { MP_CMD_GET_META_YEAR, "get_meta_year", },
-  { MP_CMD_GET_META_COMMENT, "get_meta_comment", },
-  { MP_CMD_GET_META_TRACK, "get_meta_track", },
-  { MP_CMD_GET_META_GENRE, "get_meta_genre", },
-  { MP_CMD_SWITCH_AUDIO, "switch_audio", { OARG_INT(-1) } },
-  { MP_CMD_SWITCH_ANGLE, "switch_angle", { OARG_INT(-1) } },
-  { MP_CMD_SWITCH_TITLE, "switch_title", { OARG_INT(-1) } },
-#ifdef CONFIG_TV
+
   { MP_CMD_TV_START_SCAN, "tv_start_scan", },
   { MP_CMD_TV_STEP_CHANNEL, "tv_step_channel", { ARG_INT } },
   { MP_CMD_TV_STEP_NORM, "tv_step_norm", },
@@ -168,38 +155,39 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_TV_SET_FREQ, "tv_set_freq", { ARG_FLOAT } },
   { MP_CMD_TV_STEP_FREQ, "tv_step_freq", { ARG_FLOAT } },
   { MP_CMD_TV_SET_NORM, "tv_set_norm", { ARG_STRING } },
-  { MP_CMD_TV_SET_BRIGHTNESS, "tv_set_brightness", { ARG_INT, OARG_INT(1) } },
-  { MP_CMD_TV_SET_CONTRAST, "tv_set_contrast", { ARG_INT, OARG_INT(1) } },
-  { MP_CMD_TV_SET_HUE, "tv_set_hue", { ARG_INT, OARG_INT(1) } },
-  { MP_CMD_TV_SET_SATURATION, "tv_set_saturation", { ARG_INT, OARG_INT(1) } },
-#endif
-  { MP_CMD_SUB_FORCED_ONLY, "forced_subs_only", { OARG_INT(-1) } },
-#ifdef CONFIG_DVBIN
+
   { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", { ARG_INT, ARG_INT } },
-#endif
-  { MP_CMD_SWITCH_RATIO, "switch_ratio", { OARG_FLOAT(0) } },
-  { MP_CMD_VO_FULLSCREEN, "vo_fullscreen", { OARG_INT(-1) } },
-  { MP_CMD_VO_ONTOP, "vo_ontop", { OARG_INT(-1) } },
-  { MP_CMD_VO_ROOTWIN, "vo_rootwin", { OARG_INT(-1) } },
-  { MP_CMD_VO_BORDER, "vo_border", { OARG_INT(-1) } },
-  { MP_CMD_SCREENSHOT, "screenshot", { OARG_INT(0), OARG_INT(0) } },
-  { MP_CMD_PANSCAN, "panscan", { ARG_FLOAT, OARG_INT(0) } },
-  { MP_CMD_SWITCH_VSYNC, "switch_vsync", { OARG_INT(0) } },
-  { MP_CMD_LOADFILE, "loadfile", { ARG_STRING, OARG_INT(0) } },
-  { MP_CMD_LOADLIST, "loadlist", { ARG_STRING, OARG_INT(0) } },
+
+  { MP_CMD_SCREENSHOT, "screenshot", {
+      OARG_CHOICE(0, ({"single", 0},           {"0", 0},
+                      {"each-frame", 1},       {"1", 1})),
+      OARG_CHOICE(0, ({"video", 0},            {"0", 0},
+                      {"window", 1},           {"1", 1})),
+  }},
+  { MP_CMD_LOADFILE, "loadfile", {
+      ARG_STRING,
+      OARG_CHOICE(0, ({"replace", 0},          {"0", 0},
+                      {"append", 1},           {"1", 1})),
+  }},
+  { MP_CMD_LOADLIST, "loadlist", {
+      ARG_STRING,
+      OARG_CHOICE(0, ({"replace", 0},          {"0", 0},
+                      {"append", 1},           {"1", 1})),
+  }},
   { MP_CMD_PLAYLIST_CLEAR, "playlist_clear", },
   { MP_CMD_RUN, "run", { ARG_STRING } },
 
-  { MP_CMD_GET_VO_FULLSCREEN, "get_vo_fullscreen", },
-  { MP_CMD_GET_SUB_VISIBILITY, "get_sub_visibility", },
   { MP_CMD_KEYDOWN_EVENTS, "key_down_event", { ARG_INT } },
-  { MP_CMD_SET_PROPERTY, "set_property", { ARG_STRING,  ARG_STRING } },
-  { MP_CMD_SET_PROPERTY_OSD, "set_property_osd", { ARG_STRING,  ARG_STRING } },
+  { MP_CMD_SET, "set", { ARG_STRING,  ARG_STRING } },
   { MP_CMD_GET_PROPERTY, "get_property", { ARG_STRING } },
-  { MP_CMD_STEP_PROPERTY, "step_property", { ARG_STRING, OARG_FLOAT(0), OARG_INT(0) } },
-  { MP_CMD_STEP_PROPERTY_OSD, "step_property_osd", { ARG_STRING, OARG_FLOAT(0), OARG_INT(0) } },
+  { MP_CMD_ADD, "add", { ARG_STRING, OARG_FLOAT(0) } },
+  { MP_CMD_CYCLE, "cycle", {
+      ARG_STRING,
+      { .type = {"", NULL, &m_option_type_cycle_dir},
+        .optional = true,
+        .v.f = 1 },
+  }},
 
-  { MP_CMD_SEEK_CHAPTER, "seek_chapter", { ARG_INT, OARG_INT(0) } },
   { MP_CMD_SET_MOUSE_POS, "set_mouse_pos", { ARG_INT, ARG_INT } },
 
   { MP_CMD_AF_SWITCH, "af_switch", { ARG_STRING } },
@@ -208,13 +196,70 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_AF_CLR, "af_clr", },
   { MP_CMD_AF_CMDLINE, "af_cmdline", { ARG_STRING, ARG_STRING } },
 
-  { MP_CMD_SHOW_CHAPTERS, "show_chapters_osd", },
-  { MP_CMD_SHOW_TRACKS, "show_tracks_osd", },
+  { MP_CMD_SHOW_CHAPTERS, "show_chapters", },
+  { MP_CMD_SHOW_TRACKS, "show_tracks", },
 
   { MP_CMD_VO_CMDLINE, "vo_cmdline", { ARG_STRING } },
 
   {0}
 };
+
+// Map legacy commands to proper commands
+struct legacy_cmd {
+    const char *old, *new;
+};
+static const struct legacy_cmd legacy_cmds[] = {
+    {"loop",                    "cycle loop"},
+    {"seek_chapter",            "add chapter"},
+    {"switch_angle",            "cycle angle"},
+    {"pause",                   "cycle pause"},
+    {"volume",                  "add volume"},
+    {"mute",                    "cycle mute"},
+    {"audio_delay",             "add audio-delay"},
+    {"switch_audio",            "cycle audio"},
+    {"balance",                 "add balance"},
+    {"vo_fullscreen",           "no-osd cycle fullscreen"},
+    {"panscan",                 "add panscan"},
+    {"vo_ontop",                "cycle ontop"},
+    {"vo_rootwin",              "cycle rootwin"},
+    {"vo_border",               "cycle border"},
+    {"frame_drop",              "cycle framedrop"},
+    {"gamma",                   "add gamma"},
+    {"brightness",              "add brightness"},
+    {"contrast",                "add contrast"},
+    {"saturation",              "add saturation"},
+    {"hue",                     "add hue"},
+    {"switch_vsync",            "cycle vsync"},
+    {"sub_select",              "cycle sub"},
+    {"sub_pos",                 "add sub-pos"},
+    {"sub_delay",               "add sub-delay"},
+    {"sub_visibility",          "cycle sub-visibility"},
+    {"forced_subs_only",        "cycle sub-forced-only"},
+    {"sub_scale",               "add sub-scale"},
+    {"ass_use_margins",         "cycle ass-use-margins"},
+    {"tv_set_brightness",       "add tv-brightness"},
+    {"tv_set_hue",              "add tv-hue"},
+    {"tv_set_saturation",       "add tv-saturation"},
+    {"tv_set_contrast",         "add tv-contrast"},
+    {"step_property_osd",       "cycle"},
+    {"step_property",           "no-osd cycle"},
+    {"set_property",            "no-osd set"},
+    {"set_property_osd",        "set"},
+    {"speed_set",               "set speed"},
+    {"osd_show_text",           "show_text"},
+    {"osd_show_property_text",  "show_text"},
+    {"osd_show_progression",    "show_progress"},
+    {"show_chapters_osd",       "show_chapters"},
+    {"show_tracks_osd",         "show_tracks"},
+    // Approximate (can fail if user added additional whitespace)
+    {"pt_step 1",               "playlist_next"},
+    {"pt_step -1",              "playlist_prev"},
+    // Switch_ratio without argument resets aspect ratio
+    {"switch_ratio ",           "set aspect "},
+    {"switch_ratio",            "set aspect 0"},
+    {0}
+};
+
 
 /// The names of the keys as used in input.conf
 /// If you add some new keys, you also need to add them here
@@ -440,6 +485,8 @@ struct input_ctx {
     unsigned int num_key_down;
     unsigned int last_key_down;
 
+    bool test;
+
     bool default_bindings;
     // List of command binding sections
     struct cmd_bind_section *cmd_bind_sections;
@@ -481,6 +528,7 @@ static const m_option_t input_conf[] = {
     OPT_STRING("ar-dev", input.ar_dev, CONF_GLOBAL),
     OPT_STRING("file", input.in_file, CONF_GLOBAL),
     OPT_MAKE_FLAGS("default-bindings", input.default_bindings, CONF_GLOBAL),
+    OPT_MAKE_FLAGS("test", input.test, CONF_GLOBAL),
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -582,11 +630,6 @@ static void queue_remove(struct cmd_queue *queue, struct mp_cmd *cmd)
     // if this fails, cmd was not in the queue
     assert(*p_prev == cmd);
     *p_prev = cmd->queue_next;
-}
-
-static void queue_pop(struct cmd_queue *queue)
-{
-    queue_remove(queue, queue->first);
 }
 
 static void queue_add(struct cmd_queue *queue, struct mp_cmd *cmd,
@@ -698,146 +741,246 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
     return 1;
 }
 
-mp_cmd_t *mp_input_parse_cmd(char *str)
+static int parse_cycle_dir(const struct m_option *opt, struct bstr name,
+                           struct bstr param, void *dst)
 {
-    int i, l;
+    float val;
+    if (bstrcmp0(param, "up") == 0) {
+        val = +1;
+    } else if (bstrcmp0(param, "down") == 0) {
+        val = -1;
+    } else {
+        return m_option_type_float.parse(opt, name, param, dst);
+    }
+    *(float *)dst = val;
+    return 1;
+}
+
+static bool read_token(bstr str, bstr *out_rest, bstr *out_token)
+{
+    bstr t = bstr_lstrip(str);
+    int next = bstrcspn(t, WHITESPACE "#");
+    // Handle comments
+    if (t.start[next] == '#')
+        t = bstr_splice(t, 0, next);
+    if (!t.len)
+        return false;
+    *out_token = bstr_splice(t, 0, next);
+    *out_rest = bstr_cut(t, next);
+    return true;
+}
+
+static bool eat_token(bstr *str, const char *tok)
+{
+    bstr rest, token;
+    if (read_token(*str, &rest, &token) && bstrcmp0(token, tok) == 0) {
+        *str = rest;
+        return true;
+    }
+    return false;
+}
+
+static bool append_escape(bstr *code, char **str)
+{
+    if (code->len < 1)
+        return false;
+    char replace = 0;
+    switch (code->start[0]) {
+    case '"':  replace = '"';  break;
+    case '\\': replace = '\\'; break;
+    case 'b':  replace = '\b'; break;
+    case 'f':  replace = '\f'; break;
+    case 'n':  replace = '\n'; break;
+    case 'r':  replace = '\r'; break;
+    case 't':  replace = '\t'; break;
+    case 'e':  replace = '\x1b'; break;
+    case '\'': replace = '\''; break;
+    }
+    if (replace) {
+        *str = talloc_strndup_append_buffer(*str, &replace, 1);
+        *code = bstr_cut(*code, 1);
+        return true;
+    }
+    if (code->start[0] == 'x' && code->len >= 3) {
+        bstr num = bstr_splice(*code, 1, 3);
+        char c = bstrtoll(num, &num, 16);
+        if (!num.len)
+            return false;
+        *str = talloc_strndup_append_buffer(*str, &c, 1);
+        *code = bstr_cut(*code, 3);
+        return true;
+    }
+    if (code->start[0] == 'u' && code->len >= 5) {
+        bstr num = bstr_splice(*code, 1, 5);
+        int c = bstrtoll(num, &num, 16);
+        if (num.len)
+            return false;
+        *str = append_utf8_buffer(*str, c);
+        *code = bstr_cut(*code, 5);
+        return true;
+    }
+    return false;
+}
+
+static bool read_escaped_string(void *talloc_ctx, bstr *str, bstr *literal)
+{
+    bstr t = *str;
+    char *new = talloc_strdup(talloc_ctx, "");
+    while (t.len) {
+        if (t.start[0] == '"')
+            break;
+        if (t.start[0] == '\\') {
+            t = bstr_cut(t, 1);
+            if (!append_escape(&t, &new))
+                goto error;
+        } else {
+            new = talloc_strndup_append_buffer(new, t.start, 1);
+            t = bstr_cut(t, 1);
+        }
+    }
+    int len = str->len - t.len;
+    *literal = new ? bstr0(new) : bstr_splice(*str, 0, len);
+    *str = bstr_cut(*str, len);
+    return true;
+error:
+    talloc_free(new);
+    return false;
+}
+
+mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
+{
     int pausing = 0;
-    char *ptr;
-    const mp_cmd_t *cmd_def;
+    int on_osd = MP_ON_OSD_AUTO;
+    struct mp_cmd *cmd = NULL;
+    bstr start = str;
+    void *tmp = talloc_new(NULL);
 
-    // Ignore heading spaces.
-    while (str[0] == ' ' || str[0] == '\t')
-        ++str;
-
-    if (strncmp(str, "pausing ", 8) == 0) {
+    if (eat_token(&str, "pausing")) {
         pausing = 1;
-        str = &str[8];
-    } else if (strncmp(str, "pausing_keep ", 13) == 0) {
+    } else if (eat_token(&str, "pausing_keep")) {
         pausing = 2;
-        str = &str[13];
-    } else if (strncmp(str, "pausing_toggle ", 15) == 0) {
+    } else if (eat_token(&str, "pausing_toggle")) {
         pausing = 3;
-        str = &str[15];
-    } else if (strncmp(str, "pausing_keep_force ", 19) == 0) {
+    } else if (eat_token(&str, "pausing_keep_force")) {
         pausing = 4;
-        str = &str[19];
     }
 
-    ptr = str + strcspn(str, "\t ");
-    if (*ptr != 0)
-        l = ptr - str;
-    else
-        l = strlen(str);
-
-    if (l == 0)
-        return NULL;
-
-    for (i = 0; mp_cmds[i].name != NULL; i++) {
-        if (strncasecmp(mp_cmds[i].name, str, l) == 0)
-            break;
-    }
-
-    if (mp_cmds[i].name == NULL)
-        return NULL;
-
-    cmd_def = &mp_cmds[i];
-
-    mp_cmd_t *cmd = talloc_ptrtype(NULL, cmd);
-    *cmd = (mp_cmd_t){
-        .id = cmd_def->id,
-        .name = talloc_strdup(cmd, cmd_def->name),
-        .pausing = pausing,
-    };
-
-    ptr = str;
-
-    for (i = 0; ptr && i < MP_CMD_MAX_ARGS; i++) {
-        while (ptr[0] != ' ' && ptr[0] != '\t' && ptr[0] != '\0')
-            ptr++;
-        if (ptr[0] == '\0')
-            break;
-        while (ptr[0] == ' ' || ptr[0] == '\t')
-            ptr++;
-        if (ptr[0] == '\0' || ptr[0] == '#')
-            break;
-        cmd->args[i].type = cmd_def->args[i].type;
-        switch (cmd_def->args[i].type) {
-        case MP_CMD_ARG_INT:
-            errno = 0;
-            cmd->args[i].v.i = atoi(ptr);
-            if (errno != 0) {
-                mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
-                        "isn't an integer.\n", cmd_def->name, i + 1);
-                goto error;
-            }
-            break;
-        case MP_CMD_ARG_FLOAT:
-            errno = 0;
-            cmd->args[i].v.f = atof(ptr);
-            if (errno != 0) {
-                mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
-                        "isn't a float.\n", cmd_def->name, i + 1);
-                goto error;
-            }
-            break;
-        case MP_CMD_ARG_STRING: {
-            int term = ' ';
-            if (*ptr == '\'' || *ptr == '"')
-                term = *ptr++;
-            char *argptr = talloc_size(cmd, strlen(ptr) + 1);
-            cmd->args[i].v.s = argptr;
-            while (1) {
-                if (*ptr == 0) {
-                    if (term == ' ')
-                        break;
-                    mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d is "
-                            "unterminated.\n", cmd_def->name, i + 1);
-                    goto error;
-                }
-                if (*ptr == term || (*ptr == '\t' && term == ' '))
-                    break;
-                if (*ptr == '\\')
-                    ptr++;
-                if (*ptr != 0)
-                    *argptr++ = *ptr++;
-            }
-            *argptr = 0;
+    str = bstr_lstrip(str);
+    for (const struct legacy_cmd *entry = legacy_cmds; entry->old; entry++) {
+        size_t old_len = strlen(entry->old);
+        if (bstrcasecmp(bstr_splice(str, 0, old_len),
+                        (bstr) {(char *)entry->old, old_len}) == 0)
+        {
+            mp_tmsg(MSGT_INPUT, MSGL_V, "Warning: command '%s' is "
+                    "deprecated, replaced with '%s' at %s.\n",
+                    entry->old, entry->new, loc);
+            bstr s = bstr_cut(str, old_len);
+            str = bstr0(talloc_asprintf(tmp, "%s%.*s", entry->new, BSTR_P(s)));
+            start = str;
             break;
         }
-        case 0:
-            ptr = NULL;
-            break;
-        default:
-            mp_tmsg(MSGT_INPUT, MSGL_ERR, "Unknown argument %d\n", i);
-        }
     }
-    cmd->nargs = i;
 
-    int min_args;
-    for (min_args = 0; min_args < MP_CMD_MAX_ARGS
-             && cmd_def->args[min_args].type
-             && !cmd_def->args[min_args].optional; min_args++);
-    if (cmd->nargs < min_args) {
-        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command \"%s\" requires at least %d "
-                "arguments, we found only %d so far.\n", cmd_def->name,
-                min_args, cmd->nargs);
+    if (eat_token(&str, "no-osd")) {
+        on_osd = MP_ON_OSD_NO;
+    } else if (eat_token(&str, "osd-bar")) {
+        on_osd = MP_ON_OSD_BAR;
+    } else if (eat_token(&str, "osd-msg")) {
+        on_osd = MP_ON_OSD_MSG;
+    } else if (eat_token(&str, "osd-msg-bar")) {
+        on_osd = MP_ON_OSD_MSG | MP_ON_OSD_BAR;
+    } else if (eat_token(&str, "osd-auto")) {
+        // default
+    }
+
+    int cmd_idx = 0;
+    while (mp_cmds[cmd_idx].name != NULL) {
+        if (eat_token(&str, mp_cmds[cmd_idx].name))
+            break;
+        cmd_idx++;
+    }
+
+    if (mp_cmds[cmd_idx].name == NULL) {
+        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command '%.*s' not found.\n",
+                BSTR_P(str));
         goto error;
     }
 
-    for (; i < MP_CMD_MAX_ARGS && cmd_def->args[i].type; i++) {
-        memcpy(&cmd->args[i], &cmd_def->args[i], sizeof(struct mp_cmd_arg));
-        if (cmd_def->args[i].type == MP_CMD_ARG_STRING
-            && cmd_def->args[i].v.s != NULL)
-            cmd->args[i].v.s = talloc_strdup(cmd, cmd_def->args[i].v.s);
+    cmd = talloc_ptrtype(NULL, cmd);
+    *cmd = mp_cmds[cmd_idx];
+    cmd->pausing = pausing;
+    cmd->on_osd = on_osd;
+
+    for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
+        struct mp_cmd_arg *cmdarg = &cmd->args[i];
+        if (!cmdarg->type.type)
+            break;
+        cmd->nargs++;
+        str = bstr_lstrip(str);
+        bstr arg = {0};
+        if (cmdarg->type.type == &m_option_type_string &&
+            bstr_eatstart0(&str, "\""))
+        {
+            if (!read_escaped_string(tmp, &str, &arg)) {
+                mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
+                        "has broken string escapes.\n", cmd->name, i + 1);
+                goto error;
+            }
+            if (!bstr_eatstart0(&str, "\"")) {
+                mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d is "
+                        "unterminated.\n", cmd->name, i + 1);
+                goto error;
+            }
+        } else {
+            if (!read_token(str, &str, &arg))
+                break;
+            if (cmdarg->optional && bstrcmp0(arg, "-") == 0)
+                continue;
+        }
+        // Prevent option API from trying to deallocate static strings
+        cmdarg->v = ((struct mp_cmd_arg) {{0}}).v;
+        int r = m_option_parse(&cmdarg->type, bstr0(cmd->name), arg, &cmdarg->v);
+        if (r < 0) {
+            mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
+                    "can't be parsed: %s.\n", cmd->name, i + 1,
+                    m_option_strerror(r));
+            goto error;
+        }
+        if (cmdarg->type.type == &m_option_type_string)
+            cmdarg->v.s = talloc_steal(cmd, cmdarg->v.s);
     }
 
-    if (i < MP_CMD_MAX_ARGS)
-        cmd->args[i].type = 0;
+    bstr dummy;
+    if (read_token(str, &dummy, &dummy)) {
+        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s has trailing unused "
+                "arguments: '%.*s'.\n", cmd->name, BSTR_P(str));
+        // Better make it fatal to make it clear something is wrong.
+        goto error;
+    }
 
+    int min_args = 0;
+    while (min_args < MP_CMD_MAX_ARGS && cmd->args[min_args].type.type
+           && !cmd->args[min_args].optional)
+    {
+        min_args++;
+    }
+    if (cmd->nargs < min_args) {
+        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s requires at least %d "
+                "arguments, we found only %d so far.\n", cmd->name, min_args,
+                cmd->nargs);
+        goto error;
+    }
+
+    bstr orig = (bstr) {start.start, str.start - start.start};
+    cmd->original = bstrdup(cmd, bstr_strip(orig));
+
+    talloc_free(tmp);
     return cmd;
 
- error:
-    mp_cmd_free(cmd);
+error:
+    mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command was defined at %s.\n", loc);
+    talloc_free(cmd);
+    talloc_free(tmp);
     return NULL;
 }
 
@@ -950,37 +1093,91 @@ static int read_wakeup(void *ctx, int fd)
     return MP_INPUT_NOTHING;
 }
 
+static bool bind_matches_key(struct cmd_bind *bind, int n, int *keys);
 
-static char *find_bind_for_key(const struct cmd_bind *binds, int n, int *keys)
+static void append_bind_info(char **pmsg, struct cmd_bind *bind)
+{
+    char *msg = *pmsg;
+    struct mp_cmd *cmd = mp_input_parse_cmd(bstr0(bind->cmd), bind->location);
+    bstr stripped = cmd ? cmd->original : bstr0(bind->cmd);
+    msg = talloc_asprintf_append(msg, " '%.*s'", BSTR_P(stripped));
+    if (!cmd)
+        msg = talloc_asprintf_append(msg, " (invalid)");
+    if (strcmp(bind->owner->section, "default") != 0)
+        msg = talloc_asprintf_append(msg, " in section {%s}",
+                                     bind->owner->section);
+    if (bind->owner->is_builtin) {
+        msg = talloc_asprintf_append(msg, " (default binding)");
+    } else {
+        msg = talloc_asprintf_append(msg, " in %s", bind->location);
+    }
+    *pmsg = msg;
+}
+
+static mp_cmd_t *handle_test(struct input_ctx *ictx, int n, int *keys)
+{
+    char *key_buf = get_key_combo_name(keys, n);
+    // "$>" to disable property substitution when invoking "show_text"
+    char *msg = talloc_asprintf(NULL, "$>Key %s is bound to:\n", key_buf);
+    talloc_free(key_buf);
+
+    int count = 0;
+    for (struct cmd_bind_section *bs = ictx->cmd_bind_sections;
+         bs; bs = bs->next)
+    {
+        for (struct cmd_bind *bind = bs->cmd_binds; bind->cmd; bind++) {
+            if (bind_matches_key(bind, n, keys)) {
+                count++;
+                msg = talloc_asprintf_append(msg, "%d. ", count);
+                append_bind_info(&msg, bind);
+                msg = talloc_asprintf_append(msg, "\n");
+            }
+        }
+    }
+
+    if (!count)
+        msg = talloc_asprintf_append(msg, "(nothing)");
+
+    mp_cmd_t *res = mp_input_parse_cmd(bstr0("show_text \"\""), "");
+    res->args[0].v.s = talloc_steal(res, msg);
+    return res;
+}
+
+static bool bind_matches_key(struct cmd_bind *bind, int n, int *keys)
+{
+    int found = 1, s;
+    for (s = 0; s < n && bind->input[s] != 0; s++) {
+        if (bind->input[s] != keys[s]) {
+            found = 0;
+            break;
+        }
+    }
+    return found && bind->input[s] == 0 && s == n;
+}
+
+static struct cmd_bind *find_bind_for_key(struct cmd_bind *binds, int n,
+                                          int *keys)
 {
     int j;
 
     if (n <= 0)
         return NULL;
     for (j = 0; binds[j].cmd != NULL; j++) {
-        int found = 1, s;
-        for (s = 0; s < n && binds[j].input[s] != 0; s++) {
-            if (binds[j].input[s] != keys[s]) {
-                found = 0;
-                break;
-            }
-        }
-        if (found && binds[j].input[s] == 0 && s == n)
+        if (bind_matches_key(&binds[j], n, keys))
             break;
     }
-    return binds[j].cmd;
+    return binds[j].cmd ? &binds[j] : NULL;
 }
 
 static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
-                                                 bool builtin,
-                                                 char *section)
+                                                 bool builtin, bstr section)
 {
     struct cmd_bind_section *bind_section = ictx->cmd_bind_sections;
 
-    if (section == NULL)
-        section = "default";
+    if (section.len == 0)
+        section = bstr0("default");
     while (bind_section) {
-        if (strcmp(section, bind_section->section) == 0
+        if (bstrcmp0(section, bind_section->section) == 0
             && builtin == bind_section->is_builtin)
             return bind_section;
         if (bind_section->next == NULL)
@@ -995,27 +1192,28 @@ static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
         bind_section = ictx->cmd_bind_sections;
     }
     bind_section->cmd_binds = NULL;
-    bind_section->section = talloc_strdup(bind_section, section);
+    bind_section->section = bstrdup0(bind_section, section);
     bind_section->is_builtin = builtin;
     bind_section->next = NULL;
     return bind_section;
 }
 
-static char *section_find_bind_for_key(struct input_ctx *ictx,
-                                       bool builtin, char *section,
-                                       int n, int *keys)
+static struct cmd_bind *section_find_bind_for_key(struct input_ctx *ictx,
+                                                  bool builtin, char *section,
+                                                  int n, int *keys)
 {
-    struct cmd_bind_section *bs = get_bind_section(ictx, builtin, section);
-    const struct cmd_bind *binds = bs->cmd_binds;
-    return binds ? find_bind_for_key(binds, n, keys) : NULL;
+    struct cmd_bind_section *bs = get_bind_section(ictx, builtin,
+                                                   bstr0(section));
+    return bs->cmd_binds ? find_bind_for_key(bs->cmd_binds, n, keys) : NULL;
 }
 
 static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
 {
-    char *cmd = NULL;
-    mp_cmd_t *ret;
+    if (ictx->test)
+        return handle_test(ictx, n, keys);
 
-    cmd = section_find_bind_for_key(ictx, false, ictx->section, n, keys);
+    struct cmd_bind *cmd
+        = section_find_bind_for_key(ictx, false, ictx->section, n, keys);
     if (ictx->default_bindings && cmd == NULL)
         cmd = section_find_bind_for_key(ictx, true, ictx->section, n, keys);
     if (!(ictx->section_flags & MP_INPUT_NO_DEFAULT_SECTION)) {
@@ -1032,13 +1230,11 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
         talloc_free(key_buf);
         return NULL;
     }
-    if (strcmp(cmd, "ignore") == 0)
-        return NULL;
-    ret =  mp_input_parse_cmd(cmd);
+    mp_cmd_t *ret = mp_input_parse_cmd(bstr0(cmd->cmd), cmd->location);
     if (!ret) {
         char *key_buf = get_key_combo_name(keys, n);
         mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                "Invalid command for bound key '%s': '%s'\n", key_buf, cmd);
+                "Invalid command for bound key '%s': '%s'\n", key_buf, cmd->cmd);
         talloc_free(key_buf);
     }
     return ret;
@@ -1166,7 +1362,10 @@ void mp_input_feed_key(struct input_ctx *ictx, int code)
     struct cmd_queue *queue = &ictx->key_cmd_queue;
     if (queue_count_cmds(queue) >= ictx->key_fifo_size &&
             (!mp_input_is_abort_cmd(cmd->id) || queue_has_abort_cmds(queue)))
+    {
+        talloc_free(cmd);
         return;
+    }
     queue_add(queue, cmd, false);
 }
 
@@ -1176,7 +1375,7 @@ static void read_cmd_fd(struct input_ctx *ictx, struct input_fd *cmd_fd)
     char *text;
     while ((r = read_cmd(cmd_fd, &text)) >= 0) {
         ictx->got_new_events = true;
-        struct mp_cmd *cmd = mp_input_parse_cmd(text);
+        struct mp_cmd *cmd = mp_input_parse_cmd(bstr0(text), "<pipe>");
         talloc_free(text);
         if (cmd)
             queue_add(&ictx->control_cmd_queue, cmd, false);
@@ -1323,25 +1522,25 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
 {
     if (async_quit_request)
-        return mp_input_parse_cmd("quit 1");
+        return mp_input_parse_cmd(bstr0("quit 1"), "");
 
     if (ictx->control_cmd_queue.first || ictx->key_cmd_queue.first)
         time = 0;
     read_all_events(ictx, time);
-    struct mp_cmd *ret;
     struct cmd_queue *queue = &ictx->control_cmd_queue;
     if (!queue->first)
         queue = &ictx->key_cmd_queue;
     if (!queue->first) {
-        ret = check_autorepeat(ictx);
-        if (!ret)
-            return NULL;
-        queue_add(queue, ret, false);
-    } else
-        ret = queue->first;
+        struct mp_cmd *repeated = check_autorepeat(ictx);
+        if (repeated)
+            queue_add(queue, repeated, false);
+    }
+    struct mp_cmd *ret = queue->first;
+    if (!ret)
+        return NULL;
 
     if (!peek_only)
-        queue_pop(queue);
+        queue_remove(queue, ret);
 
     return ret;
 }
@@ -1358,8 +1557,8 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
 
     ret = talloc_memdup(NULL, cmd, sizeof(mp_cmd_t));
     ret->name = talloc_strdup(ret, cmd->name);
-    for (i = 0; i < MP_CMD_MAX_ARGS && cmd->args[i].type; i++) {
-        if (cmd->args[i].type == MP_CMD_ARG_STRING && cmd->args[i].v.s != NULL)
+    for (i = 0; i < MP_CMD_MAX_ARGS; i++) {
+        if (cmd->args[i].type.type == &m_option_type_string)
             ret->args[i].v.s = talloc_strdup(ret, cmd->args[i].v.s);
     }
 
@@ -1428,24 +1627,15 @@ static int get_input_from_name(char *name, int *keys)
     return 1;
 }
 
-static void bind_keys(struct input_ctx *ictx, bool builtin,
-                      const int keys[MP_MAX_KEY_DOWN + 1], bstr command)
+static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
+                      const int keys[MP_MAX_KEY_DOWN + 1], bstr command,
+                      const char *loc)
 {
     int i = 0, j;
     struct cmd_bind *bind = NULL;
     struct cmd_bind_section *bind_section = NULL;
-    char *section = NULL;
 
-    if (bstr_startswith0(command, "{")) {
-        int p = bstrchr(command, '}');
-        if (p != -1) {
-            bstr bsection = bstr_strip(bstr_splice(command, 1, p));
-            section = bstrdup0(NULL, bsection);
-            command = bstr_lstrip(bstr_cut(command, p + 1));
-        }
-    }
     bind_section = get_bind_section(ictx, builtin, section);
-    talloc_free(section);
 
     if (bind_section->cmd_binds) {
         for (i = 0; bind_section->cmd_binds[i].cmd != NULL; i++) {
@@ -1467,14 +1657,24 @@ static void bind_keys(struct input_ctx *ictx, bool builtin,
     }
     talloc_free(bind->cmd);
     bind->cmd = bstrdup0(bind_section->cmd_binds, command);
+    bind->location = talloc_strdup(bind_section->cmd_binds, loc);
+    bind->owner = bind_section;
     memcpy(bind->input, keys, (MP_MAX_KEY_DOWN + 1) * sizeof(int));
 }
 
-static int parse_config(struct input_ctx *ictx, bool builtin, bstr data)
+static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
+                        const char *location)
 {
     int n_binds = 0, keys[MP_MAX_KEY_DOWN + 1];
+    int line_no = 0;
+    char *cur_loc = NULL;
 
     while (data.len) {
+        line_no++;
+        if (cur_loc)
+            talloc_free(cur_loc);
+        cur_loc = talloc_asprintf(NULL, "%s:%d", location, line_no);
+
         bstr line = bstr_strip_linebreaks(bstr_getline(data, &data));
         line = bstr_lstrip(line);
         if (line.len == 0 || bstr_startswith0(line, "#"))
@@ -1485,20 +1685,36 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data)
         command = bstr_strip(command);
         if (command.len == 0) {
             mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                    "Unfinished key binding: %.*s\n", BSTR_P(line));
+                    "Unfinished key binding: %.*s at %s\n", BSTR_P(line),
+                    cur_loc);
             continue;
         }
         char *name = bstrdup0(NULL, keyname);
         if (!get_input_from_name(name, keys)) {
             talloc_free(name);
             mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                    "Unknown key '%.*s'\n", BSTR_P(keyname));
+                    "Unknown key '%.*s' at %s\n", BSTR_P(keyname), cur_loc);
             continue;
         }
         talloc_free(name);
-        bind_keys(ictx, builtin, keys, command);
+
+        bstr section = {0};
+        if (bstr_startswith0(command, "{")) {
+            int p = bstrchr(command, '}');
+            if (p != -1) {
+                section = bstr_strip(bstr_splice(command, 1, p));
+                command = bstr_lstrip(bstr_cut(command, p + 1));
+            }
+        }
+
+        bind_keys(ictx, builtin, section, keys, command, cur_loc);
         n_binds++;
+
+        // Print warnings if invalid commands are encountered.
+        talloc_free(mp_input_parse_cmd(command, cur_loc));
     }
+
+    talloc_free(cur_loc);
 
     return n_binds;
 }
@@ -1514,7 +1730,7 @@ static int parse_config_file(struct input_ctx *ictx, char *file)
     res = stream_read_complete(s, NULL, 1000000, 0);
     free_stream(s);
     mp_msg(MSGT_INPUT, MSGL_V, "Parsing input config file %s\n", file);
-    int n_binds = parse_config(ictx, false, res);
+    int n_binds = parse_config(ictx, false, res, file);
     talloc_free(res.start);
     mp_msg(MSGT_INPUT, MSGL_V, "Input config file %s parsed: %d binds\n",
            file, n_binds);
@@ -1542,11 +1758,12 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
         .ar_delay = input_conf->ar_delay,
         .ar_rate = input_conf->ar_rate,
         .default_bindings = input_conf->default_bindings,
+        .test = input_conf->test,
         .wakeup_pipe = {-1, -1},
     };
     ictx->section = talloc_strdup(ictx, "default");
 
-    parse_config(ictx, true, bstr0(builtin_input_conf));
+    parse_config(ictx, true, bstr0(builtin_input_conf), "<default>");
 
 #ifdef CONFIG_COCOA
     cocoa_events_init(ictx, read_all_fd_events);
@@ -1612,7 +1829,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
 
 #ifdef CONFIG_LIRCC
     if (input_conf->use_lircc) {
-        int fd = lircc_init("mplayer", NULL);
+        int fd = lircc_init("mpv", NULL);
         if (fd >= 0)
             mp_input_add_cmd_fd(ictx, fd, 1, NULL, lircc_cleanup);
     }
@@ -1702,24 +1919,11 @@ static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam)
 {
     const mp_cmd_t *cmd;
     int i, j;
-    const char *type;
 
     for (i = 0; (cmd = &mp_cmds[i])->name != NULL; i++) {
         printf("%-20.20s", cmd->name);
-        for (j = 0; j < MP_CMD_MAX_ARGS && cmd->args[j].type; j++) {
-            switch (cmd->args[j].type) {
-            case MP_CMD_ARG_INT:
-                type = "Integer";
-                break;
-            case MP_CMD_ARG_FLOAT:
-                type = "Float";
-                break;
-            case MP_CMD_ARG_STRING:
-                type = "String";
-                break;
-            default:
-                type = "??";
-            }
+        for (j = 0; j < MP_CMD_MAX_ARGS && cmd->args[j].type.type; j++) {
+            const char *type = cmd->args[j].type.type->name;
             if (cmd->args[j].optional)
                 printf(" [%s]", type);
             else

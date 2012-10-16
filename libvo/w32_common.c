@@ -35,7 +35,7 @@
 
 #define WIN_ID_TO_HWND(x) ((HWND)(uint32_t)(x))
 
-static const wchar_t classname[] = L"mplayer2";
+static const wchar_t classname[] = L"mpv";
 
 static const struct mp_keymap vk_map[] = {
     // special keys

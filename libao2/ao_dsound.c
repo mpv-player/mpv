@@ -184,7 +184,7 @@ static void print_help(void)
 {
   mp_msg(MSGT_AO, MSGL_FATAL,
            "\n-ao dsound commandline help:\n"
-           "Example: mplayer -ao dsound:device=1\n"
+           "Example: mpv -ao dsound:device=1\n"
            "  sets 1st device\n"
            "\nOptions:\n"
            "  device=<device-number>\n"

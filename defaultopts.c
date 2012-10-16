@@ -14,7 +14,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .softvol = SOFTVOL_AUTO,
         .softvol_max = 200,
         .ao_buffersize = -1,
-        .vo_wintitle = "mplayer - ${filename}",
+        .vo_wintitle = "mpv - ${media-title}",
         .monitor_pixel_aspect = 1.0,
         .vo_panscanrange = 1.0,
         .cursor_autohide_delay = 1000,
@@ -55,6 +55,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
 #endif
         .ass_font_scale = 1,
         .ass_vsfilter_aspect_compat = 1,
+        .ass_style_override = 1,
         .use_embedded_fonts = 1,
 
         .lavc_param = {

@@ -31,15 +31,19 @@ extern float  audio_delay;
 
 extern double force_fps;
 
-extern int frame_dropping;
-
-extern int auto_quality;
-
 extern int vobsub_id;
 
 struct MPContext;
+struct MPOpts;
 struct subtitle;
 
 void set_osd_subtitle(struct MPContext *mpctx, struct subtitle *subs);
+
+struct mp_resolve_result {
+    char *url;
+    char *title;
+};
+
+struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts);
 
 #endif /* MPLAYER_MPLAYER_H */

@@ -3,10 +3,10 @@
     <assemblyIdentity
         version="0.0.9.0"
         processorArchitecture="*"
-        name="MPlayer - The Movie Player"
+        name="mpv - The Movie Player"
         type="win32"
     />
-    <description>MPlayer - The Movie Player</description>
+    <description>mpv - The Movie Player</description>
     <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
         <security>
             <requestedPrivileges>

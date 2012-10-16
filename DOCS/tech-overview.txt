@@ -1,6 +1,6 @@
 NOTE: DOCS/OUTDATED-tech/* may contain more detailed information, but most of it
       is possibly or definitely outdated. This file intends to give a big
-      picture of how mplayer is structured.
+      picture of how mplayer/mpv is structured.
 
 mplayer.c:
     This contains the main play loop, anything related to mplayer and playback
@@ -65,8 +65,8 @@ talloc.h & talloc.c:
     One very useful feature of talloc is fast tracking of memory leaks. ("Fast"
     as in it doesn't require valgrind.) You can enable it by passing the option
     --leak-report as first parameter, or better, setting the
-    MPLAYER_LEAK_REPORT environment variable to "1":
-        export MPLAYER_LEAK_REPORT=1
+    MPV_LEAK_REPORT environment variable to "1":
+        export MPV_LEAK_REPORT=1
     This will list all unfree'd allocations on exit.
 
     Documentation can be found here:
@@ -160,13 +160,13 @@ libvo/:
     Video output. They also create GUI windows and handle user input. In most
     cases, the windowing code is shared among VOs, like x11_common.c for X11 and
     w32_common.c for Windows. The VOs stand between frontend and windowing code.
-    vo_gl can pick a windowing system at runtime, e.g. the same binary can
+    vo_opengl can pick a windowing system at runtime, e.g. the same binary can
     provide both X11 and Cocoa support on OSX.
 
     VOs can be reconfigured at runtime. A config() call can change the video
     resolution and format, without destroying the window.
 
-    vo_vdpau and vo_gl3 should be taken as reference.
+    vo_vdpau and vo_opengl should be taken as reference.
 
 libaf/:
     Audio filter chain. format.h/format.c define the audio formats.

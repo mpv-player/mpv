@@ -269,7 +269,7 @@ static void print_help (void)
 {
   mp_tmsg (MSGT_AO, MSGL_FATAL,
     "\n[AO_ALSA] -ao alsa commandline help:\n"\
-    "[AO_ALSA] Example: mplayer -ao alsa:device=hw=0.3\n"\
+    "[AO_ALSA] Example: mpv -ao alsa:device=hw=0.3\n"\
     "[AO_ALSA]   Sets first card fourth hardware device.\n\n"\
     "[AO_ALSA] Options:\n"\
     "[AO_ALSA]   noblock\n"\

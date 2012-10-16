@@ -1,32 +1,32 @@
-mplayer2 manual page
+mpv manual page
 ####################
 
 Synopsis
 ========
 
-| **mplayer** [options] [file|URL|-]
-| **mplayer** [options] --playlist=PLAYLIST
-| **mplayer** [options] files
-| **mplayer** [options] {group of files and options}
-| **mplayer** [bd]://[title][/device] [options]
-| **mplayer** dvd://[title|[start\_title]-end\_title][/device] [options]
-| **mplayer** \vcd://track[/device]
-| **mplayer** \tv://[channel][/input_id] [options]
-| **mplayer** radio://[channel|frequency][/capture] [options]
-| **mplayer** \pvr:// [options]
-| **mplayer** \dvb://[card\_number@]channel [options]
-| **mplayer** \mf://[filemask|\@listfile] [-mf options] [options]
-| **mplayer** [cdda|cddb]://track[-endtrack][:speed][/device] [options]
-| **mplayer** [file|mms[t]|http|http\_proxy|rt[s]p|ftp|udp|unsv|icyx|noicyx|smb]:// [user:pass\@]URL[:port] [options]
-| **mplayer** \sdp://file [options]
-| **mplayer** \mpst://host[:port]/URL [options]
-| **mplayer** \tivo://host/[list|llist|fsid] [options]
+| **mpv** [options] [file|URL|-]
+| **mpv** [options] --playlist=PLAYLIST
+| **mpv** [options] files
+| **mpv** [options] {group of files and options}
+| **mpv** [bd]://[title][/device] [options]
+| **mpv** dvd://[title|[start\_title]-end\_title][/device] [options]
+| **mpv** \vcd://track[/device]
+| **mpv** \tv://[channel][/input_id] [options]
+| **mpv** radio://[channel|frequency][/capture] [options]
+| **mpv** \pvr:// [options]
+| **mpv** \dvb://[card\_number@]channel [options]
+| **mpv** \mf://[filemask|\@listfile] [-mf options] [options]
+| **mpv** [cdda|cddb]://track[-endtrack][:speed][/device] [options]
+| **mpv** [file|mms[t]|http|http\_proxy|rt[s]p|ftp|udp|unsv|icyx|noicyx|smb]:// [user:pass\@]URL[:port] [options]
+| **mpv** \sdp://file [options]
+| **mpv** \mpst://host[:port]/URL [options]
+| **mpv** \tivo://host/[list|llist|fsid] [options]
 
 
 DESCRIPTION
 ===========
 
-**mplayer** is a movie player for Linux. It supports a wide variety of video
+**mpv** is a movie player based on MPlayer and mplayer2. It supports a wide variety of video
 file formats, audio and video codecs, and subtitle types. Special input URL
 types are available to read input from a variety of sources other than disk
 files. Depending on platform, a variety of different video and audio output
@@ -39,8 +39,8 @@ page.
 INTERACTIVE CONTROL
 ===================
 
-MPlayer has a fully configurable, command-driven control layer which allows you
-to control MPlayer using keyboard, mouse, joystick or remote control (with
+mpv has a fully configurable, command-driven control layer which allows you
+to control mpv using keyboard, mouse, joystick or remote control (with
 LIRC). See the ``--input`` option for ways to customize it.
 
 keyboard control
@@ -283,9 +283,9 @@ the *XXX* option or if *XXX* is compiled in.
 | It has the following format:
 | %n%string\_of\_length\_n
 | *EXAMPLES*:
-| `mplayer --ao pcm:file=%10%C:test.wav test.avi`
+| `mpv --ao pcm:file=%10%C:test.wav test.avi`
 | Or in a script:
-| `mplayer --ao pcm:file=%\`expr length "$NAME"\`%"$NAME" test.avi`
+| `mpv --ao pcm:file=%\`expr length "$NAME"\`%"$NAME" test.avi`
 
 
 Per-file options
@@ -294,7 +294,7 @@ Per-file options
 When playing multiple files, any option given on the command line usually
 affects all files. Example:
 
-`mplayer --a file1.mkv --b file2.mkv --c`
+`mpv --a file1.mkv --b file2.mkv --c`
 
 +-----------+-------------------------+
 | File      | Active options          |
@@ -311,7 +311,7 @@ Sometimes, it's useful to change options per-file. This can be achieved by
 adding the special per-file markers `--{` and `--}`. (Note that you must
 escape these on some shells.) Example:
 
-`mplayer --a file1.mkv --b --\\\{ --c file2.mkv --d file3.mkv --e --\\\} file4.mkv --f`
+`mpv --a file1.mkv --b --\\\{ --c file2.mkv --d file3.mkv --e --\\\} file4.mkv --f`
 
 +-----------+-------------------------+
 | File      | Active options          |
@@ -334,9 +334,9 @@ CONFIGURATION FILES
 ===================
 
 You can put all of the options in configuration files which will be read every
-time MPlayer is run. The system-wide configuration file 'mplayer.conf' is in
-your configuration directory (e.g. ``/etc/mplayer`` or
-``/usr/local/etc/mplayer``), the user specific one is ``~/.mplayer/config``.
+time mpv is run. The system-wide configuration file 'mpv.conf' is in
+your configuration directory (e.g. ``/etc/mpv`` or
+``/usr/local/etc/mpv``), the user specific one is ``~/.mpv/config``.
 User specific options override system-wide options and options given on the
 command line override either. The syntax of the configuration files is
 ``option=<value>``, everything after a *#* is considered a comment. Options
@@ -347,16 +347,16 @@ can be specified in this way.
 You can also write file-specific configuration files. If you wish to have a
 configuration file for a file called 'movie.avi', create a file named
 'movie.avi.conf' with the file-specific options in it and put it in
-``~/.mplayer/``. You can also put the configuration file in the same directory
+``~/.mpv/``. You can also put the configuration file in the same directory
 as the file to be played, as long as you give the ``--use-filedir-conf``
 option (either on the command line or in your global config file). If a
 file-specific configuration file is found in the same directory, no
-file-specific configuration is loaded from ``~/.mplayer``. In addition, the
+file-specific configuration is loaded from ``~/.mpv``. In addition, the
 ``--use-filedir-conf`` option enables directory-specific configuration files.
-For this, MPlayer first tries to load a mplayer.conf from the same directory
+For this, mpv first tries to load a mpv.conf from the same directory
 as the file played and then tries to load any file-specific configuration.
 
-*EXAMPLE MPLAYER CONFIGURATION FILE:*
+*EXAMPLE MPV CONFIGURATION FILE:*
 
 | # Use gl3 video output by default.
 | vo=gl3
@@ -379,7 +379,7 @@ description (shown by ``--profile=help``) can be defined with the profile-desc
 option. To end the profile, start another one or use the profile name
 *default* to continue with normal options.
 
-*EXAMPLE MPLAYER PROFILE:*
+*EXAMPLE MPV PROFILE:*
 
 | [protocol.dvd]
 | profile-desc="profile for dvd:// streams"
@@ -408,6 +408,8 @@ OPTIONS
 .. include:: vf.rst
 
 .. include:: encode.rst
+
+.. include:: input.rst
 
 Taking screenshots
 ==================
@@ -438,22 +440,22 @@ ENVIRONMENT VARIABLES
 =====================
 
 There are a number of environment variables that can be used to control the
-behavior of MPlayer.
+behavior of mpv.
 
-``MPLAYER_CHARSET`` (see also ``--msgcharset``)
+``MPV_CHARSET`` (see also ``--msgcharset``)
     Convert console messages to the specified charset (default: autodetect). A
     value of "noconv" means no conversion.
 
-``MPLAYER_HOME``
-    Directory where MPlayer looks for user settings.
+``MPV_HOME``
+    Directory where mpv looks for user settings.
 
-``MPLAYER_LOCALEDIR``
-    Directory where MPlayer looks for gettext translation files (if enabled).
+``MPV_LOCALEDIR``
+    Directory where mpv looks for gettext translation files (if enabled).
 
-``MPLAYER_VERBOSE`` (see also ``-v`` and ``--msglevel``)
+``MPV_VERBOSE`` (see also ``-v`` and ``--msglevel``)
     Set the initial verbosity level across all message modules (default: 0).
     The resulting verbosity corresponds to that of ``--msglevel=5`` plus the
-    value of ``MPLAYER_VERBOSE``.
+    value of ``MPV_VERBOSE``.
 
 libaf:
     ``LADSPA_PATH``
@@ -595,58 +597,58 @@ libavformat:
 FILES
 =====
 
-``/usr/local/etc/mplayer/mplayer.conf``
-    MPlayer system-wide settings
+``/usr/local/etc/mpv/mpv.conf``
+    mpv system-wide settings
 
-``~/.mplayer/config``
-    MPlayer user settings
+``~/.mpv/config``
+    mpv user settings
 
-``~/.mplayer/input.conf``
+``~/.mpv/input.conf``
     input bindings (see ``--input=keylist`` for the full list)
 
-``~/.mplayer/DVDkeys/``
+``~/.mpv/DVDkeys/``
     cached CSS keys
 
 
-EXAMPLES OF MPLAYER USAGE
+EXAMPLES OF MPV USAGE
 =========================
 
 Quickstart Blu-ray playing:
-    - ``mplayer bd:////path/to/disc``
-    - ``mplayer bd:// --bluray-device=/path/to/disc``
+    - ``mpv bd:////path/to/disc``
+    - ``mpv bd:// --bluray-device=/path/to/disc``
 
 Quickstart DVD playing:
-    ``mplayer dvd://1``
+    ``mpv dvd://1``
 
 Play in Japanese with English subtitles:
-    ``mplayer dvd://1 --alang=ja --slang=en``
+    ``mpv dvd://1 --alang=ja --slang=en``
 
 Play only chapters 5, 6, 7:
-    ``mplayer dvd://1 --chapter=5-7``
+    ``mpv dvd://1 --chapter=5-7``
 
 Play only titles 5, 6, 7:
-    ``mplayer dvd://5-7``
+    ``mpv dvd://5-7``
 
 Play a multiangle DVD:
-    ``mplayer dvd://1 --dvdangle=2``
+    ``mpv dvd://1 --dvdangle=2``
 
 Play from a different DVD device:
-    ``mplayer dvd://1 --dvd-device=/dev/dvd2``
+    ``mpv dvd://1 --dvd-device=/dev/dvd2``
 
 Play DVD video from a directory with VOB files:
-    ``mplayer dvd://1 --dvd-device=/path/to/directory/``
+    ``mpv dvd://1 --dvd-device=/path/to/directory/``
 
 Stream from HTTP:
-    ``mplayer http://mplayer.hq/example.avi``
+    ``mpv http://mpv.hq/example.avi``
 
 Stream using RTSP:
-    ``mplayer rtsp://server.example.com/streamName``
+    ``mpv rtsp://server.example.com/streamName``
 
 input from standard V4L:
-    ``mplayer tv:// --tv=driver=v4l:width=640:height=480:outfmt=i420 --vc=rawi420 --vo=xv``
+    ``mpv tv:// --tv=driver=v4l:width=640:height=480:outfmt=i420 --vc=rawi420 --vo=xv``
 
 Play DTS-CD with passthrough:
-    ``mplayer --ac=hwdts --rawaudio=format=0x2001 --cdrom-device=/dev/cdrom cdda://``
+    ``mpv --ac=hwdts --rawaudio=format=0x2001 --cdrom-device=/dev/cdrom cdda://``
 
     You can also use ``--afm=hwac3`` instead of ``--ac=hwdts``. Adjust
     ``/dev/cdrom`` to match the CD-ROM device on your system. If your external
@@ -654,21 +656,23 @@ Play DTS-CD with passthrough:
     ``cdda://`` without setting format, hwac3 or hwdts.
 
 Play a 6-channel AAC file with only two speakers:
-    ``mplayer --rawaudio=format=0xff --demuxer=rawaudio --af=pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac``
+    ``mpv --rawaudio=format=0xff --demuxer=rawaudio --af=pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac``
 
     You might want to play a bit with the pan values (e.g multiply with a
     value) to increase volume or avoid clipping.
 
 checkerboard invert with geq filter:
-    ``mplayer --vf=geq='128+(p(X\,Y)-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/SH\,128)\,64))*4'``
+    ``mpv --vf=geq='128+(p(X\,Y)-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/SH\,128)\,64))*4'``
 
 
 AUTHORS
 =======
 
+mpv is a MPlayer fork based on mplayer2, which in turn is a fork of MPlayer.
+
 MPlayer was initially written by Arpad Gereoffy. See the ``AUTHORS`` file for
 a list of some of the many other contributors.
 
-MPlayer is (C) 2000-2011 The MPlayer Team
+MPlayer is (C) 2000-2012 The MPlayer Team
 
 This man page was written mainly by Gabucino, Jonas Jermann and Diego Biurrun.

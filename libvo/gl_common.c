@@ -38,8 +38,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
-#include <assert.h>
 #include <math.h>
+#include <assert.h>
 #include "talloc.h"
 #include "gl_common.h"
 #include "csputils.h"
@@ -241,6 +241,48 @@ int glFindFormat(uint32_t fmt, int have_texture_rg, int *bpp, GLint *gl_texfmt,
     return supported;
 }
 
+struct feature {
+    int id;
+    const char *name;
+};
+
+static const struct feature features[] = {
+    {MPGL_CAP_GL,               "Basic OpenGL"},
+    {MPGL_CAP_GL_LEGACY,        "Legacy OpenGL"},
+    {MPGL_CAP_GL2,              "OpenGL 2.0"},
+    {MPGL_CAP_GL21,             "OpenGL 2.1"},
+    {MPGL_CAP_GL3,              "OpenGL 3.0"},
+    {MPGL_CAP_FB,               "Framebuffers"},
+    {MPGL_CAP_VAO,              "VAOs"},
+    {MPGL_CAP_SRGB_TEX,         "sRGB textures"},
+    {MPGL_CAP_SRGB_FB,          "sRGB framebuffers"},
+    {MPGL_CAP_FLOAT_TEX,        "Float textures"},
+    {MPGL_CAP_TEX_RG,           "RG textures"},
+    {MPGL_CAP_NO_SW,            "NO_SW"},
+    {0},
+};
+
+static void list_features(int set, int msgl, bool invert)
+{
+    for (const struct feature *f = &features[0]; f->id; f++) {
+        if (invert == !(f->id & set))
+            mp_msg(MSGT_VO, msgl, " [%s]", f->name);
+    }
+    mp_msg(MSGT_VO, msgl, "\n");
+}
+
+// This guesses if the current GL context is a suspected software renderer.
+static bool is_software_gl(GL *gl)
+{
+    const char *renderer = gl->GetString(GL_RENDERER);
+    const char *vendor = gl->GetString(GL_VENDOR);
+    return !(renderer && vendor) ||
+           strcmp(renderer, "Software Rasterizer") == 0 ||
+           strstr(renderer, "llvmpipe") ||
+           strcmp(vendor, "Microsoft Corporation") == 0 ||
+           strcmp(renderer, "Mesa X11") == 0;
+}
+
 #ifdef HAVE_LIBDL
 #include <dlfcn.h>
 #endif
@@ -262,181 +304,297 @@ static void *getdladdr(const char *s)
     return ret;
 }
 
-typedef struct {
-    ptrdiff_t offset;           // offset to the function pointer in struct GL
-    const char *extstr;
-    const char *funcnames[7];
+#define FN_OFFS(name) offsetof(GL, name)
+
+// Define the function with a "hard" reference to the function as fallback.
+// (This requires linking with a compatible OpenGL library.)
+#define DEF_FN_HARD(name)       {FN_OFFS(name), {"gl" # name}, gl ## name}
+
+#define DEF_FN(name)            {FN_OFFS(name), {"gl" # name}}
+#define DEF_FN_NAMES(name, ...) {FN_OFFS(name), {__VA_ARGS__}}
+
+struct gl_function {
+    ptrdiff_t offset;
+    char *funcnames[7];
     void *fallback;
-    bool is_gl3;
-} extfunc_desc_t;
-
-#define DEF_FUNC_DESC(name) \
-    {offsetof(GL, name), NULL, {"gl" # name}, gl ## name}
-#define DEF_EXT_FUNCS(...) __VA_ARGS__
-#define DEF_EXT_DESC(name, ext, funcnames) \
-    {offsetof(GL, name), ext, {DEF_EXT_FUNCS funcnames}}
-// These are mostly handled the same, but needed because at least the MESA
-// headers don't define any function prototypes for these.
-#define DEF_GL3_DESC(name) \
-    {offsetof(GL, name), NULL, {"gl" # name}, NULL, .is_gl3 = true}
-
-static const extfunc_desc_t extfuncs[] = {
-    // these aren't extension functions but we query them anyway to allow
-    // different "backends" with one binary
-    DEF_FUNC_DESC(Viewport),
-    DEF_FUNC_DESC(Clear),
-    DEF_FUNC_DESC(GenTextures),
-    DEF_FUNC_DESC(DeleteTextures),
-    DEF_FUNC_DESC(TexEnvi),
-    DEF_FUNC_DESC(ClearColor),
-    DEF_FUNC_DESC(Enable),
-    DEF_FUNC_DESC(Disable),
-    DEF_FUNC_DESC(DrawBuffer),
-    DEF_FUNC_DESC(DepthMask),
-    DEF_FUNC_DESC(BlendFunc),
-    DEF_FUNC_DESC(Flush),
-    DEF_FUNC_DESC(Finish),
-    DEF_FUNC_DESC(PixelStorei),
-    DEF_FUNC_DESC(TexImage1D),
-    DEF_FUNC_DESC(TexImage2D),
-    DEF_FUNC_DESC(TexSubImage2D),
-    DEF_FUNC_DESC(GetTexImage),
-    DEF_FUNC_DESC(TexParameteri),
-    DEF_FUNC_DESC(TexParameterf),
-    DEF_FUNC_DESC(TexParameterfv),
-    DEF_FUNC_DESC(GetIntegerv),
-    DEF_FUNC_DESC(GetBooleanv),
-    DEF_FUNC_DESC(ColorMask),
-    DEF_FUNC_DESC(ReadPixels),
-    DEF_FUNC_DESC(ReadBuffer),
-    DEF_FUNC_DESC(DrawArrays),
-    DEF_FUNC_DESC(GetString),
-    DEF_FUNC_DESC(GetError),
-
-    // legacy GL functions (1.x - 2.x)
-    DEF_FUNC_DESC(Begin),
-    DEF_FUNC_DESC(End),
-    DEF_FUNC_DESC(MatrixMode),
-    DEF_FUNC_DESC(LoadIdentity),
-    DEF_FUNC_DESC(Translated),
-    DEF_FUNC_DESC(Scaled),
-    DEF_FUNC_DESC(Ortho),
-    DEF_FUNC_DESC(PushMatrix),
-    DEF_FUNC_DESC(PopMatrix),
-    DEF_FUNC_DESC(GenLists),
-    DEF_FUNC_DESC(DeleteLists),
-    DEF_FUNC_DESC(NewList),
-    DEF_FUNC_DESC(EndList),
-    DEF_FUNC_DESC(CallList),
-    DEF_FUNC_DESC(CallLists),
-    DEF_FUNC_DESC(Color4ub),
-    DEF_FUNC_DESC(Color4f),
-    DEF_FUNC_DESC(TexCoord2f),
-    DEF_FUNC_DESC(TexCoord2fv),
-    DEF_FUNC_DESC(Vertex2f),
-    DEF_FUNC_DESC(VertexPointer),
-    DEF_FUNC_DESC(ColorPointer),
-    DEF_FUNC_DESC(TexCoordPointer),
-    DEF_FUNC_DESC(EnableClientState),
-    DEF_FUNC_DESC(DisableClientState),
-
-    // OpenGL extension functions
-    DEF_EXT_DESC(GenBuffers, NULL,
-                 ("glGenBuffers", "glGenBuffersARB")),
-    DEF_EXT_DESC(DeleteBuffers, NULL,
-                 ("glDeleteBuffers", "glDeleteBuffersARB")),
-    DEF_EXT_DESC(BindBuffer, NULL,
-                 ("glBindBuffer", "glBindBufferARB")),
-    DEF_EXT_DESC(MapBuffer, NULL,
-                 ("glMapBuffer", "glMapBufferARB")),
-    DEF_EXT_DESC(UnmapBuffer, NULL,
-                 ("glUnmapBuffer", "glUnmapBufferARB")),
-    DEF_EXT_DESC(BufferData, NULL,
-                 ("glBufferData", "glBufferDataARB")),
-    DEF_EXT_DESC(ActiveTexture, NULL,
-                 ("glActiveTexture", "glActiveTextureARB")),
-    DEF_EXT_DESC(BindTexture, NULL,
-                 ("glBindTexture", "glBindTextureARB", "glBindTextureEXT")),
-    DEF_EXT_DESC(MultiTexCoord2f, NULL,
-                 ("glMultiTexCoord2f", "glMultiTexCoord2fARB")),
-    DEF_EXT_DESC(GenPrograms, "_program",
-                 ("glGenProgramsARB")),
-    DEF_EXT_DESC(DeletePrograms, "_program",
-                 ("glDeleteProgramsARB")),
-    DEF_EXT_DESC(BindProgram, "_program",
-                 ("glBindProgramARB")),
-    DEF_EXT_DESC(ProgramString, "_program",
-                 ("glProgramStringARB")),
-    DEF_EXT_DESC(GetProgramivARB, "_program",
-                 ("glGetProgramivARB")),
-    DEF_EXT_DESC(ProgramEnvParameter4f, "_program",
-                 ("glProgramEnvParameter4fARB")),
-    DEF_EXT_DESC(SwapInterval, "_swap_control",
-                 ("glXSwapIntervalSGI", "glXSwapInterval", "wglSwapIntervalSGI",
-                  "wglSwapInterval", "wglSwapIntervalEXT")),
-    DEF_EXT_DESC(TexImage3D, NULL,
-                 ("glTexImage3D")),
-
-    // ancient ATI extensions
-    DEF_EXT_DESC(BeginFragmentShader, "ATI_fragment_shader",
-                 ("glBeginFragmentShaderATI")),
-    DEF_EXT_DESC(EndFragmentShader, "ATI_fragment_shader",
-                 ("glEndFragmentShaderATI")),
-    DEF_EXT_DESC(SampleMap, "ATI_fragment_shader",
-                 ("glSampleMapATI")),
-    DEF_EXT_DESC(ColorFragmentOp2, "ATI_fragment_shader",
-                 ("glColorFragmentOp2ATI")),
-    DEF_EXT_DESC(ColorFragmentOp3, "ATI_fragment_shader",
-                 ("glColorFragmentOp3ATI")),
-    DEF_EXT_DESC(SetFragmentShaderConstant, "ATI_fragment_shader",
-                 ("glSetFragmentShaderConstantATI")),
-
-    // GL 3, possibly in GL 2.x as well in form of extensions
-    DEF_GL3_DESC(GenBuffers),
-    DEF_GL3_DESC(DeleteBuffers),
-    DEF_GL3_DESC(BindBuffer),
-    DEF_GL3_DESC(MapBuffer),
-    DEF_GL3_DESC(UnmapBuffer),
-    DEF_GL3_DESC(BufferData),
-    DEF_GL3_DESC(ActiveTexture),
-    DEF_GL3_DESC(BindTexture),
-    DEF_GL3_DESC(GenVertexArrays),
-    DEF_GL3_DESC(BindVertexArray),
-    DEF_GL3_DESC(GetAttribLocation),
-    DEF_GL3_DESC(EnableVertexAttribArray),
-    DEF_GL3_DESC(DisableVertexAttribArray),
-    DEF_GL3_DESC(VertexAttribPointer),
-    DEF_GL3_DESC(DeleteVertexArrays),
-    DEF_GL3_DESC(UseProgram),
-    DEF_GL3_DESC(GetUniformLocation),
-    DEF_GL3_DESC(CompileShader),
-    DEF_GL3_DESC(CreateProgram),
-    DEF_GL3_DESC(CreateShader),
-    DEF_GL3_DESC(ShaderSource),
-    DEF_GL3_DESC(LinkProgram),
-    DEF_GL3_DESC(AttachShader),
-    DEF_GL3_DESC(DeleteShader),
-    DEF_GL3_DESC(DeleteProgram),
-    DEF_GL3_DESC(GetShaderInfoLog),
-    DEF_GL3_DESC(GetShaderiv),
-    DEF_GL3_DESC(GetProgramInfoLog),
-    DEF_GL3_DESC(GetProgramiv),
-    DEF_GL3_DESC(GetStringi),
-    DEF_GL3_DESC(BindAttribLocation),
-    DEF_GL3_DESC(BindFramebuffer),
-    DEF_GL3_DESC(GenFramebuffers),
-    DEF_GL3_DESC(DeleteFramebuffers),
-    DEF_GL3_DESC(CheckFramebufferStatus),
-    DEF_GL3_DESC(FramebufferTexture2D),
-    DEF_GL3_DESC(Uniform1f),
-    DEF_GL3_DESC(Uniform3f),
-    DEF_GL3_DESC(Uniform4f),
-    DEF_GL3_DESC(Uniform1i),
-    DEF_GL3_DESC(UniformMatrix3fv),
-    DEF_GL3_DESC(UniformMatrix4x3fv),
-
-    {-1}
 };
+
+struct gl_functions {
+    const char *extension;      // introduced with this extension in any version
+    int provides;               // bitfield of MPGL_CAP_* constants
+    int ver_core;               // introduced as required function
+    int ver_removed;            // removed as required function (no replacement)
+    bool partial_ok;            // loading only some functions is ok
+    struct gl_function *functions;
+};
+
+#define MAX_FN_COUNT 50         // max functions per gl_functions section
+
+struct gl_functions gl_functions[] = {
+    // GL functions which are always available anywhere at least since 1.1
+    {
+        .ver_core = MPGL_VER(1, 1),
+        .provides = MPGL_CAP_GL,
+        .functions = (struct gl_function[]) {
+            DEF_FN_HARD(Viewport),
+            DEF_FN_HARD(Clear),
+            DEF_FN_HARD(GenTextures),
+            DEF_FN_HARD(DeleteTextures),
+            DEF_FN_HARD(TexEnvi),
+            DEF_FN_HARD(ClearColor),
+            DEF_FN_HARD(Enable),
+            DEF_FN_HARD(Disable),
+            DEF_FN_HARD(DrawBuffer),
+            DEF_FN_HARD(DepthMask),
+            DEF_FN_HARD(BlendFunc),
+            DEF_FN_HARD(Flush),
+            DEF_FN_HARD(Finish),
+            DEF_FN_HARD(PixelStorei),
+            DEF_FN_HARD(TexImage1D),
+            DEF_FN_HARD(TexImage2D),
+            DEF_FN_HARD(TexSubImage2D),
+            DEF_FN_HARD(GetTexImage),
+            DEF_FN_HARD(TexParameteri),
+            DEF_FN_HARD(TexParameterf),
+            DEF_FN_HARD(TexParameterfv),
+            DEF_FN_HARD(GetIntegerv),
+            DEF_FN_HARD(GetBooleanv),
+            DEF_FN_HARD(ColorMask),
+            DEF_FN_HARD(ReadPixels),
+            DEF_FN_HARD(ReadBuffer),
+            DEF_FN_HARD(DrawArrays),
+            DEF_FN_HARD(GetString),
+            DEF_FN_HARD(GetError),
+            {0}
+        },
+    },
+    // GL 2.0-3.x functions
+    {
+        .ver_core = MPGL_VER(2, 0),
+        .provides = MPGL_CAP_GL2,
+        .functions = (struct gl_function[]) {
+            DEF_FN(GenBuffers),
+            DEF_FN(DeleteBuffers),
+            DEF_FN(BindBuffer),
+            DEF_FN(MapBuffer),
+            DEF_FN(UnmapBuffer),
+            DEF_FN(BufferData),
+            DEF_FN(ActiveTexture),
+            DEF_FN(BindTexture),
+            DEF_FN(GetAttribLocation),
+            DEF_FN(EnableVertexAttribArray),
+            DEF_FN(DisableVertexAttribArray),
+            DEF_FN(VertexAttribPointer),
+            DEF_FN(UseProgram),
+            DEF_FN(GetUniformLocation),
+            DEF_FN(CompileShader),
+            DEF_FN(CreateProgram),
+            DEF_FN(CreateShader),
+            DEF_FN(ShaderSource),
+            DEF_FN(LinkProgram),
+            DEF_FN(AttachShader),
+            DEF_FN(DeleteShader),
+            DEF_FN(DeleteProgram),
+            DEF_FN(GetShaderInfoLog),
+            DEF_FN(GetShaderiv),
+            DEF_FN(GetProgramInfoLog),
+            DEF_FN(GetProgramiv),
+            DEF_FN(BindAttribLocation),
+            DEF_FN(Uniform1f),
+            DEF_FN(Uniform2f),
+            DEF_FN(Uniform3f),
+            DEF_FN(Uniform1i),
+            DEF_FN(UniformMatrix3fv),
+            DEF_FN(TexImage3D),
+            {0},
+        },
+    },
+    // GL 2.1-3.x functions (also: GLSL 120 shaders)
+    {
+        .ver_core = MPGL_VER(2, 1),
+        .provides = MPGL_CAP_GL21,
+        .functions = (struct gl_function[]) {
+            DEF_FN(UniformMatrix4x3fv),
+            {0}
+        },
+    },
+    // GL 3.x core only functions.
+    {
+        .ver_core = MPGL_VER(3, 0),
+        .provides = MPGL_CAP_GL3 | MPGL_CAP_SRGB_TEX | MPGL_CAP_SRGB_FB,
+        .functions = (struct gl_function[]) {
+            DEF_FN(GetStringi),
+            {0}
+        },
+    },
+    // Framebuffers, extension in GL 2.x, core in GL 3.x core.
+    {
+        .ver_core = MPGL_VER(3, 0),
+        .extension = "GL_ARB_framebuffer_object",
+        .provides = MPGL_CAP_FB,
+        .functions = (struct gl_function[]) {
+            DEF_FN(BindFramebuffer),
+            DEF_FN(GenFramebuffers),
+            DEF_FN(DeleteFramebuffers),
+            DEF_FN(CheckFramebufferStatus),
+            DEF_FN(FramebufferTexture2D),
+            {0}
+        },
+    },
+    // Framebuffers, alternative extension name.
+    {
+        .ver_removed = MPGL_VER(3, 0), // don't touch these fn names in 3.x
+        .extension = "GL_EXT_framebuffer_object",
+        .provides = MPGL_CAP_FB,
+        .functions = (struct gl_function[]) {
+            DEF_FN_NAMES(BindFramebuffer, "glBindFramebufferEXT"),
+            DEF_FN_NAMES(GenFramebuffers, "glGenFramebuffersEXT"),
+            DEF_FN_NAMES(DeleteFramebuffers, "glDeleteFramebuffersEXT"),
+            DEF_FN_NAMES(CheckFramebufferStatus, "glCheckFramebufferStatusEXT"),
+            DEF_FN_NAMES(FramebufferTexture2D, "glFramebufferTexture2DEXT"),
+            {0}
+        },
+    },
+    // VAOs, extension in GL 2.x, core in GL 3.x core.
+    {
+        .ver_core = MPGL_VER(3, 0),
+        .extension = "GL_ARB_vertex_array_object",
+        .provides = MPGL_CAP_VAO,
+        .functions = (struct gl_function[]) {
+            DEF_FN(GenVertexArrays),
+            DEF_FN(BindVertexArray),
+            DEF_FN(DeleteVertexArrays),
+            {0}
+        }
+    },
+    // sRGB textures, extension in GL 2.x, core in GL 3.x core.
+    {
+        .ver_core = MPGL_VER(3, 0),
+        .extension = "GL_EXT_texture_sRGB",
+        .provides = MPGL_CAP_SRGB_TEX,
+        .functions = (struct gl_function[]) {{0}},
+    },
+    // sRGB framebuffers, extension in GL 2.x, core in GL 3.x core.
+    {
+        .ver_core = MPGL_VER(3, 0),
+        .extension = "GL_EXT_framebuffer_sRGB",
+        .provides = MPGL_CAP_SRGB_FB,
+        .functions = (struct gl_function[]) {{0}},
+    },
+    // Float textures, extension in GL 2.x, core in GL 3.x core.
+    {
+        .ver_core = MPGL_VER(3, 0),
+        .extension = "GL_ARB_texture_float",
+        .provides = MPGL_CAP_FLOAT_TEX,
+        .functions = (struct gl_function[]) {{0}},
+    },
+    // GL_RED / GL_RG textures, extension in GL 2.x, core in GL 3.x core.
+    {
+        .ver_core = MPGL_VER(3, 0),
+        .extension = "GL_ARB_texture_rg",
+        .provides = MPGL_CAP_TEX_RG,
+        .functions = (struct gl_function[]) {{0}},
+    },
+    // Swap control, always an OS specific extension
+    {
+        .extension = "_swap_control",
+        .functions = (struct gl_function[]) {
+            DEF_FN_NAMES(SwapInterval, "glXSwapIntervalSGI", "glXSwapInterval",
+                         "wglSwapIntervalSGI", "wglSwapInterval",
+                         "wglSwapIntervalEXT"),
+            {0}
+        },
+    },
+    // GL legacy functions in GL 1.x - 2.x, removed from GL 3.x
+    {
+        .ver_core = MPGL_VER(1, 1),
+        .ver_removed = MPGL_VER(3, 0),
+        .provides = MPGL_CAP_GL_LEGACY,
+        .functions = (struct gl_function[]) {
+            DEF_FN_HARD(Begin),
+            DEF_FN_HARD(End),
+            DEF_FN_HARD(MatrixMode),
+            DEF_FN_HARD(LoadIdentity),
+            DEF_FN_HARD(Translated),
+            DEF_FN_HARD(Scaled),
+            DEF_FN_HARD(Ortho),
+            DEF_FN_HARD(PushMatrix),
+            DEF_FN_HARD(PopMatrix),
+            DEF_FN_HARD(GenLists),
+            DEF_FN_HARD(DeleteLists),
+            DEF_FN_HARD(NewList),
+            DEF_FN_HARD(EndList),
+            DEF_FN_HARD(CallList),
+            DEF_FN_HARD(CallLists),
+            DEF_FN_HARD(Color4ub),
+            DEF_FN_HARD(Color4f),
+            DEF_FN_HARD(TexCoord2f),
+            DEF_FN_HARD(TexCoord2fv),
+            DEF_FN_HARD(Vertex2f),
+            DEF_FN_HARD(VertexPointer),
+            DEF_FN_HARD(ColorPointer),
+            DEF_FN_HARD(TexCoordPointer),
+            DEF_FN_HARD(EnableClientState),
+            DEF_FN_HARD(DisableClientState),
+            {0}
+        },
+    },
+    // Loading of old extensions, which are later added to GL 2.0.
+    // NOTE: actually we should be checking the extension strings: the OpenGL
+    //       library could provide an entry point, but not implement it.
+    //       But the previous code didn't do that, and nobody ever complained.
+    {
+        .ver_removed = MPGL_VER(2, 1),
+        .partial_ok = true,
+        .functions = (struct gl_function[]) {
+            DEF_FN_NAMES(GenBuffers, "glGenBuffers", "glGenBuffersARB"),
+            DEF_FN_NAMES(DeleteBuffers, "glDeleteBuffers", "glDeleteBuffersARB"),
+            DEF_FN_NAMES(BindBuffer, "glBindBuffer", "glBindBufferARB"),
+            DEF_FN_NAMES(MapBuffer, "glMapBuffer", "glMapBufferARB"),
+            DEF_FN_NAMES(UnmapBuffer, "glUnmapBuffer", "glUnmapBufferARB"),
+            DEF_FN_NAMES(BufferData, "glBufferData", "glBufferDataARB"),
+            DEF_FN_NAMES(ActiveTexture, "glActiveTexture", "glActiveTextureARB"),
+            DEF_FN_NAMES(BindTexture, "glBindTexture", "glBindTextureARB", "glBindTextureEXT"),
+            DEF_FN_NAMES(MultiTexCoord2f, "glMultiTexCoord2f", "glMultiTexCoord2fARB"),
+            DEF_FN_NAMES(TexImage3D, "glTexImage3D"),
+            {0}
+        },
+    },
+    // Ancient ARB shaders.
+    {
+        .extension = "_program",
+        .ver_removed = MPGL_VER(3, 0),
+        .functions = (struct gl_function[]) {
+            DEF_FN_NAMES(GenPrograms, "glGenProgramsARB"),
+            DEF_FN_NAMES(DeletePrograms, "glDeleteProgramsARB"),
+            DEF_FN_NAMES(BindProgram, "glBindProgramARB"),
+            DEF_FN_NAMES(ProgramString, "glProgramStringARB"),
+            DEF_FN_NAMES(GetProgramivARB, "glGetProgramivARB"),
+            DEF_FN_NAMES(ProgramEnvParameter4f, "glProgramEnvParameter4fARB"),
+            {0}
+        },
+    },
+    // Ancient ATI extensions.
+    {
+        .extension = "ATI_fragment_shader",
+        .ver_removed = MPGL_VER(3, 0),
+        .functions = (struct gl_function[]) {
+            DEF_FN_NAMES(BeginFragmentShader, "glBeginFragmentShaderATI"),
+            DEF_FN_NAMES(EndFragmentShader, "glEndFragmentShaderATI"),
+            DEF_FN_NAMES(SampleMap, "glSampleMapATI"),
+            DEF_FN_NAMES(ColorFragmentOp2, "glColorFragmentOp2ATI"),
+            DEF_FN_NAMES(ColorFragmentOp3, "glColorFragmentOp3ATI"),
+            DEF_FN_NAMES(SetFragmentShaderConstant, "glSetFragmentShaderConstantATI"),
+            {0}
+        },
+    },
+};
+
+#undef FN_OFFS
+#undef DEF_FN_HARD
+#undef DEF_FN
+#undef DEF_FN_NAMES
+
 
 /**
  * \brief find the function pointers of some useful OpenGL extensions
@@ -444,53 +602,123 @@ static const extfunc_desc_t extfuncs[] = {
  * \param ext2 an extra extension string
  */
 static void getFunctions(GL *gl, void *(*getProcAddress)(const GLubyte *),
-                         const char *ext2, bool is_gl3)
+                         const char *ext2, bool gl3)
 {
-    const extfunc_desc_t *dsc;
-    char *allexts = talloc_strdup(NULL, ext2 ? ext2 : "");
-
-    *gl = (GL) {0};
+    talloc_free_children(gl);
+    *gl = (GL) {
+        .extensions = talloc_strdup(gl, ext2 ? ext2 : ""),
+    };
 
     if (!getProcAddress)
         getProcAddress = (void *)getdladdr;
 
-    if (is_gl3) {
+    GLint major = 0, minor = 0;
+    if (gl3) {
         gl->GetStringi = getProcAddress("glGetStringi");
         gl->GetIntegerv = getProcAddress("glGetIntegerv");
 
         if (!(gl->GetStringi && gl->GetIntegerv))
             return;
 
+        gl->GetIntegerv(GL_MAJOR_VERSION, &major);
+        gl->GetIntegerv(GL_MINOR_VERSION, &minor);
+
         GLint exts;
         gl->GetIntegerv(GL_NUM_EXTENSIONS, &exts);
         for (int n = 0; n < exts; n++) {
-            allexts = talloc_asprintf_append(allexts, " %s",
-                                             gl->GetStringi(GL_EXTENSIONS, n));
+            gl->extensions
+                = talloc_asprintf_append(gl->extensions, " %s",
+                                         gl->GetStringi(GL_EXTENSIONS, n));
         }
     } else {
         gl->GetString = getProcAddress("glGetString");
         if (!gl->GetString)
             gl->GetString = glGetString;
+
         const char *ext = (char*)gl->GetString(GL_EXTENSIONS);
-        allexts = talloc_asprintf_append(allexts, " %s", ext);
+        gl->extensions = talloc_asprintf_append(gl->extensions, " %s", ext);
+
+        const char *version = gl->GetString(GL_VERSION);
+        sscanf(version, "%d.%d", &major, &minor);
+    }
+    gl->version = MPGL_VER(major, minor);
+
+    mp_msg(MSGT_VO, MSGL_V, "[gl] Detected OpenGL %d.%d.\n", major, minor);
+    mp_msg(MSGT_VO, MSGL_DBG2, "[gl] Combined OpenGL extensions string:\n%s\n",
+           gl->extensions);
+
+    for (int n = 0; n < sizeof(gl_functions) / sizeof(gl_functions[0]); n++) {
+        struct gl_functions *section = &gl_functions[n];
+
+        // With gl3=false, we could have a legacy context, where functionality
+        // is never removed. (E.g. the context could be at version >= 3.0, but
+        // legacy functions like glBegin still exist and work.)
+        if (gl3 && section->ver_removed && gl->version >= section->ver_removed)
+            continue;
+
+        bool must_exist = section->ver_core && gl->version >= section->ver_core
+                          && !section->partial_ok;
+
+        if (!must_exist && section->extension &&
+            !strstr(gl->extensions, section->extension))
+            continue;
+
+        void *loaded[MAX_FN_COUNT] = {0};
+        bool all_loaded = true;
+
+        for (int i = 0; section->functions[i].funcnames[0]; i++) {
+            struct gl_function *fn = &section->functions[i];
+            void *ptr = NULL;
+            for (int x = 0; fn->funcnames[x]; x++) {
+                ptr = getProcAddress((const GLubyte *)fn->funcnames[x]);
+                if (ptr)
+                    break;
+            }
+            if (!ptr)
+                ptr = fn->fallback;
+            if (!ptr) {
+                all_loaded = false;
+                if (must_exist) {
+                    // Either we or the driver are not conforming to OpenGL.
+                    mp_msg(MSGT_VO, MSGL_ERR, "[gl] Required function '%s' not "
+                           "found.\n", fn->funcnames[0]);
+                    talloc_free_children(gl);
+                    *gl = (GL) {0};
+                    return;
+                }
+            }
+            assert(i < MAX_FN_COUNT);
+            loaded[i] = ptr;
+        }
+
+        if (all_loaded || section->partial_ok) {
+            gl->mpgl_caps |= section->provides;
+            for (int i = 0; section->functions[i].funcnames[0]; i++) {
+                struct gl_function *fn = &section->functions[i];
+                void **funcptr = (void**)(((char*)gl) + fn->offset);
+                if (loaded[i])
+                    *funcptr = loaded[i];
+            }
+        }
     }
 
-    mp_msg(MSGT_VO, MSGL_DBG2, "OpenGL extensions string:\n%s\n", allexts);
-    for (dsc = extfuncs; dsc->offset >= 0; dsc++) {
-        void *ptr = NULL;
-        if (!dsc->extstr || strstr(allexts, dsc->extstr)) {
-            for (int i = 0; !ptr && dsc->funcnames[i]; i++)
-                ptr = getProcAddress((const GLubyte *)dsc->funcnames[i]);
-        }
-        if (!ptr)
-            ptr = dsc->fallback;
-        if (!ptr && !dsc->extstr && (!dsc->is_gl3 || is_gl3))
-            mp_msg(MSGT_VO, MSGL_WARN, "[gl] OpenGL function not found: %s\n",
-                   dsc->funcnames[0]);
-        void **funcptr = (void**)(((char*)gl) + dsc->offset);
-        *funcptr = ptr;
-    }
-    talloc_free(allexts);
+    gl->glsl_version = 0;
+    if (gl->version >= MPGL_VER(2, 0))
+        gl->glsl_version = 110;
+    if (gl->version >= MPGL_VER(2, 1))
+        gl->glsl_version = 120;
+    if (gl->version >= MPGL_VER(3, 0))
+        gl->glsl_version = 130;
+    // Specifically needed for OSX (normally we request 3.0 contexts only, but
+    // OSX always creates 3.2 contexts when requesting a core context).
+    if (gl->version >= MPGL_VER(3, 2))
+        gl->glsl_version = 150;
+
+    if (!is_software_gl(gl))
+        gl->mpgl_caps |= MPGL_CAP_NO_SW;
+
+    mp_msg(MSGT_VO, MSGL_V, "[gl] Detected OpenGL features:");
+    list_features(gl->mpgl_caps, MSGL_V, false);
 }
 
 /**
@@ -1739,35 +1967,38 @@ void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
 
 #ifdef CONFIG_GL_COCOA
 #include "cocoa_common.h"
-static int create_window_cocoa(struct MPGLContext *ctx, uint32_t d_width,
-                               uint32_t d_height, uint32_t flags)
+
+static bool create_window_cocoa(struct MPGLContext *ctx, uint32_t d_width,
+                                uint32_t d_height, uint32_t flags, bool gl3)
 {
-    if (vo_cocoa_create_window(ctx->vo, d_width, d_height, flags, 0) == 0) {
-        return SET_WINDOW_OK;
-    } else {
-        return SET_WINDOW_FAILED;
+    int rv = vo_cocoa_create_window(ctx->vo, d_width, d_height, flags, gl3);
+    if (rv != 0)
+        return false;
+
+    getFunctions(ctx->gl, (void *)vo_cocoa_glgetaddr, NULL, gl3);
+
+    if (gl3) {
+        ctx->depth_r = vo_cocoa_cgl_color_size();
+        ctx->depth_g = vo_cocoa_cgl_color_size();
+        ctx->depth_b = vo_cocoa_cgl_color_size();
     }
-}
 
-static int create_window_cocoa_gl3(struct MPGLContext *ctx, int gl_flags,
-                                 int gl_version, uint32_t d_width,
-                                 uint32_t d_height, uint32_t flags)
-{
-    int rv = vo_cocoa_create_window(ctx->vo, d_width, d_height, flags, 1);
-    getFunctions(ctx->gl, (void *)vo_cocoa_glgetaddr, NULL, true);
-    ctx->depth_r = vo_cocoa_cgl_color_size();
-    ctx->depth_g = vo_cocoa_cgl_color_size();
-    ctx->depth_b = vo_cocoa_cgl_color_size();
-    return rv;
-}
-
-static int setGlWindow_cocoa(MPGLContext *ctx)
-{
-    vo_cocoa_change_attributes(ctx->vo);
-    getFunctions(ctx->gl, (void *)vo_cocoa_glgetaddr, NULL, false);
     if (!ctx->gl->SwapInterval)
         ctx->gl->SwapInterval = vo_cocoa_swap_interval;
-    return SET_WINDOW_OK;
+
+    return true;
+}
+
+static bool create_window_cocoa_old(struct MPGLContext *ctx, uint32_t d_width,
+                                    uint32_t d_height, uint32_t flags)
+{
+    return create_window_cocoa(ctx, d_width, d_height, flags, false);
+}
+
+static bool create_window_cocoa_gl3(struct MPGLContext *ctx, uint32_t d_width,
+                                    uint32_t d_height, uint32_t flags)
+{
+    return create_window_cocoa(ctx, d_width, d_height, flags, true);
 }
 
 static void releaseGlContext_cocoa(MPGLContext *ctx)
@@ -1800,24 +2031,9 @@ static void cocoa_fullscreen(struct vo *vo)
 #include "w32_common.h"
 
 struct w32_context {
-    int vinfo;
     HGLRC context;
 };
 
-static int create_window_w32(struct MPGLContext *ctx, uint32_t d_width,
-                             uint32_t d_height, uint32_t flags)
-{
-    if (!vo_w32_config(ctx->vo, d_width, d_height, flags))
-        return -1;
-    return 0;
-}
-
-/**
- * \brief little helper since wglGetProcAddress definition does not fit our
- *        getProcAddress
- * \param procName name of function to look up
- * \return function pointer returned by wglGetProcAddress
- */
 static void *w32gpa(const GLubyte *procName)
 {
     HMODULE oglmod;
@@ -1828,17 +2044,59 @@ static void *w32gpa(const GLubyte *procName)
     return GetProcAddress(oglmod, procName);
 }
 
-static int create_window_w32_gl3(struct MPGLContext *ctx, int gl_flags,
-                                 int gl_version, uint32_t d_width,
-                                 uint32_t d_height, uint32_t flags) {
+static bool create_window_w32_old(struct MPGLContext *ctx, uint32_t d_width,
+                                  uint32_t d_height, uint32_t flags)
+{
+    GL *gl = ctx->gl;
+
     if (!vo_w32_config(ctx->vo, d_width, d_height, flags))
-        return -1;
+        return false;
+
+    struct w32_context *w32_ctx = ctx->priv;
+    HGLRC *context = &w32_ctx->context;
+
+    if (*context) {
+        gl->Finish();   // supposedly to prevent flickering
+        return true;
+    }
+
+    HWND win = ctx->vo->w32->window;
+    HDC windc = vo_w32_get_dc(ctx->vo, win);
+    bool res = false;
+
+    HGLRC new_context = wglCreateContext(windc);
+    if (!new_context) {
+        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GL context!\n");
+        goto out;
+    }
+
+    if (!wglMakeCurrent(windc, new_context)) {
+        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GL context!\n");
+        wglDeleteContext(new_context);
+        goto out;
+    }
+
+    *context = new_context;
+
+    getFunctions(ctx->gl, w32gpa, NULL, false);
+    res = true;
+
+out:
+    vo_w32_release_dc(ctx->vo, win, windc);
+    return res;
+}
+
+static bool create_window_w32_gl3(struct MPGLContext *ctx, uint32_t d_width,
+                                  uint32_t d_height, uint32_t flags)
+{
+    if (!vo_w32_config(ctx->vo, d_width, d_height, flags))
+        return false;
 
     struct w32_context *w32_ctx = ctx->priv;
     HGLRC *context = &w32_ctx->context;
 
     if (*context) // reuse existing context
-        return 0; // not reusing it breaks gl3!
+        return true; // not reusing it breaks gl3!
 
     HWND win = ctx->vo->w32->window;
     HDC windc = vo_w32_get_dc(ctx->vo, win);
@@ -1847,7 +2105,7 @@ static int create_window_w32_gl3(struct MPGLContext *ctx, int gl_flags,
     new_context = wglCreateContext(windc);
     if (!new_context) {
         mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GL context!\n");
-        return -1;
+        return false;
     }
 
     // set context
@@ -1873,6 +2131,7 @@ static int create_window_w32_gl3(struct MPGLContext *ctx, int gl_flags,
     if (!wglCreateContextAttribsARB)
         goto unsupported;
 
+    int gl_version = ctx->requested_gl_version;
     int attribs[] = {
         WGL_CONTEXT_MAJOR_VERSION_ARB, MPGL_VER_GET_MAJOR(gl_version),
         WGL_CONTEXT_MINOR_VERSION_ARB, MPGL_VER_GET_MINOR(gl_version),
@@ -1902,7 +2161,7 @@ static int create_window_w32_gl3(struct MPGLContext *ctx, int gl_flags,
     if (!wglMakeCurrent(windc, *context)) {
         mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GL3 context!\n");
         wglDeleteContext(*context);
-        return -1;
+        return false;
     }
 
     /* update function pointers */
@@ -1916,86 +2175,20 @@ static int create_window_w32_gl3(struct MPGLContext *ctx, int gl_flags,
         ctx->depth_b = pfd.cBlueBits;
     }
 
-    return 0;
+    return true;
 
 unsupported:
     mp_msg(MSGT_VO, MSGL_ERR, "[gl] The current OpenGL implementation does"
                               " not support OpenGL 3.x \n");
 out:
     wglDeleteContext(new_context);
-    return -1;
-}
-
-static int setGlWindow_w32(MPGLContext *ctx)
-{
-    HWND win = ctx->vo->w32->window;
-    struct w32_context *w32_ctx = ctx->priv;
-    int *vinfo = &w32_ctx->vinfo;
-    HGLRC *context = &w32_ctx->context;
-    int new_vinfo;
-    HDC windc = vo_w32_get_dc(ctx->vo, win);
-    HGLRC new_context = 0;
-    int keep_context = 0;
-    int res = SET_WINDOW_FAILED;
-    GL *gl = ctx->gl;
-
-    // should only be needed when keeping context, but not doing glFinish
-    // can cause flickering even when we do not keep it.
-    if (*context)
-        gl->Finish();
-    new_vinfo = GetPixelFormat(windc);
-    if (*context && *vinfo && new_vinfo && *vinfo == new_vinfo) {
-        // we can keep the wglContext
-        new_context = *context;
-        keep_context = 1;
-    } else {
-        // create a context
-        new_context = wglCreateContext(windc);
-        if (!new_context) {
-            mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GL context!\n");
-            goto out;
-        }
-    }
-
-    // set context
-    if (!wglMakeCurrent(windc, new_context)) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GL context!\n");
-        if (!keep_context)
-            wglDeleteContext(new_context);
-        goto out;
-    }
-
-    // set new values
-    {
-        RECT rect;
-        GetClientRect(win, &rect);
-        ctx->vo->dwidth = rect.right;
-        ctx->vo->dheight = rect.bottom;
-    }
-    if (!keep_context) {
-        if (*context)
-            wglDeleteContext(*context);
-        *context = new_context;
-        *vinfo = new_vinfo;
-
-        getFunctions(ctx->gl, w32gpa, NULL, false);
-
-        // and inform that reinit is neccessary
-        res = SET_WINDOW_REINIT;
-    } else
-        res = SET_WINDOW_OK;
-
-out:
-    vo_w32_release_dc(ctx->vo, win, windc);
-    return res;
+    return false;
 }
 
 static void releaseGlContext_w32(MPGLContext *ctx)
 {
     struct w32_context *w32_ctx = ctx->priv;
-    int *vinfo = &w32_ctx->vinfo;
     HGLRC *context = &w32_ctx->context;
-    *vinfo = 0;
     if (*context) {
         wglMakeCurrent(0, 0);
         wglDeleteContext(*context);
@@ -2019,155 +2212,10 @@ static void swapGlBuffers_w32(MPGLContext *ctx)
 struct glx_context {
     XVisualInfo *vinfo;
     GLXContext context;
+    GLXFBConfig fbc;
 };
 
-static int create_window_x11(struct MPGLContext *ctx, uint32_t d_width,
-                             uint32_t d_height, uint32_t flags)
-{
-    struct vo *vo = ctx->vo;
-
-    static int default_glx_attribs[] = {
-        GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1,
-        GLX_DOUBLEBUFFER, None
-    };
-    static int stereo_glx_attribs[]  = {
-        GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1,
-        GLX_DOUBLEBUFFER, GLX_STEREO, None
-    };
-    XVisualInfo *vinfo = NULL;
-    if (flags & VOFLAG_STEREO) {
-        vinfo = glXChooseVisual(vo->x11->display, vo->x11->screen,
-                                stereo_glx_attribs);
-        if (!vinfo)
-            mp_msg(MSGT_VO, MSGL_ERR, "[gl] Could not find a stereo visual,"
-                    " 3D will probably not work!\n");
-    }
-    if (!vinfo)
-        vinfo = glXChooseVisual(vo->x11->display, vo->x11->screen,
-                                default_glx_attribs);
-    if (!vinfo) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
-        return -1;
-    }
-    mp_msg(MSGT_VO, MSGL_V, "[gl] GLX chose visual with ID 0x%x\n",
-            (int)vinfo->visualid);
-
-    Colormap colormap = XCreateColormap(vo->x11->display, vo->x11->rootwin,
-                                        vinfo->visual, AllocNone);
-    vo_x11_create_vo_window(vo, vinfo, vo->dx, vo->dy, d_width, d_height,
-                            flags, colormap, "gl");
-
-    return 0;
-}
-
-/**
- * \brief Returns the XVisualInfo associated with Window win.
- * \param win Window whose XVisualInfo is returne.
- * \return XVisualInfo of the window. Caller must use XFree to free it.
- */
-static XVisualInfo *getWindowVisualInfo(MPGLContext *ctx, Window win)
-{
-    XWindowAttributes xw_attr;
-    XVisualInfo vinfo_template;
-    int tmp;
-    XGetWindowAttributes(ctx->vo->x11->display, win, &xw_attr);
-    vinfo_template.visualid = XVisualIDFromVisual(xw_attr.visual);
-    return XGetVisualInfo(ctx->vo->x11->display, VisualIDMask, &vinfo_template, &tmp);
-}
-
-/**
- * \brief Changes the window in which video is displayed.
- * If possible only transfers the context to the new window, otherwise
- * creates a new one, which must be initialized by the caller.
- * \param vinfo Currently used visual.
- * \param context Currently used context.
- * \param win window that should be used for drawing.
- * \return one of SET_WINDOW_FAILED, SET_WINDOW_OK or SET_WINDOW_REINIT.
- * In case of SET_WINDOW_REINIT the context could not be transfered
- * and the caller must initialize it correctly.
- * \ingroup glcontext
- */
-static int setGlWindow_x11(MPGLContext *ctx)
-{
-    struct glx_context *glx_context = ctx->priv;
-    XVisualInfo **vinfo = &glx_context->vinfo;
-    GLXContext *context = &glx_context->context;
-    Display *display = ctx->vo->x11->display;
-    Window win = ctx->vo->x11->window;
-    XVisualInfo *new_vinfo;
-    GLXContext new_context = NULL;
-    int keep_context = 0;
-    GL *gl = ctx->gl;
-
-    // should only be needed when keeping context, but not doing glFinish
-    // can cause flickering even when we do not keep it.
-    if (*context)
-        gl->Finish();
-    new_vinfo = getWindowVisualInfo(ctx, win);
-    if (*context && *vinfo && new_vinfo &&
-        (*vinfo)->visualid == new_vinfo->visualid) {
-        // we can keep the GLXContext
-        new_context = *context;
-        XFree(new_vinfo);
-        new_vinfo = *vinfo;
-        keep_context = 1;
-    } else {
-        // create a context
-        new_context = glXCreateContext(display, new_vinfo, NULL, True);
-        if (!new_context) {
-            mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GLX context!\n");
-            XFree(new_vinfo);
-            return SET_WINDOW_FAILED;
-        }
-    }
-
-    // set context
-    if (!glXMakeCurrent(display, ctx->vo->x11->window, new_context)) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GLX context!\n");
-        if (!keep_context) {
-            glXDestroyContext(display, new_context);
-            XFree(new_vinfo);
-        }
-        return SET_WINDOW_FAILED;
-    }
-
-    // set new values
-    ctx->vo->x11->window = win;
-    vo_x11_update_geometry(ctx->vo, 1);
-    if (!keep_context) {
-        void *(*getProcAddress)(const GLubyte *);
-        if (*context)
-            glXDestroyContext(display, *context);
-        *context = new_context;
-        if (*vinfo)
-            XFree(*vinfo);
-        *vinfo = new_vinfo;
-        getProcAddress = getdladdr("glXGetProcAddress");
-        if (!getProcAddress)
-            getProcAddress = getdladdr("glXGetProcAddressARB");
-
-        const char *glxstr = "";
-        const char *(*glXExtStr)(Display *, int)
-            = getdladdr("glXQueryExtensionsString");
-        if (glXExtStr)
-            glxstr = glXExtStr(display, ctx->vo->x11->screen);
-
-        getFunctions(gl, getProcAddress, glxstr, false);
-        if (!gl->GenPrograms && gl->GetString &&
-            getProcAddress &&
-            strstr(gl->GetString(GL_EXTENSIONS), "GL_ARB_vertex_program")) {
-            mp_msg(MSGT_VO, MSGL_WARN,
-                   "Broken glXGetProcAddress detected, trying workaround\n");
-            getFunctions(gl, NULL, glxstr, false);
-        }
-
-        // and inform that reinit is neccessary
-        return SET_WINDOW_REINIT;
-    }
-    return SET_WINDOW_OK;
-}
-
-// The GL3 initialization code roughly follows/copies from:
+// The GL3/FBC initialization code roughly follows/copies from:
 //  http://www.opengl.org/wiki/Tutorial:_OpenGL_3.0_Context_Creation_(GLX)
 // but also uses some of the old code.
 
@@ -2187,12 +2235,8 @@ static GLXFBConfig select_fb_config(struct vo *vo, const int *attribs)
     return fbconfig;
 }
 
-typedef GLXContext (*glXCreateContextAttribsARBProc)
-    (Display*, GLXFBConfig, GLXContext, Bool, const int*);
-
-static int create_window_x11_gl3(struct MPGLContext *ctx, int gl_flags,
-                                 int gl_version, uint32_t d_width,
-                                 uint32_t d_height, uint32_t flags)
+static bool create_glx_window(struct MPGLContext *ctx, uint32_t d_width,
+                              uint32_t d_height, uint32_t flags)
 {
     struct vo *vo = ctx->vo;
     struct glx_context *glx_ctx = ctx->priv;
@@ -2205,7 +2249,7 @@ static int create_window_x11_gl3(struct MPGLContext *ctx, int gl_flags,
         vo_x11_create_vo_window(vo, glx_ctx->vinfo, vo->dx, vo->dy, d_width,
                                 d_height, flags, colormap, "gl");
         XFreeColormap(vo->x11->display, colormap);
-        return SET_WINDOW_OK;
+        return true;
     }
 
     int glx_major, glx_minor;
@@ -2215,7 +2259,7 @@ static int create_window_x11_gl3(struct MPGLContext *ctx, int gl_flags,
         (MPGL_VER(glx_major, glx_minor) <  MPGL_VER(1, 3)))
     {
         mp_msg(MSGT_VO, MSGL_ERR, "[gl] GLX version older than 1.3.\n");
-        return SET_WINDOW_FAILED;
+        return false;
     }
 
     const int glx_attribs_stereo_value_idx = 1; // index of GLX_STEREO + 1
@@ -2242,21 +2286,99 @@ static int create_window_x11_gl3(struct MPGLContext *ctx, int gl_flags,
         fbc = select_fb_config(vo, glx_attribs);
     if (!fbc) {
         mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
-        return SET_WINDOW_FAILED;
+        return false;
     }
+
+    glx_ctx->fbc = fbc;
+    glx_ctx->vinfo = glXGetVisualFromFBConfig(vo->x11->display, fbc);
+
+    mp_msg(MSGT_VO, MSGL_V, "[gl] GLX chose visual with ID 0x%x\n",
+            (int)glx_ctx->vinfo->visualid);
 
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_RED_SIZE, &ctx->depth_r);
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_GREEN_SIZE, &ctx->depth_g);
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_BLUE_SIZE, &ctx->depth_b);
 
-    XVisualInfo *vinfo = glXGetVisualFromFBConfig(vo->x11->display, fbc);
-    mp_msg(MSGT_VO, MSGL_V, "[gl] GLX chose visual with ID 0x%x\n",
-            (int)vinfo->visualid);
     Colormap colormap = XCreateColormap(vo->x11->display, vo->x11->rootwin,
-                                        vinfo->visual, AllocNone);
-    vo_x11_create_vo_window(vo, vinfo, vo->dx, vo->dy, d_width, d_height,
-                            flags, colormap, "gl");
+                                        glx_ctx->vinfo->visual, AllocNone);
+    vo_x11_create_vo_window(vo, glx_ctx->vinfo, vo->dx, vo->dy, d_width,
+                            d_height, flags, colormap, "gl");
     XFreeColormap(vo->x11->display, colormap);
+
+    return true;
+}
+
+static bool create_window_x11_old(struct MPGLContext *ctx, uint32_t d_width,
+                                  uint32_t d_height, uint32_t flags)
+{
+    struct glx_context *glx_ctx = ctx->priv;
+    Display *display = ctx->vo->x11->display;
+    struct vo *vo = ctx->vo;
+    GL *gl = ctx->gl;
+
+    if (!create_glx_window(ctx, d_width, d_height, flags))
+        return false;
+
+    if (glx_ctx->context)
+        return true;
+
+    GLXContext new_context = glXCreateContext(display, glx_ctx->vinfo, NULL,
+                                              True);
+    if (!new_context) {
+        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GLX context!\n");
+        return false;
+    }
+
+    if (!glXMakeCurrent(display, ctx->vo->x11->window, new_context)) {
+        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GLX context!\n");
+        glXDestroyContext(display, new_context);
+        return false;
+    }
+
+    void *(*getProcAddress)(const GLubyte *);
+    getProcAddress = getdladdr("glXGetProcAddress");
+    if (!getProcAddress)
+        getProcAddress = getdladdr("glXGetProcAddressARB");
+
+    const char *glxstr = "";
+    const char *(*glXExtStr)(Display *, int)
+        = getdladdr("glXQueryExtensionsString");
+    if (glXExtStr)
+        glxstr = glXExtStr(display, ctx->vo->x11->screen);
+
+    getFunctions(gl, getProcAddress, glxstr, false);
+    if (!gl->GenPrograms && gl->GetString &&
+        gl->version < MPGL_VER(3, 0) &&
+        getProcAddress &&
+        strstr(gl->GetString(GL_EXTENSIONS), "GL_ARB_vertex_program"))
+    {
+        mp_msg(MSGT_VO, MSGL_WARN,
+                "Broken glXGetProcAddress detected, trying workaround\n");
+        getFunctions(gl, NULL, glxstr, false);
+    }
+
+    glx_ctx->context = new_context;
+
+    if (!glXIsDirect(vo->x11->display, new_context))
+        ctx->gl->mpgl_caps &= ~MPGL_CAP_NO_SW;
+
+    return true;
+}
+
+typedef GLXContext (*glXCreateContextAttribsARBProc)
+    (Display*, GLXFBConfig, GLXContext, Bool, const int*);
+
+static bool create_window_x11_gl3(struct MPGLContext *ctx, uint32_t d_width,
+                                  uint32_t d_height, uint32_t flags)
+{
+    struct glx_context *glx_ctx = ctx->priv;
+    struct vo *vo = ctx->vo;
+
+    if (!create_glx_window(ctx, d_width, d_height, flags))
+        return false;
+
+    if (glx_ctx->context)
+        return true;
 
     glXCreateContextAttribsARBProc glXCreateContextAttribsARB =
         (glXCreateContextAttribsARBProc)
@@ -2270,40 +2392,41 @@ static int create_window_x11_gl3(struct MPGLContext *ctx, int gl_flags,
     bool have_ctx_ext = glxstr && !!strstr(glxstr, "GLX_ARB_create_context");
 
     if (!(have_ctx_ext && glXCreateContextAttribsARB)) {
-        XFree(vinfo);
-        return SET_WINDOW_FAILED;
+        return false;
     }
 
+    int gl_version = ctx->requested_gl_version;
     int context_attribs[] = {
         GLX_CONTEXT_MAJOR_VERSION_ARB, MPGL_VER_GET_MAJOR(gl_version),
         GLX_CONTEXT_MINOR_VERSION_ARB, MPGL_VER_GET_MINOR(gl_version),
         GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
         GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB
-            | (gl_flags & MPGLFLAG_DEBUG ? GLX_CONTEXT_DEBUG_BIT_ARB : 0),
+            | (flags & VOFLAG_GL_DEBUG ? GLX_CONTEXT_DEBUG_BIT_ARB : 0),
         None
     };
-    GLXContext context = glXCreateContextAttribsARB(vo->x11->display, fbc, 0,
-                                                    True, context_attribs);
+    GLXContext context = glXCreateContextAttribsARB(vo->x11->display,
+                                                    glx_ctx->fbc, 0, True,
+                                                    context_attribs);
     if (!context) {
         mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GLX context!\n");
-        XFree(vinfo);
-        return SET_WINDOW_FAILED;
+        return false;
     }
 
     // set context
     if (!glXMakeCurrent(vo->x11->display, vo->x11->window, context)) {
         mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GLX context!\n");
         glXDestroyContext(vo->x11->display, context);
-        XFree(vinfo);
-        return SET_WINDOW_FAILED;
+        return false;
     }
 
-    glx_ctx->vinfo = vinfo;
     glx_ctx->context = context;
 
     getFunctions(ctx->gl, (void *)glXGetProcAddress, glxstr, true);
 
-    return SET_WINDOW_REINIT;
+    if (!glXIsDirect(vo->x11->display, context))
+        ctx->gl->mpgl_caps &= ~MPGL_CAP_NO_SW;
+
+    return true;
 }
 
 /**
@@ -2321,7 +2444,8 @@ static void releaseGlContext_x11(MPGLContext *ctx)
         XFree(*vinfo);
     *vinfo = NULL;
     if (*context) {
-        gl->Finish();
+        if (gl->Finish)
+            gl->Finish();
         glXMakeCurrent(display, None, NULL);
         glXDestroyContext(display, *context);
     }
@@ -2363,45 +2487,46 @@ int mpgl_find_backend(const char *name)
     return -1;
 }
 
-MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
+MPGLContext *mpgl_init(enum MPGLType type, struct vo *vo)
 {
     MPGLContext *ctx;
     if (type == GLTYPE_AUTO) {
-        ctx = init_mpglcontext(GLTYPE_COCOA, vo);
+        ctx = mpgl_init(GLTYPE_COCOA, vo);
         if (ctx)
             return ctx;
-        ctx = init_mpglcontext(GLTYPE_W32, vo);
+        ctx = mpgl_init(GLTYPE_W32, vo);
         if (ctx)
             return ctx;
-        return init_mpglcontext(GLTYPE_X11, vo);
+        return mpgl_init(GLTYPE_X11, vo);
     }
     ctx = talloc_zero(NULL, MPGLContext);
-    ctx->gl = talloc_zero(ctx, GL);
-    ctx->type = type;
-    ctx->vo = vo;
+    *ctx = (MPGLContext) {
+        .gl = talloc_zero(ctx, GL),
+        .type = type,
+        .vo = vo,
+        .requested_gl_version = MPGL_VER(3, 0),
+        .vo_init_ok = true,
+    };
     switch (ctx->type) {
 #ifdef CONFIG_GL_COCOA
     case GLTYPE_COCOA:
-        ctx->create_window = create_window_cocoa;
+        ctx->create_window_old = create_window_cocoa_old;
         ctx->create_window_gl3 = create_window_cocoa_gl3;
-        ctx->setGlWindow = setGlWindow_cocoa;
         ctx->releaseGlContext = releaseGlContext_cocoa;
         ctx->swapGlBuffers = swapGlBuffers_cocoa;
         ctx->check_events = cocoa_check_events;
         ctx->update_xinerama_info = cocoa_update_xinerama_info;
         ctx->fullscreen = cocoa_fullscreen;
         ctx->ontop = vo_cocoa_ontop;
+        ctx->vo_init = vo_cocoa_init;
         ctx->vo_uninit = vo_cocoa_uninit;
-        if (vo_cocoa_init(vo))
-            return ctx;
         break;
 #endif
 #ifdef CONFIG_GL_WIN32
     case GLTYPE_W32:
         ctx->priv = talloc_zero(ctx, struct w32_context);
-        ctx->create_window = create_window_w32;
+        ctx->create_window_old = create_window_w32_old;
         ctx->create_window_gl3 = create_window_w32_gl3;
-        ctx->setGlWindow = setGlWindow_w32;
         ctx->releaseGlContext = releaseGlContext_w32;
         ctx->swapGlBuffers = swapGlBuffers_w32;
         ctx->update_xinerama_info = w32_update_xinerama_info;
@@ -2409,16 +2534,14 @@ MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
         ctx->check_events = vo_w32_check_events;
         ctx->fullscreen = vo_w32_fullscreen;
         ctx->ontop = vo_w32_ontop;
+        ctx->vo_init = vo_w32_init;
         ctx->vo_uninit = vo_w32_uninit;
-        if (vo_w32_init(vo))
-            return ctx;
         break;
 #endif
 #ifdef CONFIG_GL_X11
     case GLTYPE_X11:
         ctx->priv = talloc_zero(ctx, struct glx_context);
-        ctx->create_window = create_window_x11;
-        ctx->setGlWindow = setGlWindow_x11;
+        ctx->create_window_old = create_window_x11_old;
         ctx->create_window_gl3 = create_window_x11_gl3;
         ctx->releaseGlContext = releaseGlContext_x11;
         ctx->swapGlBuffers = swapGlBuffers_x11;
@@ -2427,40 +2550,85 @@ MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo)
         ctx->check_events = vo_x11_check_events;
         ctx->fullscreen = vo_x11_fullscreen;
         ctx->ontop = vo_x11_ontop;
+        ctx->vo_init = vo_init;
         ctx->vo_uninit = vo_x11_uninit;
-        if (vo_init(vo))
-            return ctx;
         break;
 #endif
     }
+    if (ctx->vo_init && ctx->vo_init(vo))
+        return ctx;
     talloc_free(ctx);
     return NULL;
 }
 
-int create_mpglcontext(struct MPGLContext *ctx, int gl_flags, int gl_version,
-                       uint32_t d_width, uint32_t d_height, uint32_t flags)
+bool mpgl_destroy_window(struct MPGLContext *ctx)
 {
-    if (gl_version < MPGL_VER(3, 0)) {
-        if (ctx->create_window(ctx, d_width, d_height, flags) < 0)
-            return SET_WINDOW_FAILED;
-        return ctx->setGlWindow(ctx);
-    } else {
-        if (!ctx->create_window_gl3) {
-            mp_msg(MSGT_VO, MSGL_ERR, "[gl] OpenGL 3.x context creation not "
-                   "implemented.\n");
-            return SET_WINDOW_FAILED;
-        }
-        return ctx->create_window_gl3(ctx, gl_flags, gl_version, d_width,
-                                      d_height, flags);
-    }
+    ctx->releaseGlContext(ctx);
+    *ctx->gl = (GL) {0};
+    // This is a caveat. At least on X11, this will recreate the X display
+    // connection. Also, if vo_init() fails, unspecified things will happen.
+    ctx->vo_uninit(ctx->vo);
+    ctx->vo_init_ok = ctx->vo_init(ctx->vo);
+    return ctx->vo_init_ok;
 }
 
-void uninit_mpglcontext(MPGLContext *ctx)
+static bool create_window(struct MPGLContext *ctx, int gl_caps,
+                          bool (*create)(struct MPGLContext *, uint32_t,
+                                         uint32_t, uint32_t),
+                          uint32_t d_width, uint32_t d_height, uint32_t flags)
+{
+    if (!create || !ctx->vo_init_ok)
+        return false;
+    if (create(ctx, d_width, d_height, flags)) {
+        int missing = (ctx->gl->mpgl_caps & gl_caps) ^ gl_caps;
+        if (!missing) {
+            ctx->selected_create_window = create;
+            return true;
+        }
+        mp_msg(MSGT_VO, MSGL_WARN, "[gl] Missing OpenGL features:");
+        list_features(missing, MSGL_WARN, false);
+        if (missing & MPGL_CAP_NO_SW) {
+            mp_msg(MSGT_VO, MSGL_WARN, "[gl] Rejecting suspected software "
+                   "OpenGL renderer.\n");
+        }
+    }
+    // If we tried to create a GL 3 context, and we're going to create a legacy
+    // context after this, the window should be recreated at least on X11.
+    mpgl_destroy_window(ctx);
+    return false;
+}
+
+bool mpgl_create_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
+                        uint32_t d_height, uint32_t flags)
+{
+    assert(ctx->vo_init_ok);
+    if (ctx->selected_create_window)
+        return ctx->selected_create_window(ctx, d_width, d_height, flags);
+
+    bool allow_gl3 = !(gl_caps & MPGL_CAP_GL_LEGACY);
+    bool allow_legacy = !(gl_caps & MPGL_CAP_GL3);
+    gl_caps |= MPGL_CAP_GL;
+
+    if (allow_gl3 && create_window(ctx, gl_caps, ctx->create_window_gl3,
+                                   d_width, d_height, flags))
+        return true;
+
+    if (allow_legacy && create_window(ctx, gl_caps, ctx->create_window_old,
+                                      d_width, d_height, flags))
+        return true;
+
+    mp_msg(MSGT_VO, MSGL_ERR, "[gl] OpenGL context creation failed!\n");
+    return false;
+}
+
+void mpgl_uninit(MPGLContext *ctx)
 {
     if (!ctx)
         return;
-    ctx->releaseGlContext(ctx);
-    ctx->vo_uninit(ctx->vo);
+    if (ctx->vo_init_ok) {
+        ctx->releaseGlContext(ctx);
+        ctx->vo_uninit(ctx->vo);
+    }
     talloc_free(ctx);
 }
 

@@ -47,6 +47,7 @@ struct priv {
     double lastpts;
     int64_t lastipts;
     int64_t lastframeipts;
+    double expected_next_pts;
     mp_image_t *lastimg;
     int lastdisplaycount;
 
@@ -347,6 +348,11 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
         mp_msg(MSGT_ENCODE, MSGL_WARN, "vo-lavc: NOTE: skipped initial video frame (probably because audio is not there yet)\n");
         return;
     }
+    if (pts == MP_NOPTS_VALUE) {
+        if (mpi)
+            mp_msg(MSGT_ENCODE, MSGL_WARN, "vo-lavc: frame without pts, please report; synthesizing pts instead\n");
+        pts = vc->expected_next_pts;
+    }
 
     avc = vc->stream->codec;
 
@@ -390,65 +396,53 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
 
     double timeunit = (double)vc->worst_time_base.num / vc->worst_time_base.den;
 
-    // fix the discontinuity pts offset
-    if (ectx->discontinuity_pts_offset == MP_NOPTS_VALUE) {
+    double outpts;
+    if (ectx->options->rawts)
+        outpts = pts;
+    else if (ectx->options->copyts) {
+        // fix the discontinuity pts offset
         nextpts = pts;
-        ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;
-    }
-
-    // set next allowed output pts value
-    nextpts = pts + ectx->discontinuity_pts_offset + timeunit;
-    if (nextpts > ectx->next_in_pts)
-        ectx->next_in_pts = nextpts;
-
-    // vc->lastipts is MP_NOPTS_VALUE, or the start time of vc->lastframe
-    if (mpi) {
-        if (pts == MP_NOPTS_VALUE) {
-            // NOTE: this even applies to ectx->options->copyts!
-            if (vc->lastipts == MP_NOPTS_VALUE)
-                frameipts = 0;
-            else
-                frameipts = vc->lastipts + 1;
-
-            mp_msg(MSGT_ENCODE, MSGL_INFO, "vo-lavc: pts was missing, using %d - "
-                   "consider using -ofps or -vf fixpts\n", (int) frameipts);
-
-            if (ectx->last_video_in_pts != MP_NOPTS_VALUE)
-                ectx->last_video_in_pts += timeunit;
-
-            // calculate backwards to set vc->lastpts matchingly
-            vc->lastpts = frameipts * timeunit - encode_lavc_getoffset(ectx, vc->stream);
-        } else {
-            double outpts;
-            if (ectx->options->rawts)
-                outpts = pts;
-            else if (ectx->options->copyts)
-                outpts = pts + ectx->discontinuity_pts_offset;
-            else {
-                double duration = 0;
-                if (ectx->last_video_in_pts != MP_NOPTS_VALUE)
-                    duration = pts - ectx->last_video_in_pts;
-                if (duration < 0)
-                    duration = timeunit;   // XXX warn about discontinuity?
-                outpts = vc->lastpts + duration;
-                if (ectx->audio_pts_offset != MP_NOPTS_VALUE) {
-                    double adj = outpts - pts - ectx->audio_pts_offset;
-                    adj = FFMIN(adj, duration * 0.1);
-                    adj = FFMAX(adj, -duration * 0.1);
-                    outpts -= adj;
-                }
-            }
-            vc->lastpts = outpts;
-            ectx->last_video_in_pts = pts;
-            frameipts = floor((outpts + encode_lavc_getoffset(ectx, vc->stream))
-                              / timeunit + 0.5);
+        if (ectx->discontinuity_pts_offset == MP_NOPTS_VALUE) {
+            ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;
         }
-    } else {
-        if (vc->lastipts == MP_NOPTS_VALUE)
-            frameipts = 0;
-        else
-            frameipts = vc->lastipts + 1;
-        vc->lastpts = frameipts * timeunit - encode_lavc_getoffset(ectx, vc->stream);
+        else if (fabs(nextpts + ectx->discontinuity_pts_offset - ectx->next_in_pts) > 30) {
+            mp_msg(MSGT_ENCODE, MSGL_WARN,
+                    "vo-lavc: detected an unexpected discontinuity (pts jumped by "
+                    "%f seconds)\n",
+                    nextpts + ectx->discontinuity_pts_offset - ectx->next_in_pts);
+            ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;
+        }
+
+        outpts = pts + ectx->discontinuity_pts_offset;
+    }
+    else {
+        // adjust pts by knowledge of audio pts vs audio playback time
+        double duration = 0;
+        if (ectx->last_video_in_pts != MP_NOPTS_VALUE)
+            duration = pts - ectx->last_video_in_pts;
+        if (duration < 0)
+            duration = timeunit;   // XXX warn about discontinuity?
+        outpts = vc->lastpts + duration;
+        if (ectx->audio_pts_offset != MP_NOPTS_VALUE) {
+            double adj = outpts - pts - ectx->audio_pts_offset;
+            adj = FFMIN(adj, duration * 0.1);
+            adj = FFMAX(adj, -duration * 0.1);
+            outpts -= adj;
+        }
+    }
+    vc->lastpts = outpts;
+    ectx->last_video_in_pts = pts;
+    frameipts = floor((outpts + encode_lavc_getoffset(ectx, vc->stream))
+                      / timeunit + 0.5);
+
+    // calculate expected pts of next video frame
+    vc->expected_next_pts = pts + timeunit;
+
+    if (!ectx->options->rawts && ectx->options->copyts) {
+        // set next allowed output pts value
+        nextpts = vc->expected_next_pts + ectx->discontinuity_pts_offset;
+        if (nextpts > ectx->next_in_pts)
+            ectx->next_in_pts = nextpts;
     }
 
     // never-drop mode

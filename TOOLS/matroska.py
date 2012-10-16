@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 Generate C definitions for parsing Matroska files.
 Can also be used to directly parse Matroska files and display their contents.
@@ -22,6 +22,8 @@ Can also be used to directly parse Matroska files and display their contents.
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+# for compatibility with Python 2.x
+from __future__ import print_function
 
 elements_ebml = (
     'EBML, 1a45dfa3, sub', (
@@ -205,7 +207,7 @@ class MatroskaElement(object):
 
     def __init__(self, name, elid, valtype, namespace):
         self.name = name
-        self.definename = '{}_ID_{}'.format(namespace, name.upper())
+        self.definename = '{0}_ID_{1}'.format(namespace, name.upper())
         self.fieldname = camelcase_to_words(name)
         self.structname = 'ebml_' + self.fieldname
         self.elid = elid
@@ -290,7 +292,7 @@ def generate_C_definitions():
         print()
         if el.subelements:
             print('#define N', el.fieldname)
-            print('E_S("{}", {})'.format(el.name, len(el.subelements)))
+            print('E_S("{0}", {1})'.format(el.name, len(el.subelements)))
             for subel, multiple in el.subelements:
                 print('F({0.definename}, {0.fieldname}, {1})'.format(
                         subel, int(multiple)))
@@ -391,7 +393,7 @@ def parse_one(s, depth, parent, maxlen):
             if len(t) < 20:
                 t = hexlify(t).decode('ascii')
             else:
-                t = '<skipped {} bytes>'.format(len(t))
+                t = '<skipped {0} bytes>'.format(len(t))
             print('binary', t, dec)
         elif elem.valtype == 'uint':
             print('uint', read_uint(s, length))

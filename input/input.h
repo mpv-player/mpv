@@ -20,106 +20,49 @@
 #define MPLAYER_INPUT_H
 
 #include <stdbool.h>
+#include "bstr.h"
+#include "m_option.h"
 
 // All command IDs
 enum mp_command_type {
+    MP_CMD_IGNORE,
     MP_CMD_SEEK,
-    MP_CMD_AUDIO_DELAY,
     MP_CMD_QUIT,
-    MP_CMD_PAUSE,
-    MP_CMD_GRAB_FRAMES, // deprecated: was a no-op command for years
     MP_CMD_PLAYLIST_NEXT,
     MP_CMD_PLAYLIST_PREV,
-    MP_CMD_SUB_DELAY,
     MP_CMD_OSD,
-    MP_CMD_VOLUME,
-    MP_CMD_MIXER_USEMASTER,
-    MP_CMD_CONTRAST,
-    MP_CMD_BRIGHTNESS,
-    MP_CMD_HUE,
-    MP_CMD_SATURATION,
-    MP_CMD_FRAMEDROPPING,
     MP_CMD_TV_STEP_CHANNEL,
     MP_CMD_TV_STEP_NORM,
     MP_CMD_TV_STEP_CHANNEL_LIST,
-    MP_CMD_VO_FULLSCREEN,
-    MP_CMD_SUB_POS,
     MP_CMD_SCREENSHOT,
-    MP_CMD_PANSCAN,
-    MP_CMD_MUTE,
     MP_CMD_LOADFILE,
     MP_CMD_LOADLIST,
     MP_CMD_PLAYLIST_CLEAR,
-    MP_CMD_GAMMA,
-    MP_CMD_SUB_VISIBILITY,
-    MP_CMD_VOBSUB_LANG, // deprecated: combined with SUB_SELECT
-    MP_CMD_GET_TIME_LENGTH,
-    MP_CMD_GET_PERCENT_POS,
     MP_CMD_SUB_STEP,
     MP_CMD_TV_SET_CHANNEL,
     MP_CMD_EDL_MARK,
-    MP_CMD_SUB_ALIGNMENT,
     MP_CMD_TV_LAST_CHANNEL,
-    MP_CMD_OSD_SHOW_TEXT,
     MP_CMD_TV_SET_FREQ,
     MP_CMD_TV_SET_NORM,
-    MP_CMD_TV_SET_BRIGHTNESS,
-    MP_CMD_TV_SET_CONTRAST,
-    MP_CMD_TV_SET_HUE,
-    MP_CMD_TV_SET_SATURATION,
-    MP_CMD_GET_VO_FULLSCREEN,
-    MP_CMD_GET_SUB_VISIBILITY,
-    MP_CMD_SUB_FORCED_ONLY,
-    MP_CMD_VO_ONTOP,
-    MP_CMD_SUB_SELECT,
-    MP_CMD_VO_ROOTWIN,
-    MP_CMD_SWITCH_VSYNC,
-    MP_CMD_SWITCH_RATIO,
     MP_CMD_FRAME_STEP,
-    MP_CMD_SPEED_INCR,
     MP_CMD_SPEED_MULT,
-    MP_CMD_SPEED_SET,
     MP_CMD_RUN,
-    MP_CMD_SWITCH_AUDIO,
-    MP_CMD_GET_TIME_POS,
     MP_CMD_SUB_LOAD,
     MP_CMD_KEYDOWN_EVENTS,
-    MP_CMD_VO_BORDER,
-    MP_CMD_SET_PROPERTY,
-    MP_CMD_SET_PROPERTY_OSD,
+    MP_CMD_SET,
     MP_CMD_GET_PROPERTY,
-    MP_CMD_OSD_SHOW_PROPERTY_TEXT,
-    MP_CMD_OSD_SHOW_PROGRESSION,
-    MP_CMD_SEEK_CHAPTER,
-    MP_CMD_GET_FILENAME,
-    MP_CMD_GET_VIDEO_CODEC,
-    MP_CMD_GET_VIDEO_BITRATE,
-    MP_CMD_GET_VIDEO_RESOLUTION,
-    MP_CMD_GET_AUDIO_CODEC,
-    MP_CMD_GET_AUDIO_BITRATE,
-    MP_CMD_GET_AUDIO_SAMPLES,
-    MP_CMD_GET_META_TITLE,
-    MP_CMD_GET_META_ARTIST,
-    MP_CMD_GET_META_ALBUM,
-    MP_CMD_GET_META_YEAR,
-    MP_CMD_GET_META_COMMENT,
-    MP_CMD_GET_META_TRACK,
-    MP_CMD_GET_META_GENRE,
+    MP_CMD_PRINT_TEXT,
+    MP_CMD_SHOW_TEXT,
+    MP_CMD_SHOW_PROGRESS,
     MP_CMD_RADIO_STEP_CHANNEL,
     MP_CMD_RADIO_SET_CHANNEL,
     MP_CMD_RADIO_SET_FREQ,
     MP_CMD_SET_MOUSE_POS,
-    MP_CMD_STEP_PROPERTY,
-    MP_CMD_STEP_PROPERTY_OSD,
+    MP_CMD_ADD,
+    MP_CMD_CYCLE,
     MP_CMD_RADIO_STEP_FREQ,
     MP_CMD_TV_STEP_FREQ,
-    MP_CMD_LOOP,
-    MP_CMD_BALANCE,
-    MP_CMD_SUB_SCALE,
     MP_CMD_TV_START_SCAN,
-    MP_CMD_SWITCH_ANGLE,
-    MP_CMD_ASS_USE_MARGINS,
-    MP_CMD_SWITCH_TITLE,
     MP_CMD_STOP,
 
     /// DVB commands
@@ -139,11 +82,6 @@ enum mp_command_type {
     MP_CMD_VO_CMDLINE,
 };
 
-// The arg types
-#define MP_CMD_ARG_INT 1
-#define MP_CMD_ARG_FLOAT 2
-#define MP_CMD_ARG_STRING 3
-
 #define MP_CMD_MAX_ARGS 10
 
 // Error codes for the drivers
@@ -159,6 +97,13 @@ enum mp_command_type {
 // Key FIFO was full - release events may be lost, zero button-down status
 #define MP_INPUT_RELEASE_ALL -5
 
+enum mp_on_osd {
+    MP_ON_OSD_NO = 0,           // prefer not using OSD
+    MP_ON_OSD_AUTO = 1,         // use default behavior of the specific command
+    MP_ON_OSD_BAR = 2,          // force a bar, if applicable
+    MP_ON_OSD_MSG = 4,          // force a message, if applicable
+};
+
 enum mp_input_section_flags {
     // If a key binding is not defined in the current section, search the
     // default section for it ("default" refers to bindings with no section
@@ -169,7 +114,7 @@ enum mp_input_section_flags {
 struct input_ctx;
 
 struct mp_cmd_arg {
-    int type;
+    struct m_option type;
     bool optional;
     union {
         int i;
@@ -184,6 +129,8 @@ typedef struct mp_cmd {
     struct mp_cmd_arg args[MP_CMD_MAX_ARGS];
     int nargs;
     int pausing;
+    enum mp_on_osd on_osd;
+    bstr original;
     struct mp_cmd *queue_next;
 } mp_cmd_t;
 
@@ -234,8 +181,9 @@ int mp_input_queue_cmd(struct input_ctx *ictx, struct mp_cmd *cmd);
 struct mp_cmd *mp_input_get_cmd(struct input_ctx *ictx, int time,
                                 int peek_only);
 
-/* Parse text and return corresponding struct mp_cmd. */
-struct mp_cmd *mp_input_parse_cmd(char *str);
+// Parse text and return corresponding struct mp_cmd.
+// The location parameter is for error messages.
+struct mp_cmd *mp_input_parse_cmd(bstr str, const char *location);
 
 // After getting a command from mp_input_get_cmd you need to free it using this
 // function

@@ -56,6 +56,7 @@ struct priv {
     int64_t lastpts;
     int sample_size;
     const void *sample_padding;
+    double expected_next_pts;
 
     AVRational worst_time_base;
     int worst_time_base_is_stream;
@@ -288,7 +289,7 @@ static void fill_with_padding(void *buf, int cnt, int sz, const void *padding)
 }
 
 // close audio device
-static int encode(struct ao *ao, int ptsvalid, double apts, void *data);
+static int encode(struct ao *ao, double apts, void *data);
 static void uninit(struct ao *ao, bool cut_audio)
 {
     struct priv *ac = ao->priv;
@@ -302,12 +303,12 @@ static void uninit(struct ao *ao, bool cut_audio)
                               (ac->aframesize * ao->channels * ac->sample_size
                                - ao->buffer.len) / ac->sample_size,
                               ac->sample_size, ac->sample_padding);
-            encode(ao, ao->pts != MP_NOPTS_VALUE, pts, paddingbuf);
+            encode(ao, pts, paddingbuf);
             pts += ac->aframesize / (double) ao->samplerate;
             talloc_free(paddingbuf);
             ao->buffer.len = 0;
         }
-        while (encode(ao, true, pts, NULL) > 0) ;
+        while (encode(ao, pts, NULL) > 0) ;
     }
 
     ao->priv = NULL;
@@ -320,7 +321,7 @@ static int get_space(struct ao *ao)
 }
 
 // must get exactly ac->aframesize amount of data
-static int encode(struct ao *ao, int ptsvalid, double apts, void *data)
+static int encode(struct ao *ao, double apts, void *data)
 {
     AVFrame *frame;
     AVPacket packet;
@@ -338,7 +339,7 @@ static int encode(struct ao *ao, int ptsvalid, double apts, void *data)
                             ac->aframesize * ao->channels, ac->sample_size);
     }
 
-    if (data && ptsvalid)
+    if (data)
         ectx->audio_pts_offset = realapts - apts;
 
     av_init_packet(&packet);
@@ -354,12 +355,9 @@ static int encode(struct ao *ao, int ptsvalid, double apts, void *data)
             return -1;
         }
 
-        if (ao->encode_lavc_ctx->options->rawts) {
-            // raw audio pts
-            frame->pts = floor(apts * ac->stream->codec->time_base.den / ac->stream->codec->time_base.num + 0.5);
-        } else if (ectx->options->copyts) {
+        if (ectx->options->rawts || ectx->options->copyts) {
             // real audio pts
-            frame->pts = floor((apts + ectx->discontinuity_pts_offset) * ac->stream->codec->time_base.den / ac->stream->codec->time_base.num + 0.5);
+            frame->pts = floor(apts * ac->stream->codec->time_base.den / ac->stream->codec->time_base.num + 0.5);
         } else {
             // audio playback time
             frame->pts = floor(realapts * ac->stream->codec->time_base.den / ac->stream->codec->time_base.num + 0.5);
@@ -385,7 +383,7 @@ static int encode(struct ao *ao, int ptsvalid, double apts, void *data)
                 ac->savepts = frame->pts;
         }
 
-	av_free(frame);
+        av_free(frame);
     }
     else
     {
@@ -406,6 +404,8 @@ static int encode(struct ao *ao, int ptsvalid, double apts, void *data)
            apts, realapts, packet.size);
 
     encode_lavc_write_stats(ao->encode_lavc_ctx, ac->stream);
+
+    packet.stream_index = ac->stream->index;
 
     // Do we need this at all? Better be safe than sorry...
     if (packet.pts == AV_NOPTS_VALUE) {
@@ -449,12 +449,19 @@ static int play(struct ao *ao, void *data, int len, int flags)
     int64_t ptsoffset;
     void *paddingbuf = NULL;
     double nextpts;
+    double pts = ao->pts;
+    double outpts;
 
     len /= ac->sample_size * ao->channels;
 
     if (!encode_lavc_start(ectx)) {
         mp_msg(MSGT_ENCODE, MSGL_WARN, "ao-lavc: NOTE: deferred initial audio frame (probably because video is not there yet)\n");
         return 0;
+    }
+    if (pts == MP_NOPTS_VALUE) {
+        mp_msg(MSGT_ENCODE, MSGL_WARN, "ao-lavc: frame without pts, please report; synthesizing pts instead\n");
+        // synthesize pts from previous expected next pts
+        pts = ac->expected_next_pts;
     }
 
     if (ac->worst_time_base.den == 0) {
@@ -549,26 +556,43 @@ static int play(struct ao *ao, void *data, int len, int flags)
         }
     }
 
-    // fix the discontinuity pts offset
-    if (ectx->discontinuity_pts_offset == MP_NOPTS_VALUE) {
-        nextpts = ao->pts + ptsoffset / (double) ao->samplerate;
-        ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;
+    if (!ectx->options->rawts && ectx->options->copyts) {
+        // fix the discontinuity pts offset
+        nextpts = pts + ptsoffset / (double) ao->samplerate;
+        if (ectx->discontinuity_pts_offset == MP_NOPTS_VALUE) {
+            ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;
+        }
+        else if (fabs(nextpts + ectx->discontinuity_pts_offset - ectx->next_in_pts) > 30) {
+            mp_msg(MSGT_ENCODE, MSGL_WARN,
+                    "ao-lavc: detected an unexpected discontinuity (pts jumped by "
+                    "%f seconds)\n",
+                    nextpts + ectx->discontinuity_pts_offset - ectx->next_in_pts);
+            ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;
+        }
+
+        outpts = pts + ectx->discontinuity_pts_offset;
     }
+    else
+        outpts = pts;
 
     while (len - bufpos >= ac->aframesize) {
-        encode(ao, ao->pts != MP_NOPTS_VALUE,
-               ao->pts + (bufpos + ptsoffset) / (double) ao->samplerate +
-               encode_lavc_getoffset(ectx, ac->stream),
+        encode(ao,
+               outpts + (bufpos + ptsoffset) / (double) ao->samplerate + encode_lavc_getoffset(ectx, ac->stream),
                (char *) data + ac->sample_size * bufpos * ao->channels);
         bufpos += ac->aframesize;
     }
 
     talloc_free(paddingbuf);
 
-    // set next allowed output pts value
-    nextpts = ao->pts + ectx->discontinuity_pts_offset + (bufpos + ptsoffset) / (double) ao->samplerate;
-    if (nextpts > ectx->next_in_pts)
-        ectx->next_in_pts = nextpts;
+    // calculate expected pts of next audio frame
+    ac->expected_next_pts = pts + (bufpos + ptsoffset) / (double) ao->samplerate;
+
+    if (!ectx->options->rawts && ectx->options->copyts) {
+        // set next allowed output pts value
+        nextpts = ac->expected_next_pts + ectx->discontinuity_pts_offset;
+        if (nextpts > ectx->next_in_pts)
+            ectx->next_in_pts = nextpts;
+    }
 
     return bufpos * ac->sample_size * ao->channels;
 }

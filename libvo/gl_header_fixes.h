@@ -229,3 +229,17 @@
 #define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x0002
 #define WGL_CONTEXT_CORE_PROFILE_BIT_ARB   0x00000001
 #endif
+
+// Define just enough constants to make the OpenGL 3 code compile against
+// older SDKs. Values are taken straight from OpenGL/gl3.h
+#if defined __APPLE__ && !(defined GL_VERSION_3_0)
+#define GL_RGBA16F                        0x881A
+#define GL_RGB16F                         0x881B
+#define GL_MAJOR_VERSION                  0x821B
+#define GL_MINOR_VERSION                  0x821C
+#define GL_NUM_EXTENSIONS                 0x821D
+
+#ifndef GL_ARB_framebuffer_sRGB
+#define GL_FRAMEBUFFER_SRGB               0x8DB9
+#endif
+#endif

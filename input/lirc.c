@@ -41,7 +41,7 @@ mp_input_lirc_init(void) {
   int mode;
 
   mp_tmsg(MSGT_LIRC,MSGL_V,"Setting up LIRC support...\n");
-  if((lirc_sock=lirc_init("mplayer",0))==-1){
+  if((lirc_sock=lirc_init("mpv",0))==-1){
     mp_tmsg(MSGT_LIRC,MSGL_V,"Failed to open LIRC support. You will not be able to use your remote control.\n");
     return -1;
   }

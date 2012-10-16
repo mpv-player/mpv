@@ -34,13 +34,8 @@ SRCS_COMMON-$(DVBIN)                 += stream/dvb_tune.c \
 SRCS_COMMON-$(DVDREAD)               += stream/stream_dvd.c \
                                         stream/stream_dvd_common.c
 
-# These filters use private headers and do not work with shared libavcodec.
-SRCS_COMMON-$(FFMPEG_INTERNALS)      += libmpcodecs/vf_mcdeint.c \
-                                        libmpcodecs/vf_spp.c \
-
 SRCS_COMMON-$(FTP)                   += stream/stream_ftp.c
 SRCS_COMMON-$(GIF)                   += libmpdemux/demux_gif.c
-SRCS_COMMON-$(HAVE_POSIX_SELECT)     += libmpcodecs/vf_bmovl.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c osdep/mmap_anon.c
 SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
 SRCS_COMMON-$(LIBASS)                += libmpcodecs/vf_ass.c \
@@ -152,77 +147,33 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vd.c \
               libmpcodecs/vd_ffmpeg.c \
               libmpcodecs/vf.c \
-              libmpcodecs/vf_1bpp.c \
-              libmpcodecs/vf_2xsai.c \
-              libmpcodecs/vf_blackframe.c \
-              libmpcodecs/vf_boxblur.c \
               libmpcodecs/vf_crop.c \
-              libmpcodecs/vf_cropdetect.c \
-              libmpcodecs/vf_decimate.c \
               libmpcodecs/vf_delogo.c \
-              libmpcodecs/vf_denoise3d.c \
-              libmpcodecs/vf_detc.c \
-              libmpcodecs/vf_dint.c \
               libmpcodecs/vf_divtc.c \
               libmpcodecs/vf_dlopen.c \
               libmpcodecs/vf_down3dright.c \
               libmpcodecs/vf_dsize.c \
-              libmpcodecs/vf_dvbscale.c \
-              libmpcodecs/vf_eq.c \
               libmpcodecs/vf_eq2.c \
               libmpcodecs/vf_expand.c \
-              libmpcodecs/vf_field.c \
-              libmpcodecs/vf_fil.c \
-              libmpcodecs/vf_filmdint.c \
-              libmpcodecs/vf_fixpts.c \
               libmpcodecs/vf_flip.c \
               libmpcodecs/vf_format.c \
-              libmpcodecs/vf_framestep.c \
-              libmpcodecs/vf_fspp.c \
-              libmpcodecs/vf_geq.c \
               libmpcodecs/vf_gradfun.c \
-              libmpcodecs/vf_halfpack.c \
-              libmpcodecs/vf_harddup.c \
               libmpcodecs/vf_hqdn3d.c \
-              libmpcodecs/vf_hue.c \
-              libmpcodecs/vf_il.c \
               libmpcodecs/vf_ilpack.c \
-              libmpcodecs/vf_ivtc.c \
-              libmpcodecs/vf_kerndeint.c \
-              libmpcodecs/vf_lavc.c \
-              libmpcodecs/vf_lavcdeint.c \
               libmpcodecs/vf_mirror.c \
               libmpcodecs/vf_noformat.c \
               libmpcodecs/vf_noise.c \
-              libmpcodecs/vf_ow.c \
-              libmpcodecs/vf_palette.c \
-              libmpcodecs/vf_perspective.c \
               libmpcodecs/vf_phase.c \
-              libmpcodecs/vf_pp7.c \
               libmpcodecs/vf_pullup.c \
-              libmpcodecs/vf_qp.c \
-              libmpcodecs/vf_remove_logo.c \
-              libmpcodecs/vf_rgbtest.c \
               libmpcodecs/vf_rotate.c \
-              libmpcodecs/vf_sab.c \
               libmpcodecs/vf_scale.c \
               libmpcodecs/vf_screenshot.c \
-              libmpcodecs/vf_smartblur.c \
               libmpcodecs/vf_softpulldown.c \
               libmpcodecs/vf_stereo3d.c \
-              libmpcodecs/vf_softskip.c \
               libmpcodecs/vf_swapuv.c \
-              libmpcodecs/vf_telecine.c \
-              libmpcodecs/vf_test.c \
-              libmpcodecs/vf_tfields.c \
-              libmpcodecs/vf_tile.c \
-              libmpcodecs/vf_tinterlace.c \
               libmpcodecs/vf_unsharp.c \
-              libmpcodecs/vf_uspp.c \
               libmpcodecs/vf_vo.c \
               libmpcodecs/vf_yadif.c \
-              libmpcodecs/vf_yuvcsp.c \
-              libmpcodecs/vf_yvu9.c \
               libmpdemux/asfheader.c \
               libmpdemux/aviheader.c \
               libmpdemux/aviprint.c \
@@ -252,7 +203,6 @@ SRCS_COMMON = asxparser.c \
               osdep/io.c \
               osdep/$(GETCH) \
               osdep/$(TIMER) \
-              stream/open.c \
               stream/stream.c \
               stream/stream_ffmpeg.c \
               stream/stream_file.c \
@@ -282,14 +232,16 @@ SRCS_MPLAYER-$(CACA)         += libvo/vo_caca.c
 SRCS_MPLAYER-$(COREAUDIO)    += libao2/ao_coreaudio.c
 SRCS_MPLAYER-$(COREVIDEO)    += libvo/vo_corevideo.m
 SRCS_MPLAYER-$(DIRECT3D)     += libvo/vo_direct3d.c libvo/w32_common.c
-SRCS_MPLAYER-$(GL)           += libvo/gl_common.c libvo/vo_gl.c libvo/vo_gl3.c \
-                                pnm_loader.c libvo/gl_osd.c
+SRCS_MPLAYER-$(DSOUND)       += libao2/ao_dsound.c
+SRCS_MPLAYER-$(GL)           += libvo/gl_common.c libvo/vo_opengl.c \
+                                libvo/gl_osd.c libvo/vo_opengl_old.c pnm_loader.c
 SRCS_MPLAYER-$(ENCODING)     += libvo/vo_lavc.c libao2/ao_lavc.c encode_lavc.c
 SRCS_MPLAYER-$(GL_WIN32)     += libvo/w32_common.c
 SRCS_MPLAYER-$(GL_X11)       += libvo/x11_common.c
 
 SRCS_MPLAYER-$(JACK)         += libao2/ao_jack.c
 SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
+SRCS_MPLAYER-$(LIBQUVI)       += quvi.c
 SRCS_MPLAYER-$(LIRC)          += input/lirc.c
 SRCS_MPLAYER-$(OPENAL)        += libao2/ao_openal.c
 SRCS_MPLAYER-$(OSS)           += libao2/ao_oss.c
@@ -332,15 +284,15 @@ OBJS_MPLAYER   += $(OBJS_MPLAYER-yes)
 MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
 DEP_FILES = $(patsubst %.S,%.d,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON:.m=.d) $(SRCS_MPLAYER:.m=.d))))
 
-ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
+ALL_PRG-$(MPLAYER)  += mpv$(EXESUF)
 
 INSTALL_TARGETS-$(MPLAYER)  += check_rst2man       \
-                               install-mplayer     \
-                               install-mplayer-man \
-                               install-mplayer-msg
+                               install-mpv     \
+                               install-mpv-man \
+                               install-mpv-msg
 
-INSTALL_NO_MAN_TARGETS-$(MPLAYER) += install-mplayer  \
-                                     install-mplayer-msg
+INSTALL_NO_MAN_TARGETS-$(MPLAYER) += install-mpv  \
+                                     install-mpv-msg
 
 DIRS =  . \
         input \
@@ -354,7 +306,7 @@ DIRS =  . \
         sub \
         timeline \
 
-MOFILES := $(MSG_LANGS:%=locale/%/LC_MESSAGES/mplayer.mo)
+MOFILES := $(MSG_LANGS:%=locale/%/LC_MESSAGES/mpv.mo)
 
 ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
 
@@ -391,9 +343,9 @@ all: $(ALL_PRG-yes) locales
 %-rc.o: %.rc
 	$(WINDRES) -I. $< $@
 
-mplayer$(EXESUF): $(MPLAYER_DEPS)
-mplayer$(EXESUF): EXTRALIBS += $(EXTRALIBS_MPLAYER)
-mplayer$(EXESUF):
+mpv$(EXESUF): $(MPLAYER_DEPS)
+mpv$(EXESUF): EXTRALIBS += $(EXTRALIBS_MPLAYER)
+mpv$(EXESUF):
 	$(CC) -o $@ $^ $(EXTRALIBS)
 
 codec-cfg.c: codecs.conf.h
@@ -416,8 +368,8 @@ libmpdemux/ebml.c: libmpdemux/ebml_defs.c
 libmpdemux/ebml_defs.c: TOOLS/matroska.py
 	./$< --generate-definitions > $@
 
-libvo/vo_gl3.c: libvo/vo_gl3_shaders.h
-libvo/vo_gl3_shaders.h: TOOLS/file2string.py libvo/vo_gl3_shaders.glsl
+libvo/vo_opengl.c: libvo/vo_opengl_shaders.h
+libvo/vo_opengl_shaders.h: TOOLS/file2string.py libvo/vo_opengl_shaders.glsl
 	./$^ >$@
 
 sub/osd_libass.c: sub/osd_font.h
@@ -441,7 +393,7 @@ version.h .version: version.sh
 
 locales: $(MOFILES)
 
-locale/%/LC_MESSAGES/mplayer.mo: po/%.po
+locale/%/LC_MESSAGES/mpv.mo: po/%.po
 	mkdir -p $(dir $@)
 	msgfmt -c -o $@ $<
 
@@ -455,9 +407,6 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 ###### dependency declarations / specific CFLAGS ######
 
 version.c osdep/mplayer-rc.o: version.h
-
-# Files that depend on libavcodec internals
-libmpcodecs/vf_fspp.o libmpcodecs/vf_mcdeint.o libmpcodecs/vf_spp.o: CFLAGS := -I$(FFMPEG_SOURCE_PATH) $(CFLAGS)
 
 osdep/mplayer-rc.o: osdep/mplayer.exe.manifest
 
@@ -479,49 +428,47 @@ install-dirs:
 install-%: %$(EXESUF) install-dirs
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
 
-install-mplayer-man:  $(foreach lang,$(MAN_LANGS),install-mplayer-man-$(lang))
-install-mplayer-msg:  $(foreach lang,$(MSG_LANGS),install-mplayer-msg-$(lang))
+install-mpv-man:  $(foreach lang,$(MAN_LANGS),install-mpv-man-$(lang))
+install-mpv-msg:  $(foreach lang,$(MSG_LANGS),install-mpv-msg-$(lang))
 
-install-mplayer-man-en: DOCS/man/en/mplayer.1
+install-mpv-man-en: DOCS/man/en/mpv.1
 	if test ! -d $(MANDIR)/man1 ; then $(INSTALL) -d $(MANDIR)/man1 ; fi
-	$(INSTALL) -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
+	$(INSTALL) -m 644 DOCS/man/en/mpv.1 $(MANDIR)/man1/
 
 define MPLAYER_MAN_RULE
-install-mplayer-man-$(lang): DOCS/man/$(lang)/mplayer.1
+install-mpv-man-$(lang): DOCS/man/$(lang)/mpv.1
 	if test ! -d $(MANDIR)/$(lang)/man1 ; then $(INSTALL) -d $(MANDIR)/$(lang)/man1 ; fi
-	$(INSTALL) -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
+	$(INSTALL) -m 644 DOCS/man/$(lang)/mpv.1 $(MANDIR)/$(lang)/man1/
 endef
 
 $(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MPLAYER_MAN_RULE)))
 
 define MPLAYER_MSG_RULE
-install-mplayer-msg-$(lang):
+install-mpv-msg-$(lang):
 	if test ! -d $(LOCALEDIR)/$(lang)/LC_MESSAGES ; then $(INSTALL) -d $(LOCALEDIR)/$(lang)/LC_MESSAGES ; fi
-	$(INSTALL) -m 644 locale/$(lang)/LC_MESSAGES/mplayer.mo $(LOCALEDIR)/$(lang)/LC_MESSAGES/
+	$(INSTALL) -m 644 locale/$(lang)/LC_MESSAGES/mpv.mo $(LOCALEDIR)/$(lang)/LC_MESSAGES/
 endef
 
 $(foreach lang,$(MSG_LANG_ALL),$(eval $(MPLAYER_MSG_RULE)))
 
 uninstall:
-	$(RM) $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
-	$(RM) $(prefix)/share/pixmaps/mplayer.xpm
-	$(RM) $(prefix)/share/applications/mplayer.desktop
-	$(RM) $(MANDIR)/man1/mplayer.1
-	$(RM) $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1,$(MANDIR)/$(lang)/man1/$(man)))
-	$(RM) $(foreach lang,$(MSG_LANGS),$(LOCALEDIR)/$(lang)/LC_MESSAGES/mplayer.1)
+	$(RM) $(BINDIR)/mpv$(EXESUF)
+	$(RM) $(MANDIR)/man1/mpv.1
+	$(RM) $(foreach lang,$(MAN_LANGS),$(foreach man,mpv.1,$(MANDIR)/$(lang)/man1/$(man)))
+	$(RM) $(foreach lang,$(MSG_LANGS),$(LOCALEDIR)/$(lang)/LC_MESSAGES/mpv.1)
 
 clean:
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.d /*.a /*.ho /*~)
-	-$(RM) $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1,DOCS/man/$(lang)/$(man)))
+	-$(RM) $(foreach lang,$(MAN_LANGS),$(foreach man,mpv.1,DOCS/man/$(lang)/$(man)))
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
-	-$(RM) $(call ADD_ALL_EXESUFS,mplayer)
+	-$(RM) $(call ADD_ALL_EXESUFS,mpv)
 	-$(RM) $(MOFILES)
 	-$(RM) version.h
 	-$(RM) codecs.conf.h
 	-$(RM) input/input_conf.h
 	-$(RM) libvo/vdpau_template.c
 	-$(RM) libmpdemux/ebml_types.h libmpdemux/ebml_defs.c
-	-$(RM) libvo/vo_gl3_shaders.h
+	-$(RM) libvo/vo_opengl_shaders.h
 	-$(RM) sub/osd_font.h
 
 distclean: clean

@@ -57,7 +57,7 @@ resample[=srate[:sloppy[:type]]]
 
     *EXAMPLE*:
 
-    ``mplayer --af=resample=44100:0:0``
+    ``mpv --af=resample=44100:0:0``
         would set the output frequency of the resample filter to 44100Hz using
         exact output frequency scaling and linear interpolation.
 
@@ -200,7 +200,7 @@ equalizer=[g1:g2:g3:...:g10]
 
     *EXAMPLE*:
 
-    ``mplayer --af=equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi``
+    ``mpv --af=equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi``
         Would amplify the sound in the upper and lower frequency region while
         canceling it almost completely around 1kHz.
 
@@ -223,13 +223,13 @@ channels=nch[:nr:from1:to1:from2:to2:from3:to3:...]
 
     *EXAMPLE*:
 
-    ``mplayer --af=channels=4:4:0:1:1:0:2:2:3:3 media.avi``
+    ``mpv --af=channels=4:4:0:1:1:0:2:2:3:3 media.avi``
         Would change the number of channels to 4 and set up 4 routes that swap
         channel 0 and channel 1 and leave channel 2 and 3 intact. Observe that
         if media containing two channels was played back, channels 2 and 3
         would contain silence but 0 and 1 would still be swapped.
 
-    ``mplayer --af=channels=6:4:0:0:0:1:0:2:0:3 media.avi``
+    ``mpv --af=channels=6:4:0:0:0:1:0:2:0:3 media.avi``
         Would change the number of channels to 6 and set up 4 routes that copy
         channel 0 to channels 0 to 3. Channel 4 and 5 will contain silence.
 
@@ -242,7 +242,7 @@ format[=format]
         the sign (either 's' for signed or 'u' for unsigned), 'b' denotes the
         number of bits per sample (16, 24 or 32) and 'e' denotes the
         endianness ('le' means little-endian, 'be' big-endian and 'ne' the
-        endianness of the computer MPlayer is running on). Valid values
+        endianness of the computer mpv is running on). Valid values
         (amongst others) are: 's16le', 'u32be' and 'u24ne'. Exceptions to this
         rule that are also valid format specifiers: u8, s8, floatle, floatbe,
         floatne, mulaw, alaw, mpeg2, ac3 and imaadpcm.
@@ -260,7 +260,7 @@ volume[=v[:sc]]
     background is gone.
 
     This filter has a second feature: It measures the overall maximum sound
-    level and prints out that level when MPlayer exits. This feature currently
+    level and prints out that level when mpv exits. This feature currently
     only works with floating-point data, use e.g. ``--af-adv=force=5``, or use
     ``--af=stats``.
 
@@ -281,7 +281,7 @@ volume[=v[:sc]]
 
     *EXAMPLE*:
 
-    ``mplayer --af=volume=10.1:0 media.avi``
+    ``mpv --af=volume=10.1:0 media.avi``
         Would amplify the sound by 10.1dB and hard-clip if the sound level is
         too high.
 
@@ -306,10 +306,10 @@ pan=n[:L00:L01:L02:...L10:L11:L12:...Ln0:Ln1:Ln2:...]
 
     *EXAMPLE*:
 
-    ``mplayer --af=pan=1:0.5:0.5 media.avi``
+    ``mpv --af=pan=1:0.5:0.5 media.avi``
         Would down-mix from stereo to mono.
 
-    ``mplayer --af=pan=3:1:0:0.5:0:1:0.5 media.avi``
+    ``mpv --af=pan=3:1:0:0.5:0:1:0.5 media.avi``
         Would give 3 channel output leaving channels 0 and 1 intact, and mix
         channels 0 and 1 into output channel 2 (which could be sent to a
         subwoofer for example).
@@ -338,7 +338,7 @@ sub[=fc:ch]
 
     *EXAMPLE*:
 
-    ``mplayer --af=sub=100:4 --channels=5 media.avi``
+    ``mpv --af=sub=100:4 --channels=5 media.avi``
         Would add a sub-woofer channel with a cutoff frequency of 100Hz to
         output channel 4.
 
@@ -367,7 +367,7 @@ surround[=delay]
 
     *EXAMPLE*:
 
-    ``mplayer --af=surround=15 --channels=4 media.avi``
+    ``mpv --af=surround=15 --channels=4 media.avi``
         Would add surround sound decoding with 15ms delay for the sound to the
         rear speakers.
 
@@ -395,7 +395,7 @@ delay[=ch1:ch2:...]
 
     *EXAMPLE*:
 
-    ``mplayer --af=delay=10.5:10.5:0:0:7:0 media.avi``
+    ``mpv --af=delay=10.5:10.5:0:0:7:0 media.avi``
         Would delay front left and right by 10.5ms, the two rear channels and
         the sub by 0ms and the center channel by 7ms.
 
@@ -410,14 +410,14 @@ export[=mmapped_file[:nsamples]]
     The rest is payload (non-interleaved) 16 bit data.
 
     <mmapped_file>
-        file to map data to (default: ``~/.mplayer/mplayer-af_export``)
+        file to map data to (default: ``~/.mpv/mpv-af_export``)
     <nsamples>
         number of samples per channel (default: 512)
 
     *EXAMPLE*:
 
-    ``mplayer --af=export=/tmp/mplayer-af_export:1024 media.avi``
-        Would export 1024 samples per channel to ``/tmp/mplayer-af_export``.
+    ``mpv --af=export=/tmp/mpv-af_export:1024 media.avi``
+        Would export 1024 samples per channel to ``/tmp/mpv-af_export``.
 
 extrastereo[=mul]
     (Linearly) increases the difference between left and right channels which
@@ -461,7 +461,7 @@ ladspa=file:label[:controls...]
     <controls>
         Controls are zero or more floating point values that determine the
         behavior of the loaded plugin (for example delay, threshold or gain).
-        In verbose mode (add ``-v`` to the MPlayer command line), all
+        In verbose mode (add ``-v`` to the mpv command line), all
         available controls and their valid ranges are printed. This eliminates
         the use of 'analyseplugin' from the LADSPA SDK.
 
@@ -516,21 +516,21 @@ scaletempo[=option1:option2:...]
 
     *EXAMPLE*:
 
-    ``mplayer --af=scaletempo --speed=1.2 media.ogg``
+    ``mpv --af=scaletempo --speed=1.2 media.ogg``
         Would playback media at 1.2x normal speed, with audio at normal pitch.
         Changing playback speed, would change audio tempo to match.
 
-    ``mplayer --af=scaletempo=scale=1.2:speed=none --speed=1.2 media.ogg``
+    ``mpv --af=scaletempo=scale=1.2:speed=none --speed=1.2 media.ogg``
         Would playback media at 1.2x normal speed, with audio at normal pitch,
         but changing playback speed has no effect on audio tempo.
 
-    ``mplayer --af=scaletempo=stride=30:overlap=.50:search=10 media.ogg``
+    ``mpv --af=scaletempo=stride=30:overlap=.50:search=10 media.ogg``
         Would tweak the quality and performace parameters.
 
-    ``mplayer --af=format=floatne,scaletempo media.ogg``
+    ``mpv --af=format=floatne,scaletempo media.ogg``
         Would make scaletempo use float code. Maybe faster on some platforms.
 
-    ``mplayer --af=scaletempo=scale=1.2:speed=pitch audio.ogg``
+    ``mpv --af=scaletempo=scale=1.2:speed=pitch audio.ogg``
         Would playback audio file at 1.2x normal speed, with audio at normal
         pitch. Changing playback speed, would change pitch, leaving audio
         tempo at 1.2x.

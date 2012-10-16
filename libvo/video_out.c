@@ -30,6 +30,7 @@
 #include "config.h"
 #include "options.h"
 #include "talloc.h"
+#include "bstr.h"
 #include "video_out.h"
 #include "aspect.h"
 #include "geometry.h"
@@ -72,9 +73,9 @@ int vo_colorkey = 0x0000ff00; // default colorkey is green
 extern struct vo_driver video_out_x11;
 extern struct vo_driver video_out_vdpau;
 extern struct vo_driver video_out_xv;
-extern struct vo_driver video_out_gl_nosw;
-extern struct vo_driver video_out_gl;
-extern struct vo_driver video_out_gl3;
+extern struct vo_driver video_out_opengl;
+extern struct vo_driver video_out_opengl_hq;
+extern struct vo_driver video_out_opengl_old;
 extern struct vo_driver video_out_null;
 extern struct vo_driver video_out_image;
 extern struct vo_driver video_out_lavc;
@@ -90,7 +91,8 @@ const struct vo_driver *video_out_drivers[] =
         &video_out_direct3d,
 #endif
 #ifdef CONFIG_GL_COCOA
-        &video_out_gl,
+        &video_out_opengl,
+        &video_out_opengl_old,
 #endif
 #ifdef CONFIG_COREVIDEO
         &video_out_corevideo,
@@ -102,9 +104,9 @@ const struct vo_driver *video_out_drivers[] =
         &video_out_xv,
 #endif
 #ifdef CONFIG_GL
-        &video_out_gl3,
 #if !defined CONFIG_GL_COCOA
-        &video_out_gl,
+        &video_out_opengl,
+        &video_out_opengl_old,
 #endif
 #endif
 #ifdef CONFIG_X11
@@ -119,10 +121,8 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_ENCODING
         &video_out_lavc,
 #endif
-#ifdef CONFIG_X11
 #ifdef CONFIG_GL
-        &video_out_gl_nosw,
-#endif
+        &video_out_opengl_hq,
 #endif
         NULL
 };
@@ -284,6 +284,20 @@ void list_video_out(void)
     mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
 
+static void replace_legacy_vo_name(bstr *name)
+{
+    bstr new = *name;
+    if (bstr_equals0(*name, "gl"))
+        new = bstr0("opengl");
+    if (bstr_equals0(*name, "gl3"))
+        new = bstr0("opengl-hq");
+    if (!bstr_equals(*name, new)) {
+        mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "VO driver '%.*s' has been replaced "
+                "with '%.*s'!\n", BSTR_P(*name), BSTR_P(new));
+    }
+    *name = new;
+}
+
 struct vo *init_best_video_out(struct MPOpts *opts,
                                struct mp_fifo *key_fifo,
                                struct input_ctx *input_ctx,
@@ -303,32 +317,27 @@ struct vo *init_best_video_out(struct MPOpts *opts,
     // first try the preferred drivers, with their optional subdevice param:
     if (vo_list && vo_list[0])
         while (vo_list[0][0]) {
-            char *name = strdup(vo_list[0]);
-            char *vo_subdevice = strchr(name,':');
-            if (!strcmp(name, "pgm"))
-                mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "The pgm video output driver has been replaced by -vo pnm:pgmyuv.\n");
-            if (!strcmp(name, "md5"))
-                mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "The md5 video output driver has been replaced by -vo md5sum.\n");
-            if (vo_subdevice) {
-                vo_subdevice[0] = 0;
-                ++vo_subdevice;
+            char *arg = vo_list[0];
+            bstr name = bstr0(arg);
+            char *params = strchr(arg, ':');
+            if (params) {
+                name = bstr_splice(name, 0, params - arg);
+                params++;
             }
+            replace_legacy_vo_name(&name);
             for (i = 0; video_out_drivers[i]; i++) {
                 const struct vo_driver *video_driver = video_out_drivers[i];
                 const vo_info_t *info = video_driver->info;
-                if (!strcmp(info->short_name, name)) {
+                if (bstr_equals0(name, info->short_name)) {
                     // name matches, try it
                     *vo = initial_values;
                     vo->driver = video_driver;
-                    if (!vo_preinit(vo, vo_subdevice)) {
-                        free(name);
+                    if (!vo_preinit(vo, params))
                         return vo; // success!
-                    }
                     talloc_free_children(vo);
 		}
 	    }
             // continue...
-            free(name);
             ++vo_list;
             if (!(vo_list[0])) {
                 talloc_free(vo);
@@ -499,5 +508,5 @@ void vo_mouse_movement(struct vo *vo, int posx, int posy)
   if (!enable_mouse_movements)
     return;
   snprintf(cmd_str, sizeof(cmd_str), "set_mouse_pos %i %i", posx, posy);
-  mp_input_queue_cmd(vo->input_ctx, mp_input_parse_cmd(cmd_str));
+  mp_input_queue_cmd(vo->input_ctx, mp_input_parse_cmd(bstr0(cmd_str), ""));
 }

@@ -32,7 +32,7 @@
 #include "audio_out.h"
 #include "input/input.h"
 
-#define PULSE_CLIENT_NAME "mplayer2"
+#define PULSE_CLIENT_NAME "mpv"
 
 #define VOL_PA2MP(v) ((v) * 100 / PA_VOLUME_UI_MAX)
 #define VOL_MP2PA(v) ((v) * PA_VOLUME_UI_MAX / 100)

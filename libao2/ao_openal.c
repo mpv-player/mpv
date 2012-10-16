@@ -88,7 +88,7 @@ static int control(int cmd, void *arg) {
 static void print_help(void) {
   mp_msg(MSGT_AO, MSGL_FATAL,
           "\n-ao openal commandline help:\n"
-          "Example: mplayer -ao openal:device=subdevice\n"
+          "Example: mpv -ao openal:device=subdevice\n"
           "\nOptions:\n"
 	  "   device=subdevice\n"
 	  "      Audio device OpenAL should use. Devices can be listed\n"

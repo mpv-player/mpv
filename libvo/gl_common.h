@@ -34,8 +34,11 @@
 #include "csputils.h"
 
 #if defined(CONFIG_GL_COCOA) && !defined(CONFIG_GL_X11)
-#include <OpenGL/gl.h>
+#ifdef GL_VERSION_3_0
 #include <OpenGL/gl3.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include <OpenGL/glext.h>
 #else
 #include <GL/gl.h>
@@ -155,16 +158,6 @@ void glEnable3DLeft(GL *gl, int type);
 void glEnable3DRight(GL *gl, int type);
 void glDisable3D(GL *gl, int type);
 
-/** \addtogroup glcontext
- * \{ */
-//! could not set new window, will continue drawing into the old one.
-#define SET_WINDOW_FAILED -1
-//! new window is set, could even transfer the OpenGL context.
-#define SET_WINDOW_OK 0
-//! new window is set, but the OpenGL context needs to be reinitialized.
-#define SET_WINDOW_REINIT 1
-/** \} */
-
 enum MPGLType {
     GLTYPE_AUTO,
     GLTYPE_COCOA,
@@ -173,49 +166,82 @@ enum MPGLType {
 };
 
 enum {
-    MPGLFLAG_DEBUG = 1,
+    MPGL_CAP_GL                 = (1 << 0),     // GL was successfully loaded
+    MPGL_CAP_GL_LEGACY          = (1 << 1),     // GL 1.1 (but not 3.x)
+    MPGL_CAP_GL2                = (1 << 2),     // GL 2.0 (3.x core subset)
+    MPGL_CAP_GL21               = (1 << 3),     // GL 2.1 (3.x core subset)
+    MPGL_CAP_GL3                = (1 << 4),     // GL 3.x core
+    MPGL_CAP_FB                 = (1 << 5),
+    MPGL_CAP_VAO                = (1 << 6),
+    MPGL_CAP_SRGB_TEX           = (1 << 7),
+    MPGL_CAP_SRGB_FB            = (1 << 8),
+    MPGL_CAP_FLOAT_TEX          = (1 << 9),
+    MPGL_CAP_TEX_RG             = (1 << 10),    // GL_ARB_texture_rg / GL 3.x
+    MPGL_CAP_NO_SW              = (1 << 30),    // used to block sw. renderers
 };
 
 #define MPGL_VER(major, minor) (((major) << 16) | (minor))
 #define MPGL_VER_GET_MAJOR(ver) ((ver) >> 16)
 #define MPGL_VER_GET_MINOR(ver) ((ver) & ((1 << 16) - 1))
 
+#define MPGL_VER_P(ver) MPGL_VER_GET_MAJOR(ver), MPGL_VER_GET_MINOR(ver)
+
 typedef struct MPGLContext {
     GL *gl;
     enum MPGLType type;
     struct vo *vo;
-    void *priv;
+
     // Bit size of each component in the created framebuffer. 0 if unknown.
     int depth_r, depth_g, depth_b;
-    int (*create_window)(struct MPGLContext *ctx, uint32_t d_width,
-                         uint32_t d_height, uint32_t flags);
-    int (*setGlWindow)(struct MPGLContext *);
-    void (*releaseGlContext)(struct MPGLContext *);
+
+    // GL version requested from create_window_gl3 backend.
+    // (Might be different from the actual version in gl->version.)
+    int requested_gl_version;
+
     void (*swapGlBuffers)(struct MPGLContext *);
     int (*check_events)(struct vo *vo);
     void (*fullscreen)(struct vo *vo);
+    int (*vo_init)(struct vo *vo);
     void (*vo_uninit)(struct vo *vo);
-    // only available if GL3 context creation is supported
-    // gl_flags: bitfield of MPGLFLAG_* constants
-    // gl_version: requested OpenGL version number (use MPGL_VER())
-    // return value is one of the SET_WINDOW_* constants
-    int (*create_window_gl3)(struct MPGLContext *ctx, int gl_flags,
-                             int gl_version, uint32_t d_width,
-                             uint32_t d_height, uint32_t flags);
+    void (*releaseGlContext)(struct MPGLContext *);
+
+    // Creates GL 1.x/2.x legacy context.
+    bool (*create_window_old)(struct MPGLContext *ctx, uint32_t d_width,
+                              uint32_t d_height, uint32_t flags);
+
+    // Creates GL 3.x core context.
+    bool (*create_window_gl3)(struct MPGLContext *ctx, uint32_t d_width,
+                              uint32_t d_height, uint32_t flags);
+
     // optional
     void (*ontop)(struct vo *vo);
     void (*border)(struct vo *vo);
     void (*update_xinerama_info)(struct vo *vo);
+
+    // For free use by the backend.
+    void *priv;
+    // Internal to gl_common.c.
+    bool (*selected_create_window)(struct MPGLContext *ctx, uint32_t d_width,
+                                   uint32_t d_height, uint32_t flags);
+    bool vo_init_ok;
 } MPGLContext;
 
 int mpgl_find_backend(const char *name);
 
-MPGLContext *init_mpglcontext(enum MPGLType type, struct vo *vo);
-void uninit_mpglcontext(MPGLContext *ctx);
+MPGLContext *mpgl_init(enum MPGLType type, struct vo *vo);
+void mpgl_uninit(MPGLContext *ctx);
 
-// calls create_window_gl3 or create_window+setGlWindow
-int create_mpglcontext(struct MPGLContext *ctx, int gl_flags, int gl_version,
-                       uint32_t d_width, uint32_t d_height, uint32_t flags);
+// Create a VO window and create a GL context on it.
+// (Calls create_window_gl3 or create_window+setGlWindow.)
+// gl_caps: bitfield of MPGL_CAP_* (required GL version and feature set)
+// flags: passed to the backend's create window function
+// Returns success.
+bool mpgl_create_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
+                        uint32_t d_height, uint32_t flags);
+
+// Destroy the window, without resetting GL3 vs. GL2 context choice.
+// If this fails (false), mpgl_uninit(ctx) must be called.
+bool mpgl_destroy_window(struct MPGLContext *ctx);
 
 // print a multi line string with line numbers (e.g. for shader sources)
 // mod, lev: module and log level, as in mp_msg()
@@ -223,6 +249,11 @@ void mp_log_source(int mod, int lev, const char *src);
 
 //function pointers loaded from the OpenGL library
 struct GL {
+    int version;                // MPGL_VER() mangled
+    int glsl_version;           // e.g. 130 for GLSL 1.30
+    char *extensions;           // Equivalent to GL_EXTENSIONS
+    int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
+
     void (GLAPIENTRY *Begin)(GLenum);
     void (GLAPIENTRY *End)(void);
     void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei);
@@ -283,8 +314,6 @@ struct GL {
     void (GLAPIENTRY *DisableClientState)(GLenum);
     GLenum (GLAPIENTRY *GetError)(void);
 
-
-    // OpenGL extension functions
     void (GLAPIENTRY *GenBuffers)(GLsizei, GLuint *);
     void (GLAPIENTRY *DeleteBuffers)(GLsizei, const GLuint *);
     void (GLAPIENTRY *BindBuffer)(GLenum, GLuint);
@@ -306,7 +335,6 @@ struct GL {
                                   GLsizei, GLint, GLenum, GLenum,
                                   const GLvoid *);
 
-    // ancient ATI extensions
     void (GLAPIENTRY *BeginFragmentShader)(void);
     void (GLAPIENTRY *EndFragmentShader)(void);
     void (GLAPIENTRY *SampleMap)(GLuint, GLuint, GLenum);
@@ -317,8 +345,6 @@ struct GL {
                                         GLuint, GLuint, GLuint);
     void (GLAPIENTRY *SetFragmentShaderConstant)(GLuint, const GLfloat *);
 
-
-    // GL 3, possibly in GL 2.x as well in form of extensions
     void (GLAPIENTRY *GenVertexArrays)(GLsizei, GLuint *);
     void (GLAPIENTRY *BindVertexArray)(GLuint);
     GLint (GLAPIENTRY *GetAttribLocation)(GLuint, const GLchar *);
@@ -352,6 +378,7 @@ struct GL {
                                             GLint);
 
     void (GLAPIENTRY *Uniform1f)(GLint, GLfloat);
+    void (GLAPIENTRY *Uniform2f)(GLint, GLfloat, GLfloat);
     void (GLAPIENTRY *Uniform3f)(GLint, GLfloat, GLfloat, GLfloat);
     void (GLAPIENTRY *Uniform4f)(GLint, GLfloat, GLfloat, GLfloat, GLfloat);
     void (GLAPIENTRY *Uniform1i)(GLint, GLint);

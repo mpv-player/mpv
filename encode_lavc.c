@@ -30,83 +30,62 @@
 #include "talloc.h"
 #include "stream/stream.h"
 
-static int set_to_avdictionary(void *ctx, AVDictionary **dictp, void *octx,
-                               const char *str, const char *key_val_sep,
-                               const char *pairs_sep)
+static int set_to_avdictionary(AVDictionary **dictp, const char *key,
+                               const char *val)
 {
-    int good = 0;
-    int errorcode = 0;
-    const AVOption *o;
+    char keybuf[1024];
+    char valuebuf[1024];
 
-    while (*str) {
-        char *key_ = av_get_token(&str, key_val_sep);
-        char *val_;
-        char *key, *val;
-        char valuebuf[1024];
-
-        if (*key_ && strspn(str, key_val_sep)) {
-            str++;
-            val_ = av_get_token(&str, pairs_sep);
-        } else {
-            av_log(ctx, AV_LOG_ERROR, "Missing key or no key/value "
-                   "separator found after key '%s'\n", key_);
-            av_free(key_);
-            if (!errorcode)
-                errorcode = AVERROR(EINVAL);
-            if (*str)
-                ++str;
-            continue;
+    if (key == NULL) {
+        // we need to split at equals sign
+        const char *equals = strchr(val, '=');
+        if (!equals || equals - val >= sizeof(keybuf)) {
+            mp_msg(MSGT_ENCODE, MSGL_WARN,
+                   "encode-lavc: option '%s' does not contain an equals sign\n",
+                   val);
+            return 0;
         }
-
-        key = key_;
-        val = val_;
-
-        if(!strcmp(key, "qscale") && val[0] != '+' && val[0] != '-' && !av_opt_find(octx, key, NULL, 0, AV_OPT_SEARCH_CHILDREN))
-        {
-            // hack: support "qscale" key as virtual "global_quality" key that multiplies by QP2LAMBDA
-            key = "global_quality";
-            snprintf(valuebuf, sizeof(valuebuf), "(%s)*QP2LAMBDA", val);
-            valuebuf[sizeof(valuebuf)-1] = 0;
-            val = valuebuf;
-        }
-
-        av_log(ctx, AV_LOG_DEBUG, "Setting value '%s' for key '%s'\n",
-               val, key);
-
-        if((o = av_opt_find(octx, key, NULL, 0, AV_OPT_SEARCH_CHILDREN))) {
-            if (av_dict_set(dictp, key, *val ? val : NULL, (o->type == FF_OPT_TYPE_FLAGS && (val[0] == '+' || val[0] == '-')) ? AV_DICT_APPEND : 0) >= 0)
-                ++good;
-            else
-                errorcode = AVERROR(EINVAL);
-        } else {
-            errorcode = AVERROR(ENOENT);
-        }
-
-        av_free(key_);
-        av_free(val_);
-
-        if (*str)
-            ++str;
+        memcpy(keybuf, val, equals - val);
+        keybuf[equals - val] = 0;
+        key = keybuf;
+        val = equals + 1;
     }
-    return errorcode ? errorcode : good;
+
+    // hack: support "qscale" key as virtual "global_quality" key that multiplies by QP2LAMBDA
+    if (!strcmp(key, "qscale")) {
+        key = "global_quality";
+        snprintf(valuebuf, sizeof(valuebuf),
+                 "%.1s(%s)*QP2LAMBDA",
+                 (val[0] == '+' || val[0] == '-') ? val : "",
+                 (val[0] == '+' || val[0] == '-') ? val + 1 : val);
+        valuebuf[sizeof(valuebuf) - 1] = 0;
+        val = valuebuf;
+    }
+
+    mp_msg(MSGT_ENCODE, MSGL_V,
+           "encode-lavc: setting value '%s' for key '%s'\n",
+           val,
+           key);
+
+    if (av_dict_set(dictp, key, *val ? val : NULL,
+                    (val[0] == '+' || val[0] == '-') ? AV_DICT_APPEND : 0) >= 0)
+        return 1;
+
+    return 0;
 }
 
 static bool value_has_flag(const char *value, const char *flag)
 {
     bool state = true;
     bool ret = false;
-    while(*value)
-    {
+    while (*value) {
         size_t l = strcspn(value, "+-");
-        if(l == 0)
-        {
+        if (l == 0) {
             state = (*value == '+');
             ++value;
-        }
-        else
-        {
-            if(l == strlen(flag))
-                if(!memcmp(value, flag, l))
+        } else {
+            if (l == strlen(flag))
+                if (!memcmp(value, flag, l))
                     ret = state;
             value += l;
         }
@@ -115,8 +94,10 @@ static bool value_has_flag(const char *value, const char *flag)
 }
 
 #define CHECK_FAIL(ctx, val) \
-    if(ctx && (ctx->failed || ctx->finished)) { \
-        mp_msg(MSGT_ENCODE, MSGL_ERR, "Called a function on a %s encoding context. Bailing out.\n", ctx->failed ? "failed" : "finished"); \
+    if (ctx && (ctx->failed || ctx->finished)) { \
+        mp_msg(MSGT_ENCODE, MSGL_ERR, \
+               "Called a function on a %s encoding context. Bailing out.\n", \
+               ctx->failed ? "failed" : "finished"); \
         return val; \
     }
 
@@ -147,19 +128,15 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
         const char *in = ctx->options->format;
         while (*in) {
             tok = av_get_token(&in, ",");
-            ctx->vc = avcodec_find_encoder_by_name(tok);
             ctx->avc->oformat = av_guess_format(tok, ctx->options->file, NULL);
             av_free(tok);
             if (ctx->avc->oformat)
-                ctx->vc = NULL;
-            if (ctx->vc)
                 break;
             if (*in)
                 ++in;
         }
-    } else {
+    } else
         ctx->avc->oformat = av_guess_format(NULL, ctx->options->file, NULL);
-    }
 
     if (!ctx->avc->oformat) {
         encode_lavc_fail(ctx, "encode-lavc: format not found\n");
@@ -173,8 +150,7 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
     if (ctx->options->fopts) {
         char **p;
         for (p = ctx->options->fopts; *p; ++p) {
-            if (set_to_avdictionary(ctx->avc, &ctx->foptions, ctx->avc, *p, "=", "")
-                    <= 0)
+            if (!set_to_avdictionary(&ctx->foptions, NULL, *p))
                 mp_msg(MSGT_ENCODE, MSGL_WARN,
                        "encode-lavc: could not set option %s\n", *p);
         }
@@ -196,7 +172,8 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
         }
     } else
         ctx->vc = avcodec_find_encoder(av_guess_codec(ctx->avc->oformat, NULL,
-                               ctx->avc->filename, NULL, AVMEDIA_TYPE_VIDEO));
+                                                      ctx->avc->filename, NULL,
+                                                      AVMEDIA_TYPE_VIDEO));
 
     if (ctx->options->acodec) {
         char *tok;
@@ -214,10 +191,12 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
         }
     } else
         ctx->ac = avcodec_find_encoder(av_guess_codec(ctx->avc->oformat, NULL,
-                               ctx->avc->filename, NULL, AVMEDIA_TYPE_AUDIO));
+                                                      ctx->avc->filename, NULL,
+                                                      AVMEDIA_TYPE_AUDIO));
 
     if (!ctx->vc && !ctx->ac) {
-        encode_lavc_fail(ctx, "encode-lavc: neither audio nor video codec was found\n");
+        encode_lavc_fail(
+            ctx, "encode-lavc: neither audio nor video codec was found\n");
         return NULL;
     }
 
@@ -229,6 +208,11 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
     ctx->abytes = 0;
     ctx->vbytes = 0;
     ctx->frames = 0;
+
+    if (options->video_first)
+        ctx->video_first = true;
+    if (options->audio_first)
+        ctx->audio_first = true;
 
     return ctx;
 }
@@ -263,8 +247,10 @@ int encode_lavc_start(struct encode_lavc_context *ctx)
     ctx->header_written = -1;
 
     if (!(ctx->avc->oformat->flags & AVFMT_NOFILE)) {
-        if (avio_open(&ctx->avc->pb, ctx->avc->filename, AVIO_FLAG_WRITE) < 0) {
-            encode_lavc_fail(ctx, "encode-lavc: could not open '%s'\n", ctx->avc->filename);
+        if (avio_open(&ctx->avc->pb, ctx->avc->filename,
+                      AVIO_FLAG_WRITE) < 0) {
+            encode_lavc_fail(ctx, "encode-lavc: could not open '%s'\n",
+                             ctx->avc->filename);
             return 0;
         }
     }
@@ -278,7 +264,7 @@ int encode_lavc_start(struct encode_lavc_context *ctx)
 
     for (de = NULL; (de = av_dict_get(ctx->foptions, "", de,
                                       AV_DICT_IGNORE_SUFFIX));)
-        av_log(ctx->avc, AV_LOG_ERROR, "Key '%s' not found.\n", de->key);
+        mp_msg(MSGT_ENCODE, MSGL_WARN, "ofopts: key '%s' not found.\n", de->key);
     av_dict_free(&ctx->foptions);
 
     ctx->header_written = 1;
@@ -291,7 +277,8 @@ void encode_lavc_free(struct encode_lavc_context *ctx)
         return;
 
     if (!ctx->finished)
-        encode_lavc_fail(ctx, "called encode_lavc_free without encode_lavc_finish\n");
+        encode_lavc_fail(ctx,
+                         "called encode_lavc_free without encode_lavc_finish\n");
 
     talloc_free(ctx);
 }
@@ -366,7 +353,8 @@ void encode_lavc_finish(struct encode_lavc_context *ctx)
     ctx->finished = true;
 }
 
-static void encode_2pass_prepare(struct encode_lavc_context *ctx, AVDictionary **dictp, void *octx,
+static void encode_2pass_prepare(struct encode_lavc_context *ctx,
+                                 AVDictionary **dictp,
                                  AVStream *stream, struct stream **bytebuf,
                                  const char *prefix)
 {
@@ -383,7 +371,7 @@ static void encode_2pass_prepare(struct encode_lavc_context *ctx, AVDictionary *
                 mp_msg(MSGT_ENCODE, MSGL_WARN, "%s: could not open '%s', "
                        "disabling 2-pass encoding at pass 2\n", prefix, buf);
                 stream->codec->flags &= ~CODEC_FLAG_PASS2;
-                set_to_avdictionary(stream->codec, dictp, octx, "flags=-pass2", "=", "");
+                set_to_avdictionary(dictp, "flags", "-pass2");
             } else {
                 struct bstr content = stream_read_complete(*bytebuf, NULL,
                                                            1000000000, 1);
@@ -402,10 +390,12 @@ static void encode_2pass_prepare(struct encode_lavc_context *ctx, AVDictionary *
 
         if (value_has_flag(de ? de->value : "", "pass1")) {
             if (!(*bytebuf = open_output_stream(buf, NULL))) {
-                mp_msg(MSGT_ENCODE, MSGL_WARN, "%s: could not open '%s', disabling "
-                       "2-pass encoding at pass 1\n",
-                       prefix, ctx->avc->filename);
-                set_to_avdictionary(stream->codec, dictp, octx, "flags=-pass1", "=", "");
+                mp_msg(
+                    MSGT_ENCODE, MSGL_WARN,
+                    "%s: could not open '%s', disabling "
+                    "2-pass encoding at pass 1\n",
+                    prefix, ctx->avc->filename);
+                set_to_avdictionary(dictp, "flags", "-pass1");
             }
         }
     }
@@ -418,7 +408,6 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
     AVStream *stream = NULL;
     char **p;
     int i;
-    AVCodecContext *dummy;
 
     CHECK_FAIL(ctx, NULL);
 
@@ -430,6 +419,28 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
             // already have a stream of that type, this cannot really happen
             return NULL;
 
+    if (ctx->avc->nb_streams == 0) {
+        // if this stream isn't stream #0, allocate a dummy stream first for
+        // the next loop to use
+        if (mt == AVMEDIA_TYPE_VIDEO && ctx->audio_first) {
+            mp_msg(MSGT_ENCODE, MSGL_INFO,
+                   "vo-lavc: preallocated audio stream for later use\n");
+            avformat_new_stream(ctx->avc, NULL); // this one is AVMEDIA_TYPE_UNKNOWN for now
+        }
+        if (mt == AVMEDIA_TYPE_AUDIO && ctx->video_first) {
+            mp_msg(MSGT_ENCODE, MSGL_INFO,
+                   "ao-lavc: preallocated video stream for later use\n");
+            avformat_new_stream(ctx->avc, NULL); // this one is AVMEDIA_TYPE_UNKNOWN for now
+        }
+    } else {
+        // find possibly preallocated stream
+        for (i = 0; i < ctx->avc->nb_streams; ++i)
+            if (ctx->avc->streams[i]->codec->codec_type == AVMEDIA_TYPE_UNKNOWN) // preallocated stream
+                stream = ctx->avc->streams[i];
+    }
+    if (!stream)
+        stream = avformat_new_stream(ctx->avc, NULL);
+
     if (ctx->timebase.den == 0) {
         AVRational r;
 
@@ -437,9 +448,10 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
             r = av_d2q(ctx->options->fps, ctx->options->fps * 1001 + 2);
         else if (ctx->options->autofps && vo_fps > 0) {
             r = av_d2q(vo_fps, vo_fps * 1001 + 2);
-            mp_msg(MSGT_ENCODE, MSGL_INFO, "vo-lavc: option -ofps not specified "
-                   "but -oautofps is active, using guess of %u/%u\n",
-                   (unsigned)r.num, (unsigned)r.den);
+            mp_msg(
+                MSGT_ENCODE, MSGL_INFO, "vo-lavc: option -ofps not specified "
+                "but -oautofps is active, using guess of %u/%u\n",
+                (unsigned)r.num, (unsigned)r.den);
         } else {
             // we want to handle:
             //      1/25
@@ -450,9 +462,10 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
             // so let's take 1001/30000 out
             r.num = 24000;
             r.den = 1;
-            mp_msg(MSGT_ENCODE, MSGL_INFO, "vo-lavc: option -ofps not specified "
-                   "and fps could not be inferred, using guess of %u/%u\n",
-                   (unsigned)r.num, (unsigned)r.den);
+            mp_msg(
+                MSGT_ENCODE, MSGL_INFO, "vo-lavc: option -ofps not specified "
+                "and fps could not be inferred, using guess of %u/%u\n",
+                (unsigned)r.num, (unsigned)r.den);
         }
 
         if (ctx->vc && ctx->vc->supported_framerates)
@@ -469,49 +482,33 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
             encode_lavc_fail(ctx, "vo-lavc: encoder not found\n");
             return NULL;
         }
-        stream = avformat_new_stream(ctx->avc, ctx->vc);
+        avcodec_get_context_defaults3(stream->codec, ctx->vc);
 
         // stream->time_base = ctx->timebase;
         // doing this breaks mpeg2ts in ffmpeg
         // which doesn't properly force the time base to be 90000
         // furthermore, ffmpeg.c doesn't do this either and works
 
-        stream->codec->codec_id = ctx->vc->id;
         stream->codec->time_base = ctx->timebase;
-        stream->codec->codec_type = AVMEDIA_TYPE_VIDEO;
-
-        dummy = avcodec_alloc_context3(ctx->vc);
-        dummy->codec = ctx->vc; // FIXME remove this once we can, caused by a bug in libav, elenril is aware of this
-        // FIXME:
-        // currently, to eradicate this dummy:
-        // add here: stream->codec->codec = ctx->vc; // SAME PROBLEM AS ABOVE
-        // replace dummy by stream->codec
-        // at the end of this block: stream->codec->codec = NULL; // OR SEGV LATER
 
         ctx->voptions = NULL;
 
-        // libx264: default to preset=medium
-        if (!strcmp(ctx->vc->name, "libx264"))
-            set_to_avdictionary(stream->codec, &ctx->voptions, dummy, "preset=medium", "=", "");
-
         if (ctx->options->vopts)
             for (p = ctx->options->vopts; *p; ++p)
-                if (set_to_avdictionary(stream->codec, &ctx->voptions, dummy,
-                        *p, "=", "") <= 0)
+                if (!set_to_avdictionary(&ctx->voptions, NULL, *p))
                     mp_msg(MSGT_ENCODE, MSGL_WARN,
                            "vo-lavc: could not set option %s\n", *p);
 
         de = av_dict_get(ctx->voptions, "global_quality", NULL, 0);
-        if(de)
-            set_to_avdictionary(stream->codec, &ctx->voptions, dummy, "flags=+qscale", "=", "");
+        if (de)
+            set_to_avdictionary(&ctx->voptions, "flags", "+qscale");
 
         if (ctx->avc->oformat->flags & AVFMT_GLOBALHEADER)
-            set_to_avdictionary(stream->codec, &ctx->voptions, dummy, "flags=+global_header", "=", "");
+            set_to_avdictionary(&ctx->voptions, "flags", "+global_header");
 
-        encode_2pass_prepare(ctx, &ctx->voptions, dummy, stream, &ctx->twopass_bytebuffer_v,
+        encode_2pass_prepare(ctx, &ctx->voptions, stream,
+                             &ctx->twopass_bytebuffer_v,
                              "vo-lavc");
-
-        av_free(dummy);
         break;
 
     case AVMEDIA_TYPE_AUDIO:
@@ -519,40 +516,28 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
             encode_lavc_fail(ctx, "ao-lavc: encoder not found\n");
             return NULL;
         }
-        stream = avformat_new_stream(ctx->avc, ctx->ac);
+        avcodec_get_context_defaults3(stream->codec, ctx->ac);
 
-        stream->codec->codec_id = ctx->ac->id;
         stream->codec->time_base = ctx->timebase;
-        stream->codec->codec_type = AVMEDIA_TYPE_AUDIO;
-
-        dummy = avcodec_alloc_context3(ctx->ac);
-        dummy->codec = ctx->ac; // FIXME remove this once we can, caused by a bug in libav, elenril is aware of this
-        // FIXME:
-        // currently, to eradicate this dummy:
-        // add here: stream->codec->codec = ctx->ac; // SAME PROBLEM AS ABOVE
-        // replace dummy by stream->codec
-        // at the end of this block: stream->codec->codec = NULL; // OR SEGV LATER
 
         ctx->aoptions = NULL;
 
         if (ctx->options->aopts)
             for (p = ctx->options->aopts; *p; ++p)
-                if (set_to_avdictionary(stream->codec, &ctx->aoptions, dummy,
-                        *p, "=", "") <= 0)
+                if (!set_to_avdictionary(&ctx->aoptions, NULL, *p))
                     mp_msg(MSGT_ENCODE, MSGL_WARN,
                            "ao-lavc: could not set option %s\n", *p);
 
         de = av_dict_get(ctx->aoptions, "global_quality", NULL, 0);
-        if(de)
-            set_to_avdictionary(stream->codec, &ctx->aoptions, dummy, "flags=+qscale", "=", "");
+        if (de)
+            set_to_avdictionary(&ctx->aoptions, "flags", "+qscale");
 
         if (ctx->avc->oformat->flags & AVFMT_GLOBALHEADER)
-            set_to_avdictionary(stream->codec, &ctx->aoptions, dummy, "flags=+global_header", "=", "");
+            set_to_avdictionary(&ctx->aoptions, "flags", "+global_header");
 
-        encode_2pass_prepare(ctx, &ctx->aoptions, dummy, stream, &ctx->twopass_bytebuffer_a,
+        encode_2pass_prepare(ctx, &ctx->aoptions, stream,
+                             &ctx->twopass_bytebuffer_a,
                              "ao-lavc");
-
-        av_free(dummy);
         break;
 
     default:
@@ -587,77 +572,79 @@ int encode_lavc_open_codec(struct encode_lavc_context *ctx, AVStream *stream)
     CHECK_FAIL(ctx, -1);
 
     switch (stream->codec->codec_type) {
-        case AVMEDIA_TYPE_VIDEO:
-            if (ctx->vc->capabilities & CODEC_CAP_EXPERIMENTAL) {
-                stream->codec->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
-                av_log(ctx->avc, AV_LOG_ERROR, _(
-                        "\n\n"
-                        "           ********************************************\n"
-                        "           **** Experimental VIDEO codec selected! ****\n"
-                        "           ********************************************\n\n"
-                        "This means the output file may be broken or bad.\n"
-                        "Possible reasons, problems, workarounds:\n"
-                        "- Codec implementation in ffmpeg/libav is not finished yet.\n"
-                        "     Try updating ffmpeg or libav.\n"
-                        "- Bad picture quality, blocks, blurriness.\n"
-                        "     Experiment with codec settings (-ovcopts) to maybe still get the\n"
-                        "     desired quality output at the expense of bitrate.\n"
-                        "- Slow compression.\n"
-                        "     Bear with it.\n"
-                        "- Crashes.\n"
-                        "     Happens. Try varying options to work around.\n"
-                        "If none of this helps you, try another codec in place of %s.\n\n"),
-                        ctx->vc->name);
-            }
+    case AVMEDIA_TYPE_VIDEO:
+        if (ctx->vc->capabilities & CODEC_CAP_EXPERIMENTAL) {
+            stream->codec->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
+            mp_msg(MSGT_ENCODE, MSGL_WARN, _(
+                       "\n\n"
+                       "           ********************************************\n"
+                       "           **** Experimental VIDEO codec selected! ****\n"
+                       "           ********************************************\n\n"
+                       "This means the output file may be broken or bad.\n"
+                       "Possible reasons, problems, workarounds:\n"
+                       "- Codec implementation in ffmpeg/libav is not finished yet.\n"
+                       "     Try updating ffmpeg or libav.\n"
+                       "- Bad picture quality, blocks, blurriness.\n"
+                       "     Experiment with codec settings (-ovcopts) to maybe still get the\n"
+                       "     desired quality output at the expense of bitrate.\n"
+                       "- Slow compression.\n"
+                       "     Bear with it.\n"
+                       "- Crashes.\n"
+                       "     Happens. Try varying options to work around.\n"
+                       "If none of this helps you, try another codec in place of %s.\n\n"),
+                   ctx->vc->name);
+        }
 
-            ret = avcodec_open2(stream->codec, ctx->vc, &ctx->voptions);
+        ret = avcodec_open2(stream->codec, ctx->vc, &ctx->voptions);
 
-            // complain about all remaining options, then free the dict
-            for (de = NULL; (de = av_dict_get(ctx->voptions, "", de,
-                                              AV_DICT_IGNORE_SUFFIX));)
-                av_log(ctx->avc, AV_LOG_ERROR, "Key '%s' not found.\n", de->key);
-            av_dict_free(&ctx->voptions);
+        // complain about all remaining options, then free the dict
+        for (de = NULL; (de = av_dict_get(ctx->voptions, "", de,
+                                          AV_DICT_IGNORE_SUFFIX));)
+            mp_msg(MSGT_ENCODE, MSGL_WARN, "ovcopts: key '%s' not found.\n",
+                   de->key);
+        av_dict_free(&ctx->voptions);
 
-            break;
-        case AVMEDIA_TYPE_AUDIO:
-            if (ctx->ac->capabilities & CODEC_CAP_EXPERIMENTAL) {
-                stream->codec->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
-                av_log(ctx->avc, AV_LOG_ERROR, _(
-                        "\n\n"
-                        "           ********************************************\n"
-                        "           **** Experimental AUDIO codec selected! ****\n"
-                        "           ********************************************\n\n"
-                        "This means the output file may be broken or bad.\n"
-                        "Possible reasons, problems, workarounds:\n"
-                        "- Codec implementation in ffmpeg/libav is not finished yet.\n"
-                        "     Try updating ffmpeg or libav.\n"
-                        "- Bad sound quality, noise, clicking, whistles, choppiness.\n"
-                        "     Experiment with codec settings (-oacopts) to maybe still get the\n"
-                        "     desired quality output at the expense of bitrate.\n"
-                        "- Slow compression.\n"
-                        "     Bear with it.\n"
-                        "- Crashes.\n"
-                        "     Happens. Try varying options to work around.\n"
-                        "If none of this helps you, try another codec in place of %s.\n\n"),
-                        ctx->ac->name);
-            }
-            ret = avcodec_open2(stream->codec, ctx->ac, &ctx->aoptions);
+        break;
+    case AVMEDIA_TYPE_AUDIO:
+        if (ctx->ac->capabilities & CODEC_CAP_EXPERIMENTAL) {
+            stream->codec->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
+            mp_msg(MSGT_ENCODE, MSGL_WARN, _(
+                       "\n\n"
+                       "           ********************************************\n"
+                       "           **** Experimental AUDIO codec selected! ****\n"
+                       "           ********************************************\n\n"
+                       "This means the output file may be broken or bad.\n"
+                       "Possible reasons, problems, workarounds:\n"
+                       "- Codec implementation in ffmpeg/libav is not finished yet.\n"
+                       "     Try updating ffmpeg or libav.\n"
+                       "- Bad sound quality, noise, clicking, whistles, choppiness.\n"
+                       "     Experiment with codec settings (-oacopts) to maybe still get the\n"
+                       "     desired quality output at the expense of bitrate.\n"
+                       "- Slow compression.\n"
+                       "     Bear with it.\n"
+                       "- Crashes.\n"
+                       "     Happens. Try varying options to work around.\n"
+                       "If none of this helps you, try another codec in place of %s.\n\n"),
+                   ctx->ac->name);
+        }
+        ret = avcodec_open2(stream->codec, ctx->ac, &ctx->aoptions);
 
-            // complain about all remaining options, then free the dict
-            for (de = NULL; (de = av_dict_get(ctx->aoptions, "", de,
-                                              AV_DICT_IGNORE_SUFFIX));)
-                av_log(ctx->avc, AV_LOG_ERROR, "Key '%s' not found.\n", de->key);
-            av_dict_free(&ctx->aoptions);
+        // complain about all remaining options, then free the dict
+        for (de = NULL; (de = av_dict_get(ctx->aoptions, "", de,
+                                          AV_DICT_IGNORE_SUFFIX));)
+            mp_msg(MSGT_ENCODE, MSGL_WARN, "oacopts: key '%s' not found.\n",
+                   de->key);
+        av_dict_free(&ctx->aoptions);
 
-            break;
-        default:
-            ret = -1;
-            break;
+        break;
+    default:
+        ret = -1;
+        break;
     }
 
-    if(ret < 0) {
-        encode_lavc_fail(ctx, "unable to open encoder (see above for the cause)");
-    }
+    if (ret < 0)
+        encode_lavc_fail(ctx,
+                         "unable to open encoder (see above for the cause)");
 
     return ret;
 }
@@ -695,14 +682,19 @@ int encode_lavc_write_frame(struct encode_lavc_context *ctx, AVPacket *packet)
     if (ctx->header_written <= 0)
         return -1;
 
-    mp_msg(MSGT_ENCODE, MSGL_DBG2,
-           "encode-lavc: write frame: stream %d ptsi %d (%f) size %d\n",
-           (int)packet->stream_index,
-           (int)packet->pts,
-           packet->pts * (double)ctx->avc->streams[packet->stream_index]->
-                   time_base.num / (double)ctx->avc->streams[packet->
-                   stream_index]->time_base.den,
-           (int)packet->size);
+    mp_msg(
+        MSGT_ENCODE, MSGL_DBG2,
+        "encode-lavc: write frame: stream %d ptsi %d (%f) dtsi %d (%f) size %d\n",
+        (int)packet->stream_index,
+        (int)packet->pts,
+        packet->pts
+        * (double)ctx->avc->streams[packet->stream_index]->time_base.num
+        / (double)ctx->avc->streams[packet->stream_index]->time_base.den,
+        (int)packet->dts,
+        packet->dts
+        * (double)ctx->avc->streams[packet->stream_index]->time_base.num
+        / (double)ctx->avc->streams[packet->stream_index]->time_base.den,
+        (int)packet->size);
 
     switch (ctx->avc->streams[packet->stream_index]->codec->codec_type) {
     case AVMEDIA_TYPE_VIDEO:
@@ -731,9 +723,9 @@ int encode_lavc_supports_pixfmt(struct encode_lavc_context *ctx,
     if (pix_fmt == PIX_FMT_NONE)
         return 0;
 
-    if (!ctx->vc->pix_fmts) {
+    if (!ctx->vc->pix_fmts)
         return VFCAP_CSP_SUPPORTED;
-    } else {
+    else {
         const enum PixelFormat *p;
         for (p = ctx->vc->pix_fmts; *p >= 0; ++p) {
             if (pix_fmt == *p)
@@ -829,10 +821,12 @@ static void encode_lavc_printoptions(void *obj, const char *indent,
 bool encode_lavc_showhelp(struct MPOpts *opts)
 {
     bool help_output = false;
-    if(av_codec_next(NULL) == NULL)
+    if (av_codec_next(NULL) == NULL)
         mp_msg(MSGT_ENCODE, MSGL_ERR, "NO CODECS\n");
-#define CHECKS(str) ((str) && strcmp((str), "help") == 0 ? (help_output |= 1) : 0)
-#define CHECKV(strv) ((strv) && (strv)[0] && strcmp((strv)[0], "help") == 0 ? (help_output |= 1) : 0)
+#define CHECKS(str) ((str) && \
+                     strcmp((str), "help") == 0 ? (help_output |= 1) : 0)
+#define CHECKV(strv) ((strv) && (strv)[0] && \
+                      strcmp((strv)[0], "help") == 0 ? (help_output |= 1) : 0)
     if (CHECKS(opts->encode_output.format)) {
         AVOutputFormat *c = NULL;
         mp_msg(MSGT_ENCODE, MSGL_INFO, "Available output formats:\n");
@@ -844,7 +838,8 @@ bool encode_lavc_showhelp(struct MPOpts *opts)
     if (CHECKV(opts->encode_output.fopts)) {
         AVFormatContext *c = avformat_alloc_context();
         AVOutputFormat *format = NULL;
-        mp_msg(MSGT_ENCODE, MSGL_INFO, "Available output format ctx->options:\n");
+        mp_msg(MSGT_ENCODE, MSGL_INFO,
+               "Available output format ctx->options:\n");
         encode_lavc_printoptions(c, "  -ofopts ", "          ", NULL,
                                  AV_OPT_FLAG_ENCODING_PARAM,
                                  AV_OPT_FLAG_ENCODING_PARAM);
@@ -865,24 +860,31 @@ bool encode_lavc_showhelp(struct MPOpts *opts)
         AVCodec *codec = NULL;
         mp_msg(MSGT_ENCODE, MSGL_INFO,
                "Available output video codec ctx->options:\n");
-        encode_lavc_printoptions(c, "  -ovcopts ", "           ", NULL,
-                AV_OPT_FLAG_ENCODING_PARAM | AV_OPT_FLAG_VIDEO_PARAM,
-                AV_OPT_FLAG_ENCODING_PARAM | AV_OPT_FLAG_VIDEO_PARAM);
+        encode_lavc_printoptions(
+            c, "  -ovcopts ", "           ", NULL,
+            AV_OPT_FLAG_ENCODING_PARAM |
+            AV_OPT_FLAG_VIDEO_PARAM,
+            AV_OPT_FLAG_ENCODING_PARAM |
+            AV_OPT_FLAG_VIDEO_PARAM);
         av_free(c);
         while ((codec = av_codec_next(codec))) {
             if (!av_codec_is_encoder(codec))
                 continue;
             if (codec->type != AVMEDIA_TYPE_VIDEO)
                 continue;
-            if (opts->encode_output.vcodec && opts->encode_output.vcodec[0] && strcmp(opts->encode_output.vcodec, codec->name) != 0)
+            if (opts->encode_output.vcodec && opts->encode_output.vcodec[0] &&
+                strcmp(opts->encode_output.vcodec, codec->name) != 0)
                 continue;
             if (codec->priv_class) {
                 mp_msg(MSGT_ENCODE, MSGL_INFO, "Additionally, for -ovc %s:\n",
                        codec->name);
-                encode_lavc_printoptions(&codec->priv_class, "  -ovcopts ",
-                        "           ", NULL,
-                        AV_OPT_FLAG_ENCODING_PARAM | AV_OPT_FLAG_VIDEO_PARAM,
-                        AV_OPT_FLAG_ENCODING_PARAM | AV_OPT_FLAG_VIDEO_PARAM);
+                encode_lavc_printoptions(
+                    &codec->priv_class, "  -ovcopts ",
+                    "           ", NULL,
+                    AV_OPT_FLAG_ENCODING_PARAM |
+                    AV_OPT_FLAG_VIDEO_PARAM,
+                    AV_OPT_FLAG_ENCODING_PARAM |
+                    AV_OPT_FLAG_VIDEO_PARAM);
             }
         }
     }
@@ -891,24 +893,31 @@ bool encode_lavc_showhelp(struct MPOpts *opts)
         AVCodec *codec = NULL;
         mp_msg(MSGT_ENCODE, MSGL_INFO,
                "Available output audio codec ctx->options:\n");
-        encode_lavc_printoptions(c, "  -oacopts ", "           ", NULL,
-                AV_OPT_FLAG_ENCODING_PARAM | AV_OPT_FLAG_AUDIO_PARAM,
-                AV_OPT_FLAG_ENCODING_PARAM | AV_OPT_FLAG_AUDIO_PARAM);
+        encode_lavc_printoptions(
+            c, "  -oacopts ", "           ", NULL,
+            AV_OPT_FLAG_ENCODING_PARAM |
+            AV_OPT_FLAG_AUDIO_PARAM,
+            AV_OPT_FLAG_ENCODING_PARAM |
+            AV_OPT_FLAG_AUDIO_PARAM);
         av_free(c);
         while ((codec = av_codec_next(codec))) {
             if (!av_codec_is_encoder(codec))
                 continue;
             if (codec->type != AVMEDIA_TYPE_AUDIO)
                 continue;
-            if (opts->encode_output.acodec && opts->encode_output.acodec[0] && strcmp(opts->encode_output.acodec, codec->name) != 0)
+            if (opts->encode_output.acodec && opts->encode_output.acodec[0] &&
+                strcmp(opts->encode_output.acodec, codec->name) != 0)
                 continue;
             if (codec->priv_class) {
                 mp_msg(MSGT_ENCODE, MSGL_INFO, "Additionally, for -oac %s:\n",
                        codec->name);
-                encode_lavc_printoptions(&codec->priv_class, "  -oacopts ",
-                        "           ", NULL,
-                        AV_OPT_FLAG_ENCODING_PARAM | AV_OPT_FLAG_AUDIO_PARAM,
-                        AV_OPT_FLAG_ENCODING_PARAM | AV_OPT_FLAG_AUDIO_PARAM);
+                encode_lavc_printoptions(
+                    &codec->priv_class, "  -oacopts ",
+                    "           ", NULL,
+                    AV_OPT_FLAG_ENCODING_PARAM |
+                    AV_OPT_FLAG_AUDIO_PARAM,
+                    AV_OPT_FLAG_ENCODING_PARAM |
+                    AV_OPT_FLAG_AUDIO_PARAM);
             }
         }
     }
@@ -967,7 +976,7 @@ int encode_lavc_getstatus(struct encode_lavc_context *ctx,
 
     CHECK_FAIL(ctx, -1);
 
-    minutes = (GetTimerMS() - ctx->t0) / 60000.0 * (1-f) / f;
+    minutes = (GetTimerMS() - ctx->t0) / 60000.0 * (1 - f) / f;
     megabytes = ctx->avc->pb ? (avio_size(ctx->avc->pb) / 1048576.0 / f) : 0;
     fps = ctx->frames / ((GetTimerMS() - ctx->t0) / 1000.0);
     x = playback_time / ((GetTimerMS() - ctx->t0) / 1000.0);
@@ -981,11 +990,12 @@ int encode_lavc_getstatus(struct encode_lavc_context *ctx,
     return 0;
 }
 
-void encode_lavc_expect_stream(struct encode_lavc_context *ctx, enum AVMediaType mt)
+void encode_lavc_expect_stream(struct encode_lavc_context *ctx,
+                               enum AVMediaType mt)
 {
     CHECK_FAIL(ctx, );
 
-    switch(mt) {
+    switch (mt) {
     case AVMEDIA_TYPE_VIDEO:
         ctx->expect_video = true;
         break;
@@ -1005,7 +1015,7 @@ void encode_lavc_fail(struct encode_lavc_context *ctx, const char *format, ...)
     va_list va;
     va_start(va, format);
     mp_msg_va(MSGT_ENCODE, MSGL_ERR, format, va);
-    if(ctx->failed)
+    if (ctx->failed)
         return;
     ctx->failed = true;
     encode_lavc_finish(ctx);

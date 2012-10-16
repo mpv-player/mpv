@@ -14,7 +14,7 @@
     Specify a priority list of audio codecs to be used, according to their
     codec name in codecs.conf. Use a '-' before the codec name to omit it.
     Use a '+' before the codec name to force it, this will likely crash! If
-    the list has a trailing ',' MPlayer will fall back on codecs not contained
+    the list has a trailing ',' mpv will fall back on codecs not contained
     in the list.
 
     *NOTE*: See ``--ac=help`` for a full list of available codecs.
@@ -58,7 +58,7 @@
             may silently fail, and the sound quality may drop.
         3
             Use no automatic insertion of filters and no optimization.
-            *Warning*: It may be possible to crash MPlayer using this setting.
+            *Warning*: It may be possible to crash mpv using this setting.
         4
             Use automatic insertion of filters according to 0 above, but use
             floating point processing when possible.
@@ -95,15 +95,15 @@
     Specify a priority list of audio languages to use. Different container
     formats employ different language codes. DVDs use ISO 639-1 two letter
     language codes, Matroska, MPEG-TS and NUT use ISO 639-2 three letter
-    language codes while OGM uses a free-form identifier. MPlayer prints the
+    language codes while OGM uses a free-form identifier. mpv prints the
     available languages when run in verbose (``-v``) mode. See also ``--aid``.
 
     *EXAMPLE*:
 
-    ``mplayer dvd://1 --alang=hu,en``
+    ``mpv dvd://1 --alang=hu,en``
         Chooses the Hungarian language track on a DVD and falls back on
         English if Hungarian is not available.
-    ``mplayer --alang=jpn example.mkv``
+    ``mpv --alang=jpn example.mkv``
         Plays a Matroska file in Japanese.
 
 --ao=<driver1[:suboption1[=value]:...],driver2,...[,]>
@@ -174,6 +174,14 @@
     rendering text subtitles. The syntax of the file is exactly like the ``[V4
     Styles]`` / ``[V4+ Styles]`` section of SSA/ASS.
 
+--ass-style-override=<yes|no>
+    Control whether user style overrides should be applied.
+
+    :yes: Apply all the ``--ass-*`` style override options. Changing the default
+          for any of these options can lead to incorrect subtitle rendering.
+          (Default.)
+    :no:  Render subtitles as forced by subtitle scripts.
+
 --ass-top-margin=<value>
     Adds a black band at the top of the frame. The SSA/ASS renderer can place
     toptitles there (with ``--ass-use-margins``).
@@ -243,11 +251,11 @@
 
 --bluray-angle=<ID>
     Some Blu-ray discs contain scenes that can be viewed from multiple angles.
-    Here you can tell MPlayer which angles to use (default: 1).
+    Here you can tell mpv which angles to use (default: 1).
 
 --bluray-chapter=<ID>
     (Blu-ray only)
-    Tells MPlayer which Blu-ray chapter to start the current title from
+    Tells mpv which Blu-ray chapter to start the current title from
     (default: 1).
 
 --bluray-device=<path>
@@ -276,12 +284,12 @@
 
 --cache-seek-min=<percentage>
     If a seek is to be made to a position within <percentage> of the cache
-    size from the current position, MPlayer will wait for the cache to be
+    size from the current position, mpv will wait for the cache to be
     filled to this position rather than performing a stream seek (default:
     50).
 
 --cdda=<option1:option2>
-    This option can be used to tune the CD Audio reading feature of MPlayer.
+    This option can be used to tune the CD Audio reading feature of mpv.
 
     Available options are:
 
@@ -321,7 +329,7 @@
     Specify the CD-ROM device (default: ``/dev/cdrom``).
 
 --channels=<number>
-    Request the number of playback channels (default: 2). MPlayer asks the
+    Request the number of playback channels (default: 2). mpv asks the
     decoder to decode the audio into as many channels as specified. Then it is
     up to the decoder to fulfill the requirement. This is usually only
     important when playing videos with AC-3 audio (like DVDs). In that case
@@ -455,7 +463,7 @@
     assumed to be in Netscape format.
 
 --correct-pts, --no-correct-pts
-    Switches MPlayer to a mode where timestamps for video frames are
+    Switches mpv to a mode where timestamps for video frames are
     calculated differently and video filters which add new frames or modify
     timestamps of existing ones are supported. Now enabled automatically for
     most common file formats. The more accurate timestamps can be visible for
@@ -470,7 +478,7 @@
     will stay hidden. Supported by video output drivers which use X11 or
     OS X Cocoa.
 
---delay=<sec>
+--audio-delay=<sec>
     audio delay in seconds (positive or negative float value). Negative values
     delay the audio, and positive values delay the video.
 
@@ -496,10 +504,10 @@
     override the default ones:
 
     :card=<1-4>:      Specifies using card number 1-4 (default: 1).
-    :file=<filename>: Instructs MPlayer to read the channels list from
+    :file=<filename>: Instructs mpv to read the channels list from
                       <filename>. Default is
-                      ``~/.mplayer/channels.conf.{sat,ter,cbl,atsc}`` (based
-                      on your card type) or ``~/.mplayer/channels.conf`` as a
+                      ``~/.mpv/channels.conf.{sat,ter,cbl,atsc}`` (based
+                      on your card type) or ``~/.mpv/channels.conf`` as a
                       last resort.
     :timeout=<1-30>:  Maximum number of seconds to wait when trying to tune a
                       frequency before giving up (default: 30).
@@ -513,7 +521,7 @@
     Try to limit DVD speed (default: 0, no change). DVD base speed is 1385
     kB/s, so a 8x drive can read at speeds up to 11080 kB/s. Slower speeds
     make the drive more quiet. For watching DVDs 2700 kB/s should be quiet and
-    fast enough. MPlayer resets the speed to the drive default value on close.
+    fast enough. mpv resets the speed to the drive default value on close.
     Values of at least 100 mean speed in kB/s. Values less than 100 mean
     multiples of 1385 kB/s, i.e. ``--dvd-speed=8`` selects 11080 kB/s.
 
@@ -521,12 +529,12 @@
 
 --dvdangle=<ID>
     Some DVD discs contain scenes that can be viewed from multiple angles.
-    Here you can tell MPlayer which angles to use (default: 1).
+    Here you can tell mpv which angles to use (default: 1).
 
 --edition=<ID>
     (Matroska files only)
     Specify the edition (set of chapters) to use, where 0 is the first. If set
-    to -1 (the default), MPlayer will choose the first edition declared as a
+    to -1 (the default), mpv will choose the first edition declared as a
     default, or if there is no default, the first edition defined.
 
 --edlout=<filename>
@@ -605,20 +613,20 @@
     specify a particular font. See also ``--subfont``. With fontconfig enabled
     the argument is a fontconfig pattern and the default is ``sans``. Without
     fontconfig the argument is a filename and the default is
-    ``~/.mplayer/subfont.ttf``.
+    ``~/.mpv/subfont.ttf``.
 
     *EXAMPLE*:
 
-    - ``--font=~/.mplayer/arialuni.ttf`` (no fontconfig)
+    - ``--font=~/.mpv/arialuni.ttf`` (no fontconfig)
     - ``--font='Bitstream Vera Sans'`` (usual case with fontconfig)
     - ``--font='Bitstream Vera Sans:style=Bold'`` (usual case with fontconfig)
 
 --force-window-position
-    Forcefully move MPlayer's video output window to default location whenever
+    Forcefully move mpv's video output window to default location whenever
     there is a change in video parameters, video stream or file. This used to
     be the default behavior. Currently only affects X11 VOs.
 
---forcedsubsonly
+--sub-forced-only
     Display only forced subtitles for the DVD subtitle stream selected by e.g.
     ``--slang``.
 
@@ -637,11 +645,14 @@
 --fps=<float>
     Override video framerate. Useful if the original value is wrong or missing.
 
---framedrop
+--framedrop=<no|yes|hard>
     Skip displaying some frames to maintain A/V sync on slow systems. Video
     filters are not applied to such frames. For B-frames even decoding is
-    skipped completely. May produce unwatchably choppy output. See also
-    ``--hardframedrop``.
+    skipped completely. May produce unwatchably choppy output. With ``hard``,
+    decoding and output of any frame can be skipped, and will lead to an even
+    worse playback experience.
+
+    Practical use of this feature is questionable. Disabled by default.
 
 --frames=<number>
     Play/convert only first <number> frames, then quit.
@@ -650,6 +661,7 @@
     Specifies the character set that will be passed to FriBiDi when decoding
     non-UTF-8 subtitles (default: ISO8859-8).
 
+--fullscreen
 --fs
     Fullscreen playback (centers movie, and paints black bands around it).
 
@@ -747,14 +759,11 @@
     ``--no-grabpointer`` tells the player to not grab the mouse pointer after a
     video mode change (``--vm``). Useful for multihead setups.
 
---hardframedrop
-    More intense frame dropping (breaks decoding). Leads to image distortion!
-
 --heartbeat-cmd
     Command that is executed every 30 seconds during playback via *system()* -
     i.e. using the shell.
 
-    *NOTE*: mplayer uses this command without any checking, it is your
+    *NOTE*: mpv uses this command without any checking, it is your
     responsibility to ensure it does not cause security problems (e.g. make
     sure to use full paths if "." is in your path like on Windows). It also
     only works when playing video (i.e. not with ``--no-video`` but works with
@@ -765,10 +774,10 @@
     complicated, ask the author of the screensaver program to support the
     proper X APIs.
 
-    *EXAMPLE for xscreensaver*: ``mplayer --heartbeat-cmd="xscreensaver-command
+    *EXAMPLE for xscreensaver*: ``mpv --heartbeat-cmd="xscreensaver-command
     -deactivate" file``
 
-    *EXAMPLE for GNOME screensaver*: ``mplayer
+    *EXAMPLE for GNOME screensaver*: ``mpv
     --heartbeat-cmd="gnome-screensaver-command -p" file``
 
 --help
@@ -815,7 +824,7 @@
 
     *EXAMPLE*:
 
-            ``mplayer --http-header-fields='Field1: value1','Field2: value2' http://localhost:1234``
+            ``mpv --http-header-fields='Field1: value1','Field2: value2' http://localhost:1234``
 
         Will generate HTTP request:
 
@@ -839,12 +848,12 @@
     by using ``--msglevel=identify=6``. For example, for a DVD or Blu-ray it
     will list the chapters and time length of each title, as well as a disk
     ID. Combine this with ``--frames=0`` to suppress all video output. The
-    wrapper script ``TOOLS/midentify.sh`` suppresses the other MPlayer output
+    wrapper script ``TOOLS/midentify.sh`` suppresses the other mpv output
     and (hopefully) shellescapes the filenames.
 
 --idle
-    Makes MPlayer wait idly instead of quitting when there is no file to play.
-    Mostly useful in slave mode where MPlayer can be controlled through input
+    Makes mpv wait idly instead of quitting when there is no file to play.
+    Mostly useful in slave mode where mpv can be controlled through input
     commands (see also ``--slave``).
 
 --idx
@@ -868,17 +877,17 @@
     Specify configuration file to be parsed after the default ones.
 
 --initial-audio-sync, --no-initial-audio-sync
-    When starting a video file or after events such as seeking MPlayer will by
+    When starting a video file or after events such as seeking mpv will by
     default modify the audio stream to make it start from the same timestamp
     as video, by either inserting silence at the start or cutting away the
     first samples. Disabling this option makes the player behave like older
-    MPlayer versions did: video and audio are both started immediately even if
+    mpv versions did: video and audio are both started immediately even if
     their start timestamps differ, and then video timing is gradually adjusted
     if necessary to reach correct synchronization later.
 
 --input=<commands>
     This option can be used to configure certain parts of the input system.
-    Paths are relative to ``~/.mplayer/``.
+    Paths are relative to ``~/.mpv/``.
 
     *NOTE*: Autorepeat is currently only supported by joysticks.
 
@@ -886,7 +895,7 @@
 
     conf=<filename>
         Specify input configuration file other than the default
-        ``~/.mplayer/input.conf``. ``~/.mplayer/<filename>`` is assumed if no
+        ``~/.mpv/input.conf``. ``~/.mpv/<filename>`` is assumed if no
         full path is given.
 
     ar-dev=<device>
@@ -901,7 +910,7 @@
         Number of key presses to generate per second on autorepeat.
 
     (no)default-bindings
-        Use the key bindings that MPlayer ships with by default.
+        Use the key bindings that mpv ships with by default.
 
     keylist
         Prints all keys that can be bound to commands.
@@ -916,9 +925,16 @@
         Read commands from the given file. Mostly useful with a FIFO.
         See also ``--slave``.
 
-        *NOTE*: When the given file is a FIFO MPlayer opens both ends so you
+        *NOTE*: When the given file is a FIFO mpv opens both ends so you
         can do several `echo "seek 10" > mp_pipe` and the pipe will stay
         valid.
+
+    test
+        Input test mode. Instead of executing commands on key presses, mpv
+        will show the keys and the bound commands on the OSD. Has to be used
+        with a dummy video, and the normal ways to quit the player will not
+        work (key bindings that normally quit will be shown on OSD only, just
+        like any other binding).
 
 --ipv4-only-proxy
     Skip any HTTP proxy for IPv6 addresses. It will still be used for IPv4
@@ -929,7 +945,7 @@
 
 --keepaspect, --no-keepaspect
     Keep window aspect ratio when resizing windows. Enabled by default. By
-    default MPlayer tries to keep the correct video aspect ratio by
+    default mpv tries to keep the correct video aspect ratio by
     instructing the window manager to maintain window aspect when resizing,
     and by adding black bars if the window manager nevertheless allows window
     shape to change. --no-keepaspect disables window manager aspect hints and
@@ -1100,7 +1116,7 @@
         Note, a patch to make the *o=* unneeded and pass all unknown options
         through the AVOption system is welcome. A full list of AVOptions can
         be found in the FFmpeg manual. Note that some options may conflict
-        with MPlayer options.
+        with mpv options.
 
         *EXAMPLE*: ``o=fflags=+ignidx``
     probesize=<value>
@@ -1127,11 +1143,11 @@
 --loadidx=<filename>
     The file from which to read the video index data saved by ``--saveidx``.
     This index will be used for seeking, overriding any index data contained
-    in the AVI itself. MPlayer will not prevent you from loading an index file
+    in the AVI itself. mpv will not prevent you from loading an index file
     generated from a different AVI, but this is sure to cause unfavorable
     results.
 
-    *NOTE*: This option is obsolete now that MPlayer has OpenDML support.
+    *NOTE*: This option is obsolete now that mpv has OpenDML support.
 
 --loop=<number|inf|no>
     Loops playback <number> times. ``inf`` means forever and ``no`` disables
@@ -1156,7 +1172,7 @@
 
 --mixer-channel=<name[,index]>
     (``--ao=oss`` and ``--ao=alsa`` only)
-    This option will tell MPlayer to use a different channel for controlling
+    This option will tell mpv to use a different channel for controlling
     volume than the default PCM. Options for OSS include **vol, pcm, line**.
     For a complete list of options look for ``SOUND_DEVICE_NAMES`` in
     ``/usr/include/linux/soundcard.h``. For ALSA you can use the names e.g.
@@ -1183,7 +1199,7 @@
     also ``--monitoraspect`` and ``--aspect``.
 
 --mouse-movements
-    Permit MPlayer to receive pointer events reported by the video output
+    Permit mpv to receive pointer events reported by the video output
     driver. Necessary to select the buttons in DVD menus. Supported for
     X11-based VOs (x11, xv, etc) and the gl, direct3d and corevideo VOs.
 
@@ -1202,7 +1218,7 @@
 
     *NOTE*: Some messages are printed before the command line is parsed and
     are therefore not affected by ``--msglevel``. To control these messages
-    you have to use the ``MPLAYER_VERBOSE`` environment variable; see its
+    you have to use the ``MPV_VERBOSE`` environment variable; see its
     description below for details.
 
     Available levels:
@@ -1278,7 +1294,7 @@
 
 --ordered-chapters, --no-ordered-chapters
     Enabled by default.
-    Disable support for Matroska ordered chapters. MPlayer will not load or
+    Disable support for Matroska ordered chapters. mpv will not load or
     search for video segments from other files, and will also ignore any
     chapter order specified for the main file.
 
@@ -1288,7 +1304,7 @@
 --osd-fractions
     Show OSD times with fractions of seconds.
 
---osdlevel=<0-3>
+--osd-level=<0-3>
     Specifies which mode the OSD should start in.
 
     :0: subtitles only
@@ -1306,9 +1322,6 @@
     controls how much of the image is cropped. May not work with all video
     output drivers.
 
-    *NOTE*: Values between -1 and 0 are allowed as well, but highly
-    experimental and may crash or worse. Use at your own risk!
-
 --panscanrange=<-19.0-99.0>
     (experimental)
     Change the range of the pan-and-scan functionality (default: 1). Positive
@@ -1322,23 +1335,45 @@
     See also ``--user``.
 
 --playing-msg=<string>
-    Print out a string before starting playback. The following expansions are
-    supported:
+    Print out a string before starting playback. The string is expanded for
+    properties, e.g. ``--playing-msg=file: ${filename}`` will print the string
+    ``file: `` followed by the currently played filename.
+
+    The following expansions are supported:
 
     ${NAME}
-        Expand to the value of the property ``NAME``.
-    ?(NAME:TEXT)
-        Expand ``TEXT`` only if the property ``NAME`` is available.
-    ?(!NAME:TEXT)
-        Expand ``TEXT`` only if the property ``NAME`` is not available.
+        Expands to the value of the property ``NAME``. If ``NAME`` starts with
+        ``=``, use the raw value of the property. If retrieving the property
+        fails, expand to an error string. (Use ``${NAME:}`` with a trailing
+        ``:`` to expand to an empty string instead.)
+    ${NAME:STR}
+        Expands to the value of the property ``NAME``, or ``STR`` if the
+        property can't be retrieved. ``STR`` is expanded recursively.
+    ${!NAME:STR}
+        Expands to ``STR`` (recursively) if the property ``NAME`` can't be
+        retrieved.
+    ${?NAME:STR}
+        Expands to ``STR`` (recursively) if the property ``NAME`` is available.
+    $$
+        Expands to ``$``.
+    $}
+        Expands to ``}``. (To produce this character inside rexursive
+        expansion.)
+    $>
+        Disable property expansion and special handling of ``$`` for the rest
+        of the string.
+
+--status-msg=<string>
+    Print out a custom string during playback instead of the standard status
+    line. Expands properties. See ``--playing-msg``.
 
 --playlist=<filename>
     Play files according to a playlist file (ASX, Winamp, SMIL, or
     one-file-per-line format).
 
-    *WARNING*: The way MPlayer parses and uses playlist files is not safe
+    *WARNING*: The way mpv parses and uses playlist files is not safe
     against maliciously constructed files. Such files may trigger harmful
-    actions. This has been the case for all MPlayer versions, but
+    actions. This has been the case for all mpv and MPlayer versions, but
     unfortunately this fact was not well documented earlier, and some people
     have even misguidedly recommended use of ``--playlist`` with untrusted
     sources. Do NOT use ``--playlist`` with random internet sources or files
@@ -1367,7 +1402,7 @@
 
 --priority=<prio>
     (Windows only.)
-    Set process priority for MPlayer according to the predefined priorities
+    Set process priority for mpv according to the predefined priorities
     available under Windows.
 
     Possible values of <prio>:
@@ -1396,7 +1431,7 @@
     the V4L2 driver. The Hauppauge WinTV PVR-150/250/350/500 and all IVTV
     based cards are known as PVR capture cards. Be aware that only Linux
     2.6.18 kernel and above is able to handle MPEG stream through V4L2 layer.
-    For hardware capture of an MPEG stream and watching it with MPlayer, use
+    For hardware capture of an MPEG stream and watching it with mpv, use
     ``pvr://`` as a movie URL.
 
     Available options are:
@@ -1454,10 +1489,10 @@
 
 --radio=<option1:option2:...>
     These options set various parameters of the radio capture module. For
-    listening to radio with MPlayer use ``radio://<frequency>`` (if channels
+    listening to radio with mpv use ``radio://<frequency>`` (if channels
     option is not given) or ``radio://<channel_number>`` (if channels option
     is given) as a movie URL. You can see allowed frequency range by running
-    MPlayer with ``-v``. To start the grabbing subsystem, use
+    mpv with ``-v``. To start the grabbing subsystem, use
     ``radio://<frequency or channel>/capture``. If the capture keyword is not
     given you can listen to radio using the line-in cable only. Using capture
     to listen is not recommended due to synchronization problems, which makes
@@ -1517,7 +1552,7 @@
 
     :channels=<value>:   number of channels
     :rate=<value>:       rate in samples per second
-    :format=<value>:     mplayer audio format (e.g. s16le)
+    :format=<value>:     mpv audio format (e.g. s16le)
 
 --rawvideo=<option1:option2:...>
     This option lets you play raw video files. You have to use
@@ -1537,10 +1572,10 @@
 
     *EXAMPLE*:
 
-    - ``mplayer foreman.qcif --demuxer=rawvideo --rawvideo=qcif`` Play the
+    - ``mpv foreman.qcif --demuxer=rawvideo --rawvideo=qcif`` Play the
       famous "foreman" sample video.
 
-    - ``mplayer sample-720x576.yuv --demuxer=rawvideo --rawvideo=w=720:h=576``
+    - ``mpv sample-720x576.yuv --demuxer=rawvideo --rawvideo=w=720:h=576``
       Play a raw YUV sample.
 
 --really-quiet
@@ -1562,25 +1597,13 @@
     Used with ``rtsp://`` URLs to force the destination IP address to be
     bound. This option may be useful with some RTSP server which do not send
     RTP packets to the right interface. If the connection to the RTSP server
-    fails, use ``-v`` to see which IP address MPlayer tries to bind to and try
+    fails, use ``-v`` to see which IP address mpv tries to bind to and try
     to force it to one assigned to your computer instead.
 
 --rtsp-port
     Used with ``rtsp://`` URLs to force the client's port number. This option
     may be useful if you are behind a router and want to forward the RTSP
     stream from the server to a specific client.
-
---rtsp-stream-over-http
-    (LIVE555 only)
-    Used with ``http://`` URLs to specify that the resulting incoming RTP and
-    RTCP packets be streamed over HTTP.
-
---rtsp-stream-over-tcp
-    (LIVE555 and NEMESI only)
-    Used with ``rtsp://`` URLs to specify that the resulting incoming RTP and
-    RTCP packets be streamed over TCP (using the same TCP connection as RTSP).
-    This option may be useful if you have a broken internet connection that
-    does not pass incoming UDP packets (see http://www.live555.com/mplayer/).
 
 --saturation=<-100-100>
     Adjust the saturation of the video signal (default: 0). You can get
@@ -1591,7 +1614,7 @@
     Force index rebuilding and dump the index to <filename>. Currently this
     only works with AVI files.
 
-    *NOTE*: This option is obsolete now that MPlayer has OpenDML support.
+    *NOTE*: This option is obsolete now that mpv has OpenDML support.
 
 --sb=<n>
     Seek to byte position. Useful for playback from CD-ROM images or VOB files
@@ -1641,7 +1664,7 @@
         passing the format ``%04n`` will yield ``0012`` on the 12th screenshot.
         The number is incremented every time a screenshot is taken, or if the
         file already exists. The length ``X`` must be in the range 0-9. With
-        the optional # sign mplayer will use the lowest available number. For
+        the optional # sign mpv will use the lowest available number. For
         example, if you take three screenshots--0001, 0002, 0003--and delete
         the first two, the next two screenshots won't be 0004 and 0005, but
         0001 and 0002 again.
@@ -1697,14 +1720,14 @@
     Specify a priority list of subtitle languages to use. Different container
     formats employ different language codes. DVDs use ISO 639-1 two letter
     language codes, Matroska uses ISO 639-2 three letter language codes while
-    OGM uses a free-form identifier. MPlayer prints the available languages
+    OGM uses a free-form identifier. mpv prints the available languages
     when run in verbose (``-v``) mode. See also ``--sid``.
 
     *EXAMPLE*:
 
-    - ``mplayer dvd://1 --slang=hu,en`` chooses the Hungarian subtitle track on
+    - ``mpv dvd://1 --slang=hu,en`` chooses the Hungarian subtitle track on
       a DVD and falls back on English if Hungarian is not available.
-    - ``mplayer --slang=jpn example.mkv`` plays a Matroska file with Japanese
+    - ``mpv --slang=jpn example.mkv`` plays a Matroska file with Japanese
       subtitles.
 
 --slave-broken
@@ -1715,7 +1738,7 @@
     particular, the status line output was changed, which is used by some
     applications to determine the current playback position. This switch has
     been renamed to prevent these applications from working with this version
-    of mplayer, because it would lead to buggy and confusing behavior only.
+    of mpv, because it would lead to buggy and confusing behavior only.
     Moreover, the slave mode protocol is so horribly bad that it should not be
     used for new programs, nor should existing programs attempt to adapt to the
     changed output and use the --slave-broken switch. Instead, a new, saner
@@ -1731,13 +1754,13 @@
 
 --softsleep
     Time frames by repeatedly checking the current time instead of asking
-    the kernel to wake up MPlayer at the correct time. Useful if your kernel
+    the kernel to wake up mpv at the correct time. Useful if your kernel
     timing is imprecise and you cannot use the RTC either. Comes at the
     price of higher CPU consumption.
 
 --softvol=<mode>
     Control whether to use the volume controls of the audio output driver, or
-    the internal mplayer volume filter.
+    the internal mpv volume filter.
 
     :no:    prefer audio driver controls, use the volume filter only if
             absolutely needed
@@ -1745,7 +1768,7 @@
     :auto:  prefer the volume filter if the audio driver uses the system mixer (default)
 
     The intention with ``auto`` is to avoid changing system mixer settings with
-    default settings. mplayer is a video player, not a mixer panel. On the other
+    default settings. mpv is a video player, not a mixer panel. On the other
     hand, mixer controls should be used for sound servers like PulseAudio, which
     provide per-application volume.
 
@@ -1812,7 +1835,7 @@
     *EXAMPLE*: ``--vf=scale=-ssf=lgb=3.0``
 
 --sstep=<sec>
-    Skip <sec> seconds after every frame. Since MPlayer will only seek to
+    Skip <sec> seconds after every frame. Since mpv will only seek to
     the next keyframe unless you use ``--hr-seek`` this may be inexact.
 
 --stereo=<mode>
@@ -1864,14 +1887,14 @@
     to video file directory.
 
     *EXAMPLE*: Assuming that ``/path/to/movie/movie.avi`` is played and
-    ``--sub-paths=sub:subtitles:/tmp/subs`` is specified, MPlayer searches for
+    ``--sub-paths=sub:subtitles:/tmp/subs`` is specified, mpv searches for
     subtitle files in these directories:
 
     - ``/path/to/movie/``
     - ``/path/to/movie/sub/``
     - ``/path/to/movie/subtitles/``
     - ``/tmp/subs/``
-    - ``~/.mplayer/sub/``
+    - ``~/.mpv/sub/``
 
 --subcp=<codepage>
     If your system supports ``iconv(3)``, you can use this option to specify
@@ -1888,7 +1911,7 @@
 
     You can specify your language using a two letter language code to make
     ENCA detect the codepage automatically. If unsure, enter anything and
-    watch mplayer ``-v`` output for available languages. Fallback codepage
+    watch mpv ``-v`` output for available languages. Fallback codepage
     specifies the codepage to use, when autodetection fails.
 
     *EXAMPLE*:
@@ -1898,7 +1921,7 @@
     - ``--subcp=enca:pl:cp1250`` guess the encoding for Polish, fall back on
       cp1250.
 
---subdelay=<sec>
+--sub-delay=<sec>
     Delays subtitles by <sec> seconds. Can be negative.
 
 --subfile=<filename>
@@ -1945,7 +1968,7 @@
     *NOTE*: <rate> > movie fps speeds the subtitles up for frame-based
     subtitle files and slows them down for time-based ones.
 
---subpos=<0-100>
+--sub-pos=<0-100>
     Specify the position of subtitles on the screen. The value is the vertical
     position of the subtitle in % of the screen height.
     Can be useful with ``--vf=expand``.
@@ -1986,11 +2009,11 @@
     the line used for the OSD and clear it (default: ``^[[A\r^[[K``).
 
 --title
-    Set the window title. The string can contain property names.
+    Set the window title. Properties are expanded (see ``--playing-msg``).
 
 --tv=<option1:option2:...>
     This option tunes various properties of the TV capture module. For
-    watching TV with MPlayer, use ``tv://`` or ``tv://<channel_number>`` or
+    watching TV with mpv, use ``tv://`` or ``tv://<channel_number>`` or
     even ``tv://<channel_name>`` (see option channels for channel_name below)
     as a movie URL. You can also use ``tv:///<input_id>`` to start watching a
     movie from a composite or S-Video input (see option input for details).
@@ -2130,7 +2153,7 @@
     mjpeg
         Use hardware MJPEG compression (if the card supports it). When using
         this option, you do not need to specify the width and height of the
-        output window, because MPlayer will determine it automatically from
+        output window, because mpv will determine it automatically from
         the decimation value (see below).
 
     decimation=<1|2|4>
@@ -2181,7 +2204,7 @@
         in size, resulting in choppy video when using immediatemode=0.
 
 --tvscan=<option1:option2:...>
-    Tune the TV channel scanner. MPlayer will also print value for "-tv
+    Tune the TV channel scanner. mpv will also print value for "-tv
     channels=" option, including existing and just found channels.
 
     Available suboptions are:
@@ -2200,7 +2223,7 @@
         indicate that the currently scanning channel is active.
 
 --unicode
-    Tells MPlayer to handle the subtitle file as unicode.
+    Tells mpv to handle the subtitle file as unicode.
 
 --use-filedir-conf
     Look for a file-specific configuration file in the same directory as the
@@ -2216,7 +2239,7 @@
     Use <string> as user agent for HTTP streaming.
 
 --utf8
-    Tells MPlayer to handle the subtitle file as UTF-8.
+    Tells mpv to handle the subtitle file as UTF-8.
 
 -v
     Increment verbosity level, one level for each ``-v`` found on the command
@@ -2226,7 +2249,7 @@
     Specify a priority list of video codecs to be used, according to their
     codec name in ``codecs.conf``. Use a '-' before the codec name to omit it.
     Use a '+' before the codec name to force it, this will likely crash! If
-    the list has a trailing ',' MPlayer will fall back on codecs not contained
+    the list has a trailing ',' mpv will fall back on codecs not contained
     in the list.
 
     *NOTE*: See ``--vc=help`` for a full list of available codecs.
@@ -2294,10 +2317,10 @@
 
 --wid=<ID>
     (X11, OpenGL and DirectX only)
-    This tells MPlayer to attach to an existing window. Useful to embed
-    MPlayer in a browser (e.g. the plugger extension). Earlier this option
+    This tells mpv to attach to an existing window. Useful to embed
+    mpv in a browser (e.g. the plugger extension). Earlier this option
     always filled the given window completely, thus aspect scaling, panscan,
-    etc were no longer handled by MPlayer but had to be managed by the
+    etc were no longer handled by mpv but had to be managed by the
     application that created the window. Now aspect is maintained by default.
     If you don't want that use ``--no-keepaspect``.
 
@@ -2307,7 +2330,7 @@
 
 --xineramascreen=<-2-...>
     In Xinerama configurations (i.e. a single desktop that spans across
-    multiple displays) this option tells MPlayer which screen to display the
+    multiple displays) this option tells mpv which screen to display the
     movie on. A value of -2 means fullscreen across the whole virtual display
     (in this case Xinerama information is completely ignored), -1 means
     fullscreen on the display the window currently is on. The initial position
@@ -2354,4 +2377,4 @@
 --zoom
     Allow software scaling, where available. This will allow scaling with
     output drivers (like x11) that do not support hardware scaling,
-    where MPlayer disables scaling by default for performance reasons.
+    where mpv disables scaling by default for performance reasons.
