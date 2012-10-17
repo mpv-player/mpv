@@ -1752,7 +1752,8 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 spudec_assemble(vo_spudec, packet, len, timestamp);
         }
     } else if (d_sub && (is_text_sub(type) || (sh_sub && sh_sub->active))) {
-        if (d_sub->non_interleaved)
+        bool non_interleaved = track->is_external; // if demuxing subs only
+        if (non_interleaved)
             ds_get_next_pts(d_sub);
 
         while (d_sub->first) {
@@ -1762,7 +1763,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 if (!opts->ass_enabled || !is_text_sub(type))
                     break;
                 // Try to avoid demuxing whole file at once
-                if (d_sub->non_interleaved && subpts_s > curpts_s + 1)
+                if (non_interleaved && subpts_s > curpts_s + 1)
                     break;
             }
             double duration = d_sub->first->duration;
@@ -1798,7 +1799,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 sub_add_text(&mpctx->subs, packet, len, endpts_s);
                 set_osd_subtitle(mpctx, &mpctx->subs);
             }
-            if (d_sub->non_interleaved)
+            if (non_interleaved)
                 ds_get_next_pts(d_sub);
         }
         if (!opts->ass_enabled)
@@ -3589,6 +3590,8 @@ static void open_external_file(struct MPContext *mpctx, char *filename,
         if (stream->type == filter) {
             struct track *t = add_stream_track(mpctx, stream, false);
             t->is_external = true;
+            t->title = talloc_strdup(t, filename);
+            num_added++;
         }
     }
     if (num_added == 0) {
