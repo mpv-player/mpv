@@ -26,11 +26,30 @@
 
 #include "libmpcodecs/img_format.h"
 #include "libmpcodecs/mp_image.h"
+#include "libmpcodecs/sws_utils.h"
 
 #include "libvo/fastmemcpy.h"
 #include "libavutil/mem.h"
+#include "libavutil/common.h"
 
 void mp_image_alloc_planes(mp_image_t *mpi) {
+  if (mpi->imgfmt == IMGFMT_BGRA) {
+    mpi->stride[0]=FFALIGN(mpi->width*4,SWS_MIN_BYTE_ALIGN);
+    mpi->planes[0]=av_malloc(mpi->stride[0]*mpi->height);
+    mpi->flags|=MP_IMGFLAG_ALLOCATED;
+    return;
+  }
+  if (mpi->imgfmt == IMGFMT_444P16 || mpi->imgfmt == IMGFMT_444P) {
+    int bp = mpi->imgfmt == IMGFMT_444P16 ? 2 : 1;
+    mpi->stride[0]=FFALIGN(mpi->width*bp,SWS_MIN_BYTE_ALIGN);
+    mpi->stride[1]=mpi->stride[2]=mpi->stride[0];
+    int imgsize = mpi->stride[0] * mpi->height;
+    mpi->planes[0]=av_malloc(imgsize*3);
+    mpi->planes[1]=mpi->planes[0]+imgsize;
+    mpi->planes[2]=mpi->planes[1]+imgsize;
+    mpi->flags|=MP_IMGFLAG_ALLOCATED;
+    return;
+  }
   // IF09 - allocate space for 4. plane delta info - unused
   if (mpi->imgfmt == IMGFMT_IF09) {
     mpi->planes[0]=av_malloc(mpi->bpp*mpi->width*(mpi->height+2)/8+
