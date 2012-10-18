@@ -82,6 +82,8 @@ struct sub_bitmaps {
 struct mp_eosd_res {
     int w, h; // screen dimensions, including black borders
     int mt, mb, ml, mr; // borders (top, bottom, left, right)
+    double display_par;
+    double video_par; // PAR of the original video (for some sub decoders)
 };
 
 enum mp_osdtype {

@@ -344,11 +344,18 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     struct mp_csp_details csp = {0};
     vo_control(vo, VOCTRL_GET_YUV_COLORSPACE, &csp);
 
+    struct vo_rect *src = &ctx->src_rect;
+    struct vo_rect *dst = &ctx->dst_rect;
+    double xvpar = (double)dst->width / dst->height * src->height / src->width;
+
     struct sub_render_params subparams = {
         .pts = osd->vo_sub_pts,
-        .dim = {.w = ctx->image_width, .h = ctx->image_height},
-        .normal_scale = 1,
-        .vsfilter_scale = 1,
+        .dim = {
+            .w = ctx->image_width,
+            .h = ctx->image_height,
+            .display_par = vo->monitor_par / xvpar,
+            .video_par = vo->aspdat.par,
+        },
     };
 
     if (osd_draw_on_image(osd, &img, &csp, &subparams))

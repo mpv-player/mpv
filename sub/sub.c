@@ -270,15 +270,14 @@ void draw_osd_with_eosd(struct vo *vo, struct osd_state *osd)
         formats[n] = vo_control(vo, VOCTRL_QUERY_EOSD_FORMAT, &data) == VO_TRUE;
     }
 
-    osd_update_ext(osd, dim);
+    dim.display_par = vo->monitor_par;
+    dim.video_par = vo->aspdat.par;
 
-    struct aspect_data asp = vo->aspdat;
+    osd_update_ext(osd, dim);
 
     struct sub_render_params subparams = {
         .pts = osd->vo_sub_pts,
         .dim = dim,
-        .normal_scale = 1,
-        .vsfilter_scale = (double) asp.prew / asp.preh * asp.orgh / asp.orgw,
     };
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {

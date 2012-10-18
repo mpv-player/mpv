@@ -13,8 +13,6 @@ struct MPOpts *opts;
 struct sub_render_params {
     double pts;
     struct mp_eosd_res dim;
-    double normal_scale;
-    double vsfilter_scale;
 };
 
 static inline bool is_text_sub(int type)

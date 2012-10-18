@@ -370,8 +370,7 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
 {
     struct MPOpts *opts = vo->opts;
     panscan_init(vo);
-    aspect_save_orig(vo, width, height);
-    aspect_save_prescale(vo, d_width, d_height);
+    aspect_save_videores(vo, width, height, d_width, d_height);
 
     if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
         aspect(vo, &d_width, &d_height, A_NOZOOM);

@@ -34,7 +34,7 @@
 #include "encode_lavc.h"
 
 #include "sub/sub.h"
-#include "sub/draw_bmp.h"
+#include "sub/dec_sub.h"
 
 struct priv {
     uint8_t *buffer;
@@ -485,6 +485,29 @@ static void check_events(struct vo *vo)
 {
 }
 
+static void draw_osd(struct vo *vo, struct osd_state *osd)
+{
+    struct priv *vc = vo->priv;
+
+    if (vc->lastimg && vc->lastimg_wants_osd) {
+        struct aspect_data asp = vo->aspdat;
+        double sar = (double)asp.orgw / asp.orgh;
+        double dar = (double)asp.prew / asp.preh;
+
+        struct sub_render_params subparams = {
+            .pts = osd->vo_sub_pts,
+            .dim = {
+                .w = asp.orgw,
+                .h = asp.orgh,
+                .display_par = sar / dar,
+                .video_par = dar / sar,
+            },
+        };
+
+        osd_draw_on_image(osd, vc->lastimg, &vc->colorspace, &subparams);
+    }
+}
+
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *vc = vo->priv;
@@ -506,25 +529,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_GET_YUV_COLORSPACE:
         *(struct mp_csp_details *)data = vc->colorspace;
         return 1;
-    case VOCTRL_DRAW_EOSD:
-        if (vc->lastimg && vc->lastimg_wants_osd) {
-            struct sub_bitmaps *imgs = data;
-            mp_draw_sub_bitmaps(vc->lastimg, imgs, &vc->colorspace);
-        }
-        return VO_TRUE;
-    case VOCTRL_GET_EOSD_RES: {
-        struct mp_eosd_res *r = data;
-        r->w = vc->stream->codec->width;
-        r->h = vc->stream->codec->height;
-        r->ml = r->mr = 0;
-        r->mt = r->mb = 0;
-        return VO_TRUE;
-    }
-    case VOCTRL_QUERY_EOSD_FORMAT: {
-        int format = *(int *)data;
-        return (format == SUBBITMAP_LIBASS || format == SUBBITMAP_RGBA)
-               ? VO_TRUE : VO_NOTIMPL;
-    }
     }
     return VO_NOTIMPL;
 }
@@ -543,7 +547,7 @@ const struct vo_driver video_out_lavc = {
     .control = control,
     .uninit = uninit,
     .check_events = check_events,
-    .draw_osd = draw_osd_with_eosd,
+    .draw_osd = draw_osd,
     .flip_page_timed = flip_page_timed,
 };
 

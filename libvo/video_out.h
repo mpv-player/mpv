@@ -265,12 +265,13 @@ struct vo {
     int panscan_x;
     int panscan_y;
     float panscan_amount;
-    float monitor_aspect;
+    float monitor_par;
     struct aspect_data {
         int orgw; // real width
         int orgh; // real height
         int prew; // prescaled width
         int preh; // prescaled height
+        float par; // pixel aspect ratio out of orgw/orgh and prew/preh
         int scrw; // horizontal resolution
         int scrh; // vertical resolution
         float asp;

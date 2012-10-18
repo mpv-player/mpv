@@ -283,6 +283,7 @@ void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
         return;
 
     ass_set_frame_size(osd->osd_render, osd->res.w, osd->res.h);
+    ass_set_aspect_ratio(osd->osd_render, osd->res.display_par, 1.0);
     mp_ass_render_frame(osd->osd_render, obj->osd_track, 0,
                         &obj->parts_cache, out_imgs);
     talloc_steal(obj, obj->parts_cache);

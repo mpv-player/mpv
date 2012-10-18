@@ -43,7 +43,6 @@
 
 #include "sub/sub.h"
 #include "sub/dec_sub.h"
-#include "sub/draw_bmp.h"
 
 #include "libmpcodecs/sws_utils.h"
 #define MODE_RGB  0x1
@@ -446,9 +445,12 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 
     struct sub_render_params subparams = {
         .pts = osd->vo_sub_pts,
-        .dim = {.w = img.w, .h = img.h},
-        .normal_scale = 1,
-        .vsfilter_scale = 1,
+        .dim = {
+            .w = img.w,
+            .h = img.h,
+            .display_par = vo->monitor_par,
+            .video_par = vo->aspdat.par,
+        },
     };
 
     osd_draw_on_image(osd, &img, &csp, &subparams);

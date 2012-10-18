@@ -25,18 +25,13 @@
 
 #include "video_out.h"
 
-void aspect_save_orig(struct vo *vo, int orgw, int orgh)
+void aspect_save_videores(struct vo *vo, int w, int h, int d_w, int d_h)
 {
-    mp_msg(MSGT_VO, MSGL_DBG2, "aspect_save_orig %dx%d\n", orgw, orgh);
-    vo->aspdat.orgw = orgw;
-    vo->aspdat.orgh = orgh;
-}
-
-void aspect_save_prescale(struct vo *vo, int prew, int preh)
-{
-    mp_msg(MSGT_VO, MSGL_DBG2, "aspect_save_prescale %dx%d\n", prew, preh);
-    vo->aspdat.prew = prew;
-    vo->aspdat.preh = preh;
+    vo->aspdat.orgw = w;
+    vo->aspdat.orgh = h;
+    vo->aspdat.prew = d_w;
+    vo->aspdat.preh = d_h;
+    vo->aspdat.par = (double)d_w / d_h * h / w;
 }
 
 void aspect_save_screenres(struct vo *vo, int scrw, int scrh)
@@ -52,9 +47,9 @@ void aspect_save_screenres(struct vo *vo, int scrw, int scrh)
     vo->aspdat.scrw = scrw;
     vo->aspdat.scrh = scrh;
     if (opts->force_monitor_aspect)
-        vo->monitor_aspect = opts->force_monitor_aspect;
+        vo->monitor_par = opts->force_monitor_aspect * scrh / scrw;
     else
-        vo->monitor_aspect = opts->monitor_pixel_aspect * scrw / scrh;
+        vo->monitor_par = 1.0 / opts->monitor_pixel_aspect;
 }
 
 /* aspect is called with the source resolution and the
@@ -64,17 +59,17 @@ void aspect_save_screenres(struct vo *vo, int scrw, int scrh)
 void aspect_fit(struct vo *vo, int *srcw, int *srch, int fitw, int fith)
 {
     struct aspect_data *aspdat = &vo->aspdat;
-    float pixelaspect = vo->monitor_aspect * aspdat->scrh / aspdat->scrw;
+    float pixelaspect = vo->monitor_par;
 
-    mp_msg(MSGT_VO, MSGL_DBG2, "aspect(0) fitin: %dx%d screenaspect: %.2f\n",
-           fitw, fith, vo->monitor_aspect);
+    mp_msg(MSGT_VO, MSGL_DBG2, "aspect(0) fitin: %dx%d monitor_par: %.2f\n",
+           fitw, fith, vo->monitor_par);
     *srcw = fitw;
-    *srch = (float)fitw / aspdat->prew * aspdat->preh * pixelaspect;
+    *srch = (float)fitw / aspdat->prew * aspdat->preh / pixelaspect;
     *srch += *srch % 2; // round
     mp_msg(MSGT_VO, MSGL_DBG2, "aspect(1) wh: %dx%d (org: %dx%d)\n",
            *srcw, *srch, aspdat->prew, aspdat->preh);
     if (*srch > fith || *srch < aspdat->orgh) {
-        int tmpw = (float)fith / aspdat->preh * aspdat->prew / pixelaspect;
+        int tmpw = (float)fith / aspdat->preh * aspdat->prew * pixelaspect;
         tmpw += tmpw % 2; // round
         if (tmpw <= fitw) {
             *srch = fith;

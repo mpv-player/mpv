@@ -63,7 +63,7 @@ static const struct vf_priv_s {
     int auto_insert;
 
     struct osd_state *osd;
-    double aspect_correction;
+    struct mp_eosd_res dim;
 
     unsigned char *planes[3];
     struct line_limits {
@@ -92,7 +92,17 @@ static int config(struct vf_instance *vf,
     vf->priv->planes[2]   = malloc(vf->priv->outw * vf->priv->outh);
     vf->priv->line_limits = malloc((vf->priv->outh + 1) / 2 * sizeof(*vf->priv->line_limits));
 
-    vf->priv->aspect_correction = (double)width / height * d_height / d_width;
+    double dar = (double)d_width / d_height;
+    double sar = (double)width / height;
+
+    vf->priv->dim = (struct mp_eosd_res) {
+        .w = vf->priv->outw,
+        .h = vf->priv->outh,
+        .mt = opts->ass_top_margin,
+        .mb = opts->ass_bottom_margin,
+        .display_par = sar / dar,
+        .video_par = dar / sar,
+    };
 
     return vf_next_config(vf, vf->priv->outw, vf->priv->outh, d_width,
 			  d_height, flags, outfmt);
@@ -354,18 +364,12 @@ static int render_frame(struct vf_instance *vf, mp_image_t *mpi,
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     struct vf_priv_s *priv = vf->priv;
-    struct MPOpts *opts = vf->opts;
     struct osd_state *osd = priv->osd;
     struct sub_bitmaps imgs = (struct sub_bitmaps) {0};
     if (pts != MP_NOPTS_VALUE) {
         struct sub_render_params subparams = {
             .pts = pts,
-            .dim = { .w = vf->priv->outw,
-                     .h = vf->priv->outh,
-                     .mt = opts->ass_top_margin,
-                     .mb = opts->ass_bottom_margin },
-            .normal_scale = vf->priv->aspect_correction,
-            .vsfilter_scale = 1,
+            .dim = priv->dim,
         };
         bool formats[SUBBITMAP_COUNT] = {[SUBBITMAP_LIBASS] = true};
         osd_draw_sub(osd, &imgs, &subparams, formats);

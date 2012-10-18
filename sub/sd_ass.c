@@ -137,11 +137,11 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
     if (params->pts == MP_NOPTS_VALUE)
         return;
 
-    double scale = params->normal_scale;
+    double scale = params->dim.display_par;
     bool use_vs_aspect = opts->ass_style_override
                          ? opts->ass_vsfilter_aspect_compat : 1;
     if (ctx->vsfilter_aspect && use_vs_aspect)
-        scale = params->vsfilter_scale;
+        scale = scale * params->dim.video_par;
     ASS_Renderer *renderer = osd->ass_renderer;
     mp_ass_configure(renderer, opts, &params->dim);
     ass_set_aspect_ratio(renderer, scale, 1);
