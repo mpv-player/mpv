@@ -171,8 +171,8 @@ direct3d_shaders (Windows only)
         Never render YUV video with more than 8 bits per component.
         (Using this flag will force software conversion to 8 bit.)
 
-    disable-eosd
-        Disable EOSD rendering for subtitles.
+    disable-osd
+        Disable OSD rendering for subtitles.
         (Using this flag might force the insertion of the 'ass' video filter,
         which will render the subtitles in software.)
 

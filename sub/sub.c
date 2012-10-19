@@ -91,21 +91,12 @@ void *vo_vobsub=NULL;
 static struct osd_state *global_osd;
 
 
-static void osd_update_ext(struct osd_state *osd, struct mp_eosd_res res)
+static bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b)
 {
-    struct mp_eosd_res old = osd->res;
-    if (old.w != res.w || old.h != res.h || old.ml != res.ml || old.mt != res.mt
-        || old.mr != res.mr || old.mb != res.mb)
-    {
-        osd->res = res;
-        for (int n = 0; n < MAX_OSD_PARTS; n++)
-            osd->objs[n]->force_redraw = true;
-    }
-}
-
-void osd_update(struct osd_state *osd, int w, int h)
-{
-    osd_update_ext(osd, (struct mp_eosd_res) {.w = w, .h = h});
+    return a.w == b.w && a.h == b.h && a.ml == b.ml && a.mt == b.mt
+        && a.mr == b.mr && a.mb == b.mb
+        && a.display_par == b.display_par
+        && a.video_par == b.video_par;
 }
 
 struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
@@ -163,22 +154,24 @@ static bool spu_visible(struct osd_state *osd, struct osd_object *obj)
 }
 
 static void render_object(struct osd_state *osd, struct osd_object *obj,
-                          struct sub_bitmaps *out_imgs,
-                          struct sub_render_params *sub_params,
-                          const bool formats[SUBBITMAP_COUNT])
+                          struct mp_osd_res res, double video_pts,
+                          const bool formats[SUBBITMAP_COUNT],
+                          struct sub_bitmaps *out_imgs)
 {
     *out_imgs = (struct sub_bitmaps) {0};
 
+    if (!osd_res_equals(res, obj->vo_res))
+        obj->force_redraw = true;
+    obj->vo_res = res;
+
     if (obj->type == OSDTYPE_SPU) {
-        if (spu_visible(osd, obj)) {
-            //spudec_get_bitmap(vo_spudec, osd->res.w, osd->res.h, out_imgs);
-            spudec_get_indexed(vo_spudec, &osd->res, out_imgs);
-        }
+        if (spu_visible(osd, obj))
+            spudec_get_indexed(vo_spudec, &obj->vo_res, out_imgs);
     } else if (obj->type == OSDTYPE_SUB) {
-        struct sub_render_params p = *sub_params;
-        if (p.pts != MP_NOPTS_VALUE)
-            p.pts += sub_delay - osd->sub_offset;
-        sub_get_bitmaps(osd, &p, out_imgs);
+        double sub_pts = video_pts;
+        if (sub_pts != MP_NOPTS_VALUE)
+            sub_pts += sub_delay - osd->sub_offset;
+        sub_get_bitmaps(osd, obj->vo_res, sub_pts, out_imgs);
     } else {
         osd_object_get_bitmaps(osd, obj, out_imgs);
     }
@@ -212,23 +205,21 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
 
     bool cached = false; // do we have a copy of all the image data?
 
-    if (formats[SUBBITMAP_RGBA] && out_imgs->format == SUBBITMAP_INDEXED) {
+    if (formats[SUBBITMAP_RGBA] && out_imgs->format == SUBBITMAP_INDEXED)
         cached |= osd_conv_idx_to_rgba(obj->cache[0], out_imgs);
-    }
 
     if (cached)
         obj->cached = *out_imgs;
 }
 
 // draw_flags is a bit field of OSD_DRAW_* constants
-void osd_draw(struct osd_state *osd, struct sub_render_params *params,
-              int draw_flags, const bool formats[SUBBITMAP_COUNT],
+void osd_draw(struct osd_state *osd, struct mp_osd_res res,
+              double video_pts, int draw_flags,
+              const bool formats[SUBBITMAP_COUNT],
               void (*cb)(void *ctx, struct sub_bitmaps *imgs), void *cb_ctx)
 {
     if (draw_flags & OSD_DRAW_SUB_FILTER)
         draw_flags |= OSD_DRAW_SUB_ONLY;
-
-    osd_update_ext(osd, params->dim);
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = osd->objs[n];
@@ -241,7 +232,7 @@ void osd_draw(struct osd_state *osd, struct sub_render_params *params,
             continue;
 
         struct sub_bitmaps imgs;
-        render_object(osd, obj, &imgs, params, formats);
+        render_object(osd, obj, res, video_pts, formats, &imgs);
         if (imgs.num_parts > 0) {
             if (formats[imgs.format]) {
                 cb(cb_ctx, &imgs);
@@ -252,35 +243,6 @@ void osd_draw(struct osd_state *osd, struct sub_render_params *params,
             }
         }
     }
-}
-
-static void vo_draw_eosd(void *ctx, struct sub_bitmaps *imgs)
-{
-    struct vo *vo = ctx;
-    vo_control(vo, VOCTRL_DRAW_EOSD, imgs);
-}
-
-void draw_osd_with_eosd(struct vo *vo, struct osd_state *osd)
-{
-    struct mp_eosd_res dim = {0};
-    if (vo_control(vo, VOCTRL_GET_EOSD_RES, &dim) != VO_TRUE)
-        return;
-
-    bool formats[SUBBITMAP_COUNT];
-    for (int n = 0; n < SUBBITMAP_COUNT; n++) {
-        int data = n;
-        formats[n] = vo_control(vo, VOCTRL_QUERY_EOSD_FORMAT, &data) == VO_TRUE;
-    }
-
-    dim.display_par = vo->monitor_par;
-    dim.video_par = vo->aspdat.par;
-
-    struct sub_render_params subparams = {
-        .pts = osd->vo_sub_pts,
-        .dim = dim,
-    };
-
-    osd_draw(osd, &subparams, 0, formats, &vo_draw_eosd, vo);
 }
 
 struct draw_on_image_closure {
@@ -301,12 +263,12 @@ static void draw_on_image(void *ctx, struct sub_bitmaps *imgs)
 }
 
 // Returns whether anything was drawn.
-bool osd_draw_on_image(struct osd_state *osd, struct sub_render_params *params,
-                       int draw_flags, struct mp_image *dest,
+bool osd_draw_on_image(struct osd_state *osd, struct mp_osd_res res,
+                       double video_pts, int draw_flags, struct mp_image *dest,
                        struct mp_csp_details *dest_csp)
 {
     struct draw_on_image_closure closure = {osd, dest, dest_csp};
-    osd_draw(osd, params, draw_flags, mp_draw_sub_formats,
+    osd_draw(osd, res, video_pts, draw_flags, mp_draw_sub_formats,
              &draw_on_image, &closure);
     return closure.changed;
 }
@@ -320,7 +282,7 @@ void vo_osd_changed(int new_value)
     }
 }
 
-bool vo_osd_has_changed(struct osd_state *osd)
+bool osd_has_changed(struct osd_state *osd)
 {
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         if (osd->objs[n]->force_redraw)
@@ -329,10 +291,8 @@ bool vo_osd_has_changed(struct osd_state *osd)
     return false;
 }
 
-// Needed for VOs using the old OSD API (osd_draw_text_[ext]).
-void vo_osd_reset_changed(void)
+void osd_reset_changed(struct osd_state *osd)
 {
-    struct osd_state *osd = global_osd;
     for (int n = 0; n < MAX_OSD_PARTS; n++)
         osd->objs[n]->force_redraw = false;
 }

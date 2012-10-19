@@ -22,11 +22,11 @@
 #include <stdint.h>
 
 struct sub_bitmaps;
-struct mp_eosd_res;
+struct mp_osd_res;
 
 void spudec_heartbeat(void *this, unsigned int pts100);
 void spudec_assemble(void *this, unsigned char *packet, unsigned int len, int pts100);
-void spudec_get_indexed(void *this, struct mp_eosd_res *dim, struct sub_bitmaps *res);
+void spudec_get_indexed(void *this, struct mp_osd_res *dim, struct sub_bitmaps *res);
 void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigned int frame_height, uint8_t *extradata, int extradata_len);
 void *spudec_new(unsigned int *palette);
 void spudec_free(void *this);

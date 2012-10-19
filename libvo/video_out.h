@@ -64,9 +64,6 @@ enum mp_voctrl {
     VOCTRL_ONTOP,
     VOCTRL_ROOTWIN,
     VOCTRL_BORDER,
-    VOCTRL_DRAW_EOSD,
-    VOCTRL_GET_EOSD_RES,                // struct mp_eosd_res
-    VOCTRL_QUERY_EOSD_FORMAT,           // int
 
     VOCTRL_SET_DEINTERLACE,
     VOCTRL_GET_DEINTERLACE,

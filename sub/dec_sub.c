@@ -58,7 +58,7 @@ void sub_decode(struct sh_sub *sh, struct osd_state *osd, void *data,
         sh->sd_driver->decode(sh, osd, data, data_len, pts, duration);
 }
 
-void sub_get_bitmaps(struct osd_state *osd, struct sub_render_params *params,
+void sub_get_bitmaps(struct osd_state *osd, struct mp_osd_res dim, double pts,
                      struct sub_bitmaps *res)
 {
     struct MPOpts *opts = osd->opts;
@@ -74,7 +74,7 @@ void sub_get_bitmaps(struct osd_state *osd, struct sub_render_params *params,
         osd->switch_sub_id++;
     } else {
         if (osd->sh_sub->sd_driver->get_bitmaps)
-            osd->sh_sub->sd_driver->get_bitmaps(osd->sh_sub, osd, params, res);
+            osd->sh_sub->sd_driver->get_bitmaps(osd->sh_sub, osd, dim, pts, res);
     }
 
     res->bitmap_id += osd->switch_sub_id;

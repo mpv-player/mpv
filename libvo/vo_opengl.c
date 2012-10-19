@@ -1420,11 +1420,10 @@ static mp_image_t *get_window_screenshot(struct gl_priv *p)
     return image;
 }
 
-static void draw_eosd(struct gl_priv *p, struct sub_bitmaps *imgs)
+static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
 {
+    struct gl_priv *p = ctx;
     GL *gl = p->gl;
-
-    assert(p->osd);
 
     struct mpgl_osd_part *osd = mpgl_osd_generate(p->osd, imgs);
     if (!osd)
@@ -1459,12 +1458,31 @@ static void draw_eosd(struct gl_priv *p, struct sub_bitmaps *imgs)
     debug_check_gl(p, "before drawing osd");
 
     gl->UseProgram(p->osd_programs[osd->format]);
-    mpgl_osd_gl_set_state(p->osd, osd);
+    mpgl_osd_set_gl_state(p->osd, osd);
     draw_triangles(p, osd->vertices, osd->num_vertices);
-    mpgl_osd_gl_unset_state(p->osd, osd);
+    mpgl_osd_unset_gl_state(p->osd, osd);
     gl->UseProgram(0);
 
     debug_check_gl(p, "after drawing osd");
+}
+
+static void draw_osd(struct vo *vo, struct osd_state *osd)
+{
+    struct gl_priv *p = vo->priv;
+    assert(p->osd);
+
+    struct mp_osd_res res = {
+        .w = vo->dwidth,
+        .h = vo->dheight,
+        .ml = p->border_x,
+        .mr = p->border_x,
+        .mt = p->border_y,
+        .mb = p->border_y,
+        .display_par = vo->monitor_par,
+        .video_par = vo->aspdat.par,
+    };
+
+    osd_draw(osd, res, osd->vo_pts, 0, p->osd->formats, draw_osd_cb, p);
 }
 
 // Disable features that are not supported with the current OpenGL version.
@@ -1691,7 +1709,7 @@ static int query_format(uint32_t format)
 {
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP |
                VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE |
-               VFCAP_OSD | VFCAP_EOSD | VFCAP_EOSD_RGBA;
+               VFCAP_OSD;
     if (!init_format(format, NULL))
         return 0;
     return caps;
@@ -1767,24 +1785,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return query_format(*(uint32_t *)data);
     case VOCTRL_DRAW_IMAGE:
         return draw_image(p, data);
-    case VOCTRL_DRAW_EOSD:
-        if (!data)
-            return VO_FALSE;
-        draw_eosd(p, data);
-        return VO_TRUE;
-    case VOCTRL_GET_EOSD_RES: {
-        struct mp_eosd_res *r = data;
-        r->w = vo->dwidth;
-        r->h = vo->dheight;
-        r->ml = r->mr = p->border_x;
-        r->mt = r->mb = p->border_y;
-        return VO_TRUE;
-    }
-    case VOCTRL_QUERY_EOSD_FORMAT: {
-        int f = *(int *)data;
-        return (mpgl_osd_query_format(p->osd, f) && osd_shaders[f])
-               ? VO_TRUE : VO_NOTIMPL;
-    }
     case VOCTRL_ONTOP:
         if (!p->glctx->ontop)
             break;
@@ -2304,7 +2304,7 @@ const struct vo_driver video_out_opengl = {
     .config = config,
     .control = control,
     .draw_slice = draw_slice,
-    .draw_osd = draw_osd_with_eosd,
+    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,
@@ -2322,7 +2322,7 @@ const struct vo_driver video_out_opengl_hq = {
     .config = config,
     .control = control,
     .draw_slice = draw_slice,
-    .draw_osd = draw_osd_with_eosd,
+    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,

@@ -2292,7 +2292,7 @@ int reinit_video_chain(struct MPContext *mpctx)
                                                               &retcode);
             if (vf_ass)
                 sh_video->vfilter = vf_ass;
-            else if (retcode == -1) // vf_ass open() returns -1 VO has EOSD
+            else if (retcode == -1) // vf_ass open() returns -1 VO has OSD
                 mp_msg(MSGT_CPLAYER, MSGL_V, "[ass] vf_ass not needed\n");
             else
                 mp_msg(MSGT_CPLAYER, MSGL_ERR,
@@ -2546,17 +2546,15 @@ void unpause_player(struct MPContext *mpctx)
 
 static int redraw_osd(struct MPContext *mpctx)
 {
-    struct sh_video *sh_video = mpctx->sh_video;
-    struct vf_instance *vf = sh_video->vfilter;
-    if (vo_redraw_frame(mpctx->video_out) < 0)
+    struct vo *vo = mpctx->video_out;
+    if (vo_redraw_frame(vo) < 0)
         return -1;
-    mpctx->osd->vo_sub_pts = mpctx->video_pts;
 
-    // NOTE: probably should use VO ctrl directly, and/or check if a filter does
-    //       OSD rendering (a filter can't redraw anything here)
-    vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
-    vo_osd_reset_changed();
-    vo_flip_page(mpctx->video_out, 0, -1);
+    mpctx->osd->vo_pts = mpctx->video_pts;
+    vo_draw_osd(vo, mpctx->osd);
+    osd_reset_changed(mpctx->osd);
+
+    vo_flip_page(vo, 0, -1);
     return 0;
 }
 
@@ -3160,10 +3158,10 @@ static void run_playloop(struct MPContext *mpctx)
         mpctx->video_pts = sh_video->pts;
         update_subtitles(mpctx, sh_video->pts);
         update_osd_msg(mpctx);
-        struct vf_instance *vf = sh_video->vfilter;
-        mpctx->osd->vo_sub_pts = mpctx->video_pts;
-        vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
-        vo_osd_reset_changed();
+
+        mpctx->osd->vo_pts = mpctx->video_pts;
+        vo_draw_osd(vo, mpctx->osd);
+        osd_reset_changed(mpctx->osd);
 
         mpctx->time_frame -= get_relative_time(mpctx);
         mpctx->time_frame -= vo->flip_queue_offset;
@@ -3305,8 +3303,7 @@ static void run_playloop(struct MPContext *mpctx)
         if (sleeptime > 0) {
             if (!mpctx->sh_video)
                 goto novideo;
-            if (vo_osd_has_changed(mpctx->osd) || mpctx->video_out->want_redraw)
-            {
+            if (osd_has_changed(mpctx->osd) || mpctx->video_out->want_redraw) {
                 if (redraw_osd(mpctx) < 0) {
                     if (mpctx->paused && video_left)
                         add_step_frame(mpctx);

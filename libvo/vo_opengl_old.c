@@ -26,6 +26,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "config.h"
 #include "talloc.h"
@@ -229,11 +230,14 @@ static void update_yuvconv(struct vo *vo)
     }
 }
 
-// Note: relies on state being setup, like projection matrix and blending
-static void render_osd(struct vo *vo, struct sub_bitmaps *imgs)
+static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
+    assert(p->osd);
+
+    if (!p->use_osd)
+        return;
 
     if (!p->scaled_osd) {
         gl->MatrixMode(GL_PROJECTION);
@@ -241,9 +245,26 @@ static void render_osd(struct vo *vo, struct sub_bitmaps *imgs)
         gl->LoadIdentity();
         gl->Ortho(0, vo->dwidth, vo->dheight, 0, -1, 1);
     }
+
     gl->Color4ub((p->osd_color >> 16) & 0xff, (p->osd_color >> 8) & 0xff,
                  p->osd_color & 0xff, 0xff - (p->osd_color >> 24));
-    mpgl_osd_draw_legacy(p->osd, imgs);
+
+    struct mp_osd_res res = {
+        .w = vo->dwidth,
+        .h = vo->dheight,
+        .display_par = vo->monitor_par,
+        .video_par = vo->aspdat.par,
+    };
+    if (p->scaled_osd) {
+        res.w = p->image_width;
+        res.h = p->image_height;
+    } else if (aspect_scaling()) {
+        res.ml = res.mr = p->ass_border_x;
+        res.mt = res.mb = p->ass_border_y;
+    }
+
+    mpgl_osd_draw_legacy(p->osd, osd, res);
+
     if (!p->scaled_osd)
         gl->PopMatrix();
 }
@@ -843,7 +864,7 @@ static int query_format(struct vo *vo, uint32_t format)
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP |
                VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
     if (p->use_osd)
-        caps |= VFCAP_OSD | VFCAP_EOSD;
+        caps |= VFCAP_OSD;
     if (format == IMGFMT_RGB24 || format == IMGFMT_RGBA)
         return caps;
     if (p->use_yuv && mp_get_chroma_shift(format, NULL, NULL, &depth) &&
@@ -1077,25 +1098,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return query_format(vo, *(uint32_t *)data);
     case VOCTRL_DRAW_IMAGE:
         return draw_image(vo, data);
-    case VOCTRL_DRAW_EOSD:
-        render_osd(vo, data);
-        return VO_TRUE;
-    case VOCTRL_QUERY_EOSD_FORMAT:
-        return mpgl_osd_query_format(p->osd, *(int *)data) ? VO_TRUE : VO_NOTIMPL;
-    case VOCTRL_GET_EOSD_RES: {
-        struct mp_eosd_res *r = data;
-        r->w = vo->dwidth;
-        r->h = vo->dheight;
-        r->mt = r->mb = r->ml = r->mr = 0;
-        if (p->scaled_osd) {
-            r->w = p->image_width;
-            r->h = p->image_height;
-        } else if (aspect_scaling()) {
-            r->ml = r->mr = p->ass_border_x;
-            r->mt = r->mb = p->ass_border_y;
-        }
-        return VO_TRUE;
-    }
     case VOCTRL_ONTOP:
         if (!p->glctx->ontop)
             break;
@@ -1177,7 +1179,7 @@ const struct vo_driver video_out_opengl_old = {
     .config = config,
     .control = control,
     .draw_slice = draw_slice,
-    .draw_osd = draw_osd_with_eosd,
+    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,

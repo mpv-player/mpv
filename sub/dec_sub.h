@@ -4,16 +4,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "sub.h"
+#include "sub/sub.h"
 
 struct sh_sub;
 struct ass_track;
-struct MPOpts *opts;
-
-struct sub_render_params {
-    double pts;
-    struct mp_eosd_res dim;
-};
+struct MPOpts;
 
 static inline bool is_text_sub(int type)
 {
@@ -22,7 +17,7 @@ static inline bool is_text_sub(int type)
 
 void sub_decode(struct sh_sub *sh, struct osd_state *osd, void *data,
                 int data_len, double pts, double duration);
-void sub_get_bitmaps(struct osd_state *osd, struct sub_render_params *params,
+void sub_get_bitmaps(struct osd_state *osd, struct mp_osd_res dim, double pts,
                      struct sub_bitmaps *res);
 void sub_init(struct sh_sub *sh, struct osd_state *osd);
 void sub_reset(struct sh_sub *sh, struct osd_state *osd);

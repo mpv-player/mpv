@@ -42,7 +42,6 @@
 #endif
 
 #include "sub/sub.h"
-#include "sub/dec_sub.h"
 
 #include "libmpcodecs/sws_utils.h"
 #define MODE_RGB  0x1
@@ -443,17 +442,14 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 
     struct mp_csp_details csp = MP_CSP_DETAILS_DEFAULTS;
 
-    struct sub_render_params subparams = {
-        .pts = osd->vo_sub_pts,
-        .dim = {
-            .w = img.w,
-            .h = img.h,
-            .display_par = vo->monitor_par,
-            .video_par = vo->aspdat.par,
-        },
+    struct mp_osd_res res = {
+        .w = img.w,
+        .h = img.h,
+        .display_par = vo->monitor_par,
+        .video_par = vo->aspdat.par,
     };
 
-    osd_draw_on_image(osd, &subparams, 0, &img, &csp);
+    osd_draw_on_image(osd, res, osd->vo_pts, 0, &img, &csp);
 }
 
 static void flip_page(struct vo *vo)

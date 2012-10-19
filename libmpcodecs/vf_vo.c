@@ -91,11 +91,6 @@ static int control(struct vf_instance *vf, int request, void *data)
         return vo_control(video_out, VOCTRL_GET_YUV_COLORSPACE, data) == true;
     case VFCTRL_SET_YUV_COLORSPACE:
         return vo_control(video_out, VOCTRL_SET_YUV_COLORSPACE, data) == true;
-    case VFCTRL_DRAW_OSD:
-        if (!video_out->config_ok)
-            return CONTROL_FALSE;    // vo not configured?
-        vo_draw_osd(video_out, data);
-        return CONTROL_TRUE;
     case VFCTRL_SET_EQUALIZER: {
         vf_equalizer_t *eq = data;
         if (!video_out->config_ok)

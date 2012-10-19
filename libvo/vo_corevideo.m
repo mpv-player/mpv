@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <assert.h>
+
 #import "vo_corevideo.h"
 
 // mplayer includes
@@ -50,6 +52,7 @@ struct priv {
     unsigned int image_width;
     unsigned int image_height;
     struct mp_csp_details colorspace;
+    int ass_border_x, ass_border_y;
 
     CVPixelBufferRef pixelBuffer;
     CVOpenGLTextureCacheRef textureCache;
@@ -84,6 +87,8 @@ static void resize(struct vo *vo, int width, int height)
         scale_x = (GLdouble)new_w / (GLdouble)p->image_width;
         scale_y = (GLdouble)new_h / (GLdouble)p->image_height;
         gl->Scaled(scale_x, scale_y, 1);
+        p->ass_border_x = (vo->dwidth - new_w) / 2;
+        p->ass_border_y = (vo->dheight - new_h) / 2;
     }
 
     gl->Ortho(0, p->image_width, p->image_height, 0, -1.0, 1.0);
@@ -249,7 +254,7 @@ static int query_format(struct vo *vo, uint32_t format)
     struct priv *p = vo->priv;
     const int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
                       VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN |
-                      VOCAP_NOSLICES | VFCAP_EOSD;
+                      VOCAP_NOSLICES;
     switch (format) {
         case IMGFMT_YUY2:
             p->pixelFormat = kYUVSPixelFormat;
@@ -293,6 +298,26 @@ static int preinit(struct vo *vo, const char *arg)
     return 0;
 }
 
+static void draw_osd(struct vo *vo, struct osd_state *osd)
+{
+    struct priv *p = vo->priv;
+    GL *gl = p->mpglctx->gl;
+    assert(p->osd);
+
+    struct mp_osd_res res = {
+        .w = vo->dwidth,
+        .h = vo->dheight,
+        .ml = p->ass_border_x,
+        .mr = p->ass_border_x,
+        .mt = p->ass_border_y,
+        .mb = p->ass_border_y,
+        .display_par = vo->monitor_par,
+        .video_par = vo->aspdat.par,
+    };
+
+    mpgl_osd_draw_legacy(p->osd, osd, res);
+}
+
 static CFStringRef get_cv_csp_matrix(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -324,19 +349,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
             return draw_image(vo, data);
         case VOCTRL_QUERY_FORMAT:
             return query_format(vo, *(uint32_t*)data);
-        case VOCTRL_DRAW_EOSD:
-            mpgl_osd_draw_legacy(p->osd, data);
-            return VO_TRUE;
-        case VOCTRL_QUERY_EOSD_FORMAT:
-            return mpgl_osd_query_format(p->osd, *(int *)data)
-                   ? VO_TRUE : VO_NOTIMPL;
-        case VOCTRL_GET_EOSD_RES: {
-            struct mp_eosd_res *r = data;
-            r->w = vo->dwidth;
-            r->h = vo->dheight;
-            r->mt = r->mb = r->ml = r->mr = 0;
-            return VO_TRUE;
-        }
         case VOCTRL_ONTOP:
             p->mpglctx->ontop(vo);
             return VO_TRUE;
@@ -377,7 +389,7 @@ const struct vo_driver video_out_corevideo = {
     .preinit = preinit,
     .config = config,
     .control = control,
-    .draw_osd = draw_osd_with_eosd,
+    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,

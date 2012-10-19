@@ -176,13 +176,13 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
 }
 
 static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
-                        struct sub_render_params *params,
+                        struct mp_osd_res d, double pts,
                         struct sub_bitmaps *res)
 {
     struct sd_lavc_priv *priv = sh->context;
 
-    if (priv->endpts != MP_NOPTS_VALUE && (params->pts >= priv->endpts ||
-                                           params->pts < priv->endpts - 300))
+    if (priv->endpts != MP_NOPTS_VALUE && (pts >= priv->endpts ||
+                                           pts < priv->endpts - 300))
         clear(priv);
     if (priv->bitmaps_changed && priv->count > 0)
         priv->outbitmaps = talloc_memdup(priv, priv->inbitmaps,
@@ -190,14 +190,13 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
     int inw = priv->avctx->width;
     int inh = priv->avctx->height;
     guess_resolution(sh->type, &inw, &inh);
-    struct mp_eosd_res *d = &params->dim;
-    double xscale = (double) (d->w - d->ml - d->mr) / inw;
-    double yscale = (double) (d->h - d->mt - d->mb) / inh;
+    double xscale = (double) (d.w - d.ml - d.mr) / inw;
+    double yscale = (double) (d.h - d.mt - d.mb) / inh;
     for (int i = 0; i < priv->count; i++) {
         struct sub_bitmap *bi = &priv->inbitmaps[i];
         struct sub_bitmap *bo = &priv->outbitmaps[i];
-        bo->x = bi->x * xscale + d->ml;
-        bo->y = bi->y * yscale + d->mt;
+        bo->x = bi->x * xscale + d.ml;
+        bo->y = bi->y * yscale + d.mt;
         bo->dw = bi->w * xscale;
         bo->dh = bi->h * yscale;
     }

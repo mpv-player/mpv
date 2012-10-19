@@ -198,8 +198,8 @@ static int query_format(struct vo *vo, uint32_t format)
         VFCAP_CSP_SUPPORTED |
             // we can do it
         VFCAP_CSP_SUPPORTED_BY_HW |
-            // we don't convert colorspaces here (TODO: if we add EOSD rendering, only set this flag if EOSD can be rendered without extra conversions)
-        VFCAP_OSD | VFCAP_EOSD |
+            // we don't convert colorspaces here
+        VFCAP_OSD |
             // we have OSD
         VOCAP_NOSLICES;
             // we don't use slices
@@ -494,17 +494,15 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         double sar = (double)asp.orgw / asp.orgh;
         double dar = (double)asp.prew / asp.preh;
 
-        struct sub_render_params subparams = {
-            .pts = osd->vo_sub_pts,
-            .dim = {
-                .w = asp.orgw,
-                .h = asp.orgh,
-                .display_par = sar / dar,
-                .video_par = dar / sar,
-            },
+        struct mp_osd_res dim = {
+            .w = asp.orgw,
+            .h = asp.orgh,
+            .display_par = sar / dar,
+            .video_par = dar / sar,
         };
 
-        osd_draw_on_image(osd, &subparams, 0, vc->lastimg, &vc->colorspace);
+        osd_draw_on_image(osd, dim, osd->vo_pts, 0, vc->lastimg,
+                          &vc->colorspace);
     }
 }
 

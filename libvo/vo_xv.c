@@ -50,7 +50,6 @@
 #include "x11_common.h"
 #include "fastmemcpy.h"
 #include "sub/sub.h"
-#include "sub/dec_sub.h"
 #include "aspect.h"
 #include "csputils.h"
 #include "subopt-helper.h"
@@ -348,17 +347,14 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     struct vo_rect *dst = &ctx->dst_rect;
     double xvpar = (double)dst->width / dst->height * src->height / src->width;
 
-    struct sub_render_params subparams = {
-        .pts = osd->vo_sub_pts,
-        .dim = {
-            .w = ctx->image_width,
-            .h = ctx->image_height,
-            .display_par = vo->monitor_par / xvpar,
-            .video_par = vo->aspdat.par,
-        },
+    struct mp_osd_res res = {
+        .w = ctx->image_width,
+        .h = ctx->image_height,
+        .display_par = vo->monitor_par / xvpar,
+        .video_par = vo->aspdat.par,
     };
 
-    if (osd_draw_on_image(osd, &subparams, 0, &img, &csp))
+    if (osd_draw_on_image(osd, res, osd->vo_pts, 0, &img, &csp))
         ctx->unchanged_image = false;
 }
 
@@ -466,7 +462,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 static int query_format(struct xvctx *ctx, uint32_t format)
 {
     uint32_t i;
-    int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_EOSD | VFCAP_ACCEPT_STRIDE;       // FIXME! check for DOWN
+    int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_OSD | VFCAP_ACCEPT_STRIDE;       // FIXME! check for DOWN
 
     /* check image formats */
     for (i = 0; i < ctx->formats; i++) {

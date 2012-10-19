@@ -634,7 +634,7 @@ void spudec_set_forced_subs_only(void * const this, const unsigned int flag)
   }
 }
 
-void spudec_get_indexed(void *this, struct mp_eosd_res *dim,
+void spudec_get_indexed(void *this, struct mp_osd_res *dim,
                         struct sub_bitmaps *res)
 {
     spudec_handle_t *spu = this;

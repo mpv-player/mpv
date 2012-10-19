@@ -157,15 +157,15 @@ struct vdpctx {
     VdpChromaType                      vdp_chroma_type;
     VdpYCbCrFormat                     vdp_pixel_format;
 
-    // EOSD
-    struct eosd_bitmap_surface {
+    // OSD
+    struct osd_bitmap_surface {
         VdpRGBAFormat format;
         VdpBitmapSurface surface;
         uint32_t max_width;
         uint32_t max_height;
         struct bitmap_packer *packer;
         // List of surfaces to be rendered
-        struct eosd_target {
+        struct osd_target {
             VdpRect source;
             VdpRect dest;
             VdpColor color;
@@ -174,7 +174,7 @@ struct vdpctx {
         int render_count;
         int bitmap_id;
         int bitmap_pos_id;
-    } eosd_surfaces[MAX_OSD_PARTS];
+    } osd_surfaces[MAX_OSD_PARTS];
 
     // Video equalizer
     struct mp_csp_equalizer video_eq;
@@ -182,6 +182,8 @@ struct vdpctx {
     // These tell what's been initialized and uninit() should free/uninitialize
     bool mode_switched;
 };
+
+static bool status_ok(struct vo *vo);
 
 static int change_vdptime_sync(struct vdpctx *vc, unsigned int *t)
 {
@@ -800,10 +802,10 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
         vc->output_surfaces[i] = VDP_INVALID_HANDLE;
     vc->vdp_device = VDP_INVALID_HANDLE;
     for (int i = 0; i < MAX_OSD_PARTS; i++) {
-        struct eosd_bitmap_surface *sfc = &vc->eosd_surfaces[i];
+        struct osd_bitmap_surface *sfc = &vc->osd_surfaces[i];
         talloc_free(sfc->packer);
         sfc->bitmap_id = sfc->bitmap_pos_id = 0;
-        *sfc = (struct eosd_bitmap_surface){
+        *sfc = (struct osd_bitmap_surface){
             .surface = VDP_INVALID_HANDLE,
         };
     }
@@ -941,18 +943,18 @@ static struct bitmap_packer *make_packer(struct vo *vo, VdpRGBAFormat format)
     VdpStatus vdp_st = vdp->
         bitmap_surface_query_capabilities(vc->vdp_device, format,
                                           &(VdpBool){0}, &w_max, &h_max);
-    CHECK_ST_WARNING("Query to get max EOSD surface size failed");
+    CHECK_ST_WARNING("Query to get max OSD surface size failed");
     packer->w_max = w_max;
     packer->h_max = h_max;
     return packer;
 }
 
-static void draw_eosd(struct vo *vo, int index)
+static void draw_osd_part(struct vo *vo, int index)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
-    struct eosd_bitmap_surface *sfc = &vc->eosd_surfaces[index];
+    struct osd_bitmap_surface *sfc = &vc->osd_surfaces[index];
     VdpOutputSurface output_surface = vc->output_surfaces[vc->surface_num];
     int i;
 
@@ -986,16 +988,16 @@ static void draw_eosd(struct vo *vo, int index)
                                                  &sfc->targets[i].color,
                                                  blend,
                                                  VDP_OUTPUT_SURFACE_RENDER_ROTATE_0);
-        CHECK_ST_WARNING("EOSD: Error when rendering");
+        CHECK_ST_WARNING("OSD: Error when rendering");
     }
 }
 
-static void generate_eosd(struct vo *vo, struct sub_bitmaps *imgs)
+static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
-    struct eosd_bitmap_surface *sfc = &vc->eosd_surfaces[imgs->render_index];
+    struct osd_bitmap_surface *sfc = &vc->osd_surfaces[imgs->render_index];
     bool need_upload = false;
 
     if (imgs->bitmap_pos_id == sfc->bitmap_pos_id)
@@ -1007,7 +1009,7 @@ static void generate_eosd(struct vo *vo, struct sub_bitmaps *imgs)
         return;
 
     if (imgs->bitmap_id == sfc->bitmap_id)
-        goto eosd_skip_upload;
+        goto osd_skip_upload;
 
     need_upload = true;
     VdpRGBAFormat format;
@@ -1034,7 +1036,7 @@ static void generate_eosd(struct vo *vo, struct sub_bitmaps *imgs)
     sfc->packer->padding = imgs->scaled; // assume 2x2 filter on scaling
     int r = packer_pack_from_subbitmaps(sfc->packer, imgs);
     if (r < 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] EOSD bitmaps do not fit on "
+        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] OSD bitmaps do not fit on "
                "a surface with the maximum supported size\n");
         return;
     } else if (r == 1) {
@@ -1043,13 +1045,13 @@ static void generate_eosd(struct vo *vo, struct sub_bitmaps *imgs)
             CHECK_ST_WARNING("Error when calling vdp_bitmap_surface_destroy");
         }
         mp_msg(MSGT_VO, MSGL_V, "[vdpau] Allocating a %dx%d surface for "
-               "EOSD bitmaps.\n", sfc->packer->w, sfc->packer->h);
+               "OSD bitmaps.\n", sfc->packer->w, sfc->packer->h);
         vdp_st = vdp->bitmap_surface_create(vc->vdp_device, format,
                                             sfc->packer->w, sfc->packer->h,
                                             true, &sfc->surface);
         if (vdp_st != VDP_STATUS_OK)
             sfc->surface = VDP_INVALID_HANDLE;
-        CHECK_ST_WARNING("EOSD: error when creating surface");
+        CHECK_ST_WARNING("OSD: error when creating surface");
     }
     if (imgs->scaled) {
         char zeros[sfc->packer->used_width * format_size];
@@ -1060,7 +1062,7 @@ static void generate_eosd(struct vo *vo, struct sub_bitmaps *imgs)
                                  sfc->packer->used_height});
     }
 
-eosd_skip_upload:
+osd_skip_upload:
     if (sfc->surface == VDP_INVALID_HANDLE)
         return;
     if (sfc->packer->count > sfc->targets_size) {
@@ -1072,7 +1074,7 @@ eosd_skip_upload:
 
     for (int i = 0 ;i < sfc->packer->count; i++) {
         struct sub_bitmap *b = &imgs->parts[i];
-        struct eosd_target *target = sfc->targets + sfc->render_count;
+        struct osd_target *target = sfc->targets + sfc->render_count;
         int x = sfc->packer->result[i].x;
         int y = sfc->packer->result[i].y;
         target->source = (VdpRect){x, y, x + b->w, y + b->h};
@@ -1091,13 +1093,46 @@ eosd_skip_upload:
                                                &(const void *){b->bitmap},
                                                &(uint32_t){b->stride},
                                                &target->source);
-                CHECK_ST_WARNING("EOSD: putbits failed");
+                CHECK_ST_WARNING("OSD: putbits failed");
         }
         sfc->render_count++;
     }
 
     sfc->bitmap_id = imgs->bitmap_id;
     sfc->bitmap_pos_id = imgs->bitmap_pos_id;
+}
+
+static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
+{
+    struct vo *vo = ctx;
+    generate_osd_part(vo, imgs);
+    draw_osd_part(vo, imgs->render_index);
+}
+
+static void draw_osd(struct vo *vo, struct osd_state *osd)
+{
+    struct vdpctx *vc = vo->priv;
+
+    if (!status_ok(vo))
+        return;
+
+    static const bool formats[SUBBITMAP_COUNT] = {
+        [SUBBITMAP_LIBASS] = true,
+        [SUBBITMAP_RGBA] = true,
+    };
+
+    struct mp_osd_res res = {
+        .w = vo->dwidth,
+        .h = vo->dheight,
+        .ml = vc->border_x,
+        .mr = vc->border_x,
+        .mt = vc->border_y,
+        .mb = vc->border_y,
+        .display_par = vo->monitor_par,
+        .video_par = vo->aspdat.par,
+    };
+
+    osd_draw(osd, res, osd->vo_pts, 0, formats, draw_osd_cb, vo);
 }
 
 static int update_presentation_queue_status(struct vo *vo)
@@ -1401,8 +1436,8 @@ static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
 static int query_format(uint32_t format)
 {
     int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
-        | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_EOSD
-        | VFCAP_EOSD_RGBA | VFCAP_FLIP;
+        | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD
+        | VFCAP_FLIP;
     switch (format) {
     case IMGFMT_YV12:
     case IMGFMT_I420:
@@ -1451,7 +1486,7 @@ static void destroy_vdpau_objects(struct vo *vo)
     }
 
     for (int i = 0; i < MAX_OSD_PARTS; i++) {
-        struct eosd_bitmap_surface *sfc = &vc->eosd_surfaces[i];
+        struct osd_bitmap_surface *sfc = &vc->osd_surfaces[i];
         if (sfc->surface != VDP_INVALID_HANDLE) {
             vdp_st = vdp->bitmap_surface_destroy(sfc->surface);
             CHECK_ST_WARNING("Error when calling vdp_bitmap_surface_destroy");
@@ -1619,28 +1654,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_UPDATE_SCREENINFO:
         update_xinerama_info(vo);
         return VO_TRUE;
-    case VOCTRL_DRAW_EOSD:
-        if (!data)
-            return VO_FALSE;
-        if (status_ok(vo)) {
-            struct sub_bitmaps *imgs = data;
-            generate_eosd(vo, imgs);
-            draw_eosd(vo, imgs->render_index);
-        }
-        return VO_TRUE;
-    case VOCTRL_GET_EOSD_RES: {
-        struct mp_eosd_res *r = data;
-        r->w = vo->dwidth;
-        r->h = vo->dheight;
-        r->ml = r->mr = vc->border_x;
-        r->mt = r->mb = vc->border_y;
-        return VO_TRUE;
-    }
-    case VOCTRL_QUERY_EOSD_FORMAT: {
-        int format = *(int *)data;
-        return (format == SUBBITMAP_LIBASS || format == SUBBITMAP_RGBA)
-               ? VO_TRUE : VO_NOTIMPL;
-    }
     case VOCTRL_NEWFRAME:
         vc->deint_queue_pos = next_deint_queue_pos(vo, true);
         if (status_ok(vo))
@@ -1688,7 +1701,7 @@ const struct vo_driver video_out_vdpau = {
     .draw_image = draw_image,
     .get_buffered_frame = set_next_frame_info,
     .draw_slice = draw_slice,
-    .draw_osd = draw_osd_with_eosd,
+    .draw_osd = draw_osd,
     .flip_page_timed = flip_page_timed,
     .check_events = check_events,
     .uninit = uninit,

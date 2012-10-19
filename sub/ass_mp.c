@@ -228,7 +228,7 @@ ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
 }
 
 void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
-                      struct mp_eosd_res *dim)
+                      struct mp_osd_res *dim)
 {
     ass_set_frame_size(priv, dim->w, dim->h);
     ass_set_margins(priv, dim->mt, dim->mb, dim->ml, dim->mr);
@@ -282,7 +282,7 @@ void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
                          struct sub_bitmap **parts, struct sub_bitmaps *res)
 {
     int changed;
-    res->imgs = ass_render_frame(renderer, track, time, &changed);
+    ASS_Image *imgs = ass_render_frame(renderer, track, time, &changed);
     if (changed == 2)
         res->bitmap_id = ++res->bitmap_pos_id;
     else if (changed)
@@ -292,7 +292,7 @@ void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
     res->parts = *parts;
     res->num_parts = 0;
     int num_parts_alloc = MP_TALLOC_ELEMS(res->parts);
-    for (struct ass_image *img = res->imgs; img; img = img->next) {
+    for (struct ass_image *img = imgs; img; img = img->next) {
         if (img->w == 0 || img->h == 0)
             continue;
         if (res->num_parts >= num_parts_alloc) {

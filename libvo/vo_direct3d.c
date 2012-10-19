@@ -59,13 +59,13 @@
 #define DEVTYPE D3DDEVTYPE_HAL
 //#define DEVTYPE D3DDEVTYPE_REF
 
-#define D3DFVF_EOSD_VERTEX (D3DFVF_XYZ | D3DFVF_TEX1 | D3DFVF_DIFFUSE)
+#define D3DFVF_OSD_VERTEX (D3DFVF_XYZ | D3DFVF_TEX1 | D3DFVF_DIFFUSE)
 
 typedef struct {
     float x, y, z;
     D3DCOLOR color;
     float tu, tv;
-} vertex_eosd;
+} vertex_osd;
 
 #define D3DFVF_VIDEO_VERTEX (D3DFVF_XYZ | D3DFVF_TEX3)
 
@@ -113,7 +113,7 @@ struct osdpart {
     int bitmap_id, bitmap_pos_id;
     struct d3dtex texture;
     int num_vertices;
-    vertex_eosd *vertices;
+    vertex_osd *vertices;
     struct bitmap_packer *packer;
 };
 
@@ -125,7 +125,7 @@ typedef struct d3d_priv {
     int opt_disable_stretchrect;
     int opt_disable_shaders;
     int opt_only_8bit;
-    int opt_disable_eosd;
+    int opt_disable_osd;
     int opt_disable_texture_align;
     // debugging
     int opt_force_power_of_2;
@@ -232,6 +232,10 @@ static const D3DFORMAT osd_fmt_table[SUBBITMAP_COUNT] = {
     [SUBBITMAP_LIBASS] = D3DFMT_A8,
     [SUBBITMAP_RGBA]   = D3DFMT_A8R8G8B8,
 };
+static const bool osd_fmt_supported[SUBBITMAP_COUNT] = {
+    [SUBBITMAP_LIBASS] = true,
+    [SUBBITMAP_RGBA]   = true,
+};
 
 
 static void update_colorspace(d3d_priv *priv);
@@ -241,7 +245,6 @@ static uint32_t d3d_draw_frame(d3d_priv *priv);
 static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
                       int x, int y);
 static void uninit(struct vo *vo);
-static void draw_osd(d3d_priv *priv, struct sub_bitmaps *imgs);
 static void flip_page(struct vo *vo);
 static mp_image_t *get_screenshot(d3d_priv *priv);
 static mp_image_t *get_window_screenshot(d3d_priv *priv);
@@ -1224,11 +1227,11 @@ static int query_format(d3d_priv *priv, uint32_t movie_fmt)
     if (!init_rendering_mode(priv, movie_fmt, false))
         return 0;
 
-    int eosd_caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
-                    | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
-    if (!priv->opt_disable_eosd)
-        eosd_caps |= VFCAP_EOSD | VFCAP_EOSD_RGBA;
-    return eosd_caps;
+    int osd_caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
+                 | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
+    if (!priv->opt_disable_osd)
+        osd_caps |= VFCAP_OSD;
+    return osd_caps;
 }
 
 /****************************************************************************
@@ -1296,7 +1299,7 @@ static void update_colorspace(d3d_priv *priv)
 }
 
 const char *options_help_text = "-vo direct3d command line help:\n"
-"Example: -vo direct3d:disable-eosd:disable-textures\n"
+"Example: -vo direct3d:disable-osd:disable-textures\n"
 "Options:\n"
 "    prefer-stretchrect\n"
 "        Use IDirect3DDevice9::StretchRect over other methods if possible.\n"
@@ -1311,8 +1314,8 @@ const char *options_help_text = "-vo direct3d command line help:\n"
 "    only-8bit\n"
 "        Never render YUV video with more than 8 bits per component.\n"
 "        (Using this flag will force software conversion to 8 bit.)\n"
-"    disable-eosd\n"
-"        Disable EOSD rendering for subtitles.\n"
+"    disable-osd\n"
+"        Disable OSD rendering.\n"
 "        (Using this flag might force the insertion of the 'ass' video filter,\n"
 "         which will render the subtitles in software.)\n"
 "    disable-texture-align\n"
@@ -1386,7 +1389,7 @@ static int preinit_internal(struct vo *vo, const char *arg, bool allow_shaders)
         {"disable-stretchrect", OPT_ARG_BOOL, &priv->opt_disable_stretchrect},
         {"disable-shaders", OPT_ARG_BOOL, &priv->opt_disable_shaders},
         {"only-8bit", OPT_ARG_BOOL, &priv->opt_only_8bit},
-        {"disable-eosd", OPT_ARG_BOOL, &priv->opt_disable_eosd},
+        {"disable-osd", OPT_ARG_BOOL, &priv->opt_disable_osd},
         {"force-power-of-2", OPT_ARG_BOOL, &priv->opt_force_power_of_2},
         {"disable-texture-align", OPT_ARG_BOOL, &priv->opt_disable_texture_align},
         {"texture-memory", OPT_ARG_INT, &priv->opt_texture_memory},
@@ -1507,21 +1510,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
-    case VOCTRL_DRAW_EOSD:
-        if (!data)
-            return VO_FALSE;
-        draw_osd(priv, data);
-        return VO_TRUE;
-    case VOCTRL_QUERY_EOSD_FORMAT:
-        return osd_fmt_table[*(int *)data] ? VO_TRUE : VO_NOTIMPL;
-    case VOCTRL_GET_EOSD_RES: {
-        struct mp_eosd_res *r = data;
-        r->w = vo->dwidth;
-        r->h = vo->dheight;
-        r->ml = r->mr = priv->border_x;
-        r->mt = r->mb = priv->border_y;
-        return VO_TRUE;
-    }
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         if (args->full_window)
@@ -1905,7 +1893,7 @@ static bool upload_osd(d3d_priv *priv, struct osdpart *osd,
     osd->packer->padding = imgs->scaled; // assume 2x2 filter on scaling
     int r = packer_pack_from_subbitmaps(osd->packer, imgs);
     if (r < 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>EOSD bitmaps do not fit on "
+        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>OSD bitmaps do not fit on "
             "a surface with the maximum supported size %dx%d.\n",
             osd->packer->w_max, osd->packer->h_max);
         return false;
@@ -1939,7 +1927,7 @@ static bool upload_osd(d3d_priv *priv, struct osdpart *osd,
     if (FAILED(IDirect3DTexture9_LockRect(osd->texture.system, 0, &locked_rect,
                                           &dirty_rc, 0)))
     {
-        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>EOSD texture lock failed.\n");
+        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>OSD texture lock failed.\n");
         return false;
     }
 
@@ -1948,7 +1936,7 @@ static bool upload_osd(d3d_priv *priv, struct osdpart *osd,
                            locked_rect.Pitch);
 
     if (FAILED(IDirect3DTexture9_UnlockRect(osd->texture.system, 0))) {
-        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>EOSD texture unlock failed.\n");
+        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>OSD texture unlock failed.\n");
         return false;
     }
 
@@ -1985,10 +1973,9 @@ static D3DCOLOR ass_to_d3d_color(uint32_t color)
     return D3DCOLOR_ARGB(a, r, g, b);
 }
 
-static void draw_osd(d3d_priv *priv, struct sub_bitmaps *imgs)
+static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
 {
-    if (!priv->d3d_device)
-        return;
+    d3d_priv *priv = ctx;
 
     struct osdpart *osd = generate_osd(priv, imgs);
     if (!osd)
@@ -1999,7 +1986,7 @@ static void draw_osd(d3d_priv *priv, struct sub_bitmaps *imgs)
         // the number of vertices by using an indexed vertex array, but it's
         // probably not worth doing)
         osd->num_vertices = osd->packer->count * 6;
-        osd->vertices = talloc_realloc(osd, osd->vertices, vertex_eosd,
+        osd->vertices = talloc_realloc(osd, osd->vertices, vertex_osd,
                                        osd->num_vertices);
 
         float tex_w = osd->texture.tex_w;
@@ -2022,11 +2009,11 @@ static void draw_osd(d3d_priv *priv, struct sub_bitmaps *imgs)
             float tx1 = (p.x + b->w) / tex_w;
             float ty1 = (p.y + b->h) / tex_h;
 
-            vertex_eosd *v = &osd->vertices[n * 6];
-            v[0] = (vertex_eosd) { x0, y0, 0, color, tx0, ty0 };
-            v[1] = (vertex_eosd) { x1, y0, 0, color, tx1, ty0 };
-            v[2] = (vertex_eosd) { x0, y1, 0, color, tx0, ty1 };
-            v[3] = (vertex_eosd) { x1, y1, 0, color, tx1, ty1 };
+            vertex_osd *v = &osd->vertices[n * 6];
+            v[0] = (vertex_osd) { x0, y0, 0, color, tx0, ty0 };
+            v[1] = (vertex_osd) { x1, y0, 0, color, tx1, ty0 };
+            v[2] = (vertex_osd) { x0, y1, 0, color, tx0, ty1 };
+            v[3] = (vertex_osd) { x1, y1, 0, color, tx1, ty1 };
             v[4] = v[2];
             v[5] = v[1];
         }
@@ -2054,10 +2041,10 @@ static void draw_osd(d3d_priv *priv, struct sub_bitmaps *imgs)
                                         D3DBLEND_ONE);
     }
 
-    IDirect3DDevice9_SetFVF(priv->d3d_device, D3DFVF_EOSD_VERTEX);
+    IDirect3DDevice9_SetFVF(priv->d3d_device, D3DFVF_OSD_VERTEX);
     IDirect3DDevice9_DrawPrimitiveUP(priv->d3d_device, D3DPT_TRIANGLELIST,
                                      osd->num_vertices / 3,
-                                     osd->vertices, sizeof(vertex_eosd));
+                                     osd->vertices, sizeof(vertex_osd));
 
     IDirect3DDevice9_SetTextureStageState(priv->d3d_device,0,
                                           D3DTSS_COLORARG1, D3DTA_TEXTURE);
@@ -2070,6 +2057,27 @@ static void draw_osd(d3d_priv *priv, struct sub_bitmaps *imgs)
 
     IDirect3DDevice9_SetRenderState(priv->d3d_device,
                                     D3DRS_ALPHABLENDENABLE, FALSE);
+}
+
+
+static void draw_osd(struct vo *vo, struct osd_state *osd)
+{
+    d3d_priv *priv = vo->priv;
+    if (!priv->d3d_device)
+        return;
+
+    struct mp_osd_res res = {
+        .w = vo->dwidth,
+        .h = vo->dheight,
+        .ml = priv->border_x,
+        .mr = priv->border_x,
+        .mt = priv->border_y,
+        .mb = priv->border_y,
+        .display_par = vo->monitor_par,
+        .video_par = vo->aspdat.par,
+    };
+
+    osd_draw(osd, res, osd->vo_pts, 0, osd_fmt_supported, draw_osd_cb, priv);
 }
 
 #define AUTHOR "Georgi Petrov (gogothebee) <gogothebee@gmail.com> and others"
@@ -2086,7 +2094,7 @@ const struct vo_driver video_out_direct3d = {
     .config = config,
     .control = control,
     .draw_slice = draw_slice,
-    .draw_osd = draw_osd_with_eosd,
+    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,
@@ -2104,7 +2112,7 @@ const struct vo_driver video_out_direct3d_shaders = {
     .config = config,
     .control = control,
     .draw_slice = draw_slice,
-    .draw_osd = draw_osd_with_eosd,
+    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,

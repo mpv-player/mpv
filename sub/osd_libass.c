@@ -191,7 +191,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     // Assume the OSD bar takes 2/3 of the OSD width at PlayResY=288 and
     // FontSize=22 with an OSD aspect ratio of 16:9. Rescale as needed.
     // xxx can fail when unknown fonts are involved
-    double asp = (double)osd->res.w / osd->res.h;
+    double asp = (double)obj->vo_res.w / obj->vo_res.h;
     double scale = (asp / 1.77777) * (obj->osd_track->PlayResY / 288.0);
     style->ScaleX = style->ScaleY = scale;
     style->FontSize = 22.0;
@@ -282,8 +282,8 @@ void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
     if (!obj->osd_track)
         return;
 
-    ass_set_frame_size(osd->osd_render, osd->res.w, osd->res.h);
-    ass_set_aspect_ratio(osd->osd_render, osd->res.display_par, 1.0);
+    ass_set_frame_size(osd->osd_render, obj->vo_res.w, obj->vo_res.h);
+    ass_set_aspect_ratio(osd->osd_render, obj->vo_res.display_par, 1.0);
     mp_ass_render_frame(osd->osd_render, obj->osd_track, 0,
                         &obj->parts_cache, out_imgs);
     talloc_steal(obj, obj->parts_cache);

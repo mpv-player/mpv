@@ -68,6 +68,9 @@ struct mpgl_osd *mpgl_osd_init(GL *gl, bool legacy)
         ctx->parts[n] = p;
     }
 
+    for (int n = 0; n < SUBBITMAP_COUNT; n++)
+        ctx->formats[n] = ctx->fmt_table[n].type != 0;
+
     return ctx;
 }
 
@@ -82,11 +85,6 @@ void mpgl_osd_destroy(struct mpgl_osd *ctx)
             gl->DeleteBuffers(1, &p->buffer);
     }
     talloc_free(ctx);
-}
-
-bool mpgl_osd_query_format(struct mpgl_osd *ctx, int osd_format)
-{
-    return ctx->fmt_table[osd_format].type != 0;
 }
 
 static bool upload_pbo(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
@@ -159,9 +157,9 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
     osd->packer->padding = ctx->scaled || imgs->scaled;
     int r = packer_pack_from_subbitmaps(osd->packer, imgs);
     if (r < 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] EOSD bitmaps do not fit on "
-            "a surface with the maximum supported size %dx%d.\n",
-            osd->packer->w_max, osd->packer->h_max);
+        mp_msg(MSGT_VO, MSGL_ERR, "[gl] OSD bitmaps do not fit on "
+               "a surface with the maximum supported size %dx%d.\n",
+               osd->packer->w_max, osd->packer->h_max);
         return false;
     }
 
@@ -207,7 +205,7 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
 struct mpgl_osd_part *mpgl_osd_generate(struct mpgl_osd *ctx,
                                         struct sub_bitmaps *imgs)
 {
-    if (imgs->num_parts == 0 || !mpgl_osd_query_format(ctx, imgs->format))
+    if (imgs->num_parts == 0 || !ctx->formats[imgs->format])
         return NULL;
 
     struct mpgl_osd_part *osd = ctx->parts[imgs->render_index];
@@ -226,7 +224,7 @@ struct mpgl_osd_part *mpgl_osd_generate(struct mpgl_osd *ctx,
     return osd->packer->count ? osd : NULL;
 }
 
-void mpgl_osd_gl_set_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p)
+void mpgl_osd_set_gl_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p)
 {
     GL *gl = ctx->gl;
 
@@ -235,7 +233,7 @@ void mpgl_osd_gl_set_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p)
     gl->BlendFunc(blend_factors[p->format][0], blend_factors[p->format][1]);
 }
 
-void mpgl_osd_gl_unset_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p)
+void mpgl_osd_unset_gl_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p)
 {
     GL *gl = ctx->gl;
 
@@ -249,8 +247,9 @@ struct vertex {
     float texcoord[2];
 };
 
-void mpgl_osd_draw_legacy(struct mpgl_osd *ctx, struct sub_bitmaps *imgs)
+static void draw_legacy_cb(void *pctx, struct sub_bitmaps *imgs)
 {
+    struct mpgl_osd *ctx = pctx;
     struct mpgl_osd_part *osd = mpgl_osd_generate(ctx, imgs);
     if (!osd)
         return;
@@ -309,11 +308,17 @@ void mpgl_osd_draw_legacy(struct mpgl_osd *ctx, struct sub_bitmaps *imgs)
     gl->EnableClientState(GL_TEXTURE_COORD_ARRAY);
     gl->EnableClientState(GL_COLOR_ARRAY);
 
-    mpgl_osd_gl_set_state(ctx, osd);
+    mpgl_osd_set_gl_state(ctx, osd);
     gl->DrawArrays(GL_TRIANGLES, 0, osd->num_vertices);
-    mpgl_osd_gl_unset_state(ctx, osd);
+    mpgl_osd_unset_gl_state(ctx, osd);
 
     gl->DisableClientState(GL_VERTEX_ARRAY);
     gl->DisableClientState(GL_TEXTURE_COORD_ARRAY);
     gl->DisableClientState(GL_COLOR_ARRAY);
+}
+
+void mpgl_osd_draw_legacy(struct mpgl_osd *ctx, struct osd_state *osd,
+                          struct mp_osd_res res)
+{
+    osd_draw(osd, res, osd->vo_pts, 0, ctx->formats, draw_legacy_cb, ctx);
 }

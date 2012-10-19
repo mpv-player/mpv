@@ -49,12 +49,12 @@ static const struct vf_priv_s {
     unsigned int outfmt;
     struct mp_csp_details csp;
 
-    // 1 = auto-added filter: insert only if chain does not support EOSD already
+    // 1 = auto-added filter: insert only if chain does not support OSD already
     // 0 = insert always
     int auto_insert;
 
     struct osd_state *osd;
-    struct mp_eosd_res dim;
+    struct mp_osd_res dim;
 } vf_priv_dflt = {
     .csp = MP_CSP_DETAILS_DEFAULTS,
 };
@@ -78,7 +78,7 @@ static int config(struct vf_instance *vf,
     double dar = (double)d_width / d_height;
     double sar = (double)width / height;
 
-    vf->priv->dim = (struct mp_eosd_res) {
+    vf->priv->dim = (struct mp_osd_res) {
         .w = vf->priv->outw,
         .h = vf->priv->outh,
         .mt = opts->ass_top_margin,
@@ -227,11 +227,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
     prepare_image(vf, mpi);
 
     if (pts != MP_NOPTS_VALUE) {
-        struct sub_render_params subparams = {
-            .pts = pts,
-            .dim = priv->dim,
-        };
-        osd_draw_on_image(osd, &subparams, OSD_DRAW_SUB_FILTER, vf->dmpi,
+        osd_draw_on_image(osd, priv->dim, pts, OSD_DRAW_SUB_FILTER, vf->dmpi,
                           &priv->csp);
     }
 
@@ -287,7 +283,7 @@ static int vf_open(vf_instance_t *vf, char *args)
     if (!vf->priv->outfmt) {
         uninit(vf);
         return 0;
-    } else if (vf->priv->auto_insert && flags & VFCAP_EOSD) {
+    } else if (vf->priv->auto_insert && flags & VFCAP_OSD) {
         uninit(vf);
         return -1;
     }
@@ -301,7 +297,7 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->control   = control;
     vf->get_image = get_image;
     vf->put_image = put_image;
-    vf->default_caps = VFCAP_EOSD | VFCAP_EOSD_FILTER;
+    vf->default_caps = VFCAP_OSD;
     return 1;
 }
 
