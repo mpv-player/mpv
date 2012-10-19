@@ -453,7 +453,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         },
     };
 
-    osd_draw_on_image(osd, &img, &csp, &subparams);
+    osd_draw_on_image(osd, &subparams, 0, &img, &csp);
 }
 
 static void flip_page(struct vo *vo)

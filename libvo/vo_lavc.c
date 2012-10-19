@@ -504,7 +504,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
             },
         };
 
-        osd_draw_on_image(osd, vc->lastimg, &vc->colorspace, &subparams);
+        osd_draw_on_image(osd, &subparams, 0, vc->lastimg, &vc->colorspace);
     }
 }
 

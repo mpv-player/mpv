@@ -358,7 +358,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         },
     };
 
-    if (osd_draw_on_image(osd, &img, &csp, &subparams))
+    if (osd_draw_on_image(osd, &subparams, 0, &img, &csp))
         ctx->unchanged_image = false;
 }
 

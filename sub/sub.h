@@ -212,15 +212,20 @@ void vo_osd_reset_changed(void);
 bool vo_osd_has_changed(struct osd_state *osd);
 void osd_free(struct osd_state *osd);
 
-bool osd_draw_sub(struct osd_state *osd, struct sub_bitmaps *out_imgs,
-                  struct sub_render_params *sub_params,
-                  const bool formats[SUBBITMAP_COUNT]);
+enum mp_osd_draw_flags {
+    OSD_DRAW_SUB_FILTER = (1 << 0),
+    OSD_DRAW_SUB_ONLY   = (1 << 1),
+};
+
+void osd_draw(struct osd_state *osd, struct sub_render_params *params,
+              int draw_flags, const bool formats[SUBBITMAP_COUNT],
+              void (*cb)(void *ctx, struct sub_bitmaps *imgs), void *cb_ctx);
 
 struct mp_image;
 struct mp_csp_details;
-bool osd_draw_on_image(struct osd_state *osd, struct mp_image *dest,
-                       struct mp_csp_details *dest_csp,
-                       struct sub_render_params *sub_params);
+bool osd_draw_on_image(struct osd_state *osd, struct sub_render_params *params,
+                       int draw_flags, struct mp_image *dest,
+                       struct mp_csp_details *dest_csp);
 
 bool sub_bitmaps_bb(struct sub_bitmaps *imgs, int *x1, int *y1,
                     int *x2, int *y2);
