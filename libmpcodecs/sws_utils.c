@@ -131,6 +131,14 @@ struct SwsContext *sws_getContextFromCmdLine_hq(int srcW, int srcH,
                SWS_ACCURATE_RND | SWS_BITEXACT);
 }
 
+bool mp_sws_supported_format(int imgfmt)
+{
+    enum PixelFormat av_format = imgfmt2pixfmt(imgfmt);
+
+    return av_format != PIX_FMT_NONE && sws_isSupportedInput(av_format)
+        && sws_isSupportedOutput(av_format);
+}
+
 void mp_image_swscale(struct mp_image *dst,
                       const struct mp_image *src,
                       struct mp_csp_details *csp,

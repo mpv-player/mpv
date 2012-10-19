@@ -464,6 +464,9 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
     float yuv2rgb[3][4];
     float rgb2yuv[3][4];
 
+    if (!mp_sws_supported_format(dst->imgfmt))
+        return;
+
     if (cache && !*cache)
         *cache = talloc_zero(NULL, struct mp_draw_sub_cache);
 
