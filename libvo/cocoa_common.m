@@ -592,9 +592,10 @@ void create_menu()
 
 - (void)windowDidResize:(NSNotification *) notification
 {
-    struct vo_cocoa_state *s = _vo->cocoa;
-    if (_vo)
+    if (_vo) {
+        struct vo_cocoa_state *s = _vo->cocoa;
         s->did_resize = YES;
+    }
 }
 
 - (void)fullscreen
