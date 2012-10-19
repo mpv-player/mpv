@@ -106,7 +106,6 @@ struct osd_object {
 
     // caches for OSD conversion (internal to render_object())
     struct osd_conv_cache *cache[OSD_CONV_CACHE_MAX];
-
     struct sub_bitmaps cached;
 
     // VO cache state
@@ -137,6 +136,9 @@ struct osd_state {
     int switch_sub_id;
 
     struct MPOpts *opts;
+
+    // Internal to sub.c
+    struct mp_draw_sub_cache *draw_cache;
 
     // Internally used by osd_libass.c
     struct ass_renderer *osd_render;
