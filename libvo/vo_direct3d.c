@@ -144,8 +144,6 @@ typedef struct d3d_priv {
                                 fullscreen */
     int src_width;              /**< Source (movie) width */
     int src_height;             /**< Source (movie) heigth */
-    int src_d_width;            /**< Source (movie) aspect corrected width */
-    int src_d_height;           /**< Source (movie) aspect corrected heigth */
     int border_x;               /**< horizontal border value for OSD */
     int border_y;               /**< vertical border value for OSD */
     int image_format;           /**< mplayer image format */
@@ -1598,9 +1596,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         return VO_ERROR;
     }
 
-    priv->src_d_width = d_width;
-    priv->src_d_height = d_height;
-
     if ((priv->image_format != format)
         || (priv->src_width != width)
         || (priv->src_height != height))
@@ -1858,8 +1853,8 @@ static mp_image_t *get_screenshot(d3d_priv *priv)
         return NULL;
     }
 
-    image->w = priv->src_d_width;
-    image->h = priv->src_d_height;
+    image->w = priv->vo->aspdat.prew;
+    image->h = priv->vo->aspdat.preh;
 
     return image;
 }

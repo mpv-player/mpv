@@ -77,8 +77,6 @@ struct xvctx {
     uint32_t image_width;
     uint32_t image_height;
     uint32_t image_format;
-    uint32_t image_d_width;
-    uint32_t image_d_height;
     int is_paused;
     struct vo_rect src_rect;
     struct vo_rect dst_rect;
@@ -193,8 +191,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     ctx->image_height = height;
     ctx->image_width = width;
     ctx->image_format = format;
-    ctx->image_d_width = d_width;
-    ctx->image_d_height = d_height;
 
     if ((ctx->max_width != 0 && ctx->max_height != 0)
         && (ctx->image_width > ctx->max_width
@@ -517,8 +513,8 @@ static mp_image_t *get_screenshot(struct vo *vo)
                    w, h, image->stride[p2], xv_image->pitches[2]);
     }
 
-    image->w = ctx->image_d_width;
-    image->h = ctx->image_d_height;
+    image->w = vo->aspdat.prew;
+    image->h = vo->aspdat.preh;
 
     return image;
 }

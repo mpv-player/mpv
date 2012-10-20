@@ -155,7 +155,6 @@ struct vdpctx {
     bool                               dropped_frame;
     uint64_t                           dropped_time;
     uint32_t                           vid_width, vid_height;
-    uint32_t                           vid_d_width, vid_d_height;
     uint32_t                           image_format;
     VdpChromaType                      vdp_chroma_type;
     VdpYCbCrFormat                     vdp_pixel_format;
@@ -880,8 +879,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     vc->image_format = format;
     vc->vid_width    = width;
     vc->vid_height   = height;
-    vc->vid_d_width    = d_width;
-    vc->vid_d_height   = d_height;
 
     free_video_specific(vo);
     if (IMGFMT_IS_VDPAU(vc->image_format) && !create_vdp_decoder(vo, 2))
@@ -1531,8 +1528,8 @@ static struct mp_image *get_screenshot(struct vo *vo)
 
     image->width = vc->vid_width;
     image->height = vc->vid_height;
-    image->w = vc->vid_d_width;
-    image->h = vc->vid_d_height;
+    image->w = vo->aspdat.prew;
+    image->h = vo->aspdat.preh;
 
     return image;
 }
