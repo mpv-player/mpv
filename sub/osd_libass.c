@@ -234,7 +234,7 @@ static char *mangle_ass(const char *in)
     char *res = talloc_strdup(NULL, "");
     while (*in) {
         // As used by osd_get_function_sym().
-        if (in[0] == '\xFF') {
+        if (in[0] == '\xFF' && in[1]) {
             res = talloc_strdup_append_buffer(res, ASS_USE_OSD_FONT);
             res = append_utf8_buffer(res, OSD_CODEPOINTS + in[1]);
             res = talloc_strdup_append_buffer(res, "{\\r}");
