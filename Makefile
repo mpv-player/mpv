@@ -278,7 +278,7 @@ COMMON_LIBS += $(COMMON_LIBS-yes)
 
 OBJS_COMMON    += $(addsuffix .o, $(basename $(SRCS_COMMON)))
 OBJS_MPLAYER   += $(addsuffix .o, $(basename $(SRCS_MPLAYER)))
-OBJS_MPLAYER-$(PE_EXECUTABLE) += osdep/mplayer-rc.o
+OBJS_MPLAYER-$(PE_EXECUTABLE) += osdep/mpv-rc.o
 OBJS_MPLAYER   += $(OBJS_MPLAYER-yes)
 
 MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
@@ -406,9 +406,9 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 
 ###### dependency declarations / specific CFLAGS ######
 
-version.c osdep/mplayer-rc.o: version.h
+version.c osdep/mpv-rc.o: version.h
 
-osdep/mplayer-rc.o: osdep/mplayer.exe.manifest
+osdep/mpv-rc.o: osdep/mpv.exe.manifest
 
 
 ###### installation / clean / generic rules #######
