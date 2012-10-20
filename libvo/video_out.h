@@ -105,6 +105,8 @@ struct voctrl_screenshot_args {
     // image data directly.
     // Is never NULL. (Failure has to be indicated by returning VO_FALSE.)
     struct mp_image *out_image;
+    // Whether the VO rendered OSD/subtitles into out_image
+    bool has_osd;
 };
 
 typedef struct {

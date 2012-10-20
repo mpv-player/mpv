@@ -679,6 +679,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         args->out_image = get_screenshot(vo);
+        args->has_osd = !ctx->have_image_copy;
         return true;
     }
     }

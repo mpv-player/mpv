@@ -36,13 +36,17 @@
 #include "libmpcodecs/vf.h"
 #include "libvo/video_out.h"
 #include "image_writer.h"
+#include "sub/sub.h"
 
 #include "libvo/csputils.h"
+
+#define MODE_FULL_WINDOW 1
+#define MODE_SUBTITLES 2
 
 typedef struct screenshot_ctx {
     struct MPContext *mpctx;
 
-    int full_window;
+    int mode;
     int each_frame;
     int using_vf_screenshot;
 
@@ -230,7 +234,35 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
     }
 }
 
-void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
+static struct mp_image *add_subs(struct MPContext *mpctx,
+                                 struct mp_image *image,
+                                 struct mp_csp_details *csp)
+{
+    if (!(image->flags & MP_IMGFLAG_ALLOCATED)) {
+        struct mp_image *new_image = alloc_mpi(image->width, image->height,
+                                               image->imgfmt);
+        copy_mpi(new_image, image);
+        new_image->w = image->w;
+        new_image->h = image->h;
+        image = new_image;
+    }
+
+    double sar = (double)image->width / image->height;
+    double dar = (double)image->w / image->h;
+    struct mp_osd_res res = {
+        .w = image->width,
+        .h = image->height,
+        .display_par = sar / dar,
+        .video_par = dar / sar,
+    };
+    osd_draw_on_image(mpctx->osd, res, mpctx->osd->vo_pts,
+                      OSD_DRAW_SUB_ONLY, image, csp);
+
+    return image;
+}
+
+static void screenshot_save(struct MPContext *mpctx, struct mp_image *image,
+                            bool with_subs)
 {
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
 
@@ -239,22 +271,29 @@ void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
 
     struct image_writer_opts *opts = mpctx->opts.screenshot_image_opts;
 
+    struct mp_image *new_image = image;
+    if (with_subs)
+        new_image = add_subs(mpctx, new_image, &colorspace);
+
     char *filename = gen_fname(ctx, image_writer_file_ext(opts));
     if (filename) {
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "*** screenshot '%s' ***\n", filename);
-        if (!write_image(image, &colorspace, opts, filename))
+        if (!write_image(new_image, &colorspace, opts, filename))
             mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nError writing screenshot!\n");
         talloc_free(filename);
     }
+
+    if (new_image != image)
+        free_mp_image(new_image);
 }
 
 static void vf_screenshot_callback(void *pctx, struct mp_image *image)
 {
     struct MPContext *mpctx = (struct MPContext *)pctx;
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
-    screenshot_save(mpctx, image);
+    screenshot_save(mpctx, image, ctx->mode);
     if (ctx->each_frame)
-        screenshot_request(mpctx, 0, ctx->full_window);
+        screenshot_request(mpctx, 0, ctx->mode);
 }
 
 static bool force_vf(struct MPContext *mpctx)
@@ -270,26 +309,31 @@ static bool force_vf(struct MPContext *mpctx)
     return false;
 }
 
-void screenshot_request(struct MPContext *mpctx, bool each_frame,
-                        bool full_window)
+void screenshot_request(struct MPContext *mpctx, bool each_frame, int mode)
 {
     if (mpctx->video_out && mpctx->video_out->config_ok) {
         screenshot_ctx *ctx = mpctx->screenshot_ctx;
 
         ctx->using_vf_screenshot = 0;
 
+        if (mode == MODE_SUBTITLES && mpctx->osd->render_subs_in_filter)
+            mode = 0;
+
         if (each_frame) {
             ctx->each_frame = !ctx->each_frame;
-            ctx->full_window = full_window;
+            ctx->mode = mode;
             if (!ctx->each_frame)
                 return;
         }
 
-        struct voctrl_screenshot_args args = { .full_window = full_window };
+        struct voctrl_screenshot_args args =
+                            { .full_window = (mode == MODE_FULL_WINDOW) };
         if (!force_vf(mpctx)
             && vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &args) == true)
         {
-            screenshot_save(mpctx, args.out_image);
+            if (args.has_osd)
+                mode = 0;
+            screenshot_save(mpctx, args.out_image, mode == MODE_SUBTITLES);
             free_mp_image(args.out_image);
         } else {
             mp_msg(MSGT_CPLAYER, MSGL_INFO, "No VO support for taking"
@@ -322,5 +366,5 @@ void screenshot_flip(struct MPContext *mpctx)
     if (ctx->using_vf_screenshot)
         return;
 
-    screenshot_request(mpctx, 0, ctx->full_window);
+    screenshot_request(mpctx, 0, ctx->mode);
 }

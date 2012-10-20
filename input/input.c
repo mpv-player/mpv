@@ -162,7 +162,8 @@ static const mp_cmd_t mp_cmds[] = {
       OARG_CHOICE(0, ({"single", 0},           {"0", 0},
                       {"each-frame", 1},       {"1", 1})),
       OARG_CHOICE(0, ({"video", 0},            {"0", 0},
-                      {"window", 1},           {"1", 1})),
+                      {"window", 1},           {"1", 1},
+                      {"subtitles", 2})),
   }},
   { MP_CMD_LOADFILE, "loadfile", {
       ARG_STRING,

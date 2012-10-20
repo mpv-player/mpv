@@ -104,6 +104,9 @@ screenshot [single|each-frame] [video|window]
         Save the video image, in its original resolution. Typically without
         OSD or subtitles, but the exact behavior depends on the selected video
         output.
+    <subtitles>
+        Like ``video``, but add subtitles. Some video outputs may still include
+        the OSD in the output under certain circumstances.
     <window>
         Save the contents of the mplayer window. Typically scaled, with OSD and
         subtitles. The exact behavior depends on the selected video output, and
