@@ -246,7 +246,7 @@ static char *mangle_ass(const char *in)
         res = talloc_strndup_append_buffer(res, in, 1);
         // Break ASS escapes with U+2060 WORD JOINER
         if (*in == '\\')
-            append_utf8_buffer(res, 0x2060);
+            res = append_utf8_buffer(res, 0x2060);
         in++;
     }
     return res;
