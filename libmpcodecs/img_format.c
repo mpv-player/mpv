@@ -191,6 +191,7 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
     {"argb", IMGFMT_ARGB},
     {"bgra", IMGFMT_BGRA},
     {"abgr", IMGFMT_ABGR},
+    {"bgr0", IMGFMT_BGR0},
     {"gbrp", IMGFMT_GBRP},
     {"mjpeg", IMGFMT_MJPEG},
     {"mjpg", IMGFMT_MJPEG},

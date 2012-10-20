@@ -101,6 +101,8 @@
 #define IMGFMT_RGB_DEPTH(fmt) ((fmt)&0x3F)
 #define IMGFMT_BGR_DEPTH(fmt) ((fmt)&0x3F)
 
+// AV_PIX_FMT_BGR0
+#define IMGFMT_BGR0 0x1DC70000
 
 /* Planar YUV Formats */
 
