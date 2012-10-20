@@ -280,8 +280,8 @@ static void uninit(struct vo *vo)
     struct priv *p = vo->priv;
     if (p->osd)
         mpgl_osd_destroy(p->osd);
-    mpgl_uninit(p->mpglctx);
     release_cv_entities(vo);
+    mpgl_uninit(p->mpglctx);
 }
 
 
