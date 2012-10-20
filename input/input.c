@@ -159,11 +159,11 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", { ARG_INT, ARG_INT } },
 
   { MP_CMD_SCREENSHOT, "screenshot", {
-      OARG_CHOICE(0, ({"single", 0},           {"0", 0},
-                      {"each-frame", 1},       {"1", 1})),
-      OARG_CHOICE(0, ({"video", 0},            {"0", 0},
-                      {"window", 1},           {"1", 1},
+      OARG_CHOICE(2, ({"video", 0},
+                      {"window", 1},
                       {"subtitles", 2})),
+      OARG_CHOICE(0, ({"single", 0},
+                      {"each-frame", 1})),
   }},
   { MP_CMD_LOADFILE, "loadfile", {
       ARG_STRING,

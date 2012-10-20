@@ -293,7 +293,7 @@ static void vf_screenshot_callback(void *pctx, struct mp_image *image)
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
     screenshot_save(mpctx, image, ctx->mode);
     if (ctx->each_frame)
-        screenshot_request(mpctx, 0, ctx->mode);
+        screenshot_request(mpctx, ctx->mode, false);
 }
 
 static bool force_vf(struct MPContext *mpctx)
@@ -309,7 +309,7 @@ static bool force_vf(struct MPContext *mpctx)
     return false;
 }
 
-void screenshot_request(struct MPContext *mpctx, bool each_frame, int mode)
+void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame)
 {
     if (mpctx->video_out && mpctx->video_out->config_ok) {
         screenshot_ctx *ctx = mpctx->screenshot_ctx;
@@ -366,5 +366,5 @@ void screenshot_flip(struct MPContext *mpctx)
     if (ctx->using_vf_screenshot)
         return;
 
-    screenshot_request(mpctx, 0, ctx->mode);
+    screenshot_request(mpctx, ctx->mode, false);
 }

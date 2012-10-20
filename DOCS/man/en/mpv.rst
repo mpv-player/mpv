@@ -162,7 +162,8 @@ s
     Take a screenshot.
 
 S
-    Start/stop taking screenshots.
+    Take a screenshot, without subtitles. (Whether this works depends on VO
+    driver support.)
 
 I
     Show filename on the OSD.
@@ -420,7 +421,7 @@ slave mode command, which is by default bound to the ``s`` key. Files named
 available number - no files will be overwritten.
 
 A screenshot will usually contain the unscaled video contents at the end of the
-video filter chain. Some video output drivers will include subtitles and OSD in
+video filter chain and subtitles. Some video output drivers will include OSD in
 the video frame as well - this is because of technical restrictions.
 
 The ``screenshot`` video filter is normally not required when using a
