@@ -511,7 +511,8 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
                     bits = 16;
                     break;
             }
-        }
+        } else
+            bits = 16;
     }
 #else
     int format = IMGFMT_444P;

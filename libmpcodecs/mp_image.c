@@ -196,6 +196,9 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->flags|=MP_IMGFLAG_SWAPPED;
     case IMGFMT_YUY2:
         mpi->chroma_x_shift = 1;
+        mpi->chroma_y_shift = 1;
+        mpi->chroma_width=(mpi->width>>1);
+        mpi->chroma_height=(mpi->height>>1);
 	mpi->bpp=16;
 	mpi->num_planes=1;
 	return;
