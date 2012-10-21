@@ -27,6 +27,7 @@
 struct vo;
 struct sub_render_params;
 
+// NOTE: VOs must support at least SUBBITMAP_LIBASS and SUBBITMAP_RGBA.
 enum sub_bitmap_format {
     SUBBITMAP_EMPTY = 0,// no bitmaps; always has num_parts==0
     SUBBITMAP_LIBASS,   // A8, with a per-surface blend color (libass.color)
@@ -39,7 +40,8 @@ enum sub_bitmap_format {
 // For SUBBITMAP_INDEXED
 struct osd_bmp_indexed {
     uint8_t *bitmap;
-    // Each entry is like a pixel in SUBBITMAP_RGBA format
+    // Each entry is like a pixel in SUBBITMAP_RGBA format, but using straight
+    // alpha.
     uint32_t palette[256];
 };
 
