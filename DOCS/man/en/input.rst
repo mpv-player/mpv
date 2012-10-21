@@ -14,7 +14,7 @@ with shift.
 
 A list of special keys can be obtained with
 
-| **mplayer** --input=keylist
+| **mpv** --input=keylist
 
 In general, keys can be combined with ``Shift``, ``Ctrl`` and ``Alt``:
 
@@ -45,7 +45,7 @@ ignore
     disabling default bindings, without disabling all bindings with
     ``--input=default-bindings=no``.
 
-seek <seconds> [relative|absolute|absolute-percent] [default-precise|exact|keyframes]
+seek <seconds> [relative|absolute|absolute-percent|- [default-precise|exact|keyframes]]
     Change the playback position. By default, seeks by a relative amount of
     seconds.
 
@@ -87,7 +87,7 @@ cycle <property> [up|down]
 speed_mult <value>
     Multiply the ``speed`` property by the given value.
 
-screenshot [subtitles|video|window] [single|each-frame]
+screenshot [subtitles|video|window|- [single|each-frame]]
     Take a screenshot.
 
     First argument:
@@ -100,7 +100,7 @@ screenshot [subtitles|video|window] [single|each-frame]
         Like ``subtitles``, but typically without OSD or subtitles. The exact
         behavior depends on the selected video output.
     <window>
-        Save the contents of the mplayer window. Typically scaled, with OSD and
+        Save the contents of the mpv window. Typically scaled, with OSD and
         subtitles. The exact behavior depends on the selected video output, and
         if no support is available, this will act like ``video``.
 
@@ -167,7 +167,7 @@ print_text "<string>"
     Print text to stdout. The string can contain properties, which are expanded
     like in ``--playing-msg``.
 
-show_text "<string>" [<duration>] [<level>]
+show_text "<string>" [<duration>|- [<level>]]
     Show text on the OSD. The string can contain properties, which are expanded
     like in ``--playing-msg``. This can be used to show playback time, filename,
     and so on.
@@ -223,7 +223,7 @@ pausing_keep_force. (Should these be made official?)
 Properties
 ----------
 
-Properties are used to set mplayer options during runtime, or to query arbitrary
+Properties are used to set mpv options during runtime, or to query arbitrary
 information. They can be manipulated with the ``set``/``add``/``cycle``
 commands, and retrieved with ``show_text``, or anything else that uses property
 expansion. (See ``--playing-msg`` how properties are expanded.)
