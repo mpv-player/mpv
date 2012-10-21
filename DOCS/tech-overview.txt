@@ -150,8 +150,7 @@ libmpcodecs/:
 
     vf_*.c and vf.c form the video filter chain. They are fed by the video
     decoder, and output the filtered images to the VOs though vf_vo.c. By
-    default, no video filters (except vf_vo) are used, though sometimes
-    vf_sub.c is inserted for rendering subtitles, when the VO can't.
+    default, no video filters (except vf_vo) are used.
 
     ad_*.c and dec_audio.c/ad.c handle audio decoding. The audio filter chain is
     separately in libaf.

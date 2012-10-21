@@ -49,10 +49,6 @@ static const struct vf_priv_s {
     unsigned int outfmt;
     struct mp_csp_details csp;
 
-    // 1 = auto-added filter: insert only if chain does not support OSD already
-    // 0 = insert always
-    int auto_insert;
-
     struct osd_state *osd;
     struct mp_osd_res dim;
 } vf_priv_dflt = {
@@ -276,20 +272,11 @@ static const unsigned int fmt_list[] = {
 
 static int vf_open(vf_instance_t *vf, char *args)
 {
-    int flags;
     vf->priv->outfmt = vf_match_csp(&vf->next, fmt_list, IMGFMT_YV12);
-    if (vf->priv->outfmt)
-        flags = vf_next_query_format(vf, vf->priv->outfmt);
     if (!vf->priv->outfmt) {
         uninit(vf);
         return 0;
-    } else if (vf->priv->auto_insert && flags & VFCAP_OSD) {
-        uninit(vf);
-        return -1;
     }
-
-    if (vf->priv->auto_insert)
-        mp_msg(MSGT_ASS, MSGL_INFO, "[sub] auto-open\n");
 
     vf->config = config;
     vf->query_format = query_format;
@@ -303,7 +290,6 @@ static int vf_open(vf_instance_t *vf, char *args)
 
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s, f)
 static const m_option_t vf_opts_fields[] = {
-    {"auto", ST_OFF(auto_insert), CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
