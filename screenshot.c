@@ -255,8 +255,12 @@ static struct mp_image *add_subs(struct MPContext *mpctx,
         .display_par = sar / dar,
         .video_par = dar / sar,
     };
+    // It's not really clear what's the difference between w and width
+    struct mp_image hack = *image;
+    hack.w = hack.width;
+    hack.h = hack.height;
     osd_draw_on_image(mpctx->osd, res, mpctx->osd->vo_pts,
-                      OSD_DRAW_SUB_ONLY, image, csp);
+                      OSD_DRAW_SUB_ONLY, &hack, csp);
 
     return image;
 }
