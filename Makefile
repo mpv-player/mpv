@@ -38,9 +38,7 @@ SRCS_COMMON-$(FTP)                   += stream/stream_ftp.c
 SRCS_COMMON-$(GIF)                   += libmpdemux/demux_gif.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c osdep/mmap_anon.c
 SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
-SRCS_COMMON-$(LIBASS)                += libmpcodecs/vf_ass.c \
-                                        sub/ass_mp.c \
-                                        sub/sd_ass.c \
+SRCS_COMMON-$(LIBASS)                += sub/ass_mp.c sub/sd_ass.c
 
 SRCS_COMMON-$(LIBBLURAY)             += stream/stream_bluray.c
 SRCS_COMMON-$(LIBBS2B)               += libaf/af_bs2b.c
@@ -171,6 +169,7 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_screenshot.c \
               libmpcodecs/vf_softpulldown.c \
               libmpcodecs/vf_stereo3d.c \
+              libmpcodecs/vf_sub.c \
               libmpcodecs/vf_swapuv.c \
               libmpcodecs/vf_unsharp.c \
               libmpcodecs/vf_vo.c \

@@ -289,7 +289,7 @@ static int vf_open(vf_instance_t *vf, char *args)
     }
 
     if (vf->priv->auto_insert)
-        mp_msg(MSGT_ASS, MSGL_INFO, "[ass] auto-open\n");
+        mp_msg(MSGT_ASS, MSGL_INFO, "[sub] auto-open\n");
 
     vf->config = config;
     vf->query_format = query_format;
@@ -308,15 +308,15 @@ static const m_option_t vf_opts_fields[] = {
 };
 
 static const m_struct_t vf_opts = {
-    "ass",
+    "sub",
     sizeof(struct vf_priv_s),
     &vf_priv_dflt,
     vf_opts_fields
 };
 
-const vf_info_t vf_info_ass = {
-    "Render ASS/SSA subtitles",
-    "ass",
+const vf_info_t vf_info_sub = {
+    "Render subtitles",
+    "sub",
     "Evgeniy Stepanov",
     "",
     vf_open,

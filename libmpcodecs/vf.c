@@ -64,7 +64,7 @@ extern const vf_info_t vf_info_divtc;
 extern const vf_info_t vf_info_softskip;
 extern const vf_info_t vf_info_screenshot;
 extern const vf_info_t vf_info_screenshot_force;
-extern const vf_info_t vf_info_ass;
+extern const vf_info_t vf_info_sub;
 extern const vf_info_t vf_info_yadif;
 extern const vf_info_t vf_info_stereo3d;
 extern const vf_info_t vf_info_dlopen;
@@ -102,9 +102,7 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_delogo,
     &vf_info_phase,
     &vf_info_divtc,
-#ifdef CONFIG_ASS
-    &vf_info_ass,
-#endif
+    &vf_info_sub,
     &vf_info_yadif,
     &vf_info_stereo3d,
     &vf_info_dlopen,

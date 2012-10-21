@@ -2267,39 +2267,37 @@ int reinit_video_chain(struct MPContext *mpctx)
         sh_video->vfilter = vf_open_filter(opts, NULL, "vo", vf_arg);
     }
 
-#ifdef CONFIG_ASS
     if (opts->ass_enabled) {
         int i;
         int insert = 1;
         if (opts->vf_settings)
             for (i = 0; opts->vf_settings[i].name; ++i)
-                if (strcmp(opts->vf_settings[i].name, "ass") == 0) {
+                if (strcmp(opts->vf_settings[i].name, "sub") == 0) {
                     insert = 0;
                     break;
                 }
         if (insert) {
-            extern vf_info_t vf_info_ass;
-            const vf_info_t *libass_vfs[] = {
-                &vf_info_ass, NULL
+            extern vf_info_t vf_info_sub;
+            const vf_info_t *sub_vfs[] = {
+                &vf_info_sub, NULL
             };
             char *vf_arg[] = {
                 "auto", "yes", NULL
             };
             int retcode = 0;
-            struct vf_instance *vf_ass = vf_open_plugin_noerr(opts, libass_vfs,
+            struct vf_instance *vf_sub = vf_open_plugin_noerr(opts, sub_vfs,
                                                               sh_video->vfilter,
-                                                              "ass", vf_arg,
+                                                              "sub", vf_arg,
                                                               &retcode);
-            if (vf_ass)
-                sh_video->vfilter = vf_ass;
-            else if (retcode == -1) // vf_ass open() returns -1 VO has OSD
-                mp_msg(MSGT_CPLAYER, MSGL_V, "[ass] vf_ass not needed\n");
+            if (vf_sub)
+                sh_video->vfilter = vf_sub;
+            else if (retcode == -1) // vf_sub open() returns -1 VO has OSD
+                mp_msg(MSGT_CPLAYER, MSGL_V, "[sub] vf_sub not needed\n");
             else
                 mp_msg(MSGT_CPLAYER, MSGL_ERR,
-                       "ASS: cannot add video filter\n");
+                       "sub: cannot add video filter\n");
         }
     }
-#endif
 
     sh_video->vfilter = append_filters(sh_video->vfilter, opts->vf_settings);
 
@@ -2415,7 +2413,7 @@ static double update_video(struct MPContext *mpctx)
     struct sh_video *sh_video = mpctx->sh_video;
     struct vo *video_out = mpctx->video_out;
     sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SET_OSD_OBJ,
-                               mpctx->osd); // for vf_ass
+                               mpctx->osd); // for vf_sub
     if (!mpctx->opts.correct_pts)
         return update_video_nocorrect_pts(mpctx);
 

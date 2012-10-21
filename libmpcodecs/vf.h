@@ -106,7 +106,7 @@ struct vf_ctrl_screenshot {
 #define VFCTRL_INIT_OSD        15  // Filter OSD renderer present?
 #define VFCTRL_SET_DEINTERLACE 18  // Set deinterlacing status
 #define VFCTRL_GET_DEINTERLACE 19  // Get deinterlacing status
-/* Hack to make the OSD state object available to vf_expand and vf_ass which
+/* Hack to make the OSD state object available to vf_sub which
  * access OSD/subtitle state outside of normal OSD draw time. */
 #define VFCTRL_SET_OSD_OBJ 20
 #define VFCTRL_SET_YUV_COLORSPACE 22 // arg is struct mp_csp_details*
