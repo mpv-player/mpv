@@ -643,6 +643,11 @@ static int control(stream_t *stream,int cmd,void* arg)
 
             return 1;
         }
+        case STREAM_CTRL_GET_CURRENT_TITLE:
+        {
+            *((unsigned int *)arg) = d->cur_title - 1;
+            return 1;
+        }
         case STREAM_CTRL_GET_CURRENT_CHAPTER:
         {
             *((unsigned int *)arg) = dvd_chapter_from_cell(d, d->cur_title-1, d->cur_cell);

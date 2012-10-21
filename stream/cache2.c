@@ -307,6 +307,7 @@ static int cache_execute_control(cache_vars_t *s) {
       uint_res = s->control_uint_arg;
     case STREAM_CTRL_GET_NUM_TITLES:
     case STREAM_CTRL_GET_NUM_CHAPTERS:
+    case STREAM_CTRL_GET_CURRENT_TITLE:
     case STREAM_CTRL_GET_CURRENT_CHAPTER:
     case STREAM_CTRL_GET_NUM_ANGLES:
     case STREAM_CTRL_GET_ANGLE:
@@ -634,6 +635,7 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
       s->control_lang_arg = *(struct stream_lang_req *)arg;
     case STREAM_CTRL_GET_NUM_TITLES:
     case STREAM_CTRL_GET_NUM_CHAPTERS:
+    case STREAM_CTRL_GET_CURRENT_TITLE:
     case STREAM_CTRL_GET_CURRENT_CHAPTER:
     case STREAM_CTRL_GET_ASPECT_RATIO:
     case STREAM_CTRL_GET_NUM_ANGLES:
@@ -674,6 +676,7 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
       break;
     case STREAM_CTRL_GET_NUM_TITLES:
     case STREAM_CTRL_GET_NUM_CHAPTERS:
+    case STREAM_CTRL_GET_CURRENT_TITLE:
     case STREAM_CTRL_GET_CURRENT_CHAPTER:
     case STREAM_CTRL_GET_NUM_ANGLES:
     case STREAM_CTRL_GET_ANGLE:

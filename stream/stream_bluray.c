@@ -127,6 +127,11 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         return 1;
     }
 
+    case STREAM_CTRL_GET_CURRENT_TITLE: {
+        *((unsigned int *) arg) = b->current_title;
+        return 1;
+    }
+
     case STREAM_CTRL_GET_CURRENT_CHAPTER: {
         *((unsigned int *) arg) = b->current_chapter;
         return 1;
