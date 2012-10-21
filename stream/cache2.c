@@ -305,6 +305,7 @@ static int cache_execute_control(cache_vars_t *s) {
     case STREAM_CTRL_SET_ANGLE:
       needs_flush = 1;
       uint_res = s->control_uint_arg;
+    case STREAM_CTRL_GET_NUM_TITLES:
     case STREAM_CTRL_GET_NUM_CHAPTERS:
     case STREAM_CTRL_GET_CURRENT_CHAPTER:
     case STREAM_CTRL_GET_NUM_ANGLES:
@@ -631,6 +632,7 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
       return s->stream_time_pos != MP_NOPTS_VALUE ? STREAM_OK : STREAM_UNSUPPORTED;
     case STREAM_CTRL_GET_LANG:
       s->control_lang_arg = *(struct stream_lang_req *)arg;
+    case STREAM_CTRL_GET_NUM_TITLES:
     case STREAM_CTRL_GET_NUM_CHAPTERS:
     case STREAM_CTRL_GET_CURRENT_CHAPTER:
     case STREAM_CTRL_GET_ASPECT_RATIO:
@@ -670,6 +672,7 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
     case STREAM_CTRL_GET_ASPECT_RATIO:
       *(double *)arg = s->control_double_arg;
       break;
+    case STREAM_CTRL_GET_NUM_TITLES:
     case STREAM_CTRL_GET_NUM_CHAPTERS:
     case STREAM_CTRL_GET_CURRENT_CHAPTER:
     case STREAM_CTRL_GET_NUM_ANGLES:
