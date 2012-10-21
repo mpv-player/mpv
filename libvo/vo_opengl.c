@@ -1403,23 +1403,6 @@ static mp_image_t *get_screenshot(struct gl_priv *p)
     return image;
 }
 
-static mp_image_t *get_window_screenshot(struct gl_priv *p)
-{
-    GL *gl = p->gl;
-
-    mp_image_t *image = alloc_mpi(p->vp_w, p->vp_h, IMGFMT_RGB24);
-    gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
-    gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
-    gl->ReadBuffer(GL_FRONT);
-    // flip image while reading
-    for (int y = 0; y < p->vp_h; y++) {
-        gl->ReadPixels(p->vp_x, p->vp_y + p->vp_h - y - 1, p->vp_w, 1,
-                       GL_RGB, GL_UNSIGNED_BYTE,
-                       image->planes[0] + y * image->stride[0]);
-    }
-    return image;
-}
-
 static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
 {
     struct gl_priv *p = ctx;
@@ -1842,7 +1825,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         if (args->full_window)
-            args->out_image = get_window_screenshot(p);
+            args->out_image = glGetWindowScreenshot(p->gl);
         else
             args->out_image = get_screenshot(p);
         return true;

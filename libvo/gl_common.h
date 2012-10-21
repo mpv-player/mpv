@@ -33,6 +33,8 @@
 #include "video_out.h"
 #include "csputils.h"
 
+#include "libmpcodecs/mp_image.h"
+
 #if defined(CONFIG_GL_COCOA) && !defined(CONFIG_GL_X11)
 #ifdef GL_VERSION_3_0
 #include <OpenGL/gl3.h>
@@ -72,6 +74,7 @@ void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                int sx, int sy, int rect_tex, int is_yv12, int flip);
 int loadGPUProgram(GL *gl, GLenum target, char *prog);
 void glCheckError(GL *gl, const char *info);
+mp_image_t *glGetWindowScreenshot(GL *gl);
 
 /** \addtogroup glconversion
  * \{ */

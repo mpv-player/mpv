@@ -344,6 +344,46 @@ static void set_yuv_colorspace(struct vo *vo)
     vo->want_redraw = true;
 }
 
+static int get_image_fmt(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    switch (p->pixelFormat) {
+        case kYUVSPixelFormat:   return IMGFMT_YUY2;
+        case k24RGBPixelFormat:  return IMGFMT_RGB24;
+        case k32ARGBPixelFormat: return IMGFMT_ARGB;
+        case k32BGRAPixelFormat: return IMGFMT_BGRA;
+    }
+    mp_msg(MSGT_VO, MSGL_ERR, "[vo_corevideo] Failed to convert pixel format. "
+        "Please contact the developers. PixelFormat: %d\n", p->pixelFormat);
+    return -1;
+}
+
+static mp_image_t *get_screenshot(struct vo *vo)
+{
+    int img_fmt = get_image_fmt(vo);
+    if (img_fmt < 0) return NULL;
+
+    struct priv *p = vo->priv;
+    void *base = CVPixelBufferGetBaseAddress(p->pixelBuffer);
+
+    size_t width      = CVPixelBufferGetWidth(p->pixelBuffer);
+    size_t height     = CVPixelBufferGetHeight(p->pixelBuffer);
+    size_t stride     = CVPixelBufferGetBytesPerRow(p->pixelBuffer);
+    size_t image_size = stride * height;
+
+    mp_image_t *image = alloc_mpi(width, height, img_fmt);
+    memcpy(image->planes[0], base, image_size);
+    image->stride[0]  = stride;
+
+    image->width  = width;
+    image->height = height;
+
+    image->w = vo->aspdat.prew;
+    image->h = vo->aspdat.preh;
+
+    return image;
+}
+
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
@@ -377,6 +417,14 @@ static int control(struct vo *vo, uint32_t request, void *data)
         case VOCTRL_GET_YUV_COLORSPACE:
             *(struct mp_csp_details *)data = p->colorspace;
             return VO_TRUE;
+        case VOCTRL_SCREENSHOT: {
+            struct voctrl_screenshot_args *args = data;
+            if (args->full_window)
+                args->out_image = glGetWindowScreenshot(p->mpglctx->gl);
+            else
+                args->out_image = get_screenshot(vo);
+            return VO_TRUE;
+        }
     }
     return VO_NOTIMPL;
 }

@@ -1965,6 +1965,24 @@ void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
     gl->End();
 }
 
+mp_image_t *glGetWindowScreenshot(GL *gl)
+{
+    GLint vp[4]; //x, y, w, h
+    gl->GetIntegerv(GL_VIEWPORT, vp);
+    mp_image_t *image = alloc_mpi(vp[2], vp[3], IMGFMT_RGB24);
+    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    gl->PixelStorei(GL_PACK_ALIGNMENT, 0);
+    gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
+    gl->ReadBuffer(GL_FRONT);
+    //flip image while reading
+    for (int y = 0; y < vp[3]; y++) {
+        gl->ReadPixels(vp[0], vp[1] + vp[3] - y - 1, vp[2], 1,
+                       GL_RGB, GL_UNSIGNED_BYTE,
+                       image->planes[0] + y * image->stride[0]);
+    }
+    return image;
+}
+
 #ifdef CONFIG_GL_COCOA
 #include "cocoa_common.h"
 
