@@ -38,6 +38,7 @@
 #include "mp_fifo.h"
 #include "m_config.h"
 #include "mp_msg.h"
+#include "libmpcodecs/vfcap.h"
 
 #include "osdep/shmem.h"
 #ifdef CONFIG_X11
@@ -224,9 +225,8 @@ void vo_new_frame_imminent(struct vo *vo)
 
 void vo_draw_osd(struct vo *vo, struct osd_state *osd)
 {
-    if (!vo->config_ok)
-        return;
-    vo->driver->draw_osd(vo, osd);
+    if (vo->config_ok && (vo->default_caps & VFCAP_OSD))
+        vo->driver->draw_osd(vo, osd);
 }
 
 void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration)
@@ -385,10 +385,14 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
         vo->dheight = d_height;
     }
 
+    vo->default_caps = vo_control(vo, VOCTRL_QUERY_FORMAT, &format);
+
     int ret = vo->driver->config(vo, width, height, d_width, d_height, flags,
                                  format);
     vo->config_ok = (ret == 0);
     vo->config_count += vo->config_ok;
+    if (!vo->config_ok)
+        vo->default_caps = 0;
     if (vo->registered_fd == -1 && vo->event_fd != -1 && vo->config_ok) {
         mp_input_add_key_fd(vo->input_ctx, vo->event_fd, 1, event_fd_callback,
                             NULL, vo);

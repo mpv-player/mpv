@@ -233,6 +233,7 @@ struct vo_driver {
 struct vo {
     int config_ok;  // Last config call was successful?
     int config_count;  // Total number of successful config calls
+    int default_caps; // query_format() result for configured video format
 
     bool frame_loaded;  // Is there a next frame the VO could flip to?
     struct mp_image *waiting_mpi;

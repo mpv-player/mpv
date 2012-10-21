@@ -2553,16 +2553,16 @@ static void draw_osd(struct MPContext *mpctx)
     mpctx->osd->want_redraw = false;
 }
 
-static int redraw_osd(struct MPContext *mpctx)
+static bool redraw_osd(struct MPContext *mpctx)
 {
     struct vo *vo = mpctx->video_out;
     if (vo_redraw_frame(vo) < 0)
-        return -1;
+        return false;
 
     draw_osd(mpctx);
 
     vo_flip_page(vo, 0, -1);
-    return 0;
+    return true;
 }
 
 void add_step_frame(struct MPContext *mpctx)
@@ -3304,22 +3304,23 @@ static void run_playloop(struct MPContext *mpctx)
                 audio_sleep = 0.020;
         }
         sleeptime = FFMIN(sleeptime, audio_sleep);
-        if (sleeptime > 0) {
-            if (!mpctx->sh_video)
-                goto novideo;
-            if (mpctx->osd->want_redraw || mpctx->video_out->want_redraw) {
-                mpctx->osd->want_redraw = false;
-                if (redraw_osd(mpctx) < 0) {
-                    if (mpctx->paused && video_left)
-                        add_step_frame(mpctx);
-                    else
-                        goto novideo;
+        if (sleeptime > 0 && mpctx->sh_video) {
+            bool want_redraw = mpctx->video_out->want_redraw;
+            if (mpctx->video_out->default_caps & VFCAP_OSD)
+                want_redraw |= mpctx->osd->want_redraw;
+            mpctx->osd->want_redraw = false;
+            if (want_redraw) {
+                if (redraw_osd(mpctx)) {
+                    sleeptime = 0;
+                } else if (mpctx->paused && video_left) {
+                    // force redrawing OSD by framestepping
+                    add_step_frame(mpctx);
+                    sleeptime = 0;
                 }
-            } else {
-            novideo:
-                mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);
             }
         }
+        if (sleeptime > 0)
+            mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);
     }
 
     //================= Keyboard events, SEEKing ====================
