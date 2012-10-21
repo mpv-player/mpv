@@ -66,16 +66,11 @@ static void resize(struct vo *vo, int width, int height)
 {
     struct priv *p = vo->priv;
     GL *gl = p->mpglctx->gl;
-    p->image_width = width;
-    p->image_height = height;
 
-    mp_msg(MSGT_VO, MSGL_V, "[vo_corevideo] New OpenGL Viewport (0, 0, %d, "
-                            "%d)\n", p->image_width, p->image_height);
-
-    gl->Viewport(0, 0, p->image_width, p->image_height);
+    gl->Viewport(0, 0, width, height);
     gl->MatrixMode(GL_PROJECTION);
     gl->LoadIdentity();
-
+    p->ass_border_x = p->ass_border_y = 0;
     if (aspect_scaling()) {
         int new_w, new_h;
         GLdouble scale_x, scale_y;
@@ -84,8 +79,8 @@ static void resize(struct vo *vo, int width, int height)
         panscan_calc_windowed(vo);
         new_w += vo->panscan_x;
         new_h += vo->panscan_y;
-        scale_x = (GLdouble)new_w / (GLdouble)p->image_width;
-        scale_y = (GLdouble)new_h / (GLdouble)p->image_height;
+        scale_x = (GLdouble)new_w / (GLdouble)width;
+        scale_y = (GLdouble)new_h / (GLdouble)height;
         gl->Scaled(scale_x, scale_y, 1);
         p->ass_border_x = (vo->dwidth - new_w) / 2;
         p->ass_border_y = (vo->dheight - new_h) / 2;
@@ -304,18 +299,26 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     GL *gl = p->mpglctx->gl;
     assert(p->osd);
 
+    gl->MatrixMode(GL_PROJECTION);
+    gl->PushMatrix();
+    gl->LoadIdentity();
+    gl->Ortho(0, vo->dwidth, vo->dheight, 0, -1, 1);
+
     struct mp_osd_res res = {
         .w = vo->dwidth,
         .h = vo->dheight,
-        .ml = p->ass_border_x,
-        .mr = p->ass_border_x,
-        .mt = p->ass_border_y,
-        .mb = p->ass_border_y,
         .display_par = vo->monitor_par,
         .video_par = vo->aspdat.par,
     };
 
+    if (aspect_scaling()) {
+        res.ml = res.mr = p->ass_border_x;
+        res.mt = res.mb = p->ass_border_y;
+    }
+
     mpgl_osd_draw_legacy(p->osd, osd, res);
+
+    gl->PopMatrix();
 }
 
 static CFStringRef get_cv_csp_matrix(struct vo *vo)
