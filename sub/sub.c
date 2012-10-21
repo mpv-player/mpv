@@ -280,21 +280,7 @@ void vo_osd_changed(int new_value)
         if (osd->objs[n]->type == new_value)
             osd->objs[n]->force_redraw = true;
     }
-}
-
-bool osd_has_changed(struct osd_state *osd)
-{
-    for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        if (osd->objs[n]->force_redraw)
-            return true;
-    }
-    return false;
-}
-
-void osd_reset_changed(struct osd_state *osd)
-{
-    for (int n = 0; n < MAX_OSD_PARTS; n++)
-        osd->objs[n]->force_redraw = false;
+    osd->want_redraw = true;
 }
 
 bool sub_bitmaps_bb(struct sub_bitmaps *imgs, int *x1, int *y1,

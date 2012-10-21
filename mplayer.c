@@ -2544,15 +2544,22 @@ void unpause_player(struct MPContext *mpctx)
     (void)get_relative_time(mpctx);     // ignore time that passed during pause
 }
 
+static void draw_osd(struct MPContext *mpctx)
+{
+    struct vo *vo = mpctx->video_out;
+
+    mpctx->osd->vo_pts = mpctx->video_pts;
+    vo_draw_osd(vo, mpctx->osd);
+    mpctx->osd->want_redraw = false;
+}
+
 static int redraw_osd(struct MPContext *mpctx)
 {
     struct vo *vo = mpctx->video_out;
     if (vo_redraw_frame(vo) < 0)
         return -1;
 
-    mpctx->osd->vo_pts = mpctx->video_pts;
-    vo_draw_osd(vo, mpctx->osd);
-    osd_reset_changed(mpctx->osd);
+    draw_osd(mpctx);
 
     vo_flip_page(vo, 0, -1);
     return 0;
@@ -3158,10 +3165,7 @@ static void run_playloop(struct MPContext *mpctx)
         mpctx->video_pts = sh_video->pts;
         update_subtitles(mpctx, sh_video->pts);
         update_osd_msg(mpctx);
-
-        mpctx->osd->vo_pts = mpctx->video_pts;
-        vo_draw_osd(vo, mpctx->osd);
-        osd_reset_changed(mpctx->osd);
+        draw_osd(mpctx);
 
         mpctx->time_frame -= get_relative_time(mpctx);
         mpctx->time_frame -= vo->flip_queue_offset;
@@ -3303,7 +3307,8 @@ static void run_playloop(struct MPContext *mpctx)
         if (sleeptime > 0) {
             if (!mpctx->sh_video)
                 goto novideo;
-            if (osd_has_changed(mpctx->osd) || mpctx->video_out->want_redraw) {
+            if (mpctx->osd->want_redraw || mpctx->video_out->want_redraw) {
+                mpctx->osd->want_redraw = false;
                 if (redraw_osd(mpctx) < 0) {
                     if (mpctx->paused && video_left)
                         add_step_frame(mpctx);

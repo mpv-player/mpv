@@ -126,6 +126,8 @@ struct osd_state {
 
     bool render_subs_in_filter;
 
+    bool want_redraw;
+
     char *osd_text;             // OSDTYPE_OSD
     int progbar_type, progbar_value; // OSDTYPE_PROGBAR
 
@@ -203,8 +205,6 @@ extern int sub_justify;
 struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib);
 void osd_set_text(struct osd_state *osd, const char *text);
 void vo_osd_changed(int new_value);
-void osd_reset_changed(struct osd_state *osd);
-bool osd_has_changed(struct osd_state *osd);
 void osd_free(struct osd_state *osd);
 
 enum mp_osd_draw_flags {
