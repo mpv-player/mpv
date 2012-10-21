@@ -911,9 +911,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     }
 #endif
 
-    if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0)
-        vo_fs = 1;
-
     if (initialize_vdpau_objects(vo) < 0)
         return -1;
 
