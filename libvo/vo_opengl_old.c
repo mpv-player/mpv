@@ -115,13 +115,7 @@ static void resize(struct vo *vo, int x, int y)
     GL *gl = p->gl;
 
     mp_msg(MSGT_VO, MSGL_V, "[gl] Resize: %dx%d\n", x, y);
-    if (WinID >= 0) {
-        int left = 0, top = 0, w = x, h = y;
-        geometry(&left, &top, &w, &h, vo->dwidth, vo->dheight);
-        top = y - h - top;
-        gl->Viewport(left, top, w, h);
-    } else
-        gl->Viewport(0, 0, x, y);
+    gl->Viewport(0, 0, x, y);
 
     gl->MatrixMode(GL_PROJECTION);
     gl->LoadIdentity();

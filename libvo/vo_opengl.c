@@ -1193,12 +1193,6 @@ static void resize(struct gl_priv *p)
 
     mp_msg(MSGT_VO, MSGL_V, "[gl] Resize: %dx%d\n", vo->dwidth, vo->dheight);
     p->vp_x = 0, p->vp_y = 0;
-    if (WinID >= 0) {
-        int w = vo->dwidth, h = vo->dheight;
-        int old_y = vo->dheight;
-        geometry(&p->vp_x, &p->vp_y, &w, &h, vo->dwidth, vo->dheight);
-        p->vp_y = old_y - h - p->vp_y;
-    }
     p->vp_w = vo->dwidth, p->vp_h = vo->dheight;
     gl->Viewport(p->vp_x, p->vp_y, p->vp_w, p->vp_h);
 
