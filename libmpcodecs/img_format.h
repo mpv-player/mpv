@@ -198,7 +198,6 @@
 #define IMGFMT_UYVP 0x50565955 // 10-bit UYVY
 
 /* Compressed Formats */
-#define IMGFMT_MPEGPES (('M'<<24)|('P'<<16)|('E'<<8)|('S'))
 #define IMGFMT_MJPEG (('M')|('J'<<8)|('P'<<16)|('G'<<24))
 
 // VDPAU specific format.

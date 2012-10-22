@@ -281,7 +281,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    if (IMGFMT_IS_HWACCEL(fmt) || fmt == IMGFMT_MJPEG || fmt == IMGFMT_MPEGPES)
+    if (IMGFMT_IS_HWACCEL(fmt))
         return 0;  // these can't really be filtered
     if (fmt == IMGFMT_RGB8 || fmt == IMGFMT_BGR8)
         return 0;  // we don't have palette support, sorry

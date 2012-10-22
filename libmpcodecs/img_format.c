@@ -195,7 +195,6 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
     {"gbrp", IMGFMT_GBRP},
     {"mjpeg", IMGFMT_MJPEG},
     {"mjpg", IMGFMT_MJPEG},
-    {"mpes", IMGFMT_MPEGPES},
     {"vdpau_h264", IMGFMT_VDPAU_H264},
     {"vdpau_mpeg1", IMGFMT_VDPAU_MPEG1},
     {"vdpau_mpeg2", IMGFMT_VDPAU_MPEG2},

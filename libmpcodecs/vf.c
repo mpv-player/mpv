@@ -363,11 +363,8 @@ mp_image_t *vf_get_image(vf_instance_t *vf, unsigned int outfmt,
 
 //============================================================================
 
-// By default vf doesn't accept MPEGPES
 static int vf_default_query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    if (fmt == IMGFMT_MPEGPES)
-        return 0;
     return vf_next_query_format(vf, fmt);
 }
 

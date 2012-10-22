@@ -48,7 +48,6 @@ static struct vf_priv_s {
     int exp_x,exp_y;
     double aspect;
     int round;
-    int passthrough;
     int first_slice;
 } const vf_priv_dflt = {
   -1,-1,
@@ -57,7 +56,6 @@ static struct vf_priv_s {
   -1,-1,
   0.,
   1,
-  0,
   0
 };
 
@@ -69,10 +67,6 @@ static int config(struct vf_instance *vf,
 {
     struct MPOpts *opts = vf->opts;
     mp_image_t test_mpi;
-    if(outfmt == IMGFMT_MPEGPES) {
-      vf->priv->passthrough = 1;
-      return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
-    }
     mp_image_setfmt(&test_mpi, outfmt);
     if (outfmt == IMGFMT_IF09 || !test_mpi.bpp) return 0;
     vf->priv->exp_x = vf->priv->cfg_exp_x;
@@ -261,13 +255,6 @@ static void clear_borders(struct vf_instance *vf, int w, int h)
 }
 
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
-    if (vf->priv->passthrough) {
-      mp_image_t *dmpi = vf_get_image(vf->next, IMGFMT_MPEGPES,
-                                      MP_IMGTYPE_EXPORT, 0, mpi->w, mpi->h);
-      dmpi->planes[0]=mpi->planes[0];
-      return vf_next_put_image(vf,dmpi, pts);
-    }
-
     if(mpi->flags&MP_IMGFLAG_DIRECT || mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
 	vf->dmpi=mpi->priv;
 	if(!vf->dmpi) { mp_tmsg(MSGT_VFILTER, MSGL_WARN, "Why do we get NULL??\n"); return 0; }
