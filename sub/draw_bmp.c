@@ -255,14 +255,19 @@ static inline int min(int x, int y)
         return y;
 }
 
-static void unpremultiply_and_split_bgra(mp_image_t *img, mp_image_t *alpha)
+static void unpremultiply_and_split_IMGFMT_BGR32(mp_image_t *img,
+        mp_image_t *alpha)
 {
     int x, y;
     for (y = 0; y < img->h; ++y) {
-        unsigned char *irow = &img->planes[0][img->stride[0] * y];
+        uint32_t *irow = (uint32_t *) &img->planes[0][img->stride[0] * y];
         unsigned char *arow = &alpha->planes[0][alpha->stride[0] * y];
         for (x = 0; x < img->w; ++x) {
-            unsigned char aval = irow[4 * x + 3];
+            uint32_t pval = irow[x];
+            unsigned char aval = (pval >> 24);
+            unsigned char rval = (pval >> 16) & 0xFF;
+            unsigned char gval = (pval >> 8) & 0xFF;
+            unsigned char bval = pval & 0xFF;
             // multiplied = separate * alpha / 255
             // separate = rint(multiplied * 255 / alpha)
             //          = floor(multiplied * 255 / alpha + 0.5)
@@ -271,9 +276,10 @@ static void unpremultiply_and_split_bgra(mp_image_t *img, mp_image_t *alpha)
             int div = (int) aval;
             int add = div / 2;
             if (aval) {
-                irow[4 * x + 0] = min(255, (irow[4 * x + 0] * 255 + add) / div);
-                irow[4 * x + 1] = min(255, (irow[4 * x + 1] * 255 + add) / div);
-                irow[4 * x + 2] = min(255, (irow[4 * x + 2] * 255 + add) / div);
+                rval = min(255, (rval * 255 + add) / div);
+                gval = min(255, (gval * 255 + add) / div);
+                bval = min(255, (bval * 255 + add) / div);
+                irow[x] = bval + (gval << 8) + (rval << 16) + (aval << 24);
             }
             arow[x] = aval;
         }
@@ -293,10 +299,10 @@ static bool sub_bitmap_to_mp_images(struct mp_image **sbi, int *color_yuv,
         // swscale the bitmap from w*h to dw*dh, changing BGRA8 into YUV444P16
         // and make a scaled copy of A8
         mp_image_t *sbisrc = new_mp_image(sb->w, sb->h);
-        mp_image_setfmt(sbisrc, IMGFMT_BGRA);
+        mp_image_setfmt(sbisrc, IMGFMT_BGR32);
         sbisrc->planes[0] = sb->bitmap;
         sbisrc->stride[0] = sb->stride;
-        mp_image_t *sbisrc2 = alloc_mpi(sb->dw, sb->dh, IMGFMT_BGRA);
+        mp_image_t *sbisrc2 = alloc_mpi(sb->dw, sb->dh, IMGFMT_BGR32);
         mp_image_swscale(sbisrc2, sbisrc, csp, SWS_BILINEAR);
 
         // sbisrc2 now is the original image in premultiplied alpha, but
@@ -304,7 +310,7 @@ static bool sub_bitmap_to_mp_images(struct mp_image **sbi, int *color_yuv,
         // now, un-premultiply so we can work in YUV color space, also extract
         // alpha
         *sba = alloc_mpi(sb->dw, sb->dh, IMGFMT_Y8);
-        unpremultiply_and_split_bgra(sbisrc2, *sba);
+        unpremultiply_and_split_IMGFMT_BGR32(sbisrc2, *sba);
 
         // convert to the output format
         *sbi = alloc_mpi(sb->dw, sb->dh, imgfmt);
