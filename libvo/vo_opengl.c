@@ -2527,7 +2527,7 @@ static const char help_text[] =
 "    assumed to be in sRGB.\n"
 "  pbo\n"
 "    Enable use of PBOs. This is faster, but can sometimes lead to\n"
-"    sparodic and temporary image corruption.\n"
+"    sporadic and temporary image corruption.\n"
 "  dither-depth=<n>\n"
 "    Positive non-zero values select the target bit depth.\n"
 "    -1: Disable any dithering done by mpv.\n"
