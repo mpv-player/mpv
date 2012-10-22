@@ -12,6 +12,7 @@
 #include "mpcommon.h"
 #include "sub/find_subfiles.h"
 #include "sub/sub.h"
+#include "sub/subreader.h"
 
 static struct bstr strip_ext(struct bstr str)
 {

@@ -19,13 +19,9 @@
 #ifndef MPLAYER_SUB_H
 #define MPLAYER_SUB_H
 
+#include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-
-#include "subreader.h"
-
-struct vo;
-struct sub_render_params;
 
 // NOTE: VOs must support at least SUBBITMAP_LIBASS and SUBBITMAP_RGBA.
 enum sub_bitmap_format {
@@ -145,7 +141,7 @@ struct osd_state {
     struct ass_library *osd_ass_library;
 };
 
-extern subtitle* vo_sub;
+extern struct subtitle* vo_sub;
 
 extern void* vo_spudec;
 extern void* vo_vobsub;
@@ -180,20 +176,12 @@ enum mp_osd_font_codepoints {
 extern char * const sub_osd_names[];
 extern char * const sub_osd_names_short[];
 
-extern int sub_unicode;
 extern int sub_utf8;
 
 extern char *sub_cp;
 extern int sub_pos;
-extern int sub_width_p;
-extern int sub_bg_color; /* subtitles background color */
-extern int sub_bg_alpha;
 
-extern char *subtitle_font_encoding;
 extern float text_font_scale_factor;
-extern float osd_font_scale_factor;
-extern float subtitle_font_radius;
-extern float subtitle_font_thickness;
 extern int subtitle_autoscale;
 
 extern char *font_name;
@@ -202,7 +190,6 @@ extern float font_factor;
 extern float sub_delay;
 extern float sub_fps;
 
-extern int sub_justify;
 
 struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib);
 void osd_set_text(struct osd_state *osd, const char *text);

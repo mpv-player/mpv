@@ -1831,15 +1831,6 @@
     Use/display these subtitle files. Only one file can be displayed at the
     same time.
 
---sub-bg-alpha=<0-255>
-    Specify the alpha channel value for subtitles and OSD backgrounds. Big
-    values mean more transparency. 0 means completely transparent.
-
---sub-bg-color=<0-255>
-    Specify the color value for subtitles and OSD backgrounds. Currently
-    subtitles are grayscale so this value is equivalent to the intensity of
-    the color. 255 means white and 0 black.
-
 --sub-demuxer=<[+]name>
     Force subtitle demuxer type for ``--subfile``. Using a '+' before the name
     will force it, this will skip some checks! Give the demuxer name as
@@ -1921,19 +1912,6 @@
     :2: proportional to movie width
     :3: proportional to movie diagonal (default)
 
---subfont-blur=<0-8>
-    Sets the font blur radius (default: 2).
-
---subfont-encoding=<value>
-    Sets the font encoding. When set to 'unicode', all the glyphs from the
-    font file will be rendered and unicode will be used (default: unicode).
-
---subfont-osd-scale=<0-100>
-    Sets the autoscale coefficient of the OSD elements (default: 4).
-
---subfont-outline=<0-8>
-    Sets the font outline thickness (default: 2).
-
 --subfont-text-scale=<0-100>
     Sets the subtitle text autoscale coefficient as percentage of the screen
     size (default: 3.5).
@@ -1948,10 +1926,6 @@
     Specify the position of subtitles on the screen. The value is the vertical
     position of the subtitle in % of the screen height.
     Can be useful with ``--vf=expand``.
-
---subwidth=<10-100>
-    Specify the maximum width of subtitles on the screen. Useful for TV-out.
-    The value is the width of the subtitle in % of the screen width.
 
 --sws=<n>
     Specify the software scaler algorithm to be used with the ``--zoom``
@@ -2197,9 +2171,6 @@
         Threshold value for the signal strength (in percent), as reported by
         the device (default: 50). A signal strength higher than this value will
         indicate that the currently scanning channel is active.
-
---unicode
-    Tells mpv to handle the subtitle file as unicode.
 
 --use-filedir-conf
     Look for a file-specific configuration file in the same directory as the

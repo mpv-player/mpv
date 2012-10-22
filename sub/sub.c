@@ -39,6 +39,7 @@
 #include "img_convert.h"
 #include "draw_bmp.h"
 #include "spudec.h"
+#include "subreader.h"
 
 
 char * const sub_osd_names[]={
@@ -58,21 +59,12 @@ char * const sub_osd_names[]={
 };
 char * const sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "", "", "", "", "", "" };
 
-int sub_unicode=0;
 int sub_utf8=0;
 int sub_pos=100;
-int sub_width_p=100;
 int sub_visibility=1;
-int sub_bg_color=0; /* subtitles background color */
-int sub_bg_alpha=0;
-int sub_justify=0;
 
 subtitle* vo_sub=NULL;
-char *subtitle_font_encoding = NULL;
 float text_font_scale_factor = 3.5;
-float osd_font_scale_factor = 4.0;
-float subtitle_font_radius = 2.0;
-float subtitle_font_thickness = 2.0;
 // 0 = no autoscale
 // 1 = video height
 // 2 = video width

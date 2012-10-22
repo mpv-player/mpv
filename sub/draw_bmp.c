@@ -18,6 +18,7 @@
 
 #include "sub/draw_bmp.h"
 
+#include <stddef.h>
 #include <stdbool.h>
 #include <assert.h>
 #include <math.h>
