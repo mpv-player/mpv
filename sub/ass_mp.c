@@ -61,17 +61,6 @@ ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
         style->treat_fontname_as_pattern = 1;
 
         double fs = track->PlayResY * text_font_scale_factor / 100.;
-        /* The font size is always proportional to video height only;
-         * real -subfont-autoscale behavior is not implemented.
-         * Apply a correction that corresponds to about 4:3 aspect ratio
-         * video to get a size somewhat closer to what non-libass rendering
-         * would produce with the same text_font_scale_factor
-         * and subtitle_autoscale.
-         */
-        if (subtitle_autoscale == 2)
-            fs *= 1.3;
-        else if (subtitle_autoscale == 3)
-            fs *= 1.7;
 
         uint32_t c1 = 0xFFFFFF00;
         uint32_t c2 = 0x00000000;

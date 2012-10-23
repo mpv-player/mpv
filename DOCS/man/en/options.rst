@@ -1900,18 +1900,6 @@
     Sets the subtitle font (see ``--font``). If no ``--subfont`` is given,
     ``--font`` is used for subtitles too.
 
---subfont-autoscale=<0-3>
-    Sets the autoscale mode.
-
-    *NOTE*: 0 means that text scale and OSD scale are font heights in points.
-
-    The mode can be:
-
-    :0: no autoscale
-    :1: proportional to movie height
-    :2: proportional to movie width
-    :3: proportional to movie diagonal (default)
-
 --subfont-text-scale=<0-100>
     Sets the subtitle text autoscale coefficient as percentage of the screen
     size (default: 3.5).

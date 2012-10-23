@@ -64,12 +64,7 @@ int sub_pos=100;
 int sub_visibility=1;
 
 subtitle* vo_sub=NULL;
-float text_font_scale_factor = 3.5;
-// 0 = no autoscale
-// 1 = video height
-// 2 = video width
-// 3 = diagonal
-int subtitle_autoscale = 3;
+float text_font_scale_factor = 6;
 
 char *font_name = NULL;
 char *sub_font_name = NULL;

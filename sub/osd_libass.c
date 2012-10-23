@@ -65,19 +65,7 @@ static void update_font_style(ASS_Track *track, ASS_Style *style, double factor)
     style->Encoding = -1;
 
     // duplicated from ass_mp.c
-    double fs = track->PlayResY * factor / 100.;
-    /* The font size is always proportional to video height only;
-    * real -subfont-autoscale behavior is not implemented.
-    * Apply a correction that corresponds to about 4:3 aspect ratio
-    * video to get a size somewhat closer to what non-libass rendering
-    * would produce with the same text_font_scale_factor
-    * and subtitle_autoscale.
-    */
-    if (subtitle_autoscale == 2)
-        fs *= 1.3;
-    else if (subtitle_autoscale == 3)
-        fs *= 1.7;
-    style->FontSize = fs;
+    style->FontSize = track->PlayResY * factor / 100.;
     style->Outline = style->FontSize / 16;
 }
 

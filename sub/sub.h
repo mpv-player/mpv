@@ -182,7 +182,6 @@ extern char *sub_cp;
 extern int sub_pos;
 
 extern float text_font_scale_factor;
-extern int subtitle_autoscale;
 
 extern char *font_name;
 extern char *sub_font_name;
