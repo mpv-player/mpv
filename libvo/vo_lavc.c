@@ -501,7 +501,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
             .video_par = dar / sar,
         };
 
-        osd_draw_on_image(osd, dim, osd->vo_pts, 0, vc->lastimg,
+        osd_draw_on_image(osd, dim, osd->vo_pts, OSD_DRAW_SUB_ONLY, vc->lastimg,
                           &vc->colorspace);
     }
 }
