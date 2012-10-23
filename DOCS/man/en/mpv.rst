@@ -18,9 +18,6 @@ Synopsis
 | **mpv** \mf://[filemask|\@listfile] [-mf options] [options]
 | **mpv** [cdda|cddb]://track[-endtrack][:speed][/device] [options]
 | **mpv** [file|mms[t]|http|http\_proxy|rt[s]p|ftp|udp|unsv|icyx|noicyx|smb]:// [user:pass\@]URL[:port] [options]
-| **mpv** \sdp://file [options]
-| **mpv** \mpst://host[:port]/URL [options]
-| **mpv** \tivo://host/[list|llist|fsid] [options]
 
 
 DESCRIPTION
@@ -48,13 +45,11 @@ keyboard control
 
 LEFT and RIGHT
     Seek backward/forward 10 seconds. Shift+arrow does a 1 second exact seek
-    (see ``--hr-seek``; currently modifier keys like shift only work if used in
-    an X output window).
+    (see ``--hr-seek``).
 
 UP and DOWN
     Seek forward/backward 1 minute. Shift+arrow does a 5 second exact seek (see
-    ``--hr-seek``; currently modifier keys like shift only work if used in an X
-    output window).
+    ``--hr-seek``).
 
 PGUP and PGDWN
     Seek forward/backward 10 minutes.
@@ -149,14 +144,8 @@ V
     Toggle subtitle VSFilter aspect compatibility mode. See
     ``--ass-vsfilter-aspect-compat`` for more info.
 
-C (``--capture`` only)
-    Start/stop capturing the primary stream.
-
 r and t
     Move subtitles up/down.
-
-i (``--edlout`` mode only)
-    Set start or end of an EDL skip and write it out to the given file.
 
 s
     Take a screenshot.
@@ -174,7 +163,7 @@ P
 ! and @
     Seek to the beginning of the previous/next chapter.
 
-D (``--vo=vdpau``, ``--vf=yadif``, ``--vf=kerndeint`` only)
+D (``--vo=vdpau``, ``--vf=yadif`` only)
     Activate/deactivate deinterlacer.
 
 A
@@ -184,8 +173,7 @@ c
     Change YUV colorspace.
 
 (The following keys are valid only when using a video output that supports the
-corresponding adjustment, the software equalizer (``--vf=eq`` or ``--vf=eq2``)
-or hue filter (``--vf=hue``).)
+corresponding adjustment, or the software equalizer (``--vf=eq2``).)
 
 1 and 2
     Adjust contrast.
@@ -305,7 +293,7 @@ affects all files. Example:
 | file2.mkv | --a --b --c             |
 +-----------+-------------------------+
 
-Also, if any option is changed at runtime (via slave commands), they aren't
+Also, if any option is changed at runtime (via input commands), they aren't
 reset when a new file is played.
 
 Sometimes, it's useful to change options per-file. This can be achieved by
@@ -341,9 +329,8 @@ your configuration directory (e.g. ``/etc/mpv`` or
 User specific options override system-wide options and options given on the
 command line override either. The syntax of the configuration files is
 ``option=<value>``, everything after a *#* is considered a comment. Options
-that work without values can be enabled by setting them to *yes* or *1* or
-*true* and disabled by setting them to *no* or *0* or *false*. Even suboptions
-can be specified in this way.
+that work without values can be enabled by setting them to *yes* and disabled by
+setting them to *no*. Even suboptions can be specified in this way.
 
 You can also write file-specific configuration files. If you wish to have a
 configuration file for a file called 'movie.avi', create a file named
@@ -359,8 +346,8 @@ as the file played and then tries to load any file-specific configuration.
 
 *EXAMPLE MPV CONFIGURATION FILE:*
 
-| # Use gl3 video output by default.
-| vo=gl3
+| # Use opengl video output by default.
+| vo=opengl
 | # I love practicing handstands while watching videos.
 | flip=yes
 | # Decode multiple files from PNG,
@@ -416,12 +403,13 @@ Taking screenshots
 ==================
 
 Screenshots of the currently played file can be taken using the 'screenshot'
-slave mode command, which is by default bound to the ``s`` key. Files named
-``shotNNNN.png`` will be saved in the working directory, using the first
+input mode command, which is by default bound to the ``s`` key. Files named
+``shotNNNN.jpg`` will be saved in the working directory, using the first
 available number - no files will be overwritten.
 
 A screenshot will usually contain the unscaled video contents at the end of the
-video filter chain and subtitles. Some video output drivers will include OSD in
+video filter chain and subtitles. By default the ``S`` takes screenshots without
+subtitles. Some video output drivers will always include subtitles and OSD in
 the video frame as well - this is because of technical restrictions.
 
 The ``screenshot`` video filter is normally not required when using a
@@ -442,10 +430,6 @@ ENVIRONMENT VARIABLES
 
 There are a number of environment variables that can be used to control the
 behavior of mpv.
-
-``MPV_CHARSET`` (see also ``--msgcharset``)
-    Convert console messages to the specified charset (default: autodetect). A
-    value of "noconv" means no conversion.
 
 ``MPV_HOME``
     Directory where mpv looks for user settings.
@@ -520,38 +504,12 @@ libdvdcss:
     ``HOME``
         FIXME: Document this.
 
-libao2:
-    ``AUDIOSERVER``
-        Specifies the Network Audio System server to which the nas audio
-        output driver should connect and the transport that should be used. If
-        unset DISPLAY is used instead. The transport can be one of tcp and
-        unix. Syntax is ``tcp/<somehost>:<someport>``,
-        ``<somehost>:<instancenumber>`` or ``[unix]:<instancenumber>``. The
-        NAS base port is 8000 and <instancenumber> is added to that.
-
-        *EXAMPLES*:
-
-        ``AUDIOSERVER=somehost:0``
-             Connect to NAS server on somehost using default port and
-             transport.
-        ``AUDIOSERVER=tcp/somehost:8000``
-             Connect to NAS server on somehost listening on TCP port 8000.
-        ``AUDIOSERVER=(unix)?:0``
-             Connect to NAS server instance 0 on localhost using unix domain
-             sockets.
-
-    ``DISPLAY``
-        FIXME: Document this.
-
 osdep:
     ``TERM``
         FIXME: Document this.
 
 libvo:
     ``DISPLAY``
-        FIXME: Document this.
-
-    ``FRAMEBUFFER``
         FIXME: Document this.
 
     ``HOME``
@@ -640,31 +598,13 @@ Play DVD video from a directory with VOB files:
     ``mpv dvd://1 --dvd-device=/path/to/directory/``
 
 Stream from HTTP:
-    ``mpv http://mpv.hq/example.avi``
+    ``mpv http://example.com/example.avi``
 
 Stream using RTSP:
     ``mpv rtsp://server.example.com/streamName``
 
 input from standard V4L:
     ``mpv tv:// --tv=driver=v4l:width=640:height=480:outfmt=i420 --vc=rawi420 --vo=xv``
-
-Play DTS-CD with passthrough:
-    ``mpv --ac=hwdts --rawaudio=format=0x2001 --cdrom-device=/dev/cdrom cdda://``
-
-    You can also use ``--afm=hwac3`` instead of ``--ac=hwdts``. Adjust
-    ``/dev/cdrom`` to match the CD-ROM device on your system. If your external
-    receiver supports decoding raw DTS streams, you can directly play it via
-    ``cdda://`` without setting format, hwac3 or hwdts.
-
-Play a 6-channel AAC file with only two speakers:
-    ``mpv --rawaudio=format=0xff --demuxer=rawaudio --af=pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac``
-
-    You might want to play a bit with the pan values (e.g multiply with a
-    value) to increase volume or avoid clipping.
-
-checkerboard invert with geq filter:
-    ``mpv --vf=geq='128+(p(X\,Y)-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/SH\,128)\,64))*4'``
-
 
 AUTHORS
 =======

@@ -43,25 +43,27 @@ General changes for mplayer2 to mpv
   decades old hardware
 * Removal of support for dead platforms
 * Generally improved MS Windows support (dealing with unicode filenames,
-  improved ``vo_direct3d``, improve window handling)
+  improved ``--vo=direct3d``, improved window handling)
 * Better OSD rendering (using libass). This has full unicode support, and
   languages like Arabic should be better supported.
 * Cleaned up terminal output (nicer status line, less useless noise)
 * Support for playing URLs of popular streaming sites directly
   (e.g. ``mpv https://www.youtube.com/watch?v=...``)
-* Improved OpenGL output (``vo_opengl``)
+* Improved OpenGL output (``--vo=opengl-hq``)
 * Make ``--softvol`` default (**mpv** is not a mixer control panel)
 * Improved support for .cue files
-* Screenshot improvements (can save screenshots as JPG, configurable filenames,
-  support not taking screenshots with or without subtitles)
+* Screenshot improvements (can save screenshots as JPG or PNG, configurable
+  filenames, support for taking screenshots with or without subtitles)
 * Removal of teletext support
-* Replace image VOs (``vo_jpeg`` etc.) with ``vo_image``
-* Remove ``vo_gif89a``, ``vo_md5sum``, ``vo_yuv4mpeg`` (the plan is to merge
-  divverent's encoding branch, which provides support for all of these)
+* Replace image VOs (``--vo=jpeg`` etc.) with ``--vo=image``
 * Do not lose settings when playing a new file in the same player instance
 * New location for config files, new name for the binary. (Planned change.)
 * Slave mode compatibility broken (see below)
 * Encoding functionality (replacement for mencoder)
+  (Remove ``--vo=gif89a``, ``--vo=md5sum``, ``--vo=yuv4mpeg``, as encoding can
+  handle these use cases.)
+* Image subtitles (DVDs etc.) are rendered in color and use more correct
+  positioning
 * General code cleanups
 * Many more changes
 
@@ -81,7 +83,7 @@ Command line switches
   know about this change.
 
   (The new syntax was introduced in mplayer2.)
-* In general, negating a switch like ``-noopt`` now has to be written as
+* In general, negating switches like ``-noopt`` now have to be written as
   ``-no-opt``, or better ``--no-opt``.
 * Per-file options are not the default anymore. You can explicitly specify
   file local options. See ``Usage`` section.
@@ -150,8 +152,8 @@ Other
   mplayer. A proper slave mode application needed tons of code and hacks to get
   it right. The main problem is that slave mode is a bad and incomplete
   interface, and to get around that, applications parsed output messages
-  intended for users. It's hard to know just which messages are parsed by some
-  slave mode application, and as such it's virtually impossible to improve
+  intended for users. It's hard to know which messages exactly are parsed by
+  slave mode applications. This makes it virtually impossible to improve
   terminal output intended for users without possibly breaking something.
 
   This is absolutely insane, and **mpv** will not try to keep slave mode
@@ -163,7 +165,7 @@ Policy for removed features
 
 Features are a good thing, because they make users happy. As such, it is
 attempted to preserve useful features as far as possible. But if a feature is
-likely to be not used by many, and causes otherwise problems, it will be
+likely to be not used by many, and causes problems otherwise, it will be
 removed. Developers should not be burdened with fixing or cleaning up code that
 has no actual use.
 

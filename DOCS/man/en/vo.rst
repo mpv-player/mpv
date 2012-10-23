@@ -58,6 +58,8 @@ x11 (X11 only)
     Shared memory video output driver without hardware acceleration that works
     whenever X11 is present.
 
+    *NOTE*: this is a fallback only, and shouldn't be normally used.
+
 vdpau (X11 only)
     Uses the VDPAU interface to display and optionally also decode video.
     Hardware decoding is used with ``--vc=ffmpeg12vdpau``,
@@ -233,8 +235,9 @@ opengl
     OpenGL video output driver. It supports extended scaling methods, dithering
     and color management.
 
-    By default, it tries to use fast and fail-safe settings. Use the driver
-    ``opengl-hq`` to use this driver with a high quality rendering preset.
+    By default, it tries to use fast and fail-safe settings. Use the alias
+    ``opengl-hq`` to use this driver with defaults set for high quality
+    rendering.
 
     Requires at least OpenGL 2.1 and the GL_ARB_texture_rg extension. For older
     drivers, ``opengl-old`` may work.
