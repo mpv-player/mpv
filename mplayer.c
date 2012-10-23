@@ -993,7 +993,6 @@ void init_vo_spudec(struct MPContext *mpctx)
         sh_sub_t *sh = mpctx->sh_sub;
         vo_spudec = spudec_new_scaled(NULL, width, height, sh->extradata,
                                       sh->extradata_len);
-        spudec_set_font_factor(vo_spudec, font_factor);
     }
 
     if (vo_spudec != NULL) {

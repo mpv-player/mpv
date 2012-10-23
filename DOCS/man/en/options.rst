@@ -571,14 +571,6 @@
     reliable enough), the filename extension is used to select the demuxer.
     Always falls back on content-based demuxer selection.
 
---ffactor=<number>
-    Resample the font alphamap. Can be:
-
-    :0:    plain white fonts
-    :0.75: very narrow black outline (default)
-    :1:    narrow black outline
-    :10:   bold black outline
-
 --field-dominance=<-1-1>
     Set first field for interlaced content. Useful for deinterlacers that
     double the framerate: ``--vf=tfields=1``, ``--vf=yadif=1`` and

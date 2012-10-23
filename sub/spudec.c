@@ -328,8 +328,8 @@ static void compute_palette(spudec_handle_t *this, packet_t *packet)
     start = 0x80;
     step = 0;
   } else {
-    start = this->font_start_level;
-    step = (0xF0-this->font_start_level)/(cused-1);
+    start = 72;
+    step = (0xF0-start)/(cused-1);
   }
   memset(used, 0, sizeof(used));
   for (i=0; i<4; i++) {
@@ -658,12 +658,6 @@ void spudec_get_indexed(void *this, struct mp_osd_res *dim,
         res->bitmap_id = res->bitmap_pos_id = 1;
         spu->spu_changed = 0;
     }
-}
-
-void spudec_set_font_factor(void * this, double factor)
-{
-  spudec_handle_t *spu = this;
-  spu->font_start_level = (int)(0xF0-(0xE0*factor));
 }
 
 static void spudec_parse_extradata(spudec_handle_t *this,

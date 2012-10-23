@@ -32,7 +32,6 @@ void *spudec_new(unsigned int *palette);
 void spudec_free(void *this);
 void spudec_reset(void *this);	// called after seek
 int spudec_visible(void *this); // check if spu is visible
-void spudec_set_font_factor(void * this, double factor); // sets the equivalent to ffactor
 int spudec_changed(void *this);
 void spudec_set_forced_subs_only(void * const this, const unsigned int flag);
 
