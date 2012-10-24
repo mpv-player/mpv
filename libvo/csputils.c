@@ -3,6 +3,8 @@
  *
  * Copyleft (C) 2009 Reimar Döffinger <Reimar.Doeffinger@gmx.de>
  *
+ * mp_invert_yuv2rgb based on DarkPlaces engine, original code (GPL2 or later)
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -29,7 +31,6 @@
 #include <math.h>
 #include <assert.h>
 #include <libavutil/common.h>
-#include "mp_msg.h"
 
 #include "csputils.h"
 
@@ -321,11 +322,6 @@ int mp_csp_equalizer_set(struct mp_csp_equalizer *eq, const char *property,
 
 void mp_invert_yuv2rgb(float out[3][4], float in[3][4])
 {
-    // this is from the DarkPlaces engine, reduces to 3x3. Original code
-    // released under GPL2 or any later version.
-    float det;
-
-    // this seems to help gcc's common subexpression elimination, and also makes the code look nicer
     float m00 = in[0][0], m01 = in[0][1], m02 = in[0][2], m03 = in[0][3],
           m10 = in[1][0], m11 = in[1][1], m12 = in[1][2], m13 = in[1][3],
           m20 = in[2][0], m21 = in[2][1], m22 = in[2][2], m23 = in[2][3];
@@ -341,17 +337,11 @@ void mp_invert_yuv2rgb(float out[3][4], float in[3][4])
     out[2][1] = -(m00 * m21 - m20 * m01);
     out[2][2] =  (m00 * m11 - m10 * m01);
 
-    // calculate the determinant (as inverse == 1/det * adjoint, adjoint * m == identity * det, so this calculates the det)
-    det = m00 * out[0][0] + m10 * out[0][1] + m20 * out[0][2];
-    if (det == 0.0f) {
-        //mp_msg(MSGT_VO, MSGL_ERR, "cannot invert yuv2rgb matrix\n");
-        return;
-    }
-
-    // multiplications are faster than divisions, usually
+    // calculate the determinant (as inverse == 1/det * adjoint,
+    // adjoint * m == identity * det, so this calculates the det)
+    float det = m00 * out[0][0] + m10 * out[0][1] + m20 * out[0][2];
     det = 1.0f / det;
 
-    // manually unrolled loop to multiply all matrix elements by 1/det
     out[0][0] *= det;
     out[0][1] *= det;
     out[0][2] *= det;
