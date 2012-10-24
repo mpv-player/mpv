@@ -101,6 +101,8 @@
 #define IMGFMT_RGB_DEPTH(fmt) ((fmt)&0x3F)
 #define IMGFMT_BGR_DEPTH(fmt) ((fmt)&0x3F)
 
+// AV_PIX_FMT_BGR0
+#define IMGFMT_BGR0 0x1DC70000
 
 /* Planar YUV Formats */
 
@@ -196,7 +198,6 @@
 #define IMGFMT_UYVP 0x50565955 // 10-bit UYVY
 
 /* Compressed Formats */
-#define IMGFMT_MPEGPES (('M'<<24)|('P'<<16)|('E'<<8)|('S'))
 #define IMGFMT_MJPEG (('M')|('J'<<8)|('P'<<16)|('G'<<24))
 
 // VDPAU specific format.

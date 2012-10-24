@@ -120,7 +120,7 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     mpi->flags&=~(MP_IMGFLAG_PLANAR|MP_IMGFLAG_YUV|MP_IMGFLAG_SWAPPED);
     mpi->imgfmt=out_fmt;
     // compressed formats
-    if(out_fmt == IMGFMT_MPEGPES || IMGFMT_IS_HWACCEL(out_fmt)){
+    if(IMGFMT_IS_HWACCEL(out_fmt)){
 	mpi->bpp=0;
 	return;
     }
@@ -139,6 +139,11 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	    mpi->bpp=(IMGFMT_BGR_DEPTH(out_fmt)+7)&(~7);
 	mpi->flags|=MP_IMGFLAG_SWAPPED;
 	return;
+    }
+    switch (out_fmt) {
+    case IMGFMT_BGR0:
+        mpi->bpp = 32;
+        return;
     }
     mpi->num_planes=3;
     if (out_fmt == IMGFMT_GBRP) {

@@ -76,8 +76,6 @@ struct xvctx {
     uint32_t image_width;
     uint32_t image_height;
     uint32_t image_format;
-    uint32_t image_d_width;
-    uint32_t image_d_height;
     int is_paused;
     struct vo_rect src_rect;
     struct vo_rect dst_rect;
@@ -123,8 +121,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     ctx->image_height = height;
     ctx->image_width = width;
     ctx->image_format = format;
-    ctx->image_d_width = d_width;
-    ctx->image_d_height = d_height;
 
     if ((ctx->max_width != 0 && ctx->max_height != 0)
         && (ctx->image_width > ctx->max_width
@@ -426,8 +422,8 @@ static mp_image_t *get_screenshot(struct vo *vo)
     // try to get an image without OSD
     int id = ctx->have_image_copy ? ctx->num_buffers : ctx->visible_buf;
     struct mp_image img = get_xv_buffer(vo, id);
-    img.w = ctx->image_d_width;
-    img.h = ctx->image_d_height;
+    img.w = vo->aspdat.prew;
+    img.h = vo->aspdat.preh;
 
     return talloc_memdup(NULL, &img, sizeof(img));
 }
@@ -462,7 +458,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 static int query_format(struct xvctx *ctx, uint32_t format)
 {
     uint32_t i;
-    int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_OSD | VFCAP_ACCEPT_STRIDE;       // FIXME! check for DOWN
+    int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_ACCEPT_STRIDE;       // FIXME! check for DOWN
 
     /* check image formats */
     for (i = 0; i < ctx->formats; i++) {

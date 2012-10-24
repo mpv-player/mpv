@@ -250,6 +250,8 @@ mp_image_t *vf_get_image(vf_instance_t *vf, unsigned int outfmt,
         break;
     }
     if (mpi) {
+        int missing_palette = !(mpi->flags & MP_IMGFLAG_RGB_PALETTE) &&
+                              (mp_imgflag & MP_IMGFLAG_RGB_PALETTE);
         mpi->type = mp_imgtype;
         mpi->w = vf->w;
         mpi->h = vf->h;
@@ -261,11 +263,15 @@ mp_image_t *vf_get_image(vf_instance_t *vf, unsigned int outfmt,
                           MP_IMGFLAG_DRAW_CALLBACK | MP_IMGFLAG_RGB_PALETTE);
         if (!vf->draw_slice)
             mpi->flags &= ~MP_IMGFLAG_DRAW_CALLBACK;
-        if (mpi->width != w2 || mpi->height != h) {
+        if (mpi->width != w2 || mpi->height != h || missing_palette) {
             if (mpi->flags & MP_IMGFLAG_ALLOCATED) {
-                if (mpi->width < w2 || mpi->height < h) {
+                if (mpi->width < w2 || mpi->height < h || missing_palette) {
                     // need to re-allocate buffer memory:
                     av_free(mpi->planes[0]);
+                    if (mpi->flags & MP_IMGFLAG_RGB_PALETTE)
+                        av_free(mpi->planes[1]);
+                    for (int n = 0; n < MP_MAX_PLANES; n++)
+                        mpi->planes[n] = NULL;
                     mpi->flags &= ~MP_IMGFLAG_ALLOCATED;
                     mp_msg(MSGT_VFILTER, MSGL_V,
                            "vf.c: have to REALLOCATE buffer memory :(\n");
@@ -355,11 +361,8 @@ mp_image_t *vf_get_image(vf_instance_t *vf, unsigned int outfmt,
 
 //============================================================================
 
-// By default vf doesn't accept MPEGPES
 static int vf_default_query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    if (fmt == IMGFMT_MPEGPES)
-        return 0;
     return vf_next_query_format(vf, fmt);
 }
 

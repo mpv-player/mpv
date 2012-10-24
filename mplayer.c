@@ -1106,19 +1106,11 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
     saddf(line, width, ":");
 
     // Playback position
-    double cur = MP_NOPTS_VALUE;
-    if (mpctx->sh_audio && a_pos != MP_NOPTS_VALUE) {
-        cur = a_pos;
-    } else if (mpctx->sh_video && mpctx->video_pts != MP_NOPTS_VALUE) {
-        cur = mpctx->video_pts;
-    }
-    if (cur != MP_NOPTS_VALUE) {
-        saddf(line, width, " %.1f ", cur);
-        saddf(line, width, "(");
-        sadd_hhmmssff(line, width, cur, mpctx->opts.osd_fractions);
-        saddf(line, width, ")");
-    } else
-        saddf(line, width, " ???");
+    double cur = get_current_time(mpctx);
+    saddf(line, width, " %.1f ", cur);
+    saddf(line, width, "(");
+    sadd_hhmmssff(line, width, cur, mpctx->opts.osd_fractions);
+    saddf(line, width, ")");
 
     double len = get_time_length(mpctx);
     if (len >= 0) {
@@ -2845,7 +2837,9 @@ double get_current_time(struct MPContext *mpctx)
     double apts = playing_audio_pts(mpctx);
     if (apts != MP_NOPTS_VALUE)
         return apts;
-    return mpctx->last_seek_pts;
+    if (mpctx->last_seek_pts != MP_NOPTS_VALUE)
+        return mpctx->last_seek_pts;
+    return 0;
 }
 
 int get_percent_pos(struct MPContext *mpctx)

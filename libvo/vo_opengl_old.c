@@ -73,8 +73,6 @@ struct gl_priv {
     uint32_t image_width;
     uint32_t image_height;
     uint32_t image_format;
-    uint32_t image_d_width;
-    uint32_t image_d_height;
     int many_fmts;
     int have_texture_rg;
     int ati_hack;
@@ -497,8 +495,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     p->image_height = height;
     p->image_width = width;
     p->image_format = format;
-    p->image_d_width = d_width;
-    p->image_d_height = d_height;
     p->is_yuv = mp_get_chroma_shift(p->image_format, &xs, &ys, NULL) > 0;
     p->is_yuv |= (xs << 8) | (ys << 16);
     glFindFormat(format, p->have_texture_rg, NULL, &p->texfmt, &p->gl_format,
@@ -829,8 +825,8 @@ static mp_image_t *get_screenshot(struct vo *vo)
     image->width = p->image_width;
     image->height = p->image_height;
 
-    image->w = p->image_d_width;
-    image->h = p->image_d_height;
+    image->w = vo->aspdat.prew;
+    image->h = vo->aspdat.preh;
 
     return image;
 }
@@ -1134,6 +1130,16 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_REDRAW_FRAME:
         do_render(vo);
         return true;
+    case VOCTRL_PAUSE:
+        if (!p->glctx->pause)
+            break;
+        p->glctx->pause(vo);
+        return VO_TRUE;
+    case VOCTRL_RESUME:
+        if (!p->glctx->resume)
+            break;
+        p->glctx->resume(vo);
+        return VO_TRUE;
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         if (args->full_window)

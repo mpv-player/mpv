@@ -250,6 +250,7 @@ struct vo {
     struct MPOpts *opts;
     struct vo_x11_state *x11;
     struct vo_w32_state *w32;
+    struct vo_cocoa_state *cocoa;
     struct mp_fifo *key_fifo;
     struct encode_lavc_context *encode_lavc_ctx;
     struct input_ctx *input_ctx;

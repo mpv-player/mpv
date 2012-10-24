@@ -1773,6 +1773,16 @@ static int control(struct vo *vo, uint32_t request, void *data)
             break;
         p->glctx->ontop(vo);
         return VO_TRUE;
+    case VOCTRL_PAUSE:
+        if (!p->glctx->pause)
+            break;
+        p->glctx->pause(vo);
+        return VO_TRUE;
+    case VOCTRL_RESUME:
+        if (!p->glctx->resume)
+            break;
+        p->glctx->resume(vo);
+        return VO_TRUE;
     case VOCTRL_FULLSCREEN:
         p->glctx->fullscreen(vo);
         resize(p);
@@ -2348,7 +2358,7 @@ static const char help_text[] =
 "    assumed to be in sRGB.\n"
 "  pbo\n"
 "    Enable use of PBOs. This is faster, but can sometimes lead to\n"
-"    sparodic and temporary image corruption.\n"
+"    sporadic and temporary image corruption.\n"
 "  dither-depth=<n>\n"
 "    Positive non-zero values select the target bit depth.\n"
 "    -1: Disable any dithering done by mpv.\n"

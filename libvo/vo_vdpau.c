@@ -106,8 +106,8 @@ struct vdpctx {
     uint64_t                           last_vdp_time;
     unsigned int                       last_sync_update;
 
-    /* an extra last output surface is used for OSD and screenshots */
     VdpOutputSurface                   output_surfaces[MAX_OUTPUT_SURFACES];
+    VdpOutputSurface                   screenshot_surface;
     int                                num_output_surfaces;
     struct buffered_video_surface {
         VdpVideoSurface surface;
@@ -152,7 +152,6 @@ struct vdpctx {
     bool                               dropped_frame;
     uint64_t                           dropped_time;
     uint32_t                           vid_width, vid_height;
-    uint32_t                           vid_d_width, vid_d_height;
     uint32_t                           image_format;
     VdpChromaType                      vdp_chroma_type;
     VdpYCbCrFormat                     vdp_pixel_format;
@@ -390,20 +389,17 @@ static void resize(struct vo *vo)
     int flip_offset_ms = vo_fs ? vc->flip_offset_fs : vc->flip_offset_window;
     vo->flip_queue_offset = flip_offset_ms / 1000.;
 
-    int min_output_width = FFMAX(vo->dwidth, vc->vid_width);
-    int min_output_height = FFMAX(vo->dheight, vc->vid_height);
-
-    if (vc->output_surface_width < min_output_width
-        || vc->output_surface_height < min_output_height) {
-        if (vc->output_surface_width < min_output_width) {
+    if (vc->output_surface_width < vo->dwidth
+        || vc->output_surface_height < vo->dheight) {
+        if (vc->output_surface_width < vo->dwidth) {
             vc->output_surface_width += vc->output_surface_width >> 1;
             vc->output_surface_width = FFMAX(vc->output_surface_width,
-                                             min_output_width);
+                                             vo->dwidth);
         }
-        if (vc->output_surface_height < min_output_height) {
+        if (vc->output_surface_height < vo->dheight) {
             vc->output_surface_height += vc->output_surface_height >> 1;
             vc->output_surface_height = FFMAX(vc->output_surface_height,
-                                              min_output_height);
+                                              vo->dheight);
         }
         // Creation of output_surfaces
         for (int i = 0; i < vc->num_output_surfaces; i++)
@@ -705,6 +701,12 @@ static void free_video_specific(struct vo *vo)
         CHECK_ST_WARNING("Error when calling vdp_video_mixer_destroy");
     }
     vc->video_mixer = VDP_INVALID_HANDLE;
+
+    if (vc->screenshot_surface != VDP_INVALID_HANDLE) {
+        vdp_st = vdp->output_surface_destroy(vc->screenshot_surface);
+        CHECK_ST_WARNING("Error when calling vdp_output_surface_destroy");
+    }
+    vc->screenshot_surface = VDP_INVALID_HANDLE;
 }
 
 static int create_vdp_decoder(struct vo *vo, int max_refs)
@@ -800,6 +802,7 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
     vc->flip_target = VDP_INVALID_HANDLE;
     for (int i = 0; i < MAX_OUTPUT_SURFACES; i++)
         vc->output_surfaces[i] = VDP_INVALID_HANDLE;
+    vc->screenshot_surface = VDP_INVALID_HANDLE;
     vc->vdp_device = VDP_INVALID_HANDLE;
     for (int i = 0; i < MAX_OSD_PARTS; i++) {
         struct osd_bitmap_surface *sfc = &vc->osd_surfaces[i];
@@ -869,8 +872,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     vc->image_format = format;
     vc->vid_width    = width;
     vc->vid_height   = height;
-    vc->vid_d_width    = d_width;
-    vc->vid_d_height   = d_height;
 
     free_video_specific(vo);
     if (IMGFMT_IS_VDPAU(vc->image_format) && !create_vdp_decoder(vo, 2))
@@ -1358,12 +1359,12 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
 // warning: the size and pixel format of surface must match that of the
 //          surfaces in vc->output_surfaces
 static struct mp_image *read_output_surface(struct vdpctx *vc,
-                                            VdpOutputSurface surface)
+                                            VdpOutputSurface surface,
+                                            int width, int height)
 {
     VdpStatus vdp_st;
     struct vdp_functions *vdp = vc->vdp;
-    struct mp_image *image = alloc_mpi(vc->output_surface_width,
-                                       vc->output_surface_height, IMGFMT_BGR32);
+    struct mp_image *image = alloc_mpi(width, height, IMGFMT_BGR32);
 
     void *dst_planes[] = { image->planes[0] };
     uint32_t dst_pitches[] = { image->stride[0] };
@@ -1377,19 +1378,27 @@ static struct mp_image *read_output_surface(struct vdpctx *vc,
 static struct mp_image *get_screenshot(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
+    VdpStatus vdp_st;
+    struct vdp_functions *vdp = vc->vdp;
 
-    VdpOutputSurface screenshot_surface =
-        vc->output_surfaces[vc->num_output_surfaces];
+    if (vc->screenshot_surface == VDP_INVALID_HANDLE) {
+        vdp_st = vdp->output_surface_create(vc->vdp_device,
+                                            OUTPUT_RGBA_FORMAT,
+                                            vc->vid_width, vc->vid_height,
+                                            &vc->screenshot_surface);
+        CHECK_ST_WARNING("Error when calling vdp_output_surface_create");
+    }
 
     VdpRect rc = { .x1 = vc->vid_width, .y1 = vc->vid_height };
-    render_video_to_output_surface(vo, screenshot_surface, &rc);
+    render_video_to_output_surface(vo, vc->screenshot_surface, &rc);
 
-    struct mp_image *image = read_output_surface(vc, screenshot_surface);
+    struct mp_image *image = read_output_surface(vc, vc->screenshot_surface,
+                                                 vc->vid_width, vc->vid_height);
 
     image->width = vc->vid_width;
     image->height = vc->vid_height;
-    image->w = vc->vid_d_width;
-    image->h = vc->vid_d_height;
+    image->w = vo->aspdat.prew;
+    image->h = vo->aspdat.preh;
 
     return image;
 }
@@ -1399,7 +1408,9 @@ static struct mp_image *get_window_screenshot(struct vo *vo)
     struct vdpctx *vc = vo->priv;
     int last_surface = WRAP_ADD(vc->surface_num, -1, vc->num_output_surfaces);
     VdpOutputSurface screen = vc->output_surfaces[last_surface];
-    struct mp_image *image = read_output_surface(vo->priv, screen);
+    struct mp_image *image = read_output_surface(vo->priv, screen,
+                                                 vc->output_surface_width,
+                                                 vc->output_surface_height);
     image->width = image->w = vo->dwidth;
     image->height = image->h = vo->dheight;
     return image;

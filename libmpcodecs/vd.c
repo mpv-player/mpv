@@ -60,8 +60,7 @@ int mpcodecs_config_vo2(sh_video_t *sh, int w, int h,
     unsigned int out_fmt = 0;
     int screen_size_x = 0;
     int screen_size_y = 0;
-    vf_instance_t *vf = sh->vfilter, *sc = NULL;
-    int palette = 0;
+    vf_instance_t *vf = sh->vfilter;
     int vocfg_flags = 0;
 
     if (w)
@@ -125,58 +124,14 @@ int mpcodecs_config_vo2(sh_video_t *sh, int w, int h,
             sh->output_flags = flags;
             if (flags & VFCAP_CSP_SUPPORTED_BY_HW)
                 break;
-        } else if (!palette
-                   && !(flags &
-                        (VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_CSP_SUPPORTED))
-                   && (out_fmt == IMGFMT_RGB8 || out_fmt == IMGFMT_BGR8)) {
-            sh->outfmtidx = j; // pass index to the control() function this way
-            if (sh->vd_driver->control(sh, VDCTRL_QUERY_FORMAT, &out_fmt) !=
-                CONTROL_FALSE)
-                palette = 1;
         }
     }
     if (j < 0) {
         // TODO: no match - we should use conversion...
-        if (strcmp(vf->info->name, "scale") && palette != -1) {
+        if (strcmp(vf->info->name, "scale")) {
             mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Could not find matching colorspace - retrying with -vf scale...\n");
-            sc = vf = vf_open_filter(opts, vf, "scale", NULL);
+            vf = vf_open_filter(opts, vf, "scale", NULL);
             goto csp_again;
-        } else if (palette == 1) {
-            mp_msg(MSGT_DECVIDEO, MSGL_V, "vd: Trying -vf palette...\n");
-            palette = -1;
-            vf = vf_open_filter(opts, vf, "palette", NULL);
-            goto csp_again;
-        } else {
-            // sws failed, if the last filter (vf_vo) support MPEGPES try
-            // to append vf_lavc
-            vf_instance_t *vo, *vp = NULL, *ve, *vpp = NULL;
-            // Remove the scale filter if we added it ourselves
-            if (vf == sc) {
-                ve = vf;
-                vf = vf->next;
-                vf_uninit_filter(ve);
-            }
-            // Find the last filter (vf_vo)
-            for (vo = vf; vo->next; vo = vo->next) {
-                vpp = vp;
-                vp = vo;
-            }
-            if (vo->query_format(vo, IMGFMT_MPEGPES)
-                && (!vp || (vp && strcmp(vp->info->name, "lavc")))) {
-                ve = vf_open_filter(opts, vo, "lavc", NULL);
-                if (vp)
-                    vp->next = ve;
-                else
-                    vf = ve;
-                goto csp_again;
-            }
-            if (vp && !strcmp(vp->info->name,"lavc")) {
-		if (vpp)
-                    vpp->next = vo;
-		else
-                    vf = vo;
-		vf_uninit_filter(vp);
-            }
         }
         mp_tmsg(MSGT_CPLAYER, MSGL_WARN,
             "The selected video_out device is incompatible with this codec.\n"\
