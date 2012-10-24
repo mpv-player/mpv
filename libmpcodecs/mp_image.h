@@ -130,4 +130,14 @@ mp_image_t* alloc_mpi(int w, int h, unsigned long int fmt);
 void mp_image_alloc_planes(mp_image_t *mpi);
 void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi);
 
+// this macro requires img_format.h to be included too:
+#define MP_IMAGE_PLANAR_BITS_PER_PIXEL_ON_PLANE(mpi, p) \
+    (IMGFMT_IS_YUVP16((mpi)->imgfmt) ? 16 : 8)
+#define MP_IMAGE_BITS_PER_PIXEL_ON_PLANE(mpi, p) \
+    (((mpi)->flags & MP_IMGFLAG_PLANAR) \
+        ? MP_IMAGE_PLANAR_BITS_PER_PIXEL_ON_PLANE(mpi, p) \
+        : (mpi)->bpp)
+#define MP_IMAGE_BYTES_PER_ROW_ON_PLANE(mpi, p) \
+    ((MP_IMAGE_BITS_PER_PIXEL_ON_PLANE(mpi, p) * ((mpi)->w >> (p ? mpi->chroma_x_shift : 0)) + 7) / 8)
+
 #endif /* MPLAYER_MP_IMAGE_H */
