@@ -22,6 +22,9 @@ struct SwsContext *sws_getContextFromCmdLine_hq(int srcW, int srcH,
                                                 int dstFormat);
 int mp_sws_set_colorspace(struct SwsContext *sws, struct mp_csp_details *csp);
 
+void mp_image_swscale(struct mp_image *dst, const struct mp_image *src,
+                      struct mp_csp_details *csp, int my_sws_flags);
+
 #endif /* MP_SWS_UTILS_H */
 
 // vim: ts=4 sw=4 et tw=80

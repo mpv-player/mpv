@@ -131,4 +131,28 @@ struct SwsContext *sws_getContextFromCmdLine_hq(int srcW, int srcH,
                SWS_ACCURATE_RND | SWS_BITEXACT);
 }
 
+void mp_image_swscale(struct mp_image *dst,
+                      const struct mp_image *src,
+                      struct mp_csp_details *csp,
+                      int my_sws_flags)
+{
+    enum PixelFormat dfmt, sfmt;
+    dfmt = imgfmt2pixfmt(dst->imgfmt);
+    sfmt = imgfmt2pixfmt(src->imgfmt);
+    if (src->imgfmt == IMGFMT_RGB8 || src->imgfmt == IMGFMT_BGR8)
+        sfmt = PIX_FMT_PAL8;
+
+    struct SwsContext *sws =
+        sws_getContext(src->w, src->h, sfmt, dst->w, dst->h, dfmt,
+                       my_sws_flags, NULL, NULL, NULL);
+    struct mp_csp_details mycsp = MP_CSP_DETAILS_DEFAULTS;
+    if (csp)
+        mycsp = *csp;
+    mp_sws_set_colorspace(sws, &mycsp);
+    sws_scale(sws, (const unsigned char *const *) src->planes, src->stride,
+              0, src->h,
+              dst->planes, dst->stride);
+    sws_freeContext(sws);
+}
+
 // vim: ts=4 sw=4 et tw=80

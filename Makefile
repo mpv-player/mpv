@@ -217,6 +217,7 @@ SRCS_COMMON = asxparser.c \
               sub/spudec.c \
               sub/sub.c \
               sub/img_convert.c \
+              sub/draw_bmp.c \
               sub/subassconvert.c \
               sub/subreader.c \
               sub/vobsub.c \

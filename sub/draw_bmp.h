@@ -1,0 +1,12 @@
+#ifndef MPLAYER_DRAW_BMP_H
+#define MPLAYER_DRAW_BMP_H
+
+struct mp_image;
+struct sub_bitmaps;
+struct mp_csp_details;
+void mp_draw_sub_bitmaps(struct mp_image *dst, struct sub_bitmaps *sbs,
+                         struct mp_csp_details *csp);
+
+#endif /* MPLAYER_DRAW_BMP_H */
+
+// vim: ts=4 sw=4 et tw=80
