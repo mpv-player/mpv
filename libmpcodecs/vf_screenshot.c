@@ -27,7 +27,7 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-#include "vf_scale.h"
+#include "libmpcodecs/sws_utils.h"
 #include "fmt-conversion.h"
 #include "libvo/fastmemcpy.h"
 

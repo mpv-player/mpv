@@ -43,8 +43,7 @@
 
 #include "sub/sub.h"
 
-#include "libswscale/swscale.h"
-#include "libmpcodecs/vf_scale.h"
+#include "libmpcodecs/sws_utils.h"
 #define MODE_RGB  0x1
 #define MODE_BGR  0x2
 

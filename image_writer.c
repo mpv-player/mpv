@@ -40,7 +40,7 @@
 #include "fmt-conversion.h"
 
 //for sws_getContextFromCmdLine_hq and mp_sws_set_colorspace
-#include "libmpcodecs/vf_scale.h"
+#include "libmpcodecs/sws_utils.h"
 #include "libvo/csputils.h"
 
 #include "m_option.h"

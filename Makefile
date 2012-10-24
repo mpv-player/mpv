@@ -144,6 +144,7 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/img_format.c \
               libmpcodecs/mp_image.c \
               libmpcodecs/pullup.c \
+              libmpcodecs/sws_utils.c \
               libmpcodecs/vd.c \
               libmpcodecs/vd_ffmpeg.c \
               libmpcodecs/vf.c \
