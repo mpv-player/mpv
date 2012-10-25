@@ -230,6 +230,16 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
         m[i][COL_Y] *= params->contrast;
         m[i][COL_C] += (rgblev.max-rgblev.min) * (1 - params->contrast)/2;
     }
+
+    int in_bits = FFMAX(params->int_bits_in, 1);
+    int out_bits = FFMAX(params->int_bits_out, 1);
+    double in_scale = (1 << in_bits) - 1.0;
+    double out_scale = (1 << out_bits) - 1.0;
+    for (int i = 0; i < 3; i++) {
+        m[i][COL_C] *= out_scale; // constant is 1.0
+        for (int x = 0; x < 3; x++)
+            m[i][x] *= out_scale / in_scale;
+    }
 }
 
 //! size of gamma map use to avoid slow exp function in gen_yuv2rgb_map
@@ -364,15 +374,15 @@ void mp_invert_yuv2rgb(float out[3][4], float in[3][4])
 
 // Multiply the color in c with the given matrix.
 // c is {R, G, B} or {Y, U, V} (depending on input/output and matrix).
-// Each component is an unsigned number with the given count of bits.
-void mp_map_color(float matrix[3][4], int bits, int c[3])
+// Output is clipped to the given number of bits.
+void mp_map_int_color(float matrix[3][4], int clip_bits, int c[3])
 {
-    uint8_t in[3] = {c[0], c[1], c[2]};
+    int in[3] = {c[0], c[1], c[2]};
     for (int i = 0; i < 3; i++) {
-        double val = matrix[i][3] * 255;
+        double val = matrix[i][3];
         for (int x = 0; x < 3; x++)
             val += matrix[i][x] * in[x];
-        int ival = lrint(val * (1 << (bits - 8)));
-        c[i] = av_clip(ival, 0, (1 << bits) - 1);
+        int ival = lrint(val);
+        c[i] = av_clip(ival, 0, (1 << clip_bits) - 1);
     }
 }

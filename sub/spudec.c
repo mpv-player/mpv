@@ -188,6 +188,8 @@ static void setup_palette(spudec_handle_t *spu, uint32_t palette[256])
 {
     memset(palette, 0, sizeof(palette));
     struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
+    csp.int_bits_in = 8;
+    csp.int_bits_out = 8;
     float cmatrix[3][4];
     mp_get_yuv2rgb_coeffs(&csp, cmatrix);
     for (int i = 0; i < 4; ++i) {
@@ -199,7 +201,7 @@ static void setup_palette(spudec_handle_t *spu, uint32_t palette[256])
         int color = spu->custom ? spu->cuspal[i] :
                     spu->global_palette[spu->palette[i]];
         int c[3] = {(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff};
-        mp_map_color(cmatrix, 8, c);
+        mp_map_int_color(cmatrix, 8, c);
         // R and G swapped, possibly due to vobsub_palette_to_yuv()
         palette[i] = (alpha << 24u) | (c[2] << 16) | (c[1] << 8) | c[0];
     }

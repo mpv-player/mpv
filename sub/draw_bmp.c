@@ -283,6 +283,8 @@ static void draw_ass(struct mp_draw_sub_cache **cache, struct mp_rect bb,
 {
     struct mp_csp_params cspar = MP_CSP_PARAMS_DEFAULTS;
     cspar.colorspace = *csp;
+    cspar.int_bits_in = bits;
+    cspar.int_bits_out = 8;
 
     float yuv2rgb[3][4], rgb2yuv[3][4];
     mp_get_yuv2rgb_coeffs(&cspar, yuv2rgb);
@@ -301,7 +303,7 @@ static void draw_ass(struct mp_draw_sub_cache **cache, struct mp_rect bb,
         int b = (sb->libass.color >> 8) & 0xFF;
         int a = 255 - (sb->libass.color & 0xFF);
         int color_yuv[3] = {r, g, b};
-        mp_map_color(rgb2yuv, bits, color_yuv);
+        mp_map_int_color(rgb2yuv, bits, color_yuv);
 
         int bytes = (bits + 7) / 8;
         uint8_t *alpha_p = (uint8_t *)sb->bitmap + src_y * sb->stride + src_x;

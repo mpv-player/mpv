@@ -69,8 +69,12 @@ struct mp_csp_params {
     float rgamma;
     float ggamma;
     float bgamma;
+    // texture_bits/input_bits is for rescaling fixed point input to range [0,1]
     int texture_bits;
     int input_bits;
+    // for scaling integer input and output (if 0, assume range [0,1])
+    int int_bits_in;
+    int int_bits_out;
 };
 
 #define MP_CSP_PARAMS_DEFAULTS {                                \
@@ -140,6 +144,6 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float yuv2rgb[3][4]);
 void mp_gen_yuv2rgb_map(struct mp_csp_params *params, uint8_t *map, int size);
 
 void mp_invert_yuv2rgb(float out[3][4], float in[3][4]);
-void mp_map_color(float matrix[3][4], int bits, int c[3]);
+void mp_map_int_color(float matrix[3][4], int clip_bits, int c[3]);
 
 #endif /* MPLAYER_CSPUTILS_H */
