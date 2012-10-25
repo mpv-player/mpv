@@ -80,4 +80,9 @@ extern const char *mplayer_version;
 
 char *mp_format_time(double time, bool fractions);
 
+struct mp_rect {
+    int x0, y0;
+    int x1, y1;
+};
+
 #endif /* MPLAYER_MPCOMMON_H */
