@@ -198,10 +198,10 @@ static void setup_palette(spudec_handle_t *spu, uint32_t palette[256])
             alpha = 0;
         int color = spu->custom ? spu->cuspal[i] :
                     spu->global_palette[spu->palette[i]];
-        uint8_t c[3] = {(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff};
-        mp_map_color(cmatrix, c);
+        int c[3] = {(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff};
+        mp_map_color(cmatrix, 8, c);
         // R and G swapped, possibly due to vobsub_palette_to_yuv()
-        palette[i] = (alpha << 24) | (c[2] << 16) | (c[1] << 8) | c[0];
+        palette[i] = (alpha << 24u) | (c[2] << 16) | (c[1] << 8) | c[0];
     }
 }
 

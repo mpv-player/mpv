@@ -281,13 +281,8 @@ static void draw_ass(struct mp_draw_sub_cache **cache, struct mp_rect bb,
                      struct mp_image *temp, int bits, struct mp_csp_details *csp,
                      struct sub_bitmaps *sbs)
 {
-    struct mp_csp_params cspar = {
-        .colorspace = *csp,
-        .brightness = 0, .contrast = 1,
-        .hue = 0, .saturation = 1,
-        .rgamma = 1, .ggamma = 1, .bgamma = 1,
-        .texture_bits = 8, .input_bits = 8
-    };
+    struct mp_csp_params cspar = MP_CSP_PARAMS_DEFAULTS;
+    cspar.colorspace = *csp;
 
     float yuv2rgb[3][4], rgb2yuv[3][4];
     mp_get_yuv2rgb_coeffs(&cspar, yuv2rgb);
@@ -305,20 +300,8 @@ static void draw_ass(struct mp_draw_sub_cache **cache, struct mp_rect bb,
         int g = (sb->libass.color >> 16) & 0xFF;
         int b = (sb->libass.color >> 8) & 0xFF;
         int a = 255 - (sb->libass.color & 0xFF);
-        int color_yuv[4];
-        color_yuv[0] =
-            rint(MP_MAP_RGB2YUV_COLOR(rgb2yuv, r, g, b, 255, 0)
-                    * (1 << (bits - 8)));
-        color_yuv[1] =
-            rint(MP_MAP_RGB2YUV_COLOR(rgb2yuv, r, g, b, 255, 1)
-                    * (1 << (bits - 8)));
-        color_yuv[2] =
-            rint(MP_MAP_RGB2YUV_COLOR(rgb2yuv, r, g, b, 255, 2)
-                    * (1 << (bits - 8)));
-        // NOTE: these overflows can actually happen (when subtitles use color
-        // 0,0,0 while output levels only allows 16,16,16 upwards...)
-        for (int i = 0; i < 3; i++)
-            color_yuv[i] = av_clip(color_yuv[i], 0, ((1 << bits) - 1));
+        int color_yuv[3] = {r, g, b};
+        mp_map_color(rgb2yuv, bits, color_yuv);
 
         int bytes = (bits + 7) / 8;
         uint8_t *alpha_p = (uint8_t *)sb->bitmap + src_y * sb->stride + src_x;

@@ -364,14 +364,15 @@ void mp_invert_yuv2rgb(float out[3][4], float in[3][4])
 
 // Multiply the color in c with the given matrix.
 // c is {R, G, B} or {Y, U, V} (depending on input/output and matrix).
-void mp_map_color(float matrix[3][4], uint8_t c[3])
+// Each component is an unsigned number with the given count of bits.
+void mp_map_color(float matrix[3][4], int bits, int c[3])
 {
     uint8_t in[3] = {c[0], c[1], c[2]};
     for (int i = 0; i < 3; i++) {
         double val = matrix[i][3] * 255;
         for (int x = 0; x < 3; x++)
             val += matrix[i][x] * in[x];
-        int ival = lrint(val);
-        c[i] = FFMIN(FFMAX(ival, 0), 255);
+        int ival = lrint(val * (1 << (bits - 8)));
+        c[i] = av_clip(ival, 0, (1 << bits) - 1);
     }
 }

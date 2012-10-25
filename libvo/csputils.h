@@ -139,16 +139,7 @@ void mp_gen_gamma_map(unsigned char *map, int size, float gamma);
 void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float yuv2rgb[3][4]);
 void mp_gen_yuv2rgb_map(struct mp_csp_params *params, uint8_t *map, int size);
 
-#define MP_MAP_YUV2RGB_COLOR(m, y, u, v, scale, c) ((m)[c][0] * (y) + \
-                                                    (m)[c][1] * (u) + \
-                                                    (m)[c][2] * (v) + \
-                                                    (m)[c][3] * (scale))
-#define MP_MAP_RGB2YUV_COLOR(minv, r, g, b, scale, c) ((minv)[c][0] * (r) + \
-                                                       (minv)[c][1] * (g) + \
-                                                       (minv)[c][2] * (b) + \
-                                                       (minv)[c][3] * (scale))
 void mp_invert_yuv2rgb(float out[3][4], float in[3][4]);
-
-void mp_map_color(float matrix[3][4], uint8_t c[3]);
+void mp_map_color(float matrix[3][4], int bits, int c[3]);
 
 #endif /* MPLAYER_CSPUTILS_H */
