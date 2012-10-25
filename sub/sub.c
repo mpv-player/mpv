@@ -23,7 +23,7 @@
 
 #include <libavutil/common.h>
 
-#include "config.h"
+#include "mpcommon.h"
 
 #include "stream/stream.h"
 
@@ -269,22 +269,22 @@ void vo_osd_changed(int new_value)
     osd->want_redraw = true;
 }
 
-bool sub_bitmaps_bb(struct sub_bitmaps *imgs, int *x1, int *y1,
-                    int *x2, int *y2)
+bool sub_bitmaps_bb(struct sub_bitmaps *imgs, struct mp_rect *out_bb)
 {
-    *x1 = *y1 = INT_MAX;
-    *x2 = *y2 = INT_MIN;
+    struct mp_rect bb = {INT_MAX, INT_MAX, INT_MIN, INT_MIN};
     for (int n = 0; n < imgs->num_parts; n++) {
         struct sub_bitmap *p = &imgs->parts[n];
-        *x1 = FFMIN(*x1, p->x);
-        *y1 = FFMIN(*y1, p->y);
-        *x2 = FFMAX(*x2, p->x + p->dw);
-        *y2 = FFMAX(*y2, p->y + p->dh);
+        bb.x0 = FFMIN(bb.x0, p->x);
+        bb.y0 = FFMIN(bb.y0, p->y);
+        bb.x1 = FFMAX(bb.x1, p->x + p->dw);
+        bb.y1 = FFMAX(bb.y1, p->y + p->dh);
     }
 
     // avoid degenerate bounding box if empty
-    *x1 = FFMIN(*x1, *x2);
-    *y1 = FFMIN(*y1, *y2);
+    bb.x0 = FFMIN(bb.x0, bb.x1);
+    bb.y0 = FFMIN(bb.y0, bb.y1);
 
-    return *x1 < *x2 && *y1 < *y2;
+    *out_bb = bb;
+
+    return bb.x0 < bb.x1 && bb.y0 < bb.y1;
 }
