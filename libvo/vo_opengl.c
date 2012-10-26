@@ -1400,6 +1400,8 @@ static mp_image_t *get_screenshot(struct gl_priv *p)
     image->w = p->vo->aspdat.prew;
     image->h = p->vo->aspdat.preh;
 
+    mp_image_set_colorspace_details(image, &p->colorspace);
+
     return image;
 }
 

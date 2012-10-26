@@ -46,5 +46,5 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts);
  *       accordingly. Setting w and width or h and height to different values
  *       can be used to store snapshots of anamorphic video.
  */
-int write_image(struct mp_image *image, const struct mp_csp_details *csp,
-                const struct image_writer_opts *opts, const char *filename);
+int write_image(struct mp_image *image, const struct image_writer_opts *opts,
+                const char *filename);

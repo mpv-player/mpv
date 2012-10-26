@@ -381,6 +381,8 @@ static mp_image_t *get_screenshot(struct vo *vo)
     image->w = vo->aspdat.prew;
     image->h = vo->aspdat.preh;
 
+    mp_image_set_colorspace_details(image, &p->colorspace);
+
     return image;
 }
 

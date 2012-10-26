@@ -270,14 +270,6 @@ static void screenshot_save(struct MPContext *mpctx, struct mp_image *image,
 {
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
 
-    struct mp_csp_details colorspace;
-    get_detected_video_colorspace(mpctx->sh_video, &colorspace);
-    // This is a property of the output device; images always use
-    // full-range RGB.
-    colorspace.levels_out = MP_CSP_LEVELS_PC;
-    // This is a bad hack, until the VOs set image->colorspace correctly
-    mp_image_set_colorspace_details(image, &colorspace);
-
     struct image_writer_opts *opts = mpctx->opts.screenshot_image_opts;
 
     struct mp_image *new_image = image;
@@ -287,7 +279,7 @@ static void screenshot_save(struct MPContext *mpctx, struct mp_image *image,
     char *filename = gen_fname(ctx, image_writer_file_ext(opts));
     if (filename) {
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "*** screenshot '%s' ***\n", filename);
-        if (!write_image(new_image, &colorspace, opts, filename))
+        if (!write_image(new_image, opts, filename))
             mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nError writing screenshot!\n");
         talloc_free(filename);
     }

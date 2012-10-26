@@ -104,6 +104,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
     mp_image_t img = *mpi;
     img.width = p->d_width;
     img.height = p->d_height;
+    mp_image_set_colorspace_details(&img, &p->colorspace);
 
     void *t = talloc_new(NULL);
     char *filename = talloc_asprintf(t, "%08d.%s", p->frame,
@@ -113,7 +114,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
         filename = mp_path_join(t, bstr0(p->outdir), bstr0(filename));
 
     mp_msg(MSGT_VO, MSGL_STATUS, "\nSaving %s\n", filename);
-    write_image(&img, &p->colorspace, p->opts, filename);
+    write_image(&img, p->opts, filename);
 
     talloc_free(t);
 

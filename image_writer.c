@@ -41,7 +41,6 @@
 
 #include "libmpcodecs/sws_utils.h"
 #include "libmpcodecs/vf.h"
-#include "libvo/csputils.h"
 
 #include "m_option.h"
 
@@ -260,8 +259,8 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts)
     return get_writer(opts)->file_ext;
 }
 
-int write_image(struct mp_image *image, const struct mp_csp_details *csp,
-                const struct image_writer_opts *opts, const char *filename)
+int write_image(struct mp_image *image, const struct image_writer_opts *opts,
+                const char *filename)
 {
     struct mp_image *allocated_image = NULL;
     struct image_writer_opts defs = image_writer_opts_defaults;
@@ -286,6 +285,7 @@ int write_image(struct mp_image *image, const struct mp_csp_details *csp,
 
     // Caveat: - no colorspace/levels conversion done if pixel formats equal
     //         - RGB->YUV assumes BT.601
+    //         - color levels broken in various ways thanks to libswscale
     if (image->imgfmt != destfmt || is_anamorphic) {
         struct mp_image hack = *image;
         hack.w = hack.width;

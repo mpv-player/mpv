@@ -143,6 +143,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
             image = *vf->priv->image;
         image.w = vf->priv->image->w;
         image.h = vf->priv->image->h;
+        vf_clone_mpi_attributes(&image, mpi);
         vf->priv->image_callback(vf->priv->image_callback_ctx, &image);
         vf->priv->store_slices = 0;
     }

@@ -1804,6 +1804,8 @@ static mp_image_t *get_screenshot(d3d_priv *priv)
     image->w = priv->vo->aspdat.prew;
     image->h = priv->vo->aspdat.preh;
 
+    mp_image_set_colorspace_details(image, &priv->colorspace);
+
     return image;
 }
 

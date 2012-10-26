@@ -1365,6 +1365,8 @@ static struct mp_image *read_output_surface(struct vdpctx *vc,
     VdpStatus vdp_st;
     struct vdp_functions *vdp = vc->vdp;
     struct mp_image *image = alloc_mpi(width, height, IMGFMT_BGR32);
+    image->colorspace = MP_CSP_RGB;
+    image->levels = vc->colorspace.levels_out; // hardcoded with conv. matrix
 
     void *dst_planes[] = { image->planes[0] };
     uint32_t dst_pitches[] = { image->stride[0] };
