@@ -375,11 +375,8 @@ static mp_image_t *get_screenshot(struct vo *vo)
     memcpy(image->planes[0], base, image_size);
     image->stride[0]  = stride;
 
-    image->width  = width;
-    image->height = height;
-
-    image->w = vo->aspdat.prew;
-    image->h = vo->aspdat.preh;
+    image->display_w = vo->aspdat.prew;
+    image->display_h = vo->aspdat.preh;
 
     mp_image_set_colorspace_details(image, &p->colorspace);
 

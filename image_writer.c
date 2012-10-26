@@ -264,7 +264,9 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
 {
     struct mp_image *allocated_image = NULL;
     struct image_writer_opts defs = image_writer_opts_defaults;
-    bool is_anamorphic = image->w != image->width || image->h != image->height;
+    int d_w = image->display_w ? image->display_w : image->w;
+    int d_h = image->display_h ? image->display_h : image->h;
+    bool is_anamorphic = image->w != d_w || image->h != d_h;
 
     if (!opts)
         opts = &defs;
@@ -287,17 +289,13 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
     //         - RGB->YUV assumes BT.601
     //         - color levels broken in various ways thanks to libswscale
     if (image->imgfmt != destfmt || is_anamorphic) {
-        struct mp_image hack = *image;
-        hack.w = hack.width;
-        hack.h = hack.height;
-
-        struct mp_image *dst = alloc_mpi(image->w, image->h, destfmt);
+        struct mp_image *dst = alloc_mpi(d_w, d_h, destfmt);
         vf_clone_mpi_attributes(dst, image);
 
         int flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT | SWS_FULL_CHR_H_INP |
                     SWS_ACCURATE_RND | SWS_BITEXACT;
 
-        mp_image_swscale(dst, &hack, flags);
+        mp_image_swscale(dst, image, flags);
 
         allocated_image = dst;
         image = dst;

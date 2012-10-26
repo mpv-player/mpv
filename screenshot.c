@@ -242,25 +242,23 @@ static struct mp_image *add_subs(struct MPContext *mpctx,
                                                image->imgfmt);
         copy_mpi(new_image, image);
         vf_clone_mpi_attributes(new_image, image);
-        new_image->w = image->w;
-        new_image->h = image->h;
         image = new_image;
     }
 
+    int d_w = image->display_w ? image->display_w : image->w;
+    int d_h = image->display_h ? image->display_h : image->h;
+
     double sar = (double)image->width / image->height;
-    double dar = (double)image->w / image->h;
+    double dar = (double)d_w / d_h;
     struct mp_osd_res res = {
-        .w = image->width,
-        .h = image->height,
+        .w = image->w,
+        .h = image->h,
         .display_par = sar / dar,
         .video_par = dar / sar,
     };
-    // It's not really clear what's the difference between w and width
-    struct mp_image hack = *image;
-    hack.w = hack.width;
-    hack.h = hack.height;
+
     osd_draw_on_image(mpctx->osd, res, mpctx->osd->vo_pts,
-                      OSD_DRAW_SUB_ONLY, &hack);
+                      OSD_DRAW_SUB_ONLY, image);
 
     return image;
 }

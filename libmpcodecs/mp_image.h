@@ -104,8 +104,9 @@ typedef struct mp_image {
     int number;
     unsigned char bpp;  // bits/pixel. NOT depth! for RGB it will be n*8
     unsigned int imgfmt;
-    int width,height;  // stored dimensions
+    int width,height;  // internal to vf.c, do not use (stored dimensions)
     int w,h;  // visible dimensions
+    int display_w,display_h; // if set (!= 0), anamorphic size
     uint8_t *planes[MP_MAX_PLANES];
     int stride[MP_MAX_PLANES];
     char * qscale;

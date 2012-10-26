@@ -537,6 +537,8 @@ void vf_clone_mpi_attributes(mp_image_t *dst, mp_image_t *src)
     if (dst->width == src->width && dst->height == src->height) {
         dst->qstride = src->qstride;
         dst->qscale = src->qscale;
+        dst->display_w = src->display_w;
+        dst->display_h = src->display_h;
     }
     if ((dst->flags & MP_IMGFLAG_YUV) == (src->flags & MP_IMGFLAG_YUV)) {
         dst->colorspace = src->colorspace;

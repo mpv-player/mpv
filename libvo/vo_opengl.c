@@ -1394,11 +1394,10 @@ static mp_image_t *get_screenshot(struct gl_priv *p)
     }
     gl->ActiveTexture(GL_TEXTURE0);
 
-    image->width = p->image_width;
-    image->height = p->image_height;
-
-    image->w = p->vo->aspdat.prew;
-    image->h = p->vo->aspdat.preh;
+    image->w = p->image_width;
+    image->h = p->image_height;
+    image->display_w = p->vo->aspdat.prew;
+    image->display_h = p->vo->aspdat.preh;
 
     mp_image_set_colorspace_details(image, &p->colorspace);
 

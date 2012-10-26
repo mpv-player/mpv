@@ -423,8 +423,8 @@ static mp_image_t *get_screenshot(struct vo *vo)
     // try to get an image without OSD
     int id = ctx->have_image_copy ? ctx->num_buffers : ctx->visible_buf;
     struct mp_image img = get_xv_buffer(vo, id);
-    img.w = vo->aspdat.prew;
-    img.h = vo->aspdat.preh;
+    img.display_w = vo->aspdat.prew;
+    img.display_h = vo->aspdat.preh;
 
     return talloc_memdup(NULL, &img, sizeof(img));
 }
