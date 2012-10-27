@@ -48,3 +48,6 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts);
  */
 int write_image(struct mp_image *image, const struct image_writer_opts *opts,
                 const char *filename);
+
+// Debugging helper.
+void dump_png(struct mp_image *image, const char *filename);

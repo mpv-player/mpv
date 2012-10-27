@@ -318,3 +318,10 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
 
     return success;
 }
+
+void dump_png(struct mp_image *image, const char *filename)
+{
+    struct image_writer_opts opts = image_writer_opts_defaults;
+    opts.format = "png";
+    write_image(image, &opts, filename);
+}
