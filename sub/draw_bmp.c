@@ -43,6 +43,9 @@ struct sub_cache {
 
 struct part {
     int bitmap_pos_id;
+    int imgfmt;
+    enum mp_csp colorspace;
+    enum mp_csp_levels levels;
     int num_imgs;
     struct sub_cache *imgs;
 };
@@ -53,7 +56,7 @@ struct mp_draw_sub_cache
 };
 
 static struct part *get_cache(struct mp_draw_sub_cache **cache,
-                              struct sub_bitmaps *sbs);
+                              struct sub_bitmaps *sbs, struct mp_image *format);
 static bool get_sub_area(struct mp_rect bb, struct mp_image *temp,
                          struct sub_bitmap *sb, struct mp_image *out_area,
                          int *out_src_x, int *out_src_y);
@@ -206,22 +209,24 @@ static void unpremultiply_and_split_BGR32(struct mp_image *img,
     }
 }
 
-static void scale_sb_rgba(struct sub_bitmap *sb, struct mp_csp_details *csp,
-                          int imgfmt, struct mp_image **out_sbi,
-                          struct mp_image **out_sba)
+// dst_format merely contains the target colorspace/format information
+static void scale_sb_rgba(struct sub_bitmap *sb, struct mp_image *dst_format,
+                          struct mp_image **out_sbi, struct mp_image **out_sba)
 {
     struct mp_image *sbisrc = new_mp_image(sb->w, sb->h);
     mp_image_setfmt(sbisrc, IMGFMT_BGR32);
     sbisrc->planes[0] = sb->bitmap;
     sbisrc->stride[0] = sb->stride;
     struct mp_image *sbisrc2 = alloc_mpi(sb->dw, sb->dh, IMGFMT_BGR32);
-    mp_image_swscale(sbisrc2, sbisrc, csp, SWS_BILINEAR);
+    mp_image_swscale(sbisrc2, sbisrc, SWS_BILINEAR);
 
     struct mp_image *sba = alloc_mpi(sb->dw, sb->dh, IMGFMT_Y8);
     unpremultiply_and_split_BGR32(sbisrc2, sba);
 
-    struct mp_image *sbi = alloc_mpi(sb->dw, sb->dh, imgfmt);
-    mp_image_swscale(sbi, sbisrc2, csp, SWS_BILINEAR);
+    struct mp_image *sbi = alloc_mpi(sb->dw, sb->dh, dst_format->imgfmt);
+    sbi->colorspace = dst_format->colorspace;
+    sbi->levels = dst_format->levels;
+    mp_image_swscale(sbi, sbisrc2, SWS_BILINEAR);
 
     free_mp_image(sbisrc);
     free_mp_image(sbisrc2);
@@ -231,10 +236,10 @@ static void scale_sb_rgba(struct sub_bitmap *sb, struct mp_csp_details *csp,
 }
 
 static void draw_rgba(struct mp_draw_sub_cache **cache, struct mp_rect bb,
-                      struct mp_image *temp, int bits, struct mp_csp_details *csp,
+                      struct mp_image *temp, int bits,
                       struct sub_bitmaps *sbs)
 {
-    struct part *part = get_cache(cache, sbs);
+    struct part *part = get_cache(cache, sbs, temp);
 
     for (int i = 0; i < sbs->num_parts; ++i) {
         struct sub_bitmap *sb = &sbs->parts[i];
@@ -257,7 +262,7 @@ static void draw_rgba(struct mp_draw_sub_cache **cache, struct mp_rect bb,
         }
 
         if (!(sbi && sba))
-            scale_sb_rgba(sb, csp, temp->imgfmt, &sbi, &sba);
+            scale_sb_rgba(sb, temp, &sbi, &sba);
 
         int bytes = (bits + 7) / 8;
         uint8_t *alpha_p = sba->planes[0] + src_y * sba->stride[0] + src_x;
@@ -278,11 +283,12 @@ static void draw_rgba(struct mp_draw_sub_cache **cache, struct mp_rect bb,
 }
 
 static void draw_ass(struct mp_draw_sub_cache **cache, struct mp_rect bb,
-                     struct mp_image *temp, int bits, struct mp_csp_details *csp,
-                     struct sub_bitmaps *sbs)
+                     struct mp_image *temp, int bits, struct sub_bitmaps *sbs)
 {
     struct mp_csp_params cspar = MP_CSP_PARAMS_DEFAULTS;
-    cspar.colorspace = *csp;
+    cspar.colorspace.format = temp->colorspace;
+    cspar.colorspace.levels_in = temp->levels;
+    cspar.colorspace.levels_out = MP_CSP_LEVELS_PC; // RGB (libass.color)
     cspar.int_bits_in = bits;
     cspar.int_bits_out = 8;
 
@@ -416,7 +422,7 @@ static void get_closest_y444_format(int imgfmt, int *out_format, int *out_bits)
 }
 
 static struct part *get_cache(struct mp_draw_sub_cache **cache,
-                              struct sub_bitmaps *sbs)
+                              struct sub_bitmaps *sbs, struct mp_image *format)
 {
     if (cache && !*cache)
         *cache = talloc_zero(NULL, struct mp_draw_sub_cache);
@@ -426,14 +432,25 @@ static struct part *get_cache(struct mp_draw_sub_cache **cache,
     bool use_cache = sbs->format == SUBBITMAP_RGBA;
     if (cache && use_cache) {
         part = (*cache)->parts[sbs->render_index];
-        if (part && part->bitmap_pos_id != sbs->bitmap_pos_id) {
-            talloc_free(part);
-            part = NULL;
+        if (part) {
+            if (part->bitmap_pos_id != sbs->bitmap_pos_id
+                || part->imgfmt != format->imgfmt
+                || part->colorspace != format->colorspace
+                || part->levels != format->levels)
+            {
+                talloc_free(part);
+                part = NULL;
+            }
         }
         if (!part) {
-            part = talloc_zero(*cache, struct part);
-            part->bitmap_pos_id = sbs->bitmap_pos_id;
-            part->num_imgs = sbs->num_parts;
+            part = talloc(*cache, struct part);
+            *part = (struct part) {
+                .bitmap_pos_id = sbs->bitmap_pos_id,
+                .num_imgs = sbs->num_parts,
+                .imgfmt = format->imgfmt,
+                .levels = format->levels,
+                .colorspace = format->colorspace,
+            };
             part->imgs = talloc_zero_array(part, struct sub_cache,
                                            part->num_imgs);
         }
@@ -468,7 +485,7 @@ static bool get_sub_area(struct mp_rect bb, struct mp_image *temp,
 //        containing scaled versions of sbs contents - free the cache with
 //        talloc_free()
 void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
-                         struct sub_bitmaps *sbs, struct mp_csp_details *csp)
+                         struct sub_bitmaps *sbs)
 {
     assert(mp_draw_sub_formats[sbs->format]);
     if (!mp_sws_supported_format(dst->imgfmt))
@@ -491,17 +508,23 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
         temp = &dst_region;
     } else {
         temp = alloc_mpi(bb.x1 - bb.x0, bb.y1 - bb.y0, format);
-        mp_image_swscale(temp, &dst_region, csp, SWS_POINT); // chroma up
+        // temp is always YUV, dst_region not
+        // reduce amount of conversions in YUV case (upsampling/shifting only)
+        if (dst_region.flags & MP_IMGFLAG_YUV) {
+            temp->colorspace = dst_region.colorspace;
+            temp->levels = dst_region.levels;
+        }
+        mp_image_swscale(temp, &dst_region, SWS_POINT); // chroma up
     }
 
     if (sbs->format == SUBBITMAP_RGBA) {
-        draw_rgba(cache, bb, temp, bits, csp, sbs);
+        draw_rgba(cache, bb, temp, bits, sbs);
     } else if (sbs->format == SUBBITMAP_LIBASS) {
-        draw_ass(cache, bb, temp, bits, csp, sbs);
+        draw_ass(cache, bb, temp, bits, sbs);
     }
 
     if (temp != &dst_region) {
-        mp_image_swscale(&dst_region, temp, csp, SWS_AREA); // chroma down
+        mp_image_swscale(&dst_region, temp, SWS_AREA); // chroma down
         free_mp_image(temp);
     }
 }

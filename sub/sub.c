@@ -234,7 +234,6 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
 struct draw_on_image_closure {
     struct osd_state *osd;
     struct mp_image *dest;
-    struct mp_csp_details *dest_csp;
     bool changed;
 };
 
@@ -242,18 +241,16 @@ static void draw_on_image(void *ctx, struct sub_bitmaps *imgs)
 {
     struct draw_on_image_closure *closure = ctx;
     struct osd_state *osd = closure->osd;
-    mp_draw_sub_bitmaps(&osd->draw_cache, closure->dest, imgs,
-                        closure->dest_csp);
+    mp_draw_sub_bitmaps(&osd->draw_cache, closure->dest, imgs);
     talloc_steal(osd, osd->draw_cache);
     closure->changed = true;
 }
 
 // Returns whether anything was drawn.
 bool osd_draw_on_image(struct osd_state *osd, struct mp_osd_res res,
-                       double video_pts, int draw_flags, struct mp_image *dest,
-                       struct mp_csp_details *dest_csp)
+                       double video_pts, int draw_flags, struct mp_image *dest)
 {
-    struct draw_on_image_closure closure = {osd, dest, dest_csp};
+    struct draw_on_image_closure closure = {osd, dest};
     osd_draw(osd, res, video_pts, draw_flags, mp_draw_sub_formats,
              &draw_on_image, &closure);
     return closure.changed;

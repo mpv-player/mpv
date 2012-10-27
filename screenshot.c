@@ -235,13 +235,13 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
 }
 
 static struct mp_image *add_subs(struct MPContext *mpctx,
-                                 struct mp_image *image,
-                                 struct mp_csp_details *csp)
+                                 struct mp_image *image)
 {
     if (!(image->flags & MP_IMGFLAG_ALLOCATED)) {
         struct mp_image *new_image = alloc_mpi(image->width, image->height,
                                                image->imgfmt);
         copy_mpi(new_image, image);
+        vf_clone_mpi_attributes(new_image, image);
         new_image->w = image->w;
         new_image->h = image->h;
         image = new_image;
@@ -260,7 +260,7 @@ static struct mp_image *add_subs(struct MPContext *mpctx,
     hack.w = hack.width;
     hack.h = hack.height;
     osd_draw_on_image(mpctx->osd, res, mpctx->osd->vo_pts,
-                      OSD_DRAW_SUB_ONLY, &hack, csp);
+                      OSD_DRAW_SUB_ONLY, &hack);
 
     return image;
 }
@@ -272,12 +272,17 @@ static void screenshot_save(struct MPContext *mpctx, struct mp_image *image,
 
     struct mp_csp_details colorspace;
     get_detected_video_colorspace(mpctx->sh_video, &colorspace);
+    // This is a property of the output device; images always use
+    // full-range RGB.
+    colorspace.levels_out = MP_CSP_LEVELS_PC;
+    // This is a bad hack, until the VOs set image->colorspace correctly
+    mp_image_set_colorspace_details(image, &colorspace);
 
     struct image_writer_opts *opts = mpctx->opts.screenshot_image_opts;
 
     struct mp_image *new_image = image;
     if (with_subs)
-        new_image = add_subs(mpctx, new_image, &colorspace);
+        new_image = add_subs(mpctx, new_image);
 
     char *filename = gen_fname(ctx, image_writer_file_ext(opts));
     if (filename) {

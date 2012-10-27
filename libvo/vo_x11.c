@@ -440,8 +440,6 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 
     struct mp_image img = get_x_buffer(p);
 
-    struct mp_csp_details csp = MP_CSP_DETAILS_DEFAULTS;
-
     struct mp_osd_res res = {
         .w = img.w,
         .h = img.h,
@@ -449,7 +447,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         .video_par = vo->aspdat.par,
     };
 
-    osd_draw_on_image(osd, res, osd->vo_pts, 0, &img, &csp);
+    osd_draw_on_image(osd, res, osd->vo_pts, 0, &img);
 }
 
 static void flip_page(struct vo *vo)

@@ -25,9 +25,7 @@ int mp_sws_set_colorspace(struct SwsContext *sws, struct mp_csp_details *csp);
 
 bool mp_sws_supported_format(int imgfmt);
 
-void mp_image_swscale(struct mp_image *dst,
-                      const struct mp_image *src,
-                      struct mp_csp_details *csp,
+void mp_image_swscale(struct mp_image *dst, struct mp_image *src,
                       int my_sws_flags);
 
 #endif /* MP_SWS_UTILS_H */

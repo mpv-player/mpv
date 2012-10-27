@@ -39,8 +39,8 @@
 #include "libmpcodecs/vf.h"
 #include "fmt-conversion.h"
 
-//for sws_getContextFromCmdLine_hq and mp_sws_set_colorspace
 #include "libmpcodecs/sws_utils.h"
+#include "libmpcodecs/vf.h"
 #include "libvo/csputils.h"
 
 #include "m_option.h"
@@ -284,28 +284,20 @@ int write_image(struct mp_image *image, const struct mp_csp_details *csp,
         }
     }
 
+    // Caveat: - no colorspace/levels conversion done if pixel formats equal
+    //         - RGB->YUV assumes BT.601
     if (image->imgfmt != destfmt || is_anamorphic) {
+        struct mp_image hack = *image;
+        hack.w = hack.width;
+        hack.h = hack.height;
+
         struct mp_image *dst = alloc_mpi(image->w, image->h, destfmt);
+        vf_clone_mpi_attributes(dst, image);
 
-        struct SwsContext *sws = sws_getContextFromCmdLine_hq(image->width,
-                                                              image->height,
-                                                              image->imgfmt,
-                                                              dst->width,
-                                                              dst->height,
-                                                              dst->imgfmt);
+        int flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT | SWS_FULL_CHR_H_INP |
+                    SWS_ACCURATE_RND | SWS_BITEXACT;
 
-        struct mp_csp_details colorspace = MP_CSP_DETAILS_DEFAULTS;
-        if (csp)
-            colorspace = *csp;
-        // This is a property of the output device; images always use
-        // full-range RGB.
-        colorspace.levels_out = MP_CSP_LEVELS_PC;
-        mp_sws_set_colorspace(sws, &colorspace);
-
-        sws_scale(sws, (const uint8_t **)image->planes, image->stride, 0,
-                  image->height, dst->planes, dst->stride);
-
-        sws_freeContext(sws);
+        mp_image_swscale(dst, &hack, flags);
 
         allocated_image = dst;
         image = dst;

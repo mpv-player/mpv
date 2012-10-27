@@ -309,6 +309,10 @@ static struct mp_image get_xv_buffer(struct vo *vo, int buf_index)
         img.stride[n] = xv_image->pitches[sn];
     }
 
+    struct mp_csp_details csp = {0};
+    vo_control(vo, VOCTRL_GET_YUV_COLORSPACE, &csp);
+    mp_image_set_colorspace_details(&img, &csp);
+
     return img;
 }
 
@@ -336,9 +340,6 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 
     struct mp_image img = get_xv_buffer(vo, ctx->current_buf);
 
-    struct mp_csp_details csp = {0};
-    vo_control(vo, VOCTRL_GET_YUV_COLORSPACE, &csp);
-
     struct vo_rect *src = &ctx->src_rect;
     struct vo_rect *dst = &ctx->dst_rect;
     double xvpar = (double)dst->width / dst->height * src->height / src->width;
@@ -350,7 +351,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         .video_par = vo->aspdat.par,
     };
 
-    if (osd_draw_on_image(osd, res, osd->vo_pts, 0, &img, &csp))
+    if (osd_draw_on_image(osd, res, osd->vo_pts, 0, &img))
         ctx->unchanged_image = false;
 }
 

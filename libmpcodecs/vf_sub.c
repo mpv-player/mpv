@@ -221,11 +221,10 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
     struct osd_state *osd = priv->osd;
 
     prepare_image(vf, mpi);
+    mp_image_set_colorspace_details(mpi, &priv->csp);
 
-    if (pts != MP_NOPTS_VALUE) {
-        osd_draw_on_image(osd, priv->dim, pts, OSD_DRAW_SUB_FILTER, vf->dmpi,
-                          &priv->csp);
-    }
+    if (pts != MP_NOPTS_VALUE)
+        osd_draw_on_image(osd, priv->dim, pts, OSD_DRAW_SUB_FILTER, vf->dmpi);
 
     return vf_next_put_image(vf, vf->dmpi, pts);
 }

@@ -18,6 +18,8 @@
 
 #include <assert.h>
 
+#include <libavutil/opt.h>
+
 #include "libmpcodecs/sws_utils.h"
 
 #include "libmpcodecs/mp_image.h"
@@ -139,27 +141,58 @@ bool mp_sws_supported_format(int imgfmt)
         && sws_isSupportedOutput(av_format);
 }
 
-void mp_image_swscale(struct mp_image *dst,
-                      const struct mp_image *src,
-                      struct mp_csp_details *csp,
+static int mp_csp_to_sws_colorspace(enum mp_csp csp)
+{
+    switch (csp) {
+    case MP_CSP_BT_601:     return SWS_CS_ITU601;
+    case MP_CSP_BT_709:     return SWS_CS_ITU709;
+    case MP_CSP_SMPTE_240M: return SWS_CS_SMPTE240M;
+    default:                return SWS_CS_DEFAULT;
+    }
+}
+
+void mp_image_swscale(struct mp_image *dst, struct mp_image *src,
                       int my_sws_flags)
 {
-    enum PixelFormat dfmt, sfmt;
-    dfmt = imgfmt2pixfmt(dst->imgfmt);
-    sfmt = imgfmt2pixfmt(src->imgfmt);
+    enum PixelFormat s_fmt = imgfmt2pixfmt(src->imgfmt);
     if (src->imgfmt == IMGFMT_RGB8 || src->imgfmt == IMGFMT_BGR8)
-        sfmt = PIX_FMT_PAL8;
+        s_fmt = PIX_FMT_PAL8;
+    int s_csp = mp_csp_to_sws_colorspace(mp_image_csp(src));
+    int s_range = mp_image_levels(src) == MP_CSP_LEVELS_PC;
 
-    struct SwsContext *sws =
-        sws_getContext(src->w, src->h, sfmt, dst->w, dst->h, dfmt,
-                       my_sws_flags, NULL, NULL, NULL);
-    struct mp_csp_details mycsp = MP_CSP_DETAILS_DEFAULTS;
-    if (csp)
-        mycsp = *csp;
-    mp_sws_set_colorspace(sws, &mycsp);
-    sws_scale(sws, (const unsigned char *const *) src->planes, src->stride,
-              0, src->h,
-              dst->planes, dst->stride);
+    enum PixelFormat d_fmt = imgfmt2pixfmt(dst->imgfmt);
+    int d_csp = mp_csp_to_sws_colorspace(mp_image_csp(dst));
+    int d_range = mp_image_levels(dst) == MP_CSP_LEVELS_PC;
+
+    // Work around libswscale bug #1852 (fixed in ffmpeg commit 8edf9b1fa):
+    // setting range flags for RGB gives random bogus results.
+    // Newer libswscale always ignores range flags for RGB.
+    bool s_yuv = src->flags & MP_IMGFLAG_YUV;
+    bool d_yuv = dst->flags & MP_IMGFLAG_YUV;
+    s_range = s_range && s_yuv;
+    d_range = d_range && d_yuv;
+
+    struct SwsContext *sws = sws_alloc_context();
+
+    av_opt_set_int(sws, "sws_flags", my_sws_flags, 0);
+
+    av_opt_set_int(sws, "srcw", src->w, 0);
+    av_opt_set_int(sws, "srch", src->h, 0);
+    av_opt_set_int(sws, "src_format", s_fmt, 0);
+
+    av_opt_set_int(sws, "dstw", dst->w, 0);
+    av_opt_set_int(sws, "dsth", dst->h, 0);
+    av_opt_set_int(sws, "dst_format", d_fmt, 0);
+
+    sws_setColorspaceDetails(sws, sws_getCoefficients(s_csp), s_range,
+                             sws_getCoefficients(d_csp), d_range,
+                             0, 1 << 16, 1 << 16);
+
+    int res = sws_init_context(sws, NULL, NULL);
+    assert(res >= 0);
+
+    sws_scale(sws, (const uint8_t *const *) src->planes, src->stride,
+              0, src->h, dst->planes, dst->stride);
     sws_freeContext(sws);
 }
 
