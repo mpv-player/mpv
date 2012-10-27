@@ -1480,8 +1480,11 @@ static void update_osd_msg(struct MPContext *mpctx)
             if (strcmp(mpctx->terminal_osd_text, msg->msg)) {
                 talloc_free(mpctx->terminal_osd_text);
                 mpctx->terminal_osd_text = talloc_strdup(mpctx, msg->msg);
+                // Multi-line message => clear what will be the second line
+                write_status_line(mpctx, "");
                 mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%s%s\n", opts->term_osd_esc,
                        mpctx->terminal_osd_text);
+                print_status(mpctx, MP_NOPTS_VALUE, false);
             }
         }
         return;
