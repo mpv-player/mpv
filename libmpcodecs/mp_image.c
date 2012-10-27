@@ -249,3 +249,32 @@ void free_mp_image(mp_image_t* mpi){
     talloc_free(mpi);
 }
 
+enum mp_csp mp_image_csp(struct mp_image *img)
+{
+    if (img->colorspace != MP_CSP_AUTO)
+        return img->colorspace;
+    return (img->flags & MP_IMGFLAG_YUV) ? MP_CSP_BT_601 : MP_CSP_RGB;
+}
+
+enum mp_csp_levels mp_image_levels(struct mp_image *img)
+{
+    if (img->levels != MP_CSP_LEVELS_AUTO)
+        return img->levels;
+    return (img->flags & MP_IMGFLAG_YUV) ? MP_CSP_LEVELS_TV : MP_CSP_LEVELS_PC;
+}
+
+void mp_image_set_colorspace_details(struct mp_image *image,
+                                     struct mp_csp_details *csp)
+{
+    if (image->flags & MP_IMGFLAG_YUV) {
+        image->colorspace = csp->format;
+        if (image->colorspace == MP_CSP_AUTO)
+            image->colorspace = MP_CSP_BT_601;
+        image->levels = csp->levels_in;
+        if (image->levels == MP_CSP_LEVELS_AUTO)
+            image->levels = MP_CSP_LEVELS_TV;
+    } else {
+        image->colorspace = MP_CSP_RGB;
+        image->levels = MP_CSP_LEVELS_PC;
+    }
+}

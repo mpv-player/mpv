@@ -39,6 +39,7 @@ char * const mp_csp_names[MP_CSP_COUNT] = {
     "BT.601 (SD)",
     "BT.709 (HD)",
     "SMPTE-240M",
+    "RGB",
 };
 
 char * const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
@@ -56,6 +57,7 @@ enum mp_csp avcol_spc_to_mp_csp(enum AVColorSpace colorspace)
         case AVCOL_SPC_BT470BG:   return MP_CSP_BT_601;
 	case AVCOL_SPC_SMPTE170M: return MP_CSP_BT_601;
         case AVCOL_SPC_SMPTE240M: return MP_CSP_SMPTE_240M;
+        case AVCOL_SPC_RGB:       return MP_CSP_RGB;
         default:                  return MP_CSP_AUTO;
     }
 }
@@ -75,7 +77,8 @@ enum AVColorSpace mp_csp_to_avcol_spc(enum mp_csp colorspace)
         case MP_CSP_BT_709:     return AVCOL_SPC_BT709;
         case MP_CSP_BT_601:     return AVCOL_SPC_BT470BG;
         case MP_CSP_SMPTE_240M: return AVCOL_SPC_SMPTE240M;
-        default:                return AVCOL_SPC_RGB;
+        case MP_CSP_RGB:        return AVCOL_SPC_RGB;
+        default:                return AVCOL_SPC_UNSPECIFIED;
     }
 }
 

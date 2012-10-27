@@ -24,6 +24,7 @@
 #ifndef MPLAYER_CSPUTILS_H
 #define MPLAYER_CSPUTILS_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "libavcodec/avcodec.h"
@@ -38,6 +39,7 @@ enum mp_csp {
     MP_CSP_BT_601,
     MP_CSP_BT_709,
     MP_CSP_SMPTE_240M,
+    MP_CSP_RGB,
     MP_CSP_COUNT
 };
 

@@ -24,6 +24,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include "mp_msg.h"
+#include "libvo/csputils.h"
 
 //--------- codec's requirements (filled by the codec/vf) ---------
 
@@ -118,6 +119,8 @@ typedef struct mp_image {
     int chroma_height;
     int chroma_x_shift; // horizontal
     int chroma_y_shift; // vertical
+    enum mp_csp colorspace;
+    enum mp_csp_levels levels;
     int usage_count;
     /* for private use by filter or vo driver (to store buffer id or dmpi) */
     void* priv;
@@ -130,6 +133,13 @@ void free_mp_image(mp_image_t* mpi);
 mp_image_t* alloc_mpi(int w, int h, unsigned long int fmt);
 void mp_image_alloc_planes(mp_image_t *mpi);
 void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi);
+
+enum mp_csp mp_image_csp(struct mp_image *img);
+enum mp_csp_levels mp_image_levels(struct mp_image *img);
+
+struct mp_csp_details;
+void mp_image_set_colorspace_details(struct mp_image *image,
+                                     struct mp_csp_details *csp);
 
 // this macro requires img_format.h to be included too:
 #define MP_IMAGE_PLANAR_BITS_PER_PIXEL_ON_PLANE(mpi, p) \

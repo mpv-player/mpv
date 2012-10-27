@@ -538,6 +538,10 @@ void vf_clone_mpi_attributes(mp_image_t *dst, mp_image_t *src)
         dst->qstride = src->qstride;
         dst->qscale = src->qscale;
     }
+    if ((dst->flags & MP_IMGFLAG_YUV) == (src->flags & MP_IMGFLAG_YUV)) {
+        dst->colorspace = src->colorspace;
+        dst->levels = src->levels;
+    }
 }
 
 void vf_queue_frame(vf_instance_t *vf, int (*func)(vf_instance_t *))
