@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include "mp_msg.h"
 
 //--------- codec's requirements (filled by the codec/vf) ---------
@@ -104,7 +105,7 @@ typedef struct mp_image {
     unsigned int imgfmt;
     int width,height;  // stored dimensions
     int w,h;  // visible dimensions
-    unsigned char* planes[MP_MAX_PLANES];
+    uint8_t *planes[MP_MAX_PLANES];
     int stride[MP_MAX_PLANES];
     char * qscale;
     int qstride;
