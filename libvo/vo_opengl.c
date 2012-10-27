@@ -219,9 +219,9 @@ struct gl_priv {
     int mpi_flipped;
     int vo_flipped;
 
-    struct vo_rect src_rect;    // displayed part of the source video
-    struct vo_rect dst_rect;    // video rectangle on output window
-    int border_x, border_y;     // OSD borders
+    struct mp_rect src_rect;    // displayed part of the source video
+    struct mp_rect dst_rect;    // video rectangle on output window
+    struct mp_osd_res osd_rect; // OSD size/margins
     int vp_x, vp_y, vp_w, vp_h; // GL viewport
 
     int frames_rendered;
@@ -790,8 +790,10 @@ static void delete_shaders(struct gl_priv *p)
 
 static double get_scale_factor(struct gl_priv *p)
 {
-    double sx = p->dst_rect.width / (double)p->src_rect.width;
-    double sy = p->dst_rect.height / (double)p->src_rect.height;
+    double sx = (p->dst_rect.x1 - p->dst_rect.x0) /
+                (double)(p->src_rect.x1 - p->src_rect.x0);
+    double sy = (p->dst_rect.y1 - p->dst_rect.y0) /
+                (double)(p->src_rect.y1 - p->src_rect.y0);
     // xxx: actually we should use different scalers in X/Y directions if the
     // scale factors are different due to anamorphic content
     return FFMIN(sx, sy);
@@ -1126,16 +1128,16 @@ static void do_render(struct gl_priv *p)
         gl->Enable(GL_FRAMEBUFFER_SRGB);
 
     if (p->stereo_mode) {
-        int w = p->src_rect.width;
+        int w = p->src_rect.x1 - p->src_rect.x0;
         int imgw = p->image_width;
 
         glEnable3DLeft(gl, p->stereo_mode);
 
         write_quad(vb,
-                   p->dst_rect.left, p->dst_rect.top,
-                   p->dst_rect.right, p->dst_rect.bottom,
-                   p->src_rect.left / 2, p->src_rect.top,
-                   p->src_rect.left / 2 + w / 2, p->src_rect.bottom,
+                   p->dst_rect.x0, p->dst_rect.y0,
+                   p->dst_rect.x1, p->dst_rect.y1,
+                   p->src_rect.x0 / 2, p->src_rect.y0,
+                   p->src_rect.x0 / 2 + w / 2, p->src_rect.y1,
                    final_texw, final_texh,
                    NULL, is_flipped);
         draw_triangles(p, vb, VERTICES_PER_QUAD);
@@ -1143,10 +1145,10 @@ static void do_render(struct gl_priv *p)
         glEnable3DRight(gl, p->stereo_mode);
 
         write_quad(vb,
-                   p->dst_rect.left, p->dst_rect.top,
-                   p->dst_rect.right, p->dst_rect.bottom,
-                   p->src_rect.left / 2 + imgw / 2, p->src_rect.top,
-                   p->src_rect.left / 2 + imgw / 2 + w / 2, p->src_rect.bottom,
+                   p->dst_rect.x0, p->dst_rect.y0,
+                   p->dst_rect.x1, p->dst_rect.y1,
+                   p->src_rect.x0 / 2 + imgw / 2, p->src_rect.y0,
+                   p->src_rect.x0 / 2 + imgw / 2 + w / 2, p->src_rect.y1,
                    final_texw, final_texh,
                    NULL, is_flipped);
         draw_triangles(p, vb, VERTICES_PER_QUAD);
@@ -1154,10 +1156,10 @@ static void do_render(struct gl_priv *p)
         glDisable3D(gl, p->stereo_mode);
     } else {
         write_quad(vb,
-                   p->dst_rect.left, p->dst_rect.top,
-                   p->dst_rect.right, p->dst_rect.bottom,
-                   p->src_rect.left, p->src_rect.top,
-                   p->src_rect.right, p->src_rect.bottom,
+                   p->dst_rect.x0, p->dst_rect.y0,
+                   p->dst_rect.x1, p->dst_rect.y1,
+                   p->src_rect.x0, p->src_rect.y0,
+                   p->src_rect.x1, p->src_rect.y1,
                    final_texw, final_texh,
                    NULL, is_flipped);
         draw_triangles(p, vb, VERTICES_PER_QUAD);
@@ -1174,15 +1176,16 @@ static void do_render(struct gl_priv *p)
 static void update_window_sized_objects(struct gl_priv *p)
 {
     if (p->scale_sep_program) {
-        if (p->dst_rect.height > p->scale_sep_fbo.tex_h) {
+        int h = p->dst_rect.y1 - p->dst_rect.y0;
+        if (h > p->scale_sep_fbo.tex_h) {
             fbotex_uninit(p, &p->scale_sep_fbo);
             // Round up to an arbitrary alignment to make window resizing or
             // panscan controls smoother (less texture reallocations).
-            int height = FFALIGN(p->dst_rect.height, 256);
+            int height = FFALIGN(h, 256);
             fbotex_init(p, &p->scale_sep_fbo, p->image_width, height);
         }
         p->scale_sep_fbo.vp_w = p->image_width;
-        p->scale_sep_fbo.vp_h = p->dst_rect.height;
+        p->scale_sep_fbo.vp_h = h;
     }
 }
 
@@ -1196,11 +1199,7 @@ static void resize(struct gl_priv *p)
     p->vp_w = vo->dwidth, p->vp_h = vo->dheight;
     gl->Viewport(p->vp_x, p->vp_y, p->vp_w, p->vp_h);
 
-    struct vo_rect borders;
-    calc_src_dst_rects(vo, p->image_width, p->image_height, &p->src_rect,
-                       &p->dst_rect, &borders, NULL);
-    p->border_x = borders.left;
-    p->border_y = borders.top;
+    vo_get_src_dst_rects(vo, &p->src_rect, &p->dst_rect, &p->osd_rect);
 
     bool need_scaler_reinit = false;    // filter size change needed
     bool need_scaler_update = false;    // filter LUT change needed
@@ -1242,9 +1241,9 @@ static void flip_page(struct vo *vo)
 
     p->glctx->swapGlBuffers(p->glctx);
 
-    if (p->dst_rect.left > p->vp_x || p->dst_rect.top > p->vp_y
-        || p->dst_rect.right < p->vp_x + p->vp_w
-        || p->dst_rect.bottom < p->vp_y + p->vp_h)
+    if (p->dst_rect.x0 > p->vp_x || p->dst_rect.y0 > p->vp_y
+        || p->dst_rect.x1 < p->vp_x + p->vp_w
+        || p->dst_rect.y1 < p->vp_y + p->vp_h)
     {
         gl->Clear(GL_COLOR_BUFFER_BIT);
     }
@@ -1449,18 +1448,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     struct gl_priv *p = vo->priv;
     assert(p->osd);
 
-    struct mp_osd_res res = {
-        .w = vo->dwidth,
-        .h = vo->dheight,
-        .ml = p->border_x,
-        .mr = p->border_x,
-        .mt = p->border_y,
-        .mb = p->border_y,
-        .display_par = vo->monitor_par,
-        .video_par = vo->aspdat.par,
-    };
-
-    osd_draw(osd, res, osd->vo_pts, 0, p->osd->formats, draw_osd_cb, p);
+    osd_draw(osd, p->osd_rect, osd->vo_pts, 0, p->osd->formats, draw_osd_cb, p);
 }
 
 // Disable features that are not supported with the current OpenGL version.

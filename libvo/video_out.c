@@ -39,6 +39,7 @@
 #include "m_config.h"
 #include "mp_msg.h"
 #include "libmpcodecs/vfcap.h"
+#include "sub/sub.h"
 
 #include "osdep/shmem.h"
 #ifdef CONFIG_X11
@@ -416,76 +417,91 @@ int lookup_keymap_table(const struct mp_keymap *map, int key) {
   return map->to;
 }
 
-/**
- * \brief helper function for the kind of panscan-scaling that needs a source
- *        and destination rectangle like Direct3D and VDPAU
- */
-static void src_dst_split_scaling(int src_size, int dst_size, int scaled_src_size,
-                                  int *src_start, int *src_end, int *dst_start, int *dst_end) {
-  if (scaled_src_size > dst_size) {
-    int border = src_size * (scaled_src_size - dst_size) / scaled_src_size;
-    // round to a multiple of 2, this is at least needed for vo_direct3d and ATI cards
-    border = (border / 2 + 1) & ~1;
-    *src_start = border;
-    *src_end   = src_size - border;
-    *dst_start = 0;
-    *dst_end   = dst_size;
-  } else {
-    *src_start = 0;
-    *src_end   = src_size;
-    *dst_start = (dst_size - scaled_src_size) / 2;
-    *dst_end   = *dst_start + scaled_src_size;
-  }
+static void print_video_rect(struct vo *vo, struct mp_rect src,
+                             struct mp_rect dst, struct mp_osd_res osd)
+{
+    int lv = MSGL_V;
+
+    int sw = src.x1 - src.x0, sh = src.y1 - src.y0;
+    int dw = dst.x1 - dst.x0, dh = dst.y1 - dst.y0;
+
+    mp_msg(MSGT_VO, lv, "[vo] Window size: %dx%d\n",
+           vo->dwidth, vo->dheight);
+    mp_msg(MSGT_VO, lv, "[vo] Video source: %dx%d (%dx%d)\n",
+           vo->aspdat.orgw, vo->aspdat.orgh,
+           vo->aspdat.prew, vo->aspdat.preh);
+    mp_msg(MSGT_VO, lv, "[vo] Video display: (%d, %d) %dx%d -> (%d, %d) %dx%d\n",
+           src.x0, src.y0, sw, sh, dst.x0, dst.y0, dw, dh);
+    mp_msg(MSGT_VO, lv, "[vo] Video scale: %f/%f\n",
+           (double)dw / sw, (double)dh / sh);
+    mp_msg(MSGT_VO, lv, "[vo] OSD borders: l=%d t=%d r=%d b=%d\n",
+           osd.ml, osd.mt, osd.mr, osd.mb);
+    mp_msg(MSGT_VO, lv, "[vo] Video borders: l=%d t=%d r=%d b=%d\n",
+           dst.x0, dst.y0, vo->dwidth - dst.x1, vo->dheight - dst.y1);
 }
 
-/**
- * Calculate the appropriate source and destination rectangle to
- * get a correctly scaled picture, including pan-scan.
- * Can be extended to take future cropping support into account.
- *
- * \param crop specifies the cropping border size in the left, right, top and bottom members, may be NULL
- * \param borders the border values as e.g. EOSD (ASS) and properly placed DVD highlight support requires,
- *                may be NULL and only left and top are currently valid.
- */
-void calc_src_dst_rects(struct vo *vo, int src_width, int src_height,
-                        struct vo_rect *src, struct vo_rect *dst,
-                        struct vo_rect *borders, const struct vo_rect *crop)
+static void src_dst_split_scaling(int src_size, int dst_size,
+                                  int scaled_src_size, int *src_start,
+                                  int *src_end, int *dst_start, int *dst_end)
 {
-  static const struct vo_rect no_crop = {0, 0, 0, 0, 0, 0};
-  int scaled_width  = 0;
-  int scaled_height = 0;
-  if (!crop) crop = &no_crop;
-  src_width  -= crop->left + crop->right;
-  src_height -= crop->top  + crop->bottom;
-  if (src_width  < 2) src_width  = 2;
-  if (src_height < 2) src_height = 2;
-  dst->left = 0; dst->right  = vo->dwidth;
-  dst->top  = 0; dst->bottom = vo->dheight;
-  src->left = 0; src->right  = src_width;
-  src->top  = 0; src->bottom = src_height;
-  if (borders) {
-    borders->left = 0; borders->top = 0;
-  }
-  if (aspect_scaling()) {
-    aspect(vo, &scaled_width, &scaled_height, A_WINZOOM);
-    panscan_calc_windowed(vo);
-    scaled_width  += vo->panscan_x;
-    scaled_height += vo->panscan_y;
-    if (borders) {
-      borders->left = (vo->dwidth  - scaled_width ) / 2;
-      borders->top  = (vo->dheight - scaled_height) / 2;
+    if (scaled_src_size > dst_size) {
+        int border = src_size * (scaled_src_size - dst_size) / scaled_src_size;
+        // round to a multiple of 2, this is at least needed for vo_direct3d
+        // and ATI cards
+        border = (border / 2 + 1) & ~1;
+        *src_start = border;
+        *src_end   = src_size - border;
+        *dst_start = 0;
+        *dst_end   = dst_size;
+    } else {
+        *src_start = 0;
+        *src_end   = src_size;
+        *dst_start = (dst_size - scaled_src_size) / 2;
+        *dst_end   = *dst_start + scaled_src_size;
     }
-    src_dst_split_scaling(src_width, vo->dwidth, scaled_width,
-                          &src->left, &src->right, &dst->left, &dst->right);
-    src_dst_split_scaling(src_height, vo->dheight, scaled_height,
-                          &src->top, &src->bottom, &dst->top, &dst->bottom);
-  }
-  src->left += crop->left; src->right  += crop->left;
-  src->top  += crop->top;  src->bottom += crop->top;
-  src->width  = src->right  - src->left;
-  src->height = src->bottom - src->top;
-  dst->width  = dst->right  - dst->left;
-  dst->height = dst->bottom - dst->top;
+}
+
+// Calculate the appropriate source and destination rectangle to
+// get a correctly scaled picture, including pan-scan.
+// out_src: visible part of the video
+// out_dst: area of screen covered by the video source rectangle
+// out_osd: OSD size, OSD margins, etc.
+void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
+                          struct mp_rect *out_dst, struct mp_osd_res *out_osd)
+{
+    int src_w = vo->aspdat.orgw;
+    int src_h = vo->aspdat.orgh;
+    struct mp_rect dst = {0, 0, vo->dwidth, vo->dheight};
+    struct mp_rect src = {0, 0, src_w,      src_h};
+    struct mp_osd_res osd = {
+        .w = vo->dwidth,
+        .h = vo->dheight,
+        .display_par = vo->monitor_par,
+        .video_par = vo->aspdat.par,
+    };
+    if (aspect_scaling()) {
+        int scaled_width  = 0, scaled_height = 0;
+        aspect(vo, &scaled_width, &scaled_height, A_WINZOOM);
+        panscan_calc_windowed(vo);
+        scaled_width  += vo->panscan_x;
+        scaled_height += vo->panscan_y;
+        int border_w = vo->dwidth  - scaled_width;
+        int border_h = vo->dheight - scaled_height;
+        osd.ml = border_w / 2;
+        osd.mt = border_h / 2;
+        osd.mr = border_w - osd.ml;
+        osd.mb = border_h - osd.mt;
+        src_dst_split_scaling(src_w, vo->dwidth, scaled_width,
+                              &src.x0, &src.x1, &dst.x0, &dst.x1);
+        src_dst_split_scaling(src_h, vo->dheight, scaled_height,
+                              &src.y0, &src.y1, &dst.y0, &dst.y1);
+    }
+
+    *out_src = src;
+    *out_dst = dst;
+    *out_osd = osd;
+
+    print_video_rect(vo, src, dst, osd);
 }
 
 // Return the window title the VO should set. Always returns a null terminated

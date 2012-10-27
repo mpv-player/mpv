@@ -257,7 +257,7 @@ struct vo {
     int event_fd;  // check_events() should be called when this has input
     int registered_fd;  // set to event_fd when registered in input system
 
-    // requested position/resolution
+    // requested position/resolution (usually window position/window size)
     int dx;
     int dy;
     int dwidth;
@@ -338,13 +338,12 @@ struct mp_keymap {
   int to;
 };
 int lookup_keymap_table(const struct mp_keymap *map, int key);
-struct vo_rect {
-  int left, right, top, bottom, width, height;
-};
-void calc_src_dst_rects(struct vo *vo, int src_width, int src_height,
-                        struct vo_rect *src, struct vo_rect *dst,
-                        struct vo_rect *borders, const struct vo_rect *crop);
+
 void vo_mouse_movement(struct vo *vo, int posx, int posy);
+
+struct mp_osd_res;
+void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
+                          struct mp_rect *out_dst, struct mp_osd_res *out_osd);
 
 static inline int aspect_scaling(void)
 {

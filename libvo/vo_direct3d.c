@@ -145,8 +145,7 @@ typedef struct d3d_priv {
                                 fullscreen */
     int src_width;              /**< Source (movie) width */
     int src_height;             /**< Source (movie) heigth */
-    int border_x;               /**< horizontal border value for OSD */
-    int border_y;               /**< vertical border value for OSD */
+    struct mp_osd_res osd_res;
     int image_format;           /**< mplayer image format */
     bool use_textures;          /**< use 3D texture rendering, instead of
                                 StretchRect */
@@ -294,22 +293,18 @@ static bool d3d_begin_scene(d3d_priv *priv)
  */
 static void calc_fs_rect(d3d_priv *priv)
 {
-    struct vo_rect src_rect;
-    struct vo_rect dst_rect;
-    struct vo_rect borders;
-    calc_src_dst_rects(priv->vo, priv->src_width, priv->src_height, &src_rect,
-                       &dst_rect, &borders, NULL);
+    struct mp_rect src_rect;
+    struct mp_rect dst_rect;
+    vo_get_src_dst_rects(priv->vo, &src_rect, &dst_rect, &priv->osd_res);
 
-    priv->fs_movie_rect.left     = dst_rect.left;
-    priv->fs_movie_rect.right    = dst_rect.right;
-    priv->fs_movie_rect.top      = dst_rect.top;
-    priv->fs_movie_rect.bottom   = dst_rect.bottom;
-    priv->fs_panscan_rect.left   = src_rect.left;
-    priv->fs_panscan_rect.right  = src_rect.right;
-    priv->fs_panscan_rect.top    = src_rect.top;
-    priv->fs_panscan_rect.bottom = src_rect.bottom;
-    priv->border_x               = borders.left;
-    priv->border_y               = borders.top;
+    priv->fs_movie_rect.left     = dst_rect.x0;
+    priv->fs_movie_rect.right    = dst_rect.x1;
+    priv->fs_movie_rect.top      = dst_rect.y0;
+    priv->fs_movie_rect.bottom   = dst_rect.y1;
+    priv->fs_panscan_rect.left   = src_rect.x0;
+    priv->fs_panscan_rect.right  = src_rect.x1;
+    priv->fs_panscan_rect.top    = src_rect.y0;
+    priv->fs_panscan_rect.bottom = src_rect.y1;
 
     mp_msg(MSGT_VO, MSGL_V,
            "<vo_direct3d>Video rectangle: t: %ld, l: %ld, r: %ld, b:%ld\n",
@@ -2063,18 +2058,8 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     if (!priv->d3d_device)
         return;
 
-    struct mp_osd_res res = {
-        .w = vo->dwidth,
-        .h = vo->dheight,
-        .ml = priv->border_x,
-        .mr = priv->border_x,
-        .mt = priv->border_y,
-        .mb = priv->border_y,
-        .display_par = vo->monitor_par,
-        .video_par = vo->aspdat.par,
-    };
-
-    osd_draw(osd, res, osd->vo_pts, 0, osd_fmt_supported, draw_osd_cb, priv);
+    osd_draw(osd, priv->osd_res, osd->vo_pts, 0, osd_fmt_supported,
+             draw_osd_cb, priv);
 }
 
 #define AUTHOR "Georgi Petrov (gogothebee) <gogothebee@gmail.com> and others"

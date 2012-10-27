@@ -137,7 +137,7 @@ struct vdpctx {
 
     VdpRect                            src_rect_vid;
     VdpRect                            out_rect_vid;
-    int                                border_x, border_y;
+    struct mp_osd_res                  osd_rect;
 
     struct vdpau_render_state          surface_render[MAX_VIDEO_SURFACES];
     int                                surface_num;
@@ -370,21 +370,17 @@ static void resize(struct vo *vo)
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
-    struct vo_rect src_rect;
-    struct vo_rect dst_rect;
-    struct vo_rect borders;
-    calc_src_dst_rects(vo, vc->vid_width, vc->vid_height, &src_rect, &dst_rect,
-                       &borders, NULL);
-    vc->out_rect_vid.x0 = dst_rect.left;
-    vc->out_rect_vid.x1 = dst_rect.right;
-    vc->out_rect_vid.y0 = dst_rect.top;
-    vc->out_rect_vid.y1 = dst_rect.bottom;
-    vc->src_rect_vid.x0 = src_rect.left;
-    vc->src_rect_vid.x1 = src_rect.right;
-    vc->src_rect_vid.y0 = vc->flip ? src_rect.bottom : src_rect.top;
-    vc->src_rect_vid.y1 = vc->flip ? src_rect.top    : src_rect.bottom;
-    vc->border_x        = borders.left;
-    vc->border_y        = borders.top;
+    struct mp_rect src_rect;
+    struct mp_rect dst_rect;
+    vo_get_src_dst_rects(vo, &src_rect, &dst_rect, &vc->osd_rect);
+    vc->out_rect_vid.x0 = dst_rect.x0;
+    vc->out_rect_vid.x1 = dst_rect.x1;
+    vc->out_rect_vid.y0 = dst_rect.y0;
+    vc->out_rect_vid.y1 = dst_rect.y1;
+    vc->src_rect_vid.x0 = src_rect.x0;
+    vc->src_rect_vid.x1 = src_rect.x1;
+    vc->src_rect_vid.y0 = vc->flip ? src_rect.y1 : src_rect.y0;
+    vc->src_rect_vid.y1 = vc->flip ? src_rect.y0 : src_rect.y1;
 
     int flip_offset_ms = vo_fs ? vc->flip_offset_fs : vc->flip_offset_window;
     vo->flip_queue_offset = flip_offset_ms / 1000.;
@@ -1119,18 +1115,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         [SUBBITMAP_RGBA] = true,
     };
 
-    struct mp_osd_res res = {
-        .w = vo->dwidth,
-        .h = vo->dheight,
-        .ml = vc->border_x,
-        .mr = vc->border_x,
-        .mt = vc->border_y,
-        .mb = vc->border_y,
-        .display_par = vo->monitor_par,
-        .video_par = vo->aspdat.par,
-    };
-
-    osd_draw(osd, res, osd->vo_pts, 0, formats, draw_osd_cb, vo);
+    osd_draw(osd, vc->osd_rect, osd->vo_pts, 0, formats, draw_osd_cb, vo);
 }
 
 static int update_presentation_queue_status(struct vo *vo)

@@ -77,8 +77,8 @@ struct xvctx {
     uint32_t image_height;
     uint32_t image_format;
     int is_paused;
-    struct vo_rect src_rect;
-    struct vo_rect dst_rect;
+    struct mp_rect src_rect;
+    struct mp_rect dst_rect;
     uint32_t max_width, max_height; // zero means: not set
     int mode_switched;
 #ifdef HAVE_SHM
@@ -94,11 +94,16 @@ static void resize(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
 
-    calc_src_dst_rects(vo, ctx->image_width, ctx->image_height, &ctx->src_rect,
-                       &ctx->dst_rect, NULL, NULL);
-    struct vo_rect *dst = &ctx->dst_rect;
-    vo_x11_clearwindow_part(vo, vo->x11->window, dst->width, dst->height);
-    vo_xv_draw_colorkey(vo, dst->left, dst->top, dst->width, dst->height);
+    // Can't be used, because the function calculates screen-space coordinates,
+    // while we need video-space.
+    struct mp_osd_res unused;
+
+    vo_get_src_dst_rects(vo, &ctx->src_rect, &ctx->dst_rect, &unused);
+
+    struct mp_rect *dst = &ctx->dst_rect;
+    int dw = dst->x1 - dst->x0, dh = dst->y1 - dst->y0;
+    vo_x11_clearwindow_part(vo, vo->x11->window, dw, dh);
+    vo_xv_draw_colorkey(vo, dst->x0, dst->y0, dw, dh);
 }
 
 /*
@@ -275,20 +280,22 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
 {
     struct xvctx *ctx = vo->priv;
     struct vo_x11_state *x11 = vo->x11;
-    struct vo_rect *src = &ctx->src_rect;
-    struct vo_rect *dst = &ctx->dst_rect;
+    struct mp_rect *src = &ctx->src_rect;
+    struct mp_rect *dst = &ctx->dst_rect;
+    int dw = dst->x1 - dst->x0, dh = dst->y1 - dst->y0;
+    int sw = src->x1 - src->x0, sh = src->y1 - src->y0;
 #ifdef HAVE_SHM
     if (ctx->Shmem_Flag) {
         XvShmPutImage(x11->display, x11->xv_port, x11->window, x11->vo_gc, xvi,
-                      src->left, src->top, src->width, src->height,
-                      dst->left, dst->top, dst->width, dst->height,
+                      src->x0, src->y0, sw, sh,
+                      dst->x0, dst->y0, dw, dh,
                       False);
     } else
 #endif
     {
         XvPutImage(x11->display, x11->xv_port, x11->window, x11->vo_gc, xvi,
-                   src->left, src->top, src->width, src->height,
-                   dst->left, dst->top, dst->width, dst->height);
+                   src->x0, src->y0, sw, sh,
+                   dst->x0, dst->y0, dw, dh);
     }
 }
 
@@ -340,9 +347,11 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 
     struct mp_image img = get_xv_buffer(vo, ctx->current_buf);
 
-    struct vo_rect *src = &ctx->src_rect;
-    struct vo_rect *dst = &ctx->dst_rect;
-    double xvpar = (double)dst->width / dst->height * src->height / src->width;
+    struct mp_rect *src = &ctx->src_rect;
+    struct mp_rect *dst = &ctx->dst_rect;
+    int dw = dst->x1 - dst->x0, dh = dst->y1 - dst->y0;
+    int sw = src->x1 - src->x0, sh = src->y1 - src->y0;
+    double xvpar = (double)dw / dh * sh / sw;
 
     struct mp_osd_res res = {
         .w = ctx->image_width,
