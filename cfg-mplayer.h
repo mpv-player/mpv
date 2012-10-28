@@ -318,7 +318,6 @@ const m_option_t msgl_config[]={
 };
 
 extern const m_option_t lavc_decode_opts_conf[];
-extern const m_option_t xvid_dec_opts[];
 
 const m_option_t common_opts[] = {
 // ------------------------- common options --------------------
@@ -504,9 +503,6 @@ const m_option_t common_opts[] = {
 
     {"lavdopts", (void *) lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     {"lavfdopts", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-#ifdef CONFIG_XVID4
-    {"xvidopts", (void *)xvid_dec_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-#endif
     {"codecs-file", &codecs_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
 // ------------------------- subtitles options --------------------
 
