@@ -54,6 +54,9 @@ struct sh_stream {
     struct sh_video *video;
     struct sh_sub *sub;
 
+    // Work around other hacks.
+    int lavf_codec_tag;
+
     char *title;
     bool default_track;
 

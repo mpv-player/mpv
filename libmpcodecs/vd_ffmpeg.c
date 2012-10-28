@@ -239,6 +239,8 @@ static int init(sh_video_t *sh)
     } else {
         avctx->pix_fmt = rawfmt;
     }
+    if (sh->gsh->lavf_codec_tag)
+        avctx->codec_tag = sh->gsh->lavf_codec_tag;
     avctx->stream_codec_tag = sh->video.fccHandler;
     avctx->idct_algo = lavc_param->idct_algo;
     avctx->error_concealment = lavc_param->error_concealment;

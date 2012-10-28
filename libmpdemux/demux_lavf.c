@@ -292,6 +292,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
     int stream_id;
     AVDictionaryEntry *lang = av_dict_get(st->metadata, "language", NULL, 0);
     AVDictionaryEntry *title = av_dict_get(st->metadata, "title", NULL, 0);
+    // Work around collisions resulting from the hacks changing codec_tag.
+    int lavf_codec_tag = codec->codec_tag;
     // Don't use native MPEG codec tag values with our generic tag tables.
     // May contain for example value 3 for MP3, which we'd map to PCM audio.
     if (matches_avinputformat_name(priv, "mpeg") ||
@@ -320,6 +322,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         stream_type = "audio";
         priv->astreams[priv->audio_streams] = i;
         sh_audio->libav_codec_id = codec->codec_id;
+        sh_audio->gsh->lavf_codec_tag = lavf_codec_tag;
         wf = calloc(sizeof(*wf) + codec->extradata_size, 1);
         // mp4a tag is used for all mp4 files no matter what they actually contain
         if (codec->codec_tag == MKTAG('m', 'p', '4', 'a'))
@@ -403,6 +406,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         stream_type = "video";
         priv->vstreams[priv->video_streams] = i;
         sh_video->libav_codec_id = codec->codec_id;
+        sh_video->gsh->lavf_codec_tag = lavf_codec_tag;
         bih = calloc(sizeof(*bih) + codec->extradata_size, 1);
 
         if (codec->codec_id == CODEC_ID_RAWVIDEO) {
@@ -517,6 +521,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         stream_type = "subtitle";
         priv->sstreams[priv->sub_streams] = i;
         sh_sub->libav_codec_id = codec->codec_id;
+        sh_sub->gsh->lavf_codec_tag = lavf_codec_tag;
         sh_sub->type = type;
         if (codec->extradata_size) {
             sh_sub->extradata = malloc(codec->extradata_size);
