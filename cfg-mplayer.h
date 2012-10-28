@@ -642,7 +642,6 @@ const m_option_t mplayer_opts[]={
     {"grabpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     OPT_INTRANGE("cursor-autohide-delay", cursor_autohide_delay, 0, -2, 30000),
 
-    {"adapter", &vo_adapter_num, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
     {"refreshrate",&vo_refresh_rate,CONF_TYPE_INT,CONF_RANGE, 0,100, NULL},
     {"wid", &WinID, CONF_TYPE_INT64, 0, 0, 0, NULL},
 #ifdef CONFIG_X11

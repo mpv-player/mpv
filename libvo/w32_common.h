@@ -26,9 +26,6 @@
 struct vo_w32_state {
     HWND window;
 
-    // HDC used when rendering to a device instead of window
-    HDC dev_hdc;
-
     bool vm;
 
     int depthonscreen;

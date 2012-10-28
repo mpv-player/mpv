@@ -596,20 +596,6 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
 }
 
 /**
- * \brief return the name of the selected device if it is indepedant
- * \return pointer to string, must be freed.
- */
-static wchar_t *get_display_name(void)
-{
-    DISPLAY_DEVICEW disp;
-    disp.cb = sizeof(disp);
-    EnumDisplayDevicesW(NULL, vo_adapter_num, &disp, 0);
-    if (disp.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)
-        return NULL;
-    return wcsdup(disp.DeviceName);
-}
-
-/**
  * \brief Initialize w32_common framework.
  *
  * The first function that should be called from the w32_common framework.
@@ -680,10 +666,6 @@ int vo_w32_init(struct vo *vo)
     if (WinID >= 0)
         EnableWindow(w32->window, 0);
 
-    w32->dev_hdc = 0;
-    wchar_t *dev = get_display_name();
-    if (dev) w32->dev_hdc = CreateDCW(dev, NULL, NULL, NULL);
-    free(dev);
     updateScreenProperties(vo);
 
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d with depth %d\n",
@@ -746,7 +728,6 @@ void vo_w32_uninit(struct vo *vo)
         return;
     resetMode(vo);
     ShowCursor(1);
-    if (w32->dev_hdc) DeleteDC(w32->dev_hdc);
     DestroyWindow(w32->window);
     UnregisterClassW(classname, 0);
     talloc_free(w32);
@@ -761,8 +742,6 @@ void vo_w32_uninit(struct vo *vo)
 HDC vo_w32_get_dc(struct vo *vo, HWND wnd)
 {
     struct vo_w32_state *w32 = vo->w32;
-    if (w32->dev_hdc)
-        return w32->dev_hdc;
     return GetDC(wnd);
 }
 
@@ -774,7 +753,5 @@ HDC vo_w32_get_dc(struct vo *vo, HWND wnd)
 void vo_w32_release_dc(struct vo *vo, HWND wnd, HDC dc)
 {
     struct vo_w32_state *w32 = vo->w32;
-    if (w32->dev_hdc)
-        return;
     ReleaseDC(wnd, dc);
 }

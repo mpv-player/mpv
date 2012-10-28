@@ -29,11 +29,6 @@
                           others.
     :``--ac=-ffmp3,``:    Skip FFmpeg's MP3 decoder.
 
---adapter=<value>
-    Set the graphics card that will receive the image. You can get a list of
-    available cards when you run this option with ``-v``. Currently only works
-    with the directx video output driver.
-
 --af=<filter1[=parameter1:parameter2:...],filter2,...>
     Specify a list of audio filters to apply to the audio stream. See
     :ref:`audio_filters` for details and descriptions of the available filters.
