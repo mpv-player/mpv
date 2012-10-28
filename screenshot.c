@@ -63,7 +63,7 @@ static char *stripext(void *talloc_ctx, const char *s)
     const char *end = strrchr(s, '.');
     if (!end)
         end = s + strlen(s);
-    return talloc_asprintf(talloc_ctx, "%.*s", end - s, s);
+    return talloc_asprintf(talloc_ctx, "%.*s", (int)(end - s), s);
 }
 
 #ifdef _WIN32
