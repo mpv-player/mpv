@@ -1238,7 +1238,7 @@
 --name
     Set the window class name for X11-based video output methods.
 
---ni
+--avi-ni
     (Internal AVI demuxer which is not used by default only)
     Force usage of non-interleaved AVI parser (fixes playback of some bad AVI
     files).

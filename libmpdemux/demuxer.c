@@ -657,7 +657,7 @@ int ds_fill_buffer(demux_stream_t *ds)
         }
 
 #define MaybeNI _("Maybe you are playing a non-interleaved stream/file or the codec failed?\n" \
-                "For AVI files, try to force non-interleaved mode with the -ni option.\n")
+                "For AVI files, try to force non-interleaved mode with the --demuxer=avi --avi-ni options.\n")
 
         if (demux->audio->packs >= MAX_PACKS
             || demux->audio->bytes >= MAX_PACK_BYTES) {

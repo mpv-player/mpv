@@ -283,7 +283,7 @@ do{
   if(ds)
     if(ds->packs+1>=MAX_PACKS || ds->bytes+len>=MAX_PACK_BYTES){
 	// this packet will cause a buffer overflow, switch to -ni mode!!!
-	mp_tmsg(MSGT_DEMUX,MSGL_WARN,"\nBadly interleaved AVI file detected - switching to -ni mode...\n");
+	mp_tmsg(MSGT_DEMUX,MSGL_WARN,"\nBadly interleaved AVI file detected - switching to --avi-ni mode...\n");
 	if(priv->idx_size>0){
 	    // has index
 	    demux->type=DEMUXER_TYPE_AVI_NI;

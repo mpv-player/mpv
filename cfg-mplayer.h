@@ -385,7 +385,7 @@ const m_option_t common_opts[] = {
     {"endpos", &end_at, CONF_TYPE_TIME_SIZE, 0, 0, 0, NULL},
 
     // AVI specific: force non-interleaved mode
-    {"ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"avi-ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
     // AVI and Ogg only: (re)build index at startup
     {"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1, NULL},

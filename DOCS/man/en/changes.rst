@@ -98,6 +98,7 @@ Command line switches
     -subdelay                           --sub-delay
     -subpos                             --sub-pos
     -forcedsubsonly                     --sub-forced-only
+    -ni                                 --avi-ni
     =================================== ===================================
 
 input.conf and slave commands
