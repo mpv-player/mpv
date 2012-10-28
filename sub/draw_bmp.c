@@ -244,9 +244,7 @@ static void draw_rgba(struct mp_draw_sub_cache **cache, struct mp_rect bb,
     for (int i = 0; i < sbs->num_parts; ++i) {
         struct sub_bitmap *sb = &sbs->parts[i];
 
-        // libswscale madness: it requires a minimum width
-        // skip it, we can't reasonably handle it
-        if (sb->w < 8)
+        if (sb->w < 1 || sb->h < 1)
             continue;
 
         struct mp_image dst;
