@@ -854,13 +854,15 @@ static int mp_property_fullscreen(m_option_t *prop, int action, void *arg,
 static int mp_property_deinterlace(m_option_t *prop, int action,
                                    void *arg, MPContext *mpctx)
 {
-    vf_instance_t *vf;
     if (!mpctx->sh_video || !mpctx->sh_video->vfilter)
         return M_PROPERTY_UNAVAILABLE;
-    vf = mpctx->sh_video->vfilter;
+    vf_instance_t *vf = mpctx->sh_video->vfilter;
+    int enabled = 0;
+    if (vf->control(vf, VFCTRL_GET_DEINTERLACE, &enabled) != CONTROL_OK)
+        return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_GET:
-        vf->control(vf, VFCTRL_GET_DEINTERLACE, arg);
+        *(int *)arg = !!enabled;
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         vf->control(vf, VFCTRL_SET_DEINTERLACE, arg);
