@@ -406,12 +406,6 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
                 BSTR_P(name));
         return M_OPT_INVALID;
     }
-    if ((config->mode == M_COMMAND_LINE) && (co->opt->flags & M_OPT_NOCMD)) {
-        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                "The %.*s option can't be used on the command line.\n",
-                BSTR_P(name));
-        return M_OPT_INVALID;
-    }
     if (config->file_local_mode && (co->opt->flags & M_OPT_GLOBAL)) {
         mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
                 "The %.*s option is global and can't be set per-file.\n",
@@ -548,7 +542,7 @@ void m_config_print_option_list(const struct m_config *config)
         return;
 
     mp_tmsg(MSGT_CFGPARSER, MSGL_INFO,
-            "\n Name                 Type            Min        Max      Global  CL    Cfg\n\n");
+            "\n Name                 Type            Min        Max      Global  Cfg\n\n");
     for (co = config->opts; co; co = co->next) {
         const struct m_option *opt = co->opt;
         if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
@@ -562,13 +556,12 @@ void m_config_print_option_list(const struct m_config *config)
         else
             strcpy(max, "No");
         mp_msg(MSGT_CFGPARSER, MSGL_INFO,
-             " %-20.20s %-15.15s %-10.10s %-10.10s %-3.3s   %-3.3s   %-3.3s\n",
+             " %-20.20s %-15.15s %-10.10s %-10.10s %-3.3s   %-3.3s\n",
                co->name,
                co->opt->type->name,
                min,
                max,
                opt->flags & CONF_GLOBAL ? "Yes" : "No",
-               opt->flags & CONF_NOCMD ? "No" : "Yes",
                opt->flags & CONF_NOCFG ? "No" : "Yes");
         count++;
     }

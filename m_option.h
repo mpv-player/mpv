@@ -313,9 +313,6 @@ struct m_option {
 // The option is forbidden in config files.
 #define M_OPT_NOCFG             (1 << 2)
 
-// The option is forbidden on the command line.
-#define M_OPT_NOCMD             (1 << 3)
-
 // This option can't be set per-file when used with struct m_config.
 #define M_OPT_GLOBAL            (1 << 4)
 
@@ -340,7 +337,6 @@ struct m_option {
 #define CONF_MAX                M_OPT_MAX
 #define CONF_RANGE              M_OPT_RANGE
 #define CONF_NOCFG              M_OPT_NOCFG
-#define CONF_NOCMD              M_OPT_NOCMD
 #define CONF_GLOBAL             M_OPT_GLOBAL
 #define CONF_PRE_PARSE          M_OPT_PRE_PARSE
 
