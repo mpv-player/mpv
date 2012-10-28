@@ -99,6 +99,7 @@ Command line switches
     -subpos                             --sub-pos
     -forcedsubsonly                     --sub-forced-only
     -ni                                 --avi-ni
+    -benchmark                          --untimed (no stats)
     =================================== ===================================
 
 input.conf and slave commands
