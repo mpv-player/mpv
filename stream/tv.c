@@ -56,7 +56,6 @@ char *tv_channel_last_real;
 
 /* enumerating drivers (like in stream.c) */
 extern const tvi_info_t tvi_info_dummy;
-extern const tvi_info_t tvi_info_dshow;
 extern const tvi_info_t tvi_info_v4l2;
 extern const tvi_info_t tvi_info_bsdbt848;
 
@@ -67,9 +66,6 @@ static const tvi_info_t* tvi_driver_list[]={
 #endif
 #ifdef CONFIG_TV_BSDBT848
     &tvi_info_bsdbt848,
-#endif
-#ifdef CONFIG_TV_DSHOW
-    &tvi_info_dshow,
 #endif
     &tvi_info_dummy,
     NULL
@@ -464,13 +460,10 @@ static int open_tv(tvi_handle_t *tvh)
     /* set some params got from cmdline */
     funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tvh->tv_param->input);
 
-#if defined(CONFIG_TV_V4L2) || defined(CONFIG_TV_DSHOW)
+#if defined(CONFIG_TV_V4L2)
     if (0
 #ifdef CONFIG_TV_V4L2
     || (!strcmp(tvh->tv_param->driver, "v4l2") && tvh->tv_param->normid >= 0)
-#endif
-#ifdef CONFIG_TV_DSHOW
-    || (!strcmp(tvh->tv_param->driver, "dshow") && tvh->tv_param->normid >= 0)
 #endif
     )
 	tv_set_norm_i(tvh, tvh->tv_param->normid);
