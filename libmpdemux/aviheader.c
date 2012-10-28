@@ -74,9 +74,6 @@ while(1){
   char* hdr=NULL;
   //
   if(stream_eof(demuxer->stream)) break;
-  // Imply -forceidx if -saveidx is specified
-  if (index_file_save)
-    index_mode = 2;
   //
   if(id==mmioFOURCC('L','I','S','T')){
     unsigned len=stream_read_dword_le(demuxer->stream);   // list size
@@ -587,44 +584,6 @@ freeout:
 
 }
 
-/* Read a saved index file */
-if (index_file_load) {
-  FILE *fp;
-  char magic[7];
-  unsigned int i;
-
-  if ((fp = fopen(index_file_load, "r")) == NULL) {
-    mp_tmsg(MSGT_HEADER,MSGL_ERR, "Can't read index file %s: %s\n", index_file_load, strerror(errno));
-    goto gen_index;
-  }
-  fread(&magic, 6, 1, fp);
-  if (strncmp(magic, "MPIDX1", 6)) {
-    mp_tmsg(MSGT_HEADER,MSGL_ERR, "%s is not a valid MPlayer index file.\n", index_file_load);
-    goto gen_index;
-  }
-  fread(&priv->idx_size, sizeof(priv->idx_size), 1, fp);
-  priv->idx=malloc(priv->idx_size*sizeof(AVIINDEXENTRY));
-  if (!priv->idx) {
-    mp_tmsg(MSGT_HEADER,MSGL_ERR, "Could not allocate memory for index data from %s.\n", index_file_load);
-    priv->idx_size = 0;
-    goto gen_index;
-  }
-
-  for (i=0; i<priv->idx_size;i++) {
-    AVIINDEXENTRY *idx;
-    idx=&((AVIINDEXENTRY *)priv->idx)[i];
-    fread(idx, sizeof(AVIINDEXENTRY), 1, fp);
-    if (feof(fp)) {
-      mp_tmsg(MSGT_HEADER,MSGL_ERR, "premature end of index file %s\n", index_file_load);
-      free(priv->idx);
-      priv->idx_size = 0;
-      goto gen_index;
-    }
-  }
-  fclose(fp);
-  mp_tmsg(MSGT_HEADER,MSGL_INFO, "Loaded index file: %s\n", index_file_load);
-}
-gen_index:
 if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
   int idx_pos = 0;
   // build index for file:
@@ -711,23 +670,5 @@ skip_chunk:
   mp_tmsg(MSGT_HEADER,MSGL_INFO,"AVI: Generated index table for %d chunks!\n",priv->idx_size);
   if( mp_msg_test(MSGT_HEADER,MSGL_DBG2) ) print_index(priv->idx,priv->idx_size,MSGL_DBG2);
 
-  /* Write generated index to a file */
-  if (index_file_save) {
-    FILE *fp;
-    unsigned int i;
-
-    if ((fp=fopen(index_file_save, "w")) == NULL) {
-      mp_tmsg(MSGT_HEADER,MSGL_ERR, "Couldn't write index file %s: %s\n", index_file_save, strerror(errno));
-      return;
-    }
-    fwrite("MPIDX1", 6, 1, fp);
-    fwrite(&priv->idx_size, sizeof(priv->idx_size), 1, fp);
-    for (i=0; i<priv->idx_size; i++) {
-      AVIINDEXENTRY *idx = &((AVIINDEXENTRY *)priv->idx)[i];
-      fwrite(idx, sizeof(AVIINDEXENTRY), 1, fp);
-    }
-    fclose(fp);
-    mp_tmsg(MSGT_HEADER,MSGL_INFO, "Saved index file: %s\n", index_file_save);
-  }
 }
 }

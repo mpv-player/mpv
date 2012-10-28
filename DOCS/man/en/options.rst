@@ -1146,15 +1146,6 @@
 --list-properties
     Print a list of the available properties.
 
---loadidx=<filename>
-    The file from which to read the video index data saved by ``--saveidx``.
-    This index will be used for seeking, overriding any index data contained
-    in the AVI itself. mpv will not prevent you from loading an index file
-    generated from a different AVI, but this is sure to cause unfavorable
-    results.
-
-    *NOTE*: This option is obsolete now that mpv has OpenDML support.
-
 --loop=<number|inf|no>
     Loops playback <number> times. ``inf`` means forever and ``no`` disables
     looping.
@@ -1615,12 +1606,6 @@
     Adjust the saturation of the video signal (default: 0). You can get
     grayscale output with this option. Not supported by all video output
     drivers.
-
---saveidx=<filename>
-    Force index rebuilding and dump the index to <filename>. Currently this
-    only works with AVI files.
-
-    *NOTE*: This option is obsolete now that mpv has OpenDML support.
 
 --sb=<n>
     Seek to byte position. Useful for playback from CD-ROM images or VOB files

@@ -390,8 +390,6 @@ const m_option_t common_opts[] = {
     // AVI and Ogg only: (re)build index at startup
     {"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1, NULL},
     {"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2, NULL},
-    {"saveidx", &index_file_save, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"loadidx", &index_file_load, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
     // select audio/video/subtitle stream
     OPT_TRACKCHOICE("aid", audio_id),

@@ -371,7 +371,6 @@ int demux_seek(struct demuxer *demuxer, float rel_seek_secs, float audio_delay,
 
 // AVI demuxer params:
 extern int index_mode;  // -1=untouched  0=don't use index  1=use (generate) index
-extern char *index_file_save, *index_file_load;
 extern int force_ni;
 extern int pts_from_bps;
 
