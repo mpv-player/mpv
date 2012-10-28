@@ -401,8 +401,6 @@ const m_option_t common_opts[] = {
     OPT_STRINGLIST("alang", audio_lang, 0),
     OPT_STRINGLIST("slang", sub_lang, 0),
 
-    OPT_MAKE_FLAGS("hr-mp3-seek", hr_mp3_seek, 0),
-
     OPT_STRING("quvi-format", quvi_format, 0),
 
     { "rawaudio", (void *)&demux_rawaudio_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},

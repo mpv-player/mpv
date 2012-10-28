@@ -784,15 +784,6 @@
 --help
     Show short summary of options and key bindings.
 
---hr-mp3-seek
-    Only affects the internal ``audio`` demuxer, which is not used by default
-    for mp3 files any more. The equivalent functionality is always enabled
-    with the now default libavformat demuxer for mp3. Hi-res MP3 seeking.
-    Enabled when playing from an external MP3 file, as we need to seek to the
-    very exact position to keep A/V sync. Can be slow especially when seeking
-    backwards since it has to rewind to the beginning to find an exact frame
-    position.
-
 --hr-seek=<no|absolute|yes>
     Select when to use precise seeks that are not limited to keyframes. Such
     seeks require decoding video from the previous keyframe up to the target
