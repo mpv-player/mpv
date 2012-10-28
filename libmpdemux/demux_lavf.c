@@ -335,7 +335,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         wf->nChannels = codec->channels;
         wf->nSamplesPerSec = codec->sample_rate;
         wf->nAvgBytesPerSec = codec->bit_rate / 8;
-        wf->nBlockAlign = codec->block_align ? codec->block_align : 1;
+        wf->nBlockAlign = codec->block_align;
         wf->wBitsPerSample = codec->bits_per_coded_sample;
         wf->cbSize = codec->extradata_size;
         if (codec->extradata_size)
