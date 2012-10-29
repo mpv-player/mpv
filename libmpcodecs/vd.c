@@ -51,9 +51,9 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
     NULL
 };
 
-int mpcodecs_config_vo2(sh_video_t *sh, int w, int h,
-                        const unsigned int *outfmts,
-                        unsigned int preferred_outfmt)
+int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
+                       const unsigned int *outfmts,
+                       unsigned int preferred_outfmt)
 {
     struct MPOpts *opts = sh->opts;
     int j;

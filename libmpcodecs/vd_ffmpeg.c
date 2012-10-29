@@ -446,8 +446,8 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt)
         sh->colorspace = avcol_spc_to_mp_csp(avctx->colorspace);
         sh->color_range = avcol_range_to_mp_csp_levels(avctx->color_range);
 
-        if (!mpcodecs_config_vo2(sh, sh->disp_w, sh->disp_h, supported_fmts,
-                                 ctx->best_csp))
+        if (!mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, supported_fmts,
+                                ctx->best_csp))
             return -1;
         ctx->vo_initialized = 1;
     }
@@ -806,7 +806,7 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
     return fmt[i];
 }
 
-static int control(sh_video_t *sh, int cmd, void *arg, ...)
+static int control(sh_video_t *sh, int cmd, void *arg)
 {
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
@@ -851,5 +851,5 @@ const struct vd_functions mpcodecs_vd_ffmpeg = {
     .init = init,
     .uninit = uninit,
     .control = control,
-    .decode2 = decode
+    .decode = decode,
 };

@@ -61,14 +61,6 @@ int get_video_quality_max(sh_video_t *sh_video)
             return ret;
         }
     }
-    const struct vd_functions *vd = sh_video->vd_driver;
-    if (vd) {
-        int ret = vd->control(sh_video, VDCTRL_QUERY_MAX_PP_LEVEL, NULL);
-        if (ret > 0) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[PP] Using codec's postprocessing, max q = %d.\n", ret);
-            return ret;
-        }
-    }
     return 0;
 }
 
@@ -86,13 +78,7 @@ int set_video_colors(sh_video_t *sh_video, const char *item, int value)
         if (ret == CONTROL_TRUE)
             return 1;
     }
-    /* try software control */
-    const struct vd_functions *vd = sh_video->vd_driver;
-    if (vd &&
-        vd->control(sh_video, VDCTRL_SET_EQUALIZER, (void *)item, value)
-            == CONTROL_OK)
-        return 1;
-    mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Video attribute '%s' is not supported by selected vo & vd.\n",
+    mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Video attribute '%s' is not supported by selected vo.\n",
            item);
     return 0;
 }
@@ -112,10 +98,6 @@ int get_video_colors(sh_video_t *sh_video, const char *item, int *value)
             return 1;
         }
     }
-    /* try software control */
-    const struct vd_functions *vd = sh_video->vd_driver;
-    if (vd)
-        return vd->control(sh_video, VDCTRL_GET_EQUALIZER, (void *)item, value);
     return 0;
 }
 
@@ -181,9 +163,7 @@ void resync_video_stream(sh_video_t *sh_video)
 
 void video_reset_aspect(struct sh_video *sh_video)
 {
-    int r = sh_video->vd_driver->control(sh_video, VDCTRL_RESET_ASPECT, NULL);
-    if (r != true)
-        mpcodecs_config_vo(sh_video, sh_video->disp_w, sh_video->disp_h, 0);
+    sh_video->vd_driver->control(sh_video, VDCTRL_RESET_ASPECT, NULL);
 }
 
 int get_current_video_decoder_lag(sh_video_t *sh_video)
@@ -413,14 +393,8 @@ void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
         }
     }
 
-    if (sh_video->vd_driver->decode2) {
-        mpi = sh_video->vd_driver->decode2(sh_video, packet, start, in_size,
-                                           drop_frame, &pts);
-    } else {
-        mpi = sh_video->vd_driver->decode(sh_video, start, in_size,
-                                          drop_frame);
-        pts = MP_NOPTS_VALUE;
-    }
+    mpi = sh_video->vd_driver->decode(sh_video, packet, start, in_size,
+                                      drop_frame, &pts);
 
     //------------------------ frame decoded. --------------------
 
