@@ -130,6 +130,8 @@ uint64_t ebml_read_length(stream_t *s, int *length)
     }
     if (j == num_ffs)
         return EBML_UINT_INVALID;
+    if (len >= 1ULL<<63)   // Can happen if stream_read_char returns EOF
+        return EBML_UINT_INVALID;
     return len;
 }
 
